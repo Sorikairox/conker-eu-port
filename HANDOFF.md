@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (tenth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (eleventh session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,16 +17,16 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2757 / 5911 functions in C (46.6%)**; code bytes 281,452 / 2,253,856 (12.5%)
-  (end of session 10, from `verify_all.sh`).
+- **2772 / 5912 functions in C (46.9%)**; code bytes 286,048 / 2,253,856 (12.7%)
+  (end of session 11, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2365/5328 (10.2%)
+  - game: 2380/5329 (10.4%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
-    after session 9.
+    after session 9, 2757 (281,452 bytes) after session 10.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -61,6 +61,7 @@ Commits on `eu`:
 | `624bf92`…`3c2d62f` | Session 8: real game .data/.rodata boundary, C files own their .rodata (`rodata_split.py --own`), 24 rodata functions, 2 EU file splits |
 | `9fddd60`…`dcf890a` | Session 9: 26 EU file splits (`file_split.py`), 83 files own .rodata, 29 functions (const local arrays, effect spawners) |
 | `18c0449`…`ba052c8` | Session 10: `spawngen.py` (spawners from asm), C files own `.data` (`rodata_inject.py`), 22 functions |
+| `c6ae2b4`…`fce108a` | Session 11: `spawngen.py` calls/arg stores, 15 hand-written spawner and float/switch functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -673,6 +674,76 @@ first (list: `spawngen.py` prints `SKIP ... calls ...`).
   table in game_eu_1BAF40; a stale `extern struct_eu_bytes4b D_800A78B4;` had made the whole block
   "named by C" and was removed).
 
+## Session 11: spawngen with calls, hand-written spawners and float functions
+
+Sequential, 3 work commits (`c6ae2b4`..`fce108a`), +15 functions (2757 -> 2772; one of them is an
+EU stub `func_eu_1507340C` split off a merged `.s`), +4,596 bytes.
+
+### `spawngen.py` extensions
+
+- Calls before the spawner: arity and return type from `functions.h` / the C file, or inferred (int
+  args = a-registers written since the last call, result type from whether `$v0` or `$f0` is read;
+  an inferred function gets a block-scope `rt f();` declaration). A call result used once is
+  inlined, otherwise it gets a local; reloads of struct slots become `tmp.unkX`; stores through
+  argument pointers (`arg0[0x16] |= 4`) become statements; saved registers survive calls; ALU ops on
+  non-constants, `&global` and derefs of global expressions are modelled.
+- New variants: `s32` return type without a `return` (see below) and `if (arg0 != NULL) { ... }`.
+- Result: still only 2 more functions. The ~45 remaining spawners almost all have branches or
+  loops (`bgez/bne/beql`, `slti`), several spawns, or `sinf`/`cosf`; the interpreter is straight-line
+  only. Hand-writing them works (most of this session's matches); extending spawngen to branches
+  is probably not worth it.
+
+### Patterns that matched (hand work)
+
+- **`s32` function with no `return`**: the spawner result is copied `or v1, v0` in the `beqz` delay
+  slot although nothing is returned (`func_15014094`; void gives DIFF9).
+- **`base + range * rand`**: random ranges are `s[2] + s[4] * func_150ADA68()`; m2c's
+  `func() * s[4] + s[2]` swaps float registers (`func_151BE7C0`, DIFF4 -> OK).
+- Float operand order generally: try both orders of every `+`/`*` (`func_151320EC`:
+  `x * k + y` instead of `y + x * k`, and `-a * b` for the negated product).
+- **Merged switch cases** `case 0xF: case 0x11:` (one constant register shared, `beql` with the
+  store in the delay slot), `func_151A0A10`.
+- **Stack layout**: declaration order decides the slots (first declared = highest); put
+  `temp_v0` (or another 4-byte local) before/after the struct to move it by 4; unused pads go to the
+  bottom and grow the frame, so they rarely help. Reusing one pointer variable for two unrelated
+  values (table entry, then the spawner result: `func_150139AC`; `arg0` itself: `func_150144B8`
+  near miss) removes a slot. A value used twice without a named local (`arg1 + 4` written out
+  twice) is spilled where a named local would not be (`func_1514FBB0`).
+- **Caller passes more args than the callee takes**: `func_151CFE48` homes only a1/a2; its
+  4-argument prototype moved from `functions.h` into the caller's file (`game_eu_DCEF0.c`), the
+  definition has 3 params.
+- `memcpy` prototype declared after its first use in a file breaks drafts (`redeclaration of
+  memcpy`): move the file's `s32 memcpy(...)` line to the top (`game_eu_114640.c`).
+- A merged `jr ra; nop` stub at the end of a `.s` (screen reports SIZE-1 with only the stub's words
+  different): add `void func_eu_<addr>(void) {}` after the function (`func_15072F10`).
+- `u32` bitfield reads (`(x & 0xFFFF)` with `bgez`/`0x4F800000` fix-up) need `(u32)` casts on the
+  `s32` field before shifting/masking (`func_150142EC`).
+
+### Near misses left (session 11; drafts were in the session scratch dir, not kept)
+
+- `func_150E909C` / twin `func_150E96F8` (game_eu_114640): DIFF10, only the saved-register order of
+  the three hoisted loop invariants (`&D_800DCD90`, `&D_800DCDC4`, 13). Shape: `f32 *pos =
+  func_15144B34(D_800BEE08); f32 *v = arg0 + 0x28; v[2] += ...; while (v[2] > 1.0f) { r = rand *
+  D_800DCD90; walk list D_800DCDC4; func_1514470C(node->unk0, &tmp); if (dist2 < 3240000.0f) spawn
+  ((rand % 13U) + 5, ...); v[2] -= 1.0f; }`, `pos`/`v` declared before the struct, `u8 pad18[8]`.
+- `func_150CE710` (game_eu_FBE70): DIFF12, only the scheduling of the `291.0f` load; the const
+  `{0.0f, -49.0f, -2.0f, 30000.0f}` is a `static const f32[4]` passed to `func_15143134`.
+- `func_15109034`, `func_151091B8` (game_eu_1365E0): DIFF1, `addu s0, a0, t6` operand order of
+  `arg0 + *(s32 *)(arg0 + 0x50)`; every spelling tried gives `t6, a0`.
+- `func_151D2E5C` (game_1FFF60, u8 handler): DIFF1, `bnel t9, v1` operand order in the swap case.
+- `func_15074A94` (game_981E0): DIFF16, float register numbering only (all expression shapes give
+  the same result).
+- `func_150144B8` (game_40490): DIFF6, needs a 4-byte gap between `tmp` and the matrix.
+- `func_15013778` (game_40490): DIFF17 with `func_1000FA64`'s `arg5`/`arg6` as `s32` in
+  `functions.h` (the call passes `unk8 * 2` / `unk8 / 2` unmasked; the change keeps all other
+  callers matching but was not committed); left: `mtc1 $zero, $f12` scheduled early.
+- `func_151CC784`: then-branch recomputes `arg0 + 0x70` and reads through it; every shape gives
+  direct `arg0 + 0xC4` offsets.
+- `func_1510A454` (ternary spawner): still SIZE+1/-3; args are read from their home slots (`lb
+  0x53(sp)`) in the reference.
+- `func_151BCD44`: trail-point loop, frame 0xA0 with f20-f28 saved; m2c far off, not attempted in
+  depth.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -773,6 +844,14 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
+   Next steps (session 11):
+   - Hand-write the remaining effect spawners (`spawngen.py` SKIP list, ~40): most are short,
+     branchy and use the patterns above; the game_40490 ones (`func_15015354`, `func_15011D60`,
+     `func_150124A0`) are larger.
+   - Near misses of session 11 (list above), especially the DIFF1 operand-order cases.
+   - Medium float/switch functions in owned files: drafts with `JT=1 ONLY=<list> gen2.py` (list:
+     asm functions 30-300 instructions in owned files whose `.s` has a `rodata_inject` header; 224
+     functions this session, 0 OK as generated), then natural C by hand; m2c only for structure.
    Next steps (session 10):
    - Spawners that call other functions first (~45, `spawngen.py` SKIP list): extend the
      interpreter (calls whose result is stored to a field, e.g. `func_15083E90`, function-pointer
