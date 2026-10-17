@@ -307,33 +307,44 @@ void func_15123508(struct108 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123568.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151236D0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123934.s")
-// NON-MATCHING: not sure what is up with arg0
-// s32 func_15123934(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
-//     struct108 *temp_v0;
-//     struct108 *temp_v1;
-//
-//     temp_v1 = &arg0[arg4]; // ???
-//     if (temp_v1->unk20C == 0) {
-//         temp_v1->unk2 = arg0->unk0;
-//         temp_v0 = &arg0[arg4 * 4]; // ???
-//         temp_v0->unk30 = arg0->unk2C;
-//         temp_v0->unk88 = arg0->unk84;
-//         temp_v0->unkE0 = arg0->unkDC;
-//         temp_v0->unk138 = arg0->unk134;
-//         temp_v1->unk1B6[0] = arg0->unk1B4;
-//         temp_v1->unk1E2 = arg0->unk1E0;
-//         arg0->unk2C = arg1;
-//         arg0->unkDC = arg2;
-//         arg0->unk134 = arg3;
-//         temp_v1->unk20C = 1;
-//         func_15125394();
-//         return 1;
-//     }
-//     return 0;
-// }
+s32 func_15123934(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+#define STK ((struct_eu_108_stack *)arg0)
+    if (STK->unk20C[arg4] == 0) {
+        STK->unk0[arg4 + 1] = STK->unk0[0];
+        STK->unk2C[arg4 + 1] = STK->unk2C[0];
+        STK->unk84[arg4 + 1] = STK->unk84[0];
+        STK->unkDC[arg4 + 1] = STK->unkDC[0];
+        STK->unk134[arg4 + 1] = STK->unk134[0];
+        STK->unk1B4[arg4 + 1] = STK->unk1B4[0];
+        STK->unk1E0[arg4 + 1] = STK->unk1E0[0];
+        STK->unk2C[0] = arg1;
+        STK->unkDC[0] = arg2;
+        STK->unk134[0] = arg3;
+        STK->unk20C[arg4] = 1;
+        func_15125394(arg0);
+        return 1;
+    }
+    return 0;
+#undef STK
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151239CC.s")
+s32 func_151239CC(struct108 *arg0, s32 arg1) {
+#define STK ((struct_eu_108_stack *)arg0)
+    if (STK->unk20C[arg1] != 0) {
+        STK->unk0[0] = STK->unk0[arg1 + 1];
+        STK->unk2C[0] = STK->unk2C[arg1 + 1];
+        STK->unkDC[0] = STK->unkDC[arg1 + 1];
+        STK->unk84[0] = STK->unk84[arg1 + 1];
+        STK->unk134[0] = STK->unk134[arg1 + 1];
+        STK->unk1B4[0] = STK->unk1B4[arg1 + 1];
+        STK->unk1E0[0] = STK->unk1E0[arg1 + 1];
+        func_15124B18(arg0);
+        STK->unk20C[arg1] = 0;
+        return 1;
+    }
+    return 0;
+#undef STK
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123A54.s")
 
 void func_15124770(struct108 *arg0, s32 arg1) {
@@ -458,15 +469,31 @@ s32 func_151253CC(struct108 *arg0) {
     return 0;
 }
 
-// no idea what going on here
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125490.s")
+// note: no return value when 100 <= dist <= 300 (returns garbage in the original)
+s32 func_15125490(struct108 *arg0) {
+    struct127 *temp_v0 = arg0->unk3D0;
+    s32 dist;
+
+    if (temp_v0->in_water == 1) {
+        dist = fabsf(temp_v0->y_position - temp_v0->unk118);
+        if (dist < 100) {
+            return 0;
+        }
+        if (dist > 300) {
+            return 1;
+        }
+    } else {
+        return 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151254F4.s")
-// NON-MATCHING: first statements in wrong order
+// NON-MATCHING: only the D_800A3900 load is scheduled after the prologue stores
 // void func_151254F4(struct108 *arg0, s32 arg1) {
-//     f32 tmp = D_800A352C;
-//     arg0->unk3A0 = tmp * arg0->unk380;
-//     arg0->unk398 = tmp * arg0->unk388;
+//     f32 tmp = D_800A3900;
+//
+//     arg0->unk3A0 = arg0->unk380 * tmp;
+//     arg0->unk398 = arg0->unk388 * tmp;
 //     func_15124AB4(arg0);
 //     func_151239CC(arg0, 1);
 //     arg0->unk3D4->unk198 = 0;
@@ -499,7 +526,15 @@ void func_15125608(struct108 *arg0) {
 }
 
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125628.s")
+void func_15125628(void) {
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        if (D_800DBFF4[i] != 0) {
+            D_800DBFF4[i]--;
+        }
+    }
+}
 
 void func_15125690(struct108 *arg0, s32 arg1) {
     u8 *temp_v0 = &D_800DBFF4[arg0->unk23D];
@@ -639,7 +674,19 @@ void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128030.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151283B8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151284C4.s")
+void func_151284C4(struct108 *arg0) {
+    func_1512C490(arg0);
+    arg0->unk2B0 = arg0->unk3D0->x_position;
+    arg0->unk2B4 = arg0->unk3D0->y_position;
+    arg0->unk2B8 = arg0->unk3D0->z_position;
+    if (arg0->unk23C != 0) {
+        arg0->unk23C--;
+    }
+    if ((arg0->unk84 & 8) && ((s16)arg0->unk5FE <= 0)) {
+        arg0->unk5FE = 50;
+        func_15128774(arg0, arg0->unk3D0);
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128540.s")
 
 void func_15128680(struct108 *arg0) {

@@ -413,43 +413,27 @@ void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2) {
 void func_1513E134(void) {
 }
 
+// positions a 4-vertex quad of half-size (arg4, arg5) at (arg1, arg2, arg3), rotated by angle arg6
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E13C.s")
-// void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
-//     f32 sp48;
-//     f32 sp30;
-//     f32 sp1C;
+// NON-MATCHING: arg0 lives in a1 and stack layout differs (frame 0x50)
+// void func_1513E13C(struct210 *arg0_, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
+//     Vtx *arg0 = (Vtx *)&arg0_->unk40;
+//     f32 s = func_151423D8(arg6 - 0x40);
+//     f32 c = func_151423D8(arg6);
+//     s32 y;
 //
-//     f32 temp_f0;
-//     f32 temp_f12;
-//     f32 temp_f14;
-//     f32 temp_f16;
-//     f32 temp_f18;
-//     f32 temp_f2;
-//     s32 temp_f10;
-//
-//     sp48 = func_151423D8((arg6 - 0x40));
-//     temp_f0 = func_151423D8(arg6);
-//     temp_f12 = arg5 * sp48;
-//     temp_f14 = arg4 * temp_f0;
-//     temp_f18 = arg1 + temp_f14;
-//     arg0->unk40 = temp_f18 - temp_f12;
-//     temp_f10 = arg2;
-//     arg0->unk42 = temp_f10;
-//     temp_f16 = arg5 * temp_f0;
-//     temp_f2 = arg4 * sp48;
-//     sp1C = arg3 + temp_f16;
-//     sp30 = arg1 - temp_f14;
-//     arg0->unk44 = sp1C + temp_f2;
-//     arg0->unk52 = temp_f10;
-//     arg0->unk50 = sp30 - temp_f12;
-//     arg0->unk54 = sp1C - temp_f2;
-//     arg0->unk62 = temp_f10;
-//     arg0->unk60 = sp30 + temp_f12;
-//     arg0->unk72 = temp_f10;
-//     arg0->unk70 = temp_f18 + temp_f12;
-//     sp30 = arg3 - temp_f16;
-//     arg0->unk64 = sp30 - temp_f2;
-//     arg0->unk74 = sp30 + temp_f2;
+//     arg0[0].v.ob[0] = (arg1 + arg4 * c) - arg5 * s;
+//     arg0[0].v.ob[1] = y = arg2;
+//     arg0[0].v.ob[2] = (arg3 + arg5 * c) + arg4 * s;
+//     arg0[1].v.ob[1] = y;
+//     arg0[1].v.ob[0] = (arg1 - arg4 * c) - arg5 * s;
+//     arg0[1].v.ob[2] = (arg3 + arg5 * c) - arg4 * s;
+//     arg0[2].v.ob[1] = y;
+//     arg0[2].v.ob[0] = (arg1 - arg4 * c) + arg5 * s;
+//     arg0[3].v.ob[1] = y;
+//     arg0[3].v.ob[0] = (arg1 + arg4 * c) + arg5 * s;
+//     arg0[2].v.ob[2] = (arg3 - arg5 * c) - arg4 * s;
+//     arg0[3].v.ob[2] = (arg3 - arg5 * c) + arg4 * s;
 // }
 
 void func_1513E2A4(void) {
@@ -457,44 +441,50 @@ void func_1513E2A4(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E2AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E6E8.s")
-// s32 func_1513E6E8(void *arg0) {
-//     void *temp_v0;
-//     void *temp_v0_2;
-//     void *temp_v0_3;
-//     void *temp_v0_4;
-//     s32 phi_v1;
-//     s32 phi_v1_2;
-//
-//     if ((arg0->unk58 & 0x20) != 0) {
-//         temp_v0 = arg0->unk110;
-//         temp_v0->unkC = (f32) (temp_v0->unkC + (temp_v0->unk2C * D_800BE9A4));
-//     }
-//     phi_v1 = arg0->unk58;
-//     if ((arg0->unk58 & 0x40) != 0) {
-//         temp_v0_2 = arg0->unk110;
-//         arg0->unk34 = (f32) (arg0->unk34 + (temp_v0_2->unk8 * D_800BE9A4));
-//         arg0->unk38 = (f32) (arg0->unk38 + (temp_v0_2->unkC * D_800BE9A4));
-//         arg0->unk3C = (f32) (arg0->unk3C + (temp_v0_2->unk10 * D_800BE9A4));
-//         phi_v1 = arg0->unk58;
-//     }
-//     temp_v0_3 = arg0->unk110;
-//     phi_v1_2 = phi_v1;
-//     if ((phi_v1 & 0x80) != 0) {
-//         arg0->unk40 = (f32) (arg0->unk40 + (temp_v0_3->unk14 * D_800BE9A4));
-//         arg0->unk44 = (f32) (arg0->unk44 + (temp_v0_3->unk18 * D_800BE9A4));
-//         arg0->unk48 = (f32) (arg0->unk48 + (temp_v0_3->unk1C * D_800BE9A4));
-//         phi_v1_2 = arg0->unk58;
-//     }
-//     temp_v0_4 = arg0->unk110;
-//     if ((phi_v1_2 & 0x100) != 0) {
-//         arg0->unk4C = (f32) (arg0->unk4C + (temp_v0_4->unk20 * D_800BE9A4));
-//         arg0->unk50 = (f32) (arg0->unk50 + (temp_v0_4->unk24 * D_800BE9A4));
-//         arg0->unk54 = (f32) (arg0->unk54 + (temp_v0_4->unk28 * D_800BE9A4));
-//     }
-//     arg0->unk5D = (u8)0xFF;
-//     return 1;
-// }
+typedef struct {
+    u8  pad0[0x8];
+    f32 unk8[3];
+    f32 unk14[3];
+    f32 unk20[3];
+    f32 unk2C;
+} struct_eu_1513E6E8_vel;
+
+typedef struct {
+    u8  pad0[0x34];
+    f32 unk34[3];
+    f32 unk40[3];
+    f32 unk4C[3];
+    s32 unk58;
+    u8  pad5C;
+    u8  unk5D;
+    u8  pad5E[0xB2];
+    struct_eu_1513E6E8_vel unk110;
+} struct_eu_1513E6E8;
+
+s32 func_1513E6E8(struct_eu_1513E6E8 *arg0) {
+    struct_eu_1513E6E8_vel *vel = &arg0->unk110;
+
+    if (arg0->unk58 & 0x20) {
+        vel->unk8[1] += vel->unk2C * D_800BE9A4;
+    }
+    if (arg0->unk58 & 0x40) {
+        arg0->unk34[0] += vel->unk8[0] * D_800BE9A4;
+        arg0->unk34[1] += vel->unk8[1] * D_800BE9A4;
+        arg0->unk34[2] += vel->unk8[2] * D_800BE9A4;
+    }
+    if (arg0->unk58 & 0x80) {
+        arg0->unk40[0] += vel->unk14[0] * D_800BE9A4;
+        arg0->unk40[1] += vel->unk14[1] * D_800BE9A4;
+        arg0->unk40[2] += vel->unk14[2] * D_800BE9A4;
+    }
+    if (arg0->unk58 & 0x100) {
+        arg0->unk4C[0] += vel->unk20[0] * D_800BE9A4;
+        arg0->unk4C[1] += vel->unk20[1] * D_800BE9A4;
+        arg0->unk4C[2] += vel->unk20[2] * D_800BE9A4;
+    }
+    arg0->unk5D = 0xFF;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E83C.s")
 
@@ -517,7 +507,31 @@ void func_1513F4B0(struct210 *arg0, s16 arg1) {
     func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
 }
 
+// emits gDPSetCombineLERP for combine mode arg1 (table D_800A4F88), preceded by a pipe sync if *arg2 == 1
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F4E4.s")
+// NON-MATCHING: 4 insns: copy of the gfx pointer / final increment scheduled differently
+// Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2) {
+//     s32 mode = func_15143044(arg1, 0);
+//
+//     if (mode != D_800DD5EE) {
+//         if (*arg2 == 1) {
+//             gDPPipeSync(arg0++);
+//             *arg2 = 0;
+//         }
+//         {
+//             Gfx *_g = (Gfx *)(arg0++);
+//
+// #define CC(i) D_800A4F88[arg1][i]
+//             _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) |
+//                            _SHIFTL(GCCc0w0(CC(0), CC(2), CC(4), CC(6)) | GCCc1w0(CC(8), CC(10)), 0, 24);
+//             _g->words.w1 = (unsigned int)(GCCc0w1(CC(1), CC(3), CC(5), CC(7)) |
+//                                           GCCc1w1(CC(9), CC(12), CC(14), CC(11), CC(13), CC(15)));
+// #undef CC
+//         }
+//         D_800DD5EE = mode;
+//     }
+//     return arg0;
+// }
 
 void func_1513F680(struct171 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4) {
     arg0->unk70 = arg1;
@@ -526,21 +540,73 @@ void func_1513F680(struct171 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4) {
     arg0->unk73 = arg4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F6C0.s")
+void func_1513F6C0(struct210 *arg0, u8 arg1, u8 arg2) {
+    arg0->unk80 = arg1;
+    arg0->unk81 = arg2;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F6E8.s")
+s32 func_1513F6E8(struct210 *arg0) {
+    f32 temp_f0 = ((f32 *)arg0)[0x128 / 4];
+    arg0->unk2C += temp_f0 * D_800BE9A4;
+    arg0->unk30 += temp_f0 * D_800BE9A4;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F728.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513FA2C.s")
+void func_1513FA2C(s32 arg0, s16 arg1) {
+    f32 sp18[2];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513FA70.s")
+    sp18[0] = 1.0f;
+    sp18[1] = 1.0f;
+    func_1513FAB4(arg0, 0, sp18, arg1);
+}
+
+void func_1513FA70(s32 arg0, s16 arg1) {
+    f32 sp18[2];
+
+    sp18[0] = 1.0f;
+    sp18[1] = 1.0f;
+    func_1513FAB4(arg0, 1, sp18, arg1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513FAB4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513FFF4.s")
+// sets the texture coordinates of a 4-vertex quad, flipping s/t according to arg2 bits 0/1
+void func_1513FFF4(Vtx *arg0, u8 arg1, u8 arg2) {
+    struct_eu_80090F10 *entry;
+    u16 w;
+    u16 h;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_151400D0.s")
+    if (arg1 != 0xFF) {
+        entry = &D_80090F10[arg1];
+        w = entry->unk6 - 1;
+        h = entry->unk8 - 1;
+        arg0[0].v.tc[0] = arg0[3].v.tc[0] = (arg2 & 1) ? w << 6 : 0;
+        arg0[1].v.tc[0] = arg0[2].v.tc[0] = (arg2 & 1) ? 0 : w << 6;
+        arg0[0].v.tc[1] = arg0[1].v.tc[1] = (arg2 & 2) ? h << 6 : 0;
+        arg0[2].v.tc[1] = arg0[3].v.tc[1] = (arg2 & 2) ? 0 : h << 6;
+    }
+}
+
+// copies the colours of 4 vertices
+typedef struct {
+    s16 c[4];
+    u16 flag;
+} struct_eu_vtxcol;
+
+void func_151400D0(Vtx *arg0, struct_eu_vtxcol *arg1) {
+    s32 i;
+
+    for (i = 0; i < 4; i++, arg0++, arg1++) {
+        arg0->v.flag = arg1->flag;
+        arg0->v.cn[0] = arg1->c[0];
+        arg0->v.cn[1] = arg1->c[1];
+        arg0->v.cn[2] = arg1->c[2];
+        arg0->v.cn[3] = arg1->c[3];
+        arg0->v.flag = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_15140190.s")
 

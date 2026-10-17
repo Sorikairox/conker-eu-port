@@ -28,6 +28,7 @@ void func_151617C4(struct225 *arg0);
 void func_151617E4(struct225 *arg0);
 void func_15161804(struct225 *arg0);
 void func_15161860(struct225 *arg0);
+void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6);
 struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 s32  func_15161A68(struct225 *arg0);
 struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
@@ -57,6 +58,7 @@ struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
 s32  func_1516429C(struct237 *arg0);
 void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2);
 s32  func_151643F8(struct225 *arg0);
+void func_1516441C(struct225 *arg0, s32 *arg1);
 void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4);
 s32  func_151644A8(struct242 *arg0);
 
@@ -123,33 +125,24 @@ s32 func_15160684(struct225 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151606A8.s")
-// NON-MATCHING: something along these lines...
-// void func_150A7960(s32, f32, f32, f32, f32*, f32*, f32*);
-// s32 func_151606A8(struct225 *arg0) {
-//     struct227 *temp_v0;
-//     struct226 *temp_v0_2;
-//
-//     f32 tmp[16];
-//
-//     f32 sp3C;
-//     f32 sp38;
-//     f32 sp34;
-//
-//     temp_v0 = arg0->unk18;
-//     func_150A8050(&tmp[1], temp_v0->unk0, temp_v0->unk4, temp_v0->unk8);
-//
-//     temp_v0_2 = arg0->unk18;
-//     tmp[13] = temp_v0_2->unk10;
-//     tmp[14] = temp_v0_2->unk12;
-//     tmp[15] = temp_v0_2->unk14;
-//
-//     func_150A7960(&tmp, D_800A66B4[0], D_800A66B4[1], D_800A66B4[2], &sp34, &sp38, &sp3C);
-//     arg0->unk14->unkE = sp34;
-//     arg0->unk14->unk10 = sp38;
-//     arg0->unk14->unk12 = sp3C;
-//     return 1;
-// }
+s32 func_151606A8(struct225 *arg0) {
+    struct227 **pp = &arg0->unk18;
+    s32 pad[1];
+    f32 mtx[4][4];
+    f32 z;
+    f32 y;
+    f32 x;
+
+    func_150A8050(mtx, (*pp)->unk0, (*pp)->unk4, (*pp)->unk8);
+    mtx[3][0] = ((s16 *)*pp)[8];
+    mtx[3][1] = ((s16 *)*pp)[9];
+    mtx[3][2] = ((s16 *)*pp)[10];
+    func_150A7E40(mtx, D_800A6A94.unk0, D_800A6A94.unk4, D_800A6A94.unk8, &x, &y, &z);
+    arg0->unk14->unkE = x;
+    arg0->unk14->unk10 = y;
+    arg0->unk14->unk12 = z;
+    return 1;
+}
 
 s32 func_151607A4(struct225 *arg0) {
     struct227 *temp_a1 = &arg0->unk18;
@@ -192,57 +185,128 @@ void func_15160954(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, struct225 *arg4) 
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160A58.s")
-// struct225 *func_15160A58(void *arg0, u8 arg1, void *arg2, u8 arg3, s16 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s8 argB, s32 argC, u8 argD, u8 argE, s32 argF) {
-//     s32 sp64;
-//
-//     s8 sp60;
-//     s16 sp5E;
-//     s8 sp5D;
-//     u8 sp5C;
-//     u8 sp59;
-//     s8 sp58;
-//     ? sp4C;
-//     u8 sp49;
-//     u8 sp48;
-//     void *sp44;
-//
-//     ?32 sp40;
-//     ?32 sp3C;
-//     ?32 sp38;
-//     struct225 *temp_v0;
-//     s32 phi_v1;
-//
-//     if (arg0 == 0) {
-//         return NULL;
-//     }
-//     sp5C = arg3;
-//     sp5D = 5;
-//     sp60 = 0x10;
-//     sp5E = arg4;
-//     sp44 = arg0;
-//     sp49 = arg1;
-//     sp48 = arg0->unk3B;
-//     sp4C.unk0 = (s32) arg2->unk0;
-//     sp4C.unk4 = (s32) arg2->unk4;
-//     sp4C.unk8 = (s32) arg2->unk8;
-//     sp38 = 0;
-//     sp3C = 0;
-//     sp40 = 0;
-//     sp58 = argB;
-//     sp59 = argD;
-//     temp_v0 = func_151602C0(&sp5C, &sp38, arg5, arg6, arg7, arg8, 0xFF, 0, argC + 0x18, argE, argF);
-//     if (temp_v0 != NULL) {
-//         memcpy(&temp_v0->unk18, &sp44, 0x18);
-//     }
-//     return temp_v0;
-// }
+struct225 *func_15160A58(struct127 *arg0, u8 arg1, struct17 *arg2, u8 arg3, s16 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s8 argB, s32 argC, u8 argD, u8 argE, s32 argF) {
+    struct225 *temp_v0;
+    Header header;
+    struct {
+        struct127 *unk0;
+        u8  unk4;
+        u8  unk5;
+        struct17 unk8;
+        s8  unk14;
+        u8  unk15;
+    } data;
+    Header2 header2;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    header.unk0 = arg3;
+    header.unk1 = 5;
+    header.unk2 = arg4;
+    header.unk4 = 0x10;
+    data.unk0 = arg0;
+    data.unk4 = arg0->unique_id;
+    data.unk5 = arg1;
+    data.unk8 = *arg2;
+    header2.unk0 = 0;
+    header2.unk4 = 0;
+    header2.unk8 = 0;
+    data.unk14 = argB;
+    data.unk15 = argD;
+    temp_v0 = func_151602C0(&header, &header2, arg5, arg6, arg7, arg8, 0xFF, 0, argC + 0x18, argE, argF);
+    if (temp_v0 != NULL) {
+        memcpy(&temp_v0->unk18, &data, sizeof(data));
+    }
+    return temp_v0;
+}
 
 // ??
+typedef struct {
+    struct127 *unk0;
+    u8  unk4;
+    u8  unk5;
+    struct17 unk8;
+    s8  unk14;
+    u8  unk15;
+} struct_eu_15160B74;
+
+extern u8 (*D_8008B598[])(struct225 *);
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160B74.s")
+// NON-MATCHING: spill slot of ret is 8 bytes higher; then-branch tail scheduled differently
+// u8 func_15160B74(struct225 *arg0) {
+//     struct_eu_15160B74 *pl = (struct_eu_15160B74 *)&arg0->unk18;
+//     struct127 *obj = pl->unk0;
+//     u8 ret = 1;
+//     f32 out[3];
+//
+//     if (obj->interaction_state == 0) {
+//         return 0;
+//     }
+//     if (obj->unique_id != pl->unk4) {
+//         return 0;
+//     }
+//     if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
+//         func_15143134(&pl->unk8, out, (u8 *)obj->unk1D4 + (pl->unk5 << 6));
+//         arg0->unk14->unkE = out[0];
+//         arg0->unk14->unk10 = out[1];
+//         arg0->unk14->unk12 = out[2];
+//     } else {
+//         arg0->unk14->unkE = obj->x_position;
+//         arg0->unk14->unk10 = obj->y_position;
+//         arg0->unk14->unk12 = obj->z_position;
+//     }
+//     if (pl->unk14 != -1) {
+//         ret = D_8008B598[pl->unk14](arg0);
+//     }
+//     return ret;
+// }
 
 // another struct definition
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160CDC.s")
+struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF) {
+    struct225 *temp_v0;
+    Header header;
+    struct {
+        struct127 *unk0;
+        u8  unk4;
+        u8  unk5;
+        struct17 unk8;
+        struct17 unk14;
+        f32 unk20;
+        u8  unk24;
+        u8  unk25;
+    } data;
+    Header2 header2;
+    s32 f1;
+    s32 f2;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    header.unk0 = arg5;
+    header.unk1 = 6;
+    header.unk2 = arg6;
+    header.unk4 = 0x11;
+    data.unk0 = arg0;
+    data.unk4 = arg0->unique_id;
+    data.unk5 = arg1;
+    data.unk8 = *arg2;
+    data.unk14 = *arg3;
+    data.unk20 = arg4;
+    f1 = argB ? 1 : 0;
+    f2 = argD ? 2 : 0;
+    data.unk24 = f2 | f1;
+    data.unk25 = argC;
+    header2.unk0 = 0;
+    header2.unk4 = 0;
+    header2.unk8 = 0;
+    temp_v0 = func_151602C0(&header, &header2, arg7, arg8, arg9, argA, 0xFF, 0, sizeof(data), argE, argF);
+    if (temp_v0 != NULL) {
+        memcpy(&temp_v0->unk18, &data, sizeof(data));
+    }
+    return temp_v0;
+}
 
 // similar to func_15160B74
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160E30.s")
@@ -458,30 +522,17 @@ void func_15161860(struct225 *arg0) {
     D_8008B2B0[arg0->unk12](arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151618BC.s")
-// void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, void *arg4, s16 arg5, s16 arg6) {
-//     ? sp38;
-//     ? *temp_t6;
-//     void *temp_t7;
-//     void *phi_t7;
-//     ? *phi_t6;
-//
-//     phi_t7 = &D_800A66E4;
-//     phi_t6 = &sp38;
-// loop_1:
-//     temp_t7 = phi_t7 + 0xC;
-//     temp_t6 = phi_t6 + 0xC;
-//     temp_t6->unk-C = (s32) *phi_t7;
-//     temp_t6->unk-8 = (s32) temp_t7->unk-8;
-//     temp_t6->unk-4 = (s32) temp_t7->unk-4;
-//     phi_t7 = temp_t7;
-//     phi_t6 = temp_t6;
-//     if (temp_t7 != (&D_800A66E4 + 0x24)) {
-//         goto loop_1;
-//     }
-//     temp_t6->unk0 = (s32) temp_t7->unk0;
-//     func_10010F88((sp + ((func_150ADA20() % 0xAU) * 4))->unk38, arg0, arg1, arg2, arg3, (s32) arg4->unk0, (s32) arg4->unk4, (s32) arg4->unk8, (?32) arg5, (?32) arg6);
-// }
+typedef struct {
+    s32 unk0[10];
+} struct_eu_151618BC;
+
+extern struct_eu_151618BC D_800A6AC4;
+
+void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s16 arg6) {
+    struct_eu_151618BC tbl = D_800A6AC4;
+
+    func_10010F88(tbl.unk0[(u32)func_150ADA20() % 10], arg0, arg1, arg2, arg3, arg4[0], arg4[1], arg4[2], arg5, arg6);
+}
 
 struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct225 *temp_v0;
@@ -680,7 +731,33 @@ void func_15162110(s32 arg0) {
 // }
 
 // help.
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151623F4.s")
+struct225 *func_151623F4(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4, s16 arg5, u8 arg6, s32 arg7) {
+    struct {
+        struct17 unk0;
+        struct17 unkC;
+        f32 unk18;
+        f32 unk1C;
+    } data;
+    Header header;
+    struct225 *temp_v0;
+
+    if (arg1 >= 3) {
+        return NULL;
+    }
+    data.unk0 = D_eu_800A6AEC[arg1];
+    data.unkC = D_eu_800A6B10[arg1];
+    data.unk18 = 0.0f;
+    data.unk1C = D_800A6B34[arg1];
+    header.unk0 = arg3;
+    header.unk1 = arg4;
+    header.unk2 = arg5;
+    header.unk4 = arg2;
+    temp_v0 = func_1516037C(&header, arg0, sizeof(data), arg6, arg7);
+    if (temp_v0 != NULL) {
+        memcpy(&temp_v0->unk18, &data, sizeof(data));
+    }
+    return temp_v0;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162510.s")
 // s32 func_15162510(struct237 *arg0) {
 //     struct235 *temp_v1;
@@ -991,19 +1068,22 @@ void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8
     func_1516037C(&tmp, arg0, offset, arg6, arg7);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151638E0.s")
-// NON-MATCHING: struct isnt quite right..
-// s32 func_151638E0(struct225 *arg0) {
-//     struct227 *temp_v1;
-//     f32 sp20[3];
-//     f32 sp1C;
-//
-//     temp_v1 = &arg0->unk18;
-//     func_15187FC0(arg0->unk18, &sp20); // missing a lw here
-//     func_15188010(temp_v1, &sp1C);
-//     arg0->unk14->unk2F = (temp_v1->unk4 + (temp_v1->unk8 * sp1C));
-//     return 1;
-// }
+typedef struct {
+    s32 unk0;
+    f32 unk4;
+    f32 unk8;
+} struct_eu_151638E0;
+
+s32 func_151638E0(struct225 *arg0) {
+    struct_eu_151638E0 *pl = (struct_eu_151638E0 *)&arg0->unk18;
+    f32 sp20[3];
+    f32 sp1C;
+
+    func_15188530(pl->unk0, sp20);
+    func_15188580(pl->unk0, &sp1C);
+    arg0->unk14->unk2F = pl->unk4 + (pl->unk8 * sp1C);
+    return 1;
+}
 
 s32 func_151639D0(struct225 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x27) {
@@ -1130,8 +1210,76 @@ s32 func_15163F50(struct225 *arg0, struct225 *arg1) {
 }
 
 // ???
+typedef struct {
+    s32 unk0;
+    u8  unk4;
+} struct_eu_18D770_pl;
+
+typedef struct {
+    s32 unk0;
+    union {
+        u8  b;
+        s32 w;
+    } unk4;
+    u8  unk8;
+    u8  unk9;
+} struct_eu_18D770_msg;
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15163FEC.s")
+// NON-MATCHING: only the tail of the 0x2D case is scheduled differently (target has an extra b)
+// void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
+//     struct_eu_18D770_pl *pl = &arg0->unk18;
+//     void (*func)(struct225 *, void *, u8);
+//     s32 id;
+//     s32 cur;
+//
+//     if (arg2 == 0) {
+//         id = arg1->unk0;
+//         if (id == pl->unk0 || arg1->unk4.b == pl->unk4) {
+//             func_1516972C(arg0);
+//         }
+//     } else if (arg2 == 0x2D) {
+//         cur = pl->unk0;
+//         id = arg1->unk0;
+//         if (id == cur) {
+//             pl->unk0 = arg1->unk4.w;
+//             pl->unk4 = arg1->unk9;
+//         } else if (arg1->unk4.w == cur) {
+//             pl->unk0 = id;
+//             pl->unk4 = arg1->unk8;
+//         }
+//     } else {
+//         func = D_8008B714[arg0->unk2D];
+//         if (func != NULL) {
+//             func(arg0, arg1, arg2);
+//         }
+//     }
+// }
+typedef struct {
+    u8 *unk0;
+    u8  unk4;
+} struct_eu_151640C0;
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151640C0.s")
+// NON-MATCHING: all four values are loaded into a0-a3 before the tests; regalloc
+// void func_151640C0(struct225 *arg0, struct_eu_151640C0 **arg1, u8 arg2) {
+//     struct_eu_151640C0 *a;
+//     u8 *p1;
+//     u8 *p0;
+//     u8 b1;
+//     u8 b0;
+//
+//     if (arg2 == 0x29) {
+//         a = arg1[1];
+//         p1 = a->unk0;
+//         p0 = ((struct_eu_151640C0 *)&arg0->unk18)->unk0;
+//         b1 = a->unk4;
+//         b0 = ((struct_eu_151640C0 *)&arg0->unk18)->unk4;
+//         if (p0 == p1 || b1 == b0 || b1 == p0[0x3B]) {
+//             func_1516972C(arg0);
+//         }
+//     }
+// }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15164134.s")
 
@@ -1162,7 +1310,24 @@ s32 func_1516429C(struct237 *arg0) {
 }
 
 // what structs?
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_1516434C.s")
+typedef struct {
+    f32 unk0;
+    u8  unk4;
+    u8  unk5;
+    u8  unk6;
+    u8  unk7;
+} struct_eu_1516434C;
+
+void func_1516434C(struct225 *arg0, struct_eu_1516434C *arg1, u8 arg2) {
+    struct_eu_1516434C *temp_v0 = (struct_eu_1516434C *)&arg0->unk18;
+
+    if (arg2 == 0x33 && temp_v0->unk4 == arg1->unk4) {
+        temp_v0->unk0 = arg1->unk0;
+        arg0->unk14->unk5 = arg1->unk5;
+        arg0->unk14->unk6 = arg1->unk6;
+        arg0->unk14->unk7 = arg1->unk7;
+    }
+}
 
 void func_151643A8(struct225 *arg0, s32 arg1, u8 arg2) {
     struct227 *tmp;
@@ -1180,7 +1345,18 @@ s32 func_151643F8(struct225 *arg0) {
 }
 
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_1516441C.s")
+void func_1516441C(struct225 *arg0, s32 *arg1) {
+    s32 *sp2C;
+    f32 *sp28;
+    f32 sp1C[3];
+
+    sp2C = arg1;
+    sp28 = sp1C;
+    func_15145CD0(arg1[3], &sp2C, &sp28, 1);
+    arg0->unk14->unkE = sp1C[0];
+    arg0->unk14->unk10 = sp1C[1];
+    arg0->unk14->unk12 = sp1C[2];
+}
 
 s32 func_151644A8(struct242 *arg0) {
     f32 temp_f0;
