@@ -160,6 +160,7 @@ segments:
       - [0x26700, c, libultra/io/aisetfreq]
       - [0x26860, c, init_eu_26860]
       - [0x26870, c, init_eu_26870]
+      - [0x26A30, c, init_eu_26A30]
       - [0x26AD0, c, init_eu_26AD0]
       - [0x26B30, c, init_eu_26B30]
       - [0x27700, c, init_eu_27700]
@@ -182,6 +183,8 @@ segments:
       - [0x2CAD0, rodatabin]
       - [0x2CAF0, .rodata, libultra/audio/init_1D900]
       - [0x2CB00, rodatabin]
+      - [0x2CC30, .rodata, init_eu_26870]
+      - [0x2CC80, rodatabin]
   - name:  game
     type:  code
     start: 0x0002D810

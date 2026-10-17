@@ -1394,3 +1394,4 @@ osViModePalLan1                 = 0x8002C180;
 osViModeMpalLan1                = 0x8002C1D0;
 osViModeNtscLan1                = 0x8002C220;
 osRomBase                       = 0x80000308;
+__libm_qnan_f = 0x8002CC80;
