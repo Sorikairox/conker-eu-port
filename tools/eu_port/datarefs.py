@@ -83,6 +83,7 @@ def refs(seg='game'):
     rom0, vram0 = s['start'], s['vram']
     for fi, (a, b, stem) in enumerate(files):
         hi = {}  # reg -> value
+        pending = {}  # branch target rom -> register state at the branch
         for rom in range(a, b, 4):
             w = struct.unpack('>I', data[rom:rom + 4])[0]
             op = w >> 26
@@ -92,6 +93,11 @@ def refs(seg='game'):
             imm = w & 0xFFFF
             simm = imm - 0x10000 if imm & 0x8000 else imm
             pc = vram0 + rom - rom0
+            if rom in pending:  # a branch target: registers set before the branch are live here
+                for k_, v_ in pending.pop(rom).items():
+                    hi.setdefault(k_, v_)
+            if op in (1, 4, 5, 6, 7, 0x14, 0x15, 0x16, 0x17) or (op == 0x11 and rs == 8):
+                pending.setdefault(rom + 4 + simm * 4, dict(hi))
             if op == 0x0F:  # lui
                 hi[rt] = imm << 16
                 hi.pop(('j', rt), None)

@@ -304,7 +304,51 @@ f32 func_15143E64(struct17 *arg0) {
 //     }
 //     return ret;
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_151441A4.s")
+void func_151441A4(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD) {
+    s16 temp_v0;
+    s16 temp_v0_2;
+
+    switch (argD) {
+    case 2:
+        *arg0 = (s16) arg8;
+        *arg1 = (s16) arg9;
+        *arg2 = (s16) argA;
+        *arg3 = (s16) argB;
+        return;
+    case 0:
+        *arg3 = 0;
+        temp_v0 = *arg3;
+        *arg2 = temp_v0;
+        *arg1 = temp_v0;
+        *arg0 = temp_v0;
+        return;
+    case 1:
+        *arg2 = 0;
+        temp_v0_2 = *arg2;
+        *arg1 = temp_v0_2;
+        *arg0 = temp_v0_2;
+        *arg3 = (s16) argB;
+        return;
+    case 3:
+        *arg0 = (s16) ((s32) (arg4 * argC) >> 8);
+        *arg1 = (s16) ((s32) (arg5 * argC) >> 8);
+        *arg2 = (s16) ((s32) (arg6 * argC) >> 8);
+        *arg3 = 0;
+        return;
+    case 4:
+        *arg0 = (s16) ((s32) (arg4 * argC) >> 8);
+        *arg1 = (s16) ((s32) (arg5 * argC) >> 8);
+        *arg2 = (s16) ((s32) (arg6 * argC) >> 8);
+        *arg3 = 0;
+        return;
+    default:
+        *arg0 = (s16) ((s32) (arg4 * argC) >> 8);
+        *arg1 = (s16) ((s32) (arg5 * argC) >> 8);
+        *arg2 = (s16) ((s32) (arg6 * argC) >> 8);
+        *arg3 = 0;
+        return;
+    }
+}
 void func_151442FC(s16 *arg0, s16 *arg1, s16 *arg2, s16 *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD) {
     s16 temp_v0;
     s16 temp_v0_2;

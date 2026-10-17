@@ -33,7 +33,34 @@ void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082D5C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082DD8.s")
+void func_15082DD8(u8 *arg0) {
+    u8 *temp_v0;
+
+    *(s32 *)(arg0 + 0xF8) &= 0xF7FFFFFD;
+    temp_v0 = *(u8 **)(arg0 + 0x31C);
+    *(s32 *)(arg0 + 0xF8) |= 4;
+    if ((temp_v0 != NULL) && (temp_v0[0x56] == 0)) {
+        switch (D_800BE9F0) {
+        case 0x0:
+        case 0xA:
+        case 0xE:
+        case 0x12:
+        case 0x13:
+        case 0x19:
+        case 0x1B:
+        case 0x2C:
+        case 0x3C:
+        case 0x3D:
+        case 0x42:
+        case 0x43:
+        case 0x44:
+            break;
+        default:
+            *(s32 *)(arg0 + 0xF8) |= 2;
+            break;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082E44.s")
 
