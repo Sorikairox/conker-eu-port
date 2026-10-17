@@ -57,6 +57,13 @@ Commits on `eu`:
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
 throw all of that away.**
 
+## Quick start for a new session
+
+- Standard brief and rules: `tools/eu_port/AGENT_BRIEF.md`.
+- One-command verification: `tools/eu_port/verify_all.sh` (`--quick` skips the
+  re-split). It prints code build / check_files / full ROM status and progress.
+- Progress summary only: `python3 tools/eu_port/progress.py conker/progress.csv`.
+
 ## Build environment
 
 The toolchain (IDO 5.3 recomp, mips-linux-gnu binutils) is Linux x86-64 only, so
