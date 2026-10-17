@@ -118,7 +118,44 @@ void func_151CFDF4(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CFE48.s")
+typedef struct { f32 x, y, z; } Vec3CFE48;
+f32 func_15144AA8(s32 arg0);
+s32 func_15046F70(Vec3CFE48 *, s32, f32, f32 *);
+extern f32 D_800D9C80;
+
+void func_151CFE48(s32 arg0, f32 arg1, f32 arg2) {
+    u8 *p;
+    Vec3CFE48 pos;
+    f32 *base;
+    f32 a;
+    f32 angle;
+    f32 dist;
+    struct {
+        Vec3CFE48 unk0;
+        f32 unkC;
+    } tmp;
+    struct260 *temp_v0;
+
+    p = *(u8 **)((u8 *)arg0 + 0x318);
+    if (p != NULL && func_150ADA68() < 0.22200002f) {
+        base = func_15144B34(p[0x23D]);
+        a = func_15144AA8(p[0x23D]);
+        angle = (func_150ADA68() * 80.0f + (a - 40.0f)) * 0.017453292f;
+        dist = func_150ADA68() * 2000.0f;
+        pos.x = base[0] - sinf(angle) * dist;
+        pos.y = arg1;
+        pos.z = base[2] - cosf(angle) * dist;
+        if (func_15046F70(&pos, 0, arg2, &D_800D9C80) != 0) {
+            pos.y = D_800D9C80;
+            tmp.unk0 = pos;
+            tmp.unkC = 0.0f;
+            temp_v0 = func_15149130(func_150ADA20() % 131U + 51, -1, 0x20, -1, 1, 0, 0x10, 0xFF, 1);
+            if (temp_v0 != NULL) {
+                memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CFFFC.s")
 

@@ -125,7 +125,21 @@ void func_151320AC(struct_eu_15E000 *arg0, s32 arg1) {
     func_15131F34(arg0, arg1, (u8 *)arg0 + 0xB0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151320EC.s")
+s32 func_151320EC(u8 *arg0, s32 arg1, u8 *arg2, u8 *arg3) {
+    *(f32 *)(arg0 + 0x44) = *(f32 *)(arg0 + 0x3C) * 0.060000002f + *(f32 *)(arg2 + 4);
+    *(f32 *)(arg0 + 0x58) *= *(f32 *)(arg3 + 4);
+    *(f32 *)(arg0 + 0x5C) = -*(f32 *)(arg3 + 4) * *(f32 *)(arg0 + 0x5C);
+    *(f32 *)(arg0 + 0x60) *= *(f32 *)(arg3 + 4);
+    if (fabsf(*(f32 *)(arg0 + 0x5C)) < 1.9970001f) {
+        *(f32 *)(arg0 + 0x58) = 0.0f;
+        *(f32 *)(arg0 + 0x5C) = 0.0f;
+        *(f32 *)(arg0 + 0x60) = 0.0f;
+        *(f32 *)(arg0 + 0x64) = 0.0f;
+        arg3[0] &= ~1;
+        *(s32 *)(arg0 + 0x68) &= ~6;
+    }
+    return 1;
+}
 
 extern void (*D_80089C18[])(u8 *, u8 *, u8);
 void func_1513219C(u8 *arg0, u8 *arg1, u8 arg2) {

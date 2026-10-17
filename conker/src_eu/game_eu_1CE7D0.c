@@ -3,7 +3,44 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A0A10.s")
+s32 func_1510FE4C(s32);
+
+void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+    struct260 *temp_v0;
+    struct {
+        f32 unk0;
+        f32 unk4;
+        f32 unk8;
+        u8 unkC;
+        u8 padD[3];
+        f32 unk10;
+    } tmp;
+
+    if (arg0 != NULL) {
+        tmp.unk0 = *(f32 *)(arg0 + 0x14);
+        tmp.unk8 = *(f32 *)(arg0 + 0x1C);
+        if (D_800C35EA != 1) {
+            tmp.unk4 = *(f32 *)(arg0 + 0x180);
+            tmp.unk10 = 0.0f;
+            switch (func_1510FE4C(*(s32 *)(arg0 + 0x184))) {
+            case 0xA:
+                tmp.unkC = 0;
+                break;
+            case 0xF:
+            case 0x11:
+                tmp.unkC = 1;
+                break;
+            default:
+                tmp.unkC = 0;
+                break;
+            }
+            temp_v0 = func_151491F4(arg1, -1, 1, 1, 0, 0x14, arg2, arg3);
+            if (temp_v0 != NULL) {
+                memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x14);
+            }
+        }
+    }
+}
 
 s32 func_1514CBE8(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 extern f32 D_800A90F0;

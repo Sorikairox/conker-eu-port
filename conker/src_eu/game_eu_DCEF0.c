@@ -2,6 +2,9 @@
 #include "functions.h"
 #include "variables.h"
 
+// The callee (game_eu_1FB080.c) takes only the first three arguments.
+void func_151CFE48(s32 arg0, f32 arg1, f32 arg2, s16 *arg3);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AF6E0.s")
 

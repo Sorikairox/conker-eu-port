@@ -126,7 +126,7 @@ def _romread(vaddr,n):
     if _ROM is None: _ROM=(open('conker.eu.bin','rb').read(),datarefs.segments())
     data,segs=_ROM
     for nm,sg in segs.items():
-        if nm.endswith('_data') and 'vram' in sg and sg['vram']<=vaddr<sg['vram']+(sg['end']-sg['start']):
+        if nm.endswith('_data') and 'vram' in sg and sg.get('end') is not None and sg['vram']<=vaddr<sg['vram']+(sg['end']-sg['start']):
             r=vaddr-sg['vram']+sg['start']; return data[r:r+n]
     return None
 
@@ -190,7 +190,10 @@ def work(item):
             open(os.path.join(gd,'errs',f+'.txt'),'w').write('\n'.join(em[:3]))
         else:
             try: res=check_func(opath,f,spath)
-            except Exception as ex: res='EXC'
+            except Exception as ex:
+                res='EXC'
+                import traceback
+                open(os.path.join(gd,'errs',f+'.txt'),'w').write(traceback.format_exc()[-600:])
             if VERB: open(os.path.join(gd,f+'.diff'),'w').write('\n'.join(VERB)); del VERB[1:]
         out.append((f,p,res))
         for x in (cpath,opath):

@@ -68,7 +68,141 @@ s32 func_1501396C(struct16 *arg0) {
 }
 
 // another struct
-#pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150139AC.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    u8 unk30;
+    u8 unk31;
+    u8 unk32;
+    u8 unk33;
+    u8 unk34;
+    u8 pad35[3];
+} Ent150139AC;
+extern Ent150139AC D_80096350[];
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    u8 unk14;
+    u8 unk15;
+    u8 unk16;
+    u8 unk17;
+    s32 unk18;
+} Obj150139AC;
+extern f32 D_800969F8;
+extern f32 D_800969FC;
+
+s32 func_150139AC(Obj150139AC *arg0) {
+    struct {
+        Obj150139AC *unk0;
+        f32 unk4;
+        f32 unk8;
+        f32 unkC;
+        f32 unk10;
+        f32 unk14;
+        f32 unk18;
+        f32 unk1C;
+        f32 unk20;
+        s16 unk24;
+        s16 unk26;
+        f32 unk28;
+        f32 unk2C;
+        f32 unk30;
+        f32 unk34;
+        f32 unk38;
+        f32 unk3C;
+        u8 unk40;
+        u8 unk41;
+        u8 unk42;
+        u8 pad43;
+        s16 unk44;
+        u8 pad46[2];
+        f32 unk48;
+        u8 pad4C[0x14];
+        s32 unk60;
+        u8 unk64;
+        u8 unk65;
+        u8 pad66[2];
+        s32 unk68;
+        s32 unk6C;
+    } tmp;
+    Ent150139AC *e;
+    s32 idx;
+
+    arg0->unk16 |= 4;
+    idx = arg0->unk18;
+    tmp.unk0 = arg0;
+    tmp.unkC = 0.0f;
+    switch (arg0->unk15 & 3) {
+    case 2:
+        tmp.unk4 = arg0->unk6 * arg0->unkA * 4.0f;
+        tmp.unk10 = arg0->unk2 + arg0->unk8;
+        break;
+    case 0:
+    case 1:
+        tmp.unk4 = arg0->unk6 * arg0->unk6 * D_800969F8;
+        tmp.unk10 = arg0->unk2 + arg0->unk8;
+        break;
+    default:
+        tmp.unk4 = 1.0f;
+        tmp.unk10 = 1000.0f;
+        break;
+    }
+    e = &D_80096350[idx];
+    tmp.unk14 = e->unk4;
+    tmp.unk18 = e->unk8;
+    tmp.unk1C = e->unkC;
+    tmp.unk20 = e->unk10;
+    tmp.unk24 = e->unk14;
+    tmp.unk26 = e->unk16;
+    tmp.unk28 = e->unk18;
+    tmp.unk2C = e->unk1C;
+    tmp.unk30 = e->unk20;
+    tmp.unk34 = e->unk24;
+    tmp.unk38 = e->unk28;
+    tmp.unk3C = e->unk2C;
+    tmp.unk8 = e->unk0;
+    tmp.unk40 = e->unk30;
+    tmp.unk41 = e->unk31;
+    tmp.unk42 = e->unk32;
+    tmp.unk48 = D_800969FC;
+    tmp.unk60 = 0;
+    tmp.unk64 = 0;
+    tmp.unk65 = 0;
+    tmp.unk68 = 0;
+    if (e->unk34) {
+        func_1510F800(0);
+        tmp.unk6C = func_1510FD20(arg0->unk0, arg0->unk4);
+    } else {
+        tmp.unk6C = 0;
+    }
+    if (e->unk33) {
+        tmp.unk44 = func_1000FA64(0x4D, arg0->unk0, arg0->unk2, arg0->unk4, 0x5DC0, 0x3E8, 0x12C, 0, 0, 0, 0, 0);
+    } else {
+        tmp.unk44 = 0;
+    }
+    e = (Ent150139AC *)func_151491F4(300, -1, 6, 0, 10, 0x70, 0xFF, 0);
+    if (e != NULL) {
+        memcpy((u8 *)e + 0x28, &tmp, sizeof(tmp));
+    }
+    return 1;
+}
 
 extern void (*D_800832B8[])(struct134 *, f32);
 

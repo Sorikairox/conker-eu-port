@@ -3,7 +3,18 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1514FBB0.s")
+f32 func_15144A74(u8 *, u8 *);
+s32 func_15144E80(u8 *, u8 *, u8 *, u8 *);
+
+void func_1514FBB0(u8 *arg0, u8 *arg1) {
+    arg1[0] = 2;
+    *(f32 *)(arg1 + 0x28) = *(f32 *)(arg0 + 0x20);
+    if ((func_15144E80(arg0 + 0xC, arg1 + 0x10, arg1 + 0x1C, arg1 + 4) != 0) && (func_15144A74(arg1 + 4, arg0) < 0.0f)) {
+        *(f32 *)(arg1 + 4) = -*(f32 *)(arg1 + 4);
+        *(f32 *)(arg1 + 8) = -*(f32 *)(arg1 + 8);
+        *(f32 *)(arg1 + 0xC) = -*(f32 *)(arg1 + 0xC);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1514FC58.s")
 
