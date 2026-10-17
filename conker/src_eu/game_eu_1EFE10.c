@@ -52,6 +52,19 @@ void func_151C4AC0(u8 *arg0, u8 *arg1, f32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4DD0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C5060.s")
+void func_151C5060(u8 *arg0, s32 *arg1, u8 arg2) {
+    u8 *p = arg0 + 0x110;
+    if (arg2 == 0x2D) {
+        if (arg1[0] == *(s32 *)(p + 0x90)) {
+            *(s32 *)(p + 0x90) = arg1[1];
+            p[0x94] = ((u8 *)arg1)[9];
+            return;
+        }
+        if (arg1[1] == *(s32 *)(p + 0x90)) {
+            *(s32 *)(p + 0x90) = arg1[0];
+            p[0x94] = ((u8 *)arg1)[8];
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C50BC.s")

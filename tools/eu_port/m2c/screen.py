@@ -13,7 +13,7 @@ WORD_RE = re.compile(r"/\*\s+[0-9A-F]+\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(.*
 PRAG = re.compile(r'#pragma GLOBAL_ASM\("([^"]*)/(\w+)\.s"\)')
 gd=sys.argv[1]; jobs=int(sys.argv[2]) if len(sys.argv)>2 else 8
 VERB=[''] if os.environ.get('SCREEN_V') else None
-TMP='build/screen'; os.makedirs(TMP,exist_ok=True); os.makedirs(os.path.join(gd,'errs'),exist_ok=True)
+TMP=os.environ.get('SCREEN_TMP','build/screen'); os.makedirs(TMP,exist_ok=True); os.makedirs(os.path.join(gd,'errs'),exist_ok=True)
 
 def asm_words(path):
     w,t=[],[]

@@ -5,7 +5,7 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B42B0.s")
 
-s32 func_1000FC18(s32, s16, s16, s16, s32);
+s32 func_1000FC18(u16, s16, s16, s16, s32);
 s32 func_15147E64(u8 *);
 
 void func_150B4354(u8 *arg0) {
@@ -13,7 +13,7 @@ void func_150B4354(u8 *arg0) {
     func_15147E64(arg0);
 }
 
-s32 func_1000FC18(s32, s16, s16, s16, s32);
+s32 func_1000FC18(u16, s16, s16, s16, s32);
 s32 func_15147E98(u8 *);
 
 void func_150B43C8(u8 *arg0) {

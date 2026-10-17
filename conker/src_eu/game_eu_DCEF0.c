@@ -85,4 +85,22 @@ void func_150B07FC(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0828.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0AEC.s")
+u8 *func_151149AC(u8);
+
+s32 func_150B0AEC(u8 arg0, u8 *arg1) {
+    u8 *temp_v0;
+    u8 *temp_v1;
+
+    temp_v0 = func_151149AC(arg0);
+    (*(u8 **)((u8 *)arg1 + 8)) = temp_v0;
+    if (temp_v0 == NULL) {
+        return 0;
+    }
+    temp_v1 = (*(u8 **)((u8 *)arg1 + 8));
+    (*(f32 *)((u8 *)arg1 + 0)) = -150.0f;
+    (*(f32 *)((u8 *)arg1 + 4)) = 4.5f;
+    (*(f32 *)((u8 *)arg1 + 0xC)) = (f32) (*(s16 *)((u8 *)temp_v1 + 0x10));
+    (*(f32 *)((u8 *)arg1 + 0x10)) = (f32) (*(s16 *)((u8 *)temp_v1 + 0x12));
+    (*(f32 *)((u8 *)arg1 + 0x14)) = (f32) (*(s16 *)((u8 *)temp_v1 + 0x14));
+    return 1;
+}

@@ -29,4 +29,17 @@ s32 func_1518A894(u8 *arg0, u8 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7D70/func_1518A8D0.s")
+void func_1518A8D0(u8 *arg0, s32 *arg1, u8 arg2) {
+    u8 *p = arg0 + 0x170;
+    if (arg2 == 0x2D) {
+        if (arg1[0] == *(s32 *)(p + 0x18)) {
+            *(s32 *)(p + 0x18) = arg1[1];
+            p[0x1D] = ((u8 *)arg1)[9];
+            return;
+        }
+        if (arg1[1] == *(s32 *)(p + 0x18)) {
+            *(s32 *)(p + 0x18) = arg1[0];
+            p[0x1D] = ((u8 *)arg1)[8];
+        }
+    }
+}

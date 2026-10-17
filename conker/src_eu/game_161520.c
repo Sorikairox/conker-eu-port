@@ -85,7 +85,7 @@ typedef struct {
 void func_1513555C(struct161520 *arg0, struct161520_msg *arg1, u8 arg2);
 void func_151355B8(struct161520 *arg0, struct161520_msg *arg1, u8 arg2);
 s32 func_15134070(struct127 *arg0);
-void func_15138120(struct127 *arg0, s32 arg1, s32 arg2);
+void func_15138120(struct127 *arg0, s32 arg1, u8 arg2);
 void func_151382E0(void *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4);
 void func_15138424(struct127 *arg0, void *arg1, s32 arg2, void *arg3, u8 arg4, s32 arg5);
 void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, struct161520 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);

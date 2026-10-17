@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# usage: gen2.py outdir min max   -> outdir/v<k>/<func>.c variants, generated in parallel
+# usage: [ONLY=funclist] gen2.py outdir min max   -> outdir/v<k>/<func>.c variants, generated in parallel
 import sys,re,os,subprocess
 from multiprocessing import Pool
 S=os.path.dirname(os.path.abspath(__file__))
@@ -98,10 +98,12 @@ def work(a):
     return len(vs)
 def main():
     items=[]
+    only=set(x.split()[0] for x in open(os.environ['ONLY'])) if os.environ.get('ONLY') else None
     for l in open(S+'/all.txt').read().split('\n')[1:]:
         if not l: continue
         ins,p,f,jt,fl=l.split(); ins=int(ins)
         if ins>mx or ins<mn or jt=='True': continue
+        if only is not None and f not in only: continue
         m=re.search(r'#pragma GLOBAL_ASM\("([^"]*/%s\.s)"\)'%f,open(p).read())
         if m: items.append((f,p,m.group(1)))
     os.makedirs(S+'/ctx',exist_ok=True)

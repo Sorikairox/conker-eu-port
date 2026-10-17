@@ -45,7 +45,7 @@ void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
 
 s32 func_15134070(s32);
 s32 func_15136C3C(s32, s32, s32, s32, s32, s32, s32, s32);
-s32 func_15138120(s32, s32, s32);
+s32 func_15138120(s32, s32, u8);
 s32 func_15195024(s32);
 
 void func_1519508C(s32 arg0) {

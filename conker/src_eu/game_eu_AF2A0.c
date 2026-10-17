@@ -15,7 +15,17 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082020.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_1508220C.s")
+void func_1507DF10(u8 *, s32, u8);
+void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
+    if (D_800BE616 == 0) {
+        if (arg0[0x1CA] != 0) {
+            arg0[0x1CA] = 7;
+        }
+        if (arg2 == 0 || v != 10) {
+            func_1507DF10(arg0, v, arg2);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082278.s")
 

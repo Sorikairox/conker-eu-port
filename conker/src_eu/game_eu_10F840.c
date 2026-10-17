@@ -21,4 +21,16 @@ void func_150E3510(s32 arg0, s32 arg1, s16 arg2) {
     func_150E3324(arg0, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E3540.s")
+void func_150E3540(u8 *arg0, s32 *arg1, u8 arg2) {
+    if (arg2 == 0x2D) {
+        if (arg1[0] == *(s32 *)(arg0 + 0xDC)) {
+            *(s32 *)(arg0 + 0xDC) = arg1[1];
+            arg0[0xDA] = ((u8 *)arg1)[9];
+            return;
+        }
+        if (arg1[1] == *(s32 *)(arg0 + 0xDC)) {
+            *(s32 *)(arg0 + 0xDC) = arg1[0];
+            arg0[0xDA] = ((u8 *)arg1)[8];
+        }
+    }
+}

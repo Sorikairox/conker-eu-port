@@ -664,7 +664,7 @@ void func_15077190(void) {
 }
 
 void func_150771F0(void) {
-    s32 var_a1;
+    u8 var_a1;
     u8 a2, a3;
 
     if (D_800D1893 == 0) {
