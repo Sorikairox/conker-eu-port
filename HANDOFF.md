@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-17 (fifth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (sixth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,13 +17,14 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2622 / 5913 functions in C (44.3%)**; code bytes 253,312 / 2,253,856 (11.2%)
-  (end of session 5, from `verify_all.sh`; session 4 counted 2563 against 5916).
-  - init: 320/542 functions (30.7% of bytes)
-  - game: 2271/5328 (9.5%)
+- **2664 / 5911 functions in C (45.1%)**; code bytes 265,996 / 2,253,856 (11.8%)
+  (end of session 6, from `verify_all.sh`).
+  - init: 360/540 functions (38.2% of bytes)
+  - game: 2273/5328 (9.5%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
-    2374 after the first round of new decompilation (session 3), 2563 after session 4.
+    2374 after the first round of new decompilation (session 3), 2563 after session 4,
+    2622 (253,312 bytes) after session 5.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -53,6 +54,7 @@ Commits on `eu`:
 | `c67d78d` | Salvage of an interrupted parallel round: 728 more functions (see below) |
 | `8d3f205`…`fc0e53a` | Session 4: 189 functions (near-misses, m2c pipeline, hand fixes); tools in `tools/eu_port/m2c/` |
 | `8430db4`…`3d5a326` | Session 5: 59 functions (variant screening, near misses, sqrtf split, 40 libultra functions at -O1) |
+| `3df102d`…`204343f` | Session 6: 42 functions (libultra controller/pfs/SI/PI/VI/thread at -O1, libc ldiv/_Litob at -O2, `narrow.py`) |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -277,6 +279,73 @@ Lessons:
 - `x += y` and `x = x + y` can differ in `addu` operand order.
 - A loop over `u8 i` shows up as `andi $t, $s, 0xFF` before the compare.
 
+## Session 6: libultra almost done, `narrow.py`
+
+Sequential, 4 work commits (`3df102d`..`204343f`), +42 functions (2622 -> 2664),
++12,684 bytes. Everything written from libultra/libc source knowledge, built with `m2c/flags`.
+
+- **-O1** (added to the EU-only block in `conker/Makefile`): `init_eu_277D0` (osJamMesg,
+  osPiGetCmdQueue), `init_eu_27960` (__osSiDeviceBusy), `init_eu_27950` (__osSpGetStatus),
+  `init_eu_26870` (__osSpRawReadIo/WriteIo; `__sinf` stays asm in the same file),
+  `init_eu_26370` (__osContAddressCrc/DataCrc, osDestroyThread), `init_eu_24ED0`
+  (osContStartReadData, osContGetReadData, __osPackReadData = `contreaddata_text_017C`),
+  `init_eu_256E0` (osContInit, __osContGetInitData, __osPackRequestData), `init_eu_25AA0`
+  (__osSiGetAccess, __osSiRawStartDma = `func_10025B60`), `init_eu_25FC0`/`init_eu_25C10`
+  (__osContRamRead/Write + pack helpers `func_10026204`/`func_10025E40`), `init_eu_25370`
+  (osPfsIsPlug group, same code as `pfsisplug2.c`), `init_eu_27990` (osPfsInit =
+  `func_10027990`, __osPfsGetStatus), `init_eu_27C40` (all of contpfs.c: __osSumcalc,
+  __osIdCheckSum, __osRepairPackId, __osCheckPackId, __osGetId, __osCheckId,
+  __osPfsRWInode, __osPfsSelectBank), `init_eu_23CC0` (osPiRawStartDma,
+  osEPiRawStartDma = `func_10023DA0`; bcopy/osWritebackDCache stay asm),
+  `init_eu_24320` (__osViInit = `func_10024720`), `init_eu_24880` (__osViSwapContext).
+- **-O2** (libc): `init_eu_23400` (lldiv, ldiv), `init_eu_23590` (_Litob; `unsigned char`
+  for `type`, the buffer and the digit tables, like string.c).
+- This libultra is an old revision: OSPifRam loops clear 16 words (`i < 16`, the
+  pifstatus word included), retry loops are `while (ret == PFS_ERR_CONTRFAIL && retry-- >= 0)`,
+  osDestroyThread walks `tlnext` with pred/succ, osPiRawStartDma has no domain handling,
+  `OS_USEC_TO_CYCLES` must be spelled `((u64)n * osClockRate) / 1000000LL`
+  (`osContInit`), `__osContDataCrc` needs `temp |= 0;` (not `&= 0xFF`) in the `i == 32` branch.
+- New names in `undefined_syms.eu.txt`: `__osContPifRam` 0x80042DA0,
+  `__osContinitialized` 0x8002C160, `osClockRate` 0x8002C060, `__osEepromTimerQ/Msg`
+  0x80042E08/0x80042E20, `osTvType` 0x80000300, `osViModePalLan1/MpalLan1/NtscLan1`
+  0x8002C180/1D0/220, `osRomBase` 0x80000308. The `D_8002C220` spelling is taken by a US
+  `f32` in `variables.h`, hence real names. A missing name only shows at link time (check_files
+  masks relocations), so run `verify_all.sh --quick` after adding externs.
+- **`m2c/narrow.py indir outdir`** (new variant set): a parameter that m2c masks as
+  `(argN & 0xFF)` / `& 0xFFFF` gets type `u8`/`u16` and the masks are removed. This is the
+  `(obj, msg, u8 event)` handler signature; IDO homes the arg and re-truncates it
+  (`sw a2, 8(sp); andi t6, a2, 0xFF; move a2, t6`), which is the most common single
+  pattern among the `SIZE-1` drafts. ~190 drafts change; 2 matched outright
+  (`func_150FA9E8`, `func_15179154`); most of the rest are now off by register choice only
+  (e.g. `func_15190C50`: DIFF3, a temp lands in `a0` instead of the dead `a2`). Many narrowed
+  drafts fail with CERR because `functions.h` or the C file already prototypes the function
+  with `s32` params; fixing those prototypes (check codegen of callers!) would unlock more.
+  Workflow used: `gen2.py ~/conker/conker/build/k 1 150` (~6.5 min, 1889 functions), then
+  `for v in 0..7: narrow.py build/k/v$v build/k/n$v`, `screen.py build/k/n$v 8` in the
+  container (~1.5 min per full set), `merge.py build/k/final build/k/n*`, `apply.py`.
+  `verify_all.sh` (full) wipes `conker/build/`, drafts included.
+- SIZE±1 classification (instruction multiset of ref vs draft, script not kept): besides the
+  u8 parameter case, recurring groups are `bnel`-loops of the form
+  `while (!found && i < N) { if (x == tbl[i]) found = 1; else i++; }`
+  (`func_15199954`, `func_151999BC`, `func_1519C428`, `func_1519C490`: control flow right,
+  but the reference keeps `i/found/x` in `a1/a2/a3`; declaration-order permutations did not
+  help), and extra `lw`/`addiu` pairs where the reference reloads a pointer through a
+  struct (`func_150F1B78`, `func_151BE65C`, `func_151D7AE8`, `func_151007B0`).
+
+Skipped libultra (still asm):
+- `func_10027B50` (osLeoDiskInit, `init_eu_27990`): matches except instruction scheduling of
+  the handle field stores (`pageSize`/`relDuration` share one `lui $at` in the ROM); all
+  orders of the six field assignments tried; -O2/-g worse. Maybe its own object with
+  different flags/source shape; left as asm at the end of the file.
+- `osPfsChecker`, `corrupted_init`, `corrupted` (`init_eu_289A0`, ~730 instructions, old
+  pfschecker.c) and its game/US twin `libultra/io/pfschecker2.c`: not attempted.
+- `__sinf` (`init_eu_26870`) and `sinf` (`libultra/gu/sinf.c`): need their double constants,
+  which live in the EU data blobs (no `.rodata` in C files yet).
+- `init_eu_26B30` (`__osSetHWIntrRoutine`, `func_10026C00`, `func_10026E40`,
+  `func_10027524`, `func_1002760C` next to the `__ll_*` helpers): not identified.
+- `MusPtrBankGetCurrent` (0x10027938) is really the tail of `osPiGetCmdQueue`; its symbol is
+  harmless and left in `symbol_addrs.eu.txt`.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -377,22 +446,17 @@ porting to manual work.
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
    Next steps (session 5):
-   - **Remaining libultra C functions** (likely `-O1`, use `m2c/flags`): `osPiRawStartDma`
-     (`init_eu_23CC0`, with asm `bcopy`), `__osSiDeviceBusy`, `__osSpGetStatus`,
-     `__osSpRawReadIo/WriteIo` (`init_eu_26870`, shares the file with `__sinf`),
-     `osJamMesg`, `osPiGetCmdQueue`, `osDestroyThread` (`init_eu_26370`, with the cont
-     CRC functions), `osContInit/__osContGetInitData/__osPackRequestData`,
-     `osContStartReadData/osContGetReadData` (`init_eu_24ED0`), `__osContRamRead/Write`,
-     `__osContAddressCrc/DataCrc`, the pfs functions (`__osPfsRWInode`, `__osGetId`,
-     `__osCheckId`, `__osRepairPackId`, ...), `ldiv/lldiv`, `_Litob`, `__osViSwapContext`,
-     `__osViInit` (`func_10024720`), `osSetTimer`-style helpers, `osPfsChecker`.
+   - **Remaining libultra C** (see session 6 "Skipped"): `osPfsChecker` group
+     (`init_eu_289A0` and `pfschecker2.c`), osLeoDiskInit (`func_10027B50`), `__sinf`/`sinf`
+     (needs data split), the unidentified functions in `init_eu_26B30`.
      Handwritten asm (leave as is): `bzero`, `bcopy`, `__osGetSR/__osSetSR`,
      `__osSetFpcCsr`, `__osDisableInt/__osRestoreInt`, `osInvalICache/DCache`,
-     `osWritebackDCacheAll`, `osGetCount`, `__osSetCompare`, `osMapTLB/osUnmapTLB`,
+     `osWritebackDCache(All)`, `osGetCount`, `__osSetCompare`, `osMapTLB/osUnmapTLB`,
      `__osProbeTLB`, `osSetIntMask`, `sqrtf` (init copy), the `__ll_*` helpers (compiled
      with a different compiler), `func_10007D14` (`__osPopThread`, from exceptasm.s).
-     Several init files mix two libultra objects with different flags: split them
-     like `init_eu_23360` when one flag set does not fit.
+   - **Prototype clean-up for `narrow.py`**: give the `(obj, msg, u8 event)` handlers `u8`
+     third parameters in `functions.h`/file prototypes (checking every caller still
+     matches), then regenerate drafts and screen `narrow.py` variants again.
    - Game-side copies of libultra exist too (`game_eu_21D010`, `game_eu_21E320`); look
      for more `func_151E`/`func_151F` functions that call `__osDisableInt` or touch
      `0xA4xx` registers.
