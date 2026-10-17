@@ -26,7 +26,17 @@ void func_151411C4(struct210 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_15141478.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_15141564.s")
+s32 func_15141564(structEU_16DC80 *arg0) {
+    struct { f32 unk0; f32 unk4; f32 unk8; f32 unkC; } *temp = &arg0->unk170.f;
+    f32 s;
+    s32 pad;
+
+    s = sinf(temp->unk8);
+    arg0->unk158 = temp->unk0 + (temp->unk4 * s);
+    temp->unk8 += temp->unkC * D_800BE9A4;
+    temp->unk8 = func_15144B68(temp->unk8);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151415D4.s")
 
@@ -63,7 +73,12 @@ s32 func_15141818(s32 arg0, s32 arg1) {
 //     return temp_f0;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_15141928.s")
+s32 func_15141928(structEU_16DC80 *arg0) {
+    f32 *temp_v0 = arg0->unk170.i.unk8;
+
+    func_1514182C(arg0, arg0->unk170.i.unkC, arg0->unk170.i.unk0, arg0->unk170.i.unk4, temp_v0[0], temp_v0[2]);
+    return 1;
+}
 // s32 func_15141928(void *arg0) {
 //     void *temp_v0 = arg0->unk178;
 //     func_1514182C(arg0, arg0->unk17C, arg0->unk170, arg0->unk174, temp_v0->unk0, temp_v0->unk8);
