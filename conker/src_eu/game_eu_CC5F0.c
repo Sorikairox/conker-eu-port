@@ -53,7 +53,15 @@ void func_1509FA88(s32 arg0, s32 arg1, s32 arg2) {
     func_10010F30(func_1000F568(arg0, (u8)(arg1 - arg0 + 1)), arg2, 0x40, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509FAD4.s")
+void func_1509FAD4(u16 arg0, s32 arg1, s32 arg2, s16 arg3, s32 arg4, s32 arg5) {
+    struct127 *obj = func_1505EEF4(arg2);
+
+    if (obj != NULL) {
+        if (arg5 || func_10010894(obj) == 0) {
+            func_10010344(arg0, obj, arg1, arg3, (u16) arg4);
+        }
+    }
+}
 
 void func_1509FB40(s32 arg0, s32 arg1) {
     struct127 *temp_v0 = func_1505EEF4(arg0);

@@ -5,7 +5,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150ED750.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150ED7B4.s")
+s32 func_150ED750(f32, f32);
+
+void func_150ED7B4(u8 *arg0, u8 *arg1) {
+    func_150ED750((f32) (func_1505A630((*(f32 *)((u8 *)arg1 + 0x14)) - (*(f32 *)((u8 *)arg0 + 0x14)), (*(f32 *)((u8 *)arg0 + 0x1C)) - (*(f32 *)((u8 *)arg1 + 0x1C)), 0) + 0x4000) * 0.005493164f, (*(f32 *)((u8 *)arg0 + 0x40)));
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150ED818.s")
 

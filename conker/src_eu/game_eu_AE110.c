@@ -35,7 +35,24 @@ void func_15080BF4(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080C28.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080FE8.s")
+s32 func_10004074(s32);
+s32 func_1516D850(s32);
+s32 func_151F2D6C(s32, s32);
+
+void func_15080FE8(void) {
+    s32 r;
+    D_800D1941 = 0;
+    func_1516D850(D_800D1950);
+    func_10004074(D_800D1944);
+    if (D_800D1948 != 0) {
+        r = D_800D1948;
+        func_10004074(r);
+        func_10004074(D_800D194C);
+        func_10004074(D_800D1998);
+        D_800D1948 = 0;
+    }
+    func_151F2D6C(0, 0x5622);
+}
 
 extern u8 *D_800D1DBC;
 

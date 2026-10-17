@@ -61,7 +61,15 @@ s32 func_151AD0E8(u8 *arg0, u8 *arg1) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AD110.s")
+s32 func_151AE958();
+
+void func_151AD110(u8 *arg0) {
+    s32 temp = *(s32 *)(*(u8 **)(*(u8 **)(arg0 + 0x1C) + 0x31C) + 0x9C);
+    if (temp != 0) {
+        func_151AE958(arg0);
+    }
+    if (arg0) {} // keeps arg0 live past the call (home-slot store); likely a stripped debug macro
+}
 
 void func_151AD144(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)(arg0 + 0x1C), (s32)(arg0 + 0x20), (s32)arg0);

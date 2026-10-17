@@ -103,7 +103,13 @@ void func_15045178(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_1504583C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045A04.s")
+s32 func_150A69E0(s16, s16, s32, u16);
+void func_1510F800(s32);
+
+void func_15045A04(u8 *arg0, u16 arg1, s32 *arg2, s32 arg3) {
+    func_1510F800(2);
+    *arg2 = func_150A69E0((s16) (s32) (*(f32 *)((u8 *)arg0 + 0)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 8)), arg3, arg1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045A70.s")
 

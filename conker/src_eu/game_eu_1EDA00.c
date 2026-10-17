@@ -13,7 +13,17 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C0894.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C0910.s")
+s32 func_150E856C(f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_151C0910(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    s32 pad;
+    u32 sp40;
+    f32 sp3C;
+
+    sp3C = func_150ADA68();
+    sp40 = func_150ADA20();
+    func_150E856C((sp3C * 75.0f) + 75.0f, ((sp40 % 56U) + 0xC8) & 0xFF, arg0, arg1, (func_150ADA20() % 205U) + 0x12B, 1, 1, 0, 0, 0, (s32) arg2, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C09C8.s")
 

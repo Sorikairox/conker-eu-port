@@ -12,6 +12,7 @@ from elftools.elf.relocation import RelocationSection
 WORD_RE = re.compile(r"/\*\s+[0-9A-F]+\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(.*)")
 PRAG = re.compile(r'#pragma GLOBAL_ASM\("([^"]*)/(\w+)\.s"\)')
 gd=sys.argv[1]; jobs=int(sys.argv[2]) if len(sys.argv)>2 else 8
+VERB=[''] if os.environ.get('SCREEN_V') else None
 TMP='build/screen'; os.makedirs(TMP,exist_ok=True); os.makedirs(os.path.join(gd,'errs'),exist_ok=True)
 
 def asm_words(path):
@@ -55,7 +56,12 @@ def check_func(o,f,spath):
     mine=[int.from_bytes(data[addr+i:addr+i+4],'big') for i in range(0,size,4)]
     while len(ref)>len(mine) and ref[-1]==0: ref.pop()
     while len(mine)>len(ref) and mine[-1]==0: mine.pop()
-    if len(mine)!=len(ref): return 'SIZE%+d'%(len(mine)-len(ref))
+    if len(mine)!=len(ref):
+        if VERB:
+            for i in range(max(len(mine),len(ref))):
+                a=ref[i] if i<len(ref) else 0; b=mine[i] if i<len(mine) else 0
+                VERB.append('%s %08X %08X  %s'%('  ' if a==b else '**',a,b,reft[i] if i<len(reft) else ''))
+        return 'SIZE%+d'%(len(mine)-len(ref))
     n=0
     for i,(a,b) in enumerate(zip(ref,mine)):
         off=addr+i*4
@@ -63,9 +69,13 @@ def check_func(o,f,spath):
         if off in rels:
             t,name,st=rels[off]
             if st=='STT_SECTION' or not name: return 'SECREL'
-            if not re.search(r'\b%s\b'%re.escape(name),reft[i]): return 'SYM:'+name
+            if not re.search(r'\b%s\b'%re.escape(name),reft[i]):
+                n+=1
+                if VERB: VERB.append('** %08X %08X  %s  [reloc %s]'%(a,b,reft[i],name))
+                continue
             m={4:0xFC000000,5:0xFFFF0000,6:0xFFFF0000}.get(t,0)
         if (a&m)!=(b&m): n+=1
+        if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
     return 'OK' if n==0 else 'DIFF%d'%n
 
 def work(item):
@@ -94,6 +104,7 @@ def work(item):
         else:
             try: res=check_func(opath,f,spath)
             except Exception as ex: res='EXC'
+            if VERB: open(os.path.join(gd,f+'.diff'),'w').write('\n'.join(VERB)); del VERB[1:]
         out.append((f,p,res))
         for x in (cpath,opath):
             if os.path.exists(x): os.remove(x)

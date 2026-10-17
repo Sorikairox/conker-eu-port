@@ -703,6 +703,7 @@ segments:
       - [0x216470, c, game_eu_216470]
       - [0x21CFC0, c, game_eu_21CFC0]
       - [0x21D010, c, game_eu_21D010]
+      - [0x21D050, c, game_eu_21D050]
       - [0x21D060, c, game_eu_21D060]
       - [0x21D420, c, game_eu_21D420]
       - [0x21D610, c, game_eu_21D610]

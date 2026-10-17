@@ -46,7 +46,15 @@ void func_1509D0C4(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D338.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D464.s")
+s32 func_10004074(s32);
+void func_1509D464(void) {
+    s32 r;
+    if (D_800D33D0 != 0) {
+        r = D_800D33D0;
+        func_10004074(r);
+        D_800D33D0 = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D49C.s")
 
