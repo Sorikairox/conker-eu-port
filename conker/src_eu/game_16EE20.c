@@ -234,21 +234,23 @@ void func_15142314(Mtx *arg0, s32 arg1, struct17 *arg2) {
         arg2->unk8 = mf[14];
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151423D8.s")
-// NON-MATCHING: regalloc (quadrant mask lands in a0 instead of t0)
-// f32 func_151423D8(u8 arg0) {
-//     s32 idx;
-//
-//     if (arg0 & 0x40) {
-//         idx = 0x40 - (arg0 & 0x3F);
-//     } else {
-//         idx = arg0 & 0x3F;
-//     }
-//     if (((arg0 & 0xC0) == 0) || ((arg0 & 0xC0) == 0xC0)) {
-//         return D_8009A5E0[idx];
-//     }
-//     return -D_8009A5E0[idx];
-// }
+extern f32 D_8009A5E0[];
+
+f32 func_151423D8(u8 arg0) {
+    s32 idx;
+    u8 q;
+
+    if (arg0 & 0x40) {
+        idx = 0x40 - (arg0 & 0x3F);
+    } else {
+        idx = arg0 & 0x3F;
+    }
+    q = arg0 & 0xC0;
+    if ((q == 0) || (q == 0xC0)) {
+        return D_8009A5E0[idx];
+    }
+    return -D_8009A5E0[idx];
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142444.s")
 void func_151424F4(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 sy, f32 sz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];

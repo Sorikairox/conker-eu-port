@@ -11,4 +11,8 @@ void func_151A5B84(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D2F30/func_151A5BCC.s")
+void func_151A5BCC(s32 arg0, u8 arg1) {
+    const s32 sp1C[1] = {0x5A};
+
+    func_15169260(sp1C, 1, arg0, arg1);
+}

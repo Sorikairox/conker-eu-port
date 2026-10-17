@@ -32,7 +32,19 @@ void func_150D0148(f32 arg0) {
     func_15155C9C(&sp1C, 0x52);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0170.s")
+s32 func_150D0170(u8 *arg0) {
+    f32 *v = (f32 *)(arg0 + 0x70);
+
+    *(f32 *)(arg0 + 0x10) += v[0] * D_800BE9A4;
+    *(f32 *)(arg0 + 0x14) += v[1] * D_800BE9A4 + 0.5f * v[2] * D_800BE9A4 * D_800BE9A4;
+    v[1] += v[2] * D_800BE9A4;
+    if (v[3] < *(f32 *)(arg0 + 0x14)) {
+        *(f32 *)(arg0 + 0x14) = v[3];
+        v[0] *= 0.3f;
+        v[1] = fabsf(v[1]) * -0.15f;
+    }
+    return 1;
+}
 
 u8 *func_150D0230(u8 *arg0) {
     while ((*arg0 != 0xBD) && (*arg0 != 0)) {

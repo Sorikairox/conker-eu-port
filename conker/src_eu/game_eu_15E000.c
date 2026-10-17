@@ -140,7 +140,11 @@ void func_1513219C(u8 *arg0, u8 *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151321F4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151322BC.s")
+void func_151322BC(s32 arg0, u8 arg1) {
+    const s32 sp1C[3] = {0x2B, 0x47, 0x52};
+
+    func_15169260(sp1C, 0x3, arg0, arg1);
+}
 
 s32 func_1513230C(u8 *arg0, s32 arg1) {
     func_151321F4(arg0 + 0xA8, arg0 + 0xAA, *(s32 *)(arg0 + 0xAC), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);

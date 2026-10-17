@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Split a game C file that is really two EU objects (rodata_bounds.py BOUNDARY) in one command.
 
-usage: file_split.py <stem> [--at FUNC] [--dry] [--no-own] [--resplit]
+usage: file_split.py <stem> [--at FUNC] [--rodata ROM] [--dry] [--no-own] [--resplit]
+
+--rodata ROM forces the .rodata boundary (e.g. where rodata_inject.py --dry shows a C function's
+late chunk running over an unreferenced data block).
 
 1. Finds the .rodata boundary B: the 16-byte aligned end of the late item (float/jump table)
    just before the first data item that follows late items (rodata_split.own_range's BOUNDARY).
@@ -25,6 +28,7 @@ import rodata_split as RS
 ROOT = DR.ROOT
 SRC = os.path.join(ROOT, 'src_eu')
 LATE = {'lwc1', 'ldc1', 'jtbl'}
+FORCE_B = None
 
 
 def map_funcs(v0, v1):
@@ -80,6 +84,9 @@ def analyse(stem, at=None):
         elif seen:
             D = r
             break
+    if FORCE_B:
+        D = FORCE_B
+        lastlate = max([r for r in mine if r < D and kinds.get(r, set()) & LATE] or [None])
     if D is None:
         sys.exit('%s: no BOUNDARY in its .rodata' % stem)
     data = open(DR.BIN, 'rb').read()
@@ -91,6 +98,8 @@ def analyse(stem, at=None):
     else:
         e = lastlate + (8 if 'ldc1' in ks else 4)
     B = (e + 15) & ~15
+    if FORCE_B:
+        B = D = FORCE_B
     if B > D and B - D < 16 and any(k.endswith('x') for k in kinds[D]):
         print('  data item 0x%X is an indexed access with a negative offset; boundary 0x%X' % (D, B))
         negoff = D
@@ -191,13 +200,17 @@ def main():
     a = sys.argv[1:]
     stem = a[0]
     at = a[a.index('--at') + 1] if '--at' in a else None
+    global FORCE_B
+    if '--rodata' in a:
+        FORCE_B = int(a[a.index('--rodata') + 1], 16)
     func, rom = analyse(stem, at)
     new = 'game_eu_%X' % rom
     print('split %s at %s (rom 0x%X) -> %s' % (stem, func, rom, new))
     path, h1, h2 = split_c(stem, func, new)
     Y = open(DR.YAML).read()
-    if ', .rodata, %s]' % stem in Y:
-        sys.exit('%s already owns .rodata; un-own it first' % stem)
+    if ', .rodata, %s]' % stem in Y and not a.count('--dry'):
+        # un-own: the range goes back to the blob, both halves are re-owned below
+        Y = re.sub(r'(- \[0x[0-9A-Fa-f]+), \.rodata, %s\]' % stem, r'\1, rodatabin]', Y)
     m = re.search(r'^(\s*)- \[0x[0-9A-Fa-f]+, c, %s\][^\n]*\n' % stem, Y, re.M)
     if not m:
         sys.exit('no c subsegment for %s' % stem)

@@ -70,7 +70,35 @@ Gfx *func_15142CF0(Gfx *gfx, s32 m, s32 l, s32 r, s32 g, s32 b, s32 a, u8 *arg7)
     }
     return gfx;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15142E24.s")
+s32 func_150953F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_1514306C(s32, s32, s32, u8);
+extern s32 D_800DD638;
+extern s32 D_800DD63C;
+extern s32 D_800DD640;
+extern s32 D_800DD644;
+
+s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA) {
+    s32 temp_v0;
+    s32 temp_v0_2;
+
+    temp_v0 = func_1514306C(arg1, arg6, arg2 >> 0x10, arg7);
+    if ((temp_v0 != D_800DD5E0) || (arg3 != D_800DD638) || (arg4 != D_800DD63C) || (arg5 != D_800DD640) || (arg8 != D_800DD644)) {
+        if (*arg9 == 1) {
+            *arg9 = 0;
+        }
+        if ((D_800BE9F0 == 0x18) || (D_800BE9F0 == 0x13) || (D_800BE9F0 == 6) || (D_800BE9F0 == 0x3B) || (D_800BE9F0 == 2) || (D_800BE616 != 0)) {
+            argA = 3;
+        }
+        temp_v0_2 = func_150953F8(arg0, arg1, arg2 >> 8, arg8, 0, 0, 0, arg3, arg4, arg5, argA);
+        D_800DD5E0 = temp_v0;
+        D_800DD638 = arg3;
+        D_800DD63C = arg4;
+        D_800DD640 = arg5;
+        arg0 = temp_v0_2;
+        D_800DD644 = D_800DD644;
+    }
+    return arg0;
+}
 Gfx *func_15142FBC(Gfx *gfx, s32 arg1, s32 arg2, u8 *arg3) {
     if ((arg1 != D_800DD648) || (arg2 != D_800DD64C)) {
         if (*arg3 == 1) {

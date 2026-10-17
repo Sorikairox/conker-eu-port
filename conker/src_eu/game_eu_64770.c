@@ -3,7 +3,16 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15036F60.s")
+void func_15036F60(u8 *arg0) {
+    s32 i;
+
+    *(f32 **)(arg0 + 0x324) = allocate_memory(0x48, 1, 0, 0);
+    bzero(*(f32 **)(arg0 + 0x324), 0x48);
+    for (i = 0; i < 3; i++) {
+        (*(f32 **)(arg0 + 0x324))[i] = -99999.0f;
+        (*(f32 **)(arg0 + 0x324))[i + 3] = -99999.0f;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15036FD8.s")
 

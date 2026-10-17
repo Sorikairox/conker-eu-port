@@ -58,5 +58,5 @@ void func_1514828C(u8 *arg0, s32 arg1, u8 arg2) {
 }
 
 void func_151482D4(s32 arg0, u8 arg1) {
-    func_15169260((s32)D_800A5B40, 2, arg0, arg1);
+    func_15169260(D_800A5B40, 2, arg0, arg1);
 }

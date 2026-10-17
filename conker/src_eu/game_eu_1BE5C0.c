@@ -101,5 +101,5 @@ void func_151920FC(s32 arg0, u8 arg1) {
 
     sp1C = D_800A83F0;
     func_151494E0(arg0, arg1);
-    func_15169260((s32) &sp1C, 1, arg0, arg1);
+    func_15169260(&sp1C, 1, arg0, arg1);
 }

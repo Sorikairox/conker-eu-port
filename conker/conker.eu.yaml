@@ -690,6 +690,7 @@ segments:
       - [0x1D5710, c, game_eu_1D5710]
       - [0x1D7790, c, game_eu_1D7790]
       - [0x1D9C00, c, game_eu_1D9C00]
+      - [0x1DC470, c, game_eu_1DC470] # EU file boundary (file_split.py)
       - [0x1DD290, c, game_eu_1DD290] # EU file boundary (file_split.py)
       - [0x1DD380, c, game_eu_1DD380]
       - [0x1DDE10, c, game_eu_1DDE10]
@@ -825,6 +826,8 @@ segments:
       - [0x2466B0, .rodata, game_eu_111F50]
       - [0x2466C0, .rodata, game_eu_1122E0]
       - [0x2467C0, rodatabin]
+      - [0x2467E0, .rodata, game_eu_114640]
+      - [0x246A40, rodatabin]
       - [0x246C40, .rodata, game_eu_11CB90]
       - [0x246F10, .rodata, game_eu_11F790]
       - [0x246F70, .rodata, game_eu_120060]
@@ -838,6 +841,8 @@ segments:
       - [0x2477F0, rodatabin]
       - [0x247A60, .rodata, game_eu_133A70]
       - [0x247A80, rodatabin]
+      - [0x247AC0, .rodata, game_eu_1365E0]
+      - [0x247B00, rodatabin]
       - [0x247D00, .rodata, game_eu_1387B0]
       - [0x247D10, rodatabin]
       - [0x248A70, .rodata, game_eu_14F750]
@@ -845,6 +850,9 @@ segments:
       - [0x248A90, rodatabin]
       - [0x248B00, .rodata, game_14FF90]
       - [0x248C10, rodatabin]
+      - [0x248E50, .rodata, game_eu_15E000]
+      - [0x248EC0, rodatabin]
+      - [0x24A850, .rodata, game_16DC80]
       - [0x24A860, .rodata, game_16EE20]
       - [0x24AAE0, .rodata, game_eu_170760]
       - [0x24AD30, rodatabin]
@@ -856,6 +864,8 @@ segments:
       - [0x24B6E0, rodatabin]
       - [0x24B860, .rodata, game_eu_186A80]
       - [0x24BA80, rodatabin]
+      - [0x24BBA0, .rodata, game_eu_18DB20]
+      - [0x24BCF0, rodatabin]
       - [0x24CAB0, .rodata, game_eu_1BAAA0]
       - [0x24CAC0, .rodata, game_eu_1BAF40]
       - [0x24D670, .rodata, game_eu_1BE5C0]
@@ -868,6 +878,8 @@ segments:
       - [0x24E3D0, .rodata, game_eu_1D2F30]
       - [0x24E3E0, rodatabin]
       - [0x24E680, .rodata, game_eu_1D9C00]
+      - [0x24E900, rodatabin]
+      - [0x24F3D0, .rodata, game_eu_1DC470]
       - [0x24F450, .rodata, game_eu_1DD290]
       - [0x24F750, rodatabin]
       - [0x24FBF0, .rodata, game_eu_1E7CC0]
@@ -877,7 +889,8 @@ segments:
       - [0x2502E0, .rodata, game_eu_1F7960]
       - [0x250540, .rodata, game_eu_1FB080]
       - [0x250710, .rodata, game_eu_200070]
-      - [0x2507A0, rodatabin]
+      - [0x2507A0, .rodata, game_1FFF60]
+      - [0x2507D0, rodatabin]
   - name: debugger
     type: code
     start: 0x00256450

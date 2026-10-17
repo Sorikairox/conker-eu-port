@@ -17,4 +17,8 @@ void func_15155AD4(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/func_15155B1C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_182A10/func_15155C9C.s")
+void func_15155C9C(void *arg0, u8 arg1) {
+    const s32 sp18[2] = {0x5D, 0x57};
+
+    func_15169260(sp18, 0x2, (s32)arg0, arg1);
+}
