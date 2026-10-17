@@ -13,7 +13,14 @@ void func_10023B70(void) {
     osSendMesg(&D_80042C88, NULL, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23B70/func_10023BC0.s")
+void func_10023BC0(void) {
+    OSMesg dummyMesg;
+
+    if (!D_8002C0B0) {
+        func_10023B70();
+    }
+    osRecvMesg(&D_80042C88, &dummyMesg, OS_MESG_BLOCK);
+}
 
 extern OSMesgQueue D_80042C88;
 
@@ -21,4 +28,18 @@ void func_10023C04(void) {
     osSendMesg(&D_80042C88, NULL, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23B70/osSetEventMesg.s")
+typedef struct {
+    OSMesgQueue *messageQueue;
+    OSMesg message;
+} __OSEventState;
+extern __OSEventState D_80042CA0[]; // __osEventStateTab
+
+void osSetEventMesg(OSEvent event, OSMesgQueue *mq, OSMesg msg) {
+    register u32 saveMask = __osDisableInt();
+    __OSEventState *es;
+
+    es = &D_80042CA0[event];
+    es->messageQueue = mq;
+    es->message = msg;
+    __osRestoreInt(saveMask);
+}
