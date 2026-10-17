@@ -30,3 +30,14 @@ def functions(pattern="asm/**/*.s"):
         if cur is not None and start is not None:
             out[cur] = (start, count * 4)
     return out
+
+
+LABEL = re.compile(r"^\s*glabel (\S+)\n\s+/\* [0-9A-F]+ ([0-9A-F]{8}) ", re.M)
+
+
+def labels(pattern="asm/**/*.s"):
+    """Addresses of every glabel, including ones spimdisasm emits inside a function."""
+    out = set()
+    for path in glob.glob(pattern, recursive=True):
+        out.update(int(m.group(2), 16) for m in LABEL.finditer(open(path).read()))
+    return out

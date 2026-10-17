@@ -11,6 +11,7 @@ Uses build_port/match.json (match.py + resolve.py) and the current EU asm split 
 
 Run from conker/ (plain python3, no third-party modules).
 """
+import bisect
 import glob
 import json
 import os
@@ -129,6 +130,76 @@ def function_span(text, fn):
     return None
 
 
+def place_by_shift(funcs, us_vrams, us_end, matches, eu_funcs, eu_starts, pool):
+    """Each function at its US address plus the shift of the nearest matched function
+    (in this file if any, else the segment); sizes must agree."""
+    anchors = [(uv, matches[fn]["vram"] - uv) for (fn, _), uv in zip(funcs, us_vrams) if fn in matches]
+    local = bool(anchors)
+    placed = []
+    for i, (fn, kind) in enumerate(funcs):
+        uv = us_vrams[i]
+        if kind == "c" and fn in matches:
+            placed.append((fn, kind, matches[fn]["vram"], True))
+            continue
+        shift = min(anchors or pool, key=lambda a: abs(a[0] - uv))[1]
+        ev = uv + shift
+        if ev not in eu_funcs:
+            return None, f"{fn}: predicted EU {ev:#x} is not a function start"
+        # sizes must agree; the last function may differ by its alignment padding
+        nxt = us_vrams[i + 1] if i + 1 < len(funcs) else us_end
+        if nxt is not None and nxt > uv:
+            diff = (nxt - uv) - eu_funcs[ev][1]
+            if diff != 0 and not (i + 1 == len(funcs) and 0 < diff < 16):
+                return None, f"{fn}: size US {nxt - uv:#x} != EU {eu_funcs[ev][1]:#x}"
+        elif not local:
+            return None, f"{fn}: borrowed shift and no size to verify"
+        placed.append((fn, kind, ev, False))
+    vrams = [p[2] for p in placed]
+    if vrams != sorted(vrams) or len(set(vrams)) != len(vrams):
+        return None, "EU order differs"
+    i0, i1 = eu_starts.index(vrams[0]), eu_starts.index(vrams[-1])
+    if eu_starts[i0:i1 + 1] != vrams:
+        return None, "EU has extra functions in range"
+    return placed, None
+
+
+def place_by_anchors(funcs, us_vrams, us_end, matches, eu_funcs, eu_starts, pool, eu_labels):
+    """Predict each EU address from the nearest matched function before it and after it.
+    They agree unless a function between them changed size; then take the prediction
+    that lands on a known EU function or label. Tolerates EU stubs merged by the split."""
+    keys = [a for a, _ in pool]
+    placed = []
+    for (fn, kind), uv in zip(funcs, us_vrams):
+        if fn in matches:
+            placed.append((fn, kind, matches[fn]["vram"], kind == "c"))
+            continue
+        i = bisect.bisect_right(keys, uv)
+        fwd = uv + pool[i - 1][1] if i else None
+        bwd = uv + pool[i][1] if i < len(pool) else None
+        known = eu_funcs.keys() | eu_labels
+        if fwd == bwd or (fwd in known and bwd not in known):
+            ev = fwd
+        elif bwd in known and fwd not in known:
+            ev = bwd
+        else:
+            return None, f"{fn}: cannot choose EU address ({fwd and hex(fwd)} / {bwd and hex(bwd)})"
+        placed.append((fn, kind, ev, False))
+    vrams = [p[2] for p in placed]
+    if None in vrams or vrams != sorted(vrams) or len(set(vrams)) != len(vrams):
+        return None, "EU order differs"
+    if vrams[0] not in known:
+        return None, f"EU start {vrams[0]:#x} is not a function or label"
+    # no unexplained EU function may start inside the file
+    i = bisect.bisect_left(keys, us_end) if us_end else len(pool)
+    end = (us_end + pool[i][1]) if us_end and i < len(pool) else None
+    lo = bisect.bisect_left(eu_starts, vrams[0])
+    hi = bisect.bisect_left(eu_starts, end) if end else bisect.bisect_right(eu_starts, vrams[-1])
+    extra = [v for v in eu_starts[lo:hi] if v not in set(vrams)]
+    if extra:
+        return None, f"EU has extra functions in range: {[hex(v) for v in extra[:3]]}"
+    return placed, None
+
+
 def main():
     d = json.load(open("build_port/match.json"))
     matches = d["matches"]
@@ -137,10 +208,15 @@ def main():
     us_syms.update(load_symbol_file("undefined_funcs.us.txt"))
     eu_funcs = eu_function_table()
     eu_starts = sorted(eu_funcs)
+    eu_labels = eu_asm.labels()
     global_anchors = {s: [] for s in US_SEGMENTS}
     for m in matches.values():
-        if "us_vram" in m:
+        if "us_vram" in m and seg_of(m["us_vram"]) == seg_of(m["vram"]):
             global_anchors[seg_of(m["us_vram"])].append((m["us_vram"], m["shift"]))
+    for seg, pool in global_anchors.items():
+        pool.sort()
+        global_anchors[seg] = [a for i, a in enumerate(pool)
+                               if (i and pool[i - 1][1] == a[1]) or (i + 1 < len(pool) and pool[i + 1][1] == a[1])]
 
     report = {"ported": [], "failed": {}}
     eu_c_files = []  # (eu rom start, eu rom end, name)
@@ -155,60 +231,26 @@ def main():
         if not funcs:
             report["failed"][name] = "no functions found"
             continue
-        # anchor shifts from matched C functions in this file
-        anchors = []
-        for fn, kind in funcs:
-            uv = us_vram_of(fn, us_syms)
-            if fn in matches and uv is not None:
-                anchors.append((uv, matches[fn]["vram"] - uv))
-        # without a match in this file, borrow the nearest shift from the same segment
-        local = bool(anchors)
         us_vrams = [us_vram_of(fn, us_syms) for fn, _ in funcs]
-        us_end = rom_to_vram(next_rom, US_SEGMENTS, seg_of(us_vrams[0])) if next_rom and us_vrams[0] else None
-        placed, problem = [], None
-        for i, (fn, kind) in enumerate(funcs):
-            uv = us_vrams[i]
-            if kind == "c" and fn in matches:
-                placed.append((fn, kind, matches[fn]["vram"], True))
-                continue
-            if uv is None:
-                problem = f"cannot place {fn} (no US address)"
-                break
-            pool = anchors or global_anchors[seg_of(uv)]
-            shift = min(pool, key=lambda a: abs(a[0] - uv))[1]
-            ev = uv + shift
-            if ev not in eu_funcs:
-                problem = f"{fn}: predicted EU {ev:#x} is not a function start"
-                break
-            # sizes must agree; the last function may differ by its alignment padding
-            nxt = us_vrams[i + 1] if i + 1 < len(funcs) else us_end
-            if nxt is not None and nxt > uv:
-                diff = (nxt - uv) - eu_funcs[ev][1]
-                if diff != 0 and not (i + 1 == len(funcs) and 0 < diff < 16):
-                    problem = f"{fn}: size US {nxt - uv:#x} != EU {eu_funcs[ev][1]:#x}" + ("" if local else " (borrowed shift)")
-                    break
-            elif not local:
-                problem = f"{fn}: borrowed shift and no size to verify"
-                break
-            placed.append((fn, kind, ev, False))
-        if problem:
-            report["failed"][name] = problem
+        if None in us_vrams:
+            report["failed"][name] = f"cannot place {funcs[us_vrams.index(None)][0]} (no US address)"
             continue
-        vrams = [p[2] for p in placed]
-        if vrams != sorted(vrams) or len(set(vrams)) != len(vrams):
-            report["failed"][name] = "EU order differs"
-            continue
-        # EU functions inside the file's range must be exactly the placed ones
-        i0, i1 = eu_starts.index(vrams[0]), eu_starts.index(vrams[-1])
-        inside = eu_starts[i0:i1 + 1]
-        if inside != vrams:
-            extra = [hex(v) for v in inside if v not in vrams]
-            report["failed"][name] = f"EU has extra functions in range: {extra[:4]}"
-            continue
-        # file must start at its first function in US too (nothing before it)
-        if us_vram_of(funcs[0][0], us_syms) != rom_to_vram(us_rom, US_SEGMENTS, seg_of(vrams[0])):
+        seg = seg_of(us_vrams[0])
+        if us_vrams[0] != rom_to_vram(us_rom, US_SEGMENTS, seg):
             report["failed"][name] = "first function is not at US file start"
             continue
+        us_end = rom_to_vram(next_rom, US_SEGMENTS, seg) if next_rom else None
+        if us_end is not None and seg_of(us_end) != seg:
+            us_end = None
+        ctx = (funcs, us_vrams, us_end, matches, eu_funcs, eu_starts, global_anchors[seg])
+        placed, problem = place_by_shift(*ctx)
+        if problem:
+            placed, problem2 = place_by_anchors(*ctx, eu_labels)
+            if problem2:
+                report["failed"][name] = f"{problem} / {problem2}"
+                continue
+        vrams = [p[2] for p in placed]
+        i1 = bisect.bisect_right(eu_starts, vrams[-1]) - 1
         last_v = vrams[-1]
         nxt = eu_starts[i1 + 1] if i1 + 1 < len(eu_starts) and seg_of(eu_starts[i1 + 1]) == seg_of(last_v) else None
         end_rom = vram_to_rom(nxt, EU_SEGMENTS) if nxt else None
@@ -323,7 +365,12 @@ def rewrite_segment(yaml_text, seg, files):
         mm = re.match(r"\s+- \[(0x[0-9A-Fa-f]+), *(\w+)", line)
         if mm:
             bounds[int(mm.group(1), 16)] = ("asm", None)
+    starts = sorted(f[0] for f in files)
     for start, end, name, _ in files:
+        # a file never extends past the start of the next ported file
+        later = [s for s in starts if s > start]
+        if later and (end is None or end > later[0]):
+            end = later[0]
         for b in [b for b in bounds if start < b < (end if end else 1 << 32)]:
             del bounds[b]
         bounds[start] = ("c", name)

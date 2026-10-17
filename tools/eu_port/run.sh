@@ -6,7 +6,8 @@ cd "$(dirname "$0")/../.."
 DOCKER=${DOCKER:-docker}
 command -v "$DOCKER" >/dev/null || DOCKER=/Applications/Docker.app/Contents/Resources/bin/docker
 
-git checkout -q HEAD -- conker/conker.eu.yaml conker/symbol_addrs.eu.txt conker/undefined_syms.eu.txt
+# asm-only inputs from which the port is derived
+cp tools/eu_port/baseline/{conker.eu.yaml,symbol_addrs.eu.txt,undefined_syms.eu.txt} conker/
 rm -rf conker/src_eu conker/build_port/us
 
 "$DOCKER" run --rm --platform linux/amd64 -v "$(pwd)":/conker conker bash -c '
