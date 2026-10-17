@@ -53,7 +53,10 @@ void func_151577FC(struct102 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15157990.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15157DD0.s")
+s32 func_15157DD0(s32 arg0) {
+    guMtxIdentF(&((f32 (*)[16])(arg0 + 0x7C))[D_800BE9C0]);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15157E08.s")
 

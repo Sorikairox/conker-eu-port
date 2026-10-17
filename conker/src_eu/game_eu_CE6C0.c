@@ -63,7 +63,14 @@ void func_150A3810(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3878.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3924.s")
+void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+    s32 temp_v0;
+
+    temp_v0 = arg0 * 0x34;
+    *(s16 *)(D_800D34B8 + temp_v0) = arg1;
+    (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 2)) = arg2;
+    (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 4)) = arg3;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3990.s")
 

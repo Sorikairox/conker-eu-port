@@ -51,7 +51,13 @@ void func_150FB348(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB768.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB7C0.s")
+void func_150FB7C0(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4) {
+    if ((arg2 - arg3) < arg1) {
+        *arg0 = (arg2 - arg1) * arg4;
+        return;
+    }
+    *arg0 = 0xFF;
+}
 
 s32 func_150FB81C(u8 *arg0) {
     func_150FB7C0(arg0 + 0x43, *(s16 *)(arg0 + 0x16), *(s16 *)(arg0 + 0x120), *(s16 *)(arg0 + 0x64), *(s16 *)(arg0 + 0x66));

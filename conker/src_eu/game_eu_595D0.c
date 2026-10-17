@@ -94,7 +94,21 @@ void func_1502ED6C(struct_eu_595D0 *arg0, s32 arg1) {
     arg0->unkA6 = arg1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502ED88.s")
+void func_1502ED88(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    u8 temp_v0;
+
+    temp_v0 = (*(u8 *)((u8 *)arg0 + 0xA4));
+    if ((temp_v0 != 6) && (temp_v0 != 7)) {
+        if (arg5 != 0) {
+            (*(u8 *)((u8 *)arg0 + 0xA5)) = 0xFF;
+        } else {
+            (*(s8 *)((u8 *)arg0 + 0xA5)) = 0;
+        }
+        (*(s32 *)((u8 *)arg0 + 0xA0)) = (s32) ((arg4 << 0x18) | (arg1 << 0x10) | (arg2 << 8) | arg3);
+        (*(s8 *)((u8 *)arg0 + 0xA6)) = (s8) arg6;
+    }
+    (*(u8 *)((u8 *)arg0 + 0xA4)) = 6U;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EDEC.s")
 
