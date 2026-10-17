@@ -1,6 +1,8 @@
 FROM ubuntu:24.04 AS build
 
 ENV DEBIAN_FRONTEND=noninteractive
+# asm-processor expects GLOBAL_ASM files to start with glabel
+ENV SPIMDISASM_ASM_NM_LABEL=""
 
 COPY /packages.txt /
 
