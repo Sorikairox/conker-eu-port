@@ -35,7 +35,19 @@ void func_1509F95C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4, s32 arg5) {
     func_151152A4(sp24, func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, arg4, arg5, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F9C8.s")
+void func_1509F9C8(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg4) {
+    u8 *temp_v1;
+    s32 temp_t0;
+    u8 *sp34;
+
+    temp_v1 = (arg3 * 0x34) + D_800D34B8;
+    temp_t0 = (*(s16 *)((u8 *)temp_v1 + 6));
+    if (arg4 >= (u32) temp_t0) {
+        arg4 = temp_t0 - 1;
+    }
+    sp34 = temp_v1;
+    func_10010F88(func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, 0, 0U, 0, (s16) (s32) (*(s16 *)temp_v1), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 2)), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 4)), (s16) arg4, (s16) (s32) temp_t0);
+}
 
 void func_1509FA88(s32 arg0, s32 arg1, s32 arg2) {
     func_10010F30(func_1000F568(arg0, (u8)(arg1 - arg0 + 1)), arg2, 0x40, 0, 0);
