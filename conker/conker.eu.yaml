@@ -764,6 +764,8 @@ segments:
     vram:  0x80082EB0
     subsegments:
       - [0x228130, databin]
+      - [0x2281F0, .data, game_36680]
+      - [0x228390, databin]
       - [0x22B4D0, .data, libultra/gu/sinf]
       - [0x22B4E0, databin]
       - [0x22E270, .data, game_eu_1365E0]

@@ -78,6 +78,10 @@ def owned_files(sections=('.rodata',)):
     return out
 
 
+def named_ids(csrc, names, va, vb):
+    return [i for i in set(re.findall(r'\b[A-Za-z_]\w*\b', csrc)) if i in names and va <= names[i] < vb]
+
+
 class Fail(Exception):
     pass
 
@@ -122,6 +126,11 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
         if ident in names and va <= names[ident] < vb:
             named.add(names[ident])
 
+    # data the C file defines itself (a file-scope `name[] = ...` / `name = ...` line, not extern)
+    cdefined = set()
+    for ident in (named_ids(csrc, names, va, vb) if sec == ".data" else []):
+        if re.search(r'^(?!extern|typedef)\w[^\n;]*\b%s\b[^\n;]*=' % ident, csrc, re.M):
+            cdefined.add(names[ident])
     items = {}  # vram -> dict(owner=(key,name), kinds=set, ext=bool)
     for t, k, f, st, pc in allrefs:
         if not (va <= t < vb):
@@ -192,7 +201,9 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
         it = items[t]
         reg = 'late' if t >= L else base
         o = it['owner']
-        if o is not None and o[1] == 'C':
+        if t in cdefined:
+            name, o = 'C', (o[0] if o else t, 'C')
+        elif o is not None and o[1] == 'C':
             name = 'CX' if t in named else 'C'
         elif o is not None:
             name = o[1]
@@ -217,8 +228,8 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
             return
         cands = [(lo, n) for lo, hi, n, _ in funcs if klo < lo < khi]
         if not cands:
-            raise Fail('%s: ' + sec + ' 0x%X-0x%X has no GLOBAL_ASM function between its C '
-                       'neighbours; define it in C' % (stem, run[0][0] - dv, run[-1][1] - dv))
+            raise Fail('%s: %s 0x%X-0x%X has no GLOBAL_ASM function between its C '
+                       'neighbours; define it in C' % (stem, sec, run[0][0] - dv, run[-1][1] - dv))
         pref = [x for x in cands if x[1] in {c[3] for c in run}]
         lo, n = (pref or cands)[0]
         newreg.append([run[0][0], run[-1][1], base, n, lo])
