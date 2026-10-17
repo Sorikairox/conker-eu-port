@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 memcpy(s32, f32 *, s32);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E6E30.s")
 
@@ -77,7 +79,21 @@ void func_150E7764(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E8728.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E892C.s")
+typedef struct { f32 x, y, z; } Vec3_150E892C;
+void func_150E892C(Vec3_150E892C *arg0, s16 arg1, u8 arg2, s32 arg3) {
+    struct {
+        Vec3_150E892C unk0;
+        f32 unkC;
+    } tmp;
+    struct260 *temp_v0;
+
+    tmp.unk0 = *arg0;
+    tmp.unkC = 0.0f;
+    temp_v0 = func_15149130((arg1 == -1) ? 300 : arg1, -1, 0x28, -1, (arg1 == -1) ? 0 : 1, 0, 0x10, arg2, arg3);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E89F0.s")
 
@@ -85,8 +101,6 @@ s32 func_150E8DA4(u8 *arg0, s32 arg1) {
     func_15131D98(arg0, arg0 + 0xAC, arg0 + 0xA8, arg0 + 0xAA);
     return 1;
 }
-
-s32 memcpy(s32, f32 *, s32);
 
 void func_150E8854(void) {
     struct260 *temp_v0;

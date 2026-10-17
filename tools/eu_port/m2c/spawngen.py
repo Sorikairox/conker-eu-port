@@ -58,6 +58,25 @@ def fval_ok(sym):
 
 
 _DECL = {}
+_PROTO = {}
+
+
+def proto(fn, stem):
+    """(ret type, nparams) from functions.h or the C file, or None."""
+    key = (fn, stem)
+    if key not in _PROTO:
+        r = None
+        for h in (os.path.join(ROOT, 'include', 'functions.h'), os.path.join(ROOT, 'src_eu', stem + '.c')):
+            if not os.path.exists(h):
+                continue
+            m = re.search(r'^\s*(?:extern\s+)?([\w ]+?\s*\**)\s*\b%s\s*\(([^)]*)\)\s*;' % fn, open(h).read(), re.M)
+            if m:
+                ps = m.group(2).strip()
+                n = 0 if ps in ('', 'void') else len(ps.split(','))
+                r = (m.group(1).replace(' ', ''), n)
+                break
+        _PROTO[key] = r
+    return _PROTO[key]
 
 
 def declared(sym):
@@ -134,6 +153,11 @@ class Sim:
         self.externs = []
         self.own = owned(self.stem)
         self.his = {}
+        self.calls = []      # generic calls before the spawner: dicts f, args, seq, rt
+        self.sts = []        # stores through argument pointers: (seq, lhs, expr)
+        self.clob = False    # a0-a3 no longer hold the incoming args
+        self.written = set() # registers written since the last call
+        self.protos = {}     # inferred prototypes: f -> nargs
 
     def setp(self, k, t):
         self.nargs = max(self.nargs, k + 1)
@@ -149,10 +173,13 @@ class Sim:
 
     def val(self, r):
         if r in self.R:
-            return self.R[r]
-        if r in ('$a0', '$a1', '$a2', '$a3') and not self.post:
+            e = self.R[r]
+            if e.k == 'call' and self.calls[e.v]['rt'] is None:
+                self.calls[e.v]['rt'] = 'f32' if r == '$f0' else 's32'
+            return e
+        if r in ('$a0', '$a1', '$a2', '$a3') and not self.post and not self.clob:
             return self.arg(int(r[2]))
-        if r.startswith('$f') and r in ('$f12', '$f14') and not self.post:
+        if r.startswith('$f') and r in ('$f12', '$f14') and not self.post and not self.clob:
             return self.arg((int(r[2:]) - 12) // 2, 'f32')
         raise Skip('reg ' + r)
 
@@ -174,9 +201,15 @@ class Sim:
     def deref(self, e, off, t):
         if e.k == 'a':
             self.setp(e.arg, 'u8 *')
+        elif e.k == 'x' and not e.t.startswith('arg'):
+            if t == 'u8':
+                return E('((u8 *)%s)[0x%X]' % (e.t, off))
+            return E('*(%s *)((u8 *)%s + 0x%X)' % (t, e.t, off), 'f' if t == 'f32' else 'x')
         elif e.k != 'x' or not e.t.startswith('arg'):
-            if e.k != 'p':
+            if e.k not in ('p', 'call'):
                 raise Skip('deref of ' + e.t)
+            if e.k == 'call':
+                self.calls[e.v]['ptr'] = True
         if t == 'u8':
             return E('%s[0x%X]' % (e.t, off))
         return E('*(%s *)(%s + 0x%X)' % (t, e.t, off), 'f' if t == 'f32' else 'x')
@@ -202,7 +235,9 @@ class Sim:
                     raise Skip('odd arg load')
                 self.R[dst] = self.arg(k, t)
             elif off in self.stores:
-                self.R[dst] = self.stores[off][1]
+                e0 = self.stores[off][1]
+                self.R[dst] = E('@F%X@' % off, e0.k, e0.v, e0.arg)   # a struct field (resolved in drafts)
+                self.R[dst].fld = e0
             else:
                 raise Skip('local load')
             return
@@ -224,6 +259,12 @@ class Sim:
                 raise Skip('store to arg area')
         else:
             be = self.val(b)
+            if be.k in ('a', 'p') and not self.post:
+                t = {'sw': 's32', 'swc1': 'f32', 'sh': 's16', 'sb': 'u8'}[op]
+                lhs = self.deref(be, off, t).t
+                self.sts.append((self.seq, lhs, e))
+                self.seq += 1
+                return
             if be.k != 's':
                 raise Skip('store through ' + be.t)
             if getattr(e, 'blk', None) and op == 'sw':
@@ -236,8 +277,12 @@ class Sim:
         self.seq += 1
 
     def step(self, op, o):
+        if o and op not in ('sw', 'sb', 'sh', 'swc1', 'mtc1') and o[0].startswith('$'):
+            self.written.add(o[0])
+        if op == 'mtc1':
+            self.written.add(o[1])
         R = self.R
-        if op in ('sw', 'lw') and o[0] in ('$ra', '$s0', '$s1') and o[1].endswith('($sp)') and \
+        if op in ('sw', 'lw', 'sdc1', 'ldc1') and o[0] in ('$ra', '$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp', '$f20', '$f21', '$f22', '$f24', '$f26', '$f28', '$f30') and o[1].endswith('($sp)') and \
                 (o[0] == '$ra' or op == 'lw' or o[0] not in R):
             return
         if op in ('lw', 'lbu', 'lb', 'lh', 'lhu', 'lwc1'):
@@ -250,7 +295,14 @@ class Sim:
                     self.frame = -imm(o[2])
                 return
             if o[2].startswith('%lo('):
-                raise Skip('addiu reloc')
+                sym = o[2][4:-1]
+                if self.his.get(o[1]) != sym:
+                    raise Skip('addiu reloc')
+                R[o[0]] = E('&' + sym, 'x')
+                if declared(sym) is None:
+                    self.externs.append('extern u8 %s[];' % sym)
+                    R[o[0]] = E(sym, 'x')
+                return
             s, v = o[1], imm(o[2])
             if s == '$zero':
                 R[o[0]] = E(str(v) if -10 < v < 10 else ('0x%X' % v if v > 0 else '-0x%X' % -v), 'c', v)
@@ -278,6 +330,9 @@ class Sim:
                 R[o[0]] = E('0x%X' % v, 'c', v)
         elif op == 'ori':
             e = self.val(o[1])
+            if e.k in ('x', 'call'):
+                R[o[0]] = E('(%s | 0x%X)' % (e.t, imm(o[2])), 'x')
+                return
             if e.k != 'c':
                 raise Skip('ori')
             v = e.v | imm(o[2])
@@ -295,6 +350,11 @@ class Sim:
                 raise Skip('mtc1')
         elif op == 'mov.s':
             R[o[0]] = self.val(o[1])
+        elif op in ('sll', 'srl', 'sra') and self.val(o[1]).k in ('x', 'call'):
+            R[o[0]] = E('(%s %s %s)' % (self.val(o[1]).t, '<<' if op == 'sll' else '>>', o[2]), 'x')
+        elif op in ('addu', 'subu', 'and', 'or', 'xor') and all(self.val(r).k in ('x', 'call', 'c', 'a') for r in o[1:]):
+            R[o[0]] = E('(%s %s %s)' % (self.val(o[1]).t, {'addu': '+', 'subu': '-', 'and': '&', 'or': '|', 'xor': '^'}[op],
+                                         self.val(o[2]).t), 'x')
         elif op == 'sll' and o[2] in ('16', '24'):
             R[o[0]] = E('sll', 'sll', int(o[2]), arg=self.val(o[1]))
         elif op == 'sra':
@@ -306,6 +366,8 @@ class Sim:
                 return
             self.setp(e.arg.arg, 's16' if e.v == 16 else 's8')
             R[o[0]] = e.arg
+        elif op == 'andi' and self.val(o[1]).k in ('x', 'call'):
+            R[o[0]] = E('(%s & 0x%X)' % (self.val(o[1]).t, imm(o[2])), 'x')
         elif op == 'andi' and o[2] in ('0xFF', '0xFFFF'):
             e = self.val(o[1])
             if e.k != 'a':
@@ -331,9 +393,10 @@ class Sim:
     def run(self):
         ins = self.ins
         calls = [o[0] for op, o in ins if op == 'jal' and o[0] not in PURE]
-        if len(calls) != 2 or calls[1] != 'memcpy' or calls[0] not in CALLEE:
+        if len(calls) < 2 or calls[-1] != 'memcpy' or calls[-2] not in CALLEE or \
+                any(c in CALLEE or c == 'memcpy' for c in calls[:-2]):
             raise Skip('calls %s' % ','.join(calls))
-        self.callee = calls[0]
+        self.callee = calls[-2]
         i = 0
         while i < len(ins):
             op, o = ins[i]
@@ -379,10 +442,38 @@ class Sim:
         if f in PURE:
             if self.post:
                 raise Skip('pure call after spawn')
-            keep = {r: e for r, e in self.R.items() if r in ('$zero', '$s0', '$s1')}
+            keep = {r: e for r, e in self.R.items() if r in ('$zero', '$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp')}
             self.R = keep
             r, k = PURE[f]
             self.R[r] = E('%s()' % f, k)
+            return
+        if f != self.callee and f != 'memcpy':
+            pr = proto(f, self.stem)
+            if pr is None:     # infer: int args = a-regs written since the last call; result type from use
+                if self.written & {'$f12', '$f14'}:
+                    raise Skip('float args to unprototyped ' + f)
+                n = max([int(r[2]) + 1 for r in self.written if r in ('$a0', '$a1', '$a2', '$a3')] + [0])
+                rt = None
+                self.protos[f] = n
+            else:
+                rt, n = pr
+            args = [self.val('$a%d' % k) for k in range(min(n, 4))]
+            for k in range(n - 4):
+                off = 0x10 + 4 * k
+                if off not in self.stores:
+                    raise Skip('stack arg %d of %s' % (k + 4, f))
+                args.append(self.stores.pop(off)[1])
+            ci = len(self.calls)
+            self.calls.append({'f': f, 'args': args, 'seq': self.seq, 'rt': rt})
+            self.seq += 1
+            self.R = {r: e for r, e in self.R.items() if r in ('$zero', '$s0', '$s1', '$s2', '$s3', '$s4', '$s5', '$s6', '$s7', '$fp')}
+            self.clob = True
+            if rt is None:
+                self.R['$f0'] = E('@C%d@' % ci, 'call', ci)
+                self.R['$v0'] = E('@C%d@' % ci, 'call', ci)
+            else:
+                self.R['$f0' if rt in ('f32', 'f64') else '$v0'] = E('@C%d@' % ci, 'call', ci)
+            self.written = set()
             return
         if f == self.callee:
             args = [self.val('$a%d' % k) for k in range(4)]
@@ -426,6 +517,8 @@ class Sim:
                 t = 's16'
             elif op == 'sb':
                 t = 'u8'
+            elif e.k == 'call' and self.calls[e.v]['rt'] not in ('void', 'f32', 'f64'):
+                t = 'u8 *' if '*' in self.calls[e.v]['rt'] else self.calls[e.v]['rt']
             elif e.k == 'a' and self.ptypes.get(e.arg) == 'u8 *':
                 t = 'u8 *'
             elif e.k == 'f':
@@ -434,6 +527,66 @@ class Sim:
                 t = 's32'
             F.append((r, t, e, seq))
         return [tuple(f) if len(f) == 4 else (f[0], 'Blk%d' % f[1], f[2], f[3]) for f in F]
+
+    def fsub(self, m):
+        off = int(m.group(1), 16)
+        if self.src <= off < self.src + self.size:
+            return 'tmp.unk%X' % (off - self.src)
+        return self.stores[off][1].t if off in self.stores else m.group(0)
+
+    def order(self, As, sts, seg):
+        """struct order inside each segment between calls; arg stores and call-bearing assigns keep seq."""
+        fixed = sorted([(q, t) for q, t in sts] + [(x[0], x[1]) for x in As if '@C' in x[1]])
+        out = []
+        free = [x for x in As if '@C' not in x[1]]
+        for k in range(len(self.calls) + 1):
+            lo = self.calls[k - 1]['seq'] if k else -1
+            hi = self.calls[k]['seq'] if k < len(self.calls) else 1 << 30
+            out += [x for x in fixed if lo < x[0] < hi or (x[0] == hi)]
+            out += [(x[0], x[1]) for x in free if seg(x[0]) == k]
+        return out
+
+    def resolve(self, stmts):
+        """replace @Cn@ placeholders: unused -> call statement, used once (no other call in between) ->
+        inline, else a local."""
+        text = [t for q, t in stmts]
+        seqs = [q for q, t in stmts]
+        locs = []
+        calls = []
+        for ci, c in enumerate(self.calls):
+            ph = '@C%d@' % ci
+            ct = '%s(%s)' % (c['f'], ', '.join(x.t for x in c['args']))
+            users = [k for k, t in enumerate(text) if ph in t]
+            n = sum(t.count(ph) for t in text) + sum(ph in x.t for d in self.calls for x in d['args'])
+            if n == 0:
+                calls.append((c['seq'], ct + ';'))
+                continue
+            between = any(c['seq'] < d['seq'] < seqs[users[0]] for d in self.calls) if users else True
+            if n == 1 and users and not between and not c.get('ptr'):
+                text = [t.replace(ph, ct) for t in text]
+                continue
+            lt = 'u8 *' if c.get('ptr') or '*' in c['rt'] else c['rt']
+            nm = 'temp%d' % ci
+            locs.append('%s%s%s' % (lt, '' if lt.endswith('*') else ' ', nm))
+            calls.append((c['seq'], '%s = %s%s;' % (nm, '(u8 *)' if lt == 'u8 *' and c['rt'] != 'u8*' else '', ct)))
+            text = [t.replace(ph, nm) for t in text]
+            for d in self.calls:
+                for x in d['args']:
+                    if ph in x.t:
+                        x.t = x.t.replace(ph, nm)
+        # merge call statements by seq (stable: a call precedes statements with a larger seq)
+        allst = []
+        ci = 0
+        calls.sort()
+        for q, t in zip(seqs, text):
+            while ci < len(calls) and calls[ci][0] < q:
+                allst.append(calls[ci][1]); ci += 1
+            allst.append(t)
+        allst += [t for q, t in calls[ci:]]
+        for t in allst:
+            if '@C' in t:
+                raise Skip('unresolved call')
+        return allst, locs
 
     def drafts(self):
         F = self.fields()
@@ -463,27 +616,56 @@ class Sim:
         if self.callee == 'func_15149130' and a[6].k == 'c' and a[6].v == 0:
             a[6] = E('NULL')
         call = '%s(%s)' % (self.callee, ', '.join(x.t for x in a))
+        # statements before the spawner call: (seq, text, is_call_boundary)
+        assigns = [(seq, 'tmp.unk%X = %s;' % (r, e.t), r) for r, t, e, seq in F]
+        sts = []
+        for seq, lhs, e in self.sts:
+            m = re.match(r'\((.*) ([|&]) (0x[0-9A-F]+)\)$', e.t)
+            sts.append((seq, '%s %s= %s;' % (lhs, m.group(2), m.group(3)) if m and m.group(1) == lhs
+                        else '%s = %s;' % (lhs, e.t)))
+        cseqs = [c['seq'] for c in self.calls]
+        for c in self.calls:
+            if c['rt'] is None:
+                c['rt'] = 'void'
+            if c['f'] in self.protos:
+                rtt = c['rt'] if not c['rt'].endswith('*') else c['rt'][:-1] + ' *'
+                self.externs.append('%s%s%s();' % (rtt, '' if rtt.endswith('*') else ' ', c['f']))
         out = []
+        rts = ['struct260 *'] if self.ret else ['void ', 's32 ']
+        guards = ['ret', 'nz'] if self.guard else [None]
         for extra in (0, 4, 8):
           for vfirst in (0, 1):
             for asmord in (0, 1):
-                dl = decl + (['        u8 pad%X[%d];' % (pos, tail + extra)] if tail + extra > 0 else [])
-                Fs = sorted(F, key=lambda f: f[3]) if asmord else F
-                b = ['%s%s(%s) {' % (rt, self.name, sig)]
-                b += ['    typedef struct { s32 w[%d]; } %s;' % (int(t[3:]) // 4, t) for t in blks]
-                b += ['    ' + x for x in sorted(set(self.externs))]
-                st = ['    struct {'] + dl + ['    } tmp;']
-                tv = ['    struct260 *temp_v0;']
-                b += (tv + st if vfirst else st + tv) + ['']
-                if self.guard:
-                    b += ['    if (arg0 == NULL) {', '        return%s;' % (' NULL' if self.ret else ''), '    }']
-                b += ['    tmp.unk%X = %s;' % (r, e.t) for r, t, e, s in Fs]
-                b += ['    temp_v0 = %s;' % call, '    if (temp_v0 != NULL) {',
-                      '        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x%X);' % self.size, '    }']
-                if self.ret:
-                    b += ['    return temp_v0;']
-                b += ['}', '']
-                out.append('\n'.join(b))
+              for rt in rts:
+                for gd in guards:
+                    dl = decl + (['        u8 pad%X[%d];' % (pos, tail + extra)] if tail + extra > 0 else [])
+                    seg = lambda q: sum(1 for c in cseqs if c < q)
+                    As = sorted(assigns, key=(lambda x: x[0]) if asmord else (lambda x: (seg(x[0]), x[2])))
+                    body = [(x[0] if asmord or '@C' in x[1] else (seg(x[0]), x[2]), x[1]) for x in As]
+                    stmts = sorted([(q, t) for q, t in sts] + [(x[0], x[1]) for x in As], key=lambda x: x[0]) \
+                        if asmord else self.order(As, sts, seg)
+                    text, locs = self.resolve(stmts)
+                    b = ['%s%s(%s) {' % (rt, self.name, sig)]
+                    b += ['    typedef struct { s32 w[%d]; } %s;' % (int(t[3:]) // 4, t) for t in blks]
+                    b += ['    ' + x for x in sorted(set(self.externs))]
+                    st = ['    struct {'] + dl + ['    } tmp;']
+                    tv = ['    struct260 *temp_v0;']
+                    b += (tv + st if vfirst else st + tv) + ['    %s;' % l for l in locs] + ['']
+                    ind = '    '
+                    if gd == 'ret':
+                        b += ['    if (arg0 == NULL) {', '        return%s;' % (' NULL' if self.ret else ''), '    }']
+                    elif gd == 'nz':
+                        b += ['    if (arg0 != NULL) {']
+                        ind = '        '
+                    b += [ind + t for t in text]
+                    b += [ind + 'temp_v0 = %s;' % call, ind + 'if (temp_v0 != NULL) {',
+                          ind + '    memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x%X);' % self.size, ind + '}']
+                    if gd == 'nz':
+                        b += ['    }']
+                    if self.ret:
+                        b += ['    return temp_v0;']
+                    b += ['}', '']
+                    out.append(re.sub(r'@F([0-9A-F]+)@', self.fsub, '\n'.join(b)))
         return out
 
 

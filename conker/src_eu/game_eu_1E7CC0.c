@@ -142,7 +142,36 @@ void func_151BE794(struct260 * arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BE7C0.s")
+s32 func_151BE7C0(u8 *arg0) {
+    f32 *s = (f32 *)(arg0 + 0x110);
+
+    s[9] -= D_800BE9A4;
+    if (s[9] < 0.0f) {
+        s[9] = func_150ADA68() * 4.0f;
+        s[6] = s[2] + s[4] * func_150ADA68();
+    }
+    *(f32 *)(arg0 + 0x2C) += (s[6] - *(f32 *)(arg0 + 0x2C)) * 0.35f;
+    s[10] -= D_800BE9A4;
+    if (s[10] < 0.0f) {
+        s[10] = func_150ADA68() * 9.0f;
+        if (func_150ADA20() & 1) {
+            s[7] = s[3] + s[5] * func_150ADA68();
+        } else {
+            s[7] = s[3] + s[8] * func_150ADA68();
+        }
+    }
+    *(f32 *)(arg0 + 0x30) += (s[7] - *(f32 *)(arg0 + 0x30)) * 0.4f;
+    s[14] -= D_800BE9A4;
+    if (s[14] < 0.0f) {
+        s[14] = func_150ADA68() * 10.0f;
+        s[13] = s[11] + s[12] * func_150ADA68();
+    }
+    s[15] += (s[13] - s[15]) * 0.4f;
+    arg0[0x5C] = s[15];
+    s[16] += (s[18] - s[16]) * 0.65000004f;
+    s[17] += (s[19] - s[17]) * 0.65000004f;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BEA68.s")
 

@@ -1735,7 +1735,25 @@ void func_15072EF4(void) {
     D_800D154C->stunned = (s8) D_800D1580;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15072F10.s")
+s32 func_150E1AF0(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+
+void func_15072F10(void) {
+    f32 x;
+    f32 z;
+    f32 y;
+    s16 angle;
+
+    angle = D_800D154C->unk1D1 * 200;
+    (*(s16 *)((u8 *)D_800D154C->unk31C + 0x24))--;
+    func_1505A184(D_800D154C->unk7A - D_800D154C->unk31C->unk12, 2000.0f, angle * 0.005493164f, &x, &z, &y);
+    x = x * 5000.0f + D_800D154C->x_position;
+    z = z * 5000.0f + D_800D154C->z_position;
+    y = y * 5000.0f + D_800D154C->y_position;
+    func_150E1AF0(D_800D154C, D_800D154C->x_position, D_800D154C->y_position + D_800D154C->unkD6, D_800D154C->z_position, x, y, z, D_800C3E78, 0x12);
+}
+
+void func_eu_1507340C(void) {
+}
 
 void func_15073054(void) {
     D_800D154C->unk22E = (s16) D_800D1580;
