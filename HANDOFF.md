@@ -17,8 +17,8 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2563 / 5916 functions in C (43.3%)**; code bytes 10.9% (session 4, in progress;
-  counted from `progress.csv`, which lists 5916 functions).
+- **2563 / 5916 functions in C (43.3%)**; code bytes 10.9% (end of session 4;
+  counted from `progress.csv`, which lists 5916 functions; session 3 counted 5913).
   - init: 283/543 functions
   - game: 2249/5329
   - debugger: 31/44
@@ -51,6 +51,7 @@ Commits on `eu`:
 | `fac015a`…`cfe5861` | New decompilation, ~283 functions in 10 commits (object lists, object script interpreter in `game_A28B0`, n_seqplayer/event queue/sound handles in init, EEPROM save, ring buffer, display-list relocation and state cache, matrix/vector helpers, stream decoder in `game_221290`, guNormalize, pfsisplug2) |
 | `c3f2d8f` | The 413 plain asm subsegments become C files (GLOBAL_ASM stubs) |
 | `c67d78d` | Salvage of an interrupted parallel round: 728 more functions (see below) |
+| `8d3f205`…`fc0e53a` | Session 4: 189 functions (near-misses, m2c pipeline, hand fixes); tools in `tools/eu_port/m2c/` |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -131,9 +132,33 @@ Lesson for parallel work: have each worker commit (or at least verify with
 
 ## Session 4: m2c pipeline and hand fixes
 
-Work was sequential (no agents). Tools written this session live in the session
-scratchpad, not in the repo; their logic is described here so they can be rebuilt
-(copies of the container-side scripts were in `conker/build/`, which is gitignored):
+Work was sequential (no agents). +189 functions (2374 -> 2563), +24,424 bytes of code
+in C (9.8% -> 10.9%): 30 of the 31 salvage near-misses, ~120 functions straight from
+m2c drafts, the rest m2c drafts fixed by hand. Commits `8d3f205`..`fc0e53a`.
+
+The pipeline scripts are in `tools/eu_port/m2c/` (paths inside assume the repo at
+`~/conker` and the container `conkerdev`):
+
+| Script | Where | Use |
+|---|---|---|
+| `list.py` | host | `python3 list.py > all.txt` (in that dir): every GLOBAL_ASM function with its instruction count, file, jump-table flag |
+| `gen2.py` | host | `gen2.py <outdir> <min> <max>`: m2c drafts and variants into `<outdir>/v0..v7/<func>.c` (8 processes). Needs `venv/` next to it: `python3 -m venv venv && venv/bin/pip install 'pycparser<3'`. Caches per-file contexts in `ctx/`. Use an outdir under `conker/build/` so the container sees it |
+| `screen.py` | container | `docker exec -w /conker/conker conkerdev python3 <path>/screen.py build/<dir>/vN 8` -> `screen.txt` (OK / DIFFn / SIZE±n / SYM / CERR, errors in `errs/`). Copy the script under `conker/` (e.g. `conker/build/`) first: the container only mounts the repo |
+| `apply.py` | container | `apply.py build/<dir>/final`: inserts the `OK` lines of `final/screen.txt` into `src_eu`, checks whole files, falls back to one function at a time; prints ACCEPT/REJECT |
+| `autotry.py` | container | older, slower (make + whole-file check per function); superseded by screen + apply |
+| `verify` | host | full code build + `check_files.py`; prints VERIFY-OK / VERIFY-FAILED (exit status). Use it before every commit |
+| `cf` | host | `cf src_eu/X.c func [-v]`: rebuild one object, per-function diff and whole-file check (removes the stale .o first; a failed compile used to leave the old object and look OK) |
+| `rep.py` / `revert.py` / `strip.py` | host | `rep.py func < draft.c` replaces a pragma with C between `//BEGIN`/`//END` markers; `revert.py func` puts the pragma back; `strip.py` removes the markers before committing |
+| `tidy.py` | host | cosmetic clean-up of `M2C_FIELD` expansions in changed files |
+| `best` | host | `D=<dir> best func`: the variant draft with the fewest differing words |
+
+Merging variants: for each function take the first `OK` across `v0..v7` into
+`final/` (copy the draft and append `OK func file` to `final/screen.txt`), then run
+`apply.py`. A full set of drafts for functions up to 200 instructions with all 8
+variants was generated at the end of the session into `conker/build/k/` but not
+screened; it is gitignored and may be gone, regenerate with `gen2.py`.
+
+How the pieces work:
 
 - **Draft generation** (host, needs `pycparser<3`; the system Python and the image both
   have pycparser 3.x, which m2c cannot import, so use a throwaway venv):
@@ -275,12 +300,31 @@ porting to manual work.
 3. ~~31 functions reverted in the salvage~~: 30 done in session 4. Left: `func_151EF840`
    (`sqrtf`, see session 4 notes: it shares subsegment `game_eu_21D010` with
    `osPiReadIo` and needs a file split with its own flags).
-4. **New decompilation** of the remaining ~3,540 asm functions (game is 38.7% by
+4. **New decompilation** of the remaining ~3,350 asm functions (game is 38.7% by
    count but only 8.2% by bytes: the large functions are what's left). Use m2c
    (`tools/mips_to_c`), asm-differ, decomp-permuter, and decomp.me (IDO 5.3,
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
+   Next steps from session 4:
+   - Screen and apply `conker/build/k` (or regenerate it): the `--no-stack-spill` and
+     `pad` variants were added late and never screened over the whole set.
+   - Near misses left (1-4 differing words, see the session 4 notes for what was tried):
+     `func_150351A4 func_150C60D4 func_151A53E4 func_1517A220 func_151CBAC0`
+     (commutative operand order), `func_1509D464 func_15080FE8` (global in `v0`),
+     `func_151AD110` (arg home store), `func_15195418` (dead `sp2C` store kept),
+     `func_150ED7B4 func_1503F5A0 func_1514EA78 func_1514EB28 func_1514EBD8
+     func_1514EC88 func_15166774 func_1509FAD4 func_10007D14` (register choice),
+     `func_15144B68 func_1511CAD0 func_150A7CB0` (instruction order),
+     `func_1001091C` (argument reloaded from its home slot), `func_150D03A8`
+     (extra stack slot), `func_151A547C` (flag spilled as a byte), `func_15142E24
+     func_15052260 func_151C2600` (100+ instructions, stack/operand order).
+   - `func_151EF840` (`sqrtf`): split `game_eu_21D010` at 0x21D050 into its own C file
+     built `-O2` (or whatever fills the `jr ra` delay slot), `osPiReadIo` stays in the
+     first part (its asm saves `a0`/`a1` like an `-O1` libultra build).
+   - Small functions are mostly done; what is left needs hand work or real types.
+     Naming structs (`struct127` objects, `struct_eu_node` lists, message handlers
+     with the `(obj, msg, u8 event)` signature) would make m2c's drafts much closer.
 5. Later: split EU data properly (data/rodata/bss instead of blobs), document asset
    formats, then the PC port.
 
@@ -320,5 +364,10 @@ porting to manual work.
   `check_files.py`.
 - Adding a prototype to a shared header can change codegen in files that called the
   function implicitly before. After header edits, run `check_files.py` on everything.
+- A failed compile leaves the previous object in place, so a check right after it
+  reports the old (matching) state. Delete the object first (the `cf` helper does).
+- `make` prints `build/conker.eu.bin: OK` only when it relinks; delete
+  `conker/build/conker.eu.ok` to force the check (the `verify` helper does).
+- m2c needs `pycparser<3`; with 3.x it fails on `pycparser.plyparser`.
 - `tools/n64splat` shows as modified in `git status` (submodule content); that was
   already the case before this work and is not part of any commit.
