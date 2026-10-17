@@ -4,9 +4,6 @@
 #include "variables.h"
 
 
-void func_150AE5B0(struct108 *arg0);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AE5B0.s")
-#if 0 // US version; EU code differs
 void func_150AE5B0(struct108 *arg0) {
     if ((D_800D2E4C->unk4 & 0x80) == 0) {
         if (func_1509BE40(0, 0x2000, 0xBB) != -1) {
@@ -32,13 +29,12 @@ void func_150AE5B0(struct108 *arg0) {
             arg0->unk84 &= 0xFEFFFFFF;
         }
     }
-    if (func_1509BE40(1, 0x4082, 6, 0x9000) != 0) {
+    if (func_1509BE40(1, 0x4080, 6, 0x9000) != 0) {
         arg0->unk84 |= 0x10000;
     } else {
         arg0->unk84 &= 0xFFFEFFFF;
     }
 }
-#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AE790.s")

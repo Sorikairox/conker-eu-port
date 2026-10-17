@@ -327,9 +327,5 @@ void func_15002FB4(s32 arg0) {
     }
 }
 
-void func_1500310C(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_1500310C.s")
-#if 0 // US version; EU code differs
 void func_1500310C(void) {
 }
-#endif

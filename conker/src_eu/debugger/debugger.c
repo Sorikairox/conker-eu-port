@@ -16,9 +16,6 @@ s32 func_16000028(void) {
     return 0;
 }
 
-void func_16000058(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000058.s")
-#if 0 // US version; EU code differs
 void func_16000058(void) {
     s32 i;
     s32 phi_s2;
@@ -51,12 +48,11 @@ void func_16000058(void) {
     }
     func_16001338(255, 255, 255);
     func_160012B0(611, &D_16004700); // "Version"
-    func_16001044(619, 1, 163);
+    func_16001044(619, 1, 19);
     func_160012B0(643, &D_16004708); // "Built"
     func_160012B0(651, &D_16004710); // "Dec 19 2000"
     func_160012B0(663, &D_1600471C); // "09:57:42"
 }
-#endif
 
 s32 func_16000224(void) {
     s32 res = 0;

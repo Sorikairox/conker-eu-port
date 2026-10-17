@@ -60,12 +60,9 @@ void func_1000862C(u8 idx, s32 arg1) {
     func_10017C00(D_8003C900[idx], arg1);
 }
 
-void func_10008660(u8 idx, u8 chan, u8 arg2, s32 arg3);
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008660.s")
-#if 0 // US version; EU code differs
 void func_10008660(u8 idx, u8 chan, u8 arg2, s32 arg3) {
     if (arg3 > 0) {
-        arg3 = (arg3 * 10) / 60;
+        arg3 = (arg3 * 10) / 50;
         if (arg3 == 0) {
             arg3 = 1; // final?
         } else if (arg3 >= 128) {
@@ -76,7 +73,6 @@ void func_10008660(u8 idx, u8 chan, u8 arg2, s32 arg3) {
     }
     func_10017C68(D_8003C900[idx], chan, arg2, arg3);
 }
-#endif
 
 void func_100086FC(u8 idx, u8 arg1, u8 arg2) {
     func_10017CE0(D_8003C900[idx], arg1, arg2);

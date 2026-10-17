@@ -7,15 +7,12 @@
 void* func_151674F8(void *arg0, s32 arg1, s16 arg2, s32 arg3);
 
 
-void func_150186D0(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150186D0.s")
-#if 0 // US version; EU code differs
 void func_150186D0(void) {
     func_10001444();
     func_1501A39C();
     func_151E6BFC();
 
-    D_800BE5E0 = 1;
+    *(s16 *)&D_800BE5E0 = 1; // s16 in EU, u8 in US
     D_800D18A0 = 0;
     D_800D18A2 = 0;
     D_800D18A4 = 0;
@@ -29,7 +26,6 @@ void func_150186D0(void) {
 
     while (func_151DCFD8(1) != 0) {};
 }
-#endif
 
 // something big and interesting
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_1501878C.s")

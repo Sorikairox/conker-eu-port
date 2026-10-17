@@ -1615,16 +1615,12 @@ void func_15073EA4(void) {
     func_1506C460(D_800D154C->unk40, 60.0f, 0, 0, 100, 12, 40.0f, 0.5f, 0, 14, 1);
 }
 
-void func_15073F1C(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073F1C.s")
-#if 0 // US version; EU code differs
 void func_15073F1C(void) {
     struct126 *temp_v0 = func_1503195C(D_800D154C, 0x3C, 0);
     if (temp_v0 != NULL) {
-        temp_v0->unk38 = 0x960;
+        temp_v0->unk38 = 2000;
     }
 }
-#endif
 
 void func_15073F54(void) {
 }
