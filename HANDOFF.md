@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (eleventh session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (twelfth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,16 +17,16 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2772 / 5912 functions in C (46.9%)**; code bytes 286,048 / 2,253,856 (12.7%)
-  (end of session 11, from `verify_all.sh`).
+- **2780 / 5912 functions in C (47.0%)**; code bytes 287,492 / 2,253,856 (12.8%)
+  (end of session 12, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2380/5329 (10.4%)
+  - game: 2388/5329 (10.5%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
-    after session 9, 2757 (281,452 bytes) after session 10.
+    after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -62,6 +62,7 @@ Commits on `eu`:
 | `9fddd60`…`dcf890a` | Session 9: 26 EU file splits (`file_split.py`), 83 files own .rodata, 29 functions (const local arrays, effect spawners) |
 | `18c0449`…`ba052c8` | Session 10: `spawngen.py` (spawners from asm), C files own `.data` (`rodata_inject.py`), 22 functions |
 | `c6ae2b4`…`fce108a` | Session 11: `spawngen.py` calls/arg stores, 15 hand-written spawner and float/switch functions |
+| `4df1653`…`364d883` | Session 12: decomp-permuter (`tools/eu_port/permute.sh`), 8 near misses solved by it |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -77,6 +78,8 @@ throw all of that away.**
   --resplit` first (session 8 section, "Workflow").
 - A C file that is several EU objects: `tools/eu_port/file_split.py <stem> [--dry]` (session 9).
 - A function that copies a non-const local array from `.data`: own the file's `.data` (session 10).
+- A near miss (C draft a few words off): `tools/eu_port/permute.sh <func> <draft.c> [secs] [jobs]`
+  (decomp-permuter, session 12). Run it with run_in_background; batch with `-l list`.
 
 ## Build environment
 
@@ -744,6 +747,81 @@ EU stub `func_eu_1507340C` split off a merged `.s`), +4,596 bytes.
 - `func_151BCD44`: trail-point loop, frame 0xA0 with f20-f28 saved; m2c far off, not attempted in
   depth.
 
+## Session 12: decomp-permuter
+
+Sequential, 3 work commits (`4df1653`..`364d883`), +8 functions (2772 -> 2780), +1,444 bytes, all
+found by the permuter or by a hint it printed.
+
+### Setup (`tools/eu_port/permute.sh`, `tools/eu_port/permute/setup.py`)
+
+- decomp-permuter is cloned to `tools/decomp-permuter` (gitignored; `git clone
+  https://github.com/simonlindholm/decomp-permuter tools/decomp-permuter` if missing). Nothing to
+  install: the container's Python 3.12 already has `toml` and `Levenshtein`, and the permuter ships
+  its own pycparser (`perm_pycparser`). It runs inside `conkerdev`.
+- `permute.sh <func> [draft.c] [secs=600] [jobs=8]` or `permute.sh -l <list> [secs] [jobs]` (list
+  lines `func draft.c`; default draft `$DRAFTS/<func>.c`). Per function it recreates
+  `tools/decomp-permuter/nm/<func>/` with `setup.py` (base.c = the C file with all GLOBAL_ASM pragmas
+  removed and the draft in place, through `cpp`; target.o = the `.s` (with its `rodata_inject`
+  words) assembled with `macro.inc`; compile.sh = the file's own IDO `cc` line from `make -n`, so
+  per-file OPT_FLAGS apply), runs `permuter.py -j<jobs> --stop-on-zero --better-only --stack-diffs`
+  under `timeout`, extracts the best output's function to `best.c` (the draft's own declarations
+  kept above it) and screens it with `m2c/try`. A screened OK also goes to `match.c`. Output, one line
+  per function: `func base=<score> best=<score> try=<OK|DIFFn|SIZE±n> <file>`. Log: `nm/<func>/log.txt`.
+- `setup.py extract <func> <source.c> [draft.c]` adds `// PERMUTER CHANGED DECL: new (base: old)` lines
+  when the permuter changed a declaration outside the function (it has a pass that changes callee
+  return/param types). `try` does not see those changes: apply them by hand (header edit) and re-check
+  every file (`verify_all.sh` runs `check_files.py` on all).
+- `m2c/try` takes `TRYDIR=<name>` (work dir `conker/build/<name>`), so several tries can run at once.
+- Throughput: ~16 iterations/s with `-j8` on a small function; 3 parallel streams of `-j3` on the
+  10-CPU Docker VM worked fine.
+
+Pitfalls found while setting it up (all handled by the scripts):
+- **`--stack-diffs` is required.** Without it the permuter's scorer ignores stack offsets: an m2c
+  draft that is DIFF18 in `try` (`func_151C2600`, frame size off) scores 0.
+- **Do not strip function bodies before the target.** IDO -O2 uses the register usage of callees it
+  has already compiled in the same file; with earlier bodies reduced to prototypes, codegen changed
+  (score 0 in the permuter, DIFF4 in `try`). `setup.py` strips only bodies after the target
+  (`PERM_NOSTRIP=1` keeps everything).
+- Permuter score 0 ignores relocation symbol names, so `try` stays the authority.
+
+### Results on the session 8-11 near-miss list
+
+Starting drafts: the best m2c variant per function (`JT=1 ONLY=<list> gen2.py`, `screenall`), not the
+hand drafts of earlier sessions (those were lost); continuation runs started from the previous
+`best.c`. Runs of 300-400 s, then 900 s for the closest ones.
+
+Solved:
+- `func_1517A220` (game_eu_1A6C30): DIFF1 -> OK (sqrt result in its own local).
+- `func_1514EA78`, `func_1514EB28`, `func_1514EBD8`, `func_1514EC88` (game_eu_17A800, the `v1`/`v2`
+  near misses): the permuter changed the callee `func_1514F18C` from `void` to `int`. Now `s32` in
+  `functions.h`; the m2c drafts then match as they are. The strings are the `variables.h` externs
+  `D_800A5CB0..CEC` (the file does not own its .rodata).
+- `func_151A547C` (game_eu_1D1150, "flag spilled as a byte across a call"): `sp1B = 1;` both before and
+  after the call.
+- `func_151A53E4` (game_eu_1D1150, operand order): the `u8` index read into a `u32` local first.
+- `func_15109034` (game_eu_1365E0, `addu s0, a0, t6` order): `p = arg0; p += *(s32 *)q;` with `q = arg0 +
+  0x50` a pointer local, plus a reused pointer local for the sinf part.
+
+Not solved (best permuter result, `try` of that result):
+- Close (worth a longer run or a hand look at `nm/<func>/best.c`): `func_1509CEA8` DIFF1 (stuck at
+  score 5 for 15 min), `func_151C2600` DIFF2, `func_15074A94` DIFF3, `func_15034710` DIFF8,
+  `func_15034790` DIFF9, `func_151D5FC8` DIFF10, `func_151CBAC0` DIFF11, `func_151AFA80` DIFF13.
+  `func_151091B8` (twin of `func_15109034`, SIZE+1): try the same `+=` shape by hand.
+- No improvement at all (score 10/60 from the start, 15 min): `func_150351A4`, `func_150C60D4` (float
+  operand order), `func_1511CAD0`, `func_150A7CB0` (instruction order).
+- Far (m2c drafts too far off, score hundreds-thousands): `func_15007168`, `func_151E2B9C`,
+  `func_15146EE0`, `func_150EB610` (permuter suggests `func_150EB4D0`'s last param `int` instead of
+  `u8`), `func_151472D0`, `func_151343AC`, `func_1519E6BC`, `func_151596F4`, `func_151597A0`,
+  `func_151AEBF0`, `func_151D2E5C`, `func_151CC784`, `func_1510A454`, `func_15109990`, `func_150CE710`,
+  `func_15182BE0`, `func_151C4BF4`, `func_151BCD44`, `func_1500A6D8`, `func_1500A7E8`. These need a
+  hand-written draft close to the HANDOFF notes first; the permuter only finishes the last few words.
+- Not run (no compilable m2c draft; the session-11 hand drafts are gone): `func_150E909C`,
+  `func_150E96F8`, `func_150144B8`, `func_15013778`, `func_150E6E30`, `func_151D469C`, `func_150D03A8`.
+
+Useful settings: `-j3`..`-j8`; 300 s is enough to see whether a function moves; DIFF1-4 drafts that
+do not improve in 15 min rarely do. Restart from `best.c` (strip the `PERMUTER CHANGED` lines) to
+continue a run. Read `nm/<func>/best.c` for hints (callee types, extra locals) even when it is not 0.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -844,6 +922,13 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
+   Next steps (session 12):
+   - Write hand drafts for the session 11 near misses again (they were lost) and finish them with
+     `permute.sh`; keep drafts in a persistent place (e.g. `tools/decomp-permuter/drafts/`, gitignored).
+   - Run `permute.sh -l` over every SIZE±1/DIFF1-5 draft of a fresh `gen2.py` screen (session 6 noted
+     ~250 SIZE±1 functions), 300 s each, 3 streams of `-j3`, overnight-style in the background.
+   - Look at callee prototypes the permuter changes (`PERMUTER CHANGED DECL`): a wrong `void`/`int`
+     return type in `functions.h` blocked 4 functions at once.
    Next steps (session 11):
    - Hand-write the remaining effect spawners (`spawngen.py` SKIP list, ~40): most are short,
      branchy and use the patterns above; the game_40490 ones (`func_15015354`, `func_15011D60`,
