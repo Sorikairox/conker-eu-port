@@ -1765,7 +1765,7 @@ extern s32  D_8009066C[];
 extern s32  D_800906AC[];
 extern s8   D_800901F4[];
 extern s8   D_800E1010[];
-extern u8   D_800DFC00;
+extern u8   D_800DFC00[];
 extern u8   D_800DFC01;
 extern u8   D_800DFC02;
 extern u8   D_800DFC03[];

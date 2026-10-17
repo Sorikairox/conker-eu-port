@@ -89,7 +89,17 @@ s32 func_1508863C(s32 arg0) {
     return temp_a0->unk0 * 256.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088688.s")
+s32 func_15088688(s32 arg0) {
+    struct_eu_80087640 *temp_a0;
+    s16 temp_a2;
+
+    if (D_80087640 == NULL) {
+        return 0;
+    }
+    temp_a0 = &D_80087640[arg0];
+    temp_a2 = temp_a0->unk24;
+    return (temp_a2 * 16) + (s32)(temp_a0->unk8 * 16.0f);
+}
 
 s32 func_150886E0(s32 arg0) {
     struct_eu_80087640 *temp_a0;

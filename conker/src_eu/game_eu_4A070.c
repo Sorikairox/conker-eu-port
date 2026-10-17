@@ -132,7 +132,17 @@ void func_15023464(void) {
     bzero(D_800C3CA0, 0xA8);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502348C.s")
+void func_1502348C(void) {
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if ((s16)D_800C3CA0[i].unk0 != 0) {
+            func_1516D850(*(s32 *)((u8 *)&D_800C3CA0[i] + 0x34));
+            *(s32 *)((u8 *)&D_800C3CA0[i] + 0x34) = 0;
+            D_800C3CA0[i].unk0 = 0;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150234E8.s")
 

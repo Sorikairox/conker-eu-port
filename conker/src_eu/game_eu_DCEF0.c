@@ -19,7 +19,24 @@ s32 func_150AFBC4(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AFC18.s")
+void func_151604E4(void *arg0, s32 arg1, u8 arg2, s32 arg3);
+
+void func_150AFC18(s16 arg0, u8 arg1, s32 arg2) {
+    struct {
+        s8 unk0;
+        s8 unk1;
+        s8 unk2;
+        s16 unk4;
+        s8 unk6;
+    } sp18;
+
+    sp18.unk0 = 1;
+    sp18.unk1 = -1;
+    sp18.unk2 = 2;
+    sp18.unk6 = 0;
+    sp18.unk4 = arg0;
+    func_151604E4(&sp18, 0, arg1, arg2);
+}
 
 void func_150AFC70(s32 arg0, s32 arg1) {
     func_150B2290(arg1, arg1 + 0x1ECC0);

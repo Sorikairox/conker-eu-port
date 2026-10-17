@@ -46,7 +46,19 @@ void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031F04.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503211C.s")
+s32 func_1503211C(u8 *arg0, s32 arg1) {
+    s32 var_v0 = *(s32 *)(arg0 + 0x38);
+
+    if (*(s32 *)(arg0 + 0x38) >= 3) {
+        var_v0 = 5 - var_v0;
+    }
+    *(s16 *)(arg0 + 0x18) = D_8009066C[var_v0];
+    (*(s32 *)(arg0 + 0x38))++;
+    if (*(s32 *)(arg0 + 0x38) >= 6) {
+        *(s32 *)(arg0 + 0x38) = 0;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503216C.s")
 
