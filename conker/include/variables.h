@@ -1416,6 +1416,11 @@ extern u8   D_160047D4[];
 extern u8   D_160047DC[];
 extern u8   D_160047E0[];
 
+/* EU: new decompilation (splat names, EU addresses) */
+
+extern void (*D_8008CDC0[])(void);
+extern u8   D_800D31CB;
+
 /* other */
 
 extern u32  D_00AB1950; // offsets table
