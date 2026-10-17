@@ -3,7 +3,14 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21E320/func_151F0B10.s")
+extern s32 D_8002C170;
+extern u8 *D_800E1150;
+
+void func_151F0B10(void) {
+    D_8002C170 = 1;
+    osCreateMesgQueue(&D_80042E38, &D_800E1150, 1);
+    osSendMesg(&D_80042E38, NULL, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21E320/func_151F0B60.s")
 

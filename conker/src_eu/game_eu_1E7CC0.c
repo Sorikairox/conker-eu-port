@@ -11,7 +11,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BAAC8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BB5F4.s")
+extern s32 func_151BB690;
+
+void func_151BB5F4(u8 *arg0) {
+    func_1000FA64(0x4A7U, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x18)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), 0x2000, 0x320U, 0xC8, (s32) &func_151BB690, arg0, 0, 8, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BB690.s")
 
@@ -77,7 +81,19 @@ f32 func_151BDD00(s16 *arg0) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BDD4C.s")
+s32 func_15131C7C();
+
+void func_151BDD4C(u8 *arg0) {
+    u8 *temp_v0;
+
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0xB0));
+    if (((*(s32 *)temp_v0) != 0) && ((*(u8 *)((u8 *)temp_v0 + 4)) != 0xFF)) {
+        (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x14));
+        (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x18));
+        (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x1C));
+    }
+    func_15131C7C();
+}
 
 void func_151BDDA4(u8 *arg0) {
     struct {

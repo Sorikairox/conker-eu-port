@@ -102,11 +102,45 @@ void func_150222F0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022764.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150227FC.s")
+s32 func_15022764(s32, s32);
+
+void func_150227FC(s32 arg0) {
+    s32 var_s0;
+    u8 *temp_s1;
+
+    temp_s1 = &D_800C3A5A[arg0];
+    var_s0 = 0;
+    if ((s32) *temp_s1 > 0) {
+        do {
+            func_15022764(var_s0, arg0);
+            var_s0 += 1;
+        } while (var_s0 < (s32) *temp_s1);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022864.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150228F0.s")
+s32 func_15022388(s32, s32);
+s32 func_15022440(s32, s32);
+
+void func_150228F0(s32 arg0) {
+    s32 var_s0;
+    u8 *temp_s2;
+
+    if ((&D_800C35EA)[arg0] == 1) {
+        D_800C3638 = 0;
+        temp_s2 = &D_800C3A5A[arg0];
+        var_s0 = 0;
+        if ((s32) *temp_s2 > 0) {
+            do {
+                func_15022440(var_s0, arg0);
+                func_15022388(var_s0, arg0);
+                var_s0 += 1;
+            } while (var_s0 < (s32) *temp_s2);
+        }
+        D_800C3638 = 1;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502298C.s")
 

@@ -70,6 +70,18 @@ void func_150DAB6C(u8 *arg0, f32 arg1) {
     func_151482D4(&tmp, 0x44);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150DABA8.s")
+s32 func_15131D98(s32, s32, u8 *, s32);
+s32 func_15131EC8(s32, s32, u8 *);
+
+s32 func_150DABA8(s32 arg0, s32 arg1) {
+    u8 *sp20;
+    u8 *temp_a2;
+
+    temp_a2 = arg0 + 0xA8;
+    sp20 = temp_a2;
+    func_15131D98(arg0, arg0 + 0xAC, temp_a2, arg0 + 0xAA);
+    func_15131EC8(arg0 + 0x58, (*(s32 *)((u8 *)temp_a2 + 0xC)), temp_a2);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150DABFC.s")

@@ -41,7 +41,19 @@ void func_150F3930(struct_eu_150F3930 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3978.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3A20.s")
+extern f32 D_800A1D50;
+extern f32 D_800A1D54;
+
+f32 func_150F3A20(s32 arg0, f32 arg1) {
+    f32 var_f2;
+
+    if (arg1 < -5.0f) {
+        var_f2 = (arg1 * D_800A1D50) + D_800A1D54;
+    } else {
+        var_f2 = 0.75f;
+    }
+    return var_f2;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3A74.s")
 

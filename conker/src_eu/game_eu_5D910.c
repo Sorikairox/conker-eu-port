@@ -15,7 +15,30 @@ void func_150305E0(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030600.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150306D4.s")
+s32 func_15030448(u8 *, s32);
+
+s32 func_150306D4(u8 *arg0) {
+    s32 temp_s0;
+    s32 var_a0;
+    s32 var_s1;
+
+    if ((*(u8 *)((u8 *)arg0 + 0x3B)) == 0) {
+        return 0;
+    }
+    var_a0 = D_800C3EE0;
+    var_s1 = 0;
+    if (var_a0 != 0) {
+        do {
+            temp_s0 = (*(s32 *)((u8 *)var_a0 + 0x54));
+            if ((*(u8 *)((u8 *)arg0 + 0x3B)) == (*(u8 *)var_a0)) {
+                var_s1 = 1;
+                func_15030448((u8 *) var_a0, 0);
+            }
+            var_a0 = temp_s0;
+        } while (temp_s0 != 0);
+    }
+    return var_s1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030758.s")
 
@@ -78,7 +101,15 @@ s32 func_1503211C(u8 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150335C8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033A7C.s")
+s32 func_15033A7C(u8 *arg0, u8 *arg1) {
+    u16 temp_v0;
+
+    temp_v0 = (*(u16 *)((u8 *)arg1 + 0x84));
+    if (((*(u8 *)((u8 *)arg0 + 1)) == 0x11) && ((temp_v0 == 0x3E) || (temp_v0 == 0x3D) || (temp_v0 == 0x41) || (temp_v0 == 0xD9) || (temp_v0 == 0x138) || (temp_v0 == 0x139))) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_15033AD4(u8 *arg0, s32 arg1) {
     *(s32 *)(arg0 + 0x38) += D_800BE9E4;
@@ -132,6 +163,34 @@ void func_150341B4(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150341FC.s")
+s32 func_150341FC(s32 arg0, u8 *arg1) {
+    u8 *temp_v1;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15034260.s")
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    temp_v1 = (*(u8 **)((u8 *)arg1 + 0x31C));
+    if ((temp_v1 != NULL) && ((*(u8 *)((u8 *)temp_v1 + 0x78)) != 9) && ((*(u8 *)((u8 *)temp_v1 + 0x11A)) != 3)) {
+        (*(u8 *)((u8 *)temp_v1 + 0x11A)) = 0U;
+        return 1;
+    }
+    return 0;
+}
+
+s32 func_15034260(s32 arg0, u8 *arg1) {
+    u8 temp_v0;
+    u8 *temp_v1;
+
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    temp_v1 = (*(u8 **)((u8 *)arg1 + 0x31C));
+    if (temp_v1 != NULL) {
+        temp_v0 = (*(u8 *)((u8 *)temp_v1 + 0x78));
+        if ((temp_v0 != 0xC) && (temp_v0 != 0x16) && ((*(u8 *)((u8 *)temp_v1 + 0x11A)) != 3)) {
+            (*(u8 *)((u8 *)temp_v1 + 0x11A)) = 0U;
+            return 1;
+        }
+    }
+    return 0;
+}

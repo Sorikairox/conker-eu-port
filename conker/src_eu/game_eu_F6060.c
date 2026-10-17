@@ -33,9 +33,28 @@ void func_150C89F4(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA150.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CAE30.s")
+s32 func_1514CBE8(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CAED0.s")
+void func_150CAE30(u8 *arg0) {
+    s16 sp3E;
+
+    sp3E = (func_150ADA20() % 21U) + 0xA;
+    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (func_150ADA68() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+}
+
+s32 func_150CAED0(u8 *arg0) {
+    s16 temp_v0;
+    s32 temp_v1;
+
+    temp_v0 = (*(s16 *)((u8 *)arg0 + 0x1C));
+    if (temp_v0 < 0x20) {
+        temp_v1 = temp_v0 * 8;
+        if (temp_v1 < (s32) (*(u8 *)((u8 *)arg0 + 0x28))) {
+            (*(u8 *)((u8 *)arg0 + 0x28)) = (u8) temp_v1;
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CAF04.s")
 

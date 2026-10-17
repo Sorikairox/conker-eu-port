@@ -39,7 +39,13 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE8C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FEBC.s")
+s32 func_1516FE5C(s32, s32);
+s32 func_1516FE8C(s32, s32);
+
+void func_1516FEBC(s32 arg0, s32 arg1) {
+    func_1516FE5C(arg0, arg1);
+    func_1516FE8C(arg0, arg1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FEF4.s")
 

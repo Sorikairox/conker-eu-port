@@ -37,7 +37,21 @@ void func_15080BF4(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080FE8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15081064.s")
+s32 func_15080FE8();
+extern u8 *D_800D1DBC;
+
+void func_15081064(void) {
+    if ((D_800D1941 != 0) && ((*(u8 *)((u8 *)D_800D1950 + 0x15)) == 0)) {
+        func_15080FE8();
+        if ((D_800BE9F0 != 0x29) && (D_800BE9F0 != 0x2E)) {
+            (*(u8 *)((u8 *)D_800D2E60 + 8)) = (u8) ((*(u8 *)((u8 *)D_800D2E60 + 8)) | 0x10);
+        }
+        if (D_800D1DBC != NULL) {
+            (*(s8 *)((u8 *)D_800D1DBC + 0x14)) = 1;
+            D_800D1DBC = NULL;
+        }
+    }
+}
 
 s32 func_150810F4(void) {
     if (D_800D1941 == 0) {

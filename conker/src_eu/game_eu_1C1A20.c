@@ -43,7 +43,21 @@ void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195024.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_1519508C.s")
+s32 func_15134070(s32);
+s32 func_15136C3C(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15138120(s32, s32, s32);
+s32 func_15195024(s32);
+
+void func_1519508C(s32 arg0) {
+    s32 temp_v0;
+
+    temp_v0 = func_15134070(arg0);
+    if (temp_v0 != 0x63) {
+        func_15138120(arg0, temp_v0, 0);
+    }
+    func_15136C3C(arg0, 1, 1, 1, 1, 1, 0xFF, 1);
+    func_15195024(arg0);
+}
 
 void func_15195104(s32 arg0, u8 *arg1, s32 arg2) {
     if (arg1[4] == 0x53) {

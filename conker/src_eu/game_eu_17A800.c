@@ -161,7 +161,9 @@ void func_1514ED38(struct127 *arg0) {
 void func_1514ED94(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514EDA0.s")
+void func_1514EDA0(struct102 *arg0) {
+    func_1516972C(arg0);
+}
 
 void func_1514EDC0(struct102 *arg0) {
     func_1518E878(arg0);

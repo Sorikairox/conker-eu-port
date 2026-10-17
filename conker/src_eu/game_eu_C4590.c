@@ -12,7 +12,32 @@ void func_15096970(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15096E78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15097118.s")
+s32 func_15096E78(s32);
+
+void func_15097118(void) {
+    s32 var_s0;
+    u8 *var_s1;
+
+    var_s0 = 0;
+    if (D_800C35EA != 1) {
+        var_s1 = D_800D31E0;
+loop_2:
+        if (*var_s1 != 0) {
+            if (func_15096E78(var_s0) == 0) {
+                goto block_6;
+            }
+            return;
+        }
+block_6:
+        var_s0 += 1;
+        var_s1 += 0x24;
+        if (var_s0 == 3) {
+
+        } else {
+            goto loop_2;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15097188.s")
 

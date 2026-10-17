@@ -23,7 +23,18 @@ void func_151A62DC(u16 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6BB0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A7068.s")
+s32 func_1000FD38(s32 (*)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *), u8 *, s32, u8 *);
+
+void func_151A7068(u8 *arg0) {
+    struct102 *temp_a0;
+
+    (*(s8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x110))) + 0x14)) = 1;
+    func_1000FD38(func_1000EF40, (*(u8 **)((u8 *)arg0 + 0x110)), 0, arg0);
+    temp_a0 = (*(struct102 **)((u8 *)arg0 + 0x120));
+    if (temp_a0 != NULL) {
+        func_1516972C(temp_a0);
+    }
+}
 
 void func_151A70C0(struct210 * arg0) {
     func_151A7068(arg0);

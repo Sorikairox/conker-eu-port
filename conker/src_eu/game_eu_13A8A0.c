@@ -63,7 +63,11 @@ void func_1510DCA0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DD2C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DDE4.s")
+extern s8 D_800DA2F0;
+
+void func_1510DDE4(void) {
+    D_800DA2F0 = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DDF4.s")
 

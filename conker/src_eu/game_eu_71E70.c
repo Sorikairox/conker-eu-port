@@ -16,7 +16,23 @@ void func_15044948(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044950.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044BC0.s")
+u8 *func_15044C54(s32, s32, s32, s32, s32, s32, s32, s32);
+
+u8 *func_15044BC0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    u8 *temp_v0;
+
+    temp_v0 = func_15044C54(0x20, 1, arg0, arg1, arg2, 0, 0, 0);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    (*(s16 *)((u8 *)temp_v0 + 0x10)) = (s16) arg3;
+    (*(s16 *)((u8 *)temp_v0 + 0x12)) = (s16) arg4;
+    (*(s16 *)((u8 *)temp_v0 + 0x14)) = (s16) arg5;
+    (*(s8 *)((u8 *)temp_v0 + 0x16)) = (s8) arg6;
+    (*(s32 *)((u8 *)temp_v0 + 0x18)) = arg7;
+    (*(s32 *)((u8 *)temp_v0 + 0x1C)) = arg8;
+    return temp_v0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044C54.s")
 

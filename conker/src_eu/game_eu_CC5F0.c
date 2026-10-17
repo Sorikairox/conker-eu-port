@@ -24,7 +24,16 @@ s32 func_1509F81C(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F834.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F95C.s")
+s32 func_1000F568(s32, s32);
+s32 func_151149AC(s32);
+s32 func_151152A4(s32, s32, s32, s16, s32, s32);
+
+void func_1509F95C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4, s32 arg5) {
+    s32 sp24;
+
+    sp24 = func_151149AC(arg3 & 0xFF);
+    func_151152A4(sp24, func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, arg4, arg5, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F9C8.s")
 
@@ -58,4 +67,9 @@ s32 func_1509FCE0(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509FCF8.s")
+s32 func_150ADC50();
+
+s32 func_1509FCF8(s32 arg0, s32 arg1, s32 arg2) {
+    func_150ADC50();
+    return 0;
+}

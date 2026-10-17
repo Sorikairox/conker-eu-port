@@ -3,7 +3,12 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063740.s")
+s16 func_15063740(u8 *arg0) {
+    struct127 *temp_v0;
+
+    temp_v0 = &D_800CC2D0[(*(u8 *)((u8 *)arg0 + 0x222))];
+    return func_1505A630(temp_v0->x_position - (*(f32 *)((u8 *)arg0 + 0x14)), (*(f32 *)((u8 *)arg0 + 0x1C)) - temp_v0->z_position, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_150637B4.s")
 
@@ -33,7 +38,21 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064668.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064D5C.s")
+void func_15064D5C(s32 arg0, s32 arg1) {
+    f32 temp_f0;
+    struct197 *temp_v0;
+    struct197 *temp_v1;
+
+    temp_v0 = D_800CC2D0[arg1].unk2D0;
+    temp_v1 = D_800CC2D0[arg0].unk2D0;
+    if ((temp_v0 != NULL) && (temp_v1 != NULL)) {
+        temp_f0 = temp_v0->unk18;
+        temp_v0->unk8 = temp_v1->unk8;
+        if (temp_f0 <= temp_v0->unk8) {
+            temp_v0->unk8 = temp_f0 - 1.0f;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064DD0.s")
 

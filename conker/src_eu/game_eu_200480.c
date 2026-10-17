@@ -3,7 +3,16 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_200480/func_151D2C70.s")
+void func_151D2C70(s16 arg0) {
+    u8 *temp_v0;
+
+    temp_v0 = func_15167A68(0x3C, 1, 0x18, 0, 0xFFU, 1U);
+    (*(s16 *)((u8 *)temp_v0 + 0x14)) = 0;
+    (*(s16 *)((u8 *)temp_v0 + 0x12)) = 0;
+    (*(s16 *)((u8 *)temp_v0 + 0xE)) = 0;
+    (*(s8 *)((u8 *)temp_v0 + 0x16)) = 1;
+    (*(s16 *)((u8 *)temp_v0 + 0x10)) = arg0;
+}
 
 void func_151D2CC8(s16 arg0) {
     u8 *var_v0;

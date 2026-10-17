@@ -106,7 +106,12 @@ void func_151CC11C(struct102 *arg0, u8 **arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CC784.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CC840.s")
+void func_151CC840(s32 arg0) {
+    s32 sp1C;
+
+    sp1C = arg0;
+    func_15155C9C((f32 *) &sp1C, 0x46);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CC86C.s")
 

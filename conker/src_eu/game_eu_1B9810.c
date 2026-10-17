@@ -7,7 +7,20 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C164.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C240.s")
+s32 memcpy(u8 *, s32, s32);
+
+u8 *func_1518C240(s32 arg0, u8 arg1, s32 arg2) {
+    u8 *temp_v0;
+
+    temp_v0 = func_15167A68(0x1F, arg2, 0x44, 1, (u8) (s32) arg1, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    memcpy(temp_v0 + 0x10, arg0, 0x1C);
+    (*(s32 *)((u8 *)temp_v0 + 0x2C)) = (s32) (func_150ADA20() & 0x1F);
+    (*(s32 *)((u8 *)temp_v0 + 0x30)) = (s32) (func_150ADA20() & 0x1F);
+    return temp_v0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C2D0.s")
 

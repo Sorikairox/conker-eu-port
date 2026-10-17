@@ -62,7 +62,18 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518DC50.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518E808.s")
+s32 func_1518E808(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
+    u8 *temp_v1;
+
+    temp_v1 = (*(u8 **)((u8 *)arg0 + 0x1C));
+    if ((temp_v1 != NULL) && ((*(s32 *)temp_v1) != 0)) {
+        (*(s16 *)((u8 *)arg0 + 2)) = (s16) (s32) (*(f32 *)((u8 *)temp_v1 + 0x14));
+        (*(s16 *)((u8 *)arg0 + 4)) = (s16) (s32) (*(f32 *)((u8 *)temp_v1 + 0x18));
+        (*(s16 *)((u8 *)arg0 + 6)) = (s16) (s32) (*(f32 *)((u8 *)temp_v1 + 0x1C));
+        return 0;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518E878.s")
 
@@ -222,7 +233,14 @@ void func_15190A88(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_15190B2C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_15190C34.s")
+void func_15190C34(u8 *arg0) {
+    u8 *temp_v0;
+
+    temp_v0 = (*(u8 **)((u8 *)((*(u8 **)((u8 *)arg0 + 0x10))) + 0x31C));
+    if (temp_v0 != NULL) {
+        (*(s8 *)((u8 *)temp_v0 + 0x1AC)) = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_15190C50.s")
 
@@ -269,4 +287,12 @@ s32 func_15191DEC(struct_eu_1BAAA0_e *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_15191FF4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_151920FC.s")
+extern s32 D_800A83F0;
+
+void func_151920FC(s32 arg0, u8 arg1) {
+    s32 sp1C;
+
+    sp1C = D_800A83F0;
+    func_151494E0(arg0, arg1);
+    func_15169260((s32) &sp1C, 1, arg0, arg1);
+}

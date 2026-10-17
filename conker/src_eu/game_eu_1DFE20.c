@@ -69,7 +69,9 @@ void func_151B2F00(struct_eu_1DFE20_d *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B2F24.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B3474.s")
+void func_151B3474(s32 arg0, s32 arg1, u8 arg2) {
+    func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B34B4.s")
 

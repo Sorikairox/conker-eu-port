@@ -32,7 +32,13 @@ void func_1513092C(s32 arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_15131A84.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_15131BBC.s")
+s32 func_151318EC(s32, s32, s32, s32, s32);
+s32 func_15131A84(s32, s32, s32, s32, s32);
+
+void func_15131BBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    func_15131A84(arg4, arg5, arg6, arg7, arg8);
+    func_151318EC(arg0, arg1, arg2, arg3, arg8);
+}
 
 s32 func_15131C1C(struct_eu_15E000 *arg0, s32 arg1) {
     func_15131E58(arg0->unk58, arg0->unkA8);
