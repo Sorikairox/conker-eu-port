@@ -134,6 +134,7 @@ $(BUILD_DIR)/$(SRC_DIR)/init_22460.c.o: OPT_FLAGS := -g
 $(BUILD_DIR)/src_eu/libultra/audio/n_cspgetstate.c.o: OPT_FLAGS := -O2
 $(BUILD_DIR)/src_eu/libultra/gu/guNormalize.c.o: OPT_FLAGS := -O2
 $(BUILD_DIR)/src_eu/libultra/io/pfsisplug2.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_221290.c.o: OPT_FLAGS := -g
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/ai.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/aigetstat.c.o: OPT_FLAGS := -O1
