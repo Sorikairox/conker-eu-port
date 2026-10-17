@@ -207,5 +207,3 @@ void func_151D2834(void *arg0) {
     func_151D27EC(arg0);
     func_15147E98(arg0);
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D2860.s")

@@ -8,5 +8,3 @@
 void func_1501B640(void) {
     func_1501B300();
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_48B10/func_eu_1501B640.s")

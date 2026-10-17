@@ -63,14 +63,3 @@ void *func_151A5580(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
 void func_151A56E0(s32 arg0, u8 *arg1, s16 arg2) {
     D_8008FCA0[arg1[0x14]](arg0, arg1, arg2);
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A5720.s")
-
-void func_151A5B84(u8 *arg0, s32 arg1, u8 arg2) {
-    void (*f)(s32, void *, u8) = D_8008FCA4[arg0[0x19]];
-    if (f != NULL) {
-        f(arg0, arg1, arg2);
-    }
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A5BCC.s")

@@ -112,5 +112,3 @@ void func_151AD144(u8 *arg0, s32 arg1, u8 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AF8E8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AF938.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AFA80.s")

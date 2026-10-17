@@ -10,5 +10,3 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/func_150CE960.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/func_150CEBA4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FBE70/func_150CEC50.s")

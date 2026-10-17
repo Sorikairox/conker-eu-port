@@ -59,11 +59,3 @@ void func_150B7B6C(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7C88.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7DFC.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B8020.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B87B0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B8AA0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B8C7C.s")

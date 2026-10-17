@@ -81,13 +81,3 @@ void func_150D05D0(u8 *arg0, u8 *arg1, u8 arg2) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0644.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D06B0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D07C4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D083C.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D09D4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0A44.s")

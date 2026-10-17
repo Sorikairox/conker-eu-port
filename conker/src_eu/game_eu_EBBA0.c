@@ -40,11 +40,3 @@ s32 func_150BE6C4(f32 *arg0) {
     }
     return 1;
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/func_150BE710.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/func_150BE7E8.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/func_150BE938.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBBA0/func_150BE994.s")

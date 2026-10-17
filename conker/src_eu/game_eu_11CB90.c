@@ -163,28 +163,3 @@ void func_150F1C04(u8 *arg0, s32 *arg1, u8 arg2) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F1C5C.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F1F80.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F20C8.s")
-
-void func_eu_150F2230(u8 *arg0) {
-    if ((*(u16 *)((u8 *)arg0 + 0x84)) == 0x14) {
-        (*(u8 *)((u8 *)arg0 + 0x68)) = 0x1B;
-    } else {
-        (*(u8 *)((u8 *)arg0 + 0x68)) = 0xC;
-    }
-    (*(u8 *)((u8 *)arg0 + 0x69)) = 0x13;
-    if (((*(s32 *)((u8 *)arg0 + 0x2E4)) & 3) == 3) {
-        (*(u8 *)((u8 *)arg0 + 0x69)) = 0x14;
-    }
-    if (((*(s32 *)((u8 *)arg0 + 0x2E4)) & 0xC) == 0xC) {
-        (*(u8 *)((u8 *)arg0 + 0x69)) = 0x17;
-    }
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F2290.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F2670.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F2230.s")
