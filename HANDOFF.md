@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-17 (fourth session). Update this file at the end of every work session.
+Last updated: 2026-10-17 (fifth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,13 +17,13 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2563 / 5916 functions in C (43.3%)**; code bytes 10.9% (end of session 4;
-  counted from `progress.csv`, which lists 5916 functions; session 3 counted 5913).
-  - init: 283/543 functions
-  - game: 2249/5329
-  - debugger: 31/44
+- **2622 / 5913 functions in C (44.3%)**; code bytes 253,312 / 2,253,856 (11.2%)
+  (end of session 5, from `verify_all.sh`; session 4 counted 2563 against 5916).
+  - init: 320/542 functions (30.7% of bytes)
+  - game: 2271/5328 (9.5%)
+  - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
-    2374 after the first round of new decompilation (this session).
+    2374 after the first round of new decompilation (session 3), 2563 after session 4.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -52,6 +52,7 @@ Commits on `eu`:
 | `c3f2d8f` | The 413 plain asm subsegments become C files (GLOBAL_ASM stubs) |
 | `c67d78d` | Salvage of an interrupted parallel round: 728 more functions (see below) |
 | `8d3f205`…`fc0e53a` | Session 4: 189 functions (near-misses, m2c pipeline, hand fixes); tools in `tools/eu_port/m2c/` |
+| `8430db4`…`3d5a326` | Session 5: 59 functions (variant screening, near misses, sqrtf split, 40 libultra functions at -O1) |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -213,6 +214,69 @@ Recurring fixes for near misses (IDO 5.3 -O2 -g3):
   argument stored to its home slot in a call's delay slot although never reloaded
   (`func_151AD110`).
 
+## Session 5: variant screening saturated, libultra at -O1
+
+Sequential, 6 work commits (`8430db4`..`3d5a326`), +59 functions (2563 -> 2622).
+
+- **Variant screening** of all asm functions up to 200 instructions (`conker/build/k`,
+  regenerated with `gen2.py`, ~2500 functions): only 9 new OK drafts across the 8 old
+  variants plus the new ones below. Further variant sets tried, all with 0-3 hits:
+  `compound.py` (`X = (T)(X op Y)` -> `X op= Y`), `voidret.py` (unused `s32` call
+  results -> `void` prototypes), `genx.py ... --void`, `genx.py ... --reg-vars saved`,
+  and `voidret` applied to every other variant. Automated variants are exhausted for
+  this size range; what remains needs hand work (or real struct types).
+- **Near misses fixed by hand** (session-4 list): `func_1509D464`, `func_15080FE8`
+  (global in `v0`: `if (D) { r = D; f(r); D = 0; }`), `func_151AD110` (arg home store:
+  an `if (arg0) {}` after the call keeps `arg0` live), `func_1001091C` (early returns
+  instead of `&&`), `func_15195418` (`volatile` + `s32 pad`), `func_150ED7B4` (m2c
+  invented a third argument), `func_15166774` (`+=` fixes operand order),
+  `func_1509FAD4` (plain nested ifs), `func_1503F5A0` (callee is `void`, see below),
+  `func_150D2564` (`u8` loop counter).
+- **`sqrtf` split done**: `game_eu_21D010` is split at 0x21D050; `game_eu_21D050.c`
+  (`func_151EF840`, `return sqrtf(x);` with the intrinsic) builds `-O2`.
+- **libultra is -O1** (EU): every libultra C function tried matched at `-O1` (stack
+  homes for args, `register u32 saveMask`), except libc `string.c` (memcpy/strlen/
+  strchr) at `-O2` with `unsigned char`. Files now built with overrides (see the EU-only
+  block in `conker/Makefile`): `game_eu_21D010` (osPiReadIo), `game_eu_21E320`
+  (__osSiCreateAccessQueue/__osSiGetAccess/__osSiRawStartDma), `init_eu_22D70`,
+  `init_eu_22FE0`, `init_eu_23050`, `init_eu_232A0`, `init_eu_23360` (new subsegment,
+  string.c), `init_eu_23860`, `init_eu_238E0`, `init_eu_23A20`, `init_eu_23B70`,
+  `init_eu_24210`, `init_eu_24220`, `init_eu_24260`, `init_eu_242F0`, `init_eu_24320`
+  (timers), `init_eu_24870`, `init_eu_24BF0`, `init_eu_24DF0`, `init_eu_24ED0`,
+  `init_eu_251D0`, `init_eu_252D0`, `init_eu_25360`, `init_eu_265F0`, `init_eu_26AD0`.
+  Libultra internals are referenced by their EU names with a comment
+  (`D_8002C134` = `__osViNext`, `D_8002C130` = `__osViCurr`, `D_8002C148` =
+  `__osRunQueue`, `D_8002C140` = `__osThreadTail`, `D_8002C0C0` = `__osTimerList`,
+  `D_80042D40..50` = current time / base counter / VI intr count / timer counter,
+  `D_8002AE90` = `__osPiDevMgr`, `func_10007BA4/CC8/D14/D28` = `__osEnqueueAndYield`,
+  `__osEnqueueThread`, `__osPopThread`, `__osDispatchThread`, `func_10023BC0/C04` =
+  `__osPiGetAccess/RelAccess`, `func_10024190` = `osWritebackDCache`).
+  The function the port calls `__osGetActiveQueue` (`init_eu_24870`) is really
+  `__osViGetCurrentContext` (it returns `__osViCurr`).
+
+New tools in `tools/eu_port/m2c/` (host side, same conventions as session 4):
+
+| Script | Use |
+|---|---|
+| `try func [draft.c]` | screen one draft (stdin if no file); `V=1 try ...` prints a word diff (ref, mine, asm line), also for SIZE results |
+| `flags src_eu/X.c [flagset ...]` | build the file with each `OPT_FLAGS` override (default `-O1 -O2 -g "-O2 -g3"`) and print check results; the **last** flagset stays in the Makefile |
+| `compound.py in out` / `voidret.py in out` | derive a variant set from another (only changed drafts are written) |
+| `genx.py out min max <m2c flags>` | one draft per function with extra m2c flags |
+| `merge.py out vdir...` | collect the first OK draft per function into `out/` for `apply.py` |
+
+`screen.py` now counts a relocation whose symbol is not on the asm line as one
+differing word instead of stopping with `SYM:` (gives real DIFF counts), and writes
+`<func>.diff` when `SCREEN_V=1`. `conker/build/best.txt` (gitignored, may be gone) lists
+the lowest DIFF per function across all variant sets.
+
+Lessons:
+- m2c gives unused call results the type `s32`; a non-void prototype makes IDO avoid
+  `v0` and shifts register allocation (`func_1503F5A0`). Use `void` prototypes.
+- m2c can invent arguments from registers that merely hold a value at the call
+  (`func_150ED7B4`'s callee takes two floats, not three args).
+- `x += y` and `x = x + y` can differ in `addu` operand order.
+- A loop over `u8 i` shows up as `andi $t, $s, 0xFF` before the compare.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -304,31 +368,49 @@ porting to manual work.
      `D_8003B260` stays a tentative definition in the C file (needed for codegen) and
      gets its EU address from `undefined_syms.eu.txt`.
    - `init_214F0`, `game_D4C20`, `game_221290`: all GLOBAL_ASM; only placed.
-3. ~~31 functions reverted in the salvage~~: 30 done in session 4. Left: `func_151EF840`
-   (`sqrtf`, see session 4 notes: it shares subsegment `game_eu_21D010` with
-   `osPiReadIo` and needs a file split with its own flags).
+3. ~~31 functions reverted in the salvage~~: all done (`func_151EF840` = `sqrtf` in
+   session 5, own file `game_eu_21D050.c` built `-O2`).
 4. **New decompilation** of the remaining ~3,350 asm functions (game is 38.7% by
    count but only 8.2% by bytes: the large functions are what's left). Use m2c
    (`tools/mips_to_c`), asm-differ, decomp-permuter, and decomp.me (IDO 5.3,
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
-   Next steps from session 4:
-   - Screen and apply `conker/build/k` (or regenerate it): the `--no-stack-spill` and
-     `pad` variants were added late and never screened over the whole set.
-   - Near misses left (1-4 differing words, see the session 4 notes for what was tried):
-     `func_150351A4 func_150C60D4 func_151A53E4 func_1517A220 func_151CBAC0`
-     (commutative operand order), `func_1509D464 func_15080FE8` (global in `v0`),
-     `func_151AD110` (arg home store), `func_15195418` (dead `sp2C` store kept),
-     `func_150ED7B4 func_1503F5A0 func_1514EA78 func_1514EB28 func_1514EBD8
-     func_1514EC88 func_15166774 func_1509FAD4 func_10007D14` (register choice),
-     `func_15144B68 func_1511CAD0 func_150A7CB0` (instruction order),
-     `func_1001091C` (argument reloaded from its home slot), `func_150D03A8`
-     (extra stack slot), `func_151A547C` (flag spilled as a byte), `func_15142E24
-     func_15052260 func_151C2600` (100+ instructions, stack/operand order).
-   - `func_151EF840` (`sqrtf`): split `game_eu_21D010` at 0x21D050 into its own C file
-     built `-O2` (or whatever fills the `jr ra` delay slot), `osPiReadIo` stays in the
-     first part (its asm saves `a0`/`a1` like an `-O1` libultra build).
+   Next steps (session 5):
+   - **Remaining libultra C functions** (likely `-O1`, use `m2c/flags`): `osPiRawStartDma`
+     (`init_eu_23CC0`, with asm `bcopy`), `__osSiDeviceBusy`, `__osSpGetStatus`,
+     `__osSpRawReadIo/WriteIo` (`init_eu_26870`, shares the file with `__sinf`),
+     `osJamMesg`, `osPiGetCmdQueue`, `osDestroyThread` (`init_eu_26370`, with the cont
+     CRC functions), `osContInit/__osContGetInitData/__osPackRequestData`,
+     `osContStartReadData/osContGetReadData` (`init_eu_24ED0`), `__osContRamRead/Write`,
+     `__osContAddressCrc/DataCrc`, the pfs functions (`__osPfsRWInode`, `__osGetId`,
+     `__osCheckId`, `__osRepairPackId`, ...), `ldiv/lldiv`, `_Litob`, `__osViSwapContext`,
+     `__osViInit` (`func_10024720`), `osSetTimer`-style helpers, `osPfsChecker`.
+     Handwritten asm (leave as is): `bzero`, `bcopy`, `__osGetSR/__osSetSR`,
+     `__osSetFpcCsr`, `__osDisableInt/__osRestoreInt`, `osInvalICache/DCache`,
+     `osWritebackDCacheAll`, `osGetCount`, `__osSetCompare`, `osMapTLB/osUnmapTLB`,
+     `__osProbeTLB`, `osSetIntMask`, `sqrtf` (init copy), the `__ll_*` helpers (compiled
+     with a different compiler), `func_10007D14` (`__osPopThread`, from exceptasm.s).
+     Several init files mix two libultra objects with different flags: split them
+     like `init_eu_23360` when one flag set does not fit.
+   - Game-side copies of libultra exist too (`game_eu_21D010`, `game_eu_21E320`); look
+     for more `func_151E`/`func_151F` functions that call `__osDisableInt` or touch
+     `0xA4xx` registers.
+   - Near misses left (1-4 differing words): `func_150351A4 func_150C60D4 func_151A53E4
+     func_1517A220 func_151CBAC0` (commutative operand order), `func_1511CAD0` (store/load
+     order), `func_15144B68 func_150A7CB0` (instruction order), `func_151A547C` (flag
+     spilled as a byte across a call), `func_150D03A8` (one stack slot),
+     `func_1514EA78 func_1514EB28 func_1514EBD8 func_1514EC88` (`v1`/`v2` choice),
+     `func_1509CEA8` (unrolled `for` loop, init order), `func_15142E24 func_15052260
+     func_151C2600` (100+ instructions). `conker/build/best.txt` has the full list.
+   - `func_151EF7B0` matches as C but is followed by 0x40 bytes of nop padding in its
+     file (`game_eu_21CFC0`), more than the 16-byte object alignment; needs an asm
+     padding block or a different file split.
+   - `func_15173948` (`return arg0;` with an unused second arg) has its `jr ra` delay
+     slot filled: its file (`game_eu_1A1060`) would need a split with `-O2`.
+   - About 250 functions screen as `SIZE±1`; quick looks found single-instruction
+     differences that resisted easy fixes (e.g. `func_150104F0`: `or v0, zero, zero`
+     stored twice).
    - Small functions are mostly done; what is left needs hand work or real types.
      Naming structs (`struct127` objects, `struct_eu_node` lists, message handlers
      with the `(obj, msg, u8 event)` signature) would make m2c's drafts much closer.
@@ -376,5 +458,7 @@ porting to manual work.
 - `make` prints `build/conker.eu.bin: OK` only when it relinks; delete
   `conker/build/conker.eu.ok` to force the check (the `verify` helper does).
 - m2c needs `pycparser<3`; with 3.x it fails on `pycparser.plyparser`.
+- Changing a file's `OPT_FLAGS` in the Makefile does not rebuild its object; delete the
+  `.o` (the `m2c/flags` helper does) or `verify_all.sh --quick` checks a stale object.
 - `tools/n64splat` shows as modified in `git status` (submodule content); that was
   already the case before this work and is not part of any commit.
