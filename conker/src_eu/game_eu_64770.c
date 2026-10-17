@@ -71,7 +71,19 @@ void *func_15039D44(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A968.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503AAE0.s")
+s32 func_15037224();
+s32 func_1503A968();
+extern u8 D_800C441A;
+
+void func_1503AAE0(void) {
+    s32 sp1C;
+
+    sp1C = D_800C441A;
+    D_800C441A = 0;
+    func_15037224();
+    D_800C441A = sp1C;
+    func_1503A968();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503AB20.s")
 

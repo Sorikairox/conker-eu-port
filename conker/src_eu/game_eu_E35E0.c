@@ -31,4 +31,12 @@ void func_150B6930(struct102 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6BBC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6C34.s")
+s32 func_15182BE0(s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_150B6C34(u8 arg0, s32 arg1) {
+    s32 pad;
+    u32 sp28;
+
+    sp28 = func_150ADA20();
+    func_15182BE0(0xCC, 0xCC, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (func_150ADA20() % 11U) + 0xF, 0, (s32) arg0, arg1);
+}

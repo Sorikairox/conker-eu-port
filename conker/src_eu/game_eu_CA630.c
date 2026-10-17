@@ -31,7 +31,12 @@ void func_1509D0A4(s32 arg0) {
     func_1509D0C4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D0C4.s")
+s32 func_1509D274(s32, void (*)(s32), s32);
+extern s32 D_800877DC;
+
+void func_1509D0C4(s32 arg0) {
+    func_1509D274(*(s32 *)((u8 *)&D_800877DC + (arg0 * 0x14)), func_1509D0C4, arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D104.s")
 
