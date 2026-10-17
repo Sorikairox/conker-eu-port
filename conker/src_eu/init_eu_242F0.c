@@ -2,5 +2,11 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 __osSpDeviceBusy(void) {
+    register u32 stat = IO_READ(SP_STATUS_REG);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_242F0/__osSpDeviceBusy.s")
+    if (stat & (SP_STATUS_DMA_BUSY | SP_STATUS_DMA_FULL | SP_STATUS_IO_FULL)) {
+        return 1;
+    }
+    return 0;
+}

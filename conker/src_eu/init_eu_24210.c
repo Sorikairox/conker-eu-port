@@ -2,5 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_24210/__osSpSetStatus.s")
+void __osSpSetStatus(u32 data) {
+    IO_WRITE(SP_STATUS_REG, data);
+}

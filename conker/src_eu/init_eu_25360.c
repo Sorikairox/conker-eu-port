@@ -2,5 +2,6 @@
 #include "functions.h"
 #include "variables.h"
 
-
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_25360/osDpSetStatus.s")
+void osDpSetStatus(u32 data) {
+    IO_WRITE(DPC_STATUS_REG, data);
+}

@@ -2,5 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+extern OSThread *D_8002C130; // __osActiveQueue
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_24870/__osGetActiveQueue.s")
+OSThread *__osGetActiveQueue(void) {
+    return D_8002C130;
+}
