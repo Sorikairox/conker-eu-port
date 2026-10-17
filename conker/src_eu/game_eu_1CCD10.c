@@ -5,9 +5,37 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F500.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F678.s")
+void func_1519F678(u8 *arg0) {
+    u8 **temp_v0 = *(u8 ***)(arg0 + 0x98);
+    s32 *temp_a0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F6D8.s")
+    if (*temp_v0 != NULL) {
+        temp_a0 = (s32 *)(*temp_v0 + 0x58);
+        if (*(s32 *)(arg0 + 0x20) == 6) {
+            temp_a0[0] = 0;
+        }
+        if (*(s32 *)(arg0 + 0x20) == 7) {
+            temp_a0[2] = 0;
+        }
+    }
+    func_15147E64(arg0);
+}
+
+void func_1519F6D8(u8 *arg0) {
+    u8 **temp_v0 = *(u8 ***)(arg0 + 0x98);
+    s32 *temp_a0;
+
+    if (*temp_v0 != NULL) {
+        temp_a0 = (s32 *)(*temp_v0 + 0x58);
+        if (*(s32 *)(arg0 + 0x20) == 6) {
+            temp_a0[0] = 0;
+        }
+        if (*(s32 *)(arg0 + 0x20) == 7) {
+            temp_a0[2] = 0;
+        }
+    }
+    func_15147E98(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F738.s")
 

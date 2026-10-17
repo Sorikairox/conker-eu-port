@@ -7,7 +7,23 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15188EBC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15188FC8.s")
+typedef struct struct_15188FC8 {
+    u8 pad0[0xC];
+    struct struct_15188FC8 *unkC;
+} struct_15188FC8;
+
+void func_15188FC8(struct_15188FC8 *arg0, struct_15188FC8 **arg1) {
+    struct_15188FC8 *var_v1;
+
+    arg0->unkC = NULL;
+    if (*arg1 != NULL) {
+        for (var_v1 = *arg1; var_v1->unkC != NULL; var_v1 = var_v1->unkC) {
+        }
+        var_v1->unkC = arg0;
+    } else {
+        *arg1 = arg0;
+    }
+}
 
 void func_1518900C(s32 arg0) {
     struct_eu_1B6590 *var_v0 = (struct_eu_1B6590 *)D_800DF7C8[0];

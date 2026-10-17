@@ -5,7 +5,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158620.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158748.s")
+void func_15158620(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
+
+void func_15158748(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    func_15158620(arg0, 0, 0, arg1, arg2, arg3, arg4);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158794.s")
 
@@ -90,7 +94,17 @@ void func_15159270(void **arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_1515ACFC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_1515AE90.s")
+s32 func_1515AE90(u8 *arg0, u8 **arg1) {
+    struct_eu_link *sp1C;
+    u8 *temp_v1;
+
+    if (func_1514F250(*(struct_eu_link **)(arg0 + 0x2F4), 0x13, &sp1C) == 0) {
+        return 0;
+    }
+    temp_v1 = (u8 *)sp1C->unk10;
+    *arg1 = temp_v1 + 0x34;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_1515AEE4.s")
 

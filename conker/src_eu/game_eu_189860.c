@@ -27,7 +27,17 @@ void func_1515C628(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C668.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C6C8.s")
+void func_1515C6C8(void) {
+    s32 i;
+    struct_eu_node *node;
+
+    for (i = 0; i < 2; i++) {
+        for (node = D_800DD280[i][50]; node != NULL; node = node->next) {
+            *(s32 *)((u8 *)node + 0x44) = 0;
+            *(s32 *)((u8 *)node + 0x48) = -1;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C710.s")
 

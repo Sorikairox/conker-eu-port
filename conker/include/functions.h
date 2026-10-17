@@ -712,7 +712,7 @@ void func_150CEF10(struct108 *arg0);
 void func_150DE310(s32 arg0);
 void func_150DE32C(void); // dummy
 void func_150DEC90(s32 arg0);
-void func_150EB430(void *arg0, void *arg1);
+void func_150EB430(void *arg0, void *arg1, s32 arg2);
 void func_150EC4B0(struct108 *arg0);
 void func_150F51A0(s32 arg0, s32 arg1);
 s32  func_150F51BC(void);

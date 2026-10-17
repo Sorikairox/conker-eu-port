@@ -46,7 +46,33 @@ void func_1511581C(s32 arg0) {
 void func_15116EA4(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116EB0.s")
+typedef struct {
+    u8 pad0[0x4F];
+    u8 unk4F;
+    u8 pad50[0x23];
+    u8 unk73;
+} struct_15116EB0;
+
+typedef struct {
+    u8 pad0[0x57];
+    u8 unk57;
+} struct_15116EB0_2;
+
+typedef struct {
+    u8 pad0[0x31C];
+    struct_15116EB0_2 *unk31C;
+} struct_15116EB0_1;
+
+void func_15116EB0(struct_15116EB0 *arg0, struct_15116EB0_1 *arg1) {
+    if (arg0->unk4F & 4) {
+        if (!(arg0->unk73 & 3) && !(arg0->unk73 & 4)) {
+            if (arg1->unk31C->unk57 == 1) {
+                arg0->unk73 &= ~3;
+                arg0->unk73 |= 2;
+            }
+        }
+    }
+}
 
 void func_15116F04(u8 *arg0) {
     if (arg0[0x73] & 2) {

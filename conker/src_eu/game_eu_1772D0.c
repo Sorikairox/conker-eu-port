@@ -23,7 +23,29 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514A8F0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514AA08.s")
+typedef struct {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u8 pad1E[0xE];
+    f32 unk2C;
+    f32 unk30;
+    u8 pad34[0x28];
+    u8 unk5C;
+    u8 pad5D[0xE7];
+    f32 unk144;
+    u8 pad148[0xE];
+    s16 unk156;
+    s16 unk158;
+} struct_1514AA08;
+
+s32 func_1514AA08(struct_1514AA08 *arg0) {
+    arg0->unk30 -= arg0->unk30 * arg0->unk144;
+    arg0->unk2C -= arg0->unk2C * arg0->unk144;
+    if (arg0->unk1C < arg0->unk156) {
+        arg0->unk5C = arg0->unk1C * arg0->unk158;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514AA5C.s")
 
