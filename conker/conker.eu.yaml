@@ -1,21 +1,25 @@
+sha1: c3904f30d9248dae6cb1cd946207a13c1dc96a96
+
 options:
+  platform: n64
   basename: conker
   target_path: conker.eu.bin
   base_path: .
-  find_file_boundaries: yes
+  src_path: src_eu
   compiler: IDO
-  cpp_args:
-  - "-Iinclude"
-  - "-Iinclude/2.0L"
-  - "-D_LANGUAGE_C"
-  - "-D_FINALROM"
   generated_c_preamble: |
     #include <ultra64.h>
     #include "functions.h"
     #include "variables.h"
-  create_detected_syms: yes
-  undefined_syms_path: undefined_syms.eu.txt
   symbol_addrs_path:   symbol_addrs.eu.txt
+
+  auto_link_sections: []
+  string_encoding: ASCII
+  ld_align_section_vram_end: False
+
+  # asm_jtbl_label_macro: jlabel
+  # asm_data_macro: dlabel
+
 segments:
   - name:  header
     type:  header
@@ -148,7 +152,7 @@ segments:
   - name: init_data
     type: code
     start: 0x29400
-    vram:  0x29400
+    vram:  0x80029400
     subsegments:
     - [0x29400, bin]
   - name:  game

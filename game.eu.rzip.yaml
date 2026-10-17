@@ -1,4 +1,7 @@
+sha1: 1c84634770bc267b4e23e51959302932bf4f47f4
 options:
+  platform: n64
+  basename: game
   target_path: assets/game.eu.rzip.bin
   base_path: .
   asset_path: assets/game

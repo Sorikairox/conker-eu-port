@@ -12,3 +12,4 @@ python-ranges
 pyyaml
 toml
 watchdog
+pyelftools

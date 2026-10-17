@@ -19,3 +19,10 @@
     .global \label
     \label:
 .endm
+
+.macro nonmatching label, size=1
+.endm
+
+.macro enddlabel label
+    .size \label, . - \label
+.endm
