@@ -54,7 +54,11 @@ def check_func(o,f,spath):
                     off=rr['r_offset']
                     if addr<=off<addr+size:
                         sym=symtab.get_symbol(rr['r_info_sym'])
-                        rels[off]=(rr['r_info_type'],sym.name,sym['st_info']['type'])
+                        nm=sym.name
+                        if sym['st_info']['type']=='STT_SECTION':
+                            nm=e.get_section(sym['st_shndx']).name
+                        rels[off]=(rr['r_info_type'],nm,sym['st_info']['type'])
+    rod=_rodata(e_path=o) if any(st=='STT_SECTION' for _,_,st in rels.values()) else None
     mine=[int.from_bytes(data[addr+i:addr+i+4],'big') for i in range(0,size,4)]
     while len(ref)>len(mine) and ref[-1]==0: ref.pop()
     while len(mine)>len(ref) and mine[-1]==0: mine.pop()
@@ -65,11 +69,30 @@ def check_func(o,f,spath):
                 VERB.append('%s %08X %08X  %s'%('  ' if a==b else '**',a,b,reft[i] if i<len(reft) else ''))
         return 'SIZE%+d'%(len(mine)-len(ref))
     n=0
+    hiw={}
     for i,(a,b) in enumerate(zip(ref,mine)):
         off=addr+i*4
         m=0xFFFFFFFF
         if off in rels:
             t,name,st=rels[off]
+            if st=='STT_SECTION' and name in ('.rodata',) and rod is not None and t in (5,6):
+                # literal / string / jump table in the TU's own .rodata: compare its contents with
+                # what the asm's D_/jtbl_ symbol points at in the ROM
+                if t==5: hiw[name]=(b&0xFFFF)<<16
+                else:
+                    tgt=re.search(r'%lo\((\w+)\)',reft[i])
+                    ok=False
+                    if tgt and name in hiw:
+                        lo=b&0xFFFF; lo=lo-0x10000 if lo&0x8000 else lo
+                        ok=_cmp_rodata(rod,hiw[name]+lo,tgt.group(1),reft[i],addr)
+                    if not ok:
+                        n+=1
+                        if VERB: VERB.append('** %08X %08X  %s  [rodata contents differ]'%(a,b,reft[i]))
+                        continue
+                m=0xFFFF0000
+                if (a&m)!=(b&m): n+=1
+                if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
+                continue
             if st=='STT_SECTION' or not name: return 'SECREL'
             if not re.search(r'\b%s\b'%re.escape(name),reft[i]):
                 n+=1
@@ -79,6 +102,68 @@ def check_func(o,f,spath):
         if (a&m)!=(b&m): n+=1
         if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
     return 'OK' if n==0 else 'DIFF%d'%n
+
+sys.path.insert(0,'../tools/eu_port')
+_SYMS=None
+def _symaddr(name):
+    global _SYMS
+    if _SYMS is None:
+        _SYMS={}
+        for f in ('undefined_syms_auto.txt','undefined_syms.eu.txt','symbol_addrs.eu.txt'):
+            if os.path.exists(f):
+                for l in open(f):
+                    m=re.match(r'\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)',l)
+                    if m: _SYMS.setdefault(m.group(1),int(m.group(2),16))
+    if name in _SYMS: return _SYMS[name]
+    m=re.match(r'(?:D|jtbl)_([0-9A-F]{8})',name)
+    return int(m.group(1),16) if m else None
+
+_ROM=None
+def _romread(vaddr,n):
+    """bytes at a data-segment vram address, from conker.eu.bin"""
+    global _ROM
+    import datarefs
+    if _ROM is None: _ROM=(open('conker.eu.bin','rb').read(),datarefs.segments())
+    data,segs=_ROM
+    for nm,sg in segs.items():
+        if nm.endswith('_data') and 'vram' in sg and sg['vram']<=vaddr<sg['vram']+(sg['end']-sg['start']):
+            r=vaddr-sg['vram']+sg['start']; return data[r:r+n]
+    return None
+
+def _rodata(e_path):
+    with open(e_path,'rb') as fh:
+        e=ELFFile(fh)
+        s=e.get_section_by_name('.rodata')
+        if s is None: return None
+        rel={}
+        rs=e.get_section_by_name('.rel.rodata')
+        if rs is not None:
+            for rr in rs.iter_relocations(): rel[rr['r_offset']]=rr['r_info_type']
+        return (s.data(),rel)
+
+def _cmp_rodata(rod,off,sym,line,faddr):
+    data,rel=rod
+    va=_symaddr(sym)
+    if va is None: return False
+    if 'lwc1' in line or 'swc1' in line: n=4
+    elif 'ldc1' in line or 'sdc1' in line: n=8
+    elif sym.startswith('jtbl_'):
+        # jump table: entries relative to the function start must agree
+        rv=None; i=0
+        while off+i+4<=len(data) and (off+i) in rel:
+            mine=int.from_bytes(data[off+i:off+i+4],'big')-faddr
+            rw=_romread(va+i,4)
+            if rw is None: return False
+            ref=int.from_bytes(rw,'big')
+            if rv is None: rv=ref-mine   # function vram
+            if ref-mine!=rv: return False
+            i+=4
+        return i>0
+    else:
+        # string or table: compare up to the first NUL (at least 4 bytes)
+        z=data.find(b'\0',off); n=max(4,(z-off+1) if z>=0 else 4)
+    rb=_romread(va,n)
+    return rb is not None and data[off:off+n]==rb
 
 def work(item):
     p,funcs=item

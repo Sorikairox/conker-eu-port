@@ -62,7 +62,7 @@ def parse_map(mapfile, section, ending=None):
                 offset = int(offset, 16)
             else:
                 continue
-            if new_function.startswith("L8"):
+            if new_function.startswith("L8") or new_function.startswith(".L"):
                 # skip label entries
                 continue
             if offset < previous_offset:

@@ -5,7 +5,7 @@ from multiprocessing import Pool
 S=os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.expanduser('~/conker/conker'))
 od,mn,mx=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])
-BAD=('M2C_ERROR','M2C_BITWISE','M2C_STRUCT_COPY','M2C_MEMCPY','M2C_LWL','M2C_FIRST3','M2C_UNALIGNED','M2C_TRAP','M2C_BREAK','M2C_SYNC','GLUE_F64','MULT_HI','MULTU_HI','M2C_CARRY','M2C_OVERFLOW','CLZ(','jtbl','unksp','saved_reg','(bitwise','/* irregular */')
+BAD=('M2C_ERROR','M2C_BITWISE','M2C_STRUCT_COPY','M2C_MEMCPY','M2C_LWL','M2C_FIRST3','M2C_UNALIGNED','M2C_TRAP','M2C_BREAK','M2C_SYNC','GLUE_F64','MULT_HI','MULTU_HI','M2C_CARRY','M2C_OVERFLOW','CLZ(','unksp','saved_reg','(bitwise','/* irregular */','goto *')
 def repl_field(s):
     out='';i=0
     while True:
@@ -45,8 +45,28 @@ def revdecl(c):
     ls=m.group(1).split('\n')[:-1]
     if len(ls)<2: return None
     return c[:m.start(1)]+'\n'.join(ls[::-1])+'\n'+c[m.end(1):]
+sys.path.insert(0,S)
+import rodasm
+def m2c_inputs(sp):
+    # the function .s without a rodata_inject block, plus its .rodata items (rodasm.py) so m2c
+    # writes float literals, switch statements and strings
+    d=os.path.join(S,'rod'); os.makedirs(d,exist_ok=True)
+    f=os.path.basename(sp)[:-2]
+    body=open(sp).read()
+    if body.startswith('# rodata_inject'):
+        body=body.split('# rodata_inject end\n',1)[1]
+    t=rodasm.gen(sp)
+    # jump-table targets need labels (splat only labels them when it saw the table)
+    for tg in set(re.findall(r'\.word \.L([0-9A-F]{8})',t or '')):
+        if '.L%s:'%tg not in body:
+            body=re.sub(r'(\n)(\s*/\* [0-9A-F]+ %s )'%tg,r'\1  .L%s:\n\2'%tg,body,count=1)
+    a=os.path.join(d,f+'.s'); open(a,'w').write(body)
+    ins=[a]
+    if t:
+        b=os.path.join(d,f+'.rod.s'); open(b,'w').write(t); ins.append(b)
+    return ins
 def m2c(sp,cx,extra):
-    r=subprocess.run([S+'/venv/bin/python','tools/mips_to_c/m2c.py','--valid-syntax','--context',cx]+extra+[sp],capture_output=True,text=True)
+    r=subprocess.run([S+'/venv/bin/python','tools/mips_to_c/m2c.py','--valid-syntax','--context',cx]+extra+m2c_inputs(sp),capture_output=True,text=True)
     if r.returncode or not r.stdout.strip() or any(b in r.stdout for b in BAD): return None
     c=post(r.stdout)
     return None if 'M2C' in c else c
@@ -102,7 +122,7 @@ def main():
     for l in open(S+'/all.txt').read().split('\n')[1:]:
         if not l: continue
         ins,p,f,jt,fl=l.split(); ins=int(ins)
-        if ins>mx or ins<mn or jt=='True': continue
+        if ins>mx or ins<mn or (jt=='True' and not os.environ.get('JT')): continue
         if only is not None and f not in only: continue
         m=re.search(r'#pragma GLOBAL_ASM\("([^"]*/%s\.s)"\)'%f,open(p).read())
         if m: items.append((f,p,m.group(1)))

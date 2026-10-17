@@ -8,7 +8,7 @@ sys.path.insert(0,'../tools/eu_port')
 import check_files as cf
 from elftools.elf.elffile import ELFFile
 gd=sys.argv[1]
-rom=open('conker.eu.bin','rb').read(); ranges=cf.file_ranges()
+rom=open('conker.eu.bin','rb').read(); ranges=cf.file_ranges(); owned=cf.owned_sections()
 def prag(f): return re.compile(r'#pragma GLOBAL_ASM\("[^"]*/%s\.s"\)'%f)
 def datasz(o):
     with open(o,'rb') as fh:
@@ -30,7 +30,12 @@ def ok(p,base):
         a=struct.unpack('>I',data[off:off+4])[0]; b=struct.unpack('>I',want[off:off+4])[0]
         m=masked.get(off,0xFFFFFFFF)
         if (a&m)!=(b&m): return False
-    return datasz(o)==base
+    # sections the file owns (rodata_split.py --own) must match the ROM; others must not grow
+    base=dict(base); cur=datasz(o)
+    for sec,a,b in owned.get(name,[]):
+        if cf.section_diff(o,sec,rom[a:b]): return False
+        base.pop(sec,None); cur.pop(sec,None)
+    return cur==base
 cands={}
 for l in open(os.path.join(gd,'screen.txt')):
     r,f,p=l.split()

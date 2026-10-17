@@ -28,7 +28,20 @@ void func_1519EF74(struct102 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519F0FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519F294.s")
+s32 func_1519F294(u8 *arg0) {
+    u8 *temp_v1;
+
+    temp_v1 = (*(u8 **)((u8 *)arg0 + 0x170));
+    (*(f32 *)((u8 *)arg0 + 0x18)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0x18)) * 0.1f);
+    (*(f32 *)((u8 *)arg0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0x1C)) * 0.1f);
+    (*(f32 *)((u8 *)arg0 + 0x20)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0xC));
+    (*(f32 *)((u8 *)arg0 + 0x24)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0x10));
+    (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0x14));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) (*(f32 *)((u8 *)temp_v1 + 0));
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) (*(f32 *)((u8 *)temp_v1 + 4));
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) (*(f32 *)((u8 *)temp_v1 + 8));
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519F2F4.s")
 

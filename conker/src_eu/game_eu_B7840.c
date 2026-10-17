@@ -71,9 +71,98 @@ s32 func_1508CEE4(void) {
 void func_1508EB24(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508EB2C.s")
+s32 func_1508EB2C(s32 arg0) {
+    switch (arg0) {
+    case 0x3F:
+        return 0x708;
+    case 0x14:
+        return 0xC80;
+    case 0x22:
+        return 0x1F4;
+    case 0x23:
+        return 0x2710;
+    case 0x16:
+        return 0x186A0;
+    case 0x15:
+        return 0x1F4;
+    case 0x21:
+        return 0x1F4;
+    case 0x24:
+        return 0x186A0;
+    case 0x19:
+    case 0x40:
+        return 0x1F4;
+    case 0x9:
+        return 0x1388;
+    case 0x38:
+        return 0x1388;
+    case 0x18:
+    case 0x41:
+        return 0x186A0;
+    case 0x3:
+        return 0x2EE;
+    case 0x37:
+        return 0x5DC;
+    default:
+        return 0x186A0;
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508EBDC.s")
+s32 func_1508EBDC(s32 arg0) {
+    if ((*(s16 *)((u8 *)D_800D27D0 + 0x16BC)) != 0xB8) {
+        switch (arg0) {
+        case 0x14:
+            return 0x28;
+        case 0x3F:
+            return 0x2F;
+        case 0x22:
+            return 0x56;
+        case 0x23:
+            return 0x16;
+        case 0x16:
+            return 0x24;
+        case 0x15:
+            return 0x4B;
+        case 0x21:
+            return 0x58;
+        case 0x24:
+            return 0x63;
+        case 0x19:
+            return 0x57;
+        case 0x40:
+            return 0x21;
+        case 0x9:
+            return 0x1D;
+        case 0x38:
+            return 0x7B;
+        case 0x39:
+            return 0x82;
+        case 0x37:
+            return 0x85;
+        case 0x18:
+            return 0x55;
+        case 0x41:
+            return 0x2E;
+        case 0x25:
+            return 0x1060;
+        default:
+            return -1;
+        }
+    } else {
+        switch (arg0) {                             /* switch 1; irregular */
+        case 8:                                     /* switch 1 */
+            return -1;
+        case 1:                                     /* switch 1 */
+            return 0x105C;
+        case 16:                                    /* switch 1 */
+            return 0x1019;
+        case 2:                                     /* switch 1 */
+            return 0x1059;
+        default:                                    /* switch 1 */
+            return -1;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508ECF8.s")
 

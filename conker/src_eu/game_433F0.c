@@ -3,7 +3,28 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_433F0/func_15015F40.s")
+s32 func_151E6758(s16);
+extern s32 D_800BEE08;
+
+void func_15015F40(s16 arg0, s32 arg1) {
+    switch (arg1) {
+    case 0x1A:
+    case 0x24:
+    case 0x2B:
+    case 0x2D:
+    case 0x30:
+    case 0x33:
+    case 0x34:
+    case 0x3F:
+        D_800BE616 = 1;
+        D_800BEE08 = func_151E6758(arg0) - 1;
+        return;
+    default:
+        D_800BE616 = 0;
+        D_800BEE08 = arg0 - 1;
+        return;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_433F0/func_15015FBC.s")
 // s32 func_15015FBC(s32 arg0, s32 arg1) {

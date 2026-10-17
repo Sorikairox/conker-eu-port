@@ -56,9 +56,53 @@ def text_words(path):
     return data, masked
 
 
+def owned_sections():
+    """{c file name: [(section, rom start, rom end)]} for .rodata/.data pieces of the *_data
+    segments (a file's own data sections carved out of the blobs)."""
+    out, cur, subs = {}, None, []
+    lines = open("conker.eu.yaml").read().split("\n")
+    for line in lines:
+        m = re.match(r"  - name:\s+(\w+)", line)
+        if m:
+            cur = m.group(1)
+        m = re.match(r"\s+- \[(0x[0-9A-Fa-f]+)(?:, *([.\w]+))?(?:, *([\w/]+))?\]", line)
+        if m and cur:
+            subs.append((cur, int(m.group(1), 16), m.group(2), m.group(3)))
+    for i, (seg, rom, kind, name) in enumerate(subs):
+        if seg.endswith("_data") and kind in (".rodata", ".data") and name:
+            nxt = subs[i + 1][1] if i + 1 < len(subs) else None
+            out.setdefault(name, []).append((kind, rom, nxt))
+    return out
+
+
+def section_diff(path, sec, want):
+    """None if the object's section matches want (relocated words masked, the rest of want
+    zero padding), else a short reason."""
+    with open(path, "rb") as f:
+        elf = ELFFile(f)
+        s = elf.get_section_by_name(sec)
+        data = s.data() if s else b""
+        masked = set()
+        for r in elf.iter_sections():
+            if isinstance(r, RelocationSection) and r.name == ".rel" + sec:
+                for x in r.iter_relocations():
+                    masked.add(x["r_offset"] & ~3)
+    if len(data) > len(want):
+        return f"{sec} size {len(data):#x} > {len(want):#x}"
+    if any(want[len(data):]):
+        return f"{sec} size {len(data):#x} < {len(want):#x}"
+    for off in range(0, len(data), 4):
+        if off in masked:
+            continue
+        if data[off:off + 4] != want[off:off + 4]:
+            return f"{sec} differs at +{off:#x}"
+    return None
+
+
 def main():
     rom = open("conker.eu.bin", "rb").read()
     ranges = file_ranges()
+    owned = owned_sections()
     names = [a[len("src_eu/"):-2] for a in sys.argv[1:]] or sorted(ranges)
     bad = 0
     for name in names:
@@ -86,6 +130,15 @@ def main():
                 diffs.append(off)
         if diffs:
             print(f"DIFF {name}: {len(diffs)} words, first at +{diffs[0]:#x} (rom {start + diffs[0]:#x})")
+            bad += 1
+            continue
+        why = None
+        for sec, a, b in owned.get(name, []):
+            why = section_diff(f"build/src_eu/{name}.c.o", sec, rom[a:b])
+            if why:
+                break
+        if why:
+            print(f"DATA {name}: {why}")
             bad += 1
         else:
             print(f"OK {name}")
