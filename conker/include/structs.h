@@ -974,7 +974,11 @@ typedef struct {
     s8  unk95;  // used
     u8  pad96;
     u8  unk97;
-    u8  pad98[0x7C];
+    u8  pad98[0x10];
+    f32 unkA8;
+    u8  unkAC;
+    u8  unkAD;
+    u8  padAE[0x66];
     u16 unk114;
     u16 unk116;
     u16 unk118;
@@ -989,7 +993,8 @@ typedef struct {
     u8  unk128;
     u8  pad129[0x6C];
     u8  unk195;
-    u8  pad196[0x2];
+    u8  pad196;
+    u8  unk197;
     u8  unk198;
     u8  pad199;
     /* 0x19a */ u8  grenade_count;
@@ -997,7 +1002,8 @@ typedef struct {
     u8  pad19C[0x2];
     u16 unk19E;
     u16 unk1A0;
-    u8  pad1A2[0x7];
+    u8  pad1A2[0x6];
+    u8  unk1A8;
     u8  unk1A9;
     s16 unk1AA;
 } struct126;
@@ -1079,7 +1085,8 @@ struct struct127 {
     s16 pad6C;
     s8  unk6E;
     s8  pad6F;
-    u32 pad70;
+    u8  unk70;
+    u8  pad71[0x3];
     u8  unk74;
     s8  pad75;
     u16 unk76;  // moving_angle
@@ -1344,7 +1351,8 @@ struct struct127 {
     s32 unk2E4;
     s32 unk2E8;
     s32 unk2EC;
-    u8  pad2F0[0x8];
+    u8  pad2F0[0x4];
+    /* 0x2F4 */ struct struct_eu_link *unk2F4; // list of attached objects (game_16EE20)
     u16 unk2F8; // wait animation?
     u8  unk2FA;
     u8  unk2FB;
@@ -1455,8 +1463,7 @@ struct struct137 {
     u16 unk5A; // used
     u16 pad5C;
     u16 pad5E;
-    u16 pad60;
-    u16 pad62;
+    s32 unk60;
 }; // 0x64 (100) bytes
 
 typedef struct {
@@ -2839,13 +2846,14 @@ struct struct249 {
     u16 unk0;
     u8  pad2[0x16];
     struct249 *next;
+    struct249 *prev;
 };
 
 typedef struct {
     u16 length;
     u8  pad2[0x2];
-    struct249 *unk4;
-    s32 unk8;         // tbd
+    struct249 *unk4;  // head
+    struct249 *unk8;  // tail
 } struct250; // size 0xC;
 
 typedef struct {
@@ -2948,6 +2956,545 @@ typedef struct {
 } struct260; // size at least 0x24
 
 /* EU: new decompilation */
+// doubly linked list node; lists live in D_800DD280[unk1][unk0] (game_1944C0)
+typedef struct struct_eu_node {
+    u8  unk0; // list index
+    u8  unk1; // list group
+    u8  pad2[0x2];
+    struct struct_eu_node *prev;
+    struct struct_eu_node *next;
+} struct_eu_node;
+// object with a sub-object pointer at 0x98 (game_DBA60, game_EF410 callbacks)
+typedef struct {
+    u8  pad0[0x1B];
+    u8  unk1B;
+} struct_eu_sprite_sub;
+
+typedef struct {
+    u8  pad0[0x1C];
+    s16 unk1C;
+    u8  pad1E[0x98 - 0x1E];
+    struct_eu_sprite_sub *unk98;
+} struct_eu_sprite;
+typedef struct {
+    u8 unk0[4];
+} struct_eu_bytes4;
+// object handled by the game_16DC80 callbacks (layout partly known)
+typedef struct structEU_16DC80 {
+    u8  pad0[0x34];
+    f32 unk34;
+    f32 unk38;
+    f32 unk3C;
+    u8  pad40[0xD0];
+    struct {
+        u8   pad0[0x44];
+        f32 *unk44;     // 0x154
+    } unk110;
+    f32 unk158;
+    u8  pad15C[0xC];
+    u8  unk168;
+    u8  pad169[0x7];
+    union {
+        struct {
+            f32 unk0;
+            f32 unk4;
+            f32 unk8;
+            f32 unkC;
+        } f;
+        struct {
+            s32 unk0;
+            s32 unk4;
+            f32 *unk8;
+            u8  unkC[0x4];
+        } i;
+    } unk170;
+} structEU_16DC80;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} structEU_8008A414;
+typedef struct {
+    u8  pad0[0x10];
+    f32 unk10;
+    f32 unk14;
+} struct_eu_2062D0_sub;
+
+typedef struct {
+    u8  pad0[0x58];
+    s32 unk58;
+    u8  pad5C[0x128 - 0x5C];
+    struct_eu_2062D0_sub unk128;
+} struct_eu_2062D0;
+
+typedef struct {
+    struct17 unk0;
+    f32 unkC;
+} struct_eu_1897A0_entry;
+
+typedef struct {
+    u8  pad0[0x10];
+    struct17 unk10;
+    u8  pad1C[0x25 - 0x1C];
+    u8  unk25;
+    u8  pad26[0x2C - 0x26];
+    s8  unk2C;
+    u8  pad2D;
+    s8  unk2E;
+    u8  pad2F[0x94 - 0x2F];
+    struct_eu_1897A0_entry *unk94;
+} struct_eu_1897A0;
+
+typedef struct {
+    u8  pad0[0x8];
+    f32 unk8;
+    u8  padC[0x39 - 0xC];
+    s8  unk39;
+} struct_eu_1897A0_b;
+// animation state hanging off struct127.unk2D0 (game_83300); two 0x1D0 blocks
+typedef struct {
+    u8  pad0[0x4];
+    u16 unk4;
+    u16 unk6;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    s8  unk38;
+    s8  unk39;
+    u8  pad3A[0x6];
+    u8  unk40[0x1D0];
+    u8  unk210[0x1D0];
+} struct_eu_anim; // size 0x3E0
+typedef struct {
+    s32 unk0[9];
+} struct_eu_bytes24;
+// 8-byte display-list-like command: signed opcode byte, index byte, word operand
+typedef struct {
+    s8  cmd;
+    u8  unk1;
+    u8  unk2;
+    u8  unk3;
+    u32 unk4;
+} struct_eu_cmd8;
+typedef struct {
+    s32 unk0[6];
+} struct_eu_words6;
+typedef struct {
+    u8  pad0[0x6];
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    u8  padC[0x9];
+    u8  unk15;
+} struct_eu_15144598;
+// one display list command viewed as bytes/words (used to relocate segmented addresses)
+typedef struct {
+    s8  cmd;
+    u8  b1;
+    u8  b2;
+    u8  b3;
+    u32 w1;
+} struct_eu_gfxcmd;
+// rotation (f32 x/y/z) plus s16 translation, used to build a transform (game_16EE20)
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    u8  padC[0x4];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+} struct_eu_xform;
+typedef struct {
+    u8  unk0;
+    s8  unk1;
+    u8  pad2[2];
+    f32 unk4;
+    f32 unk8;
+} struct_eu_2062D0_b_sub;
+
+typedef struct {
+    u8  pad0[0x4C];
+    f32 unk4C;
+    f32 unk50;
+    u8  pad54[0x110 - 0x54];
+    struct_eu_2062D0_b_sub unk110;
+} struct_eu_2062D0_b;
+// argument block of func_151D8E18
+typedef struct {
+    u8  unk0;
+    u8  pad1;
+    s16 unk2;
+    u8  unk4;
+    u8  unk5;
+    s8  unk6;
+    u8  pad7;
+} structEU_151D8E18;
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s8  unk16;
+    s8  unk17;
+    s8  unk18;
+    s8  unk19;
+} struct_eu_EF410;
+// parameter block passed to func_15154488 (built on the stack by its callers)
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    struct17 unk8;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    s16 unk2C;
+    s16 unk2E;
+    s16 unk30;
+    s16 unk32;
+    s16 unk34;
+    s16 unk36;
+    s16 unk38;
+    s16 unk3A;
+    u8  unk3C;
+    u8  pad3D[0x3];
+    f32 unk40;
+    s16 unk44;
+    s16 unk46;
+    s32 unk48;
+} struct_eu_15154488;
+// object created by func_15149130 and attached to a struct127 list (game_16EE20)
+typedef struct {
+    u8  pad0[0xE];
+    s16 unkE;
+    u8  pad10[0x18];
+    s32 unk28;
+} struct_eu_attached;
+
+typedef struct struct_eu_link {
+    u8  pad0[0x10];
+    struct_eu_attached *unk10;
+    struct struct_eu_link *unk14; // next
+} struct_eu_link;
+// struct108 viewed as its state stack: element 0 is the current value, [i + 1] the saved copies (game_14FF90)
+typedef struct {
+    /* 0x000 */ u16 unk0[0x16];
+    /* 0x02C */ s32 unk2C[0x16];
+    /* 0x084 */ s32 unk84[0x16];
+    /* 0x0DC */ s32 unkDC[0x16];
+    /* 0x134 */ s32 unk134[0x16];
+    /* 0x18C */ u8  pad18C[0x28];
+    /* 0x1B4 */ s16 unk1B4[0x16];
+    /* 0x1E0 */ s16 unk1E0[0x16];
+    /* 0x20C */ s16 unk20C[0x15];
+} struct_eu_108_stack;
+// quadtree node built by func_15001DE0 (game_2DF70); unk4 and unkC are byte offsets to sibling/child
+typedef struct {
+    u16 unk0;
+    u16 unk2;
+    s16 unk4;
+    u16 unk6;
+    u16 unk8;
+    u16 unkA;
+    s16 unkC;
+} struct_eu_qnode;
+typedef struct {
+    u8  pad0[0x10];
+    u8  unk10;
+    s8  unk11;
+    u8  pad12[2];
+    s16 unk14;
+} struct_eu_168A90;
+// callback object handled by func_151419D0 (game_16EE20)
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u8  unk8;
+} struct_eu_151419D0_sub;
+
+typedef struct {
+    u8  pad0[0x28];
+    struct_eu_151419D0_sub unk28;
+} struct_eu_151419D0;
+
+// message passed to func_151419D0; for type 0 the byte at 4 is compared
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    u8  unk8;
+    u8  unk9;
+} struct_eu_151419D0_msg;
+// generic view of a sound handle entry (struct15, D_80041FE0[]) as seen by the
+// per-sound update callbacks in init_EB00; unk14/unk18/unk1C are the owner keys
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    void *unk14; // callback
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    u16 unk24;
+    u16 unk26;
+    s32 unk28;
+    f32 unk2C;
+} struct_eu_sfx; // size 0x30
+// one entry of the D_800BE628 array (size 0x180)
+typedef struct {
+    u8  pad0[0x24];
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    u8  pad34[0x40 - 0x34];
+    Vp  unk40[2];
+    u8  pad60[0x74 - 0x60];
+    f32 unk74;
+    f32 unk78;
+    u8  pad7C[0x88 - 0x7C];
+    f32 unk88[12];
+    u8  padB8[0x180 - 0xB8];
+} struct_eu_BE628;
+// (id, slot) pair used by the message-0x2D "relink" handlers (game_DBA60, game_1FFF60)
+typedef struct {
+    s32 unk0;
+    u8  unk4;
+} struct_eu_idslot;
+
+typedef struct {
+    u8  pad0[0x28];
+    struct_eu_idslot unk28;
+} struct_eu_DBA60;
+typedef struct {
+    u8  pad0[0x2C];
+    f32 unk2C;
+    f32 unk30;
+    u8  pad34[4];
+    f32 unk38;
+    u8  pad3C[0x4C - 0x3C];
+    f32 unk4C;
+    f32 unk50;
+    u8  pad54[0x150 - 0x54];
+    f32 unk150;
+} struct_eu_EF410_b;
+typedef struct {
+    s32 unk0;
+    u8  unk4;
+    u8  pad5[0x3B - 0x5];
+    u8  unk3B;
+    u8  pad3C[0x74 - 0x3C];
+    u8  unk74;
+    u8  pad75[0x1D4 - 0x75];
+    u8 *unk1D4;
+} struct_eu_1FFF60_parent;
+
+typedef struct struct_eu_1FFF60_child {
+    u8  pad0[0x10];
+    struct_eu_1FFF60_parent *unk10;
+    u8  unk14;
+    u8  pad15[3];
+    struct17 unk18;
+    u8  unk24;
+    u8  pad25;
+    s16 unk26;
+    u8  unk28;
+    s8  unk29;
+    s8  unk2A;
+    u8  pad2B;
+    s32 unk2C;
+    u8  pad30[4];
+    struct17 unk34;
+    struct struct_eu_1FFF60_child *unk40; // next
+} struct_eu_1FFF60_child;
+
+typedef struct {
+    u8  pad0[0x10];
+    s32 unk10;
+    u8  pad14[0x1D - 0x14];
+    u8  unk1D;
+    u8  pad1E[0x24 - 0x1E];
+    struct_eu_1FFF60_child *unk24; // first child
+} struct_eu_1FFF60;
+// 12-byte table entry, D_80090F10 (game_169510); unk6/unk8 look like texture width/height
+typedef struct {
+    u8  pad0[0x6];
+    u16 unk6;
+    u16 unk8;
+    u8  padA[0x2];
+} struct_eu_80090F10;
+typedef struct {
+    u8  pad0[0x2E4];
+    s32 unk2E4;
+    s32 unk2E8;
+    s32 unk2EC;
+} struct_eu_EF410_c;
+typedef struct {
+    u8  pad0[0x1C];
+    s16 unk1C;
+    u8  pad1E[0x160 - 0x1E];
+    f32 unk160;
+} struct_eu_EF410_d;
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    u8  padC[8];
+} struct_eu_2062D0_pt; // size 0x14
+
+typedef struct {
+    f32 unk0;
+    u8  pad4[0x1B - 0x4];
+    u8  unk1B;
+    u8  pad1C[4];
+    u8  unk20;
+    u8  pad21[0x4C - 0x21];
+    f32 unk4C;
+    u8  unk50;
+} struct_eu_2062D0_c_sub;
+
+typedef struct {
+    u8  pad0;
+    u8  unk1;
+    u8  pad2[0xC - 0x2];
+    u8  unkC;
+    u8  padD[0x2D - 0xD];
+    s8  unk2D;
+    u8  pad2E[0x94 - 0x2E];
+    struct_eu_2062D0_pt *unk94;
+    struct_eu_2062D0_c_sub *unk98;
+} struct_eu_2062D0_c;
+typedef struct {
+    s32 unk0;
+    u8  pad4[0x14 - 0x4];
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    u8  pad20[0x150 - 0x20];
+    f32 unk150;
+    u8  pad154[0x1D4 - 0x154];
+    s32 unk1D4;
+} struct_eu_A9D90;
+
+typedef struct {
+    f32 unk0;
+    u8  unk4;
+    u8  unk5;
+    s8  unk6;
+    s8  unk7;
+    f32 unk8;
+    f32 unkC;
+} struct_eu_2062D0_d_sub;
+
+typedef struct {
+    u8  pad0[0x38];
+    f32 unk38;
+    f32 unk3C;
+    u8  pad40[0xA8 - 0x40];
+    struct_eu_2062D0_d_sub unkA8;
+    u8  padB8[0xC1 - 0xB8];
+    u8  unkC1;
+} struct_eu_2062D0_d;
+// EEPROM save block (0x70 bytes at EEPROM block 0x44): u16 checksum + data (game_33990)
+typedef struct {
+    u16 checksum;
+    u8  data[0x6E];
+} struct_eu_save;
+// byte ring buffer (game_70200)
+typedef struct {
+    u8 *buf;
+    s32 size;
+    s32 rd;
+    s32 wr;
+} struct_eu_ring;
+
+typedef struct {
+    u16 unk0;
+    u8  pad2[2];
+    u16 unk4;   // size
+    u16 unk6;
+    u8  pad8[2];
+    u16 unkA;
+} struct_eu_C8950_blk;
+typedef struct {
+    s16 unk0;   // timer
+    u8  pad2[2];
+    f32 unk4;
+    u8  unk8[0xC];
+    u8  unk14;
+    u8  unk15;
+    u8  unk16;
+} struct_eu_2062D0_e_sub;
+
+typedef struct {
+    u8  pad0;
+    u8  unk1;
+    u8  pad2[0xC - 0x2];
+    u8  unkC;
+    u8  padD[0x28 - 0xD];
+    struct_eu_2062D0_e_sub unk28;
+} struct_eu_2062D0_e;
+typedef struct {
+    u8  unk0;
+    u8  pad1;
+    s16 unk2;
+} struct_eu_spawn;
+
+typedef struct {
+    s32 count;
+    struct_eu_spawn *entries;
+} struct_eu_spawnlist;
+typedef struct {
+    u8  unk0;
+    u8  pad1[3];
+    s32 unk4;
+    u8  unk8;
+    u8  unk9;
+    u8  unkA;
+    u8  unkB;
+    u8  unkC;
+    u8  unkD;
+    u8  padE[2];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+} struct_eu_2062D0_f_sub;
+
+typedef struct {
+    u8  pad0[0x4C];
+    f32 unk4C;
+    f32 unk50;
+    f32 unk54;
+    u8  unk58[0xA8 - 0x58];
+    struct_eu_2062D0_f_sub unkA8;
+} struct_eu_2062D0_f;
+typedef struct {
+    u8  pad0[8];
+    s32 unk8;
+    u8  padC[2];
+    s8  unkE;
+    u8  padF;
+} struct_eu_BE818;
 /* EU: end new */
 
 #endif

@@ -55,9 +55,9 @@ typedef struct {
 
 typedef struct N_PVoice_s {
     ALLink               node;
-    struct N_ALVoice_s    *vvoice;
     /* RARE CUSTOM */
-    u8                          pad[0x8];
+    /* 0x08 */ ALLink       unk8;  /* second list link, see _n_collectPVoices */
+    /* 0x10 */ struct N_ALVoice_s    *vvoice;
 /** ALLoadFilter *********************************/
     ADPCM_STATE                 *dc_state;
     ADPCM_STATE                 *dc_lstate;
@@ -126,8 +126,8 @@ typedef struct N_ALMainBus_s {
 
 typedef struct N_ALAuxBus_s {
     ALFilter            filter;
-    s32                 sourceCount;
-    s32                 maxSources;
+    /* RARE CUSTOM: replaces sourceCount and maxSources */
+    /* 0x14 */  ALLink              voices; /* physical voices on this bus, see n_alSynAllocVoice */
     N_PVoice           **sources;
     /* 0x20 */  ALFx                *fx;
     ALFx    *fx_array[AL_MAX_AUX_BUS_SOURCES];
@@ -171,5 +171,31 @@ void init_lpfilter(ALLowPass *lp);
 
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
+
+// alUnlink / alLink, expanded inline in this version of the library
+#define N_AL_UNLINK(e)                          \
+    {                                           \
+        ALLink *ln = (ALLink *)(e);             \
+                                                \
+        if (ln->next != NULL) {                 \
+            ln->next->prev = ln->prev;          \
+        }                                       \
+        if (ln->prev != NULL) {                 \
+            ln->prev->next = ln->next;          \
+        }                                       \
+    }
+
+#define N_AL_LINK(e, after)                     \
+    {                                           \
+        ALLink *ln = (ALLink *)(e);             \
+        ALLink *to = (ALLink *)(after);         \
+                                                \
+        ln->next = to->next;                    \
+        ln->prev = to;                          \
+        if (to->next != NULL) {                 \
+            to->next->prev = ln;                \
+        }                                       \
+        to->next = ln;                          \
+    }
 
 #endif /*  __N_SYNTHINTERNALS__ */
