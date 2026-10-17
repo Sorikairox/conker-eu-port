@@ -102,7 +102,18 @@ s32 func_151D93F4(void *arg0, void *arg1) {
     return res;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9450.s")
+s32 func_151D9450(struct_eu_2062D0_d *arg0, s32 arg1) {
+    struct_eu_2062D0_d_sub *sub = &arg0->unkA8;
+
+    if (arg0->unkC1 & 1) {
+        return 1;
+    }
+    sub->unk4 += sub->unk6 * D_800BE9E4;
+    sub->unk5 += sub->unk7 * D_800BE9E4;
+    arg0->unk38 = func_151423D8(sub->unk4 - 0x40) * sub->unk8 + sub->unk0;
+    arg0->unk3C = func_151423D8(sub->unk5 - 0x40) * sub->unkC + sub->unk0;
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9534.s")
 
 u8 func_151D97A8(void) {
@@ -167,7 +178,15 @@ u8 func_151D9B34(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9B8C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151D9EB0.s")
+void func_151D9EB0(struct_eu_2062D0_e *arg0) {
+    struct_eu_2062D0_e_sub *sub = &arg0->unk28;
+
+    sub->unk0 -= D_800BE9E4;
+    if (sub->unk0 < 0) {
+        func_151D9014(sub->unk8, (f32 *)D_800A5860, sub->unk16, func_150ADA68() * D_800AB844 + D_800AB848, (u32)func_150ADA20() % 41 + 0x23, sub->unk14, sub->unk4, 0, 1.0f, 1.0f, sub->unk15, 0, 1, 0, arg0->unkC, arg0->unk1);
+        sub->unk0 = (u32)func_150ADA20() % 111 + 30;
+    }
+}
 
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
     func_151DBCBC(arg0, arg1 * 0.5f, arg2, arg3, arg4, arg5, arg6);
@@ -179,12 +198,44 @@ void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA08C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA368.s")
 // TODO when we know what arg0 is...
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA6A8.s")
+s32 func_151DA6A8(struct_eu_2062D0 *arg0) {
+    s32 i;
+    struct_eu_2062D0_sub *p;
+
+    if (arg0->unk58 & 1) {
+        p = &arg0->unk128;
+        i = D_800BE9E4;
+        while (i--) {
+            p->unk10 *= p->unk14;
+        }
+    }
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA6F8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA938.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DAA88.s")
+s32 func_151DAA88(struct_eu_2062D0_c *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    struct_eu_2062D0_c_sub *sub = arg0->unk98;
+    struct_eu_2062D0_pt *pts = arg0->unk94;
+    struct17 sp34;
+
+    sp34.unk0 = pts[arg0->unk2D].unk0;
+    sp34.unk4 = arg4;
+    sp34.unk8 = pts[arg0->unk2D].unk8;
+    func_151D9FC0(sub->unk50, sub->unk0 * 11.0f * sub->unk4C, sub->unk1B, arg5, &sp34, arg0->unkC, arg0->unk1);
+    sub->unk20 = 4;
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DAB58.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DADA0.s")
+s32 func_151DADA0(struct_eu_2062D0_b *arg0) {
+    struct_eu_2062D0_b_sub *sub = &arg0->unk110;
+    f32 f0;
+
+    sub->unk0 += sub->unk1 * D_800BE9E4;
+    f0 = func_151423D8(sub->unk0 - 0x40);
+    arg0->unk4C = sub->unk4 * f0 + 1.0f;
+    arg0->unk50 = D_800AB890 - sub->unk8 * f0;
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DAE28.s")
 
 void func_151DB004(struct218 *arg0) {

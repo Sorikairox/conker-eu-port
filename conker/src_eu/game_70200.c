@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include <stdarg.h>
 
 
 void func_15042D50(void) {
@@ -13,8 +14,31 @@ void func_15042D78(u8 arg0) {
     D_800CBD74 = arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042D94.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042E3C.s")
+void func_15042D94(s32 arg0, s32 arg1, u8 arg2, s32 arg3, ...) {
+    va_list ap;
+    s32 args[16];
+    s32 i;
+
+    D_800CBD74 = arg2;
+    D_800CBD70 = arg0;
+    D_800CBD72 = arg1;
+    va_start(ap, arg3);
+    for (i = 0; i < 16; i++) {
+        args[i] = va_arg(ap, s32);
+    }
+    func_15042ECC(arg3, args);
+}
+void func_15042E3C(s32 arg0, ...) {
+    va_list ap;
+    s32 args[16];
+    s32 i;
+
+    va_start(ap, arg0);
+    for (i = 0; i < 16; i++) {
+        args[i] = va_arg(ap, s32);
+    }
+    func_15042ECC(arg0, args);
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042ECC.s")
 
 void func_150432BC(f32 arg0) {
@@ -52,10 +76,62 @@ void func_15043A00(struct105 *arg0, s32 arg1, s32 arg2) {
 }
 
 // something with memcpy
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043A20.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043AC8.s")
+s32 func_15043A20(u8 *buf, s32 size, s32 pos, u8 *src, s32 len) {
+    s32 n;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043B70.s")
+    while (len != 0) {
+        if (size < pos + len) {
+            n = size - pos;
+        } else {
+            n = len;
+        }
+        memcpy(buf + pos, src, n);
+        pos += n;
+        src += n;
+        len -= n;
+        if (pos >= size) {
+            pos = 0;
+        }
+    }
+    return pos;
+}
+s32 func_15043AC8(u8 *buf, s32 size, s32 pos, u8 *dst, s32 len) {
+    s32 n;
+
+    while (len != 0) {
+        if (size < pos + len) {
+            n = size - pos;
+        } else {
+            n = len;
+        }
+        memcpy(dst, buf + pos, n);
+        pos += n;
+        dst += n;
+        len -= n;
+        if (pos >= size) {
+            pos = 0;
+        }
+    }
+    return pos;
+}
+
+s32 func_15043B70(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    s32 n;
+
+    while (arg3 != 0) {
+        if (arg1 < arg2 + arg3) {
+            n = arg1 - arg2;
+        } else {
+            n = arg3;
+        }
+        arg2 += n;
+        arg3 -= n;
+        if (arg2 >= arg1) {
+            arg2 = 0;
+        }
+    }
+    return arg2;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043BB8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043CA4.s")

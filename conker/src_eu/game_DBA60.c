@@ -39,7 +39,38 @@ void func_150AE5B0(struct108 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AE790.s")
 // some funky xor going on
+// spawns the objects of D_80088A80[0]; also checksums the code range
+// func_15001A08..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AEB9C.s")
+// NON-MATCHING: regalloc; checksums code func_15001A08..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
+// void func_150AEB9C(u8 *arg0) {
+//     u32 *p;
+//     u32 sum;
+//     s32 i;
+//     u8 *obj;
+//
+//     if (arg0 == NULL) {
+//         return;
+//     }
+//     sum = 0;
+//     for (p = (u32 *)func_15001A08; p < D_15001B08; p++) {
+//         sum ^= *p;
+//         sum <<= 1;
+//     }
+//     if (sum != 0x1B61AF60) {
+//         D_800DD280[0][35] = NULL;
+//         D_800DD280[1][35] = NULL;
+//     }
+//     for (i = 0; i < D_80088A80[0].count; i++) {
+//         obj = (u8 *)func_151491F4(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+//         if (obj == NULL) {
+//             return;
+//         }
+//         *(u8 **)(obj + 0x28) = arg0;
+//         obj[0x2C] = arg0[0x3B];
+//         obj[0x2D] = D_80088A80[0].entries[i].unk0;
+//     }
+// }
 
 void func_150AECCC(struct42 *arg0) {
     arg0->unk96 = arg0->unk96 + (arg0->unk94 * D_800BE9E4);
@@ -62,7 +93,19 @@ void func_150AED4C(struct114 *arg0) {
     arg0->unk36 = arg0->unk34;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AED9C.s")
+s32 func_150AED9C(struct_eu_sprite *arg0) {
+    struct_eu_sprite_sub *sub = arg0->unk98;
+    s32 v = arg0->unk1C * 8;
+
+    if (v >= 0x100) {
+        v = 0xFF;
+    }
+    sub->unk1B = v;
+    if (sub->unk1B < 0) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_150AEDD8(struct202 *arg0) {
     if (arg0->unk1C < 0x20) {

@@ -57,7 +57,27 @@ struct249 *func_1509B704(s16 arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B764.s")
+void func_1509B764(struct249 *arg0) {
+    if (D_800D2F48.length == 1) {
+        D_800D2F48.unk4 = NULL;
+        D_800D2F48.unk8 = NULL;
+    } else {
+        if (arg0 == D_800D2F48.unk4) {
+            D_800D2F48.unk4 = arg0->next;
+            arg0->next->prev = NULL;
+        } else {
+            arg0->prev->next = arg0->next;
+        }
+        if (arg0 == D_800D2F48.unk8) {
+            D_800D2F48.unk8 = arg0->prev;
+            arg0->prev->next = NULL;
+        } else {
+            arg0->next->prev = arg0->prev;
+        }
+    }
+    func_10004074(arg0);
+    D_800D2F48.length--;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B810.s")
 
@@ -72,6 +92,27 @@ void func_1509B8FC(s16 arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B950.s")
+// NON-MATCHING: register allocation of pad/pos swapped (v1/t0)
+// struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *arg0) {
+//     u16 pos;
+//     s32 pad;
+//     struct_eu_C8950_blk *new;
+//
+//     pad = 8 - (((s32)arg0 + arg0->unk4) & 7);
+//     pos = arg0->unk4 + pad;
+//     arg0->unk4 = pos + arg0->unk6;
+//     arg0->unkA = pos;
+//     arg0->unk4 = arg0->unk4 - (((s32)arg0 + arg0->unk4) & 7) + 8;
+//     new = allocate_memory(arg0->unk4, 0xFF, 2, 0);
+//     if (new == NULL) {
+//         while (1) {
+//         }
+//     }
+//     bcopy(arg0, new, arg0->unk4);
+//     bzero((u8 *)new + new->unkA, new->unk6);
+//     func_10004074(arg0);
+//     return new;
+// }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BA04.s")
 

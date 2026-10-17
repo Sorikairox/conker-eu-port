@@ -2,11 +2,88 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "controller.h"
+
+// debugger copies of __osContPifRam and __osMaxControllers
+extern OSPifRam D_80042DA0;
+extern u8 D_80042DE0; // __osContLastCmd
+extern u8 D_80042DE1;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_16001700.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_16001830.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_160018BC.s")
+void func_160018BC(void);
+s32 func_160019A8(s32 direction, void *dramAddr);
+
+// reads the controllers (osContStartReadData + wait)
+s32 func_16001700(void) {
+    s32 ret;
+    s32 i;
+    u32 end;
+
+    if (D_80042DE0 != CONT_CMD_READ_BUTTON) {
+        func_160018BC();
+        func_160019A8(OS_WRITE, &D_80042DA0);
+        i = 0;
+        end = osGetCount() + 200000;
+        while (osGetCount() < end) {
+            i = func_160016F4(i);
+        }
+        func_160016F4(i);
+    }
+    for (i = 0; i < 16; i++) {
+        D_80042DA0.ramarray[i] = CONT_CMD_NOP;
+    }
+    D_80042DA0.pifstatus = 0;
+    ret = func_160019A8(OS_READ, &D_80042DA0);
+    D_80042DE0 = CONT_CMD_READ_BUTTON;
+    i = 0;
+    end = osGetCount() + 800000;
+    while (osGetCount() < end) {
+        i = func_160016F4(i);
+    }
+    func_160016F4(i);
+    return ret;
+}
+// osContGetReadData
+void func_16001830(OSContPad *data) {
+    u8 *ptr;
+    __OSContReadFormat readformat;
+    s32 i;
+
+    ptr = (u8 *)D_80042DA0.ramarray;
+    for (i = 0; i < D_80042DE1; i++, ptr += sizeof(__OSContReadFormat), data++) {
+        readformat = *(__OSContReadFormat *)ptr;
+        data->errno = CHNL_ERR(readformat);
+        if (data->errno == 0) {
+            data->button = readformat.button;
+            data->stick_x = readformat.stick_x;
+            data->stick_y = readformat.stick_y;
+        }
+    }
+}
+// __osPackReadData
+void func_160018BC(void) {
+    u8 *ptr;
+    __OSContReadFormat readformat;
+    s32 i;
+
+    ptr = (u8 *)D_80042DA0.ramarray;
+    for (i = 0; i < 16; i++) {
+        D_80042DA0.ramarray[i] = 0;
+    }
+    D_80042DA0.pifstatus = CONT_CMD_EXE;
+    readformat.dummy = CONT_CMD_NOP;
+    readformat.txsize = CONT_CMD_READ_BUTTON_TX;
+    readformat.rxsize = CONT_CMD_READ_BUTTON_RX;
+    readformat.cmd = CONT_CMD_READ_BUTTON;
+    readformat.button = 0xFFFF;
+    readformat.stick_x = -1;
+    readformat.stick_y = -1;
+    for (i = 0; i < D_80042DE1; i++) {
+        *(__OSContReadFormat *)ptr = readformat;
+        ptr += sizeof(__OSContReadFormat);
+    }
+    *ptr = CONT_CMD_END;
+}
 
 // another __osSiDeviceBusy function
 s32 func_16001984()

@@ -209,7 +209,35 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 // 3 loops
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15002008.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15002248.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15002560.s")
+void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1) {
+    struct_eu_qnode *s1;
+    struct_eu_qnode *s0;
+    s32 off;
+
+    for (;;) {
+        if (arg0 == NULL) {
+            return;
+        }
+        if (arg0->unk4 == 0) {
+            if (arg1 != NULL) {
+                off = (u8 *)arg1 - (u8 *)arg0;
+            } else {
+                off = 0;
+            }
+            arg0->unk4 = off;
+        }
+        if (arg0->unkC == 0) {
+            return;
+        }
+        s1 = (struct_eu_qnode *)((u8 *)arg0 + arg0->unkC);
+        while (s1->unk4 != 0) {
+            s0 = (struct_eu_qnode *)((u8 *)s1 + s1->unk4);
+            func_15002560(s1, s0);
+            s1 = s0;
+        }
+        arg0 = s1;
+    }
+}
 
 void func_150025FC(void) {
     s32 tmp0;
@@ -246,10 +274,41 @@ void func_15002724(s32 arg0) {
     D_800DBE38 += func_150027F8(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15002754.s")
+void func_15002754(void) {
+    D_800B0DC0 = (D_800B0DC0 + 3) & ~3;
+    D_800DC208[D_800DC280] = D_800B0DC0;
+    D_800B0DC0 += D_800DBE38 * 12;
+    D_800DC218[D_800DC280] = D_800B0DC0;
+    D_800B0DC0 += D_800DBE38 * 8;
+    D_800DC228[D_800DC280] = D_800B0DC0;
+    D_800B0DC0 += D_800DBE38 * 4;
+    func_1510F800(D_800DC280);
+    D_800DBE38 = 0;
+}
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_150027F8.s")
+s32 func_150027F8(Gfx *arg0) {
+    s32 i;
+    s32 count;
+    s32 cmd;
+
+    if (arg0 == NULL) {
+        return 0;
+    }
+    i = 0;
+    count = 0;
+    while ((cmd = ((s8 *)&arg0[i])[0]) != -0x21) {
+        i++;
+        if ((cmd >> 4) == 1) {
+            count += 4;
+        } else if (cmd == 6) {
+            count += 2;
+        } else if (cmd == 5) {
+            count += 1;
+        }
+    }
+    return count;
+}
 
 s32 func_15002878(void) {
     s32 i;

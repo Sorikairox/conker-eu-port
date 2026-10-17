@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include "libc/math.h"
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A220.s")
@@ -47,7 +48,20 @@
 //     func_1510B070(arg1);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A39C.s")
+void func_1501A39C(void) {
+    s32 i;
+    Gfx *gfx;
+
+    for (i = 0; i < 2; i++) {
+        gfx = D_800BEDE8[i];
+        gSPSegment(gfx++, 0, 0);
+        gSPSegment(gfx++, 0, 0);
+        gSPDisplayList(gfx++, D_8002CC90);
+        gDPSetDepthImage(gfx++, D_800BEDE4);
+        gSPViewport(gfx++, &((struct_eu_BE628 *)D_800BE628)->unk40[i]);
+        D_800BE9D8[i] = (s32)gfx;
+    }
+}
 // NON-MATCHING: something along these lines
 // extern Gfx* D_800BE9C8;
 // extern s32 D_8002C930;
@@ -112,9 +126,48 @@ void func_150A7A00(f32 arg0, f32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A8C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501AE94.s")
+s32 func_1501AE94(s32 arg0) {
+    f32 w = (f32)D_800BE620 - 2.0f;
+    f32 h = D_800BE624;
+    struct_eu_BE628 *e = &((struct_eu_BE628 *)D_800BE628)[arg0];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501AF44.s")
+    if (e->unk2C < 2.0f || w < e->unk30) {
+        return 0;
+    }
+    if (e->unk24 < 0.0f || h < e->unk28) {
+        return 0;
+    }
+    return 1;
+}
+
+void func_1501AF44(f32 *x0, f32 *y0, f32 *x1, f32 *y1) {
+    f32 tmp;
+
+    if (*x0 < 2.0f) {
+        *x0 = 2.0f;
+    } else {
+        tmp = ((f32)D_800BE620 - 2.0f < *x0) ? (f32)D_800BE620 - 2.0f : *x0;
+        *x0 = tmp;
+    }
+    if (*x1 < 2.0f) {
+        *x1 = 2.0f;
+    } else {
+        tmp = ((f32)D_800BE620 - 2.0f < *x1) ? (f32)D_800BE620 - 2.0f : *x1;
+        *x1 = tmp;
+    }
+    if (*y0 < 0.0f) {
+        *y0 = 0.0f;
+    } else {
+        tmp = ((f32)D_800BE624 < *y0) ? (f32)D_800BE624 : *y0;
+        *y0 = tmp;
+    }
+    if (*y1 < 0.0f) {
+        *y1 = 0.0f;
+    } else {
+        tmp = ((f32)D_800BE624 < *y1) ? (f32)D_800BE624 : *y1;
+        *y1 = tmp;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B0A0.s")
 
