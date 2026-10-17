@@ -5,6 +5,20 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_26870/__sinf.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_26870/__osSpRawReadIo.s")
+s32 __osSiDeviceBusy(void);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_26870/__osSpRawWriteIo.s")
+s32 __osSpRawReadIo(u32 devAddr, u32 *data) {
+    if (__osSiDeviceBusy()) {
+        return -1;
+    }
+    *data = IO_READ(devAddr);
+    return 0;
+}
+
+s32 __osSpRawWriteIo(u32 devAddr, u32 data) {
+    if (__osSiDeviceBusy()) {
+        return -1;
+    }
+    IO_WRITE(devAddr, data);
+    return 0;
+}
