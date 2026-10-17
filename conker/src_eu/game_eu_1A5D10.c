@@ -23,7 +23,16 @@ u8 *func_15179108(u8 arg0) {
     return NULL;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15179154.s")
+void func_15179154(u8 arg0, s32 arg1, s16 arg2) {
+    u8 *temp_v0;
+
+    temp_v0 = func_15179108(arg0);
+    if (temp_v0 != NULL) {
+        (*(s32 *)((u8 *)temp_v0 + 0x10)) = arg1;
+        (*(s32 *)((u8 *)temp_v0 + 0x14)) = 0x80000000;
+        (*(s16 *)((u8 *)temp_v0 + 0x30)) = arg2;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_151791A4.s")
 

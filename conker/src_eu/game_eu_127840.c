@@ -9,7 +9,28 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA738.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA9E8.s")
+void func_150FA9E8(u8 *arg0, s32 arg1, u8 arg2) {
+    s32 temp_t6;
+
+    temp_t6 = arg2;
+    if (temp_t6 == 0x4C) {
+        (*(s8 *)((u8 *)arg0 + 0x11)) = -1;
+        func_1515D4D4(0U, 0U, 0U, 0xFF);
+        return;
+    }
+    if (temp_t6 == 0x4D) {
+        (*(s8 *)((u8 *)arg0 + 0x11)) = 0x1E;
+        return;
+    }
+    if (temp_t6 == 0x4E) {
+        (*(s8 *)((u8 *)arg0 + 0x11)) = -1;
+        return;
+    }
+    if (temp_t6 == 0x4F) {
+        (*(s8 *)((u8 *)arg0 + 0x11)) = -1;
+        func_1515D4D4(0xFFU, 0xFFU, 0xFFU, 0xFF);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA520.s")
 
