@@ -5,7 +5,31 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15108850.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15109034.s")
+s32 func_15109100(u8 *);
+s32 func_15109140(u8 *);
+
+s32 func_15109034(u8 *arg0) {
+    u8 *temp_s0;
+    u8 *temp_s0_2;
+    u8 *new_var;
+
+    // permuter: the offset is read through a pointer local and added with +=
+    temp_s0_2 = arg0 + 0x50;
+    temp_s0 = arg0;
+    temp_s0 += *(s32 *)temp_s0_2;
+    temp_s0_2 = temp_s0 + 0xF8;
+    *(f32 *)(temp_s0_2 + 8) = *(f32 *)(temp_s0 + 0x100) + (0.0857f * D_800BE9A4);
+    *(f32 *)(temp_s0_2 + 0xC) = *(f32 *)(temp_s0_2 + 0xC) + (0.0783f * D_800BE9A4);
+    temp_s0 = temp_s0_2;
+    *(f32 *)(temp_s0 + 8) = func_15144B68(*(f32 *)(temp_s0 + 8));
+    *(f32 *)(temp_s0 + 0xC) = func_15144B68(*(f32 *)(temp_s0 + 0xC));
+    *(f32 *)(temp_s0 + 0) = sinf(*(f32 *)(temp_s0 + 8)) * 7.1050005f;
+    new_var = temp_s0;
+    *(f32 *)(temp_s0 + 4) = sinf(*(f32 *)(new_var + 0xC)) * 7.1050005f;
+    func_15109100(arg0);
+    func_15109140(arg0);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15109100.s")
 

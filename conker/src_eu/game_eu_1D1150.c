@@ -54,11 +54,52 @@ void func_151A4F4C(u8 *arg0, u8 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A5338.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A53E4.s")
+s32 func_151A53E4(u8 *arg0, u8 *arg1) {
+    s32 temp_v1;
+    u32 idx;
+    u8 *temp_v0;
+
+    temp_v0 = *(u8 **)arg0;
+    temp_v1 = *(s32 *)(temp_v0 + 0x1D4);
+    if (temp_v1 == 0) {
+        return 0;
+    }
+    if ((temp_v0[0x74] & 0xF) == 0xF) {
+        return 0;
+    }
+    idx = arg0[5]; // permuter: unsigned local for the index
+    func_15143134(arg0 + 8, arg1, temp_v1 + ((idx << 2) << 4));
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A544C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A547C.s")
+s32 func_151A3AB4(u8 *, u8, u8 *);
+
+void func_151A547C(u8 *arg0) {
+    u8 *temp_v0;
+    u8 sp1B;
+    u8 *temp_a0;
+
+    sp1B = 0;
+    temp_a0 = arg0 + 0x28;
+    if (**(s32 **)(arg0 + 0x28) == 0) {
+        sp1B = 1;
+    }
+    temp_v0 = *(u8 **)temp_a0;
+    if (temp_a0[4] != temp_v0[0x3B]) {
+        sp1B = 1;
+    }
+    if ((sp1B == 0) && (*(s32 *)(temp_v0 + 0x1D4) != 0) && ((temp_v0[0x74] & 0xF) != 0xF)) {
+        sp1B = 1; // permuter: the flag is stored before and after the call
+        func_151A3AB4(temp_a0, arg0[0xC], arg0);
+        sp1B = 1;
+    }
+    if (sp1B) {
+        *(s16 *)(arg0 + 0xE) = -1;
+        arg0[0xD] |= 1;
+    }
+}
 
 void func_151A552C(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_v0 = (u8 *)arg0 + 0x28;

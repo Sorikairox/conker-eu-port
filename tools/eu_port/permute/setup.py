@@ -144,7 +144,7 @@ def extract(func, path, draft=None):
             return {m.group(2): re.sub(r'^extern', '', re.sub(r'\s+', '', m.group(1))) for m in DECL.finditer(t)}
         b = decls(open(bp).read()); n = decls(s[:r[0]] + s[r[1]:])
         for k in sorted(n):
-            if k in b and n[k] != b[k]:
+            if k in b and n[k] != b[k] and not b[k].startswith(k) and not n[k].startswith(k):
                 note += '// PERMUTER CHANGED DECL: %s (base: %s)\n' % (n[k], b[k])
     print(note + pre + s[r[0]:r[1]])
 
