@@ -98,4 +98,11 @@ void func_151B35C4(void *arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B35F0.s")
+void func_151B35F0(s32 arg0, s32 arg1, u8 arg2) {
+    s32 pad;
+    s32 temp_a2;
+
+    temp_a2 = arg0 + 0x150;
+    func_15169850(arg1, arg2, temp_a2, arg0 + 0x154, arg0);
+    func_15169850(arg1, arg2, temp_a2 + 0x14, temp_a2 + 0x18, arg0);
+}
