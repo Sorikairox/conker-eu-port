@@ -61,7 +61,32 @@ void func_151CC11C(struct102 *arg0, u8 **arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CC190.s")
+f32 func_151CC784(u8 *arg0);
+void func_1514373C(f32 arg0, f32 arg1, u8 *arg2, u8 *arg3);
+
+typedef struct {
+    u8 pad0[0x18];
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+} Sub151CC190;
+
+s32 func_151CC190(u8 *arg0) {
+    f32 temp;
+    f32 prod;
+    Sub151CC190 *v;
+
+    v = (Sub151CC190 *)(arg0 + 0x70);
+    temp = func_151CC784(arg0);
+    if (temp != v->unk28) {
+        v->unk28 = temp;
+        prod = (temp - v->unk18) * v->unk20 * 6.283186f;
+        func_1514373C(v->unk24 + prod, 55.0f, arg0 + 0x10, arg0 + 0x14);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CC210.s")
 

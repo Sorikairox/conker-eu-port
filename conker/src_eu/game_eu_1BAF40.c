@@ -38,12 +38,6 @@ typedef struct {
 } struct_eu_1BAAA0_e;
 
 typedef struct {
-    u8 unk0[4];
-} struct_eu_bytes4b;
-
-extern struct_eu_bytes4b D_800A78B4;
-
-typedef struct {
     /* 0x00 */ u8 pad0[0x84];
     /* 0x84 */ s32 unk84;
 } struct_eu_1BAAA0_b;
@@ -210,7 +204,12 @@ s32 func_1518F6CC(struct_eu_1BAAA0_e *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F8F4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F9CC.s")
+// rodata_inject: size 0x24CB34 4
+void func_1518F9CC(s32 arg0, u8 arg1) {
+    const s32 sp1C[1] = {0x21};
+
+    func_15169260(sp1C, 1, arg0, arg1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FA0C.s")
 

@@ -43,7 +43,13 @@ s32 func_15141564(structEU_16DC80 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151416E8.s")
 
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151417C4.s")
+void func_151417C4(u8 arg0, u8 arg1) {
+    u8 sp24[4];
+    s32 sp1C[2] = {0x1C, 0x56};
+
+    sp24[0] = arg0;
+    func_15169260(sp1C, 2, (s32)sp24, arg1);
+}
 
 s32 func_15141818(s32 arg0, s32 arg1) {
     return 0;

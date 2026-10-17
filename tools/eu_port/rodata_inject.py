@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Give GLOBAL_ASM functions their .rodata back, for C files that own a .rodata section.
+"""Give GLOBAL_ASM functions their .rodata (and .data) back, for C files that own such a section.
+
+.data (session 10): an owned `[addr, .data, stem]` range is planned like the strings/const part of
+.rodata (one region, no late items): items of C functions (local array initialisers, C-defined
+variables) are the compiler's; everything else goes, as raw words in `.section .data`, into a
+GLOBAL_ASM function between its C neighbours. Data symbols the C code names get a glabel.
+A float/double literal item ends after 4/8 bytes; for other compiler-owned items whose end is not
+the next reference, put `// rodata_inject: size <rom addr> <bytes>` in the C file.
 
 Runs after splat (hooked into `make VERSION=eu extract`). For every `[addr, .rodata, stem]`
 subsegment of a *_data segment in conker.eu.yaml whose src_eu/<stem>.c still has GLOBAL_ASM
@@ -55,8 +62,9 @@ def asm_range(path):
     return lo, hi
 
 
-def owned_files():
-    """[(code seg, stem, rom a, rom b, data seg dict)] for .rodata subsegments of *_data segments."""
+def owned_files(sections=('.rodata',)):
+    """[(code seg, stem, rom a, rom b, data seg dict)] for .rodata (or `sections`) subsegments of
+    *_data segments; with several sections the tuple gets the section as a 6th element."""
     segs = DR.segments()
     out = []
     for name, s in segs.items():
@@ -64,9 +72,9 @@ def owned_files():
             continue
         subs = s['subs']
         for i, (rom, t, stem) in enumerate(subs):
-            if t == '.rodata' and stem:
+            if t in sections and stem:
                 end = subs[i + 1][0] if i + 1 < len(subs) else s['end']
-                out.append((name[:-5], stem, rom, end, s))
+                out.append((name[:-5], stem, rom, end, s) + ((t,) if len(sections) > 1 else ()))
     return out
 
 
@@ -74,9 +82,12 @@ class Fail(Exception):
     pass
 
 
-def plan(seg, stem, a, b, dseg, allrefs, data, names):
+def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
     """List of chunks (start, end, region, owner) for one owned file; owner = func name,
-    'C' (compiler) or raises Fail."""
+    'C' (compiler) or raises Fail. sec='.data': one region 'data' (no late items); data items the
+    C code names (externs) also get labels (returned in plan.labels)."""
+    base = 'data' if sec == '.data' else 'rodata'
+    late_kinds = set() if sec == '.data' else LATE_KINDS
     cpath = os.path.join(ROOT, 'src_eu', stem + '.c')
     src = open(cpath).read()
     pragmas = re.findall(r'#pragma GLOBAL_ASM\("([^"]+)"\)', src)
@@ -125,6 +136,8 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names):
             it['other'] = True
     for t in named:
         items.setdefault(t, {'owner': None, 'kinds': set(), 'other': False})
+    plan.labels = {names[i] - dv: i for i in set(re.findall(r'\b[A-Za-z_]\w*\b', csrc))
+                   if i in names and va <= names[i] < vb} if sec == '.data' else {}
     if not items:
         raise Fail('%s: no references into 0x%X-0x%X' % (stem, a, b))
     addrs = sorted(items)
@@ -152,15 +165,32 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names):
     tail = data[e - dv:b]
     if any(tail):
         raise Fail('%s: nonzero bytes after the last item (0x%X-0x%X)' % (stem, e - dv, b))
+    # a literal item ends after its own size; words between it and the next item are unreferenced
+    # (they become their own owner-less items, resolved onto a GLOBAL_ASM neighbour below)
+    for i, t in enumerate(list(addrs)):
+        ks = items[t]['kinds']
+        if ks and ks <= {'lwc1', 'ldc1'} and base == 'rodata':
+            size = 8 if 'ldc1' in ks else 4
+            nxt = addrs[i + 1] if i + 1 < len(addrs) else e
+            if t + size < nxt:
+                items[t + size] = {'owner': None, 'kinds': set(), 'other': False}
+    # explicit item sizes from the C source, for compiler-owned data whose end cannot be told from
+    # the references (e.g. a const local array followed by an unreferenced table):
+    #   // rodata_inject: size <rom addr> <bytes>
+    for ra, sz in re.findall(r'rodata_inject: size (0x[0-9A-Fa-f]+) (0x[0-9A-Fa-f]+|\d+)', src):
+        t = int(ra, 16) + dv + int(sz, 0)
+        if va <= t < e and t not in items:
+            items[t] = {'owner': None, 'kinds': set(), 'other': False}
+    addrs = sorted(items)
     bounds = addrs + [e]
     if addrs[0] > va:
         bounds[0] = va  # leading unreferenced bytes go with the first item
-    lates = [t for t in addrs if items[t]['kinds'] & LATE_KINDS]
+    lates = [t for t in addrs if items[t]['kinds'] & late_kinds]
     L = lates[0] if lates else e
     chunks = []
     for i, t in enumerate(addrs):
         it = items[t]
-        reg = 'late' if t >= L else 'rodata'
+        reg = 'late' if t >= L else base
         o = it['owner']
         if o is not None and o[1] == 'C':
             name = 'CX' if t in named else 'C'
@@ -177,7 +207,7 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names):
     # strings/const data: only the compiler's own items (strings of C functions) are fixed; every
     # other run between two of them goes, in address order, into one GLOBAL_ASM function placed
     # between those C functions (file-scope const tables need not follow function order)
-    reg_chunks = [c for c in chunks if c[2] == 'rodata']
+    reg_chunks = [c for c in chunks if c[2] == base]
     late_chunks = [c for c in chunks if c[2] == 'late']
     newreg = []
     run = []
@@ -187,11 +217,11 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names):
             return
         cands = [(lo, n) for lo, hi, n, _ in funcs if klo < lo < khi]
         if not cands:
-            raise Fail('%s: .rodata 0x%X-0x%X has no GLOBAL_ASM function between its C '
+            raise Fail('%s: ' + sec + ' 0x%X-0x%X has no GLOBAL_ASM function between its C '
                        'neighbours; define it in C' % (stem, run[0][0] - dv, run[-1][1] - dv))
         pref = [x for x in cands if x[1] in {c[3] for c in run}]
         lo, n = (pref or cands)[0]
-        newreg.append([run[0][0], run[-1][1], 'rodata', n, lo])
+        newreg.append([run[0][0], run[-1][1], base, n, lo])
         del run[:]
     klo = -1
     for c in reg_chunks:
@@ -230,7 +260,7 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names):
             raise Fail('%s: 0x%X-0x%X (%s) is named by C code or unreferenced and has no '
                        'GLOBAL_ASM neighbour; define it in C' % (stem, c[0] - dv, c[1] - dv, c[2]))
     # order check: owners must follow file order within each region, one chunk per asm function
-    for reg in ('rodata', 'late'):
+    for reg in (base, 'late'):
         seen = set()
         prev = -1
         for c in chunks:
@@ -276,7 +306,7 @@ def emit(funcs, chunks, data, labels={}):
         cs = per[n]
         out = [MARK]
         for a, b, reg in cs:
-            out.append('.section .%s' % ('late_rodata' if reg == 'late' else 'rodata'))
+            out.append('.section .%s' % {'late': 'late_rodata'}.get(reg, reg))
             r = a
             while r < b:
                 if r in labels:
@@ -303,25 +333,31 @@ def main():
     names = sym_addrs()
     refcache = {}
     bad = 0
-    for seg, stem, a, b, dseg in owned_files():
+    todo = {}
+    for seg, stem, a, b, dseg, sec in owned_files(('.rodata', '.data')):
         if args and stem not in args:
             continue
         if seg not in refcache:
             refcache[seg] = DR.refs(seg)
         try:
-            funcs, chunks = plan(seg, stem, a, b, dseg, refcache[seg], data, names)
+            funcs, chunks = plan(seg, stem, a, b, dseg, refcache[seg], data, names, sec)
         except Fail as e:
             print('rodata_inject: FAIL', e)
             bad = 1
             continue
         if funcs is None:
             continue
+        dv = dseg['vram'] - dseg['start']
+        t = todo.setdefault(stem, [funcs, [], {}])
+        t[1] += chunks
+        t[2].update(symbols_at(funcs, names, dv))
+        t[2].update(plan.labels)
+    for stem, (funcs, chunks, labels) in todo.items():
         if dry:
             for c in chunks:
                 print('%-30s 0x%06X-0x%06X %-6s %s' % (stem, c[0], c[1], c[2], c[3]))
             continue
-        dv = dseg['vram'] - dseg['start']
-        per = emit(funcs, chunks, data, symbols_at(funcs, names, dv))
+        per = emit(funcs, chunks, data, labels)
         print('rodata_inject: %s: %d chunks, %d asm functions' % (stem, len(chunks), len(per)))
     sys.exit(bad)
 
