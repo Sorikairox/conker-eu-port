@@ -9,10 +9,16 @@ for fn in ['symbol_addrs.eu.txt', 'undefined_syms.eu.txt', 'undefined_syms_auto.
         m = re.match(r'\s*(\w+)\s*=\s*(0x[0-9A-Fa-f]+)', l)
         if m:
             defs.setdefault(m.group(1), int(m.group(2), 16))
-for l in open('build/conker.eu.map'):
-    m = re.match(r'\s+0x0*([0-9a-f]{8})\s+(\w+)\s*$', l)
-    if m:
-        defs.setdefault(m.group(2), int(m.group(1), 16))
+import os
+if os.path.exists('build/conker.eu.map'):
+    for l in open('build/conker.eu.map'):
+        m = re.match(r'\s+0x0*([0-9a-f]{8})\s+(\w+)\s*$', l)
+        if m:
+            defs.setdefault(m.group(2), int(m.group(1), 16))
+sys.path.insert(0, os.path.dirname(__file__))
+import eu_asm
+for n, (v, _) in eu_asm.functions().items():
+    defs.setdefault(n, v)
 imp = defaultdict(set)
 for l in open(sys.argv[1]):
     a, b = l.split()[:2]
