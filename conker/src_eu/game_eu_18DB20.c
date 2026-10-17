@@ -5,7 +5,16 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/func_15160310.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/func_151604E4.s")
+u8 *func_151604E4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    u8 *temp_v0;
+
+    temp_v0 = func_15167A68(0x34, arg3, arg1 + 0x18, 1, (u8) (s32) arg2, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    memcpy(temp_v0 + 0xE, arg0, 8);
+    return temp_v0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/func_1516055C.s")
 

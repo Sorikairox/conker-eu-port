@@ -37,7 +37,6 @@ void func_15080BF4(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080FE8.s")
 
-s32 func_15080FE8();
 extern u8 *D_800D1DBC;
 
 void func_15081064(void) {

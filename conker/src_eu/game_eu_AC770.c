@@ -49,7 +49,29 @@ void func_1507F380(s32 arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F834.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F8A0.s")
+s32 func_1507F8A0(s32 arg0) {
+    s32 pad;
+    s32 var_v1;
+    u32 var_a0;
+
+    if (arg0 == 0) {
+        var_v1 = 0x96;
+        var_a0 = 0x32;
+        goto block_7;
+    }
+    if (D_800BE9F0 == 0x31) {
+        return 0;
+    }
+    var_v1 = 0;
+    if (arg0 == 1) {
+        var_v1 = 0x32;
+        var_a0 = 0x32;
+    } else {
+        var_a0 = 0x1E;
+    }
+block_7:
+    return (func_150ADA20() % var_a0) + var_v1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F92C.s")
 

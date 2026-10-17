@@ -27,7 +27,15 @@ void func_150D5F5C(struct260 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D6B00.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D6BB4.s")
+s32 func_15182BE0(s32, s32, s32, s32, s32, s32, s32, s32); 
+
+void func_150D6BB4(u8 arg0, u8 arg1, s32 arg2) {
+    s32 pad;
+    u32 sp28;
+
+    sp28 = func_150ADA20();
+    func_15182BE0(0xFF, 0xFF, 0xFF, ((sp28 % 56U) + 0xC8) & 0xFF, (func_150ADA20() % 6U) + 0x19, (s32) arg0, (s32) arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D6C40.s")
 
