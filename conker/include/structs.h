@@ -2947,4 +2947,7 @@ typedef struct {
     u8  pad18[0xC];
 } struct260; // size at least 0x24
 
+/* EU: new decompilation */
+/* EU: end new */
+
 #endif

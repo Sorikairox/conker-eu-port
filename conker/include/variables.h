@@ -1420,6 +1420,7 @@ extern u8   D_160047E0[];
 
 extern void (*D_8008CDC0[])(void);
 extern u8   D_800D31CB;
+/* EU: end new */
 
 /* other */
 

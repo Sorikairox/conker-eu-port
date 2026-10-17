@@ -1131,4 +1131,5 @@ void func_1019EA88(void);
 /* EU: new decompilation */
 void func_15168B10(s32 arg0, s32 arg1);
 void func_15169070(s32 arg0, s32 arg1, s32 arg2, u8 arg3);
+/* EU: end new */
 #endif
