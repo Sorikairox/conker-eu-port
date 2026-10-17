@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-17. Update this file at the end of every work session.
+Last updated: 2026-10-17 (second session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,11 +17,16 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **1094 / 5902 functions in C (18.5%)**; code bytes 4.8%.
-  - init: 217/541 functions
-  - game: 864/5318
-  - debugger: 13/43
-- 252 of the 266 US C files are ported to `conker/src_eu/`.
+- **1363 / 5910 functions in C (23.1%)**; code bytes 5.9% (133452 / 2253856).
+  - init: 234/543 functions
+  - game: 1109/5324
+  - debugger: 20/43
+  - (previous session: 1094/5902, 18.5%. The total grew by 8 because merged
+    `jr ra; nop` stubs were split out into their own symbols.)
+- All 266 US C files are ported to `conker/src_eu/`, plus two EU-only files that
+  come from EU file boundaries: `game_30E60.c` (tail of `game_305D0`) and
+  `game_8FCB0.c` (tail of `game_83300`).
+- No `#if 0 // US version; EU code differs` blocks are left.
 
 Commits on `eu`:
 
@@ -32,6 +37,16 @@ Commits on `eu`:
 | `c2cf2b3` | Anchor-based placement; baseline inputs pinned |
 | `8eb7484` | Looser anchor outlier filter (245 files) |
 | `e448d65` | `.rodata` of ported C files placed in data blobs (252 files) |
+| `b5aeddd` | This hand-off document |
+| `d6c0494` | 37 "differing" functions were only missing EU symbols; restored as C |
+| `d59c123` | 8 more: PAL constants, debugger text width, s16 store, padding stubs |
+| `b57f948` | Last 4 differing functions; new EU file `game_30E60.c` |
+| `af90530` | Hand-port of 11 of the 14 unported files (+ `game_8FCB0.c`) |
+| `2142e35` | The 3 asm-only unported files get their own subsegments |
+
+**From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
+Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
+throw all of that away.**
 
 ## Build environment
 
@@ -57,6 +72,25 @@ Expected output:
 - `build/conker.eu.z64: OK` (whole ROM)
 
 Progress: `make -C conker VERSION=eu progress` writes `conker/progress.csv`.
+
+Faster iteration: keep one container running and `docker exec` into it.
+
+```sh
+docker run -d --name conkerdev --platform linux/amd64 -v ~/conker:/conker -w /conker conker sleep infinity
+docker exec conkerdev make -C conker VERSION=eu -j8          # code build + verify
+docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION=eu -j8'  # full ROM
+```
+
+After a yaml or `symbol_addrs.eu.txt` change, re-split (the root `make VERSION=eu
+extract` only needs to run once per checkout):
+
+```sh
+rm -rf conker/asm conker/build; find conker -maxdepth 1 -name '*_auto.txt' -delete
+docker exec conkerdev make -C conker VERSION=eu extract
+```
+
+(In zsh, `rm conker/*_auto.txt` fails when no file matches and aborts an `&&` chain;
+use `find -delete`.)
 
 Notes:
 - The image sets `SPIMDISASM_ASM_NM_LABEL=""`. asm-processor rejects the `nonmatching`
@@ -86,7 +120,25 @@ Notes:
     before/after anchors. Writes `src_eu/`, the yaml subsegments, symbols and the
     `.rodata` splits. Report: `build_port/port_report.json`.
   - `eu_asm.py`: reads function starts, sizes and labels from splat's asm.
-  - `bindiff.py`: lists the words that differ between the built and original binary.
+  - `bindiff.py`: lists the words that differ between the built and original binary
+    (run from `conker/`).
+- Hand-porting helpers (run from `conker/`, the first two inside the container):
+  - `check_funcs.py src_eu/X.c [func ...] [-v] [-s]`: builds the object through make
+    and compares each function with `asm/nonmatchings/X/<func>.s`, relocations masked.
+    `-v` prints a word-by-word diff, `-s` prints the address each referenced symbol
+    must have in EU (`SYM name = 0x...`). Reference `.s` files only exist for
+    functions that were GLOBAL_ASM at split time.
+  - `implied_syms.sh file:func ...`: `-s` for several functions.
+  - `cmp_syms.py <name addr list>`: compares implied addresses with the symbol files,
+    the map and the asm labels; prints `undef` and `MISMATCH` lines.
+  - `add_syms.py <cmp output>`: appends the `undef` ones to `undefined_syms.eu.txt`.
+  - `toggle_us.py on|list file.c [func]`: swaps an `#if 0 // US version` block back in.
+  - `survey.py <us stem>`: a US file's functions with their match.json status.
+  - `port_one.py <stem> <eu rom start> <eu rom end> [US=0xEU ...] [--auto-anchors]
+    [--src= --first= --last=] [--apply]`: places one US file in EU by piecewise
+    shift, reports merged stubs and extra EU functions, and with `--apply` adds the
+    symbols, edits the yaml and deletes `src_eu/<stem>.c` so that the next split writes
+    a GLOBAL_ASM stub plus every function's `.s`. Then copy the US C in and check it.
 
 **Important:** `run.sh` deletes and regenerates `src_eu/`, the EU yaml and the symbol
 files. Once anyone hand-edits `src_eu/`, stop using `run.sh` as-is, or teach it to
@@ -107,24 +159,36 @@ porting to manual work.
 
 ## Remaining work (in order)
 
-1. **49 C functions that differ in EU** fell back to asm. Find them with
-   `grep -rn "EU code differs" conker/src_eu`. Adapt the US C until it matches the EU
-   asm next to it; build and diff with asm-differ (`tools/asm-differ`).
-2. **14 US files not ported**. Reasons are in `build_port/port_report.json`.
-   - `init_1050`, `init_39C0`, `init_214F0`
-   - `init_50A0`: has `.bss`
-   - `libultra/audio/n_cspgetstate`, `libultra/audio/game_21FC90`
-   - `libultra/io/ai`, `libultra/io/aigetstat`, `libultra/io/aisetfreq`.
-     Possibly EU uses a different libultra revision.
-   - `game_83300`, `game_A28B0`, `game_A9D90`, `game_D4C20`, `game_221290`
-
-   Port each by hand: copy from `conker/src`, add a `c` subsegment at the EU rom offset,
-   and add symbols.
-3. **Unmatched and ambiguous US functions**: 146 have no exact EU match and 30 are
-   still ambiguous (see `match.json`). Many fall within items 1 and 2.
-4. **New decompilation** of the ~4,800 functions no one has done. Use m2c
+1. ~~49 C functions that differ in EU~~: done. Findings:
+   - 37 only lacked EU symbol definitions (the port marked them as differing because
+     relocation targets were unresolved).
+   - PAL changes: 300 -> 250, 2400 -> 2000, `/ 60` -> `/ 50`; debugger text width
+     163 -> 19; `func_1509BE40(1, 0x4080, ...)`; `D_800BE5E0` is stored as s16 in EU
+     (cast in `game_45B80.c`, the shared header still says u8).
+   - Tables in `game_305D0.c` hold 7764 entries in EU (7762 in US).
+   - `func_10005020` (`init_49E0.c`) blanks the VI once before the first swap
+     (EU-only `D_eu_8002AFA8`, `D_eu_8002AE24`).
+2. ~~14 US files not ported~~: done.
+   - Shift-only: `game_A9D90`, `game_A28B0`, `libultra/audio/game_21FC90`,
+     `libultra/io/ai`, `aigetstat`, `aisetfreq`.
+   - `game_83300`: EU has a file boundary (16-byte padding) after `func_150627D4`, so
+     `func_15062800`... live in `game_8FCB0.c` (named after its US rom offset).
+   - `libultra/audio/n_cspgetstate`: EU builds it `-O2` (see the EU-only rule in
+     `conker/Makefile`) and adds two empty functions, `ptstart` and `func_eu_10017D80`.
+   - `init_1050`: `osInitialize()` is `__osInitialize_common()`, no `D_8002AC5C` check.
+   - `init_39C0`: no VI mode setup; EU-only `func_10003C10` (0x210 bytes, PAL VI
+     timing) is still asm.
+   - `init_50A0`: no third message queue / `osViSetEvent`. Its `.bss` variable
+     `D_8003B260` stays a tentative definition in the C file (needed for codegen) and
+     gets its EU address from `undefined_syms.eu.txt`.
+   - `init_214F0`, `game_D4C20`, `game_221290`: all GLOBAL_ASM; only placed.
+3. **Unmatched and ambiguous US functions** in `match.json`. Most of the old list is
+   now handled; recheck against the current split before relying on it.
+4. **New decompilation** of the ~4,500 asm functions. Use m2c
    (`tools/mips_to_c`), asm-differ, decomp-permuter, and decomp.me (IDO 5.3,
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
+   `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
+   `func_10003C10` (`init_39C0.c`).
 5. Later: split EU data properly (data/rodata/bss instead of blobs), document asset
    formats, then the PC port.
 
@@ -143,3 +207,21 @@ porting to manual work.
   accepts MIPS32r2 ELFs; this ROM is MIPS-II/VR4300.
 - Do not push or commit to upstream. Commit locally on `eu` with the attribution
   trailer.
+- `check_funcs.py` reports trailing `nop`s in the EU asm as a DIFF. At the end of a
+  file that is just 16-byte padding and links fine. Anywhere else it means EU has a
+  file boundary there: split the C file and add a subsegment (`game_30E60`,
+  `game_8FCB0`).
+- Adding a US name in `symbol_addrs.eu.txt` at an address that already has a
+  `func_eu_`/`D_eu_` name makes splat stop with "Duplicate symbol"; drop the `_eu_`
+  line if nothing references it.
+- splat writes auto names such as `D_8003B9D0 = 0x8003B9D0` into
+  `undefined_syms_auto.txt`, which the linker reads after `undefined_syms.eu.txt`, so
+  it wins over a US name with the same spelling. Give the EU address an explicit
+  `D_eu_` name in both `symbol_addrs.eu.txt` and `undefined_syms.eu.txt`, then re-split.
+- An `extern u64` global is stored with two `lui`s; a tentative definition in the same
+  file gets one. Keep the definition; `.bss`/COMMON is discarded by the linker script
+  and the address comes from `undefined_syms.eu.txt`.
+- `-O2 -g3` does not fill the `jr ra` delay slot of a one-line leaf; `-O2` does
+  (`n_cspgetstate`).
+- `tools/n64splat` shows as modified in `git status` (submodule content); that was
+  already the case before this work and is not part of any commit.
