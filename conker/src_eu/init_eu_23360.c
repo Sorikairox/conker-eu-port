@@ -1,0 +1,36 @@
+#include <ultra64.h>
+#include "functions.h"
+#include "variables.h"
+
+// libc string.c
+void *memcpy(void *s1, const void *s2, size_t n) {
+    unsigned char *su1 = (unsigned char *)s1;
+    const unsigned char *su2 = (const unsigned char *)s2;
+
+    while (n > 0) {
+        *su1++ = *su2++;
+        n--;
+    }
+    return (void *)s1;
+}
+
+size_t strlen(const unsigned char *s) {
+    const unsigned char *sc = s;
+
+    while (*sc != '\0') {
+        sc++;
+    }
+    return (size_t)(sc - s);
+}
+
+const char *strchr(const unsigned char *s, int c) {
+    const unsigned char ch = c;
+
+    while (*s != ch) {
+        if (*s == '\0') {
+            return NULL;
+        }
+        s++;
+    }
+    return (const char *)s;
+}

@@ -123,6 +123,7 @@ segments:
       - [0x231B0, c, init_eu_231B0]
       - [0x23260, c, init_eu_23260]
       - [0x232A0, c, init_eu_232A0]
+      - [0x23360, c, init_eu_23360]
       - [0x23400, c, init_eu_23400]
       - [0x23590, c, init_eu_23590]
       - [0x23830, c, libultra/io/ai]
