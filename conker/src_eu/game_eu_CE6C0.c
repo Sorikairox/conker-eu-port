@@ -1,0 +1,60 @@
+#include <ultra64.h>
+#include "functions.h"
+#include "variables.h"
+
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A09D0.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A11F4.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A126C.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A1520.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A152C.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2280.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A28C4.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A29A0.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2AB4.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2C6C.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2D44.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2E20.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A29C8.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2FCC.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3184.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3264.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A332C.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A33C4.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3484.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3538.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3674.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3794.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3810.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3878.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3924.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3990.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A39E4.s")
