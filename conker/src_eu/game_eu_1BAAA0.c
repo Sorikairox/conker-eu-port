@@ -75,7 +75,21 @@ s32 func_1518E808(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518E878.s")
+void func_1518E878(u8 *arg0) {
+    s32 i;
+    struct102 **var_s0;
+
+    var_s0 = (struct102 **)(arg0 + 0x48);
+    *(s32 *)(arg0 + 0x28) = 0;
+    *(f32 *)(arg0 + 0x24) = 0.0f;
+    for (i = 0; i < 100; i++) {
+        if (*var_s0 != NULL) {
+            func_1516972C(*var_s0);
+        }
+        var_s0 = (struct102 **)((u8 *)var_s0 + 0x18);
+    }
+    bzero(arg0 + 0x48, 0x960);
+}
 
 void func_1518E8EC(u8 *arg0, u8 arg1) {
     if (arg1 != arg0[0x22]) {

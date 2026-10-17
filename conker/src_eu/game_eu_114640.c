@@ -87,7 +87,18 @@ s32 func_150E8DA4(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E8854.s")
+s32 memcpy(s32, f32 *, s32);
+
+void func_150E8854(void) {
+    struct260 *temp_v0;
+    f32 sp30;
+
+    sp30 = 10.0f;
+    temp_v0 = func_15149130(0x12C, -1, 0x35, -1, 0U, 0U, (struct37 *)4, 0xFFU, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &sp30, 4);
+    }
+}
 
 s32 func_150E8EB0(u8 *);
 extern f32 D_800A1748;
