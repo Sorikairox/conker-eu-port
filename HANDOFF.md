@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (seventh session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (eighth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,14 +17,15 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2682 / 5911 functions in C (45.4%)**; code bytes 268,452 / 2,253,856 (11.9%)
-  (end of session 7, from `verify_all.sh`).
+- **2706 / 5911 functions in C (45.8%)**; code bytes 273,596 / 2,253,856 (12.1%)
+  (end of session 8, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2290/5328 (9.6%)
+  - game: 2314/5328 (9.8%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
-    2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6.
+    2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
+    (268,452 bytes) after session 7.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -56,6 +57,7 @@ Commits on `eu`:
 | `8430db4`…`3d5a326` | Session 5: 59 functions (variant screening, near misses, sqrtf split, 40 libultra functions at -O1) |
 | `3df102d`…`204343f` | Session 6: 42 functions (libultra controller/pfs/SI/PI/VI/thread at -O1, libc ldiv/_Litob at -O2, `narrow.py`) |
 | `4b80d37`…`4086ef1` | Session 7: u8 handler prototypes, 16 handlers, `__sinf`/`sinf` with their own .rodata/.data (first data-blob splits) |
+| `624bf92`…`3c2d62f` | Session 8: real game .data/.rodata boundary, C files own their .rodata (`rodata_split.py --own`), 24 rodata functions, 2 EU file splits |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -67,6 +69,8 @@ throw all of that away.**
 - One-command verification: `tools/eu_port/verify_all.sh` (`--quick` skips the
   re-split). It prints code build / check_files / full ROM status and progress.
 - Progress summary only: `python3 tools/eu_port/progress.py conker/progress.csv`.
+- A function that needs float literals, a switch or strings: `rodata_split.py --own <stem>
+  --resplit` first (session 8 section, "Workflow").
 
 ## Build environment
 
@@ -403,8 +407,8 @@ Sequential, 4 work commits (`4b80d37`..`4086ef1`), +18 functions (2664 -> 2682),
 - **splat links all `.data`-type subsegments of a segment before all `.rodata` ones** (see the
   generated `conker/conker.ld`). A `.data` piece is therefore only possible where everything
   before it is data-typed: `game_data` now starts with `databin` pieces (linked as `.data`) up to
-  a provisional boundary at rom 0x22D990 (below the first jump table `jtbl_8008891C`), then
-  `rodatabin`. The real boundary is somewhere in 0x22B4E0..0x22D990; move it when a file needs it.
+  a provisional boundary at rom 0x22D990, then `rodatabin` (superseded in session 8: the real
+  boundary is 0x237060).
   `init_data` is still all rodatabin (fine while only .rodata pieces are carved there).
 - Done: `__sinf` (`init_eu_26870.c`, now only `__sinf`, -O2 -g3; the SpRaw functions moved to the
   new `init_eu_26A30.c`, -O1) with .rodata 0x2CC30-0x2CC80 (P[5], rpi, pihi, pilo, zero as `du`/`fu`
@@ -414,6 +418,114 @@ Sequential, 4 work commits (`4b80d37`..`4086ef1`), +18 functions (2664 -> 2682),
 - `cosf` (game, same layout: .data 0x22B4C0, .rodata 0x23E3A0) is a C draft in a comment in
   `libultra/gu/cosf.c`: all but `dn`/`dx` register choice (f12/f2) matches. Needs
   `ABS(d) ((d) > 0 ? ...)` (int 0) with `ROUND` against `0.0f`, else the zero constant is CSE'd.
+
+## Session 8: C files own their .rodata
+
+Sequential, 3 work commits (`624bf92`..`3c2d62f`), +24 functions (2682 -> 2706), +5,144 bytes.
+
+### The game_data layout
+
+- **.data ends at rom 0x237048** (the last write from code is to 0x236FA0; 0x236FC0-0x237048
+  is a pointer table into .bss), then 16 zero bytes, and **.rodata starts at 0x237060** with
+  game_2D4B0's jump table (file 0, as expected: all .rodata of the segment is linked in file
+  order after all .data). `conker.eu.yaml` now has `[0x22B4E0, databin]` up to 0x237060.
+  Session 7's "provisional boundary" at 0x22D990 was based on `jtbl_8008891C`, which is
+  spimdisasm's misreading of a data word (it is loaded with `lw`, never jumped through).
+- `tools/eu_port/datarefs.py [game|init] [--runs] [--lo/--hi] [--file stem]`: scans the code of a
+  segment for %hi/%lo pairs (register state carried into branch targets, `addu` chains for
+  indexed loads) and prints who references which data address. Kinds: `lw`, `lwc1`, `ldc1`,
+  `addiu`, ..., `jtbl` (indexed `lw` followed by `jr`), an `x` suffix for indexed access
+  (an array). `--runs` shows the file index sequence; a drop marks the .data/.rodata switch.
+  `owners()` assigns each .rodata address to one referencing file (longest non-decreasing
+  chain of file indices), so shared const tables do not distort the per-file ranges.
+
+### Workflow: a function that needs .rodata (float literals, switch, strings, const tables)
+
+1. `python3 tools/eu_port/rodata_split.py --own <stem> --dry` prints the file's .rodata range
+   (16-byte aligned, from the references) and warnings. It refuses (without `--force`) files
+   whose rodata shows a second object (see below).
+2. `python3 tools/eu_port/rodata_split.py --own <stem> --resplit` does it:
+   - splits the blob in `conker/conker.eu.yaml`: `[a, .rodata, <stem>]`;
+   - runs `rodata_literals.py <stem> --apply`: ported C that read the file's float constants
+     through externs (`D_800A56A8` = `0x800A5A88` in `undefined_syms.eu.txt`) gets literals
+     (`3.1415927f`); same codegen, but now the compiler emits them in place;
+   - re-splits in `conkerdev` (wipes `conker/asm` and `conker/build`: keep drafts elsewhere).
+     `make VERSION=eu extract` now runs `tools/eu_port/rodata_inject.py` after splat.
+3. Write the function with literals/switch/strings. Screen it with `m2c/try` / `m2c/tryall`:
+   `screen.py` now accepts relocations to the TU's own `.rodata` and compares what they point
+   at with the ROM (literal value, jump table entries relative to the function, string bytes).
+4. Insert with `m2c/apply.py` (it re-runs `rodata_inject.py` for owned files before building
+   and checks owned sections) or by hand followed by
+   `docker exec -w /conker/conker conkerdev python3 ../tools/eu_port/rodata_inject.py <stem>`
+   (objects depend only on the .c, so delete the .o).
+5. `verify_all.sh`. `check_files.py` now also compares each owned `.rodata`/`.data` with its
+   ROM range (DATA lines); `tools/eu_port/rodiff.py src_eu/X.c [.rodata]` (container) prints the
+   word diff. `conker.eu.bin: OK` covers the data segments too.
+
+How `rodata_inject.py` works (one plan per owned file that still has GLOBAL_ASM pragmas):
+items = addresses the file's code references; each belongs to the first function (file order)
+that uses it; items from the first float/double/jump-table item on are the late region (IDO
+emits literals and jump tables after all strings/const data of the object). GLOBAL_ASM
+functions get their items prepended to their `.s` as raw `.word`s in `.section .rodata` /
+`.section .late_rodata` (plus `glabel` for the symbols the asm uses, which splat leaves
+undefined once the range is owned); asm-processor reserves the space at the right spot.
+Items of C functions are left to the compiler, except ones the C names (externs) or nobody
+references, which go to a neighbouring GLOBAL_ASM function. Strings/const data that are not
+C-owned are placed as one block in any GLOBAL_ASM function between their C neighbours (file-
+scope tables do not follow function order). `--dry` prints the plan; it fails (and so does
+`make extract`) when a layout cannot be expressed, e.g. a late item named by C code with no
+GLOBAL_ASM neighbour (write it as a literal) or a data block between two C functions with no
+GLOBAL_ASM function in between (define it in C, e.g. `static const f32 v[3] = {...};`).
+
+Owned so far: game_433F0, game_eu_64770, game_eu_6EDC0, game_981E0, game_eu_B7840,
+game_eu_14F750, game_eu_14F980, game_16EE20, game_eu_170760, game_eu_1CC6F0, game_eu_1C1A20,
+game_14FF90, game_eu_133A70, game_eu_1387B0, game_eu_AF2A0, game_eu_120060, game_eu_61AE0,
+game_eu_49F20 (plus session 7's sinf/__sinf and the ported files).
+
+### Files that are really several EU objects
+
+One IDO object's .rodata is [strings/const data][literals/jump tables]; data after late items,
+or zero padding up to a 16-byte boundary between late items, means a second object.
+`tools/eu_port/rodata_bounds.py [stem...]` lists them for all game files: 28 BOUNDARY (certain),
+25 PADDING (possible; can also be double alignment), and US hints (the US yaml's rodata
+subsegment starts, mapped to EU, fall on such boundaries: game_77AD0 0x23E6F0, game_16EE20
+0x24AAE0). Split done this session:
+- `game_eu_14F750` | `game_eu_14F980` (func_15122170..; rodata 0x248A70 | 0x248A80).
+- `game_16EE20` | `game_eu_170760` (from func_151429E0 at 0x15142F50). The second object's
+  .data starts at 0x22F780 (zero padding before it) and its .rodata at 0x24AAE0; the text
+  boundary is the 16-byte aligned function between the last user of the first .rodata and the
+  first user of the second's .data/.rodata. Move the functions into `src_eu/game_eu_<rom>.c`
+  (fix the pragma paths), add the c subsegment, `--own` both.
+Byte-wise, owning a multi-object file still matches while the affected items stay in
+GLOBAL_ASM functions, but C functions whose items are on the wrong side will not.
+
+### m2c with rodata
+
+- `m2c/rodasm.py <func.s>`: the function's .rodata items as labelled asm (`.word`, jump tables
+  as `.word .L...`, strings as `.asciz`); `gen2.py` passes it to m2c as a second input (and adds
+  labels for jump-table targets inside delay slots), so drafts get literals, `switch` and
+  strings. `JT=1` includes jump-table functions; cache in `m2c/rod/` (gitignored).
+- All 1114 asm game functions up to 400 instructions that use .rodata were run through
+  v0..v7, narrowed (n0..n7), `compound.py` and the new `switchinline.py` (`temp = x; switch
+  (temp)` -> `switch (x)`, which keeps the switch value in its own register): 11 + 3 OK. The
+  rest came from hand work on the lowest DIFFs (list: `screen.txt` of all sets, best per
+  function).
+- Patterns that fixed near misses: write the switch on the expression; `+=`/`-=`/`&=`/`|=`
+  instead of m2c's `x = (f32)(x + y)` and temps (`func_1510B34C`, `func_15082DD8`); plain
+  `f32 *` indexing (`func_15108060`); an explicit empty `case 0:` when the table starts at 0
+  (`func_1501C710`); missing stack args (`func_151441A4`); local arrays of the right size
+  (`s32 sp2C[9]`, frame size tells); `const` local aggregates are initialised from .rodata
+  (non-const ones from .data); IDO does not merge equal float literals in a function.
+- Drafts that declare a prototype already declared differently in the file fail when a second
+  draft lands in the same file; use one prototype at the top (`game_eu_1C1A20`).
+
+Near misses left (rodata functions): `func_15007168` (DIFF2: only the order of the two `lui`s of
+the first loop; tried do/while/for, end pointer locals, operand order), `func_151E2B9C` (a0/v1
+swapped), `func_15146EE0` (const struct copy matches; return value lands in v1, not v0),
+`func_151D5FC8` (delay slot filled from the branch target), `func_150EB610`/`func_151472D0`
+(twins; every argument homed and reloaded from the stack), `func_1511CAD0` (store/reload order
+at the end), `func_151D343C`/`func_1518F9CC`/`func_151343AC` (copy of a const local array:
+`const s32 a[1] = {..}` gets the data right, the call setup order differs).
 
 ## Layout
 
@@ -478,7 +590,8 @@ porting to manual work.
   `func_eu_XXXXXXXX` or `D_eu_XXXXXXXX`.
 - A US C function whose EU code differs becomes a prototype plus
   `#pragma GLOBAL_ASM(...)`, with the US body kept under `#if 0 // US version; EU code differs`.
-- EU data segments are still binary blobs (`rodatabin`). Data symbols the C code uses
+- EU data segments are mostly binary blobs (`databin`/`rodatabin`); files that own their
+  .rodata are listed in the session 8 section. Data symbols the C code uses
   are defined in `undefined_syms.eu.txt`.
 
 ## Remaining work (in order)
@@ -514,16 +627,24 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
-   Next steps (session 7):
+   Next steps (session 8):
+   - **Rodata functions** (1299 asm game functions reference .rodata, ~300k instructions; the
+     largest pool left): use the workflow in the session 8 section. Start with files that
+     `rodata_bounds.py` does not flag; split flagged files first (US hints help). Hand-fix the
+     lowest DIFFs from a fresh `JT=1 ONLY=<list> gen2.py` run (list: asm functions with a
+     `%lo` of a game .rodata symbol, i.e. vram 0x80091DE0..0x800B11D0; see the near misses
+     above). Functions over 400 instructions were not drafted yet.
+   - **.data pieces**: everything before 0x237060 in `game_data` is now `databin`, so a game
+     file can own its `.data` with `rodata_split.py <stem> <a> <b> --section .data` (ranges:
+     `datarefs.py game --runs --hi 0x237060`). Not automated yet (no injection for .data of
+     GLOBAL_ASM functions: only whole-C files or files whose .data is used only by C code).
+     `init_data`/`debugger_data` still need their .data/.rodata boundary.
    - **Handlers**: ~200 functions with u8 params remain asm (`m2c/u8params.py`); the drafts in
      `conker/build/u` (regenerate with `m2c/u8run.sh`) are the starting point. Do the 1-case
      handlers with the patterns above; the 2-case ones wait for the unfilled-delay-slot puzzle
      (try: an empty statement/macro after the last store, a `do {} while (0)` wrapper, `register`
      locals, or splitting the file at different flags).
-   - **Data split**: carve `.rodata` for C files that need constants (any function m2c drops for
-     `SECREL`/literal pools) with `rodata_split.py`. For `.data` pieces in `game_data`, keep them
-     before 0x22D990 or move the boundary. `init_data`/`debugger_data` would need the same
-     databin prefix before a `.data` piece. Finish `cosf`.
+   - Finish `cosf` (session 7).
    - **Remaining libultra C**: `osPfsChecker` group (`init_eu_289A0` and `pfschecker2.c`),
      osLeoDiskInit (`func_10027B50`), the unidentified functions in `init_eu_26B30`.
      Handwritten asm (leave as is): `bzero`, `bcopy`, `__osGetSR/__osSetSR`,
@@ -552,15 +673,15 @@ porting to manual work.
      stored twice).
    - Naming structs (`struct127` objects, `struct_eu_node` lists, the message struct
      `{s32 old; s32 new; u8 b8, b9}`) would make m2c's drafts much closer.
-5. Later: finish splitting EU data (started in session 7, see above), document asset
-   formats, then the PC port.
+5. Later: finish splitting EU data (started in session 7; game .rodata ownership works since
+   session 8), document asset formats, then the PC port.
 
 ## Pitfalls already hit
 
 - `git checkout` of generated files reverts them to whatever `HEAD` has, which is now
   generated output, not the baseline. Use `tools/eu_port/baseline/`.
-- splat orders a segment's `.data` before its `.rodata`, so the data blob pieces must be
-  `rodatabin`.
+- splat orders a segment's `.data` before its `.rodata`: a `.data` piece needs only data-typed
+  pieces before it (game_data: `databin` up to 0x237060).
 - The baseline EU split merged tiny `jr ra; nop` stubs into the preceding function.
   This shows up as US vs EU size differences of +8 or +16 bytes.
 - `ld_align_section_vram_end: False` is needed in `conker/conker.eu.yaml`. Otherwise
@@ -598,5 +719,13 @@ porting to manual work.
 - m2c needs `pycparser<3`; with 3.x it fails on `pycparser.plyparser`.
 - Changing a file's `OPT_FLAGS` in the Makefile does not rebuild its object; delete the
   `.o` (the `m2c/flags` helper does) or `verify_all.sh --quick` checks a stale object.
+- `rodata_split.py --resplit` and `verify_all.sh` (full) wipe `conker/build/`: keep m2c drafts
+  and hand drafts outside it (e.g. the session scratch dir) while splitting.
+- After changing which functions of an owned file are C, re-run `rodata_inject.py <stem>`
+  before building (apply.py does), otherwise the old plan's raw rodata is still in the .s files.
+- `progress.py` counted `.L..._game_data` labels (splat defines them for jump-table targets
+  once a file's .rodata is known) as functions; it skips `.L` names now.
+- `apply.py` used to truncate a C file when inserting a draft failed (open for write before
+  building the text); fixed. Check `git diff --stat` for emptied files after any crash.
 - `tools/n64splat` shows as modified in `git status` (submodule content); that was
   already the case before this work and is not part of any commit.
