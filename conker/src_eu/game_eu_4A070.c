@@ -15,7 +15,22 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D044.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D240.s")
+s32 func_1502B6BC(s32 *, s32, s32 *, s32, s32, s32, s32);
+extern s32 D_800C3A88;
+
+s32 func_1501D240(s32 arg0, s32 arg1, s32 arg2) {
+    s32 sp34;
+    s32 sp30;
+    s32 temp_v0;
+
+    temp_v0 = func_1502B6BC(&sp30, 0, &sp34, 3, 6, arg0, arg1);
+    if (temp_v0 != 0) {
+        (&D_800C3A88)[arg2] = temp_v0;
+    } else {
+        (&D_800C3A88)[arg2] = 0;
+    }
+    return temp_v0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D2C4.s")
 

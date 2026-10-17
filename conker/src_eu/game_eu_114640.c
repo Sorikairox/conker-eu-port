@@ -7,7 +7,24 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7104.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E73B4.s")
+extern f32 *D_80088DDC;
+extern f32 *D_80088DE0;
+extern f32 D_800A16DC;
+
+void func_150E73B4(f32 *arg0) {
+    f32 *var_v0;
+    f32 temp_f0;
+
+    if (func_150ADA68() < D_800A16DC) {
+        var_v0 = D_80088DDC;
+    } else {
+        var_v0 = D_80088DE0;
+    }
+    temp_f0 = func_150ADA68();
+    arg0[0] = var_v0[0] + ((var_v0[3] - var_v0[0]) * temp_f0);
+    arg0[1] = var_v0[1] + ((var_v0[4] - var_v0[1]) * temp_f0);
+    arg0[2] = var_v0[2] + ((var_v0[5] - var_v0[2]) * temp_f0);
+}
 
 void func_150E7458(s32 arg0) {
     func_1514470C((&D_800D9A20)[func_150ADA20() & 1], arg0);
