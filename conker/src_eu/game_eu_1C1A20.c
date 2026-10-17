@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_1518D1C0(u8 *, s32, s32, s32, s32, s32, char *);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194210.s")
 
@@ -13,9 +15,33 @@ void func_15194858(s32 arg0, s32 arg1, s32 arg2) {
     func_15194210(arg1, 1, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194890.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194904.s")
+void func_15194890(s32 arg0, u8 *arg1, s32 arg2) {
+
+    switch ((*(u8 *)((u8 *)arg1 + 4))) {
+    s32 pad;
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_1518D1C0(arg1, 0xA, 0, 1, 0xFF, 1, "effects_impact_lavaboulder");
+        break;
+    }
+}
+
+void func_15194904(s32 arg0, u8 *arg1, s32 arg2) {
+
+    switch ((*(u8 *)((u8 *)arg1 + 4))) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_1518D1C0(arg1, 0xC, 0, 1, 0xFF, 1, "effects_impact_fireimp");
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194978.s")
 
@@ -26,7 +52,24 @@ void func_15194AF8(struct127 *arg0, struct127 *arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194B3C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194794.s")
+s32 func_151AF820(u8 *, s32, s32);
+s32 func_151B01B8(s32, u8 *);
+s32 func_151B09BC(s32, u8 *, s32, s32, s32);
+
+void func_15194794(s32 arg0, u8 *arg1, s32 arg2) {
+
+    func_151B01B8(arg0, arg1);
+    func_151B09BC(arg0, arg1, 0x3E8, 0xFF, 0);
+    switch ((*(u8 *)((u8 *)arg1 + 4))) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        func_151AF820(arg1, 0xFF, 1);
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194D80.s")
 
@@ -78,7 +121,20 @@ void func_15195314(s32 arg0, s32 arg1, s32 arg2) {
     func_15195564(arg0, arg1, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195338.s")
+s32 func_1504715C(s32 *, s32);
+s32 func_1514B8D4(s32, s32 *, s32, s32);
+
+void func_15195338(s32 arg0, s32 arg1, s32 arg2) {
+    s32 sp2C[9];
+
+    if (D_800BE616 != 0) {
+        func_15195314(arg0, arg1, arg2);
+    } else {
+        func_1518D1C0((u8 *)arg1, 0xB, 0, 1, 0xFF, 1, "effects_impact_lava");
+    }
+    func_1504715C(sp2C, arg1);
+    func_1514B8D4(arg1 + 0x14, sp2C, 0xFF, 1);
+}
 
 void func_151953C4(s32 arg0, u8 *arg1, s32 arg2) {
     u8 v = arg1[4];

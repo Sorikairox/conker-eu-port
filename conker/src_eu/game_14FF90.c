@@ -4,7 +4,6 @@
 #include "variables.h"
 
 extern f32 D_800A34B0[4][2];
-extern f32 D_800A34D0;
 extern f32 D_800A34D4;
 extern f32 D_800A34D8;
 extern f32 D_800A34DC;
@@ -23,12 +22,7 @@ extern f32 D_800A350C;
 extern f32 D_800A3510;
 extern f32 D_800A3514;
 extern f32 D_800A3518;
-extern f32 D_800A351C;
-extern f32 D_800A3520;
-extern f32 D_800A3524;
-extern f32 D_800A3528;
 extern f32 D_800A352C;
-extern f32 D_800A3530;
 extern f32 D_800A3534;
 extern f32 D_800A3538;
 extern f32 D_800A353C;
@@ -59,9 +53,6 @@ extern f32 D_800A359C;
 extern f32 D_800A35A0;
 extern f32 D_800A35A4;
 extern f32 D_800A35A8;
-extern f32 D_800A35AC;
-
-
 #if 0
 f32 D_800A34B0[4][2] = {
     { 267.0f, 100.0f },
@@ -70,7 +61,7 @@ f32 D_800A34B0[4][2] = {
     { 530.0f, 400.0f }
 };
 
-f32 D_800A34D0 = 0.01666666753590107f;
+f32 0.02f = 0.01666666753590107f;
 f32 D_800A34D4 = 0.10000000149011612f;
 f32 D_800A34D8 = 999.0f;
 f32 D_800A34DC = 0.01745329238474369f;
@@ -89,12 +80,12 @@ f32 D_800A350C = 0.8999999761581421f;
 f32 D_800A3510 = 0.8500000238418579f;
 f32 D_800A3514 = -10000.0f;
 f32 D_800A3518 = 0.0033333334140479565f;
-f32 D_800A351C = 57.2957763671875f;
-f32 D_800A3520 = 0.01745329238474369f;
-f32 D_800A3524 = 0.01745329238474369f;
-f32 D_800A3528 = 0.01745329238474369f;
+f32 57.295776f = 57.2957763671875f;
+f32 0.017453292f = 0.01745329238474369f;
+f32 0.017453292f = 0.01745329238474369f;
+f32 0.017453292f = 0.01745329238474369f;
 f32 D_800A352C = 0.01745329238474369f;
-f32 D_800A3530 = 0.01745329238474369f;
+f32 0.017453292f = 0.01745329238474369f;
 f32 D_800A3534 = 6.2831854820251465f;
 f32 D_800A3538 = 0.01745329238474369f;
 f32 D_800A353C = 0.03999999910593033f;
@@ -125,7 +116,7 @@ f32 D_800A359C = -0.01745329238474369f;
 f32 D_800A35A0 = 999.0f;
 f32 D_800A35A4 = 0.01745329238474369f;
 f32 D_800A35A8 = 999.0f;
-f32 D_800A35AC = 999.0f;
+f32 999.0f = 999.0f;
 #endif
 
 void func_15122AE0(void) {
@@ -133,7 +124,7 @@ void func_15122AE0(void) {
     s16 i;
     f32 temp_f20;
 
-    temp_f20 = D_800BEA08 * D_800A34D0;
+    temp_f20 = D_800BEA08 * 0.02f;
 
     for (i = 0; i <= D_80082FA0; i++) {
         temp_s0 = &D_800DBFF0[i]; // ???
@@ -411,7 +402,7 @@ void func_1512523C(struct108 *arg0) {
     } else {
         phi_f14 = temp_f12;
     }
-    temp_f2 = func_150484A0(arg0->unk2FC - arg0->unk2C0, phi_f14) * D_800A351C;
+    temp_f2 = func_150484A0(arg0->unk2FC - arg0->unk2C0, phi_f14) * 57.295776f;
     arg0->unk388 = temp_f2;
     if (temp_f2 > 180.0f) {
         arg0->unk388 -= 360.0f;
@@ -419,7 +410,7 @@ void func_1512523C(struct108 *arg0) {
     arg0->unk388 = -arg0->unk388;
     arg0->unk388 -= arg0->unk3A8;
     arg0->unk388 += arg0->unk38C;
-    arg0->unk398 = arg0->unk388 * D_800A3520;
+    arg0->unk398 = arg0->unk388 * 0.017453292f;
 }
 
 void func_15125330(struct108 *arg0) {
@@ -430,7 +421,7 @@ void func_15125330(struct108 *arg0) {
     tmp.unk8 = arg0->unk2C4 - arg0->unk300;
 
     arg0->unk37C = func_15048FC8(&tmp);
-    arg0->unk39C = arg0->unk37C * D_800A3524;
+    arg0->unk39C = arg0->unk37C * 0.017453292f;
 }
 
 void func_15125394(struct108 *arg0) {
@@ -455,7 +446,7 @@ s32 func_151253CC(struct108 *arg0) {
         func_15125330(arg0);
         func_1512523C(arg0);
         temp_f0 = arg0->unk37C;
-        temp_f2 = D_800A3528;
+        temp_f2 = 0.017453292f;
         arg0->unk380 = arg0->unk37C;
         arg0->unk3A0 = (f32) (temp_f0 * temp_f2);
         arg0->unk398 = (f32) (arg0->unk388 * temp_f2);
@@ -487,10 +478,19 @@ s32 func_15125490(struct108 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151254F4.s")
-// NON-MATCHING: only the D_800A3900 load is scheduled after the prologue stores
+void func_151254F4(struct108 *arg0, s32 arg1) {
+    arg0->unk3A0 = arg0->unk380 * 0.017453292f;
+    arg0->unk398 = arg0->unk388 * 0.017453292f;
+    func_15124AB4(arg0);
+    func_151239CC(arg0, 1);
+    arg0->unk3D4->unk198 = 0;
+    arg0->unk73C = 0;
+    arg0->unk3D0 = &D_800CC2D0[arg1];
+    arg0->unk670 = 0.0f;
+}
+// NON-MATCHING: only the 0.017453292f load is scheduled after the prologue stores
 // void func_151254F4(struct108 *arg0, s32 arg1) {
-//     f32 tmp = D_800A3900;
+//     f32 tmp = 0.017453292f;
 //
 //     arg0->unk3A0 = arg0->unk380 * tmp;
 //     arg0->unk398 = arg0->unk388 * tmp;
@@ -515,7 +515,7 @@ void func_15125594(struct108 *arg0) {
     if (temp_f0 < temp_f2) {
         arg0->unk380 += 360.0f;
     }
-    arg0->unk3A0 = arg0->unk380 * D_800A3530;
+    arg0->unk3A0 = arg0->unk380 * 0.017453292f;
     func_15124AB4(arg0);
 }
 
@@ -727,6 +727,6 @@ void func_15128774(struct108 *arg0, struct127 *arg1) {
     arg0->unk308 = arg0->unk2FC = arg1->y_position;
     arg0->unk30C = arg0->unk300 = arg1->z_position;
     arg0->unk37C = arg0->unk3D0->unk40 - 180.0f;
-    arg0->unk3D4->unk18C = D_800A35AC;
+    arg0->unk3D4->unk18C = 999.0f;
     arg0->unk23C = 1;
 }

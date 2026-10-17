@@ -93,7 +93,7 @@ def check_func(o,f,spath):
                 if (a&m)!=(b&m): n+=1
                 if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
                 continue
-            if st=='STT_SECTION' or not name: return 'SECREL'
+            if st=='STT_SECTION' or not name: return 'SECREL'+(':%s:%d'%(name,t) if VERB else '')
             if not re.search(r'\b%s\b'%re.escape(name),reft[i]):
                 n+=1
                 if VERB: VERB.append('** %08X %08X  %s  [reloc %s]'%(a,b,reft[i],name))

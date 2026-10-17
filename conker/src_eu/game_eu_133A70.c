@@ -129,7 +129,18 @@ void func_15107E64(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107FA0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15108060.s")
+void func_15108060(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+    f32 dx = arg1[0] - arg0[0];
+    f32 dy = arg1[1] - arg0[1];
+    f32 dz = arg1[2] - arg0[2];
+
+    arg2[0] = arg0[0] + dx * 0.333f;
+    arg2[1] = arg0[1] + dy * 0.333f;
+    arg2[2] = arg0[2] + dz * 0.333f;
+    arg3[0] = arg0[0] + dx * 0.6667f;
+    arg3[1] = arg0[1] + dy * 0.6667f;
+    arg3[2] = arg0[2] + dz * 0.6667f;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_151080F8.s")
 

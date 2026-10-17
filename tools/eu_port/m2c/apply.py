@@ -14,6 +14,9 @@ def datasz(o):
     with open(o,'rb') as fh:
         return {s.name:s['sh_size'] for s in ELFFile(fh).iter_sections() if s.name in ('.rodata','.data','.rdata','.sdata')}
 def build(ps):
+    # files owning .rodata: re-plan the GLOBAL_ASM functions' rodata for the current C/asm split
+    st=[p[len('src_eu/'):-2] for p in ps if p[len('src_eu/'):-2] in owned]
+    if st: subprocess.run(['python3','../tools/eu_port/rodata_inject.py']+st,capture_output=True)
     objs=['build/'+p+'.o' for p in ps]
     for o in objs:
         if os.path.exists(o): os.remove(o)
@@ -49,7 +52,8 @@ def insert(src,fs):
         m=prag(f).search(src)
         src=src[:m.start()]+code+src[m.end():]
     return src
-for p in ps: open(p,'w').write(insert(orig[p],cands[p]))
+new={p:insert(orig[p],cands[p]) for p in ps}  # all drafts first: a failure must not truncate a file
+for p in ps: open(p,'w').write(new[p])
 build(ps)
 bad=[p for p in ps if not ok(p,base[p])]
 for p in ps:
