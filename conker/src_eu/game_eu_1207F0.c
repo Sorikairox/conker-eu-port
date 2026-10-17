@@ -5,7 +5,26 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F2FE0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F320C.s")
+void func_150F320C(u8 *arg0) {
+    struct {
+        u8 *unk0;
+        u8 unk4;
+        u8 unk5;
+        f32 unk8;
+        u8 unkC;
+    } tmp;
+    struct260 *temp_v0;
+
+    tmp.unk0 = arg0;
+    tmp.unk4 = arg0[0x3B];
+    tmp.unk5 = 0;
+    tmp.unk8 = 0.0f;
+    tmp.unkC = 0;
+    temp_v0 = func_15149130(300, -1, 0x5C, -1, 0, 0x44, 0x10, 255, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3294.s")
 

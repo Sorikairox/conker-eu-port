@@ -11,7 +11,21 @@ void func_15159270(void **arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159514.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_151595F4.s")
+s32 func_151595F4(u8 *arg0, u8 arg1) {
+    s32 flags = *(s32 *)(arg0 + 0x184) & 0x1F;
+    s32 ret;
+
+    if ((arg1 == 2) || (arg1 == 3)) {
+        ret = 0;
+    } else if ((-10000.0f == *(f32 *)(arg0 + 0x118)) && !(flags & 0xA)) {
+        ret = 1;
+    } else if ((*(f32 *)(arg0 + 0x118) < *(f32 *)(arg0 + 0x18)) || (arg0[0x137] != 0)) {
+        ret = 1;
+    } else {
+        ret = 0;
+    }
+    return ret;
+}
 
 s32 func_15159690(u8 *arg0, u8 arg1) {
     s32 r;

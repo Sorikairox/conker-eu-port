@@ -21,7 +21,32 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4EB0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4F4C.s")
+void func_151A4F4C(u8 *arg0, u8 arg1) {
+    struct260 *temp_v0;
+    struct {
+        u8 *unk0;
+        u8 unk4;
+        f32 unk8;
+        f32 unkC;
+        u8 unk10;
+        f32 unk14;
+        f32 unk18;
+        f32 unk1C;
+    } tmp;
+
+    tmp.unk0 = arg0;
+    tmp.unk4 = arg0[0x3B];
+    tmp.unk8 = 0.722f;
+    tmp.unkC = 0.0f;
+    tmp.unk10 = 1;
+    tmp.unk14 = 0.0f;
+    tmp.unk18 = 0.0f;
+    tmp.unk1C = 0.0f;
+    temp_v0 = func_151491F4(300, -1, 5, 0, 1, 0x20, arg1, 0);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x20);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4FE8.s")
 

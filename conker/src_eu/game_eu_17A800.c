@@ -255,7 +255,22 @@ void func_1514F680(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F878.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F93C.s")
+void func_1514F93C(u8 *arg0) {
+    struct {
+        u8 *unk0;
+        u8 unk4;
+        f32 unk8;
+    } tmp;
+    struct260 *temp_v0;
+
+    tmp.unk0 = arg0;
+    tmp.unk4 = arg0[0x3B];
+    tmp.unk8 = 0.0f;
+    temp_v0 = func_15149130(300, -1, 0x3A, -1, 0, 0x2B, 0xC, 255, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
+    }
+}
 
 void func_1514F9BC(struct127 *arg0) {
     func_1514F18C(func_1518D1C0(arg0, 5, 0, 1, 0xFF, 1, D_800A5D68), arg0, 0xD);

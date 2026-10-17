@@ -1188,7 +1188,7 @@ struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *arg0);
 void func_1514C9E0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
 void func_15001A08(void);
 void func_151D2B4C(s32 arg0);
-void func_150B1138(s32 arg0, s32 arg1, s32 arg2);
+void func_150B1138(u8 *arg0, u8 arg1, s32 arg2);
 void func_1519D320(s32 arg0, f32 arg1, s32 arg2);
 f32  func_15117858(f32 *arg0, f32 arg1);
 f32  func_15117A98(f32 *arg0, f32 arg1);

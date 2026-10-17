@@ -110,13 +110,35 @@ void func_150E8E40(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E8EB0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E9000.s")
+void func_150E9000(void) {
+    struct260 *temp_v0;
+    f32 v[3];
+
+    v[0] = 1.2e-07f;
+    v[1] = 3.2e-07f;
+    v[2] = 0.0f;
+    temp_v0 = func_15149130((func_150ADA20() % 41U) + 30, -1, 0x33, -1, 1, 0, 12, 255, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, v, 12);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E909C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E92DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E965C.s")
+void func_150E965C(void) {
+    struct260 *temp_v0;
+    f32 v[3];
+
+    v[0] = 2e-07f;
+    v[1] = 1.5e-07f;
+    v[2] = 0.0f;
+    temp_v0 = func_15149130((func_150ADA20() % 26U) + 5, -1, 0x36, -1, 1, 0, 12, 255, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, v, 12);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E96F8.s")
 

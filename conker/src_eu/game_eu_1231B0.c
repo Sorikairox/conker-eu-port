@@ -23,7 +23,22 @@ void func_150F5C0C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F5FD4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F6188.s")
+void func_150F6188(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
+    struct {
+        u8 *unk0;
+        u8 unk4;
+        f32 unk8;
+    } tmp;
+    struct260 *temp_v0;
+
+    tmp.unk0 = arg0;
+    tmp.unk4 = arg0[0x3B];
+    tmp.unk8 = 0.0f;
+    temp_v0 = func_15149130(arg1, -1, 0x51, -1, 1, 0x3E, 0xC, arg2, arg3);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F6218.s")
 

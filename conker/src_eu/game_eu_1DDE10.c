@@ -46,7 +46,25 @@ void func_151B2034(void *arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B2060.s")
+void func_151B2060(u8 *arg0) {
+    struct260 *temp_v0;
+    struct {
+        u8 *unk0;
+        u8 unk4;
+        f32 unk8;
+    } tmp;
+
+    if (arg0 == NULL) {
+        return;
+    }
+    tmp.unk0 = arg0;
+    tmp.unk4 = arg0[0x3B];
+    tmp.unk8 = 0.0f;
+    temp_v0 = func_151491F4(0x3C, -1, 0x15, 1, 0x11, 0xC, 255, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B20E4.s")
 

@@ -14,7 +14,20 @@ void func_150F8DCC(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F8EAC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F9CA0.s")
+extern u8 D_800A2010[][2];
+
+void func_150F9CA0(u8 arg0) {
+    struct {
+        s32 unk0;
+        u8 unk4;
+    } tmp;
+
+    tmp.unk0 = 0;
+    tmp.unk4 = D_800A2010[arg0][0];
+    func_151494E0(&tmp, 0x42);
+    tmp.unk4 = D_800A2010[arg0][1];
+    func_151494E0(&tmp, 0x42);
+}
 
 void func_150F9D08(s32 arg0) {
 }

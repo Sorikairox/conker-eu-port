@@ -52,7 +52,17 @@ void func_1515046C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152DE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1515302C.s")
+extern u8 D_800A63C0[][3];
+
+void func_1515302C(u8 *arg0) {
+    u8 i = func_150ADA20() % 5U;
+    u8 *e = D_800A63C0[i];
+
+    arg0[3] = func_150ADA20() % 101U + 0x9B;
+    arg0[0] = e[0];
+    arg0[1] = e[1];
+    arg0[2] = e[2];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151530A8.s")
 
