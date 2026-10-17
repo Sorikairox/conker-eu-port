@@ -1169,7 +1169,7 @@ void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, s32 arg3,
 void func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
 void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1);
 s32  func_1514F250(struct_eu_link *arg0, s32 arg1, struct_eu_link **arg2);
-void func_1514F18C(void *arg0, struct127 *arg1, s32 arg2);
+s32 func_1514F18C(void *arg0, struct127 *arg1, s32 arg2);
 void func_15141E38(struct127 *arg0, s32 arg1);
 void func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 s32  func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);

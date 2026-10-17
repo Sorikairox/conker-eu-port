@@ -94,7 +94,7 @@ def setup(func, draft, od):
         elif a.startswith('-D') or a.startswith('-I'): cpp.append(a)
     r = subprocess.run(cpp, input=tu, capture_output=True, text=True, cwd=ROOT)
     if r.returncode: sys.exit('cpp failed:\n' + r.stderr[-2000:])
-    base = strip_others(r.stdout, func)
+    base = r.stdout if os.environ.get('PERM_NOSTRIP') else strip_others(r.stdout, func)
     open(os.path.join(od, 'base.c'), 'w').write(base)
     # compile.sh: permuter calls `compile.sh in.c -o out.o`
     sh = '#!/bin/bash\nset -e\nIN=$(realpath "$1"); OUT=$(realpath -m "$3")\ncd %s\n%s -o "$OUT" "$IN"\n' % (
@@ -126,7 +126,27 @@ def extract(func, path, draft=None):
     if draft:   # keep the draft's own declarations above the function
         d = open(draft).read(); rd = find_body(d, func)
         if rd: pre = d[:rd[0]]
-    print(pre + s[r[0]:r[1]])
+    # the permuter may also change declarations outside the function (e.g. a callee's return
+    # type); report them as comments, they are not part of the draft
+    note = ''
+    bp = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(path))), 'base.c')
+    if os.path.exists(bp):
+        DECL = re.compile(r'^([^\n;{}#]*?\b(\w+)\s*\([^;{}]*\)\s*);', re.M)
+        def top(t):   # text at brace depth 0 (drops bodies and struct members)
+            o = []; d = 0
+            for ch in t:
+                if ch == '{': d += 1; o.append(';')
+                elif ch == '}': d -= 1
+                elif d == 0: o.append(ch)
+            return ''.join(o)
+        def decls(t):
+            t = top(t)
+            return {m.group(2): re.sub(r'^extern', '', re.sub(r'\s+', '', m.group(1))) for m in DECL.finditer(t)}
+        b = decls(open(bp).read()); n = decls(s[:r[0]] + s[r[1]:])
+        for k in sorted(n):
+            if k in b and n[k] != b[k]:
+                note += '// PERMUTER CHANGED DECL: %s (base: %s)\n' % (n[k], b[k])
+    print(note + pre + s[r[0]:r[1]])
 
 
 if __name__ == '__main__':
