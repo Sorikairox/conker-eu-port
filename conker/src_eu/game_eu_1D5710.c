@@ -23,7 +23,18 @@ void func_151A8B10(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8DA8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8FD0.s")
+void func_151A8FD0(u8 *arg0, s32 arg1, u8 arg2) {
+    s32 idx = arg0[0x5C];
+    void (*fn)(u8 *, s32, u8);
+
+    if (idx >= 3) {
+        idx = 0;
+    }
+    fn = (void (*)(u8 *, s32, u8))D_8008FD04[idx];
+    if (fn != NULL) {
+        fn(arg0, arg1, arg2);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9028.s")
 

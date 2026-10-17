@@ -65,7 +65,22 @@ void func_151CEA8C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF05C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF1C0.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} struct_151CF1C0;
+
+s32 func_151CF1C0(struct_151CF1C0 *arg0, u8 *arg1, u8 *arg2) {
+    if (arg2 != NULL) {
+        *arg0 = *(struct_151CF1C0 *)(arg2 + 0x40);
+    } else {
+        arg0->x = ((struct_151CF1C0 *)(arg1 + 0x14))->x;
+        arg0->y = ((struct_151CF1C0 *)(arg1 + 0x14))->y;
+        arg0->z = ((struct_151CF1C0 *)(arg1 + 0x14))->z;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF204.s")
 
