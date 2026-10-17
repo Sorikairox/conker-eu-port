@@ -32,11 +32,12 @@ EU_SEGMENTS = {
 }
 SEG_BY_VRAM_TOP = {0x10: "init", 0x15: "game", 0x16: "debugger"}
 
-# C files carrying their own .data/.rodata/.bss; ported once EU data is split
-SKIP_DATA_FILES = {
-    "game/done/game_75810", "game/done/game_75950", "init_50A0",
-    "libultra/audio/cents2ratio", "libultra/audio/init_128D0", "libultra/audio/init_1D900",
-    "libultra/gu/guPerspectiveF", "libultra/gu/guRotateF",
+# C files with .data/.bss of their own; .rodata-only files are placed via section_bases
+SKIP_DATA_FILES = {"init_50A0"}
+DATA_SEGMENTS = {  # name: (rom start, vram start, size)
+    "init_data": (0x29400, 0x80029400, 0x4410),
+    "game_data": (0x228130, 0x80082EB0, 0x2E320),
+    "debugger_data": (0x259B50, 0x16003700, 0x1658),
 }
 
 FUNC_RE = re.compile(r"func_([0-9A-F]{8})")
@@ -222,6 +223,7 @@ def main():
     report = {"ported": [], "failed": {}}
     eu_c_files = []  # (eu rom start, eu rom end, name)
     func_names = {}  # US name -> EU vram
+    rodata_files = []  # (eu vram, size, name)
     for us_rom, name, next_rom in us_c_files():
         if name in SKIP_DATA_FILES:
             report["failed"][name] = "has own data sections"
@@ -243,6 +245,13 @@ def main():
         us_end = rom_to_vram(next_rom, US_SEGMENTS, seg) if next_rom else None
         if us_end is not None and seg_of(us_end) != seg:
             us_end = None
+        rodata = None
+        if name in d["us_sections"]:
+            base = d["section_bases"].get(f"{name}:.rodata")
+            if set(d["us_sections"][name]) != {".rodata"} or base is None:
+                report["failed"][name] = "data sections not placeable"
+                continue
+            rodata = (int(base, 16), d["us_sections"][name][".rodata"])
         ctx = (funcs, us_vrams, us_end, matches, eu_funcs, eu_starts, global_anchors[seg])
         placed, problem = place_by_shift(*ctx)
         if problem:
@@ -256,6 +265,8 @@ def main():
         nxt = eu_starts[i1 + 1] if i1 + 1 < len(eu_starts) and seg_of(eu_starts[i1 + 1]) == seg_of(last_v) else None
         end_rom = vram_to_rom(nxt, EU_SEGMENTS) if nxt else None
         eu_c_files.append((vram_to_rom(vrams[0], EU_SEGMENTS), end_rom, name, placed))
+        if rodata:
+            rodata_files.append((rodata[0], rodata[1], name))
         for fn, _, ev, _ in placed:
             func_names[fn] = ev
         report["ported"].append(name)
@@ -338,6 +349,10 @@ def main():
     yaml_text = open("conker.eu.yaml").read()
     for seg in ("init", "game", "debugger"):
         yaml_text = rewrite_segment(yaml_text, seg, [f for f in eu_c_files if seg_of(f[3][0][2]) == seg])
+    for seg, (rom0, vram0, seg_size) in DATA_SEGMENTS.items():
+        items = [(v - vram0 + rom0, size, n) for v, size, n in rodata_files if 0 <= v - vram0 < seg_size]
+        if items:
+            yaml_text = rewrite_data_segment(yaml_text, seg, rom0, sorted(items))
     open("conker.eu.yaml", "w").write(yaml_text)
 
     json.dump(report, open("build_port/port_report.json", "w"), indent=1)
@@ -382,6 +397,22 @@ def rewrite_segment(yaml_text, seg, files):
         kind, name = bounds[b]
         out.append(f"      - [0x{b:X}, c, {name}]" if kind == "c" else f"      - [0x{b:X}, asm]")
     return yaml_text[:body_start] + "\n".join(out) + "\n" + yaml_text[m.end():]
+
+
+
+def rewrite_data_segment(yaml_text, seg, rom0, items):
+    """Carve each file's .rodata out of a data segment's binary blob."""
+    head = re.search(r"^  - name:\s+" + seg + r"\n(?:    \w+:.*\n)*?    subsegments:\n", yaml_text, re.M)
+    m = re.compile(r"(?:^ {4,}- .*\n|^ {4,}#.*\n|^\s*\n)*", re.M).match(yaml_text, head.end())
+    out, pos = [], rom0
+    for rom, size, name in items:
+        if rom > pos:
+            out.append(f"      - [0x{pos:X}, rodatabin]")
+        out.append(f"      - [0x{rom:X}, .rodata, {name}]")
+        pos = rom + size
+    # rodatabin rather than bin: splat orders a segment's .data before its .rodata
+    out.append(f"      - [0x{pos:X}, rodatabin]")
+    return yaml_text[:head.end()] + "\n".join(out) + "\n" + yaml_text[m.end():]
 
 
 if __name__ == "__main__":

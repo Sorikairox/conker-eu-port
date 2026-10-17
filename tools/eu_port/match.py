@@ -102,17 +102,23 @@ def eu_functions():
 
 
 def us_functions():
-    funcs = []
+    funcs, sections = [], {}
     for obj in glob.glob("build_port/us/**/*.o", recursive=True):
         rel = os.path.relpath(obj, "build_port/us")[:-2]
         text, syms, relocs = load_object(obj)
+        with open(obj, "rb") as f:
+            elf = ELFFile(f)
+            sizes = {n: elf.get_section_by_name(n).data_size for n in (".data", ".rodata", ".bss")
+                     if elf.get_section_by_name(n) is not None and elf.get_section_by_name(n).data_size}
+        if sizes:
+            sections[rel] = sizes
         for name, start, end in function_spans(syms, len(text)):
             funcs.append({
                 "name": name, "file": rel, "fp": fingerprint(text, start, end, relocs),
                 "relocs": {o - start: r for o, r in relocs.items() if start <= o < end},
                 "words": [struct.unpack(">I", text[o:o + 4])[0] for o in range(start, end, 4)],
             })
-    return funcs
+    return funcs, sections
 
 
 def us_target_addend(rtype, word, hi_words):
@@ -157,7 +163,7 @@ def resolve_ambiguous(matches, ambiguous, eu_vram):
 
 def main():
     eu, eu_addr = eu_functions()
-    us = us_functions()
+    us, us_sections = us_functions()
     by_fp = defaultdict(list)
     for f in eu:
         by_fp[f["fp"]].append(f)
@@ -184,8 +190,12 @@ def main():
         u, e = us_by_name[name], eu_by_name[m["eu"]]
         votes[name][m["vram"]] += 100
         for off, (rtype, usym) in u["relocs"].items():
-            if usym.startswith("section:") or off not in e["relocs"]:
+            if off not in e["relocs"]:
                 continue
+            if usym.startswith("section:"):
+                if usym[8:] not in (".rodata", ".data", ".bss"):
+                    continue
+                usym = f"{u['file']}:{usym[8:]}"
             etype, esym = e["relocs"][off]
             if etype != rtype or rtype == R_MIPS_HI16 or esym not in eu_addr:
                 continue
@@ -205,7 +215,9 @@ def main():
 
     json.dump({
         "matches": matches, "ambiguous": ambiguous, "unmatched": unmatched,
-        "symbols": {k: hex(v) for k, v in sorted(symbols.items())}, "conflicts": conflicts,
+        "symbols": {k: hex(v) for k, v in sorted(symbols.items()) if ":" not in k}, "conflicts": conflicts,
+        "section_bases": {k: hex(v) for k, v in sorted(symbols.items()) if ":" in k},
+        "us_sections": us_sections,
     }, open("build_port/match.json", "w"), indent=1)
     print(f"US functions: {len(us)}  EU functions: {len(eu)}")
     print(f"matched {len(matches)}  ambiguous {len(ambiguous)}  unmatched {len(unmatched)}")

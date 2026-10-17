@@ -64,7 +64,7 @@ segments:
       - [0x12290, c, init_11FA0]
       - [0x12850, c, init_12560]
       - [0x12B10, c, libultra/audio/heap]
-      - [0x12BC0, asm]
+      - [0x12BC0, c, libultra/audio/init_128D0]
       - [0x13610, c, libultra/audio/n_csplayer]
       - [0x15840, c, libultra/audio/init_15550]
       - [0x17B60, c, libultra/audio/init_17870]
@@ -83,7 +83,7 @@ segments:
       - [0x19040, c, libultra/audio/init_18D50]
       - [0x19090, c, libultra/audio/n_sl]
       - [0x19150, c, libultra/audio/n_synthesizer]
-      - [0x19DA0, asm]
+      - [0x19DA0, c, libultra/audio/cents2ratio]
       - [0x19E40, c, libultra/audio/init_19B50]
       - [0x1ADD0, c, init_1AAE0]
       - [0x1C350, c, init_1C060]
@@ -95,7 +95,7 @@ segments:
       - [0x1CD80, c, libultra/audio/n_synsetpitch2]
       - [0x1CE30, c, libultra/audio/n_synsetpan]
       - [0x1CEE0, c, libultra/audio/init_1CBF0]
-      - [0x1DBF0, asm]
+      - [0x1DBF0, c, libultra/audio/init_1D900]
       - [0x1DE90, c, libultra/audio/n_cseqnextdelta]
       - [0x1DF70, c, libultra/audio/n_synallocvoice]
       - [0x1E460, c, libultra/audio/n_synstartvoiceparam]
@@ -171,7 +171,13 @@ segments:
     start: 0x29400
     vram:  0x80029400
     subsegments:
-    - [0x29400, bin]
+      - [0x29400, rodatabin]
+      - [0x2C7B0, .rodata, libultra/audio/init_128D0]
+      - [0x2C7C0, rodatabin]
+      - [0x2CAC0, .rodata, libultra/audio/cents2ratio]
+      - [0x2CAD0, rodatabin]
+      - [0x2CAF0, .rodata, libultra/audio/init_1D900]
+      - [0x2CB00, rodatabin]
   - name:  game
     type:  code
     start: 0x0002D810
@@ -319,9 +325,10 @@ segments:
       - [0x71E70, asm]
       - [0x75700, c, libultra/gu/cosf]
       - [0x75860, c, libultra/gu/sinf]
-      - [0x75A00, asm]
-      - [0x75C90, asm]
-      - [0x75FA0, asm]
+      - [0x75A00, c, libultra/gu/guPerspectiveF]
+      - [0x75C90, c, libultra/gu/guRotateF]
+      - [0x75E60, c, game/done/game_75810]
+      - [0x75FA0, c, game/done/game_75950]
       - [0x760E0, c, game/done/game_75A90]
       - [0x76220, c, game/done/game_75BD0]
       - [0x762E0, c, game_75C90]
@@ -718,7 +725,12 @@ segments:
     start: 0x00228130
     vram:  0x80082EB0
     subsegments:
-    - [0x228130, bin]
+      - [0x228130, rodatabin]
+      - [0x23E3E0, .rodata, libultra/gu/guPerspectiveF]
+      - [0x23E3F0, .rodata, libultra/gu/guRotateF]
+      - [0x23E400, .rodata, game/done/game_75810]
+      - [0x23E410, .rodata, game/done/game_75950]
+      - [0x23E430, rodatabin]
   - name: debugger
     type: code
     start: 0x00256450
