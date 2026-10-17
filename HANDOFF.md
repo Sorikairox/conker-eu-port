@@ -17,10 +17,11 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2374 / 5913 functions in C (40.1%)**; code bytes 9.8%.
-  - init: 281/542 functions
-  - game: 2062/5328
-  - debugger: 31/43
+- **2520 / 5916 functions in C (42.6%)**; code bytes 10.6% (session 4, in progress;
+  counted from `progress.csv`, which lists 5916 functions).
+  - init: 283/543 functions
+  - game: 2206/5329
+  - debugger: 31/44
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (this session).
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
