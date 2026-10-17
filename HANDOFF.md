@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-17 (third session). Update this file at the end of every work session.
+Last updated: 2026-10-17 (fourth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,10 +17,10 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2520 / 5916 functions in C (42.6%)**; code bytes 10.6% (session 4, in progress;
+- **2563 / 5916 functions in C (43.3%)**; code bytes 10.9% (session 4, in progress;
   counted from `progress.csv`, which lists 5916 functions).
   - init: 283/543 functions
-  - game: 2206/5329
+  - game: 2249/5329
   - debugger: 31/44
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (this session).
@@ -129,6 +129,58 @@ again:
 Lesson for parallel work: have each worker commit (or at least verify with
 `check_files.py`) per small batch, so an interruption loses little.
 
+## Session 4: m2c pipeline and hand fixes
+
+Work was sequential (no agents). Tools written this session live in the session
+scratchpad, not in the repo; their logic is described here so they can be rebuilt
+(copies of the container-side scripts were in `conker/build/`, which is gitignored):
+
+- **Draft generation** (host, needs `pycparser<3`; the system Python and the image both
+  have pycparser 3.x, which m2c cannot import, so use a throwaway venv):
+  `m2c.py --valid-syntax --context <per-file ctx>`, where the per-file context is
+  `gcc -E` of the `src_eu` file (headers plus the file's own prototypes) with `#pragma`
+  lines dropped. Post-processing: `M2C_FIELD(x, T *, off)` -> `(*(T *)((u8 *)x + off))`,
+  `M2C_UNK*` -> sized ints, `void *` -> `u8 *` (so byte arithmetic works), `?` types ->
+  `s32`, and `*(&D + (i * k))` -> `*(T *)((u8 *)&D + (i * k))` (m2c's byte offsets
+  otherwise get scaled). Drafts containing `M2C_ERROR`, bitwise casts, struct copies,
+  unaligned access or jump tables are dropped.
+- **Variants per function**: base; `s8 *` -> `u8 *`; `--no-andor`; reversed local
+  declaration order; `s32 pad;` as first local; `--no-stack-spill` (+ pad, + reversed).
+- **Screening** (in the container, 8 worker processes, grouped by C file): each draft
+  goes into a standalone TU (the C file with every GLOBAL_ASM pragma removed and the
+  draft in place of its own pragma), compiled directly with the file's `cc` line from
+  `make -n -B` (so per-file OPT_FLAGS apply). The function's words are compared with
+  its `.s` (relocations masked, relocated symbol names must appear on the asm line, no
+  relocations against section symbols, i.e. no new .rodata/.data). ~1500 drafts take
+  about a minute.
+- **Apply**: insert every screened draft, rebuild the touched objects, compare each
+  whole object with the ROM (`check_files.py` logic, plus "no data section grew");
+  files that fail are redone one function at a time.
+- Yield: about 10% of functions up to 40 instructions match as generated, ~3% of
+  41-100, under 1% of 101-200. The rest of the session was hand-fixing near misses.
+
+Recurring fixes for near misses (IDO 5.3 -O2 -g3):
+- Byte constants >= 0x80 stored through `s8 *` assemble as `-1`/`0xFFC8`: use `u8 *`.
+- m2c misses stack arguments it never reads; count them from the caller's stack slot
+  offsets (`arg4` at `0x10($sp)` etc.).
+- Stack slot off by 4: add an unused `s32 pad;` as the first local (moves spills down)
+  or delete m2c's `spXX = temp;` spill copies (moves them up); declaration order of
+  locals also moves slots (`func_151AA72C`, `func_150E8854`).
+- A pointer kept in a register across both branches (`addiu vX, a0, 0x28` in two delay
+  slots) comes from a pointer local initialised before the `if`, not from a field
+  access in each branch.
+- A value reloaded instead of CSE'd: the source read it with a different type/cast.
+- Same register for two unrelated values: reuse one variable (`func_1519EF74`).
+- `var = 0; if (c) var = f(); return var;` from m2c often wants early returns.
+- Index arithmetic `base + i * size` vs `&((T *)base)[i]` changes `addu` operand
+  order; `(u8 *)p + i * k` vs `i * k + (u8 *)p` too (`func_150243AC`, `func_15157DD0`).
+- Operand order of commutative float ops sometimes follows the source and sometimes
+  not; try both, then give up.
+- Unsolved patterns worth a fresh look: a global loaded into `v0` then moved to `a0`
+  for a call (`if (D) { f(D); D = 0; }`, `func_1509D464`, `func_15080FE8`), and an
+  argument stored to its home slot in a call's delay slot although never reloaded
+  (`func_151AD110`).
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -220,15 +272,9 @@ porting to manual work.
      `D_8003B260` stays a tentative definition in the C file (needed for codegen) and
      gets its EU address from `undefined_syms.eu.txt`.
    - `init_214F0`, `game_D4C20`, `game_221290`: all GLOBAL_ASM; only placed.
-3. **31 functions reverted in the salvage** are near-misses worth retrying. Their
-   non-matching C attempts were not kept in git, so start them fresh: `func_150EB430 func_15108D7C func_1510ADF0 func_1510AE4C
-   func_15116EB0 func_1514AA08 func_15156544 func_15158748 func_1515AE90 func_1515C6C8
-   func_15188FC8 func_15195104 func_1519812C func_1519F678 func_1519F6D8 func_151A8FD0
-   func_151AA72C func_151AA7C0 func_151ABD38 func_151ABD88 func_151C1DC4 func_151CF1C0
-   func_151D2CC8 func_151D7CD4 func_151D8CC8 func_151EF840 func_15012F40 func_1502348C
-   func_1503211C func_15088688 func_150AFC18`.
-   Unmatched and ambiguous US functions in `match.json`. Most of the old list is
-   now handled; recheck against the current split before relying on it.
+3. ~~31 functions reverted in the salvage~~: 30 done in session 4. Left: `func_151EF840`
+   (`sqrtf`, see session 4 notes: it shares subsegment `game_eu_21D010` with
+   `osPiReadIo` and needs a file split with its own flags).
 4. **New decompilation** of the remaining ~3,540 asm functions (game is 38.7% by
    count but only 8.2% by bytes: the large functions are what's left). Use m2c
    (`tools/mips_to_c`), asm-differ, decomp-permuter, and decomp.me (IDO 5.3,
