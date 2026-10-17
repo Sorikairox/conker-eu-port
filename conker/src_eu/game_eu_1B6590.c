@@ -35,7 +35,33 @@ void func_1518900C(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15189040.s")
+s32 func_10004074(u8 *);
+
+void func_15189040(s32 arg0) {
+    s32 temp_s0;
+    s32 var_s1;
+    u8 *var_s2;
+
+    var_s1 = *D_800DF7C8;
+    var_s2 = NULL;
+    if (var_s1 != 0) {
+        do {
+            temp_s0 = (*(s32 *)((u8 *)var_s1 + 0xC));
+            if (arg0 == (*(s32 *)((u8 *)var_s1 + 0x10))) {
+                if (var_s2 == NULL) {
+                    *D_800DF7C8 = temp_s0;
+                } else {
+                    (*(s32 *)((u8 *)var_s2 + 0xC)) = temp_s0;
+                }
+                func_100043B4((*(s32 **)((u8 *)var_s1 + 8)), 2U);
+                func_10004074((u8 *) var_s1);
+            } else {
+                var_s2 = (u8 *) var_s1;
+            }
+            var_s1 = temp_s0;
+        } while (temp_s0 != 0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151890E4.s")
 

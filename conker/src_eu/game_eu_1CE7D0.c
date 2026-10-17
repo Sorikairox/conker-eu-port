@@ -5,7 +5,21 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A0A10.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A10A8.s")
+s32 func_1514CBE8(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+extern f32 D_800A90F0;
+
+void func_151A10A8(u8 *arg0) {
+    u8 *temp_s0;
+
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + (D_800A90F0 * D_800BE9A4));
+    if ((*(f32 *)((u8 *)arg0 + 0x38)) > 1.0f) {
+        temp_s0 = arg0 + 0x28;
+        do {
+            func_1514CBE8((*(f32 *)temp_s0), (*(f32 *)((u8 *)temp_s0 + 4)), (*(s32 *)((u8 *)temp_s0 + 8)), (func_150ADA68() * 25.0f) + 15.0f, 0, 0xFF, 5, 4, (s32) (*(u8 *)((u8 *)temp_s0 + 0xC)), 0.0f, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)));
+            (*(f32 *)((u8 *)temp_s0 + 0x10)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x10)) - 1.0f);
+        } while ((*(f32 *)((u8 *)temp_s0 + 0x10)) > 1.0f);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A11BC.s")
 

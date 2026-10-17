@@ -470,7 +470,28 @@ void func_1506D6B4(void) {
         func_1506D584();
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D74C.s")
+void func_1506D74C(void) {
+    f32 sp34;
+    f32 sp30;
+    f32 sp2C;
+
+    if (D_800D154C->in_water == 0) {
+        D_800D154C->gravity = 5.0f;
+        D_800D154C->y_velocity = 0.0f;
+    }
+    D_800D154C->y_position += 70.0f;
+    (*(s8 *)((u8 *)D_800D154C + 0x137)) = 0;
+    D_800D154C->disable_run = 0;
+    func_1505A184(D_800D154C->unk76, (f32) D_800D1580, 0.0f, &sp34, &sp30, &sp2C);
+    func_1505E650(D_800D154C, 0xFU, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    D_800D154C->x_position += sp34;
+    D_800D154C->z_position += sp30;
+    D_800D154C->unk100 |= 2;
+    D_800D154C->unk28 = 0.0f;
+    D_800D154C->unk83 = 0x14;
+    D_800D154C->unk31C->unk44 = 0xC;
+    D_800D154C->unk31C->unk54 = 0xA;
+}
 
 void func_1506D898(void) {
     D_800D154C->y_position -= 80.0f;

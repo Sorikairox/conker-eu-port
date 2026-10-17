@@ -23,9 +23,46 @@ void func_150E764C(f32 *arg0, f32 *arg1) {
     arg0[2] = arg1[7];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E766C.s")
+extern f32 D_800A16E0;
+extern f32 D_800A16E4;
+extern f32 D_800A16E8;
+extern f32 D_800A16EC;
+extern f32 D_800A16F0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7764.s")
+void func_150E766C(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
+    f32 temp_f16;
+    f32 temp_f2;
+
+    (*(f32 *)arg3) = func_150484A0((*(f32 *)arg2), (*(f32 *)((u8 *)arg2 + 8)));
+    (*(f32 *)((u8 *)arg3 + 8)) = (f32) (func_150ADA68() * D_800A16E0);
+    (*(f32 *)((u8 *)arg3 + 0x10)) = (f32) (func_150ADA68() * D_800A16E4);
+    (*(f32 *)((u8 *)arg3 + 0x18)) = (f32) (func_150ADA68() * 0.5f);
+    temp_f2 = (*(f32 *)arg2);
+    temp_f16 = (*(f32 *)((u8 *)arg2 + 8));
+    (*(f32 *)((u8 *)arg3 + 4)) = (f32) (func_150484A0(sqrtf((temp_f2 * temp_f2) + (temp_f16 * temp_f16)), (*(f32 *)((u8 *)arg2 + 4))) - D_800A16E8);
+    (*(f32 *)((u8 *)arg3 + 0xC)) = (f32) (func_150ADA68() * D_800A16EC);
+    (*(f32 *)((u8 *)arg3 + 0x14)) = (f32) (func_150ADA68() * D_800A16F0);
+    (*(f32 *)((u8 *)arg3 + 0x1C)) = (f32) (func_150ADA68() * 0.5f);
+}
+
+extern f32 D_800A16F4;
+extern f32 D_800A16F8;
+extern f32 D_800A16FC;
+extern f32 D_800A1700;
+extern f32 D_800A1704;
+extern f32 D_800A1708;
+extern f32 D_800A170C;
+
+void func_150E7764(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
+    (*(f32 *)arg3) = func_150484A0((*(f32 *)arg2), (*(f32 *)((u8 *)arg2 + 8)));
+    (*(f32 *)((u8 *)arg3 + 8)) = (f32) D_800A16F4;
+    (*(f32 *)((u8 *)arg3 + 0x10)) = (f32) (func_150ADA68() * D_800A16F8);
+    (*(f32 *)((u8 *)arg3 + 0x18)) = (f32) (func_150ADA68() * D_800A16FC);
+    (*(f32 *)((u8 *)arg3 + 4)) = (f32) D_800A1700;
+    (*(f32 *)((u8 *)arg3 + 0xC)) = (f32) D_800A1704;
+    (*(f32 *)((u8 *)arg3 + 0x14)) = (f32) (func_150ADA68() * D_800A1708);
+    (*(f32 *)((u8 *)arg3 + 0x1C)) = (f32) (func_150ADA68() * D_800A170C);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7810.s")
 

@@ -27,7 +27,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F594.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F730.s")
+s32 func_1516DF0C(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_1516F730(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    func_1516DF0C(2, 0, 0, 0x2D, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, arg1, 0xA, 0xA, arg0, 0x3C, 0, 0, 0x81, 4, 0, 1, 0, 0, 0, 4, 2, (s32) arg2, arg3);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F868.s")
 

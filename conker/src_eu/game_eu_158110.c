@@ -17,7 +17,30 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512B2C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512B670.s")
+s32 func_1512B2C4();
+
+void func_1512B670(u8 *arg0) {
+    s32 temp_v0;
+    s32 temp_v0_2;
+    s32 temp_v0_3;
+
+    temp_v0 = (*(s32 *)((u8 *)arg0 + 0x2C));
+    if ((temp_v0 & ~0x100) && (D_800BEAC0 == 0) && (D_800C3671 == 0)) {
+        if (temp_v0 != 0x40) {
+            temp_v0_2 = (*(s32 *)((u8 *)arg0 + 0x84));
+            if ((temp_v0_2 & 8) && !(temp_v0_2 & 0x200) && ((*(u8 *)((u8 *)arg0 + 0x23C)) == 0)) {
+                temp_v0_3 = (*(s32 *)((u8 *)arg0 + 0x5F0));
+                if (!(temp_v0_3 & 0x80) && !(temp_v0_3 & 0x40)) {
+                    func_1512B2C4();
+                    return;
+                }
+            }
+        }
+        (*(s16 *)((u8 *)arg0 + 0x5F8)) = 1;
+        (*(s16 *)((u8 *)arg0 + 0x5FC)) = 2;
+        (*(s16 *)((u8 *)arg0 + 0x5FE)) = 0x32;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512B728.s")
 
