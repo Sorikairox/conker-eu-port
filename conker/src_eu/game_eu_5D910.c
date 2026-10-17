@@ -89,7 +89,24 @@ s32 func_1503211C(u8 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150334A8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503356C.s")
+s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
+
+s32 func_1503356C(u8 *arg0, s32 arg1) {
+    u8 *var_s0;
+
+    var_s0 = *(u8 **)(arg0 + 0x48);
+    if (var_s0 == NULL) {
+        return 0;
+    }
+    if ((*(u16 *)(var_s0 + 4) & 0x8000) != 0x8000) {
+        func_1503F8A8(var_s0, 0, 0, 0x3F800000, 0.0f, 1);
+        var_s0 = *(u8 **)(arg0 + 0x48);
+    }
+    if ((*(f32 *)(var_s0 + 0x18) - 1.0f) <= *(f32 *)(var_s0 + 8)) {
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033618.s")
 

@@ -72,6 +72,16 @@ void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 4)) = arg3;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3990.s")
+s32 func_150A39E4();
+
+s32 func_150A3990(u8 *arg0) {
+    if (arg0[0x14] == 1) {
+        return 0;
+    }
+    if (!(arg0[0x15] & 3)) {
+        return func_150A39E4();
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A39E4.s")
