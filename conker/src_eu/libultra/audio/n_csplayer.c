@@ -105,9 +105,6 @@ extern void (*jtbl_8002C4CC[])(void);
 // jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_csplayer/__n_CSPHandleMIDIMsg.s")
 
-void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event);
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_csplayer/__n_CSPHandleMetaMsg.s")
-#if 0 // US version; EU code differs
 void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 {
   ALTempoEvent    *tevt = &event->msg.tempo;
@@ -177,7 +174,6 @@ void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
     }
   }
 }
-#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_csplayer/__n_CSPRepostEvent.s")
 

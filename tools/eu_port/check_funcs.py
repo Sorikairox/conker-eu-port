@@ -86,6 +86,11 @@ def main():
             if s["st_shndx"] == tidx and s["st_info"]["type"] == "STT_FUNC":
                 funcs.append((s["st_value"], s["st_size"], s.name))
         funcs.sort()
+        # static functions can carry st_size 0: size them up to the next symbol
+        for k, (a, sz, nm) in enumerate(funcs):
+            if sz == 0:
+                nxt = funcs[k + 1][0] if k + 1 < len(funcs) else len(data)
+                funcs[k] = (a, nxt - a, nm)
 
     bad = 0
     for addr, size, name in funcs:

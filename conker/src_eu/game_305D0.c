@@ -9,13 +9,10 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/func_150031EC.s")
 
-s32 func_150034B4(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/func_150034B4.s")
-#if 0 // US version; EU code differs
 s32 func_150034B4(void) {
       s32 i;
 
-      for (i = 0; i < 7762; i++) {
+      for (i = 0; i < 7764; i++) {
           D_800B0E58[i] = -1;
           D_800BC448[i] = 0;
       }
@@ -29,7 +26,6 @@ s32 func_150034B4(void) {
           D_800D9F60 = 1;
       }
 }
-#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/func_15003570.s")
 // NON-MATCHING: something along these lines
@@ -49,7 +45,7 @@ s32 func_150034B4(void) {
 //     phi_s2 = D_80091D20;
 //     phi_s3 = D_800B87A0;
 //
-//     for (i = 0; i < 7762; i++) {
+//     for (i = 0; i < 7764; i++) {
 //         if ((phi_s0 & 1) != 0) {
 //             phi_s0 = phi_s0 - 1;
 //             phi_s1 = 1;
@@ -134,27 +130,13 @@ void func_150038A0(void) {
     D_800DBE62 = (u8)1;
 }
 
-s32 func_1500390C(s32 arg0);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_305D0/func_1500390C.s")
-#if 0 // US version; EU code differs
 s32 func_1500390C(s32 arg0) {
     s32 i;
 
-    for (i = 0; i < 7762; i++) {
+    for (i = 0; i < 7764; i++) {
         if (arg0 == D_800B0E58[i]) {
             return i;
         }
     }
     return -1;
-}
-#endif
-
-void func_150039B0(s32 arg0) {
-}
-
-void func_150039BC(s32 arg0) {
-    D_800DBE5C = arg0;
-    if (D_800DBE5C) {
-        D_800DBE5C += 8;
-    }
 }

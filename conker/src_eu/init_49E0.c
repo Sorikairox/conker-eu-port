@@ -181,9 +181,9 @@ void func_10004FE0(void) {
     }
 }
 
-void func_10005020(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/init_49E0/func_10005020.s")
-#if 0 // US version; EU code differs
+extern u8 D_eu_8002AFA8;
+extern s8 D_eu_8002AE24;
+
 void func_10005020(void) {
     void *fb;
 
@@ -191,8 +191,13 @@ void func_10005020(void) {
     fb = D_8002AC50->framebuffer;
     if ((D_8002AC50->flags & OS_SC_SWAPBUFFER) && (D_8002AC5C == 0)) {
         func_1515FDA0(fb);
+        // EU: blank the VI once before the first swap
+        if (D_eu_8002AFA8 == 0) {
+            osViBlack(FALSE);
+            D_eu_8002AFA8 = 1;
+        }
         osViSwapBuffer(fb);
+        D_eu_8002AE24 = 1;
     }
     osSendMesg(D_8002AC50->msgQ, D_8002AC50->msg, 1);
 }
-#endif
