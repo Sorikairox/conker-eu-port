@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (sixth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (seventh session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,14 +17,14 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2664 / 5911 functions in C (45.1%)**; code bytes 265,996 / 2,253,856 (11.8%)
-  (end of session 6, from `verify_all.sh`).
-  - init: 360/540 functions (38.2% of bytes)
-  - game: 2273/5328 (9.5%)
+- **2682 / 5911 functions in C (45.4%)**; code bytes 268,452 / 2,253,856 (11.9%)
+  (end of session 7, from `verify_all.sh`).
+  - init: 361/540 functions (38.5% of bytes)
+  - game: 2290/5328 (9.6%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
-    2622 (253,312 bytes) after session 5.
+    2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -55,6 +55,7 @@ Commits on `eu`:
 | `8d3f205`…`fc0e53a` | Session 4: 189 functions (near-misses, m2c pipeline, hand fixes); tools in `tools/eu_port/m2c/` |
 | `8430db4`…`3d5a326` | Session 5: 59 functions (variant screening, near misses, sqrtf split, 40 libultra functions at -O1) |
 | `3df102d`…`204343f` | Session 6: 42 functions (libultra controller/pfs/SI/PI/VI/thread at -O1, libc ldiv/_Litob at -O2, `narrow.py`) |
+| `4b80d37`…`4086ef1` | Session 7: u8 handler prototypes, 16 handlers, `__sinf`/`sinf` with their own .rodata/.data (first data-blob splits) |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -346,6 +347,74 @@ Skipped libultra (still asm):
 - `MusPtrBankGetCurrent` (0x10027938) is really the tail of `osPiGetCmdQueue`; its symbol is
   harmless and left in `symbol_addrs.eu.txt`.
 
+## Session 7: u8 handler prototypes, first data-blob splits
+
+Sequential, 4 work commits (`4b80d37`..`4086ef1`), +18 functions (2664 -> 2682), +2,456 bytes.
+
+### u8/u16 parameters (`(obj, msg, u8 event)` handlers)
+
+- `m2c/u8params.py` lists every asm function whose prologue re-truncates an argument register
+  (`andi $tX, $aN, 0xFF|0xFFFF` then `or $aN, $tX, $zero`, before any other write to `$aN`):
+  239 params in 218 functions. Output `func file argN u8|u16`.
+- `m2c/fixprotos.py list [--apply]` retypes those params in every one-line prototype in
+  `include/*.h` and `src_eu` (FIX/OK/ODD report). Only 20 prototypes needed changes (most
+  handlers have none). After `--apply`, touch all C files and run `m2c/verify`: two callers
+  changed codegen and were fixed (`game_A28B0` `func_150771F0`: `u8 var_a1`; `game_eu_CC5F0`:
+  drop a now-redundant `& 0xFF`).
+- `m2c/u8run.sh [build/u]`: the whole pipeline (list, fresh contexts, `gen2.py` with the new
+  `ONLY=<list>` filter, `narrow.py` forced by the list, screen n0..n7, merge). Result: **0 OK**.
+  The narrowed m2c drafts are mostly 3-30 words off; the u8 type alone was not the blocker.
+  `m2c/protofix.py` (prototypes for called u8 functions) gave 1 more.
+- So the 16 handlers came from hand work with the helpers below. Patterns that matched:
+  - "object deleted" (event 0): `id = msg[0]; if (id == obj->ref || obj->b4 == msg->b4) func_1516972C(obj);`
+    -- the `id` local is required (puts the value in `v0`).
+  - "swap ids" (event 0x2D, msg = {s32 old, s32 new, u8 b8, u8 b9}):
+    `if (msg[0] == *p) { *p = msg[1]; p[4] = msg->b9; return; } if (msg[1] == *p) { *p = msg[0]; p[4] = msg->b8; }`
+    with `p` a pointer local set before the event test (no `cur` local; plain `else if` also works
+    when no case follows).
+  - Dispatch: `f = D_xxx[obj->b4D]; if (f != NULL) f(obj, msg, event);` with
+    `extern void (*D_xxx[])(u8 *, u8 *, u8);` -- pass all three args through (m2c drops them).
+  - Pass-through wrappers need the callee prototyped with its u8 params, else IDO re-truncates.
+  - An intermediate pointer kept in `v0` (`lw v0, 0x98(a0); lw v1, 4(v0)`) needs its own local.
+  - `sw a0, home; lw t7, home` (arg0 reloaded from its home slot): take its address,
+    `p = (*(u8 **)&arg0) + 0x28` (`func_150D380C`).
+  - Multiple `return X;` compile to `b end; li v1, X` + `move v0, v1` at -O2 -g3.
+  - u16 params do not always show the `or`: `andi a3, a1, 0xFFFF` alone when `a1` is reused
+    (`func_1508220C`: `u16` param + callee prototype `(u8 *, s32, u8)`).
+- **Unsolved handler shape** (blocks most 2-case handlers, e.g. `func_151AEBF0`,
+  `func_150FE08C`, `func_151590AC`, and the US note in `game_18D770.c` `func_15163FEC`): the
+  last branch of an if-chain ends `sw/sb; jr ra; nop` (delay slot not filled) where IDO fills it
+  for every source shape tried (if/else-if, switch with/without default, returns, goto, `-O2`,
+  `-O2 -g`, `-O3`). Everything else in those functions matches.
+- New helpers in `m2c/` (host side): `tryall func a.c b.c ...` (screens several drafts in
+  parallel, one line each; `SCREEN_OPT="-O2"` overrides the file's -O/-g flags, also honoured by
+  `screen.py`), `keep func draft.c` (collects a matched draft in `conker/build/hand/` for
+  `apply.py build/hand`; move the dir away after applying), `asm func...` (compact listing).
+  `screen.py` takes `SCREEN_TMP` so parallel runs don't collide.
+
+### Data blobs: first real .rodata/.data pieces
+
+- Mechanism: a C file gets its own section by splitting the containing blob in
+  `conker/conker.eu.yaml`: `[a, rodatabin] -> [a, rodatabin], [x, .rodata, <stem>], [y, rodatabin]`.
+  `tools/eu_port/rodata_split.py <stem> <rom start> <rom end> [--section .data]` does the edit.
+  Then define the constants in the C file with the exact bytes (object sections are 16-byte
+  aligned/padded), re-split (`rm -rf conker/asm conker/build`, `*_auto.txt`, `make extract`) and run
+  the full `verify_all.sh` (only the full ROM check covers data bytes; `check_files` is .text only).
+- **splat links all `.data`-type subsegments of a segment before all `.rodata` ones** (see the
+  generated `conker/conker.ld`). A `.data` piece is therefore only possible where everything
+  before it is data-typed: `game_data` now starts with `databin` pieces (linked as `.data`) up to
+  a provisional boundary at rom 0x22D990 (below the first jump table `jtbl_8008891C`), then
+  `rodatabin`. The real boundary is somewhere in 0x22B4E0..0x22D990; move it when a file needs it.
+  `init_data` is still all rodatabin (fine while only .rodata pieces are carved there).
+- Done: `__sinf` (`init_eu_26870.c`, now only `__sinf`, -O2 -g3; the SpRaw functions moved to the
+  new `init_eu_26A30.c`, -O1) with .rodata 0x2CC30-0x2CC80 (P[5], rpi, pihi, pilo, zero as `du`/`fu`
+  unions); `__libm_qnan_f = 0x8002CC80` in `undefined_syms.eu.txt`. Game `sinf` (float version,
+  `libultra/gu/sinf.c`): .data 0x22B4D0 (`static fu rpi, pihi, pilo, zero`), .rodata 0x23E3C0
+  (`static const fu P[]`). Both matched first try.
+- `cosf` (game, same layout: .data 0x22B4C0, .rodata 0x23E3A0) is a C draft in a comment in
+  `libultra/gu/cosf.c`: all but `dn`/`dx` register choice (f12/f2) matches. Needs
+  `ABS(d) ((d) > 0 ? ...)` (int 0) with `ROUND` against `0.0f`, else the zero constant is CSE'd.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -445,18 +514,23 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
-   Next steps (session 5):
-   - **Remaining libultra C** (see session 6 "Skipped"): `osPfsChecker` group
-     (`init_eu_289A0` and `pfschecker2.c`), osLeoDiskInit (`func_10027B50`), `__sinf`/`sinf`
-     (needs data split), the unidentified functions in `init_eu_26B30`.
+   Next steps (session 7):
+   - **Handlers**: ~200 functions with u8 params remain asm (`m2c/u8params.py`); the drafts in
+     `conker/build/u` (regenerate with `m2c/u8run.sh`) are the starting point. Do the 1-case
+     handlers with the patterns above; the 2-case ones wait for the unfilled-delay-slot puzzle
+     (try: an empty statement/macro after the last store, a `do {} while (0)` wrapper, `register`
+     locals, or splitting the file at different flags).
+   - **Data split**: carve `.rodata` for C files that need constants (any function m2c drops for
+     `SECREL`/literal pools) with `rodata_split.py`. For `.data` pieces in `game_data`, keep them
+     before 0x22D990 or move the boundary. `init_data`/`debugger_data` would need the same
+     databin prefix before a `.data` piece. Finish `cosf`.
+   - **Remaining libultra C**: `osPfsChecker` group (`init_eu_289A0` and `pfschecker2.c`),
+     osLeoDiskInit (`func_10027B50`), the unidentified functions in `init_eu_26B30`.
      Handwritten asm (leave as is): `bzero`, `bcopy`, `__osGetSR/__osSetSR`,
      `__osSetFpcCsr`, `__osDisableInt/__osRestoreInt`, `osInvalICache/DCache`,
      `osWritebackDCache(All)`, `osGetCount`, `__osSetCompare`, `osMapTLB/osUnmapTLB`,
      `__osProbeTLB`, `osSetIntMask`, `sqrtf` (init copy), the `__ll_*` helpers (compiled
      with a different compiler), `func_10007D14` (`__osPopThread`, from exceptasm.s).
-   - **Prototype clean-up for `narrow.py`**: give the `(obj, msg, u8 event)` handlers `u8`
-     third parameters in `functions.h`/file prototypes (checking every caller still
-     matches), then regenerate drafts and screen `narrow.py` variants again.
    - Game-side copies of libultra exist too (`game_eu_21D010`, `game_eu_21E320`); look
      for more `func_151E`/`func_151F` functions that call `__osDisableInt` or touch
      `0xA4xx` registers.
@@ -466,7 +540,8 @@ porting to manual work.
      spilled as a byte across a call), `func_150D03A8` (one stack slot),
      `func_1514EA78 func_1514EB28 func_1514EBD8 func_1514EC88` (`v1`/`v2` choice),
      `func_1509CEA8` (unrolled `for` loop, init order), `func_15142E24 func_15052260
-     func_151C2600` (100+ instructions). `conker/build/best.txt` has the full list.
+     func_151C2600` (100+ instructions); session 7: `func_151597A0`, `func_151596F4`
+     (multi-return float compares, SIZE-1), `func_151AEBF0` (delay slot only).
    - `func_151EF7B0` matches as C but is followed by 0x40 bytes of nop padding in its
      file (`game_eu_21CFC0`), more than the 16-byte object alignment; needs an asm
      padding block or a different file split.
@@ -475,10 +550,9 @@ porting to manual work.
    - About 250 functions screen as `SIZE±1`; quick looks found single-instruction
      differences that resisted easy fixes (e.g. `func_150104F0`: `or v0, zero, zero`
      stored twice).
-   - Small functions are mostly done; what is left needs hand work or real types.
-     Naming structs (`struct127` objects, `struct_eu_node` lists, message handlers
-     with the `(obj, msg, u8 event)` signature) would make m2c's drafts much closer.
-5. Later: split EU data properly (data/rodata/bss instead of blobs), document asset
+   - Naming structs (`struct127` objects, `struct_eu_node` lists, the message struct
+     `{s32 old; s32 new; u8 b8, b9}`) would make m2c's drafts much closer.
+5. Later: finish splitting EU data (started in session 7, see above), document asset
    formats, then the PC port.
 
 ## Pitfalls already hit
