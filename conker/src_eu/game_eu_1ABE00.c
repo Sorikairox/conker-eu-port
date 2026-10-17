@@ -13,7 +13,12 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517EA18.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517EFBC.s")
+Gfx *func_1517EFBC(Gfx *arg0) {
+    gDPPipeSync(arg0++);
+    gDPSetCombine(arg0++, 0xFFB3FF, 0xFF65FEFF);
+    gDPSetOtherMode(arg0++, 0x2C0F, 0x504344);
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517F01C.s")
 

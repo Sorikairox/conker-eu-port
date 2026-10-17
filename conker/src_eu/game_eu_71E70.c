@@ -3,7 +3,9 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044660.s")
+void func_15044660(void) {
+    D_800CC1BC = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044670.s")
 
@@ -22,17 +24,58 @@ void func_15044948(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044E68.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044FD4.s")
+void func_15044FD4(u8 *arg0) {
+    s16 *temp_v0 = *(s16 **)(arg0 + 0x18);
+    s16 temp_t0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045030.s")
+    *(s16 *)(arg0 + 6) = temp_v0[0];
+    *(s16 *)(arg0 + 8) = temp_v0[1];
+    *(s16 *)(arg0 + 0xA) = temp_v0[2];
+    temp_t0 = **(s16 **)(arg0 + 0x1C) / 32;
+    *(s16 *)(arg0 + 0x10) = temp_t0;
+    *(s16 *)(arg0 + 0x12) = temp_t0;
+    *(s16 *)(arg0 + 0x14) = temp_t0;
+    func_15044E68(arg0);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045090.s")
+s32 func_15045030(u8 *arg0) {
+    func_1505D1C4((f32)*(s16 *)(arg0 + 6), (f32)*(s16 *)(arg0 + 8), (f32)*(s16 *)(arg0 + 0xA), *(s16 *)(arg0 + 0x10), 0xFF, 0, 0, 0);
+    return 0;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150450D8.s")
+void func_15045090(void) {
+    if (D_800CC2D0->stunned == 0) {
+        if (D_800CC2D0->immune == 0) {
+            func_1505D024(D_800CC2D0, 5, D_800CC2D0->unk7A, -1);
+        }
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045130.s")
+void func_150450D8(void) {
+    if (D_800CC2D0->stunned == 0) {
+        if (D_800CC2D0->immune == 0) {
+            if (D_800C35EA != 1) {
+                func_1505D024(D_800CC2D0, 4, D_800CC2D0->unk7A, -1);
+            }
+        }
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045178.s")
+void func_15045130(void) {
+    if (D_800CC2D0->stunned == 0) {
+        if (D_800CC2D0->immune == 0) {
+            func_1505D024(D_800CC2D0, 0x40, D_800CC2D0->unk7A, -1);
+        }
+    }
+}
+
+void func_15045178(void) {
+    if (D_800CC2D0->stunned == 0) {
+        if (D_800CC2D0->immune == 0) {
+            func_1505D024(D_800CC2D0, 1, D_800CC2D0->unk7A, -1);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150451C0.s")
 

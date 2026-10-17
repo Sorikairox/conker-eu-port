@@ -9,9 +9,13 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147008.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147128.s")
+void func_15147128(s32 arg0, s32 arg1, s32 arg2) {
+    func_15147168(arg0, arg1, arg2, 0);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147148.s")
+void func_15147148(s32 arg0, s32 arg1, s32 arg2) {
+    func_15147168(arg0, arg1, arg2, 1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147168.s")
 

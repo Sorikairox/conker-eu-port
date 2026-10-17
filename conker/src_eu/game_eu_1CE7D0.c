@@ -15,7 +15,8 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A15C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A177C.s")
+void func_151A177C(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1794.s")
 
@@ -43,7 +44,13 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3084.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3134.s")
+void func_151A3134(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 *arg5) {
+    f32 temp_f0 = 1.0f - arg4;
+
+    arg5[0] = arg0[0] * temp_f0;
+    arg5[1] = arg0[1] * temp_f0;
+    arg5[2] = arg0[2] * temp_f0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3180.s")
 

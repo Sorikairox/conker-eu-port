@@ -3,12 +3,18 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/func_15104B60.s")
+void func_15104B60(s32 arg0, s32 arg1, s32 arg2) {
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/func_15104B74.s")
+s32 func_15104B74(s32 arg0, s32 arg1) {
+    return 1;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/func_15104B88.s")
+void func_15104B88(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/func_15104BA0.s")
+s32 func_15104BA0(s32 arg0, s32 arg1) {
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_132370/func_15104BB4.s")

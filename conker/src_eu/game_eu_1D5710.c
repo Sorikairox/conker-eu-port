@@ -11,7 +11,9 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A88F0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8B10.s")
+void func_151A8B10(u8 *arg0) {
+    func_151D5E30(arg0 + 0x6C, arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8B34.s")
 

@@ -9,7 +9,9 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030448.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150305E0.s")
+void func_150305E0(s32 arg0, s32 arg1) {
+    func_15030600(arg0, arg1, 0xFF);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030600.s")
 
@@ -29,7 +31,12 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150314B4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031C1C.s")
+void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    u8 *temp_v0 = func_15031C4C(arg0, arg1, arg3);
+    if (temp_v0 != NULL) {
+        temp_v0[3] = arg2;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031C4C.s")
 
@@ -61,7 +68,15 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033A7C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033AD4.s")
+s32 func_15033AD4(u8 *arg0, s32 arg1) {
+    *(s32 *)(arg0 + 0x38) += D_800BE9E4;
+    if (*(s32 *)(arg0 + 0x38) >= 16) {
+        *(s32 *)(arg0 + 0x38) = 0;
+        *(s32 *)(arg0 + 0x3C) ^= 1;
+    }
+    *(s16 *)(arg0 + 0x18) = D_800906AC[*(s32 *)(arg0 + 0x3C)];
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033B28.s")
 
@@ -71,13 +86,39 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033ECC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150340F0.s")
+s32 func_150340F0(s32 arg0, u8 *arg1) {
+    if (arg1[5] == 3) {
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15034118.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15034174.s")
+u8 *func_15034174(u8 *arg0) {
+    u8 *var_v1;
+    u8 *next;
+    for (var_v1 = (u8 *)D_800C3EE0; var_v1 != NULL; var_v1 = next) {
+        next = *(u8 **)(var_v1 + 0x54);
+        if (arg0[0x3B] == var_v1[0]) {
+            return var_v1;
+        }
+    }
+    return NULL;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150341B4.s")
+void func_150341B4(s32 arg0, s32 arg1) {
+    u8 *var_v0;
+    u8 *next;
+    for (var_v0 = (u8 *)D_800C3EE0; var_v0 != NULL; var_v0 = next) {
+        next = *(u8 **)(var_v0 + 0x54);
+        if (arg0 == var_v0[0]) {
+            var_v0[0] = arg1;
+        } else if (arg1 == var_v0[0]) {
+            var_v0[0] = arg0;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150341FC.s")
 

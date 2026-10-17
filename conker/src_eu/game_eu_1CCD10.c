@@ -25,7 +25,14 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0DBC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0E98.s")
+void func_151A0E98(u8 *arg0) {
+    u8 *p = *(u8 **)(arg0 + 0x28) + 0x58;
+    if (arg0[0x2C] == 6) {
+        *(s32 *)(p + 4) = 0;
+    } else {
+        *(s32 *)(p + 0xC) = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0EC0.s")
 

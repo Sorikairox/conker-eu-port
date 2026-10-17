@@ -9,7 +9,9 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A126C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A1520.s")
+u8 *func_150A1520(u8 *arg0) {
+    return arg0 + 0x400;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A152C.s")
 

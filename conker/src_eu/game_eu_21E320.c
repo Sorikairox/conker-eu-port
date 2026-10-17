@@ -7,6 +7,8 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21E320/func_151F0B60.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21E320/func_151F0BA4.s")
+void func_151F0BA4(void) {
+    osSendMesg(&D_80042E38, NULL, OS_MESG_NOBLOCK);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21E320/func_151F0BD0.s")

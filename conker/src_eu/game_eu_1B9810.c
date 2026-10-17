@@ -13,7 +13,19 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C628.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CAB0.s")
+s32 func_1518CAB0(u8 *arg0) {
+    u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
+    s32 var_v1 = *(s16 *)(arg0 + 0x1C) * 8;
+
+    if (var_v1 >= 0x100) {
+        var_v1 = 0xFF;
+    }
+    temp_v0[0x1B] = var_v1;
+    if (temp_v0[0x1B] < 0) {
+        return 0;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CAEC.s")
 

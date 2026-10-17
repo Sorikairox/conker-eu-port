@@ -21,7 +21,9 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038910.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039D44.s")
+void *func_15039D44(s32 arg0, s32 arg1) {
+    return &D_80098418[arg1];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039D68.s")
 

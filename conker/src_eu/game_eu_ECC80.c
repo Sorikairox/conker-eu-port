@@ -3,7 +3,8 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF470.s")
+void func_150BF470(s32 arg0) {
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF47C.s")
 

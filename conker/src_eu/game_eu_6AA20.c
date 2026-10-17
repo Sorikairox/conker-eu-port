@@ -7,9 +7,19 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D658.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D728.s")
+void func_1503D728(s32 *arg0, s32 arg1) {
+    s32 temp_v0 = *arg0;
+    if ((temp_v0 != 0) && !(temp_v0 & 0x0F000000)) {
+        *arg0 = temp_v0 + arg1;
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D74C.s")
+void func_1503D74C(s32 *arg0, s32 arg1) {
+    while (*arg0 != 0) {
+        *arg0 += arg1;
+        arg0 += 2;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D774.s")
 

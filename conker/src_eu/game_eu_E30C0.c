@@ -7,10 +7,18 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5988.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5CA4.s")
+void func_150B5CA4(void *arg0) {
+    func_151D2B4C(6);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5CC8.s")
+void func_150B5CC8(void *arg0) {
+    func_150B5CA4(arg0);
+    func_1514933C(arg0);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5CF4.s")
+void func_150B5CF4(void *arg0) {
+    func_150B5CA4(arg0);
+    func_15149368(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5D20.s")

@@ -17,11 +17,15 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FCA0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510F800.s")
+void func_1510F800(s32 arg0) {
+    func_150A4ED4(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FDA0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FE4C.s")
+s32 func_1510FE4C(s32 arg0) {
+    return arg0 & 0x1F;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FE58.s")
 

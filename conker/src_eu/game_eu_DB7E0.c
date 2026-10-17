@@ -7,6 +7,8 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/func_150AE760.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/func_150AE83C.s")
+s32 func_150AE83C(s32 arg0) {
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DB7E0/func_150AE84C.s")

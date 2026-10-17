@@ -11,4 +11,7 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_151674DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_15167548.s")
+Gfx *func_15167548(Gfx *arg0, s32 arg1, s32 arg2) {
+    gSPMatrix(arg0++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    return arg0;
+}

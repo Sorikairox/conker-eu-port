@@ -3495,6 +3495,75 @@ typedef struct {
     s8  unkE;
     u8  padF;
 } struct_eu_BE818;
+typedef struct {
+    /* 0x00 */ s32 unk0;
+    /* 0x04 */ s32 unk4;
+    /* 0x08 */ u16 unk8;
+    /* 0x0A */ u8  padA[2];
+    /* 0x0C */ s32 unkC;
+    /* 0x10 */ s32 unk10;
+} struct_eu_800877D0; // size 0x14
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    u8 padC[0x14 - 0xC];
+    f32 unk14;
+    u8 pad18[0x24 - 0x18];
+    s16 unk24;
+    u8 pad26;
+    s8 unk27;
+    u8 pad28[0x31 - 0x28];
+    u8 unk31;
+    u8 pad32[0x46 - 0x32];
+    u8 unk46;
+    u8 pad47[0x84 - 0x47];
+} struct_eu_80087640; // size 0x84
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} struct_eu_s32pair;
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+} struct_eu_words3; // size 0xC
+typedef struct struct_eu_1B6590 {
+    /* 0x00 */ u8 pad0[0x6];
+    /* 0x06 */ s16 unk6;
+    /* 0x08 */ u8 pad8[0x4];
+    /* 0x0C */ struct struct_eu_1B6590 *unkC;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ s32 unk14;
+} struct_eu_1B6590; // D_800DF7C8 list node
+typedef struct {
+    /* 0x00 */ u8  pad0[6];
+    /* 0x06 */ u8  unk6;
+    /* 0x07 */ u8  unk7;
+    /* 0x08 */ u8  unk8;
+    /* 0x09 */ u8  pad9[3];
+    /* 0x0C */ f32 unkC;
+    /* 0x10 */ u8  pad10[0x14];
+} struct_eu_800DFB30; // size 0x24
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    u8  pad6;
+    u8  unk7;
+    u8  pad8[0x8];
+} struct_eu_800D2778; // size 0x10
+typedef struct {
+    s32 unk0;
+} struct_eu_s32x1;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} struct_eu_s32x2;
+typedef struct {
+    /* 0x00 */ u8 unk0[0xC];
+} struct_eu_size0C;
 /* EU: end new */
 
 #endif

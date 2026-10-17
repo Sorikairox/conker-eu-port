@@ -5,7 +5,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8850.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C89F4.s")
+void func_150C89F4(s32 arg0) {
+    if (arg0 == 0) {
+        func_150C8850();
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C851C.s")
 

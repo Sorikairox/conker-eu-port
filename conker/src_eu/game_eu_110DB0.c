@@ -27,4 +27,8 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E469C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E46F4.s")
+s32 func_150E46F4(f32 *arg0) {
+    arg0[0x2C / 4] += arg0[0x4C / 4] * D_800BE9A4;
+    arg0[0x30 / 4] += arg0[0x54 / 4] * D_800BE9A4;
+    return 1;
+}

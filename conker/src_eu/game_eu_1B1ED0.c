@@ -13,39 +13,59 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151859C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185AC4.s")
+s32 func_15185AC4(f32 *arg0) {
+    return arg0[2] < arg0[1];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185AEC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185BEC.s")
+s32 func_15185BEC(f32 *arg0) {
+    return arg0[0] < -arg0[2];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185C18.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185D20.s")
+s32 func_15185D20(f32 *arg0) {
+    return arg0[1] < -arg0[2];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185D4C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185E44.s")
+s32 func_15185E44(f32 *arg0) {
+    return arg0[2] < arg0[0];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185E6C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185F6C.s")
+s32 func_15185F6C(f32 *arg0) {
+    return D_800D3AA8 < arg0[2];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185F98.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186098.s")
+s32 func_15186098(f32 *arg0) {
+    return arg0[2] < D_800D3AAC;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151860C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151861B4.s")
+s32 func_151861B4(f32 *arg0) {
+    return *arg0 <= 0.0f;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151861DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151862CC.s")
+s32 func_151862CC(f32 *arg0) {
+    return arg0[1] <= 0.0f;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151862F4.s")
+s32 func_151862F4(f32 *arg0) {
+    return *arg0 > 0.0f;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_1518631C.s")
+s32 func_1518631C(f32 *arg0) {
+    return arg0[1] > 0.0f;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186344.s")
 

@@ -34,11 +34,17 @@ void func_1503F1A8(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F2B4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F368.s")
+void func_1503F368(s32 arg0, s32 arg1) {
+    func_1503EE68(arg0, 2.0f, 2.0f, 0);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F39C.s")
+void func_1503F39C(s32 arg0, s32 arg1) {
+    func_1503EE68(arg0, 1.0f, 2.0f, 1);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F3C8.s")
+void func_1503F3C8(s32 arg0, s32 arg1) {
+    func_1503EE68(arg0, 2.06f, 3.0f, 1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F3F8.s")
 

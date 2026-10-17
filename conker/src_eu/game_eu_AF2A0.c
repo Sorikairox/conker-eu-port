@@ -2,6 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct {
+    /* 0x000 */ u8 pad0[0x1C9];
+    /* 0x1C9 */ u8 unk1C9;
+    /* 0x1CA */ u8 pad1CA[0xFA];
+    /* 0x2C4 */ u8 *unk2C4;
+    /* 0x2C8 */ u8 unk2C8;
+} struct_eu_AF2A0;
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15081A90.s")
 
@@ -43,7 +51,14 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083FB0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084000.s")
+s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    struct127 *temp_v0 = func_1505EEF4(arg0, arg1, arg2, arg3);
+
+    if (temp_v0 != NULL) {
+        return temp_v0 - D_800CC2D0;
+    }
+    return -1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150844AC.s")
 
@@ -55,9 +70,28 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150849C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E08.s")
+u8 func_15084E08(struct_eu_AF2A0 *arg0) {
+    s32 temp_v1 = arg0->unk1C9;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E34.s")
+    if (temp_v1 != 0) {
+        return arg0->unk2C4[temp_v1 - 1];
+    }
+    return arg0->unk2C4[0];
+}
+
+u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
+    s32 temp_v1;
+
+    if (arg0->unk1C9 != 0) {
+        temp_v1 = arg0->unk1C9 - 1;
+    } else {
+        temp_v1 = (arg0->unk2C8 != 0) ? arg0->unk2C8 - 1 : 0;
+    }
+    if (arg1 != NULL) {
+        *arg1 = temp_v1;
+    }
+    return arg0->unk2C4[temp_v1];
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E80.s")
 

@@ -19,4 +19,10 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15184298.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15184688.s")
+s32 func_15184688(u8 *arg0) {
+    u8 *temp_v0 = *(u8 **)(arg0 + 0x31C);
+    if ((temp_v0 != NULL) && (temp_v0[0x57] != 0)) {
+        return 1;
+    }
+    return 0;
+}

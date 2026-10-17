@@ -9,7 +9,15 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15188FC8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_1518900C.s")
+void func_1518900C(s32 arg0) {
+    struct_eu_1B6590 *var_v0 = (struct_eu_1B6590 *)D_800DF7C8[0];
+    while (var_v0 != NULL) {
+        if (arg0 == var_v0->unk10) {
+            var_v0->unk6 = 0;
+        }
+        var_v0 = var_v0->unkC;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15189040.s")
 

@@ -17,4 +17,13 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C6750.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C6840.s")
+s32 func_151C6840(u8 *arg0, s32 arg1, s32 arg2) {
+    switch (arg0[4]) {
+        case 0x5A:
+        case 0x74:
+        case 0x7A:
+            return 0;
+        default:
+            return 1;
+    }
+}
