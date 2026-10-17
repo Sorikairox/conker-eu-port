@@ -36,13 +36,70 @@ void func_151A177C(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1D0C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1E8C.s")
+void func_151A1E8C(u8 *arg0) {
+    typedef struct { s32 w[3]; } Blk12;
+    struct260 *temp_v0;
+    struct {
+        Blk12 unk0;
+        f32 unkC;
+        f32 unk10;
+        f32 unk14;
+        s16 unk18;
+        s16 unk1A;
+        s16 unk1C;
+        s16 unk1E;
+    } tmp;
+
+    tmp.unk0 = *(Blk12 *)(arg0 + 0x28);
+    tmp.unkC = *(f32 *)(arg0 + 0x34);
+    tmp.unk10 = 0.0f;
+    tmp.unk14 = *(f32 *)(arg0 + 0x38);
+    tmp.unk18 = *(s16 *)(arg0 + 0x3E);
+    tmp.unk1A = *(s16 *)(arg0 + 0x40);
+    tmp.unk1C = *(s16 *)(arg0 + 0x42);
+    tmp.unk1E = *(s16 *)(arg0 + 0x44);
+    temp_v0 = func_151491F4(*(s16 *)(arg0 + 0x3C), -1, 3, 1, 0, 0x20, arg0[0xC], arg0[0x1]);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x20);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1F48.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A23E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A2498.s")
+void func_151A2498(u8 *arg0) {
+    typedef struct { s32 w[3]; } Blk12;
+    struct {
+        Blk12 unk0;
+        f32 unkC;
+        f32 unk10;
+        f32 unk14;
+        s16 unk18;
+        s16 unk1A;
+        s16 unk1C;
+        s16 unk1E;
+        s16 unk20;
+        s16 unk22;
+        u8 pad24[4];
+    } tmp;
+    struct260 *temp_v0;
+
+    tmp.unk0 = *(Blk12 *)(arg0 + 0x28);
+    tmp.unkC = *(f32 *)(arg0 + 0x34);
+    tmp.unk10 = 0.0f;
+    tmp.unk14 = *(f32 *)(arg0 + 0x38);
+    tmp.unk18 = *(s16 *)(arg0 + 0x3E);
+    tmp.unk1A = *(s16 *)(arg0 + 0x40);
+    tmp.unk1C = *(s16 *)(arg0 + 0x42);
+    tmp.unk1E = *(s16 *)(arg0 + 0x44);
+    tmp.unk20 = *(s16 *)(arg0 + 0x46);
+    tmp.unk22 = *(s16 *)(arg0 + 0x48);
+    temp_v0 = func_151491F4(*(s16 *)(arg0 + 0x3C), -1, 4, 1, 0, 0x24, arg0[0xC], arg0[0x1]);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x24);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A2564.s")
 

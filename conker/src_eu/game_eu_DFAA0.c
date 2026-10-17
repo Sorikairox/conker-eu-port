@@ -21,7 +21,21 @@ void func_150B2300(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B23C0.s")
+void func_150B23C0(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+    typedef struct { s32 w[3]; } Blk12;
+    struct {
+        Blk12 unk0;
+        f32 unkC;
+    } tmp;
+    struct260 *temp_v0;
+
+    tmp.unk0 = *(Blk12 *)arg1;
+    tmp.unkC = 0.0f;
+    temp_v0 = func_15149130((func_150ADA20() % 133U) + 69, -1, 0x49, -1, 1, 0, 0x10, arg0[0xC], arg0[0x1]);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2470.s")
 

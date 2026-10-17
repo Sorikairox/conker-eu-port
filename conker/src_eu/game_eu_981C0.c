@@ -32,7 +32,24 @@ void func_1506ADC8(s32 arg0, s32 arg1) {
     func_151B68D0(arg0, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506AE08.s")
+void func_1506AE08(u8 *arg0, u8 *arg1) {
+    typedef struct { s32 w[2]; } Blk8;
+    struct260 *temp_v0;
+    struct {
+        u8 *unk0;
+        u8 unk4;
+        u8 pad5[3];
+        Blk8 unk8;
+    } tmp;
+
+    tmp.unk0 = arg0;
+    tmp.unk4 = arg0[0x3B];
+    tmp.unk8 = *(Blk8 *)arg1;
+    temp_v0 = func_15149130(0xA, 7, 0x23, -1, 1, 0x21, 0x10, 0xFF, 1);
+    if (temp_v0 != NULL) {
+        memcpy((u8 *)temp_v0 + 0x28, &tmp, 0x10);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506AEA0.s")
 

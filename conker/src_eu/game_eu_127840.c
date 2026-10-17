@@ -34,7 +34,29 @@ void func_150FA9E8(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA520.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FAFC0.s")
+extern u8 D_80088F00;
+
+void func_150FAFC0(u8 arg0, s32 arg1) {
+    struct {
+        u8 *unk0;
+        u8 *unk4;
+        f32 unk8;
+    } tmp;
+    struct260 *temp_v0;
+
+    if (D_80088F00 == 0) {
+        tmp.unk0 = D_800D34B8 + 0x71C;
+        tmp.unk4 = D_800D34B8 + 0x6E8;
+        tmp.unk8 = 0.0f;
+        temp_v0 = func_15149130(300, -1, 0x57, -1, 0, 0x46, 0xC, arg0, arg1);
+        if (temp_v0 != NULL) {
+            D_80088F00 = 1;
+        }
+        if (temp_v0 != NULL) {
+            memcpy((u8 *)temp_v0 + 0x28, &tmp, 0xC);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB06C.s")
 
