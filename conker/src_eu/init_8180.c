@@ -3,8 +3,10 @@
 #include "macros.h"
 
 typedef struct {
-  u8 pad0[0x760];
-} struct247; // something naudio related?
+  u8 unk0[8][0xEC];
+} struct247; // something naudio related? size 0x760
+
+void func_100186DC(void *arg0, void *arg1);
 
 extern N_ALCSPlayer *D_8003C900[];
 extern ALCSeq        D_8003CA58[];
@@ -170,11 +172,9 @@ void func_10008C04(u8 idx, u8 arg1, s32 arg2) {
     func_10018790(&D_8003CA58[idx], &D_8003CD48[idx], arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008C6C.s")
-// NON-MATCHING: need to determine what these variables hold
-// void func_10008C6C(u8 idx, u8 arg1) {
-//     func_100186DC(&D_8003CA58[idx], &D_8003CD48[idx + (arg1 * 0xEC)]); // (idx * 0x760)
-// }
+void func_10008C6C(u8 idx, u8 arg1) {
+    func_100186DC(&D_8003CA58[idx], D_8003CD48[idx].unk0[arg1]);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008CE8.s")
 // NON-MATCHING: 80% of the way there

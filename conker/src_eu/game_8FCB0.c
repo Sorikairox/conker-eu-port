@@ -68,5 +68,15 @@ void func_15062BDC(struct127 *arg0, f32 arg1, f32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062D10.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062E24.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062FC0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15063168.s")
+void func_15063168(struct127 *arg0) {
+    s32 i;
+
+    for (i = 0; i < D_8008FD8C; i++) {
+        if ((i != (arg0 - D_800CC2D0)) && ((1 << i) & D_800CC268)) {
+            if ((D_800CC2D0[i].unk31C != NULL) && (((u8 *)D_800CC2D0[i].unk31C)[0x1AC] == 0)) {
+                func_15195564(arg0, &D_800CC2D0[i], 1);
+            }
+        }
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15063254.s")

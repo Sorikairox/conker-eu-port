@@ -3,6 +3,32 @@
 #include <os_internal.h>
 #include <ultraerror.h>
 
+// alUnlink / alLink, expanded inline in this version of the library
+#define N_AL_UNLINK(e)                          \
+    {                                           \
+        ALLink *ln = (ALLink *)(e);             \
+                                                \
+        if (ln->next != NULL) {                 \
+            ln->next->prev = ln->prev;          \
+        }                                       \
+        if (ln->prev != NULL) {                 \
+            ln->prev->next = ln->next;          \
+        }                                       \
+    }
+
+#define N_AL_LINK(e, after)                     \
+    {                                           \
+        ALLink *ln = (ALLink *)(e);             \
+        ALLink *to = (ALLink *)(after);         \
+                                                \
+        ln->next = to->next;                    \
+        ln->prev = to;                          \
+        if (to->next != NULL) {                 \
+            to->next->prev = ln;                \
+        }                                       \
+        to->next = ln;                          \
+    }
+
 void n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 itemCount)
 {
     s32 i;
@@ -28,180 +54,122 @@ void n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 itemCount)
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1C060/n_alEvtqNextEvent.s")
-// s32 n_alEvtqNextEvent(void *arg0, void *arg1) {
-//     void *sp2C;
-//     s32 sp28;
-//     void *sp24;
-//     void *sp20;
-//     void *sp1C;
-//
-//     sp2C = arg0->unk8;
-//     if (sp2C != 0) {
-//         sp24 = sp2C;
-//         if (sp24->unk0 != 0) {
-//             sp24->unk0->unk4 = (s32) sp24->unk4;
-//         }
-//         if (sp24->unk4 != 0) {
-//             *sp24->unk4 = (s32) sp24->unk0;
-//         }
-//         bcopy(sp2C + 0xC, arg1, 0x10);
-//         sp20 = sp2C;
-//         sp1C = arg0;
-//         sp20->unk0 = (s32) *sp1C;
-//         sp20->unk4 = sp1C;
-//         if (*sp1C != 0) {
-//             (*sp1C)->unk4 = sp20;
-//         }
-//         *sp1C = sp20;
-//         sp28 = sp2C->unk8;
-//     } else {
-//         *arg1 = (u16)-1;
-//         sp28 = 0;
-//     }
-//     return sp28;
-// }
+ALMicroTime n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt) {
+    N_ALEventListItem *item;
+    ALMicroTime delta;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1C060/n_alEvtqPostEvent.s")
-// void n_alEvtqPostEvent(void *arg0, s32 arg1, s32 arg2, s32 arg3) {
-//     void *sp3C;
-//     void *sp38;
-//     void *sp34;
-//     s32 sp30;
-//     s32 sp2C;
-//     void *sp28;
-//     void *sp24;
-//     void *sp20;
-//     void *sp1C;
-//     void *sp18;
-//     void *temp_t3;
-//     void *temp_t5;
-//
-//     sp30 = 0;
-//     if ((arg3 & 2) != 0) {
-//         sp2C = osSetIntMask(1);
-//     }
-//     sp3C = *arg0;
-//     if (sp3C == 0) {
-//         if ((arg3 & 2) != 0) {
-//             osSetIntMask(sp2C);
-//         }
-//         return;
-//     }
-//     if ((sp3C->unk0 == 0) && ((arg3 & 1) == 0)) {
-//         if ((arg3 & 2) != 0) {
-//             osSetIntMask(sp2C);
-//         }
-//         return;
-//     }
-//     sp28 = sp3C;
-//     if (sp28->unk0 != 0) {
-//         sp28->unk0->unk4 = (s32) sp28->unk4;
-//     }
-//     if (sp28->unk4 != 0) {
-//         *sp28->unk4 = (s32) sp28->unk0;
-//     }
-//     bcopy(arg1, sp3C + 0xC, 0x10);
-//     if (arg2 == 0x7FFFFFFF) {
-//         sp30 = -1;
-//     }
-//     temp_t3 = arg0 + 8;
-//     sp34 = temp_t3;
-//     if (temp_t3 != 0) {
-// loop_18:
-//         if (*sp34 == 0) {
-//             if (sp30 != 0) {
-//                 sp3C->unk8 = 0;
-//             } else {
-//                 sp3C->unk8 = arg2;
-//             }
-//             sp24 = sp3C;
-//             sp20 = sp34;
-//             sp24->unk0 = (s32) *sp20;
-//             sp24->unk4 = sp20;
-//             if (*sp20 != 0) {
-//                 (*sp20)->unk4 = sp24;
-//             }
-//             *sp20 = sp24;
-//         } else {
-//             sp38 = *sp34;
-//             if (arg2 < sp38->unk8) {
-//                 sp3C->unk8 = arg2;
-//                 sp38->unk8 = (s32) (sp38->unk8 - arg2);
-//                 sp1C = sp3C;
-//                 sp18 = sp34;
-//                 sp1C->unk0 = (s32) *sp18;
-//                 sp1C->unk4 = sp18;
-//                 if (*sp18 != 0) {
-//                     (*sp18)->unk4 = sp1C;
-//                 }
-//                 *sp18 = sp1C;
-//             } else {
-//                 arg2 = arg2 - sp38->unk8;
-//                 temp_t5 = *sp34;
-//                 sp34 = temp_t5;
-//                 if (temp_t5 != 0) {
-//                     goto loop_18;
-//                 }
-//             }
-//         }
-//     }
-//     if ((arg3 & 2) != 0) {
-//         osSetIntMask(sp2C);
-//     }
-// }
+    item = (N_ALEventListItem *)evtq->allocList.next;
+    if (item) {
+        N_AL_UNLINK(item);
+        bcopy(&item->evt, evt, sizeof(*evt));
+        N_AL_LINK(item, &evtq->freeList);
+        delta = item->delta;
+    } else {
+        /* sct 11/28/95 - If we get here, most like we overflowed the event queue */
+        /* with non-self-perpetuating events.  Eg. if we filled the evtq with volume */
+        /* events, then when the seqp is told to play it will handle all the events */
+        /* at once completely emptying out the queue.  At this point this problem */
+        /* must be treated as an out of resource error and the evtq should be increased. */
+        evt->type = -1;
+        delta = 0;
+    }
+    return delta;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1C060/func_1001C4F0.s")
-// s32 func_1001C4F0(void *arg0, s16 arg1) {
-//     void *sp3C;
-//     void *sp38;
-//     void *sp34;
-//     void *sp30;
-//     s32 sp2C;
-//     s32 sp28;
-//     s32 sp24;
-//     void *sp20;
-//     void *sp1C;
-//     void *sp18;
-//
-//     sp28 = 0;
-//     sp24 = 0;
-//     sp2C = osSetIntMask(1);
-//     sp3C = arg0->unk8;
-//     if (sp3C != 0) {
-// loop_1:
-//         sp38 = *sp3C;
-//         sp34 = sp3C;
-//         sp30 = sp38;
-//         sp24 = sp24 + sp34->unk8;
-//         if (sp34->unkC == arg1) {
-//             if (sp28 == 0) {
-//                 sp28 = sp24;
-//             }
-//             if (sp30 != 0) {
-//                 sp30->unk8 = (s32) (sp30->unk8 + sp34->unk8);
-//             }
-//             sp20 = sp3C;
-//             if (sp20->unk0 != 0) {
-//                 sp20->unk0->unk4 = (s32) sp20->unk4;
-//             }
-//             if (sp20->unk4 != 0) {
-//                 *sp20->unk4 = (s32) sp20->unk0;
-//             }
-//             sp1C = sp3C;
-//             sp18 = arg0;
-//             sp1C->unk0 = (s32) *sp18;
-//             sp1C->unk4 = sp18;
-//             if (*sp18 != 0) {
-//                 (*sp18)->unk4 = sp1C;
-//             }
-//             *sp18 = sp1C;
-//         }
-//         sp3C = sp38;
-//         if (sp3C != 0) {
-//             goto loop_1;
-//         }
-//     }
-//     osSetIntMask(sp2C);
-//     return sp28;
-// }
+void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s32 flags) {
+    N_ALEventListItem *item;
+    N_ALEventListItem *nextItem;
+    ALLink *node;
+    s32 postAtEnd = 0;
+    OSIntMask mask;
+
+    if (flags & 2) {
+        mask = osSetIntMask(OS_IM_NONE);
+    }
+
+    item = (N_ALEventListItem *)evtq->freeList.next;
+    if (!item) {
+        if (flags & 2) {
+            osSetIntMask(mask);
+        }
+        return;
+    }
+
+    // keep the last free item unless told otherwise
+    if (!item->node.next && !(flags & 1)) {
+        if (flags & 2) {
+            osSetIntMask(mask);
+        }
+        return;
+    }
+
+    N_AL_UNLINK(item);
+    bcopy(evt, &item->evt, sizeof(*evt));
+
+    if (delta == AL_EVTQ_END) {
+        postAtEnd = -1;
+    }
+
+    for (node = &evtq->allocList; node != 0; node = node->next) {
+        if (!node->next) { /* end of the list */
+            if (postAtEnd) {
+                item->delta = 0;
+            } else {
+                item->delta = delta;
+            }
+            N_AL_LINK(item, node);
+            break;
+        } else {
+            nextItem = (N_ALEventListItem *)node->next;
+
+            if (delta < nextItem->delta) {
+                item->delta = delta;
+                nextItem->delta -= delta;
+
+                N_AL_LINK(item, node);
+                break;
+            }
+
+            delta -= nextItem->delta;
+        }
+    }
+
+    if (flags & 2) {
+        osSetIntMask(mask);
+    }
+}
+
+// n_alEvtqFlushType that also returns the time of the first flushed event
+s32 func_1001C4F0(ALEventQueue *evtq, s16 type) {
+    ALLink *thisNode;
+    ALLink *nextNode;
+    N_ALEventListItem *thisItem;
+    N_ALEventListItem *nextItem;
+    OSIntMask mask;
+    s32 first = 0;
+    s32 time = 0;
+
+    mask = osSetIntMask(OS_IM_NONE);
+
+    thisNode = evtq->allocList.next;
+    while (thisNode != 0) {
+        nextNode = thisNode->next;
+        thisItem = (N_ALEventListItem *)thisNode;
+        nextItem = (N_ALEventListItem *)nextNode;
+        time += thisItem->delta;
+        if (thisItem->evt.type == type) {
+            if (first == 0) {
+                first = time;
+            }
+            if (nextItem) {
+                nextItem->delta += thisItem->delta;
+            }
+            N_AL_UNLINK(thisNode);
+            N_AL_LINK(thisNode, &evtq->freeList);
+        }
+        thisNode = nextNode;
+    }
+
+    osSetIntMask(mask);
+    return first;
+}

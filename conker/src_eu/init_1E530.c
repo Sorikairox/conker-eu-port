@@ -95,26 +95,15 @@
 //     return sp34;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1E530/func_1001F978.s")
-// NON-MATCHING: lots of work still to do
-// struct56 *func_1001F978(struct55 *arg0, s32 arg1, s32 arg2, struct56 *arg3) {
-//     struct56 *sp24;
-//     s16 sp22;
-//     struct56 *temp_t9;
-//
-//     sp24 = arg3;
-//     sp22 = arg2 >> 8;
-//     temp_t9 = sp24;
-//     sp24 = temp_t9->unk8;
-//     temp_t9->unk0 = 0xB000020;
-//     temp_t9->unk4 = osVirtualToPhysical(&arg0->unk8);
-//     temp_t9 = sp24;
-//     sp24 = temp_t9->unk8;
-//     temp_t9->unk0 = (s32) (((arg0->unk28 & 0xFF) << 0x10) | 0xE000000 | (arg0->unk2 & 0xFFFF));
-//     temp_t9->unk4 = (s32) ((osVirtualToPhysical(arg0->unk2C[arg1]) & 0xFFFFFF) | ((sp22 & 0xFF) << 0x18));
-//     arg0->unk28 = 0;
-//     return sp24;
-// }
+Acmd *func_1001F978(struct55 *arg0, s32 arg1, s32 arg2, Acmd *p) {
+    Acmd *ptr = p;
+    s16 tmp = arg2 >> 8;
+
+    aLoadADPCM(ptr++, 32, osVirtualToPhysical(&arg0->unk8));
+    aPoleFilter(ptr++, arg0->unk28, arg0->unk2, (osVirtualToPhysical(((s32 **)&arg0->unk2C)[arg1]) & 0xFFFFFF) | ((tmp & 0xFF) << 24));
+    arg0->unk28 = 0;
+    return ptr;
+}
 
 f32 func_1001FA78(f32 arg0[4][4], s32 arg1) {
     f32 tmp;

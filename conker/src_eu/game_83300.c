@@ -967,31 +967,46 @@ f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DADC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DDA8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DF10.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DFDC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E060.s")
+void func_1505DFDC(struct127 *arg0) {
+    s32 id;
+    struct_eu_anim *anim = (struct_eu_anim *)arg0->unk2D0;
+
+    arg0->unk84.uh = 0xFFFF;
+    if (anim != NULL) {
+        id = arg0->id;
+        anim->unk28 = 0;
+        bzero(anim->unk40, 0x3A0);
+        anim->unk40[1] = D_800C52F0[id] + 1;
+        anim->unk210[1] = D_800C52F0[id] + 1;
+        anim->unk30 = 0;
+        anim->unk34 = 0;
+    }
+}
+void func_1505E060(struct_eu_anim *arg0) {
+    arg0->unk6 = arg0->unk4;
+    arg0->unkC = arg0->unk8;
+    arg0->unk14 = arg0->unk10;
+    arg0->unk24 = arg0->unk20;
+    arg0->unk1C = arg0->unk18;
+    arg0->unk39 = arg0->unk38;
+    arg0->unk2C = arg0->unk28;
+    bcopy(arg0->unk40, arg0->unk210, 0x1D0);
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E0C4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E650.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E7CC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E874.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505ED34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EEB0.s")
-// I HATE LOOPS.
-// struct127 *func_1505EEB0(s32 state, s32 *arg1) {
-//     struct127 *tmp = D_800CC2D0;
-//     s32 i = 0;
-//
-//     if (state != tmp->interaction_state) {
-//         for (i = 0; i < 25; i++) {
-//             tmp = &D_800CC2D0[i];
-//             if (state == tmp->interaction_state)
-//                 break;
-//         }
-//     }
-//
-//     *arg1 = i;
-//     return tmp;
-// }
+struct127 *func_1505EEB0(s32 state, s32 *arg1) {
+    struct127 *tmp;
+    s32 i;
+
+    for (tmp = D_800CC2D0, i = 0; i < 25 && state != tmp->interaction_state; tmp++, i++) {
+    }
+    *arg1 = i;
+    return tmp;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EEF4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EFD0.s")
@@ -1000,8 +1015,20 @@ f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506045C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060778.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060A30.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060A9C.s")
+void func_15060A30(s32 arg0, struct127 *arg1) {
+    if (arg1->camera == NULL) {
+        func_10010344(arg0, arg1, 28000, 500, 2500);
+    } else {
+        func_15060778(arg0, arg1, 24000, 0, 500, 2500, 1);
+    }
+}
+void func_15060A9C(s32 arg0, struct127 *arg1) {
+    if (arg1->camera == NULL) {
+        func_10010630(arg0, arg1, 24000, 500, 2500);
+    } else {
+        func_15060778(arg0, arg1, 24000, 0, 500, 2500, 0);
+    }
+}
 
 void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2) {
     if (arg1->camera == NULL) {
@@ -1015,7 +1042,16 @@ void func_15060B70(s32 arg0, void *arg1) {
     func_10010154(arg0, arg1, 0x6D60, 0x1F4, 0x9C4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060BA4.s")
+s32 func_15060BA4(struct127 *arg0, s32 arg1) {
+    if (arg0->health == 6) {
+        return 0;
+    }
+    arg0->health += arg1;
+    if (arg0->health >= 7) {
+        arg0->health = 6;
+    }
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060BE0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060D54.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060F28.s")
@@ -1034,7 +1070,16 @@ void func_150615DC(struct127 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506160C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150617BC.s")
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506196C.s")
+s32 func_1506196C(struct127 *arg0, s32 arg1) {
+    s32 v = (&arg0->unkB)[arg1] * arg0->unk7;
+
+    if (v == 0xFE01) {
+        v = 0xFF;
+    } else {
+        v = v >> 8;
+    }
+    return v;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150619A8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15061B4C.s")
