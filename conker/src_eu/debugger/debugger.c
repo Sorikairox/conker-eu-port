@@ -3,6 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_1600160C();
+
 
 void func_16000000(void) {
     func_160012B0(278, &D_160046AC);
@@ -165,7 +167,32 @@ void func_16000424(struct118 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000590.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160006CC.s")
+typedef struct {
+    u8 c[4];
+} struct_16003B48;
+extern struct_16003B48 D_16003B48;
+extern u8 D_160037F0[];
+
+void func_160006CC(struct118 *arg0) {
+    struct_16003B48 name;
+    s32 pad;
+    s32 pos = 0x123;
+    u8 *p = D_160037F0;
+    s32 idx;
+
+    name = D_16003B48;
+    func_16001338(0xC0, 0xC0, 0xFF);
+    do {
+        name.c[0] = p[0];
+        name.c[1] = p[1];
+        func_160012B0(pos, name.c);
+        pos += 3;
+        idx = p[2];
+        func_16001044(pos, 0, ((s32 *)arg0)[idx + 1]);
+        pos += 0xD;
+        p += 3;
+    } while (p[0] != 0);
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_1600078C.s")
 // NON-MATCHING: close but still some stuff to figure out
 // void func_1600078C(void) {
@@ -298,13 +325,100 @@ void func_16001338(u8 arg0, u8 arg1, u8 arg2) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001390.s")
+// NON-MATCHING: fill rectangle; x0 is reloaded twice in the original, temps shifted by one
+// void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
+//     u16 *fb;
+//     s32 i;
+//
+//     if ((x1 < x0) || (y1 < y0) || (x0 < 0) || (y0 < 0)) {
+//         return;
+//     }
+//     x1++;
+//     y1++;
+//     fb = (u16 *)func_1600160C(0) + (x0 + y0 * D_160038A8);
+//     x1 -= x0;
+//     y1 -= y0;
+//     for (; y1 > 0; y1--) {
+//         for (i = x1; i > 0; i--) {
+//             *fb++ = D_1600388C;
+//         }
+//         fb += D_160038A8 - x1;
+//     }
+// }
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160014F0.s")
+// NON-MATCHING: only glyph/j registers swapped (t0/a1)
+// extern u8 D_16003CE0[];
+//
+// u16 *func_160014F0(fb, c)
+//     u16 *fb;
+//     u8 c;
+// {
+//     u16 *p = fb;
+//     s32 color = D_1600388C;
+//     u16 bits;
+//     u16 val;
+//     s32 ch;
+//     s32 i;
+//     u8 *glyph;
+//     s32 j;
+//
+//     ch = c;
+//     if (ch < 0x20) {
+//         ch = 0x20;
+//     }
+//     glyph = D_16003CE0 + ((ch - 0x20) << 3);
+//     for (i = 0; i < 8; i++) {
+//         bits = *glyph;
+//         for (j = 0; j < 8; j++) {
+//             if (bits & 0x80) {
+//                 val = color;
+//             } else {
+//                 val = 1;
+//             }
+//             bits <<= 1;
+//             *p++ = val;
+//         }
+//         glyph++;
+//         p += D_160038A8 - 8;
+//     }
+//     return fb + 8;
+// }
 
-// splat into framebuffer
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_1600160C.s")
+// framebuffer address of a text cell
+s32 func_1600160C(s32 arg0) {
+    s32 y = arg0 & 0xFFE0;
+    s32 v1 = y;
 
-// contains delay slot
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001678.s")
+    if (D_160038A8 != 0x124) {
+        v1 = (y >> 2) + y;
+    }
+    v1 = (u32)(v1 >> 2) * (D_160038A8 * 2);
+    v1 += (arg0 & 0x1F) * 16;
+    v1 += D_160038A8 * 4;
+    v1 += 0x10;
+    return D_8002AAE8[D_16003888] + v1;
+}
+
+// clear the framebuffer
+void func_16001678(void) {
+    u32 *fb = D_8002AAE8[D_16003888];
+    s32 h;
+    u32 *end;
+
+    if (D_160038A8 == 0x124) {
+        h = 0xD7;
+    } else {
+        h = 0x108;
+    }
+    end = (u32 *)(((u32)(D_160038A8 >> 1) * h * 4) + (u32)fb);
+    while (fb < end) {
+        fb[0] = 0x10001;
+        fb[1] = 0x10001;
+        fb[2] = 0x10001;
+        fb[3] = 0x10001;
+        fb += 4;
+    }
+}
 
 s32 func_160016F4(s32 arg0) {
     return arg0;

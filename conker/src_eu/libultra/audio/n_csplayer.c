@@ -7,6 +7,20 @@
 #include "cseq.h"
 #include "n_cseqp.h"
 
+// alLink, expanded inline in this version of the library
+#define N_AL_LINK(e, after)                     \
+    {                                           \
+        ALLink *ln = (ALLink *)(e);             \
+        ALLink *to = (ALLink *)(after);         \
+                                                \
+        ln->next = to->next;                    \
+        ln->prev = to;                          \
+        if (to->next != NULL) {                 \
+            to->next->prev = ln;                \
+        }                                       \
+        to->next = ln;                          \
+    }
+
 
        ALMicroTime      __n_CSPVoiceHandler(void *node);
 static void              __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp);
@@ -175,7 +189,26 @@ void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_csplayer/__n_CSPRepostEvent.s")
+void __n_CSPRepostEvent(ALEventQueue *evtq, N_ALEventListItem *item)
+{
+    ALLink            *node;
+    N_ALEventListItem *nextItem;
+
+    for (node = &evtq->allocList; node != 0; node = node->next) {
+        if (!node->next) { /* end of the list */
+            N_AL_LINK(item, node);
+            break;
+        } else {
+            nextItem = (N_ALEventListItem *)node->next;
+            if (item->delta < nextItem->delta) {
+                nextItem->delta -= item->delta;
+                N_AL_LINK(item, node);
+                break;
+            }
+            item->delta -= nextItem->delta;
+        }
+    }
+}
 
 void __n_setUsptFromTempo (N_ALCSPlayer *seqp, f32 tempo)
 {

@@ -1,5 +1,6 @@
 #include "n_synthInternals.h"
 
+
 extern f32 D_8002C750;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_synthesizer/n_alSynNew.s")
@@ -116,74 +117,51 @@ extern f32 D_8002C750;
 //     D_8002BA44->unk3C = sp34;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_synthesizer/n_alAudioFrame.s")
-// void *n_alAudioFrame(void *arg0, void *arg1, s32 arg2, u32 arg3) {
-//     void *sp3C;
-//     void *sp38;
-//     s32 sp34;
-//     s32 sp30;
-//     void *sp2C;
-//     void *sp28;
-//     s32 temp_t5_2;
-//     void *temp_t0;
-//     void *temp_t1;
-//     void *temp_t2;
-//     void *temp_t5;
-//     void *temp_t7;
-//     void *temp_t8;
-//     void *temp_t9;
-//
-//     sp38 = arg0;
-//     sp30 = arg2;
-//     if (*D_8002BA44 == 0) {
-//         *arg1 = 0;
-//         return arg0;
-//     }
-//     D_8002BA44->unk1C = func_10019A04(&sp3C);
-//     temp_t2 = D_8002BA44;
-//     if ((u32) (temp_t2->unk1C - temp_t2->unk20) < arg3) {
-// loop_3:
-//         temp_t7 = D_8002BA44;
-//         temp_t7->unk1C = (s32) (temp_t7->unk1C & -0x10);
-//         sp3C->unk10 = (s32) (sp3C->unk10 + _n_timeToSamplesNoRound(sp3C->unk8(sp3C)));
-//         D_8002BA44->unk1C = func_10019A04(&sp3C);
-//         temp_t5 = D_8002BA44;
-//         if ((u32) (temp_t5->unk1C - temp_t5->unk20) < arg3) {
-//             goto loop_3;
-//         }
-//     }
-//     temp_t9 = D_8002BA44;
-//     temp_t9->unk1C = (s32) (temp_t9->unk1C & -0x10);
-//     if ((s32) arg3 > 0) {
-// loop_5:
-//         temp_t5_2 = D_8002BA44->unk58;
-//         if (temp_t5_2 < (s32) arg3) {
-//             sp34 = temp_t5_2;
-//         } else {
-//             sp34 = (s32) arg3;
-//         }
-//         sp38 = func_1001FB40(D_8002BA44->unk20, sp38);
-//         temp_t0 = sp38;
-//         sp38 = temp_t0 + 8;
-//         sp2C = temp_t0;
-//         *sp2C = 0xD000000;
-//         temp_t1 = sp38;
-//         sp38 = temp_t1 + 8;
-//         sp28 = temp_t1;
-//         sp28->unk0 = 0x62E0000;
-//         sp28->unk4 = sp30;
-//         arg3 = arg3 - sp34;
-//         sp30 = sp30 + (sp34 * 2 * 2);
-//         temp_t8 = D_8002BA44;
-//         temp_t8->unk20 = (s32) (temp_t8->unk20 + sp34);
-//         if ((s32) arg3 > 0) {
-//             goto loop_5;
-//         }
-//     }
-//     *arg1 = (s32) ((s32) (sp38 - arg0) >> 3);
-//     _collectPVoices();
-//     return sp38;
-// }
+static s32 __n_nextSampleTime(ALPlayer **client);
+Acmd *func_1001FB40(s32 sampleOffset, Acmd *p); // n_alSavePull?
+s32 _n_timeToSamplesNoRound(s32 micros);
+
+Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen)
+{
+    ALPlayer *client;
+    Acmd     *cmdlEnd = cmdList;
+    s32      nOut;
+    s16      *lOutBuf = outBuf;
+
+    if (n_syn->head == 0) {
+        *cmdLen = 0;
+        return cmdList;
+    }
+
+    for (n_syn->paramSamples = __n_nextSampleTime(&client);
+         (u32)(n_syn->paramSamples - n_syn->curSamples) < (u32)outLen;
+         n_syn->paramSamples = __n_nextSampleTime(&client)) {
+        n_syn->paramSamples &= ~0xf;
+        client->samplesLeft += _n_timeToSamplesNoRound((*client->handler)(client));
+    }
+    n_syn->paramSamples &= ~0xf;
+
+    while (outLen > 0) {
+        nOut = MIN(n_syn->maxOutSamples, outLen);
+        cmdlEnd = func_1001FB40(n_syn->curSamples, cmdlEnd);
+        {
+            Acmd *_a = cmdlEnd++;
+            _a->words.w0 = 0x0D000000;
+        }
+        {
+            Acmd *_a = cmdlEnd++;
+            _a->words.w0 = 0x062E0000;
+            _a->words.w1 = (u32)lOutBuf;
+        }
+        outLen -= nOut;
+        lOutBuf += nOut << 1;
+        n_syn->curSamples += nOut;
+    }
+
+    *cmdLen = (s32)(cmdlEnd - cmdList);
+    _n_collectPVoices();
+    return cmdlEnd;
+}
 
 ALParam *__n_allocParam(void) {
     ALParam *update = 0;
@@ -203,8 +181,24 @@ void _n_freeParam(ALParam *param)
   n_syn->paramList = param;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_synthesizer/_n_collectPVoices.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_synthesizer/_n_freePVoice.s")
+void _n_collectPVoices(void) {
+    ALLink *dl;
+
+    while ((dl = n_syn->pLameList.next) != 0) {
+        N_AL_UNLINK(dl);
+        N_AL_LINK(dl, &n_syn->pFreeList);
+        N_AL_UNLINK(&((N_PVoice *)dl)->unk8);
+        ((N_PVoice *)dl)->unk8.next = NULL;
+        ((N_PVoice *)dl)->unk8.prev = NULL;
+    }
+}
+void _n_freePVoice(N_PVoice *pvoice) {
+    /*
+     * move the voice from the allocated list to the lame list
+     */
+    N_AL_UNLINK(pvoice);
+    N_AL_LINK(pvoice, &n_syn->pLameList);
+}
 
 s32 _n_timeToSamplesNoRound(s32 micros) {
     f32 tmp = (((f32) micros * (f32) n_syn->outputRate) / D_8002C750) + 0.5f; // 1000000.0f
@@ -216,65 +210,16 @@ s32 _n_timeToSamples( s32 micros)
   return _n_timeToSamplesNoRound( micros) & ~0xf;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_synthesizer/__n_nextSampleTime.s")
-// static s32 __n_nextSampleTime(ALPlayer **client)
-// {
-//   ALMicroTime temp,delta = 0x7fffffff;     /* max delta for s32 */
-//   ALPlayer *cl;
-//
-//   /*    assert(D_8002BA44->head); */
-//   *client = 0;
-//
-// #if 0
-//   for (cl = D_8002BA44->head; cl != 0; cl = cl->next) {
-//     if ((cl->samplesLeft - D_8002BA44->curSamples) < delta) {
-//       *client = cl;
-//       delta = cl->samplesLeft - D_8002BA44->curSamples;
-//     }
-//   }
-// #endif
-//
-//   if( D_8002BA44->n_sndp )
-//     if( (temp = D_8002BA44->n_sndp->samplesLeft - D_8002BA44->curSamples) < delta ) {
-//       *client = D_8002BA44->n_sndp;
-//       delta = temp;
-//     }
-//
-//   if( D_8002BA44->n_seqp1 )
-//     if( (temp = D_8002BA44->n_seqp1->samplesLeft - D_8002BA44->curSamples) < delta ) {
-//       *client = D_8002BA44->n_seqp1;
-//       delta = temp;
-//     }
-//
-//   if( D_8002BA44->n_seqp2 )
-//     if( (D_8002BA44->n_seqp2->samplesLeft - D_8002BA44->curSamples) < delta ) {
-//       *client = D_8002BA44->n_seqp2;
-//     }
-//
-//   return (*client)->samplesLeft;
-// }
+static s32 __n_nextSampleTime(ALPlayer **client) {
+    u32 delta = 0x7FFFFFFF; /* max delta for s32 */
+    ALPlayer *cl;
 
-// s32 func_10019A04(void *arg0) {
-//     u32 sp4;
-//     void *sp0;
-//     void *temp_t2;
-//     void *temp_t8;
-//
-//     sp4 = 0x7FFFFFFF;
-//     *arg0 = NULL;
-//     temp_t8 = *D_8002BA44;
-//     sp0 = temp_t8;
-//     if (temp_t8 != 0) {
-// loop_1:
-//         if ((u32) (sp0->unk10 - D_8002BA44->unk20) < sp4) {
-//             *arg0 = sp0;
-//             sp4 = sp0->unk10 - D_8002BA44->unk20;
-//         }
-//         temp_t2 = sp0->unk0;
-//         sp0 = temp_t2;
-//         if (temp_t2 != 0) {
-//             goto loop_1;
-//         }
-//     }
-//     return (*arg0)->unk10;
-// }
+    *client = 0;
+    for (cl = n_syn->head; cl != 0; cl = cl->next) {
+        if ((cl->samplesLeft - n_syn->curSamples) < delta) {
+            *client = cl;
+            delta = cl->samplesLeft - n_syn->curSamples;
+        }
+    }
+    return (*client)->samplesLeft;
+}
