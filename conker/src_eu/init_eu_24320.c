@@ -95,4 +95,49 @@ OSTime __osInsertTimer(OSTimer *t) {
     return tim;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_24320/func_10024720.s")
+typedef struct {
+    f32 factor;
+    u16 offset;
+    u32 scale;
+} __OSViScale;
+typedef struct {
+    u16 state;
+    u16 retraceCount;
+    void *framep;
+    OSViMode *modep;
+    u32 control;
+    OSMesgQueue *msgq;
+    OSMesg msg;
+    __OSViScale x;
+    __OSViScale y;
+} __OSViContext;
+extern __OSViContext D_8002C0D0[2]; // vi
+extern __OSViContext *D_8002C130;   // __osViCurr
+extern __OSViContext *D_8002C134;   // __osViNext
+extern u32 D_8002C138;              // osViClock
+void __osViSwapContext(void);
+
+// __osViInit
+void func_10024720(void) {
+    bzero(D_8002C0D0, sizeof(D_8002C0D0));
+    D_8002C130 = &D_8002C0D0[0];
+    D_8002C134 = &D_8002C0D0[1];
+    D_8002C134->retraceCount = 1;
+    D_8002C130->retraceCount = 1;
+    if (osTvType == OS_TV_PAL) {
+        D_8002C134->modep = &osViModePalLan1;
+        D_8002C138 = VI_PAL_CLOCK;
+    } else if (osTvType == OS_TV_MPAL) {
+        D_8002C134->modep = &osViModeMpalLan1;
+        D_8002C138 = VI_MPAL_CLOCK;
+    } else {
+        D_8002C134->modep = &osViModeNtscLan1;
+        D_8002C138 = VI_NTSC_CLOCK;
+    }
+    D_8002C134->state = 0x20 /* VI_STATE_BLACK */;
+    D_8002C134->control = D_8002C134->modep->comRegs.ctrl;
+    while (IO_READ(VI_CURRENT_REG) > 10) {
+    }
+    IO_WRITE(VI_CONTROL_REG, 0);
+    __osViSwapContext();
+}
