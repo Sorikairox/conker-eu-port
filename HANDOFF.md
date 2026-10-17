@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-17 (second session). Update this file at the end of every work session.
+Last updated: 2026-10-17 (third session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,12 +17,15 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **1363 / 5910 functions in C (23.1%)**; code bytes 5.9% (133452 / 2253856).
-  - init: 234/543 functions
-  - game: 1109/5324
-  - debugger: 20/43
-  - (previous session: 1094/5902, 18.5%. The total grew by 8 because merged
-    `jr ra; nop` stubs were split out into their own symbols.)
+- **2374 / 5913 functions in C (40.1%)**; code bytes 9.8%.
+  - init: 281/542 functions
+  - game: 2062/5328
+  - debugger: 31/43
+  - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
+    2374 after the first round of new decompilation (this session).
+- Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
+  GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
+  replace a pragma with C.
 - All 266 US C files are ported to `conker/src_eu/`, plus two EU-only files that
   come from EU file boundaries: `game_30E60.c` (tail of `game_305D0`) and
   `game_8FCB0.c` (tail of `game_83300`).
@@ -43,6 +46,10 @@ Commits on `eu`:
 | `b57f948` | Last 4 differing functions; new EU file `game_30E60.c` |
 | `af90530` | Hand-port of 11 of the 14 unported files (+ `game_8FCB0.c`) |
 | `2142e35` | The 3 asm-only unported files get their own subsegments |
+| `b5aa354` | Hand-off update after the hand port |
+| `fac015a`…`cfe5861` | New decompilation, ~283 functions in 10 commits (object lists, object script interpreter in `game_A28B0`, n_seqplayer/event queue/sound handles in init, EEPROM save, ring buffer, display-list relocation and state cache, matrix/vector helpers, stream decoder in `game_221290`, guNormalize, pfsisplug2) |
+| `c3f2d8f` | The 413 plain asm subsegments become C files (GLOBAL_ASM stubs) |
+| `c67d78d` | Salvage of an interrupted parallel round: 728 more functions (see below) |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -99,6 +106,28 @@ Notes:
 - Splitting from scratch needs `rm -rf conker/asm conker/build conker/*_auto.txt` first.
   Stale asm files get assembled otherwise.
 
+## Session 3 incident: interrupted parallel round
+
+The decompilation agent fanned out into parallel helpers ("round 2") that hit a usage
+limit mid-run and left uncommitted edits in 192 files. The tree compiled but did not
+match (built binary 0x40 bytes long). Recovery, which is the template if it happens
+again:
+
+1. `git diff > backup.patch`.
+2. `check_files.py` (inside the container, after building) compares every src_eu
+   object with the original bytes at its rom range. 25 files were bad.
+3. A HEAD worktree split supplies the `.s` files for reverted functions (copy the
+   submodules `tools/n64splat asm-processor asm-differ mips_to_c` into the worktree,
+   they are not checked out there). `revert_bad.py <head conker dir> src_eu/X.c ...`
+   then reverts, file by file, the first differing function back to GLOBAL_ASM until
+   the file matches: 31 functions reverted, everything else kept.
+4. One untouched file (`game_A28B0`) broke because round 2 added a prototype
+   `func_1505D024(struct127 *, s32, s32, s32)` to `functions.h`; removed it.
+5. Clean re-split, full ROM verify, commit.
+
+Lesson for parallel work: have each worker commit (or at least verify with
+`check_files.py`) per small batch, so an interruption loses little.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -122,6 +151,14 @@ Notes:
   - `eu_asm.py`: reads function starts, sizes and labels from splat's asm.
   - `bindiff.py`: lists the words that differ between the built and original binary
     (run from `conker/`).
+- Verification (run from `conker/` inside the container, after building objects):
+  - `check_files.py [src_eu/X.c ...]`: **the reliable check.** Whole-object `.text`
+    vs the original EU bytes at the file's rom range, relocations masked. Covers C
+    functions, which `check_funcs.py` cannot (splat writes no `.s` for a function that
+    is already C). Known false SIZE reports for the last file of each code segment:
+    `init_eu_289A0`, `game_eu_227BF0`, `debugger_eu_259B40`.
+  - `revert_bad.py HEAD_CONKER_DIR src_eu/X.c ...`: reverts non-matching new C
+    functions back to GLOBAL_ASM (see the incident section).
 - Hand-porting helpers (run from `conker/`, the first two inside the container):
   - `check_funcs.py src_eu/X.c [func ...] [-v] [-s]`: builds the object through make
     and compares each function with `asm/nonmatchings/X/<func>.s`, relocations masked.
@@ -182,9 +219,18 @@ porting to manual work.
      `D_8003B260` stays a tentative definition in the C file (needed for codegen) and
      gets its EU address from `undefined_syms.eu.txt`.
    - `init_214F0`, `game_D4C20`, `game_221290`: all GLOBAL_ASM; only placed.
-3. **Unmatched and ambiguous US functions** in `match.json`. Most of the old list is
+3. **31 functions reverted in the salvage** are near-misses worth retrying; the C
+   attempts are in commit `c67d78d`'s parent working state only via the backup, so
+   treat them as fresh: `func_150EB430 func_15108D7C func_1510ADF0 func_1510AE4C
+   func_15116EB0 func_1514AA08 func_15156544 func_15158748 func_1515AE90 func_1515C6C8
+   func_15188FC8 func_15195104 func_1519812C func_1519F678 func_1519F6D8 func_151A8FD0
+   func_151AA72C func_151AA7C0 func_151ABD38 func_151ABD88 func_151C1DC4 func_151CF1C0
+   func_151D2CC8 func_151D7CD4 func_151D8CC8 func_151EF840 func_15012F40 func_1502348C
+   func_1503211C func_15088688 func_150AFC18`.
+   Unmatched and ambiguous US functions in `match.json`. Most of the old list is
    now handled; recheck against the current split before relying on it.
-4. **New decompilation** of the ~4,500 asm functions. Use m2c
+4. **New decompilation** of the remaining ~3,540 asm functions (game is 38.7% by
+   count but only 8.2% by bytes: the large functions are what's left). Use m2c
    (`tools/mips_to_c`), asm-differ, decomp-permuter, and decomp.me (IDO 5.3,
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
@@ -223,5 +269,10 @@ porting to manual work.
   and the address comes from `undefined_syms.eu.txt`.
 - `-O2 -g3` does not fill the `jr ra` delay slot of a one-line leaf; `-O2` does
   (`n_cspgetstate`).
+- `check_funcs.py` silently skips functions that are already written in C (no `.s` is
+  generated for them), so "all OK" from it says nothing about new C. Use
+  `check_files.py`.
+- Adding a prototype to a shared header can change codegen in files that called the
+  function implicitly before. After header edits, run `check_files.py` on everything.
 - `tools/n64splat` shows as modified in `git status` (submodule content); that was
   already the case before this work and is not part of any commit.
