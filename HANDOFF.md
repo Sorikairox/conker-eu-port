@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (ninth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (tenth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,15 +17,16 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2735 / 5911 functions in C (46.3%)**; code bytes 277,860 / 2,253,856 (12.3%)
-  (end of session 9, from `verify_all.sh`).
+- **2757 / 5911 functions in C (46.6%)**; code bytes 281,452 / 2,253,856 (12.5%)
+  (end of session 10, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2343/5328 (10.1%)
+  - game: 2365/5328 (10.2%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
-    (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8.
+    (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
+    after session 9.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -59,6 +60,7 @@ Commits on `eu`:
 | `4b80d37`…`4086ef1` | Session 7: u8 handler prototypes, 16 handlers, `__sinf`/`sinf` with their own .rodata/.data (first data-blob splits) |
 | `624bf92`…`3c2d62f` | Session 8: real game .data/.rodata boundary, C files own their .rodata (`rodata_split.py --own`), 24 rodata functions, 2 EU file splits |
 | `9fddd60`…`dcf890a` | Session 9: 26 EU file splits (`file_split.py`), 83 files own .rodata, 29 functions (const local arrays, effect spawners) |
+| `18c0449`…`ba052c8` | Session 10: `spawngen.py` (spawners from asm), C files own `.data` (`rodata_inject.py`), 22 functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -73,6 +75,7 @@ throw all of that away.**
 - A function that needs float literals, a switch or strings: `rodata_split.py --own <stem>
   --resplit` first (session 8 section, "Workflow").
 - A C file that is several EU objects: `tools/eu_port/file_split.py <stem> [--dry]` (session 9).
+- A function that copies a non-const local array from `.data`: own the file's `.data` (session 10).
 
 ## Build environment
 
@@ -601,6 +604,75 @@ late chunk an extra word D_800AB29C; needs a `rodata_inject.py` look), `func_151
 rejected: its const array sits between strings and a table in one data block of game_eu_1BAF40),
 `func_151A5BCC`-style arrays in unowned game_eu_15FF50 (`func_151343AC`).
 
+## Session 10: spawners from the asm, C files own .data
+
+Sequential, 3 work commits (`18c0449`..`ba052c8`), +22 functions (2735 -> 2757), +3,592 bytes.
+
+### `tools/eu_port/m2c/spawngen.py <outdir> [func ...]` (effect spawners in bulk)
+
+A small symbolic interpreter of the asm of every remaining `func_15149130`/`func_151491F4` +
+`memcpy` function (only other calls allowed: the random helpers `func_150ADA20`/`func_150ADA68`).
+It recovers the struct (stores into the memcpy source range; `lw/sw` word runs through an `sp+X`
+register become a block copy `typedef struct { s32 w[N]; } BlkN;`), the call args (a0-a3, stack
+slots 0x10..), param types (lbu/lb/lh/lhu/lw/lwc1 of arg homes, `sll/sra`, `andi`, loads through an
+arg -> `u8 *`, `mtc1 aN` -> f32), the `if (arg0 == NULL) return [NULL];` guard, `return temp_v0;`,
+`% NU` for `divu`, float literals (owned files) or externs. 12 variants per function (temp_v0
+declared before/after the struct, struct vs asm store order, 0/4/8 bytes of tail padding).
+Workflow: `spawngen.py ~/conker/conker/build/sg`, then `m2c/screenall build/sg` (screens every
+`v*/`, merges the first OK into `final/`, prints the best result per function), then
+`apply.py build/sg/final` in the container. First run: 9 of 14 drafted functions OK.
+Helpers: `m2c/permassign.py draft.c outdir [fixed] [max]` (every order of the `tmp.X = ...`
+assignment block, for `tryall`), `tryall` now runs at most 8 screens at once (720 parallel
+screens got OOM-killed).
+
+Hand-written spawners and what mattered: store order follows the source (`func_150D2620`:
+`D_800D9D20++` first, then the asm store order), `+` operand order of floats (`func_151D0058`),
+`if (arg0 != NULL) { ... }` instead of an early return (`func_151B2610`), aligned array fields
+(`f32 unk10[3]`, not `u8[0xC]`), two `if (temp_v0 != NULL)` blocks (`func_150FAFC0`), call-time
+ternaries `(arg1 == -1) ? 300 : arg1` / `? 0 : 1` with temp_v0 declared first (`func_150B58B0`),
+a function-pointer table call writing into a struct field (`func_151D1510`).
+Left: `func_1510A454`, `func_15109990`, `func_150E892C`, `func_150ECFE8` (the same ternaries, but
+the struct stores come after the branches: SIZE+1 or DIFF30+ for every shape tried),
+`func_151D469C` (DIFF2: `sh -1` / `sb 0` store order; all 720 assignment orders tried),
+`func_15182BE0` (struct 4 bytes lower and `arg4` reloaded for the `div`), `func_1515AFF4`
+(struct copy loop), `func_151C4BF4`, `func_150E6E30`, and ~45 spawners that call other functions
+first (list: `spawngen.py` prints `SKIP ... calls ...`).
+
+### C files own .data
+
+- `rodata_inject.py` now also plans owned `[addr, .data, stem]` ranges (one region, no late items):
+  local array initialisers of C functions and data the C file defines at file scope (a
+  `name[] = ...` line) are the compiler's, everything else goes as raw words in `.section .data`
+  into a GLOBAL_ASM function between its C neighbours; data symbols the C code names get a glabel.
+  All sections of a file are emitted in one `# rodata_inject` block per function.
+- Done: `game_eu_1365E0` (0x22E270-0x22E280, `func_1510957C`, `func_1510965C`),
+  `game_16DC80` (0x22F5B0-0x22F6A0; its function-pointer tables stay in GLOBAL_ASM functions;
+  `func_151417C4`), `game_36680` (0x2281F0-0x228390; `D_80082BFC`/`D_80082D60` are now C tables
+  at the end of the file, written with `tools/eu_port/ptrtable.py <rom a> <rom b>`; the two
+  `= D_80082BE0`-style initialisers became literal `{...}`).
+- Steps: find the file's .data range with `datarefs.py game --lo/--hi` (references are in file
+  order; take 16-byte boundaries), write the C, `rodata_split.py <stem> <a> <b> --section .data`,
+  `verify_all.sh` (full). `rodata_inject.py <stem> --dry` shows the plan (`data` lines).
+- Non-const local arrays: `s32 sp1C[2] = {0x38, 0x54};`; a `u8` local passed by address needs
+  `u8 sp24[4]` (4-byte slot); declare the struct before the array to get the array lower.
+- Screening (`screen.py`) does not accept .data relocations; `tools/eu_port/fdiff.py src_eu/X.c
+  func` (container, from `conker/`) rebuilds the object and prints a word diff with disassembly
+  against the ROM, for functions without a `.s`.
+- Near misses in `game_36680` (drafts in comments): `func_1500A6D8`, `func_1500A7E8`: everything
+  matches except the local array at sp+0x28 instead of sp+0x24 (tried pads of every size, array /
+  struct / flat shapes, declaration orders).
+
+### rodata_inject layout fixes
+
+- A float/double literal item now ends after 4/8 bytes; an unreferenced word after it becomes its
+  own item and goes to a GLOBAL_ASM neighbour (`func_151CC190` in game_eu_1F7960: unused
+  `D_800AB29C` after its literal). `func_151CC190` needed `Sub151CC190 *v = arg0 + 0x70` set before
+  the call and the exact literal `6.283186f` (0x40C90FDC, not 2pi).
+- Compiler-owned items whose end is not the next reference take a hint in the C file:
+  `// rodata_inject: size 0x24CB34 4` (`func_1518F9CC`, const array followed by an unreferenced
+  table in game_eu_1BAF40; a stale `extern struct_eu_bytes4b D_800A78B4;` had made the whole block
+  "named by C" and was removed).
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -701,6 +773,16 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
+   Next steps (session 10):
+   - Spawners that call other functions first (~45, `spawngen.py` SKIP list): extend the
+     interpreter (calls whose result is stored to a field, e.g. `func_15083E90`, function-pointer
+     tables) or hand-write; add the `if (arg0 != NULL) { }` guard as a spawngen variant.
+   - More .data ownership: list asm functions that copy from a game .data address (`addiu tX, tX,
+     %lo(D_8008...)` followed by `lw $at, 0x0(tX)`; ~30 functions, see session 10) and own their
+     files' .data. Files whose .data holds only data used by C can be written fully in C
+     (`ptrtable.py` for pointer tables).
+   - Solve the sp+0x24 local array slot in `game_36680` (`func_1500A6D8`, `func_1500A7E8`).
+   - Medium float/switch functions by hand (session 9 advice still holds).
    Next steps (session 9):
    - Effect spawners with `m2c/spawn.py` (~40 left, see session 9), then other families that call
      the same helpers (`func_15160CDC`, `func_15169260`).
@@ -813,5 +895,9 @@ porting to manual work.
   `conker/build/`, including `build/hand` (kept drafts) and m2c draft dirs: apply kept drafts before
   re-splitting, or keep copies outside (session scratch dir).
 - `apply.py` run twice on the same `build/hand` crashes (pragmas already replaced); harmless.
+- `tryall` with hundreds of drafts used to start them all at once and got OOM-killed in the
+  container; it now runs 8 at a time (~1 s per draft).
+- A C table that references a function still in GLOBAL_ASM needs that function's prototype
+  above the table (`game_36680`).
 - `tools/n64splat` shows as modified in `git status` (submodule content); that was
   already the case before this work and is not part of any commit.
