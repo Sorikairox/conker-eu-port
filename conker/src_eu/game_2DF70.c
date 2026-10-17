@@ -287,9 +287,6 @@ s32 func_15002FA0(s32 arg0) {
     return arg0 ^ 0xF0F0F0F0;
 }
 
-void func_15002FB4(s32 arg0);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_15002FB4.s")
-#if 0 // US version; EU code differs
 void func_15002FB4(s32 arg0) {
     struct00 *sp3C; // TBD
     s32 sp38;
@@ -329,7 +326,6 @@ void func_15002FB4(s32 arg0) {
         temp_v0->unk8 = 2U;
     }
 }
-#endif
 
 void func_1500310C(void);
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2DF70/func_1500310C.s")

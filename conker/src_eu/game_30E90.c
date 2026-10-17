@@ -7,23 +7,15 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150039E0.s")
 
 // FIXME: matches but something isnt right
-void func_15004574(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_15004574.s")
-#if 0 // US version; EU code differs
 void func_15004574(void) {
     if (D_800DBF88 != 0xFF) {
         D_800DBF8C = D_800DBEF4[D_800DBF88].unk1C;
         D_800DBF90 = D_800DBEF4[D_800DBF88].unk28;
     }
 }
-#endif
 
-void func_150045BC(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150045BC.s")
-#if 0 // US version; EU code differs
 void func_150045BC(void) {
 }
-#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150045C4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_30E90/func_150049A4.s")

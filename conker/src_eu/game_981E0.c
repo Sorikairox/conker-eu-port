@@ -18,21 +18,13 @@ void func_1506AFE0(void) {
     func_1505E650(D_800D154C, 0x48, 1.0f, 5.0f, 0.0f, 0.0f, 0);
 }
 
-void func_1506B020(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B020.s")
-#if 0 // US version; EU code differs
 void func_1506B020(void) {
     D_800D154C->unk1CB = (u8)1;
     func_1505E650(D_800D154C, 0x39, 1.0f, 5.0f, 0.0f, 0.0f, 0);
 }
-#endif
 
-void func_1506B070(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B070.s")
-#if 0 // US version; EU code differs
 void func_1506B070(void) {
 }
-#endif
 
 void func_1506B078(void) {
     f32 tmp = (D_800D154C->y_position - (D_800D154C->unk118 - 150.0f)) * D_80099C34;
@@ -80,36 +72,20 @@ void func_1506B2BC(void) {
     }
 }
 
-void func_1506B328(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B328.s")
-#if 0 // US version; EU code differs
 void func_1506B328(void) {
     func_1505E650(D_800D154C, 0x3E, 1.0f, 5.0f, 0.0f, 0.0f, 0);
 }
-#endif
 
-void func_1506B368(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B368.s")
-#if 0 // US version; EU code differs
 void func_1506B368(void) {
 }
-#endif
 
-void func_1506B370(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B370.s")
-#if 0 // US version; EU code differs
 void func_1506B370(void) {
     // return index of D_800D154C in structs array
     func_1507D4F8(((s32)D_800D154C - (s32)D_800CC2D0) / (s32)sizeof(struct127));
 }
-#endif
 
-void func_1506B3B0(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B3B0.s")
-#if 0 // US version; EU code differs
 void func_1506B3B0(void) {
 }
-#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B3B8.s")
 // NON-MATCHING: 5% there...
@@ -166,9 +142,6 @@ void func_1506B50C(void) {
     D_800D154C->unk21C = 0;
 }
 
-void func_1506B520(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B520.s")
-#if 0 // US version; EU code differs
 void func_1506B520(void) {
     s32 tmp;
 
@@ -183,21 +156,12 @@ void func_1506B520(void) {
         func_1507CD64(D_800D154C, 1);
     }
 }
-#endif
 
-void func_1506B5A4(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B5A4.s")
-#if 0 // US version; EU code differs
 void func_1506B5A4(void) {
 }
-#endif
 
-void func_1506B5AC(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B5AC.s")
-#if 0 // US version; EU code differs
 void func_1506B5AC(void) {
 }
-#endif
 
 void func_1506B5B4(void) {
     D_800D154C->unk1CB = (u8)1;
@@ -506,20 +470,12 @@ void func_1506D898(void) {
     D_800D154C->unk31C->unk44 = 12;
 }
 
-void func_1506D934(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D934.s")
-#if 0 // US version; EU code differs
 void func_1506D934(void) {
     D_800D154C->unk103 = D_800D1580;
 }
-#endif
 
-void func_1506D950(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D950.s")
-#if 0 // US version; EU code differs
 void func_1506D950(void) {
 }
-#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D958.s")
 
@@ -571,20 +527,12 @@ void func_1506DCC0(void) {
     D_800D154C->unk2EC = (s32) D_800D1580;
 }
 
-void func_1506DCDC(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506DCDC.s")
-#if 0 // US version; EU code differs
 void func_1506DCDC(void) {
     D_800D154C->health = (s8) D_800D1580;
 }
-#endif
 
-void func_1506DCF8(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506DCF8.s")
-#if 0 // US version; EU code differs
 void func_1506DCF8(void) {
 }
-#endif
 
 void func_1506DD00(void) {
     struct127 *temp_v1;
@@ -602,9 +550,6 @@ void func_1506DD44(void) {
     D_800D154C->unkF8 &= ~D_800D1580;
 }
 
-void func_1506DD6C(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506DD6C.s")
-#if 0 // US version; EU code differs
 void func_1506DD6C(void) {
     if (D_800D154C->unk31C != 0) {
         D_800D154C->unk31C->matrix_physics = D_800D1580 & 0x7F;
@@ -613,14 +558,9 @@ void func_1506DD6C(void) {
         D_800D154C->unk76 = D_800D154C->unk7A;
     }
 }
-#endif
 
-void func_1506DDB8(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506DDB8.s")
-#if 0 // US version; EU code differs
 void func_1506DDB8(void) {
 }
-#endif
 
 void func_1506DDC0(void) {
     if (func_15178E50(D_800BE9F0) != 0) {
@@ -1550,21 +1490,13 @@ void func_15072EF4(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15072F10.s")
 
-void func_15073054(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073054.s")
-#if 0 // US version; EU code differs
 void func_15073054(void) {
     D_800D154C->unk22E = (s16) D_800D1580;
 }
-#endif
 
-void func_15073070(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073070.s")
-#if 0 // US version; EU code differs
 void func_15073070(void) {
 
 }
-#endif
 
 void func_15073078(void) {
     func_1512D748(0, D_800D1580, 1);
@@ -1628,21 +1560,13 @@ void func_15073A28(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073A50.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073B38.s")
 
-void func_15073C28(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073C28.s")
-#if 0 // US version; EU code differs
 void func_15073C28(void) {
     func_1507F640();
 }
-#endif
 
-void func_15073C48(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073C48.s")
-#if 0 // US version; EU code differs
 void func_15073C48(void) {
 
 }
-#endif
 
 // ???
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073C50.s")
@@ -1702,12 +1626,8 @@ void func_15073F1C(void) {
 }
 #endif
 
-void func_15073F54(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073F54.s")
-#if 0 // US version; EU code differs
 void func_15073F54(void) {
 }
-#endif
 
 void func_15073F5C(void) {
     D_800D154C->unk2CB = (s8) D_800D1580;

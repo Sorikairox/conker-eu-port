@@ -2,9 +2,6 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/libultra/io/sptask/_VirtualToPhysicalTask.s")
 
-void osSpTaskLoad(OSTask *intp);
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/io/sptask/osSpTaskLoad.s")
-#if 0 // US version; EU code differs
 void osSpTaskLoad(OSTask *intp)
 {
 
@@ -34,7 +31,6 @@ void osSpTaskLoad(OSTask *intp)
                  tp->t.ucode_boot_size) == -1)
         ;
 }
-#endif
 
 void osSpTaskStartGo(OSTask *tp) {
     while(__osSpDeviceBusy())

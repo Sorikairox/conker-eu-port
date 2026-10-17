@@ -30,9 +30,6 @@ s32 func_1504072C(s32 arg0) {
 void func_15040748(s32 arg0) {
 }
 
-s32 func_15040754(struct148 *arg0);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_15040754.s")
-#if 0 // US version; EU code differs
 s32 func_15040754(struct148 *arg0) { // overly simple
     s32 temp_a2;
     s32 temp_a1;
@@ -46,14 +43,9 @@ s32 func_15040754(struct148 *arg0) { // overly simple
     }
     return func_1504072C(arg0->unk4);
 }
-#endif
 
-void func_150407A0(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_150407A0.s")
-#if 0 // US version; EU code differs
 void func_150407A0(void) {
 }
-#endif
 
 void func_150407A8(s32 arg0) {
 }
@@ -212,19 +204,11 @@ void func_15040A28(s32 arg0) {
 void func_15040A34(s32 arg0) {
 }
 
-void func_15040A40(s32 arg0);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_15040A40.s")
-#if 0 // US version; EU code differs
 void func_15040A40(s32 arg0) {
 }
-#endif
 
-void func_15040A4C(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_15040A4C.s")
-#if 0 // US version; EU code differs
 void func_15040A4C(void) {
 }
-#endif
 
 void func_15040A54(s32 arg0) {
 }

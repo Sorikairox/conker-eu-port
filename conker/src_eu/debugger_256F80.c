@@ -9,9 +9,6 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_160018BC.s")
 
 // another __osSiDeviceBusy function
-s32 func_16001984();
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_16001984.s")
-#if 0 // US version; EU code differs
 s32 func_16001984()
 {
     register u32 stat = IO_READ(SI_STATUS_REG);
@@ -19,12 +16,8 @@ s32 func_16001984()
         return 1;
     return 0;
 }
-#endif
 
 // very similar to __osSiRawStartDma
-s32 func_160019A8(s32 direction, void *dramAddr);
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_160019A8.s")
-#if 0 // US version; EU code differs
 s32 func_160019A8(s32 direction, void *dramAddr) {
     if ((s32)dramAddr & 3) { // what is this checking?
         return -1;
@@ -50,14 +43,9 @@ s32 func_160019A8(s32 direction, void *dramAddr) {
 
     return 0;
 }
-#endif
 
-void func_16001A64(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_256F80/func_16001A64.s")
-#if 0 // US version; EU code differs
 void func_16001A64(void) {
 }
-#endif
 
 s32 func_16001A6C(f32 arg0) {
     s32 tmp = *(s32*) &arg0;

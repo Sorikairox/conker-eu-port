@@ -390,9 +390,6 @@ void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 a
 void func_1513E070(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E084.s")
-#if 0 // US version; EU code differs
 void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2) {
     struct212 *temp_v0 = &arg0->unk110;
     if (arg2 == 0x1A) {
@@ -412,14 +409,9 @@ void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2) {
         }
     }
 }
-#endif
 
-void func_1513E134(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E134.s")
-#if 0 // US version; EU code differs
 void func_1513E134(void) {
 }
-#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E13C.s")
 // void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {

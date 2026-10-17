@@ -58,9 +58,6 @@ void func_16000058(void) {
 }
 #endif
 
-s32 func_16000224(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000224.s")
-#if 0 // US version; EU code differs
 s32 func_16000224(void) {
     s32 res = 0;
 
@@ -95,21 +92,12 @@ s32 func_16000224(void) {
     }
     return res;
 }
-#endif
 
-void func_16000304(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000304.s")
-#if 0 // US version; EU code differs
 void func_16000304(void) {
 }
-#endif
 
-void func_1600030C(void);
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_1600030C.s")
-#if 0 // US version; EU code differs
 void func_1600030C(void) {
 }
-#endif
 
 void func_16000314(void) {
     switch(D_16003B28) {
