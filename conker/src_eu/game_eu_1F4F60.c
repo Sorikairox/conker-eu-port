@@ -123,7 +123,21 @@ void func_151CC840(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CD2CC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CD444.s")
+s32 func_151A5580(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 memcpy(s32, u8 **, s32);
+
+void func_151CD444(u8 *arg0) {
+    s32 temp_v0;
+    u8 *sp28;
+
+    if (D_800BE616 != 0) {
+        sp28 = arg0;
+        temp_v0 = func_151A5580(0, 0, 0, 0xFF, 0, (s32) (*(u8 *)((u8 *)arg0 + 0x23D)), 1, 4);
+        if (temp_v0 != 0) {
+            memcpy(temp_v0 + 0x20, &sp28, 4);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CD4B8.s")
 

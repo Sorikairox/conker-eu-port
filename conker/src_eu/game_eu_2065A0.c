@@ -39,4 +39,9 @@ void func_151D9364(s32 arg0, u8 arg1) {
     func_15169260(&D_800AB6E0, 1, arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_151D9398.s")
+extern s8 D_eu_800E0E30;
+
+void func_151D9398(void) {
+    D_eu_800E0E30 = 1;
+    func_151D9364(0, 0x58U);
+}

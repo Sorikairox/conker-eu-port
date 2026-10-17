@@ -98,7 +98,35 @@ void func_1518E8EC(u8 *arg0, u8 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518E934.s")
+s32 memcpy(u8 *, u8 **, s32);
+
+u8 *func_1518E934(u8 **arg0, u8 arg1) {
+    u8 *temp_v0;
+    u8 *sp24;
+
+    if ((*(u8 *)((u8 *)(*arg0) + 4)) == 0x96) {
+        return NULL;
+    }
+    temp_v0 = func_15167A68(0x21, 1, 0x9EC, 1, (u8) (s32) arg1, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    sp24 = temp_v0;
+    memcpy(temp_v0 + 0x18, arg0, 0xC);
+    (*(s32 *)((u8 *)temp_v0 + 0x28)) = 0;
+    (*(s8 *)((u8 *)temp_v0 + 0x2C)) = 8;
+    (*(s8 *)((u8 *)temp_v0 + 0x2D)) = 4;
+    (*(s32 *)((u8 *)temp_v0 + 0x30)) = 0;
+    (*(s32 *)((u8 *)temp_v0 + 0x10)) = 1;
+    (*(s32 *)((u8 *)temp_v0 + 0x14)) = 0;
+    (*(f32 *)((u8 *)temp_v0 + 0x24)) = 0.0f;
+    (*(f32 *)((u8 *)temp_v0 + 0x38)) = 0.0f;
+    (*(f32 *)((u8 *)temp_v0 + 0x3C)) = 0.0f;
+    (*(f32 *)((u8 *)temp_v0 + 0x40)) = 0.0f;
+    (*(f32 *)((u8 *)temp_v0 + 0x34)) = 1.0f;
+    bzero(temp_v0 + 0x48, 0x960);
+    return sp24;
+}
 
 void func_1518EA10(struct_eu_1BAAA0 *arg0) {
     func_1518E878(arg0);
@@ -136,9 +164,25 @@ void func_1518EB48(s8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s
     *arg6 = 0x401;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518EBDC.s")
+s32 func_1518D1C0(s32, s32, s32, s32, s32, s32, s32 *);
+extern s32 D_800A7840;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518EC44.s")
+s32 func_1518EBDC(u8 *arg0) {
+    func_1518D1C0((*(s32 *)((u8 *)arg0 + 0x18)), 3, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)), &D_800A7840);
+    (*(s16 *)((u8 *)arg0 + 0x1E)) = 0x80;
+    (*(s8 *)((u8 *)arg0 + 0x21)) = -1;
+    return 0;
+}
+
+s32 func_1518D1C0(s32, s32, s32, s32, s32, s32, s32 *);
+extern s32 D_800A787C;
+
+s32 func_1518EC44(u8 *arg0) {
+    func_1518D1C0((*(s32 *)((u8 *)arg0 + 0x18)), 4, 0, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)), &D_800A787C);
+    (*(s16 *)((u8 *)arg0 + 0x1E)) = 0x80;
+    (*(s8 *)((u8 *)arg0 + 0x21)) = -1;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAAA0/func_1518ECAC.s")
 

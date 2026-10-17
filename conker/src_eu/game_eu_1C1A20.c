@@ -103,6 +103,17 @@ void func_15195BC0(s32 arg0, s32 arg1, s32 arg2) {
     func_151B09BC(arg0, arg1, 1000, 0xFF, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195C08.s")
+s32 func_1507CD64(struct127 *, s32);
+
+void func_15195C08(u8 *arg0, struct127 *arg1, s32 arg2) {
+    if ((arg1->health == 0) && (arg1->unk127 != 0xFF)) {
+        func_15136C3C((s32) arg1, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(arg1);
+        func_1507CD64(arg1, 6);
+    }
+    if ((*(u8 *)((u8 *)arg0 + 4)) == 0x47) {
+        (*(s8 *)((u8 *)arg0 + 0x1CA)) = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195CA8.s")

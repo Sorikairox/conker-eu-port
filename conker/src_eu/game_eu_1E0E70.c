@@ -3,7 +3,27 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3660.s")
+s32 memcpy(u8 *, s32, s32);
+extern f32 D_800AA770;
+
+u8 *func_151B3660(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    u8 *temp_v0;
+    f32 temp_f0;
+    u8 *sp24;
+
+    temp_v0 = func_15167A68(0x33, arg4, arg2 + 0x150, 1, (u8) (s32) arg3, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    sp24 = temp_v0;
+    memcpy(temp_v0 + 0x10, arg0, 0x38);
+    temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0x38));
+    (*(u8 *)((u8 *)temp_v0 + 0x10)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 0x10)) | 0xE);
+    (*(f32 *)((u8 *)temp_v0 + 0x138)) = (f32) (2.0f * ((temp_f0 * temp_f0) / D_800AA770));
+    (*(s32 *)((u8 *)temp_v0 + 0x13C)) = (s32) (temp_f0 * arg1 * 4096.0f);
+    bzero(temp_v0 + 0x140, 0x10);
+    return sp24;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3734.s")
 

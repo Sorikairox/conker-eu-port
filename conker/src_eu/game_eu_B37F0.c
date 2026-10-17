@@ -103,7 +103,34 @@ void func_1508845C(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_1508849C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088568.s")
+s32 func_1508849C(struct_eu_80087640 *, struct127 *, s32, s32);
+extern s8 D_800D27BA;
+
+s32 func_15088568(s32 arg0, s32 arg1) {
+    struct_eu_80087640 *temp_a0;
+    struct127 *temp_a1;
+    s8 temp_v1;
+    s32 var_a2;
+    struct_eu_80087640 *sp1C;
+
+    var_a2 = 0;
+    if (D_80087640 == NULL) {
+        return 0;
+    }
+    temp_a0 = &D_80087640[arg0];
+    temp_v1 = (s8) temp_a0->pad28[8];
+    temp_a1 = &D_800CC2D0[(s8) temp_a0->unk31];
+    if (temp_v1 == 0) {
+        sp1C = temp_a0;
+        var_a2 = func_1508849C(temp_a0, temp_a1, arg1, arg0);
+    } else if (temp_v1 == 1) {
+        temp_a0->pad28[8] = 2;
+        temp_a1->immune = 0xFF;
+    }
+    temp_a0->pad28[2] = (u8) D_800D27BA;
+    D_800D27BA += 1;
+    return var_a2;
+}
 
 s32 func_1508863C(s32 arg0) {
     struct_eu_80087640 *temp_a0;

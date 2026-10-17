@@ -17,9 +17,23 @@ Gfx *func_15095350(Gfx *arg0) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15095380.s")
+s32 func_15095470(s32, s32, s32);
+s32 func_150954E4(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 D_800D30B0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_150953F8.s")
+void func_15095380(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    func_15095470(arg1, arg2, arg3);
+    func_150954E4(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
+}
+
+s32 func_15095470(s32, s32, s32);
+s32 func_150954E4(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 D_800D30B0;
+
+void func_150953F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+    func_15095470(arg1, arg2, arg3);
+    func_150954E4(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15095470.s")
 

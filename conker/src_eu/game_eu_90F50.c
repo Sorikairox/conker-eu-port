@@ -22,7 +22,18 @@ s16 func_15063740(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063AA0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063D6C.s")
+extern s16 D_800CC6D2;
+
+s16 func_15063D6C(u8 *arg0) {
+    D_800CC6D2 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12))) - func_15063740(arg0);
+    if (D_800CC6D2 >= 0x3E81) {
+        D_800CC6D2 = 0x3E80;
+    }
+    if (D_800CC6D2 < -0x3E80) {
+        D_800CC6D2 = -0x3E80;
+    }
+    return D_800CC6D2;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063DE8.s")
 
