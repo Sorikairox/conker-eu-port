@@ -219,9 +219,8 @@ porting to manual work.
      `D_8003B260` stays a tentative definition in the C file (needed for codegen) and
      gets its EU address from `undefined_syms.eu.txt`.
    - `init_214F0`, `game_D4C20`, `game_221290`: all GLOBAL_ASM; only placed.
-3. **31 functions reverted in the salvage** are near-misses worth retrying; the C
-   attempts are in commit `c67d78d`'s parent working state only via the backup, so
-   treat them as fresh: `func_150EB430 func_15108D7C func_1510ADF0 func_1510AE4C
+3. **31 functions reverted in the salvage** are near-misses worth retrying. Their
+   non-matching C attempts were not kept in git, so start them fresh: `func_150EB430 func_15108D7C func_1510ADF0 func_1510AE4C
    func_15116EB0 func_1514AA08 func_15156544 func_15158748 func_1515AE90 func_1515C6C8
    func_15188FC8 func_15195104 func_1519812C func_1519F678 func_1519F6D8 func_151A8FD0
    func_151AA72C func_151AA7C0 func_151ABD38 func_151ABD88 func_151C1DC4 func_151CF1C0
