@@ -36,7 +36,17 @@ void func_151B887C(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B88C8.s")
+void func_151B88C8(u8 *arg0, s32 *arg1, u8 arg2) {
+    u8 *q = *(u8 **)(arg0 + 0x98);
+    u8 *p = *(u8 **)(q + 4);
+    s32 id;
+    if (arg2 == 0) {
+        id = arg1[0];
+        if (id == *(s32 *)p || p[4] == ((u8 *)arg1)[4]) {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 void func_151B8920(u8 *arg0) {
     struct102 **temp_v0 = *(struct102 ***)(arg0 + 0x98);

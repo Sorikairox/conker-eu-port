@@ -64,7 +64,17 @@ void func_15159270(void **arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_151595F4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15159690.s")
+s32 func_15159690(u8 *arg0, u8 arg1) {
+    s32 r;
+    if (arg1 == 2 || arg1 == 3) {
+        r = 1;
+    } else if (*(f32 *)(arg0 + 0x180) < *(f32 *)(arg0 + 0x118) - 35.0f) {
+        r = 1;
+    } else {
+        r = 0;
+    }
+    return r;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_151596F4.s")
 

@@ -151,7 +151,16 @@ void func_150F0EB8(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F1B78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F1C04.s")
+void func_150F1C04(u8 *arg0, s32 *arg1, u8 arg2) {
+    u8 *p = arg0 + 0x18;
+    s32 id;
+    if (arg2 == 0x43) {
+        id = arg1[0];
+        if (id == *(s32 *)p || p[4] == ((u8 *)arg1)[4]) {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F1C5C.s")
 

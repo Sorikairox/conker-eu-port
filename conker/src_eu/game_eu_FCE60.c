@@ -64,7 +64,21 @@ s32 func_150D0294(u8 *arg0, u8 **arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0544.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D05D0.s")
+extern void (*D_80088C50[])(u8 *, u8 *, u8);
+void func_150D03A8(u8 *, u8 *, u8);
+void func_150D05D0(u8 *arg0, u8 *arg1, u8 arg2) {
+    void (*f)(u8 *, u8 *, u8);
+    if (arg2 == 0x51) {
+        if (arg0[0x28] == arg1[0]) {
+            func_150D03A8(arg0, arg1, arg2);
+        }
+    } else {
+        f = D_80088C50[arg0[0x4D]];
+        if (f != NULL) {
+            f(arg0, arg1, arg2);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0644.s")
 

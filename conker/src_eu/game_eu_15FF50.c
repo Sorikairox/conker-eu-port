@@ -69,7 +69,15 @@ void func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15134290.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15134358.s")
+void func_15134358(struct102 *arg0, s32 *arg1, u8 arg2) {
+    s32 id;
+    if (arg2 == 0) {
+        id = arg1[0];
+        if (id == *(s32 *)((u8 *)arg0 + 0x7C) || ((u8 *)arg1)[4] == *((u8 *)arg0 + 0x80)) {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_151343AC.s")
 

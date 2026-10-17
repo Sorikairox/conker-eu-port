@@ -151,7 +151,24 @@ void func_15199834(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199DDC.s")
+void func_15199DDC(struct102 *arg0, s32 *arg1, u8 arg2) {
+    s32 id;
+    s32 cur;
+    u8 *p = *(u8 **)((u8 *)arg0 + 0x98);
+    if (arg2 == 0 || arg2 == 2 || arg2 == 0x26) {
+        if (*(s32 *)p == arg1[0] || p[4] == ((u8 *)arg1)[4]) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (arg1[0] == *(s32 *)p) {
+            *(s32 *)p = arg1[1];
+            p[4] = ((u8 *)arg1)[9];
+        } else if (arg1[1] == *(s32 *)p) {
+            *(s32 *)p = arg1[0];
+            p[4] = ((u8 *)arg1)[8];
+        }
+    }
+}
 
 void func_15199E98(void *arg0) {
     func_15199EF0(arg0);

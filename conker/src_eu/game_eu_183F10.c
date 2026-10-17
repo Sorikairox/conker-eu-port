@@ -5,7 +5,10 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15156700.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_151568F8.s")
+void func_15156700(s32, u8, s32, s32, s32);
+void func_151568F8(s32 arg0, u8 arg1, s32 arg2) {
+    func_15156700(arg0, arg1, arg2, 0xFF, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15156928.s")
 

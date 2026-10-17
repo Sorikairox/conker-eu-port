@@ -29,6 +29,8 @@ def cc_cmd(p):
             a=shlex.split(l)
             i=a.index('-o'); a=a[:i]+a[i+2:]   # drop -o out
             a=[x for x in a if not x.endswith('.c')]
+            if os.environ.get('SCREEN_OPT'):   # e.g. SCREEN_OPT="-O2 -g": replaces the file's -O/-g flags
+                a=[x for x in a if not re.match(r'-(O\d?|g\d?)$',x)]+os.environ['SCREEN_OPT'].split()
             return a
     return None
 
