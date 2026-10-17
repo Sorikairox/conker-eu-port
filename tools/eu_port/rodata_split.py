@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # usage: rodata_split.py <src stem> <rom start> <rom end> [--section .rodata|.data]
-# Carves [start, end) out of the rodatabin that contains it in conker/conker.eu.yaml and
+# Carves [start, end) out of the rodatabin/databin that contains it in conker/conker.eu.yaml and
 # makes it the given section of src_eu/<stem>.c (default .rodata): the blob line is split into
 # [blob start, rodatabin], [start, .rodata, stem], [end, rodatabin] (empty pieces dropped).
 # Afterwards: define the constants in the C file (exact bytes, 16-byte padded object section),
@@ -20,11 +20,12 @@ for i,l in enumerate(L):
     for l2 in L[i+1:]:
         m2=R.match(l2) or re.match(r'^\s*- \[0x([0-9A-Fa-f]+)\]',l2)
         if m2: nxt=int(m2.group(2) if m2.re is R else m2.group(1),16); break
-    if m.group(3)=='rodatabin' and s<=a and nxt is not None and b<=nxt:
+    if m.group(3) in ('rodatabin','databin') and s<=a and nxt is not None and b<=nxt:
         ind=m.group(1); new=[]
-        if s<a: new.append('%s- [0x%X, rodatabin]'%(ind,s))
+        bt=m.group(3)
+        if s<a: new.append('%s- [0x%X, %s]'%(ind,s,bt))
         new.append('%s- [0x%X, %s, %s]'%(ind,a,sec,stem))
-        if b<nxt: new.append('%s- [0x%X, rodatabin]'%(ind,b))
+        if b<nxt: new.append('%s- [0x%X, %s]'%(ind,b,bt))
         L[i:i+1]=new; open(p,'w').write('\n'.join(L)); print('\n'.join(new)); break
 else:
     sys.exit('no rodatabin contains 0x%X-0x%X'%(a,b))

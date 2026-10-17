@@ -735,7 +735,11 @@ segments:
     start: 0x00228130
     vram:  0x80082EB0
     subsegments:
-      - [0x228130, rodatabin]
+      - [0x228130, databin]
+      - [0x22B4D0, .data, libultra/gu/sinf]
+      - [0x22B4E0, databin]
+      - [0x22D990, rodatabin] # provisional .data/.rodata boundary (data ends before jtbl_8008891C)
+      - [0x23E3C0, .rodata, libultra/gu/sinf]
       - [0x23E3E0, .rodata, libultra/gu/guPerspectiveF]
       - [0x23E3F0, .rodata, libultra/gu/guRotateF]
       - [0x23E400, .rodata, game/done/game_75810]
