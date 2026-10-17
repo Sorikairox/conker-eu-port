@@ -215,8 +215,9 @@ def main():
             global_anchors[seg_of(m["us_vram"])].append((m["us_vram"], m["shift"]))
     for seg, pool in global_anchors.items():
         pool.sort()
+        # drop outliers: both neighbours agree with each other but not with this one
         global_anchors[seg] = [a for i, a in enumerate(pool)
-                               if (i and pool[i - 1][1] == a[1]) or (i + 1 < len(pool) and pool[i + 1][1] == a[1])]
+                               if not (0 < i < len(pool) - 1 and pool[i - 1][1] == pool[i + 1][1] != a[1])]
 
     report = {"ported": [], "failed": {}}
     eu_c_files = []  # (eu rom start, eu rom end, name)
