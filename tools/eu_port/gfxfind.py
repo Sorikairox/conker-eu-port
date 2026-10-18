@@ -143,8 +143,12 @@ def main():
     hints = []
     if '--hints' in args:
         hints = args[args.index('--hints') + 1:]
+    live = set()  # functions that still have a GLOBAL_ASM pragma (the .s files stay on disk after a match)
+    for c in glob.glob('src_eu/*.c'):
+        live.update(re.findall(r'^#pragma GLOBAL_ASM\("[^"]*/(\w+)\.s"\)', open(c).read(), re.M))
     idx = {}
-    for p in glob.glob('asm/nonmatchings/**/*.s', recursive=True): idx[os.path.basename(p)[:-2]] = p
+    for p in glob.glob('asm/nonmatchings/**/*.s', recursive=True):
+        if os.path.basename(p)[:-2] in live: idx[os.path.basename(p)[:-2]] = p
     res = []
     for f, p in idx.items():
         if hints and f not in hints: continue

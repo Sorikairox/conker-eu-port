@@ -46,7 +46,21 @@ void func_151791A4(u8 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178C9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15179314.s")
+extern s32 D_800DD36C;
+s32 func_15179314(u8 *arg0) {
+    u8 *next; // fakematch: declared before p to move the spill slot to 0x20
+    u8 *p = (u8 *)D_800DD36C;
+
+    func_100111C8(*(u16 *)(arg0 + 0x2E));
+    while (p != NULL) {
+        next = *(u8 **)(p + 8);
+        if (*(u8 **)(p + 0x14) == arg0) {
+            func_1516972C(p);
+        }
+        p = next;
+    }
+    func_15169824(arg0);
+}
 
 s32 func_15179314(u8 *);
 void func_15178E14(u8 arg0)

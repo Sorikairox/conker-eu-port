@@ -519,3 +519,9 @@ func_1503DD2C	untried	4	OK	y	n	q = p - 0x38 before the NULL test; if (r != NULL)
 func_1514F6A0	untried	5	OK	y	n	switch (a1) {case 0xD: ..;break; case 0xE: ..;break; default: return f(a0,a1,a2);} return 1; (if-chain gave SIZE-1/-2)
 func_1515F10C	untried	1	OK	y	n	singly linked list unlink (no NULL check on the search), then free: prev/cur pointers
 func_151E5564	untried	2	OK	y	n	needed file edit: 'extern s32 func_151E5564;' -> 'void func_151E5564(void);' and a forward void func_151E5D28(void) in the draft
+func_1509CF78	untried	5	DIFF2	n	n	count nonzero over 204 x 0x14 entries: 'for (i<204) if (D_800877D0[i].unk0)' unrolls like the ref, but the end pointer reloc is D_800887C0 (ref) vs D_800877D0+0xFF0 (mine): bytes equal, screen is name-strict; pointer-compare loops do not unroll
+func_15031C4C	untried	6	SIZE-1	n	n	list search with skip count (a2--==0); ref has bnez;nop;jr early return (no delay-slot fill), mine fills with lw; needs 'u8 *func_15031C4C();' forward decl above its caller in game_eu_5D910.c
+func_1512D868	untried	1	OK	y	n	switch on u8 state: case 1 reset counter+state 2; case 2 counter += D_800BE9E4, >= D_800DC6C0[idx] -> state 0
+func_151103B0	untried	1	OK	y	n	relative-offset list walk: p += s16 at 0xC, else p += s16 at 0x4 and count++, else NULL
+func_15179314	untried	3	OK	y	n	callee file declares s32 ret (no return stmt); 'u8 *next' declared BEFORE p moves the spill slot (fakematch)
+func_151CA070	untried	2	DIFF27	n	n	ref spills a0,a1,a2 at entry and copies a0 to a1 (s32 arg0 as pointer); frame 0x58 vs 0x50 in mine

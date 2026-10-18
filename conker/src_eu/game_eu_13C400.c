@@ -60,4 +60,23 @@ s32 func_1510FE4C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FD20.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_151103B0.s")
+extern u8 *D_800DC278;
+s32 func_151103B0(u8 *arg0) {
+    s32 count = 0;
+    u8 *p = D_800DC278;
+
+    while (p != NULL) {
+        if (p == arg0) {
+            return count;
+        }
+        if (*(s16 *)(p + 0xC) != 0) {
+            p += *(s16 *)(p + 0xC);
+        } else if (*(s16 *)(p + 4) != 0) {
+            p += *(s16 *)(p + 4);
+            count++;
+        } else {
+            p = NULL;
+        }
+    }
+    return 0;
+}
