@@ -11,7 +11,15 @@ void *func_1515D9B0(void) {
     return sp1C;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515D9F0.s")
+u8 *func_1515D9F0(s32 arg0) {
+    u8 *p;
+    s32 n;
+    s32 *q = &arg0; // fakematch: address-taken arg
+    n = *q * 0x60;
+    p = allocate_memory(n, 1, 2, 0);
+    bzero(p, n);
+    return p;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515D4D4.s")
 
@@ -145,7 +153,24 @@ void func_15160104(u8 *arg0, s32 arg1) {
     func_1505D024(arg0, 0x6002D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_15160134.s")
+u8 *func_15105C24(s32);
+
+void func_15160134(u8 *arg0, s32 arg1) {
+    s32 pad; // fakematch: unused local moves v to sp18
+    struct127 *v = NULL;
+    u8 *t;
+    s32 a3;
+    t = func_15105C24(arg1);
+    if (t != NULL) {
+        v = *(struct127 **)(t + 0x98);
+    }
+    if (v != NULL) {
+        a3 = v - D_800CC2D0;
+    } else {
+        a3 = -1;
+    }
+    func_1505D024(arg0, 0x6002E, *(u16 *)(arg0 + 0x7A), a3);
+}
 
 void func_151601A4(s32 arg0, s32 arg1) {
     func_1505D024(arg0, 0x33, 0xC000, -1);

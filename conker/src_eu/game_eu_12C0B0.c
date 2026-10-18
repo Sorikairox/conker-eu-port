@@ -29,4 +29,15 @@ void func_150FED14(s32 arg0, s32 arg1, s32 arg2) {
     func_151D43B4(arg0, arg2, D_800A2398, D_80088F34, 0.0f);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12C0B0/func_150FED54.s")
+void func_150FED54(u8 *arg0) {
+    s8 sp18[8];
+    if (*(s32 *)(arg0 + 0x318) != 0) {
+        sp18[0] = 1;
+        *(s16 *)(sp18 + 2) = ((u32)func_150ADA20() % 13) + 0x14;
+        sp18[5] = 1 << (*(u8 **)(arg0 + 0x318))[0x23D];
+        func_150ADA20();
+        sp18[4] = 8;
+        sp18[6] = -1;
+        func_151D8E18(sp18, 0, 0xFF, 1);
+    }
+}

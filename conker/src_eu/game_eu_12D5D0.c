@@ -24,7 +24,17 @@ void func_1510015C(u8 *arg0, s32 arg1, s32 arg2) {
     func_15145EA4(&sp1C, &sp18, (*(s32 *)((u8 *)arg0 + 0x1D4)) + (D_80088BB0 << 6), 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/func_151001BC.s")
+void func_151001BC(u8 *arg0) {
+    s8 sp18[8];
+    if (*(s32 *)(arg0 + 0x318) != 0) {
+        sp18[0] = 1;
+        *(s16 *)(sp18 + 2) = ((u32)func_150ADA20() % 11) + 0x14;
+        sp18[5] = 1 << (*(u8 **)(arg0 + 0x318))[0x23D];
+        sp18[4] = (func_150ADA20() & 1) + 7;
+        sp18[6] = -1;
+        func_151D8E18(sp18, 0, 0xFF, 1);
+    }
+}
 
 s32 func_151D5FC8(s32, s32, s32, s32, s32, s32, s32);
 s32 func_151D441C(s32, s32, s32, s32);

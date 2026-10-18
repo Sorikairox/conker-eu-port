@@ -20,6 +20,15 @@ void func_151B9190(f32 *arg0, s32 arg1)
   func_151D9450(arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6900/func_151B9204.s")
+s32 func_151B9204(u8 *arg0) {
+    
+    u8 *v = arg0 + 0x120;
+    *(f32 *)(arg0 + 0x58) = *(f32 *)(v + 0x14) + (*(f32 *)(v + 0x28) * sinf(*(f32 *)(arg0 + 0x130)));
+    *(f32 *)(v + 0x10) = (*(f32 *)(v + 0x18) * D_800BE9A4) + *(f32 *)(v + 0x10);
+    *(f32 *)(v + 0x10) = func_15144B68(*(f32 *)(v + 0x10));
+    *(f32 *)(v + 0) = (*(f32 *)(v + 0x1C) * D_800BE9A4) + *(f32 *)(v + 0);
+    *(f32 *)(v + 8) = (*(f32 *)(v + 0x24) * D_800BE9A4) + *(f32 *)(v + 8);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6900/func_151B92AC.s")

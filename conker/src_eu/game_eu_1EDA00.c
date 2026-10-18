@@ -131,4 +131,14 @@ void func_151C1EF0(s32 arg0, s32 arg1, s32 *arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C230C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C1FB8.s")
+void func_151C1FB8(u8 *arg0) {
+    s8 sp18[8];
+    if (*(s32 *)(arg0 + 0x318) != 0) {
+        sp18[0] = 1;
+        *(s16 *)(sp18 + 2) = (func_150ADA20() & 7) + 0xD;
+        sp18[5] = 1 << (*(u8 **)(arg0 + 0x318))[0x23D];
+        sp18[4] = ((u32)func_150ADA20() % 3) + 6;
+        sp18[6] = -1;
+        func_151D8E18(sp18, 0, 0xFF, 1);
+    }
+}

@@ -123,4 +123,14 @@ void func_1503F5A0(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F6F4.s")
+s32 func_1503E5F8(f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_1503F6F4(Mtx *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
+    f32 sp30[16];
+    if (D_800C42B0 != 0) {
+        guMtxL2F((f32 (*)[4]) sp30, arg0);
+    } else {
+        memcpy(sp30, arg0, 0x40);
+    }
+    func_1503E5F8(sp30, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
