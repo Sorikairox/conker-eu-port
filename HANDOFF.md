@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (fourteenth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (fifteenth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2820 / 5912 functions in C (47.7%)**; code bytes 292,952 / 2,253,856 (13.0%)
-  (end of session 14, from `verify_all.sh`).
+- **2823 / 5912 functions in C (47.8%)**; code bytes 293,688 / 2,253,856 (13.0%)
+  (end of session 15, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2428/5329 (10.8%)
+  - game: 2431/5329 (10.8%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -66,6 +66,7 @@ Commits on `eu`:
 | `4df1653`…`364d883` | Session 12: decomp-permuter (`tools/eu_port/permute.sh`), 8 near misses solved by it |
 | `2b846db`…`3a88cab` | Session 13: scripted near-miss sweep (`tools/eu_port/sweep.sh`), 19 functions |
 | `2f1f805`…`c896fcf` | Session 14: native arm64 toolchain, sweep passes 3/4, hand-finished near misses, 21 functions |
+| `63f199e`…`ae35e92` | Session 15: `protocheck.py` (152 prototype fixes), `stackfix.py`, `rescreen.py`, 3 functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -85,6 +86,11 @@ throw all of that away.**
   (decomp-permuter, session 12). Run it with run_in_background; batch with `-l list`.
 - The whole near-miss sweep (m2c drafts -> screen -> permuter -> apply): `tools/eu_port/sweep.sh`
   (session 13).
+- Prototype problems (wrong void/int return, u8/s16 params, float args, arg counts):
+  `tools/eu_port/protocheck.py` (report), `--apply --skip-logged` (fix, verified), then
+  `tools/eu_port/rescreen.py` (session 15).
+- A draft whose stack slots or frame size are off: `tools/eu_port/stackfix.py <func> <draft.c>`;
+  `--scan list` / `--bisect func draft.c` (session 15).
 
 ## Fast native toolchain (session 14 restart)
 
@@ -959,6 +965,100 @@ prototype.
   (SIZE+1, permuter suggests `func_1514F2AC` returning `volatile u8`), `func_15183EE4` (DIFF15),
   and the other DIFF leftovers in `sweep/perm_cand3.txt`.
 
+## Session 15: prototype checker and stack-slot helper
+
+Sequential. Work commits `63f199e` (protocheck + prototype fixes + 2 functions), `ae35e92`
+(stackfix + 1 function). +3 functions (2820 -> 2823), +736 bytes. A third batch (permuter on the 4
+closest callers of changed prototypes, 200 s each) found nothing, so the session stopped at 2 work commits.
+
+### `tools/eu_port/protocheck.py` (host side; ~4 s for a report)
+
+```sh
+python3 tools/eu_port/protocheck.py                 # report: one line per contradiction + totals
+python3 tools/eu_port/protocheck.py --sig func_X    # everything known about one function
+python3 tools/eu_port/protocheck.py --apply --skip-logged [--strong] [--max N] [--dry]
+python3 tools/eu_port/rescreen.py                   # rescreen drafts of the asm callers of changed functions
+```
+
+- **DEF**: functions defined in C vs every other prototype of them (functions.h, other C files).
+  Codegen classes are compared (`s32/u32/ptr` count as one class, so only real differences show;
+  `--all` adds those minor ones).
+- **ASM** (function still GLOBAL_ASM): a small dataflow over the `.s` (branches, likely-branch delay
+  slots, call clobbers) gives live-in argument registers (`a0-a3`, `f12/f14`, stack args), prologue
+  re-truncation (`andi 0xFF/0xFFFF` and `sll/sra 24/16` written back to `$aN`), narrow reloads of arg
+  slots (`lbu 0x..3(sp)` of a home/stack arg with no word load of the same slot), whether `$v0/$f0`
+  is set by the function and unread at `jr ra`, and, across all asm callers, whether `$v0/$f0` is read
+  after `jal f`. Kinds: `ret` (void prototype, value returned or used), `retvoid` (weak), `narrow`,
+  `wide` (weak), `count`, `float`. Hand-written asm (eret/mtc0/cache) is skipped.
+- **`--apply`**: per prototype line, the combined change first, then each part alone if that fails;
+  the objects of every C file that mentions the function are rebuilt in `conkerdev` and checked with
+  `check_files.py`; kept only if they all match (compile errors count as failure). Everything goes
+  to `tools/eu_port/protocheck.log` (KEEP/REJECT with old/new line and evidence); `--skip-logged`
+  does not retry REJECTed lines. A full pass takes ~10 min; it was run until it converged.
+- Numbers (first report): DEF 23 MAJOR, ASM narrow 237, ret 41, count 3, wide 3, retvoid 1.
+  **152 prototype lines fixed for 104 functions** (132 from asm evidence, 20 from C definitions;
+  46 in `functions.h`, the rest file-local m2c prototypes); **137 attempts rejected** (24 compile
+  errors: C callers that pass a different number of args or use the value; 113 changed caller
+  codegen, mostly retries of single params of the 47-param `func_1516DF0C` and of `func_150E856C`,
+  `func_15182BE0`, `func_151A6308`). Left after convergence: narrow 46, count 3, wide 2, DEF 8
+  (all verified to break callers; e.g. `func_15043BB8` reads 3 args and returns a value, but its C
+  caller passes one; `func_1000FD38`'s caller passes 4 args to a 3-param definition).
+  Examples: `func_15083568`, `func_1505327C`, `func_15140410`, `func_15115244` void -> s32 (callers
+  read `$v0`); `func_15052F9C`, `func_1505E874`, `func_15166120`, `func_150ED750` -> f32;
+  `func_15169850`, `func_151DC484`, `func_1514D3B0`, `func_151149AC` u8/s16 params.
+- **Value**: rescreening the existing drafts of the 375 asm callers of changed functions (only 12 had
+  drafts in `nm/` or `sweep/drafts*`) gave 0 OK; a fresh m2c run over the 375 callers
+  (`ONLY=<callers> JT=1 gen2.py ... 1 600`, narrow, screen) gave **1 OK, `func_1514E404`** (needs
+  `func_15083568` to return s32; strings/float are externs, the file does not own .rodata), 2
+  functions improved over their session-13 best (`func_15095B70` CERR -> SIZE±1, `func_15143E94`
+  DIFF77 -> SIZE±1), 197 unchanged, 2 worse. So the prototype fixes mostly pay off later, when these
+  callers are drafted by hand: the header now tells the truth about returns and narrow params.
+- Not covered: callers' argument counts (the data is collected, `callargs`, but not reported), too many
+  params in a prototype (`func_150D03A8` has a 3-param handler prototype but only reads `a0`; its own
+  definition with 1 param would need its C caller changed: an old-style `()` declaration changed the
+  caller's codegen).
+
+### `tools/eu_port/stackfix.py`
+
+```sh
+python3 tools/eu_port/stackfix.py func_X draft.c [--rounds 2] [--beam 4]   # -> conker/build/stackfix/func_X/{best,match}.c
+python3 tools/eu_port/stackfix.py --scan list.txt          # "func draft.c" lines: which are off by stack offsets only
+python3 tools/eu_port/stackfix.py --bisect func_X draft.c  # statements whose removal changes the frame size
+```
+
+- Decodes sp-based loads/stores/`addiu` from `screen.py`'s word diff (`SCREEN_V=1`) and prints the
+  frame (mine/target), whether every differing word is the same instruction with a different sp
+  offset, and the offset map (`28->24`).
+- Candidates (per declaration block, multi-line `struct {...} x;` locals are one unit): every order
+  (<= 5 units, else rotations/swaps/move-to-front/back), `s32`/`u8[8|12|16]` pads at each position,
+  array sizes ±1/±2/+4 (locals and struct fields), locals moved into each enclosing block of all their
+  uses and out of inner blocks. Screened 8 at a time with `screen.py`; beam search over rounds, ranked
+  by (stack-only, DIFF).
+- `screen.py` (and `try`/`tryall`) take `SCREEN_DATAREL=1`: relocations to the TU's own `.data`
+  (non-const local array initialisers) are accepted with their contents unchecked; apply.py/fdiff
+  remain the authority. stackfix always sets it.
+- Results:
+  - `func_1500A6D8` (session-10 array at sp+0x28 vs 0x24): **matched in round 1** (167 candidates):
+    `s32 temp_v0;` declared before the array, i.e. `struct220 sp48; f32 sp30[6]; s32 temp_v0; u8
+    sp24[2][3] = ...; s32 i;`.
+  - `func_1500A7E8` (its twin): the same order fixed the stack; then DIFF10 of scheduling; moving the
+    `unk14` store before the `sp48` stores (session-10 hint) + 300 s permuter -> **matched**.
+  - `func_150144B8` (session 11, no draft left): new hand draft (in
+    `tools/decomp-permuter/drafts/`); stackfix took it from DIFF30 to **DIFF4, stack-only**: all slots
+    right except `x` and the frame (0xC8 vs 0xC0). `--bisect` shows that removing
+    `tmp.unk1C *= D_80096A38;` gives 0xC0: that statement costs 8 hidden bytes (not a local; spellings
+    `x = x * k`, `k * x`, a block-scope `k` tried). Permuter 300 s: no improvement.
+  - `func_150D03A8`: SIZE+2 from the 3-param prototype (IDO homes the unused `a1`/`a2`; the ROM
+    only homes `a0`); not a stack problem, see above.
+  - `--scan` over 259 drafts (every still-asm `nm/<f>/best.c`, else the newest `sweep/drafts*`):
+    1 stack-only (`func_100046E4`), 2 almost (`func_151F0730`, `func_10006530`, frame/1-2 words),
+    1 OK (`func_150E0B78`, rejected by apply: literals 2570/3850 must be `D_800A13A0/A4`, which
+    then gives DIFF14). `func_100046E4`: stackfix -> DIFF2, only the frame (0x90 vs 0x80) differs,
+    16 unused bytes above `OSIoMesg sp68` that no declaration change removes (`--bisect`: dropping the
+    `osPiStartDma` call gives 0x78; register locals, array sizes, dropping permuter temps: no).
+  - So stack-only near misses are rare in the current pool (1 in 259 drafts); the tool's main value
+    is on hand drafts (2 matches + 1 DIFF4 out of the 4 targets) and `--bisect` for frame-size puzzles.
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -1059,6 +1159,17 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
+   Next steps (session 15):
+   - Hand-draft the callers of the fixed prototypes: `rescreen.py` lists them (375 asm functions call a
+     changed function); m2c drafts of them are in no better shape, but the header is now right.
+   - `func_150144B8` (DIFF4, `tools/decomp-permuter/drafts/func_150144B8c.c`): find why
+     `tmp.unk1C *= D_80096A38` costs 8 bytes of frame (`stackfix.py --bisect`).
+   - `func_100046E4` (DIFF2, frame 0x90 vs 0x80, `conker/build/stackfix` is wiped by verify_all; the
+     permuter best is `nm/func_100046E4/best.c`): 16 bytes above `sp68`.
+   - `func_150E0B78`: the permuter draft with the extern literals `D_800A13A0/A4` is DIFF14.
+   - protocheck: report callers' argument counts (`callargs` is collected) and extra params
+     (`func_150D03A8`); the 8 DEF leftovers need their C callers changed together with the prototype.
+   - Session 14 next steps still apply (pass 4 rest, `sweep.sh gen 400`).
    Next steps (session 14):
    - Finish pass 4: the 68 unrun functions of `sweep/cand4.txt` (lines 91-158), 100 s each (~40 min).
    - Look at `func_150E0B78` (`nm/func_150E0B78/match.c`, REJECTed by apply.py).
@@ -1214,5 +1325,10 @@ porting to manual work.
   container; it now runs 8 at a time (~1 s per draft).
 - A C table that references a function still in GLOBAL_ASM needs that function's prototype
   above the table (`game_36680`).
+- Never `git checkout` a source file to undo an experiment once `protocheck.py --apply` has edited
+  it: that drops the kept prototype fixes too (happened to `game_eu_FCE60.c` in session 15; restored
+  from `protocheck.log`). Edit the line back instead.
+- `verify_all.sh` (full) wipes `conker/build/`, including `build/pc` (m2c drafts of protocheck callers)
+  and `build/stackfix`; keep drafts you want in `tools/decomp-permuter/drafts/`.
 - `tools/n64splat` shows as modified in `git status` (submodule content); that was
   already the case before this work and is not part of any commit.
