@@ -96,7 +96,28 @@ void func_150A2C6C(u8 *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2D44.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2E20.s")
+void func_150A2E20(s32 arg0, s32 arg1, int arg2)
+{
+  s32 temp_v0;
+  int new_var;
+  int new_var2;
+  new_var = 1;
+  arg0 = arg0 & 0xFFF;
+  if (arg0 < ((u32) D_800D3094))
+  {
+    new_var2 = -new_var;
+    if (arg1 != (-new_var))
+    {
+      *((s32 *) (((u8 *) (D_800D34B8 + ((13 * arg0) * 4))) + 0x18)) = arg1;
+    }
+    temp_v0 = arg0 * 0x34;
+    if (arg2 != new_var2)
+    {
+      *((s8 *) (((u8 *) (D_800D34B8 + temp_v0)) + 0x17)) = arg2;
+    }
+    *((s32 *) (((u8 *) (D_800D34B8 + temp_v0)) + 0x1C)) = 0;
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A29C8.s")
 

@@ -21,4 +21,25 @@ void func_15016500(void) {
 }
 
 // grim looking loop
-#pragma GLOBAL_ASM("asm/nonmatchings/game_439B0/func_15016588.s")
+s32 func_1502B020(s32 *, s32, s32, u8, s32);
+extern u8 D_800BEECB;
+void func_15016588(void) {
+    s32 idx;
+    s32 i;
+    bzero(D_eu_800BE9A0, 8);
+    idx = -1;
+    for (i = 0; i != 0x43; i++) {
+        s32 bit;
+        s32 sp40;
+        if (!(i & 7)) {
+            bit = 1;
+            idx++;
+        } else {
+            bit *= 2;
+        }
+        func_1502B020(&sp40, 3, 0x1A, D_800BEECB, i);
+        if (sp40 != 0) {
+            D_eu_800BE9A0[idx] |= bit;
+        }
+    }
+}

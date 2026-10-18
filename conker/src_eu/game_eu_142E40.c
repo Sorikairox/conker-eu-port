@@ -172,7 +172,17 @@ void func_15117D18(f32 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117F3C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151182BC.s")
+void func_151182BC(u8 *arg0, u8 *arg1) {
+    s32 lo = *(s32 *)(arg0 + 0x3C) & 0xFFFF;
+    s32 f;
+    if (*(s32 *)arg1 == 1 && (arg0[0x4F] & 4)) {
+        f = arg0[0x73];
+        if (!(f & 3) && !(f & 4) && (lo == 0 || (*(u8 **)(arg1 + 0x31C))[0x57] == 1)) {
+            arg0[0x73] = f & 0xFFFC;
+            arg0[0x73] |= 2;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118324.s")
 
