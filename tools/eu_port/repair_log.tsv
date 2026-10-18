@@ -78,3 +78,18 @@ func_150C6BF0	SIZE-2	1	DIFF11	n	n	twin of func_150C62C0 (0x6C/func_150C7290)
 func_150DF0D8	SIZE+1	1	OK	y	n	callee is 4-arg: pass-through a0 + (arg0+0x120, arg0+0x12C, s16); draftcheck hint
 func_150D18B0	DIFF13	2	OK	y	n	pass-through a0 to func_15059C84, floats as externs D_800A0C80/84/88, statement order (3C before C4)
 func_150C7DE0	DIFF14	2	DIFF14	n	n	pass-through a0; ref keeps dead addiu v0,v0,0x1E0 (same as func_150C63FC) that IDO drops
+func_1507EE24	DIFF13	1	OK	y	n	s32 temp_v0 (was s32 * so arg1 + temp scaled by 4); float literal as extern D_8009BC70
+func_151A94CC	SIZE-2	1	OK	y	n	5-arg callee: a1 pass-through, a3 = arg2 (f32 *), stack arg3; draftcheck hint
+func_150FB708	SIZE-4	2	DIFF17	n	n	pass a0 + f32 sp1C[5] array (separate locals were dead-stored away); only fp reg numbering differs (zero in f2 vs f0)
+func_151791A4	DIFF13	1	OK	y	n	arg2 is s32 with & 0xFFFF (u16 param read lhu); callee is 1-param C fn
+func_15190AC0	SIZE+4	1	OK	y	n	function-pointer table (extern void (*D[])(u8*,s32,u8)), 3-arg call with pass-through a0 (draftcheck)
+func_15182CD8	DIFF13	1	OK	y	n	6-arg callee func_1517F5FC (a0 pass-through = arg0, result assigned back to arg0)
+func_1517FA48	DIFF27	2	OK	y	n	same 6-arg func_1517F5FC (a0 pass-through); (u16) cast on s16 table read for lhu
+func_150EF328	DIFF19	1	OK	y	n	callee (u8*, s32, f32): a0 pass-through, 250.0f in a2 as lui immediate; draftcheck
+func_150D2804	DIFF18	1	OK	y	n	6-arg func_1517F5FC, a0 pass-through, arg0 = result
+func_15116690	SIZE-1	4	DIFF7	n	n	7-arg callee (a0 pass-through), u16 arg1, bytes; only reg numbering/order of the shifts differs
+func_15063894	CERR	2	OK	y	n	struct127 *arg0, D_800CC2D0[arg0 - D_800CC2D0], first call needs pass-through a0
+func_1503DE70	CERR	1	DIFF14	n	n	4-arg callee (a1 pass-through), struct127 index arg0 - D_800CC2D0; only temp register numbering differs (t3/t4 vs t4/t5)
+func_15194F64	CERR	1	OK	y	n	C callee func_151046F0 takes 3 params: all of a0-a2 pass through
+func_1507EE9C	CERR	2	OK	y	n	5-arg callee with pass-through a0; a C caller in the file passes 2 args to it: K&R definition 'void f(arg0) u8 *arg0; {' avoids the arg-count clash
+func_151F0114	SIZE+1	1	DIFF9	n	n	8-arg f32 callee (float args via a1-a3 mfc1), f32 sp28[16]; arg3 homed to stack in mine, f16 kept in ref

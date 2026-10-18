@@ -12,7 +12,18 @@ s16 func_15063740(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_150637B4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063894.s")
+s32 func_150836CC(struct127 *, s32);
+void func_15063894(struct127 *arg0) {
+    struct127 *temp_v0;
+    temp_v0 = &D_800CC2D0[arg0 - D_800CC2D0];
+    temp_v0->unk31C->unk78 = 0;
+    temp_v0->unk31C->unk11A = 0;
+    func_150836CC(arg0, 0x1D);
+    func_150836CC(arg0, 0x1E);
+    *((u8 *)arg0 + 0x8A) = 0;
+    *((u8 *)arg0 + 0x89) = 0;
+    *((u8 *)arg0 + 0x83) = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063920.s")
 

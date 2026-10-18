@@ -76,7 +76,12 @@ void func_15194794(s32 arg0, u8 *arg1, s32 arg2) {
 void func_15194F50(s32 arg0, s32 arg1, s32 arg2) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194F64.s")
+void func_15194F64(s32 arg0, u8 *arg1, s32 arg2) {
+    if ((D_80090130 == 1) && (arg1[0x127] == 0) && (D_800E9D00 & 8) && (*(u16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) == 0)) {
+        func_151046F0(arg0, (s32)arg1, arg2);
+        *(s16 *)(*(u8 **)(arg1 + 0x31C) + 0x1A0) = 0x3E8;
+    }
+}
 
 void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
     func_1507DE4C(arg1);

@@ -21,4 +21,14 @@ void func_150ED7B4(u8 *arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150EF204.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150EF328.s")
+void func_15104B60(u8 *, s32, f32);
+s32 func_15052590(u8 *);
+void func_150EF328(u8 *arg0) {
+    if (arg0[5] != 3) {
+        func_15104B60(arg0, 0xF, 250.0f);
+        arg0[5] = 3;
+        *(s16 *)(arg0 + 0xE4) = 0;
+        arg0[0x125] = 0xFF;
+    }
+    func_15052590(arg0);
+}

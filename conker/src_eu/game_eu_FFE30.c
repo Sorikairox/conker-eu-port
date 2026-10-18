@@ -45,6 +45,14 @@ void func_150D27E4(s32 arg0) {
     D_800D9D20--;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FFE30/func_150D2804.s")
+u8 *func_1517F5FC(u8 *, u8, u8, u8, u8, s32);
+u8 *func_150D2804(u8 *arg0, u8 *arg1, s16 arg2) {
+    if (arg1[0x28] == 1) {
+        arg0 = func_1517F5FC(arg0, arg1[0x3C], 0xFF, 0xFF, 0xFF, arg2);
+    } else {
+        arg0 = func_1517F5FC(arg0, arg1[0x3D], 0, 0, 0, arg2);
+    }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FFE30/func_150D2884.s")

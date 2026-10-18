@@ -320,7 +320,18 @@ void func_15190A88(u8 *arg0) {
     func_1516944C(0x3E, (s32)&tmp, 0x2A);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_15190AC0.s")
+void func_151D33FC(u8 *, s32, u8);
+extern void (*D_8008DA24[])(u8 *, s32, u8);
+void func_15190AC0(u8 *arg0, s32 arg1, u8 arg2) {
+    void (*f)(u8 *, s32, u8);
+    if (arg2 == 0x2A) {
+        func_151D33FC(arg0, arg1, arg2);
+    }
+    f = D_8008DA24[arg0[0x8A]];
+    if (f != NULL) {
+        f(arg0, arg1, arg2);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_15190B2C.s")
 
