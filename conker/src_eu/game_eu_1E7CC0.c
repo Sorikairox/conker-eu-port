@@ -130,7 +130,14 @@ void func_151BDDA4(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BE65C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BE6E8.s")
+void func_151BE6E8(u8 *arg0)
+{
+  u8 *v = arg0 + 0x28; // fakematch: v defined first so IDO keeps it as a separate pointer (not folded into offsets)
+  if (*(s32 *)(arg0 + 0x30) != 0) { func_1516972C(*(struct102 **)(arg0 + 0x30)); }
+  if (*(struct102 **)(v + 0xC)) { func_1516972C(*(struct102 **)(v + 0xC)); } // fakematch: pointer-typed test gives one load (s32 test double-loads like line above)
+  if (*(struct102 **)(v + 0x10)) { func_1516972C(*(struct102 **)(v + 0x10)); }
+  if (*(struct102 **)(v + 0x14)) { func_1516972C(*(struct102 **)(v + 0x14)); }
+}
 
 void func_151BE768(struct260 * arg0) {
     func_151BE6E8(arg0);

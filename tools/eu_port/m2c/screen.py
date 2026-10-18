@@ -203,6 +203,8 @@ def work(item):
                 open(os.path.join(gd,'errs',f+'.txt'),'w').write(traceback.format_exc()[-600:])
             if VERB: open(os.path.join(gd,f+'.diff'),'w').write('\n'.join(VERB)); del VERB[1:]
         out.append((f,p,res))
+        if os.environ.get('SCREEN_KEEP') and os.path.exists(opath):
+            import shutil; shutil.copy(opath,os.path.join(gd,f+'.o'))
         for x in (cpath,opath):
             if os.path.exists(x): os.remove(x)
     return out

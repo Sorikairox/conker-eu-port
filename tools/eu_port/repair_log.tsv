@@ -280,3 +280,13 @@ func_150E35A0	SIZE-1	2	DIFF42	n	y	ptr kept in a1/a2 instead of a0; permuter no h
 func_150D368C	SIZE+1	3	SIZE-2	n	y	permuter SIZE-2; frame 0x28 vs 0x20
 func_1501A220	SIZE-1	2	DIFF9	n	y	permuter DIFF9
 func_1511FD20	SIZE-1	1	SIZE+1	n	y	permuter no help
+func_150FE1AC	DIFF22	8	OK	y	n	recipe: v=arg0+K defined at top, pointer-typed test for single load
+func_151BE6E8	DIFF16	1	OK	y	n	same recipe as 150FE1AC
+func_150FE320	DIFF10	6	OK	y	y	array locals + unnamed f32 spill temps + s32 pad first
+func_150FDDA0	DIFF22	5	OK	y	n	same as 150FE320 + ADA20 proto u8->s32
+func_150D368C	SIZE-2	7	OK	y	y	var=0 after calls (frame), a+(b*f) operand forms, permuter for mul order
+func_150F83A0	DIFF12	5	DIFF6	n	y	frame ok; v spill slot 0x18 vs 0x1C not fixed
+func_150F3794	DIFF31	3	DIFF31	n	n	frame 0x30 vs 0x28 unexplained, bisect only shows call
+func_150C5060	DIFF16	6	DIFF16	n	n	reload shape: regs a2/t0 vs v0/v1; -O1/volatile/arg3 no help
+func_151AEBF0	SIZE-1	3	DIFF20	n	n	regs fixed with shared var a; only unfilled delay slot differs
+func_1510660C	DIFF24	2	DIFF24	n	n	frame 0x38 vs 0x30, bisect/stackfix no help

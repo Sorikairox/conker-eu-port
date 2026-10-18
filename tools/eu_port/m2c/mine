@@ -1,0 +1,9 @@
+#!/bin/bash
+# usage: mine <func> <draft.c>  -> compiles the draft like try and prints MY disassembly of <func> (one line, ';' separated)
+export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
+f=$1; T=mine_$f; d=~/conker/conker/build/$T; rm -rf $d; mkdir -p $d
+cp "$2" $d/$f.c; cp ~/conker/tools/eu_port/m2c/screen.py ~/conker/conker/build/screen.py
+docker exec -e SCREEN_KEEP=1 -e SCREEN_V=1 -e SCREEN_TMP=build/screen_$T -w /conker/conker conkerdev python3 build/screen.py build/$T 1 >/dev/null 2>&1
+echo "$(head -1 $d/screen.txt | cut -d' ' -f1) $(cat $d/errs/$f.txt 2>/dev/null)"
+[ -f $d/$f.o ] && docker exec -w /conker/conker conkerdev sh -c "mips-linux-gnu-objdump -d -j .text build/$T/$f.o" | awk -v f="<$f>:" '$0 ~ f {p=1;next} /^$/ {p=0} p' | cut -f3- | sed 's/ *<.*//;s/\t/ /' | tr '\n' ';'; echo
+true
