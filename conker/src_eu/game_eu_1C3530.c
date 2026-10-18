@@ -269,7 +269,14 @@ void func_15199EF0(void *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519BA28.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C38C.s")
+void func_1519C38C(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3) {
+    vertex sp4 = *(vertex *)arg1;
+
+    arg1[1] += arg2 * arg3;
+    arg0[0] += sp4.x * arg3;
+    arg0[1] += sp4.y * arg3 + 0.5f * arg2 * arg3 * arg3;
+    arg0[2] += sp4.z * arg3;
+}
 
 extern u8 D_800A8E7C;
 void func_1519C428(u8 *arg0) {

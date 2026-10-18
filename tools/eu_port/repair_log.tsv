@@ -558,3 +558,24 @@ func_1514E128	CERR	1	OK	y	n	wrapper with 12 stack args; callee proto from file m
 func_1511AD48	CERR	1	OK	y	n	m2c store through s32 expr needs *(f32 *)(...) = 0.0f (the 'Dereferenced a non-pointer')
 func_150226E8	CERR	3	SIZE+4	n	n	append-if-absent u8 list: s32 arg0, goto (m2c) loop form; mine uses an extra s0 (frame 8), do-while/return forms SIZE+20
 func_1514EDF0	CERR	2	OK	y	n	do-while list walk; callee protos from file moved to head; u8 temp_s0 = ret for the &0xFF loop test; stackfix.py declaration order gave the 0x34 slot
+func_150E3850	CERR	1	OK	y	n	callee proto moved to file head (fwdproto), m2c draft as is
+func_150E3788	CERR	1	OK	y	n	same fwdproto fix as func_150E3850
+func_1515F4E4	CERR	1	OK	y	n	forward protos for f32 func_1515F578 / void func_1515F61C at file head; draft void callee
+func_150626EC	CERR	3	SIZE-2	n	n	struct127 arg0 - D_800CC2D0 draft: ref materialises D_800CC2D0 hi/lo three times (s0 loop ptr, s3 subtrahend separate); mine CSEs (move s0,s3); variants a-d same
+func_150D9304	CERR	1	OK	y	n	vertex sp4 = *(vertex *)arg1 struct copy, f32* args with += (no hand tricks)
+func_1519C38C	CERR	1	OK	y	n	same template as func_150D9304 (0.5f * a * b * b)
+func_15114E8C	CERR	2	OK	y	n	f32 sp20[4][4] local; float add written field + s16 (swap) so lwc1 loads first
+func_151145D0	CERR	1	OK	y	n	struct131 *arg0 - D_800DBEF4 pointer difference as index (div by 0xA0), s32 *D_800DC3C4 table
+func_151D441C	CERR	3	DIFF25	n	n	struct127 idx + midpoint floats; arg order (arg2+arg1) fixes lwc1 order; remaining: subu t0 hoisted above lw v0/branch in ref; ternary/idx-local variants DIFF25-42
+func_150FE290	CERR	1	OK	y	y	struct127 loop; p = D_800CC2D0 must be inside the if (permuter 100s found it; clean natural form)
+func_15030600	CERR	3	SIZE+1	n	y	fwdproto fixed CERR; do-while/while/6 decl orders all DIFF24 (saved reg numbering: ref s2=0xFF s3=arg0 s4=arg1 s5=found); permuter 150s best SIZE+1 (score 896)
+func_150E3A94	CERR	1	OK	y	n	s32 idx = *(u8*)+0x48 keeps the bltz; s16 casts of truncated floats as in m2c; draft otherwise m2c
+func_150C1698	CERR	3	DIFF41	n	n	free-list unlink by s16 index: do-while + s16 first/prev/cur + found; ref roles a3=first a2=cur a1=prev v1=found, mine rotated; 24 decl orders no effect
+func_151CB07C	CERR	3	OK	y	y	u8 handler with local v=arg1[0]; permuter found empty dummy_label after first arm (fakematch) -> delay slot fill
+func_15107FA0	CERR	1	OK	y	n	locals f32 sp2C[3]; s32 sp28, sp24 passed by address; vertex struct copy; callee gets arg0 pass-through
+func_151080F8	CERR	1	OK	y	n	same template as func_15107FA0 (vec locals sp2C[3]/sp20[3]); callee prototypes implicit
+func_150D8F44	CERR	3	DIFF54	n	n	ref: or a3,a0 copy at entry, lw 0x1D4(a3), a3 spilled to 0x40(sp) in jal delay slot (shape A arg copy as 4th pass-through arg); p=arg0 local variants no effect
+func_15040CC8	CERR	3	SIZE+1	n	n	D_80084840 fn-ptr table loop fixes CERR; ref keeps first empty loop counter in s0 (same var as 2nd loop) while mine uses v0 temp; separate var / for forms no help
+func_15174F68	CERR	1	OK	y	n	D_8008D0A4 as fn-ptr table (was extern s32 called as function), D_800B0E00[0/1] args
+func_1514D880	CERR	3	OK	y	y	D_8008AF88/AEF8 pointer tables; permuter 150s: inline the s16 index load twice and -1 != x (fakematch)
+func_1507C608	CERR	3	DIFF4	n	y	struct127 loop with 4 hoisted lui; permuter 120+200s best DIFF4 (end pointer s32 *new_var local); order of the hoisted lui/addiu s4/s5/s2 and bnel operand swap remain

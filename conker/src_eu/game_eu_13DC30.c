@@ -64,7 +64,19 @@ Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151143D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151145D0.s")
+extern s32 *D_800DC3C4;
+
+s32 func_151145D0(struct131 *arg0, s32 arg1) {
+    if (*((u8 *)arg0 + 0x4F) & 0x80) {
+        if (arg1 == -1) {
+            return 1;
+        }
+        if (D_800DC3C4[arg0 - D_800DBEF4] & (1 << arg1)) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114644.s")
 
@@ -82,7 +94,16 @@ void func_15114E28(f32 (*arg0)[4], u8 *arg1) {
     func_150A7A48(sp18, arg0, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114E8C.s")
+void func_15114E8C(f32 (*arg0)[4], u8 *arg1) {
+    f32 sp20[4][4];
+
+    func_15114E28(arg0, arg1);
+    (*(f32 *)((u8 *)arg0 + 0x30)) = *(s16 *)(arg1 + 0x10);
+    (*(f32 *)((u8 *)arg0 + 0x34)) = *(f32 *)(arg1 + 0x18) + *(s16 *)(arg1 + 0x12);
+    (*(f32 *)((u8 *)arg0 + 0x38)) = *(s16 *)(arg1 + 0x14);
+    func_150A7CB0(sp20, *(s32 *)(arg1 + 0x2C), *(s32 *)(arg1 + 0x30), *(s32 *)(arg1 + 0x34));
+    func_150A7A48(sp20, arg0, arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151149AC.s")
 

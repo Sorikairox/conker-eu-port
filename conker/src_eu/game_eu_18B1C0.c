@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_1515F61C(f32, s32);
+
+f32 func_1515F578(s16 *, s32);
+
 s32 func_1505D024();
 
 
@@ -61,7 +65,14 @@ void func_1515DC38(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F1E8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F4E4.s")
+void func_1515F5B0(f32, s32);
+
+void func_1515F4E4(s16 *arg0) {
+    func_1515F5B0(1.0f / func_1515F578(arg0, 0), 0);
+    func_1515F5B0(1.0f / func_1515F578(arg0, 5), 1);
+    func_1515F5B0(1.0f / func_1515F578(arg0, 0xA), 2);
+    func_1515F61C(-func_1515F578(arg0, 0xE), 3);
+}
 
 f32 func_1515F578(s16 *arg0, s32 arg1) {
     s32 v = arg0[arg1];

@@ -2,14 +2,33 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_150E35A0(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E35A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3788.s")
+s32 func_150AD9A0(s32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3850.s")
+s32 func_150E3788(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7) {
+    s32 temp_v0;
 
-s32 func_150E35A0(s32, s32, s32, s32, s32, s32, s32, f32, s32, f32, f32, f32, s32, s16);
+    temp_v0 = func_150E35A0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, (f32) func_150AD9A0(arg0 - arg3, arg1 - arg4, arg2 - arg5) / (f32) arg7, 0, 0.0f, 0.0f, 0.0f, 0, -0x63);
+    if (temp_v0 != 0) {
+        return (*(u8 *)((u8 *)temp_v0 + 0x48)) + 1;
+    }
+    return 0;
+}
+
+s32 func_150E3850(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, f32 arg5) {
+    s32 temp_v0;
+
+    temp_v0 = func_150E35A0(arg0, arg1, arg2, 0, 0, 0, arg4, arg5, arg3, 0.0f, 0.0f, 0.0f, 0, -0x63);
+    if (temp_v0 != 0) {
+        return (*(u8 *)((u8 *)temp_v0 + 0x48)) + 1;
+    }
+    return 0;
+}
+
 
 void func_150E38C0(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
     s32 temp_a0;
@@ -39,7 +58,24 @@ s32 func_150E3994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3A94.s")
+void func_150E3A94(struct102 *arg0) {
+    s32 idx;
+    s32 *p;
+
+    idx = *(u8 *)((u8 *)arg0 + 0x48);
+    if (idx >= 0) {
+        p = &D_800D99D0[idx];
+        if ((s32)arg0 == *p) {
+            *p = 0;
+        }
+    }
+    if (*(u16 *)((u8 *)arg0 + 0x4A) != 0) {
+        func_100111C8(*(u16 *)((u8 *)arg0 + 0x4A));
+        *(u16 *)((u8 *)arg0 + 0x4A) = 0;
+        func_10010F88(0x2D7, 0x5DC0, 0, 0, 0, (s16)(s32)*(f32 *)((u8 *)arg0 + 0x28), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x2C), (s16)(s32)*(f32 *)((u8 *)arg0 + 0x30), 0x3E8, 0x1770);
+    }
+    func_1516972C(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3B5C.s")
 

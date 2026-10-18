@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_15030448(u8 *, s32);
+
+s32 func_15030600(u8 *, s32, s32);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030100.s")
 
@@ -14,8 +18,6 @@ void func_150305E0(s32 arg0, s32 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030600.s")
-
-s32 func_15030448(u8 *, s32);
 
 s32 func_150306D4(u8 *arg0) {
     s32 temp_s0;

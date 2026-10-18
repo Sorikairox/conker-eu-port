@@ -12,7 +12,26 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CAC50.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CB07C.s")
+void func_151CB07C(struct102 *arg0, u8 **arg1, u8 arg2) {
+    void (*f)(void *, u8 **, u8);
+    u8 *v;
+
+    if (arg2 == 0x21) {
+        if (*(s32 *)((u8 *)arg0 + 0x70) == (s32)arg1[0]) {
+            func_1516972C(arg0);
+        }
+    dummy_label: ; // fakematch: empty label after the first arm makes IDO fill the b delay slot like the original
+    } else if (arg2 == 0) {
+        v = arg1[0];
+        if (*(s32 *)((u8 *)arg0 + 0x70) == *(s32 *)(v + 0x318)) {
+            func_1516972C(arg0);
+        }
+    }
+    f = D_8008FFB0[*(u8 *)((u8 *)arg0 + 0x7D)];
+    if (f != NULL) {
+        f(arg0, arg1, arg2);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CB128.s")
 

@@ -13,7 +13,27 @@ u8 *func_15160A58(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s3
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514D6CC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514D880.s")
+extern u8 *D_8008AF88[];
+extern void (*D_8008AEF8[])(s32);
+
+s32 func_1514D880(u8 *arg0) {
+    struct102 *p;
+    struct102 *next;
+
+    p = *(struct102 **)(arg0 + 0x2F4);
+    if (p != NULL) {
+        do {
+            next = *(struct102 **)((u8 *)p + 0x14);
+            // fakematch: the s16 index is re-read for the call (no local) and compared as -1 != x; keeps the register order of the original
+            if (-1 != *(s16 *)(D_8008AF88[*(s16 *)((u8 *)p + 0x1C)] + 2)) {
+                D_8008AEF8[*(s16 *)(D_8008AF88[*(s16 *)((u8 *)p + 0x1C)] + 2)](*(s32 *)((u8 *)p + 0x10));
+            }
+            func_1516972C(p);
+            p = next;
+        } while (next != NULL);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514D3B0.s")
 

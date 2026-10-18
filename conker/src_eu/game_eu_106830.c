@@ -18,7 +18,17 @@ void func_150D904C(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D9098.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D9304.s")
+extern f32 D_800A0F1C;
+extern f32 D_800A0F20;
+
+void func_150D9304(f32 *arg0, f32 *arg1, f32 arg2) {
+    vertex sp4 = *(vertex *)arg1;
+
+    arg1[1] += D_800A0F1C * arg2;
+    arg0[0] += sp4.x * arg2;
+    arg0[1] += sp4.y * arg2 + D_800A0F20 * arg2 * arg2;
+    arg0[2] += sp4.z * arg2;
+}
 
 void func_150D939C(u8 *arg0) {
     arg0[0x30] = 0;
