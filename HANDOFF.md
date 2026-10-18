@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (twelfth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (thirteenth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,16 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2780 / 5912 functions in C (47.0%)**; code bytes 287,492 / 2,253,856 (12.8%)
-  (end of session 12, from `verify_all.sh`).
+- **2799 / 5912 functions in C (47.3%)**; code bytes 290,016 / 2,253,856 (12.9%)
+  (end of session 13, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2388/5329 (10.5%)
+  - game: 2407/5329 (10.6%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
-    after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11.
+    after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
+    2780 (287,492 bytes) after session 12.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -63,6 +64,7 @@ Commits on `eu`:
 | `18c0449`…`ba052c8` | Session 10: `spawngen.py` (spawners from asm), C files own `.data` (`rodata_inject.py`), 22 functions |
 | `c6ae2b4`…`fce108a` | Session 11: `spawngen.py` calls/arg stores, 15 hand-written spawner and float/switch functions |
 | `4df1653`…`364d883` | Session 12: decomp-permuter (`tools/eu_port/permute.sh`), 8 near misses solved by it |
+| `2b846db`…`3a88cab` | Session 13: scripted near-miss sweep (`tools/eu_port/sweep.sh`), 19 functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -80,6 +82,8 @@ throw all of that away.**
 - A function that copies a non-const local array from `.data`: own the file's `.data` (session 10).
 - A near miss (C draft a few words off): `tools/eu_port/permute.sh <func> <draft.c> [secs] [jobs]`
   (decomp-permuter, session 12). Run it with run_in_background; batch with `-l list`.
+- The whole near-miss sweep (m2c drafts -> screen -> permuter -> apply): `tools/eu_port/sweep.sh`
+  (session 13).
 
 ## Build environment
 
@@ -822,6 +826,70 @@ Useful settings: `-j3`..`-j8`; 300 s is enough to see whether a function moves; 
 do not improve in 15 min rarely do. Restart from `best.c` (strip the `PERMUTER CHANGED` lines) to
 continue a run. Read `nm/<func>/best.c` for hints (callee types, extra locals) even when it is not 0.
 
+## Session 13: scripted near-miss sweep
+
+Sequential, 3 work commits (`2b846db`..`3a88cab`), +19 functions (2780 -> 2799), +2,524 bytes.
+
+### `tools/eu_port/sweep.sh` (rerun it as is)
+
+```sh
+tools/eu_port/sweep.sh gen 200          # ~22 min: list.py, JT=1 gen2.py 1..200 (fresh ctx/), narrow.py,
+                                        # screen v0..v7 + n0..n7, best variant per function
+tools/eu_port/sweep.sh perm tools/decomp-permuter/sweep/cand.txt 300 3 3   # run_in_background
+tools/eu_port/sweep.sh apply            # apply.py on every nm/<f>/match.c still GLOBAL_ASM + needsyms.py
+tools/eu_port/verify_all.sh --quick     # then commit
+```
+
+- Work dir `tools/decomp-permuter/sweep/` (gitignored, survives `verify_all.sh`): `best.txt` (best
+  screen result per function and its variant dir), `cand.txt` (SIZE±1 and DIFF1-5, closest first;
+  drafts copied to `drafts/`), `ok/` (drafts that screened OK as generated), `perm_<list>.txt`
+  (permute.sh summary lines, one per function; `perm_<list>_<i>.txt` per stream while it runs).
+- `perm` splits the list round-robin into N streams of `permute.sh -l` (3 x `-j3` on the 10-CPU VM).
+  The streams use `conker/build/perm_<f>` for `try`: do not run the full `verify_all.sh` (it wipes
+  `conker/build` and `conker/asm`) while a sweep runs; `--quick` and `apply` are fine.
+- Second pass used here: functions whose permuter score improved (`best < base`, not OK), ranked by
+  best score, restarted from their `best.c` minus the `// PERMUTER CHANGED` lines (`drafts2/`,
+  `cand2.txt`), 750 s each.
+- `tools/eu_port/needsyms.py [--apply] func...` (new, called by `sweep.sh apply`): a function that
+  leaves GLOBAL_ASM can take the last reference to a splat auto symbol (`D_8009F970 = 0x8009F970;`
+  in `undefined_syms_auto.txt`) with it; the next clean split drops it and the link fails if the C
+  names it. It appends those symbols to `undefined_syms.eu.txt`. (`--quick` does not catch this,
+  only the full `verify_all.sh` does.)
+
+### Statistics
+
+- `gen`: 2050 functions drafted (<= 200 instructions), 2 OK as generated (`func_150CFA40` applied;
+  `func_151EF7B0` rejected again, the 0x40-byte padding issue), **278 candidates**: DIFF1 2, DIFF2 2,
+  DIFF3 3, DIFF5 7, SIZE-1 156, SIZE+1 108 (nothing at DIFF4).
+- Pass 1 (300 s, 3 x `-j3`, ~6 h): **16 OK** by bucket: DIFF2 1/2, DIFF5 3/7, SIZE-1 8/156,
+  SIZE+1 4/108 (DIFF1 0/2, DIFF3 0/3). 254 improved without reaching 0 (best score <= 50: 19,
+  <= 150: 14 more, <= 300: 42 more, the rest > 300), 8 never produced a better output.
+- Pass 2 (top 54 improved, 750 s, ~3.8 h): **2 OK** (`func_1519CE80`, `func_15080830`).
+- Matched: `func_150F13C8`, `func_150F6980`, `func_15121E34`, `func_15173948` (the `return arg0`
+  one from session 4's list), `func_1518FDC8`, `func_151AF8E8`, `func_15080600`, `func_150A11F4`,
+  `func_150721A4`, `func_1507266C`, `func_1517FD24`, `func_1518B0D0`, `func_151B5654`,
+  `func_151E5AB8`, `func_15033618`, `func_15085ABC`, `func_1519CE80`, `func_15080830`, plus
+  `func_150CFA40` (m2c).
+- `func_150A11F4` (game_eu_CE6C0, no own .rodata): the permuter/screen accept float literals, but
+  `apply.py` rejects them in a file that does not own its .rodata; the two literals became the
+  externs `D_8009F970`/`D_8009F974` the asm names (each `lwc1` has its own symbol). Same fix for any
+  future literal match in an un-owned file.
+- Yield: SIZE±1 drafts are mostly real structural differences; 300 s solves ~5%. The permuter's
+  score-0 outputs that `try` still rejects (`func_1505E7CC` DIFF1: a branch offset;
+  `func_151B7C28` DIFF1; `func_15129E30` SIZE+2) and the closest non-zero ones (`func_151AC3B0`
+  score 1, DIFF1: a `u8` stack local at sp+0x1C instead of 0x1D; `func_1509CEA8`, `func_1515C668`,
+  `func_1517D534` score 5, DIFF1) are the best hand targets: `tools/decomp-permuter/nm/<f>/best.c`.
+
+### `PERMUTER CHANGED DECL` review
+
+None of the suggested prototype changes came with a score-0 result, so none were applied:
+`func_1000FA64` arg0 `u16 -> int` (from `func_150A28C4`, score 745 -> 160, SIZE-1; session 11 also
+suspected this prototype's `arg5`/`arg6`), `func_150026C4` `void -> u16` return (`func_15003668`),
+`func_15127EB8` `void -> int`, `func_1514F250` arg1 `s32 -> char`, `func_150EB4D0` last param
+`u8 -> int` (again), `func_1000853C`/`func_100111C8`/`func_1513F680` (`volatile` noise). The 21
+`guBlinkRdpDL` lines are a whitespace artefact. Worth one test each: edit `functions.h`, re-run the
+affected function's permuter from `best.c`, and `verify_all.sh --quick` (check_files on all files).
+
 ## Layout
 
 - `conker.eu.yaml`, `game.eu.rzip.yaml`: outer ROM split. The game code is compressed
@@ -922,6 +990,12 @@ porting to manual work.
    `-O2 -g3 -mips2`; per-file flag overrides are in `conker/Makefile`).
    `check_funcs.py -v` is a quick per-function diff. Easy EU-only targets:
    `func_10003C10` (`init_39C0.c`).
+   Next steps (session 13):
+   - Hand-finish the score-0/score-1..5 permuter results listed in the session 13 section.
+   - Test the `func_1000FA64` arg0 `int` prototype (permuter hint, 745 -> 160 for `func_150A28C4`).
+   - Rerun `sweep.sh gen` with a larger max (200-400 instructions) or after naming structs; the
+     <= 200 pool is now swept at 300 s. A longer pass (900 s+) over `improved.txt` entries with best
+     score <= 300 not yet retried (ranks 55-75) is the cheap next permuter run.
    Next steps (session 12):
    - Write hand drafts for the session 11 near misses again (they were lost) and finish them with
      `permute.sh`; keep drafts in a persistent place (e.g. `tools/decomp-permuter/drafts/`, gitignored).
