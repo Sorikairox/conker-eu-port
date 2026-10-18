@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (twenty-eighth session). Update this file at the end of every work session.
+Last updated: 2026-10-19 (twenty-ninth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,10 +17,10 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3071 / 5913 functions in C (51.9%)**; code bytes 332,360 / 2,253,856 (14.7%)
-  (end of session 28, from `verify_all.sh`).
+- **3081 / 5913 functions in C (52.1%)**; code bytes 333,212 / 2,253,856 (14.8%)
+  (end of session 29, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2679/5330 (12.7%)
+  - game: 2689/5330 (12.7%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
@@ -1854,6 +1854,62 @@ callee implicitly earlier (CERR `redeclaration`), compare order, `s32` instead o
 ### Next steps (session 28)
 - `clones.py --near 12 --lax --draft` after each batch; hand-finish the dist <= 8 ones (see the list in `repair_log.tsv`, `NEAR*` rows).
 - `func_150F1B78` family: different idea needed (permuter does not find it; try `s32 *` pointer compare through a struct, or the 2nd load as a separate `*(s32 *)&arg1[...]`).
+
+## Session 29: declfix.py (automatic declaration fixing), near drafts K<=16
+
+1 work commit (`7a38dde`) + hand-off; +10 functions (3071 -> 3081), +852 bytes, full `verify_all.sh` OK. 40 functions looked at; rows in `repair_log.tsv` (start bucket `NEARd`, `FLOAT`).
+Matched: `func_150F527C`, `func_151B6150`, `func_1515F858`, `func_151C34A0`, `func_1514F2AC`, `func_1514F3E0`, `func_1509ED80`, `func_15085118`, `func_1501D064`, `func_15063A54`.
+
+### tools/eu_port/declfix.py (called by `clones.py --draft` / `--near --draft`; `--nofix` disables it)
+
+`declfix.fix(body, func, sibling_stem, target_stem)` post-processes every draft. It chunks C sources (top-level decls / typedefs / defs / pragmas / includes) and, for every identifier the draft uses
+that the target file does not see (`D_*`, `func_*`, `struct_*`, `jtbl_*`, capitalised names), pulls the declaration from the sibling's file, `functions.h` / `variables.h` / `structs.h`, then any other
+`src_eu` file (a variable with an initializer becomes `extern`; chunk dependencies are pulled first). Further rules: a callee defined *later* in the target file, or in the sibling's file, gets a forward prototype from
+its definition; the draft's own definition is reconciled with a prototype in a header or in the target file (return type from the prototype; pointer params keep the header type plus a local alias with the draft's type,
+scalar params take the header type; a prototype that exists only in the target file is replaced); calls to prototyped callees get the prototype's argument count (pad `0` / truncate); an `#include` the sibling has
+(stdarg.h) is hoisted when the draft uses a name from it. New draft directives, understood by `m2c/screen.py` (so `try` / `repair_try.sh` / `screenall`) and `m2c/apply.py`:
+`//HOIST <line>` (moved after the last `#include` of the target file: forward prototypes, includes) and `//DROP <line>` (that exact line is deleted from the target file, e.g. an `extern s32 func_X;` that the
+definition replaces, or the old wrong prototype).
+CERR rate of the K<=16 drafts (99 written): **30/99 (30.3%) before, 20/99 (20.2%) after**; K<=12 subset 18/46 (39%) -> 10/46 (22%). The 12 drafts that changed state became DIFF/SIZE (screenable). Left CERR (20): struct types whose
+fields differ from the sibling's (`unk75 undefined`, 6), callee/own arity mismatches the asm contradicts, libultra data aliases (`__osSiMesgQ` -> `func_1518E808`), asm-only fragments. Not automatable: the field-name problem
+(would need a rewrite to raw offsets).
+
+### Near-clone hit rate per K bucket (this session, only unlogged candidates, closest and easiest first)
+
+| dist | candidates (K<=16 list) | tried | matched |
+|---|---|---|---|
+| <=4 | 5 | 2 | 0 (handwritten asm, 64-bit store) |
+| 5-8 | 20 | 11 | 2 |
+| 9-12 | 31 | 8 | 3 |
+| 13-16 | 43 | 8 | 5 |
+
+(35 of the 99 drafted candidates were already in `repair_log.tsv` from earlier sessions and were skipped; of the 15 done in session 28 none show up any more. The skeleton distance says little about difficulty: the matches came from small
+real functions whose body the sibling only resembles in shape, written fresh from the asm; the tests that failed were fragments, scheduling oddities or IDO deleting dead code.) 118 -> about 70 candidates are now either matched, logged hard, or not functions.
+
+### Float functions blocked by rodata (item 3)
+
+`rodata_split.py --own game_eu_142E40 / game_eu_1CCD10 / game_eu_12C5F0` done (`game_eu_C2B60` already owned its rodata). Retried: `func_15095B70` (84 insns; permuter 120 s: best score 1208 vs base 2058), `func_151166FC` (permuter best DIFF27),
+`func_150FF1A8` (SIZE-5, spills missing), `func_1519F500` (m2c DIFF78). None matched; the files now own their .rodata so literals work. These need real hand work.
+
+### Recipes confirmed / new
+
+- Recipe A again (`func_150F527C`): `u8 *v = arg0 + 0x170;` first, then `v[0x24] |= 5` in the branch.
+- A callee with fewer params than the header: if the ref does not store `a2` at entry and the function has no third use, the function has 2 params. Change the header and drop the argument at the (single) caller if the build stays identical
+  (`func_151B6150`, caller in `game_981E0.c` is unchanged otherwise).
+- Linked-list search (`func_1514F2AC`): load `next = node->next` at the loop top, then `if (key == node->key) found = 1; else node = next;` (the load is scheduled above the compare in the ref).
+- Pointer-table dispatch with range check (`func_1515F858`): `v = *(s32 *)(arg1 + 0x1C); if (v >= 0 && v < 3) D_8008B460[v](arg0, arg1);`; the call passes a0/a1 untouched.
+- Wrapper with 6 params (`func_151C34A0`): a0/a1 pass through, `arg2` is a struct pointer whose fields go to stack args; no tricks needed.
+- Local 8-byte struct on the stack (`func_1514F3E0`): `struct { u8 *unk0; u8 unk4; u8 unk5; s16 unk6; } sp20;` gives the `sb/sh` stores at 0x24..0x26.
+- Pointer difference of two struct pointers (`func_15063A54`): `arg0 - D_800CC2D0` with `struct127 *` gives the `div by 0x32C`; the permuter found that both stores must go through `(*(u8 **)(v + 0x31C))[...]`.
+- Ruled out / unsolved (details in `repair_log.tsv`): an empty `if (x < 0) {}` kept by the ref (`func_151600E0`, IDO deletes it, also with `volatile`); a dead `addiu` kept by the ref (`func_151C9C8C`); `ra` saved at 0(sp) in an
+  init function (`func_10006530`, probably per-file flags); entry spill of `a0` where the ref spills in the call delay slots (`func_151A8B84`); pointer loops that IDO unrolls (`func_150B7214`, `func_15172C50`) vs. the plain
+  do-while of the ref; `func_150C572C` still DIFF2 (addiu order of `s1`/`s0`). Several "near" candidates are not functions at all (asm fragments ending `jr t9`, `sw s6,0xA74(sp)`) or hand-written asm (`func_150A7770`): the `Handwritten function` marker
+  in the .s file and a missing prologue identify them.
+
+### Next steps (session 29)
+- `clones.py --near 16 --lax --draft` is now cheap to rerun after every batch (declfix runs automatically); filter the output against `repair_log.tsv` (`cut -f1`) and skip candidates whose `.s` has the `Handwritten` marker or no prologue.
+- Remaining CERR drafts: struct types that differ between sibling and target (rewrite to raw `u8 *` offsets by hand).
+- Float functions: `func_15095B70`, `func_151166FC`, `func_150FF1A8`, `func_1519F500` are unblocked but hard.
 
 ## Layout
 
