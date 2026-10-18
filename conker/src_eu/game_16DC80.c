@@ -16,9 +16,21 @@ void func_151411C4(struct210 *arg0) {
     func_1513CAA0(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151411E4.s")
+void func_151411E4(structEU_16DC80 *arg0) {
+    if (*(s32 *)((u8 *)arg0 + 0x154) != 0) {
+        func_1517E6A4(*(f32 **)((u8 *)arg0 + 0x154), arg0);
+    }
+    D_800DCE20 -= 1;
+    D_8008A33C[arg0->unk168](arg0);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_15141250.s")
+void func_15141250(structEU_16DC80 *arg0) {
+    if (*(s32 *)((u8 *)arg0 + 0x154) != 0) {
+        func_1517E6A4(*(f32 **)((u8 *)arg0 + 0x154), arg0);
+    }
+    D_800DCE20 -= 1;
+    D_8008A384[arg0->unk168](arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151412BC.s")
 

@@ -290,3 +290,9 @@ func_150F3794	DIFF31	3	DIFF31	n	n	frame 0x30 vs 0x28 unexplained, bisect only sh
 func_150C5060	DIFF16	6	DIFF16	n	n	reload shape: regs a2/t0 vs v0/v1; -O1/volatile/arg3 no help
 func_151AEBF0	SIZE-1	3	DIFF20	n	n	regs fixed with shared var a; only unfilled delay slot differs
 func_1510660C	DIFF24	2	DIFF24	n	n	frame 0x38 vs 0x30, bisect/stackfix no help
+func_151411E4	DIFF22	3	OK	y	n	s32 test of cast field then reload = double load; pass arg0 as 2nd arg; table call via D[*(u8*)(arg0+K)](arg0)
+func_15141250	DIFF22	1	OK	y	n	same as 151411E4
+func_151C00DC	SIZE-2	4	OK	y	y	v=arg0+0x28 as separate var after first if; permuter new_var pointer temp (fakematch)
+func_1514E014	DIFF19	4	DIFF2	n	y	sp1C[2] array gives both zero stores; spill temp slot 0x24 vs 0x18 unsolved
+func_150F2910	DIFF11	3	DIFF8	n	n	K&R def stores all args; buffer sp1C[12] fixes frame; lbu a2 sched differs
+func_150C5060	DIFF16	12	DIFF2	n	y	permuter: &arg0 twice via new_var,new_var2 gives right regs; loads 0x66 vs 0x3E
