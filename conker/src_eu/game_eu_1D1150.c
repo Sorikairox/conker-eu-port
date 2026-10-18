@@ -72,7 +72,15 @@ s32 func_151A53E4(u8 *arg0, u8 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A544C.s")
+void func_151A544C(u8 *arg0)
+{
+  u8 *temp_v0;
+  temp_v0 = *((u8 **) (arg0 + 0x98));
+  arg0[0x30] = 0;
+  *((u16 *) (arg0 + 0x1E)) = *((u16 *) (arg0 + 0x1E)) & 0xFFFD;
+  temp_v0[0x30] |= 1;
+  temp_v0[0x30] |= 4;
+}
 
 s32 func_151A3AB4(u8 *, u8, u8 *);
 

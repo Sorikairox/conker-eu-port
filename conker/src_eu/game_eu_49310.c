@@ -7,7 +7,29 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501BBB8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501BFF0.s")
+extern f32 D_80096D10;
+void func_1501C0D0(u8, f32, f32);
+void func_1501BFF0(u8 arg0, u8 arg1)
+{
+  f32 t;
+  f32 a;
+  f32 b;
+  if (arg1 >= 9) {
+    arg1 = 8;
+  }
+  if (arg1 == 8) {
+    a = 20.0f;
+    b = 0.0f;
+  } else if (arg1 == 0) {
+    a = 0.0f;
+    b = 99.0f;
+  } else {
+    t = ((f32)(u32)arg1 - 1) * D_80096D10 * 5.0f;
+    a = t + 2.0f;
+    b = 7.0f - t;
+  }
+  func_1501C0D0(arg0, a, b);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501C0D0.s")
 

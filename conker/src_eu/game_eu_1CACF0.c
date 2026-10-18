@@ -5,7 +5,15 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D4E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D510.s")
+void func_1519D510(u8 *arg0)
+{
+  u8 *temp_v0;
+  temp_v0 = *((u8 **) (arg0 + 0x98));
+  arg0[0x30] = 0;
+  *((u16 *) (arg0 + 0x1E)) = *((u16 *) (arg0 + 0x1E)) & 0xFFFD;
+  temp_v0[6] |= 1;
+  temp_v0[6] |= 4;
+}
 
 void func_1519D540(u8 *arg0) {
     s32 *p = *(s32 **)(arg0 + 0x98);

@@ -43,7 +43,35 @@ s32 func_150C6088(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/func_150C60D4.s")
+s32 func_150C60D4(u8 *arg0)
+{
+  u8 *temp_t0;
+  u8 *temp_v0;
+  u8 *temp_v1;
+  temp_v0 = arg0;
+  temp_v0 = temp_v0 + 0xC8;
+  if ((*(*((s32 **) (((u8 *) arg0) + 0xC8)))) == 0)
+  {
+    return 0;
+  }
+  temp_v1 = *((u8 **) (((u8 *) temp_v0) + 0));
+  if ((*((u8 *) (((u8 *) temp_v0) + 4))) != (*((u8 *) (((u8 *) temp_v1) + 0x3B))))
+  {
+    return 0;
+  }
+  ;
+  if ((*((u8 **) (((u8 *) temp_v1) + 0x1D4))) == 0)
+  {
+    *((f32 *) (((u8 *) arg0) + 0x24)) = (f32) (*((f32 *) (((u8 *) temp_v1) + 0x14)));
+    *((f32 *) (((u8 *) arg0) + 0x28)) = (f32) (*((f32 *) (((u8 *) (*((u8 **) (((u8 *) temp_v0) + 0)))) + 0x18)));
+    *((f32 *) (((u8 *) arg0) + 0x2C)) = (f32) (*((f32 *) (((u8 *) (*((u8 **) (((u8 *) temp_v0) + 0)))) + 0x1C)));
+  }
+  else
+  {
+    func_15143134(temp_v0 + 8, arg0 + 0x24, ((*((u8 *) (((u8 *) temp_v0) + 5))) << 6) + (((s32) (*((u8 **) (((u8 *) temp_v1) + 0x1D4)))) ^ 0));
+  }
+  return 1;
+}
 
 void func_150C6174(s32 arg0) {
     func_1514D3B0(arg0, 0x15, 1, 0);

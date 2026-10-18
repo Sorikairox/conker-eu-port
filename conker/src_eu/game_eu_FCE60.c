@@ -70,7 +70,22 @@ s32 func_150D0294(u8 *arg0, u8 **arg1) {
     return temp_v0 - arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D02C8.s")
+s32 func_150D02C8(u8 *arg0)
+{
+  u8 *end;
+  s32 best = 0;
+  u8 *next;
+  end = func_150D026C(arg0);
+  while (arg0 < end) {
+    s32 v;
+    v = func_150D0294(arg0, &next);
+    if (best < v) {
+      best = v;
+    }
+    arg0 = next + 1;
+  }
+  return best;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D034C.s")
 

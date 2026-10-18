@@ -1,0 +1,21 @@
+func	start	attempts	end	matched	permuter	note
+func_151A544C	DIFF1	2	OK	y	n	|= 1; |= 4 compound ops on the field (no temp that folds)
+func_15033730	DIFF1	1	OK	y	n	switch with merged cases 0x27/0x35
+func_150351A4	DIFF1	3	DIFF1	n	n	float mul operand order; permuter already failed in s13
+func_150C60D4	DIFF1	3	OK	y	y	ptr-typed base local; permuter solved in <200s
+func_1501BFF0	SIZE+1	1	OK	y	n	wrong m2c call prototype: (u8,f32,f32) floats go in a1/a2; clean if-chain
+func_15030060	SIZE+1	3	DIFF5	n	n	goto-shared store; a2 register choice
+func_1503D774	SIZE+1	2	OK	y	n	u8* walk with param as loop var + start copy; register order
+func_1519D510	DIFF3	1	OK	y	n	same |=1;|=4 field pattern as func_151A544C (fold avoided by compound ops)
+func_150104F0	DIFF2	3	SIZE-1	n	n	needs or v0,zero materialised for chained byte stores; not found
+func_150D51D4	DIFF4	3	OK	y	n	lerp as x += (t - x) * k (no temp); array index not *4 (permuter draft scaled it)
+func_151F0730	DIFF4	3	SIZE+1	n	n	memcpy(a0,a1,a2)+a2: a2 home store not in jal delay slot
+func_10007D14	DIFF2	0	DIFF2	n	n	hand-written asm (exceptasm), skipped
+func_151149AC	SIZE+1	3	DIFF14	n	n	search loop with two induction vars (ptr + offset); start sequence differs
+func_151999BC	SIZE+1	1	DIFF23	n	n	session-6 while(!found&&i<N) table-search family; register assignment differs
+func_151B53FC	SIZE-1	1	OK	y	n	local f32 v[3] filled in natural order; draft had reversed/extra temps
+func_15100248	SIZE-1	1	OK	y	n	pass-through args: call takes arg2/arg3 untouched (a2/a3) + stack args; m2c dropped them
+func_150D02C8	SIZE-1	1	OK	y	n	stackfix.py found local decl order/scope (v declared in loop block; end,best,next order)
+func_151AB06C	SIZE-1	3	SIZE-1	n	n	pass-through 3-arg calls; var lands in a3 not a2 (a0=a2 copy missing)
+func_151073F8	SIZE+1	2	OK	y	n	fn-pointer table typed array (not s32 *4); pointer fields loaded into locals (keeps a0)
+func_150A7CB0	DIFF3	3	DIFF3	n	y	store order of swc1 0x3C vs sw 0x38 delay slot; permuter 200s no improvement

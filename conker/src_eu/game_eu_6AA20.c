@@ -21,7 +21,17 @@ void func_1503D74C(s32 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D774.s")
+void func_1503D774(u8 *arg0, s32 arg1)
+{
+  u8 *start = arg0;
+  while (*(u16 *)arg0 != 0x3E7) {
+    if (*(s32 *)(arg0 + 4) != 0) {
+      func_1503D728(arg0 + 4, start);
+    }
+    arg0 += 8;
+  }
+  D_800C5A90[arg1] = (arg0 - start) >> 3;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D800.s")
 

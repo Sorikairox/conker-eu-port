@@ -20,7 +20,15 @@ void func_1510015C(u8 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/func_151001BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/func_15100248.s")
+s32 func_151D5FC8(s32, s32, s32, s32, s32, s32, s32);
+s32 func_151D441C(s32, s32, s32, s32);
+extern s32 D_8009002C;
+extern u8 *D_80090034;
+void func_15100248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4)
+{
+  func_151D5FC8(arg0, arg1, arg2, arg3, arg4, D_8009002C, *D_80090034);
+  func_151D441C(arg0, arg1, arg1, 0x8003A);
+}
 
 void func_151002AC(s32 arg0, u8 *arg1, s32 arg2) {
     u8 temp_v0 = arg1[4];
