@@ -7,9 +7,31 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_150344AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034630.s")
+s16 *func_15034630(s16 *arg0, s32 arg1)
+{
+  struct127 *temp_v0;
+  temp_v0 = &D_800CC2D0[arg1];
+  if (temp_v0->unk1D1 != 0)
+  {
+    *arg0 = 6;
+    arg0 += 2;
+    arg0[-1] = (s16) (temp_v0->unk1D1 * 0xC8);
+  }
+  return arg0;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_150346A0.s")
+s16 *func_150346A0(s16 *arg0, s32 arg1)
+{
+  struct127 *temp_v0;
+  temp_v0 = &D_800CC2D0[arg1];
+  if (temp_v0->unk1D1 != 0)
+  {
+    *arg0 = 6;
+    arg0 += 2;
+    arg0[-1] = (s16) (temp_v0->unk1D1 * 0xC8);
+  }
+  return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034710.s")
 

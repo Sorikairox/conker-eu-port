@@ -28,7 +28,27 @@ void func_1508B630(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B20C.s")
+// PERMUTER CHANGED DECL: voidfunc_1508B20C(f32,f32,f32,f32) (base: voidfunc_1508B20C(f32arg0,f32arg1,f32arg2,f32arg3))
+void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
+{
+  s32 temp_a1;
+  s8 temp_v1;
+  u8 *new_var;
+  if (D_800D27D0 != 0)
+  {
+    temp_v1 = *((s8 *) (((u8 *) D_800D27D0) + 0x1745));
+    if (temp_v1 < 8)
+    {
+      new_var = (u8 *) D_800D27D0; // fakematch: pointer copy in a named local (permuter)
+      *((s8 *) (new_var + 0x1745)) = (s8) (temp_v1 + 1);
+      temp_a1 = temp_v1 * 0xC;
+      *((s16 *) (((u8 *) (D_800D27D0 + temp_a1)) + 0x174C)) = (s16) ((s32) arg0);
+      *((s16 *) (((u8 *) (D_800D27D0 + temp_a1)) + 0x174E)) = (s16) ((s32) arg1);
+      *((s16 *) (((u8 *) (D_800D27D0 + temp_a1)) + 0x1750)) = (s16) ((s32) arg2);
+      *((f32 *) (((u8 *) (D_800D27D0 + temp_a1)) + 0x1748)) = (f32) (arg3 * arg3);
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B704.s")
 

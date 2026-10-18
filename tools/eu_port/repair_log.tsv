@@ -247,3 +247,9 @@ func_1510BB78	DIFF7	3	DIFF2	n	y	spill slot 0x28 vs 0x2C; stackfix no help
 func_1510B8AC	DIFF12	1	DIFF8	n	y	permuter best DIFF8
 func_151EF7B0	OK	1	OK	n	n	REJECT: function is followed by 16 nops of file padding (size 20 insns)
 func_150E394C	n/a	3	DIFF	n	n	needs extern s32 func_150E394C removal in game_eu_110DB0; lw v0 / or a1,v0 reuse not reproduced
+func_1508B20C	DIFF15	1	OK	y	y	permuter solved outright
+func_15034630	DIFF15	2	OK	y	y	permuter DIFF1: arg0 += 2; arg0[-1] = ...
+func_150346A0	DIFF15	2	OK	y	y	twin of func_15034630
+func_151B92AC	DIFF15	1	DIFF12	n	y	permuter best DIFF12
+func_151B8B5C	DIFF15	1	DIFF14	n	y	permuter best DIFF14
+func_151BE6E8	DIFF-	3	SIZE+2	n	y	same family as func_150FE1AC: ref spills the a1 copy of arg0 into the a0 home slot (frame 0x20)

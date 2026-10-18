@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (twentieth session). Update this file at the end of every work session.
+Last updated: 2026-10-19 (twenty-first session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,8 +17,8 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2948 / 5913 functions in C (49.9%)**; code bytes 307,808 / 2,253,856 (13.7%)
-  (end of session 20, from `verify_all.sh`).
+- **2959 / 5913 functions in C (50.0%)**; code bytes 309,380 / 2,253,856 (13.7%)
+  (end of session 21, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
   - game: 2556/5330 (11.5%)
   - debugger: 31/43 (41.3%)
@@ -27,7 +27,7 @@ pushed, and nothing goes upstream.
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -70,6 +70,7 @@ Commits on `eu`:
 | `c5c5784`…`f68cfe6` | Session 16: structured repair loop (`repair_ctx.sh`, `repair_try.sh`, `repair_log.tsv`), 19 functions |
 | `f300d27`, `75e7386`, `3b05e9d` | Session 17: `draftcheck.py` hints in `repair_ctx.sh`, fresh m2c drafts of short functions (`gen40.sh`), `game_eu_13C400` owns .rodata; 35 functions (+9, +11, +14 in the three batches) |
 | `028cb85` | Session 20: permuter on hand drafts, dead-addiu trick, table-call family; 26 functions |
+| `2ad4fa9`, next | Session 21: `// fakematch:` labels on sessions 19-20 constructs, own rodata for `game_eu_1C3530`; 11 functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -1444,6 +1445,36 @@ full ROM all OK). ~50 functions tried (12 of them only by the permuter).
 - Give the permuter *hand-improved* DIFF2-8 drafts rather than raw ones; hand drafts that screen at DIFF<=8 with a known blocked shape (table call, dead add,
   constant in a register) are worth 120 s each.
 - Run the permuter with 5 jobs in the background from the first minute and draft meanwhile (this session did, and it paid off).
+
+## Session 21: fakematch labels, untried DIFF<=12 list, strings for func_15197F7C
+
+2 work commits (`2ad4fa9` + the next) + this hand-off; +11 functions (2948 -> 2959). ~32 functions tried. Full `verify_all.sh` before each commit.
+
+- **Fakematch labels**: every `new_var` pin, `p += K+1; p--;`, `if (0) { }`, chained pointer, dead-test construct committed in sessions 19-20 and today's has a
+  `// fakematch: <why>` comment (`grep -rn fakematch conker/src_eu`). Comments only; code unchanged. **Pitfall**: BSD `sed -i -E` on macOS treats `-E` as the
+  backup suffix and leaves `*.c-E` files in `src_eu/` that the Makefile's `grep GLOBAL_ASM` then picks up (build error "target doesn't match"); use `perl -pi`
+  or `sed -i ''  -E`, and `rm conker/src_eu/*-E` if they appear.
+- **Own .rodata for `game_eu_1C3530`** (`rodata_split.py --own game_eu_1C3530 --resplit`): `func_15197F7C` matches with string literals. `func_151422C0` (a stub
+  returning `(arg3+arg2)>>1`) really takes 6 args (`..., char *file, s32 line`); prototype and definition changed.
+- Matched (11): permuter solved `func_150F2F14` (loop limit/arg1 register swap, `new_var = 0x405D`), `func_151CA114`, `func_15156468`, `func_1508B20C`, outright;
+  permuter + 1-2 hand edits: `func_1515C3C0` (swap two float copies), `func_1503F7A0` (`s16 sp40[2]`, `(u32)arg0 + D*4` operand order), `func_150C1E78` (load `q` first;
+  `t = (v*8) & 0xFFFFFFFFFFFFFFFF` keeps `t` in a temp), `func_150D26DC` (reload the loop-invariant instead of a `temp_f2` local), `func_15034630`/`func_150346A0`
+  (`arg0 += 2; arg0[-1] = ...` instead of the permuter's `+= 4; (u8*)arg0 - 2`), plus `func_15197F7C`.
+- Permuter on the other 5 untried DIFF<=12 drafts: `func_15031044` nothing, `func_1510B8AC` best DIFF8, `func_1510BB78` DIFF2 by hand (spill slot 0x28 vs 0x2C, stackfix no help),
+  `func_150FE1AC` / `func_151BE6E8` (see below). The permuter solved 5 of ~25 raw/hand drafts given (80-150 s, 4-5 jobs); `permute.sh` removes the `nm/<func>` dir
+  at the start, so never pass a draft *from* that dir for the same function (SETUP-FAILED).
+- New pattern: a copy of `arg0` in `a1` that is **spilled to `0x20(sp)` = the home slot of `a0`** (`func_150FE1AC`, `func_151BE6E8`, frame 0x20): `u8 *p = arg0;`
+  gives the copy, but the spill is placed in a fresh local (frame 0x28/0x30). Not solved; `arg0 = p` before the call (SIZE+2) is closest.
+- Left: `func_151EF7B0` (4-insn function followed by 16 nops of file padding: apply.py REJECTs on size; needs the padding split into the next file or a no-op filler),
+  `func_150E394C` (`extern s32 func_150E394C;` in the same file must be removed first; ref: `lw v0; a0=2; bnez; or a1,v0` reuse not reproduced),
+  `func_151B92AC` DIFF12, `func_151B8B5C` DIFF14, `func_1515F5B0` DIFF26, `func_151A0EC0` DIFF13, `func_150848F0` DIFF14, `func_150F2230` DIFF25, `func_15109140`, `func_1512D7A8`,
+  `func_15031044`, `func_1510B8AC`. `func_150A7770/ADACC/7EF4`, `func_151F911C/9150` are hand-written asm (not C).
+
+### Next steps (session 21)
+
+- Several short leftovers are `hand-written asm` marked with `/* Handwritten function */`: skip them, they will need `INCLUDE_ASM`-style stubs anyway.
+- The `a1 -> 0x20(sp)` spill family (delete handlers with 3-4 `if (f) func(f)`): look for a construct that makes IDO treat the param copy as the param itself.
+- Untried from `fresh.txt`: everything above ~17 insns; `gensome.sh` + `permute.sh -l` (80 s, 5 jobs) is a cheap first pass, then hand-fix DIFF<=2.
 
 ## Layout
 
