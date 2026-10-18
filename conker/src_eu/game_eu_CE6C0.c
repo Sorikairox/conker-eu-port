@@ -30,13 +30,69 @@ u8 *func_150A1520(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2280.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A28C4.s")
+void func_150A28C4(u8 *arg0)
+{
+  int new_var;
+  s32 var_t0;
+  s32 var_v1;
+  u32 temp_v0;
+  u8 temp_t1;
+  if ((*((s32 *) (((u8 *) arg0) + 0x20))) == 0)
+  {
+    var_v1 = 0;
+    var_t0 = 8;
+    if (!((*((u8 *) (((u8 *) arg0) + 0x15))) & 3))
+    {
+      var_v1 = 0x8000;
+    }
+    temp_t1 = *((u8 *) (((u8 *) arg0) + 0x17));
+    if ((((s32) temp_t1) >> (new_var = 7)) != 0)
+    {
+      var_t0 = 0x108;
+    }
+    temp_v0 = *((u32 *) (((u8 *) arg0) + 0x1C));
+    func_1000FA64((temp_v0 >> 0x10) & ((short) 0xFFFF), *((s16 *) (((u8 *) arg0) + 0)), *((s16 *) (((u8 *) arg0) + 2)), *((s16 *) (((u8 *) arg0) + 4)), (temp_t1 & 0x7F) * 0x147, (u16) ((*((s32 *) (((u8 *) arg0) + 0x18))) | var_v1), (s16) (temp_v0 & 0xFFFF), 0, 0, 0, var_t0, 0);
+    *((s32 *) (((u8 *) arg0) + 0x20)) = 1;
+ dummy_label_636436: ;
+    return;
+  }
+  *((s32 *) (((u8 *) arg0) + 0x20)) = 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A29A0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2AB4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2C6C.s")
+s32 func_150A2280(u8 *, u8 *, s32);
+s32 func_151733EC(u8 *, u8, s32);
+
+void func_150A2C6C(u8 *arg0)
+{
+  int new_var;
+  s32 var_s0;
+  u32 var_s1;
+  u8 *temp_v0;
+  if ((*((u8 *) (((u8 *) arg0) + 0x65))) == 0)
+  {
+    var_s1 = 0;
+    var_s0 = 0;
+    if (D_800D3094 != 0)
+    {
+      do
+      {
+        new_var = var_s0 ^ 0;
+        if (((((s32) (*((u8 *) (((u8 *) (&D_800D34B8[new_var])) + 0x15)))) >> 2) == 8) && (func_150A2280(arg0, &D_800D34B8[var_s0 & 0xFFFFFFFF], 0) == 0))
+        {
+          temp_v0 = &D_800D34B8[var_s0];
+          func_151733EC(arg0, *((u8 *) (((u8 *) temp_v0) + 0x17)), *((s32 *) (((u8 *) temp_v0) + 0x18)));
+        }
+        var_s1 += 1;
+        var_s0 += 0x34;
+      }
+      while (var_s1 < ((u32) D_800D3094));
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2D44.s")
 

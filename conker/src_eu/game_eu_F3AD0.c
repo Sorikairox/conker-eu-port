@@ -21,7 +21,40 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3AD0/func_150C63FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3AD0/func_150C6440.s")
+s32 func_150C6494(s32, u8 *, s32);
+
+void func_150C6440(u8 *arg0)
+{
+  u8 *new_var2;
+  long long new_var3;
+  int new_var;
+  s32 temp_a2;
+  s32 *new_var5;
+  s32 *new_var4;
+  if (!arg0)
+  {
+    do
+    {
+    }
+    while (0);
+  }
+  new_var2 = (u8 *) arg0;
+  new_var5 = (s32 *) (new_var2 + 0x18);
+  temp_a2 = *new_var5;
+  new_var = 0x5C;
+  new_var4 = &(*((s32 *) (((u8 *) arg0) + new_var)));
+  if ((*((s32 *) (((u8 *) arg0) + new_var))) != 0)
+  {
+    new_var = (*new_var4) + 0x58;
+    *((s8 *) (((u8 *) ((0, new_var))) + 4)) = 1;
+    dummy_label_747774:
+    ;
+
+    ;
+    return;
+  }
+  *((s32 *) (((u8 *) arg0) + new_var)) = func_150C6494(new_var3 = temp_a2, arg0, temp_a2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3AD0/func_150C6494.s")
 

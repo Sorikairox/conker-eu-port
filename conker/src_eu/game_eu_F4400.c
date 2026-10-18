@@ -9,7 +9,40 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6D2C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6D70.s")
+s32 func_150C6DC4(s32, u8 *, s32);
+
+void func_150C6D70(u8 *arg0)
+{
+  u8 *new_var4;
+  u8 *new_var;
+  s32 *new_var3;
+  u8 *new_var2;
+  s32 temp_a2;
+  do
+  {
+    new_var2 = arg0;
+    temp_a2 = *((s32 *) (((u8 *) new_var2) + 0x18));
+    new_var = ((u8 *) new_var2) + 0x70;
+    if (((*((s32 *) new_var)) != 0) ^ 0)
+    {
+      temp_a2++;
+      temp_a2--;
+      new_var3 = (s32 *) new_var;
+      new_var4 = (u8 *) ((*new_var3) + 0x58);
+      new_var2 = new_var4 + 4;
+      *((s8 *) new_var2) = 1;
+      goto dummy_label_302949;
+      dummy_label_302949:
+      ;
+
+      ;
+      ;
+      return;
+    }
+  }
+  while (0);
+  *((s32 *) new_var) = func_150C6DC4(temp_a2, new_var2, *((s32 *) (((u8 *) new_var2) + 0x18)));
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6DC4.s")
 

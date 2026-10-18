@@ -229,7 +229,19 @@ void func_1518FDC8(u8 *arg0)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FE0C.s")
+s32 func_1518FE50(s32);
+
+void func_1518FE0C(s32 arg0)
+{
+  u8 *new_var;
+  u8 *temp_v0;
+  f32 *new_var2;
+  temp_v0 = ((((((arg0 + 0x30) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF) & 0xFFFFFFFF;
+  new_var2 = (f32 *) (((u8 *) temp_v0) + 0);
+  new_var = temp_v0;
+  *new_var2 = (f32) ((*((f32 *) (((u8 *) new_var) + 0xC))) + ((*((f32 *) (((u8 *) temp_v0) + 0x10))) * func_150ADA68()));
+  func_1518FE50(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FE50.s")
 
