@@ -69,4 +69,27 @@ s32 func_150F2A00(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2C20.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2F14.s")
+void func_150F2F14(s32 arg0, s32 arg1)
+{
+  int new_var;
+  s32 var_s0;
+  var_s0 = 0;
+  if (1)
+  {
+    do
+    {
+      func_1509BFB0(0, var_s0 + 0x4016, arg1);
+      var_s0 += 1;
+    }
+    while (var_s0 != 0xE);
+  }
+  new_var = 0x405D; // fakematch: constant in a variable (permuter)
+  func_1509BFB0(0, new_var, arg1);
+  func_1509BFB0(0, 0x405F, arg1);
+  if (D_800D2E4C->pad15[0] & 8)
+  {
+    func_1509BFB0(0, 0x4063, arg1);
+    func_1509BFB0(0, 0x4064, arg1);
+    func_1509BFB0(0, 0x4065, arg1);
+  }
+}

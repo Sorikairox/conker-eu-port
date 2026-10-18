@@ -29,7 +29,28 @@ void func_150D2620(s16 arg0, f32 arg1, f32 arg2, u8 arg3, u8 arg4, u8 arg5, s32 
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FFE30/func_150D26DC.s")
+void func_150D26DC(u8 *arg0)
+{
+  u8 *temp_v0;
+  u8 *temp_v0_2;
+  temp_v0 = (temp_v0_2 = arg0 + 0x28); // fakematch: two pointers to the same address (permuter)
+  *((f32 *) (((u8 *) arg0) + 0x2C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x2C))) + D_800BE9A4);
+  if ((*((f32 *) (((u8 *) arg0) + 0x38))) < (*((f32 *) (((u8 *) arg0) + 0x2C))))
+  {
+    do
+    {
+      *((f32 *) (((u8 *) temp_v0) + 4)) = (f32) ((*((f32 *) (((u8 *) temp_v0) + 4))) - (*((f32 *) (((u8 *) temp_v0) + 0x10))));
+    }
+    while ((*((f32 *) (((u8 *) temp_v0) + 0x10))) < (*((f32 *) (((u8 *) temp_v0) + 4))));
+  }
+  if ((*((f32 *) (((u8 *) temp_v0_2) + 4))) <= (*((f32 *) (((u8 *) temp_v0_2) + 8))))
+  {
+    *((s8 *) (((u8 *) temp_v0_2) + 0)) = 1;
+    func_1515D4D4(0xFF, 0xFF, 0xFF, 0xFFU);
+    return;
+  }
+  *((s8 *) (((u8 *) temp_v0_2) + 0)) = 0;
+}
 
 void func_150D278C(struct260 *arg0) {
     func_150D27E4((s32)arg0);

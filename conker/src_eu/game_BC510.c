@@ -16,8 +16,8 @@ void func_1508F060(void)
   u8 *p;
   D_800D288D = 0;
   D_800D289D = 0;
-  new_var = 2;
-  new_var2 = &new_var;
+  new_var = 2; // fakematch: constant 2 must stay in a register
+  new_var2 = &new_var; // fakematch: pins new_var in a register
   p = D_800D2880 + ((*new_var2) * 16);
   (D_800D2880 + ((*new_var2) * 16))[0x1D] = 0;
   p[0x2D] = 0;

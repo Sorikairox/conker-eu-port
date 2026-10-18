@@ -48,4 +48,18 @@ s32 func_151C8D5C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CA0E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CA114.s")
+s32 func_151CA114(u8 *arg0, s8 *arg1)
+{
+  u8 *new_var;
+  new_var = *((u8 **) (((u8 *) arg0) + 0x188)); // fakematch: pointer in a named local (permuter)
+  if ((*((u8 *) (((u8 *) new_var) + 0x6F))) == 0)
+  {
+    *arg1 = 1;
+  }
+  else
+  {
+    *((s32 *) (((u8 *) arg0) + 0x58)) = (s32) ((*((s32 *) (((u8 *) arg0) + 0x58))) & (~2));
+    *arg1 = 0;
+  }
+  return 1;
+}

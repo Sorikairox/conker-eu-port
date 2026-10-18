@@ -10,7 +10,7 @@ void func_151A625C(struct260 *arg0)
 {
   u16 *new_var;
   struct260 *p = arg0;
-  new_var = (u16 *) (((u8 *) p) + 0x6C);
+  new_var = (u16 *) (((u8 *) p) + 0x6C); // fakematch: re-load of the field (no andi)
   if ((*new_var) != 0)
   {
     func_151A62DC(*new_var);
@@ -23,7 +23,7 @@ void func_151A629C(struct260 *arg0)
 {
   u16 *new_var;
   struct260 *p = arg0;
-  new_var = (u16 *) (((u8 *) p) + 0x6C);
+  new_var = (u16 *) (((u8 *) p) + 0x6C); // fakematch: re-load of the field (no andi)
   if ((*new_var) != 0)
   {
     func_151A62DC(*new_var);

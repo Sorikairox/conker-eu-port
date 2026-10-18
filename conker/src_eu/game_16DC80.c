@@ -28,8 +28,8 @@ s32 func_1514143C(u8 *arg0)
   if (*((s32 *) (arg0 + 0x154)))
   {
     p = arg0 + 0x111;
- if (0) { }
-    p--;
+ if (0) { } // fakematch: empty if, scheduling
+    p--;  // fakematch: dead addiu kept (p = arg0 + K+1; p--;)
     (*((f32 **) (p + 0x44)))[0] = *((f32 *) (arg0 + 0x34));
     (*((f32 **) (p + 0x44)))[1] = *((f32 *) (arg0 + 0x38));
     (*((f32 **) (p + 0x44)))[2] = *((f32 *) (arg0 + 0x3C));

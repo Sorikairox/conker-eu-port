@@ -92,7 +92,7 @@ void func_151D5E30(s32 **arg0)
     }
     if (t)
     {
-      new_var = arg0[i];
+      new_var = arg0[i]; // fakematch: re-load of the element after the test
       func_100043B4(new_var, 3);
  } }
 }

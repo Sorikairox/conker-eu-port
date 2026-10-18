@@ -996,7 +996,7 @@ struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg
 void func_151635A8(u8 *arg0, s32 arg1, u8 arg2)
 {
   int new_var;
-  new_var = 0x25;
+  new_var = 0x25; // fakematch: constant index in a variable stops the CSE of the table index load
   if (D_8008B710[arg0[new_var]] != 0)
   {
     D_8008B710[arg0[new_var]](arg0, arg1, arg2);

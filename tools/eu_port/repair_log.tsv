@@ -233,3 +233,17 @@ func_150C7E30	DIFF10	1	OK	y	n	dead addiu v0,0x1E0: p = base; p += 0x1E1; p--; re
 func_150C7DE0	DIFF14	1	OK	y	n	same dead-addiu trick
 func_150C63FC	DIFF9	1	OK	y	n	dead addiu trick with store offset 0
 func_1514143C	DIFF12	3	OK	y	y	permuter 150s
+func_150F2F14	DIFF11	2	OK	y	y	permuter solved the s1/s2 register swap (new_var=0x405D)
+func_1515C3C0	DIFF4	1	OK	y	y	permuter best.c + swap the 0x30/0x34 float copies
+func_1503F7A0	DIFF7	5	OK	y	y	s16 sp40[2] array; (u32)arg0 + D*4 operand order; permuter dead if
+func_15197F7C	CERR	2	OK	y	n	own .rodata (game_eu_1C3530); func_151422C0 stub is really 6 args
+func_15156468	DIFF14	3	OK	y	y	callee takes 1 arg; permuter dead test
+func_151CA114	DIFF10	2	OK	y	y	permuter: pointer in named local, single return 1
+func_150C1E78	DIFF16	5	OK	y	y	permuter + q loaded first; t = v*8 & 0xFFFFFFFFFFFFFFFF
+func_150D26DC	DIFF13	2	OK	y	y	permuter DIFF2; temp_f2 not hoisted into a local
+func_15031044	DIFF12	1	DIFF12	n	y	permuter found nothing; first reload uses t7 (extra temp consumed)
+func_150FE1AC	DIFF12	4	SIZE+2	n	y	ref spills p (a1 copy of a0) to 0x20 and v to 0x18, frame 0x20; best.c needs sp18 (frame 0x30)
+func_1510BB78	DIFF7	3	DIFF2	n	y	spill slot 0x28 vs 0x2C; stackfix no help
+func_1510B8AC	DIFF12	1	DIFF8	n	y	permuter best DIFF8
+func_151EF7B0	OK	1	OK	n	n	REJECT: function is followed by 16 nops of file padding (size 20 insns)
+func_150E394C	n/a	3	DIFF	n	n	needs extern s32 func_150E394C removal in game_eu_110DB0; lw v0 / or a1,v0 reuse not reproduced

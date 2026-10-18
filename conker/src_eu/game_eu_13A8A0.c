@@ -33,7 +33,7 @@ void func_1510DBB0(s16 *arg0)
   s16 *end;
   s16 n = q[0];
   p = q + 1;
-  new_var = p + n;
+  new_var = p + n; // fakematch: hoists p + n before the guard
   if (n > 0)
   {
     end = new_var;

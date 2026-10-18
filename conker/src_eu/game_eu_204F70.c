@@ -38,7 +38,7 @@ void func_151D7958(u8 *arg0, s32 arg1, u8 arg2)
   u8 *new_var;
   if (D_80090044[arg0[0x2C]] != 0)
   {
-    new_var = &arg0[0x2C];
+    new_var = &arg0[0x2C]; // fakematch: second index read must not be CSEd
     if (arg1)
     {
     }

@@ -23,8 +23,8 @@ void func_1513F6C0(u8 *, u8, u8);
 s32 func_150C63FC(u8 *arg0) {
     u8 *p;
     p = *(u8 **)(arg0 + 0xB0);
-    p += 0x59;
-    p--;
+    p += 0x59;  // fakematch: keeps the dead addiu (p += K+1; p--;)
+    p--;  // fakematch: pairs with p += K+1
     *(s32 *)(p + 0) = 0;
     *(s32 *)(arg0 + 0xB0) = 0;
     *(s32 *)(arg0 + 0x18) |= 2;

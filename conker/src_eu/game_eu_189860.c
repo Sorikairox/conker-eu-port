@@ -7,7 +7,38 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C160.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C3C0.s")
+s32 memcpy(u8 *, u8 **, s32);
+
+u8 *func_1515C3C0(u8 **arg0, s32 arg1, u8 arg2, s32 arg3)
+{
+  u8 *temp_v0;
+  u8 *sp2C;
+  if ((*arg0) == 0)
+  {
+    return 0;
+  }
+  temp_v0 = func_15167A68(0x32, arg3, arg1 + 0x50, 1, (u8) ((s32) arg2), 1U);
+  if (temp_v0 == 0)
+  {
+    return 0;
+  }
+  sp2C = temp_v0; // fakematch: copy of the result in its own local
+  memcpy(temp_v0 + 0x18, arg0, 8);
+  *((f32 *) (((u8 *) sp2C) + 0x20)) = (f32) (*((f32 *) (((u8 *) (*arg0)) + 0x14)));
+  *((f32 *) (((u8 *) sp2C) + 0x24)) = (f32) (*((f32 *) (((u8 *) (*arg0)) + 0x18)));
+  *((f32 *) (((u8 *) sp2C) + 0x28)) = (f32) (*((f32 *) (((u8 *) (*arg0)) + 0x1C)));
+  *((f32 *) (((u8 *) sp2C) + 0x2C)) = (f32) (*((f32 *) (((u8 *) (*arg0)) + 0x14)));
+  *((f32 *) (((u8 *) sp2C) + 0x30)) = (f32) (*((f32 *) (((u8 *) (*arg0)) + 0x18)));
+  *((f32 *) (((u8 *) sp2C) + 0x34)) = (f32) (*((f32 *) (((u8 *) (*arg0)) + 0x1C)));
+  *((s32 *) (((u8 *) sp2C) + 0x44)) = 0;
+  *((s32 *) (((u8 *) sp2C) + 0x48)) = -1;
+  *((s32 *) (((u8 *) sp2C) + 0x10)) = 1;
+  *((s32 *) (((u8 *) sp2C) + 0x14)) = 0;
+  *((f32 *) (((u8 *) sp2C) + 0x38)) = 0.0f;
+  *((f32 *) (((u8 *) sp2C) + 0x3C)) = 0.0f;
+  *((f32 *) (((u8 *) sp2C) + 0x40)) = 0.0f;
+  return sp2C;
+}
 
 void func_1515C4C0(struct102 *arg0) {
     func_1514EDF0(arg0, ((s32 *)arg0)[0x18 / 4]);

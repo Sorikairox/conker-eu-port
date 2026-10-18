@@ -207,7 +207,7 @@ void func_15142180(u8 arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
     func_15154488(&sp24, &sp24.unk8, 0, 0xFF, 1);
 }
 
-s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+s32 func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5) {
     return (arg3 + arg2) >> 1;
 }
 

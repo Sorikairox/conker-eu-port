@@ -271,9 +271,9 @@ u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
   {
     return 0;
   }
-  new_var = ((u8 *) temp_v0) + 0x10;
+  new_var = ((u8 *) temp_v0) + 0x10; // fakematch: permuter temp for the store order
   *((s32 *) new_var) = arg0;
-  new_var2 = 0;
+  new_var2 = 0; // fakematch: permuter temp, zero kept in a register
  *((s32 *) (((u8 *) temp_v0) + ((unsigned int) 0x18))) = new_var2; *((s32 *) (((u8 *) temp_v0) + 0x14)) = new_var2;
   *((s16 *) (((u8 *) temp_v0) + 0x1C)) = arg1;
   return temp_v0;

@@ -19,8 +19,8 @@ void func_150C7DE0(u8 *arg0) {
     u8 *p;
     if (!(arg0[0x73] & 4)) {
         p = (u8 *)D_800DBEF4;
-        p += 0x1E1;
-        p--;
+        p += 0x1E1;  // fakematch: keeps the dead addiu (p += K+1; p--;)
+        p--;  // fakematch: pairs with p += K+1
         *(s32 *)(arg0 + 0x3C) = -(*(s32 *)(p + 0x3C) & 0xFFFF0000) & 0xFFFF0000;
         func_1511563C(arg0);
     }
@@ -29,8 +29,8 @@ void func_150C7DE0(u8 *arg0) {
 void func_150C7E30(u8 *arg0) {
     u8 *p;
     p = (u8 *)D_800DBEF4;
-    p += 0x1E1;
-    p--;
+    p += 0x1E1;  // fakematch: keeps the dead addiu (p += K+1; p--;)
+    p--;  // fakematch: pairs with p += K+1
     *(s32 *)(arg0 + 0x3C) = *(s32 *)(p + 0x3C) & 0xFFFF0000;
     func_1511563C(arg0);
 }

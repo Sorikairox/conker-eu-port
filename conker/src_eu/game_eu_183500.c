@@ -32,7 +32,23 @@ void func_15155D6C(s32 arg0, s32 arg1, f32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/func_1515626C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/func_15156468.s")
+void func_1515F10C(s32);
+s32 func_1518CF74(s32);
+void func_15156468(struct102 *arg0)
+{
+  u8 *p = (u8 *) arg0;
+  s32 temp_a2;
+  temp_a2 = *((s32 *) (p + 0x14));
+  if (temp_a2 != 0)
+  {
+    func_1515F10C(temp_a2);
+  }
+  if (((!arg0) && (!arg0)) && (!arg0)) // fakematch: dead test from the permuter
+  {
+  }
+  func_15169804(p);
+  func_1518CF74(0xA6);
+}
 
 void func_151564AC(void) {
     u8 *temp_v0 = (u8 *)func_15156544(D_800C3E78);

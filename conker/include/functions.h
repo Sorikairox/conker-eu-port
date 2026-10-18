@@ -784,7 +784,7 @@ void func_15141970(struct37 *arg0);
 void func_15141990(void *arg0);
 void func_151419B0(void *arg0);
 void func_15141DA4(void *arg0, s32 arg1, s32 arg2);
-s32  func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32  func_151422C0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, char *arg4, s32 arg5);
 s32  func_151422DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32  func_151422F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 s32  func_15143E08(struct127 *arg0);

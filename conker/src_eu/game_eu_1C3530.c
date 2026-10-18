@@ -49,13 +49,15 @@ void func_15196888(u8 *arg0, s32 arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151976B8.s")
 
 f32 func_15197F68(s32 arg0) {
-    return D_800A8E84;
+    return 1.32f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15197F7C.s")
+f32 func_15197F7C(s32 arg0) {
+    return (f32) func_151422C0(0xA, (s32) "power", 1, 0x1F4, "../Effects/CharacterFlameThrower/characterflamethrower.c", 0x8CC) * 0.01f;
+}
 
 f32 func_15197FD8(s32 arg0) {
-    return D_800A8E8C;
+    return 10.9f;
 }
 
 void func_15197A7C(u8 *arg0) {
