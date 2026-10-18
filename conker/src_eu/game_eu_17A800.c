@@ -20,14 +20,44 @@
 void func_1514DEDC(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514DEE8.s")
+void func_1514DEE8(struct127 *arg0) {
+    f32 buf[8];
+    u8 *r;
+    *(s32 *)&buf[0] = 0;
+    *(s32 *)&buf[1] = 0;
+    *(s32 *)&buf[2] = 0;
+    *(s32 *)&buf[3] = 0;
+    *(s32 *)&buf[5] = 0;
+    *(s32 *)&buf[6] = 0;
+    *(s32 *)&buf[7] = 0;
+    buf[4] = 12.0f;
+    r = func_15159140(arg0, 1, 0x20);
+    if (r != NULL) {
+        memcpy(r + 0x58, buf, 0x20);
+        func_1514F18C(r, arg0, 0x13);
+    }
+}
 
 void func_1514DF64(struct127 *arg0) {
     func_1514DEE8(arg0);
     func_1514F18C(func_151AD010(arg0, 0x41A00000, 0), arg0, 0x14);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514DFA8.s")
+void func_1514DFA8(struct127 *arg0) {
+    u8 *r;
+    s32 buf[7];
+    buf[5] = 0;
+    buf[6] = 0;
+    buf[0] = 0;
+    buf[1] = 0;
+    buf[2] = 0;
+    buf[3] = 0;
+    r = func_15159140(arg0, 1, 0x1C);
+    if (r != NULL) {
+        memcpy(r + 0x58, buf, 0x1C);
+        func_1514F18C(r, arg0, 0x13);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E014.s")
 

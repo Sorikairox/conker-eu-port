@@ -357,3 +357,13 @@ func_150BB740	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
 func_150CB128	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
 func_150CC1F0	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
 func_150CCDE4	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
+func_150C5060	DIFF2	6	OK	y	n	shape C: u8 **q=&arg0; p=*q+0x28 per branch (natural p[0x16]&=; no temp)
+func_150C62C0	SIZE-2	2	OK	y	n	shape C: if/else instead of early return in arm (sb before b; lw ra in slot)
+func_150C6BF0	SIZE-2	2	OK	y	n	shape C: same, u8 *p=*(u8**)(a+0x6C); p+=0xB0; p[4]=1 in if/else
+func_1519F928	SIZE	2	OK	y	n	m2c draft passed arg wrong; f(arg0,6) with p[]= stores
+func_15173298	DIFF26	2	OK	y	n	missing arg: 3-arg call with stale a1 (arg1 param)
+func_150B00D4	SIZE-2	4	OK	y	n	float order: v0 + v4*sinf() ; mul+old for first; no named f32 temp -> frame 0x20
+func_15157E08	SIZE-3	2	OK	y	n	callee proto with f32 3rd param (mtc1/mfc1), arg0 passthrough
+func_1514DFA8	SIZE-4	2	OK	y	n	s32 buf[7]; declare u8 *r BEFORE buf so r spills above buf
+func_1514DEE8	SIZE-8	2	OK	y	n	sibling of 1514DFA8: f32 buf[8], buf first then r
+func_1510B8AC	DIFF12	2	OK	y	n	f32 params after s32 arg0 -> memory form; struct V3 table

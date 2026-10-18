@@ -3,7 +3,16 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6BF0.s")
+s32 func_150C7290();
+void func_150C6BF0(u8 *arg0) {
+    if (*(s32 *)(arg0 + 0x6C) != 0) {
+        u8 *p = *(u8 **)(arg0 + 0x6C);
+        p += 0xB0;
+        p[4] = 1;
+    } else {
+    *(s32 *)(arg0 + 0x6C) = func_150C7290();
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6C3C.s")
 

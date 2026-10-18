@@ -47,7 +47,13 @@ void func_150AFC70(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AFCA4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B00D4.s")
+s32 func_150B00D4(u8 *arg0) {
+    u8 *v = arg0 + 0x70;
+    *(f32 *)(arg0 + 0x78) = *(f32 *)(arg0 + 0x7C) * D_800BE9A4 + *(f32 *)(arg0 + 0x78);
+    *(f32 *)(v + 8) = func_15144B68(*(f32 *)(arg0 + 0x78));
+    *(f32 *)(arg0 + 0x10) = *(f32 *)v + *(f32 *)(v + 4) * sinf(*(f32 *)(v + 8));
+    return 1;
+}
 
 s32 func_1516DF0C(s16, s16, s16, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, s16, s16, s16, s16, u16, u8, u8, u8, u8, s16, u16, u16, u8, u8, u8, u8, u8, s32, u8, u8, u8, s32);
 

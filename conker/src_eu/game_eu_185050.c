@@ -11,7 +11,15 @@ s32 func_15157DD0(s32 arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15157E08.s")
+s32 func_15157580(s32, s32, f32, s32, s32, s32, s32, s32);
+s32 func_15157E08(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8) {
+    u8 *v = func_15157580(arg0, arg2, arg3, arg4, arg5, arg6 + 0x38, arg7, arg8);
+    if (v == NULL) {
+        return 0;
+    }
+    memcpy(v + 0x120, arg1, 0x38);
+    return v;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15157E88.s")
 
