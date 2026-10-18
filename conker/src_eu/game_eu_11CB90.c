@@ -128,7 +128,7 @@ void func_150F0968(void *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F0E0C.s")
 
-s32 func_15160A58(s32, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15160A58(s32, u8, s32 *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
 extern s32 D_800A1A44;
 extern s32 D_800A1A50;
 

@@ -40,7 +40,7 @@ void func_150B6930(struct102 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6BBC.s")
 
-s32 func_15182BE0(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15182BE0(u8, u8, u8, s32, s16, u8, u8, s32);
 
 void func_150B6C34(u8 arg0, s32 arg1) {
     s32 pad;

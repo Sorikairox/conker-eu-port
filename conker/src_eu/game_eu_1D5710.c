@@ -46,7 +46,7 @@ void func_151A8FD0(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A951C.s")
 
-void func_151A98CC(u8 *, s32, u8);
+s32 func_151A98CC(u8 *, s32, u8);
 void func_151A95D4(u8 *arg0, s32 arg1, u8 arg2) {
     if (arg0[0x4C] == 1) {
         func_151A98CC(arg0, arg1, arg2);

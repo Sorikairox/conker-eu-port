@@ -38,7 +38,7 @@ void func_150F3754(s32 arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3794.s")
 
-void func_15140410();
+s32 func_15140410();
 
 void func_150F38FC(u8 *arg0, s16 arg1) {
     func_15140410(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);

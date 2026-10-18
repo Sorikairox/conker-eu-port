@@ -71,7 +71,7 @@ void func_150DAB6C(u8 *arg0, f32 arg1) {
 }
 
 s32 func_15131D98(s32, s32, u8 *, s32);
-s32 func_15131EC8(s32, s32, u8 *);
+void func_15131EC8(s32, s32, u8 *);
 
 s32 func_150DABA8(s32 arg0, s32 arg1) {
     u8 *sp20;

@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-void func_150EBA04(void *arg0, f32 *arg1, s32 arg2);
+s32 func_150EBA04(void *arg0, f32 *arg1, s32 arg2);
 
 void func_150EB430(void *arg0, void *arg1, s32 arg2) {
     f32 sp1C[3];

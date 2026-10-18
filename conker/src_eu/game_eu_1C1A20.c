@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-s32 func_1518D1C0(u8 *, s32, s32, s32, s32, s32, char *);
+s32 func_1518D1C0(u8 *, s16, s32, u8, u8, s32, char *);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194210.s")
@@ -52,9 +52,9 @@ void func_15194AF8(struct127 *arg0, struct127 *arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194B3C.s")
 
-s32 func_151AF820(u8 *, s32, s32);
+s32 func_151AF820(u8 *, u8, s32);
 s32 func_151B01B8(s32, u8 *);
-s32 func_151B09BC(s32, u8 *, s32, s32, s32);
+s32 func_151B09BC(s32, u8 *, s16, u8, s32);
 
 void func_15194794(s32 arg0, u8 *arg1, s32 arg2) {
 
@@ -87,7 +87,7 @@ void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195024.s")
 
 s32 func_15134070(s32);
-s32 func_15136C3C(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15136C3C(s32, u8, u8, u8, u8, u8, u8, s32);
 s32 func_15138120(s32, s32, u8);
 s32 func_15195024(s32);
 
@@ -122,7 +122,7 @@ void func_15195314(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 s32 func_1504715C(s32 *, s32);
-s32 func_1514B8D4(s32, s32 *, s32, s32);
+s32 func_1514B8D4(s32, s32 *, u8, s32);
 
 void func_15195338(s32 arg0, s32 arg1, s32 arg2) {
     s32 sp2C[9];
@@ -144,7 +144,7 @@ void func_151953C4(s32 arg0, u8 *arg1, s32 arg2) {
     }
 }
 
-s32 func_15182BE0(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15182BE0(u8, u8, u8, u8, s16, u8, u8, s32);
 s32 func_15195160(s32, u8 *, s8 *);
 
 void func_15195418(s32 arg0, u8 *arg1, s32 arg2) {

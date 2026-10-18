@@ -42,7 +42,7 @@ void func_151A0A10(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-s32 func_1514CBE8(f32, f32, s32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+s32 func_1514CBE8(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 extern f32 D_800A90F0;
 
 void func_151A10A8(u8 *arg0) {

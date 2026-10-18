@@ -346,54 +346,25 @@ void func_1500A68C(s32 arg0, s32 arg1) {
     func_15162740(arg0, 21, 6, 0, 300, 2, 255, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_1500A6D8.s")
-// Near miss (session 10): sp24 lands at sp+0x28, the ROM has sp+0x24 (all else matches).
-// void func_1500A6D8(s32 arg0, s32 arg1) {
-//     struct220 sp48;
-//     f32 sp30[6];
-//     u8 sp24[2][3] = {{7, 8, 9}, {8, 9, 10}};
-//     s32 temp_v0;
-//     s32 i;
-//
-//     i = (D_800BE9F0 == 6) ? 1 : 0;
-//     if (func_150B0AEC(sp24[i][arg1 - 0x49], sp30) != 0) {
-//         sp48.unk0 = 0;
-//         sp48.unk1 = 0x17;
-//         sp48.unk2 = 300;
-//         sp48.unk4 = 0;
-//         temp_v0 = func_1516037C(&sp48, arg0, 0x18, 255, 1);
-//         if (temp_v0 != 0) {
-//             memcpy((u8 *)temp_v0 + 0x18, sp30, 0x18);
-//         }
-//     }
-// }
-// void func_1500A6D8(s32 arg0, s32 arg1) {
-//     s8 sp4C;
-//     s16 sp4A;
-//     s8 sp49;
-//     s8 sp48;
-//     ? sp30;
-//     ? sp24;
-//     s32 temp_v0;
-//     s32 phi_v0;
-//
-//     sp24.unk0 = (s32) (void *)0x80082BEC->unk0;
-//     sp24.unk4 = (u16) (void *)0x80082BEC->unk4;
-//     phi_v0 = 0;
-//     if (D_800BE9F0 == 6) {
-//         phi_v0 = 1;
-//     }
-//     if (func_150B060C((&sp24 + ((phi_v0 * 4) - phi_v0) + arg1)->unk-49, &sp30, arg1) != 0) {
-//         sp48 = 0;
-//         sp49 = 23;
-//         sp4A = 300;
-//         sp4C = 0;
-//         temp_v0 = func_1516037C(&sp48, arg0, 24, 255, 1);
-//         if (temp_v0 != 0) {
-//             memcpy(temp_v0 + 0x18, &sp30, 0x18);
-//         }
-//     }
-// }
+void func_1500A6D8(s32 arg0, s32 arg1) {
+    struct220 sp48;
+    f32 sp30[6];
+    s32 temp_v0;
+    u8 sp24[2][3] = {{7, 8, 9}, {8, 9, 10}};
+    s32 i;
+
+    i = (D_800BE9F0 == 6) ? 1 : 0;
+    if (func_150B0AEC(sp24[i][arg1 - 0x49], sp30) != 0) {
+        sp48.unk0 = 0;
+        sp48.unk1 = 0x17;
+        sp48.unk2 = 300;
+        sp48.unk4 = 0;
+        temp_v0 = func_1516037C(&sp48, arg0, 0x18, 255, 1);
+        if (temp_v0 != 0) {
+            memcpy((u8 *)temp_v0 + 0x18, sp30, 0x18);
+        }
+    }
+}
 
 void func_1500A79C(s32 arg0, s32 arg1) {
     func_15162740(arg0, 22, 6, 0, 300, 2, 255, 1);

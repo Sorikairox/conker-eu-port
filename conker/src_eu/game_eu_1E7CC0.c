@@ -25,7 +25,7 @@ void func_151BB5F4(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BC494.s")
 
-s32 func_150E856C(f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
 
 void func_151BC56C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     s32 pad;

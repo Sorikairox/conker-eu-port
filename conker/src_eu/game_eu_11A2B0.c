@@ -5,7 +5,7 @@
 
 extern f32 D_800A1940;
 extern f32 D_800A1944;
-s32 func_151464B8(s32);
+u8 func_151464B8(s32);
 void func_151432BC(s32, f32 *, f32 *, f32 *, f32 *);
 
 void func_150ECAA0(u8 *arg0) {
@@ -69,7 +69,7 @@ void func_150ED0CC(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-s32 func_1502ED88(u8 *, u8, u8, u8, s32, s32, s32);
+void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
 
 void func_150ED10C(u8 *arg0) {
     u8 *sp28;

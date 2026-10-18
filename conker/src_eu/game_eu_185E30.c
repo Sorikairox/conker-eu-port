@@ -5,7 +5,7 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158620.s")
 
-void func_15158620(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
+s32 func_15158620(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 
 void func_15158748(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
     func_15158620(arg0, 0, 0, arg1, arg2, arg3, arg4);

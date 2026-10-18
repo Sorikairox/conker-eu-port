@@ -120,7 +120,7 @@ void func_151CFDF4(u8 *arg0, s32 arg1, u8 arg2) {
 
 typedef struct { f32 x, y, z; } Vec3CFE48;
 f32 func_15144AA8(s32 arg0);
-s32 func_15046F70(Vec3CFE48 *, s32, f32, f32 *);
+s32 func_15046F70(Vec3CFE48 *, u16, f32, f32 *);
 extern f32 D_800D9C80;
 
 void func_151CFE48(s32 arg0, f32 arg1, f32 arg2) {

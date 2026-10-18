@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-u8 *func_151149AC(s32);
+u8 * func_151149AC(u8);
 s32 func_15117D18();
 void func_150CF5B0(u8 *arg0) {
     u8 *p;

@@ -16,7 +16,7 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC470/func_151AF820.s")
 
-s32 func_151AF938(f32 *, s32, s32, s32, s32);
+s32 func_151AF938(f32 *, s32, s32, s32, u8);
 
 void func_151AF8E8(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 *arg6)
 {

@@ -41,7 +41,7 @@ void func_151DECFC(void) {
     }
 }
 
-s32 func_1501C710(s32, s32, s32, s32, s32);
+void func_1501C710(s32, s32, s32, s32, s32);
 extern s8 D_80090144;
 extern s8 D_800D3260;
 
@@ -103,7 +103,7 @@ void func_151E2A1C(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3AE4.s")
 
 s32 func_151F2CDC();
-s32 func_151F2D6C(s32, s32);
+void func_151F2D6C(s32, s32);
 extern s32 *D_800E0EB8;
 extern s32 func_151E2FCC;
 

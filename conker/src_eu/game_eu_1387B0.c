@@ -9,7 +9,7 @@ void func_1510AFA0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1387B0/func_1510AFC4.s")
 
-s32 func_151152A4(u8 *, s32, s32, s32, s32, s32);
+s32 func_151152A4(u8 *, s32, s32, s16, s16, s32);
 
 void func_1510B34C(u8 *arg0) {
     f32 x;

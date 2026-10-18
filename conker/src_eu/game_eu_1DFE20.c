@@ -100,7 +100,7 @@ void func_151B3474(s32 arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B34B4.s")
 
-void func_151B4D88(void *arg0, void *arg1, s32 arg2, u8 arg3);
+s32 func_151B4D88(void *arg0, void *arg1, s32 arg2, u8 arg3);
 
 void func_151B3550(u8 *arg0, s32 arg1, u8 arg2) {
     func_151B4D88(arg0, arg0 + 0x150, arg1, arg2);

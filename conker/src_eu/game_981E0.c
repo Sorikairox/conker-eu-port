@@ -641,8 +641,8 @@ s32 func_1506E0EC();
 s32 func_1506E2CC();
 s32 func_150B0290();
 s32 func_150B0344(s32);
-s32 func_1516F730(u8, s32, s32, s32);
-s32 func_1516F868(u8, s32, s32, s32, s32, s32);
+void func_1516F730(s32, s32, u8, s32);
+s32 func_1516F868(u8, s32, s32, s32, u8, s32);
 s32 func_15187B50(f32, f32, f32, s32, s32, s32, f32, f32);
 
 void func_1506DE84(void) {

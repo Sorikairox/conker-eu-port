@@ -93,6 +93,13 @@ def check_func(o,f,spath):
                 if (a&m)!=(b&m): n+=1
                 if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
                 continue
+            if st=='STT_SECTION' and name=='.data' and os.environ.get('SCREEN_DATAREL'):
+                # SCREEN_DATAREL=1: accept relocations to the TU's own .data (local array initialisers);
+                # contents are not compared, verify with apply.py/fdiff.py
+                m={4:0xFC000000,5:0xFFFF0000,6:0xFFFF0000}.get(t,0)
+                if (a&m)!=(b&m): n+=1
+                if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
+                continue
             if st=='STT_SECTION' or not name: return 'SECREL'+(':%s:%d'%(name,t) if VERB else '')
             if not re.search(r'\b%s\b'%re.escape(name),reft[i]):
                 n+=1

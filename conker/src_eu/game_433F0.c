@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-s32 func_151E6758(s16);
+s8 func_151E6758(s16);
 extern s32 D_800BEE08;
 
 void func_15015F40(s16 arg0, s32 arg1) {

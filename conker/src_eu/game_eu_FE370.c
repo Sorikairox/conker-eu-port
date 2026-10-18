@@ -4,7 +4,7 @@
 
 
 s32 func_1509BE40(s32, s32, s32);
-s32 func_151254F4(struct108 *, s32);
+void func_151254F4(struct108 *, s32);
 
 void func_150D0B60(struct108 *arg0) {
     if (!(D_800D2E4C->unk0 & 0x80)) {

@@ -34,7 +34,7 @@ void n_alCSeqNew(ALCSeq *seq, u8 *ptr)
 // AL_TRACK_END is one higher in this version of the event enum
 #define N_AL_TRACK_END 0x13
 
-void __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3);
+s32 __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3);
 
 void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2)
 {

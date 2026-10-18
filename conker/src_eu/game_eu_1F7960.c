@@ -109,7 +109,7 @@ void func_151CC840(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CD2CC.s")
 
-s32 func_151A5580(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_151A5580(s32, s32, s32, s32, s32, s32, u8, s32);
 s32 memcpy(s32, u8 **, s32);
 
 void func_151CD444(u8 *arg0) {

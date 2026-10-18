@@ -23,7 +23,7 @@ void func_151A62DC(u16 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6BB0.s")
 
-s32 func_1000FD38(s32 (*)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *), u8 *, s32, u8 *);
+void func_1000FD38(s32 (*)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *), u8 *, s32, u8 *);
 
 void func_151A7068(u8 *arg0) {
     struct102 *temp_a0;

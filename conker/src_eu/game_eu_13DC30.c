@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 
-void func_15115244();
+s32 func_15115244();
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110420.s")
