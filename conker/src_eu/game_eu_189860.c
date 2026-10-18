@@ -25,7 +25,32 @@ void func_1515C628(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)(arg0 + 0x18), (s32)(arg0 + 0x1C), (s32)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C668.s")
+s32 func_1515C668(u8 *arg0, u8 **arg1)
+{
+  struct_eu_link *sp1C;
+  struct_eu_attached *new_var;
+  do
+  {
+    if (arg0 == 0)
+    {
+      dummy_label_135635:
+      ;
+
+      ;
+      goto block_4;
+    }
+    if (func_1514F250(*((struct_eu_link **) (((u8 *) arg0) + 0x2F4)), 0x16, &sp1C) != 0)
+    {
+      new_var = sp1C->unk10;
+      *arg1 = (u8 *) new_var + 0x38;
+      return 1;
+    }
+  }
+  while (0);
+  block_4:
+  return 0;
+
+}
 
 void func_1515C6C8(void) {
     s32 i;

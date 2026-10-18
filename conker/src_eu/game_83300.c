@@ -994,7 +994,53 @@ void func_1505E060(struct_eu_anim *arg0) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E0C4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E650.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E7CC.s")
+u32 func_1505E7CC(s32 arg0, struct127 *arg1)
+{
+  s32 temp_v1;
+  u32 temp_v0_2;
+  u32 var_v1;
+  u8 *temp_a0;
+  u8 *var_a1;
+  u8 temp_v0;
+  temp_v0 = arg1->id;
+  if (temp_v0 == 0xFF)
+  {
+    return 0U;
+  }
+  temp_v1 = D_800D1588[temp_v0];
+  if (temp_v1 == 0)
+  {
+    return 0U;
+  }
+  temp_v0_2 = *((u32 *) (((u8 *) temp_v1) + (-4)));
+  if (temp_v0_2 == 0)
+  {
+    return 0U;
+  }
+  temp_v0_2 = temp_v0_2 / 24U;
+  temp_a0 = *((u8 **) (((u8 *) temp_v1) + (-8)));
+  if (temp_a0 == 0)
+  {
+    return 0U;
+  }
+  var_v1 = 0;
+  if (temp_v0_2 != 0)
+  {
+    var_a1 = temp_a0;
+    loop_10:
+    if (arg0 == (*var_a1))
+    {
+      return var_v1;
+    }
+    var_v1 += 1;
+    var_a1 += 0x18;
+    if (var_v1 < temp_v0_2)
+    {
+      goto loop_10;
+    }
+  }
+  return 0U;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E874.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505ED34.s")
 

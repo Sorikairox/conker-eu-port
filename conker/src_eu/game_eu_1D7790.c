@@ -200,4 +200,10 @@ void func_151AB930(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AC304.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AC3B0.s")
+void func_151AC3B0(u8 *arg0)
+{
+  struct { u8 *unk0; u8 unk4; } sp18;
+  sp18.unk0 = arg0;
+  sp18.unk4 = arg0[0x3B];
+  func_1516944C(0x20, (s32) &sp18, 0xCU);
+}

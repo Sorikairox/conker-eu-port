@@ -19,7 +19,34 @@ s32 func_1509CE88(s32 arg0) {
     return D_800877D0[arg0].unk4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509CEA8.s")
+s32 func_1509CEA8(s32 arg0)
+{
+  s32 var_v1;
+  struct_eu_800877D0 *var_v0;
+  var_v1 = 0;
+ var_v0 = D_800877D0; loop_1: if ((var_v0->unk0 != 0) && (arg0 == ((var_v0->unk4 & 0x1FFFFFFF) + 1))) { return var_v1;
+  }
+
+  if (((*((s32 *) (((u8 *) var_v0) + 0x14))) != 0) && (arg0 == (((*((s32 *) (((u8 *) var_v0) + 0x18))) & 0x1FFFFFFF) + 1)))
+  {
+    return var_v1 + 1;
+  }
+  if (((*((s32 *) (((u8 *) var_v0) + 0x28))) != 0) && (arg0 == (((*((s32 *) (((u8 *) var_v0) + 0x2C))) & 0x1FFFFFFF) + 1)))
+  {
+    return var_v1 + 2;
+  }
+  if (((*((s32 *) (((u8 *) var_v0) + 0x3C))) != 0) && (arg0 == (((*((s32 *) (((u8 *) var_v0) + 0x40))) & 0x1FFFFFFF) + 1)))
+  {
+    return var_v1 + 3;
+  }
+  var_v1 += 4;
+  var_v0 += 4;
+  if (var_v1 == 0xCC)
+  {
+    return 0xCC;
+  }
+  goto loop_1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509CF78.s")
 
