@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (twenty-fourth session). Update this file at the end of every work session.
+Last updated: 2026-10-19 (twenty-fifth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2991 / 5913 functions in C (50.6%)**; code bytes 316,280 / 2,253,856 (14.0%)
-  (end of session 24, from `verify_all.sh`).
+- **3026 / 5913 functions in C (51.2%)**; code bytes 326,668 / 2,253,856 (14.5%)
+  (end of session 25, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2599/5330 (11.9%)
+  - game: 2634/5330 (12.4%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24, 3026 (326,668 bytes) after session 25.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -74,6 +74,7 @@ Commits on `eu`:
 | `8fdd85e`, next | Session 22: 70-150 insn functions experiment; 4 functions, +1,536 bytes |
 | `e5241d4`, `270f3d8`, next | Session 23: recurring blocked shapes; "Known IDO shapes" section; 8 functions, +1,764 bytes |
 | `27e612a`, next | Session 24: `shapes.py`, recipes A/B applied family-wide; 20 functions, +3,600 bytes |
+| `b59b0cc`, next | Session 25: `clones.py`, template clones; 35 functions, +10,388 bytes |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -1663,6 +1664,62 @@ After the session A has 95, B 215, C 430, D 176 left (C and D untouched).
 - Run the same A/B recipes on the 101-150 insn functions of `shapes.py --list A 150` / `--list B 150` (expected hit rate lower, bytes per function higher).
 - Look for more "templates": functions whose drafts differ only in constants (the 7-function family above); group `gensome` drafts by their normalised text to find them.
 - Shapes C and D remain the biggest pools (430 + 176); D is mostly 2-case u8 handlers (see session 23 section D).
+
+## Session 25: clones.py (template families)
+
+2 work commits (`b59b0cc` + the batch in the hand-off commit) + hand-off. +35 functions (2991 -> 3026), +10,388 bytes. Full `verify_all.sh` OK. Tools: `tools/eu_port/clones.py`.
+About 41 functions tried (35 matched); rows in `repair_log.tsv` (start bucket `CLONE` for clone drafts).
+
+### clones.py
+
+- `clones.py` (report): objdump of every `conker/build/src_eu/*.o` (one docker exec, cached in `conker/build/clones.dump`; `--refresh` after a build that
+  changed the live set) -> per function a skeleton = opcode + registers per instruction, immediates / branch targets / reloc symbols abstracted
+  (sp offsets and `addiu sp/aN,sp,K` kept). Prints (a) asm-only clusters, (b) GLOBAL_ASM functions whose skeleton equals a matched C function.
+  `--min N` (default 6 insns), `--top K`. Loosening the skeleton (register renaming, sp offsets dropped) gave the identical clusters, so the
+  strict one is enough: template families are rare in this ROM.
+- `clones.py --draft [--lax] [--per K]` writes `conker/build/cl/v0..` drafts (+ `clones.txt` with `asm <- sibling status`), by copying the C sibling and substituting
+  aligned immediate / reloc differences (literal 17 -> 33, `unk3C` -> `unk4C` field names, data symbols with their `extern`, callee prototypes copied from the sibling file).
+  Then `m2c/screenall build/cl` and the normal `keep` / `apply.py` flow. `--lax` keeps the sibling's own data-symbol names (aliases of the same address link
+  identically) and ignores addend immediates: the screen reports those as DIFFn (names differ) although the linked bytes match, so apply them with a hand dir whose
+  `screen.txt` has fake `OK` rows: `apply.py` byte-checks the whole file and REJECTs the bad ones (used for 5 libultra copies).
+- `clones.py --asm-clusters` lists asm-only clusters (smallest member first) for solving one and cloning to the rest.
+
+### Statistics (start of session, 2857 GLOBAL_ASM functions, 5641 functions in objects, skeleton >= 6 insns)
+
+- (a) asm-only clusters (>= 2 members): 67 clusters, 161 functions. Sizes: 2 members x 53, 3 x 7, 4 x 4, 5 x 2, 8 x 1. Biggest by bytes are pairs of huge functions
+  (`func_151B6ED8`/`func_151BD040` 483 insns, `func_160021FC`/`func_10002718` 420, `func_16001BB4`/`func_100020D0` 402: the 16xxxxxx overlay copy against the init copy).
+  After the session: `func_150AEDF8` x 8 (43 insns, 2-case u8 handler, shape C, see below), `func_1500B8F4` x 3 (113 insns), `func_151AB954` x 3 (197 insns).
+- (b) GLOBAL_ASM functions with a matched C sibling: **33 functions in 28 clusters, 10,388 bytes** (most are the second copy of libultra in the game segment).
+- Clone hit rate: of the 33 type-(b) candidates **30 matched** (91%); 11 straight from the generated draft (6 screened OK, 5 libultra with `--lax` link-check),
+  19 after a small hand fix: -O1 for the libultra files, a `controller.h` include / forward prototype, a struct-typed draft rewritten with `u8 *arg0` raw offsets
+  (field names of another struct), float literals, a 64-bit global kept as one symbol, `* 8` -> `* 32` (the `sll` amount is not a literal in the C).
+  Not matched: `func_151EF850` (osContInit, SIZE-22), `func_151F0260` (osContStartReadData), `func_10001AA8` (369 insns, other segment's types).
+- asm-only: solved `func_151B0454` (106 insns) by hand and cloned: 4 of 4 siblings matched at the first screen.
+- Bytes: the game copy of libultra pfs code (`game_eu_21E520`, 8 functions, ~1,900 insns) was a verbatim copy of `init_eu_27C40.c`.
+
+### Findings
+
+- **The game segment has a second copy of libultra built -O1.** `game_eu_21D060`, `21D420`, `21D990`, `21DA70`, `21E490`, `21E520`, `220050`, `220400` got `OPT_FLAGS := -O1`
+  in `conker/Makefile` (like `21E320`/`21D010` already had), and `#include "controller.h"`. Check the neighbours (`21D010`..`2205xx`) for the same when more of them show up.
+  Names of data symbols differ between the copies (`__osPfsPifRam` / `D_80042D60`) but link to the same addresses; `D_80042D44` is the low word of the 64-bit
+  `D_80042D40` (`func_151F0C80`: the C keeps `extern OSTime D_80042D40`).
+- **IDO unrolls `for (i = n; i != 0; i--)` at -O2** when the body only uses a hoisted pointer: `f32 *p = (f32 *)(arg0 + 0xA8); for (i = D_800BE9E4; i != 0; i--) { *(f32 *)(arg0 + 0x58) *= *p; *(f32 *)(arg0 + 0x60) *= *p; }`
+  gives the 4x unrolled loop with remainder prologue of `func_151B0454` (`i = 0; i < n` forms are not unrolled).
+- A clone target whose callee is defined later in the file needs a forward prototype in the draft (`func_151985C4`), and a function first called implicitly in its own
+  file needs a prototype at the top of the file (`func_15147ECC`, `func_15157734`, `func_15158F90`; the callers pass `void *`).
+
+### Not solved
+
+- `func_150AEDF8` family (8 members: `func_150CEBA4`, `func_150D7370`, `func_150D7578`, `func_151937A4`, `func_15193850`, `func_151B255C`, `func_151BEB08`): same body as the matched
+  `func_151985C4` but with the `arg2 == 0x2D` arm first. Draft with `u8 *v = arg0 + 0x28` at the top gets DIFF21 only because the 0x2D arm ends `sb; b L; lw ra` (epilogue
+  load in the branch delay slot) where mine puts the `sb` in the delay slot: shape C/D again. Variants tried: return in arm, nested else, inverted condition; permuter 150 s (see `nm/func_150AEDF8`).
+- `func_1500B8F4` family (3 x 113 insns, float interpolation), `func_151AB954` family (3 x 197): not attempted.
+
+### Next steps (session 25)
+
+- Rerun `clones.py --refresh --draft --lax` after every batch (new C functions create new siblings; the 4 clones of `func_151B0454` came exactly that way).
+- Solve one member of each asm-only pair cluster with <= 150 insns, then clone (list: `clones.py --asm-clusters`).
+- Shapes A/B in the 101-150 bucket (session 24 next steps) were not touched this session.
 
 ## Layout
 

@@ -29,7 +29,18 @@ void func_15132B0C(struct102 * arg0) {
     func_15169824(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132B38.s")
+void func_15132B38(u8 *arg0) {
+    s32 i;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (((s32 *)(arg0 + 0x154))[i]) {
+            func_100043B4(((s32 *)(arg0 + 0x154))[i], 4);
+        }
+    }
+    if (*(s32 *)(arg0 + 0x164) != 0) {
+        func_100043B4(*(s32 *)(arg0 + 0x164), 4);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132BBC.s")
 

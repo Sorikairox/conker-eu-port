@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_15157734(u8 *arg0);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15156700.s")
 
@@ -36,7 +38,18 @@ void func_15157554(struct102 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15157580.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15157734.s")
+void func_15157734(u8 *arg0) {
+    s32 i;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (((s32 *)(arg0 + 0x104))[i]) {
+            func_100043B4(((s32 *)(arg0 + 0x104))[i], 4);
+        }
+    }
+    if (*(s32 *)(arg0 + 0x114) != 0) {
+        func_100043B4(*(s32 *)(arg0 + 0x114), 4);
+    }
+}
 
 void func_151577B8(struct102 *arg0) {
     func_15157734(arg0);

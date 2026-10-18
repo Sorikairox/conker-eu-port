@@ -28,4 +28,12 @@ s32 func_151B0184(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/func_151B0238.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/func_151B0454.s")
+s32 func_151B0454(u8 *arg0, s32 arg1) {
+    s32 i;
+    f32 *p = (f32 *)(arg0 + 0xA8);
+    for (i = D_800BE9E4; i != 0; i--) {
+        *(f32 *)(arg0 + 0x58) *= *p;
+        *(f32 *)(arg0 + 0x60) *= *p;
+    }
+    return 1;
+}

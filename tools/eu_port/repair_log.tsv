@@ -344,3 +344,16 @@ func_151F2E20	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h fo
 func_151F0C80	CLONE	2	OK	y	n	clone; shared 64-bit D_80042D40 kept
 func_150AF6A0	CLONE	2	OK	y	n	clone; * 32 by hand
 func_150D19AC	CLONE	2	OK	y	n	clone; float constants by hand
+func_15132B38	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_1513B798	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_15147ECC	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_15157734	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_15158794	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_15158F90	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_1516055C	CLONE	2	OK	y	n	clone of func_1513C92C/func_151603FC via raw u8* offsets (struct fields differ)
+func_151985C4	CLONE	2	OK	y	n	clone; forward prototype for later-defined callee
+func_151B0454	SIZE-82	3	OK	y	n	asm-only cluster of 5: for (i = n; i != 0; i--) with f32 *p = arg0+0xA8 gives IDO's unrolled loop at -O2
+func_150BB740	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
+func_150CB128	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
+func_150CC1F0	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)
+func_150CCDE4	CLONE	1	OK	y	n	clone of func_151B0454 (asm-only cluster)

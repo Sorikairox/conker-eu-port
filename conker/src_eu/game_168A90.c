@@ -5,7 +5,23 @@
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513B5E0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513B798.s")
+void func_1513B798(u8 *arg0) {
+    s32 pad;
+    u8 ret = 0;
+
+    if ((arg0[0x10] & 1) != 0) {
+        *(s16 *)(arg0 + 0x14) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x14) < 0) {
+            ret = 1;
+        }
+    }
+    if ((ret == 0) && (*(s8 *)(arg0 + 0x11) != -1) && (D_80089FB8[*(s8 *)(arg0 + 0x11)](arg0) == 0)) {
+        ret = 1;
+    }
+    if (ret) {
+        func_1516972C(arg0);
+    }
+}
 // NON-MATCHING: only the stack slot of done differs (0x1B vs 0x1F)
 // void func_1513B798(struct_eu_168A90 *arg0) {
 //     u8 done;

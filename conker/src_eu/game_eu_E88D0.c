@@ -22,7 +22,15 @@ void func_1513F6C0();
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E88D0/func_150BB4CC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E88D0/func_150BB740.s")
+s32 func_150BB740(u8 *arg0, s32 arg1) {
+    s32 i;
+    f32 *p = (f32 *)(arg0 + 0xA8);
+    for (i = D_800BE9E4; i != 0; i--) {
+        *(f32 *)(arg0 + 0x58) *= *p;
+        *(f32 *)(arg0 + 0x60) *= *p;
+    }
+    return 1;
+}
 
 void func_150BB8E8(struct_eu_E88D0 *arg0) {
     arg0->unk18 |= 1;

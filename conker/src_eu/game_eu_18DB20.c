@@ -16,7 +16,24 @@ u8 *func_151604E4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18DB20/func_1516055C.s")
+extern s32 (*D_8008B470[])(void);
+void func_1516055C(u8 *arg0) {
+    s32 pad;
+    u8 ret = 0;
+
+    if ((arg0[0xE] & 1) != 0) {
+        *(s16 *)(arg0 + 0x12) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x12) < 0) {
+            ret = 1;
+        }
+    }
+    if ((ret == 0) && (*(s8 *)(arg0 + 0xF) != -1) && (D_8008B470[*(s8 *)(arg0 + 0xF)]() == 0)) {
+        ret = 1;
+    }
+    if (ret) {
+        func_1516972C(arg0);
+    }
+}
 
 void func_eu_15160600(u8 *arg0, s32 arg1, u8 arg2) {
     void (*temp_v0)(u8 *, s32, u8) = D_8008B484[arg0[0x14]];
