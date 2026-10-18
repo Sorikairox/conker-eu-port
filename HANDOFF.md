@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3026 / 5913 functions in C (51.2%)**; code bytes 326,668 / 2,253,856 (14.5%)
-  (end of session 25, from `verify_all.sh`).
+- **3039 / 5913 functions in C (51.4%)**; code bytes 328,116 / 2,253,856 (14.6%)
+  (end of session 26, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2634/5330 (12.4%)
+  - game: 2647/5330 (12.5%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24, 3026 (326,668 bytes) after session 25.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24, 3026 (326,668 bytes) after session 25, 3039 (328,116 bytes) after session 26.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -1568,7 +1568,8 @@ that one function on a single line (`;` separated), next to the screen result; f
   `func_1510660C` (frame 0x38 vs 0x30, nonstack diff 17; stackfix no help), `func_150F2910` (`buf[12]` fixes the frame; K&R definition `f(a,b,c) u8 *a; u8 b; s32 c;`
   makes IDO store all three args like the ref, but `lbu a2,0x2F(sp)` is hoisted above `sw ra` instead of sitting in the `jal` delay slot).
 
-**C. Reload from home slot / `b L; lw ra` / `beqz; nop` (4-arg handlers).** Not solved; hypotheses ruled out for `func_150C5060`:
+**C. Reload from home slot / `b L; lw ra` / `beqz; nop` (4-arg handlers).** PARTLY SOLVED in session 26 (see the "Session 26" section for the
+recipes; the original notes follow). Hypotheses ruled out for `func_150C5060`:
 - `-O1`, `-O3`, `-g3` flags (all give `s0 = arg0` instead of memory args), `volatile` params, an extra unused 4th param, switch instead of if-chain, K&R definition
   (arg0 goes to s0 unless its address is taken), separate pointer locals per branch, hoisting the `arg0` load above the first compare.
 - Taking the address `*(u8 **)&arg0` (as `func_150D380C`) gives the memory form (all args stored at entry, each use reloads). The permuter (150 + 240 s) then found
@@ -1720,6 +1721,64 @@ About 41 functions tried (35 matched); rows in `repair_log.tsv` (start bucket `C
 - Rerun `clones.py --refresh --draft --lax` after every batch (new C functions create new siblings; the 4 clones of `func_151B0454` came exactly that way).
 - Solve one member of each asm-only pair cluster with <= 150 insns, then clone (list: `clones.py --asm-clusters`).
 - Shapes A/B in the 101-150 bucket (session 24 next steps) were not touched this session.
+
+## Session 26: shape C hypotheses, recipes
+
+2 work commits (`d257144` + the batch in the hand-off commit) + hand-off; +13 functions (3026 -> 3039), +1,448 bytes. Full `verify_all.sh` OK.
+About 30 functions looked at (13 matched); rows in `repair_log.tsv`. `clones.py --refresh --draft --lax` found nothing new (the 2 candidates are the
+known failures `func_10001AA8`, `func_151EF850`).
+Matched: `func_150C5060`, `func_150C62C0`, `func_150C6BF0`, `func_1519F928`, `func_15173298`, `func_150B00D4`, `func_15157E08`, `func_1514DFA8`,
+`func_1514DEE8`, `func_1510B8AC`, `func_151968A0`, `func_15196924`, `func_151AE61C`.
+Helper used (not committed, 20 lines): a "compile this draft with SCREEN_OPT=<flags> and print my asm" wrapper around `screen.py` (the `mine` script
+does not pass `SCREEN_OPT` through; `docker exec -e SCREEN_OPT=...` is all it takes).
+
+### Shape C hypotheses (confirmed / ruled out)
+
+- **CONFIRMED: address-taken `arg0` via a pointer local** fixes `func_150C5060` completely:
+  `u8 **q = &arg0;` (label `// fakematch`) and then `p = *q + 0x28; p[0x16] = p[0x16] & 0xFFFD;` in each branch, `*q` for every other use of `arg0`.
+  The permuter's `p += 0x28; p[0x16] = p[0x3E]...` was a *wrong semantic* (0x66 load); the natural un-hoisted `p[0x16]` form compiles to the ref's
+  `lbu 0x3E(a2); addiu a2,a2,0x28; sb 0x16(a2)`. It must be a real `*q` use: `*(&arg0)` is folded away (s0 form), an unused `q`, `volatile u8 *arg0` (pointee
+  volatile), or passing `&arg0` to a dummy callee all fail.
+- **CONFIRMED: `b L; lw ra` vs `sb` in the delay slot** (`func_150C6BF0`, `func_150C62C0`): write `if (x) { ... } else { ... }` and NOT `if (x) { ...; return; }`.
+  With the early `return` the scheduler puts the `sb` into the `b` delay slot; with if/else the `sb` stays before `b` and the epilogue `lw ra` takes the slot.
+  (Also needed: `u8 *p = *(u8 **)(arg0 + 0x6C); p += 0xB0; p[4] = 1;` instead of `*(s8 *)(x + 0xB0 + 4)` to get the separate `addiu`.)
+- **RULED OUT as a general cause: per-function flags.** `-O0`, `-g`, `-O1`, `-O2`, `-O2 -g`(= `-g`), `-O3` on the plain draft of `func_150C5060` all give wrong sizes.
+  `-O1` is the only one with the right frame size (0x20) and memory args, but it never fills delay slots (`bne; nop`), spills named locals (`p` to 0x24(sp))
+  and has no `bnel`/`lw ra` in slots, so no EU file boundary is implied. `-g` alone is `-O0` (everything via `sw`/`lw`, no scheduling).
+- **Partly useful: `volatile` parameters** (`s32 * volatile arg1`, `volatile u8 arg2`) make IDO reload that param at every use *and* store a0..a2 at entry like the
+  ref. For the `func_150F1B78` family (below) `q = &arg0` + `volatile arg1/arg2` gets DIFF13. A `volatile` arg0 is wrong (no hoisted `lw t3,0x20(sp)`).
+- Not tried: a struct parameter passed by value.
+- A shape-C-looking function is often just a 1-arg function with unprototyped/missing call arguments: `func_15173298` (`f(arg0, arg1, 1)` with the stale a1 as an
+  unused 2nd parameter), `func_1519F928` (`f(arg0, 6)`: m2c dropped arg0), `func_15157E08` (callee prototype with an `f32` 3rd parameter gives `mtc1 a3,f12; mfc1 a2,f12`
+  and a0 passthrough). Check call arities before anything exotic.
+
+### Other findings
+
+- Float operand order: `a*b + c` in source can come out as `add.s c,(a*b)`; try the 4 forms. `func_150B00D4`: `x*y + z` for the first, `v[0] + v[4] * sinf()` for the
+  last; and no named `f32` temp (a named float local grew the frame by 8).
+- Local-array + pointer spill order: `s32 buf[7]; u8 *r;` puts `r` BELOW buf; declare `u8 *r;` first to get `r` at the higher slot (`func_1514DFA8`), buf first for
+  the other (`func_1514DEE8`, 8-word `f32 buf[8]` with `buf[4] = 12.0f`). `stackfix.py` found the `sp1F,a,sp1E` order for `func_151AE61C` in 31 candidates.
+- `f32` parameters after an `s32` one are passed in a1..a3 and stored/reloaded by `lw`/`lwc1` (`func_1510B8AC`): declare them `f32`, struct of three `f32`.
+- A table call `D[i](arg0)` with `s8 i = o[0x65]` and `arg0` kept in memory came out right on the first try (`func_151968A0`, clone `func_15196924`).
+
+### Not solved (shape C), with the closest drafts
+
+- **`func_150AEDF8` family (8) + `func_150F1B78` family** (`func_150F1B78`, `func_150F7890`, `func_151007B0`, `func_151D7AE8`, `func_151BE65C`, probably more `func_150F`/`func_151F`:
+  grep for `jal func_1516972C` after `sw $a2, 0x28($sp)`). Constants differ only (`0x43/0x3E/0x48/0x3D/0x3B`, field 0x28/0x40, callee `func_15149514`/`func_15169850`).
+  Best: `u8 **q = &arg0; s32 * volatile arg1; volatile u8 arg2`, per-branch `p = *q + 0x28;` -> DIFF13: the ref loads `arg1` twice and hoists the 2nd `lw` above the `beq`
+  (uopt does not CSE `arg1` across the `||` block boundary in the ref; it does in every variant of mine, including `&arg1` locals), and compares `p[0]`-side operand
+  second. For `func_150AEDF8` itself (`arg2 == 0x2D` arm first) best.c is DIFF6: the only difference is the `arg1[0]` load order/register in the `arg2 == 0` arm.
+- `func_151016C8` (DIFF13): first `if (*(T **)(arg0+0x138)) f(that)` needs `lw t7` + `or a0,t7,zero` (ref) vs my `lw a1/v0` + `move a0`.
+- `func_15116690` (ref reuses `a1` as the temp for `*(arg0+0x3C)`: an unused 2nd parameter reassigned; the implicit 1-arg call in `game_eu_142E40.c:226` forbids a 2-arg definition).
+- `func_151A8B34` / `func_151A8B84` (twins): ref spills `a0` in the delay slot of each call (`jalr` and the next `jal`), mine stores it at entry once there are 3 calls (with 2 calls it matches).
+- `func_150C1B60` (ref stores only a2/a3 home slots, reloads a2), `func_151DDA10` (DIFF11, libultra-ish `__osSiGetAccess`), `func_150639D8`, `func_1511645C`.
+
+### Next steps (session 26)
+
+- Shape C is not one thing: the cheap wins were (1) `&arg0` through `*q`, (2) if/else instead of early return, (3) fix call arities. Run those three on `shapes.py --list C 60`
+  (about 20 of the 60 smallest were looked at), with `gensome.sh` for drafts; most CERRs there are prototype conflicts (add a forward prototype in the draft).
+- Solve the `func_150F1B78` family arg1-double-load problem (5+ members): try `arg1` as `s32 arg1[]` / struct pointer, or `||` written with the byte compare first and `goto`.
+- Shapes A/B in the 101-150 bucket were not touched.
 
 ## Layout
 

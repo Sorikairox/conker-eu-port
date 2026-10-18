@@ -367,3 +367,12 @@ func_15157E08	SIZE-3	2	OK	y	n	callee proto with f32 3rd param (mtc1/mfc1), arg0 
 func_1514DFA8	SIZE-4	2	OK	y	n	s32 buf[7]; declare u8 *r BEFORE buf so r spills above buf
 func_1514DEE8	SIZE-8	2	OK	y	n	sibling of 1514DFA8: f32 buf[8], buf first then r
 func_1510B8AC	DIFF12	2	OK	y	n	f32 params after s32 arg0 -> memory form; struct V3 table
+func_151968A0	CERR	2	OK	y	n	table call pair: s8 i=o[0x65]; D[i](arg0); memory-arg form came naturally
+func_15196924	CERR	1	OK	y	n	clone of func_151968A0 (callee 15147E98)
+func_151AE61C	CERR	8	OK	y	n	stackfix order sp1F,a,sp1E; no named b (expression repeated)
+func_150AEDF8	DIFF6	6	DIFF6	n	n	family of 8: remaining diff is arg1 loaded once (CSE) vs twice in ref; see HANDOFF shape C
+func_150F1B78	DIFF25	8	DIFF13	n	n	q=&arg0, volatile s32 *arg1 + volatile u8 arg2 gives DIFF13 (f4); ref loads arg1 twice, 2nd hoisted above beq
+func_151016C8	SIZE+1	4	DIFF13	n	n	first test needs lw t7+or a0,t7 (temp in t-reg), mine uses a1/v0
+func_15116690	SIZE-4	3	DIFF24	n	n	ref reuses a1 as a temp (or a1,v0) -> unused param arg1 reassigned; implicit-call conflict with 1 arg
+func_150C1B60	SIZE+1	3	DIFF13	n	n	stores only a2,a3 (and reloads a2) in ref; mine stores a0 too
+func_151A8B34	DIFF18	4	DIFF18	n	n	ref spills a0 in delay slot before each call (jalr, jal); mine stores at entry when 3 calls
