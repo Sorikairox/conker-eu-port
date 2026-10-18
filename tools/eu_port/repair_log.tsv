@@ -253,3 +253,30 @@ func_150346A0	DIFF15	2	OK	y	y	twin of func_15034630
 func_151B92AC	DIFF15	1	DIFF12	n	y	permuter best DIFF12
 func_151B8B5C	DIFF15	1	DIFF14	n	y	permuter best DIFF14
 func_151BE6E8	DIFF-	3	SIZE+2	n	y	same family as func_150FE1AC: ref spills the a1 copy of arg0 into the a0 home slot (frame 0x20)
+func_1507839C	DIFF9	1	OK	y	n	D_800CC2E8 f32 array indexed by byte offset: *(f32*)((u8*)D + i*0x32C)
+func_151D5FC8	DIFF11	0	DIFF11	n	n	skipped: beqz delay slot filled from target (lui at for float const), file rodata not owned
+func_151154C4	DIFF12	0	DIFF12	n	n	skipped: global-address hoist order, array-in-array loop
+func_15003668	SIZE-1	0	SIZE-1	n	n	skipped: 142 insns, many calls, not examined
+func_150F3794	SIZE-1	2	DIFF31	n	y	arg0 copy in a3 spilled to a0 home slot family (frame 0x28 vs 0x30), v0/v1 swapped; blocked
+func_15121C68	DIFF16	2	OK	y	n	no temp local (arg0[0x23E] re-read), |= 0x80 store last in its branch
+func_151C2600	DIFF18	1	DIFF10	n	n	stackfix: frame 0x58 vs 0x50, 3 float-arg callees; left
+func_150D368C	SIZE+1	3	SIZE+1	n	n	+= operand order tried; frame 0x28 vs 0x20 extra spill; to permuter
+func_1501A220	SIZE-1	2	SIZE-1	n	n	arg0 copy to s1 in bnez delay slot not reproduced; to permuter
+func_1511FD20	SIZE-1	1	SIZE-1	n	n	float field loaded via local: f0 instead of f8, SIZE-1 persists
+func_150597FC	DIFF15	0	DIFF15	n	y	permuter 240s on raw draft: no match (best DIFF14-17/SIZE-1)
+func_150D741C	DIFF15	0	DIFF15	n	y	permuter 240s on raw draft: no match (best DIFF14-17/SIZE-1)
+func_15063DE8	DIFF15	0	DIFF15	n	y	permuter 240s on raw draft: no match (best DIFF14-17/SIZE-1)
+func_150EB610	DIFF15	0	DIFF15	n	y	permuter 240s on raw draft: no match (best DIFF14-17/SIZE-1)
+func_15137F30	DIFF21	1	OK	y	n	vector a+b*s: write (b*s)+a (product first); loads reversed like ref
+func_150F83A0	DIFF20	1	DIFF17	n	n	stackfix only (frame off, big struct-less locals); left
+func_1510660C	DIFF20	1	DIFF17	n	n	stackfix only (frame off, big struct-less locals); left
+func_150FE320	DIFF20	1	DIFF17	n	n	stackfix only (frame off, big struct-less locals); left
+func_150FDDA0	DIFF20	1	DIFF17	n	n	stackfix only (frame off, big struct-less locals); left
+func_1502B224	DIFF9	3	OK	y	y	frame via stackfix order; beq operands: permuter (0, var_s1) comma expr
+func_1000FC18	DIFF11	2	DIFF7	n	y	permuter DIFF7: beql delay slot lui v0 limit reload hoisted before |=0x80; moving var_s1+=1 worse
+func_151C2600	DIFF18	2	DIFF2	n	y	permuter DIFF4 (147 insns) + stackfix DIFF2; only f32 spill slot 0x30 vs 0x34 left (pad variants + 2nd permuter run no help)
+func_10003C10	SIZE-1	0	DIFF128	n	y	permuter 150s no help (arg0 copy to a3 + home slot family)
+func_150E35A0	SIZE-1	2	DIFF42	n	y	ptr kept in a1/a2 instead of a0; permuter no help
+func_150D368C	SIZE+1	3	SIZE-2	n	y	permuter SIZE-2; frame 0x28 vs 0x20
+func_1501A220	SIZE-1	2	DIFF9	n	y	permuter DIFF9
+func_1511FD20	SIZE-1	1	SIZE+1	n	y	permuter no help

@@ -16,7 +16,47 @@ void func_1502AAF8(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AF04.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B020.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B110.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B224.s")
+s32 *allocate_memory(s32, s32, s32, s32);
+s32 func_10004074(s32 *);
+s32 func_10006530(s32 *, s32, u32);
+s32 func_150ADC50();
+
+s32 func_1502B224(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
+{
+  s32 *temp_v0;
+  u32 temp_t6;
+  s32 sp24;
+  u32 temp_v0_2;
+  u32 var_s1;
+  temp_t6 = ((arg2 & 0x0FFFFFFF) + 1) & (~1);
+  var_s1 = temp_t6;
+  if ((arg3 != 0) && (((u32) arg3) < temp_t6))
+  {
+    var_s1 = (u32) arg3;
+  }
+  if ((arg2 & 0x70000000) == 0x10000000)
+  {
+    temp_v0 = allocate_memory((s32) var_s1, 1, 2, 2);
+    if (temp_v0 == 0)
+    {
+      return 0;
+    }
+    func_10004514((s32) arg0, temp_v0, (var_s1 + 0xF) & (~0xF), 1);
+    sp24 = (*temp_v0) & 0x7FFFFFFF;
+    var_s1 = func_10006530(temp_v0, arg1, D_8003809C);
+    if (sp24 != ((0, var_s1))) // fakematch: comma expression flips beq operand order
+    {
+      D_8003C8E0 = 0x0C000036;
+      func_150ADC50();
+    }
+    func_10004074(temp_v0);
+    goto block_10;
+  }
+  func_10004514((s32) arg0, (u8 *) arg1, (var_s1 + 0xF) & (~0xF), 1);
+  block_10:
+  return (s32) var_s1;
+
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B350.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B4A8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B5C8.s")

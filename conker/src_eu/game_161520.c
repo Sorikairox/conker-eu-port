@@ -424,7 +424,22 @@ void func_15137E60(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, struct1
     func_151D9014(sp6C, sp54, 0, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5->unkC, arg5->unk1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15137F30.s")
+extern f32 D_800A4C0C;
+void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, struct161520 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC) {
+    (*(f32 *)((u8 *)arg6 + 0)) = ((*(f32 *)((u8 *)arg2 + 0)) * arg4) + (*(f32 *)((u8 *)arg0 + 0));
+    (*(f32 *)((u8 *)arg6 + 4)) = ((*(f32 *)((u8 *)arg2 + 4)) * arg4) + (*(f32 *)((u8 *)arg0 + 4));
+    (*(f32 *)((u8 *)arg6 + 8)) = ((*(f32 *)((u8 *)arg2 + 8)) * arg4) + (*(f32 *)((u8 *)arg0 + 8));
+    (*(f32 *)((u8 *)arg7 + 0)) = ((*(f32 *)((u8 *)arg3 + 0)) * arg4) + (*(f32 *)((u8 *)arg1 + 0));
+    (*(f32 *)((u8 *)arg7 + 4)) = ((*(f32 *)((u8 *)arg3 + 4)) * arg4) + (*(f32 *)((u8 *)arg1 + 4));
+    (*(f32 *)((u8 *)arg7 + 8)) = ((*(f32 *)((u8 *)arg3 + 8)) * arg4) + (*(f32 *)((u8 *)arg1 + 8));
+    (*(f32 *)((u8 *)arg8 + 0)) = ((*(f32 *)((u8 *)arg7 + 0)) - (*(f32 *)((u8 *)arg6 + 0))) * arg5->unk74;
+    (*(f32 *)((u8 *)arg8 + 4)) = (f32) (((*(f32 *)((u8 *)arg7 + 4)) - (*(f32 *)((u8 *)arg6 + 4))) * arg5->unk74);
+    (*(f32 *)((u8 *)arg8 + 8)) = (f32) (((*(f32 *)((u8 *)arg7 + 8)) - (*(f32 *)((u8 *)arg6 + 8))) * arg5->unk74);
+    *arg9 = ((func_150ADA68() * 217.0f) + -456.0f) * D_800A4C0C;
+    *argA = (func_150ADA20() % 31U) + 0x1E;
+    *argB = (func_150ADA20() % 156U) + 0x64;
+    *argC = (func_150ADA68() * 35.0f) + 40.0f;
+}
 
 s32 func_151380B4(struct127 *arg0, s32 arg1, void *arg2) {
     struct255 *temp_v0 = arg0->unk1D4;
