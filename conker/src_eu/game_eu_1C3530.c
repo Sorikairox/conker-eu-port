@@ -271,9 +271,49 @@ void func_15199EF0(void *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C38C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C428.s")
+extern u8 D_800A8E7C;
+void func_1519C428(u8 *arg0) {
+    u8 **q = *(u8 ***)(arg0 + 0x98); // fakematch: q/r temps and u32 key (permuter) pin registers
+    u8 *r = *q;
+    s32 i = 0;
+    s32 found = 0;
+    u32 key = r[0x3B]; // fakematch: u32 (not u8) key picks the register
+    u8 *p = &D_800A8E7C;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C490.s")
+    do {
+        if (key == *p) {
+            found = 1;
+        } else {
+            i++;
+            p++;
+        }
+    } while (found == 0 && i < 6);
+    if (found != 0) {
+        ((u8 **)D_800E0900)[i][0x14] = 0;
+    }
+}
+
+extern u8 D_800A8E7C;
+void func_1519C490(u8 *arg0) {
+    u8 **q = *(u8 ***)(arg0 + 0x98); // fakematch: q/r temps and u32 key (permuter) pin registers
+    u8 *r = *q;
+    s32 i = 0;
+    s32 found = 0;
+    u32 key = r[0x3B]; // fakematch: u32 (not u8) key picks the register
+    u8 *p = &D_800A8E7C;
+
+    do {
+        if (key == *p) {
+            found = 1;
+        } else {
+            i++;
+            p++;
+        }
+    } while (found == 0 && i < 6);
+    if (found != 0) {
+        ((u8 **)D_800E0900)[i][0x14] = 1;
+    }
+}
 
 void func_1519C4FC(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);

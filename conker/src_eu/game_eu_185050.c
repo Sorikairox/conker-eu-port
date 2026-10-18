@@ -36,7 +36,12 @@ s32 func_15158338(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_1515835C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_151584F0.s")
+Gfx *func_151584F0(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
+    gSPMatrix(gdl++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(gdl++, &D_800DD040[arg2 * 64], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    *arg4 = 1;
+    return gdl;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15158558.s")
 

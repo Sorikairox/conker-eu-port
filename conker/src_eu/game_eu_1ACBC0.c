@@ -115,7 +115,22 @@ s32 func_15182238(s32 arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_15182270.s")
+extern f32 D_800A768C;
+
+void func_15182270(s32 arg0, s32 arg1) {
+    f32 *p;
+
+    if (arg1 == 0) {
+        (&D_800DDDC8)[arg0] = 0.0f;
+    } else {
+        (&D_800DDDD8)[arg0] = 0.0f;
+        p = D_800DE218[arg0];
+        (&D_800DDDC8)[arg0] = D_800A768C;
+        p[0] = 0.0f;
+        p[1] = 0.0f;
+    }
+    (&D_800DDE1C)[arg0] = arg1;
+}
 
 extern f32 D_800A7690;
 

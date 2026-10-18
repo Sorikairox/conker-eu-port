@@ -58,7 +58,19 @@ void func_150F3930(struct_eu_150F3930 *arg0) {
     arg0->unk4F_0 = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3978.s")
+extern f32 D_800A1D40;
+
+void func_150F3978(s32 arg0) {
+    u8 *e = (u8 *)D_800DBFF0 + arg0 * 0x9A0;
+
+    if (*(f32 *)(e + 0x300) < D_800A1D40) {
+        if (*(f32 *)(e + 0x2FC) > 840.0f) {
+            **(s16 **)&D_800D9A40 = **(s16 **)&D_800D9A40 | (1 << arg0); // fakematch: D_800D9A40 is declared s32 but holds a pointer; inline casts, no local
+            return;
+        }
+        **(s16 **)&D_800D9A40 = **(s16 **)&D_800D9A40 & ~(1 << arg0);
+    }
+}
 
 extern f32 D_800A1D50;
 extern f32 D_800A1D54;

@@ -39,7 +39,26 @@ s32 func_15159690(u8 *arg0, u8 arg1) {
     return r;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_151596F4.s")
+s32 func_151596F4(u8 *arg0, u8 arg1) {
+    s32 r;
+
+    if (arg1 == 2 || arg1 == 3) {
+        if (D_800C35EA != 1) {
+            r = 0;
+        } else if (*(f32 *)(arg0 + 0x118) - 75.0f < *(f32 *)(arg0 + 0x18)) {
+            r = 1;
+        } else {
+            r = 0;
+        }
+    } else {
+        if (*(f32 *)(arg0 + 0x118) - 75.0f < *(f32 *)(arg0 + 0x18)) {
+            r = 1;
+        } else {
+            r = 0;
+        }
+    }
+    return r;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_151597A0.s")
 

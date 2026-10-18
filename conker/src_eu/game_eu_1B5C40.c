@@ -25,6 +25,16 @@ void func_15188580(s32 arg0, f32 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B5C40/func_151885BC.s")
+extern f32 D_800DFB3C[][9];
+void func_151885BC(s32 arg0, f32 arg1) {
+    if (arg0 < D_800DFBE4 && arg0 >= 0) {
+        if (arg1 > 1.0f) {
+            arg1 = 1.0f;
+        } else if (arg1 < 0.0f) {
+            arg1 = 0.0f;
+        }
+        D_800DFB3C[arg0][0] = arg1;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B5C40/func_15188630.s")

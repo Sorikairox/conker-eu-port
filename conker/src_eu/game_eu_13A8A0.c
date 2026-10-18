@@ -91,6 +91,21 @@ void func_1510DDE4(void) {
     D_800DA2F0 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DDF4.s")
+extern u8 D_800DA2F8[];
+
+void func_1510DDF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    u8 *p;
+    s32 i = (u8)D_800DA2F0;
+
+    if (i < 8) {
+        p = D_800DA2F8 + i * 16;
+        *(s32 *)(p + 0) = arg0;
+        *(s32 *)(p + 4) = arg1;
+        *(s32 *)(p + 8) = arg2;
+        p[0xC] = arg3;
+        p[0xD] = arg4;
+        D_800DA2F0 = i + 1;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DE40.s")

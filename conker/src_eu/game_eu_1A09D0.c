@@ -5,7 +5,17 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/func_15172C50.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/func_15173218.s")
+s32 func_1517F3B0(s32, s32, s32, s32, s32, s32);
+extern s8 D_800DD6E0[];
+
+void func_15173218(s32 arg0) {
+    s8 *temp_v0 = D_800DD6E0 + arg0;
+    if (*temp_v0 != -1) {
+        *temp_v0 = -1;
+        func_1517F3B0(0, 0, 0, 0, 1, arg0);
+        func_1517F3B0(0, 0, 0, 0x32, 0, arg0);
+    }
+}
 
 void func_15173298(u8 *arg0, s32 arg1) {
     u8 *t;

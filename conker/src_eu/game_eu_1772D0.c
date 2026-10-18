@@ -9,7 +9,14 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514A004.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514A164.s")
+s32 func_1514A164(u8 *arg0) {
+    *(f32 *)(arg0 + 0x2C) -= *(f32 *)(arg0 + 0x2C) * *(f32 *)(arg0 + 0x150);
+    *(f32 *)(arg0 + 0x30) -= *(f32 *)(arg0 + 0x30) * *(f32 *)(arg0 + 0x150);
+    if (*(f32 *)(arg0 + 0x2C) < 2.0f || *(f32 *)(arg0 + 0x30) < 2.0f) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_1514A1C8(u8 *arg0) {
     f32 temp_f0;
