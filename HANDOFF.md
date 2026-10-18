@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (twenty-second session). Update this file at the end of every work session.
+Last updated: 2026-10-19 (twenty-third session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,8 +17,8 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2963 / 5913 functions in C (50.1%)**; code bytes 310,916 / 2,253,856 (13.8%)
-  (end of session 22, from `verify_all.sh`).
+- **2971 / 5913 functions in C (50.2%)**; code bytes 312,680 / 2,253,856 (13.9%)
+  (end of session 23, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
   - game: 2571/5330 (11.6%)
   - debugger: 31/43 (41.3%)
@@ -27,7 +27,7 @@ pushed, and nothing goes upstream.
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -72,6 +72,7 @@ Commits on `eu`:
 | `028cb85` | Session 20: permuter on hand drafts, dead-addiu trick, table-call family; 26 functions |
 | `2ad4fa9`, next | Session 21: `// fakematch:` labels on sessions 19-20 constructs, own rodata for `game_eu_1C3530`; 11 functions |
 | `8fdd85e`, next | Session 22: 70-150 insn functions experiment; 4 functions, +1,536 bytes |
+| `e5241d4`, `270f3d8`, next | Session 23: recurring blocked shapes; "Known IDO shapes" section; 8 functions, +1,764 bytes |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -1521,6 +1522,74 @@ full ROM all OK). ~50 functions tried (12 of them only by the permuter).
 - If tokens are cheap, go through the remaining SIZE+-1..3 drafts of 70-130 insns (`func_150CE710`, `func_150DB858`, `func_151621B8`, `func_15003668`, `func_1519D7B0`, `func_15150258` ...):
   try operand-order variants, the arg-copy patterns above and the permuter with a hand-fixed draft only.
 - Otherwise go back to short functions (higher match rate) but prefer ones above 40 insns for bytes.
+
+## Session 23 and Known IDO shapes
+
+2 work commits (`e5241d4`, `270f3d8`) + this hand-off; +8 functions (2963 -> 2971), +1,764 bytes. Full `verify_all.sh` OK.
+Matched: `func_150FE1AC`, `func_151BE6E8`, `func_150FE320`, `func_150FDDA0`, `func_150D368C`, `func_151411E4`, `func_15141250`, `func_151C00DC`.
+About 25 functions tried; rows in `repair_log.tsv`. New helper: `tools/eu_port/m2c/mine <func> <draft.c>` compiles a draft and prints MY disassembly of
+that one function on a single line (`;` separated), next to the screen result; far quicker for shape experiments than reading word diffs.
+(It needs the `SCREEN_KEEP` env hook added to `m2c/screen.py`.) Tip: `tryall` runs 8 drafts in parallel, so enumerating 100-1000 mechanical variants
+(declaration orders, operand forms) costs only minutes: used for the frame puzzles below.
+
+### Known IDO shapes (recipes and ruled-out hypotheses; do not repeat)
+
+**A. Arg copy in a1/a2/a3 spilled to the a0 home slot (`or a1,a0,zero ... sw a1,0x20(sp)` around calls), delete handlers.** SOLVED for the
+`if (p->X) f(p->X); ...` family (`func_150FE1AC`, `func_151BE6E8`):
+- Do not copy `arg0` into a named local; use `arg0` itself. Then IDO keeps it in the copy register and spills it to its own home slot.
+- Define the second pointer **first, at the top**: `u8 *v = arg0 + 0x110;` (a definition just before its first use is folded into the load offsets
+  and `v` then never exists in a register; defined first, IDO rematerialises `addiu v0,a1,0x110` after each reload and spills `v` to 0x18).
+- Compare as **pointer-typed field** for the single-load tests (`if (*(struct102 **)(v + 0x28)) f(*(struct102 **)(v + 0x28))` = `lw a0; beqzl a0`),
+  but compare as `*(s32 *)` for the double-load tests (`lw t6; beql t6; ... lw a0` again, the first test of those functions). This is the whole difference.
+- `func_151411E4`/`func_15141250` (table call `D[u8 field](arg0)`): `if (*(s32 *)((u8 *)arg0 + 0x154) != 0) { f(*(f32 **)((u8 *)arg0 + 0x154), arg0); }` and
+  `D_8008A33C[*(u8 *)((u8 *)arg0 + 0x168)](arg0)`; the struct-field version (`arg0->unk110.unk44`) loads once into a2, which is wrong.
+  The a1 copy is just the 2nd call argument (`arg0`), nothing exotic.
+- `func_151C00DC` (loop over two slots): `arg0` must stay out of the s-regs: the permuter found `new_var = arg0 + 0x28; if (*(s32 *)new_var) ...` then a
+  second `v = arg0 + 0x28` for the loop (`// fakematch`).
+- NOT solved: `func_150F3794` (frame 0x30 vs 0x28 with identical spill slots; `--bisect` only says the 3-arg call matters; named temps removed, inline
+  `temp_f2`, `v`/`t` declaration order: no change), `func_151D16E8` (124 insns), `func_10003C10` (leaf that stores a0 to 0(sp), not attempted).
+
+**B. Frame bigger than the locals explain.**
+- Out-parameter locals are 12-byte vectors: `s32 spA8[3]` etc., not `s32 spA8` (`func_150FE320`, `func_150FDDA0`, same template; frame 0xB8/0xC0).
+- **Named locals take stack slots even when unused; unnamed spill temps (e.g. an `f32` result that survives two later calls) go below the named ones.**
+  Do not give the spilled float results a name: put the calls inline in the argument list (`(func_150ADA68() * 10.0f) + 25.0f, ...`; IDO evaluates left to right).
+  Then one unused `s32 pad;` declared **first** moves those temps to the ref offsets (0x78/0x7C). Labelled `// fakematch`. Found by brute-forcing
+  declaration orders (5040 + 1680 permutations with `tryall`); `stackfix.py` alone only got DIFF2/DIFF3.
+- A `var = 0;` default set before a call that returns (e.g. `var_v0 = 0` before `sinf`) is live across the call and grows the frame by 8: set it after
+  the calls (`func_150D368C`, frame 0x28 -> 0x20), or return constants from the branches.
+- `func_150ADA20` returned `u8` in `functions.h`: every use that is kept across a branch got `andi v1,v0,0xFF` where the ref has `or v1,v0,zero`. Changed the
+  prototype to `s32` (the whole build still matches); 189 call sites.
+- Float expression order (`func_150D368C`): `a + (b * sinf(x))` for one statement and `(b * sinf(y)) + a` for another were needed, found by trying the 16 combinations
+  with `tryall`; the last `mul.s` operand order came from the permuter.
+- Not solved: `func_150F83A0` (DIFF6: spill slot 0x18 vs 0x1C, `s32 pad` first/last no help, permuter best in `nm/`), `func_1514E014` (DIFF2: `sp24` spill
+  at 0x24 vs 0x18: the ref keeps a real named local above the array; 168 declaration/pad orders tried; the 2-word `sp1C[2]` array is needed for the two zero stores),
+  `func_1510660C` (frame 0x38 vs 0x30, nonstack diff 17; stackfix no help), `func_150F2910` (`buf[12]` fixes the frame; K&R definition `f(a,b,c) u8 *a; u8 b; s32 c;`
+  makes IDO store all three args like the ref, but `lbu a2,0x2F(sp)` is hoisted above `sw ra` instead of sitting in the `jal` delay slot).
+
+**C. Reload from home slot / `b L; lw ra` / `beqz; nop` (4-arg handlers).** Not solved; hypotheses ruled out for `func_150C5060`:
+- `-O1`, `-O3`, `-g3` flags (all give `s0 = arg0` instead of memory args), `volatile` params, an extra unused 4th param, switch instead of if-chain, K&R definition
+  (arg0 goes to s0 unless its address is taken), separate pointer locals per branch, hoisting the `arg0` load above the first compare.
+- Taking the address `*(u8 **)&arg0` (as `func_150D380C`) gives the memory form (all args stored at entry, each use reloads). The permuter (150 + 240 s) then found
+  `u8 **new_var = &arg0, **new_var2 = &arg0;` used in the branches, which fixes all registers (a2 for `p`, t0 for the else-branch copy); DIFF2 left: `p += 0x28; p[0x16] = p[0x3E]...`
+  loads `0x66` where the ref loads `0x3E(a2)` before the `addiu`. Best draft is in `tools/decomp-permuter/nm/func_150C5060/best.c` (regenerate with
+  `permute.sh func_150C5060 <draft>`; the draft is the session-22 one with `&arg0` in every branch). Using a temp `t = p[0x3E] & 0xFFFD` before `p += 0x28` (the natural form) changes the registers again (12 variants tried).
+- `func_150F1B78`, `func_150F7890`, `func_151007B0`, `func_151D7AE8`, `func_150C62C0`, `func_150C6BF0`, `func_151095E4`, `func_1514F3E0`: not retried, same template.
+  `func_150C6BF0`: the `sb` sits before `b L` while `lw ra` is in its delay slot (epilogue instruction hoisted by the scheduler); source variants unchanged.
+- Permuter note: it returns NOSYM on K&R definitions; give it the ANSI form.
+
+**D. `store; jr ra; nop` (unfilled return slot) in 2-case u8 handlers** (`func_151AEBF0` and 6 more). Not solved. New information:
+- All registers and everything else match once the loaded value is a **single shared variable** `a = *(s32 *)arg1;` assigned inside both arms
+  (`if (t == 0) { a = ...; if (a == arg0->x) {store} return; } if (t == 0x2D) { a = ...; b = ...; ...}`); `func_151AEBF0` then differs only in that arm 1 ends
+  `jr ra; sw zero,0x44(a0)` (filled) instead of `sw zero,0x44(a0); jr ra; nop`.
+- Ruled out for the unfilled slot: `return;` in the arm or not, `goto done`, empty `else {}`, `s32` return type, K&R definition, switch, -O2/-O3/-g variants.
+  Probably a structure that only exists in the original source (an instruction after the store that the compiler deleted), not a flag.
+
+### Next steps (session 23)
+
+- Finish the near misses with a documented residue: `func_150C5060` (DIFF2, see C), `func_150F83A0` (DIFF6), `func_1514E014` (DIFF2), `func_150F2910` (DIFF8).
+- Apply recipe A to other "arg0 copy in a1/a2" functions of the list produced by grepping `asm/nonmatchings` for `or $aN, $a0, $zero` + `sw $aN, 0x18/0x20($sp)`
+  (about 20 below 60 insns, e.g. `func_15183EE4`, `func_151AB06C`, `func_1518AF80`); recipe B (arrays, unnamed temps, pad first) for the other frame-size cases.
+- Always try `m2c/mine` + 10-20 mechanical variants through `tryall` before the permuter; the permuter found the last step of 2 of the 8 matches.
 
 ## Layout
 
