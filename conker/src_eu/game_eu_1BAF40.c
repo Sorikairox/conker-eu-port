@@ -219,7 +219,15 @@ void func_1518F9CC(s32 arg0, u8 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FD34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FDC8.s")
+void func_1518FDC8(u8 *arg0)
+{
+  u8 *new_var;
+  new_var = ((u8 *) arg0) + 0x89;
+  if ((*((s8 *) new_var)) != (-1))
+  {
+    D_8008DA20[*((s8 *) new_var)](arg0);
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FE0C.s")
 

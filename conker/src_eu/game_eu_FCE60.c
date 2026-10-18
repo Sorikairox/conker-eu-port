@@ -7,7 +7,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CF994.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFA40.s")
+s32 func_151CFE48(struct127 *, f32, s32);
+
+void func_150CFA40(s32 arg0) {
+    func_151CFE48(D_800CC2D0, D_800CC2D0->y_position + 300.0f, 0xC61C4000);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFA88.s")
 

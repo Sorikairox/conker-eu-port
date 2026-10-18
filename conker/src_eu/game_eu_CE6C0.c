@@ -5,7 +5,18 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A09D0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A11F4.s")
+extern f32 D_8009F970;
+extern f32 D_8009F974;
+void func_150A11F4(u8 *arg0)
+{
+  f32 temp_f20;
+  temp_f20 = (*((f32 *) (((u8 *) arg0) + 0xC))) * D_8009F970;
+  *((f32 *) (((u8 *) arg0) + 0x24)) = func_150AD78C(temp_f20);
+  *((f32 *) (((u8 *) arg0) + 0x28)) = func_150AD780(temp_f20);
+  temp_f20 = (*((f32 *) (((u8 *) arg0) + 0x10))) * D_8009F974;
+  *((f32 *) (((u8 *) arg0) + 0x2C)) = func_150AD78C(temp_f20);
+  *((f32 *) (((u8 *) arg0) + 0x30)) = func_150AD780(temp_f20);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A126C.s")
 

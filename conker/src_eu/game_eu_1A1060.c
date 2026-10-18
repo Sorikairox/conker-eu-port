@@ -5,7 +5,13 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1060/func_15173850.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1060/func_15173948.s")
+s32 func_15173948(s32 arg0, s32 arg1)
+{
+  return arg0;
+  if (arg0)
+  {
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1060/func_15173954.s")
 

@@ -74,7 +74,18 @@ void func_150F6940(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)(arg0 + 0x28), (s32)(arg0 + 0x2C), (s32)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F6980.s")
+void func_150F6980(u8 *arg0)
+{
+  int new_var;
+  s32 *new_var3;
+  int new_var2;
+  new_var3 = &(*((s32 *) (((u8 *) arg0) + 0x160)));
+  if ((*((s32 *) (((u8 *) arg0) + 0x160))) != 0)
+  {
+    new_var = 0x28;
+    *((s32 *) (((u8 *) (new_var2 = (*new_var3) + new_var)) + 8)) = 0;
+  }
+}
 
 void func_150F69A0(void *arg0) {
     func_150F6980(arg0);
