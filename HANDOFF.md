@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (fifteenth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (sixteenth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2823 / 5912 functions in C (47.8%)**; code bytes 293,688 / 2,253,856 (13.0%)
-  (end of session 15, from `verify_all.sh`).
+- **2842 / 5912 functions in C (48.1%)**; code bytes 296,208 / 2,253,856 (13.1%)
+  (end of session 16, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2431/5329 (10.8%)
+  - game: 2450/5329 (10.9%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -67,6 +67,7 @@ Commits on `eu`:
 | `2b846db`…`3a88cab` | Session 13: scripted near-miss sweep (`tools/eu_port/sweep.sh`), 19 functions |
 | `2f1f805`…`c896fcf` | Session 14: native arm64 toolchain, sweep passes 3/4, hand-finished near misses, 21 functions |
 | `63f199e`…`ae35e92` | Session 15: `protocheck.py` (152 prototype fixes), `stackfix.py`, `rescreen.py`, 3 functions |
+| `c5c5784`…`f68cfe6` | Session 16: structured repair loop (`repair_ctx.sh`, `repair_try.sh`, `repair_log.tsv`), 19 functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -89,6 +90,7 @@ throw all of that away.**
 - Prototype problems (wrong void/int return, u8/s16 params, float args, arg counts):
   `tools/eu_port/protocheck.py` (report), `--apply --skip-logged` (fix, verified), then
   `tools/eu_port/rescreen.py` (session 15).
+- Budgeted LLM repair of near misses (session 16): `tools/eu_port/repair_ctx.sh <func>` (target asm + draft + diff region), write a reasoned rewrite, `tools/eu_port/repair_try.sh <func> <draft.c>` (one line OK/DIFFn/SIZE±n; OK drafts go to `conker/build/hand` for `apply.py build/hand`). Log in `tools/eu_port/repair_log.tsv`.
 - A draft whose stack slots or frame size are off: `tools/eu_port/stackfix.py <func> <draft.c>`;
   `--scan list` / `--bisect func draft.c` (session 15).
 
@@ -1058,6 +1060,97 @@ python3 tools/eu_port/stackfix.py --bisect func_X draft.c  # statements whose re
     `osPiStartDma` call gives 0x78; register locals, array sizes, dropping permuter temps: no).
   - So stack-only near misses are rare in the current pool (1 in 259 drafts); the tool's main value
     is on hand drafts (2 matches + 1 DIFF4 out of the 4 targets) and `--bisect` for frame-size puzzles.
+
+## Session 16: structured, budgeted "repair" loop (LLM rewrites vs. the permuter)
+
+Sequential, 3 work commits (`c5c5784`, `380bff1`, `f68cfe6`), +19 functions (2823 -> 2842), +2,520 bytes.
+
+### Tools
+
+- `tools/eu_port/repair_ctx.sh <func>`: compact context for one function: target `.s` (instructions only; skipped above
+  60 insns, `MAXT=n` to force), the current draft (`tools/decomp-permuter/repair/<f>.c` = latest attempt, else permuter
+  `best.c`, else a sweep draft), and the aligned word diff (`ref mine asm`, only the differing region +-3 lines; `**` marks
+  differing words; lines that only differ by relocation are not counted). Runs `repair_try.sh` itself when no diff exists yet.
+- `tools/eu_port/repair_try.sh <func> <draft.c>`: screens the draft (`m2c/try`), saves it as `repair/<f>.c` and the diff as
+  `repair/<f>.diff`, prints `func RESULT` (OK / DIFFn / SIZE+-n / CERR + first error). An OK draft is also `keep`-ed in
+  `conker/build/hand`. Careful: it overwrites `repair/<f>.c` with whatever file you pass, so never pass a stale `/tmp/d.c`.
+- `tools/decomp-permuter/repair/` (gitignored): `worklist.txt` / `worklist2.txt` (start bucket, function, insn count for the
+  252 near-miss drafts, screened fresh against the current headers), the latest draft and diff per function.
+- `tools/eu_port/repair_log.tsv`: func, start bucket, attempts, end bucket, matched y/n, permuter used y/n, note.
+- Workflow per function: ctx, up to 3 reasoned rewrites (each followed by `repair_try.sh`), `stackfix.py` when only the frame/slots
+  are off (it counted as part of an attempt), `permute.sh` (200 s, background) only for DIFF<=4. Batches: `apply.py build/hand`,
+  float literals in files that do not own `.rodata` become the externs the asm names (apply REJECTs literals), `needsyms.py`,
+  full `verify_all.sh`, commit.
+
+### Numbers
+
+- Worklist: SIZE+-1 and DIFF<=5 first, then DIFF6-14 up to ~70 instructions (skipped: > 70 insns, hand asm such as
+  `func_10007D14`, the unfilled-delay-slot handlers, `func_1502B8E0` varargs printf).
+- **47 functions tried, 19 matched (40%)**, 100 rewrite attempts (**0.19 matches per attempt**; the 19 matches took 33
+  attempts, i.e. 1.7 each, and 16 of them matched within <= 2 attempts). Permuter used on 4 (all DIFF<=4 after 3 attempts):
+  1 solved (`func_150C60D4`, < 200 s), 3 not (`func_150A7CB0`, `func_150A0744`, `func_1502F17C`).
+- Cost: roughly 330k tokens in total including building the tools and the HANDOFF reading, i.e. ~17k tokens per match, or
+  ~3.3k per attempt; wall clock was dominated by the model, not the compiler (a `try` is ~3 s). For comparison the
+  permuter sweep (sessions 13-14) needed ~10 h of 9-core time and ~100-300 s per function for ~35 matches out of 400
+  candidates (9%); the repair loop got 40% of a hand-picked 47 in about an hour of model time, and the two approaches
+  complement each other: the repair loop wins when the draft's *structure* is wrong, the permuter when only
+  temp/register/operand order is off.
+- Matched: `func_151A544C`, `func_1519D510`, `func_15033730`, `func_150C60D4`, `func_1501BFF0`, `func_1503D774`,
+  `func_150D51D4`, `func_151B53FC`, `func_15100248`, `func_150D02C8`, `func_151073F8`, `func_15088A68`, `func_1507F2D4`,
+  `func_15096DB0`, `func_150F9FA0`, `func_151B44D8`, `func_1511C37C`, `func_1503E4E4`, `func_1510083C`.
+
+### What kinds of rewrites worked
+
+1. **Fix the call, not the body** (6 of 19): m2c drops or invents arguments. Check the registers set before each `jal`:
+   untouched `a0..a3` are *pass-through* arguments (`func_15100248`: `f(a0..a4)` forwards a0-a3 to the callee;
+   `func_1510FDA0`: 7 params); a float following int args goes in `a1/a2/a3` as bits, so the prototype is `(u8, f32, f32)`,
+   not an int plus `f12` (`func_1501BFF0`); `lw` of a field into `a1/a2` means the parameter is `s32`, not `f32`
+   (`func_1511C37C`).
+2. **Strip permuter junk first** (`func_15088A68`): `do {} while (0)`, `if (!x && !x && !x) {}`, `volatile`, `(0, x)`,
+   `x = x;`, `goto dummy_label`. They are noise from the permuter's own passes; the clean version matched at once.
+3. **Roll back what IDO unrolled** (`func_15096DB0`): a 4x-unrolled loop with remainder prologue (`andi 3`) is just
+   `for (i = 0; i < n; i++) if (tbl[i * 0x24]) return 1;`. m2c writes the unrolled form literally.
+4. **Compound assignments** (`func_151A544C`, `func_1519D510`, `func_150F9FA0`): `p[0x30] |= 1; p[0x30] |= 4;`
+   (two stores, the second `ori` of the first result) and `*(s32 *)(p + 0x84) |= 0x80; ... &= ~8;`. A temp in between
+   lets IDO fold the constants (`ori 5`). Lerp: `x += (t - x) * k;` without a temp (`func_150D51D4`, also fixes the
+   `add.s` operand order).
+5. **Control-flow shape**: `switch` with merged cases (`func_15033730`), if/else instead of fall-through into a second
+   test (`func_1503E4E4`), `if (s) v = s; else v = f();` with two locals (`func_1511C37C`), table typed as an array of
+   function pointers instead of `s32` with `* 4` index (`func_151073F8`; the m2c/permuter `&D + i * 4` on an `s32` extern
+   scales twice, so check any `(&D_x) + (i * 4)`).
+6. **Register-order tricks**: a pointer alias declared first and the other pointer read through it (`q = arg0 + 0x28;
+   o = *(u8 **)q;` fixed v0/v1 in `func_1510083C`); a block-scope alias `f32 *dst = arg1;` keeps `arg1` out of `a3`
+   (`func_151B44D8`); the loop parameter itself as the walking pointer plus a `start` copy (`func_1503D774`); a single
+   pointer variable reused for base and `+= 0x58` (`func_1507F2D4`); `u8 *` ptr-typed base instead of `s32` for
+   `base + (idx << 6)` operand order was a no-op but the permuter then found the rest (`func_150C60D4`).
+7. **`stackfix.py` after a clean rewrite** (`func_150D02C8`, `func_1507F2D4`): the rewrite gets the code right, the
+   tool finds the local declaration order/scope.
+- Did not help: parameter-as-temp (adds homing), `&arg0` deref tricks for home-slot reloads, `if (x) {}` liveness hacks,
+  reordering statements for scheduling. Those cases stayed at DIFF6-30.
+
+### Left (see `repair_log.tsv` for the notes)
+
+- Rewritten but not matching: `func_150351A4` (DIFF1, `mul.s` operand order), `func_15030060` (DIFF5, `a2` register),
+  `func_150104F0` (SIZE-1, `or v0, zero` before chained byte stores), `func_151F0730` (SIZE+1, `sw a2` not in the `jal`
+  delay slot), `func_150A7CB0` (DIFF3), `func_1502F17C` (DIFF3, best draft in `repair/`: `u8` truncation of `v - 2`),
+  `func_150A0744` (DIFF7, register numbering), `func_1510FDA0` (screens OK with the 0.02f literal, 1 word off in the real
+  file with the extern `D_800A316C`: `c.eq.s` operand order; file does not own .rodata; owning it should fix it),
+  `func_15087040` (SIZE-3, trailing dead `jr ra; nop` after an inline `sqrt.s`), `func_151149AC`, `func_151999BC`
+  (table-search family), `func_150FC8E8` (`&&` chain, `v0/v1` of two pointers), `func_150836AC`, `func_150E0150`,
+  `func_151016C8` (frame fixed, registers off), `func_15190A2C` (needs `p = arg0 + 0x30` spilled separately),
+  `func_15104A0C`, `func_151BE65C`, `func_150C1B60` (ref homes only `a2/a3`).
+- Blocked by the session-7 unfilled-delay-slot shape (not attempted or abandoned): `func_15193850`, `func_151B255C`,
+  `func_151B7664`, `func_151D51E8`.
+- Not yet tried from `repair/worklist2.txt`: ~170 entries, mostly DIFF12+ or > 70 instructions.
+
+### Next steps (session 16)
+
+- Continue the repair loop on `worklist2.txt` (DIFF12-30, <= 60 insns first), and extend it to *fresh* m2c drafts of
+  short functions (m2c output with correct call prototypes after the protocheck fixes), not only to drafts that already
+  were near misses: the 6 "wrong call" fixes suggest many failed drafts are only wrong at their calls.
+- Check m2c drafts for the call patterns in item 1 automatically (pass-through `a0..a3`, `lw` into `a1..a3` before a call
+  whose prototype says `f32`, float after int args) and for `(&D + i * k)` scaling on non-byte externs.
+- Own `.rodata` of `game_eu_13C400` and retry `func_1510FDA0`.
 
 ## Layout
 
