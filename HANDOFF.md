@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (seventeenth session). Update this file at the end of every work session.
+Last updated: 2026-10-19 (twentieth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2922 / 5913 functions in C (49.4%)**; code bytes 305,776 / 2,253,856 (13.6%)
-  (end of session 19, from `verify_all.sh`).
+- **2948 / 5913 functions in C (49.9%)**; code bytes 307,808 / 2,253,856 (13.7%)
+  (end of session 20, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2530/5330 (11.4%)
+  - game: 2556/5330 (11.5%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -69,6 +69,7 @@ Commits on `eu`:
 | `63f199e`…`ae35e92` | Session 15: `protocheck.py` (152 prototype fixes), `stackfix.py`, `rescreen.py`, 3 functions |
 | `c5c5784`…`f68cfe6` | Session 16: structured repair loop (`repair_ctx.sh`, `repair_try.sh`, `repair_log.tsv`), 19 functions |
 | `f300d27`, `75e7386`, `3b05e9d` | Session 17: `draftcheck.py` hints in `repair_ctx.sh`, fresh m2c drafts of short functions (`gen40.sh`), `game_eu_13C400` owns .rodata; 35 functions (+9, +11, +14 in the three batches) |
+| `028cb85` | Session 20: permuter on hand drafts, dead-addiu trick, table-call family; 26 functions |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -1383,6 +1384,66 @@ Sequential, 2 work commits (`b466fd2` + the final one), +23 functions (2899 -> 2
 - Run the permuter (200 s, 4 jobs, background) *first* on every register/scheduling-only DIFF<=6 leftover and on the untried DIFF<=12 list; it solved 5/13 and took
   two more to DIFF1-2. Then hand-fix the last word (operand order of `mul`/`multu`/`add`, byte types).
 - Use the initializer-copy and constant-store-order patterns on the remaining 12-insn delete-handlers and object-init functions.
+
+## Session 20: permuter first on every leftover, dead-addiu and table-call families solved
+
+Sequential, 1 work commit (`028cb85`) + this hand-off, +26 functions (2922 -> 2948), +2,032 bytes. Full `verify_all.sh` (code build, check_files,
+full ROM all OK). ~50 functions tried (12 of them only by the permuter).
+
+### Numbers
+
+- Rows in `repair_log.tsv` this session: 33 (26 matched). Hand-written rewrites matched 14 (mostly callee prototype/arity, array locals, copies);
+  the permuter (120-150 s, 5 jobs, run in the background while drafting) solved **10 of ~25** draft runs it was given, many of which had stayed open for
+  several sessions. A DIFF2-7 hand draft is a better permuter input than a raw m2c DIFF12 draft: the seven fresh DIFF11-12 drafts of the session-19 list
+  were not run (the permuter was killed in favour of hand-improved drafts), the DIFF<=6 old leftovers `func_1513B798`, `func_1511CAD0`, `func_15074A94`,
+  `func_150A7CB0`, `func_1510B930` got **no improvement** in 150 s.
+- Matched (26): `func_1519D4E0`, `func_151308E4`, `func_151343AC`, `func_151A3180`, `func_15135424`, `func_1503E1FC`, `func_151C3444`, `func_150ED750`,
+  `func_150D1920`, `func_15034118`, `func_1519072C`, `func_151A625C`, `func_151A629C`, `func_151D5E30`, `func_1510DBB0`, `func_151635A8`,
+  `func_151D7958`, `func_15107C24`, `func_150D034C`, `func_1508F060`, `func_150C6D2C`, `func_151AB730`, `func_150C7E30`, `func_150C7DE0`,
+  `func_150C63FC`, `func_1514143C`.
+- Pitfalls: `apply.py` is `tools/eu_port/m2c/apply.py` (run it in the container with cwd `conker`: `docker exec -w /conker/conker conkerdev python3
+  ../tools/eu_port/m2c/apply.py build/hand`), and an applied draft must be moved to `build/hand_done` with its line removed from `build/hand/screen.txt`
+  before the next run. Permuter `match.c` may change the return type of the function (`volatile short func_1514143C`); the real build is the judge:
+  `void` did **not** match, `s32`/`s16` did (kept `s32`, the function has no return statement). `verify_all.sh` wipes `conker/build`: after it, functions that
+  are already C have no `.s` to screen against (`repair_try.sh` prints just the name).
+
+### New rewrite patterns
+
+1. **Dead `addiu v0, v0, K` kept (the old "dead addiu" blocked family, 6 functions)**: IDO folds `p + K` into the offsets and drops the add, but not across
+   `p += K + 1; p--;`. Write `p = base; p += K+1; p--;` then address everything with the *reduced* offsets (`p + (off - K)`):
+   `func_150C6D2C/151AB730/150C63FC` (K=0x58), `func_150C7E30/7DE0` (K=0x1E0, read at `p + 0x3C` instead of `0x21C`). The permuter found `p++; p--;`
+   (adds 0); `+K+1/-1` makes it exact.
+2. **Indirect call through a table re-reads the index** (`func_151635A8`, `func_15107C24`, `func_151D7958`; IDO CSEs the second `lbu` otherwise): the permuter
+   solves it with `int new_var = 0x25; ... D[arg0[new_var]]` (constant index in a variable) or `u8 *new_var = &arg0[0x2C];` for the second read. For
+   `func_15107C24` keep the local table pointer `void (**tab)(u8 *, s32, u8) = D;`. Handler params `(u8 *, s32, u8 arg2)`.
+3. **Re-load of a field instead of reuse**: `u16 *new_var = (u16 *)(p + 0x6C); if (*new_var) f(*new_var);` (`func_151A625C/629C`: gives `lhu t6` for the test and a
+   fresh `lhu a0`, no `andi`); the loop `s32 *t = arg0[i]; if (t) { new_var = arg0[i]; f(new_var, 3); }` (`func_151D5E30`).
+4. **A constant that must stay a register** (`func_1508F060`: `v0 = 2; sll t6, v0, 4`): `int new_var = 2; int *new_var2 = &new_var; ... (*new_var2) * 16`.
+5. **Locals optimised away that the ref keeps in memory**: `s32 sp20[2]; s32 sp18[2];` arrays assigned element-wise (`func_15135424`); `u8 sp1C[4]` array
+   passed to a 2-arg callee (`func_1519D4E0`); initializer copy of a 8-byte `.data` blob: `struct_eu_s32x2 sp18 = D_800A3C40;` (`func_151343AC`).
+6. **Callee arity/types from the asm, again** (`func_151308E4`: 6-param callee, a0 pass-through + stack `u8`; `func_151A3180`: callee `(s16, s16, f32, s32)`, the
+   draft passed 5 args; `func_150ED750`: `arg0 = func(arg0)` spills into the param home so the frame stays 0x18).
+7. **`s8` param -> `s32`** (`func_1503E1FC`): an `s8` param makes IDO home `a1`; `s32` stores the byte directly.
+8. **`u8 *` instead of `s32` for object pointers in loops/compares** (`func_15034118`, `func_151C3444`, `func_150D1920`: draft was already right, only the types
+   made the m2c draft CERR/SIZE-off).
+9. **Hoisted `p + n` before the guard** (`func_1510DBB0`, permuter): `new_var = p + n; if (n > 0) { end = new_var; do { ... } while (end != p); }` with `s16 *q = arg0;`.
+
+### Left (notes in `repair_log.tsv`)
+
+- Not solved: `func_151F0754` (varargs `(u8 *, s32, ...)`, DIFF4 with the permuter: `a0` home before `ra`, `lw a1` placement), `func_150C572C` (DIFF2: `addiu s1/s0`
+  order), `func_1513B798`, `func_151CA484` (ref keeps `&sp24` in `s0`: permuter DIFF4), `func_15199954`/`func_1519C428` (search-loop family, DIFF22), `func_1514F3E0`
+  (arg0 reloaded from home), `func_1515A120` (SIZE-3, arg1 homed), `func_151D1694` (CERR: return type vs. the implicit declaration in the caller),
+  `func_100043B4` (dead `addiu v1, -0xC` in a jal delay slot: `arg0 -= 2; arg0--;` made it worse, DIFF15), `func_15197F7C` (string literals: needs `.rodata` ownership),
+  `func_151600E0` (empty `if` with dead `bltz`), `func_1502DE10` (switch/jump table), `func_151D5E30`-style CERR group of `fresh.txt` (many left).
+- Untried: the 7 DIFF11-12 fresh drafts of the session-19 list (`func_150F2F14`, `func_15031044`, `func_1503F7A0`, `func_150FE1AC`, `func_1510B8AC`, `func_1510BB78`,
+  `func_1515C3C0`), the rest of `fresh.txt` above ~30 instructions, worklist2.
+
+### Next steps (session 20)
+
+- Re-try the other known "dead addiu" leftovers with pattern 1 (`func_15109100`, `func_15141478`, `func_151C9C8C`) and every function that logged "ref keeps `v0 = a0 + K`".
+- Give the permuter *hand-improved* DIFF2-8 drafts rather than raw ones; hand drafts that screen at DIFF<=8 with a known blocked shape (table call, dead add,
+  constant in a register) are worth 120 s each.
+- Run the permuter with 5 jobs in the background from the first minute and draft meanwhile (this session did, and it paid off).
 
 ## Layout
 
