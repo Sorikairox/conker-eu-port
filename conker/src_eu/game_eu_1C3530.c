@@ -230,6 +230,7 @@ void func_15199DDC(struct102 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
+void func_15199EF0(void *);
 void func_15199E98(void *arg0) {
     func_15199EF0(arg0);
     func_15147E64(arg0);
@@ -240,7 +241,25 @@ void func_15199EC4(void *arg0) {
     func_15147E98(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199EF0.s")
+extern s32 D_8008FC54;
+extern s32 D_8008FC60;
+
+void func_15199EF0(void *arg0) {
+    u8 *v = *(u8 **)((u8 *)arg0 + 0x98);
+    s8 i = v[0x39];
+    u8 *t;
+    if (i != -1) {
+        ((void (**)(u8 *))&D_8008FC60)[i](arg0);
+    }
+    i = v[0x36];
+    if (i != -1) {
+        ((void (**)(u8 *))&D_8008FC54)[i](arg0);
+    }
+    t = *(u8 **)(v + 0x148);
+    if (t != NULL) {
+        func_1516972C(t);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199F80.s")
 

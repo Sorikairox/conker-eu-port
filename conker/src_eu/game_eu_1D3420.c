@@ -68,7 +68,23 @@ void func_151A70EC(struct210 * arg0) {
     func_1513CAA0(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A7118.s")
+s32 func_1505D024();
+void func_151A7118(u8 *arg0, s32 arg1) {
+    s32 pad; // fakematch: unused local moves v to sp18
+    struct127 *v = NULL;
+    u8 *t;
+    s32 a3;
+    t = func_151A7188(arg1);
+    if (t != NULL) {
+        v = *(struct127 **)(t + 0x38);
+    }
+    if (v != NULL) {
+        a3 = v - D_800CC2D0;
+    } else {
+        a3 = -1;
+    }
+    func_1505D024(arg0, 0x60034, *(u16 *)(arg0 + 0x7A), a3);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A7188.s")
 

@@ -395,3 +395,15 @@ func_150F1B78	CERR	6	DIFF6	n	y	q=&arg0 + volatile arg1/arg2 + a=*(s32*)arg1 firs
 func_150F7890	CERR	3	DIFF6	n	y	family of func_150F1B78, loads p side first; hoisted arg1 reload stays after beq; permuter 100s DIFF8
 func_150C7E68	DIFF-SIZE	3	DIFF11	n	n	arity func_15116690(arg0); ref loads lh and addiu on the global ptr before the if(v); returns stale v0 on the bit-set path
 func_1517F910	CERR	3	DIFF21	n	n	ref: call result not masked (u8 callee) and a0/v1 hoisted before bnez; needs u8 prototype that conflicts with file's implicit call
+func_151A7118	none	1	OK	y	n	clone of func_15160134 (constant 0x60034, field 0x38, callee func_151A7188)
+func_15199EF0	CERR	1	OK	y	n	table calls ((void(**)(u8*))&D)[i](arg0); needed forward prototype void f(void *) before the file's callers (implicit-int use conflicts with a definition)
+func_151A0F5C	CERR	1	OK	y	n	u8 arg2 param, nested v=*(*(arg0+0x28)+0x18); (s32)v == *(s32*)arg1 || v[0x3B] == arg1[4]
+func_1519E92C	CERR	2	OK	y	n	volatile u8 arg2 reloads the byte after each call (fakematch); forward prototype void f(void) for callee defined later
+func_150FE120	none	2	OK	y	n	callee func_1513EDE4 returned void in functions.h: changed to s32 (return func_1513EAD8(...)), draft casts result to u8 *
+func_151640C0	CERR	3	DIFF11	n	n	q=&arg0 + q1=&arg1 ok for memory form; ref keeps p in v1, c in a1, r=*q+0x18 in v0; registers/order differ
+func_1518FD34	CERR	4	DIFF31	n	n	ref defines v=arg0+0x30 after the first call and spills it (sw v0,0x1C); named v is hoisted before the call, inline offsets fold it; also stray move a1,v0 on the return
+func_15167B44	SIZE+1	2	DIFF15	n	n	temp_a1 must be s32 (no sll/sra); ref uses v1 for the s8 and v0 for the u8, mine reuses v0; final 0x14+0x16 sum operand order swapped
+func_150CB5E0	DIFF	3	SIZE-6	n	n	ref keeps arg0 in s0 (or s0,a0) but IDO keeps it in memory in mine, named copy p=arg0 no help; callee func_15046F70 needs f32 proto
+func_1000CDA0	SIZE-1	0	SIZE-1	n	n	skipped (u8 flag word logic, 90 insns)
+func_1516AAA8	SIZE+1	0	SIZE+1	n	n	skipped: 15-arg float spawner call
+func_150FF1A8	SIZE-5	0	SIZE-5	n	n	skipped: float literals (rodata) in a file without .rodata

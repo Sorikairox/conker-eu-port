@@ -19,7 +19,16 @@ void func_150FD530(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FE08C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FE120.s")
+u8 *func_150FE120(u8 *arg0, s16 arg1) {
+    u8 *v = (u8 *)func_1513EDE4((s32)arg0, arg1);
+    if (v != NULL) {
+        *(s16 *)(v + 0x8) = *(f32 *)(arg0 + 0x124);
+        *(s16 *)(v + 0x18) = *(f32 *)(arg0 + 0x128);
+        *(s16 *)(v + 0x28) = *(f32 *)(arg0 + 0x128);
+        *(s16 *)(v + 0x38) = *(f32 *)(arg0 + 0x124);
+    }
+    return v;
+}
 
 void func_150FE1AC(u8 *arg0)
 {

@@ -91,7 +91,15 @@ void func_1519E764(u8 *arg0, u8 *arg1, u8 arg2)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E874.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E92C.s")
+void func_1519E688(void);
+void func_1519D5A0(s32, s32, s32, s32, s32, s32);
+// fakematch: volatile arg2 reloads the byte after each call like the original
+void func_1519E92C(s32 arg0, s16 arg1, volatile u8 arg2, s32 arg3) {
+    func_1519E688();
+    func_1519D5A0(arg0, 3, 0x12C, 0, arg2, arg3);
+    func_1519D5A0(arg0, 4, 0x12C, 0, arg2, arg3);
+    func_151491F4(arg1, 6, -1, 1, 3, 0, arg2, arg3);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E9D4.s")
 

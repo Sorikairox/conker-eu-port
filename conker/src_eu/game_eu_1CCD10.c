@@ -91,4 +91,12 @@ void func_151A0E98(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0EC0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0F5C.s")
+void func_151A0F5C(u8 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = *(u8 **)(*(u8 **)(arg0 + 0x28) + 0x18);
+    if (arg2 == 0) {
+        if (((s32)v == *(s32 *)arg1) || (v[0x3B] == arg1[4])) {
+            func_151A0E98(arg0);
+            func_1516972C(arg0);
+        }
+    }
+}
