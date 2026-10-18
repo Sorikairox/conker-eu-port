@@ -183,7 +183,36 @@ void func_151E5798(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5928.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5AB8.s")
+void func_151E5AB8(void)
+{
+  f32 temp_f0;
+  s32 var_v1_2;
+  if (D_800E0B94 != 2)
+  {
+    if (((u8) D_800E0FC6) != 0)
+    {
+      var_v1_2 = ((u8) D_800E0FC6) - (D_800BE9E4 * ((u8) D_80090114));
+      if (var_v1_2 < 0)
+      {
+        var_v1_2 = 0;
+      }
+      D_800E0FC6 = var_v1_2;
+    }
+    if (((D_80090174 != 0) && ((*((s8 *) (((u8 *) D_80090174) + 0x2B))) == 0)) && ((*((f32 *) (((u8 *) D_80090174) + 0xC))) > 0.0f))
+    {
+      temp_f0 = *((f32 *) (((u8 *) D_80090174) + 8));
+      if (temp_f0 > 0.5f)
+      {
+        var_v1_2 = (s32) ((temp_f0 - 0.5f) * 524.0f);
+        if (var_v1_2 >= 0x100)
+        {
+          var_v1_2 = 0xFF;
+        }
+        D_800E0FC6 = (s8) var_v1_2;
+      }
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5B94.s")
 

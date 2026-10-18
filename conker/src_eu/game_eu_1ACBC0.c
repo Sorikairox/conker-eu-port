@@ -67,7 +67,23 @@ void func_1517FC90(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FCCC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FD24.s")
+void func_1517FD24(void)
+{
+  s32 new_var;
+  if (D_800DDE08 != 0)
+  {
+    if (D_800BE9E4 < ((s32) D_800DDE08))
+    {
+      new_var = D_800BE9E4;
+      D_800DDE08 -= new_var;
+    }
+    else
+    {
+      D_800DDE08 = 0;
+    }
+    D_800DE1B9 += D_800DE1B8 * D_800BE9E4;
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FD84.s")
 

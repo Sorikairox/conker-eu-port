@@ -14,7 +14,8 @@
 #   perm: splits the list round-robin into <streams> lists, runs permute.sh -l on each in parallel
 #         (-j<jobs>), one summary line per function in $S/perm_<listname>.txt.
 #   collect: "func path/match.c" for every nm/<func>/match.c (screened OK by try).
-#   apply: apply.py on every match.c whose function is still GLOBAL_ASM (ACCEPT/REJECT lines).
+#   apply: apply.py on every match.c whose function is still GLOBAL_ASM (ACCEPT/REJECT lines), then
+#          needsyms.py --apply on the accepted ones (auto symbols the new C names).
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 R=~/conker; S=$R/tools/decomp-permuter/sweep; M=$R/tools/eu_port/m2c; K=$R/conker/build/k
 mkdir -p $S
@@ -64,7 +65,8 @@ apply)
     grep -v '^// PERMUTER CHANGED' $m > $A/$f.c; echo "OK $f ${src#$R/conker/}" >> $A/screen.txt
   done
   [ -f $A/screen.txt ] || { echo "nothing to apply"; exit 0; }
-  docker exec -w /conker/conker conkerdev python3 ../tools/eu_port/m2c/apply.py build/permok 2>&1 | grep -E 'ACCEPT|REJECT'
+  docker exec -w /conker/conker conkerdev python3 ../tools/eu_port/m2c/apply.py build/permok 2>&1 | grep -E 'ACCEPT|REJECT' | tee $A/result.txt
+  python3 $R/tools/eu_port/needsyms.py --apply $(awk '$1=="ACCEPT"{print $2}' $A/result.txt)
   ;;
-*) sed -n '2,18p' $0 ;;
+*) sed -n '2,19p' $0 ;;
 esac

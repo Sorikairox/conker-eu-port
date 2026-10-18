@@ -31,4 +31,20 @@ u8 func_15085890(struct_eu_B2980 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150859AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_15085ABC.s")
+void func_15085ABC(s16 arg0)
+{
+  long var_s0;
+  var_s0 = 0;
+  if (D_800D18A8 == 0)
+  {
+    do
+    {
+      if ((1 << var_s0) & arg0)
+      {
+        func_15085710(var_s0, 5, (s32) D_800CC2D0[var_s0].health);
+      }
+      var_s0 += 1;
+    }
+    while (var_s0 != 4);
+  }
+}
