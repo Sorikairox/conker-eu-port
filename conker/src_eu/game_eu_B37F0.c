@@ -180,7 +180,18 @@ s32 func_1508872C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150889D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088A68.s")
+void func_15088A68(s32 arg0, s32 arg1)
+{
+  s32 a;
+  s32 b;
+  if (D_80087640 != 0) {
+    a = (s8)D_80087640[arg1].unk31;
+    b = (s8)D_80087640[arg1].pad28[8];
+    bcopy(&D_80087640[arg0], &D_80087640[arg1], 0x84);
+    D_80087640[arg1].unk31 = a;
+    D_80087640[arg1].pad28[8] = b;
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088B08.s")
 

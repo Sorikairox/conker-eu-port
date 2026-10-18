@@ -19,3 +19,18 @@ func_150D02C8	SIZE-1	1	OK	y	n	stackfix.py found local decl order/scope (v declar
 func_151AB06C	SIZE-1	3	SIZE-1	n	n	pass-through 3-arg calls; var lands in a3 not a2 (a0=a2 copy missing)
 func_151073F8	SIZE+1	2	OK	y	n	fn-pointer table typed array (not s32 *4); pointer fields loaded into locals (keeps a0)
 func_150A7CB0	DIFF3	3	DIFF3	n	y	store order of swc1 0x3C vs sw 0x38 delay slot; permuter 200s no improvement
+func_15087040	DIFF2(SIZE-ish)	3	SIZE-3	n	n	sqrt dist: trailing dead jr ra/nop not reproduced
+func_15088A68	SIZE+1	1	OK	y	n	stripped permuter junk (do{}while, !x&&!x&&!x ifs), array-index form
+func_1507F2D4	SIZE+1	3	OK	y	n	one pointer var reused (p=base; type=p[0x64]; p+=0x58); s32 type; stackfix declaration order
+func_1510FDA0	SIZE+1	1	OK(screen)	n	n	pass-through args again: callee takes (a0,a1,&v,&v), function has 7 params (stack args 0x3C/0x40)
+func_150FC8E8	SIZE+1	3	DIFF45	n	n	goto chain rewritten as &&-chain; o/v register assignment (v0/v1) not reproduced
+func_151B44D8	SIZE-1	3	OK	y	n	block-scope alias pointer f32 *dst = arg1 (keeps arg1 out of a3); o declared in block; u8 param
+func_150836AC	SIZE+1	2	SIZE-1	n	n	if/else branch order fixed; lbu a0 + move s3 copy not reproduced
+func_15096DB0	SIZE-1	1	OK	y	n	m2c emitted the IDO 4x-unrolled loop literally; rolled back to for(i<n) if(tbl[i*0x24]) return 1
+func_150E0150	SIZE-1	3	DIFF17	n	n	loop over 3 with IV counter; stack 0x48/frame 0x58 + register order (stackfix no match)
+func_150AF6A0	DIFF7	3	DIFF7	n	n	v0/v1 register swap (pointer vs value); single/double var, decl order tried
+func_15167010	DIFF7	1	SIZE-1	n	n	fn-pointer table walk (stride 0x34); ref saves unused s1 (extra local)
+func_150F9FA0	DIFF7	1	OK	y	n	flag updates as compound ops: |= 0x80; &= ~8 (two separate stores, no temps)
+func_151016C8	DIFF7	3	DIFF13	n	n	arg0-home reload pattern; frame fixed by dropping temp locals, regs (t7 vs a1) differ
+func_1502B8E0	SIZE-1	0	SIZE-1	n	n	va_list/varargs printf-style function; skipped
+func_1510FDA0	(see above)	-	-	-	-	NOTE: screened OK with 0.02f literal but real file with extern D_800A316C gives c.eq.s operand swap (1 word); reverted to asm

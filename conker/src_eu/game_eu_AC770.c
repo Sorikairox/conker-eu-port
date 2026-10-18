@@ -32,7 +32,29 @@ void func_1507F298(u8 arg0, u8 *arg1) {
     arg1[0] = arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F2D4.s")
+void func_1507F2D4(void)
+{
+  u8 *p;
+  s32 type;
+  p = (u8 *)D_800D154C->unk31C;
+  type = p[0x64];
+  p += 0x58;
+  if (type == 0) {
+    p[0xC] = 1;
+    p[0xD] = 0;
+  } else if (type == 1) {
+    func_150ADA20();
+    if (p[0xD] >= 3) {
+      p[0xC] = 2;
+      p[0xD] = 0;
+    }
+  } else {
+    if (p[0xD] >= (func_150ADA20() & 3) + 8) {
+      p[0xC] = 1;
+      p[0xD] = 0;
+    }
+  }
+}
 
 void func_1507F380(s32 arg0, u8 *arg1) {
     s32 i;

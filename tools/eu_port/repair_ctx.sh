@@ -12,7 +12,7 @@ s=$(find ~/conker/conker/asm/nonmatchings -name $f.s | head -1)
 n=$(grep -c '^ *\/\*' $s)
 echo "=== TARGET $f ($n insns)"
 [ "$n" -gt "${MAXT:-60}" ] && echo "(listing skipped: > ${MAXT:-60} insns; see DIFF, or MAXT=999 for all)" || grep -E '^\s*(/\*|\.L|glabel)' $s | sed -E 's/\/\* [0-9A-F]+ [0-9A-F]+ [0-9A-F]+ \*\/ *//' | grep -v '^glabel'
-if [ -f $d ]; then echo "=== DRAFT ($d)"; grep -v '^$' $d; else echo "=== no draft: m2c needed"; fi
+if [ -f $d ]; then echo "=== DRAFT ($d)"; head -90 $d | grep -v "^$"; else echo "=== no draft: m2c needed"; fi
 [ -f $R/$f.diff ] || ~/conker/tools/eu_port/repair_try.sh $f $d >/dev/null
 echo "=== DIFF (ref  mine  asm)"
 awk '{l[NR]=$0; if ($1=="**" && $0 !~ /%hi|%lo|jal /) {if(!first) first=NR; last=NR}} END{

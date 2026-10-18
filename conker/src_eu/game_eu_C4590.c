@@ -8,7 +8,16 @@ void func_15096970(void) {
     D_800D2DB4 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15096DB0.s")
+s32 func_15096DB0(s32 arg0)
+{
+  s32 i;
+  for (i = 0; i < arg0; i++) {
+    if (*((u8 *)D_800D31E0 + i * 0x24) != 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15096E78.s")
 
