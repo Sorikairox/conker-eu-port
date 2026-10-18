@@ -107,19 +107,40 @@ void func_150D034C(u8 *arg0)
   *((*((u8 **) ((p + ((*((u8 *) (p + 0x15))) << 2)) + 0x18))) + (*((u8 *) (p + 0x14)))) = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D03A8.s")
+void func_150D03A8(u8 *arg0) {
+    u8 *v = arg0 + 0x28;
+
+    if (**(u8 **)(arg0 + 0x38) != 0) {
+        *(u8 **)(v + 0xC) = *(u8 **)(v + 0x10) + 1;
+        *(u8 *)(v + 0x14) = func_150D0294(*(u8 **)(v + 0xC), (u8 **)(v + 0x10));
+        *(u8 *)(v + 0x15) = *(u8 *)(v + 0x15) ^ 1;
+        func_150D034C(arg0);
+        *(u8 *)(v + 8) = *(u8 *)(v + 8) | 1;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0420.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0544.s")
+extern s32 D_80088C40[];
+
+s32 func_150D0544(s32 arg0, u8 *arg1, s32 arg2) {
+    u8 *v = arg1 + 0x28;
+
+    if ((*(s8 *)(arg1 + 0x4C) != -1) && (((s32 (**)(u8 *))D_80088C40)[*(volatile s8 *)(arg1 + 0x4C)](arg1) == 0)) { // fakematch: volatile forces the second lb of the index, v defined first so addiu is rematerialised
+        *(s16 *)(arg1 + 0xE) = -1;
+        return arg0;
+    }
+    *(u8 *)(v + 8) &= 0xFFFE;
+    return arg0;
+}
 
 extern void (*D_80088C50[])(u8 *, u8 *, u8);
-void func_150D03A8(u8 *, u8 *, u8);
+void func_150D03A8(u8 *);
 void func_150D05D0(u8 *arg0, u8 *arg1, u8 arg2) {
     void (*f)(u8 *, u8 *, u8);
     if (arg2 == 0x51) {
         if (arg0[0x28] == arg1[0]) {
-            func_150D03A8(arg0, arg1, arg2);
+            func_150D03A8(arg0);
         }
     } else {
         f = D_80088C50[arg0[0x4D]];

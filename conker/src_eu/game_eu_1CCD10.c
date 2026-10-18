@@ -41,7 +41,27 @@ void func_1519F6D8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F928.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F970.s")
+void func_151A0E98(u8 *);
+void func_1519F9FC(u8 *);
+
+void func_1519F970(u8 *arg0) {
+    u8 *v = arg0 + 0x58;
+
+    if (*(s32 *)(arg0 + 0x58) != 0) {
+        func_1519F9FC(*(u8 **)(arg0 + 0x58));
+    }
+    if (*(u8 **)(v + 8) != NULL) {
+        func_1519F9FC(*(u8 **)(v + 8));
+    }
+    if (*(u8 **)(v + 4) != NULL) {
+        func_151A0E98(*(u8 **)(v + 4));
+        func_1516972C(*(struct102 **)(v + 4));
+    }
+    if (*(u8 **)(v + 0xC) != NULL) {
+        func_151A0E98(*(u8 **)(v + 0xC));
+        func_1516972C(*(struct102 **)(v + 0xC));
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F9FC.s")
 

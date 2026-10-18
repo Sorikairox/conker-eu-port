@@ -228,7 +228,17 @@ void func_1511AC84(u8 *arg0) {
     func_1511AA1C(arg0, arg0 + 0x80, arg0 + 0x84);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ACC0.s")
+s32 func_15022BB0(s32, s32);
+s32 func_15116854(u8 *);
+
+void func_1511ACC0(u8 *arg0) {
+    if ((D_800C35EA == 1) && (func_15022BB0((arg0 - (u8 *)D_800DBEF4) / 160, 0) != 0)) {
+        *(s32 *)(arg0 + 0x7C) = 0;
+        *(f32 *)(arg0 + 0x18) = 0.0f;
+    }
+    func_15116854(arg0);
+    func_1511AA1C(arg0, arg0 + 0x80, arg0 + 0x84);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511AD48.s")
 

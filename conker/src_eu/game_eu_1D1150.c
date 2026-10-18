@@ -150,7 +150,39 @@ void *func_151A5580(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A5620.s")
+void func_151A5620(u8 *arg0) {
+    s32 v0;
+    s32 v1;
+
+    v0 = *(s32 *)(arg0 + 0x10);
+    if (v0 != 0) {
+        v0 = v0 - D_800BE9E4;
+        if (v0 <= 0) {
+            func_1516972C(arg0);
+            return;
+        }
+        *(s32 *)(arg0 + 0x10) = v0;
+    }
+    if (*(u8 *)(arg0 + 0x19) == 0) {
+        func_10011FA0(2);
+    }
+    v1 = D_800BE9E4 * 2;
+    v0 = *(u8 *)(arg0 + 0x15);
+    if (*(u8 *)(arg0 + 0x18) == 0) {
+        v0 = v0 - v1;
+        if (v0 < 0x90) {
+            v0 = 0x90;
+            *(u8 *)(arg0 + 0x18) = 1;
+        }
+    } else {
+        v0 = v0 + v1;
+        if (v0 >= 0x100) {
+            v0 = 0xFF;
+            *(u8 *)(arg0 + 0x18) = 0;
+        }
+    }
+    *(u8 *)(arg0 + 0x15) = v0;
+}
 
 void func_151A56E0(s32 arg0, u8 *arg1, s16 arg2) {
     D_8008FCA0[arg1[0x14]](arg0, arg1, arg2);

@@ -3,7 +3,38 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B8790/func_1518AF80.s")
+extern s32 D_8008D960;
+void func_1518AF80(u8 *arg0) {
+    struct102 *n;
+    struct102 *a2;
+    s16 h;
+    u8 k;
+
+    if (*(s32 *)(arg0 + 0x1C) != 0) {
+        h = *(s16 *)(arg0 + 0x22);
+        if (h < 0) {
+            a2 = *(struct102 **)(arg0 + 0x14);
+            n = *(struct102 **)((u8 *)a2 + 0x18);
+            if (n == NULL) {
+                *(s32 *)(arg0 + 0x10) = 0;
+                *(s32 *)(arg0 + 0x14) = 0;
+            } else {
+                *(s32 *)((u8 *)n + 0x14) = 0;
+                *(s32 *)(arg0 + 0x14) = *(s32 *)((u8 *)a2 + 0x18);
+            }
+            k = *(u8 *)((u8 *)a2 + 0x1C);
+            if (k != 0) {
+                ((void (**)(s32))&D_8008D960)[k](*(s32 *)((u8 *)a2 + 0x10));
+            }
+            func_1516972C(a2);
+            *(s32 *)(arg0 + 0x1C) = *(s32 *)(arg0 + 0x1C) - 1;
+            return;
+        }
+        if (*(u8 *)(arg0 + 0x24) & 1) {
+            *(s16 *)(arg0 + 0x22) = h - D_800BE9E4;
+        }
+    }
+}
 
 u8 *func_1518AADC(s32 arg0, s16 arg1, u8 arg2)
 {

@@ -11,9 +11,33 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D441C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D44C4.s")
+void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2) {
+    s8 sp48[8];
+    s32 sp3C[3];
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D45A4.s")
+    sp48[0] = 3;
+    sp48[1] = -1;
+    *(s16 *)(sp48 + 2) = (func_150ADA20() % 3U) + 4;
+    sp48[4] = 0;
+    sp3C[0] = *(f32 *)(arg0 + 0);
+    sp3C[1] = *(f32 *)(arg0 + 4);
+    sp3C[2] = *(f32 *)(arg0 + 8);
+    func_151602C0(sp48, sp3C, (func_150ADA20() % 13U) + 0x14, 0xFF, 0xE8, 0xAB, 0xFFU, 0U, 0, arg1, arg2);
+}
+
+void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
+    s8 sp48[8];
+    s32 sp3C[3];
+
+    sp48[0] = 3;
+    sp48[1] = -1;
+    *(s16 *)(sp48 + 2) = (func_150ADA20() % 11U) + 0x14;
+    sp48[4] = 0;
+    sp3C[0] = *(f32 *)(arg0 + 0);
+    sp3C[1] = *(f32 *)(arg0 + 4);
+    sp3C[2] = *(f32 *)(arg0 + 8);
+    func_151602C0(sp48, sp3C, (func_150ADA20() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4684.s")
 
