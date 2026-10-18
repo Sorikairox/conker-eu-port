@@ -22,7 +22,7 @@ func_150A7CB0	DIFF3	3	DIFF3	n	y	store order of swc1 0x3C vs sw 0x38 delay slot; 
 func_15087040	DIFF2(SIZE-ish)	3	SIZE-3	n	n	sqrt dist: trailing dead jr ra/nop not reproduced
 func_15088A68	SIZE+1	1	OK	y	n	stripped permuter junk (do{}while, !x&&!x&&!x ifs), array-index form
 func_1507F2D4	SIZE+1	3	OK	y	n	one pointer var reused (p=base; type=p[0x64]; p+=0x58); s32 type; stackfix declaration order
-func_1510FDA0	SIZE+1	1	OK(screen)	n	n	pass-through args again: callee takes (a0,a1,&v,&v), function has 7 params (stack args 0x3C/0x40)
+func_1510FDA0	SIZE+1	1	SIZE+1(screen OK)	n	n	screened OK (literal 0.02f) but with extern D_800A316C the real file differs by 1 word (c.eq.s operand order); pass-through args: 7 params, callee takes (a0,a1,&v,&v)
 func_150FC8E8	SIZE+1	3	DIFF45	n	n	goto chain rewritten as &&-chain; o/v register assignment (v0/v1) not reproduced
 func_151B44D8	SIZE-1	3	OK	y	n	block-scope alias pointer f32 *dst = arg1 (keeps arg1 out of a3); o declared in block; u8 param
 func_150836AC	SIZE+1	2	SIZE-1	n	n	if/else branch order fixed; lbu a0 + move s3 copy not reproduced
@@ -33,4 +33,23 @@ func_15167010	DIFF7	1	SIZE-1	n	n	fn-pointer table walk (stride 0x34); ref saves 
 func_150F9FA0	DIFF7	1	OK	y	n	flag updates as compound ops: |= 0x80; &= ~8 (two separate stores, no temps)
 func_151016C8	DIFF7	3	DIFF13	n	n	arg0-home reload pattern; frame fixed by dropping temp locals, regs (t7 vs a1) differ
 func_1502B8E0	SIZE-1	0	SIZE-1	n	n	va_list/varargs printf-style function; skipped
-func_1510FDA0	(see above)	-	-	-	-	NOTE: screened OK with 0.02f literal but real file with extern D_800A316C gives c.eq.s operand swap (1 word); reverted to asm
+func_1510B930	DIFF3	0	DIFF3	n	n	not attempted (budget): float loop fn-call table sweep
+func_15195D9C	DIFF8	2	SIZE-1	n	n	const-propagated address hoists (lui+addiu pointer for 0D14/0D1C) not reproduced
+func_151E8998	DIFF5	3	DIFF6	n	n	shared-lui store groups (FD4/FD0, FD8/FDC); struct/array spellings tried
+func_10006530	DIFF5	0	DIFF5	n	n	leaf wrapper with sp offsets 0 (hand asm / different frame), skipped
+func_15193850	DIFF7	2	DIFF21	n	n	swap-ids handler; ref has unfilled beq delay slot nop (blocked shape of session 7)
+func_151B255C	DIFF7	0	DIFF7	n	n	twin of func_15193850, same blocked unfilled-delay-slot shape
+func_15184198	SIZE+1	2	DIFF57	n	n	stride-0x14 table cleanup: clean rewrite lost register allocation (a1/v1)
+func_15119974	SIZE-1	0	SIZE-1	n	n	move-toward-target s16 with /256: not attempted (size)
+func_151BE65C	SIZE-1	3	DIFF27	n	n	u8 handler where arg0/arg1 are reloaded from home slots: &arg0 deref tricks changed frame
+func_1511C37C	DIFF10	2	OK	y	n	call passes lw (s32) fields not f32; if (s) v=s; else v=f() with two locals
+func_151A9610	DIFF11	2	SIZE-1	n	n	index var should live in a1 (unused 2nd arg register); param-as-temp attempt added homing
+func_15190A2C	DIFF6	2	DIFF13	n	n	pointer p=arg0+0x30 must be spilled separately from arg0 (two stack slots)
+func_15104A0C	DIFF14	1	SIZE-1	n	n	arg1 reloaded from home slot + a2/a3 zeroed before test; not reproduced
+func_1503E4E4	DIFF13	1	OK	y	n	bit test on two tables: if/else (each returns 1) then return 0; draft fell through from first if into second
+func_1510083C	DIFF14	3	OK	y	n	q = arg0+0x28 declared first then o = *(u8**)q (register order v0/v1)
+func_150A0744	SIZE+1	2	DIFF7	n	y	bit-field flag update with compound ops; permuter 200s best DIFF7 (temp register numbering)
+func_150C1B60	DIFF19	1	DIFF13	n	n	12-arg call with passthrough a1; ref homes only a2/a3 (a0/a1 unnamed), mine homes all 4
+func_1518B748	DIFF11	3	DIFF11	n	n	clamp/min chain: ref reuses a1 for trunc result and has unfilled b; not reproduced
+func_151B7664	DIFF13	0	DIFF13	n	n	u8 handler, unfilled delay slots (blocked shape), skipped
+func_1502F17C	DIFF8	3	DIFF3	n	y	u8 table clamp; s32 temp for loaded value fixes regs, remaining u8 truncation of v-2; permuter 200s worse

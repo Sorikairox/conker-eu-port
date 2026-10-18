@@ -9,7 +9,21 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E238.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E4E4.s")
+extern s32 D_800C6A84;
+extern s32 D_800C6A88;
+s32 func_1503E4E4(s32 arg0, s32 arg1)
+{
+  if (arg0 < 0x20) {
+    if ((*(s32 *)((u8 *)&D_800C6A84 + arg1 * 0x10)) & (1 << arg0)) {
+      return 1;
+    }
+  } else {
+    if ((*(s32 *)((u8 *)&D_800C6A88 + arg1 * 0x10)) & (1 << arg0)) {
+      return 1;
+    }
+  }
+  return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E550.s")
 

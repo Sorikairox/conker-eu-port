@@ -33,4 +33,15 @@ void func_15100734(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12DF10/func_151007B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12DF10/func_1510083C.s")
+void func_1510083C(u8 *arg0)
+{
+  u8 *q = arg0 + 0x28;
+  u8 *o = *(u8 **)q;
+  if (*(s32 *)o == 0 || o[4] == 0xFF || q[4] != o[0x3B]) {
+    *(s16 *)(arg0 + 0xE) = -1;
+    return;
+  }
+  if (*(s32 *)(o + 0x318) != 0) {
+    *(s16 *)(q + 6) -= D_800BE9E4;
+  }
+}
