@@ -132,4 +132,49 @@ void func_1502ED88(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FED8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_15030060.s")
+void func_15030060(u8 *arg0)
+{
+  u8 idx = arg0[4];
+  u8 *p;
+  u8 *s;
+  u8 a2;
+  s32 v;
+  if ((D_80038080 == 0) && (D_800BE9F0 == 0x1D))
+  {
+    ((u8 *) D_800D2040)[idx] = 2;
+    return;
+  }
+  p = &((u8 *) D_800D2040)[idx];
+  if ((*p) != 0xFF)
+  {
+    s = *((u8 **) (arg0 + 0x144));
+    if (s != 0)
+    {
+      ;
+      if (s[0x2E] != 0xFF)
+      {
+        if (s[0x2E] != 0)
+        {
+          ;
+          if ((*p) < (s[0x2E] * 30))
+          {
+            *p = s[0x2E] * 30;
+          }
+        }
+        else
+        {
+          goto set3;
+        }
+      }
+    }
+    else
+    {
+      set3:
+      *p = 3;
+
+    }
+    if (arg0)
+    {
+    }
+  }
+}

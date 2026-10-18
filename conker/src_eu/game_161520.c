@@ -212,7 +212,26 @@ s32 func_15134CEC(struct161520_c *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15134DAC.s")
+s32 memcpy(u8 *, u8 *, s32);
+
+u8 *func_15134DAC(u8 *arg0, s32 arg1) {
+    u8 *temp_v0;
+    u8 *sp24;
+
+    temp_v0 = func_15167A68(0x29, 0, arg1 + 0x80, 1, 0xFFU, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    sp24 = temp_v0;
+    memcpy(temp_v0 + 0x18, arg0, 0x3C);
+    (*(s16 *)((u8 *)sp24 + 0x54)) = (s16) -(*(s16 *)((u8 *)arg0 + 0x28));
+    (*(s32 *)((u8 *)sp24 + 0x10)) = 1;
+    (*(s32 *)((u8 *)sp24 + 0x14)) = 0;
+    (*(f32 *)((u8 *)sp24 + 0x70)) = 0.0f;
+    (*(f32 *)((u8 *)sp24 + 0x74)) = 0.0f;
+    (*(f32 *)((u8 *)sp24 + 0x78)) = 0.0f;
+    return sp24;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15134E48.s")
 

@@ -30,7 +30,22 @@ void func_150E7458(s32 arg0) {
     func_1514470C((&D_800D9A20)[func_150ADA20() & 1], arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7498.s")
+extern s32 D_80088DE4;
+void func_150E7498(f32 *arg0) {
+    f32 *v;
+    f32 t;
+    f32 a;
+    f32 b;
+    f32 c;
+    v = ((f32 **)&D_80088DE4)[func_150ADA20() % 6U];
+    t = func_150ADA68();
+    a = v[0];
+    arg0[0] = (v[3] - a) * t + a;
+
+    arg0[1] = (v[4] - (b = v[1])) * t + b;
+
+    arg0[2] = (v[5] - (c = v[2])) * t + c;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E752C.s")
 

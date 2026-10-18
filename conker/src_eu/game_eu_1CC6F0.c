@@ -3,7 +3,21 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519EEE0.s")
+u8 *func_1519EEE0(s16 arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
+    u8 *temp_v0;
+    temp_v0 = func_15167A68(0x26, arg6, 0x2C, 1, (u8) (s32) arg5, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    (*(s32 *)((u8 *)temp_v0 + 0x18)) = arg3;
+    (*(s32 *)((u8 *)temp_v0 + 0x1C)) = arg4;
+    (*(s16 *)((u8 *)temp_v0 + 0x20)) = arg0;
+    (*(u8 *)((u8 *)temp_v0 + 0x28)) = arg2;
+    (*(s32 *)((u8 *)temp_v0 + 0x24)) = arg1;
+    (*(s32 *)((u8 *)temp_v0 + 0x10)) = 1;
+    (*(s32 *)((u8 *)temp_v0 + 0x14)) = 0;
+    return temp_v0;
+}
 
 void func_1519EF74(struct102 *arg0) {
     s32 var_v0;

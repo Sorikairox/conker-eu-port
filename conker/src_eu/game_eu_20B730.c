@@ -98,7 +98,33 @@ void func_151E2A1C(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3864.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3A1C.s")
+s32 func_151E86A4();
+extern s8 D_80090134;
+extern s16 D_8009015C;
+extern s8 D_800BEA38;
+extern s8 D_800D27C8;
+extern u8 D_800E0FC9;
+extern s8 D_800E0FE1;
+
+void func_151E3A1C(void) {
+    D_80087260 = 3;
+    if (D_800E9D00 & 0x200) {
+        D_80087260 = 0x33;
+    }
+    *D_80087270 = 0;
+    D_8008FD8C = 1;
+    D_80090130 = 1;
+    D_80090134 = 1;
+    D_8009015C = 0;
+    D_800BEA38 = 1;
+    D_800D27C8 = 0;
+    D_800E0B94 = 0;
+    D_800D3260 = 0;
+    func_1501C710(6, (s32) (s8) D_800BE3DF, (s32) D_800BE800, 0, 1);
+    D_800E0FC9 = 1;
+    D_800E0FE1 = 1;
+    func_151E86A4();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3AE4.s")
 

@@ -121,7 +121,7 @@ void func_15107B84(s32 ***arg0) {
     temp_v1[2] = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107B9C.s")
+void func_15107B9C(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x30) != 0) { func_1516972C(*(struct102 **)(p + 0x30)); } }
 
 void func_15107BCC(struct260 * arg0) {
     func_15107B9C(arg0);

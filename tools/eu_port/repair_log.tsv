@@ -159,3 +159,34 @@ func_150FF148	DIFF14	1	OK	y	n	hoist the 0x1D4 + (D<<6) arg into a local before t
 func_15133F44	DIFF13	1	OK	y	n	statement order: 0x3C store before temp_f0 = 0x14 load (same as 15133FC0)
 func_151DDA10	DIFF11	1	DIFF24	n	n	if/else-if chain with one v is worse than the m2c goto-ish shape (sp2C spill); unsolved
 func_150E3C3C	DIFF12	1	OK	y	n	parameter as temp: arg0 = arg0 - 1 (ref reuses a0; v0 for the table load)
+func_150D09D4	DIFF9	2	OK	y	n	arg1 pass-through + s8 sp30[8] array for frame/offset
+func_100043B4	DIFF6	1	DIFF6	n	n	dead addiu v1,-0xC in jal delay slot (dead param update) dropped by IDO; same family as 150C63FC
+func_1519EEE0	DIFF6	1	OK	y	n	statement order: arg1 store (0x24) before the constant 0x10/0x14 stores
+func_1513B798	DIFF6	4	DIFF2	n	n	s32 flag fixes regs; ref spills it as byte (sb/lbu 0x1B); u8 flag starts in v0 instead
+func_151B9190	DIFF6	2	DIFF6	n	n	f-reg numbering only (f4/f6 swap of 0x64/0x5C loads); to permuter
+func_150B42B0	DIFF7	1	OK	y	n	byte local whose address is passed: s8 sp24[4] array (offset/frame)
+func_150B7258	DIFF7	4	SIZE+1	n	n	ref keeps &D_800D9CB4 in s0 (pointer) then reuses s0 for D_800D9CB8 walk; globals scalar access in mine; += 4 on s32* was wrong (scale)
+func_150E7498	DIFF8	3	OK	y	n	f32* table index form + three separate lerp locals; (v[4] - (b = v[1])) loads the far operand first
+func_15022864	DIFF8	2	DIFF2	n	n	u8 array indexed pointer form gets DIFF2 (subu/or delay slot swap); to permuter
+func_1515C710	DIFF8	3	OK	y	n	if/else instead of early return; (f32)s16 + load operand order
+func_1515C7B4	DIFF8	1	OK	y	n	twin of 1515C710: if/else shape
+func_15172210	DIFF8	2	OK	y	n	init-store order: arg stores first, constant zero stores before the final byte store, 0x59 store last
+func_15172474	DIFF8	2	OK	y	n	table read via s32 index form + (u8*)temp_v0+0x10 (struct102* scaled the offset)
+func_1518AADC	DIFF8	2	DIFF8	n	n	init-store function: ref hoists lw arg0 (t8) above the sh/sw stores; mine loads it right before sw 0x18; local copy no help
+func_1518FA0C	DIFF8	2	OK	y	n	four named temps loaded before the || test (u8 *args, u8 temps), compare operand order a0==a1
+func_151C9CBC	DIFF8	1	DIFF8	n	n	ref copies a0/a1 to a3/a2 then stores to sp slots without homing; mine homes a0 (sw 0x20)
+func_10001420	DIFF9	2	DIFF9	n	n	memclear loop: mine materialises the D_80043ED0 address twice (lui v0/v1); ref hoists the end as a1+0xFE0
+func_150C4FD8	DIFF9	3	DIFF4	n	n	ref copies a0 to a1 (local gets a2 in mine); 2-param K&R rejected by caller arity; to permuter
+func_15107B9C	DIFF9	3	OK	y	n	u8 *p = arg0 with initializer gives the or a1,a0 copy (a plain assignment put it in a2)
+func_150C4FD8	DIFF4	1	OK	y	n	same as 15107B9C: u8 *p = arg0 initializer
+func_15134DAC	DIFF9	1	OK	y	n	statement order: the 0x54 negated-s16 store before the 0x10 constant store
+func_151C9CBC	DIFF8	4	DIFF9	n	n	locals initialised from params in decl: still not the or a3,a0 / or a2,a1 shape
+func_15174E90	DIFF9	2	DIFF5	n	n	s32 local fixes regs; ref clamp branch has unfilled delay slot nop and lui hoisted above it (blocked shape)
+func_1519E764	DIFF9	4	DIFF3	n	n	byte reads at arg1+0/+4 were really *arg1 and s32; remaining a0/v1 load order vs register; to permuter
+func_151C8C24	DIFF9	4	DIFF12	n	n	x=arg0,y=arg1 initialisers give the or a2,a0 / or a3,a1 copies; but frame 0x28 vs 0x20 (struct/array/stackfix no help)
+func_1514F114	DIFF5	3	OK	y	y	permuter (<200s) solved the hoisted lw t8
+func_15030060	DIFF5	1	OK	y	y	permuter (<200s) solved the a2 register choice
+func_151D1488	DIFF9	1	OK	y	n	u8 *p = arg0 initializer (twin of 15107B9C)
+func_151E3A1C	DIFF9	2	OK	y	n	u8 (not s8) extern type for D_800E0FC9 breaks the constant CSE across the call
+func_150D19AC	DIFF10	1	DIFF10	n	n	two stack slots 0x1C/0x28 for the same pointer + mtc1 f6 hoisted above lw t6; local order swap no help
+func_151A4EB0	DIFF10	3	DIFF10	n	n	temp should live in a1 (the unused 2nd arg reg, homed by sw a1,4(sp)); arg1-as-temp loses the home store (DIFF38); to permuter

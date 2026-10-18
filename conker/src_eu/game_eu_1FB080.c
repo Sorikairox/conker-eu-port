@@ -208,7 +208,7 @@ void func_151D06D8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D09A8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D1488.s")
+void func_151D1488(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0xA8) != 0) { func_1516972C(*(struct102 **)(p + 0xA8)); } }
 
 void func_151D14B8(void *arg0) {
     func_151D1488(arg0);

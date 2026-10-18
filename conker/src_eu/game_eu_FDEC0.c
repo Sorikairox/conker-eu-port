@@ -20,6 +20,15 @@ void func_150D07C4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {    s32 sfpa
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/func_150D083C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/func_150D09D4.s")
+u8 *func_150D0420(u8, s32, s16, s32, s32, s32, u8, s32);
+void func_150D09D4(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
+    s8 sp30[8];
+    u8 *temp_v0;
+    sp30[0] = 0;
+    temp_v0 = func_150D0420(arg0, arg1, arg2, 8, 2, 0, arg3, arg4);
+    if (temp_v0 != NULL) {
+        memcpy(*(void **)(temp_v0 + 0x48), sp30, 1);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FDEC0/func_150D0A44.s")

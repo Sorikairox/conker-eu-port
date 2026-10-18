@@ -261,7 +261,23 @@ s32 func_1514F0FC(s32 arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F114.s")
+u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
+{
+  int new_var2;
+  u8 *new_var;
+  u8 *temp_v0;
+  temp_v0 = func_15167A68(0x24, 1, arg2 + 0x20, 1, 0xFFU, 1U);
+  if ((temp_v0 == 0) ^ 0)
+  {
+    return 0;
+  }
+  new_var = ((u8 *) temp_v0) + 0x10;
+  *((s32 *) new_var) = arg0;
+  new_var2 = 0;
+ *((s32 *) (((u8 *) temp_v0) + ((unsigned int) 0x18))) = new_var2; *((s32 *) (((u8 *) temp_v0) + 0x14)) = new_var2;
+  *((s16 *) (((u8 *) temp_v0) + 0x1C)) = arg1;
+  return temp_v0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F18C.s")
 
