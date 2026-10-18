@@ -107,7 +107,14 @@ void func_15082DD8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E90.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083FB0.s")
+s32 func_15083FB0(u8 arg0) {
+    struct127 *p = func_15083E90(arg0);
+
+    if (p != NULL) {
+        return p - D_800CC2D0;
+    }
+    return -1;
+}
 
 s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct127 *temp_v0 = func_1505EEF4(arg0, arg1, arg2, arg3);

@@ -55,6 +55,7 @@ void func_15044FD4(u8 *arg0) {
 }
 
 s32 func_150472F4(u8 *, f32, u8 *);
+s32 func_150A44A4(f32, f32, s32, u8 *, f32 *);
 s32 func_150473A0(u8 *, f32, u8 *);
 s32 func_150451C0(u8 *, f32, u8 *);
 s32 func_15046C6C(u8 *, u16, f32, u8 *);
@@ -203,7 +204,19 @@ s32 func_15047274(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150472F4.s")
+s32 func_150472F4(u8 *arg0, f32 arg1, u8 *arg2) {
+    f32 sp24;
+
+    if ((arg2[0x1C] & 4) && (func_150A44A4(*(f32 *)(arg0 + 0), *(f32 *)(arg0 + 8), 0, arg2 + 4, &sp24) != 0)) {
+        if ((arg1 <= sp24) && (sp24 <= *(f32 *)(arg0 + 4))) {
+            *(f32 *)arg2 = sp24;
+            arg2[0x1C] = arg2[0x1C] | 2;
+            return 2;
+        }
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_150A44A4(f32, f32, s32, u8 *, f32 *);
 

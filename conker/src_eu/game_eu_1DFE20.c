@@ -53,11 +53,27 @@ void func_151B2610(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B26B0.s")
 
+void func_151B27DC(u8 *);
+
 void func_151B27BC(s32 arg0) {
     func_151B27DC(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B27DC.s")
+void func_151B27DC(u8 *arg0) {
+    u8 *base = arg0 + 0x28;
+    u8 i;
+
+    for (i = 0; i < 3; i++) {
+        struct102 *p = ((struct102 **)(base + 0x10))[i];
+
+        if (p != NULL) {
+            func_1516972C(p);
+        }
+    }
+    if (*(struct102 **)(base + 0x1C) != NULL) {
+        func_1516972C(*(struct102 **)(base + 0x1C));
+    }
+}
 
 void func_151B284C(void *arg0) {
     func_151B27BC(arg0);

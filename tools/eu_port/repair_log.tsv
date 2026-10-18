@@ -424,3 +424,6 @@ func_150F7890	DIFF6	1	DIFF8	n	y	session 28: permuter 700 s -j4: no improvement (
 func_15095B70	C61-100	1	SIZE-1	n	n	float code with rodata, not pursued
 func_151166FC	C61-100	1	SIZE-1	n	n	float rodata, not pursued
 func_1519F500	C61-100	1	SIZE-1	n	n	float rodata, 100 insns, not pursued
+func_150472F4	NEAR4	2	OK	y	n	sibling func_150473A0: compare order arg1 <= sp24 && sp24 <= arg0[4]; forward prototype of func_150A44A4 added at file top
+func_15083FB0	NEAR6	1	OK	y	n	sibling func_15084000: 1-arg u8 call, p - D_800CC2D0 (div 0x32C)
+func_151B27DC	NEAR5	2	OK	y	n	sibling func_150D2564 loop + extra post-loop slot 0x1C test; prototype above the caller func_151B27BC
