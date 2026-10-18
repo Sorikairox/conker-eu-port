@@ -40,6 +40,14 @@ void func_150BE710(u8 *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBF20/func_150BE7E8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBF20/func_150BE938.s")
+s16 *func_150BE938(s16 *arg0, s32 arg1) {
+    u8 *p = (u8 *)&D_800CC2D0[arg1];
+
+    arg0[0] = 0x68;
+    arg0[1] = *(s32 *)(p + 0x2E8);
+    arg0[2] = 0xE;
+    arg0[3] = *(s32 *)(p + 0x2E4);
+    return arg0 + 4;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EBF20/func_150BE994.s")

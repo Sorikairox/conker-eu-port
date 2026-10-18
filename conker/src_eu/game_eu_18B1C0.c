@@ -81,7 +81,21 @@ void func_1515F61C(f32 arg0, s32 arg1) {
     *(s32 *)((u8 *)&D_800DD140 + (arg1 * 4)) = (s32) arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F10C.s")
+void func_1515F10C(s32 **arg0) {
+    s32 **prev = NULL;
+    s32 **cur = (s32 **)D_800DCD78;
+
+    while (cur != arg0) {
+        prev = cur;
+        cur = (s32 **)*cur;
+    }
+    if (prev != NULL) {
+        *prev = *cur;
+    } else {
+        D_800DCD78 = (s32)*cur;
+    }
+    func_10004074(cur);
+}
 
 void func_1515F170(s32 arg0, u8 arg1) {
     u8 *var_v0 = (u8 *)D_800DCD78;

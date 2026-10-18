@@ -26,7 +26,13 @@ void func_151108E0(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110948.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110AC4.s")
+Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b) {
+    gDPPipeSync(gdl++);
+    gDPSetOtherMode(gdl++, 0x302C0F, 4);
+    gdl = func_1501A680(gdl);
+    gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
+    return func_1501A6CC(gdl, arg1, arg2, arg3, arg4);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110B80.s")
 

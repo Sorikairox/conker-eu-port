@@ -497,3 +497,25 @@ func_15174AA4	CERR	3	OK	y	n	Gfx: gDPPipeSync + gSPMatrix + table call D[*(u8*)(D
 func_15174B48	CERR	1	OK	y	n	twin of func_15174AA4 (padB[2], D_8008D11C)
 func_151ED998	SIZE-3	1	OK	y	n	Gfx: gDPPipeSync, gDPSetOtherMode(0x082C3F,0x504340), gDPSetCombine(0xFFFFFF,0xFFFEFB7D), gDPSetEnvColor(0,0,0,a), tail call returns
 func_1518D218	CERR	3	OK	y	y	halfword accumulators from a packed s32: permuter found new_var=(s32*)(arg0+0x14); u16 new_var2=*new_var for the low half; table call D[idx&0xF]()
+func_15184114	untried	1	OK	y	n	Gfx writer: table search + gSPDisplayList(gdl++, D[idx]); Gfx* return, 4 s32 params
+func_1510D338	untried	4	OK	y	n	gDPSetPrimColor(gdl, 0xF2, 0, ...) (m=0xF2 is the high byte of the low half); s32 params; no 'off' local (arg3*3 repeated)
+func_15110AC4	untried	1	OK	y	n	PipeSync + gDPSetOtherMode(0x302C0F, 4) + callee returns gdl + gDPSetFillColor(GPACK_RGBA5551<<16|GPACK_RGBA5551); u8 r,g,b stack params
+func_1510DE40	untried	5	DIFF39	n	y	gSPSegment loop over 16-byte table: ref re-does lui/lbu of the count each iteration, mine hoists address into a3; permuter 100s best DIFF44
+func_15174200	untried	5	OK	y	n	needs forward prototype s32 func_151149AC(u8) in draft; s32 arg2; u32 v temp (fakematch)
+func_1509F764	untried	2	OK	y	n	NOT a Gfx writer. switch(arg1): case order in source is 1, 0, 2 (ref lays case 1 body first); forward proto for func_1509FB40
+func_150417F8	untried	6	OK	y	n	gSPTextureRectangle(x<<2,y<<2,(x+8)<<2,(y+12)<<2,0,s,t,0x400,0x400) with << not * (no folding); col=idx%8, (idx-col)/8 locals
+func_15019BB8	untried	5	DIFF5	n	y	gSPViewport + calls; (s16)arg1 inline (named s16 local grew frame); left: operand/load order of D_800BE628 expression; permuter best DIFF5
+func_1513B83C	untried	4	SIZE-1	n	n	DL/MTX/SEGMENT writer; ref narrows s16 arg2 again (sll/sra) before the indirect call, mine moves a2; K&R fn-ptr type no help
+func_15019464	untried	2	SIZE-2	n	y	same viewport expr as func_15019BB8; permuter 100s SIZE-2
+func_150EAA10	DIFF1	3	DIFF1	n	n	mul.s order unchanged by r*f / f*r / named temps (IDO canonicalises)
+func_150A7B80	untried	1	SIZE+16	n	n	ref uses sd (64-bit stores) for the zeroing: -mips2 cannot emit it from u64 stores; needs a per-file -mips3 or inline asm
+func_15174F10	untried	1	OK	y	n	u8 counters with wrap: D_800DD836 += D_800BE9E4; if (a0 < D_800DD836) {D_800DD835++; if >= a1 -> 0; D_800DD836 = 0}
+func_150747E4	untried	3	DIFF16	n	n	struct127 stride 0x32C: IDO folds (idx-1)*0x32C into idx*0x32C-0x32C, ref keeps v1=idx-1 and multiplies; local i / u8* arith no help
+func_1506EF5C	untried	4	DIFF20	n	n	byte stores through D_800D154C: ref register allocation (a2/v1) not reproduced with locals or extra params
+func_150BE938	untried	1	OK	y	n	s16 *p writes + return arg0+4; (u8 *)&D_800CC2D0[arg1] gives the 0x32C stride
+func_151C6F7C	untried	6	DIFF10	n	n	K&R definition (u8 arg2) gives the sw a2 spill; remaining diff is temp register numbering (v = ... then call)
+func_1514F250	untried	3	OK	y	n	list search: next = n->unk14 loaded BEFORE the compare; while (n && !found) { next=..; if (key==..) found=1; else n=next; }
+func_1503DD2C	untried	4	OK	y	n	q = p - 0x38 before the NULL test; if (r != NULL) v = r[a1]; else v = 0xFF; (explicit else, not a ternary or default+if)
+func_1514F6A0	untried	5	OK	y	n	switch (a1) {case 0xD: ..;break; case 0xE: ..;break; default: return f(a0,a1,a2);} return 1; (if-chain gave SIZE-1/-2)
+func_1515F10C	untried	1	OK	y	n	singly linked list unlink (no NULL check on the search), then free: prev/cur pointers
+func_151E5564	untried	2	OK	y	n	needed file edit: 'extern s32 func_151E5564;' -> 'void func_151E5564(void);' and a forward void func_151E5D28(void) in the draft

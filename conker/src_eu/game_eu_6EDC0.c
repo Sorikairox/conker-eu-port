@@ -9,7 +9,14 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_15041770.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150417F8.s")
+Gfx *func_150417F8(Gfx *gdl, s32 x, s32 y, s32 idx) {
+    s32 col = idx % 8; // fakematch: locals keep the unfolded mod/sub/div
+    s32 s = col * 8;
+    s32 row = (idx - col) / 8;
+
+    gSPTextureRectangle(gdl++, x << 2, y << 2, (x + 8) << 2, (y + 12) << 2, 0, s * 32, (row * 3) << 7, 0x400, 0x400);
+    return gdl;
+}
 
 void func_150418D0(s32 arg0, s32 *arg1, s32 *arg2, f32 *arg3, s32 *arg4, f32 *arg5) {
     if ((arg0 >= 0xA8) && (arg0 < 0x100)) {

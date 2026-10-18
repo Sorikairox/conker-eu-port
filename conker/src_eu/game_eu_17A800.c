@@ -311,7 +311,24 @@ u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F18C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F250.s")
+s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2) {
+    s32 found = 0;
+    struct_eu_link *n = arg0;
+    struct_eu_link *next;
+
+    while (n != NULL && found == 0) {
+        next = n->unk14;
+        if (arg1 == *(s16 *)((u8 *)n + 0x1C)) {
+            found = 1;
+        } else {
+            n = next;
+        }
+    }
+    if (arg2 != NULL) {
+        *arg2 = n;
+    }
+    return found;
+}
 
 s32 func_1514F2AC(u8 *arg0, s32 arg1, u8 **arg2) {
     s32 found = 0;
@@ -371,7 +388,19 @@ void func_1514F680(void) {
     func_1514F704();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F6A0.s")
+s32 func_1514F6A0(u8 *arg0, s32 arg1, s32 arg2) {
+    switch (arg1) {
+    case 0xD:
+        (*(u8 **)(arg0 + 0x14))[9] = 0;
+        break;
+    case 0xE:
+        (*(u8 **)(arg0 + 0x14))[9] = 1;
+        break;
+    default:
+        return func_1514EE0C(arg0, arg1, arg2);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F704.s")
 

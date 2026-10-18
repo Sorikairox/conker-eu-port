@@ -3,7 +3,19 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2720/func_15174F10.s")
+extern u8 D_800DD835;
+extern u8 D_800DD836;
+
+void func_15174F10(s32 arg0, s32 arg1) {
+    D_800DD836 += D_800BE9E4;
+    if (arg0 < D_800DD836) {
+        D_800DD835++;
+        if (D_800DD835 >= arg1) {
+            D_800DD835 = 0;
+        }
+        D_800DD836 = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2720/func_15174F68.s")
 

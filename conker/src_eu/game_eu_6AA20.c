@@ -45,7 +45,26 @@ void func_1503D774(u8 *arg0, s32 arg1)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DC74.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DD2C.s")
+u8 func_1503DD2C(s32 arg0, s32 arg1) {
+    u8 *p = ((u8 **)&D_800D19A0)[arg0];
+    u8 *q = p - 0x38; // fakematch: computed before the NULL test (delay-slot addiu)
+    u8 *r;
+    u8 v;
+
+    if (p == NULL) {
+        return 0xFF;
+    }
+    if (*(u32 *)(q + 0x34) < arg1 + 1) {
+        return 0xFF;
+    }
+    r = *(u8 **)(q + 0x30);
+    if (r != NULL) {
+        v = r[arg1];
+    } else {
+        v = 0xFF;
+    }
+    return v;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DD8C.s")
 

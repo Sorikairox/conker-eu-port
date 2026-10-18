@@ -5,7 +5,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D090.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D338.s")
+Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
+    gDPSetPrimColor(gdl++, 0xF2, 0, D_800D9F88[arg3 * 3], D_800D9F88[arg3 * 3 + 1], D_800D9F88[arg3 * 3 + 2], arg1);
+    gDPSetEnvColor(gdl++, D_800D9F98[arg3 * 3], D_800D9F98[arg3 * 3 + 1], D_800D9F98[arg3 * 3 + 2], arg2);
+    return gdl;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D3E0.s")
 

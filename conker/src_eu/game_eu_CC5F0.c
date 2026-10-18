@@ -16,7 +16,22 @@ s32 func_1509F728(s32 arg0, s32 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F764.s")
+void func_1509FB40(s32, s32);
+s32 func_1509FC5C();
+s32 func_1509F764(s32 arg0, s32 arg1, s32 *arg2) {
+    switch (arg1) {
+    case 1:
+        func_1509FB40(arg2[2] & 0xFFF, 0);
+        return 1;
+    case 0:
+        func_1509FB40(arg2[2] & 0xFFF, 1);
+        return 1;
+    case 2:
+        func_1509FC5C((u32)(arg2[0] & 0xFFFF0000) >> 16, arg2[2] & 0xFFF, arg2[3], arg2[4], arg2[5]);
+        return 1;
+    }
+    return 0;
+}
 
 s32 func_1509F81C(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
