@@ -17,10 +17,10 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3081 / 5913 functions in C (52.1%)**; code bytes 333,212 / 2,253,856 (14.8%)
-  (end of session 29, from `verify_all.sh`).
+- **3103 / 5913 functions in C (52.5%)**; code bytes 336,172 / 2,253,856 (14.9%)
+  (end of session 30, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2689/5330 (12.7%)
+  - game: 2711/5330 (12.9%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
@@ -75,6 +75,7 @@ Commits on `eu`:
 | `e5241d4`, `270f3d8`, next | Session 23: recurring blocked shapes; "Known IDO shapes" section; 8 functions, +1,764 bytes |
 | `27e612a`, next | Session 24: `shapes.py`, recipes A/B applied family-wide; 20 functions, +3,600 bytes |
 | `b59b0cc`, next | Session 25: `clones.py`, template clones; 35 functions, +10,388 bytes |
+| `a4d295b`, next, next | Session 30: `shortpool.py`, `m2cfix.py`, Gfx-macro / clamp / queue-add recipes; 22 functions, +2,960 bytes |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -1910,6 +1911,51 @@ real functions whose body the sibling only resembles in shape, written fresh fro
 - `clones.py --near 16 --lax --draft` is now cheap to rerun after every batch (declfix runs automatically); filter the output against `repair_log.tsv` (`cut -f1`) and skip candidates whose `.s` has the `Handwritten` marker or no prologue.
 - Remaining CERR drafts: struct types that differ between sibling and target (rewrite to raw `u8 *` offsets by hand).
 - Float functions: `func_15095B70`, `func_151166FC`, `func_150FF1A8`, `func_1519F500` are unblocked but hard.
+
+## Session 30: short-function pool (<=50 insns, never tried), Gfx-macro and clamp recipes
+
+2 work commits (`a4d295b`, next) + hand-off; +22 functions (3081 -> 3103), +2,960 bytes, full `verify_all.sh` OK.
+
+### Tools
+- `tools/eu_port/shortpool.py [max=50]`: GLOBAL_ASM functions <= max insns that are not in `repair_log.tsv`, minus hand-written asm (`Handwritten` marker, mtc0/syscall/...),
+  no-`jr ra` fragments, jump-table `jr` and fragments that read a saved/temp/v reg before writing it. Counts to stderr, names to stdout. Result: 524 functions <= 50 insns,
+  100 already logged, 31 hand-written, 3 no `jr ra`, 4 jump tables, 2 fragments -> **384 candidates** (these are the ones earlier hint/DIFF filters skipped).
+- `tools/eu_port/m2cfix.py <list>`: runs `declfix.fix` (own file as "sibling") on the gensome drafts in `repair/fresh/`, screens them in bulk (8 jobs) -> `conker/build/dfx/ranked.txt`.
+  On the 334 drafts gensome produced: before 107 CERR / 108 DIFF (all > 12) / 119 SIZE; after 115 CERR (+8: declfix added conflicting externs), 1 DIFF <= 12 (DIFF12), 105 DIFF > 12.
+  So **bulk m2c drafts of this pool are poor** (no DIFF <= 4; the screen only ranks SIZE+-1 first); the ranking was still the right order to read asm in (SIZE+-1..3 first).
+- Gotcha: an m2c `extern` for a symbol the target file already declares (`D_800DA2F0` was `extern s8`) gives "redeclaration": use the file's type with a cast. `//DROP <line>` removes a wrong prototype
+  of the *target* file only (not of a caller in another file).
+
+### Numbers (rows in `repair_log.tsv`, start buckets from `CERR/SIZE/DIFF`)
+- **37 functions tried, 22 matched (59%)**, 97 rewrite attempts = **0.23 matches per attempt** (the 22 matches took 48 attempts, 2.2 each; the 15 failures took 49). Permuter: 3 of 4 runs solved
+  (`func_1519C428`, `func_1518D218`, plus `func_150EAA10`/`func_151B1EC8` no), 90-100 s each.
+- Token cost: about 175k tokens of work after the ~35k for reading brief/HANDOFF = **about 8k tokens per match** (about 10k including the reading), against ~10k per match in sessions 18-20. The pool still pays,
+  but only because of two new families (below); the generic "m2c draft + 3 rewrites" part of this pool was a coin flip.
+- Matched (22): `func_15173218`, `func_1510DDF4`, `func_151584F0`, `func_15182270`, `func_1519C428`, `func_1519C490`, `func_151885BC`, `func_151834C8`, `func_1514A164`, `func_151596F4`, `func_150F3978`,
+  `func_15158558`, `func_1517DAE8`, `func_15031CBC`, `func_1507C370`, `func_15163504`, `func_151D76BC`, `func_150CFAF8`, `func_15174AA4`, `func_15174B48`, `func_151ED998`, `func_1518D218`.
+
+### New recipes
+1. **m2c emits raw display-list words; use the gbi macros** (7 matches on the first or second try): `0xDA380003` = `gSPMatrix(gdl++, sym, G_MTX_NOPUSH|G_MTX_LOAD|G_MTX_MODELVIEW)`, `0xDA380007` = same with `G_MTX_PROJECTION`,
+   `0xDA380005` = `G_MTX_NOPUSH|G_MTX_MUL|G_MTX_PROJECTION`, `0xE7000000` = `gDPPipeSync`, `0xDB060020` = `gSPSegment(gdl++, 8, &sym)`, `0xF2000000...` = `gDPSetTileSize(gdl++, t, x>>7, y>>7, lrs, lrt)`,
+   `0xEF.. ` = `gDPSetOtherMode(H, L)`, `0xFC.. ` = `gDPSetCombine(m0, m1)`, `0xFB.. ` = `gDPSetEnvColor`. Return type is `Gfx *` (m2c says void/u8*; `return gdl`). Raw `u32` stores gave SIZE-3 (different register use).
+   the pool grep for `lui` of `0xD[AB89E]xxxxxx` finds the rest; still open: `func_15174200`, `func_15184114`, `func_1510D338`, `func_1510DE40`, `func_1509F764`, `func_15110AC4` (not tried).
+2. **Clamp = `if (x > hi) x = hi; else if (x < lo) x = lo;`** (the `b L; mov.s` + shared constant register means else-if), `func_151885BC`, `func_151834C8`.
+3. **Compound assignment on memory fields** reloads instead of forwarding the stored value: `*(f32 *)(p+0x2C) -= *(f32 *)(p+0x2C) * *(f32 *)(p+0x150);` (`func_1514A164`; named locals forwarded and gave DIFF18).
+4. **Queue-add template** (`func_1510DDF4`, `func_1517DAE8`): `s32 i = D_count; if (i < N) { p = D_tab + i*16; stores...; D_count = i + 1; }` with the counter store written *last*; params are `s32`/`s16` (no `andi`), 5th+ params from the stack.
+5. **Linked-list search** with `next = n->0x54` loaded at the loop top, as do-while inside `if (n != NULL)` (`func_15031CBC`). **Struct stride**: `p++` over `struct127 D[]` instead of m2c's `+= 0x32C` (`func_1507C370`).
+6. Byte tables: `extern s8 D[]; D + arg0` (not `u8 *`/`s32`) for `lb` + compare with -1 (`func_15173218`); an `s32` parameter where m2c says `u8` removes an `sw a1,4(sp); andi` entry (`func_15182270`).
+7. `if (c) r = 1; else r = 0;` (explicit else) removes the `bc1fl ... move v0,v1` delay-slot copy of the epilogue that `r = 0; if (c) r = 1;` produces (`func_151596F4`); put the `arg1 == 2 || arg1 == 3` block first.
+8. A header type can be wrong (`D_800D9A40` is declared `s32` but is a `s16 *`): inline `**(s16 **)&D_800D9A40` at each use, no local (`func_150F3978`; `// fakematch`).
+9. A named `u8 t` local that is used once grew the frame (0x28 -> 0x30) in `func_15174AA4`/`func_15101610`: inline the expression instead.
+
+### Left (notes in `repair_log.tsv`)
+- DIFF1: `func_150EAA10`, `func_151AAFFC` (only `mul.s` operand order, `q = &arg0` memory form + `p = *q; p += 0x80`, permuter 100 s nothing).
+- DIFF2-6: `func_151B1EC8` (delay-slot store), `func_150A7DA0` (mtc1/nop vs sw in the slot), `func_150ADD90` (cross product float register order), `func_151597A0` (epilogue copy in bc1t slot).
+- Other: `func_15101610` (callee takes `u16`, lhu -> `andi`), `func_150FE08C` (2-case u8 handler, shape D), `func_1517FCCC`, `func_1512DB74`, `func_1511A998`, `func_150416EC`, `func_15085170`, `func_151CC784`, `func_15102B74`.
+
+### Next steps (session 30)
+- Finish the Gfx-macro candidates listed under recipe 1 and grep the pool for other raw gbi words (`0xE?/0xF?/0xD?` immediates in `lui`); run `shortpool.py 70` for the next size bucket (counts will be higher: it is the same recipe set).
+- 350 of the 384 pool candidates are untouched; the bulk-draft screen is not a good filter (no DIFF<=12), so read the asm of SIZE+-1..3 drafts first.
 
 ## Layout
 
