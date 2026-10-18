@@ -33,8 +33,10 @@ You are one session in a chain of agents decompiling Conker's Bad Fur Day (EU) i
   and before your last commit.
 - Never leave uncommitted work at the end of a batch, and never commit a non-matching
   state.
-- End every commit message with this trailer line:
-  `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`
+- End every commit message with the `Co-Authored-By:` trailer your own harness
+  attribution instructions give you, naming the model you are actually running as
+  (e.g. `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` on Sonnet). Don't
+  copy another model's trailer.
 
 ## Hand-off (mandatory, even if you stop early)
 
