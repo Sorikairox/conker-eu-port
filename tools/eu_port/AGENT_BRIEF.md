@@ -26,6 +26,14 @@ You are one session in a chain of agents decompiling Conker's Bad Fur Day (EU) i
   "Fast native toolchain"); recreate it from `conker-arm` if it is missing. Then the tools listed in `HANDOFF.md` (`docker exec` container, m2c pipeline in
   `tools/eu_port/m2c/`, `check_files.py`).
 
+## Code quality
+
+- When a match depends on an unnatural construct (permuter artifacts such as `new_var`
+  temporaries, `int *p = &k` to pin a constant, `do {} while (0)`, `p += K+1; p--;`,
+  dummy volatile or self-assignment), put a `// fakematch: <why>` comment on that line.
+  These compile to the right bytes and can be cleaned up later; the label makes them
+  findable (`grep -rn fakematch conker/src_eu`).
+
 ## Commits
 
 - Small batches, roughly 5–20 functions. Commit only after `verify_all.sh` (or at
