@@ -119,3 +119,26 @@ func_150AEDF8	DIFF6	2	SIZE-1	n	n	u8 handler delete/swap: clean rewrite (m2c draf
 func_15034710	DIFF8	1	DIFF8	n	n	calc first then stores; literal as extern D_800980C8; only temp reg numbering left
 func_15074A94	DIFF2	3	DIFF2	n	y	f12/f8 swap of sub.s/div.s results; 3 expression shapes (inline, temp, operand swap), permuter 200s no better
 func_1511CAD0	DIFF2	1	DIFF2	n	y	store/load order of the last 0x84 update vs the 8(s0) condition; condition swap is DIFF20; permuter 200s no better
+func_151108E0	DIFF7	1	OK	y	n	callee f32 (arg1 matrix ptr,f32,f32,f32); own params (s32, f32(*)[4], f32,f32,f32); D_800BE628 as u8* + 0xBC
+func_1512C5D8	DIFF7	3	OK	y	n	callee func_15123A54 takes only arg0 (m2c invented f32 args); then statement order: store 0x384 before 0x5CC=0 fixes f16/f18
+func_15141478	SIZE-1	2	SIZE-1	n	n	v1 spilled to 0x24 across calls in ref (sw v1 in each jal delay slot, lw after) but mine gets an s-reg for it (frame 0x28, s0/s1); sp24 local/two v1 vars no help
+func_15094CD0	SIZE+1	2	OK	y	n	a0 pass-through to func_15094DAC(arg0,sp50); sp50 is u8*[16] (frame 0x90), clean for loop (var_s1 += 4 on u8** was wrong)
+func_150AD930	DIFF11	2	DIFF11	n	n	leaf sqrt of squares: ref uses f0/f2/f4 and a nop (maybe asm-written), mine f12/f14 regs; sum local no help
+func_1516FE5C	DIFF7	2	DIFF7	n	n	lb/lbu load order + t-reg numbering (ref lb v0 first, sra t0 t9), locals hi/lo no help
+func_1503BC4C	DIFF6	2	OK	y	n	extern u8 D_800CC9EB (lo in lbu) + s32 temp (u8 temp went to v1)
+func_1514F114	DIFF5	2	DIFF5	n	n	scheduling: ref hoists lw t8 (arg0 home) before the zero stores; mine after; stmt reorder no help
+func_1517A028	DIFF19	3	DIFF6	n	n	a0/a1 swap (pointer in a1, temp in a0); decl order, no temp, index loop (DIFF19) no help
+func_15178E14	DIFF8	2	OK	y	n	own def has 1 param but functions.h/caller give 2: functions.h now void f(); + K&R def (u8 arg0) gives sw a0/andi/or a0 prologue
+func_151C8D5C	DIFF7	2	OK	y	n	7th param (s16 *) at 0x18(sp): add arg4/arg5 dummies; locals p,q to order lw/lbu/regs
+func_151EFDD0	DIFF8	3	DIFF8	n	n	returns the new value (u32); only a0/a1/v0 numbering off (lui a0 / mflo a1 in ref); permuter candidate but DIFF8
+func_150C7E30	DIFF10	1	DIFF10	n	n	known dead addiu v0,0x1E0 after the load (D struct ptr) dropped; a0 pass-through to func_1511563C
+func_1514143C	DIFF9	1	DIFF12	n	n	ref keeps v0=arg0+0x110 (0x44 offset not folded into 0x154); typed f32** variant DIFF12
+func_151927C0	DIFF11	4	OK	y	n	statement order: compute y=(x&0xFF)>>1 first, then 0x38/0x3A stores, then 0x14=(y<<16)+y, then 0x3B; explicit (y<<16)+y instead of *0x10001 fixed the t2/t3 dest
+func_15109100	DIFF9	2	DIFF15	n	n	returns p (v0) but IDO puts p in v1 + copy; ref v1=0x3E7 hoisted, v0=a0+t6; rewrites worse than m2c draft
+func_1516FE8C	DIFF9	1	DIFF9	n	n	same as FE5C: ref keeps lb value and product in v0, temps t6/t7 numbering; single reused var gives v1
+func_150EA904	DIFF14	2	OK	y	y	u8 *p = D + arg1*0xA0 form got DIFF3 (t8/t9 vs t0/t1 for the |= 3); permuter: (p[0x73] & 0xFFFF) | 3
+func_1516FEF4	DIFF6	3	OK	y	n	reuse ONE s32 local v for lh value and product (v0 numbering, t6 not skipped)
+func_1516FE8C	DIFF9	2	DIFF6	n	n	single reused v gives v0 right but t6/t7 swap and r in v1 not t0; return v makes v1
+func_151CA0E0	DIFF13	1	DIFF10	n	n	if/else with single return 1: still v0=1 in delay slots differs; branch-likely shape
+func_150ADDE0	DIFF12	2	DIFF12	n	n	dot product f0/f2/f4 numbering (like AD930: leaf float with f0 first) mine f4+; sum local SIZE+1
+func_100038E0	DIFF9	1	DIFF9	n	n	hw reg write: v0 const used as address; local u32 a not enough

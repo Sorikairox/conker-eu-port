@@ -3,7 +3,14 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1BFC70/func_151927C0.s")
+void func_151927C0(u8 *arg0) {
+    s16 y;
+    y = (*(s32 *)(arg0 + 0x14) & 0xFF) >> 1;
+    *(s16 *)(arg0 + 0x38) = 0x12C;
+    *(s8 *)(arg0 + 0x3A) = 0xA;
+    *(s32 *)(arg0 + 0x14) = (y << 16) + y;
+    *(s8 *)(arg0 + 0x3B) = 0;
+}
 // JUSTREG: using t2 not t3
 // void func_151927C0(struct114 *arg0) {
 //     s32 tmp0;

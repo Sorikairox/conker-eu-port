@@ -63,7 +63,36 @@ void func_1512BB6C(struct_eu_158110 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C080.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C5D8.s")
+void func_15123A54(u8 *);
+s32 func_1512C6C0(u8 *);
+
+void func_1512C5D8(u8 *arg0) {
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f2;
+    f32 var_f14;
+    s32 temp_v0;
+
+    if ((*(f32 *)((u8 *)arg0 + 0x390)) < 180.0f) {
+        var_f14 = 2.0f;
+    } else {
+        var_f14 = -2.0f;
+    }
+    temp_v0 = (*(s32 *)((u8 *)arg0 + 0x2C));
+    if ((temp_v0 != 0x80) && (temp_v0 != 0x40)) {
+        temp_f2 = (*(f32 *)((u8 *)arg0 + 0x2F8)) - (*(f32 *)((u8 *)arg0 + 0x2BC));
+        temp_f12 = (*(f32 *)((u8 *)arg0 + 0x300)) - (*(f32 *)((u8 *)arg0 + 0x2C4));
+        temp_f0 = sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12));
+        (*(f32 *)((u8 *)arg0 + 0x370)) = temp_f0;
+        if (temp_f0 < 42.0f) {
+            (*(f32 *)((u8 *)arg0 + 0x384)) = (*(f32 *)((u8 *)arg0 + 0x37C)) - 45.0f * var_f14;
+            (*(f32 *)((u8 *)arg0 + 0x5CC)) = 0.0f;
+            func_15123A54(arg0);
+            (*(s32 *)((u8 *)arg0 + 0x240)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x240)) | 2);
+        }
+    }
+    func_1512C6C0(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_158110/func_1512C6C0.s")
 

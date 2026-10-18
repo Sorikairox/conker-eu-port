@@ -48,4 +48,8 @@ void func_151791A4(u8 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15179314.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178E14.s")
+s32 func_15179314(u8 *);
+void func_15178E14(u8 arg0)
+{
+    func_15179314(func_15179108(arg0));
+}

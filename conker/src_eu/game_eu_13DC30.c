@@ -17,7 +17,12 @@ void func_1511084C(f32 (*arg0)[4], f32 arg1, f32 arg2, f32 arg3) {
     func_150A7A48(arg0, sp28, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151108E0.s")
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void func_1511084C(f32 (*)[4], f32, f32, f32);
+void func_151108E0(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4) {
+    func_1511084C(arg1, arg2, arg3, arg4);
+    func_150A7A48(arg1, (f32 (*)[4])((u8 *)D_800BE628 + arg0 * 0x180 + 0xBC), arg1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110948.s")
 

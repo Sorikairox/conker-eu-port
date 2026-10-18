@@ -22,7 +22,15 @@ void func_150EAE60(s32 arg0) {
     func_150E6060();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_117D70/func_150EA904.s")
+void func_150EA904(s32 arg0, s32 arg1)
+{
+  u8 *p;
+  p = ((u8 *) D_800DBEF4) + (arg1 * 0xA0);
+  if (p[0x72] == 224)
+  {
+    p[0x73] = (p[0x73] & 0xFFFF) | 3;
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_117D70/func_150EAEC4.s")
 
