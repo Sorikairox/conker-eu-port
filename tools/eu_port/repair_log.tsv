@@ -525,3 +525,22 @@ func_1512D868	untried	1	OK	y	n	switch on u8 state: case 1 reset counter+state 2;
 func_151103B0	untried	1	OK	y	n	relative-offset list walk: p += s16 at 0xC, else p += s16 at 0x4 and count++, else NULL
 func_15179314	untried	3	OK	y	n	callee file declares s32 ret (no return stmt); 'u8 *next' declared BEFORE p moves the spill slot (fakematch)
 func_151CA070	untried	2	DIFF27	n	n	ref spills a0,a1,a2 at entry and copies a0 to a1 (s32 arg0 as pointer); frame 0x58 vs 0x50 in mine
+func_150E2EA4	DIFF8	1	OK	y	n	wrapper: callee proto (s32,f32,f32,f32,...) so zeros go via mfc1 a1-a3
+func_150E3334	DIFF8	1	OK	y	n	same callee proto fix as func_150E2EA4
+func_1509CF78	DIFF2	1	OK	y	n	unrolled for(i<204) loop; screen now resolves reloc sym+addend vs asm sym by address (screen.py _alias_ok): D_800877D0+0xFF0 == D_800887C0
+func_150CEBA4	SIZE-1	4	DIFF9	n	y	u8 handler family (43 insns x7: 150D7370,150F066C,151937A4,151BEB08,150F15A0,150D7578): draft had arg0+0x18 on struct ptr (scaled) -> cast; ref has 'or a3,a0' copy; permuter 150s best DIFF9
+func_15109140	DIFF15	3	DIFF12	n	n	returns void (not s32); a0 reused as D_800C3958 element ptr; addu operand order a0+t6 vs t6+a0 open
+func_150C851C	SIZE-1	2	SIZE-1	n	n	chain order of the two *300/*50 mul-by-shifts swapped (s2/s3); expr order swap, base/mod locals: no
+func_15088360	SIZE-1	2	SIZE-1	n	n	spill v1 at 0x18 vs 0x1C; sp1C local grows frame; ternary for first branch no
+func_151A951C	SIZE-1	3	SIZE-1	n	n	needs s32 pad[2] first for frame 0x30; then arg0 reload reg (v0 vs t6) differs
+func_1513445C	SIZE-0	3	DIFF12	n	n	gSPSegment(gdl++, arg2, v) macros; needs Gfx* proto in game_eu_15FF50; ref loads ptr first then lbu x2, q local grows frame
+func_15080AA8	DIFF16	5	OK	y	y	p->unk31C-> in every access (u8 a unused local dropped); a/ptr register swap solved by permuter in 50 s (extra pad ; statement)
+func_150DFDA0	SIZE-2	2	SIZE-2	n	n	flag and/or sequence with intermediate stores; ref has 2 trailing nops; compound-assign form DIFF13
+func_150A33C4	DIFF13	1	DIFF35	n	n	natural rewrite worse than permuter-style draft (v1 vs t1 temp numbering)
+func_151D7D78	CERR	1	OK	y	n	forward void proto (fwdproto.sh); early 'q = *(s32**)(*v+0x98)' load, compound &=/|= on *v fields reload
+func_151D1990	CERR	1	OK	y	n	same template as func_151D7D78 (v+8 pointer slot, 0x28)
+func_151D43B4	CERR	4	OK	y	n	ptr+int operand order a0+t6: write (u8*)((s32)p + (x<<6)) with integer add (new recipe); proto in functions.h has void* arg2
+func_15095470	CERR	3	OK	y	n	m2c 'temp_v0 + idx*4' deref -> *(s32*)(u8*)((s32)temp_v0 + ...) integer add (operand order); void return (ret kept temp in wrong reg); proto void in game_eu_C2B60
+func_15080B84	CERR	3	OK	y	y	ring-queue u16 table; D_800D1994++ after the call; a0/v1 swap solved by permuter (new_var temp, fakematch)
+func_1507F834	CERR	3	DIFF15	n	n	table-of-byte-ptrs flag walk; ret var shared with the u8 field: ref has ptr in v1, field v0 and flag a0; mine v0/a0
+func_151E86A4	CERR	3	OK	y	y	void decl in game_eu_20B730; for loop over words with (u32) ptr compare gives DIFF2 (end-address lui a0 vs a2); permuter 10 s: osSpTaskLoad address pinned in a local (fakematch)

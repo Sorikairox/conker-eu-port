@@ -98,7 +98,7 @@ void func_151E2A1C(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3864.s")
 
-s32 func_151E86A4();
+void func_151E86A4(void);
 extern s8 D_80090134;
 extern s16 D_8009015C;
 extern s8 D_800BEA38;
@@ -322,7 +322,23 @@ void func_151E8648(void) {
     func_10017870(4U);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E86A4.s")
+extern s32 func_151DE100;
+void func_151E86A4(void) {
+    void (*new_var)(OSTask *tp); // fakematch: permuter temp pinning osSpTaskLoad address
+    s32 var_v1;
+    s32 *var_v0;
+    func_151E8648();
+    new_var = osSpTaskLoad; // fakematch
+    var_v1 = 0;
+    for (var_v0 = &func_151DE100; (u32) var_v0 < (u32) func_151DECB4; var_v0++) {
+        var_v1 += *var_v0;
+        if (!new_var) { } // fakematch
+    }
+    if (var_v1 != 0xBB9FE01C) {
+        *((s32 *) new_var) = 0;
+        if (func_151DECB4) { } // fakematch
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E870C.s")
 

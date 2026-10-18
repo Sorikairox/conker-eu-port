@@ -15,6 +15,23 @@ gd=sys.argv[1]; jobs=int(sys.argv[2]) if len(sys.argv)>2 else 8
 VERB=[''] if os.environ.get('SCREEN_V') else None
 TMP=os.environ.get('SCREEN_TMP','build/screen'); os.makedirs(TMP,exist_ok=True); os.makedirs(os.path.join(gd,'errs'),exist_ok=True)
 
+def _alias_ok(i,t,name,rels,mine,reft,addr):
+    """reloc symbol X+addend vs asm symbol Y: accept when the symbol files give addr(X)+addend == addr(Y)
+    (the compiler addresses the end of an array as base+size, the asm names the next symbol)."""
+    if t not in (5,6): return False
+    mm=re.search(r'%(?:hi|lo)\((\w+)\)',reft[i])
+    if not mm: return False
+    ax=_symaddr(name); ay=_symaddr(mm.group(1))
+    if ax is None or ay is None: return False
+    j=i
+    if t==5:
+        j=next((k for k in range(i+1,len(mine)) if addr+k*4 in rels and rels[addr+k*4][1]==name and rels[addr+k*4][0]==6),None)
+        if j is None: return False
+    lo=mine[j]&0xFFFF; lo=lo-0x10000 if lo&0x8000 else lo
+    hi=0
+    if t==5: hi=(mine[i]&0xFFFF)<<16
+    return ((ax+hi+lo)&0xFFFFFFFF)==ay
+
 def asm_words(path):
     w,t=[],[]
     for line in open(path):
@@ -101,7 +118,7 @@ def check_func(o,f,spath):
                 if VERB: VERB.append('%s %08X %08X  %s'%('  ' if (a&m)==(b&m) else '**',a,b,reft[i]))
                 continue
             if st=='STT_SECTION' or not name: return 'SECREL'+(':%s:%d'%(name,t) if VERB else '')
-            if not re.search(r'\b%s\b'%re.escape(name),reft[i]):
+            if not re.search(r'\b%s\b'%re.escape(name),reft[i]) and not _alias_ok(i,t,name,rels,mine,reft,addr):
                 n+=1
                 if VERB: VERB.append('** %08X %08X  %s  [reloc %s]'%(a,b,reft[i],name))
                 continue

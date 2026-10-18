@@ -7,7 +7,17 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4300.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D43B4.s")
+void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
+    u8 *temp_v0;
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x1D4));
+    if (temp_v0 != 0) {
+        func_15143134(arg2, (u8 *) arg1, (u8 *)((s32)temp_v0 + (arg3 << 6)));
+        return;
+    }
+    (*(f32 *)((u8 *)arg1 + 0)) = (f32) (*(f32 *)((u8 *)arg0 + 0x14));
+    (*(f32 *)((u8 *)arg1 + 4)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x18)) + arg4);
+    (*(f32 *)((u8 *)arg1 + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 0x1C));
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D441C.s")
 

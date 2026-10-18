@@ -48,7 +48,16 @@ s32 func_1509CEA8(s32 arg0)
   goto loop_1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509CF78.s")
+s32 func_1509CF78(void) {
+    s32 n = 0;
+    s32 i;
+    for (i = 0; i < 204; i++) {
+        if (D_800877D0[i].unk0 != 0) {
+            n++;
+        }
+    }
+    return n;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509CBD4.s")
 

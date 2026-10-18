@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_151D7D78(u8 *);
+
 
 struct260 *func_151D7760(s16 arg0, u8 arg1, u8 arg2, f32 arg3, u8 *arg4, u8 arg5, s32 arg6) {
     struct260 *temp_v0;
@@ -108,7 +110,21 @@ s32 func_151D7D4C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7D78.s")
+void func_151D7D78(u8 *arg0) {
+    u8 **v;
+    s32 *q;
+    v = (u8 **)(arg0 + 0x28);
+    if (*(s32 *)(arg0 + 0x28) != 0) {
+        q = *(s32 **)(*v + 0x98);
+        *(s8 *)(*v + 0x30) = 0;
+        *(u16 *)(*v + 0x1E) &= 0xFFFD;
+        *(u16 *)(*v + 0x1E) |= 8;
+        *(u16 *)(*v + 0x1E) |= 1;
+        *(s16 *)(*v + 0x1C) = 0x14;
+        *q = 0;
+        *v = NULL;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7DE0.s")
 
