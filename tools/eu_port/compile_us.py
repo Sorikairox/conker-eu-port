@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 SRC = "src"
 OUT = "build_port/us"
-CC = "../ido/ido5.3_recomp/cc"
+CC = os.environ.get("IDO_DIR", "../ido/ido5.3_recomp") + "/cc"
 
 INCLUDE = "-I . -I include -I include/2.0L -I include/2.0L/PR -I include/libc -I src/libultra/os -I src/libultra/audio -I src/libultra/io"
 CFLAGS = ("-G 0 -Xfullwarn -Xcpluscomm -signed -nostdinc -non_shared -Wab,-r4300_mul "

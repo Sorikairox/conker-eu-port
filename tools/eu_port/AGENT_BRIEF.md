@@ -22,7 +22,8 @@ You are one session in a chain of agents decompiling Conker's Bad Fur Day (EU) i
   re-splits from scratch, then runs the code build, `check_files.py`, the full ROM
   build and a progress summary. It exits 0 only when everything matches.
   `--quick` skips the re-split.
-- Inner loop: the tools listed in `HANDOFF.md` (`docker exec` container, m2c pipeline in
+- Inner loop: the native arm64 `conkerdev` container (image `conker-arm`, see HANDOFF
+  "Fast native toolchain"); recreate it from `conker-arm` if it is missing. Then the tools listed in `HANDOFF.md` (`docker exec` container, m2c pipeline in
   `tools/eu_port/m2c/`, `check_files.py`).
 
 ## Commits

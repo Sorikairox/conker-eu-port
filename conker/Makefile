@@ -64,7 +64,9 @@ TARGET = $(BUILD_DIR)/$(BASENAME).$(VERSION)
 
 LD_SCRIPT = $(BASENAME).ld
 
-CC     := ../ido/ido5.3_recomp/cc
+# IDO_DIR is overridden by the arm64 image (Dockerfile.arm) with a native build
+IDO_DIR ?= ../ido/ido5.3_recomp
+CC     := $(IDO_DIR)/cc
 
 CROSS   = mips-linux-gnu-
 AS      = $(CROSS)as

@@ -85,6 +85,25 @@ throw all of that away.**
 - The whole near-miss sweep (m2c drafts -> screen -> permuter -> apply): `tools/eu_port/sweep.sh`
   (session 13).
 
+## Fast native toolchain (session 14 restart)
+
+The inner loops run in a **native arm64 image** (`Dockerfile.arm`, image `conker-arm`).
+It has the native linux-arm build of ido-static-recomp v1.2 at `/opt/ido5.3`, selected
+through `IDO_DIR` (the Makefile and compile_us.py honour it), so there's no x86
+emulation. The `.text`, `.rel.text` and `.data` output is byte-identical to the x86 IDO;
+only `.mdebug` (debug info, discarded at link) differs.
+- A clean code build takes 20 s instead of 81 s, and one compile is about 3.6× faster.
+- The permuter and screening get the speed-up automatically, because they take the
+  compile line from `make -n`.
+- Build the image with
+  `docker build --platform linux/arm64 -f Dockerfile.arm -t conker-arm .`, then start
+  `conkerdev` from it (command below).
+- `verify_all.sh` still runs on the x86 image `conker` and stays the authority before
+  every commit. It also covers the bundled x86 `tools/gzip` used for ROM recompression.
+- Permuter time budget: a function now gets ~3.6× more iterations per second, so about
+  100 s per function in a sweep matches the old 300 s. Put the closest candidates
+  (DIFF1–5, SIZE±1) first.
+
 ## Build environment
 
 The toolchain (IDO 5.3 recomp, mips-linux-gnu binutils) is Linux x86-64 only, so
@@ -113,7 +132,7 @@ Progress: `make -C conker VERSION=eu progress` writes `conker/progress.csv`.
 Faster iteration: keep one container running and `docker exec` into it.
 
 ```sh
-docker run -d --name conkerdev --platform linux/amd64 -v ~/conker:/conker -w /conker conker sleep infinity
+docker run -d --name conkerdev --platform linux/arm64 -v ~/conker:/conker -w /conker conker-arm sleep infinity
 docker exec conkerdev make -C conker VERSION=eu -j8          # code build + verify
 docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION=eu -j8'  # full ROM
 ```
