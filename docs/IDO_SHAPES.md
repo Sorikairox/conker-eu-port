@@ -56,6 +56,10 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 10. **Hand-written asm** (`Handwritten function` marker, `mtc0`, `eret`, `cache`, `sd/ld`, `lwr/swr`) is not C: skip. `-mips2` cannot emit
     `sd/ld/dsll` (`func_150A7B80`, `func_150ADA20` 64-bit PRNG, `func_150DFE40` lwr/swr): `u64` stores become two `sw`; would need a per-file `-mips3` build.
 
+11. **Session 33 additions.** `fwdproto.sh` also fixes a file-local prototype that sits after its first use: delete the later line, insert it at the head (`func_150E3850`, `func_150E3788`, `func_1515F4E4`; callee `f32`/`void` types from the definition,
+    `void` for the callee the ref ignores). `extern s32 D_x;` that the draft calls as a function is really a function-pointer table: `extern void (*D_x[])(u8 *);` (`func_15040CC8`, `func_15174F68`, `func_1514D880`).
+    A pointer compared with `&D_800D121C` needs `(struct127 *)&D_800D121C`.
+
 ## 2. Stack frame and locals
 
 1. **Declaration order decides slots**: first declared = highest address. A lone 4-byte local before/after a struct moves it by 4
@@ -96,6 +100,8 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 15. **Local arrays from `.data`**: non-const `s32 sp1C[2] = {0x38, 0x54};` copies from `.data` (file must own that `.data`); `const` aggregates from `.rodata`;
     declare the struct before the array to get the array lower (s10). Initializer copy of an 8-byte blob: `struct_eu_s32x2 sp18 = D_800A3C40;` (`func_151343AC`).
     Locals the compiler optimises away but the ref keeps in memory: `s32 sp20[2]; s32 sp18[2];` assigned element-wise (`func_15135424`); `u8 sp1C[4]` passed to a 2-arg callee (`func_1519D4E0`).
+17. **m2c `spXX` undefined locals = arrays passed by address**: `f32 sp2C[3]; s32 sp28; s32 sp24;` with the vector passed as `sp2C` and a 12-byte copy `*(vertex *)arg4 = *(vertex *)sp2C;` (`func_15107FA0`, `func_151080F8`, `func_150D9304`, `func_1519C38C`
+    use `vertex sp4 = *(vertex *)arg1;` for the struct copy); matrix local `f32 sp20[4][4];` (`func_15114E8C`).
 16. **`const s32 sp1C[1] = {0x5A}; func_15169260(sp1C, 1, ...)`** needs a `void *` first param and no `(s32)` cast, else the address is computed into `v0` first (`func_15169260` family, s9).
 
 ## 3. Control flow and branch shapes
@@ -139,6 +145,11 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
     ref has an `or a3,a0` copy; if-chain, switch, K&R, shared-pointer-first all tried; permuter best DIFF9). `func_150AEDF8` family (8 members, `arg2 == 0x2D` arm first): `sb; b L; lw ra` where
     mine puts the `sb` in the delay slot; also `func_1519ED88` (DIFF26 with `D_800E0D50 = 0;` after the call). `func_15174E90`, `func_15031C4C`, `func_151B1EC8`: delay-slot variants, OPEN.
 13. **An empty `if (x < 0) {}` kept by the ref** (`func_151600E0`): IDO deletes it, also with `volatile`. OPEN. `func_150C7E68`, `func_1517F910` (hoisted `lw`s above the branch): OPEN.
+
+14. **Object-array loops** (`struct127 *p`, `p++`, end `(struct127 *)&D_800D121C`): `p = D_800CC2D0;` must be assigned inside the `if` that guards the loop (`func_150FE290`, permuter). `arg0 - D_800CC2D0` with `struct127 *arg0` is the index; IDO materialises `D_800CC2D0` twice in the ref
+    (loop pointer and index base each get their own `lui/addiu`) where mine CSEs: OPEN (`func_150626EC`, `func_1502F6B8`). An empty counting loop kept in a saved register (`func_15040CC8`): OPEN.
+15. **Byte read compared with `>= 0`** keeps the `bltz`: `s32 idx = *(u8 *)(p + 0x48); if (idx >= 0)` (`func_150E3A94`). A handler's first-arm `b` delay slot can be changed by an empty `dummy_label: ;` after that arm (permuter, `func_151CB07C`, fakematch); the local `v = arg1[0]` fixes v0 reuse.
+    Re-evaluating an `s16` table index inline for the call and testing `-1 != x` (permuter) fixed saved-register roles in `func_1514D880`.
 
 ## 4. Register allocation, copies and delay slots (the "arg copy" and "reload from home" shapes)
 

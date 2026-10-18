@@ -29,11 +29,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3139 / 5913 functions in C (53.1%)**, code bytes 340,772 / 2,253,856 (15.1%) (end of session 32; updated at the end of this file's session notes below).
-  init 361/540 (38.5% of bytes), game 2727/5330 (13.0%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
+- **3153 / 5913 functions in C (53.3%)**, code bytes 343,020 / 2,253,856 (15.2%) (end of session 33, from `verify_all.sh`).
+  init 361/540 (38.5% of bytes), game 2761/5330 (13.2%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
-- Session 33 (this one): docs restructure, then repair loop on the session-32 pool; see "Session 33" at the end.
+- Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
 - Conventions: EU symbols keep their **US names** (address in the name is the US one); clashing ones are `func_eu_XXXXXXXX` / `D_eu_XXXXXXXX`. A US function whose EU code differs is a prototype + `GLOBAL_ASM`.
   Data segments are mostly `databin`/`rodatabin` blobs; files that own `.rodata`/`.data` are listed in `docs/sessions/s08.md` / `s10.md` and by `grep -n 'rodata' conker/conker.eu.yaml`. Data symbols C code uses live in `undefined_syms.eu.txt`.
   Label every unnatural construct `// fakematch: <why>` (`grep -rn fakematch conker/src_eu`). Commit trailer: your own `Co-Authored-By:` line (see AGENT_BRIEF).
@@ -100,7 +100,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
-1. Continue the repair loop over `shortpool.py 70` (about 600 unlogged candidates after session 33). First read the first compile error of CERR drafts (many are prototype/forward-declaration fixes, `fwdproto.sh`); for SIZE+-1..3 drafts read the asm before restructuring; queue DIFF8-9 register-only leftovers for the permuter in the background.
+1. Continue the repair loop over `shortpool.py 70` (about 605 unlogged candidates; the ranked results of session 33's `gensome.sh` run are in `tools/decomp-permuter/repair/pool33.res`, 540 drafts: 167 CERR, 167 DIFF, 115 SIZE-, 91 SIZE+; the CERR first-errors are in `repair/cerr.err`, 153 CERR left). CERR with `Dereferenced a non-pointer`/`X undefined` (m2c vector locals `spXX`) and `redeclaration` (forward prototype) were the cheapest class in session 33 (12 of 14 matches); the remaining ones are listed in cerr.err. Queue DIFF<=9 register-only leftovers for the permuter in the background (`permute.sh f draft.c 150 5`).
 2. Pool expansions: `shortpool.py 100`, `clones.py --refresh --draft --lax` and `--near 16` after each batch (new matched C = new siblings), shape lists `shapes.py --list A|B 150` (A 101-150: 18, B 33 untouched), Gfx writers 101-150 insns (`gfxfind.py --untried --hints`).
 3. Open families worth a fresh idea: shape D unfilled delay slot (176 fns), the `func_150F1B78` family, `func_150AEDF8` family (8), the 43-insn u8 handler family (7), `mul.s` operand-order DIFF1s (`func_150EAA10`, `func_151AAFFC`), `func_151C2600` (DIFF2 frame), `func_150C572C` (DIFF2). All documented in IDO_SHAPES.md.
 4. Float functions blocked by rodata are unblocked in owned files (`game_eu_142E40`, `1CCD10`, `12C5F0`, `18B1C0`, `13C400`...): `func_15095B70`, `func_151166FC`, `func_150FF1A8`, `func_1519F500` need real hand work.
@@ -109,4 +109,13 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 ## Session notes
 
 ### Session 33
-(filled in at the end of the session)
+- Docs restructure (this file, `docs/IDO_SHAPES.md`, `docs/sessions/`), no code change.
+- Repair loop on the `shortpool.py 70` pool: 621 candidates, `gensome.sh` (5 min) -> 540 drafts. Worked CERR drafts by reading the first compile error first: 21 functions logged, **14 matched (67%)**,
+  40 attempts, permuter used on 7 (3 solved: `func_150FE290`, `func_151CB07C`, `func_1514D880`; 3 improved only: `func_1507C608` DIFF4, `func_15030600` SIZE+1; the rest not run).
+  Matched: `func_150E3850`, `func_150E3788` (callee prototype moved to file head), `func_1515F4E4` (forward protos), `func_150D9304`, `func_1519C38C` (vertex struct-copy vector integrators),
+  `func_15114E8C`, `func_15107FA0`, `func_151080F8` (m2c `spXX` vector locals -> `f32 spXX[3]` arrays passed by address), `func_151145D0`, `func_150FE290`, `func_150E3A94`, `func_151CB07C`, `func_15174F68`, `func_1514D880`.
+- New recipes are in `docs/IDO_SHAPES.md` (sections 1.5, 2.3, 3.5, 4.1, 5.1): `fwdproto.sh` also for moving a file-local prototype to the head; `struct127 *` loops need `p = D_800CC2D0` inside the `if`; `s32 idx = *(u8 *)...; if (idx >= 0)` keeps a `bltz` on a byte; fn-pointer tables for `extern s32 D_x` called as function.
+- Not solved (notes in `repair_log.tsv`): `func_150626EC`, `func_1502F6B8` (SIZE-1/-2: the ref materialises `D_800CC2D0` hi/lo twice, loop pointer and index base separately; mine CSEs), `func_15040CC8` (empty counting loop kept in `s0`), `func_150C1698` (s16 index free-list unlink, rotated registers),
+  `func_150D8F44` (shape A arg copy in a3 as 4th pass-through arg), `func_151D441C` (DIFF25: `subu` hoisted above the `lw v0` in the ref), `func_15030600` (saved register numbering).
+- `-O2` quirk worth knowing: `tools/eu_port/m2c/tryall` on a CERR-free list is the cheapest way to try 3-24 mechanical variants (declaration orders did nothing for register roles in `func_150C1698`).
+- Pitfall: a stray `cat > /tmp/x` in a compound shell command blocks on stdin (the call hangs until the tool timeout).
