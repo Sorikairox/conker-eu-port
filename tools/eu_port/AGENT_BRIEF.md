@@ -1,7 +1,9 @@
 # Standard brief for a decompilation work session
 
 You are one session in a chain of agents decompiling Conker's Bad Fur Day (EU) in
-`~/conker`, branch `eu`. Read `HANDOFF.md` in full before doing anything.
+`~/conker`, branch `eu`. Read `HANDOFF.md` in full before doing anything, and `docs/IDO_SHAPES.md` before any
+matching work. The session history in `docs/sessions/` is reference only (grep it when a
+function or tool name comes up; do not read it through).
 
 ## Rules
 
