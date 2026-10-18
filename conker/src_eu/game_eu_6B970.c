@@ -49,7 +49,20 @@ s32 func_1503E4E4(s32 arg0, s32 arg1)
 void func_1503F1A8(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F1B0.s")
+void func_1503EF90(s32);
+void func_1503F1B0(s32 arg0) {
+    s32 temp_v0;
+    struct106 *temp_v1;
+
+    func_1503EF90(arg0);
+    temp_v1 = &D_800C6660[arg0];
+    temp_v0 = *(s16 *)((u8 *)temp_v1 + 0xC);
+    temp_v0 = temp_v0 - D_800BE9E4; // fakematch: split load/subtract (permuter) gives the ref register order
+    (*(s16 *)((u8 *)temp_v1 + 0xC)) = temp_v0;
+    if (temp_v0 <= 0) {
+        func_15060F28(&D_800CC2D0[arg0], 1);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F23C.s")
 

@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (twenty-third session). Update this file at the end of every work session.
+Last updated: 2026-10-19 (twenty-fourth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2971 / 5913 functions in C (50.2%)**; code bytes 312,680 / 2,253,856 (13.9%)
-  (end of session 23, from `verify_all.sh`).
+- **2991 / 5913 functions in C (50.6%)**; code bytes 316,280 / 2,253,856 (14.0%)
+  (end of session 24, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2571/5330 (11.6%)
+  - game: 2599/5330 (11.9%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -73,6 +73,7 @@ Commits on `eu`:
 | `2ad4fa9`, next | Session 21: `// fakematch:` labels on sessions 19-20 constructs, own rodata for `game_eu_1C3530`; 11 functions |
 | `8fdd85e`, next | Session 22: 70-150 insn functions experiment; 4 functions, +1,536 bytes |
 | `e5241d4`, `270f3d8`, next | Session 23: recurring blocked shapes; "Known IDO shapes" section; 8 functions, +1,764 bytes |
+| `27e612a`, next | Session 24: `shapes.py`, recipes A/B applied family-wide; 20 functions, +3,600 bytes |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -1590,6 +1591,78 @@ that one function on a single line (`;` separated), next to the screen result; f
 - Apply recipe A to other "arg0 copy in a1/a2" functions of the list produced by grepping `asm/nonmatchings` for `or $aN, $a0, $zero` + `sw $aN, 0x18/0x20($sp)`
   (about 20 below 60 insns, e.g. `func_15183EE4`, `func_151AB06C`, `func_1518AF80`); recipe B (arrays, unnamed temps, pad first) for the other frame-size cases.
 - Always try `m2c/mine` + 10-20 mechanical variants through `tryall` before the permuter; the permuter found the last step of 2 of the 8 matches.
+
+## Session 24: shapes.py and family-wide recipes
+
+2 work commits (`27e612a` + the batch of 5 in the hand-off commit) + hand-off; +20 functions (2971 -> 2991), +3,600 bytes. Full `verify_all.sh` OK.
+About 33 functions looked at; rows in `repair_log.tsv`.
+
+### New tools
+
+- `tools/eu_port/shapes.py` scans the asm of every function still in GLOBAL_ASM and tags the known shapes (A arg-copy spilled to the a0 home slot,
+  B out-parameter vectors `x[3]`, C reload from home slot, D unfilled `store; jr ra; nop`). `shapes.py` prints counts per shape and size bucket;
+  `shapes.py --list A 100` lists the tagged functions up to 100 insns, smallest first. Heuristics only (B is loose: any two `addiu aN,sp,X` 12 apart in a
+  frame >= 0x20, so most >150 hits are noise; A needs `or aN,a0,zero` + `sw aN,<frame>(sp)`).
+- `tools/eu_port/sh.sh <func>`: the asm on one line plus the gensome draft (use it instead of reading the .s).
+- Workflow that worked: `gensome.sh ${=LIST}` (zsh needs `${=...}` to split a variable; a plain `$L` passes one word and the run finishes in 2 s with one CERR),
+  `m2c/mine func draft.c` to see my asm, stackfix for slot-only diffs, `repair_try.sh` to keep an OK draft, `apply.py build/hand` (reset `build/hand/screen.txt`
+  to only the new OK rows first, and do not `rm` the hand files before apply), `permute.sh -l list 120 8` for DIFF<=8 leftovers.
+
+### Counts of the still-open shapes (live GLOBAL_ASM functions, 2876 at the start of the session, 2856 at the end)
+
+| shape | <=20 | 21-40 | 41-60 | 61-100 | 101-150 | >150 | total (start) |
+|---|---|---|---|---|---|---|---|
+| A arg copy spilled | 0 | 10 | 18 | 28 | 18 | 28 | 102 |
+| B out-param `x[3]` | 0 | 4 | 17 | 18 | 33 | 156 | 228 |
+| C reload from home slot | 5 | 49 | 80 | 86 | 75 | 147 | 442 |
+| D unfilled `store; jr ra; nop` | 16 | 58 | 46 | 37 | 14 | 5 | 176 |
+| all functions | 79 | 301 | 424 | 566 | 495 | 1011 | 2876 |
+
+After the session A has 95, B 215, C 430, D 176 left (C and D untouched).
+
+### Hit rate
+
+- Shape A (<=100 insns, smallest first): 15 tried or looked at, **8 matched** (`func_1518AF80`, `func_150D0544`, `func_150D03A8`, `func_1519F970`, `func_1511ACC0`, `func_151A5620`,
+  `func_1503F1B0`, plus `func_150F0718` which is a B/A mix); failed: `func_15190A2C`, `func_151AB06C`, `func_15183EE4` (DIFF4), `func_151321F4` (DIFF3), `func_1510DD2C`;
+  skipped without trying (float literals in a file without .rodata, or m2c draft too far off): `func_151220D0`, `func_151CCD2C`, `func_151AF820`.
+- Shape B (<=100 insns): 16 tried, **13 matched** (`func_150F2230`, `func_150F9ED0`, `func_1506AB5C`, `func_1506AD28`, `func_1515A120`, and the 7-function template family `func_151D44C4`,
+  `func_151D45A4`, `func_151C09C8`, `func_151C1E10`, `func_150B64E0`, `func_151C5C54`, `func_151BC494`); failed `func_1506AC24` (float literals + slot offsets), skipped `func_1514F878`
+  (string rodata), `func_151AFA80` (rodata floats).
+- Overall for these two shapes: 20 of about 31 tried (65%), well above the 52% of the short-function loop. The family templates (7 siblings from one solved case, 1 attempt each) carry a good part of it.
+
+### Recipe refinements
+
+1. **Recipe B, the data-structure form.** When an m2c draft has `sp48`, `sp49`, `sp4A`, `sp4C` byte/half locals followed by `sp3C/sp40/sp44` s32s that are passed by address
+   (`func_151602C0((Header *)&sp48, (Header2 *)&sp3C, ...)`), write `s8 sp48[8]; s32 sp3C[3];` and `*(s16 *)(sp48 + 2) = ...`, `sp48[4] = 0;`. This matched at the first try for seven
+   functions (all "particle spawner" bodies, only constants differ: `% N + K`, colours). See `/tmp`-style generator idea: a 10-line python script that regexes the draft constants into the template.
+2. **Frame bigger than the vectors (`func_150F9ED0`, frame 0xA8):** `s32 pad[15];` declared first (fakematch) puts the five 12-byte vectors at the ref offsets; then stackfix order search finishes the
+   spill slots, and the last diff was an operand order (`(x << 6) + y` not `y + (x << 6)`). Size the pad as (ref frame - highest used offset) / 4.
+3. **Missing callee argument = stale register.** Several drafts failed because m2c invented arguments (`func_15183EE4`, `func_1511ACC0`, `func_150D03A8`): if the asm sets no register for an
+   argument, call with fewer args (the stale value in a1 is the arg0 copy). A handler stored as 3-arg in a table that only reads a0 must be declared 1-arg for the C to spill like the ref
+   (`func_150D03A8`; the file's prototype and its one caller were changed, whole build still matches).
+4. **Recipe A extra:** a table call whose index byte is read twice (`lb t6,0x4C(a1)` for the compare, `lb t7,0x4C(a1)` again for the index after the spills): the second read as
+   `*(volatile s8 *)` (fakematch, `func_150D0544`). The first test of a `lw t6; beqz; or a0,t6` double-load is a `*(s32 *)` compare followed by passing `*(u8 **)` of the same field;
+   subsequent single-load tests are pointer-typed. A callee prototype `(u8 *)` instead of `(s32)` was needed for `lw a0,..; beql a0` in `func_1519F970`.
+5. **A 4-byte stack argument off by one slot** (`func_1515A120`: `lw t6,0x48(sp)`): float arguments take a0..a3 slots, so add dummy `s32 arg4, s32 arg5` parameters.
+6. **No sign extension of a halfword result:** use `s32 temp` for `lh x; subu; sh x` (no `sll/sra`) (`func_1503F1B0`); the last step was permuter (split `temp = load; temp = temp - D;`, fakematch).
+7. stackfix does help for A-shape near misses: `func_1518AF80` (DIFF2 -> OK by declaration order `n,a2,h,k`) and `func_150F0718` (`r,sp4C,sp40,sp3C,sp54`). It did not help `func_15183EE4`
+   (needs a named local at 0x18 so the unnamed `v0` spill lands at 0x1C; pads go above, not below), nor frame-size cases.
+8. Callee prototype conflicts when screening: a file-local `void f(s16 *);` conflicts with a draft that calls with more args; temporarily change the file's declaration to `void f();` or
+   drop the draft's own prototype for functions the file already calls implicitly (`func_1511AA1C`). `func_10004074` has three different local prototypes in three files.
+
+### Left
+
+- A: `func_15190A2C` (v = arg0+0x30 is folded instead of kept in `t7` and spilled to 0x18; frame 0x18 vs 0x20; 8 variants), `func_151AB06C` (frame 0x28 vs 0x30, `(x+0x80)+4` folded),
+  `func_15183EE4` (DIFF4 slots), `func_151321F4` (DIFF3, sum temp in t0 not a0), `func_1510DD2C` (frame 0x30 vs 0x28 with 4 named locals), `func_150F3794`, `func_1514E014` (older).
+- B: `func_1506AC24` (+4 slot shift and float-literal scheduling), `func_151AFA80`, `func_1514F878`, `func_151CCD2C`, `func_151220D0` (rodata floats; need the `extern f32 D_...` form).
+- The remaining A (95) and B (215) functions above 100 insns were not touched; the 101-150 bucket of A has 18, B 33.
+- C and D (430 and 176 functions) are still open; sessions 23 notes still apply.
+
+### Next steps (session 24)
+
+- Run the same A/B recipes on the 101-150 insn functions of `shapes.py --list A 150` / `--list B 150` (expected hit rate lower, bytes per function higher).
+- Look for more "templates": functions whose drafts differ only in constants (the 7-function family above); group `gensome` drafts by their normalised text to find them.
+- Shapes C and D remain the biggest pools (430 + 176); D is mostly 2-case u8 handlers (see session 23 section D).
 
 ## Layout
 

@@ -111,7 +111,7 @@ func_15082D5C	DIFF31	1	OK	y	n	u8 locals gave andi/regs wrong: s32 lo/hi/i with u
 func_1508039C	SIZE-1	2	DIFF10	n	n	struct {u8 *; u8} sp20 needed (dead-store otherwise); sp1C pointer not kept on stack in mine
 func_150FB768	SIZE+1	1	OK	y	n	5-param function (arg0 pass-through to func_151D76BC; arg0 unused otherwise)
 func_150234E8	CERR	1	OK	y	n	callees func_1516D850/898 are 1-param C fns: m2c invented a second arg
-func_1503F1B0	CERR	3	SIZE+1	n	n	draft needs 'void func_1503EF90(s32);' (implicit decl clashed with later prototype); then only t-reg numbering (v0/v1 swapped)
+func_1503F1B0	CERR	2	OK	y	y	s32 temp (no sext) + permuter: split load / subtract (fakematch)
 func_1508823C	SIZE+1	2	OK	y	n	callee takes 3 args (4th invented by m2c); s32 call result passed to u8 param gives the andi
 func_15095EA0	DIFF28	2	OK	y	n	arg4 stays f32 (C caller passes 4096.0f); callee prototype (s32, f32, f32, f32, s32, s32 *): f32 stack arg goes to a3 with lw
 func_150882C4	DIFF36	1	DIFF36	n	n	hint false positive (a3 is a spill copy of a1); u16 angle diff chain not reproduced
@@ -315,6 +315,10 @@ func_15190A2C	SIZE-1	5	SIZE-1	n	n	recipe A v first: v folded into offset (no add
 func_151AB06C	SIZE-1	3	SIZE-2	n	n	recipe A: frame 0x28 vs 0x30, (x+0x80)+4 folded vs separate addiu
 func_15183EE4	SIZE+1	4	DIFF4	n	y	1-arg callee proto + p=...: only v0 spill slot 0x18 vs 0x1C; stackfix no; permuter queued
 func_151321F4	SIZE-2	5	DIFF3	n	y	temp_a0 -= 0x40 style; only t0 vs a0 for the sum temp left
-func_1503F1B0	CERR	2	DIFF19	n	y	s32 temp (no sext) fixes sll/sra; reg numbering v0/v1 differs
+func_1503F1B0	CERR	2	OK	y	y	s32 temp (no sext) + permuter: split load / subtract (fakematch)
 func_1510DD2C	CERR	4	DIFF30	n	n	3-arg callee; frame 0x30 vs 0x28 (named locals), file proto changed then reverted
-func_1506AB5C	SIZE-13	1	DIFF8	n	y	B arrays f32[3]; f-reg numbering f8/f10 vs f10/f16
+func_1506AB5C	SIZE-13	1	OK	y	y	B arrays f32[3]; permuter: only statement order (sp2C[2] before sp20[0])
+func_1506AD28	SIZE-13	1	OK	y	n	sibling of func_1506AB5C (3rd-from-last arg 1)
+func_1515A120	SIZE-3	2	OK	y	n	B arrays f32[3]; two dummy stack params (arg4,arg5) so arg6 is at 0x48
+func_150F0718	SIZE-7	3	OK	y	n	s8 hdr[8]+s32 v[3]; memcpy before sp54 store; stackfix order r,sp4C,sp40,sp3C,sp54
+func_1506AC24	SIZE-3	2	DIFF38	n	n	B template with float literals: sp38/sp44 +4 off, nonstack diff 38
