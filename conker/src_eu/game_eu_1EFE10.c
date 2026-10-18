@@ -24,7 +24,21 @@ s32 func_151C33FC(u8 *arg0, u8 *arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C3444.s")
+s32 func_151C3444(u8 *arg0, u8 *arg1) {
+    if (arg0 == arg1) {
+        return 0;
+    }
+    if (*(s32 *)arg0 == 0) {
+        return 0;
+    }
+    if (arg0[4] == 0xFF) {
+        return 0;
+    }
+    if (arg0[0x127] == 0xFF) {
+        return 0;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C34A0.s")
 

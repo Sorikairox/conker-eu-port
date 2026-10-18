@@ -5,7 +5,26 @@
 
 
 // need to figure out D_800D2460
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F060.s")
+extern u8 D_800D2880[];
+extern s8 D_800D288D;
+extern s8 D_800D289D;
+extern s32 D_800D28E0;
+void func_1508F060(void)
+{
+  int *new_var2;
+  int new_var;
+  u8 *p;
+  D_800D288D = 0;
+  D_800D289D = 0;
+  new_var = 2;
+  new_var2 = &new_var;
+  p = D_800D2880 + ((*new_var2) * 16);
+  (D_800D2880 + ((*new_var2) * 16))[0x1D] = 0;
+  p[0x2D] = 0;
+  p[0x3D] = 0;
+  p[0xD] = 0;
+  D_800D28E0 = 0;
+}
 
 void func_1508F0A4(void) {
     func_1508F0D4();

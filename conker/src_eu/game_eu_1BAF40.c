@@ -372,6 +372,20 @@ void func_15190C50(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1519072C.s")
+void func_1519072C(u8 *arg0)
+{
+  u8 *sp20[2];
+  s32 sp1C;
+  sp1C = 1;
+  sp20[0] = arg0;
+ if (0) { }
+  if (sp1C)
+  {
+    sp1C = (s32) sp20;
+    ((u8 *) sp20)[4] = arg0[0x3B];
+    func_151D343C(sp1C, 0x2A);
+  }
+  func_1518F9CC(0xFFFFFFFFFFFFFFFF & sp1C, 0x49);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_15190770.s")

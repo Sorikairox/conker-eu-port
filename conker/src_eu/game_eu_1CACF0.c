@@ -3,7 +3,11 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D4E0.s")
+void func_1519D4E0(u8 arg0) {
+    u8 sp1C[4];
+    sp1C[0] = arg0;
+    func_151482D4(sp1C, 6);
+}
 
 void func_1519D510(u8 *arg0)
 {

@@ -7,7 +7,19 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6C3C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6D2C.s")
+s32 func_1513F6C0(u8 *, s32, s32);
+s32 func_150C6D2C(u8 *arg0)
+{
+  u8 *p;
+  p = *((u8 **) (arg0 + 0xB0));
+  p += 0x59;
+  p--;
+  *((s32 *) (p + 0x14)) = 0;
+  *((s32 *) (arg0 + 0xB0)) = 0;
+  *((s32 *) (arg0 + 0x18)) = (*((s32 *) (arg0 + 0x18))) | 2;
+  func_1513F6C0(arg0, 0, 0);
+  return 0;
+}
 
 s32 func_150C6DC4(s32, u8 *, s32);
 

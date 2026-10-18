@@ -5,7 +5,14 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503DE70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E1FC.s")
+void func_1503E1FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    struct106 *temp_v0;
+    temp_v0 = &D_800C6660[arg0];
+    temp_v0->unk4 |= arg2;
+    temp_v0->unk8 |= arg3;
+    temp_v0->pad[2] = arg1;
+    temp_v0->unkF = 2;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E238.s")
 

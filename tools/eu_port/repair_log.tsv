@@ -198,3 +198,38 @@ func_1518AADC	DIFF2	0	OK	y	y	permuter 200s
 func_1519E764	DIFF2	0	OK	y	y	permuter 200s
 func_151A4EB0	DIFF10	3	OK	y	y	permuter DIFF2 + multiply operand order swapped (multu a1,t7)
 func_1513B798	DIFF6	5	DIFF2	n	y	permuter best (DIFF2): char flag spills at 0x1A (s8: lb), ref byte at 0x1B lbu; u8 gives DIFF10; stackfix pad no help
+func_1519D4E0	CERR	1	OK	y	n	u8 sp1C[4] array passed to 2-param callee (a2 = andi temp only)
+func_151308E4	SIZE-2	1	OK	y	n	callee has 6 params: a0 passes through, stack u8 arg
+func_151343AC	SIZE-1	1	OK	y	n	initializer copy: struct_eu_s32x2 sp18 = D_800A3C40
+func_151A3180	DIFF18	1	OK	y	n	callee is (s16,s16,f32,s32): draft passed 5 args
+func_15135424	SIZE-3	2	OK	y	n	s32 sp20[2], sp18[2] arrays (locals were optimised away)
+func_1503E1FC	SIZE+2	1	OK	y	n	s8 param -> s32 (no home store of narrow arg)
+func_151C3444	CERR	1	OK	y	n	u8 * arg1; draft already right, only compile errors
+func_150ED750	CERR	2	OK	y	n	arg0 = func(arg0): spill into the param home, frame 0x18
+func_150D1920	CERR	1	OK	y	n	u8 * arg0, divide a u8* difference by 0x32C
+func_15034118	CERR	1	OK	y	n	u8 * p / next locals instead of s32 var_a0
+func_1519072C	DIFF2	14	OK	y	y	permuter 120s (sp1C trick, kept verbatim)
+func_151A625C	DIFF12	5	OK	y	y	permuter: u16 *new_var = p+0x6C, test and pass *new_var (no re-load / andi)
+func_151A629C	DIFF12	1	OK	y	n	twin of 151A625C with the new_var pattern
+func_151D5E30	DIFF3	5	OK	y	y	permuter: s32 *t = arg0[i]; call with second load new_var
+func_150C572C	DIFF2	2	DIFF2	n	y	permuter best DIFF2 (addiu s1/s0 order)
+func_151F0754	DIFF15	4	DIFF4	n	y	varargs-style (u8*,s32,...) DIFF7; permuter DIFF4: a0 home order, lw a1 in delay
+func_151D7958	CERR	1	n	n	n	indirect call via table: ref re-reads the index (IDO CSEs it); same for func_15107C24, func_151635A8
+func_1508F060	SIZE-2	3	SIZE-2	n	n	i=2 constant folds; ref keeps v0=2, sll 4 unfolded
+func_150C6D2C	DIFF9	1	DIFF15	n	n	dead addiu v0,0x58 after pass-through a0 again (also func_151AB730)
+func_151D1694	CERR	1	CERR	n	n	return type clash with implicit decl in caller, not resolved
+func_150D034C	CERR	3	SIZE-1	n	n	ref keeps v0=a3+0x28 unfolded (dead-addiu family)
+func_15199954	SIZE+1	2	DIFF22	n	n	search-loop family again
+func_151CA484	SIZE-2	1	SIZE-2	n	n	ref keeps &sp24 in s0 across calls; mine rematerialises
+func_1510DBB0	SIZE-1	3	OK	y	y	permuter: new_var = p + n hoisted before the test, end != p
+func_151635A8	SIZE-1	2	OK	y	y	permuter: int new_var = 0x25 index variable keeps the table index re-read
+func_15107C24	SIZE-4	2	OK	y	y	permuter: int new_var = 0x68 plus local table pointer
+func_151D7958	SIZE-4	2	OK	y	y	permuter: u8 *new_var = &arg0[0x2C] for the second read, if (arg1) {} padding
+func_150D034C	SIZE-1	3	OK	y	y	permuter: p = q after q = p + 0x28 keeps v0 unfolded
+func_1508F060	SIZE-2	4	OK	y	y	permuter: int new_var = 2 via int *new_var2 = &new_var (constant kept in memory)
+func_150C6D2C	DIFF9	3	OK	y	y	dead addiu v0,0x58: p += 0x59; p--; and store at p + (off-0x58)
+func_151AB730	SIZE-1	1	OK	y	n	twin of 150C6D2C
+func_150C7E30	DIFF10	1	OK	y	n	dead addiu v0,0x1E0: p = base; p += 0x1E1; p--; read at p + 0x3C
+func_150C7DE0	DIFF14	1	OK	y	n	same dead-addiu trick
+func_150C63FC	DIFF9	1	OK	y	n	dead addiu trick with store offset 0
+func_1514143C	DIFF12	3	OK	y	y	permuter 150s

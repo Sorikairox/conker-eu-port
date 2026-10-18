@@ -16,7 +16,10 @@ void func_15131EC8(f32 *arg0, f32 arg1);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151307F0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151308E4.s")
+s32 func_151307F0(s32, u8, s32, s32, u8, s32);
+s32 func_151308E4(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    return func_151307F0(arg0, arg1, 0, arg2, arg3, arg4);
+}
 
 s32 func_151308E4(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4);
 

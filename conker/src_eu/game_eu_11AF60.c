@@ -3,7 +3,18 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150ED750.s")
+f32 func_15144BC8(f32);
+f32 func_150ED750(f32 arg0, f32 arg1) {
+    f32 temp_f0;
+    f32 var_f2;
+    arg0 = func_15144BC8(arg0);
+    temp_f0 = func_15144BC8(func_15144BC8(arg1) - arg0);
+    var_f2 = temp_f0;
+    if (temp_f0 > 180.0f) {
+        var_f2 = -360.0f + temp_f0;
+    }
+    return var_f2;
+}
 
 f32 func_150ED750(f32, f32);
 

@@ -275,7 +275,16 @@ void func_151353A8(struct161520 *arg0) {
     D_80089F28[idx](arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135424.s")
+s32 func_15145EA4(s32 *, s32 *, s32, s32);
+void func_15135424(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 sp20[2];
+    s32 sp18[2];
+    sp20[0] = arg1;
+    sp20[1] = arg2;
+    sp18[0] = arg3;
+    sp18[1] = arg4;
+    func_15145EA4(sp20, sp18, arg0, 2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135480.s")
 

@@ -133,7 +133,17 @@ void func_15107BF8(struct260 * arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107C24.s")
+extern void (*D_80088FD8[])(u8 *, s32, u8);
+void func_15107C24(u8 *arg0, s32 arg1, u8 arg2)
+{
+  int new_var;
+  void (**tab)(u8 *, s32, u8) = D_80088FD8;
+  new_var = 0x68;
+  if (tab[arg0[new_var]] != 0)
+  {
+    tab[arg0[new_var]](arg0, arg1, arg2);
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107C80.s")
 

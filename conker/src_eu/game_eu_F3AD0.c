@@ -19,7 +19,18 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3AD0/func_150C630C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3AD0/func_150C63FC.s")
+void func_1513F6C0(u8 *, u8, u8);
+s32 func_150C63FC(u8 *arg0) {
+    u8 *p;
+    p = *(u8 **)(arg0 + 0xB0);
+    p += 0x59;
+    p--;
+    *(s32 *)(p + 0) = 0;
+    *(s32 *)(arg0 + 0xB0) = 0;
+    *(s32 *)(arg0 + 0x18) |= 2;
+    func_1513F6C0(arg0, 0, 0);
+    return 0;
+}
 
 s32 func_150C6494(s32, u8 *, s32);
 

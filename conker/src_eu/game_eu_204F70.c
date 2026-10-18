@@ -32,7 +32,19 @@ struct260 *func_151D7760(s16 arg0, u8 arg1, u8 arg2, f32 arg3, u8 *arg4, u8 arg5
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7814.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7958.s")
+extern void (*D_80090044[])(u8 *, s32, u8);
+void func_151D7958(u8 *arg0, s32 arg1, u8 arg2)
+{
+  u8 *new_var;
+  if (D_80090044[arg0[0x2C]] != 0)
+  {
+    new_var = &arg0[0x2C];
+    if (arg1)
+    {
+    }
+    D_80090044[*new_var](arg0, arg1, arg2);
+  }
+}
 
 void func_151D79B4(void *arg0) {
     func_151D7D78(arg0);

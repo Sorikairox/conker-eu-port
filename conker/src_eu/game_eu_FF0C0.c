@@ -20,7 +20,18 @@ void func_150D18B0(u8 *arg0) {
     func_15059C84(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF0C0/func_150D1920.s")
+u8 *func_151149AC(s32);
+void func_150D1920(u8 *arg0) {
+    u8 *temp_v0;
+    temp_v0 = func_151149AC(0xF9);
+    if (temp_v0 != NULL) {
+        if ((arg0 - (u8 *)D_800CC2D0) / 0x32C == 0) {
+            temp_v0[0x6E] = 1;
+        } else {
+            temp_v0[0x6E] = 0;
+        }
+    }
+}
 
 void func_150D197C(s32 arg0) {
     u8 *temp_v0 = func_151149AC(0xF9);

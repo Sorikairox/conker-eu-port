@@ -125,7 +125,19 @@ s32 func_151AB36C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB640.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB730.s")
+s32 func_1513F6C0(u8 *, s32, s32);
+s32 func_151AB730(u8 *arg0)
+{
+  u8 *p;
+  p = *((u8 **) (arg0 + 0xB0));
+  p += 0x59;
+  p--;
+  *((s32 *) (p + 0x18)) = 0;
+  *((s32 *) (arg0 + 0xB0)) = 0;
+  *((s32 *) (arg0 + 0x18)) = (*((s32 *) (arg0 + 0x18))) | 2;
+  func_1513F6C0(arg0, 0, 0);
+  return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB774.s")
 

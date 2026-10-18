@@ -96,7 +96,16 @@ s32 func_150D02C8(u8 *arg0)
   return best;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D034C.s")
+s32 memcpy(s32, void *, s32);
+void func_150D034C(u8 *arg0)
+{
+  u8 *p = arg0;
+  u8 *q;
+  memcpy(*((s32 *) ((p + ((*((u8 *) (p + 0x3D))) << 2)) + ((0, 0x40)))), *((void **) (p + 0x34)), *((u8 *) (p + 0x3C)));
+  q = p + 0x28;
+  p = q;
+  *((*((u8 **) ((p + ((*((u8 *) (p + 0x15))) << 2)) + 0x18))) + (*((u8 *) (p + 0x14)))) = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D03A8.s")
 

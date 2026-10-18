@@ -160,7 +160,10 @@ void func_151A3134(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 *arg5)
     arg5[2] = arg0[2] * temp_f0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3180.s")
+s32 func_15143794(s16, s16, f32, s32);
+void func_151A3180(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, s32 arg5) {
+    func_15143794(arg1, arg2, (1.0f - arg4) * arg3, arg5);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A31D4.s")
 

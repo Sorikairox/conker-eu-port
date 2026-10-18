@@ -80,4 +80,19 @@ void func_151D56F8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D6310.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5E30.s")
+void func_151D5E30(s32 **arg0)
+{
+  s32 *new_var;
+  u8 i;
+  for (i = 0; i < 4; i++)
+  {
+    s32 *t = arg0[i];
+    if (1)
+    {
+    }
+    if (t)
+    {
+      new_var = arg0[i];
+      func_100043B4(new_var, 3);
+ } }
+}

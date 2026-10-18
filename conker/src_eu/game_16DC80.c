@@ -22,7 +22,19 @@ void func_151411C4(struct210 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151412BC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_1514143C.s")
+s32 func_1514143C(u8 *arg0)
+{
+  u8 *p;
+  if (*((s32 *) (arg0 + 0x154)))
+  {
+    p = arg0 + 0x111;
+ if (0) { }
+    p--;
+    (*((f32 **) (p + 0x44)))[0] = *((f32 *) (arg0 + 0x34));
+    (*((f32 **) (p + 0x44)))[1] = *((f32 *) (arg0 + 0x38));
+    (*((f32 **) (p + 0x44)))[2] = *((f32 *) (arg0 + 0x3C));
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_15141478.s")
 

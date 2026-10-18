@@ -107,7 +107,10 @@ void func_15134358(struct102 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_151343AC.s")
+void func_151343AC(s32 arg0, u8 arg1) {
+    struct_eu_s32x2 sp18 = D_800A3C40;
+    func_15169260(&sp18, 2, arg0, arg1);
+}
 
 void func_151343F4(s32 arg0, u8 *arg1, s32 arg2) {
     func_1513445C(arg0, *(u16 *)(arg1 + 0x170), arg1[0x172], *(s32 *)(arg1 + 0x174));

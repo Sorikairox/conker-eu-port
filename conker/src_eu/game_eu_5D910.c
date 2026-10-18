@@ -207,7 +207,27 @@ s32 func_150340F0(s32 arg0, u8 *arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15034118.s")
+s32 func_15034118(u8 *arg0, s32 *arg1) {
+    s32 n;
+    u8 *p;
+    u8 *next;
+    n = 0;
+    if (D_800C3EE0 == 0) {
+        return 0;
+    }
+    p = (u8 *)D_800C3EE0;
+    if (p != NULL) {
+        do {
+            next = *(u8 **)(p + 0x54);
+            if (arg0[0x3B] == p[0]) {
+                arg1[n] = (s32)p;
+                n += 1;
+            }
+            p = next;
+        } while (next != NULL);
+    }
+    return n;
+}
 
 u8 *func_15034174(u8 *arg0) {
     u8 *var_v1;
