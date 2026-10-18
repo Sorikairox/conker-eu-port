@@ -22,7 +22,15 @@ void func_1514FBB0(u8 *arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1514FE68.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150108.s")
+s32 func_15146078(u8 *, s32 *, s32 *);
+s32 func_1514FE68(u8 *, u8 *, s32 *, s32 *, f32, s32, s32);
+void func_15150108(u8 *arg0, u8 arg1, s32 arg2) {
+    s32 sp34[3];
+    s32 sp28[3];
+    if (func_15146078(arg0, sp34, sp28) != 0) {
+        func_1514FE68(arg0 + 0x10, arg0, sp34, sp28, (*(f32 *)((u8 *)arg0 + 0xC)), (s32) arg1, arg2);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1515016C.s")
 

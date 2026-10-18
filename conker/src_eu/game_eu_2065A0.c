@@ -25,7 +25,15 @@ s32 func_151D8D90(u8 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_eu_151D8FD4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_151D90D4.s")
+void func_1501C15C(u8);
+void func_151D90D4(u8 *arg0) {
+    u8 i;
+    for (i = 0; i < 4; i++) {
+        if (arg0[0x13] & (1 << i)) {
+            func_1501C15C(i);
+        }
+    }
+}
 
 void func_151D9138(void *arg0) {
     func_151D90D4(arg0);

@@ -114,7 +114,17 @@ void func_151991D0(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199200.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151992B0.s")
+void func_151992B0(u8 *arg0) {
+    u8 *p;
+    u16 t;
+    p = *(u8 **)(arg0 + 0x98);
+    if (*(s8 *)(arg0 + 0x2C) != 0) {
+        t = *(u16 *)(p + 0x66);
+        if (t != 0) {
+            func_100111C8(t);
+        }
+    }
+}
 
 void func_151992EC(s32 arg0) {
 }

@@ -166,8 +166,20 @@ s32 func_1508EBDC(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508ECF8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508EFEC.s")
+void func_1508EFEC(s32 arg0, s32 arg1, s32 arg2) {
+    s32 t;
+    t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
+    func_1509BFB0(1, t | 0x2000, arg1, arg2);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508F054.s")
+void func_1508F054(s32 arg0, s32 arg1) {
+    s32 t;
+    t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
+    func_1509BFB0(1, t | 0x2000, 0x14, arg1);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508F0B8.s")
+void func_1508F0B8(s32 arg0, s32 arg1) {
+    s32 t;
+    t = *((u8 *)&D_800CC82F + arg0 * 0x32C);
+    func_1509BFB0(1, t | 0x2000, 0x61, arg1);
+}

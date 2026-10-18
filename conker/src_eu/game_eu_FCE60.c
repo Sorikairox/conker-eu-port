@@ -13,7 +13,16 @@ void func_150CFA40(s32 arg0) {
     func_151CFE48(D_800CC2D0, D_800CC2D0->y_position + 300.0f, 0xC61C4000);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFA88.s")
+extern s32 D_80088C30;
+extern s32 D_80088C34;
+extern s32 D_80088C38;
+void func_150CFA88(s32 arg0) {
+    s32 temp_v1;
+    D_80088C30 += D_800BE9E4 * 0x1A;
+    temp_v1 = D_800BE9E4 * 0x1C;
+    D_80088C34 -= temp_v1;
+    D_80088C38 -= temp_v1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFAF8.s")
 

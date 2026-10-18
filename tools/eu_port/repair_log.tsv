@@ -142,3 +142,20 @@ func_1516FE8C	DIFF9	2	DIFF6	n	n	single reused v gives v0 right but t6/t7 swap an
 func_151CA0E0	DIFF13	1	DIFF10	n	n	if/else with single return 1: still v0=1 in delay slots differs; branch-likely shape
 func_150ADDE0	DIFF12	2	DIFF12	n	n	dot product f0/f2/f4 numbering (like AD930: leaf float with f0 first) mine f4+; sum local SIZE+1
 func_100038E0	DIFF9	1	DIFF9	n	n	hw reg write: v0 const used as address; local u32 a not enough
+func_150C7D70	DIFF6	1	OK	y	n	a0 pass-through to func_15116A8C (4 args, f32 last = lui a3 only); own param s32 arg0
+func_151D90D4	DIFF9	1	OK	y	n	for (u8 i=0;i<4;i++) with callee (u8 i): v0=i copy of s0 comes free
+func_1508F054	DIFF9	1	OK	y	n	table byte read into an s32 temp (lbu v0, lo(D)(v0) then ori): v0 for the call arg
+func_1508EFEC	DIFF9	1	OK	y	n	same as F054 (s32 temp = *((u8*)&D + arg0*0x32C))
+func_1508F0B8	DIFF9	1	OK	y	n	same as F054
+func_15133FC0	DIFF11	1	OK	y	n	statement order: the 0x10+arg4 store first; ref hoists the stack-arg load
+func_150CFA88	DIFF10	1	OK	y	n	statement order: D*0x1A accumulate first, then the 0x1C temp (v0/v1 numbering)
+func_15150108	DIFF11	1	OK	y	n	frame size: sp34/sp28 are 12-byte vectors (s32 sp34[3], sp28[3]) not scalars
+func_1515F61C	DIFF12	1	DIFF12	n	n	screens OK with literal 32767.0f, but with the extern D_eu_800A6904 the real file schedules lui at after c.le.s (+1 insn); owning .rodata of game_eu_18B1C0 would fix it
+func_150F791C	DIFF9	4	OK	y	y	pointer-array loop: p[i + 2] on s32* (was *4 twice); i += 1; i &= 0xFF; while (i < 2) via permuter (from DIFF3)
+func_15155CF0	DIFF8	2	DIFF8	n	n	scheduling: ref sw v1,0x24 before jal with addiu a0 in delay; mine reversed; with/without sp24 var same
+func_151992B0	DIFF12	1	OK	y	n	load the 0x98 pointer before the test (ref lb, lw both before the branch); locals p,t
+func_1515D4D4	DIFF10	2	DIFF15	n	n	ref: lui/addiu of D_800DD157 before the or a3 narrowing; p/q pointer locals worse
+func_150FF148	DIFF14	1	OK	y	n	hoist the 0x1D4 + (D<<6) arg into a local before the sp20/sp1C stores (ref loads arg0,D,arg2 in that order); string literal "A " = D_800A23D0
+func_15133F44	DIFF13	1	OK	y	n	statement order: 0x3C store before temp_f0 = 0x14 load (same as 15133FC0)
+func_151DDA10	DIFF11	1	DIFF24	n	n	if/else-if chain with one v is worse than the m2c goto-ish shape (sp2C spill); unsolved
+func_150E3C3C	DIFF12	1	OK	y	n	parameter as temp: arg0 = arg0 - 1 (ref reuses a0; v0 for the table load)

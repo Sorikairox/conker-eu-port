@@ -43,7 +43,18 @@ s32 func_150E3994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3B5C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3C3C.s")
+void func_150E3C3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
+    s32 temp_v0;
+    arg0 = arg0 - 1;
+    if ((arg0 >= 0) && (arg0 < 8)) {
+        temp_v0 = D_800D99D0[arg0];
+        if ((temp_v0 != 0) && ((*(u8 *)((u8 *)temp_v0 + 0)) == 0x27)) {
+            *arg1 = (s32) (*(f32 *)((u8 *)temp_v0 + 0x10));
+            *arg2 = (s32) (*(f32 *)((u8 *)temp_v0 + 0x14));
+            *arg3 = (s32) (*(f32 *)((u8 *)temp_v0 + 0x18));
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3CB8.s")
 
