@@ -979,7 +979,15 @@ struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15163504.s")
+s32 func_15163504(u8 *arg0) {
+    *(s16 *)(*(u8 **)(arg0 + 0x14) + 0xE) = (s32)**(f32 **)(arg0 + 0x18);
+    *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x10) = (s32)**(f32 **)(arg0 + 0x1C);
+    *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x12) = (s32)**(f32 **)(arg0 + 0x20);
+    if (*(s8 *)(arg0 + 0x24) != -1) {
+        return D_8008B70C[*(volatile s8 *)(arg0 + 0x24)](); // fakematch: volatile forces the second lb
+    }
+    return 1;
+}
 // NON-MATCHING: something is missing..
 // s32 func_15163504(struct225 *arg0) {
 //     s32 ret = 1;

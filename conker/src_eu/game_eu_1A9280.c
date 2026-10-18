@@ -42,9 +42,25 @@ void func_1517D534(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517D5E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517DAE8.s")
+extern u8 D_800DE158[];
 
-s32 func_1517DAE8(s16, s16, s16, f32, s32, s32, u8);
+void func_1517DAE8(s16 arg0, s16 arg1, s16 arg2, f32 arg3, s32 arg4, s32 arg5, u8 arg6) {
+    u8 *p;
+    s32 i = D_8008CEB0;
+
+    if (i < 3) {
+        p = D_800DE158 + i * 16;
+        *(s16 *)(p + 0) = arg0;
+        *(s16 *)(p + 2) = arg1;
+        *(s16 *)(p + 4) = arg2;
+        *(f32 *)(p + 0xC) = arg3;
+        *(s16 *)(p + 8) = arg4;
+        *(s16 *)(p + 0xA) = arg5;
+        p[6] = arg6;
+        D_8008CEB0 = i + 1;
+    }
+}
+
 
 void func_1517DB6C(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_1517DAE8(arg0, arg1, arg2, D_800DBFF0[arg3].unk380, arg4, arg5, (s32) D_800DDD1C >> 3);

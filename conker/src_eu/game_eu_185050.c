@@ -43,7 +43,13 @@ Gfx *func_151584F0(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
     return gdl;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15158558.s")
+extern Mtx *D_800DC6D0[];
+
+Gfx *func_15158558(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
+    gSPMatrix(gdl++, (u8 *)D_800BE628 + arg2 * 0x180 + (D_800BE9C0 << 6) + 0x100, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(gdl++, (u8 *)D_800DC6D0[D_800BE9C0] + (arg2 << 6), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+    return gdl;
+}
 
 void func_151585E8(s32 arg0, u8 arg1) {
     func_15169260(D_800A6440, 3, arg0, arg1);

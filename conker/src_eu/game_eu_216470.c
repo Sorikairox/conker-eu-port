@@ -42,7 +42,17 @@ s32 func_151EC0E0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ED854.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ED998.s")
+u8 *func_1501A6CC(u8 *, s32, s32, s32, s32);
+Gfx *func_151ED998(Gfx *gdl) {
+    if ((u8)D_800E0FC6 == 0) {
+        return gdl;
+    }
+    gDPPipeSync(gdl++);
+    gDPSetOtherMode(gdl++, 0x082C3F, 0x504340);
+    gDPSetCombine(gdl++, 0xFFFFFF, 0xFFFEFB7D);
+    gDPSetEnvColor(gdl++, 0, 0, 0, (u8)D_800E0FC6);
+    return (Gfx *)func_1501A6CC((u8 *)gdl, 0, 0, D_800BE620, D_800BE624);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDA54.s")
 

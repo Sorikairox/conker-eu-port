@@ -24,7 +24,16 @@ void func_150CFA88(s32 arg0) {
     D_80088C38 -= temp_v1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFAF8.s")
+extern s32 D_80088C30;
+extern s32 D_80088C34;
+extern s32 D_80088C38;
+extern s32 D_80088C3C;
+
+Gfx *func_150CFAF8(Gfx *gdl) {
+    gDPSetTileSize(gdl++, 0, D_80088C30 >> 7, D_80088C34 >> 7, 0x47E, 0x47E);
+    gDPSetTileSize(gdl++, 1, D_80088C38 >> 7, D_80088C3C >> 7, 0x47E, 0x47E);
+    return gdl;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CFB90.s")
 
