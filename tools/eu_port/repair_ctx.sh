@@ -5,7 +5,7 @@
 P=~/conker/tools/decomp-permuter; R=$P/repair; f=$1
 d=$R/$f.c
 if [ ! -f $d ]; then
-  for c in $P/nm/$f/best.c $P/sweep/drafts4/$f.c $P/sweep/drafts3/$f.c $P/sweep/drafts2/$f.c $P/sweep/drafts/$f.c $P/drafts/$f.c $P/drafts_pc/$f.c; do
+  for c in $R/fresh/$f.c $P/nm/$f/best.c $P/sweep/drafts4/$f.c $P/sweep/drafts3/$f.c $P/sweep/drafts2/$f.c $P/sweep/drafts/$f.c $P/drafts/$f.c $P/drafts_pc/$f.c; do
     [ -f $c ] && { mkdir -p $R; grep -v 'PERMUTER CHANGED' $c > $d; break; }; done
 fi
 s=$(find ~/conker/conker/asm/nonmatchings -name $f.s | head -1)
@@ -19,3 +19,4 @@ awk '{l[NR]=$0; if ($1=="**" && $0 !~ /%hi|%lo|jal /) {if(!first) first=NR; last
   if(!first){print "(no differing words; size/other)"; exit}
   a=first-3; if(a<1)a=1; b=first+14; if(b>NR)b=NR
   for(i=a;i<=b;i++) print l[i]; if(last>b) print "... last diff at line " last " of " NR}' $R/$f.diff | sed '/^$/d'
+h=$(python3 ~/conker/tools/eu_port/draftcheck.py $f $d 2>/dev/null | grep -v "no .s found"); [ -n "$h" ] && { echo "=== HINTS (draftcheck.py: call patterns / double scaling)"; echo "$h"; }

@@ -3,7 +3,22 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF0C0/func_150D18B0.s")
+extern f32 D_800A0C80;
+extern f32 D_800A0C84;
+extern f32 D_800A0C88;
+void func_15059C84(u8 *);
+void func_150D18B0(u8 *arg0) {
+    f32 temp_f0;
+    f32 temp_f2;
+    temp_f0 = *(f32 *)(arg0 + 0xBC);
+    temp_f2 = *(f32 *)(arg0 + 0x148);
+    *(f32 *)(arg0 + 0xB8) += temp_f0;
+    *(f32 *)(arg0 + 0xBC) = temp_f0 * D_800A0C80;
+    *(f32 *)(arg0 + 0x3C) *= D_800A0C84;
+    *(f32 *)(arg0 + 0xC4) += temp_f2;
+    *(f32 *)(arg0 + 0x148) = temp_f2 * D_800A0C88;
+    func_15059C84(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF0C0/func_150D1920.s")
 

@@ -5,7 +5,7 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 f=$1; T=${TRYDIR:-t}; d=~/conker/conker/build/$T; rm -rf $d; mkdir -p $d
 if [ -n "$2" ]; then cp "$2" $d/$f.c; else cat > $d/$f.c; fi
 cp ~/conker/tools/eu_port/m2c/screen.py ~/conker/conker/build/screen.py
-docker exec -e SCREEN_V=$V -e SCREEN_DATAREL=$SCREEN_DATAREL -e SCREEN_TMP=build/screen_$T -w /conker/conker conkerdev python3 build/screen.py build/$T 1 >/dev/null 2>&1
+docker exec -e SCREEN_OPT="$SCREEN_OPT" -e SCREEN_V=$V -e SCREEN_DATAREL=$SCREEN_DATAREL -e SCREEN_TMP=build/screen_$T -w /conker/conker conkerdev python3 build/screen.py build/$T 1 >/dev/null 2>&1
 cut -d' ' -f1 $d/screen.txt; [ -f $d/errs/$f.txt ] && cat $d/errs/$f.txt
 [ -n "$V" ] && [ -f $d/$f.diff ] && cat $d/$f.diff
 true

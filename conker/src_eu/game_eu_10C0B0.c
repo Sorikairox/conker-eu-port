@@ -25,7 +25,13 @@ s32 func_150DF04C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DF0D8.s")
+s32 func_15140410(s32, s32, s32, s16);
+s32 func_150DF0D8(s32 arg0, s16 arg1) {
+    if (D_800DBFF0[D_80082FA0].unk388 < 5.0f) {
+        return 0;
+    }
+    return func_15140410(arg0, arg0 + 0x120, arg0 + 0x12C, arg1);
+}
 
 void func_150DF1A8(u8 arg0, s32 arg1);
 

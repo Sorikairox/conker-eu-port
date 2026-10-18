@@ -111,4 +111,15 @@ void func_150D05D0(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150D0644.s")
+u8 *func_150D0420(u8, s32, s16, s32, s32, s32, u8, s32);
+s32 memcpy(s32, void *, s32);
+void func_150D0644(u8 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
+    s32 sfpad;
+    s8 sp30[4];
+    u8 *temp_v0;
+    sp30[0] = 0;
+    temp_v0 = func_150D0420(arg0, arg1, arg2, 8, 0, 0, arg3, arg4);
+    if (temp_v0 != NULL) {
+        memcpy((*(s32 *)((u8 *)temp_v0 + 0x48)), sp30, 1);
+    }
+}

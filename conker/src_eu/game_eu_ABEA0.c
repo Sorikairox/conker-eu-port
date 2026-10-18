@@ -53,7 +53,19 @@ s32 func_1507EA98(u8 *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E7E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507ECE8.s")
+s32 func_1507ECE8(s32 arg0, s32 arg1) {
+    s32 *p;
+    s32 v;
+    p = (s32 *)D_800D1C90[func_15084E08(arg0)];
+    if (p != NULL) {
+        p -= 2;
+        v = *p;
+        if (v != 0) {
+            return (arg1 * 10) + v;
+        }
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507ED48.s")
 

@@ -21,7 +21,25 @@ void func_1510F800(s32 arg0) {
     func_150A4ED4(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FDA0.s")
+s32 func_1510E908(s32, s32, f32 *, f32 *);
+void func_1510FDA0(s32 arg0, s32 arg1, f32 *arg2, f32 *arg3, s32 arg4, f32 *arg5, f32 *arg6)
+{
+  f32 sp24;
+  f32 sp20;
+  f32 temp_f2;
+  func_1510E908(arg0, arg1, &sp24, &sp20);
+  temp_f2 = sqrtf((sp24 * sp24) + (sp20 * sp20));
+  *arg5 = sp24;
+  *arg6 = sp20;
+  temp_f2 = temp_f2 * 0.02f;
+  if (temp_f2 == 0.0f) {
+    *arg2 = 1.0f;
+    *arg3 = 0.0f;
+    return;
+  }
+  *arg2 = sp24 / temp_f2;
+  *arg3 = sp20 / temp_f2;
+}
 
 s32 func_1510FE4C(s32 arg0) {
     return arg0 & 0x1F;
