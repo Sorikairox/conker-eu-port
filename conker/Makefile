@@ -178,6 +178,14 @@ $(BUILD_DIR)/src_eu/init_eu_23A20.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_238E0.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_23860.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/game_eu_21E320.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21E520.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21D060.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21D420.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21D990.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21DA70.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21E490.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_220050.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_220400.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_23B70.c.o: OPT_FLAGS := -O1
 
 $(BUILD_DIR)/$(SRC_DIR)/libultra/io/ai.c.o: OPT_FLAGS := -O1

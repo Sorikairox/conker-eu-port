@@ -76,7 +76,16 @@ s32 func_1514AA08(struct_1514AA08 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514B30C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514B4E4.s")
+s32 func_1514B4E4(struct_eu_EF410_b *arg0) {
+    arg0->unk2C -= arg0->unk2C * arg0->unk150;
+    arg0->unk30 -= arg0->unk30 * arg0->unk150;
+    arg0->unk38 += arg0->unk50 * D_800BE9A4 + 0.5f * arg0->unk4C * D_800BE9A4 * D_800BE9A4;
+    arg0->unk50 += arg0->unk4C * D_800BE9A4;
+    if (arg0->unk2C < 10.0f || arg0->unk30 < 10.0f) {
+        return 0;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514B5A4.s")
 

@@ -103,6 +103,20 @@ block_7:
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150802A8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1508039C.s")
+void func_1508039C(u8 *arg0)
+{
+  u8 *sp20[2];
+  s32 sp1C;
+  sp1C = 1;
+  sp20[0] = arg0;
+ if (0) { }
+  if (sp1C)
+  {
+    sp1C = (s32) sp20;
+    ((u8 *) sp20)[4] = arg0[0x3B];
+    func_151920FC(sp1C, 0xD);
+  }
+  func_151494E0(0xFFFFFFFFFFFFFFFF & sp1C, 0xD);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150803E0.s")

@@ -322,3 +322,25 @@ func_1506AD28	SIZE-13	1	OK	y	n	sibling of func_1506AB5C (3rd-from-last arg 1)
 func_1515A120	SIZE-3	2	OK	y	n	B arrays f32[3]; two dummy stack params (arg4,arg5) so arg6 is at 0x48
 func_150F0718	SIZE-7	3	OK	y	n	s8 hdr[8]+s32 v[3]; memcpy before sp54 store; stackfix order r,sp4C,sp40,sp3C,sp54
 func_1506AC24	SIZE-3	2	DIFF38	n	n	B template with float literals: sp38/sp44 +4 off, nonstack diff 38
+func_151F0D10	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F0D6C	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F0DD4	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F11EC	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F1384	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F15E0	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F16DC	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_151F19FC	CLONE	1	OK	y	n	clone of init_eu_27C40 libultra copy; file needs -O1
+func_1508039C	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_1514B4E4	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151EFA48	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151EFC10	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151EFCC4	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151F0180	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151EFB18	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151F2840	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151F2A84	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151F2BF0	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151F2E20	CLONE	1	OK	y	n	clone draft (clones.py); file -O1 + controller.h for libultra
+func_151F0C80	CLONE	2	OK	y	n	clone; shared 64-bit D_80042D40 kept
+func_150AF6A0	CLONE	2	OK	y	n	clone; * 32 by hand
+func_150D19AC	CLONE	2	OK	y	n	clone; float constants by hand

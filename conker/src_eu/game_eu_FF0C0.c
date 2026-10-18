@@ -40,4 +40,10 @@ void func_150D197C(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF0C0/func_150D19AC.s")
+extern f32 D_800A0C90;
+void func_150D19AC(s32 arg0) {
+    f32 *sp28;
+    sp28 = (f32 *)((arg0 ^ 0) + 0x28); sp28 = sp28;
+    func_151467A4(arg0 + 0x30, 10.0f, arg0 + 0x2C, 50.0f, 100.0f, 123.0f, D_800A0C90, sp28);
+    func_1515D4D4(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
+}
