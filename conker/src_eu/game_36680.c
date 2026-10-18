@@ -370,75 +370,36 @@ void func_1500A79C(s32 arg0, s32 arg1) {
     func_15162740(arg0, 22, 6, 0, 300, 2, 255, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_1500A7E8.s")
-// Near miss (session 10): sp24 at sp+0x28 instead of 0x24; move unk14 before the sp48 stores.
-// void func_1500A7E8(s32 arg0, s32 arg1) {
-//     struct220 sp48;
-//     struct {
-//         f32 unk0;
-//         f32 unk4;
-//         u8 *unk8;
-//         f32 unkC;
-//         f32 unk10;
-//         f32 unk14;
-//     } sp30;
-//     u8 sp24[6] = {2, 3, 4, 5, 6, 7};
-//     s32 temp_v0;
-//
-//     sp30.unk8 = (u8 *)func_151149AC(sp24[arg1 - 0x50]);
-//     if (sp30.unk8 != NULL) {
-//         sp30.unk0 = -400.0f;
-//         sp30.unk4 = 4.0f;
-//         sp30.unkC = *(s16 *)(sp30.unk8 + 0x10);
-//         sp30.unk10 = *(s16 *)(sp30.unk8 + 0x12);
-//         sp48.unk0 = 0;
-//         sp48.unk1 = 0x17;
-//         sp48.unk2 = 300;
-//         sp48.unk4 = 0;
-//         sp30.unk14 = *(s16 *)(sp30.unk8 + 0x14);
-//         temp_v0 = func_1516037C(&sp48, arg0, 0x18, 255, 1);
-//         if (temp_v0 != 0) {
-//             memcpy((u8 *)temp_v0 + 0x18, &sp30, 0x18);
-//         }
-//     }
-// }
-// void func_1500A7E8(s32 arg0, s32 arg1) {
-//     s8 sp4C;
-//     s16 sp4A;
-//     s8 sp49;
-//     s8 sp48;
-//     f32 sp44;
-//     f32 sp40;
-//     f32 sp3C;
-//     void *sp38;
-//     f32 sp34;
-//     f32 sp30;
-//     ? sp24;
-//     s32 temp_v0_2;
-//     s8 *temp_a0;
-//     void *temp_v0;
-//
-//     sp24.unk0 = (s32) (void *)0x80082BF4->unk0;
-//     sp24.unk4 = (u16) (void *)0x80082BF4->unk4;
-//     temp_v0 = func_151149AC((&sp24 + arg1)->unk-50);
-//     sp38 = temp_v0;
-//     if (temp_v0 != 0) {
-//         sp30 = -400.0f;
-//         sp34 = 4.0f;
-//         temp_a0 = &sp48;
-//         sp3C = (f32) temp_v0->unk10;
-//         sp40 = (f32) temp_v0->unk12;
-//         sp48 = 0;
-//         sp49 = 0x17;
-//         sp4A = 300;
-//         sp4C = 0;
-//         sp44 = (f32) temp_v0->unk14;
-//         temp_v0_2 = func_1516037C(temp_a0, arg0, 0x18, 255, 1);
-//         if (temp_v0_2 != 0) {
-//             memcpy(temp_v0_2 + 0x18, &sp30, 0x18);
-//         }
-//     }
-// }
+void func_1500A7E8(s32 arg0, s32 arg1) {
+    struct220 sp48;
+    struct {
+        f32 unk0;
+        f32 unk4;
+        u8 *unk8;
+        f32 unkC;
+        f32 unk10;
+        f32 unk14;
+    } sp30;
+    s32 temp_v0;
+    u8 sp24[6] = {2, 3, 4, 5, 6, 7};
+
+    sp30.unk8 = (u8 *)func_151149AC(sp24[arg1 - 0x50]);
+    if (sp30.unk8 != NULL) {
+        sp30.unk0 = -400.0f;
+        sp30.unk4 = 4.0f;
+        sp30.unkC = *(s16 *)(sp30.unk8 + 0x10);
+        sp30.unk10 = *(s16 *)(sp30.unk8 + 0x12);
+        sp30.unk14 = *(s16 *)(sp30.unk8 + 0x14);
+        sp48.unk0 = 0;
+        sp48.unk1 = 0x17;
+        sp48.unk2 = 300;
+        sp48.unk4 = 0;
+        temp_v0 = func_1516037C(&sp48, arg0, 0x18, 255, 1);
+        if (temp_v0 != 0) {
+            memcpy((u8 *)temp_v0 + 0x18, &sp30, 0x18);
+        }
+    }
+}
 
 void func_1500A8C8(s32 arg0, s32 arg1) {
     func_151615F8(arg0, 0, 6, 0xE, 255, 1);
