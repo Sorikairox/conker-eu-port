@@ -544,3 +544,17 @@ func_15095470	CERR	3	OK	y	n	m2c 'temp_v0 + idx*4' deref -> *(s32*)(u8*)((s32)tem
 func_15080B84	CERR	3	OK	y	y	ring-queue u16 table; D_800D1994++ after the call; a0/v1 swap solved by permuter (new_var temp, fakematch)
 func_1507F834	CERR	3	DIFF15	n	n	table-of-byte-ptrs flag walk; ret var shared with the u8 field: ref has ptr in v1, field v0 and flag a0; mine v0/a0
 func_151E86A4	CERR	3	OK	y	y	void decl in game_eu_20B730; for loop over words with (u32) ptr compare gives DIFF2 (end-address lui a0 vs a2); permuter 10 s: osSpTaskLoad address pinned in a local (fakematch)
+func_150EC954	CERR	3	OK	y	n	arg1 is u8* (m2c compared ptr with s32); if-chain not switch; temp declared s32 (not u8) puts it in v0
+func_151C0894	CERR	1	OK	y	n	for (u8 i<arg2) arg3[i] ptr table scan, then same 'arg0==arg1 / ->0 / ->4==0xFF' tail
+func_15034AD8	CERR	1	OK	y	n	struct127 p++ loop with end (struct127*)&D_800D121C
+func_15047E70	CERR	1	OK	y	n	float wrapper: callee (f32(*)[4], s32 pass-through a1, f32 a2, f32 a3, 7 stack f32); sp38 is f32[4][4]
+func_1517E6A4	CERR	2	SIZE+1	n	n	list unlink: proto in functions.h has 2 params, mine spills the unused a1 (ref has no sw a1); while-form and goto-form both
+func_150C0F48	CERR	1	OK	y	n	forward proto void(void*) via fwdproto.sh; s16 index*8 list walk
+func_150639D8	CERR	1	OK	y	n	callee first arg is the unchanged a0 (pointer), not f32; fwd proto void(struct127*) for func_15063A54
+func_151DE080	CERR	1	OK	y	n	init sequence; callee protos/externs that the file declared after the function moved to the file head (fwdproto.sh)
+func_151A98CC	CERR	0	CERR	n	n	shape D (2-case u8 handler, unfilled return slot): skipped
+func_1509D1EC	CERR	3	SIZE+3	n	n	u8 table scan x 0xCC: first call has no a0 (K&R decl s32 f()); mine uses 6 s-regs (hoists table base), ref 5
+func_1514E128	CERR	1	OK	y	n	wrapper with 12 stack args; callee proto from file moved to file head; string arg is extern D_800A5C80 (s32*) not a literal
+func_1511AD48	CERR	1	OK	y	n	m2c store through s32 expr needs *(f32 *)(...) = 0.0f (the 'Dereferenced a non-pointer')
+func_150226E8	CERR	3	SIZE+4	n	n	append-if-absent u8 list: s32 arg0, goto (m2c) loop form; mine uses an extra s0 (frame 8), do-while/return forms SIZE+20
+func_1514EDF0	CERR	2	OK	y	n	do-while list walk; callee protos from file moved to head; u8 temp_s0 = ret for the &0xFF loop test; stackfix.py declaration order gave the 0x34 slot

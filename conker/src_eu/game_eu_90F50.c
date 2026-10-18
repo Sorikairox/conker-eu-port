@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_15063A54(struct127 *);
+
 
 s16 func_15063740(u8 *arg0) {
     struct127 *temp_v0;
@@ -27,7 +29,13 @@ void func_15063894(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063920.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_150639D8.s")
+s32 func_15081A90(u8 *, s32, s32, s32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+void func_150639D8(u8 *arg0, f32 arg1) {
+    u8 *temp_v0;
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x31C));
+    func_15081A90(arg0, (*(s32 *)((u8 *)temp_v0 + 0x13C)), (*(s32 *)((u8 *)temp_v0 + 0x140)), (*(s32 *)((u8 *)temp_v0 + 0x144)), (*(f32 *)((u8 *)temp_v0 + 0x130)), (*(f32 *)((u8 *)temp_v0 + 0x134)), (*(f32 *)((u8 *)temp_v0 + 0x138)), temp_v0 + 0xB0, arg1, 0, 0, 0, -1, 0, 0);
+    func_15063A54((struct127 *)arg0);
+}
 
 void func_15063A54(struct127 *arg0) {
     u8 *v = *(u8 **)(*(u8 **)((u8 *)arg0 + 0x31C) + 0xB0);

@@ -2,6 +2,12 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_1514F2FC(u8 *, u8 *);
+
+s32 func_1514F2AC(u8 *, s32, u8 **);
+
+u8 *func_15160A58(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514CFF0.s")
 
@@ -81,7 +87,9 @@ void func_1514E108(void) {
     func_1514F704();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E128.s")
+void func_1514E128(struct127 *arg0) {
+    func_15160A58(arg0, 2, (s32 *)D_800A5C80, 2, 0x12C, 0x28, 0xFF, 0xFF, 0xFF, 0xFF, 0, -1, 0, 0, 0xFF, 1);
+}
 
 void func_1514E1A8(struct127 *arg0) {
     func_1500EE18(arg0, 0xFF, 1);
@@ -167,7 +175,6 @@ extern u8 D_800A5C8C[];
 extern u8 D_800A5C98[];
 extern u8 D_800A5CA4[];
 extern f32 D_800A61E4;
-u8 *func_15160A58(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_15160CDC(struct127 *, s32, s32 *, s32 *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_1514E404(struct127 *arg0) {
@@ -365,7 +372,22 @@ s32 func_1514F2FC(u8 *arg0, u8 *arg1) {
     return sp1C;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514EDF0.s")
+void func_1514EDF0(s32 arg0, u8 *arg1) {
+    s32 temp_v0;
+    u8 *var_s1;
+    u8 *sp34;
+    u8 temp_s0;
+    var_s1 = (*(u8 **)((u8 *)arg1 + 0x2F4));
+    sp34 = NULL;
+    do {
+        temp_v0 = func_1514F2AC(var_s1, arg0, &sp34);
+        temp_s0 = temp_v0;
+        if (temp_v0 != 0) {
+            var_s1 = (*(u8 **)((u8 *)sp34 + 0x14));
+            func_1514F2FC(sp34, arg1);
+        }
+    } while (temp_s0 != 0);
+}
 
 void func_1514F3E0(u8 *arg0) {
     struct {

@@ -2,6 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_151E5D28(void);
+
+extern s8 D_800D3260;
+
+extern s8 D_80090144;
+
+void func_1501C710(s32, s32, s32, s32, s32);
+
 
 void func_151DDF20(void) {
     s32 i;
@@ -16,7 +24,21 @@ s32 func_151DE074(s32 arg0) {
     return ~arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DE080.s")
+s32 func_1000E934();
+s32 func_1000F1A8();
+
+void func_151DE080(void) {
+    D_800D3260 = 0;
+    func_1501C710(6, 0x1D, 0, 0, 1);
+    D_800E0B94 = 3;
+    D_80090144 = 0;
+    D_800BEAC1 = 0;
+    func_151E5D28();
+    func_1000F1A8();
+    func_1000E934();
+    D_8008FD8C = 1;
+    D_80090130 = 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DE100.s")
 
@@ -41,9 +63,6 @@ void func_151DECFC(void) {
     }
 }
 
-void func_1501C710(s32, s32, s32, s32, s32);
-extern s8 D_80090144;
-extern s8 D_800D3260;
 
 void func_151DED3C(void) {
     D_800D3260 = 0;
@@ -165,7 +184,6 @@ void func_151E553C(void) {
     }
 }
 
-void func_151E5D28(void);
 void func_151E5564(void) {
     D_8009016C = 0;
     func_151E5D28();
@@ -345,7 +363,6 @@ void func_151E86A4(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E8998.s")
 
 s32 func_1517F54C();
-extern s8 D_80090144;
 extern s16 D_800E0EB0;
 
 void func_151E89C0(void) {

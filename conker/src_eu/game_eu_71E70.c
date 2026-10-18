@@ -251,4 +251,9 @@ void func_15047978(Mtx *arg0, f32 arg1, f32 arg2, volatile s32 arg3, f32 arg4, f
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150479F0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15047E70.s")
+s32 func_150479F0(f32 (*)[4], s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+void func_15047E70(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA) {
+    f32 sp38[4][4];
+    func_150479F0(sp38, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
+    guMtxF2L(sp38, arg0);
+}

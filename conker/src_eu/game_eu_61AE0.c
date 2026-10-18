@@ -57,4 +57,15 @@ void func_1503482C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034A18.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034AD8.s")
+void func_15034AD8(void) {
+    struct127 *var_s0;
+    var_s0 = D_800CC2D0;
+    if (D_800BEAC0 == 0) {
+        do {
+            if ((var_s0->interaction_state != 0) && (var_s0->unk9C != 0)) {
+                func_15034A18(var_s0);
+            }
+            var_s0++;
+        } while (var_s0 != (struct127 *)&D_800D121C);
+    }
+}

@@ -236,7 +236,27 @@ void func_1511ACC0(u8 *arg0) {
     func_1511AA1C(arg0, arg0 + 0x80, arg0 + 0x84);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511AD48.s")
+void func_1511AD48(u8 *arg0) {
+    s32 var_a1;
+    s32 var_v1;
+    u8 *temp_v0;
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x80));
+    (*(s8 *)((u8 *)temp_v0 + 0x1E)) = 1;
+    (*(f32 *)((u8 *)temp_v0 + 0x10)) = 0.0f;
+    (*(s8 *)((u8 *)temp_v0 + 0x1C)) = 0;
+    (*(s8 *)((u8 *)temp_v0 + 0x1D)) = 7;
+    (*(f32 *)((u8 *)temp_v0 + 0x14)) = 260.0f;
+    (*(f32 *)((u8 *)temp_v0 + 0x18)) = 100.0f;
+    var_v1 = 0;
+    var_a1 = 0;
+    if ((s32) (*(u16 *)((u8 *)arg0 + 0x16)) > 0) {
+        do {
+            var_v1 += 1;
+            *(f32 *)((*(s32 *)((u8 *)temp_v0 + 4)) + var_a1) = 0.0f;
+            var_a1 += 4;
+        } while (var_v1 < (s32) (*(u16 *)((u8 *)arg0 + 0x16)));
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ADC0.s")
 
