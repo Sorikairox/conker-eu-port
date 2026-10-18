@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-18 (sixteenth session). Update this file at the end of every work session.
+Last updated: 2026-10-18 (seventeenth session). Update this file at the end of every work session.
 
 ## Goal
 
@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2842 / 5912 functions in C (48.1%)**; code bytes 296,208 / 2,253,856 (13.1%)
-  (end of session 16, from `verify_all.sh`).
+- **2877 / 5913 functions in C (48.7%)**; code bytes 300,256 / 2,253,856 (13.3%)
+  (end of session 17, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2450/5329 (10.9%)
+  - game: 2485/5330 (11.1%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -68,6 +68,7 @@ Commits on `eu`:
 | `2f1f805`…`c896fcf` | Session 14: native arm64 toolchain, sweep passes 3/4, hand-finished near misses, 21 functions |
 | `63f199e`…`ae35e92` | Session 15: `protocheck.py` (152 prototype fixes), `stackfix.py`, `rescreen.py`, 3 functions |
 | `c5c5784`…`f68cfe6` | Session 16: structured repair loop (`repair_ctx.sh`, `repair_try.sh`, `repair_log.tsv`), 19 functions |
+| `f300d27`, `75e7386`, `3b05e9d` | Session 17: `draftcheck.py` hints in `repair_ctx.sh`, fresh m2c drafts of short functions (`gen40.sh`), `game_eu_13C400` owns .rodata; 35 functions (+9, +11, +14 in the three batches) |
 
 **From `b5aeddd` on, `src_eu/`, the EU yaml and the symbol files are hand-edited.
 Do not run `tools/eu_port/run.sh`: it would regenerate them from the baseline and
@@ -90,6 +91,7 @@ throw all of that away.**
 - Prototype problems (wrong void/int return, u8/s16 params, float args, arg counts):
   `tools/eu_port/protocheck.py` (report), `--apply --skip-logged` (fix, verified), then
   `tools/eu_port/rescreen.py` (session 15).
+- Pre-checks of a draft's calls/tables against the asm (session 17): `tools/eu_port/draftcheck.py <func> [draft.c]`; `repair_ctx.sh` prints its `HINT` lines. Fresh m2c drafts of short asm functions: `tools/eu_port/gen40.sh [max=40]` (-> `repair/fresh/`, ranking in `repair/fresh.txt`). Log rows: `tools/eu_port/rlog.sh func start attempts end y|n perm y|n "note"` (never pass a bare `?`, zsh globs it).
 - Budgeted LLM repair of near misses (session 16): `tools/eu_port/repair_ctx.sh <func>` (target asm + draft + diff region), write a reasoned rewrite, `tools/eu_port/repair_try.sh <func> <draft.c>` (one line OK/DIFFn/SIZE±n; OK drafts go to `conker/build/hand` for `apply.py build/hand`). Log in `tools/eu_port/repair_log.tsv`.
 - A draft whose stack slots or frame size are off: `tools/eu_port/stackfix.py <func> <draft.c>`;
   `--scan list` / `--bisect func draft.c` (session 15).
@@ -1151,6 +1153,102 @@ Sequential, 3 work commits (`c5c5784`, `380bff1`, `f68cfe6`), +19 functions (282
 - Check m2c drafts for the call patterns in item 1 automatically (pass-through `a0..a3`, `lw` into `a1..a3` before a call
   whose prototype says `f32`, float after int args) and for `(&D + i * k)` scaling on non-byte externs.
 - Own `.rodata` of `game_eu_13C400` and retry `func_1510FDA0`.
+
+## Session 17: draft pre-check hints, fresh short-function drafts, callee-arity fixes
+
+Sequential, 3 work commits (`f300d27`, `75e7386`, `3b05e9d`), +35 functions (2842 -> 2877), +4,048 bytes. The repair loop of
+session 16 with a script that checks the drafts' *calls* first. Full `verify_all.sh` before every commit.
+
+### Tools
+
+- `tools/eu_port/draftcheck.py <func> [draft.c]` (also run by `repair_ctx.sh`, section `=== HINTS`): walks the target `.s` call
+  segment by call segment (delay slots and `$sp+0x10..` stack-arg stores included) and prints `HINT` lines when the draft disagrees:
+  * *pass-through*: `a0..a3` untouched since entry and live-in (read by the function) before a `jal` are arguments of the callee;
+    the draft passes fewer (`pass-through a0 ... draft passes 2`);
+  * *arity*: callee prototype (C definition in `src_eu`, else `functions.h`, else file declarations, else the draft's own) has fewer
+    params than the registers/stack slots the asm sets; draft passes more args than the asm sets (invented args);
+  * *float*: `mfc1 aN` before the call but the prototype says non-float (float after int args), f12/f14 set but first param not
+    float; `lw aN` into a float param only when the prototype is the draft's/file's own, not a definition;
+  * *table*: `(&D + i * k)` on a non-byte extern (scales twice), `*(&D + idx)` on a 4-byte extern (the asm may read bytes).
+  False positives to ignore: callee is a C function with fewer params than the registers (junk in `a1..a3`), `sp`-spill copies in `a3`.
+- `tools/eu_port/gen40.sh [max]`: `list.py` + `gen2.py` (JT=1) + narrow + screen for every asm function up to `max` instructions,
+  ranked list in `tools/decomp-permuter/repair/fresh.txt` (`score result func dir`), best drafts in `repair/fresh/<f>.c`
+  (`repair_ctx.sh` prefers these). 422 functions <= 40 insns: **2 OK as generated** (`func_15115244` applied, `func_151EF7B0`
+  still the padding case), 27 SIZE-1, 24 SIZE+1, 103 CERR (mostly undeclared `spXX` locals of m2c: add `f32 sp28[4][4];` etc.).
+- `tools/eu_port/rlog.sh`: append a `repair_log.tsv` row. `m2c/try` now passes `SCREEN_OPT` into the container
+  (`SCREEN_OPT="-O1 -g3" repair_try.sh ...`).
+- Pitfalls: `verify_all.sh` wipes `conker/build` (also `build/hand_done`): `make` before `apply.py`, `mkdir build/hand_done`, and move
+  applied drafts out of `build/hand` (apply crashes on an already applied one); a `sed -i '$d'` on the log after a failed `rlog` deletes
+  the previous row.
+
+### Numbers
+
+- Rows in `repair_log.tsv` this session: 66, of which 59 with attempts: **59 tried, 33 matched (56%)**, 106 rewrite attempts =
+  **0.31 matches per attempt** (the matches took 47 attempts: 1.4 each; 25 of 33 matched with <= 2 attempts). Plus `func_1510FDA0`
+  (not in the log; matched once `game_eu_13C400` owns its `.rodata`). Permuter 200 s on 2 DIFF2 leftovers
+  (`func_15074A94`, `func_1511CAD0`): no improvement.
+- Cumulative repair loop (sessions 16 + 17): **106 tried, 52 matched (49%), 206 attempts = 0.25 matches per attempt**.
+- About two thirds of the 33 matches came from a call/prototype fix found by `draftcheck.py` or by reading the callee's liveins with
+  `protocheck.py --sig`: the call patterns are by far the best predictor of a cheap match.
+- Matched (33): `func_15115244` (fresh), `func_1507ECE8`, `func_150D07C4`, `func_150D0644`, `func_151D8D90`, `func_15045A70`,
+  `func_150DF0D8`, `func_150D18B0`, `func_1507EE24`, `func_151A94CC`, `func_151791A4`, `func_15190AC0`, `func_15182CD8`,
+  `func_1517FA48`, `func_150EF328`, `func_150D2804`, `func_15063894`, `func_15194F64`, `func_1507EE9C`, `func_15114E28`,
+  `func_1511084C`, `func_151000EC`, `func_1510ED24`, `func_1510EDAC`, `func_1510EE3C`, `func_150BA1F4`, `func_15133A80`,
+  `func_15133CD0`, `func_15082D5C`, `func_150FB768`, `func_150234E8`, `func_1508823C`, `func_15095EA0`.
+- `game_eu_13C400` now owns `.rodata` 0x2483A0-0x2483F0 (3 functions with f32 literals use literals directly).
+
+### Rewrite patterns that worked (new this session)
+
+1. **Pass-through args** (`func_150DF0D8`, `func_150EF328`, `func_15182CD8`, `func_15190AC0`, `func_151A94CC`):
+   untouched `a0..a3` are real arguments. m2c drops them, so the call has 1-3 args too few and every later register shifts.
+   Callees seen: `func_1517F5FC` (6 args: `(arg0, v[3], v[0], v[1], v[2], v[4])`, `func_150D2804`, `func_15182CD8`, `func_1517FA48`),
+   `func_1510EED0` (16 args), `func_150D0420` (8 args), `func_15142600` / `func_151424F4` / `func_15142838` (12/12/9 args,
+   `a0` pass-through, object fields via `lw a1..a3`, f32 stack args), `func_15104B60` (`(u8 *, s32, f32)`: 250.0f is a `lui a2`).
+2. **The opposite: m2c invented args** when the callee is a C function with fewer params (`func_1516D850/898`, `func_15179108`,
+   `func_15088D24`): read the definition (`protocheck.py --sig f`) before trusting the registers.
+3. **Narrow protos make the prologue**: a `u8`/`s16` callee param whose argument is the function's own `u8`/`s16` param gives
+   `sw a0; andi t6,a0,0xFF; or a0,t6` and `sll/sra` for free (`func_150D07C4/0644`: prototype `(u8, s32, s16, s32, s32, s32, u8, s32)`
+   AND params `(u8, s32, s16, u8, s32)`; with `s32` params nothing is truncated). `s32` call result passed to a `u8` param: `andi`.
+4. **A float following int args is an `f32` param** even if you only see `lw`/`mfc1` into `a1..a3`: `(u8 *, f32, s32 *, u8 *)` for
+   `func_1504627C`; an f32 stack arg handed on goes through `lw a3, off(sp)` (`func_15095EA0`: keep the header's `f32 arg4`).
+5. **K&R definition when a C caller passes more args than the callee reads** (`func_1507EE9C`): `void f(arg0) u8 *arg0; { ... }`
+   avoids the `number of arguments` clash with the earlier call and keeps both codegens.
+6. **Missing m2c locals**: CERR drafts with `&sp28[0]`/`sp20` and no declaration are matrices: `f32 sp28[4][4];`
+   (`func_15114E28`, `func_1511084C`, `func_150F2A98`); a struct local `struct { f32 x; s16 y; } sp2C;` for a memcpy source with
+   mixed field sizes (`func_150D07C4`, `u8 sp30[4]`-style gave worse results than `s8 sp30` + stackfix pad).
+7. **Tables**: `extern s32 D_x` read as `*(&D_x + idx)` was `u8 D_x[]` with byte stride (`func_151D8D90`, a `for` with `u8 i` and
+   `1 << i`); function-pointer table `extern void (*D[])(u8 *, s32, u8)` called with all 3 args (`func_15190AC0`);
+   `s32 *` + `arg1 + temp_v0` scales by 4: keep the pointer an `s32`/`u8 *` (`func_1507EE24`).
+8. **Struct index**: `arg0 - D_800CC2D0` with `struct127 *arg0` (not `u8 *`) gives the `div 0x32C` (`func_15063894`, `func_151000EC`).
+9. **s32 locals instead of `u8`** for loop bounds loaded from byte externs (`func_15082D5C`); `(u16)` cast on an s16 table read for `lhu`
+   (`func_1517FA48`); statement order inside a float block (`func_150D18B0`: the `0x3C` multiply before the `0xC4` add);
+   hoist a `u16` load into a local before the call (`func_151000EC`).
+10. **Draft declares a callee that a later C function in the same file calls differently**: add the prototype to the draft
+    (`void func_1503EF90(s32);`), else the implicit declaration clashes (CERR `redeclaration`).
+
+### Left (notes in `repair_log.tsv`)
+
+- **Shape that keeps recurring: reload-from-home / unfilled delay slot.** Handlers and small functions where the ref reloads
+  `arg0` from its home slot, has `b L; lw ra` (epilogue instruction in the delay slot of each return) and `beqz ..; nop`:
+  `func_150C5060`, `func_150F1B78`, `func_150F7890`, `func_151007B0`, `func_151D7AE8` (same 4-arg handler template: `-O1 -g3` gives
+  DIFF28 not OK), `func_150C62C0`, `func_150C6BF0` (DIFF11), `func_151095E4` (switch layout right, case end unfilled).
+  Still unsolved; maybe a pragma or a different object boundary.
+- **A dead `addiu v0, v0, K` that IDO drops from my C**: `func_150C63FC` (+ `func_150C6D2C`, `func_151AB730`), `func_150C7DE0`.
+- Register numbering only (permuter candidates, DIFF > 4 so not run): `func_1503DE70`, `func_1503F1B0`, `func_150F2A98` (t7/t8),
+  `func_150FB708` (f0/f2), `func_15034710` (t6..t9), `func_15116690` (DIFF7), `func_151F0114` (DIFF9), `func_151674DC` (DIFF23).
+- DIFF2 permuter-resistant: `func_15074A94` (f12/f8 swap), `func_1511CAD0`, `func_151D51E8` (handler shape).
+- `func_1507ED48` (SIZE-2), `func_150AEDF8` (SIZE-1), `func_151BD7CC` (SIZE-1, u8 handlers), `func_15022BB0` (needs the loop not
+  unrolled: `goto` form is DIFF22), `func_1508039C`, `func_150DF1A8`, `func_150F2910`, `func_1509FC5C`, `func_150882C4`.
+- Not tried: the other worklist2 entries (DIFF12+, ~140), `func_1517AF18`, `func_15094CD0`, fresh SIZE+-2 ranks, 41-70 insn
+  functions of `fresh.txt`'s CERR group after adding the missing locals.
+
+### Next steps (session 17)
+
+- Run `gen40.sh 70` and use `draftcheck.py` hints as the filter; start with drafts where it prints *pass-through* / *proto has N
+  params, asm passes M* against a prototype that is a C definition (those are real).
+- Make `draftcheck.py` auto-apply the safe part: rewrite the draft's call (add pass-through args), declare the callee from the
+  asm liveins when no definition exists, add `sp` matrix locals for undeclared `spXX` (would turn many CERR into screenable drafts).
+- Look at the reload-from-home shape with a fresh idea (list above): 8 functions wait on it.
 
 ## Layout
 
