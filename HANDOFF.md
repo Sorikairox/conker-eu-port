@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3039 / 5913 functions in C (51.4%)**; code bytes 328,116 / 2,253,856 (14.6%)
-  (end of session 26, from `verify_all.sh`).
+- **3059 / 5913 functions in C (51.7%)**; code bytes 330,824 / 2,253,856 (14.7%)
+  (end of session 27, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2647/5330 (12.5%)
+  - game: 2667/5330 (12.6%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24, 3026 (326,668 bytes) after session 25, 3039 (328,116 bytes) after session 26.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19, 2948 (307,808 bytes) after session 20, 2959 after session 21, 2963 (310,916 bytes) after session 22, 2971 (312,680 bytes) after session 23, 2991 (316,280 bytes) after session 24, 3026 (326,668 bytes) after session 25, 3039 (328,116 bytes) after session 26, 3059 (330,824 bytes) after session 27.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -1580,6 +1580,28 @@ recipes; the original notes follow). Hypotheses ruled out for `func_150C5060`:
   `func_150C6BF0`: the `sb` sits before `b L` while `lw ra` is in its delay slot (epilogue instruction hoisted by the scheduler); source variants unchanged.
 - Permuter note: it returns NOSYM on K&R definitions; give it the ANSI form.
 
+**C, session 27 additions (confirmed / ruled out).**
+- CONFIRMED: `u8 **q = &arg0;` is only needed when the ref reloads arg0 in every block; a plain 1-arg function with an `sw a0,N(sp)` entry spill that
+  reloads `lw a0` after a call is normal (value live across a call, no s-reg): do not add `q` there (`func_15160134`: plain locals; `func_1515D9F0` needed `s32 *q = &arg0`).
+- CONFIRMED: `volatile` on exactly the parameter that the ref stores at entry *and* reloads (`volatile s32 arg3` in `func_15047978`: `sw a3,0x7C; lw a3,0x7C`;
+  `volatile u8 arg2` in `func_1519E92C`: `lbu` reload after each call) gives the byte-exact result. Try it per parameter, one at a time (`volatile s32 arg3` alone, not all).
+- CONFIRMED: **dispatch template** `switch (probe(a0, a2, a3)) { case 0: return g(a0, a1, a2, a3); case 1: return 0; case 2: return 1; }` (no default, no return after) gives
+  `beqz; li at,1; beq; li at,2; beql ...; b end`. An if-chain gives `bnez/bnel` (DIFF20). 5 members: `func_15046F70`, `func_15045AF0`, `func_15047274`, `func_15046EF0`, `func_150455FC`.
+  Their callee `func_15045A70` / `func_150473A0` is already C with an `f32` 3rd/2nd parameter, so the whole family takes `f32 arg2` and the file header got prototypes
+  (`s32 func_150472F4(u8 *, f32, u8 *);` etc.): an unprototyped K&R call would promote the f32 to double.
+- CONFIRMED: particle-spawner template `s8 sp18[8]; ... *(s16 *)(sp18 + 2) = rand() % N + K; sp18[5] = 1 << (*(u8 **)(arg0 + 0x318))[0x23D]; ... func_151D8E18(sp18, 0, 0xFF, 1)`:
+  `sp18[6] = -1` needs `s8` (a `u8` array gives `li 255`). 4 members matched first try: `func_150FED54`, `func_151001BC`, `func_150FE808`, `func_151C1FB8`
+  (`func_1519A1A4`, `func_151C62D0`, `func_151C8F4C` also call `func_151D8E18` but are large).
+- CONFIRMED: `x * y + z` operand forms: 16 combinations with `m2c/mine` found them (`func_151B9204`: DIFF14 -> OK with a `s32 pad;` declared first moving the spill to 0x18).
+- RULED OUT for the `func_150F1B78` family (arg1 loaded twice, 2nd `lw` hoisted above the `beq`): `q1 = &arg1` and `*q1` uses are folded away (output identical to plain arg1);
+  `s32 *arg1` / compare order / `!=` forms: identical output. Best is `q = &arg0; u8 *volatile arg1; volatile u8 arg2; a = *(s32 *)arg1; p = *q + 0x28; t = arg1; if ((a == *(s32 *)p) || (p[4] == t[4]))`
+  = DIFF6 (register numbering only: ref uses t0 for the hoisted reload, mine v1; mine allocates arg0's temp t1 where the ref has t2). `func_150F7890` (loads the `p` side first) best DIFF6 with
+  `*(s32 *)p == *(s32 *)arg1` but the arg1 reload stays after the beq. Permuter (90-100 s each) found nothing better. The family is still open; `func_150AEDF8` not retried.
+- A callee that the *same file* calls implicitly before its definition (`func_15199EF0`, `func_1518FE50`, `func_1519E688`) makes every draft CERR (`redeclaration`): put a forward prototype in the draft
+  (or in the file above the first caller; for a `void` function use `void f(void *)`), do not change the draft body.
+- A wrong `void` prototype in `functions.h` hides a return value the ref uses (`func_1513EDE4` -> `s32` with `return func_1513EAD8(...)`, build unchanged).
+- Call arity: `func_150473A0` was a "shape C" only because the callee has 5 params (stale a1): count `a0..a3 + stack` writes in the ref before anything exotic.
+
 **D. `store; jr ra; nop` (unfilled return slot) in 2-case u8 handlers** (`func_151AEBF0` and 6 more). Not solved. New information:
 - All registers and everything else match once the loaded value is a **single shared variable** `a = *(s32 *)arg1;` assigned inside both arms
   (`if (t == 0) { a = ...; if (a == arg0->x) {store} return; } if (t == 0x2D) { a = ...; b = ...; ...}`); `func_151AEBF0` then differs only in that arm 1 ends
@@ -1779,6 +1801,29 @@ does not pass `SCREEN_OPT` through; `docker exec -e SCREEN_OPT=...` is all it ta
   (about 20 of the 60 smallest were looked at), with `gensome.sh` for drafts; most CERRs there are prototype conflicts (add a forward prototype in the draft).
 - Solve the `func_150F1B78` family arg1-double-load problem (5+ members): try `arg1` as `s32 arg1[]` / struct pointer, or `||` written with the byte compare first and `goto`.
 - Shapes A/B in the 101-150 bucket were not touched.
+
+## Session 27: shape C family hypotheses, recipes over `shapes.py --list C 60`
+
+2 work commits (`e737c24`, `78c945e`) + hand-off; +20 functions (3039 -> 3059), +2,708 bytes. Full `verify_all.sh` OK.
+About 36 functions tried (20 matched); rows in `repair_log.tsv`.
+Matched: `func_150FED54`, `func_151001BC`, `func_150FE808`, `func_151C1FB8` (spawner template), `func_151B9204`, `func_150473A0`, `func_1515D9F0`, `func_15160134`, `func_151A7118` (clone),
+`func_1503F6F4`, `func_15047978`, `func_15046F70`, `func_15045AF0`, `func_15047274`, `func_15046EF0`, `func_150455FC` (dispatch template), `func_15199EF0`, `func_151A0F5C`,
+`func_1519E92C`, `func_150FE120`.
+Tool: `m2c/mine` now passes `SCREEN_OPT` through (`SCREEN_OPT="-O1" m2c/mine func draft.c`). `clones.py --refresh --draft --lax` at the end: only the known failures
+(`func_10001AA8`, `func_151EF850`); new siblings of the dispatch/spawner templates are not exact-skeleton clones (constants/regs differ), so they had to be done by hand.
+Findings are in "Known IDO shapes" (C, session 27 additions).
+
+### Not solved
+- `func_150F1B78` family (DIFF6, see Known IDO shapes), `func_150AEDF8` family untouched this session.
+- `func_150C7E68` (DIFF11; ref loads `lh` and does `addiu` on the global pointer before the `if (v)`, returns stale v0), `func_1517F910` (DIFF21: ref passes the call result unmasked and
+  hoists `lw a0`/`lw v1` above the branch; needs `u8` return for an implicitly-declared callee), `func_151640C0` (DIFF11), `func_1518FD34` (DIFF31: `v = arg0 + 0x30` is defined after the first call
+  in the ref), `func_15167B44` (DIFF15: v0/v1 roles swapped, `s32 temp_a1`), `func_150CB5E0` (ref keeps arg0 in `s0`, IDO does not).
+- Skipped: `func_1000CDA0`, `func_1516AAA8` (15-arg float call), `func_150FF1A8` (float literals without .rodata). C 61-100 was only scanned (24 drafts generated, 3 tried): most of those are > 60 insns of float code.
+
+### Next steps (session 27)
+- C 61-100: the SIZE+-1 drafts (`func_15167B44`, `func_1516AAA8`, `func_151B97C4`, `func_1000E46C`) and the CERRs that only need a forward prototype.
+- Look for more "templates" by hand (dispatch `switch(probe) {0,1,2}`, `s8 spNN[8]` spawners): grep asm for `beqz $v0; ...; addiu $at,$zero,1; beq $v0,$at; addiu $at,$zero,2; beql $v0,$at`.
+- `func_150F1B78` family: permuter with `volatile arg1` base and a `t = arg1` temp, longer than 100 s, or matching the hoisted-load register by splitting the condition in a nested `if`.
 
 ## Layout
 
