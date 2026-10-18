@@ -24,6 +24,7 @@ hints = []
 
 # ---- prototypes
 _protos = {}
+_prov = {}
 def protos():
     # order of trust: C definitions in src_eu, functions.h, other declarations in src_eu, the draft's own
     if _protos: return _protos
@@ -35,9 +36,13 @@ def protos():
         try: texts[fn] = open(fn).read()
         except Exception: pass
     for fn in srcs_:
-        for m in dpat.finditer(texts.get(fn, '')): _protos.setdefault(m.group(1), m.group(2))
+        for m in dpat.finditer(texts.get(fn, '')):
+            if m.group(1) not in _protos: _prov[m.group(1)] = 'def'
+            _protos.setdefault(m.group(1), m.group(2))
     for fn in [R + '/include/functions.h'] + srcs_ + [draft]:
-        for m in ppat.finditer(texts.get(fn, '')): _protos.setdefault(m.group(1), m.group(2))
+        for m in ppat.finditer(texts.get(fn, '')):
+            if m.group(1) not in _protos: _prov[m.group(1)] = 'draft' if fn == draft else ('hdr' if fn.endswith('functions.h') else 'decl')
+            _protos.setdefault(m.group(1), m.group(2))
     return _protos
 
 def params(name):
@@ -143,7 +148,7 @@ if sp:
                     msgs.append('proto has %d params, asm passes a0..a%d' % (len(ps), k - 1))
                 for n in range(min(4, len(ps))):
                     kd = seg_k.get(n)
-                    if kd in ('lw', 'ld') and is_float(ps[n]) and n > 0:
+                    if kd in ('lw', 'ld') and is_float(ps[n]) and n > 0 and _prov.get(name) in ('draft', 'decl'):
                         msgs.append('lw/ld into a%d but param %d is %s -> s32 param' % (n, n, ps[n]))
                     if kd == 'mfc1' and not is_float(ps[n]):
                         msgs.append('mfc1 into a%d: param %d should be f32 (float after int args)' % (n, n))

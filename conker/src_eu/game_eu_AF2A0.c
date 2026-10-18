@@ -31,7 +31,28 @@ void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150829C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082D5C.s")
+s32 func_150829C0(s32, s32);
+extern u8 D_800D2520;
+extern u8 D_800D2521;
+void func_15082D5C(s32 arg0, s32 arg1, s32 arg2) {
+    s32 lo;
+    s32 hi;
+    s32 i;
+    if (arg2 != 0) {
+        lo = 0;
+        hi = D_800D2521;
+    } else {
+        lo = D_800D2521;
+        hi = D_800D2520;
+    }
+    i = lo;
+    if (lo < hi) {
+        do {
+            func_150829C0(i, arg1);
+            i += 1;
+        } while (i != hi);
+    }
+}
 
 void func_15082DD8(u8 *arg0) {
     u8 *temp_v0;

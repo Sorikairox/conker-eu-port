@@ -77,7 +77,22 @@ s32 func_150871B8(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088130.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_1508823C.s")
+s32 func_15088D24(u8, u8, s32);
+void func_1508823C(s32 arg0, s32 arg1) {
+    struct_eu_80087640 *temp_v1;
+    s32 temp_v0;
+    if (D_80087640 != NULL) {
+        temp_v1 = &D_80087640[arg0];
+        if (arg1 != (s8) temp_v1->pad28[7]) {
+            if (arg1 != 0) {
+                temp_v0 = func_15088D24(temp_v1->pad28[3], temp_v1->pad28[4], 1);
+                temp_v1->pad28[5] = temp_v0;
+                temp_v1->pad28[6] = func_15088D24(temp_v1->pad28[4], temp_v0, 1);
+            }
+            temp_v1->pad28[7] = (u8) arg1;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150882C4.s")
 

@@ -93,3 +93,29 @@ func_1503DE70	CERR	1	DIFF14	n	n	4-arg callee (a1 pass-through), struct127 index 
 func_15194F64	CERR	1	OK	y	n	C callee func_151046F0 takes 3 params: all of a0-a2 pass through
 func_1507EE9C	CERR	2	OK	y	n	5-arg callee with pass-through a0; a C caller in the file passes 2 args to it: K&R definition 'void f(arg0) u8 *arg0; {' avoids the arg-count clash
 func_151F0114	SIZE+1	1	DIFF9	n	n	8-arg f32 callee (float args via a1-a3 mfc1), f32 sp28[16]; arg3 homed to stack in mine, f16 kept in ref
+func_15114E28	CERR	1	OK	y	n	draft lacked the sp18 matrix local: f32 sp18[4][4]; callee protos from functions.h
+func_1511084C	CERR	1	OK	y	n	missing f32 sp28[4][4] local in m2c draft (undeclared); f32 callee protos fine
+func_150F2A98	CERR	2	DIFF7	n	n	m2c draft lacked sp20 matrix local (f32 sp20[4][4], rows 3 = sp50..58); stackfix order sp20,temp_v0,sp1C; only t7/t8 numbering left
+func_151000EC	CERR	2	OK	y	n	arg2 struct127 *, index arg2 - D_800CC2D0; u16 local loaded first (ref hoists lhu into v0)
+func_1509FC5C	DIFF26	1	DIFF26	n	n	10-arg call with s16 trunc args; arg schedule differs; hint false positive (callee func_1505EEF4 takes 1 arg)
+func_150F2910	SIZE+1	2	DIFF8	n	n	u8 sp1C[8] frame 0x28 vs 0x20 and arg1 reload; stackfix best DIFF8
+func_150DF1A8	DIFF23	3	DIFF7	n	n	tables are u8 D[] indexed idx*4 (stride 4); u8 arg0 reload vs ref andi from a0 reg; spill slot differs
+func_1510ED24	DIFF31	1	OK	y	n	16-arg callee func_1510EED0: a0/a1 pass-through, a2=0, f32 stack args; draftcheck proto-arity hint
+func_1510EDAC	DIFF33	1	OK	y	n	twin of func_1510ED24 with literals -10000.0f, 20000.0f
+func_1510EE3C	DIFF34	2	OK	y	n	twin; unused params at 0x78/0x7C shift the last arg to 0x80 (argE)
+func_150BA1F4	DIFF26	1	OK	y	n	12-arg callee: a0 pass-through (arg0), arg1 object fields lw into a1-a3 then f32 stack args
+func_15133A80	DIFF26	1	OK	y	n	twin of func_150BA1F4
+func_15133CD0	DIFF23	1	OK	y	n	9-arg callee, a0 pass-through
+func_151674DC	DIFF23	2	DIFF23	n	n	9-arg callee (a0 pass-through); store of &D_800908FC through address register scheduled differently
+func_15082D5C	DIFF31	1	OK	y	n	u8 locals gave andi/regs wrong: s32 lo/hi/i with u8 externs
+func_1508039C	SIZE-1	2	DIFF10	n	n	struct {u8 *; u8} sp20 needed (dead-store otherwise); sp1C pointer not kept on stack in mine
+func_150FB768	SIZE+1	1	OK	y	n	5-param function (arg0 pass-through to func_151D76BC; arg0 unused otherwise)
+func_150234E8	CERR	1	OK	y	n	callees func_1516D850/898 are 1-param C fns: m2c invented a second arg
+func_1503F1B0	CERR	3	SIZE+1	n	n	draft needs 'void func_1503EF90(s32);' (implicit decl clashed with later prototype); then only t-reg numbering (v0/v1 swapped)
+func_1508823C	SIZE+1	2	OK	y	n	callee takes 3 args (4th invented by m2c); s32 call result passed to u8 param gives the andi
+func_15095EA0	DIFF28	2	OK	y	n	arg4 stays f32 (C caller passes 4096.0f); callee prototype (s32, f32, f32, f32, s32, s32 *): f32 stack arg goes to a3 with lw
+func_150882C4	DIFF36	1	DIFF36	n	n	hint false positive (a3 is a spill copy of a1); u16 angle diff chain not reproduced
+func_150AEDF8	DIFF6	2	SIZE-1	n	n	u8 handler delete/swap: clean rewrite (m2c draft had permuter junk) still SIZE-1: obj/p register allocation differs
+func_15034710	DIFF8	1	DIFF8	n	n	calc first then stores; literal as extern D_800980C8; only temp reg numbering left
+func_15074A94	DIFF2	3	DIFF2	n	y	f12/f8 swap of sub.s/div.s results; 3 expression shapes (inline, temp, operand swap), permuter 200s no better
+func_1511CAD0	DIFF2	1	DIFF2	n	y	store/load order of the last 0x84 update vs the 8(s0) condition; condition swap is DIFF20; permuter 200s no better

@@ -40,7 +40,16 @@ void func_15095E58(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     func_15095EA0(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095EA0.s")
+s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
+s32 func_15096144(s32, s32, s32, s32, s32);
+s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    s32 sp24;
+    func_15095F18(arg1, arg2, arg3, arg4, arg5, &sp24);
+    if (sp24 != 0) {
+        arg0 = func_15096144(arg0, arg1, arg6, arg7, arg8);
+    }
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095F18.s")
 

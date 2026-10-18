@@ -92,7 +92,11 @@ void func_150FB348(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB708.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB768.s")
+s32 func_151584F0(s32, s32, s32, s32, s32);
+s32 func_151D76BC(s32, s32, s32, s32, s32);
+void func_150FB768(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    func_151584F0(func_151D76BC(arg0, arg1, arg2, arg3, arg4), arg1, arg2, arg3, arg4);
+}
 
 void func_150FB7C0(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4) {
     if ((arg2 - arg3) < arg1) {

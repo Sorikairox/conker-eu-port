@@ -4,7 +4,13 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/func_150FF840.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12D5D0/func_151000EC.s")
+void func_151000EC(u8 *arg0, s32 arg1, struct127 *arg2, s32 arg3) {
+    u16 w;
+    s32 idx;
+    w = *(u16 *)((u8 *)arg2 + 0x7A);
+    idx = arg2 - D_800CC2D0;
+    func_1505D1C4(*(f32 *)arg0, *(f32 *)(arg0 + 4), *(f32 *)(arg0 + 8), arg3 | 0x60000, idx, w, 0, arg1);
+}
 
 s32 func_15145EA4(s32 **, s32 *, s32, s32);
 extern s32 D_800A2500;
