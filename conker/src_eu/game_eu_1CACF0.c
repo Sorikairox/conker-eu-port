@@ -35,7 +35,55 @@ void func_1519D570(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519DF64.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E764.s")
+void func_1519E764(u8 *arg0, u8 *arg1, u8 arg2)
+{
+  s32 temp_a0;
+  s32 temp_t6;
+  s32 temp_v1;
+  u8 *temp_v0;
+  temp_t6 = arg2;
+  temp_v0 = *((u8 **) (((u8 *) arg0) + 0x98));
+  if (temp_t6 == 0)
+  {
+    if (((*((s32 *) (((u8 *) temp_v0) + 0))) == (*((s32 *) (((u8 *) arg1) + 0)))) || ((*((u8 *) (((u8 *) temp_v0) + 4))) == (*((u8 *) (((u8 *) arg1) + 4)))))
+    {
+      func_1519D510(arg0);
+    }
+  }
+  else
+    if (temp_t6 == 6)
+  {
+    if ((*arg1) == (*((u8 *) (((u8 *) temp_v0) + 0x4C))))
+    {
+      func_1519D510(arg0);
+    }
+  }
+  else
+    if (temp_t6 == 7)
+  {
+    if (((*((s32 *) (((u8 *) temp_v0) + 0))) == (*((s32 *) (((u8 *) arg1) + 0)))) || ((*((u8 *) (((u8 *) temp_v0) + 4))) == (*((u8 *) (((u8 *) arg1) + 4)))))
+    {
+      func_1519D510(arg0);
+    }
+  }
+  else
+    if (temp_t6 == 0x2D)
+  {
+    ;
+    temp_a0 = *((s32 *) (((u8 *) arg1) + 0));
+    if (temp_a0 == (*((s32 *) (((u8 *) temp_v0) + 0))))
+    {
+      *((s32 *) (((u8 *) temp_v0) + 0)) = *((s32 *) (((u8 *) arg1) + 4));
+      *((u8 *) (((u8 *) temp_v0) + 4)) = (u8) (*((u8 *) (((u8 *) arg1) + 9)));
+      return;
+    }
+    if ((*((s32 *) (((u8 *) arg1) + 4))) == (*((s32 *) (((u8 *) temp_v0) + 0))))
+    {
+      *((s32 *) (((u8 *) temp_v0) + 0)) = temp_a0;
+      *((u8 *) (((u8 *) temp_v0) + 4)) = (u8) (*((u8 *) (((u8 *) arg1) + 8)));
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E874.s")
 

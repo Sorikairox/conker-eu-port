@@ -190,3 +190,11 @@ func_151D1488	DIFF9	1	OK	y	n	u8 *p = arg0 initializer (twin of 15107B9C)
 func_151E3A1C	DIFF9	2	OK	y	n	u8 (not s8) extern type for D_800E0FC9 breaks the constant CSE across the call
 func_150D19AC	DIFF10	1	DIFF10	n	n	two stack slots 0x1C/0x28 for the same pointer + mtc1 f6 hoisted above lw t6; local order swap no help
 func_151A4EB0	DIFF10	3	DIFF10	n	n	temp should live in a1 (the unused 2nd arg reg, homed by sw a1,4(sp)); arg1-as-temp loses the home store (DIFF38); to permuter
+func_1515F61C	DIFF12	1	OK	y	n	game_eu_18B1C0 now owns .rodata 0x24BB80-0x24BBA0: literal 32767.0f instead of extern
+func_151B9190	DIFF6	3	OK	y	y	permuter: addend + (x * sinf()) form; mul.s operand order needs x * sinf not sinf * x
+func_151B90F0	DIFF10	1	OK	y	n	twin of 151B9190: addend + (x * sinf(y)) form
+func_15022864	DIFF2	0	OK	y	y	permuter 200s
+func_1518AADC	DIFF2	0	OK	y	y	permuter 200s
+func_1519E764	DIFF2	0	OK	y	y	permuter 200s
+func_151A4EB0	DIFF10	3	OK	y	y	permuter DIFF2 + multiply operand order swapped (multu a1,t7)
+func_1513B798	DIFF6	5	DIFF2	n	y	permuter best (DIFF2): char flag spills at 0x1A (s8: lb), ref byte at 0x1B lbu; u8 gives DIFF10; stackfix pad no help

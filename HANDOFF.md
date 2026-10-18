@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2899 / 5913 functions in C (49.0%)**; code bytes 302,528 / 2,253,856 (13.4%)
-  (end of session 18, from `verify_all.sh`).
+- **2922 / 5913 functions in C (49.4%)**; code bytes 305,776 / 2,253,856 (13.6%)
+  (end of session 19, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2507/5330 (11.2%)
+  - game: 2530/5330 (11.4%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18, 2922 (305,776 bytes) after session 19.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -1326,6 +1326,63 @@ commit, `--quick` before the first (plus a failed full run that caught the `func
   cases in < 200 s this session.
 - Try "reuse one local" and "statement order" first on any short DIFF<=12 draft; they produced 9 of the 22 matches.
 - Remaining `fresh.txt` entries by DIFF score, then worklist2.
+
+## Session 19: repair loop on fresh drafts (short, DIFF<=12), permuter on leftovers, initializer copies
+
+Sequential, 2 work commits (`b466fd2` + the final one), +23 functions (2899 -> 2922), +3,248 bytes. Full `verify_all.sh` before both.
+
+### Tools / setup
+
+- `game_eu_18B1C0` now owns `.rodata` 0x24BB80-0x24BBA0 (`rodata_split.py --own ... --resplit`); `func_1515F61C` matches with the literal `32767.0f`.
+- `tools/eu_port/gensome.sh <func>...`: regenerates m2c drafts for just those functions (ONLY=list into `conker/build/ks`), narrows, screens and copies the
+  best draft per function into `repair/fresh/` (prints `result func`). Needed because a `--resplit` or `verify_all.sh` wipes `conker/build/k40`, so `fctx.sh`
+  can no longer find the gen40 drafts of functions not already in `repair/fresh/` (the dir named in `fresh.txt` is gone).
+- Permuter (`permute.sh -l list 200 4`, background, 7 + 6 functions): **5 of the 13 solved outright** (`func_1514F114`, `func_15030060`, `func_15022864`,
+  `func_1518AADC`, `func_1519E764`, all < 200 s; the register-only/scheduling leftovers) and two more brought to DIFF1/2 whose last word was hand-fixed
+  (`func_151B9190`: mul operand order; `func_151A4EB0`: multu operand order). `match.c` goes through `repair_try.sh` (-> `build/hand`) like any draft.
+- Pitfalls: `apply.py` aborts if `build/hand/screen.txt` still lists a function whose `.c` was moved to `hand_done` (delete the line); a draft that
+  declares a prototype for a callee that an earlier-applied function of the same file now defines must drop that declaration (`func_15172474`, REJECT until
+  `func_15172210`'s decl line was removed and `temp_v0` made `u8 *`).
+
+### Numbers
+
+- Rows in `repair_log.tsv` this session: **39 tried, 23 matched (59%)**; 81 rewrite attempts (the 16 reasoned matches took 29; 7 matches came from
+  the permuter, 6 of them with 0-3 hand tweaks). Cumulative repair loop (sessions 16-19): **185 tried, 97 matched (52%)**.
+- Matched (23): `func_1515F61C`, `func_150D09D4`, `func_1519EEE0`, `func_150B42B0`, `func_150E7498`, `func_1515C710`, `func_1515C7B4`, `func_15172210`,
+  `func_15172474`, `func_1518FA0C`, `func_15107B9C`, `func_150C4FD8`, `func_151D1488`, `func_15134DAC`, `func_151E3A1C`, `func_151B90F0`,
+  plus permuter: `func_1514F114`, `func_15030060`, `func_15022864`, `func_1518AADC`, `func_1519E764`, `func_151B9190`, `func_151A4EB0`.
+
+### New rewrite patterns
+
+1. **`or a1, a0` / `or a2, a0` copies of a parameter** (`func_15107B9C`, `func_150C4FD8`, `func_151D1488`): `u8 *p = arg0;` as a *declaration with initializer* gives
+   the copy into `a1`; the same via a later assignment `p = arg0;` puts it in `a2`. Twin handlers: `if (*(s32 *)(p + K) != 0) func_1516972C(*(struct102 **)(p + K));`.
+   (Did not carry over to `func_151C9CBC`/`func_151C8C24`: copies right, but frame 0x28 instead of 0x20.)
+2. **One-byte local passed by address** (`func_150D09D4`, `func_150B42B0`): `s8 sp30[8]` / `s8 sp24[4]` array (assign `sp[0]`, pass `sp`) puts the byte at the
+   ref offset and fixes the frame, where `s8 sp30;` + stackfix pad only reached DIFF2.
+3. **Constant store order in object-init functions** (`func_1519EEE0`, `func_15172210`, `func_15134DAC`): the ref has the argument-derived stores first, then
+   the constant (0/1) stores, then the last byte store (`+0x59`); `s16` negated store before the `1`-store. Writing in that order gives the ref schedule.
+4. **Float operand order matters for the register numbers**: `addend + (x * sinf(y))` (`func_151B9190`, `func_151B90F0`); a lerp `(v[4] - (b = v[1])) * t + b` with
+   separate locals per component loads the far operand first (`func_150E7498`, with the table through `((f32 **)&D)[idx % 6U]`); `(f32)s16 + load` in
+   `func_1515C710` (use if/else instead of an early `return`). Integer multiplies: swap operands when `multu` has `rs`/`rt` reversed (`func_151A4EB0`).
+5. **Several `||` operands: name every load** (`func_1518FA0C`: four temps loaded before the test, compare order `a0 == a1`).
+6. **Byte vs word reads of a struct field** (`func_1519E764`): m2c's `(u8)*(s32 *)p` / `*(u8 *)(p + 4)` were really `*p` (byte at +0) and `*(s32 *)(p + 4)`.
+7. **`D_800E0FC9` as `u8`** (`func_151E3A1C`): a different type for the second of two `= 1` stores stops IDO from CSE-ing the constant across a call.
+8. **Pointer arithmetic on a struct pointer scales the offset** (`func_15172474`: `(u8 *)temp_v0 + 0x10`; `struct102 *` + 0x10 was `+0x400`).
+
+### Left (notes in `repair_log.tsv`)
+
+- `func_1513B798` DIFF2 (permuter best.c kept as the draft: the flag byte is `lbu` at sp+0x1B; `char` gives `lb` at 0x1A, `u8` is DIFF10).
+- Dead `addiu v1, -0xC` in a delay slot (`func_100043B4`, same family as `func_150C63FC`); `func_15174E90` (clamp branch with unfilled delay slot, blocked shape);
+  `func_10001420` (memclear loop: mine materialises the base address twice); `func_150B7258` (ref keeps `&D_800D9CB4` in `s0`, then reuses it for `D_800D9CB8`).
+- Not solved: `func_150D19AC` (same pointer in two stack slots + mtc1 hoist), `func_151C9CBC`/`func_151C8C24` (frame size), `func_150ADDE0` (leaf float f0/f2/f4; -O1/-O3/-mips1 no help).
+- Untried from the DIFF<=12 list: `func_150F2F14`, `func_15031044`, `func_1503F7A0`, `func_150FE1AC`, `func_1510B8AC`, `func_1510BB78`, `func_1515C3C0`; the rest of `fresh.txt` and worklist2.
+- Earlier leftovers still open: `func_1517A028` (permuter DIFF1), `func_151E8998` (DIFF10), `func_1516FE5C/FE8C` (DIFF4/5), `func_1510B930` (nothing).
+
+### Next steps (session 19)
+
+- Run the permuter (200 s, 4 jobs, background) *first* on every register/scheduling-only DIFF<=6 leftover and on the untried DIFF<=12 list; it solved 5/13 and took
+  two more to DIFF1-2. Then hand-fix the last word (operand order of `mul`/`multu`/`add`, byte types).
+- Use the initializer-copy and constant-store-order patterns on the remaining 12-insn delete-handlers and object-init functions.
 
 ## Layout
 

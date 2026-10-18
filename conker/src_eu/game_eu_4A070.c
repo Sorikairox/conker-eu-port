@@ -133,7 +133,16 @@ void func_150227FC(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022864.s")
+u8 *func_151149AC(u8);
+extern u8 D_800C3970[];
+void func_15022864(s32 arg0)
+{
+  s32 i;
+  u8 *cnt;
+  u8 *p;
+  cnt = &D_800C396A[arg0];
+ do { i = 0; if ((*cnt) > 0) { p = D_800C3970 + (arg0 * 0x1E); do { func_151149AC(*p)[0x6E] = 1; i += 1; p += 1; } while (i < (*cnt)); } } while (0);
+}
 
 s32 func_15022388(s32, s32);
 s32 func_15022440(s32, s32);

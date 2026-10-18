@@ -19,7 +19,25 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4DEC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4EB0.s")
+s32 func_151A4EB0(u8 *arg0, s32 arg1)
+{
+  s16 temp_a1;
+  u8 *temp_v1;
+  temp_v1 = arg0 + 0xA8;
+  if ((*((s16 *) (arg0 + 0x1A))) < (*((s16 *) (((u8 *) arg0) + 0xAC))))
+  {
+    *((s8 *) (((u8 *) arg0) + 0x2B)) = (s8) ((*((s16 *) (((u8 *) arg0) + 0xAE))) * (*((s16 *) (arg0 + 0x1A))));
+  }
+  if ((*((s16 *) (arg0 + 0x1A))) < (*((s16 *) (((u8 *) temp_v1) + 8))))
+  {
+    f32 temp_f0;
+    temp_f0 = (f32) ((*((s16 *) (((u8 *) temp_v1) + 0xA))) * D_800BE9E4);
+    *((f32 *) (((u8 *) arg0) + 0x38)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x38))) + temp_f0);
+    *((f32 *) (((u8 *) arg0) + 0x3C)) = (f32) ((*((f32 *) (((u8 *) arg0) + 0x3C))) + temp_f0);
+  }
+  *((s8 *) (((u8 *) arg0) + 0x2C)) = (s8) ((*((s16 *) (((u8 *) temp_v1) + 2))) * (*((s16 *) (((u8 *) arg0) + 0x1A))));
+  return 1;
+}
 
 void func_151A4F4C(u8 *arg0, u8 arg1) {
     struct260 *temp_v0;
