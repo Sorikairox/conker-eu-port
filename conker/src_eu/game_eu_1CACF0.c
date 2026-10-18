@@ -103,7 +103,25 @@ void func_1519E92C(s32 arg0, s16 arg1, volatile u8 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E9D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519EAE0.s")
+void func_1519EAE0(u8 *arg0, s32 *arg1, u8 arg2) {
+    u8 *v = arg0 + 0x28;
+    if (arg2 == 0) {
+        if ((*(s32 *)v == arg1[0]) || (v[4] == ((u8 *)arg1)[4])) {
+            func_1516972C(arg0);
+        }
+    } else {
+        v = arg0 + 0x28;
+        if (arg2 == 0x2D) {
+            if (arg1[0] == *(s32 *)v) {
+                *(s32 *)v = arg1[1];
+                v[4] = ((u8 *)arg1)[9];
+            } else if (arg1[1] == *(s32 *)v) {
+                *(s32 *)v = arg1[0];
+                v[4] = ((u8 *)arg1)[8];
+            }
+        }
+    }
+}
 
 void func_1519EB8C(struct102 *arg0, s32 arg1, u8 arg2) {
     if ((arg2 == 0) || (arg2 == 9)) {

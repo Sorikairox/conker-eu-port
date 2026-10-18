@@ -415,7 +415,7 @@ extern s32 D_80088750;
 extern vertex D_80088724;
 extern u8  D_80088980;
 extern u8  D_80088B40;
-extern u8  D_80088B60;
+extern void (*D_80088B60[2])(void);
 extern u8  D_80088B90;
 extern u8  D_80088BB0;
 extern s32 D_800894B0;

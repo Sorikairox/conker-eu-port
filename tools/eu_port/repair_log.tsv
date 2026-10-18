@@ -407,3 +407,20 @@ func_150CB5E0	DIFF	3	SIZE-6	n	n	ref keeps arg0 in s0 (or s0,a0) but IDO keeps it
 func_1000CDA0	SIZE-1	0	SIZE-1	n	n	skipped (u8 flag word logic, 90 insns)
 func_1516AAA8	SIZE+1	0	SIZE+1	n	n	skipped: 15-arg float spawner call
 func_150FF1A8	SIZE-5	0	SIZE-5	n	n	skipped: float literals (rodata) in a file without .rodata
+func_150C5970	NEAR1	2	OK	y	n	clones.py --near: sibling func_15147F50, lbu 0x38 + s32 idx; D_80088B58 table [2]
+func_150C59C0	NEAR1	1	OK	y	n	same; D_80088B60 in variables.h changed to void (*[2])(void)
+func_150C620C	NEAR6	2	OK	y	n	sibling func_1513E084 with arg2==0 first; compare order arg1[0] == *(s32*)v in the 0x2D arm (DIFF2 -> OK)
+func_1519EAE0	NEAR6	1	OK	y	n	same template, offset 0x28
+func_151AC304	NEAR6	1	OK	y	n	same template
+func_151A5338	NEAR6	1	OK	y	n	same template
+func_1519ED88	NEAR8	5	DIFF26	n	n	same template + D_800E0D50 = 0 after the call: mine puts sw in the b delay slot (ref: sw; b; lw ra); volatile/return/else variants no help
+func_151C6424	NEAR1	1	OK	y	n	sibling func_15137E60: third arg 1, u8 *arg5 with arg5[0xC], arg5[1]
+func_151C8C24	NEAR4	1	OK	y	n	two-word sp18 {arg0,arg1}, call (sp18, 0x20)
+func_151C9CBC	NEAR2	2	OK	y	n	s32 arg0 (a u8 arg0 adds andi/spill), tmp[0]=arg1, byte store at tmp+1
+func_151E8998	NEAR3	2	SIZE+1	n	n	ref shares one lui for D_800E0FD4/FD0 (array form no help)
+func_151F0730	NEAR3	3	SIZE+1	n	n	memcpy(a,b,n)+n: ref stores a2 in jal delay slot, mine reloads
+func_150F1B78	DIFF6	1	DIFF6	n	y	session 28: permuter 700 s -j4 from the DIFF6 draft: best score 35, no improvement
+func_150F7890	DIFF6	1	DIFF8	n	y	session 28: permuter 700 s -j4: no improvement (DIFF8)
+func_15095B70	C61-100	1	SIZE-1	n	n	float code with rodata, not pursued
+func_151166FC	C61-100	1	SIZE-1	n	n	float rodata, not pursued
+func_1519F500	C61-100	1	SIZE-1	n	n	float rodata, 100 insns, not pursued

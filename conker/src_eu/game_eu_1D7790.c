@@ -210,7 +210,25 @@ void func_151AB930(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151ABF78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AC304.s")
+void func_151AC304(u8 *arg0, s32 *arg1, u8 arg2) {
+    u8 *v = arg0 + 0x28;
+    if (arg2 == 0) {
+        if ((*(s32 *)v == arg1[0]) || (v[4] == ((u8 *)arg1)[4])) {
+            func_1516972C(arg0);
+        }
+    } else {
+        v = arg0 + 0x28;
+        if (arg2 == 0x2D) {
+            if (arg1[0] == *(s32 *)v) {
+                *(s32 *)v = arg1[1];
+                v[4] = ((u8 *)arg1)[9];
+            } else if (arg1[1] == *(s32 *)v) {
+                *(s32 *)v = arg1[0];
+                v[4] = ((u8 *)arg1)[8];
+            }
+        }
+    }
+}
 
 void func_151AC3B0(u8 *arg0)
 {

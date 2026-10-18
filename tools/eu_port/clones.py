@@ -129,14 +129,17 @@ def cfunc_text(name):
         j += 1
     return t[m.start():j + 1]
 
-def diffs(c, a):
-    """aligned diffs between C-function c and asm function a: imm [(pos, k, old, new)], sym [(old, new)]"""
+def diffs(c, a, pairs=None):
+    """aligned diffs between C-function c and asm function a: imm [(pos, k, old, new, posA)], sym [(old, new, type)].
+    pairs = aligned (i, j) instruction indices (default: identity)"""
     fc, fa = funcs[c], funcs[a]; imm = []; sym = []; same = collections.defaultdict(list)
-    for i in range(len(fc['sk'])):
-        for k, (x, y) in enumerate(zip(fc['im'][i], fa['im'][i])):
-            if x != y: imm.append((i, k, x, y))
+    if pairs is None: pairs = [(i, i) for i in range(len(fc['sk']))]
+    for i, j in pairs:
+        if fc['ins'][i][0] != fa['ins'][j][0] or len(fc['im'][i]) != len(fa['im'][j]): continue
+        for k, (x, y) in enumerate(zip(fc['im'][i], fa['im'][j])):
+            if x != y: imm.append((i, k, x, y, j))
             else: same[x].append(i)
-        rc, ra = fc['ins'][i][2], fa['ins'][i][2]
+        rc, ra = fc['ins'][i][2], fa['ins'][j][2]
         if rc and ra and rc[1] != ra[1]: sym.append((rc[1], ra[1], rc[0]))
     return imm, sym, same
 
@@ -171,18 +174,19 @@ def find_proto(name):
     m = re.search(r'^(\w[\w \*]*?)\s*\b%s\s*\(([^)]*)\);' % re.escape(name), HDR_TXT, re.M)
     return m
 
-def make_draft(c, a, lax=False):
+def make_draft(c, a, lax=False, pairs=None):
     body = cfunc_text(c)
     if body is None: return None, 'nosrc'
-    imm, sym, same = diffs(c, a)
+    imm, sym, same = diffs(c, a, pairs)
     if lax:   # alias data symbols (same address, other name) link identically: keep the sibling's names
         sym = [x for x in sym if x[2] == 'R_MIPS_26']
-        imm = [x for x in imm if not (funcs[c]['ins'][x[0]][2] and funcs[a]['ins'][x[0]][2] and funcs[c]['ins'][x[0]][2][1] != funcs[a]['ins'][x[0]][2][1])
-               and not (not funcs[a]['ins'][x[0]][2] and funcs[c]['ins'][x[0]][2]) and not (x[3] == 0)]
+        imm = [x for x in imm if not (funcs[c]['ins'][x[0]][2] and funcs[a]['ins'][x[4]][2] and funcs[c]['ins'][x[0]][2][1] != funcs[a]['ins'][x[4]][2][1])
+               and not (not funcs[a]['ins'][x[4]][2] and funcs[c]['ins'][x[0]][2]) and not (x[3] == 0)]
+    prs = pairs if pairs is not None else [(i, i) for i in range(len(funcs[c]['ins']))]
     if not lax and any(funcs[c]['ins'][i][2] and funcs[c]['ins'][i][2][1].startswith('.rodata') or
-           funcs[a]['ins'][i][2] and funcs[a]['ins'][i][2][1].startswith('.rodata') for i in range(len(funcs[c]['ins']))
-           if (funcs[c]['ins'][i][2] or funcs[a]['ins'][i][2]) and
-              (funcs[c]['ins'][i][2] or ('', ''))[1] != (funcs[a]['ins'][i][2] or ('', ''))[1]):
+           funcs[a]['ins'][j][2] and funcs[a]['ins'][j][2][1].startswith('.rodata') for i, j in prs
+           if (funcs[c]['ins'][i][2] or funcs[a]['ins'][j][2]) and
+              (funcs[c]['ins'][i][2] or ('', ''))[1] != (funcs[a]['ins'][j][2] or ('', ''))[1]):
         return None, 'rodata'
     body = re.sub(r'\b%s\b' % re.escape(c), a, body)
     smap = {}
@@ -196,7 +200,7 @@ def make_draft(c, a, lax=False):
         body = re.sub(r'(?<![\w])%s(?!\w)' % re.escape(o), '@@' + n + '@@', body)
     # immediates grouped by old value, in instruction order
     byold = collections.defaultdict(list)
-    for (i, k, x, y) in imm: byold[x].append(y)
+    for (i, k, x, y, _j) in imm: byold[x].append(y)
     missing = []
     edits = []
     for x, news in byold.items():
@@ -238,6 +242,90 @@ def make_draft(c, a, lax=False):
             pre += ln + '\n'
     body = pre + body
     return body, ('missing:' + ','.join(hex(m) for m in missing)) if missing else 'ok'
+
+
+# ---- fuzzy mode: closest matched C function by skeleton edit distance
+def align(sa, sb, K):
+    """banded edit distance between skeleton lists (insert/delete/substitute = 1). -> (dist, pairs[(i in sa, j in sb)], ops) or None if > K"""
+    n, m = len(sa), len(sb)
+    if abs(n - m) > K: return None
+    INF = 99
+    D = [[INF] * (m + 1) for _ in range(n + 1)]
+    for j in range(min(m, K) + 1): D[0][j] = j
+    for i in range(1, n + 1):
+        lo, hi = max(0, i - K), min(m, i + K)
+        if lo == 0: D[i][0] = i
+        for j in range(max(1, lo), hi + 1):
+            v = D[i - 1][j - 1] + (0 if sa[i - 1] == sb[j - 1] else 1)
+            if D[i - 1][j] + 1 < v: v = D[i - 1][j] + 1
+            if D[i][j - 1] + 1 < v: v = D[i][j - 1] + 1
+            D[i][j] = v
+        if min(D[i][lo:hi + 1]) > K: return None
+    d = D[n][m]
+    if d > K: return None
+    i, j = n, m; pairs = []; ops = []
+    while i > 0 or j > 0:
+        if i > 0 and j > 0 and D[i][j] == D[i - 1][j - 1] + (0 if sa[i - 1] == sb[j - 1] else 1):
+            pairs.append((i - 1, j - 1))
+            if sa[i - 1] != sb[j - 1]: ops.append(('chg', i - 1, j - 1))
+            i -= 1; j -= 1
+        elif i > 0 and D[i][j] == D[i - 1][j] + 1: ops.append(('del', i - 1, None)); i -= 1
+        else: ops.append(('ins', None, j - 1)); j -= 1
+    return d, pairs[::-1], ops[::-1]
+
+def near_pairs(K, maxlen, only=None):
+    """-> {asm func: (dist, sibling C func, pairs, ops)} for the closest C sibling (dist 1..K; exact skeleton matches are the exact mode's job)"""
+    cs = [n for n, f in funcs.items() if not f['live'] and len(f['sk']) >= MIN]
+    cnt = {n: collections.Counter(funcs[n]['sk']) for n in cs}
+    bylen = collections.defaultdict(list)
+    for n in cs: bylen[len(funcs[n]['sk'])].append(n)
+    res = {}
+    for a, fa in funcs.items():
+        if not fa['live'] or len(fa['sk']) < MIN or len(fa['sk']) > maxlen: continue
+        if only and a not in only: continue
+        if any(not funcs[x]['live'] for x in by.get(fa['key'], ())): continue   # exact sibling exists
+        ca = collections.Counter(fa['sk']); best = None
+        for L in range(len(fa['sk']) - K, len(fa['sk']) + K + 1):
+            for c in bylen.get(L, ()):
+                lb = sum((ca - cnt[c]).values())
+                if lb > K or (best and lb > best[0]): continue
+                r = align(funcs[c]['sk'], fa['sk'], K if not best else best[0])
+                if r and (best is None or r[0] < best[0] or (r[0] == best[0] and c < best[1])): best = (r[0], c, r[1], r[2])
+        if best and best[0] >= 1: res[a] = best
+    return res
+
+if opt('--near'):
+    K = int(opt('--near')); maxlen = int(opt('--maxlen', 200))
+    only = set(opt('--only', '').split(',')) - {''} if isinstance(opt('--only'), str) else None
+    res = near_pairs(K, maxlen, only)
+    hist = collections.Counter(v[0] for v in res.values())
+    print('--near %d (live skeleton %d..%d insns): %d GLOBAL_ASM functions with a C sibling within %d edits' % (K, MIN, maxlen, len(res), K))
+    cum = 0
+    for d in sorted(hist):
+        cum += hist[d]
+        print('  dist %d: %3d functions (%d cumulative, %d bytes cumulative)' % (d, hist[d], cum,
+            sum(len(funcs[a]['sk']) * 4 for a, v in res.items() if v[0] <= d)))
+    if opt('--draft'):
+        out = opt('--draft'); out = out if isinstance(out, str) else R + '/build/nr'
+        import shutil; shutil.rmtree(out, ignore_errors=True)
+        rows = []; stat = collections.Counter()
+        os.makedirs(out + '/v0', exist_ok=True)
+        for a, (d, c, pairs, ops) in sorted(res.items(), key=lambda kv: (kv[1][0], len(funcs[kv[0]]['sk']))):
+            body, why = make_draft(c, a, False, pairs)
+            if body is None and LAX: body, why = make_draft(c, a, True, pairs); why = 'lax ' + why
+            stat[why.split('(')[0].split(':')[0]] += 1
+            if body is None: continue
+            notes = []
+            for op, i, j in ops:
+                if op == 'ins': notes.append('asm +%s' % funcs[a]['sk'][j])
+                elif op == 'del': notes.append('sib -%s' % funcs[c]['sk'][i])
+                else: notes.append('%s -> %s' % (funcs[c]['sk'][i], funcs[a]['sk'][j]))
+            body = '/* NEAR %d from %s: %s */\n' % (d, c, '; '.join(notes)) + body
+            open('%s/v0/%s.c' % (out, a), 'w').write(body + '\n')
+            rows.append('%s <- %s dist %d %s' % (a, c, d, why))
+        open(out + '/clones.txt', 'w').write('\n'.join(rows) + '\n')
+        print('near drafts: %d files in %s/v0; reasons: %s' % (len(rows), out, dict(stat)))
+    sys.exit(0)
 
 if opt('--draft'):
     out = opt('--draft'); out = out if isinstance(out, str) else R + '/build/cl'

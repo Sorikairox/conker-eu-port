@@ -23,7 +23,19 @@ void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C5D2C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C6424.s")
+void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
+void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
+    f32 sp6C[3];
+    f32 sp60[3];
+    f32 sp54[3];
+    f32 sp50;
+    s16 sp4E;
+    u8 sp4D;
+    f32 sp48;
+
+    func_15137F30(arg0, arg1, arg2, arg3, arg4, arg5, sp6C, sp60, sp54, &sp50, &sp4E, &sp4D, &sp48);
+    func_151D9014(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C64F4.s")
 
