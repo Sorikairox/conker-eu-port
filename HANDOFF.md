@@ -17,17 +17,17 @@ pushed, and nothing goes upstream.
 ## Current state
 
 - The full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **2877 / 5913 functions in C (48.7%)**; code bytes 300,256 / 2,253,856 (13.3%)
-  (end of session 17, from `verify_all.sh`).
+- **2899 / 5913 functions in C (49.0%)**; code bytes 302,528 / 2,253,856 (13.4%)
+  (end of session 18, from `verify_all.sh`).
   - init: 361/540 functions (38.5% of bytes)
-  - game: 2485/5330 (11.1%)
+  - game: 2507/5330 (11.2%)
   - debugger: 31/43 (41.3%)
   - History: 1094 (18.5%) after the automated port, 1363 (23.1%) after the hand port,
     2374 after the first round of new decompilation (session 3), 2563 after session 4,
     2622 (253,312 bytes) after session 5, 2664 (265,996 bytes) after session 6, 2682
     (268,452 bytes) after session 7, 2706 (273,596 bytes) after session 8, 2735 (277,860 bytes)
     after session 9, 2757 (281,452 bytes) after session 10, 2772 (286,048 bytes) after session 11,
-    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17.
+    2780 (287,492 bytes) after session 12, 2799 (290,016 bytes) after session 13, 2820 (292,952 bytes) after session 14, 2823 (293,688 bytes) after session 15, 2842 (296,208 bytes) after session 16, 2877 (300,256 bytes) after session 17, 2899 (302,528 bytes) after session 18.
 - Every former plain `asm` subsegment is now a C file (`*_eu_<rom>.c`, initially all
   GLOBAL_ASM stubs; commit `c3f2d8f`), so new decompilation never needs yaml edits:
   replace a pragma with C.
@@ -1249,6 +1249,83 @@ session 16 with a script that checks the drafts' *calls* first. Full `verify_all
 - Make `draftcheck.py` auto-apply the safe part: rewrite the draft's call (add pass-through args), declare the callee from the
   asm liveins when no definition exists, add `sp` matrix locals for undeclared `spXX` (would turn many CERR into screenable drafts).
 - Look at the reload-from-home shape with a fresh idea (list above): 8 functions wait on it.
+
+## Session 18: repair loop on fresh gen40 drafts (hint filter), reuse-one-local patterns
+
+Sequential, 2 work commits (`82a7b53`, `d14edb0`), +22 functions (2877 -> 2899), +2,272 bytes. Full `verify_all.sh` before the last
+commit, `--quick` before the first (plus a failed full run that caught the `func_15178E14` caller size).
+
+### Tools / setup
+
+- `gen40.sh 70` rerun (7 min, 932 ranked entries in `repair/fresh.txt`; 240 are still CERR). It does **not** refresh
+  `repair/fresh/`, so the new `tools/eu_port/fctx.sh <func>` copies the draft from the dir named in `fresh.txt` into `repair/fresh/`
+  and prints `repair_ctx.sh` (MAXT=60 default). Use it instead of `repair_ctx.sh` for gen40 drafts.
+- Hint filter used: `draftcheck.py` over all non-CERR fresh drafts that are still asm and not in the log (329 files, 115 with hints). Most
+  hints are `proto has 1 params, asm passes a0..a3` on `func_1516972C` (a C function with one param: junk regs, ignore) and `sinf/cosf`
+  pass-through (libm, ignore). The real ones were callee arity (`func_15094DAC`, `func_15123A54`, `func_1511084C`); most other matches
+  were statement-order/local fixes, so "short + DIFF <= 12" was a better filter than the hints.
+- Pitfalls: BSD `sed -i` needs `sed -i ''` (without it the script is taken as the backup suffix: "extra characters at the end of d
+  command"). `rlog.sh` with an unquoted `DIFF?` in zsh is a glob error and writes no row.
+
+### Numbers
+
+- Rows in `repair_log.tsv` this session: **40 tried, 22 matched (55%)**, 68 rewrite attempts = **0.32 matches per attempt**
+  (the 22 matches took 28 attempts, 1.3 each). Permuter 200 s on 2 leftovers (DIFF3 each): **2 solved** (`func_150EA904`,
+  `func_150F791C`, both < 200 s).
+- Cumulative repair loop (sessions 16 + 17 + 18): **146 tried, 74 matched (51%), 274 attempts = 0.27 matches per attempt**.
+- Matched (22): `func_151108E0`, `func_1512C5D8`, `func_15094CD0`, `func_1503BC4C`, `func_15178E14`, `func_151C8D5C`, `func_151927C0`,
+  `func_150EA904`, `func_1516FEF4`, `func_150C7D70`, `func_151D90D4`, `func_1508F054`, `func_1508EFEC`, `func_1508F0B8`,
+  `func_15133FC0`, `func_150CFA88`, `func_15150108`, `func_150F791C`, `func_151992B0`, `func_150FF148`, `func_15133F44`, `func_150E3C3C`.
+
+### New rewrite patterns
+
+1. **Callee arity from the asm, again** (`func_1512C5D8`, `func_15094CD0`, `func_151108E0`, `func_150C7D70`): m2c invented f32 args for a
+   callee that takes only `arg0`; or dropped the pass-through `a0` (`func_15094DAC(arg0, sp50)`, `func_15116A8C(arg0, 1, 0x43, f32)`).
+2. **Byte-table read into an `s32` temp** (`func_1503BC4C`, `func_1508F054/EFEC/F0B8`): `lbu v0, %lo(D)(v0)` with the table folded into
+   the load needs `s32 t = *((u8 *)&D + idx * 0x32C);`. A `u8 t` goes to `v1`; an `s32` temp lands in `v0` as the ref has it.
+3. **Reuse one local** (`func_1516FEF4`): `s32 v = *(s16 *)p; v = v * arg1; *(s16 *)p = v >> 8;` numbers the temps like the ref
+   (no skipped `t6`). The same idea only half-worked on `func_1516FE5C/FE8C` (v0 right, `t6/t7` swapped).
+4. **Statement order decides schedule and regs** (`func_151927C0`: compute `y` first, then the constant stores, then `(y << 16) + y`;
+   explicit `(y << 16) + y` beats `* 0x10001`; `func_15133FC0/F44`: the `0x3C` store first, `temp_f0` loaded after it;
+   `func_150CFA88`: accumulate `D * 0x1A` first, then the `0x1C` temp; `func_150FF148`: hoist the third call argument into a local;
+   `func_1512C5D8`: store `0x384` before `0x5CC = 0`; `func_151992B0`: load the `0x98` pointer before the test).
+5. **Frame size = local sizes**: `func_15150108` had `s32 sp34; s32 sp28;` but the frame wants `s32 sp34[3]; s32 sp28[3];` (12-byte
+   vectors); `func_15094CD0`: `u8 *sp50[16]` and a plain `for` instead of m2c's `var_s1 += 4` on a `u8 **` (scaled twice).
+6. **Stack-passed 5th..7th parameters**: `lw t8, 0x18($sp)` in a leaf with a 4-register prologue is the 7th parameter: add dummy
+   `arg4/arg5` (`func_151C8D5C`); `p`/`q` locals order the loads.
+7. **Loop shapes**: `u8 i` with a `u8` callee param gives the `v0 = s0 & 0xFF` copy for free (`func_151D90D4`); the s32 form
+   `i += 1; i = i & 0xFF; while (i < 2)` (permuter result for `func_150F791C`; `t = (i + 1) & 0xFF` made a spurious `v0`); an `s32 *` array
+   walked as `p[i + 2]`, never `(p + i * 4)`.
+8. **Parameter as the temp** (`func_150E3C3C`: `arg0 = arg0 - 1;` keeps the table index in `a0`, `v0` for the loaded pointer).
+9. **Header prototype vs. real arity** (`func_15178E14`): the caller in `game_CB1C0.c` passed two args to a one-param function; fixing
+   the prototype to `void func_15178E14(u8);` and the caller to one argument matched both. (`()` in the header plus a K&R definition matched the
+   function but shrank the caller by 4 insns, so don't.)
+10. **Permuter output cleanup**: `p[0x73] = (p[0x73] & 0xFFFF) | 3;` (`func_150EA904`) is what the permuter found; keep it verbatim.
+
+### Left (notes in `repair_log.tsv`)
+
+- **Float literal needs an extern, and the extern schedules differently**: `func_1515F61C` screens OK with the literal `32767.0f` (nested
+  if/else clamp), but in the real file (no `.rodata` ownership) the extern `D_eu_800A6904` puts `lui at` before `c.le.s` and costs one insn.
+  Own the `.rodata` of `game_eu_18B1C0` (like `game_eu_13C400` in session 17) and write the literal. The same trap may hide in other
+  "OK" float drafts that `apply.py` REJECTs.
+- Leaf float functions with `f0/f2/f4` numbering where mine starts at `f4/f12` (`func_150AD930` sqrt of squares, `func_150ADDE0` dot
+  product, DIFF11-12): maybe not compiled like the rest (try other `SCREEN_OPT`).
+- Dead `addiu v0, v0, K` again (`func_150C7E30`, a0 pass-through to `func_1511563C`), `func_151C9C8C`; `func_1514143C` (ref keeps `v0 = a0 + 0x110`
+  unfolded); `func_15141478` (ref spills `v1` to `0x24($sp)` across calls, mine gets an s-reg: frame 0x28).
+- Reload-from-home shape again: `func_150A33C4/3484`, `func_150802A8` (`or a2, a0` alias), `func_151CA0E0`, `func_151CA114`.
+- Register-number leftovers: `func_1517A028` (a0/a1, DIFF6), `func_1514F114` (DIFF5, hoisted `lw t8`), `func_151EFDD0` (DIFF8), `func_15155CF0`
+  (DIFF8 scheduling), `func_1515D4D4`, `func_15109100`, `func_151DDA10`, `func_100038E0`, `func_1516FE5C/FE8C`.
+- Skipped as too big/odd: `func_1000CDA0` (67 insns), `func_150E2EA4/E3334` (27-arg call), handwritten `func_150A7770`, `func_150ADACC`.
+- Not tried: the rest of `fresh.txt` (SIZE-1/+1 at 25-60 insns, ~100 entries), worklist2 (nothing from it this session), the CERR group
+  (240; add the missing `spXX` locals).
+
+### Next steps (session 18)
+
+- Own the `.rodata` of `game_eu_18B1C0` and retry `func_1515F61C`; scan `repair/*.c` for other drafts REJECTed only for literals.
+- Run `permute.sh` also on DIFF5-6 register-only leftovers (`func_1517A028`, `func_1514F114`, `func_151EFDD0`): it solved both DIFF3
+  cases in < 200 s this session.
+- Try "reuse one local" and "statement order" first on any short DIFF<=12 draft; they produced 9 of the 22 matches.
+- Remaining `fresh.txt` entries by DIFF score, then worklist2.
 
 ## Layout
 
