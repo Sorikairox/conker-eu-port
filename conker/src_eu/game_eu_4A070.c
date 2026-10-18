@@ -11,7 +11,15 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CE34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D064.s")
+s32 func_1501D064(s32 arg0) {
+    s32 sum = 0;
+    s32 i;
+
+    for (i = 0; i < D_800C3A5A[arg0]; i++) {
+        sum += D_800C39F8[arg0][i];
+    }
+    return sum;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D044.s")
 

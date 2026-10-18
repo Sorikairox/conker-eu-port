@@ -29,7 +29,18 @@ void func_15063894(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_150639D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063A54.s")
+void func_15063A54(struct127 *arg0) {
+    u8 *v = *(u8 **)(*(u8 **)((u8 *)arg0 + 0x31C) + 0xB0);
+    u8 *w;
+
+    if (v != NULL) {
+        w = *(u8 **)(v + 0x31C);
+        if (w != NULL) {
+            (*(u8 **)(v + 0x31C))[0x195] = 0x1E;
+            (*(u8 **)(v + 0x31C))[0x196] = arg0 - D_800CC2D0;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063AA0.s")
 

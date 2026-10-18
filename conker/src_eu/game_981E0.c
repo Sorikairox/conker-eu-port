@@ -1646,7 +1646,7 @@ void func_1507266C(void)
     temp_a1->unkF0 = 1.0f;
     temp_a1->unkDC = 1.0f;
     temp_a1->unkE0 = 1.0f;
-    func_151B6150(&D_800CC2D0[D_800C3E78], temp_a1, temp_a2);
+    func_151B6150(&D_800CC2D0[D_800C3E78], temp_a1);
   }
 }
 

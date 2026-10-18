@@ -5,11 +5,14 @@ usage:
   clones.py --draft [OUTDIR] [--min N] [--per K] [--only f1,f2]
         write drafts for GLOBAL_ASM functions whose skeleton equals an already-matched C function:
         OUTDIR/v0/<func>.c, v1/... (default conker/build/cl), screen with  m2c/screenall build/cl
+  (both draft modes run declfix.py on every draft; --nofix switches that off)
   clones.py --asm-clusters [--min N] list asm-only clusters (no C sibling), smallest member first
 Skeleton = opcodes + registers per instruction; immediates, branch targets and reloc symbols are abstracted
 (sp-relative offsets and `addiu sp/aN,sp,K` are kept so the frame must agree).  Source of instructions:
 objdump of conker/build/src_eu/*.o (one docker exec, cached in conker/build/clones.dump; --refresh redoes it)."""
 import re, sys, os, glob, subprocess, collections
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import declfix
 R = os.path.expanduser('~/conker/conker')
 DUMP = R + '/build/clones.dump'
 args = sys.argv[1:]
@@ -321,6 +324,7 @@ if opt('--near'):
                 elif op == 'del': notes.append('sib -%s' % funcs[c]['sk'][i])
                 else: notes.append('%s -> %s' % (funcs[c]['sk'][i], funcs[a]['sk'][j]))
             body = '/* NEAR %d from %s: %s */\n' % (d, c, '; '.join(notes)) + body
+            if not opt('--nofix'): body, fn = declfix.fix(body, a, funcs[c]['file'], live[a]); why += ' fix=' + ','.join(fn)
             open('%s/v0/%s.c' % (out, a), 'w').write(body + '\n')
             rows.append('%s <- %s dist %d %s' % (a, c, d, why))
         open(out + '/clones.txt', 'w').write('\n'.join(rows) + '\n')
@@ -344,6 +348,7 @@ if opt('--draft'):
                 if body is None and LAX: body, why = make_draft(c, a, True); why = 'lax ' + why
                 stat[why.split('(')[0].split(':')[0]] += 1
                 if body is None: continue
+                if not opt('--nofix'): body, fn = declfix.fix(body, a, funcs[c]['file'], live[a]); why += ' fix=' + ','.join(fn)
                 d = '%s/v%d' % (out, made[a]); os.makedirs(d, exist_ok=True)
                 open('%s/%s.c' % (d, a), 'w').write(body + '\n'); made[a] += 1
                 rows.append('%s <- %s %s' % (a, c, why))

@@ -5,4 +5,10 @@
 
 s32 func_151B5590();
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3960/func_151B6150.s")
+void func_151B6150(struct127 *arg0, struct127 *arg1) {
+    if (arg0->id == 0x53) {
+        if (arg1->id == 0x16) {
+            func_151B5590(arg1, 0xFF, 1);
+        }
+    }
+}

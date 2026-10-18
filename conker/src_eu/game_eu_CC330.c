@@ -16,4 +16,12 @@ s32 func_1509EBD0(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC330/func_1509EC10.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC330/func_1509ED80.s")
+s32 func_1509ED80(s32 arg0, s32 arg1, s32 arg2) {
+    switch (arg1) {
+    case 7:
+        return func_1000E0F8(arg0);
+    case 8:
+        return func_1000E8F0(arg0);
+    }
+    return 0;
+}

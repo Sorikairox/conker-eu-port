@@ -179,4 +179,17 @@ u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15085098.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15085118.s")
+extern u8 D_800BE9B0;
+extern u16 D_800BE9B8[];
+s32 func_15085118(s32 arg0) {
+    s32 ret = 0;
+    s32 i;
+
+    for (i = 0; i < D_800BE9B0; i++) {
+        if (arg0 == D_800BE9B8[i]) {
+            ret = i;
+            break;
+        }
+    }
+    return ret;
+}

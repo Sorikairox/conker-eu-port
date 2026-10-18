@@ -139,7 +139,17 @@ void func_1515F828(u8 *arg0, s32 arg1) {
     func_1505D024(arg0, 0x6001D, *(u16 *)(arg0 + 0x7A), -1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F858.s")
+extern void (*D_8008B460[])(u8 *, u8 *);
+void func_1515F858(u8 *arg0, u8 *arg1) {
+    s32 v;
+
+    if (arg0[0x3B] == 1) {
+        v = *(s32 *)(arg1 + 0x1C);
+        if ((v >= 0) && (v < 3)) {
+            D_8008B460[v](arg0, arg1);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F8A8.s")
 

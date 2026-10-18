@@ -172,6 +172,11 @@ def _cmp_rodata(rod,off,sym,line,faddr):
     rb=_romread(va,n)
     return rb is not None and data[off:off+n]==rb
 
+def hoist_into(src,lines):
+    # forward prototypes / includes go after the last #include of the file
+    ms=list(re.finditer(r'^#include[^\n]*\n',src,re.M)); k=ms[-1].end() if ms else 0
+    return src[:k]+'\n'.join(lines)+'\n'+src[k:]
+
 def work(item):
     p,funcs=item
     src=open(p).read()
@@ -185,7 +190,12 @@ def work(item):
         if not m: out.append((f,p,'NOPRAGMA')); continue
         spath=m.group(1)+'/'+f+'.s'
         code=open(os.path.join(gd,f+'.c')).read()
+        hoist=[l[8:] for l in code.split('\n') if l.startswith('//HOIST ')]
+        dropl=[l[7:] for l in code.split('\n') if l.startswith('//DROP ')]
+        code='\n'.join(l for l in code.split('\n') if not l.startswith(('//HOIST ','//DROP ')))
         tu=src[:m.start()]+'\n'+code+'\n'+src[m.end():]
+        for l in dropl: tu=tu.replace(l+'\n','',1)
+        if hoist: tu=hoist_into(tu,hoist)
         tu=PRAG.sub('',tu)
         cpath=os.path.join(TMP,f+'.c'); opath=os.path.join(TMP,f+'.o')
         open(cpath,'w').write(tu)

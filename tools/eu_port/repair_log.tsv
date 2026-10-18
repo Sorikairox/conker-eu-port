@@ -427,3 +427,36 @@ func_1519F500	C61-100	1	SIZE-1	n	n	float rodata, 100 insns, not pursued
 func_150472F4	NEAR4	2	OK	y	n	sibling func_150473A0: compare order arg1 <= sp24 && sp24 <= arg0[4]; forward prototype of func_150A44A4 added at file top
 func_15083FB0	NEAR6	1	OK	y	n	sibling func_15084000: 1-arg u8 call, p - D_800CC2D0 (div 0x32C)
 func_151B27DC	NEAR5	2	OK	y	n	sibling func_150D2564 loop + extra post-loop slot 0x1C test; prototype above the caller func_151B27BC
+func_150F527C	NEAR5	3	OK	y	n	if-chain arg2==0x4E: sb/ori on v=arg0+0x170 defined FIRST (recipe A); proto (u8*,s32,u8)
+func_151B6150	NEAR8	3	OK	y	n	ref has 2 params: struct127* x2; header + the one caller lose the 3rd arg (arg2 unused made mine store a2)
+func_1515F858	NEAR9	2	OK	y	n	table call D_8008B460[v](arg0,arg1) guarded v>=0&&v<3; extern void (*[])(u8*,u8*)
+func_151C34A0	NEAR15	1	OK	y	n	wrapper: 6 params, callee gets *(s32*)(arg2+0x1B4), arg2+0x170, arg2[0xC], arg2[1]
+func_1514F2AC	NEAR15	2	OK	y	n	list search: load next at loop top (next = node->next) then else node = next; found path keeps node
+func_1514F3E0	NEAR9	1	OK	y	n	8-byte local struct {u8*,u8,u8,s16} passed to func_1515C3C0; result into func_1514F18C
+func_1509ED80	NEAR9	2	OK	y	n	dispatch template switch(arg1){case 7: return f(arg0); case 8: return g(arg0);} return 0; 3 params
+func_15085118	NEAR14	1	OK	y	n	find index of arg0 in u16 table, count D_800BE9B0 (u8); loop with break, ret=i
+func_1501D064	NEAR14	1	OK	y	n	sum of u16 table row: for i<D_800C3A5A[a] sum += D_800C39F8[a][i]
+func_15063A54	NEAR13	3	OK	y	y	permuter: first store needs (*(u8**)(v+0x31C))[0x195] (not w[0x195]); arg0 - D_800CC2D0 struct127 pointer difference
+func_150ADACC	NEAR3	8	SIZE+1	n	n	daddiu a0,a0,1; sd a0 (64-bit store of arg0+1), returns 0 via li a0: s64 variants SIZE+1..+4
+func_10006530	NEAR5	0	DIFF4	n	n	ra saved at 0(sp) with frame 0x10: needs other flags (-g?) for init_eu_5DA0; not tried further
+func_150C572C	DIFF9	5	DIFF2	n	y	do-while over D_800D9CF0..D_800D9D00 matches except addiu s1/s0 order (same as earlier session); permuter 80 s nothing
+func_151C9C8C	NEAR5	5	DIFF8	n	n	ref keeps a dead addiu v0,v0,0x110 (q+0x110 unused) that IDO deletes in every variant
+func_10001420	NEAR6	2	DIFF9	n	n	zero loop from D_80043ED0 0xFE0 bytes: ref lui t6/addiu a1 (t-regs), mine v0/v1
+func_100038E0	NEAR7	3	DIFF9	n	n	D_800383D0=0xBC000C02; D_800383D4=0x4040; *(s16*)0xBC000C02=0x4040: mine hoists the li 0x4040
+func_1516FE5C	NEAR9	6	DIFF7	n	n	fixed-point mul: lb/lbu/sll/addu/multu/sra; only register numbering differs (ref lb v0 first)
+func_151F0754	NEAR6	3	DIFF7	n	n	sprintf wrapper in game segment: sw a0 before sw ra and lw a1 delay slot differences; callback is func_151F0730
+func_15095B70	FLOAT	1	SIZE-1	n	y	84-insn float; after rodata owned: permuter 120 s best 1208/2058
+func_151166FC	FLOAT	1	SIZE-1	n	y	rodata now owned (rodata_split --own game_eu_142E40); permuter 120 s best DIFF27
+func_150FF1A8	FLOAT	1	SIZE-5	n	n	rodata now owned (game_eu_12C5F0); draft missing spills (SIZE-5), not pursued
+func_1519F500	FLOAT	0	DIFF78	n	n	rodata now owned (game_eu_1CCD10); m2c draft DIFF78, not pursued
+func_151600E0	NEAR5	4	SIZE-2	n	n	empty if(*(s32*)(b+0x1C)<0){} kept by ref (bltz with nop): IDO deletes it in every variant incl. volatile
+func_15178CC0	NEAR11	5	SIZE-1	n	n	if (c) return f(arg0); return arg0; ref has trailing duplicate jr ra and lw v0 before or v0,a0
+func_150A7EF4	NEAR12	0	SIZE-2	n	n	not a function: fragment ending jr t9 (split-boundary)
+func_15172C50	NEAR16	6	DIFF21	n	n	two byte arrays cleared/-1: ref is pointer-compare 4x unrolled (a1 != a2 end symbol D_800DD2D0); index form unrolls with counters, pointer forms not unrolled
+func_10007CC8	NEAR15	2	DIFF15	n	n	sorted list insert: ref uses t6-t9 temps and peeled first compare; mine v1/a2
+func_150B7214	NEAR6	3	SIZE+25	n	n	loop over D_800D9CB8..D_800D9CC4 (3 ptrs, field +0x14, set +0x20): IDO unrolls my loop, ref is plain do-while
+func_10006C1C	NEAR11	0	SIZE-4	n	n	not a function: fragment storing to 0xA44(sp)
+func_150A7770	NEAR4	0	CERR	n	n	handwritten memset asm
+func_151A8B84	NEAR9	3	DIFF18	n	n	table call D_8008FCF8[arg0[0x5C]](arg0); func_151A8B10; func_15169824: mine spills a0 at entry, ref spills in the jalr/jal delay slots
+func_1515F5B0	NEAR7	6	DIFF25	n	n	f32 clamp to D_800A6900 / -32768.0f, *65536 -> D_800DD140[arg1]; scheduling: ref lui at,C700 after c.le.s (needs //DROP of the extern at line 74)
+func_10005BE0	NEAR14	5	DIFF18	n	n	fill D_8003BE70..D_8003C21C with 0xFF then mask byte; mine xor-compares, li 0xFF in a1 not t0

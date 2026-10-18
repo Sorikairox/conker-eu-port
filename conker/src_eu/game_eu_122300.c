@@ -9,7 +9,16 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4FB8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F527C.s")
+void func_150F527C(u8 *arg0, s32 arg1, u8 arg2) {
+    u8 *v = arg0 + 0x170;
+
+    if (arg2 == 0x4E) {
+        arg0[0x71] = 0;
+        v[0x24] |= 5;
+    } else if (arg2 == 0x4F) {
+        func_1516972C(arg0);
+    }
+}
 
 void func_150F4D5C(u8 *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     struct {

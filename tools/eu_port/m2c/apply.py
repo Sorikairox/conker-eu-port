@@ -49,8 +49,15 @@ orig={p:open(p).read() for p in ps}
 def insert(src,fs):
     for f in fs:
         code=open(os.path.join(gd,f+'.c')).read().strip('\n')
+        hoist=[l[8:] for l in code.split('\n') if l.startswith('//HOIST ')]
+        dropl=[l[7:] for l in code.split('\n') if l.startswith('//DROP ')]
+        code='\n'.join(l for l in code.split('\n') if not l.startswith(('//HOIST ','//DROP ')))
         m=prag(f).search(src)
         src=src[:m.start()]+code+src[m.end():]
+        for l in dropl: src=src.replace(l+'\n','',1)
+        if hoist:   # forward prototypes / includes after the last #include
+            ms=list(re.finditer(r'^#include[^\n]*\n',src,re.M)); k=ms[-1].end() if ms else 0
+            src=src[:k]+'// hoisted forward declaration(s) for %s\n'%f+'\n'.join(hoist)+'\n'+src[k:]
     return src
 new={p:insert(orig[p],cands[p]) for p in ps}  # all drafts first: a failure must not truncate a file
 for p in ps: open(p,'w').write(new[p])
