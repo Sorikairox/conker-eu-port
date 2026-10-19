@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 47, main checkout, game < 0x130000; 3286/5913). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 42, worktree eu-wt-a; 40 = previous); session 45 (main, game < 0x130000). Update this file at the end of every work session.
@@ -31,6 +31,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 49 (main, game < 0x130000): 3295 / 5913 functions in C (55.7%)**, code bytes 369,560 / 2,253,856 (16.4%) (game 2889, init 374, debugger 32), `verify_all.sh` all OK. +5 in 2 commits: `func_150EFE90`, `func_1509B810`, `func_150D6898`, `func_15019BB8`, `func_150F83A0`.
+  Doc `docs/sessions/s49.md`, recipes IDO_SHAPES "s49 recipes". Key findings: **m2c callee prototypes are often wrong** (read the arg registers: floats after an int first arg travel in GPRs, a `lui/ori` constant is an `s32` param, pass-through args);
+  `(u8 *)GLOBAL + idx * K` / `field * call()` operand orders; `goto end; end: ;` ends a 0x2D arm.
 - **Session 46 (worktree a, on top of s44 + eu merge): 3263 / 5913 functions in C (55.2%)**, code bytes 362,956 / 2,253,856 (16.1%) (game 2857, init 374, debugger 32), from `verify_all.sh` (all OK). 18 matched in 2 commits. Doc `docs/sessions/s46.md`, recipes IDO_SHAPES section 16: **operand-order rule** (two plain memory operands come out in REVERSED source order, a named local keeps its position) solved the whole 0x2D/0 handler family and the DIFF1 `addu`/`bnel` cases; an `s32` header return keeps `v0` live and blocks a `bne` delay-slot fill (make it `void`).
   Open from s46: `func_15199200`/`func_1519C52C` (DIFF1 addu), `func_151A23E4` (DIFF2, permuter best `tools/decomp-permuter/drafts/s46_func_151A23E4e.c`), `func_1517BD68` (DIFF4), `func_151A7E2C`, `func_151B6804`, `func_151BAA18`, `func_151D51E8`, `func_15183E20`, `func_151A13F0`/`func_151A14D8` (28-arg call to the stub `func_151A177C`), `func_151D75B0`, `func_151D5714`. Try the reversed-order rule on every remaining DIFF1/DIFF<=6 operand-order leftover.
 
@@ -111,6 +114,10 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+1z. Slice below 0x130000 after session 49 (details `docs/sessions/s49.md`): open near misses with bests in `conker/build_port/s49/`: `func_150D2884` DIFF2 (`as1.c`, spill slot 0x30 vs 0x34), `func_150B7B9C` DIFF10 (`af1.c`), `func_15095A4C` DIFF14 (`am2.c`),
+   `func_150A0744` DIFF9, `func_1503FAF0` SIZE+1 (`aa4.c`), `func_1503E00C` SIZE+2 (`n5.c`), `func_150158D0` SIZE+2, `func_1505D5D0` (frame OK, float schedule), `func_15083E20` SIZE+1, `func_150F8DFC` (the 0x2D family's last member: v in a0, arg0 copy in a3).
+   First check the **callee prototype and arity from the asm** of every SIZE+n draft (this solved two this session). Unscreened: `build_port/s49/pool5.txt` entries 41-221 (71-110 insns), `gensome5.out` has the first 40 (CERR: `func_150C2334`, `func_150D0420`, `func_1502B4A8`, `func_1503B840`, `func_1503ED44`, `func_1504ADD0`, `func_1509D338`, `func_15022A8C`,
+   `func_15094DAC`, `func_15010110`, `func_15016380`, `func_15080900`, `func_15081974` untried; SIZE+1 `func_1503EE68`, `func_1506BCC8`, `func_150DE8AC`, `func_15059B54`, `func_151008C0`). The old leftovers `func_15080748`, `func_15013000`, `func_1504BA38`, `func_15012370`, `func_1507C608`, `func_150C572C`, `func_1509B950` took 3-10 forms each this session without progress.
 1. Slice below 0x130000 after session 47 (details `docs/sessions/s47.md`, recipes IDO_SHAPES section 17): +13. Open near misses (permuter bests in `conker/build_port/s47/` and `tools/decomp-permuter/nm/`):
    `func_15080748` DIFF8 (`best1_15080748.c`), `func_150B7B9C` DIFF8 (frame 0x68 vs 0x60), `func_15012370` DIFF10, `func_150D4ED0` DIFF15, `func_150B7DFC` DIFF28 (stack-struct spawner, same recipe as 7964/7A40/7C88),
    `func_15097DDC` DIFF6, `func_1509CBD4` DIFF6, `func_15013000` DIFF8, `func_1504BA38` DIFF10 (s45 bests, two more 900 s runs gave nothing), `func_150EFE90` SIZE-1 (family), `func_150F8DFC`, `func_1501E7A8` SIZE-1, `func_150A3184`,
