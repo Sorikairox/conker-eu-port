@@ -397,7 +397,7 @@ included) is solved this way; an `s32` return type in the header keeps `v0` live
 7. **OPEN (kept pointer folded)**: `func_150F2B20`, `func_150B9A40`: the ref keeps `addiu v0,a0,K` as a live pointer used for 3 accesses; `u8 *pp = ...`, `&s->field`, `p += K+1; p--;` all fold it away.
    `func_15062D10`: `s32 *q = &arg1;` (fakematch) with `q[0..2]` reproduces the `a1..a3` home stores; rest is DIFF49.
 
-## 17. Session 47 recipes (game < 0x130000)
+## 18. Session 47 recipes (game < 0x130000)
 
 1. **0x2D/0 family, more members**: `func_150CEBA4` (0x2D first, K=0x18: the D7370 form unchanged), `func_150FE08C` (leaf, `*(s32 *)v = 0`; permuter: unused label in the 0x2D arm +
    `new_var = v[4] ^ 0`), `func_150FCD98` (second slot at `v + 0x18`, chained `else if (*(s32 *)(v + 0x18) != 0)`; permuter `t == (new_var = *(s32 *)v)` and `arg1[4] == v[4]` operand order).
