@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 51, worktree eu-wt-a, 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 52, worktree eu-wt-a, 3325/5915; session 51 was 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 42, worktree eu-wt-a; 40 = previous); session 45 (main, game < 0x130000). Update this file at the end of every work session.
@@ -31,6 +31,10 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 52 (worktree a, on top of s51): 3325 / 5915 functions in C (56.2%)**, code bytes 374,124 / 2,253,856 (16.6%) (game 2919, init 374, debugger 32), `verify_all.sh` all OK. +10 matched in 2 commits (`ed9fbaa`, `a8dc183`; +2 total from two merged `jr ra` stubs).
+  Doc `docs/sessions/s52.md`, recipes IDO_SHAPES `## s52 recipes`. **Clone sweep result: `--near 24 --lax` gave 139 drafts, 0 OK as generated; 8 matched after hand-finishing (rewrite from the ref asm, draft = template pointer), 2 by permuter.** The near-24 pool is exhausted
+  for this slice (rerun after batch 1 gave nothing new). Matched: `func_151D0EA0`, `func_151C9C8C`, `func_15195D9C` (`A = B = 0` chains), `func_1515F5B0` (literal + `*=`), `func_15171434`, `func_1517AF18`, `func_15195D20`, `func_15178CC0` (stub `func_eu_15178D14`), `func_151A8B34`/`8B84` (permuter).
+  Open (drafts in `docs/sessions/s52_drafts/`): `func_151F0730` DIFF2, `func_151F0754` DIFF7, `func_151C491C` DIFF15 (register walk), `func_151590AC` DIFF18 (shape D), `func_151E8998` (shared `lui at`), `func_151F0114` (guOrtho, mtc1/mfc1 third float).
 - **Session 51 (worktree a, on top of s48/s49 + eu merge): 3313 / 5913 functions in C (56.0%)**, code bytes 373,092 / 2,253,856 (16.6%) (game 2907, init 374, debugger 32), `verify_all.sh` all OK. +13 in 2 commits (`621d075`, `95efb93`).
   Doc `docs/sessions/s51.md`, recipes IDO_SHAPES `## s51 recipes`. Matched: the 6-function s16 lerp family (`(b - a) * q + a`, product first), `func_15172530`, `func_15183E20` (inline `(u8 *)D_x + arg0 * 0x14`, permuted stores),
   and 5 `clones.py --near 16 --draft --lax` drafts (`func_15193850`, `func_151B255C`, `func_eu_151B01B8`, `func_15199954`, `func_151999BC`). **Clone drafts are the best yield per token**: also screened OK in the other slice: `func_150EB4D0`, DIFF1 `func_150EAA10`

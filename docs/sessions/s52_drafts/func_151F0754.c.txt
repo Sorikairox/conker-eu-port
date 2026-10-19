@@ -1,0 +1,13 @@
+#include <stdarg.h>
+s32 func_151F0730();
+s32 func_151F0754(char *buf, const char *fmt, ...) {
+    s32 ret;
+    va_list args;
+
+    va_start(args, fmt);
+    ret = func_100020D0(func_151F0730, buf, fmt, args);
+    if (ret >= 0) {
+        buf[ret] = 0;
+    }
+    return ret;
+}

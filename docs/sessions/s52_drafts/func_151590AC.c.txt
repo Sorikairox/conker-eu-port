@@ -1,0 +1,16 @@
+void func_151590AC(u8 *arg0, u8 *arg1, u8 arg2) {
+    if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)(arg0 + 0x40)) {
+            *(s32 *)(arg0 + 0x40) = *(s32 *)(arg1 + 4);
+            arg0[0x44] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)(arg0 + 0x40)) {
+            *(s32 *)(arg0 + 0x40) = *(s32 *)arg1;
+            arg0[0x44] = arg1[8];
+        }
+    } else if (arg2 == 0) {
+        if (*(s32 *)arg1 == *(s32 *)(arg0 + 0x40) || arg0[0x44] == arg1[4]) {
+            *(s32 *)(arg0 + 0x40) = 0;
+            arg0[0x44] = 0;
+        }
+    }
+}

@@ -461,3 +461,17 @@ See `docs/sessions/s51.md`.
 5. **`clones.py --near 16 --draft --lax` then `screenall build/cln`** gave 5 OK of 74 drafts in the slice (twin handlers, node lookup, key search). CERR on a clone draft is often only a missing forward `extern` (copy it from the template's neighbourhood).
    `apply.py` needs a hand-written `screen.txt` (`OK <func> src_eu/<file>.c`) when the drafts were copied out of the clone directory.
 6. **Dead local stores are deleted**: `sp18 = temp_v0;` keeps a pointer live only if something reads it before the call; do not expect an unused named copy to force a spill (`func_151B97C4`).
+
+## s52 recipes (clone hand-finishing, chains, trailing stubs)
+
+See `docs/sessions/s52.md`.
+1. **`A = B = 0;` chain assignment** reproduces the "`lui v0/v1` + `addiu` pointers for the chained globals, `lui at` for the others" layout (`func_15195D9C`: `D10 = D14 = 0; D18 = D1C = 0; D20 = -2;`).
+   The inner target is stored first. Plain separate statements or arrays do not give it.
+2. **Float clamp + scale**: in a file that owns `.rodata`, write the literal (`arg0 >= 32767.0f`), not an `extern f32 D_...` (the extern moved a `lui` before `c.le.s`); scale in place with `arg0 *= 65536.0f; x = (s32) arg0;`
+   (`mul.s f12,f12,f4`, `func_1515F5B0`). A sibling that is already matched shows which literal sits where.
+3. **Trailing dead `jr ra; nop` after a function** (screen says SIZE-1 but only the last row differs in `V=1 try`): add `void func_eu_<addr>(void) {}` after it (existing recipe 14); `screen.py`/`try` measure only the named function, so
+   hand-write the `screen.txt` line and let `apply.py` decide (`func_15178CC0`, `func_15195D20`). If registers differ besides the tail, change the body first (a named local `u8 *p = *(u8 **)(a1 + 0x14);` put the pointer in `v0`).
+4. **`(u32)arg1 << 8`** instead of `arg1 << 8` when the ref has `lw a2,home; sll t8,a2,8; ... or a2,t8,zero` (signed shift gave a different schedule); frame pad `s32 sp30[6]` with `&sp30[1]` for a 0x48 frame and `a3 = sp+0x34` (`func_1517AF18`).
+5. **Switch with no default and pass-through `a0`**: `switch (D_x) { case 2: f(arg0,1,1,1,arg1,arg2); break; case 16: f(arg0,0xA9,8,0,arg1,arg2); break; }` matched first try from the asm (`func_15171434`); a `u8` param is read with `lbu 0x27(sp)`.
+6. **Permuter artifacts** that solved a DIFF18 function-pointer table call: `u8 *new_var = arg0; ... if (!arg0) {} fn(new_var);` (fakematch, `func_151A8B34`/`8B84`). A DIFF18-from-scratch `permute.sh` run (200 s, 3 jobs) is worth it on indirect-call wrappers.
+7. **`clones.py --near` yield**: only dist <= 8 drafts are close to usable; for dist > 8 read the ref asm and write the body, using the draft only for file/prototypes. The NEAR header (`asm +x`, `sib -y`) lists what to change.
