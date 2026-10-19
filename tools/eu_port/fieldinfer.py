@@ -473,7 +473,13 @@ def main():
     out = R + '/build_port/s54/fi'
     if '--out' in args: out = args[args.index('--out') + 1]
     os.makedirs(out, exist_ok=True)
-    hp = args[args.index('--hdr') + 1] if '--hdr' in args else None   # header to take the ORIGINAL struct127 from (default: working tree)
+    hp = args[args.index('--hdr') + 1] if '--hdr' in args else None   # header to take the ORIGINAL struct127 from
+    if hp is None:   # default: the pre-s54 header (names are offset-based across structs, so the tool is not idempotent on its own output)
+        hp = R + '/build_port/s54/structs.h.orig'
+        if not os.path.exists(hp):
+            import subprocess
+            os.makedirs(os.path.dirname(hp), exist_ok=True)
+            open(hp, 'w').write(subprocess.run(['git', '-C', ROOT, 'show', '4bb1b44:conker/include/structs.h'], capture_output=True, text=True).stdout)
     hdr, ev, objp, pparams, fs = run(hdrpath=hp)
     cn = c_names()
     chosen, lines, ren = build(hdr, ev, cn)

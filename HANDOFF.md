@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 54, main checkout, game < 0x130000; 3320/5913, no new matches, typed struct127 + m2c context). Older: (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 51, worktree eu-wt-a, 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
@@ -32,6 +32,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 54 (main, game < 0x130000): 3320 / 5913 functions in C (56.1%)**, code bytes 374,552 / 2,253,856, `verify_all.sh` all OK; no new matches (infrastructure session, commit `8165abe`).
+  `tools/eu_port/fieldinfer.py` infers the layout of `struct127` (D_800CC2D0 entries) and which asm-function parameters are `struct127 *` from all remaining asm + the matched-C header; the typed body is now in
+  `structs.h` (121 inferred fields, pinned fields untouched; all 709 objects still match) and 27 prototypes were retyped to `struct127 *`. `TYPED=1 gensome.sh` / `gen2.py` use it (context `ctx_typed/`, per-function `ctxf/`).
+  `fi_ab.sh` A/B over 320 drafts: CERR 143 -> 127, 16 improved, 1 worse, raw `(u8 *)p + 0xNN` accesses -35% on the object-heavy sample; no draft became OK by typing alone. Doc `docs/sessions/s54.md`, recipes `## s54 recipes`.
+  Near misses: `func_150B15D0` DIFF1 (stack slot of the third out-float), `func_150344AC` SIZE-1. After ANY header edit: `find src_eu -name '*.c' -exec touch {} +` before `make` (no header deps).
 - **Session 53 (main, game < 0x130000): 3320 / 5913 functions in C (56.1%)**, code bytes 374,552 / 2,253,856 (16.6%), `verify_all.sh` all OK. +4 in `2e8da48`: `func_150EB4D0`, `func_150EAA10`, `func_150C572C`, `func_150DF1A8` (clone drafts).
   Doc `docs/sessions/s53.md`, recipes IDO_SHAPES `## s53 recipes`. The clone sweep (`clones.py --near 24/40 --lax --draft`) is now exhausted in this slice: 0 straight OK, 2 hand-finished; remaining drafts are junk or need real work.
   Open: `func_1507F834` DIFF6 (register roles), `func_150ADDE0` DIFF10, `func_150FB708` DIFF13 (drafts in `conker/build_port/s53/`), s50 `func_15024438`/`func_150893AC` (permuter 300 s no). `func_151EF850` (draft DIFF2) is outside the < 0x130000 slice.
@@ -93,6 +98,7 @@ Verification / build
 Drafting and screening (`argfix.py FUNC < draft.c` rewrites callee prototypes from the caller's asm, `ARGFIX=1 m2cfix.py list` runs it after declfix, s50; `m2c/` is host-side; paths in `m2c/` scripts come from `CONKER_ROOT` / `CONKERDEV`, defaults `~/conker` and `conkerdev`; s04-s07)
 - `m2c/list.py` all GLOBAL_ASM functions; `m2c/gen2.py outdir min max` m2c drafts + 8 variants; `m2c/screen.py` (OK/DIFFn/SIZE+-n/CERR; word diff with `SCREEN_V=1`); `m2c/try func [draft]`, `m2c/tryall func a.c b.c...` (8 parallel),
   `m2c/mine func draft.c` (my asm on one line; honours `SCREEN_OPT`), `m2c/keep`, `m2c/apply.py build/hand`, `m2c/screenall dir`, `m2c/merge.py`, `m2c/narrow.py`, `m2c/switchinline.py`, `m2c/compound.py`, `m2c/voidret.py`, `m2c/spawngen.py`/`spawn.py` (effect spawners, s09-s11), `m2c/flags src_eu/X.c` (build with each OPT_FLAGS).
+- `fieldinfer.py [--protos|--apply-protos] [--patch-header] [--hdr orig.h]` (s54) typed `struct127` + `struct127 *` parameter hints (`build_port/s54/fi/{struct127.h,params.json,fields.tsv,funcs.tsv,protos.tsv}`); `fi_ab.sh <list> <tag>` A/B bucket table typed vs untyped context (`MODES=typed` re-runs one side; swaps `structs.h` while running); `TYPED=1 gensome.sh <funcs>` drafts with the typed context.
 - `gensome.sh <funcs>` drafts for a few functions into `repair/fresh/`; `gen40.sh [max]` bulk; `m2cfix.py list` declfix + bulk screen (s30); `fctx.sh <func>` / `sh.sh <func>` context + asm on one line (s18, s24).
 - `shortpool.py [max]` candidate pool of unlogged short functions (s30, s32). `shapes.py [--list A|B|C|D N]` tags known shapes (s24). `gfxfind.py [--list|--untried|--hints F]` Gfx writers (s31).
   `clones.py [--draft] [--lax]`, `--near K`, `--asm-clusters` template clones (s25, s28); `declfix.py` called by it (s29).
@@ -164,7 +170,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 2. Pool expansions: `shortpool.py 100`, `clones.py --refresh --draft --lax` and `--near 16` after each batch (new matched C = new siblings), shape lists `shapes.py --list A|B 150` (A 101-150: 18, B 33 untouched), Gfx writers 101-150 insns (`gfxfind.py --untried --hints`).
 3. Open families worth a fresh idea: shape D unfilled delay slot (176 fns), the `func_150F1B78` family, `func_150AEDF8` family (8), the 43-insn u8 handler family (7), `mul.s` operand-order DIFF1s (`func_150EAA10`, `func_151AAFFC`), `func_151C2600` (DIFF2 frame), `func_150C572C` (DIFF2). All documented in IDO_SHAPES.md.
 4. Float functions blocked by rodata are unblocked in owned files (`game_eu_142E40`, `1CCD10`, `12C5F0`, `18B1C0`, `13C400`...): `func_15095B70`, `func_151166FC`, `func_150FF1A8`, `func_1519F500` need real hand work.
-5. Longer term: libultra leftovers (`osPfsChecker` ~730 insns in `init_eu_289A0`, `func_10027B50` osLeoDiskInit, unidentified `init_eu_26B30`), `-mips3` per-file build for `sd/ld` functions, naming structs (`struct127`, `struct_eu_node`) to improve m2c, finish splitting EU data, asset formats, then the PC port.
+5. Longer term: libultra leftovers (`osPfsChecker` ~730 insns in `init_eu_289A0`, `func_10027B50` osLeoDiskInit, unidentified `init_eu_26B30`), `-mips3` per-file build for `sd/ld` functions, naming structs to improve m2c (`struct127` done in s54 with `fieldinfer.py`; the same tool generalises to the 0x24-byte emitter entries of `func_150B45C8`/`func_150D93CC`, `struct102`, `struct_eu_node`: seed with their prototypes), finish splitting EU data, asset formats, then the PC port.
 
 ## Session notes
 
