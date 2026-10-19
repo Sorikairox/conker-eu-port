@@ -233,6 +233,8 @@ def work(item):
         if os.environ.get('SCREEN_KEEP') and os.path.exists(opath):
             import shutil; shutil.copy(opath,os.path.join(gd,f+'.o'))
         for x in (cpath,opath):
+            if x==cpath and os.environ.get('SCREEN_KEEPC'):
+                import shutil; shutil.copy(cpath,os.path.join(gd,f+'.tu.c'))
             if os.path.exists(x): os.remove(x)
     return out
 
