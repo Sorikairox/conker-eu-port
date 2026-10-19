@@ -139,7 +139,20 @@ void func_15019414(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150198FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019BB8.s")
+extern u16 D_800D1CC2;
+Gfx *func_15151FA8();
+Gfx *func_15019BB8(Gfx *gdl, s32 arg1) {
+    gSPViewport(gdl++, (u8 *)D_800BE628 + arg1 * 0x180 + 0x40 + D_800BE9C0 * 0x10);
+    gdl = func_1501A490(gdl, (s16)arg1, 0, 0, 0, 0);
+    gdl = func_1517FA48(gdl, arg1);
+    gdl = func_1517F910(gdl, arg1);
+    gdl = func_15180AF0(gdl, arg1);
+    if ((D_800D18A0 & (1 << arg1)) || (D_800D1CC2 & (1 << arg1))) {
+        gdl = func_1507DB6C(gdl, arg1);
+    }
+    gdl = func_151674F8(gdl, 4, (s16)arg1, 0);
+    return func_151674F8(gdl, 4, (s16)arg1, 1);
+}
 // NON-MATCHING: need to figure out what is going on
 // void func_15019BB8(struct14 *arg0, s32 arg1) {
 //     s32 temp_v0;

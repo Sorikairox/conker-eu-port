@@ -119,7 +119,37 @@ void func_150EFDE0(u8 *arg0) {
     func_1513CAA0(*q);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EFE90.s")
+void func_150EFE90(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = (u8 *)arg0 + 0x110;
+    if (arg2 == 0) {
+        s32 x = *(s32 *)v; s32 y = *(s32 *)arg1; s32 p = v[4]; s32 q = arg1[4];
+        if (x == y || q == p) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)arg1;
+            v[4] = arg1[8];
+        }
+        if (*(s32 *)arg1 == *(s32 *)(v + 8)) {
+            *(s32 *)(v + 8) = *(s32 *)(arg1 + 4);
+            v[0xC] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)(v + 8)) {
+            *(s32 *)(v + 8) = *(s32 *)arg1;
+            v[0xC] = arg1[8];
+        }
+        goto end; end: ; // fakematch: no-op label ends the 0x2D arm like the ref (b to the epilogue not delay-filled)
+    } else if (arg2 == 0x43) {
+        if (*(s32 *)arg1 == *(s32 *)v || arg1[4] == v[4]) {
+            if (arg1[5] == v[0xD]) {
+                func_1516972C(arg0);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EFFCC.s")
 

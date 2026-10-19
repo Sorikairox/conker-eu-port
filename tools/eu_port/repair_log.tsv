@@ -836,3 +836,7 @@ func_151A14D8	draft	1	DIFF57	n	n	twin of func_151A13F0
 func_151C4B0C	CERR	1	OK	y	n	fn ptr casts: ((void(*)(u8*,s32))D_800E0940)(..., (v - (s32)D_800DBEF4)/160); extern void (*D_8008FF70[])(s32) HOIST
 func_151DD4A0	CERR	1	OK	y	n	osEepromLongWrite-like: header buffer is void*; osSetTimer(&timer, (12000ULL * D_8002C060)/1000000ULL, 0, &queue, &msg) with extern u64 D_8002C060
 func_15134108	DIFF26	3	OK	y	y	remote permuter 600s x2 (second pass from best base 330): match; callers 151341C8/15134290 now take u8 *arg0
+func_150EFE90	SIZE-1	4	OK	y	n	x/y/p/q named locals (v,arg1,v[4],arg1[4] loads), q==p order, goto end; end: ; after second slot compare
+func_1509B810	SIZE+n	4	OK	y	n	key = arg0->unk0 & ~0xFC00 hoisted (signed slt), do-while instead of gotos falls into shared head insert
+func_150D6898	SIZE+3	4	OK	y	n	callee proto (s32,f32,s32,f32,f32,s32,s32) 7 args; sp28 named, ADA20 before the float math; stackfix declaration order
+func_15019BB8	DIFF5	3	OK	y	n	cast base to u8 * : (u8 *)D_800BE628 + arg1 * 0x180 puts the load first (operand order)
