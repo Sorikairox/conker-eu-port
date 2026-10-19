@@ -68,6 +68,11 @@ function or tool name comes up; do not read it through).
 - Spread permuter streams across both machines: local `permute.sh` / `sweep.sh perm`
   plus `remote_perm.sh` (Mac mini worker, see HANDOFF), each as its own background job.
 
+## Recipes
+
+- New recipes in docs/IDO_SHAPES.md go in a section titled `## sNN recipes (<topic>)` with your
+  session number. Don't use a running section number: parallel sessions collide on those.
+
 ## Code quality
 
 - When a match depends on an unnatural construct (permuter artifacts such as `new_var`

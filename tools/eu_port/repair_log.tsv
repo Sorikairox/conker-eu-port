@@ -830,3 +830,9 @@ func_15077F64	SIZE+1	2	SIZE+1	n	n	sp1E slot is 0x1F in mine; t0=&D_800D154C live
 func_1502B5C8	SIZE-1	4	SIZE-1	n	n	varargs: arg1 via &arg1 home slot OK, u8 *var_s1; sp38/sp40 slots 0x48/0x4C vs 0x38/0x40
 func_1509D104	DIFF1	3	OK	y	y	permuter 900 s: q = *new_var + (u8 *)(new_var2 = &D_800D2E70) (fakematch)
 func_150B7B9C	DIFF13	4	DIFF8	n	y	permuter best still has frame 0x68 vs 0x60
+func_151D324C	DIFF12	5	OK	y	y	dummy_label after callee call in arm 0 (b + target-copied slot); 2D arm no temps with arg0->unk10 on the LEFT
+func_151A13F0	draft	3	DIFF57	n	n	28-arg call to stub func_151A177C (stub proto would need 28 params); ref homes only a2/a3 and reloads a2; mine homes f12/a0; sig (f32,s32,s32,s32,s32) guess
+func_151A14D8	draft	1	DIFF57	n	n	twin of func_151A13F0
+func_151C4B0C	CERR	1	OK	y	n	fn ptr casts: ((void(*)(u8*,s32))D_800E0940)(..., (v - (s32)D_800DBEF4)/160); extern void (*D_8008FF70[])(s32) HOIST
+func_151DD4A0	CERR	1	OK	y	n	osEepromLongWrite-like: header buffer is void*; osSetTimer(&timer, (12000ULL * D_8002C060)/1000000ULL, 0, &queue, &msg) with extern u64 D_8002C060
+func_15134108	DIFF26	3	OK	y	y	remote permuter 600s x2 (second pass from best base 330): match; callers 151341C8/15134290 now take u8 *arg0

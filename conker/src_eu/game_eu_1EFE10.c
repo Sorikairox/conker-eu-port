@@ -1,6 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_151C4B0C
+extern void (*D_8008FF70[])(s32);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C2600.s")
@@ -62,7 +64,29 @@ void func_151C4AC0(u8 *arg0, u8 *arg1, f32 arg2) {
     (*(f32 *)((u8 *)arg0 + 0x3C)) += ((*(f32 *)((u8 *)arg1 + 0xC)) * arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4B0C.s")
+s32 func_151C4B0C(s32 arg0, u8 *arg1, f32 arg2) {
+    s32 temp_v1;
+    s32 var_v1;
+    s8 temp_v0;
+    var_v1 = 1;
+    (*(f32 *)((u8 *)arg1 + 0x8C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0x8C)) - arg2);
+    if ((*(f32 *)((u8 *)arg1 + 0x8C)) <= 0.0f) {
+        if ((D_800E0940 != NULL) && ((*(u8 *)((u8 *)arg1 + 0)) & 1)) {
+            temp_v1 = (*(s32 *)((u8 *)arg1 + 0x84));
+            if (temp_v1 != 0) {
+                ((void (*)(u8 *, s32)) D_800E0940)(arg1 + 0x30, (temp_v1 - (s32) D_800DBEF4) / 160);
+            }
+        }
+        if ((*(u8 *)((u8 *)arg1 + 0)) & 2) {
+            temp_v0 = (*(s8 *)((u8 *)arg1 + 0x9C));
+            if (temp_v0 != -1) {
+                D_8008FF70[temp_v0](arg0);
+            }
+        }
+        var_v1 = 0;
+    }
+    return var_v1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4BF4.s")
 

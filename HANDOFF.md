@@ -31,8 +31,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 46 (worktree a, on top of s44 + eu merge): 3263 / 5913 functions in C (55.2%)**, code bytes 362,956 / 2,253,856 (16.1%) (game 2857, init 374, debugger 32), from `verify_all.sh` (all OK). 18 matched in 2 commits. Doc `docs/sessions/s46.md`, recipes IDO_SHAPES section 16: **operand-order rule** (two plain memory operands come out in REVERSED source order, a named local keeps its position) solved the whole 0x2D/0 handler family and the DIFF1 `addu`/`bnel` cases; an `s32` header return keeps `v0` live and blocks a `bne` delay-slot fill (make it `void`).
+  Open from s46: `func_15199200`/`func_1519C52C` (DIFF1 addu), `func_151A23E4` (DIFF2, permuter best `tools/decomp-permuter/drafts/s46_func_151A23E4e.c`), `func_1517BD68` (DIFF4), `func_151A7E2C`, `func_151B6804`, `func_151BAA18`, `func_151D51E8`, `func_15183E20`, `func_151A13F0`/`func_151A14D8` (28-arg call to the stub `func_151A177C`), `func_151D75B0`, `func_151D5714`. Try the reversed-order rule on every remaining DIFF1/DIFF<=6 operand-order leftover.
+
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3286 / 5913 functions in C (55.6%)**, code bytes 367,408 / 2,253,856 (16.3%) (after session 47 on the main checkout, from `verify_all.sh`; the worktree agent's work is merged separately). init 374/540 (40.3% of bytes), game 2880/5330 (14.2% of bytes), debugger 32/43 (42.6% of bytes).
+- **3290 / 5913 functions in C (55.6%)**, code bytes 368,252 / 2,253,856 (16.3%) (merged state, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2884/5330 (14.3% of bytes), debugger 32/43 (42.6% of bytes).
   Sessions 35 (main), 36-38 (worktree eu-wt-a, merged) and 39 (main, game files below 0x130000; a parallel worktree session works above it) done. Session 36 recipes: IDO_SHAPES section 12, session 39: section 13. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
