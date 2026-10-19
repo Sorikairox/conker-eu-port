@@ -195,7 +195,27 @@ void func_151D3220(struct102 *arg0) {
     func_15169824(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FFF60/func_151D324C.s")
+extern s32 D_80090004[];
+void func_151D33FC(struct224 *, struct223 *);
+void func_151D324C(struct224 *arg0, struct223 *arg1, u8 arg2) {
+    s32 (*temp_v0_2)(struct224 *, struct223 *, u8);
+    if (arg2 == 0) {
+        func_151D33FC(arg0, arg1);
+        goto dummy_label; dummy_label: ;
+    } else if (arg2 == 0x2D) {
+        if (arg0->unk10 == arg1->unk0) {
+            arg0->unk10 = arg1->unk4.w;
+            arg0->unk14 = arg1->unk9;
+        } else if (arg0->unk10 == arg1->unk4.w) {
+            arg0->unk10 = arg1->unk0;
+            arg0->unk14 = arg1->unk8;
+        }
+    }
+    temp_v0_2 = (void *)D_80090004[arg0->pad15[8]];
+    if (temp_v0_2 != NULL) {
+        temp_v0_2(arg0, arg1, arg2);
+    }
+}
 
 void func_151D3308(struct224 *arg0) {
     struct224 *temp_v0;
