@@ -32,6 +32,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 53 (main, game < 0x130000): 3320 / 5913 functions in C (56.1%)**, code bytes 374,552 / 2,253,856 (16.6%), `verify_all.sh` all OK. +4 in `2e8da48`: `func_150EB4D0`, `func_150EAA10`, `func_150C572C`, `func_150DF1A8` (clone drafts).
+  Doc `docs/sessions/s53.md`, recipes IDO_SHAPES `## s53 recipes`. The clone sweep (`clones.py --near 24/40 --lax --draft`) is now exhausted in this slice: 0 straight OK, 2 hand-finished; remaining drafts are junk or need real work.
+  Open: `func_1507F834` DIFF6 (register roles), `func_150ADDE0` DIFF10, `func_150FB708` DIFF13 (drafts in `conker/build_port/s53/`), s50 `func_15024438`/`func_150893AC` (permuter 300 s no). `func_151EF850` (draft DIFF2) is outside the < 0x130000 slice.
 - **Session 50 (main, game < 0x130000): 3298 / 5913 functions in C (55.8%)**, code bytes 370,496 / 2,253,856 (16.4%) (game 2892, init 374, debugger 32), `verify_all.sh` all OK. +3: `func_1501E220`, `func_150CE0C0`, `func_1506BCC8`.
   Doc `docs/sessions/s50.md`, recipes IDO_SHAPES "s50 recipes". New tool `argfix.py` (callee prototypes from the caller's asm; `ARGFIX=1 m2cfix.py list`): on 189 pool5 drafts CERR 96 -> 77, SIZE+-1 15 -> 19.
   Key findings: m2c `T *p += K` strides by sizeof(T) (three SIZE-1 drafts were just that); a DIFF1 `c.eq.s` operand order is a 200 s permuter job; a stale arg register (`func_151EFDD0()` has no args) is invisible to argfix.
