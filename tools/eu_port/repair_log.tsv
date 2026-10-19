@@ -625,3 +625,5 @@ func_10017780	DIFF5	3	OK	y	n	comma exprs (count=0,p!=NULL) and (count++,p=next) 
 func_10010E78	DIFF1	4	OK	y	y	permuter: u32 temp_t1 = call; temp_t1 = (u32)arg2 * temp_t1 >> 15
 func_1000F85C	DIFF22	2	OK	y	y	permuter: f32 sp1C block-scoped inside the arg1==0x10 branch
 func_10005AD0	DIFF5	2	OK	y	y	callee func_10005C38 prototype void (return value unused)
+func_10016F80	CERR	4	OK	y	n	n_alEvtqFlushType clone: evt local, u16 read, expanded unlink/link blocks, proto in file head
+func_1000FF90	DIFF31	2	OK	y	y	for loop with D_80041FE0[i].fld and u32 new_var=-1 inside loop (permuter)

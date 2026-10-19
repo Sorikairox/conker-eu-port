@@ -362,7 +362,22 @@ s32 func_1000FE88(struct15 *arg0, s32 arg1, s32 *arg2) {
 //     return -1;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FF90.s")
+extern s32 D_80042B00;
+s32 func_1000FF90(s32 arg0, s32 arg1, s32 arg2) {
+    s32 i;
+    u32 new_var; // fakematch: -1 kept in its own register
+
+    for (i = 0; i < D_80042B00; i++) {
+        new_var = -1;
+        if ((arg0 == D_80041FE0[i].unk14) &&
+            ((arg1 == D_80041FE0[i].unk18) || (arg1 == new_var)) &&
+            ((arg2 == D_80041FE0[i].unk1C) || (arg2 == -1)) &&
+            ((D_80041FE0[i].unk10 & 0x80) == 0)) {
+            return i;
+        }
+    }
+    return -1;
+}
 void func_1001001C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 i;
 
