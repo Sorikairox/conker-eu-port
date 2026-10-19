@@ -94,7 +94,34 @@ void func_151D2E14(struct102 *arg0) {
     func_15169824(tmp);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FFF60/func_151D2E5C.s")
+void func_151D2E5C(struct102 *arg0, u8 *arg1, u8 arg2) {
+    s32 temp_v0;
+    s32 temp_v1;
+    u8 t14;
+    u8 t4;
+
+    if (arg2 == 0) {
+        temp_v0 = *(s32 *)((u8 *)arg0 + 0x10);
+        temp_v1 = *(s32 *)(arg1 + 0);
+        t14 = *((u8 *)arg0 + 0x14);
+        t4 = *(arg1 + 4);
+        if ((temp_v0 == temp_v1) || (t14 == t4)) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        temp_v0 = *(s32 *)(arg1 + 0);
+        temp_v1 = *(s32 *)((u8 *)arg0 + 0x10);
+        if (temp_v0 == *(s32 *)((u8 *)arg0 + 0x10)) { // fakematch: reread of the field flips the cmp operands
+            *(s32 *)((u8 *)arg0 + 0x10) = *(s32 *)(arg1 + 4);
+            *((u8 *)arg0 + 0x14) = *(arg1 + 9);
+            return;
+        }
+        if (*(s32 *)(arg1 + 4) == *(s32 *)((u8 *)arg0 + 0x10)) { // fakematch: reread
+            *(s32 *)((u8 *)arg0 + 0x10) = temp_v0;
+            *((u8 *)arg0 + 0x14) = *(arg1 + 8);
+        }
+    }
+}
 // NON-MATCHING: one bnel has its operands swapped (bnel t9, v1)
 // void func_151D2E5C(struct224 *arg0, struct223 *arg1, u8 arg2) {
 //     s32 temp_v0;
