@@ -42,7 +42,30 @@ s32 func_1502C6AC(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CC64.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CF24.s")
+s32 func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
+
+void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD) {
+    s32 temp_a2;
+    u8 *temp_v0;
+    u8 *temp_v1;
+
+    temp_a2 = arg1 * 3;
+    temp_v0 = temp_a2 + D_800D9F88;
+    *arg4 = (s32) (*(u8 *)((u8 *)temp_v0 + 0));
+    temp_v1 = temp_a2 + D_800D9F98;
+    *arg5 = (s32) (*(u8 *)((u8 *)temp_v0 + 1));
+    *arg6 = (s32) (*(u8 *)((u8 *)temp_v0 + 2));
+    *arg7 = (s32) (*(u8 *)((u8 *)temp_v1 + 0));
+    *arg8 = (s32) (*(u8 *)((u8 *)temp_v1 + 1));
+    *arg9 = (s32) (*(u8 *)((u8 *)temp_v1 + 2));
+    *argA = 0;
+    *argB = 0;
+    *argC = 0;
+    *argD = (*(s32 *)((u8 *)arg3 + 0xC));
+    if ((*(u8 *)((u8 *)arg0 + 0xA4)) != 0) {
+        func_1502EF24(arg0, argA, argB, argC, argD);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CFEC.s")
 
@@ -126,7 +149,22 @@ void func_1502ED88(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F780.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FC38.s")
+u8 *allocate_memory(s32, s32, s32, s32);
+void func_1502FC38(u8 *arg0) {
+    s32 temp_v1;
+    u8 *temp_v0;
+    if ((*(s32 *)(arg0 + 0xF8) & 0x4000) && *(s32 *)(arg0 + 0x264) != 0 && *(s32 *)(arg0 + 0x1D4) != 0) {
+        temp_v1 = arg0[4];
+        if (*(s32 *)(arg0 + 0x1D8) == 0) {
+            temp_v0 = allocate_memory(D_800C52F0[temp_v1] << 6, 1, 1, 2);
+            *(u8 **)(arg0 + 0x1D8) = temp_v0;
+            if (temp_v0 == NULL) {
+                return;
+            }
+        }
+        bcopy(*(u8 **)(arg0 + 0x1D4), *(u8 **)(arg0 + 0x1D8), D_800C52F0[temp_v1] << 6);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FCEC.s")
 

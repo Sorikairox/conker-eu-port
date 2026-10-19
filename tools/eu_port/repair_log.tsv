@@ -747,3 +747,36 @@ func_151BAA18	draft	4	SIZE-1	n	n	family: ref has t0=arg2 copy and a3=v1 copy; ne
 func_151A7E2C	fresh	2	DIFF13	y	y	b1: temp_v0 assigned before temp_v1 helps; permuter best 70 unsolved
 func_151D2E5C	draft	6	DIFF1	n	n	bnel t9,v1 operand order unchanged by 10 source forms
 func_151D324C	CERR	4	DIFF12	y	y	fwd proto func_151D33FC(2 args), u8 arg2 natural; ref b delay slot duplicates lbu t1; permuter best 115
+func_1505F188	CERR	6	OK	y	n	u8* arg, HOIST void proto (implicit-int caller), u8/u16 for 0xFF/0xFFFF stores, 3.3f store moved up after 0x180 store makes lwc1 early
+func_1507BB28	CERR	9	DIFF22	n	n	Rec45{p,id} list lookup; HOIST struct216* proto; t=D_800D1588[..] separate var; ref materialises D_80086E28 twice (a2 base, v1 ptr) mine copies; best a5.c in build_port/s45
+func_150F2B20	CERR	7	SIZE-1	n	n	mtx[4][4] local (mtx[3][0..2] set), out f32s; frame OK 0x88 w/ outs declared before mtx; ref keeps addiu v0,s0,0x18 pointer and reloads *v0 x3, mine folds pp to lw 0x18(s0); stackfix no
+func_15062D10	CERR	6	DIFF49	n	n	R45{s32 w0,w1} rec table; s32 *q=&arg1 (fakematch) reproduces the a1..a3 home stores (prologue matches); then sra ok, but base/index addu order and reg alloc differ; not permuter-sized
+func_1502F6B8	CERR	8	DIFF16	n	y	for-loop form (e6.c) gives equal size DIFF16: start/base CSE into one reg + entry beq; do-while forms SIZE-1; ref has 3 separate lui/addiu pairs; remote perm queued
+func_150D7370	draft	9	DIFF21	n	y	u8* v=(u8*)arg0+0xA8 first gives the a3 arg copy; s32 t=*(s32*)arg1 first in 2nd arm fixes load order; remaining: 1b arm ends 'b L7410 + lw ra' (return) vs mine b L740C; remote perm queued (f4.c)
+func_150F066C	draft	4	DIFF31	n	n	V45 struct copy for 0x34..0x3C reproduces lw/sw $at copy; ref keeps v1=v0+0x110 (not folded) and add.s base+prod operand order; mine folds + prod first
+func_150D2C00	draft	9	DIFF14	n	n	clean form h5.c: v[3]-=D_800BE9E4 inline; only frame 0x28 vs 0x20 (v1 spill at 0x1C, ref 0x18); stackfix/K&R/sp18 variants no change
+func_150B78D0	draft	3	DIFF17	n	y	named s16 locals in ref load order (j1.c): register-only DIFF17; remote perm queued
+func_150D7370	draft	10	OK	y	y	permuter (remote) solved from f4.c: 'if (arg1) {}' in else + no-op goto label in 0x2D arm; v=(u8*)arg0+0xA8 first gives a3 arg copy
+func_150F0D64	draft	5	OK	y	y	sibling of func_150D7370; local permuter: empty ';' statement, b dropped (a = arg1[0] loaded first, v[0] reloaded)
+func_150B9A40	draft	3	DIFF27	n	n	ref keeps v0=a0+0x110 pointer + lh in v1 (reload after store); mine folds the pointer even with p+=0x111;p-- recipe (same as func_150F2B20)
+func_15033698	draft	5	OK	y	y	permuter: -10000.0f in a variable assigned at top, compared as (0, new_var) swaps c.eq.s operands (fakematch)
+func_1505F188	CERR	9	DIFF38	n	n	draft OK (b3a.c) but literals need game_83300 to own .rodata: owning it makes func_1505D34C frame 0x28 vs 0x30 (literal vs extern D_80099520), reverted; extern f32 D_800999F4/F8 variants SIZE+1/DIFF38
+func_150A3878	draft	2	OK	y	n	u16 arg1 (homes+andi), s32 arg2 (no s8 home)
+func_150B5D20	draft	3	OK	y	n	sibling of func_150D7370/150F0D64: p3.c plain form (v=(u8*)arg0+0x28 first; t=*arg1 first in arg2==0 arm)
+func_150F0E0C	draft	1	OK	y	n	0x2D/0 handler family template (p3.c / m1.c from func_150B5D20/150D7370)
+func_150D5E7C	draft	1	OK	y	n	0x2D/0 handler family template (p3.c / m1.c from func_150B5D20/150D7370)
+func_150D7578	draft	1	OK	y	n	0x2D/0 handler family template (p3.c / m1.c from func_150B5D20/150D7370)
+func_150F15A0	draft	1	OK	y	n	0x2D/0 handler family template (p3.c / m1.c from func_150B5D20/150D7370)
+func_150DAA8C	draft	3	DIFF39	n	y	family template + 0x44 arm (lwc1 f4 dup, swc1 then 'b end; lw ra'): mine puts swc1 in delay; return; no effect; remote perm queued
+func_150FE08C	DIFF24	5	DIFF17	n	y	r2.c direct-compare family form (arg0 + 0x110 first), leaf; remote perm queued
+func_150DAA8C	draft	4	OK	y	y	permuter: (u16) cast of the 0x44 condition + unused label after the store (fakematch)
+func_150CF994	draft	1	OK	y	n	0x2D/0 family template p3.c (0x28)
+func_1502CF24	draft	1	OK	y	n	callee func_1502EF24 has 5 args: pass-through arg0 first (proto u8*,s32*x4)
+func_1502FC38	draft	2	OK	y	n	field tests as *(s32*) (value stays in t reg), s32 temp_v1 (word spill across allocate_memory)
+func_15015E30	draft	1	DIFF24	n	y	m2c draft register-only (t0/t1/v1 roles); local permute queued
+func_1504BA38	draft	2	DIFF27	n	y	s8* table p=D_800994F0+idx*3, D_80099588 float; register-only (ptr in v0 vs ref v1, a1); remote perm queued
+func_15013000	draft	3	DIFF27	n	y	i/off loop with fn-pointer table D_800831C0; ref s0=off s1=i, late lw of D_800D3094, a0=s0+v1 in jalr delay; remote perm queued (x2.c)
+func_1508148C	draft	5	DIFF9	n	y	scalars D_8009C100/104/108 + array D_8009C10C[i-3][0] loop, s32 id: DIFF9 (ref base pointer D_8009C10C unfolded, mine folds -12); remote perm queued (z4.c)
+func_15097DDC	draft	2	DIFF30	n	y	callee func_1505EEF4 takes no args (passing them loads a1: wrong); ref a0 reloaded after call, a2=v0; remote perm queued
+func_150174C0	draft	1	SIZE+1	n	n	untried beyond m2c draft: stray s1 save (extra local); nested loop over D_800D23C0 records 0x18 stride
+func_150A3794	DIFF6	3	OK	y	y	remote permuter x3 (900 s each, chained from w2.c): chained x=old_x=(f32)arg stores + u8* new_var for the 0x180 store

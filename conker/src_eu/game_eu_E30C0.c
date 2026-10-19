@@ -45,4 +45,20 @@ void func_150B5CF4(void *arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E30C0/func_150B5D20.s")
+void func_150B5D20(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = (u8 *)arg0 + 0x28;
+    if (arg2 == 0) {
+        s32 t = *(s32 *)arg1;
+        if (t == *(s32 *)v || v[4] == arg1[4]) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)arg1;
+            v[4] = arg1[8];
+        }
+    }
+}
