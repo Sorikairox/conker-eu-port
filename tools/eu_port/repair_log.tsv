@@ -802,3 +802,31 @@ func_151B1F54	DIFF25	6	OK	y	n	or a3,a0 family: top 'cur' var before the if, 2D a
 func_151937A4	DIFF10	10	OK	y	y	or a3,a0 family solved: temp_v0=(u8*)arg0+0x28 BEFORE the if; 2D arm without key temps, compare *(arg1+k)==*(temp_v0); arm 0: temp_v1=arg1[0] var; goto dummy_label at end of 2D arm
 func_151BEB08	DIFF11	2	OK	y	n	twin of func_151937A4 (0xB0)
 func_151BCB54	DIFF	3	OK	y	n	family: header changed to void (s32 return keeps v0 live -> no bne delay-slot addiu v0); same as 151B1F54 template
+func_150CEBA4	DIFF0	1	OK	y	n	0x2D-first family template (D7370 form), K=0x18
+func_150FE08C	DIFF5	1	OK	y	y	leaf *v=0 family member; remote permuter: unused label + ^0 temps
+func_150EFD30	SIZE+2	1	OK	y	n	shape C: u8 **q=&arg0 + m2c struct102* temps (lw a0 test)
+func_150EFDE0	SIZE+2	1	OK	y	n	same as EFD30
+func_1502298C	SIZE+2	3	OK	y	y	D_800C3938[][0x19] array, cached n reloaded after call; permuter new_var=&*cnt
+func_150FCD98	DIFF16	4	OK	y	y	two-slot 0x2D family; permuter new_var, arg1[4]==v[4] order
+func_1508148C	DIFF2	3	OK	y	y	(id = arg0[4]) == D_8009C100 in the first compare; all permuter junk removed
+func_150848F0	DIFF14	2	OK	y	n	s32 callee params, var_s2 += field (no temp_s2), *(u8**)(&D+u8) not *4
+func_150B2974	DIFF19	1	OK	y	n	f32 sp3C[3] copy, pass *(s32*)&sp3C[2]
+func_150B7964	CERR	3	OK	y	n	HUD spawner: local struct (unk0 ptr at +0, fields to +0x39) passed by address; u8 fields for 0xFF; pointer-typed test
+func_150B7A40	CERR	1	OK	y	n	same struct; D_800D9CC4 = D_800D9CB8[3]
+func_150B7C88	CERR	2	OK	y	n	same struct + unk4; stores in ref order; 60.0f/170.0f first
+func_150B7DFC	CERR	3	DIFF32	n	y	struct + s32 unkC=sp.unk20 (trunc.w.s); remote permuter queued
+func_150B7B9C	DIFF16	3	DIFF16	n	y	struct declared before slot ptr; remote permuter queued
+func_150D4ED0	DIFF22	4	DIFF15	n	y	0x2D family w/ func_15031C4C calls; if/else id; permuter queued
+func_150EFE90	SIZE-1	1	SIZE-1	n	y	two-slot+0x43 family; missing or a3,a0 copy; permuter DIFF57
+func_150F8DFC	CERR	3	SIZE-1	n	n	0x42/0x3F handler: arg1 gets the a3 copy instead of arg0
+func_150A3184	SIZE+1	3	SIZE-2	n	n	u64 bit table via __ull_rshift; frame lacks s4
+func_1501E7A8	CERR	5	SIZE-1	n	n	cnt reload per path; ref computes n*8 before addiu s0; tbl hoist
+func_1509D104	SIZE+2	2	DIFF1	n	y	u16 id list; addu operand order a1=s4+t4; long permuter run queued
+func_1502C8F8	SIZE+2	3	SIZE+2	n	n	frame 0x30 vs 0x28 (extra 8 stack bytes)
+func_15080748	DIFF23	3	DIFF14	n	y	no sp1C local; var_v1 = D_800D1D4C before the compare; permuter queued
+func_150C6C3C	DIFF23	4	DIFF23	n	n	frame 0x38 vs 0x28: extra 16 stack bytes, shape A p=arg0 copy did not help
+func_15012370	DIFF18	2	DIFF18	n	y	u8 loop var made it worse; permuter queued
+func_15077F64	SIZE+1	2	SIZE+1	n	n	sp1E slot is 0x1F in mine; t0=&D_800D154C live pointer
+func_1502B5C8	SIZE-1	4	SIZE-1	n	n	varargs: arg1 via &arg1 home slot OK, u8 *var_s1; sp38/sp40 slots 0x48/0x4C vs 0x38/0x40
+func_1509D104	DIFF1	3	OK	y	y	permuter 900 s: q = *new_var + (u8 *)(new_var2 = &D_800D2E70) (fakematch)
+func_150B7B9C	DIFF13	4	DIFF8	n	y	permuter best still has frame 0x68 vs 0x60

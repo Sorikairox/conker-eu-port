@@ -11,7 +11,36 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FCB94.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FCD98.s")
+void func_150FCD98(struct102 *arg0, u8 *arg1, u8 arg2) {
+    s32 new_var; // fakematch: permuter temp
+    u8 *v = (u8 *)arg0 + 0x28;
+    if (arg2 == 0) {
+        s32 t = *(s32 *)arg1;
+        if (t == (new_var = *(s32 *)v) || arg1[4] == v[4]) {
+            func_1516972C(arg0);
+        } else if (*(s32 *)(v + 0x18) != 0) {
+            if (t == *(s32 *)(v + 0x18) || arg1[4] == v[0x1C]) {
+                func_1516972C(arg0);
+            }
+        }
+    } else if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)arg1;
+            v[4] = arg1[8];
+        } else if (*(s32 *)(v + 0x18) != 0) {
+            if (*(s32 *)arg1 == *(s32 *)(v + 0x18)) {
+                *(s32 *)(v + 0x18) = *(s32 *)(arg1 + 4);
+                v[0x1C] = arg1[9];
+            } else if (*(s32 *)(arg1 + 4) == *(s32 *)(v + 0x18)) {
+                *(s32 *)(v + 0x18) = *(s32 *)arg1;
+                v[0x1C] = arg1[8];
+            }
+        }
+    }
+}
 
 s32 func_150FCEB0(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg0[4]) {

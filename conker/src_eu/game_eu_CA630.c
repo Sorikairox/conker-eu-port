@@ -74,7 +74,32 @@ void func_1509D0C4(s32 arg0) {
     func_1509D274(*(s32 *)((u8 *)&D_800877DC + (arg0 * 0x14)), func_1509D0C4, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D104.s")
+extern u16 *D_800877E0[][5];
+
+s32 func_1509D104(s32 arg0) {
+    s32 cnt;
+    u16 *p;
+    s32 *new_var2; // fakematch: permuter temp
+    u16 *new_var; // fakematch: permuter temp
+    u8 *q; // fakematch: permuter temp (dead)
+
+    p = D_800877E0[arg0][0];
+    cnt = 0;
+    if (*p != 0xFFFF) {
+        do {
+            ((u8 *)D_800D2E4C)[*p >> 3] |= 1 << (*p & 7);
+            new_var = p;
+            q = *new_var + (u8 *)(new_var2 = &D_800D2E70);
+            if (*((u8 *)&D_800D2E70 + *new_var) != 3) {
+                *((u8 *)new_var2 + *new_var) = 3;
+                func_1509D0C4(*new_var);
+                cnt++;
+            }
+            p++;
+        } while (*p != 0xFFFF);
+    }
+    return cnt;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D1EC.s")
 

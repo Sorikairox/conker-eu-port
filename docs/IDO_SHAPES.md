@@ -391,3 +391,22 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
    (matching draft, needs `3.3f` and `-10000.0f` literals) is blocked on that: `extern f32 D_800999F4/F8` gives SIZE+1 (loads not CSE'd).
 7. **OPEN (kept pointer folded)**: `func_150F2B20`, `func_150B9A40`: the ref keeps `addiu v0,a0,K` as a live pointer used for 3 accesses; `u8 *pp = ...`, `&s->field`, `p += K+1; p--;` all fold it away.
    `func_15062D10`: `s32 *q = &arg1;` (fakematch) with `q[0..2]` reproduces the `a1..a3` home stores; rest is DIFF49.
+
+## 17. Session 47 recipes (game < 0x130000)
+
+1. **0x2D/0 family, more members**: `func_150CEBA4` (0x2D first, K=0x18: the D7370 form unchanged), `func_150FE08C` (leaf, `*(s32 *)v = 0`; permuter: unused label in the 0x2D arm +
+   `new_var = v[4] ^ 0`), `func_150FCD98` (second slot at `v + 0x18`, chained `else if (*(s32 *)(v + 0x18) != 0)`; permuter `t == (new_var = *(s32 *)v)` and `arg1[4] == v[4]` operand order).
+   Open: `func_150EFE90` (two slots + 0x43 arm, no `or a3,a0` copy: SIZE-1), `func_150D4ED0` (calls `func_15031C4C`; DIFF15), `func_150F8DFC` (0x42/0x3F arms; the copy goes to `arg1` not `arg0`).
+2. **`lw s3,0x28(sp)` reload of arg0 in a delete-all-slots loop** (`func_150EFD30/DE0`): shape C `u8 **q = &arg0;` `*q + 0x110` and `func_xxx(*q)` plus m2c's `struct102 *temp_a0 = ...; if (temp_a0 != NULL)` temps (the pointer-typed temps give `lw a0` in the beql).
+3. **Cached loop bound reloaded after a call** (`func_1502298C`): `n = *cnt; do { ... if (e->state) { call(); n = *cnt; } ... } while (i < n)` plus a permuter `new_var = &*cnt`. A 2D table
+   `extern u8 D_x[][0x19]` stops the `*4` scaling of `arg0 * 25` (use `D_x[arg0]`, not `&D_x + arg0 * 0x19` on an `s32`).
+4. **Pointer arithmetic on an `s32 *` global scales by 4** (`func_150848F0`: `*(&D_8008704C + u8 * 4)` was `*16`): write `*(u8 **)(&D_8008704C + idx)`. Callee params `(s32, s32)` instead of `(u8, s32)` remove the `andi` before `or a0,s0`.
+   A count that is later added to (`var_s2 += field`) must not get its own `temp_s2`.
+5. **Spawner functions with a stack struct passed by address** (`func_150B7964/7A40/7C88`, HUD element creators): the ref keeps every store because the callee gets `&sp`. Declare one local struct whose first member is
+   the pointer written at `sp+0x1C/0x24` (fields at the byte offsets from the struct base; `u8` fields for `0xFF`, `s8` gives `-1`), assign in the **ref store order** (the scheduler keeps it), `60.0f/170.0f` stores first so the `lui at`
+   constants are hoisted like the ref, and pointer-typed tests `if (*(struct102 **)D_800D9CB8 != NULL)` (`lw a0` directly). `D_800D9CC4` is `D_800D9CB8[3]`. A named `f32 h` (for `trunc.w.s` into an `s32` field) steals a stack slot
+   and shifts the struct by 4: use `sp.unkC = sp.unk20`. Open: `func_150B7DFC` (DIFF28 permuter), `func_150B7B9C` (DIFF8: struct declared before `s32 *slot`, frame 0x68 vs 0x60 in the permuter best).
+6. **`f32` triple copied through `lwc1/swc1` and passed as `s32`** (`func_150B2974`): `f32 sp3C[3]; sp3C[2] = *(f32 *)(arg0 + 0x1C);` and pass `*(s32 *)&sp3C[2]` (a named `s32 sp44 = ...` loads with `lw`).
+7. **`(id = arg0[4]) == D_8009C100`** (`func_1508148C`): assigning in the first compare gives the ref operand order of the `bne`s; the permuter's `& 0xFFFFFFFFu` / `^ 0` chains were all unnecessary.
+8. **Leftovers with notes in `repair_log.tsv`**: `func_150C6C3C` (extra 16 stack bytes), `func_1502C8F8` (frame 0x30 vs 0x28), `func_1502B5C8` (varargs, `&arg1` fakematch OK, `sp38/sp40` land at 0x48/0x4C), `func_15077F64` (`t0 = &D_800D154C` live pointer),
+   `func_150A3184` (u64 table, frame lacks `s4`), `func_1501E7A8` (loop bound `n*8` computed before the `addiu s0`), `func_15080748` (DIFF8 permuter best), `func_15012370` (DIFF10).
