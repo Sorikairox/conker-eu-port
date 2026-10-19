@@ -780,3 +780,11 @@ func_1508148C	draft	5	DIFF9	n	y	scalars D_8009C100/104/108 + array D_8009C10C[i-
 func_15097DDC	draft	2	DIFF30	n	y	callee func_1505EEF4 takes no args (passing them loads a1: wrong); ref a0 reloaded after call, a2=v0; remote perm queued
 func_150174C0	draft	1	SIZE+1	n	n	untried beyond m2c draft: stray s1 save (extra local); nested loop over D_800D23C0 records 0x18 stride
 func_150A3794	DIFF6	3	OK	y	y	remote permuter x3 (900 s each, chained from w2.c): chained x=old_x=(f32)arg stores + u8* new_var for the 0x180 store
+func_1508148C	DIFF9	4	DIFF2	n	y	remote perm x2: best DIFF2 (build_port/s45/bestfinal_func_1508148C.c)
+func_150FE08C	DIFF17	3	DIFF3	n	y	remote perm x2: best DIFF3 (bestfinal_func_150FE08C.c)
+func_15097DDC	DIFF30	3	DIFF6	n	y	remote perm x2: best DIFF6 (bestfinal_func_15097DDC.c)
+func_1504BA38	DIFF27	3	DIFF10	n	y	remote perm x2: best DIFF10 (bestfinal_func_1504BA38.c)
+func_15013000	DIFF27	3	DIFF8	n	y	remote perm x2: best DIFF8 (bestfinal_func_15013000.c)
+func_15015E30	DIFF24	2	DIFF21	n	y	local perm 200 s: best DIFF21 (bestfinal_func_15015E30.c)
+func_1509CBD4	SIZE-1	4	DIFF6	n	y	remote perm 900 s x3 (chained): best DIFF6 (best3_1509CBD4.c in build_port/s45); first perm got equal size DIFF7
+func_1503D658	DIFF7	1	DIFF7	n	y	remote perm 900 s from best_func_1503D658.c: no improvement (base 35, best none)
