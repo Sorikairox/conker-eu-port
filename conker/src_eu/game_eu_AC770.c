@@ -10,7 +10,20 @@ void func_1507EF60(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507EF98.s")
+extern u8 *D_80086FC4[];
+extern u8 D_8009BFC0[];
+void func_1507EF98(s32 arg0, s32 *arg1, s32 arg2) {
+    u8 *src;
+    s32 len;
+    s32 v;
+    src = D_80086FC4[arg2];
+    len = D_8009BFC0[arg2];
+    v = *arg1;
+    if (v + len < 0x28) {
+        bcopy(src, v + arg0, len);
+        *arg1 += len;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F018.s")
 

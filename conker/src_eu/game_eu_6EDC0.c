@@ -7,7 +7,16 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150416EC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_15041770.s")
+extern u8 D_80084C60[];
+s32 func_15041770(u8 arg0) {
+    s32 i;
+    for (i = 0; i < 0x50; i++) {
+        if (arg0 == D_80084C60[i]) {
+            return i;
+        }
+    }
+    return i;
+}
 
 Gfx *func_150417F8(Gfx *gdl, s32 x, s32 y, s32 idx) {
     s32 col = idx % 8; // fakematch: locals keep the unfolded mod/sub/div

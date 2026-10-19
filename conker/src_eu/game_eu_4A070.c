@@ -40,9 +40,22 @@ s32 func_1501D240(s32 arg0, s32 arg1, s32 arg2) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D2C4.s")
+void func_1501D2C4(s32 arg0, s32 arg1) {
+    if (D_800C3670 == 0) {
+        D_800C3A60[arg0] |= 1ULL << arg1;
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D330.s")
+s32 func_1501D330(s32 arg0, s32 arg1) {
+    u64 bit;
+    if (D_800C3670 != 0) {
+        return 1;
+    }
+    if ((D_800C3A60[arg0] & (1ULL << arg1)) != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501D348.s")
 

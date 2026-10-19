@@ -645,3 +645,22 @@ func_15084814	CERR	5	DIFF16	n	y	v/p two pointers arg0+arg1*8 (the 2nd as (u8*)((
 func_150B7B9C	CERR	3	DIFF16	n	y	spawner struct sp24 (0x3C) with m2c store order; file protos: void func_150B7B9C + u8 *func_15169ED8(void *) at head; scheduling/regs only; queued for permuter
 func_15088B08	CERR	5	DIFF10	n	n	same for(;;)/continue loop as func_150889D8; externs D_800D27B4/B8/B9 + void func_15088CA0(u8*) moved to file head; sp18/sp24 named spills land at ref offsets but frame 0x30 vs 0x28; stackfix no
 func_1509B950	CERR	6	DIFF2	y	n	remote permuter 300+400s: best DIFF2 (pad in t0/t9 vs ref v1/t0); m2c temp form SIZE-1; pos/pad forms DIFF4
+func_150489B0	SIZE+2	5	OK	y	n	sin quadrant table: u8 arg0, negative index via *(f32*)(D_8009A9E0 + -(arg0*4)) with u8 extern (sll then negu); s32 i = arg0 copy for the plain index
+func_15083E0C	SIZE+3	6	DIFF19	n	n	index search: i/off/p loop with return (off + base - base)/0x30 (struct258 is 0x10 so raw u8 *); for(;;) continue/break; a1/a3 roles swapped vs ref, declaration orders no help
+func_1509E330	SIZE+5	1	OK	y	n	extern f32 D[] / u8 D[] tables instead of s32 &D + idx*4
+func_1501D330	SIZE+5	5	OK	y	n	u64 bit test: (D_800C3A60[arg0] & (1ULL << arg1)) inline, s64 table; screen DIFF1 is only the lui reloc name D_eu_800C3E84 vs D_800C3A60+4 (alias)
+func_1501D2C4	DIFF17	1	OK	y	n	u64 table bit set: D_800C3A60[arg0] |= 1ULL << arg1 (s64 table); sibling of func_1501D330
+func_1503A8FC	DIFF17	3	DIFF7	n	y	f32 copies via struct127 base; v0/v1 roles swapped vs ref (base in v1, 1D4 ptr in v0); declaration orders no help; queued for permuter
+func_15084208	DIFF18	1	OK	y	n	first free id search: do/while with id++, i=0 restart; *((u8 *)D_800D20FC + i * 0x30 + 0x28)
+func_15102D9C	DIFF20	4	DIFF4	n	y	p=*(u8**)(arg0+0xD0); p=p+0x110 inside the if; ref hoists addiu above the bnel; queued for permuter
+func_1503DA64	DIFF20	4	DIFF15	n	n	no named sp24 (frame 0x30 ok) but unnamed v1 spill lands at 0x20 vs ref 0x24; pad/array/stackfix no
+func_15102D9C	DIFF4	4	OK	y	y	permuter (local, 150s): empty 'if (!arg0 && !arg0 && !arg0) {}' after p = p + 0x110 hoists the addiu above the bnel
+func_15102E2C	DIFF20	1	OK	y	n	sibling of func_15102D9C (0x170/0x174), same recipe
+func_15041770	DIFF21	1	OK	y	n	unrolled 4x byte-table search: for (i=0;i<0x50;i++) if (arg0 == D[i]) return i; return i; (u8 D[])
+func_1503F23C	DIFF22	2	DIFF22	n	y	pair32 table e = D_800847FC[arg0] + arg1, &&/|| chain; register renames only; queued for permuter
+func_1507EF98	DIFF22	1	OK	y	n	u8 *D[] / u8 D[] tables, unnamed spills (no sp1C/sp18 locals)
+func_15049F30	DIFF23	0	DIFF23	n	n	not tried: float leaf with f12/f14/f16 numbering (OPEN family in IDO_SHAPES 5.2)
+func_1501C0D0	SIZE+6	1	OK	y	n	f32[]/u8[] tables indexed by idx
+func_15080A20	SIZE+6	2	OK	y	n	s32 arg2 (no andi), (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x74/0x75] = arg2
+func_15085098	SIZE+6	3	OK	y	n	f32 r = (f32)((u32)func_150ADA20() % (u32)(s32)f); *(f32*)(p+8) = r (named f32 result puts cvt in f0)
+func_150489B0	SIZE+2	5	OK-notapplied	n	n	matches (sin quadrant table) but apply.py REJECTs: game_75E60 built 0x150 expected 0x160 (nop padding after the file, IDO_SHAPES 8.7); draft kept in HANDOFF notes

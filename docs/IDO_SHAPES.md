@@ -303,3 +303,29 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
    when the first compile error asks for it (forward prototype, section 1.5).
 5. **EU struct offsets differ from US** (`auxBus` field at +0x40, US sources say 0x1C): use the raw cast read `*(T *)((u8 *)p + 0x40)` (`func_1001DA28`).
 6. Near misses: `func_10010E78` (DIFF1, `multu` operand order, drop `& 0xFFFF` on a u16 param), `func_100046E4` (DIFF4, frame 0x90 vs 0x80 from locals), `func_16000F8C` (DIFF5 bits in v0 vs v1).
+
+## 13. Session 39 recipes (CERR-class drafts below 0x130000, short fresh drafts)
+
+1. **Callee called without its argument by a C caller** (`func_15088BFC` calls `func_150889D8()`): K&R definition `s32 f(arg0) struct127 *arg0; {...}`. In a pointer-difference function compute `idx = arg0 - D_800CC2D0;`
+   *before* the `D_80087640 == NULL` test, else v0/v1 roles are swapped (`func_150889D8`).
+2. **Index search loop that IDO unrolls (`bnel` ladder, SIZE+29)**: `if (n >= 2) { for (;;) { if (match) return i; i++; p++; if (i < n) { continue; } break; } }` keeps it rolled and gives the
+   `bnel ... addiu` shape (`func_150889D8`; same loop in `func_15088760`/`func_15088B08`, not matched there). Constant-trip byte tables are unrolled 4x by the ref too: `for (i = 0; i < 0x50; i++) if (arg0 == D[i]) return i; return i;` is exact (`func_15041770`);
+   "first free id" = `do { if (id == *((u8 *)D_800D20FC + i * 0x30 + 0x28)) { id++; i = 0; } i++; } while (i < D_800D2520);` (`func_15084208`).
+3. **64-bit libcalls** (`__ll_mul`, `__ull_div`, `__ll_lshift` in the asm): `osSetTimer(&t, (25ULL * osClockRate) / 1000000ULL, 0, &mq, (void *)6)` with `extern u64 D_8002C060` (`func_1501BB20`);
+   `D_800C3A60[arg0] |= 1ULL << arg1;` and `if ((D_800C3A60[arg0] & (1ULL << arg1)) != 0)` with the shift inline (`func_1501D2C4/D330`; a named `u64 bit` flips the `and` operands). The screen's DIFF1 on the second `lui` is only the alias `D_eu_800C3E84` = `D_800C3A60 + 4`.
+4. **m2c prototype for an implicit-int callee with a different arity** (`func_15031C4C` takes 3 args, m2c wrote 2): delete the draft prototype and call it implicitly with the real arguments (`func_150FF550`). A callee defined later in the file with a `void`/other type:
+   move the file's prototype to the head (`fwdproto.sh` does not delete the old line, remove it by hand) and fix its type (`func_150334A8`, `func_150AF6E0` `u8 *func_151149AC(u8)`, `func_15022388` `s32` -> `void`).
+5. **Node walk template** (`func_150B0290`, sibling of `func_151670C0`): `node = D_800DD2C4; D_800DD5C0++; while (node != NULL) { D_800DD5C8[D_800DD5C0] = node->next; if (D_800C3E78 == ((u8 *)node)[0x3F]) func_1516972C((struct102 *)node); node = D_800DD5C8[D_800DD5C0]; } D_800DD5C0--;`
+   (do not paste the m2c `struct102` typedef: redeclaration CERR). Two-list variant `for (i = 0; i < 2; i++) { node = D_800DD280[i][0x27]; ...}` is SIZE-1 only (`func_150E3B5C`: ref ends the outer loop with `bnel` + next iteration's `lb` in the slot).
+6. **Early return on NULL, then a plain nested `if` for the tail** (no `else return 0`): `if (s == NULL) return 0; ... if (v != NULL) { ...; if (f <= x) { store } } return 0;` gives the three separate `or v0,zero` sites (`func_150334A8`).
+7. **Pointer difference of 0xA0 structs** `(struct131 *)func_151149AC(x) - D_800DBEF4` into a local index `i`, then `D_800DC3C4[i] & 1` (`func_150AF6E0`; inline it in the subscript = DIFF24).
+   `(a + off + base - base) / 0x30` needs raw `u8 *` (the header struct is 0x10 bytes) (`func_15083E0C`, DIFF19 left).
+8. **Tables**: declare `extern f32 D[]` / `extern u8 D[]` and index (`func_1509E330`, `func_1501C0D0`, `func_1507EF98`, `func_150AF6E0`): the `s32 D; *(&D + i*4)` m2c form is SIZE+n. A 2-level table `((u16 **)D_800BE728[0])[idx][0]` (`func_150EDAF8`).
+   Quarter-wave table with negative index (`func_150489B0`): `extern u8 D_8009A7E0[]` and `*(f32 *)(D_8009A7E0 + -(arg0 * 4))` gives `sll; negu` like the ref (`D[-arg0]` gives `negu; sll`), the plain arm needs `s32 i = arg0;`.
+   The same file (`game_75E60`) is followed by 16 bytes of nop padding, so `apply.py` REJECTs it (8.7); the matching draft is in `docs/sessions/s39_func_150489B0.c.txt`.
+9. **Permuter artifact worth keeping**: `p = p + 0x110; if (!arg0 && !arg0 && !arg0) {}` (empty, `// fakematch`) hoists the `addiu` above the `bnel` (`func_15102D9C/E2C`, local permuter 150 s).
+10. **`f32 r = (f32)(u32expr % div); *(f32 *)(p+8) = r;`** puts the u32->f32 `cvt.s.w` result in f0 like the ref; without the named f32 it is f8/f10 (`func_15085098`).
+    A `s32 arg2` (not `u8`) avoids `andi` and the home store for an untouched narrow param; `or`-ing `0x80` then storing through a table pointer (`func_15080A20`).
+11. **Near misses (all in repair_log)**: `func_150952B0` (two `f32[4][4]` locals land at 0x20/0x60 = frame 0xA0, ref 0x18/0x58 = 0x98; any type/struct/pad gives the same, and `arg0` reload needs `s32 *q = &arg0`),
+    `func_1506C32C` (`(&sp24)[a1]` with 4 scalar locals: frame 0x40 vs 0x38), `func_15088B08` (frame 0x30 vs 0x28 although sp18/sp24 sit at the ref offsets), `func_1503DA64` (unnamed spill at 0x20, ref 0x24),
+    `func_150A00F0` (array of 12-byte structs, 2+2x4 unroll is right, ref uses a fresh `lui $at` per store), `func_1509B950` (DIFF2 permuter, pad reg v1 vs t0), `func_1509CBD4` (SIZE-1: ref copies `or s1,v0`).

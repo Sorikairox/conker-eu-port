@@ -5,7 +5,16 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080900.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080A20.s")
+void func_15080A20(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    if (arg2 != 0) {
+        arg2 |= 0x80;
+    }
+    if (arg1 == 0) {
+        (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x74] = arg2;
+        return;
+    }
+    (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x75] = arg2;
+}
 
 void func_15080AA8(s32 arg0) {
     struct127 *p;

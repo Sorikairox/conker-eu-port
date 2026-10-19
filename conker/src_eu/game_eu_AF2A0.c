@@ -101,7 +101,25 @@ void func_15082DD8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083F30.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084208.s")
+s32 func_15084208(void) {
+    s32 id;
+    s32 i;
+    id = 1;
+    i = 0;
+    if (D_800D2520 > 0) {
+        do {
+            if (id == *((u8 *)D_800D20FC + i * 0x30 + 0x28)) {
+                id++;
+                i = 0;
+            }
+            i++;
+        } while (i < D_800D2520);
+    }
+    if (id >= 0x100) {
+        id = 0xFF;
+    }
+    return id;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E0C.s")
 
@@ -177,7 +195,15 @@ u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15085098.s")
+void func_15085098(u8 *arg0) {
+    u8 *p;
+    f32 r;
+    if (arg0[4] == 0x94) {
+        p = *(u8 **)(arg0 + 0x2D0);
+        r = (f32)((u32)func_150ADA20() % (u32)(s32)*(f32 *)(p + 0x18));
+        *(f32 *)(p + 8) = r;
+    }
+}
 
 extern u8 D_800BE9B0;
 extern u16 D_800BE9B8[];

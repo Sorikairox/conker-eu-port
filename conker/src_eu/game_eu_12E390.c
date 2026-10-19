@@ -92,7 +92,23 @@ void func_151027E8(u8 *arg0) {
     func_151403A8(&tmp, 0x1A);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_15102D9C.s")
+s32 func_15102D9C(u8 *arg0, s16 arg1) {
+    u8 *p;
+    u8 *q;
+    p = *(u8 **)(arg0 + 0xD0);
+    if (arg1 == p[0x132]) {
+        p = p + 0x110;
+        if (!arg0 && !arg0 && !arg0) {} // fakematch: permuter artifact, hoists the +0x110 above the compare
+        q = *(u8 **)p;
+        if (q == NULL || (*(u8 **)(q + 0x31C))[0x197] != 0) {
+            return 0;
+        }
+    }
+    if (!(arg0[0xD4] & 1)) {
+        return 0;
+    }
+    return 1;
+}
 
 s32 func_15102E04(u8 *arg0, s32 arg1) {
     s32 ret = 1;
@@ -102,4 +118,20 @@ s32 func_15102E04(u8 *arg0, s32 arg1) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_15102E2C.s")
+s32 func_15102E2C(u8 *arg0, s16 arg1) {
+    u8 *p;
+    u8 *q;
+    p = *(u8 **)(arg0 + 0x170);
+    if (arg1 == p[0x132]) {
+        p = p + 0x110;
+        if (!arg0 && !arg0 && !arg0) {} // fakematch: permuter artifact, hoists the +0x110 above the compare
+        q = *(u8 **)p;
+        if (q == NULL || (*(u8 **)(q + 0x31C))[0x197] != 0) {
+            return 0;
+        }
+    }
+    if (!(arg0[0x174] & 1)) {
+        return 0;
+    }
+    return 1;
+}
