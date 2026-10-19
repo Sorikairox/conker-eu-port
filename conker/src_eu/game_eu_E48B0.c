@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+u8 *func_15169ED8(void *);
+
+void func_150B7B9C(s32, s32);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B70A0.s")
 

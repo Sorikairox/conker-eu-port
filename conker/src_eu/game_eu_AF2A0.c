@@ -127,7 +127,7 @@ s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150844AC.s")
 
-s32 func_15084814(u8 *, s32);
+void func_15084814(u8 *, s32);
 
 void func_150847B4(u8 *arg0) {
     s32 var_s0;

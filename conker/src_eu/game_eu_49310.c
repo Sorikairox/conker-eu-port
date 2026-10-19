@@ -3,7 +3,16 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501BB20.s")
+extern u8 D_8002AE18;
+extern u64 D_8002C060;
+extern OSMesgQueue D_8003B578;
+extern OSTimer D_800BEB00;
+void func_1501BB20(void) {
+    if (D_8002AE18 != 0) {
+        osSetTimer(&D_800BEB00, (25ULL * D_8002C060) / 1000000ULL, 0, &D_8003B578, (void *)6);
+        D_8002AE18 = 0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501BBB8.s")
 

@@ -2,6 +2,14 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_15088CA0(u8 *);
+
+extern s8 D_800D27B9;
+
+extern s32 D_800D27B4;
+
+extern s8 D_800D27B8;
+
 
 u8 *func_1502B5C8(s32, s32, s32, s32);
 s32 func_15086058();
@@ -193,7 +201,40 @@ s32 func_1508872C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_1508882C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150889D8.s")
+// K&R: func_15088BFC calls this without the argument.
+s32 func_150889D8(arg0)
+    struct127 *arg0;
+{
+    s32 idx;
+    s32 i;
+    s32 n;
+    struct_eu_80087640 *p;
+
+    idx = arg0 - D_800CC2D0;
+    if (D_80087640 == NULL) {
+        return -1;
+    }
+    if (idx == 0) {
+        return 0;
+    }
+    i = 1;
+    n = D_800D27B8 + D_800D27B9;
+    p = D_80087640 + 1;
+    if (n >= 2) {
+        for (;;) {
+            if (idx == (s8)p->unk31) {
+                return i;
+            }
+            i++;
+            p++;
+            if (i < n) { // fakematch: continue/break form keeps the loop rolled and the bnel shape
+                continue;
+            }
+            break;
+        }
+    }
+    return -1;
+}
 
 void func_15088A68(s32 arg0, s32 arg1)
 {
@@ -211,8 +252,6 @@ void func_15088A68(s32 arg0, s32 arg1)
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088B08.s")
 
 s32 func_150889D8();
-extern s32 D_800D27B4;
-extern s8 D_800D27B8;
 
 void func_15088BFC(void) {
     s32 temp_v0;

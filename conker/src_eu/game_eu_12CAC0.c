@@ -5,7 +5,28 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF2B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF550.s")
+extern s32 D_800A2420;
+void func_150FF550(u8 *arg0, s16 arg1, u8 *arg2) {
+    s32 *sp34;
+    u8 *sp30;
+    s32 temp_v0;
+    if (arg1 == -1) {
+        *(f32 *)(arg2 + 0) = *(f32 *)(arg0 + 0x14);
+        *(f32 *)(arg2 + 4) = *(f32 *)(arg0 + 0x18);
+        *(f32 *)(arg2 + 8) = *(f32 *)(arg0 + 0x1C);
+        return;
+    }
+    temp_v0 = func_15031C4C(arg0, arg1, 0);
+    if (temp_v0 == 0) {
+        *(f32 *)(arg2 + 0) = *(f32 *)(arg0 + 0x14);
+        *(f32 *)(arg2 + 4) = *(f32 *)(arg0 + 0x18);
+        *(f32 *)(arg2 + 8) = *(f32 *)(arg0 + 0x1C);
+        return;
+    }
+    sp34 = &D_800A2420;
+    sp30 = arg2;
+    func_1514654C(arg0, temp_v0, 0, &sp34, &sp30, 1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF604.s")
 

@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
+
 s32 func_15030448(u8 *, s32);
 
 s32 func_15030600(u8 *, s32, s32);
@@ -116,9 +118,31 @@ s32 func_1503211C(u8 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150322B8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150334A8.s")
+s32 func_150334A8(u8 *arg0, u8 *arg1) {
+    u8 *v;
+    u8 *s;
+    f32 f;
+    s32 t;
+    v = *(u8 **)(arg1 + 0x2D0);
+    s = *(u8 **)(arg0 + 0x48);
+    if (s == NULL) {
+        return 0;
+    }
+    t = *(s32 *)(arg1 + 0x2E4) & 0xFF;
+    if (t != 0xFF) {
+        func_1503F8A8(s, 0, t, 0x3F800000, 0.0f, 1);
+    }
+    if (v != NULL) {
+        *(f32 *)(*(u8 **)(arg0 + 0x48) + 8) = *(f32 *)(v + 8);
+        s = *(u8 **)(arg0 + 0x48);
+        f = *(f32 *)(s + 0x18);
+        if (f <= *(f32 *)(s + 8)) {
+            *(f32 *)(s + 8) = f - 1.0f;
+        }
+    }
+    return 0;
+}
 
-s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
 
 s32 func_1503356C(u8 *arg0, s32 arg1) {
     u8 *var_s0;

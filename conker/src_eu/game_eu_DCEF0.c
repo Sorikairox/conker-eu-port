@@ -2,11 +2,27 @@
 #include "functions.h"
 #include "variables.h"
 
+u8 *func_151149AC(u8);
+
 // The callee (game_eu_1FB080.c) takes only the first three arguments.
 void func_151CFE48(s32 arg0, f32 arg1, f32 arg2, s16 *arg3);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AF6E0.s")
+extern s32 * D_800DC3C4;
+void func_150AF6E0(s32 arg0, u8 arg1) {
+    s32 i;
+    if (D_800CC3D4[0] == 0) {
+        i = (struct131 *)func_151149AC(arg0) - D_800DBEF4;
+        if (D_800DC3C4[i] & 1) {
+            func_1505D024(D_800CC2D0, 0x3F, 0x6E00, -1);
+            return;
+        }
+        i = (struct131 *)func_151149AC(arg1) - D_800DBEF4;
+        if (D_800DC3C4[i] & 1) {
+            func_1505D024(D_800CC2D0, 0x3F, 0xEE00, -1);
+        }
+    }
+}
 
 void func_150AF7C0(s32 arg0, s16 *arg1) {
     func_151CFE48(arg0, (f32)(arg1[4] + arg1[1]), (f32)arg1[1], arg1);
@@ -61,7 +77,21 @@ void func_150B0148(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     func_1516DF0C(1, 0, 0, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0, 1, 0, 0, 0, 0, 0xAA, 0xAA, 0xAA, 0xAA, arg2, arg3, 0, arg0, 0xF0, 0x50, 0x50, 1, 4, 0, 1, 0, 0, 0, arg1, 0, (s32) arg4, arg5);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0290.s")
+extern struct_eu_node *D_800DD2C4;
+void func_150B0290(void) {
+    struct_eu_node *node;
+
+    node = D_800DD2C4;
+    D_800DD5C0++;
+    while (node != NULL) {
+        D_800DD5C8[D_800DD5C0] = node->next;
+        if (D_800C3E78 == ((u8 *)node)[0x3F]) {
+            func_1516972C((struct102 *)node);
+        }
+        node = D_800DD5C8[D_800DD5C0];
+    }
+    D_800DD5C0--;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0344.s")
 
@@ -94,7 +124,6 @@ void func_150B07FC(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0828.s")
 
-u8 *func_151149AC(u8);
 
 s32 func_150B0AEC(u8 arg0, u8 *arg1) {
     u8 *temp_v0;

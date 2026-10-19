@@ -115,7 +115,31 @@ void func_150222F0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022304.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022388.s")
+extern u16 *D_800C39E8[];
+extern u8 *D_800C3A10[];
+void func_15022388(s32 arg0, s32 arg1) {
+    struct127 *obj;
+    u8 *e;
+    if (D_800C39E8[arg1][arg0] != 0) {
+        e = D_800C3A10[arg1] + arg0 * 8;
+        if (*(u16 *)e == 2) {
+            obj = func_15083E90(e[2]);
+            if (obj != NULL) {
+                *((u8 *)obj + 0x6C) = 0;
+                *((u8 *)obj + 0x6D) = 0;
+                *((u8 *)obj + 0x6A) = 0;
+                *((u8 *)obj + 0x6B) = 0;
+                *(s16 *)((u8 *)obj + 0x282) = 0;
+                *(s16 *)((u8 *)obj + 0x27A) = 0;
+                *(s16 *)((u8 *)obj + 0x27C) = 0;
+                *(s16 *)((u8 *)obj + 0x27E) = 0;
+                *(s16 *)((u8 *)obj + 0x280) = 0;
+                func_1507E7E4(obj, 0, 3, 0xFFFF, 0xA);
+                *((u8 *)obj + 0x71) = 0;
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022440.s")
 
@@ -152,7 +176,7 @@ void func_15022864(s32 arg0)
  do { i = 0; if ((*cnt) > 0) { p = D_800C3970 + (arg0 * 0x1E); do { func_151149AC(*p)[0x6E] = 1; i += 1; p += 1; } while (i < (*cnt)); } } while (0);
 }
 
-s32 func_15022388(s32, s32);
+void func_15022388(s32, s32);
 s32 func_15022440(s32, s32);
 
 void func_150228F0(s32 arg0) {

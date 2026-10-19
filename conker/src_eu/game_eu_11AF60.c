@@ -24,7 +24,29 @@ void func_150ED7B4(u8 *arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150ED818.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150EDAF8.s")
+void func_150EDAF8(u8 *arg0) {
+    struct127 *temp_v1;
+    u8 var_v0;
+    u8 *temp_v0;
+    struct108 *cam;
+    temp_v0 = *(u8 **)(arg0 + 0x31C);
+    if ((temp_v0 != NULL) && (temp_v0[0x84] == 0)) {
+        if (D_800BE616 != 0) {
+            var_v0 = arg0[0x127];
+        } else {
+            var_v0 = arg0[0x124];
+        }
+        if (((u16 **)D_800BE728[0])[var_v0][0] & 0x10) {
+            temp_v1 = &D_800CC2D0[var_v0];
+            if (*((u8 *)temp_v1->unk31C + 0x197) != 0) {
+                cam = temp_v1->camera;
+                if (cam != NULL) {
+                    arg0[0x2FC] |= 1 << *((u8 *)cam + 0x23D);
+                }
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150EDBB8.s")
 
