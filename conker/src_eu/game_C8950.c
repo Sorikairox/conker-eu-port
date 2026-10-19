@@ -79,7 +79,51 @@ void func_1509B764(struct249 *arg0) {
     D_800D2F48.length--;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B810.s")
+void func_1509B810(struct249 *arg0) {
+    s32 var_a3;
+    struct249 *temp_v0;
+    struct249 *var_v0;
+    s32 key;
+    var_v0 = D_800D2F48.unk8;
+    key = arg0->unk0 & ~0xFC00;
+    if (D_800D2F48.length == 0) {
+        D_800D2F48.unk4 = arg0;
+        D_800D2F48.unk8 = arg0;
+        arg0->next = NULL;
+        arg0->prev = NULL;
+        D_800D2F48.length += 1;
+        return;
+    }
+    var_a3 = 0;
+    if ((s32) D_800D2F48.length > 0) {
+        do {
+            var_a3 += 1;
+            if ((var_v0->unk0 & ~0xFC00) < key) {
+                if (var_v0 == D_800D2F48.unk8) {
+                    arg0->prev = var_v0;
+                    arg0->next = NULL;
+                    var_v0->next = arg0;
+                    D_800D2F48.unk8 = arg0;
+                    D_800D2F48.length += 1;
+                    return;
+                }
+                arg0->prev = var_v0;
+                arg0->next = var_v0->next;
+                var_v0->next->prev = arg0;
+                var_v0->next = arg0;
+                D_800D2F48.length += 1;
+                return;
+            }
+            var_v0 = var_v0->prev;
+        } while (var_a3 < (s32) D_800D2F48.length);
+    }
+    temp_v0 = D_800D2F48.unk4;
+    D_800D2F48.unk4 = arg0;
+    arg0->prev = NULL;
+    arg0->next = temp_v0;
+    temp_v0->prev = arg0;
+    D_800D2F48.length += 1;
+}
 
 void func_1509B8FC(s16 arg0) {
     struct248 *temp_v0;

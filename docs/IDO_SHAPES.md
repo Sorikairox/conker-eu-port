@@ -411,3 +411,39 @@ See `docs/sessions/s48.md`. Extends section 17 (s46 operand-order rule).
 5. **Float register roles of the s16 lerp family** (`func_151859C4` + 5 siblings): reading the s16 fields inline (no `temp_v0` locals) restores the size and the load order
    (arg1 field first); still open: the quotient lands in `f14` instead of `f0`.
 6. **`rlog.sh` and `CONKER_ROOT`**: running `rlog.sh` in a shell without the `wt.sh env` eval appends to the MAIN checkout's repair_log.tsv. Always `eval "$(tools/eu_port/wt.sh env a)"` in the same command.
+## 18. Session 47 recipes (game < 0x130000)
+
+1. **0x2D/0 family, more members**: `func_150CEBA4` (0x2D first, K=0x18: the D7370 form unchanged), `func_150FE08C` (leaf, `*(s32 *)v = 0`; permuter: unused label in the 0x2D arm +
+   `new_var = v[4] ^ 0`), `func_150FCD98` (second slot at `v + 0x18`, chained `else if (*(s32 *)(v + 0x18) != 0)`; permuter `t == (new_var = *(s32 *)v)` and `arg1[4] == v[4]` operand order).
+   Open: `func_150EFE90` (two slots + 0x43 arm, no `or a3,a0` copy: SIZE-1), `func_150D4ED0` (calls `func_15031C4C`; DIFF15), `func_150F8DFC` (0x42/0x3F arms; the copy goes to `arg1` not `arg0`).
+2. **`lw s3,0x28(sp)` reload of arg0 in a delete-all-slots loop** (`func_150EFD30/DE0`): shape C `u8 **q = &arg0;` `*q + 0x110` and `func_xxx(*q)` plus m2c's `struct102 *temp_a0 = ...; if (temp_a0 != NULL)` temps (the pointer-typed temps give `lw a0` in the beql).
+3. **Cached loop bound reloaded after a call** (`func_1502298C`): `n = *cnt; do { ... if (e->state) { call(); n = *cnt; } ... } while (i < n)` plus a permuter `new_var = &*cnt`. A 2D table
+   `extern u8 D_x[][0x19]` stops the `*4` scaling of `arg0 * 25` (use `D_x[arg0]`, not `&D_x + arg0 * 0x19` on an `s32`).
+4. **Pointer arithmetic on an `s32 *` global scales by 4** (`func_150848F0`: `*(&D_8008704C + u8 * 4)` was `*16`): write `*(u8 **)(&D_8008704C + idx)`. Callee params `(s32, s32)` instead of `(u8, s32)` remove the `andi` before `or a0,s0`.
+   A count that is later added to (`var_s2 += field`) must not get its own `temp_s2`.
+5. **Spawner functions with a stack struct passed by address** (`func_150B7964/7A40/7C88`, HUD element creators): the ref keeps every store because the callee gets `&sp`. Declare one local struct whose first member is
+   the pointer written at `sp+0x1C/0x24` (fields at the byte offsets from the struct base; `u8` fields for `0xFF`, `s8` gives `-1`), assign in the **ref store order** (the scheduler keeps it), `60.0f/170.0f` stores first so the `lui at`
+   constants are hoisted like the ref, and pointer-typed tests `if (*(struct102 **)D_800D9CB8 != NULL)` (`lw a0` directly). `D_800D9CC4` is `D_800D9CB8[3]`. A named `f32 h` (for `trunc.w.s` into an `s32` field) steals a stack slot
+   and shifts the struct by 4: use `sp.unkC = sp.unk20`. Open: `func_150B7DFC` (DIFF28 permuter), `func_150B7B9C` (DIFF8: struct declared before `s32 *slot`, frame 0x68 vs 0x60 in the permuter best).
+6. **`f32` triple copied through `lwc1/swc1` and passed as `s32`** (`func_150B2974`): `f32 sp3C[3]; sp3C[2] = *(f32 *)(arg0 + 0x1C);` and pass `*(s32 *)&sp3C[2]` (a named `s32 sp44 = ...` loads with `lw`).
+7. **`(id = arg0[4]) == D_8009C100`** (`func_1508148C`): assigning in the first compare gives the ref operand order of the `bne`s; the permuter's `& 0xFFFFFFFFu` / `^ 0` chains were all unnecessary.
+8. **Leftovers with notes in `repair_log.tsv`**: `func_150C6C3C` (extra 16 stack bytes), `func_1502C8F8` (frame 0x30 vs 0x28), `func_1502B5C8` (varargs, `&arg1` fakematch OK, `sp38/sp40` land at 0x48/0x4C), `func_15077F64` (`t0 = &D_800D154C` live pointer),
+   `func_150A3184` (u64 table, frame lacks `s4`), `func_1501E7A8` (loop bound `n*8` computed before the `addiu s0`), `func_15080748` (DIFF8 permuter best), `func_15012370` (DIFF10).
+
+## s49 recipes (operand order, callee arity from m2c protos, SIZE-n loops)
+
+1. **`goto end; end: ;` in the last arm** (`func_150EFE90`, 0x2D arm of the family, SIZE-1): the ref ends the 0x2D arm with an unfilled `sb t2,0xC(v0); b epilogue; lw ra` (target-filled delay slot) instead of `b; sb`. A no-op `goto end; end: ;`
+   after the second slot compare in the arm reproduces it (same trick as the s45 0x2D-first members). With two slots the first arm needs **four named locals** loaded in ref order
+   (`s32 x = *(s32 *)v; s32 y = *(s32 *)arg1; s32 p = v[4]; s32 q = arg1[4];`, compare `x == y || q == p`): that gives the `v1/a0/a2/t0` registers and the `or a3,a0` copy. Pointer-typed temps are not needed.
+2. **m2c prototypes lie about arity and types; read the callee registers.** `func_150D6898` (SIZE+3) called a 9-parameter `(f32, f32, s32, ...)` prototype; the real one is `(s32, f32, s32, f32, f32, s32, s32)` (first arg int => the f32 args travel
+   in GPRs: `mfc1 a1,f12`; a 32-bit constant in `a2` via `lui/ori` is an `s32` parameter; the 5th, a float, goes to `0x10(sp)`). `func_15083E20`/`func_150158D0`/`func_1503FAF0` showed the same: pass `(arg0, arg1, arg2)` through, and a callee
+   param that is `s32` stops the extra `sll/sra` renormalisation of an `s16` argument (`func_1503FAF0` SIZE+3 -> SIZE+1 with `func_1510F800(s32, s32, s32)`). Then the stack slot of a float spill across a call is fixed by `stackfix.py` (declaration order `temp_f12, sp28, ...`).
+3. **Sorted list insert with the mask hoisted** (`func_1509B810`): `key = arg0->unk0 & ~0xFC00;` before the empty-list test (signed `slt` needs the `int` constant `~0xFC00`; `0xFFFF03FF` is unsigned and gives `sltu`), loop as `do { ... } while (i < length)` that falls
+   into the shared head-insert code (the m2c `goto`/duplicated return block gave SIZE+8).
+4. **Operand order of an address sum** (`func_15019BB8`): `(u8 *)D_800BE628 + arg1 * 0x180 + ...` loads the base before the multiply (the `s32` global + int form multiplied first). Same effect as the s46 reversed-order rule for plain memory operands.
+5. **Reload of a loop bound after the call** (`func_1503E00C`, still SIZE+2): the ref keeps `n = *cnt` in `a2` (the third, pass-through argument of the call) and reloads it only on the call path; named `n` lands in `s0`, an expression `*cnt` in the test gives a duplicate `s3/s4`.
+   Best drafts `conker/build_port/s49/n5.c`/`q1.c`; use a 3-argument callee `(temp_a1, temp_a1, *cnt)`.
+6. **Leftovers**: `func_150B7B9C` DIFF13 -> DIFF10 with `old = *slot; if (old != 0) f(old);` (pointer-typed test keeps a2 free); `func_150D2884` permuter best DIFF9 (`*(s32 *)(arg0 + 0x30) -= D_800BE9E4;` instead of a `temp_t8`,
+   no `pad`; only the spill slot 0x30 vs 0x34 and t-register numbering remain); `func_15080748` (subu result lands in `t0` not `v0` whatever the temp form), `func_15013000` (load of `D_800D3094` hoisted above the two stores: no source order change moves it),
+   `func_1504BA38` (the permuter's `s8 new_var2 = 0x184` is a truncation bug; clean forms give p/c/b in v0/v1/a1 instead of v1/a1/v0, DIFF27), `func_150C572C` (addiu s0/s1 order, 9 forms), `func_1509B950` (pos in t9 not v1, 6 forms),
+   `func_150F8DFC` (ref puts `v = arg0+0x28` in a0 and copies arg0 to a3; every form copies arg1 instead).

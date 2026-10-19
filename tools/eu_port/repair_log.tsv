@@ -802,6 +802,34 @@ func_151B1F54	DIFF25	6	OK	y	n	or a3,a0 family: top 'cur' var before the if, 2D a
 func_151937A4	DIFF10	10	OK	y	y	or a3,a0 family solved: temp_v0=(u8*)arg0+0x28 BEFORE the if; 2D arm without key temps, compare *(arg1+k)==*(temp_v0); arm 0: temp_v1=arg1[0] var; goto dummy_label at end of 2D arm
 func_151BEB08	DIFF11	2	OK	y	n	twin of func_151937A4 (0xB0)
 func_151BCB54	DIFF	3	OK	y	n	family: header changed to void (s32 return keeps v0 live -> no bne delay-slot addiu v0); same as 151B1F54 template
+func_150CEBA4	DIFF0	1	OK	y	n	0x2D-first family template (D7370 form), K=0x18
+func_150FE08C	DIFF5	1	OK	y	y	leaf *v=0 family member; remote permuter: unused label + ^0 temps
+func_150EFD30	SIZE+2	1	OK	y	n	shape C: u8 **q=&arg0 + m2c struct102* temps (lw a0 test)
+func_150EFDE0	SIZE+2	1	OK	y	n	same as EFD30
+func_1502298C	SIZE+2	3	OK	y	y	D_800C3938[][0x19] array, cached n reloaded after call; permuter new_var=&*cnt
+func_150FCD98	DIFF16	4	OK	y	y	two-slot 0x2D family; permuter new_var, arg1[4]==v[4] order
+func_1508148C	DIFF2	3	OK	y	y	(id = arg0[4]) == D_8009C100 in the first compare; all permuter junk removed
+func_150848F0	DIFF14	2	OK	y	n	s32 callee params, var_s2 += field (no temp_s2), *(u8**)(&D+u8) not *4
+func_150B2974	DIFF19	1	OK	y	n	f32 sp3C[3] copy, pass *(s32*)&sp3C[2]
+func_150B7964	CERR	3	OK	y	n	HUD spawner: local struct (unk0 ptr at +0, fields to +0x39) passed by address; u8 fields for 0xFF; pointer-typed test
+func_150B7A40	CERR	1	OK	y	n	same struct; D_800D9CC4 = D_800D9CB8[3]
+func_150B7C88	CERR	2	OK	y	n	same struct + unk4; stores in ref order; 60.0f/170.0f first
+func_150B7DFC	CERR	3	DIFF32	n	y	struct + s32 unkC=sp.unk20 (trunc.w.s); remote permuter queued
+func_150B7B9C	DIFF16	3	DIFF16	n	y	struct declared before slot ptr; remote permuter queued
+func_150D4ED0	DIFF22	4	DIFF15	n	y	0x2D family w/ func_15031C4C calls; if/else id; permuter queued
+func_150EFE90	SIZE-1	1	SIZE-1	n	y	two-slot+0x43 family; missing or a3,a0 copy; permuter DIFF57
+func_150F8DFC	CERR	3	SIZE-1	n	n	0x42/0x3F handler: arg1 gets the a3 copy instead of arg0
+func_150A3184	SIZE+1	3	SIZE-2	n	n	u64 bit table via __ull_rshift; frame lacks s4
+func_1501E7A8	CERR	5	SIZE-1	n	n	cnt reload per path; ref computes n*8 before addiu s0; tbl hoist
+func_1509D104	SIZE+2	2	DIFF1	n	y	u16 id list; addu operand order a1=s4+t4; long permuter run queued
+func_1502C8F8	SIZE+2	3	SIZE+2	n	n	frame 0x30 vs 0x28 (extra 8 stack bytes)
+func_15080748	DIFF23	3	DIFF14	n	y	no sp1C local; var_v1 = D_800D1D4C before the compare; permuter queued
+func_150C6C3C	DIFF23	4	DIFF23	n	n	frame 0x38 vs 0x28: extra 16 stack bytes, shape A p=arg0 copy did not help
+func_15012370	DIFF18	2	DIFF18	n	y	u8 loop var made it worse; permuter queued
+func_15077F64	SIZE+1	2	SIZE+1	n	n	sp1E slot is 0x1F in mine; t0=&D_800D154C live pointer
+func_1502B5C8	SIZE-1	4	SIZE-1	n	n	varargs: arg1 via &arg1 home slot OK, u8 *var_s1; sp38/sp40 slots 0x48/0x4C vs 0x38/0x40
+func_1509D104	DIFF1	3	OK	y	y	permuter 900 s: q = *new_var + (u8 *)(new_var2 = &D_800D2E70) (fakematch)
+func_150B7B9C	DIFF13	4	DIFF8	n	y	permuter best still has frame 0x68 vs 0x60
 func_151D324C	DIFF12	5	OK	y	y	dummy_label after callee call in arm 0 (b + target-copied slot); 2D arm no temps with arg0->unk10 on the LEFT
 func_151A13F0	draft	3	DIFF57	n	n	28-arg call to stub func_151A177C (stub proto would need 28 params); ref homes only a2/a3 and reloads a2; mine homes f12/a0; sig (f32,s32,s32,s32,s32) guess
 func_151A14D8	draft	1	DIFF57	n	n	twin of func_151A13F0
@@ -824,3 +852,29 @@ func_151B6444	SIZE-1	2	SIZE-1	n	n	s48: callee func_15133E04 is 1-arg; ref reload
 func_1518F8F4	DIFF17	2	SIZE-2	n	n	s48: dropping sp18/var_v1 spill form loses the v1 spill
 func_15191E2C	SIZE-1	2	DIFF26	n	n	s48: explicit else-if gives DIFF26; frame 0x30 and v0/v1 roles
 func_151321F4	DIFF3	9	OK	y	y	s48: permuter (local 500s from DIFF3 base) added chained store 'temp_a0 = (*(u8*)arg0 = temp_a0)' pinning the sum to a0; caller func_1513230C passes *(f32 *)(arg0+0xAC) now
+func_150EFE90	SIZE-1	4	OK	y	n	x/y/p/q named locals (v,arg1,v[4],arg1[4] loads), q==p order, goto end; end: ; after second slot compare
+func_1509B810	SIZE+n	4	OK	y	n	key = arg0->unk0 & ~0xFC00 hoisted (signed slt), do-while instead of gotos falls into shared head insert
+func_150D6898	SIZE+3	4	OK	y	n	callee proto (s32,f32,s32,f32,f32,s32,s32) 7 args; sp28 named, ADA20 before the float math; stackfix declaration order
+func_15019BB8	DIFF5	3	OK	y	n	cast base to u8 * : (u8 *)D_800BE628 + arg1 * 0x180 puts the load first (operand order)
+func_15080748	DIFF8	6	DIFF8	n	n	s49: u8 new_var removed/s32/diff temp/subu operand order: subu result stays in t0 not v0 (DIFF8-14)
+func_15013000	DIFF8	3	DIFF8	n	n	s49: store order swap, i/off decl order, i<(u32)D_800D3094 guard: lw D_800D3094 stays hoisted above the stores (DIFF10)
+func_1504BA38	DIFF10	5	DIFF10	n	n	s49: clean forms (no s8 0x184 wrap) DIFF17-29: p/c/b land in v0/v1/a1 not v1/a1/v0
+func_150F8DFC	SIZE-1	8	DIFF31	n	y	s49: struct102 *arg0 + v first, v in arm, w pointer: all copy arg1 to a3 (ref: v in a0, arg0 copy a3); permuter 400 s no gain
+func_1507C608	DIFF8	1	DIFF8	n	n	s49: end != p / p != end order forms: no change
+func_15083E20	SIZE+1	3	SIZE+1	n	n	s49: callee (u8*,s32,u8*) takes 3 pass-through args, arg1 s32: extra or a3,a1 copy (arg1 split into two webs) remains
+func_15012370	DIFF10	3	DIFF10	n	n	s49: named const k=0x180 local: IDO folds it, s4/s2 roles unchanged
+func_1503E00C	SIZE+2	8	SIZE+2	n	n	s49: 3-arg callee (temp_a1,temp_a1,*cnt), array externs: n5.c SIZE+2 (cnt ptr in s3 and s4 copy, tbl in s5); ref keeps bound in a2
+func_150A7CB0	DIFF3	2	DIFF3	n	n	s49: store order variants unchanged
+func_1509B950	DIFF2	10	DIFF2	n	n	s49: pos in t9 instead of v1: 10 more forms no change
+func_150C572C	DIFF2	9	DIFF2	n	n	s49: addiu s0/s1 order: end local, casts, compare order: no change
+func_150D2884	DIFF24	8	DIFF9	n	y	s49: -= D_800BE9E4 without temp_t8, no pad: permuter DIFF9 (t2.c), left: spill slot 0x30 vs 0x34, t-reg numbering
+func_1503FAF0	SIZE+3	4	SIZE+1	n	n	s49: structured loop, callee (s32,s32,s32): SIZE+1 (arg1 kept in s0, ref reloads lh a1 from home)
+func_150158D0	SIZE+4	4	SIZE+2	n	n	s49: (u8 *)&D_80083310 + arg0*8 and callee (u8*,s32,s32); stackfix --bisect: func_10004514 call adds 0x18 of frame (s2 spilled), unresolved
+func_1502F17C	DIFF3	3	DIFF3	n	n	s49: s32 v / else-first forms SIZE-1 (IDO then fills the delay slots; ref is unoptimised)
+func_150B7B9C	DIFF13	6	DIFF10	n	n	s49: old = *slot; if (old != 0) f(old); DIFF10 (af1.c); left: first store order, spill slot 0x20 vs 0x18
+func_150F83A0	DIFF14	2	DIFF12	n	y	s49: no pad -> frame ok; left float reg numbering/spill slot; permuter running
+func_15095A4C	SIZE+1	8	DIFF16	n	y	s49: f32 arg2 (callee f32 third), (u8 *)&D_800D30C8 + (D_80082FA4 << 6), arg0/arg1 reused as temps, t3/t4 temps stored after, (u8 *)D_800BE628: am2.c DIFF16
+func_1505D5D0	SIZE+1	2	DIFF57	n	n	s49: callee func_1505D408 takes 8 args (s32,u8*,f32 x5,s32): frame ok, float schedule differs
+func_1506BCC8	SIZE+1	2	SIZE+2	n	n	s49: ref recomputes lui/addiu a0 for &D_800D154C each use and frame 0x18; pp local gives frame 0x30
+func_150F83A0	DIFF12	3	OK	y	y	permuter DIFF3 then hand: mem * sinf() operand order ((v+0x28 field) * sinf(..)) fixes the last mul.s and spill slot
+func_150D2884	DIFF9	4	DIFF2	n	y	permuter (remote) DIFF2: as1.c in build_port/s49; only the spill slot 0x30 vs 0x34 left (pad/sp34/order/type forms and stackfix all fail)

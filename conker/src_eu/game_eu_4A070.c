@@ -211,7 +211,30 @@ void func_150228F0(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502298C.s")
+extern u8 D_800C3938[][0x19];
+
+void func_1502298C(s32 arg0)
+{
+  s32 i;
+  u8 *new_var; // fakematch: permuter temp
+  s32 n;
+  u8 *cnt = &D_800C3930[arg0];
+  u8 *p;
+  struct127 *e;
+ i = 0; n = *cnt; if (n > 0) { p = D_800C3938[arg0]; do {
+      e = &D_800CC2D0[*p];
+      if (e->interaction_state)
+      {
+        new_var = &(*cnt);
+        func_15060F28(e, 0);
+        n = *new_var;
+      }
+      i++;
+      p++;
+    }
+    while (i < n);
+  }
+}
 
 void func_15022A40(s32 *arg0) {
     s32 v = arg0[0];
