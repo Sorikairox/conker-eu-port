@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: mydis.sh <func>  : disassemble column 2 ("mine") of tools/decomp-permuter/repair/<func>.diff
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 f=$1; d=${CONKER_ROOT:-$HOME/conker}/tools/decomp-permuter/repair/$f.diff

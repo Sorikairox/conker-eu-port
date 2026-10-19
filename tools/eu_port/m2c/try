@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: try <func> [draft.c]   (draft from stdin if omitted) -> screen result for one draft
 # TRYDIR=name uses build/<name> (parallel use). V=1 try ... prints word diff (ref, mine, asm). Runs screen.py on a single draft in conker/build/t (host side; uses container conkerdev).
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH

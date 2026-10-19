@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: gen40.sh [max=40]   fresh m2c drafts (JT=1) of all asm functions <= max insns -> conker/build/k40, screened;
 # ranked list "score result func dir" -> tools/decomp-permuter/repair/fresh.txt (score 0=OK, n=DIFFn, 3.5=SIZE+-1)
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
