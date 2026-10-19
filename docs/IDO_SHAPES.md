@@ -373,7 +373,7 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 10. **OPEN**: `func_1509B950` (DIFF2, pad in t9 vs v1), `func_150E3B5C` (loop tail `bnel`), `func_1507488C` (flag copies `or a1,v1` / `or a1,t8`), `func_15003570` (lbu order 0,3,1,2),
     `func_1503D658` (ref reloads `lb v1`, no CSE with the first check).
 
-## 16. Session 46 recipes (operand order, 0x2D/0 handler family)
+## 17. Session 46 recipes (operand order, 0x2D/0 handler family)
 
 See `docs/sessions/s46.md` for the details. Key rule: with two plain memory-expression operands IDO emits `beq/bne/addu/multu` operands in REVERSED source order, while a named local keeps its
 source position. Drop the key temp and put the `arg0`/pl field on the left (`pl->unk0 == arg1->unk0`) to get `bnel arg1field,plfield`. The whole 0x2D/0 handler family (`or a3,a0` variants
