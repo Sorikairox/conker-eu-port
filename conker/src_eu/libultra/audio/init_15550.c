@@ -398,7 +398,31 @@ void func_10017714(s32 arg0, s16 type, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/init_15550/func_10017780.s")
+extern u16 *D_80042C58;
+void func_10017780(u8 arg0, u16 arg1) {
+    s32 mask;
+    N_ALUnknownStruct1 *p;
+    s32 count;
+    struct {
+        s16 type;
+        N_ALUnknownStruct1 *cur;
+        u8 pad[8];
+    } ev;
+
+    mask = osSetIntMask(1);
+    p = D_8002BA20;
+    D_80042C58[arg0] = arg1;
+    if ((count = 0, p != NULL)) { // fakematch: count init ordered after the p load
+        do {
+            if ((p->unkC != 0) && ((*(u8 *)(*(s32 *)(p->unkC + 4) + 2) & 0x1F) == arg0)) {
+                ev.type = 0x800;
+                ev.cur = p;
+                n_alEvtqPostEvent(&D_8002BA2C->evtq, (N_ALEvent *) &ev, 0, 2);
+            }
+        } while ((count++, p = p->node.next) != NULL); // fakematch: count++ in the condition
+    }
+    osSetIntMask(mask);
+}
 // NON-MATCHING: far from matching
 // void func_10017780(u8 arg0, u16 arg1) {
 //     s32 sp34;

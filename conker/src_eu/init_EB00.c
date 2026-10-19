@@ -231,7 +231,26 @@ s32 func_1000F4D8(u16 arg0) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F568.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F6B8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F85C.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+} EU42988;
+extern EU42988 D_80042988[];
+void func_1000F85C(u16 arg0, s16 arg1, s32 arg2) {
+    if (arg0 >= 0x10) {
+        if (func_1000F3D0(arg0) != 0) {
+            if (arg1 == 0x10) {
+                f32 sp1C;
+                sp1C = alCents2Ratio(arg2);
+                arg2 = *(s32 *)&sp1C;
+            } else if (arg1 == 0x11) {
+                arg1 = 0x10;
+            }
+            func_10017714(D_80042988[arg0 & 0xF].unk0, arg1, arg2);
+        }
+    }
+}
 // NON-MATCHING: not even close
 // void func_1000F85C(s32 arg0, s16 arg1, s32 arg2) {
 //     f32 sp1C;
@@ -526,7 +545,18 @@ void func_10010AA8(struct127 *arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010BE8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010E78.s")
+u16 func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA)
+{
+  s32 sp2C;
+  u32 temp_t1;
+  temp_t1 = (u32) func_1000F6B8(arg5, arg6, arg7, arg8, &sp2C, (s32) arg9, (s32) argA);
+  temp_t1 = (((u32) arg2) * temp_t1) >> 0xF;
+  if (temp_t1 != 0)
+  {
+    return func_10010BE8(arg0, arg1, temp_t1, sp2C & 0x7F, (s16) ((s32) arg3), (sp2C & 0x80) | arg4, (u8) ((s32) D_80041FD9));
+  }
+  return 0;
+}
 
 void func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
     func_10010BE8(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);

@@ -619,3 +619,9 @@ func_10019D98	SIZE+7	4	OK	y	n	-g file: drop m2c temp_t9/temp_t7 stack temps; ass
 func_10027524	SIZE-18	4	SIZE-3	n	n	PI init (reads PI_STATUS &2 loops): needs volatile globals + volatile local stat; ref hoists lw D_80043EC4 above addiu sp (mine not)
 func_1001DA28	CERR	1	OK	y	n	EU auxBus field at +0x40 (US sources is 0x1C): raw cast read
 func_100046E4	SIZE+1	5	DIFF4	n	n	chunked osPiStartDma loop; locals 0x10 too high (frame 0x90 vs 0x80), pinning consts via locals fixed the rest; stack-only
+func_16000F8C	DIFF2	3	OK	y	y	permuter: do{}while(0) + dead if(!bits&&!bits) fakematch
+func_1001A45C	CERR	1	OK	y	n	clone of func_10019B50 loop with 2 args
+func_10017780	DIFF5	3	OK	y	n	comma exprs (count=0,p!=NULL) and (count++,p=next) in -g
+func_10010E78	DIFF1	4	OK	y	y	permuter: u32 temp_t1 = call; temp_t1 = (u32)arg2 * temp_t1 >> 15
+func_1000F85C	DIFF22	2	OK	y	y	permuter: f32 sp1C block-scoped inside the arg1==0x10 branch
+func_10005AD0	DIFF5	2	OK	y	y	callee func_10005C38 prototype void (return value unused)
