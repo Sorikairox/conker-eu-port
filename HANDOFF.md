@@ -31,6 +31,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 46 (worktree a, on top of s44 + eu merge): 3263 / 5913 functions in C (55.2%)**, code bytes 362,956 / 2,253,856 (16.1%) (game 2857, init 374, debugger 32), from `verify_all.sh` (all OK). 18 matched in 2 commits. Doc `docs/sessions/s46.md`, recipes IDO_SHAPES section 16: **operand-order rule** (two plain memory operands come out in REVERSED source order, a named local keeps its position) solved the whole 0x2D/0 handler family and the DIFF1 `addu`/`bnel` cases; an `s32` header return keeps `v0` live and blocks a `bne` delay-slot fill (make it `void`).
+  Open from s46: `func_15199200`/`func_1519C52C` (DIFF1 addu), `func_151A23E4` (DIFF2, permuter best `tools/decomp-permuter/drafts/s46_func_151A23E4e.c`), `func_1517BD68` (DIFF4), `func_151A7E2C`, `func_151B6804`, `func_151BAA18`, `func_151D51E8`, `func_15183E20`, `func_151A13F0`/`func_151A14D8` (28-arg call to the stub `func_151A177C`), `func_151D75B0`, `func_151D5714`. Try the reversed-order rule on every remaining DIFF1/DIFF<=6 operand-order leftover.
+
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
 - **3234 / 5913 functions in C (54.7%)**, code bytes 357,448 / 2,253,856 (15.9%) (session 44, worktree a, on top of 3227; game 2828, init 374, debugger 32). Session 44 doc `docs/sessions/s44.md` (recipes: HOIST/DROP protos, `new_var` loop tail, `goto dummy_label`, `pad[16]` frame; new `myasm.sh`) (after merging sessions 39 (main, game < 0x130000) and 40 (worktree a, game >= 0x130000 + init/debugger), from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2810/5330 (13.6%), debugger 32/43 (42.6%).
 - **3239 / 5913 functions in C (54.8%)**, code bytes 358,236 / 2,253,856 (15.9%) (merged state, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2833/5330 (13.8% of bytes), debugger 32/43 (42.6% of bytes).
