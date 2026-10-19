@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 35). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 40, worktree eu-wt-a). Update this file at the end of every work session.
 
 Layout of the docs (read in this order):
 - `tools/eu_port/AGENT_BRIEF.md`: the rules of a work session (short).
@@ -29,8 +29,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3179 / 5913 functions in C (53.8%)**, code bytes 348,056 / 2,253,856 (15.4%) (after merging sessions 35-38, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2773/5330 (13.3%), debugger 32/43 (42.6%).
-  Sessions 35 (main) and 36-38 (worktree eu-wt-a) merged. Session 36 recipes: IDO_SHAPES section 12, `docs/sessions/s36.md`. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
+- **3197 / 5913 functions in C (54.1%)**, code bytes 351,080 / 2,253,856 (15.6%), init 374/540, game 2791/5330, debugger 32/43, from `verify_all.sh` (session 40 on branch `eu-wt-a`: +18 over the merged `eu` state of 3179; not yet merged into `eu`). Previously merged: sessions 35-38. Session 40 recipes: IDO_SHAPES section 13, `docs/sessions/s40.md`. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
 - Session 35: permuter sweep over the repair leftovers, +8 (commits `3315bbc` and the next); see "Session 35" at the end. Session 34: 5 more from the pool (commit `350efff`), see "Session 34" at the end. Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
@@ -103,6 +102,10 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+
+0. (Session 40 worktree `a`, game >= 0x130000 + init/debugger slice) Unsolved leftovers with notes in `repair_log.tsv`: the **0x2D/0 handler family** with the `or a3,a0` entry copy (`func_151937A4`, `func_151BEB08`, `func_151BCB54`, `func_151BAA18`, `func_151D2E5C` DIFF1; IDO_SHAPES 13.2),
+   the `D_800DD280[j][idx]` node searches (`func_151CEBE4` SIZE+1, `func_151A7188`), `func_151C1B20` (shape C, ref frame 0x28 vs 0x20), `func_151A2F10` (frame 0x20 vs 0x28), `func_1514DA28` (DIFF2 spill slot 0x1C vs 0x18), `func_15159828` (SIZE-3),
+   `func_10003BD0` (DIFF23 after the permuter). The next untried CERR/short candidates from `shortpool.py` in this slice (`conker/build_port/list3.txt` was screened: CERR `func_15114644`, `func_1511F8A4`, `func_15134908`, `func_151475B0`, `func_1517F3B0`, `func_15182388`, `func_1519E874`, `func_151ACB00`, `func_151BEC7C`, `func_151D324C`, `func_151E4A78`, `func_151E8620`; `func_151D75B0` DIFF16) are not logged.
 
 1. Continue the repair loop over `shortpool.py 70` (about 575 unlogged candidates; ~125 CERR left in `cerr.err`, minus the 28 logged in s34; the ranked results of session 33's `gensome.sh` run are in `tools/decomp-permuter/repair/pool33.res`, 540 drafts: 167 CERR, 167 DIFF, 115 SIZE-, 91 SIZE+; the CERR first-errors are in `repair/cerr.err`, 153 CERR left). CERR with `Dereferenced a non-pointer`/`X undefined` (m2c vector locals `spXX`) and `redeclaration` (forward prototype) were the cheapest class in session 33 (12 of 14 matches); the remaining ones are listed in cerr.err. Queue DIFF<=9 register-only leftovers for the permuter in the background (`permute.sh f draft.c 150 5`).
 2. Pool expansions: `shortpool.py 100`, `clones.py --refresh --draft --lax` and `--near 16` after each batch (new matched C = new siblings), shape lists `shapes.py --list A|B 150` (A 101-150: 18, B 33 untouched), Gfx writers 101-150 insns (`gfxfind.py --untried --hints`).

@@ -643,3 +643,18 @@ func_15169850	draft	3	OK	y	y	header proto (s32,u8,s32,s32,s32) + pointer casts; 
 func_151A5290	draft	2	OK	y	n	sibling of func_15169850: fwd proto void func_151A544C(u8*); drop temp_v1, reload *(temp_v0) at 2nd compare
 func_151BCB54	draft	4	SIZE+1	n	n	sibling of 15169850 family; arg copy a3 ok, ref compares a copy v0 of arg2; SIZE+1 (permuter queued)
 func_151937A4	draft	4	SIZE-1	n	n	same 0x2D/0 handler family; ref copies a0->a3 and uses a0 as temp_a0, mine doesn't copy
+func_1518FA8C	draft	2	OK	y	n	callee 15190334(arg0,&sp33,arg1) pass-through a0; stackfix pad s32 for sp33 slot (fakematch)
+func_15142444	draft	2	OK	y	n	u8 arg0, compare as arg1->unique_id == arg0 (operand order)
+func_15159828	draft	3	SIZE-3	n	n	u8 spD search loop in u16 spC; ref has unfilled nops/b-to-next (loop exit shape); stack slot 0xC vs 0x16
+func_15110B80	draft	1	OK	y	n	no var_a0 copy: assign arg0 directly, extern u8 D_800DC2D8[]
+func_151D4300	draft	4	OK	y	n	vertex struct copy for 3-word else, f32 operand orders (prod + t4 no; t4+prod yes; vC * sinf), drops sp18/temp_f0 frame
+func_151A9028	draft	2	OK	y	y	family 0x2D/0: drop temp_v1 reload at 2nd compare, temp_t6 for 0x2D cmp, permuter new_var key temp in branch 0
+func_151DD950	draft	2	OK	y	n	osEepromLongRead: natural libultra source, callee 151DD6F0 takes u8 address, address++ after call
+func_1514F18C	draft	1	OK	y	n	void*arg0 header sig, ret=NULL local, table call D_8008AEF8[idx](arg0)
+func_151A7188	draft	3	DIFF32	n	n	D_800DD280 two-level list search like 151CEBE4; i+1 hoisted early in mine (addiu v0,v0,1 after table load); need fwdproto struct_eu_node *func_151A7188(s32) at file head
+func_151D7A60	draft	2	OK	y	y	tmp struct stores in layout order (unk4 first); permuter found the order
+func_151937A4	draft	7	DIFF11	n	y	permuter best DIFF11 (tmp temps), arg copy a3 not reproduced
+func_151BEB08	draft	5	DIFF11	n	y	same as 151937A4 family; permuter best DIFF11
+func_151D2E5C	draft	3	DIFF1	n	y	0/0x2D family; cmp operand order in 2nd compare (bnel t9,v1 vs v1,t9) not reachable by source order; permuter 300s no gain
+func_151BAA18	draft	4	SIZE-1	n	y	family; ref compares a copy t0 of arg2 for 0x2D; permuter best.c CERR
+func_10003BD0	draft	1	DIFF28	n	y	volatile p reload fakematch; permuter best 480 -> DIFF23, lui/addiu order of globals differs
