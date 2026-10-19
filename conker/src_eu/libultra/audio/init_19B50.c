@@ -40,7 +40,27 @@ void func_10019D6C(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk8 = arg3;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/init_19B50/func_10019D98.s")
+s32 func_1001CA90(u8 *, f32);
+f32 func_1001CEA4(s32);
+void func_10019D98(u8 *arg0, u8 arg1) {
+    u8 *sp2C;
+    s16 sp2A;
+    s8 sp29;
+    f32 sp24;
+    sp29 = (*(s8 *)((u8 *)(((*(s32 *)((u8 *)arg0 + 0x60)) + (arg1 * 0x3C))) + 0x15)) - 0x40;
+    sp24 = (*(f32 *)((u8 *)(((*(s32 *)((u8 *)arg0 + 0x60)) + (arg1 * 0x3C))) + 0x18));
+    if ((sp2C = (*(u8 **)((u8 *)arg0 + 0x64))) != NULL) {
+        do {
+            if ((*(u8 *)((u8 *)sp2C + 0x35)) == arg1) {
+                sp2A = (s16) (*(u8 *)((u8 *)(((*(s32 *)((u8 *)arg0 + 0x60)) + (arg1 * 0x3C))) + 0x14));
+                n_alSynSetPan(sp2C + 4, (u8) sp2A);
+                if (sp2A != 0) {
+                    func_1001CA90(sp2C + 4, func_1001CEA4(((*(u8 *)((u8 *)sp2C + 0x36)) - (*(u8 *)((u8 *)((*(u8 **)((u8 *)((*(u8 **)((u8 *)sp2C + 0x24))) + 4))) + 4))) + sp29) * 440.0f * sp24);
+                }
+            }
+        } while ((sp2C = (*(u8 **)((u8 *)sp2C + 0))) != NULL);
+    }
+}
 
 void func_10019ED8(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     seqp->chanState[chan].unk14 = arg3;

@@ -290,3 +290,16 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 1. For short functions (<= 70 insns) with an m2c draft: first the call arities and prototypes (section 1), then the family templates (3.3, 3.4, 2.3, 4.1), then statement order/reuse-one-local; ~0.3 matches per attempt.
 2. Large (70-150 insns) functions give 3-5x the bytes per call but a third of the match rate: only try drafts with a small local diff (DIFF <= 12 or one register/operand-order issue); skip frame-size/stack cases.
 3. Clone drafts (`clones.py`) of matched siblings: 91% for exact skeleton matches, 80% hand-finished for near ones.
+
+## 12. Session 36 recipes (-g audio / libultra files)
+
+1. **Event passed as `&s16`** (m2c: `s16 sp3C; sp3C = 0x4000; n_alEvtqPostEvent(q, &sp3C, ...)`): the event is really a local struct
+   `struct { s16 type; void *ptr; u8 pad[8]; } ev;` (type at +0, pointer at +4 of the event, 0x10 bytes). Declare the struct, set `ev.type`/`ev.ptr`, pass `(N_ALEvent *) &ev`
+   (`func_10017604`, `func_10017438`; `stackfix.py` finds the pad). No `osSetIntMask` prototype is needed (`func_10017604`).
+2. **Drop m2c temps in -g files; pointer chasing with assignment-in-condition.** `temp_t9 = p->next; if (temp_t9 != NULL)` spills the temps in -g; write
+   `if ((sp2C = p->next) != NULL) { do { ... } while ((sp2C = *sp2C) != NULL); }` so the value stays in the load register (`func_10019D98`).
+3. **`f32 arg1` that arrives in a1** and is read as bits: `f32 sp54; ... bits = *(s32 *)&sp54;` (union-style read of the home slot; `func_16000F8C` got to DIFF5 only).
+4. **Do not add prototypes for implicitly declared int callees** that the file already calls without one: a prototype can change the arg handling (s36, `func_10004DB0`); only add them
+   when the first compile error asks for it (forward prototype, section 1.5).
+5. **EU struct offsets differ from US** (`auxBus` field at +0x40, US sources say 0x1C): use the raw cast read `*(T *)((u8 *)p + 0x40)` (`func_1001DA28`).
+6. Near misses: `func_10010E78` (DIFF1, `multu` operand order, drop `& 0xFFFF` on a u16 param), `func_100046E4` (DIFF4, frame 0x90 vs 0x80 from locals), `func_16000F8C` (DIFF5 bits in v0 vs v1).

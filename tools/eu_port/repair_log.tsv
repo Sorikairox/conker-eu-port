@@ -603,3 +603,19 @@ func_150F5B48	CERR	2	DIFF41	n	y	fwdproto self; body = draft; v0/v1 swapped roles
 func_151481BC	CERR	3	SIZE-1	n	n	D_8008A644 fn-ptr table (u8*, s32, s16); arg0 = func_151462C8(arg0..) param-as-temp keeps the s1 copy, temp_v1 read after the call; ref presets v0=s1 in beqz delay slot (var_v0=temp_s1 form loses the s1 copy)
 func_1516DBE8	CERR	2	DIFF13	n	n	D_8008CF40 fn-ptr table with (arg0) arg; tail expr load order differs; 8 operand-order forms no change
 func_1509D274	CERR	3	DIFF19	n	y	file proto -> s32 f(); 2-param def, u16 temp_t6 form: s0/s1 roles swapped (decl order irrelevant over 120 perms); permuter DIFF19
+func_10004DB0	CERR	3	OK	y	n	from US comment; invert cond so else-body first, set2 last
+func_10010E78	CERR	6	DIFF1	y	n	drop & 0xFFFF on u16 param; only multu operand order left
+func_1000ECCC	CERR	1	DIFF47	n	n	void* header param + local struct: arg6 lands in a3 not a2 (arg spill order); would need struct param in header
+func_10017604	CERR	5	OK	y	n	-g file: event is a local struct {s16 type; ptr; u8 pad[8]} (type at 0x1C, ptr at 0x20), no osSetIntMask proto; stackfix found the pad
+func_1000EE70	CERR	4	DIFF41	n	n	void* hdr params + local struct; delay-slot/lw 0x1C hoist order differs (ref lw t9,lw t7,beqz,andi)
+func_10009BE4	CERR	5	SIZE+1	n	n	cast *(u32*)unkC, (s32)arg0 cmp, call 1 arg; ref hoists lui a1 into beqz delay slot (target block starts with &D_800406A0)
+func_10003570	CERR	4	SIZE+1	n	n	local struct for D_8002AEB0; ref loads s0=&D_8002AEB0 before sw ra and tests lw 0(s0), mine tests via separate lui
+func_10017438	SIZE+1	1	OK	y	n	-g file: event as local struct {s16 type; voice ptr; u8 pad[8]}; goto loop -> do/while
+func_100036E8	SIZE-11	4	SIZE-1	n	n	vimgr main (libultra viMgrMain); mine pins D_80038190 in s1 (extra s8 saved), ref uses lui/at for it
+func_10026C00	SIZE+3	1	SIZE+3	n	n	__ull_rem: ld/ddivu not matchable at -mips2
+func_16000F8C	SIZE+3	4	DIFF5	n	n	struct-free draft: f32 sp54 bits union read, sp28[0x28] (stackfix order); bits in v0 vs v1 left
+func_10011EB8	SIZE+3	3	DIFF53	n	n	same size; or a3,a0/or a0,a3 arg copy + reg roles (t0/t1,a2/a3) differ; table is u16 pairs [5]
+func_10019D98	SIZE+7	4	OK	y	n	-g file: drop m2c temp_t9/temp_t7 stack temps; assign-in-condition 'if ((sp2C = p->next) != NULL)' / '} while ((sp2C = *sp2C) != NULL)' keeps the value in the load register
+func_10027524	SIZE-18	4	SIZE-3	n	n	PI init (reads PI_STATUS &2 loops): needs volatile globals + volatile local stat; ref hoists lw D_80043EC4 above addiu sp (mine not)
+func_1001DA28	CERR	1	OK	y	n	EU auxBus field at +0x40 (US sources is 0x1C): raw cast read
+func_100046E4	SIZE+1	5	DIFF4	n	n	chunked osPiStartDma loop; locals 0x10 too high (frame 0x90 vs 0x80), pinning consts via locals fixed the rest; stack-only
