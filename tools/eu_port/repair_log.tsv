@@ -808,3 +808,7 @@ func_151A14D8	draft	1	DIFF57	n	n	twin of func_151A13F0
 func_151C4B0C	CERR	1	OK	y	n	fn ptr casts: ((void(*)(u8*,s32))D_800E0940)(..., (v - (s32)D_800DBEF4)/160); extern void (*D_8008FF70[])(s32) HOIST
 func_151DD4A0	CERR	1	OK	y	n	osEepromLongWrite-like: header buffer is void*; osSetTimer(&timer, (12000ULL * D_8002C060)/1000000ULL, 0, &queue, &msg) with extern u64 D_8002C060
 func_15134108	DIFF26	3	OK	y	y	remote permuter 600s x2 (second pass from best base 330): match; callers 151341C8/15134290 now take u8 *arg0
+func_15199200	DIFF1	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)
+func_1519C52C	DIFF1	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)
+func_151A23E4	DIFF2	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)
+func_151AAFFC	DIFF1	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)

@@ -80,7 +80,19 @@ s32 func_151AAB54(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AAC88.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AAFFC.s")
+f32 func_151AAFFC(u8 *arg0) {
+    u8 **q;
+    u8 *p;
+    f32 r;
+
+    q = &arg0;
+    r = func_151423D8((((u32) (*(u32 *)((u8 *)arg0 + 0x88)) >> 0x10) - 0x40));
+    p = *q;
+    r = (*(f32 *)((u8 *)p + 0x90)) + ((*(f32 *)((u8 *)p + 0x94)) * (0, r)); // fakematch: (0, x) comma flips commutative operand order
+    p += 0x80;
+    *(s32 *)(p + 8) = (*(s32 *)((u8 *)p + 0xC)) * D_800BE9E4 + (*(u32 *)((u8 *)p + 8));
+    return r;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB06C.s")
 

@@ -103,7 +103,40 @@ void func_151A1E8C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1F48.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A23E4.s")
+void func_151A23E4(u8 *arg0)
+{
+  s16 temp_lo;
+  u8 *new_var;
+  s16 temp_lo_2;
+  u8 *new_var2;
+  s16 temp_v1;
+  u8 *temp_v0;
+  u8 *temp_v0_2;
+  new_var = (0, arg0 + 0x50); // fakematch: (0, x) comma flips commutative operand order
+  temp_v1 = *((s16 *) (((u8 *) arg0) + 0x38));
+  temp_v0 = new_var;
+  if ((*((s16 *) (((u8 *) arg0) + 0x54))) < temp_v1)
+  {
+    new_var2 = ((u8 *) temp_v0) + 2;
+    *((s8 *) (((u8 *) arg0) + 0x3F)) = (s8) ((*((s16 *) (((u8 *) temp_v0) + 0))) * ((*((s16 *) new_var2)) - temp_v1));
+  }
+  temp_v0_2 = new_var;
+  if ((*((s16 *) (((u8 *) temp_v0_2) + 0xA))) < temp_v1)
+  {
+    temp_lo = (*((s16 *) (((u8 *) temp_v0_2) + 6))) * ((*((s16 *) (((u8 *) temp_v0_2) + 8))) - temp_v1);
+    *((s16 *) (((u8 *) arg0) + 0x36)) = temp_lo;
+    *((s16 *) (((u8 *) arg0) + 0x34)) = temp_lo;
+  }
+  if (temp_v1 < (*((s16 *) (((u8 *) temp_v0_2) + 0xC))))
+  {
+    *((s8 *) (((u8 *) arg0) + 0x3F)) = (s8) ((*((s16 *) (((u8 *) temp_v0_2) + 0xE))) * (0, temp_v1)); // fakematch: (0, x) comma flips commutative operand order
+  }
+  if (temp_v1 < (*((s16 *) (((u8 *) temp_v0_2) - (-0x10)))))
+  {
+    temp_lo_2 = (*((s16 *) (((u8 *) arg0) + 0x36)) = (*((s16 *) (((u8 *) temp_v0_2) + 0x12))) * (0, temp_v1)); // fakematch: (0, x) comma flips commutative operand order
+    *((s16 *) (((u8 *) arg0) + 0x34)) = temp_lo_2;
+  }
+}
 
 void func_151A2498(u8 *arg0) {
     typedef struct { s32 w[3]; } Blk12;

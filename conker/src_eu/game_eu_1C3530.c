@@ -162,7 +162,19 @@ void func_151991D0(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199200.s")
+void func_15199200(u8 *arg0) {
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u16 temp_a0;
+    temp_v0 = *(u8 **)(arg0 + 0x98);
+    temp_v1 = *(u8 **)(arg0 + 0x94);
+    if (*(s8 *)(arg0 + 0x2C) != 0) {
+        temp_a0 = *(u16 *)(temp_v0 + 0x66);
+        if (temp_a0 != 0) {
+            func_1000F91C(temp_a0, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x24 + (0, temp_v1))) + 0)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x24 + (0, temp_v1))) + 4)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x24 + (0, temp_v1))) + 8)), 0x1F4, 0x1388); // fakematch: (0, x) comma flips commutative operand order
+        }
+    }
+}
 
 void func_151992B0(u8 *arg0) {
     u8 *p;
@@ -326,7 +338,19 @@ void func_1519C4FC(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C52C.s")
+void func_1519C52C(u8 *arg0) {
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u16 temp_a0;
+    temp_v0 = *(u8 **)(arg0 + 0x98);
+    temp_v1 = *(u8 **)(arg0 + 0x94);
+    if (*(s8 *)(arg0 + 0x2C) != 0) {
+        temp_a0 = *(u16 *)(temp_v0 + 0x130);
+        if (temp_a0 != 0) {
+            func_1000F91C(temp_a0, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x28 + (0, temp_v1))) + 0)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x28 + (0, temp_v1))) + 4)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x28 + (0, temp_v1))) + 8)), 0x1F4, 0x1388); // fakematch: (0, x) comma flips commutative operand order
+        }
+    }
+}
 
 void func_1519C5DC(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
