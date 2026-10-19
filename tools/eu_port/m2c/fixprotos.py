@@ -5,7 +5,7 @@
 # with --apply, change an int-like type (s32/u32/int/s16/s8/unsigned...) to u8/u16.
 # Prints: FIX/OK/ODD path:line func argN old->new
 import sys,re,glob,os
-os.chdir(os.path.expanduser('~/conker/conker'))
+os.chdir(os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker'))
 want={}
 for l in open(sys.argv[1]):
     f,_,n,t=l.split(); want.setdefault(f,{})[int(n)]=t

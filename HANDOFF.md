@@ -59,11 +59,15 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 
 ## Tool index (`tools/eu_port/`, details in the session named)
 
+Parallel worktrees (one agent per worktree; s35)
+- `wt.sh new|env|merge|rm <name>`: git worktree `~/conker-wt/<name>` on branch `eu-wt-<name>` + container `conkerdev-<name>` (conker-arm, worktree mounted at /conker). `eval "$(tools/eu_port/wt.sh env <name>)"` exports `CONKER_ROOT` (default `$HOME/conker`) and `CONKERDEV` (default `conkerdev`), which every host-side script in `tools/eu_port` reads. `verify_all.sh` runs from its own checkout. `merge` merges the branch into `eu` in the main checkout (only when no agent is active there). Worktrees have their own m2c venv and gitignored data (`ctx/` regenerates, permuter `nm/`, `repair/`, `sweep/` start empty). Run `verify_all.sh` once in a new worktree to create `conker/asm` and `conker/build`.
+- `remote_perm.sh f [draft.c] [secs] [jobs]` permuter search on the Mac mini worker (REMOTE, its own `conkerdev` container; local setup/screening use `CONKER_ROOT`/`CONKERDEV`; concurrent jobs fine, each has its own `nm/<func>`).
+
 Verification / build
 - `verify_all.sh [--quick]` full check (s-brief). `check_files.py [src_eu/X.c]` whole-object `.text` + owned `.rodata/.data` vs ROM (reliable; `check_funcs.py` skips functions already in C). `fdiff.py src_eu/X.c func` word diff of a C function. `rodiff.py` rodata word diff. `bindiff.py`.
 - `needsyms.py [--apply] funcs` re-adds splat auto symbols that a newly matched function was the last user of (only the full verify catches it, s13). `revert_bad.py` reverts bad new C to GLOBAL_ASM (s03).
 
-Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts assume `~/conker` and `conkerdev`; s04-s07)
+Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts come from `CONKER_ROOT` / `CONKERDEV`, defaults `~/conker` and `conkerdev`; s04-s07)
 - `m2c/list.py` all GLOBAL_ASM functions; `m2c/gen2.py outdir min max` m2c drafts + 8 variants; `m2c/screen.py` (OK/DIFFn/SIZE+-n/CERR; word diff with `SCREEN_V=1`); `m2c/try func [draft]`, `m2c/tryall func a.c b.c...` (8 parallel),
   `m2c/mine func draft.c` (my asm on one line; honours `SCREEN_OPT`), `m2c/keep`, `m2c/apply.py build/hand`, `m2c/screenall dir`, `m2c/merge.py`, `m2c/narrow.py`, `m2c/switchinline.py`, `m2c/compound.py`, `m2c/voidret.py`, `m2c/spawngen.py`/`spawn.py` (effect spawners, s09-s11), `m2c/flags src_eu/X.c` (build with each OPT_FLAGS).
 - `gensome.sh <funcs>` drafts for a few functions into `repair/fresh/`; `gen40.sh [max]` bulk; `m2cfix.py list` declfix + bulk screen (s30); `fctx.sh <func>` / `sh.sh <func>` context + asm on one line (s18, s24).

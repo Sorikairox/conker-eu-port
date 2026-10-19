@@ -13,7 +13,7 @@ Rules, for every identifier the draft uses that the target file does not see:
   * an #include the sibling's file has and the target lacks is hoisted when the draft uses a name from it (stdarg.h).
 """
 import re, os, glob, sys
-R = os.path.expanduser('~/conker/conker')
+R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 INCS = [R, R + '/include', R + '/include/2.0L', R + '/include/2.0L/PR', R + '/include/libc',
         R + '/src/libultra/os', R + '/src/libultra/audio', R + '/src/libultra/io']
 _cache = {}

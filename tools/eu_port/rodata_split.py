@@ -58,7 +58,7 @@ def resplit():
     docker = '/Applications/Docker.app/Contents/Resources/bin/docker'
     cmd = ('cd /conker/conker && rm -rf asm build && find . -maxdepth 1 -name "*_auto.txt" -delete'
            ' && make VERSION=eu extract 2>&1 | grep -E "rodata_inject|rror" ; true')
-    subprocess.run([docker, 'exec', 'conkerdev', 'bash', '-c', cmd])
+    subprocess.run([docker, 'exec', os.environ.get('CONKERDEV','conkerdev'), 'bash', '-c', cmd])
 
 
 def own_range(stem):

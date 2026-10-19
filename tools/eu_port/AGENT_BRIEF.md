@@ -18,6 +18,15 @@ function or tool name comes up; do not read it through).
   twice, write or extend a script under `tools/eu_port/` and document it in
   `HANDOFF.md`. Keep script output compact.
 
+## Parallel worktrees
+
+- If you were launched in a worktree (`~/conker-wt/<name>`, branch `eu-wt-<name>`), work only there and
+  never touch `~/conker` or its `conkerdev` container. **Before using any tool**, in every shell run
+  `eval "$(tools/eu_port/wt.sh env <name>)"` (exports `CONKER_ROOT` and `CONKERDEV=conkerdev-<name>`);
+  without it the scripts silently act on the main checkout. Commit on your branch only; the coordinator
+  merges with `wt.sh merge <name>`. In a worktree read "`~/conker`" and "`conkerdev`" in this brief as
+  `$CONKER_ROOT` and `$CONKERDEV` (`docker exec $CONKERDEV ...`).
+
 ## Verification
 
 - Authoritative check: `tools/eu_port/verify_all.sh` (repo root, on the host). It
@@ -27,6 +36,24 @@ function or tool name comes up; do not read it through).
 - Inner loop: the native arm64 `conkerdev` container (image `conker-arm`, see HANDOFF
   "Fast native toolchain"); recreate it from `conker-arm` if it is missing. Then the tools listed in `HANDOFF.md` (`docker exec` container, m2c pipeline in
   `tools/eu_port/m2c/`, `check_files.py`).
+
+## Waiting and long jobs
+
+- Never block on a long job with `sleep` or an `until pgrep ...; do sleep N; done` loop.
+  It wastes wall time doing nothing.
+- Start long jobs (permuter runs and sweeps, bulk gensome/screening, verify_all.sh) with
+  the Bash tool's `run_in_background`. Give each one its own output file. The harness
+  notifies you when it finishes.
+- While it runs, do useful work that doesn't conflict with it: hand-repair other
+  functions, read asm, write drafts, or screen single drafts with `try`. Don't start a
+  second job that writes `conker/build` (verify_all.sh, apply.py, clean builds) while
+  another one is running.
+- If there's truly nothing else to do, end your turn. You'll be resumed when the
+  background job completes. Don't sleep-poll instead.
+- To wait for a specific condition (e.g. a file appearing), use the Monitor tool if it's
+  available, not a sleep loop.
+- Spread permuter streams across both machines: local `permute.sh` / `sweep.sh perm`
+  plus `remote_perm.sh` (Mac mini worker, see HANDOFF), each as its own background job.
 
 ## Code quality
 

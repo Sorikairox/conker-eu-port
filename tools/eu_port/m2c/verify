@@ -1,7 +1,7 @@
 #!/bin/bash
 # full code build + check_files on all; exit 1 unless bin OK and only the 3 known SIZE reports
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
-out=$(docker exec -w /conker/conker conkerdev bash -c "rm -f build/conker.eu.ok; make VERSION=eu -j8 2>&1 | grep -E 'conker.eu.bin: |Error' | tail -5; python3 ../tools/eu_port/check_files.py 2>&1 | grep -v '^OK'")
+out=$(docker exec -w /conker/conker ${CONKERDEV:-conkerdev} bash -c "rm -f build/conker.eu.ok; make VERSION=eu -j8 2>&1 | grep -E 'conker.eu.bin: |Error' | tail -5; python3 ../tools/eu_port/check_files.py 2>&1 | grep -v '^OK'")
 echo "$out"
 echo "$out" | grep -q "build/conker.eu.bin: OK" || { echo VERIFY-FAILED; exit 1; }
 echo "$out" | grep -q "^3 bad of" || { echo VERIFY-FAILED; exit 1; }

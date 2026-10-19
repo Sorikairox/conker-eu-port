@@ -25,7 +25,7 @@ Results: <out>/best.c (lowest score) and <out>/match.c on an OK; one line per ro
 """
 import os, re, sys, itertools, subprocess, shutil, collections
 
-HOME = os.path.expanduser('~/conker')
+HOME = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'')
 R = HOME + '/conker'
 DOCKER = '/Applications/Docker.app/Contents/Resources/bin/docker'
 sys.path.insert(0, HOME + '/tools/eu_port')
@@ -83,7 +83,7 @@ def screen(func, drafts, tag):
     for i, c in enumerate(drafts):
         os.makedirs('%s/%d' % (d, i)); open('%s/%d/%s.c' % (d, i, func), 'w').write(c)
     shutil.copy(HOME + '/tools/eu_port/m2c/screen.py', R + '/build/screen.py')
-    subprocess.run([DOCKER, 'exec', '-e', 'SCREEN_V=1', '-e', 'SCREEN_DATAREL=1', '-w', '/conker/conker', 'conkerdev', 'bash', '-c',
+    subprocess.run([DOCKER, 'exec', '-e', 'SCREEN_V=1', '-e', 'SCREEN_DATAREL=1', '-w', '/conker/conker', os.environ.get('CONKERDEV','conkerdev'), 'bash', '-c',
                     "ls build/sf_%s | xargs -P 8 -I{} sh -c 'SCREEN_TMP=build/sf_%s/{}/tmp python3 build/screen.py build/sf_%s/{} 1 >/dev/null 2>&1'"
                     % (tag, tag, tag)], capture_output=True)
     out = []
@@ -274,7 +274,7 @@ def scan(listfile):
         os.makedirs('%s/%d' % (d, i))
         open('%s/%d/%s.c' % (d, i, f), 'w').write(''.join(l for l in open(p) if not l.startswith('// PERMUTER')))
     shutil.copy(HOME + '/tools/eu_port/m2c/screen.py', R + '/build/screen.py')
-    subprocess.run([DOCKER, 'exec', '-e', 'SCREEN_V=1', '-e', 'SCREEN_DATAREL=1', '-w', '/conker/conker', 'conkerdev', 'bash', '-c',
+    subprocess.run([DOCKER, 'exec', '-e', 'SCREEN_V=1', '-e', 'SCREEN_DATAREL=1', '-w', '/conker/conker', os.environ.get('CONKERDEV','conkerdev'), 'bash', '-c',
                     "ls build/sf_scan | xargs -P 8 -I{} sh -c 'SCREEN_TMP=build/sf_scan/{}/tmp python3 build/screen.py build/sf_scan/{} 1 >/dev/null 2>&1'"],
                    capture_output=True)
     cnt = collections.Counter()

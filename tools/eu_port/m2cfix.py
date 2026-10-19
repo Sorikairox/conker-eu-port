@@ -4,7 +4,7 @@ of the functions in listfile (own file used as 'sibling'), write them to outdir,
 Ranked results -> outdir/ranked.txt ("score result func")."""
 import sys,os,subprocess,re,shutil
 sys.path.insert(0,os.path.dirname(__file__)); import declfix
-R=os.path.expanduser('~/conker'); fresh=R+'/tools/decomp-permuter/repair/fresh/'
+R=os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); fresh=R+'/tools/decomp-permuter/repair/fresh/'
 out=sys.argv[2] if len(sys.argv)>2 else R+'/conker/build/dfx'
 shutil.rmtree(out,ignore_errors=True); os.makedirs(out)
 stem={}
@@ -23,7 +23,7 @@ print('fixed',n)
 rel=os.path.relpath(out,R+'/conker')
 shutil.copy(R+'/tools/eu_port/m2c/screen.py',R+'/conker/build/screen.py')
 env=dict(os.environ,PATH='/Applications/Docker.app/Contents/Resources/bin:'+os.environ['PATH'])
-subprocess.run(['docker','exec','-w','/conker/conker','conkerdev','python3','build/screen.py',rel,'8'],env=env,capture_output=True)
+subprocess.run(['docker','exec','-w','/conker/conker',os.environ.get('CONKERDEV','conkerdev'),'python3','build/screen.py',rel,'8'],env=env,capture_output=True)
 rows=[]
 for l in open(out+'/screen.txt'):
     t=l.split()

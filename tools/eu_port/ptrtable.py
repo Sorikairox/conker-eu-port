@@ -6,7 +6,7 @@ Prints `name, name, ...` (NULL for 0), names from symbol_addrs.eu.txt / undefine
 with a warning on stderr. Paste into e.g. `void (*D_x[])(s32) = { ... };` and declare the functions first.
 """
 import os, re, sys, struct
-ROOT = os.path.expanduser('~/conker/conker')
+ROOT = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 a, b = int(sys.argv[1], 0), int(sys.argv[2], 0)
 names = {}
 for f in ('symbol_addrs.eu.txt', 'undefined_syms.eu.txt', 'undefined_funcs_auto.txt'):

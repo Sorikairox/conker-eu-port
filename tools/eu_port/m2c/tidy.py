@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # cosmetic cleanup of m2c --valid-syntax field accesses in modified files
 import re,sys,subprocess,os
-os.chdir(os.path.expanduser('~/conker'))
+os.chdir(os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''))
 files=subprocess.run(['git','diff','--name-only','--','conker/src_eu'],capture_output=True,text=True).stdout.split()
 for p in files:
     s=open(p).read(); t=s

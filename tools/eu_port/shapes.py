@@ -4,7 +4,7 @@ usage: shapes.py [--list SHAPE [maxinsns]]   (default: counts per shape and size
 shapes: A argcopy (a1..a3 = a0 copy spilled to a0 home slot), B outvec (s32 x[3] frame: sp addresses 12 apart),
         C reload (lw aN from own home slot), D unfilled (store; jr ra; nop)"""
 import re, sys, glob, os
-R = os.path.expanduser('~/conker/conker')
+R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 live = set()
 for f in glob.glob(R + '/src_eu/*.c'):
     live.update(re.findall(r'GLOBAL_ASM\("[^"]*/(\w+)\.s"\)', open(f).read()))

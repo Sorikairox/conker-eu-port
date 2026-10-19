@@ -10,9 +10,9 @@ Checks the session-16 call patterns:
 Prototypes come from the draft itself, then include/functions.h and the other src_eu files. Compact output.
 """
 import sys, re, os, glob
-R = os.path.expanduser('~/conker/conker')
+R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 func = sys.argv[1]
-draft = sys.argv[2] if len(sys.argv) > 2 else os.path.expanduser('~/conker/tools/decomp-permuter/repair/%s.c' % func)
+draft = sys.argv[2] if len(sys.argv) > 2 else os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/tools/decomp-permuter/repair/%s.c' % func)
 
 def find_s(f):
     g = glob.glob(R + '/asm/nonmatchings/*/%s.s' % f)

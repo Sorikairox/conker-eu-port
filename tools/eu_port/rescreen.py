@@ -10,7 +10,7 @@ decides). Screens them with m2c/screen.py (8 jobs) and prints one line per calle
 best result; OK drafts are copied to conker/build/hand/<f>.c for m2c/apply.py.
 """
 import os, re, sys, glob, subprocess, shutil, collections
-HOME = os.path.expanduser('~/conker'); R = HOME + '/conker'
+HOME = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); R = HOME + '/conker'
 DOCKER = '/Applications/Docker.app/Contents/Resources/bin/docker'
 PERM = HOME + '/tools/decomp-permuter'
 
@@ -52,7 +52,7 @@ def main():
             if i < len(l): open('%s/v%d/%s.c' % (d, i, f), 'w').write(l[i][1])
     shutil.copy(HOME + '/tools/eu_port/m2c/screen.py', R + '/build/screen.py')
     for i in range(nv):
-        subprocess.run([DOCKER, 'exec', '-e', 'SCREEN_TMP=build/rescreen/tmp%d' % i, '-w', '/conker/conker', 'conkerdev',
+        subprocess.run([DOCKER, 'exec', '-e', 'SCREEN_TMP=build/rescreen/tmp%d' % i, '-w', '/conker/conker', os.environ.get('CONKERDEV','conkerdev'),
                         'python3', 'build/screen.py', 'build/rescreen/v%d' % i, '8'], capture_output=True)
     res = collections.defaultdict(list)
     for i in range(nv):

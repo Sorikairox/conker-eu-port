@@ -2,8 +2,8 @@
 # usage: tryall <func> draft1.c draft2.c ...  -> screen result per draft (one container run per draft set)
 # At most 8 screens run at once. Drafts go to conker/build/ta/<i>/<func>.c; prints "<result> <draft>".
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
-f=$1; shift; d=~/conker/conker/build/ta; rm -rf $d; i=0
+f=$1; shift; d=${CONKER_ROOT:-$HOME/conker}/conker/build/ta; rm -rf $d; i=0
 for x in "$@"; do mkdir -p $d/$i; cp "$x" $d/$i/$f.c; i=$((i+1)); done
-cp ~/conker/tools/eu_port/m2c/screen.py ~/conker/conker/build/screen.py
-docker exec -e SCREEN_OPT="$SCREEN_OPT" -e SCREEN_DATAREL="$SCREEN_DATAREL" -w /conker/conker conkerdev bash -c "ls build/ta | xargs -P 8 -I{} sh -c 'SCREEN_TMP=build/ta/{}/tmp python3 build/screen.py build/ta/{} 1 >/dev/null 2>&1'"
+cp ${CONKER_ROOT:-$HOME/conker}/tools/eu_port/m2c/screen.py ${CONKER_ROOT:-$HOME/conker}/conker/build/screen.py
+docker exec -e SCREEN_OPT="$SCREEN_OPT" -e SCREEN_DATAREL="$SCREEN_DATAREL" -w /conker/conker ${CONKERDEV:-conkerdev} bash -c "ls build/ta | xargs -P 8 -I{} sh -c 'SCREEN_TMP=build/ta/{}/tmp python3 build/screen.py build/ta/{} 1 >/dev/null 2>&1'"
 i=0; for x in "$@"; do echo "$(cut -d' ' -f1 $d/$i/screen.txt) $x"; i=$((i+1)); done
