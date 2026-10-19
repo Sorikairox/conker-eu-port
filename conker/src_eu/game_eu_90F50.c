@@ -29,7 +29,7 @@ void func_15063894(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063920.s")
 
-s32 func_15081A90(u8 *, s32, s32, s32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+s32 func_15081A90(struct127 *, s32, s32, s32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
 void func_150639D8(u8 *arg0, f32 arg1) {
     u8 *temp_v0;
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0x31C));

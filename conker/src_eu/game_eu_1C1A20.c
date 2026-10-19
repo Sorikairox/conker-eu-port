@@ -93,7 +93,7 @@ void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
 
 s32 func_15134070(s32);
 s32 func_15136C3C(s32, u8, u8, u8, u8, u8, u8, s32);
-s32 func_15138120(s32, s32, u8);
+s32 func_15138120(struct127 *, s32, u8);
 s32 func_15195024(s32);
 
 void func_1519508C(s32 arg0) {
@@ -126,7 +126,7 @@ void func_15195314(s32 arg0, s32 arg1, s32 arg2) {
     func_15195564(arg0, arg1, 1);
 }
 
-s32 func_1504715C(s32 *, s32);
+s32 func_1504715C(s32 *, struct127 *);
 s32 func_1514B8D4(s32, s32 *, u8, s32);
 
 void func_15195338(s32 arg0, s32 arg1, s32 arg2) {

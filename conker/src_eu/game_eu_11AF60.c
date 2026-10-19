@@ -71,7 +71,7 @@ void func_150EDBB8(u8 *arg0, s32 arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11AF60/func_150EF204.s")
 
 void func_15104B60(u8 *, s32, f32);
-s32 func_15052590(u8 *);
+s32 func_15052590(struct127 *);
 void func_150EF328(u8 *arg0) {
     if (arg0[5] != 3) {
         func_15104B60(arg0, 0xF, 250.0f);

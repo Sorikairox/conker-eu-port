@@ -6,7 +6,7 @@
 extern f32 D_800A0C80;
 extern f32 D_800A0C84;
 extern f32 D_800A0C88;
-void func_15059C84(u8 *);
+void func_15059C84(struct127 *);
 void func_150D18B0(u8 *arg0) {
     f32 temp_f0;
     f32 temp_f2;

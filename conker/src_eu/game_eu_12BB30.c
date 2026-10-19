@@ -5,7 +5,7 @@
 
 extern f32 D_800A2364;
 extern f32 D_800A2368;
-s32 func_150FDF38(s32, u8, s32, s32 *, s32 *);
+s32 func_150FDF38(struct127 *, u8, s32, s32 *, s32 *);
 s32 func_151C284C(s32 *, s32, s32 *, s32 *, s32, s32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32, s32);
 s32 func_150FDDA0(s32 arg0, u8 arg1, s32 arg2) {
     s32 pad; // fakematch: unused local moves the unnamed f32 spill temps down (frame layout)
