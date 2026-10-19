@@ -165,7 +165,19 @@ void func_15195418(s32 arg0, u8 *arg1, s32 arg2) {
     func_15195160(arg0, arg1, &sp37);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_151954B8.s")
+s32 func_1507CD64(struct127 *, s32);
+s32 func_151C0648(f32 *, struct127 *, s32, s32, s32);
+void func_151954B8(s32 arg0, struct127 *arg1, s32 arg2) {
+    f32 sp34[3];
+
+    sp34[0] = arg1->x_position;
+    sp34[1] = arg1->y_position + 50.0f;
+    sp34[2] = arg1->z_position;
+    func_151C0648(sp34, arg1, 1, 0xFF, 1);
+    func_15136C3C(arg1, 0, 0, 1, 0, 0, 0xFF, 1);
+    func_15145A50(arg1);
+    func_1507CD64(arg1, 6);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195564.s")
 

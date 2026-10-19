@@ -16,7 +16,35 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F3B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F470.s")
+extern u8 D_800DE1F0[];
+s32 func_1517F470(arg0)
+s32 arg0;
+{
+    s32 d;
+    s32 *new_var; // fakematch: base pointer temp
+    s32 r;
+    s32 b;
+
+    r = (((s32 *)&D_800DDDB0)[arg0] * 0xFF) / d; // fakematch: dead store (d unset), permuter artifact that fixes the register roles
+    b = D_800DE1F0[arg0];
+    if (b != 0) {
+        r = b;
+    } else {
+        d = (new_var = (s32 *)&D_800DDE28)[arg0];
+        if (d != 0) {
+            r = (((s32 *)&D_800DDDB0)[arg0] * 0xFF) / d;
+            if (r >= 0x100) {
+                r = 0xFF;
+            }
+        } else {
+            r = 0xFF;
+        }
+        if (((s8 *)&D_800DDDAC)[arg0] == 0) {
+            r = 0xFF - r;
+        }
+    }
+    return r;
+}
 
 s32 func_1517F51C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     if (func_1517F470(arg0, arg1, arg2, arg3) == 0xFF) {

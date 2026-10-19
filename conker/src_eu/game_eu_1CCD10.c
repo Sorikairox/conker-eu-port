@@ -89,7 +89,28 @@ void func_151A0E98(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_151A0EC0.s")
+void func_151A0EC0(u8 *arg0, u8 *arg1, u8 arg2) {
+    s32 temp_t6;
+    unsigned int new_var; // fakematch: field temp pins t7/v1 register choice
+    unsigned int new_var2; // fakematch: same for the second branch
+    u8 **temp_v1;
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+
+    temp_t6 = arg2;
+    temp_v1 = *(u8 ***)(arg0 + 0x98);
+    if (temp_t6 == 0xA) {
+        temp_v0 = *temp_v1;
+        if ((temp_v0 != NULL) && (((new_var = *(s32 *)(temp_v0 + 0x18)) == *(s32 *)(arg1 + 0)) || (*(u8 *)(temp_v0 + 0x1C) == *(u8 *)(arg1 + 4)))) {
+            func_1519F9FC(arg0);
+        }
+    } else if (temp_t6 == 0) {
+        temp_v0_2 = *temp_v1;
+        if ((temp_v0_2 != NULL) && ((new_var2 = *(s32 *)(temp_v0_2 + 0x18)) == *(s32 *)(arg1 + 0))) {
+            func_1519F9FC(arg0);
+        }
+    }
+}
 
 void func_151A0F5C(u8 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = *(u8 **)(*(u8 **)(arg0 + 0x28) + 0x18);

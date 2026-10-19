@@ -27,7 +27,27 @@ u8 *func_1515D9F0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515D4D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DA90.s")
+struct lnode_1515DA90 { struct lnode_1515DA90 *next; };
+struct lnode_1515DA90 *func_1515DA90(void) {
+    struct lnode_1515DA90 *p;
+    struct lnode_1515DA90 *cur;
+
+    p = allocate_memory(0x34, 1, 2, 2);
+    if (p != NULL) {
+        bzero(p, 0x34);
+        if (D_800DCD78 != 0) {
+            cur = (struct lnode_1515DA90 *)D_800DCD78;
+            while (cur->next != NULL) {
+                cur = cur->next;
+            }
+            cur->next = p;
+        } else {
+            D_800DCD78 = (s32)p;
+        }
+        p->next = NULL;
+    }
+    return p;
+}
 
 s32 func_1515D5F8();
 
