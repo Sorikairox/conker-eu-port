@@ -45,7 +45,14 @@ s32 func_151C8D5C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9B88.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9C8C.s")
+s32 func_151C9C8C(u8 *arg0, s32 arg1) {
+    s32 *q = &arg1; // fakematch: arg1 home store
+    u8 *p = *(u8 **)(arg0 + 0x170) + 0x110;
+    if (p[0x86] & 2) {
+        return 1;
+    }
+    return 0;
+}
 
 void func_151C9CBC(s32 arg0, s32 arg1) {
     s32 tmp[2];

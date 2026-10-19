@@ -9,7 +9,12 @@ void func_1519C7C8(u8 *arg0);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195D20.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195D9C.s")
+extern s32 D_800E0D10, D_800E0D14, D_800E0D18, D_800E0D1C, D_800E0D20;
+void func_15195D9C(void) {
+    D_800E0D10 = D_800E0D14 = 0;
+    D_800E0D18 = D_800E0D1C = 0;
+    D_800E0D20 = -2;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195DD8.s")
 
