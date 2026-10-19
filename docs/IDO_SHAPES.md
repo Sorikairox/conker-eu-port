@@ -483,3 +483,14 @@ See `docs/sessions/s51.md`.
 5. **`clones.py --near 16 --draft --lax` then `screenall build/cln`** gave 5 OK of 74 drafts in the slice (twin handlers, node lookup, key search). CERR on a clone draft is often only a missing forward `extern` (copy it from the template's neighbourhood).
    `apply.py` needs a hand-written `screen.txt` (`OK <func> src_eu/<file>.c`) when the drafts were copied out of the clone directory.
 6. **Dead local stores are deleted**: `sp18 = temp_v0;` keeps a pointer live only if something reads it before the call; do not expect an unused named copy to force a spill (`func_151B97C4`).
+## s53 recipes (clone-draft finishing)
+
+See `docs/sessions/s53.md`.
+1. **A DIFF1 clone draft may be a wrong field offset, not a scheduling problem** (`func_150EAA10`): the `**` line of the word diff showed `lw t9,0x84` vs `0x8C`; the clone copied the
+   template's `p + 0xC` where the target multiplies `p[0x84]` (`p + 4` after `p += 0x80`). Read the one differing word before reaching for `(0, local)`.
+2. **`s32 i = arg0 * 4;` as a named local keeps the `sw v0,0x18(sp)` spill across a call and the table index in v0** (`func_150DF1A8`: `D_800A10DB[i]` / `D_800A10FB[i]` with `u8 arg0`, `i` computed once);
+   the inline `arg0 * 4` twice gave DIFF2.
+3. **A global handler/pointer table declared with the callee's pointer type removes the `or a0,v0` copy** (`func_150C572C`: `extern struct102 *D_800D9CF0[]; if (D[i]) func(D[i]); D[i] = 0;` the `sw zero` lands in the `bne` delay slot).
+4. **A pure-zero-argument function (`s32 f(void)`) drops the `sw a0,0(sp)` home stores** that named-but-unused clone parameters produce (`func_1507F834`: SIZE+1 -> DIFF8, then DIFF6 with `u8 b = tbl[type][p[5]]; if (b == 0)`).
+5. **Many `--near 24..40` clone drafts are junk** (the "template" matches on skeleton only; constants, call counts and float/int types differ): `func_150FB708`, `func_150ADACC` (data decoded as mips3 code), `func_150A7EF4` (a fragment ending in `jr t9`), `func_150226E8`.
+   Judge them from the target asm first; a clone draft is worth a try only when its `NEAR n` comment lists at most ~5 differences.
