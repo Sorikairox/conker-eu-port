@@ -23,7 +23,42 @@ void func_15179420(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179D20.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_1517A028.s")
+int func_1517A028(void)
+{
+  s32 temp_v0;
+  s32 var_v1;
+  u8 **var_a0;
+  s32 temp_a1;
+  u8 *temp_v0_2;
+  int new_var;
+  new_var = D_800DD866 - 1;
+  temp_v0 = new_var;
+  if (temp_v0 >= 0)
+  {
+    var_v1 = temp_v0 * 4;
+    var_a0 = D_800DD870 + var_v1;
+    loop_2:
+    temp_v0_2 = *var_a0;
+
+    var_v1 -= 4;
+    if (temp_v0_2 != 0)
+    {
+      if (((*((s32 *) (((u8 *) temp_v0_2) + 0x90))) & 2) == 0)
+      {
+        *((s32 *) (((u8 *) temp_v0_2) + 0x90)) |= 2;
+        return;
+      }
+    }
+    var_a0 -= 1; // fakematch: dead pointer decrement
+    if (var_v1 < 0)
+    {
+    }
+    else
+    {
+      goto loop_2;
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_1517A084.s")
 
