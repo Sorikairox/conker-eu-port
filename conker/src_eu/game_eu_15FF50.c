@@ -133,4 +133,15 @@ void func_15134428(s32 arg0, u8 *arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_1513445C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15134548.s")
+s32 func_15134548(s32 arg0, u8 *arg1, s32 arg2) {
+    u8 *p = arg1 + 0x170;
+    u8 *q = p;
+    u8 *e;
+    s32 i;
+
+    for (i = 0; i < *q; i = (i + 1) & 0xFF) {
+        e = (u8 *)((s32)p + (i << 3));
+        arg0 = (s32)func_1513445C((u8 *)arg0, *(u16 *)(e + 4), *(u8 *)(e + 6), *(s32 *)(e + 8));
+    }
+    return arg0;
+}

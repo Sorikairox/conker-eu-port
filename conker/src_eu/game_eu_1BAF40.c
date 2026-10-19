@@ -228,7 +228,21 @@ void func_1518FA0C(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FA8C.s")
+s32 func_1518FB40(s32, u8 *, s16, s8, s8, s8, u8, s32, u8, s32);
+s32 func_15190334(s32, u8 *, u8);
+extern u8 *D_8008D9D0[];
+s32 func_1518FA8C(s32 arg0, u8 arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    s32 sfpad; // fakematch: unused local shifts sp33 to the ref slot
+    u8 sp33;
+
+    if (arg0 == 0) {
+        return 0;
+    }
+    if (func_15190334(arg0, &sp33, arg1) == 0) {
+        return 0;
+    }
+    return func_1518FB40(arg0, D_8008D9D0[sp33] + arg1 * 0x50, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FB40.s")
 

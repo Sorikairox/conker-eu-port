@@ -15,7 +15,18 @@ Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D66C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D8F4.s")
+extern u16 D_800920D0[];
+extern s32 D_1A3B40;
+s32 func_1510D8F4(s32 arg0) {
+    s32 sum;
+    s32 i;
+
+    sum = (s32)&D_1A3B40;
+    for (i = 0; i < arg0; i++) {
+        sum += D_800920D0[i];
+    }
+    return sum;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D984.s")
 

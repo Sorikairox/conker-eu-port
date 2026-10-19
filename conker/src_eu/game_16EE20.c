@@ -251,7 +251,27 @@ f32 func_151423D8(u8 arg0) {
     }
     return -D_8009A5E0[idx];
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142444.s")
+struct127 *func_15142444(u8 arg0, struct127 *arg1) {
+    struct127 *temp_v0;
+
+    if (arg0 == 0xFF) {
+        if (arg1->unk1D4 != NULL) {
+            return arg1;
+        }
+        return NULL;
+    }
+    if ((arg1 != NULL) && (arg1->interaction_state != 0) && (arg1->unique_id == arg0)) {
+        if (arg1->unk1D4 != NULL) {
+            return arg1;
+        }
+        return NULL;
+    }
+    temp_v0 = func_15083E90(arg0);
+    if ((temp_v0 != NULL) && (temp_v0->unk1D4 != NULL)) {
+        return temp_v0;
+    }
+    return NULL;
+}
 void func_151424F4(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 sy, f32 sz, f32 tx, f32 ty, f32 tz) {
     f32 mf[4][4];
 

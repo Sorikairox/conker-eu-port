@@ -336,7 +336,35 @@ u8 *func_1514F114(s32 arg0, s16 arg1, s32 arg2)
   return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F18C.s")
+s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2) {
+    u8 *ret;
+    u8 *node;
+    struct_eu_link *next;
+    s16 idx;
+
+    ret = NULL;
+    if (arg0 != NULL) {
+        node = (u8 *)func_1514F114(arg0, arg2, 0);
+        ret = node;
+        if (node != NULL) {
+            *(struct_eu_link **)(node + 0x14) = arg1->unk2F4;
+            arg1->unk2F4 = (struct_eu_link *)node;
+            next = *(struct_eu_link **)(node + 0x14);
+            *(s32 *)(node + 0x18) = 0;
+            if (next != NULL) {
+                *(u8 **)((u8 *)next + 0x18) = node;
+            }
+        } else {
+            idx = *(s16 *)(D_8008AF88[arg2] + 2);
+            if (idx != -1) {
+                D_8008AEF8[idx](arg0);
+            } else {
+                func_1516972C((struct102 *)arg0);
+            }
+        }
+    }
+    return (s32)ret;
+}
 
 s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2) {
     s32 found = 0;

@@ -36,7 +36,30 @@ void func_151A8FD0(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9028.s")
+void func_151A9028(struct102 *arg0, u8 *arg1, u8 arg2) {
+    s32 temp_a0;
+    s32 new_var; // fakematch: key temp pins the v1 register
+    s32 temp_t6 = arg2;
+    u8 *temp_v0 = *(u8 **)((u8 *)arg0 + 0x60);
+
+    if (arg2 == 0) {
+        new_var = *(s32 *)(arg1 + 0);
+        if ((new_var == *(s32 *)(temp_v0 + 0)) || (*(u8 *)(arg1 + 4) == *(u8 *)(temp_v0 + 4))) {
+            func_1516972C(arg0);
+        }
+    } else if (temp_t6 == 0x2D) {
+        temp_a0 = *(s32 *)(arg1 + 0);
+        if (temp_a0 == *(s32 *)(temp_v0 + 0)) {
+            *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 4);
+            *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 9);
+            return;
+        }
+        if (*(s32 *)(arg1 + 4) == *(s32 *)(temp_v0 + 0)) {
+            *(s32 *)(temp_v0 + 0) = temp_a0;
+            *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 8);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8B20.s")
 

@@ -365,7 +365,26 @@ void func_15169824(struct102 *arg0) {
     func_10004074(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169850.s")
+s32 func_15169850(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 temp_v1;
+
+    if (arg1 == 0) {
+        if ((*(s32 *)(arg0 + 0) == *(s32 *)arg2) || (*(u8 *)(arg0 + 4) == *(u8 *)arg3)) {
+            func_1516972C((struct102 *)arg4);
+        }
+    } else if (arg1 == 0x2D) {
+        temp_v1 = *(s32 *)(arg0 + 0);
+        if (temp_v1 == *(s32 *)arg2) {
+            *(s32 *)arg2 = *(s32 *)(arg0 + 4);
+            *(u8 *)arg3 = *(u8 *)(arg0 + 9);
+            return;
+        }
+        if (*(s32 *)(arg0 + 4) == *(s32 *)arg2) {
+            *(s32 *)arg2 = temp_v1;
+            *(u8 *)arg3 = *(u8 *)(arg0 + 8);
+        }
+    }
+}
 // NON-MATCHING: regalloc (v0/v1 swapped)
 // void func_15169850(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4) {
 //     s32 *a = (s32 *)arg0;

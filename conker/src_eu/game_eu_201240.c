@@ -5,7 +5,20 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D3A30.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4300.s")
+s32 func_151D4300(u8 *arg0) {
+    u8 *v;
+
+    v = arg0 + 0x170;
+    if (*(s16 *)(arg0 + 0x170) > 0) {
+        *(f32 *)(v + 4) = (*(f32 *)(v + 8) * D_800BE9A4) + *(f32 *)(v + 4);
+        *(f32 *)(v + 4) = func_15144B68(*(f32 *)(v + 4));
+        *(f32 *)(arg0 + 0x24) = *(f32 *)(arg0 + 0x54) + (*(f32 *)(v + 0xC) * sinf(*(f32 *)(v + 4)));
+        *(s16 *)(v + 0) = *(s16 *)(v + 0) - D_800BE9E4;
+    } else {
+        *(vertex *)(arg0 + 0x20) = *(vertex *)(arg0 + 0x50);
+    }
+    return 1;
+}
 
 void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
     u8 *temp_v0;

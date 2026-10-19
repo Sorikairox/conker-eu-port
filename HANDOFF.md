@@ -1,6 +1,7 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
 Last updated: 2026-10-20 (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 40, worktree eu-wt-a). Update this file at the end of every work session.
 
 Layout of the docs (read in this order):
 - `tools/eu_port/AGENT_BRIEF.md`: the rules of a work session (short).
@@ -29,7 +30,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3198 / 5913 functions in C (54.1%)**, code bytes 350,892 / 2,253,856 (15.6%) (after session 39, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2792/5330 (13.4%), debugger 32/43 (42.6%).
+- **3216 / 5913 functions in C (54.4%)**, code bytes 353,916 / 2,253,856 (15.7%) (after merging sessions 39 (main, game < 0x130000) and 40 (worktree a, game >= 0x130000 + init/debugger), from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2810/5330 (13.6%), debugger 32/43 (42.6%).
   Sessions 35 (main), 36-38 (worktree eu-wt-a, merged) and 39 (main, game files below 0x130000; a parallel worktree session works above it) done. Session 36 recipes: IDO_SHAPES section 12, session 39: section 13. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
@@ -108,6 +109,11 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
    `func_150E3B5C` (SIZE-1, loop tail `bnel`), `func_1509CBD4` (SIZE-1), `func_15083E0C` (DIFF19), `func_15088B08`/`func_15088760` (frame/arg-copy), `func_150952B0`, `func_1506C32C`, `func_1503DA64`, `func_150A00F0` (frame/stack, see IDO_SHAPES 13.11). `func_150489B0` matches but `apply.py` REJECTs it (16 bytes of nop padding after `game_75E60`): split the padding or add a filler, draft in `docs/sessions/s39_func_150489B0.c.txt`.
    Fresh `gensome.sh` drafts: 30 shortest unlogged pool functions of the slice were screened (list in `docs/sessions/s39.md`); the untouched ones with SIZE+n/DIFF<=22 are `func_15022304`, `func_1503FC54`, `func_1503F8A8`, `func_150CCB48`, `func_1507488C`, `func_150A69E0`, `func_150A3794`, `func_15010600`. `shortpool.py 70` still has ~190 unlogged functions in the slice.
    Fresh short drafts matched at about 0.5 per attempt this session (tables as typed arrays, u64 bit tables, `s32 arg` instead of `u8`).
+0. (Session 40 worktree `a`, game >= 0x130000 + init/debugger slice) Unsolved leftovers with notes in `repair_log.tsv`: the **0x2D/0 handler family** with the `or a3,a0` entry copy (`func_151937A4`, `func_151BEB08`, `func_151BCB54`, `func_151BAA18`, `func_151D2E5C` DIFF1; IDO_SHAPES 13.2),
+   the `D_800DD280[j][idx]` node searches (`func_151CEBE4` SIZE+1, `func_151A7188`), `func_151C1B20` (shape C, ref frame 0x28 vs 0x20), `func_151A2F10` (frame 0x20 vs 0x28), `func_1514DA28` (DIFF2 spill slot 0x1C vs 0x18), `func_15159828` (SIZE-3),
+   `func_10003BD0` (DIFF23 after the permuter). The next untried CERR/short candidates from `shortpool.py` in this slice (`conker/build_port/list3.txt` was screened: CERR `func_15114644`, `func_1511F8A4`, `func_15134908`, `func_151475B0`, `func_1517F3B0`, `func_15182388`, `func_1519E874`, `func_151ACB00`, `func_151BEC7C`, `func_151D324C`, `func_151E4A78`, `func_151E8620`; `func_151D75B0` DIFF16) are not logged.
+
+1. Continue the repair loop over `shortpool.py 70` (about 575 unlogged candidates; ~125 CERR left in `cerr.err`, minus the 28 logged in s34; the ranked results of session 33's `gensome.sh` run are in `tools/decomp-permuter/repair/pool33.res`, 540 drafts: 167 CERR, 167 DIFF, 115 SIZE-, 91 SIZE+; the CERR first-errors are in `repair/cerr.err`, 153 CERR left). CERR with `Dereferenced a non-pointer`/`X undefined` (m2c vector locals `spXX`) and `redeclaration` (forward prototype) were the cheapest class in session 33 (12 of 14 matches); the remaining ones are listed in cerr.err. Queue DIFF<=9 register-only leftovers for the permuter in the background (`permute.sh f draft.c 150 5`).
 2. Pool expansions: `shortpool.py 100`, `clones.py --refresh --draft --lax` and `--near 16` after each batch (new matched C = new siblings), shape lists `shapes.py --list A|B 150` (A 101-150: 18, B 33 untouched), Gfx writers 101-150 insns (`gfxfind.py --untried --hints`).
 3. Open families worth a fresh idea: shape D unfilled delay slot (176 fns), the `func_150F1B78` family, `func_150AEDF8` family (8), the 43-insn u8 handler family (7), `mul.s` operand-order DIFF1s (`func_150EAA10`, `func_151AAFFC`), `func_151C2600` (DIFF2 frame), `func_150C572C` (DIFF2). All documented in IDO_SHAPES.md.
 4. Float functions blocked by rodata are unblocked in owned files (`game_eu_142E40`, `1CCD10`, `12C5F0`, `18B1C0`, `13C400`...): `func_15095B70`, `func_151166FC`, `func_150FF1A8`, `func_1519F500` need real hand work.

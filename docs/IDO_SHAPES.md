@@ -329,3 +329,25 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 11. **Near misses (all in repair_log)**: `func_150952B0` (two `f32[4][4]` locals land at 0x20/0x60 = frame 0xA0, ref 0x18/0x58 = 0x98; any type/struct/pad gives the same, and `arg0` reload needs `s32 *q = &arg0`),
     `func_1506C32C` (`(&sp24)[a1]` with 4 scalar locals: frame 0x40 vs 0x38), `func_15088B08` (frame 0x30 vs 0x28 although sp18/sp24 sit at the ref offsets), `func_1503DA64` (unnamed spill at 0x20, ref 0x24),
     `func_150A00F0` (array of 12-byte structs, 2+2x4 unroll is right, ref uses a fresh `lui $at` per store), `func_1509B950` (DIFF2 permuter, pad reg v1 vs t0), `func_1509CBD4` (SIZE-1: ref copies `or s1,v0`).
+## 14. Session 40 recipes (game >= 0x130000, CERR-class and the 0x2D/0 handler family)
+
+1. **Redeclaration CERR because a caller precedes the definition** (`func_151A5290`, `func_151954B8`, `func_151A7188`): the file calls the function (or the callee) before the definition, so the
+   implicit `int` declaration clashes with the C definition. Put the real prototype in the draft head (callee case, `func_151954B8`: `s32 func_1507CD64(struct127 *, s32);`) or `fwdproto.sh` it at the
+   file head (caller case; pass the full path `conker/src_eu/X.c`, a bare stem fails silently). A header prototype that disagrees with the draft (`void *arg0` vs `u8 *`) is the same error: take the header signature
+   (`func_15169850`, `func_151BCB54`, `func_1514F18C`).
+2. **0x2D / 0 handler family** (`func_15169850`, `func_151A5290`, `func_151A9028`, `func_151937A4`, `func_151BEB08`, `func_151BAA18`, `func_151BCB54`, `func_151D2E5C`: key `arg2`, `0` = delete if `*(s32*)(arg1)` or `arg1[4]` matches,
+   `0x2D` = swap the key of the object field). Matching recipe: compare `arg2` (u8) directly, no `& 0xFF`; in the `0x2D` branch keep ONE key temp (`temp_a0 = *(s32 *)(arg1 + 0)`) and re-read
+   `*(s32 *)(temp_v0 + 0)` at the second compare instead of a second temp (the m2c `temp_v1` costs the register roles); a permuter key temp `new_var = *(s32 *)(arg1 + 0)` in the `0` branch (fakematch) and `s32 temp_t6 = arg2;`
+   for the `0x2D` test fix the `v1/t7` roles (`func_151A9028`). The variants where the ref also copies `a0` into `a3` at entry (`func_151937A4`, `func_151BEB08`, `func_151BCB54`: `or a3,a0`, `lw a0` used as a key temp) are OPEN
+   (best DIFF11 from the permuter; SIZE-1/+1 by hand).
+3. **Natural-source libultra copies**: `func_151DD950` is `osEepromLongRead`; with the real source and a `u8 address` callee parameter (`address++` after the call, `andi` shows up after the increment) it matched at once.
+   When a game-segment function is a libultra copy, write the SDK source, do not copy the m2c shape.
+4. **Frame pads**: when the diff is only a stack slot (`sw` at 0x1C vs 0x18 / `&sp33` at 0x37 vs 0x33) and `stackfix.py` reports a `pad@... s32 sfpad;` MATCH, take it as a labelled fakematch (`func_1518FA8C`, `func_15192800`).
+   `stackfix.py` takes ~2 min on a 45-insn function; run it with `run_in_background` or on small drafts.
+5. **`switch` for a 5/6/default chain whose last arm is duplicated dead code** (`addiu v0,3` after the join, `func_15192800`).
+6. **Vector copy / f32 operand order** (`func_151D4300`): a 3-word else-branch copy is `*(vertex *)(p + 0x20) = *(vertex *)(p + 0x50)`; `x += y * K` stays `x + (y * K)`; the sinf call `vC * sinf(x)` order fixed both `mul.s` and the frame; drop m2c `sp18 = ...` and `temp_f0` temps.
+7. **Table globals typed `s32` scalar in the header** (`D_800A5770`, `D_800DDDAC`, `D_800DDE28`): index through `((s32 *)&D_x)[i]`, never `(s32 *)D_x` (that loads the value as a pointer); `u8 D_x[]` headers need `(s32 *)D_x`.
+8. **Operand order of `==` is register-number driven for a loaded temp**: `(arg1->unique_id == arg0)` instead of `(arg0 == arg1->unique_id)` (`func_15142444`), `(t14 == t4)` (`func_151D2E5C`); `(s32)p + (i << 3)` instead of `p + (i << 3)` (`func_15134548`, with `i = (i + 1) & 0xFF` for the u8 loop counter).
+9. **Dropping a `var_a0 = arg0` m2c copy** (`func_15110B80`): assign the result to `arg0` itself; the copy cost a `move`.
+10. **List append**: `p` plain local (no `sp1C` slot), `while (cur->next != NULL) cur = cur->next; cur->next = p;` (`func_1515DA90`).
+11. **OPEN**: `D_800DD280[j][idx]` two-level node searches (`func_151CEBE4` SIZE+1, `func_151A7188` DIFF32): the ref strength-reduces a second pointer in the first and does `i = (i + 1) & 0xFF` late in the second; my `for` forms hoist the increment.
