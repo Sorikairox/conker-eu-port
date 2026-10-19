@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 51, worktree eu-wt-a, 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 42, worktree eu-wt-a; 40 = previous); session 45 (main, game < 0x130000). Update this file at the end of every work session.
@@ -31,6 +31,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 51 (worktree a, on top of s48/s49 + eu merge): 3313 / 5913 functions in C (56.0%)**, code bytes 373,092 / 2,253,856 (16.6%) (game 2907, init 374, debugger 32), `verify_all.sh` all OK. +13 in 2 commits (`621d075`, `95efb93`).
+  Doc `docs/sessions/s51.md`, recipes IDO_SHAPES `## s51 recipes`. Matched: the 6-function s16 lerp family (`(b - a) * q + a`, product first), `func_15172530`, `func_15183E20` (inline `(u8 *)D_x + arg0 * 0x14`, permuted stores),
+  and 5 `clones.py --near 16 --draft --lax` drafts (`func_15193850`, `func_151B255C`, `func_eu_151B01B8`, `func_15199954`, `func_151999BC`). **Clone drafts are the best yield per token**: also screened OK in the other slice: `func_150EB4D0`, DIFF1 `func_150EAA10`
+  (comma trick untried), DIFF2 `func_151EF850` (drafts in `docs/sessions/s51_drafts/`).
+  Open (drafts in `docs/sessions/s51_drafts/`): `func_1516FE5C`/`8C` DIFF4/5 (lb must land in v0), `func_15172D80` (frame 0x40 vs 0x38), `func_151B97C4` SIZE+1 (spill v0 across sinf, loads after the call), `func_1519ED88` (needs `D_800E0D50 = 0`, unfilled `b` slot), `func_151EFDD0` (a0/a1 temps).
 - **Session 48 (worktree a, on top of s46 + eu merge): 3282 / 5913 functions in C (55.5%)**, code bytes 366,268 / 2,253,856 (16.3%) (game 2876, init 374, debugger 32), from `verify_all.sh` (all OK). 5 matched (`func_15199200`, `func_1519C52C`, `func_151A23E4`, `func_151AAFFC` in `0c1660f`, `func_151321F4`). Doc `docs/sessions/s48.md`, recipes IDO_SHAPES `## s48 recipes`: **`(0, local)` flips a commutative operand pair** (addu/multu/mul.s) when one operand is a named local or call result.
   Open from s48 (drafts in `tools/decomp-permuter/drafts/s48_*.c`): `func_15172D80` DIFF2 (frame 0x48 vs 0x38), `func_15178C9C` DIFF5, `func_1516FE5C`/`func_1516FE8C` DIFF4/5 (lb in v0), `func_1517BD68` DIFF4, the `func_151859C4` lerp family (6 functions, f0 vs f14), `func_150EAA10` untried with the comma trick (slice below 0x130000).
 - **Session 49 (main, game < 0x130000): 3295 / 5913 functions in C (55.7%)**, code bytes 369,560 / 2,253,856 (16.4%) (game 2889, init 374, debugger 32), `verify_all.sh` all OK. +5 in 2 commits: `func_150EFE90`, `func_1509B810`, `func_150D6898`, `func_15019BB8`, `func_150F83A0`.

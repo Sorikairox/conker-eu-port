@@ -1,0 +1,39 @@
+#define USEC_TO_CYCLES(n) (((u64)(n) * osClockRate) / 1000000LL)
+extern u8 _osContNumControllers;
+extern s32 __osContinitialized;
+extern u8 _osLastSentSiCmd;
+extern OSMesgQueue __osEepromTimerQ;
+extern OSMesg __osEepromTimerMsg;
+void __osSiCreateAccessQueue(void);
+s32 func_10025B60(s32, void *); // __osSiRawStartDma
+void __osContGetInitData(u8 *pattern, OSContStatus *data);
+void __osPackRequestData(u8 cmd);
+s32 func_151EF850(OSMesgQueue *mq, u8 *bitpattern, OSContStatus *data) {
+    OSMesg dummy;
+    s32 ret = 0;
+    OSTime t;
+    OSTimer mytimer;
+    OSMesgQueue timerMesgQueue;
+
+    if (__osContinitialized) {
+        return 0;
+    }
+    __osContinitialized = 1;
+    t = osGetTime();
+    if (t < USEC_TO_CYCLES(500000)) {
+        osCreateMesgQueue(&timerMesgQueue, &dummy, 1);
+        osSetTimer(&mytimer, USEC_TO_CYCLES(500000) - t, 0, &timerMesgQueue, &dummy);
+        osRecvMesg(&timerMesgQueue, &dummy, OS_MESG_BLOCK);
+    }
+    _osContNumControllers = MAXCONTROLLERS;
+    __osPackRequestData(CONT_CMD_REQUEST_STATUS);
+    ret = func_10025B60(OS_WRITE, &__osContPifRam);
+    osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
+    ret = func_10025B60(OS_READ, &__osContPifRam);
+    osRecvMesg(mq, &dummy, OS_MESG_BLOCK);
+    __osContGetInitData(bitpattern, data);
+    _osLastSentSiCmd = CONT_CMD_REQUEST_STATUS;
+    __osSiCreateAccessQueue();
+    osCreateMesgQueue(&__osEepromTimerQ, &__osEepromTimerMsg, 1);
+    return ret;
+}

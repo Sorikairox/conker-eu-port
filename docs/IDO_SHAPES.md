@@ -447,3 +447,17 @@ See `docs/sessions/s48.md`. Extends section 17 (s46 operand-order rule).
    no `pad`; only the spill slot 0x30 vs 0x34 and t-register numbering remain); `func_15080748` (subu result lands in `t0` not `v0` whatever the temp form), `func_15013000` (load of `D_800D3094` hoisted above the two stores: no source order change moves it),
    `func_1504BA38` (the permuter's `s8 new_var2 = 0x184` is a truncation bug; clean forms give p/c/b in v0/v1/a1 instead of v1/a1/v0, DIFF27), `func_150C572C` (addiu s0/s1 order, 9 forms), `func_1509B950` (pos in t9 not v1, 6 forms),
    `func_150F8DFC` (ref puts `v = arg0+0x28` in a0 and copies arg0 to a3; every form copies arg1 instead).
+
+## s51 recipes (lerp operand order, inline pointer sums, clones.py --near)
+
+See `docs/sessions/s51.md`.
+1. **`base + prod` versus `prod + base` for an `add.s` of a float lerp** (the s16 clip helper family, 6 functions): the ref is `add.s fD, base, prod` with the quotient staying in `f0`; write `(b - a) * q + a` (product LEFT, base RIGHT).
+   `a + (b - a) * q` made IDO swap the operand registers and move the quotient to `f14`. Same idea for the integer part: `(f32)(b - a) * q + (f32)a`. A denominator `(a0 - b0) + (a8 - b8)` vs `(a8 - b8) + (a0 - b0)` changes only the
+   load order of `b` (try both). Reloading `*(f32 *)(arg2 + 0)` for the mirrored store is simply `*(f32 *)(arg2 + 8) = *(f32 *)(arg2 + 0)` / `-...`.
+2. **`s32 D[]` global used with a byte stride**: `arg0 * 0x14 + D` scales by 4 (the 0x50 shift); write `(u8 *)D + arg0 * 0x14` and **repeat it at each use** instead of a local pointer (the local adds a stack home and 8 frame bytes). A `*(&D_x + arg0)` store
+   of a byte flag needs `extern u8 D_x` (an `s32` extern scales the index).
+3. **Permute independent trailing stores**: after the frame and registers match, four independent `sw` statements in a spawner/initialiser gave DIFF9 -> OK in 2 of 24 orders (`tryall` on the permutations, three batches of 8).
+4. **`u8` compare against a `/ 256` quotient**: `s32 temp = *(u8 *)p; if (x / 256 >= temp)` avoids the `or v1,v0,zero` copy that a `u8 temp` plus `(s32)` cast creates (`func_15172530`).
+5. **`clones.py --near 16 --draft --lax` then `screenall build/cln`** gave 5 OK of 74 drafts in the slice (twin handlers, node lookup, key search). CERR on a clone draft is often only a missing forward `extern` (copy it from the template's neighbourhood).
+   `apply.py` needs a hand-written `screen.txt` (`OK <func> src_eu/<file>.c`) when the drafts were copied out of the clone directory.
+6. **Dead local stores are deleted**: `sp18 = temp_v0;` keeps a pointer live only if something reads it before the call; do not expect an unused named copy to force a spill (`func_151B97C4`).
