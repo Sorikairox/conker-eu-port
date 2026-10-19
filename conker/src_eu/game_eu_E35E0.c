@@ -14,7 +14,32 @@ u8 *func_150B5DD0(u8 *arg0, s32 arg1) {
     return arg0 + 4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B5E30.s")
+extern f32 D_800A0068;
+extern f32 D_800A006C;
+void func_150B5F1C(f32 *, u8, u8);
+void func_150B60E0(u8 *, u8 *);
+void func_150B5E30(u8 *arg0) {
+    s32 pad; // fakematch: frame/spill slot padding
+    f32 sp28[3];
+    u8 *a3;
+    a3 = *(u8 **)(arg0 + 0x28);
+    if (*(s32 *)a3 == 0 || arg0[0x2C] != a3[0x3B]) {
+        *(s16 *)(arg0 + 0xE) = -1;
+        return;
+    }
+    if (*(s32 *)(a3 + 0x1D4) != 0) {
+        if (func_150ADA68() < D_800A0068) {
+            sp28[0] = *(f32 *)(a3 + 0x14);
+            sp28[1] = *(f32 *)(a3 + 0x18);
+            sp28[2] = *(f32 *)(a3 + 0x1C);
+            func_150B5F1C(sp28, arg0[0xC], arg0[1]);
+        }
+        if (func_150ADA68() < D_800A006C) {
+            func_150B60E0(a3, (u8 *)sp28);
+            func_150B5F1C(sp28, arg0[0xC], arg0[1]);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B5F1C.s")
 

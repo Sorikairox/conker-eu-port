@@ -695,3 +695,31 @@ func_151BEB08	draft	5	DIFF11	n	y	same as 151937A4 family; permuter best DIFF11
 func_151D2E5C	draft	3	DIFF1	n	y	0/0x2D family; cmp operand order in 2nd compare (bnel t9,v1 vs v1,t9) not reachable by source order; permuter 300s no gain
 func_151BAA18	draft	4	SIZE-1	n	y	family; ref compares a copy t0 of arg2 for 0x2D; permuter best.c CERR
 func_10003BD0	draft	1	DIFF28	n	y	volatile p reload fakematch; permuter best 480 -> DIFF23, lui/addiu order of globals differs
+func_150489B0	s41	1	OK	y	n	y
+K&R def + K&R fwd decl: the ref caller func_15048A40 saw no prototype; 'padding' was the caller's extra andi/move						
+func_1503A8FC	s41	1	OK	y	n	y
+single u8 *p = (u8*)D_800CC2D0[i].unk1D4 + 0x40 (no struct127 *base local) swaps the v0/v1 roles						
+func_150E3B5C	s41	1	SIZE-1	n	n	5 more tail forms (i!=2, do-while, -=1, --D, countdown): bne+sb delay unchanged
+func_15022304	s41	8	DIFF26	n	n	dedupe-append byte list; for-loop unrolls (SIZE+28), goto loop gives bne i,n (ref keeps slt i,a3 with a3=copy of count a2); arg0 s32 needed
+func_1503F8A8	s41	1	OK	y	n	y
+callee 12 args: float arg3 only goes via a3->f12 stack store; a0=0 a1=0 a2=arg0 a3=0 stack ints; m2c had put the f32 first						
+func_1503FC54	s41	6	OK	y	y	i!=start circular scan, permuter 240s solved (new_var temp for start+1)
+func_150CCB48	s41	5	OK	y	y	reload s16 via arg0 not temp, p=arg0+0x128 at top, no temp_v0 var DIFF5; permuter solved
+func_1507488C	s41	9	SIZE-1	n	n	byte fields as u8 b2,b1 locals (andi on operands ok); ref has 'or a1,v1' + 'andi t8,a1,1' + 'or a1,t8' flag copies, mine folds to andi a1,v1,1 (u7.c); flag var typed u8/s32 variants DIFF12-17
+func_1503D658	s41	6	SIZE+2	n	n	list walk (8-byte records, end -0x21); ref keeps index s0 + base s2 (no strength reduction), mine reduces to p+=8 in s0; per-branch i+=1, narrow i types, (s32)arg0+(i<<3) all fail
+func_150EDBB8	s41	6	OK	y	n	y
+fwd proto 8 args, arg0 pass-through, ternary clamp s=(x<-45)?-45:(x>45?45:x), -x*7 (negu;sll;subu) instead of x*-7						
+func_150B5E30	s41	5	OK	y	n	y
+callee protos (f32*,u8,u8)/(u8*,u8*) from existing code, f32 sp28[3], s32 pad first for frame 0x38						
+func_150C7C70	s41	1	OK	y	n	y
+K&R decl s32 func_1509BE40(); (4 vs 6 arg calls)						
+func_150A3794	s41	8	DIFF6	n	y	struct127 sp24 local + s32 pad[2] first fixes frame (0x350); remaining store order (ref z,oldz,y,0x180,oldy,x,oldx) DIFF6; permuter 240s best DIFF8 (w2.c in build_port/s41)
+func_150802A8	s41	3	SIZE-1	n	n	callee func_1508039C(u8*) 1-arg ok; ref copies arg0 to a2 ('or a2,a0' + sw a2,0x18), mine keeps a0; local copy of arg0 no change
+func_1509D49C	s41	3	DIFF25	n	n	writes OK structurally (D_800D33D0 (u8*) cast, u8* D_800D2E4C table); ref roles D->v0 entry->v1 p->a0, mine D->v1 entry->v0 p->v1; permuter not run
+func_1509B950	s41	9	DIFF2	n	n	9 more forms (pos/pad/sz variants) SIZE-1..DIFF16; permuter best.c DIFF2 pad in t9 vs v1 stays
+func_1519F9FC	fresh	3	DIFF19	n	n	pointer a1=v1+0x58 hoist variants no help
+func_1515BF04	fresh	1	DIFF20	n	n	f32 order, not worked
+func_15010600	s41	6	OK	y	y	zero fill of 2x14 bytes: u8 arrays, i<12 loop; permuter put D_800D9D59=0 inside the loop (fakematch)
+func_1509C120	s41	4	OK	y	n	y
+sp38[4] pointer array, condition on sp34 local copy (not D_800D2E4C), stackfix.py order n,i,sp38,sp34						
+func_15003570	s41	5	DIFF23	n	n	byte-assemble expression forms do not change the lbu order (ref p0,p3,p1,p2; mine p2,p3,p0,p1)
