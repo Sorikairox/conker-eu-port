@@ -74,7 +74,13 @@ void *func_15039D44(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A37C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A8FC.s")
+void func_1503A8FC(void) {
+    u8 *p;
+    p = (u8 *)D_800CC2D0[D_800C3E78].unk1D4 + 0x40;
+    *(f32 *)(p + 0x30) = *(f32 *)((u8 *)&D_800CC2D0[D_800C3E78] + 0x174);
+    *(f32 *)(p + 0x34) = D_800CC2D0[D_800C3E78].y_position;
+    *(f32 *)(p + 0x38) = *(f32 *)((u8 *)&D_800CC2D0[D_800C3E78] + 0x178);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A968.s")
 

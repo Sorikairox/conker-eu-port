@@ -124,7 +124,29 @@ void func_1509B8FC(s16 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BFB0.s")
 
 // need a bigger brain
-#pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509C120.s")
+void func_1509C120(void) {
+    s32 n;
+    s32 i;
+    struct102 *sp38[4];
+    struct102 *sp34;
+    n = func_150ADA20() & 3;
+    sp34 = D_800D2E4C;
+    if (sp34 == NULL || (func_150ADA20() & 4)) {
+        for (i = 0; i <= n; i++) {
+            sp38[i] = (struct102 *)allocate_memory(0x1B, 0xFF, 2, 0);
+        }
+        for (i = 0; i <= n; i++) {
+            if (i != n) {
+                func_10004074(sp38[i]);
+            }
+        }
+        D_800D2E4C = sp38[n];
+        if (sp34 != NULL) {
+            bcopy(sp34, D_800D2E4C, 0x1B);
+            func_10004074(sp34);
+        }
+    }
+}
 
 void func_1509C228(void) {
     if ((D_800D2E68 & 8) || (D_800D2E4C->unkF & 1)) {

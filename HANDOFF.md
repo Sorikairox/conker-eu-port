@@ -2,6 +2,8 @@
 
 Last updated: 2026-10-20 (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 42, worktree eu-wt-a; 40 = previous). Update this file at the end of every work session.
 
 Layout of the docs (read in this order):
 - `tools/eu_port/AGENT_BRIEF.md`: the rules of a work session (short).
@@ -31,6 +33,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
 - **3234 / 5913 functions in C (54.7%)**, code bytes 357,448 / 2,253,856 (15.9%) (session 44, worktree a, on top of 3227; game 2828, init 374, debugger 32). Session 44 doc `docs/sessions/s44.md` (recipes: HOIST/DROP protos, `new_var` loop tail, `goto dummy_label`, `pad[16]` frame; new `myasm.sh`) (after merging sessions 39 (main, game < 0x130000) and 40 (worktree a, game >= 0x130000 + init/debugger), from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2810/5330 (13.6%), debugger 32/43 (42.6%).
+- **3239 / 5913 functions in C (54.8%)**, code bytes 358,236 / 2,253,856 (15.9%) (merged state, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2833/5330 (13.8% of bytes), debugger 32/43 (42.6% of bytes).
   Sessions 35 (main), 36-38 (worktree eu-wt-a, merged) and 39 (main, game files below 0x130000; a parallel worktree session works above it) done. Session 36 recipes: IDO_SHAPES section 12, session 39: section 13. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
@@ -105,6 +108,13 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+1. Slice below 0x130000 after session 41 (details `docs/sessions/s41.md`, recipes IDO_SHAPES section 15): 11 matched. Open near misses (all in `repair_log.tsv`; best permuter sources in `tools/decomp-permuter/drafts/best_func_*.c`):
+   `func_1503D658` DIFF7, `func_150225D0` DIFF12, `func_150A3794` DIFF6 (store order), `func_1509B950` DIFF2, `func_1509D49C` DIFF15, `func_150337A8` DIFF16, `func_15003570` DIFF21, `func_150E3B5C`/`func_1509CBD4`/`func_1507488C`/`func_15022304` (SIZE-1/structural),
+   `func_15007440` (goto loops, frame OK, DIFF52), `func_1503D950`, `func_1503FCE0`, `func_15088130`, `func_150802A8`. Untried CERR in the slice: `func_1507BB28`, `func_1505F188`, `func_150F2B20`, `func_15062D10`, `func_1502F6B8`.
+   Old s39 list still open: `func_1503F23C`, `func_15084814`, `func_150B7B9C`, `func_15083E0C`, `func_15088B08`, `func_15088760`, `func_150952B0`, `func_1506C32C`, `func_1503DA64`, `func_150A00F0`.
+   Tips from s41: an apply.py "padding" REJECT can be a neighbour's codegen (K&R forward decl); struct-array indexing stops strength reduction, goto loops stop unrolling; `rlog.sh` takes exactly 7 fields.
+   `shortpool.py 70` still has ~190 unlogged functions in the slice.
+0. (Session 40 worktree `a`, game >= 0x130000 + init/debugger slice) Unsolved leftovers with notes in `repair_log.tsv`: the **0x2D/0 handler family** with the `or a3,a0` entry copy (`func_151937A4`, `func_151BEB08`, `func_151BCB54`, `func_151BAA18`, `func_151D2E5C` DIFF1; IDO_SHAPES 13.2),
 1. Slice below 0x130000 after session 39: of the 44 CERR drafts there only the near misses are left (all in `repair_log.tsv`, sorted by closeness): `func_1509B950` (DIFF2, permuter best in `tools/decomp-permuter/nm/func_1509B950/best.c`), `func_1503A8FC` (DIFF5, v0/v1 roles), `func_1503F23C`, `func_15084814`, `func_150B7B9C` (DIFF16/22 register-only, permuter runs unsolved or still unchecked),
    `func_150E3B5C` (SIZE-1, loop tail `bnel`), `func_1509CBD4` (SIZE-1), `func_15083E0C` (DIFF19), `func_15088B08`/`func_15088760` (frame/arg-copy), `func_150952B0`, `func_1506C32C`, `func_1503DA64`, `func_150A00F0` (frame/stack, see IDO_SHAPES 13.11). `func_150489B0` matches but `apply.py` REJECTs it (16 bytes of nop padding after `game_75E60`): split the padding or add a filler, draft in `docs/sessions/s39_func_150489B0.c.txt`.
    Fresh `gensome.sh` drafts: 30 shortest unlogged pool functions of the slice were screened (list in `docs/sessions/s39.md`); the untouched ones with SIZE+n/DIFF<=22 are `func_15022304`, `func_1503FC54`, `func_1503F8A8`, `func_150CCB48`, `func_1507488C`, `func_150A69E0`, `func_150A3794`, `func_15010600`. `shortpool.py 70` still has ~190 unlogged functions in the slice.

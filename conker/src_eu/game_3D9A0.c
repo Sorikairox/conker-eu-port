@@ -25,7 +25,30 @@ dummy_label_927029:
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3D9A0/func_15010600.s")
+extern u8 D_800D9D40;
+extern u8 D_800D9D41;
+extern u8 D_800D9D48;
+extern u8 D_800D9D49;
+extern u8 D_800D9D4A[];
+extern u8 D_800D9D58;
+extern u8 D_800D9D59;
+extern u8 D_800D9D5A[];
+void func_15010600(void)
+{
+  s32 i;
+  D_800D9D41 = 0;
+  D_800D9D40 = 0;
+  D_800D9D48 = 0;
+  D_800D9D58 = 0;
+  D_800D9D49 = 0;
+  for (i = 0; i < 12; i++)
+  {
+    D_800D9D59 = 0; // fakematch: store inside the loop schedules after the pointer setup
+    D_800D9D4A[i] = 0;
+    D_800D9D5A[i] = 0;
+  }
+
+}
 // NON-MATCHING: addresses are wrong :(
 // void func_15010600(void) {
 //     s32 i;

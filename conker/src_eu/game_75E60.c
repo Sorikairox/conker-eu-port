@@ -4,27 +4,32 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_75E60/func_150489B0.s")
-// NON-MATCHING: not convinced this is correct
-// f32 func_150489B0(u8 arg0) {
-//     f32 ret;
-//
-//     if (arg0 >= 65) {
-//         if (arg0 >= 129) {
-//             if (arg0 >= 193) {
-//                 ret = D_8009A620[-arg0];
-//             } else {
-//                 ret = -D_8009A020[arg0];
-//             }
-//         } else {
-//             ret = -D_8009A420[-arg0];
-//         }
-//     } else {
-//         ret = D_8009A220[arg0];
-//     }
-//
-//     return ret;
-// }
+f32 func_150489B0(); // fakematch: K&R decl so func_15048A40 re-masks the u8 arg (ref calls an undeclared function)
+extern f32 D_8009A3E0[];
+extern f32 D_8009A5E0[];
+extern u8 D_8009A7E0[];
+extern u8 D_8009A9E0[];
+f32 func_150489B0(arg0)
+u8 arg0;
+{
+    f32 r;
+    s32 i;
+    i = arg0;
+    if (arg0 > 0x40) {
+        if (arg0 > 0x80) {
+            if (arg0 > 0xC0) {
+                r = *(f32 *)(D_8009A9E0 + -(arg0 * 4));
+            } else {
+                r = -D_8009A3E0[i];
+            }
+        } else {
+            r = -*(f32 *)(D_8009A7E0 + -(arg0 * 4));
+        }
+    } else {
+        r = D_8009A5E0[arg0];
+    }
+    return r;
+}
 
 void func_15048A40(u8 arg0) {
     func_150489B0((arg0 - 0x40) & 0xFF);

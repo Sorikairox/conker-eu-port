@@ -351,3 +351,24 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 9. **Dropping a `var_a0 = arg0` m2c copy** (`func_15110B80`): assign the result to `arg0` itself; the copy cost a `move`.
 10. **List append**: `p` plain local (no `sp1C` slot), `while (cur->next != NULL) cur = cur->next; cur->next = p;` (`func_1515DA90`).
 11. **OPEN**: `D_800DD280[j][idx]` two-level node searches (`func_151CEBE4` SIZE+1, `func_151A7188` DIFF32): the ref strength-reduces a second pointer in the first and does `i = (i + 1) & 0xFF` late in the second; my `for` forms hoist the increment.
+
+## 15. Session 41 recipes (game < 0x130000: near misses, CERR-class)
+
+1. **"Padding after the file" can be a codegen difference in a *caller*** (`func_150489B0`, apply.py REJECT 0x150 vs 0x160). The sibling `func_15048A40` in the same file calls the function through
+   no prototype in the ref (extra `andi`/`move` on the argument = 0x10 bytes). Defining the callee as `f32 func_150489B0(arg0) u8 arg0; {...}` (K&R) plus a K&R forward `f32 func_150489B0();`
+   before it reproduces the ref (`// fakematch`). First diff the *neighbouring* functions of a padded file before splitting it.
+2. **No base local, one pointer local** (`func_1503A8FC`): `u8 *p = (u8 *)D_800CC2D0[i].unk1D4 + 0x40;` with the other accesses written as `D_800CC2D0[i].field` swaps the v0/v1 roles
+   that `struct127 *b = &D_800CC2D0[i]` gave. Same family as `func_1509D49C` (not solved there).
+3. **Struct-array indexing keeps an index variable**: `Gfx *p; ... *(s8 *)&p[i]` / `rec_t *p; p = &arg0[i]` stops IDO from strength-reducing `i * 8` into a pointer bump (ref `sll t,i,3; addu t,t,base`
+   every iteration; `func_150337A8`, `func_1503D658`). `u8 *` + `i * 8` always gets reduced. Use `s32 v = p->t` (not `s8`) to avoid the extra `sll/sra` re-truncation.
+4. **`do {} while` / `for` over a constant trip count unrolls (x4, x16)**; the ref did not unroll: write the loop with `label: ...; if (c) goto label;` (`func_15007440` SIZE+85 -> +5; also
+   `func_15022304`: for-loop SIZE+28).
+5. **Callee with floats only on the stack**: `mtc1 a3,f12 ... swc1 f12,0x1C(sp)` is just `f32 arg3` being copied to an outgoing stack slot, not an FP argument. Count `sw`s to 0x10..: callee
+   `(s32,s32,u8 *,s32,s32,s32,s32,f32,f32,f32,f32,s32)` (`func_1503F8A8`).
+6. **K&R callee when one function is called with 4 and 6 args** (`s32 func_1509BE40();`, `func_150C7C70`).
+7. **`-x * 7` not `x * -7`** (`negu; sll 3; subu`) and ternary clamp `(x < -45) ? -45 : ((x > 45) ? 45 : x)` (`func_150EDBB8`).
+8. **Frame pads**: `s32 pad;` first (`func_150B5E30`, `f32 sp28[3]` after it), `struct127 sp24; s32 pad[2];` for a 0x350 frame (`func_150A3794`; stores still DIFF6). `stackfix.py` finds the order
+   (`func_1509C120`: `n, i, sp38[4], sp34`) once the non-stack part is OK; copying a global into a local (`sp34 = D_800D2E4C; if (sp34 == NULL ||`) was what made it OK.
+9. **A cached loop bound that the ref reloads only after calls** (`func_150225D0`, `func_15088130`): `n = *cnt;` once, `n = *cnt;` again after the record test/call, loop `while (i < n)`.
+10. **OPEN**: `func_1509B950` (DIFF2, pad in t9 vs v1), `func_150E3B5C` (loop tail `bnel`), `func_1507488C` (flag copies `or a1,v1` / `or a1,t8`), `func_15003570` (lbu order 0,3,1,2),
+    `func_1503D658` (ref reloads `lb v1`, no CSE with the first check).
