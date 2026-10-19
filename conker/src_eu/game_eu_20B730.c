@@ -324,7 +324,31 @@ void func_151E73A8(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E73C8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E856C.s")
+extern f32 D_800ABE94;
+u8 *func_151149AC(u8);
+extern u8 D_80090360[][6];
+
+void func_151E856C(void)
+{
+  s32 var_s0;
+  u8 var_a0;
+  u8 *temp_v0;
+ var_s0 = 0; if ((!((*((f32 *) (((u8 *) D_80090174) + 8))) < D_800ABE94)) || ((*((s8 *) (((u8 *) D_80090174) + 0x3E))) != 0)) { do { if ((*((s8 *) (((u8 *) D_80090174) + 0x3E))) == 0) { var_a0 = D_80090360[var_s0][*((s8 *) (((u8 *) D_80090174) + 0x2C))];
+      }
+      else
+      {
+        var_a0 = D_80090360[var_s0][0];
+      }
+      temp_v0 = func_151149AC(var_a0);
+      var_s0 += 1;
+      if (temp_v0 != 0)
+      {
+        *((s32 *) (((u8 *) temp_v0) + 0x80)) = 2;
+      }
+    }
+    while (var_s0 != 2);
+  }
+}
 
 extern s8 D_800E1019;
 

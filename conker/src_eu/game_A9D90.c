@@ -135,4 +135,29 @@ s32 func_1507E114(s32 arg0) {
     func_150851E0(0, D_800BE800, 1, sp54, sp48, &sp43, &sp42, &sp44, &sp3C, 1, &sp5C);
     return sp5C + 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507E1D0.s")
+void func_1507E1D0(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
+    u8 *var_a2;
+    f32 sp28[3];
+    f32 sp1C[3];
+    if ((*(u8 **)((u8 *)arg0 + 0x1D4)) != NULL) {
+        s32 temp_v0;
+        sp28[0] = 0.0f;
+        sp28[1] = (*(f32 *)((u8 *)arg0 + 0x150)) * 30.0f;
+        sp28[2] = 0.0f;
+        temp_v0 = (*(s32 *)((u8 *)arg0 + 0));
+        var_a2 = (*(u8 **)((u8 *)arg0 + 0x1D4));
+        if (temp_v0 == 1) {
+            var_a2 += 0x300;
+        } else if (temp_v0 == 0x1E) {
+            var_a2 += 0xC0;
+        }
+        func_15143134(sp28, sp1C, var_a2);
+        *arg1 = sp1C[0];
+        *arg2 = sp1C[1];
+        *arg3 = sp1C[2];
+    } else {
+    *arg1 = (*(f32 *)((u8 *)arg0 + 0x14));
+    *arg2 = (*(f32 *)((u8 *)arg0 + 0x18));
+    *arg3 = (*(f32 *)((u8 *)arg0 + 0x1C));
+    }
+}

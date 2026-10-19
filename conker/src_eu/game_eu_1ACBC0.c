@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+s32 func_1517F470();
+
 typedef struct {
     /* 0x00 */ u8 pad0[0xE];
     /* 0x0E */ s16 unkE;
@@ -23,7 +25,25 @@ s32 func_1517F51C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F54C.s")
+s32 func_1517F54C(void) {
+    s32 var_s0;
+    s32 var_s1;
+
+    var_s1 = -1;
+    var_s0 = 0;
+    if (D_80082FA0 >= 0) {
+        do {
+            if ((func_1517F470(var_s0) > 0) || ((&D_800DDDC8)[var_s0] > 0.0f)) {
+                var_s1 += 1;
+            }
+            var_s0 += 1;
+        } while (D_80082FA0 >= var_s0);
+    }
+    if (var_s1 == D_80082FA0) {
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F5FC.s")
 

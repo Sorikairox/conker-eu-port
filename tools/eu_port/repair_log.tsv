@@ -579,3 +579,27 @@ func_15040CC8	CERR	3	SIZE+1	n	n	D_80084840 fn-ptr table loop fixes CERR; ref kee
 func_15174F68	CERR	1	OK	y	n	D_8008D0A4 as fn-ptr table (was extern s32 called as function), D_800B0E00[0/1] args
 func_1514D880	CERR	3	OK	y	y	D_8008AF88/AEF8 pointer tables; permuter 150s: inline the s16 index load twice and -1 != x (fakematch)
 func_1507C608	CERR	3	DIFF4	n	y	struct127 loop with 4 hoisted lui; permuter 120+200s best DIFF4 (end pointer s32 *new_var local); order of the hoisted lui/addiu s4/s5/s2 and bnel operand swap remain
+func_15158AFC	CERR	3	DIFF45	n	n	sp24 f32[16] in struct + s32 pad above fixes stack; remaining: ref computes addiu v0 early, guMtxF2L args late (sched)
+func_1518AE84	CERR	1	DIFF45	n	n	twin of func_15158AFC (0x100 base)
+func_1507E1D0	CERR	4	OK	y	y	sp28/sp1C f32[3] arrays + stackfix order (var_a2, sp28, sp1C; temp_v0 inside the if) + explicit else + store sp28[1] before sp28[2]; permuter worse than hand
+func_1516FF34	CERR	3	SIZE+5	n	n	callee redeclaration fixed (func_1516FEF4 u8* param), but ref has no arg copy or a2; flag-first load; reverted callee edit
+func_1519ECC4	CERR	2	SIZE+2	n	n	dropped bad proto, var_v1 as u8 (sp23); frame 0x30 vs 0x28 (stackfix no)
+func_15044C54	CERR	2	OK	y	n	allocate_memory(arg0,1,0,0): untouched a0 is pass-through 4th arg; D_800CBE00 chain via *(s32 *)
+func_1512BAAC	CERR	1	DIFF44	n	n	s16 store through s32 base fixes CERR; a1/a2 roles (D_800BE628 addr vs 0x180) swapped, hoisted lui
+func_1501CDA0	CERR	2	DIFF13	n	y	u8 **/goto loop (no unroll) gives DIFF13: v0/v1/a1 roles of temp_v1/var_v0/var_a1 rotated; permuter running
+func_150D247C	CERR	4	SIZE-1	n	n	u8 arg2 (homed), vertex struct copies (lw at), (s32)arg1 compare, D_800A5860 u8[]; ref has two addiu v0 (per-branch) and store before b (else form) - can't get both: top v SIZE-1, per-branch DIFF41
+func_15022764	CERR	3	DIFF17	n	n	D_800C39E8/3A10 as u16*[]/u8*[] tables, s32 w/o return; ref lw a1 in beqz delay and spill 0x1C, mine 0x18+or v1,v0
+func_15003120	CERR	3	DIFF36	n	n	D_800B1240 s32*, D_800B1244 s8*; roles of a1/a2/v1 differ (off/cnt init order)
+func_15131D98	SIZE-2	2	OK	y	n	callee u8 param: drop explicit & 0xFF; float operand order f32 * call(); (a*D)+b for the u8 adds
+func_151733EC	CERR	4	DIFF8	n	y	callee redeclaration fixed (drop protos, D_800DD6E0 is s8[]); remaining stack frame 0x38 vs 0x30 (spill slots shifted by 8); permuter DIFF8 best
+func_15168E54	SIZE-2	3	DIFF14	n	n	SR avoided by (var_s0<<3)+(s32)arg0, var_v0 s32; v1/a2 roles differ
+func_1514AA5C	DIFF33	2	DIFF25	n	n	vertex copy for 0x34->0x40; schedule/v1 hoisted address differ
+func_150A3484	SIZE-1	2	DIFF28	n	n	arg1 = temp_t8 gives the or a1; register order t8/t9 differ
+func_15190770	DIFF	0	-	n	n	not tried further: ref keeps arg0 in s0 and reloads from home
+func_1517F54C	CERR	2	OK	y	n	fwdproto 's32 func_1517F470();' (implicit 4-arg caller in file, real 1-arg), no temp for D_80082FA0 (compare against the global after the loop)
+func_151E856C	SIZE-2	3	OK	y	y	D_80090360 as u8 [][6] (no strength reduction of s0*6, [i][off] indexing) -> DIFF2; permuter 150s solved the last 2 (start-order)
+func_150D513C	CERR	3	DIFF2	n	n	fwdproto self + function (not extern s32) for func_150D5634, cast (s32 *); only frame 0x28 vs 0x30 left (unnamed spill of the function address; named sp20 gives 0x38); stackfix no
+func_150F5B48	CERR	2	DIFF41	n	y	fwdproto self; body = draft; v0/v1 swapped roles (b loaded into v1, a into a2); permuter 150s no gain
+func_151481BC	CERR	3	SIZE-1	n	n	D_8008A644 fn-ptr table (u8*, s32, s16); arg0 = func_151462C8(arg0..) param-as-temp keeps the s1 copy, temp_v1 read after the call; ref presets v0=s1 in beqz delay slot (var_v0=temp_s1 form loses the s1 copy)
+func_1516DBE8	CERR	2	DIFF13	n	n	D_8008CF40 fn-ptr table with (arg0) arg; tail expr load order differs; 8 operand-order forms no change
+func_1509D274	CERR	3	DIFF19	n	y	file proto -> s32 f(); 2-param def, u16 temp_t6 form: s0/s1 roles swapped (decl order irrelevant over 120 perms); permuter DIFF19

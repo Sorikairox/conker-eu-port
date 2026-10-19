@@ -60,6 +60,11 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
     `void` for the callee the ref ignores). `extern s32 D_x;` that the draft calls as a function is really a function-pointer table: `extern void (*D_x[])(u8 *);` (`func_15040CC8`, `func_15174F68`, `func_1514D880`).
     A pointer compared with `&D_800D121C` needs `(struct127 *)&D_800D121C`.
 
+12. **Session 34 additions.** An untouched `a0` that the callee receives next to constants is a pass-through 4th argument (`func_15044C54`: `allocate_memory(arg0, 1, 0, 0)`).
+    A caller in the same file passing more args than the real callee takes (implicit decl in the file): forward-declare it unprototyped, `fwdproto.sh file 's32 f();'`, and define the real arity (`func_1517F54C`; for a self-redeclaration with a
+    3-arg file prototype, replace the file's prototype by `s32 f();` and define 2 params, `func_1509D274`). A callee C definition with `u8` param: drop the explicit `& 0xFF` from the argument, IDO makes the `andi; or a0,t6` itself (`func_15131D98`).
+    Callee defined later as a function but drafted as `extern s32 f;`: declare `void f(void);` and pass `(s32 *)f` (`func_150D513C`).
+
 ## 2. Stack frame and locals
 
 1. **Declaration order decides slots**: first declared = highest address. A lone 4-byte local before/after a struct moves it by 4
@@ -151,6 +156,9 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 15. **Byte read compared with `>= 0`** keeps the `bltz`: `s32 idx = *(u8 *)(p + 0x48); if (idx >= 0)` (`func_150E3A94`). A handler's first-arm `b` delay slot can be changed by an empty `dummy_label: ;` after that arm (permuter, `func_151CB07C`, fakematch); the local `v = arg1[0]` fixes v0 reuse.
     Re-evaluating an `s16` table index inline for the call and testing `-1 != x` (permuter) fixed saved-register roles in `func_1514D880`.
 
+16. **Session 34 (control flow).** A `s0 * 6` index in a `do {} while` is strength-reduced to `s0 += 6`; index a 2D table `D[i][off]` / `D[i][0]` (`extern u8 D[][6]`) to keep the `multiu` per iteration (`func_151E856C`, permuter finished the last 2 words).
+    `(i << 3) + (s32)base` instead of `i * 8 + base` stops the same strength reduction (`func_15168E54`, DIFF14 left). A byte loop whose trip count is constant (`!= 0x10`) is unrolled by IDO as `do/while`; the `loop: ...; if (x != 0x10) goto loop;` form keeps the rolled loop (`func_1501CDA0`, DIFF13 left).
+
 ## 4. Register allocation, copies and delay slots (the "arg copy" and "reload from home" shapes)
 
 1. **Arg copy in a1/a2/a3 spilled to the a0 home slot (shape A: `or a1,a0,zero ... sw a1,0x20(sp)` around calls)**, delete handlers `if (p->X) f(p->X); ...`
@@ -197,6 +205,10 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 14. **Merged `jr ra; nop` stub** at the end of a `.s` (screen SIZE-1 with only the stub's words different): add `void func_eu_<addr>(void) {}` after the function (`func_15072F10`, `func_eu_1507340C`).
 15. **The `jr ra` delay slot of a one-line leaf** is not filled with `-O2 -g3` but is with `-O2` (`n_cspgetstate`, per-file flags); `func_15173948` (`return arg0;`) would need such a file split. Hidden spills of `a0` like `func_151F0730` (`sw a2` not in the `jal` delay slot, `memcpy(a,b,n) + n`) OPEN.
 
+17. **Session 34 (m2c leftovers).** `spXX` pieces of one vector: `f32 sp28[3]` and pass `sp28`; the stack order that fits is found by `stackfix.py` (declare the block-scope `s32 temp_v0` inside the `if`), then use explicit `if/else` and move one store (`func_1507E1D0`).
+    A matrix local `f32 sp24[4][4]` is placed 4 bytes too low (8-aligned); `struct { f32 m[16]; } sp24s;` plus a leading `s32 pad;` gives the ref offsets (`func_15158AFC`, scheduling still differs).
+    A 12-byte `lw $at; sw $at` copy is a `*(vertex *)(dst) = *(vertex *)(src);` (`func_150D247C`, `func_1514AA5C`).
+
 ## 5. Operand order
 
 1. **Commutative integer ops**: `x += y` vs `x = x + y`, `base + i*size` vs `&((T *)base)[i]`, `(u8 *)p + i*k` vs `i*k + (u8 *)p` change `addu` operand order (`func_150243AC`, `func_15157DD0`, `func_15166774`).
@@ -212,6 +224,8 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
    `*(f32 *)(arg0 + 0x44) *= k` (`func_150BD498`), `+=` lerps (`func_15052260`), one product temp (`func_151CC190`). `x *= y` `mul.s` operand pairs (`func_150EAA10`, `func_151AAFFC`, `func_150351A4`): IDO canonicalises; `r*f`, `f*r`, `f + r*g`, named temps all give the same order. OPEN.
    Float register numbering in leaf functions (f0/f2/f4 vs f4/f12: `func_150AD930`, `func_150ADDE0`, `func_150ADD90`): -O1/-O3/-mips1 no help. OPEN.
 3. **Operand order in compares**: `bnel $v1,$a0`: in the 0x2D arm `arg1[0] == *(s32 *)v`; `bnel t9,v1` swap case (`func_151D2E5C` OPEN). Sign extension: no `sll/sra` for `lh x; subu; sh x` -> `s32 temp` (`func_1503F1B0`); split `temp = load; temp = temp - D;`.
+
+4. **Session 34.** Float `mul.s` with a call result: `f32_field * call()` puts the field in `ft` (`func_15131D98`); integer `(a * D) + b` for the second operand order of `addu`.
 
 ## 6. Types, tables, structs
 

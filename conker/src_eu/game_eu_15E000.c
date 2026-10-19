@@ -80,7 +80,12 @@ s32 func_15131D84(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_15131D98.s")
+void func_15131D98(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
+    (*(f32 *)((u8 *)arg0 + 0x4C)) = (f32) ((*(f32 *)((u8 *)arg1 + 0)) * func_151423D8((*(u8 *)((u8 *)arg2 + 0)) - 0x40));
+    (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) ((*(f32 *)((u8 *)arg1 + 4)) * func_151423D8((*(u8 *)((u8 *)arg2 + 1)) - 0x40));
+    (*(u8 *)((u8 *)arg2 + 0)) = (u8) (((*(u8 *)((u8 *)arg3 + 0)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 0)));
+    (*(u8 *)((u8 *)arg2 + 1)) = (u8) (((*(u8 *)((u8 *)arg3 + 1)) * D_800BE9E4) + (*(u8 *)((u8 *)arg2 + 1)));
+}
 
 void func_15131E58(f32 *arg0, f32 arg1) {
     s32 i = D_800BE9E4;
