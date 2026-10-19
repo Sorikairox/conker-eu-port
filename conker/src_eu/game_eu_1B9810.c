@@ -5,7 +5,28 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C000.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518C164.s")
+void func_1518C164(u8 *arg0) {
+    s32 i;
+    struct_eu_node *node;
+
+    if (arg0 != NULL) {
+        for (i = 0; i < 2; i++) {
+            u8 *new_var; // fakematch: permuter temp, turns the loop tail into bnel
+            node = D_800DD280[i][0x1F];
+            D_800DD5C0++;
+            while (node != NULL) {
+                D_800DD5C8[D_800DD5C0] = node->next;
+                new_var = (u8 *)node;
+                *(u8 **)(new_var + 0x24) = arg0;
+                if ((arg0 != NULL) || (arg0[0x3B] == *((u8 *)node + 0x28))) {
+                    func_1516972C((struct102 *)node);
+                }
+                node = D_800DD5C8[D_800DD5C0];
+            }
+            D_800DD5C0--;
+        }
+    }
+}
 
 s32 memcpy(u8 *, s32, s32);
 

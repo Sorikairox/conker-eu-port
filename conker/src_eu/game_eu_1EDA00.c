@@ -1,11 +1,35 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_151C0350
+void func_151C09C8(u8 *, u8, s32);
+void func_151C0B54(s32, u8, s32);
+void func_151C0BA0(struct17 *, u8, s32);
+void func_15150108(f32 *, u8, s32);
+void func_151C01F0(f32 *, f32 *);
+void func_151C0AA8(u8 *, u8, s32);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C01F0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C0350.s")
+typedef struct { s32 a[3]; } V3_151C0350;
+void func_151C0350(u8 *arg0, f32 *arg1, u8 arg2, u8 arg3, s32 arg4) {
+    f32 pad[16]; // fakematch: unused frame space
+    f32 sp24[9];
+
+    func_151C09C8(arg0, arg3, arg4);
+    func_151C0AA8(arg0, arg3, arg4);
+    func_151C0B54((s32)arg0, arg3, arg4);
+    func_151C0BA0((struct17 *)arg0, arg3, arg4);
+    if (arg2 != 0) {
+        sp24[0] = -arg1[0];
+        sp24[1] = -arg1[1];
+        sp24[2] = -arg1[2];
+        func_151C01F0(&sp24[4], &sp24[3]);
+        *(V3_151C0350 *)&sp24[6] = *(V3_151C0350 *)arg0;
+        func_15150108(sp24, arg3, arg4);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C0434.s")
 
