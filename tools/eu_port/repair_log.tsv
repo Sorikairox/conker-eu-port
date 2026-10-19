@@ -914,3 +914,7 @@ func_15193A24	SIZE-9	4	OK	y	n	105 insns: m2c sp38/sp3C/sp40 scalars passed as &s
 func_151A7BC0	DIFF14	8	OK	y	n	106 insns: vecfix (sp74[9] array), drop named sp58/sp5C/sp60 (unnamed arg spills of nested call args), temp_f18 declared before sp6C (slot 0x70 gap), sp6C load first
 func_151BC920	SIZE+2	8	OK	y	n	130 insns: vecfix sp6C[9]; func_15143794 prototype (s16,s16,f32,void*) in draft; spill names sp58/sp5C/sp60/sp64 inlined into call args; temp_f8 inlined but call evaluated before the 0.0f stores
 func_151B8CA4	SIZE+2	3	OK	y	n	twin of func_151BC920 (same shape: vecfix, proto func_15143794, inlined spills)
+func_1000B638	SIZE+2	4	OK	y	n	126 insns: arg0 itself is the flag variable kept across calls (spilled to its own home), not a separate var_a3; sp1C = arg0 & 2 first
+func_151D7410	SIZE+2	3	OK	y	n	matrix array: ((f32(*)[16])(arg0+0x7C))[D_800BE9C0][k] macro instead of arg0+(D_800BE9C0<<6)+off; f32 func_15144AA8(s32) prototype
+func_1515835C	DIFF54	6	OK	y	y	matrix array macro like func_151D7410; permuter reached DIFF31 on the m2c form, natural f32[16] indexing matched directly
+func_15157E88	DIFF72	5	OK	y	y	matrix array macro; u8 *p = arg0+0x120 kept live in a0; permuter added 'do {} while (0)' (fakematch) between two stores
