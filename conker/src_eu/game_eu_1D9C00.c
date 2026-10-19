@@ -1,6 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_151AD010
+s32 func_151AD0E8(u8 *, u8 *);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC3F0.s")
@@ -61,7 +63,28 @@ s32 func_151ACFD0(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AD010.s")
+u8 *func_151AD010(u8 *arg0, f32 arg1, s32 arg2) {
+    u8 *temp_v0;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    temp_v0 = func_15167A68(0x30, 0, arg2 + 0x30, 1, 0xFFU, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    if (func_151AD0E8(arg0, temp_v0 + 0x18) == 0) {
+        func_1516979C((struct102 *)temp_v0);
+        return NULL;
+    }
+    *(u8 **)(temp_v0 + 0x1C) = arg0;
+    temp_v0[0x20] = arg0[0x3B];
+    *(s32 *)(temp_v0 + 0x24) = (struct127 *)arg0 - D_800CC2D0;
+    *(f32 *)(temp_v0 + 0x28) = arg1;
+    *(s32 *)(temp_v0 + 0x10) = 1;
+    *(s32 *)(temp_v0 + 0x14) = 0;
+    return temp_v0;
+}
 
 s32 func_151AD0E8(u8 *arg0, u8 *arg1) {
     s32 ret = 0;

@@ -788,3 +788,17 @@ func_15013000	DIFF27	3	DIFF8	n	y	remote perm x2: best DIFF8 (bestfinal_func_1501
 func_15015E30	DIFF24	2	DIFF21	n	y	local perm 200 s: best DIFF21 (bestfinal_func_15015E30.c)
 func_1509CBD4	SIZE-1	4	DIFF6	n	y	remote perm 900 s x3 (chained): best DIFF6 (best3_1509CBD4.c in build_port/s45); first perm got equal size DIFF7
 func_1503D658	DIFF7	1	DIFF7	n	y	remote perm 900 s from best_func_1503D658.c: no improvement (base 35, best none)
+func_151C0AA8	CERR	3	OK	y	n	decl order f32 temp_f12 before sp28; call1, call2 then compute; proto HOIST (u8*,f32,s32,f32,f32,u8,s32)
+func_1518CDC0	DIFF21	2	OK	y	n	0x2D family: no temps in 2D arm (reread both operands), goto dummy_label, id var only in the arg2==0 arm, *(u8*)(arg1+4)
+func_151BEA68	SIZE-3	3	OK	y	n	sp20[2] array (not 2 scalars), operands 0x54*0x40 reversed, (u8*)arg0+0x110, 4-arg callee, stackfix decl order
+func_151341C8	DIFF19	1	OK	y	n	extra leading s32 arg0 (a0 pass-through) + f32 args in int regs; HOIST callee proto (s32,f32,f32,f32,f32,s32)
+func_15134290	DIFF19	1	OK	y	n	twin of func_151341C8
+func_1514F878	SIZE-3	1	OK	y	n	two 3-word struct copies from D_800A5D50/5C: typedef struct{s32 w[3];} locals sp54/sp48 = global; float D_800A6238 extern f32
+func_151F0260	SIZE+1	1	OK	y	n	for (sp18=0; sp18<0x10; sp18++) instead of do-while with temp_t1 (frame 0x20)
+func_1519E874	DIFF1	3	OK	y	n	reread recipe: no local for the table ptr; (p[5] << 6) + *(s32 *)(*(u8 **)p + 0x1D4) with the shift FIRST in source gives addu v0,t8
+func_15163FEC	DIFF1	8	OK	y	y	0x2D family: no temps in 2D arm, compare with pl field on the LEFT: pl->unk0 == arg1->unk0, pl->unk0 == arg1->unk4.w (operand order is reversed vs source), goto dummy_label
+func_15164134	DIFF1	1	OK	y	n	twin of func_15163FEC
+func_151B1F54	DIFF25	6	OK	y	n	or a3,a0 family: top 'cur' var before the if, 2D arm without key temps, compare arg1 field LEFT of pointer-var field (u8* pl); see s46
+func_151937A4	DIFF10	10	OK	y	y	or a3,a0 family solved: temp_v0=(u8*)arg0+0x28 BEFORE the if; 2D arm without key temps, compare *(arg1+k)==*(temp_v0); arm 0: temp_v1=arg1[0] var; goto dummy_label at end of 2D arm
+func_151BEB08	DIFF11	2	OK	y	n	twin of func_151937A4 (0xB0)
+func_151BCB54	DIFF	3	OK	y	n	family: header changed to void (s32 return keeps v0 live -> no bne delay-slot addiu v0); same as 151B1F54 template

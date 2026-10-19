@@ -34,7 +34,29 @@ s32 func_151B1A28(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1EC8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1F54.s")
+void func_151B1F54(struct102 *arg0, u8 *arg1, u8 arg2) {
+    s32 cur;
+    u8 *temp_v0;
+    cur = *(s32 *)((u8 *)arg0 + 0x28);
+    if ((arg2 == 0) || (arg2 == 0x13)) {
+        if (cur == (*(s32 *)((u8 *)arg1 + 0)) || ((*(u8 *)((u8 *)arg0 + 0x2C)) == (*(u8 *)((u8 *)arg1 + 4)))) {
+            func_1516972C(arg0);
+        }
+    } else {
+        temp_v0 = (u8 *)arg0 + 0x28;
+        if (arg2 == 0x2D) {
+            if (*(s32 *)(arg1 + 0) == *(s32 *)(temp_v0 + 0)) {
+                *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 4);
+                *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 9);
+                return;
+            }
+            if (*(s32 *)(arg1 + 4) == *(s32 *)(temp_v0 + 0)) {
+                *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 0);
+                *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 8);
+            }
+        }
+    }
+}
 
 void func_151B2008(void *arg0) {
     func_151B1EC8(arg0);

@@ -49,6 +49,27 @@ struct260 *func_151932B8(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C06A0/func_15193360.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C06A0/func_151937A4.s")
+void func_151937A4(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *temp_v0;
+    s32 temp_v1;
+    temp_v0 = (u8 *)arg0 + 0x28;
+    if (arg2 == 0x2D) {
+        if (*(s32 *)(arg1 + 0) == *(s32 *)(temp_v0 + 0)) {
+            *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 4);
+            *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 9);
+            return;
+        }
+        if (*(s32 *)(arg1 + 4) == *(s32 *)(temp_v0 + 0)) {
+            *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 0);
+            *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 8);
+        }
+        goto dummy_label; dummy_label: ; // fakematch: b + target-copied lw ra
+    } else if (arg2 == 0) {
+        temp_v1 = *(s32 *)(arg1 + 0);
+        if (temp_v1 == *(s32 *)(temp_v0 + 0) || *(u8 *)(temp_v0 + 4) == *(u8 *)(arg1 + 4)) {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C06A0/func_15193850.s")

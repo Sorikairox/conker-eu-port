@@ -72,7 +72,29 @@ s32 func_151BCB30(s32 **arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BCB54.s")
+void func_151BCB54(void *arg0, void *arg1, u8 arg2) {
+    s32 cur;
+    u8 *temp_v0;
+    cur = *(s32 *)((u8 *)arg0 + 0x40);
+    if (arg2 == 0) {
+        if (cur == (*(s32 *)((u8 *)arg1 + 0)) || ((*(u8 *)((u8 *)arg1 + 4)) == (*(u8 *)((u8 *)arg0 + 0x44)))) {
+            func_1516972C(arg0);
+        }
+    } else {
+        temp_v0 = (u8 *)arg0 + 0x40;
+        if (arg2 == 0x2D) {
+            if (*(s32 *)((u8 *)arg1 + 0) == *(s32 *)(temp_v0 + 0)) {
+                *(s32 *)(temp_v0 + 0) = *(s32 *)((u8 *)arg1 + 4);
+                *(u8 *)(temp_v0 + 4) = *(u8 *)((u8 *)arg1 + 9);
+                return;
+            }
+            if (*(s32 *)((u8 *)arg1 + 4) == *(s32 *)(temp_v0 + 0)) {
+                *(s32 *)(temp_v0 + 0) = *(s32 *)((u8 *)arg1 + 0);
+                *(u8 *)(temp_v0 + 4) = *(u8 *)((u8 *)arg1 + 8);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BCBFC.s")
 
@@ -192,9 +214,48 @@ s32 func_151BE7C0(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BEA68.s")
+s32 func_1513FAB4(s32, s32, f32 *, s16);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BEB08.s")
+s32 func_151BEA68(struct102 *arg0, s16 arg1) {
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+    f32 sp20[2];
+
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x110));
+    if (((*(u8 *)((u8 *)arg0 + 0x114)) != (*(u8 *)((u8 *)temp_v0 + 0x3B))) || (temp_v0_2 = (u8 *)arg0 + 0x110, ((*(s32 *)((u8 *)temp_v0 + 0)) == 0))) {
+        func_1516972C(arg0);
+        return 0;
+    }
+    if (!((*(u8 *)((u8 *)temp_v0_2 + 0x58)) & 1)) {
+        return 0;
+    }
+    sp20[0] = (*(f32 *)((u8 *)temp_v0_2 + 0x54)) * (*(f32 *)((u8 *)temp_v0_2 + 0x40));
+    sp20[1] = (*(f32 *)((u8 *)temp_v0_2 + 0x54)) * (*(f32 *)((u8 *)temp_v0_2 + 0x44));
+    return func_1513FAB4(arg0, 0, sp20, arg1);
+}
+
+void func_151BEB08(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *temp_v0;
+    s32 temp_v1;
+    temp_v0 = (u8 *)arg0 + 0xB0;
+    if (arg2 == 0x2D) {
+        if (*(s32 *)(arg1 + 0) == *(s32 *)(temp_v0 + 0)) {
+            *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 4);
+            *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 9);
+            return;
+        }
+        if (*(s32 *)(arg1 + 4) == *(s32 *)(temp_v0 + 0)) {
+            *(s32 *)(temp_v0 + 0) = *(s32 *)(arg1 + 0);
+            *(u8 *)(temp_v0 + 4) = *(u8 *)(arg1 + 8);
+        }
+        goto dummy_label; dummy_label: ; // fakematch: b + target-copied lw ra
+    } else if (arg2 == 0) {
+        temp_v1 = *(s32 *)(arg1 + 0);
+        if (temp_v1 == *(s32 *)(temp_v0 + 0) || *(u8 *)(temp_v0 + 4) == *(u8 *)(arg1 + 4)) {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 void func_151BEBB4(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)(arg0 + 0x110), (s32)(arg0 + 0x114), (s32)arg0);
