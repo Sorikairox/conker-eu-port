@@ -7,7 +7,25 @@ extern u8 D_800A8E7C;
 void func_1519C7C8(u8 *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195D20.s")
+typedef struct DNode { struct DNode *next; struct DNode *prev; } DNode;
+DNode *func_15195D20(s32 arg0, DNode **arg1, DNode **arg2) {
+    DNode *node = allocate_memory(arg0, 1, 0, 0);
+    if (node != NULL) {
+        node->prev = NULL;
+        if (*arg2 != NULL) {
+            node->next = *arg2;
+            (*arg2)->prev = node;
+            *arg2 = node;
+        } else {
+            node->next = NULL;
+            *arg2 = node;
+            *arg1 = node;
+        }
+    }
+    return node;
+}
+
+void func_eu_15195D94(void) {}
 
 extern s32 D_800E0D10, D_800E0D14, D_800E0D18, D_800E0D1C, D_800E0D20;
 void func_15195D9C(void) {

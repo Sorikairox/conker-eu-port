@@ -15,9 +15,31 @@ void func_151A8B10(u8 *arg0) {
     func_151D5E30(arg0 + 0x6C, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8B34.s")
+void func_151A8B34(u8 *arg0) {
+    u8 *new_var; // fakematch: permuter temp
+    void (*fn)(void *) = D_8008FCEC[arg0[0x5C]];
+    new_var = arg0;
+    if (fn != NULL) {
+        if (!arg0) { // fakematch: permuter empty branch
+        }
+        fn(new_var);
+    }
+    func_151A8B10(arg0);
+    func_15169804(arg0);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8B84.s")
+void func_151A8B84(u8 *arg0) {
+    u8 *new_var; // fakematch: permuter temp
+    void (*fn)(void *) = D_8008FCF8[arg0[0x5C]];
+    new_var = arg0;
+    if (fn != NULL) {
+        if (!arg0) { // fakematch: permuter empty branch
+        }
+        fn(new_var);
+    }
+    func_151A8B10(arg0);
+    func_15169824(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8BD4.s")
 
