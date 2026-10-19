@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: tryall <func> draft1.c draft2.c ...  -> screen result per draft (one container run per draft set)
 # At most 8 screens run at once. Drafts go to conker/build/ta/<i>/<func>.c; prints "<result> <draft>".
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH

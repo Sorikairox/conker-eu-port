@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: repair_try.sh <func> <draft.c>  -> one line "<func> OK|DIFFn|SIZE+-n|CERR..." 
 # Screens the draft (m2c/try), saves it as tools/decomp-permuter/repair/<func>.c (latest) and the word
 # diff as <func>.diff (used by repair_ctx.sh). An OK draft is also kept in conker/build/hand (apply.py build/hand).

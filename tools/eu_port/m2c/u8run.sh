@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: u8run.sh [outdir=build/u]  -- the u8/u16-parameter pipeline (session 7):
 # u8params.py -> list, fresh contexts, gen2.py drafts for those functions only, narrow.py
 # (forced by the list) into n0..n7, screen.py each set in the container, merge.py -> final.

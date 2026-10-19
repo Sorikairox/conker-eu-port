@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+extern u8 D_800A8E7C;
+
 void func_1519C7C8(u8 *arg0);
 
 
@@ -162,7 +164,19 @@ void func_151991D0(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199200.s")
+void func_15199200(u8 *arg0) {
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u16 temp_a0;
+    temp_v0 = *(u8 **)(arg0 + 0x98);
+    temp_v1 = *(u8 **)(arg0 + 0x94);
+    if (*(s8 *)(arg0 + 0x2C) != 0) {
+        temp_a0 = *(u16 *)(temp_v0 + 0x66);
+        if (temp_a0 != 0) {
+            func_1000F91C(temp_a0, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x24 + (0, temp_v1))) + 0)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x24 + (0, temp_v1))) + 4)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x24 + (0, temp_v1))) + 8)), 0x1F4, 0x1388); // fakematch: (0, x) comma flips commutative operand order
+        }
+    }
+}
 
 void func_151992B0(u8 *arg0) {
     u8 *p;
@@ -192,9 +206,47 @@ void func_15199924(u8 *arg0) {
     temp_v0[6] |= 4;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199954.s")
+void func_15199954(u8 *arg0) {
+    u8 **q = *(u8 ***)(arg0 + 0x98); // fakematch: q/r temps and u32 key (permuter) pin registers
+    u8 *r = *q;
+    s32 i = 0;
+    s32 found = 0;
+    u32 key = r[0x3B]; // fakematch: u32 (not u8) key picks the register
+    u8 *p = &D_800A8E7C;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151999BC.s")
+    do {
+        if (key == *p) {
+            found = 1;
+        } else {
+            i++;
+            p++;
+        }
+    } while (found == 0 && i < 6);
+    if (found != 0) {
+        ((u8 **)D_800E0900)[i][0x14] = 0;
+    }
+}
+
+void func_151999BC(u8 *arg0) {
+    u8 **q = *(u8 ***)(arg0 + 0x98); // fakematch: q/r temps and u32 key (permuter) pin registers
+    u8 *r = *q;
+    s32 i = 0;
+    s32 found = 0;
+    u32 key = r[0x3B]; // fakematch: u32 (not u8) key picks the register
+    u8 *p = &D_800A8E7C;
+
+    do {
+        if (key == *p) {
+            found = 1;
+        } else {
+            i++;
+            p++;
+        }
+    } while (found == 0 && i < 6);
+    if (found != 0) {
+        ((u8 **)D_800E0900)[i][0x14] = 1;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199A28.s")
 
@@ -278,7 +330,6 @@ void func_1519C38C(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3) {
     arg0[2] += sp4.z * arg3;
 }
 
-extern u8 D_800A8E7C;
 void func_1519C428(u8 *arg0) {
     u8 **q = *(u8 ***)(arg0 + 0x98); // fakematch: q/r temps and u32 key (permuter) pin registers
     u8 *r = *q;
@@ -300,7 +351,6 @@ void func_1519C428(u8 *arg0) {
     }
 }
 
-extern u8 D_800A8E7C;
 void func_1519C490(u8 *arg0) {
     u8 **q = *(u8 ***)(arg0 + 0x98); // fakematch: q/r temps and u32 key (permuter) pin registers
     u8 *r = *q;
@@ -326,7 +376,19 @@ void func_1519C4FC(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C52C.s")
+void func_1519C52C(u8 *arg0) {
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u16 temp_a0;
+    temp_v0 = *(u8 **)(arg0 + 0x98);
+    temp_v1 = *(u8 **)(arg0 + 0x94);
+    if (*(s8 *)(arg0 + 0x2C) != 0) {
+        temp_a0 = *(u16 *)(temp_v0 + 0x130);
+        if (temp_a0 != 0) {
+            func_1000F91C(temp_a0, 0x7FFFU, 0, 0U, 0, (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x28 + (0, temp_v1))) + 0)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x28 + (0, temp_v1))) + 4)), (s16) (s32) (*(f32 *)(((u8 *)((*(s8 *)(arg0 + 0x2D)) * 0x28 + (0, temp_v1))) + 8)), 0x1F4, 0x1388); // fakematch: (0, x) comma flips commutative operand order
+        }
+    }
+}
 
 void func_1519C5DC(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);

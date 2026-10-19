@@ -1,6 +1,7 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
 Last updated: 2026-10-20 (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 51, worktree eu-wt-a, 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 42, worktree eu-wt-a; 40 = previous); session 45 (main, game < 0x130000). Update this file at the end of every work session.
@@ -34,6 +35,13 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 - **Session 50 (main, game < 0x130000): 3298 / 5913 functions in C (55.8%)**, code bytes 370,496 / 2,253,856 (16.4%) (game 2892, init 374, debugger 32), `verify_all.sh` all OK. +3: `func_1501E220`, `func_150CE0C0`, `func_1506BCC8`.
   Doc `docs/sessions/s50.md`, recipes IDO_SHAPES "s50 recipes". New tool `argfix.py` (callee prototypes from the caller's asm; `ARGFIX=1 m2cfix.py list`): on 189 pool5 drafts CERR 96 -> 77, SIZE+-1 15 -> 19.
   Key findings: m2c `T *p += K` strides by sizeof(T) (three SIZE-1 drafts were just that); a DIFF1 `c.eq.s` operand order is a 200 s permuter job; a stale arg register (`func_151EFDD0()` has no args) is invisible to argfix.
+- **Session 51 (worktree a, on top of s48/s49 + eu merge): 3313 / 5913 functions in C (56.0%)**, code bytes 373,092 / 2,253,856 (16.6%) (game 2907, init 374, debugger 32), `verify_all.sh` all OK. +13 in 2 commits (`621d075`, `95efb93`).
+  Doc `docs/sessions/s51.md`, recipes IDO_SHAPES `## s51 recipes`. Matched: the 6-function s16 lerp family (`(b - a) * q + a`, product first), `func_15172530`, `func_15183E20` (inline `(u8 *)D_x + arg0 * 0x14`, permuted stores),
+  and 5 `clones.py --near 16 --draft --lax` drafts (`func_15193850`, `func_151B255C`, `func_eu_151B01B8`, `func_15199954`, `func_151999BC`). **Clone drafts are the best yield per token**: also screened OK in the other slice: `func_150EB4D0`, DIFF1 `func_150EAA10`
+  (comma trick untried), DIFF2 `func_151EF850` (drafts in `docs/sessions/s51_drafts/`).
+  Open (drafts in `docs/sessions/s51_drafts/`): `func_1516FE5C`/`8C` DIFF4/5 (lb must land in v0), `func_15172D80` (frame 0x40 vs 0x38), `func_151B97C4` SIZE+1 (spill v0 across sinf, loads after the call), `func_1519ED88` (needs `D_800E0D50 = 0`, unfilled `b` slot), `func_151EFDD0` (a0/a1 temps).
+- **Session 48 (worktree a, on top of s46 + eu merge): 3282 / 5913 functions in C (55.5%)**, code bytes 366,268 / 2,253,856 (16.3%) (game 2876, init 374, debugger 32), from `verify_all.sh` (all OK). 5 matched (`func_15199200`, `func_1519C52C`, `func_151A23E4`, `func_151AAFFC` in `0c1660f`, `func_151321F4`). Doc `docs/sessions/s48.md`, recipes IDO_SHAPES `## s48 recipes`: **`(0, local)` flips a commutative operand pair** (addu/multu/mul.s) when one operand is a named local or call result.
+  Open from s48 (drafts in `tools/decomp-permuter/drafts/s48_*.c`): `func_15172D80` DIFF2 (frame 0x48 vs 0x38), `func_15178C9C` DIFF5, `func_1516FE5C`/`func_1516FE8C` DIFF4/5 (lb in v0), `func_1517BD68` DIFF4, the `func_151859C4` lerp family (6 functions, f0 vs f14), `func_150EAA10` untried with the comma trick (slice below 0x130000).
 - **Session 49 (main, game < 0x130000): 3295 / 5913 functions in C (55.7%)**, code bytes 369,560 / 2,253,856 (16.4%) (game 2889, init 374, debugger 32), `verify_all.sh` all OK. +5 in 2 commits: `func_150EFE90`, `func_1509B810`, `func_150D6898`, `func_15019BB8`, `func_150F83A0`.
   Doc `docs/sessions/s49.md`, recipes IDO_SHAPES "s49 recipes". Key findings: **m2c callee prototypes are often wrong** (read the arg registers: floats after an int first arg travel in GPRs, a `lui/ori` constant is an `s32` param, pass-through args);
   `(u8 *)GLOBAL + idx * K` / `field * call()` operand orders; `goto end; end: ;` ends a 0x2D arm.
@@ -41,7 +49,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
   Open from s46: `func_15199200`/`func_1519C52C` (DIFF1 addu), `func_151A23E4` (DIFF2, permuter best `tools/decomp-permuter/drafts/s46_func_151A23E4e.c`), `func_1517BD68` (DIFF4), `func_151A7E2C`, `func_151B6804`, `func_151BAA18`, `func_151D51E8`, `func_15183E20`, `func_151A13F0`/`func_151A14D8` (28-arg call to the stub `func_151A177C`), `func_151D75B0`, `func_151D5714`. Try the reversed-order rule on every remaining DIFF1/DIFF<=6 operand-order leftover.
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3290 / 5913 functions in C (55.6%)**, code bytes 368,252 / 2,253,856 (16.3%) (merged state, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2884/5330 (14.3% of bytes), debugger 32/43 (42.6% of bytes).
+- **3316 / 5913 functions in C (56.1%)**, code bytes 374,028 / 2,253,856 (16.6%) (merged state, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2910/5330 (14.5% of bytes), debugger 32/43 (42.6% of bytes).
   Sessions 35 (main), 36-38 (worktree eu-wt-a, merged) and 39 (main, game files below 0x130000; a parallel worktree session works above it) done. Session 36 recipes: IDO_SHAPES section 12, session 39: section 13. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**

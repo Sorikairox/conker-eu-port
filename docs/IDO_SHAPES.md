@@ -397,6 +397,20 @@ included) is solved this way; an `s32` return type in the header keeps `v0` live
 7. **OPEN (kept pointer folded)**: `func_150F2B20`, `func_150B9A40`: the ref keeps `addiu v0,a0,K` as a live pointer used for 3 accesses; `u8 *pp = ...`, `&s->field`, `p += K+1; p--;` all fold it away.
    `func_15062D10`: `s32 *q = &arg1;` (fakematch) with `q[0..2]` reproduces the `a1..a3` home stores; rest is DIFF49.
 
+## s48 recipes (comma operand swap, arg-reload mul.s)
+
+See `docs/sessions/s48.md`. Extends section 17 (s46 operand-order rule).
+1. **`(0, local)` flips a commutative operand pair.** `addu`, `multu`, `mul.s`, `beq` with one named-local/call-result operand ignore source order
+   (`local * mem` and `mem * local` compile the same); wrap the local in a comma, `mem * (0, local)` or `prod + (0, local)`, to get the other order. Try the 4 forms
+   (`(0, x)` on each operand, both positions) with `tryall`. Solved `func_15199200`/`func_1519C52C` (`idx*0x24 + (0, temp_v1)`), `func_151A23E4` (`mem * (0, temp_v1)`),
+   `func_151AAFFC` (`mem94 * (0, r)` with `r` the call result). Mark with `// fakematch`. `func_150EAA10`/`func_150351A4` (older DIFF1 mul.s) should try it.
+2. **mul.s of a call result and a field** (`func_151AAFFC`): `u8 **q = &arg0; r = f(...); p = *q;` reloads arg0 from its home after the call; loads via `p`, then `p += 0x80`
+   and the store uses `p + 8` with the loaded operands written as `p + 8` / `p + 0xC` (relative to the incremented pointer) so the `addiu v0,v0,0x80` is not folded.
+3. **A `u8` callee fed by `(x >> 16) - 0x40`**: no `& 0xFF` in the source (`andi t8; or a0,t8` comes from the callee's narrowing) (`func_151AAFFC`, `func_151321F4`).
+4. **`beq` of a loaded local and a global** (`func_15172D80`): `if (D_800BE9F0 != *temp_v1)` with no `temp_a1` local gives `lw t2; lb a1; beq t2,a1`.
+5. **Float register roles of the s16 lerp family** (`func_151859C4` + 5 siblings): reading the s16 fields inline (no `temp_v0` locals) restores the size and the load order
+   (arg1 field first); still open: the quotient lands in `f14` instead of `f0`.
+6. **`rlog.sh` and `CONKER_ROOT`**: running `rlog.sh` in a shell without the `wt.sh env` eval appends to the MAIN checkout's repair_log.tsv. Always `eval "$(tools/eu_port/wt.sh env a)"` in the same command.
 ## 18. Session 47 recipes (game < 0x130000)
 
 1. **0x2D/0 family, more members**: `func_150CEBA4` (0x2D first, K=0x18: the D7370 form unchanged), `func_150FE08C` (leaf, `*(s32 *)v = 0`; permuter: unused label in the 0x2D arm +
@@ -456,3 +470,16 @@ included) is solved this way; an `s32` return type in the header keeps `v0` live
    ref) reproduces everything except one stack slot (`sp44` lands at 0x3C instead of 0x44; `va_list` takes a slot). Best: `conker/build_port/s50/sf2/best.c`.
 9. **Not solved, notes**: `func_150EBA04` (frame OK with `s32 pad[2]` first, loop 1's `slti` becomes `bne at,4`), `func_1503EE68` (needs a 4-byte local above `f32 sp50[3]` without growing the frame), `func_1506B3B8`
    (frame 0x30 vs 0x20), `func_1505A250` (ref keeps the `arg2` home store), `func_150DE8AC` (frame 0x68 vs 0x60 with the two `struct_eu_s32x2` locals).
+## s51 recipes (lerp operand order, inline pointer sums, clones.py --near)
+
+See `docs/sessions/s51.md`.
+1. **`base + prod` versus `prod + base` for an `add.s` of a float lerp** (the s16 clip helper family, 6 functions): the ref is `add.s fD, base, prod` with the quotient staying in `f0`; write `(b - a) * q + a` (product LEFT, base RIGHT).
+   `a + (b - a) * q` made IDO swap the operand registers and move the quotient to `f14`. Same idea for the integer part: `(f32)(b - a) * q + (f32)a`. A denominator `(a0 - b0) + (a8 - b8)` vs `(a8 - b8) + (a0 - b0)` changes only the
+   load order of `b` (try both). Reloading `*(f32 *)(arg2 + 0)` for the mirrored store is simply `*(f32 *)(arg2 + 8) = *(f32 *)(arg2 + 0)` / `-...`.
+2. **`s32 D[]` global used with a byte stride**: `arg0 * 0x14 + D` scales by 4 (the 0x50 shift); write `(u8 *)D + arg0 * 0x14` and **repeat it at each use** instead of a local pointer (the local adds a stack home and 8 frame bytes). A `*(&D_x + arg0)` store
+   of a byte flag needs `extern u8 D_x` (an `s32` extern scales the index).
+3. **Permute independent trailing stores**: after the frame and registers match, four independent `sw` statements in a spawner/initialiser gave DIFF9 -> OK in 2 of 24 orders (`tryall` on the permutations, three batches of 8).
+4. **`u8` compare against a `/ 256` quotient**: `s32 temp = *(u8 *)p; if (x / 256 >= temp)` avoids the `or v1,v0,zero` copy that a `u8 temp` plus `(s32)` cast creates (`func_15172530`).
+5. **`clones.py --near 16 --draft --lax` then `screenall build/cln`** gave 5 OK of 74 drafts in the slice (twin handlers, node lookup, key search). CERR on a clone draft is often only a missing forward `extern` (copy it from the template's neighbourhood).
+   `apply.py` needs a hand-written `screen.txt` (`OK <func> src_eu/<file>.c`) when the drafts were copied out of the clone directory.
+6. **Dead local stores are deleted**: `sp18 = temp_v0;` keeps a pointer live only if something reads it before the call; do not expect an unused named copy to force a spill (`func_151B97C4`).

@@ -1,4 +1,5 @@
 #!/bin/bash
+_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
 # usage: gensome.sh <func>...   regenerate m2c drafts (JT=1) for just these functions (gen40.sh wipes build/k40; a resplit wipes it too),
 # narrow + screen, copy the best draft per function into repair/fresh/ and print "result func".
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
