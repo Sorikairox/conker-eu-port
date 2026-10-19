@@ -22,7 +22,19 @@ s32 func_151AC97C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC9B8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ACB00.s")
+s32 func_151ACB00(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    u8 *sp44;
+    f32 (*tab)[5];
+    f32 sp34[3];
+    sp44 = *(u8 **)(arg0 + 0x98);
+    tab = *(f32 (**)[5])(arg0 + 0x94);
+    sp34[0] = tab[*(s8 *)(arg0 + 0x2D)][0];
+    sp34[1] = arg4;
+    sp34[2] = tab[*(s8 *)(arg0 + 0x2D)][2];
+    func_151DBCBC(func_151D8E20(), *(f32 *)(sp44 + 0) * 7.0f, *(u8 *)(sp44 + 0x1B), arg5, sp34, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    *(s8 *)(sp44 + 0x20) = 4;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ACBCC.s")
 

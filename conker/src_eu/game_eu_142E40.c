@@ -328,7 +328,27 @@ void func_1511D0B4(s32 arg0, f32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F4C8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F8A4.s")
+void func_15114E8C(f32 (*)[4], u8 *);
+u8 *func_151149AC(u8);
+void func_1511F8A4(u8 *arg0) {
+    s32 pad[2]; // fakematch: frame pad
+    f32 sp48[4][4];
+    f32 sp44;
+    f32 sp40;
+    f32 sp3C;
+    u8 *temp_v0;
+    u16 t = *(u16 *)(arg0 + 0x3E);
+    if ((*(u16 *)(arg0 + 0x54) == 0x8005) && (D_800BE9F0 == 0x35)) {
+        temp_v0 = func_151149AC(t);
+        if (temp_v0 != 0) {
+            func_15114E8C(sp48, temp_v0);
+            func_150A7E40(sp48, -3.0f, 223.0f, 549.0f, &sp44, &sp40, &sp3C);
+            *(s16 *)(arg0 + 0x10) = (s32)sp44;
+            *(s16 *)(arg0 + 0x12) = (s32)sp40;
+            *(s16 *)(arg0 + 0x14) = (s32)sp3C;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F970.s")
 

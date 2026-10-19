@@ -695,3 +695,21 @@ func_151BEB08	draft	5	DIFF11	n	y	same as 151937A4 family; permuter best DIFF11
 func_151D2E5C	draft	3	DIFF1	n	y	0/0x2D family; cmp operand order in 2nd compare (bnel t9,v1 vs v1,t9) not reachable by source order; permuter 300s no gain
 func_151BAA18	draft	4	SIZE-1	n	y	family; ref compares a copy t0 of arg2 for 0x2D; permuter best.c CERR
 func_10003BD0	draft	1	DIFF28	n	y	volatile p reload fakematch; permuter best 480 -> DIFF23, lui/addiu order of globals differs
+func_15114644	CERR	2	OK	n	n	u32 bit-test loop: goto loop (no unroll), mask temp m=1<<i; v&m
+func_1511F8A4	CERR	3	OK	n	n	matrix local f32 sp48[4][4], s32 pad[2] declared first (frame 0x90), u16 arg0+0x3E hoisted to a local before the if
+func_1517F3B0	CERR	2	OK	n	n	D_800DDDAC etc via (s8*)&D, u8 D_800DE1D0[][3], params arg1/arg2 s32 (s8 spilled them)
+func_15114644	CERR	3	OK	n	n	mask temp
+func_15182388	CERR	1	OK	n	n	same typing as func_1517F3B0
+func_15134908	CERR	3	OK	y	y	u8 *temp_v0; u8 *sp24 copy, u8 |= 2 on arg0+0x16, 0x3C store last; permuter
+func_151475B0	CERR	4	OK	y	y	q=&arg0, volatile u8 arg1, f32 sp44[3], do{}while(0)
+func_1519E874	CERR	4	DIFF1	y	n	arg copy p=arg0, f32 sp1C[2] (frame), only addu a2 operand order (v,t8) left; operand forms/permuter no help
+func_151BEC7C	CERR	4	OK	n	n	struct V4 copy local of D_800AAB88, v=arg0+0x110 declared first with initializer, += form
+func_151E4A78	CERR	3	OK	n	n	D_800ABA76[][10], D_800ABB88 s16[][2] as s8*, (u8*)&D_80090120 = 1 stops CSE of 1; file head: func_151E2FCC proto fixed (was extern s32)
+func_151E8620	CERR	5	DIFF4	y	n	Gfx* ptr diff; arg0 = fn(arg0), temp_a2 = arg0, reread D_800E0B94 after call; t6/t7 numbering left
+func_151BEC7C	CERR	4	OK	n	n	literal 0.65000004f (file owns rodata)
+func_151C1D48	fresh	2	OK	n	y	u8 tab[], u8 [][12]; operand order via permuter
+func_151937A4	draft	8	DIFF10	y	y	remote permuter 600s best DIFF10; or a3,a0 copy still not reproduced (p=arg0 copy gets propagated)
+func_151BAA18	draft	4	SIZE-1	n	n	family: ref has t0=arg2 copy and a3=v1 copy; new_var=temp_v1 before if coalesced
+func_151A7E2C	fresh	2	DIFF13	y	y	b1: temp_v0 assigned before temp_v1 helps; permuter best 70 unsolved
+func_151D2E5C	draft	6	DIFF1	n	n	bnel t9,v1 operand order unchanged by 10 source forms
+func_151D324C	CERR	4	DIFF12	y	y	fwd proto func_151D33FC(2 args), u8 arg2 natural; ref b delay slot duplicates lbu t1; permuter best 115

@@ -150,7 +150,7 @@ void func_151E3A1C(void) {
 s32 func_151F2CDC();
 void func_151F2D6C(s32, s32);
 extern s32 *D_800E0EB8;
-extern s32 func_151E2FCC;
+void func_151E2FCC(void);
 
 void func_151E49C8(void) {
     if ((u8) D_80090120 != 0) {
@@ -168,7 +168,31 @@ void func_151E49C8(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E4A78.s")
+s32 func_1501D348(s32, s32, s32, s32, s32);
+extern u8 D_800ABA76[][10];
+extern s16 D_800ABB88[][2];
+void func_151E4A78(void) {
+    s8 *p;
+    s8 temp_v1;
+    s8 var_a1;
+    temp_v1 = D_800ABA76[((s8 *)D_80090174)[0x42]][0];
+    if (temp_v1 >= 0) {
+        if (D_800E1030[0] != 0) {
+            p = (s8 *)&D_800ABB88[temp_v1];
+            var_a1 = p[3];
+        } else {
+            p = (s8 *)&D_800ABB88[temp_v1];
+            var_a1 = p[2];
+        }
+        func_1501D348(*(s16 *)p, var_a1, 0, 0, 0);
+        *(u8 *)&D_80090120 = 1; // fakematch: u8 store keeps the constant out of the CSE
+        D_800E0B94 = 5;
+        D_8008FD8C = 1;
+        D_80090130 = 1;
+        return;
+    }
+    func_151E2FCC();
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E4B40.s")
 
