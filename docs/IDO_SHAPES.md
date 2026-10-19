@@ -378,3 +378,21 @@ Constructs that only exist to coax the compiler get a `// fakematch: <why>` comm
 See `docs/sessions/s46.md` for the details. Key rule: with two plain memory-expression operands IDO emits `beq/bne/addu/multu` operands in REVERSED source order, while a named local keeps its
 source position. Drop the key temp and put the `arg0`/pl field on the left (`pl->unk0 == arg1->unk0`) to get `bnel arg1field,plfield`. The whole 0x2D/0 handler family (`or a3,a0` variants
 included) is solved this way; an `s32` return type in the header keeps `v0` live and blocks `bne` delay-slot filling (make it `void`).
+## 16. Session 45 recipes (game < 0x130000: the 0x2D/0 handler family, arity fixes)
+
+1. **The 0x2D/0 key handler family** `void f(struct102 *arg0, u8 *arg1, u8 arg2)` (8-byte records `{s32 key; u8 flag; ...}` at `arg0 + K`, `or a3,a0` arg copy, `jal func_1516972C`); solved
+   `func_150B5D20`, `func_150CF994` (K=0x28), `func_150F0E0C` (0x170), `func_150D5E7C` (0x28, cond `0||0x2F||3`), `func_150D7370`, `func_150D7578`, `func_150F15A0` (0xA8, 0x2D arm first), `func_150F0D64` (0x60 via `*(u8 **)(arg0 + 0x60)`),
+   `func_150DAA8C` (`*(u8 **)(arg0 + 0x98)`, extra 0x44 arm). Recipe: **`u8 *v = (u8 *)arg0 + K;` first** (second pointer defined first gives the `or a3,a0` copy); arm `arg2 == 0`:
+   `s32 t = *(s32 *)arg1; if (t == *(s32 *)v || v[4] == arg1[4]) f(arg0);` (loading `t` first fixes the load order); arm `0x2D` with direct compares
+   `if (*(s32*)arg1 == *(s32*)v) {*(s32*)v = *(s32*)(arg1+4); v[4] = arg1[9];} else if (*(s32*)(arg1+4) == *(s32*)v) {*(s32*)v = *(s32*)arg1; v[4] = arg1[8];}`.
+   Arg2==0 first: plain form OK. 0x2D first (`func_150D7370/7578/15A0`): permuter needs `if (arg1) {}` in the else arm and a no-op `goto end; end: ;` after the second compare. `func_150F0D64`: `a = *(s32 *)arg1;` and no `b`.
+   `func_150DAA8C`: `(u16)(cond)` around the 0x44 condition + an unused label after the store. Still open: `func_150FE08C` (leaf, `*v = 0`, DIFF5 after permuter), `func_150EFE90`, `func_150D4ED0`, `func_150FCD98`.
+2. **Callee arity from the asm** (again): `func_1502CF24` calls a 5-arg function with `arg0` passed through (`func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *)`). A callee the m2c draft calls with
+   `()` but whose caller homes both args before the call takes **no args** (`func_15097DDC`: passing them loads `a1`, wrong).
+3. **A callee implicitly declared earlier in the same file** (draft is CERR "redeclaration"): `//HOIST <proto>;` first line in the draft (screen.py hoists it after the last `#include`); the return type must match the use (`struct216 *func_1507BB28`).
+4. **A field tested for `!= 0` and later passed as a pointer stays in a temp reg** only if tested as `*(s32 *)(p + K) != 0` (pointer-typed test loads into `a0`): `func_1502FC38`. A byte spilled across a call as a word needs `s32 v = p[4]`, not `u8`.
+5. **`-10000.0f` compared as `x != c`**: `float new_var; new_var = -10000.0f;` at the top and `x != (0, new_var)` swaps the `c.eq.s` operands (permuter, `func_15033698`; fakematch).
+6. **A rodata-owning file changes codegen of literals**: owning `.rodata` of `game_83300` turned `D_80099520` into the literal `0.017453292f` and `func_1505D34C` then got frame 0x28 instead of 0x30 (same C otherwise); I reverted it. `func_1505F188`
+   (matching draft, needs `3.3f` and `-10000.0f` literals) is blocked on that: `extern f32 D_800999F4/F8` gives SIZE+1 (loads not CSE'd).
+7. **OPEN (kept pointer folded)**: `func_150F2B20`, `func_150B9A40`: the ref keeps `addiu v0,a0,K` as a live pointer used for 3 accesses; `u8 *pp = ...`, `&s->field`, `p += K+1; p--;` all fold it away.
+   `func_15062D10`: `s32 *q = &arg1;` (fakematch) with `q[0..2]` reproduces the `a1..a3` home stores; rest is DIFF49.

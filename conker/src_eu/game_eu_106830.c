@@ -65,7 +65,28 @@ void func_150DAA60(s32 arg0) {
     func_15147E98(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150DAA8C.s")
+void func_150DAA8C(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = *(u8 **)((u8 *)arg0 + 0x98);
+    if (arg2 == 0x44) {
+        if ((u16)(*(s32 *)v == *(s32 *)arg1 || v[4] == arg1[4])) { // fakematch: permuter artifact (u16 cast of the condition)
+            *(f32 *)(v + 0x3C) = *(f32 *)(arg1 + 8);
+dummy_label: ; // fakematch: permuter artifact (unused label)
+        }
+    } else if (arg2 == 0) {
+        s32 t = *(s32 *)arg1;
+        if (t == *(s32 *)v || arg1[4] == v[4]) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)arg1;
+            v[4] = arg1[8];
+        }
+    }
+}
 
 void func_150DAB6C(u8 *arg0, f32 arg1) {
     struct {

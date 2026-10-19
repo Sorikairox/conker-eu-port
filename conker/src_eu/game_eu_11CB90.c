@@ -146,9 +146,44 @@ void func_150F0968(void *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F03F8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F0D64.s")
+void func_150F0D64(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = *(u8 **)((u8 *)arg0 + 0x60);
+    s32 a;
+    if (arg2 == 0) {
+        s32 t = *(s32 *)arg1;
+        if (t == *(s32 *)v || v[4] == arg1[4]) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        ; // fakematch: permuter artifact (empty statement)
+        a = *(s32 *)arg1;
+        if (a == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = a;
+            v[4] = arg1[8];
+        }
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F0E0C.s")
+void func_150F0E0C(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = (u8 *)arg0 + 0x170;
+    if (arg2 == 0) {
+        s32 t = *(s32 *)arg1;
+        if (t == *(s32 *)v || v[4] == arg1[4]) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)arg1;
+            v[4] = arg1[8];
+        }
+    }
+}
 
 s32 func_15160A58(s32, u8, s32 *, u8, s16, s32, s32, s32, s32, s32, s32, s8, s32, u8, u8, s32);
 extern s32 D_800A1A44;
@@ -192,7 +227,31 @@ s32 func_150F13C8(u8 *arg0, s32 arg1)
   return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F15A0.s")
+void func_150F15A0(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = (u8 *)arg0 + 0xA8;
+    if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else {
+            if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+                *(s32 *)v = *(s32 *)arg1;
+                v[4] = arg1[8];
+            }
+            goto end; // fakematch: permuter artifact (no-op jump keeps this arm's exit)
+end:        ;
+        }
+    } else {
+        if (arg1) { // fakematch: permuter artifact (empty if)
+        }
+        if (arg2 == 0 || arg2 == 0x43) {
+            s32 t = *(s32 *)arg1;
+            if (t == *(s32 *)v || v[4] == arg1[4]) {
+                func_1516972C(arg0);
+            }
+        }
+    }
+}
 
 void func_150F10D4(u8 *arg0) {
     struct {

@@ -182,7 +182,29 @@ s32 func_15033618(u8 *arg0, u8 *arg1)
   return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033698.s")
+s32 func_15033698(u8 *arg0, u8 *arg1) {
+    f32 temp_f0;
+    f32 new_var;
+    u8 *temp_v0;
+    new_var = -10000.0f; // fakematch: constant in a variable swaps the c.eq.s operands
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    if (arg1[0xAD] != 0) {
+        temp_v0 = *(u8 **)(arg1 + 0x31C);
+        if (temp_v0 != NULL) {
+            temp_v0[0x11A] = 0;
+        }
+        return 1;
+    }
+    temp_f0 = *(f32 *)(arg1 + 0x118);
+    if (temp_f0 != (0, new_var) && *(f32 *)(arg1 + 0x18) < temp_f0 + 300.0f) {
+        arg0[3] = 0;
+    } else {
+        arg0[3] = 0xFF;
+    }
+    return 0;
+}
 
 s32 func_15033730(u8 *arg0, u8 *arg1)
 {
