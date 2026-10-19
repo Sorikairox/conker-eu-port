@@ -29,8 +29,8 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3158 / 5913 functions in C (53.4%)**, code bytes 344,028 / 2,253,856 (15.3%) (end of session 34, from `verify_all.sh`).
-  init 361/540 (38.5% of bytes), game 2766/5330 (13.2%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
+- **3163 / 5913 functions in C (53.5%)**, code bytes 345,344 / 2,253,856 (15.3%) (worktree eu-wt-a after applying the s36 drafts, from `verify_all.sh`).
+  init 366/540 (39.3% of bytes), game 2766/5330 (13.2%), debugger 31/43 (41.3%). Session 36 recipes: IDO_SHAPES section 12, `docs/sessions/s36.md`. Next: near misses func_10010E78 (variants f10e78_a/b.c in repair/), func_10005AD0, func_16000F8C, func_100046E4. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
 - Session 34: 5 more from the pool (commit `350efff`), see "Session 34" at the end. Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
