@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 40, worktree eu-wt-a; session 41, main checkout, game < 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 42, worktree eu-wt-a; 40 = previous); session 45 (main, game < 0x130000). Update this file at the end of every work session.
@@ -31,6 +31,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 50 (main, game < 0x130000): 3298 / 5913 functions in C (55.8%)**, code bytes 370,496 / 2,253,856 (16.4%) (game 2892, init 374, debugger 32), `verify_all.sh` all OK. +3: `func_1501E220`, `func_150CE0C0`, `func_1506BCC8`.
+  Doc `docs/sessions/s50.md`, recipes IDO_SHAPES "s50 recipes". New tool `argfix.py` (callee prototypes from the caller's asm; `ARGFIX=1 m2cfix.py list`): on 189 pool5 drafts CERR 96 -> 77, SIZE+-1 15 -> 19.
+  Key findings: m2c `T *p += K` strides by sizeof(T) (three SIZE-1 drafts were just that); a DIFF1 `c.eq.s` operand order is a 200 s permuter job; a stale arg register (`func_151EFDD0()` has no args) is invisible to argfix.
 - **Session 49 (main, game < 0x130000): 3295 / 5913 functions in C (55.7%)**, code bytes 369,560 / 2,253,856 (16.4%) (game 2889, init 374, debugger 32), `verify_all.sh` all OK. +5 in 2 commits: `func_150EFE90`, `func_1509B810`, `func_150D6898`, `func_15019BB8`, `func_150F83A0`.
   Doc `docs/sessions/s49.md`, recipes IDO_SHAPES "s49 recipes". Key findings: **m2c callee prototypes are often wrong** (read the arg registers: floats after an int first arg travel in GPRs, a `lui/ori` constant is an `s32` param, pass-through args);
   `(u8 *)GLOBAL + idx * K` / `field * call()` operand orders; `goto end; end: ;` ends a 0x2D arm.
@@ -76,7 +79,7 @@ Verification / build
 - `verify_all.sh [--quick]` full check (s-brief). `check_files.py [src_eu/X.c]` whole-object `.text` + owned `.rodata/.data` vs ROM (reliable; `check_funcs.py` skips functions already in C). `fdiff.py src_eu/X.c func` word diff of a C function. `rodiff.py` rodata word diff. `bindiff.py`.
 - `needsyms.py [--apply] funcs` re-adds splat auto symbols that a newly matched function was the last user of (only the full verify catches it, s13). `revert_bad.py` reverts bad new C to GLOBAL_ASM (s03).
 
-Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts come from `CONKER_ROOT` / `CONKERDEV`, defaults `~/conker` and `conkerdev`; s04-s07)
+Drafting and screening (`argfix.py FUNC < draft.c` rewrites callee prototypes from the caller's asm, `ARGFIX=1 m2cfix.py list` runs it after declfix, s50; `m2c/` is host-side; paths in `m2c/` scripts come from `CONKER_ROOT` / `CONKERDEV`, defaults `~/conker` and `conkerdev`; s04-s07)
 - `m2c/list.py` all GLOBAL_ASM functions; `m2c/gen2.py outdir min max` m2c drafts + 8 variants; `m2c/screen.py` (OK/DIFFn/SIZE+-n/CERR; word diff with `SCREEN_V=1`); `m2c/try func [draft]`, `m2c/tryall func a.c b.c...` (8 parallel),
   `m2c/mine func draft.c` (my asm on one line; honours `SCREEN_OPT`), `m2c/keep`, `m2c/apply.py build/hand`, `m2c/screenall dir`, `m2c/merge.py`, `m2c/narrow.py`, `m2c/switchinline.py`, `m2c/compound.py`, `m2c/voidret.py`, `m2c/spawngen.py`/`spawn.py` (effect spawners, s09-s11), `m2c/flags src_eu/X.c` (build with each OPT_FLAGS).
 - `gensome.sh <funcs>` drafts for a few functions into `repair/fresh/`; `gen40.sh [max]` bulk; `m2cfix.py list` declfix + bulk screen (s30); `fctx.sh <func>` / `sh.sh <func>` context + asm on one line (s18, s24).
@@ -114,6 +117,9 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+1zz. Slice below 0x130000 after session 50 (details `docs/sessions/s50.md`): near misses with drafts in `conker/build_port/s50/`: `func_1502B6BC` DIFF1 (`sf2/best.c`, varargs, `sp44` slot 0x3C vs 0x44), `func_150D2884` DIFF2 (`build_port/s49/as1.c`),
+   `func_150A29C8` DIFF15 (`b_func_150A29C8.c`), `func_150EBA04` DIFF19 (`w/x2.c`), `func_150DE8AC` SIZE-1 (`w/e1.c`), `func_150893AC` / `func_15024438` / `func_150C8850` / `func_15083568` / `func_150B45C8` / `func_1505A250` (SIZE+-1, `w/`),
+   `func_150A2FCC` (needs a 3-parameter definition: header has 4 and the caller in `game_16EE20` passes 4). Ranked pool5 drafts: `build_port/s50/dfx1/ranked.txt` (77 CERR left; `func_15004AAC` DIFF40 next). The 32 pool5 functions without a draft need `gensome.sh` retried.
 1z. Slice below 0x130000 after session 49 (details `docs/sessions/s49.md`): open near misses with bests in `conker/build_port/s49/`: `func_150D2884` DIFF2 (`as1.c`, spill slot 0x30 vs 0x34), `func_150B7B9C` DIFF10 (`af1.c`), `func_15095A4C` DIFF14 (`am2.c`),
    `func_150A0744` DIFF9, `func_1503FAF0` SIZE+1 (`aa4.c`), `func_1503E00C` SIZE+2 (`n5.c`), `func_150158D0` SIZE+2, `func_1505D5D0` (frame OK, float schedule), `func_15083E20` SIZE+1, `func_150F8DFC` (the 0x2D family's last member: v in a0, arg0 copy in a3).
    First check the **callee prototype and arity from the asm** of every SIZE+n draft (this solved two this session). Unscreened: `build_port/s49/pool5.txt` entries 41-221 (71-110 insns), `gensome5.out` has the first 40 (CERR: `func_150C2334`, `func_150D0420`, `func_1502B4A8`, `func_1503B840`, `func_1503ED44`, `func_1504ADD0`, `func_1509D338`, `func_15022A8C`,
