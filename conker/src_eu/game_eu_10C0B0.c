@@ -43,4 +43,10 @@ void func_150DF160(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DF1A8.s")
+extern u8 D_800A10DB[];
+extern u8 D_800A10FB[];
+void func_150DF1A8(u8 arg0, s32 arg1) {
+    s32 i = arg0 * 4;
+    func_151616D0(D_800A10DB[i], 0x22, 0);
+    func_151417C4(D_800A10FB[i], 0x22);
+}
