@@ -448,6 +448,28 @@ See `docs/sessions/s48.md`. Extends section 17 (s46 operand-order rule).
    `func_1504BA38` (the permuter's `s8 new_var2 = 0x184` is a truncation bug; clean forms give p/c/b in v0/v1/a1 instead of v1/a1/v0, DIFF27), `func_150C572C` (addiu s0/s1 order, 9 forms), `func_1509B950` (pos in t9 not v1, 6 forms),
    `func_150F8DFC` (ref puts `v = arg0+0x28` in a0 and copies arg0 to a3; every form copies arg1 instead).
 
+## s50 recipes (m2c pointer-stride bugs, stack-passed float args, DIFF1 compare order)
+
+1. **m2c `T *p; p += K` strides by `sizeof(T)`.** `s32 *var_v0_2; var_v0_2 -= 0xC` is 48 bytes, `f32 *var_t2 += 4` is 16, `s32 *var_s0 += 4` is 16 where the asm has `addiu 4`; a byte table walked as `f32 *var_v1 += 1`
+   is 4 bytes. Retype the pointer (`u8 *`) or use `p++` / `((u8 *)base)[i + 9]` (`func_15024438`, `func_150893AC`, `func_150EBA04`). A draft whose only fault is this shows up as SIZE-1/-2 with a plausible
+   shape: check every `+= K` against the asm increment first.
+2. **A `lw aN`/`lui+lw` argument that the draft passes as a constant is usually a different argument**: `func_1501E0C8(arg0, &D_800C3C88)` (pass-through `a0` plus an address in `a1`), `func_151149AC(x, 1)` (the `1` is
+   `addiu a1,zero,1`, not `arg1`), `func_151EFDD0()` has no arguments at all (`a0` held `&D_800D154C` for the earlier `lw`; stale register, argfix cannot tell and keeps it).
+3. **Callee stack args must be counted from the asm (`sw`/`swc1` to `0x10(sp)`..)**: `func_1514CBE8` takes 12 parameters; `(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8)` with the third a **`lw a2` of an
+   `f32` local** (an `f32` parameter loaded from memory travels with `lw`, not `mfc1`) and the fourth `lui a3` an `f32` literal (`251.0f`). The callee's out-parameter may be bigger than m2c's single local:
+   `func_1504715C(&sp48)` fills 36 bytes, `f32 sp48[9]; f32 sp6C[3];` gives the frame 0x78 (`func_150CE0C0`). `f32 sp6C[3]` (array) rather than three locals keeps the dead-looking `sp70 = ... + 1000.0f` store, because
+   `&sp6C` escapes.
+4. **64-bit shift through `__ull_rshift`**: `__ull_rshift(hi, lo, 0, n)` is `u64 >> n`; write `(D_800D3510[arg0 * 3 + (arg1 >> 6)] >> (arg1 & 0x3F)) & 1` with `extern u64 D_800D3510[];` (two `lw`, shift count in `a2:a3 = 0:n`).
+   The asm names the second word `D_800D3514`; the screen accepts the alias. Siblings: `func_150A29C8` (DIFF15 after the permuter), `func_150A2FCC` (needs a 3-parameter definition; header and an out-of-slice caller have 4).
+5. **DIFF1 `c.eq.s fA,fB` operand order**: `if (v != 0.0f)` gave `c.eq.s f0,f2`, the ref has `f2,f0`; the permuter fixed it in seconds as `if (0.0f != D_800D154C->xz_velocity)` with the load inline (`func_1506BCC8`). Run the
+   permuter on every DIFF1-2 whose only diff is a compare operand.
+6. **Empty label as scheduling barrier**: the permuter's `dummy_label: ;` before the first of two calls kept a `swc1` out of the `jal` delay slot (`func_150CE0C0`, `// fakematch`).
+7. **`y_position == unk180` operand order**: with two plain memory operands the compare loads them in reversed source order; the ref loads `unk180` first, so write `p->y_position == p->unk180` (the m2c form
+   `unk180 == y_position` was reversed).
+8. **Varargs** (`func_1502B6BC`, DIFF1): `s32 f(s32 *a, s32 b, s32 *c, s32 n, ...)` with `va_list ap; va_start(ap, n);` and `v = va_arg(ap, s32);` evaluated before the `if (*p != 0)` (the increment is unconditional in the
+   ref) reproduces everything except one stack slot (`sp44` lands at 0x3C instead of 0x44; `va_list` takes a slot). Best: `conker/build_port/s50/sf2/best.c`.
+9. **Not solved, notes**: `func_150EBA04` (frame OK with `s32 pad[2]` first, loop 1's `slti` becomes `bne at,4`), `func_1503EE68` (needs a 4-byte local above `f32 sp50[3]` without growing the frame), `func_1506B3B8`
+   (frame 0x30 vs 0x20), `func_1505A250` (ref keeps the `arg2` home store), `func_150DE8AC` (frame 0x68 vs 0x60 with the two `struct_eu_s32x2` locals).
 ## s51 recipes (lerp operand order, inline pointer sums, clones.py --near)
 
 See `docs/sessions/s51.md`.
@@ -475,3 +497,14 @@ See `docs/sessions/s52.md`.
 5. **Switch with no default and pass-through `a0`**: `switch (D_x) { case 2: f(arg0,1,1,1,arg1,arg2); break; case 16: f(arg0,0xA9,8,0,arg1,arg2); break; }` matched first try from the asm (`func_15171434`); a `u8` param is read with `lbu 0x27(sp)`.
 6. **Permuter artifacts** that solved a DIFF18 function-pointer table call: `u8 *new_var = arg0; ... if (!arg0) {} fn(new_var);` (fakematch, `func_151A8B34`/`8B84`). A DIFF18-from-scratch `permute.sh` run (200 s, 3 jobs) is worth it on indirect-call wrappers.
 7. **`clones.py --near` yield**: only dist <= 8 drafts are close to usable; for dist > 8 read the ref asm and write the body, using the draft only for file/prototypes. The NEAR header (`asm +x`, `sib -y`) lists what to change.
+## s53 recipes (clone-draft finishing)
+
+See `docs/sessions/s53.md`.
+1. **A DIFF1 clone draft may be a wrong field offset, not a scheduling problem** (`func_150EAA10`): the `**` line of the word diff showed `lw t9,0x84` vs `0x8C`; the clone copied the
+   template's `p + 0xC` where the target multiplies `p[0x84]` (`p + 4` after `p += 0x80`). Read the one differing word before reaching for `(0, local)`.
+2. **`s32 i = arg0 * 4;` as a named local keeps the `sw v0,0x18(sp)` spill across a call and the table index in v0** (`func_150DF1A8`: `D_800A10DB[i]` / `D_800A10FB[i]` with `u8 arg0`, `i` computed once);
+   the inline `arg0 * 4` twice gave DIFF2.
+3. **A global handler/pointer table declared with the callee's pointer type removes the `or a0,v0` copy** (`func_150C572C`: `extern struct102 *D_800D9CF0[]; if (D[i]) func(D[i]); D[i] = 0;` the `sw zero` lands in the `bne` delay slot).
+4. **A pure-zero-argument function (`s32 f(void)`) drops the `sw a0,0(sp)` home stores** that named-but-unused clone parameters produce (`func_1507F834`: SIZE+1 -> DIFF8, then DIFF6 with `u8 b = tbl[type][p[5]]; if (b == 0)`).
+5. **Many `--near 24..40` clone drafts are junk** (the "template" matches on skeleton only; constants, call counts and float/int types differ): `func_150FB708`, `func_150ADACC` (data decoded as mips3 code), `func_150A7EF4` (a fragment ending in `jr t9`), `func_150226E8`.
+   Judge them from the target asm first; a clone draft is worth a try only when its `NEAR n` comment lists at most ~5 differences.

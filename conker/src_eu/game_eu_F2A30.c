@@ -7,7 +7,17 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/func_150C539C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F2A30/func_150C572C.s")
+extern struct102 *D_800D9CF0[];
+void func_150C572C(void) {
+    s32 i;
+
+    for (i = 0; i < 4; i++) {
+        if (D_800D9CF0[i] != 0) {
+            func_1516972C(D_800D9CF0[i]);
+        }
+        D_800D9CF0[i] = 0;
+    }
+}
 
 s32 func_150C5780(void) {
     if ((D_800C35EA == 1) && ((D_800C3A08 == 0xB) || (D_800C3A08 == 0xC) || (D_800C3A08 == 0xD))) {

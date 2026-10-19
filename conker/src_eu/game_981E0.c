@@ -341,7 +341,37 @@ void func_1506BCA0(void) {
 }
 
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506BCC8.s")
+s32 func_151EFDD0(void);
+void func_1506BCC8(void)
+{
+  struct127 *p;
+  f32 d;
+  f32 v;
+  if (D_800D154C->interaction_state == 0x16)
+  {
+    if (D_800D154C->y_position == D_800D154C->unk180)
+    {
+      D_800D154C->y_velocity = (f32) ((func_151EFDD0() % 8) + D_800D1580);
+      if (0.0f != D_800D154C->xz_velocity)
+      {
+        D_800D154C->y_velocity = D_800D154C->y_velocity * (D_800D154C->xz_velocity / 40.0f);
+      }
+      else
+      {
+        D_800D154C->y_velocity = 0.0f;
+      }
+    }
+  }
+  else
+  {
+    p = D_800D154C;
+    d = p->y_position - p->unk180;
+    if ((d > (-5.0f)) && (d < 5.0f))
+    {
+      p->y_velocity = (f32) D_800D1580;
+    }
+  }
+}
 
 void func_1506BDE8(void) {
     if (D_800D154C->y_position < -1750.0f) {
