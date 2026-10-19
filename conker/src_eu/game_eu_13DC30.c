@@ -84,7 +84,27 @@ s32 func_151145D0(struct131 *arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114644.s")
+s32 func_15114644(u8 *arg0) {
+    s32 i;
+    s32 v;
+    s32 m; // fakematch: mask temp fixes the and operand order
+    i = 0;
+    if (arg0[0x4F] & 0x80) {
+        v = D_800DC3C4[(arg0 - (u8 *)D_800DBEF4) / 160];
+loop:
+        m = 1 << i;
+        if ((v & m) != 0) return i;
+        m = 1 << (i + 1);
+        if ((v & m) != 0) return i + 1;
+        m = 1 << (i + 2);
+        if ((v & m) != 0) return i + 2;
+        m = 1 << (i + 3);
+        if ((v & m) != 0) return i + 3;
+        i += 4;
+        if (i != 0x20) goto loop;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
 

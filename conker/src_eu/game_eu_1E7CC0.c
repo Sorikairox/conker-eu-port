@@ -221,7 +221,22 @@ void func_151BEC50(struct210 * arg0) {
     func_1513CAA0(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BEC7C.s")
+typedef struct { s32 a[4]; } V4_151BEC7C;
+extern V4_151BEC7C D_800AAB88;
+s32 func_151BEC7C(u8 *arg0) {
+    u8 *v = arg0 + 0x110;
+    V4_151BEC7C sp24;
+    f32 f;
+    sp24 = D_800AAB88;
+    *(s16 *)(arg0 + 0x170) = *(s16 *)(arg0 + 0x170) - D_800BE9E4;
+    if (*(s16 *)(arg0 + 0x170) < 0) {
+        *(s8 *)(arg0 + 0x18) = sp24.a[func_150ADA20() & 3];
+        *(s16 *)(arg0 + 0x170) = (func_150ADA20() & 7) + 3;
+    }
+    f = *(f32 *)(v + 0x48);
+    *(f32 *)(v + 0x48) += (*(f32 *)(arg0 + 0x174) - f) * 0.65000004f;
+    return 1;
+}
 
 void func_151BED38(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)(arg0 + 0x180), (s32)(arg0 + 0x184), (s32)arg0);

@@ -181,7 +181,24 @@ void func_1513477C(struct102 *arg0) {
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15134908.s")
+s32 memcpy(u8 *, u8 *, s32);
+s32 func_15134908(struct_eu_EF410 *arg0, s32 arg1, u8 arg2, s32 arg3) {
+    u8 *temp_v0;
+    u8 *sp24; // fakematch: temp_v0 copy kept in a stack slot
+    temp_v0 = func_15167A68(0x2A, arg3, arg1 + 0x40, 1, arg2, 1);
+    if (temp_v0 == NULL) {
+        return 0;
+    }
+    *((u8 *)arg0 + 0x16) |= 2;
+    sp24 = temp_v0;
+    memcpy(temp_v0 + 0x10, (u8 *)arg0, 0x1C);
+    *(f32 *)(sp24 + 0x2C) = **(f32 **)(sp24 + 0x10);
+    *(f32 *)(sp24 + 0x30) = **(f32 **)(sp24 + 0x14);
+    *(f32 *)(sp24 + 0x34) = **(f32 **)(sp24 + 0x18);
+    *(f32 *)(sp24 + 0x38) = 1.0f / (2.0f * *(f32 *)(sp24 + 0x1C));
+    *(f32 *)(sp24 + 0x3C) = 0.0f;
+    return (s32)sp24;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151349D0.s")
 

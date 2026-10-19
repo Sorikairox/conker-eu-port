@@ -52,9 +52,16 @@ function or tool name comes up; do not read it through).
   foreground with a generous Bash timeout (up to 600000 ms). Never end your turn to wait
   for them: ending a turn can hand back an interim report and end your session with
   work uncommitted.
-- End your turn to wait only for long permuter runs or sweeps, and only after
-  committing everything that's already verified. When the job's notification arrives,
-  continue the session.
+- **Never end your turn while you have budget left.** In this harness, ending a turn
+  hands back your report and ends the session, even with background jobs running.
+  Sessions 36, 37 and 43 ended that way, with matched work left uncommitted.
+- While a long background job runs (a permuter run, gensome on many functions), keep
+  working on other functions. When you've truly nothing else to do, block with
+  `tools/eu_port/waitjob.sh pid <PIDs>` or `waitjob.sh file <out> <marker>`. It waits in
+  the foreground for up to 9 minutes per call; call it again if it says "still running".
+  Record the PIDs of background jobs you start (`echo $!`) so you can wait on or kill
+  exactly those.
+- Your session is over only when the budget is used and the hand-off commit is made.
 - Never sleep-poll.
 - To wait for a specific condition (e.g. a file appearing), use the Monitor tool if it's
   available, not a sleep loop.
