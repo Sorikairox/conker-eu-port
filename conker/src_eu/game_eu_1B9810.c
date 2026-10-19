@@ -65,4 +65,21 @@ s32 func_1518CAB0(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CC0C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CDC0.s")
+void func_1518CDC0(struct102 *arg0, u8 *arg1, u8 arg2) {
+    s32 id;
+    if (arg2 == 0x2D) {
+        if (*(s32 *)(arg1 + 0) == *(s32 *)((u8 *)arg0 + 0x24)) {
+            (*(s32 *)((u8 *)arg0 + 0x24)) = (s32) (*(s32 *)((u8 *)arg1 + 4));
+            arg0->unk28 = (*(u8 *)((u8 *)arg1 + 9));
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)((u8 *)arg0 + 0x24)) {
+            (*(s32 *)((u8 *)arg0 + 0x24)) = *(s32 *)(arg1 + 0);
+            arg0->unk28 = (*(u8 *)((u8 *)arg1 + 8));
+        }
+        goto dummy_label; dummy_label: ; // fakematch: b + target-copied delay slot
+    } else if (arg2 == 0) {
+        id = *(s32 *)(arg1 + 0);
+        if ((id == (*(s32 *)((u8 *)arg0 + 0x24))) || (arg0->unk28 == *(u8 *)(arg1 + 4))) {
+            func_1516972C(arg0);
+        }
+    }
+}

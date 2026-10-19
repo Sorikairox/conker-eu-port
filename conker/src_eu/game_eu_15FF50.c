@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_15134290
+s32 func_15134108(s32, f32, f32, f32, f32, s32);
+// hoisted forward declaration(s) for func_151341C8
+s32 func_15134108(s32, f32, f32, f32, f32, s32);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132740.s")
@@ -104,9 +108,21 @@ s32 func_15133FC0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15134108.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_151341C8.s")
+s32 func_151341C8(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
+    func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
+    if (func_150ADA20() & 1) {
+        func_10010F88((func_150ADA20() % 9U) + 0x2DE, 0x2EE0U, 0, 0U, 0, (s16) (s32) arg1, (s16) (s32) arg2, (s16) (s32) arg3, 0x1F4, 0x3E8);
+    }
+    return 1;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15134290.s")
+s32 func_15134290(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
+    func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
+    if (func_150ADA20() & 1) {
+        func_10010F88((func_150ADA20() % 10U) + 0x1B8, 0x5DC0U, 0, 0U, 0, (s16) (s32) arg1, (s16) (s32) arg2, (s16) (s32) arg3, 0x1F4, 0x3E8);
+    }
+    return 1;
+}
 
 void func_15134358(struct102 *arg0, s32 *arg1, u8 arg2) {
     s32 id;

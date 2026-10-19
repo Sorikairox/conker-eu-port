@@ -1,6 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_1514F878
+typedef struct { s32 w[3]; } V3_1514F878;
+extern V3_1514F878 D_800A5D50;
+extern V3_1514F878 D_800A5D5C;
+extern f32 D_800A6238;
 
 s32 func_1514F2FC(u8 *, u8 *);
 
@@ -474,7 +479,13 @@ s32 func_1514F6A0(u8 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F704.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F878.s")
+void func_1514F878(struct127 *arg0) {
+    V3_1514F878 sp54;
+    V3_1514F878 sp48;
+    sp54 = D_800A5D50;
+    sp48 = D_800A5D5C;
+    func_15160CDC(arg0, 5, &sp54, &sp48, D_800A6238, 2, 0x12C, 0xFF, 0xFF, 0xFF, 0xFF, 1, 0, 0, 0xFF, 1);
+}
 
 void func_1514F93C(u8 *arg0) {
     struct {

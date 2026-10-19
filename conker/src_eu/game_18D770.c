@@ -1241,7 +1241,32 @@ typedef struct {
     u8  unk9;
 } struct_eu_18D770_msg;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15163FEC.s")
+void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
+    struct_eu_18D770_pl *pl = &arg0->unk18;
+    void (*func)(struct225 *, void *, u8);
+    s32 id;
+
+    if (arg2 == 0) {
+        id = arg1->unk0;
+        if (id == pl->unk0 || arg1->unk4.b == pl->unk4) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (pl->unk0 == arg1->unk0) {
+            pl->unk0 = arg1->unk4.w;
+            pl->unk4 = arg1->unk9;
+        } else if (pl->unk0 == arg1->unk4.w) {
+            pl->unk0 = arg1->unk0;
+            pl->unk4 = arg1->unk8;
+        }
+        goto dummy_label; dummy_label: ; // fakematch: forces the `b` + target-copied delay slot
+    } else {
+        func = D_8008B714[arg0->unk2D];
+        if (func != NULL) {
+            func(arg0, arg1, arg2);
+        }
+    }
+}
 // NON-MATCHING: only the tail of the 0x2D case is scheduled differently (target has an extra b)
 // void func_15163FEC(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
 //     struct_eu_18D770_pl *pl = &arg0->unk18;
@@ -1297,7 +1322,32 @@ typedef struct {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15164134.s")
+void func_15164134(struct225 *arg0, struct_eu_18D770_msg *arg1, u8 arg2) {
+    struct_eu_18D770_pl *pl = &arg0->unk18;
+    void (*func)(struct225 *, void *, u8);
+    s32 id;
+
+    if (arg2 == 0) {
+        id = arg1->unk0;
+        if (id == pl->unk0 || arg1->unk4.b == pl->unk4) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (pl->unk0 == arg1->unk0) {
+            pl->unk0 = arg1->unk4.w;
+            pl->unk4 = arg1->unk9;
+        } else if (pl->unk0 == arg1->unk4.w) {
+            pl->unk0 = arg1->unk0;
+            pl->unk4 = arg1->unk8;
+        }
+        goto dummy_label; dummy_label: ; // fakematch: forces the `b` + target-copied delay slot
+    } else {
+        func = D_8008B71C[((u8 *)arg0)[0x3D]];
+        if (func != NULL) {
+            func(arg0, arg1, arg2);
+        }
+    }
+}
 
 struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
     struct225 *temp_v0;

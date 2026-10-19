@@ -89,7 +89,18 @@ void func_1519E764(u8 *arg0, u8 *arg1, u8 arg2)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519E874.s")
+s32 func_1519E874(u8 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
+    u8 *p = arg0;
+    f32 sp1C[2];
+    if (*(s32 *)(*(u8 **)p + 0x1D4) == 0) {
+        return 0;
+    }
+    func_15143134(p + 8, sp1C, (p[5] << 6) + *(s32 *)(*(u8 **)p + 0x1D4));
+    arg1[0] = ((sp1C[0] - arg2) * arg5) + arg2;
+    arg1[1] = ((sp1C[1] - arg3) * arg5) + arg3;
+    arg1[2] = ((sp1C[2] - arg4) * arg5) + arg4;
+    return 1;
+}
 
 void func_1519E688(void);
 void func_1519D5A0(s32, s32, s32, s32, s32, s32);
