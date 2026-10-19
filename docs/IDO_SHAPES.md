@@ -433,3 +433,26 @@ included) is solved this way; an `s32` return type in the header keeps `v0` live
    no `pad`; only the spill slot 0x30 vs 0x34 and t-register numbering remain); `func_15080748` (subu result lands in `t0` not `v0` whatever the temp form), `func_15013000` (load of `D_800D3094` hoisted above the two stores: no source order change moves it),
    `func_1504BA38` (the permuter's `s8 new_var2 = 0x184` is a truncation bug; clean forms give p/c/b in v0/v1/a1 instead of v1/a1/v0, DIFF27), `func_150C572C` (addiu s0/s1 order, 9 forms), `func_1509B950` (pos in t9 not v1, 6 forms),
    `func_150F8DFC` (ref puts `v = arg0+0x28` in a0 and copies arg0 to a3; every form copies arg1 instead).
+
+## s50 recipes (m2c pointer-stride bugs, stack-passed float args, DIFF1 compare order)
+
+1. **m2c `T *p; p += K` strides by `sizeof(T)`.** `s32 *var_v0_2; var_v0_2 -= 0xC` is 48 bytes, `f32 *var_t2 += 4` is 16, `s32 *var_s0 += 4` is 16 where the asm has `addiu 4`; a byte table walked as `f32 *var_v1 += 1`
+   is 4 bytes. Retype the pointer (`u8 *`) or use `p++` / `((u8 *)base)[i + 9]` (`func_15024438`, `func_150893AC`, `func_150EBA04`). A draft whose only fault is this shows up as SIZE-1/-2 with a plausible
+   shape: check every `+= K` against the asm increment first.
+2. **A `lw aN`/`lui+lw` argument that the draft passes as a constant is usually a different argument**: `func_1501E0C8(arg0, &D_800C3C88)` (pass-through `a0` plus an address in `a1`), `func_151149AC(x, 1)` (the `1` is
+   `addiu a1,zero,1`, not `arg1`), `func_151EFDD0()` has no arguments at all (`a0` held `&D_800D154C` for the earlier `lw`; stale register, argfix cannot tell and keeps it).
+3. **Callee stack args must be counted from the asm (`sw`/`swc1` to `0x10(sp)`..)**: `func_1514CBE8` takes 12 parameters; `(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8)` with the third a **`lw a2` of an
+   `f32` local** (an `f32` parameter loaded from memory travels with `lw`, not `mfc1`) and the fourth `lui a3` an `f32` literal (`251.0f`). The callee's out-parameter may be bigger than m2c's single local:
+   `func_1504715C(&sp48)` fills 36 bytes, `f32 sp48[9]; f32 sp6C[3];` gives the frame 0x78 (`func_150CE0C0`). `f32 sp6C[3]` (array) rather than three locals keeps the dead-looking `sp70 = ... + 1000.0f` store, because
+   `&sp6C` escapes.
+4. **64-bit shift through `__ull_rshift`**: `__ull_rshift(hi, lo, 0, n)` is `u64 >> n`; write `(D_800D3510[arg0 * 3 + (arg1 >> 6)] >> (arg1 & 0x3F)) & 1` with `extern u64 D_800D3510[];` (two `lw`, shift count in `a2:a3 = 0:n`).
+   The asm names the second word `D_800D3514`; the screen accepts the alias. Siblings: `func_150A29C8` (DIFF15 after the permuter), `func_150A2FCC` (needs a 3-parameter definition; header and an out-of-slice caller have 4).
+5. **DIFF1 `c.eq.s fA,fB` operand order**: `if (v != 0.0f)` gave `c.eq.s f0,f2`, the ref has `f2,f0`; the permuter fixed it in seconds as `if (0.0f != D_800D154C->xz_velocity)` with the load inline (`func_1506BCC8`). Run the
+   permuter on every DIFF1-2 whose only diff is a compare operand.
+6. **Empty label as scheduling barrier**: the permuter's `dummy_label: ;` before the first of two calls kept a `swc1` out of the `jal` delay slot (`func_150CE0C0`, `// fakematch`).
+7. **`y_position == unk180` operand order**: with two plain memory operands the compare loads them in reversed source order; the ref loads `unk180` first, so write `p->y_position == p->unk180` (the m2c form
+   `unk180 == y_position` was reversed).
+8. **Varargs** (`func_1502B6BC`, DIFF1): `s32 f(s32 *a, s32 b, s32 *c, s32 n, ...)` with `va_list ap; va_start(ap, n);` and `v = va_arg(ap, s32);` evaluated before the `if (*p != 0)` (the increment is unconditional in the
+   ref) reproduces everything except one stack slot (`sp44` lands at 0x3C instead of 0x44; `va_list` takes a slot). Best: `conker/build_port/s50/sf2/best.c`.
+9. **Not solved, notes**: `func_150EBA04` (frame OK with `s32 pad[2]` first, loop 1's `slti` becomes `bne at,4`), `func_1503EE68` (needs a 4-byte local above `f32 sp50[3]` without growing the frame), `func_1506B3B8`
+   (frame 0x30 vs 0x20), `func_1505A250` (ref keeps the `arg2` home store), `func_150DE8AC` (frame 0x68 vs 0x60 with the two `struct_eu_s32x2` locals).

@@ -862,3 +862,17 @@ func_1505D5D0	SIZE+1	2	DIFF57	n	n	s49: callee func_1505D408 takes 8 args (s32,u8
 func_1506BCC8	SIZE+1	2	SIZE+2	n	n	s49: ref recomputes lui/addiu a0 for &D_800D154C each use and frame 0x18; pp local gives frame 0x30
 func_150F83A0	DIFF12	3	OK	y	y	permuter DIFF3 then hand: mem * sinf() operand order ((v+0x28 field) * sinf(..)) fixes the last mul.s and spill slot
 func_150D2884	DIFF9	4	DIFF2	n	y	permuter (remote) DIFF2: as1.c in build_port/s49; only the spill slot 0x30 vs 0x34 left (pad/sp34/order/type forms and stackfix all fail)
+func_1501E220	SIZE+1	2	OK	n	n	s50: func_1501E0C8(arg0, &D_800C3C88) pass-through a0 + address in a1 (m2c passed (&D, 0)); u8 D_800C3C88 via header; if-chain unrolled from the comma expression
+func_150CE0C0	SIZE-1	5	OK	n	y	s50: 12-param callee with f32 third+fourth (a2 lw of an f32 local, a3 251.0f); f32 sp6C[3] + f32 sp48[9] (callee writes 0x24 bytes); permuter added dummy_label (fakematch) to keep the sp70 store out of the jal delay slot
+func_1506BCC8	SIZE+1	4	OK	n	y	s50: func_151EFDD0() has NO args (stale a0 = &D_800D154C); y_position == unk180 operand order; p only in else branch; permuter fixed c.eq.s operand order (0.0f != D->xz_velocity)
+func_1502B6BC	SIZE+1	6	DIFF1	n	n	s50: varargs (s32*,s32,s32*,s32,...) with va_list/va_arg before the if; only sp44 at 0x3C vs 0x44 left (sf2/best.c); sp38[3], pads, orders tried
+func_150A29C8	SIZE-1	5	DIFF15	n	y	s50: header proto u8->(u32,u32) needed (kept u8 in header); u64 D_800D3510[arg0*3+(arg1>>6)] >> (arg1&0x3F) is the __ull_rshift; permuter best DIFF15 (b_func_150A29C8.c)
+func_150A2FCC	SIZE-1	2	SIZE+2	n	n	s50: sibling of 150A29C8; real definition has 3 params (a3 not homed) but functions.h has 4 and the caller game_16EE20 (outside slice) passes 4; needs header+caller change
+func_150EBA04	SIZE+1	5	DIFF19	n	n	s50: stride bugs fixed (s32* +=4 is 16 bytes; use ++), pad[2] first gives frame 0x50; loop 1 compare becomes bne at,4 vs ref slti: x2.c
+func_150893AC	SIZE-1	3	SIZE-1	n	y	s50: u8 *arg0 ids at +0x2B, ((u8*)temp_a2)[var_t1+9] stride; permuter no gain
+func_15024438	SIZE-1	3	DIFF58	n	y	s50: var_v0_2 must be u8* (m2c s32* += 0xC is 48 bytes); register roles a0/a2 vs v1/t0 left
+func_1503EE68	SIZE+1	4	DIFF19	n	n	s50: D_80098CD0 global float scale, arg0 pointer s32, f32 sp50[3]; frame 0x60 needs a 4-byte local above the array (pad gives 0x68)
+func_1505DDA8	SIZE+1	3	SIZE+2	n	n	s50: u16 arg2, stack args (&sp64,0) fixed by argfix; loop body ok, saves s8 where ref saves 8 regs
+func_1506B3B8	SIZE-1	3	SIZE-2	n	n	s50: frame 0x30 vs 0x20 and sp19 byte at 0x1B vs 0x19; no pad variants help
+func_1505A250	SIZE-1	2	SIZE-1	n	n	s50: ref keeps arg2 home store (swc1 f10,0x18(sp)) and frame 0x10; pads do not change the frame
+func_150DE8AC	SIZE+1	5	SIZE-1	n	n	s50: struct_eu_s32x2 sp50 = D_80088CF0; sp48 = D_80088CF8, call func_151149AC(x, 1); frame 0x68 vs 0x60
