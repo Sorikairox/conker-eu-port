@@ -160,7 +160,19 @@ void func_1513219C(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151321F4.s")
+void func_151321F4(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, f32 *arg4, f32 *arg5)
+{
+  u8 temp_a0;
+  f32 r;
+  temp_a0 = ((*((s8 *) (((u8 *) arg1) + 0))) * D_800BE9E4) + (*((u8 *) (((u8 *) arg0) + 0)));
+  temp_a0 = (*((u8 *) (((u8 *) arg0) + 0)) = temp_a0);  // fakematch: chained store assignment pins temp_a0 to a0
+  *((u8 *) (((u8 *) arg0) + 1)) = (u8) (((*((s8 *) (((u8 *) arg1) + 1))) * D_800BE9E4) + (*((u8 *) (((u8 *) arg0) + 1))));
+  temp_a0 = temp_a0 - 0x40;
+  r = func_151423D8(temp_a0);
+  *arg4 = ((*((f32 *) (((u8 *) arg3) + 0))) * (0, r)) + arg2;  // fakematch: comma flips mul.s operand order
+  r = func_151423D8((*((u8 *) (((u8 *) arg0) + 1))) - 0x40);
+  *arg5 = ((*((f32 *) (((u8 *) arg3) + 4))) * (0, r)) + arg2;  // fakematch: comma flips mul.s operand order
+}
 
 void func_151322BC(s32 arg0, u8 arg1) {
     const s32 sp1C[3] = {0x2B, 0x47, 0x52};
@@ -169,7 +181,7 @@ void func_151322BC(s32 arg0, u8 arg1) {
 }
 
 s32 func_1513230C(u8 *arg0, s32 arg1) {
-    func_151321F4(arg0 + 0xA8, arg0 + 0xAA, *(s32 *)(arg0 + 0xAC), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);
+    func_151321F4(arg0 + 0xA8, arg0 + 0xAA, *(f32 *)(arg0 + 0xAC), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);
     return 1;
 }
 

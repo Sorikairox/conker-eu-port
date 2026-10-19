@@ -812,3 +812,15 @@ func_15199200	DIFF1	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem
 func_1519C52C	DIFF1	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)
 func_151A23E4	DIFF2	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)
 func_151AAFFC	DIFF1	8	OK	n	n	s48: comma (0,x) operand swap: x + (0, local) / mem * (0, local)
+func_1517BD68	DIFF4	12	DIFF4	n	y	s48: sum into separate local gives or a3,a0 SIZE+1 in 10 variants; remote permuter 600s none
+func_15172D80	DIFF9	6	DIFF2	y	y	s48: if (D_800BE9F0 != *temp_v1) w/o temp_a1 + no sp34 local: only frame 0x48 vs 0x38 left (draft drafts/s48_func_15172D80.c)
+func_1516FE5C	DIFF9	8	DIFF4	y	y	s48: permuter best drafts/s48_func_1516FE5Cc.c: only lb/lbu/sll temp numbering (ref lb in v0) left; twin func_1516FE8C DIFF5
+func_1516FE8C	DIFF9	4	DIFF5	y	y	s48: twin of func_1516FE5C, best nm/func_1516FE8C
+func_151321F4	SIZE-2	8	DIFF3	y	y	s48: u8 narrowing + (0,r) mul.s + product+mem addu order fixed; only sum in t0 vs a0 (ref copies arg0 to a2) left; drafts/s48_func_151321F4b.c
+func_15178C9C	DIFF16	3	DIFF5	y	y	s48: permuter best drafts/s48_func_15178C9Cd.c, register roles
+func_151859C4	SIZE+1	3	DIFF36	y	y	s48: s16 fields inline (no locals) fixes size; f0 vs f14 quotient register; 6-function triangle-clip family
+func_151D75B0	DIFF16	2	DIFF15	n	n	s48: unfilled beqz delay slot (shape D) + mul order via mem*(0,a0) gives DIFF15
+func_151B6444	SIZE-1	2	SIZE-1	n	n	s48: callee func_15133E04 is 1-arg; ref reloads 0x170(s0) after store, frame 0x48 vs 0x38
+func_1518F8F4	DIFF17	2	SIZE-2	n	n	s48: dropping sp18/var_v1 spill form loses the v1 spill
+func_15191E2C	SIZE-1	2	DIFF26	n	n	s48: explicit else-if gives DIFF26; frame 0x30 and v0/v1 roles
+func_151321F4	DIFF3	9	OK	y	y	s48: permuter (local 500s from DIFF3 base) added chained store 'temp_a0 = (*(u8*)arg0 = temp_a0)' pinning the sum to a0; caller func_1513230C passes *(f32 *)(arg0+0xAC) now

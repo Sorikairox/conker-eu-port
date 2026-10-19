@@ -396,3 +396,18 @@ included) is solved this way; an `s32` return type in the header keeps `v0` live
    (matching draft, needs `3.3f` and `-10000.0f` literals) is blocked on that: `extern f32 D_800999F4/F8` gives SIZE+1 (loads not CSE'd).
 7. **OPEN (kept pointer folded)**: `func_150F2B20`, `func_150B9A40`: the ref keeps `addiu v0,a0,K` as a live pointer used for 3 accesses; `u8 *pp = ...`, `&s->field`, `p += K+1; p--;` all fold it away.
    `func_15062D10`: `s32 *q = &arg1;` (fakematch) with `q[0..2]` reproduces the `a1..a3` home stores; rest is DIFF49.
+
+## s48 recipes (comma operand swap, arg-reload mul.s)
+
+See `docs/sessions/s48.md`. Extends section 17 (s46 operand-order rule).
+1. **`(0, local)` flips a commutative operand pair.** `addu`, `multu`, `mul.s`, `beq` with one named-local/call-result operand ignore source order
+   (`local * mem` and `mem * local` compile the same); wrap the local in a comma, `mem * (0, local)` or `prod + (0, local)`, to get the other order. Try the 4 forms
+   (`(0, x)` on each operand, both positions) with `tryall`. Solved `func_15199200`/`func_1519C52C` (`idx*0x24 + (0, temp_v1)`), `func_151A23E4` (`mem * (0, temp_v1)`),
+   `func_151AAFFC` (`mem94 * (0, r)` with `r` the call result). Mark with `// fakematch`. `func_150EAA10`/`func_150351A4` (older DIFF1 mul.s) should try it.
+2. **mul.s of a call result and a field** (`func_151AAFFC`): `u8 **q = &arg0; r = f(...); p = *q;` reloads arg0 from its home after the call; loads via `p`, then `p += 0x80`
+   and the store uses `p + 8` with the loaded operands written as `p + 8` / `p + 0xC` (relative to the incremented pointer) so the `addiu v0,v0,0x80` is not folded.
+3. **A `u8` callee fed by `(x >> 16) - 0x40`**: no `& 0xFF` in the source (`andi t8; or a0,t8` comes from the callee's narrowing) (`func_151AAFFC`, `func_151321F4`).
+4. **`beq` of a loaded local and a global** (`func_15172D80`): `if (D_800BE9F0 != *temp_v1)` with no `temp_a1` local gives `lw t2; lb a1; beq t2,a1`.
+5. **Float register roles of the s16 lerp family** (`func_151859C4` + 5 siblings): reading the s16 fields inline (no `temp_v0` locals) restores the size and the load order
+   (arg1 field first); still open: the quotient lands in `f14` instead of `f0`.
+6. **`rlog.sh` and `CONKER_ROOT`**: running `rlog.sh` in a shell without the `wt.sh env` eval appends to the MAIN checkout's repair_log.tsv. Always `eval "$(tools/eu_port/wt.sh env a)"` in the same command.
