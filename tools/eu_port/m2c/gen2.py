@@ -3,7 +3,7 @@
 import sys,re,os,subprocess
 from multiprocessing import Pool
 S=os.path.dirname(os.path.abspath(__file__))
-os.chdir(os.path.expanduser('~/conker/conker'))
+os.chdir(os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker'))
 od,mn,mx=sys.argv[1],int(sys.argv[2]),int(sys.argv[3])
 BAD=('M2C_ERROR','M2C_BITWISE','M2C_STRUCT_COPY','M2C_MEMCPY','M2C_LWL','M2C_FIRST3','M2C_UNALIGNED','M2C_TRAP','M2C_BREAK','M2C_SYNC','GLUE_F64','MULT_HI','MULTU_HI','M2C_CARRY','M2C_OVERFLOW','CLZ(','unksp','saved_reg','(bitwise','/* irregular */','goto *')
 def repl_field(s):

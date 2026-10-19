@@ -6,7 +6,7 @@ Default: counts, size buckets, per-command tag counts. --list: one line per func
 --untried: only functions not in repair_log.tsv. --hints F...: draft gSP/gDP macro lines for those functions
 (word 0 decoded from the constant, word 1 from its source: zero / const / &sym / ?). Use `gdl++` as pkt."""
 import sys, os, re, glob, collections
-R = os.path.expanduser('~/conker'); os.chdir(R + '/conker')
+R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); os.chdir(R + '/conker')
 logged = {l.split('\t')[0] for l in open(R + '/tools/eu_port/repair_log.tsv')}
 NAMES = {0xE7: 'PIPESYNC', 0xE6: 'LOADSYNC', 0xE8: 'TILESYNC', 0xE9: 'FULLSYNC', 0xDA: 'MTX', 0xDB: 'MOVEWORD',
          0xD9: 'GEOMODE', 0xD8: 'POPMTX', 0xD7: 'TEXTURE', 0xFB: 'ENVCOLOR', 0xFA: 'PRIMCOLOR', 0xFC: 'COMBINE',

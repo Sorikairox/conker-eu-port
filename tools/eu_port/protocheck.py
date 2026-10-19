@@ -26,10 +26,10 @@ Applied/rejected lines go to tools/eu_port/protocheck.log.
 """
 import os, re, sys, glob, subprocess, collections
 
-R = os.path.expanduser('~/conker/conker')
+R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 SRC = R + '/src_eu'
 ASM = R + '/asm/nonmatchings'
-LOG = os.path.expanduser('~/conker/tools/eu_port/protocheck.log')
+LOG = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/tools/eu_port/protocheck.log')
 DOCKER = '/Applications/Docker.app/Contents/Resources/bin/docker'
 
 # ---------------------------------------------------------------- C parsing
@@ -605,7 +605,7 @@ def mentions(f, files):
     return out
 
 def dexec(cmd):
-    return subprocess.run([DOCKER, 'exec', '-w', '/conker/conker', 'conkerdev', 'bash', '-c', cmd],
+    return subprocess.run([DOCKER, 'exec', '-w', '/conker/conker', os.environ.get('CONKERDEV','conkerdev'), 'bash', '-c', cmd],
                           capture_output=True, text=True)
 
 def check(cfiles):

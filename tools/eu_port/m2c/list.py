@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import glob,re,os,sys
-os.chdir(os.path.expanduser('~/conker/conker'))
+os.chdir(os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker'))
 out=[]
 for p in glob.glob('src_eu/**/*.c',recursive=True):
     for m in re.finditer(r'#pragma GLOBAL_ASM\("([^"]+)"\)',open(p).read()):

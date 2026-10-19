@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # usage: revert.py func  -> put back GLOBAL_ASM
 import sys,glob,re,os
-os.chdir(os.path.expanduser('~/conker/conker'))
+os.chdir(os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker'))
 func=sys.argv[1]
 for p in glob.glob('src_eu/**/*.c',recursive=True):
     s=open(p).read()

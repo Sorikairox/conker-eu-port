@@ -17,7 +17,7 @@
 #   apply: apply.py on every match.c whose function is still GLOBAL_ASM (ACCEPT/REJECT lines), then
 #          needsyms.py --apply on the accepted ones (auto symbols the new C names).
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
-R=~/conker; S=$R/tools/decomp-permuter/sweep; M=$R/tools/eu_port/m2c; K=$R/conker/build/k
+R=${CONKER_ROOT:-$HOME/conker}; S=$R/tools/decomp-permuter/sweep; M=$R/tools/eu_port/m2c; K=$R/conker/build/k
 mkdir -p $S
 case $1 in
 gen)
@@ -28,7 +28,7 @@ gen)
   for v in 0 1 2 3 4 5 6 7; do python3 $M/narrow.py $K/v$v $K/n$v >/dev/null 2>&1; done
   cp $M/screen.py $R/conker/build/screen.py
   for v in $K/v* $K/n*; do
-    docker exec -w /conker/conker conkerdev python3 build/screen.py build/k/$(basename $v) 8 >/dev/null 2>&1
+    docker exec -w /conker/conker ${CONKERDEV:-conkerdev} python3 build/screen.py build/k/$(basename $v) 8 >/dev/null 2>&1
   done
   rm -rf $S/ok $S/drafts; mkdir -p $S/drafts
   (cd $R/conker && python3 $M/merge.py $S/ok $K/v* $K/n* >/dev/null 2>&1)
@@ -65,7 +65,7 @@ apply)
     grep -v '^// PERMUTER CHANGED' $m > $A/$f.c; echo "OK $f ${src#$R/conker/}" >> $A/screen.txt
   done
   [ -f $A/screen.txt ] || { echo "nothing to apply"; exit 0; }
-  docker exec -w /conker/conker conkerdev python3 ../tools/eu_port/m2c/apply.py build/permok 2>&1 | grep -E 'ACCEPT|REJECT' | tee $A/result.txt
+  docker exec -w /conker/conker ${CONKERDEV:-conkerdev} python3 ../tools/eu_port/m2c/apply.py build/permok 2>&1 | grep -E 'ACCEPT|REJECT' | tee $A/result.txt
   python3 $R/tools/eu_port/needsyms.py --apply $(awk '$1=="ACCEPT"{print $2}' $A/result.txt)
   ;;
 *) sed -n '2,19p' $0 ;;

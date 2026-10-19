@@ -286,7 +286,29 @@ s32 func_16000A5C(void) {
 
 // called from func_10007DAC
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000B14.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000F8C.s")
+s32 func_16001B34(u8 *, u8 *, u8 *, u8 *, f64);
+void func_16000F8C(s32 arg0, f32 arg1)
+{
+  f32 sp54;
+  s32 bits;
+  u8 sp28[0x28];
+  u32 exp;
+  if ((arg0 >= (D_160038A0 << 5)) && (arg0 < 0x341))
+  {
+    sp54 = arg1;
+    bits = *((s32 *) (&sp54));
+    exp = ((u32) (bits & 0x7F800000)) >> 0x17;
+    do { } while (0); // fakematch: permuter register assignment
+    if (((exp == 0) || (exp >= 0xFFU)) && ((bits * 2) != 0))
+    {
+      if ((!bits) && (!bits)) { } // fakematch: permuter register assignment
+      func_160012B0(arg0, D_160047D0);
+      return;
+    }
+    func_16001B34(sp28, D_160047D4, D_160047DC, D_160047E0, (f64) arg1);
+    func_160012B0(arg0, sp28);
+  }
+}
 // NON-MATCHING: lots to figure out
 // void func_16000F8C(s32 arg0, f32 arg1) {
 //     struct165 tmp;

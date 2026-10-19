@@ -1,4 +1,4 @@
 #!/bin/bash
 # best FUNC -> path of variant draft with lowest DIFF
-cd ~/conker/conker/build/${D:-g}
+cd ${CONKER_ROOT:-$HOME/conker}/conker/build/${D:-g}
 grep -H " $1 " v*/screen.txt | grep DIFF | sed 's/:DIFF/ /' | sort -k2 -n | head -1 | awk '{split($1,a,"/"); print "'$PWD'/" a[1] "/'$1'.c"}'

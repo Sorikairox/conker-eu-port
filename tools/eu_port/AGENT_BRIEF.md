@@ -18,6 +18,15 @@ function or tool name comes up; do not read it through).
   twice, write or extend a script under `tools/eu_port/` and document it in
   `HANDOFF.md`. Keep script output compact.
 
+## Parallel worktrees
+
+- If you were launched in a worktree (`~/conker-wt/<name>`, branch `eu-wt-<name>`), work only there and
+  never touch `~/conker` or its `conkerdev` container. **Before using any tool**, in every shell run
+  `eval "$(tools/eu_port/wt.sh env <name>)"` (exports `CONKER_ROOT` and `CONKERDEV=conkerdev-<name>`);
+  without it the scripts silently act on the main checkout. Commit on your branch only; the coordinator
+  merges with `wt.sh merge <name>`. In a worktree read "`~/conker`" and "`conkerdev`" in this brief as
+  `$CONKER_ROOT` and `$CONKERDEV` (`docker exec $CONKERDEV ...`).
+
 ## Verification
 
 - Authoritative check: `tools/eu_port/verify_all.sh` (repo root, on the host). It
@@ -39,8 +48,14 @@ function or tool name comes up; do not read it through).
   functions, read asm, write drafts, or screen single drafts with `try`. Don't start a
   second job that writes `conker/build` (verify_all.sh, apply.py, clean builds) while
   another one is running.
-- If there's truly nothing else to do, end your turn. You'll be resumed when the
-  background job completes. Don't sleep-poll instead.
+- Short jobs (under ~10 min: verify_all.sh, a single build, apply.py) run in the
+  foreground with a generous Bash timeout (up to 600000 ms). Never end your turn to wait
+  for them: ending a turn can hand back an interim report and end your session with
+  work uncommitted.
+- End your turn to wait only for long permuter runs or sweeps, and only after
+  committing everything that's already verified. When the job's notification arrives,
+  continue the session.
+- Never sleep-poll.
 - To wait for a specific condition (e.g. a file appearing), use the Monitor tool if it's
   available, not a sleep loop.
 - Spread permuter streams across both machines: local `permute.sh` / `sweep.sh perm`

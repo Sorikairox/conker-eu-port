@@ -29,8 +29,8 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3166 / 5913 functions in C (53.5%)**, code bytes 344,884 / 2,253,856 (15.3%) (end of session 35, from `verify_all.sh`).
-  init 362/540 (38.5% of bytes), game 2773/5330 (13.3%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
+- **3179 / 5913 functions in C (53.8%)**, code bytes 348,056 / 2,253,856 (15.4%) (after merging sessions 35-38, from `verify_all.sh`). init 374/540 (40.3% of bytes), game 2773/5330 (13.3%), debugger 32/43 (42.6%).
+  Sessions 35 (main) and 36-38 (worktree eu-wt-a) merged. Session 36 recipes: IDO_SHAPES section 12, `docs/sessions/s36.md`. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
 - Session 35: permuter sweep over the repair leftovers, +8 (commits `3315bbc` and the next); see "Session 35" at the end. Session 34: 5 more from the pool (commit `350efff`), see "Session 34" at the end. Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
@@ -59,11 +59,15 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 
 ## Tool index (`tools/eu_port/`, details in the session named)
 
+Parallel worktrees (one agent per worktree; s35)
+- `wt.sh new|env|merge|rm <name>`: git worktree `~/conker-wt/<name>` on branch `eu-wt-<name>` + container `conkerdev-<name>` (conker-arm, worktree mounted at /conker). `eval "$(tools/eu_port/wt.sh env <name>)"` exports `CONKER_ROOT` (default `$HOME/conker`) and `CONKERDEV` (default `conkerdev`), which every host-side script in `tools/eu_port` reads. `verify_all.sh` runs from its own checkout. `merge` merges the branch into `eu` in the main checkout (only when no agent is active there). Worktrees have their own m2c venv and gitignored data (`ctx/` regenerates, permuter `nm/`, `repair/`, `sweep/` start empty). Run `verify_all.sh` once in a new worktree to create `conker/asm` and `conker/build`.
+- `remote_perm.sh f [draft.c] [secs] [jobs]` permuter search on the Mac mini worker (REMOTE, its own `conkerdev` container; local setup/screening use `CONKER_ROOT`/`CONKERDEV`; concurrent jobs fine, each has its own `nm/<func>`).
+
 Verification / build
 - `verify_all.sh [--quick]` full check (s-brief). `check_files.py [src_eu/X.c]` whole-object `.text` + owned `.rodata/.data` vs ROM (reliable; `check_funcs.py` skips functions already in C). `fdiff.py src_eu/X.c func` word diff of a C function. `rodiff.py` rodata word diff. `bindiff.py`.
 - `needsyms.py [--apply] funcs` re-adds splat auto symbols that a newly matched function was the last user of (only the full verify catches it, s13). `revert_bad.py` reverts bad new C to GLOBAL_ASM (s03).
 
-Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts assume `~/conker` and `conkerdev`; s04-s07)
+Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts come from `CONKER_ROOT` / `CONKERDEV`, defaults `~/conker` and `conkerdev`; s04-s07)
 - `m2c/list.py` all GLOBAL_ASM functions; `m2c/gen2.py outdir min max` m2c drafts + 8 variants; `m2c/screen.py` (OK/DIFFn/SIZE+-n/CERR; word diff with `SCREEN_V=1`); `m2c/try func [draft]`, `m2c/tryall func a.c b.c...` (8 parallel),
   `m2c/mine func draft.c` (my asm on one line; honours `SCREEN_OPT`), `m2c/keep`, `m2c/apply.py build/hand`, `m2c/screenall dir`, `m2c/merge.py`, `m2c/narrow.py`, `m2c/switchinline.py`, `m2c/compound.py`, `m2c/voidret.py`, `m2c/spawngen.py`/`spawn.py` (effect spawners, s09-s11), `m2c/flags src_eu/X.c` (build with each OPT_FLAGS).
 - `gensome.sh <funcs>` drafts for a few functions into `repair/fresh/`; `gen40.sh [max]` bulk; `m2cfix.py list` declfix + bulk screen (s30); `fctx.sh <func>` / `sh.sh <func>` context + asm on one line (s18, s24).

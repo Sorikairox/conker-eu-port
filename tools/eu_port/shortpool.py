@@ -2,7 +2,7 @@
 """shortpool.py [max=50]  GLOBAL_ASM functions <= max insns not in repair_log.tsv, minus fragments / hand-written asm.
 Prints counts to stderr, candidate names (one per line, smallest first) to stdout."""
 import sys,os,re,glob,collections
-R=os.path.expanduser('~/conker'); mx=int(sys.argv[1]) if len(sys.argv)>1 else 50
+R=os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); mx=int(sys.argv[1]) if len(sys.argv)>1 else 50
 os.chdir(R+'/conker')
 logged={l.split('\t')[0] for l in open(R+'/tools/eu_port/repair_log.tsv')}
 idx={}

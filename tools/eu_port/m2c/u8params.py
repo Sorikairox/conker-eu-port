@@ -4,7 +4,7 @@
 # (`andi $tX, $aN, 0xFF|0xFFFF` then `or $aN, $tX, $zero`): the source had a u8/u16 param N.
 # Output lines: func file argN u8|u16
 import os,re,glob
-R=os.path.expanduser('~/conker/conker/asm/nonmatchings')
+R=os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker/asm/nonmatchings')
 I=re.compile(r'\*/\s+(\w+)\s+(.*)')
 for p in sorted(glob.glob(R+'/*/*.s')):
     ins=[]

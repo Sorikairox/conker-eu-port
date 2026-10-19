@@ -1,4 +1,4 @@
 #!/bin/bash
 # usage: cf src_eu/X.c [func...] [-v]
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
-docker exec -w /conker/conker conkerdev bash -c "rm -f build/$1.o; python3 ../tools/eu_port/check_funcs.py $* 2>&1 | grep -v '^OK' | grep -v '^python3\|^\.\./ido' | head -${N:-80}; python3 ../tools/eu_port/check_files.py $1 2>&1 | tail -3"
+docker exec -w /conker/conker ${CONKERDEV:-conkerdev} bash -c "rm -f build/$1.o; python3 ../tools/eu_port/check_funcs.py $* 2>&1 | grep -v '^OK' | grep -v '^python3\|^\.\./ido' | head -${N:-80}; python3 ../tools/eu_port/check_files.py $1 2>&1 | tail -3"

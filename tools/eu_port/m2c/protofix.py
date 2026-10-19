@@ -6,7 +6,7 @@
 # caller's own params when passed through (argN), else s32. Writes only changed drafts.
 import sys,os,re,glob
 ind,outd,lst=sys.argv[1:4]; os.makedirs(outd,exist_ok=True)
-C=os.path.expanduser('~/conker/conker')
+C=os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 want={}
 for l in open(lst):
     f,src,k,t=l.split(); want.setdefault(f,{})[int(k)]=t

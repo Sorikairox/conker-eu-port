@@ -3,6 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_10003ACC(s32 arg0, s32 arg1, s32 arg2);
+
 
 void func_100039C0(void) {
     D_800BE620 = 292; // screen width px

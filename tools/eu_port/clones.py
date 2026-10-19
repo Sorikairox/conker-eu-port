@@ -13,7 +13,7 @@ objdump of conker/build/src_eu/*.o (one docker exec, cached in conker/build/clon
 import re, sys, os, glob, subprocess, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import declfix
-R = os.path.expanduser('~/conker/conker')
+R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 DUMP = R + '/build/clones.dump'
 args = sys.argv[1:]
 def opt(n, d=None):
@@ -26,7 +26,7 @@ LAX = bool(opt('--lax')); MIN = int(opt('--min', 6)); TOP = int(opt('--top', 15)
 
 if opt('--refresh') or not os.path.exists(DUMP):
     env = dict(os.environ, PATH='/Applications/Docker.app/Contents/Resources/bin:' + os.environ['PATH'])
-    out = subprocess.run(['docker', 'exec', 'conkerdev', 'sh', '-c',
+    out = subprocess.run(['docker', 'exec', os.environ.get('CONKERDEV','conkerdev'), 'sh', '-c',
         'cd /conker/conker; for f in build/src_eu/*.o; do echo "#FILE $f"; mips-linux-gnu-objdump -dr --no-show-raw-insn $f; done'],
         capture_output=True, text=True, env=env).stdout
     open(DUMP, 'w').write(out)
