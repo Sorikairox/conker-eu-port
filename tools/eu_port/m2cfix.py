@@ -3,6 +3,7 @@
 of the functions in listfile (own file used as 'sibling'), write them to outdir, then screen (8 jobs) and print result counts.
 Ranked results -> outdir/ranked.txt ("score result func")."""
 import sys,os,subprocess,re,shutil
+import argfix   # ARGFIX=1 (or 'tail'): rewrite callee prototypes from the caller's asm after declfix (s50)
 sys.path.insert(0,os.path.dirname(__file__)); import declfix
 R=os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); fresh=R+'/tools/decomp-permuter/repair/fresh/'
 out=sys.argv[2] if len(sys.argv)>2 else R+'/conker/build/dfx'
@@ -18,6 +19,9 @@ for f in open(sys.argv[1]).read().split():
     body=open(p).read()
     try: body,notes=declfix.fix(body,f,stem[f],stem[f])
     except Exception as e: notes=['ERR '+str(e)[:40]]
+    if os.environ.get('ARGFIX'):
+        try: body,an=argfix.fix(body,f,os.environ['ARGFIX']=='tail')
+        except Exception as e: an=['ERR '+str(e)[:40]]
     open(out+'/'+f+'.c','w').write(body); n+=1
 print('fixed',n)
 rel=os.path.relpath(out,R+'/conker')
