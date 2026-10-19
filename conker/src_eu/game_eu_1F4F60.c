@@ -58,7 +58,22 @@ void func_151C9CBC(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CA070.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CA0E0.s")
+s32 func_151CA0E0(u8 *arg0)
+{
+  u8 *new_var2;
+  u8 *new_var;
+  new_var = arg0;
+  new_var2 = *((u8 **) (new_var + 0x18));
+  if ((*((u8 *) (new_var2 + 0x6F))) == 0)
+  {
+    *((s8 *) ((*((u8 **) (arg0 + 0x14))) + 9)) = 0;
+  }
+  else
+  {
+    *((s8 *) ((*((u8 **) (new_var + 0x14))) + 9)) = 1;
+  }
+  return 1;
+}
 
 s32 func_151CA114(u8 *arg0, s8 *arg1)
 {

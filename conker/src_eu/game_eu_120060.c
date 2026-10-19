@@ -38,7 +38,15 @@ s32 func_150F28FC(s32 arg0, s32 arg1) {
     return 0xE;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2910.s")
+void func_150F2910(u8 *arg0, int arg1, s32 arg2)
+{
+  u8 sp1C[12];
+  if ((*((s32 *) (arg0 + 0x1D4))) != 0)
+  {
+    func_150F2850(sp1C, arg0, arg1);
+    func_151C384C(sp1C, 0xFF, 0);
+  }
+}
 
 s32 func_150F2960(u8 *arg0) {
     f32 *temp_s0;

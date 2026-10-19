@@ -4,7 +4,15 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_38E0/func_100038E0.s")
+extern u32 D_800383D0;
+extern s16 D_800383D4;
+void func_100038E0(void)
+{
+  int new_var;
+  volatile s16 *p = (volatile s16 *) 0xBC000C02;
+  new_var = 0x4040;
+ do { D_800383D0 = (u32) p; D_800383D4 = new_var; *p = new_var; } while (0);
+}
 // NON-MATCHING: wtf is this
 // s32 func_100038E0(void) {
 //     D_80038070 = 0xBC000C02; // -0.007815362885594368 ?

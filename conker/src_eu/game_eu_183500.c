@@ -5,7 +5,22 @@
 struct_eu_node *func_15156544(s32 arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/func_15155CF0.s")
+s32 func_1518C900(s32);
+struct_eu_node *func_15155CF0(s32 arg0, s32 arg1)
+{
+  struct_eu_node *temp_v0;
+  temp_v0 = func_15167A68(0x50, 0, 0xA0, 1, (u8) arg1, 1U);
+  if (temp_v0 == 0)
+  {
+    return temp_v0;
+  }
+  *((s8 *) (((u8 *) temp_v0) + 0x10)) = (s8) arg0;
+  *((s8 *) (((u8 *) temp_v0) + 0x11)) = 0;
+  *((s32 *) (((u8 *) temp_v0) + 0x14)) = 0;
+  *((f32 *) (((u8 *) temp_v0) + 0x98)) = 0.0f;
+  func_1518C900(0xA6);
+  return temp_v0;
+}
 
 struct_eu_node *func_15155CF0(s32, s32);
 
