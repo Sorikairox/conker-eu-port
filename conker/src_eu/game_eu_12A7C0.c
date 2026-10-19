@@ -17,7 +17,40 @@ void func_150FD530(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FDA94.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FE08C.s")
+void func_150FE08C(u8 *arg0, u8 *arg1, u8 arg2)
+{
+  s32 new_var2; // fakematch: permuter temp
+  u8 new_var; // fakematch: permuter temp
+  u8 *v = arg0 + 0x110;
+  if (arg2 == 0x2D)
+  {
+    if ((*((s32 *) arg1)) == (*((s32 *) v)))
+    {
+      *((s32 *) v) = *((s32 *) (arg1 + 4));
+      v[4] = arg1[9];
+      return;
+    }
+    if ((*((s32 *) (arg1 + 4))) == (*((s32 *) v)))
+    {
+      *((s32 *) v) = *((s32 *) arg1);
+      v[4] = arg1[8];
+      dummy_label_617528: // fakematch: permuter artifact (unused label)
+      ;
+
+      ;
+      ;
+    }
+  }
+  else
+    if (arg2 == 0)
+  {
+    new_var2 = *((s32 *) arg1);
+    if ((new_var2 == (*((s32 *) v))) || ((new_var = v[4] ^ 0) == arg1[4])) // fakematch: ^ 0
+    {
+      *((s32 *) v) = 0;
+    }
+  }
+}
 
 u8 *func_150FE120(u8 *arg0, s16 arg1) {
     u8 *v = (u8 *)func_1513EDE4((s32)arg0, arg1);

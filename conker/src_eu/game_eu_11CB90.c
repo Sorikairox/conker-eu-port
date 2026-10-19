@@ -47,9 +47,77 @@ s32 func_150EFD04(u8 *arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EFD30.s")
+void func_150EFD30(u8 *arg0) {
+    u8 **q = &arg0; // fakematch: forces the arg0 home-slot reload
+    s32 var_s0;
+    struct102 *temp_a0;
+    struct102 *temp_a0_2;
+    struct102 *temp_a0_3;
+    struct102 *temp_a0_4;
+    u8 *temp_s3;
+    u8 *var_s1;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EFDE0.s")
+    var_s0 = 0;
+    temp_s3 = *q + 0x110;
+    var_s1 = temp_s3;
+    do {
+        temp_a0 = (*(struct102 **)((u8 *)var_s1 + 0x1C));
+        if (temp_a0 != NULL) {
+            func_1516972C(temp_a0);
+        }
+        var_s0 += 4;
+        var_s1 += 4;
+    } while (var_s0 != 8);
+    temp_a0_2 = (*(struct102 **)((u8 *)temp_s3 + 0x24));
+    if (temp_a0_2 != NULL) {
+        func_1516972C(temp_a0_2);
+    }
+    temp_a0_3 = (*(struct102 **)((u8 *)temp_s3 + 0x28));
+    if (temp_a0_3 != NULL) {
+        func_1516972C(temp_a0_3);
+    }
+    temp_a0_4 = (*(struct102 **)((u8 *)temp_s3 + 0x2C));
+    if (temp_a0_4 != NULL) {
+        func_1516972C(temp_a0_4);
+    }
+    func_1513CA6C(*q);
+}
+
+void func_150EFDE0(u8 *arg0) {
+    u8 **q = &arg0; // fakematch: forces the arg0 home-slot reload
+    s32 var_s0;
+    struct102 *temp_a0;
+    struct102 *temp_a0_2;
+    struct102 *temp_a0_3;
+    struct102 *temp_a0_4;
+    u8 *temp_s3;
+    u8 *var_s1;
+
+    var_s0 = 0;
+    temp_s3 = *q + 0x110;
+    var_s1 = temp_s3;
+    do {
+        temp_a0 = (*(struct102 **)((u8 *)var_s1 + 0x1C));
+        if (temp_a0 != NULL) {
+            func_1516979C(temp_a0);
+        }
+        var_s0 += 4;
+        var_s1 += 4;
+    } while (var_s0 != 8);
+    temp_a0_2 = (*(struct102 **)((u8 *)temp_s3 + 0x24));
+    if (temp_a0_2 != NULL) {
+        func_1516979C(temp_a0_2);
+    }
+    temp_a0_3 = (*(struct102 **)((u8 *)temp_s3 + 0x28));
+    if (temp_a0_3 != NULL) {
+        func_1516979C(temp_a0_3);
+    }
+    temp_a0_4 = (*(struct102 **)((u8 *)temp_s3 + 0x2C));
+    if (temp_a0_4 != NULL) {
+        func_1516979C(temp_a0_4);
+    }
+    func_1513CAA0(*q);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EFE90.s")
 
