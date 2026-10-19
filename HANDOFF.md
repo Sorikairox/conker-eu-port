@@ -77,6 +77,7 @@ Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts come from `
   `clones.py [--draft] [--lax]`, `--near K`, `--asm-clusters` template clones (s25, s28); `declfix.py` called by it (s29).
 
 Repair loop
+- `mydis.sh <f>` disassembles the "mine" column of `repair/<f>.diff` (s45); a `//HOIST <proto>;` first line in a draft hoists a forward prototype for screening.
 - `repair_ctx.sh <f>` context + `draftcheck.py` HINT lines; `repair_try.sh <f> draft.c`; `rlog.sh` log row into `repair_log.tsv` (~590 rows); `stackfix.py f draft.c` / `--scan` / `--bisect` (frame/slot puzzles, s15);
   `protocheck.py [--sig f | --apply --skip-logged]` + `rescreen.py` prototype contradictions (s15); `fwdproto.sh file 'proto;'` forward prototype after the last `#include` (s32); `permute.sh f draft.c [secs] [jobs]` / `-l list` (decomp-permuter, `nm/<f>/best.c`, `match.c`, s12); `sweep.sh` older bulk permuter sweep (s13).
 
