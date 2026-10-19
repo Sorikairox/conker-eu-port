@@ -2,6 +2,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_1515835C(u8 *, u8 *);
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15157840.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15157990.s")
@@ -21,7 +23,28 @@ s32 func_15157E08(s32 arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4, s32 arg5, s3
     return v;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15157E88.s")
+#define MTX_7E88(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
+s32 func_15157E88(u8 *arg0) {
+    u8 *p;
+
+    func_150A8050(&MTX_7E88(arg0), *(f32 *)(arg0 + 0x120), *(f32 *)(arg0 + 0x124), *(f32 *)(arg0 + 0x128));
+    p = arg0 + 0x120;
+    MTX_7E88(arg0)[12] = *(f32 *)(arg0 + 0x54);
+    MTX_7E88(arg0)[13] = *(f32 *)(arg0 + 0x58);
+    do {} while (0); // fakematch: block split keeps p live in a0
+    MTX_7E88(arg0)[14] = *(f32 *)(arg0 + 0x5C);
+    MTX_7E88(arg0)[0] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[1] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[2] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[4] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[5] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[6] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[8] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[9] *= *(f32 *)(p + 0xC);
+    MTX_7E88(arg0)[10] *= *(f32 *)(p + 0xC);
+    return 1;
+}
+#undef MTX_7E88
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_15158018.s")
 
@@ -34,7 +57,23 @@ s32 func_15158338(s32 arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185050/func_1515835C.s")
+#define MTX_835C(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
+void func_1515835C(u8 *arg0, u8 *arg1) {
+    func_150A8050(&MTX_835C(arg0), ((f32 *)arg1)[0], ((f32 *)arg1)[1], ((f32 *)arg1)[2]);
+    MTX_835C(arg0)[12] = ((f32 *)arg0)[0x54 / 4];
+    MTX_835C(arg0)[13] = ((f32 *)arg0)[0x58 / 4];
+    MTX_835C(arg0)[14] = ((f32 *)arg0)[0x5C / 4];
+    MTX_835C(arg0)[0] *= ((f32 *)arg1)[3];
+    MTX_835C(arg0)[1] *= ((f32 *)arg1)[3];
+    MTX_835C(arg0)[2] *= ((f32 *)arg1)[3];
+    MTX_835C(arg0)[4] *= ((f32 *)arg1)[4];
+    MTX_835C(arg0)[5] *= ((f32 *)arg1)[4];
+    MTX_835C(arg0)[6] *= ((f32 *)arg1)[4];
+    MTX_835C(arg0)[8] *= ((f32 *)arg1)[3];
+    MTX_835C(arg0)[9] *= ((f32 *)arg1)[3];
+    MTX_835C(arg0)[10] *= ((f32 *)arg1)[3];
+}
+#undef MTX_835C
 
 Gfx *func_151584F0(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
     gSPMatrix(gdl++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

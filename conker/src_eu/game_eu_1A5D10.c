@@ -7,7 +7,15 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_151787D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178CC0.s")
+s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
+    u8 *p = *(u8 **)(arg1 + 0x14);
+    if (p[0x36] & (1 << arg2)) {
+        return func_15168118(arg0);
+    }
+    return arg0;
+}
+
+void func_eu_15178D14(void) {}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178D1C.s")
 

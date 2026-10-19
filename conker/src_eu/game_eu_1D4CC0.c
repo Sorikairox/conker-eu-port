@@ -20,7 +20,28 @@ s32 func_151A799C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A79EC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A7BC0.s")
+s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+    f32 sp74[9];
+    f32 temp_f18;
+    f32 sp6C;
+    f32 temp_f2;
+
+    sp6C = (*(f32 *)((u8 *)arg6 + 0x40));
+    sp74[6] = arg0;
+    sp74[7] = arg1;
+    sp74[8] = arg2;
+    temp_f18 = (func_150ADA68() * 166.0f) + 160.0f;
+    sp74[0] = 0.0f;
+    sp74[1] = 0.0f;
+    sp74[2] = 0.0f;
+    temp_f2 = temp_f18 * 0.001f;
+    sp74[3] = -arg3 * D_800BEDC8 * temp_f2;
+    sp74[4] = -arg4 * D_800BEDC8 * temp_f2;
+    sp74[5] = -arg5 * D_800BEDC8 * temp_f2;
+    func_151A2C9C(&sp74[6], sp74, &sp74[3], 0x3F800000, ((func_150ADA68() * 591.0f) + -600.0f) * 0.001f, ((func_150ADA68() * 500.0f) + 400.0f) * sp6C, ((u32) func_150ADA20() % 21U) + 0xF, (func_150ADA20() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A7D70.s")
 

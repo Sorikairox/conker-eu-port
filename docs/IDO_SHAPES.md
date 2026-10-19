@@ -483,6 +483,20 @@ See `docs/sessions/s51.md`.
 5. **`clones.py --near 16 --draft --lax` then `screenall build/cln`** gave 5 OK of 74 drafts in the slice (twin handlers, node lookup, key search). CERR on a clone draft is often only a missing forward `extern` (copy it from the template's neighbourhood).
    `apply.py` needs a hand-written `screen.txt` (`OK <func> src_eu/<file>.c`) when the drafts were copied out of the clone directory.
 6. **Dead local stores are deleted**: `sp18 = temp_v0;` keeps a pointer live only if something reads it before the call; do not expect an unused named copy to force a spill (`func_151B97C4`).
+
+## s52 recipes (clone hand-finishing, chains, trailing stubs)
+
+See `docs/sessions/s52.md`.
+1. **`A = B = 0;` chain assignment** reproduces the "`lui v0/v1` + `addiu` pointers for the chained globals, `lui at` for the others" layout (`func_15195D9C`: `D10 = D14 = 0; D18 = D1C = 0; D20 = -2;`).
+   The inner target is stored first. Plain separate statements or arrays do not give it.
+2. **Float clamp + scale**: in a file that owns `.rodata`, write the literal (`arg0 >= 32767.0f`), not an `extern f32 D_...` (the extern moved a `lui` before `c.le.s`); scale in place with `arg0 *= 65536.0f; x = (s32) arg0;`
+   (`mul.s f12,f12,f4`, `func_1515F5B0`). A sibling that is already matched shows which literal sits where.
+3. **Trailing dead `jr ra; nop` after a function** (screen says SIZE-1 but only the last row differs in `V=1 try`): add `void func_eu_<addr>(void) {}` after it (existing recipe 14); `screen.py`/`try` measure only the named function, so
+   hand-write the `screen.txt` line and let `apply.py` decide (`func_15178CC0`, `func_15195D20`). If registers differ besides the tail, change the body first (a named local `u8 *p = *(u8 **)(a1 + 0x14);` put the pointer in `v0`).
+4. **`(u32)arg1 << 8`** instead of `arg1 << 8` when the ref has `lw a2,home; sll t8,a2,8; ... or a2,t8,zero` (signed shift gave a different schedule); frame pad `s32 sp30[6]` with `&sp30[1]` for a 0x48 frame and `a3 = sp+0x34` (`func_1517AF18`).
+5. **Switch with no default and pass-through `a0`**: `switch (D_x) { case 2: f(arg0,1,1,1,arg1,arg2); break; case 16: f(arg0,0xA9,8,0,arg1,arg2); break; }` matched first try from the asm (`func_15171434`); a `u8` param is read with `lbu 0x27(sp)`.
+6. **Permuter artifacts** that solved a DIFF18 function-pointer table call: `u8 *new_var = arg0; ... if (!arg0) {} fn(new_var);` (fakematch, `func_151A8B34`/`8B84`). A DIFF18-from-scratch `permute.sh` run (200 s, 3 jobs) is worth it on indirect-call wrappers.
+7. **`clones.py --near` yield**: only dist <= 8 drafts are close to usable; for dist > 8 read the ref asm and write the body, using the draft only for file/prototypes. The NEAR header (`asm +x`, `sib -y`) lists what to change.
 ## s53 recipes (clone-draft finishing)
 
 See `docs/sessions/s53.md`.
@@ -508,3 +522,31 @@ See `docs/sessions/s54.md`.
    *unused* `s32 pad;` declared first still takes the top slot (floats +4, spill 0x40 -> 0x3C, frame may grow by 8). `func_150B15D0`: three address-taken out floats + spill at 0x40 is DIFF1 (floats at 0x4C..0x57),
    a leading pad gives the right float slots but the spill at 0x3C (DIFF2); two pads, an explicit `sp40`, `f32 v[3]`/`v[4]` and all declaration permutations (stackfix, 24 + 120 + 20 variants) do not fix both. OPEN.
 5. **m2c `var += 0x32C` on a `struct127 *`** (`func_1502C494`) is still the s50 stride bug (use `++`), and `!= &D_800D121C` compares against a differently typed symbol (cast).
+## s55 recipes (larger functions: vector locals, spill names, matrix arrays, arg0 as variable)
+
+1. **m2c scalar vectors lose stores.** `f32 sp38; f32 sp3C; f32 sp40;` with `f(&sp38)` makes IDO drop the stores to `sp3C/sp40` as dead (SIZE-2..-13). Declare one array
+   `f32 sp38[3]` (`vecfix.py` does it for the whole pool); this alone fixed `func_15193A24`. A 16-byte `sp88[4]` is right when the ref leaves 4 bytes above the 12-byte vector.
+2. **Frame slot positions are declaration order.** The first declared stack-resident local sits at the top; named locals that live in registers still reserve a slot (even unused ones),
+   so move a pointer/float name above or below the array to shift it by 4 (`temp_v0` before `sp38[3]` in `func_15193A24`, `temp_f18` before `sp6C` in `func_151A7BC0`,
+   `u8 *temp_s0, *temp_s1; s32 spB4[3]; s32 var_s1; f32 spA4[3]; ...` in `func_151922C4`). Compare the first `**` lines of the diff (`sw a2,0xA0(sp)`...) with the ref's top-relative
+   offsets, not the absolute ones, when the frame sizes differ.
+3. **m2c `spXX = call();` names are unnamed spills in the ref.** Results of calls nested in a later call's argument list are spilled by IDO into the lowest slots; a named local takes a
+   different (higher) slot. Inline them into the consuming call (`func_151A7BC0`, `func_151BC920`: `... ((func_150ADA68() * 591.0f) + -600.0f) * 0.001f ...`; `spinline.py`). Keep a separate
+   `temp = call();` statement first if the ref calls before it stores constants (`sp6C[0] = 0.0f` after the `rand()` in `func_151BC920`).
+4. **A callee with a C definition elsewhere and no header prototype is called as `int f(...)`.** An `f32` argument then goes in `a2/a3` as a double and the call grows by 2-3 insns (SIZE+2).
+   Put `void func_15143794(s16, s16, f32, void *);` above the draft (and `f32 func_15144AA8(s32);` for a float return used with `mtc1`/`add.s f0`). Same check as recipe 1.1.
+5. **`x = a < b;` as a value** compiles to `or s1,zero,zero; c.lt.s; nop; bc1f L; nop; b L; addiu s1,zero,1` when written `x = (a < b) ? 1 : 0;`, and the `if (a < b) x = 1;` form gives the same
+   branch without the `b` (`func_151922C4`).
+6. **u8 params: no `& 0xFF`, no `& 0xFF` on the callee argument.** A `u8` callee param (`f32 func_151423D8(u8)`) fed `sp87 - 0x40` gives `addiu a0; andi t9; jal; or a0,t9,zero` (`func_151AF064`);
+   writing `(sp87 - 0x40) & 0xFF` fuses the andi into the delay slot. A `u8` param copied into `s1` and then moved to `s6` (`func_15151500`) is a register-choice problem, not a type problem.
+7. **A parameter reassigned as the long-lived variable** (`arg0 = arg0 & 1;` after `sp1C = arg0 & 2;`) compiles to `sw a0,home; or a3,a0,zero`, with spill/reload through the param's own home
+   slot (`sw a3,0x20(sp)` ... `lw a3,0x20(sp)` around calls) and `sw a3,0x2C(sp)` for the dead 4th param. A separate `var_a3 = arg0 & 1;` loses the `sw a0` at entry (`func_1000B638`, SIZE+2 -> OK).
+8. **Matrix-array structs: `((f32 (*)[16])(arg0 + 0x7C))[D_800BE9C0][k]`** (k = 12..14 translation, 0-2/4-6/8-10 scale rows). The m2c form `arg0 + (D_800BE9C0 << 6) + off` never matched;
+   the index global is reloaded for every access (u8 global vs f32 stores). Use a local `#define MTX_xxxx(a) ...` / `#undef`. A pointer `u8 *p = arg0 + 0x120` read as `*(f32 *)(p + 0xC)` stays a register
+   base only after a `do {} while (0); // fakematch` between two stores (permuter, `func_15157E88`). Used by `func_1515835C`, `func_15157E88`, `func_151D7410`; the same family is open in 6 more files (s55.md).
+9. **Float literals in a file that does not own `.rodata` are REJECTed by apply.py** and an `extern f32 D_xxx` instead changes the schedule (`lwc1` hoisted above the `lui`), so own the rodata:
+   `rodata_split.py --own <stem> --resplit` (done for `game_eu_1D4CC0`, `game_eu_1E61C0`, `game_eu_204730`), then build and `apply.py`.
+10. **Workflow for 100-200 insn drafts**: (a) `ARGFIX=1 m2cfix.py`, (b) `vecfix.py`, `spinline.py`, (c) `rt.sh f draft.c`: if `opshift` shows 0-3 shifts the draft is a permuter case (register
+    allocation only); if it shows inserted `jal`/`addiu a0` the callee prototype or the vector shape is wrong; if the `addiu sp` line differs, fix declaration order (recipe 2) first.
+    The permuter on 100+ insn functions rarely reaches 0 in 15 minutes unless the diff is a single schedule choice (it solved `func_15157E88` in 20 s and took `func_1515835C` from DIFF54 to DIFF31 in 15 min).
+

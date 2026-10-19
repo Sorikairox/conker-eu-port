@@ -206,7 +206,24 @@ void func_151D06D8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D06FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D0EA0.s")
+/* NEAR 2 from func_150D5E7C: sib -li at,#; sib -beq a2,at,T */
+void func_151D0EA0(struct102 *arg0, u8 *arg1, u8 arg2) {
+    u8 *v = (u8 *)arg0 + 0x28;
+    if (arg2 == 0 || arg2 == 24) {
+        s32 t = *(s32 *)arg1;
+        if (t == *(s32 *)v || v[4] == arg1[4]) {
+            func_1516972C(arg0);
+        }
+    } else if (arg2 == 0x2D) {
+        if (*(s32 *)arg1 == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)(arg1 + 4);
+            v[4] = arg1[9];
+        } else if (*(s32 *)(arg1 + 4) == *(s32 *)v) {
+            *(s32 *)v = *(s32 *)arg1;
+            v[4] = arg1[8];
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D09A8.s")
 

@@ -893,11 +893,15 @@ segments:
       - [0x24E3B0, .rodata, game_eu_1D1150]
       - [0x24E3D0, .rodata, game_eu_1D2F30]
       - [0x24E3E0, rodatabin]
+      - [0x24E420, .rodata, game_eu_1D4CC0]
+      - [0x24E440, rodatabin]
       - [0x24E680, .rodata, game_eu_1D9C00]
       - [0x24E900, rodatabin]
       - [0x24F3D0, .rodata, game_eu_1DC470]
       - [0x24F450, .rodata, game_eu_1DD290]
       - [0x24F750, rodatabin]
+      - [0x24FAF0, .rodata, game_eu_1E61C0]
+      - [0x24FB40, rodatabin]
       - [0x24FBF0, .rodata, game_eu_1E7CC0]
       - [0x24FF10, .rodata, game_eu_1EC610]
       - [0x24FF90, rodatabin]
@@ -907,6 +911,8 @@ segments:
       - [0x250710, .rodata, game_eu_200070]
       - [0x2507A0, .rodata, game_1FFF60]
       - [0x2507D0, rodatabin]
+      - [0x2508B0, .rodata, game_eu_204730]
+      - [0x2508E0, rodatabin]
   - name: debugger
     type: code
     start: 0x00256450

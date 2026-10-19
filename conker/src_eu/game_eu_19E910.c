@@ -5,7 +5,16 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171100.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171434.s")
+void func_15171434(s32 arg0, u8 arg1, s32 arg2) {
+    switch (D_800BE9F0) {
+    case 2:
+        func_15171100(arg0, 1, 1, 1, arg1, arg2);
+        break;
+    case 16:
+        func_15171100(arg0, 0xA9, 8, 0, arg1, arg2);
+        break;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_151714BC.s")
 
