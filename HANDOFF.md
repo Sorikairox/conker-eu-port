@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (session 34). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 35). Update this file at the end of every work session.
 
 Layout of the docs (read in this order):
 - `tools/eu_port/AGENT_BRIEF.md`: the rules of a work session (short).
@@ -29,11 +29,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3158 / 5913 functions in C (53.4%)**, code bytes 344,028 / 2,253,856 (15.3%) (end of session 34, from `verify_all.sh`).
-  init 361/540 (38.5% of bytes), game 2766/5330 (13.2%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
+- **3166 / 5913 functions in C (53.5%)**, code bytes 344,884 / 2,253,856 (15.3%) (end of session 35, from `verify_all.sh`).
+  init 362/540 (38.5% of bytes), game 2773/5330 (13.3%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
-- Session 34: 5 more from the pool (commit `350efff`), see "Session 34" at the end. Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
+- Session 35: permuter sweep over the repair leftovers, +8 (commits `3315bbc` and the next); see "Session 35" at the end. Session 34: 5 more from the pool (commit `350efff`), see "Session 34" at the end. Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
 - Conventions: EU symbols keep their **US names** (address in the name is the US one); clashing ones are `func_eu_XXXXXXXX` / `D_eu_XXXXXXXX`. A US function whose EU code differs is a prototype + `GLOBAL_ASM`.
   Data segments are mostly `databin`/`rodatabin` blobs; files that own `.rodata`/`.data` are listed in `docs/sessions/s08.md` / `s10.md` and by `grep -n 'rodata' conker/conker.eu.yaml`. Data symbols C code uses live in `undefined_syms.eu.txt`.
   Label every unnatural construct `// fakematch: <why>` (`grep -rn fakematch conker/src_eu`). Commit trailer: your own `Co-Authored-By:` line (see AGENT_BRIEF).
@@ -125,3 +125,8 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
   `func_1517F54C` (file gets `s32 func_1517F470();` fwd proto), `func_151E856C` (`extern u8 D[][6]` stops strength reduction; permuter finished; uses `D_800ABE94` extern, file does not own rodata). Recipes are in IDO_SHAPES (1.12, 3.16, 4.17, 5.4). Details and token cost: `docs/sessions/s34.md`.
 - Near misses worth a fresh look (all logged): `func_150D513C` (DIFF2, only frame 0x28 vs 0x30 from the unnamed spill of a function address), `func_151E856C`-style tables, `func_15003120` (DIFF36 roles), `func_15168E54` (DIFF14), `func_1509D274` (DIFF19, s0/s1 roles), `func_151733EC` (DIFF8, frame), `func_150D247C` (SIZE-1), `func_151481BC` (SIZE-1, ref presets v0 in the beqz delay slot).
 - Pitfall: `repair_try.sh` overwrites `repair/<f>.c` with the draft you pass; use one distinct draft filename per function (I clobbered a shared `g.c`). In zsh, `set -- $var` does not split; use bash for loops over lists.
+
+### Session 35
+- Bulk permuter sweep (`sweep.sh perm`, 3 streams x -j3, 120 s) over 103 SIZE+-1 / DIFF<=12 leftovers from pool33.res + repair_log: 6 solved; pass 2 from best.c (240 s) on 13 improved: 2 solved; 1 more by hand (func_1517A028). 9 matches, 8 applied (func_150351A4 REJECTed by apply.py). ~2.5 h wall, few tokens. Details and unsolved DIFF1/2 list in `docs/sessions/s35.md`.
+- Yield is about 8% per candidate; the remaining SIZE+-1 drafts are structural (permuter cannot fix). Next: the 90 candidates left unsolved are not worth repeating; go back to CERR-class drafts or new pools.
+- Pitfall: a permuter that ignores `timeout -s INT` stalls a whole `sweep.sh perm` stream; kill it with `docker exec conkerdev pkill -9 -f 'permuter.py nm/<f>'`.
