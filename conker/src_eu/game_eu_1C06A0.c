@@ -72,4 +72,34 @@ void func_151937A4(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C06A0/func_15193850.s")
+void func_15193850(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  s32 new_var;
+  u8 *v = arg0 + 0x28;
+  if (arg2 == 0x2D)
+  {
+    if (arg1[0] == (*((s32 *) v)))
+    {
+      *((s32 *) v) = arg1[1];
+      v[4] = ((u8 *) arg1)[9];
+    }
+    else
+    {
+      if (arg1[1] == (*((s32 *) v)))
+      {
+        *((s32 *) v) = arg1[0];
+        v[4] = ((u8 *) arg1)[8];
+ } dummy_label_982087: ; // fakematch: unused label
+      ;
+    }
+  }
+  else
+    if (arg2 == 0)
+  {
+    new_var = arg1[0]; // fakematch: new_var pins the load order
+    if (((*((s32 *) v)) == new_var) || ((v[4] ^ 0) == ((u8 *) arg1)[4])) // fakematch: ^ 0 operand order
+    {
+      func_1516972C(arg0);
+    }
+  }
+}
