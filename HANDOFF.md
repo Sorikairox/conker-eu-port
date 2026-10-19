@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-19 (session 33). Update this file at the end of every work session.
+Last updated: 2026-10-19 (session 34). Update this file at the end of every work session.
 
 Layout of the docs (read in this order):
 - `tools/eu_port/AGENT_BRIEF.md`: the rules of a work session (short).
@@ -29,11 +29,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 ## Current state
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3153 / 5913 functions in C (53.3%)**, code bytes 343,020 / 2,253,856 (15.2%) (end of session 33, from `verify_all.sh`).
-  init 361/540 (38.5% of bytes), game 2761/5330 (13.2%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
+- **3158 / 5913 functions in C (53.4%)**, code bytes 344,028 / 2,253,856 (15.3%) (end of session 34, from `verify_all.sh`).
+  init 361/540 (38.5% of bytes), game 2766/5330 (13.2%), debugger 31/43 (41.3%). Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
-- Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
+- Session 34: 5 more from the pool (commit `350efff`), see "Session 34" at the end. Session 33: docs restructure (commit `7ef7e94`), then 14 functions from the session-32 pool (commit `d2cde39`); see "Session 33" at the end.
 - Conventions: EU symbols keep their **US names** (address in the name is the US one); clashing ones are `func_eu_XXXXXXXX` / `D_eu_XXXXXXXX`. A US function whose EU code differs is a prototype + `GLOBAL_ASM`.
   Data segments are mostly `databin`/`rodatabin` blobs; files that own `.rodata`/`.data` are listed in `docs/sessions/s08.md` / `s10.md` and by `grep -n 'rodata' conker/conker.eu.yaml`. Data symbols C code uses live in `undefined_syms.eu.txt`.
   Label every unnatural construct `// fakematch: <why>` (`grep -rn fakematch conker/src_eu`). Commit trailer: your own `Co-Authored-By:` line (see AGENT_BRIEF).
@@ -71,7 +71,7 @@ Drafting and screening (`m2c/` is host-side; paths in `m2c/` scripts assume `~/c
   `clones.py [--draft] [--lax]`, `--near K`, `--asm-clusters` template clones (s25, s28); `declfix.py` called by it (s29).
 
 Repair loop
-- `repair_ctx.sh <f>` context + `draftcheck.py` HINT lines; `repair_try.sh <f> draft.c`; `rlog.sh` log row into `repair_log.tsv` (560 rows); `stackfix.py f draft.c` / `--scan` / `--bisect` (frame/slot puzzles, s15);
+- `repair_ctx.sh <f>` context + `draftcheck.py` HINT lines; `repair_try.sh <f> draft.c`; `rlog.sh` log row into `repair_log.tsv` (~590 rows); `stackfix.py f draft.c` / `--scan` / `--bisect` (frame/slot puzzles, s15);
   `protocheck.py [--sig f | --apply --skip-logged]` + `rescreen.py` prototype contradictions (s15); `fwdproto.sh file 'proto;'` forward prototype after the last `#include` (s32); `permute.sh f draft.c [secs] [jobs]` / `-l list` (decomp-permuter, `nm/<f>/best.c`, `match.c`, s12); `sweep.sh` older bulk permuter sweep (s13).
 
 Data / rodata / file splitting (s07-s10)
@@ -100,7 +100,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
-1. Continue the repair loop over `shortpool.py 70` (about 605 unlogged candidates; the ranked results of session 33's `gensome.sh` run are in `tools/decomp-permuter/repair/pool33.res`, 540 drafts: 167 CERR, 167 DIFF, 115 SIZE-, 91 SIZE+; the CERR first-errors are in `repair/cerr.err`, 153 CERR left). CERR with `Dereferenced a non-pointer`/`X undefined` (m2c vector locals `spXX`) and `redeclaration` (forward prototype) were the cheapest class in session 33 (12 of 14 matches); the remaining ones are listed in cerr.err. Queue DIFF<=9 register-only leftovers for the permuter in the background (`permute.sh f draft.c 150 5`).
+1. Continue the repair loop over `shortpool.py 70` (about 575 unlogged candidates; ~125 CERR left in `cerr.err`, minus the 28 logged in s34; the ranked results of session 33's `gensome.sh` run are in `tools/decomp-permuter/repair/pool33.res`, 540 drafts: 167 CERR, 167 DIFF, 115 SIZE-, 91 SIZE+; the CERR first-errors are in `repair/cerr.err`, 153 CERR left). CERR with `Dereferenced a non-pointer`/`X undefined` (m2c vector locals `spXX`) and `redeclaration` (forward prototype) were the cheapest class in session 33 (12 of 14 matches); the remaining ones are listed in cerr.err. Queue DIFF<=9 register-only leftovers for the permuter in the background (`permute.sh f draft.c 150 5`).
 2. Pool expansions: `shortpool.py 100`, `clones.py --refresh --draft --lax` and `--near 16` after each batch (new matched C = new siblings), shape lists `shapes.py --list A|B 150` (A 101-150: 18, B 33 untouched), Gfx writers 101-150 insns (`gfxfind.py --untried --hints`).
 3. Open families worth a fresh idea: shape D unfilled delay slot (176 fns), the `func_150F1B78` family, `func_150AEDF8` family (8), the 43-insn u8 handler family (7), `mul.s` operand-order DIFF1s (`func_150EAA10`, `func_151AAFFC`), `func_151C2600` (DIFF2 frame), `func_150C572C` (DIFF2). All documented in IDO_SHAPES.md.
 4. Float functions blocked by rodata are unblocked in owned files (`game_eu_142E40`, `1CCD10`, `12C5F0`, `18B1C0`, `13C400`...): `func_15095B70`, `func_151166FC`, `func_150FF1A8`, `func_1519F500` need real hand work.
@@ -119,3 +119,9 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
   `func_150D8F44` (shape A arg copy in a3 as 4th pass-through arg), `func_151D441C` (DIFF25: `subu` hoisted above the `lw v0` in the ref), `func_15030600` (saved register numbering).
 - `-O2` quirk worth knowing: `tools/eu_port/m2c/tryall` on a CERR-free list is the cheapest way to try 3-24 mechanical variants (declaration orders did nothing for register roles in `func_150C1698`).
 - Pitfall: a stray `cat > /tmp/x` in a compound shell command blocks on stdin (the call hangs until the tool timeout).
+
+### Session 34
+- Repair loop, CERR-first, 29 functions logged, **5 matched**: `func_1507E1D0` (`f32 sp28[3]`/`sp1C[3]`, stackfix order, explicit else), `func_15044C54` (pass-through `allocate_memory(arg0,1,0,0)`), `func_15131D98` (u8 callee param: no `& 0xFF`, `f32 * call()`),
+  `func_1517F54C` (file gets `s32 func_1517F470();` fwd proto), `func_151E856C` (`extern u8 D[][6]` stops strength reduction; permuter finished; uses `D_800ABE94` extern, file does not own rodata). Recipes are in IDO_SHAPES (1.12, 3.16, 4.17, 5.4). Details and token cost: `docs/sessions/s34.md`.
+- Near misses worth a fresh look (all logged): `func_150D513C` (DIFF2, only frame 0x28 vs 0x30 from the unnamed spill of a function address), `func_151E856C`-style tables, `func_15003120` (DIFF36 roles), `func_15168E54` (DIFF14), `func_1509D274` (DIFF19, s0/s1 roles), `func_151733EC` (DIFF8, frame), `func_150D247C` (SIZE-1), `func_151481BC` (SIZE-1, ref presets v0 in the beqz delay slot).
+- Pitfall: `repair_try.sh` overwrites `repair/<f>.c` with the draft you pass; use one distinct draft filename per function (I clobbered a shared `g.c`). In zsh, `set -- $var` does not split; use bash for loops over lists.
