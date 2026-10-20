@@ -967,3 +967,12 @@ func_151CD97C	new	4	OK	y	n	s72: fn-level v=arg0+0x28, blk_t at top of arms 0x17/
 func_151C8C5C	new	2	OK	y	n	s72: shape C u8 **q = &arg0 (arg0 reloaded from home), switch(arg2), mem compare v+0x28 == arg1[1]
 func_15135480	DIFF1	3	OK	y	y	s72: remote permuter from plain-compare grid: key-first plain compares, t=arg1->unk0 in 2nd arm, (k ^ 0) default arm
 func_151347CC	new	2	OK	y	n	s72: s32 *key = &arg0->unk1C read as *key in the 0x2D arm (s71 recipe 2)
+func_1507ED48	DIFF1	1	OK	y	n	s73: p -= 2; return p[1] / 10U (dead p-=2 kept because p is the pointer base)
+func_150D2C00	DIFF5	3	OK	y	y	s73: shape C q=&arg0 (fakematch) + v declared inside the if-body (remote permuter 1 round)
+func_150DE450	DIFF7	1	OK	y	n	s73 LAX gensome (irregular switch): switch on arg0[0x72] directly, no named u8 temp
+func_150348D4	DIFF13	4	OK	y	n	s73 LAX gensome: no named temps at all (D_800CC2D0[arg0].x written out, switch on .id): frame 0x20 (s60/s64 rule)
+func_1507DF10	SIZE-2	1	OK	y	n	s73 nodraft gensome: clean switch with |=/&= compound ops (m2c temp_tN reuse cost 2 insns)
+func_1507F92C	SIZE+1	1	OK	y	n	s73 LAX gensome: switch on D_800B89C4[idx*0x32C] (u8 array), if/else calls, s32 v (u16 v: DIFF38)
+func_150D8DF0	SIZE-2	1	OK	y	n	s73 LAX gensome: u8 arg2 switch, named idx/x/y/z locals top-down (frame order), floats passed to func_150A7E40 mf
+func_150DBBB0	SIZE-1	2	OK	y	y	s73 nodraft: if/else-if/else, u8 field; f32 **pp = arg0+0x120 field pointer keeps the reload (remote permuter)
+func_15073B38	DIFF24	2	OK	y	y	s73 nodraft: 2 chained remote permuter rounds (DIFF24->4->OK); permuter temps + ^ 0 (fakematch); clean single f temp = DIFF3

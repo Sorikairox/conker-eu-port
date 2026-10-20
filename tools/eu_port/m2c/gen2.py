@@ -67,7 +67,8 @@ def m2c_inputs(sp):
     return ins
 def m2c(sp,cx,extra):
     r=subprocess.run([S+'/venv/bin/python','tools/mips_to_c/m2c.py','--valid-syntax','--context',cx]+extra+m2c_inputs(sp),capture_output=True,text=True)
-    if r.returncode or not r.stdout.strip() or any(b in r.stdout for b in BAD): return None
+    bad=BAD if not os.environ.get('LAX') else tuple(b for b in BAD if b!='/* irregular */')   # s73: LAX=1 keeps m2c's irregular-control-flow drafts (gotos)
+    if r.returncode or not r.stdout.strip() or any(b in r.stdout for b in bad): return None
     c=post(r.stdout)
     return None if 'M2C' in c else c
 TYPED=os.environ.get('TYPED')   # s54: typed struct127 (header already carries it) + struct127 * params from fieldinfer

@@ -67,7 +67,33 @@ s32 func_1507ECE8(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507ED48.s")
+u32 func_1507ED48(s32 arg0)
+{
+  s32 *p;
+  u32 r;
+  s32 idx;
+  idx = *((u8 *) (arg0 + 4));
+  if (idx != 0x96)
+  {
+    idx = func_15084E08(arg0);
+    arg0 = idx;
+  }
+  else
+  {
+    arg0 = idx;
+  }
+  if (arg0 == 0xFF)
+  {
+    return 0;
+  }
+  p = (s32 *) D_800D1C90[arg0];
+  r = 0;
+  if (p != 0)
+  {
+    p -= 2; return (u32)p[1] / 10U;
+  }
+  return r;
+}
 
 void func_1507EDC8(s32 arg0, s32 arg1) {
 }
