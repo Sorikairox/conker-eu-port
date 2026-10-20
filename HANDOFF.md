@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 59, worktree eu-wt-a, 3350/5915, 383,768 bytes; s56 was 3346). Older stamps below are history.
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
 Last updated: 2026-10-20 (session 56, worktree eu-wt-a, 3346/5915; session 55, worktree eu-wt-a, 3340/5915; session 52 was 3325; session 51 was 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
@@ -152,6 +153,12 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+
+000. Slice game >= 0x130000 after session 59 (details `docs/sessions/s59.md`, drafts `docs/sessions/s59_drafts/`): `func_1511E14C` matched (bitfield = `&= 0xFFFC; |= v` + operand swaps).
+   `func_151664F0` is a bit-exact draft (s58 frame rule: do not name the float, declare `i` before `temp_v0`) but apply.py REJECTs it: `game_eu_193D00`'s `.rodata` range starts at 0x24C2F0 with a foreign word `ff000000`,
+   the float is at +4. Find the owner of that word / pad the owned range, then apply `s59_drafts/func_151664F0.r4_OK_blocked_rodata.c`.
+   CERR `spXX undefined` class: `tools/eu_port/spdecl.py` + `extfix.sh` (+ `vecfix.py`, `redeclfix.py`) took 30 of the 36 to SIZE/DIFF; closest: `func_151E3864` DIFF4, `func_151922C4` DIFF11, `func_1512D5E0` DIFF20,
+   `func_151D7FE8` (DIFF70, structure right), `func_151452C4`/`func_151831CC` SIZE-2/-3. Then the s58 spawner template for `func_1510A1A0`, `func_15154DF4`, `func_151B65C0`, `func_151B61A0`, `func_151D49B8`.
 
 0. Slice game >= 0x130000 after session 56 (details `docs/sessions/s56.md`, recipes IDO_SHAPES `## s56 recipes`, drafts `docs/sessions/s56_drafts/` and `s55_drafts/`): large functions pay off in bytes.
    (a) The six `[D_800BE9C0]` matrix functions are written but unmatched; best first: `func_15177360` SIZE-1 (missing `or t0,v0,zero ... sw t0,0x50(sp)` word variable), `func_15188008` SIZE-1 (`s16 var_s2`;
