@@ -955,3 +955,7 @@ func_15159514	DIFF24	8	OK	y	y	s71: permuter: fn-level s32 *key=(s32*)(arg0+0x18)
 func_15135480	DIFF32	7	DIFF1	n	y	s71: switch(unk50) + named t,k; second compare operand order (bnel t9,v0) left; remote permuter best DIFF1 in s71_drafts
 func_15104FF8	SIZE+1	4	DIFF34	n	n	s71: frame 0x40/0x50 vs ref 0x48 (named locals), o in v0 + move a1,v0 in bne slot
 func_15187EC0	DIFF42	3	DIFF17	n	n	s71: ref reloads arg0 from home but hoists all stack-arg loads above the stores; &arg0 blocks the hoist
+func_151CD97C	new	4	OK	y	n	s72: fn-level v=arg0+0x28, blk_t at top of arms 0x17/0x18 (per-arm addiu remat), arm-local u8 *p for the 0x18 call arg
+func_151C8C5C	new	2	OK	y	n	s72: shape C u8 **q = &arg0 (arg0 reloaded from home), switch(arg2), mem compare v+0x28 == arg1[1]
+func_15135480	DIFF1	3	OK	y	y	s72: remote permuter from plain-compare grid: key-first plain compares, t=arg1->unk0 in 2nd arm, (k ^ 0) default arm
+func_151347CC	new	2	OK	y	n	s72: s32 *key = &arg0->unk1C read as *key in the 0x2D arm (s71 recipe 2)

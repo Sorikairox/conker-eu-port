@@ -176,7 +176,19 @@ void func_1513477C(struct102 *arg0) {
     D_80089AD4[idx]();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151347CC.s")
+void func_151347CC(struct161520 *arg0, struct161520_msg *arg1, u8 arg2) {
+  s32 *key = &arg0->unk1C;
+    if ((arg2 == 0) || (arg2 == 3)) {
+        if ((arg1->unk0 == arg0->unk1C) || (arg1->unk4.b == arg0->unk18)) { func_1516972C((struct102 *)arg0); }
+    } else if (arg2 == 0x11) {
+        if ((arg0->unk3D == 5) && ((arg1->unk0 == arg0->unk1C) || (arg1->unk4.b == arg0->unk18))) { func_1516972C((struct102 *)arg0); }
+    } else if (arg2 == 0x16) {
+        if ((s32)arg1 == arg0->unk1C) { func_1516972C((struct102 *)arg0); }
+    } else if (arg2 == 0x2D) {
+        if (arg1->unk0 == *key) { arg0->unk1C = arg1->unk4.w; arg0->unk18 = arg1->unk9; }
+        else if (arg1->unk4.w == *key) { arg0->unk1C = arg1->unk0; arg0->unk18 = arg1->unk8; }
+    }
+}
 
 void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
 }
@@ -303,7 +315,49 @@ void func_15135424(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     func_15145EA4(sp20, sp18, arg0, 2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15135480.s")
+void func_15135480(struct161520 *arg0, struct161520_msg *arg1, u8 arg2)
+{
+  s32 t;
+  s32 k;
+  if (arg2 == 0x2D)
+  {
+    if (arg0->unk1C == arg1->unk0)
+    {
+      arg0->unk1C = arg1->unk4.w;
+      arg0->unk18 = arg1->unk9;
+    }
+    else
+      if (arg0->unk1C == arg1->unk4.w)
+    {
+      t = arg1->unk0;
+      arg0->unk1C = t;
+      arg0->unk18 = arg1->unk8;
+    }
+  }
+  switch (arg0->unk50)
+  {
+    case 1:
+      func_151355B8(arg0, arg1, arg2);
+      break;
+
+    case 2:
+      func_1513555C(arg0, arg1, arg2);
+      break;
+
+    default:
+      if (arg2 == 0)
+    {
+      k = arg0->unk1C;
+      if (((k ^ 0) == arg1->unk0) || (arg0->unk18 == arg1->unk4.b)) // fakematch: (k ^ 0) keeps the key in v0 (s71/s72)
+      {
+        func_1516972C((struct102 *) arg0);
+      }
+    }
+      break;
+
+  }
+
+}
 
 void func_1513555C(struct161520 *arg0, struct161520_msg *arg1, u8 arg2) {
     if ((arg2 == 0) || (arg2 == 0x12)) {
