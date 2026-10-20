@@ -186,6 +186,7 @@ segments:
       - [0x2C2D0, .rodata, init_2070]
       - [0x2C3D0, .rodata, init_2E50]
       - [0x2C3F0, rodatabin]
+      - [0x2C5A0, .rodata, init_EB00]
       - [0x2C770, .rodata, init_11FA0]
       - [0x2C7B0, .rodata, libultra/audio/init_128D0]
       - [0x2C7C0, .rodata, libultra/audio/n_csplayer]

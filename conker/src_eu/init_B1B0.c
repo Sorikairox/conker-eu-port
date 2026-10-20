@@ -256,7 +256,28 @@ s32 func_1000BC28(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C530.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C7E8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C934.s")
+s32 func_1000C934(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
+    s32 vol;
+    s32 max;
+    s32 flag;
+
+    vol = 0;
+    flag = D_800DBFF0->unk5F0 & 1;
+    if (flag) {
+        max = 0x7FFF;
+    } else {
+        max = 0x2EE0;
+    }
+    if (D_800BE9F0 == 0x37 && !flag) {
+        func_100114D0(2200, 1066, -1600, max, 3000, 1500, NULL, &vol, NULL);
+        vol &= 0xFF00;
+        vol = max - vol;
+    }
+    if ((u16)(vol != arg0)) {
+        func_1000E40C(0x54, vol);
+    }
+    return vol | 0x80000000;
+}
 // NON-MATCHING: close but last part isn't quite right
 // s32 func_1000C934(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 //     s32 sp3C;
@@ -431,7 +452,35 @@ void func_1000DEC4(void) {
         D_800419A8[i].unk60 = 0;
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000DF68.s")
+void func_1000DF68(s32 arg0, s32 arg1, s32 arg2) {
+    struct151 *p;
+
+    p = func_1000B1FC(arg0);
+    if (p != NULL) {
+        p->unk4E = arg1;
+        if (arg2 == 1) {
+            p->unk4C = arg1;
+            if (p->unk0 >= 0) {
+                func_1000CC54(p->unk0);
+            }
+        }
+        if (arg2 >= 2) {
+            s32 d = p->unk4C - arg1;
+            if (d < 0) {
+                d = -d;
+            }
+            d /= arg2;
+            if (d <= 0) {
+                d = 2;
+            } else if (d >= 0x8000) {
+                d = 0x7FFF;
+            }
+            p->unk50 = d;
+        } else {
+            p->unk50 = 0x200;
+        }
+    }
+}
 
 void func_1000E054(s32 arg0, s32 arg1) {
     struct151 *sp1C;
@@ -480,7 +529,31 @@ s32 func_1000E134(s32 arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E17C.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E2F4.s")
+extern s8 D_800422A0;
+
+void func_1000E2F4(s32 arg0) {
+    s32 i;
+    u8 id;
+
+    for (i = 0; i != 3; i++) {
+        if (D_800417B0[i] != NULL && D_800417B0[i]->unk4 > 0 && D_800417B0[i]->unk15 == 0) {
+            if (arg0 != 0) {
+                id = i;
+                func_10008EE0(id, 0);
+                if (!(*(s32 *)&D_8002B074[D_800417B0[i]->unk4].unk4 & 0x10)) {
+                    func_10008F58(id);
+                }
+            } else {
+                if (!(*(s32 *)&D_8002B074[D_800417B0[i]->unk4].unk4 & 0x10)) {
+                    func_100084D8(i);
+                }
+                D_800417B0[i]->unk30 = -1;
+                func_1000CC54(i);
+            }
+        }
+    }
+    D_800422A0 = arg0;
+}
 
 void func_1000E40C(s32 arg0, s32 arg1) {
     struct151 *temp_v0;
@@ -499,7 +572,41 @@ void func_1000E40C(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E46C.s")
+s32 func_1000E46C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    struct151 *p;
+    s32 i;
+
+    p = func_1000B1FC(arg0);
+    arg1 = (arg1 * 0xFF) / 100;
+    if (arg1 > 0xFF) {
+        arg1 = 0xFF;
+    } else if (arg1 < 0) {
+        arg1 = 0;
+    }
+    if (p != NULL) {
+        if (p->unk0 >= 0) {
+            if (arg3 < 0) {
+                func_1000886C(((u8 *)p)[3], arg2, arg1);
+            } else {
+                func_10008790(((u8 *)p)[3], arg2, arg1, arg3);
+            }
+            return 1;
+        }
+        if (arg1 == 0) {
+            p->unk38 |= arg2;
+        } else if (arg1 > 0) {
+            p->unk38 &= ~arg2;
+        }
+        for (i = 0; arg2 != 0; i++) {
+            if (arg2 & 1) {
+                p->unk3C[i] = arg1;
+            }
+            arg2 >>= 1;
+        }
+        return 1;
+    }
+    return 0;
+}
 s32 func_1000E588(s32 arg0, s32 arg1, s32 arg2) {
     struct151 *tmp = func_1000B1FC(arg0);
 
@@ -575,7 +682,29 @@ s32 func_1000E770(s32 *arg0, s32 *arg1) {
     return D_80041F04;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E7A0.s")
+void func_1000E7A0(u32 arg0, s32 arg1) {
+    if (arg0 % 2 == 1) {
+        D_80041F04 |= 1;
+    } else if (arg0 & 2) {
+        D_80041F08 += arg1;
+        D_80041F0C++;
+    } else if (arg0 & 4) {
+        D_80041F08 = arg1 + 1;
+        D_80041F04 |= 4;
+    } else if (arg0 & 8) {
+        D_80041F0C = arg1 >> 8;
+        arg1 &= 0xFF;
+        if (arg1 == 0 || arg1 == 4 || arg1 == 5) {
+            D_80041F08 = 2;
+        } else if (arg1 == 10) {
+            D_80041F08 = 1;
+        } else {
+            D_80041F08 = 3;
+        }
+    } else if (arg0 & 0x10) {
+        D_80041F04 |= 0x10;
+    }
+}
 // NON-MATCHING: mostly just wrong registers
 // void func_1000E7A0(u32 arg0, s32 arg1) {
 //     if ((arg0 & 1) == 1) {

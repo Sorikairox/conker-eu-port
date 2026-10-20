@@ -4,6 +4,30 @@
 #include "variables.h"
 typedef struct { s32 x; s32 y; s32 z; s32 ex; s32 ey; s32 ez; f32 f; } SfxListener; // size 0x1C
 extern SfxListener D_80042308[];
+typedef struct {
+    u16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u16 unk8;
+    s16 unkA;
+    s32 unkC;
+    s32 unk10;
+    s32 (*unk14)(struct15 *, s32 *, u32 *, s32 *, s32 *, s32 *, u16 *);
+    s32 unk18;
+    s32 unk1C;
+    s16 unk20;
+    u8 unk22;
+    u8 unk23;
+    u16 unk24;
+    u16 unk26;
+    u16 unk28;
+    u16 pad2A;
+    f32 unk2C;
+} SfxEnt; // size 0x30
+extern u8 D_800BEA35;
+s32 func_1000A750(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 *argA, u32 *argB, u32 *argC);
+
 extern s32 D_80042B00;
 void func_10011310(void);
 void func_10011624(struct15 *arg0, s32 *arg1, s32 arg2, s32 arg3);
@@ -202,10 +226,10 @@ void func_1000F248(s32 arg0) {
     func_1000F1A8();
     if (arg0 == 4) {
         D_80041F54 = 0;
-        D_80041F58 = D_8002C3F8; // 0.009999999776482582
+        D_80041F58 = 0.01f; // 0.009999999776482582
     } else {
         D_80041F54 = 23000;
-        D_80041F58 = D_8002C3FC; // 0.10000000149011612
+        D_80041F58 = 0.1f; // 0.10000000149011612
     }
 
     if (arg0 == 0x35) {
@@ -358,7 +382,18 @@ void func_1000F9D4(u16 arg0, s16 arg1, s16 arg2, s16 arg3) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FA64.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FC18.s")
+void func_1000FC18(u16 arg0, s16 arg1, s16 arg2, s16 arg3, u16 arg4) {
+    s32 i;
+
+    for (i = 0; i < D_80042B00; i++) {
+        if (arg0 == ((SfxEnt *)D_80041FE0)[i].unk0 && arg1 == ((SfxEnt *)D_80041FE0)[i].unk2 && arg2 == ((SfxEnt *)D_80041FE0)[i].unk4 && arg3 == ((SfxEnt *)D_80041FE0)[i].unk6 && arg4 == (((SfxEnt *)D_80041FE0)[i].unk8 & 0x7FFF)) {
+            if (((SfxEnt *)D_80041FE0)[i].unk24 != 0) {
+                func_100111C8(((SfxEnt *)D_80041FE0)[i].unk24);
+            }
+            ((SfxEnt *)D_80041FE0)[i].unk10 |= 0x80;
+        }
+    }
+}
 void func_1000FD38(s32 arg0, s32 arg1, s32 arg2) {
     s32 i;
 
