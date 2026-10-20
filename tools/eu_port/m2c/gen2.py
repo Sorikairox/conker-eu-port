@@ -70,9 +70,42 @@ def m2c(sp,cx,extra):
     if r.returncode or not r.stdout.strip() or any(b in r.stdout for b in BAD): return None
     c=post(r.stdout)
     return None if 'M2C' in c else c
+TYPED=os.environ.get('TYPED')   # s54: typed struct127 (header already carries it) + struct127 * params from fieldinfer
+FIP={}
+if TYPED:
+    import json
+    FIP=json.load(open(os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker'))+'/conker/build_port/s54/fi/params.json'))
+def typed_ctx(f,cx,sp):
+    """two-pass: take m2c's own signature of f, retype hinted params to struct127 *, declare it in a per-function context"""
+    h=FIP.get(f)
+    if not h: return cx
+    t=open(cx).read()
+    dre=re.compile(r'^\w[^\n(;]*\b%s\s*\([^;{}]*\);[^\n]*$'%f,re.M)
+    if re.search(r'^\w[^\n(;]*\b%s\s*\([^;{}]*\)\s*\{'%f,t,re.M): return cx   # defined in C
+    b=m2c(sp,cx,[])
+    if not b: return cx
+    m=re.search(r'^([^\n(]*?)\b%s\(([^)]*)\) \{'%f,b,re.M)
+    if not m or '(' in m.group(2) or m.group(2).strip() in ('','void'): return cx
+    ps=[x.strip() for x in m.group(2).split(',')]; ch=0
+    for i in h:
+        if i<len(ps):
+            mm=re.fullmatch(r'(s32|u32|u8 \*|s8 \*|s16 \*|u16 \*|s32 \*|u32 \*) ?(\w+)',ps[i])
+            if mm: ps[i]='struct127 *'+mm.group(2); ch+=1
+    if not ch: return cx
+    os.makedirs(S+'/ctxf',exist_ok=True)
+    c2=S+'/ctxf/'+f+'.c'
+    pr=m.group(1).strip()+' '+f+'('+', '.join(ps)+');'
+    if dre.search(t):
+        # keep the declared return type, replace only the parameter list when the declared arity matches m2c's
+        d=dre.search(t).group(0); dp=re.search(r'\((.*)\)',d).group(1).split(',')
+        if len(dp)!=len(ps) and dp!=['void']: return cx
+        t=dre.sub(lambda _:re.sub(r'\(.*\)','('+', '.join(ps)+')',d),t,count=1); pr=''
+    open(c2,'w').write(t+'\n'+pr+'\n')
+    return c2
 def ctx(p):
     stem=p.replace('/','_')[:-2]
-    cx=S+'/ctx/'+stem+'.c'
+    cx=S+('/ctx_typed/' if TYPED else '/ctx/')+stem+'.c'
+    os.makedirs(os.path.dirname(cx),exist_ok=True)
     if not os.path.exists(cx):
         r=subprocess.run(['gcc','-E','-P','-Iinclude','-Iinclude/2.0L','-Iinclude/2.0L/PR','-Isrc','-D_LANGUAGE_C','-ffreestanding','-DF3DEX_GBI_2',p],capture_output=True,text=True)
         open(cx,'w').write(''.join(x+'\n' for x in r.stdout.split('\n') if not x.startswith('#pragma')))
@@ -92,6 +125,7 @@ def addpad(c):
 def work(a):
     f,p,sp=a
     cx=ctx(p); n=0
+    if TYPED: cx=typed_ctx(f,cx,sp)
     base=m2c(sp,cx,[])
     vs={}
     if base:

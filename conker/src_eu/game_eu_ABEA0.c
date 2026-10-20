@@ -96,7 +96,7 @@ void func_1507EE24(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-s32 func_1507E7E4(u8 *, u8, u8, u16, s32);
+s32 func_1507E7E4(struct127 *, u8, u8, u16, s32);
 void func_1507EE9C(arg0)
 u8 *arg0;
 {

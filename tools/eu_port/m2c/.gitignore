@@ -3,3 +3,5 @@ ctx/
 all.txt
 __pycache__/
 rod/
+ctx_typed/
+ctxf/

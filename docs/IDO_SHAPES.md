@@ -509,6 +509,19 @@ See `docs/sessions/s53.md`.
 5. **Many `--near 24..40` clone drafts are junk** (the "template" matches on skeleton only; constants, call counts and float/int types differ): `func_150FB708`, `func_150ADACC` (data decoded as mips3 code), `func_150A7EF4` (a fragment ending in `jr t9`), `func_150226E8`.
    Judge them from the target asm first; a clone draft is worth a try only when its `NEAR n` comment lists at most ~5 differences.
 
+## s54 recipes (typed m2c context, stack-slot layout)
+
+See `docs/sessions/s54.md`.
+1. **Typed drafts need typed prototypes**: declfix conforms a draft to the prototype already in the source file, so `u8 *arg0` stays and every field is a raw `(u8 *)arg0 + 0xNN`. `fieldinfer.py --apply-protos`
+   retypes the prototypes of hinted asm functions to `struct127 *` (check_files-safe). Pointer fields in a struct must be `u8 *`, not `void *` (`void * + int` is a CERR in IDO).
+2. **A `u16` callee result needs no `& 0xFFFF`**: `temp = func_1505A630(...)` (`u16` return) gives the ref's `andi v1,v0,0xFFFF`; `func_1505A184(temp_v1 - 0x3000, ...)` (`u16` first param) gives `addiu a0; andi t2,a0; or a0,t2`
+   (`func_150B15D0`). Same family as s48 recipe 3.
+3. **One float local for a ternary and an earlier temp** keeps f2 (`temp_f2 = 1000.0f` / `temp_f2 = 1050.0f - temp_f2 * 0.7f`, a separate `var_f2` took f12). A new named float for a product (`p`) grew the frame by 8;
+   reusing an existing dead temp (`temp_f2 = (x - 820.0f) * 0.09f; ... *D * (0, temp_f2)`) did not.
+4. **Declaration order = stack order, unused locals take a slot**: locals are allocated downward from the frame top in declaration order (first declared = highest), compiler spills go below the block, and an
+   *unused* `s32 pad;` declared first still takes the top slot (floats +4, spill 0x40 -> 0x3C, frame may grow by 8). `func_150B15D0`: three address-taken out floats + spill at 0x40 is DIFF1 (floats at 0x4C..0x57),
+   a leading pad gives the right float slots but the spill at 0x3C (DIFF2); two pads, an explicit `sp40`, `f32 v[3]`/`v[4]` and all declaration permutations (stackfix, 24 + 120 + 20 variants) do not fix both. OPEN.
+5. **m2c `var += 0x32C` on a `struct127 *`** (`func_1502C494`) is still the s50 stride bug (use `++`), and `!= &D_800D121C` compares against a differently typed symbol (cast).
 ## s55 recipes (larger functions: vector locals, spill names, matrix arrays, arg0 as variable)
 
 1. **m2c scalar vectors lose stores.** `f32 sp38; f32 sp3C; f32 sp40;` with `f(&sp38)` makes IDO drop the stores to `sp3C/sp40` as dead (SIZE-2..-13). Declare one array
@@ -569,3 +582,17 @@ See `docs/sessions/s53.md`.
     `fnptrfix.py in out` (m2c `*(s32 *)((u8 *)&TAB + i * 4)(args)` is a deref of the call result: rewrite to `(*(s32 (**)())(...))(args)`), `SCREEN_KEEPC=1 repair_try.sh` keeps the compiled TU
     (`conker/build/rt_<f>/<f>.tu.c`) so the line of a `cfe: Error ... line N` is readable. On the 141 CERR drafts of s55: `redeclfix` 141 -> 97 CERR, `fnptrfix + redeclfix` 97 -> 84; the rest are `spXX` read-only
     stack vectors (36), `Dereferenced a non-pointer` (20, m2c `*(base + idx)` of an `s32` global) and `Unacceptable operand` (11).
+## s57 recipes (slice < 0x130000: spawner stack structs, named-local slot order, params)
+
+See `docs/sessions/s57.md`.
+1. **Stack-struct spawners** (49 asm callers of `func_15132FBC`, e.g. `func_150CB2D0`/`CBD10`/`CCF8C`/`CE420`, `func_150D2C9C`): m2c emits scalars `s8 sp98; s16 sp9C; f32 sp28[13]; ...` and passes `sp28`. IDO drops the stores to the never-addressed scalars (SIZE-56). `spstruct.py in out`
+   merges all `spXX` at or above the lowest array into ONE `struct { ...; } sp` with pads (fields `uXX` named by stack offset) and passes `&sp`: the SIZE-56 drafts become DIFF42/47, i.e. all stores and the schedule are right and only the frame layout is left
+   (mine puts the struct 8 bytes higher with an 8-byte hole below, the ref has the same 8 bytes above the struct; 2 pad words, f64 tail, union with f64, named `sp20` all failed, OPEN).
+2. **9-byte aligned const struct copy**: `struct S9 { u8 a[9]; } sp38; sp38 = D_800A0D60;` gives exactly `lw/lw/sw/lbu/sw/sb` through `$at` (the three-statement s32/s32/u8 form schedules the byte load earlier).
+3. **Named locals in registers take slots, and their DECLARATION ORDER decides where the free hole ends up** (`func_150EA3B4`, DIFF3 -> OK): declare the live-across-calls float (`f32 temp_f20;`) BEFORE the stack vectors `s32 sp80[3]; s32 sp74[3];` to get the ref's unused slot above them
+   (the permuter had the vectors right but 4 bytes too low). Inline `x = call();` temps that are only consumed as arguments (they become unnamed spills) and save their slots.
+4. **`rand() * field` operand order**: when mine gives `mul.s f16,f10,f0` and the ref `mul.s f16,f0,f10`, write the field first (`field * func_150ADA68()`); `(0, call())` did not help here (`func_150EA3B4`).
+5. **`f32` literal passed as `0x3F800000`** to an `f32` parameter converts the integer (`lui at,0x4E7E`); write `1.0f` (`func_150891D4`).
+6. **Sub-vector `s32 spXX` + `&spXX` to a `float[3]` out parameter**: declare the real 12-byte arrays (`s32 sp88[4]`/`[3]`) or the frame is short by 4 bytes per vector (`func_150891D4`, `func_150EA3B4`).
+7. **Stack-passed args of a function that ignores them**: `func_150C76C0` read its 6th parameter (`lw $v1,0x74($sp)`), m2c had dropped the 5th (`arg4`): add the unused `s32 arg4` so the later params land on the right stack slots (DIFF1 -> OK).
+8. **`void f(s16, s16, f32, void *)` prototype for `func_15143794`** (the header has `s32 f(s16,s16,s32,u8*)` in one file only): fixes SIZE+2 in every draft that calls it (`func_150E0978`: after the prototype the remaining DIFF35 was frame slots, fixed by inlining the `spXX = call()` temps, recipe 3 of s55).

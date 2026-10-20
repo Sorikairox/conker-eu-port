@@ -910,6 +910,9 @@ func_15172D80	DIFF2	8	DIFF2	n	n	s51: dropping sp2C gives frame 0x40 vs 0x38 (was
 func_151B97C4	SIZE+1	5	SIZE+1	n	n	s51: prod+mem order fixes add.s; ref spills v0 across sinf and loads f2/f12 AFTER sinf; sunk addiu / early loads in mine
 func_151EFDD0	DIFF8	8	SIZE+3	n	n	s51: ref keeps D in a0 (scalar u32 D_80091D20 needs header change), t6=a0<<2; locals/args forms SIZE+2..5
 func_1519ED88	SIZE-1	3	DIFF26	n	n	s51: needs D_800E0D50 = 0 after the call; then arm 1 ends with unfilled b (sw zero not in delay slot); goto end forms no help
+func_150B15D0	CERR	25	DIFF1	n	n	s54 typed ctx: draft compiles; only sp48 at 0x54 vs 0x48 (3 float out-params, spill 0x40); u16 temp_v1 (no &0xFFFF), one temp_f2 for the ternary, *D*(0,p) mul order; array/pad/order variants all fail (pad gives spill 0x3C)
+func_150344AC	CERR	6	SIZE-1	n	y	s54 typed ctx: s16 temp_f10 (no s32); ref copies arg0 into a2 (temp in a0), mine keeps var_a2=a0
+func_15022A8C	CERR	2	SIZE+2	n	n	s54 typed ctx: extern u8 D_800CC3FF[] idx*0x32C; ref early-return shape differs (bnez not bnel)
 func_15193A24	SIZE-9	4	OK	y	n	105 insns: m2c sp38/sp3C/sp40 scalars passed as &sp38 -> dead stores dropped; one f32 sp38[3] array; temp_v1 inlined, temp_v0 declared before the array (slot order)
 func_151A7BC0	DIFF14	8	OK	y	n	106 insns: vecfix (sp74[9] array), drop named sp58/sp5C/sp60 (unnamed arg spills of nested call args), temp_f18 declared before sp6C (slot 0x70 gap), sp6C load first
 func_151BC920	SIZE+2	8	OK	y	n	130 insns: vecfix sp6C[9]; func_15143794 prototype (s16,s16,f32,void*) in draft; spill names sp58/sp5C/sp60/sp64 inlined into call args; temp_f8 inlined but call evaluated before the 0.0f stores

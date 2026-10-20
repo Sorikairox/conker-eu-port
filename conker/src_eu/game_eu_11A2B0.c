@@ -87,7 +87,7 @@ void func_150ED10C(u8 *arg0) {
 }
 
 void func_150ECFE8(u8 *, u8, u8, u8, u8, u8, s16, u8, s32);
-s32 func_151CA070(s32, u8, s32);
+s32 func_151CA070(struct127 *, u8, s32);
 
 void func_150ED180(s32 arg0, u8 arg1, s32 arg2) {
     func_151CA070(arg0, arg1, arg2);

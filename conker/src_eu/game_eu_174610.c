@@ -4,7 +4,7 @@
 
 
 s32 func_15046F70(f32 *, s32, f32, s32);
-s32 func_1504715C(s32, u8 *);
+s32 func_1504715C(s32, struct127 *);
 s32 func_15142314(s32, s32, f32 *, u8);
 
 s32 func_15146E00(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {

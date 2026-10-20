@@ -63,8 +63,8 @@ void func_150A28C4(u8 *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2AB4.s")
 
-s32 func_150A2280(u8 *, u8 *, s32);
-s32 func_151733EC(u8 *, u8, s32);
+s32 func_150A2280(struct127 *, u8 *, s32);
+s32 func_151733EC(struct127 *, u8, s32);
 
 void func_150A2C6C(u8 *arg0)
 {

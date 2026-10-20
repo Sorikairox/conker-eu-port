@@ -36,7 +36,7 @@ void func_151001BC(u8 *arg0) {
     }
 }
 
-s32 func_151D5FC8(s32, s32, s32, s32, s32, s32, s32);
+s32 func_151D5FC8(struct127 *, s32, s32, s32, s32, s32, s32);
 s32 func_151D441C(s32, s32, s32, s32);
 extern s32 D_8009002C;
 extern u8 *D_80090034;

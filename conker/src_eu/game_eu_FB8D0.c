@@ -5,7 +5,7 @@
 
 s32 func_15046F70(f32 *, s32, f32, f32 *);
 extern f32 D_800A0B80;
-s32 func_1504715C(f32 *, u8 *);
+s32 func_1504715C(f32 *, struct127 *);
 s32 func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
 void func_150CE0C0(u8 *arg0, u8 arg1, s32 arg2)
 {
