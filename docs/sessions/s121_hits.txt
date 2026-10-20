@@ -146,3 +146,11 @@ bk: 0.94 func_100214F0 480 g:src_core1_n_audio_n_adpcm.c.o:n_alAdpcmPull 426 src
 bk: 0.87 func_10020ABC 214 g:src_core1_n_audio_n_env.c.o:__n_pullSubFrame 192 src_eu/init_20000.c
 bk: 0.67 func_10006C1C 16 g:src_core1_code_0.c.o:mainThread_create 20 src_eu/init_eu_5DA0.c
 bk: 0.62 func_10001420 8 g:src_core1_ucode.c.o:ucode_getPtrAndSize 8 src_eu/init_1420.c
+# s129 re-screen of the init slice (rarescreen.sh, OPTS="-O1 -O2 -g"; DKR now also at -g): no new rows >= 0.85.
+# init_11FA0 func_10012020 (Conker music-mode mixer, sinf + jump table) and init_19B50 func_1001A030/func_1001A508 have no row >= 0.6
+# in DKR, BK or DK64 at any opt level. func_1001A030 = DK64 n_csplayer.c AL_MIDI_SUSTAIN_CTRL case (matched s129 by hand,
+# a switch case is not a function so srcmatch cannot see it); func_1001A508 is Conker-only. Top rows unchanged:
+0.93 func_10001550 296 O2:libultra_src_libc_xldtob.c.o:_Ldtob 290 src_eu/init_1420.c   (DKR; ultralib builds libc -O3: 0.64, PD/DKR -O2 0.79 by opcmp.py)
+0.87 func_100036E8 101 O2:libultra_src_io_vimgr.c.o:viMgrMain 88 src_eu/init_eu_3570.c
+0.61 func_10008180 214 O2:src_global_asm_done_code_5A50.c.o:func_global_asm_80600D50 212 src_eu/init_8180.c
+0.61 func_10008CE8 126 O2:src_global_asm_code_6710.c.o:func_global_asm_8060A1B0 122 src_eu/init_8180.c

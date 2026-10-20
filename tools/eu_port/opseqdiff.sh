@@ -16,7 +16,7 @@ def norm(l):
     if l.startswith('sll zero,zero,0') or op=='nop': return 'nop'
     if op.startswith('b') or op.startswith('j'): return al.get(op,op)
     if op in ('lui','ori'): return op+' '+l.split(' ')[1].split(',')[0]+',REL'
-    l=re.sub(r'%\w+\([^)]*\)','REL',l)
+    l=re.sub(r'%\w+\([^)]*\)','0',l)  # s129: unrelocated .o shows 0
     l=re.sub(r'0x[0-9A-Fa-f]+',lambda m:str(int(m.group(0),16)),l)
     if SPN: l=re.sub(r'-?\d+\(sp\)','N(sp)',l)
     return l

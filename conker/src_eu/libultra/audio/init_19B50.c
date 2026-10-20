@@ -82,7 +82,42 @@ void func_10019F98(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/init_19B50/func_1001A030.s")
+// s129: DK64 n_csplayer.c AL_MIDI_SUSTAIN_CTRL case as a controller handler (chanState 0x28 flag
+// selects the channel's release time over the envelope's)
+typedef struct {
+    /* 0x00 */ u8 pad0[0x24];
+    /* 0x24 */ ALMicroTime releaseTime;
+    /* 0x28 */ u8 unk28;
+    /* 0x29 */ u8 pad29[0x13];
+} ChanState19B50;
+
+void func_1001A030(N_ALCSPlayer *seqp, s32 arg1, s32 chan, u32 byte2) {
+    N_ALVoiceState *vs;
+
+    seqp->chanState[chan].sustain = byte2;
+    for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
+        if ((vs->channel == chan) && (vs->phase != AL_PHASE_RELEASE)) {
+            if (byte2 > AL_SUSTAIN) {
+                if (vs->phase == AL_PHASE_NOTEON) {
+                    vs->phase = AL_PHASE_SUSTAIN;
+                }
+            } else {
+                if (vs->phase == AL_PHASE_SUSTAIN) {
+                    vs->phase = AL_PHASE_NOTEON;
+                } else if (vs->phase == AL_PHASE_SUSTREL) {
+                    vs->phase = AL_PHASE_RELEASE;
+                    if (((ChanState19B50 *)seqp->chanState)[chan].unk28) {
+                        __n_seqpReleaseVoice((N_ALSeqPlayer *)seqp, &vs->voice,
+                                             ((ChanState19B50 *)seqp->chanState)[chan].releaseTime < AL_USEC_PER_FRAME ? AL_USEC_PER_FRAME : ((ChanState19B50 *)seqp->chanState)[chan].releaseTime);
+                    } else {
+                        __n_seqpReleaseVoice((N_ALSeqPlayer *)seqp, &vs->voice,
+                                             vs->sound->envelope->releaseTime < AL_USEC_PER_FRAME ? AL_USEC_PER_FRAME : vs->sound->envelope->releaseTime);
+                    }
+                }
+            }
+        }
+    }
+}
 
 void func_1001A224(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     N_ALSoundState *state;
@@ -131,7 +166,45 @@ void func_1001A45C(N_ALCSPlayer *seqp, u8 chan) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/init_19B50/func_1001A508.s")
+// s129: Conker controller handler (DK64 has no counterpart): sets up the chanState 0x0D..0x10 ramp
+// and starts it through func_1001A704 with byte1 = 0xFE
+typedef struct {
+    /* 0x00 */ u8 pad0[0xD];
+    /* 0x0D */ u8 unkD;
+    /* 0x0E */ u8 unkE;
+    /* 0x0F */ u8 unkF;
+    /* 0x10 */ f32 unk10;
+    /* 0x14 */ u8 pad14[0x28];
+} ChanRamp19B50;
+
+#define RAMP(c) (((ChanRamp19B50 *)seqp->chanState)[c])
+
+float fabsf(float);
+#pragma intrinsic (fabsf)
+void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3);
+
+void func_1001A508(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
+    f32 diff;
+
+    if (RAMP(chan).unkF == 0) {
+        RAMP(chan).unkF = 0x88;
+    }
+    if (RAMP(chan).unkE != arg3) {
+        diff = arg3 - RAMP(chan).unkD;
+        RAMP(chan).unk10 = diff / (RAMP(chan).unkF & 0x7F);
+        RAMP(chan).unk10 = fabsf(RAMP(chan).unk10);
+        if (RAMP(chan).unkE == RAMP(chan).unkD) {
+            RAMP(chan).unkE = arg3;
+        } else {
+            RAMP(chan).unkE = arg3;
+            return;
+        }
+    } else {
+        return;
+    }
+    ((N_ALEvent *)arg1)->msg.midi.byte1 = 0xFE;
+    func_1001A704(seqp, arg1, chan, arg3);
+}
 
 void func_1001A704(N_ALCSPlayer *seqp, s32 arg1, s32 chan, s32 arg3) {
     u8 sp2F;
