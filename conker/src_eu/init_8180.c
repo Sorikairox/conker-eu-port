@@ -176,47 +176,55 @@ void func_10008C6C(u8 idx, u8 arg1) {
     func_100186DC(&D_8003CA58[idx], D_8003CD48[idx].unk0[arg1]);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008CE8.s")
-// NON-MATCHING: 80% of the way there
-// s32 func_10008CE8(u8 idx, u16 arg1) {
-//     s32 sp3C;
-//     ALCSeq *temp_s0_3;
-//     u32 i;
-//
-//     i = 0;
-//     func_10018C60(&D_8003C900[idx]);
-//     while ((n_alCSPGetState(&D_8003C900[idx]) != 0) && (i < 2000000)) {
-//         i++;
-//     };
-//
-//     if (i >= 2000000) {
-//         func_10018C60(&D_8003C900[idx]);
-//         while ((n_alCSPGetState(&D_8003C900[idx]) != 0) && (i < 4000000)) {
-//             i++;
-//         }
-//     }
-//
-//     if (arg1 != D_8003CA3C[idx]) {
-//         if (D_8003CA48[idx] != NULL) {
-//             func_10004074(&D_8003CA48[idx]); // de-init?
-//             D_8003CA48[idx] = NULL;
-//         }
-//
-//         sp3C = D_8003CD40[arg1].unk4;
-//         temp_s0_3 = allocate_memory(&D_8003C910[arg1], 0xFF, 2, 2);
-//         if (temp_s0_3 == NULL) {
-//             return -1;
-//         }
-//         func_10004514(sp3C, temp_s0_3, ALIGN16(D_8003C910[arg1]), 1);
-//         D_8003CA3C[idx] = arg1;
-//       }
-//
-//     n_alCSeqNew(&D_8003CA58[idx], &D_8003CA48[idx]);
-//     func_10018CB0(&D_8003C900[idx], &D_8003CA58[idx]);
-//     func_10017B30(&D_8003C900[idx]);
-//
-//     return 0;
-// }
+// s129: (re)start sequence player idx with sequence arg1: wait for the player to stop, load the
+// sequence (cached in D_8003CDE8[idx], id in D_8003CDDC[idx]) and start it
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} SeqRom8180;
+
+extern u16 D_8003CDDC[];
+extern u8 *D_8003CDE8[];
+extern SeqRom8180 *D_8003D0E0;
+extern u16 D_8003CCB0[];
+void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+void func_10004074(s32 arg0);
+s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+void func_10018CB0(N_ALCSPlayer *csp, ALCSeq *seq);
+
+s32 func_10008CE8(u8 idx, s32 arg1) {
+    s32 devAddr;
+    u32 i;
+
+    i = 0;
+    func_10018C60(D_8003C900[idx]);
+    while (n_alCSPGetState(D_8003C900[idx]) != 0 && i < 2000000) {
+        i++;
+    }
+    if (i >= 2000000) {
+        func_10018C60(D_8003C900[idx]);
+        while (n_alCSPGetState(D_8003C900[idx]) != 0 && i < 4000000) {
+            i++;
+        }
+    }
+    if (arg1 != D_8003CDDC[idx]) {
+        if (D_8003CDE8[idx] != NULL) {
+            func_10004074((s32)D_8003CDE8[idx]); // the int conversion gives the ref v0 load + move
+            D_8003CDE8[idx] = NULL;
+        }
+        devAddr = D_8003D0E0[arg1].unk4;
+        D_8003CDE8[idx] = allocate_memory(D_8003CCB0[arg1], 0xFF, 2, 2);
+        if (D_8003CDE8[idx] == NULL) {
+            return -1;
+        }
+        func_10004514(devAddr, D_8003CDE8[idx], ALIGN16(D_8003CCB0[arg1]), 1);
+        D_8003CDDC[idx] = arg1;
+    }
+    n_alCSeqNew(&D_8003CA58[idx], D_8003CDE8[idx]);
+    func_10018CB0(D_8003C900[idx], &D_8003CA58[idx]);
+    func_10017B30(D_8003C900[idx]);
+    return 0;
+}
 
 void func_10008EE0(u8 idx, s32 arg1) {
     func_10018D00(D_8003C900[idx], arg1);
