@@ -402,7 +402,97 @@ void func_1511E14C(u8 *arg0)
   *((u8 *) (arg0 + 0x73)) |= var_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511E320.s")
+s32 func_10010558(s32, struct127 *, s32, s32, s32, s32);
+
+void func_1511E320(u8 *arg0, struct127 *arg1) {
+    s32 snd;
+    s32 vol;
+    s32 isA;
+    s32 isB;
+    u8 id;
+
+    vol = 0x6590;
+    snd = 0;
+    isA = arg1->id == 0x3B;
+    isB = arg1->id == 0x80;
+    switch (*(u16 *)(arg0 + 0x54)) {
+    case 0x39:
+    case 0x5C:
+    case 0x5D:
+    case 0x5E:
+        if (isA) {
+            func_10010630(0x542, arg1, 0x6590, 0x64, 0x3E8);
+        } else if (isB) {
+            func_10010630(0x567, arg1, 0x6590, 0x64, 0x3E8);
+        }
+        snd = 0x2B0;
+        break;
+    case 0x3A:
+        if (isA) {
+            snd = (func_150ADA20() & 1) + 0x53E;
+        } else if (isB) {
+            snd = 0x567;
+        } else {
+            snd = 0x60A;
+        }
+        break;
+    case 0x3B:
+    case 0x51:
+        snd = 0x181;
+        break;
+    case 0x3C:
+    case 0x6A:
+        snd = 0xB1;
+        break;
+    case 0x3D:
+    case 0x6B:
+        snd = 0x442;
+        break;
+    case 0x3E:
+        snd = 0x444;
+        break;
+    case 0x46:
+        snd = 0x2F0;
+        break;
+    case 0x47:
+        snd = 0x4A3;
+        break;
+    case 0x50:
+    case 0x55:
+        snd = (func_150ADA20() & 1) + 0xB;
+        break;
+    case 0x52:
+    case 0x58:
+        snd = 0x510;
+        break;
+    case 0x53:
+        snd = 0x2AF;
+        if (isB) {
+            func_10010558(0x567, arg1, 0x7D00, 0x64, 0x3E8, 0x19);
+        }
+        break;
+    case 0x56:
+        if (isB) {
+            func_10010630(0x567, arg1, 0x6590, 0x64, 0x3E8);
+        }
+        snd = 0x5AE;
+        break;
+    case 0x57:
+    case 0x6D:
+    case 0x6E:
+        snd = 0x51;
+        vol = 0x2328;
+        break;
+    case 0x64:
+    case 0x65:
+        snd = 0x629;
+        vol = 0x7FFF;
+        break;
+    }
+    if (snd != 0) {
+        func_10010630(snd, arg1, vol, 0x64, 0x3E8);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511E4F4.s")
 

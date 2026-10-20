@@ -29,13 +29,46 @@ void func_151AEC60(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC470/func_151AED60.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC470/func_151AEE40.s")
+void func_151AF064(); // K&R: the ref passes the flag unmasked (definition is K&R too)
+void func_151AEF34(u8 *, f32, f32, f32, u8, u8);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC470/func_151AEF34.s")
+void func_151AEE40(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+    f32 v[3];
+    f32 r;
+    s32 a;
+    s32 b;
+
+    v[0] = arg0;
+    v[1] = arg1;
+    v[2] = arg2;
+    r = func_150ADA68();
+    if (!(r < 0.15f)) {
+        if (r < 0.25f) {
+            a = (func_150ADA68() > 0.0f) ? 1 : 0;
+            func_151AF064(v, a, arg6[0xC]);
+        } else {
+            b = (func_150ADA68() > 0.80500007f) ? 1 : 0;
+            func_151AEF34((u8 *)v, arg3, arg4, arg5, b, arg6[0xC]);
+        }
+    }
+}
+
+void func_151AEF34(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5) {
+    s32 pad; // fakematch
+    f32 v[3];
+
+    v[0] = -arg1 * 0.10300001f;
+    v[1] = -arg2 * 0.10300001f;
+    v[2] = -arg3 * 0.10300001f;
+    func_151D9014(arg0, v, 0, (func_150ADA68() * 0.60200006f) + -1.0450001f, ((u32)func_150ADA20() % 31) + 0x3C, ((u32)func_150ADA20() % 101) + 0x9B, (func_150ADA68() * 219.0f) + 77.0f, arg4, 1.0f, 1.0f, 0, 0, 1, 0, arg5, 1);
+}
 
 s32 func_151DA6F8(s32, f32 *, f32, s16, s32, f32, s32, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
 
-void func_151AF064(s32 arg0, u8 arg1, u8 arg2)
+void func_151AF064(arg0, arg1, arg2)
+    s32 arg0;
+    u8 arg1;
+    u8 arg2;
 {
   f32 sp88[4];
   u8 sp87;

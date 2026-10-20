@@ -221,9 +221,53 @@ s32 func_1518F6CC(struct_eu_1BAAA0_e *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F710.s")
+s32 func_1518F710(u8 *arg0) {
+    u8 *p = arg0 + 0x110;
+    s32 v;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F8F4.s")
+    *(s16 *)(p + 0x1E) -= D_800BE9E4;
+    if (*(s16 *)(p + 0x1E) < 0) {
+        *(s16 *)(p + 0x1E) = func_150ADA20() % 6U;
+        if (func_150ADA20() & 3) {
+            *(f32 *)(p + 0x18) = *(f32 *)(p + 0x10) + (*(f32 *)(p + 0xC) - *(f32 *)(p + 0x10)) * func_150ADA68();
+        } else {
+            *(f32 *)(p + 0x18) = *(f32 *)(p + 0xC) + (*(f32 *)(p + 0x14) - *(f32 *)(p + 0xC)) * func_150ADA68();
+        }
+    }
+    *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.359f;
+    *(s16 *)(p + 0x1C) -= D_800BE9E4;
+    if (*(s16 *)(p + 0x1C) < 0) {
+        *(s16 *)(p + 0x1C) = func_150ADA20() % 17U;
+        *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * func_150ADA68();
+    }
+    *(f32 *)(arg0 + 0x2C) += (*(f32 *)(p + 0x8) - *(f32 *)(arg0 + 0x2C)) * 0.186f;
+    *(s16 *)(p + 0x2C) -= D_800BE9E4;
+    if (*(s16 *)(p + 0x2C) < 0) {
+        *(s16 *)(p + 0x2C) = func_150ADA20() % 15U;
+        *(f32 *)(p + 0x28) = *(f32 *)(p + 0x24) + (*(f32 *)(p + 0x20) - *(f32 *)(p + 0x24)) * func_150ADA68();
+    }
+    *(s32 *)(arg0 + 0x24) = (s32)((*(f32 *)(p + 0x28) - *(s32 *)(arg0 + 0x24)) * 0.231f) + *(s32 *)(arg0 + 0x24);
+    return 1;
+}
+
+s32 func_1518F8F4(u8 *arg0) {
+    u8 *p;
+
+    if (*(s16 *)(arg0 + 0x12C) == 0) {
+        p = arg0 + 0x110;
+        *(f32 *)(p + 0x8) = *(f32 *)(p + 0x4) + (*(f32 *)(p + 0x0) - *(f32 *)(p + 0x4)) * func_150ADA68();
+        *(s16 *)(p + 0x1C) = 1;
+    }
+    p = arg0 + 0x110;
+    if (p) {} // fakematch: keeps p in v1 for the 0x1E test
+    if (*(s16 *)(p + 0x1E) == 0) {
+        *(f32 *)(p + 0x18) = *(f32 *)(p + 0x10) + (*(f32 *)(p + 0xC) - *(f32 *)(p + 0x10)) * func_150ADA68();
+        *(s16 *)(p + 0x1E) = 1;
+    }
+    *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.359f;
+    *(f32 *)(arg0 + 0x2C) += (*(f32 *)(p + 0x8) - *(f32 *)(arg0 + 0x2C)) * 0.186f;
+    return 1;
+}
 
 // rodata_inject: size 0x24CB34 4
 void func_1518F9CC(s32 arg0, u8 arg1) {
@@ -423,4 +467,29 @@ void func_1519072C(u8 *arg0)
   func_1518F9CC(0xFFFFFFFFFFFFFFFF & sp1C, 0x49);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_15190770.s")
+typedef struct { u8 *p; u8 b; } S190770;
+s32 func_151920FC(void *, s32);
+u8 func_151D8E20();
+
+u8 *func_15190770(u8 **arg0, s32 arg1, u8 arg2, s32 arg3) {
+    u8 *obj;
+    S190770 s;
+    u8 *q;
+
+    s.p = *arg0;
+    s.b = (*arg0)[0x3B];
+    func_151920FC(&s, 0xE);
+    obj = func_15167A68(0x20, arg3, arg1 + 0x300, 1, arg2, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    memcpy(obj + 0x10, arg0, 0xC);
+    q = obj + 0x30;
+    *(u8 **)(obj + 0x24) = q;
+    *(u8 **)(obj + 0x28) = obj + 0x300;
+    *(s32 *)(obj + 0x20) = 0;
+    *(f32 *)(obj + 0x1C) = 0.0f;
+    bzero(q, 0x2D0);
+    *(s8 *)(obj + 0x2C) = func_151D8E20();
+    return obj;
+}
