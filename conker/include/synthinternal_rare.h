@@ -335,4 +335,23 @@ void            _collectPVoices(ALSynth *drvr);
 s32             _timeToSamples(ALSynth *ALSynth, s32 micros);
 ALMicroTime     _samplesToTime(ALSynth *synth, s32 samples);
 
+/* s123: DK64 include/n_synthInternals.h defines (Rare n_audio) */
+#include <PR/n_abi.h>
+#ifndef FIXED_SAMPLE
+#define SAMPLES               184
+#define SAMPLE184(delta)      (((delta) + SAMPLES - 1) / SAMPLES) * SAMPLES
+#define FIXED_SAMPLE          SAMPLES
+#define N_AL_DECODER_IN         0
+#define N_AL_RESAMPLER_OUT      0
+#define N_AL_TEMP_0             0
+#define N_AL_DECODER_OUT        368
+#define N_AL_TEMP_1             368
+#define N_AL_TEMP_2             736
+#define N_AL_MAIN_L_OUT         1248
+#define N_AL_MAIN_R_OUT         1616
+#define N_AL_AUX_L_OUT          1984
+#define N_AL_AUX_R_OUT          2352
+#define N_AL_DIVIDED            368
+#endif
+
 #endif

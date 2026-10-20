@@ -1,139 +1,87 @@
 #include <n_libaudio.h>
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1FB40/func_1001FB40.s")
-// void *func_1001FB40(s32 arg0, void *arg1) {
-//     void *sp54;
-//     s32 sp50;
-//     s32 sp4C;
-//     void *sp48;
-//     void *sp44;
-//     void *sp40;
-//     void *sp3C;
-//     void *sp38;
-//     void *sp34;
-//     void *sp30;
-//     void *sp2C;
-//     void *sp28;
-//     void *sp24;
-//     void *sp20;
-//     void *sp1C;
-//     s32 temp_t2;
-//     s32 temp_t6_2;
-//     void *temp_t0;
-//     void *temp_t0_2;
-//     void *temp_t1;
-//     void *temp_t2_2;
-//     void *temp_t4;
-//     void *temp_t5;
-//     void *temp_t5_2;
-//     void *temp_t6;
-//     void *temp_t7;
-//     void *temp_t8;
-//     void *temp_t8_2;
-//
-//     sp54 = arg1;
-//     if ((D_800E0E04 == 0) || (func_151F2E88(0xB8, &sp54) == 0)) {
-//         temp_t8 = sp54;
-//         sp54 = temp_t8 + 8;
-//         sp48 = temp_t8;
-//         sp48->unk0 = 0x20004E0;
-//         sp48->unk4 = 0x2E0;
-//         temp_t4 = sp54;
-//         sp54 = temp_t4 + 8;
-//         sp44 = temp_t4;
-//         sp44->unk0 = 0x20007C0;
-//         sp44->unk4 = 0x2E0;
-//     }
-//     sp4C = 0;
-//     sp50 = 1;
-//     if (D_8002BA44->unk50 >= 2) {
-// loop_4:
-//         if ((s32) (D_8002BA44->unk48 + (sp50 * 0x44))->unk40->unk2 > 0) {
-//             sp4C = sp50;
-//         }
-//         temp_t2 = sp50 + 1;
-//         sp50 = temp_t2;
-//         if (temp_t2 < D_8002BA44->unk50) {
-//             goto loop_4;
-//         }
-//     }
-//     sp50 = 0;
-//     if (D_8002BA44->unk50 > 0) {
-// loop_8:
-//         if (sp4C >= D_8002BA44->unk50) {
-//             sp4C = 0;
-//         }
-//         if (sp50 != 0) {
-//             temp_t1 = sp54;
-//             sp54 = temp_t1 + 8;
-//             sp40 = temp_t1;
-//             sp40->unk0 = 0x20007C0;
-//             sp40->unk4 = 0x2E0;
-//         }
-//         sp54 = D_8002BA44->unk44->unk4(arg0, sp54, sp4C);
-//         if (*(&D_800428C4 + sp4C) != 0) {
-//             if (*(&D_800428C6 + sp4C) != 0) {
-//                 temp_t5 = sp54;
-//                 sp54 = temp_t5 + 8;
-//                 sp3C = temp_t5;
-//                 sp3C->unk0 = 0xC008000;
-//                 sp3C->unk4 = 0x7C004E0;
-//             } else {
-//                 temp_t0 = sp54;
-//                 sp54 = temp_t0 + 8;
-//                 sp38 = temp_t0;
-//                 sp38->unk0 = 0xC007FFF;
-//                 sp38->unk4 = 0x7C00650;
-//             }
-//         } else {
-//             if (*(&D_800428C6 + sp4C) != 0) {
-//                 temp_t7 = sp54;
-//                 sp54 = temp_t7 + 8;
-//                 sp34 = temp_t7;
-//                 sp34->unk0 = 0xC008000;
-//                 sp34->unk4 = 0x7C00650;
-//             } else {
-//                 temp_t5_2 = sp54;
-//                 sp54 = temp_t5_2 + 8;
-//                 sp30 = temp_t5_2;
-//                 sp30->unk0 = 0xC007FFF;
-//                 sp30->unk4 = 0x7C00650;
-//             }
-//             temp_t0_2 = sp54;
-//             sp54 = temp_t0_2 + 8;
-//             sp2C = temp_t0_2;
-//             sp2C->unk0 = 0xC007FFF;
-//             sp2C->unk4 = 0x7C004E0;
-//         }
-//         if ((s32) D_8002BA44->unk48[sp4C]->unk40->unk2 > 0) {
-//             sp28 = D_8002BA44->unk48[sp4C]->unk40;
-//             if (sp28->unk28 != 0) {
-//                 func_1001CF38(sp28, (f32) D_8002BA44->unk54);
-//             }
-//             temp_t2_2 = sp54;
-//             sp54 = temp_t2_2 + 8;
-//             sp24 = temp_t2_2;
-//             sp24->unk0 = 0xB000020;
-//             sp24->unk4 = osVirtualToPhysical(sp28 + 8);
-//             temp_t8_2 = sp54;
-//             sp54 = temp_t8_2 + 8;
-//             sp20 = temp_t8_2;
-//             sp20->unk0 = 0xE0004E0;
-//             sp20->unk4 = (s32) (osVirtualToPhysical(sp28->unk2C) & 0xFFFFFF & 0xFFFFFF);
-//             temp_t6 = sp54;
-//             sp54 = temp_t6 + 8;
-//             sp1C = temp_t6;
-//             sp1C->unk0 = 0xE000650;
-//             sp1C->unk4 = (s32) (osVirtualToPhysical(sp28->unk30) & 0xFFFFFF & 0xFFFFFF);
-//             sp28->unk28 = 0;
-//         }
-//         temp_t6_2 = sp50 + 1;
-//         sp4C = sp4C + 1;
-//         sp50 = temp_t6_2;
-//         if (temp_t6_2 < D_8002BA44->unk50) {
-//             goto loop_8;
-//         }
-//     }
-//     return sp54;
-// }
+// s127: main bus pull (n_alMainBusPull-like): Conker's per-bus loop starting at the last active aux bus,
+// per-bus mix gains from D_800428C4/D_800428C6 and the bus fx pole filter (load ADPCM + two pole filters)
+#include "n_abi.h"
+
+typedef struct {
+    /* 0x00 */ s16 pad0;
+    /* 0x02 */ s16 unk2;
+    /* 0x04 */ u8 pad4[4];
+    /* 0x08 */ s16 unk8[0x10];
+    /* 0x28 */ s32 unk28;
+    /* 0x2C */ void *unk2C;
+    /* 0x30 */ void *unk30;
+} FB40Fx;
+
+typedef struct {
+    /* 0x00 */ u8 pad0[0x40];
+    /* 0x40 */ FB40Fx *fx;
+} FB40AuxBus;
+
+typedef struct {
+    /* 0x00 */ void *pad0;
+    /* 0x04 */ Acmd *(*handler)(s32 sampleOffset, Acmd *p, s32 bus);
+} FB40MainBus;
+
+extern N_ALSynth *D_8002BA44;
+extern s32 D_800E0E04;
+extern u8 D_800428C4[];
+extern u8 D_800428C6[];
+s32 func_151F2E88(s32 arg0, Acmd **arg1);
+void func_1001CF38(FB40Fx *fx, f32 rate);
+
+Acmd *func_1001FB40(s32 sampleOffset, Acmd *cmdList) {
+    Acmd *ptr = cmdList;
+    s32 i;
+    s32 j;
+
+    if (D_800E0E04 == 0 || func_151F2E88(0xB8, &ptr) == 0) {
+        aClearBuffer(ptr++, 0x4E0, 0x2E0);
+        aClearBuffer(ptr++, 0x7C0, 0x2E0);
+    }
+
+    j = 0;
+    for (i = 1; i < D_8002BA44->maxAuxBusses; i++) {
+        if (((FB40AuxBus *)D_8002BA44->auxBus)[i].fx->unk2 > 0) {
+            j = i;
+        }
+    }
+
+    for (i = 0; i < D_8002BA44->maxAuxBusses; i++, j++) {
+        if (j >= D_8002BA44->maxAuxBusses) {
+            j = 0;
+        }
+        if (i != 0) {
+            aClearBuffer(ptr++, 0x7C0, 0x2E0);
+        }
+        ptr = ((FB40MainBus *)D_8002BA44->mainBus)->handler(sampleOffset, ptr, j);
+        if (D_800428C4[j]) {
+            if (D_800428C6[j]) {
+                aMix(ptr++, 0, 0x8000, 0x7C0, 0x4E0);
+            } else {
+                aMix(ptr++, 0, 0x7FFF, 0x7C0, 0x650);
+            }
+        } else {
+            if (D_800428C6[j]) {
+                aMix(ptr++, 0, 0x8000, 0x7C0, 0x650);
+            } else {
+                aMix(ptr++, 0, 0x7FFF, 0x7C0, 0x650);
+            }
+            aMix(ptr++, 0, 0x7FFF, 0x7C0, 0x4E0);
+        }
+        if (((FB40AuxBus *)D_8002BA44->auxBus)[j].fx->unk2 > 0) {
+            FB40Fx *fx = ((FB40AuxBus *)D_8002BA44->auxBus)[j].fx;
+
+            if (fx->unk28) {
+                func_1001CF38(fx, D_8002BA44->outputRate);
+            }
+            n_aLoadADPCM(ptr++, 0x20, osVirtualToPhysical(fx->unk8));
+            n_aPoleFilter(ptr++, 0, 0x4E0, 0, osVirtualToPhysical(fx->unk2C) & 0xFFFFFF);
+            n_aPoleFilter(ptr++, 0, 0x650, 0, osVirtualToPhysical(fx->unk30) & 0xFFFFFF);
+            fx->unk28 = 0;
+        }
+    }
+    return ptr;
+}

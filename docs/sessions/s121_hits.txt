@@ -132,3 +132,25 @@
 0.60 func_15102B74 49 O1:src_core1_ml.c.o:func_80257918 41 src_eu/game_eu_12E390.c
 0.60 func_1510BB78 37 g:src_critter_code_0.c.o:func_critter_80025A3C 36 src_eu/game_eu_138E00.c
 0.60 func_15116690 26 O1:libultra_src_libc_ll.c.o:__ull_divremi 27 src_eu/game_eu_142E40.c
+# s123 rarescreen.sh re-run, slice init, OPTS=-g only, DK64 + Banjo-Kazooie (after s123 ports of 1E530/22040/22460/n_alFxNew/n_csq; func_10020000 matched later in s123). No new >=0.85 hits beyond s121.
+dk64: 0.97 func_10020000 605 g:src_global_asm_audio_n_env.c.o:n_alEnvmixerPull 584 src_eu/init_20000.c
+dk64: 0.95 func_10021E4C 121 g:src_global_asm_audio_n_load.c.o:func_global_asm_80740A90 109 src_eu/init_214F0.c
+dk64: 0.94 func_100214F0 480 g:src_global_asm_audio_n_load.c.o:func_global_asm_80740100 426 src_eu/init_214F0.c
+dk64: 0.92 func_10020ABC 214 g:src_global_asm_audio_n_env.c.o:_pullSubFrame 184 src_eu/init_20000.c
+dk64: 0.90 func_100210C0 266 g:src_global_asm_audio_code_1445A0.c.o:func_global_asm_8073F8A0 312 src_eu/init_210C0.c
+dk64: 0.83 _n_handleEvent 1363 g:src_global_asm_audio_n_sndplayer.c.o:func_global_asm_80735DBC 1091 src_eu/libultra/audio/init_15550.c
+dk64: 0.81 func_100155A0 181 g:src_global_asm_audio_n_sndplayer.c.o:func_global_asm_80735AA0 148 src_eu/libultra/audio/init_15550.c
+dk64: 0.69 func_10006C1C 16 g:src_global_asm_code_936B0.c.o:func_global_asm_80690814 19 src_eu/init_eu_5DA0.c
+bk: 0.95 func_10021E4C 121 g:src_core1_n_audio_n_adpcm.c.o:_n_decodeChunk 109 src_eu/init_214F0.c
+bk: 0.94 func_100214F0 480 g:src_core1_n_audio_n_adpcm.c.o:n_alAdpcmPull 426 src_eu/init_214F0.c
+bk: 0.87 func_10020ABC 214 g:src_core1_n_audio_n_env.c.o:__n_pullSubFrame 192 src_eu/init_20000.c
+bk: 0.67 func_10006C1C 16 g:src_core1_code_0.c.o:mainThread_create 20 src_eu/init_eu_5DA0.c
+bk: 0.62 func_10001420 8 g:src_core1_ucode.c.o:ucode_getPtrAndSize 8 src_eu/init_1420.c
+# s129 re-screen of the init slice (rarescreen.sh, OPTS="-O1 -O2 -g"; DKR now also at -g): no new rows >= 0.85.
+# init_11FA0 func_10012020 (Conker music-mode mixer, sinf + jump table) and init_19B50 func_1001A030/func_1001A508 have no row >= 0.6
+# in DKR, BK or DK64 at any opt level. func_1001A030 = DK64 n_csplayer.c AL_MIDI_SUSTAIN_CTRL case (matched s129 by hand,
+# a switch case is not a function so srcmatch cannot see it); func_1001A508 is Conker-only. Top rows unchanged:
+0.93 func_10001550 296 O2:libultra_src_libc_xldtob.c.o:_Ldtob 290 src_eu/init_1420.c   (DKR; ultralib builds libc -O3: 0.64, PD/DKR -O2 0.79 by opcmp.py)
+0.87 func_100036E8 101 O2:libultra_src_io_vimgr.c.o:viMgrMain 88 src_eu/init_eu_3570.c
+0.61 func_10008180 214 O2:src_global_asm_done_code_5A50.c.o:func_global_asm_80600D50 212 src_eu/init_8180.c
+0.61 func_10008CE8 126 O2:src_global_asm_code_6710.c.o:func_global_asm_8060A1B0 122 src_eu/init_8180.c

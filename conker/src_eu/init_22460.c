@@ -2,7 +2,75 @@
 
 
 // modified n_alResamplePull
-#pragma GLOBAL_ASM("asm/nonmatchings/init_22460/func_10022460.s")
+// s123: modified n_alResamplePull = DK64 src/global_asm/audio/code_145D70.c (func_global_asm_80741070), built -g
+/* DK64 CustomPVoice (include/structs.h), only the fields used here */
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    void *unk14;
+    f32 unk18;
+    s32 unk1C;
+    f32 unk20;
+    s32 unk24;
+} CustomResampler;
+typedef struct {
+    u8 pad0[0x34]; /* Conker: DK64 offsets +8 */
+    CustomResampler resampler;
+    u8 pad5C[0x99 - 0x5C];
+    u8 unk8C; /* Conker 0x99 (DK64 0x8C) */
+    u8 pad9A[0xA0 - 0x9A];
+    s16 unk90;
+    s16 unk92;
+    u8 padA4[0xA8 - 0xA4];
+    s32 unk98;
+    u8 padAC[0xC8 - 0xAC];
+    s32 unkB8;
+    s32 unkBC;
+} CustomPVoice;
+
+#define func_global_asm_80741070 func_10022460
+#define func_global_asm_80740100 func_100214F0
+Acmd *func_global_asm_80740100(CustomPVoice *, s16 *, s32, Acmd *);
+
+void *func_global_asm_80741070(CustomPVoice *arg0, s16 *arg1, Acmd *arg2) {
+    Acmd *sp34;
+    s16 sp32;
+    s32 sp2C;
+    s32 sp28;
+    f32 sp24;
+    Acmd *sp20;
+    Acmd *sp1C;
+
+    sp34 = arg2;
+    sp32 = 0x170;
+    if (arg0->resampler.unk1C != 0) {
+        sp34 = func_global_asm_80740100(arg0, &sp32, 0xB8, arg2);
+        sp20 = sp34++;
+        sp20->words.w0 = (sp32 & 0xFFFFFF) | 0x0A000000;
+        sp20->words.w1 = ((*arg1 & 0xFFFF) << 0x10) | 0x170;
+        if (1) {}
+    } else {
+        if (arg0->resampler.unk18 > 1.99996) {
+            arg0->resampler.unk18 = 1.99996f;
+        }
+        arg0->resampler.unk18 = (s32) (arg0->resampler.unk18 * 32768.0f);
+        arg0->resampler.unk18 /= 32768.0f;
+        sp24 = arg0->resampler.unk20 + (arg0->resampler.unk18 * 184.0f);
+        sp2C = (s32) sp24;
+        arg0->resampler.unk20 = sp24 - sp2C;
+        sp34 = func_global_asm_80740100(arg0, &sp32, sp2C, arg2);
+        sp28 = arg0->resampler.unk18 * 32768.0f;
+        sp1C = sp34++;
+        sp1C->words.w0 = (osVirtualToPhysical(arg0->resampler.unk14) & 0xFFFFFF) | 0x05000000;
+        sp1C->words.w1 = ((arg0->resampler.unk24 & 3) << 0x1E) | ((sp28 & 0xFFFF) << 0xE) | ((sp32 & 0xFFF) * 4);
+        arg0->resampler.unk24 = 0;
+    }
+    return sp34;
+}
+
 // NON-MATCHING: same issues as the other functions in this range
 // struct21 *func_10022460(struct42 *arg0, struct119 *arg1, struct21 *arg2) {
 //     struct21 *sp34;
