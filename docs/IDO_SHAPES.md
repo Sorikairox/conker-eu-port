@@ -723,3 +723,14 @@ See `docs/sessions/s75.md`.
 2. **A global pointer load the ref schedules at the very top** (`lui v0; lw v0` right after the prologue) is the first statement of the source: `p = D_800D154C; sp.u20 = p; sp.u24 = p->unique_id;` (`func_1506F54C`). Placed later, IDO sinks the load to its use.
 3. A call whose 4th argument register holds only a `%hi` (`lui a3` reused for `addiu a2,a3,%lo`) is a 3-arg call of an unprototyped callee (`s32 f();`), the other calls pass 4 (`func_15096E78`).
 4. Temps spilled across calls in different `case` arms get the ref's separate slots when declared inside the case blocks (`case 1: { struct108 *a; ... }`) (`func_15096E78`).
+## s76 recipes (screening context, exhaustive small orders, file families)
+See `docs/sessions/s76.md`.
+1. **Re-screen a near miss with the callee prototypes it needs**: a draft whose callees are still `GLOBAL_ASM` with no prototype passes `f32` as `double` (SIZE+9 instead of DIFF5, `func_150464C0`); put the prototypes at the top of the draft. Same for a sibling defined later in the file (`func_15046C6C` needs `func_15046750`'s prototype).
+2. **Statement-order DIFFs: screen all permutations** (4 statements = 24 variants, one `tryall`): `func_150D7930` (DIFF10 t-register numbering, the `|=` first) and the 12 declaration orders of 3 named locals + pad (`func_150DE52C`, f0 vs f6 reload). Cheaper than reasoning about the register order.
+3. **`if (r)` vs `if (r != 0)`** on a `u8` call result moved its spill `sb` from after the first call into the second `jal` delay slot (permuter find, `func_150464C0`).
+4. **Base register before index**: `addu v1, base, idx*K` with the base loaded first = `((f32 (*)[5])base)[idx]` array indexing, not `base + idx * 0x14` (`func_150DE52C`).
+5. **`lwl/lwr` + `lhu/sh` copy of an aligned 18-byte block** = assignment of a struct with alignment 2 (`struct { s16 v[9]; }`), plain C (`func_150475B0`).
+6. **Nested ternary as a call argument**: `bne ..; b L; li a0,2; beql v0,zero,L2; li v0,1; b L2; move v0,zero; li v0,1 (dead)` = `x == K ? 2 : (x != 0 ? 0 : 1)` (the `beql` tests the false arm of `!= 0`) (`func_150A0890`).
+7. **A beq chain for a small switch is a plain `switch`**; if its compare constants are CSE'd with stored values, the stored-to variable has another type (`u8`) (`func_1500E738`).
+8. **Read the neighbours of a match**: callers and siblings in the same file share the structs and shapes (5 of 11 matches this session were `HitInfo` functions next to `func_150464C0`; two were clones of an already matched function).
+9. OPEN: a `jal sqrtf` in game code cannot be written while `gu.h`'s `#pragma intrinsic(sqrtf)` is in scope (`(&sqrtf)(x)` gives `jalr`); an alias symbol works for the call (`func_15047680`).
