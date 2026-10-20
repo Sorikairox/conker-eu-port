@@ -963,6 +963,13 @@ OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), 
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s113 recipes (extern-only late rodata, label barrier, u8 flag args)
+See `docs/sessions/s113.md`.
+1. **Extern floats in an owned file with no late GLOBAL_ASM neighbour** (s111 recipe 4): `rodata_inject.py` now moves an extern-only late region into the regular `.rodata` of a GLOBAL_ASM neighbour; keep the externs (`func_150BDE34`). `static const f32` goes to `.data` in IDO, never `.rodata`.
+2. **`b L` whose delay slot holds the target's first insn (`lbu t8,0xD7(sp)`) instead of the preceding `swc1`**: a label right before the inner switch's last `break` (`dummy: ;`, fakematch) stops IDO from moving the store into the slot (`func_150E7C50`, permuter).
+3. **Rand flag pair passed to a `u8` param with a constant** (`or t8,v1,t0; ori t6,t8,9; andi a3,t6,255`): `(u8)((A ? 2 : 0) | (B ? 4 : 0)) | 9` inline in the call; `(... | 9) & 0xFF` puts the `or` in a3 (DIFF10), other groupings DIFF4 (`func_150E7810`).
+4. Spawner with a stack struct whose top lies 0x18 below the frame top: `s32 pad[6];` declared first (`func_150E7C50`); for several locals copy the ref offsets by declaration order (first declared = highest).
+OPEN: `func_150B3CA8` DIFF95 (all declared locals 4 bytes high, spill temps right), `func_150F0BEC`/`func_150B6314` (2nd flag `andi` t0 vs t3), `func_150BAEF4` DIFF3.
 ## s111 recipes (K&R callee for array args, struct-member pointer spill, owned-rodata externs)
 See `docs/sessions/s111.md`.
 1. **`addiu a1,sp,X` spilled to a stack slot and reloaded for later calls (frame +8)** when a local array goes to a fully prototyped `s32` param as `(s32) pos`: declare the callee K&R (`void func_151000EC();`) and pass `pos` uncast; the ref rematerialises the address per call (`func_150FF840`).
