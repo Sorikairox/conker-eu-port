@@ -24,7 +24,7 @@
 
        ALMicroTime      __n_CSPVoiceHandler(void *node);
 static void              __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp);
-static void             __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event);
+void                    __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event);
 static void             __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event);
        void             __n_CSPRepostEvent(ALEventQueue *evtq, N_ALEventListItem *item);
        void              __n_setUsptFromTempo(N_ALCSPlayer *seqp, f32 tempo);
@@ -115,7 +115,44 @@ void n_alCSPNew(N_ALCSPlayer *seqp, ALSeqpConfig *c)
 
 extern void (*jtbl_8002C4CC[])(void);
 // jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_csplayer/__n_CSPHandleNextSeqEvent.s")
+// s125: DK64 n_csplayer.c func_global_asm_80733A88 (__CSPHandleNextSeqEvent); Conker event ids
+// (track end 0x13, loop start 0x14, loop end 0x15, seqp stop 0x11) and a state 3 check
+static void __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp)
+{
+    N_ALEvent evt;
+
+    if (seqp->target == NULL || seqp->state == 3)
+        return;
+
+    n_alCSeqNextEvent(seqp->target, &evt, 1);
+
+    switch (evt.type)
+    {
+      case 1:
+          __n_CSPHandleMIDIMsg(seqp, &evt);
+          __n_CSPPostNextSeqEvent(seqp);
+          break;
+
+      case 3:
+          __n_CSPHandleMetaMsg(seqp, &evt);
+          __n_CSPPostNextSeqEvent(seqp);
+          break;
+
+      case 4:
+          seqp->state = AL_STOPPING;
+          evt.type    = 0x11;
+          n_alEvtqPostEvent(&seqp->evtq, &evt, AL_EVTQ_END, 0);
+          break;
+
+      case 0x13:
+      case 0x14:
+      case 0x15:
+          __n_CSPPostNextSeqEvent(seqp);
+          break;
+      default:
+          break;
+    }
+}
 // jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/n_csplayer/__n_CSPHandleMIDIMsg.s")
 

@@ -354,65 +354,50 @@ s32 n_alEnvmixerParam(N_PVoice *filter, s32 paramID, void *param) {
 }
 
 // _pullSubFrame
-#pragma GLOBAL_ASM("asm/nonmatchings/init_20000/func_10020ABC.s")
-// NON-MATCHING: pretty close but no cigar
-// struct21 *func_10020ABC(struct42 *arg0, struct119 *arg1, s32 arg2, s32 arg3, struct21 *arg4) {
-//     struct21 *sp34;
-//     struct42 *sp30;
-//     struct21 *sp2C;
-//     struct21 *sp28;
-//     struct21 *sp24;
-//     struct21 *sp20;
-//     struct21 *sp1C;
-//
-//     sp34 = arg4;
-//     sp30 = arg0;
-//     if (sp30->unk28 != 0) {
-//         sp30->unk28->unkA = (u8)1;
-//     }
-//     if ((sp30->unk8C != 1) || (arg3 == 0)) {
-//         return sp34;
-//     }
-//
-//     sp34 = func_10022040(sp30, arg1, arg3, arg4);
-//     if (sp30->unk80) {
-//         sp30->unk80 = 0;
-//         sp30->unk70 = (D_8002BC10[(s16)sp30->unk60] * (s16)sp30->unk62) >> 15;
-//         sp30->unk6E = _getRate((s16)sp30->unk64, (s16)sp30->unk70, sp30->unk7C, &sp30->unk6C);
-//         sp30->unk76 = (D_8002BD0E[-(s16)sp30->unk60] * (s16)sp30->unk62) >> 15;
-//         sp30->unk74 = _getRate((s16)sp30->unk66, (s16)sp30->unk76, sp30->unk7C, &sp30->unk72);
-//
-//         sp2C = sp34 = &sp34->unk8;
-//         sp2C->unk0 = ((s16)sp30->unk64 & 0xFFFF) | 0x9060000;
-//         sp2C->unk4 = (((s16)sp30->unk68 & 0xFFFF) << 16) | ((s16)sp30->unk6A & 0xFFFF);
-//
-//         sp28 = sp34 = &sp34->unk8;
-//         sp28->unk0 = ((s16)sp30->unk76 & 0xFFFF) | 0x9040000;
-//         sp28->unk4 = (((s16)sp30->unk74 & 0xFFFF) << 16) | (sp30->unk72 & 0xFFFF);
-//
-//         sp24 = sp34 = &sp34->unk8;
-//         sp24->unk0 = ((s16)sp30->unk70 & 0xFFFF) | 0x9000000;
-//         sp24->unk4 = (((s16)sp30->unk6E & 0xFFFF) << 16) | (sp30->unk6C & 0xFFFF);
-//
-//         sp20 = sp34 = &sp34->unk8;
-//         sp20->unk0 = ((s16)sp30->unk66 & 0xFFFF) | 0x3010000;
-//         sp20->unk4 = osVirtualToPhysical(sp30->unk5C);
-//     } else {
-//         sp1C = sp34 = &sp34->unk8;
-//         sp1C->unk0 = 0x3000000;
-//         sp1C->unk4 = osVirtualToPhysical(sp30->unk5C);
-//         // nop...
-//     }
-//     // just this line :(
-//     arg1 = &arg1->unk170;
-//     sp30->unk78 += 0xb8; // 184
-//     if ((((s16)sp30->unk68 & 2)) || (((s16)sp30->unk6A & 2))) {
-//         sp30->unk68 &= -3; // (s16)sp30->unk68 & -3;
-//         sp30->unk6A &= -3;
-//         sp30->unk80 = 1;
-//     }
-//     return sp34;
-// }
+s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
+Acmd *func_10022040(N_PVoice *, s16 *, s32, Acmd *);
+Acmd *_pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p)
+{
+	Acmd *ptr = p;
+	N_PVoice *e = filter;
+
+	if (e->dc_table) {
+		((u8 *) e->dc_table)[10] = 1;
+	}
+
+	if (e->em_motion != AL_PLAYING || !outCount) {
+		return ptr;
+	}
+
+	ptr = func_10022040(e, inp, outCount, p);
+
+	if (e->em_first) {
+		e->em_first = 0;
+
+		e->em_ltgt = (e->em_volume * n_eqpower[e->em_pan]) >> 15;
+		e->em_lratm = _getRate(e->em_cvolL, e->em_ltgt, e->em_segEnd, &(e->em_lratl));
+		e->em_rtgt = (e->em_volume * n_eqpower[N_EQPOWER_LENGTH - e->em_pan - 1]) >> 15;
+		e->em_rratm = _getRate(e->em_cvolR, e->em_rtgt, e->em_segEnd, &(e->em_rratl));
+
+		n_aSetVolume(ptr++, A_LEFT  | A_VOL, e->em_cvolL, e->em_dryamt, e->em_wetamt);
+		n_aSetVolume(ptr++, A_RIGHT | A_VOL, e->em_rtgt, e->em_rratm,  e->em_rratl);
+		n_aSetVolume(ptr++, A_RATE, e->em_ltgt, e->em_lratm, e->em_lratl);
+		n_aEnvMixer (ptr++, A_INIT, e->em_cvolR, osVirtualToPhysical(e->em_state));
+	} else {
+		n_aEnvMixer(ptr++, A_CONTINUE, 0, osVirtualToPhysical(e->em_state));
+	}
+
+	*inp += (FIXED_SAMPLE << 1);
+	e->em_delta += FIXED_SAMPLE;
+
+	if ((e->em_dryamt & 2) || (e->em_wetamt & 2)) {
+		e->em_dryamt &= ~2;
+		e->em_wetamt &= ~2;
+		e->em_first = 1;
+	}
+
+	return ptr;
+}
 
 s16 _getRate(f32 arg0, f32 arg1, s32 arg2, u16 *arg3) {
     s16 spE;
