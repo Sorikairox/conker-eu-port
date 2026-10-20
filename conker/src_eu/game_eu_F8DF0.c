@@ -3,7 +3,27 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F8DF0/func_150CB5E0.s")
+s32 func_1504715C(s32, u8 *);
+s32 func_15046F70(f32 *, s32, f32, s32);
+extern f32 D_800A09B0[3];
+extern f32 D_800A09BC[3];
+
+s32 func_150CB5E0(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
+    f32 sp2C[3];
+
+    if ((arg3 != 1) && (arg3 != 2)) {
+        return 0;
+    }
+    func_15143134((arg3 == 1) ? D_800A09BC : D_800A09B0, arg0, (arg3 == 1) ? *(u8 **)(arg1 + 0x1D4) + 0xA00 : *(u8 **)(arg1 + 0x1D4) + 0xBC0);
+    if (arg2 == 0) {
+        return 1;
+    }
+    sp2C[0] = arg0[0];
+    sp2C[1] = arg0[1] + 100.0f;
+    sp2C[2] = arg0[2];
+    func_1504715C(arg2, arg1);
+    return func_15046F70(sp2C, 0, arg0[1] - 500.0f, arg2);
+}
 
 s32 func_150CB6E0(s32 arg0, s32 arg1) {
     return 11;

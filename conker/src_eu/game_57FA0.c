@@ -2,6 +2,7 @@
 
 #include "functions.h"
 #include "variables.h"
+#include <stdarg.h>
 
 #include "macros.h"
 
@@ -14,8 +15,57 @@ void func_1502AAF8(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AB04.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AC88.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AF04.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B020.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B110.s")
+
+u8 *func_1502B020(s32 *arg0, s32 arg1, ...) {
+    u8 *p;
+    s32 v;
+    va_list ap;
+    s32 ok;
+
+    ok = 1;
+    p = D_AB2240;
+    va_start(ap, arg1);
+    for (; arg1 != 0; arg1--) {
+        v = va_arg(ap, s32);
+        if (ok != 0) {
+            p += func_1502AC88(p, v, &ok);
+        }
+        ok &= 0x0FFFFFFF;
+    }
+    if (arg0 != NULL) {
+        *arg0 = ok & 0x0FFFFFFF;
+    }
+    if (ok == 0) {
+        return 0;
+    }
+    return p;
+}
+
+s32 func_1502B110(u8 *arg0, s32 arg1, s32 arg2, u32 arg3, ...) {
+    s32 v;
+    va_list ap;
+    s32 ok;
+    s32 ret;
+
+    ok = 1;
+    ret = 0;
+    if (arg0 == NULL) {
+        arg0 = D_AB2240;
+    }
+    va_start(ap, arg3);
+    for (; arg3 > 1; arg3--) {
+        v = va_arg(ap, s32);
+        if (ok != 0) {
+            arg0 += func_1502AC88(arg0, v, &ok);
+        }
+        ok &= 0x0FFFFFFF;
+    }
+    v = va_arg(ap, s32);
+    if (ok != 0) {
+        ret = func_1502AF04(arg0, arg2, v, arg1);
+    }
+    return ret;
+}
 s32 *allocate_memory(s32, s32, s32, s32);
 s32 func_10004074(s32 *);
 s32 func_10006530(s32 *, s32, u32);
@@ -59,8 +109,40 @@ s32 func_1502B224(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B350.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B4A8.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B5C8.s")
-#include <stdarg.h>
+s32 func_1502B350(u8 *, s32, s32 *);
+
+s32 func_1502B5C8(s32 *arg0, s32 arg1, ...) {
+    s32 *q;
+    s32 v;
+    u8 *p;
+    s32 sp40;
+    s32 ret;
+    s32 sp38;
+    va_list ap;
+
+    q = &sp40;
+    if (arg0 != NULL) {
+        q = arg0;
+    }
+    *q = 1;
+    p = D_AB2240;
+    va_start(ap, arg1);
+    if (arg1 != 0) {
+        do {
+            v = va_arg(ap, s32);
+            if (*q != 0) {
+                p += func_1502AC88(p, v, &sp38);
+            }
+            *q = sp38 & 0x0FFFFFFF;
+        } while (--arg1 != 0);
+    }
+    if (*q != 0) {
+        ret = func_1502B350(p, sp38, q);
+    } else {
+        ret = 0;
+    }
+    return ret;
+}
 s32 func_1502B350(u8 *, s32, s32 *);
 s32 func_1502B4A8(s32, s32);
 s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...) {
@@ -102,7 +184,31 @@ s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...) {
     }
     return var_s0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B7F0.s")
+
+s32 func_1502B7F0(s32 *arg0, s32 arg1, ...) {
+    s32 v;
+    u8 *p;
+    va_list ap;
+    s32 ok;
+    s32 sp34;
+
+    ok = 1;
+    p = D_AB2240;
+    va_start(ap, arg1);
+    for (; arg1 != 0; arg1--) {
+        v = va_arg(ap, s32);
+        if (ok != 0) {
+            p += func_1502AC88(p, v, &sp34);
+        }
+        ok = sp34 & 0x0FFFFFFF;
+    }
+    if (ok != 0) {
+        *arg0 = func_1502B350(p, sp34, &ok);
+    } else {
+        *arg0 = 0;
+    }
+    return ok;
+}
 // void func_1502B7F0(s32 *arg0, s32 arg1, s32 arg2, s32 arg3) {
 //     s32 sp38;
 //     s32 sp34;
@@ -133,9 +239,67 @@ s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...) {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B8E0.s")
+s32 func_1502B224(u8 *, s32, s32, s32);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B9B4.s")
+s32 func_1502B8E0(s32 arg0, s32 arg1, s32 arg2, ...) {
+    s32 ok;
+    u8 *p;
+    s32 v;
+    va_list ap;
+    s32 sp34;
+
+    ok = 1;
+    p = D_AB2240;
+    va_start(ap, arg2);
+    if (arg2 != 0) {
+        do {
+            v = va_arg(ap, s32);
+            if (ok != 0) {
+                p += func_1502AC88(p, v, &sp34);
+            }
+            ok = sp34 & 0x0FFFFFFF;
+        } while (--arg2 != 0);
+    }
+    if (ok != 0) {
+        ok = func_1502B224(p, arg0, sp34, arg1);
+    }
+    return ok;
+}
+
+
+s32 func_1502B9B4(s32 arg0, ...) {
+    s32 ok;
+    u8 *p;
+    s32 v;
+    va_list ap;
+    s32 sp54;
+    s32 *q;
+    u8 buf[0x18];
+    ok = 1;
+    p = D_AB2240;
+    va_start(ap, arg0);
+    if (arg0 != 0) {
+        do {
+            v = va_arg(ap, s32);
+            if (ok != 0) {
+                p += func_1502AC88(p, v, &sp54);
+            }
+            ok = sp54 & 0x0FFFFFFF;
+        } while (--arg0 != 0);
+    }
+    if (ok != 0) {
+        ok = ((sp54 & 0x0FFFFFFF) + 1) & ~1;
+        if ((sp54 & 0x70000000) == 0x10000000) {
+            q = (s32 *)buf;
+            if ((u32)q & 8) {
+                q = (s32 *)(buf + 8);
+            }
+            func_10004514((s32)p, q, 0x10, 1);
+            ok = *q;
+        }
+    }
+    return ok;
+}
 // NON-MATCHING: maybe 50% there?
 // s32 func_1502B9B4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 //
