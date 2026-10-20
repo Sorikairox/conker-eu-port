@@ -717,3 +717,9 @@ See `docs/sessions/s72.md`.
 3. **`addiu vN,s0,K` re-materialised in every arm** (often in the arm-test delay slot) = a function-level `u8 *v = arg0 + K;` plus a declaration at the top of the arms (`s32 blk_t;`); each unused declaration adds 4 frame bytes, so match the frame size by how many arms get one (`func_151CD97C`). An arm-local `u8 *v` instead folds K into the offsets.
 4. **Arm-local declarations change scheduling too**: `s32 a;`/`s32 b;` declared inside the arms (not at function level) moved `lui/addiu a0,%hi/%lo(D_800CC2D0)` above the `lw` (`func_15156598`).
 5. Linked-list push where the ref tests the head in a t-register: re-read the field you just stored (`n->prev = q->head; if (n->prev != NULL) n->prev->next = n;`), not a named head temp (`func_1518B140`).
+## s75 recipes (struct copies, statement position of an early load)
+See `docs/sessions/s75.md`.
+1. **m2c `M2C_MEMCPY_ALIGNED` + unrolled `lw/sw` x3 copy loops = plain struct assignments** of a 0x24-byte struct (`a = *arg3; b = *arg3; ... *arg3 = a;`), results in `u8` named locals at the byte slot (`func_150469E8`, typedef `HitInfo`). `LAX=1` gen2 drafts these now.
+2. **A global pointer load the ref schedules at the very top** (`lui v0; lw v0` right after the prologue) is the first statement of the source: `p = D_800D154C; sp.u20 = p; sp.u24 = p->unique_id;` (`func_1506F54C`). Placed later, IDO sinks the load to its use.
+3. A call whose 4th argument register holds only a `%hi` (`lui a3` reused for `addiu a2,a3,%lo`) is a 3-arg call of an unprototyped callee (`s32 f();`), the other calls pass 4 (`func_15096E78`).
+4. Temps spilled across calls in different `case` arms get the ref's separate slots when declared inside the case blocks (`case 1: { struct108 *a; ... }`) (`func_15096E78`).
