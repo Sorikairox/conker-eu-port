@@ -972,6 +972,14 @@ See `docs/sessions/s114.md`.
 5. Spawner arg read from its home slot into v0 (`lh v0,0x5A(sp)`) where mine uses v1: `p2 = &arg2;` and read through `*p2`, plus an `if (arg0) {}` barrier (permuter, `func_151AED60`). Spawner `s.p = arg0` (arg reloaded from its home slot) placement: sweep its position among the stores (`func_151C6750`).
 6. Stack locals: the first declared array gets the highest address. `pos[3]` at 0x5C, `vel[3]` at 0x50, `sp48` at 0x48: `f32 pos[3]; f32 vel[3]; u8 *obj; s32 sp48;` (the register pointer fills the gap) (`func_151AA8BC`).
 OPEN: `func_151AED60` code OK but `.rodata` 3 zero words between two C functions' items; `func_1518F4C4` DIFF1 (third lerp add order); `func_151DBE80` frame +8.
+## s118 recipes (mul.s order, spill slot via struct tail, hoisted literal = rodata)
+See `docs/sessions/s118.md`.
+1. **`mul.s d, p, prod` where `prod = obj[0] * K` and `p = *ptr`**: write `*p * (obj[0] * K)`. `(obj[0] * K) * *p` swaps the source registers (`func_151DA938`). Also: the first of two Node14 reads written raw (`*(f32 *)(tbl + i * 0x14)`) gives the swapped `addu` even after a spill reload. Use `((Node14 *)tbl)[i].x` for both (`func_1518A42C`).
+2. **Compiler spill slot of a returned pointer (`sw v0,X(sp)` around a memcpy) at the frame top instead of just below a stack struct**: the struct is 4 bytes longer in the source. Add a tail field (`s32 u84;`) and drop pads (`func_151CF05C`).
+3. **A float load hoisted out of a loop into a callee-saved FPR (`lwc1 f22` before the loop)**: it is a float literal (`.rodata`), not an extern global. A global would be reloaded after each call. Make the file own `.rodata` (`rodata_split.py --own`) and write the literal (`func_151A9DE4`, `3.1415927f`).
+4. Small table copied to the stack with `lw at; sw at; lhu at; sh at` from an extern: `typedef struct { s16 v[3]; } T; extern T D_x; T t = D_x;` works without owning `.data` (`func_151A975C`).
+5. A function called through an implicit declaration earlier in the file: a K&R definition must return `int`, not `s32` (`s32` is `long`, so cfe gives "Incompatible function return type").
+OPEN: `func_1518CC0C` DIFF3, `func_151473F4` DIFF9 (arg homes), `func_151A9670` DIFF3 (byte local slot), `func_151D1694` DIFF12 (u8 param reloaded by `lbu`).
 ## s116 recipes (rodata file boundary, Node14 table, spawner arg reuse)
 See `docs/sessions/s116.md`.
 1. **C function code-OK but unreferenced zero words of `.rodata` between two C functions' items**: if the zeros end on a 16-byte boundary (and the text boundary is 16-aligned), it is an EU object boundary: `file_split.py <stem> --at <func> --rodata <rom> --resplit` (`func_151AED60`).
