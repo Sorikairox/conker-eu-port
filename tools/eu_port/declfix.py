@@ -13,6 +13,21 @@ Rules, for every identifier the draft uses that the target file does not see:
   * an #include the sibling's file has and the target lacks is hoisted when the draft uses a name from it (stdarg.h).
 """
 import re, os, glob, sys
+import sys as _gsys
+def _conker_guard():
+    # refuse to run on a checkout other than CONKER_ROOT (e.g. a worktree shell without the wt.sh env)
+    import os as _o, subprocess as _s
+    if _o.path.exists("/.dockerenv"):
+        return  # inside a build container: paths are /conker, not the host checkout
+    try:
+        top = _s.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return
+    root = _o.path.realpath(_o.path.expanduser(_o.environ.get("CONKER_ROOT", "~/conker")))
+    if top and _o.path.realpath(top) != root:
+        _gsys.stderr.write("refusing: cwd repo %s != CONKER_ROOT %s (eval the wt.sh env)\n" % (top, root))
+        _gsys.exit(3)
+_conker_guard()
 R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 INCS = [R, R + '/include', R + '/include/2.0L', R + '/include/2.0L/PR', R + '/include/libc',
         R + '/src/libultra/os', R + '/src/libultra/audio', R + '/src/libultra/io']

@@ -3,4 +3,50 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21D610/func_151EFE00.s")
+typedef struct {
+    /* 0x00 */ u16 state;
+    /* 0x02 */ u16 retraceCount;
+    /* 0x04 */ void *framep;
+    /* 0x08 */ OSViMode *modep;
+    /* 0x0C */ u32 control;
+    /* 0x10 */ OSMesgQueue *msgq;
+    /* 0x14 */ OSMesg msg;
+} OSViContext_s86;
+
+extern OSViContext_s86 *D_8002C134; /* __osViNext */
+u32 __osDisableInt(void);
+void __osRestoreInt(u32);
+
+void func_151EFE00(u32 func) {
+    register u32 saveMask;
+
+    saveMask = __osDisableInt();
+    if ((func & 0x1) != 0) {
+        D_8002C134->control |= 0x8;
+    }
+    if ((func & 0x2) != 0) {
+        D_8002C134->control &= ~0x8;
+    }
+    if ((func & 0x4) != 0) {
+        D_8002C134->control |= 0x4;
+    }
+    if ((func & 0x8) != 0) {
+        D_8002C134->control &= ~0x4;
+    }
+    if ((func & 0x10) != 0) {
+        D_8002C134->control |= 0x10;
+    }
+    if ((func & 0x20) != 0) {
+        D_8002C134->control &= ~0x10;
+    }
+    if ((func & 0x40) != 0) {
+        D_8002C134->control |= 0x10000;
+        D_8002C134->control &= ~0x300;
+    }
+    if ((func & 0x80) != 0) {
+        D_8002C134->control &= ~0x10000;
+        D_8002C134->control |= D_8002C134->modep->comRegs.ctrl & 0x300;
+    }
+    D_8002C134->state |= 0x8;
+    __osRestoreInt(saveMask);
+}

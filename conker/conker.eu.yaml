@@ -176,7 +176,9 @@ segments:
     start: 0x29400
     vram:  0x80029400
     subsegments:
-      - [0x29400, rodatabin]
+      - [0x29400, databin]
+      - [0x2AE80, .data, libultra/io/aisetnextbuf]
+      - [0x2AE90, databin]
       - [0x2C7B0, .rodata, libultra/audio/init_128D0]
       - [0x2C7C0, rodatabin]
       - [0x2CAC0, .rodata, libultra/audio/cents2ratio]
@@ -891,6 +893,8 @@ segments:
       - [0x248A90, rodatabin]
       - [0x248B00, .rodata, game_14FF90]
       - [0x248C10, rodatabin]
+      - [0x248D00, .rodata, game_eu_15A210]
+      - [0x248D40, rodatabin]
       - [0x248E50, .rodata, game_eu_15E000]
       - [0x248EC0, rodatabin]
       - [0x24A100, .rodata, game_169510]

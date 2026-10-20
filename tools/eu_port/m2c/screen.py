@@ -242,7 +242,7 @@ f2p={}
 for p in glob.glob('src_eu/**/*.c',recursive=True):
     for m in PRAG.finditer(open(p).read()): f2p[m.group(2)]=p
 groups={}
-for g in sorted(glob.glob(os.path.join(gd,'func_*.c'))):
+for g in sorted(glob.glob(os.path.join(gd,'*.c'))):
     f=os.path.basename(g)[:-2]
     if f in f2p: groups.setdefault(f2p[f],[]).append(f)
 items=sorted(groups.items(),key=lambda x:-len(x[1]))

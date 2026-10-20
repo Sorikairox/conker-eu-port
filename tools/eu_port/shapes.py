@@ -4,6 +4,21 @@ usage: shapes.py [--list SHAPE [maxinsns]]   (default: counts per shape and size
 shapes: A argcopy (a1..a3 = a0 copy spilled to a0 home slot), B outvec (s32 x[3] frame: sp addresses 12 apart),
         C reload (lw aN from own home slot), D unfilled (store; jr ra; nop)"""
 import re, sys, glob, os
+import sys as _gsys
+def _conker_guard():
+    # refuse to run on a checkout other than CONKER_ROOT (e.g. a worktree shell without the wt.sh env)
+    import os as _o, subprocess as _s
+    if _o.path.exists("/.dockerenv"):
+        return  # inside a build container: paths are /conker, not the host checkout
+    try:
+        top = _s.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return
+    root = _o.path.realpath(_o.path.expanduser(_o.environ.get("CONKER_ROOT", "~/conker")))
+    if top and _o.path.realpath(top) != root:
+        _gsys.stderr.write("refusing: cwd repo %s != CONKER_ROOT %s (eval the wt.sh env)\n" % (top, root))
+        _gsys.exit(3)
+_conker_guard()
 R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 live = set()
 for f in glob.glob(R + '/src_eu/*.c'):

@@ -4,6 +4,21 @@ Compile-loop on a CERR draft: while the first error is "redeclaration of 'X'", d
 declaration lines for X (prototype / extern before the function definition) so the file's / header's
 declaration wins. Prints the final result line and the remaining first error (s56)."""
 import sys, os, re, subprocess
+import sys as _gsys
+def _conker_guard():
+    # refuse to run on a checkout other than CONKER_ROOT (e.g. a worktree shell without the wt.sh env)
+    import os as _o, subprocess as _s
+    if _o.path.exists("/.dockerenv"):
+        return  # inside a build container: paths are /conker, not the host checkout
+    try:
+        top = _s.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return
+    root = _o.path.realpath(_o.path.expanduser(_o.environ.get("CONKER_ROOT", "~/conker")))
+    if top and _o.path.realpath(top) != root:
+        _gsys.stderr.write("refusing: cwd repo %s != CONKER_ROOT %s (eval the wt.sh env)\n" % (top, root))
+        _gsys.exit(3)
+_conker_guard()
 func, src, out = sys.argv[1:4]
 maxit = int(sys.argv[4]) if len(sys.argv) > 4 else 8
 root = os.environ.get('CONKER_ROOT', os.path.expanduser('~/conker'))

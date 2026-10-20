@@ -281,35 +281,39 @@ typedef struct {
 
 extern u8 (*D_8008B598[])(struct225 *);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160B74.s")
-// NON-MATCHING: spill slot of ret is 8 bytes higher; then-branch tail scheduled differently
-// u8 func_15160B74(struct225 *arg0) {
-//     struct_eu_15160B74 *pl = (struct_eu_15160B74 *)&arg0->unk18;
-//     struct127 *obj = pl->unk0;
-//     u8 ret = 1;
-//     f32 out[3];
-//
-//     if (obj->interaction_state == 0) {
-//         return 0;
-//     }
-//     if (obj->unique_id != pl->unk4) {
-//         return 0;
-//     }
-//     if ((obj->unk1D4 != NULL) && ((obj->unk74 & 0xF) != 0xF)) {
-//         func_15143134(&pl->unk8, out, (u8 *)obj->unk1D4 + (pl->unk5 << 6));
-//         arg0->unk14->unkE = out[0];
-//         arg0->unk14->unk10 = out[1];
-//         arg0->unk14->unk12 = out[2];
-//     } else {
-//         arg0->unk14->unkE = obj->x_position;
-//         arg0->unk14->unk10 = obj->y_position;
-//         arg0->unk14->unk12 = obj->z_position;
-//     }
-//     if (pl->unk14 != -1) {
-//         ret = D_8008B598[pl->unk14](arg0);
-//     }
-//     return ret;
-// }
+typedef struct { f32 x, y, z; } V3_60B74;
+
+u8 func_15160B74(struct225 *arg0) {
+    u8 ret;
+    u8 *obj;
+    u8 *s;
+
+    obj = *(u8 **)((u8 *)arg0 + 0x18);
+    ret = 1;
+    s = (u8 *)arg0 + 0x18;
+    if (*(s32 *)obj == 0) {
+        return 0;
+    }
+    if (s[4] != obj[0x3B]) {
+        return 0;
+    }
+    if (*(u8 **)(obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
+        V3_60B74 out;
+
+        func_15143134(s + 8, &out, (s[5] << 6) + *(u8 **)(obj + 0x1D4));
+        arg0->unk14->unkE = out.x;
+        arg0->unk14->unk10 = out.y;
+        arg0->unk14->unk12 = out.z;
+    } else {
+        arg0->unk14->unkE = *(f32 *)(obj + 0x14);
+        arg0->unk14->unk10 = *(f32 *)(obj + 0x18);
+        arg0->unk14->unk12 = *(f32 *)(obj + 0x1C);
+    }
+    if ((s8)s[0x14] != -1) {
+        ret = D_8008B598[(s8)s[0x14]](arg0);
+    }
+    return ret;
+}
 
 // another struct definition
 struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg3, f32 arg4, u8 arg5, s16 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 argB, u8 argC, u8 argD, u8 argE, s32 argF) {

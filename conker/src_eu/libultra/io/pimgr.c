@@ -56,4 +56,65 @@
 // 	}
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/io/pimgr/osCreatePiManager.s")
+#include <ultra64.h>
+#include "functions.h"
+#include "variables.h"
+
+typedef struct {
+    u32 active;
+    OSThread *thread;
+    OSMesgQueue *cmdQueue;
+    OSMesgQueue *evtQueue;
+    OSMesgQueue *acsQueue;
+    s32 (*dma)(s32, u32, void *, u32);
+    s32 (*edma)(OSPiHandle *, s32, u32, void *, u32);
+} OSDevMgr_s86;
+
+extern OSDevMgr_s86 D_8002AE90; /* __osPiDevMgr */
+extern OSThread D_80035C70;     /* piThread */
+extern char D_80042C88[];       /* piThreadStack end */
+extern OSMesgQueue D_80036EA0;  /* piEventQueue */
+extern OSMesg D_80036EB8[1];    /* piEventBuf */
+extern u32 D_8002C0B0;          /* __osPiAccessQueueEnabled */
+extern OSMesgQueue D_80036EA0;
+void func_10023B70(void);       /* __osPiCreateAccessQueue */
+s32 func_10023DA0(OSPiHandle *, s32, u32, void *, u32); /* osEPiRawStartDma */
+void func_10002E50(void *);     /* __osDevMgrMain */
+s32 osPiRawStartDma(s32, u32, void *, u32);
+u32 __osDisableInt(void);
+void __osRestoreInt(u32);
+
+void osCreatePiManager(OSPri pri, OSMesgQueue *cmdQ, OSMesg *cmdBuf, s32 cmdMsgCnt) {
+    u32 savedMask;
+    OSPri oldPri;
+    OSPri myPri;
+
+    if (!D_8002AE90.active) {
+        osCreateMesgQueue(cmdQ, cmdBuf, cmdMsgCnt);
+        osCreateMesgQueue(&D_80036EA0, (OSMesg *)&D_80036EB8, 1);
+        if (!D_8002C0B0) {
+            func_10023B70();
+        }
+        osSetEventMesg(OS_EVENT_PI, &D_80036EA0, (OSMesg)0x22222222);
+        oldPri = -1;
+        myPri = osGetThreadPri(NULL);
+        if (myPri < pri) {
+            oldPri = myPri;
+            osSetThreadPri(NULL, pri);
+        }
+        savedMask = __osDisableInt();
+        D_8002AE90.active = 1;
+        D_8002AE90.thread = &D_80035C70;
+        D_8002AE90.cmdQueue = cmdQ;
+        D_8002AE90.evtQueue = &D_80036EA0;
+        D_8002AE90.acsQueue = (OSMesgQueue *)D_80042C88;
+        D_8002AE90.dma = osPiRawStartDma;
+        D_8002AE90.edma = func_10023DA0;
+        osCreateThread(&D_80035C70, 0, func_10002E50, &D_8002AE90, &D_80036EA0, pri);
+        osStartThread(&D_80035C70);
+        __osRestoreInt(savedMask);
+        if (oldPri != -1) {
+            osSetThreadPri(NULL, oldPri);
+        }
+    }
+}

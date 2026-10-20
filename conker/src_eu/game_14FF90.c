@@ -649,7 +649,45 @@ void func_15126138(struct108 *arg0) {
 }
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_1512623C.s")
+typedef struct { f32 x, y, z; } V3_2623C;
+
+void func_1512623C(u8 *arg0, u8 *arg1, s32 arg2, f32 *arg3, f32 *arg4, f32 *arg5, s32 arg6) {
+    s32 ret;
+    V3_2623C in;
+    V3_2623C out;
+    s32 idx;
+    u8 *m;
+
+    ret = 1;
+    if (*(u8 **)(arg0 + 0x1D4) != NULL) {
+        ret = 0;
+        if (arg6 != 0) {
+            idx = 3;
+            in.x = 0.0f;
+            in.z = 0.0f;
+            in.y = 20.0f;
+        } else if (arg2 == 0x1B) {
+            idx = 4;
+            in.y = 116.0f;
+            in.x = 0.0f;
+            in.z = 130.0f;
+        } else {
+            ret = 1;
+        }
+        if (ret == 0) {
+            m = *(u8 **)(arg0 + 0x1D4); m += idx << 6;
+            func_15143134(&in, &out, m);
+            *arg3 = out.x;
+            *arg4 = out.y;
+            *arg5 = out.z;
+        }
+    }
+    if (ret != 0) {
+        *arg3 = *(f32 *)(arg0 + 0x14);
+        *arg4 = *(s16 *)(arg1 + 0x114) * 0.75f + *(f32 *)(arg0 + 0x18);
+        *arg5 = *(f32 *)(arg0 + 0x1C);
+    }
+}
 // ooh mama
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15126378.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15127520.s")
