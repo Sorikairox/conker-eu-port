@@ -2,6 +2,12 @@
 
 #include "functions.h"
 #include "variables.h"
+typedef struct { s32 x; s32 y; s32 z; s32 ex; s32 ey; s32 ez; f32 f; } SfxListener; // size 0x1C
+extern SfxListener D_80042308[];
+extern s32 D_80042B00;
+void func_10011310(void);
+void func_10011624(struct15 *arg0, s32 *arg1, s32 arg2, s32 arg3);
+typedef struct { s32 unk0; u8 pad4[0x10]; f32 unk14; f32 unk18; f32 unk1C; u8 pad20[0x64]; u16 unk84; u8 pad86[0xFE]; u32 unk184; } SfxObj;
 
 
 s32 func_1000EB00(struct04 *arg0, s32 arg1, s32 *arg2, s32 *arg3, s32 arg6, s32 arg7, u16 *arg8) {
@@ -124,7 +130,35 @@ s32 func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4,
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000EFB4.s")
+s32 func_1000EFB4(struct_eu_sfx *arg0, s32 arg1, s32 *arg2, struct11 *arg3, s32 arg4, s32 *arg5, u16 *arg6) {
+    SfxObj *obj = (SfxObj *)arg0->unk18;
+    u16 *p;
+    s32 id;
+
+    if (obj != NULL && (id = *arg2) != 0) {
+        if (obj->unk0 != 0) {
+            for (p = (u16 *)arg0->unk1C; *p != 0; p++) {
+                if (obj->unk84 == *p || !(arg0->unk10 & 1)) {
+                    *arg5 = ((obj->unk184 >> 3) & 0x30) * 2;
+                    arg0->unk2 = obj->unk14;
+                    arg0->unk4 = obj->unk18;
+                    arg0->unk6 = obj->unk1C;
+                    return 0;
+                }
+            }
+        }
+        if (*arg6 == 0xCA) {
+            func_10010F30(0xCB, id, arg3->unk3, 0, *arg5);
+        } else if (*arg6 == 0x2CF) {
+            func_10010F30(0x2D7, id, arg3->unk3, 0, *arg5);
+            func_10010F30((func_150ADA20() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
+        } else if (*arg6 == 0x2D2) {
+            func_10010F30(0x2DA, id, arg3->unk3, 0, *arg5);
+            func_10010F30((func_150ADA20() % 3U) + 0x2EB, 0x3E80, arg3->unk3, 0, *arg5);
+        }
+    }
+    return 1;
+}
 void func_1000F1A8(void) {
     s32 i;
 
@@ -636,7 +670,56 @@ s32 func_1001147C(u16 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_100114D0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011624.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011BB8.s")
+void func_10011BB8(void) {
+    s32 i;
+    s32 j;
+    s32 step;
+
+    if (D_80041F60 == 0 && D_80041F61 == 0) {
+        for (i = 0; i <= D_80082FA0; i++) {
+            u8 *obj = (u8 *)&D_800DBFF0[i];
+
+            if (D_80082FA0 != 0 || (*(s32 *)(obj + 0x2C) & 0x80000)) {
+                D_80042308[i].x = *(f32 *)(obj + 0x2F8);
+                D_80042308[i].y = *(f32 *)(obj + 0x2FC);
+                D_80042308[i].z = *(f32 *)(obj + 0x300);
+            } else {
+                D_80042308[i].x = *(f32 *)(obj + 0x2A4);
+                D_80042308[i].y = *(f32 *)(obj + 0x2A8);
+                D_80042308[i].z = *(f32 *)(obj + 0x2AC);
+            }
+            D_80042308[i].ex = *(f32 *)(obj + 0x2F8);
+            D_80042308[i].ey = *(f32 *)(obj + 0x2FC);
+            D_80042308[i].ez = *(f32 *)(obj + 0x300);
+            D_80042308[i].f = *(f32 *)(obj + 0x380);
+        }
+        func_10011310();
+        func_10011624(D_80041FE0, &D_80042B00, 0, D_80042B00);
+        for (i = 0, j = 0; i < D_80042B00; i++) {
+            D_80041FE0[j] = D_80041FE0[i];
+            if (!(D_80041FE0[j].unk10 & 0x80)) {
+                j++;
+            }
+        }
+        D_80042B00 = j;
+    }
+    if (D_80041F54 != D_80041FDC || D_80041F60 != D_80041F61) {
+        if (D_80041F61 == 1) {
+            func_10017780(0, 0);
+            func_10017780(1, 0);
+        } else {
+            func_10017780(0, D_80041F54);
+            func_10017780(1, D_80041F54);
+            step = (D_80041FDC - D_80041F54) * D_80041F58;
+            if (step != 0) {
+                D_80041F54 += step;
+            } else {
+                D_80041F54 = D_80041FDC;
+            }
+        }
+        D_80041F60 = D_80041F61;
+    }
+}
 
 void func_10011E88(s32 arg0) {
 }

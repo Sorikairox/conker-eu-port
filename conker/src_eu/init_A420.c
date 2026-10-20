@@ -3,6 +3,10 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct { s16 x, y, z, w; } PathPt;
+f32 func_150ADDE0(f32 *a, f32 *b);
+s32 func_1000A420(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
 
 void func_1000E40C(s32, s32);
 #pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A420.s")
@@ -74,6 +78,7 @@ void func_1000E40C(s32, s32);
 //     }
 //     return ret;
 // }
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A750.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000B060.s")
