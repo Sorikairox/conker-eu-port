@@ -67,7 +67,41 @@ s16 func_15063D6C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063DE8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063F14.s")
+s32 func_15031C4C(struct127 *, s32, s32);
+void func_1506B04C(struct127 *, s32, void *);
+
+void func_15063F14(struct127 *arg0, s32 arg1) {
+    s32 kind;
+    struct {
+        struct127 *obj;
+        struct17 pos;
+        s32 idx;
+    } blk;
+
+    if (arg0->id == 0x75 || arg0->id == 0xB1) {
+        kind = 100;
+    } else {
+        kind = 44;
+    }
+    if (func_15031C4C(arg0, kind, 0) == 0 && arg1 == 0) {
+        return;
+    }
+    if (arg0->unk1D4 != NULL) {
+        func_15143134(NULL, &blk.pos, (u8 *)arg0->unk1D4 + 0x100);
+    } else {
+        blk.pos.unk0 = arg0->x_position;
+        blk.pos.unk4 = arg0->y_position;
+        blk.pos.unk8 = arg0->z_position;
+    }
+    blk.idx = (arg0 - D_800CC2D0) + 1;
+    blk.obj = arg0;
+    func_1506B04C(arg0, 0xB, &blk);
+    if (func_150836CC(arg0, kind)) {} // fakematch: consuming the result frees v0 for the tail
+    if (*(*(u8 **)((u8 *)arg0 + 0x31C) + 0x19A) != 0) {
+        *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x19A) -= 1;
+    }
+    *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x11A) = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_1506401C.s")
 
