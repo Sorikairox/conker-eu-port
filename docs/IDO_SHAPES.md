@@ -972,6 +972,16 @@ See `docs/sessions/s114.md`.
 5. Spawner arg read from its home slot into v0 (`lh v0,0x5A(sp)`) where mine uses v1: `p2 = &arg2;` and read through `*p2`, plus an `if (arg0) {}` barrier (permuter, `func_151AED60`). Spawner `s.p = arg0` (arg reloaded from its home slot) placement: sweep its position among the stores (`func_151C6750`).
 6. Stack locals: the first declared array gets the highest address. `pos[3]` at 0x5C, `vel[3]` at 0x50, `sp48` at 0x48: `f32 pos[3]; f32 vel[3]; u8 *obj; s32 sp48;` (the register pointer fills the gap) (`func_151AA8BC`).
 OPEN: `func_151AED60` code OK but `.rodata` 3 zero words between two C functions' items; `func_1518F4C4` DIFF1 (third lerp add order); `func_151DBE80` frame +8.
+## s120 recipes (tail recursion, store forwarding, C-defined rodata tables, fn-select if/else)
+See `docs/sessions/s120.md`.
+1. **A recursive function whose body ends in a loop back to the top, with args re-normalised (`sll/sra`) and a stack-passed arg stored back to its home**: IDO -O2 eliminated the *tail* recursive call. Write both calls (`f(.., lo, mid, ..); f(.., mid, hi, ..);`) and a guard `if (hi - lo < 2 || depth <= 0) return;` (`func_151A88F0`, SIZE-1).
+2. **A pointer stored to a field and then used from a register for the next uses, but reloaded after a store through it**: store-to-load forwarding. Write `s->tbl = X; s->end = &s->tbl[n]; s->tbl->x = 0;` (no local `p`; a local is folded into `s + k` offsets) (`func_151A7F00`).
+3. **`lui/lwc1 %lo(D_x)` of a value that starts a block of unreferenced data words**: a file-scope const table, not a literal. Define `const u32 D_x[N] = {...};` in C, read `*(f32 *)D_x`, add `// rodata_inject: cdefined <rom a> <rom b>`. IDO emits const data before every float literal (`func_151A8BD4`).
+4. **`li s7, A; if (c) { li s7, B; b next }`**: `if (c) fn = B; else fn = A;` (IDO hoists the else store; a plain `fn = A; if (c) fn = B;` gives no branch) (`func_151A929C`).
+5. **Same byte field loaded twice (`lb` for a `!= -1` test, `lb` again as a table index)**: use different expressions, `*(s8 *)(p + k) != -1` and `D[(s8)p[k]]` (`func_151A929C`).
+6. An arg narrowed by `lbu N+3(sp)` from its home when passed to a `u8` callee slot is an `int`/`s32` param, not `u8` (`func_151473F4`; the permuter found it).
+7. Permuter: pycparser parses `n * sizeof(T) + x` as a cast and the base fails to compile ("Bad type name for cast operator"); write `n * 0x18U`.
+OPEN: `func_151A7F00` DIFF1 (`addu` order), `func_151A88F0` SIZE-1, `func_151A9670` DIFF2, `func_151473F4` DIFF3, `func_151D1694` DIFF12, `func_151A8DA8` DIFF91, `func_16000590` DIFF23.
 ## s118 recipes (mul.s order, spill slot via struct tail, hoisted literal = rodata)
 See `docs/sessions/s118.md`.
 1. **`mul.s d, p, prod` where `prod = obj[0] * K` and `p = *ptr`**: write `*p * (obj[0] * K)`. `(obj[0] * K) * *p` swaps the source registers (`func_151DA938`). Also: the first of two Node14 reads written raw (`*(f32 *)(tbl + i * 0x14)`) gives the swapped `addu` even after a spill reload. Use `((Node14 *)tbl)[i].x` for both (`func_1518A42C`).
