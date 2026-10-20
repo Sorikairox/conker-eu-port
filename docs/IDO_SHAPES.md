@@ -873,6 +873,14 @@ See `docs/sessions/s91.md`.
 5. A `static` local in a gu file (`guRandom` xseed) needs the function in its own file (the containing file had other flags) plus the owned `.data` piece (16-byte aligned start).
 
 
+## s98 recipes (f32 params in a-regs, &arg compares, stack-struct callers)
+See `docs/sessions/s98.md`.
+1. **`mtc1 a1,f12; mtc1 a2,f14` and `sw a3; lwc1 f,0x(a3 home)`** at entry = `f32` params after a non-float first param (`func_151AF938`). If a matched C caller declares them `s32`, retype that caller's pass-through params to `f32` (same bytes) instead of casting the call (a function-pointer cast gives `jalr`; a block-scope prototype conflicts with the definition).
+2. **All args homed and one of them loaded twice in an `||` condition** (`lw t8,0x24(sp)` and `lw t1,0x24(sp)`): `&arg` for every arg, `*pa` everywhere, then `t = (*pa1)->a == p->a; if (1) {} if (t || (*pa1)->b == p->b)` (fakematch: the empty block splits the first compare off) (`func_151BE65C`).
+3. A frame-slot-only DIFF2 (one float spill 8 bytes off) is worth one remote permuter run before declaration sweeps: `func_1519150C` was OK in seconds with `s32 pad; u8 *p; f32 s; f32 c;`.
+4. **Stack-struct callers with several structs**: struct fields at the m2c sp offsets, structs declared from the highest address down (plus a top `s32 pad` if the frame has 4 free bytes at the top); then sweep the positions of the statements that read a reloaded arg (`arg0->unique_id`, `= arg0`): they fix both the reload count and the store order (`func_1514E57C`).
+5. A rodata float in a file that does not own `.rodata` can be read through the extern `D_800Axxxx` symbol (same `lui/lwc1`); run `needsyms.py --apply`.
+
 ## s97 recipes (homed args, empty multi-arg stubs, clip helpers)
 See `docs/sessions/s97.md`.
 1. **An arg reloaded from its home slot after calls** (`lw s0,0x20(sp)` of arg0 where -O2 would keep it in a register): take its address, `struct210 **pa = &arg0;` and use `*pa` (fakematch) (`func_151C9A84`/`9B88`). Probably the same fix for the s95 open `func_1519150C`/`B1DD8` (`p = arg0 + 0x110` spilled).
