@@ -66,7 +66,20 @@ void func_1503F1B0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F23C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F2B4.s")
+extern u8 D_80098CC4[];
+
+void func_1503F2B4(s32 arg0) {
+    struct106 *p;
+    s32 n;
+    s32 i;
+
+    p = &D_800C6660[arg0];
+    *(s16 *)&p->pad[0] = 0x78;
+    n = D_80098CC4[(u8)p->pad[2]];
+    for (i = 0; i < n; i++) {
+        *(f32 *)(p->unk0 + i * 0x68 + 0x4C) = (s32)(func_150ADA20() % 20U) - 5;
+    }
+}
 
 void func_1503F368(s32 arg0, s32 arg1) {
     func_1503EE68(arg0, 2.0f, 2.0f, 0);

@@ -80,11 +80,145 @@ void func_150E7764(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
     (*(f32 *)((u8 *)arg3 + 0x1C)) = (f32) (func_150ADA68() * 0.15f);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7810.s")
+void func_150E7C50(f32, s16, u8, u8, u8, s16, s16, s32, s32, u8, s32);
+s32 func_150E7B20(f32 *, f32, s16, u8, u8, u8, s16, s16, s32, s32, u8, s32);
+s32 func_1516547C(s32, s32, s32, s32, s32);
+void func_150E9000(void);
+void func_150E965C(void);
+typedef struct { s32 w[2]; } E7810_V;
+extern E7810_V D_80088DFC;
+
+void func_150E7810(u8 arg0, u8 arg1, s32 arg2) {
+    E7810_V v;
+    f32 pos[2];
+    structEU_151D8E18 s;
+
+    if (func_150ADA68() < 0.0042f) {
+        v = D_80088DFC;
+        if (func_150ADA68() < 0.75000006f) {
+            pos[0] = (func_150ADA68() * 300.0f) + -150.0f;
+            pos[1] = (func_150ADA68() * 200.0f) + -100.0f;
+            func_150E7B20(pos, ((func_150ADA68() * 150.0f) + 200.0f) * 0.1f, (func_150ADA20() % 201U) + 0x1F4, (u8)(((func_150ADA20() & 1) ? 2 : 0) | ((func_150ADA20() & 1) ? 4 : 0)) | 9, (func_150ADA20() % 26U) + 0x64, 0xFF, 0x40, 3, (s32)&v, 2, arg1, arg2);
+        } else {
+            func_150E7C50(((func_150ADA68() * 100.0f) + 150.0f) * 0.1f, (func_150ADA20() % 201U) + 0x1F4, 9, (func_150ADA20() % 26U) + 0x64, 0xFF, 0x40, 3, (s32)&v, 2, arg1, arg2);
+        }
+        func_10010F30(0x360, 0x7FFF, 0, 0, 0);
+        func_1516547C(1, arg0, 0, arg1, arg2);
+        s.unk0 = 1;
+        s.unk2 = (func_150ADA20() % 26U) + 0x19;
+        s.unk5 = 1;
+        s.unk4 = (func_150ADA20() % 6U) + 3;
+        s.unk6 = -1;
+        func_151D8E18(&s, 0, 0xFF, 0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7B20.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7C50.s")
+s32 func_150ADA20(void);
+f32 func_150ADA68(void);
+s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+typedef struct { s32 w[3]; } Vec3E7C50;
+extern Vec3E7C50 D_80088E08;
+extern Vec3E7C50 D_80088E14;
+
+void func_150E7C50(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA) {
+    s32 pad[6]; // fakematch: 0x18 unused bytes above the struct
+    struct {
+        f32 u0;
+        f32 u4;
+        f32 u8;
+        f32 uC;
+        s8 u10;
+        s16 u12;
+        u16 u14;
+        s16 u16;
+        s16 u18;
+        u8 u1A;
+        u8 u1B;
+        u8 u1C;
+        u8 u1D;
+        u8 u1E;
+        u8 u1F;
+        u8 u20;
+        u8 u21;
+        u8 u22;
+        u8 u23;
+        s32 u24;
+        s32 u28;
+        s32 u2C;
+        s32 u30;
+        s32 u34;
+        s32 u38;
+        s32 u3C;
+        u8 u40;
+        u8 u41;
+    } sp;
+    u8 r;
+    Vec3E7C50 a;
+    Vec3E7C50 b;
+
+    r = func_150ADA20() & 3;
+    sp.u12 = arg1;
+    sp.u14 = arg2 & 0xFFF9;
+    sp.u16 = arg5;
+    sp.u18 = arg6;
+    sp.u1A = 5;
+    sp.u1B = 0xFF;
+    sp.u1C = 0xE6;
+    sp.u1D = 0xBE;
+    sp.u1E = arg3;
+    sp.u1F = 0xFF;
+    sp.u20 = 0xFF;
+    sp.u21 = 0xFF;
+    sp.u22 = 0xFF;
+    sp.u23 = arg4;
+    sp.u24 = 1;
+    sp.u28 = 0;
+    sp.u2C = 0;
+    sp.u40 = 0;
+    sp.u41 = 0xA;
+    sp.u30 = 7;
+    sp.u34 = 0x3C;
+    sp.u38 = 0x80;
+    sp.u3C = 0x20;
+    sp.uC = arg0;
+    sp.u8 = arg0;
+    switch (r) {
+    case 0:
+    case 1:
+        a = D_80088E08;
+        sp.u10 = a.w[func_150ADA20() % 3U];
+        sp.u4 = (func_150ADA68() * 160.0f) + -80.0f;
+        switch (r) {
+        case 0:
+            sp.u14 |= 2;
+            sp.u0 = 145.0f - arg0;
+            break;
+        case 1:
+            sp.u0 = arg0 - 145.0f;
+        dummy: ; // fakematch: label barrier keeps the swc1 out of the b delay slot
+            break;
+        }
+        break;
+    case 2:
+    case 3:
+        b = D_80088E14;
+        sp.u10 = b.w[func_150ADA20() % 3U];
+        sp.u0 = (func_150ADA68() * 260.0f) + -130.0f;
+        switch (r) {
+        case 2:
+            sp.u14 |= 4;
+            sp.u4 = 110.0f - arg0;
+            break;
+        case 3:
+            sp.u4 = arg0 - 110.0f;
+            break;
+        }
+        break;
+    }
+    func_151559FC(&sp, 0, arg7, arg8, 0, arg9, argA);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7F14.s")
 
@@ -128,7 +262,7 @@ void func_150E8854(void) {
     }
 }
 
-s32 func_150E8EB0(u8 *);
+void func_150E8EB0();
 void func_150E8E40(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x28)) - D_800BE9A4);
     if ((*(f32 *)((u8 *)arg0 + 0x28)) < 0.0f) {
@@ -137,7 +271,32 @@ void func_150E8E40(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E8EB0.s")
+typedef struct { s32 a, b; } E8EB0_V;
+typedef struct { u8 a; u8 p1; s16 b; u8 c; u8 d; s8 e; } E8EB0_S;
+extern E8EB0_V D_80088E20;
+extern u8 D_800BEE0B;
+void func_150E8EB0() {
+    E8EB0_V v;
+    E8EB0_S s;
+
+    v = D_80088E20;
+    func_15169260(&v, 2, 0, 0x1B);
+    func_1516547C(0, D_800BEE0B, 0, 0xFF, 1);
+    s.a = 1;
+    s.b = func_150ADA20() % 21U + 20;
+    s.d = 1;
+    s.c = func_150ADA20() % 6U + 3;
+    s.e = -1;
+    func_151D8E18((structEU_151D8E18 *)&s, 0, 0xFF, 1);
+    if (D_800DCDC4 != 0) {
+        func_150E9000();
+    }
+    if (D_800DCDC4 != 0) {
+        func_150E965C();
+    }
+    func_10010F30(0x4C8, 0x7FFF, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
+    func_10010F30(0x4CD, 0x5DC0, 0x40, 0x200 - (func_150ADA20() & 0x400), 0);
+}
 
 void func_150E9000(void) {
     struct260 *temp_v0;
@@ -289,4 +448,39 @@ void func_150E965C(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E995C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E9C9C.s")
+s32 func_15133D30(u8 *);
+
+typedef struct { s32 u0; s16 u4; u8 u6; u8 u7; s32 u8; s32 uC; u8 u10, u11, u12, u13, u14, u15, u16, u17; s32 u18; s32 u1C; s16 u20; s16 u22; s16 u24; s16 u26; } E9_S;
+s32 func_150E9C9C(u8 *arg0) {
+    u8 *p;
+    E9_S s;
+    f32 f;
+
+    func_15133D30(arg0);
+    p = arg0 + 0x170;
+    if (*(f32 *)(arg0 + 0x3C) < *(f32 *)(arg0 + 0x170)) {
+        if ((*(s32 *)(p + 4) & 0x1F) == 0xA) {
+            f = func_150ADA68() * 20.0f + 20.0f;
+            s.u6 = 0xB;
+            s.u0 = 0x9701;
+            s.u4 = 0x64;
+            s.u7 = 0;
+            s.u8 = 0;
+            s.uC = 0;
+            s.u10 = 0xFF;
+            s.u11 = 0xFF;
+            s.u12 = 0xFF;
+            s.u13 = 0xFF;
+            s.u14 = 0xFF;
+            s.u15 = 0xFF;
+            s.u18 = 0x3B0003;
+            s.u16 = 0;
+            s.u17 = 7;
+            s.u22 = 0x14;
+            s.u24 = 0xC;
+            func_1513C73C((s32)&s, 0, 0, (s32)(p + 8), *(f32 *)(arg0 + 0x38), *(f32 *)p + 5.0f, *(f32 *)(arg0 + 0x40), f, f, func_150ADA20() & 0xFF, 0, 0, arg0[0xC], arg0[1]);
+        }
+        return 0;
+    }
+    return 1;
+}

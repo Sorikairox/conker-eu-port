@@ -801,6 +801,24 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s99 recipes (homed trailing params, file boundary in rodata, spawner templates)
+See `docs/sessions/s99.md`.
+1. **`sw a2` / `sw a3` homes at entry with no use of the args**: give the definition unused trailing `f32 arg2, u8 arg3` params (s97 recipe 2 again, now for unused ones) (`func_150EAA80`, `func_150EA560`, both `(u8 *, s16, f32, u8)`).
+2. **Untried files full of template spawners**: `func_1513092C` + tail-struct members copy the s96 `func_150C65D8` draft (`s96_drafts/`) almost verbatim; a point-pair velocity is `sp.u64 = *(V3 *)arg0;` + `scale * (b - a)` (`func_150EAB4C`, `func_150EA69C`). `func_151602C0` loop spawners: frame by s96 recipe 1 (count the 4-byte gaps between the struct bases in the ref and put that many named scalars there), then statement-order sweeps (`func_150EB090`).
+3. **Text OK, `.rodata` short / a zero word between two functions' late literals**: the file is two EU objects; split it at the function after the zero word: `file_split.py <stem> --at FUNC --rodata <rom of the next item>` (`func_150EB090`, `game_eu_1188A0`). Float literals that print as `0.060000002f` in m2c must be written that way.
+4. An early `lbu` of a field that is only used at the end comes from `v = p->x;` written as its own statement before `v -= ...` (`func_150EAEC4`).
+5. The `&arg0` reload recipe (s97) does not fix the late `mtc1 zero` of `func_150C6494`, nor the 35-insn all-args-homed handlers `func_150F7890`/`func_151007B0`/`func_150F1B78` (those get to DIFF6 with `volatile` arg1/arg2, `s99_drafts/func_150F7890_DIFF6.c`).
+OPEN: `func_150EB3A4` SIZE-1 (`addiu v0,s0,24` kept per arm + return-value register), `func_150C6494` DIFF26, `func_150F7890` DIFF6.
+
+## s96 recipes (big spawners: scalar slots, loop-count position, tail structs)
+See `docs/sessions/s96.md`.
+1. **Named scalars take 4-byte frame slots next to the spawner structs** (even register-allocated ones): when every struct offset is off by 4n with the frame right, move n scalar declarations from below the structs to above them (or vice versa for the frame top); screen all placements in one `tryall` (`func_150E16CC`, `func_150E9E10`).
+2. **Constant stores after a `jal`** in the ref: the call's statement comes before them in the source (`i = (rand() & 7) + 5;` above the second struct's constant run, then `for (; i > 0; i--)`) (`func_150E9E10`).
+3. **An argument kept in an s-register across a loop where the ref reloads it from its home** (and the ref hoists a struct address into `fp` instead): give the callee prototype the narrow type (`u8`), which frees the register (`func_15132FBC(void *, s32, s32, s32, u8, s32)`).
+4. **Spawner + tail struct** (`memcpy(obj + 0xA8, &b, 0x28)`, `func_1513092C`): declare the tail as its own local after the spawner struct, `obj` between them; chain the shared float as `b.scale = sp.u5C = sp.u60 = X` and screen the 6 orders (`func_150C65D8`).
+5. **Triple chains**: in `a = b = c = X` the middle target is stored first, the left one second, the right one last (after the next call): `sp.u52 = sp.u56 = sp.u3E = t;` (`func_150E9E10`).
+OPEN: `func_150E16CC` DIFF26 (`mtc1 zero,f22` placed late; drafts `docs/sessions/s96_drafts/`), `func_1509BE40`/`BFB0` SIZE+1 (varargs, one `lui at` not shared, frame 8 low).
+
 ## s94 recipes (spawner frames by declaration order, block-scoped flags)
 See `docs/sessions/s94.md`.
 1. **Spill slot of a flag 4 bytes off** (`func_150B8C7C`, s92 DIFF2): permute the order of the scalar names below the stack struct (`s32 obj; s32 b; s32 a;`); `itertools.permutations` over the declaration lines, screened in one loop, found it at once.
@@ -907,6 +925,38 @@ See `docs/sessions/s93.md`.
 5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
 6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
 
+## s107 recipes (gSPSegment loops, flag temps, arg homes)
+See `docs/sessions/s107.md`.
+1. **gSPSegment loop with the call inside** (`or v1,s2; andi seg; or 0xDB06...; sw; sw v0`): put the call result in a named temp before `gSPSegment(gfx++, i + 1, a)` (inline call makes the macro compute w0 first); loop `i` from 0 with `i + 1` as the segment gives the ref's two strength-reduced counters (`func_150C8B00`).
+2. **Frame 8 high with right code**: merge a named temp into another dead scalar (`lvl = func(...)`), then `tryall` the declaration orders (`func_150C8B00`).
+3. **Two `andi x,v0,0xFF` from one compare** (one for the `if`, one for the `u8` var spilled with `sb`): `b = cmp; a = b; if ((u8)b)` with `s32 b`, `u8 a` (`func_150F6EDC`).
+4. **Arg reloaded from its home (`lw v1,0x88(sp)`) instead of s0**: cut the number of arg uses: derive a sub-pointer once (`p = arg0 + 0x28; m = p[2] * rand`) (`func_150C29F0`).
+OPEN: `func_150C29F0` perm DIFF2, `func_150F6EDC` DIFF25, `func_150C8DD0` SIZE-2 (`li s1,5` + `multu`), `func_150F66F8` (frame).
+## s105 recipes (lui-able constants from .rodata, extern runs in owned files, emitter structs)
+See `docs/sessions/s105.md`.
+1. **A float whose low 16 bits are zero (`1655.0f` = 0x44CEE000) loaded with `lui at; lwc1` from `.rodata`**: no literal form gives that (`1655.0f`, `(f32)1655.0`, `1655`, `1655.0` all fold to `lui; mtc1`); a function-scope `static const` gives the code but the wrong `.rodata` position. Use `extern f32 D_x;` (`func_150C2700`).
+2. **Externs in a file that owns `.rodata`**: `rodata_inject.py` attaches named externs to the next GLOBAL_ASM function, so a run of externs is fine when it ends right before that function's items; turn the C neighbours in between back into externs to keep the order (`func_150C2804`, `func_150C2898` -> `func_150C29F0`). Check with `rodata_inject.py <stem> --dry`.
+3. **Frame 8 bytes too big with identical code** after switching an extern to a literal (`func_150C2898`, `0.001f`) or with a named float temp (`func_150C2558`): keep the extern / write the value into the struct field and reuse the field (no reload).
+4. Small spawners with one stack struct: put the statement whose constant is shared (CSE'd, e.g. `6` stored twice) or the stack-arg float (`s.u10 = arg4;`) first; IDO numbers t/f registers in source order of first use, the stores are scheduled anyway (`func_150C2700`).
+OPEN: `func_150C2290` DIFF37 / `func_150C2558` SIZE+1 (t-register numbering in the `func_15151FA8` emitter struct).
+## s103 recipes (indirect calls, negated constants, small neighbours)
+See `docs/sessions/s103.md`.
+1. **`lui t9,%hi(f); addiu t9,%lo(f); jalr t9`** to a known function = a call through a cast function pointer: `((s32 (*)(u32, u32 *))func_151EF800)(...)` (`func_150C3D5C`). Writing to a function's code: `((u32 *)&func_10004074)[0] = ...` (`(u32 *)func` without `&` is a cfe error).
+2. **`neg.s` of a constant loaded from `.rodata`** (the same constant appears twice in `.rodata`): the source had a local `m = 0.55f;` used as `t = m;` and `t = -m;` (`func_150E0228`); a `-0.55f` literal folds.
+3. **A constant materialised straight into the argument register** (`lui a0; ori a0,a0`) and stored to a local: the local is `s32`, not `u32` (`func_150C3D5C`, permuter).
+4. `lwr`/`swr` at offset 2 with no `lwl`/`swl` = copy of a 3-byte struct (`typedef struct { u8 a[3]; } Tri3; Tri3 t = D_x;`) (`func_150DFE40`).
+5. **A loaded value in `v0`/`a0` instead of a t-register**: give it its own named local (`k = D_800DD835; a = D_800906D4[k + 9];`), declared after the arrays so it does not shift their slots (`func_150E0150`); a command word read into `a0`: `w = g[i].w0;` (`func_150E0350`).
+6. Spawner hand drafts (`func_150F6A5C`, `func_150E047C`): `SubX *s = (SubX *)(arg0 + 0x28); obj = s->o;`, then Header/Header2/`u8 col[4]` locals; the frame by declaration order (`s, obj, n, pos, header, header2, col`), and a label barrier from the remote permuter for the last scheduling diff.
+OPEN: `func_150E047C` SIZE-1 (`move v0,t6` copy of the reloaded spill), `func_150C2424` (needs game_EF410 `.rodata`), `func_150F03F8` DIFF160.
+## s101 recipes (address CSE across calls, volatile homes, unused block locals)
+See `docs/sessions/s101.md`.
+1. **`&local` held in an s-register / spilled across calls (SIZE+8) when the ref recomputes `addiu aN,sp,K` at each call**: one of the call args carries an int cast (`(s32)pos`); give the callee a pointer param and pass the array uncast (`func_15070F60`).
+2. **An arg reloaded from its home at every single use** (even twice in a row): `u8 *volatile arg0` (the s97 `&arg0` pointer only reloads after stores) (`func_150F1C5C`, still DIFF186 for scheduling).
+3. **A dead `sw v0` of a call result into a spill slot** with no later load: the result was folded away, e.g. `(func_150ADA20() % 1U) + 0xFF` (`func_150F1C5C`).
+4. Constant float stores scheduled late in mine (`10.0f` pair): an unused block-scoped `s32 blk;` at the top of the `if` body (s69) fixed it after the permuter showed a temp there (`func_15071B18`).
+5. Field cached in a local gives one load; the ref reloads after stores in one arm: drop the local and write `arg0->x` at every read (`func_150E523C`).
+6. Float literals: always check the bits (`57.295776f`, `-0.97800004f`); m2c / `%g` forms round to the neighbour.
+OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), `func_15073A50` DIFF2 (frame 8 high), `func_150C8850` SIZE-1, `func_1506D584` DIFF20.
 ## s100 recipes (add.s operand order, spawner frame size, float setup order)
 1. **`add.s d, prod, lo`** (product first) for a `rand * (hi - lo) + lo` range comes from `lo + (hi - lo) * func_150ADA68()`; `func_150ADA68() * (hi - lo) + lo` gives `add.s d, lo, prod` (func_1514A70C).
 2. **Spawner frame 8 bytes too big, offsets right relative to the top**: the `func_151308E4` struct is 0x6C (`u8 pad98[0x8]` after `u97`), with two 4-byte scalars declared **above** it (e.g. `u8 *p; s32 r;` then `struct {...} sp;`). The 0x74 template only fits when nothing is declared above it. Scalars get 4-byte slots in declaration order even when they live in registers (func_15193360, func_151B20E4).
@@ -922,6 +972,29 @@ See `docs/sessions/s114.md`.
 5. Spawner arg read from its home slot into v0 (`lh v0,0x5A(sp)`) where mine uses v1: `p2 = &arg2;` and read through `*p2`, plus an `if (arg0) {}` barrier (permuter, `func_151AED60`). Spawner `s.p = arg0` (arg reloaded from its home slot) placement: sweep its position among the stores (`func_151C6750`).
 6. Stack locals: the first declared array gets the highest address. `pos[3]` at 0x5C, `vel[3]` at 0x50, `sp48` at 0x48: `f32 pos[3]; f32 vel[3]; u8 *obj; s32 sp48;` (the register pointer fills the gap) (`func_151AA8BC`).
 OPEN: `func_151AED60` code OK but `.rodata` 3 zero words between two C functions' items; `func_1518F4C4` DIFF1 (third lerp add order); `func_151DBE80` frame +8.
+## s115 recipes (lo rand callers: unsigned modulo, K&R no-arg, CERR rows)
+See `docs/sessions/s115.md`.
+1. **`divu` for `rand() % n` with a narrow or signed `n`**: write `% (u32)n`; `u8 n` promotes to int and gives `div` + the `-1/0x80000000` break checks (`func_1509F834`, `func_150C851C`).
+2. **`or sX,sY,zero` in the rand `jal` delay slot, then `addu sX,sY,hi`**: the source copies first, `v = lo; v += rand() % (u32)range;`. The order of the two loop-invariant lines (`range` before `lo`) sets the t7/t8 numbering (`func_150C851C`).
+3. **Function whose `a0` is never homed although a matched caller passes an argument**: the definition takes no params; declare it `void f();` (K&R) in the file and define `void f() {` (`func_150E8EB0`). A global tested twice (`lw` reloaded before the second `beqz`): write the global in both `if`s, not a local.
+4. A byte-table loop count loaded straight into an s-register: `s32 n = table[i];` (`u8 n` gives `lbu v0` + move) (`func_1503F2B4`).
+5. **randscreen CERR rows are cheap**: implicit declarations (a call earlier in the file), the file's own prototype of a callee, a typedef declared below the pragma. Fix the file's declarations (move the typedef/extern up, add prototypes) and screen again (`func_150C851C`, `func_150E8EB0`).
+6. A 5-byte stack copy done with `lw at; sw at; lbu at; sb at` through `t6 = &local` is an IDO initializer template (`u8 ids[5] = {...}`, aligned by the compiler): needs the file to own `.data` (`func_151008C0`, open).
+OPEN: `func_150B0F40` SIZE-1, `func_1506E46C` SIZE-6 (spilled `v & 0x7FFF`), `func_1505F188` DIFF27 (f0/f2 roles; literal needs `.rodata`), `func_150E752C` SIZE-1.
+## s113 recipes (extern-only late rodata, label barrier, u8 flag args)
+See `docs/sessions/s113.md`.
+1. **Extern floats in an owned file with no late GLOBAL_ASM neighbour** (s111 recipe 4): `rodata_inject.py` now moves an extern-only late region into the regular `.rodata` of a GLOBAL_ASM neighbour; keep the externs (`func_150BDE34`). `static const f32` goes to `.data` in IDO, never `.rodata`.
+2. **`b L` whose delay slot holds the target's first insn (`lbu t8,0xD7(sp)`) instead of the preceding `swc1`**: a label right before the inner switch's last `break` (`dummy: ;`, fakematch) stops IDO from moving the store into the slot (`func_150E7C50`, permuter).
+3. **Rand flag pair passed to a `u8` param with a constant** (`or t8,v1,t0; ori t6,t8,9; andi a3,t6,255`): `(u8)((A ? 2 : 0) | (B ? 4 : 0)) | 9` inline in the call; `(... | 9) & 0xFF` puts the `or` in a3 (DIFF10), other groupings DIFF4 (`func_150E7810`).
+4. Spawner with a stack struct whose top lies 0x18 below the frame top: `s32 pad[6];` declared first (`func_150E7C50`); for several locals copy the ref offsets by declaration order (first declared = highest).
+OPEN: `func_150B3CA8` DIFF95 (all declared locals 4 bytes high, spill temps right), `func_150F0BEC`/`func_150B6314` (2nd flag `andi` t0 vs t3), `func_150BAEF4` DIFF3.
+## s111 recipes (K&R callee for array args, struct-member pointer spill, owned-rodata externs)
+See `docs/sessions/s111.md`.
+1. **`addiu a1,sp,X` spilled to a stack slot and reloaded for later calls (frame +8)** when a local array goes to a fully prototyped `s32` param as `(s32) pos`: declare the callee K&R (`void func_151000EC();`) and pass `pos` uncast; the ref rematerialises the address per call (`func_150FF840`).
+2. **A pointer stored to the stack late (`sw v1,X(sp)` in a `jal` delay slot) and reloaded after a memcpy**: it is a member of the stack struct whose tail is memcpy'd (`b.q = q; ... memcpy(r + 0x70, &b.p, 0x58)`), not a spill; declaring it fixes the slot layout (`func_150BE40C`, DIFF21: the reads through `q` still fold to `40(s0)`).
+3. **A rand result kept across the next rand inside one call's arguments**: inline both rand calls in the argument list; a named `f32 r` takes a slot 4 bytes too high (`func_150BAEF4`, DIFF5 -> DIFF3).
+4. **Extern floats in a file that owns `.rodata`** (`game_eu_EB430`): code can be bit-exact with `extern f32 D_x` but `rodata_inject` FAILs ("named by C code ... define it in C") and apply.py REJECTs; literals give frame +8 (s105 recipe 3), file-scope `const f32 D_x = ...;` did not land in `.rodata`. OPEN for `func_150BDE34`.
+OPEN: `func_150F0BEC` / `func_150B6314` (`func_151307F0` flag pair: 2nd `andi` t0 vs t3), `func_150FF840` DIFF25 (loads hoisted above `if (arg1)`), `func_150C1BC0` (needs `game_eu_EF370` `.rodata`).
 ## s112 recipes (range-0 rand terms, all-inline rands, K&R flag callee, lo + (hi - lo) * rand)
 See `docs/sessions/s112.md`.
 1. **A rand call whose result is spilled but never used, or `mul.s f, rand, zero` with `mtc1 zero`**: the source had a range-0 random term. Write `(func_150ADA20() % 1U) + 0xFF` (the call and its spill stay, the term folds) (`func_151C5B38`) or `func_150ADA68() * (f32)0 + 0.68f` (`* 0.0f` is folded away completely, `(f32)0` keeps the multiply) (`func_151B0600`).
@@ -977,3 +1050,13 @@ See `docs/sessions/s102.md`.
 4. `rodata_split.py --own` can start the range 0x10 later than the first `D_` label of the file when the bytes before are another file's jump-table word + padding (the warning "unreferenced nonzero bytes before the range" is then harmless): check the injected `.late_rodata` of the first asm function; a foreign word (e.g. a `0x1519xxxx` text address) means the tool's start was right.
 5. `p[i] = p[j] * D + p[i]` vs `p[i] += ...` / `D * p[j]`: each of the 4-7 forms gives a different load order; sweep them in one `tryall` (`func_151621B8`, `s * p[3] + p[0]` for `mul.s f0,f6` + `add.s f4,f8`).
 OPEN: `func_151570C4` DIFF62 (h2 loads from the spilled `row[j]` scheduled early in the ref; permuter DIFF16 by recomputing `row = D[i]`), `func_15156700` DIFF62 (switch head OK, struct copy temp at sp+0x30), `func_151BD9EC` DIFF98 (frame fixed with pad 2 + two scalars above; t-register numbering after the flag block, the s98 `func_151925AC` problem).
+## s109 recipes (rand spawners in the lo slice: named vs inline rand temps)
+See `docs/sessions/s109.md`.
+1. **s106 recipe 1 (all rands inline) did not fit any lo-slice spawner tried**; the lo ones name the early rands and inline only the last: `a = rand(); b = rand(); c = rand(); f(..., a & 0xFF, (u8)((b & 1) + (c & 1) * 2), ...)`. The ref spills the named ones (`sw v0,0x50(sp)` in the next `jal` delay slot). `tools/eu_port/inlinerand.py draft.c out` writes the all-inline, all-named and "first k named" variants of an m2c draft for one `tryall` (`func_150BA26C`, `func_150E856C`, `func_150D1714`).
+2. **Rand temp slots are allocated top-down in declaration order, and a named-but-unspilled temp still takes a slot**: ref `a` at 0x48, `b` 0x4C, `c` 0x50 (c never stored) under the struct at 0x5C = `Struct s; s32 c; s32 b; s32 a;` (`func_150BA26C`). An extra slot above them can be one more named rand (`r4 = rand(); ... r4 % 156U`, `func_150D1714`).
+3. **Dead `sw v0,0x48(sp)` of a rand result that is never read**: the results go into an array, `s32 r[3]; r[0] = rand(); r[1] = rand(); ... (r[0] & 3) + 6` (array stores are not dead-store eliminated; `r[2]` makes the frame right) (`func_150FF1A8`).
+4. **`andi tN,v0,0xFF` before a rand result goes to a `u8` call slot**: write the mask, `func_150ADA20() & 0xFF` (the bare call gives `sw v0` directly) (`func_150E9C9C`).
+5. **Three vector sums computed before the subtracts** (`add.s f0/f2/f14` then `sub.s`): name them `x`, `y`, `z` and declare them between the two vectors (`f32 a[3]; f32 x, y, z; f32 d[3];` gives the 12-byte gap), and write the IDO-reversed operand order: `x = arg3[0] * arg4 + arg1[0]`, `d[0] = m * (x - a[0])` (`func_150D1714`).
+6. **Flag temps of an `a | b | 0x9300` struct field cost 8 frame bytes when named**: reuse the rand temps declared for later (`if (arg4 == -1) b = 0; else b = 1; if (arg5) c = 0x400; else c = 0; s.u0 = c | b | ...;`) (`func_150E856C`, frame fixed, still DIFF56).
+7. Two `sh` stores in the wrong order (`func_150C29F0`, s107 DIFF2): a same-line `do { ...; s.u5C = ..; s.u5E = ..; } while (0);` around the preceding statements (local permuter, fakematch; s106 recipe 4 again).
+OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 with `pad9A[0xA]`; only t-regs of the arg1/arg2 loads), `func_150E856C` perm DIFF56 (arg4/arg5 kept in a0/a1 in the ref), `func_150B87B0` SIZE-6 (loop, hoisted FPR constants).

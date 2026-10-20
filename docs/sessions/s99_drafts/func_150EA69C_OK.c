@@ -1,0 +1,124 @@
+typedef struct { f32 x, y, z; } V3s99;
+s32 func_1513092C(void *, s32, s32);
+void func_150EA69C(f32 *arg0, f32 *arg1, s32 arg2, s32 arg3, f32 arg4, u8 *arg5) {
+    struct {
+        s32 u34;
+        s32 u38;
+        s16 u3C;
+        s16 u3E;
+        s32 u40;
+        s32 u44;
+        u8 u48;
+        u8 u49;
+        u8 u4A;
+        u8 u4B;
+        u8 u4C;
+        u8 u4D;
+        u8 u4E;
+        u8 u4F;
+        u8 u50;
+        s8 u51;
+        s16 u52;
+        s16 u54;
+        s16 u56;
+        f32 u58;
+        f32 u5C;
+        f32 u60;
+        V3s99 u64;
+        f32 u70;
+        f32 u74;
+        f32 u78;
+        f32 u7C;
+        f32 u80;
+        f32 u84;
+        f32 u88;
+        s32 u8C;
+        u8 pad90[4];
+        s8 u94;
+        s8 u95;
+        s8 u96;
+        s8 u97;
+        u8 pad98[0xC];
+    } sp;
+    s32 obj;
+    struct {
+        f32 scale;
+        s8 u20;
+        s8 u21;
+        s8 u22;
+        s8 u23;
+        f32 u24;
+        f32 u28;
+        f32 u2C;
+        f32 u30;
+        s8 u34;
+        s8 u35;
+        s8 u36;
+        s8 u37;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+    } b;
+
+    sp.u51 = 0x2F;
+    sp.u3C = 0xC01;
+    sp.u34 = 0x200005;
+    sp.u38 = 0;
+    sp.u4E = 0;
+    sp.u4D = 0;
+    sp.u4C = 0;
+    sp.u4B = 0;
+    sp.u4A = 0;
+    sp.u49 = 0;
+    sp.u48 = 0;
+    sp.u44 = 0;
+    sp.u40 = 0;
+    sp.u50 = 0xFF;
+    sp.u56 = 0;
+    sp.u58 = 0.0f;
+    sp.u8C = 0x1207;
+    sp.u94 = 5;
+    sp.u95 = 5;
+    sp.u96 = 4;
+    sp.u97 = -1;
+    sp.u70 = 0.0f;
+    sp.u74 = 0.0f;
+    sp.u78 = 0.0f;
+    sp.u52 = 0x14;
+    sp.u54 = 0xC;
+    b.u20 = 0;
+    b.u21 = 0;
+    b.u34 = 0;
+    b.u35 = 0;
+    b.u2C = 3.5f;
+    b.u30 = 0.2857143f;
+    sp.u7C = *(f32 *)(arg5 + 0x74) * (arg1[0] - arg0[0]);
+    sp.u80 = *(f32 *)(arg5 + 0x74) * (arg1[1] - arg0[1]);
+    sp.u84 = *(f32 *)(arg5 + 0x74) * (arg1[2] - arg0[2]);
+    sp.u64 = *(V3s99 *)arg0;
+    sp.u64.x += sp.u7C * arg4;
+    sp.u64.y += sp.u80 * arg4;
+    sp.u64.z += sp.u84 * arg4;
+    if (func_150ADA20() & 1) {
+        sp.u8C |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        sp.u8C |= 0x80;
+    }
+    sp.u3E = (func_150ADA20() % 51U) + 0x32;
+    sp.u4F = (func_150ADA20() % 101U) + 0x64;
+    b.scale = sp.u5C = sp.u60 = (func_150ADA68() * 39.0f) + 31.0f;
+    b.u22 = (func_150ADA20() % 5U) + 4;
+    b.u23 = (func_150ADA20() % 5U) + 4;
+    b.u24 = ((func_150ADA68() * 0.25f) + 0.15f) * b.scale;
+    b.u28 = ((func_150ADA68() * 0.25f) + 0.15f) * b.scale;
+    b.u36 = (func_150ADA20() % 5U) + 4;
+    b.u37 = (func_150ADA20() % 5U) + 4;
+    b.u38 = ((func_150ADA68() * 0.1f) + 0.08f) * b.scale;
+    b.u3C = ((func_150ADA68() * 0.1f) + 0.08f) * b.scale;
+    sp.u88 = ((func_150ADA68() * 70.0f) + 73.0f) * 0.001f;
+    obj = func_1513092C(&sp, 2, 0x28);
+    if (obj != 0) {
+        memcpy(obj + 0xA8, &b, 0x28);
+    }
+}

@@ -1,0 +1,64 @@
+typedef struct {
+    f32 u0, u4, u8, uC, u10, u14, u18, u1C, u20;
+    s16 u24, u26, u28, u2A, u2C, u2E, u30, u32, u34, u36;
+    u8 u38, u39, u3A;
+    s32 u3C, u40, u44, u48, u4C, u50;
+    u8 u54, u55, u56;
+    s32 u58, u5C, u60, u64, u68, u6C, u70, u74, u78;
+    u8 u7C, u7D;
+    s16 u80, u82;
+    u8 pad84[4];
+} S1FA8;
+s32 func_15151FA8(S1FA8 *, u8, s32);
+f32 func_150ADA68(void);
+
+s32 func_150C2558(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    S1FA8 s;
+
+    s.u0 = arg2;
+    s.u4 = arg3;
+    s.u8 = (arg4 + 15.0f) - (func_150ADA68() * 30.0f);
+    s.u2A = 9;
+    s.u30 = 3;
+    s.u36 = 0x15;
+    s.u38 = 0xB;
+    s.u28 = (s32)(s.u8 * 0.07012195f) - 0x40;
+    s.u32 = 3;
+    s.u34 = 0x28;
+    s.u3A = 0x28;
+    s.u3C = 1;
+    s.u40 = 4;
+    s.u54 = 0xFF;
+    s.u55 = 0xFF;
+    s.u58 = 3;
+    s.u24 = 1;
+    s.u26 = 0;
+    s.u2C = 0;
+    s.u2E = 0;
+    s.u39 = 1;
+    s.u44 = 0;
+    s.u48 = 0;
+    s.u4C = 0;
+    s.u50 = 0;
+    s.u56 = 0;
+    s.u5C = 0xFF;
+    s.u60 = 0;
+    s.u64 = 0x220005;
+    s.u68 = 0x1D0600;
+    s.u6C = 1;
+    s.u70 = 0x3B;
+    s.u74 = 0x80;
+    s.u78 = 0x20;
+    s.u7C = 0;
+    s.u7D = 7;
+    s.u80 = 0xC;
+    s.u82 = 0x15;
+    s.u1C = 200.0f;
+    s.u20 = 150.0f;
+    s.uC = 22.0f;
+    s.u14 = 0.0f;
+    s.u18 = 0.0f;
+    s.u10 = 44.0f;
+    func_15151FA8(&s, argE, 1);
+    return 1;
+}
