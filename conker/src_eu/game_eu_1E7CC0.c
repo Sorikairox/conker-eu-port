@@ -3,7 +3,92 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BA4B0.s")
+typedef struct {
+    s8 u0;
+    s8 u1;
+    s8 u2;
+    s16 u4;
+    s32 u8_;
+    s32 uC;
+    s32 u10;
+    s32 u14;
+    s32 u18;
+    s32 u1C;
+    s32 u20;
+    s8 u24;
+    s8 u25;
+    s32 u28;
+    s32 u2C;
+    s32 u30;
+    s32 u34;
+    s8 u38;
+    u8 u39;
+} Sa4b0;
+typedef struct {
+    u8 *p;
+    u8 b;
+} Ba4b0;
+extern s8 D_800E0FFE[];
+u8 *func_1513B5E0(Sa4b0 *, s32, s32, u8, s32);
+u8 *func_151BA4B0(u8 *arg0, u8 arg1, s32 arg2)
+{
+  u8 *ret;
+  Sa4b0 s;
+  Ba4b0 b;
+  s32 idx;
+  if (arg0 == 0)
+  {
+    return 0;
+  }
+  b.p = arg0;
+  b.b = arg0[0x3B];
+  s.u0 = 2;
+  s.u1 = -1;
+  s.u2 = 3;
+  s.u4 = 300;
+  s.u30 = 9;
+  s.u34 = 0x1AD;
+  s.u39 = 0xFF;
+  idx = (arg0 - ((u8 *) D_800CC2D0)) / 812;
+  goto dummy_label_283214; // fakematch: label barrier (permuter) puts sw a0 (b.p) before the arg0[0x3B] load
+  dummy_label_283214:
+  ;
+  if ((idx < 2) && (D_800E0FFE[idx] != 0))
+  {
+    if (D_80090130 == 2)
+    {
+      s.u39 = 0xFD;
+    }
+    else
+      if (D_80090130 == 4)
+    {
+      if (idx == 0)
+      {
+        s.u39 = 0xFB;
+      }
+      else
+      {
+        s.u39 = 0xF7;
+      }
+    }
+  }
+  s.u8_ = 1;
+  s.uC = 0x200205;
+  s.u10 = 0x60600;
+  s.u24 = 0;
+  s.u25 = 0;
+  s.u14 = 1;
+  s.u18 = 0x36;
+  s.u1C = 0x80;
+  s.u20 = 0x20;
+  s.u38 = 2;
+  ret = func_1513B5E0(&s, 1, 8, arg1, arg2);
+  if (ret != 0)
+  {
+    memcpy((ret + (*((s32 *) (ret + 0x50)))) + ((0, 0xF8)), &b, 8); // fakematch: comma expression (permuter) gives addu a0,v0,t9
+  }
+  return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BA634.s")
 
@@ -253,7 +338,71 @@ s32 func_151BD86C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BD8A8.s")
+typedef struct {
+    u8 u0;
+    u8 *u4;
+    s8 u8_;
+    f32 uC;
+    f32 u10;
+    f32 u14;
+    f32 u18;
+    f32 u1C;
+    f32 u20;
+    s8 u24;
+    s16 u26;
+    s16 u28;
+    s16 u2A;
+    s16 u2C;
+    s8 u2E;
+    s8 u2F;
+    s8 u30;
+    f32 u34;
+    s8 u38;
+    s8 u39;
+} Sd8a8;
+s32 func_15134DAC(Sd8a8 *, s32, ...);
+void func_151BD8A8(u8 *arg0, s32 arg1, s32 arg2)
+{
+  Sd8a8 s;
+  s16 zp; // fakematch: unused pad, puts z at sp+0x20
+  s16 z;
+  s32 v;
+  if (arg0 != 0)
+  {
+    s.u0 = arg0[0x3B];
+    s.u4 = arg0;
+    s.u8_ = 1;
+    s.u24 = 0;
+    s.u26 = 0x32;
+    s.u28 = 0x64;
+    s.u2A = 0x12C;
+    s.uC = 31.0f;
+    s.u2E = 4;
+    s.u2F = 4;
+    s.u30 = 3;
+    s.u38 = 5;
+    s.u39 = -1;
+    z = 0;
+    s.u10 = -34.0f;
+    s.u14 = -117.0f;
+    s.u18 = 35.0f;
+    s.u1C = -24.0f;
+    s.u20 = -182.0f;
+    s.u34 = 0.30061f;
+    v = func_15134DAC(&s, 2);
+    if (v != 0)
+    {
+      memcpy((void *) (v + 0x80), &z, 2);
+    }
+    s.uC = -s.uC;
+    s.u18 = -s.u18;
+    v = func_15134DAC(&s, 2);
+    if (v != 0)
+    {
+      memcpy((void *) (v + 0x80), &z, 2);
+    }
+  }
+}
 
 s32 func_151BD9DC(s16 *arg0) {
     arg0[0x40] = 0;
