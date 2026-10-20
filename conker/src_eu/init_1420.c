@@ -3,6 +3,25 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct {
+    union {
+        long long ll;
+        long double ld;
+    } v;
+    unsigned char *s;
+    int n0;
+    int nz0;
+    int n1;
+    int nz1;
+    int n2;
+    int nz2;
+    int prec;
+    int width;
+    size_t nchar;
+    unsigned int flags;
+    unsigned char qual;
+} _Pft;
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_1420/func_10001420.s")
 // NOT MATCHING: JUSTREG: uses v0 registers not a1 registers
@@ -79,24 +98,6 @@ s16 func_100019F0(s16 *arg0, struct05 *arg1) {
     return 0;
 }
 
-typedef struct {
-    union {
-        long long ll;
-        long double ld;
-    } v;
-    unsigned char *s;
-    int n0;
-    int nz0;
-    int n1;
-    int nz1;
-    int n2;
-    int nz2;
-    int prec;
-    int width;
-    size_t nchar;
-    unsigned int flags;
-    unsigned char qual;
-} _Pft;
 #define FLAGS_ZERO 16
 #define FLAGS_MINUS 4
 #define FLAGS_HASH 8

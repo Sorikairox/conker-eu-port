@@ -2580,7 +2580,108 @@ s32 func_151F578C(struct asistream *stream, u32 gr, u32 ch)
 
 	return 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_221290/func_151F63C4.s")
+extern struct mp3decfourbytes **D_800E0E20;
+f32 func_1504A6F0(f32 arg0, f32 arg1);
+void func00046650(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
+void func00047550(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
+s32 func_151F9184(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
+s32 func_151F933C(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
+s32 func_151F63C4(struct asistream *stream, u32 gr, u32 ch)
+{
+	s32 sp64 = stream->unk2020;
+	s32 sp60;
+	s32 sp54[3];
+	const s16 *sp50;
+	const u8 *sp4c;
+	s32 sp48;
+	s16 *sp44;
+	u8 *sp40;
+	s32 i;
+	u32 sp38;
+	s32 sp34;
+	s32 sp30;
+	s32 sp2c;
+	s32 sp28;
+
+	if (stream->version != VERSION_2) {
+		func_151F4F38(stream, gr, ch);
+	} else {
+		func_151F578C(stream, gr, ch);
+	}
+
+	sp60 = stream->big_value[gr][ch] * 2;
+	sp50 = var70057860[stream->version][stream->samplerateindex];
+	sp4c = var70057968[stream->version][stream->samplerateindex];
+
+	if (stream->window_switching[gr][ch] == 0 && stream->block_type[gr][ch] == 0) {
+		sp54[0] = sp50[stream->region0_count[gr][ch]] + 1;
+
+		if (sp54[0] > sp60) {
+			sp54[0] = sp54[1] = sp60;
+		} else {
+			sp54[1] = sp50[stream->region0_count[gr][ch] + stream->region1_count[gr][ch] + 1] + 1;
+
+			if (sp54[1] > sp60) {
+				sp54[1] = sp60;
+			}
+		}
+	} else {
+		if (stream->block_type[gr][ch] == 2 && stream->mixed_block_flag[gr][ch] == 0) {
+			sp54[0] = sp4c[2] * 3 + 3;
+		} else {
+			sp54[0] = sp50[7] + 1;
+		}
+
+		if (sp54[0] > sp60) {
+			sp54[0] = sp60;
+		}
+
+		sp54[1] = sp60;
+	}
+
+	sp54[2] = sp60;
+	sp48 = 0;
+	sp44 = stream->unk3f94[ch];
+	sp40 = stream->unk4418[ch];
+
+	for (i = 0; i < 3; i++) {
+		sp38 = stream->table_select[gr][ch][i];
+		sp34 = var700577d8[sp38];
+		sp30 = sp54[i];
+
+		if (D_800E0E20[sp38] == NULL) {
+			sp2c = sp30 - sp48;
+
+			bzero(sp44, sp2c * 2);
+
+			sp44 += sp2c;
+			sp40 += sp2c;
+			sp48 = sp30;
+		} else {
+			sp48 = func_151F9184(stream->unk1c, &stream->unk2020, sp38, sp48, sp34, sp30, &sp44, &sp40);
+		}
+	}
+
+	sp38 = stream->count1table_select[gr][ch] + 32;
+	sp28 = stream->part2_3_length[gr][ch] + sp64;
+	sp48 = func_151F933C(stream->unk1c, &stream->unk2020, sp38, sp48, sp28, &sp44, &sp40);
+	stream->unk2020 = sp28;
+
+	if (sp48 > 576) {
+		stream->unk465c[ch] = 576;
+	} else {
+		stream->unk465c[ch] = sp48;
+	}
+
+	if (sp48 < 576) {
+		stream->unk4660[ch] = 576 - sp48;
+		bzero(sp44, stream->unk4660[ch] * 2);
+	} else {
+		stream->unk4660[ch] = 0;
+	}
+
+	return 1;
+}
 s32 func_151F6970(struct_eu_221290 *arg0, s32 ch) {
     s16 *table;
     f32 *dst;
@@ -2776,7 +2877,133 @@ s32 func_151F6FD0(struct asistream *stream)
 
 	return 1;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_221290/func_151F78B4.s")
+f32 func_1504A6F0(f32 arg0, f32 arg1);
+void func_151F94E0(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4);
+void func_151FA3E0(struct asistream_4f64 *arg0, s32 arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3);
+s32 mp3util000462f8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s16 **arg6, u8 **arg7);
+s32 mp3util000464a8(u8 *arg0, s32 *arg1, s32 arg2, s32 arg3, s32 arg4, s16 **arg5, u8 **arg6);
+s32 func_151F7F60(struct_eu_221290 *arg0);
+s32 func_151F6970(struct_eu_221290 *arg0, s32 ch);
+s32 func_151F63C4(struct asistream *stream, u32 gr, u32 ch);
+s32 func_151F78B4(struct asistream *stream)
+{
+	s32 sp954;
+	s32 gr = 0;
+	s32 ch;
+	s32 sp948;
+	s32 sp944;
+	s32 sp940;
+	s32 i;
+	s32 j;
+	u16 *sp934;
+	struct asistream_4f64 sp34[32];
+	f32 sp30;
+	f32 sp2c;
+	f32 sp28;
+	s32 sp24;
+	s32 sp20;
+
+	sp934 = stream->unk2070[stream->unk3ba0];
+	sp954 = func_151F7F60((struct_eu_221290 *)stream);
+
+	if (sp954 == 0) {
+		return 0;
+	}
+
+	stream->unk2020 = (sp954 - stream->main_data_begin) * 8;
+
+	if (stream->unk2020 < 0) {
+		return 1;
+	}
+
+	for (ch = 0; ch < stream->numchannels; ch++) {
+		func_151F63C4(stream, gr, ch);
+		func_151F42E8(stream, gr, ch);
+	}
+
+	func_151F6970((struct_eu_221290 *)stream, gr);
+
+	if (stream->window_switching[gr][0] != 0 && stream->block_type[gr][0] == 2) {
+		sp948 = 32;
+	} else {
+		sp944 = (stream->unk465c[0] - 1) / 18 + 1;
+		sp948 = sp944;
+	}
+
+	for (ch = 0; ch < stream->numchannels; ch++) {
+		func_151F6B28(stream, gr, ch);
+
+		if (stream->window_switching[gr][ch] != 0
+				&& stream->block_type[gr][ch] == 2
+				&& stream->mixed_block_flag[gr][ch] != 0) {
+			sp940 = 0;
+		} else if (stream->window_switching[gr][ch] == 0) {
+			sp940 = 0;
+		} else {
+			sp940 = stream->block_type[gr][ch];
+		}
+
+		if (sp940 == 2) {
+			for (i = 0; i < 2; i++) {
+				func_151FA3E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
+			}
+		} else {
+			for (i = 0; i < 2; i++) {
+				func_151F94E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
+			}
+		}
+
+		if (stream->window_switching[gr][ch]
+					&& stream->block_type[gr][ch] == 2
+					&& stream->mixed_block_flag[gr][ch]) {
+			sp940 = 2;
+		}
+
+		if (sp940 == 2) {
+			for (i = 2; i < sp948; i++) {
+				func_151FA3E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
+			}
+		} else {
+			for (i = 2; i < sp948; i++) {
+				func_151F94E0(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
+			}
+		}
+
+		while (i < 32) {
+			bcopy(&stream->unk6a64[ch][i], &sp34[i], sizeof(struct asistream_4f64));
+			bzero(&stream->unk6a64[ch][i], sizeof(struct asistream_4f64));
+			i++;
+		}
+
+		sp30 = 65536;
+		sp28 = 1;
+		sp20 = sp30 * sp28 * 16;
+		*sp934 = sp20 >> 16;
+		sp934++;
+
+		*sp934 = sp20 & 0xffff;
+		sp934++;
+
+		sp20 = -sp20;
+		*sp934 = sp20 >> 16;
+		sp934++;
+
+		*sp934 = sp20 & 0xffff;
+		sp934++;
+
+		sp2c = 2048 / sp28;
+
+		for (j = 0; j < 18; j++) {
+			for (i = 0; i < 32; i++) {
+				sp24 = sp34[i].unk00[j] * sp2c;
+				*sp934 = sp24;
+				sp934++;
+			}
+		}
+	}
+
+	return 1;
+}
 s32 func_151F7F60(struct_eu_221290 *arg0) {
     s32 sp1C;
     s32 sp18;
