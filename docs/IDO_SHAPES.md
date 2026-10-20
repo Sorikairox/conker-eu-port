@@ -738,3 +738,10 @@ See `docs/sessions/s77.md`.
 4. **`move v1,v0; move v0,v1` before the epilogue where the ref has the value in `v0` already**: the s32 function has no `return` (falls off the end with the variable in v0, IDO_SHAPES 3.9) (`func_15195024`, fakematch comment).
 5. **Prologue `sw a1; andi t6,a1,0xFF; or a1,t6,zero`** (narrow in place, then `a1` passed on unchanged to several calls) = the callees' prototypes take `u8` (`func_15172164`; with `s32` prototypes IDO narrows into `a3` and copies per call).
 6. A spill slot 4 bytes low (0x20 vs 0x24) with two named locals: declare the spilled one first (`u8 *obj; s32 type;`, `func_151307F0`).
+## s79 recipes (argument-block families, frame of small spawn helpers)
+See `docs/sessions/s79.md`.
+1. **Sweep by callee, not only by file**: `grep -l "jal func_X"` over the slice asm for callees whose argument block is already a typed struct (`structEU_151D8E18` for `func_151D8E18`, `struct_eu_EF410` for `func_15134908`, `struct_eu_15154488` for `func_15154488`, `s32 buf[9]` for `func_1504715C(buf, obj)`); write each caller from the ref asm with that struct (7 of 9 s79 matches, most on the first try).
+2. **Frame 4 low with one stack struct and nothing else named**: the ref reloads `arg0` from its home; a named copy `u8 *p = arg0;` used for the field addresses fixed it (`func_151B8C18`).
+3. **Frame 8 high around a `u8` table lookup** (`kind = D_800A43C6[i * 16]; if (kind == 2) return; ... unk3C = (kind == 1)`): declare `s32 kind`, not `u8` (`func_151382E0`).
+4. Lowest store before a `jal func_1504715C` landing in the delay slot where the ref puts the argument copy there: a bare label between the stores and the call (fakematch, s66 recipe 1) matched `func_15194D80`; in `func_15194B3C` the same label also removes an `arg0` copy (SIZE-1), still open.
+5. `divu` by a computed divisor needs `% (u32) (x + 1)`; `%` on a plain s32 sum gives `div` + the `-1`/`0x8000` traps (`func_151D5404`).
