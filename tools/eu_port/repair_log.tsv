@@ -991,3 +991,9 @@ func_150464C0	CERR	1	DIFF5	n	n	s75 sibling of 469E8; ref stores r1 (sb) in delay
 func_150DE6AC	SIZE+1	12	DIFF9	n	y	s75 frame fixed (no named temps), regs only; 2 remote perm rounds
 func_1506F54C	SIZE-1	20	DIFF44	n	y	s75 p=D_800D154C first, float store order; perm 2 rounds
 func_15096E78	SIZE+1	14	DIFF96	n	n	s75 K&R func_1512DAD0 (3-arg call), case-local a0 temps give ref spill slots; frame 0x38 vs 0x30
+func_150464C0	DIFF5	3	OK	y	y	s76 callee protos u8(u8*,f32,s32*,HitInfo*); perm: if (r1) instead of r1 != 0 moves sb into 2nd jal slot
+func_150DE52C	DIFF11	3	OK	y	n	s76 f32 (*)[5] index; u50/u54/u5C named locals after struct, unused s32 pad58 (fakematch) -> f0 reload
+func_150DE6AC	DIFF9	1	OK	y	n	s76 twin of DE52C, same fix
+func_150D7930	DIFF10	2	OK	y	n	s76 all 24 statement orders: |= 2 first, then 0x2A, 0x28, 0x29 stores
+func_1500E738	SIZE-1	3	OK	y	n	s76 plain switch 0/1/2-3 with break; extern u8 D_800DCE50 stops CSE of 1/2 with the beq compares; case 1: before default
+func_150A0890	SIZE-2	4	OK	y	n	s76 case 5: nested ternary (x == 0x3E7 ? 2 : (x != 0 ? 0 : 1)) + break, function-level return 0
