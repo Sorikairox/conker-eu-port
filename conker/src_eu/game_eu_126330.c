@@ -1,6 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_150F8DFC
+void func_150F8EAC(u8 *arg0);
 
 typedef struct { s32 x, y, z; } V3i;
 s32 func_151530A8(s32 *, s32, s32);
@@ -144,7 +146,36 @@ void func_150F8DCC(s32 arg0, s32 arg1) {
     func_151494E0(tmp, 0x3F);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F8DFC.s")
+void func_150F8DFC(struct102 *arg0, u8 *arg1, u8 arg2)
+{
+  u8 *w = (u8 *) arg0;
+  u8 *v = w + 0x28;
+  u8 i;
+  if (arg2 == 0x42)
+  {
+    s32 blk_t; // fakematch: block-local declaration = basic-block boundary (s69)
+    if (arg1[4] == v[4])
+    {
+      unsigned int blk_t; // fakematch: unsigned index temp (permuter)
+      for (i = 0; i < 7; i++)
+      {
+        blk_t = i;
+        (*((u8 **) ((v + 0xC) + (blk_t * 4))))[0x6E] = 1;
+      }
+
+      (*((u8 **) (v + 0x28)))[0x6E] = 0;
+      v[8] = 7;
+    }
+  }
+  else
+    if ((arg2 ^ 0) == 0x3F) // fakematch: ^ 0 (permuter)
+  {
+    if ((*((s32 *) arg1)) == (*((s32 *) (w + 0x28))))
+    {
+      func_150F8EAC(arg0);
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F8EAC.s")
 
