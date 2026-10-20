@@ -62,7 +62,43 @@ s32 func_15141564(structEU_16DC80 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151415D4.s")
+typedef struct {
+    f32 v0;
+    f32 base;
+    f32 amp;
+    f32 t;
+    f32 t0;
+    f32 t1;
+    f32 t2;
+    f32 period;
+    f32 scale;
+} Env15D4;
+
+s32 func_151415D4(u8 *arg0) {
+    Env15D4 *e = (Env15D4 *)(arg0 + 0x170);
+    f32 period;
+    f32 f;
+
+    if (e->t < e->t0) {
+        *(f32 *)(arg0 + 0x158) = e->base;
+    } else if (e->t < e->t1) {
+        f = (e->t - e->t0) * e->scale;
+        *(f32 *)(arg0 + 0x158) = e->base + e->amp * f;
+    dummy: // fakematch: the label keeps the store out of the branch delay slot
+        ;
+    } else if (e->t < e->t2) {
+        *(f32 *)(arg0 + 0x158) = e->v0;
+    } else {
+        f = 1.0f - (e->t - e->t2) * e->scale;
+        *(f32 *)(arg0 + 0x158) = e->base + e->amp * f;
+    }
+    period = e->period;
+    e->t += D_800BE9A4;
+    while (period < e->t) {
+        e->t -= period;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151416E8.s")
 

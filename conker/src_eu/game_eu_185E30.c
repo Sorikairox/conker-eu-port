@@ -5,7 +5,34 @@
 void func_15158F90(u8 *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158620.s")
+s32 func_1515D9B0(void);
+s32 func_1515D9F0(s32);
+void *memcpy(void *, const void *, u32);
+
+s32 func_15158620(s32 src, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6) {
+    u8 *p;
+    s32 i;
+
+    p = func_15167A68(arg3 ? 0x55 : 0x37, arg6, arg4 + 0xF8, 1, arg5, 1);
+    if (p == NULL) {
+        return 0;
+    }
+    memcpy(p + 0x10, (void *)src, 0x44);
+    *(s32 *)(p + 0xD8) = arg1;
+    *(s32 *)(p + 0xF4) = arg2;
+    p[0xDC] = 0;
+    for (i = 0; i < 4; i++) {
+        ((s32 *)(p + 0xE0))[i] = 0;
+    }
+    *(s32 *)(p + 0xF0) = 0;
+    if (arg1 != 0) {
+        for (i = 0; i <= D_80082FA0; i++) {
+            ((s32 *)(p + 0xE0))[i] = func_1515D9F0(arg1);
+        }
+        *(s32 *)(p + 0xF0) = func_1515D9B0();
+    }
+    return (s32)p;
+}
 
 s32 func_15158620(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 
@@ -145,7 +172,41 @@ void func_151590AC(u8 *arg0, s32 *arg1, u8 arg2)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15159140.s")
+s32 func_151598E0(u8 *, u8 *, u8 *);
+
+u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2) {
+    u8 *p;
+
+    if (arg0 == NULL) {
+        return NULL;
+    }
+    p = func_15167A68(0x2E, 0, arg2 + 0x58, 1, 0xFF, 1);
+    if (p == NULL) {
+        return NULL;
+    }
+    *(u8 **)(p + 0x18) = arg0;
+    p[0x1C] = arg0[0x3B];
+    p[0x2C] = 2;
+    p[0x2D] = 2;
+    p[0x2E] = 2;
+    p[0x2F] = 3;
+    p[0x30] = 0;
+    *(f32 *)(p + 0x20) = *(f32 *)(arg0 + 0x14);
+    *(f32 *)(p + 0x24) = *(f32 *)(arg0 + 0x18);
+    *(f32 *)(p + 0x28) = *(f32 *)(arg0 + 0x1C);
+    p[0x31] = 0;
+    if (arg1 != 0) {
+        p[0x31] |= 1;
+    }
+    *(s32 *)(p + 0x10) = 1;
+    *(s32 *)(p + 0x14) = 0;
+    if (func_151598E0(arg0, p + 0x1D, p) == 0) {
+        func_1516979C((struct102 *)p);
+        return NULL;
+    }
+    p[0x50] = 0;
+    return p;
+}
 
 void func_15159244(void **arg0) {
     func_1514EDF0(arg0, arg0[0x18 / 4]);

@@ -180,7 +180,34 @@ s32 func_1514A70C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514A8F0.s")
+void func_1513F680(u8 *, u8, u8, u8, u8);
+s32 func_1514A8F0(u8 *arg0) {
+    u8 *p;
+    s32 done;
+
+    p = arg0 + 0x110;
+    done = 1;
+    if (!(arg0[0x74] & 2)) {
+        *(f32 *)(arg0 + 0x2C) += (*(f32 *)(p + 8) - *(f32 *)(arg0 + 0x2C)) * 0.7f;
+        if (*(f32 *)(p + 8) * 0.95f < *(f32 *)(arg0 + 0x2C)) {
+            arg0[0x74] |= 2;
+        } else {
+            done = 0;
+        }
+    }
+    if (!(arg0[0x74] & 8)) {
+        *(f32 *)(arg0 + 0x30) += (*(f32 *)(p + 0x18) - *(f32 *)(arg0 + 0x30)) * 0.7f;
+        if (*(f32 *)(p + 0x18) * 0.95f < *(f32 *)(arg0 + 0x30)) {
+            arg0[0x74] |= 8;
+        } else {
+            done = 0;
+        }
+    }
+    if (done) {
+        func_1513F680(arg0, arg0[0x70], 4, arg0[0x72], arg0[0x73]);
+    }
+    return 1;
+}
 
 typedef struct {
     u8 pad0[0x1C];

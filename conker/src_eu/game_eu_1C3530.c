@@ -441,7 +441,24 @@ void func_1519C7C8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C7DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519CA54.s")
+s32 func_1519CA54(u8 *arg0) {
+    u8 *p;
+    s32 i;
+    s32 v;
+
+    p = arg0 + 0x110;
+    for (i = D_800BE9E4; i > 0; i--) {
+        *(f32 *)(arg0 + 0x2C) -= *(f32 *)(arg0 + 0x2C) * *(f32 *)(p + 0x24);
+        *(f32 *)(arg0 + 0x30) -= *(f32 *)(arg0 + 0x30) * *(f32 *)(p + 0x24);
+    }
+    if (*(s16 *)(arg0 + 0x1C) < *(s16 *)(p + 0x28)) {
+        v = *(s16 *)(p + 0x2A) * *(s16 *)(arg0 + 0x1C);
+        if (v < arg0[0x5C]) {
+            arg0[0x5C] = v;
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519CADC.s")
 
