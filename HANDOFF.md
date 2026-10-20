@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 69, worktree eu-wt-a, game >= 0x130000, 3390/5915, 399,796 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 66, worktree eu-wt-a, game >= 0x130000, 3373/5915, 394,744 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 67, main checkout, game < 0x130000, 3374/5915, 395,164 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 65, main checkout, game < 0x130000, 3371/5915, 393,212 bytes). Older stamps below are history.
@@ -41,6 +42,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 69 (worktree a, game >= 0x130000, Opus): 3390 / 5915 (57.3%)**, 399,796 bytes, full `verify_all.sh` all OK. +10 in `cf5f22b`, `e13e9b2`: `func_151AEBF0`, `func_151D51E8`, `func_151590AC`, `func_151095E4`, `func_151A98CC`, `func_1519ED88`, `func_151B34B4`, `func_151BD7CC`, `func_151B7664`, `func_151BAA18`.
+  **Shape D solved**: the block ending with the unfilled `store; jr ra; nop` declares a local (basic-block boundary, s66). Tools `blkvar.py` (declaration variants per block for `tryall`), `putc.py` (draft -> source). Doc `docs/sessions/s69.md`, recipes IDO_SHAPES `## s69 recipes`, drafts `docs/sessions/s69_drafts/`.
+  Open: `func_151597A0` DIFF9 (kept `b` to the next instruction), `func_15168B44` DIFF15 (double `sw`), matrix `func_15177360`/`func_15188008` SIZE-1 (blkvar no help).
 - **Session 66 (worktree a, game >= 0x130000, Opus): 3373 / 5915 (57.0%)**, 394,744 bytes, `verify_all.sh` all OK. +6 in `165afea`, `3c16bdc`: `func_151D49B8`, `func_151E3864`, `func_15154DF4`, `func_151B65C0`, `func_151452C4`, `func_15145EA4`; `game_eu_201240` and `game_eu_1E3DD0` now own `.rodata`.
   Tools: `rodata_split.py` manual-range `--dry` is read-only (`2b22a58`); `rodata_inject.py` accepts an unreferenced nonzero tail. Doc `docs/sessions/s66.md`, recipes IDO_SHAPES `## s66 recipes` (**inner `{ decl; }` block = basic-block boundary**: empty jal slot / late `addiu`; typed constants are not CSE'd; spawner tail = named `s32 obj` declared first).
   Open: `func_151831CC` SIZE-1 (frame right, layout 4 low), `func_15177360` SIZE-1 (`col[3]` array; missing `or t0,v0` copy); drafts `docs/sessions/s66_drafts/`.
@@ -124,6 +128,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s69: `blkvar.py draft.c outprefix` (one variant per if/else/loop body with a block-local `s32 blk_t;` + `_ball`; feed to `m2c/tryall`: the shape-D fix), `putc.py func draft.c` (replace the function's GLOBAL_ASM with the draft). `docs/sessions/s69_drafts/dsweep.sh` (old/fresh draft + blkvar per function).
 - s67: `spawnfix.py in.c out.c` (s65 spawner_fix + `u8` for 0xB4 fields; run after `spsort.py`). `docs/sessions/s67_drafts/order_gen_example.py` (all statement-group orders under data dependencies, for one `tryall`).
 - s65: `spsort.py in.c out.c [--const]` (sort runs of `sp.uXX = ...;` into field order); `docs/sessions/s65_drafts/refdiff.py func draft.c [n]` (normalised ref-vs-mine diff).
 - s62: `fixchain.sh <list> <outdir>` (variants v0..v5 of every fixer, keeps the best, extern + redecl loop on CERR).
@@ -178,6 +183,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+00000. Slice >= 0x130000 after s69 (`docs/sessions/s69.md`): (a) shape D is a declaration in the arm (IDO_SHAPES `## s69 recipes`): hand-rewrite the remaining u8 handlers (`andi $t6,$a2,0xFF` prologue, 28 left, sizes 29-186: `func_151640C0`, `func_15104FF8`, `func_15187EC0`, `func_1513DF9C`, `func_15135480`, `func_15159514`, ...) and the other `shapes.py --list D` functions, then `blkvar.py` + `tryall`; raw m2c drafts need the rewrite first (`s69_drafts/dsweep_results.txt`). (b) Re-check every open item noted as "unfilled delay slot" / "blocked shape" in `repair_log.tsv` with blkvar (`grep -i 'unfilled\|delay slot' tools/eu_port/repair_log.tsv`). (c) `func_151597A0`, `func_15168B44` (s69 drafts). (d) Spawner callers `func_151B61A0`, `func_151BF490` (untouched this session).
 
 00000. Slice game >= 0x130000 after session 66 (`docs/sessions/s66.md`): apply the s66 recipes (inner block for empty delay slots / late address computations, typed constants, spawner tail) to the remaining spawner callers (`func_151B61A0` checksum loop, `func_151BF490`) and the s56 matrix family (`func_15188008` SIZE-1, `func_15177360` SIZE-1); then `func_151831CC` (frame bisect with `s58_drafts/cx.sh`), `func_151D7FE8` (DIFF70), `func_1516FE1C`/`func_1512D5E0` (SIZE-4).
 000000. Slice below 0x130000 after session 67 (`docs/sessions/s67.md`, drafts `docs/sessions/s67_drafts/`): (a) spawner pool: look for `func_151602C0(&sp.uXX, &sp.uYY, ...)` and make `pos`/`Header`/`Header2` separate locals (IDO_SHAPES s67 recipe 1), then statement-order permutations with one `tryall` and a permuter round; `func_150B0828` (DIFF54: delayed `swc1 pos[2]`, `u87,u84,u86,u85` store order); (b) `func_1500B1F4`: start from `s67_drafts/func_1500B1F4_DIFF95_one_x.c` (right size) and fix the prologue roles; (c) `func_1508DCAC` DIFF52 (`s67_drafts/func_1508DCAC_DIFF52.c`): the ref computes `timers + arg0*4` late.
