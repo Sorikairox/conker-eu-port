@@ -710,3 +710,10 @@ See `docs/sessions/s73.md`.
 3. A dead pointer update kept in the ref (`addiu v1,v1,-8` after the load) = `p -= 2; return p[1] ...;` (the update is the base of the load) (`func_1507ED48`).
 4. Shape C + a block-local pointer: `u8 **q = &arg0;` at function level and the derived `s32 *v = *q + K` declared in the if-body fixed a frame 0x28 -> 0x20 (`func_150D2C00`).
 5. Blkvar on fresh (unrepaired) drafts: 0 OK in 41 functions. Use it after the naming/typing fixes, not before.
+## s72 recipes (compare grids, merged else, per-arm rematerialisation)
+See `docs/sessions/s72.md`.
+1. **0x2D compare order: grid, then permuter.** One `tryall` over first/second operand order x key form (named `k`, plain memory, `s32 *key`) x default-arm form (`k`, `(k ^ 0)`), then the permuter on the best-register variant (`func_15135480`: grid DIFF3 -> permuter OK; clean result: key-first plain compares, `t = arg1->unk0;` in the second arm). Reuse the grid's arm bodies for siblings in the same file (`func_151347CC` matched with `*key`).
+2. **`b L` to the next instruction at the end of both inner arms** = the enclosing `if` has an `else` that IDO merged into the compare chain: `if (a || b || c) { if (x) r = 2; else r = 1; } else { r = 0; } return r;` (`func_151597A0`).
+3. **`addiu vN,s0,K` re-materialised in every arm** (often in the arm-test delay slot) = a function-level `u8 *v = arg0 + K;` plus a declaration at the top of the arms (`s32 blk_t;`); each unused declaration adds 4 frame bytes, so match the frame size by how many arms get one (`func_151CD97C`). An arm-local `u8 *v` instead folds K into the offsets.
+4. **Arm-local declarations change scheduling too**: `s32 a;`/`s32 b;` declared inside the arms (not at function level) moved `lui/addiu a0,%hi/%lo(D_800CC2D0)` above the `lw` (`func_15156598`).
+5. Linked-list push where the ref tests the head in a t-register: re-read the field you just stored (`n->prev = q->head; if (n->prev != NULL) n->prev->next = n;`), not a named head temp (`func_1518B140`).
