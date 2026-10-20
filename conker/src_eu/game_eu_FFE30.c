@@ -76,4 +76,14 @@ u8 *func_150D2804(u8 *arg0, u8 *arg1, s16 arg2) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FFE30/func_150D2884.s")
+void func_150D2884(u8 *arg0)
+{
+  u8 *temp_v1;
+  *((s32 *) (arg0 + 0x30)) -= D_800BE9E4;
+  if ((*((s32 *) (arg0 + 0x30))) < 0)
+  {
+    temp_v1 = arg0 + 0x28;
+    func_150D2620((s16)((*((s16 *) (((u8 *) temp_v1) + 0xC))) + (func_150ADA20() % ((u32) ((*((s16 *) (((u8 *) temp_v1) + 0xE))) + 1)))), *((f32 *) (((u8 *) temp_v1) + 0x10)), *((f32 *) (((u8 *) temp_v1) + 0x14)), *((u8 *) (((u8 *) temp_v1) + 0x18)), (u8) ((s32) (*((u8 *) (((u8 *) temp_v1) + 0x19)))), (u8) ((s32) (*((u8 *) (((u8 *) arg0) + 0xC)))), (s32) (*((u8 *) (((u8 *) arg0) + 1))));
+    *((s32 *) (((u8 *) temp_v1) + 8)) = (s32) ((*((s32 *) (((u8 *) temp_v1) + 0))) + (func_150ADA20() % ((u32) ((*((s32 *) (((u8 *) temp_v1) + 4))) + 1))));
+  }
+}
