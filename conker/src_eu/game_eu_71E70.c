@@ -288,14 +288,6 @@ s32 func_15045AF0(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045B70.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045DD4.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15046038.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_1504627C.s")
-
 typedef struct {
     s16 v[9];
 } HitPos;
@@ -308,6 +300,15 @@ typedef struct {
     u8 pad1E[2];
     s32 unk20;
 } HitInfo;
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045B70.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15045DD4.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15046038.s")
+
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_1504627C.s")
+
 u8 func_150464C0(u8 *, u16, f32, HitInfo *);
 
 u8 func_15045B70(u8 *, f32, s32 *, HitInfo *);
@@ -631,7 +632,72 @@ void func_150475B0(HitInfo *out, u8 *in) {
     out->unk20 = *(s32 *)(in + 0x5C);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15047680.s")
+#pragma function sqrtf
+extern f32 D_80099110;
+extern f32 D_80099114;
+extern f32 D_80099118;
+void func_15047680(f32 mf[4][4], f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp, f32 zUp) {
+    f32 len, inv, xLook, yLook, zLook, xRight, yRight, zRight;
+
+    guMtxIdentF(mf);
+
+    xLook = xAt - xEye;
+    yLook = yAt - yEye;
+    zLook = zAt - zEye;
+
+    len = sqrtf(xLook * xLook + yLook * yLook + zLook * zLook);
+    if (len == 0.0f) {
+        len = D_80099110;
+    }
+    inv = -1.0f / len;
+    xLook *= inv;
+    yLook *= inv;
+    zLook *= inv;
+
+    xRight = yUp * zLook - zUp * yLook;
+    yRight = zUp * xLook - xUp * zLook;
+    zRight = xUp * yLook - yUp * xLook;
+    len = sqrtf(xRight * xRight + yRight * yRight + zRight * zRight);
+    if (len == 0.0f) {
+        len = D_80099114;
+    }
+    inv = 1.0f / len;
+    xRight *= inv;
+    yRight *= inv;
+    zRight *= inv;
+
+    xUp = yLook * zRight - zLook * yRight;
+    yUp = zLook * xRight - xLook * zRight;
+    zUp = xLook * yRight - yLook * xRight;
+    len = sqrtf(xUp * xUp + yUp * yUp + zUp * zUp);
+    if (len == 0.0f) {
+        len = D_80099118;
+    }
+    inv = 1.0f / len;
+    xUp *= inv;
+    yUp *= inv;
+    zUp *= inv;
+
+    mf[0][0] = xRight;
+    mf[1][0] = yRight;
+    mf[2][0] = zRight;
+    mf[3][0] = -(xEye * xRight + yEye * yRight + zEye * zRight);
+
+    mf[0][1] = xUp;
+    mf[1][1] = yUp;
+    mf[2][1] = zUp;
+    mf[3][1] = -(xEye * xUp + yEye * yUp + zEye * zUp);
+
+    mf[0][2] = xLook;
+    mf[1][2] = yLook;
+    mf[2][2] = zLook;
+    mf[3][2] = -(xEye * xLook + yEye * yLook + zEye * zLook);
+
+    mf[0][3] = 0;
+    mf[1][3] = 0;
+    mf[2][3] = 0;
+    mf[3][3] = 1;
+}
 
 void func_15047680(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 
@@ -644,9 +710,9 @@ void func_15047978(Mtx *arg0, f32 arg1, f32 arg2, volatile f32 arg3, f32 arg4, f
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150479F0.s")
 
-s32 func_150479F0(f32 (*)[4], s32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+void func_150479F0(f32 (*)[4], LookAt *, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 void func_15047E70(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA) {
     f32 sp38[4][4];
-    func_150479F0(sp38, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
+    func_150479F0(sp38, (LookAt *) arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
     guMtxF2L(sp38, arg0);
 }
