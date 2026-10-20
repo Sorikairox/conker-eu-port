@@ -173,7 +173,13 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
         e = (e + 3) & ~3
     tail = data[e - dv:b]
     if any(tail):
-        raise Fail('%s: nonzero bytes after the last item (0x%X-0x%X)' % (stem, e - dv, b))
+        # unreferenced nonzero words after the last item (s66: game_eu_201240): an owner-less item
+        # that is resolved onto a GLOBAL_ASM neighbour like the gaps between items below
+        if e & 3 or os.environ.get('RODATA_TAIL_STRICT'):
+            raise Fail('%s: nonzero bytes after the last item (0x%X-0x%X)' % (stem, e - dv, b))
+        print('rodata_inject: %s: unreferenced tail 0x%X-0x%X kept as an owner-less item' % (stem, e - dv, b))
+        items[e] = {'owner': None, 'kinds': set(), 'other': False}
+        e = b + dv
     # a literal item ends after its own size; words between it and the next item are unreferenced
     # (they become their own owner-less items, resolved onto a GLOBAL_ASM neighbour below)
     for i, t in enumerate(list(addrs)):
