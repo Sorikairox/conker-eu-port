@@ -3,6 +3,7 @@
 
 usage:
   rodata_split.py --own <stem> [--dry] [--resplit]
+  rodata_split.py <stem> <rom a> <rom b> [--section .data] [--dry] [--resplit]
       Give src_eu/<stem>.c its .rodata: the range is computed from the code's references
       (datarefs.py): from the 16-byte aligned start of the first item the file references to
       the aligned end of its last item. Prints the range and the plan (rodata_inject.py --dry).
@@ -177,7 +178,11 @@ def main():
         return
     stem, lo, hi = a[0], int(a[1], 16), int(a[2], 16)
     sec = a[a.index('--section') + 1] if '--section' in a else '.rodata'
-    split(stem, lo, hi, sec)
+    split(stem, lo, hi, sec, dry='--dry' in a)
+    if '--dry' in a:
+        print('(dry run: conker.eu.yaml not changed)')
+    elif '--resplit' in a:
+        resplit()
 
 
 if __name__ == '__main__':
