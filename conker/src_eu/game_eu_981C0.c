@@ -36,7 +36,35 @@ void func_1506ABFC(s32 arg0, s32 arg1) {
     func_151BC6B4(arg0, 0xFF, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506AC24.s")
+extern f32 D_80099DE8;
+
+void func_1506AC24(struct127 *arg0, s32 arg1) {
+    struct225 *temp_v0;
+    Header header;
+    struct {
+        f32 unk0;
+        f32 unk4;
+        f32 unk8;
+        f32 unkC;
+    } data;
+    Header2 header2;
+
+    header2.unk0 = arg0->x_position;
+    header2.unk4 = arg0->y_position + 50.0f;
+    header2.unk8 = arg0->z_position;
+    data.unk0 = 0.0f;
+    data.unk8 = 0.0f;
+    header.unk0 = 2;
+    header.unk1 = 0xF;
+    header.unk2 = 0x12C;
+    header.unk4 = 5;
+    data.unk4 = 80.0f;
+    data.unkC = D_80099DE8;
+    temp_v0 = func_151602C0(&header, &header2, 0, 0xFF, 0xFF, 0x5A, 0xFF, 0, sizeof(data), 0xFF, 1);
+    if (temp_v0 != NULL) {
+        memcpy(&temp_v0->unk18, &data, sizeof(data));
+    }
+}
 
 s32 func_151D3A30(f32 *, f32 *, s32, s32, s32, s32);
 

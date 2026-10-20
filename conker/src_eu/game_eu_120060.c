@@ -88,7 +88,21 @@ s32 func_150F2A98(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2B20.s")
+s32 func_150F2B20(u8 *arg0) {
+    u8 **p = (u8 **)(arg0 + 0x18);
+    f32 z, y, x;
+    f32 m[4][4];
+
+    func_150A8050(m, *(f32 *)(*p + 0x20) * 3.0f, 0.0f, *(f32 *)(*p + 0x28) * 3.0f);
+    m[3][0] = *(f32 *)(*p + 0x38);
+    m[3][1] = *(f32 *)(*p + 0x3C);
+    m[3][2] = *(f32 *)(*p + 0x40);
+    func_150A7E40(m, 0.0f, -495.0f, 0.0f, &x, &y, &z);
+    *(s16 *)(*(u8 **)(arg0 + 0x14) + 0xE) = x;
+    *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x10) = y;
+    *(s16 *)(*(u8 **)(arg0 + 0x14) + 0x12) = z;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2C20.s")
 

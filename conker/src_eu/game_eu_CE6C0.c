@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+typedef struct { u8 pad0[0x14]; u8 unk14; u8 unk15; u8 unk16; u8 unk17; u8 pad18[0x1C]; } Unk34B8;
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A09D0.s")
@@ -24,7 +25,46 @@ u8 *func_150A1520(u8 *arg0) {
     return arg0 + 0x400;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A152C.s")
+s32 func_150A2280(struct127 *, u8 *, s32);
+extern f32 D_8009F97C;
+
+void func_150A152C(struct108 *arg0, u8 **arg1, s32 arg2) {
+    struct127 sp;
+
+    sp.x_position = arg0->unk2F8;
+    sp.y_position = arg0->unk2FC;
+    sp.z_position = arg0->unk300;
+    sp.unk180 = sp.y_position;
+    sp.old_x_position = arg0->unk304;
+    sp.old_y_position = arg0->unk308;
+    sp.old_z_position = arg0->unk30C;
+    arg0->unk364 = D_8009F97C;
+    arg0->unk84 &= ~0x40000;
+    for (; arg2 != 0; arg2--, arg1++) {
+        if (*arg1 == NULL) {
+            continue;
+        }
+        if (func_150A2280(&sp, *arg1, 0) != 0) {
+            continue;
+        }
+        if (((*arg1)[0x15] >> 2) != 1) {
+            continue;
+        }
+        switch ((*arg1)[0x17]) {
+        case 2:
+            if (1) { // fakematch: if (1) block from the permuter (constant allocation order)
+                arg0->unk364 = *(s16 *)(*arg1 + 2) + *(s16 *)(*arg1 + 8);
+            }
+            break;
+        case 0:
+            arg0->unk84 |= 0x40000;
+            break;
+        case 6:
+            arg0->unk84 &= ~0x40000;
+            break;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
 
@@ -125,7 +165,26 @@ void func_150A2E20(s32 arg0, s32 arg1, int arg2)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3184.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3264.s")
+s32 func_150A2280(struct127 *, u8 *, s32);
+
+s32 func_150A3264(s32 arg0, u32 arg1) {
+    struct108 *e;
+    struct127 sp;
+
+    e = &D_800DBFF0[arg0];
+    arg1 &= 0xFFF;
+    if ((u32)D_800D3094 < arg1) {
+        return 1;
+    }
+    sp.x_position = e->unk2F8;
+    sp.y_position = e->unk2FC;
+    sp.z_position = e->unk300;
+    sp.unk180 = sp.y_position;
+    sp.old_x_position = e->unk304;
+    sp.old_y_position = e->unk308;
+    sp.old_z_position = e->unk30C;
+    return func_150A2280(&sp, D_800D34B8 + arg1 * 0x34, 0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A332C.s")
 
@@ -133,9 +192,40 @@ void func_150A2E20(s32 arg0, s32 arg1, int arg2)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3484.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3538.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3674.s")
+s32 func_150A3538(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
+    u32 i;
+    struct127 sp;
+
+    sp.x_position = sp.old_x_position = (f32)arg1;
+    sp.y_position = sp.old_y_position = (f32)arg2;
+    sp.z_position = sp.old_z_position = (f32)arg3;
+    sp.unk180 = sp.y_position;
+    for (i = 0; i < (u32)D_800D3094; i++) {
+        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == 3 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg0 && func_150A2280(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+s32 func_150A2280(struct127 *, u8 *, s32);
+
+u8 *func_150A3674(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    u32 i;
+    struct127 sp;
+
+    sp.x_position = sp.old_x_position = (f32)arg2;
+    sp.y_position = sp.old_y_position = (f32)arg3;
+    sp.z_position = sp.old_z_position = (f32)arg4;
+    sp.unk180 = sp.y_position;
+    for (i = 0; i < (u32)D_800D3094; i++) {
+        if (((Unk34B8 *)D_800D34B8)[i].unk14 == 0 && (((Unk34B8 *)D_800D34B8)[i].unk15 >> 2) == arg0 && ((Unk34B8 *)D_800D34B8)[i].unk17 == arg1 && func_150A2280(&sp, D_800D34B8 + i * 0x34, 0) == 0) {
+            return D_800D34B8 + i * 0x34;
+        }
+    }
+    return NULL;
+}
 
 s32 func_150A3794(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct127 sp24;

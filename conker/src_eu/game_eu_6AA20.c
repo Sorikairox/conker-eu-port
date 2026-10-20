@@ -75,7 +75,26 @@ s32 func_1503D950(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DA64.s")
+s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+
+s32 func_1503DA64(s32 arg0, s32 arg1) {
+    s32 sp2C;
+    s32 *v;
+
+    if (D_800D1C90[arg0] != NULL) {
+        return 0;
+    }
+    v = (s32 *)func_1502B6BC(&sp2C, 2, NULL, 2, 0x11, arg0);
+    if (v == NULL) {
+        D_800D1C90[arg0] = NULL;
+        return 2;
+    }
+    do { // fakematch: do-while(0) keeps the result in v0 (permuter)
+        D_800D1C90[arg0] = (struct124 *)v;
+        D_800D1C90[arg0] = (struct124 *)*v;
+    } while (0);
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DAF4.s")
 
