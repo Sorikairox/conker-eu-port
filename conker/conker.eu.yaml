@@ -808,6 +808,7 @@ segments:
       - [0x23F760, rodatabin]
       - [0x242230, .rodata, game_eu_AF2A0]
       - [0x242420, rodatabin]
+      - [0x243010, .rodata, game_eu_B37F0]
       - [0x243070, .rodata, game_eu_B7840]
       - [0x2432D0, rodatabin]
       - [0x2434F0, .rodata, game_eu_C24E0]
