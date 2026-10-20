@@ -4,7 +4,7 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 cd ~/conker/conker
 docker exec -w /conker/conker conkerdev make VERSION=eu build/src_eu/$1.c.o 2>&1 | grep -i 'error' | head -5
 docker exec -w /conker/conker conkerdev mips-linux-gnu-objdump -d --no-show-raw-insn -M no-aliases build/src_eu/$1.c.o > /tmp/od_$$.txt 2>/dev/null
-docker exec -w /conker/conker conkerdev mips-linux-gnu-objdump -d build/src_eu/$1.c.o | awk -v f="<$2>:" '$2==f{p=1;next} p&&/^$/{exit} p&&/^ +[0-9a-f]+:/{print $2" "$3" "$4" "$5}' > /tmp/odb_$$.txt
+docker exec -w /conker/conker conkerdev mips-linux-gnu-objdump -d -z build/src_eu/$1.c.o | awk -v f="<$2>:" '$2==f{p=1;next} p&&/^$/{exit} p&&/^ +[0-9a-f]+:/{print $2" "$3" "$4" "$5}' > /tmp/odb_$$.txt
 grep -o '\*/ .*' asm/nonmatchings/$1/$2.s | sed 's/^\*\/ *//' > /tmp/oda_$$.txt
 grep -o '/\* [0-9A-F]* [0-9A-F]* [0-9A-F]* \*/' asm/nonmatchings/$1/$2.s | awk '{print tolower($4)}' > /tmp/odw_$$.txt
 python3 - /tmp/odb_$$.txt /tmp/odw_$$.txt /tmp/oda_$$.txt ${3:-15} <<'PY'
