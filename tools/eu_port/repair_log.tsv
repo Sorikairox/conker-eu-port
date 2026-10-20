@@ -923,3 +923,15 @@ func_1515835C	DIFF54	6	OK	y	y	matrix array macro like func_151D7410; permuter re
 func_15157E88	DIFF72	5	OK	y	y	matrix array macro; u8 *p = arg0+0x120 kept live in a0; permuter added 'do {} while (0)' (fakematch) between two stores
 func_150CA2C4	SIZE+1	130	DIFF5	n	y	s58 spawner; head schedule 1.0f vs arg1 reload; draft docs/sessions/s58_drafts
 func_150B3394	SIZE-99	15	DIFF29	n	y	s58 spawner; t-reg numbering only; draft docs/sessions/s58_drafts
+func_150FE638	DIFF2	1	OK	y	n	s64: no named pointer/result temps (v_none_0)
+func_150FCFB0	DIFF6	1	OK	y	n	s64: loop var declared before the stack struct
+func_150B45C8	DIFF7	3	OK	y	n	s64: V3 struct copy + (idx*0x24)+(0,base)
+func_150FEB84	SIZE-1	3	OK	n	n	s64: bit-exact (x * 2 int literal keeps mul.s; & 0xFFFFu sp5F); blocked: game_eu_12C0B0 must own .rodata incl. const vector tables D_800A2398/D_800A23B0 + 24 unreferenced leading bytes
+func_150D2884	DIFF2	1	OK	y	n	s64: inline the single-use s16 call arg
+func_150891D4	DIFF11	2	OK	y	n	s64: u8* walker (m2c struct-stride bug)
+func_15077F64	SIZE+1	10	DIFF2	n	y	s64: proto (s32 arg1) + dx/dz named + P4 path points + u8 pad -> DIFF2 negu v0 vs a1; permuter 600s none
+func_150CA2C4	DIFF5	0	DIFF5	n	n	s64: skipped, s58 exhausted statement orders (scheduling only)
+func_150DE8AC	SIZE-1	2	DIFF26	n	n	s64: indexed forms SIZE-3; ref sets a1=1 before beqz a0 + s0/s1 swap
+func_1507F834	DIFF6	3	DIFF6	n	n	s64: 18 eval-order/type forms all DIFF6
+func_150619A8	SIZE-1	3	SIZE-1	n	n	s64: ref rematerialises D_800CC2D0 and expands *0x32C to shifts; mine hoists to fp/s7 even with goto loops
+func_1500B1F4	SIZE-1	4	SIZE-1	n	n	s64: stride fix (f32* += 2), u8 arg1; frame 0x58 vs 0x50 (one 8-byte temp, bisect finds no single statement)

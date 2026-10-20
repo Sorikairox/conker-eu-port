@@ -637,3 +637,11 @@ See `docs/sessions/s62.md`.
 3. **No spare local for the spawner result**: reuse a dead parameter (`arg5 = func_15132FBC(...); if (arg5) {...} return arg5;`) instead of `temp_v0`/`var_v1` (each named int local is a 4-byte slot below the struct).
 4. **Call-site struct pointer**: `func_15132FBC((u8 *)&sp.u2C[5], ...)` (m2c's `&sp2C[5]`); the object copy `memcpy(r + 0x170, &sp, N)` copies the 8/0x14 bytes in front of that pointer; struct = one block covering the prefix floats and the spawner struct.
 5. `register f32` does not remove the slot/temp cost.
+
+## s64 recipes (named temps take slots, struct copies, int literal keeps mul.s)
+See `docs/sessions/s64.md`.
+1. **Delete m2c/permuter names before moving declarations**: named pointer temps (`temp_v0 = arg0->unk31C`), named call results and single-use `s16 temp_a0` call arguments take named slots and push the unnamed spills down by 4-8 bytes. Inline them (IDO CSEs the repeated `arg0->field` loads) (`func_150FE638`, `func_150D2884`). A loop counter that lives in a register still takes a slot: declare it before a stack struct to put the struct 4 lower (`func_150FCFB0`).
+2. **`lw $at, 0(x); sw $at, K(y); lw tN, 4(x); sw tN; lw $at, 8(x); sw $at`** is a 12-byte struct assignment, not three `s32` copies (`func_150B45C8`; s59 recipe 4).
+3. **`x * 2.0f` is folded to `add.s x, x`**; the ref's `lui 0x4000; mtc1; mul.s` comes from the integer literal `x * 2` (`func_150FEB84`).
+4. **m2c pointer strides**: check every `p += 1` on a struct pointer against the ref's `addiu` (`func_150891D4` walked bytes; `func_1500B1F4` family: `"?"` string = `f32 D_80096014[]`, `+= 2`).
+5. **Call argument untruncated in the ref** (`or a1, a0` where the header says `u8`): the caller saw an `s32` prototype (US note `void func_15056A00(s32, s32, u8)`); the callee narrows itself (`func_15077F64`).
