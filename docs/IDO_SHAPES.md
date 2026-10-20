@@ -745,3 +745,10 @@ See `docs/sessions/s79.md`.
 3. **Frame 8 high around a `u8` table lookup** (`kind = D_800A43C6[i * 16]; if (kind == 2) return; ... unk3C = (kind == 1)`): declare `s32 kind`, not `u8` (`func_151382E0`).
 4. Lowest store before a `jal func_1504715C` landing in the delay slot where the ref puts the argument copy there: a bare label between the stores and the call (fakematch, s66 recipe 1) matched `func_15194D80`; in `func_15194B3C` the same label also removes an `arg0` copy (SIZE-1), still open.
 5. `divu` by a computed divisor needs `% (u32) (x + 1)`; `%` on a plain s32 sum gives `div` + the `-1`/`0x8000` traps (`func_151D5404`).
+
+## s80 recipes (callee families via calleefam.py, scheduling barriers)
+See `docs/sessions/s80.md`.
+1. **`tools/eu_port/calleefam.py --typed --max 100`** lists argument-block families with a hint from a matched caller; a family of near-identical clones (here 10 callers of `func_151AC3F0`) is fastest as a small generator script once the first one matches.
+2. **First load scheduled after a global float compare operand** (`lwc1 x; lui; lwc1 D` in the ref, `lui; lwc1 D; lwc1 x` in mine) after `obj = *(u8 **)(arg0 + 0x18)`: the permuter's `if ((obj && obj) && obj) {}` right after the declaration fixes it (fakematch); a real `if (obj->unk31C ...) return;` there does the same naturally.
+3. **Slot 4 bytes too high under a struct local**: declare a 4-byte local (`f32 a;` that the function uses anyway) above the struct (`func_15123070`); `u8 *obj` declared before `struct17 pos` (`func_151A9F80`). A named `s32 ret` for a call result takes the slot between the compiler temp and the struct.
+4. **`lui v0; addiu v0; sw x,0(v0)` store to a global** = through a named pointer: `u8 **p = &D; *p = x;` and pass `*p` later (`func_151674DC`).
