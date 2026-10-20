@@ -71,7 +71,49 @@ u8 *func_1514A288(u8 *arg0, s16 arg1) {
     return sp40;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514A434.s")
+typedef struct { f32 x, y, z; } V3A434;
+typedef struct {
+    V3A434 pos;
+    u8 unkC[0xA];
+    s16 h16;
+    s16 h18;
+    s16 h1A;
+    s16 h1C;
+    s16 h1E;
+    s16 h20;
+    s16 h22;
+    s16 h24;
+    s16 h26;
+    u8 c0[3];
+    u8 c1[3];
+    u8 b2E;
+    u8 b2F;
+    u8 b30;
+    u8 b31;
+} SpawnA434;
+void func_151429E0(u8, u8 *, u8 *, u8 *);
+void func_1518CFF0(SpawnA434 *, s32);
+s32 func_1514A434(u8 *arg0) {
+    SpawnA434 s;
+
+    s.pos = *(V3A434 *)(arg0 + 0x34);
+    s.h16 = 0;
+    s.h18 = 0;
+    s.h1A = s.h1C = func_150ADA20() % 6U + 8;
+    s.h1E = 0;
+    s.h20 = 0;
+    s.h22 = func_150ADA20() % 201U + 100;
+    s.h24 = func_150ADA20() % 5U + 3;
+    s.h26 = 600;
+    func_151429E0(3, &s.c0[0], &s.c0[1], &s.c0[2]);
+    func_151429E0(4, &s.c1[0], &s.c1[1], &s.c1[2]);
+    s.b2E = 0xFF;
+    s.b2F = func_150ADA20() % 65U + 0x5C;
+    s.b30 = func_150ADA20() % 3U + 1;
+    s.b31 = 0;
+    func_1518CFF0(&s, 1);
+    return 0;
+}
 
 s32 func_151D6310(s32, s16, s32, u8 **, u8 *);
 extern f32 D_800DD608[];

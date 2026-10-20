@@ -236,7 +236,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
   Open from s46: `func_15199200`/`func_1519C52C` (DIFF1 addu), `func_151A23E4` (DIFF2, permuter best `tools/decomp-permuter/drafts/s46_func_151A23E4e.c`), `func_1517BD68` (DIFF4), `func_151A7E2C`, `func_151B6804`, `func_151BAA18`, `func_151D51E8`, `func_15183E20`, `func_151A13F0`/`func_151A14D8` (28-arg call to the stub `func_151A177C`), `func_151D75B0`, `func_151D5714`. Try the reversed-order rule on every remaining DIFF1/DIFF<=6 operand-order leftover.
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3708 / 5915 functions in C (62.7%)**, code bytes 534,248 / 2,253,856 (23.7%) (merged state, from `verify_all.sh`). init 390/540 (47.2% of bytes), game 3284/5332 (21.5% of bytes), debugger 34/43 (65.9% of bytes).
+- **3721 / 5915 functions in C (62.9%)**, code bytes 537,744 / 2,253,856 (23.9%) (merged state, from `verify_all.sh`). init 390/540 (47.2% of bytes), game 3297/5332 (21.7% of bytes), debugger 34/43 (65.9% of bytes).
   Sessions 35 (main), 36-38 (worktree eu-wt-a, merged) and 39 (main, game files below 0x130000; a parallel worktree session works above it) done. Session 36 recipes: IDO_SHAPES section 12, session 39: section 13. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**

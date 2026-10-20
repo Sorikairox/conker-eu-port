@@ -202,7 +202,29 @@ s32 func_1518EC44(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F4C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F5C8.s")
+s32 func_1518F5C8(u8 *arg0) {
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 f;
+    u8 *q;
+
+    f = *(f32 *)(arg0 + 0x150);
+    q = arg0; // fakematch: second name for arg0 puts the D_800BE9A4 address in v1
+    *(f32 *)(q + 0x140) *= f;
+    *(f32 *)(q + 0x144) += *(f32 *)(q + 0x14C) * D_800BE9A4;
+    *(f32 *)(q + 0x148) *= f;
+    x = *(f32 *)(arg0 + 0x140) * D_800BE9A4;
+    y = *(f32 *)(arg0 + 0x144) * D_800BE9A4;
+    z = *(f32 *)(arg0 + 0x148) * D_800BE9A4;
+    *(f32 *)(q + 0x34) += x;
+    *(f32 *)(q + 0x38) += y;
+    *(f32 *)(q + 0x3C) += z;
+    *(f32 *)(q + 0x40) += x;
+    *(f32 *)(q + 0x44) += y;
+    *(f32 *)(q + 0x48) += z;
+    return 1;
+}
 
 s32 func_1518F678(struct_eu_1BAAA0_e *arg0) {
     arg0->unk30 = arg0->unk30 - (arg0->unk30 * arg0->unk154);
