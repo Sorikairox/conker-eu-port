@@ -763,6 +763,13 @@ See `docs/sessions/s79.md`.
 3. **Frame 8 high around a `u8` table lookup** (`kind = D_800A43C6[i * 16]; if (kind == 2) return; ... unk3C = (kind == 1)`): declare `s32 kind`, not `u8` (`func_151382E0`).
 4. Lowest store before a `jal func_1504715C` landing in the delay slot where the ref puts the argument copy there: a bare label between the stores and the call (fakematch, s66 recipe 1) matched `func_15194D80`; in `func_15194B3C` the same label also removes an `arg0` copy (SIZE-1), still open.
 5. `divu` by a computed divisor needs `% (u32) (x + 1)`; `%` on a plain s32 sum gives `div` + the `-1`/`0x8000` traps (`func_151D5404`).
+## s85 recipes (real arity of a shared definition, matrix-column order)
+See `docs/sessions/s85.md`.
+1. **`sw a3, home` at entry with a 4-param header but a3 never read**: the definition has 3 params. When a caller in a file you may not touch passes 4, make the header prototype unprototyped (`s32 f(); // 3 params ...`) and keep an ANSI 3-param definition; int/pointer args make the caller byte-identical (`func_150A2FCC`). A 4-param definition with an unused `arg3` is SIZE+1 (the store).
+2. **Two scan loops with one shared `return -1`** (the first loop's `blez` jumps to the final `li v0,-1`): `if (c) { for ... } else { for ... } return -1;` (`func_150A2FCC`).
+3. **Matrix with the translation copied in and the constant column cleared**: write `m[3][0..2] = ...` before `m[0..2][3] = 0; m[3][3] = 1;`; IDO schedules the last load into the call's delay slot (`func_150335C8`).
+4. A global byte index that lands in v0 right before a `jal`: name it (`u8 i = D_800BE9C0;`) (`func_150C8C30`).
+
 ## s83 recipes (switch operand copy, scan loops, declaration order)
 See `docs/sessions/s83.md`.
 1. **`move v0,a3` before a compare-chain switch on a param that is also the 4th call argument**: the callee takes only 3 args (a3 merely still holds the value); with the 3-arg prototype the copy disappears. `beq x,7,L; b L` with the shared value set in an earlier delay slot = `case 7: default: v = K;` (`func_150BEEB0`).
