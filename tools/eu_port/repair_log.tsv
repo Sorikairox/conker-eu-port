@@ -986,3 +986,8 @@ func_15156598	new	3	OK	y	y	s72: struct127 ptr diffs arg1[i] - D_800CC2D0; arm-lo
 func_151A6520	new	8	DIFF30	n	y	s72: shape C u8 **q=&arg0 + s32 *m=arg1 (s0); left: loop preheader order (key before p) and the c copy into v1; drafts s72_drafts
 func_1513DF9C	new	0	skip	n	n	s72: jump table jtbl_800A5568, game_169510 owns no .rodata
 func_151604A0	new	0	skip	n	n	s72: two jump tables, game_18D770 owns no .rodata
+func_150469E8	CERR	2	OK	y	n	s75 LAX BITWISE/MEMCPY draft; clean rewrite with HitInfo struct copies
+func_150464C0	CERR	1	DIFF5	n	n	s75 sibling of 469E8; ref stores r1 (sb) in delay slot of 2nd jal; draft s75_drafts
+func_150DE6AC	SIZE+1	12	DIFF9	n	y	s75 frame fixed (no named temps), regs only; 2 remote perm rounds
+func_1506F54C	SIZE-1	20	DIFF44	n	y	s75 p=D_800D154C first, float store order; perm 2 rounds
+func_15096E78	SIZE+1	14	DIFF96	n	n	s75 K&R func_1512DAD0 (3-arg call), case-local a0 temps give ref spill slots; frame 0x38 vs 0x30
