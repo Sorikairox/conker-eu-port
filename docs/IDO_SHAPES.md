@@ -963,6 +963,13 @@ OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), 
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s111 recipes (K&R callee for array args, struct-member pointer spill, owned-rodata externs)
+See `docs/sessions/s111.md`.
+1. **`addiu a1,sp,X` spilled to a stack slot and reloaded for later calls (frame +8)** when a local array goes to a fully prototyped `s32` param as `(s32) pos`: declare the callee K&R (`void func_151000EC();`) and pass `pos` uncast; the ref rematerialises the address per call (`func_150FF840`).
+2. **A pointer stored to the stack late (`sw v1,X(sp)` in a `jal` delay slot) and reloaded after a memcpy**: it is a member of the stack struct whose tail is memcpy'd (`b.q = q; ... memcpy(r + 0x70, &b.p, 0x58)`), not a spill; declaring it fixes the slot layout (`func_150BE40C`, DIFF21: the reads through `q` still fold to `40(s0)`).
+3. **A rand result kept across the next rand inside one call's arguments**: inline both rand calls in the argument list; a named `f32 r` takes a slot 4 bytes too high (`func_150BAEF4`, DIFF5 -> DIFF3).
+4. **Extern floats in a file that owns `.rodata`** (`game_eu_EB430`): code can be bit-exact with `extern f32 D_x` but `rodata_inject` FAILs ("named by C code ... define it in C") and apply.py REJECTs; literals give frame +8 (s105 recipe 3), file-scope `const f32 D_x = ...;` did not land in `.rodata`. OPEN for `func_150BDE34`.
+OPEN: `func_150F0BEC` / `func_150B6314` (`func_151307F0` flag pair: 2nd `andi` t0 vs t3), `func_150FF840` DIFF25 (loads hoisted above `if (arg1)`), `func_150C1BC0` (needs `game_eu_EF370` `.rodata`).
 ## s108 recipes (rand loop counts, real callee prototypes, pointer in rand args)
 See `docs/sessions/s108.md`.
 1. **Spawner loop count `n = base + rand() % (k + 1)` where the ref's first in-loop rand result lands in the other s-register** (`move s1,v0` vs `move s3,v0`): write it as `n = func_150ADA20(); n = base + (n % (u32)(k + 1));` (permuter, `func_1515423C`, `func_15151500`, `func_15152DE4`).
