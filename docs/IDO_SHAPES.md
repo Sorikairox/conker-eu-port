@@ -963,6 +963,13 @@ OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), 
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s117 recipes (rodata ownership pads, list walks, constant registers)
+See `docs/sessions/s117.md`.
+1. **A matched C function's odd `s32 pad;` can be a compensation for a file that does not own `.rodata`**: after `rodata_split.py --own <stem> --resplit` the frame of a function with a float literal shrinks by 8; remove the pad (`func_1505D34C` in `game_83300`). Run `check_files.py` on the file after any ownership change.
+2. Weighted random list walk `n = list; while (n->w < r) { r -= n->w; n = n->next; }`: assign `n` **after** the rand call, or `n` lives across the call in an s-reg (`func_150E909C`).
+3. A local constant copy `m = 61.0f; k = m; ... k = -m;` gives `mov.s`/`neg.s` from one materialised constant (s103 recipe for floats), and `r -= c; if (r < d)` gives the in-place `sub.s` (`func_150B0F40`).
+4. `u8` loop index times a constant always gave `multu` here (also `(s32)i * 3`, `(u8 *)p + i * 12`); the ref's `sll/subu/sll` for one of two `i*12` terms is unexplained (`func_150FFC60`, open).
+OPEN: `func_150FFC60` SIZE-1, `func_150E752C` perm DIFF2, `func_1507E690` SIZE-1, `func_150FB06C` SIZE-4, `func_150E909C` perm DIFF7, `func_1505F188` DIFF14 (perm).
 ## s115 recipes (lo rand callers: unsigned modulo, K&R no-arg, CERR rows)
 See `docs/sessions/s115.md`.
 1. **`divu` for `rand() % n` with a narrow or signed `n`**: write `% (u32)n`; `u8 n` promotes to int and gives `div` + the `-1/0x80000000` break checks (`func_1509F834`, `func_150C851C`).

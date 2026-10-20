@@ -1,3 +1,4 @@
+Last updated: 2026-10-21 (session 117, main checkout, game < 0x130000, 3721/5915, 537,744 bytes, 0 matches). Older stamps below are history.
 Last updated: 2026-10-21 (session 115, main checkout, game < 0x130000, 3715/5915, 536,024 bytes). Older stamps below are history.
 Last updated: 2026-10-21 (session 113, main checkout, game < 0x130000, 3696/5915, 530,400 bytes). Older stamps below are history.
 Last updated: 2026-10-21 (session 111, main checkout, game < 0x130000, 3691/5915, 527,656 bytes, 0 matches). Older stamps below are history.
@@ -87,6 +88,8 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 117 (main, game < 0x130000, Opus 5.5): 3721 / 5915 functions in C (62.9%)**, code bytes 537,744 / 2,253,856 (23.9%), full `verify_all.sh` all OK. **0 matches**; `eef8f40`: **`game_83300` owns `.rodata`** (literals now work for `func_1505F188`; `func_1505D34C` lost a pad that only compensated for the non-owned literal). Near misses in `docs/sessions/s117_drafts/`: `func_150E752C` perm DIFF2, `func_150FFC60` SIZE-1, `func_1507E690` SIZE-1 (hand draft, no m2c draft), `func_150FB06C` SIZE-4, `func_150E909C` perm DIFF7, `func_1505F188` DIFF21.
+  Doc `docs/sessions/s117.md`, recipes IDO_SHAPES `## s117 recipes`. No new tools.
 - **Session 115 (main, game < 0x130000, Opus 5.5): 3715 / 5915 functions in C (62.8%)**, code bytes 536,024 / 2,253,856 (23.8%), full `verify_all.sh` all OK. +7 in `3d524a7`, `fd46bcc`: lo rand callers `func_1509F834`, `func_150F850C`, `func_1503F2B4`, `func_1500FDE0`, `func_15064594`, `func_150C851C`, `func_150E8EB0` (hand rewrites from the randscreen drafts; IDO_SHAPES `## s115 recipes`). 0.052 matches / call.
   Full lo re-screen (100 callers) in `docs/sessions/s115_drafts/randscreen.txt`; near misses in `s115_drafts/` (`func_150B0F40` SIZE-1, `func_150E752C` SIZE-1, `func_1506E46C` SIZE-6, `func_1505F188` DIFF27, `func_150C2334` DIFF63, `func_150DF8B4` DIFF71). Doc `docs/sessions/s115.md`.
 - **Session 113 (main, game < 0x130000, Opus 5.5): 3696 / 5915 functions in C (62.5%)**, code bytes 530,400 / 2,253,856 (23.5%), full `verify_all.sh` all OK. +3 in `11b5195`, `81ce3b1`: `func_150BDE34` (s111 draft; **`rodata_inject.py` now places extern-only late rodata as regular `.rodata` of an asm neighbour**), `func_150E7C50`, `func_150E7810` (game_eu_114640 rand spawners, hand drafts). 0.024 matches / call.
