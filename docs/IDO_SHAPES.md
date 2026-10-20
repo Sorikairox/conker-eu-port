@@ -763,3 +763,11 @@ See `docs/sessions/s79.md`.
 3. **Frame 8 high around a `u8` table lookup** (`kind = D_800A43C6[i * 16]; if (kind == 2) return; ... unk3C = (kind == 1)`): declare `s32 kind`, not `u8` (`func_151382E0`).
 4. Lowest store before a `jal func_1504715C` landing in the delay slot where the ref puts the argument copy there: a bare label between the stores and the call (fakematch, s66 recipe 1) matched `func_15194D80`; in `func_15194B3C` the same label also removes an `arg0` copy (SIZE-1), still open.
 5. `divu` by a computed divisor needs `% (u32) (x + 1)`; `%` on a plain s32 sum gives `div` + the `-1`/`0x8000` traps (`func_151D5404`).
+## s81 recipes (varargs loops, unnamed slot pointers, Mtx arrays)
+See `docs/sessions/s81.md`.
+1. **Counted loop over a memory-resident count** (`&arg` taken by `va_start`) with the decrement stored before the other store in the `bnez` delay slot: `for (; arg1 != 0; arg1--) { ... }`; `if (arg1) do {...} while (--arg1);`, `while (arg1) {...; arg1--;}` and the statement order inside the body all give the reversed store order (`func_1502B020`, `func_1502B7F0`). `sltiu at,a3,2; beqz` = `for (; arg3 > 1; arg3--)` with `u32 arg3` (`func_1502B110`).
+2. **Out-param local at the lowest slot** (`addiu a2,sp,0x34` with other named locals above): declare it last (`func_1502B8E0`); with two stack locals sweep only which names go between them (20 variants for 5 names, `func_1502B5C8`).
+3. **Frame 8 high with a pointer kept in a register and spilled across calls**: drop the name (`*(s32 **)&D_800D1588[arg0]` repeated; IDO CSEs the address into v1 and spills it to a compiler slot) (`func_1503D950`). Same rule as s64 recipe 1.
+4. `addu a1, arg0, idx<<6; addiu a1, a1, 0x78` = `&((Mtx *)(arg0 + 0x78))[D_800BE9C0]`; `arg0 + (D << 6) + 0x78` swaps the t-register roles (`func_150F2A98`).
+5. A `jal` in a block followed by stores of the last `pos` element landing in the delay slot: declare the call's buffer inside the block (`case 1: { f32 buf[9]; ... }`), the natural form of the s79 label trick (`func_15076768`).
+6. A ternary over two different address sums (`bne; lw base; b; addiu base, 0xA00 / lw base; addiu 0xBC0`) is `c ? *p + 0xA00 : *p + 0xBC0`, not `*p + (c ? 0xA00 : 0xBC0)` (`func_150CB5E0`).
