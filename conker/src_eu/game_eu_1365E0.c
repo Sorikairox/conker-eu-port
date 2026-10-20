@@ -55,7 +55,29 @@ void func_1510957C(s32 arg0, s32 arg1, u8 arg2) {
     func_15169260(sp1C, 2, (s32)&sp24, 0x1D);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_151095E4.s")
+void func_151095E4(u8 *arg0, s32 arg1, u8 arg2)
+{
+  u8 *p = arg0;
+  p += *(s32 *)(arg0 + 0x50);
+  p += 0xF8;
+  switch (arg2) {
+  case 0x1D:
+    {
+      s32 t; // fakematch: block-local declaration = basic-block boundary (unfilled jr ra delay slot, s69)
+      *(s32 *)(p + 0x14) = ((s32 *)arg1)[0];
+      p[0x18] = ((u8 *)arg1)[8];
+      *(s32 *)(p + 0x1C) = ((s32 *)arg1)[1];
+    }
+    break;
+  case 0x1E:
+    if (p[0x20] != 0) {
+      p[0x20] = 0;
+    } else {
+      p[0x20] = 1;
+    }
+    break;
+  }
+}
 
 void func_1510965C(void) {
     s32 sp18[2] = {0x38, 0x54};

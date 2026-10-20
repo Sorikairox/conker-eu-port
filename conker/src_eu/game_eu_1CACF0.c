@@ -155,7 +155,28 @@ void func_1519E688(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519ECC4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519ED88.s")
+void func_1519ED88(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  u8 *v = arg0 + 0x28;
+  if (arg2 == 0) {
+    if (*(s32 *)v == arg1[0] || v[4] == ((u8 *)arg1)[4]) {
+      func_1516972C((struct102 *)arg0);
+      {
+        s32 t; // fakematch: block-local declaration = basic-block boundary (unfilled b delay slot, s69)
+        D_800E0D50 = 0;
+      }
+    }
+  } else if (arg2 == 0x2D) {
+    
+    if (arg1[0] == *(s32 *)v) {
+      *(s32 *)v = arg1[1];
+      v[4] = ((u8 *)arg1)[9];
+    } else if (arg1[1] == *(s32 *)v) {
+      *(s32 *)v = arg1[0];
+      v[4] = ((u8 *)arg1)[8];
+    }
+  }
+}
 
 void func_1519EE3C(struct260 *arg0) {
     func_1514EDF0(arg0, *(s32 *)((u8 *)arg0 + 0x28));

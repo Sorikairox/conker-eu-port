@@ -173,7 +173,22 @@ void func_151D4668(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4D44.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D51E8.s")
+void func_151D51E8(struct102 *arg0, u8 *arg1, u8 arg2)
+{
+  u8 *p = (u8 *)arg0 + 0x28;
+  if (arg2 == 0x3C) {
+    if (*(s32 *)p == *(s32 *)arg1 || p[4] == arg1[4]) {
+      func_1516972C(arg0);
+    }
+  } else if (arg2 == 4) {
+    if (*(s32 *)p == *(s32 *)arg1 || p[4] == arg1[4]) {
+      u8 *q = p + 0x10; // a declaration in the arm = basic-block boundary (unfilled b delay slot, s69)
+      *q &= ~1;
+    }
+  } else {
+    func_15149514((s32)arg1, arg2, (s32)p, (s32)(p + 4), (s32)arg0);
+  }
+}
 
 s32 func_151D52B4(u8 *arg0, s32 arg1) {
     u8 *p = arg0 + 0xA8;

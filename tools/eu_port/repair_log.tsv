@@ -935,3 +935,15 @@ func_150DE8AC	SIZE-1	2	DIFF26	n	n	s64: indexed forms SIZE-3; ref sets a1=1 befor
 func_1507F834	DIFF6	3	DIFF6	n	n	s64: 18 eval-order/type forms all DIFF6
 func_150619A8	SIZE-1	3	SIZE-1	n	n	s64: ref rematerialises D_800CC2D0 and expands *0x32C to shifts; mine hoists to fp/s7 even with goto loops
 func_1500B1F4	SIZE-1	4	SIZE-1	n	n	s64: stride fix (f32* += 2), u8 arg1; frame 0x58 vs 0x50 (one 8-byte temp, bisect finds no single statement)
+func_151AEBF0	SIZE-1	1	OK	y	n	declaration in the if arm = basic-block boundary (s69 shape D)
+func_151D51E8	SIZE-1	3	OK	y	n	top-level p + u8 *q local in the arg2==4 arm (s69)
+func_151590AC	DIFF18	4	OK	y	y	arm-local decl + no b local (permuter showed reload form)
+func_151095E4	DIFF13	3	OK	y	n	void return, case block with decl, p += steps
+func_151A98CC	CERR	2	OK	y	n	per-arm u8 *p locals (natural shape D form), void proto
+func_1519ED88	DIFF26	3	OK	y	n	function-level v, { s32 t; D_800E0D50 = 0; } block after the call
+func_151B34B4	DIFF33	2	OK	y	n	shared a/b/c over both swap halves, (b = arg1[1]) == c
+func_151BD7CC	SIZE-1	3	OK	y	y	t=id copy; arm 2D compares with *p (permuter DIFF3 then tryall)
+func_151B7664	DIFF13	6	OK	y	y	twin of BD7CC recipe
+func_151BAA18	SIZE-1	2	OK	y	n	BD7CC recipe + q += steps for addu order
+func_151597A0	SIZE-1	4	DIFF9	n	n	b to next insn + or v0,v1 not reproduced (switch/return/decl)
+func_15168B44	DIFF24	3	DIFF15	n	y	double sw 0x14 needs volatile; open

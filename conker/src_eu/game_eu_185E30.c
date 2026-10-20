@@ -74,7 +74,31 @@ s32 func_1515906C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_151590AC.s")
+void func_151590AC(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  s32 a;
+  if (arg2 == 0x2D) {
+    a = arg1[0];
+    if (a == *(s32 *)(arg0 + 0x40)) {
+      *(s32 *)(arg0 + 0x40) = arg1[1];
+      arg0[0x44] = ((u8 *)arg1)[9];
+      return;
+    }
+    if (arg1[1] == *(s32 *)(arg0 + 0x40)) {
+      s32 *p = (s32 *)(arg0 + 0x40); // a declaration in the arm = basic-block boundary (unfilled jr ra delay slot, s69)
+      *p = a;
+      arg0[0x44] = ((u8 *)arg1)[8];
+    }
+    return;
+  }
+  if (arg2 == 0) {
+    a = arg1[0];
+    if (a == *(s32 *)(arg0 + 0x40) || arg0[0x44] == ((u8 *)arg1)[4]) {
+      *(s32 *)(arg0 + 0x40) = 0;
+      arg0[0x44] = 0;
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15159140.s")
 

@@ -95,7 +95,7 @@ void func_151A94CC(u8 *arg0, u8 *arg1, f32 *arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A951C.s")
 
-s32 func_151A98CC(u8 *, s32, u8);
+void func_151A98CC(u8 *, s32, u8);
 void func_151A95D4(u8 *arg0, s32 arg1, u8 arg2) {
     if (arg0[0x4C] == 1) {
         func_151A98CC(arg0, arg1, arg2);
@@ -108,7 +108,20 @@ void func_151A95D4(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A975C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A98CC.s")
+void func_151A98CC(u8 *arg0, s32 arg1, u8 arg2)
+{
+  if (arg2 == 0x17) {
+    u8 *p = arg0 + 0x28;
+    if (((u8 *)arg1)[0] == arg0[0x80]) {
+      *p |= 1;
+    }
+  } else if (arg2 == 0x18) {
+    u8 *p = arg0 + 0x28;
+    if (((u8 *)arg1)[0] == arg0[0x80]) {
+      *p &= ~1;
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9940.s")
 

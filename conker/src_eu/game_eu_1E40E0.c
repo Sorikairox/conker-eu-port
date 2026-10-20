@@ -11,7 +11,40 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B6ED8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7664.s")
+void func_151B7664(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  s32 *p;
+  s32 id;
+  s32 t;
+  p = *((s32 **) (arg0 + 0x98));
+  id = p[0];
+  t = id;
+  if (arg2 == 0)
+  {
+    if (t == arg1[0])
+    {
+      s32 blk_t; // fakematch: block-local declaration = basic-block boundary (unfilled jr ra delay slot, s69)
+      arg0[0x30] = 0;
+      *((u16 *) (arg0 + 0x1E)) |= 8;
+    }
+  }
+  else
+    if (arg2 == 0x2D)
+  {
+    t = arg1[0];
+    if (t == *p)
+    {
+      p[0] = arg1[1];
+      ((u8 *) p)[4] = ((u8 *) arg1)[9];
+      return;
+    }
+    if (arg1[1] == *p)
+    {
+      p[0] = t;
+      ((u8 *) p)[4] = ((u8 *) arg1)[8];
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B76F4.s")
 
