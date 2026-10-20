@@ -22,10 +22,6 @@ extern s32  D_800E1238;
 extern void *D_8002BA44;
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/game_21FC90/func_151F27E0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/game_21FC90/func_151F2890.s")
-
 void func_151F2960(s32 arg0, s32 arg1) {
     if (D_800E0DFC == 0) {
         return;
