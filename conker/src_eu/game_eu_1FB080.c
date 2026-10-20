@@ -106,13 +106,75 @@ void func_151CEA8C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CEFD0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF05C.s")
-
 typedef struct {
     f32 x;
     f32 y;
     f32 z;
 } struct_151CF1C0;
+
+s32 func_151CF1C0(struct_151CF1C0 *arg0, u8 *arg1, u8 *arg2);
+extern f32 D_800AB3E8;
+typedef struct {
+    u8 *obj;
+    u8 b48;
+    u8 *other;
+    f32 f50;
+    f32 f54;
+    f32 f58;
+    f32 f5C;
+    s8 f60;
+    f32 f64;
+    f32 f68;
+    struct_151CF1C0 pos;
+    s16 u78;
+    s16 u7A;
+    s32 u7C;
+    s8 u80;
+    s8 u81;
+    s32 u84;
+} SpawnCF05C;
+
+u8 *func_151CF05C(u8 *arg0, u8 *arg1, u8 arg2, u8 arg3, s32 arg4) {
+    SpawnCF05C sp;
+    u8 *ret;
+    s8 fl;
+
+    sp.u81 = 0x19;
+    sp.u78 = 0x12C;
+    sp.u7A = 0x10;
+    sp.u7C = 0x11;
+    sp.u80 = 3;
+    sp.obj = arg0;
+    if (arg0 != NULL) {
+        sp.b48 = arg0[0x3B];
+    } else {
+        sp.b48 = 0;
+    }
+    sp.f54 = 1.0f;
+    sp.f5C = 1.0f;
+    sp.other = arg1;
+    sp.f50 = 0.0f;
+    sp.f58 = 0.0f;
+    if (arg2) {
+        fl = 2;
+    } else {
+        fl = 0;
+    }
+    sp.f60 = fl;
+    sp.f64 = func_150ADA68() * 400.0f + 400.0f;
+    sp.f68 = 2.0f * func_150ADA68() * D_800AB3E8;
+    if (func_151CF1C0(&sp.pos, arg0, arg1) == 0) {
+        sp.pos.x = 0.0f;
+        sp.pos.y = 0.0f;
+        sp.pos.z = 0.0f;
+    }
+    ret = func_15147FF0(&sp.pos, 0x28, 0x28, 0, 0xF, 0xF, 0, 0, 0, arg3, arg4);
+    if (ret != NULL) {
+        memcpy(*(void **)(ret + 0x98), &sp, 0x28);
+    }
+    return ret;
+}
+
 
 s32 func_151CF1C0(struct_151CF1C0 *arg0, u8 *arg1, u8 *arg2) {
     if (arg2 != NULL) {
