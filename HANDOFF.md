@@ -1,4 +1,4 @@
-Last updated: 2026-10-20 (session 59, worktree eu-wt-a, 3350/5915, 383,768 bytes; s56 was 3346). Older stamps below are history.
+Last updated: 2026-10-20 (session 61, worktree eu-wt-a, 3357/5915, 387,496 bytes; s59 was 3350). Older stamps below are history.
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
 Last updated: 2026-10-20 (session 58, main checkout, game < 0x130000; 3349/5915, spawner frame solved).
@@ -37,6 +37,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 61 (worktree a, game >= 0x130000): 3357 / 5915 (56.8%)**, 387,496 bytes, `verify_all.sh` OK. +1: `func_151664F0` (leading rodata word is a `"\xff"` string: manual `rodata_split.py game_eu_193D00 24C2F0 24C300` + `const char rodata_pre_193D00[]`). Spawner callers (s58 template) in `docs/sessions/s61_drafts/`: `func_15154DF4` DIFF2 (one register: `lw t0`), `func_151B65C0` DIFF134, `func_1510A1A0` DIFF109, `func_151D49B8` SIZE-1. Next: finish those four (see `docs/sessions/s61.md`, IDO_SHAPES `## s61 recipes`), `func_151B61A0` (checksum loop), `func_151BF490`, `func_151E3864` (DIFF4).
 - **Session 58 (main, game < 0x130000): 3349 / 5915 functions in C (56.6%)**, code bytes 383,888 / 2,253,856 (17.0%) (game 2942 = 310,936 bytes, init 375, debugger 32), `verify_all.sh` all OK. +6 in `6aaa280`: `func_150CB2D0`, `func_150CBD10`, `func_150CCF8C`, `func_150CE420`, `func_150121C0`, `func_150BB978`.
   **Spawner frame solved** (doc `docs/sessions/s58.md`, IDO_SHAPES `## s58 recipes`): the s57 hole was a dead 8-byte compiler temp from the chained float assignment `sp.u28[3] = sp.u28[2] = X;` (write `sp.u28[3] = X; sp.u28[2] = sp.u28[3];`), struct is 0x80 bytes, 15-param signature. Template `docs/sessions/s58_drafts/spawner_template_func_150CB2D0.c`.
   Open: `func_150CA2C4` DIFF5 (head schedule), `func_150B3394` DIFF29 (t-reg numbering); the remaining in-slice callers are 250-590 insns; the small ones are in files >= 0x130000 (other slot).

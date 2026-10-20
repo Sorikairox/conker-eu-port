@@ -615,3 +615,11 @@ See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
 3. **A named float local assigned from an expression and used twice also costs a temp slot** (`f32 t = r() * 3.0f; x = t; y = t;` grew the frame like the chain); inline or use the struct field as the second source.
 4. **Spawner struct for `func_15132FBC`** is 0x80 bytes (8 tail bytes after `u9C`) when nothing else is declared above it; with named locals above it (out-params, angle results) a 0x78/0x7C struct plus those names fill the same space.
    15-parameter signature `(s32, s32, f32, f32, f32, s32, s32, s32, s16 arg8, s32..., u8 argE)` so the stack params land on m2c's offsets; `u8 u88` when the ref stores 0xFF.
+
+## s61 recipes (leading rodata word, named-float slot cost, spawner callers)
+
+1. **File .rodata starting with an unreferenced word** (`func_151664F0`, `game_eu_193D00`): the ROM range is 16-aligned `[0x24C2F0,0x24C300)` = `ff000000, 0.017453292f, 0, 0`. The `ff000000` is a 2-byte string `"\xff"` (padded to 4 by the float) of the file with no code reference. Own the range with `rodata_split.py game_eu_193D00 24C2F0 24C300` (manual form, the `--own` range was wrong because refs() has no ref at 0x24C2F0) and add `const char rodata_pre_193D00[] = "\xff"; // fakematch` at the top of the C file: `const u32 = 0xFF000000` goes to `.data`, the string goes to `.rodata` first. Object `.rodata` is 16-aligned and padded to 16, so an owned range shorter than the object fails section_diff.
+2. **A named f32 used 3 times costs 12 bytes of frame (4 slot + 8 temp)**; used once it costs nothing. Two uses of one random float can share one local (`temp_f0 = rand(); ...; temp_f0 = rand();`: the permuter found this in `func_15154DF4`, DIFF16 -> DIFF2).
+3. **No spare local for the spawner result**: reuse a dead parameter (`arg5 = func_15132FBC(...); if (arg5) {...} return arg5;`) instead of `temp_v0`/`var_v1` (each named int local is a 4-byte slot below the struct).
+4. **Call-site struct pointer**: `func_15132FBC((u8 *)&sp.u2C[5], ...)` (m2c's `&sp2C[5]`); the object copy `memcpy(r + 0x170, &sp, N)` copies the 8/0x14 bytes in front of that pointer; struct = one block covering the prefix floats and the spawner struct.
+5. `register f32` does not remove the slot/temp cost.
