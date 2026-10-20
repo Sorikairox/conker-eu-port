@@ -64,7 +64,31 @@ s32 func_151B7C28(u8 *arg0, u8 *arg1)
   return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7C7C.s")
+s32 func_151B7C7C(u8 *arg0, f32 *arg1) {
+    u8 *p;
+    u8 *q;
+    u8 *obj;
+    f32 mf[4][4];
+
+    p = *(u8 **)(arg0 + 0x98);
+    q = *(u8 **)(p + 4);
+    obj = *(u8 **)q;
+    func_150A8050(mf, *(f32 *)(obj + 0x20), *(f32 *)(obj + 0x24), *(f32 *)(obj + 0x28));
+    mf[3][0] = *(f32 *)(obj + 0x38);
+    mf[3][1] = *(f32 *)(obj + 0x3C);
+    mf[3][2] = *(f32 *)(obj + 0x40);
+    mf[0][0] *= *(f32 *)(obj + 0x18);
+    mf[0][1] *= *(f32 *)(obj + 0x18);
+    mf[0][2] *= *(f32 *)(obj + 0x18);
+    mf[1][0] *= *(f32 *)(obj + 0x1C);
+    mf[1][1] *= *(f32 *)(obj + 0x1C);
+    mf[1][2] *= *(f32 *)(obj + 0x1C);
+    mf[2][0] *= *(f32 *)(obj + 0x18);
+    mf[2][1] *= *(f32 *)(obj + 0x18);
+    mf[2][2] *= *(f32 *)(obj + 0x18);
+    func_150A7E40(mf, 0.0f, 0.0f, -250.0f, &arg1[0], &arg1[1], &arg1[2]);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7DA4.s")
 

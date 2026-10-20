@@ -101,7 +101,38 @@ s32 func_1513416C(struct102 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513418C.s")
+s32 memcpy(u8 *, u8 *, s32);
+
+struct102 *func_1513418C(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
+    u8 *e;
+    u8 *v;
+    u8 *m;
+
+    e = func_15167A68(0x28, arg3, arg1 + 0x58, 1, arg2, 1);
+    if (e == NULL) {
+        return NULL;
+    }
+    memcpy(e + 0x10, arg0, 0x30);
+    if (e[0x3A] & 2) {
+        v = *(u8 **)(e + 0x1C);
+        if (*(s32 *)v == 0 || e[0x18] != v[0x3B]) {
+            func_1516972C((struct102 *)e);
+            return NULL;
+        }
+        if (*(u8 **)(v + 0x1D4) != NULL && (v[0x74] & 0xF) != 0xF) {
+            m = *(u8 **)(v + 0x1D4);
+            m += e[0x20] << 6;
+            func_15143134(e + 0x24, e + 0x40, m);
+        } else {
+            e[0x3A] |= 8;
+        }
+    } else {
+        e[0x3A] |= 0x18;
+    }
+    *(f32 *)(e + 0x4C) = 1.0f / (*(f32 *)(e + 0x30) + *(f32 *)(e + 0x30));
+    *(f32 *)(e + 0x50) = 0.0f;
+    return (struct102 *)e;
+}
 // void *func_1513418C(s32 arg0, s32 arg1 /* size/offset */, u8 arg2, s32 arg3) {
 //     void *sp24;
 //     s32 temp_v1;
