@@ -87,7 +87,15 @@ s32 func_1517F54C(void) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F5FC.s")
+#define VP(i, o) (*(f32 *)((u8 *)D_800BE628 + (i) * 0x180 + (o)))
+Gfx *func_1517F5FC(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i) {
+    gDPPipeSync(gfx++);
+    gDPSetCombineLERP(gfx++, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE);
+    gDPSetPrimColor(gfx++, 0, 0, r, g, b, a);
+    gDPSetOtherMode(gfx++, 0x2CFF, 0x504344);
+    gDPFillRectangle(gfx++, VP(i, 0x2C), VP(i, 0x24), VP(i, 0x30), VP(i, 0x28));
+    return gfx;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F910.s")
 
@@ -114,10 +122,10 @@ void func_1517F9F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
     D_800DE240[arg5] = arg4;
 }
 
-u8 *func_1517F5FC(u8 *, u8, u8, u8, u8, s32);
+Gfx *func_1517F5FC(Gfx *, s32, s32, s32, s32, s32);
 s32 func_1517FA48(s32 arg0, s32 arg1) {
     u8 *temp_v0;
-    u8 temp_a1;
+    s32 temp_a1;
     if ((u16)D_800DE240[arg1] == 0) {
         return arg0;
     }
@@ -246,7 +254,7 @@ void func_15182CB8(struct_eu_1ACBC0 *arg0) {
     arg0->unk2B = arg0->unk2E * arg0->unkE;
 }
 
-u8 *func_1517F5FC(u8 *, u8, u8, u8, u8, s32);
+Gfx *func_1517F5FC(Gfx *, s32, s32, s32, s32, s32);
 u8 *func_15182CD8(u8 *arg0, u8 *arg1, s16 arg2) {
     u8 *v;
     v = arg1 + 0x28;
