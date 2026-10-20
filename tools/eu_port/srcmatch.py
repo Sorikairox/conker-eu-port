@@ -34,7 +34,9 @@ for l in lst.splitlines():
     if len(p) < 3 or not p[1].startswith('src_eu/'): continue
     f = p[1]; fn = p[2]
     m = re.search(r'_([0-9A-F]+)\.c$', f)
-    if sl != 'all':
+    if sl == 'init':
+        if not os.path.basename(f).startswith('init'): continue
+    elif sl != 'all':
         if not (os.path.basename(f).startswith('game') and m): continue
         off = int(m.group(1), 16)
         if (sl == 'lo') != (off < 0x130000): continue

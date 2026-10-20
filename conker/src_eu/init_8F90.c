@@ -3,6 +3,62 @@
 #include "functions.h"
 #include "variables.h"
 
+typedef struct AMDMABuffer_s {
+    ALLink node;
+    u32 startAddr;
+    u32 lastFrame;
+    char *ptr;
+} AMDMABuffer;
+typedef struct {
+    u8 initialized;
+    AMDMABuffer *firstUsed;
+    AMDMABuffer *firstFree;
+} AMDMAState;
+#define dmaState (*(AMDMAState *)&D_80040F78)
+extern u32 D_8002B194;
+extern u32 D_8002B198;
+extern OSMesgQueue D_80041638;
+extern OSIoMesg D_80041338[];
+typedef struct { s16 type; s16 pad; void *data; } AmMsg;
+extern OSMesgQueue D_8003E970;
+extern OSMesgQueue D_8003E9A8;
+extern s32 D_8003E9E0;
+extern void *D_8003E730[];
+extern u32 D_8002B194;
+s32 func_100095A0();
+struct AudTask {
+        void *next;
+        u32 state;
+        u32 unk8;
+        u32 flags;
+        void *framebuffer;
+        u32 unk14;
+        OSTask list;
+        OSMesgQueue *msgQ;
+        OSMesg msg;
+    };
+typedef struct {
+    s16 *data;
+    s16 *unk4;
+    s16 frameSamples;
+    s16 pad;
+    s32 padC;
+    struct AudTask task;
+    s32 unk70;
+} AudioInfo;
+extern u8 D_80041324;
+extern s32 D_80041328;
+extern s32 D_8004132C;
+extern u32 D_8002B19C;
+extern Acmd *D_8003E728[];
+extern OSMesgQueue D_8003B560;
+extern u8 D_10029400[];
+extern u8 D_100294D0[];
+extern u8 D_8002CCC0[];
+void func_100099BC(void);
+void func_1000A03C(void);
+Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10008F90.s")
 // NON-MATCHING: so much to do
@@ -160,7 +216,50 @@ void func_100093CC(void) {
 }
 
 // audio thread
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009400.s")
+void func_10009400(s32 arg0) {
+    s32 pad; // fakematch: 4-byte frame slot above msg
+    u8 done = 0;
+    AmMsg *msg = NULL;
+    void *lastInfo = NULL;
+    struct { void *next; void *mq; s32 x; } client;
+    u32 count = 0;
+    s32 first = 1;
+
+    client.x = 0;
+    func_100051C8((OSPfs *) &client, &D_8003E970);
+    while (!done) {
+        osRecvMesg(&D_8003E970, (OSMesg *) &msg, OS_MESG_BLOCK);
+        if (D_8002AC5C) {
+            msg->type = 4;
+        }
+        switch (msg->type) {
+            case 1:
+                if (count >= 2) {
+                    count = 0;
+                }
+                if (count == 0 && func_100095A0(D_8003E730[D_8002B194 % 3], lastInfo)) {
+                    if (!first) {
+                        osRecvMesg(&D_8003E9A8, (OSMesg *) &msg, OS_MESG_BLOCK);
+                        lastInfo = msg->data;
+                    }
+                    first = 0;
+                }
+                count++;
+                break;
+            case 4:
+                done = 1;
+                break;
+            case 10:
+                done = 1;
+                break;
+        }
+    }
+    n_alClose((s32) &D_8003E9E0);
+    for (;;) {
+        osRecvMesg(&D_8003E970, (OSMesg *) &msg, OS_MESG_BLOCK);
+    }
+}
+
 // NON-MATCHING: a long way to go
 // void func_10009400(s32 arg0) {
 //     OSMesg *msg;
@@ -213,7 +312,65 @@ void func_100093CC(void) {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_100095A0.s")
+s32 func_100095A0(AudioInfo *info, AudioInfo *lastInfo) {
+    s16 *audioPtr;
+    Acmd *cmdp;
+    s32 cmdLen;
+    s32 samplesLeft;
+    struct AudTask *t;
+    u32 end;
+    u32 ret;
+
+    audioPtr = (s16 *) osVirtualToPhysical(info->data);
+    func_100099BC();
+    func_1000A03C();
+    samplesLeft = IO_READ(AI_LEN_REG) >> 2;
+    if (lastInfo) {
+        osAiSetNextBuffer(lastInfo->unk4, lastInfo->frameSamples << 2);
+    }
+    if (samplesLeft >= 0xF9 && D_80041324 == 0) {
+        info->frameSamples = D_80041328;
+        D_80041324 = 2;
+    } else {
+        info->frameSamples = D_8004132C;
+        if (D_80041324) {
+            D_80041324--;
+        }
+    }
+    end = (u32) audioPtr + (info->frameSamples << 2);
+    if ((end & 0x1FFF) == 0) {
+        audioPtr += 8;
+        info->unk4 = info->data + 8;
+    } else {
+        info->unk4 = info->data;
+    }
+    cmdp = n_alAudioFrame(D_8003E728[D_8002B19C], &cmdLen, audioPtr, info->frameSamples);
+    if (cmdLen == 0) {
+        return 0;
+    }
+    t = &info->task;
+    t->next = 0;
+    t->msgQ = &D_8003E9A8;
+    t->msg = (OSMesg) &info->unk70;
+    t->flags = 2;
+    t->framebuffer = 0;
+    t->list.t.data_ptr = (u64 *) D_8003E728[D_8002B19C];
+    t->list.t.data_size = (cmdp - D_8003E728[D_8002B19C]) * sizeof(Acmd);
+    t->list.t.type = M_AUDTASK;
+    t->list.t.ucode_boot = (u64 *) D_10029400;
+    t->list.t.ucode_boot_size = D_100294D0 - D_10029400;
+    t->list.t.flags = 0;
+    t->list.t.ucode = (u64 *) aspMainTextStart;
+    t->list.t.ucode_data = (u64 *) D_8002CCC0;
+    t->list.t.ucode_data_size = 0x800;
+    t->list.t.yield_data_ptr = NULL;
+    t->list.t.yield_data_size = 0x400;
+    osWritebackDCacheAll();
+    osSendMesg(&D_8003B560, (OSMesg) t, OS_MESG_BLOCK);
+    D_8002B19C ^= 1;
+    return 1;
+}
+
 // NON-MATCHING: so far away
 // s32 func_100095A0(struct50 *arg0, struct51 *arg1) {
 //     s32 sp3C;
@@ -282,7 +439,57 @@ void func_100093CC(void) {
 //     return 1;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_100097CC.s")
+s32 func_100097CC(u32 addr, s32 len, s32 state) {
+    void *foundBuffer;
+    s32 delta, addrEnd, buffEnd;
+    AMDMABuffer *dmaPtr, *lastDmaPtr;
+
+    lastDmaPtr = NULL;
+    dmaPtr = dmaState.firstUsed;
+    addrEnd = (s32) addr + len;
+    while (dmaPtr) {
+        buffEnd = dmaPtr->startAddr + 0x800;
+        if (dmaPtr->startAddr > (u32) addr) {
+            break;
+        } else if (addrEnd <= buffEnd) {
+            dmaPtr->lastFrame = D_8002B194;
+            foundBuffer = dmaPtr->ptr + addr - dmaPtr->startAddr;
+            return osVirtualToPhysical(foundBuffer);
+        }
+        lastDmaPtr = dmaPtr;
+        dmaPtr = (AMDMABuffer *) dmaPtr->node.next;
+    }
+    dmaPtr = dmaState.firstFree;
+    if (!dmaPtr || D_8002B198 >= 32) {
+        return 0;
+    }
+    dmaState.firstFree = (AMDMABuffer *) dmaPtr->node.next;
+    { ALLink *ln = (ALLink *) dmaPtr; if (ln->next) ln->next->prev = ln->prev; if (ln->prev) ln->prev->next = ln->next; }
+    if (lastDmaPtr) {
+        ALLink *ln = (ALLink *) dmaPtr; ALLink *to = (ALLink *) lastDmaPtr;
+        ln->next = to->next; ln->prev = to;
+        if (to->next) to->next->prev = ln;
+        to->next = ln;
+    } else if (dmaState.firstUsed) {
+        lastDmaPtr = dmaState.firstUsed;
+        dmaState.firstUsed = dmaPtr;
+        dmaPtr->node.next = (ALLink *) lastDmaPtr;
+        dmaPtr->node.prev = 0;
+        lastDmaPtr->node.prev = (ALLink *) dmaPtr;
+    } else {
+        dmaState.firstUsed = dmaPtr;
+        dmaPtr->node.next = 0;
+        dmaPtr->node.prev = 0;
+    }
+    foundBuffer = dmaPtr->ptr;
+    delta = addr & 1;
+    addr -= delta;
+    dmaPtr->startAddr = addr;
+    dmaPtr->lastFrame = D_8002B194;
+    osPiStartDma(&D_80041338[D_8002B198++], OS_MESG_PRI_HIGH, OS_READ, addr, foundBuffer, 0x800, &D_80041638);
+    return osVirtualToPhysical(foundBuffer) + delta;
+}
+
 // NON-MATCHING: another horrible function
 // s32 func_100097CC(u32 arg0, s32 arg1, s32 arg2) {
 //     s32 sp2C;
@@ -384,7 +591,41 @@ s32 func_10009980(s32 *arg0) {
     return func_100097CC;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_100099BC.s")
+void func_100099BC(void) {
+    u32 i;
+    OSIoMesg *iomsg = 0;
+    AMDMABuffer *dmaPtr, *nextPtr;
+
+    for (i = 0; i < D_8002B198; i++) {
+        if (osRecvMesg(&D_80041638, (OSMesg *) &iomsg, OS_MESG_NOBLOCK) == -1) {
+            osRecvMesg(&D_80041638, (OSMesg *) &iomsg, OS_MESG_BLOCK);
+        }
+    }
+    dmaPtr = dmaState.firstUsed;
+    while (dmaPtr) {
+        nextPtr = (AMDMABuffer *) dmaPtr->node.next;
+        if (dmaPtr->lastFrame + 1 < D_8002B194) {
+            if (dmaState.firstUsed == dmaPtr) {
+                dmaState.firstUsed = nextPtr;
+            }
+            { ALLink *ln = (ALLink *) dmaPtr; if (ln->next) ln->next->prev = ln->prev; if (ln->prev) ln->prev->next = ln->next; }
+            if (dmaState.firstFree) {
+                ALLink *ln = (ALLink *) dmaPtr; ALLink *to = (ALLink *) dmaState.firstFree;
+                ln->next = to->next; ln->prev = to;
+                if (to->next) to->next->prev = ln;
+                to->next = ln;
+            } else {
+                dmaState.firstFree = dmaPtr;
+                dmaPtr->node.next = 0;
+                dmaPtr->node.prev = 0;
+            }
+        }
+        dmaPtr = nextPtr;
+    }
+    D_8002B198 = 0;
+    D_8002B194++;
+}
+
 
 void func_10009B2C(struct54 *arg0) {
     if (((s32)arg0 & 1) == 0) {
