@@ -61,7 +61,52 @@ s32 func_1518CAB0(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CAEC.s")
+typedef struct { f32 x, y, z; s32 a, b; } Node14;
+typedef struct {
+    u8 pad0[0x80];
+    s32 u80;
+    u8 pad84[6];
+    s16 u8A;
+    s16 u8C;
+    s16 u8E;
+    s16 u90;
+    s16 u92;
+    s16 u94;
+    s16 u96;
+    s16 u98;
+    u8 pad9A[6];
+    s8 uA0;
+    s8 uA1;
+    s8 uA2;
+    u8 padA3[5];
+} SpawnCAEC;
+s32 func_1516865C(SpawnCAEC *, s32, s32, s32, s32);
+s32 func_15168800(SpawnCAEC *, u8, u8);
+
+s32 func_1518CAEC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+    SpawnCAEC sp;
+    u8 *obj;
+    u8 *tbl;
+
+    obj = *(u8 **)(arg0 + 0x98);
+    tbl = *(u8 **)(arg0 + 0x94);
+    arg2 = arg4; // fakematch: the unused arg2 holds the truncated arg4 (spill slot layout, permuter)
+    sp.u80 = 0;
+    sp.u8A = 0x100;
+    sp.u8C = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].x;
+    sp.u8E = arg2;
+    sp.u90 = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
+    sp.u92 = sp.u94 = func_150ADA20() % 21U + 0x23;
+    sp.uA2 = -1;
+    sp.uA0 = 0x12;
+    sp.u98 = 0xC;
+    sp.uA1 = 0;
+    sp.u96 = arg2;
+    func_1516865C(&sp, 0xFF, 0xFF, 0xFF, 0xFF);
+    func_15168800(&sp, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    *(s8 *)(obj + 0x20) = 4;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B9810/func_1518CC0C.s")
 

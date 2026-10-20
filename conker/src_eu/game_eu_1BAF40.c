@@ -200,7 +200,33 @@ s32 func_1518EC44(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F080.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518F4C4.s")
+s32 func_1518F4C4(u8 *arg0)
+{
+  u8 *p = arg0 + 0x110;
+  f32 x;
+  f32 y;
+  f32 z;
+  f32 f;
+  u8 *q;
+  f = *((f32 *) (arg0 + 0x150));
+  *((f32 *) (arg0 + 0x140)) *= f;
+  q = arg0; // fakematch: second name moves the D_800BE9A4 address to v1 (s114 recipe 4)
+  *((f32 *) (q + 0x144)) += (*((f32 *) (q + 0x14C))) * D_800BE9A4;
+  *((f32 *) (q + 0x148)) *= f;
+  x = (*((f32 *) (arg0 + 0x140))) * D_800BE9A4;
+  y = (*((f32 *) (arg0 + 0x144))) * D_800BE9A4;
+  z = (*((f32 *) (arg0 + 0x148))) * D_800BE9A4;
+  *((f32 *) (arg0 + 0x34)) += x;
+  *((f32 *) (q + 0x38)) += y;
+  *((f32 *) (q + 0x3C)) += z;
+  *((f32 *) (q + 0x40)) += x;
+  *((f32 *) (q + 0x44)) += y;
+  *((f32 *) (q + 0x48)) += z;
+  *(f32 *)(arg0 + 0x40) = (*(f32 *)(arg0 + 0x40) - *(f32 *)(arg0 + 0x34)) * *(f32 *)(arg0 + 0x15C) + *(f32 *)(arg0 + 0x34);
+  *(f32 *)(arg0 + 0x44) = (*(f32 *)(arg0 + 0x44) - *(f32 *)(arg0 + 0x38)) * *(f32 *)(p + 0x4C) + *(f32 *)(arg0 + 0x38);
+  *(f32 *)(arg0 + 0x48) = (*(f32 *)(arg0 + 0x48) - *(f32 *)(arg0 + 0x3C)) * *(f32 *)(p + 0x4C) + *(f32 *)(arg0 + 0x3C);
+  return 1;
+}
 
 s32 func_1518F5C8(u8 *arg0) {
     f32 x;

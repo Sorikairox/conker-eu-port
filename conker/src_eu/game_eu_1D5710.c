@@ -117,7 +117,48 @@ void func_151A95D4(u8 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9670.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A975C.s")
+typedef struct {
+    s32 u0;
+    s16 u4;
+    u8 u6;
+    u8 u7;
+    s32 u8_;
+    s32 uC;
+    u8 u10[8];
+    s32 u18;
+    s32 u1C;
+    u8 u20;
+    s16 u22;
+    s16 u24;
+} Spawn975C;
+typedef struct { s16 v[3]; } Tbl975C;
+extern Tbl975C D_8008FD44;
+
+void func_151A975C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+    s32 pad;
+    Spawn975C sp;
+    f32 f;
+    Tbl975C t;
+
+    t = D_8008FD44;
+    f = func_150ADA68() * 50.0f + 50.0f;
+    sp.u6 = t.v[func_150ADA20() % 3U];
+    sp.u7 = 0;
+    sp.u10[6] = 0;
+    sp.u10[7] = 7;
+    sp.u8_ = 0;
+    sp.uC = 0;
+    sp.u0 = 0x1701;
+    sp.u4 = 0x3C;
+    sp.u10[0] = 0xA0;
+    sp.u10[1] = 0xFF;
+    sp.u10[2] = 0;
+    sp.u10[3] = 0;
+    sp.u10[4] = 0;
+    sp.u10[5] = 0xFF;
+    sp.u18 = 0x3B0002;
+    func_1513C650((s32)&sp, 1, 0, (s32)(arg0 + 0x58), *(f32 *)(arg1 + 0), *(f32 *)(arg1 + 4), *(f32 *)(arg1 + 8), f, f, func_150ADA20() & 0xFF, (func_150ADA20() & 1) + (func_150ADA20() & 1), 3, 0xFF, 0, arg0[0xC], arg0[1]);
+}
 
 void func_151A98CC(u8 *arg0, s32 arg1, u8 arg2)
 {
@@ -138,4 +179,44 @@ void func_151A98CC(u8 *arg0, s32 arg1, u8 arg2)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9BE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9DE4.s")
+typedef struct {
+    f32 x;
+    u8 pad4[0x14];
+    s32 u18;
+    u8 u1C;
+    u8 u1D;
+    s32 u20;
+} Obj9DE4;
+s32 func_15046F70(f32 *, s32, f32, Obj9DE4 *);
+void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
+typedef void (*Fn9DE4)(f32 *, Obj9DE4 *, s32, u8, s32);
+extern Fn9DE4 D_8008FE00[];
+
+void func_151A9DE4(f32 *arg0, f32 arg1, f32 arg2, Obj9DE4 *arg3, s32 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+    Obj9DE4 o;
+    f32 pos[3];
+    f32 v[3];
+    f32 a;
+
+    if (arg3 == NULL) {
+        arg3 = &o;
+        o.x = 99999.9f;
+        o.u18 = 0;
+        o.u1C = 7;
+        o.u1D = 0;
+        o.u20 = 0;
+    }
+    pos[1] = arg0[1];
+    for (; arg4 > 0; arg4--) {
+        a = func_150ADA68();
+        func_1514373C(2.0f * a * 3.1415927f, func_150ADA68() * arg2, &pos[0], &pos[2]);
+        pos[0] += arg0[0];
+        pos[2] += arg0[2];
+        if (func_15046F70(pos, 0, arg1, arg3)) {
+            v[0] = pos[0];
+            v[1] = arg3->x;
+            v[2] = pos[2];
+            D_8008FE00[arg5](v, arg3, arg6, arg7, arg8);
+        }
+    }
+}

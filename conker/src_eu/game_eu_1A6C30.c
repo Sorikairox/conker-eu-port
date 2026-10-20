@@ -52,7 +52,75 @@ void func_15179A38(void) {
     p[1] = y;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179B70.s")
+typedef struct {
+    u8 pad0[0x80];
+    s32 u80;
+    s16 u84;
+    u8 pad86[4];
+    s16 u8A;
+    s16 u8C;
+    s16 u8E;
+    s16 u90;
+    s16 u92;
+    s16 u94;
+    u8 pad96[2];
+    u16 u98;
+    u8 pad9A[2];
+    s16 u9C;
+    s16 u9E;
+    s8 uA0;
+    s8 uA1;
+    s8 uA2;
+    u8 padA3[5];
+} Spawn9B70;
+s32 func_1516865C(Spawn9B70 *, s32, s32, s32, s32);
+s32 func_15168800(Spawn9B70 *, u8, u8);
+void func_15179B70(s32 arg0, s32 arg1) {
+    s32 x2;
+    s32 y2;
+    s32 z2;
+    s32 x;
+    s32 y;
+    s32 z;
+    u32 r;
+    s32 v;
+    s32 pad[2];
+    Spawn9B70 sp;
+
+    sp.uA0 = 0x11;
+    sp.u8A = 0x33;
+    sp.uA2 = 1;
+    sp.u98 = 0;
+    func_1516865C(&sp, 0xFF, 0xFF, 0xFF, 0x50);
+    if (r) {} // fakematch: empty test of the not yet set r moves D_800DBFF0 to v0 (permuter)
+    x = D_800DBFF0->unk2F8;
+    y = D_800DBFF0->unk2FC;
+    z = D_800DBFF0->unk300;
+    x2 = func_150ADA20() % 500 + x;
+    z2 = func_150ADA20() % 500 + z;
+    if (arg0 == 0) {
+        y2 = y + 500;
+    } else {
+        y2 = func_150ADA20() % 500 + y;
+    }
+    r = func_150ADA20() % 10U;
+    sp.u8E = y2;
+    sp.u8C = x2;
+    sp.u90 = z2;
+    sp.u9C = 0;
+    sp.u9E = 0;
+    sp.u92 = 4;
+    sp.u94 = r + 0x23;
+    sp.u98 = 0x8C00;
+    sp.uA1 = r + 0xA;
+    sp.u80 = arg1;
+    sp.u84 = D_800DD866;
+    v = func_15168800(&sp, 0xFF, 0);
+    if (v != 0) {
+        ((s32 *)D_800DD870)[D_800DD866] = v;
+        D_800DD866++;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179D20.s")
 

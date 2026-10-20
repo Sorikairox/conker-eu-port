@@ -970,6 +970,23 @@ See `docs/sessions/s117.md`.
 3. A local constant copy `m = 61.0f; k = m; ... k = -m;` gives `mov.s`/`neg.s` from one materialised constant (s103 recipe for floats), and `r -= c; if (r < d)` gives the in-place `sub.s` (`func_150B0F40`).
 4. `u8` loop index times a constant always gave `multu` here (also `(s32)i * 3`, `(u8 *)p + i * 12`); the ref's `sll/subu/sll` for one of two `i*12` terms is unexplained (`func_150FFC60`, open).
 OPEN: `func_150FFC60` SIZE-1, `func_150E752C` perm DIFF2, `func_1507E690` SIZE-1, `func_150FB06C` SIZE-4, `func_150E909C` perm DIFF7, `func_1505F188` DIFF14 (perm).
+## s114 recipes (shared value stores, sign step, one reused temp, spawner structs)
+See `docs/sessions/s114.md`.
+1. **One value stored to two struct fields with other stores between (`sh t1,a; sh zero..; sh t1,b`) and the frame 8 too big with a named temp**: `s.a = s.b = expr;` (the left field is stored first) (`func_1514A434`).
+2. **Sign step `li v0,1; bgez x,L; nop; b L; li v0,-1`** (the `b` to the next instruction): `if (x < 0) { s = -1; } else { s = 1; }`; `s = 1; if (x < 0) s = -1;`, ternaries and block-local declarations give `bgezl` or extra moves (`func_1517A75C`, not yet a full match; try it on `func_1511B4B8`).
+3. **The ref keeps a loaded field, a difference and a later result all in v0**: one `s32 t` reused for all three (`t = A6; ... t = x - v; if (t <= 0) ... t = t - D;`) (`func_1517ADBC`).
+4. **Global float address `lui/addiu` in v1 where mine uses v0** (with `li v0,1` for the return scheduled early in the ref): a second name `q = arg0;` used for the later stores (permuter fakematch, `func_1518F5C8`).
+5. Spawner arg read from its home slot into v0 (`lh v0,0x5A(sp)`) where mine uses v1: `p2 = &arg2;` and read through `*p2`, plus an `if (arg0) {}` barrier (permuter, `func_151AED60`). Spawner `s.p = arg0` (arg reloaded from its home slot) placement: sweep its position among the stores (`func_151C6750`).
+6. Stack locals: the first declared array gets the highest address. `pos[3]` at 0x5C, `vel[3]` at 0x50, `sp48` at 0x48: `f32 pos[3]; f32 vel[3]; u8 *obj; s32 sp48;` (the register pointer fills the gap) (`func_151AA8BC`).
+OPEN: `func_151AED60` code OK but `.rodata` 3 zero words between two C functions' items; `func_1518F4C4` DIFF1 (third lerp add order); `func_151DBE80` frame +8.
+## s116 recipes (rodata file boundary, Node14 table, spawner arg reuse)
+See `docs/sessions/s116.md`.
+1. **C function code-OK but unreferenced zero words of `.rodata` between two C functions' items**: if the zeros end on a 16-byte boundary (and the text boundary is 16-aligned), it is an EU object boundary: `file_split.py <stem> --at <func> --rodata <rom> --resplit` (`func_151AED60`).
+2. **`multu idx,20` + `addu t,tbl,prod` table read** (`arg0+0x94` table, `s8` index at `arg0+0x2D`): `((Node14 *)tbl)[idx].x/.z` with `typedef struct { f32 x, y, z; s32 a, b; } Node14;`; the raw `*(f32 *)(tbl + idx * 0x14)` gives `addu t,prod,tbl` (`func_1518CAEC`, `func_151AC9B8`).
+3. **A position vector built from the table and `arg4`**: write `pos[0] = tbl[i].x; pos[1] = arg4; pos[2] = tbl[i].z;` (x,y,z order); `pos[1]` first loads `arg4` too early (`func_151AC9B8`, `func_1518CC0C`).
+4. **A truncated float kept across a call, spilled 4 bytes higher than a named `s32 v` gets**: assign it to an unused int parameter (`arg2 = arg4;`, fakematch) (`func_1518CAEC`, permuter).
+5. Third of three lerps with `add.s d, a, prod` like the others: `(b - a) * t + a`, not `a + t * (b - a)` (`func_1518F4C4`).
+OPEN: `func_1518A42C` DIFF1 (`addu` order after a spill reload), `func_1518CC0C` DIFF3 (`li a0,20` one slot late), `func_151DA938` DIFF4 (`obj + 0x48` kept in v0).
 ## s115 recipes (lo rand callers: unsigned modulo, K&R no-arg, CERR rows)
 See `docs/sessions/s115.md`.
 1. **`divu` for `rand() % n` with a narrow or signed `n`**: write `% (u32)n`; `u8 n` promotes to int and gives `div` + the `-1/0x80000000` break checks (`func_1509F834`, `func_150C851C`).
