@@ -882,6 +882,14 @@ See `docs/sessions/s91.md`.
 5. A `static` local in a gu file (`guRandom` xseed) needs the function in its own file (the containing file had other flags) plus the owned `.data` piece (16-byte aligned start).
 
 
+## s97 recipes (homed args, empty multi-arg stubs, clip helpers)
+See `docs/sessions/s97.md`.
+1. **An arg reloaded from its home slot after calls** (`lw s0,0x20(sp)` of arg0 where -O2 would keep it in a register): take its address, `struct210 **pa = &arg0;` and use `*pa` (fakematch) (`func_151C9A84`/`9B88`). Probably the same fix for the s95 open `func_1519150C`/`B1DD8` (`p = arg0 + 0x110` spilled).
+2. **Caller homes `sw a2`/`sw a3` at entry and reloads `lw a2` before a call**: the params are not `s32`: a third `f32` param (in a2) and a `u8` param (`andi` + homed) (`func_151A13F0`).
+3. **Calls with more args than an empty C stub declares**: give the empty definition the full signature (same bytes) and a prototype above the callers (`func_151A177C`, 28 params).
+4. **Template copy spawners** (`spXX = *(T *)(arg0 + 0xYY)` runs into two stack structs): generate a struct with fields at the m2c sp offsets and keep m2c's statement order (`s97_drafts/gen6e68.py`): OK at once.
+5. Clip-vertex lerp (`t = a->x / (a->x - b->x)`) goes **before** `out->x = 0.0f;` even though the zero store is scheduled first.
+
 ## s95 recipes (spawner hi members, twins, late double alignment)
 See `docs/sessions/s95.md`.
 1. **`func_151308E4` spawners in the hi slice**: `tools/eu_port/spgen2.py func draft.c docs/sessions/s95_drafts/af04_Ay.c out.c` (m2c struct base shifted onto the s92 template); `func_151B0238` OK as generated. A frame 8 bytes too big with all offsets 4 high = struct 0x70 not 0x74 (`pad98[0xC]`); offsets 4 low with the frame right = struct 0x74.
