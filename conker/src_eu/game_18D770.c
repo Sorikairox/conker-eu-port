@@ -1521,7 +1521,21 @@ s32 func_151644A8(struct242 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151644F4.s")
+void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
+    f32 z;
+    f32 y;
+    f32 x;
+    f32 mf[4][4];
+
+    func_150A8050(mf, arg3, 0.0f, arg4);
+    mf[3][0] = arg1->unk0;
+    mf[3][1] = arg1->unk4;
+    mf[3][2] = arg1->unk8;
+    func_150A7E40(mf, 0.0f, *(f32 *)&arg2, 0.0f, &x, &y, &z);
+    arg0->unk14->unkE = x;
+    arg0->unk14->unk10 = y;
+    arg0->unk14->unk12 = z;
+}
 // NON-MATCHING: close...
 // void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4) {
 //     f32 tmp1;

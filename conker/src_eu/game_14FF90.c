@@ -259,7 +259,26 @@ void func_15122AE0(void) {
 //     }
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123070.s")
+void func_15123070(u8 *arg0) {
+    f32 a;
+    struct17 tmp;
+
+    if (*(s32 *)(arg0 + 0x6C8) != 0 && (*(s32 *)(arg0 + 0x6FC) == 10 || *(s32 *)(arg0 + 0x6FC) == 14)) {
+        func_15048F90((struct17 *)(arg0 + 0x618), (struct17 *)(arg0 + 0x2A4), &tmp);
+        *(f32 *)(arg0 + 0x390) = *(f32 *)(arg0 + 0x37C) - func_15048FC8(&tmp);
+        if (!arg0 && !arg0 && !arg0) { // fakematch: permuter barrier (puts the -360.0f lui in the arm)
+        }
+    } else {
+        a = *(f32 *)(*(u8 **)(arg0 + 0x3D0) + 0x40) - *(f32 *)(arg0 + 0x37C) - 180.0f;
+        while (a < 0.0f) {
+            a += 360.0f;
+        }
+        *(f32 *)(arg0 + 0x390) = a;
+    }
+    while (*(f32 *)(arg0 + 0x390) < -360.0f) {
+        *(f32 *)(arg0 + 0x390) += 360.0f;
+    }
+}
 // NON-MATCHING: 1 missing lui
 // void func_15123070(struct108 *arg0) {
 //     f32 temp_f0;

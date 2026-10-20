@@ -771,3 +771,10 @@ See `docs/sessions/s81.md`.
 4. `addu a1, arg0, idx<<6; addiu a1, a1, 0x78` = `&((Mtx *)(arg0 + 0x78))[D_800BE9C0]`; `arg0 + (D << 6) + 0x78` swaps the t-register roles (`func_150F2A98`).
 5. A `jal` in a block followed by stores of the last `pos` element landing in the delay slot: declare the call's buffer inside the block (`case 1: { f32 buf[9]; ... }`), the natural form of the s79 label trick (`func_15076768`).
 6. A ternary over two different address sums (`bne; lw base; b; addiu base, 0xA00 / lw base; addiu 0xBC0`) is `c ? *p + 0xA00 : *p + 0xBC0`, not `*p + (c ? 0xA00 : 0xBC0)` (`func_150CB5E0`).
+
+## s80 recipes (callee families via calleefam.py, scheduling barriers)
+See `docs/sessions/s80.md`.
+1. **`tools/eu_port/calleefam.py --typed --max 100`** lists argument-block families with a hint from a matched caller; a family of near-identical clones (here 10 callers of `func_151AC3F0`) is fastest as a small generator script once the first one matches.
+2. **First load scheduled after a global float compare operand** (`lwc1 x; lui; lwc1 D` in the ref, `lui; lwc1 D; lwc1 x` in mine) after `obj = *(u8 **)(arg0 + 0x18)`: the permuter's `if ((obj && obj) && obj) {}` right after the declaration fixes it (fakematch); a real `if (obj->unk31C ...) return;` there does the same naturally.
+3. **Slot 4 bytes too high under a struct local**: declare a 4-byte local (`f32 a;` that the function uses anyway) above the struct (`func_15123070`); `u8 *obj` declared before `struct17 pos` (`func_151A9F80`). A named `s32 ret` for a call result takes the slot between the compiler temp and the struct.
+4. **`lui v0; addiu v0; sw x,0(v0)` store to a global** = through a named pointer: `u8 **p = &D; *p = x;` and pass `*p` later (`func_151674DC`).
