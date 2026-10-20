@@ -1,6 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_15191970
+void func_15191970(u8 *arg0);
 
 typedef struct {
     /* 0x00 */ f32 x;
@@ -85,7 +87,32 @@ s32 func_1519150C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_151915FC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191970.s")
+typedef struct { s16 base; s16 range; u8 pad4[0x10]; } Rng14;
+extern Rng14 D_800AA120[];
+s32 func_1513F680(u8 *, s32, s32, s32, s32);
+void func_15191970(u8 *arg0) {
+    s32 i;
+    u8 **p;
+    u8 *q;
+    Rng14 *r;
+
+    *(f32 *)(arg0 + 0x1C) = 0.0f;
+    *(s32 *)(arg0 + 0x20) = 0;
+    p = *(u8 ***)(arg0 + 0x24);
+    for (i = 0; i != 0x3C; i++, p += 3) {
+        if (*p != NULL) {
+            q = *p + 0x110;
+            *(f32 *)(q + 0) = 0.0f;
+            *(f32 *)(q + 4) = 0.0f;
+            *(f32 *)(q + 8) = 0.0f;
+            r = &D_800AA120[*(u8 *)(q + 0x20)];
+            func_1513F680(*p, 0xD, 0x12, 0, 0xD);
+            *(s16 *)(*p + 0x1C) = func_150ADA20() % (u32)(r->range + 1) + r->base;
+            *(s32 *)(*p + 0x58) |= 1;
+        }
+    }
+    bzero(*(u8 ***)(arg0 + 0x24), 0x2D0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191A90.s")
 
