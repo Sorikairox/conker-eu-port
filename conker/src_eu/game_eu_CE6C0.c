@@ -175,7 +175,31 @@ s32 func_150A29C8(s32 arg0, s32 arg1) {
     return func_150A2280(&D_800CC2D0[arg0], D_800D34B8 + arg1 * 0x34, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2FCC.s")
+s32 func_150A2FCC(u32 arg0, s32 arg1, s32 *arg2) {
+    s32 i;
+    u32 v;
+
+    if (arg0 < 16 && ((u16)D_800D2340 & (1 << arg0))) {
+        for (i = 0; i < arg1; i++) {
+            v = arg2[i] & 0xFFF;
+            if (v < (u32)D_800D3094) {
+                if ((D_800D3510[arg0][v >> 6] >> (v & 0x3F)) & 1) {
+                    return v;
+                }
+            }
+        }
+    } else {
+    for (i = 0; i < arg1; i++) {
+        v = arg2[i] & 0xFFF;
+        if (v < (u32)D_800D3094) {
+            if (func_150A2280(&D_800CC2D0[arg0], D_800D34B8 + v * 0x34, 1) == 0) {
+                return v;
+            }
+        }
+    }
+    }
+    return -1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3184.s")
 

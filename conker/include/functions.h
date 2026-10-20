@@ -1144,7 +1144,7 @@ void func_16000590(struct118 *arg0);
 s32  func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2);
 void func_15168A4C(struct_eu_node *arg0, s32 arg1);
 void func_15168A9C(struct_eu_node *arg0);
-s32  func_150A2FCC(s32 arg0, s32 arg1, struct_eu_words6 *arg2, struct127 *arg3);
+s32  func_150A2FCC(); // 3 params (u32, s32, s32 *); the caller in game_16EE20 passes a 4th
 s32 func_150027F8(Gfx *arg0);
 u16  func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
 s32 func_1506D584(void);
