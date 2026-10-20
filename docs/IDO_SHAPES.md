@@ -920,6 +920,8 @@ See `docs/sessions/s106.md`.
 3. Flag kept in `v0` across `if` blocks (`lbu v0,0(s0)` ... `andi v0,t8,0xFF`): declare it `s32`, not `u8`; `f = arg0[0] |= 1;` placed after the first of the following float stores matches the store order (`func_1514FC58`).
 4. Address of a global float (`lui v1; addiu v1` for `D_800BE9A4`) hoisted into the first basic block: a **same-line** `do { t = p[0]; x = ...; } while (0);` (permuter; on separate lines it does not match) (`func_15154A9C`).
 5. Stack struct passed to a spawner with a lone `s16` local at sp+0x20 below it: an unused `s16 zp;` declared before it puts it at the right slot (fakematch); the `arg0[0x3B]` byte load scheduled first = that field is the first statement (`func_151BD8A8`).
+6. `addu a0,v0,t9` (ret + loaded offset) that no source order gives (mine `addu a0,t9,v0`): `ret + *(s32 *)(ret + 0x50) + ((0, 0xF8))` comma fakematch (permuter, `func_151BA4B0`); `sw a0` of a struct field before an unrelated load: `goto l; l: ;` label barrier.
+OPEN: `func_151570C4` DIFF2 (frame +8), `func_1514FE68` SIZE+2.
 ## s104 recipes (unfolded sub-pointers, returned args, array-of-struct copies, spawner byte triples)
 See `docs/sessions/s104.md`.
 1. **`addiu v1,a0,K` recomputed after a call and spilled, fields read through v1** (mine folds `arg0 + K` into every offset): the pointer is used *before* the call, e.g. `p = arg0 + 0x18; s = sinf(p[6]);` instead of `sinf(*(f32 *)(arg0 + 0x30))` (`func_15162510`).
