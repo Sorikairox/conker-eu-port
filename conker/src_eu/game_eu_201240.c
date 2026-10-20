@@ -267,7 +267,25 @@ void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D611C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D6310.s")
+s32 allocate_memory(s32, s32, s32, s32);
+
+void func_151D6310(s32 *arg0, s16 arg1, s32 arg2, s32 *arg3, u8 *arg4) {
+    u8 dummy;
+
+    if (arg4 == NULL) {
+        arg4 = &dummy;
+    }
+    *arg4 = 0;
+    if (arg0[arg1] == 0) {
+        arg0[arg1] = allocate_memory(arg2 * 2, 1, 2, 1);
+        if (arg0[arg1] == 0) {
+            *arg3 = 0;
+            return;
+        }
+        *arg4 = 1;
+    }
+    *arg3 = arg0[arg1] + (D_800BE9C0 ? 0 : arg2);
+}
 
 void func_151D5E30(s32 **arg0)
 {
