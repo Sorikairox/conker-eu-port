@@ -249,7 +249,32 @@ void func_151BDDA4(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BE33C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BE65C.s")
+typedef struct {
+    s32 a;
+    u8 b;
+} K_E65C;
+void func_1516972C(struct102 *arg0);
+s32 func_15169850(s32, u8, s32, s32, s32);
+void func_151BE65C(struct102 *arg0, K_E65C *arg1, u8 arg2) {
+    s32 t;
+    K_E65C *p;
+    struct102 **pa0 = &arg0; // fakematch: address taken keeps arg0 in its home slot
+    K_E65C **pa1 = &arg1; // fakematch: address taken keeps arg1 in its home slot
+    u8 *pa2 = &arg2; // fakematch: address taken keeps arg2 in its home slot
+
+    if (*pa2 == 0x3B) {
+        p = (K_E65C *)((u8 *)*pa0 + 0x28);
+        t = (*pa1)->a == p->a;
+        if (1) { // fakematch: empty block keeps the first compare in its own basic block
+        }
+        if (t || (*pa1)->b == p->b) {
+            func_1516972C(*pa0);
+        }
+    } else {
+        p = (K_E65C *)((u8 *)*pa0 + 0x28);
+        func_15169850((s32)*pa1, *pa2, (s32)p, (s32)p + 4, (s32)*pa0);
+    }
+}
 
 void func_151BE6E8(u8 *arg0)
 {

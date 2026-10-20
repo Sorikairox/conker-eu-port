@@ -218,7 +218,112 @@ void func_1514E540(u8 *arg0) {
     arg0[0x101] |= 0x34;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E57C.s")
+extern f32 D_800A61E8;
+extern f32 D_800A61EC;
+void *func_1518A560(void *, void *, void *, s32, s32, s32, s32);
+void func_1514E57C(struct127 *arg0) {
+    s32 pad; // fakematch: unused slot at the top of the frame
+    struct {
+        f32 uA4;
+        f32 uA8;
+        f32 uAC;
+        f32 uB0;
+        f32 uB4;
+        f32 uB8;
+        f32 uBC;
+        f32 uC0;
+        f32 uC4;
+        u8 padC8[0x24];
+        f32 uEC;
+        u8 padF0[8];
+        s8 uF8;
+        s8 uF9;
+        s8 uFA;
+        s8 uFB;
+    } b;
+    struct {
+        s8 u4C;
+        u8 pad4D;
+        s16 u4E;
+        s16 u50;
+        u8 pad52[2];
+        s32 u54;
+        s32 u58;
+        u8 u5C;
+        u8 u5D;
+        u8 u5E;
+        u8 u5F;
+        u8 pad60[8];
+        f32 u68;
+        f32 u6C;
+        f32 u70;
+        f32 u74;
+        f32 u78;
+        f32 u7C;
+        u8 pad80[0xC];
+        s32 u8C;
+        u8 pad90;
+        u8 u91;
+        u8 pad92[0x12];
+    } a;
+    struct {
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        struct127 *u44;
+        s8 u48;
+        u8 u49;
+        s8 u4A;
+        u8 pad4B;
+    } c;
+
+    a.u4C = 3;
+    a.u54 = 0;
+    a.u58 = 0;
+    a.u8C = 0x12002;
+    a.u50 = 0;
+    a.u91 = 0xFF;
+    a.u5C = 0xFF;
+    a.u5D = 0x8E;
+    a.u5E = 0x19;
+    a.u5F = 0xFF;
+    a.u4E = 0x401;
+    a.u68 = 0.0f;
+    a.u6C = 0.0f;
+    a.u70 = 0.0f;
+    a.u74 = 0.0f;
+    a.u78 = 0.0f;
+    a.u7C = 0.0f;
+    b.uA4 = 20.0f;
+    b.uA8 = 20.0f;
+    b.uAC = 20.0f;
+    b.uB0 = 20.0f;
+    b.uB4 = 0.0f;
+    b.uB8 = 0.0f;
+    b.uBC = 0.5f;
+    b.uC0 = 0.5f;
+    b.uC4 = D_800A61E8;
+    c.u49 = arg0->unique_id;
+    c.u2C = 35.0f;
+    c.u44 = arg0;
+    c.u30 = 27.0f;
+    c.u38 = 35.0f;
+    c.u3C = 27.0f;
+    c.u48 = 6;
+    b.uF8 = 0;
+    b.uF9 = 0;
+    b.uFA = 0;
+    b.uFB = 0;
+    c.u4A = -1;
+    c.u34 = 59.0f;
+    c.u40 = D_800A61EC;
+    b.uEC = 1.0f;
+    func_1514F18C(func_1518A560(&a, &b, &c, 2, 0, 0, 0), arg0, 6);
+    func_151D7A60(arg0, 5, -1, 0xFF, 1);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E704.s")
 
