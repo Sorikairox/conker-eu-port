@@ -550,3 +550,18 @@ See `docs/sessions/s54.md`.
     allocation only); if it shows inserted `jal`/`addiu a0` the callee prototype or the vector shape is wrong; if the `addiu sp` line differs, fix declaration order (recipe 2) first.
     The permuter on 100+ insn functions rarely reaches 0 in 15 minutes unless the diff is a single schedule choice (it solved `func_15157E88` in 20 s and took `func_1515835C` from DIFF54 to DIFF31 in 15 min).
 
+
+## s57 recipes (slice < 0x130000: spawner stack structs, named-local slot order, params)
+
+See `docs/sessions/s57.md`.
+1. **Stack-struct spawners** (49 asm callers of `func_15132FBC`, e.g. `func_150CB2D0`/`CBD10`/`CCF8C`/`CE420`, `func_150D2C9C`): m2c emits scalars `s8 sp98; s16 sp9C; f32 sp28[13]; ...` and passes `sp28`. IDO drops the stores to the never-addressed scalars (SIZE-56). `spstruct.py in out`
+   merges all `spXX` at or above the lowest array into ONE `struct { ...; } sp` with pads (fields `uXX` named by stack offset) and passes `&sp`: the SIZE-56 drafts become DIFF42/47, i.e. all stores and the schedule are right and only the frame layout is left
+   (mine puts the struct 8 bytes higher with an 8-byte hole below, the ref has the same 8 bytes above the struct; 2 pad words, f64 tail, union with f64, named `sp20` all failed, OPEN).
+2. **9-byte aligned const struct copy**: `struct S9 { u8 a[9]; } sp38; sp38 = D_800A0D60;` gives exactly `lw/lw/sw/lbu/sw/sb` through `$at` (the three-statement s32/s32/u8 form schedules the byte load earlier).
+3. **Named locals in registers take slots, and their DECLARATION ORDER decides where the free hole ends up** (`func_150EA3B4`, DIFF3 -> OK): declare the live-across-calls float (`f32 temp_f20;`) BEFORE the stack vectors `s32 sp80[3]; s32 sp74[3];` to get the ref's unused slot above them
+   (the permuter had the vectors right but 4 bytes too low). Inline `x = call();` temps that are only consumed as arguments (they become unnamed spills) and save their slots.
+4. **`rand() * field` operand order**: when mine gives `mul.s f16,f10,f0` and the ref `mul.s f16,f0,f10`, write the field first (`field * func_150ADA68()`); `(0, call())` did not help here (`func_150EA3B4`).
+5. **`f32` literal passed as `0x3F800000`** to an `f32` parameter converts the integer (`lui at,0x4E7E`); write `1.0f` (`func_150891D4`).
+6. **Sub-vector `s32 spXX` + `&spXX` to a `float[3]` out parameter**: declare the real 12-byte arrays (`s32 sp88[4]`/`[3]`) or the frame is short by 4 bytes per vector (`func_150891D4`, `func_150EA3B4`).
+7. **Stack-passed args of a function that ignores them**: `func_150C76C0` read its 6th parameter (`lw $v1,0x74($sp)`), m2c had dropped the 5th (`arg4`): add the unused `s32 arg4` so the later params land on the right stack slots (DIFF1 -> OK).
+8. **`void f(s16, s16, f32, void *)` prototype for `func_15143794`** (the header has `s32 f(s16,s16,s32,u8*)` in one file only): fixes SIZE+2 in every draft that calls it (`func_150E0978`: after the prototype the remaining DIFF35 was frame slots, fixed by inlining the `spXX = call()` temps, recipe 3 of s55).

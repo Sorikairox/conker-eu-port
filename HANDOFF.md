@@ -34,6 +34,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 57 (main, game < 0x130000): 3343 / 5915 functions in C (56.5%)**, code bytes 380,568 / 2,253,856 (16.9%) (game 2936 = 307,616 bytes, init 375, debugger 32), `verify_all.sh` all OK. +3 (`func_150C76C0`, `func_150E0978`, `func_150EA3B4`) in `1887f9a`.
+  Doc `docs/sessions/s57.md`, recipes IDO_SHAPES `## s57 recipes`, new tool `spstruct.py` (stack-struct spawner drafts). Pool: 344 unlogged 100-200 insn functions in the slice -> 282 drafts -> 0 OK / 139 CERR / 121 SIZE / 22 DIFF.
+  Key open puzzle: the stack-struct spawner family (49 callers of `func_15132FBC`): after `spstruct.py` the stores match, only the frame hole (8 bytes below mine, above in the ref) is wrong; `func_150CB2D0`/`CBD10`/`CCF8C`/`CE420` are identical DIFF47 drafts. `func_151096A0` is in `game_eu_1365E0` (>= 0x130000), not in the main slice.
 - **Session 54 (main, game < 0x130000): 3320 / 5913 functions in C (56.1%)**, code bytes 374,552 / 2,253,856, `verify_all.sh` all OK; no new matches (infrastructure session, commit `8165abe`).
   `tools/eu_port/fieldinfer.py` infers the layout of `struct127` (D_800CC2D0 entries) and which asm-function parameters are `struct127 *` from all remaining asm + the matched-C header; the typed body is now in
   `structs.h` (121 inferred fields, pinned fields untouched; all 709 objects still match) and 27 prototypes were retyped to `struct127 *`. `TYPED=1 gensome.sh` / `gen2.py` use it (context `ctx_typed/`, per-function `ctxf/`).
@@ -93,6 +96,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s57: `spstruct.py` (m2c stack-struct scalars -> one `struct sp`). `rt.sh` evals `wt.sh env a` (worktree!): do not use it in the main checkout.
 - s55: `vecfix.py` (m2c scalar `spXX` vectors -> arrays), `spinline.py` (inline named spill temps into the consuming call), `opshift.py` (opcode-level shift summary of a `repair_try` diff), `rt.sh f draft.c` (try + shifts).
 
 Parallel worktrees (one agent per worktree; s35)
@@ -141,6 +145,8 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+
+00. Slice below 0x130000 after session 57 (`docs/sessions/s57.md`): solve the spawner frame layout (drafts in `docs/sessions/s57_drafts/`, ranked pool `rank.txt`), then clone to the 4 identical drafts; `func_150891D4` DIFF11 / `func_150619A8` SIZE-1 are register-level. Run the permuter first on any DIFF>40 draft whose call shapes are right (it cut `func_150EA3B4` from DIFF135 to DIFF3 in 30 min).
 
 0. Slice game >= 0x130000 after session 55 (details `docs/sessions/s55.md`, recipes IDO_SHAPES `## s55 recipes`): large functions pay off in bytes. Open near misses with drafts in `docs/sessions/s55_drafts/`
    (permuter-ready: `func_151922C4`, `func_15166F10` DIFF4, `func_1511F30C` DIFF13, `func_151AF064`, `func_15151500`, `func_1000F6B8`; structure work: `func_151BCD44`, `func_151664F0`, `func_151846C0`, `func_151A31D4`).
