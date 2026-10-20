@@ -37,7 +37,25 @@ s32 func_15109034(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_151091B8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_151092A4.s")
+s32 func_151092A4(u8 *arg0, s32 arg1) {
+    f32 mf[4][4];
+    u8 *q;
+
+    q = arg0; q += *(s32 *)(arg0 + 0x50); q += 0xF8;
+    func_150A8050(mf, *(f32 *)q, 0.0f, *(f32 *)(q + 4));
+    mf[3][1] = *(f32 *)(q + 0x10);
+    mf[0][0] *= 0.157f;
+    mf[0][1] *= 0.157f;
+    mf[0][2] *= 0.157f;
+    mf[1][0] *= 0.157f;
+    mf[1][1] *= 0.157f;
+    mf[1][2] *= 0.157f;
+    mf[2][0] *= 0.157f;
+    mf[2][1] *= 0.157f;
+    mf[2][2] *= 0.157f;
+    guMtxF2L(mf, &((Mtx *)(arg0 + 0x78))[D_800BE9C0]);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15109390.s")
 

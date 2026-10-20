@@ -34,11 +34,56 @@ void func_15158794(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158838.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158AFC.s")
+s32 func_15158AFC(Mtx *arg0, u8 *arg1) {
+    f32 *r;
+    f32 mf[4][4];
+
+    r = (f32 *)(arg1 + 0xF8);
+    func_150A8050(mf, r[0], r[1], r[2]);
+    mf[3][0] = *(f32 *)(arg1 + 0x48);
+    mf[3][1] = *(f32 *)(arg1 + 0x4C);
+    mf[3][2] = *(f32 *)(arg1 + 0x50);
+    mf[0][0] *= r[3];
+    mf[0][1] *= r[3];
+    mf[0][2] *= r[3];
+    mf[1][0] *= r[3];
+    mf[1][1] *= r[3];
+    mf[1][2] *= r[3];
+    mf[2][0] *= r[3];
+    mf[2][1] *= r[3];
+    mf[2][2] *= r[3];
+    guMtxF2L(mf, arg0);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158BF4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_185E30/func_15158E90.s")
+typedef struct { f32 m[4][4]; } MtxF_s82;
+extern MtxF_s82 D_8008B1B8;
+
+s32 func_15158E90(Mtx *arg0, u8 *arg1) {
+    f32 s;
+    u8 *p;
+    MtxF_s82 mf;
+
+    p = arg1;
+    mf = D_8008B1B8;
+    s = *(f32 *)(p + 0xF8) * 0.003921569f;
+    mf.m[3][0] = *(f32 *)(p + 0x48);
+    mf.m[3][1] = *(f32 *)(p + 0x4C);
+    mf.m[3][2] = *(f32 *)(p + 0x50);
+    mf.m[0][0] *= s;
+    mf.m[0][1] *= s;
+    mf.m[0][2] *= s;
+    mf.m[1][0] *= s;
+    mf.m[1][1] *= s;
+    mf.m[1][2] *= s;
+    mf.m[2][0] *= s;
+    mf.m[2][1] *= s;
+    mf.m[2][2] *= s;
+    guMtxF2L(mf.m, arg0);
+    return 1;
+}
 
 void func_15158F90(u8 *arg0) {
     s32 i;
