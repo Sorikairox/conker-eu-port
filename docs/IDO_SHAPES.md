@@ -925,6 +925,13 @@ See `docs/sessions/s93.md`.
 5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
 6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
 
+## s105 recipes (lui-able constants from .rodata, extern runs in owned files, emitter structs)
+See `docs/sessions/s105.md`.
+1. **A float whose low 16 bits are zero (`1655.0f` = 0x44CEE000) loaded with `lui at; lwc1` from `.rodata`**: no literal form gives that (`1655.0f`, `(f32)1655.0`, `1655`, `1655.0` all fold to `lui; mtc1`); a function-scope `static const` gives the code but the wrong `.rodata` position. Use `extern f32 D_x;` (`func_150C2700`).
+2. **Externs in a file that owns `.rodata`**: `rodata_inject.py` attaches named externs to the next GLOBAL_ASM function, so a run of externs is fine when it ends right before that function's items; turn the C neighbours in between back into externs to keep the order (`func_150C2804`, `func_150C2898` -> `func_150C29F0`). Check with `rodata_inject.py <stem> --dry`.
+3. **Frame 8 bytes too big with identical code** after switching an extern to a literal (`func_150C2898`, `0.001f`) or with a named float temp (`func_150C2558`): keep the extern / write the value into the struct field and reuse the field (no reload).
+4. Small spawners with one stack struct: put the statement whose constant is shared (CSE'd, e.g. `6` stored twice) or the stack-arg float (`s.u10 = arg4;`) first; IDO numbers t/f registers in source order of first use, the stores are scheduled anyway (`func_150C2700`).
+OPEN: `func_150C2290` DIFF37 / `func_150C2558` SIZE+1 (t-register numbering in the `func_15151FA8` emitter struct).
 ## s103 recipes (indirect calls, negated constants, small neighbours)
 See `docs/sessions/s103.md`.
 1. **`lui t9,%hi(f); addiu t9,%lo(f); jalr t9`** to a known function = a call through a cast function pointer: `((s32 (*)(u32, u32 *))func_151EF800)(...)` (`func_150C3D5C`). Writing to a function's code: `((u32 *)&func_10004074)[0] = ...` (`(u32 *)func` without `&` is a cfe error).

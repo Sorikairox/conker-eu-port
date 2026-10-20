@@ -7,22 +7,22 @@ typedef struct {
     s32 u58, u5C, u60, u64, u68, u6C, u70, u74, u78;
     u8 u7C, u7D;
     s16 u80, u82;
+    u8 pad84[4];
 } S1FA8;
 s32 func_15151FA8(S1FA8 *, u8, s32);
 f32 func_150ADA68(void);
 
 s32 func_150C2558(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
-    f32 t;
     S1FA8 s;
 
     s.u0 = arg2;
     s.u4 = arg3;
-    t = (arg4 + 15.0f) - (func_150ADA68() * 30.0f);
+    s.u8 = (arg4 + 15.0f) - (func_150ADA68() * 30.0f);
     s.u2A = 9;
     s.u30 = 3;
     s.u36 = 0x15;
     s.u38 = 0xB;
-    s.u28 = (s32)(t * 0.07012195f) - 0x40;
+    s.u28 = (s32)(s.u8 * 0.07012195f) - 0x40;
     s.u32 = 3;
     s.u34 = 0x28;
     s.u3A = 0x28;
@@ -53,7 +53,6 @@ s32 func_150C2558(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     s.u7D = 7;
     s.u80 = 0xC;
     s.u82 = 0x15;
-    s.u8 = t;
     s.u1C = 200.0f;
     s.u20 = 150.0f;
     s.uC = 22.0f;
