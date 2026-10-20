@@ -82,7 +82,43 @@ struct137 *func_1000B2F4(s32 arg0) {
     return NULL;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000B3D4.s")
+void func_1000B3D4(struct00 *arg0, struct151 *arg1) {
+    s32 i;
+    struct151 *p;
+
+    p = NULL;
+    i = 0;
+    if ((&arg1)[0] != NULL) { // fakematch: keeps arg1 in its stack home
+        if (arg1->unk60 != NULL && arg0 != arg1->unk60) {
+            if (arg1->unk60->unk4 == arg0->unk4) {
+                arg0->unk4 = -1;
+                return;
+            }
+            arg1->unk60->unk4 = -1;
+        }
+        arg1->unk60 = arg0;
+        return;
+    }
+    for (; i != 3; i++) {
+        if (p == NULL && (D_800417B0[i] == NULL || (D_800417B0[i]->unk4 <= 0 && D_800417B0[i]->unk60 == NULL))) {
+            p = (struct151 *)func_1000B2F4(0);
+            if (p != NULL) {
+                p->unk0 = i;
+                p->unk60 = arg0;
+                D_800417B0[i] = p;
+            } else {
+                arg0->unk4 = -1;
+                return;
+            }
+        } else if (p == NULL && D_800417B0[i] != NULL && D_800417B0[i]->unk60 != NULL && D_800417B0[i]->unk60->unk4 == 0) {
+            p = (struct151 *)-1;
+            func_1000B294(D_800417B0[i]->unk60);
+            D_800417B0[i]->unk60->unk4 = -1;
+            D_800417B0[i]->unk60->unk0 = -1;
+            D_800417B0[i]->unk60 = arg0;
+        }
+    }
+}
 
 s32 func_1000B548(s32 *arg0) {
     s32 ret = 0;
