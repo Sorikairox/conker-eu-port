@@ -730,6 +730,24 @@ See `docs/sessions/s75.md`.
 2. **A global pointer load the ref schedules at the very top** (`lui v0; lw v0` right after the prologue) is the first statement of the source: `p = D_800D154C; sp.u20 = p; sp.u24 = p->unique_id;` (`func_1506F54C`). Placed later, IDO sinks the load to its use.
 3. A call whose 4th argument register holds only a `%hi` (`lui a3` reused for `addiu a2,a3,%lo`) is a 3-arg call of an unprototyped callee (`s32 f();`), the other calls pass 4 (`func_15096E78`).
 4. Temps spilled across calls in different `case` arms get the ref's separate slots when declared inside the case blocks (`case 1: { struct108 *a; ... }`) (`func_15096E78`).
+## s76 recipes (screening context, exhaustive small orders, file families)
+See `docs/sessions/s76.md`.
+1. **Re-screen a near miss with the callee prototypes it needs**: a draft whose callees are still `GLOBAL_ASM` with no prototype passes `f32` as `double` (SIZE+9 instead of DIFF5, `func_150464C0`); put the prototypes at the top of the draft. Same for a sibling defined later in the file (`func_15046C6C` needs `func_15046750`'s prototype).
+2. **Statement-order DIFFs: screen all permutations** (4 statements = 24 variants, one `tryall`): `func_150D7930` (DIFF10 t-register numbering, the `|=` first) and the 12 declaration orders of 3 named locals + pad (`func_150DE52C`, f0 vs f6 reload). Cheaper than reasoning about the register order.
+3. **`if (r)` vs `if (r != 0)`** on a `u8` call result moved its spill `sb` from after the first call into the second `jal` delay slot (permuter find, `func_150464C0`).
+4. **Base register before index**: `addu v1, base, idx*K` with the base loaded first = `((f32 (*)[5])base)[idx]` array indexing, not `base + idx * 0x14` (`func_150DE52C`).
+5. **`lwl/lwr` + `lhu/sh` copy of an aligned 18-byte block** = assignment of a struct with alignment 2 (`struct { s16 v[9]; }`), plain C (`func_150475B0`).
+6. **Nested ternary as a call argument**: `bne ..; b L; li a0,2; beql v0,zero,L2; li v0,1; b L2; move v0,zero; li v0,1 (dead)` = `x == K ? 2 : (x != 0 ? 0 : 1)` (the `beql` tests the false arm of `!= 0`) (`func_150A0890`).
+7. **A beq chain for a small switch is a plain `switch`**; if its compare constants are CSE'd with stored values, the stored-to variable has another type (`u8`) (`func_1500E738`).
+8. **Read the neighbours of a match**: callers and siblings in the same file share the structs and shapes (5 of 11 matches this session were `HitInfo` functions next to `func_150464C0`; two were clones of an already matched function).
+9. OPEN: a `jal sqrtf` in game code cannot be written while `gu.h`'s `#pragma intrinsic(sqrtf)` is in scope (`(&sqrtf)(x)` gives `jalr`); an alias symbol works for the call (`func_15047680`).
+## s78 recipes (sqrtf call, reciprocal temp, early return value)
+See `docs/sessions/s78.md`.
+1. **`jal sqrtf` in a file that includes gu.h**: put `#pragma function sqrtf` above the function (undoes `#pragma intrinsic(sqrtf)`; `game/done/game_75950.c` already did this). It stays in effect for the rest of the file: a later function that needs `sqrt.s` takes `#pragma intrinsic(sqrtf)` again. Solves the s76 OPEN 9 without an alias symbol (`func_15047680`).
+2. **guLookAt-style normalisation with a zero guard** (`len = sqrtf(..); if (len == 0.0f) len = K; len = 1.0f / len; x *= len;`): a separate `inv` for the reciprocal. Reusing `len` merges the webs and re-allocates the scaled vector to new FPRs (frame +32) (`func_15047680`; same effect on the reflect clone `func_150479F0`).
+3. **`li v0,1` scheduled before a switch with `b end` arms and an empty `jr ra; nop`** = `s32 ret = 1; ... return ret;` together with a named pointer local for the switch operand (`u8 *p = ...; switch (p[0x68] - 15)`); either one alone stays DIFF27 (`func_150B6BBC`). A subtraction before the compares (`addiu v1,v1,-15; beql v1,zero`) is `switch (x - 15) { case 0: ... }`, not `case 15`.
+4. **A float constant loaded in the first two instructions** (`lui at; lwc1 f0` before the index arithmetic): `f32 k = D_x;` first and the rest of the body in a block with a declaration (s66 boundary) (`func_15034790`).
+5. Store-order sweeps over all 24 orders x tail forms in one `tryall` solved a switch-handler twin directly (`func_150D79EC`); do this before any reasoning for small handler families.
 ## s77 recipes (clean rewrites of permuter bests, eeprom probe, LAX switch drafts)
 See `docs/sessions/s77.md`.
 1. **Rewrite permuter bests from the ref asm before running more rounds**: 5 of 7 s74 near misses (DIFF2-19 after 2-3 remote rounds) closed as clean source. Loops over global arrays are index loops (`D[i].x`, `for (i = 0; i < 2; i++)` over two parallel tables -> IDO's pointer IVs + `&D_end` compare); an inner array whose start is copied (`lw v0, 0(s7) ... move s0,v0`) is a named `base = D[i]` indexed `base[j * 3 + k]` (`func_1510B930`, `func_151154C4`).

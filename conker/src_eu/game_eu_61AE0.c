@@ -35,7 +35,27 @@ s16 *func_150346A0(s16 *arg0, s32 arg1)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034710.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034790.s")
+extern f32 D_800980CC;
+s16 *func_15034790(s16 *arg0, s32 arg1) {
+    struct127 *p;
+    s32 v;
+    f32 k;
+
+    k = D_800980CC;
+    {
+        s32 blk_t; // fakematch: block boundary keeps the k load first
+
+        arg0[0] = 0x12;
+        p = &D_800CC2D0[arg1];
+        v = *(s16 *)((u8 *)p + 0x2E6);
+        arg0[1] = v * k;
+        arg0[2] = 0xE;
+        p += 0; // fakematch: register roles of p and v
+        v = -*(s16 *)((u8 *)p + 0x2E4);
+        arg0[3] = v * k;
+    }
+    return arg0 + 4;
+}
 
 s32 func_1503BCAC();
 

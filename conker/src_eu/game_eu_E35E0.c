@@ -192,7 +192,26 @@ void func_150B6930(struct102 *arg0, s32 arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B696C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6BBC.s")
+s32 func_150B6BBC(u8 *arg0) {
+    u8 *p = *(u8 **)(arg0 + 0x18);
+    s32 ret = 1;
+
+    switch (p[0x68] - 15) {
+    case 0:
+        (*(u8 **)(arg0 + 0x14))[9] = 1;
+        break;
+    case 1:
+        (*(u8 **)(arg0 + 0x14))[9] = 0;
+        (*(u8 **)(arg0 + 0x14))[0x2F] = 0x14;
+        break;
+    default:
+    case 2:
+        (*(u8 **)(arg0 + 0x14))[9] = 0;
+        (*(u8 **)(arg0 + 0x14))[0x2F] = 0x28;
+        break;
+    }
+    return ret;
+}
 
 s32 func_15182BE0(u8, u8, u8, s32, s16, u8, u8, s32);
 

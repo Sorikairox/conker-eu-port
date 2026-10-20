@@ -1006,6 +1006,17 @@ func_150464C0	CERR	1	DIFF5	n	n	s75 sibling of 469E8; ref stores r1 (sb) in delay
 func_150DE6AC	SIZE+1	12	DIFF9	n	y	s75 frame fixed (no named temps), regs only; 2 remote perm rounds
 func_1506F54C	SIZE-1	20	DIFF44	n	y	s75 p=D_800D154C first, float store order; perm 2 rounds
 func_15096E78	SIZE+1	14	DIFF96	n	n	s75 K&R func_1512DAD0 (3-arg call), case-local a0 temps give ref spill slots; frame 0x38 vs 0x30
+func_150464C0	DIFF5	3	OK	y	y	s76 callee protos u8(u8*,f32,s32*,HitInfo*); perm: if (r1) instead of r1 != 0 moves sb into 2nd jal slot
+func_150DE52C	DIFF11	3	OK	y	n	s76 f32 (*)[5] index; u50/u54/u5C named locals after struct, unused s32 pad58 (fakematch) -> f0 reload
+func_150DE6AC	DIFF9	1	OK	y	n	s76 twin of DE52C, same fix
+func_150D7930	DIFF10	2	OK	y	n	s76 all 24 statement orders: |= 2 first, then 0x2A, 0x28, 0x29 stores
+func_1500E738	SIZE-1	3	OK	y	n	s76 plain switch 0/1/2-3 with break; extern u8 D_800DCE50 stops CSE of 1/2 with the beq compares; case 1: before default
+func_150A0890	SIZE-2	4	OK	y	n	s76 case 5: nested ternary (x == 0x3E7 ? 2 : (x != 0 ? 0 : 1)) + break, function-level return 0
+func_15046750	SIZE+9	2	OK	y	n	s76 sibling of 150464C0 (HitInfo template, max instead of min, early clear of unk1D/unk20); HitInfo extended
+func_150475B0	none	3	OK	y	n	s76 HitInfo filler: HitPos (s16[9], lwl/lwr copy) assignment, flags = (c?1:0)|(c?2:0)|(c?4:0), u8 unk1D (separate li 1)
+func_1504715C	none	4	OK	y	n	s76 HitInfo from object: s16 x,y,z trunc locals (s32 gives v-regs), arm-local s32 idx (shape D tail), ternary |= call ? 1 : 0
+func_15046C6C	none	2	OK	y	n	s76 clone of matched 150469E8 (max: b.t < a.t; calls 15046750 + 150453BC)
+func_15046FF0	none	1	OK	y	n	s76 clone of 150469E8 (calls 15046C6C + 1504583C)
 func_1510B930	DIFF4	1	OK	y	n	s77: clean index loop D_800D9EEO[i]
 func_151154C4	DIFF5	2	OK	y	n	s77: for i<2, base=D_800DC208[i], base[j*3+k]
 func_151B8B5C	DIFF12	1	OK	y	n	s77: vertex copy + += lerps

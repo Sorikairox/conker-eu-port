@@ -27,7 +27,29 @@ void func_150BADD0(u8 *arg0, s32 arg1, u8 arg2) {
     func_15149514(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E81B0/func_150BAE10.s")
+s32 func_1504715C(s32, u8 *);
+s32 func_15046F70(f32 *, s32, f32, s32);
+extern f32 D_800A0230;
+
+s32 func_150BAE10(f32 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+    f32 sp24[3];
+
+    arg0[0] = *(f32 *)(arg1 + 0x14);
+    if (D_800A0230 < *(f32 *)(arg1 + 0x180)) {
+        arg0[1] = *(f32 *)(arg1 + 0x180);
+    } else {
+        arg0[1] = *(f32 *)(arg1 + 0x18);
+    }
+    arg0[2] = *(f32 *)(arg1 + 0x1C);
+    if (arg2 == 0) {
+        return 1;
+    }
+    sp24[0] = arg0[0];
+    sp24[1] = arg0[1] + 100.0f;
+    sp24[2] = arg0[2];
+    func_1504715C(arg2, arg1);
+    return func_15046F70(sp24, 0, arg0[1] - 100.0f, arg2);
+}
 
 s32 func_150BAEE0(s32 arg0, s32 arg1) {
     return 9;
