@@ -801,6 +801,15 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s96 recipes (big spawners: scalar slots, loop-count position, tail structs)
+See `docs/sessions/s96.md`.
+1. **Named scalars take 4-byte frame slots next to the spawner structs** (even register-allocated ones): when every struct offset is off by 4n with the frame right, move n scalar declarations from below the structs to above them (or vice versa for the frame top); screen all placements in one `tryall` (`func_150E16CC`, `func_150E9E10`).
+2. **Constant stores after a `jal`** in the ref: the call's statement comes before them in the source (`i = (rand() & 7) + 5;` above the second struct's constant run, then `for (; i > 0; i--)`) (`func_150E9E10`).
+3. **An argument kept in an s-register across a loop where the ref reloads it from its home** (and the ref hoists a struct address into `fp` instead): give the callee prototype the narrow type (`u8`), which frees the register (`func_15132FBC(void *, s32, s32, s32, u8, s32)`).
+4. **Spawner + tail struct** (`memcpy(obj + 0xA8, &b, 0x28)`, `func_1513092C`): declare the tail as its own local after the spawner struct, `obj` between them; chain the shared float as `b.scale = sp.u5C = sp.u60 = X` and screen the 6 orders (`func_150C65D8`).
+5. **Triple chains**: in `a = b = c = X` the middle target is stored first, the left one second, the right one last (after the next call): `sp.u52 = sp.u56 = sp.u3E = t;` (`func_150E9E10`).
+OPEN: `func_150E16CC` DIFF26 (`mtc1 zero,f22` placed late; drafts `docs/sessions/s96_drafts/`), `func_1509BE40`/`BFB0` SIZE+1 (varargs, one `lui at` not shared, frame 8 low).
+
 ## s94 recipes (spawner frames by declaration order, block-scoped flags)
 See `docs/sessions/s94.md`.
 1. **Spill slot of a flag 4 bytes off** (`func_150B8C7C`, s92 DIFF2): permute the order of the scalar names below the stack struct (`s32 obj; s32 b; s32 a;`); `itertools.permutations` over the declaration lines, screened in one loop, found it at once.
