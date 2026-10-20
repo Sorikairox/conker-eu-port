@@ -855,3 +855,12 @@ See `docs/sessions/s91.md`.
 4. A reference `f32 *` global that the ref indexes with `lui at; addu at; lwc1 %lo(at)` is an array in this game: declare `extern f32 D_x[];`.
 5. A `static` local in a gu file (`guRandom` xseed) needs the function in its own file (the containing file had other flags) plus the owned `.data` piece (16-byte aligned start).
 
+
+## s93 recipes (libc printf family, PD mp3)
+See `docs/sessions/s93.md`.
+1. **libultra libc was compiled without `-signed`** (plain `char` = `lbu`), the project uses `-signed`: put `#define char unsigned char` inside the function body (after the signature, so prototypes still agree) and `#undef char` after it; make `_Pft.qual` `unsigned char`.
+2. **Back-branch delay slot holds a copy of the loop head's first load** (`addiu a3,s2,1; b top+4; lbu s0,0(a3)`) and the preceding `if` uses `beql` into the tail, but mine puts the tail assignment in the `b` delay slot: a `dummy: ;` label after the last statement of the loop body splits the tail block (fakematch; `_Printf` both copies).
+3. **Old xprintf scan loop** is GoldenEye's `for (c = *s; (c = *s++) > 0;) { if (c == '%') { s--; break; } }` (`blez` on the loaded byte), not PD/ultralib's `c != 0 && c != '%'`.
+4. A string literal in a file that does not own `.rodata` links into a discarded section (`ld: defined in discarded section .rodata`): use the `extern` D_ symbol.
+5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
+6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
