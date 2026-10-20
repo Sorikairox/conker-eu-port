@@ -730,3 +730,11 @@ See `docs/sessions/s75.md`.
 2. **A global pointer load the ref schedules at the very top** (`lui v0; lw v0` right after the prologue) is the first statement of the source: `p = D_800D154C; sp.u20 = p; sp.u24 = p->unique_id;` (`func_1506F54C`). Placed later, IDO sinks the load to its use.
 3. A call whose 4th argument register holds only a `%hi` (`lui a3` reused for `addiu a2,a3,%lo`) is a 3-arg call of an unprototyped callee (`s32 f();`), the other calls pass 4 (`func_15096E78`).
 4. Temps spilled across calls in different `case` arms get the ref's separate slots when declared inside the case blocks (`case 1: { struct108 *a; ... }`) (`func_15096E78`).
+## s77 recipes (clean rewrites of permuter bests, eeprom probe, LAX switch drafts)
+See `docs/sessions/s77.md`.
+1. **Rewrite permuter bests from the ref asm before running more rounds**: 5 of 7 s74 near misses (DIFF2-19 after 2-3 remote rounds) closed as clean source. Loops over global arrays are index loops (`D[i].x`, `for (i = 0; i < 2; i++)` over two parallel tables -> IDO's pointer IVs + `&D_end` compare); an inner array whose start is copied (`lw v0, 0(s7) ... move s0,v0`) is a named `base = D[i]` indexed `base[j * 3 + k]` (`func_1510B930`, `func_151154C4`).
+2. **osEepromProbe shape** (`beqz v0, L; lhu t6, type(sp)` then `b end; move v1,zero`): compute `type = st.type & 0xC000;` right after the call, then `if (ret != 0) { ret = 0; } else { switch (type) {...} }` (`func_151DDA10`).
+3. **m2c `/* irregular */` switches with `goto block_N`** are plain switches with the shared tail repeated in each case (`ret = 1; break;`); case body order follows the ref layout, `default:` last unless the ref puts its body first (`func_151598E0`, `func_151307F0`).
+4. **`move v1,v0; move v0,v1` before the epilogue where the ref has the value in `v0` already**: the s32 function has no `return` (falls off the end with the variable in v0, IDO_SHAPES 3.9) (`func_15195024`, fakematch comment).
+5. **Prologue `sw a1; andi t6,a1,0xFF; or a1,t6,zero`** (narrow in place, then `a1` passed on unchanged to several calls) = the callees' prototypes take `u8` (`func_15172164`; with `s32` prototypes IDO narrows into `a3` and copies per call).
+6. A spill slot 4 bytes low (0x20 vs 0x24) with two named locals: declare the spilled one first (`u8 *obj; s32 type;`, `func_151307F0`).
