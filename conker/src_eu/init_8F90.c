@@ -709,4 +709,50 @@ s32 func_10009FFC(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A03C.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A348.s")
+typedef struct ACBuf_s {
+    ALLink node;
+    s32 unk8;
+    s32 *unkC;
+    s32 unk10;
+    s8 unk14;
+    u8 unk15;
+    u8 unk16;
+} ACBuf;
+typedef struct {
+    s32 unk0;
+    ACBuf *firstUsed;
+    s32 unk8;
+    s32 unkC;
+    ACBuf *firstFree;
+} ACState;
+#define acState (*(ACState *)&D_800406A0)
+
+void func_1000A348(void) {
+    ACBuf *dmaPtr, *nextPtr;
+    s32 *p;
+
+    dmaPtr = acState.firstUsed;
+    while (dmaPtr) {
+        nextPtr = (ACBuf *) dmaPtr->node.next;
+        if (dmaPtr->unk14 == 0 && dmaPtr->unk16 == 0) {
+            p = dmaPtr->unkC;
+            *p = dmaPtr->unk8;
+            dmaPtr->unkC = NULL;
+            if (acState.firstUsed == dmaPtr) {
+                acState.firstUsed = nextPtr;
+            }
+            { ALLink *ln = (ALLink *) dmaPtr; if (ln->next) ln->next->prev = ln->prev; if (ln->prev) ln->prev->next = ln->next; }
+            if (acState.firstFree) {
+                ALLink *ln = (ALLink *) dmaPtr; ALLink *to = (ALLink *) acState.firstFree;
+                ln->next = to->next; ln->prev = to;
+                if (to->next) to->next->prev = ln;
+                to->next = ln;
+            } else {
+                acState.firstFree = dmaPtr;
+                dmaPtr->node.next = 0;
+                dmaPtr->node.prev = 0;
+            }
+        }
+        dmaPtr = nextPtr;
+    }
+}

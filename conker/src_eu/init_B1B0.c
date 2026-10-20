@@ -449,7 +449,30 @@ s32 func_1000CD40(s32 arg0, s32 arg1, s32 arg2) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CDA0.s")
+s32 func_1000CDA0(u8 arg0, s32 *arg1) {
+    if (arg0 == 0) {
+        return 1;
+    }
+    if (arg1 != NULL) {
+        if (arg1[0] >= 0) {
+            if ((D_800417B0[arg1[0]] == NULL) || (arg1[1] <= 0)) {
+                return 1;
+            }
+            if (func_1000853C(arg1[0]) == 3) {
+                return 1;
+            }
+            if (!(D_8002B078[arg1[1]][0] & 0x20)) {
+                D_800418AC[arg1[0]] |= 3;
+            }
+            arg0 &= ~D_800418AC[arg1[0]];
+        } else {
+            return 1;
+        }
+    } else {
+        return 1;
+    }
+    return arg0 == 0;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D2F8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D758.s")
@@ -781,7 +804,35 @@ u8 func_1000E8F0(s32 arg0) {
 }
 
 // initialising with grim loops
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E934.s")
+extern s32 D_80041C50[3][16];
+extern s32 D_80041B60[3][16];
+extern s32 D_80041C40[3];
+extern s32 D_80041C30[3];
+extern s32 D_80041C20[3];
+extern u8 D_80041D40;
+
+void func_1000E934(void) {
+    u32 i;
+    s32 j;
+    s32 k;
+
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 16; j++) {
+            D_80041C50[i][j] = 0x8000;
+            D_80041B60[i][j] = 0x100;
+        }
+        func_10008F24(i);
+        D_800417B0[i] = NULL;
+        D_80041C40[i] = 0;
+        D_80041C30[i] = 0;
+        D_80041C20[i] = 0;
+    }
+    bzero(D_800419A8, sizeof(D_800419A8));
+    D_80041D40 = 0;
+    for (k = 0; k < 12; k++) {
+        D_800419A8[k].unk4 = -1;
+    }
+}
 
 u16 func_1000EA94(s32 arg0) {
     u16 tmp;
