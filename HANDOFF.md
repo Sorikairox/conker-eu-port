@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 71, worktree eu-wt-a, game >= 0x130000, 3396/5915, 401,352 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 69, worktree eu-wt-a, game >= 0x130000, 3390/5915, 399,796 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 68, main checkout, game < 0x130000, 3380/5915, 398,248 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 66, worktree eu-wt-a, game >= 0x130000, 3373/5915, 394,744 bytes). Older stamps below are history.
@@ -43,6 +44,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 71 (worktree a, game >= 0x130000, Opus): 3396 / 5915 (57.4%)**, 401,352 bytes, full `verify_all.sh` all OK. +5 in `942e5e2`, `2de5b93`: `func_151640C0`, `func_15161F4C`, `func_151B604C`, `func_15133AF8`, `func_15159514` (u8 arg2 handlers, mostly the 0x2D/0 family).
+  Key: the 0x2D arm's second compare order is fixed by plain memory compares without `t`/`k` (or a `s32 *key` pointer), then blkvar. Doc `docs/sessions/s71.md`, recipes IDO_SHAPES `## s71 recipes`, drafts `docs/sessions/s71_drafts/`.
+  Open: `func_15135480` DIFF1 (perm best), `func_15187EC0` DIFF17, `func_15104FF8` DIFF34.
 - **Session 69 (worktree a, game >= 0x130000, Opus): 3390 / 5915 (57.3%)**, 399,796 bytes, full `verify_all.sh` all OK. +10 in `cf5f22b`, `e13e9b2`: `func_151AEBF0`, `func_151D51E8`, `func_151590AC`, `func_151095E4`, `func_151A98CC`, `func_1519ED88`, `func_151B34B4`, `func_151BD7CC`, `func_151B7664`, `func_151BAA18`.
   **Shape D solved**: the block ending with the unfilled `store; jr ra; nop` declares a local (basic-block boundary, s66). Tools `blkvar.py` (declaration variants per block for `tryall`), `putc.py` (draft -> source). Doc `docs/sessions/s69.md`, recipes IDO_SHAPES `## s69 recipes`, drafts `docs/sessions/s69_drafts/`.
   Open: `func_151597A0` DIFF9 (kept `b` to the next instruction), `func_15168B44` DIFF15 (double `sw`), matrix `func_15177360`/`func_15188008` SIZE-1 (blkvar no help).
@@ -185,6 +189,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+000000. Slice >= 0x130000 after s71 (`docs/sessions/s71.md`): finish `func_15135480` from `s71_drafts/func_15135480.permbest_DIFF1.c` (try the s71 plain-compare form in the 0x2D arm); the 15 untried u8 handlers listed in s71.md (0x2D ones first: `grep 0x2D` in the asm; recipe IDO_SHAPES `## s71 recipes`); then s69 (b)-(d) below (not reached in s71).
 00000. Slice >= 0x130000 after s69 (`docs/sessions/s69.md`): (a) shape D is a declaration in the arm (IDO_SHAPES `## s69 recipes`): hand-rewrite the remaining u8 handlers (`andi $t6,$a2,0xFF` prologue, 28 left, sizes 29-186: `func_151640C0`, `func_15104FF8`, `func_15187EC0`, `func_1513DF9C`, `func_15135480`, `func_15159514`, ...) and the other `shapes.py --list D` functions, then `blkvar.py` + `tryall`; raw m2c drafts need the rewrite first (`s69_drafts/dsweep_results.txt`). (b) Re-check every open item noted as "unfilled delay slot" / "blocked shape" in `repair_log.tsv` with blkvar (`grep -i 'unfilled\|delay slot' tools/eu_port/repair_log.tsv`). (c) `func_151597A0`, `func_15168B44` (s69 drafts). (d) Spawner callers `func_151B61A0`, `func_151BF490` (untouched this session).
 
 0000000. Slice below 0x130000 after session 68 (`docs/sessions/s68.md`): (a) **re-screen every store-order near miss with same-line joins** (IDO_SHAPES s68 recipe 1; one `tryall` over all subsets of adjacent store groups), starting with `func_1500E8C0` (`s68_drafts/func_1500E8C0_DIFF48.c`), `func_150B0828` DIFF54 and `func_15077F64`; (b) `func_15082020` DIFF28: find the construct that ends the entry block after the `pos` stores yet computes `a0 = &b` there; (c) `func_150B5568`/`func_150AEEB0`: find which 4 named words the ref lacks (x, y, z first; IDO_SHAPES s68 recipe 3 for the angles); (d) remaining pool: `func_150E6E30`, `func_150E7104`, `func_150C1BC0`, `func_150C06DC` (frame right), `func_1506D2E8`.
