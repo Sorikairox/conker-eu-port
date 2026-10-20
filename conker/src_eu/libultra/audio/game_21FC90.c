@@ -144,7 +144,201 @@ void func_151F2E4C(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/libultra/audio/game_21FC90/func_151F2E88.s")
+extern s32 D_8002C05E;
+extern s32 D_800BE9F0;
+extern s32 D_800E11B4;
+extern s32 *D_800E11B8;
+extern s16 D_800E11BC;
+extern s16 D_800E11BE;
+extern s16 D_800E11C0;
+extern s16 D_800E11C2;
+extern s16 D_800E11C4;
+extern s16 D_800E11C6;
+extern u16 D_800E11C8;
+extern s16 D_800E11CA;
+extern s16 D_800E11CC;
+extern u16 D_800E11CE;
+extern s16 D_800E11D0;
+extern s16 D_800E11D2;
+extern u8 D_800E11D4;
+extern u8 D_800E11D5;
+extern s32 D_800E11D8;
+extern s32 D_800E11DC;
+extern s32 *D_800E120C;
+extern s16 *D_800E1218;
+extern s32 D_800E121C;
+extern s32 D_800E1220;
+extern s32 D_800E1224[];
+extern s32 D_800E1228;
+extern u8 D_800E1249;
+extern s16 D_8002BF60[];
+s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
+void func_1001CF38(void *, s32);
+s32 func_151F85C4(s32, s32, s32);
+s32 func_151F86B0(s32, s16 **, s32 *);
+void func_151F3D78(void);
+void func_151F39E4();
+
+// One block-scoped Acmd temp per command (each takes its own -g stack slot, like the libaudio a* macros).
+#define CMD(p, a, b) { Acmd *_a = (p)++; _a->words.w0 = (a); _a->words.w1 = (b); }
+
+s32 func_151F2E88(s32 count, Acmd **cmdp) {
+    s32 i;
+    s32 diff;
+    s32 n;
+    s16 *buf;
+    s16 *src;
+    s32 len;
+    s32 outL;
+    s32 outR;
+
+    n = 0;
+    src = NULL;
+    outL = 0x4E0;
+    outR = 0x650;
+    if (D_800E0E14 != D_800E0E16) {
+        diff = D_800E0E16 - D_800E0E14;
+        if ((diff >= -2) && (diff < 3)) {
+            D_800E0E14 += diff;
+        } else if (diff >= 3) {
+            D_800E0E14 += 2;
+        } else {
+            D_800E0E14 -= 2;
+        }
+    }
+    if (D_800E0E04 == 5) {
+        func_151F3D78();
+        if (D_800E0E18 == 0) {
+            D_800E11B4 = func_151F85C4(0, D_800E0DFC, D_800E0DE0);
+            if (D_800E11B4 == 0) {
+                D_800E0DE4 = 0;
+                D_800E0E10 = 0;
+                D_800E0E18 = 5;
+                func_151F3D78();
+                D_800E0E04 = 5;
+                return 0;
+            } else {
+                D_800E0E04 = 1;
+                D_800E11D4 = 1;
+                D_800E11D5 = 1;
+                D_800E1218 = NULL;
+                D_800E121C = 0;
+                D_800E1220 = 0;
+                D_800E1228 = 0;
+                bzero(*(void **)((u8 *)&D_800E0D80 + 0x74), 0x440);
+            }
+        } else {
+            D_800E0E18 -= 1;
+        }
+    }
+    if (D_800E0E04 == 7) {
+        func_151F3D78();
+        if (D_800E0E18 == 0) {
+            D_800E0E04 = 1;
+        } else {
+            D_800E0E18 -= 1;
+        }
+    }
+    if (D_800E0E04 == 1) {
+        if ((count + D_800E1220) > D_800E121C) {
+            D_800E121C -= D_800E1220;
+            if ((D_800E121C != 0) && (D_800E1218 != NULL)) {
+                src = D_800E1218 + D_800E1220;
+                len = D_800E121C;
+            }
+            D_800E1220 = 0;
+            D_800E121C = 0;
+            if (func_151F86B0(D_800E11B4, &buf, &n) != 0) {
+                D_800E1218 = buf;
+                for (i = 0; i < n; i++) {
+                    CMD(*cmdp, 0x08000000, osVirtualToPhysical((void *)D_800E1224[i]));
+                    CMD(*cmdp, (D_800E1228 & 0xFFFF) | 0x07000000, osVirtualToPhysical(buf));
+                    buf += 0x244;
+                }
+                D_800E1228 = (D_800E1228 - 0x24) & 0x1E;
+                D_800E121C = 0x240;
+                D_800E1249 = n == 2;
+            } else {
+            }
+        }
+        func_151F3D78();
+        if (D_800E1249 == 0) {
+            outL = 0;
+        }
+        if (src != NULL) {
+            CMD(*cmdp, ((((len + len)) & 0xFFF) << 0xC) | 0x04000000 | (outL & 0xFFF), osVirtualToPhysical(src));
+            if (D_800E1249 != 0) {
+                src += 0x244;
+                CMD(*cmdp, ((((len + len)) & 0xFFF) << 0xC) | 0x04000000 | (outR & 0xFFF), osVirtualToPhysical(src));
+            }
+            outL += (len + len);
+            outR += (len + len);
+            count -= len;
+        }
+        if ((count > 0) && (D_800E1218 != NULL)) {
+            src = D_800E1218 + D_800E1220;
+            CMD(*cmdp, ((((count + count)) & 0xFFF) << 0xC) | 0x04000000 | (outL & 0xFFF), osVirtualToPhysical(src));
+            if (D_800E1249 != 0) {
+                src += 0x244;
+                CMD(*cmdp, ((((count + count)) & 0xFFF) << 0xC) | 0x04000000 | (outR & 0xFFF), osVirtualToPhysical(src));
+            }
+            D_800E1220 += count;
+        }
+        func_151F39E4(&D_800E0D80);
+        if (D_800E1249 == 0) {
+            CMD(*cmdp, 0x020004E0, 0x2E0);
+            CMD(*cmdp, 0x020007C0, 0x2E0);
+            if (D_800E11D5 == 0) {
+                if (D_800E0DB2 > 0) {
+                    if (D_800E0DD8 != 0) {
+                        func_1001CF38((u8 *)&D_800E0D80 + 0x30, 0x46AC0800);
+                    }
+                    CMD(*cmdp, 0x0B000020, osVirtualToPhysical((u8 *)&D_800E0D80 + 0x38) & 0xFFFFFF);
+                    if (D_800E0DD8 == 2) {
+                        D_800E0DD8 = 0;
+                    }
+                    CMD(*cmdp, ((D_800E0DD8 & 0xFF) << 0x10) | 0x0E000000, osVirtualToPhysical(D_800E120C) & 0xFFFFFF & 0xFFFFFF);
+                    D_800E0DD8 = 0;
+                }
+                if (D_800E11D4 != 0) {
+                    D_800E11D4 = 0;
+                    D_800E11CC = (D_800E11BE * D_8002BF60[D_800E11BC]) >> 15;
+                    D_800E11CA = _getRate(D_800E11C0, D_800E11CC, D_800E11DC, (u16 *)((u8 *)&D_800E0D80 + 0x18));
+                    D_800E11D2 = (D_800E11BE * D_8002BF60[128 - D_800E11BC - 1]) >> 15;
+                    D_800E11D0 = _getRate(D_800E11C2, D_800E11D2, D_800E11DC, (u16 *)((u8 *)&D_800E0D80 + 0x1E));
+                    CMD(*cmdp, (D_800E11C0 & 0xFFFF) | 0x09060000, ((D_800E11C4 & 0xFFFF) << 0x10) | (D_800E11C6 & 0xFFFF));
+                    CMD(*cmdp, (D_800E11D2 & 0xFFFF) | 0x09040000, ((D_800E11D0 & 0xFFFF) << 0x10) | (D_800E11CE & 0xFFFF));
+                    CMD(*cmdp, (D_800E11CC & 0xFFFF) | 0x09000000, ((D_800E11CA & 0xFFFF) << 0x10) | (D_800E11C8 & 0xFFFF));
+                    CMD(*cmdp, (D_800E11C2 & 0xFFFF) | 0x03010000, osVirtualToPhysical(D_800E11B8));
+                } else {
+                    CMD(*cmdp, 0x03000000, osVirtualToPhysical(D_800E11B8));
+                }
+                D_800E11D8 += 0xB8;
+                if (D_800E11D8 > D_800E11DC) {
+                    D_800E11D8 = D_800E11DC;
+                }
+            } else {
+                D_800E11D5 = 0;
+            }
+        }
+    } else if ((D_800E0E04 == 3) && (D_800BE9F0 != 0x35)) {
+        if (D_800E0E2C != 0) {
+            func_10004074(D_800E0E20);
+            func_10004074(D_800E0E24);
+            func_10004074(D_800E0E28);
+            D_800E0E2C = 0;
+        }
+        if (D_800E0E30 != NULL) {
+            func_10004074(D_800E0E30);
+            D_800E0E30 = NULL;
+        }
+        D_800E0E04 = 0;
+        return 0;
+    } else {
+        return 0;
+    }
+    return 1;
+}
 
 typedef struct {
     /* 0x00 */ u8  pad0[0xC];

@@ -8,7 +8,7 @@
 # Example: tools/eu_port/refcc.sh tools/goldeneye build_port/s90/ge 12 -DVERSION_US -DBYTEMATCH -DTARGET_N64
 OPT=${OPT:--O2}; R=${CONKER_ROOT:-$HOME/conker}; C=${CONKERDEV:-conkerdev}
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
-src=$1; out=$2; rounds=${3:-12}; shift 3; extra="$*"
+src=$1; out=$2; rounds=${3:-12}; shift 3; extra=$(echo "$*" | sed 's/-I /-I/g')  # s132: no space after -I (at -O3 uld reads a separate missing dir as an input file)
 st=$out.stub; mkdir -p $R/$out $R/$st; [ -f $R/$st/gen_ids.h ] || printf '#ifndef GEN_IDS_H\n#define GEN_IDS_H\n#endif\n' > $R/$st/gen_ids.h
 cat > $R/$out.job.sh <<EOF
 #!/bin/bash
@@ -18,7 +18,7 @@ find . -name '*.c' -not -path './tools/*' | sed 's|^\./||' | sort | xargs -P8 -I
 f={}; n=\$(echo \$f | tr / _); o='\$OUT'/\$n.o; [ -s \$o ] && exit 0
 printf "#include \"gen_ids.h\"\n#include \"/conker/$src/%s\"\n" \$f > '\$W'/\$n
 if ! /opt/ido5.3/cc -c ${OPT:--O2} -mips2 -32 -G 0 -non_shared -Xcpluscomm -Wab,-r4300_mul -Olimit 2000 -w -D_LANGUAGE_C -D_MIPS_SZLONG=32 -DF3DEX_GBI_2 $extra \
-  -I . -I include -I include/PR -I include/ultra64 -I src -I src/include -I src/game -I \$(dirname \$f) -I '\$ST' -o \$o '\$W'/\$n > '\$W'/\$n.err 2>&1; then
+  -I. -Iinclude -Iinclude/PR -Iinclude/ultra64 -Isrc -Isrc/include -Isrc/game -I\$(dirname \$f) -I'\$ST' -o \$o '\$W'/\$n > '\$W'/\$n.err 2>&1; then
   rm -f \$o; echo "FAIL \$f \$(grep -m1 rror '\$W'/\$n.err | cut -c1-160)" >> '\$OUT'.fail.txt
   grep -o "'"'"'[A-Za-z_][A-Za-z_0-9]*'"'"' undefined" '\$W'/\$n.err | tr -d "'"'"'" | cut -d" " -f1 >> '\$OUT'.undef.txt
   grep -o "Cannot open file [^ ]* for" '\$W'/\$n.err | cut -d" " -f4 >> '\$OUT'.hdr.txt; fi'
