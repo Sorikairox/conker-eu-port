@@ -10,7 +10,8 @@ B=${1:-eu-wt-a}
 if [ "$B" = --continue ]; then
   B=$(sed -n "s/^Merge branch '\([^']*\)'.*/\1/p" .git/MERGE_MSG 2>/dev/null | head -1); B=${B:-eu-wt-a}
 else
-  git merge --no-edit "$B" >/dev/null 2>&1
+  # --no-commit: even a clean merge must not land before verify_all.sh passes
+  git merge --no-commit --no-ff "$B" >/dev/null 2>&1
 fi
 conf=$(git diff --name-only --diff-filter=U)
 if [ -n "$conf" ]; then
@@ -34,7 +35,7 @@ line = (f"- **{t.group(1)} / {t.group(2)} functions in C ({t.group(3)}%)**, code
 L = open("HANDOFF.md").read().split("\n")
 out_lines, done = [], False
 for l in L:
-    if re.match(r"- \*\*\d+ / 5913 functions in C", l):
+    if re.match(r"- \*\*\d+ / \d+ functions in C", l):
         if not done:
             out_lines.append(line); done = True
         continue

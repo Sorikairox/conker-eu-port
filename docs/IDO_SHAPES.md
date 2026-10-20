@@ -616,6 +616,20 @@ See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
 4. **Spawner struct for `func_15132FBC`** is 0x80 bytes (8 tail bytes after `u9C`) when nothing else is declared above it; with named locals above it (out-params, angle results) a 0x78/0x7C struct plus those names fill the same space.
    15-parameter signature `(s32, s32, f32, f32, f32, s32, s32, s32, s16 arg8, s32..., u8 argE)` so the stack params land on m2c's offsets; `u8 u88` when the ref stores 0xFF.
 
+## s60 recipes (frame slots: which names take slots)
+See `docs/sessions/s60.md`.
+1. A named pointer that is spilled across a call costs an 8-byte slot; writing the expression out (`D_800CC2D0[arg0].x` repeatedly) makes the spill an unnamed temp and can remove 8 frame bytes (`func_1502C8F8`).
+2. Two `s16` locals share one word; a 4-byte local declared before them sits above and moves them down 4 (`s32 lim; s16 a; s16 b;`).
+3. For address-taken / spilled locals try all permutations of the other names in one script: the position of the spilled float (`temp_f16` second) or two names above `sp44` decided DIFF2 -> OK (`func_150B15D0`, `func_1502B6BC`).
+4. `s32 i; u8 *p;` declared before the stack structs fill the 8 bytes above them (`func_150DE8AC`); a `p = &sp50; p += 1; p--;` forces `&sp50` to be computed twice.
+5. `f32 two = 2.0f` takes a slot; inlining gives `add.s`, not `mul.s`.
+
+## s62 recipes (fixchain triage, add.s order, dead stack vectors)
+See `docs/sessions/s62.md`.
+1. A DIFF1 `add.s fd, fs, ft` operand swap (`x = x + (a - x) * k` gives `prod + x`): write it as a compound assignment `arg->f += (0.0f - arg->f) * 0.2f;` (or `x = x + (...)` with no named `temp_f0`) -> OK (`func_15052590`). The named-local form `temp_f0 + (...)` and its reverse both stay wrong.
+2. A m2c vector `f32 sp60; f32 sp64;` where only `&sp60` is passed: the store to sp64 is dropped as dead (SIZE-5, missing `lui/mtc1/mul.s/add.s/swc1`). One array `f32 sp60[2]` restores it (`func_150FE638`, 31 -> 4 after the permuter).
+3. Writing a stack struct of s8/s16 fields as separate scalars drops the stores (SIZE-8); a `struct {s8 u44; s8 pad; s16 u46; ...} sp` grows the frame by 8 (0x58 vs 0x50) while `s8 sp44[8]` + `*(s16 *)&sp44[2]` keeps the frame but lands 4 bytes too high (`func_150FCFB0`, DIFF6; the ref has a 4-byte neighbour above the array).
+4. `(0, temp_v1) + (idx * 0x24)` flips `addu` to `base + product` when the base is a plain local and the product comes from `mflo` (`func_150B45C8`). An `s8` loop variable that the ref never sign-extends must be `s32` (SIZE+3 -> DIFF). Zero stores to float fields must be `0.0f` (`swc1 $f0`, not `sw $zero`).
 ## s61 recipes (leading rodata word, named-float slot cost, spawner callers)
 
 1. **File .rodata starting with an unreferenced word** (`func_151664F0`, `game_eu_193D00`): the ROM range is 16-aligned `[0x24C2F0,0x24C300)` = `ff000000, 0.017453292f, 0, 0`. The `ff000000` is a 2-byte string `"\xff"` (padded to 4 by the float) of the file with no code reference. Own the range with `rodata_split.py game_eu_193D00 24C2F0 24C300` (manual form, the `--own` range was wrong because refs() has no ref at 0x24C2F0) and add `const char rodata_pre_193D00[] = "\xff"; // fakematch` at the top of the C file: `const u32 = 0xFF000000` goes to `.data`, the string goes to `.rodata` first. Object `.rodata` is 16-aligned and padded to 16, so an owned range shorter than the object fails section_diff.
@@ -631,3 +645,10 @@ See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
 3. The last permuter diff `addiu 0xFF` vs `-1` means the struct member is `s8`: make it `u8` (a `u8` constant 0xFF does not sign-extend).
 4. **Float literals of a two-object C file**: find the literal's real ROM address by searching the ROM for the float (`struct.pack('>f', v)`), do not assume the file's rodata start. `file_split.py <stem> --at <first func of the 2nd object> --resplit` (needs a prior full build for `conker.eu.map`) gives the second object its own file that auto-owns its rodata, even when the plain `--dry` says "no clean split point". A manual `rodata_split.py ... --dry` is not dry in this tree: it writes the yaml.
 5. A statement like `x += 180.0f; temp = rand();` leaves the store in the delay slot of the call; the ref sometimes has a `nop` there instead (open: unknown trigger, see `func_151D49B8`).
+## s64 recipes (named temps take slots, struct copies, int literal keeps mul.s)
+See `docs/sessions/s64.md`.
+1. **Delete m2c/permuter names before moving declarations**: named pointer temps (`temp_v0 = arg0->unk31C`), named call results and single-use `s16 temp_a0` call arguments take named slots and push the unnamed spills down by 4-8 bytes. Inline them (IDO CSEs the repeated `arg0->field` loads) (`func_150FE638`, `func_150D2884`). A loop counter that lives in a register still takes a slot: declare it before a stack struct to put the struct 4 lower (`func_150FCFB0`).
+2. **`lw $at, 0(x); sw $at, K(y); lw tN, 4(x); sw tN; lw $at, 8(x); sw $at`** is a 12-byte struct assignment, not three `s32` copies (`func_150B45C8`; s59 recipe 4).
+3. **`x * 2.0f` is folded to `add.s x, x`**; the ref's `lui 0x4000; mtc1; mul.s` comes from the integer literal `x * 2` (`func_150FEB84`).
+4. **m2c pointer strides**: check every `p += 1` on a struct pointer against the ref's `addiu` (`func_150891D4` walked bytes; `func_1500B1F4` family: `"?"` string = `f32 D_80096014[]`, `+= 2`).
+5. **Call argument untruncated in the ref** (`or a1, a0` where the header says `u8`): the caller saw an `s32` prototype (US note `void func_15056A00(s32, s32, u8)`); the callee narrows itself (`func_15077F64`).
