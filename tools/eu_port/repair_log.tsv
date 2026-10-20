@@ -976,3 +976,7 @@ func_1507F92C	SIZE+1	1	OK	y	n	s73 LAX gensome: switch on D_800B89C4[idx*0x32C] (
 func_150D8DF0	SIZE-2	1	OK	y	n	s73 LAX gensome: u8 arg2 switch, named idx/x/y/z locals top-down (frame order), floats passed to func_150A7E40 mf
 func_150DBBB0	SIZE-1	2	OK	y	y	s73 nodraft: if/else-if/else, u8 field; f32 **pp = arg0+0x120 field pointer keeps the reload (remote permuter)
 func_15073B38	DIFF24	2	OK	y	y	s73 nodraft: 2 chained remote permuter rounds (DIFF24->4->OK); permuter temps + ^ 0 (fakematch); clean single f temp = DIFF3
+func_150D7930	SIZE-1	4	DIFF10	n	y	s73: u8 arg2 switch clean DIFF15 (t-reg numbering only); statement orders DIFF10; remote perm 500s DIFF10. s73_drafts
+func_150A0890	SIZE+1	3	SIZE-2	n	n	s73: jtbl switch; case-5 if/else-if gives DIFF61 (v0=0 hoisted into beqz slot); break tails SIZE-2
+func_1500E738	SIZE-1	2	SIZE-1	n	n	s73: first switch is a linear beq chain 0..3 in the ref; if-chain SIZE-4, duplicated bodies SIZE+4
+func_150836AC	SIZE-1	3	SIZE-1	n	y	s73: s32 sel (no andi), separate tmp for t[0x2F]; open: bnez;nop;b;li5;b;li3 (b to next insn, s69 recipe 5 shape); perm 500s SIZE-1
