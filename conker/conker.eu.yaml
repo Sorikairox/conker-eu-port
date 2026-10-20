@@ -179,6 +179,8 @@ segments:
       - [0x29400, databin]
       - [0x2AE80, .data, libultra/io/aisetnextbuf]
       - [0x2AE90, databin]
+      - [0x2C060, .data, libultra/os/initialize]
+      - [0x2C080, databin]
       - [0x2C7B0, .rodata, libultra/audio/init_128D0]
       - [0x2C7C0, rodatabin]
       - [0x2CAC0, .rodata, libultra/audio/cents2ratio]

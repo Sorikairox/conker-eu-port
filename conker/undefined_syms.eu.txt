@@ -1568,3 +1568,4 @@ D_80042D60 = 0x80042D60;
 D_80042DE0 = 0x80042DE0;
 D_8008B598 = 0x8008B598;
 D_80037130 = 0x80037130;
+D_8002C060                      = 0x8002C060; /* osClockRate: libultra/os/initialize owns .data */
