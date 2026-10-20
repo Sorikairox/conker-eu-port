@@ -36,7 +36,7 @@ void func_15056150(struct127 *arg0) {
         temp_f18 = arg0->x_position - temp_f2;
         temp_f20 = arg0->z_position - temp_f12;
         temp_f22 = arg0->y_position - temp_f14;
-        temp_f0 = sqrtf((temp_f18 * temp_f18) + (temp_f20 * temp_f20) + (temp_f22 * temp_f22) + D_80099440);
+        temp_f0 = sqrtf((temp_f18 * temp_f18) + (temp_f20 * temp_f20) + (temp_f22 * temp_f22) + 0.1f);
         temp_f18 *= 1.0f / temp_f0;
         temp_f20 *= 1.0f / temp_f0;
         temp_f22 *= 1.0f / temp_f0;
@@ -62,7 +62,7 @@ void func_15056258(struct127 *arg0) {
             if (phi_f12 > 300.0f) {
                 phi_f12 = 300.0f;
             }
-            arg0->y_position += (phi_f12 * temp_f2 * D_80099444);
+            arg0->y_position += (phi_f12 * temp_f2 * 0.002997f);
         }
     }
 }
@@ -511,7 +511,7 @@ void func_15059140(struct127 *arg0) {
         }
     }
     if (arg0->unkB0 != 0) {
-        func_15058F24(arg0, arg0->unkB0 * D_800994A8, 1.0f);
+        func_15058F24(arg0, arg0->unkB0 * 0.01f, 1.0f);
     }
     if (arg0->unkF8 & 0x20000) {
         func_15056258(arg0);
@@ -520,17 +520,17 @@ void func_15059140(struct127 *arg0) {
         func_15059444(arg0);
     }
     if (arg0->id == 0xA) {
-        arg0->unk180 = D_800994AC;
+        arg0->unk180 = -5000.0f;
     }
     if ((arg0->unkF8 & 0x180000) != 0) {
         func_150511E8(arg0);
     }
     func_1505B5F8(arg0, arg0->unk180);
-    if (((arg0->unkF4 & 0x1000) != 0) && (arg0->unk28 < D_800994B0)) {
+    if (((arg0->unkF4 & 0x1000) != 0) && (arg0->unk28 < 0.2f)) {
         func_15056B08(arg0);
     }
     if (arg0->unkF8 & 0x80000) {
-        sp2C = D_800994B4;
+        sp2C = 0.15f;
     }
     func_1505A250(0, 0, sp2C, &arg0->unk164, &arg0->unk168);
     if (arg0->unkD0 != 0) {
@@ -774,7 +774,7 @@ f32 func_1505A5CC(struct49 *arg0) {
     x = ret;
     y = arg0->unk3;
 
-    x = sqrtf(x*x + y*y) * D_800994D4;
+    x = sqrtf(x*x + y*y) * 0.6f;
     ret = x;
 
     if (ret > 35.0f) {
@@ -785,7 +785,7 @@ f32 func_1505A5CC(struct49 *arg0) {
 }
 
 u16 func_1505A630(f32 arg0, f32 arg1, s32 arg2) {
-    return ((u16) (u32) (func_150484A0(-arg0, arg1) * D_800994D8)) + 16384;
+    return ((u16) (u32) (func_150484A0(-arg0, arg1) * 10430.378f)) + 16384;
 }
 
 f32 func_1505A6F8(struct127 *arg0, struct127 *arg1) {
@@ -994,7 +994,6 @@ void func_1505D2B8(struct127 *arg0, u8 arg1) {
 
 f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
     f32 sp24;
-    s32 pad;
     f32 temp_f0;
     f32 temp_f12;
 
@@ -1002,7 +1001,7 @@ f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
         arg1 = arg1 * arg3;
         arg2 = arg2 * arg3;
     }
-    temp_f12 = (arg0 - 90.0f) * D_80099520; // 0.01745329238474369f;
+    temp_f12 = (arg0 - 90.0f) * 0.017453292f; // 0.01745329238474369f;
     sp24 = func_150AD780(temp_f12);
     temp_f0 = func_150AD78C(temp_f12);
     *arg4 = (-arg1 * temp_f0) + (arg2 * sp24);
