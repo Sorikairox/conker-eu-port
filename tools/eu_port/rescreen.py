@@ -10,6 +10,21 @@ decides). Screens them with m2c/screen.py (8 jobs) and prints one line per calle
 best result; OK drafts are copied to conker/build/hand/<f>.c for m2c/apply.py.
 """
 import os, re, sys, glob, subprocess, shutil, collections
+import sys as _gsys
+def _conker_guard():
+    # refuse to run on a checkout other than CONKER_ROOT (e.g. a worktree shell without the wt.sh env)
+    import os as _o, subprocess as _s
+    if _o.path.exists("/.dockerenv"):
+        return  # inside a build container: paths are /conker, not the host checkout
+    try:
+        top = _s.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return
+    root = _o.path.realpath(_o.path.expanduser(_o.environ.get("CONKER_ROOT", "~/conker")))
+    if top and _o.path.realpath(top) != root:
+        _gsys.stderr.write("refusing: cwd repo %s != CONKER_ROOT %s (eval the wt.sh env)\n" % (top, root))
+        _gsys.exit(3)
+_conker_guard()
 HOME = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); R = HOME + '/conker'
 DOCKER = '/Applications/Docker.app/Contents/Resources/bin/docker'
 PERM = HOME + '/tools/decomp-permuter'

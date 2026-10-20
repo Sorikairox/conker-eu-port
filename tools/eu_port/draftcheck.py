@@ -10,6 +10,21 @@ Checks the session-16 call patterns:
 Prototypes come from the draft itself, then include/functions.h and the other src_eu files. Compact output.
 """
 import sys, re, os, glob
+import sys as _gsys
+def _conker_guard():
+    # refuse to run on a checkout other than CONKER_ROOT (e.g. a worktree shell without the wt.sh env)
+    import os as _o, subprocess as _s
+    if _o.path.exists("/.dockerenv"):
+        return  # inside a build container: paths are /conker, not the host checkout
+    try:
+        top = _s.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return
+    root = _o.path.realpath(_o.path.expanduser(_o.environ.get("CONKER_ROOT", "~/conker")))
+    if top and _o.path.realpath(top) != root:
+        _gsys.stderr.write("refusing: cwd repo %s != CONKER_ROOT %s (eval the wt.sh env)\n" % (top, root))
+        _gsys.exit(3)
+_conker_guard()
 R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/conker')
 func = sys.argv[1]
 draft = sys.argv[2] if len(sys.argv) > 2 else os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+'/tools/decomp-permuter/repair/%s.c' % func)

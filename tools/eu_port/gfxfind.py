@@ -6,6 +6,21 @@ Default: counts, size buckets, per-command tag counts. --list: one line per func
 --untried: only functions not in repair_log.tsv. --hints F...: draft gSP/gDP macro lines for those functions
 (word 0 decoded from the constant, word 1 from its source: zero / const / &sym / ?). Use `gdl++` as pkt."""
 import sys, os, re, glob, collections
+import sys as _gsys
+def _conker_guard():
+    # refuse to run on a checkout other than CONKER_ROOT (e.g. a worktree shell without the wt.sh env)
+    import os as _o, subprocess as _s
+    if _o.path.exists("/.dockerenv"):
+        return  # inside a build container: paths are /conker, not the host checkout
+    try:
+        top = _s.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return
+    root = _o.path.realpath(_o.path.expanduser(_o.environ.get("CONKER_ROOT", "~/conker")))
+    if top and _o.path.realpath(top) != root:
+        _gsys.stderr.write("refusing: cwd repo %s != CONKER_ROOT %s (eval the wt.sh env)\n" % (top, root))
+        _gsys.exit(3)
+_conker_guard()
 R = os.path.expanduser(os.environ.get('CONKER_ROOT','~/conker')+''); os.chdir(R + '/conker')
 logged = {l.split('\t')[0] for l in open(R + '/tools/eu_port/repair_log.tsv')}
 NAMES = {0xE7: 'PIPESYNC', 0xE6: 'LOADSYNC', 0xE8: 'TILESYNC', 0xE9: 'FULLSYNC', 0xDA: 'MTX', 0xDB: 'MOVEWORD',
