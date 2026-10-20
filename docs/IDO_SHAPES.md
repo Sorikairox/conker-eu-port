@@ -623,3 +623,11 @@ See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
 3. **No spare local for the spawner result**: reuse a dead parameter (`arg5 = func_15132FBC(...); if (arg5) {...} return arg5;`) instead of `temp_v0`/`var_v1` (each named int local is a 4-byte slot below the struct).
 4. **Call-site struct pointer**: `func_15132FBC((u8 *)&sp.u2C[5], ...)` (m2c's `&sp2C[5]`); the object copy `memcpy(r + 0x170, &sp, N)` copies the 8/0x14 bytes in front of that pointer; struct = one block covering the prefix floats and the spawner struct.
 5. `register f32` does not remove the slot/temp cost.
+
+## s63 recipes (permuter chains, reloaded float temp, rodata of a two-object file)
+
+1. **Chain permuter rounds**: a spawner caller went DIFF95 -> 31 -> 18 -> 5 -> 1 with four consecutive 560 s / 8-job rounds, each restarted from the previous `nm/<f>/best.c` (`cp best.c next.c; permute.sh f next.c 560 8`). One round finding nothing does not mean the draft is stuck; a round that improves usually improves again.
+2. **Reload a stored float into the reused float temp** (`temp_f0 = sp.u9C;` before the V3 copy, then `* temp_f0` for the three vector multiplies) reproduces the ref's early `lwc1 f2,0x9C(sp)` (DIFF109 -> 95).
+3. The last permuter diff `addiu 0xFF` vs `-1` means the struct member is `s8`: make it `u8` (a `u8` constant 0xFF does not sign-extend).
+4. **Float literals of a two-object C file**: find the literal's real ROM address by searching the ROM for the float (`struct.pack('>f', v)`), do not assume the file's rodata start. `file_split.py <stem> --at <first func of the 2nd object> --resplit` (needs a prior full build for `conker.eu.map`) gives the second object its own file that auto-owns its rodata, even when the plain `--dry` says "no clean split point". A manual `rodata_split.py ... --dry` is not dry in this tree: it writes the yaml.
+5. A statement like `x += 180.0f; temp = rand();` leaves the store in the delay slot of the call; the ref sometimes has a `nop` there instead (open: unknown trigger, see `func_151D49B8`).
