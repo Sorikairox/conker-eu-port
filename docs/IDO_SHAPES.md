@@ -913,6 +913,16 @@ See `docs/sessions/s93.md`.
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s104 recipes (unfolded sub-pointers, returned args, array-of-struct copies, spawner byte triples)
+See `docs/sessions/s104.md`.
+1. **`addiu v1,a0,K` recomputed after a call and spilled, fields read through v1** (mine folds `arg0 + K` into every offset): the pointer is used *before* the call, e.g. `p = arg0 + 0x18; s = sinf(p[6]);` instead of `sinf(*(f32 *)(arg0 + 0x30))` (`func_15162510`).
+2. **Pointer arg held in v0 to the end, stores through v0, no final move** (mine uses v1): the function returns that arg (`return arg2;`) (`func_1514FD78`).
+3. `lw at,0(tN); sw at,X(a0)` x3 = a 12-byte struct copy. If `addu tN,base,idx` comes out swapped with byte arithmetic in both orders, index an array of 0x14-byte structs: `((E20 *)base)[i].pos` (`func_151BCBFC`).
+4. `lw a0,spill; andi a0,a0,0xFF; sll/sra` for an s16 param from a spilled rand: `r & 0xFF`; `(u8)r` gives `lbu a0,spill+3` (`func_1514FD78`).
+5. `move v0,zero` in the delay slot of the `bgez` that picks a flag/count pair: `flag = 0; if (x < 0) { n = 300; } else { flag = 1; n = x; }` (not if/else for both, not inverted) (`func_1510A454`).
+6. Spawner frame 8 high with one named float temp stored twice: drop it, `sp.u84 = sp.u88 = expr;` (`sp.u88 = sp.u84 = ...` gives the other store order). Byte fields set to the same constant (0xFF) in different blocks of the struct: the ref's register reuse shows the source grouping; interleave the triples (`u7C, u40, uA2, u7D, u41, ...`), then permuter + two `linejoin.py`/`ljsweep.py` rounds (`func_15157294`).
+7. Stack frame vs named float temps (again): every named f32 local costs a slot even when it lives in a register; when the frame is too big, replace temps that are also stored to the struct by the struct fields and keep only the ones never stored (`func_1516295C`: only `c`, `d`).
+OPEN: `func_151570C4` DIFF7 (permuter), `func_1516295C` DIFF62 (frame right, scheduling).
 ## s102 recipes (block-scoped struct initializers, rand-flag type, rodata range start)
 See `docs/sessions/s102.md`.
 1. **Struct-copy destination address computed before the source address** (ref: `addiu a0,sp,X` / `addiu s5,sp,Y` above `lui/addiu tN,D_x`, even hoisted above a `beql`): the copy is a **block-scoped initializer**, `{ V3 c = D_x; func(&c, &b, ...); }`; a plain `c = D_x;` statement loads the source address first. Block locals sit below the outer ones, so move other scalars (here `base`, `ang`) into the loop block to get the offsets back (`func_151B20E4`).
