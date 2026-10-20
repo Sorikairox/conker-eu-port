@@ -597,6 +597,14 @@ See `docs/sessions/s57.md`.
 7. **Stack-passed args of a function that ignores them**: `func_150C76C0` read its 6th parameter (`lw $v1,0x74($sp)`), m2c had dropped the 5th (`arg4`): add the unused `s32 arg4` so the later params land on the right stack slots (DIFF1 -> OK).
 8. **`void f(s16, s16, f32, void *)` prototype for `func_15143794`** (the header has `s32 f(s16,s16,s32,u8*)` in one file only): fixes SIZE+2 in every draft that calls it (`func_150E0978`: after the prototype the remaining DIFF35 was frame slots, fixed by inlining the `spXX = call()` temps, recipe 3 of s55).
 
+## s59 recipes (CERR spXX class, bitfield-like stores, frame via s58 rules)
+
+1. **`spXX undefined` CERR drafts**: `tools/eu_port/spdecl.py in out` declares the missing stack names (array when indexed or address-taken, `guMtx*` matrices 16), `extfix.sh` adds missing `extern D_*`; 30 of 36 compile. See `docs/sessions/s59.md`.
+2. **m2c `X = spNN;` with `s32 spNN[3]`** stores the address; the ref stores the value: `X = spNN[0];`.
+3. **`andi t,v,0xFFFC; sb; or; sb` (double store to one byte)** is `*(u8*)p &= 0xFFFC; *(u8*)p |= v;` (not a bitfield; `0xFC` gives `andi 0xFC`). Plain memory-operand sums load in the order written; swap `a + b` -> `b + a` when the ref loads the second field first (`func_1511E14C`).
+4. **12-byte vector copies** from m2c (`f32 +0; s32 +4; s32 +8`) are struct assignments: `typedef struct {f32 x,y,z;} V3; *(V3 *)dst = *(V3 *)src;` gives the `lw/sw` triples.
+5. **s58 frame rule applied** (`func_151664F0`): a named float live across a call lives in a compiler temp only when it is NOT named; inline `((f32) arg0) * 0.0174f` twice and declare the other named locals above it (`s32 i; u8 *temp_v0;`) to put them at 0x34/0x30 and the spill at 0x2C.
+6. A file's first `.rodata` word can belong to a neighbour (`ff000000` before the float): `rodata_split.py --own` then yields a mismatching section and apply.py REJECTs with no message; compare `conker/conker.eu.bin` at the range start.
 ## s58 recipes (stack frame layout, the func_15132FBC spawner family)
 
 See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
