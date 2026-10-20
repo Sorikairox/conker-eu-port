@@ -99,13 +99,64 @@ void func_1515DC38(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E7E8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E9AC.s")
+u8 *func_1515F0F4(s32, s32, s32, s32, u8 **);
+
+void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
+    u8 *p;
+
+    p = func_1515F0F4(arg0, arg1, arg2, 0, (u8 **)D_800DCD84);
+    if (p != NULL) {
+        arg4[0] = (*(u32 *)(p + 0x18)) & 0xFF;
+        arg4[1] = (*(u32 *)(p + 0x18) >> 8) & 0xFF;
+        arg4[2] = (*(u32 *)(p + 0x18) >> 16) & 0xFF;
+        arg5[0] = (*(u32 *)(p + 0x1C)) & 0xFF;
+        arg5[1] = (*(u32 *)(p + 0x1C) >> 8) & 0xFF;
+        arg5[2] = (*(u32 *)(p + 0x1C) >> 16) & 0xFF;
+        *arg6 = (*(u32 *)(p + 0x1C) >> 24) & 0xFF;
+        *arg7 = (*(u32 *)(p + 0x18) >> 24) & 0xFF;
+    } else {
+        arg4[0] = ((u8 *)D_800DCD24)[0];
+        arg4[1] = ((u8 *)D_800DCD24)[1];
+        arg4[2] = ((u8 *)D_800DCD24)[2];
+        arg5[0] = D_800DCD28[0];
+        arg5[1] = D_800DCD28[1];
+        arg5[2] = D_800DCD28[2];
+        *arg6 = D_800DCD3C;
+        *arg7 = D_800DCD3D;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515EAB4.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515EDF8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F0F4.s")
+
+u8 *func_1515F0F4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 **arg4) {
+    struct127 sp;
+    s32 pad[2]; // 8 bytes below the struct (frame 0x360)
+    u8 *p;
+
+    sp.x_position = sp.old_x_position = arg0;
+    sp.unk180 = sp.y_position = sp.old_y_position = arg1;
+    sp.z_position = sp.old_z_position = arg2;
+    for (; arg4 != NULL; arg4 = (u8 **)arg4[0]) {
+        p = arg4[1];
+        if (p[0x14] != 0) {
+            continue;
+        }
+        if (arg3 != 0 && !((*(u32 *)(p + 0x18) >> 24) & arg3)) {
+            continue;
+        }
+        if ((p[0x15] >> 2) != 0x18 && (*(u32 *)(p + 0x18) >> 31) != 0) {
+            continue;
+        }
+        if (func_150A2280(&sp, p, 0) != 0) {
+            continue;
+        }
+        return arg4[1];
+    }
+    return NULL;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515F1E8.s")
 
