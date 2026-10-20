@@ -934,3 +934,8 @@ See `docs/sessions/s101.md`.
 5. Field cached in a local gives one load; the ref reloads after stores in one arm: drop the local and write `arg0->x` at every read (`func_150E523C`).
 6. Float literals: always check the bits (`57.295776f`, `-0.97800004f`); m2c / `%g` forms round to the neighbour.
 OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), `func_15073A50` DIFF2 (frame 8 high), `func_150C8850` SIZE-1, `func_1506D584` DIFF20.
+## s100 recipes (add.s operand order, spawner frame size, float setup order)
+1. **`add.s d, prod, lo`** (product first) for a `rand * (hi - lo) + lo` range comes from `lo + (hi - lo) * func_150ADA68()`; `func_150ADA68() * (hi - lo) + lo` gives `add.s d, lo, prod` (func_1514A70C).
+2. **Spawner frame 8 bytes too big, offsets right relative to the top**: the `func_151308E4` struct is 0x6C (`u8 pad98[0x8]` after `u97`), with two 4-byte scalars declared **above** it (e.g. `u8 *p; s32 r;` then `struct {...} sp;`). The 0x74 template only fits when nothing is declared above it. Scalars get 4-byte slots in declaration order even when they live in registers (func_15193360, func_151B20E4).
+3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
+4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
