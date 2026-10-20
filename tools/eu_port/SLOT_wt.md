@@ -3,6 +3,9 @@
 You work in the **git worktree** ~/conker-wt/a (branch `eu-wt-a`). Another agent works in
 the main checkout ~/conker: never touch ~/conker, its `conkerdev` container, or branch `eu`.
 
+- **Every Edit/Write/cp path must start with `/Users/sorikairo/conker-wt/a/`.** The shell
+  guard only protects host scripts. Your own file edits to `~/conker/...` silently land in the
+  other agent's checkout (session 86 did this). Before each edit, check the path.
 - **In every shell, before any tool:** `cd ~/conker-wt/a && eval "$(tools/eu_port/wt.sh env a)"`
   (your container is `conkerdev-a`).
 - Read tools/eu_port/AGENT_BRIEF.md and follow it exactly. Then HANDOFF.md, and
