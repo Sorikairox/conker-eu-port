@@ -801,6 +801,15 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s89 recipes (porting Perfect Dark / known Rare source)
+
+See `docs/sessions/s89.md`.
+1. **Perfect Dark shares code with Conker**: `src/lib/mtx.c` and `src/game/quaternion.c` matched almost verbatim. Find more with `tools/eu_port/srcmatch.py <objdir>` over IDO-compiled reference objects; >= 0.85 is real.
+2. Conker edits of shared code: dropped stores (`quaternion_to_mtx` has no `m[3][0..2] = 0`), inlined wrappers (`look - pos` into new locals, not the params), regrouped sums (`a - b - c + 1` not `a - (b + c) + 1`).
+3. The `store; b L; lw ra` arm tail (s69 shape D) showed up in two PD functions: declare that arm's locals inside the arm (`quaternion_slerp`), or a `dummy: ;` label after the arm when moving declarations grows the frame (`quaternion0f097044`: block f32s took 8 more frame bytes).
+4. A local `s32 indices[3] = {1, 2, 0}` whose initializer sits in another file's `.data`: copy it as a 12-byte struct from the extern symbol (`typedef struct { s32 v[3]; } Idx3; Idx3 indices = D_80086390;`, fakematch) instead of owning `.data`.
+5. `sqrtf` as `jal`: `#pragma function sqrtf` before the function (place it last in the file or check the later functions).
+
 ## s87 recipes (early return, rodata of the last asm user, arity scan)
 See `docs/sessions/s87.md`.
 1. **`lw tN, home(sp)` reload of an arg at the start of the guarded body** (ref) where mine reuses the register from the test: write `if (!x) return;` + body instead of `if (x) { body }` (`func_150E0C58`, `func_150FB8A4`, `func_150F9D6C`).
