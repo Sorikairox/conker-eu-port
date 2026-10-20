@@ -696,3 +696,10 @@ See `docs/sessions/s71.md`.
 3. **`or v0,a2,zero` copy of the u8 arg2 spilled across a call** = `s32 sel = arg2;` tested in the later arms (`func_15133AF8`); a function-level `t` reused in arm 0 takes `v0` after it.
 4. Shape C with two args reloaded (`func_151640C0`): `q = &arg0; r = &arg1;` + named loads; the permuter's `v = *q; v = v + 0x18;` (split add, fakematch) set the v0/v1 roles.
 5. OPEN: `func_15187EC0` (ref reloads `arg0` from its home but still hoists the stack-arg loads above the stores, which `&arg0` prevents), `func_15104FF8` (frame 0x48 between my 0x40/0x50).
+## s72 recipes (compare grids, merged else, per-arm rematerialisation)
+See `docs/sessions/s72.md`.
+1. **0x2D compare order: grid, then permuter.** One `tryall` over first/second operand order x key form (named `k`, plain memory, `s32 *key`) x default-arm form (`k`, `(k ^ 0)`), then the permuter on the best-register variant (`func_15135480`: grid DIFF3 -> permuter OK; clean result: key-first plain compares, `t = arg1->unk0;` in the second arm). Reuse the grid's arm bodies for siblings in the same file (`func_151347CC` matched with `*key`).
+2. **`b L` to the next instruction at the end of both inner arms** = the enclosing `if` has an `else` that IDO merged into the compare chain: `if (a || b || c) { if (x) r = 2; else r = 1; } else { r = 0; } return r;` (`func_151597A0`).
+3. **`addiu vN,s0,K` re-materialised in every arm** (often in the arm-test delay slot) = a function-level `u8 *v = arg0 + K;` plus a declaration at the top of the arms (`s32 blk_t;`); each unused declaration adds 4 frame bytes, so match the frame size by how many arms get one (`func_151CD97C`). An arm-local `u8 *v` instead folds K into the offsets.
+4. **Arm-local declarations change scheduling too**: `s32 a;`/`s32 b;` declared inside the arms (not at function level) moved `lui/addiu a0,%hi/%lo(D_800CC2D0)` above the `lw` (`func_15156598`).
+5. Linked-list push where the ref tests the head in a t-register: re-read the field you just stored (`n->prev = q->head; if (n->prev != NULL) n->prev->next = n;`), not a named head temp (`func_1518B140`).

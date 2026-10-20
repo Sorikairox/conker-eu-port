@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 72, worktree eu-wt-a, game >= 0x130000, 3403/5915, 403,196 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 71, worktree eu-wt-a, game >= 0x130000, 3396/5915, 401,352 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 69, worktree eu-wt-a, game >= 0x130000, 3390/5915, 399,796 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 68, main checkout, game < 0x130000, 3380/5915, 398,248 bytes). Older stamps below are history.
@@ -44,6 +45,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 72 (worktree a, game >= 0x130000, Opus): 3403 / 5915 (57.5%)**, 403,196 bytes, full `verify_all.sh` all OK. +7 in `3ee131c`, `351018b`: `func_151CD97C`, `func_151C8C5C`, `func_15135480`, `func_151347CC`, `func_1518B140`, `func_151597A0`, `func_15156598`.
+  Repair-log re-check (17 slice near misses with slot/compare notes, blkvar + compare-fix variants in one batch): 0 cured mechanically, 2 by hand (`func_15135480` grid + permuter, `func_151597A0` merged outer else). Doc `docs/sessions/s72.md`, recipes IDO_SHAPES `## s72 recipes`, drafts `docs/sessions/s72_drafts/`.
+  Open: `func_151A6520` DIFF30 (loop preheader order), remote permuter 900 s no gain, jump-table handlers `func_1513DF9C`/`func_151604A0` (files own no `.rodata`).
 - **Session 71 (worktree a, game >= 0x130000, Opus): 3396 / 5915 (57.4%)**, 401,352 bytes, full `verify_all.sh` all OK. +5 in `942e5e2`, `2de5b93`: `func_151640C0`, `func_15161F4C`, `func_151B604C`, `func_15133AF8`, `func_15159514` (u8 arg2 handlers, mostly the 0x2D/0 family).
   Key: the 0x2D arm's second compare order is fixed by plain memory compares without `t`/`k` (or a `s32 *key` pointer), then blkvar. Doc `docs/sessions/s71.md`, recipes IDO_SHAPES `## s71 recipes`, drafts `docs/sessions/s71_drafts/`.
   Open: `func_15135480` DIFF1 (perm best), `func_15187EC0` DIFF17, `func_15104FF8` DIFF34.
@@ -189,6 +193,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+0000000. Slice >= 0x130000 after s72 (`docs/sessions/s72.md`): (a) `func_151A6520` from `s72_drafts/func_151A6520.wim_DIFF31.c` (key load before `p = m[1]`, `c` in v1); (b) own `.rodata` of `game_169510` / `game_18D770` (`rodata_split.py --own`) then `func_1513DF9C`, `func_151604A0` (jump tables); (c) the remaining u8 handlers are 0x68-byte stack-struct spawners (`func_15192150`, `func_15138120`, `func_151A8BD4`; s58 spawner template) or long (`func_151462C8`, `func_151CC86C`, `func_15149AC0`); (d) s69 leftovers `func_15168B44` (double `sw` to 0x14), `func_151B61A0`, `func_151BF490` were not reached; (e) build the s72 compare grid generically (a script over the 0x2D arm of any draft) for the `or a3,a0` family (`func_151937A4`, `func_151BEB08`, `func_151BCB54`).
 000000. Slice >= 0x130000 after s71 (`docs/sessions/s71.md`): finish `func_15135480` from `s71_drafts/func_15135480.permbest_DIFF1.c` (try the s71 plain-compare form in the 0x2D arm); the 15 untried u8 handlers listed in s71.md (0x2D ones first: `grep 0x2D` in the asm; recipe IDO_SHAPES `## s71 recipes`); then s69 (b)-(d) below (not reached in s71).
 00000. Slice >= 0x130000 after s69 (`docs/sessions/s69.md`): (a) shape D is a declaration in the arm (IDO_SHAPES `## s69 recipes`): hand-rewrite the remaining u8 handlers (`andi $t6,$a2,0xFF` prologue, 28 left, sizes 29-186: `func_151640C0`, `func_15104FF8`, `func_15187EC0`, `func_1513DF9C`, `func_15135480`, `func_15159514`, ...) and the other `shapes.py --list D` functions, then `blkvar.py` + `tryall`; raw m2c drafts need the rewrite first (`s69_drafts/dsweep_results.txt`). (b) Re-check every open item noted as "unfilled delay slot" / "blocked shape" in `repair_log.tsv` with blkvar (`grep -i 'unfilled\|delay slot' tools/eu_port/repair_log.tsv`). (c) `func_151597A0`, `func_15168B44` (s69 drafts). (d) Spawner callers `func_151B61A0`, `func_151BF490` (untouched this session).
 
