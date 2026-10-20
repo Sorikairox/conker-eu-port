@@ -983,3 +983,8 @@ func_151DDA10	DIFF11	3	DIFF19	n	n	s74: osEepromProbe-like; ref beqz+lhu slot, mi
 func_10007D14	DIFF3	0	DIFF2	n	y	s74: remote perm 2x600s best nm/func_10007D14
 func_1510B930	DIFF5	0	DIFF4	n	y	s74: remote perm 2x600s
 func_151EF7B0	new	0	OK	n	n	s74: C matches but file .text 0x50 = 16 trailing nops (padding); left asm
+func_1510BB78	DIFF12	0	DIFF3	n	y	s74: remote perm 3x600s, nm best
+func_151154C4	DIFF12	0	DIFF5	n	y	s74: remote perm 3x600s, nm best
+func_151B92AC	DIFF15	3	DIFF7	n	y	s74: unnamed arg0+0x110 temp needed (frame 0x20); perm 2 rounds
+func_151B8B5C	DIFF15	0	DIFF12	n	y	s74: remote perm 600s
+func_15183EE4	DIFF15	0	DIFF15	n	y	s74: remote perm 600s (score 96->26)
