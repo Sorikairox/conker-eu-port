@@ -94,7 +94,40 @@ void func_151D7A60(u8 *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7AE8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7B74.s")
+extern u8 D_800AB660[];
+extern u8 D_800AB6B4[];
+extern s32 (*D_80090048[])(u8 *);
+
+s32 func_151D7B74(u8 *arg0) {
+    u8 *obj;
+    u8 *s;
+    u8 *f;
+
+    f = arg0 + 0x28;
+    obj = *(u8 **)(arg0 + 0x40);
+    s = arg0 + 0x40;
+    if (*(s32 *)obj == 0 || s[4] != obj[0x3B]) {
+        return 0;
+    }
+    if (*(u8 **)(obj + 0x1D4) == NULL) {
+        f[5] &= ~1;
+        return 1;
+    }
+    if (*(u8 **)(obj + 0x31C) != NULL && (*(u8 **)(obj + 0x31C))[0x197] != 0 && *(s32 *)(obj + 0x318) != 0) {
+        f[5] &= ~1;
+        return 1;
+    }
+    if (obj[7] != 0xFF) {
+        f[5] &= ~1;
+        return 1;
+    }
+    func_15143134(&D_800AB660[s[5] * 12], f + 8, *(u8 **)(obj + 0x1D4) + (D_800AB6B4[s[5]] << 6));
+    f[5] |= 1;
+    if ((s8)s[6] != -1) {
+        return D_80090048[(s8)s[6]](arg0);
+    }
+    return 1;
+}
 
 s32 func_151D7CD4(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x40);

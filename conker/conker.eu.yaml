@@ -891,6 +891,8 @@ segments:
       - [0x248A90, rodatabin]
       - [0x248B00, .rodata, game_14FF90]
       - [0x248C10, rodatabin]
+      - [0x248D00, .rodata, game_eu_15A210]
+      - [0x248D40, rodatabin]
       - [0x248E50, .rodata, game_eu_15E000]
       - [0x248EC0, rodatabin]
       - [0x24A100, .rodata, game_169510]
