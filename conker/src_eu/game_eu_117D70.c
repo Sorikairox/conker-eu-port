@@ -458,7 +458,3 @@ void func_150EAEC4(S_EAEC4 *arg0) {
         arg0->u6E = 1;
     }
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_117D70/func_150EB090.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_117D70/func_150EB3A4.s")

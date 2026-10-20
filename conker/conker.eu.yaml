@@ -521,6 +521,7 @@ segments:
       - [0x114640, c, game_eu_114640]
       - [0x117620, c, game_eu_117620]
       - [0x117D70, c, game_eu_117D70]
+      - [0x1188A0, c, game_eu_1188A0] # EU file boundary (file_split.py)
       - [0x118CE0, c, game_eu_118CE0]
       - [0x118F50, c, game_eu_118F50]
       - [0x1191C0, c, game_eu_1191C0]
@@ -874,6 +875,7 @@ segments:
       - [0x2467E0, .rodata, game_eu_114640]
       - [0x246A40, .rodata, game_eu_117620]
       - [0x246A60, .rodata, game_eu_117D70]
+      - [0x246AB0, .rodata, game_eu_1188A0]
       - [0x246AC0, rodatabin]
       - [0x246C40, .rodata, game_eu_11CB90]
       - [0x246F10, .rodata, game_eu_11F790]
