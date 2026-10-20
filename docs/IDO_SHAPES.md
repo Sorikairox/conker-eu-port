@@ -623,3 +623,10 @@ See `docs/sessions/s60.md`.
 3. For address-taken / spilled locals try all permutations of the other names in one script: the position of the spilled float (`temp_f16` second) or two names above `sp44` decided DIFF2 -> OK (`func_150B15D0`, `func_1502B6BC`).
 4. `s32 i; u8 *p;` declared before the stack structs fill the 8 bytes above them (`func_150DE8AC`); a `p = &sp50; p += 1; p--;` forces `&sp50` to be computed twice.
 5. `f32 two = 2.0f` takes a slot; inlining gives `add.s`, not `mul.s`.
+
+## s62 recipes (fixchain triage, add.s order, dead stack vectors)
+See `docs/sessions/s62.md`.
+1. A DIFF1 `add.s fd, fs, ft` operand swap (`x = x + (a - x) * k` gives `prod + x`): write it as a compound assignment `arg->f += (0.0f - arg->f) * 0.2f;` (or `x = x + (...)` with no named `temp_f0`) -> OK (`func_15052590`). The named-local form `temp_f0 + (...)` and its reverse both stay wrong.
+2. A m2c vector `f32 sp60; f32 sp64;` where only `&sp60` is passed: the store to sp64 is dropped as dead (SIZE-5, missing `lui/mtc1/mul.s/add.s/swc1`). One array `f32 sp60[2]` restores it (`func_150FE638`, 31 -> 4 after the permuter).
+3. Writing a stack struct of s8/s16 fields as separate scalars drops the stores (SIZE-8); a `struct {s8 u44; s8 pad; s16 u46; ...} sp` grows the frame by 8 (0x58 vs 0x50) while `s8 sp44[8]` + `*(s16 *)&sp44[2]` keeps the frame but lands 4 bytes too high (`func_150FCFB0`, DIFF6; the ref has a 4-byte neighbour above the array).
+4. `(0, temp_v1) + (idx * 0x24)` flips `addu` to `base + product` when the base is a plain local and the product comes from `mflo` (`func_150B45C8`). An `s8` loop variable that the ref never sign-extends must be `s32` (SIZE+3 -> DIFF). Zero stores to float fields must be `0.0f` (`swc1 $f0`, not `sw $zero`).

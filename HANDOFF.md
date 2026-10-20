@@ -37,6 +37,8 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 62 (main, game < 0x130000): 3360 / 5915 functions in C (56.8%)**, code bytes 388,608 / 2,253,856 (17.2%), `verify_all.sh` all OK. +1 (`func_15052590`). New tool `tools/eu_port/fixchain.sh <list> <outdir>` (all draft fixers, best variant per function, bucket table). Doc `docs/sessions/s62.md`, recipes IDO_SHAPES `## s62 recipes`, drafts `docs/sessions/s62_drafts/`.
+  Re-run of the s57 pool (244 drafts): 140 CERR / 18 DIFF / 86 SIZE -> 89 CERR / 22 DIFF / 133 SIZE, 0 OK; only spstruct (v3) ever beats plain declfix+argfix (23 drafts). Open: `func_150FE638` DIFF2 (one spill slot), `func_150FCFB0` DIFF6 (struct 4 bytes high), `func_150B45C8` DIFF7 (t6 vs v0), `func_150EAEC4` DIFF35.
 - **Session 60 (main, game < 0x130000): 3358 / 5915 functions in C (56.8%)**, code bytes 387,676 / 2,253,856 (17.2%), `verify_all.sh` all OK. +3 (`func_1502B6BC`, `func_1502C8F8`, `func_150B15D0`); `game_eu_DEDE0` now owns `.rodata`. Doc `docs/sessions/s60.md`, recipes IDO_SHAPES `## s60 recipes`: frame-only near misses are fixed by declaration order and by which names exist (3 of 11 tried). Open with drafts in `docs/sessions/s60_drafts/`: `func_150DE8AC` (SIZE-1, `&sp50` shared), `func_150FEB84` (needs unfolded `mul.s` 2.0f), `func_1502B5C8`, `func_150D2884` (DIFF2), `func_150C6C3C`, `func_15077F64`.
 - **Session 58 (main, game < 0x130000): 3349 / 5915 functions in C (56.6%)**, code bytes 383,888 / 2,253,856 (17.0%) (game 2942 = 310,936 bytes, init 375, debugger 32), `verify_all.sh` all OK. +6 in `6aaa280`: `func_150CB2D0`, `func_150CBD10`, `func_150CCF8C`, `func_150CE420`, `func_150121C0`, `func_150BB978`.
   **Spawner frame solved** (doc `docs/sessions/s58.md`, IDO_SHAPES `## s58 recipes`): the s57 hole was a dead 8-byte compiler temp from the chained float assignment `sp.u28[3] = sp.u28[2] = X;` (write `sp.u28[3] = X; sp.u28[2] = sp.u28[3];`), struct is 0x80 bytes, 15-param signature. Template `docs/sessions/s58_drafts/spawner_template_func_150CB2D0.c`.
@@ -79,7 +81,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
   Open from s46: `func_15199200`/`func_1519C52C` (DIFF1 addu), `func_151A23E4` (DIFF2, permuter best `tools/decomp-permuter/drafts/s46_func_151A23E4e.c`), `func_1517BD68` (DIFF4), `func_151A7E2C`, `func_151B6804`, `func_151BAA18`, `func_151D51E8`, `func_15183E20`, `func_151A13F0`/`func_151A14D8` (28-arg call to the stub `func_151A177C`), `func_151D75B0`, `func_151D5714`. Try the reversed-order rule on every remaining DIFF1/DIFF<=6 operand-order leftover.
 
 - Full EU ROM rebuilds **byte-identical** (`build/conker.eu.z64: OK`).
-- **3359 / 5915 functions in C (56.8%)**, code bytes 388,144 / 2,253,856 (17.2%) (merged state, from `verify_all.sh`). init 375/540 (40.6% of bytes), game 2952/5332 (15.2% of bytes), debugger 32/43 (42.6% of bytes).
+- **3360 / 5915 functions in C (56.8%)**, code bytes 388,608 / 2,253,856 (17.2%) (merged state, from `verify_all.sh`). init 375/540 (40.6% of bytes), game 2952/5332 (15.2% of bytes), debugger 32/43 (42.6% of bytes).
   Sessions 35 (main), 36-38 (worktree eu-wt-a, merged) and 39 (main, game files below 0x130000; a parallel worktree session works above it) done. Session 36 recipes: IDO_SHAPES section 12, session 39: section 13. Progress by session is in `docs/sessions/commit_table_and_state_history.md`.
 - Every plain asm subsegment is a C file (`*_eu_<rom>.c`); new decompilation = replace a `#pragma GLOBAL_ASM` with C, no yaml edits. All 266 US C files are ported to `conker/src_eu/` (plus EU-only `game_30E60.c`, `game_8FCB0.c`).
 - **From commit `b5aeddd` on, `src_eu/`, the EU yaml and symbol files are hand-edited. Never run `tools/eu_port/run.sh`.**
@@ -108,6 +110,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s62: `fixchain.sh <list> <outdir>` (variants v0..v5 of every fixer, keeps the best, extern + redecl loop on CERR).
 - s58: `docs/sessions/s58_drafts/cx.sh` (standalone compile, sp-relative instructions only; frame-rule experiments and one-file statement bisection).
 - s56: `redeclfix.py f draft out` (strip conflicting prototypes / add the real one), `fnptrfix.py in out` (m2c function-pointer-table calls), `SCREEN_KEEPC=1 repair_try.sh` keeps `conker/build/rt_<f>/<f>.tu.c`.
 - s57: `spstruct.py` (m2c stack-struct scalars -> one `struct sp`). `rt.sh` evals `wt.sh env a` (worktree!): do not use it in the main checkout.
