@@ -29,7 +29,13 @@ void func_150F84D8(u8 *arg0, s16 arg1) {
     func_15140410(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F850C.s")
+void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
+void func_151D44C4(u8 *, u8, s32);
+
+void func_150F850C(u8 *arg0, u8 arg1, s32 arg2) {
+    func_15154728(arg0, 9.0f + func_150ADA68() * 3.0f, 0x3F030C35, 70.0f + func_150ADA68() * 70.0f, 0.0f, arg1, arg2);
+    func_151D44C4(arg0, arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F85AC.s")
 

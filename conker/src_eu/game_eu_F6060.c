@@ -11,12 +11,29 @@ void func_150C89F4(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C851C.s")
-
 typedef struct { u8 u0; u8 pad1[3]; s16 u4; u8 pad6[4]; } E10;
+extern E10 *D_eu_800BE900;
+s32 func_150CE07C(s32);
+void func_150C851C(s32 arg0) {
+    s32 i;
+    s32 v;
+    s32 lo;
+    s32 range;
+
+    if (D_eu_800BE900 != NULL) {
+        func_150CE07C(arg0);
+        range = ((arg0 * 50) >> 8) + 50;
+        lo = (arg0 * 300) >> 8;
+        for (i = 0; i < 10; i++) {
+            v = lo;
+            v += func_150ADA20() % (u32)range;
+            *(s16 *)&D_eu_800BE900[i].pad6[2] = v;
+        }
+    }
+}
+
 typedef struct { s32 *a[2]; } P2;
 extern P2 D_eu_80088BB0;
-extern E10 *D_eu_800BE900;
 s32 func_1510D66C(s32, s32 *, s32, s32);
 Gfx *func_150C8B00(Gfx *gfx) {
     s32 i;

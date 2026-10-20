@@ -37,7 +37,32 @@ s32 func_1509F81C(s32 arg0, s32 arg1, s32 arg2) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F834.s")
+u32 func_1509F834(s32 arg0, s32 arg1, u32 mask, u32 arg3, s32 arg4, s16 arg5, s32 arg6) {
+    struct127 *p;
+    u8 n;
+    u8 r;
+
+    p = func_1505EEF4(arg4);
+    if (arg3 >= 0x8000U) {
+        arg3 = 0x7FFF;
+    }
+    if (p == NULL) {
+        return mask;
+    }
+    if (func_10010894(p) == 0) {
+        if (mask == 0) {
+            mask = -1U >> (32 - (u8)(arg1 - arg0 + 1));
+        }
+        n = arg1 - arg0 + 1;
+        do {
+            r = func_150ADA20() % (u32)n;
+        } while (!((1 << r) & mask));
+        if (func_10010344((u16)(r + arg0), p, arg3, arg5, arg6) != 0) {
+            mask ^= 1 << r;
+        }
+    }
+    return mask;
+}
 
 s32 func_1000F568(s32, s32);
 s32 func_151149AC(u8);

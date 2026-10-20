@@ -5,6 +5,7 @@
 
 
 void func_15058F24(struct127 *arg0, f32, f32);
+void func_1505F188(struct127 *arg0);
 u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
 void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
 f32  func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);

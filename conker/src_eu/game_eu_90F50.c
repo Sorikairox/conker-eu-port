@@ -109,7 +109,33 @@ void func_15063F14(struct127 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_1506435C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064594.s")
+s32 func_1505DADC(u8 *, u16 *, s32, s32, s32);
+
+u16 func_15064594(u8 *arg0, u16 arg1, u16 arg2, u16 arg3) {
+    u16 r;
+    s32 pad; // fakematch: frame slot between r and s
+    u16 s;
+
+    s = 0;
+    r = arg1;
+    if (func_150ADA20() & 1) {
+        r = arg2;
+    }
+    if (arg1 == *(u16 *)(arg0 + 0x84) || arg2 == *(u16 *)(arg0 + 0x84)) {
+        if (arg0[0x107] < 0x28) {
+            return 999;
+        }
+        r = arg3;
+    }
+    if (arg3 == *(u16 *)(arg0 + 0x84)) {
+        r = 999;
+    }
+    if (func_1505DADC(arg0, &s, 0, 0xFE, 0x40) != 0xFF) {
+        *(u16 *)(arg0 + 0x76) = s;
+    }
+    arg0[0x83] = 0xFF;
+    return r;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064668.s")
 
