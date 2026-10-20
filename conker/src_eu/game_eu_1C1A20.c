@@ -89,7 +89,25 @@ void func_15194FD8(s32 arg0, s32 arg1, s32 arg2) {
     func_15194F64(0, arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195024.s")
+s32 func_15195024(s32 arg0) {
+    s32 r = *(u8 *)(arg0 + 4);
+    s32 a;
+
+    *(s32 *)(arg0 + 0x9C) |= 0xFFFE;
+    a = -1;
+    switch (r) {
+    case 0x75:
+        a = 0x73;
+        break;
+    case 0x80:
+        a = 0x72;
+        break;
+    }
+    if (a != -1) {
+        r = func_15083568((struct127 *)arg0, a, 1.0f, 0);
+    }
+    // fakematch: no return statement, the result is left in v0 (IDO_SHAPES 3.9)
+}
 
 s32 func_15134070(s32);
 s32 func_15136C3C(s32, u8, u8, u8, u8, u8, u8, s32);

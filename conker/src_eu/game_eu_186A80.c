@@ -101,7 +101,38 @@ s32 func_151597A0(u8 *arg0, u8 *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159828.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_151598E0.s")
+s32 func_151598E0(struct127 *arg0, u8 *arg1) {
+    s32 ret = 0;
+
+    if (D_800BE616 != 0) {
+        *arg1 = 0;
+        ret = 1;
+    }
+    if (arg0->unique_id == 1) {
+        *arg1 = 0;
+        ret = 1;
+    }
+    if (arg0->unk5 == 5 || arg0->unk5 == 2) {
+        *arg1 = 1;
+        ret = 1;
+    }
+    switch (arg0->id) {
+    case 8:
+        *arg1 = 2;
+        ret = 1;
+        break;
+    case 10:
+        *arg1 = 3;
+        ret = 1;
+        break;
+    case 41:
+    case 42:
+        *arg1 = 4;
+        ret = 1;
+        break;
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515999C.s")
 

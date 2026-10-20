@@ -687,7 +687,53 @@ void func_151284C4(struct108 *arg0) {
         func_15128774(arg0, arg0->unk3D0);
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128540.s")
+s32 func_15121F40(struct108 *);
+s32 func_151236D0(struct108 *);
+s32 func_151256BC(struct108 *);
+s32 func_15126378(struct108 *);
+s32 func_15128030(struct108 *);
+s32 func_1512A8D0(struct108 *);
+s32 func_1512EA20(struct108 *);
+
+s32 func_15128540(struct108 *arg0) {
+    if (func_151253CC(arg0) != 0) {
+        return 1;
+    }
+    if (func_15128030(arg0) != 0) {
+        return 0;
+    }
+    if (arg0->unk2C & 0x80000) {
+        func_1512A8D0(arg0);
+        *(vertex *)&arg0->unk2BC = *(vertex *)&arg0->unk2A4;
+        func_151256BC(arg0);
+        func_151236D0(arg0);
+        func_151284C4(arg0);
+        return 1;
+    }
+    if (arg0->unk2C & 0x100000) {
+        func_1512EA20(arg0);
+        func_151236D0(arg0);
+        func_151284C4(arg0);
+        return 1;
+    }
+    if (arg0->unk2C & 0x200000) {
+        func_15121F40(arg0);
+        func_151236D0(arg0);
+        func_151284C4(arg0);
+        return 1;
+    }
+    if (arg0->unk2C & 0x400000) {
+        func_1512D380((s32) arg0);
+        func_151236D0(arg0);
+        func_151284C4(arg0);
+        return 1;
+    }
+    if (func_15126378(arg0) != 0) {
+        func_151284C4(arg0);
+        return 1;
+    }
+    return 0;
+}
 
 void func_15128680(struct108 *arg0) {
 }

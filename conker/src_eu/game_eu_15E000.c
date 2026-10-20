@@ -14,7 +14,36 @@ void func_15131E88(f32 *arg0, f32 arg1);
 void func_15131EC8(f32 *arg0, f32 arg1);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151307F0.s")
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+    u8 *obj;
+    s32 type;
+
+    switch (arg1) {
+    case 0:
+        type = 0x2B;
+        break;
+    case 1:
+        type = 0x52;
+        break;
+    case 2:
+        type = 0x47;
+        break;
+    default:
+        type = 0x2B;
+        break;
+    }
+    obj = func_15167A68(type, arg5, arg3 + 0xA8, 1, arg4, 1);
+    if (obj == NULL) {
+        return 0;
+    }
+    memcpy(obj + 0x10, arg0, 0x70);
+    if (arg2 != 0) {
+        *(struct_eu_bytes24 *)(obj + 0x80) = *(struct_eu_bytes24 *)arg2;
+    } else {
+        obj[0x9C] = 0;
+    }
+    return (s32)obj;
+}
 
 s32 func_151307F0(s32, u8, s32, s32, u8, s32);
 s32 func_151308E4(s32 arg0, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
