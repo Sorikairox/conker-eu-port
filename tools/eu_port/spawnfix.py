@@ -9,9 +9,6 @@ s=open(src).read()
 pat=re.compile(r'^(\s*)\(\*\((?:s32|f32) \*\)\(\(u8 \*\)\((&sp\.u[0-9A-F]+)\) \+ 0\)\) = \((?:s32|f32)\) \(\*\((?:s32|f32) \*\)\(\(u8 \*\)(.+?) \+ 0\)\);\n\s*\(\*\((?:s32|f32) \*\)\(\(u8 \*\)\(\2\) \+ 4\)\) = .*\n\s*\(\*\((?:s32|f32) \*\)\(\(u8 \*\)\(\2\) \+ 8\)\) = .*\n',re.M)
 s=pat.sub(lambda m:f'{m.group(1)}*(V3i *) {m.group(2)} = *(V3i *) {m.group(3)};\n',s)
 if 'V3i' in s and 'typedef struct { s32 x, y, z; } V3i;' not in s: s='typedef struct { s32 x, y, z; } V3i;\n'+s
-for f in set(re.findall(r'sp\.u([0-9A-F]+) = (?:0xFF|0xB4|-1|-0x4C);',s)):
-    if re.search(rf'sp\.u{f} = (?:0xFF|0xB4);',s) or 1:
-        pass
 for f in set(re.findall(r'sp\.u([0-9A-F]+) = (?:0xFF|0xB4);',s)):
     s=re.sub(rf'(\n\s+)s8 u{f};',rf'\1u8 u{f};',s)
 open(dst,'w').write(s)

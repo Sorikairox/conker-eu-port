@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 67, main checkout, game < 0x130000, 3374/5915, 395,164 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 65, main checkout, game < 0x130000, 3371/5915, 393,212 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 64, main checkout, game < 0x130000, 3366/5915, 390,936 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 61, worktree eu-wt-a, 3357/5915, 387,496 bytes; s59 was 3350). Older stamps below are history.
@@ -39,6 +40,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 67 (main, game < 0x130000, Opus): 3374 / 5915 functions in C (57.0%)**, code bytes 395,164 / 2,253,856 (17.5%), `verify_all.sh` all OK. +2 in `c3a09bf`, `3fb76eb`: `func_150FF9F4` (u8 param, 3 named locals above the struct, `&D_800A4AA0`), `func_150F8B20` (separate `pos`/`Header`/`Header2` locals + permuter barrier, fakematch). Open: `func_150B0828` DIFF54, `func_1500B1F4` SIZE+2 (prologue registers; one reused float temp gives right size), `func_1508DCAC` DIFF52 (timer address hoisted), the 18 other spawner pool drafts (generic fixes do nothing; per-function work). Details `docs/sessions/s67.md`.
 - **Session 65 (main, game < 0x130000, Opus): 3371 / 5915 functions in C (57.0%)**, code bytes 393,212 / 2,253,856 (17.4%), `verify_all.sh` all OK. +5 in `b1e1f9c`, `49c9a66`: `func_150FEB84` (`game_eu_12C0B0` owns `.rodata`, manual range), `func_15045674`/`func_1504583C` (twins), `func_150F0FA4`, `func_150B5C38` (`game_eu_E35E0` owns `.rodata`). Header: `func_15056A00(struct127 *, s32, u8)`. New tool `spsort.py` (spawner stores in field order). Doc `docs/sessions/s65.md`, recipes IDO_SHAPES `## s65 recipes`, drafts `docs/sessions/s65_drafts/` (`refdiff.py f draft.c` normalised opcode diff).
   Open: `func_15077F64` DIFF2 (negu register only), `func_1500B1F4` family SIZE+2 (call shape fixed, frame right, prologue register roles), `func_1508DCAC` SIZE-1, `func_150F8B20` SIZE+1, `func_150FF9F4`/`func_150B0828` SIZE+2.
 - **Session 63 (worktree a, game >= 0x130000): 3358 / 5915 (56.8%)**, 388,188 bytes, `verify_all.sh` OK. +1: `func_1510A1A0` (reload temp + 4 chained permuter rounds + `u8` member; `game_eu_1371A0` split at it -> `game_eu_1379B0`). Near misses and the full tried-list in `docs/sessions/s63.md`: `func_15154DF4` DIFF2, `func_151D49B8` SIZE-1 (store in delay slot vs `nop`), `func_151E3864` DIFF4, `func_151B65C0` DIFF134 (float const regs). Recipes: IDO_SHAPES `## s63 recipes`. Next: `func_151B61A0` (checksum loop), `func_151BF490`, `func_151831CC`/`func_151452C4`.
@@ -118,6 +120,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s67: `spawnfix.py in.c out.c` (s65 spawner_fix + `u8` for 0xB4 fields; run after `spsort.py`). `docs/sessions/s67_drafts/order_gen_example.py` (all statement-group orders under data dependencies, for one `tryall`).
 - s65: `spsort.py in.c out.c [--const]` (sort runs of `sp.uXX = ...;` into field order); `docs/sessions/s65_drafts/refdiff.py func draft.c [n]` (normalised ref-vs-mine diff).
 - s62: `fixchain.sh <list> <outdir>` (variants v0..v5 of every fixer, keeps the best, extern + redecl loop on CERR).
 - s58: `docs/sessions/s58_drafts/cx.sh` (standalone compile, sp-relative instructions only; frame-rule experiments and one-file statement bisection).
@@ -172,6 +175,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+000000. Slice below 0x130000 after session 67 (`docs/sessions/s67.md`, drafts `docs/sessions/s67_drafts/`): (a) spawner pool: look for `func_151602C0(&sp.uXX, &sp.uYY, ...)` and make `pos`/`Header`/`Header2` separate locals (IDO_SHAPES s67 recipe 1), then statement-order permutations with one `tryall` and a permuter round; `func_150B0828` (DIFF54: delayed `swc1 pos[2]`, `u87,u84,u86,u85` store order); (b) `func_1500B1F4`: start from `s67_drafts/func_1500B1F4_DIFF95_one_x.c` (right size) and fix the prologue roles; (c) `func_1508DCAC` DIFF52 (`s67_drafts/func_1508DCAC_DIFF52.c`): the ref computes `timers + arg0*4` late.
 00000. Slice below 0x130000 after session 65 (`docs/sessions/s65.md`): (a) remaining `func_151530A8`/spawner-struct drafts: run `s65_drafts/spawner_fix.py` + `spsort.py` on each, then fix by reading `refdiff.py` (F8B20 SIZE+1, FF9F4/B0828 SIZE+2; the other 18 stack-struct drafts in `build_port/s62/fc/best` are SIZE+-2..20 and need structural fixes first);
    (b) `func_1500B1F4` family (`s65_drafts/func_1500B1F4_SIZE+2_frame_ok.c`, 9-arg call): only the a0/a1 narrowing/copy registers differ; then clone to `B8F4`/`BAB8`/`BC7C`; (c) `func_1508DCAC` SIZE-1 (`base+0x11C` before `+off`, frame 0x50); (d) `func_15077F64` DIFF2 (prototype already changed); (e) next s62 `rank.txt` entries: `func_150B0F40`, `func_150CE710`, `func_150F2C20`, `func_150B731C`, `func_15082020`, `func_150C8850`.
 0000. Slice below 0x130000 after session 64 (`docs/sessions/s64.md`): (a) own `game_eu_12C0B0` `.rodata` (0x247600-0x247650: 24 unreferenced bytes, `D_800A2398` 0x18 and `D_800A23B0` vector tables passed by address, `D_800A23C0` = literal, `D_800A23C4` = 301.0f) then apply `s64_drafts/func_150FEB84_OK_blocked_rodata.c`;
