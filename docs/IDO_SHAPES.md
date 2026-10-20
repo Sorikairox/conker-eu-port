@@ -925,6 +925,13 @@ See `docs/sessions/s93.md`.
 5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
 6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
 
+## s107 recipes (gSPSegment loops, flag temps, arg homes)
+See `docs/sessions/s107.md`.
+1. **gSPSegment loop with the call inside** (`or v1,s2; andi seg; or 0xDB06...; sw; sw v0`): put the call result in a named temp before `gSPSegment(gfx++, i + 1, a)` (inline call makes the macro compute w0 first); loop `i` from 0 with `i + 1` as the segment gives the ref's two strength-reduced counters (`func_150C8B00`).
+2. **Frame 8 high with right code**: merge a named temp into another dead scalar (`lvl = func(...)`), then `tryall` the declaration orders (`func_150C8B00`).
+3. **Two `andi x,v0,0xFF` from one compare** (one for the `if`, one for the `u8` var spilled with `sb`): `b = cmp; a = b; if ((u8)b)` with `s32 b`, `u8 a` (`func_150F6EDC`).
+4. **Arg reloaded from its home (`lw v1,0x88(sp)`) instead of s0**: cut the number of arg uses: derive a sub-pointer once (`p = arg0 + 0x28; m = p[2] * rand`) (`func_150C29F0`).
+OPEN: `func_150C29F0` perm DIFF2, `func_150F6EDC` DIFF25, `func_150C8DD0` SIZE-2 (`li s1,5` + `multu`), `func_150F66F8` (frame).
 ## s105 recipes (lui-able constants from .rodata, extern runs in owned files, emitter structs)
 See `docs/sessions/s105.md`.
 1. **A float whose low 16 bits are zero (`1655.0f` = 0x44CEE000) loaded with `lui at; lwc1` from `.rodata`**: no literal form gives that (`1655.0f`, `(f32)1655.0`, `1655`, `1655.0` all fold to `lui; mtc1`); a function-scope `static const` gives the code but the wrong `.rodata` position. Use `extern f32 D_x;` (`func_150C2700`).
