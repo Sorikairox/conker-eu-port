@@ -1017,3 +1017,14 @@ func_150475B0	none	3	OK	y	n	s76 HitInfo filler: HitPos (s16[9], lwl/lwr copy) as
 func_1504715C	none	4	OK	y	n	s76 HitInfo from object: s16 x,y,z trunc locals (s32 gives v-regs), arm-local s32 idx (shape D tail), ternary |= call ? 1 : 0
 func_15046C6C	none	2	OK	y	n	s76 clone of matched 150469E8 (max: b.t < a.t; calls 15046750 + 150453BC)
 func_15046FF0	none	1	OK	y	n	s76 clone of 150469E8 (calls 15046C6C + 1504583C)
+func_1510B930	DIFF4	1	OK	y	n	s77: clean index loop D_800D9EEO[i]
+func_151154C4	DIFF5	2	OK	y	n	s77: for i<2, base=D_800DC208[i], base[j*3+k]
+func_151B8B5C	DIFF12	1	OK	y	n	s77: vertex copy + += lerps
+func_151B92AC	DIFF7	3	OK	y	y	s77: v[1]*sinf() order, named v ok (remote perm)
+func_151DDA10	DIFF19	2	OK	y	n	s77: type before if, if (ret != 0) ret = 0; else switch
+func_1510BB78	DIFF3	3	DIFF2	n	y	s77: clean s32 off; spill 0x28 vs 0x2C only; perm 600s none
+func_10007D14	DIFF2	0	DIFF2	n	n	s77: __osPopThread exceptasm, hand-written
+func_15192E20	DIFF19	2	DIFF7	n	y	s77: jump table default b end;nop unfilled; perm 600s DIFF7
+func_1514EE90	SIZE-2	2	SIZE-1	n	y	s77: ref keeps addiu a3,a0,0x110 unfolded
+func_151462C8	SIZE-1	2	SIZE-4	n	n	s77: clean rewrite s77/62c8/a.c, switch compare order
+func_15195024	SIZE+2	2	OK	y	y	s77: no return statement (perm)
