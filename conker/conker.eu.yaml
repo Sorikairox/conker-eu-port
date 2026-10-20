@@ -163,6 +163,7 @@ segments:
       - [0x26A30, c, init_eu_26A30]
       - [0x26AD0, c, init_eu_26AD0]
       - [0x26B30, c, init_eu_26B30]
+      - [0x26DF0, c, init_eu_26DF0]
       - [0x27700, c, init_eu_27700]
       - [0x277C0, c, init_eu_277C0]
       - [0x277D0, c, init_eu_277D0]

@@ -178,6 +178,11 @@ $(BUILD_DIR)/src_eu/init_eu_24220.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_24210.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_23050.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_22FE0.c.o: OPT_FLAGS := -O1
+
+# libultra ll.c: 64-bit long long helpers need -mips3 (then the o32 ABI bit, like ultralib)
+$(BUILD_DIR)/src_eu/init_eu_26B30.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/init_eu_26DF0.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/init_eu_26B30.c.o: MIPSBIT := -mips3 -32
 $(BUILD_DIR)/src_eu/init_eu_23360.c.o: OPT_FLAGS := -O2
 $(BUILD_DIR)/src_eu/init_eu_232A0.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_22D70.c.o: OPT_FLAGS := -O1
@@ -273,6 +278,11 @@ endif
 
 $(BUILD_DIR)/%.c.o: %.c
 	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(MIPSBIT) -o $@ $<
+
+# libultra ll.c (init_eu_26B30): -mips3 object gets the o32 ABI bit, like ultralib
+$(BUILD_DIR)/src_eu/init_eu_26B30.c.o: src_eu/init_eu_26B30.c
+	$(CC) -c -32 $(CFLAGS) $(OPT_FLAGS) $(MIPSBIT) -o $@ $<
+	$(PYTHON) tools/set_o32abi_bit.py $@
 
 $(BUILD_DIR)/%.s.o: %.s
 	$(AS) $(ASFLAGS) -o $@ $<

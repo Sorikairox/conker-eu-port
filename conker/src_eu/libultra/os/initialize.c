@@ -27,7 +27,7 @@ void func_10008410(void); /* osMapTLBRdb */
 s32 osPiRawReadIo(u32, u32 *);
 void bzero(void *, int);
 void __osSetHWIntrRoutine(s32, s32 (*)(void));
-s32 func_10026E40(void); /* __osLeoInterrupt */
+s32 __osLeoInterrupt(void); /* __osLeoInterrupt */
 
 void __osInitialize_common(void) {
     u32 pifdata;
@@ -66,7 +66,7 @@ void __osInitialize_common(void) {
     }
     if (!((leostat = IO_READ(0x05000508)) & 0xFFFF)) {
         D_8002C070 = 1;
-        __osSetHWIntrRoutine(1, func_10026E40);
+        __osSetHWIntrRoutine(1, __osLeoInterrupt);
     } else {
         D_8002C070 = 0;
     }
