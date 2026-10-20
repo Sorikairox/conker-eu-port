@@ -851,6 +851,8 @@ segments:
       - [0x245650, .rodata, game_eu_EBBA0]
       - [0x245660, .rodata, game_eu_EBF20]
       - [0x245700, rodatabin]
+      - [0x245A60, .rodata, game_eu_F3AD0]
+      - [0x245AA0, .rodata, game_eu_F4400]
       - [0x245AE0, .rodata, game_eu_F4D30]
       - [0x245B00, rodatabin]
       - [0x245B40, .rodata, game_eu_F6060]

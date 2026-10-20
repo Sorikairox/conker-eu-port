@@ -1,5 +1,5 @@
 #!/bin/bash
-# ndiff.sh func draft.c [n]  (s75) ref vs mine, relocations normalised (lui/%lo immediates -> K), unified diff with 1 line context
+# ndiff.sh func draft.c [ctx] [maxlines]  (s75; s96: 3rd arg = context lines, 4th = output cap) ref vs mine, relocations normalised (lui/%lo immediates -> K), unified diff
 R=${CONKER_ROOT:-$HOME/conker}; T=$(mktemp -d)
 python3 $R/docs/sessions/s65_drafts/refdiff.py "$1" "$2" 2>/dev/null >/dev/null
 s=$(ls $R/conker/asm/nonmatchings/*/$1.s | head -1)
@@ -18,4 +18,4 @@ import sys,re
 for l in open(sys.argv[1]):
     l=l.strip(); l=re.sub(r"0x([0-9A-Fa-f]+)",lambda m:str(int(m.group(1),16)),l); l=re.sub(r",K\((at|gp)\)$",r",K(\1)",l); l=re.sub(r"^(?:addiu|ori) (\w+),zero,(-?\d+)$",r"li \1,\2",l); l=re.sub(r"^(?:or|addu) (\w+),(\w+),zero$",r"move \1,\2",l); l=re.sub(r"^lw (\w+),K\((\w+)\)$",r"lw \1,0(\2)",l); print(l)
 P
-diff -U1 $T/ref2 $T/mine | tail -n +3 | head -${3:-40}; rm -rf $T
+diff -U${3:-1} $T/ref2 $T/mine | tail -n +3 | head -${4:-200}; rm -rf $T
