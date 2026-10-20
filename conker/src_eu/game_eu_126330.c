@@ -207,7 +207,31 @@ void func_150F9D40(struct260 *arg0) {
     func_15149368(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F9D6C.s")
+s32 func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32, s32, s32, s32);
+s32 func_15145EA4(f32 **, s32 **, s32, s32);
+extern u8 D_80088EF0;
+extern f32 D_800A2018[];
+extern f32 D_800A2024[];
+
+void func_150F9D6C(u8 *arg0, u8 arg1, s32 arg2)
+{
+  s32 sp64[3];
+  f32 sp58[3];
+  f32 *sp54;
+  s32 *sp50;
+  s32 m;
+  if (*(s32 *)(arg0 + 0x1D4) == 0)
+  {
+    return;
+  }
+  sp54 = D_800A2018;
+  sp50 = sp64;
+  m = *(s32 *)(arg0 + 0x1D4) + (D_80088EF0 << 6);
+  func_15145EA4((0, &sp54), &sp50, (0, m), 1); // fakematch: permuter comma operands fix the 0x48/0x4C spill slot
+  sp58[1] = (func_150ADA68() * 1) + 2.0f; // fakematch: int * 1 keeps the result scheduling
+  sp58[0] = (func_150ADA68() * 14.0f) + 28.0f;
+  func_151030B8(arg0, D_80088EF0, D_800A2018, D_800A2024, sp58, (func_150ADA20() % 3U) + 4, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 300.0f) + 400.0f, sp64, 0xFF, 0, -1, arg1, arg2);
+}
 
 u8 *func_150FF808(u8 *);
 s32 func_150FF9F4(s32 *, s32 *, u8, s32);
