@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 66, worktree eu-wt-a, game >= 0x130000, 3373/5915, 394,744 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 64, main checkout, game < 0x130000, 3366/5915, 390,936 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 61, worktree eu-wt-a, 3357/5915, 387,496 bytes; s59 was 3350). Older stamps below are history.
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
@@ -38,6 +39,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 66 (worktree a, game >= 0x130000, Opus): 3373 / 5915 (57.0%)**, 394,744 bytes, `verify_all.sh` all OK. +6 in `165afea`, `3c16bdc`: `func_151D49B8`, `func_151E3864`, `func_15154DF4`, `func_151B65C0`, `func_151452C4`, `func_15145EA4`; `game_eu_201240` and `game_eu_1E3DD0` now own `.rodata`.
+  Tools: `rodata_split.py` manual-range `--dry` is read-only (`2b22a58`); `rodata_inject.py` accepts an unreferenced nonzero tail. Doc `docs/sessions/s66.md`, recipes IDO_SHAPES `## s66 recipes` (**inner `{ decl; }` block = basic-block boundary**: empty jal slot / late `addiu`; typed constants are not CSE'd; spawner tail = named `s32 obj` declared first).
+  Open: `func_151831CC` SIZE-1 (frame right, layout 4 low), `func_15177360` SIZE-1 (`col[3]` array; missing `or t0,v0` copy); drafts `docs/sessions/s66_drafts/`.
 - **Session 63 (worktree a, game >= 0x130000): 3358 / 5915 (56.8%)**, 388,188 bytes, `verify_all.sh` OK. +1: `func_1510A1A0` (reload temp + 4 chained permuter rounds + `u8` member; `game_eu_1371A0` split at it -> `game_eu_1379B0`). Near misses and the full tried-list in `docs/sessions/s63.md`: `func_15154DF4` DIFF2, `func_151D49B8` SIZE-1 (store in delay slot vs `nop`), `func_151E3864` DIFF4, `func_151B65C0` DIFF134 (float const regs). Recipes: IDO_SHAPES `## s63 recipes`. Next: `func_151B61A0` (checksum loop), `func_151BF490`, `func_151831CC`/`func_151452C4`.
 - **Session 64 (main, game < 0x130000, Opus): 3366 / 5915 functions in C (56.9%)**, code bytes 390,936 / 2,253,856 (17.3%), `verify_all.sh` all OK. +5 in `4a0bf21`, `cd1041a`: `func_150FE638`, `func_150FCFB0`, `func_150B45C8`, `func_150D2884`, `func_150891D4`; `game_eu_12BB30` and `game_eu_B37F0` now own `.rodata`. Doc `docs/sessions/s64.md` (root cause per target), recipes IDO_SHAPES `## s64 recipes`, drafts `docs/sessions/s64_drafts/`.
   Bit-exact but blocked: `func_150FEB84` (needs `game_eu_12C0B0` `.rodata` with const vector tables). Open: `func_15077F64` DIFF2 (negu register; needs the `func_15056A00(struct127 *, s32, u8)` prototype), `func_150DE8AC`, `func_1507F834`, `func_150619A8`, `func_1500B1F4` family (details s64.md).
@@ -168,6 +172,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+00000. Slice game >= 0x130000 after session 66 (`docs/sessions/s66.md`): apply the s66 recipes (inner block for empty delay slots / late address computations, typed constants, spawner tail) to the remaining spawner callers (`func_151B61A0` checksum loop, `func_151BF490`) and the s56 matrix family (`func_15188008` SIZE-1, `func_15177360` SIZE-1); then `func_151831CC` (frame bisect with `s58_drafts/cx.sh`), `func_151D7FE8` (DIFF70), `func_1516FE1C`/`func_1512D5E0` (SIZE-4).
 0000. Slice below 0x130000 after session 64 (`docs/sessions/s64.md`): (a) own `game_eu_12C0B0` `.rodata` (0x247600-0x247650: 24 unreferenced bytes, `D_800A2398` 0x18 and `D_800A23B0` vector tables passed by address, `D_800A23C0` = literal, `D_800A23C4` = 301.0f) then apply `s64_drafts/func_150FEB84_OK_blocked_rodata.c`;
    (b) `func_15077F64` DIFF2 (`s64_drafts/func_15077F64_DIFF2.c`, apply the header prototype change `void func_15056A00(struct127 *arg0, s32 arg1, u8 arg2);` first; only the `negu` destination is left); (c) the `func_1500B1F4` lerp family (4 SIZE-1 siblings, `s64_drafts/func_1500B1F4_SIZE-1_clean.c`: one extra 8-byte compiler temp);
    (d) `func_150619A8` (`s64_drafts/func_150619A8_SIZE-1_clean.c`: stop IDO hoisting `&D_800CC2D0` / 0x32C). Apply the s64 recipe 1 (delete named temps) to other spill-slot DIFF2s first.
