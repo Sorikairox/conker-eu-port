@@ -801,6 +801,13 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s90 recipes (float literal forms, Rare math helpers)
+See `docs/sessions/s90.md`.
+1. **`0` and `0.0f` are different constants to IDO 5.3 in float code**: they get separate registers / rematerialisations (`return 0` reuses the compare zero, `return 0.0f` re-emits `mtc1 zero,f0`; a mix of `0.0f` compares and int `0` loop tests moved the parameter into a callee-saved f20). When float zeros sit in the wrong registers or a param is unexpectedly in `f20` (`sdc1 f20` in the ref), sweep the literal form per site (`0` / `0.0f`, `1` / `1.0f`) with one `tryall` (`func_1504A6F0`: 1 of 128 matched; `func_1504A620`: `return 0.0f`).
+2. **`x *= 2` is `add.s x,x,x` only when written `x += x`**; `x / 2` in PD source was `x * 0.5f` in Conker (`func_1504A5A0`, `func_1504A620`).
+3. **Screening a reference decomp with generated headers**: `tools/eu_port/refcc.sh` defines every undefined identifier with a unique value through a force-included header, iterating until everything compiles (PD 625/625).
+4. PD `src/lib/mp3/lib_*.c` (expf / logf / powf) are Conker `func_1504A5A0` / `func_1504A620` / `func_1504A6F0`; PD's mp3 decoder itself is not in Conker (no hit >= 0.6).
+
 ## s89 recipes (porting Perfect Dark / known Rare source)
 
 See `docs/sessions/s89.md`.
