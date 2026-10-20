@@ -1166,7 +1166,7 @@ void func_15143134(void *arg0, void *arg1, void *arg2);
 void func_151C384C(void *arg0, u8 arg1, s32 arg2);
 void func_151DC484(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4);
 void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
-void func_15056A00(struct127 *arg0, u8 arg1, u8 arg2);
+void func_15056A00(struct127 *arg0, s32 arg1, u8 arg2);
 void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1);
 s32 func_1514F250(struct_eu_link *arg0, s16 arg1, struct_eu_link **arg2);
 s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2);
