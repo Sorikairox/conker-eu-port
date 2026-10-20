@@ -959,6 +959,8 @@ segments:
       - [0x2507D0, .rodata, game_eu_201240]
       - [0x2508B0, .rodata, game_eu_204730]
       - [0x2508E0, rodatabin]
+      - [0x2511B0, .rodata, game_221290]
+      - [0x2562E0, rodatabin]
   - name: debugger
     type: code
     start: 0x00256450
