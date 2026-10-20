@@ -68,6 +68,7 @@ void func_151A70EC(struct210 * arg0) {
     func_1513CAA0(arg0);
 }
 
+u8 *func_151A7188(s32);
 s32 func_1505D024();
 void func_151A7118(u8 *arg0, s32 arg1) {
     s32 pad; // fakematch: unused local moves v to sp18
@@ -86,6 +87,22 @@ void func_151A7118(u8 *arg0, s32 arg1) {
     func_1505D024(arg0, 0x60034, *(u16 *)(arg0 + 0x7A), a3);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A7188.s")
+u8 *func_151A7188(s32 arg0) {
+    u8 i;
+    u8 j;
+    struct_eu_node *p;
+
+    for (i = 0; i < 2; i++) {
+        for (j = 0; j < 2; j++) {
+            for (p = D_800DD280[j][(&D_800A5770)[i]]; p != NULL; p = p->next) {
+                if ((*(u8 *)((u8 *)p + 0x13) == 0x2C) && (arg0 == *(s32 *)((u8 *)p + 0x28))) {
+                    return (u8 *)p;
+                }
+            next: ; // fakematch: label at the end of the inner loop body moves the j/i increments into the exit block
+            }
+        }
+    }
+    return NULL;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A7240.s")

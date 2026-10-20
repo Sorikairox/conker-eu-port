@@ -200,7 +200,126 @@ s32 func_16001BB4(void *prout, char *arg, const char *fmt, va_list args)
 }
 #undef char
 // uses jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_160021FC.s")
+void func_160033A8(_Pft *args, u8 type);
+void func_1600288C(_Pft *px, u8 code);
+#define char unsigned char
+
+// rodata_inject: late_align8 0x25ADA0
+void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
+{
+	x->n0 = x->nz0 = x->n1 = x->nz1 = x->n2 = x->nz2 = 0;
+
+	switch (type) {
+	case 'c':
+		buff[x->n0++] = va_arg(*args, int);
+		break;
+	case 'd':
+	case 'i':
+		if (x->qual == 'l') {
+			x->v.ll = va_arg(*args, int);
+		} else if (x->qual == 'L') {
+			x->v.ll = va_arg(*args, s64);
+		} else {
+			x->v.ll = va_arg(*args, int);
+		}
+
+		if (x->qual == 'h') {
+			x->v.ll = (s16)x->v.ll;
+		}
+
+		if (x->v.ll < 0) {
+			buff[x->n0++] = '-';
+		} else if (x->flags & FLAGS_PLUS) {
+			buff[x->n0++] = '+';
+		} else if (x->flags & FLAGS_SPACE) {
+			buff[x->n0++] = ' ';
+		}
+
+		x->s = (char *)&buff[x->n0];
+
+		func_160033A8(x, type);
+		break;
+	case 'x':
+	case 'X':
+	case 'u':
+	case 'o':
+		if (x->qual == 'l') {
+			x->v.ll = va_arg(*args, int);
+		} else if (x->qual == 'L') {
+			x->v.ll = va_arg(*args, s64);
+		} else {
+			x->v.ll = va_arg(*args, int);
+		}
+
+		if (x->qual == 'h') {
+			x->v.ll = (u16)x->v.ll;
+		} else if (x->qual == 0) {
+			x->v.ll = (unsigned int)x->v.ll;
+		}
+
+		if (x->flags & FLAGS_HASH) {
+			buff[x->n0++] = '0';
+
+			if (type == 'x' || type == 'X') {
+				buff[x->n0++] = type;
+			}
+		}
+
+		x->s = (char *)&buff[x->n0];
+		func_160033A8(x, type);
+		break;
+	case 'e':
+	case 'f':
+	case 'g':
+	case 'E':
+	case 'G':
+		x->v.ld = x->qual == 'L' ? va_arg(*args, f64) : va_arg(*args, f64);
+
+		if (*(u16 *)&x->v.ld & 0x8000) {
+			buff[x->n0++] = '-';
+		} else if (x->flags & FLAGS_PLUS) {
+			buff[x->n0++] = '+';
+		} else if (x->flags & FLAGS_SPACE) {
+			buff[x->n0++] = ' ';
+		}
+
+		x->s = (char *)&buff[x->n0];
+		func_1600288C(x, type);
+		break;
+	case 'n':
+		if (x->qual == 'h') {
+			*(va_arg(*args, u16 *)) = x->nchar;
+		} else if (x->qual == 'l') {
+			*va_arg(*args, unsigned int *) = x->nchar;
+		} else if (x->qual == 'L') {
+			*va_arg(*args, u64 *) = x->nchar;
+		} else {
+			*va_arg(*args, unsigned int *) = x->nchar;
+		}
+		break;
+	case 'p':
+		x->v.ll = (long)va_arg(*args, void *);
+		x->s = (char *)&buff[x->n0];
+		func_160033A8(x, 'x');
+		break;
+	case 's':
+		x->s = va_arg(*args, char *);
+		x->n1 = func_16001B00(x->s);
+
+		if (x->prec >= 0 && x->n1 > x->prec) {
+			x->n1 = x->prec;
+		}
+		break;
+	case '%':
+		buff[x->n0++] = '%';
+		break;
+	default:
+		buff[x->n0++] = type;
+		break;
+	}
+}
+
+#undef char
 // contains delay slot
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_1600288C.s")
 // _Ldunscale

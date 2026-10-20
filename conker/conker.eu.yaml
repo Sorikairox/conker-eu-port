@@ -982,5 +982,7 @@ segments:
     start: 0x259B50
     vram:  0x16003700
     subsegments:
-    - [0x259B50, bin] # .data
+    - [0x259B50, databin] # .data (+ early .rodata)
+    - [0x25AC50, .rodata, debugger_257350]
+    - [0x25ADB0, rodatabin]
   - [0x25B1A8] # end of file
