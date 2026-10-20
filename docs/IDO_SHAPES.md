@@ -1081,3 +1081,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 2. **Rare's libultra fork**: GoldenEye `tools/goldeneye/src/libultrare` (compile with `tools/eu_port/gelu.sh`) differs from ultralib (`__osLeoInterrupt` has the `osDiskExist` check). Map its global names to the EU D_ names with `#define` at the top of the file.
 3. **Shared `lui` for several fields of one global** (`osLeoDiskInit`): the ref compiled the global as defined in the file. A tentative definition `OSPiHandle D_80043E50;` (COMMON, resolved by the address in `undefined_syms_auto.txt`) gives it with no data emitted; `extern` gives one `lui` per store.
 4. A **chained assignment** `a = b = p;` loads the address of the middle global into a register (`func_10003BD0`); separate statements use `lui at` per store.
+
+## s121 recipes (n_audio / audio manager ports)
+1. **Screen Rare references at `-g` too** (`rarescreen.sh`): Conker's `-g` n_audio files (init_1E530..init_22460) are DK64 `src/global_asm/audio` (DK64 builds them `-g`); at `-O1`/`-O2` they only scored 0.6-0.86.
+2. **`while (1)` vs `for (;;)`** after a call in a function that never returns: `while (1)` left 7 zero words before the epilogue, `for (;;)` matched (`func_10009400`).
+3. Register locals still **reserve stack slots in declaration order** (higher address first): position an address-taken struct by moving its declaration between register locals (`func_10009400`, `func_100095A0`).
+4. Two `lui/addiu` of the **same address** = two different symbols in the original (rspboot end / aspMain start): use the second name and add it to `undefined_syms.eu.txt` (`func_100095A0`, `aspMainTextStart`).
+5. Inline `alUnlink`/`alLink` as code with **block-scoped `ALLink *ln, *to`** gives the 8 extra frame bytes of libultra-style DMA list code (`func_100099BC`).
