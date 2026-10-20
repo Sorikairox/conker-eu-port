@@ -800,3 +800,11 @@ See `docs/sessions/s82.md`.
 4. Two stores at the end in the ref order `swc1 0x50; swc1 0x4C` but float regs off by one: write the computed store first (`e->4C = 1/(x+x); e->50 = 0;`), IDO schedules the constant store ahead (`func_1513418C`).
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
+
+## s87 recipes (early return, rodata of the last asm user, arity scan)
+See `docs/sessions/s87.md`.
+1. **`lw tN, home(sp)` reload of an arg at the start of the guarded body** (ref) where mine reuses the register from the test: write `if (!x) return;` + body instead of `if (x) { body }` (`func_150E0C58`, `func_150FB8A4`, `func_150F9D6C`).
+2. **apply.py REJECT on a function whose `# rodata_inject` block holds tables it references** and no asm function of the file follows: put `const u32 rodata_<stem>_<func>[] = { exact words };` before the definition; the `D_` names stay absolute symbols. Drop a trailing `0` word that is only alignment (`func_150FE49C`, `func_150FDF38`).
+3. **Two uses of `base + i * 12` across calls**: the same form twice is CSE'd and spilled (frame +8, SIZE-n); the ref recomputes, so write the second use in a different form (`D[i]` then `(f32 *)((u8 *)D + i * 12)`) (`func_150E0C58`).
+4. **Loop over a stack array with `p == &a[1]` tests and the addresses in s-registers**: separate locals declared in reverse (`struct17 p3, p2, p1, p0;`, `for (p = &p0; p != &p3 + 1; p++)`), not an array; a constant used as `x = d; ... x = -d;` with `neg.s` is a variable (`func_1506E2CC`, partial).
+5. `tools/eu_port/arityscan.py --slice lo` lists prototypes with trailing params the asm never reads; confirm with `--callers` (callers must not write the register) and beware pass-through args (unread but forwarded to a callee) (`func_1508849C`, `func_15088E84`).
