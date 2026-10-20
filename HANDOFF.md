@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 78, main checkout, game < 0x130000, 3455/5915, 419,096 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 76, main checkout, game < 0x130000, 3431/5915, 412,692 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 74, worktree eu-wt-a, game >= 0x130000, 3415/5915, 407,396 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 75, main checkout, game < 0x130000, 3420/5915, 407,932 bytes). Older stamps below are history.
@@ -50,6 +51,8 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 78 (main, game < 0x130000, Opus): 3455 / 5915 functions in C (58.4%)**, code bytes 419,096 / 2,253,856 (18.6%), full `verify_all.sh` all OK. +5 in `62950b3`, `06161f7`: `func_15047680` (guLookAtF clone: `#pragma function sqrtf` + `inv` temp), `func_150D79EC`, `func_150D7A9C` (order sweep), `func_150B6BBC`, `func_15034790`.
+  Doc `docs/sessions/s78.md`, recipes IDO_SHAPES `## s78 recipes`, drafts `docs/sessions/s78_drafts/` (`neighbours.sh` per-file asm neighbour sizes). `game_eu_71E70` now has `#pragma function sqrtf` above `func_15047680` and the `HitInfo` typedef above `func_15045B70`.
 - **Session 76 (main, game < 0x130000, Opus): 3431 / 5915 functions in C (58.0%)**, code bytes 412,692 / 2,253,856 (18.3%), full `verify_all.sh` all OK. +11 in `8e1399a`, `be7e2f4`: near misses `func_150464C0`, `func_150DE52C`, `func_150DE6AC`, `func_150D7930`, `func_1500E738`, `func_150A0890` (`game_3BA70`, `game_eu_CE0A0` own `.rodata`), and the `HitInfo` family of `game_eu_71E70`: `func_15046750`, `func_150475B0`, `func_1504715C`, `func_15046C6C`, `func_15046FF0`.
   Doc `docs/sessions/s76.md`, recipes IDO_SHAPES `## s76 recipes` (prototypes in the draft before judging a near miss; exhaustive order tryalls; `lwl/lwr` = align-2 struct copy). Open drafts `docs/sessions/s76_drafts/`: `func_150451C0` DIFF12 (perm), `func_15047680` (guLookAtF, `jal sqrtf` vs intrinsic).
 - **Session 74 (worktree a, game >= 0x130000, Opus): 3415 / 5915 (57.7%)**, 407,396 bytes, full `verify_all.sh` all OK. +6 in `695d3cd`: `func_1513DF9C`, `func_151604A0` (jump tables; `game_169510`, `game_18D770` now own `.rodata`), `func_1511CAD0`, `func_151733EC`, `func_1515F8A8`, `func_1515FB34`.
@@ -152,6 +155,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s78: `docs/sessions/s78_drafts/neighbours.sh` (slice files touched since bcbf973 with GLOBAL_ASM: C count + each asm neighbour's size).
 - s76: no new tools; `m2c/tryall` over all statement/declaration permutations (IDO_SHAPES s76 recipe 2).
 - s74: `rodata_inject.py` directive `// rodata_inject: inside <rom addr>` (a constant-index load inside a C-named array is not its own item). Fresh worktree: `fieldinfer.py --report` before `TYPED=1 gensome.sh`.
 - s75: `ndiff.sh func draft.c [n]` (ref vs mine diff, relocations normalised: read this instead of refdiff.py), `m2c/gen2.py` `LAX=1` also rewrites M2C_BITWISE/M2C_MEMCPY_ALIGNED, `RAWDUMP=dir`; `gensome.sh` `MAXI=n`.
@@ -212,6 +216,7 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 - Check call arities / prototypes and the first compile error before restructuring. Permuter first for register-only DIFF <= 9. Do not give float spills names. Do not copy `arg0` into a local for delay-slot/arg-copy shapes. Hand-written asm (`Handwritten function`), `sd/ld`, `lwr/swr` are not matchable as C at -mips2.
 
 ## Next steps (prioritized)
+000000000000. Slice below 0x130000 after session 78 (`docs/sessions/s78.md`): (a) `func_15046038` DIFF7 (`s78_drafts/func_15046038_DIFF7.c`: one register, the `unkC` index must land in v1), then its opcode twin `func_1504627C` (max form) and the pair `func_15045B70`/`DD4` (`s78_drafts/func_15045B70_SIZE-2.c`): 4 functions; (b) `func_150479F0` guLookAtReflectF clone (SIZE-6 draft, needs `#pragma intrinsic(sqrtf)` before it); (c) `func_150D7B6C` SIZE-1, `func_15034A18` DIFF26, `func_150451C0` DIFF12 (all s78 variant families listed in s78.md are exhausted); (d) `func_1506F54C` DIFF44 not reached; (e) rerun `s78_drafts/neighbours.sh` after each match and gensome the unlogged small neighbours (9 of them gave 4 matches).
 00000000. Slice >= 0x130000 after s74 (`docs/sessions/s74.md` section 4): permuter bests `func_10007D14` DIFF2, `func_1510B930` DIFF4, `func_1510BB78`, `func_151154C4`, `func_151B8B5C`, `func_151B92AC` (`nm/<f>/best.c`, chain more rounds); `func_151DDA10` (eeprom probe, `beqz`+`lhu` slot); the 50 DIFF / 70 SIZE+ fixchain drafts in `conker/build_port/s74/fc{A,B}/best` (untracked: regenerate with `TYPED=1 gensome.sh` + `fixchain.sh` from `s74/A2.txt`, `B2.txt` if lost); 342 functions whose m2c output has `M2C_` markers (no draft yet; `gen2.py` drops them). `func_151EF7B0` matches but its file is 16 nops longer.
 
 00000000000. Slice below 0x130000 after session 76 (`docs/sessions/s76.md`): (a) `func_150451C0` from `s76_drafts/func_150451C0_perm_DIFF12.c` (twin of the matched `func_15045674`; only the tail order), then its twin `func_150453BC` the same way; (b) `func_15047680` (guLookAtF clone): decide on the `sqrtf` alias symbol, then the look-vector register allocation; (c) the other `game_eu_71E70` asm functions are `HitInfo` producers (`func_15045B70`/`DD4`/`6038`/`627C`, 145-153 insns, call `func_150A49D0`/`func_150A48C0`) and probably clone each other; (d) s75 `big_rank.txt` drafts have 24-128 byte frame gaps: not near misses; (e) `func_1506F54C` DIFF44, `func_1506AD30` untouched.
