@@ -21,3 +21,5 @@ the main checkout ~/conker: never touch ~/conker, its `conkerdev` container, or 
   background processes of yours may be left running.
 - Hand-off: update HANDOFF's current state and next steps compactly, and add
   docs/sessions/sNN.md.
+- **Hard context cap:** count your tool calls. After about 150, stop new work regardless of the
+  function budget and do the hand-off. Keep tool outputs short (head/grep, no big asm dumps).
