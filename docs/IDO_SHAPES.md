@@ -963,6 +963,13 @@ OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), 
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s117 recipes (rodata ownership pads, list walks, constant registers)
+See `docs/sessions/s117.md`.
+1. **A matched C function's odd `s32 pad;` can be a compensation for a file that does not own `.rodata`**: after `rodata_split.py --own <stem> --resplit` the frame of a function with a float literal shrinks by 8; remove the pad (`func_1505D34C` in `game_83300`). Run `check_files.py` on the file after any ownership change.
+2. Weighted random list walk `n = list; while (n->w < r) { r -= n->w; n = n->next; }`: assign `n` **after** the rand call, or `n` lives across the call in an s-reg (`func_150E909C`).
+3. A local constant copy `m = 61.0f; k = m; ... k = -m;` gives `mov.s`/`neg.s` from one materialised constant (s103 recipe for floats), and `r -= c; if (r < d)` gives the in-place `sub.s` (`func_150B0F40`).
+4. `u8` loop index times a constant always gave `multu` here (also `(s32)i * 3`, `(u8 *)p + i * 12`); the ref's `sll/subu/sll` for one of two `i*12` terms is unexplained (`func_150FFC60`, open).
+OPEN: `func_150FFC60` SIZE-1, `func_150E752C` perm DIFF2, `func_1507E690` SIZE-1, `func_150FB06C` SIZE-4, `func_150E909C` perm DIFF7, `func_1505F188` DIFF14 (perm).
 ## s114 recipes (shared value stores, sign step, one reused temp, spawner structs)
 See `docs/sessions/s114.md`.
 1. **One value stored to two struct fields with other stores between (`sh t1,a; sh zero..; sh t1,b`) and the frame 8 too big with a named temp**: `s.a = s.b = expr;` (the left field is stored first) (`func_1514A434`).
@@ -1086,3 +1093,16 @@ See `docs/sessions/s109.md`.
 6. **Flag temps of an `a | b | 0x9300` struct field cost 8 frame bytes when named**: reuse the rand temps declared for later (`if (arg4 == -1) b = 0; else b = 1; if (arg5) c = 0x400; else c = 0; s.u0 = c | b | ...;`) (`func_150E856C`, frame fixed, still DIFF56).
 7. Two `sh` stores in the wrong order (`func_150C29F0`, s107 DIFF2): a same-line `do { ...; s.u5C = ..; s.u5E = ..; } while (0);` around the preceding statements (local permuter, fakematch; s106 recipe 4 again).
 OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 with `pad9A[0xA]`; only t-regs of the arg1/arg2 loads), `func_150E856C` perm DIFF56 (arg4/arg5 kept in a0/a1 in the ref), `func_150B87B0` SIZE-6 (loop, hoisted FPR constants).
+
+## s119 recipes (init / libultra builds)
+1. **`-mips3` C files** (64-bit `dsll`/`ld`/`sd` code such as ultralib `libc/ll.c`): per-object `MIPSBIT := -mips3 -32`, `OPT_FLAGS := -O1`, and an explicit Makefile rule placed *after* the generic `%.c.o` recipes (an explicit rule earlier in the Makefile becomes the default goal) that runs `$(PYTHON) tools/set_o32abi_bit.py $@` on the object. Then the object links with the `-mips2` ones (`init_eu_26B30`). Lo-slice candidates: the 64-bit rng in `game_DAE50` (`func_150ADA20`: `ld`/`dsll32`, = PD/GE `random()`), `game_eu_D2DB0`, `game_D51B0`.
+2. **Rare's libultra fork**: GoldenEye `tools/goldeneye/src/libultrare` (compile with `tools/eu_port/gelu.sh`) differs from ultralib (`__osLeoInterrupt` has the `osDiskExist` check). Map its global names to the EU D_ names with `#define` at the top of the file.
+3. **Shared `lui` for several fields of one global** (`osLeoDiskInit`): the ref compiled the global as defined in the file. A tentative definition `OSPiHandle D_80043E50;` (COMMON, resolved by the address in `undefined_syms_auto.txt`) gives it with no data emitted; `extern` gives one `lui` per store.
+4. A **chained assignment** `a = b = p;` loads the address of the middle global into a register (`func_10003BD0`); separate statements use `lui at` per store.
+
+## s121 recipes (n_audio / audio manager ports)
+1. **Screen Rare references at `-g` too** (`rarescreen.sh`): Conker's `-g` n_audio files (init_1E530..init_22460) are DK64 `src/global_asm/audio` (DK64 builds them `-g`); at `-O1`/`-O2` they only scored 0.6-0.86.
+2. **`while (1)` vs `for (;;)`** after a call in a function that never returns: `while (1)` left 7 zero words before the epilogue, `for (;;)` matched (`func_10009400`).
+3. Register locals still **reserve stack slots in declaration order** (higher address first): position an address-taken struct by moving its declaration between register locals (`func_10009400`, `func_100095A0`).
+4. Two `lui/addiu` of the **same address** = two different symbols in the original (rspboot end / aspMain start): use the second name and add it to `undefined_syms.eu.txt` (`func_100095A0`, `aspMainTextStart`).
+5. Inline `alUnlink`/`alLink` as code with **block-scoped `ALLink *ln, *to`** gives the 8 extra frame bytes of libultra-style DMA list code (`func_100099BC`).

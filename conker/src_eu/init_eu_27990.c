@@ -60,4 +60,29 @@ s32 __osPfsGetStatus(OSMesgQueue *queue, int channel) {
     return ret;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_27990/func_10027B50.s")
+extern OSPiHandle *D_8002AEAC; /* __osPiTable */
+OSPiHandle D_80043E50;  /* LeoDiskHandle (.bss; tentative definition, COMMON resolved by undefined_syms: gives the shared lui) */
+extern OSPiHandle *D_80043EC4; /* __osDiskHandle (.bss) */
+
+// osLeoDiskInit (Rare libultrare, GoldenEye src/libultrare/io/leodiskinit.c)
+OSPiHandle *func_10027B50(void) {
+    s32 sp1c;
+
+    D_80043E50.type = 2;
+    D_80043E50.baseAddress = (0xa0000000 | 0x05000000);
+    D_80043E50.latency = 3;
+    D_80043E50.pulse = 6;
+    D_80043E50.pageSize = 6;
+    D_80043E50.relDuration = 2;
+    IO_WRITE(PI_BSD_DOM2_LAT_REG, D_80043E50.latency);
+    IO_WRITE(PI_BSD_DOM2_PWD_REG, D_80043E50.pulse);
+    IO_WRITE(PI_BSD_DOM2_PGS_REG, D_80043E50.pageSize);
+    IO_WRITE(PI_BSD_DOM2_RLS_REG, D_80043E50.relDuration);
+    bzero(&D_80043E50.transferInfo, sizeof(__OSTranxInfo));
+    sp1c = __osDisableInt();
+    D_80043E50.next = D_8002AEAC;
+    D_8002AEAC = &D_80043E50;
+    D_80043EC4 = &D_80043E50;
+    __osRestoreInt(sp1c);
+    return &D_80043E50;
+}

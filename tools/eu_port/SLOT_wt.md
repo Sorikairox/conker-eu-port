@@ -14,8 +14,7 @@ the main checkout ~/conker: never touch ~/conker, its `conkerdev` container, or 
   scratchpad).
 - **Never pkill/pgrep by name on the host**, since that kills the other agent's jobs.
   Kill only PIDs you started, or your own /work/<id> jobs on the Mac mini.
-- **Slice:** game files whose name ends in a hex offset **at or above 0x130000**, plus
-  init (src_eu/init_*, src_eu/libultra/**) and debugger (src_eu/debugger*). Don't touch
+- **Slice:** game ≥ 0x130000 + debugger (src_eu/debugger*). Don't touch init or
   game files below 0x130000.
 - Shared headers: only add lines or change single prototypes, then run check_files.py on
   everything.
