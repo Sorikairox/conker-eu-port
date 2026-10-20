@@ -587,7 +587,7 @@ See `docs/sessions/s54.md`.
 See `docs/sessions/s57.md`.
 1. **Stack-struct spawners** (49 asm callers of `func_15132FBC`, e.g. `func_150CB2D0`/`CBD10`/`CCF8C`/`CE420`, `func_150D2C9C`): m2c emits scalars `s8 sp98; s16 sp9C; f32 sp28[13]; ...` and passes `sp28`. IDO drops the stores to the never-addressed scalars (SIZE-56). `spstruct.py in out`
    merges all `spXX` at or above the lowest array into ONE `struct { ...; } sp` with pads (fields `uXX` named by stack offset) and passes `&sp`: the SIZE-56 drafts become DIFF42/47, i.e. all stores and the schedule are right and only the frame layout is left
-   (mine puts the struct 8 bytes higher with an 8-byte hole below, the ref has the same 8 bytes above the struct; 2 pad words, f64 tail, union with f64, named `sp20` all failed, OPEN).
+   (mine puts the struct 8 bytes higher with an 8-byte hole below, the ref has the same 8 bytes above the struct; 2 pad words, f64 tail, union with f64, named `sp20` all failed; SOLVED in s58: the chained assignment costs a dead temp, see `## s58 recipes`).
 2. **9-byte aligned const struct copy**: `struct S9 { u8 a[9]; } sp38; sp38 = D_800A0D60;` gives exactly `lw/lw/sw/lbu/sw/sb` through `$at` (the three-statement s32/s32/u8 form schedules the byte load earlier).
 3. **Named locals in registers take slots, and their DECLARATION ORDER decides where the free hole ends up** (`func_150EA3B4`, DIFF3 -> OK): declare the live-across-calls float (`f32 temp_f20;`) BEFORE the stack vectors `s32 sp80[3]; s32 sp74[3];` to get the ref's unused slot above them
    (the permuter had the vectors right but 4 bytes too low). Inline `x = call();` temps that are only consumed as arguments (they become unnamed spills) and save their slots.
@@ -605,3 +605,13 @@ See `docs/sessions/s57.md`.
 4. **12-byte vector copies** from m2c (`f32 +0; s32 +4; s32 +8`) are struct assignments: `typedef struct {f32 x,y,z;} V3; *(V3 *)dst = *(V3 *)src;` gives the `lw/sw` triples.
 5. **s58 frame rule applied** (`func_151664F0`): a named float live across a call lives in a compiler temp only when it is NOT named; inline `((f32) arg0) * 0.0174f` twice and declare the other named locals above it (`s32 i; u8 *temp_v0;`) to put them at 0x34/0x30 and the spill at 0x2C.
 6. A file's first `.rodata` word can belong to a neighbour (`ff000000` before the float): `rodata_split.py --own` then yields a mismatching section and apply.py REJECTs with no message; compare `conker/conker.eu.bin` at the range start.
+## s58 recipes (stack frame layout, the func_15132FBC spawner family)
+
+See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
+1. **Frame layout at -O2 -g3, bottom up**: outgoing args (>= 0x10), saved regs, compiler temps (8 bytes each, directly below the locals), named locals from the frame TOP down in declaration order.
+   The round-to-8 padding goes at the bottom, between the saves and the temps. A gap BELOW the locals that nothing uses is a dead compiler temp, not a missing local: find the statement that creates it
+   (one function per "statement removed" variant in one standalone file, `docs/sessions/s58_drafts/cx.sh`) instead of adding pads.
+2. **A chained float assignment `a = b = expr;` costs an 8-byte temp** even when the value stays in a register. Write `b = expr; a = b;` (same `swc1` pair). This was the whole s57 spawner hole.
+3. **A named float local assigned from an expression and used twice also costs a temp slot** (`f32 t = r() * 3.0f; x = t; y = t;` grew the frame like the chain); inline or use the struct field as the second source.
+4. **Spawner struct for `func_15132FBC`** is 0x80 bytes (8 tail bytes after `u9C`) when nothing else is declared above it; with named locals above it (out-params, angle results) a 0x78/0x7C struct plus those names fill the same space.
+   15-parameter signature `(s32, s32, f32, f32, f32, s32, s32, s32, s16 arg8, s32..., u8 argE)` so the stack params land on m2c's offsets; `u8 u88` when the ref stores 0xFF.
