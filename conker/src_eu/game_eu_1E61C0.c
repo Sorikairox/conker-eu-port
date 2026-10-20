@@ -23,7 +23,24 @@ void func_151B8BEC(s32 arg0, s16 arg1) {
     func_1513FA70(arg0, arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E61C0/func_151B8C18.s")
+extern f32 D_800DCE54;
+void func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
+    u8 *p;
+    struct_eu_EF410 sp18;
+
+    p = arg0;
+
+    sp18.unk0 = (s32) (p + 0x38);
+    sp18.unk4 = (s32) (p + 0x3C);
+    sp18.unk8 = (s32) (p + 0x40);
+    sp18.unkC = 10.0f;
+    sp18.unk10 = 0.2075f * D_800DCE54;
+    sp18.unk14 = 300;
+    sp18.unk16 = 0;
+    sp18.unk17 = 3;
+    sp18.unk18 = 0;
+    func_15134908(&sp18, 0, arg1, arg2);
+}
 
 void func_15143794(s16, s16, f32, void *);
 s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);

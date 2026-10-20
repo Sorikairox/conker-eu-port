@@ -216,7 +216,36 @@ void func_151D56F8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D58E4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5404.s")
+typedef struct {
+    struct17 pos;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    u8 unk18;
+} Blk_151D5404;
+void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s32 arg6, s32 arg7) {
+    s32 i;
+    Blk_151D5404 sp38;
+    structEU_151D8E18 sp30;
+    s32 p;
+
+    sp38.pos = *arg0;
+    sp38.unkC = arg1;
+    sp38.unk10 = arg2;
+    sp38.unk14 = arg3;
+    sp30.unk0 = 1;
+    sp30.unk2 = (func_150ADA20() % (u32) (arg5 + 1)) + arg4;
+    sp30.unk4 = 0;
+    sp30.unk6 = 0;
+    for (i = 0; i < D_80082FA0 + 1; i++) {
+        sp30.unk5 = 1 << i;
+        sp38.unk18 = i;
+        p = func_151D8E18(&sp30, 0x1C, 0xFF, 0);
+        if (p != 0) {
+            memcpy((u8 *)p + 0x18, &sp38, 0x1C);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5AC4.s")
 

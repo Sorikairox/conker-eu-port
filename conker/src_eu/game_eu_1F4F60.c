@@ -88,7 +88,18 @@ void func_151C9CBC(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9740.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151CA070.s")
+s32 func_1504715C(s32 *, struct127 *);
+void func_151AC3F0(struct17 *, s32 *, s32, u8, s32);
+void func_151CA070(struct127 *arg0, u8 arg1, s32 arg2) {
+    struct17 pos;
+    s32 sp20[9];
+
+    pos.unk0 = *(f32 *)((u8 *)arg0 + 0x14);
+    pos.unk4 = *(f32 *)((u8 *)arg0 + 0x180) + 2.0f;
+    pos.unk8 = *(f32 *)((u8 *)arg0 + 0x1C);
+    func_1504715C(sp20, arg0);
+    func_151AC3F0(&pos, sp20, 2, arg1, arg2);
+}
 
 s32 func_151CA0E0(u8 *arg0)
 {
