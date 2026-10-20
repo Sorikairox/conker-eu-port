@@ -35,7 +35,7 @@ line = (f"- **{t.group(1)} / {t.group(2)} functions in C ({t.group(3)}%)**, code
 L = open("HANDOFF.md").read().split("\n")
 out_lines, done = [], False
 for l in L:
-    if re.match(r"- \*\*\d+ / 5913 functions in C", l):
+    if re.match(r"- \*\*\d+ / \d+ functions in C", l):
         if not done:
             out_lines.append(line); done = True
         continue
