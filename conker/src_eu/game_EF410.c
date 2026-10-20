@@ -100,7 +100,14 @@
 //     func_15151A38(&sp18, arg0 & 0xFF, 1);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2424.s")
+void func_150C2424(u8 arg0) {
+    f32 r;
+
+    r = func_150ADA68() * 8.0f + 8.0f;
+    func_1514C9E0(8500.0f, -490.0f, -328.0f, 8500.0f, -490.0f, 328.0f, r, 1, 0, 0.0f, 0, arg0);
+    r = func_150ADA68() * 3.0f + 4.0f;
+    func_1514C9E0(8843.0f, -560.0f, -580.0f, 8117.0f, -560.0f, -580.0f, r, 3, 0, 0.0f, 0, arg0);
+}
 s32 func_150C251C(struct_eu_sprite *arg0) {
     struct_eu_sprite_sub *sub = arg0->unk98;
     s32 v = arg0->unk1C * 8;
@@ -115,7 +122,63 @@ s32 func_150C251C(struct_eu_sprite *arg0) {
     return 1;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2558.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2700.s")
+typedef struct {
+    s16 u0[4];
+    f32 u8;
+    f32 uC;
+    f32 u10;
+    s16 u14;
+    s16 u16;
+    f32 u18;
+    f32 u1C;
+    s16 u20;
+    s16 u22;
+    f32 u24;
+    f32 u28;
+    u8 u2C;
+    u8 u2D;
+    f32 u30;
+    f32 u34;
+    u8 u38;
+    u8 u39;
+    f32 u3C;
+    u8 u40;
+    f32 u44;
+} S2700;
+s32 func_151506E8(S2700 *, f32 *, s32, u8, s32);
+
+s32 func_150C2700(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
+    extern f32 D_800A064C;
+    S2700 s;
+
+    s.u10 = arg4;
+    s.u8 = arg2;
+    s.uC = arg3;
+    s.u14 = 6;
+    s.u16 = 5;
+    s.u0[0] = 0x6B;
+    s.u0[1] = 0x46;
+    s.u0[2] = -0x1F;
+    s.u0[3] = 0x2E;
+    s.u20 = 0x64;
+    s.u22 = 0;
+    s.u2C = 0x9B;
+    s.u2D = 0x64;
+    s.u34 = 0.0f;
+    s.u38 = 1;
+    s.u39 = 6;
+    s.u3C = 0.0f;
+    s.u40 = 1;
+    s.u44 = 0.0f;
+    s.u18 = 30.0f;
+    s.u1C = 35.0f;
+    s.u24 = -2.328f;
+    s.u28 = 1.6630001f;
+    s.u30 = D_800A064C;
+    func_151506E8(&s, &s.u8, 0, argE, 1);
+    return 1;
+}
+extern f32 D_800A0650, D_800A0654; // s105: 0x64C-0x664 stay externs (1655.0f is loaded from .rodata, not lui)
 void func_150C2804(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
     struct_eu_EF410 sp1C;
 
@@ -131,6 +194,7 @@ void func_150C2804(s32 arg0, s32 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5) {
     sp1C.unk19 = -1;
     func_15134908(&sp1C, 0, arg4, arg5);
 }
+extern f32 D_800A0658, D_800A065C, D_800A0660; // C2898 keeps these as externs: literals add 8 frame bytes (s105)
 void func_150C2898(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, struct_eu_2062D0_c *arg6) {
     f32 sp6C[3];
     f32 sp60[3];
@@ -172,9 +236,9 @@ s32 func_150C308C(struct_eu_EF410_d *arg0) {
     if (arg0->unk1C >= 6) {
         v = (struct17 *)func_15144B34(D_80082FA4);
         d = v->unk0 * v->unk0 + v->unk8 * v->unk8;
-        if (d < D_800A06E0) {
+        if (d < 2500000.0f) {
             flag = TRUE;
-        } else if (D_800A06E4 < func_15144C8C(func_150484A0(v->unk0, v->unk8), arg0->unk160)) {
+        } else if (0.4f < func_15144C8C(func_150484A0(v->unk0, v->unk8), arg0->unk160)) {
             flag = TRUE;
         }
     }
@@ -248,7 +312,6 @@ s32 func_15170F24(s32, s32, s32, s32, f32, s32, s32);
 s32 func_15171770(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
 s32 func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_150C3D48(s32 arg0);
-extern f32 D_800A0708;
 s32 func_151EF800(u32, u32 *);
 s32 func_10004074(s32);
 
@@ -264,7 +327,7 @@ void func_150C3D5C(struct127 *arg0) {
         ((u32 *)&func_10004074)[0] = 0x03E00008;
         ((u32 *)&func_10004074)[1] = 0;
     }
-    func_15171770(3, 0xCB, arg0->x_position, arg0->y_position, arg0->z_position, 10.0f, 1.0f, 2.0f, 60.0f, 3, 0x3C, D_800A0708, 0xFF, 0);
+    func_15171770(3, 0xCB, arg0->x_position, arg0->y_position, arg0->z_position, 10.0f, 1.0f, 2.0f, 60.0f, 3, 0x3C, -0.7f, 0xFF, 0);
     func_15170F24(arg0->x_position, arg0->y_position + 20.0f, arg0->z_position, 0xA, 2000.0f, 0xFF, 0);
     func_1516DF0C(arg0->x_position, arg0->y_position, arg0->z_position, 0xD, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0, 0, 0, 0x14, 0x14, 2, 0, 0, 0, 0, 0x51, 0x51, 0x51, 0x51, 0xA, 1, 0, 0xFF, 0xA, 0x578, 0x190, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0xFF, 0);
     header.unk0 = 3;
