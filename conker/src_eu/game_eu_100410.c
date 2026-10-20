@@ -3,7 +3,21 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/func_150D2C00.s")
+s32 func_150D2C9C(s32, u8 *, u8, u8);
+void func_150D2C00(u8 *arg0)
+{
+  u8 **q = &arg0; // fakematch: arg0 reloaded from its home (shape C)
+  if ((*q)[0x78] & 1)
+  {
+    s32 *v = (s32 *) ((*q) + 0x28);
+    v[3] -= D_800BE9E4;
+    if (v[3] < 0)
+    {
+      func_150D2C9C(v[0], (u8 *) (&v[4]), (*q)[0xC], (*q)[1]);
+      v[3] = v[1] + (func_150ADA20() % ((u32) (v[2] + 1)));
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/func_150D2C9C.s")
 

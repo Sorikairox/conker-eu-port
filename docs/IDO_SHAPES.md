@@ -703,6 +703,13 @@ See `docs/sessions/s71.md`.
 3. **`or v0,a2,zero` copy of the u8 arg2 spilled across a call** = `s32 sel = arg2;` tested in the later arms (`func_15133AF8`); a function-level `t` reused in arm 0 takes `v0` after it.
 4. Shape C with two args reloaded (`func_151640C0`): `q = &arg0; r = &arg1;` + named loads; the permuter's `v = *q; v = v + 0x18;` (split add, fakematch) set the v0/v1 roles.
 5. OPEN: `func_15187EC0` (ref reloads `arg0` from its home but still hoists the stack-arg loads above the stores, which `&arg0` prevents), `func_15104FF8` (frame 0x48 between my 0x40/0x50).
+## s73 recipes (fresh m2c drafts: names, LAX switches)
+See `docs/sessions/s73.md`.
+1. **Fresh m2c drafts: delete every named temp first** (`temp_v0 = x->id; switch (temp_v0)`, `sp18 = var_a3`, `var_v0 = p->state`): switch on the expression, write `D_800CC2D0[arg0].field` out. Fixed the result register (`func_150DE450`) and an 0x10 frame excess (`func_150348D4`) with no other change.
+2. **m2c `/* irregular */` switch drafts are usually small clean switches**: `LAX=1 gensome.sh` keeps them; fix `s8` 0xFF fields to `u8`, `u8 argN` for an `andi aN,0xFF` prologue, compound `|=`/`&=` for m2c `temp_tN = x | K; x = temp; x = temp & ~M`.
+3. A dead pointer update kept in the ref (`addiu v1,v1,-8` after the load) = `p -= 2; return p[1] ...;` (the update is the base of the load) (`func_1507ED48`).
+4. Shape C + a block-local pointer: `u8 **q = &arg0;` at function level and the derived `s32 *v = *q + K` declared in the if-body fixed a frame 0x28 -> 0x20 (`func_150D2C00`).
+5. Blkvar on fresh (unrepaired) drafts: 0 OK in 41 functions. Use it after the naming/typing fixes, not before.
 ## s72 recipes (compare grids, merged else, per-arm rematerialisation)
 See `docs/sessions/s72.md`.
 1. **0x2D compare order: grid, then permuter.** One `tryall` over first/second operand order x key form (named `k`, plain memory, `s32 *key`) x default-arm form (`k`, `(k ^ 0)`), then the permuter on the best-register variant (`func_15135480`: grid DIFF3 -> permuter OK; clean result: key-first plain compares, `t = arg1->unk0;` in the second arm). Reuse the grid's arm bodies for siblings in the same file (`func_151347CC` matched with `*key`).
@@ -717,3 +724,9 @@ See `docs/sessions/s74.md`.
 3. **Store-before-load at the end of a block**: ref `swc1 f0,0x84(s0); lwc1 f6,0x8(s0)` where mine hoists the compare's load above the store: wrap the last assignment in a block with a declaration (`{ s32 blk_t; x = f(x); }`, s66 boundary) (`func_1511CAD0`).
 4. **m2c `(u32) f & 0xFF` into a u8 local** gives `or; andi`; the ref's `andi; or` is the plain `u8 v = f;` (`func_1515F8A8`, `func_1515FB34`).
 5. **Frame too big by 8-16 with m2c spill names** (`sp28 = p; sp2C = idx;`): delete them and the named pointer temps; the spills become compiler temps (`func_151733EC`). A pointer the ref spills to a temp slot but uses as a base register must stay unnamed but not inlined (inlining folds the offset; `func_151B92AC` open).
+## s75 recipes (struct copies, statement position of an early load)
+See `docs/sessions/s75.md`.
+1. **m2c `M2C_MEMCPY_ALIGNED` + unrolled `lw/sw` x3 copy loops = plain struct assignments** of a 0x24-byte struct (`a = *arg3; b = *arg3; ... *arg3 = a;`), results in `u8` named locals at the byte slot (`func_150469E8`, typedef `HitInfo`). `LAX=1` gen2 drafts these now.
+2. **A global pointer load the ref schedules at the very top** (`lui v0; lw v0` right after the prologue) is the first statement of the source: `p = D_800D154C; sp.u20 = p; sp.u24 = p->unique_id;` (`func_1506F54C`). Placed later, IDO sinks the load to its use.
+3. A call whose 4th argument register holds only a `%hi` (`lui a3` reused for `addiu a2,a3,%lo`) is a 3-arg call of an unprototyped callee (`s32 f();`), the other calls pass 4 (`func_15096E78`).
+4. Temps spilled across calls in different `case` arms get the ref's separate slots when declared inside the case blocks (`case 1: { struct108 *a; ... }`) (`func_15096E78`).

@@ -5,7 +5,7 @@ _top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 R=${CONKER_ROOT:-$HOME/conker}; M=$R/tools/eu_port/m2c; K=$R/conker/build/ks; F=$R/tools/decomp-permuter/repair/fresh
 rm -rf $K; mkdir -p $K $F; for f in "$@"; do echo $f; done > $K/only.txt
-ONLY=$K/only.txt JT=1 $M/venv/bin/python3 $M/gen2.py $K 1 400 > $K/gen.log 2>&1
+ONLY=$K/only.txt JT=1 $M/venv/bin/python3 $M/gen2.py $K 1 ${MAXI:-400} > $K/gen.log 2>&1
 for v in 0 1 2 3 4 5 6 7; do [ -d $K/v$v ] && python3 $M/narrow.py $K/v$v $K/n$v >/dev/null 2>&1; done
 cp $M/screen.py $R/conker/build/screen.py
 for v in $K/v* $K/n*; do [ -d $v ] && docker exec -w /conker/conker ${CONKERDEV:-conkerdev} python3 build/screen.py build/ks/$(basename $v) 8 >/dev/null 2>&1; done

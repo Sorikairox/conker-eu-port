@@ -296,11 +296,56 @@ s32 func_15045AF0(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_1504627C.s")
 
+typedef struct {
+    f32 t;
+    u8 pad4[0x18];
+    u8 flags;
+    u8 pad1D[7];
+} HitInfo;
+u8 func_150464C0(u8 *, u16, f32, HitInfo *);
+
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150464C0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15046750.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150469E8.s")
+s32 func_150469E8(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3) {
+    HitInfo a;
+    HitInfo b;
+    u8 r1;
+    u8 r2;
+
+    if (arg2 < *(f32 *)(arg0 + 4)) {
+        ((HitInfo *)arg3)->flags &= ~2;
+        return 0;
+    }
+    a = *(HitInfo *)arg3;
+    b = *(HitInfo *)arg3;
+    r1 = func_150464C0(arg0, arg1, arg2, &a);
+    r2 = func_150451C0(arg0, arg2, &b);
+    if (r1 != 0 && r2 != 0) {
+        if (a.t < b.t) {
+            *(HitInfo *)arg3 = a;
+            return 1;
+        }
+        *(HitInfo *)arg3 = b;
+        return 1;
+    }
+    if (r1 != 0) {
+        *(HitInfo *)arg3 = a;
+        return 1;
+    }
+    if (r2 != 0) {
+        *(HitInfo *)arg3 = b;
+        return 1;
+    }
+    if (a.t < b.t) {
+        *(HitInfo *)arg3 = a;
+    } else {
+        *(HitInfo *)arg3 = b;
+    }
+    ((HitInfo *)arg3)->flags &= ~2;
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15046C6C.s")
 

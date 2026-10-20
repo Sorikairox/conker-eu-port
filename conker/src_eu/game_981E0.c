@@ -1885,7 +1885,18 @@ void func_15073A28(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073A50.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073B38.s")
+void func_15073B38(void)
+{
+  f32 new_var; // fakematch: permuter temps (new_var/new_var2/new_var3) and ^ 0 set registers and load order
+  f32 new_var3;
+  f32 new_var2;
+  new_var2 = (f32) (D_800D1580 & 0xFFFF);
+  new_var = new_var2;
+  D_800D154C->unk31C->unkA8 = new_var;
+  new_var = (new_var3 = (f32) ((((s32) D_800D1580) >> 0x10) & 0xFF));
+  D_800D154C->unk31C->unkAC = (u8) ((u32) new_var);
+  D_800D154C->unk31C->unkAD = ((u8) (((s32) D_800D1580) >> 0x18)) ^ 0;
+}
 
 void func_15073C28(void) {
     func_1507F640();

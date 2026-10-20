@@ -7,7 +7,49 @@ u8 *func_15169ED8(void *);
 void func_150B7B9C(s32, s32);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B70A0.s")
+void func_150B7C88(void);
+void func_150B7B6C(void);
+void func_150B7B3C(void);
+void func_150B7A40(void);
+void func_150B7964(void);
+s32 func_150B7170(void);
+s32 func_150B7214(void);
+s32 func_150B7258(void);
+s32 func_150B7DFC(void);
+
+void func_150B70A0(s32 arg0) {
+    switch (D_800D9CB0) {
+    case 1:
+        func_150B7170();
+        return;
+    case 2:
+        func_150B7214();
+        return;
+    case 4:
+        func_150B7258();
+        return;
+    case 5:
+        func_150B7964();
+        return;
+    case 6:
+        func_150B7A40();
+        return;
+    case 7:
+        func_150B7B3C();
+        return;
+    case 8:
+        func_150B7C88();
+        return;
+    case 9:
+        func_150B7B6C();
+        return;
+    case 10:
+        func_150B7DFC();
+        /* fallthrough */
+    default:
+        return;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7170.s")
 

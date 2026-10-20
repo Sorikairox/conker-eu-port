@@ -15,7 +15,19 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DDBC0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DE450.s")
+void func_150DE450(u8 *arg0) {
+    struct260 *o;
+    o = func_151491F4(0x64, 2, -1, 1U, 0U, 1, 0xFFU, 0);
+    if (o != NULL) {
+        switch (arg0[0x72]) {
+        case 0xFB: *((s8 *)o + 0x28) = 1; break;
+        case 0xFC: *((s8 *)o + 0x28) = 2; break;
+        case 0xFD: *((s8 *)o + 0x28) = 4; break;
+        case 0xFE: *((s8 *)o + 0x28) = 3; break;
+        default: func_1516972C((struct102 *) o); break;
+        }
+    }
+}
 
 void func_150DE508(struct102 *arg0) {
     func_150DC2F0(arg0->unk28, arg0);

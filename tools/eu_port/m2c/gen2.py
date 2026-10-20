@@ -65,10 +65,69 @@ def m2c_inputs(sp):
     if t:
         b=os.path.join(d,f+'.rod.s'); open(b,'w').write(t); ins.append(b)
     return ins
+
+def _args(c,i):
+    """c[i]=='(' -> (list of top-level comma args, index after the matching ')')"""
+    d=0; a=[]; st=i+1
+    for j in range(i,len(c)):
+        if c[j]=='(': d+=1
+        elif c[j]==')':
+            d-=1
+            if d==0: a.append(c[st:j].strip()); return a,j+1
+        elif c[j]==',' and d==1: a.append(c[st:j].strip()); st=j+1
+    return None,None
+_LV=re.compile(r'^(\*?[A-Za-z_]\w*(\s*(->|\.)\s*\w+|\[[^\[\]]*\])*|M2C_FIELD\(.*\))$')
+def laxmark(c):
+    """s75: LAX rewrite of M2C_BITWISE(T, lvalue) -> (*(T *)&(lvalue)) and M2C_MEMCPY_ALIGNED(d, s, n) -> struct copy
+    (typedef struct { s32 w[n/4]; } m2c_blkN, prepended). Returns None if a marker cannot be rewritten."""
+    sizes=set()
+    for name in ('M2C_BITWISE','M2C_MEMCPY_ALIGNED'):
+        while True:
+            i=c.find(name+'(')
+            if i<0: break
+            a,e=_args(c,i+len(name))
+            if not a or len(a)!=(2 if name=='M2C_BITWISE' else 3): return None
+            if name=='M2C_BITWISE':
+                t,x=a
+                if not _LV.match(x): return None
+                r='(*(%s *)&(%s))'%(t,x)
+            else:
+                d,sr,n=a
+                try: n=int(n,0)
+                except ValueError: return None
+                if n%4: return None
+                T='struct_eu_bytes24' if n==0x24 else 'm2c_blk%X'%n
+                if n!=0x24: sizes.add(n)
+                side=[]
+                for x in (d,sr):
+                    m=re.fullmatch(r'&(sp[0-9A-F]+)',x)
+                    if m and not re.search(r'&%s\s*[-+]'%m.group(1),c) and len(re.findall(r'(?<!&)\b%s\b'%m.group(1),c))==1 and re.search(r'^    [^\n;(]*\b%s;'%m.group(1),c,re.M):
+                        c=re.sub(r'^    [^\n;(]*\b%s;'%m.group(1),'    %s %s;'%(T,m.group(1)),c,count=1,flags=re.M); side.append(m.group(1))
+                    else: side.append('*(%s *)(%s)'%(T,x))
+                i=c.find(name+'('); a,e=_args(c,i+len(name))
+                r='%s = %s'%tuple(side)
+            c=c[:i]+r+c[e:]
+    # struct passed by value: copy to the outgoing-args area + call with subroutine_arg0..3
+    def byval(m):
+        byval.callees.add(m.group(3)); return '%s%s(%s);'%(m.group(2),m.group(3),m.group(1))
+    byval.callees=set()
+    c=re.sub(r'\*\(struct_eu_bytes24 \*\)\(sp\) = ([^;\n]+);\n(\s*)(\w+)\(subroutine_arg0, subroutine_arg1, subroutine_arg2, subroutine_arg3\);',byval,c)
+    for f in byval.callees:
+        c=re.sub(r'^(?!\s)[^\n]*\b%s\([^;\n]*\);[^\n]*$'%f,'void %s(struct_eu_bytes24);'%f,c,flags=re.M)
+    if 'subroutine_arg' in c: return None
+    if sizes:
+        c=''.join('typedef struct { s32 w[%d]; } m2c_blk%X;\n'%(n//4,n) for n in sorted(sizes))+c
+    return c
 def m2c(sp,cx,extra):
     r=subprocess.run([S+'/venv/bin/python','tools/mips_to_c/m2c.py','--valid-syntax','--context',cx]+extra+m2c_inputs(sp),capture_output=True,text=True)
-    if r.returncode or not r.stdout.strip() or any(b in r.stdout for b in BAD): return None
-    c=post(r.stdout)
+    bad=BAD if not os.environ.get('LAX') else tuple(b for b in BAD if b!='/* irregular */')   # s73: LAX=1 keeps m2c's irregular-control-flow drafts (gotos)
+    if os.environ.get('RAWDUMP') and r.stdout.strip():   # s75: raw m2c output per function for marker studies
+        os.makedirs(os.environ['RAWDUMP'],exist_ok=True); open(os.path.join(os.environ['RAWDUMP'],os.path.basename(sp)[:-2]+'.c'),'w').write(r.stdout)
+    out=r.stdout
+    if os.environ.get('LAX') and not r.returncode and ('M2C_BITWISE' in out or 'M2C_MEMCPY_ALIGNED' in out):
+        out=laxmark(out) or out   # s75: LAX also rewrites float/int bit casts and aligned struct copies
+    if r.returncode or not out.strip() or any(b in out for b in bad): return None
+    c=post(out)
     return None if 'M2C' in c else c
 TYPED=os.environ.get('TYPED')   # s54: typed struct127 (header already carries it) + struct127 * params from fieldinfer
 FIP={}

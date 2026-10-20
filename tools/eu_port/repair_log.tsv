@@ -967,6 +967,19 @@ func_151CD97C	new	4	OK	y	n	s72: fn-level v=arg0+0x28, blk_t at top of arms 0x17/
 func_151C8C5C	new	2	OK	y	n	s72: shape C u8 **q = &arg0 (arg0 reloaded from home), switch(arg2), mem compare v+0x28 == arg1[1]
 func_15135480	DIFF1	3	OK	y	y	s72: remote permuter from plain-compare grid: key-first plain compares, t=arg1->unk0 in 2nd arm, (k ^ 0) default arm
 func_151347CC	new	2	OK	y	n	s72: s32 *key = &arg0->unk1C read as *key in the 0x2D arm (s71 recipe 2)
+func_1507ED48	DIFF1	1	OK	y	n	s73: p -= 2; return p[1] / 10U (dead p-=2 kept because p is the pointer base)
+func_150D2C00	DIFF5	3	OK	y	y	s73: shape C q=&arg0 (fakematch) + v declared inside the if-body (remote permuter 1 round)
+func_150DE450	DIFF7	1	OK	y	n	s73 LAX gensome (irregular switch): switch on arg0[0x72] directly, no named u8 temp
+func_150348D4	DIFF13	4	OK	y	n	s73 LAX gensome: no named temps at all (D_800CC2D0[arg0].x written out, switch on .id): frame 0x20 (s60/s64 rule)
+func_1507DF10	SIZE-2	1	OK	y	n	s73 nodraft gensome: clean switch with |=/&= compound ops (m2c temp_tN reuse cost 2 insns)
+func_1507F92C	SIZE+1	1	OK	y	n	s73 LAX gensome: switch on D_800B89C4[idx*0x32C] (u8 array), if/else calls, s32 v (u16 v: DIFF38)
+func_150D8DF0	SIZE-2	1	OK	y	n	s73 LAX gensome: u8 arg2 switch, named idx/x/y/z locals top-down (frame order), floats passed to func_150A7E40 mf
+func_150DBBB0	SIZE-1	2	OK	y	y	s73 nodraft: if/else-if/else, u8 field; f32 **pp = arg0+0x120 field pointer keeps the reload (remote permuter)
+func_15073B38	DIFF24	2	OK	y	y	s73 nodraft: 2 chained remote permuter rounds (DIFF24->4->OK); permuter temps + ^ 0 (fakematch); clean single f temp = DIFF3
+func_150D7930	SIZE-1	4	DIFF10	n	y	s73: u8 arg2 switch clean DIFF15 (t-reg numbering only); statement orders DIFF10; remote perm 500s DIFF10. s73_drafts
+func_150A0890	SIZE+1	3	SIZE-2	n	n	s73: jtbl switch; case-5 if/else-if gives DIFF61 (v0=0 hoisted into beqz slot); break tails SIZE-2
+func_1500E738	SIZE-1	2	SIZE-1	n	n	s73: first switch is a linear beq chain 0..3 in the ref; if-chain SIZE-4, duplicated bodies SIZE+4
+func_150836AC	SIZE-1	3	SIZE-1	n	y	s73: s32 sel (no andi), separate tmp for t[0x2F]; open: bnez;nop;b;li5;b;li3 (b to next insn, s69 recipe 5 shape); perm 500s SIZE-1
 func_1518B140	new	3	OK	y	n	s72: queue push; link test re-reads n+0x14 after storing it (no named head temp), decl order a1 first fixes spill slot 0x1C
 func_151597A0	DIFF9	3	OK	y	n	s72: b L to next insn = outer if (...) { if (arg2==1||arg2==2) r=2; else r=1; } else { r = 0; } (else arm merged), no fakematch
 func_15156598	new	3	OK	y	y	s72: struct127 ptr diffs arg1[i] - D_800CC2D0; arm-local s32 a / s32 b declarations fix the lui/addiu schedule (permuter hint)
@@ -988,3 +1001,8 @@ func_151154C4	DIFF12	0	DIFF5	n	y	s74: remote perm 3x600s, nm best
 func_151B92AC	DIFF15	3	DIFF7	n	y	s74: unnamed arg0+0x110 temp needed (frame 0x20); perm 2 rounds
 func_151B8B5C	DIFF15	0	DIFF12	n	y	s74: remote perm 600s
 func_15183EE4	DIFF15	0	DIFF15	n	y	s74: remote perm 600s (score 96->26)
+func_150469E8	CERR	2	OK	y	n	s75 LAX BITWISE/MEMCPY draft; clean rewrite with HitInfo struct copies
+func_150464C0	CERR	1	DIFF5	n	n	s75 sibling of 469E8; ref stores r1 (sb) in delay slot of 2nd jal; draft s75_drafts
+func_150DE6AC	SIZE+1	12	DIFF9	n	y	s75 frame fixed (no named temps), regs only; 2 remote perm rounds
+func_1506F54C	SIZE-1	20	DIFF44	n	y	s75 p=D_800D154C first, float store order; perm 2 rounds
+func_15096E78	SIZE+1	14	DIFF96	n	n	s75 K&R func_1512DAD0 (3-arg call), case-local a0 temps give ref spill slots; frame 0x38 vs 0x30

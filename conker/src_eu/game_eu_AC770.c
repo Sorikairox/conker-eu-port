@@ -108,7 +108,36 @@ block_7:
     return (func_150ADA20() % var_a0) + var_v1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F92C.s")
+extern u8 D_800B89C4[];
+
+void func_1507F92C(struct127 *arg0) {
+    s32 v;
+
+    if (arg0->unk13C >= 0x64) {
+        switch (D_800B89C4[arg0->unk13C * 0x32C]) {
+        case 0x57:
+            v = 0x115;
+            break;
+        case 0x8C:
+            v = 0x1A5;
+            break;
+        case 0xA8:
+        case 0xA9:
+            v = 0x1AF;
+            break;
+        case 0x89:
+        case 0xBA:
+            v = 0x1FA;
+            break;
+        default:
+            v = 0xD8;
+            break;
+        }
+        func_1505E650(arg0, v, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+    } else {
+        func_1505E650(arg0, 0xF, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F640.s")
 
