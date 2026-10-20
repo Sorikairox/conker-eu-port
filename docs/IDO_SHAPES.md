@@ -801,6 +801,15 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s99 recipes (homed trailing params, file boundary in rodata, spawner templates)
+See `docs/sessions/s99.md`.
+1. **`sw a2` / `sw a3` homes at entry with no use of the args**: give the definition unused trailing `f32 arg2, u8 arg3` params (s97 recipe 2 again, now for unused ones) (`func_150EAA80`, `func_150EA560`, both `(u8 *, s16, f32, u8)`).
+2. **Untried files full of template spawners**: `func_1513092C` + tail-struct members copy the s96 `func_150C65D8` draft (`s96_drafts/`) almost verbatim; a point-pair velocity is `sp.u64 = *(V3 *)arg0;` + `scale * (b - a)` (`func_150EAB4C`, `func_150EA69C`). `func_151602C0` loop spawners: frame by s96 recipe 1 (count the 4-byte gaps between the struct bases in the ref and put that many named scalars there), then statement-order sweeps (`func_150EB090`).
+3. **Text OK, `.rodata` short / a zero word between two functions' late literals**: the file is two EU objects; split it at the function after the zero word: `file_split.py <stem> --at FUNC --rodata <rom of the next item>` (`func_150EB090`, `game_eu_1188A0`). Float literals that print as `0.060000002f` in m2c must be written that way.
+4. An early `lbu` of a field that is only used at the end comes from `v = p->x;` written as its own statement before `v -= ...` (`func_150EAEC4`).
+5. The `&arg0` reload recipe (s97) does not fix the late `mtc1 zero` of `func_150C6494`, nor the 35-insn all-args-homed handlers `func_150F7890`/`func_151007B0`/`func_150F1B78` (those get to DIFF6 with `volatile` arg1/arg2, `s99_drafts/func_150F7890_DIFF6.c`).
+OPEN: `func_150EB3A4` SIZE-1 (`addiu v0,s0,24` kept per arm + return-value register), `func_150C6494` DIFF26, `func_150F7890` DIFF6.
+
 ## s96 recipes (big spawners: scalar slots, loop-count position, tail structs)
 See `docs/sessions/s96.md`.
 1. **Named scalars take 4-byte frame slots next to the spawner structs** (even register-allocated ones): when every struct offset is off by 4n with the frame right, move n scalar declarations from below the structs to above them (or vice versa for the frame top); screen all placements in one `tryall` (`func_150E16CC`, `func_150E9E10`).
