@@ -22,7 +22,29 @@ s32 func_151AC97C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC9B8.s")
+typedef struct { f32 x, y, z; s32 a, b; } Node14;
+u8 func_151D8E20(void);
+s32 func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+s32 func_151AC9B8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+    u8 *tbl;
+    u8 *obj;
+    f32 pos[3];
+    u8 id;
+
+    tbl = *(u8 **)(arg0 + 0x94);
+    obj = *(u8 **)(arg0 + 0x98);
+    pos[0] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].x;
+    pos[1] = arg4;
+    pos[2] = ((Node14 *)tbl)[*(s8 *)(arg0 + 0x2D)].z;
+    id = func_151D8E20();
+    if (func_150ADA20() & 1) {
+        func_151D9B8C(id, *(f32 *)(obj + 0) * 6.0f, *(u8 *)(obj + 0x1B), arg5, (struct17 *)pos, func_150ADA20() % 41U + 0x50, 1, 1, 0, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    } else {
+        func_151DAB58(id, *(f32 *)(obj + 0) * 1.5f, *(u8 *)(obj + 0x1B), pos, 1, *(u8 *)(arg0 + 0xC), *(u8 *)(arg0 + 1));
+    }
+    *(s8 *)(obj + 0x20) = 4;
+    return 1;
+}
 
 s32 func_151ACB00(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     u8 *sp44;
