@@ -49,5 +49,3 @@ s32 func_151EFCC4(OSMesgQueue *queue, int channel) {
     }
     return ret;
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_21D420/func_151EFDD0.s")

@@ -145,6 +145,7 @@ $(BUILD_DIR)/src_eu/game_21D5F0.c.o: OPT_FLAGS := -O3
 $(BUILD_DIR)/src_eu/libultra/io/pfschecker2.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_289A0.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/game_eu_21D610.c.o: OPT_FLAGS := -O1
+$(BUILD_DIR)/src_eu/game_eu_21D5E0.c.o: OPT_FLAGS := -O3
 $(BUILD_DIR)/src_eu/init_eu_23590.c.o: OPT_FLAGS := -O2
 $(BUILD_DIR)/src_eu/init_eu_24880.c.o: OPT_FLAGS := -O1
 $(BUILD_DIR)/src_eu/init_eu_24320.c.o: OPT_FLAGS := -O1
