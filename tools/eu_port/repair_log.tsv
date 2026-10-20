@@ -921,3 +921,5 @@ func_1000B638	SIZE+2	4	OK	y	n	126 insns: arg0 itself is the flag variable kept a
 func_151D7410	SIZE+2	3	OK	y	n	matrix array: ((f32(*)[16])(arg0+0x7C))[D_800BE9C0][k] macro instead of arg0+(D_800BE9C0<<6)+off; f32 func_15144AA8(s32) prototype
 func_1515835C	DIFF54	6	OK	y	y	matrix array macro like func_151D7410; permuter reached DIFF31 on the m2c form, natural f32[16] indexing matched directly
 func_15157E88	DIFF72	5	OK	y	y	matrix array macro; u8 *p = arg0+0x120 kept live in a0; permuter added 'do {} while (0)' (fakematch) between two stores
+func_150CA2C4	SIZE+1	130	DIFF5	n	y	s58 spawner; head schedule 1.0f vs arg1 reload; draft docs/sessions/s58_drafts
+func_150B3394	SIZE-99	15	DIFF29	n	y	s58 spawner; t-reg numbering only; draft docs/sessions/s58_drafts

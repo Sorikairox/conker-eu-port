@@ -1,5 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
+Last updated: 2026-10-20 (session 58, main checkout, game < 0x130000; 3349/5915, spawner frame solved).
 Last updated: 2026-10-20 (session 54, main checkout, game < 0x130000; 3320/5913, no new matches, typed struct127 + m2c context). Older: (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 55, worktree eu-wt-a, 3340/5915; session 52 was 3325; session 51 was 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
@@ -34,6 +35,9 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 58 (main, game < 0x130000): 3349 / 5915 functions in C (56.6%)**, code bytes 383,888 / 2,253,856 (17.0%) (game 2942 = 310,936 bytes, init 375, debugger 32), `verify_all.sh` all OK. +6 in `6aaa280`: `func_150CB2D0`, `func_150CBD10`, `func_150CCF8C`, `func_150CE420`, `func_150121C0`, `func_150BB978`.
+  **Spawner frame solved** (doc `docs/sessions/s58.md`, IDO_SHAPES `## s58 recipes`): the s57 hole was a dead 8-byte compiler temp from the chained float assignment `sp.u28[3] = sp.u28[2] = X;` (write `sp.u28[3] = X; sp.u28[2] = sp.u28[3];`), struct is 0x80 bytes, 15-param signature. Template `docs/sessions/s58_drafts/spawner_template_func_150CB2D0.c`.
+  Open: `func_150CA2C4` DIFF5 (head schedule), `func_150B3394` DIFF29 (t-reg numbering); the remaining in-slice callers are 250-590 insns; the small ones are in files >= 0x130000 (other slot).
 - **Session 57 (main, game < 0x130000): 3343 / 5915 functions in C (56.5%)**, code bytes 380,568 / 2,253,856 (16.9%) (game 2936 = 307,616 bytes, init 375, debugger 32), `verify_all.sh` all OK. +3 (`func_150C76C0`, `func_150E0978`, `func_150EA3B4`) in `1887f9a`.
   Doc `docs/sessions/s57.md`, recipes IDO_SHAPES `## s57 recipes`, new tool `spstruct.py` (stack-struct spawner drafts). Pool: 344 unlogged 100-200 insn functions in the slice -> 282 drafts -> 0 OK / 139 CERR / 121 SIZE / 22 DIFF.
   Key open puzzle: the stack-struct spawner family (49 callers of `func_15132FBC`): after `spstruct.py` the stores match, only the frame hole (8 bytes below mine, above in the ref) is wrong; `func_150CB2D0`/`CBD10`/`CCF8C`/`CE420` are identical DIFF47 drafts. `func_151096A0` is in `game_eu_1365E0` (>= 0x130000), not in the main slice.
@@ -96,6 +100,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s58: `docs/sessions/s58_drafts/cx.sh` (standalone compile, sp-relative instructions only; frame-rule experiments and one-file statement bisection).
 - s57: `spstruct.py` (m2c stack-struct scalars -> one `struct sp`). `rt.sh` evals `wt.sh env a` (worktree!): do not use it in the main checkout.
 - s55: `vecfix.py` (m2c scalar `spXX` vectors -> arrays), `spinline.py` (inline named spill temps into the consuming call), `opshift.py` (opcode-level shift summary of a `repair_try` diff), `rt.sh f draft.c` (try + shifts).
 
@@ -146,6 +151,8 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+000. Spawner family after session 58 (`docs/sessions/s58.md`): apply the template to the small `func_15132FBC` callers in files >= 0x130000 (`func_1510A1A0`, `func_15154DF4`, `func_151BF490`, `func_151B65C0`, `func_151B61A0`, `func_151D49B8`; own `.rodata` first);
+     finish `func_150CA2C4` (DIFF5) / `func_150B3394` (DIFF29) from `docs/sessions/s58_drafts/`; larger in-slice callers listed in s58.md. For any frame-slot puzzle, bisect with `s58_drafts/cx.sh` before adding pads.
 00. Slice below 0x130000 after session 57 (`docs/sessions/s57.md`): solve the spawner frame layout (drafts in `docs/sessions/s57_drafts/`, ranked pool `rank.txt`), then clone to the 4 identical drafts; `func_150891D4` DIFF11 / `func_150619A8` SIZE-1 are register-level. Run the permuter first on any DIFF>40 draft whose call shapes are right (it cut `func_150EA3B4` from DIFF135 to DIFF3 in 30 min).
 
 0. Slice game >= 0x130000 after session 55 (details `docs/sessions/s55.md`, recipes IDO_SHAPES `## s55 recipes`): large functions pay off in bytes. Open near misses with drafts in `docs/sessions/s55_drafts/`
