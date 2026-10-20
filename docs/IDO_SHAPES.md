@@ -668,3 +668,10 @@ See `docs/sessions/s67.md`.
 4. **`andi sN, aK, 0xFF` at entry + `sw aK` home** = `u8` parameter passed on unchanged. A cast `(u8) argK` of an `s32` parameter is hoisted below the first branch instead (`func_150FF9F4`, `func_1500B1F4`).
 5. **Lerp of a lerp per component** (`func_1500B1F4` family): the ref evaluates x-lerp, then the outer lerp of x, then y... and keeps one float temp. Reusing ONE named `f32 x` for all three components gave the right size where three names x/y/z gave SIZE+2.
 6. **`b end` after the last case of a float ladder** = an `if / else if / else` chain, not `cat = 2; if (...) cat = 1;` (`func_1508DCAC`).
+
+## s68 recipes (same-line statements, named temps below a struct)
+See `docs/sessions/s68.md`.
+1. **Store-order DIFFs: put the statements on one source line.** IDO keeps the store order of statements on different lines; statements on the same line are scheduled as one unit and can come out with stores swapped (`func_15013DE8`: `sp.u50 = 0x6231; sp.u52 = 0x1A4D;` on one line gives `li t0,0x6231; li t1,0x1A4D; sh t1,0x52; sh t0,0x50`). Screen all subsets of adjacent groups joined in one `tryall`. Check permuter outputs for joined lines (it re-prints statements on one line) before keeping its other changes.
+2. **Low stack slots reloaded after a call are named locals, not struct fields**: if the call receives `&sp.uNN`, the struct starts at uNN; floats stored below it and reloaded after a call are named `f32` locals declared after the struct (`func_15013DE8`).
+3. **`move sN,v0; andi tK,sN,0xFF; ... move sN,tK`** = `u8 a = f() & 0xFF;` (explicit mask on a u8 local; plain `u8 a = f();` gives `andi sN,v0,0xFF`) (`func_150B5568`).
+4. **A named float spilled to its home although callee-saved FPRs are free**: IDO's interference is per basic block; if the floats share the block up to the first `divu` zero check, 7 live floats get 6 registers and the last declared one is spilled.
