@@ -25,4 +25,26 @@ s32 func_151DD4A0(OSMesgQueue *mq, u8 address, void *buffer, s32 nbytes) {
     return osSetTimer(&D_80042DE8, (12000ULL * D_8002C060) / 1000000ULL, 0, &D_80042E08, &D_80042E20);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20ACB0/func_151DD588.s")
+int func_151DD588(s32 flag) {
+    if (D_800E0E50 == NULL) {
+        return 0;
+    }
+    if (osRecvMesg(&D_80042E08, NULL, flag) != -1) {
+        if (D_800E0E5C <= 0) {
+            D_800E0E50 = NULL;
+            D_800E0E5C = 0;
+            return 0;
+        }
+        if (func_151DDA90(D_800E0E50, D_800E0E54, D_800E0E58) != 0) {
+            D_800E0E50 = NULL;
+            D_800E0E5C = 0;
+            return 0;
+        }
+        D_800E0E5C -= 8;
+        D_800E0E54 += 1;
+        D_800E0E58 = (u8 *)D_800E0E58 + 8;
+        osSetTimer(&D_80042DE8, (12000ULL * D_8002C060) / 1000000ULL, 0, &D_80042E08, &D_80042E20);
+        return 1;
+    }
+    return 0;
+}
