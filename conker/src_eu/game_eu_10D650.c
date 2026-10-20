@@ -57,6 +57,32 @@ void func_150E0978(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F7CA4E3, (func_150ADA68() * 0.23f) + -0.337f, (func_150ADA68() * 200.0f) + 150.0f, ((u32) func_150ADA20() % 26U) + 0x28, (func_150ADA20() % 201U) + 0x37, 0x1E, 0x14, 0, -1, 0x34, 0x35, 0x34, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D650/func_150E0B78.s")
+void func_150E0B78(u8 *arg0)
+{
+  f32 temp_f0;
+  f32 temp_f12;
+  f32 temp_f14;
+  f32 temp_f2;
+  s32 var_v0;
+  temp_f2 = D_800DBFF0->unk300 - ((f32) (*((s16 *) (((u8 *) arg0) + 0x14))));
+  temp_f12 = D_800DBFF0->unk2F8 - ((f32) (*((s16 *) (((u8 *) arg0) + 0x10))));
+  temp_f14 = D_800DBFF0->unk2FC - ((f32) (*((s16 *) (((u8 *) arg0) + 0x12))));
+  temp_f0 = sqrtf((temp_f2 * temp_f2) + ((temp_f12 * temp_f12) + (temp_f14 * temp_f14)));
+  if (temp_f0 <= 2570.0f)
+  {
+    var_v0 = 0xFF;
+  }
+  else
+    if (temp_f0 >= 3850.0f)
+  {
+    var_v0 = 0;
+  }
+  else
+  {
+    temp_f14 = 2570.0f; // fakematch: temp reuse keeps 3850 - 2570 at run time (permuter)
+    var_v0 = (s32) (255.0f - (((temp_f0 - 2570.0f) * (1.0f / (3850.0f - temp_f14))) * 255.f));
+  }
+  *((s8 *) (((u8 *) arg0) + 0x8A)) = (s8) var_v0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D650/func_150E0C58.s")

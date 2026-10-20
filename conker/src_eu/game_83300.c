@@ -663,7 +663,54 @@ void func_1505959C(struct127 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150597FC.s")
+void func_150597FC(struct127 *arg0)
+{
+  s32 var_a1;
+  struct126 *temp_a2;
+  s32 new_var;
+  struct127 *temp_v0;
+  struct127 *temp_v0_2;
+  int temp_v1;
+  new_var = D_800CC268;
+  var_a1 = 0;
+  // fakematch: s32 blk_t; block-local declarations below are basic-block boundaries (blkvar, s69)
+  if (D_8008FD8C > 0)
+  {
+    s32 blk_t;
+    loop_2:
+    if ((((((!((1 << var_a1) & new_var)) || ((temp_v0 = &D_800CC2D0[var_a1], temp_v0->unk13C != 0))) || (temp_v0->disable_run != 0)) || (temp_v0->interaction_state != 1)) || (temp_v0->stunned != 0)) || (temp_v0->unk127 == 0xFF))
+    {
+      s32 blk_t;
+      var_a1 += 1;
+      if (var_a1 < D_8008FD8C)
+      {
+        s32 blk_t;
+        if (1) { } // fakematch: permuter empty if (BB split)
+        goto loop_2;
+      }
+      if (!arg0->unk28) { } // fakematch: permuter empty if (BB split)
+    }
+
+  }
+  if (var_a1 != D_8008FD8C)
+  {
+    s32 blk_t;
+    temp_v0_2 = &D_800CC2D0[var_a1];
+    if (temp_v0_2->unk13C == 0)
+    {
+      s32 blk_t;
+      temp_a2 = temp_v0_2->unk31C;
+      if ((((((((((temp_a2->unk27 == 0) && (temp_v0_2->health != 0)) && (arg0->unk13D == 0)) && (((arg0->stunned != 0) || (arg0->unk25C & 0x1000)) || (arg0->id == 0x57))) && (arg0->unk28 == 0.0f)) && (temp_v0_2->unk28 == 0.0f)) && (arg0->unk25C & 8)) && (temp_a2->unk19B == 0)) && (((temp_v1 = arg0->id, temp_v1 != 0xA9)) || ((*((u8 *) (((u8 *) temp_v0_2) + 0x128))) == 0))) && ((temp_v1 != 0xA8) || ((*((u8 *) (((u8 *) temp_v0_2) + 0x128))) != 0)))
+      {
+        s32 blk_t;
+        temp_v0_2->unk13C = D_800C3E78 + 0x64;
+        temp_v0_2->xz_velocity = 0.0f;
+        *((s16 *) (((u8 *) temp_a2) + 0x18)) = 0;
+        func_1505959C(arg0, var_a1);
+      }
+    }
+  }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150599C8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15059B54.s")

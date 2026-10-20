@@ -952,3 +952,6 @@ func_150E3B5C	SIZE-1	2	OK	y	n	s70: blkvar sweep: node declared in the for body (
 func_150F8DFC	DIFF31	3	OK	y	y	s70: blkvar DIFF19 -> remote permuter DIFF3 -> last store is ((u8**)(v+0xC))[7] (v+0x28) + operands arg1[4]==v[4]; 3 permuter fakematches
 func_15074C80	DIFF54	2	OK	y	n	s70: blkvar DIFF11 showed the shape; clean else-if chain ==3 ? 0x39 : 0x51 (no blk_t)
 func_1507ED48	SIZE-2	5	DIFF3	n	y	s70: if/else both arg0=idx, if(p){r=*--p/10U;--p;return r;} DIFF3: ref keeps dead p-=8 (addiu -8), mine -4; draft conker/build_port/s70/7g_9.c
+func_150D2C00	DIFF14	4	DIFF5	n	y	s70: blkvar DIFF12 -> permuter DIFF5 frame-only (mine 0x28, ref 0x20; ref reloads arg0 from its home); no-v/inline-r/stackfix: no
+func_150E0B78	SIZE-1	1	OK	y	y	s70: blkvar b1 DIFF23 -> remote permuter 400s match; temp_f14 = 2570.0f reuse (fakematch)
+func_150597FC	DIFF17	3	OK	y	y	s70: blkvar ball DIFF12 -> 2 permuter rounds (local DIFF10, remote 400s OK); blk_t decls + empty ifs (fakematch)
