@@ -2,7 +2,141 @@
 #include "functions.h"
 #include "variables.h"
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_126330/func_150F8B20.s")
+typedef struct { s32 x, y, z; } V3i;
+s32 func_151530A8(s32 *, s32, s32);
+
+void func_150F8B20(s32 arg0, u8 *arg1, s32 arg2) {
+
+    f32 pos[3];
+    Header header;
+    Header2 header2;
+    struct {
+        s32 u3C;
+        s32 u40;
+        s32 u44;
+        u8 pad48[0x8];
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        f32 u5C;
+        f32 u60;
+        f32 u64;
+        s16 u68;
+        s16 u6A;
+        s16 u6C;
+        s16 u6E;
+        s32 u70;
+        s32 u74;
+        s16 u78;
+        s16 u7A;
+        s16 u7C;
+        s8 u7E;
+        s8 u7F;
+        s8 u80;
+        u8 u81;
+        u8 u82;
+        u8 u83;
+        u8 u84;
+        s8 u85;
+        s8 u86;
+        s8 u87;
+        s8 u88;
+        u8 u89;
+        u8 u8A;
+        u8 u8B;
+        u8 u8C;
+        s8 u8D;
+        s8 u8E;
+        s8 u8F;
+        s8 u90;
+        u8 u91;
+        s8 u92;
+        s8 u93;
+        s8 u94;
+        u8 pad95[0x3];
+        s32 u98;
+        s32 u9C;
+        s16 uA0;
+        s16 uA2;
+        s16 uA4;
+        s8 uA6;
+        u8 padA7[0x1];
+        f32 uA8;
+        s8 uAC;
+        s8 uAD;
+        s8 uAE;
+        s8 uAF;
+    } sp;
+
+    pos[0] = (*(f32 *)((u8 *)arg1 + 0x14));
+    pos[1] = (*(f32 *)((u8 *)arg1 + 0x18)) + 50.0f;
+    pos[2] = (*(f32 *)((u8 *)arg1 + 0x1C));
+    if ((arg1 && arg1) && arg1) {
+    } // fakematch: scheduling barrier (pos stores before header stores)
+    header.unk0 = 3;
+    if ((arg1 && arg1) && arg1) {
+    } // fakematch
+    header.unk1 = -1;
+    header.unk2 = (func_150ADA20() % 9U) + 5;
+    header.unk4 = 0;
+    header2.unk0 = pos[0];
+    header2.unk4 = pos[1];
+    header2.unk8 = pos[2];
+    func_151602C0(&header, &header2, (func_150ADA20() % 31U) + 0x5A, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    sp.u3C = 8;
+    sp.u40 = 0xC;
+    *(V3i *) &sp.u44 = *(V3i *) pos;
+    sp.u50 = 3.07f;
+    sp.u54 = 6.2f;
+    sp.u58 = -0.96900004f;
+    sp.u5C = 0.71800005f;
+    sp.u60 = 15.0f;
+    sp.u64 = 30.0f;
+    sp.u68 = 0;
+    sp.u6A = 0xFF;
+    sp.u6C = -0x40;
+    sp.u6E = 0x50;
+    sp.u70 = 3;
+    sp.u74 = 1;
+    sp.u78 = 0x14;
+    sp.u7A = 0xF;
+    sp.u7C = 1;
+    sp.u7E = 4;
+    sp.u7F = 2;
+    sp.u80 = 3;
+    sp.u81 = 0xFF;
+    sp.u82 = 0xFF;
+    sp.u83 = 0xFF;
+    sp.u84 = 0xFF;
+    sp.u85 = 0;
+    sp.u86 = 0;
+    sp.u87 = 0;
+    sp.u88 = 0;
+    sp.u89 = 0xFF;
+    sp.u8A = 0xFF;
+    sp.u8B = 0xFF;
+    sp.u8C = 0xFF;
+    sp.u8D = 0;
+    sp.u8E = 0;
+    sp.u8F = 0;
+    sp.u90 = 0;
+    sp.u91 = 0xFF;
+    sp.u92 = 0;
+    sp.u93 = 3;
+    sp.u94 = 0x24;
+    sp.u98 = 0x200005;
+    sp.u9C = 0x60600;
+    sp.uA0 = 8;
+    sp.uA2 = 0x1F;
+    sp.uA4 = 1;
+    sp.uA6 = 0;
+    sp.uA8 = 1.0f;
+    sp.uAC = -1;
+    sp.uAD = 0;
+    sp.uAE = -1;
+    sp.uAF = -1;
+    func_151530A8(&sp.u3C, 0xFF, 1);
+}
 
 void func_150F8DCC(s32 arg0, s32 arg1) {
     s32 tmp[2];
