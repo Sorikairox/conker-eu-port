@@ -325,36 +325,3 @@ void func_1515FB34(s32 arg0, s32 arg1) {
     }
     func_1515D4D4(var_v1, var_t0, var_t1, 0);
 }
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515FDC0.s")
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_151600E0.s")
-
-void func_15160104(u8 *arg0, s32 arg1) {
-    func_1505D024(arg0, 0x6002D, *(u16 *)(arg0 + 0x7A), -1);
-}
-
-u8 *func_15105C24(s32);
-
-void func_15160134(u8 *arg0, s32 arg1) {
-    s32 pad; // fakematch: unused local moves v to sp18
-    struct127 *v = NULL;
-    u8 *t;
-    s32 a3;
-    t = func_15105C24(arg1);
-    if (t != NULL) {
-        v = *(struct127 **)(t + 0x98);
-    }
-    if (v != NULL) {
-        a3 = v - D_800CC2D0;
-    } else {
-        a3 = -1;
-    }
-    func_1505D024(arg0, 0x6002E, *(u16 *)(arg0 + 0x7A), a3);
-}
-
-void func_151601A4(s32 arg0, s32 arg1) {
-    func_1505D024(arg0, 0x33, 0xC000, -1);
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_151601D0.s")
