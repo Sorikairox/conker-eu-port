@@ -3,21 +3,189 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151A9F80.s")
+s32 func_15045AF0(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
+void func_151AC3F0(struct17 *, s32 *, s32, u8, s32);
+void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
+void func_151AC3B0(u8 *);
+void func_151AA814(u8 *, u8 *);
+extern f32 D_800A9354;
+void func_151A9F80(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA054.s")
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A9354 < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA150.s")
+extern f32 D_800A9358;
+void func_151AA054(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+    s32 ret;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA250.s")
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A9358 < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    if (ret) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
+        func_10010FFC(0, 17, 21000, 0, 0, obj);
+    }
+    func_151AC3B0(obj);
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA370.s")
+extern f32 D_800A935C;
+void func_151AA150(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+    s32 ret;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA470.s")
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A935C < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    if (ret) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 1, arg0[0xC], arg0[1]);
+        func_10010FFC(0, 17, 21000, 0, 0, obj);
+    }
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA578.s")
+extern f32 D_800A9360;
+void func_151AA250(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AA64C.s")
+    if (*(u8 **)(obj + 0x31C) != NULL && (*(u8 **)(obj + 0x31C))[0x95] != 0) {
+        return;
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A9360 < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 1, arg0[0xC], arg0[1]);
+        func_10010FFC(0, 8, 27000, 0, 0, obj);
+    }
+    func_151AA814(obj, arg0 + 0x34);
+    func_151AC3B0(obj);
+}
+
+extern f32 D_800A9364;
+void func_151AA370(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+    s32 ret;
+
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A9364 < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    if (ret) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 2, arg0[0xC], arg0[1]);
+        func_10010FFC(0, 17, 21000, 0, 0, obj);
+    }
+}
+
+extern f32 D_800A9368;
+void func_151AA470(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+    s32 ret;
+
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A9368 < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    if (ret) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 2, arg0[0xC], arg0[1]);
+        func_10010FFC(0, 8, 27000, 0, 0, obj);
+    }
+    func_151AA814(obj, arg0 + 0x34);
+    func_151AC3B0(obj);
+}
+
+extern f32 D_800A936C;
+void func_151AA578(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A936C < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 4, arg0[0xC], arg0[1]);
+    }
+}
+
+extern f32 D_800A9370;
+void func_151AA64C(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A9370 < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    if (func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34)) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 4, arg0[0xC], arg0[1]);
+    }
+}
 
 void func_151AA720(s32 arg0) {
 }
@@ -151,7 +319,29 @@ s32 func_151AB730(u8 *arg0)
   return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB774.s")
+extern f32 D_800A93CC;
+void func_151AB774(u8 *arg0) {
+    u8 *obj = *(u8 **)(arg0 + 0x18);
+    struct17 pos;
+    s32 ret;
+
+    if ((obj && obj) && obj) { // fakematch: scheduling barrier after the obj load (permuter)
+    }
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    if (D_800A93CC < *(f32 *)(obj + 0x118)) {
+        pos.unk4 = *(f32 *)(obj + 0x118) + 100.0f;
+    } else {
+        pos.unk4 = *(f32 *)(obj + 0x18) + 150.0f;
+    }
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    ret = func_15045AF0((u8 *)&pos, 0, pos.unk4 - 300.0f, arg0 + 0x34);
+    if (ret) {
+        pos.unk4 = *(f32 *)(arg0 + 0x34);
+        func_151AC3F0(&pos, (s32 *)(arg0 + 0x34), 3, arg0[0xC], arg0[1]);
+        func_10010FFC(0, 17, 21000, 0, 0, obj);
+    }
+    func_151AA814(obj, arg0 + 0x34);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB874.s")
 
