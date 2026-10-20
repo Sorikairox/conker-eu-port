@@ -835,7 +835,19 @@ struct225 *func_151623F4(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s8 arg4, s16 arg5,
     }
     return temp_v0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162510.s")
+s32 func_15162510(u8 *arg0) {
+    f32 s;
+    f32 *p;
+
+    p = (f32 *)(arg0 + 0x18);
+    s = sinf(p[6]);
+    (*(u8 **)(arg0 + 0x14))[5] = s * p[3] + p[0];
+    (*(u8 **)(arg0 + 0x14))[6] = s * p[4] + p[1];
+    (*(u8 **)(arg0 + 0x14))[7] = s * p[5] + p[2];
+    p[6] = p[7] * D_800BE9A4 + p[6];
+    p[6] = func_15144B68(p[6]);
+    return 1;
+}
 // s32 func_15162510(struct237 *arg0) {
 //     struct235 *temp_v1;
 //     f32 temp_f0;
@@ -1571,4 +1583,55 @@ void func_151644F4(struct242 *arg0, struct17 *arg1, s32 arg2, f32 arg3, f32 arg4
 // }
 
 // loop
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151645C4.s")
+extern u8 D_80088A90[];
+extern u8 D_80088A94[];
+extern u8 D_80088A98[];
+void func_15111CAC(s32);
+void func_1515F170(s32, s32);
+
+void func_151645C4(u8 arg0) {
+    D_800DCDD0 = arg0;
+    if (arg0) {
+        switch (D_800BE9F0) {
+        case 0xB:
+            func_15111CAC(4);
+            break;
+        case 0x6:
+            func_1515F170(0xA, 1);
+            func_15111CAC(4);
+        case 0x39:
+            ((u8 *)&D_800DCD20)[0] = D_80088A90[0];
+            ((u8 *)&D_800DCD20)[1] = D_80088A90[1];
+            ((u8 *)&D_800DCD20)[2] = D_80088A90[2];
+            D_800B0DF0->unk5 = D_80088A94[0];
+            D_800B0DF0->unk6 = D_80088A94[1];
+            D_800B0DF0->unk7 = D_80088A94[2];
+            break;
+        case 0x7:
+        case 0xC:
+            break;
+        }
+    } else {
+        switch (D_800BE9F0) {
+        case 0x6:
+            func_1515F170(0xA, 0);
+        case 0x7:
+        case 0xC:
+        case 0x39:
+            func_15111CAC(6);
+            ((u8 *)&D_800DCD20)[0] = D_80088A98[0];
+            ((u8 *)&D_800DCD20)[1] = D_80088A98[1];
+            ((u8 *)&D_800DCD20)[2] = D_80088A98[2];
+            D_800B0DF0->unk5 = 0xFF;
+            D_800B0DF0->unk6 = 0xFF;
+            D_800B0DF0->unk7 = 0xFF;
+            break;
+        case 0xB:
+            func_15111CAC(6);
+            break;
+        case 0x29:
+            func_15111CAC(1);
+            break;
+        }
+    }
+}
