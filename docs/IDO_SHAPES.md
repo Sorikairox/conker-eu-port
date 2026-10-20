@@ -925,6 +925,15 @@ See `docs/sessions/s93.md`.
 5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
 6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
 
+## s103 recipes (indirect calls, negated constants, small neighbours)
+See `docs/sessions/s103.md`.
+1. **`lui t9,%hi(f); addiu t9,%lo(f); jalr t9`** to a known function = a call through a cast function pointer: `((s32 (*)(u32, u32 *))func_151EF800)(...)` (`func_150C3D5C`). Writing to a function's code: `((u32 *)&func_10004074)[0] = ...` (`(u32 *)func` without `&` is a cfe error).
+2. **`neg.s` of a constant loaded from `.rodata`** (the same constant appears twice in `.rodata`): the source had a local `m = 0.55f;` used as `t = m;` and `t = -m;` (`func_150E0228`); a `-0.55f` literal folds.
+3. **A constant materialised straight into the argument register** (`lui a0; ori a0,a0`) and stored to a local: the local is `s32`, not `u32` (`func_150C3D5C`, permuter).
+4. `lwr`/`swr` at offset 2 with no `lwl`/`swl` = copy of a 3-byte struct (`typedef struct { u8 a[3]; } Tri3; Tri3 t = D_x;`) (`func_150DFE40`).
+5. **A loaded value in `v0`/`a0` instead of a t-register**: give it its own named local (`k = D_800DD835; a = D_800906D4[k + 9];`), declared after the arrays so it does not shift their slots (`func_150E0150`); a command word read into `a0`: `w = g[i].w0;` (`func_150E0350`).
+6. Spawner hand drafts (`func_150F6A5C`, `func_150E047C`): `SubX *s = (SubX *)(arg0 + 0x28); obj = s->o;`, then Header/Header2/`u8 col[4]` locals; the frame by declaration order (`s, obj, n, pos, header, header2, col`), and a label barrier from the remote permuter for the last scheduling diff.
+OPEN: `func_150E047C` SIZE-1 (`move v0,t6` copy of the reloaded spill), `func_150C2424` (needs game_EF410 `.rodata`), `func_150F03F8` DIFF160.
 ## s101 recipes (address CSE across calls, volatile homes, unused block locals)
 See `docs/sessions/s101.md`.
 1. **`&local` held in an s-register / spilled across calls (SIZE+8) when the ref recomputes `addiu aN,sp,K` at each call**: one of the call args carries an int cast (`(s32)pos`); give the callee a pointer param and pass the array uncast (`func_15070F60`).
