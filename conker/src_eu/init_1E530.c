@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+// s121: Rare n_audio reverb (DK64 src/global_asm/audio/n_reverb.c, built -g)
+#include "synthinternal_rare.h"
+#define _n_saveBuffer func_1001F79C
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_1E530/func_1001E530.s")
@@ -52,7 +55,40 @@
 //     return sp34;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_1E530/func_1001F79C.s")
+Acmd *_n_saveBuffer(ALFx *arg0, s32 arg1, s16 *arg2, s32 arg3, Acmd *arg4) {
+    Acmd *sp34;
+    s32 sp30;
+    s32 sp2C;
+    u32 sp28;
+    u32 sp24;
+    Acmd *sp20;
+    Acmd *sp1C;
+    Acmd *sp18;
+
+    sp34 = arg4;
+    sp24 = &arg0->base[arg1][arg0->length];
+    if ((u32)arg2 < (u32)arg0->base[arg1]) {
+        arg2 += arg0->length;
+    }
+    sp28 = &arg2[184];
+    if (sp28 > sp24) {
+        sp30 = (s32) (sp28 - sp24) >> 1;
+        sp2C = (s32) (sp24 - (s32)arg2) >> 1;
+        sp20 = sp34++;
+        sp20->words.w0 = (((sp2C * 2) & 0xFFF) << 0xC) | 0x06000000 | (arg3 & 0xFFF);
+        sp20->words.w1 = osVirtualToPhysical((void *) arg2);
+        sp1C = sp34++;
+        sp1C->words.w0 = (((sp30 * 2) & 0xFFF) << 0xC) | 0x06000000 | ((arg3 + (sp2C * 2)) & 0xFFF);
+        sp1C->words.w1 = osVirtualToPhysical(arg0->base[arg1]);
+        if (1) {}
+    } else {
+        sp18 = sp34++;
+        sp18->words.w0 = (arg3 & 0xFFF) | 0x06170000;
+        sp18->words.w1 = osVirtualToPhysical((void *) arg2);
+    }
+    return sp34;
+}
+
 // void *func_1001F79C(void *arg0, s32 arg1, u32 arg2, s32 arg3, void *arg4) {
 //     void *sp34;
 //     s32 sp30;
