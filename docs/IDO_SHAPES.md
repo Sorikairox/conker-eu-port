@@ -856,6 +856,15 @@ See `docs/sessions/s91.md`.
 5. A `static` local in a gu file (`guRandom` xseed) needs the function in its own file (the containing file had other flags) plus the owned `.data` piece (16-byte aligned start).
 
 
+## s95 recipes (spawner hi members, twins, late double alignment)
+See `docs/sessions/s95.md`.
+1. **`func_151308E4` spawners in the hi slice**: `tools/eu_port/spgen2.py func draft.c docs/sessions/s95_drafts/af04_Ay.c out.c` (m2c struct base shifted onto the s92 template); `func_151B0238` OK as generated. A frame 8 bytes too big with all offsets 4 high = struct 0x70 not 0x74 (`pad98[0xC]`); offsets 4 low with the frame right = struct 0x74.
+2. **A product of a global and a literal used three times** (`k = 0.087f * D_x;` then `-argN * k`): the statement's position among the plain stores fixes the load order; sweep it over the neighbouring stores (`func_151A4BE8`: after `sp.u6C = arg2;`).
+3. **Twin with library calls renamed**: when a hi twin calls `func_150AD78C`/`func_150AD780` where the lo one calls `sinf`/`cosf`, map them by call order in the asm, not by a sorted diff (`func_15179A38`: the first call is `func_150AD78C`). `check_files` passes either way (relocations); only the full ROM catches it.
+4. **u8 nested loops over linked lists with the j/i increments in the exit block** (`beql a0,zero` to `addiu v1,v1,1`): a `next: ;` label at the end of the innermost loop body (permuter, fakematch) (`func_15105C24`).
+5. **A GLOBAL_ASM double after a C jump table lands 4 bytes low**: `// rodata_inject: late_align8 <rom addr>` in the C file (asm-processor `.late_rodata_alignment 8`) (debugger_257350).
+6. A function a matched caller calls implicitly (int) cannot be defined with a pointer return type: add the real prototype above the caller and check the caller still matches (`func_151A7188`). `s32` (long) is not `int` to cfe either.
+
 ## s93 recipes (libc printf family, PD mp3)
 See `docs/sessions/s93.md`.
 1. **libultra libc was compiled without `-signed`** (plain `char` = `lbu`), the project uses `-signed`: put `#define char unsigned char` inside the function body (after the signature, so prototypes still agree) and `#undef char` after it; make `_Pft.qual` `unsigned char`.
