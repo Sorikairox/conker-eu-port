@@ -506,7 +506,45 @@ void func_15136AE4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513783C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15137C64.s")
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec37C64;
+s32 func_15145128(Vec37C64 *, Vec37C64 *, s32 *, s32 *);
+s32 func_15146078(Vec37C64 *, s32, s32);
+
+s32 func_15137C64(Vec37C64 *a, Vec37C64 *b, Vec37C64 *dir, s32 arg3, s32 arg4, Vec37C64 *p, Vec37C64 *q, Vec37C64 *d) {
+    s32 sp2C;
+    s32 sp28;
+
+    if (p != NULL && q != NULL) {
+        *a = *p;
+        *b = *q;
+    } else if (p != NULL) {
+        *a = *p;
+        *b = *p;
+    } else if (q != NULL) {
+        *a = *q;
+        *b = *q;
+    } else {
+        return 0;
+    }
+    if (d == NULL) {
+        dir->x = b->x - a->x;
+        dir->y = b->y - a->y;
+        dir->z = b->z - a->z;
+        if (func_15145128(dir, dir, &sp2C, &sp28) == 0) {
+            return 0;
+        }
+    } else {
+        *dir = *d;
+    }
+    if (func_15146078(dir, arg3, arg4) == 0) {
+        return 2;
+    }
+    return 1;
+}
 
 s32 func_15137E10(struct161520 *arg0) {
     arg0->unk74 = ((func_150ADA68() * 50.0f) + 580.0f) * D_800A4C08;

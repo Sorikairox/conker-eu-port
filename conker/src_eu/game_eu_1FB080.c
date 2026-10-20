@@ -68,11 +68,100 @@ void func_151CD97C(u8 *arg0, s32 *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CDA70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CDC24.s")
+typedef struct { f32 unk0; f32 unk4; f32 unk8; f32 unkC; u8 pad10[0xC]; } S1C;
+typedef struct { s32 x, y, z; } V3i;
+s32 func_151CDC24(u8 *arg0) {
+    s32 i;
+    u8 *p;
+    S1C *e;
+    S1C *base;
+    f32 v;
+    p = *(u8 **)(arg0 + 0x98);
+    base = *(S1C **)(arg0 + 0x94);
+    if ((*(s8 *)(arg0 + 0x2C) < 2) && (*(u16 *)(arg0 + 0x1E) & 8)) {
+        return 0;
+    }
+    i = *(s8 *)(arg0 + 0x2E);
+    while (i != *(s8 *)(arg0 + 0x2D)) {
+        i--;
+        if (i < 0) {
+            i = *(u8 *)(arg0 + 0x25) - 1;
+        }
+        e = &base[i];
+                e->unk4 += (e->unkC * D_800BE9A4) + (-0.12750001f * (D_800BE9A4 * D_800BE9A4));
+        e->unkC += -0.25500003f * D_800BE9A4;
+        if (e->unk4 < *(f32 *)(p + 0x44)) {
+            while (i != *(s8 *)(arg0 + 0x2D)) {
+                *(s8 *)(arg0 + 0x2D) += 1;
+                if (*(u8 *)(arg0 + 0x25) == *(s8 *)(arg0 + 0x2D)) {
+                    *(s8 *)(arg0 + 0x2D) = 0;
+                }
+                *(s8 *)(arg0 + 0x2C) -= 1;
+            }
+            base[*(s8 *)(arg0 + 0x2D)].unk4 = *(f32 *)(p + 0x44);
+        }
+    }
+    *(V3i *)(arg0 + 0x54) = *(V3i *)(arg0 + 0x10);
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CDD6C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CE144.s")
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    u8 pad8[0xC];
+    s16 unk14;
+    u8 pad16[6];
+} NodeCE144;
+
+s32 func_151CE144(u8 *arg0) {
+    NodeCE144 *nodes;
+    NodeCE144 *start;
+    NodeCE144 *n;
+    s32 prev;
+    s32 i;
+    f32 len;
+    f32 inv;
+    f32 d;
+    f32 k;
+
+    nodes = *(NodeCE144 **)(arg0 + 0x94);
+    if (*(s8 *)(arg0 + 0x2C) <= 0) {
+        return 1;
+    }
+    {
+        prev = *(s8 *)(arg0 + 0x2E) - 1;
+        if (prev < 0) {
+            prev = arg0[0x25] - 1;
+        }
+        start = &nodes[*(s8 *)(arg0 + 0x2D)];
+        len = fabsf((prev + nodes)->unk4 - start->unk4);
+        if (len == 0.0f) {
+            return 1;
+        }
+        {
+            inv = 1.0f / len;
+            k = inv * 10.0f;
+            i = *(s8 *)(arg0 + 0x2D);
+            do {
+                n = &nodes[i];
+                d = n->unk4 - start->unk4;
+                n->unk14 = 0xFF;
+                if (d < len * 0.19700001f) {
+                    n->unk14 = (u8)(((0, d) * (inv * 5.076142f)) * 255.0f); // fakematch: comma gives the mul.s d, (inv * k) operand order
+                } else if (len - len * 0.1f < d) {
+                    n->unk14 = (u8)((len - d) * k * 255.0f);
+                }
+                i++;
+                if (i >= arg0[0x25]) {
+                    i = 0;
+                }
+            } while (i != *(s8 *)(arg0 + 0x2E));
+        }
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CE3D0.s")
 
