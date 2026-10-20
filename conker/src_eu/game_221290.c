@@ -2195,7 +2195,83 @@ s32 func_151F9150(u8 *buffer, s32 *offset, s32 numbits); /* mp3util_get_bits */
 
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_221290/func_151F3DE0.s")
+extern f32 D_800E1268[36];
+extern f32 D_800E12F8[36];
+extern f32 D_800E1418[36];
+extern struct mp3decfourbytes **D_800E0E20;
+extern s32 D_800E0E28;
+extern f32 *D_800E0E30;
+
+s32 func_151F3DE0(void) {
+    s32 i;
+    f32 x;
+    f32 x2;
+    f32 d;
+    f32 n;
+    f32 eps;
+    f32 a;
+    f32 b;
+
+    for (i = 0; i < 36; i++) {
+        D_800E1268[i] = sinf((i + 0.5f) * 0.08726646f);
+    }
+    for (i = 0; i < 18; i++) {
+        D_800E12F8[i] = sinf((i + 0.5f) * 0.08726646f);
+    }
+    for (i = 18; i < 24; i++) {
+        D_800E12F8[i] = 1.0f;
+    }
+    for (i = 24; i < 30; i++) {
+        D_800E12F8[i] = sinf((i + 0.5f - 18.0f) * 0.2617994f);
+    }
+    for (i = 30; i < 36; i++) {
+        D_800E12F8[i] = 0.0f;
+    }
+    for (i = 0; i < 6; i++) {
+        D_800E1418[i] = 0.0f;
+    }
+    for (i = 6; i < 12; i++) {
+        D_800E1418[i] = sinf((i + 0.5f - 6.0f) * 0.2617994f);
+    }
+    for (i = 12; i < 18; i++) {
+        D_800E1418[i] = 1.0f;
+    }
+    for (i = 18; i < 36; i++) {
+        D_800E1418[i] = sinf((i + 0.5f) * 0.08726646f);
+    }
+    for (i = 1; i < 34; i++) {
+        ((u8 **)D_800E0E20)[i] += D_800E0E28;
+    }
+    D_800E14A8 = D_800E0E30;
+    if (D_800E14A8 == NULL) {
+        return 0;
+    }
+    x = 1.0f;
+    D_800E14A8[0] = 0.0f;
+    for (i = 1; i < 0x2000; i++) {
+        n = i;
+        n *= n;
+        eps = n * 0.000001f;
+        n *= n;
+        do {
+            x2 = x * x;
+            d = (x2 * x - n) / (2.0f * x2);
+            x -= d;
+        } while (d > eps || d < -eps);
+        D_800E14A8[i] = x;
+    }
+    a = 0.70710677f;
+    b = 0.25f;
+    D_800E14B0[0] = 1.0f;
+    D_800E18B0[0] = 1.0f;
+    for (i = 1; i < 256; i++) {
+        D_800E14B0[i] = a;
+        D_800E18B0[i] = b;
+        b *= 0.25f;
+        a *= 0.70710677f;
+    }
+    return 1;
+}
 /* mp3dec00040164 (Perfect Dark src/lib/mp3/decoder.c) */
 s32 func_151F42E8(struct asistream *stream, u32 gr, u32 ch)
 {
