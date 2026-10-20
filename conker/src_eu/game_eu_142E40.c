@@ -324,7 +324,45 @@ void func_1511D0B4(s32 arg0, f32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F1D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F30C.s")
+void func_1511F30C(u8 *arg0) {
+    s32 dir;
+    f32 step;
+    f32 lim;
+
+    if (*(s32 *)(arg0 + 0x7C) == 0) {
+        *(f32 *)(arg0 + 0x84) = (f32) *(s16 *)(arg0 + 0x14);
+    }
+    step = (f32) D_800BE9E4 * 4.0f;
+    dir = 1 - (*(u8 *)(arg0 + 0x72) & 1);
+    if (*(s32 *)(arg0 + 0x80) != 0) {
+        if (dir & 1) {
+            lim = *(f32 *)(arg0 + 0x84);
+            *(s16 *)(arg0 + 0x14) = (s32) ((f32) *(s16 *)(arg0 + 0x14) + step);
+            if (lim < (f32) *(s16 *)(arg0 + 0x14)) {
+                *(s16 *)(arg0 + 0x14) = (s32) lim;
+            }
+        } else {
+            lim = *(f32 *)(arg0 + 0x84);
+            *(s16 *)(arg0 + 0x14) = (s32) ((f32) *(s16 *)(arg0 + 0x14) - step);
+            if ((f32) *(s16 *)(arg0 + 0x14) < lim) {
+                *(s16 *)(arg0 + 0x14) = (s32) lim;
+            }
+        }
+    } else if (dir & 1) {
+        *(s16 *)(arg0 + 0x14) = (s32) ((f32) *(s16 *)(arg0 + 0x14) - step);
+        lim = *(f32 *)(arg0 + 0x84) - 350.0f;
+        if ((f32) *(s16 *)(arg0 + 0x14) < lim) {
+            *(s16 *)(arg0 + 0x14) = (s32) lim;
+        }
+    } else {
+        *(s16 *)(arg0 + 0x14) = (s32) ((f32) *(s16 *)(arg0 + 0x14) + step);
+        lim = *(f32 *)(arg0 + 0x84) + 350.0f;
+        if (lim < (f32) *(s16 *)(arg0 + 0x14)) {
+            *(s16 *)(arg0 + 0x14) = (s32) lim;
+        }
+    }
+    *(s32 *)(arg0 + 0x7C) = 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F4C8.s")
 

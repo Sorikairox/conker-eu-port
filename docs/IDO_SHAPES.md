@@ -551,6 +551,37 @@ See `docs/sessions/s54.md`.
     The permuter on 100+ insn functions rarely reaches 0 in 15 minutes unless the diff is a single schedule choice (it solved `func_15157E88` in 20 s and took `func_1515835C` from DIFF54 to DIFF31 in 15 min).
 
 
+## s56 recipes (matrix/Gfx family, twin spawners, redecl/fnptr tooling)
+
+1. **Gfx writers: type the display-list pointer as `Gfx *` and use the gbi macros** (`gSPMatrix(gdl++, MTX, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW)` = `0xDA380003`,
+   `gSPSegment(gdl++, 1, x)` = `0xDB060004`, `gDPPipeSync` = `0xE7000000`, `gDPSetEnvColor(gdl++, r, g, b, a)` = `0xFB000000`, `gSPDisplayList(gdl++, p)`, `gDPSetPrimColor(gdl++, 1, 0, 255, 255, 255, a)`
+   = `0xFA000100`, `gSPVertex(gdl++, v, 4, 0)` = `0x01004008`, `gSP1Triangle(gdl++, 0, 1, 2, 0)` = `0x05000204`, `gSPMatrix(..., G_MTX_NOPUSH | G_MTX_MUL | G_MODELVIEW)` = `0xDA380001`).
+   The m2c `(*(s32 *)(p + 0) = ...; p + 8 ...)` chains with `u8 *` never reproduce the `or v1,s1,zero; sw w0,0(v1); addiu s1,s1,8` copies; the macros do (`func_15177360` tail,
+   `func_15158838` tail, `func_151EC9A0`). `gDPSetEnvColor` drops the `& 0xFF` of the r term (`sll 24` only). Callees that take/return the list become `Gfx *`; a callee defined later in the file with an
+   `s32` signature (`func_1517AF18(s32, s32)`) is called as `(Gfx *)func_1517AF18((s32)gdl, x)`.
+2. **Matrix pointer indexing with a cast** `guMtxF2L(sp54, (Mtx *)MTX(arg1))`, `MTX(a) = ((f32 (*)[16])((a) + 0x10))[D_800BE9C0]` (all six family members use this; `f32 sp54[16]` for the local matrix, translation
+   `sp54[12..14]`, scale loops `[0,1,2,4,5,6,8,9,10] *= k`). `sp54`/`sp94` declaration order: the matrix declared first sits at the higher address.
+3. **Compute every float temp first, then do the stores** (`func_151ACDC0`, twin of `func_1514A288`/`func_1514A540`): the scheduler keeps the source order of the *dependent chains* but interleaves
+   independent stores; the zero stores `sp4C[6/0x16/0x26/0x36] = 0` go after `temp_f0 = 4C*2C; temp_f14 = 50*30; temp_f2 = D[i]*f0; temp_f12 = D2[i]*f0` and the product of the *two plain memory operands* is written with the
+   operands swapped (`f4C * f2C`, `f50 * f30`). Named `f32` locals each reserve a stack slot: declare them **before** a following `u8 sp37` to push it down 4-8 bytes (ref `addiu t6,sp,0x37`), and do not name
+   values the ref keeps unnamed (one extra local = +8 frame). `D_800DD608[arg1]` is `extern f32 D[]`, not `*(&s32 + idx*4)`.
+4. **`if (p != NULL) { ... } else { return NULL; }` followed by the common tail** gives `b L; or v0,zero,zero; b end` in the middle of the function (ref layout of the three particle twins).
+   `memcpy(((u8 **)(arg0 + 0x100))[arg1], arg0 + 0xC0, 0x40)` (array of pointers) gives the `sll/addu/lw 0x100` order; `arg0 + (arg1 * 4) + 0x100` gave a different addu order.
+5. **Double `sb` to the same byte (`andi t1,t9,0xFFFC; sb t1; or t2,t1,v0; sb t2`) is a bitfield assignment**: `struct { u8 hi : 6; u8 lo : 2; } *f = (void *)(arg0 + 0x73); f->lo = v;` keeps both stores, plain
+   `& 0xFFFC` / `| v` loses the first one (`func_1511E14C`, structure matched, DIFF25 left in the float registers).
+6. **A loop var of type `s16`/`s8` stops IDO's strength reduction/unrolling** (and costs a `sll/sra` per use): `i*0xA0` stays a per-iteration `sll/addu/sll` (`func_15188008`, `func_151096A0`: ref keeps
+   `i * K` and the counter both; with `s32 i` IDO derives `i` from the byte-offset induction var and drops it). A constant-trip 4x loop unrolls even with the m2c pointer bump; the `label: ...; if (i < 4) goto label;`
+   form keeps it rolled but changes `slti/bnez` into `li 4; bne` (`func_15157580`, DIFF19 left).
+7. **Locals that must live in memory**: `volatile s32` stack words give the `sw v0,0x4C(sp); sw v0,0x48(sp)` pair (`func_15177360`); a plain `s32 sp50` assigned from the same value is copy-propagated away
+   (the ref keeps `or t0,v0,zero; ... sw t0,0x50(sp)` in the jal delay slot: unsolved, 3 statements shape). `s32 a[3]` rounds to 16 bytes (use `[2]` + a scalar).
+8. **Reversed memory-operand rule for `|` chains**: `f18 | 0x80000 | 0x2C00 | f2C | f30` keeps the two constants separate (`lui at,8; or; ori 0x2C00`), `f18 | 0x82C00 | ...` folds them; IDO still
+   loads `f30` before `f18` unless the chain is split (`func_15158838`: 240 permutations of the 5 terms and the table pair gave DIFF63 at best; the `lw t2,0x24` table index first order is not reachable by reordering).
+9. **A function that falls off the end with a stale `v0`** (`func_151846C0`): `return (T *)var_v0;` made IDO move `v0` into `a0` in the loop (extra `or v0,a0`); deleting the return changes the loop shape.
+   Not solved, DIFF53.
+10. **Tools**: `redeclfix.py f draft.c out.c` (loops `repair_try`; deletes the draft's own prototype/extern for a name reported as `redeclaration of 'X'`, or inserts the real prototype of a callee defined later in the file),
+    `fnptrfix.py in out` (m2c `*(s32 *)((u8 *)&TAB + i * 4)(args)` is a deref of the call result: rewrite to `(*(s32 (**)())(...))(args)`), `SCREEN_KEEPC=1 repair_try.sh` keeps the compiled TU
+    (`conker/build/rt_<f>/<f>.tu.c`) so the line of a `cfe: Error ... line N` is readable. On the 141 CERR drafts of s55: `redeclfix` 141 -> 97 CERR, `fnptrfix + redeclfix` 97 -> 84; the rest are `spXX` read-only
+    stack vectors (36), `Dereferenced a non-pointer` (20, m2c `*(base + idx)` of an `s32` global) and `Unacceptable operand` (11).
 ## s57 recipes (slice < 0x130000: spawner stack structs, named-local slot order, params)
 
 See `docs/sessions/s57.md`.
