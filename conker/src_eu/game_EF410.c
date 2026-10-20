@@ -101,15 +101,6 @@
 // }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2424.s")
-// NON-MATCHING: D_800A0638 is loaded after the -490.0f constant
-// void func_150C2424(u8 arg0) {
-//     f32 r;
-//
-//     r = func_150ADA68() * 8.0f + 8.0f;
-//     func_1514C9E0(D_800A0638, -490.0f, -328.0f, D_800A0638, -490.0f, 328.0f, r, 1, 0, 0.0f, 0, arg0);
-//     r = func_150ADA68() * 3.0f + 4.0f;
-//     func_1514C9E0(D_800A063C, -560.0f, -580.0f, 8117.0f, -560.0f, -580.0f, r, 3, 0, 0.0f, 0, arg0);
-// }
 s32 func_150C251C(struct_eu_sprite *arg0) {
     struct_eu_sprite_sub *sub = arg0->unk98;
     s32 v = arg0->unk1C * 8;
