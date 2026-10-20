@@ -786,3 +786,11 @@ See `docs/sessions/s84.md`.
 3. **Base-first `addu` without a new name**: reverse the operands (`(i << 6) + base`, `idx + array[k]`, `x + 0x10 + (i << 6)`) before trying `m = base; m += ...` (that one adds a name, which can move the frame or registers) (`func_15160B74`, `func_1512D5E0`, `func_15177638`).
 4. **A stack local 8-16 bytes too high with ret/spill slots right**: declare it inside the block that uses it (`if (...) { V3 out; ... }`) (`func_15160B74`). A phi float (`k = c1 / c2 / 0`) declared after `mf` fills the gap below `mf` instead of growing the frame (`func_1512D5E0`).
 5. A `beq v0, -1, <shared return 0 label>` = `if (call != -1) { ... return 1; } return 0;` (`func_151DD588`).
+
+## s86 recipes (libultra from decompals/ultralib)
+See `docs/sessions/s86.md`. Reference clone `tools/ultralib` (gitignored; `git clone --depth 1 https://github.com/decompals/ultralib tools/ultralib`).
+1. **Write the ultralib source, pick the branch by the asm**: `#if BUILD_VERSION >= VERSION_J` blocks are visible (single vs double `__osEepStatus`, `ptr += 4` vs a 4-step `ptr++` loop, NOP fill loops, `& 0x3FFF) == 0x2000` in aisetnextbuf). This ROM mixes them per file. Then try `SCREEN_OPT=-O1`, default, `-O2`, `-O3` (io -O1 when every local lives on the stack and no delay slot is filled; gu -O2/-O3).
+2. **Static vs extern**: a function-/file-scope `static` is addressed with `lui at` at every access; an `extern` gets its address CSE'd into a register (s-reg in loops). When the ref has `lui at` per access of a libultra static, the C needs the real `static` (and the file must own that `.data`, `rodata_split.py <stem> a b --section .data`; turn the neighbouring `rodatabin` blobs of that segment into `databin`, splat links all `.data` before `.rodata`).
+3. **Separate symbol for an array end**: `&stack[SIZE]` that equals the address of the next object (`&viEventQueue`) is a different symbol in C and is not CSE'd with it: add the array's start symbol to `undefined_syms.eu.txt` and pass `&D_x[SIZE]`.
+4. **-O3 reverses function order** in the object (`game_21D5F0`): write the source in reverse ROM order.
+5. Old `FIX32TOF` divides (`/ 65536.0f`, `lui 0x4780`), new multiplies by `1/65536`. Undeclared macros (e.g. `CHECK_IPAGE` missing from `src/libultra/io/controller.h`) compile as implicit calls: define them.
