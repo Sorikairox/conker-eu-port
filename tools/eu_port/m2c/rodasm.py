@@ -37,7 +37,7 @@ def rodata_ranges():
         for name, s in DR.segments().items():
             if name.endswith('_data') and 'vram' in s:
                 rs = [r for r, t, n in s['subs'] if t in ('rodatabin', '.rodata')]
-                if rs:
+                if rs and s.get('start') is not None and s.get('end') is not None:
                     r0 = min(rs)
                     out.append((r0 - s['start'] + s['vram'], s['end'] - s['start'] + s['vram'],
                                 s['vram'] - s['start']))

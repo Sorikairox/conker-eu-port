@@ -937,7 +937,7 @@ segments:
       - [0x24E1E0, rodatabin]
       - [0x24E320, .rodata, game_eu_1CC6F0]
       - [0x24E340, .rodata, game_eu_1CCD10]
-      - [0x24E370, rodatabin]
+      - [0x24E370, .rodata, game_eu_1CE7D0]
       - [0x24E3B0, .rodata, game_eu_1D1150]
       - [0x24E3D0, .rodata, game_eu_1D2F30]
       - [0x24E3E0, rodatabin]
