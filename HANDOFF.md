@@ -1,3 +1,4 @@
+Last updated: 2026-10-20 (session 65, main checkout, game < 0x130000, 3371/5915, 393,212 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 64, main checkout, game < 0x130000, 3366/5915, 390,936 bytes). Older stamps below are history.
 Last updated: 2026-10-20 (session 61, worktree eu-wt-a, 3357/5915, 387,496 bytes; s59 was 3350). Older stamps below are history.
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
@@ -38,6 +39,8 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 65 (main, game < 0x130000, Opus): 3371 / 5915 functions in C (57.0%)**, code bytes 393,212 / 2,253,856 (17.4%), `verify_all.sh` all OK. +5 in `b1e1f9c`, `49c9a66`: `func_150FEB84` (`game_eu_12C0B0` owns `.rodata`, manual range), `func_15045674`/`func_1504583C` (twins), `func_150F0FA4`, `func_150B5C38` (`game_eu_E35E0` owns `.rodata`). Header: `func_15056A00(struct127 *, s32, u8)`. New tool `spsort.py` (spawner stores in field order). Doc `docs/sessions/s65.md`, recipes IDO_SHAPES `## s65 recipes`, drafts `docs/sessions/s65_drafts/` (`refdiff.py f draft.c` normalised opcode diff).
+  Open: `func_15077F64` DIFF2 (negu register only), `func_1500B1F4` family SIZE+2 (call shape fixed, frame right, prologue register roles), `func_1508DCAC` SIZE-1, `func_150F8B20` SIZE+1, `func_150FF9F4`/`func_150B0828` SIZE+2.
 - **Session 64 (main, game < 0x130000, Opus): 3366 / 5915 functions in C (56.9%)**, code bytes 390,936 / 2,253,856 (17.3%), `verify_all.sh` all OK. +5 in `4a0bf21`, `cd1041a`: `func_150FE638`, `func_150FCFB0`, `func_150B45C8`, `func_150D2884`, `func_150891D4`; `game_eu_12BB30` and `game_eu_B37F0` now own `.rodata`. Doc `docs/sessions/s64.md` (root cause per target), recipes IDO_SHAPES `## s64 recipes`, drafts `docs/sessions/s64_drafts/`.
   Bit-exact but blocked: `func_150FEB84` (needs `game_eu_12C0B0` `.rodata` with const vector tables). Open: `func_15077F64` DIFF2 (negu register; needs the `func_15056A00(struct127 *, s32, u8)` prototype), `func_150DE8AC`, `func_1507F834`, `func_150619A8`, `func_1500B1F4` family (details s64.md).
 - **Session 62 (main, game < 0x130000): 3360 / 5915 functions in C (56.8%)**, code bytes 388,608 / 2,253,856 (17.2%), `verify_all.sh` all OK. +1 (`func_15052590`). New tool `tools/eu_port/fixchain.sh <list> <outdir>` (all draft fixers, best variant per function, bucket table). Doc `docs/sessions/s62.md`, recipes IDO_SHAPES `## s62 recipes`, drafts `docs/sessions/s62_drafts/`.
@@ -114,6 +117,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s65: `spsort.py in.c out.c [--const]` (sort runs of `sp.uXX = ...;` into field order); `docs/sessions/s65_drafts/refdiff.py func draft.c [n]` (normalised ref-vs-mine diff).
 - s62: `fixchain.sh <list> <outdir>` (variants v0..v5 of every fixer, keeps the best, extern + redecl loop on CERR).
 - s58: `docs/sessions/s58_drafts/cx.sh` (standalone compile, sp-relative instructions only; frame-rule experiments and one-file statement bisection).
 - s56: `redeclfix.py f draft out` (strip conflicting prototypes / add the real one), `fnptrfix.py in out` (m2c function-pointer-table calls), `SCREEN_KEEPC=1 repair_try.sh` keeps `conker/build/rt_<f>/<f>.tu.c`.
@@ -167,6 +171,8 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
+00000. Slice below 0x130000 after session 65 (`docs/sessions/s65.md`): (a) remaining `func_151530A8`/spawner-struct drafts: run `s65_drafts/spawner_fix.py` + `spsort.py` on each, then fix by reading `refdiff.py` (F8B20 SIZE+1, FF9F4/B0828 SIZE+2; the other 18 stack-struct drafts in `build_port/s62/fc/best` are SIZE+-2..20 and need structural fixes first);
+   (b) `func_1500B1F4` family (`s65_drafts/func_1500B1F4_SIZE+2_frame_ok.c`, 9-arg call): only the a0/a1 narrowing/copy registers differ; then clone to `B8F4`/`BAB8`/`BC7C`; (c) `func_1508DCAC` SIZE-1 (`base+0x11C` before `+off`, frame 0x50); (d) `func_15077F64` DIFF2 (prototype already changed); (e) next s62 `rank.txt` entries: `func_150B0F40`, `func_150CE710`, `func_150F2C20`, `func_150B731C`, `func_15082020`, `func_150C8850`.
 0000. Slice below 0x130000 after session 64 (`docs/sessions/s64.md`): (a) own `game_eu_12C0B0` `.rodata` (0x247600-0x247650: 24 unreferenced bytes, `D_800A2398` 0x18 and `D_800A23B0` vector tables passed by address, `D_800A23C0` = literal, `D_800A23C4` = 301.0f) then apply `s64_drafts/func_150FEB84_OK_blocked_rodata.c`;
    (b) `func_15077F64` DIFF2 (`s64_drafts/func_15077F64_DIFF2.c`, apply the header prototype change `void func_15056A00(struct127 *arg0, s32 arg1, u8 arg2);` first; only the `negu` destination is left); (c) the `func_1500B1F4` lerp family (4 SIZE-1 siblings, `s64_drafts/func_1500B1F4_SIZE-1_clean.c`: one extra 8-byte compiler temp);
    (d) `func_150619A8` (`s64_drafts/func_150619A8_SIZE-1_clean.c`: stop IDO hoisting `&D_800CC2D0` / 0x32C). Apply the s64 recipe 1 (delete named temps) to other spill-slot DIFF2s first.

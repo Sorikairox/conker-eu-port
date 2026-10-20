@@ -645,3 +645,10 @@ See `docs/sessions/s64.md`.
 3. **`x * 2.0f` is folded to `add.s x, x`**; the ref's `lui 0x4000; mtc1; mul.s` comes from the integer literal `x * 2` (`func_150FEB84`).
 4. **m2c pointer strides**: check every `p += 1` on a struct pointer against the ref's `addiu` (`func_150891D4` walked bytes; `func_1500B1F4` family: `"?"` string = `f32 D_80096014[]`, `+= 2`).
 5. **Call argument untruncated in the ref** (`or a1, a0` where the header says `u8`): the caller saw an `s32` prototype (US note `void func_15056A00(s32, s32, u8)`); the callee narrows itself (`func_15077F64`).
+
+## s65 recipes (rodata ownership with foreign refs, arg copies, spawner field order)
+See `docs/sessions/s65.md`.
+1. **Owning `.rodata` whose leading items are used only by another file** (`game_eu_12C0B0`: vec3s `D_800A1FB0`/`BC` used by `game_981E0`): give the manual range (`rodata_split.py <stem> <start> <end>`); rodata_inject attaches the unreferenced items to a GLOBAL_ASM neighbour and the other file keeps linking through `symbol_addrs`. Late float items named by C fail ("no GLOBAL_ASM neighbour"): write literals instead, with the exact word (`3.7099998f` = 0x406D70A3, `3.71f` is ...A4).
+2. **An unexplained 8-byte frame temp can be extra call arguments**: m2c passed scratch floats (f12/f14) as two leading args of `func_1500AF08`; count the outgoing stack stores (`func_1500B1F4`).
+3. **Permuter `new_var = arg2` as a real second pointer**: `out = arg2;` used for a copy loop and the stores after it moved the dest IV increment into the `bne` slot and, declared first, filled the slot above the spilled `best` (`func_15045674`). A loop-body pointer declared in block scope (`{ s16 *p; ... }`) differs from function scope.
+4. **Spawner struct initialisers** (`func_151530A8` callers): write the stores in **field order** (`tools/eu_port/spsort.py in out`), make fields stored with `li 255` / `li 0xB4` `u8` (m2c's `s8` gives `li -1`), and copy the vec3 argument as a 12-byte struct (`*(V3i *) &sp.u24 = *(V3i *) arg0;`). `docs/sessions/s65_drafts/spawner_fix.py` does the copy and the 0xFF fields (`func_150F0FA4`, `func_150B5C38`).
