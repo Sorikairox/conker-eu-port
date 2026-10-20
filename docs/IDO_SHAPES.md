@@ -778,3 +778,11 @@ See `docs/sessions/s82.md`.
 4. Two stores at the end in the ref order `swc1 0x50; swc1 0x4C` but float regs off by one: write the computed store first (`e->4C = 1/(x+x); e->50 = 0;`), IDO schedules the constant store ahead (`func_1513418C`).
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
+
+## s84 recipes (C-owned rodata tables, split symbols, block-scoped locals)
+See `docs/sessions/s84.md`.
+1. **Last GLOBAL_ASM of a `.rodata`-owning file**: a table the C names (`extern D_x`) has no GLOBAL_ASM left to carry it; define it in C as `const` data with the real values (`const T D_x[N] = {...}`, it goes to `.rodata` before the compiler's late literals) and drop its `undefined_syms.eu.txt` line (`func_151AFA80`).
+2. **`lui at` per load vs a shared `lui/addiu` base**: m2c `D_x + 4` loads from one symbol share a base register; the ref's separate `lui at, %hi(D_x + 4)` means two C symbols (`extern f32 D_x, D_x4;`, add `D_x4` to `undefined_syms.eu.txt`) (`func_15177638`).
+3. **Base-first `addu` without a new name**: reverse the operands (`(i << 6) + base`, `idx + array[k]`, `x + 0x10 + (i << 6)`) before trying `m = base; m += ...` (that one adds a name, which can move the frame or registers) (`func_15160B74`, `func_1512D5E0`, `func_15177638`).
+4. **A stack local 8-16 bytes too high with ret/spill slots right**: declare it inside the block that uses it (`if (...) { V3 out; ... }`) (`func_15160B74`). A phi float (`k = c1 / c2 / 0`) declared after `mf` fills the gap below `mf` instead of growing the frame (`func_1512D5E0`).
+5. A `beq v0, -1, <shared return 0 label>` = `if (call != -1) { ... return 1; } return 0;` (`func_151DD588`).
