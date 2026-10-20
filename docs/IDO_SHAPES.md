@@ -906,3 +906,9 @@ See `docs/sessions/s93.md`.
 4. A string literal in a file that does not own `.rodata` links into a discarded section (`ld: defined in discarded section .rodata`): use the `extern` D_ symbol.
 5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
 6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
+
+## s100 recipes (add.s operand order, spawner frame size, float setup order)
+1. **`add.s d, prod, lo`** (product first) for a `rand * (hi - lo) + lo` range comes from `lo + (hi - lo) * func_150ADA68()`; `func_150ADA68() * (hi - lo) + lo` gives `add.s d, lo, prod` (func_1514A70C).
+2. **Spawner frame 8 bytes too big, offsets right relative to the top**: the `func_151308E4` struct is 0x6C (`u8 pad98[0x8]` after `u97`), with two 4-byte scalars declared **above** it (e.g. `u8 *p; s32 r;` then `struct {...} sp;`). The 0x74 template only fits when nothing is declared above it. Scalars get 4-byte slots in declaration order even when they live in registers (func_15193360, func_151B20E4).
+3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
+4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
