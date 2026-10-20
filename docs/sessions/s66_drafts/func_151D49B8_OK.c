@@ -1,0 +1,91 @@
+typedef struct { f32 x, y, z; } V3;
+
+void func_151D49B8(u8 *arg0, u8 *arg1, s32 arg2, u8 *arg3, f32 arg4, u8 arg5, s32 arg6) {
+    struct {
+        s32 u38[6];
+        u8 pad50[0x4];
+        f32 u54[5];
+        s32 u68[2];
+        f32 u70;
+        f32 u74;
+        f32 u78;
+        s32 u7C;
+        u8 pad80[0x8];
+        f32 u88;
+        f32 u8C;
+        f32 u90;
+        f32 u94;
+        f32 u98;
+        f32 u9C;
+        f32 uA0;
+        s32 uA4;
+        s16 uA8;
+        s16 uAA;
+        s8 uAC;
+        u8 padAD[0x3];
+        s32 uB0;
+        u8 uB4;
+        s8 uB5;
+        s8 uB6;
+        s8 uB7;
+        s8 uB8;
+        s8 uB9;
+        s8 uBA;
+        s8 uBB;
+        s8 uBC;
+        u8 padBD[0x1];
+        s8 uBE;
+        u8 padBF[0x1];
+        u8 *uC0;
+        u8 uC4;
+        u8 padC5[0x1];
+        s16 uC6;
+        s16 uC8;
+        u8 padCA[0x2];
+        s32 uCC;
+    } sp;
+
+    func_1503F6F4(arg2, &sp.u38[3], &sp.u38[4], &sp.u38[5], &sp.u54[4], &sp.u68[0], &sp.u68[1], &sp.u38[0], &sp.u38[1], &sp.u38[2]);
+    sp.u54[4] += 180.0f;
+    {
+        f32 temp_f0;
+
+        temp_f0 = func_150ADA68();
+        sp.u54[0] = 1.0f;
+        sp.u54[1] = 1.0f;
+        sp.u70 = 1.0f;
+        sp.u74 = 1.0f;
+        sp.u78 = 1.0f;
+        sp.u54[3] = 0.042000003f * arg4;
+        sp.u54[2] = sp.u54[3];
+        *(V3 *)&sp.u7C = *(V3 *)arg0;
+        arg4 = ((temp_f0 * 105.0f) + 199.0f) * 0.001f;
+        sp.u88 = (*(f32 *)((u8 *)arg1 + 0)) * arg4;
+        sp.u8C = (*(f32 *)((u8 *)arg1 + 4)) * arg4;
+        sp.u90 = (*(f32 *)((u8 *)arg1 + 8)) * arg4;
+        sp.u94 = ((func_150ADA68() * 6378.0f) + -3189.0f) * 0.001f;
+        sp.u98 = 0.0f;
+        sp.u9C = ((func_150ADA68() * 6378.0f) + -3189.0f) * 0.001f;
+        sp.uA0 = ((func_150ADA68() * 320.0f) + -707.0f) * 0.001f;
+        sp.uA4 = 0x29E8;
+        sp.uA8 = (func_150ADA20() & 7) + 0x1C;
+        sp.uAA = 0x25;
+        sp.uAC = 0;
+        sp.uB0 = 0;
+        sp.uB4 = 0xFF;
+        sp.uB5 = 8;
+        sp.uB6 = 0;
+        sp.uB7 = 0;
+        sp.uB8 = 0;
+        sp.uB9 = 0;
+        sp.uBA = 0;
+        sp.uBB = 0;
+        sp.uBC = 2;
+        sp.uBE = 1;
+        sp.uC0 = arg3;
+        sp.uC4 = (*(u8 *)((u8 *)arg3 + 0x3B));
+        sp.uC6 = 6;
+        sp.uC8 = 0x2A;
+        func_15132FBC((u8 *)&sp.u54, 3, 0xFF, 0, (s32) arg5, arg6);
+    }
+}
