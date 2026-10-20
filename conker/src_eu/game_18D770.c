@@ -2,6 +2,10 @@
 #include "functions.h"
 #include "variables.h"
 
+// rodata_inject: inside 0x24BFDC
+// rodata_inject: inside 0x24C014
+// rodata_inject: inside 0x24C04C
+
 s32 func_151149AC(u8);
 
 struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
@@ -108,7 +112,51 @@ void func_151603FC(struct225 *arg0) {
 }
 
 // requires jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151604A0.s")
+extern s32 (*D_8008B4F0[])(struct225 *);
+
+void func_151604A0(struct225 *arg0, u8 *arg1, u8 arg2) {
+    s32 pad[2]; // fakematch: frame is 8 bytes larger than the locals need
+    struct17 tmp;
+
+    switch (arg2) {
+    case 0x17:
+    case 0x18:
+    case 0x1C:
+    case 0x1F:
+    case 0x22:
+        if (arg1[0] == ((u8 *)arg0)[0x12]) { // fakematch: raw byte index loads arg1[0] first
+            switch (arg2) {
+            case 0: // fakematch: a low case keeps the table 0-based (sltiu 0x23, no -0x17)
+                break;
+            case 0x17:
+                arg0->unk14->unk9 = 0;
+                break;
+            case 0x18:
+                arg0->unk14->unk9 = 1;
+                break;
+            case 0x1C:
+                tmp.unk0 = arg0->unk14->unkE;
+                tmp.unk4 = arg0->unk14->unk10;
+                tmp.unk8 = arg0->unk14->unk12;
+                func_151618BC(16000, 0, 0, 0, &tmp, 500, 1000);
+                break;
+            case 0x1F:
+                arg0->unkF = 0xB;
+                arg0->unk14->unk9 = 0;
+                break;
+            case 0x22:
+                func_1516972C((struct102 *)arg0);
+                break;
+            }
+        }
+        break;
+    default:
+        if (D_8008B4F0[arg0->unk12] != NULL) {
+            D_8008B4F0[arg0->unk12](arg0);
+        }
+        break;
+    }
+}
 
 s32 func_15160600(struct225 *arg0) {
     arg0->unk14->unk2F = func_151422DC(0, &D_800A6690, 0, 0xFF, 0xFF, &D_800A6698, 575);
@@ -159,7 +207,7 @@ s32 func_151607A4(struct225 *arg0) {
         } else {
             temp_a1->unkC -= D_800BE9A4;
         }
-    } else if (func_150ADA68() < D_800A6AD4) {
+    } else if (func_150ADA68() < 0.0050000004f) {
         temp_a1->unk10 = (func_150ADA20() % 5U) + 1;
         func_15160954(&temp_a1->unk4, &temp_a1->unk0, &temp_a1->unk8, &temp_a1->unkC, arg0);
     }
@@ -331,14 +379,14 @@ struct225 *func_1516127C(s32 arg0, u8 arg1, s32 arg2) {
 
     src[0] = 50.0f;
     src[1] = 40.0f;
-    src[2] = func_150ADA68() * D_800A6AD8;
+    src[2] = func_150ADA68() * 6.2831855f;
 
     header.unk0 = 0;
     header.unk1 = 1;
     header.unk2 = 300;
     header.unk4 = 5;
 
-    src[3] = D_800A6ADC;
+    src[3] = 0.1021f;
 
     temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg1, arg2);
     if (temp_v0 != NULL) {
@@ -364,7 +412,7 @@ struct225 *func_15161334(s32 arg0, u8 arg1, s32 arg2) {
     tmp1[2] = 50.0f;
     tmp1[4] = 0.0f;
     tmp1[5] = 10.0f;
-    tmp1[6] = D_800A6AE0;
+    tmp1[6] = 0.2489f;
     tmp1[7] = 127.0f;
 
     temp_v0 = func_1516037C(&header, arg0, sizeof(tmp1), arg1, arg2);
@@ -407,7 +455,7 @@ struct225 *func_15161494(s32 arg0, u8 arg1, s32 arg2) {
     tmp[0] = 127.0f;
     tmp[1] = 100.0f;
     tmp[2] = 0.0f;
-    tmp[3] = D_800A6AE4;
+    tmp[3] = 0.08f;
 
     temp_v0 = func_1516037C(&header, arg0, sizeof(tmp), arg1, arg2);
     if (temp_v0 != NULL) {
@@ -423,8 +471,8 @@ struct225 *func_15161540(s32 arg0, u8 arg1, s32 arg2) {
 
     tmp[0] = 28.0f;
     tmp[1] = 27.0f;
-    tmp[2] = func_150ADA68() * D_800A6AE8;
-    tmp[3] = D_800A6AEC;
+    tmp[2] = func_150ADA68() * 6.2831855f;
+    tmp[3] = 0.0766f;
 
     header.unk0 = 0;
     header.unk1 = 1;
@@ -692,7 +740,7 @@ struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2) {
     src[3] = 1.0f;
     src[4] = 0.0f;
     src[5] = 10.0f;
-    src[6] = D_800A6AF0;
+    src[6] = 0.2489f;
     src[7] = 127.0f;
 
     temp_v0 = func_1516037C(&header, arg0, sizeof(src), arg1, arg2);
@@ -713,7 +761,7 @@ void func_15162110(s32 arg0) {
     src[6] = 0.0f;
     src[0] = 42.5f;
     src[3] = 37.5f;
-    src[7] = D_800A6AF4;
+    src[7] = 0.0761f;
 
     temp_v0 = func_15149130(300, -1, 30, -1, 0, 0, sizeof(src), 0xFF, 1);
     if (temp_v0 != NULL) {
@@ -805,7 +853,7 @@ struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5,
     src[3] = 1.0f;
     src[4] = 0.0f;
     src[5] = 10.0f;
-    src[6] = D_800A6AF8;
+    src[6] = 0.2489f;
     src[7] = 127.0f;
 
     header.unk0 = arg3;
@@ -834,7 +882,7 @@ struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
     src[3] = 1.0f;
     src[4] = 0.0f;
     src[5] = 10.0f;
-    src[6] = D_800A6AFC;
+    src[6] = 0.2489f;
     src[7] = 127.0f;
     temp_v0 = func_151602C0(header, arg1, 0, arg2, arg3, arg4, arg5, arg6, offset + sizeof(src), arg9, argA);
     if (temp_v0 != NULL) {
@@ -1047,7 +1095,7 @@ struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5
 
     src[0] = D_800A6964[arg1];
     src[1] = D_800A699C[arg1];
-    src[2] = func_150ADA68() * D_800A6B00;
+    src[2] = func_150ADA68() * 6.2831855f;
     src[3] = D_800A69D4[arg1];
 
     header.unk0 = arg4;
@@ -1074,7 +1122,7 @@ s32 func_15163704(struct225 *arg0) {
     temp_v0->unk8 += temp_v0->unkC * D_800BE9A4;
     temp_v0->unk8 = func_15144B68(temp_v0->unk8);
 
-    if (temp_v0->unk8 > D_800A6B04) {
+    if (temp_v0->unk8 > 3.1415927f) {
         return 0;
     }
     return 1;
@@ -1145,7 +1193,7 @@ struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2) {
     }
     tmp1[0] = D_800A6964[6]; // D_800A697C
     tmp1[1] = D_800A699C[6]; // D_800A69B4
-    tmp1[2] = func_150ADA68() * D_800A6B08;
+    tmp1[2] = func_150ADA68() * 6.2831855f;
     tmp1[3] = D_800A69D4[6]; // D_800A69EC;
 
     header2.unk0 = temp_v0->unk10;
@@ -1185,7 +1233,7 @@ struct225 *func_15163BE8(s32 arg0, u8 arg1, s32 arg2) {
 
     src[0] = D_800A6964[6];
     src[1] = D_800A699C[6];
-    src[2] = func_150ADA68() * D_800A6B0C;
+    src[2] = func_150ADA68() * 6.2831855f;
     src[3] = D_800A69D4[6];
 
     temp_v0 = func_15160A58(arg0, 1, &D_800A6A0C, 2, 300, 100, 0, 0xFF, 0, 0xFF, 0, 0, sizeof(src), 1, arg1, arg2);
@@ -1410,7 +1458,7 @@ struct225 *func_15164208(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
 
 s32 func_1516429C(struct237 *arg0) {
     arg0->unk14->unk2F = arg0->unk18.unk0;
-    arg0->unk18.unk0 = arg0->unk18.unk0 - (arg0->unk18.unk0 * D_800A6B10);
+    arg0->unk18.unk0 = arg0->unk18.unk0 - (arg0->unk18.unk0 * 0.70000005f);
     return 1;
 }
 

@@ -298,7 +298,26 @@ void func_1511C3E4(u8 *arg0) {
 void func_1511CAC8(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511CAD0.s")
+void func_1511CAD0(u8 *arg0) {
+    f32 temp_f8;
+    f32 sp20;
+
+    sp20 = sinf((*(f32 *)((u8 *)arg0 + 0x80)));
+    temp_f8 = sinf((*(f32 *)((u8 *)arg0 + 0x84))) * 16.0f;
+    (*(f32 *)((u8 *)arg0 + 0)) = (f32) (sp20 * 16.0f);
+    (*(f32 *)((u8 *)arg0 + 8)) = temp_f8;
+    (*(f32 *)((u8 *)arg0 + 0x80)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x80)) + (0.073f * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x84)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x84)) + (0.065f * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x80)) = func_15144B68((*(f32 *)((u8 *)arg0 + 0x80)));
+    {
+        s32 blk_t; // fakematch: block boundary keeps the 0x84 store before the compare load
+        (*(f32 *)((u8 *)arg0 + 0x84)) = func_15144B68((*(f32 *)((u8 *)arg0 + 0x84)));
+    }
+    if (((*(f32 *)((u8 *)arg0 + 8)) == 0.0f) && ((*(f32 *)((u8 *)arg0 + 0x84)) == 0.0f)) {
+        (*(f32 *)((u8 *)arg0 + 0)) = 7.5f;
+        (*(f32 *)((u8 *)arg0 + 8)) = 8.0f;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511CBC0.s")
 

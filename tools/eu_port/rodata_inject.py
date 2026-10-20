@@ -7,6 +7,7 @@ variables) are the compiler's; everything else goes, as raw words in `.section .
 GLOBAL_ASM function between its C neighbours. Data symbols the C code names get a glabel.
 A float/double literal item ends after 4/8 bytes; for other compiler-owned items whose end is not
 the next reference, put `// rodata_inject: size <rom addr> <bytes>` in the C file.
+A constant-index load of an element inside a C-named array: `// rodata_inject: inside <rom addr>` (s74).
 
 Runs after splat (hooked into `make VERSION=eu extract`). For every `[addr, .rodata, stem]`
 subsegment of a *_data segment in conker.eu.yaml whose src_eu/<stem>.c still has GLOBAL_ASM
@@ -147,6 +148,11 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
         items.setdefault(t, {'owner': None, 'kinds': set(), 'other': False})
     plan.labels = {names[i] - dv: i for i in set(re.findall(r'\b[A-Za-z_]\w*\b', csrc))
                    if i in names and va <= names[i] < vb} if sec == '.data' else {}
+    # s74: `// rodata_inject: inside <rom addr>` in the C file = a constant-index load of an element of
+    # a const array named by C (`D_800A6964[6]` -> lwc1 at array+0x18): not an item of its own
+    # (game_18D770, whose f32 tables would otherwise split into compiler-owned "late" literals)
+    for ra in re.findall(r'rodata_inject: inside (0x[0-9A-Fa-f]+)', src):
+        items.pop(int(ra, 16) + dv, None)
     if not items:
         raise Fail('%s: no references into 0x%X-0x%X' % (stem, a, b))
     addrs = sorted(items)

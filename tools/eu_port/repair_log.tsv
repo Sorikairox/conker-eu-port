@@ -973,3 +973,13 @@ func_15156598	new	3	OK	y	y	s72: struct127 ptr diffs arg1[i] - D_800CC2D0; arm-lo
 func_151A6520	new	8	DIFF30	n	y	s72: shape C u8 **q=&arg0 + s32 *m=arg1 (s0); left: loop preheader order (key before p) and the c copy into v1; drafts s72_drafts
 func_1513DF9C	new	0	skip	n	n	s72: jump table jtbl_800A5568, game_169510 owns no .rodata
 func_151604A0	new	0	skip	n	n	s72: two jump tables, game_18D770 owns no .rodata
+func_1513DF9C	new	2	OK	y	n	s74: game_169510 owns .rodata; if(!(flags&0x400000)) idx=0; else switch in case-body order
+func_151604A0	new	3	OK	y	n	s74: game_18D770 owns .rodata (rodata_inject inside directive, named late floats -> literals); fakematches pad[2], case 0, raw byte index
+func_1511CAD0	DIFF2	2	OK	y	y	s74: block with decl around last 0x84 store (fakematch blk_t); remote perm none
+func_151733EC	DIFF10	3	OK	y	n	s74: drop m2c sp28/sp2C/temp_v0/temp_v0_2 names, s32 idx
+func_1515F8A8	DIFF10	1	OK	y	n	s74: u8 v = f32 (no (u32)&0xFF)
+func_1515FB34	DIFF10	1	OK	y	n	s74: same as 1515F8A8
+func_151DDA10	DIFF11	3	DIFF19	n	n	s74: osEepromProbe-like; ref beqz+lhu slot, mine beqzl; struct status at 0x24
+func_10007D14	DIFF3	0	DIFF2	n	y	s74: remote perm 2x600s best nm/func_10007D14
+func_1510B930	DIFF5	0	DIFF4	n	y	s74: remote perm 2x600s
+func_151EF7B0	new	0	OK	n	n	s74: C matches but file .text 0x50 = 16 trailing nops (padding); left asm
