@@ -1,9 +1,9 @@
 #!/bin/bash
 # opseqdiff.sh file func [ctx] (s125): difflib of mnemonic+operand lines (built .o vs splat .s), sp offsets kept; shows only changed hunks
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
-cd ~/conker/conker
-docker exec -w /conker/conker conkerdev make VERSION=eu build/src_eu/$1.c.o 2>&1 | grep -i 'error' | head -5
-docker exec -w /conker/conker conkerdev mips-linux-gnu-objdump -d -z -M no-aliases build/src_eu/$1.c.o | awk -v f="<$2>:" '$2==f{p=1;next} p&&/^$/{exit} p&&/^ +[0-9a-f]+:/{$1="";$2="";print}' > /tmp/osa_$$.txt
+cd ${CONKER_ROOT:-$HOME/conker}/conker
+docker exec -w /conker/conker ${CONKERDEV:-conkerdev} make VERSION=eu build/src_eu/$1.c.o 2>&1 | grep -i 'error' | head -5
+docker exec -w /conker/conker ${CONKERDEV:-conkerdev} mips-linux-gnu-objdump -d -z -M no-aliases build/src_eu/$1.c.o | awk -v f="<$2>:" '$2==f{p=1;next} p&&/^$/{exit} p&&/^ +[0-9a-f]+:/{$1="";$2="";print}' > /tmp/osa_$$.txt
 grep -o '\*/ .*' asm/nonmatchings/$1/$2.s | sed 's/^\*\/ *//' > /tmp/osb_$$.txt
 python3 - /tmp/osa_$$.txt /tmp/osb_$$.txt ${3:-2} <<'PY'
 import sys,difflib,re,os

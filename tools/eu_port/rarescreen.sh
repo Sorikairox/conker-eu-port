@@ -1,7 +1,7 @@
 #!/bin/bash
 # s121: screen a reference decomp (Rare or libultra) against the unmatched Conker functions.
 # usage: rarescreen.sh <name> <srcroot> <slice: init|lo|hi|all> [thr=0.6] [-- extra cc flags...]
-#   Compiles every .c under <srcroot> with refcc.sh at -O1, -O2 and -g (OPTS overrides; -O3 objects fail under refcc) (with -Dstatic= so that
+#   Compiles every .c under <srcroot> with refcc.sh at -O1, -O2 and -g (OPTS overrides, e.g. OPTS="-O1 -O2 -O3 -g"; -O3 works since s132) (with -Dstatic= so that
 #   static functions get their own symbols; IDO emits none for statics), into
 #   build_port/rare/<name>_O{1,2,3}/, then runs srcmatch.py on each objdir (opcode similarity,
 #   size ratio 0.8-1.25) and writes the merged ranking (best ratio per Conker function) to

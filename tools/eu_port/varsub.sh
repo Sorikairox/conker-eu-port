@@ -1,7 +1,7 @@
 #!/bin/bash
 # varsub.sh (s127) file func 'old' 'new1' 'new2' ... : try each replacement of old in src_eu/<file>.c, print objcmp diff count, restore
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
-cd ~/conker/conker
+cd ${CONKER_ROOT:-$HOME/conker}/conker
 stem=$1; f=src_eu/$1.c; fn=$2; old="$3"; shift 3
 cp $f build_port/varsub_backup.c
 for n in "$@"; do
