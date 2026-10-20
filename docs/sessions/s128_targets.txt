@@ -1,0 +1,88 @@
+# s128 targets: unmatched slice functions 30-250 insns, no repair_log row, <=1 session-doc mention, file >=10 C functions, not in the s124 screen (build_port/s128/rank.py + new.txt, 117 functions); gensome screen build_port/s128/gs.txt: 30 CERR, 19 DIFF, 37 SIZE, 31 no output
+# result func insns file
+SIZE+1 func_1514C860 96 game_eu_1772D0.c  # s128 perm DIFF15
+SIZE+1 func_151A31D4 186 game_eu_1CE7D0.c
+SIZE-1 func_151415D4 69 game_16DC80.c  # OK s128
+SIZE-1 func_1514A8F0 70 game_eu_1772D0.c  # OK s128
+SIZE-1 func_15158620 74 game_eu_185E30.c  # OK s128
+SIZE-1 func_1519D7B0 133 game_eu_1CACF0.c
+SIZE-1 func_151AE86C 59 game_eu_1D9C00.c  # s128 DIFF23
+SIZE+2 func_151A3BCC 105 game_eu_1D1150.c
+SIZE-2 func_1514AB04 67 game_eu_1772D0.c  # s128 perm DIFF21
+SIZE-2 func_1517F5FC 197 game_eu_1ACBC0.c
+SIZE+3 func_151A2FC4 48 game_eu_1CE7D0.c  # OK s128
+SIZE+3 func_151C8880 233 game_eu_1F4F60.c
+DIFF23 func_15159140 65 game_eu_185E30.c  # OK s128
+SIZE-4 func_1514C390 76 game_eu_1772D0.c
+DIFF27 func_1519CA54 34 game_eu_1C3530.c  # OK s128
+DIFF30 func_15168F08 31 game_1944C0.c  # s128 perm DIFF5
+SIZE-5 func_15141E38 80 game_16EE20.c
+DIFF31 func_151AEB40 44 game_eu_1D9C00.c  # s128 DIFF15
+DIFF35 func_151419D0 43 game_16EE20.c
+DIFF35 func_151A4DEC 49 game_eu_1D1150.c
+SIZE+6 func_15149DA8 151 game_eu_1772D0.c
+DIFF39 func_151A3084 44 game_eu_1CE7D0.c
+SIZE+7 func_151E5D54 33 game_eu_20B730.c
+DIFF43 func_15133C18 46 game_eu_15FF50.c
+DIFF47 func_151A2B90 67 game_eu_1CE7D0.c
+SIZE-8 func_1517FF64 106 game_eu_1ACBC0.c
+SIZE-9 func_15187B50 230 game_eu_1B1ED0.c
+DIFF58 func_15185360 109 game_eu_1B1ED0.c
+DIFF59 func_151A2A58 78 game_eu_1CE7D0.c
+DIFF61 func_151846C0 134 game_eu_1B1ED0.c
+DIFF69 func_151AE694 96 game_eu_1D9C00.c
+SIZE-13 func_151ABE04 51 game_eu_1D7790.c
+DIFF79 func_1514CBE8 120 game_eu_1772D0.c
+DIFF80 func_1517FD84 120 game_eu_1ACBC0.c
+DIFF86 func_151A1D0C 96 game_eu_1CE7D0.c
+SIZE+15 func_151F27E0 44 game_21FC90.c
+DIFF93 func_1514CDC8 138 game_eu_1772D0.c
+DIFF101 func_15187954 127 game_eu_1B1ED0.c
+DIFF123 func_1514C9E0 130 game_eu_1772D0.c
+SIZE+23 func_151F2890 52 game_21FC90.c
+SIZE-25 func_151A4B40 42 game_eu_1D1150.c
+SIZE-25 func_151AA814 42 game_eu_1D7790.c
+SIZE-30 func_151AB874 56 game_eu_1D7790.c
+SIZE+38 func_15187EE8 72 game_eu_1B1ED0.c
+SIZE-57 func_1514B30C 118 game_eu_1772D0.c
+SIZE-59 func_151C957C 115 game_eu_1F4F60.c
+SIZE-62 func_15142600 142 game_16EE20.c
+SIZE-68 func_151534E0 202 game_eu_17D3C0.c
+SIZE-69 func_151A4FE8 170 game_eu_1D1150.c
+SIZE-81 func_1514B0CC 144 game_eu_1772D0.c
+SIZE-87 func_15153BA4 224 game_eu_17D3C0.c
+SIZE-105 func_151A3700 144 game_eu_1CE7D0.c
+SIZE-106 func_1514B5A4 204 game_eu_1772D0.c
+SIZE-106 func_151AC628 213 game_eu_1D9C00.c
+SIZE-108 func_151A34BC 145 game_eu_1CE7D0.c
+SIZE-131 func_15153808 231 game_eu_17D3C0.c
+CERR func_15141A7C 100 game_16EE20.c
+CERR func_1514306C 50 game_eu_170760.c
+CERR func_1514A004 88 game_eu_1772D0.c
+CERR func_1514BE54 201 game_eu_1772D0.c
+CERR func_1514C50C 175 game_eu_1772D0.c
+CERR func_1514DAD4 58 game_eu_17A800.c
+CERR func_15158BF4 167 game_eu_185E30.c
+CERR func_15186A9C 154 game_eu_1B1ED0.c
+CERR func_15196270 53 game_eu_1C3530.c
+CERR func_1519D5A0 132 game_eu_1CACF0.c
+CERR func_151A3940 93 game_eu_1D1150.c
+CERR func_151A3AB4 70 game_eu_1D1150.c
+CERR func_151A9BE4 128 game_eu_1D5710.c
+CERR func_151AE958 122 game_eu_1D9C00.c
+CERR func_151B26B0 67 game_eu_1DFE20.c
+CERR func_151B28F8 210 game_eu_1DFE20.c
+CERR func_151B2C40 176 game_eu_1DFE20.c
+CERR func_151C01F0 88 game_eu_1EDA00.c
+CERR func_151C0648 147 game_eu_1EDA00.c
+CERR func_151C7750 243 game_eu_1F4F60.c
+CERR func_151C8D90 111 game_eu_1F4F60.c
+CERR func_151C9740 224 game_eu_1F4F60.c
+CERR func_151C9748 207 game_eu_1F4F60.c
+CERR func_151D2F90 104 game_1FFF60.c
+CERR func_151D535C 231 game_eu_201240.c
+CERR func_151D5AC4 77 game_eu_201240.c
+CERR func_151D611C 125 game_eu_201240.c
+CERR func_151D7814 81 game_eu_204F70.c
+CERR func_151D7DE0 63 game_eu_204F70.c
+CERR func_151D7EDC 67 game_eu_204F70.c

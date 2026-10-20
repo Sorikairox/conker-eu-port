@@ -33,7 +33,91 @@ void func_1519D570(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D5A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D7B0.s")
+typedef struct { f32 x, y, z; } V3;
+typedef struct {
+    V3 pos;
+    V3 vel;
+    f32 unk18;
+    s16 unk1C;
+    s16 unk1E;
+    u8 unk20;
+    u8 pad21[3];
+} Trail;
+typedef struct {
+    u8 pad0[6];
+    u8 flags;
+    u8 pad7[0x1D];
+    f32 unk24;
+    u8 pad28[8];
+    f32 unk30;
+    f32 unk34;
+    u8 pad38[0xE];
+    s16 unk46;
+} TrailDef;
+typedef struct {
+    u8 pad0[0x25];
+    u8 count;
+    u8 pad26[6];
+    s8 n;
+    s8 head;
+    s8 tail;
+    u8 pad2F[0x25];
+    V3 pos;
+    u8 pad60[0x34];
+    Trail *trails;
+    TrailDef *def;
+} TrailObj;
+
+s32 func_1519D7B0(TrailObj *arg0) {
+    TrailDef *def = arg0->def;
+    Trail *trails = arg0->trails;
+    s32 i;
+    Trail *t;
+    s16 life;
+
+    if (arg0->n < 2 && (def->flags & 1)) {
+        return 0;
+    }
+    i = arg0->tail;
+    while (i != arg0->head) {
+        i--;
+        if (i < 0) {
+            i = arg0->count - 1;
+        }
+        t = &trails[i];
+        t->unk20 = 0xFF;
+        t->vel.x *= def->unk30;
+        t->vel.y += def->unk24 * D_800BE9A4;
+        t->vel.z *= def->unk30;
+        t->pos.x += trails[i].vel.x * D_800BE9A4;
+        t->pos.y += trails[i].vel.y * D_800BE9A4;
+        life = t->unk1E;
+        t->pos.z += trails[i].vel.z * D_800BE9A4;
+        if (life > 0) {
+            t->unk1E = life - D_800BE9E4;
+        } else {
+            t->unk1C -= D_800BE9E4 * def->unk46;
+        }
+        t->unk18 += D_800BE9A4 * def->unk34;
+        if (t->unk1C < 0) {
+            def->flags &= ~2;
+            while (i != arg0->head) {
+                arg0->head++;
+                if (arg0->head == arg0->count) {
+                    arg0->head = 0;
+                }
+                arg0->n--;
+            }
+            trails[arg0->head].unk1C = 0;
+        }
+    }
+    if (arg0->n > 0) {
+        arg0->pos = trails[arg0->head].pos;
+    } else {
+        arg0->pos.x = 0.0f; arg0->pos.y = 0.0f; arg0->pos.z = 0.0f;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D9C4.s")
 

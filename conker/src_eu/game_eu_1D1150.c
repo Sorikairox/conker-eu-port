@@ -7,7 +7,86 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3AB4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3BCC.s")
+typedef struct { f32 x, y, z; } V3;
+typedef struct {
+    V3 pos;
+    f32 unkC;
+    s16 unk10;
+    s16 unk12;
+    u8 unk14;
+    u8 pad15[3];
+} Trail18;
+typedef struct {
+    u8 pad0[0x1C];
+    s16 unk1C;
+    u8 pad1E[6];
+    f32 unk24;
+    u8 pad28[2];
+    s8 unk2A;
+    u8 pad2B[5];
+    u8 flags;
+    u8 pad31[0x1B];
+    u8 unk4C;
+} TrailDef18;
+typedef struct {
+    u8 pad0[0x25];
+    u8 count;
+    u8 pad26[6];
+    s8 n;
+    s8 head;
+    s8 tail;
+    u8 pad2F[0x25];
+    V3 pos;
+    u8 pad60[0x34];
+    Trail18 *trails;
+    TrailDef18 *def;
+} TrailObj18;
+
+s32 func_151A3BCC(TrailObj18 *arg0) {
+    TrailDef18 *def = arg0->def;
+    Trail18 *trails = arg0->trails;
+    s32 i;
+    Trail18 *t;
+    s16 life;
+
+    if (arg0->n < 2 && (def->flags & 1)) {
+        return 0;
+    }
+    def->unk4C += def->unk2A * D_800BE9E4;
+    i = arg0->tail;
+    while (i != arg0->head) {
+        i--;
+        if (i < 0) {
+            i = arg0->count - 1;
+        }
+        t = &trails[i];
+        life = t->unk12;
+        if (life > 0) {
+            t->unk12 = life - D_800BE9E4;
+        } else {
+            t->unk10 -= D_800BE9E4 * def->unk1C;
+        }
+        t->unk14 = 0xFF;
+        t->unkC += D_800BE9A4 * def->unk24;
+        if (t->unk10 < 0) {
+            def->flags &= ~2;
+            while (i != arg0->head) {
+                arg0->head++;
+                if (arg0->head == arg0->count) {
+                    arg0->head = 0;
+                }
+                arg0->n--;
+            }
+            trails[arg0->head].unk10 = 0;
+        }
+    }
+    if (arg0->n > 0) {
+        arg0->pos = trails[arg0->head].pos;
+    } else {
+        arg0->pos.x = 0.0f; arg0->pos.y = 0.0f; arg0->pos.z = 0.0f;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3D70.s")
 

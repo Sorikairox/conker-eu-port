@@ -128,7 +128,21 @@ void func_15197A7C(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198024.s")
+s32 func_15198024(u8 *arg0) {
+    *(f32 *)(arg0 + 0x140) *= *(f32 *)(arg0 + 0x15C);
+    *(f32 *)(arg0 + 0x144) += *(f32 *)(arg0 + 0x158) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x148) *= *(f32 *)(arg0 + 0x15C);
+    *(f32 *)(arg0 + 0x14C) *= *(f32 *)(arg0 + 0x160);
+    *(f32 *)(arg0 + 0x150) += *(f32 *)(arg0 + 0x158) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x154) *= *(f32 *)(arg0 + 0x160);
+    *(f32 *)(arg0 + 0x34) += *(f32 *)(arg0 + 0x140) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x144) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x3C) += *(f32 *)(arg0 + 0x148) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x14C) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x44) += *(f32 *)(arg0 + 0x150) * D_800BE9A4;
+    *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x154) * D_800BE9A4;
+    return 1;
+}
 
 typedef struct {
     u8 pad0[0x1C];
