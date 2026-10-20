@@ -189,7 +189,135 @@ void func_15156E68(u8 *arg0, u8 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_151570C4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_15157294.s")
+void func_15157294(u8 *arg0, u8 arg1)
+{
+  struct 
+  {
+    f32 u18[3];
+    s16 u24;
+    s16 u26;
+    s16 u28;
+    s16 u2A;
+    s16 u2C;
+    s16 u2E;
+    f32 u30;
+    f32 u34;
+    f32 u38;
+    f32 u3C;
+    u8 u40;
+    u8 u41;
+    u8 u42;
+    u8 u43;
+    u8 u44;
+    u8 u45;
+    u8 u46;
+    u8 u47;
+    u8 u48;
+    s16 u4A;
+    s16 u4C;
+    s16 u4E;
+    f32 u50;
+    f32 u54;
+    u8 u58;
+    u8 u59;
+    s16 u5A;
+    s16 u5C;
+    u8 u5E;
+    u8 u5F;
+    s16 u60;
+    s32 u64;
+    s32 u68;
+    s16 u6C;
+    s32 u70;
+    s32 u74;
+    u8 u78;
+    u8 u79;
+    u8 u7A;
+    u8 u7B;
+    u8 u7C;
+    u8 u7D;
+    u8 u7E;
+    u8 u7F;
+    u8 u80;
+    f32 u84;
+    f32 u88;
+    s16 u8C;
+    s16 u8E;
+    s16 u90;
+    f32 u94;
+    s32 u98;
+    u8 u9C;
+    u8 u9D;
+    s8 u9E;
+    s8 u9F;
+    u8 uA0;
+    u8 uA1;
+    u8 uA2;
+    u8 uA3;
+    u8 uA4;
+    } sp;
+    memcpy(&sp, arg0, 0xC);
+    sp.u24 = 0xA;
+    sp.u26 = 0x1E;
+    sp.u28 = 0;
+    sp.u2A = -0x3F;
+    sp.u2C = 0xFF;
+    sp.u2E = 0x80;
+    sp.u30 = 6.97f;
+    sp.u34 = 3.37f;
+    sp.u38 = 1.6899999f;
+    sp.u3C = 1.6899999f; sp.u7C = 0xFF; sp.u40 = 0xFF; sp.uA2 = 0xFF; // fakematch: same-line statements (IDO line numbers change the scheduling)
+    sp.u7D = 0xFF; sp.u41 = 0xFF; sp.uA3 = 0xFF; // fakematch: same-line statements (IDO line numbers change the scheduling)
+    sp.u7E = 0xFF; sp.u42 = 0xFF; sp.uA4 = 0xFF; // fakematch: same-line statements (IDO line numbers change the scheduling)
+    sp.u43 = 0xFF;
+    sp.u44 = 0xFF;
+    sp.u45 = 0xFF;
+    sp.u46 = 0xFF;
+    sp.u47 = 0xFF;
+    sp.u48 = 9;
+    sp.u4A = 5;
+    sp.u4C = 0xA;
+    sp.u4E = 0x1601;
+    sp.u50 = 2.01f;
+    sp.u54 = 3.02f;
+    sp.u58 = 0x64;
+    sp.u59 = 0x9B;
+    sp.u5A = 4;
+    sp.u5C = 0x3F;
+    sp.u5E = 0;
+    sp.u5F = 0x2B;
+    sp.u60 = 0x1A01;
+    sp.u64 = 0x200005;
+    sp.u68 = 0;
+    sp.u6C = (func_150ADA20() % 3U) + 7;
+    sp.u70 = 0;
+    sp.u74 = 0;
+    sp.u78 = 0xFF;
+    sp.u79 = 0xFF;
+    sp.u7A = 0xFF;
+    sp.u7B = 0xFF;
+    sp.u7F = (func_150ADA20() % 1U) + 0xFF;
+    sp.u80 = 0xFF;
+    sp.u84 = sp.u88 = func_150ADA68() * 150.0f + 196.0f;
+    sp.u8C = 4;
+    sp.u8E = 0x3F;
+    sp.u90 = 0x16;
+    sp.u98 = 0xE01;
+    sp.u94 = 1.25f;
+    if (func_150ADA20() & 1) {
+        sp.u98 |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        sp.u98 |= 0x80;
+    }
+    sp.u9C = 4;
+    sp.u9D = 4;
+    sp.u9E = -1;
+    sp.u9F = -1;
+    sp.uA0 = 1;
+    sp.uA1 = 1;
+    func_15156E68((u8 *)&sp, arg1);
+}
 
 void func_15157504(s32 arg0) {
     func_151D5E30(arg0 + 0x88, arg0);
