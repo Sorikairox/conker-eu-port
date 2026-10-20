@@ -947,3 +947,6 @@ func_151B7664	DIFF13	6	OK	y	y	twin of BD7CC recipe
 func_151BAA18	SIZE-1	2	OK	y	n	BD7CC recipe + q += steps for addu order
 func_151597A0	SIZE-1	4	DIFF9	n	n	b to next insn + or v0,v1 not reproduced (switch/return/decl)
 func_15168B44	DIFF24	3	DIFF15	n	y	double sw 0x14 needs volatile; open
+func_151640C0	DIFF18	6	OK	y	y	s71: shape C (q=&arg0,r=&arg1) + named k/w/b/c, permuter split v=*q; v+=0x18, (c == b)
+func_15161F4C	SIZE-2	5	OK	y	n	s71: fn-level v=arg0+0x18 (or a3,a0 copy), plain memory compares no t/k, blk_t in arm 0, D_8008B6F8 fnptr table
+func_151B604C	DIFF4	4	OK	y	n	s71: double 0x2D swap at v+0x580/0x588, s32 k=arg1[0] in arm 0, blk_t in last arm (shape D)
