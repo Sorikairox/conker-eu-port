@@ -132,6 +132,10 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
     for ident in (named_ids(csrc, names, va, vb) if sec == ".data" else []):
         if re.search(r'^(?!extern|typedef)\w[^\n;]*\b%s\b[^\n;]*=' % ident, csrc, re.M):
             cdefined.add(names[ident])
+    # s91: `// rodata_inject: cdefined <rom a> <rom b>`: the C file defines every item in [a, b)
+    # itself (e.g. const tables ported from a reference decomp under their own names)
+    cdef_ranges = [(int(x, 16) + dv, int(y, 16) + dv)
+                   for x, y in re.findall(r'rodata_inject: cdefined (0x[0-9A-Fa-f]+) (0x[0-9A-Fa-f]+)', src)]
     items = {}  # vram -> dict(owner=(key,name), kinds=set, ext=bool)
     for t, k, f, st, pc in allrefs:
         if not (va <= t < vb):
@@ -213,7 +217,9 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
         it = items[t]
         reg = 'late' if t >= L else base
         o = it['owner']
-        if t in cdefined:
+        if any(x <= t < y for x, y in cdef_ranges):
+            name, o = 'C', (0, 'C')  # file-scope tables: keyed at the file start
+        elif t in cdefined:
             name, o = 'C', (o[0] if o else t, 'C')
         elif o is not None and o[1] == 'C':
             name = 'CX' if t in named else 'C'
