@@ -801,6 +801,16 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s92 recipes (asm-only clusters, func_151308E4 spawners)
+See `docs/sessions/s92.md`.
+1. **`clones.py --asm-clusters` lists byte-identical asm-only families**; solve the smallest member, then `sed` the name (and field offsets / globals) into the others. s92: `func_150CA57C` x4 (physics step), `func_150C630C`/`C6C3C`, `func_1505EEF4`/`EFD0`/`F0AC` (struct127 scans) all matched at the first or second try.
+2. **Peeled + 4x unrolled scan of `D_800CC2D0[25]`** (first element tested with constant addresses, then `v1 = &D[1]` and a counter stepping 4 to 25): `struct127 *p = D_800CC2D0; for (i = 0; i < 25; i++) { if (p->x != 0 && p->f == arg0) return p; p++; }`. `p++` at the end of the body; `for (...; i++, p++)` and index forms are DIFF7 / SIZE-2 (`func_1505EEF4`).
+3. **`func_151308E4` spawners** (same 15-param signature as the s58 `func_150CB2D0` family; struct passed as `&sp`, 0x70 bytes, or 0x74 when a `memcpy(obj + 0xA8, &scale, 4)` tail follows): fields stored in m2c's order, 0xFF/0xB0/0xA0 fields `u8`; the duplicated float is `sp.u5C = sp.u60 = X;` or `sp.u60 = sp.u5C = X;` (screen both: they give opposite store orders); `obj` declared **after** `scale` below the struct (`func_150CAF04`). A statement that m2c shows after a run of constant stores but whose call happens before them goes **before** the run (`sp.u88 = (rand * 550 - 1416) * 0.001f` in `func_150C9EB4`).
+4. **Flag word `b | 0xE01 | a | 0xC000` with the or-result in a later t-register**: the constant is two flags, `... | 0x8000 | 0x4000` (`func_150B8AA0`). Random flags `a` / `b` are `if (rand() & 1) a = 0x40; else a = 0;` (not `a = 0; if (...) a = 0x40;`, which stores 0 to a home).
+5. A float argument computed into `f12` (`add.s f12; mfc1 a2, f12`) is a named `f32 f = ...;` passed by name; inline it goes to an `f8`-class temp (`func_150C9EB4`). `(X * K) * rand()` vs `rand() * (X * K)` flips the `mul.s` operands.
+6. `0.0f + vz * s` / `vz * c - 0.0f` survive only with a named zero (`f32 vx = 0.0f;`): the literal is folded away; write the store target as a named `s16 *p = D_x;` set right before the stores (`func_150E4740`).
+OPEN: `func_150B8C7C` DIFF2 (spilled flag `a` at 0x24, mine 0x28: unused names and `pad` arrays do not move it; `docs/sessions/s92_drafts/func_150B8C7C_DIFF2.c`), `func_150EB610` DIFF6 (shape C: the ref loads `arg0` twice from its home and computes the call args before the `beqz`; 32 variants + remote permuter 600 s).
+
 ## s90 recipes (float literal forms, Rare math helpers)
 See `docs/sessions/s90.md`.
 1. **`0` and `0.0f` are different constants to IDO 5.3 in float code**: they get separate registers / rematerialisations (`return 0` reuses the compare zero, `return 0.0f` re-emits `mtc1 zero,f0`; a mix of `0.0f` compares and int `0` loop tests moved the parameter into a callee-saved f20). When float zeros sit in the wrong registers or a param is unexpectedly in `f20` (`sdc1 f20` in the ref), sweep the literal form per site (`0` / `0.0f`, `1` / `1.0f`) with one `tryall` (`func_1504A6F0`: 1 of 128 matched; `func_1504A620`: `return 0.0f`).
