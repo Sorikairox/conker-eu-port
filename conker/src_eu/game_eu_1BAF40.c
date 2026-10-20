@@ -134,7 +134,28 @@ void func_1518EA68(void *arg0) {
     func_15169824(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518EA94.s")
+void func_1518EA94(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, s16 *arg6) {
+    s32 temp_v1;
+
+    *arg1 = 2;
+    if (func_150ADA20() & 1) {
+        *arg1 |= 1;
+    }
+    temp_v1 = func_150ADA20() & 1;
+    switch (temp_v1) {                              /* irregular */
+    case 0:
+        *arg0 = 0x13;
+        break;
+    case 1:
+        *arg0 = 0x14;
+        break;
+    }
+    *arg2 = 0;
+    *arg3 = 0;
+    *arg4 = 0;
+    *arg5 = 0xFF;
+    *arg6 = 0x301;
+}
 
 void func_151429E0(s32, s32, s32, s32);
 

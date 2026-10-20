@@ -157,4 +157,27 @@ void func_15115484(s32 arg0, s32 arg1, s32 arg2) {
     func_1001001C(func_15115244, arg0, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151154C4.s")
+s32 func_150ADC50();
+extern s32 D_800DC3CC;
+extern s32 D_800DC3D0;
+extern s32 D_800DC3D4;
+
+void func_151154C4(s32 arg0, s32 arg1, s32 arg2)
+{
+    s32 i;
+    s32 j;
+    if (D_800BE9F0 == 0x12 || D_800BE9F0 == 0x36 || D_800BE9F0 == 0x13) {
+        for (i = 0; i < 2; i++) {
+            u32 *base = (u32 *)D_800DC208[i];
+            for (j = 0; j < D_800DBE18[i]; j++) {
+                if ((base[j * 3 + 0] & 0xF0000000) != 0x80000000 || (base[j * 3 + 1] & 0xF0000000) != 0x80000000 || (base[j * 3 + 2] & 0xF0000000) != 0x80000000 || (base[j * 3 + 0] & 3) || (base[j * 3 + 1] & 3) || (base[j * 3 + 2] & 3)) {
+                    D_8003C8E0 = 0x0C00005A;
+                    func_150ADC50();
+                }
+            }
+        }
+        D_800DC3CC = arg0;
+        D_800DC3D0 = arg1;
+        D_800DC3D4 = arg2;
+    }
+}
