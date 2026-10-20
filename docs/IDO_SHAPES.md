@@ -1113,3 +1113,11 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. DK64 n_audio float literals are `.rodata` at `-g` even when lui-able: the Conker file must own its `.rodata`; a literal that lives in another object's rodata becomes an `extern f32` (`D_8002CAE8`).
 4. Size off by a tail of zero words at the end of a file = file padding: split it as an unnamed `[addr, asm]` yaml segment (`0x229D0`).
 5. Conker's envmixer changed DK64's code (pan bit 1, `0xFFFC` masks, `184U`): when ratio is ~0.97 and sizes differ, read the asm around the first real diff and rewrite that block; the rest stays verbatim.
+
+## s125 recipes (DK64 n_audio ports, Conker changes)
+1. **Conker N_PVoice = Conker's own `src/libultra/audio/n_synthInternals.h`** (extra `ALLink unk8` at 0x8, so every DK64 `dc_*`/`em_*` offset is +8): port DK64 n_load.c / n_env.c code with the real field names and `#include "n_synthInternals.h"` alone.
+2. Conker's additions to DK64 audio code are mostly **early outs and guards**: a NULL table / bad book address -> `aClearBuffer` + return (`n_alAdpcmPull`), DMA result 0 -> reset flags + return, `seqp->state == 3` in the target check. When a 0.9x hit is 10-15 % longer, read the asm between the DK64 landmarks and add the block; the rest stays verbatim.
+3. `K0_TO_PHYS(x)` in Conker's headers is not a mask: write `(u32)(x) & 0x1FFFFFFF` when the asm shows `and` with `0x1FFFFFFF`.
+4. A `switch` whose `default:` jumps to a shared `return 0` block = `default: break;` + `return 0;` after the switch (an inner `if (...) {...}` in a case must not have its own `break`).
+5. IDO `-g` linked-list walk `if (p) do {...} while (p)` = `while (p != NULL) { ...; p = p->next; }`; a `for` loop adds a jump to the bottom test.
+6. Inlined `alLink` in `-O2` code that keeps `ln`/`to` in a/v registers with copies (`or a2,v1`) = block-scoped `ALLink *ln, *to` (also fixes 8 frame bytes, cf. s121 recipe 5); the plain macro form gives offset-folded stores.
