@@ -25,7 +25,7 @@ typedef struct {
     s32 width;
     u32 nchar;
     u32 flags;
-    char qual;
+    unsigned char qual;
 } _Pft;
 
 #define FLAGS_ZERO 16
@@ -79,9 +79,247 @@ s32 func_16001B8C(u8 *arg0, u8 *arg1, u32 arg2) {
     return func_16001AD0(arg0, arg1, arg2) + arg2;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_16001BB4.s")
+// libultra libc xprintf.c _Printf (old version: (c = *s++) > 0 scan, as GoldenEye)
+#define FLAGS_SPACE 1
+#define FLAGS_PLUS 2
+#define ISDIGIT(x) ((x >= '0' && x <= '9'))
+#define ATOI(dst, src) \
+	for (dst = 0; ISDIGIT(*src); ++src) { \
+		if (dst < 999) \
+			dst = dst * 10 + *src - '0'; \
+	}
+#define MAX_PAD (sizeof(D_16003C70) - 1)
+#define PAD(s, n) \
+	if (0 < (n)) { \
+		int i, j = (n); \
+		for (; 0 < j; j -= i) { \
+			i = MAX_PAD < (unsigned int)j ? (int)MAX_PAD : j; \
+			PUT(s, i); \
+		} \
+	}
+#define PUT(s, n) \
+	if (0 < (n)) { \
+		if ((arg = (*(void *(*)(void *, const char *, u32))prout)(arg, s, n)) != NULL) \
+			x.nchar += (n); \
+		else \
+			return x.nchar; \
+	}
+extern char D_16003C70[33]; // spaces
+extern char D_16003C94[33]; // zeroes
+extern const char D_16004800[]; // "hlL"
+extern const char D_16004804[6]; // fchar
+extern const u32 D_1600480C[6]; // fbit
+void func_160021FC(_Pft *px, va_list *pap, unsigned char code, unsigned char *ac);
+char *strchr(const char *, s32);
+
+s32 func_16001BB4(void *prout, char *arg, const char *fmt, va_list args)
+{
+#define char unsigned char
+	_Pft x;
+	const char *s;
+	char c;
+	const char *t;
+	char ac[32];
+	x.nchar = 0;
+
+	for (;;) {
+		s = fmt;
+
+		for (c = *s; (c = *s++) > 0;) {
+			if (c == '%') {
+				s--;
+				break;
+			}
+		}
+
+		PUT(fmt, s - fmt);
+
+		if (c == 0) {
+			return x.nchar;
+		}
+
+		fmt = ++s;
+
+		for (x.flags = 0; (t = strchr(D_16004804, *s)) != NULL; s++) {
+			x.flags |= D_1600480C[t - D_16004804];
+		}
+
+		if (*s == '*') {
+			x.width = va_arg(args, int);
+
+			if (x.width < 0) {
+				x.width = -x.width;
+				x.flags |= FLAGS_MINUS;
+			}
+
+			s++;
+		} else {
+			ATOI(x.width, s);
+		}
+
+		if (*s != '.') {
+			x.prec = -1;
+		} else if (*++s == '*') {
+			x.prec = va_arg(args, int);
+			++s;
+		} else {
+			ATOI(x.prec, s);
+		}
+
+		x.qual = strchr(D_16004800, *s) ? *s++ : '\0';
+
+		if (x.qual == 'l' && *s == 'l') {
+			x.qual = 'L';
+			++s;
+		}
+
+		func_160021FC(&x, &args, *s, ac);
+
+		x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
+
+		if (!(x.flags & FLAGS_MINUS)) {
+			PAD(D_16003C70, x.width);
+		}
+
+		PUT(ac, x.n0);
+		PAD(D_16003C94, x.nz0);
+		PUT(x.s, x.n1);
+		PAD(D_16003C94, x.nz1);
+		PUT(x.s + x.n1, x.n2);
+		PAD(D_16003C94, x.nz2);
+
+		if (x.flags & FLAGS_MINUS) {
+			PAD(D_16003C70, x.width);
+		}
+
+		fmt = s + 1;
+	dummy: ; // fakematch: label splits the loop tail so the back-branch delay copies the loop-head load
+	}
+
+	return 0;
+}
+#undef char
 // uses jump table
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_160021FC.s")
+void func_160033A8(_Pft *args, u8 type);
+void func_1600288C(_Pft *px, u8 code);
+#define char unsigned char
+
+// rodata_inject: late_align8 0x25ADA0
+void func_160021FC(_Pft *x, va_list *args, char type, char *buff)
+{
+	x->n0 = x->nz0 = x->n1 = x->nz1 = x->n2 = x->nz2 = 0;
+
+	switch (type) {
+	case 'c':
+		buff[x->n0++] = va_arg(*args, int);
+		break;
+	case 'd':
+	case 'i':
+		if (x->qual == 'l') {
+			x->v.ll = va_arg(*args, int);
+		} else if (x->qual == 'L') {
+			x->v.ll = va_arg(*args, s64);
+		} else {
+			x->v.ll = va_arg(*args, int);
+		}
+
+		if (x->qual == 'h') {
+			x->v.ll = (s16)x->v.ll;
+		}
+
+		if (x->v.ll < 0) {
+			buff[x->n0++] = '-';
+		} else if (x->flags & FLAGS_PLUS) {
+			buff[x->n0++] = '+';
+		} else if (x->flags & FLAGS_SPACE) {
+			buff[x->n0++] = ' ';
+		}
+
+		x->s = (char *)&buff[x->n0];
+
+		func_160033A8(x, type);
+		break;
+	case 'x':
+	case 'X':
+	case 'u':
+	case 'o':
+		if (x->qual == 'l') {
+			x->v.ll = va_arg(*args, int);
+		} else if (x->qual == 'L') {
+			x->v.ll = va_arg(*args, s64);
+		} else {
+			x->v.ll = va_arg(*args, int);
+		}
+
+		if (x->qual == 'h') {
+			x->v.ll = (u16)x->v.ll;
+		} else if (x->qual == 0) {
+			x->v.ll = (unsigned int)x->v.ll;
+		}
+
+		if (x->flags & FLAGS_HASH) {
+			buff[x->n0++] = '0';
+
+			if (type == 'x' || type == 'X') {
+				buff[x->n0++] = type;
+			}
+		}
+
+		x->s = (char *)&buff[x->n0];
+		func_160033A8(x, type);
+		break;
+	case 'e':
+	case 'f':
+	case 'g':
+	case 'E':
+	case 'G':
+		x->v.ld = x->qual == 'L' ? va_arg(*args, f64) : va_arg(*args, f64);
+
+		if (*(u16 *)&x->v.ld & 0x8000) {
+			buff[x->n0++] = '-';
+		} else if (x->flags & FLAGS_PLUS) {
+			buff[x->n0++] = '+';
+		} else if (x->flags & FLAGS_SPACE) {
+			buff[x->n0++] = ' ';
+		}
+
+		x->s = (char *)&buff[x->n0];
+		func_1600288C(x, type);
+		break;
+	case 'n':
+		if (x->qual == 'h') {
+			*(va_arg(*args, u16 *)) = x->nchar;
+		} else if (x->qual == 'l') {
+			*va_arg(*args, unsigned int *) = x->nchar;
+		} else if (x->qual == 'L') {
+			*va_arg(*args, u64 *) = x->nchar;
+		} else {
+			*va_arg(*args, unsigned int *) = x->nchar;
+		}
+		break;
+	case 'p':
+		x->v.ll = (long)va_arg(*args, void *);
+		x->s = (char *)&buff[x->n0];
+		func_160033A8(x, 'x');
+		break;
+	case 's':
+		x->s = va_arg(*args, char *);
+		x->n1 = func_16001B00(x->s);
+
+		if (x->prec >= 0 && x->n1 > x->prec) {
+			x->n1 = x->prec;
+		}
+		break;
+	case '%':
+		buff[x->n0++] = '%';
+		break;
+	default:
+		buff[x->n0++] = type;
+		break;
+	}
+}
+
+#undef char
 // contains delay slot
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger_257350/func_1600288C.s")
 // _Ldunscale

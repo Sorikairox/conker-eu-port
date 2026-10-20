@@ -95,6 +95,9 @@ def plan(seg, stem, a, b, dseg, allrefs, data, names, sec='.rodata'):
     late_kinds = set() if sec == '.data' else LATE_KINDS
     cpath = os.path.join(ROOT, 'src_eu', stem + '.c')
     src = open(cpath).read()
+    # s95: `// rodata_inject: late_align8 <rom addr>`: the GLOBAL_ASM late chunk starting there holds a double
+    # after C late rodata (jump table) of a word-aligned size: asm-processor must align it to 8
+    LATE8.update(int(x, 16) for x in re.findall(r'rodata_inject: late_align8 (0x[0-9A-Fa-f]+)', src))
     pragmas = re.findall(r'#pragma GLOBAL_ASM\("([^"]+)"\)', src)
     if not pragmas:
         return None, []
@@ -318,6 +321,9 @@ def symbols_at(funcs, names, dv):
     return out
 
 
+LATE8 = set()
+
+
 def emit(funcs, chunks, data, labels={}):
     byname = {n: sp for _, _, n, sp in funcs}
     per = {}
@@ -336,6 +342,8 @@ def emit(funcs, chunks, data, labels={}):
         out = [MARK]
         for a, b, reg in cs:
             out.append('.section .%s' % {'late': 'late_rodata'}.get(reg, reg))
+            if reg == "late" and a in LATE8:
+                out.append('.late_rodata_alignment 8')
             r = a
             while r < b:
                 if r in labels:
