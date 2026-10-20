@@ -935,3 +935,8 @@ func_150DE8AC	SIZE-1	2	DIFF26	n	n	s64: indexed forms SIZE-3; ref sets a1=1 befor
 func_1507F834	DIFF6	3	DIFF6	n	n	s64: 18 eval-order/type forms all DIFF6
 func_150619A8	SIZE-1	3	SIZE-1	n	n	s64: ref rematerialises D_800CC2D0 and expands *0x32C to shifts; mine hoists to fp/s7 even with goto loops
 func_1500B1F4	SIZE-1	4	SIZE-1	n	n	s64: stride fix (f32* += 2), u8 arg1; frame 0x58 vs 0x50 (one 8-byte temp, bisect finds no single statement)
+func_151AEBF0	SIZE-1	1	OK	y	n	declaration in the if arm = basic-block boundary (s69 shape D)
+func_151D51E8	SIZE-1	3	OK	y	n	top-level p + u8 *q local in the arg2==4 arm (s69)
+func_151590AC	DIFF18	4	OK	y	y	arm-local decl + no b local (permuter showed reload form)
+func_151095E4	DIFF13	3	OK	y	n	void return, case block with decl, p += steps
+func_151A98CC	CERR	2	OK	y	n	per-arm u8 *p locals (natural shape D form), void proto

@@ -1136,7 +1136,7 @@ void func_1513A5E0(s32 arg0, u8 arg1, s32 arg2);
 void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
 void func_1517E6A4(f32 *arg0, structEU_16DC80 *arg1);
 void func_1514182C(structEU_16DC80 *arg0, void *arg1, s32 arg2, s32 arg3, f32 arg4, f32 arg5);
-s32 func_151095E4(u8 *arg0, s32 arg1, u8 arg2);
+void func_151095E4(u8 *arg0, s32 arg1, u8 arg2);
 void func_151BAA18(u8 *arg0, s32 arg1, u8 arg2);
 void func_150AB278(struct_eu_bytes24 arg0);
 void func_160006CC(struct118 *arg0);

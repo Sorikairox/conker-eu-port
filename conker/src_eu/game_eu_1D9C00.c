@@ -195,4 +195,20 @@ void func_151AE814(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AEB40.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AEBF0.s")
+void func_151AEBF0(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  s32 a;
+  if (arg2 == 0) {
+    a = arg1[0];
+    if (a == *(s32 *)(arg0 + 0x44)) {
+      s32 *p = (s32 *)(arg0 + 0x44); // a declaration in the arm = basic-block boundary (unfilled jr ra delay slot, s69)
+      *p = 0;
+    }
+    return;
+  }
+  if (arg2 == 0x2D) {
+    a = arg1[0];
+    if (a == *(s32 *)(arg0 + 0x44)) { *(s32 *)(arg0 + 0x44) = arg1[1]; return; }
+    if (arg1[1] == *(s32 *)(arg0 + 0x44)) { *(s32 *)(arg0 + 0x44) = a; }
+  }
+}
