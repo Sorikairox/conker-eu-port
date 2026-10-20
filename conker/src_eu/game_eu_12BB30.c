@@ -18,7 +18,45 @@ s32 func_150FDDA0(s32 arg0, u8 arg1, s32 arg2) {
     return func_151C284C(sp8C, 0, sp8C, sp98, 0, 0, 300.0f, 0.0033333334f, (func_150ADA68() * 10.0f) + 25.0f, (func_150ADA68() * 201.0f) + 601.0f, 50.0f, (func_150ADA20() % 56U) + 0xC8, arg0, 1, 1, 0, 0xFF, 1, 1, 0, (D_800BE9F0 == 0x2B) ? 0x27 : 0x1A, 0.0f, 0xFF, -1, 0, (s32) arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12BB30/func_150FDF38.s")
+const u32 rodata_12BB30_FDF38[] = { 0x40E00000, 0xC3080000, 0x42340000, 0x40E00000, 0xC3290000, 0x424C0000, 0x40E00000, 0x42200000, 0x41500000 }; // D_800A2340 = [0], D_800A234C = [3], D_800A2358 = [6]
+void func_150FE638(struct127 *, s32, u8, s32);
+s32 func_15145EA4(u8 **, struct17 **, s32, s32);
+void func_151D441C(struct127 *, struct17 *, struct17 *, s32);
+void func_151D44C4(struct17 *, u8, s32);
+void func_150FE808(u8 *);
+extern u8 D_80088F20;
+
+s32 func_150FDF38(struct127 *arg0, u8 arg1, s32 arg2, s32 *arg3, s32 *arg4) {
+    struct17 pos;
+    struct17 pos2;
+    u8 *tbl[2];
+    struct17 *out[2];
+
+    if (arg0 != NULL) {
+        if (arg0->unk1D4 != 0) {
+            tbl[0] = D_800A2340;
+            tbl[1] = D_800A2340 + 0x18;
+            out[0] = &pos;
+            out[1] = &pos2;
+            func_15145EA4(tbl, out, (s32) arg0->unk1D4 + (D_80088F20 << 6), 2);
+        } else {
+            pos.unk0 = *(f32 *)((u8 *)arg0 + 0x14);
+            pos.unk4 = *(f32 *)((u8 *)arg0 + 0x18) + 56.0f;
+            pos.unk8 = *(f32 *)((u8 *)arg0 + 0x1C);
+            pos2 = pos;
+        }
+        func_151D441C(arg0, &pos, &pos2, (D_800BE9F0 == 0x2B) ? 0x28 : 0x1E);
+        func_151D44C4(&pos, arg1, arg2);
+        func_150FE638(arg0, (s32) &pos, arg1, arg2);
+        func_150FE808((u8 *) arg0);
+        if (arg3 != NULL) {
+            *(struct17 *)arg3 = pos;
+        }
+        if (arg4 != NULL) {
+            *(struct17 *)arg4 = pos2;
+        }
+    }
+}
 
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800A234C;

@@ -124,9 +124,31 @@ void func_1508845C(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_1508849C.s")
+struct216 *func_1507BB28(s32, s32);
 
-s32 func_1508849C(struct_eu_80087640 *, struct127 *, s32, s32);
+s32 func_1508849C(struct_eu_80087640 *arg0, struct127 *arg1, s32 arg2) {
+    struct126 *temp_v0;
+
+    temp_v0 = arg1->unk31C;
+    if (temp_v0->unk120 != 0) {
+        return 1;
+    }
+    if (D_800D18A0 & (1 << (arg1 - D_800CC2D0))) {
+        return 1;
+    }
+    temp_v0->unk84 = 1;
+    arg1->interaction_state = 0xC;
+    arg1->unk232 = arg2;
+    D_800D154C = arg1;
+    D_800C3E78 = *(s8 *)&arg0->unk31;
+    arg1->unk218 = func_1507BB28(0, arg2);
+    arg1->unk21C = 0;
+    arg1->immune = 0xFF;
+    arg0->pad28[8] = 2;
+    return 0;
+}
+
+s32 func_1508849C(struct_eu_80087640 *, struct127 *, s32); // 3 params: the asm never reads a3 (s87)
 extern s8 D_800D27BA;
 
 s32 func_15088568(s32 arg0, s32 arg1) {
@@ -145,7 +167,7 @@ s32 func_15088568(s32 arg0, s32 arg1) {
     temp_a1 = &D_800CC2D0[(s8) temp_a0->unk31];
     if (temp_v1 == 0) {
         sp1C = temp_a0;
-        var_a2 = func_1508849C(temp_a0, temp_a1, arg1, arg0);
+        var_a2 = func_1508849C(temp_a0, temp_a1, arg1);
     } else if (temp_v1 == 1) {
         temp_a0->pad28[8] = 2;
         temp_a1->immune = 0xFF;
@@ -303,7 +325,7 @@ void func_15088CA0(u8 *arg0) {
 f32 func_15144BC8(f32);
 f32 func_15049AD0(s32 *, s32, f32);
 f32 func_15049B94(s32 *, s32, f32, s32 *);
-s32 func_15088E84(struct_eu_80087640 *, f32, struct_eu_800D2778 *);
+s32 func_15088E84(struct_eu_80087640 *, f32); // 2 params: the asm never reads a2 (s87)
 s32 func_150893AC(struct_eu_80087640 *, s32 *, s32 *, s32 *);
 
 void func_150891D4(u8 *arg0)
@@ -352,7 +374,7 @@ void func_150891D4(u8 *arg0)
       while (var_v0 != 5);
       if (var_s0)
       {
-        func_15088E84(temp_s4, 1.0f, D_800D2778);
+        func_15088E84(temp_s4, 1.0f);
       }
     }
     while (var_s0 != 0);
