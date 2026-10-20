@@ -1,7 +1,4 @@
 #include "n_synthInternals.h"
-
-extern f32 D_8002C814;
-
 // relies on jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/init_20000/func_10020000.s")
 
@@ -134,7 +131,7 @@ s16 _getRate(f32 arg0, f32 arg1, s32 arg2, u16 *arg3) {
     spC = (s16) (s32) sp0;
     spE = spE + spC;
     sp0 = sp0 - (f32) spC;
-    *arg3 = (u32) (D_8002C814 * sp0); // 65535.0f
+    *arg3 = (u32) (65535.0f * sp0); // 65535.0f
     return spE;
 }
 
