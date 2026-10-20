@@ -801,3 +801,12 @@ See `docs/sessions/s88.md`.
 2. **A libultra global defined in the same file is addressed differently from an extern**: a `u64` store to an extern takes two `lui at`; to a variable defined in the file (known alignment) one shared `lui at`. Define the variable in C (`u64 osClockRate = ...;`) and own the `.data`; a definition that also has an `undefined_syms.eu.txt` assignment links fine (script value wins, same address). Add the old auto `D_` name to `undefined_syms.eu.txt` (`/* */` comments only: ld scripts reject `//`).
 3. **Owning `.data` inside a data blob**: after `rodata_split.py <stem> a b --section .data`, the blob pieces after it must be `rodatabin` (splat links every `.data` piece before every `.rodata` piece of a segment); a later `.rodata` split in the same area then keeps ROM order.
 4. **Old libultra I/O wait** is `stat = IO_READ(PI_STATUS_REG); while (stat & 3) stat = IO_READ(PI_STATUS_REG);` (load, test, store in the delay slot, then a separate loop body), not `while ((stat = IO_READ(...)) & 3);`.
+
+## s91 recipes (porting from reference decomps; Perfect Dark mp3)
+See `docs/sessions/s91.md`.
+1. **Check the reference repos by callee signature**: a struct with a `dmafunc(s32, u8 *, s32, s32)` callback at 0x4 and a 6-slot buffer ring = PD `lib/mp3` (`tools/perfect_dark`). Conker's struct offsets equal PD's `struct asistream`, so the PD source compiles 1:1 at the file's `-g`.
+2. **Port flow**: `pdport.py ctx` + `func` -> draft, `try`; on DIFF, `pdport.py relmap` + `rename` (PD globals -> `D_` names), `try` again; always build the ROM after applying (relocation-normalised OK hides swapped symbols).
+3. **A file whose functions build local arrays from initialisers needs its `.rodata`**: if the reference also has the file's const tables, compile them alone and compare with the ROM; when identical, define them in C, own the whole range and mark it `// rodata_inject: cdefined a b`.
+4. A reference `f32 *` global that the ref indexes with `lui at; addu at; lwc1 %lo(at)` is an array in this game: declare `extern f32 D_x[];`.
+5. A `static` local in a gu file (`guRandom` xseed) needs the function in its own file (the containing file had other flags) plus the owned `.data` piece (16-byte aligned start).
+
