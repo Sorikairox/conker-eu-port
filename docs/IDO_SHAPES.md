@@ -801,6 +801,13 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s94 recipes (spawner frames by declaration order, block-scoped flags)
+See `docs/sessions/s94.md`.
+1. **Spill slot of a flag 4 bytes off** (`func_150B8C7C`, s92 DIFF2): permute the order of the scalar names below the stack struct (`s32 obj; s32 b; s32 a;`); `itertools.permutations` over the declaration lines, screened in one loop, found it at once.
+2. **A missing `nop` before a loop after `mtc1 zero,f0`** (`func_150E92DC`, SIZE-1): declare the flag variable used only in the loop inside the enclosing `if` block (`if (x > 1.0f) { s32 a; ... do { ... } while (...); }`).
+3. **`EC | (v0 | s0)` with EC in the lower t-register**: `sp.u8C |= (u32)(b | a);` (fakematch). Plain `|=`, both orders, parenthesised and a named temp (costs 8 frame bytes) all give `(EC | v0) | s0` or the swapped registers.
+4. Angle-vector spawners (`func_151423D8(arg8 - 0x40)`, `func_151423D8(arg8)`, then a random angle `s16 t`): copy `func_150BB978`; `arg8` is `s32` (`lw` + `addiu -0x40` + `andi 0xFF`), the spawner struct is 0x70 bytes (`pad98[0xC]`) when the frame top is right above it.
+
 ## s92 recipes (asm-only clusters, func_151308E4 spawners)
 See `docs/sessions/s92.md`.
 1. **`clones.py --asm-clusters` lists byte-identical asm-only families**; solve the smallest member, then `sed` the name (and field offsets / globals) into the others. s92: `func_150CA57C` x4 (physics step), `func_150C630C`/`C6C3C`, `func_1505EEF4`/`EFD0`/`F0AC` (struct127 scans) all matched at the first or second try.
