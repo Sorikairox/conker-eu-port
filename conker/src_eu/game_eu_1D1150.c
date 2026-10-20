@@ -15,7 +15,102 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4B40.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4BE8.s")
+s32 func_151308E4(void *, s32, s32, u8, s32);
+void func_151A4BE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
+    struct {
+        s32 u34;
+        s32 u38;
+        s16 u3C;
+        s16 u3E;
+        s32 u40;
+        s32 u44;
+        u8 u48;
+        s8 u49;
+        s8 u4A;
+        u8 u4B;
+        s8 u4C;
+        s8 u4D;
+        s8 u4E;
+        u8 u4F;
+        u8 u50;
+        s8 u51;
+        s16 u52;
+        s16 u54;
+        s16 u56;
+        f32 u58;
+        f32 u5C;
+        f32 u60;
+        f32 u64;
+        f32 u68;
+        f32 u6C;
+        u8 pad70[0xC];
+        f32 u7C;
+        f32 u80;
+        f32 u84;
+        f32 u88;
+        s32 u8C;
+        u8 pad90[4];
+        s8 u94;
+        s8 u95;
+        s8 u96;
+        s8 u97;
+        u8 pad98[0xC];
+    } sp;
+    f32 k;
+    s16 sh[6];
+    s32 obj;
+
+    sp.u51 = 0x27;
+    sp.u3C = 0x1401;
+    sp.u34 = 0x200005;
+    sp.u38 = 0;
+    sp.u3E = (func_150ADA20() % 5U) + 0xF;
+    sp.u40 = 0;
+    sp.u44 = 0;
+    sp.u48 = 0x8A;
+    sp.u49 = 0;
+    sp.u4A = 0;
+    sp.u4B = 0xFF;
+    sp.u4C = 0;
+    sp.u4D = 0;
+    sp.u4E = 0;
+    sp.u52 = 1;
+    sp.u54 = 0xFF;
+    sp.u56 = 1;
+    sp.u58 = 1.0f;
+    sp.u5C = sp.u60 = (func_150ADA68() * 50.0f) + 500.0f;
+    sp.u64 = arg0;
+    sp.u68 = arg1;
+    sp.u6C = arg2;
+    k = 0.087f * D_800BEDC8;
+    sp.u7C = -arg3 * k;
+    sp.u80 = -arg4 * k;
+    sp.u8C = 0xD;
+    sp.u94 = 1;
+    sp.u95 = 1;
+    sp.u84 = -arg5 * k;
+    sp.u88 = 0.0f;
+    if (func_150ADA20() & 1) {
+        sp.u8C |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        sp.u8C |= 0x80;
+    }
+    sp.u4F = 0xFF;
+    sp.u50 = 0xFF;
+    sp.u96 = 0;
+    sp.u97 = -1;
+    sh[0] = 0x10;
+    sh[1] = 0xF;
+    sh[2] = 0xD;
+    sh[3] = 0x13;
+    sh[4] = 0x11;
+    sh[5] = -0x18;
+    obj = func_151308E4(&sp, 0, 0xC, arg6[0xC], 1);
+    if (obj != 0) {
+        memcpy(obj + 0xA8, sh, 0xC);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4DEC.s")
 
