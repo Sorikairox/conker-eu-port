@@ -1096,3 +1096,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. Register locals still **reserve stack slots in declaration order** (higher address first): position an address-taken struct by moving its declaration between register locals (`func_10009400`, `func_100095A0`).
 4. Two `lui/addiu` of the **same address** = two different symbols in the original (rspboot end / aspMain start): use the second name and add it to `undefined_syms.eu.txt` (`func_100095A0`, `aspMainTextStart`).
 5. Inline `alUnlink`/`alLink` as code with **block-scoped `ALLink *ln, *to`** gives the 8 extra frame bytes of libultra-style DMA list code (`func_100099BC`).
+
+## s123 recipes (DK64 n_audio ports at -g)
+1. **Port a whole Conker n_audio file from DK64 `src/global_asm/audio` at once**, `#define` the DK64 names to the Conker symbols, and define DK64 struct types locally (`RareSynth`, `RareAuxBus`, `CustomPVoice`, `RareSynConfig`) instead of including `n_libaudio.h` (it clashes with `functions.h`). Then fix only what the object diff shows: Conker's struct offsets (CustomPVoice +8 from 0x28; aux bus stride 0x44; ALSynConfig `outputRate` 0x2C) and frame pads (at `-g` every local has a slot: drop DK64 `pad` locals until the frame matches).
+2. When the target's header prototype disagrees with the DK64 signature, rename the header's declaration away: `#define f f_proto` / `#include` / `#undef f` (`n_alFxNew`), rather than changing a shared prototype and every caller.
+3. DK64 n_audio float literals are `.rodata` at `-g` even when lui-able: the Conker file must own its `.rodata`; a literal that lives in another object's rodata becomes an `extern f32` (`D_8002CAE8`).
+4. Size off by a tail of zero words at the end of a file = file padding: split it as an unnamed `[addr, asm]` yaml segment (`0x229D0`).
+5. Conker's envmixer changed DK64's code (pan bit 1, `0xFFFC` masks, `184U`): when ratio is ~0.97 and sizes differ, read the asm around the first real diff and rewrite that block; the rest stays verbatim.
