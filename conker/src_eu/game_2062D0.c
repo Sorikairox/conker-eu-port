@@ -371,7 +371,30 @@ void func_151DB4CC(struct218 *arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DB5D0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DB97C.s")
+typedef struct { u8 fl; u8 pad1[3]; s32 unk4; u8 a[3]; u8 d[3]; u8 padE[2]; f32 s[3]; } S97C;
+s32 func_15131E88(u8 *, s32);
+s32 func_151DB97C(u8 *arg0, s32 arg1) {
+    S97C *p;
+    f32 z;
+    f32 y;
+    f32 x;
+    p = (S97C *)(arg0 + 0xA8);
+    if (p->fl & 2) {
+        func_15131E88(arg0 + 0x58, *(s32 *)(arg0 + 0xAC));
+    }
+    if (p->fl & 1) {
+        p->a[0] += p->d[0] * D_800BE9E4;
+        p->a[1] += p->d[1] * D_800BE9E4;
+        p->a[2] += p->d[2] * D_800BE9E4;
+        x = func_151423D8(p->a[0] - 0x40);
+        y = func_151423D8(p->a[1] - 0x40);
+        z = func_151423D8(p->a[2] - 0x40);
+        *(f32 *)(arg0 + 0x4C) = p->s[0] * x;
+        *(f32 *)(arg0 + 0x50) = p->s[1] * y;
+        *(f32 *)(arg0 + 0x54) = p->s[2] * z;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DBAA8.s")
 
