@@ -15,7 +15,58 @@ void func_150C89F4(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8B00.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8C30.s")
+u8 *func_15073118(struct127 *, s32, s32, f32, f32, f32, f32, f32, f32, f32, s32);
+void func_1503E5F8(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+extern f32 D_800A08C0;
+extern f32 D_800A08C4;
+extern f32 D_800A08C8;
+extern f32 D_800A08CC;
+s32 func_150C8C30(u8 *arg0, struct127 *arg1) {
+    u8 *v;
+    u8 *e;
+    u8 i;
+    u8 *p;
+    s16 t;
+    s32 pad[2]; // fakematch: frame 8 bytes (unknown named locals)
+    f32 m[4][4];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 u0;
+    f32 u1;
+    f32 u2;
+    f32 r0;
+    f32 r1;
+    f32 r2;
+
+    v = *(u8 **)((u8 *)arg1 + 0x2D0);
+    if (v == NULL) {
+        return 0;
+    }
+    if ((*(u16 *)((u8 *)arg1 + 0x84) == 0x14 && 10.0f < *(f32 *)(v + 8)) || *(u16 *)((u8 *)arg1 + 0x84) == 0x23) {
+        i = D_800BE9C0;
+        p = *(u8 **)(arg0 + 0x34);
+        p += (i == 0) << 6;
+        guMtxL2F(m, (Mtx *)p);
+        m[0][3] = 0.0f;
+        m[1][3] = 0.0f;
+        m[2][3] = 0.0f;
+        m[3][3] = 1.0f;
+        func_1503E5F8((f32 *)m, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
+        e = func_15073118(arg1, -1, 0x4E, 0.0f, 0.0f, 0.0f, 0.0f, D_800A08C0, D_800A08C4, D_800A08C8, 0xC8);
+        *(f32 *)(e + 0x14) = x;
+        *(f32 *)(e + 0x18) = y;
+        *(f32 *)(e + 0x1C) = z;
+        *(f32 *)(e + 0xB8) = r0;
+        *(f32 *)(e + 0x40) = r1;
+        *(f32 *)(e + 0xC4) = r2;
+        t = (*(f32 *)(e + 0x40) - 90.0f) * D_800A08CC;
+        *(s16 *)(e + 0x76) = t;
+        *(s16 *)(e + 0x7A) = t;
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8DD0.s")
 

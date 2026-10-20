@@ -22,7 +22,45 @@ s32 func_150FE320(s32 arg0, u8 arg1, s32 arg2) {
     return func_151C284C(sp90, sp84, 0, 0, 0, 0, 300.0f, 0.0033333334f, (func_150ADA68() * 10.0f) + 25.0f, (func_150ADA68() * 200.0f) + 600.0f, 50.0f, (func_150ADA20() % 56U) + 0xC8, arg0, 1, 1, 0, 0xFF, 1, 1, 0, 0x23, 0.0f, 0xFF, -1, 0, (s32) arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12C0B0/func_150FE49C.s")
+const u32 rodata_12C0B0_FE49C[] = { 0x00000000, 0xC1E00000, 0x41C00000, 0x00000000, 0x00000000, 0x41C00000, 0x00000000, 0xC31B0000, 0x41D80000, 0x00000000, 0x41200000, 0x41D80000, 0x00000000, 0xC3520000, 0x41D80000 }; // D_800A2398 = [6], D_800A23A4 = [9], D_800A23B0 = [12]
+void func_150FEB84(struct127 *, s32, u8, s32);
+s32 func_15145EA4(u8 **, struct17 **, s32, s32);
+void func_151D441C(struct127 *, struct17 *, struct17 *, s32);
+void func_151D44C4(struct17 *, u8, s32);
+void func_150FED54(u8 *);
+extern u8 D_80088F34;
+
+s32 func_150FE49C(struct127 *arg0, u8 arg1, s32 arg2, s32 *arg3, s32 *arg4) {
+    struct17 pos;
+    struct17 pos2;
+    u8 *tbl[2];
+    struct17 *out[2];
+
+    if (arg0 != NULL) {
+        if (arg0->unk1D4 != 0) {
+            tbl[0] = D_800A2398;
+            tbl[1] = D_800A2398 + 0xC;
+            out[0] = &pos;
+            out[1] = &pos2;
+            func_15145EA4(tbl, out, (s32) arg0->unk1D4 + (D_80088F34 << 6), 2);
+        } else {
+            pos.unk0 = *(f32 *)((u8 *)arg0 + 0x14);
+            pos.unk4 = *(f32 *)((u8 *)arg0 + 0x18) + 70.0f;
+            pos.unk8 = *(f32 *)((u8 *)arg0 + 0x1C);
+            pos2 = pos;
+        }
+        func_151D441C(arg0, &pos, &pos2, 0x23);
+        func_151D44C4(&pos, arg1, arg2);
+        func_150FEB84(arg0, (s32) &pos, arg1, arg2);
+        func_150FED54((u8 *) arg0);
+        if (arg3 != NULL) {
+            *(struct17 *)arg3 = pos;
+        }
+        if (arg4 != NULL) {
+            *(struct17 *)arg4 = pos2;
+        }
+    }
+}
 
 void func_150FEB84(struct127 *arg0, s32 arg1, u8 arg2, s32 arg3) {
     f32 sp60[2];

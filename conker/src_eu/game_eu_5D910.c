@@ -227,7 +227,59 @@ s32 func_15033730(u8 *arg0, u8 *arg1)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150337A8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150335C8.s")
+void func_15031044(s32, f32, f32, f32, f32, f32, f32);
+void func_1503E5F8(f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+void func_150A7A48(f32 a[4][4], f32 b[4][4], f32 c[4][4]);
+s32 func_150335C8(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    s32 ret;
+    f32 m1[4][4];
+    f32 m2[4][4];
+    f32 m3[4][4];
+    f32 m4[4][4];
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 u0;
+    f32 u1;
+    f32 u2;
+    f32 r0;
+    f32 r1;
+    f32 r2;
+
+    if (arg1->unk1D4 == NULL) {
+        return 0;
+    }
+    ret = func_15083568(arg1, arg2, 1.0f, 0);
+    if (ret != 0) {
+        *(s8 *)(ret + 2) = arg3;
+        *(f32 *)(ret + 0x40) = *(f32 *)(arg0 + 0x14C);
+        if (arg4 != 0) {
+            *(u8 *)(ret + 0x16) &= ~4;
+        } else {
+            *(u8 *)(ret + 0x16) |= 4;
+        }
+        guMtxL2F(m1, (Mtx *)((u8 *)arg1->unk1D4 + (arg3 << 6)));
+        func_15048B10((s32)m1, (s32)m2);
+        func_150A9B0C(m3, *(f32 *)(arg0 + 0xB8), *(f32 *)(arg0 + 0x40), *(f32 *)(arg0 + 0xC4), *(f32 *)(arg0 + 0x14C), *(f32 *)(arg0 + 0x150), *(f32 *)(arg0 + 0x14C));
+        m3[3][0] = *(f32 *)(arg0 + 0x14);
+        m3[3][1] = *(f32 *)(arg0 + 0x18);
+        m3[3][2] = *(f32 *)(arg0 + 0x1C);
+        m3[0][3] = 0.0f;
+        m3[1][3] = 0.0f;
+        m3[2][3] = 0.0f;
+        m3[3][3] = 1.0f;
+        func_150A7A48(m3, m2, m4);
+        func_1503E5F8((f32 *)m4, &x, &y, &z, &r0, &r1, &r2, &u0, &u1, &u2);
+        if (arg5 != 0) {
+            z = 0.0f;
+            y = 0.0f;
+            x = 0.0f;
+        }
+        func_15031044(ret, x, y, z, r0, r1, r2);
+        return ret;
+    }
+    return 0;
+}
 
 s32 func_15033A7C(u8 *arg0, u8 *arg1) {
     u16 temp_v0;

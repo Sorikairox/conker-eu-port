@@ -24,4 +24,15 @@ void func_15094CD0(s32 arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15094EC8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_150952B0.s")
+extern Mtx *D_800DC6D0[];
+extern f32 D_800D30C8[][4][4];
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+
+void func_150952B0(s32 arg0) {
+    f32 a[4][4];
+    f32 b[4][4];
+
+    guMtxL2F(a, &D_800DC6D0[D_800BE9C0][arg0]);
+    guMtxL2F(b, &((Mtx *)((u8 *)&((struct_eu_BE628 *)D_800BE628)[arg0] + 0x100))[D_800BE9C0]);
+    func_150A7A48(a, b, D_800D30C8[arg0]);
+}

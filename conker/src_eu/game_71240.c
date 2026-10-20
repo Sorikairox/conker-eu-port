@@ -68,4 +68,63 @@ void func_15043FF0(vertex *arg0, struct113 *arg1) {
     arg0->z += arg1->unk3C * 0.000015258789f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_71240/func_150440A0.s")
+#pragma function sqrtf
+void func_150440A0(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
+{
+	f32 a;
+	f32 b;
+	f32 c;
+	f32 tmp;
+	f32 lx;
+	f32 ly;
+	f32 lz;
+
+	lx = lookx - posx;
+	ly = looky - posy;
+	lz = lookz - posz;
+
+	
+
+	tmp = -1 / sqrtf(lx * lx + ly * ly + lz * lz);
+	lx *= tmp;
+	ly *= tmp;
+	lz *= tmp;
+
+	a = upy * lz - upz * ly;
+	b = upz * lx - upx * lz;
+	c = upx * ly - upy * lx;
+
+	tmp = 1 / sqrtf(a * a + b * b + c * c);
+	a *= tmp;
+	b *= tmp;
+	c *= tmp;
+
+	upx = ly * c - lz * b;
+	upy = lz * a - lx * c;
+	upz = lx * b - ly * a;
+
+	tmp = 1 / sqrtf(upx * upx + upy * upy + upz * upz);
+	upx *= tmp;
+	upy *= tmp;
+	upz *= tmp;
+
+	mtx[0][0] = a;
+	mtx[1][0] = upx;
+	mtx[2][0] = lx;
+	mtx[3][0] = posx;
+
+	mtx[0][1] = b;
+	mtx[1][1] = upy;
+	mtx[2][1] = ly;
+	mtx[3][1] = posy;
+
+	mtx[0][2] = c;
+	mtx[1][2] = upz;
+	mtx[2][2] = lz;
+	mtx[3][2] = posz;
+
+	mtx[0][3] = 0;
+	mtx[1][3] = 0;
+	mtx[2][3] = 0;
+	mtx[3][3] = 1;
+}

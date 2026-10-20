@@ -763,6 +763,28 @@ See `docs/sessions/s79.md`.
 3. **Frame 8 high around a `u8` table lookup** (`kind = D_800A43C6[i * 16]; if (kind == 2) return; ... unk3C = (kind == 1)`): declare `s32 kind`, not `u8` (`func_151382E0`).
 4. Lowest store before a `jal func_1504715C` landing in the delay slot where the ref puts the argument copy there: a bare label between the stores and the call (fakematch, s66 recipe 1) matched `func_15194D80`; in `func_15194B3C` the same label also removes an `arg0` copy (SIZE-1), still open.
 5. `divu` by a computed divisor needs `% (u32) (x + 1)`; `%` on a plain s32 sum gives `div` + the `-1`/`0x8000` traps (`func_151D5404`).
+## s85 recipes (real arity of a shared definition, matrix-column order)
+See `docs/sessions/s85.md`.
+1. **`sw a3, home` at entry with a 4-param header but a3 never read**: the definition has 3 params. When a caller in a file you may not touch passes 4, make the header prototype unprototyped (`s32 f(); // 3 params ...`) and keep an ANSI 3-param definition; int/pointer args make the caller byte-identical (`func_150A2FCC`). A 4-param definition with an unused `arg3` is SIZE+1 (the store).
+2. **Two scan loops with one shared `return -1`** (the first loop's `blez` jumps to the final `li v0,-1`): `if (c) { for ... } else { for ... } return -1;` (`func_150A2FCC`).
+3. **Matrix with the translation copied in and the constant column cleared**: write `m[3][0..2] = ...` before `m[0..2][3] = 0; m[3][3] = 1;`; IDO schedules the last load into the call's delay slot (`func_150335C8`).
+4. A global byte index that lands in v0 right before a `jal`: name it (`u8 i = D_800BE9C0;`) (`func_150C8C30`).
+
+## s83 recipes (switch operand copy, scan loops, declaration order)
+See `docs/sessions/s83.md`.
+1. **`move v0,a3` before a compare-chain switch on a param that is also the 4th call argument**: the callee takes only 3 args (a3 merely still holds the value); with the 3-arg prototype the copy disappears. `beq x,7,L; b L` with the shared value set in an earlier delay slot = `case 7: default: v = K;` (`func_150BEEB0`).
+2. **Scan loop with `lw base; addu v0,v1,s0` for the tests and `addu a1,s0,v1` for the call**: two forms of the address (struct-typed index for the field tests, `base + i * size` for the argument/return), counter declared before the big stack struct (`func_150A3674`).
+3. Stack struct 4 bytes high next to a named pointer/temp: declare the pointer **before** the struct (`func_150A3264`, `func_1506AC24`); a named pointer used across a call and rematerialised as `addiu v0,s0,K` is declared first (`func_150F2B20`).
+4. `__ull_rshift` on a u64 table: cast both indices to `u32`; screen DIFF1 on the second word's symbol (`D_800D3514`) is only a relocation name (`func_150A29C8`).
+
+## s81 recipes (varargs loops, unnamed slot pointers, Mtx arrays)
+See `docs/sessions/s81.md`.
+1. **Counted loop over a memory-resident count** (`&arg` taken by `va_start`) with the decrement stored before the other store in the `bnez` delay slot: `for (; arg1 != 0; arg1--) { ... }`; `if (arg1) do {...} while (--arg1);`, `while (arg1) {...; arg1--;}` and the statement order inside the body all give the reversed store order (`func_1502B020`, `func_1502B7F0`). `sltiu at,a3,2; beqz` = `for (; arg3 > 1; arg3--)` with `u32 arg3` (`func_1502B110`).
+2. **Out-param local at the lowest slot** (`addiu a2,sp,0x34` with other named locals above): declare it last (`func_1502B8E0`); with two stack locals sweep only which names go between them (20 variants for 5 names, `func_1502B5C8`).
+3. **Frame 8 high with a pointer kept in a register and spilled across calls**: drop the name (`*(s32 **)&D_800D1588[arg0]` repeated; IDO CSEs the address into v1 and spills it to a compiler slot) (`func_1503D950`). Same rule as s64 recipe 1.
+4. `addu a1, arg0, idx<<6; addiu a1, a1, 0x78` = `&((Mtx *)(arg0 + 0x78))[D_800BE9C0]`; `arg0 + (D << 6) + 0x78` swaps the t-register roles (`func_150F2A98`).
+5. A `jal` in a block followed by stores of the last `pos` element landing in the delay slot: declare the call's buffer inside the block (`case 1: { f32 buf[9]; ... }`), the natural form of the s79 label trick (`func_15076768`).
+6. A ternary over two different address sums (`bne; lw base; b; addiu base, 0xA00 / lw base; addiu 0xBC0`) is `c ? *p + 0xA00 : *p + 0xBC0`, not `*p + (c ? 0xA00 : 0xBC0)` (`func_150CB5E0`).
 
 ## s80 recipes (callee families via calleefam.py, scheduling barriers)
 See `docs/sessions/s80.md`.
@@ -779,6 +801,29 @@ See `docs/sessions/s82.md`.
 5. Repeated `(arg0 + K)[D_idx]` matrix-in-object updates: `((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0][i][j] *= c;` reloads the index per statement like the ref (`func_151BF0D0`); the m2c literal `0.92300004f` must be kept as printed (`0.923f` is DIFF1).
 
 
+## s90 recipes (float literal forms, Rare math helpers)
+See `docs/sessions/s90.md`.
+1. **`0` and `0.0f` are different constants to IDO 5.3 in float code**: they get separate registers / rematerialisations (`return 0` reuses the compare zero, `return 0.0f` re-emits `mtc1 zero,f0`; a mix of `0.0f` compares and int `0` loop tests moved the parameter into a callee-saved f20). When float zeros sit in the wrong registers or a param is unexpectedly in `f20` (`sdc1 f20` in the ref), sweep the literal form per site (`0` / `0.0f`, `1` / `1.0f`) with one `tryall` (`func_1504A6F0`: 1 of 128 matched; `func_1504A620`: `return 0.0f`).
+2. **`x *= 2` is `add.s x,x,x` only when written `x += x`**; `x / 2` in PD source was `x * 0.5f` in Conker (`func_1504A5A0`, `func_1504A620`).
+3. **Screening a reference decomp with generated headers**: `tools/eu_port/refcc.sh` defines every undefined identifier with a unique value through a force-included header, iterating until everything compiles (PD 625/625).
+4. PD `src/lib/mp3/lib_*.c` (expf / logf / powf) are Conker `func_1504A5A0` / `func_1504A620` / `func_1504A6F0`; PD's mp3 decoder itself is not in Conker (no hit >= 0.6).
+
+## s89 recipes (porting Perfect Dark / known Rare source)
+
+See `docs/sessions/s89.md`.
+1. **Perfect Dark shares code with Conker**: `src/lib/mtx.c` and `src/game/quaternion.c` matched almost verbatim. Find more with `tools/eu_port/srcmatch.py <objdir>` over IDO-compiled reference objects; >= 0.85 is real.
+2. Conker edits of shared code: dropped stores (`quaternion_to_mtx` has no `m[3][0..2] = 0`), inlined wrappers (`look - pos` into new locals, not the params), regrouped sums (`a - b - c + 1` not `a - (b + c) + 1`).
+3. The `store; b L; lw ra` arm tail (s69 shape D) showed up in two PD functions: declare that arm's locals inside the arm (`quaternion_slerp`), or a `dummy: ;` label after the arm when moving declarations grows the frame (`quaternion0f097044`: block f32s took 8 more frame bytes).
+4. A local `s32 indices[3] = {1, 2, 0}` whose initializer sits in another file's `.data`: copy it as a 12-byte struct from the extern symbol (`typedef struct { s32 v[3]; } Idx3; Idx3 indices = D_80086390;`, fakematch) instead of owning `.data`.
+5. `sqrtf` as `jal`: `#pragma function sqrtf` before the function (place it last in the file or check the later functions).
+
+## s87 recipes (early return, rodata of the last asm user, arity scan)
+See `docs/sessions/s87.md`.
+1. **`lw tN, home(sp)` reload of an arg at the start of the guarded body** (ref) where mine reuses the register from the test: write `if (!x) return;` + body instead of `if (x) { body }` (`func_150E0C58`, `func_150FB8A4`, `func_150F9D6C`).
+2. **apply.py REJECT on a function whose `# rodata_inject` block holds tables it references** and no asm function of the file follows: put `const u32 rodata_<stem>_<func>[] = { exact words };` before the definition; the `D_` names stay absolute symbols. Drop a trailing `0` word that is only alignment (`func_150FE49C`, `func_150FDF38`).
+3. **Two uses of `base + i * 12` across calls**: the same form twice is CSE'd and spilled (frame +8, SIZE-n); the ref recomputes, so write the second use in a different form (`D[i]` then `(f32 *)((u8 *)D + i * 12)`) (`func_150E0C58`).
+4. **Loop over a stack array with `p == &a[1]` tests and the addresses in s-registers**: separate locals declared in reverse (`struct17 p3, p2, p1, p0;`, `for (p = &p0; p != &p3 + 1; p++)`), not an array; a constant used as `x = d; ... x = -d;` with `neg.s` is a variable (`func_1506E2CC`, partial).
+5. `tools/eu_port/arityscan.py --slice lo` lists prototypes with trailing params the asm never reads; confirm with `--callers` (callers must not write the register) and beware pass-through args (unread but forwarded to a callee) (`func_1508849C`, `func_15088E84`).
 ## s84 recipes (C-owned rodata tables, split symbols, block-scoped locals)
 See `docs/sessions/s84.md`.
 1. **Last GLOBAL_ASM of a `.rodata`-owning file**: a table the C names (`extern D_x`) has no GLOBAL_ASM left to carry it; define it in C as `const` data with the real values (`const T D_x[N] = {...}`, it goes to `.rodata` before the compiler's late literals) and drop its `undefined_syms.eu.txt` line (`func_151AFA80`).

@@ -21,7 +21,35 @@ void func_151617C4(void *arg0);
 void func_151617E4(void *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EEE00.s")
+extern u8 D_800A1A0C[];
+extern u8 D_800A1A08[];
+extern struct17 D_800A19C0[];
+void func_150EF500(struct127 *, u8, s32, s32);
+void func_150F0FA4(u8 *);
+
+void func_150EEE00(struct127 *arg0, u8 arg1) {
+    struct17 pos;
+    Header header;
+    Header2 header2;
+
+    if (D_800A1A0C[arg1] & arg0->unk94) {
+        return;
+    }
+    func_150EF500(arg0, arg1, 0xFF, 1);
+    if (arg0->unk1D4 == NULL) {
+        return;
+    }
+    func_15143134(&D_800A19C0[arg1], &pos, (u8 *)(0, arg0->unk1D4) + (D_800A1A08[arg1] << 6)); // fakematch: comma from the permuter (register choice)
+    header.unk0 = 3;
+    header.unk1 = -1;
+    header.unk2 = (u32)func_150ADA20() % 3 + 4;
+    header.unk4 = 0;
+    header2.unk0 = pos.unk0;
+    header2.unk4 = pos.unk4;
+    header2.unk8 = pos.unk8;
+    func_151602C0(&header, &header2, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
+    func_150F0FA4((u8 *)&pos);
+}
 
 void func_150EEF40(u8 *arg0, u8 arg1) {
     struct {

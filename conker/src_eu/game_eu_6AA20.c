@@ -37,9 +37,64 @@ void func_1503D774(u8 *arg0, s32 arg1)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D8E0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D950.s")
+s32 func_1503D8E0(s32);
+void func_1503D800(s32);
+s32 func_1502B350(u8 *, s32, s32 *);
+s32 func_1502B5C8(s32 *, s32, ...);
+void func_1503D74C(s32 *arg0, s32 arg1);
+void func_1503D774(u8 *arg0, s32 arg1);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DA64.s")
+s32 func_1503D950(s32 arg0, s32 arg1) {
+    s32 sp34;
+    s32 *p;
+
+    if (*(s32 **)&D_800D1588[arg0] != NULL) {
+        return 0;
+    }
+    p = (s32 *)func_1502B5C8(&sp34, 2, 0xF, func_1503D8E0(arg0));
+    if (p == NULL) {
+        *(s32 **)&D_800D1588[arg0] = NULL;
+        D_800C5A90[arg0] = 0;
+        func_1503D800(arg0);
+        return 4;
+    }
+    *(s32 **)&D_800D1588[arg0] = p;
+    if ((*(s32 **)&D_800D1588[arg0])[0] != 0) {
+        (*(s32 **)&D_800D1588[arg0])[0] += (s32)*(s32 **)&D_800D1588[arg0];
+        func_1503D74C((s32 *)(*(s32 **)&D_800D1588[arg0])[0], (s32)*(s32 **)&D_800D1588[arg0] + 0x10);
+    }
+    if ((*(s32 **)&D_800D1588[arg0])[1] != 0) {
+        (*(s32 **)&D_800D1588[arg0])[1] += (s32)*(s32 **)&D_800D1588[arg0];
+    }
+    if ((*(s32 **)&D_800D1588[arg0])[2] != 0) {
+        (*(s32 **)&D_800D1588[arg0])[2] += (s32)*(s32 **)&D_800D1588[arg0];
+    }
+    *(s32 **)&D_800D1588[arg0] = (s32 *)((u8 *)*(s32 **)&D_800D1588[arg0] + 0x10);
+    func_1503D774((u8 *)*(s32 **)&D_800D1588[arg0], arg0);
+    func_1503D800(arg0);
+    return 0;
+}
+
+s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+
+s32 func_1503DA64(s32 arg0, s32 arg1) {
+    s32 sp2C;
+    s32 *v;
+
+    if (D_800D1C90[arg0] != NULL) {
+        return 0;
+    }
+    v = (s32 *)func_1502B6BC(&sp2C, 2, NULL, 2, 0x11, arg0);
+    if (v == NULL) {
+        D_800D1C90[arg0] = NULL;
+        return 2;
+    }
+    do { // fakematch: do-while(0) keeps the result in v0 (permuter)
+        D_800D1C90[arg0] = (struct124 *)v;
+        D_800D1C90[arg0] = (struct124 *)*v;
+    } while (0);
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DAF4.s")
 
