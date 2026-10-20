@@ -894,6 +894,8 @@ segments:
       - [0x24BB80, .rodata, game_eu_18B1C0]
       - [0x24BBA0, .rodata, game_eu_18DB20]
       - [0x24BCF0, rodatabin]
+      - [0x24C2F0, .rodata, game_eu_193D00]
+      - [0x24C300, rodatabin]
       - [0x24CAB0, .rodata, game_eu_1BAAA0]
       - [0x24CAC0, .rodata, game_eu_1BAF40]
       - [0x24D670, .rodata, game_eu_1BE5C0]
