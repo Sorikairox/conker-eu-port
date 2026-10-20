@@ -7,7 +7,41 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BA634.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BAA18.s")
+void func_151BAA18(u8 *arg0, s32 arg1, u8 arg2)
+{
+  u8 *q;
+  s32 *p;
+  s32 id;
+  s32 t;
+  q = arg0;
+  q += *(s32 *)(arg0 + 0x50);
+  q += 0xF8;
+  p = (s32 *)q;
+  id = p[0];
+  t = id;
+  if (arg2 == 0)
+  {
+    if ((t == ((s32 *)arg1)[0]) || (((u8 *) t)[0x3B] == ((u8 *) arg1)[4]))
+    {
+      func_1516972C((struct102 *)arg0);
+    }
+  }
+  else
+    if (arg2 == 0x2D)
+  {
+    t = ((s32 *)arg1)[0];
+    if (t == *p)
+    {
+      p[0] = ((s32 *)arg1)[1];
+      ((u8 *) p)[4] = ((u8 *) arg1)[9];
+    }
+    else if (((s32 *)arg1)[1] == *p)
+    {
+      p[0] = t;
+      ((u8 *) p)[4] = ((u8 *) arg1)[8];
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BAAC8.s")
 
@@ -122,7 +156,40 @@ void func_151BCB54(void *arg0, void *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BD040.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BD7CC.s")
+void func_151BD7CC(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  s32 *p;
+  s32 id;
+  s32 t;
+  p = *((s32 **) (arg0 + 0x98));
+  id = p[0];
+  t = id;
+  if (arg2 == 0)
+  {
+    if ((t == arg1[0]) || (((u8 *) p)[4] == ((u8 *) arg1)[4]))
+    {
+      s32 blk_t; // fakematch: block-local declaration = basic-block boundary (unfilled jr ra delay slot, s69)
+      arg0[0x30] = 0;
+      *((u16 *) (arg0 + 0x1E)) |= 8;
+    }
+  }
+  else
+    if (arg2 == 0x2D)
+  {
+    t = arg1[0];
+    if (t == *p)
+    {
+      p[0] = arg1[1];
+      ((u8 *) p)[4] = ((u8 *) arg1)[9];
+      return;
+    }
+    if (arg1[1] == *p)
+    {
+      p[0] = t;
+      ((u8 *) p)[4] = ((u8 *) arg1)[8];
+    }
+  }
+}
 
 s32 func_151BD86C(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x28);

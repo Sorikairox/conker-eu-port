@@ -114,7 +114,37 @@ void func_151B3474(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B34B4.s")
+void func_151B34B4(u8 *arg0, s32 *arg1, u8 arg2)
+{
+  u8 *v = arg0 + 0x28;
+  s32 a;
+  s32 b;
+  s32 c;
+  if (arg2 == 0x2D) {
+    a = arg1[0];
+    c = *(s32 *)v;
+    if (a == c) {
+      *(s32 *)v = arg1[1];
+      v[4] = ((u8 *)arg1)[9];
+    } else if ((b = arg1[1]) == c) {
+      *(s32 *)v = a;
+      v[4] = ((u8 *)arg1)[8];
+    }
+    b = arg1[1];
+    a = arg1[0];
+    c = *(s32 *)(v + 8);
+    if (a == c) {
+      *(s32 *)(v + 8) = b;
+      v[0xC] = ((u8 *)arg1)[9];
+      return;
+    }
+    if (b == c) {
+      
+      *(s32 *)(v + 8) = a;
+      v[0xC] = ((u8 *)arg1)[8];
+    }
+  }
+}
 
 s32 func_151B4D88(void *arg0, void *arg1, s32 arg2, u8 arg3);
 
