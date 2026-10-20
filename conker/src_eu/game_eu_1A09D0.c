@@ -31,4 +31,20 @@ void func_15173298(u8 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/func_15172D80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/func_151733EC.s")
+void func_151733EC(struct127 *arg0, s32 arg1, s32 arg2) {
+    s32 temp_v1;
+
+    temp_v1 = arg0->unk127;
+    if ((arg0->health != 0) && ((arg0->unk31C == NULL) || ((s8) arg0->unk31C->pad17[0xC] <= 0))) {
+        if (arg0->camera != NULL) {
+            if (D_800DD6E0[temp_v1] == -1) {
+                func_1517F3B0(0, 0, 0, 0xA, 1, (s32) temp_v1);
+                arg0->unk2F8 |= 0x10;
+                D_800DD6E0[temp_v1] = (s8) arg1;
+                (&D_800DD2C0)[temp_v1] = (u8) arg2;
+            }
+        } else if (arg1 == D_800BE9F0) {
+            func_15173298((u8 *) arg0, arg2);
+        }
+    }
+}

@@ -19,7 +19,17 @@ void func_1510B8AC(s32 arg0, f32 arg1, f32 arg2, f32 arg3) {
     D_800D9F10 = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B930.s")
+void func_1510B930(void)
+{
+    s32 i;
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (D_800D9EE0[i].x != -1.0f) {
+            func_1510B6A8(i, D_800D9EE0[i].y, D_800D9EE0[i].z, D_800D9EE0[i].x, 0.0f);
+            D_800D9EE0[i].x = -1.0f;
+        }
+    }
+    D_800D9F10 = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B9D8.s")
 

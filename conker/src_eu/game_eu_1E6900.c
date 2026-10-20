@@ -31,4 +31,13 @@ s32 func_151B9204(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E6900/func_151B92AC.s")
+s32 func_151B92AC(u8 *arg0)
+{
+    f32 *v = (f32 *)(arg0 + 0x110);
+    *(f32 *)(arg0 + 0x38) = v[0] + v[1] * sinf(*(f32 *)(arg0 + 0x118));
+    v[2] = v[3] * D_800BE9A4 + v[2];
+    v[2] = func_15144B68(v[2]);
+    *(f32 *)(arg0 + 0x40) += v[4] * D_800BE9A4;
+    *(f32 *)(arg0 + 0x48) += v[6] * D_800BE9A4;
+    return 1;
+}
