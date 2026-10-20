@@ -36,6 +36,7 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 60 (main, game < 0x130000): 3358 / 5915 functions in C (56.8%)**, code bytes 387,676 / 2,253,856 (17.2%), `verify_all.sh` all OK. +3 (`func_1502B6BC`, `func_1502C8F8`, `func_150B15D0`); `game_eu_DEDE0` now owns `.rodata`. Doc `docs/sessions/s60.md`, recipes IDO_SHAPES `## s60 recipes`: frame-only near misses are fixed by declaration order and by which names exist (3 of 11 tried). Open with drafts in `docs/sessions/s60_drafts/`: `func_150DE8AC` (SIZE-1, `&sp50` shared), `func_150FEB84` (needs unfolded `mul.s` 2.0f), `func_1502B5C8`, `func_150D2884` (DIFF2), `func_150C6C3C`, `func_15077F64`.
 - **Session 58 (main, game < 0x130000): 3349 / 5915 functions in C (56.6%)**, code bytes 383,888 / 2,253,856 (17.0%) (game 2942 = 310,936 bytes, init 375, debugger 32), `verify_all.sh` all OK. +6 in `6aaa280`: `func_150CB2D0`, `func_150CBD10`, `func_150CCF8C`, `func_150CE420`, `func_150121C0`, `func_150BB978`.
   **Spawner frame solved** (doc `docs/sessions/s58.md`, IDO_SHAPES `## s58 recipes`): the s57 hole was a dead 8-byte compiler temp from the chained float assignment `sp.u28[3] = sp.u28[2] = X;` (write `sp.u28[3] = X; sp.u28[2] = sp.u28[3];`), struct is 0x80 bytes, 15-param signature. Template `docs/sessions/s58_drafts/spawner_template_func_150CB2D0.c`.
   Open: `func_150CA2C4` DIFF5 (head schedule), `func_150B3394` DIFF29 (t-reg numbering); the remaining in-slice callers are 250-590 insns; the small ones are in files >= 0x130000 (other slot).

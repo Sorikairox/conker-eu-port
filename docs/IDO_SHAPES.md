@@ -607,3 +607,11 @@ See `docs/sessions/s58.md` (solves s57 recipe 1's frame hole).
 3. **A named float local assigned from an expression and used twice also costs a temp slot** (`f32 t = r() * 3.0f; x = t; y = t;` grew the frame like the chain); inline or use the struct field as the second source.
 4. **Spawner struct for `func_15132FBC`** is 0x80 bytes (8 tail bytes after `u9C`) when nothing else is declared above it; with named locals above it (out-params, angle results) a 0x78/0x7C struct plus those names fill the same space.
    15-parameter signature `(s32, s32, f32, f32, f32, s32, s32, s32, s16 arg8, s32..., u8 argE)` so the stack params land on m2c's offsets; `u8 u88` when the ref stores 0xFF.
+
+## s60 recipes (frame slots: which names take slots)
+See `docs/sessions/s60.md`.
+1. A named pointer that is spilled across a call costs an 8-byte slot; writing the expression out (`D_800CC2D0[arg0].x` repeatedly) makes the spill an unnamed temp and can remove 8 frame bytes (`func_1502C8F8`).
+2. Two `s16` locals share one word; a 4-byte local declared before them sits above and moves them down 4 (`s32 lim; s16 a; s16 b;`).
+3. For address-taken / spilled locals try all permutations of the other names in one script: the position of the spilled float (`temp_f16` second) or two names above `sp44` decided DIFF2 -> OK (`func_150B15D0`, `func_1502B6BC`).
+4. `s32 i; u8 *p;` declared before the stack structs fill the 8 bytes above them (`func_150DE8AC`); a `p = &sp50; p += 1; p--;` forces `&sp50` to be computed twice.
+5. `f32 two = 2.0f` takes a slot; inlining gives `add.s`, not `mul.s`.
