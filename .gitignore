@@ -37,3 +37,7 @@ tools/decomp-permuter
 tools/gfxdis
 build_port/
 tools/ultralib/
+tools/banjo-kazooie/
+tools/perfect_dark/
+tools/dkr/
+tools/dk64/

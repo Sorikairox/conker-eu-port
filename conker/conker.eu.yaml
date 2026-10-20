@@ -806,6 +806,8 @@ segments:
       - [0x23E400, .rodata, game/done/game_75810]
       - [0x23E410, .rodata, game/done/game_75950]
       - [0x23E430, rodatabin]
+      - [0x23E6C0, .rodata, game_eu_77740]
+      - [0x23E6D0, rodatabin]
       - [0x23E6E0, .rodata, game_77AD0]
       - [0x23E6F0, .rodata, game_eu_78230]
       - [0x23EA60, rodatabin]
