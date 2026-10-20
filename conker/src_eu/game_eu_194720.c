@@ -40,7 +40,17 @@ void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_151672D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_151674DC.s")
+extern u8 D_800908FC[];
+extern u8 *D_800DD658;
+extern s32 D_800DD650;
+extern s32 D_800DD654;
+extern u8 D_800DD660[];
+void func_151674DC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    u8 **p = &D_800DD658;
+
+    *p = D_800908FC;
+    func_15095380(arg0, *p, D_800DD650, D_800DD660, 0, 0, 0, D_800DD654, 3);
+}
 
 Gfx *func_15167548(Gfx *arg0, s32 arg1, s32 arg2) {
     gSPMatrix(arg0++, D_80089810, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
