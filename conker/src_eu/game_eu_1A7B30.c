@@ -53,7 +53,42 @@ void func_1517ABB4(f32 arg0, u8 arg1, s16 arg2, s16 arg3, s16 arg4)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517ADBC.s")
+void func_1517ADBC(struct102 *arg0) {
+    s32 t;
+    s16 v;
+    t = *(u16 *)((u8 *)arg0 + 0xA6);
+    if (t == 0) {
+        *(s16 *)((u8 *)arg0 + 0x90) += *(s16 *)((u8 *)arg0 + 0xA0);
+        *(s16 *)((u8 *)arg0 + 0x92) += *(s16 *)((u8 *)arg0 + 0xA2);
+        *(s16 *)((u8 *)arg0 + 0x94) += *(s16 *)((u8 *)arg0 + 0xA4);
+        if (*(s16 *)((u8 *)arg0 + 0xA2) > 0) {
+            (*(s16 *)((u8 *)arg0 + 0xA2))--;
+            if (*(s16 *)((u8 *)arg0 + 0xA2) <= 0) {
+                *(s16 *)((u8 *)arg0 + 0xA2) = -3;
+            }
+        }
+        v = *(s16 *)((u8 *)arg0 + 0xB0);
+        t = *(s16 *)((u8 *)arg0 + 0x92) - v;
+        if (t <= 0) {
+            *(s16 *)((u8 *)arg0 + 0x96) = 0x5A;
+            *(s16 *)((u8 *)arg0 + 0x9A) = 0;
+            *(u16 *)((u8 *)arg0 + 0xA6) = 60;
+            *(s16 *)((u8 *)arg0 + 0x92) = v;
+        } else {
+            *(s16 *)((u8 *)arg0 + 0x96) += *(s8 *)((u8 *)arg0 + 0x9C);
+            *(s16 *)((u8 *)arg0 + 0x98) += *(s8 *)((u8 *)arg0 + 0x9D);
+            *(s16 *)((u8 *)arg0 + 0x9A) += *(s8 *)((u8 *)arg0 + 0x9E);
+        }
+    } else {
+        t = t - D_800BE9E4;
+        if (t > 0) {
+            *(u16 *)((u8 *)arg0 + 0xA6) = t;
+            *(s8 *)((u8 *)arg0 + 0xB3) = (t * 256) / 60;
+        } else {
+            func_1516972C(arg0);
+        }
+    }
+}
 
 s32 func_1517AEC8(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     D_800DD880 = -1;

@@ -49,7 +49,38 @@ void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C64F4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C6750.s")
+typedef struct {
+    s16 n0; s16 n1; s32 p; s16 c; s16 a; s16 d; s16 e;
+    f32 f0; f32 f1; f32 f2; f32 f3; f32 f4;
+    u8 b0; u8 b1; s16 h0; s16 h1; s16 pad;
+    f32 g0; f32 g1; f32 g2; s32 q;
+} SpawnC6750;
+void func_15154BF4(SpawnC6750 *, u8, s32);
+void func_151C6750(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    SpawnC6750 s;
+
+    s.f0 = 5.0f;
+    s.n0 = 10;
+    s.f1 = 7.0f;
+    s.n1 = 4;
+    s.p = arg0;
+    s.c = 0;
+    s.d = 255;
+    s.a = -24;
+    s.e = 25;
+    s.b0 = 0xBE;
+    s.b1 = 0x41;
+    s.h0 = 0xC8;
+    s.h1 = 0x96;
+    s.f2 = -0.208f;
+    s.f3 = 0.085f;
+    s.f4 = 0.970632f;
+    s.g0 = 96.0f;
+    s.g1 = 109.0f;
+    s.g2 = 1.0f;
+    s.q = arg1;
+    func_15154BF4(&s, arg2, arg3);
+}
 
 s32 func_151C6840(u8 *arg0, s32 arg1, s32 arg2) {
     switch (arg0[4]) {

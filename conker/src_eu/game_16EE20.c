@@ -131,7 +131,52 @@ void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
 //         }
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141F78.s")
+typedef struct {
+    s32 u0;
+    s16 u4;
+    u8 u6;
+    u8 u7;
+    s32 u8_;
+    s32 uC;
+    u8 u10[8];
+    s32 u18;
+    s32 u1C;
+    u8 u20;
+    s16 u22;
+    s16 u24;
+} Spawn41F78;
+void func_15141F78(u8 arg0, u8 *arg1, f32 arg2, u8 arg3, u8 *arg4, u8 arg5) {
+    Spawn41F78 sp;
+    f32 f;
+    s32 v;
+
+    sp.u6 = arg0;
+    sp.u7 = 0;
+    sp.u0 = 0x6F701;
+    sp.u4 = func_150ADA20() % 61U + 100;
+    sp.u8_ = 0;
+    sp.uC = 0;
+    sp.u10[0] = (func_150ADA20() & 0x7F) + 0x80;
+    sp.u10[1] = 0xFF;
+    sp.u10[2] = 0xFF;
+    sp.u10[3] = 0xFF;
+    sp.u10[4] = 0xFF;
+    sp.u10[5] = 0xFF;
+    sp.u18 = 0x3B0002;
+    sp.u10[6] = 0;
+    sp.u10[7] = 7;
+    sp.u20 = 0xFF;
+    sp.u1C = *(s32 *)(arg1 + 0x18);
+    sp.u22 = 0x28;
+    sp.u24 = 6;
+    f = (func_150ADA68() * 5.0f + 10.0f) * arg2;
+    if (arg5 == 2) {
+        v = 1;
+    } else {
+        v = 0;
+    }
+    func_1513C650((s32)&sp, 0, 0, (s32)(arg1 + 4), *(f32 *)(arg4 + 0), *(f32 *)(arg1 + 0), *(f32 *)(arg4 + 8), f, f, arg3, v, 3, 1, 0, 0xFF, 1);
+}
 // NON-MATCHING: need to determine arguments
 // void func_1513C650(s32, s32, s32, u16, s32, s32, s32, f32, f32, s32, s32, s32, s32, s32, u8, s32);
 // s32 func_1513C650(s32 arg0, u8 arg1, u8 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF);
