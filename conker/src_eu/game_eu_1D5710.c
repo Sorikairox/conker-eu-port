@@ -373,7 +373,23 @@ void func_151A95D4(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9610.s")
+extern s32 (*D_8008FD24[])(u8 *, s32);
+
+s32 func_151A9610(u8 *arg0) {
+    s32 i;
+    s32 (*fn)(u8 *, s32);
+
+    arg0[0x16] |= 4;
+    i = *(s32 *)(arg0 + 0x18);
+    if (i < 0 || i >= 8) {
+        return 1;
+    }
+    fn = D_8008FD24[i];
+    if (fn != NULL) {
+        fn(arg0, i);
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9670.s")
 

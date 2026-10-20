@@ -2,7 +2,7 @@
 # ndiff.sh func draft.c [ctx] [maxlines]  (s75; s96: 3rd arg = context lines, 4th = output cap) ref vs mine, relocations normalised (lui/%lo immediates -> K), unified diff
 R=${CONKER_ROOT:-$HOME/conker}; T=$(mktemp -d)
 python3 $R/docs/sessions/s65_drafts/refdiff.py "$1" "$2" 2>/dev/null >/dev/null
-s=$(ls $R/conker/asm/nonmatchings/*/$1.s | head -1)
+s=$(ls $R/conker/asm/nonmatchings/*/$1.s $R/conker/asm/nonmatchings/*/*/$1.s 2>/dev/null | head -1)
 grep -o '^ */\* [0-9A-F]* [0-9A-F]* [0-9A-F]* \*/ *.*' $s | sed -E 's/^ *\/\*.*\*\/ *//; s/\$//g; s/  +/ /g; s/%(hi|lo)\([^)]*\)/K/g; s/\(0x[0-9A-F]+ >> 16\)/K/; s/, /,/g' | sed -E 's/^(lui [a-z0-9]+),.*/\1,K/; s/^(j[a-z]*) .*/\1 F/; s/^(b[a-z]*) (.*),\.L.*/\1 \2,L/; s/^(b) \.L.*/\1 L/' > $T/ref
 $R/tools/eu_port/m2c/mine "$1" "$2" | tr ';' '\n' | tail -n +2 | sed -E 's/^ *//; s/\$//g; s/, /,/g' | python3 -c '
 import sys,re

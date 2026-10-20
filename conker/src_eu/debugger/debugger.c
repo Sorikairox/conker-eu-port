@@ -4,6 +4,7 @@
 #include "variables.h"
 
 s32 func_1600160C();
+void func_16001044(s32 arg0, s32 arg1, s32 arg2);
 
 
 void func_16000000(void) {
@@ -346,27 +347,37 @@ void func_16001338(u8 arg0, u8 arg1, u8 arg2) {
     D_1600388C = ((arg0 & 0xF8) << 8) | ((arg1 & 0xF8) << 3) | ((arg2 & 0xF8) >> 2) | 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001390.s")
-// NON-MATCHING: fill rectangle; x0 is reloaded twice in the original, temps shifted by one
-// void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
-//     u16 *fb;
-//     s32 i;
-//
-//     if ((x1 < x0) || (y1 < y0) || (x0 < 0) || (y0 < 0)) {
-//         return;
-//     }
-//     x1++;
-//     y1++;
-//     fb = (u16 *)func_1600160C(0) + (x0 + y0 * D_160038A8);
-//     x1 -= x0;
-//     y1 -= y0;
-//     for (; y1 > 0; y1--) {
-//         for (i = x1; i > 0; i--) {
-//             *fb++ = D_1600388C;
-//         }
-//         fb += D_160038A8 - x1;
-//     }
-// }
+void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
+    s32 base;
+    u16 *fb;
+    s32 i;
+
+    if (x1 < x0) {
+        return;
+    }
+    if (y1 < y0) {
+        return;
+    }
+    if (x0 < 0) {
+        return;
+    }
+    if (y0 < 0) {
+        return;
+    }
+    x1++;
+    y1++;
+    base = func_1600160C(0);
+    fb = (u16 *)base + (x0 + y0 * D_160038A8);
+    x1 -= x0;
+    y1 -= y0;
+    for (; y1 > 0;) {
+        for (i = x1; i > 0; i--) {
+            *fb++ = D_1600388C;
+        }
+        y1--;
+        fb += D_160038A8 - x1;
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160014F0.s")
 // NON-MATCHING: only glyph/j registers swapped (t0/a1)
 // extern u8 D_16003CE0[];
