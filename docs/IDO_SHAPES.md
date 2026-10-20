@@ -963,6 +963,15 @@ OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), 
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s115 recipes (lo rand callers: unsigned modulo, K&R no-arg, CERR rows)
+See `docs/sessions/s115.md`.
+1. **`divu` for `rand() % n` with a narrow or signed `n`**: write `% (u32)n`; `u8 n` promotes to int and gives `div` + the `-1/0x80000000` break checks (`func_1509F834`, `func_150C851C`).
+2. **`or sX,sY,zero` in the rand `jal` delay slot, then `addu sX,sY,hi`**: the source copies first, `v = lo; v += rand() % (u32)range;`. The order of the two loop-invariant lines (`range` before `lo`) sets the t7/t8 numbering (`func_150C851C`).
+3. **Function whose `a0` is never homed although a matched caller passes an argument**: the definition takes no params; declare it `void f();` (K&R) in the file and define `void f() {` (`func_150E8EB0`). A global tested twice (`lw` reloaded before the second `beqz`): write the global in both `if`s, not a local.
+4. A byte-table loop count loaded straight into an s-register: `s32 n = table[i];` (`u8 n` gives `lbu v0` + move) (`func_1503F2B4`).
+5. **randscreen CERR rows are cheap**: implicit declarations (a call earlier in the file), the file's own prototype of a callee, a typedef declared below the pragma. Fix the file's declarations (move the typedef/extern up, add prototypes) and screen again (`func_150C851C`, `func_150E8EB0`).
+6. A 5-byte stack copy done with `lw at; sw at; lbu at; sb at` through `t6 = &local` is an IDO initializer template (`u8 ids[5] = {...}`, aligned by the compiler): needs the file to own `.data` (`func_151008C0`, open).
+OPEN: `func_150B0F40` SIZE-1, `func_1506E46C` SIZE-6 (spilled `v & 0x7FFF`), `func_1505F188` DIFF27 (f0/f2 roles; literal needs `.rodata`), `func_150E752C` SIZE-1.
 ## s113 recipes (extern-only late rodata, label barrier, u8 flag args)
 See `docs/sessions/s113.md`.
 1. **Extern floats in an owned file with no late GLOBAL_ASM neighbour** (s111 recipe 4): `rodata_inject.py` now moves an extern-only late region into the regular `.rodata` of a GLOBAL_ASM neighbour; keep the externs (`func_150BDE34`). `static const f32` goes to `.data` in IDO, never `.rodata`.
