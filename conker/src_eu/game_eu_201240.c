@@ -249,7 +249,15 @@ void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 a
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5AC4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5BF8.s")
+void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
+s32 func_151D5AC4(u8 *, u8, s32);
+
+void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2) {
+
+    func_151D5AC4(arg0, arg1, arg2);
+    func_151D45A4(arg0, arg1, arg2);
+    func_15154728(arg0, (func_150ADA68() * 4.0f) + 12.0f, 0x3FD20C49, (func_150ADA20() % 56U) + 0xC8, 0.0f, arg1, arg2);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5714.s")
 
@@ -259,7 +267,25 @@ void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 a
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D611C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D6310.s")
+s32 allocate_memory(s32, s32, s32, s32);
+
+void func_151D6310(s32 *arg0, s16 arg1, s32 arg2, s32 *arg3, u8 *arg4) {
+    u8 dummy;
+
+    if (arg4 == NULL) {
+        arg4 = &dummy;
+    }
+    *arg4 = 0;
+    if (arg0[arg1] == 0) {
+        arg0[arg1] = allocate_memory(arg2 * 2, 1, 2, 1);
+        if (arg0[arg1] == 0) {
+            *arg3 = 0;
+            return;
+        }
+        *arg4 = 1;
+    }
+    *arg3 = arg0[arg1] + (D_800BE9C0 ? 0 : arg2);
+}
 
 void func_151D5E30(s32 **arg0)
 {
