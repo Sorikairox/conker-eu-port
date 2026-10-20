@@ -84,7 +84,110 @@ void func_150E7764(s32 arg0, s32 arg1, u8 *arg2, u8 *arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7B20.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7C50.s")
+s32 func_150ADA20(void);
+f32 func_150ADA68(void);
+s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+typedef struct { s32 w[3]; } Vec3E7C50;
+extern Vec3E7C50 D_80088E08;
+extern Vec3E7C50 D_80088E14;
+
+void func_150E7C50(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 arg6, s32 arg7, s32 arg8, u8 arg9, s32 argA) {
+    s32 pad[6]; // fakematch: 0x18 unused bytes above the struct
+    struct {
+        f32 u0;
+        f32 u4;
+        f32 u8;
+        f32 uC;
+        s8 u10;
+        s16 u12;
+        u16 u14;
+        s16 u16;
+        s16 u18;
+        u8 u1A;
+        u8 u1B;
+        u8 u1C;
+        u8 u1D;
+        u8 u1E;
+        u8 u1F;
+        u8 u20;
+        u8 u21;
+        u8 u22;
+        u8 u23;
+        s32 u24;
+        s32 u28;
+        s32 u2C;
+        s32 u30;
+        s32 u34;
+        s32 u38;
+        s32 u3C;
+        u8 u40;
+        u8 u41;
+    } sp;
+    u8 r;
+    Vec3E7C50 a;
+    Vec3E7C50 b;
+
+    r = func_150ADA20() & 3;
+    sp.u12 = arg1;
+    sp.u14 = arg2 & 0xFFF9;
+    sp.u16 = arg5;
+    sp.u18 = arg6;
+    sp.u1A = 5;
+    sp.u1B = 0xFF;
+    sp.u1C = 0xE6;
+    sp.u1D = 0xBE;
+    sp.u1E = arg3;
+    sp.u1F = 0xFF;
+    sp.u20 = 0xFF;
+    sp.u21 = 0xFF;
+    sp.u22 = 0xFF;
+    sp.u23 = arg4;
+    sp.u24 = 1;
+    sp.u28 = 0;
+    sp.u2C = 0;
+    sp.u40 = 0;
+    sp.u41 = 0xA;
+    sp.u30 = 7;
+    sp.u34 = 0x3C;
+    sp.u38 = 0x80;
+    sp.u3C = 0x20;
+    sp.uC = arg0;
+    sp.u8 = arg0;
+    switch (r) {
+    case 0:
+    case 1:
+        a = D_80088E08;
+        sp.u10 = a.w[func_150ADA20() % 3U];
+        sp.u4 = (func_150ADA68() * 160.0f) + -80.0f;
+        switch (r) {
+        case 0:
+            sp.u14 |= 2;
+            sp.u0 = 145.0f - arg0;
+            break;
+        case 1:
+            sp.u0 = arg0 - 145.0f;
+        dummy: ; // fakematch: label barrier keeps the swc1 out of the b delay slot
+            break;
+        }
+        break;
+    case 2:
+    case 3:
+        b = D_80088E14;
+        sp.u10 = b.w[func_150ADA20() % 3U];
+        sp.u0 = (func_150ADA68() * 260.0f) + -130.0f;
+        switch (r) {
+        case 2:
+            sp.u14 |= 4;
+            sp.u4 = 110.0f - arg0;
+            break;
+        case 3:
+            sp.u4 = arg0 - 110.0f;
+            break;
+        }
+        break;
+    }
+    func_151559FC(&sp, 0, arg7, arg8, 0, arg9, argA);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7F14.s")
 
