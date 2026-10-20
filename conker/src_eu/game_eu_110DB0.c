@@ -77,7 +77,22 @@ void func_150E3A94(struct102 *arg0) {
     func_1516972C(arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3B5C.s")
+void func_150E3B5C(s32 arg0) {
+    s32 i;
+    arg0 = arg0 - 1;
+    for (i = 0; i < 2; i++) {
+        struct_eu_node *node = D_800DD280[i][0x27];
+        D_800DD5C0++;
+        while (node != NULL) {
+            D_800DD5C8[D_800DD5C0] = node->next;
+            if (arg0 == -1 || arg0 == ((u8 *)node)[0x48]) {
+                func_150E3A94(node);
+            }
+            node = D_800DD5C8[D_800DD5C0];
+        }
+        D_800DD5C0--;
+    }
+}
 
 void func_150E3C3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     s32 temp_v0;
