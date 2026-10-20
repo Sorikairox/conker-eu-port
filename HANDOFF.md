@@ -1,6 +1,6 @@
 # Hand-off: Conker's Bad Fur Day (EU) decompilation
 
-Last updated: 2026-10-20 (session 55, worktree eu-wt-a, 3340/5915; session 52 was 3325; session 51 was 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
+Last updated: 2026-10-20 (session 56, worktree eu-wt-a, 3346/5915; session 55, worktree eu-wt-a, 3340/5915; session 52 was 3325; session 51 was 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 50, main checkout, game < 0x130000; 3298/5913). Older: (session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 51, worktree eu-wt-a, 3313/5913; session 49, main checkout, game < 0x130000; 3295/5913; s47 was 3286). Older stamps below are history. (session 39, main checkout; slice below 0x130000). Update this file at the end of every work session.
 Last updated: 2026-10-20 (session 44, worktree eu-wt-a; s43 = the stopped one, s42/40 before). Update this file at the end of every work session.
@@ -33,6 +33,11 @@ Mac/Windows port. Nothing is pushed, nothing goes upstream (remote `upstream` is
 
 ## Current state
 
+- **Session 56 (worktree a, on top of s55): 3346 / 5915 functions in C (56.6%)**, code bytes 381,960 / 2,253,856 (16.9%) (game 2939 = 309,008 bytes 14.9%, init 375, debugger 32), `verify_all.sh` all OK. +6 in 2 commits
+  (`5034a19` + the s56 doc commit): `func_15166F10`, `func_151AF064`, `func_1514A288`, `func_151ACDC0`, `func_1514A540`, `func_1511F30C`. Doc `docs/sessions/s56.md`, recipes IDO_SHAPES `## s56 recipes`, drafts `docs/sessions/s56_drafts/`.
+  **The six matrix-array functions did not match** (all ~120 first words right; best: `func_15177360` SIZE-1, `func_15188008` SIZE-1, `func_1517A910` DIFF48, `func_15158838` DIFF63, `func_151096A0` DIFF90, `func_1515DC40` DIFF45; details s56.md).
+  New: `redeclfix.py`, `fnptrfix.py`, `SCREEN_KEEPC=1`. Key findings: `Gfx *` + gbi macros reproduce the `or v1,s1,zero` copies; compute all float temps before the stores; `s16` loop vars stop strength reduction; double `sb` = bitfield;
+  clean source (no permuter artifacts, single-use temps inlined) fixes register swaps (`func_1511F30C`). Open near misses: `func_151664F0` DIFF2 (stack-only: f32 spill slot 0x28 vs 0x2C, `s56_drafts/*permbest_DIFF2*`), `func_151922C4` DIFF13, `func_15199F80` DIFF32, `func_1511E14C` DIFF25, `func_15157580` DIFF19, `func_151A6900` (twin, frame).
 - **Session 55 (worktree a, on top of s52 + eu merge): 3340 / 5915 functions in C (56.5%)**, code bytes 379,228 / 2,253,856 (16.8%) (game 2933 = 306,276 bytes 14.8%, init 375, debugger 32), `verify_all.sh` all OK. +8 large functions (100-134 insns each, +3,644 bytes vs 375,584 at the s55 start) in 2 commits (`3519ee2`, `00bcbb0`): `func_15193A24`, `func_151A7BC0`, `func_151BC920`, `func_151B8CA4`, `func_15157E88`, `func_1515835C`, `func_151D7410`, `func_1000B638`. Doc `docs/sessions/s55.md`, recipes IDO_SHAPES `## s55 recipes`. Pool: 359 unlogged GLOBAL_ASM functions of 100-200 insns in the slice -> 294 drafts -> after `ARGFIX=1 m2cfix.py` 0 OK / 141 CERR / 77 SIZE<=13 / 52 SIZE>13 / 24 DIFF>12. New tools: `vecfix.py` (m2c scalar `spXX` vectors -> one array, fixes dead-store SIZE-n), `spinline.py` (inline named spill temps into the call that consumes them), `opshift.py` + `rt.sh` (opcode-level insert/delete alignment of a `repair_try` diff; `rt.sh f draft.c` = try + shifts). Files that now own `.rodata`: `game_eu_1D4CC0`, `game_eu_1E61C0`, `game_eu_204730` (needed for float literals).
 - **Session 52 (worktree a, on top of s51): 3325 / 5915 functions in C (56.2%)**, code bytes 374,124 / 2,253,856 (16.6%) (game 2919, init 374, debugger 32), `verify_all.sh` all OK. +10 matched in 2 commits (`ed9fbaa`, `a8dc183`; +2 total from two merged `jr ra` stubs).
   Doc `docs/sessions/s52.md`, recipes IDO_SHAPES `## s52 recipes`. **Clone sweep result: `--near 24 --lax` gave 139 drafts, 0 OK as generated; 8 matched after hand-finishing (rewrite from the ref asm, draft = template pointer), 2 by permuter.** The near-24 pool is exhausted
@@ -87,6 +92,7 @@ docker exec conkerdev bash -c 'make -C conker VERSION=eu replace && make VERSION
 - Per-file `OPT_FLAGS` overrides are in `conker/Makefile` (libultra `-O1`, libc `-O2`, game copies of libultra `-O1`). Changing a file's flags does not rebuild its object: delete the `.o`.
 
 ## Tool index (`tools/eu_port/`, details in the session named)
+- s56: `redeclfix.py f draft out` (strip conflicting prototypes / add the real one), `fnptrfix.py in out` (m2c function-pointer-table calls), `SCREEN_KEEPC=1 repair_try.sh` keeps `conker/build/rt_<f>/<f>.tu.c`.
 - s55: `vecfix.py` (m2c scalar `spXX` vectors -> arrays), `spinline.py` (inline named spill temps into the consuming call), `opshift.py` (opcode-level shift summary of a `repair_try` diff), `rt.sh f draft.c` (try + shifts).
 
 Parallel worktrees (one agent per worktree; s35)
@@ -135,10 +141,13 @@ Matching (recipes in `docs/IDO_SHAPES.md`)
 
 ## Next steps (prioritized)
 
-0. Slice game >= 0x130000 after session 55 (details `docs/sessions/s55.md`, recipes IDO_SHAPES `## s55 recipes`): large functions pay off in bytes. Open near misses with drafts in `docs/sessions/s55_drafts/`
-   (permuter-ready: `func_151922C4`, `func_15166F10` DIFF4, `func_1511F30C` DIFF13, `func_151AF064`, `func_15151500`, `func_1000F6B8`; structure work: `func_151BCD44`, `func_151664F0`, `func_151846C0`, `func_151A31D4`).
-   Rewrite the remaining `D_800BE9C0 << 6` matrix functions (`func_15158838`, `func_1515DC40`, `func_15177360`, `func_1517A910`, `func_15188008`, `func_151096A0`) with `((f32 (*)[16])(arg0 + 0x7C))[D_800BE9C0]`.
-   Re-run the pool pipeline (`gensome.sh` -> `ARGFIX=1 m2cfix.py` -> `vecfix.py` -> `spinline.py` -> screen) after each batch; 141 of 294 pool drafts are still CERR (28 `spXX undefined`, 16 `Dereferenced a non-pointer`: vecfix variants for struct/array locals would help).
+0. Slice game >= 0x130000 after session 56 (details `docs/sessions/s56.md`, recipes IDO_SHAPES `## s56 recipes`, drafts `docs/sessions/s56_drafts/` and `s55_drafts/`): large functions pay off in bytes.
+   (a) The six `[D_800BE9C0]` matrix functions are written but unmatched; best first: `func_15177360` SIZE-1 (missing `or t0,v0,zero ... sw t0,0x50(sp)` word variable), `func_15188008` SIZE-1 (`s16 var_s2`;
+   hoisted constants go to `t9` instead of `fp/s7`), `func_1517A910` (IDO shares the `D_800DD880` address; ref uses two `lui`), `func_15158838`, `func_1515DC40` (register numbering only), `func_151096A0`.
+   (b) Compile-able near misses: `func_151664F0` DIFF2 (stack-only), `func_151922C4` DIFF13, `func_1511E14C` DIFF25 (bitfield), `func_15199F80`, `func_15157580`, `func_15150258`/`func_15151500` (u8 param copy `or s5,s1`),
+   `func_151A6900` (third particle twin: drop named pointer temps to reach frame 0x50). Clean rewrites (no permuter artifacts, single-use temps inlined, float temps first, operand swaps) solved 4 of 6 matches this session.
+   (c) Re-run `tools/eu_port/redeclfix.py` / `fnptrfix.py` on new CERR drafts first; 84 of the 141 s55 CERR drafts are still CERR (36 `spXX undefined` read-only stack vectors written by a callee, 20 `Dereferenced a non-pointer`).
+   Pool pipeline: `gensome.sh` -> `ARGFIX=1 m2cfix.py` -> `vecfix.py` -> `spinline.py` -> screen (`conker/build_port/pipe.sh`, untracked); shift scan: `repair_try` + `opshift.py` per draft (2-3 shift groups = hand-fixable).
 
 1zz. Slice below 0x130000 after session 50 (details `docs/sessions/s50.md`): near misses with drafts in `conker/build_port/s50/`: `func_1502B6BC` DIFF1 (`sf2/best.c`, varargs, `sp44` slot 0x3C vs 0x44), `func_150D2884` DIFF2 (`build_port/s49/as1.c`),
    `func_150A29C8` DIFF15 (`b_func_150A29C8.c`), `func_150EBA04` DIFF19 (`w/x2.c`), `func_150DE8AC` SIZE-1 (`w/e1.c`), `func_150893AC` / `func_15024438` / `func_150C8850` / `func_15083568` / `func_150B45C8` / `func_1505A250` (SIZE+-1, `w/`),
