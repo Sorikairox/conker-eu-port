@@ -924,3 +924,13 @@ See `docs/sessions/s93.md`.
 4. A string literal in a file that does not own `.rodata` links into a discarded section (`ld: defined in discarded section .rodata`): use the `extern` D_ symbol.
 5. A local pointer copy of a `void *` parameter (`_Pft *args = arg0;`) costs a stack slot at `-O2 -g3`: use a macro cast (`#define args ((_Pft *)arg0)`) when the header prototype must stay `void *`.
 6. PD mp3 in Conker: `mp3main00043dd0` returns `0` on failure (`if (sp954 == 0)`), `var8009c650` is a pointer (`**`), `sine_block` is `D_800E1268`.
+
+## s101 recipes (address CSE across calls, volatile homes, unused block locals)
+See `docs/sessions/s101.md`.
+1. **`&local` held in an s-register / spilled across calls (SIZE+8) when the ref recomputes `addiu aN,sp,K` at each call**: one of the call args carries an int cast (`(s32)pos`); give the callee a pointer param and pass the array uncast (`func_15070F60`).
+2. **An arg reloaded from its home at every single use** (even twice in a row): `u8 *volatile arg0` (the s97 `&arg0` pointer only reloads after stores) (`func_150F1C5C`, still DIFF186 for scheduling).
+3. **A dead `sw v0` of a call result into a spill slot** with no later load: the result was folded away, e.g. `(func_150ADA20() % 1U) + 0xFF` (`func_150F1C5C`).
+4. Constant float stores scheduled late in mine (`10.0f` pair): an unused block-scoped `s32 blk;` at the top of the `if` body (s69) fixed it after the permuter showed a temp there (`func_15071B18`).
+5. Field cached in a local gives one load; the ref reloads after stores in one arm: drop the local and write `arg0->x` at every read (`func_150E523C`).
+6. Float literals: always check the bits (`57.295776f`, `-0.97800004f`); m2c / `%g` forms round to the neighbour.
+OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), `func_15073A50` DIFF2 (frame 8 high), `func_150C8850` SIZE-1, `func_1506D584` DIFF20.
