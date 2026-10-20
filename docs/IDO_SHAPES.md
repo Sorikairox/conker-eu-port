@@ -763,6 +763,13 @@ See `docs/sessions/s79.md`.
 3. **Frame 8 high around a `u8` table lookup** (`kind = D_800A43C6[i * 16]; if (kind == 2) return; ... unk3C = (kind == 1)`): declare `s32 kind`, not `u8` (`func_151382E0`).
 4. Lowest store before a `jal func_1504715C` landing in the delay slot where the ref puts the argument copy there: a bare label between the stores and the call (fakematch, s66 recipe 1) matched `func_15194D80`; in `func_15194B3C` the same label also removes an `arg0` copy (SIZE-1), still open.
 5. `divu` by a computed divisor needs `% (u32) (x + 1)`; `%` on a plain s32 sum gives `div` + the `-1`/`0x8000` traps (`func_151D5404`).
+## s83 recipes (switch operand copy, scan loops, declaration order)
+See `docs/sessions/s83.md`.
+1. **`move v0,a3` before a compare-chain switch on a param that is also the 4th call argument**: the callee takes only 3 args (a3 merely still holds the value); with the 3-arg prototype the copy disappears. `beq x,7,L; b L` with the shared value set in an earlier delay slot = `case 7: default: v = K;` (`func_150BEEB0`).
+2. **Scan loop with `lw base; addu v0,v1,s0` for the tests and `addu a1,s0,v1` for the call**: two forms of the address (struct-typed index for the field tests, `base + i * size` for the argument/return), counter declared before the big stack struct (`func_150A3674`).
+3. Stack struct 4 bytes high next to a named pointer/temp: declare the pointer **before** the struct (`func_150A3264`, `func_1506AC24`); a named pointer used across a call and rematerialised as `addiu v0,s0,K` is declared first (`func_150F2B20`).
+4. `__ull_rshift` on a u64 table: cast both indices to `u32`; screen DIFF1 on the second word's symbol (`D_800D3514`) is only a relocation name (`func_150A29C8`).
+
 ## s81 recipes (varargs loops, unnamed slot pointers, Mtx arrays)
 See `docs/sessions/s81.md`.
 1. **Counted loop over a memory-resident count** (`&arg` taken by `va_start`) with the decrement stored before the other store in the `bnez` delay slot: `for (; arg1 != 0; arg1--) { ... }`; `if (arg1) do {...} while (--arg1);`, `while (arg1) {...; arg1--;}` and the statement order inside the body all give the reversed store order (`func_1502B020`, `func_1502B7F0`). `sltiu at,a3,2; beqz` = `for (; arg3 > 1; arg3--)` with `u32 arg3` (`func_1502B110`).
