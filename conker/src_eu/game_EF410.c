@@ -216,7 +216,79 @@ void func_150C2898(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     sp54 = func_150ADA20();
     func_151D9014(sp6C, sp60, 6, (sp4C * D_800A065C) + D_800A0660, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (func_150ADA68() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C29F0.s")
+extern f32 D_800A0670, D_800A0674, D_800A0678, D_800A067C, D_800A0680, D_800A0684, D_800A0688, D_800A068C;
+s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
+void func_150C29F0(u8 *arg0)
+{
+  f32 t;
+  struct 
+  {
+    f32 u3C;
+    f32 u40;
+    f32 u44;
+    f32 u48;
+    f32 u4C;
+    f32 u50;
+    f32 u54;
+    f32 u58;
+    s16 u5C;
+    s16 u5E;
+    s16 u60;
+    u8 u62;
+    u8 u63;
+    u8 u64;
+    u8 u65;
+    s16 u66;
+    u8 u68;
+    u8 u69;
+    u8 u6A;
+    u8 u6B;
+    s32 u6C;
+    u8 u70;
+    u8 pad71[3];
+    f32 u74;
+    f32 u78;
+    f32 u7C;
+    f32 u80;
+  } sp;
+  f32 scale;
+  f32 *p;
+  u8 r;
+  f32 c;
+  f32 s;
+  f32 m;
+  r = func_150ADA20() & 0xFF;
+  c = func_151423D8(r - 0x40);
+ do { s = func_151423D8(r); p = (f32 *) (arg0 + 0x28); m = p[2] * func_150ADA68(); sp.u5C = 0x6231; sp.u5E = 0x1A4D; } while (0); // fakematch: same-line do-while (permuter) orders the two sh stores
+  sp.u62 = 0;
+  sp.u63 = 0;
+  sp.u64 = 0;
+  sp.u65 = 0xFF;
+  sp.u68 = 0xFF;
+  sp.u69 = 0xFF;
+  sp.u6C = 0;
+  sp.u66 = 1;
+  sp.u6A = 0;
+  sp.u6B = 1;
+  sp.u60 = (func_150ADA20() % 201U) + 100;
+  sp.u70 = 0xF;
+  sp.u74 = 0.0f;
+  sp.u7C = D_800A0670;
+  sp.u80 = D_800A0674;
+  sp.u3C = p[0] + (m * c);
+  sp.u40 = p[3];
+  sp.u44 = p[1] + (m * s);
+  sp.u78 = D_800A0678;
+  scale = (func_150ADA68() * 0.5f) + 1.0f;
+  t = (func_150ADA68() * 0.5f) + 1.0f;
+  sp.u48 = D_800A067C * scale;
+  sp.u50 = D_800A0680 * scale;
+  sp.u4C = D_800A0684 * t;
+  sp.u54 = D_800A0688 * t;
+  sp.u58 = D_800A068C * t;
+  func_15149AC0(&sp.u3C, 0xA, 1, 0, arg0[0xC], arg0[1]);
+  *((s16 *) (arg0 + 0xE)) = (func_150ADA20() % 51U) + 0x19;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2C00.s")
 s32 func_150C2FCC(struct_eu_EF410_b *arg0) {
     arg0->unk2C -= arg0->unk2C * arg0->unk150;
