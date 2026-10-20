@@ -1101,9 +1101,39 @@ struct127 *func_1505EEB0(s32 state, s32 *arg1) {
     return tmp;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EEF4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505EFD0.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F0AC.s")
+struct127 *func_1505EEF4(s32 arg0) {
+    s32 i;
+    struct127 *p = D_800CC2D0;
+    for (i = 0; i < 25; i++) {
+        if (p->interaction_state != 0 && p->unk13F == arg0) {
+            return p;
+        }
+        p++;
+    }
+    return NULL;
+}
+struct127 *func_1505EFD0(s32 arg0) {
+    s32 i;
+    struct127 *p = D_800CC2D0;
+    for (i = 0; i < 25; i++) {
+        if (p->interaction_state != 0 && p->unk127 == arg0) {
+            return p;
+        }
+        p++;
+    }
+    return NULL;
+}
+struct127 *func_1505F0AC(s32 arg0) {
+    s32 i;
+    struct127 *p = D_800CC2D0;
+    for (i = 0; i < 25; i++) {
+        if (p->interaction_state != 0 && p->id == arg0) {
+            return p;
+        }
+        p++;
+    }
+    return NULL;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F188.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506045C.s")

@@ -26,7 +26,36 @@ void func_150C62C0(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3AD0/func_150C630C.s")
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[3];
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 pad1A;
+    f32 unk1C;
+} struct_C630;
+s8 func_150C630C(u8 *arg0) {
+    s8 ret;
+    struct_C630 *p;
+    ret = 1;
+    p = (struct_C630 *)(arg0 + 0xB0);
+    if (p->unk4 == 0) {
+        ret = 0;
+    }
+    p->unk4 = 0;
+    p->unk14 -= D_800BE9E4;
+    if (p->unk14 < 0) {
+        p->unk14 = ((u32)func_150ADA20() % (u32)(p->unk18 + 1)) + p->unk16;
+        p->unk10 = (func_150ADA68() * p->unkC) + p->unk8;
+    }
+    *(s32 *)(arg0 + 0x24) += (s32)((p->unk10 - (f32)*(s32 *)(arg0 + 0x24)) * p->unk1C);
+    return ret;
+}
 
 void func_1513F6C0(u8 *, u8, u8);
 s32 func_150C63FC(u8 *arg0) {

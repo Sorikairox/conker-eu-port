@@ -1589,3 +1589,4 @@ D_8002C060                      = 0x8002C060; /* osClockRate: libultra/os/initia
 D_800E14A8 = 0x800E14A8;
 D_800E14B0 = 0x800E14B0;
 D_800E18B0 = 0x800E18B0;
+D_800D9E10 = 0x800D9E10;
