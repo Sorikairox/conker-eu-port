@@ -68,7 +68,27 @@ s32 func_1000EC24(struct251 *arg0, s32 arg1, s32 *arg2, struct11 *arg3, struct04
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000ECCC.s")
+s32 func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
+    struct_eu_sfx *sfx = arg0;
+    s16 timer = sfx->unk18;
+
+    if (*arg6 != 0) {
+        sfx->unk18 = (*arg6 << 16) | (sfx->unk18 & 0xFFFF);
+        sfx->unk0 = 0;
+        *arg6 = 0;
+    }
+    timer -= D_800BE9E4;
+    if (timer <= 0) {
+        *arg6 = sfx->unk18 >> 16;
+        sfx->unk0 = *arg6;
+        if (func_10010894((struct127 *)sfx->unk1C) == 0) {
+            func_10010344(*arg6, (struct127 *)sfx->unk1C, sfx->unkC, sfx->unkA, sfx->unk8);
+        }
+        return 1;
+    }
+    sfx->unk18 = (sfx->unk18 & 0xFFFF0000) | timer;
+    return 0;
+}
 // ? func_1000ECCC(void *arg0, ? arg1, ? arg2, ? arg3, void *arg6) {
 //     s16 temp_a1;
 //     s32 temp_t4;
