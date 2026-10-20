@@ -66,9 +66,85 @@ s32 func_151C8D5C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9748.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9A84.s")
+void func_151C9A84(struct210 *arg0) {
+    u8 *p;
+    struct102 *a;
+    struct210 **pa = &arg0; // fakematch: arg0 address taken keeps it in its home slot
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4F60/func_151C9B88.s")
+    p = (u8 *)*pa + 0x110;
+    if (*(s32 *)((u8 *)*pa + 0x13C) != 0) {
+        func_1516972C(*(struct102 **)(p + 0x2C));
+        func_1000FD38(func_151C8D5C, p, 0);
+    }
+    p = (u8 *)*pa;
+    a = *(struct102 **)(p + 0x144);
+    p += 0x110;
+    if (a != NULL) {
+        func_1516972C(a);
+    }
+    if (*(struct102 **)(p + 0x38) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x38));
+    }
+    if (*(struct102 **)(p + 0x3C) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x3C));
+    }
+    if (*(struct102 **)(p + 0x40) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x40));
+    }
+    if (*(struct102 **)(p + 0x44) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x44));
+    }
+    if (*(struct102 **)(p + 0x48) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x48));
+    }
+    if (*(struct102 **)(p + 0x4C) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x4C));
+    }
+    if (*(struct102 **)(p + 0x50) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x50));
+    }
+    func_1513CA6C(arg0);
+}
+
+void func_151C9B88(struct210 *arg0) {
+    u8 *p;
+    struct102 *a;
+    struct210 **pa = &arg0; // fakematch: arg0 address taken keeps it in its home slot
+
+    p = (u8 *)*pa + 0x110;
+    if (*(s32 *)((u8 *)*pa + 0x13C) != 0) {
+        func_1516972C(*(struct102 **)(p + 0x2C));
+        func_1000FD38(func_151C8D5C, p, 0);
+    }
+    p = (u8 *)*pa;
+    a = *(struct102 **)(p + 0x144);
+    p += 0x110;
+    if (a != NULL) {
+        func_1516972C(a);
+    }
+    if (*(struct102 **)(p + 0x38) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x38));
+    }
+    if (*(struct102 **)(p + 0x3C) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x3C));
+    }
+    if (*(struct102 **)(p + 0x40) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x40));
+    }
+    if (*(struct102 **)(p + 0x44) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x44));
+    }
+    if (*(struct102 **)(p + 0x48) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x48));
+    }
+    if (*(struct102 **)(p + 0x4C) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x4C));
+    }
+    if (*(struct102 **)(p + 0x50) != NULL) {
+        func_1516972C(*(struct102 **)(p + 0x50));
+    }
+    func_1513CAA0(arg0);
+}
 
 s32 func_151C9C8C(u8 *arg0, s32 arg1) {
     s32 *q = &arg1; // fakematch: arg1 home store

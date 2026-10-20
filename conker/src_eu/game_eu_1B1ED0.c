@@ -115,13 +115,39 @@ s32 func_15186098(f32 *arg0) {
     return arg0[2] < D_800D3AAC;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151860C4.s")
+typedef struct {
+    f32 x, y, z;
+    s16 s, t, u;
+} ClipVtx_60C4;
+ClipVtx_60C4 *func_151860C4(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out) {
+    f32 t;
+
+    t = a->x / (a->x - b->x);
+    out->x = 0.0f;
+    out->y = a->y + (b->y - a->y) * t;
+    out->z = a->z + (b->z - a->z) * t;
+    out->s = a->s + (b->s - a->s) * t;
+    out->t = a->t + (b->t - a->t) * t;
+    out->u = a->u + (b->u - a->u) * t;
+    return out + 1;
+}
 
 s32 func_151861B4(f32 *arg0) {
     return *arg0 <= 0.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151861DC.s")
+ClipVtx_60C4 *func_151861DC(ClipVtx_60C4 *a, ClipVtx_60C4 *b, ClipVtx_60C4 *out) {
+    f32 t;
+
+    t = a->y / (a->y - b->y);
+    out->y = 0.0f;
+    out->x = a->x + (b->x - a->x) * t;
+    out->z = a->z + (b->z - a->z) * t;
+    out->s = a->s + (b->s - a->s) * t;
+    out->t = a->t + (b->t - a->t) * t;
+    out->u = a->u + (b->u - a->u) * t;
+    return out + 1;
+}
 
 s32 func_151862CC(f32 *arg0) {
     return arg0[1] <= 0.0f;
@@ -135,7 +161,31 @@ s32 func_1518631C(f32 *arg0) {
     return arg0[1] > 0.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186344.s")
+extern ClipVtx_60C4 *(*D_8008D838[])(ClipVtx_60C4 *, ClipVtx_60C4 *, ClipVtx_60C4 *);
+extern s32 (*D_8008D860[])(ClipVtx_60C4 *);
+ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *out) {
+    ClipVtx_60C4 *prev = &in[n - 1];
+    ClipVtx_60C4 *(*isect)(ClipVtx_60C4 *, ClipVtx_60C4 *, ClipVtx_60C4 *) = D_8008D838[plane];
+    s32 (*inside)(ClipVtx_60C4 *) = D_8008D860[plane];
+    ClipVtx_60C4 *cur = in;
+    s32 i;
+
+    for (i = 0; i < n; i++) {
+        if (inside(cur)) {
+            if (inside(prev)) {
+                *out++ = *cur;
+            } else {
+                out = isect(prev, cur, out);
+                *out++ = *cur;
+            }
+        } else if (inside(prev)) {
+            out = isect(prev, cur, out);
+        }
+        prev = cur;
+        cur++;
+    }
+    return out;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186494.s")
 
