@@ -963,6 +963,14 @@ OPEN: `func_1501175C` SIZE+1 (`p = obj + 0x28` must get s1 while `obj` spills), 
 3. Floats loaded once before a spawner loop: the order of the setup statements decides the float registers (`sp.u88 = 0.0f; sp.u58 = K1; scale = K2;` gave the ref `f18/f6/f16`). Sweep the permutations with `tryall`.
 4. `extern f32 D_800Axxxx` is a memory load and is never hoisted out of a loop; a literal is (into f20-f30). If the ref keeps a rodata constant in a callee-saved float register across the loop, the file must own `.rodata`.
 
+## s108 recipes (rand loop counts, real callee prototypes, pointer in rand args)
+See `docs/sessions/s108.md`.
+1. **Spawner loop count `n = base + rand() % (k + 1)` where the ref's first in-loop rand result lands in the other s-register** (`move s1,v0` vs `move s3,v0`): write it as `n = func_150ADA20(); n = base + (n % (u32)(k + 1));` (permuter, `func_1515423C`, `func_15151500`, `func_15152DE4`).
+2. **gensome prototypes of big spawner callees are often wrong** (m2c drops stack args). Take the prototype from a matched caller (`grep -rn 'func_X(' conker/src_eu`) before anything else: `func_151DA6F8` has 18 args, not 15 (`func_15154488`). Two drafts in one file need byte-identical local prototypes, or apply.py REJECTs the second.
+3. A stack array 4 bytes below its ref slot with the frame right: declare the register-allocated loop counter `s32 n;` **before** the array (`func_15154488`, `func_1515128C`, `func_151BC6B4` with `ret`).
+4. Float rand arg `mul.s f0,f4` (rand first): read the field **through the pointer local** in the argument, `p[8] * func_150ADA68()`, with `p` assigned before the call; `*(f32 *)(arg0 + 0x48)` or the other operand order gives DIFF1 or SIZE+1 (`func_151A951C`).
+5. `beq fp,v0` (constant -1 register first) for `if (i != -1)` with `s8 i`: `if (i != 0xFFFFFFFF)` (`func_15152DE4`).
+OPEN: `func_151BC6B4` DIFF71 (block-2 struct offsets), `func_151570C4` DIFF2 (frame +8), `func_15141478` SIZE-1 (spilled CSE temp).
 ## s106 recipes (inline rand args, u8 callee slots, same-line do-while)
 See `docs/sessions/s106.md`.
 1. **Rand spawner loops (`func_150ADA20`/`func_150ADA68` results feeding one big call)**: when m2c's temps (`temp_s3 = rand(); ... f(temp_s3 % ...)`) leave operand-order diffs (`addu a1,t2,t3`, `mul.s f6,f0,f4` swapped) that no source swap fixes, put **every rand call inline in the argument list** (`f(base + rand() % (n + 1), base2 + field * func_150ADA68(), ...)`): IDO evaluates call arguments left to right, which gives exactly the ref's call order and operand order; write ints as `base + rand() % (n + 1)` and floats as `base + field * func_150ADA68()` (`func_15150258`, `func_15154BF4`). A float flag argument from a rand compare is also inline: `func_150ADA68() < *(f32 *)(arg0 + 0x34)` (no `? 1 : 0`).
