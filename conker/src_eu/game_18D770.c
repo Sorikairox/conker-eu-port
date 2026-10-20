@@ -658,7 +658,22 @@ void func_15161F2C(struct225 *arg0) {
     func_15163F50(arg0, &arg0->unk18);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15161F4C.s")
+extern void (*D_8008B6F8[])(u8 *, u8 *, u8);
+void func_15161F4C(u8 *arg0, u8 *arg1, u8 arg2)
+{
+  u8 *v = arg0 + 0x18;
+  if (arg2 == 0)
+  {
+    s32 blk_t; // fakematch: block-local declaration = basic-block boundary (s69)
+    if ((*(s32 *)v == *(s32 *)arg1) || (v[4] == arg1[4])) { func_1516972C((struct102 *)arg0); }
+  }
+  else if (arg2 == 0x2D)
+  {
+    if (*(s32 *)arg1 == *(s32 *)v) { *(s32 *)v = *(s32 *)(arg1 + 4); v[4] = arg1[9]; }
+    else if (*(s32 *)(arg1 + 4) == *(s32 *)v) { *(s32 *)v = *(s32 *)arg1; v[4] = arg1[8]; }
+  }
+  if (D_8008B6F8[arg0[0x1D]] != NULL) { D_8008B6F8[arg0[0x1D]](arg0, arg1, arg2); }
+}
 
 struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2) {
     struct225 *temp_v0;
@@ -1301,7 +1316,31 @@ typedef struct {
     u8  unk4;
 } struct_eu_151640C0;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151640C0.s")
+void func_151640C0(u8 *arg0, u8 *arg1, u8 arg2)
+{
+  u8 **q = &arg0; // fakematch: shape C home reload
+  u8 **r = &arg1; // fakematch: shape C home reload
+  u8 *a;
+  u8 *v;
+  s32 k;
+  s32 w;
+  u8 b;
+  u8 c;
+  if (arg2 == 0x29)
+  {
+    a = *(u8 **)(*r + 4);
+    v = *q;
+    v = v + 0x18; // fakematch: split add keeps the reload in v0 (permuter)
+    k = *(s32 *)a;
+    w = *(s32 *)v;
+    c = v[4];
+    b = a[4];
+    if ((w == k) || (c == b) || (b == ((u8 *)w)[0x3B]))
+    {
+      func_1516972C((struct102 *)*q);
+    }
+  }
+}
 // NON-MATCHING: all four values are loaded into a0-a3 before the tests; regalloc
 // void func_151640C0(struct225 *arg0, struct_eu_151640C0 **arg1, u8 arg2) {
 //     struct_eu_151640C0 *a;

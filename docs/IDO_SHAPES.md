@@ -696,3 +696,10 @@ See `docs/sessions/s70.md`.
 3. **Pointer-walk vs index loop**: `slti at,sN,K; bnez` loop test (not `li at,K; bne`) + a separate pointer register = `for (i = 0; i < K; i++) ... a[i]` (IDO strength-reduces itself and keeps the `<` test). A loop to a symbol end (`sN != &D_end`) with the start in another register = also an index loop over the array (`func_150EBA04`).
 4. Frame 8 bytes too small with everything else right: an unused `s32 pad[2];` declared first fixed `func_150EBA04` (`f64` and `u8[8]` too; after the other locals: no). Fakematch.
 5. Pipeline for a whole slice (about 10 min / 3,000 variants): `ljcollect.py l.txt` -> `ljsweep.py l.txt base > base.res` -> `ljpipe.py base.res w > w.txt` -> `ljsweep.py w.txt w > w.res` -> `ljbest.py w.res w/sel.txt`.
+## s71 recipes (0x2D/0 handler family: compare order, arg2 copy)
+See `docs/sessions/s71.md`.
+1. **Second 0x2D compare `bnel arg1[1], key` comes out reversed**: drop the named `t`/`k` and write plain memory compares (`if (*(s32 *)arg1 == *(s32 *)v) {...} else if (*(s32 *)(arg1 + 4) == *(s32 *)v) { ... = *(s32 *)arg1; ...}`), IDO CSEs the loads (`func_15161F4C`, `func_15133AF8`, `func_151B604C`). Alternative: a function-level `s32 *key = (s32 *)(arg0 + K);` read as `*key` in every compare (`func_15159514`, permuter). `(0, k)` and operand swaps of a named `k` do nothing.
+2. Then add `s32 blk_t;` (s69 shape D) in the arm whose tail is `store; b L; lw ra` or `b L; <copy of the target insn>`: arm 0 with the `jal` in `func_15161F4C`, the last swap arm elsewhere.
+3. **`or v0,a2,zero` copy of the u8 arg2 spilled across a call** = `s32 sel = arg2;` tested in the later arms (`func_15133AF8`); a function-level `t` reused in arm 0 takes `v0` after it.
+4. Shape C with two args reloaded (`func_151640C0`): `q = &arg0; r = &arg1;` + named loads; the permuter's `v = *q; v = v + 0x18;` (split add, fakematch) set the v0/v1 roles.
+5. OPEN: `func_15187EC0` (ref reloads `arg0` from its home but still hoists the stack-arg loads above the stores, which `&arg0` prevents), `func_15104FF8` (frame 0x48 between my 0x40/0x50).
