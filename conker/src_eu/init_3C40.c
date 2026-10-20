@@ -54,7 +54,15 @@ void func_10004308(void) {
     osSetIntMask(mask);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/func_100043B4.s")
+typedef struct { s32 a; s32 b; u32 c; } Hdr43B4; /* 12-byte header before the block */
+
+void func_100043B4(s32 *arg0, u32 arg1) {
+    Hdr43B4 *h = (Hdr43B4 *)arg0 - 1;
+    u32 mask = osSetIntMask(1);
+
+    h->c = (h->c & 0xFFFFFF) | (arg1 << 24);
+    osSetIntMask(mask);
+}
 // NON-MATCHING: missing an addiu
 // void func_100043B4(s32 *arg0, u32 arg1) {
 //     OSIntMask mask = osSetIntMask(1);
