@@ -959,3 +959,9 @@ func_151CD97C	new	4	OK	y	n	s72: fn-level v=arg0+0x28, blk_t at top of arms 0x17/
 func_151C8C5C	new	2	OK	y	n	s72: shape C u8 **q = &arg0 (arg0 reloaded from home), switch(arg2), mem compare v+0x28 == arg1[1]
 func_15135480	DIFF1	3	OK	y	y	s72: remote permuter from plain-compare grid: key-first plain compares, t=arg1->unk0 in 2nd arm, (k ^ 0) default arm
 func_151347CC	new	2	OK	y	n	s72: s32 *key = &arg0->unk1C read as *key in the 0x2D arm (s71 recipe 2)
+func_1518B140	new	3	OK	y	n	s72: queue push; link test re-reads n+0x14 after storing it (no named head temp), decl order a1 first fixes spill slot 0x1C
+func_151597A0	DIFF9	3	OK	y	n	s72: b L to next insn = outer if (...) { if (arg2==1||arg2==2) r=2; else r=1; } else { r = 0; } (else arm merged), no fakematch
+func_15156598	new	3	OK	y	y	s72: struct127 ptr diffs arg1[i] - D_800CC2D0; arm-local s32 a / s32 b declarations fix the lui/addiu schedule (permuter hint)
+func_151A6520	new	8	DIFF30	n	y	s72: shape C u8 **q=&arg0 + s32 *m=arg1 (s0); left: loop preheader order (key before p) and the c copy into v1; drafts s72_drafts
+func_1513DF9C	new	0	skip	n	n	s72: jump table jtbl_800A5568, game_169510 owns no .rodata
+func_151604A0	new	0	skip	n	n	s72: two jump tables, game_18D770 owns no .rodata
