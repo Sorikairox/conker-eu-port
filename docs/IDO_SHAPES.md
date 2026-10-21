@@ -1228,3 +1228,23 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **The ref loads a later statement's source before an earlier store** (`lbu t9; sh v1; sb v1; sb t9`): the later statement was written first in the source. Swap the two statements; the stores keep their order (`func_1516DF0C`).
 4. **A table byte compared in `v0` instead of a t-reg**: assign it to a `u8` local first (`u8 t = D[i * 0x32C]; if (t == 0x3A)`) (`func_1516F2D8`).
 5. A switch whose jump table starts below its lowest real case: the low case shares the default body (`case 9: default:`). Empty cases (`return`) are separate table targets (`func_151CA150`).
+
+## s138 recipes (fade updaters, spawner struct copies, K&R arg registers)
+1. **A byte field updated with `slti 255` / `bgez` compares** (fade in/out: `v = p[0x1F]; v += D << 6; if (v >= 0xFF) v = 0xFE;`): the working variable is `s32`, not the `u8` m2c gives (`func_1516F21C`, `func_151702C0`).
+2. **Two values in `a0`/`a1` right before a call that takes no arguments**: the source passes them anyway through a K&R declaration (`s32 f(); f(hi, lo)`); m2c's extra call args are a hint, not noise (`func_15170D50`).
+3. **m2c spawner drafts with dozens of `spXX` locals and a `memcpy(ret + 0x70, &spB, 0x58)`**: rebuild them as two local structs (template at `&spA`, the 0x58 block at `&spB`); separate locals lose all their stores (SIZE-60..-120). `s138_drafts/spstruct.py` does it (`func_151CB128`).
+4. A `u8` param whose word home is reloaded with `andi 0xFF` at entry: declare it `u8` and drop m2c's `& 0xFF` uses.
+
+## s140 recipes (byte-store temps, FP compare order, parked-near-miss permuting)
+1. **Two byte stores of one shifted value with the low-byte temp in the wrong t-reg** (`sra t0; sra t9,t0; sb t9; sb t0`, mine t8): `p[k+1] = v & 0xFFFFu;` (fakematch) moves it (`func_1516FE5C`/`FE8C`). Both had to be `void` in the file prototypes first.
+2. **`add.s` operands of an FP compare in the wrong order** (`lo + x < dist`): the comma form `(lo + x) < (0, dist)` (permuter) flips them; source operand order alone is canonicalised (`func_151D91B0`). Declaring `f32 *p` before `f32 d[3]` moved the array 4 lower to the ref slot.
+3. **A search-loop flag** (`while (!found && i < n)`) that the ref keeps with `andi 0xFF`: declare it `u8` (`func_15143E94`).
+4. **Remote permuter on old parked near misses pays**: s139 4/6, s140 4/20 (all DIFF <= 7 starts). Screen all saved drafts at once with `ljsweep.py` (`s140_drafts/collect.py` + `rank.py`), permute the best per function.
+
+
+## s142 recipes (comma operand order, struct-typed FP access)
+1. **Commutative FP op with its operands in the wrong `fs`/`ft` order** (`mul.s f14, f8, f0` vs mine `f0, f8`): source order is canonicalised, but **`x * (0, s)`** puts `s` in `fs`; also fixes the f-register pair (`1.0f - (arg1[5] * (0, dist - lo))`, `func_151D91B0`; `F(0x10) * (0, s)`, `func_1513384C`). Screen all 4 forms (`(0,a)*b`, `a*(0,b)`, ...) per op with tryall; label fakematch.
+2. **A call result multiplied by a product** with the product loaded after the call: `s = call(); s = (B * A) * s;` gives the ref load/operand order (`func_1513384C`).
+3. **FP register pairs alternating the wrong way (f4/f6, f6/f4) all through a function that uses `p = arg0 + K` with `*(f32 *)(p + n)` casts**: rewrite with a **struct pointer** (`Sub *v = (Sub *)(arg0 + 0x70); v->unk18`). The casts cost DIFF8 / DIFF27; the struct form matched first try (`func_151CD7D4`, `func_151CBF20` game_eu_1F7960).
+4. `(a + (*p >> 6)) - K` vs `((*p >> 6) + a) - K` changes the t-register numbering (DIFF12 -> OK, `func_1517BC58`).
+5. Chained byte stores `p[6] = (p[0] = v)` store `[0]` first; write `p[0] = (p[6] = v)` for `sb 6; sb 0` (`func_15187EC0`).

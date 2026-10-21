@@ -183,7 +183,28 @@ s32 func_1515A68C(u8 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A7A8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515AB7C.s")
+typedef struct { f32 unk0; u8 unk4; u8 unk5; s8 unk6; s8 unk7; f32 unk8; f32 unkC; u8 unk10; u8 unk11; u8 unk12; u8 unk13; f32 unk14; f32 unk18; f32 unk1C; } SubAB7C;
+f32 func_151423D8(u8);
+s32 func_1515AB7C(u8 *arg0, s32 arg1) {
+    SubAB7C *p;
+    s32 i;
+
+    p = (SubAB7C *)(arg0 + 0xA8);
+    *(f32 *)(arg0 + 0x38) = (func_151423D8(p->unk4 - 0x40) * p->unk8) + p->unk0;
+    *(f32 *)(arg0 + 0x3C) = (func_151423D8(p->unk5 - 0x40) * p->unkC) + p->unk0;
+    *(f32 *)(arg0 + 0x4C) = func_151423D8(p->unk10 - 0x40) * p->unk14;
+    *(f32 *)(arg0 + 0x54) = func_151423D8(p->unk11 - 0x40) * p->unk18;
+    p->unk4 += p->unk6 * D_800BE9E4;
+    p->unk5 += p->unk7 * D_800BE9E4;
+    p->unk10 += p->unk12 * D_800BE9E4;
+    p->unk11 += p->unk13 * D_800BE9E4;
+    for (i = D_800BE9E4; i > 0; i--) {
+        *(f32 *)(arg0 + 0x58) *= p->unk1C;
+        *(f32 *)(arg0 + 0x5C) *= p->unk1C;
+        *(f32 *)(arg0 + 0x60) *= p->unk1C;
+    }
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515ACFC.s")
 

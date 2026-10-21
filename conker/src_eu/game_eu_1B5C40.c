@@ -3,7 +3,26 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B5C40/func_15187EC0.s")
+s32 func_15187EC0(s32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7)
+{
+  u8 *e;
+  if (D_800DFBE4 < 5)
+  {
+    e = (u8 *) (&D_800DFB30[D_800DFBE4]);
+    *((f32 *) (((u8 *) (&D_800DFB30[D_800DFBE4])) + 0x14)) = arg1;
+    *((s32 *) (((u8 *) (&D_800DFB30[D_800DFBE4])) + 0x10)) = arg0;
+    ((u8 *) (&D_800DFB30[D_800DFBE4]))[0] = (((u8 *) (&D_800DFB30[D_800DFBE4]))[6] = arg2);
+    ((u8 *) (&D_800DFB30[D_800DFBE4]))[1] = (((u8 *) (&D_800DFB30[D_800DFBE4]))[7] = arg3);
+    ((u8 *) (&D_800DFB30[D_800DFBE4]))[2] = (((u8 *) (&D_800DFB30[D_800DFBE4]))[8] = arg4);
+    ((u8 *) (&D_800DFB30[D_800DFBE4]))[3] = arg5;
+    ((u8 *) (&D_800DFB30[D_800DFBE4]))[4] = arg6;
+    ((u8 *) (&D_800DFB30[D_800DFBE4]))[5] = arg7;
+    bzero(e + 0x18, 0xC);
+    D_800DFBE4++;
+    return D_800DFBE4 - 1;
+  }
+  return -1;
+}
 
 void func_15188500(void) {
     bzero(D_800DFB30, 0xB4);

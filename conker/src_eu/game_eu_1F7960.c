@@ -3,7 +3,88 @@
 #include "variables.h"
 void *memcpy(void *, const void *, unsigned int);
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CA150.s")
+void func_151CD444(u8 *arg0);
+s32 func_151CA398(u8 *, s32, s32, s32, s32);
+s32 func_151CA484(u8 *);
+s32 func_151CA4E8(u8 *, s32, s32, s32, s32);
+s32 func_151CAC50(u8 *, s32);
+s32 func_151CB128(u8 *, s32);
+s32 func_151CB2D8(u8 *, s32);
+s32 func_151CBBAC(u8 *, s32, s32, s32, s32);
+s32 func_151CCAD4(u8 *, s32, s32, s32, s32, s32);
+s32 func_151CCDF0(u8 *, s32, s32, s32, s32, s32);
+s32 func_151CD2CC(u8 *, s32, s32, s32);
+extern u8 D_800CC3C8[];
+
+void func_151CA150(u8 *arg0, s32 arg1)
+{
+  s32 v; s32 t;
+  func_151CA484(arg0);
+  v = *((u8 *) (((u8 *) (*((u8 **) (((u8 *) arg0) + 0x3D0)))) + 0x65));
+  if (v != 0) { t = D_800CC3C8[v * 0x32C]; if ((t == 0x23) || (t == 0x8A)) arg1 = 0x1B; }
+  switch (arg1)
+  {
+    case 0x23:
+      func_151CA4E8(arg0, 1, 1, -1, 0xFF);
+      func_151CAC50(arg0, 0);
+      return;
+
+    case 0x1F:
+
+    case 0x29:
+      func_151CA4E8(arg0, 2, 1, -1, 0xFF);
+      func_151CB2D8(arg0, 0);
+      return;
+
+    case 0xC:
+
+    case 0x16:
+      func_151CB2D8(arg0, 0);
+      func_151CD444(arg0);
+      return;
+
+    case 0x1B:
+      if (D_800BE9F0 == 0x27)
+    {
+      func_151CA398(arg0, 1, -1, 0xFF, 1);
+      return;
+    }
+      if (D_80082FA0 == 0)
+    {
+      func_151CCAD4(arg0, 0xFF, 0, 0, 1, 0xFF);
+      func_151CCDF0(arg0, 0xFF, 0, 0, 1, 0xFF);
+    }
+    else
+    {
+      func_151CD2CC(arg0, 0xFF, 0, 0);
+    }
+      func_151CA4E8(arg0, 3, 1, -1, 0xFF);
+      func_151CBBAC(arg0, 1, 1, -1, 0xFF);
+      return;
+
+    case 0x24:
+      func_151CA4E8(arg0, 0, 1, -1, 0xFF);
+      func_151CAC50(arg0, 0);
+      return;
+
+    case 0x12:
+
+    case 0x18:
+
+    case 0x38:
+
+    case 0x3B:
+      break;
+
+    case 9:
+
+    default:
+      func_151CB128(arg0, 0);
+      break;
+
+  }
+
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CA398.s")
 
@@ -80,7 +161,41 @@ void func_151CBEC8(u8 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CBF20.s")
+f32 func_151CC784(u8 *);
+typedef struct { u8 pad0[0xC]; u8 unkC; u8 unkD; u8 padE[2]; f32 unk10; f32 unk14; f32 unk18; f32 unk1C; f32 unk20; } Sub151CBF20;
+s32 func_151CBF20(u8 *arg0) {
+    s32 pad; // frame padding
+    Sub151CBF20 *v;
+    f32 t;
+    f32 k;
+    f32 lo;
+    u8 a;
+
+    v = (Sub151CBF20 *)(arg0 + 0x70);
+    k = (1.0f - ((func_151CC784(arg0) - v->unk18) * v->unk20)) * 75.0f;
+    if (v->unkC & 1) {
+        lo = 91.0f + k;
+        *(f32 *)(arg0 + 0x14) = (sinf(v->unk10) * ((112.0f + k) - lo)) + lo;
+        v->unk10 += 0.505f * D_800BE9A4;
+        if (v->unk10 >= 3.1415927f) {
+            *(f32 *)(arg0 + 0x14) = lo;
+            v->unkC &= 0xFFFE;
+        }
+    } else {
+        *(f32 *)(arg0 + 0x14) = 91.0f + k;
+    }
+    if (v->unkD == 2) {
+        *(f32 *)(arg0 + 0x14) -= 20.0f;
+    }
+    a = v->unk14;
+    if (arg0[0x20] == 0x7C) {
+        arg0[0x2E] = 0xFF - a;
+    } else {
+        arg0[0x2E] = a;
+    }
+    v->unk14 += (255.0f - v->unk14) * 0.67600006f;
+    return 1;
+}
 
 void func_151CC11C(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {
@@ -160,4 +275,17 @@ void func_151CD444(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CD4B8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CD7D4.s")
+f32 func_151CC784(u8 *);
+typedef struct { u8 pad0[0xD]; u8 unkD; u8 padE[0xA]; f32 unk18; f32 unk1C; f32 unk20; } SubCD;
+void func_151CD7D4(u8 *arg0) {
+    f32 k;
+    SubCD *v;
+
+    v = (SubCD *)(arg0 + 0x70);
+    k = (1.0f - ((func_151CC784(arg0) - v->unk18) * v->unk20)) * 75.0f;
+    if (v->unkD == 5) {
+        *(f32 *)(arg0 + 0x14) = 92.0f + k;
+    } else if (v->unkD == 4) {
+        *(f32 *)(arg0 + 0x14) = -92.0f - k;
+    }
+}

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+void func_151D91B0(u8 *arg0, f32 *arg1);
 
 
 extern u8 D_800BED64[];
@@ -46,10 +47,33 @@ void func_151D9164(void *arg0) {
 }
 
 void func_151D9190(u8 *arg0) {
-    func_151D91B0(arg0, arg0 + 0x18);
+    func_151D91B0(arg0, (f32 *)(arg0 + 0x18));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_151D91B0.s")
+f32 func_15143E64(f32 *, f32 *);
+
+void func_151D91B0(u8 *arg0, f32 *arg1) {
+    f32 *p;
+    f32 d[3];
+    f32 dist;
+    f32 lo;
+    f32 v;
+
+    p = func_15144B34(((u8 *)arg1)[0x18]);
+    d[0] = arg1[0] - p[0];
+    d[1] = arg1[1] - p[1];
+    d[2] = arg1[2] - p[2];
+    dist = func_15143E64(d, arg1);
+    lo = arg1[3];
+    if (dist < lo) {
+        v = 1.0f;
+    } else if ((lo + arg1[4]) < (0, dist)) { // fakematch: comma orders the add.s
+        v = 0.0f;
+    } else {
+        v = 1.0f - (arg1[5] * (0, dist - lo)); // fakematch: comma swaps the f-regs
+    }
+    arg0[0x12] = v * 8.0f;
+}
 
 void func_151D930C(struct102 *arg0, s32 arg1, u8 arg2) {
     if (arg2 == 0x58) {

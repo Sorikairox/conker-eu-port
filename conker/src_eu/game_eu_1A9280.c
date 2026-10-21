@@ -34,7 +34,23 @@ s32 func_1517BA70(u8 *arg0, u8 *arg1, s32 *arg2, s32 arg3) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517BC58.s")
+s32 func_1517BC58(s16 *arg0, s16 *arg1, s32 *arg2, u8 *arg3) {
+    s32 t;
+    if (*arg2 >= 0x600) {
+        arg1[1] = (arg0[1] + (*arg2 >> 6)) - 0x18;
+        arg1[0] = (arg0[0] + (*arg2 >> 8)) - 6;
+        t = ((*arg3 << 7) / ((*arg2 >> 6) - 0x17)) >> 4;
+        if (t < *arg3) {
+            *arg3 = t;
+        }
+        *arg2 = 0x600;
+    } else {
+        arg1[0] = arg0[0];
+        arg1[1] = arg0[1];
+    }
+    arg1[2] = arg0[2];
+    return 0;
+}
 
 s32 func_1517BD18(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
     if (*arg2 >= 0x300) {

@@ -1,0 +1,55 @@
+date	commit	funcs	total	bytes	bytes_pct	subject
+2026-10-19 08:28	7ef7e94	3139	5913	340772	15.1	Docs restructure: split HANDOFF.md into a short hand-off, docs/IDO_SHAPES.md recipes and d
+2026-10-19 08:54	3f248da	3153	5913	343020	15.2	Session 33: hand-off (current state, next steps, session notes, new recipes)
+2026-10-19 09:21	cbb5a4a	3158	5913	344028	15.3	Session 34: hand-off (state, notes, s34.md)
+2026-10-20 00:48	03858bb	3166	5913	344884	15.3	Session 35: hand-off (state, notes, s35.md)
+2026-10-20 00:52	312b2c6	3179	5913	348056	15.4	Merge eu-wt-a: parallel worktree infra, remote worker fix, sessions 36-38
+2026-10-20 01:33	3b5be89	3198	5913	350892	15.6	Session 39 hand-off: HANDOFF state, s39.md
+2026-10-20 01:38	dfa32ba	3216	5913	353916	15.7	Merge eu-wt-a: session 40 (game >= 0x130000, init, debugger)
+2026-10-20 02:34	463a10e	3227	5913	355980	15.8	EU: match func_15033CB8; session 41 hand-off (HANDOFF, IDO_SHAPES section 15, s41.md, repa
+2026-10-20 02:39	746ea5e	3239	5913	358236	15.9	Merge eu-wt-a: session 42 + waitjob/brief fix (verified: 3239/5913)
+2026-10-20 03:41	6452148	3253	5913	360704	16.0	Session 45 hand-off: HANDOFF, IDO_SHAPES section 16, s45.md, repair log
+2026-10-20 03:44	d8ac96e	3273	5913	364580	16.2	Merge eu-wt-a (verified: 3273/5913)
+2026-10-20 04:46	ca84162	3286	5913	367408	16.3	Session 47 hand-off: HANDOFF current state and next steps
+2026-10-20 04:49	b2436f6	3290	5913	368252	16.3	Merge eu-wt-a (verified: 3290/5913)
+2026-10-20 06:23	09d94be	3316	5913	374028	16.6	Merge eu-wt-a (verified: 3316/5913)
+2026-10-20 08:07	4db8d24	3340	5915	379228	16.8	Merge eu-wt-a (verified: 3340/5915)
+2026-10-20 10:46	0ff2b3a	3359	5915	388144	17.2	merge_wt.sh: never commit a merge before verify; record merged state
+2026-10-20 11:20	a74325b	3360	5915	388608	17.2	s62 hand-off: fixchain results, recipes, drafts
+2026-10-20 11:24	68d92b3	3361	5915	389016	17.3	Merge eu-wt-a (verified: 3361/5915)
+2026-10-20 12:39	f537133	3372	5915	393904	17.5	Merge eu-wt-a (verified: 3372/5915)
+2026-10-20 13:07	2452df9	3379	5915	397812	17.7	Merge eu-wt-a (verified: 3379/5915)
+2026-10-20 13:42	490125f	3391	5915	400232	17.8	Merge eu-wt-a (verified: 3391/5915)
+2026-10-20 14:42	c0a1ce3	3406	5915	404212	17.9	Merge eu-wt-a (verified: 3406/5915)
+2026-10-20 15:24	c41a12a	3419	5915	407288	18.1	Merge eu-wt-a (verified: 3419/5915)
+2026-10-20 16:46	be1e4c5	3450	5915	417720	18.5	Merge eu-wt-a (verified: 3450/5915)
+2026-10-20 17:38	b191bf5	3474	5915	423928	18.8	Merge eu-wt-a (verified: 3474/5915)
+2026-10-20 18:12	12e85b8	3495	5915	428676	19.0	Merge eu-wt-a (verified: 3495/5915)
+2026-10-20 18:36	344bb2a	3511	5915	433020	19.2	Merge eu-wt-a (verified: 3511/5915)
+2026-10-20 19:32	542b906	3550	5915	449328	19.9	Merge eu-wt-a (verified: 3550/5915)
+2026-10-20 20:42	154e247	3577	5915	469720	20.8	Merge eu-wt-a (verified: 3577/5915)
+2026-10-20 21:43	896f9a6	3611	5915	491296	21.8	Merge eu-wt-a (verified: 3611/5915)
+2026-10-20 22:22	e1a1bd7	3614	5915	494316	21.9	s96 hand-off: session doc, IDO_SHAPES s96 recipes, drafts, HANDOFF current state + next st
+2026-10-20 22:25	f5d5b39	3622	5915	496720	22.0	Merge eu-wt-a (verified: 3622/5915)
+2026-10-20 22:52	8d15760	3633	5915	501484	22.3	Merge eu-wt-a (verified: 3633/5915)
+2026-10-20 23:25	bbfa874	3642	5915	506344	22.5	Merge eu-wt-a (verified: 3642/5915)
+2026-10-20 23:55	46de693	3649	5915	509232	22.6	s103 hand-off: session doc, IDO_SHAPES s103 recipes, drafts, HANDOFF current state + next 
+2026-10-20 23:57	66bf7d3	3653	5915	512316	22.7	Merge eu-wt-a (verified: 3653/5915)
+2026-10-21 00:33	1c45d74	3662	5915	515568	22.9	Merge eu-wt-a (verified: 3662/5915)
+2026-10-21 01:06	2bb3708	3671	5915	518848	23.0	Merge eu-wt-a (verified: 3671/5915)
+2026-10-21 01:47	8f8e65e	3691	5915	527656	23.4	Merge eu-wt-a (verified: 3691/5915)
+2026-10-21 02:13	ec94fe7	3693	5915	528420	23.4	Merge eu-wt-a (verified: 3693/5915)
+2026-10-21 03:03	cb4af38	3708	5915	534248	23.7	Merge eu-wt-a (verified: 3708/5915)
+2026-10-21 03:26	15d6dcf	3721	5915	537744	23.9	Merge eu-wt-a (verified: 3721/5915)
+2026-10-21 04:35	8d9c259	3747	5913	544776	24.2	Merge eu-wt-a (verified: 3747/5913)
+2026-10-21 05:16	1bf6928	3752	5913	547028	24.3	Merge eu-wt-a (verified: 3752/5913)
+2026-10-21 05:44	0dd9fcd	3764	5914	559560	24.8	Merge eu-wt-a (verified: 3764/5914)
+2026-10-21 06:18	fe934cf	3772	5913	566476	25.1	Merge eu-wt-a (verified: 3772/5913)
+2026-10-21 06:52	f002bbf	3785	5913	584736	25.9	Merge eu-wt-a (verified: 3785/5913)
+2026-10-21 07:19	2fe2cbe	3795	5913	590220	26.2	Merge eu-wt-a (verified: 3795/5913)
+2026-10-21 07:54	ae0db85	3804	5913	593444	26.3	Merge eu-wt-a (verified: 3804/5913)
+2026-10-21 08:37	205b7c2	3814	5913	600452	26.6	Merge eu-wt-a (verified: 3814/5913)
+2026-10-21 09:07	bed8100	3822	5913	602992	26.8	Merge eu-wt-a (verified: 3822/5913)
+2026-10-21 09:35	d84c111	3830	5913	606088	26.9	Merge eu-wt-a (verified: 3830/5913)
+2026-10-21 10:10	d54ebc7	3839	5913	609728	27.1	Merge eu-wt-a (verified: 3839/5913)
+2026-10-21 12:40	(merge)	3864	5913	617032	27.4	Merge eu-wt-a (verified)

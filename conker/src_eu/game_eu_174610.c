@@ -148,6 +148,27 @@ s32 func_1514766C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147888.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151479E8.s")
+void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
+void func_15142180(u8, f32 *, s32, f32, f32);
+extern u8 (*D_800900BC)(void);
+void func_151479E8(u8 *arg0, int arg1, s32 arg2)
+{
+  f32 sp4C[3];
+  s32 sp28[9];
+  if (*((s32 *) (arg0 + 0x1D4)))
+  {
+    if (0) // fakematch: empty if keeps the arg0 reload schedule (DIFF2 without)
+    {
+    }
+    if (func_15146E00(sp4C, arg0, (s32) sp28, arg1) != 0)
+    {
+      func_15141F78(D_800900BC(), sp28, arg2 * 0.0076923077f, (u8) ((*((f32 *) (arg0 + 0x40))) * 0.7111111f), sp4C, arg1);
+      if (arg2 >= 0x73)
+      {
+        func_15142180(6, sp4C, sp28[6], 1.0f, 1.0f);
+      }
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147B48.s")
