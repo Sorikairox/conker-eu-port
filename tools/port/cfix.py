@@ -18,6 +18,7 @@ and returns the rewritten code or None.  The rewrites are deliberately mechanica
                 `lw aN, off(sp)` below the frame = the local spOFF.  Inserted (m2c dropped it) or
                 replaced (m2c passed something else), the callee's draft prototype widened.
 """
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import re, os, glob
 
 ROOT = '/conker' if os.path.exists('/.dockerenv') else os.path.expanduser(os.environ.get('CONKER_ROOT', '~/conker'))

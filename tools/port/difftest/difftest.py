@@ -28,6 +28,7 @@ call (hash of non-stack bytes that differ from their initial value), final memor
 return value (by the candidate's declared return type) and the restoration of sp/s0-s8/f20-f30.
 Prints one line: EQUIV <func> (n trials ...) | DIFFER <func>: <reason> | ERROR <func>: <why>.
 """
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.join(_pgo.path.dirname(_pgo.path.abspath(__file__)), '..')); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random, gc
 # Unicorn 2.1.x mis-translates a call whose delay slot holds an FPU instruction (lwc1/swc1/...):
 # the callee's first block runs with stale delay-slot flags and jumps to 0 (UC_ERR_EXCEPTION at
@@ -50,6 +51,8 @@ TU_BASE = 0x80700000                            # candidate TU .rodata/.data/.bs
 RET_MAGIC = 0x807FF000
 CAND_ALT = 0x0F000000                           # (| the 256 MB jal region of vram) candidate code when it would overlap a callee
 SP_ENTRY = STK_TOP - 0x100
+STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
+OUTPARAMS = os.environ.get('DIFFTEST_OUTPARAMS') == '1' or '--outparams' in sys.argv
 
 
 def phys(a):
@@ -492,6 +495,11 @@ class Run:
                 self.stub_at(((vram + 4 * k + 4) & 0xF0000000) | ((w & 0x3FFFFFF) << 2))
             elif op == 0 and (w & 0x3F) in (8, 9) and not ((w & 0x3F) == 8 and (w >> 21) & 31 == 31):
                 mu.hook_add(UC_HOOK_CODE, self.on_jalr, begin=vram + 4 * k, end=vram + 4 * k)
+        if STEP and not trace:
+            # P7: a code hook over the body makes Unicorn translate one instruction per block. Works around
+            # a 2.0.1 mis-run seen in func_100049E0 (a jump-table lw read 0 after a branch-likely that follows
+            # a stubbed call); slower, so opt-in (DIFFTEST_STEP=1 or --step)
+            mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
         if trace:
             mu.hook_add(UC_HOOK_MEM_READ, self.on_read)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
@@ -637,12 +645,22 @@ class Run:
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40, 4)]
         fregs = {n: mu.reg_read(FREG(n)) & 0xFFFFFFFF for n in (12, 13, 14, 15)}
         self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
-                               mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None))
+                               mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
         r = random.Random(h32('ret', self.seed, addr, k))
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
         mu.reg_write(FREG(0), rand_float_bits(r)); mu.reg_write(FREG(1), rand_float_bits(r))
         mu.reg_write(FREG(2), rand_float_bits(r))
+        # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
+        # word through each aligned aN that points into the caller's frame (out-params such as
+        # osRecvMesg's &msg). Keyed by (callee, call number, arg index), so both runs see the same value.
+        if OUTPARAMS:
+            idx = sorted(a) if site is not None and a else range(4)
+            for i in idx:
+                v = regs[i]
+                if v & 3 == 0 and sp <= v < STK_TOP - 4:
+                    ro = random.Random(h32('out', self.seed, addr, k, i))
+                    mu.mem_write(phys(v), struct.pack('>I', rand_arg(ro)))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
             mu.reg_write(reg, r.getrandbits(32))
@@ -699,6 +717,9 @@ def same_val(R, a, C, b):
     return False
 
 
+LIBULTRA_PREFIXES = ('os', '__os', 'gu', 'bzero', 'bcopy')
+
+
 def compare(R, C, rk, arity):
     """-> None if equal, else a reason string"""
     if C.fault and not R.fault and not R.done:
@@ -719,8 +740,12 @@ def compare(R, C, rk, arity):
         if a['addr'] != b['addr']:
             return 'call #%d: ref calls %s, cand calls %s' % (i, a['name'], b['name'])
         na = arity.get(a['name'])
-        cnt = max(na if na is not None else 0, max(a['a'] | b['a'], default=-1) + 1)
+        # with a known prototype, only the reference's call-site writes widen it (P7: a candidate that
+        # happens to compute something in a2 right before a 1-arg call was a false DIFFER)
+        cnt = max(na if na is not None else 0, max(a['a'] if na not in (None, 99) else a['a'] | b['a'], default=-1) + 1)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
+        # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
+        if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
         for k in range(min(cnt, 4)):
             if not same_val(R, a['regs'][k], C, b['regs'][k]):
                 return 'call #%d %s: a%d ref=0x%X cand=0x%X' % (i, a['name'], k, a['regs'][k], b['regs'][k])
@@ -812,6 +837,17 @@ def explain(R, C, inputs, forced):
         R.out['v0'], C.out['v0'], R.out['f0'], C.out['f0'], R.fault, C.fault))
 
 
+def strip_pad(words):
+    """drop IDO's trailing alignment nops (P7): with them the candidate covered the next function's first
+    word, so no stub could go there and a tail call into it ran the padding (func_10004DB0 --self DIFFER)"""
+    n = len(words)
+    while n > 1 and words[n - 1] == 0: n -= 1
+    if n < len(words) and (is_branch(words[n - 1]) or (words[n - 1] >> 26) in (2, 3)
+                           or ((words[n - 1] >> 26) == 0 and (words[n - 1] & 0x3E) == 8)):
+        n += 1   # the last instruction has a delay slot (a nop)
+    return words[:n]
+
+
 def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verbose=False, tmp=None):
     """-> dict(result=EQUIV|DIFFER|UNSURE|ERROR|CERR, line=..., ...)"""
     p, spath, src = find_file(func)
@@ -830,6 +866,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         tu = build_tu(func, p, src, code)
         opath = compile_tu(func, p, tu, tmp or os.environ.get('DIFFTEST_TMP', 'build/difftest'))
         cwords, cdata = link_candidate(opath, func, vram)
+        cwords = strip_pad(cwords)
         if not spath:   # C function: reference = ROM bytes, same length as the matched object
             rom = vram2rom(vram); raw = open('conker.eu.bin', 'rb').read()
             n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN', '0')) // 4 or len(cwords)
@@ -846,6 +883,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         if (w >> 26) in (2, 3) and rend <= ((((vram + 4 * k + 4) & 0xF0000000) | ((w & 0x3FFFFFF) << 2))) < cend:
             cvram = (vram & 0xF0000000) | CAND_ALT
             cwords, cdata = link_candidate(opath, func, cvram)
+            cwords = strip_pad(cwords)
             break
     rk = ret_kind(tu, func)
     kinds = param_kinds(tu, func)

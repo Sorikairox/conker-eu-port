@@ -3,6 +3,7 @@
 after `make VERSION=eu` and `make VERSION=eu NON_MATCHING=1`).
 Compares build/conker.eu.elf with build_nm/conker.eu.elf: section sizes, how many functions and data
 symbols moved (and from where), and the hazards a moved layout hits (raw pointers in the data blobs)."""
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys
 from elftools.elf.elffile import ELFFile
 def load(p):

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """host side of tools/port/nmrepair.sh (see there)"""
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, glob, subprocess, shutil
 
 R = os.path.expanduser(os.environ.get('CONKER_ROOT', '~/conker'))

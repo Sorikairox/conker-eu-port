@@ -10,6 +10,7 @@ Signatures are compared by ABI class: return (void / int / f32 / f64 / i64) and 
 (int-or-pointer / f32 / f64 / i64; `...` and K&R `()` match anything).  Prints one line per problem;
 exit 1 if any.  Run from the repo root.
 """
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
