@@ -1056,3 +1056,13 @@ func_150E96F8	s139	3	OK	y	n	twin of E909C OK: struct 0x3C (v[4] + u30/u34/u35/u3
 func_10011EB8	s139	4	OK	y	y	arg0 = f(arg0) reused as idx (or a3,a0 copy), s32 v + s32 F568 arg; table D_8002C5A0[22][5] cdefined in C; 2 permuter fakematches
 func_10003C10	s139	6	DIFF65	n	y	hand from asm: homed arg0, extern floats; only reg roles of y/h (v0/a0) left; local perm 600 s no gain
 func_10010BE8	s139	10	DIFF110	n	y	same size: separate e vars per region (m2c temp_s0/_2), ((s32*)&D_80042984)[1] for the 42988 load; frame 88 vs 80
+func_15133C18	DIFF11	5	DIFF9	n	n	SIZE-1 (3C18b): ref keeps *arg1 in v1, a0=*v1 before jal, or a1,v1 in delay; a temp p costs a slot (spill 0x20 vs 0x24)
+func_1514306C	CERR	7	DIFF24	n	n	jtbl switch case order 4,3,1,2,5,6,default right; case 6 ref keeps a copy arg1=v0 (or a1,v0 in bnez delay) then v=a1, mine copy-propagates (SIZE-1)
+func_1514A004	SIZE-5	6	DIFF43	n	y	off=0x110 base var (s166) fixed SIZE; done=0 hoisted vs ref delay-slot copies; remote perm
+func_15141A7C	SIZE-6	3	SIZE-5	n	n	structure right; ref reloads the fn ptr (and a->unk28 / r*8 via a copy a3) for the call instead of reusing the tested value; mine CSEs
+func_15185360	SIZE+2	4	DIFF56	n	y	home-store/reload of all args reproduced; o/p/k/d named slots fix frame+spill; left: index calc order + FP regs
+func_1517FF64	SIZE-3	4	DIFF30	n	y	early return + nested-ternary clamps; left: ref routes each clamp through a0/t3 temps
+func_1514C390	SIZE-2	7	DIFF37	n	y	tgt/m/d struct17 locals + 2 pad slots; k*(t-p)+p order; left: call-arg setup scheduling
+func_1517FAD4	SIZE+3	7	SIZE+2	n	n	frame fixed by named r,g; t is uninitialised on the !D_800DE1BC path: ref keeps t=0 in f2 and loads 0x20(sp) on the other path, mine also stores t (swc1) -> +2
+func_1514B30C	SIZE-1	7	DIFF2	n	y	func_15013DE8 spawn-block struct + pad[2]; call before the a-products; left: sh order of u52/u50 only
+func_15187954	SIZE-2	4	SIZE-2	n	n	m2c-shaped loop with continue; ref stores a1/a2 lazily (bnel/jal delay slots), mine stores a2 at entry; loop regs differ

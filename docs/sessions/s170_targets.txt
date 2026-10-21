@@ -1,0 +1,15 @@
+# s170 targets: slice GLOBAL_ASM 8-140 insns, not in repair_log / any sNN.md / HANDOFF / s170 skip list; cols: insns file func
+46 game_eu_15FF50.c func_15133C18
+50 game_eu_170760.c func_1514306C
+76 game_eu_1772D0.c func_1514C390
+88 game_eu_1772D0.c func_1514A004
+100 game_16EE20.c func_15141A7C
+106 game_eu_1ACBC0.c func_1517FF64
+109 game_eu_1B1ED0.c func_15185360
+111 game_eu_1ACBC0.c func_1517FAD4
+118 game_eu_1772D0.c func_1514B30C
+120 game_eu_1ACBC0.c func_1517FD84
+127 game_eu_1B1ED0.c func_15187954
+128 game_eu_1A9280.c func_1517E3CC
+130 game_eu_1772D0.c func_1514C9E0
+138 game_eu_197680.c func_15169FB8
