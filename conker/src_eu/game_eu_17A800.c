@@ -100,7 +100,24 @@ s32 func_1514D880(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514D3B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514DA28.s")
+s32 func_1514DA28(arg0, arg1)
+s16 arg0;
+s16 arg1;
+{
+    if (arg0 == -1) {
+        return 0;
+    }
+    if (arg0 == arg1) {
+        return 1;
+    }
+    if (func_1514DA28(*(s16 *)(D_8008AF88[arg0] + 6), arg1, arg0) != 0) {
+        return 1;
+    }
+    if (func_1514DA28(*(s16 *)(D_8008AF88[arg0] + 4), arg1) != 0) {
+        return 1;
+    }
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514DAD4.s")
 
@@ -292,7 +309,21 @@ void func_1514DFA8(struct127 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E014.s")
+void func_1514E014(struct127 *arg0) {
+    u8 *p;
+    s32 buf[2];
+
+    arg0->unk94 |= 2;
+    buf[0] = 0;
+    buf[1] = 0;
+    if ((arg0 && arg0) && arg0) { // fakematch: permuter, moves the a2 = 8 setup before the memcpy call
+    }
+    p = func_15159140(arg0, 1, 8);
+    if (p != NULL) {
+        memcpy(p + 0x58, buf, 8);
+        func_1514F18C(p, arg0, 0x13);
+    }
+}
 
 void func_1514E088(struct127 *arg0) {
     s32 temp_v0 = func_15159140(arg0, 1, 0);
