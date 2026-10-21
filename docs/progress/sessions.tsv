@@ -71,3 +71,4 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 161	main	game>=0x15190000	3	1112	125	first func_151559FC spawner callers; ternary-to-u8 store shape open
 168	wt	game 0x15130000-0x1518FFFF+dbg	4	1884	127	13 fresh rows (now 100+ insns) 4 matched; every named scalar costs a frame slot
 163	main	game>=0x15190000	7	1692	130	switched to smallest-first fresh rows: 7/16 (vs 0.024/call before); only 3 never-mentioned funcs left, 61 listed-but-untried
+165	main	game>=0x15190000	2	840	135	listed-but-untried rows 2/10 (now 90+ insns); m2c call arity errors
