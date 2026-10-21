@@ -1076,3 +1076,4 @@ func_151C34F8	DIFF93	6	DIFF37	n	y	151602C0 + 151530A8 0x74 block; all decls in t
 func_151BF490	DIFF21	6	DIFF7	n	y	func_15132FBC 0x78 block; pad + trailing s32 u78; perm barrier (arg4&&arg4)&&arg4 DIFF7
 func_151B61A0	SIZE-1	6	SIZE-1	n	n	checksum loop + 15132FBC block; trailing empty func_151B643C in .s
 func_151AB3A8	SIZE-2	4	SIZE-2	n	n	1513C73C block; early-return addiu v0,0xB0 not folded in ref
+func_151925AC	DIFF39	3	OK	y	y	func_151308E4 block; u8 before u0, pad2 spill slot, remote perm (s16) rand cast

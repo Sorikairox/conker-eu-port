@@ -1352,3 +1352,9 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 2. **`mul.s` by 1.0 / 0.0 kept in the target**: write the constant as an int (`1 * arg4`, `0 * arg4`); `1.0f * x` and a `f32 one = 1.0f` local both fold away (`func_1513A24C`, open).
 3. **Result variable of a switch in v0 with a re-materialised `move v0,zero` in the default**: don't initialise it at the declaration; set it in an `else { v = 0; }` of the guarding `if` (`func_15137610`). A dispatch chain `beqz v0; ...; b <case0 body>` = `switch (v) { case 1: ... case 2: ... case 3: ... case 0: default: ... }` with case 0 last.
 4. **Function called with no arguments through an implicit declaration**: define it `int f(T *arg0)` (cfe treats `s32` as a different return type: "Incompatible function return type") (`func_1514F704`).
+
+## s159 recipes (block-scoped param blocks, trailing block fields, hoisted divisors)
+1. **A spawner's second param block (or all blocks) sits lower in the ref frame than function-scope declarations allow, and pads only grow the frame**: declare the block locals inside the `if` that uses them (`if (arg2 != 0) { Blk2 b2; s32 pos[3]; ... }`, `func_151A6618` OK; `func_151CEC80`, `func_151C34F8` layouts fixed the same way). Same idea as s152 recipe 1, but for whole param blocks.
+2. **`li s7,K` hoisted before a loop + `divu v0,s7` + `bnez s7; break 7`**: a `% K` / `/ K` by a constant inside a loop; IDO hoists the constant into a saved register and then emits the trap check (`func_151CEC80`, `% 101U` in the spawn loop). Probably also the s157 recipe 5 case (`func_1519D320`).
+3. **Block 4 bytes too low even with the frame right** (`func_151BF490`): `s32 pad;` first plus a trailing `s32 u78;` in the block struct (frame and every slot right).
+4. **A rand result in a variable that is spilled across the next rand call at a slot 4 bytes off**: a dummy `s32 pad2;` declared just before it (fakematch, `func_151925AC`).
