@@ -179,7 +179,17 @@ s32 func_eu_1501C860(s32 a0, s32 a1) {
     s32 cap, n;
     (void)a0;
     { static int nlog; if (nlog++ < 3) port_log("[frame] submit: idx %d gdl %08X bufs %08X %08X reserve %08X %08X\n", *idx, *gdlp, bufs[0], bufs[1], rsv[0], rsv[1]); }
-    if (!bufs[0] || !bufs[1] || *gdlp < bufs[0]) { port_log("[frame] no DL buffers: frame dropped\n"); return 0; }
+    if (!bufs[0] || !bufs[1] || *gdlp < bufs[0]) {
+        /* The DL buffers come from func_15015E30 (C), called only by the level loader func_15007B3C
+         * (asm stub). Drop the frame, and wake the main loop as func_10004F00 would on task start
+         * (the retrace message, case 1 in func_1501878C), so the game keeps stepping. */
+        extern u16 D_8003B240;
+        static int ndrop;
+        if (ndrop++ < 2) port_log("[frame] no DL buffers (func_15007B3C is asm): frame dropped\n");
+        osSendMesg((OSMesgQueue *)port_n64_to_wasm(0x800BEE30), (OSMesg)&D_8003B240, OS_MESG_NOBLOCK);
+        if (a1 != 0) *idx ^= 1;
+        return 0;
+    }
     task = (u32 *)((u8 *)P11W(0x800BEEF8) + *idx * 0x60);
     *P11W(0x800BEEF4) = (u32)task;
     task[0] = 0;
