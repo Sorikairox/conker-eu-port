@@ -1383,3 +1383,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 4. **`beqz t0,L; nop; b L; addiu v0,1`** is `s32 flag; if (arg1 != 0) flag = 1; else flag = 0;` (u8 flag or `flag = 0; if (..) flag = 1;` give other code, `func_15189E70`).
 5. **An extern float loaded once into `f0` and used twice**: copy it to a block-local `f32 f = D_...;` (two direct reads gave `lui/addiu` + two `lwc1`, SIZE+3; `func_1516A964`, `func_1518A784`).
 6. A byte store of the low part of an int: `p[0x2D] = h & 0xFF;` can shift temp registers by one (`func_1516ABB8`, remote permuter).
+## s163 recipes (K&R definitions, local order, clamp constants)
+1. **An unused trailing parameter that the ref does not home** (`sw a2,N(sp)` only in mine): the function was defined with fewer params than its callers pass. Write a **K&R definition** `s32 f(arg0, arg1) u8 *arg0; u8 arg1; {` and turn the callers' prototype into `s32 f();` (`func_151A3AB4`).
+2. **Stack locals: the first declared gets the highest slot.** Two param blocks plus a call result: `u8 *r; SB b; SA a; s32 pad[2];` gave a 0x4C / b 0x68 / r 0x84 (`func_151D7DE0`). A pad *before* the first local moves everything down by its size only if it is used by the layout; if nothing moves, the gap is below (pad last) (`func_151D7814`, `func_151CEACC`: `s32 pad[6]` last).
+3. **Clamp that re-materializes the bound** (`lui at,0x437F; mtc1 at,f0` in the assign branch instead of `mov.s f0,f2`): assign an int literal `f = 255;` while comparing with `255.0f` (`func_151C75E8`).
+4. **`li v0,1` for `return 1` scheduled before a float clamp**: an empty `if (!arg0 && !arg0 && !arg0) {}` before the return (fakematch, local permuter; a single `!arg0` did not work) (`func_151C75E8`).
+5. **`lbu a0; addu a0,a0,v1`** (load straight into the sum register): `v = (u8)G; v += d;` instead of `v = (u8)G + d;` (`func_151E5D54`).
+6. **List walk that advances twice per iteration** (`bnel v0,zero,loop` at the bottom): `do { if (hit) return; nx = e->next; if (nx) { e = nx; nx = nx->next; } } while (nx);` (`func_15196270`).
