@@ -232,10 +232,27 @@ static int block_on(OSMesgQueue *mq, int full, const char *what) {
     return 0;
 }
 
+/* P19: real-time freeze fix. Timers fire only at retrace (frame() -> port_vi_retrace), so a game
+ * thread that polls a queue with OS_MESG_NOBLOCK (or busy-waits on osGetTime/osGetCount) never left
+ * its fiber: the browser main loop callback never returned and the page froze in real time. After
+ * SPIN_LIMIT consecutive empty polls the thread delivers due timers and yields; port_sched_run's
+ * per-frame switch cap then returns to the browser. */
+#define SPIN_LIMIT 4096
+static unsigned spin_count;
+void port_timers_poll(void);
+void port_spin_check(void) {
+    if (!cur || ++spin_count < SPIN_LIMIT) return;
+    spin_count = 0;
+    port_timers_poll();
+    make_ready(cur);
+    switch_out();
+}
 s32 osRecvMesg(OSMesgQueue *mq, OSMesg *msg, s32 flag) {
     while (mq->validCount == 0) {
-        if (flag == OS_MESG_NOBLOCK || block_on(mq, 0, "osRecvMesg") < 0) return -1;
+        if (flag == OS_MESG_NOBLOCK) { port_spin_check(); return -1; }
+        if (block_on(mq, 0, "osRecvMesg") < 0) return -1;
     }
+    spin_count = 0;
     if (msg) *msg = mq->msg[mq->first];
     mq->first = (mq->first + 1) % mq->msgCount;
     mq->validCount--;

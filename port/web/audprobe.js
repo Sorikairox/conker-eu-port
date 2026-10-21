@@ -47,6 +47,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const s = await ev('window.audprobe ? JSON.stringify(window.audprobe) : null');
     if (s) { last = JSON.parse(s); console.log(`t=${t + 1}s (${((Date.now() - t0) / 1000).toFixed(1)}s) ` + s); }
   }
+  if (process.env.PROBE_SHOT) {  // P19: real-time screenshot over CDP (--virtual-time-budget never ends now)
+    const r = await Promise.race([call('Page.captureScreenshot', { format: 'png' }), sleep(10000).then(() => null)]);
+    const b64 = r && (r.result ? r.result.data : r.data);
+    if (b64) { require('fs').writeFileSync(process.env.PROBE_SHOT, Buffer.from(b64, 'base64')); console.log('screenshot:', process.env.PROBE_SHOT); }
+    else console.log('screenshot: no answer');
+  }
   const lines = await ev(`Array.from(document.querySelectorAll('#console *')).map(e => e.textContent).filter(l => /\\[aud|\\[audtest|\\[voicetest|fail/.test(l)).slice(-8).join('\\n')`);
   if (lines) console.log(lines);
   const ok = last && last.frames > 0 && last.nonzero > 1000 && last.sq / last.nonzero > 1e-5;

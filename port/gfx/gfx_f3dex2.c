@@ -549,12 +549,14 @@ static void unknown(unsigned op, unsigned w0, unsigned w1) {
     }
 }
 
+static int gfx_trace;   /* P19: dump every command of the first real frames */
 void gfx_run_dl(const void *dl) {
     const unsigned char *stack[32], *pc = dl;
     int sp = 0, guard = 0;
     gfx_stats.dls++;
     while (pc && ++guard < 1000000) {
         unsigned w0 = rd32(pc), w1 = rd32(pc + 4), op = w0 >> 24;
+        if (gfx_trace) port_log("[gfx]   %p: %08X %08X\n", (const void *)pc, w0, w1);
         pc += 8;
         gfx_stats.cmds++;
         if (op >= 0x10 && op <= 0x1F) {
@@ -751,7 +753,15 @@ void gfx_run_task(void *task) {
         port_log("[gfx] task %u: ucode %08X ucode_data %08X dl %08X (%u bytes)\n", gfx_stats.tasks, ucode, rd32(t + 24), data, size);
     const void *dl = gfx_addr(data);
     if (!dl) { gfx_stats.bad_addr++; return; }
+    /* P19: per-frame statistics (first 6 tasks, then every 120th): commands, triangles, unknown ops */
+    unsigned c0 = gfx_stats.cmds, t0 = gfx_stats.tris, u0 = gfx_stats.unknown_ops, d0 = gfx_stats.dls;
+    int logf = gfx_stats.tasks <= 6 || gfx_stats.tasks % 120 == 0;
+    gfx_trace = gfx_stats.tasks <= 2;
     gfx_frame_begin(0, 0, 0);
     gfx_run_dl(dl);
     gfx_frame_end();
+    gfx_trace = 0;
+    if (logf)
+        port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands\n", gfx_stats.tasks,
+                 gfx_stats.dls - d0, gfx_stats.cmds - c0, gfx_stats.tris - t0, gfx_stats.unknown_ops - u0);
 }

@@ -422,14 +422,15 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
 `docs/port/sessions/P8.md` (address space, PC overrides, texture ids, re-rank) and
 `docs/port/sessions/P9.md` (ROM-offset symbols, KSEG0 tests, audio HLE) and
 `docs/port/sessions/P11.md` (runtime check of the C scheduler/allocator/asset walker, live-frame path, SDL2) and
-`docs/port/sessions/P14.md` (MP3 voice audio, Conker lighting, skeleton bind pose, browser audio fix). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P14.md` (MP3 voice audio, Conker lighting, skeleton bind pose, browser audio fix) and
+`docs/port/sessions/P19.md` (real game frames, RCP/PIF model, level-loader stubs, real-time freeze guard). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -579,8 +580,9 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
   - Rule: EM_JS functions must be named `__port_*`. `gen_stubs.py` stubs any other undefined name
     as "missing", silently.
   - `&audonly=1` loads the game data without starting the game threads.
-  - **Open:** the game page blocks its main thread in *real-time* headless Chrome. DevTools
-    evaluate and pause get no answer; the demo page is fine. It runs only under virtual time.
+  - **Open (P19: cause found, fix not yet confirmed):** the game page blocked its main thread in
+    real-time headless Chrome. Timers fire only at retrace, so a NOBLOCK-polling or clock-spinning thread
+    never yielded. `port_spin_check` (`pc_sched.c`) now yields after 4096 empty polls.
 - **Renderer (P14):**
   - Conker lighting: normals are s8 x,y at `G_MOVEMEM 0x0E base + 2 * slot`, and z is the Vtx flag
     low byte. The vertex colour is multiplied by ambient plus directional lights (48-byte Light
@@ -592,6 +594,33 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
   The steps are in P14.md "Next": merge, drop the `func_15019130` / `func_eu_1501C860` overrides and
   the `osContInit` shim (P13: the override's ucode choice was reversed), `rebuild.sh 10 clean`, look
   for real gfx tasks, and runtime-check `func_15007B3C` / `func_15043384`.
+- **P19 (after merging port P17, 506 NM): real game gfx tasks reach `gfx_run_task`.**
+  - The P11 overrides `func_15019130` / `func_eu_1501C860` and the `osContInit` SI shim are gone.
+  - Node 10 s: 143 gfx frames plus 286 audio tasks (the C audio thread runs). Each frame is 12 commands,
+    0 triangles, 0 unknown: segment, init DL, z-image, viewport, fullsync. The scene, colour image and
+    clear are still asm stubs.
+  - New PC pieces:
+    - `vbe.py rcp_io` turns constant `IO_READ`/`IO_WRITE` into `__port_io_read/write` (`pc_os.c`);
+    - a PIF model (pad 0, 16K EEPROM, SI event);
+    - `osPiRawReadIo`;
+    - `port_spin_check` (§ freeze below).
+  - TEMPORARY overrides in `pc_overrides.c`: `func_1502B350` (asset load), `func_1502B4A8` (sub-file
+    relocation), `func_15002248` (quadtree helper; its garbage `*out` made free() spin).
+  - **For the port branch:**
+    - `func_15049260` is declared `void`, but `func_15002248` uses its v0 (from `func_150AB278`);
+    - `struct_eu_bytes24` is 36 bytes;
+    - no bug found in `func_15007B3C`, `func_10004074`, `func_15019130` or `func_eu_1501C860`;
+    - `func_15043384`, `func_1510BC10`, `func_1501E46C`, `func_15084E80` and `func_150802A8` were not
+      checked (none traps in 10 s).
+  - Top stubs: func_1000CEAC, func_1000D2F8, func_150A7A48, func_150A4ED4, func_1501B22C,
+    func_15113B44, func_1502BDC0, func_1517D7B0, func_1000A03C, func_15173954. Top 30 in P19.md §9.
+  - **Open:**
+    - browser-only heap corruption before the first asset load: trap in `func_10003C6C` from the level
+      loader in real-time Chrome; node is clean (P19.md §6);
+    - the real-time freeze guard is not yet confirmed in the browser.
+  - Screenshot (real-time CDP, `PROBE_SHOT=` in `audprobe.sh`): `docs/port/sessions/P19_screenshot.png`
+    shows a black canvas plus that crash. `shot.sh` no longer finishes for `app=game`.
+  - Rule: after changing `port_prefix.h`, the `.ll` cache now rebuilds by itself.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

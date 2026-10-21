@@ -179,3 +179,10 @@ $('game').onclick = () => start('game');
   const app = q.get('app');
   if (app === 'demo' || (app === 'game' && romBytes)) start(app);
 })();
+
+// P19: show the wasm stack of an uncaught error on the page (the console text alone has no stack)
+window.addEventListener('error', (e) => {
+  const st = e.error && e.error.stack ? String(e.error.stack).split('\n').slice(0, 12).join('\n') : '';
+  if (st) try { log('[error] ' + st, 'fail'); } catch (_) { console.error(st); }
+});
+

@@ -159,7 +159,8 @@ static double now_ms(void) {
     if (!t0) t0 = t;
     return t - t0;
 }
-OSTime osGetTime(void) { return (OSTime)(now_ms() * (OS_CPU_COUNTER / 1000.0)); }
+void port_spin_check(void); /* P19: busy-waits on the clock yield too (pc_sched.c) */
+OSTime osGetTime(void) { port_spin_check(); return (OSTime)(now_ms() * (OS_CPU_COUNTER / 1000.0)); }
 u32 osGetCount(void) { return (u32)osGetTime(); }
 
 #define MAX_TIMERS 16
@@ -182,6 +183,8 @@ int osStopTimer(OSTimer *t) {
     return -1;
 }
 
+static void timers_poll(void);
+void port_timers_poll(void) { timers_poll(); }
 static void timers_poll(void) {
     OSTime now = osGetTime();
     for (int i = 0; i < MAX_TIMERS; i++) {
