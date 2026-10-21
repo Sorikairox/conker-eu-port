@@ -93,15 +93,71 @@ async function start(app) {
   }
   $('threads').disabled = false;
   $('threads').onclick = () => M._port_dump_threads();
-  try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
+  // &audonly=1 (P14, audprobe.sh): data segments only, no game threads; for the audio tests
+  if (new URLSearchParams(location.search).get('audonly')) log('audonly: game memory ' + (M._port_audio_prepare() > 0 ? 'loaded' : 'FAILED') + ', game not started');
+  else try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
   // &audtest=HEX[:FRAMES]: n_audio synth + audio HLE test (port/audio/aud_test.c). Browsers start
   // audio only from a user gesture, so it runs on the next click and plays through SDL audio.
-  const at = new URLSearchParams(location.search).get('audtest');
-  if (app === 'game' && at) {
-    log('audtest: click the page to synthesise and play sound record 0x' + at);
-    document.addEventListener('click', () => { const [r, f] = at.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }, { once: true });
+  const q = new URLSearchParams(location.search), at = q.get('audtest'), vt = q.get('voicetest');
+  // &voicetest=HEX[:CALLS] (P14): voice clip through the stream handler, MP3 decoder and MP3 ABI
+  const run = at ? () => { const [r, f] = at.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }
+            : vt ? () => { const [r, f] = vt.split(':'); M._port_voice_test(parseInt(r, 16), +(f || 2000)); } : null;
+  if (app === 'game' && run) {
+    if (q.get('audprobe')) { log('audprobe: starting the audio test without a click'); setTimeout(run, 500); }
+    else {
+      log('audio test: click the page to synthesise and play it');
+      document.addEventListener('click', run, { once: true });
+    }
   }
 }
+
+// &audprobe=1 (P14, test aid): count what the Web Audio graph actually pulls. Every
+// ScriptProcessorNode's onaudioprocess (SDL2's output path) is wrapped; after the original handler
+// fills outputBuffer, the probe counts callbacks, frames and non-zero samples and the rms, and logs
+// a summary line ("[audprobe] ...") every second. Headless Chrome needs
+// --autoplay-policy=no-user-gesture-required (port/web/audprobe.sh).
+function installAudioProbe() {
+  const st = { ctx: 0, nodes: 0, calls: 0, frames: 0, nonzero: 0, sq: 0, peak: 0, rate: 0, state: '' };
+  window.audprobe = st;
+  for (const name of ['AudioContext', 'webkitAudioContext']) {
+    const C = window[name];
+    if (!C || C.prototype.__probed) continue;
+    C.prototype.__probed = true;
+    const orig = C.prototype.createScriptProcessor;
+    C.prototype.createScriptProcessor = function (...a) {
+      const node = orig.apply(this, a), ctx = this;
+      st.nodes++; st.rate = ctx.sampleRate;
+      let user = null;
+      const wrapped = (e) => {
+        if (user) user.call(node, e);
+        st.calls++; st.state = ctx.state;
+        const b = e.outputBuffer;
+        st.frames += b.length;
+        for (let c = 0; c < b.numberOfChannels; c++) {
+          const d = b.getChannelData(c);
+          for (let i = 0; i < d.length; i++) {
+            const v = d[i];
+            if (v !== 0) { st.nonzero++; st.sq += v * v; if (Math.abs(v) > st.peak) st.peak = Math.abs(v); }
+          }
+        }
+      };
+      Object.defineProperty(node, 'onaudioprocess', {
+        get: () => user, set: (f) => { user = f; node.addEventListener('audioprocess', wrapped); }, configurable: true,
+      });
+      return node;
+    };
+    const Orig = C;
+    window[name] = function (...a) { st.ctx++; const c = new Orig(...a); st.state = c.state; return c; };
+    window[name].prototype = Orig.prototype;
+  }
+  setInterval(() => {
+    if (!st.calls && !st.ctx) return;
+    const rms = st.nonzero ? Math.sqrt(st.sq / st.nonzero) : 0;
+    log(`[audprobe] contexts ${st.ctx} nodes ${st.nodes} rate ${st.rate} state ${st.state}: ${st.calls} callbacks, ` +
+        `${st.frames} frames pulled, ${st.nonzero} non-zero samples, rms ${rms.toFixed(4)} peak ${st.peak.toFixed(3)}`);
+  }, 1000);
+}
+if (new URLSearchParams(location.search).get('audprobe')) installAudioProbe();
 window.addEventListener('error', (e) => log(String(e.message || e), 'fail'));
 $('demo').onclick = () => start('demo');
 $('game').onclick = () => start('game');

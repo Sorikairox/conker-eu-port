@@ -324,13 +324,14 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
 `docs/port/sessions/P8.md` (address space, PC overrides, texture ids, re-rank) and
 `docs/port/sessions/P9.md` (ROM-offset symbols, KSEG0 tests, audio HLE) and
-`docs/port/sessions/P11.md` (runtime check of the C scheduler/allocator/asset walker, live-frame path, SDL2). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P11.md` (runtime check of the C scheduler/allocator/asset walker, live-frame path, SDL2) and
+`docs/port/sessions/P14.md` (MP3 voice audio, Conker lighting, skeleton bind pose, browser audio fix). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -341,6 +342,9 @@ port/web/boot.sh 10       # node boot, read-only mounts, compact summary; log in
 port/web/rebuild.sh 10 [clean]   # P11: build + boot in one step (clean = after a merge / C change)
 python3 port/tools/priority.py port/build/boot.log 50   # conversion priority list (measured stubs + next wave)
 AUDTEST=26390 port/web/boot.sh 8   # P9: C n_audio synth + audio HLE on a ROM sound -> port/build/audio/audtest.wav (page: &audtest=26390, click)
+VOICETEST=3 port/web/boot.sh 8      # P14: voice clip via func_151F2E88 + MP3 decoder + MP3 ABI -> port/build/audio/voice.wav
+port/web/audprobe.sh "app=game&audonly=1&audtest=26390" 10   # P14: real headless-Chrome Web Audio consumption check
+port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot (P14: keep the budget short)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -457,21 +461,53 @@ AUDTEST=26390 port/web/boot.sh 8   # P9: C n_audio synth + audio HLE on a ROM so
   - The first DL (written at NULL) is G_DL 0x8002CC90, G_SETZIMG z-buffer, G_MOVEMEM viewport;
     see P11.md §2.
 - **Audio (P11):** the output is SDL2 (`-sUSE_SDL=2`; the image runs `embuilder build sdl2`).
-  `[audtest]` passes unchanged. MP3 ABI 7/8 is still not implemented.
+  `[audtest]` passes unchanged. **P14: that SDL2 output never played anything** (see below).
+- **MP3 voice audio (P14):** commands 7 (MP3) and 8 (MP3ADDY) are implemented in `aud_abi.c`.
+  - Command 7 is the polyphase synthesis filterbank. The window is read from the ROM at 0x2CFD0.
+    The FIFO is per state address and resets when the game zeroes the state.
+  - The MP3 decoder's hand-written asm (bits, Huffman, IMDCT) has **TEMPORARY** PC versions in
+    `port/audio/mp3_pc.c`. Remove them when the port branch converts `game_eu_226870.c` /
+    `game_eu_227BF0.c`.
+  - `VOICETEST=3` drives the real `func_151F2960`/`func_151F2E88` and gives speech: a syllabic
+    envelope, energy below 4 kHz, diff/energy 0.24.
+  - Voice clips are asset (0x16, id), MPEG-2 L3 at 22050 Hz mono. The handler's state word
+    `D_800E1224` = `&D_800E0D80 + 0x74`; `D_800E0D80` is 0x800E11B0 in the EU ROM.
+- **Browser audio (P14):**
+  - `port/web/audprobe.sh` (CDP + `&audprobe=1` probe) showed that the SDL2 build never created an
+    AudioContext: no Emscripten audio driver is linked, so SDL used a dummy device.
+  - `aud_out.c` now has a direct Web Audio ScriptProcessor sink. It reads the ring from the heap,
+    with no wasm call in the callback.
+  - Measured: audtest 203864 non-zero samples pulled and voicetest 69618. Both PASS.
+  - Rule: EM_JS functions must be named `__port_*`. `gen_stubs.py` stubs any other undefined name
+    as "missing", silently.
+  - `&audonly=1` loads the game data without starting the game threads.
+  - **Open:** the game page blocks its main thread in *real-time* headless Chrome. DevTools
+    evaluate and pause get no answer; the demo page is fine. It runs only under virtual time.
+- **Renderer (P14):**
+  - Conker lighting: normals are s8 x,y at `G_MOVEMEM 0x0E base + 2 * slot`, and z is the Vtx flag
+    low byte. The vertex colour is multiplied by ambient plus directional lights (48-byte Light
+    records). The ucode's exact formula is not checked against the RSP code.
+  - Viewer skeleton: bone table at header +0x10/+0x14, entries `{parent, idx, idx, 0, f32 xyz}`.
+    The bind pose is the joint offsets x the model matrix. Conker now stands assembled:
+    `docs/port/sessions/P14_viewer.png`.
+- **Merge of `port` P13 (b0fa85d): NOT done in P14** (the permission system denied `git merge`).
+  The steps are in P14.md "Next": merge, drop the `func_15019130` / `func_eu_1501C860` overrides and
+  the `osContInit` shim (P13: the override's ucode choice was reversed), `rebuild.sh 10 clean`, look
+  for real gfx tasks, and runtime-check `func_15007B3C` / `func_15043384`.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
      overrides. After that, rerun `port/web/rebuild.sh 10` and look for `[gfx] task` lines with
      real DLs. Then convert `func_1502AB04` (the asset-cache insert, 217 calls).
-     MP3 ABI 7/8 (voice clips) is still open.
+     MP3 ABI 7/8 is done (P14).
   2. The texture cache (`func_1510D66C`, `func_1510D3E0`); ROM-offset symbols are done (P9).
      A PC override of the asset-table walker `func_1502AC88` (#3 stub, format in P9.md) unblocks
      the asset loader. Audio: `func_10008180`, `func_10008F90`, `func_10009CBC` as PC overrides, then
-     game audio tasks play through `port/audio`. MP3 commands are still missing.
+     game audio tasks play through `port/audio` (MP3 commands: P14).
   3. Test the 352 MB memory on 32-bit Android and iOS Safari. Add a `GLOBAL_BASE=16MB` fallback
      only if needed.
-  4. Conker lighting (normal array at `G_MOVEMEM` 0x0E); the material DLs in segment 8 for the
-     viewer.
+  4. Conker lighting and per-bone matrices are done (P14). Still open: the material DLs in segment 8
+     and the texture-bank segments for the viewer, and checking the light formula against the ucode.
   5. Still open from P4.md, "Known gaps":
      - address constants and `K0_TO_PHYS` in C;
      - bitfields;

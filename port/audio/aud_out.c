@@ -1,11 +1,14 @@
-/* PC audio output (session P9): a ring buffer of stereo s16 frames drained by an SDL audio
- * callback. Since P11 this is the SDL2 port (-sUSE_SDL=2; `embuilder build sdl2` in port/web/Dockerfile,
- * so builds stay offline); P9 used emscripten's built-in SDL 1.2 audio. The calls are the subset both
- * provide (SDL_OpenAudio/SDL_PauseAudio). In node (no AudioContext) the
- * device stays closed and pushed audio is only counted. */
+/* PC audio output (session P9): a ring buffer of stereo s16 frames drained by the browser.
+ * P9 used emscripten's built-in SDL 1.2 audio, P11 switched to the SDL2 port; P14 found with a
+ * headless-Chrome probe (port/web/audprobe.sh) that the SDL2 build never created an AudioContext
+ * (SDL_OpenAudio "succeeded" with 0 Hz / 0 channels: the SDL2 port in the image has no Emscripten
+ * audio driver linked, so SDL fell back to a dummy device) and nothing was played. Since P14 the
+ * output is a direct Web Audio ScriptProcessorNode (EM_JS below) that reads the ring straight
+ * from the wasm heap and advances the read index, so no wasm call happens on the audio callback
+ * (safe while ASYNCIFY fibers are suspended). In node (no AudioContext) the device stays closed and
+ * pushed audio is only counted. */
 #include <stdint.h>
 #include <string.h>
-#include <SDL.h> /* SDL2 port (-sUSE_SDL=2, cached in the conker-emsdk image since P11) */
 #include <emscripten.h>
 #include "aud.h"
 #include "../ultra/pc_mem.h"
@@ -18,28 +21,50 @@ static volatile unsigned rd, wr;
 static int opened;
 static unsigned pushed, dropped;
 
-static void cb(void *u, Uint8 *stream, int len) {
-    (void)u;
-    int16_t *o = (int16_t *)stream;
-    int frames = len / 4;
-    for (int i = 0; i < frames; i++) {
-        if (rd != wr) { o[2 * i] = ring[rd][0]; o[2 * i + 1] = ring[rd][1]; rd = (rd + 1) & (RING - 1); }
-        else o[2 * i] = o[2 * i + 1] = 0;
-    }
-}
+/* Web Audio sink: ScriptProcessorNode(2048 frames, stereo) pulling from ring[rd..wr). The page's
+ * first click / key resumes a context that the autoplay policy started suspended. Returns the
+ * context's rate (Web Audio resamples from `rate` when it cannot run at it) or 0. */
+/* The __port_ prefix keeps port/tools/gen_stubs.py from stubbing this EM_JS import as "missing". */
+EM_JS(int, __port_web_audio_open, (int rate, int ring, int rdp, int wrp, int mask), {
+  try {
+    var G = globalThis, C = G.AudioContext || G.webkitAudioContext;
+    if (!C) return 0;
+    var ctx;
+    try { ctx = new C({ sampleRate: rate }); } catch (e) { ctx = new C(); }
+    var node = ctx.createScriptProcessor(2048, 0, 2);
+    var src = ctx.sampleRate === rate ? 1 : rate / ctx.sampleRate;
+    var pos = 0;
+    node.onaudioprocess = function (e) {
+        var L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1);
+        var r = HEAPU32[rdp >> 2], w = HEAPU32[wrp >> 2], base = ring >> 1;
+        for (var i = 0; i < L.length; i++) {
+            if (r === w) { L[i] = R[i] = 0; continue; }
+            L[i] = HEAP16[base + 2 * r] / 32768; R[i] = HEAP16[base + 2 * r + 1] / 32768;
+            pos += src;
+            while (pos >= 1 && r !== w) { pos -= 1; r = (r + 1) & mask; }
+        }
+        HEAPU32[rdp >> 2] = r;
+    };
+    node.connect(ctx.destination);
+    var resume = function () { if (ctx.state !== 'running') ctx.resume(); };
+    if (typeof document !== 'undefined') { document.addEventListener('click', resume); document.addEventListener('keydown', resume); }
+    resume();
+    globalThis.portAudio = { ctx: ctx, node: node };
+    return ctx.sampleRate | 0;
+  } catch (e) { globalThis.portAudioErr = String(e && e.stack || e); return -1; }
+});
 
 int aud_out_open(int rate) {
     if (opened) return 0;
     int has_ctx = EM_ASM_INT({ return (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') ? 1 : 0; });
     if (!has_ctx) { port_log("[aud] no AudioContext (node): output disabled, %d Hz\n", rate); opened = -1; return -1; }
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) { port_log("[aud] SDL_Init audio failed\n"); opened = -1; return -1; }
-    SDL_AudioSpec want, have;
-    memset(&want, 0, sizeof want);
-    want.freq = rate; want.format = AUDIO_S16; want.channels = 2; want.samples = 1024; want.callback = cb;
-    if (SDL_OpenAudio(&want, &have) < 0) { port_log("[aud] SDL_OpenAudio failed\n"); opened = -1; return -1; }
-    SDL_PauseAudio(0);
+    int got = __port_web_audio_open(rate, (int)(uintptr_t)ring, (int)(uintptr_t)&rd, (int)(uintptr_t)&wr, (int)(RING - 1));
+    if (got <= 0) {
+        port_log("[aud] Web Audio open failed (%d): %s\n", got, got < 0 ? "exception, see globalThis.portAudioErr" : "no AudioContext");
+        opened = -1; return -1;
+    }
     opened = 1;
-    port_log("[aud] SDL audio open: %d Hz, %d ch, %d samples\n", have.freq, have.channels, have.samples);
+    port_log("[aud] Web Audio open: ring at %d Hz, context %d Hz, stereo, ScriptProcessor 2048\n", rate, got);
     return 0;
 }
 
@@ -109,4 +134,13 @@ void aud_wav_finish(int rate) {
             ring[wr][0] = cap[i][0]; ring[wr][1] = cap[i][1]; wr = nx;
         }
     }
+}
+
+/* Page test mode &audonly=1 (P14, port/web/audprobe.sh): load the game's data segments without
+ * starting the game threads, so an audio test can run on a page that stays responsive. */
+int port_mem_load(void);
+int port_audio_prepare(void) {
+    static int state;
+    if (!state) state = port_mem_load() == 0 ? 1 : -1;
+    return state;
 }
