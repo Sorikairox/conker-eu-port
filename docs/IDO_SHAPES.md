@@ -1228,3 +1228,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 2. **A local array at the wrong offset with the frame otherwise right** (`sp4C` at 0x44 vs 0x4C): enlarge the *lower* array (`s32 sp28[7]` -> `[9]`) and drop the permuter's slot-holding temps (`new_var` float, `u8 **q = &arg0`), which then fit (`func_151479E8`).
 3. **`lw/sw` (not `lwc1/swc1`) word copies of three floats** are a struct assignment `*prev = *cur` of a `{f32 x, y, z;}` vector; the `lwc1` stores that follow are field-by-field assignments (`func_1515C518`). For spawners whose `memcpy` size is larger than the visible fields, add trailing fields until `sizeof(b)` matches the `li a2` (`func_151B68D0`: 0x28 -> 0x2C), then a `s32 pad;` between the two struct locals and a trailing pad word in struct A to fix the frame.
 4. s142 recipe 1 also works for integer `multu`: `t = p[2] * (0, arg0->x38)` turned the permuter's DIFF1 into OK (`func_151A7E2C`), and the permuter fakes it needed (`unsigned long long` index, `new_var = 0x42`) could then be dropped.
+
+## s146 recipes (gbi tail words, fn tables, frame pads)
+1. **`lui t, 0xEC00; li t, 0xFF; or v0, s1, zero; sw w1; sw w0`** at the end of a display-list prologue is `gDPSetConvert(gfx++, 0, 0, 0, 0, 0, 0xFF)`; writing the words by hand (`gfx->words.w0 = ...`) costs SIZE-1, a `Gfx *g = gfx++` block DIFF2 (`func_15189270`).
+2. **Two function-pointer tables 4 bytes apart** (`D_8008B418`, `D_8008B41C`, both indexed `* 4`) are best declared as two `extern s32 (*X[])(u8 *)` arrays (`func_1515C050`, `func_151890E4`).
+3. **A single byte-spill slot 4 bytes too high** (`sb v1, 0x23` vs mine `0x27`) with the frame size right: declare `s32 pad;` *before* the variable (after it does nothing) (`func_1515C050`).
+4. **An uninitialised local read in a switch default** (`lw v1, 0(sp)` in an 8-byte frame): its slot follows the declaration order; `s32 i; u8 *p;` put `p` at 0 (`func_1516CDE8`).
+5. **Store-order-only DIFFs on a freshly allocated struct**: generate all permutations of the 4-5 field stores and `tryall` them (`func_15188EBC`, 1 of 24 OK). Cheap and exact.
