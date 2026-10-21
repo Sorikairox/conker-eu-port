@@ -55,7 +55,22 @@ void func_150B70A0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7214.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7258.s")
+s32 func_150B7258(void) {
+    struct102 **p;
+
+    if (*(struct102 **)&D_800D9CB4 != NULL) {
+        func_1516972C(*(struct102 **)&D_800D9CB4);
+        *(struct102 **)&D_800D9CB4 = NULL;
+    }
+    p = (struct102 **)D_800D9CB8; do { // fakematch: same-line `do` sets the s0/s1 addiu order
+        if (*p != NULL) {
+            func_1516972C(*p);
+            *p = NULL;
+        }
+        p++;
+    } while (p != (struct102 **)D_800D9CE0);
+    D_800D9CB0 = 3;
+}
 
 void func_150B72DC(u8 *arg0) {
     *(s16 *)(arg0 + 0x34) += D_800BE9E4 * 0x30;

@@ -85,7 +85,38 @@ void func_15082DD8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082E44.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150836AC.s")
+typedef struct {
+    u8 pad0[0x127];
+    u8 unk127;
+    u8 pad128[0x1C];
+    u8 *unk144;
+    u8 pad148[0x1B8];
+    u8 unk300;
+    u8 unk301;
+    u8 pad302[2];
+    s32 unk304[4];
+    s32 unk314;
+} S836AC;
+s32 func_1515D9F0(s32);
+s32 func_1515D9B0(void);
+void func_150836AC(S836AC *arg0)
+{
+    s32 i;
+    s32 sel;
+    u8 tmp;
+
+    if (arg0->unk144 != NULL) {
+        tmp = arg0->unk144[0x2F];
+        if (tmp == 0) { if (arg0->unk127 == 0) sel = 5; else sel = 3; } else { sel = tmp; }
+        for (i = 0; i <= D_80082FA0; i++) {
+            arg0->unk304[i] = func_1515D9F0(sel);
+        }
+        if (arg0->unk304[i - 1] != 0) {
+            arg0->unk301 = sel;
+        }
+        arg0->unk314 = func_1515D9B0();
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083784.s")
 

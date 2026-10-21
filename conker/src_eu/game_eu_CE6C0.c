@@ -1,7 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-typedef struct { u8 pad0[0x14]; u8 unk14; u8 unk15; u8 unk16; u8 unk17; u8 pad18[0x1C]; } Unk34B8;
+typedef struct { s16 x; s16 y; s16 z; u8 pad6[0xE]; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; u8 pad20[4]; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
+extern u64 D_800D3510[][3];
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A09D0.s")
@@ -134,7 +135,19 @@ void func_150A2C6C(u8 *arg0)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2D44.s")
+void func_150A2D44(s32 arg0, s32 arg1) {
+    s32 i;
+
+    arg0 &= 0xFFF;
+    if ((u32)arg0 < (u32)D_800D3094) {
+        ((Unk34B8 *)D_800D34B8)[arg0].unk14 = arg1;
+    }
+    if (arg1 == 1) {
+        for (i = 0; i < 16; i++) {
+            D_800D3510[i][(u32)arg0 >> 6] &= ~(1ULL << ((u32)arg0 & 0x3F));
+        }
+    }
+}
 
 void func_150A2E20(s32 arg0, s32 arg1, int arg2)
 {
@@ -201,7 +214,22 @@ s32 func_150A2FCC(u32 arg0, s32 arg1, s32 *arg2) {
     return -1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3184.s")
+s32 func_150A3184(s32 arg0) {
+    s32 i;
+
+    arg0 &= 0xFFF;
+    if ((u32)D_800D3094 < arg0) {
+        return -1;
+    }
+    for (i = 0; i < 16; i++) {
+        if (*(u16 *)((u8 *)&D_800D2138 + 0x208) & (1 << i)) {
+            if ((D_800D3510[i][(u32)arg0 >> 6] >> ((u32)arg0 & 0x3F)) & 1) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
 
 s32 func_150A2280(struct127 *, u8 *, s32);
 
@@ -226,9 +254,31 @@ s32 func_150A3264(s32 arg0, u32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A332C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A33C4.s")
+s32 func_150A332C(Unk34B8 *, f32, f32, f32);
+s32 func_150A33C4(s32 arg0, s32 arg1) {
+    arg1 &= 0xFFF;
+    if ((u32) D_800D3094 < arg1) {
+        return 1;
+    }
+    if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
+        return func_150A332C(arg1 + (Unk34B8 *) D_800D34B8, D_800CC2D0[arg0].x_position, D_800CC2D0[arg0].y_position, D_800CC2D0[arg0].z_position);
+    }
+    return 0;
+}
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A3484.s")
+s32 func_150A332C(Unk34B8 *, f32, f32, f32);
+s32 func_150A3484(s32 arg0, s32 arg1) {
+    struct108 *v = &D_800DBFF0[arg0];
+
+    arg1 &= 0xFFF;
+    if ((u32) D_800D3094 < arg1) {
+        return 1;
+    }
+    if ((((Unk34B8 *) D_800D34B8)[arg1].unk15 & 3) == 3) {
+        return func_150A332C(arg1 + (Unk34B8 *) D_800D34B8, v->unk2F8, v->unk2FC, v->unk300);
+    }
+    return 0;
+}
 
 
 s32 func_150A3538(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {

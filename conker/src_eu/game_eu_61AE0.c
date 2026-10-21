@@ -107,7 +107,38 @@ void func_150348D4(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034A18.s")
+typedef struct { f32 m[4][4]; } Mtx44;
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5[0x97];
+    s32 unk9C;
+    u8 padA0[0x134];
+    Mtx44 *unk1D4;
+} S34A18;
+s32 func_1502DE10(u8);
+void func_15034A18(S34A18 *arg0) {
+    s32 i;
+    s32 j;
+    s32 k;
+    s32 n;
+    Mtx44 *m;
+    if (arg0->unk1D4 != NULL && arg0->unk9C != 0) {
+        n = func_1502DE10(arg0->unk4) - 1;
+        m = arg0->unk1D4;
+        i = 31; if (n < 31) i = n;
+        for (; i >= 0; i--) {
+            if (arg0->unk9C & (1 << i)) {
+                Mtx44 *e = &m[i];
+                for (j = 0; j < 3; j++) {
+                    for (k = 0; k < 3; k++) {
+                        e->m[j][k] = 0.0f;
+                    }
+                }
+            }
+        }
+    }
+}
 
 void func_15034AD8(void) {
     struct127 *var_s0;
