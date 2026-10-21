@@ -3,7 +3,40 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C050.s")
+extern s32 (*D_8008B418[])(u8 *);
+extern s32 (*D_8008B41C[])(u8 *);
+u8 func_1514401C(u8, u8 *, u8 *, u8);
+void func_1515C050(u8 *arg0) {
+    s32 pad; // fakematch: frame pad puts the flag spill at 0x23
+    u8 flag;
+
+    flag = 0;
+    if (arg0[0x11] & 1) {
+        *(s16 *)(arg0 + 0x14) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x14) < 0) {
+            flag = 1;
+        }
+    }
+    if (flag == 0) {
+        if (((s8 *)arg0)[0x38] != -1) {
+            if (D_8008B418[((s8 *)arg0)[0x38]](arg0) == 0) {
+                flag = 1;
+            }
+        }
+        if (*(s32 *)(arg0 + 0x1C) != 0) {
+            flag = func_1514401C(arg0[0x10], arg0 + 0x1C, arg0 + 0x18, arg0[0x12]);
+        }
+    }
+    if (flag != 0) {
+        if (((s8 *)arg0)[0x39] != -1) {
+            if (D_8008B41C[((s8 *)arg0)[0x39]](arg0) != 0) {
+                func_1516972C((struct102 *)arg0);
+            }
+        } else {
+            func_1516972C((struct102 *)arg0);
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_189860/func_1515C160.s")
 

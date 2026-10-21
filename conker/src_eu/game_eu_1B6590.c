@@ -5,7 +5,44 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15188D80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15188EBC.s")
+typedef struct Node8EBC { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8EBC *uC; s32 u10; } Node8EBC;
+extern Node8EBC *D_800DFBFC;
+void *allocate_memory(s32, s32, s32, s32);
+s32 func_10004074(u8 *);
+void func_15188FC8();
+void func_15188EBC(s32 arg0, s32 arg1, s32 arg2) {
+    Node8EBC *n;
+    void *buf;
+
+    for (n = D_800DFBFC; n != NULL; n = n->uC) {
+        if (arg0 == n->u10) {
+            if (n->u6 < arg1) {
+                n->u6 = arg1;
+            }
+            n->u4 = arg2;
+            return;
+        }
+    }
+    n = allocate_memory(0x14, 1, 0, 0);
+    if (n == NULL) {
+        return;
+    }
+    buf = allocate_memory(0x180, 1, 1, 0);
+    if (buf == NULL) {
+        func_10004074((u8 *)n);
+        return;
+    }
+    n->u0 = 1;
+    n->u1 = 3;
+    n->u2 = 0;
+    n->u3 = 0x14;
+    n->u4 = arg2;
+    n->u6 = arg1;
+    n->u8_ = buf;
+    n->u10 = arg0;
+    bzero(buf, 0x180);
+    func_15188FC8(n, &D_800DFBFC);
+}
 
 typedef struct struct_15188FC8 {
     u8 pad0[0xC];

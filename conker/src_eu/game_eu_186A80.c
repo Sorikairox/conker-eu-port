@@ -260,6 +260,23 @@ s32 func_1515AE90(u8 *arg0, u8 **arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515AEE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515AFF4.s")
+typedef struct { f32 x, y, z; } V3_AFF4;
+typedef struct { s32 w[10]; } Blk_AFF4;
+typedef struct { f32 u0; V3_AFF4 pos; f32 u10; Blk_AFF4 blk; } Sp_AFF4;
+void func_1515AFF4(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
+    Sp_AFF4 sp;
+    s16 *r;
+    struct260 *p;
+
+    sp.u0 = 0.0f;
+    sp.pos = *arg1;
+    sp.u10 = arg2;
+    sp.blk = *(Blk_AFF4 *)(arg0 + 0x84);
+    r = (s16 *)(arg0 + 0x80);
+    p = func_15149130((s16)(r[0] + (u32)func_150ADA20() % (r[1] + 1)), -1, 0x3F, -1, 1, 0, (struct37 *)0x3C, arg0[0xC], arg0[1]);
+    if (p != NULL) {
+        memcpy((u8 *)p + 0x28, &sp, 0x3C);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515B0F8.s")
