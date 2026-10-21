@@ -201,12 +201,32 @@ void func_1516F868(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FDD4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE5C.s")
+void func_1516FE5C(s32 arg0, s32 arg1) {
+    s32 v;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE8C.s")
+    v = ((s8 *)arg0)[0x26];
+    v <<= 8;
+    v += ((u8 *)arg0)[0x27];
+    v *= (u32)arg1;
+    v >>= 8;
+    ((u8 *)arg0)[0x26] = v >> 8;
+    ((u8 *)arg0)[0x27] = v & 0xFFFFu; // fakematch: the mask moves the low byte temp from t8 to t0
+}
 
-s32 func_1516FE5C(s32, s32);
-s32 func_1516FE8C(s32, s32);
+void func_1516FE8C(s32 arg0, s32 arg1) {
+    s32 v;
+
+    v = ((s8 *)arg0)[0x28];
+    v <<= 8;
+    v += ((u8 *)arg0)[0x29];
+    v *= (u32)arg1;
+    v >>= 8;
+    ((u8 *)arg0)[0x28] = v >> 8;
+    ((u8 *)arg0)[0x29] = v & 0xFFFFu; // fakematch: the mask moves the low byte temp from t8 to t0
+}
+
+void func_1516FE5C(s32, s32);
+void func_1516FE8C(s32, s32);
 
 void func_1516FEBC(s32 arg0, s32 arg1) {
     func_1516FE5C(arg0, arg1);

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+void func_151D91B0(u8 *arg0, f32 *arg1);
 
 
 extern u8 D_800BED64[];
@@ -46,7 +47,7 @@ void func_151D9164(void *arg0) {
 }
 
 void func_151D9190(u8 *arg0) {
-    func_151D91B0(arg0, arg0 + 0x18);
+    func_151D91B0(arg0, (f32 *)(arg0 + 0x18));
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_151D91B0.s")
