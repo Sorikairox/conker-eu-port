@@ -1397,3 +1397,9 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **`multu` operand order of a product used twice** (`if (t * k < x) x = t * k;`): write the product twice instead of a `v = t * k` temp; the permuter needed a `dummy:` label before it (`func_1515C534`).
 4. **`lhu at / sh at` copies of 2-byte tables into stack locals**: struct copies of `typedef struct { u8 v[2]; } P; P a = D_8008D3A4;` (`func_1517E7FC`, draft only).
 5. **F3DEX2 `0x0214xxxx` / `0x05xxxxxx` runs** are `gSPModifyVertex(gdl++, v, G_MWO_POINT_ST, st)` and `gSP1Triangle(gdl++, a, b, c, 0)` (vertex index = low half / 2) (`func_151672D8`).
+
+## s165 recipes (K&R argument CSE, m2c call arity, jump-table cases)
+1. **A `u8` param reloaded (`lbu a1,0x9F(sp)`) before every call, except that mine reuses one saved value** (`sw a1,0x58(sp)` after a K&R call): the int-promoted argument of a K&R (`f()`) call was CSEd with a later `s32` parameter. Declare the later callee's parameter `u8` (`func_151A3940`, `func_15160A58` 15th param).
+2. **Check m2c's call arity against the outgoing area**: `ra` at 0x34 means at most 8 stack words. m2c gave `func_1514B0CC` 14 args (it added `arg0` and a trailing `b`). The real call has 12, with f12/f14 floats first and a2/a3 next (`func_151A79EC`). In the same way, `func_151307F0`'s m2c f32 first argument is bogus: it is `(block *, u8, s32, s32, u8, s32)`.
+3. **`mul.s fD, f(neg), f(k)` vs `fD, f(k), f(neg)`**: write `k * -x` to get the neg register first (`func_151A79EC`).
+4. **m2c switch case lists can be wrong**: decode the `jtbl_*` words from the `.s` (`rodata_inject`) and map index + base back to cases. A `beql v0,at,L+4` with the delay slot = the case's first insn is just another case label (`func_15195160`).
