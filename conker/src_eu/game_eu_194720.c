@@ -38,7 +38,29 @@ void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_eu_151670C0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_194720/func_151672D8.s")
+extern Vtx D_8008B780[];
+
+Gfx *func_151672D8(Gfx *gdl, u8 *arg1, s32 arg2) {
+    s32 i;
+    s32 t;
+
+    for (i = 0; i < 3; i++) {
+        gSPMatrix(gdl++, arg1 + 0x10 + i * 0x40, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPVertex(gdl++, D_8008B780, 6, 0);
+        t = 0x2800 - (arg1[0xD0] << 12) / 10;
+        gSPModifyVertex(gdl++, 0, G_MWO_POINT_ST, (t << 16) + 0x2000);
+        gSPModifyVertex(gdl++, 1, G_MWO_POINT_ST, (t << 16) + 0x2000);
+        gSPModifyVertex(gdl++, 2, G_MWO_POINT_ST, (t << 16) + 0x2400);
+        gSPModifyVertex(gdl++, 3, G_MWO_POINT_ST, ((t + 0x800) << 16) + 0x2000);
+        gSPModifyVertex(gdl++, 4, G_MWO_POINT_ST, ((t + 0x800) << 16) + 0x2000);
+        gSPModifyVertex(gdl++, 5, G_MWO_POINT_ST, ((t + 0x800) << 16) + 0x2400);
+        gSP1Triangle(gdl++, 5, 3, 0, 0);
+        gSP1Triangle(gdl++, 2, 5, 0, 0);
+        gSP1Triangle(gdl++, 1, 4, 5, 0);
+        gSP1Triangle(gdl++, 1, 5, 2, 0);
+    }
+    return gdl;
+}
 
 extern u8 D_800908FC[];
 extern u8 *D_800DD658;

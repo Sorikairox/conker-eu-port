@@ -1390,3 +1390,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 4. **`li v0,1` for `return 1` scheduled before a float clamp**: an empty `if (!arg0 && !arg0 && !arg0) {}` before the return (fakematch, local permuter; a single `!arg0` did not work) (`func_151C75E8`).
 5. **`lbu a0; addu a0,a0,v1`** (load straight into the sum register): `v = (u8)G; v += d;` instead of `v = (u8)G + d;` (`func_151E5D54`).
 6. **List walk that advances twice per iteration** (`bnel v0,zero,loop` at the bottom): `do { if (hit) return; nx = e->next; if (nx) { e = nx; nx = nx->next; } } while (nx);` (`func_15196270`).
+
+## s168 recipes (debug sliders, GBI vertex edits, named-scalar frame slots)
+1. **`func_151422DC` debug-slider blocks with the slot index in `s0` from the third call on** (`li s0,2; ... addiu s0,s0,1`): `i = 0; f(i++, "name", ...)` for every call; IDO constant-folds the first two (`func_15160648`). String literals need the file to own `.rodata`.
+2. **Frame 8 too big with all locals in the right order**: every named scalar (even register-allocated) takes a 4-byte slot above the address-taken locals (s96 recipe 1). Drop one helper pointer (`e = base + i * 0x10` inlined twice) to shrink the frame (`func_1517F18C`, frame 80 -> 72). Unused `s32 pad[n]` arrays did **not** change that frame.
+3. **`multu` operand order of a product used twice** (`if (t * k < x) x = t * k;`): write the product twice instead of a `v = t * k` temp; the permuter needed a `dummy:` label before it (`func_1515C534`).
+4. **`lhu at / sh at` copies of 2-byte tables into stack locals**: struct copies of `typedef struct { u8 v[2]; } P; P a = D_8008D3A4;` (`func_1517E7FC`, draft only).
+5. **F3DEX2 `0x0214xxxx` / `0x05xxxxxx` runs** are `gSPModifyVertex(gdl++, v, G_MWO_POINT_ST, st)` and `gSP1Triangle(gdl++, a, b, c, 0)` (vertex index = low half / 2) (`func_151672D8`).

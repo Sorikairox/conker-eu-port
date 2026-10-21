@@ -27,7 +27,26 @@ void func_15171734(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171770.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171B70.s")
+void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, u8 argB, s32 argC);
+extern f32 D_800A73A0;
+extern f32 D_800A73A4;
+
+void func_15171B70(u8 *arg0, u8 arg1, s32 arg2) {
+    switch (arg0[0x72]) {
+    case 0xEB:
+        func_15171D6C((s16 *)arg0, 400.0f, 500.0f, 0.0f, D_800A73A0, 0.0f, 2, 5, 20, 20, 1.0f, arg1, arg2);
+        break;
+    case 0xF6:
+        func_15171D6C((s16 *)arg0, 200.0f, 400.0f, -1800.0f, -1000.0f, -1200.0f, 2, 5, 4, 10, 1.0f, arg1, arg2);
+        break;
+    case 0xF8:
+        func_15171D6C((s16 *)arg0, 100.0f, 160.0f, -2500.0f, D_800A73A4, 0.0f, 2, 5, 4, 4, 0.5f, arg1, arg2);
+        break;
+    case 0xF9:
+        func_15171D6C((s16 *)arg0, 200.0f, 100.0f, 100.0f, -300.0f, 0.0f, 1, 5, 4, 4, 1.0f, arg1, arg2);
+        break;
+    }
+}
 
 void func_15170648(f32 *, f32, f32, s32, f32, s32, s32, s32, u8, s32);
 void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, u8 argB, s32 argC) {
