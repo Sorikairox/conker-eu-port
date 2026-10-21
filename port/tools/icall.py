@@ -46,10 +46,27 @@ def tramp_name(ret, params):
     return '@__icall.' + hashlib.md5((ret + '(' + ','.join(params) + ')').encode()).hexdigest()[:12]
 
 
+LOADP = re.compile(r'^\s*(%[\w.$-]+) = load ptr, ptr (%[\w.$-]+)(?:, align \d+)?$')
+STOREP = re.compile(r'^\s*store ptr (%[\w.$-]+), ptr (%[\w.$-]+)(?:, align \d+)?$')
+
+
 def rewrite(lines, stats):
-    """Rewrite indirect call sites. Returns (lines, {trampoline name: (ret, params)})."""
+    """Rewrite indirect call sites. Returns (lines, {trampoline name: (ret, params, passthru)}).
+
+    P23: a site of the form `x = fp(x, ...)` with a pointer result and a pointer first argument (at -O0:
+    the first argument is loaded from the slot the result is stored to; the display-list builders
+    `gdl = table[i](gdl)`) gets a pass-through trampoline: when the target is an asm stub
+    (__port_is_stub, port/stubs/icall_tab.c) it returns its first argument instead of the stub's 0, as
+    gen_stubs.py does for direct `x = f(x, ...)` calls since P11. The frame DL then goes on past
+    builders that are still asm."""
     out, need = [], {}
-    for l in lines:
+    loads = {}
+    for li, l in enumerate(lines):
+        if l.startswith('define '):
+            loads = {}
+        lm = LOADP.match(l)
+        if lm:
+            loads[lm[1]] = lm[2]
         if l.startswith('  ') and 'call ' in l and '@' not in l.split('call ', 1)[1].split('(', 1)[0]:
             m = ICALL.match(l)
             if m and '...' not in m[4] and 'asm ' not in m[4]:
@@ -57,8 +74,13 @@ def rewrite(lines, stats):
                 sa = site_args(m[6])
                 params = [t for t, _ in sa]
                 if ret and len(params) <= MAXARGS and wsig(ret, params):
-                    name = tramp_name(ret, params)
-                    need[name] = (ret, params)
+                    pt = False
+                    if ret == 'ptr' and params and params[0] == 'ptr' and m[2] and li + 1 < len(lines):
+                        sm = STOREP.match(lines[li + 1])
+                        pt = bool(sm and sm[1] == m[2] and loads.get(sa[0][1]) == sm[2])
+                    name = tramp_name(ret, params) + ('.pt' if pt else '')
+                    stats['icall_pt'] += pt
+                    need[name] = (ret, params, pt)
                     args = ', '.join([f'ptr {m[5]}'] + [f'{t} {v}' for t, v in sa])
                     pre = m[3].replace('musttail ', 'tail ')
                     res = f'{m[2]} = ' if m[2] else ''
@@ -70,7 +92,7 @@ def rewrite(lines, stats):
     return out, need
 
 
-def trampoline(name, ret, params):
+def trampoline(name, ret, params, pt=False):
     n = len(params)
     ws = wsig(ret, params)
     sid = sig_id(ws)
@@ -91,6 +113,8 @@ def trampoline(name, ret, params):
          'fast:']
     if ret == 'void':
         L += [f'  call void %fp({actual})', '  ret void']
+    elif pt:
+        L += [f'  %r = call {ret} %fp({actual})', '  br label %done']
     else:
         L += [f'  %r = call {ret} %fp({actual})', f'  ret {ret} %r']
     L.append('slow:')
@@ -119,6 +143,11 @@ def trampoline(name, ret, params):
         L += ['  %rd = bitcast i64 %rv to double', '  ret double %rd']
     elif ret == 'float':
         L += ['  %ri = trunc i64 %rv to i32', '  %rf = bitcast i32 %ri to float', '  ret float %rf']
+    elif ret == 'ptr' and pt:
+        L += ['  %ri = trunc i64 %rv to i32', '  %rp = inttoptr i32 %ri to ptr', '  br label %done',
+              'done:', '  %rr = phi ptr [ %r, %fast ], [ %rp, %slow ]',
+              '  %isst = call i32 @__port_is_stub(ptr %fp)', '  %stub = icmp ne i32 %isst, 0',
+              '  %res = select i1 %stub, ptr %a0, ptr %rr', '  ret ptr %res']
     elif ret == 'ptr':
         L += ['  %ri = trunc i64 %rv to i32', '  %rp = inttoptr i32 %ri to ptr', '  ret ptr %rp']
     else:
@@ -151,6 +180,8 @@ def epilogue(text, need, regs):
         L += trampoline(name, *need[name])
     if need:
         L += ['declare i32 @__port_fsig(ptr)', 'declare i64 @__port_icall_slow(ptr, i32, ptr, i32, i32, i32)']
+    if any(v[2] for v in need.values()):
+        L += ['declare i32 @__port_is_stub(ptr)']
     ctor = None
     if regs:
         ents = ', '.join(f'{{ ptr, i32 }} {{ ptr {n}, i32 {sig_id(w)} }}' for n, w in regs)

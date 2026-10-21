@@ -5,7 +5,7 @@ port/exclude.txt) plus the PC-side game TUs given on the command line (port/boot
 Writes port/build/vbe_report.txt (transform counts). Runs inside the conker-emsdk container."""
 import json, os, subprocess, sys, collections, concurrent.futures as cf
 sys.path.insert(0, os.path.dirname(__file__))
-import census
+import census, srcfix
 
 OUT = 'port/build'
 LL, VOBJ = f'{OUT}/ll', f'{OUT}/vobj'
@@ -20,11 +20,19 @@ def to_ll(path):
     """phase 1: C -> -O0 IR (incremental)"""
     tag = tag_of(path)
     ll = f'{LL}/{tag}.ll'
-    if os.path.exists(ll) and os.path.getmtime(ll) > max(os.path.getmtime(path), os.path.getmtime('port/ultra/port_prefix.h')):  # P19: prefix too
+    fx = srcfix.path_for(os.path.relpath(path, census.SRC)) if path.startswith(census.SRC) else path
+    if os.path.exists(ll) and os.path.getmtime(ll) > max(os.path.getmtime(path), os.path.getmtime('port/ultra/port_prefix.h'),
+                                                         os.path.getmtime(fx) if os.path.exists(fx) else 0):  # P19: prefix too
         return tag, 0, ''
     base = [a for a in census.BASE if a not in ('-c', '-O1')]
+    src = path
+    if path.startswith(census.SRC):  # P23: census left a patched copy (port/tools/srcfix.py)
+        fx = srcfix.path_for(os.path.relpath(path, census.SRC))
+        if os.path.exists(fx):
+            src = fx
+            base = base + ['-iquote', os.path.dirname(path)]
     p = subprocess.run(base + census.PORT_RELAX + ['-Wno-everything', '-S', '-emit-llvm', '-O0', '-Xclang',
-                       '-disable-O0-optnone', path, '-o', ll], capture_output=True, text=True)
+                       '-disable-O0-optnone', src, '-o', ll], capture_output=True, text=True)
     return tag, p.returncode and 1, p.stderr[-2000:]
 
 

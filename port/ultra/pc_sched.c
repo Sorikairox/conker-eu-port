@@ -362,7 +362,7 @@ static void frame(void) {
 
 void port_dump_stubs(int max);
 EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
-    port_dump_stubs(60);
+    port_dump_stubs(120);
     port_log("[sched] %u frames, %u ended by the %.0f ms budget, %u slow (>= 250 ms)\n", port_frame_count, budget_frames, FRAME_BUDGET_MS, slow_frames);
     { void port_mem_null_report(void); port_mem_null_report(); }
     { void port_sp_report(void); port_sp_report(); }

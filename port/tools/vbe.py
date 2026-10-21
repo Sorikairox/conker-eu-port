@@ -357,7 +357,8 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. func_151DE100 is left alone: it is read as code bytes.
-FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690']
+FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690',
+                'func_150ADC50']  # P23: debugger.c compares a thread pc with &func_150ADC50
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
 EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)
 

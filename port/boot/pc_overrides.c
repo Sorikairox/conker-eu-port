@@ -83,115 +83,15 @@ int port_romsym_test(void) {
 /* P19: the P11 TEMPORARY overrides of func_15019130 and func_eu_1501C860 were removed: both are
  * NON_MATCHING C on the port branch since P15-P17 (game_45B80.c, game_eu_4A070.c). */
 
-/* ---- P19: TEMPORARY PC override of func_1502B350 (game_57FA0.c, still GLOBAL_ASM) ----
- * The asset load behind func_1502B6BC / func_1502B5C8 / func_1502B020 callers: allocate, DMA the
- * record, and when (info & 0x70000000) == 0x10000000 inflate it into a second buffer (rzip; the first
- * word is the inflated size, rejected when 0 or >= 1000000) and free the packed copy. *ok receives the
- * loaded size (0 on failure). Hand-translated from the EU asm at 0x1502B640 (48 insns). Without it the
- * stub returned 0 and the level record D_800B0DF0 (EU 0x800B1200) was never loaded, so
- * func_15174B48 called through D_8008D11C[garbage]. The 3rd func_10006530 argument is the word at
- * EU 0x80038404 (US name D_800380A4). Remove when the port branch converts func_1502B350. */
-void *port_n64_to_wasm(unsigned n64addr);
-int port_heap_check(void);
-s32 *allocate_memory(s32, s32, s32, s32);
-s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
-s32 func_10006530(s32 *, s32 *, u32);
-void func_10004074(s32 *);
-s32 func_1502B350(u8 *rom, s32 info, s32 *ok) {
-    u32 size = ((info & 0x0FFFFFFF) + 1) & ~1;
-    s32 *buf = allocate_memory(size, 1, 2, 2);
-    s32 *out;
-    s32 n, got;
-    static int ncall; int dbg = ncall++ < 4;
-    if (dbg) { port_glog("[b350] #%d rom %X info %X size %X buf %X\n", ncall, (u32)rom, info, size, (u32)buf); port_heap_check(); }
-    if (buf == NULL) return 0;
-    func_10004514((s32)rom, buf, (size + 15) & ~15, 1);
-    if (dbg) port_heap_check();
-    if ((info & 0x70000000) != 0x10000000) {
-        *ok = size;
-        return (s32)buf;
-    }
-    n = buf[0] & 0x7FFFFFFF;
-    *ok = n;
-    out = NULL; got = 0;
-    if (n != 0 && (u32)n < 1000000) {
-        out = allocate_memory(n, 1, 2, 2);
-        if (out != NULL) got = func_10006530(buf, out, *(u32 *)port_n64_to_wasm(0x80038404));
-        if (dbg) { port_glog("[b350] n %X out %X got %X\n", n, (u32)out, got); port_heap_check(); }
-    }
-    func_10004074(buf);
-    *ok = got;
-    return (s32)out;
-}
+/* P23: the P19 TEMPORARY overrides of func_1502B350, func_1502B4A8 and func_15002248 were removed:
+ * the port branch converted them in P20 (game_57FA0.c, game_eu_2F180.c). */
 
-/* ---- P19: TEMPORARY PC override of func_15002248 (game_eu_2F180.c, still GLOBAL_ASM) ----
- * Quadtree build helper of func_15001DE0: keeps the entries of the u16 index list `in` (in[0] = count)
- * whose triangle passes the box test, writes them to a new list *out (allocate_memory; the caller frees
- * it), and returns the count plus the grid-snapped x min / z max of the kept entries in *xmin / *zmax.
- * The stub left *out as stack garbage, so func_15001DE0 freed a garbage pointer and the heap free list
- * went cyclic (func_10004074 then spun forever). Hand-translated from the EU asm at 0x15002248
- * (200 insns). Data at EU addresses: grid shift 0x80083330 (US D_80082FA0), triangle table
- * 0x800DC26C (3 vertex pointers per entry, s16 xyz), grid table 0x800DC274 (s16 x, z per entry).
- * The box test: func_15049260 is declared void in C, but this caller uses its v0 (the result of
- * func_150AB278, still asm). Until both are C every entry is kept, as the stub's v0 = 0 implies.
- * Vertex pointers are valid when >= 0x10000000 (wasm data) instead of the asm's > 0x80000000. */
-typedef struct { s32 unk0[9]; } P19Tri;
-void func_150492CC(f32, f32, f32);
-void func_15049260(P19Tri);
-s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
-    s32 shift = *(s32 *)port_n64_to_wasm(0x80083330) + 1;
-    s32 step = 1 << shift, lo = step - 1, mask = -step;
-    s32 n = in[0] + 1, cnt = 0, found = 0, i, k;
-    u16 *list;
-    func_150492CC((f32)(x1 - x0), 32000.0f, (f32)(z1 - z0));
-    list = (u16 *)allocate_memory(n * 2, 1, 0, 0);
-    *out = list;
-    *xmin = 0;
-    *zmax = 0;
-    for (i = 1; i < n; i++) {
-        u16 idx = in[i];
-        u32 *tri = (u32 *)(*(u32 *)port_n64_to_wasm(0x800DC26C) + idx * 12);
-        f32 v[9];
-        P19Tri t;
-        for (k = 0; k < 3; k++) {
-            s16 *p = (s16 *)tri[k];
-            if ((u32)p >= 0x10000000) {
-                v[k * 3 + 0] = (f32)(p[0] - ((x0 + x1) >> 1));
-                v[k * 3 + 1] = (f32)p[1];
-                v[k * 3 + 2] = (f32)(p[2] - ((z0 + z1) >> 1));
-            } else {
-                v[k * 3 + 0] = v[k * 3 + 1] = v[k * 3 + 2] = 0.0f;
-            }
-        }
-        for (k = 0; k < 9; k++) t.unk0[k] = *(s32 *)&v[k];
-        func_15049260(t);
-        {
-            s16 *g = (s16 *)(*(u32 *)port_n64_to_wasm(0x800DC274) + idx * 4);
-            s32 a = (g[0] - lo) & mask, b = ((g[1] + lo) & mask) + lo;
-            list[++cnt] = idx;
-            if (!found) { found = 1; *xmin = a; *zmax = b; }
-            else { if (a < *xmin) *xmin = a; if (*zmax < b) *zmax = b; }
-        }
-    }
-    list[0] = cnt;
-    return cnt;
-}
-
-/* ---- P19: TEMPORARY PC override of func_1502B4A8 (game_57FA0.c, still GLOBAL_ASM) ----
- * Relocates a loaded asset's sub-file table: entries are {s32 offset, u32 info}. With n == 0, n is the
- * index of the first entry whose info has bit 31 set, plus one. For each entry info &= 0x0FFFFFFF and
- * offset becomes base + offset (0 when offset == -1 or info == 0). Returns n. Hand-translated from the
- * EU asm at 0x1502B798. The stub's 0 left the level record D_800B0DF0 (EU 0x800B1200) NULL in
- * func_15002FB4, so func_15174B48 indexed D_8008D11C with a null-zone byte. */
-s32 func_1502B4A8(s32 *base, s32 n) {
-    s32 i;
-    if (n == 0) {
-        do { n++; } while (!(base[(n - 1) * 2 + 1] & 0x80000000));
-    }
-    for (i = 0; i < n; i++) {
-        s32 *e = &base[i * 2];
-        e[1] &= 0x0FFFFFFF;
-        e[0] = (e[0] == -1 || e[1] == 0) ? 0 : e[0] + (s32)base;
-    }
-    return n;
+/* P23: ?dlstat=N probe of the frame builder's state (logged with the gfx frame statistics). */
+extern unsigned char D_800BEA35, D_800BEAC0, D_800E0B94;
+extern unsigned D_800BE9D0, D_800BE9D8[2], D_800BEDE8[2];
+extern short D_800BE9C0;
+void port_frame_probe(unsigned task) {
+    port_glog("[probe] task %u: BEA35 %u BEAC0 %u E0B94 %u GDL %08X BE9D8 %08X %08X BEDE8 %08X %08X BE9C0 %d\n", task,
+              D_800BEA35, D_800BEAC0, D_800E0B94, D_800BE9D0, D_800BE9D8[0], D_800BE9D8[1],
+              D_800BEDE8[0], D_800BEDE8[1], (int)D_800BE9C0); /* vbe TU: plain accesses are game memory */
 }

@@ -13,6 +13,8 @@ Outputs (port/build/census/):
   diag/<file>.strict.txt, diag/<file>.build.txt   raw diagnostics
 """
 import os, re, subprocess, sys, collections, concurrent.futures as cf
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import srcfix
 
 ROOT = os.getcwd()
 SRC = 'conker/src_eu'
@@ -63,6 +65,22 @@ def compile_one(path):
         res[mode] = (p.returncode, p.stderr)
         with open(f'{CEN}/diag/{tag}.{mode}.txt', 'w') as f:
             f.write(p.stderr)
+    # P23: retry a failing build with a diagnostic-driven patched copy (port/tools/srcfix.py)
+    fixed = srcfix.path_for(rel)
+    if os.path.exists(fixed):
+        os.remove(fixed)
+    if res['build'][0]:
+        fx = srcfix.fix(path, rel, res['build'][1])
+        if fx:
+            p = subprocess.run(BASE + PORT_RELAX + ['-iquote', os.path.dirname(path), fx, '-o', obj],
+                               capture_output=True, text=True)
+            with open(f'{CEN}/diag/{tag}.srcfix.txt', 'w') as f:
+                f.write(p.stderr)
+            if p.returncode == 0:
+                res['srcfix'] = True
+                res['build'] = (0, res['build'][1])
+            else:
+                os.remove(fx)
     return rel, res
 
 
@@ -79,7 +97,7 @@ def main():
     errs = {m: collections.Counter() for m in ('strict', 'build')}
     errfiles = {m: collections.defaultdict(set) for m in ('strict', 'build')}
     warns = collections.Counter(); warnfiles = collections.defaultdict(set)
-    rows = []
+    rows = []; fixedl = []
     with cf.ThreadPoolExecutor(os.cpu_count() or 4) as ex:
         for rel, res in ex.map(compile_one, files):
             row = [rel]
@@ -99,6 +117,8 @@ def main():
                         warns[flag] += 1; warnfiles[flag].add(rel)
                 row.append(n)
             row.append('ok' if res['build'][0] == 0 else 'FAIL')
+            if res.get('srcfix'):
+                fixedl.append(rel)
             rows.append(row)
     with open(f'{CEN}/files.tsv', 'w') as f:
         f.write('file\tstrict_errors\tbuild_errors\tbuild\n')
@@ -110,7 +130,8 @@ def main():
         f.write(f"strict (clang defaults, -std=gnu89): {nfail['strict']} TUs with errors, "
                 f"{sum(errs['strict'].values())} errors\n")
         f.write(f"build  (PORT_RELAX flags):          {nfail['build']} TUs with errors, "
-                f"{sum(errs['build'].values())} errors\n\n")
+                f"{sum(errs['build'].values())} errors\n")
+        f.write(f"srcfix (P23, patched copy builds):  {len(fixedl)} TUs: {' '.join(sorted(fixedl))}\n\n")
         for mode in ('strict', 'build'):
             f.write(f'== {mode} errors by category (count / files) ==\n')
             for k, v in errs[mode].most_common(60):

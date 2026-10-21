@@ -464,7 +464,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -473,7 +473,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P11.md` (runtime check of the C scheduler/allocator/asset walker, live-frame path, SDL2) and
 `docs/port/sessions/P14.md` (MP3 voice audio, Conker lighting, skeleton bind pose, browser audio fix) and
 `docs/port/sessions/P19.md` (real game frames, RCP/PIF model, level-loader stubs, real-time freeze guard) and
-`docs/port/sessions/P21.md` (browser heap corruption = fiber stack alignment, real-time Chrome, debug flags). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P21.md` (browser heap corruption = fiber stack alignment, real-time Chrome, debug flags) and
+`docs/port/sessions/P23.md` (merge P20, srcfix, frame DL end to end, DL-path stub list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -693,6 +694,37 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
     `Gfx*(Gfx*)`) through `D_80090370`. It returns NULL, so every frame DL ends after the viewport.
     Convert that table's functions next. `__osRunningThread` is never set (0).
   - Rule: after changing `port_prefix.h`, the `.ll` cache now rebuilds by itself.
+- **P23 (after merging port P20, 366af85): the frame DL runs end to end.**
+  - **Merge:**
+    - The P19 overrides `func_1502B350` / `func_1502B4A8` / `func_15002248` were removed.
+    - `func_150ADC50` was added to `vbe.py FUNC_AS_DATA`: `debugger.c` declares it as data.
+    - **`port/tools/srcfix.py`** builds patched copies of TUs that clang rejects (lvalue casts, K&R arity).
+      Five P20 TUs had dropped out of the build.
+  - **Checks:**
+    - Node: all self-tests PASS and the heap has 0 errors, also with `heapwatch`.
+    - Real-time Chrome, Metal, 45 s: past gfx frame 600 with 0 heap breaks.
+  - **Why the frames were empty:** `func_eu_1501C860` throws away any frame whose DL pointer is outside
+    the buffer, and asm DL builders returned 0.
+  - **Fixed in three ways:**
+    - `x = fp(x)` indirect sites return `a0` when the target is a stub (`__port_is_stub`);
+    - stubs declared `Gfx *f(Gfx *, ...)` return `a0`;
+    - every int stub returns `a0` when `a0` points into the frame DL buffers (`port_stub_dlret`).
+  - **Result:** each frame is about 120 commands, 0 triangles and 0 unknown opcodes. The screenshot
+    `P23_screenshot.png` shows only the clear colour.
+  - **For the port branch:**
+    - **Frame-DL-path stubs, which block the scene:** func_15113B44, func_1502BDC0, func_15110420,
+      func_1510BF50, func_15186D04, func_150362D8, func_1517E7FC, func_15182450, func_1517FAD4,
+      func_1508FD38, func_151EC300 (`D_80090370[11]`; not func_151EC11C), func_1517F910, func_15180AF0.
+    - **Top measured stubs:** func_1000CEAC, func_1000D2F8, func_150A4ED4, func_1517D7B0, func_1000A03C,
+      func_15173954, func_1509BE40, func_1501B300, then about 26 at one call per frame.
+      `guMtxF2L` is an asm stub. Full list in P23.md §3.
+    - **clang errors in converted C (fix when convenient):**
+      - `game_eu_113D60.c:131`, `game_eu_1C3530.c:1069`, `game_eu_1F4F60.c:93`: lvalue casts;
+      - `game_eu_1D1150.c:435`: `func_151A3AB4` called with 3 arguments, defined with 2;
+      - `game_eu_B37F0.c:282`: `func_150889D8()` called with 0 arguments, defined with 1;
+      - `debugger.c`: `extern s32 func_150ADC50`.
+    - **`func_15002248` (P20)** was not reached in 10 s, so it is not checked at runtime. No bug found.
+  - **Flags:** `dltrace=N`, `dlstat=N` (opcode histogram, segments, `[probe]`) and `gdltrack=N`.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

@@ -9,6 +9,9 @@
  * load sequence the game uses decodes the way the RDP would see it. */
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
+int port_flag(const char *name);
+__attribute__((weak)) void port_frame_probe(unsigned task) { (void)task; }
 #include <math.h>
 #include <GLES3/gl3.h>
 #include "gfx.h"
@@ -36,9 +39,11 @@ static unsigned char *phys(unsigned a) {
     return 0;
 }
 
+static unsigned fr_ops[256], fr_seguse[16];  /* P23: per-frame opcode histogram and segment references */
 void *gfx_addr(unsigned a) {
     if (a >= PORT_WASM_BASE) return phys(a);
     unsigned seg = a >> 24;
+    if (seg < 16) fr_seguse[seg]++;
     if (segset & (1u << seg)) {
         unsigned char *b = phys(segtab[seg]);
         return b ? b + (a & 0xFFFFFF) : 0;
@@ -559,6 +564,7 @@ void gfx_run_dl(const void *dl) {
         if (gfx_trace) port_log("[gfx]   %p: %08X %08X\n", (const void *)pc, w0, w1);
         pc += 8;
         gfx_stats.cmds++;
+        fr_ops[op]++;
         if (op >= 0x10 && op <= 0x1F) {
             /* Conker (Rare F3DEX2 variant): four triangles in one command, 12 five-bit indices */
             gfx_stats.tri4++;
@@ -756,7 +762,12 @@ void gfx_run_task(void *task) {
     /* P19: per-frame statistics (first 6 tasks, then every 120th): commands, triangles, unknown ops */
     unsigned c0 = gfx_stats.cmds, t0 = gfx_stats.tris, u0 = gfx_stats.unknown_ops, d0 = gfx_stats.dls;
     int logf = gfx_stats.tasks <= 6 || gfx_stats.tasks % 120 == 0;
-    gfx_trace = gfx_stats.tasks <= 2;
+    static int dltrace = -1, dlstat = -1;
+    if (dltrace < 0) { dltrace = port_flag("dltrace"); dlstat = port_flag("dlstat"); }
+    /* P23: ?dltrace=N dumps every command of gfx task N too; ?dlstat=N logs the opcode histogram every N tasks */
+    gfx_trace = gfx_stats.tasks <= 2 || (dltrace && gfx_stats.tasks == (unsigned)dltrace);
+    if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;
+    memset(fr_ops, 0, sizeof fr_ops); memset(fr_seguse, 0, sizeof fr_seguse);
     gfx_frame_begin(0, 0, 0);
     gfx_run_dl(dl);
     gfx_frame_end();
@@ -764,4 +775,14 @@ void gfx_run_task(void *task) {
     if (logf)
         port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands\n", gfx_stats.tasks,
                  gfx_stats.dls - d0, gfx_stats.cmds - c0, gfx_stats.tris - t0, gfx_stats.unknown_ops - u0);
+    if (logf) {  /* P23: opcode histogram and segment use of this frame */
+        char b[1024]; int n = 0;
+        for (int i = 0; i < 256 && n < (int)sizeof b - 32; i++)
+            if (fr_ops[i]) n += snprintf(b + n, sizeof b - n, " %02X:%u", i, fr_ops[i]);
+        n += snprintf(b + n, sizeof b - n, " | seg refs");
+        for (int i = 0; i < 16 && n < (int)sizeof b - 32; i++)
+            if (fr_seguse[i]) n += snprintf(b + n, sizeof b - n, " %X:%u%s", i, fr_seguse[i], (segset >> i & 1) || !i ? "" : "(unset)");
+        port_log("[gfx] frame %u ops:%s\n", gfx_stats.tasks, b);
+        if (logf == 2) port_frame_probe(gfx_stats.tasks);
+    }
 }

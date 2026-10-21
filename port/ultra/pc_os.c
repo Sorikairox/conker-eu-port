@@ -83,7 +83,8 @@ const char *port_gstr(const char *g) {
 
 /* per-stub call counters (names are string literals: pointer identity), for the priority list */
 #define STUB_SLOTS 4096
-static struct { const char *name, *what; unsigned n, first_frame, order; } stub_tab[STUB_SLOTS];
+static struct { const char *name, *what; unsigned n, first_frame, order, dl; } stub_tab[STUB_SLOTS];
+static unsigned stub_last = STUB_SLOTS;  /* P23: slot of the latest stub hit */
 static unsigned stub_distinct;
 
 static int stub_count(const char *name, const char *what) {
@@ -93,6 +94,7 @@ static int stub_count(const char *name, const char *what) {
         stub_tab[h].name = name; stub_tab[h].what = what;
         stub_tab[h].first_frame = port_frame_count; stub_tab[h].order = ++stub_distinct;
     }
+    stub_last = h;
     return ++stub_tab[h].n == 1;
 }
 
@@ -111,12 +113,48 @@ EMSCRIPTEN_KEEPALIVE void port_dump_stubs(int max) {
     port_log("[stubs] %u distinct asm stubs hit, %d calls; ranked by calls (first-hit order, frame):\n",
              n, port_stub_hits);
     for (unsigned i = 0; i < n && (int)i < max; i++)
-        port_log("  %3u. %-14s %8u  #%-3u f%-4u %s\n", i + 1, stub_tab[idx[i]].name, stub_tab[idx[i]].n,
-                 stub_tab[idx[i]].order, stub_tab[idx[i]].first_frame, stub_tab[idx[i]].what);
+        port_log("  %3u. %-14s %8u  #%-3u f%-4u %s%s\n", i + 1, stub_tab[idx[i]].name, stub_tab[idx[i]].n,
+                 stub_tab[idx[i]].order, stub_tab[idx[i]].first_frame, stub_tab[idx[i]].what,
+                 stub_tab[idx[i]].dl ? " [DL]" : "");
+    /* P23: the stubs on the frame display-list path: they were handed a pointer into the frame DL buffers
+     * and returned it unchanged (pass-through), so their drawing is what is missing from the frame */
+    unsigned k = 0;
+    for (unsigned i = 0; i < n; i++) if (stub_tab[idx[i]].dl) k++;
+    port_log("[stubs] %u on the frame DL path (returned a frame-DL pointer; their output is missing):\n", k);
+    for (unsigned i = 0, j = 0; i < n; i++)
+        if (stub_tab[idx[i]].dl)
+            port_log("  DL %2u. %-14s %8u calls, %8u with a DL pointer  %s\n", ++j, stub_tab[idx[i]].name, stub_tab[idx[i]].n,
+                     stub_tab[idx[i]].dl, stub_tab[idx[i]].what);
 }
 
+/* P23: mark the latest stub hit as a frame-DL builder (called right after its port_stub_hit) */
+void port_stub_mark_dl(void) { if (stub_last < STUB_SLOTS) stub_tab[stub_last].dl++; }
+
+/* P23: return value of an int stub with an int first argument (gen_stubs.py): a0 when it points into the
+ * frame DL buffers D_800BEDE8[0..1] (each D_800BEDE8[1] - D_800BEDE8[0] bytes; the stub is a DL builder
+ * whose output is simply missing), else 0 as before. */
+extern unsigned D_800BEDE8[2];
+static unsigned dlret_hits;
+void port_stub_mark_dl(void);
+int port_stub_dlret(int a0) {
+    unsigned a = (unsigned)a0, b0 = D_800BEDE8[0], b1 = D_800BEDE8[1];
+    if (b0 && b1 > b0 && a >= b0 && a < b1 + (b1 - b0)) { dlret_hits++; port_stub_mark_dl(); return a0; }
+    return 0;
+}
+unsigned port_stub_dlret_hits(void) { return dlret_hits; }
+/* source-detected pass-through stubs (gen_stubs.py): always a0; marked as DL builders when a0 is in range */
+int port_stub_pt(int a0) { port_stub_dlret(a0); return a0; }
+
+/* P23: ?gdltrack=N: during VI frame N, log every stub hit with the frame DL write pointer D_800BE9D0
+ * (game_45B80.c GDL) and the DL buffers, to find where the frame DL leaves its buffer. */
+extern unsigned D_800BE9D0;
 void port_stub_hit(const char *name, const char *what) {
     port_stub_hits++;
+    { static int gt = -1; if (gt < 0) gt = port_flag("gdltrack");
+      if (gt && port_frame_count >= (unsigned)gt && port_frame_count < (unsigned)gt + 8) {
+          OSThread *t = port_current_thread();
+          port_log("[gdl] %s thread=%d GDL %08X (buf %08X %08X)\n", name, t ? (int)t->id : -1, D_800BE9D0, D_800BEDE8[0], D_800BEDE8[1]);
+      } }
     if (stub_count(name, what) && stub_logged < PORT_STUB_LOG_MAX) { /* first hit of each stub */
         stub_logged++;
         OSThread *t = port_current_thread();

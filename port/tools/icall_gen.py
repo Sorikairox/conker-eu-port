@@ -62,9 +62,11 @@ def expectations(regs):
 
 def main():
     out, objs = sys.argv[1], sys.argv[2:]
-    regs, sigs = {}, set()
+    regs, sigs, stubs = {}, set(), set()
     for o in objs:
         for nm, kind, flags, sig in wasmobj.read(o):
+            if o.endswith('asm_stubs.o') and nm and kind == wasmobj.SYM_FUNC and not flags & (wasmobj.LOCAL | wasmobj.UNDEF):
+                stubs.add(nm)
             if nm is None or kind != wasmobj.SYM_FUNC or flags & (wasmobj.LOCAL | wasmobj.UNDEF):
                 continue
             if not nm.replace('_', 'a').isalnum() or nm in ('main',) or nm.startswith('__icall'):
@@ -94,6 +96,27 @@ def main():
     L += ['    {0, 0}};', '__attribute__((constructor)) static void icall_tab_reg(void) {',
           f'    __port_fsig_reg(tab, {len(regs)});', '}', '',
           'const char *port_fsig_name(unsigned id) {', '    switch (id) {']
+    # P23: the asm stubs (asm_stubs.o), for the pass-through indirect-call trampolines (icall.py)
+    # only real stubs (their body calls port_stub_hit); alias forwarders run a C body
+    import re as _re
+    src = [o[:-2].replace('/build/stubs/', '/stubs/') + '.c' for o in objs if o.endswith('asm_stubs.o')]
+    real = set()
+    for f in src:
+        if os.path.exists(f):
+            real |= set(_re.findall(r'^__attribute__\(\(weak\)\) \w+ (\w+)\([^)]*\) \{ port_stub_hit', open(f).read(), _re.M))
+    stubs = stubs & real if real else stubs
+    sj = [j for j, (nm, ws) in enumerate(sorted(regs.items())) if nm in stubs]
+    S = ['', '/* P23: asm stubs, for icall.py pass-through sites (x = fp(x, ...) returns x when fp is a stub) */',
+         'static unsigned stubidx[] = {' + ', '.join(f'(unsigned)(unsigned long)(void *)icf_{j}' for j in sj) + (', 0};' if not sj else '};'),
+         f'static const int nstub = {len(sj)};',
+         'static int ucmp(const void *a, const void *b) { unsigned x = *(const unsigned *)a, y = *(const unsigned *)b; return x < y ? -1 : x > y; }',
+         'void qsort(void *, unsigned long, unsigned long, int (*)(const void *, const void *));',
+         'int __port_is_stub(void *fp) {',
+         '    static int sorted; unsigned v = (unsigned)(unsigned long)fp; int lo = 0, hi = nstub - 1;',
+         '    if (!sorted) { qsort(stubidx, nstub, sizeof(unsigned), ucmp); sorted = 1; }',
+         'void port_stub_mark_dl(void);',
+         '    while (lo <= hi) { int m = (lo + hi) >> 1; if (stubidx[m] == v) { port_stub_mark_dl(); return 1; } if (stubidx[m] < v) lo = m + 1; else hi = m - 1; }',
+         '    return 0;', '}']
     L += [f'    case {i}u: return "{s}";' for i, s in sorted(ids.items())]
     L += ['    }', '    return "?";', '}', '',
           'unsigned long long __port_icall_slow(void *fp, unsigned tsig, const unsigned long long *b, int n,',
@@ -108,9 +131,10 @@ def main():
         else:
             L.append(f'    case {i}u: return R_{r}((({T})fp)({args}), rk);')
     L += ['    }', '    return 0;', '}']
+    L += S
     L += expectations(regs)
     open(out, 'w').write('\n'.join(L) + '\n')
-    print(f'icall_gen: {len(regs)} registered functions (non-vbe objects), {len(ids)} target signatures')
+    print(f'icall_gen: {len(regs)} registered functions (non-vbe objects), {len(ids)} target signatures, {len(sj)} asm stubs')
 
 
 if __name__ == '__main__':
