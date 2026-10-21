@@ -101,7 +101,44 @@ void func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     func_15132BBC(arg0, arg1, arg2, 0, arg3, arg4, arg5);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132FF8.s")
+extern s32 (*D_80089D2C[])(Mtx *);
+u8 func_151464B8(s16 *arg0);
+typedef struct {
+    u8 pad0[0x60];
+    u32 flags;
+    u8 pad64[8];
+    s16 *unk6C;
+    u8 pad70[8];
+    u8 unk78;
+    u8 pad79[0x17];
+    Mtx mtx[2];
+} Unk15132FF8;
+
+void func_15132FF8(Unk15132FF8 *arg0) {
+    s32 r;
+
+    arg0->flags &= ~0x200000;
+    if (arg0->flags & 0x20000) {
+        return;
+    }
+    if ((arg0->flags & 0x400) && arg0->unk6C != NULL && func_151464B8(arg0->unk6C) != 0) {
+        return;
+    }
+    if (arg0->flags & 0x80000) {
+        arg0->flags |= 0x200000;
+        return;
+    }
+    r = D_80089D2C[arg0->unk78](&arg0->mtx[D_800BE9C0]);
+    if (r == -1) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    if (r == 0) {
+        arg0->flags &= ~0x40000;
+    } else {
+        arg0->flags |= 0x240000;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_151330F0.s")
 

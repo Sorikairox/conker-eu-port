@@ -1301,3 +1301,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **`(K - x) * 4` distributed into `negu; sll; addiu K*4`**: write `(K - x) << 2` (`func_151D2D0C`).
 4. **m2c `u8` params with no `andi` in the ref** (`bnez a1`, `sb a0` straight from the arg register): declare them `s32` (`func_151D6CA0`).
 5. **A stack-passed param (arg4+) loaded into an s-register and stored back to its home slot at loop exit**: IDO does this when the param is assigned *and read* (`func_15196344` reads `arg4`); in `func_15195AA8` nothing visible reads it and no fake read reproduced it (open).
+## s152 recipes (frame slots via block scope, call-result temps, rodata externs)
+1. **Spilled locals 8 bytes too high with the frame size already right**: declare them in the `if` block that uses them instead of at function scope (`{ f32 rot; s32 pad; f32 h; ... }` inside `if (mode == 1 || mode == 3)`), keeping the pointer local at function scope (`func_1515626C`).
+2. **`c * f()` comes out `mul.s f4,f0,f2` (call result first) whatever the source order**: assign the call result to a named temp first (`t = func_15048A40(v); *arg1 = c * t;`) to get `mul.s f4,f2,f0` (`func_151705A4`).
+3. **Float local in the wrong FP register (f0/f2 swap) when it is set in an if/else**: in the branch that assigns it, do the side-effect statement first and the assignment last (`*(p+0x14) += *(p+0x28) * dt; g = *(p+0x28);`); no fakematch needed (`func_15158018`).
+4. **`addu s0,a0,t6` (base first) for `arg0 + *(s32 *)(arg0 + 0x50) + 0xF8`**: wrap the constant in a comma, `+ (0, 0xF8)` (permuter; `func_1513BEB0`). A file that does not own `.rodata` still converts with `extern f32 D_800A4E64;` etc. in place of the literals (`apply.py` rejects the literal version).
+5. **Read-modify-write flag word, then tests on the result**: `arg0->flags &= ~X; if (arg0->flags & Y)` gives the extra `t6`→`t7` temp of the target; `f = arg0->flags & ~X; arg0->flags = f;` lands in `v0` (`func_15132FF8`).
+6. **`neg = -step` that must be computed before a `step < 0` test**: hoist it into the enclosing `else` (`func_15167B44`, permuter).

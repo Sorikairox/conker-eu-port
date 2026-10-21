@@ -87,4 +87,43 @@ s32 func_1513BAD4(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BAE8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BBFC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BEB0.s")
+extern f32 D_800A4E64; // 0.037f (file does not own .rodata)
+extern f32 D_800A4E68; // 1.9f
+extern f32 D_800A4E6C; // 77.3f
+extern f32 D_800A4E70; // 0.019f
+extern f32 D_800A4E74; // 0.01f
+typedef struct {
+    f32 a;
+    f32 b;
+    f32 c;
+    f32 d;
+    f32 e;
+} Wave1513BEB0;
+
+s32 func_1513BEB0(u8 *arg0) {
+    f32 f;
+    Wave1513BEB0 *w = (Wave1513BEB0 *)(arg0 + *(s32 *)(arg0 + 0x50) + (0, 0xF8)); // fakematch: comma keeps addu a0,t6 order
+
+    w->c += D_800A4E64 * D_800BE9A4;
+    f = func_15144B68(w->c);
+    w->c = f;
+    w->a += D_800A4E68 * D_800BE9A4;
+    w->b = sinf(f) * D_800A4E6C;
+    w->d += D_800A4E70 * D_800BE9A4;
+    w->e += D_800A4E74 * D_800BE9A4;
+    w->d = func_15144B68(w->d);
+    w->e = func_15144B68(w->e);
+    while (w->a > 4096.0f) {
+        w->a -= 4096.0f;
+    }
+    while (w->a < 0.0f) {
+        w->a += 4096.0f;
+    }
+    while (w->b > 4096.0f) {
+        w->b -= 4096.0f;
+    }
+    while (w->b < 0.0f) {
+        w->b += 4096.0f;
+    }
+    return 1;
+}
