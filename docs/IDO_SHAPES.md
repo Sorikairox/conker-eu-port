@@ -1215,3 +1215,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **A search-loop flag** (`while (!found && i < n)`) that the ref keeps with `andi 0xFF`: declare it `u8` (`func_15143E94`).
 4. **Remote permuter on old parked near misses pays**: s139 4/6, s140 4/20 (all DIFF <= 7 starts). Screen all saved drafts at once with `ljsweep.py` (`s140_drafts/collect.py` + `rank.py`), permute the best per function.
 
+
+## s142 recipes (comma operand order, struct-typed FP access)
+1. **Commutative FP op with its operands in the wrong `fs`/`ft` order** (`mul.s f14, f8, f0` vs mine `f0, f8`): source order is canonicalised, but **`x * (0, s)`** puts `s` in `fs`; also fixes the f-register pair (`1.0f - (arg1[5] * (0, dist - lo))`, `func_151D91B0`; `F(0x10) * (0, s)`, `func_1513384C`). Screen all 4 forms (`(0,a)*b`, `a*(0,b)`, ...) per op with tryall; label fakematch.
+2. **A call result multiplied by a product** with the product loaded after the call: `s = call(); s = (B * A) * s;` gives the ref load/operand order (`func_1513384C`).
+3. **FP register pairs alternating the wrong way (f4/f6, f6/f4) all through a function that uses `p = arg0 + K` with `*(f32 *)(p + n)` casts**: rewrite with a **struct pointer** (`Sub *v = (Sub *)(arg0 + 0x70); v->unk18`). The casts cost DIFF8 / DIFF27; the struct form matched first try (`func_151CD7D4`, `func_151CBF20` game_eu_1F7960).
+4. `(a + (*p >> 6)) - K` vs `((*p >> 6) + a) - K` changes the t-register numbering (DIFF12 -> OK, `func_1517BC58`).
+5. Chained byte stores `p[6] = (p[0] = v)` store `[0]` first; write `p[0] = (p[6] = v)` for `sb 6; sb 0` (`func_15187EC0`).
