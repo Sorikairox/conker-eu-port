@@ -122,7 +122,11 @@ void func_15121C68(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x99C)) = 0.0f;
 }
 
+#ifdef NON_MATCHING
+void func_151CA484(u8 *arg0);
+#else
 s32 func_151CA484(u8 *);
+#endif
 
 void func_15121E34(u8 *arg0)
 {

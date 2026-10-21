@@ -32,6 +32,10 @@ def fix_redecl(code, err, func=None, src=None):
     for n in set(names):
         for l in _decl_lines(code, n):
             code = code.replace(l + '\n', '', 1); ch = True
+        # P20: also a //HOIST declaration (rostr's `extern u8 D_X[];` vs variables.h's `extern s32 D_X;`)
+        for l in code.split('\n'):
+            if l.startswith('//HOIST ') and _decl_lines(l[8:], n):
+                code = code.replace(l + '\n', '', 1); ch = True
     return code if ch else None
 
 def fix_question_types(code, err, func=None, src=None):
@@ -81,6 +85,15 @@ def fix_implicit_proto(code, err, func=None, src=None):
             m = re.search(r'^([A-Za-z_][^;{}()\n]*\b%s\s*\([^;{}]*?\))\s*\{' % n, text, re.M)
             if m:
                 add.append('//HOIST %s;' % ' '.join(m.group(1).split())); break
+        else:
+            # P20: no C definition, but the file prototypes X *after* the draft (an implicit `int X()` at the
+            # draft's call vs `s32 X(...)`, s32 being long): hoist the file's prototype. Only when the draft does
+            # not declare X itself (then it is fix_redecl's case).
+            if n == func or _decl_lines(code, n) or any(_decl_lines(l[8:], n) for l in code.split('\n') if l.startswith('//HOIST ')):
+                continue
+            ps = [l for l in (src or '').split('\n') if re.match(r'^(extern\s+)?[A-Za-z_][^;{}()=\n]*\b%s\s*\([^;{}]*\)\s*;\s*$' % n, l)]
+            if len(set(x.strip() for x in ps)) == 1:
+                add.append('//HOIST %s' % ps[0].strip())
     add = [a for a in add if a not in code]
     return '\n'.join(add) + '\n' + code if add else None
 
@@ -156,14 +169,16 @@ def lint(code, func=None):
     if any(re.search(r'&%s\b' % v, code) for v in scal):
         out.append('lint:stackaddr')   # &scalar stack local passed on: callee may read neighbours -> make it an array/struct (vecfix.py/spstruct.py)
     if re.search(r'\bsubroutine_arg|\bsaved_reg|M2C_', code): out.append('lint:m2cmacro')
+    if not os.environ.get('CONVERT_P1') and cfix.table_problems(code, func):
+        out.append('lint:table')   # P18: a table the body defines itself: values/size not the ROM's, or indexed past its size
     return out
 
 sys.path.insert(0, HERE)
 import cfix
 FIXES = [('fptab', cfix.fix_fptab), ('implproto', fix_implicit_proto), ('spframe', cfix.fix_spframe), ('cmpcast', fix_cmp_cast), ('cmp2', cfix.fix_cmp),
          ('deref', cfix.fix_deref), ('fnptr', fix_fnptr), ('redecl', fix_redecl), ('qtypes', fix_question_types),
-         ('undecl', fix_undeclared), ('argc', fix_args_count)]
-# P17: cfix.fix_selfproto (definition vs the header's own prototype of FUNC) is written but untested, not registered
+         ('undecl', fix_undeclared), ('argc', fix_args_count), ('selfproto', cfix.fix_selfproto)]
+# selfproto (P17, registered after user approval 2026-10-22): definition vs the header's own prototype of FUNC
 # DIFFER: tried in order, each at most once per draft
 DFIXES = [('litsym', cfix.fix_litsym), ('passthru2', cfix.fix_passthru), ('passthru', fix_passthrough), ('u8arith', cfix.fix_u8arith),
           ('spframe', lambda c, w, f, s: cfix.fix_spframe(c, w, f, s, force=True))]
@@ -249,6 +264,11 @@ def _eval_one(item):
 
 def _child(item, out):
     """one function in its own forked process: a Unicorn segfault / hang kills only this child"""
+    try:   # P18: die with convert.py (its trial grandchildren die with this process the same way)
+        import ctypes, signal
+        ctypes.CDLL(None).prctl(1, signal.SIGKILL, 0, 0, 0)
+    except Exception:
+        pass
     try:
         r = eval_one(item)
     except Exception as e:

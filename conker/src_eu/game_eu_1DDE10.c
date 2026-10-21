@@ -43,8 +43,107 @@ s32 func_151B1A28(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1A5C.s")
+#ifdef NON_MATCHING
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+s32 memcpy(s32, f32 *, s32);
+extern s32 D_800DD608;
+extern s32 D_800DD618;
 
+u8 *func_151B1A5C(u8 *arg0, s16 arg1) {
+    struct {
+        u8 u3B;
+        f32 u3C;
+        u8 pad40[0x10];
+        f32 u50;
+        f32 u54;
+        u8 pad58[0x4];
+        f32 u5C;
+        u8 * u60;
+        u8 * u64;
+    } sp;
+    u8 *sp34;
+    f32 *sp30;
+    f32 *sp2C;
+    f32 *temp_a0;
+    f32 *temp_a1;
+    f32 *temp_v1;
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 temp_f0_3;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f2;
+    f32 var_f12;
+    f32 var_f14;
+    f32 var_f16;
+    s32 temp_t0;
+    u8 *temp_v0;
+
+    func_151D6310(arg0 + 0x100, arg1, 0x40, &sp.u64, &sp.u3B);
+    sp.u60 = sp.u64;
+    if (sp.u64 != NULL) {
+        if (sp.u3B != 0) {
+            temp_v0 = arg0 + (arg1 * 4);
+            temp_a1 = arg0 + 0xC0;
+            sp30 = temp_a1;
+            sp34 = temp_v0;
+            memcpy((*(s32 *)((u8 *)temp_v0 + 0x100)), temp_a1, 0x40);
+            memcpy((*(s32 *)((u8 *)temp_v0 + 0x100)) + 0x40, temp_a1, 0x40);
+        }
+        temp_t0 = arg1 * 4;
+        temp_v1 = temp_t0 + &D_800DD618;
+        temp_a0 = temp_t0 + &D_800DD608;
+        var_f16 = -1.0f;
+        var_f14 = ((*temp_v1 * ((*(f32 *)((u8 *)arg0 + 0x40)) - (*(f32 *)((u8 *)arg0 + 0x34)))) - (*temp_a0 * ((*(f32 *)((u8 *)arg0 + 0x48)) - (*(f32 *)((u8 *)arg0 + 0x3C))))) * D_800BEDC8;
+        if (var_f14 < 0.0f) {
+            var_f16 = 1.0f;
+            var_f14 = -var_f14;
+        }
+        var_f12 = sqrtf(var_f14) * 0.25f;
+        if (var_f12 > 1.5707964f) {
+            var_f12 = 1.5707964f;
+        }
+        temp_f12 = var_f12 * var_f16;
+        sp30 = temp_v1;
+        sp2C = temp_a0;
+        sp.u3C = temp_f12;
+        sp.u5C = sinf(temp_f12);
+        temp_f0 = cosf(temp_f12);
+        temp_f12_2 = (*(f32 *)((u8 *)arg0 + 0x2C));
+        temp_f14 = (*(f32 *)((u8 *)arg0 + 0x30));
+        temp_f2 = temp_f12_2 * temp_f0;
+        temp_f18 = temp_f12_2 * sp.u5C;
+        temp_f16 = -temp_f2;
+        sp.u54 = temp_f14 * temp_f0;
+        sp.u50 = temp_f14 * sp.u5C;
+        (*(s16 *)((u8 *)sp.u64 + 0)) = (s16) (s32) ((*temp_v1 * temp_f16) + (*(f32 *)((u8 *)arg0 + 0x34)));
+        (*(s16 *)((u8 *)sp.u64 + 2)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x38)) + temp_f18);
+        (*(s16 *)((u8 *)sp.u64 + 4)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) - (*temp_a0 * temp_f16));
+        (*(s16 *)((u8 *)sp.u64 + 6)) = 0;
+        (*(s16 *)((u8 *)sp.u64 + 0x10)) = (s16) (s32) ((*temp_v1 * temp_f2) + (*(f32 *)((u8 *)arg0 + 0x34)));
+        (*(s16 *)((u8 *)sp.u64 + 0x12)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x38)) - temp_f18);
+        (*(s16 *)((u8 *)sp.u64 + 0x14)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) - (*temp_a0 * temp_f2));
+        (*(s16 *)((u8 *)sp.u64 + 0x16)) = 0;
+        temp_f0_2 = temp_f2 - sp.u50;
+        (*(s16 *)((u8 *)sp.u64 + 0x20)) = (s16) (s32) ((*temp_v1 * temp_f0_2) + (*(f32 *)((u8 *)arg0 + 0x34)));
+        (*(s16 *)((u8 *)sp.u64 + 0x22)) = (s16) (s32) (((*(f32 *)((u8 *)arg0 + 0x38)) - temp_f18) - sp.u54);
+        (*(s16 *)((u8 *)sp.u64 + 0x24)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) - (*temp_a0 * temp_f0_2));
+        (*(s16 *)((u8 *)sp.u64 + 0x26)) = 0;
+        temp_f0_3 = -(temp_f2 + sp.u50);
+        (*(s16 *)((u8 *)sp.u64 + 0x30)) = (s16) (s32) ((*temp_v1 * temp_f0_3) + (*(f32 *)((u8 *)arg0 + 0x34)));
+        (*(s16 *)((u8 *)sp.u64 + 0x32)) = (s16) (s32) (((*(f32 *)((u8 *)arg0 + 0x38)) + temp_f18) - sp.u54);
+        (*(s16 *)((u8 *)sp.u64 + 0x34)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) - (*temp_a0 * temp_f0_3));
+        (*(s16 *)((u8 *)sp.u64 + 0x36)) = 0;
+        return sp.u60;
+    }
+    return NULL;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1A5C.s")
+#endif
 s32 func_151B1DD8(u8 *arg0) {
     s32 pad;
     u8 *p;

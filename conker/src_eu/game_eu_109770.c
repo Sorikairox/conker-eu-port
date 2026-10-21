@@ -6,7 +6,7 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DBF60.s")
 
 #ifdef NON_MATCHING
-s32 func_151534E0(f32 *, u8, u8 *);
+void func_151534E0(u8 *arg0, s32 arg1);
 
 void func_150DC1E0(u8 *arg0) {
     struct {
@@ -71,7 +71,7 @@ void func_150DC1E0(u8 *arg0) {
     sp.u38 = 5.0f;
     sp.u2C = 0.32f;
     sp.u30 = 0.0f;
-    func_151534E0(&sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)), arg0);
+    func_151534E0((u8 *) &sp.u18, (*(u8 *)((u8 *)arg0 + 0xC)));   /* the callee never reads a2 */
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DC1E0.s")

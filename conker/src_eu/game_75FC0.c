@@ -80,7 +80,7 @@ f32 func_15048C30(f32 arg0) {
     if (temp_t6 < 0x7F) {
         temp_f2_2 = fabsf(arg0);
         if (temp_f2_2 < D_80086388) {
-            temp_v1_2 = ((u8 *)&D_800993FC);
+            temp_v1_2 = ((u8 *)&D_800993D0);   /* P18: the asm uses D_800993D0 here (was D_800993FC) */
             temp_f16 = (2.0f * (arg0 * arg0)) - D_80086370;
             temp_f18_2 = temp_f16 * temp_f16;
             temp_f12 = (*(f32 *)((u8 *)temp_v1_2 + 4)) + ((((((((*(f32 *)((u8 *)temp_v1_2 + 0x14)) * temp_f18_2) + (*(f32 *)((u8 *)temp_v1_2 + 0x10))) * temp_f18_2) + (*(f32 *)((u8 *)temp_v1_2 + 0xC))) * temp_f18_2) + (*(f32 *)((u8 *)temp_v1_2 + 8))) * temp_f18_2);

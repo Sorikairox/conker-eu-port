@@ -102,8 +102,113 @@ u8 *func_15110C28(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110C28.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110E44.s")
+#ifdef NON_MATCHING
+s32 func_15110E44(f32 arg0, f32 arg1, f32 arg2, f32 arg3) {
+    struct {
+        s32 u1C;
+    } sp;
+    s32 sp18;
+    s32 var_a2;
+    s32 var_v1;
 
+    switch (D_800BE9F0) {
+    case 0x6:
+    case 0x3B:
+        var_v1 = (s32) (((arg1 * 40.0f) / 1800.0f) + 200.0f);
+        break;
+    case 0x14:
+        var_v1 = (s32) (((arg1 * 22.0f) / 1800.0f) + 113.0f);
+        break;
+    case 0xC:
+        var_v1 = (s32) (((arg1 * 90.0f) / 1800.0f) + 150.0f);
+        break;
+    case 0x0:
+        if ((arg1 < 1600.0f) && (arg3 > 26.0f)) {
+            var_v1 = 0;
+        } else {
+            var_v1 = (s32) (((arg1 * 51.0f) / 1800.0f) + 134.0f);
+        }
+        break;
+    case 0x7:
+        if (arg2 < -1100.0f) {
+        default:
+block_46:
+            var_v1 = 0x140;
+        } else if (arg3 > 20.0f) {
+            var_v1 = 0;
+        } else {
+            var_v1 = (s32) (((arg1 * 54.0f) / 1800.0f) + 167.0f);
+        }
+        break;
+    case 0x41:
+        var_v1 = 0x89;
+        break;
+    case 0x3C:
+        if ((arg2 < -1650.0f) || ((arg0 > 3495.0f) && (arg0 < 4578.0f) && (arg2 < 2960.0f))) {
+            goto block_46;
+        }
+        var_v1 = 0;
+        break;
+    case 0xB:
+        sp18 = 0;
+        if (func_150A29C8(0, 0x18) == 1) {
+            var_a2 = sp18;
+            if (func_150A29C8(0, 0x2E) == 0) {
+                var_v1 = sp.u1C;
+                if (arg3 > 0.0f) {
+                    var_v1 = 0;
+                } else {
+                    var_a2 = 1;
+                }
+            } else {
+                var_v1 = 0;
+            }
+        } else {
+            var_a2 = 1;
+            var_v1 = sp.u1C;
+        }
+        if (var_a2 != 0) {
+            if (arg1 < 1218.0f) {
+                var_v1 = 0x1E;
+            } else {
+                var_v1 = 0x140;
+                if (arg1 < 2000.0f) {
+                    var_v1 = 0xA0;
+                }
+            }
+        }
+        break;
+    case 0x13:
+        if ((D_800C35EA == 1) && ((D_800C3A08 == 2) || (D_800C3A08 == 1))) {
+            goto block_46;
+        }
+        if (arg1 < 1900.0f) {
+            var_v1 = 0x10E;
+        } else {
+            goto block_46;
+        }
+        break;
+    case 0x1C:
+        var_v1 = (s32) (((arg1 * 34.0f) / 1800.0f) + 130.0f);
+        break;
+    case 0xE:
+        var_v1 = 0xA5;
+        break;
+    case 0x39:
+        var_v1 = 0x54;
+        break;
+    case 0x2D:
+        var_v1 = (s32) (((arg1 * 53.0f) / 1800.0f) + 139.0f);
+        break;
+    case 0x30:
+        var_v1 = (s32) (((arg1 * 53.0f) / 1800.0f) + 139.0f);
+        break;
+    }
+    return var_v1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110E44.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_1511127C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111CAC.s")

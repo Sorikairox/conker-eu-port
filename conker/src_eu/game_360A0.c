@@ -7,9 +7,7 @@
 #ifdef NON_MATCHING
 void func_15143874(s16, f32, f32 *, f32 *);
 void func_15189E70(void *, u8);
-u8 D_80095B48[4] = { 0x3B, 0xF, 0x67, 0xA2 };       /* const */
-u8 D_80095B4C[4] = { 0x41, 0xA0, 0xCC, 0xCD };      /* const */
-u8 D_80095B50[4] = { 0x3E, 0xCC, 0xCC, 0xCD };      /* const */
+/* P18: D_80095B48/4C/50 are rodata f32 words (variables.h: u8[]); the body used to define them as u8[4] and read one byte */
 
 s32 func_15008BF0(u8 *arg0) {
     struct {
@@ -43,7 +41,7 @@ s32 func_15008BF0(u8 *arg0) {
 
     (*(u8 *)((u8 *)arg0 + 0x16)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x16)) | 4);
     sp.u54 = 0.0f;
-    sp.u50 = (f32) (*(s16 *)((u8 *)arg0 + 6)) * 0.19600001f * *D_80095B48;
+    sp.u50 = (f32) (*(s16 *)((u8 *)arg0 + 6)) * 0.19600001f * *(f32 *)D_80095B48;
     sp.u70 = 4;
     sp.u74 = 2;
     sp.u60 = 0x64;
@@ -52,9 +50,9 @@ s32 func_15008BF0(u8 *arg0) {
     sp.u6E = 0x14;
     sp.u58 = 7.0f;
     sp.u5C = 6.0f;
-    sp.u48 = *D_80095B4C;
+    sp.u48 = *(f32 *)D_80095B4C;
     sp.u4C = 7.5f;
-    sp.u64 = *D_80095B50;
+    sp.u64 = *(f32 *)D_80095B50;
     sp.u68 = 0.60700005f;
     sp.u2A = 0x14;
     sp.u28 = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x10)) * 0.7111111f);

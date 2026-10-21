@@ -38,8 +38,48 @@ void func_150FF82C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     func_15145740(arg0, arg1, arg2, arg3, 0.81100005f);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF854.s")
+#ifdef NON_MATCHING
+u8 func_150FFC60(s32, u8 *, s32, s32, u8 *, u8 *, s32);
+void func_151D5724(u8 *, u8 *, void *, void *, void *, u8 *, u8 *, u8 **, u8 **, u8 *);
 
+void func_150FF854(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, u8 *argC, u8 *argD, s32 argE) {
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f2;
+    f32 var_f16;
+    f32 var_f18;
+    u8 temp_v0;
+    u8 var_v1;
+
+    var_v1 = *arg0;
+    if (var_v1 != 0) {
+        temp_v0 = func_150FFC60(arg1, arg2, arg3, arg4, argC, argD, argE);
+        var_v1 = temp_v0 & 0xFF;
+        *arg0 = temp_v0;
+    }
+    if (var_v1 == 0) {
+        temp_f14 = (*(f32 *)((u8 *)arg5 + 0));
+        if ((fabsf(temp_f14) > 0.0001f) || (fabsf((*(f32 *)((u8 *)arg5 + 8))) > 0.0001f)) {
+            temp_f2 = (*(f32 *)((u8 *)arg5 + 8));
+            temp_f12 = 1.0f / sqrtf((temp_f14 * temp_f14) + (temp_f2 * temp_f2));
+            var_f16 = temp_f2 * temp_f12;
+            var_f18 = -temp_f14 * temp_f12;
+        } else {
+            var_f16 = 1.0f;
+            var_f18 = 0.0f;
+        }
+        (*(f32 *)((u8 *)arg2 + 0)) = (f32) ((*(f32 *)((u8 *)argD + 0x14)) + (34.0f * var_f18));
+        (*(f32 *)((u8 *)arg2 + 4)) = (f32) ((*(f32 *)((u8 *)argD + 0x18)) + 49.0f);
+        (*(f32 *)((u8 *)arg2 + 8)) = (f32) ((*(f32 *)((u8 *)argD + 0x1C)) + (34.0f * var_f16));
+        (*(f32 *)((u8 *)argC + 0)) = (f32) (*(f32 *)((u8 *)arg2 + 0));
+        (*(f32 *)((u8 *)argC + 4)) = (f32) (*(f32 *)((u8 *)arg2 + 4));
+        (*(f32 *)((u8 *)argC + 8)) = (f32) (*(f32 *)((u8 *)arg2 + 8));
+    }
+    func_151D5724(argD, arg2, arg5, arg6, arg7, arg8, arg9, argA, argB, argC);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF854.s")
+#endif
 typedef struct { s32 x, y, z; } V3i;
 void func_150FF9F4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
 

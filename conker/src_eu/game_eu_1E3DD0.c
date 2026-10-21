@@ -104,4 +104,31 @@ s32 func_151B65C0(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5, s1
     return obj;
 }
 
+#ifdef NON_MATCHING
+s32 func_15133E04(f32);
+
+void func_151B6804(u8 *arg0) {
+    u8 *sp18;
+    f32 *temp_v0;
+    f32 temp_f12;
+    f32 temp_f2;
+    u8 *temp_v0_2;
+
+    temp_v0 = arg0 + 0x170;
+    (*(f32 *)((u8 *)arg0 + 0x170)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x170)) + (0.55600005f * D_800BE9A4));
+    if ((*(f32 *)((u8 *)arg0 + 0x170)) > 6.2831855f) {
+        do {
+            *temp_v0 -= 6.2831855f;
+        } while (*temp_v0 > 6.2831855f);
+    }
+    temp_v0_2 = arg0 + 0x170;
+    sp18 = temp_v0_2;
+    temp_f12 = (*(f32 *)((u8 *)temp_v0_2 + 4));
+    temp_f2 = temp_f12 + (sinf((*(f32 *)((u8 *)temp_v0_2 + 0))) * (0.061000004f * temp_f12));
+    (*(f32 *)((u8 *)arg0 + 0x1C)) = temp_f2;
+    (*(f32 *)((u8 *)arg0 + 0x18)) = temp_f2;
+    func_15133E04(temp_f12);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3DD0/func_151B6804.s")
+#endif

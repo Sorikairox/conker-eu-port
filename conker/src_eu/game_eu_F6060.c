@@ -215,8 +215,113 @@ void func_150C9EB4(u8 *arg0, f32 *arg1, u8 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA0DC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA2C4.s")
+#ifdef NON_MATCHING
+extern f32 D_800A0950;
+extern f32 D_800A0954;
+extern f32 D_800A0958;
+extern f32 D_800A0960;
+extern f32 D_800A0964;
+extern f32 D_800A0968;
 
+void func_150CA2C4(u8 *arg0, u8 *arg1, u8 arg2, s32 arg3) {
+    struct {
+        s32 u28;
+        s32 u2C;
+        s32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        f32 u48;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        s32 u5C;
+        u8 pad60[0x8];
+        s32 u68;
+        u8 pad6C[0x8];
+        f32 u74;
+        f32 u78;
+        f32 u7C;
+        f32 u80;
+        s32 u84;
+        s16 u88;
+        s16 u8A;
+        s8 u8C;
+        u8 pad8D[0x3];
+        s32 u90;
+        s8 u94;
+        s8 u95;
+        s8 u96;
+        s8 u97;
+        s8 u98;
+        s8 u99;
+        s8 u9A;
+        s8 u9B;
+        s8 u9C;
+        u8 pad9D[0x1];
+        s8 u9E;
+        u8 pad9F[0x1];
+        s32 uA0;
+        s8 uA4;
+        u8 padA5[0x1];
+        s16 uA6;
+        s16 uA8;
+    } sp;
+    s32 sp20;
+    f32 temp_f18;
+    f32 temp_f2;
+    f32 temp_f4;
+
+    func_150CD2A0(arg0, &sp.u30, &sp.u2C, &sp.u28);
+    (*(s32 *)((u8 *)(&sp.u5C) + 0)) = (s32) (*(s32 *)((u8 *)arg1 + 0));
+    (*(s32 *)((u8 *)(&sp.u5C) + 4)) = (s32) (*(s32 *)((u8 *)arg1 + 4));
+    (*(s32 *)((u8 *)(&sp.u5C) + 8)) = (s32) (*(s32 *)((u8 *)arg1 + 8));
+    sp.u50 = 1.0f;
+    sp.u54 = 1.0f;
+    sp.u58 = 1.0f;
+    sp.u84 = 0x29E8;
+    sp.u44 = func_150ADA68() * 360.0f;
+    sp.u48 = func_150ADA68() * 360.0f;
+    temp_f18 = func_150ADA68() * 360.0f;
+    sp.u8A = 0x20;
+    sp.u38 = D_800A0950;
+    sp.u4C = temp_f18;
+    sp.u78 = 0.0f;
+    sp.u34 = 1.0f;
+    sp20 = func_150ADA20();
+    func_15143794((s16) arg2, (s16) (((u32) sp20 % 26U) - 0x2D), ((func_150ADA68() * 81.0f) + 60.0f) * (*(f32 *)((u8 *)arg0 + 0x20)) * D_800A0954, &sp.u68);
+    sp.u74 = ((func_150ADA68() * 260.0f) + -130.0f) * D_800A0958;
+    sp.u7C = ((func_150ADA68() * 260.0f) + -130.0f) * D_800A0958;
+    sp.u88 = (func_150ADA20() % 41U) + 0x28;
+    sp.u80 = ((func_150ADA68() * D_800A0960) + D_800A0964) * D_800A0968;
+    temp_f4 = func_150ADA68() * 400.0f;
+    sp.u8C = 0;
+    sp.u90 = 0;
+    temp_f2 = (temp_f4 + 199.0f) * D_800A0968;
+    sp.u3C = temp_f2;
+    sp.u40 = temp_f2;
+    sp.u94 = (func_150ADA20() % 101U) + 0x9B;
+    sp.u95 = 7;
+    sp.u96 = 0;
+    sp.u97 = 0;
+    sp.u98 = 0;
+    sp.u99 = 0;
+    sp.u9A = 0;
+    sp.u9B = 0;
+    sp.u9C = 0;
+    sp.u9E = 2;
+    sp.uA0 = 0;
+    sp.uA4 = 0;
+    sp.uA6 = 0x20;
+    sp.uA8 = 7;
+    func_15132FBC(&sp.u34, 3, 0xFF, 0, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA2C4.s")
+#endif
 s32 func_150CA57C(u8 *arg0) {
     *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x44) * D_800BE9A4;
     *(f32 *)(arg0 + 0x3C) += (*(f32 *)(arg0 + 0x48) * D_800BE9A4) + (*(f32 *)(arg0 + 0x5C) * D_800BE9A4 * D_800BE9A4 * 0.5f);

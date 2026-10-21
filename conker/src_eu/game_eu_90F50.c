@@ -102,7 +102,11 @@ s32 func_15063DE8(u8 *arg0, s32 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063DE8.s")
 #endif
+#ifdef NON_MATCHING
+u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
+#else
 s32 func_15031C4C(struct127 *, s32, s32);
+#endif
 void func_1506B04C(struct127 *, s32, void *);
 
 void func_15063F14(struct127 *arg0, s32 arg1) {

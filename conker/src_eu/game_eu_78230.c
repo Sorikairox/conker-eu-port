@@ -260,7 +260,31 @@ s32 func_1504AEF4(s32 arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504AF10.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504B0FC.s")
+#ifdef NON_MATCHING
+void func_1504BA38(struct127 *arg0) {
+    s8 temp_a1;
+    s8 temp_v0;
+    u8 *temp_v1;
+
+    if (arg0->unk28 > 10.0f) {
+        arg0->unkCE = 0;
+        return;
+    }
+    temp_v1 = ((arg0->unk184 & 0x1F) * 3) + ((u8 *)&D_800994F0);
+    temp_a1 = (*(s8 *)((u8 *)temp_v1 + 2));
+    if ((temp_a1 != 0) && (arg0->unkAA == 0)) {
+        arg0->unkAA = (u8) temp_a1;
+    }
+    temp_v0 = (*(s8 *)((u8 *)temp_v1 + 1));
+    if (temp_v0 == 0) {
+        arg0->unkCE = (s16) (*(s8 *)((u8 *)temp_v1 + 0));
+        return;
+    }
+    arg0->unkCE = (s16) (s32) ((f32) temp_v0 * 0.1f * ((f32) (*(s8 *)((u8 *)temp_v1 + 0)) - arg0->xz_velocity));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504BA38.s")
+#endif
 // NON-MATCHING: starts to fall apart towards the end
 // void func_1504BA38(struct127 *arg0) {
 //     s8 temp_a1;

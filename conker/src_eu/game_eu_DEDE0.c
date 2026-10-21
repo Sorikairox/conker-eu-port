@@ -87,6 +87,58 @@ block_3:
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1964.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1CBC.s")
+#ifdef NON_MATCHING
+s32 func_15056B08(struct127 *);
+s32 func_1505A770(struct127 *);
+u8 *func_1505EEB0(s32, s32 *);
 
+void func_150B1CBC(struct127 *arg0) {
+    struct {
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        u8 pad38[0x4];
+        s32 u3C;
+    } sp;
+    f32 var_f12;
+    u16 temp_v0;
+    u8 temp_t9;
+    u8 *temp_s0;
+
+    temp_s0 = func_1505EEB0(0xA, &sp.u3C);
+    func_15056B08(arg0);
+    if (arg0->unk1E5 == 2) {
+        arg0->x_position = (*(f32 *)((u8 *)temp_s0 + 0x14));
+        arg0->z_position = (*(f32 *)((u8 *)temp_s0 + 0x1C));
+        arg0->y_velocity = 0.0f;
+        arg0->y_position = (*(f32 *)((u8 *)temp_s0 + 0x18)) + ((f32) ((s32) arg0->unk21C / 5) + 160.0f);
+        arg0->unk7E = 0;
+        arg0->gravity = -0.35f;
+    } else {
+        temp_t9 = arg0->unk7E;
+        var_f12 = (f32) temp_t9;
+        if ((s32) temp_t9 < 0) {
+            var_f12 += 4294967296.0f;
+        }
+        (*(f32 *)((u8 *)temp_s0 + 0xB8)) = (f32) (func_150AD78C(var_f12 * 0.2f) * 6.0f);
+        func_1505A770(arg0);
+        (*(f32 *)((u8 *)temp_s0 + 0x18)) = (f32) (arg0->y_position - 170.0f);
+        (*(s8 *)((u8 *)temp_s0 + 0x13C)) = (s8) (D_800C3E78 + 0x64);
+        func_1505A184((*(u16 *)((u8 *)temp_s0 + 0x7A)), (*(f32 *)((u8 *)temp_s0 + 0xB8)) * -7.0f, 0.0f, &sp.u34, &sp.u30, &sp.u2C);
+        (*(f32 *)((u8 *)temp_s0 + 0x14)) = (f32) (arg0->x_position + sp.u34);
+        (*(f32 *)((u8 *)temp_s0 + 0x1C)) = (f32) (arg0->z_position + sp.u30);
+        (*(u16 *)((u8 *)temp_s0 + 0x7A)) = (u16) ((*(u16 *)((u8 *)temp_s0 + 0x7A)) + (D_800BE9A0 << 8));
+        arg0->unk7E += D_800BE9A0;
+        (*(s8 *)((u8 *)temp_s0 + 0xAD)) = 0;
+        (*(f32 *)((u8 *)temp_s0 + 0x3C)) = 0.0f;
+        (*(f32 *)((u8 *)temp_s0 + 0x16C)) = 0.0f;
+        (*(f32 *)((u8 *)temp_s0 + 0x170)) = 0.0f;
+    }
+    temp_v0 = func_1505A630(D_800CC2D0->x_position - arg0->x_position, arg0->z_position - D_800CC2D0->z_position, 0);
+    arg0->unk7A = temp_v0;
+    arg0->unk40 = (f32) (s16) (temp_v0 + 0x4000) * 0.005493164f;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1CBC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1EC0.s")

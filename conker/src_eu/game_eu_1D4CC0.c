@@ -18,7 +18,11 @@ s32 func_151A799C(u8 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+void func_1514B0CC(f32, f32, f32, f32, s16, f32, f32, f32, f32, s16, s16, u8);
+#else
 s32 func_1514B0CC(f32, f32, s32, f32, s32, f32, f32, f32, f32, s32, s32, u8);
+#endif
 s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
 {
   u8 *p;
@@ -50,7 +54,12 @@ s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
       {
         b = 1;
       }
+#ifdef NON_MATCHING
+      /* arg3 holds f32 bits */
+      func_1514B0CC(arg1, arg4, *(f32 *) &arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (func_150ADA20() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+#else
       func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (func_150ADA20() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+#endif
     }
   }
   else

@@ -4,6 +4,10 @@
 #include "variables.h"
 
 #include "macros.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
+s32 func_15049260(struct_eu_bytes24 arg0);
+#endif
 
 void func_15001970(void) {
     s32 pad;
@@ -199,7 +203,84 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 
 // 3 loops
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15002008.s")
+#ifdef NON_MATCHING
+extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
+extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
+
+/* Quadtree build helper of func_15001DE0: keeps the entries of the u16 index list `in` (in[0] = count)
+ * whose triangle (relative to the box centre) passes the box test func_15049260 (0 = inside), writes
+ * them to a new list *out (in[0] layout; the caller frees it) and returns their count. *xmin / *zmax get
+ * the grid-snapped x minimum / z maximum of the kept entries (grid step 2 << D_80082FA0). */
+s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
+    s32 step = 1 << (D_80082FA0 + 1);
+    s32 lo = step - 1;
+    s32 mask = -step;
+    s32 n;
+    s32 cnt;
+    s32 found;
+    s32 i;
+    s32 k;
+    u16 *list;
+    u16 *src;
+    union {
+        struct_eu_bytes24 s;
+        f32 v[9];
+    } tri;
+
+    func_150492CC((f32) (x1 - x0), 32000.0f, (f32) (z1 - z0));
+    n = in[0] + 1;
+    cnt = 0;
+    list = (u16 *) allocate_memory(n * 2, 1, 0, 0);
+    *out = list;
+    *xmin = 0;
+    *zmax = 0;
+    found = 0;
+    src = &in[1];
+    for (i = 1; i < n; i++, src++) {
+        u16 idx = *src;
+        u32 *verts = (u32 *) (D_800DC26C + idx * 12);
+        s16 *g;
+        s32 a;
+        s32 b;
+
+        for (k = 0; k < 3; k++) {
+            s16 *p = (s16 *) verts[k];
+            if ((u32) p < 0x80000001) {
+                tri.v[k * 3 + 0] = 0.0f;
+                tri.v[k * 3 + 1] = 0.0f;
+                tri.v[k * 3 + 2] = 0.0f;
+            } else {
+                tri.v[k * 3 + 0] = (f32) (p[0] - ((x0 + x1) >> 1));
+                tri.v[k * 3 + 1] = (f32) p[1];
+                tri.v[k * 3 + 2] = (f32) (p[2] - ((z0 + z1) >> 1));
+            }
+        }
+        if (func_15049260(tri.s) != 0) {
+            continue;
+        }
+        list[++cnt] = idx;
+        g = (s16 *) (D_800DC274 + idx * 4);
+        a = (g[0] - lo) & mask;
+        b = ((g[1] + lo) & mask) + lo;
+        if (!found) {
+            found = 1;
+            *xmin = a;
+            *zmax = b;
+        } else {
+            if (a < *xmin) {
+                *xmin = a;
+            }
+            if (*zmax < b) {
+                *zmax = b;
+            }
+        }
+    }
+    list[0] = cnt;
+    return cnt;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15002248.s")
+#endif
 void func_15002560(struct_eu_qnode *arg0, struct_eu_qnode *arg1) {
     struct_eu_qnode *s1;
     struct_eu_qnode *s0;

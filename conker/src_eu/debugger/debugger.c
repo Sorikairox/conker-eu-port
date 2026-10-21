@@ -4,6 +4,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 u8 *func_160014F0(s16 *arg0, s32 arg1);
+void func_16001678(void);
 #endif
 
 s32 func_1600160C();
@@ -435,7 +436,181 @@ s32 func_16000A5C(void) {
 }
 
 // called from func_10007DAC
+#ifdef NON_MATCHING
+s32 func_16001700(void);
+void func_16001830(void *);
+s32 func_16003650();
+extern s32 D_16003894;
+extern s32 D_16003898;
+extern s32 D_160038AC;
+extern s32 D_1600392C;
+extern s32 D_160039AC;
+extern s32 D_160039E8;
+extern s32 D_16003A2C;
+extern s32 D_16003A68;
+extern s32 D_16003AF8;
+extern s32 D_16003B08;
+extern u8 *D_8002C130;
+extern s32 D_8003CC88;
+extern s32 func_150ADC50;
+extern s32 func_160036F0;
+
+s32 func_16000B14(OSThread *arg0) {
+    s32 sp40;
+    s32 (*temp_v0)();
+    s32 *var_a0;
+    s32 (*temp_v1)();
+    s32 temp_a1;
+    s32 temp_a2;
+    s32 temp_t4;
+    s32 temp_t5;
+    s32 var_s3;
+    s32 var_v0;
+    s32 var_v0_2;
+    s32 var_v0_3;
+    s32 var_v0_4;
+    s32 var_v0_5;
+    s32 var_v1;
+    u32 temp_t1;
+
+    var_s3 = 0;
+    sp40 = 1;
+    if (D_8002AC5C != 0) {
+        return 0;
+    }
+    D_16003888 = 0;
+    if (((*(s32 *)((u8 *)D_8002AAE8 + 0)) == 0) || (D_8002AAE8[1] == 0)) {
+        (*(s32 *)((u8 *)D_8002AAE8 + 0)) = 0x80350000;
+        D_8002AAE8[1] = 0x80350000;
+        return 0;
+    }
+    func_16003650();
+    (*(s32 *)((u8 *)(&D_160038AC) + 0x3C)) = (s32) (*(s32 *)((u8 *)(&D_8003CC88) + 0));
+    (*(s32 *)((u8 *)(&D_1600392C) + 0x3C)) = (s32) (*(s32 *)((u8 *)(&D_8003CC88) + 4));
+    D_160039E8 = (*(s32 *)((u8 *)(&D_8003CC88) + 8));
+    D_16003A68 = (*(s32 *)((u8 *)(&D_8003CC88) + 0xC));
+    temp_t1 = arg0->context.pc;
+    if ((temp_t1 & 0xFF000000) != 0x15000000) {
+        D_16003AF0 = 1;
+    } else {
+        temp_a1 = temp_t1 & ~0xFFF;
+        temp_a2 = temp_a1 & 0x1000;
+        temp_t4 = temp_a1 & ~0x1000;
+        D_16003AF0 = 0;
+        var_a0 = &D_160039AC;
+        var_v1 = 0;
+        do {
+            if (temp_t4 == (*(s32 *)((u8 *)var_a0 + 0))) {
+                if (temp_a2 != 0) {
+                    var_v0_2 = *(&D_1600392C + var_v1);
+                } else {
+                    var_v0_2 = *(&D_160038AC + var_v1);
+                }
+                if (var_v0_2 & 2) {
+                    D_16003AF0 = 1;
+                }
+            }
+            if (temp_t4 == (*(s32 *)((u8 *)var_a0 + 4))) {
+                if (temp_a2 != 0) {
+                    var_v0_3 = (*(s32 *)((u8 *)((&D_1600392C + var_v1)) + 4));
+                } else {
+                    var_v0_3 = (*(s32 *)((u8 *)((&D_160038AC + var_v1)) + 4));
+                }
+                if (var_v0_3 & 2) {
+                    D_16003AF0 = 1;
+                }
+            }
+            if (temp_t4 == (*(s32 *)((u8 *)var_a0 + 8))) {
+                if (temp_a2 != 0) {
+                    var_v0_4 = (*(s32 *)((u8 *)((&D_1600392C + var_v1)) + 8));
+                } else {
+                    var_v0_4 = (*(s32 *)((u8 *)((&D_160038AC + var_v1)) + 8));
+                }
+                if (var_v0_4 & 2) {
+                    D_16003AF0 = 1;
+                }
+            }
+            temp_t5 = (*(s32 *)((u8 *)var_a0 + 0xC));
+            var_a0 += 0x10;
+            if (temp_t4 == temp_t5) {
+                if (temp_a2 != 0) {
+                    var_v0_5 = (*(s32 *)((u8 *)((&D_1600392C + var_v1)) + 0xC));
+                } else {
+                    var_v0_5 = (*(s32 *)((u8 *)((&D_160038AC + var_v1)) + 0xC));
+                }
+                if (var_v0_5 & 2) {
+                    D_16003AF0 = 1;
+                }
+            }
+            var_v1 += 0x10;
+        } while (var_a0 != &D_16003A2C);
+    }
+    if ((((u32) D_8003C8E0 >> 0x18) & 0xFF) == 0xC) {
+        arg0 = &D_80031AE0;
+    }
+    if ((*(s32 *)((u8 *)D_8002C130 + 4)) == D_8002AAE8[1]) {
+        D_16003888 = 1;
+    }
+    D_1600389C = (struct118 *) arg0;
+    D_160038A4 = 0;
+    if ((arg0->context.cause == 0x20) && ((s32)&func_150ADC50 == arg0->context.pc)) {
+        D_160038A4 = 1;
+    }
+    do {
+        if ((sp40 == 0) && (var_s3 & 2)) {
+            func_16001678();
+        }
+        temp_v0 = *(s32 *)((u8 *)&D_16003AF8 + (D_16003AF4 * 4));
+        if (temp_v0 != NULL) {
+            temp_v0();
+        }
+        osWritebackDCacheAll();
+loop_47:
+        var_s3 = 0;
+        D_16003898 = D_16003894;
+        func_16001700();
+        func_16001830(&func_160036F0);
+        if (sp40 != 0) {
+            D_16003898 = D_16003894;
+        }
+        D_16003894 = (s32) (*(u16 *)((u8 *)(&func_160036F0) + 0));
+        if ((*(s8 *)((u8 *)(&func_160036F0) + 2)) >= 0x33) {
+            D_16003894 = (*(u16 *)((u8 *)(&func_160036F0) + 0)) | 0x20000;
+        }
+        if ((*(s8 *)((u8 *)(&func_160036F0) + 2)) < -0x32) {
+            D_16003894 |= 0x10000;
+        }
+        if ((*(s8 *)((u8 *)(&func_160036F0) + 3)) >= 0x33) {
+            D_16003894 |= 0x40000;
+        }
+        if ((*(s8 *)((u8 *)(&func_160036F0) + 3)) < -0x32) {
+            D_16003894 |= 0x80000;
+        }
+        D_16003890 = (D_16003894 ^ D_16003898) & D_16003894;
+        temp_v1 = *(s32 *)((u8 *)&D_16003B08 + (D_16003AF4 * 4));
+        if (temp_v1 != NULL) {
+            var_s3 = temp_v1();
+        }
+        if (!(var_s3 & 5)) {
+            goto loop_47;
+        }
+        sp40 = 0;
+    } while (!(var_s3 & 4));
+    if (D_16003AF0 == 0) {
+        arg0->state = 4;
+        arg0->flags = 0;
+        return 1;
+    }
+    var_v0 = 0;
+    if ((arg0->context.cause == 0x20) && (D_160038A4 == 0)) {
+        var_v0 = 1;
+        arg0->context.pc += 4;
+    }
+    return var_v0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000B14.s")
+#endif
 s32 func_16001B34(u8 *, u8 *, u8 *, u8 *, f64);
 void func_16000F8C(s32 arg0, f32 arg1)
 {

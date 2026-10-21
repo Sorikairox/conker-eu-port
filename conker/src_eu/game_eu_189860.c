@@ -43,10 +43,10 @@ void func_1515C050(u8 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_1513F4E4(s32, u8, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s16, s16, s16, s32, s8 *);
+Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 func_15142CF0(s32, s32, s32, s16, s32, s32, s32, s8 *);
-s32 func_15142E24(s32, struct_eu_80090F10 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
 void func_151441A4(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);
 void func_151442FC(s16 *, s16 *, s16 *, s16 *, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8);

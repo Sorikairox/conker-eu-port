@@ -4,6 +4,7 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_150A28C4(u8 *arg0);
 s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2);
+s32 func_150AD9A0(s32, s32, s32);
 #endif
 typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
 extern u64 D_800D3510[][3];
@@ -129,8 +130,63 @@ void func_150A11F4(u8 *arg0)
   *((f32 *) (((u8 *) arg0) + 0x30)) = func_150AD780(temp_f20);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A126C.s")
+#ifdef NON_MATCHING
+extern f32 D_8009F978;
+s32 func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 
+void func_150A126C(void) {
+    f32 temp_f2;
+    f32 var_f0;
+    s16 temp_v1;
+    s32 var_s2;
+    s32 var_s4;
+    struct127 *var_s1;
+    u32 var_s7;
+    u8 *temp_s0;
+    u8 *temp_s0_2;
+    u8 *temp_s0_3;
+    u8 temp_v0;
+
+    var_s7 = 0;
+    var_s4 = 0;
+    if (D_800D3094 != 0) {
+        do {
+            temp_s0 = &D_800D34B8[var_s4];
+            if ((*(u8 *)((u8 *)temp_s0 + 0x14)) == 0) {
+                var_s1 = D_800CC2D0;
+                var_s2 = 0;
+                if (((s32) (*(u8 *)((u8 *)temp_s0 + 0x15)) >> 2) == 6) {
+                    do {
+                        if ((var_s1->interaction_state != 0) && ((temp_v0 = var_s1->unk5, (temp_v0 == 0)) || (temp_v0 == 1)) && (func_150A2280(var_s1, &D_800D34B8[var_s4], 1) == 0)) {
+                            temp_s0_2 = &D_800D34B8[var_s4];
+                            if ((*(u8 *)((u8 *)temp_s0_2 + 0x17)) == 0) {
+                                temp_s0_3 = &D_800D34B8[var_s4];
+                                temp_v1 = (*(s16 *)((u8 *)temp_s0_3 + 6));
+                                if (func_150AD9A0((s16) (s32) (var_s1->x_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 0))), (s16) (s32) (var_s1->y_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 2))), (s16) (s32) (var_s1->z_position - (f32) (*(s16 *)((u8 *)temp_s0_2 + 4)))) < temp_v1) {
+                                    temp_f2 = (f32) temp_v1;
+                                    var_f0 = temp_f2 * D_8009F978;
+                                    if (var_f0 > 100.0f) {
+                                        var_f0 = 100.0f;
+                                    }
+                                    func_15035AF8(2, var_s2, (f32) (*(s16 *)((u8 *)temp_s0_3 + 0)), (f32) (*(s16 *)((u8 *)temp_s0_3 + 2)), (f32) (*(s16 *)((u8 *)temp_s0_3 + 4)), 0.0f, (*(f32 *)((u8 *)temp_s0_3 + 0x10)), temp_f2 - var_f0, temp_f2, 255.0f);
+                                }
+                            } else {
+                                func_15035AF8(1, var_s2, var_s1->x_position, var_s1->unk180, var_s1->z_position, 0.0f, 0.0f, 100.0f, 150.0f, 255.0f);
+                            }
+                        }
+                        var_s2 += 1;
+                        var_s1 = (struct127 *)((u8 *)var_s1 + (0x32C));
+                    } while (var_s2 != 0x19);
+                }
+            }
+            var_s7 += 1;
+            var_s4 += 0x34;
+        } while (var_s7 < (u32) D_800D3094);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A126C.s")
+#endif
 u8 *func_150A1520(u8 *arg0) {
     return arg0 + 0x400;
 }
