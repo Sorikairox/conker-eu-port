@@ -39,7 +39,7 @@ void func_1519F6D8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CCD10/func_1519F738.s")
 
-s32 func_1519F738(s32, s32);
+s32 func_1519F738(u8 *, u8);
 void func_1519F928(u8 *arg0) {
     s32 *p = (s32 *)(arg0 + 0x58);
     p[0] = func_1519F738(arg0, 6);

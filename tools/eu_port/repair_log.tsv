@@ -1126,3 +1126,7 @@ func_1517FAD4	SIZE+3	7	SIZE+2	n	n	frame fixed by named r,g; t is uninitialised o
 func_1514B30C	SIZE-1	7	DIFF2	n	y	func_15013DE8 spawn-block struct + pad[2]; call before the a-products; left: sh order of u52/u50 only
 func_15187954	SIZE-2	4	SIZE-2	n	n	m2c-shaped loop with continue; ref stores a1/a2 lazily (bnel/jal delay slots), mine stores a2 at entry; loop regs differ
 func_1514C9E0	DIFF48	3	DIFF31	n	y	fn-table line spawner; identical odd/even step branches; s32 pad[2] declared first fixes frame; left: FP callee-saved reg roles (arg6 f26, arg0 f28, arg1 f30)
+func_151D611C	CERR	9	SIZE-1	n	n	s167: hand draft 611C_a (u8 loop, fn-table D_80087030[arg3], struct127 e). Frame 160 vs 152: ref has 12 free bytes above pos and 16 below, mine 36 below; decl order/pads/struct17 no change. SIZE-1 = ref beql+mtc1 double in the D2/D4 max
+func_151D6760	SIZE+6	8	SIZE+62	n	n	s167: 2-tap RGBA5551 blur loop; with a hoisted local bound IDO unrolls x4 (ref x2, SIZE+62); with the global bound no unroll (SIZE-84). Needs a heavier per-iteration body
+func_151CB2D8	DIFF147	3	DIFF147	n	n	s167: prototype line 12 -> u8 arg1 applied; greedy.py over the a-field stores 147->134 by its metric, ndiff no better
+func_151B99B8	CERR	8	OK	y	y	s167: f32 m[4][4] + pos[3]; q = arg0 + off with s32 off declared first (frame slot + keeps q in a0, fakematch), return 1; local permuter: do-while(0) around the three s16 stores

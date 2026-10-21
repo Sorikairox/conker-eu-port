@@ -9,7 +9,7 @@ s32 func_151CA484(u8 *);
 s32 func_151CA4E8(u8 *, s32, s32, s32, s32);
 s32 func_151CAC50(u8 *, s32);
 void func_151CB128(u8 *, u8);
-s32 func_151CB2D8(u8 *, s32);
+s32 func_151CB2D8(u8 *, u8);
 void func_151CBBAC(u8 *, u8, u8, s8, u8);
 void func_151CCAD4(u8 *, u8, u8, u8, u8, u8);
 s32 func_151CCDF0(u8 *, s32, s32, s32, s32, s32);
