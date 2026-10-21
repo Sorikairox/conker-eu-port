@@ -3,7 +3,20 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516D970.s")
+void func_1516D970(void) {
+    s32 i;
+    s32 v;
+
+    for (i = 0; i < 4; i++) {
+        if ((&D_800DD2A0)[i] < 0xFF) {
+            v = (&D_800DD2A0)[i] + D_800BE9A0;
+            if (v >= 0x100) {
+                v = 0xFF;
+            }
+            (&D_800DD2A0)[i] = v;
+        }
+    }
+}
 
 s32 func_15044BC0(s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *);
 

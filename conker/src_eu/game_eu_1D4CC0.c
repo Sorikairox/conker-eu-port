@@ -45,7 +45,28 @@ void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A7D70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A7E2C.s")
+#define S(o) (*(s16 *)(arg0 + (o)))
+#define S2(o) (*(s16 *)(p + (o)))
+void func_151A7E2C(u8 *arg0)
+{
+  u8 *p = arg0 + 0x50;
+  unsigned char t;
+  if ((*((s16 *) (arg0 + 0x38))) < (*((s16 *) (arg0 + 0x54))))
+  {
+    *((s8 *) (arg0 + 0x3F)) = (*((s16 *) (arg0 + 0x56))) * (*((s16 *) (arg0 + 0x38)));
+  }
+  if ((*((s16 *) (arg0 + 0x38))) < (*((s16 *) (p + 8))))
+  {
+    short d;
+    d = (*((s16 *) (p + 0xA))) * D_800BE9E4;
+    *((s16 *) (arg0 + 0x34)) += d;
+    *((s16 *) (arg0 + 0x36)) += d;
+  }
+  t = (*((s16 *) (p + 2))) * (0, (*((s16 *) (arg0 + 0x38)))); // fakematch: comma puts arg0->0x38 in fs of multu (s142 recipe 1)
+  *((s8 *) (arg0 + 0x42)) = t;
+  *((s8 *) (arg0 + 0x41)) = t;
+  *((s8 *) (arg0 + 0x40)) = t;
+}
 
 void func_151A7EB8(u8 *arg0) {
     u8 *temp_v0;
