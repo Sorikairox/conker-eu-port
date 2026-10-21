@@ -1202,6 +1202,12 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 4. Unused declared locals still take a frame slot at -O2 (s129 recipe 1): an unused `e` pointer moved the only spilled local from 0x4C to 0x48 (`func_1517DC00`).
 
 
+## s141 recipes (near-miss sweep, bitfield structs)
+1. **Permuter output full of `x >> 31`, `v[0] |= 0x80; v[0] &= 0xBF`, `(v[0] & 0xC3) | ((t << 2) & 0x3C)`** (lbu/ori/andi/sb on byte 0 of a word) = a **bitfield struct** with `u32 a:1; u32 b:1; u32 c:4; ...` from the top bit down. Write the fields as plain assignments (`v->a = 1; v->b = 0; v->c = t;`): `func_150A0744` went DIFF5 -> OK on the first try. `>> 31` on an `lw` is the test of bit 31 (`if (v->a)`); `sll 1; srl 31` the next bit; `sll 2; srl 28` a 4-bit field.
+2. **A pointer loop over a fixed-size array that IDO unrolls** (SIZE+90) when ended with `v != END_SYMBOL`: `while (v != &arr[N])` keeps it rolled (same size); `v < END` changes the test (SIZE+1). (`func_150A067C`.)
+3. A float literal in a file that does not own `.rodata`: an `extern f32 D_...` copy of the literal changes the float register allocation (DIFF9); own the rodata instead (`rodata_split.py --own <stem> --resplit`, then build before apply.py).
+4. Permuter conversions come from *fresh* drafts: an nm `best.c` that already is a permuter output at DIFF2 gained nothing in 600 s (6 of 6); drafts whose score fell a lot in the first run converted in a second 300 s run (`func_1501E7A8`).
+
 ## s139 recipes (lo near misses, init sound helpers)
 1. **Stack struct offset off by 4/8 with the frame right**: the locals declared *before* the struct sit above it. Move pointer/float locals in front of the struct declaration (E909C: `f32 r` before it; twin E96F8: `p` and `n` too). Reordering locals after it does nothing.
 2. **`beql a,b` operand order that no swap fixes, with a mask**: write the mask unsigned, `x != (arg0 & 0x7FU)` (`func_1000C350`).
