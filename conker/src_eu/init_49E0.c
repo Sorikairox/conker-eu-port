@@ -5,7 +5,123 @@
 
 
 // contains jr
+#ifdef NON_MATCHING
+/* P7: UNVERIFIED-difftest (infinite loop: UNSURE by construction; no difference over 10 trials with DIFFTEST_OUTPARAMS=1), needs runtime check */
+/* scheduler thread (sched.c-style): retrace / SP done / DP done / pre-NMI / controller messages */
+typedef struct SchedClient {
+    /* 0x00 */ struct SchedClient *next;
+    /* 0x04 */ OSMesgQueue *msgQ;
+    /* 0x08 */ s32 flags;            /* bit 0: does not want retrace messages */
+} SchedClient;
+extern OSViMode D_8002AF20;          /* the active VI mode (PAL timing tweak below) */
+extern OSTimer D_8003A8E8;           /* gfx task timeout timer */
+extern u16 D_8003A928;
+void func_10003ACC(s32 arg0, s32 arg1, s32 arg2);
+void func_10004DB0(void);
+
+void func_100049E0(s32 arg0) {
+    OSMesg msg;
+    SchedClient *client;
+    OSTime countdown;
+
+    D_8003A581 = 0;
+    D_8003A582 = 0;
+    D_8003A584 = 1;
+    D_8003A583 = 0;
+    *(u16 *)&D_8003B240 = 1;         /* retrace message */
+    msg = 0;
+    D_8003A928 = 4;
+
+    for (;;) {
+        osRecvMesg(&D_8003B218, &msg, OS_MESG_BLOCK);
+        /* an if chain, not a switch: difftest mis-ran IDO's jump table here; see P7.md */
+        if ((u32)msg == 0) { /* retrace */
+            if (D_8002AC5C != 0) {
+                D_8002AF20.comRegs.hStart = 0x8C02D5;
+                D_8002AF20.comRegs.xScale = 0x200;
+                D_8002AF20.fldRegs[0].yScale = 0x400;
+                D_8002AF20.fldRegs[1].yScale = 0x400;
+                D_8002AF20.fldRegs[0].vStart = 0x3D01E8;
+                D_8002AF20.fldRegs[1].vStart = 0x3D01E8;
+                func_10003ACC(0, 0, 0);
+            }
+            for (client = (SchedClient *)D_8003B234; client != NULL; client = client->next) {
+                if (!(client->flags & 1)) {
+                    osSendMesg(client->msgQ, (OSMesg)&D_8003B240, OS_MESG_NOBLOCK);
+                }
+            }
+            if (D_8003B238 != 0xFF) {
+                D_8003B238++;
+            }
+            if (D_8003B23A != 0) {
+                D_8003B23A--;
+            }
+            if (D_8003A581 == 0 && D_8002AC6C == 0 &&
+                osRecvMesg(&D_8003B200, (OSMesg *)&D_8002AC54, OS_MESG_NOBLOCK) == 0) {
+                countdown = 200000;
+                if (D_8003A582 != 0 || (s32)osAiGetStatus() >= 0) {
+                    countdown = 20000;
+                }
+                osSetTimer(&D_8003A8E8, countdown, 0, &D_8003B218, (OSMesg)3);
+                D_8002AC6C = 1;
+            }
+            if (D_8003A581 == 0) {
+                func_10004DB0();
+            }
+        } else if ((u32)msg == 1) {
+            D_8003A584 = 1;
+            if (D_8003A583 == 0) {
+                func_10004FE0();
+            }
+        } else if ((u32)msg == 2) { /* SP task done */
+            if (D_8003A582 == 3) {
+                if (osSpTaskYielded(&D_8002AC50->list) == 1) {
+                    osSpTaskLoad(&D_8002AC54->list);
+                    osSpTaskStartGo(&D_8002AC54->list);
+                    D_8003A581 = 1;
+                    D_8003A582 = 4;
+                } else {
+                    D_8003A582 = 1;
+                    osSpTaskLoad(&D_8002AC54->list);
+                    osSpTaskStartGo(&D_8002AC54->list);
+                    D_8003A581 = 1;
+                    D_8003A583 = 0;
+                }
+            } else if (D_8003A581 != 0) {
+                osSendMesg(D_8002AC54->msgQ, D_8002AC54->msg, OS_MESG_BLOCK);
+                D_8003A581 = 0;
+                if (D_8003A582 == 4) {
+                    osSpTaskLoad(&D_8002AC50->list);
+                    osSpTaskStartGo(&D_8002AC50->list);
+                    D_8003A580 = 1;
+                    D_8003A582 = 1;
+                }
+            } else {
+                D_8003A583 = 0;
+                if (D_8003A584 == 1) {
+                    func_10004FE0();
+                }
+            }
+        } else if ((u32)msg == 3) { /* gfx task timeout */
+            D_8002AC6C = 0;
+            if (D_8003A583 != 0) {
+                osSpTaskYield();
+                D_8003A582 = 3;
+            } else {
+                osSpTaskLoad(&D_8002AC54->list);
+                osSpTaskStartGo(&D_8002AC54->list);
+                D_8003A581 = 1;
+            }
+        } else if ((u32)msg == 6) { /* controller read */
+            if (D_8002AC5C == 0) {
+                osContStartReadData(&D_800BE900);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_49E0/func_100049E0.s")
+#endif
 // void func_100049E0(s32 arg0) {
 //     u32 sp64;
 //     s32 sp5C;

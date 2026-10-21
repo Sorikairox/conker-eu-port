@@ -12,6 +12,7 @@ Host:  tools/port/convert.py [--tag T] [--trials N] [--jobs J] [--insert] [--no-
   a summary on stdout.
 Container (internal): convert.py --eval DIR [--trials N] [--jobs J] FUNC...
 """
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, glob, json, subprocess, collections
 
 HERE = os.path.dirname(os.path.abspath(__file__))

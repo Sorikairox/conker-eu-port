@@ -7,6 +7,7 @@
 progress.csv comes from `make VERSION=eu progress` (verify_all.sh regenerates it in conker/).
 Run from the repo root or conker/ (host or container).  --list prints the asm-only functions (name, insns, file).
 """
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, csv, glob, collections
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

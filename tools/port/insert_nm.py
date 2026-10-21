@@ -15,6 +15,7 @@ Draft directives (same as m2c/screen.py): `//HOIST <decl>` lines go into one
 exact line of the file in `#ifndef NON_MATCHING ... #endif`. A function that already has a
 NON_MATCHING block gets its C side replaced.
 """
+import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, glob
 
 ROOT = os.path.expanduser(os.environ.get('CONKER_ROOT', '~/conker')) if not os.path.exists('/.dockerenv') else '/conker'

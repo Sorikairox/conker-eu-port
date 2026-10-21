@@ -7,5 +7,6 @@
 #   3. the draft and the asm side by side (numbered draft lines | asm without the address/word columns)
 # Edit a copy of the draft and re-run with it as the second argument until EQUIV; then
 # tools/port/insert_nm.py FUNC draft.c and verify_all.sh.
+. "$(dirname "${BASH_SOURCE[0]}")/portguard.sh"  # wrong-checkout guard (P7)
 R=${CONKER_ROOT:-$HOME/conker}
 exec python3 "$R/tools/port/nmrepair.py" "$@"

@@ -13,7 +13,54 @@ void func_1502AAF8(s32 arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AB04.s")
+#ifdef NON_MATCHING
+/* P7: difftest EQUIV (128 trials, also with DIFFTEST_OUTPARAMS=1); only the cache-miss path ran (no random key hit) */
+/* reads the 8-byte ROM record at arg0 + arg1 * 8 through a 16-entry most-recently-used cache.
+ * Returns the record's first word and stores its second in *arg2. */
+typedef struct RomRecCacheEntry {
+    /* 0x00 */ u32 key;      /* ROM address | 0x80000000 */
+    /* 0x04 */ s32 stamp;    /* D_800C4180 at the last use */
+    /* 0x08 */ s32 word0;
+    /* 0x0C */ s32 word1;
+} RomRecCacheEntry;
+extern RomRecCacheEntry D_800C4188[16];
+extern s32 D_800C4180;   /* use counter */
+void func_1502AB04(s32 arg0, s32 *arg1, s32 arg2, u32 arg3);
+
+s32 func_1502AC88(u8 *arg0, s32 arg1, s32 *arg2) {
+    u32 key = (u32)(arg0 + arg1 * 8) | 0x80000000;
+    RomRecCacheEntry hit;
+    u64 raw[6];          /* room for a 16-byte aligned 32-byte DMA buffer */
+    u8 *buf;
+    s32 *rec;
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < 16; i++) {
+        if (D_800C4188[i].key == key) {
+            /* move the hit to the end: most recent */
+            hit = D_800C4188[i];
+            for (j = i; j < 15; j++) {
+                D_800C4188[j] = D_800C4188[j + 1];
+            }
+            D_800C4188[15] = hit;
+            D_800C4188[15].stamp = D_800C4180;
+            *arg2 = D_800C4188[15].word1;
+            return D_800C4188[15].word0;
+        }
+    }
+    D_800C4180++;
+    buf = (u8 *)(((u32)raw + 15) & ~15);
+    func_10004514(key & 0x7FFFFFF0, buf, ((key & 0xE) + 0x1F) & ~0xF, 1);
+    rec = (s32 *)(buf + (key & 0xF));
+    i = rec[0];
+    *arg2 = rec[1];
+    func_1502AB04(2, rec, D_800C4180, key);   /* add it to the cache */
+    return i;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AC88.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AF04.s")
 
 u8 *func_1502B020(s32 *arg0, s32 arg1, ...) {
