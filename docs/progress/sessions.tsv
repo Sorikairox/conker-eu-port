@@ -64,3 +64,5 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 155	main	game>=0x15190000	5	3152	135	func_15154488 spawner family solved (block-scoped pointer); display-list builders first try
 160	wt	game 0x15130000-0x1518FFFF+dbg	8	2736	130	game_161520 owns .rodata (externs kept for frame), 3 parked drafts applied; 5/10 fresh rows
 157	main	game>=0x15190000	4	1576	135	spawner param-block template converts; 5 display-list builders all stuck at DIFF2-53
+162	wt	game 0x15130000-0x1518FFFF+dbg	2	720	125	9 fresh rows tried, 2 matched (chained assignment); frame +8 from twice-read float extern
+159	main	game>=0x15190000	2	1344	137	param blocks declared inside the if; 10 spawner callers tried, 2 matched, 8 near misses
