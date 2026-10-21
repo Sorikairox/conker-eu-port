@@ -1,0 +1,50 @@
+session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
+94	main	game<0x130000	3	2104		3 big spawners hand-written from the s92 template
+95	wt	game>=0x130000+init+dbg	9	4412	142	spawner generator spgen2.py; debugger_data split; _Ldtob stuck on 2 hazard nops
+96	main	game<0x130000	3	3020	125	named-scalar stack-slot placement sweep for big spawners
+97	wt	game>=0x130000+init+dbg	8	2404	151	&arg0 reload fakematch; rodasm.py crash fixed
+98	wt	game>=0x130000+init+dbg	5	1340	168	f32 params in a-registers; &arg + if(1){} pattern
+99	main	game<0x130000	6	3424	161	untried neighbours of matched spawners; file split at a .rodata object boundary
+100	wt	game>=0x130000+init+dbg	2	1576	137	shared t-register numbering problem diagnosed, not solved
+101	main	game<0x130000	7	3284	196	neighbour sweeps (4/7); u8 *volatile arg recipe; spcallers.sh
+102	wt	game>=0x130000+init+dbg	4	3084	156	block-scoped struct-copy initialisers
+103	main	game<0x130000	7	2888	157	anti-piracy check in C; neighbours 5/7
+104	wt	game>=0x130000+init+dbg	7	2744	140	all neighbours; pointer-returning functions
+105	main	game<0x130000	2	508	110	~25 calls lost to .rodata plumbing in game_EF410
+106	wt	game>=0x130000+init+dbg	7	2608	161	inline rand calls in call arguments (recipe 1)
+107	main	game<0x130000	2	672	139	low yield; near misses parked
+108	wt	game>=0x130000+init+dbg	8	4516	145	all 7 rand spawners in one file; randinline.py/randscreen.sh
+109	main	game<0x130000	5	1900	142	lo-slice variant of the rand recipe; inlinerand.py
+110	wt	game>=0x130000+init+dbg	9	3156	168	realproto.py (prototype collector)
+111	main	game<0x130000	0	0	134	zero matches; tool de-duplication only
+112	wt	game>=0x130000+init+dbg	12	3848	197	range-0 rand terms; K&R callees for unmasked flags (best rate at the time)
+113	main	game<0x130000	3	1980	128	rodata_inject extern-only late region
+114	wt	game>=0x130000+init+dbg	6	1720	159	sign-step pattern solved
+115	main	game<0x130000	7	1776	168	screened 100 rand callers; CERR rows are cheap wins
+116	wt	game>=0x130000+dbg	6	1820	160	zero words in .rodata = object boundary; file split
+117	main	game<0x130000	0	0	163	zero matches; lo game slice parked after this
+118	wt	game>=0x130000+dbg	5	1748	154	debugger survey; tail-field spill-slot recipe
+119	main	init	15	3464	139	slice switched to init: ultralib ll.c at -mips3, GoldenEye libultrare
+120	wt	game>=0x130000+dbg	3	1488	184	recursive function tail-call loop shape
+121	main	init	5	2252	172	Conker n_audio = DK64 audio at -g; rarescreen.sh
+122	wt	game>=0x130000+dbg	2	448	125	game slice shares no code with BK/DK64/DKR/GE
+123	main	init	9	11000	133	all 9 DK64 -g n_audio hits ported
+124	wt	game>=0x130000+dbg	3	936	156	byte-ranked target list (s124_targets.txt)
+125	main	init	7	6736	128	more DK64 n_audio ports with Conker changes
+126	wt	game>=0x130000+dbg	5	2416	125	parked drafts applied; ulp-exact literals
+127	main	init	5	13916	112	n_csplayer and the sound player complete (largest session by bytes)
+128	wt	game>=0x130000+dbg	6	1440	145	wider target list (s128_targets.txt)
+129	main	init	5	4236	130	no n_audio asm left in init
+130	wt	game>=0x130000+dbg	6	2388	154	libultra io/crc copy found in the game segment
+131	main	init	3	1432	148	one 580-insn function took most of the session
+132	wt	game>=0x130000+dbg	2	4240	138	mp3 voice handler matched; ultralib -O3 screening fixed
+133	main	init	7	1980	146	init_EB00 owns .rodata; remote permuter fast on small drafts
+134	wt	game>=0x130000+dbg	2	572	127	new target list (s134_targets.txt)
+135	main	init	6	1968	176	permuter finished 2 of 6
+136	wt	game>=0x130000+dbg	5	2064	142	stack-arg reload instruction gives the param type
+137	main	init	3	1032	134	mostly permuter-finished
+138	wt	game>=0x130000+dbg	5	1660	171	spawnstruct.py for memcpy spawners
+139	main	init+lo	6	2656	186	parked lo near misses convert cheaply (4/6)
+140	wt	game>=0x130000+dbg	5	1428	126	near-miss sweep: remote permuter converts ~20%
+142	wt	game>=0x130000+dbg	9	3240	141	comma trick for FP operand order; struct access for FP register pairs
+141	main	game<0x130000	5	852	128	nearmiss.py inventory; remote permuter only 2/72 runs; bitfield-struct recipe

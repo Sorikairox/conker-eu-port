@@ -43,6 +43,12 @@ for l in L:
 open("HANDOFF.md", "w").write("\n".join(out_lines))
 EOF
 git add HANDOFF.md
+# retrospective log: history.tsv is rebuilt from git; this merge's row is the working-tree HANDOFF
+mkdir -p docs/progress
+{ python3 tools/eu_port/progress_log.py
+  echo "$out" | awk -v d="$(date '+%Y-%m-%d %H:%M')" -v b="$B" '$1=="total"{f=$3; sub("/","",f); split($7,x,"/"); p=$8; gsub(/[()%]/,"",p); printf "%s\t(merge)\t%s\t%s\t%s\t%s\tMerge %s (verified)\n", d, f, $4, x[1], p, b}'
+} > docs/progress/history.tsv
+git add docs/progress/history.tsv
 git commit -q -m "Merge $B (verified: $(echo "$out" | awk '$1=="total"{print $3$4}'))
 
 Append-only conflicts resolved by union (merge_union.py). verify_all.sh: code build OK,
