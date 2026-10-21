@@ -93,8 +93,18 @@ void func_1511638C(u8 *arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116A8C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116E08.s")
+#ifdef NON_MATCHING
+s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
+    f32 sp24;
+    f32 sp1C;
 
+    sp1C = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x14)) - arg0);
+    sp24 = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x1C)) - arg1);
+    return (s32) ((*(f32 *)((u8 *)arg3 + 0x3C)) * func_15048A40(((0x40 - ((s32) (*(u16 *)((u8 *)arg3 + 0x76)) >> 8)) - func_150490A8(&sp1C, arg1, arg0)) & 0xFF));
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116E08.s")
+#endif
 void func_15116EA4(s32 arg0) {
 }
 

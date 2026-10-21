@@ -3,8 +3,34 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/func_150C5870.s")
+#ifdef NON_MATCHING
+f32 func_15143E64(f32 *);
+s32 memcpy(u8 *, s32, s32);
 
+u8 *func_150C5870(s32 arg0, s32 arg1) {
+    u8 *sp2C;
+    f32 sp28;
+    f32 sp24;
+    f32 sp20;
+    u8 *temp_v0;
+
+    temp_v0 = func_15167A68(0x46, 0, arg1 + 0xC8, 1, 0xFFU, 1U);
+    if (temp_v0 == NULL) {
+        return NULL;
+    }
+    sp2C = temp_v0;
+    memcpy(temp_v0 + 0x18, arg0, 0x24);
+    sp20 = (*(f32 *)((u8 *)temp_v0 + 0x18)) - (*(f32 *)((u8 *)temp_v0 + 0x24));
+    sp24 = (*(f32 *)((u8 *)temp_v0 + 0x1C)) - (*(f32 *)((u8 *)temp_v0 + 0x28));
+    sp28 = (*(f32 *)((u8 *)temp_v0 + 0x20)) - (*(f32 *)((u8 *)temp_v0 + 0x2C));
+    (*(f32 *)((u8 *)sp2C + 0xC0)) = func_15143E64(&sp20);
+    (*(s32 *)((u8 *)sp2C + 0x10)) = 1;
+    (*(s32 *)((u8 *)sp2C + 0x14)) = 0;
+    return sp2C;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F3080/func_150C5870.s")
+#endif
 void func_150C5930(struct102 *arg0) {
     func_15169804(arg0);
 }

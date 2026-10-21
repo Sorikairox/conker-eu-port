@@ -279,7 +279,35 @@ void func_15168B10(s32 arg0, s32 arg1) {
     func_15168A4C(arg0, arg1);
 }
 
+#ifdef NON_MATCHING
+void func_15168B44(u8 *arg0) {
+    s32 temp_t2;
+    s32 temp_t6;
+    s32 temp_t9;
+    s32 temp_v1;
+    u8 temp_a2;
+
+    temp_v1 = (*(s32 *)((u8 *)arg0 + 0x14));
+    temp_t6 = temp_v1 & 0xFFFF;
+    if (temp_t6 != 0) {
+        temp_t9 = temp_v1 & 0xFFFF0000;
+        (*(s32 *)((u8 *)arg0 + 0x14)) = temp_t9;
+        (*(s16 *)((u8 *)arg0 + 0x38)) = 0x1E;
+        (*(s32 *)((u8 *)arg0 + 0x14)) = (s32) (temp_t9 | ((temp_t6 - 1) & 0xFFFF));
+        return;
+    }
+    temp_a2 = (*(u8 *)((u8 *)arg0 + 0x3F));
+    temp_t2 = (temp_v1 >> 0x10) & 0xFFFF;
+    if (temp_t2 < (s32) temp_a2) {
+        (*(u8 *)((u8 *)arg0 + 0x3F)) = (u8) (temp_a2 - temp_t2);
+        (*(s16 *)((u8 *)arg0 + 0x38)) = 0x1E;
+        return;
+    }
+    (*(s16 *)((u8 *)arg0 + 0x38)) = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168B44.s")
+#endif
 void func_15168BAC(u8 *arg0) {
     u8 idx = arg0[0xE4];
     if (idx != 0) {

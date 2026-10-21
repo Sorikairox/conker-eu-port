@@ -1,6 +1,12 @@
 BASENAME := conker
 
+# NON_MATCHING=1: compile the C side of `#ifdef NON_MATCHING` blocks (functionally equivalent,
+# not byte-identical bodies) into a separate build tree, without the sha1 verify
+ifeq ($(NON_MATCHING),1)
+BUILD_DIR = build_nm
+else
 BUILD_DIR = build
+endif
 VERSION   := us
 
 ### Split configuration
@@ -109,6 +115,9 @@ CFLAGS += -D_LANGUAGE_C -D_FINALROM -DF3DEX_GBI_2 -D_MIPS_SZLONG=32
 # ignore compiler warnings about anonymous structs
 CFLAGS += -woff 649,838
 CFLAGS += $(INCLUDE_CFLAGS)
+ifeq ($(NON_MATCHING),1)
+CFLAGS += -DNON_MATCHING
+endif
 
 LDFLAGS = -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(TARGET).map -T undefined_syms.$(VERSION).txt -T undefined_funcs.$(VERSION).txt -T undefined_syms_auto.txt -T undefined_funcs_auto.txt --no-check-sections
 
@@ -230,7 +239,7 @@ default: all
 all: dirs $(TARGET).bin $(VERIFY)
 
 dirs:
-	$(foreach dir,$(SRC_DIRS) $(ASM_DIRS) $(BIN_DIRS) ,$(shell mkdir -p build/$(dir)))
+	$(foreach dir,$(SRC_DIRS) $(ASM_DIRS) $(BIN_DIRS) ,$(shell mkdir -p $(BUILD_DIR)/$(dir)))
 
 clean:
 	rm -rf build
@@ -265,7 +274,7 @@ replace: $(VERIFY) $(TARGET).header.bin $(TARGET).boot.bin $(TARGET).init.bin $(
 ### Recipes
 
 $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
-	$(CPP) -P -DBUILD_DIR=$(BUILD_DIR) -o $@ $<
+	$(CPP) -P -DBUILD_DIR=$(BUILD_DIR) $< | sed 's#\bbuild/#$(BUILD_DIR)/#g' > $@
 
 $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
 	$(LD) $(LDFLAGS) -o $@
