@@ -1053,3 +1053,6 @@ func_1000C350	s139	3	OK	y	y	hand: early return arg0 in branch1 + (arg0 & 0x7FU) 
 func_150E752C	s139	1	OK	y	y	s117 perm DIFF2 -> remote perm OK (p declared block-local)
 func_150E909C	s139	1	OK	y	y	s117 perm DIFF7 -> remote perm OK (f32 r declared before s)
 func_150E96F8	s139	3	OK	y	n	twin of E909C OK: struct 0x3C (v[4] + u30/u34/u35/u38), p,n declared before s
+func_10011EB8	s139	4	OK	y	y	arg0 = f(arg0) reused as idx (or a3,a0 copy), s32 v + s32 F568 arg; table D_8002C5A0[22][5] cdefined in C; 2 permuter fakematches
+func_10003C10	s139	6	DIFF65	n	y	hand from asm: homed arg0, extern floats; only reg roles of y/h (v0/a0) left; local perm 600 s no gain
+func_10010BE8	s139	10	DIFF110	n	y	same size: separate e vars per region (m2c temp_s0/_2), ((s32*)&D_80042984)[1] for the 42988 load; frame 88 vs 80
