@@ -187,7 +187,7 @@ s32 func_1519E874(u8 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5) {
 }
 
 void func_1519E688(void);
-void func_1519D5A0(s32, s32, s32, s32, s32, s32);
+s32 func_1519D5A0(s32, s32, s32, s32, s32, s32);
 // fakematch: volatile arg2 reloads the byte after each call like the original
 void func_1519E92C(s32 arg0, s16 arg1, volatile u8 arg2, s32 arg3) {
     func_1519E688();

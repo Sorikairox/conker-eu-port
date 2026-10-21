@@ -3,7 +3,46 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E8C60.s")
+Gfx *func_151ED998(Gfx *gdl);
+void func_15042D94(s32, s32, s32, void *);
+extern Gfx *(*D_800903A4[])(Gfx *);
+extern u8 D_800BEB60;
+
+Gfx *func_151E8C60(Gfx *gdl) {
+    s32 msg;
+    Gfx *(*fn)(Gfx *);
+
+    D_8003C8E0 = 0x09000001;
+    msg = 0;
+    gdl = func_151ED998(gdl);
+    fn = D_800903A4[D_800E0B94];
+    if (fn != NULL) {
+        gdl = fn(gdl);
+    }
+    if (D_80000300 == 0) {
+        if (D_800BE616 != 0 && D_80090130 >= 2) {
+            if ((D_800BEB60 & 0xF) == 0) {
+                if (D_800E1003 == 1) {
+                    msg = 0x33;
+                } else if (D_800E1003 == 2) {
+                    msg = 0x16;
+                }
+            }
+        } else if ((D_800BEB60 & 1) == 0) {
+            if (D_800E1003 == 1) {
+                msg = 0x32;
+            } else if (D_800E1003 == 2) {
+                msg = 0x15;
+            }
+        }
+    }
+    if (msg != 0) {
+        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        func_15042D94(0x94, 0xC8, 0x81, ((void **)D_800E1008)[msg]);
+    }
+    D_8003C8E0 = 0;
+    return gdl;
+}
 
 extern Gfx *(*D_80090370[])(Gfx *);
 extern s32 D_80090408;
@@ -70,7 +109,27 @@ s32 func_151EC0E0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ECE00.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ED854.s")
+void func_15096D44(Gfx *);
+Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+extern Gfx D_800903D8[];
+extern u8 D_80091BCC[];
+extern u8 D_80091BD8[];
+
+void func_151ED854(Gfx *gdl) {
+    s32 a;
+
+    gSPDisplayList(gdl++, D_800903D8);
+    a = D_800E0EC0 * 4;
+    if (a >= 0x100) {
+        a = 0xFF;
+    }
+    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, a);
+    gdl = func_151EDBE8(gdl, D_80091BCC, 0x92, 0x6C, 8, 3, 1.0f, 0);
+    gDPPipeSync(gdl++);
+    gDPSetCombine(gdl++, 0xFFD3FF, 0xFFA6FF7F);
+    gDPSetEnvColor(gdl++, 0xFF, 0x80, 0x20, ((u8)D_800E0FC7 * (a + 1)) >> 8);
+    func_15096D44(func_151EDBE8(gdl, D_80091BD8, 0x92, 0x6C, 8, 3, 1.0f, 0));
+}
 
 u8 *func_1501A6CC(u8 *, s32, s32, s32, s32);
 Gfx *func_151ED998(Gfx *gdl) {
