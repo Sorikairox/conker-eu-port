@@ -25,7 +25,7 @@ extern unsigned char *port_rom;
 extern unsigned port_rom_size;
 extern unsigned gfx_tex_unresolved_segs;
 
-typedef struct { unsigned rom, dl, size; unsigned char *buf; float c[3], r; } Asset;
+typedef struct { unsigned rom, dl, size; unsigned char *buf; float c[3], r; int nbones; float bone[64][3]; } Asset;
 #define MAXA 9
 static Asset A[MAXA];
 static int nA, inited;
@@ -60,8 +60,33 @@ static unsigned char *inflate_rom(unsigned rom, unsigned *size) {
     return buf;
 }
 
+/* Skeleton (P14). Skinned model files start with a header whose word +0x10 is the offset of the
+ * bone table and +0x14 its size; an entry is 16 bytes {u8 parent (0xFF = root), u8 index, u8 index,
+ * u8 0, f32 x, y, z}, the joint's offset from its parent. Vertices of a skinned part are relative to
+ * their bone's joint and are drawn with G_MTX(segment 3 + 64 * bone). The bind pose is therefore
+ * joint position (sum of the offsets up the parent chain) then the model matrix. Checked on the
+ * four skinned viewer models (9, 2, 28 and 28 bones). */
+static void load_bones(Asset *a) {
+    unsigned off = *(unsigned *)(a->buf + 0x10), sz = *(unsigned *)(a->buf + 0x14), n = sz / 16;
+    a->nbones = 0;
+    if (a->size < 0x18 || !off || sz % 16 || n > 64 || off + sz > a->size || (off & 3)) return;
+    for (unsigned i = 0; i < n; i++) {
+        const unsigned char *e = a->buf + off + 16 * i;
+        unsigned par = vbe_ld8(e), idx = vbe_ld8(e + 1);
+        if (i == 0 ? par != 0xFF : (par >= i || idx != i)) { a->nbones = 0; return; }
+        for (int k = 0; k < 3; k++) {
+            unsigned w = *(const unsigned *)(e + 4 + 4 * k);
+            float f;
+            memcpy(&f, &w, 4);
+            a->bone[i][k] = (i ? a->bone[par][k] : 0) + f;
+        }
+    }
+    a->nbones = (int)n;
+}
+
 static int load(Asset *a) {
     a->buf = inflate_rom(a->rom, &a->size);
+    if (a->buf) load_bones(a);
     return a->buf ? 0 : -1;
 }
 
@@ -146,6 +171,7 @@ static unsigned cc(unsigned a, unsigned b, unsigned c, unsigned d, unsigned Aa, 
 }
 
 /* viewer DL for asset k in grid cell (cx, cy) of size (cw, ch) N64 pixels; returns the DL */
+static int measuring;
 static unsigned *build(Asset *a, float cx, float cy, float cw, float ch, float ang) {
     unsigned *vp = work, *mp = work + 4, *mm = work + 20, *dl = work + 64, *d = dl;
     unsigned char *v = (unsigned char *)vp;
@@ -163,15 +189,33 @@ static unsigned *build(Asset *a, float cx, float cy, float cw, float ch, float a
     ident(Rx); Rx[1][1] = cosf(ax); Rx[1][2] = sinf(ax); Rx[2][1] = -sinf(ax); Rx[2][2] = cosf(ax);
     ident(T2); T2[3][2] = -dist;
     mul(M, T, Ry); mul(M, M, Rx); mul(M, M, T2);
+    if (measuring) ident(M);                           /* bounds in model space */
     put_mtx(mm, M);
-    for (int i = 0; i < 64; i++) put_mtx((unsigned *)(bones + 64 * i), M); /* skinned parts: bind pose */
+    for (int i = 0; i < 64; i++) {                     /* skinned parts: bind pose, see load_bones() */
+        float B[4][4], BM[4][4];
+        ident(B);
+        if (i < a->nbones) { B[3][0] = a->bone[i][0]; B[3][1] = a->bone[i][1]; B[3][2] = a->bone[i][2]; }
+        mul(BM, B, M);
+        put_mtx((unsigned *)(bones + 64 * i), BM);
+    }
+    /* one directional light (upper left front, in eye space) + ambient, Light records at 48-byte
+     * stride as Rare's ucode reads them (gfx_f3dex2.c light_vtx) */
+    unsigned char *L = (unsigned char *)(work + 3072);
+    memset(L, 0, 4 * 48);
+    static const unsigned char dcol[3] = {0xE0, 0xDC, 0xD0}, acol[3] = {0x60, 0x60, 0x68};
+    for (int k = 0; k < 3; k++) { vbe_st8(L + k, dcol[k]); vbe_st8(L + 4 + k, dcol[k]); vbe_st8(L + 48 + k, acol[k]); vbe_st8(L + 52 + k, acol[k]); }
+    vbe_st8(L + 8, (unsigned)(signed char)-50); vbe_st8(L + 9, 60); vbe_st8(L + 10, 80);
     unsigned w1;
 #define G(a, b) (*d++ = (a), *d++ = (b))
     G(0xE7000000, 0);
     G(0xDC080008, (unsigned)(uintptr_t)vp);                     /* gsSPViewport */
     G(0xDA380007, (unsigned)(uintptr_t)mp);                     /* gsSPMatrix projection|load */
     G(0xDA380003, (unsigned)(uintptr_t)mm);                     /* gsSPMatrix modelview|load */
-    G(0xD9000000, 0x00200405);                                  /* geometry: zbuffer shade smooth cull_back */
+    G(0xD9000000, 0x00220405);                                  /* geometry: zbuffer shade lighting smooth cull_back */
+    G(0xDC08000E, 0);                                           /* no normal array until the model sets one */
+    G(0xDB020000, 48);                                          /* 1 light */
+    G(0xDC080C0A, (unsigned)(uintptr_t)L);                      /* light 0 (offset 2 * 48) */
+    G(0xDC08120A, (unsigned)(uintptr_t)(L + 48));               /* ambient (offset 3 * 48) */
     G(0xEF002000, 0x00000030);                                  /* 1-cycle, bilerp; z compare + update */
     unsigned w0 = cc(1, 15, 4, 7, 7, 7, 7, 4, &w1);             /* TEXEL0 * SHADE, alpha SHADE */
     G(w0, w1);
@@ -215,15 +259,16 @@ int gfx_demo_init(const char *spec) {
                  tex_loaded, tex_missing);
         /* measure pass: walk the DL once for the object-space bounds */
         float mn[3], mx[3];
-        gfx_measure_only = 1;
+        gfx_measure_only = 1; measuring = 1;
         gfx_frame_begin(0, 0, 0);
         gfx_bounds_reset();
         gfx_run_dl(build(a, 160, 120, 320, 240, 0));
-        gfx_measure_only = 0;
+        gfx_measure_only = 0; measuring = 0;
         if (!gfx_bounds(mn, mx)) { port_log("[gfxdemo] asset rom+0x%X: no vertices\n", a->rom); a->buf = 0; continue; }
         float r = 0;
         for (int i = 0; i < 3; i++) { a->c[i] = (mn[i] + mx[i]) / 2; if ((mx[i] - mn[i]) / 2 > r) r = (mx[i] - mn[i]) / 2; }
         a->r = r * 1.2f;
+        if (a->nbones) port_log("[gfxdemo] asset rom+0x%X: %d bones\n", a->rom, a->nbones);
         port_log("[gfxdemo] asset rom+0x%X (%u bytes), DL +0x%X: bounds (%.0f %.0f %.0f)..(%.0f %.0f %.0f)\n", a->rom, a->size, a->dl,
                  mn[0], mn[1], mn[2], mx[0], mx[1], mx[2]);
         ok++;
@@ -247,10 +292,10 @@ void gfx_demo_frame(void) {
     }
     gfx_frame_end();
     if (frame++ == 2)
-        port_log("[gfxdemo] frame: %u commands, %u triangles (%u from Conker TRI4), %u draws, %u texture uploads, %u texture ids unresolved, %u bad addresses\n",
+        port_log("[gfxdemo] frame: %u commands, %u triangles (%u from Conker TRI4), %u draws, %u texture uploads, %u texture ids unresolved, %u bad addresses, %u lit vertices\n",
                  gfx_stats.cmds - before.cmds, gfx_stats.tris - before.tris, (gfx_stats.tri4 - before.tri4) * 4,
                  gfx_stats.draws - before.draws, gfx_stats.tex_uploads - before.tex_uploads, gfx_stats.tex_ids - before.tex_ids,
-                 gfx_stats.bad_addr + gfx_stats.unset_seg - before.bad_addr - before.unset_seg);
+                 gfx_stats.bad_addr + gfx_stats.unset_seg - before.bad_addr - before.unset_seg, gfx_stats.lit - before.lit);
 }
 
 /* node / test hook: the viewer without a GL context (interpreter + stats only) */

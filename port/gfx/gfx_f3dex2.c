@@ -64,6 +64,9 @@ static float tex_sc_s = 1, tex_sc_t = 1;
 static short vp_scale[4] = {640, 480, 511, 0}, vp_trans[4] = {640, 480, 511, 0};
 static short fog_mul, fog_off;
 static unsigned rdphalf1, rdphalf2, normal_base;
+/* lights (P14): directional lights 0..n-1, ambient = colour of light n (F3DEX2 convention) */
+static int num_lights;
+static float light_col[8][3], light_dir[8][3];
 static float bmin[3], bmax[3];
 static int bany;
 
@@ -410,18 +413,55 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
 }
 
 /* ------------------------------------------------------------------ RSP commands */
+/* Conker lighting (session P14). Conker's F3DEX2 variant keeps the Vtx rgba as the vertex colour
+ * when G_LIGHTING is on and takes the normal from a separate array:
+ *   G_MOVEMEM index 0x0E sets the array base for the following G_VTX loads; vertex slot k (the
+ *   index in the 32-entry vertex buffer, not the index in the Vtx array) has its normal's x and y
+ *   as s8 at base + 2k, and z is the low byte of the Vtx flag halfword (+7).
+ * Checked on the ROM models: one array chunk is 0x40 bytes (32 slots x 2) per vertex batch, and a
+ * flat panel at x = 1 has (127, 0, flag 0), i.e. +X. The colour is then
+ *   rgb = vertex rgb * min(1, ambient + sum_l max(0, n . dir_l) * col_l)
+ * with n rotated by the modelview and normalised, and the lights in the F3DEX2 Light layout
+ * (G_MOVEMEM index 0x0A, col at +0, dir s8 at +8; numlights by G_MOVEWORD index 2). Rare's records
+ * are 48 bytes (light n at offset (n + 2) * 48, numlights word = n * 48); their point-light fields
+ * are not interpreted. Without any light command the ambient is 1 (unlit look, as before). */
+static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx) {
+    float nx = (signed char)vbe_ld8(n), ny = (signed char)vbe_ld8(n + 1), nz = (signed char)vbe_ld8(vtx + 7);
+    float ex = nx * mv[0][0] + ny * mv[1][0] + nz * mv[2][0];
+    float ey = nx * mv[0][1] + ny * mv[1][1] + nz * mv[2][1];
+    float ez = nx * mv[0][2] + ny * mv[1][2] + nz * mv[2][2];
+    float len = sqrtf(ex * ex + ey * ey + ez * ez);
+    float c[3];
+    int nl = num_lights > 7 ? 7 : num_lights;
+    if (len > 0) { ex /= len; ey /= len; ez /= len; }
+    for (int k = 0; k < 3; k++) c[k] = light_col[nl][k];
+    for (int l = 0; l < nl; l++) {
+        float d = ex * light_dir[l][0] + ey * light_dir[l][1] + ez * light_dir[l][2];
+        if (d > 0) for (int k = 0; k < 3; k++) c[k] += d * light_col[l][k];
+    }
+    v->r *= c[0] > 1 ? 1 : c[0]; v->g *= c[1] > 1 ? 1 : c[1]; v->b *= c[2] > 1 ? 1 : c[2];
+    gfx_stats.lit++;
+}
+
 static void load_vtx(unsigned w0, unsigned w1) {
     unsigned n = w0 >> 12 & 0xFF, end = w0 >> 1 & 0x7F, v0 = end - n;
     const unsigned char *p = gfx_addr(w1);
+    const unsigned char *nrm = normal_base ? gfx_addr(normal_base) : 0;
     if (!p || v0 + n > 64) { gfx_stats.bad_addr++; return; }
     for (unsigned i = 0; i < n; i++, p += 16) {
         V *v = &vb[v0 + i];
         float x = (short)vbe_ld16(p), y = (short)vbe_ld16(p + 2), z = (short)vbe_ld16(p + 4);
         v->ox = x; v->oy = y; v->oz = z;
-        if (!bany) { bmin[0] = bmax[0] = x; bmin[1] = bmax[1] = y; bmin[2] = bmax[2] = z; bany = 1; }
-        if (x < bmin[0]) bmin[0] = x; if (x > bmax[0]) bmax[0] = x;
-        if (y < bmin[1]) bmin[1] = y; if (y > bmax[1]) bmax[1] = y;
-        if (z < bmin[2]) bmin[2] = z; if (z > bmax[2]) bmax[2] = z;
+        {   /* bounds after the modelview (the viewer measures with an identity model matrix, so
+             * skinned parts are placed by their bone matrices) */
+            float bx = x * mv[0][0] + y * mv[1][0] + z * mv[2][0] + mv[3][0];
+            float by = x * mv[0][1] + y * mv[1][1] + z * mv[2][1] + mv[3][1];
+            float bz = x * mv[0][2] + y * mv[1][2] + z * mv[2][2] + mv[3][2];
+            if (!bany) { bmin[0] = bmax[0] = bx; bmin[1] = bmax[1] = by; bmin[2] = bmax[2] = bz; bany = 1; }
+            if (bx < bmin[0]) bmin[0] = bx; if (bx > bmax[0]) bmax[0] = bx;
+            if (by < bmin[1]) bmin[1] = by; if (by > bmax[1]) bmax[1] = by;
+            if (bz < bmin[2]) bmin[2] = bz; if (bz > bmax[2]) bmax[2] = bz;
+        }
         v->x = x * mp[0][0] + y * mp[1][0] + z * mp[2][0] + mp[3][0];
         v->y = x * mp[0][1] + y * mp[1][1] + z * mp[2][1] + mp[3][1];
         v->z = x * mp[0][2] + y * mp[1][2] + z * mp[2][2] + mp[3][2];
@@ -429,9 +469,10 @@ static void load_vtx(unsigned w0, unsigned w1) {
         v->s = (short)vbe_ld16(p + 8) / 32.0f * tex_sc_s;
         v->t = (short)vbe_ld16(p + 10) / 32.0f * tex_sc_t;
         /* Conker (F3DEX2 + Rare): the vertex rgba stays a colour even with G_LIGHTING; normals come
-         * from a separate array (MOVEMEM index 0x0E, normal_base). Lighting is not applied yet. */
+         * from a separate array (MOVEMEM index 0x0E, normal_base), see light_vtx(). */
         v->r = vbe_ld8(p + 12) / 255.0f; v->g = vbe_ld8(p + 13) / 255.0f; v->b = vbe_ld8(p + 14) / 255.0f;
         v->a = vbe_ld8(p + 15) / 255.0f;
+        if ((geom & G_LIGHTING) && nrm) light_vtx(v, nrm + 2 * (v0 + i), p);
         if (!(geom & G_SHADE)) v->r = v->g = v->b = 1;
         v->fog = 0;
         if (geom & G_FOG) {
@@ -572,6 +613,7 @@ void gfx_run_dl(const void *dl) {
             unsigned idx = w0 >> 16 & 0xFF, off = w0 & 0xFFFF;
             if (idx == 6) { segtab[(off / 4) & 15] = w1; segset |= 1u << ((off / 4) & 15); }
             else if (idx == 8) { fog_mul = (short)(w1 >> 16); fog_off = (short)w1; }
+            else if (idx == 2) num_lights = (int)(w1 / 48);  /* G_MW_NUMLIGHT, Rare 48-byte lights */
             break;
         }
         case 0xDC: {                                          /* G_MOVEMEM */
@@ -581,7 +623,17 @@ void gfx_run_dl(const void *dl) {
                 for (int i = 0; i < 4; i++) { vp_scale[i] = (short)vbe_ld16(p + 2 * i); vp_trans[i] = (short)vbe_ld16(p + 8 + 2 * i); }
                 state_dirty = 1;
             } else if (idx == 0x0E) normal_base = w1;         /* Conker: vertex normal array (not G_MV_MATRIX) */
-            break;                                            /* lights (10): not used yet, see load_vtx */
+            else if (idx == 0x0A && p) {                      /* G_MV_LIGHT: see light_vtx() */
+                int n = (int)((w0 >> 8 & 0xFF) * 8 / 48) - 2;
+                if (n >= 0 && n < 8) {
+                    for (int k = 0; k < 3; k++) light_col[n][k] = vbe_ld8(p + k) / 255.0f;
+                    float d[3], l;
+                    for (int k = 0; k < 3; k++) d[k] = (signed char)vbe_ld8(p + 8 + k);
+                    l = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+                    for (int k = 0; k < 3; k++) light_dir[n][k] = l > 0 ? d[k] / l : 0;
+                }
+            }
+            break;
         }
         case 0xDD:                                            /* G_LOAD_UCODE (+ RDPHALF_1 = text) */
             if (gfx_stats.ucode_loads++ < 4) port_log("[gfx] G_LOAD_UCODE text %08X data %08X size 0x%X\n", rdphalf1, w1, (w0 & 0xFFFF) + 1);
@@ -675,6 +727,7 @@ int gfx_bounds(float mn[3], float mx[3]) {
 void gfx_frame_begin(float r, float g, float b) {
     mtx_ident(mv); mtx_ident(proj); mtx_ident(mp); mvsp = 0;
     segset = 0; geom = 0; oth_h = oth_l = 0; tex_on = 0;
+    normal_base = 0; num_lights = 0; light_col[0][0] = light_col[0][1] = light_col[0][2] = 1;
     state_dirty = 1; rect_mode = 0; nbatch = 0;
     gfx_stats.frames++;
     if (!gl_ok) return;

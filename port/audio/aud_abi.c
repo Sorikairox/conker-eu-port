@@ -12,6 +12,7 @@
  * DRAM: game memory in vbe layout (word-swapped, pc_mem.h), accessed through vbe_ld8/16. */
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include "aud.h"
 #include "../ultra/pc_mem.h"
 
@@ -48,6 +49,7 @@ static inline uint8_t *aud_dram(uint32_t a) {
 }
 static inline int16_t m16(uint8_t *p) { return (int16_t)vbe_ld16(p); }
 static inline void m16w(uint8_t *p, int v) { vbe_st16(p, (unsigned)(uint16_t)v); }
+static inline uint32_t vbe_ld32w(const uint8_t *p) { return *(const uint32_t *)(uintptr_t)p; } /* 4-aligned word: native */
 
 static void dma_in(unsigned d, uint32_t addr, unsigned n) {   /* DRAM -> DMEM */
     uint8_t *p = aud_dram(addr & ~7u);
@@ -224,6 +226,102 @@ static void cmd_filter(uint32_t w0, uint32_t w1) {
     m16w(st, y1); m16w(st + 2, y2); m16w(st + 4, x1); m16w(st + 6, x2);
 }
 
+/* ---------------- MP3 synthesis (commands 7 and 8, session P14) ----------------
+ *
+ * Conker's voice clips are MPEG-2 Layer III. The CPU (game_221290.c) does everything up to the
+ * hybrid filterbank and leaves one granule in DRAM as
+ *   +0  s32 gain << 16 (0x00100000) and its negation
+ *   +8  18 time slots x 32 subband samples, s16, sample = float value * 2048
+ * The RSP's part is the polyphase synthesis filterbank (ISO 11172-3 2.4.3.2): per time slot,
+ * matrixing into the 64-sample V vector, a 16-vector V FIFO and the 512-tap window. Output: 576
+ * s16 PCM samples written from the start of the same buffer.
+ *   MP3ADDY (8): w1 = DRAM address of the channel's synthesis state (the game zeroes 0x440 bytes
+ *                there when a stream starts).
+ *   MP3 (7):     w0 & 0x1E = FIFO position (the game steps it by -0x24 per granule, i.e. -2 per
+ *                slot, mod 0x20), w1 = the granule buffer.
+ * The FIFO is kept here in float, keyed by the state address; a marker word in the DRAM state ties
+ * it to the game's buffer, so the game's bzero at stream start resets it, as it would the RSP's.
+ * The window is read from the user's ROM (ucode data, 0x2CFD0 in the EU ROM). Written from the ISO
+ * description; mupen64plus-rsp-hle's mp3.c was only used to confirm the command fields and the
+ * in-place buffer layout (see LICENSES.md). */
+static uint32_t mp3_addr;
+static float mp3_win[512];
+static float mp3_cos[32][32]; /* X[i] = sum_k cos((2k+1) i pi / 64) S[k] */
+static int mp3_ok;
+static struct { uint32_t key, marker; float x[16][32]; } mp3_st[4];
+static uint32_t mp3_gen;
+
+static int mp3_tables(void) {
+    /* window rows: 16 halfwords per row, row 2j = D[j + 32i] (i = 0..15) for j = 0..16, scaled so
+     * that D[256] = 1.144989014 is 32767 */
+    static const uint8_t sig[16] = {0x00, 0x00, 0xFF, 0xF3, 0x00, 0x5D, 0xFF, 0x38, 0x03, 0x7A, 0xF7, 0x36, 0x0B, 0x37, 0xC0, 0x0E};
+    if (mp3_ok) return mp3_ok > 0 ? 0 : -1;
+    mp3_ok = -1;
+    if (!port_rom) return -1;
+    for (unsigned off = 0x1000; off + 0x880 < port_rom_size && off < 0x100000; off += 8) {
+        if (memcmp(port_rom + off, sig, 16) != 0) continue;
+        const double s = 1.144989014 / 32767.0;
+        for (int j = 0; j <= 16; j++)
+            for (int i = 0; i < 16; i++) {
+                const uint8_t *p = port_rom + off + 2 * (32 * j + i);
+                mp3_win[j + 32 * i] = (float)((int16_t)(p[0] << 8 | p[1]) * s);
+            }
+        /* j = 17..31 from the prototype's symmetry: D[k] = D[512 - k] * (-1)^(k/64 + (512-k)/64) */
+        for (int j = 17; j < 32; j++)
+            for (int i = 0; i < 16; i++) {
+                int k = j + 32 * i, m = 512 - k;
+                mp3_win[k] = (((k >> 6) + (m >> 6)) & 1) ? -mp3_win[m] : mp3_win[m];
+            }
+        for (int i = 0; i < 32; i++)
+            for (int k = 0; k < 32; k++) mp3_cos[i][k] = (float)cos(3.14159265358979 / 64.0 * (2 * k + 1) * i);
+        port_log("[aud] mp3 window at ROM 0x%X\n", off);
+        mp3_ok = 1;
+        return 0;
+    }
+    port_log("[aud] mp3 window not found in ROM\n");
+    return -1;
+}
+
+static void mp3_synth(unsigned index, uint32_t addr) {
+    uint8_t *st = aud_dram(mp3_addr), *buf = aud_dram(addr);
+    uint32_t *mark = (uint32_t *)(uintptr_t)((uintptr_t)st & ~(uintptr_t)3);
+    int slot = -1, pos = (int)(index >> 1);
+    int16_t in[576];
+    float gain;
+
+    if (mp3_tables() < 0) return;
+    for (int i = 0; i < 4; i++) if (mp3_st[i].key == mp3_addr) slot = i;
+    if (slot < 0) { slot = (int)(mp3_gen & 3); mp3_st[slot].key = mp3_addr; mp3_st[slot].marker = 0; }
+    if (*mark != mp3_st[slot].marker || mp3_st[slot].marker == 0) {   /* new stream (or new buffer) */
+        memset(mp3_st[slot].x, 0, sizeof mp3_st[slot].x);
+        mp3_st[slot].marker = 0x50330000u | (++mp3_gen & 0xFFFF);
+        *mark = mp3_st[slot].marker;
+    }
+    gain = (float)(int32_t)vbe_ld32w(buf) / 65536.0f;
+    for (int n = 0; n < 576; n++) in[n] = m16(buf + 8 + 2 * n);
+
+    for (int t = 0; t < 18; t++, pos = (pos - 1) & 15) {
+        float *x = mp3_st[slot].x[pos];
+        const int16_t *s = in + 32 * t;
+        for (int i = 0; i < 32; i++) {
+            float acc = 0.0f;
+            for (int k = 0; k < 32; k++) acc += mp3_cos[i][k] * s[k];
+            x[i] = acc;
+        }
+        for (int j = 0; j < 32; j++) {
+            float acc = 0.0f;
+            for (int i = 0; i < 16; i++) {
+                const float *v = mp3_st[slot].x[(pos + i) & 15]; /* the vector from i slots ago */
+                float vv;
+                if (!(i & 1)) vv = j <= 16 ? (j == 16 ? 0.0f : v[j + 16]) : -v[48 - j]; /* V[j] */
+                else vv = j <= 15 ? -v[16 - j] : -v[j - 16];                           /* V[32 + j] */
+                acc += mp3_win[j + 32 * i] * vv;
+            }
+            m16w(buf + 2 * (32 * t + j), clamp16((int32_t)lrintf(acc * gain)));
+        }
+    }
+}
+
 void aud_run_alist(const uint32_t *cmds, uint32_t nbytes) {
     unsigned n = nbytes / 8;
     aud_stats.lists++;
@@ -251,7 +349,8 @@ void aud_run_alist(const uint32_t *cmds, uint32_t nbytes) {
         case 0x04: dma_in(MAIN + (w0 & 0xFFF), w1, (w0 >> 12) & 0xFFF); break;
         case 0x05: cmd_resample(w0, w1); break;
         case 0x06: dma_out(MAIN + (w0 & 0xFFF), w1, (w0 >> 12) & 0xFFF); aud_stats.saves++; break;
-        case 0x07: case 0x08: aud_stats.mp3++; break; /* MP3 / MP3ADDY: not implemented */
+        case 0x07: aud_stats.mp3++; mp3_synth(w0 & 0x1E, w1); break;
+        case 0x08: mp3_addr = w1; break; /* MP3ADDY: DRAM address of the synthesis state */
         case 0x09: { unsigned f = (w0 >> 16) & 0xFF;
             if (f & 4) {
                 if (f & 2) { vol[0] = (int16_t)w0; dry = (int16_t)(w1 >> 16); wet = (int16_t)w1; }

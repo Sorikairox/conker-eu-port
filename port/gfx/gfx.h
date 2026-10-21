@@ -16,7 +16,7 @@
 
 typedef struct {
     unsigned tasks, dls, cmds, tris, verts, draws, tex_uploads, unknown_ops, frames;
-    unsigned ucode_loads, bad_addr, tri4, tex_ids, unset_seg;
+    unsigned ucode_loads, bad_addr, tri4, tex_ids, unset_seg, lit;
 } GfxStats;
 extern GfxStats gfx_stats;
 

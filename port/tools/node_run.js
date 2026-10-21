@@ -11,5 +11,7 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
   M.callMain([]);
   // AUDTEST=<hex sound record offset>[:frames]: drive the C n_audio synth + audio HLE (port/audio/aud_test.c)
   if (process.env.AUDTEST) setTimeout(() => { const [r, f] = process.env.AUDTEST.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }, 1500);
+  // VOICETEST=<hex voice clip id>[:calls]: voice stream handler + MP3 decoder + MP3 ABI (P14)
+  if (process.env.VOICETEST) setTimeout(() => { const [r, f] = process.env.VOICETEST.split(':'); M._port_voice_test(parseInt(r, 16), +(f || 2000)); }, 1500);
   setTimeout(() => { M._port_dump_threads(); process.exit(0); }, +secs * 1000);
 });

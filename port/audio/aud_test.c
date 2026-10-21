@@ -134,3 +134,120 @@ int port_audio_test(u32 rec_off, int frames) {
     aud_wav_finish(OUT_RATE);
     return 0;
 }
+
+/* ---------------- voice clip test (session P14) ----------------
+ * Drives Conker's voice stream handler func_151F2E88 (matched C) on one clip from the ROM: the
+ * game's MP3 decoder (game_221290.c, with port/audio/mp3_pc.c for its asm inner loops) decodes the
+ * frames on the CPU and emits MP3ADDY/MP3 (8/7) for the synthesis filterbank, then LOADBUFF, the
+ * envelope mixer setup and ENVMIXER. Each call covers 184 samples; the test appends INTERLEAVE +
+ * SAVEBUFF and runs the list through the audio HLE (aud_abi.c), like the game's func at init_1FB40.c.
+ *
+ * Voice clips are asset (0x16, id) (func_1001263C: func_1502B020(&size, 2, 22, id)); the decoder's
+ * tables are assets (0x17,4) Huffman tree index, (0x17,5) fast table, (0x17,6) trees, which
+ * func_151F2960 loads with the asm asset loader; here they are DMA'd directly. The game's stream
+ * DMA callback func_151F3C4C uses the audio DMA table (asm-initialised), so a PC one reads the ROM.
+ * Entry: port_voice_test(id, max_calls); node: VOICETEST=<hex id>[:calls]. */
+s32 func_151F2E88(s32 count, u64 **cmdp);
+void func_151F2960(s32 rom, s32 size);
+s32 func_151F3DE0(void);
+void func_151F2D6C(s32 vol, s32 t);
+void func_151F2DFC(s32 pan, s32 now);
+void func_151F2E4C(s32 a, s32 b);
+extern u8 **D_800E0E20;
+extern u8 *D_800E0E24;
+extern s32 D_800E0E28;
+extern u8 D_800E0E2C;
+extern f32 *D_800E0E30;
+extern s32 D_800E0DFC;
+extern s32 D_800E0E04;
+extern void *D_800E1224;
+extern void *D_800E11B8;
+extern void *D_800E120C;
+extern s16 D_800E11C4, D_800E11C6;
+extern void **D_8002BA44;
+
+static u8 mp3_tree_idx[0x100] __attribute__((aligned(16)));
+static u8 mp3_fast[0x4400] __attribute__((aligned(16)));
+static u8 mp3_trees[0xA800] __attribute__((aligned(16)));
+static f32 mp3_pow[0x2000] __attribute__((aligned(16)));
+static u8 mp3_state[0x440] __attribute__((aligned(16)));
+static u8 env_state[0x80] __attribute__((aligned(16)));
+static u8 flt_state[0x40] __attribute__((aligned(16)));
+static s16 vout[184 * 2] __attribute__((aligned(16)));
+static void *fake_audio_tbl[16];
+static u32 voice_rom, voice_size, voice_pos;
+
+static s32 voice_dma(s32 ctx, u8 *dst, s32 len, s32 off) {
+    (void)ctx;
+    if (off != -1) voice_pos = (u32)off;
+    if (voice_pos >= voice_size) return 0;
+    if ((u32)len > voice_size - voice_pos) len = (s32)(voice_size - voice_pos);
+    if (len <= 0) return 0;
+    /* byte copy: dst may be unaligned and is game memory (vbe layout) */
+    {
+        static u8 tmp[0x1000] __attribute__((aligned(16)));
+        s32 done = 0;
+        while (done < len) {
+            s32 n = len - done > 0x800 ? 0x800 : len - done;
+            u32 a = voice_rom + voice_pos + done, a8 = a & ~7u, skip = a - a8;
+            s32 i;
+            osPiRawStartDma(OS_READ, a8, tmp, (n + skip + 7) & ~7u);
+            for (i = 0; i < n; i++) dst[done + i] = tmp[skip + i];
+            done += n;
+        }
+    }
+    voice_pos += len;
+    return len;
+}
+
+int port_voice_test(u32 id, int calls) {
+    u32 info, a4, a5, a6, clips;
+    s32 i, played = 0;
+    void **saved_tbl = D_8002BA44;
+
+    clips = asset(0x16, id, &info);
+    voice_rom = clips; voice_size = info & 0xFFFFFF; voice_pos = 0;
+    a4 = asset(0x17, 4, &info); osPiRawStartDma(OS_READ, a4, mp3_tree_idx, ((info & 0xFFFFFF) + 7) & ~7u);
+    a5 = asset(0x17, 5, &info); osPiRawStartDma(OS_READ, a5, mp3_fast, ((info & 0xFFFFFF) + 7) & ~7u);
+    a6 = asset(0x17, 6, &info); osPiRawStartDma(OS_READ, a6, mp3_trees, ((info & 0xFFFFFF) + 7) & ~7u);
+    port_log("[voicetest] clip 0x%X: ROM 0x%X size 0x%X; tables 0x%X 0x%X 0x%X (trees 0x%X bytes)\n",
+             id, voice_rom, voice_size, a4, a5, a6, info & 0xFFFFFF);
+
+    D_800E0E20 = (u8 **)mp3_tree_idx;
+    D_800E0E24 = mp3_fast;
+    D_800E0E28 = (s32)mp3_trees;
+    D_800E0E30 = mp3_pow;
+    if (!func_151F3DE0()) { port_log("[voicetest] mp3dec init failed\n"); return 1; }
+    D_800E0E2C = 1; /* tables loaded: func_151F2960 skips its loader */
+
+    D_800E1224 = mp3_state;
+    D_800E11B8 = env_state;
+    D_800E120C = flt_state;
+    fake_audio_tbl[9] = (void *)pc_dma_new; /* func_151F3D78's prefetch DMA */
+    D_8002BA44 = fake_audio_tbl;
+    D_800E0DFC = (s32)voice_dma;
+    func_151F2D6C(0x7FFF, 0);   /* volume */
+    func_151F2DFC(64, 1);       /* centre pan */
+    func_151F2E4C(0, 0);        /* no filter */
+    D_800E11C4 = 0x7FFF;        /* dry */
+    D_800E11C6 = 0;             /* wet */
+    func_151F2960((s32)voice_rom, (s32)voice_size);
+
+    for (i = 0; i < calls; i++) {
+        u64 *p = cmds;
+        s32 r;
+        if (D_800E0E04 == 3 || D_800E0E04 == 0) break; /* end of stream (state 3 frees the tables) */
+        r = func_151F2E88(0xB8, &p);
+        if (!r) continue;
+        ((u32 *)p)[0] = 0x0D000000; ((u32 *)p)[1] = 0; p++;
+        ((u32 *)p)[0] = 0x06000000 | (0x2E0 << 12); ((u32 *)p)[1] = (u32)vout; p++;
+        if (played < 3) port_log("[voicetest] call %d: %d commands\n", i, (s32)(p - cmds));
+        aud_run_alist((const u32 *)cmds, (u32)(p - cmds) * 8);
+        aud_wav_append(vout, 184);
+        played++;
+    }
+    D_8002BA44 = saved_tbl;
+    port_log("[voicetest] %d calls, %d played (%d samples), state %d\n", i, played, played * 184, D_800E0E04);
+    aud_wav_finish(22050);
+    return 0;
+}
