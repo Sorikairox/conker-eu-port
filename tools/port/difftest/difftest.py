@@ -336,7 +336,9 @@ def call_site_writes(words, idx):
     j = idx + 1
     while j >= 0:
         w = words[j] if j < len(words) else 0
-        if j < idx and (is_branch(w) or (j + 1 < idx and is_branch(words[j]))): break
+        # P13: also stop at the delay slot of an earlier branch/jump (j - 1 is that branch): its writes belong
+        # to the earlier call or path (a jal's delay slot a2=3 widened a 1-arg call to 3 args)
+        if j < idx and (is_branch(w) or (0 < j and is_branch(words[j - 1]))): break
         d = gpr_dest(w)
         if d is not None and 4 <= d <= 7: a.add(d - 4)
         fd = fpr_dest(w)
@@ -361,6 +363,20 @@ def proto_arity(tu, name):
             n += 2 if re.search(r'\b(f64|double|s64|u64|long long)\b', p) and '*' not in p else 1
         best = n
     return best
+
+FSKIP = {}
+def proto_fslots(tu, name):
+    """P13: a-register slots that the prototype's leading float/double parameters occupy under o32 (they travel in
+    f12/f14, so a0/a1 at the call hold junk and must not be compared)"""
+    for m in re.finditer(r'\b%s\s*\(([^()]*)\)\s*[;{]' % re.escape(name), tu):
+        ps = [p for p in m.group(1).split(',') if p.strip()]
+        out, slot = set(), 0
+        for p in ps[:2]:
+            if re.search(r'\b(f32|float)\b', p) and '*' not in p: out.add(slot); slot += 1
+            elif re.search(r'\b(f64|double)\b', p) and '*' not in p: out |= {slot, slot + 1}; slot += 2
+            else: break
+        return out
+    return set()
 
 def ret_kind(tu, func):
     m = re.search(r'^([^\n;#/(){}]*?)\b%s\s*\([^;{]*?\)\s*\{' % func, tu, re.M)
@@ -390,6 +406,13 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
     _v, _n = (_v.split('*') + ['1'])[:2]
     for _k in range(int(_n)):
         POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
+
+# P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
+# reach code behind a callee's result (e.g. an early return unless func_1517F51C() == 0).
+STUBRET = {}
+for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
+    _a, _v = _p.split('=')
+    STUBRET[int(_a, 16) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -661,6 +684,7 @@ class Run:
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
         r = random.Random(h32('ret', self.seed, addr, k))
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
+        if (addr & 0x1FFFFFFF) in STUBRET: mu.reg_write(UC_MIPS_REG_V0, STUBRET[addr & 0x1FFFFFFF])
         mu.reg_write(FREG(0), rand_float_bits(r)); mu.reg_write(FREG(1), rand_float_bits(r))
         mu.reg_write(FREG(2), rand_float_bits(r))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
@@ -759,6 +783,7 @@ def compare(R, C, rk, arity):
         # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
         if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
         for k in range(min(cnt, 4)):
+            if k in FSKIP.get(a['name'], ()): continue
             if not same_val(R, a['regs'][k], C, b['regs'][k]):
                 return 'call #%d %s: a%d ref=0x%X cand=0x%X' % (i, a['name'], k, a['regs'][k], b['regs'][k])
         # outgoing stack args: the contiguous run of slots from sp+0x10 written right before the call
@@ -920,7 +945,9 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if not R.fault: learned[0] += 1
         C = Run(cwords, cvram, cdata, (seed, t), romdata, tu, 4 * maxi, forced).run(inputs)
         for c in R.calls + C.calls:
-            if c['name'] not in arity: arity[c['name']] = proto_arity(tu, c['name'])
+            if c['name'] not in arity:
+                pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
+                arity[c['name']] = proto_arity(tu, pn); FSKIP[c['name']] = proto_fslots(tu, pn)
         why = compare(R, C, rk, arity)
         ncalls += len(R.calls)
         if verbose:

@@ -32,8 +32,53 @@ void func_15141250(structEU_16DC80 *arg0) {
     D_8008A384[arg0->unk168](arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151412BC.s")
+#ifdef NON_MATCHING
+/* Per-frame grid-cell lookup for the scene nodes (P13, hand C). For the two node tables D_800DD280[2][104]
+ * and the four list heads named by the index table D_800A5168[0..3], walk each list (next at 0x08). A node with
+ * flag 0x2000 (word 0x58) clears its four per-player cell values (u16 at 0x15C); with flag 0x10 too, each
+ * player's (x, y) cell (s32 at 0x134 / 0x144) inside the D_800BE620 x D_800BE624 grid looks up the u16 grid
+ * D_800BEDE4[y][x]; out of range gives 0x7FFF. */
+void func_151412BC(void) {
+    u8 *row;
+    u8 *node;
+    u8 k;
+    u8 i;
+    s32 x;
+    s32 y;
+    s32 flags;
 
+    for (row = (u8 *)D_800DD280; row != (u8 *)&D_800DD5C0; row += 0x1A0) {
+        for (k = 0; k < 4; k++) {
+            node = ((u8 **)row)[((s32 *)&D_800A5168)[k]];
+            for (; node != NULL; node = *(u8 **)(node + 0x8)) {
+                flags = *(s32 *)(node + 0x58);
+                if (!(flags & 0x2000)) {
+                    continue;
+                }
+                *(s16 *)(node + 0x162) = 0;
+                *(s16 *)(node + 0x160) = 0;
+                *(s16 *)(node + 0x15E) = 0;
+                *(s16 *)(node + 0x15C) = 0;
+                if (!(flags & 0x10)) {
+                    continue;
+                }
+                for (i = 0; i <= D_80082FA0; i++) {
+                    x = *(s32 *)(node + 0x134 + i * 4);
+                    y = *(s32 *)(node + 0x144 + i * 4);
+                    if (x < 0 || x >= D_800BE620 || y < 0 || y >= D_800BE624) {
+                        *(u16 *)(node + 0x15C + i * 2) = 0x7FFF;
+                    } else {
+                        *(u16 *)(node + 0x15C + i * 2) =
+                            *(u16 *)((u8 *)D_800BEDE4 + (y * D_800BE620) * 2 + x * 2);
+                    }
+                }
+            }
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151412BC.s")
+#endif
 s32 func_1514143C(u8 *arg0)
 {
   u8 *p;

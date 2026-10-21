@@ -5,8 +5,98 @@
 s32 func_1507EE9C(struct127 *);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_eu_1501C860.s")
+#ifdef NON_MATCHING
+/* End of frame (P13, hand C): closes the display list (rolled back to the per-buffer reserve D_800BE9D8 when it
+ * overflowed, cut at 0x190 commands before the end otherwise), fills the gfx OSScTask D_800BEEF8[idx] (0x60
+ * bytes), sends it to the scheduler's gfx queue and, when arg1 != 0, flips the DL buffer index D_800BE9C0.
+ * Names are the asm's (several are US names remapped by undefined_syms.eu.txt). */
+extern s32 *D_800BEEF4;           /* the task being filled */
+extern u8 D_800BEEF8[];           /* OSScTask[2], 0x60 each */
+extern u8 D_10029400[];           /* rspboot */
+extern u8 D_100294D0[];
+extern u8 D_800BEFC0;
+extern u8 D_800BEA37;
+extern u8 D_8003A948[];           /* yield buffer */
+extern OSMesgQueue D_800BEE30;    /* main-loop queue */
+extern u8 D_800BEE88[];           /* done messages, 0x20 each */
+extern OSMesgQueue D_8003B548;    /* scheduler gfx queue */
+extern s16 D_800BEEC8;
+extern s32 D_800BEFD0;            /* ucode text / data pairs */
+extern s32 D_800C1480;
+extern u8 *D_800BEFBC;
+extern u8 *D_800BEEF0;
+void func_1501A39C(void);
+void func_1501CC1C(void);
 
+void func_eu_1501C860(s32 arg0, s32 arg1) {
+    s32 *task;
+    s32 cap;
+    s32 n;
+    s32 base;
+    s32 *g;
+
+    task = (s32 *)(D_800BEEF8 + D_800BE9C0 * 0x60);
+    D_800BEEF4 = task;
+    task[0] = 0;
+    cap = ((s32)D_800BEDE8[1] - (s32)D_800BEDE8[0]) >> 3;
+    base = (s32)D_800BEDE8[D_800BE9C0];
+    n = (D_800BE9D0 - base) >> 3;
+    if (n < 0 || cap < n) {
+        func_1501A39C();
+        D_800BE9D0 = D_800BE9D8[D_800BE9C0];
+        g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xE9000000;
+        g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xDF000000;
+        base = (s32)D_800BEDE8[D_800BE9C0];
+        n = (D_800BE9D0 - base) >> 3;
+    }
+    if (n < 0 || cap - 0x190 < n) {
+        D_800BE9D0 = base + (cap - 0x190) * 8;
+        g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xE9000000;
+        g = (s32 *)D_800BE9D0; D_800BE9D0 += 8; g[1] = 0; g[0] = 0xDF000000;
+        base = (s32)D_800BEDE8[D_800BE9C0];
+    }
+    D_800BEEF4[0x48 / 4] = base;
+    D_800BEEF4[0x4C / 4] = ((D_800BE9D0 - (s32)D_800BEDE8[D_800BE9C0]) >> 3) << 3;
+    func_1501CC1C();
+    D_800BEEF4[0x18 / 4] = 1;                                  /* M_GFXTASK */
+    D_800BEEF4[0x1C / 4] = 4;                                  /* OS_TASK_LOADABLE */
+    D_800BEEF4[0x20 / 4] = (s32)D_10029400;
+    D_800BEEF4[0x24 / 4] = D_100294D0 - D_10029400;
+    if (D_800BEFC0 != 0) {
+        D_800BEEF4[0x28 / 4] = (s32)&D_800C1480;
+        D_800BEEF4[0x30 / 4] = (s32)D_800BEFBC;
+    } else {
+        D_800BEEF4[0x28 / 4] = (s32)&D_800BEFD0;
+        D_800BEEF4[0x30 / 4] = (s32)D_800BEEF0;
+    }
+    D_800BEEF4[0x34 / 4] = 0x800;
+    D_800BEEF4[0x38 / 4] = (s32)&D_800CC230;
+    D_800BEEF4[0x3C / 4] = 0x400;
+    D_800BEEF4[0x40 / 4] = D_80038090;
+    D_800BEEF4[0x44 / 4] = D_80038094;
+    D_800BEEF4[0x50 / 4] = (s32)D_8003A948;
+    D_800BEEF4[0x54 / 4] = 0xC00;
+    D_800BEEF4[0x0C / 4] = 0x23;
+    if (arg1 != 0) {
+        D_800BEEF4[0x0C / 4] |= 0x40;
+    }
+    if (D_800BEA37 != 0) {
+        D_800BEEF4[0x0C / 4] |= (D_80082FA0 + 1) << 16;
+        D_800BEA37 = 0;
+    }
+    D_800BEEF4[0x58 / 4] = (s32)&D_800BEE30;
+    D_800BEEF4[0x5C / 4] = (s32)(D_800BEE88 + D_800BE9C0 * 0x20);
+    D_800BEEF4[0x10 / 4] = D_8002AAE8[D_800BE9C0];
+    osWritebackDCacheAll();
+    osSendMesg(&D_8003B548, (OSMesg)D_800BEEF4, OS_MESG_BLOCK);
+    if (arg1 != 0) {
+        D_800BE9C0 ^= 1;
+    }
+    D_800BEEC8++;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_eu_1501C860.s")
+#endif
 #ifdef NON_MATCHING
 extern s32 D_2D810;
 extern s8 D_80084400;

@@ -239,6 +239,18 @@ void func_15018DFC(void) {
     func_1507C8FC();
 }
 
+#ifdef NON_MATCHING
+/* P13: returns the DL pointer. The matching C is void, but the asm leaves func_15174AA4's result in v0 and
+ * func_150195A0 uses it as the new GDL. */
+void *func_15018E88(void *arg0, s16 arg1) {
+    if (D_800BE616 == 0) {
+        func_1517D7B0(&arg0, 1);
+    }
+    arg0 = func_151674F8(arg0, 0, arg1, 0);
+    arg0 = func_151674F8(arg0, 0, arg1, 1);
+    return func_15174AA4(arg0, D_800BE9F0, arg1);
+}
+#else
 void func_15018E88(void *arg0, s16 arg1) {
     if (D_800BE616 == 0) {
         func_1517D7B0(&arg0, 1);
@@ -247,6 +259,7 @@ void func_15018E88(void *arg0, s16 arg1) {
     arg0 = func_151674F8(arg0, 0, arg1, 1);
     func_15174AA4(arg0, D_800BE9F0, arg1);
 }
+#endif
 
 void *func_15018F08(void *arg0, s16 arg1) {
     arg0 = func_15174B48(arg0, D_800BE9F0, arg1);
@@ -290,8 +303,144 @@ void func_1501905C(void) {
 }
 
 // few loops
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019130.s")
+#ifdef NON_MATCHING
+// Per-frame world update (P13 from the P12 convert.py EQUIV, prototypes cleaned): camera/objects/players/effects
+// steps, then ages the 0x20-byte records D_80043ED0..D_80044B20 (four counters each). Returns 1 (func_1501878C
+// builds the frame only when this is nonzero).
+extern s32 D_80043ED0;
+extern s8 D_800D27C9;
+void func_10004250(void);
+void func_15018DFC(void);
+void func_1501C860(void);
+void func_1501E364(s32 arg0);
+void func_1501E46C(s32 arg0);
+void func_1501ECA4(s32 arg0);
+void func_15020F6C(s32 arg0);
+void func_1502457C(s32 arg0, s32 arg1);
+void func_1502C1D4(void);
+void func_1502C494(void);
+void func_15035210(void);
+void func_15036438(void);
+void func_15044D18(void);
+void func_1504ADD0(void);
+void func_15063AA0(void);
+void func_15088130(void);
+void func_150952B0(s32 arg0);
+void func_1509BA04(s32 arg0);
+void func_1509BBA0(s32 arg0);
+void func_150A126C(void);
+void func_1510BC10(void);
+void func_1510DDE4(void);
+void func_1510F800(s32 arg0);
+void func_151101B4(s32 arg0);
+void func_15113000(s32 arg0);
+void func_15113700(void);
+void func_15113798(void);
+void func_15114208(void);
+void func_151143D4(s32 arg0);
+void func_15114708(void);
+void func_1511FC20(s32 arg0);
+void func_15122AE0(void);
+void func_1515DC38(void);
+void func_1516706C(void);
+void func_151670C0(void);
+void func_151671E8(void);
+void func_15173E34(s32 arg0);
+void func_15174F68(s32 arg0, s32 arg1);
+void func_15178004(void);
+void func_1517FCCC(void);
+void func_1517FD24(void);
+void func_15181A6C(void);
+void func_15184298(void);
+void func_151890E4(s32 arg0);
 
+s32 func_15019130(void) {
+    s32 i;
+    u8 j;
+    s32 *p;
+
+    func_1510DDE4();
+    func_1509BA04(0);
+    func_1509BBA0(2);
+    D_800DD157 = 0;
+    func_10004250();
+    func_1501E46C(0);
+    func_15035210();
+    func_1510BC10();
+    func_1510F800(0);
+    func_15113700();
+    if (D_800BEAC0 == 0) {
+        func_151143D4(1);
+    }
+    if (D_800BEAC0 == 0) {
+        func_15114708();
+    }
+    func_15044D18();
+    func_15018DFC();
+    func_1502457C(1, 0);
+    func_1501ECA4(0);
+    func_1502457C(0, 0);
+    func_15020F6C(0);
+    func_1501E364(0);
+    if (D_800D27C9 != 0) {
+        func_15088130();
+    }
+    func_15122AE0();
+    func_1504ADD0();
+    func_1510F800(0);
+    for (i = 0; i <= D_80082FA0; i++) {
+        func_151101B4(i);
+    }
+    func_1510BC10();
+    for (j = 0; j <= D_80082FA0; j++) {
+        func_150952B0(j);
+    }
+    func_15113000(0);
+    func_15174F68(D_800BE9F0, 0);
+    func_1501C860();
+    func_1511FC20(D_800BE9C0);
+    func_151890E4(0);
+    if (D_800BEAC0 == 0) {
+        func_1516706C();
+        func_151671E8();
+    }
+    func_1502C1D4();
+    if (D_800BE616 == 0) {
+        func_150A126C();
+    }
+    func_15113798();
+    func_151890E4(1);
+    func_15173E34(D_800BE9F0);
+    func_1502C494();
+    func_15114208();
+    if (D_800CC2B0 != 0) {
+        func_15063AA0();
+    }
+    if (D_800BEAC0 == 0) {
+        func_15184298();
+        func_151670C0();
+        func_15178004();
+    }
+    if (D_800BEAC0 == 0) {
+        func_15181A6C();
+    }
+    func_1517FCCC();
+    func_1517FD24();
+    func_15036438();
+    func_1515DC38();
+    p = &D_80043ED0;
+    do {
+        p[1]++;
+        p[3]++;
+        p[5]++;
+        p[7]++;
+        p += 8;
+    } while (p != &D_80044B20);
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019130.s")
+#endif
 void func_15019414(void) {
     if (D_800BEAC0 == 0) {
         func_15167010();
@@ -356,8 +505,76 @@ Gfx *func_15019464(Gfx *gdl, s16 player) {
 //
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150195A0.s")
+#ifdef NON_MATCHING
+/* Per-player scene pass (P13, hand C). Skipped (returns gdl) while paused (D_800BEAC0), during D_80084810, when
+ * func_1517F51C(player) says so or the player's bit in D_800D18A0 is set. In split screen it first sets the
+ * player's viewport/projection; then the layers in order: sky (func_15113B44 1), the D_800BE575 == 2 pass,
+ * model group 6, func_15186D04, the projection again, func_1502BDC0 1, func_150362D8, the fixed matrix, the
+ * world (func_15018E88 / func_15113B44 0 / func_15018F08, order by player flag 0x5F0 bit 0), func_15189270 0/1,
+ * func_1502BDC0 2 and model group 2. */
+void *func_15018E88(void *arg0, s16 arg1);
+Gfx *func_1510BD34(Gfx *arg0, s32 arg1);
+Gfx *func_15113B44(Gfx *arg0, s32 arg1, s16 arg2);
+Gfx *func_15186D04(Gfx *arg0, s32 arg1);
+Gfx *func_150362D8(Gfx *arg0, s32 arg1);
+Gfx *func_1502BDC0(Gfx *arg0, s32 arg1, s16 arg2);
+Gfx *func_15189270(Gfx *gfx, s32 arg1, s16 arg2);
+u8 *func_151D6D28(u8 *);
 
+Gfx *func_150195A0(Gfx *arg0, s16 arg1) {
+    s32 player = arg1;
+    u8 *pl = (u8 *)D_800DBFF0 + player * 0x9A0;
+    Gfx *gdl = arg0;
+
+    if (D_800BEAC0 != 0) {
+        return gdl;
+    }
+    if (D_80084810 != 0) {
+        return gdl;
+    }
+    if (func_1517F51C(player) != 0 || (D_800D18A0 & (1 << player))) {
+        return gdl;
+    }
+    if (D_80082FA0 > 0) {
+        gdl = func_1510BD34(gdl, player);
+        gdl = func_1515DC40(gdl, player);
+        func_1510BED8(player);
+        gdl->words.w0 = 0xDC080008;
+        gdl->words.w1 = D_800BE628 + player * 0x180 + D_800BE9C0 * 16 + 0x40;
+        gdl = (Gfx *)func_1501A490((s32)(gdl + 1), player, 0, 0, 0, 0);
+    }
+    gdl = func_15113B44(gdl, 1, player);
+    if (D_800BE575 == 2) {
+        gdl = (Gfx *)func_151D6D28((u8 *)gdl);
+    }
+    gdl = func_151674F8(gdl, 6, player, 0);
+    gdl = func_151674F8(gdl, 6, player, 1);
+    gdl = func_15186D04(gdl, player);
+    gdl = (Gfx *)func_1501A490((s32)gdl, player, 0, 0, 0, 0);
+    gdl = func_1502BDC0(gdl, 1, player);
+    gdl = func_150362D8(gdl, player);
+    gdl->words.w0 = 0xDA380003;
+    gdl->words.w1 = (u32)D_80089810;
+    gdl++;
+    if (*(s32 *)(pl + 0x5F0) & 1) {
+        gdl = func_15018E88(gdl, player);
+        gdl = func_15113B44(gdl, 0, player);
+        gdl = func_15018F08(gdl, player);
+    } else {
+        gdl = func_15018F08(gdl, player);
+        gdl = func_15113B44(gdl, 0, player);
+        gdl = func_15018E88(gdl, player);
+    }
+    gdl = func_15189270(gdl, 0, player);
+    gdl = func_15189270(gdl, 1, player);
+    gdl = func_1502BDC0(gdl, 2, player);
+    gdl = func_151674F8(gdl, 2, player, 0);
+    gdl = func_151674F8(gdl, 2, player, 1);
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150195A0.s")
+#endif
 #ifdef NON_MATCHING
 u8 * func_1508FD38(u8 *);
 s32 func_151734E0(s32);
@@ -459,8 +676,40 @@ Gfx *func_15019BB8(Gfx *gdl, s32 arg1) {
 //     func_151674F8(temp_v0, 4, sp2A, 1);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019CC8.s")
+#ifdef NON_MATCHING
+/* Per-player 3D setup (P13, hand C): viewport and projection of camera record D_800BE628 + player * 0x180
+ * (double-buffered by the DL buffer index D_800BE9C0), the fixed matrix D_80089810, level 0x1D's extra pass
+ * (func_1502BDC0), the two model layers of group 5, then the view matrix and the player's model matrix from
+ * D_800DC6D0[idx] (0x40 per player). */
+extern s32 D_800DC6D0[];
+Gfx *func_1502BDC0(Gfx *arg0, s32 arg1, s16 arg2);
 
+Gfx *func_15019CC8(Gfx *arg0, s32 arg1) {
+    Gfx *gdl;
+    s16 player = arg1;
+
+    arg0->words.w0 = 0xDC080008;
+    arg0->words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 16 + 0x40;
+    gdl = (Gfx *)func_1501A490((s32)(arg0 + 1), player, 0, 0, 0, 0);
+    gdl[0].words.w0 = 0xDA380003;
+    gdl[0].words.w1 = (u32)D_80089810;
+    gdl[1].words.w0 = 0xDA380007;
+    gdl[1].words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 64 + 0x100;
+    gdl += 2;
+    if (D_800BE9F0 == 0x1D) {
+        gdl = func_1502BDC0(gdl, 6, player);
+    }
+    gdl = func_151674F8(gdl, 5, 0, 0);
+    gdl = func_151674F8(gdl, 5, 0, 1);
+    gdl[0].words.w0 = 0xDA380007;
+    gdl[0].words.w1 = D_800BE628 + arg1 * 0x180 + D_800BE9C0 * 64 + 0x100;
+    gdl[1].words.w0 = 0xDA380005;
+    gdl[1].words.w1 = D_800DC6D0[D_800BE9C0] + arg1 * 64;
+    return gdl + 2;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019CC8.s")
+#endif
 Gfx *func_15019E60(Gfx *arg0) {
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
