@@ -291,7 +291,64 @@ s16 func_15143E24(struct127 *arg0) {
 f32 func_15143E64(struct17 *arg0) {
     return sqrtf((arg0->unk0 * arg0->unk0) + (arg0->unk4 * arg0->unk4) + (arg0->unk8 * arg0->unk8));
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15143E94.s")
+extern s32 D_800BEE08;
+u8 func_15143E94(s32 arg0, s32 arg1)
+{
+  u8 ret;
+  s8 i;
+  u8 found;
+  s8 n;
+  s32 found2;
+  structEU_151D8E18 sp28;
+  ret = 0;
+  if (((!found2) && (!found2)) && (!found2)) // fakematch: dummy test of the uninitialised found2 (permuter)
+  {
+  }
+  n = D_80082FA0 + 1;
+  i = 0;
+  found = 0;
+  while ((!found) && (i < n))
+  {
+    if (D_800CC2D0[i].health != 0)
+    {
+      found = 1;
+    }
+    else
+    {
+      i++;
+    }
+  }
+
+  if (found)
+  {
+    i = 0;
+    found2 = 0;
+    while ((!found2) && (i < n))
+    {
+      if (func_150A29C8(i, arg1) == 0)
+      {
+        found2 = 1;
+      }
+      else
+      {
+        i++;
+      }
+    }
+
+    if (found2)
+    {
+      func_1512D748(&D_800DBFF0[D_800BEE08], arg0, 1);
+      sp28.unk0 = 1;
+      sp28.unk2 = (func_150ADA20() & 0xF) + 20;
+      sp28.unk4 = (func_150ADA20() & 3) + 4;
+      sp28.unk6 = -1;
+      sp28.unk5 = 1;
+      func_151D8E18(&sp28, 0, 0xFF, 0);
+      ret = 1;
+    }
+  }
+  return ret;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514401C.s")
 // NON-MATCHING: regalloc only (flags copy in v0, limit in t0)
 // s32 func_1514401C(u8 arg0, s32 *arg1, s32 *arg2, u8 arg3) {

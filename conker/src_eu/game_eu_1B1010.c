@@ -30,7 +30,33 @@ void func_15183E20(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15183EE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15183F60.s")
+void func_15183F60(s32 arg0, s32 arg1)
+{
+  u8 *temp_v0;
+  if ((*((s32 *) (((u8 *) D_800DDE80) + (arg0 * 0x14)))) == 0)
+  {
+    func_1518403C(arg0);
+    if (1) // fakematch: empty block (permuter)
+    {
+    }
+  }
+  if ((*((s32 *) (((u8 *) D_800DDE80) + (arg0 * 0x14)))) != 0)
+  {
+    if ((*((s32 *) (((u8 *) D_800DDE80) + (arg1 * 0x14)))) == 0)
+    {
+      temp_v0 = func_1502B6BC(0, 0, 0, 2, 9, arg1 + 0xAD);
+      if (temp_v0 != 0)
+      {
+        *((u8 **) (((u8 *) D_800DDE80) + (arg1 * 0x14))) = temp_v0;
+        *((s32 *) ((((u8 *) D_800DDE80) + (arg1 * 0x14)) + 4)) = *((s32 *) (temp_v0 + 0));
+        *((s32 *) ((((u8 *) D_800DDE80) + (arg1 * 0x14)) + 8)) = *((s32 *) (temp_v0 + 8));
+        *((s32 *) ((((u8 *) D_800DDE80) + (arg1 * 0x14)) + 0xC)) = *((s32 *) (temp_v0 + 0x18));
+        *((s32 *) ((((u8 *) D_800DDE80) + (arg1 * 0x14)) + 0x10)) = 0;
+        D_800DDF68[arg1] = 1;
+      }
+    }
+  }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_1518403C.s")
 
