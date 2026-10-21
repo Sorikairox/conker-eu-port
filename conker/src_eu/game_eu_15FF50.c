@@ -70,7 +70,51 @@ void func_15132968(u8 *arg0) {
     D_80089D74[var_v0](arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_151329B4.s")
+void func_15132B38(u8 *arg0);
+s32 func_1510DBB0(s32, s32 *, u16 *);
+extern s32 D_800DCA70[];
+typedef struct Node29B4 {
+    s32 *data;
+    struct Node29B4 *next;
+    struct Node29B4 *prev;
+    u8 pad0C[2];
+    u8 flag;
+} Node29B4;
+typedef struct {
+    u8 pad0[0x66];
+    u16 idx;
+    u8 pad68[0x24];
+    Node29B4 *node;
+} Obj29B4;
+void func_151329B4(Obj29B4 *arg0) {
+    D_800DC63C--;
+    ((s16 *)D_800DC468)[arg0->idx]--;
+    if (((s16 *)D_800DC468)[arg0->idx] == 0) {
+        if (arg0->node->flag != 0) {
+            D_800DC468[arg0->idx] = 1;
+        } else {
+            func_1510DBB0(D_800DCA70[arg0->idx], &D_800DC63C, D_800DC468);
+            if (arg0->node->prev == NULL) {
+                D_800DC460 = (s32)arg0->node->next;
+                if (D_800DC460 != 0) {
+                    ((Node29B4 *)D_800DC460)->prev = NULL;
+                } else {
+                    D_800DC464 = 0;
+                }
+            } else {
+                arg0->node->prev->next = arg0->node->next;
+                if (arg0->node->next != NULL) {
+                    arg0->node->next->prev = arg0->node->prev;
+                } else {
+                    D_800DC464 = (s32)arg0->node->prev;
+                }
+            }
+            func_100043B4(arg0->node->data, 4);
+            func_100043B4((s32 *)arg0->node, 4);
+        }
+    }
+    func_15132B38((u8 *)arg0);
+}
 
 void func_15132AE0(struct102 * arg0) {
     func_151329B4(arg0);
