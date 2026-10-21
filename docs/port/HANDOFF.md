@@ -267,11 +267,12 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
-`docs/port/sessions/P8.md` (address space, PC overrides, texture ids, re-rank). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P8.md` (address space, PC overrides, texture ids, re-rank) and
+`docs/port/sessions/P9.md` (ROM-offset symbols, KSEG0 tests, audio HLE). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -280,6 +281,7 @@ port/web/run.sh build     # census + vbe IR build of the game TUs + memory table
 port/web/run.sh serve     # http://localhost:8064/?app=demo   (stop: port/web/run.sh stop)
 port/web/boot.sh 10       # node boot, read-only mounts, compact summary; log in port/build/boot.log (GFXDEMO=1 for the viewer)
 python3 port/tools/priority.py port/build/boot.log 50   # conversion priority list (measured stubs + next wave)
+AUDTEST=26390 port/web/boot.sh 8   # P9: C n_audio synth + audio HLE on a ROM sound -> port/build/audio/audtest.wav (page: &audtest=26390, click)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -347,9 +349,22 @@ python3 port/tools/priority.py port/build/boot.log 50   # conversion priority li
   - the bank is ROM `0x1A3B40 + sum D_800920D0[0..id)`, rzip files;
   - `0x0040xxxx` / `0x0080xxxx` = the 256- / 16-colour TLUT at the end of the texture.
 
-  The viewer has a PC copy (`tex_patch_dl`) and draws real textures (`P8_screenshot.png`). Gap: the
-  port must give `&D_1A3B40` (one of 14 ROM-offset data stubs) its absolute value before game-driven
-  texture loads can work.
+  The viewer has a PC copy (`tex_patch_dl`) and draws real textures (`P8_screenshot.png`).
+- **ROM-offset symbols (P9):** `vbe.py` turns `&D_1A3B40`, `&D_AB2240`, `&D_2D810`, `&D_11AF` into
+  constants and declares the four `extern s32 func_X` callbacks as functions (data stubs 14 → 6).
+  `[romsym] PASS`: the C `func_1510D8F4(0xED0)` = 0x6F1618, and a DMA from there gives the ROM bytes.
+  The boot's C `func_15003570` now builds the right texture size table.
+- **KSEG0 tests (P9):** `vbe.py` `k0_checks` rewrites `(p & 0xFF000003) == 0x80000000` and
+  `K0_TO_PHYS(p) > 0x800000` (4 sites, all audio) for wasm pointers.
+- **Audio (P9):** `port/audio/` holds:
+  - an n_audio ABI interpreter (Conker/MP3 table, all commands but MP3);
+  - SDL output (Emscripten's built-in SDL audio; SDL2 needs an image change);
+  - M_AUDTASK / `osAiSetNextBuffer` hooks.
+
+  Test path `aud_test.c`: the game's C `n_alInit`/`n_alSynNew`/`n_alAudioFrame` with a sound from
+  the ROM bank. The WAV is exactly the independently decoded sample (correlation 1.0000). The sound
+  bank layout (asset table walk, ctl, on-demand records, sample table) is in P9.md. No game audio
+  task yet: audio init `func_10008180`/`func_10008F90` and the scheduler are asm.
 - **Priority list (P8, after merging port fa5daf8, 10 s boot; full 50 in P8.md):**
   15 distinct stubs are hit.
   - Measured: func_1501878C (540), func_1501BBB8 (540), func_1502AC88 (201), func_150159E8 (95),
@@ -363,8 +378,10 @@ python3 port/tools/priority.py port/build/boot.log 50   # conversion priority li
 - **Next for the browser build:**
   1. Convert `func_100049E0` and the frame builders (`func_1501878C`, `func_1501BBB8`) on the port
      branch. Game frames then render with no further change.
-  2. Make the ROM-offset symbols (`&D_1A3B40` …) absolute in the port (vbe pass or icall-style
-     table). Then the texture cache (`func_1510D66C`, `func_1510D3E0`).
+  2. The texture cache (`func_1510D66C`, `func_1510D3E0`); ROM-offset symbols are done (P9).
+     A PC override of the asset-table walker `func_1502AC88` (#3 stub, format in P9.md) unblocks
+     the asset loader. Audio: `func_10008180`, `func_10008F90`, `func_10009CBC` as PC overrides, then
+     game audio tasks play through `port/audio`. MP3 commands are still missing.
   3. Test the 352 MB memory on 32-bit Android and iOS Safari. Add a `GLOBAL_BASE=16MB` fallback
      only if needed.
   4. Conker lighting (normal array at `G_MOVEMEM` 0x0E); the material DLs in segment 8 for the

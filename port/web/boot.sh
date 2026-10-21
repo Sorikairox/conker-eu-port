@@ -5,9 +5,10 @@ set -uo pipefail
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 SEC=${1:-10}; LOG=${2:-$ROOT/port/build/boot.log}
-envs=(); for v in GFXDEMO; do [ -n "${!v:-}" ] && envs+=(-e "$v=${!v}"); done
-docker run --rm ${envs[@]+"${envs[@]}"} -v "$ROOT/port":/src/port:ro -v "$ROOT/conker":/src/conker:ro \
+envs=(); for v in GFXDEMO AUDTEST; do [ -n "${!v:-}" ] && envs+=(-e "$v=${!v}"); done
+out=(); if [ -n "${AUDTEST:-}" ]; then mkdir -p "$ROOT/port/build/audio"; out=(-v "$ROOT/port/build/audio":/out -e AUDTEST_WAV=/out/audtest.wav); fi
+docker run --rm ${envs[@]+"${envs[@]}"} ${out[@]+"${out[@]}"} -v "$ROOT/port":/src/port:ro -v "$ROOT/conker":/src/conker:ro \
   -v "$ROOT/baserom.eu.z64":/rom/baserom.eu.z64:ro -w /src conker-emsdk \
   timeout $((SEC + 110)) node port/tools/node_run.js port/build/web/conker.js createConker "$SEC" /rom/baserom.eu.z64 > "$LOG" 2>&1
 echo "rc=$? log=$LOG"
-grep -E "PASS|FAIL|main loop|distinct asm stubs|null zone|\[sp\] tasks|\[gfx|\[seg|abort|RuntimeError|Aborted" "$LOG" | head -30
+grep -E "PASS|FAIL|\[aud|main loop|distinct asm stubs|null zone|\[sp\] tasks|\[gfx|\[seg|abort|RuntimeError|Aborted" "$LOG" | head -30

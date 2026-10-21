@@ -94,6 +94,13 @@ async function start(app) {
   $('threads').disabled = false;
   $('threads').onclick = () => M._port_dump_threads();
   try { M.callMain([]); } catch (e) { if (e !== 'unwind') log(String(e), 'fail'); }
+  // &audtest=HEX[:FRAMES]: n_audio synth + audio HLE test (port/audio/aud_test.c). Browsers start
+  // audio only from a user gesture, so it runs on the next click and plays through SDL audio.
+  const at = new URLSearchParams(location.search).get('audtest');
+  if (app === 'game' && at) {
+    log('audtest: click the page to synthesise and play sound record 0x' + at);
+    document.addEventListener('click', () => { const [r, f] = at.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }, { once: true });
+  }
 }
 window.addEventListener('error', (e) => log(String(e.message || e), 'fail'));
 $('demo').onclick = () => start('demo');

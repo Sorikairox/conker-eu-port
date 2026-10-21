@@ -9,5 +9,7 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
   }
   if (process.env.GFXDEMO) { const t = M.stringToNewUTF8 ? M.stringToNewUTF8(process.env.GFXDEMO) : 0; M._port_gfx_demo_test(t); }
   M.callMain([]);
+  // AUDTEST=<hex sound record offset>[:frames]: drive the C n_audio synth + audio HLE (port/audio/aud_test.c)
+  if (process.env.AUDTEST) setTimeout(() => { const [r, f] = process.env.AUDTEST.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }, 1500);
   setTimeout(() => { M._port_dump_threads(); process.exit(0); }, +secs * 1000);
 });

@@ -379,10 +379,43 @@ def abs_syms(text, st):
     return ABS_REF.sub(ref, text)
 
 
+# KSEG0 pointer tests in Rare's audio code (session P9). The N64 code tells a resident pointer from an
+# unloaded reference with (p & 0xFF000003) == 0x80000000, and a RAM pointer with
+# K0_TO_PHYS(p) <= 0x800000. Port pointers are wasm addresses 0x10000000..0x15FFFFFF, so:
+#   and p, 0xFF000003 ; icmp eq/ne 0x80000000   ->  and p, 0xF0000003 ; icmp eq/ne 0x10000000
+#   and p, 0x1FFFFFFF ; icmp ugt 0x800000       ->  ... icmp ugt 0x16000000 (end of wasm memory)
+# Unloaded references (ROM offset << 5 | tag, small offsets) keep failing the first test: their
+# tag has the low bits set. Sites: init_1AAE0, init_15550, init_214F0 (the only ones in the game).
+K0_AND = re.compile(r'^\s*(%[\w.$-]+) = and i32 %[\w.$-]+, (-16777213|536870911)$', re.M)
+
+
+def k0_checks(text, st):
+    names = {}
+    def and_(m):
+        names[m[1]] = m[2]
+        if m[2] == '-16777213':
+            st['k0_mask'] += 1
+            return m[0].replace(', -16777213', ', -268435453')
+        return m[0]
+    text = K0_AND.sub(and_, text)
+    if not names:
+        return text
+    def cmp(m):
+        kind = names.get(m[2])
+        if kind == '-16777213' and m[1] in ('eq', 'ne') and m[3] == '-2147483648':
+            st['k0_cmp'] += 1
+            return f'icmp {m[1]} i32 {m[2]}, 268435456'
+        if kind == '536870911' and m[1] == 'ugt' and m[3] == '8388608':
+            st['k0_ram'] += 1
+            return f'icmp ugt i32 {m[2]}, 369098752'
+        return m[0]
+    return re.sub(r'icmp (\w+) i32 (%[\w.$-]+), (-?\d+)', cmp, text)
+
+
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
-    p = Pass(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0).split('\n'))
+    p = Pass(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0).split('\n'))
     p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs

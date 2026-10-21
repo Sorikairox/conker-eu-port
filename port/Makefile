@@ -26,6 +26,9 @@ ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/sessions/P6.md)
 GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))
+# audio HLE (n_audio ABI interpreter) + SDL output (docs/port/sessions/P9.md)
+AUD_SRC := audio/aud_abi.c audio/aud_out.c
+AUD_OBJ := $(patsubst audio/%.c,$(B)/audio/%.o,$(AUD_SRC))
 
 .PHONY: all demo objs game web clean
 all: demo game web
@@ -38,6 +41,10 @@ $(B)/gfx/%.o: gfx/%.c gfx/gfx.h ultra/pc_mem.h
 	@mkdir -p $(@D)
 	emcc $(ULTRA_CFLAGS) -c $< -o $@
 
+$(B)/audio/%.o: audio/%.c audio/aud.h ultra/pc_mem.h
+	@mkdir -p $(@D)
+	emcc $(ULTRA_CFLAGS) -c $< -o $@
+
 # ---- scheduler demo
 $(B)/demo.o: sched_demo/demo.c ultra/pc_ultra.h
 	@mkdir -p $(@D)
@@ -46,7 +53,7 @@ $(B)/demo_stubs.o: sched_demo/demo_stubs.c ultra/pc_mem.h
 	emcc $(ULTRA_CFLAGS) -c $< -o $@
 
 demo: $(WEB)/sched_demo.js
-$(WEB)/sched_demo.js: $(B)/demo.o $(B)/demo_stubs.o $(ULTRA_OBJ) $(GFX_OBJ)
+$(WEB)/sched_demo.js: $(B)/demo.o $(B)/demo_stubs.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ)
 	@mkdir -p $(@D)
 	emcc $^ -o $@ $(LINK_COMMON) -sEXPORT_NAME=createSchedDemo
 
@@ -64,8 +71,8 @@ GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>
 # renderer can tell RSP segment addresses (0x01..0x0F << 24) from wasm pointers exactly. The untouched
 # zone costs address space only (pages are committed on first write); INITIAL_MEMORY covers it +
 # ~10 MB data + the 64 MB ROM copy + heap.
-BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c
-BOOT_OBJS := $(patsubst boot/%.c,$(B)/vobj/port__%.o,$(BOOT_SRC))
+BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c audio/aud_test.c
+BOOT_OBJS := $(patsubst %.c,$(B)/vobj/port__%.o,$(notdir $(BOOT_SRC)))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
 $(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt tools/vbe.py tools/vbe_build.py tools/sigs.py tools/icall.py $(BOOT_SRC) ultra/pc_mem.h $(GEN)/memtest_expect.h
@@ -82,21 +89,21 @@ $(B)/stubs/n64mem_labels.o: $(GEN)/n64mem_labels.s
 	@mkdir -p $(@D)
 	emcc -c $< -o $@
 
-$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) tools/gen_stubs.py tools/n64mem.py
-	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ))
+$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/gen_stubs.py tools/n64mem.py
+	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))
 
 # indirect calls: signature table of the non-vbe objects + mismatch dispatcher (tools/icall.py)
-$(GEN)/icall_tab.c: $(B)/vbe.stamp $(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) tools/icall_gen.py tools/icall.py
-	cd .. && python3 port/tools/icall_gen.py port/$@ $(addprefix port/,$(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ))
+$(GEN)/icall_tab.c: $(B)/vbe.stamp $(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) tools/icall_gen.py tools/icall.py
+	cd .. && python3 port/tools/icall_gen.py port/$@ $(addprefix port/,$(B)/stubs/asm_stubs.o $(B)/stubs/n64mem_tab.o $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ))
 
 $(B)/census/files.tsv:
 	cd .. && python3 port/tools/census.py
 
 game: $(WEB)/conker.js
-$(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(STUB_OBJS)
+$(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
-	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(STUB_OBJS) -o $@ \
-	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -Wl,--error-limit=0 2> $(B)/link_warnings.txt \
+	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS) -o $@ \
+	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test -Wl,--error-limit=0 2> $(B)/link_warnings.txt \
 	  || (tail -40 $(B)/link_warnings.txt; exit 1)
 	@echo "link warnings: $$(grep -c warning $(B)/link_warnings.txt) (port/build/link_warnings.txt)"
 	@ls -l $(WEB)/conker.wasm
@@ -108,7 +115,7 @@ $(WEB)/%: web/%
 	cp $< $@
 
 clean:
-	rm -rf $(B)/obj $(B)/vobj $(B)/ll $(B)/vbe.stamp $(B)/ultra $(B)/gfx $(B)/stubs $(B)/census $(B)/*.o $(WEB) $(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/icall_tab.c
+	rm -rf $(B)/obj $(B)/vobj $(B)/ll $(B)/vbe.stamp $(B)/ultra $(B)/gfx $(B)/audio $(B)/stubs $(B)/census $(B)/*.o $(WEB) $(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/icall_tab.c
 
 print-objs:
 	@echo $(GAME_OBJS)

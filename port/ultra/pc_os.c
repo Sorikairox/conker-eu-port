@@ -9,6 +9,7 @@
 #include "pc_ultra.h"
 #include "../gfx/gfx.h"
 #include "pc_mem.h"
+#include "../audio/aud.h"
 #include <PR/os_exception.h>
 #include <PR/os_convert.h>
 #include <PR/mbi.h>
@@ -256,9 +257,10 @@ void osSpTaskStartGo(OSTask *tp) {
     port_sp_tasks_by_type[type & 7]++;
     if (sp_tasks++ < 8)
         port_log("[sp] task %u: type %u%s ucode %08X data_ptr %08X size %u\n", sp_tasks, type,
-                 type == M_GFXTASK ? " (gfx)" : type == M_AUDTASK ? " (audio, not executed)" : "",
+                 type == M_GFXTASK ? " (gfx)" : type == M_AUDTASK ? " (audio)" : "",
                  (unsigned)(uintptr_t)tp->t.ucode, (unsigned)(uintptr_t)tp->t.data_ptr, (unsigned)tp->t.data_size);
     if (type == M_GFXTASK) { gfx_run_task(tp); port_gfx_frame_tasks++; }
+    if (type == M_AUDTASK) aud_run_alist((const uint32_t *)tp->t.data_ptr, (uint32_t)tp->t.data_size); /* port/audio */
     port_post_event(OS_EVENT_SP);
     if (type == M_GFXTASK) port_post_event(OS_EVENT_DP);
 }
@@ -271,10 +273,12 @@ void port_sp_report(void) {
 void osSpTaskYield(void) {}
 OSYieldResult osSpTaskYielded(OSTask *tp) { (void)tp; return 0; }
 void osDpSetStatus(u32 s) { (void)s; }
-s32 osAiSetNextBuffer(void *p, u32 n) { (void)p; (void)n; return 0; }
+/* AI: the buffer (interleaved BE s16 stereo in game memory) goes to the SDL ring (port/audio/aud_out.c) */
+static int ai_rate = 22020;
+s32 osAiSetNextBuffer(void *p, u32 n) { aud_out_open(ai_rate); aud_out_push_game(p, n / 4); return 0; }
 u32 osAiGetStatus(void) { return 0; }
-u32 osAiGetLength(void) { return 0; }
-s32 osAiSetFrequency(u32 f) { return (s32)f; }
+u32 osAiGetLength(void) { return aud_out_queued() * 4; }
+s32 osAiSetFrequency(u32 f) { ai_rate = (int)f; return (s32)f; }
 
 /* ---------------- controllers: one pad, nothing pressed (input comes later) ---------------- */
 
