@@ -1,6 +1,8 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+// hoisted forward declaration(s) for func_1501E7A8
+s32 func_1507EE9C(struct127 *);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_eu_1501C860.s")
@@ -108,7 +110,58 @@ void func_1501E220(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E5AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E7A8.s")
+extern u8 *D_800C3A10[];
+
+void func_1501E7A8(s32 arg0)
+{
+  s32 var_s0;
+  s32 n;
+  struct127 *e;
+  u8 *cnt;
+  u8 **tbl;
+  u8 *p;
+  cnt = &D_800C3A5A[arg0];
+  n = *cnt;
+  if (n > 0)
+  {
+    tbl = &D_800C3A10[arg0];
+    var_s0 = 0;
+    do
+    {
+      p = (*tbl) + var_s0;
+      if ((*((u16 *) p)) == 2)
+      {
+        e = func_15083E90(p[2]);
+        if (e == 0)
+        {
+          s32 blk_t; // fakematch: block-local decl (shape D)
+          n = *cnt;
+        }
+        else
+        {
+          if ((*((u8 *) (((u8 *) e) + 0x6C))) >= 0xA)
+          {
+            *((u8 *) (((u8 *) e) + 0x6C)) = 0;
+            *((s8 *) (((u8 *) e) + 0x6A)) = 0;
+          }
+          if ((*((u8 *) (((u8 *) e) + 0x6D))) >= 0xA)
+          {
+            *((u8 *) (((u8 *) e) + 0x6D)) = 0;
+            *((s8 *) (((u8 *) e) + 0x6B)) = 0;
+          }
+          func_1507EE9C(e);
+          n = *cnt;
+        }
+      }
+      if (0) // fakematch: permuter empty if
+      {
+      }
+    }
+    while ((var_s0 += 8) < (n * 8));
+  }
+  tbl++; // fakematch: permuter tbl++/tbl--
+  tbl--;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E888.s")
 
