@@ -348,9 +348,42 @@ LIBC_CLASH = ['ldiv', 'lldiv', 'memcpy', 'sinf', 'sqrtf', 'strchr', 'strlen', 't
 RENAME = re.compile(r'@(' + '|'.join(LIBC_CLASH) + r')\b(?![.\w])')
 
 
+# Data symbols that the N64 link places at absolute addresses below the RAM range: ROM offsets (and a
+# texture id) that the game uses as `&sym` and hands to the PI DMA / texture cache. In the port they
+# must keep their absolute value, so every reference becomes a constant `inttoptr` and the external
+# declaration is dropped (no zero-filled data stub is generated any more). Values: the symbol
+# addresses in conker.eu.ld / port/stubs/stubs_report.txt (session P9).
+ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240': 0xAB2240}
+# Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
+# functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
+# instead of a zero-filled data stub. func_151DE100 is left alone: it is read as code bytes.
+FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690']
+ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
+EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)
+
+
+def abs_syms(text, st):
+    def decl(m):
+        if m[1] in ROM_ABS:
+            st['romabs_decl'] += 1
+            return ''
+        if m[1] in FUNC_AS_DATA:
+            st['func_as_data'] += 1
+            return f'declare void @{m[1]}()'
+        return m[0]
+    text = EXT_DECL.sub(decl, text)
+
+    def ref(m):
+        st['romabs_ref'] += 1
+        return f'inttoptr (i32 {ROM_ABS[m[1]]} to ptr)'
+    return ABS_REF.sub(ref, text)
+
+
 def main():
     src, dst = sys.argv[1], sys.argv[2]
-    p = Pass(RENAME.sub(r'@vbe.\1', open(src).read()).split('\n'))
+    st0 = collections.Counter()
+    p = Pass(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0).split('\n'))
+    p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs
         st = collections.Counter()

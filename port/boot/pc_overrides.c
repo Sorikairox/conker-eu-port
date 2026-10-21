@@ -56,3 +56,26 @@ int port_overrides_test(void) {
     else port_log("[overrides] guRandom PASS (0 failures)\n");
     return bad;
 }
+
+/* ROM-offset symbols (session P9): &D_1A3B40 must be the texture bank's ROM offset, not a wasm
+ * address (port/tools/vbe.py ROM_ABS). The game's own C func_1510D8F4 (game_eu_13A8A0.c) computes
+ * texture 0xED0's ROM offset; a PI DMA of the first 16 bytes there must give the bytes Python reads
+ * from the ROM at 0x6F1618 (rzip header: BE u32 size 0x300, then DEFLATE). D_800B8BB8 is the
+ * inflated-size table that func_15003570 (game_305D0.c, C) builds from the same bank by DMA. */
+s32 func_1510D8F4(s32 id);
+extern s16 D_800B8BB8[];
+int port_romsym_test(void) {
+    static const u8 want[16] = {0x00, 0x00, 0x03, 0x00, 0xED, 0x4F, 0x21, 0x56,
+                                0x43, 0x31, 0x10, 0xFC, 0x9B, 0x6C, 0x36, 0xBB};
+    static u8 buf[16];
+    u32 rom = (u32)func_1510D8F4(0xED0);
+    int bad = 0, i;
+    if (rom != 0x6F1618) { port_log("[romsym] func_1510D8F4(0xED0) = 0x%X, want 0x6F1618\n", rom); bad++; }
+    osPiRawStartDma(OS_READ, rom, buf, 16);
+    for (i = 0; i < 16; i++) bad += buf[i] != want[i];
+    port_log("[romsym] tex 0xED0 @ROM 0x%X: %02X%02X%02X%02X %02X%02X%02X%02X, size table %d\n", rom,
+             buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], D_800B8BB8[0xED0]);
+    if (bad) port_log("[romsym] FAIL (%d failures)\n", bad); /* %s args would be vbe strings */
+    else port_log("[romsym] PASS (0 failures)\n");
+    return bad;
+}

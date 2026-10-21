@@ -79,6 +79,11 @@ void func_15007830(void) {
     D_800BEECA = 1;
     func_1509C120();
     port_log("[entry] init sequence done, entering main loop (state %d)\n", D_800BEA35);
+    { /* session P9: func_15003570 (C) DMAs the texture bank at &D_1A3B40; texture 0xED0 inflates to 768 */
+        extern s16 D_800B8BB8[];
+        if (D_800B8BB8[0xED0] == 768 && D_800B8BB8[0] > 0) port_log("[romsym] size table PASS (tex 0xED0 = 768, tex 0 = %d)\n", D_800B8BB8[0]);
+        else port_log("[romsym] size table FAIL (tex 0xED0 = %d, want 768)\n", D_800B8BB8[0xED0]);
+    }
     for (;;) {
         u32 idx = (u32)D_800BEA35 - 1;
         target = idx < 5 ? jtbl[idx] : 0x1500797C;
