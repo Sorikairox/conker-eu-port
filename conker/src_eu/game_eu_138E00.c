@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void func_1501B22C(s32);
+#endif
 
 
 #ifdef NON_MATCHING
@@ -56,8 +60,31 @@ void func_1510B930(void)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B9D8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BA9C.s")
+#ifdef NON_MATCHING
+// Apply the pending per-player requests queued in D_800D9F18 (x == -1.0f: none) through func_1510BB78,
+// with the player's camera record (D_800BE628, 0x180 bytes each).
+struct PendingF2 { f32 x, y; };
+extern struct PendingF2 D_800D9F18[];
+extern u8 D_800D9F38;
+void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
+void func_1510BA9C(void) {
+    s32 i;
+    u8 *cam;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        if (D_800D9F18[i].x != -1.0f) {
+            cam = (u8 *)D_800BE628 + i * 0x180;
+            func_1510BB78(i, (u16 *)(cam + 0xB8), *(f32 *)(cam + 0x78), *(f32 *)(cam + 0x74), D_800D9F18[i].x,
+                          D_800D9F18[i].y, *(f32 *)(cam + 0x84));
+            D_800D9F18[i].x = -1.0f;
+        }
+    }
+    D_800D9F38 = 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BA9C.s")
+#endif
 #ifdef NON_MATCHING
 void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
     s32 sp2C;
@@ -73,10 +100,82 @@ void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BB78.s")
 #endif
+#ifdef NON_MATCHING
+extern f32 D_800DA030[][4][4];   /* per player: view matrix (float) */
+extern f32 D_800DA130[][4][4];   /* per player: product */
+extern u8 *D_800DC6D0[];         /* per DL buffer: fixed-point view matrices, 0x40 per player */
+
+/* Per-player matrix refresh (P15, hand C from the asm): converts this frame's fixed-point projection
+ * (player record + 0x100 in D_800BE628, 0x180 per player, 0x40 per DL buffer) and view matrix to float,
+ * multiplies them into D_800DA130[i] and runs the per-player update func_1501B22C(i). */
+void func_1510BC10(void) {
+    f32 proj[4][4];
+    s16 i;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        guMtxL2F(proj, (Mtx *)(D_800BE628 + i * 0x180 + D_800BE9C0 * 0x40 + 0x100));
+        guMtxL2F(D_800DA030[i], (Mtx *)(D_800DC6D0[D_800BE9C0] + i * 0x40));
+        func_150A7A48(D_800DA030[i], proj, D_800DA130[i]);
+        func_1501B22C(i);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BC10.s")
+#endif
+#ifdef NON_MATCHING
+u8 *func_1510BD34(u8 *arg0, s32 arg1) {
+    u8 *temp_a0;
+    u8 *temp_a0_10;
+    u8 *temp_a0_11;
+    u8 *temp_a0_2;
+    u8 *temp_a0_3;
+    u8 *temp_a0_4;
+    u8 *temp_a0_5;
+    u8 *temp_a0_6;
+    u8 *temp_a0_7;
+    u8 *temp_a0_8;
+    u8 *temp_a0_9;
 
+    (*(s32 *)((u8 *)arg0 + 0)) = 0xE7000000;
+    (*(s32 *)((u8 *)arg0 + 4)) = 0;
+    temp_a0_2 = arg0 + 8;
+    (*(s32 *)((u8 *)temp_a0_2 + 4)) = 1;
+    (*(s32 *)((u8 *)temp_a0_2 + 0)) = 0xF9000000;
+    temp_a0_3 = temp_a0_2 + 8;
+    (*(s32 *)((u8 *)temp_a0_3 + 0)) = 0xDA380003;
+    (*(u8 **)((u8 *)temp_a0_3 + 4)) = D_80089810;
+    temp_a0_4 = temp_a0_3 + 8;
+    (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xDB0E0000;
+    temp_a0_5 = temp_a0_4 + 8;
+    (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) (*(u16 *)((u8 *)((D_800BE628 + (arg1 * 0x180))) + 0xB8));
+    (*(s32 *)((u8 *)temp_a0_5 + 4)) = 3;
+    (*(s32 *)((u8 *)temp_a0_5 + 0)) = 0xDB040004;
+    temp_a0_6 = temp_a0_5 + 8;
+    (*(s32 *)((u8 *)temp_a0_6 + 0)) = 0xDB04000C;
+    (*(s32 *)((u8 *)temp_a0_6 + 4)) = 3;
+    temp_a0_7 = temp_a0_6 + 8;
+    (*(s32 *)((u8 *)temp_a0_7 + 0)) = 0xDB040014;
+    (*(s32 *)((u8 *)temp_a0_7 + 4)) = 0xFFFD;
+    temp_a0_8 = temp_a0_7 + 8;
+    (*(s32 *)((u8 *)temp_a0_8 + 0)) = 0xDB04001C;
+    (*(s32 *)((u8 *)temp_a0_8 + 4)) = 0xFFFD;
+    temp_a0_9 = temp_a0_8 + 8;
+    (*(s32 *)((u8 *)temp_a0_9 + 0)) = 0xD9EFFFFF;
+    (*(s32 *)((u8 *)temp_a0_9 + 4)) = 0;
+    temp_a0_10 = temp_a0_9 + 8;
+    (*(s32 *)((u8 *)temp_a0_10 + 0)) = 0xDA380007;
+    (*(s32 *)((u8 *)temp_a0_10 + 4)) = (s32) (D_800BE628 + (arg1 * 0x180) + (D_800BE9C0 << 6) + 0x100);
+    temp_a0_11 = temp_a0_10 + 8;
+    (*(s32 *)((u8 *)temp_a0_11 + 0)) = 0xDA380005;
+    temp_a0 = temp_a0_11 + 8;
+    (*(s32 *)((u8 *)temp_a0_11 + 4)) = (s32) (*(s32 *)((u8 *)&D_800DC6D0 + (D_800BE9C0 * 4)) + (arg1 << 6));
+    (*(s32 *)((u8 *)temp_a0 + 0)) = 0xEF082C3F;
+    (*(s32 *)((u8 *)temp_a0 + 4)) = 0x552230;
+    return temp_a0 + 8;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BD34.s")
-
+#endif
 #ifdef NON_MATCHING
 extern f32 D_800D3A00;
 

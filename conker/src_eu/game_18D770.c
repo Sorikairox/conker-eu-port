@@ -917,7 +917,99 @@ struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4,
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+/* six 5-entry tables (rodata 0x800A6C60..0x800A6CD7), indexed by arg1 & 0xFF < 5 */
+static const f32 D_800A6C60[5] = { 0.0f, 50.0f, 50.0f, 50.0f, 50.0f };
+static const f32 D_800A6C74[5] = { 0.0f, 15.0f, 15.0f, 15.0f, 15.0f };
+static const f32 D_800A6C88[5] = { 0.0f, 0.0f, 15.5f, 31.0f, 46.5f };
+static const f32 D_800A6C9C[5] = { 10.0f, 12.0f, 12.0f, 12.0f, 12.0f };
+static const f32 D_800A6CB0[5] = { 10.0f, 25.0f, 25.0f, 25.0f, 25.0f };
+static const f32 D_800A6CC4[5] = { 10.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
+    struct {
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        f32 u48;
+        f32 u4C;
+        f32 u50;
+        s8 u54;
+        s8 u55;
+        s8 u56;
+        s8 u57;
+        s8 u58;
+        u8 pad59[0x3];
+        u8 u5C;
+        s8 u5D;
+        s16 u5E;
+        u8 u60;
+        u8 pad61[0x3];
+        struct225 * u64;
+    } sp;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f2;
+    s32 temp_t6;
+    struct225 *temp_v0;
+    struct225 *var_v1;
+
+    temp_t6 = arg1 & 0xFF;
+    if (temp_t6 >= 5) {
+        return NULL;
+    }
+    temp_f2 = D_800A6C60[temp_t6];
+    temp_f12 = D_800A6C74[temp_t6];
+    temp_f0 = D_800A6C9C[temp_t6];
+    temp_f18 = D_800A6CB0[temp_t6];
+    temp_f14 = temp_f18 + temp_f0;
+    sp.u38 = temp_f2 - temp_f12;
+    sp.u3C = D_800A6C88[temp_t6];
+    temp_f16 = D_800A6CC4[temp_t6] + temp_f14;
+    sp.u55 = arg6;
+    sp.u44 = temp_f14;
+    sp.u48 = temp_f16;
+    sp.u4C = temp_f18 + temp_f16;
+    sp.u30 = temp_f2;
+    sp.u34 = temp_f12;
+    sp.u40 = temp_f0;
+    sp.u56 = arg7;
+    sp.u57 = arg8;
+    sp.u58 = arg9;
+    if (sp.u3C < temp_f0) {
+        sp.u54 = 0;
+    } else if (sp.u3C < sp.u44) {
+        sp.u54 = 1;
+    } else if (sp.u3C < sp.u48) {
+        sp.u54 = 2;
+    } else if (sp.u3C < sp.u4C) {
+        sp.u54 = 3;
+    } else {
+        sp.u54 = 4;
+    }
+    sp.u5C = arg3;
+    sp.u5D = arg5;
+    sp.u5E = arg4;
+    sp.u60 = arg2;
+    sp.u50 = 1.0f / temp_f18;
+    temp_v0 = func_1516037C((Header *) &sp.u5C, arg0, argA + 0x30, argB, argC);
+    var_v1 = temp_v0;
+    if (temp_v0 != NULL) {
+        sp.u64 = temp_v0;
+        memcpy(&temp_v0->unk18, &sp.u30, 0x30);
+        var_v1 = sp.u64;
+    }
+    return var_v1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_1516295C.s")
+#endif
 // s32 func_1516295C(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, s8 arg6, s8 arg7, s8 arg8, s8 arg9, s32 argA, u8 argB, s32 argC) {
 //     struct225 *temp_v0;
 //     Header header;

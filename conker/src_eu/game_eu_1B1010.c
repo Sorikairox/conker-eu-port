@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1510DBB0(s16 *arg0);
+void func_10004074(s32);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15183800.s")
@@ -90,8 +94,41 @@ Gfx *func_15184114(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     return gdl;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15184198.s")
+#ifdef NON_MATCHING
+extern s32 D_800DE350;
+extern s8 D_800DE3A0;
+extern s8 D_800DE3A1;
+extern s32 D_800DE3C8;
 
+/* Release slot arg0 of the D_800DDE80 table (0x14-byte entries): its texture (word 0x10) through
+ * func_1510DBB0 and its block (word 0) back to the allocator, clearing the slot's DL D_800DDF78[arg0].
+ * Slot 8 keeps its block unless D_800DE3A1 == -2; slot 9 with D_800DE3A0 == -2 also frees D_800DE350.
+ * (P15, hand C from the asm) */
+void func_15184198(s32 arg0) {
+    s32 *e = &D_800DDE80[arg0 * 5];
+
+    if (e[4] != 0) {
+        func_1510DBB0((s16 *)e[4]);
+        e[4] = 0;
+    }
+    if (arg0 == 8) {
+        if (D_800DE3A1 != -2) {
+            return;
+        }
+    } else if (arg0 == 9 && D_800DE3A0 == -2 && D_800DE350 != 0) {
+        func_10004074(D_800DE350);
+        D_800DE350 = 0;
+        D_800DE3C8 = 0;
+    }
+    if (e[0] != 0) {
+        func_10004074(e[0]);
+        e[0] = 0;
+        D_800DDF78[arg0] = 0;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15184198.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15184298.s")
 
 s32 func_15184688(u8 *arg0) {

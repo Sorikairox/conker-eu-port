@@ -337,8 +337,50 @@ s32 func_151702C0(u8 *arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE1C.s")
+#ifdef NON_MATCHING
+void func_1516FE1C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    struct {
+        s32 uFC;
+    } sp;
+    f32 *temp_fp;
+    s16 var_fp;
+    s16 var_s7;
+    s32 var_a0;
+    s32 var_a1;
+    s32 var_s0;
+    s32 var_s1;
+    s32 var_s2;
+    struct127 *temp_t0;
 
+    var_a0 = arg0;
+    temp_t0 = &D_800CC2D0[var_a0];
+    var_s1 = 0;
+    var_s0 = 0;
+    if (temp_t0->interaction_state == 1) {
+        var_s7 = 4;
+        var_fp = 0;
+        var_s2 = 0x19;
+        var_a1 = 1;
+    } else {
+        temp_fp = &temp_t0->x_position;
+        var_s7 = (s16) ((s32) temp_fp >> 0x10);
+        var_fp = (s16) temp_fp;
+        var_a0 = 0xFF;
+        var_a1 = 0x21;
+        var_s2 = sp.uFC;
+    }
+    do {
+        if (var_s0 == 1) {
+            var_s2 = 0x1B;
+            var_s1 = 8;
+        }
+        func_1516DF0C(var_s7, var_fp, 0, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, (u8) var_s1, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0xAA, 0xAA, 0xAA, 0xAA, (u16) (arg1 & 0xFFFF), 0x1EU, 0U, (u8) (var_a0 & 0xFF), 0x1EU, 0x168, 0x18U, (u16) (var_a1 & 0xFFFF), 4U, 0U, 1U, 0U, 0U, 0, (u8) var_s2, 0U, (u8) (s32) arg2, arg3);
+        var_s0 += 1;
+    } while (var_s0 != 2);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FE1C.s")
+#endif
 f32 func_150489B0();
 s32 func_151705A4(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     s32 mask;

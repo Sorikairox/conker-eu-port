@@ -24,4 +24,43 @@ void func_150492CC(f32 arg0, f32 arg1, f32 arg2) {
 }
 
 // too many temp vars
+#ifdef NON_MATCHING
+extern f32 D_800CC630;
+extern f32 D_800CC634;
+extern f32 D_800CC638;
+extern f32 D_800CC63C;
+
+void func_15049350(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8) {
+    f32 sp10;
+    f32 spC;
+    f32 sp8;
+    f32 sp4;
+    s32 sp0;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f2;
+    f32 temp_f6;
+
+    temp_f0 = (*(f32 *)&(arg0)) - arg3;
+    sp0 = arg0;
+    temp_f2 = arg1 - arg4;
+    sp4 = arg1;
+    temp_f12 = arg2 - arg5;
+    temp_f14 = (*(f32 *)&(arg0)) - arg6;
+    temp_f16 = arg1 - arg7;
+    temp_f18 = arg2 - arg8;
+    temp_f6 = (temp_f2 * temp_f18) - (temp_f12 * temp_f16);
+    D_800CC630 = temp_f6;
+    sp10 = temp_f6;
+    spC = (-temp_f0 * temp_f18) + (temp_f12 * temp_f14);
+    D_800CC634 = spC;
+    sp8 = (temp_f0 * temp_f16) - (temp_f2 * temp_f14);
+    D_800CC638 = sp8;
+    D_800CC63C = (arg2 * sp8) + ((temp_f6 * (*(f32 *)&(arg0))) + (spC * sp4));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_76710/func_15049350.s")
+#endif

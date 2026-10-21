@@ -52,8 +52,27 @@ void func_151791A4(u8 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178C9C.s")
+#ifdef NON_MATCHING
+s32 func_15178C9C(s32 arg0, s32 arg1) {
+    s32 temp_f10;
+    s32 temp_f16;
+    s32 temp_f8;
+    struct127 *temp_a2;
+    u8 *temp_v0;
 
+    temp_v0 = func_15179108(arg0 & 0xFF);
+    if (temp_v0 != NULL) {
+        temp_a2 = &D_800CC2D0[arg1];
+        temp_f16 = (s32) (temp_a2->x_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x18)));
+        temp_f10 = (s32) (temp_a2->y_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x1C)));
+        temp_f8 = (s32) (temp_a2->z_position - (f32) (*(s32 *)((u8 *)temp_v0 + 0x20)));
+        return (s32) sqrtf((f32) ((temp_f16 * temp_f16) + (temp_f10 * temp_f10) + (temp_f8 * temp_f8)));
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15178C9C.s")
+#endif
 extern s32 D_800DD36C;
 s32 func_15179314(u8 *arg0) {
     u8 *next; // fakematch: declared before p to move the spill slot to 0x20

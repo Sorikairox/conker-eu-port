@@ -48,7 +48,11 @@ void func_150EDAF8(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15062FC0(u8 *, s32, s32, s32, s32, s32, s32, s32);
+#else
 s32 func_15062FC0(u8 *, s32, s32, s32, s32, s32, s32, s32);
+#endif
 void func_150EDBB8(u8 *arg0, s32 arg1, s32 arg2) {
     s32 t;
     s32 var_s0;

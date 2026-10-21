@@ -84,8 +84,49 @@ s32 func_1508CEE4(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DE78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DF48.s")
+#ifdef NON_MATCHING
+s32 func_1508DF48(s32 arg0, s32 arg1) {
+    s32 temp_a3;
+    s32 temp_v1;
+    s32 var_a1;
+    struct127 *temp_v1_2;
+    u8 *temp_a1;
+    u8 *temp_t0;
 
+    temp_a1 = D_800D27D0 + (arg0 * 4);
+    if (D_800D27D0 == NULL) {
+        return 0;
+    }
+    temp_v1 = (*(s32 *)((u8 *)temp_a1 + 0xEB0));
+    if (temp_v1 >= 0) {
+        if (arg1 < 0) {
+            return 1;
+        }
+        (*(s32 *)((u8 *)temp_a1 + 0xEB0)) = -1;
+        temp_a3 = temp_v1 * 4;
+        temp_t0 = D_800D27D0 + temp_a3;
+        if (!((*(s32 *)((u8 *)temp_t0 + 0x11F4)) & 2)) {
+            (*(s32 *)((u8 *)temp_t0 + 0xF70)) = -1;
+            (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x10F0)) = -1;
+            var_a1 = (*(s32 *)((u8 *)D_800D27D0 + 0xEAC));
+            if (arg1 == 1) {
+                (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x12F4)) = 0xFA;
+                temp_v1_2 = &D_800CC2D0[arg0];
+                var_a1 = 4;
+                (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x1374)) = (s32) temp_v1_2->x_position;
+                (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x13F4)) = (s32) (temp_v1_2->y_position + 50.0f);
+                (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x1474)) = (s32) temp_v1_2->z_position;
+            }
+            (*(s32 *)((u8 *)((D_800D27D0 + temp_a3)) + 0x1070)) = var_a1;
+        }
+        /* Duplicate return node #9. Try simplifying control flow for better match */
+        return 0;
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DF48.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508E080.s")
 
 void func_1508EB24(void) {

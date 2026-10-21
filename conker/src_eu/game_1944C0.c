@@ -545,7 +545,29 @@ void func_15168E34(s32 *arg0, s32 arg1) {
         *arg0 = temp_v0 + arg1;
     }
 }
+#ifdef NON_MATCHING
+void func_15168E54(s8 *arg0, s32 arg1) {
+    s32 var_s0;
+    s8 *var_v1;
+    s8 var_v0;
+
+    var_s0 = 0;
+    var_v1 = arg0;
+    if (*arg0 != -0x21) {
+        var_v0 = *arg0;
+        do {
+            if ((var_v0 == 1) || ((var_v0 == -0x24) && ((*(u8 *)((u8 *)var_v1 + 3)) == 0xE))) {
+                func_15168E34(var_v1 + 4, arg1);
+            }
+            var_s0 += 1;
+            var_v1 = (var_s0 * 8) + arg0;
+            var_v0 = *var_v1;
+        } while (var_v0 != -0x21);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168E54.s")
+#endif
 // NON-MATCHING: first cmd load is CSE'd in mine
 // void func_15168E54(struct_eu_gfxcmd *arg0, s32 arg1) {
 //     s32 i = 0;

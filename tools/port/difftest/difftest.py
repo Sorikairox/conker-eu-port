@@ -29,7 +29,7 @@ return value (by the candidate's declared return type) and the restoration of sp
 Prints one line: EQUIV <func> (n trials ...) | DIFFER <func>: <reason> | ERROR <func>: <why>.
 """
 import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.join(_pgo.path.dirname(_pgo.path.abspath(__file__)), '..')); import portguard  # wrong-checkout guard (P7)
-import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random, gc
+import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random, gc, pickle
 # Unicorn 2.1.x mis-translates a call whose delay slot holds an FPU instruction (lwc1/swc1/...):
 # the callee's first block runs with stale delay-slot flags and jumps to 0 (UC_ERR_EXCEPTION at
 # 0x00000000).  2.0.1 is correct.  Pinned copy: pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1
@@ -53,6 +53,7 @@ CAND_ALT = 0x0F000000                           # (| the 256 MB jal region of vr
 SP_ENTRY = STK_TOP - 0x100
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 OUTPARAMS = os.environ.get('DIFFTEST_OUTPARAMS') == '1' or '--outparams' in sys.argv
+NOFORK = os.environ.get('DIFFTEST_NOFORK') == '1'   # P16: run trials in-process (old behaviour)
 
 
 def phys(a):
@@ -212,7 +213,8 @@ def compile_tu(func, p, tu, tmp):
     cpath = os.path.join(tmp, func + '.c'); opath = os.path.join(tmp, func + '.o')
     open(cpath, 'w').write(tu)
     if os.path.exists(opath): os.remove(opath)
-    r = subprocess.run(cmd + ['-o', opath, cpath], capture_output=True, text=True)
+    # P15: headers as the NON_MATCHING build sees them (the TU's own NM blocks are already resolved)
+    r = subprocess.run(cmd + ['-DNON_MATCHING', '-o', opath, cpath], capture_output=True, text=True)
     if r.returncode or not os.path.exists(opath):
         em = [l for l in (r.stdout + r.stderr).split('\n') if 'rror' in l]
         tl = tu.split('\n'); ctx = []
@@ -336,7 +338,9 @@ def call_site_writes(words, idx):
     j = idx + 1
     while j >= 0:
         w = words[j] if j < len(words) else 0
-        if j < idx and (is_branch(w) or (j + 1 < idx and is_branch(words[j]))): break
+        # P13: also stop at the delay slot of an earlier branch/jump (j - 1 is that branch): its writes belong
+        # to the earlier call or path (a jal's delay slot a2=3 widened a 1-arg call to 3 args)
+        if j < idx and (is_branch(w) or (0 < j and is_branch(words[j - 1]))): break
         d = gpr_dest(w)
         if d is not None and 4 <= d <= 7: a.add(d - 4)
         fd = fpr_dest(w)
@@ -361,6 +365,20 @@ def proto_arity(tu, name):
             n += 2 if re.search(r'\b(f64|double|s64|u64|long long)\b', p) and '*' not in p else 1
         best = n
     return best
+
+FSKIP = {}
+def proto_fslots(tu, name):
+    """P13: a-register slots that the prototype's leading float/double parameters occupy under o32 (they travel in
+    f12/f14, so a0/a1 at the call hold junk and must not be compared)"""
+    for m in re.finditer(r'\b%s\s*\(([^()]*)\)\s*[;{]' % re.escape(name), tu):
+        ps = [p for p in m.group(1).split(',') if p.strip()]
+        out, slot = set(), 0
+        for p in ps[:2]:
+            if re.search(r'\b(f32|float)\b', p) and '*' not in p: out.add(slot); slot += 1
+            elif re.search(r'\b(f64|double)\b', p) and '*' not in p: out |= {slot, slot + 1}; slot += 2
+            else: break
+        return out
+    return set()
 
 def ret_kind(tu, func):
     m = re.search(r'^([^\n;#/(){}]*?)\b%s\s*\([^;{]*?\)\s*\{' % func, tu, re.M)
@@ -390,6 +408,13 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
     _v, _n = (_v.split('*') + ['1'])[:2]
     for _k in range(int(_n)):
         POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
+
+# P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
+# reach code behind a callee's result (e.g. an early return unless func_1517F51C() == 0).
+STUBRET = {}
+for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
+    _a, _v = _p.split('=')
+    STUBRET[int(_a, 16) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -661,6 +686,7 @@ class Run:
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
         r = random.Random(h32('ret', self.seed, addr, k))
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
+        if (addr & 0x1FFFFFFF) in STUBRET: mu.reg_write(UC_MIPS_REG_V0, STUBRET[addr & 0x1FFFFFFF])
         mu.reg_write(FREG(0), rand_float_bits(r)); mu.reg_write(FREG(1), rand_float_bits(r))
         mu.reg_write(FREG(2), rand_float_bits(r))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
@@ -759,6 +785,7 @@ def compare(R, C, rk, arity):
         # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
         if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
         for k in range(min(cnt, 4)):
+            if k in FSKIP.get(a['name'], ()): continue
             if not same_val(R, a['regs'][k], C, b['regs'][k]):
                 return 'call #%d %s: a%d ref=0x%X cand=0x%X' % (i, a['name'], k, a['regs'][k], b['regs'][k])
         # outgoing stack args: the contiguous run of slots from sp+0x10 written right before the call
@@ -903,13 +930,11 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     differ = None; ok = inconcl = 0; ncalls = 0; learned = [0]
     import time
     t0 = time.time(); budget = float(os.environ.get('DIFFTEST_BUDGET', '30'))
-    for t in range(trials):
-        if time.time() - t0 > budget and t >= 8:
-            break
+    def one(t):
         rng = random.Random(h32('trial', seed, t))
         inputs = make_inputs(rng, kinds)
         romdata = t % 2 == 1
-        forced = {}
+        forced = {}; lrn = 0
         R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi).run(inputs)
         if R.fault and not os.environ.get('DIFFTEST_NOLEARN'):
             inputs = dict(a=list(inputs['a']), f=list(inputs['f']), stk=list(inputs['stk']))
@@ -917,26 +942,68 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                 if not learn_pointer(rwords, vram, (seed, t), romdata, tu, maxi, inputs, forced): break
                 R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
                 if not R.fault: break
-            if not R.fault: learned[0] += 1
+            if not R.fault: lrn = 1
         C = Run(cwords, cvram, cdata, (seed, t), romdata, tu, 4 * maxi, forced).run(inputs)
+        new = {}
         for c in R.calls + C.calls:
-            if c['name'] not in arity: arity[c['name']] = proto_arity(tu, c['name'])
+            if c['name'] not in arity and c['name'] not in new:
+                pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
+                new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn))
+                arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]
         why = compare(R, C, rk, arity)
-        ncalls += len(R.calls)
         if verbose:
             print('trial %d: %s ref(done=%s fault=%s calls=%d) cand(done=%s fault=%s calls=%d)' % (
                 t, why or 'same', R.done, R.fault, len(R.calls), C.done, C.fault, len(C.calls)))
-        if why:
-            differ = 'trial %d: %s' % (t, why)
-            if verbose: explain(R, C, inputs, forced)
+            if why: explain(R, C, inputs, forced)
+        return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new)
+    crashed = 0
+    for t in range(trials):
+        if time.time() - t0 > budget and t >= 8:
             break
-        if R.fault or not R.done: inconcl += 1
-        else: ok += 1
-        # free the emulators now: each Uc (2.0.1) holds a large translation buffer, and the hook
-        # callbacks make Run <-> Uc a cycle that only the cyclic GC would collect (workers ran out of memory)
-        R.mu = C.mu = None; del R, C
-        gc.collect()
-    res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl, learned=learned[0])
+        if NOFORK:
+            o = one(t)
+            gc.collect()
+        else:
+            # P16: each trial runs in a forked child that exits without closing its emulators. With unicorn
+            # 2.0.1 (aarch64 container) a uc_close -- explicit, or unicorn's weakref finalizer when the GC
+            # collects a dropped Run/Uc -- makes a LATER emulator segfault inside emu_start (func_1509BA04: all
+            # seeds exit 139; never closing: EQUIV). These were the "random Unicorn segfaults" of P7-P15, and
+            # through them the convert.py Pool deadlock. A child that still dies counts as inconclusive.
+            sys.stdout.flush()
+            rfd, wfd = os.pipe()
+            pid = os.fork()
+            if pid == 0:
+                os.close(rfd)
+                gc.disable()   # no collection = no uc_close inside the child (dropped learn_pointer runs)
+                try: o = one(t)
+                except BaseException as e: o = dict(exc='%s: %s' % (type(e).__name__, e))
+                try:
+                    sys.stdout.flush()
+                    data = pickle.dumps(o)
+                    while data: data = data[os.write(wfd, data):]
+                finally:
+                    os._exit(0)
+            os.close(wfd)
+            chunks = []
+            while True:
+                c = os.read(rfd, 1 << 16)
+                if not c: break
+                chunks.append(c)
+            os.close(rfd); _, st = os.waitpid(pid, 0)
+            if not chunks:
+                crashed += 1; inconcl += 1
+                if verbose: print('trial %d: child died (status %d), inconclusive' % (t, st))
+                continue
+            o = pickle.loads(b''.join(chunks))
+            if 'exc' in o: raise RuntimeError('trial %d: %s' % (t, o['exc']))
+            for k, (ar, fs) in o['new'].items(): arity[k] = ar; FSKIP[k] = fs
+        ncalls += o['ncalls']; learned[0] += o['learned']
+        if o['why']:
+            differ = 'trial %d: %s' % (t, o['why'])
+            break
+        if o['ok']: ok += 1
+        else: inconcl += 1
+    res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl, learned=learned[0], crashed=crashed)
     if differ:
         line = 'DIFFER %s: %s' % (func, differ); res['result'] = 'DIFFER'; res['why'] = differ
     elif ok < max(4, trials // 8):
@@ -944,7 +1011,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     else:
         line = 'EQUIV %s (%d trials ok, %d inconclusive, %d calls, ret=%s, ref %d words, cand %d words%s)' % (
             func, ok, inconcl, ncalls, rk, len(rwords), len(cwords),
-            ', %d trials via learned pointer inputs' % learned[0] if learned[0] else ''); res['result'] = 'EQUIV'
+            ', %d trials via learned pointer inputs' % learned[0] if learned[0] else '') + (' [%d trials crashed]' % crashed if crashed else ''); res['result'] = 'EQUIV'
     res['line'] = line
     return res
 

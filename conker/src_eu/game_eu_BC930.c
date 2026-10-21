@@ -73,4 +73,78 @@ void func_1508F21C(u32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_1503E0C0(s32);
+void func_15115114(u32);
+
+void func_1508F26C(s32 arg0, s32 arg1) {
+    s32 temp_a1;
+    s32 temp_a2;
+    s32 temp_v1;
+    s32 var_a1;
+    s32 var_s1;
+    s32 var_s3;
+    u16 temp_v0;
+    u16 var_a0;
+    u32 var_s0;
+    u32 var_s0_2;
+    u32 var_s2;
+    u8 *var_v0;
+
+    var_s2 = 0;
+    if (D_80087380 != 0) {
+        temp_a2 = D_800D23C0;
+        var_s3 = 0;
+        var_a1 = temp_a2;
+loop_2:
+        var_a0 = (*(u16 *)((u8 *)var_a1 + 2));
+        var_s0 = 0;
+        if (var_a0 != 0) {
+            var_v0 = temp_a2 + (var_s2 * 0x18);
+loop_4:
+            var_s0 += 1;
+            if (((((arg0 & 0xFFFF) << 0xC) + (arg1 & 0xFFFF)) & 0xFFFF) == (*(u16 *)((u8 *)var_v0 + 8))) {
+                var_s0_2 = 0;
+                if (var_a0 != 0) {
+                    var_s1 = 0;
+                    do {
+                        temp_v0 = (*(u16 *)((u8 *)((temp_a2 + (var_s2 * 0x18) + var_s1)) + 8));
+                        temp_v1 = (s32) temp_v0 >> 0xC;
+                        temp_a1 = temp_v0 & 0xFFF;
+                        switch (temp_v1) {          /* irregular */
+                        case 2:
+                            func_15115114(temp_a1);
+                            var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
+                            break;
+                        case 3:
+                            func_1503E0C0(temp_a1);
+                            var_a0 = (*(u16 *)((u8 *)((D_800D23C0 + var_s3)) + 2));
+                            break;
+                        }
+                        var_s0_2 += 1;
+                        var_s1 += 2;
+                    } while (var_s0_2 < var_a0);
+                }
+                func_1508F21C(var_s2);
+                return;
+            }
+            var_v0 += 2;
+            if (var_s0 >= var_a0) {
+                goto block_15;
+            }
+            goto loop_4;
+        }
+block_15:
+        var_s2 += 1;
+        var_s3 += 0x18;
+        var_a1 += 0x18;
+        if (var_s2 >= (u32) D_80087380) {
+
+        } else {
+            goto loop_2;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_BC930/func_1508F26C.s")
+#endif

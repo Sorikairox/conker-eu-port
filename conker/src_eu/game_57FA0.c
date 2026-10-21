@@ -5,18 +5,7 @@
 #include <stdarg.h>
 
 #include "macros.h"
-
-void func_1502AAF0(void) {
-}
-
-void func_1502AAF8(s32 arg0) {
-}
-
-#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AB04.s")
-#ifdef NON_MATCHING
-/* P7: difftest EQUIV (128 trials, also with DIFFTEST_OUTPARAMS=1); only the cache-miss path ran (no random key hit) */
-/* reads the 8-byte ROM record at arg0 + arg1 * 8 through a 16-entry most-recently-used cache.
- * Returns the record's first word and stores its second in *arg2. */
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 typedef struct RomRecCacheEntry {
     /* 0x00 */ u32 key;      /* ROM address | 0x80000000 */
     /* 0x04 */ s32 stamp;    /* D_800C4180 at the last use */
@@ -24,6 +13,41 @@ typedef struct RomRecCacheEntry {
     /* 0x0C */ s32 word1;
 } RomRecCacheEntry;
 extern RomRecCacheEntry D_800C4188[16];
+#endif
+
+void func_1502AAF0(void) {
+}
+
+void func_1502AAF8(s32 arg0) {
+}
+
+#ifdef NON_MATCHING
+/* ROM record MRU cache insert (P13, hand C): drops the n oldest of the 16 entries (bcopy down) and appends n
+ * records from arg1 (two words each) at the end, keys arg3, arg3 + 8, ..., all stamped arg2. */
+
+void func_1502AB04(s32 arg0, s32 *arg1, s32 arg2, u32 arg3) {
+    u32 i;
+
+    if (arg0 != 0) {
+        bcopy(&D_800C4188[arg0], &D_800C4188[0], 0x100 - arg0 * 16);
+    }
+    for (i = 16 - arg0; i < 16; i++) {
+        D_800C4188[i].word0 = arg1[0];
+        D_800C4188[i].word1 = arg1[1];
+        D_800C4188[i].key = arg3;
+        D_800C4188[i].stamp = arg2;
+        arg1 += 2;
+        arg3 += 8;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502AB04.s")
+#endif
+#ifdef NON_MATCHING
+/* P7: difftest EQUIV (128 trials, also with DIFFTEST_OUTPARAMS=1); only the cache-miss path ran (no random key hit) */
+/* reads the 8-byte ROM record at arg0 + arg1 * 8 through a 16-entry most-recently-used cache.
+ * Returns the record's first word and stores its second in *arg2. */
+/* RomRecCacheEntry / D_800C4188: hoisted above (P13) */
 extern s32 D_800C4180;   /* use counter */
 void func_1502AB04(s32 arg0, s32 *arg1, s32 arg2, u32 arg3);
 

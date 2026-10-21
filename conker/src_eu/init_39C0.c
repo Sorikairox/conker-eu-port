@@ -71,4 +71,40 @@ block_10:
 #pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/func_10003ACC.s")
 #endif
 // EU only
+#ifdef NON_MATCHING
+extern s32 D_8002AF20;
+
+void func_10003C10(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
+    s32 temp_a2;
+    s32 temp_f8;
+    s32 temp_t6;
+    s32 temp_v0;
+    s32 var_t0;
+    s32 var_v1;
+    u32 temp_t2;
+
+    if (D_8002AC5C == 0) {
+        temp_v0 = arg1 + 0x3F;
+        temp_a2 = arg0 + 0x8C;
+        temp_f8 = (s32) (517.0f * arg3);
+        var_t0 = (s32) (585.0f * arg2);
+        var_v1 = temp_f8;
+        if ((arg0 + var_t0 + 0x8C) >= 0x31B) {
+            var_t0 = 0x31A - temp_a2;
+        }
+        if ((temp_v0 + temp_f8) >= 0x272) {
+            var_v1 = 0x271 - temp_v0;
+        }
+        (*(s32 *)((u8 *)(&D_8002AF20) + 0x1C)) = (s32) ((temp_a2 << 0x10) | (temp_a2 + var_t0));
+        temp_t6 = (temp_v0 << 0x10) | (temp_v0 + var_v1);
+        (*(u32 *)((u8 *)(&D_8002AF20) + 0x20)) = (u32) (512.0f - (f32) (var_t0 - 0x249));
+        (*(s32 *)((u8 *)(&D_8002AF20) + 0x30)) = temp_t6;
+        (*(s32 *)((u8 *)(&D_8002AF20) + 0x44)) = temp_t6;
+        temp_t2 = (u32) (1024.0f - ((f32) (var_v1 - 0x1AB) * 1.95f));
+        (*(u32 *)((u8 *)(&D_8002AF20) + 0x2C)) = temp_t2;
+        (*(u32 *)((u8 *)(&D_8002AF20) + 0x40)) = temp_t2;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_39C0/func_10003C10.s")
+#endif

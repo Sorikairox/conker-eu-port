@@ -31,8 +31,16 @@ void func_10005BE0(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_100061F8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10006530.s")
+#ifdef NON_MATCHING
+/* thin wrapper: a0..a2 pass through untouched, v0 comes back from func_1000654C */
+s32 func_1000654C();
 
+s32 func_10006530(s32 arg0, s32 arg1, u32 arg2) {
+    return func_1000654C(arg0, arg1, arg2);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10006530.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_1000654C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_1000661C.s")

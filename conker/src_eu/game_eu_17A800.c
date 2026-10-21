@@ -1094,7 +1094,11 @@ typedef struct {
     /* 0x18 */ u8 u18;
 } BlkFB3C;
 
+#ifdef NON_MATCHING
+u8 *func_150C0FC0(BlkFB3C *arg0, s32 arg1, s32 arg2);
+#else
 void func_150C0FC0(BlkFB3C *arg0, s32 arg1, s32 arg2);
+#endif
 
 void func_1514FB3C(u8 *arg0) {
     BlkFB3C b;

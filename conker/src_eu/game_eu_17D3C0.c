@@ -292,7 +292,11 @@ typedef struct {
     s16 h;
     s16 i;
 } S_3f24;
+#ifdef NON_MATCHING
+s32 func_15156700(S_3f24 *, u8, s32, u8, s32);
+#else
 void func_15156700(S_3f24 *, u8, s32, u8, s32);
+#endif
 
 void func_15153F24(u8 *arg0, u8 arg1) {
     S_3f24 sp;

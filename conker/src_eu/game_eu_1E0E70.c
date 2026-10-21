@@ -72,9 +72,98 @@ void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B402C.s")
+#ifdef NON_MATCHING
+s32 func_151B42A0(u8 *arg0) {
+    f32 sp80;
+    f32 sp78;
+    f32 sp74;
+    f32 sp70;
+    f32 sp6C;
+    f32 sp68;
+    f32 sp64;
+    f32 sp60;
+    f32 sp5C;
+    f32 sp58;
+    f32 temp_f0;
+    f32 temp_f10;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f14_2;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f20;
+    f32 temp_f22;
+    f32 temp_f22_2;
+    f32 temp_f22_3;
+    f32 temp_f24;
+    f32 temp_f24_2;
+    f32 temp_f24_3;
+    f32 temp_f26;
+    f32 temp_f26_2;
+    f32 temp_f28;
+    f32 temp_f28_2;
+    f32 temp_f2;
+    f32 temp_f2_2;
+    f32 temp_f30;
+    f32 temp_f4;
+    f32 temp_f6;
+    f32 var_f20;
+    s32 var_s1;
+    u8 *temp_s0;
+    u8 *var_s2;
 
+    temp_f26 = (*(f32 *)((u8 *)arg0 + 0x20));
+    temp_f2 = (*(f32 *)((u8 *)arg0 + 0x14));
+    temp_f28 = (*(f32 *)((u8 *)arg0 + 0x24));
+    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x18));
+    temp_f18 = temp_f26 - temp_f2;
+    temp_f0 = fabsf(temp_f18);
+    sp80 = temp_f28 - temp_f12;
+    temp_f14 = (*(f32 *)((u8 *)arg0 + 0x1C));
+    temp_f30 = (*(f32 *)((u8 *)arg0 + 0x28));
+    temp_f20 = temp_f30 - temp_f14;
+    if ((temp_f0 > 0.0001f) || (fabsf(temp_f20) > 0.0001f)) {
+        temp_f16 = temp_f2 + (temp_f18 * 0.5f);
+        sp70 = temp_f16;
+        temp_f4 = temp_f2 - temp_f16;
+        temp_f22 = temp_f12 + (sp80 * 0.5f);
+        sp64 = temp_f4;
+        temp_f24 = temp_f14 + (temp_f20 * 0.5f);
+        sp74 = temp_f22;
+        temp_f10 = temp_f26 - temp_f16;
+        sp78 = temp_f24;
+        sp58 = temp_f10;
+        sp6C = temp_f14 - temp_f24;
+        sp5C = temp_f28 - temp_f22;
+        sp68 = temp_f12 - temp_f22;
+        temp_f6 = temp_f30 - temp_f24;
+        sp60 = temp_f6;
+        temp_f22_2 = 1.0f / sqrtf((temp_f18 * temp_f18) + (temp_f20 * temp_f20));
+        temp_f26_2 = temp_f20 * temp_f22_2;
+        temp_f28_2 = temp_f18 * temp_f22_2;
+        temp_f14_2 = ((temp_f6 * temp_f26_2) + (temp_f10 * temp_f28_2)) - ((sp6C * temp_f26_2) + (temp_f4 * temp_f28_2));
+        temp_f24_2 = sp5C - sp68;
+        var_s1 = 0;
+        var_s2 = arg0 + 0x48;
+        var_f20 = func_150484A0(temp_f24_2, temp_f14_2) - 3.1415927f;
+        temp_f22_3 = sqrtf((temp_f14_2 * temp_f14_2) + (temp_f24_2 * temp_f24_2)) * 0.5f;
+        do {
+            temp_s0 = var_s2;
+            temp_f24_3 = sinf(var_f20);
+            temp_f2_2 = temp_f22_3 * cosf(var_f20);
+            var_s1 += 0x18;
+            var_s2 += 0x18;
+            (*(f32 *)((u8 *)temp_s0 + 0)) = (f32) ((temp_f2_2 * temp_f28_2) + sp70);
+            (*(f32 *)((u8 *)temp_s0 + 4)) = (f32) ((temp_f22_3 * temp_f24_3) + sp74);
+            (*(f32 *)((u8 *)temp_s0 + 8)) = (f32) ((temp_f2_2 * temp_f26_2) + sp78);
+            var_f20 += 0.34906587f;
+        } while (var_s1 != 0xF0);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B42A0.s")
-
+#endif
 extern f32 D_800AA78C;
 s32 func_151B44D8(u8 *arg0, f32 *arg1, u8 arg2)
 {
@@ -102,12 +191,175 @@ s32 func_151B44D8(u8 *arg0, f32 *arg1, u8 arg2)
   return var_v1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B458C.s")
+#ifdef NON_MATCHING
+s32 func_151B402C(f32, f32);
 
+s32 func_151B458C(u8 *arg0) {
+    f32 sp110;
+    f32 sp108;
+    f32 sp104;
+    f32 sp100;
+    f32 spFC;
+    f32 spF8;
+    f32 spF4;
+    f32 spF0;
+    f32 spEC;
+    f32 spE8;
+    f32 spD0;
+    f32 spAC;
+    f32 spA4;
+    f32 sp98;
+    f32 sp6C;
+    f32 sp68;
+    f32 sp64;
+    f32 sp5C;
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 temp_f0_3;
+    f32 temp_f10;
+    f32 temp_f10_2;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f14;
+    f32 temp_f14_2;
+    f32 temp_f16;
+    f32 temp_f16_2;
+    f32 temp_f16_3;
+    f32 temp_f18;
+    f32 temp_f18_2;
+    f32 temp_f20;
+    f32 temp_f22;
+    f32 temp_f22_2;
+    f32 temp_f24;
+    f32 temp_f26;
+    f32 temp_f26_2;
+    f32 temp_f28;
+    f32 temp_f28_2;
+    f32 temp_f2;
+    f32 temp_f2_2;
+    f32 temp_f2_3;
+    f32 temp_f2_4;
+    f32 temp_f30;
+    f32 temp_f30_2;
+    f32 temp_f4;
+    f32 temp_f6;
+    f32 var_f20;
+    s32 var_s1;
+    u8 *var_s2;
+
+    temp_f28 = (*(f32 *)((u8 *)arg0 + 0x20));
+    temp_f2 = (*(f32 *)((u8 *)arg0 + 0x14));
+    temp_f30 = (*(f32 *)((u8 *)arg0 + 0x24));
+    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x18));
+    temp_f20 = temp_f28 - temp_f2;
+    temp_f0 = fabsf(temp_f20);
+    sp110 = temp_f30 - temp_f12;
+    temp_f16 = (*(f32 *)((u8 *)arg0 + 0x28));
+    temp_f14 = (*(f32 *)((u8 *)arg0 + 0x1C));
+    sp5C = temp_f16;
+    temp_f26 = temp_f16 - temp_f14;
+    if ((temp_f0 > 0.0001f) || (fabsf(temp_f26) > 0.0001f)) {
+        temp_f16_2 = temp_f2 + (temp_f20 * 0.5f);
+        sp100 = temp_f16_2;
+        temp_f18 = temp_f12 + (sp110 * 0.5f);
+        spF4 = temp_f2 - temp_f16_2;
+        temp_f22 = temp_f14 + (temp_f26 * 0.5f);
+        sp104 = temp_f18;
+        sp108 = temp_f22;
+        spE8 = temp_f28 - temp_f16_2;
+        spEC = temp_f30 - temp_f18;
+        spF8 = temp_f12 - temp_f18;
+        spFC = temp_f14 - temp_f22;
+        temp_f10 = sp5C - temp_f22;
+        temp_f0_2 = sqrtf((temp_f20 * temp_f20) + (temp_f26 * temp_f26));
+        spF0 = temp_f10;
+        temp_f2_2 = 1.0f / temp_f0_2;
+        temp_f28_2 = temp_f26 * temp_f2_2;
+        temp_f30_2 = temp_f20 * temp_f2_2;
+        temp_f16_3 = ((temp_f10 * temp_f28_2) + (spE8 * temp_f30_2)) - ((spFC * temp_f28_2) + (spF4 * temp_f30_2));
+        temp_f18_2 = spEC - spF8;
+        spD0 = temp_f16_3;
+        temp_f4 = (temp_f16_3 * temp_f16_3) + (temp_f18_2 * temp_f18_2);
+        temp_f0_3 = sqrtf(temp_f4);
+        sp64 = temp_f4;
+        spA4 = temp_f4;
+        temp_f2_3 = 1.0f / temp_f0_3;
+        spAC = temp_f0_3 * 0.5f;
+        temp_f10_2 = (*(f32 *)((u8 *)arg0 + 0x138));
+        sp68 = temp_f10_2;
+        temp_f22_2 = spD0 * temp_f2_3;
+        temp_f24 = temp_f18_2 * temp_f2_3;
+        temp_f6 = temp_f4 * 0.25f;
+        sp6C = temp_f6;
+        if (temp_f10_2 < sp6C) {
+            return func_151B402C(temp_f12, temp_f14);
+        }
+        var_f20 = 0.0f;
+        var_s1 = 0;
+        var_s2 = arg0 + 0x48;
+        sp98 = sqrtf(sp68 - temp_f6);
+        do {
+            temp_f26_2 = sinf(var_f20);
+            var_s1 += 0x18;
+            temp_f2_4 = spAC * cosf(var_f20);
+            temp_f12_2 = sp98 * temp_f26_2;
+            temp_f14_2 = (temp_f2_4 * temp_f22_2) - (temp_f12_2 * temp_f24);
+            (*(f32 *)((u8 *)var_s2 + 0)) = (f32) ((temp_f14_2 * temp_f30_2) + sp100);
+            (*(f32 *)((u8 *)var_s2 + 4)) = (f32) (((temp_f2_4 * temp_f24) - (temp_f12_2 * temp_f22_2)) + sp104);
+            (*(f32 *)((u8 *)var_s2 + 8)) = (f32) ((temp_f14_2 * temp_f28_2) + sp108);
+            var_s2 += 0x18;
+            var_f20 += 0.34906587f;
+        } while (var_s1 != 0xF0);
+        goto block_6;
+    }
+block_6:
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B458C.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4854.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4D88.s")
+#ifdef NON_MATCHING
+s32 func_151B4D88(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {
+    s32 var_a2;
+    s32 temp_t6;
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u8 *var_a0;
+    u8 *var_a2_2;
 
+    temp_t6 = arg3 & 0xFF;
+    temp_v0 = (*(u8 **)((u8 *)arg1 + 0));
+    temp_v1 = (*(u8 **)((u8 *)arg1 + 0x14));
+    if (((*(s32 *)((u8 *)temp_v0 + 0x1D4)) == 0) || ((*(s32 *)((u8 *)temp_v1 + 0x1D4)) == 0)) {
+        (*(u8 *)((u8 *)arg0 + 0x10)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x10)) | 0xC);
+        return 1;
+    }
+    if (((*(s32 *)((u8 *)temp_v0 + 0)) == 0) || ((*(u8 *)((u8 *)arg1 + 4)) != (*(u8 *)((u8 *)temp_v0 + 0x3B))) || ((*(s32 *)((u8 *)temp_v1 + 0)) == 0) || ((*(u8 *)((u8 *)arg1 + 0x18)) != (*(u8 *)((u8 *)temp_v1 + 0x3B)))) {
+        return 0;
+    }
+    var_a2 = 8;
+    if (temp_t6 != 0) {
+        var_a2 = 4;
+    }
+    (*(u8 *)((u8 *)arg0 + 0x10)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x10)) & ~var_a2);
+    if (temp_t6 != 0) {
+        var_a0 = arg1 + 8;
+    } else {
+        var_a0 = arg1 + 0x1C;
+    }
+    if (temp_t6 != 0) {
+        var_a2_2 = (*(s32 *)((u8 *)temp_v0 + 0x1D4)) + ((*(u8 *)((u8 *)arg1 + 5)) << 6);
+    } else {
+        var_a2_2 = (*(s32 *)((u8 *)temp_v1 + 0x1D4)) + ((*(u8 *)((u8 *)arg1 + 0x19)) << 6);
+    }
+    func_15143134(var_a0, arg2, var_a2_2);
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4D88.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_151B4E8C(u8 *arg0) {
     f32 temp_f0;

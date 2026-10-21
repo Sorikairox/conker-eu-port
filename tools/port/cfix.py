@@ -486,3 +486,129 @@ def fix_proto(code, why=None, func=None, src=None):
             if res: body = ''.join(res) + body[i:]
         out = out[:bdef.end()] + body
     return out if out != code else None
+
+
+# ---------------------------------------------------------------- P17: draft definition vs the header's own prototype
+_CKW = {'int', 'char', 'short', 'long', 'float', 'double', 'void', 'unsigned', 'signed', 'const', 'volatile'}
+
+def _split_params(s):
+    out, d, cur = [], 0, ''
+    for ch in s:
+        if ch == '(' : d += 1
+        elif ch == ')': d -= 1
+        if ch == ',' and d == 0: out.append(cur.strip()); cur = ''
+        else: cur += ch
+    if cur.strip(): out.append(cur.strip())
+    return out
+
+def _ptype(p):
+    """'u8 *arg0' -> ('u8 *', 'arg0'); 's32' -> ('s32', None)"""
+    m = re.match(r'^(.*?[\s\*])(\w+)$', p.strip())
+    if m and m.group(2) not in _CKW and m.group(1).strip():
+        return re.sub(r'\s+', ' ', m.group(1).strip()).replace(' *', '*').replace('*', ' *').strip(), m.group(2)
+    return re.sub(r'\s+', ' ', p.strip()).replace(' *', '*').replace('*', ' *').strip(), None
+
+def _norm(t):
+    return re.sub(r'\s+', '', t)
+
+def fix_selfproto(code, err, func=None, src=None):
+    """IDO 'redeclaration of FUNC' where FUNC is the function being converted: the header/file prototype and the
+    draft's definition disagree in pointer types (void * vs u8 *) or integer widths. Re-declare the definition with
+    the prototype's types; a pointer parameter of another type is renamed and copied into a local of the draft's type."""
+    if not func or ("redeclaration of '%s'" % func) not in (err or ''): return None
+    m = re.search(r"([^\s:|]+), line (\d+): redeclaration of '%s'; previous declaration at line (\d+) in file '([^']+)'" % re.escape(func), err)
+    if not m: return None
+    # drop the draft's own prototypes of FUNC (//HOIST or plain): the definition is enough
+    code = '\n'.join(l for l in code.split('\n')
+                     if not re.match(r'^(//HOIST\s+)?[^(){};=]*\b%s\s*\([^{]*\)\s*;\s*$' % re.escape(func), l))
+    dlines = set(l.strip() for l in code.split('\n'))
+    hm = None
+    for fn, ln in ((m.group(4), int(m.group(3))), (m.group(1), int(m.group(2)))):
+        try: lines = open(fn).read().split('\n')
+        except Exception: continue
+        if lines[ln - 1].strip() in dlines or ('//HOIST ' + lines[ln - 1].strip()) in dlines: continue
+        hm = re.search(r'([\w\s\*]*?)\b%s\s*\(([^;{]*)\)\s*;' % re.escape(func), ' '.join(lines[ln - 1:ln + 3]))
+        if hm: break
+    dm = re.search(r'^([^\n;{}]*?)\b%s\s*\(([^)]*)\)\s*\{' % re.escape(func), code, re.M)
+    if not hm or not dm: return None
+    hret, dret = _ptype(hm.group(1) + ' x')[0], _ptype(dm.group(1) + ' x')[0]
+    hps, dps = _split_params(hm.group(2)), _split_params(dm.group(2))
+    if len(hps) != len(dps) or any('...' in p for p in hps + dps): return None
+    if hps == ['void'] or dps == ['void']: return None
+    newp, locs = [], []
+    isf = lambda t: t in ('f32', 'f64', 'float', 'double')
+    for hp, dp in zip(hps, dps):
+        ht, _ = _ptype(hp); dt, dn = _ptype(dp)
+        if dn is None: return None
+        if _norm(ht) == _norm(dt): newp.append(dp); continue
+        if '*' in ht and '*' in dt:
+            newp.append('%s %s_p' % (ht, dn)); locs.append('    %s %s = (%s) %s_p;' % (dt, dn, dt, dn)); continue
+        if '*' in ht or '*' in dt or isf(ht) or isf(dt) or '(' in ht or '(' in dt: return None
+        newp.append('%s %s' % (ht, dn))
+    if _norm(hret) != _norm(dret):
+        if not ('*' in hret and '*' in dret): return None
+        ret = hret
+    else:
+        ret = dm.group(1).strip()
+    head = '%s %s(%s) {' % (ret, func, ', '.join(newp))
+    if locs: head += '\n' + '\n'.join(locs)
+    return code[:dm.start()] + head + code[dm.end():]
+
+
+# ---------------------------------------------------------------- P17: float literals -> the rodata symbol the asm loads
+def fix_litsym(code, why=None, func=None, src=None):
+    """DIFFER workaround (P17): in some candidates a TU float literal reads back as 0 in difftest (seen in
+    func_1503EE68 -0.3f, func_151B97C4 0.0234f; the literal value is bit-exact). Replace each f32 literal whose
+    bits equal a word the asm loads with `lwc1 %lo(D_X)` by D_X itself (extern f32), which reads the ROM's rodata."""
+    import glob as _g, struct as _st
+    if not func: return None
+    sp = _g.glob('asm/nonmatchings/*/%s.s' % func)
+    if not sp: return None
+    syms = sorted(set(re.findall(r'lwc1\s+\$f\d+, %lo\((D_[0-9A-F]{8})\)', open(sp[0]).read())))
+    if not syms: return None
+    try:
+        import difftest as _dt
+        rom = open('conker.eu.bin', 'rb').read()
+    except Exception:
+        return None
+    vals = {}
+    for s in syms:
+        o = _dt.vram2rom(int(s[2:], 16))
+        if o is not None: vals.setdefault(rom[o:o + 4], s)
+    used = set()
+    def rep(m):
+        try: b = _st.pack('>f', float(m.group(1)))
+        except Exception: return m.group(0)
+        s = vals.get(b)
+        if not s: return m.group(0)
+        used.add(s); return s
+    c = re.sub(r'(?<![\w.])(-?\d+\.\d*(?:[eE][-+]?\d+)?)f\b', rep, code)
+    if not used or c == code: return None
+    decl = ''.join('extern f32 %s;\n' % s for s in sorted(used) if not re.search(r'\b%s\b' % s, code))
+    return decl + c
+
+
+# ---------------------------------------------------------------- P17: m2c call through a function-pointer table
+def fix_fptab(code, err=None, func=None, src=None):
+    """IDO 'Non-function name referenced in function call' for m2c's `*(&D_X + (i * 4))(args)`:
+    rewrite as a call through the table word, `((s32 (*)()) *(s32 *)((u8 *)&D_X + (i * 4)))(args)`."""
+    if err is not None and 'Non-function name referenced in function call' not in err: return None
+    out, i, ch = '', 0, False
+    while True:
+        k = code.find('*(&D_', i)
+        if k < 0: out += code[i:]; break
+        j, d = k + 1, 0
+        while j < len(code):
+            if code[j] == '(': d += 1
+            elif code[j] == ')':
+                d -= 1
+                if d == 0: break
+            j += 1
+        if j >= len(code) or not code[j + 1:j + 2] == '(':
+            out += code[i:k + 1]; i = k + 1; continue
+        inner = code[k + 2:j]                       # &D_X + (...)
+        m = re.match(r'&(D_\w+) \+ (.*)$', inner, re.S)
+        if not m: out += code[i:k + 1]; i = k + 1; continue
+        out += code[i:k] + '((s32 (*)()) *(s32 *)((u8 *)&%s + %s))' % (m.group(1), m.group(2))
+        i = j + 1; ch = True
+    return out if ch else None

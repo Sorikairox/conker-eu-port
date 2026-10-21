@@ -162,8 +162,111 @@ void func_150B5C38(u8 *arg0, u8 arg1, s32 arg2) {
     func_150B64E0(arg0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6314.s")
+#ifdef NON_MATCHING
+s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
 
+s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
+    struct {
+        s32 u28;
+        s32 u2C;
+        s16 u30;
+        s16 u32;
+        s32 u34;
+        s32 u38;
+        s8 u3C;
+        s8 u3D;
+        s8 u3E;
+        s8 u3F;
+        s8 u40;
+        s8 u41;
+        s8 u42;
+        s8 u43;
+        s8 u44;
+        s8 u45;
+        s16 u46;
+        s16 u48;
+        s16 u4A;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        s32 u58;
+        u8 pad5C[0x8];
+        f32 u64;
+        f32 u68;
+        f32 u6C;
+        f32 u70;
+        f32 u74;
+        f32 u78;
+        f32 u7C;
+        s32 u80;
+        u8 pad84[0x4];
+        s8 u88;
+        s8 u89;
+        s8 u8A;
+        s8 u8B;
+        s8 u8C;
+        s8 u8D;
+    } sp;
+    s32 sp20;
+    f32 temp_f6;
+    s32 var_v0;
+    s32 var_v1;
+
+    sp.u45 = 0x2B;
+    sp.u30 = 0x4403;
+    sp.u28 = 0x200005;
+    sp.u2C = 0x20000;
+    sp.u32 = (func_150ADA20() % 7U) + 4;
+    sp.u34 = 0;
+    sp.u38 = 0;
+    sp.u3C = 0xFF;
+    sp.u3D = 0xFF;
+    sp.u3E = 0xFF;
+    sp.u3F = 0xFF;
+    sp.u40 = 0xFF;
+    sp.u41 = 0xFF;
+    sp.u42 = 0xFF;
+    sp.u43 = 0xFF;
+    sp.u44 = 0xFF;
+    temp_f6 = (func_150ADA68() * 500.0f) + 500.0f;
+    sp.u54 = temp_f6;
+    sp.u50 = temp_f6;
+    (*(s32 *)((u8 *)(&sp.u58) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0));
+    (*(s32 *)((u8 *)(&sp.u58) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 4));
+    (*(s32 *)((u8 *)(&sp.u58) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 8));
+    sp.u46 = 3;
+    sp.u48 = 0x55;
+    sp.u4A = 1;
+    sp.u64 = 0.0f;
+    sp.u68 = 0.0f;
+    sp.u6C = 0.0f;
+    sp.u70 = 0.0f;
+    sp.u74 = 0.0f;
+    sp.u78 = 0.0f;
+    sp.u7C = 0.0f;
+    sp.u4C = 1.0f;
+    var_v1 = 0;
+    if (func_150ADA20() & 1) {
+        var_v1 = 0x40;
+    }
+    sp20 = var_v1;
+    if (func_150ADA20() & 1) {
+        var_v0 = 0x80;
+    } else {
+        var_v0 = 0;
+    }
+    sp.u80 = var_v0 | 1 | var_v1 | 0xC200;
+    sp.u88 = 6;
+    sp.u89 = 6;
+    sp.u8A = -1;
+    sp.u8B = -1;
+    sp.u8C = -1;
+    sp.u8D = 4;
+    return func_151307F0(&sp.u28, 1, 0, 0, (s32) arg1, arg2);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B6314.s")
+#endif
 void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
     s32 sp3C[3];

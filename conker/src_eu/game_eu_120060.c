@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_150F2F14(s32 arg0, s32 arg1);
+#endif
 
 
 static const f32 D_800A1CF0_vec[3] = { 0.0f, -45.0f, 0.0f };
@@ -104,8 +107,88 @@ s32 func_150F2B20(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2C20.s")
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, s32, s32);
 
+void func_150F2C20(struct108 *arg0) {
+    f32 temp_f0;
+    s32 temp_t2;
+    s32 temp_t4;
+    s32 temp_v0_2;
+    struct127 *temp_v0;
+
+    temp_v0 = arg0->unk3D0;
+    if ((temp_v0->unk102 != 0) && (temp_v0->stunned == 0)) {
+        func_150F2F14((s32) arg0, 1);
+        if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
+            if (func_15123934(arg0, 0x80, 0, 0, 3) != 0) {
+                temp_t2 = arg0->unk84 | 0x300400;
+                arg0->unk84 = temp_t2;
+                arg0->unk84 = temp_t2 & ~6;
+                arg0->unk1B4 = 1;
+                arg0->unk1E0 = 3;
+                func_15124B18(arg0);
+            }
+            arg0->unk348 = 29.0f;
+            arg0->unk34C = 29.0f;
+            arg0->unk374 = 200.0f;
+            arg0->unk190 = -19.0f;
+            if (arg0->unk3E8 == 0) {
+                temp_f0 = arg0->unk374;
+                if ((0.5f * temp_f0) < ((*(f32 *)((u8 *)arg0 + 0x370)) - temp_f0)) {
+                    func_15128774(arg0, arg0->unk3D0);
+                }
+            }
+        }
+    } else {
+        temp_v0->unk7 = 0xFF;
+        if (arg0->unk23E == 0x3B) {
+            func_150F2F14((s32) arg0, 1);
+            if ((arg0->unk2C != 0x100) && (arg0->unk6C8 == 0)) {
+                if (func_15123934(arg0, 8, 0, 0, 3) != 0) {
+                    temp_t4 = arg0->unk84 | 0x300000;
+                    arg0->unk84 = temp_t4;
+                    arg0->unk84 = temp_t4 & ~4;
+                    arg0->unk1B4 = 1;
+                    arg0->unk1E0 = 3;
+                }
+                arg0->unk134 = 0;
+                arg0->unk348 = 125.0f;
+                arg0->unk34C = 125.0f;
+                arg0->unk374 = 220.0f;
+                arg0->unk190 = 30.0f;
+            }
+        } else {
+            temp_v0_2 = arg0->unk2C;
+            if (((temp_v0_2 == 8) || (temp_v0_2 == 0x80)) && (arg0->unk6C8 == 0)) {
+                func_151239CC(arg0, 3);
+            }
+            if (arg0->unk1B4 == 1) {
+                arg0->unk1B4 = 2;
+                func_15124B18(arg0);
+            }
+            func_150F2F14((s32) arg0, 0);
+        }
+    }
+    if (func_1509BE40(1, 0x405A, 6, 0x9000) != 0) {
+        arg0->unk84 |= 0x80000000;
+    } else {
+        arg0->unk84 &= 0x7FFFFFFF;
+    }
+    if (func_1509BE40(1, 0x405E, 6, 0x9000) != 0) {
+        arg0->unk84 |= 0x10000;
+    } else {
+        arg0->unk84 &= 0xFFFEFFFF;
+    }
+    if (func_1509BE40(1, 0x405F, 6, 0x2000) != 0) {
+        arg0->unk84 |= 0x10;
+        return;
+    }
+    arg0->unk84 &= ~0x10;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_120060/func_150F2C20.s")
+#endif
 void func_150F2F14(s32 arg0, s32 arg1)
 {
   int new_var;

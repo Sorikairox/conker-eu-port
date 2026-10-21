@@ -9,7 +9,36 @@ void func_15010780(void) {
     func_15177410(0, 255, 6628, 108, 0, 0.0f, 15000, 80.0f, 77, 15, 127, 127, 127, 127, 127, 127);
 }
 
+#ifdef NON_MATCHING
+s32 memcpy(s32, s16 *, s32);
+extern s32 *D_800E0D64;
+extern s32 func_150DE8AC;
+
+void func_15010880(void) {
+    struct {
+        s16 u54;
+        u8 pad56[0x2];
+        u8 * u58;
+        u8 * u5C;
+    } sp;
+    struct260 *temp_v0;
+
+    func_15177410(0x10U, 0xE9U, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98U, 36.0f, 0x4D, 0xF, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU);
+    D_800E0D64 = &func_150DE8AC;
+    sp.u54 = 0;
+    sp.u58 = D_800D34B8 + 0xEA0;
+    sp.u5C = D_800D34B8 + 0xED4;
+    temp_v0 = func_15149130(0x12C, -1, 0x5E, -1, 0U, 0U, (struct37 *)0xC, 0xFFU, 1);
+    if (temp_v0 != NULL) {
+        memcpy(((struct260 *)((u8 *)temp_v0 + 0x28)), &sp.u54, 0xC);
+    }
+    if (D_800D2E4C->unk12 & 0x40) {
+        func_15149130(5, 9, -1, -1, 1U, 0U, NULL, 0xFFU, 1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_3DC30/func_15010880.s")
+#endif
 // NON-MATCHING: ops in wrong order
 // void func_15010880(void) {
 //     struct177 tmp;

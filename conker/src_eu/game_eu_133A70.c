@@ -1,6 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15108060(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void func_15107FA0(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4);
+void func_151084D4(u8 *arg0, u8 arg1, void *arg2, void *arg3);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15106260.s")
@@ -223,8 +228,40 @@ void func_15107E64(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, temp_a2, temp_a2 + 4, (s32)arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107EA4.s")
+#ifdef NON_MATCHING
+s32 func_15107EA4(u8 *arg0, s8 *arg1) {
+    struct {
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        u8 * u38;
+    } sp;
+    u8 *sp28;
+    u8 *temp_a3;
+    u8 *temp_t6;
+    u8 *temp_v0;
 
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x60));
+    temp_t6 = (*(u8 **)((u8 *)temp_v0 + 0));
+    sp.u38 = temp_t6;
+    if (((*(s32 *)((u8 *)temp_t6 + 0)) == 0) || (temp_a3 = arg0 + 0x14, ((*(u8 *)((u8 *)temp_v0 + 4)) != (*(u8 *)((u8 *)temp_t6 + 0x3B))))) {
+        return 0;
+    }
+    *arg1 = 0;
+    (*(f32 *)((u8 *)(&sp.u2C) + 0)) = (*(f32 *)((u8 *)temp_a3 + 0));
+    (*(s32 *)((u8 *)(&sp.u2C) + 4)) = (s32) (*(s32 *)((u8 *)temp_a3 + 4));
+    (*(s32 *)((u8 *)(&sp.u2C) + 8)) = (s32) (*(s32 *)((u8 *)temp_a3 + 8));
+    sp28 = temp_a3;
+    func_15107FA0(sp.u38, (*(s16 *)((u8 *)temp_v0 + 6)), (*(s16 *)((u8 *)temp_v0 + 8)), temp_a3, NULL);
+    if ((sp.u2C != (*(f32 *)((u8 *)arg0 + 0x14))) || (sp.u30 != (*(f32 *)((u8 *)arg0 + 0x18))) || (sp.u34 != (*(f32 *)((u8 *)arg0 + 0x1C)))) {
+        *arg1 = 1;
+        func_15108060((f32 *) sp28, arg0 + 0x38, arg0 + 0x20, arg0 + 0x2C);
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107EA4.s")
+#endif
 s32 func_15143794(s16, s16, s32, u8 *);
 s32 func_1515C7B4(u8 *, f32 *, s32 *, s32 *);
 
@@ -276,8 +313,42 @@ void func_151080F8(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_1510819C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_151083C8.s")
+#ifdef NON_MATCHING
+s32 func_151083C8(u8 *arg0, s8 *arg1) {
+    struct {
+        f32 u24;
+        f32 u28;
+        f32 u2C;
+    } sp;
+    f32 *sp20;
+    f32 *temp_a3;
+    u8 *temp_s1;
+    u8 *temp_v0;
 
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x60));
+    temp_s1 = (*(u8 **)((u8 *)temp_v0 + 0));
+    if (((*(s32 *)((u8 *)temp_s1 + 0)) == 0) || ((*(u8 *)((u8 *)temp_v0 + 4)) != (*(u8 *)((u8 *)temp_s1 + 0x3B)))) {
+        return 0;
+    }
+    temp_a3 = arg0 + 0x14;
+    if ((*(s32 *)((u8 *)temp_s1 + 0x1D4)) == 0) {
+        return 0;
+    }
+    *arg1 = 0;
+    (*(f32 *)((u8 *)(&sp.u24) + 0)) = (*(f32 *)((u8 *)temp_a3 + 0));
+    (*(s32 *)((u8 *)(&sp.u24) + 4)) = (s32) (*(s32 *)((u8 *)temp_a3 + 4));
+    (*(s32 *)((u8 *)(&sp.u24) + 8)) = (s32) (*(s32 *)((u8 *)temp_a3 + 8));
+    sp20 = temp_a3;
+    func_151084D4(temp_s1, (*(u8 *)((u8 *)temp_v0 + 0x14)), temp_v0 + 8, temp_a3);
+    if ((sp.u24 != (*(f32 *)((u8 *)arg0 + 0x14))) || (sp.u28 != (*(f32 *)((u8 *)arg0 + 0x18))) || (sp.u2C != (*(f32 *)((u8 *)arg0 + 0x1C)))) {
+        *arg1 = 1;
+        func_15108060(sp20, arg0 + 0x38, arg0 + 0x20, arg0 + 0x2C);
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_151083C8.s")
+#endif
 void func_151084D4(u8 *arg0, u8 arg1, void *arg2, void *arg3) {
     func_15143134(arg2, arg3, *(u8 **)(arg0 + 0x1D4) + (arg1 << 6));
 }

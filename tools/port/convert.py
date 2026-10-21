@@ -160,11 +160,12 @@ def lint(code, func=None):
 
 sys.path.insert(0, HERE)
 import cfix
-FIXES = [('implproto', fix_implicit_proto), ('spframe', cfix.fix_spframe), ('cmpcast', fix_cmp_cast), ('cmp2', cfix.fix_cmp),
+FIXES = [('fptab', cfix.fix_fptab), ('implproto', fix_implicit_proto), ('spframe', cfix.fix_spframe), ('cmpcast', fix_cmp_cast), ('cmp2', cfix.fix_cmp),
          ('deref', cfix.fix_deref), ('fnptr', fix_fnptr), ('redecl', fix_redecl), ('qtypes', fix_question_types),
          ('undecl', fix_undeclared), ('argc', fix_args_count)]
+# P17: cfix.fix_selfproto (definition vs the header's own prototype of FUNC) is written but untested, not registered
 # DIFFER: tried in order, each at most once per draft
-DFIXES = [('passthru2', cfix.fix_passthru), ('passthru', fix_passthrough), ('u8arith', cfix.fix_u8arith),
+DFIXES = [('litsym', cfix.fix_litsym), ('passthru2', cfix.fix_passthru), ('passthru', fix_passthrough), ('u8arith', cfix.fix_u8arith),
           ('spframe', lambda c, w, f, s: cfix.fix_spframe(c, w, f, s, force=True))]
 if os.environ.get('CONVERT_P1'):   # the P1 fix set, for before/after measurements
     FIXES = [x for x in FIXES if x[0] in ('implproto', 'cmpcast', 'fnptr', 'redecl', 'qtypes', 'undecl', 'argc')]
@@ -189,7 +190,9 @@ def eval_one(item):
         signal.alarm(0)
 
 def _eval_one(item):
-    func, drafts, trials, tmp = item
+    func, drafts, trials, tmp = item[:4]
+    seed = item[4] if len(item) > 4 else 1
+    prog = item[5] if len(item) > 5 else None   # P16: best-so-far snapshot, survives a Unicorn segfault
     sys.path.insert(0, os.path.join(HERE, 'difftest'))
     import difftest
     rank = {'EQUIV': 0, 'UNSURE': 1, 'DIFFER': 2, 'CERR': 3, 'ERROR': 4}
@@ -210,7 +213,9 @@ def _eval_one(item):
             c0 = cfix.fix_rostr(code, '', func, src)
             if c0: code = c0; fixes.append('rostr')
         for rnd in range(7):
-            res = difftest.check(func, code, False, trials, 1, 100000, False, tmp)
+            if prog:
+                json.dump(dict(best=best, log=log, at='%s/%s' % (vname, ','.join(fixes))), open(prog, 'w'))
+            res = difftest.check(func, code, False, trials, seed, 100000, False, tmp)
             res.update(variant=vname, fixes=','.join(fixes), code=code)
             if res['result'] == 'EQUIV': res['lint'] = lint(code, func)
             log.append('%s\t%s\t%s\t%s' % (func, vname, ','.join(fixes), res['line'][:200]))
@@ -242,8 +247,26 @@ def _eval_one(item):
         if lt: best['fixes'] = ','.join([x for x in [best.get('fixes', '')] + lt if x])
     return best
 
+def _child(item, out):
+    """one function in its own forked process: a Unicorn segfault / hang kills only this child"""
+    try:
+        r = eval_one(item)
+    except Exception as e:
+        r = dict(func=item[0], result='ERROR', line='ERROR %s: %r' % (item[0], e), variant='', fixes='', log=[])
+    tmpf = out + '.tmp'
+    json.dump(r, open(tmpf, 'w')); os.rename(tmpf, out)
+    os._exit(0)
+
 def inner_eval(d, funcs, trials, jobs):
-    from multiprocessing import Pool
+    """P16: no multiprocessing.Pool. A Pool worker killed by a Unicorn segfault (exit 139) loses its task, and
+    imap_unordered then waits forever (the P7 r7 / P15 deadlocks: idle workers in futex_wait). Each function now
+    runs in its own forked child, results come back through a file (no pipe to fill), the parent polls with a
+    wall-clock limit, kills hung children, and re-runs crashed ones with the next difftest seed."""
+    import multiprocessing, time
+    # (do not import difftest/unicorn here: a child forked from a parent that loaded unicorn segfaults at its first Uc run)
+    ctx = multiprocessing.get_context('fork')
+    seeds = [int(x) for x in os.environ.get('CONVERT_SEEDS', '1,3,5').split(',')]
+    wall = float(os.environ.get('CONVERT_BUDGET', '150')) * 3 + 300   # per attempt
     items = []
     for f in funcs:
         seen = set(); dr = []
@@ -253,16 +276,51 @@ def inner_eval(d, funcs, trials, jobs):
             seen.add(c); dr.append((os.path.basename(os.path.dirname(v)), c))
         items.append((f, dr, trials, 'build/convert_tmp/%s' % f))
     os.makedirs(os.path.join(d, 'pass'), exist_ok=True); os.makedirs(os.path.join(d, 'best'), exist_ok=True)
-    with Pool(jobs) as pool, open(os.path.join(d, 'results.tsv'), 'w') as fo, open(os.path.join(d, 'attempts.tsv'), 'w') as fd:
-        for r in pool.imap_unordered(eval_one, items):
-            reason = r['line'].split(': ', 1)[1] if ': ' in r['line'] else r['line']
-            fo.write('\t'.join([r['func'], r['result'], r.get('variant', ''), r.get('fixes', ''), reason.replace('\t', ' ')]) + '\n'); fo.flush()
-            fd.write('\n'.join(r.get('log', [])) + '\n'); fd.flush()
-            if r.get('code'):
-                open(os.path.join(d, 'best', r['func'] + '.c'), 'w').write(r['code'])
-            if r['result'] == 'EQUIV':
-                open(os.path.join(d, 'pass', r['func'] + '.c'), 'w').write(r['code'])
-            print(r['line'][:160], flush=True)
+    rd = os.path.join(d, 'run'); os.makedirs(rd, exist_ok=True)
+    queue = [(it, 0) for it in items]; running = {}   # Process -> (item, attempt, outfile, t0)
+    fo = open(os.path.join(d, 'results.tsv'), 'w'); fd = open(os.path.join(d, 'attempts.tsv'), 'w')
+    def emit(r):
+        reason = r['line'].split(': ', 1)[1] if ': ' in r['line'] else r['line']
+        fo.write('\t'.join([r['func'], r['result'], r.get('variant', '') or '', r.get('fixes', '') or '', reason.replace('\t', ' ')]) + '\n'); fo.flush()
+        fd.write('\n'.join(r.get('log', []) or []) + '\n'); fd.flush()
+        if r.get('code'):
+            open(os.path.join(d, 'best', r['func'] + '.c'), 'w').write(r['code'])
+        if r['result'] == 'EQUIV':
+            open(os.path.join(d, 'pass', r['func'] + '.c'), 'w').write(r['code'])
+        print(r['line'][:160], flush=True)
+    while queue or running:
+        while queue and len(running) < jobs:
+            it, att = queue.pop(0)
+            out = os.path.join(rd, '%s.%d.json' % (it[0], att)); prog = out + '.prog'
+            for x in (out, prog):
+                if os.path.exists(x): os.remove(x)
+            p = ctx.Process(target=_child, args=(it + (seeds[att], prog), out)); p.start()
+            running[p] = (it, att, out, time.time())
+        time.sleep(0.5)
+        for p in list(running):
+            it, att, out, t0 = running[p]
+            if p.is_alive() and time.time() - t0 < wall: continue
+            why = None
+            if p.is_alive():
+                p.kill(); why = 'killed after %ds wall' % (time.time() - t0)
+            p.join()
+            del running[p]
+            if why is None and os.path.exists(out):
+                try: emit(json.load(open(out))); continue
+                except Exception as e: why = 'unreadable result (%r)' % e
+            if why is None: why = 'child exit %s' % p.exitcode   # -11 = SIGSEGV (Unicorn)
+            print('CRASH %s (seed %d): %s' % (it[0], seeds[att], why), flush=True)
+            if att + 1 < len(seeds) and not why.startswith('killed'):
+                queue.append((it, att + 1)); continue
+            part = {}
+            try: part = json.load(open(out + '.prog'))
+            except Exception: pass
+            b = part.get('best') or {}
+            r = dict(func=it[0], result='CRASH', variant=b.get('variant', ''), fixes=b.get('fixes', ''), code=b.get('code'),
+                     log=part.get('log', []), line='CRASH %s: %s on seeds %s (at %s; best so far %s)' % (
+                         it[0], why, ','.join(map(str, seeds[:att + 1])), part.get('at', '?'), (b.get('line') or '-')[:120]))
+            emit(r)
+    fo.close(); fd.close()
 
 
 # ------------------------------------------------------------------ host side

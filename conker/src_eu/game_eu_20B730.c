@@ -130,8 +130,57 @@ void func_151E2A1C(void) {
     D_80090120 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2A54.s")
+#ifdef NON_MATCHING
+s32 func_151DDF6C(s8, s8);
+extern s32 D_80082F4C;
+extern s32 D_800ABA74;
 
+void func_151E2A54(void) {
+    s8 temp_a1;
+    u8 var_v1;
+    u8 *temp_v0;
+
+    temp_a1 = *(s8 *)((u8 *)&D_800ABA74 + *(s8 *)((u8 *)D_80090174 + 0x42) * 0xA);
+    temp_v0 = (temp_a1 * 0xA) + D_80082F4C;
+    var_v1 = (*(u8 *)((u8 *)temp_v0 + 3));
+    if ((s32) var_v1 >= 5) {
+        (*(u8 *)((u8 *)temp_v0 + 3)) = 4U;
+        var_v1 = 4 & 0xFF;
+    }
+    if ((s32) var_v1 < 0) {
+        (*(u8 *)((u8 *)temp_v0 + 3)) = 0U;
+    }
+    if ((*(s8 *)((u8 *)temp_v0 + 1)) <= 0) {
+        (*(s8 *)((u8 *)temp_v0 + 1)) = 1;
+    }
+    (*(s8 *)((u8 *)D_800E1010 + 2)) = (*(s8 *)((u8 *)temp_v0 + 1));
+    (*(s8 *)((u8 *)D_800E1010 + 0xB)) = 0;
+    (*(s8 *)((u8 *)D_800E1010 + 3)) = (s8) (*(s8 *)((u8 *)temp_v0 + 2));
+    (*(u8 *)((u8 *)D_800E1010 + 0x10)) = (u8) (*(u8 *)((u8 *)temp_v0 + 3));
+    (*(u8 *)((u8 *)D_800E1010 + 0x11)) = (u8) (*(u8 *)((u8 *)temp_v0 + 4));
+    if (temp_a1 == 0) {
+        (*(u8 *)((u8 *)D_800E1010 + 4)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+    } else if (temp_a1 == 1 || temp_a1 == 2) {
+        (*(u8 *)((u8 *)D_800E1010 + 0xD)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+        (*(u8 *)((u8 *)D_800E1010 + 0xE)) = (u8) (*(u8 *)((u8 *)temp_v0 + 6));
+    } else if (temp_a1 == 7) {
+        (*(u8 *)((u8 *)D_800E1010 + 0x12)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+    } else if (temp_a1 == 5) {
+        (*(u8 *)((u8 *)D_800E1010 + 0x11)) = 0U;
+        (*(u8 *)((u8 *)D_800E1010 + 0x12)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+    } else if (temp_a1 == 8 || temp_a1 == 9) {
+        (*(u8 *)((u8 *)D_800E1010 + 7)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+        (*(u8 *)((u8 *)D_800E1010 + 0x11)) = 1U;
+        (*(s8 *)((u8 *)D_800E1010 + 3)) = 2;
+        (*(u8 *)((u8 *)D_800E1010 + 0x13)) = (u8) (*(u8 *)((u8 *)temp_v0 + 6));
+    }
+    (*(u8 *)((u8 *)D_800E1010 + 0x16)) = (u8) (*(u8 *)((u8 *)temp_v0 + 8));
+    (*(u8 *)((u8 *)D_800E1010 + 6)) = (u8) (*(u8 *)((u8 *)temp_v0 + 9));
+    func_151DDF6C((*(s8 *)((u8 *)temp_v0 + 1)), temp_a1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2A54.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2B9C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2C88.s")
@@ -430,8 +479,51 @@ void func_151E582C(void) {
     D_800E0FC5 = D_800E0B94;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5928.s")
+#ifdef NON_MATCHING
+// Per-frame game-mode step: screen offset/scale from the D_800E1010 settings, input snapshot,
+// the mode's handler from the table D_8009018C[D_800E0B94], and the time-in-mode counter
+// D_800E0EC0 (reset and the previous mode kept in D_800E0FC5 when the mode changed; mode 7 keeps it).
+extern f32 D_800ABE3C;
+extern s8 D_800E100C;
+extern u16 D_800BED50;
+extern u8 D_800E0FC5;
+extern void (*D_8009018C[])(void);
+void func_10003C10(s32 x, s32 y, f32 scaleY, f32 scaleX);
+void func_151E7110(s32 arg0);
 
+void func_151E5928(void) {
+    u8 prevMode = D_800E0B94;
+
+    func_10003C10((D_800E1010[0x17] - 16) * 2, (D_800E1010[0x18] - 8) * 2, D_800E1010[0x1A] * D_800ABE3C + 1.0f,
+                  D_800E1010[0x1B] * D_800ABE3C + 1.0f);
+    D_8003C8E0 = 0x08000000;
+    D_800E100C = 0xFF;
+    func_15042D78(0x81);
+    D_800E0FCA = D_800BED50;
+    if (D_800901C8 != 0) {
+        D_800901C8--;
+        D_800E0FCA = 0;
+    }
+    if (D_800E0B94 == 0) {
+        func_151E7110(2);
+    } else if (D_800E0B94 == 8) {
+        func_151E7110(4);
+    } else {
+        func_151E7110(1);
+    }
+    D_8009018C[D_800E0B94]();
+    if (D_800E0B94 != 7) {
+        D_800E0EC0 += D_800BE9E4;
+        if (prevMode != D_800E0B94) {
+            D_800E0FC5 = prevMode;
+            D_800E0EC0 = 0;
+        }
+    }
+    D_8003C8E0 = 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5928.s")
+#endif
 void func_151E5AB8(void)
 {
   f32 temp_f0;

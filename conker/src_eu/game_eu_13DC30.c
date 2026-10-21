@@ -42,8 +42,66 @@ Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110C28.s")
+#ifdef NON_MATCHING
+extern u8 D_800BEEE2;
 
+u8 *func_15110C28(u8 *arg0) {
+    s32 temp_t5;
+    s32 temp_t7;
+    u8 *temp_a0;
+    u8 *temp_a0_2;
+    u8 *temp_a0_3;
+    u8 *temp_a0_4;
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+    u8 *temp_v0_3;
+    u8 *var_a0;
+
+    var_a0 = arg0;
+    if (D_80082FA4 == 0) {
+        temp_a0 = var_a0 + 8;
+        (*(s32 *)((u8 *)var_a0 + 0)) = 0xE7000000;
+        (*(s32 *)((u8 *)var_a0 + 4)) = 0;
+        (*(s32 *)((u8 *)temp_a0 + 4)) = 4;
+        (*(s32 *)((u8 *)temp_a0 + 0)) = 0xEF302C0F;
+        temp_a0_2 = temp_a0 + 8;
+        (*(s32 *)((u8 *)temp_a0_2 + 0)) = 0xFCFFFFFF;
+        (*(s32 *)((u8 *)temp_a0_2 + 4)) = 0xFFFE793C;
+        temp_a0_3 = temp_a0_2 + 8;
+        (*(s32 *)((u8 *)temp_a0_3 + 0)) = (s32) (((D_800BE620 - 1) & 0xFFF) | 0xFF100000);
+        temp_a0_4 = temp_a0_3 + 8;
+        (*(s32 *)((u8 *)temp_a0_3 + 4)) = (s32) D_800BEDE4;
+        (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xF7000000;
+        (*(s32 *)((u8 *)temp_a0_4 + 4)) = 0xFFFCFFFC;
+        temp_v0 = func_1501A490((s32) (temp_a0_4 + 8), 0xFF, 0, 0, 0, 0);
+        (*(s32 *)((u8 *)temp_v0 + 4)) = 0x8000;
+        (*(s32 *)((u8 *)temp_v0 + 0)) = (s32) ((((D_800BE620 - 2) & 0x3FF) << 0xE) | 0xF6000000 | ((D_800BE624 & 0x3FF) * 4));
+        (*(s32 *)((u8 *)temp_v0 + 8)) = 0xE7000000;
+        (*(s32 *)((u8 *)temp_v0 + 0xC)) = 0;
+        temp_v0_2 = func_1501A680(temp_v0 + 0x10);
+        var_a0 = temp_v0_2;
+        if (D_80082FA0 != 0) {
+            (*(s32 *)((u8 *)temp_v0_2 + 0)) = 0xE7000000;
+            (*(s32 *)((u8 *)temp_v0_2 + 4)) = 0;
+            temp_v0_3 = func_1501A490((s32) (var_a0 + 8), 0xFF, 0, 0, 0, 0);
+            (*(s32 *)((u8 *)temp_v0_3 + 0)) = 0xF7000000;
+            (*(s32 *)((u8 *)temp_v0_3 + 4)) = 0x10001;
+            temp_t5 = (s32) D_800BE624 >> 1;
+            var_a0 = func_1501A6CC(temp_v0_3 + 8, 0, temp_t5 - 6, D_800BE620, temp_t5 + 6);
+            if (D_80082FA0 != 1) {
+                temp_t7 = (s32) D_800BE620 >> 1;
+                var_a0 = func_1501A6CC(var_a0, temp_t7 - 1, 0, temp_t7 + 1, D_800BE624);
+            }
+            if (D_800BEEE2 != 0) {
+                var_a0 = func_1501A6CC(var_a0, 0, 0, D_800BE620, D_800BE624);
+            }
+        }
+    }
+    return var_a0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110C28.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110E44.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_1511127C.s")
@@ -168,8 +226,51 @@ loop:
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
+#ifdef NON_MATCHING
+void func_15114CBC(struct127 *, s32);
+extern s32 *D_800DC3C4;
+typedef void (*fn15114708)(u8 *, struct127 *, u8 *, void *);
 
+void func_15114708(void) {
+    s32 i;
+    s32 j;
+    s32 *mask;
+    u8 *e;
+    u8 *base;
+    fn15114708 fn;
+    struct127 *obj;
+    u8 f;
+
+    for (i = 0; i < D_800DC320; i++) {
+        if (D_800DC3C4[i] == 0) {
+            continue;
+        }
+        for (j = 0; j < 0x19 && D_800DC3C4[i] != 0; j++) {
+            mask = &D_800DC3C4[i];
+            if (!(*mask & (1 << j))) {
+                continue;
+            }
+            *mask ^= 1 << j;
+            base = (u8 *)D_800DBEF4;
+            e = base + i * 0xA0;
+            fn = *(fn15114708 *)(e + 0x78);
+            obj = (struct127 *)((u8 *)D_800CC2D0 + j * 0x32C);
+            if (fn != NULL && (e[0x92] != 0 || ((u8 *)obj)[0x127] != 0xFF)) {
+                (*fn)(e, obj, base, (void *)fn);
+                e = (u8 *)D_800DBEF4 + i * 0xA0;
+            }
+            f = e[0x4F];
+            if ((f & 4) == 4 && !(f & 8)) {
+                func_15114CBC(obj, i);
+            }
+        }
+        e = (u8 *)D_800DBEF4 + i * 0xA0;
+        e[0x4F] &= 0x73;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151148C8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114CBC.s")
@@ -195,8 +296,38 @@ void func_15114E8C(f32 (*arg0)[4], u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151149AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
+#ifdef NON_MATCHING
+/* Per-frame release of the per-entry blocks D_800DC328[i] (P15, hand C from the asm). Entries are the
+ * 0xA0-byte D_800DBEF4 records. A disabled entry (flag 0x70 & 1) drops its block pointer unless it is
+ * kept (0x6F & 0x80). Otherwise a live block is freed at once, or, for kept / type-3 entries (0x4E),
+ * after its D_800DC32C[i] frame countdown reaches 0. */
+void func_10004074(s32);
+void func_15114F9C(void) {
+    s32 i;
 
+    for (i = 0; i < D_800DC320; i++) {
+        u8 *e = (u8 *)D_800DBEF4 + i * 0xA0;
+
+        if ((e[0x70] & 1) == 1) {
+            if (!(e[0x6F] & 0x80)) {
+                D_800DC328[i] = 0;
+            }
+        } else if (D_800DC328[i] != 0) {
+            if (e[0x4E] != 3 && !(e[0x6F] & 0x80)) {
+                func_10004074(D_800DC328[i]);
+                D_800DC328[i] = 0;
+            } else if (D_800DC32C[i] != 0) {
+                D_800DC32C[i]--;
+            } else {
+                func_10004074(D_800DC328[i]);
+                D_800DC328[i] = 0;
+            }
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
+#endif
 extern s32 D_800DC3C8;
 
 void func_15115114(u32 arg0) {

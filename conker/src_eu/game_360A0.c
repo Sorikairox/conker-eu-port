@@ -4,7 +4,75 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+void func_15143874(s16, f32, f32 *, f32 *);
+void func_15189E70(void *, u8);
+u8 D_80095B48[4] = { 0x3B, 0xF, 0x67, 0xA2 };       /* const */
+u8 D_80095B4C[4] = { 0x41, 0xA0, 0xCC, 0xCD };      /* const */
+u8 D_80095B50[4] = { 0x3E, 0xCC, 0xCC, 0xCD };      /* const */
+
+s32 func_15008BF0(u8 *arg0) {
+    struct {
+        f32 u20;
+        f32 u24;
+        s16 u28;
+        s16 u2A;
+        s16 u2C;
+        s16 u2E;
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        f32 u48;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        f32 u5C;
+        s16 u60;
+        s16 u62;
+        f32 u64;
+        f32 u68;
+        s16 u6C;
+        s16 u6E;
+        s32 u70;
+        s32 u74;
+    } sp;
+
+    (*(u8 *)((u8 *)arg0 + 0x16)) = (u8) ((*(u8 *)((u8 *)arg0 + 0x16)) | 4);
+    sp.u54 = 0.0f;
+    sp.u50 = (f32) (*(s16 *)((u8 *)arg0 + 6)) * 0.19600001f * *D_80095B48;
+    sp.u70 = 4;
+    sp.u74 = 2;
+    sp.u60 = 0x64;
+    sp.u62 = 0x64;
+    sp.u6C = 0x28;
+    sp.u6E = 0x14;
+    sp.u58 = 7.0f;
+    sp.u5C = 6.0f;
+    sp.u48 = *D_80095B4C;
+    sp.u4C = 7.5f;
+    sp.u64 = *D_80095B50;
+    sp.u68 = 0.60700005f;
+    sp.u2A = 0x14;
+    sp.u28 = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x10)) * 0.7111111f);
+    sp.u2E = 8;
+    sp.u2C = (s16) (s32) (((*(f32 *)((u8 *)arg0 + 0xC)) * 0.7111111f) - 64.0f);
+    func_15143874((s16) (sp.u28 - 0x40), (f32) (*(s16 *)((u8 *)arg0 + 6)), &sp.u20, &sp.u24);
+    sp.u30 = (f32) (*(s16 *)((u8 *)arg0 + 0)) - sp.u20;
+    sp.u34 = (f32) (*(s16 *)((u8 *)arg0 + 2));
+    sp.u3C = 2.0f * sp.u20;
+    sp.u40 = 0.0f;
+    sp.u38 = (f32) (*(s16 *)((u8 *)arg0 + 4)) - sp.u24;
+    sp.u44 = 2.0f * sp.u24;
+    func_15189E70(&sp.u28, (*(u8 *)((u8 *)arg0 + 0x1B)));
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_360A0/func_15008BF0.s")
+#endif
 // NON-MATCHING: absolute mess
 // s32 func_15008BF0(struct110 *arg0) {
 //     struct109 tmp;

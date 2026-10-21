@@ -76,4 +76,40 @@ Gfx *func_1517EFBC(Gfx *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517F01C.s")
 
+#ifdef NON_MATCHING
+s32 func_15095A4C(f32, f32, f32, u8 *, u8 *, f32 *, f32 *, f32);
+extern s32 D_800899D0;
+
+s32 func_1517F18C(u8 *arg0, u32 *arg1) {
+    struct {
+        f32 u28;
+        f32 u2C;
+    } sp;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f2;
+    u16 temp_a3;
+    u8 *temp_a1;
+    u8 *temp_a2;
+
+    if (func_15095A4C((*(f32 *)((u8 *)arg0 + 0)), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg0 + 0xC, arg0 + 0x10, &sp.u2C, &sp.u28, 4000.0f) == 1) {
+        if ((*(u8 *)((u8 *)arg0 + 0x2E)) & 4) {
+            temp_f2 = (*(f32 *)((u8 *)arg0 + 0)) - D_800DBFF0->unk2F8;
+            temp_f12 = (*(f32 *)((u8 *)arg0 + 4)) - D_800DBFF0->unk2FC;
+            temp_f14 = (*(f32 *)((u8 *)arg0 + 8)) - D_800DBFF0->unk300;
+            if ((((temp_f2 * (*(f32 *)((u8 *)arg0 + 0x14))) + (temp_f12 * (*(f32 *)((u8 *)arg0 + 0x18))) + (temp_f14 * (*(f32 *)((u8 *)arg0 + 0x1C)))) / sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12) + (temp_f14 * temp_f14))) < (*(f32 *)((u8 *)arg0 + 0x20))) {
+                return 1;
+            }
+        }
+        temp_a3 = (*(u16 *)((u8 *)arg0 + 0x2A));
+        temp_a1 = ((s32 *)((u8 *)&D_800899D0 + (((s32) temp_a3 >> 0xD) * 8)));
+        *arg1 = (u32) ((*(s32 *)((u8 *)temp_a1 + 4)) + ((((s32) temp_a3 >> 2) & 0x7FF) << (*(s32 *)((u8 *)temp_a1 + 0)))) >> 3;
+        temp_a2 = D_800BE628 + (D_800BE9C0 * 0x10);
+        (*(s16 *)((u8 *)arg0 + 0x2C)) = (s16) (u32) (((f32) (*(s16 *)((u8 *)temp_a2 + 0x4C)) + ((sp.u2C / sp.u28) * (f32) (*(s16 *)((u8 *)temp_a2 + 0x44)))) * 32.0f);
+        return 1;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517F18C.s")
+#endif

@@ -30,9 +30,152 @@ void func_10018790(N_ALCSPlayer *arg0, s32 arg1, u32 arg2, u32 arg3);
 void func_10018D00(N_ALCSPlayer *arg0, s16 arg1);
 void func_10018D50(N_ALCSPlayer *seqp);
 
-// this one is a monster
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008180.s")
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+} SeqRom8180;
 
+extern u16 D_8003CDDC[];
+extern u8 *D_8003CDE8[];
+extern SeqRom8180 *D_8003D0E0;
+extern u16 D_8003CCB0[];
+void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+void func_10004074(s32 arg0);
+s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+void func_10018CB0(N_ALCSPlayer *csp, ALCSeq *seq);
+
+// this one is a monster
+#ifdef NON_MATCHING
+// Audio init: audio heap, synth + audio manager (func_10008F90), the instrument bank, the sequence
+// table (sizes rounded up to even into D_8003CCB0), three sequence players and the sound player.
+typedef struct {
+    s32 maxVVoices;
+    s32 maxPVoices;
+    s32 maxUpdates;
+    s32 maxFXbusses;
+    void *dmaproc;
+    void *unk14;
+    void *unk18;
+    void *unk1C;
+    void *unk20;
+    s32 unk24;
+    ALHeap *heap;
+    s32 outputRate;
+    u8 fxTypes[4];
+    s32 *params[2];
+} AmSynConfig;
+typedef struct {
+    s32 frequency;
+    u32 unk4;
+    u32 unk8;
+} AmConfig;
+typedef struct {
+    /* 0x00 */ u32 maxStates;
+    /* 0x04 */ s32 maxEvents;
+    /* 0x08 */ s32 maxSounds;
+    /* 0x0C */ ALHeap *heap;
+    /* 0x10 */ s32 unk10;
+    /* 0x14 */ u16 unk14;
+} SndpConfig8180;
+extern ALHeap D_8003E710;          /* the audio heap */
+extern u8 D_80044B20[];            /* its 0x3E000-byte arena */
+extern s32 D_8003E708;             /* the first bank of the instrument bank file */
+u8 *func_1502B020(s32 *arg0, s32 arg1, ...);
+s32 func_1502B8E0(s32 arg0, s32 arg1, s32 arg2, ...);
+s32 func_1502B9B4(s32 arg0, ...);
+void func_10008F90(AmSynConfig *c, s32 pri, AmConfig *arg2);
+void func_100046E4(u32 devAddr, u8 *dramAddr, u32 size);
+void func_10012934(ALBankFile *file, u8 *table, s32 arg2);
+void func_100131FC(ALSeqpConfig *arg0, s32 arg1);
+void func_10015550(N_ALCSPlayer *csp, s32 arg1);
+s32 func_100155A0(SndpConfig8180 *c);
+void func_10017870(u8 arg0);
+void func_10017944(s32 arg0, u32 arg1);
+
+void func_10008180(void) {
+    AmConfig amc;
+    ALSeqpConfig seqc;
+    AmSynConfig c;
+    SndpConfig8180 sndc;
+    ALBankFile *bankFile;
+    ALSeqFile *hdr;
+    ALSeqFile *seqFile;
+    u8 *seqRom;
+    u8 *ctlRom;
+    u8 *tblRom;
+    s32 size;
+    s32 len;
+    s32 i;
+
+    alHeapInit(&D_8003E710, D_80044B20, 0x3E000);
+    c.maxVVoices = 0x2C;
+    c.maxPVoices = 0x28;
+    c.maxUpdates = 0x40;
+    c.maxFXbusses = 2;
+    c.dmaproc = NULL;
+    c.fxTypes[0] = 6;
+    c.fxTypes[1] = 6;
+    c.outputRate = 0;
+    c.heap = &D_8003E710;
+    amc.frequency = 22020;
+    amc.unk4 = 1;
+    amc.unk8 = 0xBB0;
+    c.unk24 = (s32)func_1502B020(NULL, 2, 0x17, 2);
+    func_10008F90(&c, 12, &amc);
+
+    size = func_1502B9B4(2, 0x17, 0);
+    bankFile = allocate_memory(size, 0xFF, 2, 0);
+    func_1502B8E0((s32)bankFile, size, 2, 0x17, 0);
+    ctlRom = func_1502B020(NULL, 2, 0x17, 1);
+    tblRom = func_1502B020(NULL, 2, 0x17, 2);
+    func_10012934(bankFile, tblRom, (s32)ctlRom);
+    D_8003E708 = (s32)bankFile->bankArray[0];
+
+    seqRom = func_1502B020(NULL, 2, 0x17, 3);
+    hdr = allocate_memory(0x10, 1, 2, 0);
+    func_100046E4((u32)seqRom, (u8 *)hdr, 0x10);
+    size = hdr->seqCount * 8 + 4;
+    func_10004074((s32)hdr);
+    D_8003D0E0 = allocate_memory(size, 0xFF, 2, 0);
+    func_100046E4((u32)seqRom, (u8 *)D_8003D0E0, (size + 0xF) & ~0xF);
+    alSeqFileNew((ALSeqFile *)D_8003D0E0, seqRom);
+    seqFile = (ALSeqFile *)D_8003D0E0;
+    for (i = 0; i < 150; i++) {
+        len = seqFile->seqArray[i].len & 0xFFFF;
+        D_8003CCB0[i] = len;
+        if (len & 1) {
+            D_8003CCB0[i] = len + 1;
+        }
+    }
+
+    seqc.maxVoices = 0x2C;
+    seqc.maxEvents = 0x68;
+    seqc.debugFlags = 0;
+    seqc.maxChannels = 0x10;
+    seqc.heap = &D_8003E710;
+    func_100131FC(&seqc, 0x58);
+    for (i = 0; i < 3; i++) {
+        D_8003CDDC[i] = 0xFFFF;
+        D_8003CDE8[i] = NULL;
+        D_8003C900[i] = alHeapDBAlloc(NULL, 0, &D_8003E710, 1, sizeof(N_ALCSPlayer));
+        n_alCSPNew(D_8003C900[i], &seqc);
+        func_10015550(D_8003C900[i], (s32)bankFile->bankArray[0]);
+    }
+
+    sndc.maxEvents = 0x40;
+    sndc.maxStates = 0x40;
+    sndc.maxSounds = 0x14;
+    sndc.unk14 = 8;
+    sndc.heap = &D_8003E710;
+    sndc.unk10 = (s32)tblRom;
+    func_100155A0(&sndc);
+    func_10017870(4);
+    func_10017944(0, 2);
+    func_10017944(1, 2);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/init_8180/func_10008180.s")
+#endif
 void func_100084D8(u8 idx) {
     if ((n_alCSPGetState(D_8003C900[idx]) == 0) || (n_alCSPGetState(D_8003C900[idx]) == 3)) {
         func_10017AA0(D_8003C900[idx]);
@@ -178,19 +321,6 @@ void func_10008C6C(u8 idx, u8 arg1) {
 
 // s129: (re)start sequence player idx with sequence arg1: wait for the player to stop, load the
 // sequence (cached in D_8003CDE8[idx], id in D_8003CDDC[idx]) and start it
-typedef struct {
-    s32 unk0;
-    s32 unk4;
-} SeqRom8180;
-
-extern u16 D_8003CDDC[];
-extern u8 *D_8003CDE8[];
-extern SeqRom8180 *D_8003D0E0;
-extern u16 D_8003CCB0[];
-void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
-void func_10004074(s32 arg0);
-s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
-void func_10018CB0(N_ALCSPlayer *csp, ALCSeq *seq);
 
 s32 func_10008CE8(u8 idx, s32 arg1) {
     s32 devAddr;

@@ -3,8 +3,71 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506A9B0.s")
+#ifdef NON_MATCHING
+s32 func_151A74B0(s16 *, s32, s32, s32);
 
+void func_1506A9B0(u8 *arg0, s32 arg1) {
+    struct {
+        s16 u1C;
+        u8 pad1E[0x2];
+        f32 u20;
+        f32 u24;
+        f32 u28;
+        s16 u2C;
+        u8 pad2E[0x2];
+        f32 u30;
+        s16 u34;
+        s16 u36;
+        s16 u38;
+        s16 u3A;
+        f32 u3C;
+        f32 u40;
+        u8 pad44[0x8];
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        f32 u5C;
+        f32 u60;
+        f32 u64;
+        f32 u68;
+        f32 u6C;
+        s8 u70;
+        s8 u71;
+        s16 u72;
+        s16 u74;
+    } sp;
+
+    sp.u1C = 3;
+    sp.u20 = (*(f32 *)((u8 *)arg0 + 0x14));
+    sp.u24 = (*(f32 *)((u8 *)arg0 + 0x18));
+    sp.u28 = (*(f32 *)((u8 *)arg0 + 0x1C));
+    sp.u3C = 15.1f;
+    sp.u30 = 151.5f;
+    sp.u40 = 25.2f;
+    sp.u2C = 0x5A;
+    sp.u34 = 0;
+    sp.u36 = 0xFF;
+    sp.u38 = -0x40;
+    sp.u3A = 0x28;
+    sp.u4C = 0.0f;
+    sp.u50 = 0.0f;
+    sp.u54 = 0.0f;
+    sp.u70 = 0;
+    sp.u71 = 0;
+    sp.u72 = 0x32;
+    sp.u74 = 0x19;
+    sp.u58 = 0.388f;
+    sp.u5C = 0.24300002f;
+    sp.u60 = -1.0200001f;
+    sp.u68 = -4.0f;
+    sp.u64 = 0.0f;
+    sp.u6C = 8.0f;
+    func_151A74B0(&sp.u1C, 1, 0xFF, 1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506A9B0.s")
+#endif
 void func_1506AABC(s32 arg0, s32 arg1) {
     func_150E08C8(arg0, 0xFF, 1);
 }

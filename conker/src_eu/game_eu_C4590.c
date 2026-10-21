@@ -50,6 +50,69 @@ block_6:
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15097188.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_150979AC.s")
+#ifdef NON_MATCHING
+f32 func_150ADDE0(f32 *, struct17 *);
+extern s32 D_800DC450;
 
+s32 func_150979AC(s32 arg0, s32 arg1, u8 *arg2) {
+    struct {
+        struct127 * u28;
+        f32 u2C;
+        struct17 u30;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        u8 pad48[0x4];
+        struct108 * u4C;
+    } sp;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f2;
+    struct108 *temp_a3;
+    struct127 *temp_v0;
+    u8 *temp_v1;
+
+    temp_a3 = &D_800DBFF0[arg0];
+    if (D_80082FA0 < arg0) {
+        goto block_13;
+    }
+    switch (arg1) {
+    case 31:
+        return (s32) (temp_a3->unk390 * 65536.0f);
+    case 30:
+        return (s32) (temp_a3->unk37C * 65536.0f);
+    case 29:
+        return (s32) *(D_800D31E0 + ((*(s32 *)((u8 *)arg2 + 8)) * 0x24));
+    case 32:
+        temp_v1 = (((*(s32 *)((u8 *)arg2 + 8)) & 0xFFF) * 0x18) + D_800DC450;
+        temp_f2 = temp_a3->unk2F8 - (f32) (*(s16 *)((u8 *)temp_v1 + 0));
+        temp_f12 = temp_a3->unk300 - (f32) (*(s16 *)((u8 *)temp_v1 + 4));
+        return (s32) sqrtf((temp_f2 * temp_f2) + (temp_f12 * temp_f12));
+    case 33:
+        sp.u4C = temp_a3;
+        temp_v0 = func_1505EEF4((*(s32 *)((u8 *)arg2 + 8)) & 0xFFF, temp_a3);
+        sp.u28 = temp_v0;
+        if (temp_v0 == NULL) {
+            return -1;
+        }
+        sp.u4C = temp_a3;
+        temp_f12_2 = temp_a3->unk39C + 1.5707964f;
+        sp.u2C = temp_f12_2;
+        sp.u3C = sinf(temp_f12_2);
+        sp.u40 = 0.0f;
+        sp.u44 = cosf(temp_f12_2);
+        func_15048F90((struct17 *) &temp_a3->unk2F8, (struct17 *) &sp.u28->x_position, &sp.u30);
+        sp.u30.unk4 = 0.0f;
+        if (func_150ADDE0(&sp.u3C, &sp.u30) >= 0.0f) {
+            return -1;
+        }
+        return 1;
+    default:
+block_13:
+        return 0;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_150979AC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15097BA8.s")
