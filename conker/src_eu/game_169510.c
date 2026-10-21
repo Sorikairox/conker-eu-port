@@ -3,55 +3,62 @@
 #include "functions.h"
 #include "variables.h"
 
+// copies the colours of 4 vertices
+typedef struct {
+    s16 c[4];
+    u16 flag;
+} struct_eu_vtxcol;
+
+void func_1513FFF4(Vtx *arg0, u8 arg1, u8 arg2);
+void func_151400D0(Vtx *arg0, struct_eu_vtxcol *arg1);
+s32 func_1515D9B0(void);
+s32 func_1515D9F0(s32);
+
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513C060.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513C350.s")
-// NON-MATCHING: JUSTREG: final 3 lines :(
-// struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA) {
-//     struct210 *temp_v0;
-//     u8 phi_v0;
-//     s32 i;
-//
-//     if (arg1 == 0) {
-//         arg1 = &D_800A4AA0;
-//     }
-//     if (arg0->unk0 & 0x40000) {
-//         phi_v0 = 0x4A;
-//     } else {
-//         phi_v0 = 0x1B;
-//     }
-//     temp_v0 = func_15167A68(phi_v0, argA, arg8 + 0xB0, 1, arg9, 1);
-//     if (temp_v0 == 0) {
-//         return NULL;
-//     }
-//     memcpy(&temp_v0->unk18.i.unk0, arg0, 0x28); // memcpy
-//     func_1513FFF4(&temp_v0->unk40, temp_v0->unk1E, arg4);
-//     func_151400D0(&temp_v0->unk40, arg1);
-//     temp_v0->unk80 = arg2;
-//     temp_v0->unk81 = arg3;
-//     temp_v0->unk84 = arg5;
-//     temp_v0->unk10 = 1;
-//     temp_v0->unk14 = 0;
-//     temp_v0->unkA0 = arg6;
-//     for (i = 0; i < 4; i++) {
-//         temp_v0->unk8C[i] = 0;
-//     }
-//
-//     temp_v0->unk9C = 0;
-//     if (arg5) {
-//         for (i = 0; i <= D_80082FA0; i++) {
-//             temp_v0->unk8C[i] = func_1515D480(arg5);
-//         }
-//         temp_v0->unk9C = func_1515D440();
-//     }
-//     if (arg7) {
-//         temp_v0->unkA4[0] = arg7->unk0;
-//         temp_v0->unkA4[1] = arg7->unk4;
-//         temp_v0->unkA4[2] = arg7->unk8;
-//     }
-//     return temp_v0;
-// }
+struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA) {
+    struct210 *temp_v0;
+    u8 phi_v0;
+    s32 i;
+
+    if (arg1 == 0) {
+        arg1 = (s32)&D_800A4AA0;
+    }
+    if (arg0->unk0 & 0x40000) {
+        phi_v0 = 0x4A;
+    } else {
+        phi_v0 = 0x1B;
+    }
+    temp_v0 = func_15167A68(phi_v0, argA, arg8 + 0xB0, 1, arg9, 1);
+    if (temp_v0 == 0) {
+        return NULL;
+    }
+    memcpy(&temp_v0->unk18.i.unk0, arg0, 0x28); // memcpy
+    func_1513FFF4((Vtx *)&temp_v0->unk40, temp_v0->unk1E, arg4);
+    func_151400D0((Vtx *)&temp_v0->unk40, (struct_eu_vtxcol *)arg1);
+    temp_v0->unk80 = arg2;
+    temp_v0->unk81 = arg3;
+    temp_v0->unk84 = arg5;
+    temp_v0->unk10 = 1;
+    temp_v0->unk14 = 0;
+    temp_v0->unkA0 = arg6;
+    for (i = 0; i < 4; i++) {
+        temp_v0->unk8C[i] = 0;
+    }
+
+    temp_v0->unk9C = 0;
+    if (arg5) {
+        for (i = 0; i <= D_80082FA0; i++) {
+            temp_v0->unk8C[i] = func_1515D9F0(arg5);
+        }
+        temp_v0->unk9C = func_1515D9B0();
+    }
+    if (arg7) {
+        *(struct167 *)temp_v0->unkA4 = *arg7;
+    }
+    return temp_v0;
+}
 
 struct210 *func_1513C4EC(s32 arg0, s32 arg1, u8 arg2, u8 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, u8 arg9, u8 argA, s32 argB, s32 argC, s32 argD, u8 argE, s32 argF) {
     s32 temp_v0;
@@ -533,30 +540,22 @@ void func_1513F4B0(struct210 *arg0, s16 arg1) {
 }
 
 // emits gDPSetCombineLERP for combine mode arg1 (table D_800A4F88), preceded by a pipe sync if *arg2 == 1
-#pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F4E4.s")
-// NON-MATCHING: 4 insns: copy of the gfx pointer / final increment scheduled differently
-// Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2) {
-//     s32 mode = func_15143044(arg1, 0);
-//
-//     if (mode != D_800DD5EE) {
-//         if (*arg2 == 1) {
-//             gDPPipeSync(arg0++);
-//             *arg2 = 0;
-//         }
-//         {
-//             Gfx *_g = (Gfx *)(arg0++);
-//
-// #define CC(i) D_800A4F88[arg1][i]
-//             _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) |
-//                            _SHIFTL(GCCc0w0(CC(0), CC(2), CC(4), CC(6)) | GCCc1w0(CC(8), CC(10)), 0, 24);
-//             _g->words.w1 = (unsigned int)(GCCc0w1(CC(1), CC(3), CC(5), CC(7)) |
-//                                           GCCc1w1(CC(9), CC(12), CC(14), CC(11), CC(13), CC(15)));
-// #undef CC
-//         }
-//         D_800DD5EE = mode;
-//     }
-//     return arg0;
-// }
+Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2) {
+    s32 mode = func_15143044(arg1, 0);
+
+    if (mode != D_800DD5EE) {
+        if (*arg2 == 1) {
+            gDPPipeSync(arg0++);
+            *arg2 = 0;
+        }
+#define CC(i) D_800A4F88[arg1][i]
+        // fakematch: w0 and w1 on one line (statement scheduling)
+        { Gfx *_g = (Gfx *)(arg0++); _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) | _SHIFTL(GCCc0w0(CC(0), CC(2), CC(4), CC(6)) | GCCc1w0(CC(8), CC(10)), 0, 24); _g->words.w1 = (unsigned int)(GCCc0w1(CC(1), CC(3), CC(5), CC(7)) | GCCc1w1(CC(9), CC(12), CC(14), CC(11), CC(13), CC(15))); }
+#undef CC
+        D_800DD5EE = mode;
+    }
+    return arg0;
+}
 
 void func_1513F680(struct171 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4) {
     arg0->unk70 = arg1;
@@ -614,11 +613,6 @@ void func_1513FFF4(Vtx *arg0, u8 arg1, u8 arg2) {
     }
 }
 
-// copies the colours of 4 vertices
-typedef struct {
-    s16 c[4];
-    u16 flag;
-} struct_eu_vtxcol;
 
 void func_151400D0(Vtx *arg0, struct_eu_vtxcol *arg1) {
     s32 i;

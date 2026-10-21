@@ -3,6 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_15142314(Mtx *, s32, f32 *);
+
 void func_151429E0(u8 arg0, u8 *arg1, u8 *arg2, u8 *arg3) {
     u8 *temp_v1 = &D_8008A500[(func_150ADA20() & 3) * 3 + arg0 * 12];
 
@@ -915,7 +917,6 @@ void func_15145DB4(struct_eu_xform *arg0, struct17 *arg1, struct17 *arg2, s32 ar
         func_150A7E40(mf, arg1[i].unk0, arg1[i].unk4, arg1[i].unk8, &arg2[i].unk0, &arg2[i].unk4, &arg2[i].unk8);
     }
 }
-void func_15142314(Mtx *, s32, f32 *);
 
 void func_15145EA4(f32 **arg0, f32 **arg1, Mtx *arg2, s32 arg3) {
     f32 **p;

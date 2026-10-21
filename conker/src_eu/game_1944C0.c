@@ -285,26 +285,23 @@ void func_15168E34(s32 *arg0, s32 arg1) {
 //         cmd = gfx->cmd;
 //     }
 // }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168F08.s")
-// NON-MATCHING: relocates segmented addresses of G_VTX / G_MOVEMEM(0x0E) commands in a display list; regalloc only
-// void func_15168F08(struct_eu_gfxcmd *arg0, s32 arg1) {
-//     s32 i = 0;
-//     struct_eu_gfxcmd *gfx = arg0;
-//     s32 cmd;
-//
-//     if (arg0->cmd != -0x21) {
-//         cmd = gfx->cmd;
-//         do {
-//             i++;
-//             if (cmd == 1 || (cmd == -0x24 && gfx->b3 == 0xE)) {
-//                 gfx->w1 &= 0xFFFFFF;
-//                 gfx->w1 += arg1;
-//             }
-//             gfx = &arg0[i];
-//             cmd = gfx->cmd;
-//         } while (cmd != -0x21);
-//     }
-// }
+
+void func_15168F08(struct_eu_gfxcmd *arg0, s32 arg1) {
+    s32 i = 0;
+    struct_eu_gfxcmd *gfx = arg0;
+
+    while (gfx->cmd != -0x21) {
+        i++;
+        if (gfx->cmd == 1 || (gfx->cmd == -0x24 && gfx->b3 == 0xE)) {
+            gfx->w1 &= 0xFFFFFF;
+            gfx->w1 += arg1;
+        }
+        gfx = &arg0[i];
+        goto next; // fakematch: label at the end of the loop body
+    next:;
+    }
+}
+
 void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2) {
     if (arg0 == 0) {
         *arg1 = 1;
