@@ -21,4 +21,38 @@ void func_1516AAA8(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1979F0/func_1516ABB8.s")
+s32 func_1516ABB8(u8 *arg0) {
+    s32 a;
+    s32 h;
+
+    a = arg0[0x1F];
+    if (arg0[0x24] != 0) {
+        if (a != 0xFF) {
+            a += D_800BE9E4 * 16;
+            if (a >= 0x100) {
+                a = 0xFF;
+            }
+            arg0[0x1F] = a;
+        }
+    } else if (a != 0) {
+        a -= D_800BE9E4 * 4;
+        if (a < 0) {
+            a = 0;
+        }
+        arg0[0x1F] = a;
+    }
+    if (arg0[0x24] == 0 && a == 0) {
+        return 1;
+    }
+    *(s16 *)(arg0 + 0x18) -= 300;
+    func_1516FDD4(arg0);
+    h = func_1510FE58(*(s16 *)(arg0 + 0xE), *(s16 *)(arg0 + 0x10), *(s16 *)(arg0 + 0x12), 0) + 10;
+    arg0[0x2C] = h >> 8;
+    arg0[0x2D] = h & 0xFF;
+    if (*(s16 *)(arg0 + 0x10) < h) {
+        *(s16 *)(arg0 + 0x10) = h;
+        *(s16 *)(arg0 + 0x18) = *(s16 *)(arg0 + 0x18) * -0.5f;
+        func_1516FEBC(arg0, 0xE6);
+    }
+    return 0;
+}
