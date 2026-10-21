@@ -55,3 +55,5 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 147	main	game<0x130000+init	1	276	125	func_15048A40 returns f32 (cross-slot fix); sharedsym.py: lo/init shared tables already typed
 150	wt	game>=0x130000+dbg	8	3492	132	func_1516972C handler family; local permuter 3/9
 149	main	game>=0x15190000 (new split)	7	1960	135	slice rebalanced to upper hi game; structure-first hand drafts
+152	wt	game 0x15130000-0x1518FFFF+dbg	6	2364	128	commented NON-MATCHING drafts above GLOBAL_ASM are cheap; permuter 2/5
+151	main	game>=0x15190000	5	1196	133	remote permuter int-typed temp fix; CERR rows are not near misses once prototypes are fixed
