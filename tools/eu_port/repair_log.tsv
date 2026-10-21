@@ -1115,3 +1115,14 @@ func_151CB2D8	CERR	9	DIFF147	n	n	Spawn559A/B + 0x14 block for func_151604E4; arg
 func_151AB874	DIFF4	3	DIFF4	n	n	s165: moving ex.u8 load earlier gives DIFF12/19; perm DIFF4 draft stays best
 func_151D4898	SIZE-1	3	DIFF26	n	n	s165: missing or t7,v0 copy before -0x4000; separate temp, chained, inline cast forms all DIFF26+
 func_151A79EC	DIFF75	11	OK	y	y	12-arg func_1514B0CC call; perm: decl p before b, single p; then f14 * -f48 operand order by hand
+func_15133C18	DIFF11	5	DIFF9	n	n	SIZE-1 (3C18b): ref keeps *arg1 in v1, a0=*v1 before jal, or a1,v1 in delay; a temp p costs a slot (spill 0x20 vs 0x24)
+func_1514306C	CERR	7	DIFF24	n	n	jtbl switch case order 4,3,1,2,5,6,default right; case 6 ref keeps a copy arg1=v0 (or a1,v0 in bnez delay) then v=a1, mine copy-propagates (SIZE-1)
+func_1514A004	SIZE-5	6	DIFF43	n	y	off=0x110 base var (s166) fixed SIZE; done=0 hoisted vs ref delay-slot copies; remote perm
+func_15141A7C	SIZE-6	3	SIZE-5	n	n	structure right; ref reloads the fn ptr (and a->unk28 / r*8 via a copy a3) for the call instead of reusing the tested value; mine CSEs
+func_15185360	SIZE+2	4	DIFF56	n	y	home-store/reload of all args reproduced; o/p/k/d named slots fix frame+spill; left: index calc order + FP regs
+func_1517FF64	SIZE-3	4	DIFF30	n	y	early return + nested-ternary clamps; left: ref routes each clamp through a0/t3 temps
+func_1514C390	SIZE-2	7	DIFF37	n	y	tgt/m/d struct17 locals + 2 pad slots; k*(t-p)+p order; left: call-arg setup scheduling
+func_1517FAD4	SIZE+3	7	SIZE+2	n	n	frame fixed by named r,g; t is uninitialised on the !D_800DE1BC path: ref keeps t=0 in f2 and loads 0x20(sp) on the other path, mine also stores t (swc1) -> +2
+func_1514B30C	SIZE-1	7	DIFF2	n	y	func_15013DE8 spawn-block struct + pad[2]; call before the a-products; left: sh order of u52/u50 only
+func_15187954	SIZE-2	4	SIZE-2	n	n	m2c-shaped loop with continue; ref stores a1/a2 lazily (bnel/jal delay slots), mine stores a2 at entry; loop regs differ
+func_1514C9E0	DIFF48	3	DIFF31	n	y	fn-table line spawner; identical odd/even step branches; s32 pad[2] declared first fixes frame; left: FP callee-saved reg roles (arg6 f26, arg0 f28, arg1 f30)
