@@ -302,7 +302,35 @@ void func_15019414(void) {
     }
 }
 
+#ifdef NON_MATCHING
+// Per-player frame setup: camera update, viewport, the player's view DL (func_1501A490) and,
+// in normal play (not paused, no cutscene flag, player view active), the light words and func_1510BF50.
+extern s16 D_80084810;
+void func_1510BED8(s16 player);
+Gfx *func_15110420(Gfx *gdl, s32 arg1);
+s32 func_1517F51C(s32 player);
+Gfx *func_1510BF50(Gfx *gdl, s16 player);
+
+Gfx *func_15019464(Gfx *gdl, s16 player) {
+    func_1510BED8(player);
+    gSPViewport(gdl++, (u8 *)D_800BE628 + player * 0x180 + D_800BE9C0 * 16 + 0x40);
+    gdl = (Gfx *)func_1501A490((s32)gdl, player, 0, 0, 0, 0);
+    if (D_800BEAC0 != 0) {
+        return gdl;
+    }
+    if (D_80084810 != 0) {
+        return gdl;
+    }
+    gdl = func_15110420(gdl, D_800BE9F0);
+    if (func_1517F51C(player) != 0 || (D_800D18A0 & (1 << player))) {
+        return gdl;
+    }
+    gdl = func_1515DC40(gdl, player);
+    return func_1510BF50(gdl, player);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019464.s")
+#endif
 // NON-MATCHING: 70% of the way there... maybe.
 // s32 func_15019464(Gfx *arg0, s16 arg1) {
 //     s32 temp_s0;

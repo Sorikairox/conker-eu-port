@@ -880,8 +880,142 @@ void func_10009BE4(struct54 *arg0) {
 //     // return temp_v0;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009CBC.s")
+#ifdef NON_MATCHING
+// Sound-bank on-demand loader (the n_alSynNew DMA callback set up by func_10009FFC).
+// *slot holds either a packed ROM reference (bit 0 set: ROM offset in bits 8.., size byte in bits 0..7)
+// or, once loaded, a pointer to its cache entry. A ROM reference is replaced by a fresh cache entry
+// (from the free list, else the last idle loaded entry is evicted) and an async PI DMA is started;
+// the call returns 0 until the DMA completed. A loaded entry returns its data.
+typedef struct SndCacheEntry_s {
+    struct SndCacheEntry_s *next;
+    struct SndCacheEntry_s *prev;
+    u32 romRef;     /* the original *slot value */
+    u32 *slot;
+    u8 *data;
+    s8 users;
+    u8 state;       /* 0 = DMA pending, 1 = DMA done, 2 = in use (evictable when users == 0) */
+    u8 keep;
+} SndCacheEntry;
+typedef struct {
+    u8 initialized;
+    SndCacheEntry *used;
+    SndCacheEntry *free;
+    SndCacheEntry *loaded;
+} SndCache;
+#define sndCache (*(SndCache *)&D_800406A0)
+extern s32 D_8002B1A0;          /* PI DMA messages in flight this frame */
+extern OSIoMesg D_800416D0[];
+extern OSMesgQueue D_80041A90;
+void *allocate_memory(s32 size, s32 arg1, s32 arg2, s32 arg3);
+void func_10024190(void *addr, s32 size); /* osWritebackDCache */
 
+#define SND_CACHE_UNLINK(e)              \
+    {                                    \
+        if ((e)->next != NULL) {         \
+            (e)->next->prev = (e)->prev; \
+        }                                \
+        if ((e)->prev != NULL) {         \
+            (e)->prev->next = (e)->next; \
+        }                                \
+    }
+
+s32 func_10009CBC(void *arg0, s32 arg1) {
+    u32 *slot = arg0;
+    u32 ref = *slot;
+    SndCacheEntry *e;
+    SndCacheEntry *it;
+    SndCacheEntry *head;
+    u32 size;
+    u32 alignedSize;
+
+    if (!(ref & 1)) {
+        e = (SndCacheEntry *)ref;
+        *slot = ref;
+        if (e->state == 0) {
+            return 0;
+        }
+        if (arg1 == 1) {
+            if (e->state == 1) {
+                e->state = 2;
+            } else {
+                e->users++;
+            }
+        }
+        return (s32)e->data;
+    }
+
+    if (arg1 == 0) {
+        size = (ref & 0xFF) + 1;
+    } else {
+        size = (ref & 0xFE) << 6;
+    }
+
+    if (sndCache.free != NULL) {
+        e = sndCache.free;
+        sndCache.free = e->next;
+        SND_CACHE_UNLINK(e);
+    } else {
+        e = NULL;
+        for (it = sndCache.used; it != NULL; it = it->next) {
+            if (it->users == 0 && it->keep == 0 && it->state == 2) {
+                e = it;
+            }
+        }
+        if (e != NULL) {
+            *e->slot = e->romRef;
+            func_100043B4((s32 *)e->data, 4);
+            e->data = NULL;
+            e->slot = NULL;
+            if (e == sndCache.used) {
+                sndCache.used = e->next;
+            }
+            SND_CACHE_UNLINK(e);
+        }
+    }
+    if (e == NULL) {
+        return 0;
+    }
+
+    e->next = NULL;
+    e->prev = NULL;
+    head = sndCache.loaded;
+    if (head != NULL) {
+        e->prev = head;
+        e->next = head->next;
+        if (head->next != NULL) {
+            head->next->prev = e;
+        }
+        head->next = e;
+    } else {
+        sndCache.loaded = e;
+        e->next = NULL;
+        e->prev = NULL;
+    }
+    e->romRef = ref;
+    e->users = 0;
+    e->keep = arg1;
+    e->state = 0;
+    e->slot = slot;
+
+    if ((u32)D_8002B1A0 < 40) {
+        alignedSize = (size + 0xF) & ~0xF;
+        e->data = allocate_memory(alignedSize, 0xFF, 2, 0);
+        bzero(e->data, alignedSize);
+    } else {
+        e->data = NULL;
+    }
+    if (e->data != NULL) {
+        func_10024190(e->data, alignedSize);
+        osInvalDCache(e->data, alignedSize);
+        osPiStartDma(&D_800416D0[D_8002B1A0++], OS_MESG_PRI_HIGH, OS_READ, (ref >> 5) & ~7, e->data, alignedSize,
+                     &D_80041A90);
+        *slot = (u32)e;
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009CBC.s")
+#endif
 s32 func_10009FFC(void) {
     if (D_800406A0.unk0 == 0) {
         D_800406A0.unk4 = NULL;

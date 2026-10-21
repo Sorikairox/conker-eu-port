@@ -60,8 +60,14 @@ s32 arg0;
     return r;
 }
 
+#ifdef NON_MATCHING
+/* func_1517F470 takes one argument; the matching code passes a1-a3 through unused */
+s32 func_1517F51C(s32 arg0) {
+    if (func_1517F470(arg0) == 0xFF) {
+#else
 s32 func_1517F51C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     if (func_1517F470(arg0, arg1, arg2, arg3) == 0xFF) {
+#endif
         return 1;
     }
     return 0;
