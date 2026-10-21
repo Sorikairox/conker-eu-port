@@ -1248,3 +1248,11 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **FP register pairs alternating the wrong way (f4/f6, f6/f4) all through a function that uses `p = arg0 + K` with `*(f32 *)(p + n)` casts**: rewrite with a **struct pointer** (`Sub *v = (Sub *)(arg0 + 0x70); v->unk18`). The casts cost DIFF8 / DIFF27; the struct form matched first try (`func_151CD7D4`, `func_151CBF20` game_eu_1F7960).
 4. `(a + (*p >> 6)) - K` vs `((*p >> 6) + a) - K` changes the t-register numbering (DIFF12 -> OK, `func_1517BC58`).
 5. Chained byte stores `p[6] = (p[0] = v)` store `[0]` first; write `p[0] = (p[6] = v)` for `sb 6; sb 0` (`func_15187EC0`).
+
+## s143 recipes (struct-typed rewrites of lo near misses)
+1. **A file with several near misses on one global table** (`D_800D34B8 + i * 0x34`): extend the file's struct for the table to the full entry and rewrite every function against it; game_eu_CE6C0 gave 4 matches from one `Unk34B8`. Look for the struct already typedef'd at the file top first.
+2. **`addu a0, off, base` (offset first) for an element address passed to a call**: write `arg1 + (T *) base`, not `&((T *) base)[arg1]` (DIFF1 -> OK, `func_150A33C4`).
+3. **Nested loops that keep `row + k*4` byte indexing (no pointer walk)**: take a pointer to the outer element inside the outer body, `Mtx44 *e = &m[i]; ... e->m[j][k] = 0` (DIFF26 -> OK, `func_15034A18`). Clamp `i = 31; if (n < 31) i = n;` gives `li 31` in the delay slot with no `b`.
+4. **A global used as an array of pointers but declared `s32`**: read it as `*(struct102 **)&D` so the value loads straight into `a0` (an `(struct102 *)` cast on the s32 gives `lw v0; move a0,v0`).
+5. **A permuter `goto dummy; dummy:` that fixes a DIFF1 store position**: check the branch targets in the ref; here an `if` closed earlier than the draft assumed (`func_150A2D44`). `ndiff` normalises labels to `L`, so a wrong branch target only shows in `check_files`.
+6. The ref reading a bitmask from `base + 0x208` instead of its own symbol: write `*(u16 *)((u8 *)&D_800D2138 + 0x208)` (`func_150A3184`).
