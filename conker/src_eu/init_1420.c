@@ -23,7 +23,20 @@ typedef struct {
 } _Pft;
 
 
+#ifdef NON_MATCHING
+extern u32 D_80043ED0[];
+
+/* clear the 0xFE0-byte block at D_80043ED0 */
+void func_10001420(void) {
+    u32 *p = D_80043ED0;
+
+    do {
+        *p++ = 0;
+    } while ((u32)p < (u32)D_80043ED0 + 0xFE0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_1420/func_10001420.s")
+#endif
 // NOT MATCHING: JUSTREG: uses v0 registers not a1 registers
 // void func_10001420(void) {
 //     s32 *tmp = &D_80043B40;

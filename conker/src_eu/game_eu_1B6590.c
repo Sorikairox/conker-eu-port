@@ -8,7 +8,11 @@
 typedef struct Node8EBC { u8 u0; u8 u1; u8 u2; u8 u3; u8 u4; s16 u6; void *u8_; struct Node8EBC *uC; s32 u10; } Node8EBC;
 extern Node8EBC *D_800DFBFC;
 void *allocate_memory(s32, s32, s32, s32);
+#ifdef NON_MATCHING // the definition is void; one signature for wasm
+void func_10004074(u8 *);
+#else
 s32 func_10004074(u8 *);
+#endif
 void func_15188FC8();
 void func_15188EBC(s32 arg0, s32 arg1, s32 arg2) {
     Node8EBC *n;
@@ -72,7 +76,11 @@ void func_1518900C(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING // the definition is void; one signature for wasm
+void func_10004074(u8 *);
+#else
 s32 func_10004074(u8 *);
+#endif
 
 void func_15189040(s32 arg0) {
     s32 temp_s0;
@@ -102,7 +110,11 @@ void func_15189040(s32 arg0) {
 
 extern void (*D_8008D920[])(struct_eu_1B6590 *);
 extern void (*D_8008D928[])(struct_eu_1B6590 *);
+#ifdef NON_MATCHING // the definition is void; one signature for wasm
+void func_10004074(u8 *);
+#else
 s32 func_10004074(u8 *);
+#endif
 void func_151890E4(s32 arg0) {
     struct_eu_1B6590 **head;
     struct_eu_1B6590 *n;

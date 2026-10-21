@@ -11,4 +11,4 @@ for a in "$@"; do
   fi
   args+=("$a")
 done
-exec docker exec -e DIFFTEST_TMP="${DIFFTEST_TMP:-build/difftest}" -w /conker/conker ${CONKERDEV:-conkerdev} python3 ../tools/port/difftest/difftest.py "${args[@]}"
+exec docker exec -e DIFFTEST_TMP="${DIFFTEST_TMP:-build/difftest}" -e DIFFTEST_BUDGET="${DIFFTEST_BUDGET:-30}" -w /conker/conker ${CONKERDEV:-conkerdev} python3 ../tools/port/difftest/difftest.py "${args[@]}"

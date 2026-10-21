@@ -129,7 +129,7 @@ void func_15093878(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150A7D00(s32, f32, f32, f32);
+void func_150A7D00(s32, f32, f32, f32);
 s32 func_1510D66C(u8 *, s32, s32, s32);
 extern s32 D_11AF;
 extern s32 D_800D2870;

@@ -511,7 +511,189 @@ s32 func_1000CDA0(u8 arg0, s32 *arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D2F8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D758.s")
+#ifdef NON_MATCHING
+void func_1000D96C(s32 arg0, s32 arg1, s32 arg2) {
+    struct137 *sp2C;
+    s32 sp24;
+    s32 temp_t7;
+    struct00 *temp_v1;
+    struct137 *temp_v0_3;
+    struct137 *temp_v0_4;
+    struct137 *var_a3;
+    struct137 *var_s0;
+    struct138 *temp_v0_2;
+    struct151 *temp_v0;
+
+    var_a3 = NULL;
+    temp_t7 = arg0 & 0xFFF;
+    var_s0 = NULL;
+    sp24 = 0;
+    arg0 = temp_t7;
+    arg1 &= 0xFFF;
+    if ((temp_t7 != 0) && (sp2C = NULL, var_a3 = sp2C, (func_1000B1FC(temp_t7) != NULL))) {
+        temp_v0 = func_1000B1B0(arg0);
+        if (temp_v0 != NULL) {
+            temp_v1 = temp_v0->unk60;
+            if (temp_v1 != NULL) {
+                if (temp_v1->unk0 == -1) {
+                    (*(u16 *)((u8 *)temp_v0 + 0x54)) = 0x8000U;
+                    (*(s16 *)((u8 *)temp_v0 + 0x56)) = 0x400;
+                    temp_v1->unk4 = -1;
+                    temp_v0->unk60->unk0 = -1;
+                    temp_v0->unk60 = NULL;
+                }
+                arg0 = 0;
+                if (arg1 == 0) {
+                    return;
+                }
+                goto block_12;
+            }
+            if ((temp_v0->unk15 != 0) || ((*(u16 *)((u8 *)temp_v0 + 0x54)) == 0)) {
+                (*(u16 *)((u8 *)temp_v0 + 0x54)) = 0x8000U;
+                temp_v0->unk52 = 0;
+                (*(s16 *)((u8 *)temp_v0 + 0x56)) = 0x400;
+                arg0 = 0;
+                if (arg1 == 0) {
+                    return;
+                }
+                goto block_12;
+            }
+        }
+    } else {
+block_12:
+        if (arg1 != 0) {
+            var_a3 = func_1000B1B0(arg1);
+        }
+        if (var_a3 != NULL) {
+            if ((var_a3 != NULL) && (var_a3->unk60 != 0)) {
+                if (arg0 != 0) {
+
+                }
+            } else if ((arg2 == 4) || (arg2 == 6)) {
+                if (arg0 != 0) {
+                    sp2C = var_a3;
+                    var_s0 = func_1000B2F4(arg0);
+                }
+                if ((var_s0 != NULL) || (arg0 == 0)) {
+                    if (arg0 != 0) {
+                        temp_v0_2 = &D_8002B074[arg0];
+                        if (((*(s32 *)((u8 *)temp_v0_2 + 4)) & 0x20) && ((*(s32 *)((u8 *)(&D_8002B074[arg1]) + 4)) & 0x20)) {
+                            sp24 = 1;
+                        }
+                        (*(s8 *)((u8 *)var_s0 + 0x14)) = (s8) sp24;
+                        if ((*(s32 *)((u8 *)temp_v0_2 + 4)) & 8) {
+                            var_s0->unk54 = 0x8000;
+                            var_s0->unk52 = 0;
+                            var_s0->pad56 = 0x3C;
+                        } else if (sp24 != 0) {
+                            var_s0->unk54 = 0x8000;
+                            var_s0->unk52 = 0;
+                            var_s0->pad56 = 0x100;
+                        }
+                        var_s0->unk10 = var_a3;
+                        var_s0->pad18 = 2;
+                        sp2C = var_a3;
+                        func_1000B3D4((struct00 *) var_s0, NULL);
+                    }
+                    if (arg2 == 6) {
+                        if (arg0 != 0) {
+                            var_a3->pad1C = 2;
+                        }
+                        (*(s8 *)((u8 *)var_a3 + 0x14)) = 0;
+                        var_a3->unk10 = var_a3;
+                        var_a3->unk54 = 0;
+                        if ((*(s32 *)((u8 *)(&D_8002B074[arg1]) + 4)) & 8) {
+                            var_a3->pad56 = 0x28;
+                            return;
+                        }
+                        var_a3->pad56 = 0xA0;
+                        return;
+                    }
+                    sp2C = var_a3;
+                    temp_v0_3 = func_1000B2F4(0);
+                    if (temp_v0_3 != NULL) {
+                        if (arg0 != 0) {
+                            var_a3->pad1C = 2;
+                        }
+                        (*(s8 *)((u8 *)var_a3 + 0x14)) = 0;
+                        var_a3->unk10 = var_a3;
+                        var_a3->unk54 = 0;
+                        if (sp24 != 0) {
+                            var_a3->pad56 = 0x80;
+                        } else {
+                            var_a3->pad56 = 0x200;
+                        }
+                        temp_v0_3->pad18 = 0x80;
+                        temp_v0_3->unk10 = var_a3;
+                        func_1000B3D4((struct00 *) temp_v0_3, (struct151 *) var_a3);
+                    }
+                }
+            } else {
+                goto block_56;
+            }
+        } else {
+            if (arg1 != 0) {
+                temp_v0_4 = func_1000B1FC(arg1);
+                var_a3 = temp_v0_4;
+                if (temp_v0_4 != NULL) {
+                    if (arg0 != 0) {
+                        sp2C = var_a3;
+                        bzero(var_a3, 0x64);
+                        var_a3->unk0 = -1;
+                        if (arg0 < 0x96) {
+                            var_a3->unk2C = (s32) D_8002B074[arg0].unk0;
+                        } else {
+                            var_a3->unk2C = 0x6590;
+                        }
+                        var_a3->unk5A = 0x8000;
+                        var_a3->unk58 = 0x8000;
+                        var_a3->unk54 = 0x8000;
+                        var_a3->unk52 = 0x8000;
+                        var_a3->unk4C = 0x8000;
+                        var_a3->unk4E = 0x8000;
+                        var_a3->unk8 = (s32) &D_8002B9D4;
+                        var_a3->unkC = (s32) &D_8002B9F4;
+                        var_a3->unk10 = var_a3;
+                        var_a3->unk30 = (u32) var_a3->unk2C;
+                    } else {
+                        temp_v0_4->pad18 = 0x80;
+                    }
+                    var_a3->unk4 = arg0;
+                    return;
+                }
+            }
+block_56:
+            if ((arg0 != 0) || (var_a3 != NULL)) {
+                sp2C = var_a3;
+                var_s0 = func_1000B2F4(arg0);
+            }
+            if (var_s0 != NULL) {
+                if (arg2 == 3) {
+                    var_s0->unk54 = 0x8000;
+                    var_s0->unk52 = 0;
+                    var_s0->pad56 = 0x400;
+                } else if (arg2 == 2) {
+                    var_s0->pad18 = 1;
+                    var_s0->unk10 = var_a3;
+                } else if (arg2 == 1) {
+                    var_s0->pad18 = 2;
+                    var_s0->unk10 = var_a3;
+                } else if (arg2 == 5) {
+                    var_s0->pad18 = 0x80;
+                    var_s0->unk10 = var_a3;
+                    if (var_a3 != NULL) {
+                        var_a3->unk54 = 0;
+                        var_a3->pad56 = 0x200;
+                    }
+                }
+                func_1000B3D4((struct00 *) var_s0, (struct151 *) var_a3);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D96C.s")
+#endif
 void func_1000DE1C(s32 arg0, s32 arg1) {
     s32 n;
     s32 i;

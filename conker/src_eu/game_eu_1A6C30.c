@@ -14,7 +14,11 @@ void func_15179420(void) {
 }
 
 extern u16 D_800DD860;
+#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+void func_10004074(s32 *);
+#else
 s32 func_10004074(s32 *);
+#endif
 void func_1517946C(s32 arg0) {
     s32 i;
 

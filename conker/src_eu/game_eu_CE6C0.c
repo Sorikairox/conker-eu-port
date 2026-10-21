@@ -70,7 +70,7 @@ void func_150A152C(struct108 *arg0, u8 **arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
 
 #ifdef NON_MATCHING
-s32 func_150AD9A0(s16, s16, s16, struct127 *);
+s32 func_150AD9A0(s32, s32, s32);
 s32 func_150ADE40(s16, s16, s32, s32);
 
 s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2) {
@@ -168,7 +168,7 @@ s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2) {
             goto block_35;
         case 1:
             sp58 = var_t0;
-            if (func_150AD9A0(sp5E, sp5C, sp5A, arg0) < ((*(s16 *)((u8 *)arg1 + 6)) + var_t0)) {
+            if (func_150AD9A0(sp5E, sp5C, sp5A) < ((*(s16 *)((u8 *)arg1 + 6)) + var_t0)) {
                 return 0;
             }
             goto block_35;

@@ -70,7 +70,11 @@ void func_15080BF4(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080C28.s")
 
+#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+void func_10004074(s32);
+#else
 s32 func_10004074(s32);
+#endif
 void func_1516D850(s32);
 void func_151F2D6C(s32, s32);
 

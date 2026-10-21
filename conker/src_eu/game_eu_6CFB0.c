@@ -4,7 +4,11 @@
 
 
 s32 allocate_memory(s32, s32, s32, s32);
+#ifdef NON_MATCHING // the definition is void; one signature for wasm
+void func_10004074(s32);
+#else
 s32 func_10004074(s32);
+#endif
 s32 func_1502DB14(u8 *, s32, s32);
 s32 func_1507C170(u8 *, f32, s32, s32);
 s32 func_150A86B0(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);

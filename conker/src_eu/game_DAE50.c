@@ -173,7 +173,16 @@ s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150ADA68.s")
 
+#ifdef NON_MATCHING
+extern s64 D_80088950;
+
+/* MIPS III: a 64-bit add of the (sign-extended) argument */
+void func_150ADACC(s32 arg0) {
+    D_80088950 = (s64)arg0 + 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150ADACC.s")
+#endif
 // NON-MATCHING: hand-written function
 // void func_150ADACC(s64 arg0) {
 //     D_800885B0 = arg0 + 1;

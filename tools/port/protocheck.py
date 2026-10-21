@@ -51,6 +51,23 @@ def nm_blocks(src):
     return [(m.group(2), m.group(1)) for m in pat.finditer(src)]
 
 
+def nm_view(src):
+    """the text as the NON_MATCHING build sees it (non-nested #ifdef/#ifndef NON_MATCHING [#else] #endif)"""
+    out, mode = [], None   # mode: None outside, (keep_if, in_else) inside
+    for ln in src.split('\n'):
+        t = ln.strip()
+        if mode is None and (t.startswith('#ifdef NON_MATCHING') or t.startswith('#ifndef NON_MATCHING')):
+            mode = [t.startswith('#ifdef'), False]; continue
+        if mode is not None:
+            if t.startswith('#if'): mode = None; out.append(ln); continue   # nested: give up on this block
+            if t == '#else': mode[1] = True; continue
+            if t.startswith('#endif'): mode = None; continue
+            if mode[0] != mode[1]: out.append(ln)
+            continue
+        out.append(ln)
+    return '\n'.join(out)
+
+
 def main():
     want = set(sys.argv[1:])
     files = glob.glob(os.path.join(ROOT, 'conker/src_eu/**/*.c'), recursive=True)
@@ -60,6 +77,7 @@ def main():
         s = open(p, errors='replace').read()
         nmb = nm_blocks(s) if p.endswith('.c') else []
         for f, b in nmb: blocks.append((f, b, p))
+        if p.endswith('.c'): s = nm_view(s)   # the NON_MATCHING side of every #ifdef/#ifndef NON_MATCHING
         # strip GLOBAL_ASM-only: definitions anywhere (matching C and NON_MATCHING) count
         for m in SIG.finditer(s):
             ret, name, ps, end = m.groups()
