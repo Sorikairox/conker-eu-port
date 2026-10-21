@@ -1202,3 +1202,9 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **The ref loads a later statement's source before an earlier store** (`lbu t9; sh v1; sb v1; sb t9`): the later statement was written first in the source. Swap the two statements; the stores keep their order (`func_1516DF0C`).
 4. **A table byte compared in `v0` instead of a t-reg**: assign it to a `u8` local first (`u8 t = D[i * 0x32C]; if (t == 0x3A)`) (`func_1516F2D8`).
 5. A switch whose jump table starts below its lowest real case: the low case shares the default body (`case 9: default:`). Empty cases (`return`) are separate table targets (`func_151CA150`).
+
+## s138 recipes (fade updaters, spawner struct copies, K&R arg registers)
+1. **A byte field updated with `slti 255` / `bgez` compares** (fade in/out: `v = p[0x1F]; v += D << 6; if (v >= 0xFF) v = 0xFE;`): the working variable is `s32`, not the `u8` m2c gives (`func_1516F21C`, `func_151702C0`).
+2. **Two values in `a0`/`a1` right before a call that takes no arguments**: the source passes them anyway through a K&R declaration (`s32 f(); f(hi, lo)`); m2c's extra call args are a hint, not noise (`func_15170D50`).
+3. **m2c spawner drafts with dozens of `spXX` locals and a `memcpy(ret + 0x70, &spB, 0x58)`**: rebuild them as two local structs (template at `&spA`, the 0x58 block at `&spB`); separate locals lose all their stores (SIZE-60..-120). `s138_drafts/spstruct.py` does it (`func_151CB128`).
+4. A `u8` param whose word home is reloaded with `andi 0xFF` at entry: declare it `u8` and drop m2c's `& 0xFF` uses.
