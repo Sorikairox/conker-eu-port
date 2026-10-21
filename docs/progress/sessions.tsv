@@ -54,3 +54,4 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 148	wt	game>=0x130000+dbg	7	2384	130	done-flag handler family; local permuter 2/3 on register-only diffs
 147	main	game<0x130000+init	1	276	125	func_15048A40 returns f32 (cross-slot fix); sharedsym.py: lo/init shared tables already typed
 150	wt	game>=0x130000+dbg	8	3492	132	func_1516972C handler family; local permuter 3/9
+149	main	game>=0x15190000 (new split)	7	1960	135	slice rebalanced to upper hi game; structure-first hand drafts
