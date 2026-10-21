@@ -5,7 +5,54 @@
 void func_15147ECC(u8 *arg0);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1754C0/func_15147CB0.s")
+extern s32 (*D_8008A5A0[])(u8 *);
+extern s32 (*D_8008A5DC[])(u8 *);
+extern s32 (*D_8008A624[])(u8 *);
+void func_15147CB0(u8 *arg0) {
+    s32 pad; // fakematch: moves the byte spill slot
+    s8 done = 0;
+    s8 w;
+
+    if (*(u16 *)(arg0 + 0x1E) & 1) {
+        *(s16 *)(arg0 + 0x1C) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x1C) < 0) {
+            done = 1;
+        }
+    }
+    if (arg0[0x2F] >= 15) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    if (arg0[0x2F] != 0 && !done) {
+        if (!D_8008A5A0[arg0[0x2F]](arg0)) {
+            done = 1;
+        }
+    }
+    if (arg0[0x30] >= 18) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    if (arg0[0x30] != 0 && !done) {
+        if (!D_8008A5DC[arg0[0x30]](arg0)) {
+            done = 1;
+        }
+    }
+    if (*(u16 *)(arg0 + 0x1E) & 0x10) {
+        w = *(s8 *)(arg0 + 0x24);
+        if (w < -1 || w >= 8) {
+            func_1516972C((struct102 *)arg0);
+            return;
+        }
+        if (w != -1 && !done) {
+            if (!D_8008A624[w](arg0)) {
+                done = 1;
+            }
+        }
+    }
+    if (done) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 void func_15147E40(u8 *arg0) {
     func_151D5E30(arg0 + 0x84, arg0);

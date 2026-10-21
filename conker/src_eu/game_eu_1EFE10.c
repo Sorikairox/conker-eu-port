@@ -56,7 +56,41 @@ void func_151C34A0(s32 arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C491C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4990.s")
+s32 func_15081A90(struct127 *, s32, s32, s32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+typedef struct { s32 w0; s32 w4; u8 b8[0x18]; u8 b20[0x39]; u8 x59; u8 pad5A[0x1A]; } Res_151C4990;
+s32 func_151C4990(u8 *arg0, u8 *arg1, f32 arg2)
+{
+  u8 ret;
+  struct127 *t;
+  Res_151C4990 r;
+  f32 f;
+  t = *((struct127 **) (arg1 + 0x90));
+  ret = 1;
+  if (arg1[0] & 4)
+  {
+    if ((*((f32 *) (arg1 + 0x8C))) < arg2)
+    {
+      f = (*((f32 *) (arg1 + 0x8C))) * (*((f32 *) (arg1 + 0x98)));
+    }
+    else
+    {
+      f = (*((f32 *) (arg1 + 0x98))) * arg2;
+    }
+    if (f != 0.0f)
+    {
+      func_15081A90(t, *((s32 *) (arg0 + 0x34)), *((s32 *) (arg0 + 0x38)), *((s32 *) (arg0 + 0x3C)), *((f32 *) (arg1 + 0x60)), *((f32 *) (arg1 + 0x64)), *((f32 *) (arg1 + 0x68)), (u8 *) (&r), f, 1, 0, !(arg1[0] & 8), *((s8 *) (arg1 + 0xA8)), 0, *((s32 *) (arg1 + 0xAC)));
+      if (r.x59 >= 2)
+      {
+        func_151C34A0(r.w0, (s32) t, arg0, (s32) r.b8, (s32) r.b20, (s32) (&r));
+        ret = 0;
+        if (arg1) // fakematch: register order of ret/flags
+        {
+        }
+      }
+    }
+  }
+  return ret;
+}
 
 void func_151C4AC0(u8 *arg0, u8 *arg1, f32 arg2) {
     (*(f32 *)((u8 *)arg0 + 0x34)) += ((*(f32 *)((u8 *)arg1 + 4)) * arg2);

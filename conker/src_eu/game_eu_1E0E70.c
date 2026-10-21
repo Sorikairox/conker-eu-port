@@ -25,7 +25,42 @@ u8 *func_151B3660(s32 arg0, f32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     return sp24;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3734.s")
+typedef struct { u8 pad0[0x10]; u8 flags; u8 pad11; s16 y; f32 x14[3]; f32 x20[3]; s8 x2C; s8 x2D; u8 pad2E[6]; s8 x34; } Obj_151B3734;
+extern s32 (*D_8008FE90[])(Obj_151B3734 *, f32 *, s32);
+extern s32 (*D_8008FE98[])(Obj_151B3734 *);
+void func_151B3734(Obj_151B3734 *arg0) {
+    s32 pad; // fakematch: moves the byte spill slot
+    u8 done = 0;
+
+    if (arg0->flags & 1) {
+        arg0->y -= D_800BE9E4;
+        if (arg0->y < 0) {
+            done = 1;
+        }
+    }
+    if (!done) {
+        if (arg0->x2C != -1) {
+            if (!D_8008FE90[arg0->x2C](arg0, arg0->x14, 1)) {
+                done = 1;
+            }
+        }
+        if (arg0->x2D != -1) {
+            if (!D_8008FE90[arg0->x2D](arg0, arg0->x20, 0)) {
+                done = 1;
+            }
+        }
+        if ((arg0->flags & 4) || (arg0->flags & 8)) {
+            arg0->flags |= 2;
+        } else if (arg0->x34 != -1) {
+            if (!D_8008FE98[arg0->x34](arg0)) {
+                done = 1;
+            }
+        }
+    }
+    if (done) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3878.s")
 
@@ -92,7 +127,40 @@ s32 func_151B4F3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4FC4.s")
+s32 func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
+u8 func_151B4FC4(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s8 *argC, s8 *argD) {
+    u8 ret;
+    s32 pad[2]; // fakematch: frame slots between ret and t
+    u8 *t;
+    s32 sp54;
+    s32 sp50;
+    s32 sp4C;
+    u32 sp48; // fakematch: unsigned puts the copy in v0
+    s32 v;
+    s32 pad2; // fakematch: frame slot below sp48
+
+    ret = 1;
+    t = *(u8 **)(arg0 + 0x150);
+    func_1502EF24(t, &sp54, &sp50, &sp4C, (s32 *)&sp48);
+    if (t[0xA4] & 1) {
+        *arg1 = 0x200005;
+        *arg2 = 0x60600;
+        *arg3 = sp54;
+        *arg4 = sp50;
+        *arg5 = sp4C;
+        *arg6 = 0xFF;
+        *arg9 = v = sp48;
+        *arg8 = v;
+        *arg7 = v;
+        *argA = 0xFF;
+        *argB = 0x100000;
+        *argC = 5;
+        *argD = 0x2F;
+    } else {
+        ret = func_151B4F3C(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD);
+    }
+    return ret;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B5128.s")
 
