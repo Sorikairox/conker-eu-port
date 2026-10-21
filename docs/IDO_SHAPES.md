@@ -1188,3 +1188,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **Argument kept in its stack home** (`sw a1,0x3C(sp)` at entry, `lw tN,0x3C(sp)` at each use) while mine keeps it in `a1`: take its address once, `if ((&arg1)[0] != NULL)` (fakematch, `func_1000B3D4`).
 4. Array-of-struct accesses written as `((T *)base)[i].f` (no pointer local) matched where `T *s = &base[i]` gave register diffs (`func_1000FC18`); for a 357-insn loop the same form produced the target's two induction variables (`i*0x30` in `fp` and the element address in `s0`), a pointer local merged them (`func_10011624` draft).
 5. Block-scoped temp again: `if (arg2 >= 2) { s32 d = ...; }` fixed a tail store/branch layout DIFF12 (`func_1000DF68`, permuter). A two-statement `v &= 0xFF00; v = max - v;` fixed a register-only DIFF18 (`func_1000C934`, permuter).
+
+## s134 recipes (pointer-typed args, base pointer kept in an s-reg, homed args)
+1. **`multu x, K; sll t, 1; addu t, arg` after `K` was folded nowhere else** = pointer arithmetic on a `u16 *` arg: `(s32)(arg1 + idx * 640)`. Writing `idx * 640 * 2 + arg1` folds to one `1280` constant (`func_1517DC00`, SIZE+2 -> OK).
+2. **A base pointer `p = arg0 + K` held in its own s-reg (`addiu s0, s1, K` after the first call) while early accesses use `arg0 + K + off`**: write *every* access of that region through `p` (`p[4] += ...`), not `arg0[0xAC]`; mixing makes IDO fold `p` and drop an s-reg (`func_1515A68C`).
+3. **A pointer arg reloaded from its stack home before every use, even twice inside one `a || b`**: declare the parameter `u8 *volatile arg1`; a byte arg homed (`sw a2`) and reloaded once for a late call = `(&arg2)[0]` at that call (`func_15191EF0`, size right, still DIFF31).
+4. Unused declared locals still take a frame slot at -O2 (s129 recipe 1): an unused `e` pointer moved the only spilled local from 0x4C to 0x48 (`func_1517DC00`).
+
