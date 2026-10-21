@@ -26,7 +26,7 @@ one() {
   rm -rf $od; mkdir -p $od; cp "$d" $od/draft.c
   if ! docker exec ${CONKERDEV:-conkerdev} python3 /conker/tools/eu_port/permute/setup.py $f /conker/tools/decomp-permuter/nm/$f/draft.c /conker/tools/decomp-permuter/nm/$f > $od/setup.txt 2>&1; then
     echo "$f SETUP-FAILED $(tail -3 $od/setup.txt | tr '\n' ' ' | cut -c1-200)"; return; fi
-  docker exec -w /conker/tools/decomp-permuter ${CONKERDEV:-conkerdev} timeout -s INT $secs \
+  docker exec -w /conker/tools/decomp-permuter ${CONKERDEV:-conkerdev} timeout -s INT -k 30 $secs \
     python3 permuter.py nm/$f -j$jobs --stop-on-zero --better-only --stack-diffs $PERM_ARGS > $od/log.txt 2>&1
   base=$(tr '\r' '\n' < $od/log.txt | grep -m1 -o 'base score = [0-9]*' | grep -o '[0-9]*$')
   bestdir=$(ls -d $od/output-* 2>/dev/null | sed 's/.*output-\([0-9]*\)-\([0-9]*\)$/\1 \2 &/' | sort -n -k1,1 -k2,2 | head -1 | cut -d' ' -f3)
