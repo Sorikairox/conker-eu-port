@@ -1086,3 +1086,15 @@ func_151DBCBC	DIFF101	5	DIFF80	n	n	inside-if r0/r1 no frame change; frame +8 sta
 func_151CCAD4	new	7	DIFF118	n	y	Spawn559A 0x58; frame +8 unexplained (ret-in-hole no)
 func_151CD4B8	new	8	SIZE+2	n	y	frame fixed with block-scoped tbl/ret; arg3 u8 copy a3->s4 extra
 func_151CBBAC	new	6	SIZE+1	n	n	ret in the A/B hole fixes frame; uC ternary stored per branch
+func_151A7D70	DIFF34	2	OK	y	n	clone of matched sibling func_151A7E2C (comma multu operand)
+func_151E5D54	SIZE+7	6	OK	y	n	s32 return, no return stmt; v = (u8)D7; v += d;
+func_151ABE04	SIZE-13	8	DIFF25	n	n	func_15190770 12-byte block lands at 0x24 (ref 0x20); pad before/after or inside block grows frame; scalars SIZE-13
+func_15196270	CERR	7	OK	y	y	do-while list walk, s32 params, flag store before next; remote perm: non-void return
+func_151D7DE0	CERR	6	OK	y	n	func_15147FF0 caller: decl r, b(0x1C memcpy to r->0x98), a, s32 pad[2]
+func_151A4B40	SIZE-25	7	DIFF20	n	y	func_1513418C block; arg0 reload shape OK w/o q; early return; u24/u20 moved up; scheduling left (perm 400s: DIFF20)
+func_151A2B90	DIFF47	6	DIFF29	n	n	clone of 7E2C family; join p = arg0+0x50 recompute is CSEd away (ref: addiu v0 in beql slot); block-scoped/s16*/new var no help
+func_151B26B0	CERR	3	OK	y	n	Link struct at arg0+0x28; compare s->d != old
+func_151D4898	new	7	SIZE-1	n	n	f32->u32 conv angle ((conv - 0x4000) | 1) u16; missing one or t7,v0 copy at the cvt join
+func_151D7814	new	8	DIFF11	n	n	D_80090040 handler + func_15143E64 dist; pad above pos fixes locals; left: s->f5 folded to arg0+0x2D and v0 spill 0x18 vs 0x1C
+func_151A3AB4	new	7	OK	y	n	K&R 2-param def (arg2 never used; prototype with 3 params homes a2); file prototype at the caller made s32 func_151A3AB4();
+func_151D7EDC	CERR	6	DIFF13	n	y	0x1C tbl; elem ptr e = &tbl[2D] gives same size; delay-slot/addu order left; local perm 400s best SIZE+1

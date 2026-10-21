@@ -93,7 +93,52 @@ s32 func_15195FF4(s16 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195AA8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15196270.s")
+typedef struct Ent6270 {
+    struct Ent6270 *dnext;
+    struct Ent6270 *dprev;
+    s32 id;
+    u16 sub;
+    u8 flag;
+    u8 padF;
+    struct Ent6270 *next;
+} Ent6270;
+
+s32 func_15196270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) // fakematch: non-void return type with bare returns (void gives a different reg copy; remote permuter)
+{
+  Ent6270 *e;
+  Ent6270 *n;
+  Ent6270 *nx;
+  nx = *((Ent6270 **) (arg0 + 0x18));
+  e = nx;
+  if (nx != 0)
+  {
+    do
+    {
+      if ((arg1 == e->id) && (arg2 == e->sub))
+      {
+        return;
+      }
+      nx = e->next;
+      if (nx != 0)
+      {
+        e = nx;
+        nx = nx->next;
+      }
+    }
+    while (nx != 0);
+    n = (Ent6270 *) func_15195D20(0x14, (DNode **) (&D_800E0D10), (DNode **) (&D_800E0D14));
+    e->next = n;
+  }
+  else
+  {
+    n = (Ent6270 *) func_15195D20(0x14, (DNode **) (&D_800E0D10), (DNode **) (&D_800E0D14));
+    *((Ent6270 **) (arg0 + 0x18)) = n;
+  }
+  n->id = arg1;
+  n->sub = arg2;
+  n->flag = arg3;
+  n->next = 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15196344.s")
 

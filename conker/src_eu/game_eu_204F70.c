@@ -176,7 +176,34 @@ void func_151D7D78(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7DE0.s")
+typedef struct { f32 x, y, z; } V37DE0;
+typedef struct { V37DE0 pos; s16 u58; s16 u5A; s32 u5C; s8 u60; s8 u61; u8 pad62[2]; s32 u64; } SA7DE0;
+typedef struct { u8 *u68; V37DE0 pos; f32 u78, u7C, u80; } SB7DE0;
+
+void func_151D7DE0(u8 *arg0) {
+    u8 *r;
+    SB7DE0 b;
+    SA7DE0 a;
+    s32 pad[2]; // fakematch: frame padding below the param block
+
+    b.u68 = arg0;
+    b.pos = *(V37DE0 *)(arg0 + 0x30);
+    b.u78 = 0.0f;
+    b.u7C = 0.0f;
+    b.u80 = 0.0f;
+    a.u61 = 0x19;
+    a.pos = *(V37DE0 *)(arg0 + 0x30);
+    a.u58 = 0x12C;
+    a.u5A = 0x76;
+    a.u5C = 0x12;
+    a.u60 = 4;
+    a.u64 = 0;
+    r = (u8 *)func_15147FF0(&a, 0x20, 0x1C, 0xD, 0x10, 0x10, 0, 0, 0, arg0[0xC], arg0[1]);
+    if (r != NULL) {
+        memcpy(*(void **)(r + 0x98), &b, 0x1C);
+        *(u8 **)(arg0 + 0x28) = r;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7EDC.s")
 

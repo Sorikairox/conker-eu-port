@@ -5,7 +5,51 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3940.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3AB4.s")
+typedef struct { f32 x, y, z; } V33AB4;
+typedef struct { V33AB4 pos; s16 u0C; u16 u0E; s32 u10; s8 u14; s8 u15; u8 pad16[2]; s32 u18; } SA3AB4;
+typedef struct {
+    u8 raw[0x30];
+    u8 u30;
+    u8 pad31[3];
+    V33AB4 u34;
+    f32 u40;
+    u8 u44;
+    u8 pad45[3];
+    f32 u48;
+    u8 u4C;
+    u8 pad4D[3];
+} SB3AB4;
+
+s32 func_151A53E4(u8 *arg0, u8 *arg1);
+
+s32 func_151A3AB4(arg0, arg1) u8 *arg0; u8 arg1; {
+    SA3AB4 a;
+    SB3AB4 b;
+    u8 *r;
+
+    if (*(s32 *)arg0 == 0) {
+        return 0;
+    }
+    memcpy(&b, arg0, 0x30);
+    b.u44 = 0;
+    a.u15 = 0x32;
+    a.u0E = 2;
+    a.u0C = 1000;
+    b.u30 = 6;
+    b.u4C = 0;
+    b.u40 = 0.0f;
+    b.u48 = 0.0f;
+    if (func_151A53E4((u8 *)&b, (u8 *)&a.pos)) {
+        b.u34 = a.pos;
+        a.u0E |= 4;
+    }
+    a.u10 = 8;
+    r = (u8 *)func_15147FF0(&a, 0x50, 0x18, 6, 6, 6, 0, 0, 0, arg1, 0);
+    if (r != NULL) {
+        memcpy(*(void **)(r + 0x98), &b, 0x50);
+    }
+    return (s32)r;
+}
 
 typedef struct { f32 x, y, z; } V3;
 typedef struct {
@@ -313,7 +357,7 @@ void func_151A544C(u8 *arg0)
   temp_v0[0x30] |= 4;
 }
 
-s32 func_151A3AB4(u8 *, u8, u8 *);
+s32 func_151A3AB4(); // K&R: defined with 2 params, called with 3
 
 void func_151A547C(u8 *arg0) {
     u8 *temp_v0;

@@ -510,7 +510,26 @@ void func_151E5D28(void) {
     D_800843F0[3] = 3;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5D54.s")
+s32 func_151E5D54(void) {
+    s32 d;
+    s32 v;
+
+    if ((u8)D_800E0FC8 == 0) {
+        d = D_800BE9E4 * 8;
+    } else {
+        d = -D_800BE9E4 * 8;
+    }
+    v = (u8)D_800E0FC7;
+    v += d;
+    if (v >= 0x100) {
+        v = 0x1FE - v;
+        D_800E0FC8 = (u8)D_800E0FC8 ^ 1;
+    } else if (v < 0) {
+        v = -v;
+        D_800E0FC8 = (u8)D_800E0FC8 ^ 1;
+    }
+    D_800E0FC7 = v;
+}
 
 void func_151E5DD8(void) {
     if (D_800E0EBC != 0) {

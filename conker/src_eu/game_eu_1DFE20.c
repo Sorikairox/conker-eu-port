@@ -51,7 +51,44 @@ void func_151B2610(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B26B0.s")
+typedef struct {
+    u8 *a;
+    u8 a4;
+    u8 pad5[3];
+    u8 *c;
+    u8 cC;
+    u8 d;
+} Link26B0;
+s32 func_151B28A4(u8 *arg0);
+void func_151B27DC(u8 *);
+void func_151B28F8(u8 *);
+void func_151B2C40(u8 *);
+
+void func_151B26B0(u8 *arg0) {
+    Link26B0 *s;
+    u8 *a;
+    u8 *c;
+    u8 old;
+
+    a = *(u8 **)(arg0 + 0x28);
+    c = *(u8 **)(arg0 + 0x30);
+    s = (Link26B0 *)(arg0 + 0x28);
+    if (*(s32 *)a == 0 || a[4] == 0xFF || s->a4 != a[0x3B] || *(s32 *)c == 0 || c[4] == 0xFF || s->cC != c[0x3B]) {
+        *(s16 *)(arg0 + 0xE) = -1;
+        return;
+    }
+    old = s->d;
+    s->d = func_151B28A4(arg0);
+    if (s->d != old) {
+        func_151B27DC(arg0);
+        if (s->d == 1) {
+            func_151B28F8(arg0);
+        }
+        if (s->d == 2 || s->d == 0) {
+            func_151B2C40(arg0);
+        }
+    }
+}
 
 void func_151B27DC(u8 *);
 
