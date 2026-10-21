@@ -43,8 +43,9 @@ typedef struct {
     s16 h;
     u16 xE;
     u16 x10;
-    s16 x12;
-    s8 x14;
+    u8 x12;
+    u8 x13;
+    u8 x14;
     s32 x18;
     s16 a[5];
     s16 b[5];

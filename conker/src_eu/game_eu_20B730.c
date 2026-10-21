@@ -318,7 +318,69 @@ void func_151E55C8(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E564C.s")
+extern f32 D_80090170;
+extern f32 D_800ABE30;
+extern f32 D_800ABE34;
+extern f32 D_800ABE38;
+
+void func_151E564C(void)
+{
+  unsigned int n; // fakematch: permuter temp
+  int ff; // fakematch: constant in a register gives beq a2,v0 operand order
+  s32 v;
+  f32 f;
+  v = *((u8 *) (&D_800E0FC6));
+  ff = 0xFF; // fakematch
+  D_80090170 = 1.0f - (((u32) v) / 255.0f);
+  if (((u8) D_80090114) == 0xFF)
+  {
+    f = D_800DDDC8;
+    if (D_800ABE30 < f)
+    {
+      v = (u8) (D_800E0FC6 = v + D_800BE9E4);
+      if (v < 0x55)
+      {
+        D_800DDDD8 = D_800ABE34;
+      }
+      else
+      {
+        D_800DDDD8 = D_800ABE38;
+      }
+    }
+    if (f < ((float) 1.0f))
+    {
+      return;
+    }
+    if (v < 0x6E)
+    {
+      return;
+    }
+  }
+  else
+  {
+    n = (u8) D_80090114;
+    if (v != ff)
+    {
+      v += D_800BE9E4 * n;
+      if (v >= 0x100)
+      {
+        v = 0xFF;
+      }
+      D_800E0FC6 = v;
+      return;
+    }
+  }
+  *((u8 *) (&D_800E0FC6)) = 0xFF;
+  D_80090114 = 8;
+  D_80090170 = 1.0f;
+  if (1) // fakematch: empty ifs on separate lines
+  {
+  }
+  if (1)
+  {
+  }
+  ((void (*)(void)) D_800E0EB8)();
+}
 
 void func_151E5798(void) {
     (*(f32 *)D_80090174) = 0.0f;
