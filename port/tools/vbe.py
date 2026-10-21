@@ -345,7 +345,11 @@ class Pass:
 # @vbe.<name> in every game TU. List = game-defined symbols that libc.a/libcompiler_rt.a also define:
 #   comm -12 <(llvm-nm --defined-only -j libc.a libcompiler_rt.a | sort -u) <(llvm-nm --defined-only -j port/build/vobj/*.o | sort -u)
 LIBC_CLASH = ['ldiv', 'lldiv', 'memcpy', 'sinf', 'sqrtf', 'strchr', 'strlen', 'tanf']
-RENAME = re.compile(r'@(' + '|'.join(LIBC_CLASH) + r')\b(?![.\w])')
+# P25: libc names the game only *calls* (GLOBAL_ASM in the decomp) and that emscripten's libc would
+# otherwise satisfy with host-byte semantics (bcopy/bzero on vbe memory) or a different algorithm
+# (cosf). They get the same @vbe.<name> rename; port/ultra/pc_libc.c and pc_gu.c define them.
+LIBC_VBE = ['bcopy', 'bzero', 'cosf']
+RENAME = re.compile(r'@(' + '|'.join(LIBC_CLASH + LIBC_VBE) + r')\b(?![.\w])')
 
 
 # Data symbols that the N64 link places at absolute addresses below the RAM range: ROM offsets (and a
@@ -451,7 +455,12 @@ def main():
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs
         st = collections.Counter()
-        p.lines = sigs.normalize(p.lines, json.load(open(sys.argv[3])), p.tmp, st)
+        can = json.load(open(sys.argv[3]))
+        for k in LIBC_VBE:  # sigdb is collected before the rename: alias @vbe.<name> (P25 names only;
+            # aliasing LIBC_CLASH too would re-type _Litob's sret call to lldiv, a new link warning)
+            if '@' + k in can:
+                can['@vbe.' + k] = can['@' + k]
+        p.lines = sigs.normalize(p.lines, can, p.tmp, st)
         p.st.update(st)
     # indirect calls -> site-typed trampolines with a signature check (port/tools/icall.py)
     import icall

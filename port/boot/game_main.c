@@ -91,11 +91,12 @@ int port_memtest(void);
 int port_icalltest(void);
 int port_overrides_test(void);
 int port_romsym_test(void);
+int port_gu_test(void); /* P25 */
 
 static void port_boot(void) {
     /* N64 data segments from the user's ROM into the RDRAM mirror + pointer relocation
      * (docs/port/MEMORY.md); on the N64 the IPL3 / func_10001194 load these. */
-    if (port_mem_load() == 0) { port_memtest(); port_icalltest(); port_overrides_test(); port_romsym_test(); }
+    if (port_mem_load() == 0) { port_memtest(); port_icalltest(); port_overrides_test(); port_romsym_test(); port_gu_test(); }
     /* libultra boot globals the IPL3 leaves in low RDRAM */
     D_80000300 = 1;          /* osTvType: NTSC=1 / PAL=0; EU ROM -> PAL */
     D_80000300 = 0;

@@ -609,6 +609,12 @@ void gfx_run_dl(const void *dl) {
             unsigned prm = (w0 & 0xFF) ^ 1;                  /* ^ G_MTX_PUSH */
             float m[4][4];
             mtx_read(m, p);
+            { static int md = -1; if (md < 0) md = port_flag("mtxdump"); /* P25: ?mtxdump=1 + dltrace: G_MTX contents */
+              if (md && gfx_trace)
+                  port_log("[mtx] %08X %s%s%s: %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f\n",
+                           w1, prm & 4 ? "P" : "MV", prm & 2 ? " load" : " mul", prm & 1 ? " push" : "",
+                           m[0][0], m[0][1], m[0][2], m[0][3], m[1][0], m[1][1], m[1][2], m[1][3],
+                           m[2][0], m[2][1], m[2][2], m[2][3], m[3][0], m[3][1], m[3][2], m[3][3]); }
             if (prm & 4) { if (prm & 2) memcpy(proj, m, sizeof m); else mtx_mul(proj, m, proj); }
             else {
                 if ((prm & 1) && mvsp < 31) memcpy(mvstack[mvsp++], mv, sizeof mv);

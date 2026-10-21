@@ -464,7 +464,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -474,7 +474,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P14.md` (MP3 voice audio, Conker lighting, skeleton bind pose, browser audio fix) and
 `docs/port/sessions/P19.md` (real game frames, RCP/PIF model, level-loader stubs, real-time freeze guard) and
 `docs/port/sessions/P21.md` (browser heap corruption = fiber stack alignment, real-time Chrome, debug flags) and
-`docs/port/sessions/P23.md` (merge P20, srcfix, frame DL end to end, DL-path stub list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P23.md` (merge P20, srcfix, frame DL end to end, DL-path stub list) and
+`docs/port/sessions/P25.md` (libultra/libgu/libc PC layer complete, `[gutest]`, licenses). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -717,7 +718,7 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
       func_1508FD38, func_151EC300 (`D_80090370[11]`; not func_151EC11C), func_1517F910, func_15180AF0.
     - **Top measured stubs:** func_1000CEAC, func_1000D2F8, func_150A4ED4, func_1517D7B0, func_1000A03C,
       func_15173954, func_1509BE40, func_1501B300, then about 26 at one call per frame.
-      `guMtxF2L` is an asm stub. Full list in P23.md §3.
+      `guMtxF2L` is an asm stub (P25: now PC). Full list in P23.md §3.
     - **clang errors in converted C (fix when convenient):**
       - `game_eu_113D60.c:131`, `game_eu_1C3530.c:1069`, `game_eu_1F4F60.c:93`: lvalue casts;
       - `game_eu_1D1150.c:435`: `func_151A3AB4` called with 3 arguments, defined with 2;
@@ -725,6 +726,40 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
       - `debugger.c`: `extern s32 func_150ADC50`.
     - **`func_15002248` (P20)** was not reached in 10 s, so it is not checked at runtime. No bug found.
   - **Flags:** `dltrace=N`, `dlstat=N` (opcode histogram, segments, `[probe]`) and `gdltrack=N`.
+- **P25: the libultra/libgu/libc PC layer is complete.** `asm_stubs.c` has no libultra, libgu or libc
+  name left (stubs 1168 → 1160; the only non-`func_` stub is the PC tool `port_icall_check`).
+  - **New `port/ultra/pc_gu.c`:**
+    - `guMtxF2L` (Rare's asm: `cvt.w.s`, round to nearest even; written as whole Mtx words);
+    - `func_150A7B80` (guMtxIdent);
+    - `vbe.cosf` (the libultra polynomial);
+    - Rare's fast sin/cos `func_150AD78C` / `func_150AD780` (D5E90.s; constants from .rodata).
+  - **New `port/ultra/pc_libc.c`:** `vbe.bcopy` / `vbe.bzero` on the vbe helpers.
+  - **Found:** `bcopy`, `bzero` and `cosf` were asm-only and had been bound **silently to musl**. musl's
+    bcopy/bzero use host bytes, which is wrong on vbe memory at mismatched alignment.
+    `vbe.py LIBC_VBE` renames them like `LIBC_CLASH`, with sigdb aliases for those names only.
+  - **`pc_os.c`:**
+    - interrupt state is tracked (`__osDisableInt` / `__osRestoreInt` / `osSetIntMask` return the
+      previous state);
+    - `__osProbeTLB`, `__osSetCompare`, `__osCleanupThread`;
+    - `func_10024190` (osWritebackDCache) is a no-op.
+  - **Licenses:** ultralib has **no license**, and its C keeps SGI's proprietary header. Nothing was
+    copied from it; everything was written from the game's asm and the decomp. See
+    `port/ultra/LICENSES.md`.
+  - **`[gutest] PASS`:** F2L edge values, L2F→F2L round trip, guPerspective (game C) and a guLookAtF
+    matrix, bit-exact against `port/tools/gu_expect.py`; cosf bit-exact; fast sin/cos; bcopy/bzero on
+    vbe memory.
+  - **Matrices:**
+    - The one game `guMtxF2L` call in 10 s, the level-load `guPerspective` (`func_15017640` → 0x105D87F0),
+      now writes a valid projection.
+    - **No frame-DL `G_MTX` changed.** The frame loads a static identity, and zero projections
+      (0x10622690 / 0x106226D0 / address 0) that still-asm camera code fills.
+    - Flags: `mtxdump=1` (with `dltrace`) and `gulog=N`.
+  - **For the port branch:**
+    - the same 13 DL-path stubs as P23;
+    - top stubs `func_1000CEAC` / `func_1000D2F8` (426 each);
+    - `func_150A4ED4` (296 calls) is **not an EU function**: it is inside `func_150A49D0`, so the call in
+      `game_eu_13C400.c:173` uses an unmapped name;
+    - `func_150A8050` (RPY rotate) is still asm.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

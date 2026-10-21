@@ -21,7 +21,7 @@ LINK_COMMON := -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VE
                -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test \
                -sEXPORTED_RUNTIME_METHODS=HEAPU8,callMain,stringToNewUTF8 -sENVIRONMENT=web,node --profiling-funcs
 
-ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c
+ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c ultra/pc_gu.c ultra/pc_libc.c
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/sessions/P6.md)
 GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c
@@ -71,11 +71,11 @@ GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>
 # renderer can tell RSP segment addresses (0x01..0x0F << 24) from wasm pointers exactly. The untouched
 # zone costs address space only (pages are committed on first write); INITIAL_MEMORY covers it +
 # ~10 MB data + the 64 MB ROM copy + heap.
-BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c boot/sched_test.c audio/aud_test.c audio/mp3_pc.c
+BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c boot/sched_test.c boot/gu_test.c audio/aud_test.c audio/mp3_pc.c
 BOOT_OBJS := $(patsubst %.c,$(B)/vobj/port__%.o,$(notdir $(BOOT_SRC)))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
-$(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt tools/vbe.py tools/vbe_build.py tools/sigs.py tools/icall.py $(BOOT_SRC) ultra/pc_mem.h $(GEN)/memtest_expect.h
+$(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt tools/vbe.py tools/vbe_build.py tools/sigs.py tools/icall.py $(BOOT_SRC) ultra/pc_mem.h $(GEN)/memtest_expect.h $(GEN)/gutest_expect.h
 	cd .. && python3 port/tools/vbe_build.py $(addprefix port/,$(BOOT_SRC))
 	@touch $@
 

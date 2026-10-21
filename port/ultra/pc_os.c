@@ -110,6 +110,7 @@ EMSCRIPTEN_KEEPALIVE void port_dump_stubs(int max) {
     unsigned n = 0;
     for (unsigned i = 0; i < STUB_SLOTS; i++) if (stub_tab[i].name) idx[n++] = i;
     qsort(idx, n, sizeof idx[0], stub_cmp);
+    { extern unsigned port_gu_f2l_calls; port_log("[gu] guMtxF2L calls: %u (P25 PC libgu)\n", port_gu_f2l_calls); }
     port_log("[stubs] %u distinct asm stubs hit, %d calls; ranked by calls (first-hit order, frame):\n",
              n, port_stub_hits);
     for (unsigned i = 0; i < n && (int)i < max; i++)
@@ -179,24 +180,34 @@ EMSCRIPTEN_KEEPALIVE void port_set_rom(unsigned char *p, unsigned size) {
 
 /* ---------------- interrupts / CPU ---------------- */
 
-u32 __osDisableInt(void) { return 1; }
-s32 __osRestoreInt(u32 m) { (void)m; return 0; } /* game TUs define it returning s32 */
-u32 __osGetSR(void) { return 0; }
-s32 __osSetSR(u32 v) { (void)v; return 0; }
-u32 __osSetFpcCsr(u32 v) { (void)v; return 0; }
+/* P25: interrupt state for the cooperative scheduler. Fibers switch only inside blocking libultra
+ * calls, so nothing is ever preempted and masking cannot change scheduling; the state is still kept
+ * so that the libultra contracts hold: __osDisableInt returns the previous SR.IE (1 or 0) and clears
+ * it, __osRestoreInt(m) ORs it back, osSetIntMask returns the previous mask, __osGetSR/__osSetSR and
+ * __osSetFpcCsr read and write their registers. */
+static u32 pc_sr = 0x1 /* SR_IE */, pc_fpcsr = 0x01000800 /* FPCSR_FS | FPCSR_EV, RM = nearest */;
+static OSIntMask pc_intmask = OS_IM_ALL;
+u32 __osDisableInt(void) { u32 ie = pc_sr & 1; pc_sr &= ~1u; return ie; }
+s32 __osRestoreInt(u32 m) { pc_sr |= m & 1; return 0; } /* game TUs define it returning s32 */
+u32 __osGetSR(void) { return pc_sr; }
+s32 __osSetSR(u32 v) { pc_sr = v; return 0; }
+u32 __osSetFpcCsr(u32 v) { u32 o = pc_fpcsr; pc_fpcsr = v; return o; }
+void __osSetCompare(u32 v) { (void)v; } /* CP0 Compare: timers come from the PC clock (osSetTimer) */
+/* __osCleanupThread: the return address libultra gives a new thread. The PC fiber entry already
+ * destroys a thread whose entry returns; anything that jumps here gets the same. */
+void __osCleanupThread(void) { osDestroyThread(NULL); }
 /* P19 debug: HEAPDBG builds walk the game heap on every osSetIntMask (the allocator brackets with it)
  * and print a stack at the first broken heap. */
 #ifdef PORT_HEAPDBG
 int port_heap_check(void); extern int port_heap_quiet;
 #endif
 OSIntMask osSetIntMask(OSIntMask m) {
-    (void)m;
     { void port_heapwatch(const char *where); port_heapwatch("osSetIntMask"); }
 #ifdef PORT_HEAPDBG
     { static int done, calls; calls++; if (calls >= 108 && calls <= 111) { port_log("[heapdbg] call %d\n", calls); emscripten_log(EM_LOG_CONSOLE | EM_LOG_JS_STACK, "heapdbg"); }
       if (!done) { port_heap_quiet = 1; if (port_heap_check()) { done = 1; port_log("[heapdbg] heap broken at osSetIntMask call %d\n", calls); emscripten_log(EM_LOG_CONSOLE | EM_LOG_JS_STACK, "heapdbg"); } port_heap_quiet = 0; } }
 #endif
-    return OS_IM_ALL;
+    { OSIntMask o = pc_intmask; pc_intmask = m; return o; }
 }
 void __osInitialize_common(void) { port_log("[os] __osInitialize_common\n"); }
 
@@ -205,11 +216,16 @@ void __osInitialize_common(void) { port_log("[os] __osInitialize_common\n"); }
 void osInvalICache(void *p, s32 n) { (void)p; (void)n; }
 void osInvalDCache(void *p, s32 n) { (void)p; (void)n; }
 void osWritebackDCache(void *p, s32 n) { (void)p; (void)n; }
+void func_10024190(void *p, s32 n) { (void)p; (void)n; } /* P25: unnamed osWritebackDCache (init_eu_23CC0.s, cache 0x19 loop) */
 void osWritebackDCacheAll(void) {}
 void osMapTLB(s32 i, OSPageMask m, void *v, u32 e, u32 o, s32 a) { (void)i; (void)m; (void)v; (void)e; (void)o; (void)a; }
 void osUnmapTLB(s32 i) { (void)i; }
 void osUnmapTLBAll(void) {}
 u32 osVirtualToPhysical(void *p) { return (u32)(uintptr_t)p; }
+/* __osProbeTLB(vaddr): physical address of a TLB-mapped vaddr, or -1. The PC has no TLB: the mapped
+ * 0x16000000 segment is relocated to the n64_seg16 mirror at load time, so every pointer the game
+ * holds is already a final (wasm) address, as osVirtualToPhysical above assumes. */
+u32 __osProbeTLB(void *p) { return (u32)(uintptr_t)p; }
 
 /* ---------------- time: 46.875 MHz CPU counter from performance.now() ---------------- */
 
