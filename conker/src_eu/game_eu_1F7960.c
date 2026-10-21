@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+void *memcpy(void *, const void *, unsigned int);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CA150.s")
 
@@ -143,7 +144,6 @@ void func_151CC840(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CD2CC.s")
 
 s32 func_151A5580(s32, s32, s32, s32, s32, s32, u8, s32);
-s32 memcpy(s32, u8 **, s32);
 
 void func_151CD444(u8 *arg0) {
     s32 temp_v0;
