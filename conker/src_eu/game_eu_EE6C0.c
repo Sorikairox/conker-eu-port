@@ -33,7 +33,6 @@ void func_150C0F48(void *arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C0FC0.s")
-
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1138.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1698.s")

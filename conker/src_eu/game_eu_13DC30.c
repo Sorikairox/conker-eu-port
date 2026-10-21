@@ -168,8 +168,51 @@ loop:
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
+#ifdef NON_MATCHING
+void func_15114CBC(struct127 *, s32);
+extern s32 *D_800DC3C4;
+typedef void (*fn15114708)(u8 *, struct127 *, u8 *, void *);
 
+void func_15114708(void) {
+    s32 i;
+    s32 j;
+    s32 *mask;
+    u8 *e;
+    u8 *base;
+    fn15114708 fn;
+    struct127 *obj;
+    u8 f;
+
+    for (i = 0; i < D_800DC320; i++) {
+        if (D_800DC3C4[i] == 0) {
+            continue;
+        }
+        for (j = 0; j < 0x19 && D_800DC3C4[i] != 0; j++) {
+            mask = &D_800DC3C4[i];
+            if (!(*mask & (1 << j))) {
+                continue;
+            }
+            *mask ^= 1 << j;
+            base = (u8 *)D_800DBEF4;
+            e = base + i * 0xA0;
+            fn = *(fn15114708 *)(e + 0x78);
+            obj = (struct127 *)((u8 *)D_800CC2D0 + j * 0x32C);
+            if (fn != NULL && (e[0x92] != 0 || ((u8 *)obj)[0x127] != 0xFF)) {
+                (*fn)(e, obj, base, (void *)fn);
+                e = (u8 *)D_800DBEF4 + i * 0xA0;
+            }
+            f = e[0x4F];
+            if ((f & 4) == 4 && !(f & 8)) {
+                func_15114CBC(obj, i);
+            }
+        }
+        e = (u8 *)D_800DBEF4 + i * 0xA0;
+        e[0x4F] &= 0x73;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151148C8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114CBC.s")

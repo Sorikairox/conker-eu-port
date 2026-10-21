@@ -28,4 +28,38 @@ void func_1500FF4C(void) {
     func_1510CA2C(D_80091B68, 0, 0xAD, 0x75);
 }
 
+#ifdef NON_MATCHING
+s32 memcpy(u8 *, f32 *, s32);
+extern s32 D_8009068C;
+extern s32 D_800B1214;
+
+void func_1500FF7C(void) {
+    struct {
+        f32 u38;
+        f32 u3C;
+        u8 pad40[0x4];
+        f32 u44;
+    } sp;
+    struct260 *temp_v0;
+    u8 *temp_v0_2;
+
+    func_15195AA8(*D_800B0E00, D_8009068C, 1, -1, 0, 0, 0, -4);
+    func_15195AA8(D_800B1214, D_8009068C, 1, -1, 0, 1, 0, -4);
+    func_1500FDE0();
+    func_1500FF4C();
+    sp.u44 = 0.0f;
+    temp_v0 = func_151491F4(0x12C, -1, 0x12, 0U, 0xEU, 4, 0xFFU, 0);
+    if (temp_v0 != NULL) {
+        memcpy(((struct260 *)((u8 *)temp_v0 + 0x28)), &sp.u44, 4);
+    }
+    sp.u38 = 0.0f;
+    sp.u3C = 0.0f;
+    temp_v0_2 = func_15149130(0x12C, -1, 0x17, -1, 0U, 0x14U, (struct37 *)8, 0xFFU, 1);
+    D_80088C10 = temp_v0_2;
+    if (temp_v0_2 != NULL) {
+        memcpy(temp_v0_2 + 0x28, &sp.u38, 8);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_3D5F0/func_1500FF7C.s")
+#endif

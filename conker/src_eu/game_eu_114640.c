@@ -250,7 +250,6 @@ void func_150E7C50(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E821C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E856C.s")
-
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E8728.s")
 
 typedef struct { f32 x, y, z; } Vec3_150E892C;

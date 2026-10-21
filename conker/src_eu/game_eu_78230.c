@@ -517,7 +517,51 @@ void func_1504CA60(struct127 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504CB98.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_150511E8.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15051558.s")
+#ifdef NON_MATCHING
+f32 func_1505210C(u8 *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 arg4) {
+    f32 sp34;
+    f32 sp2C;
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 temp_f12;
+    f32 temp_f20;
+    f32 temp_f2;
+    f32 var_f20;
+    f32 var_f22;
+
+    temp_f20 = -arg2;
+    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x40)) * 0.017453292f;
+    sp2C = temp_f12;
+    sp34 = func_150AD780(temp_f12);
+    temp_f0 = func_150AD78C(temp_f12);
+    var_f22 = func_150484A0((arg1 * sp34) + (temp_f20 * temp_f0), 1.0f) * 57.295776f;
+    temp_f2 = func_150484A0((-arg1 * temp_f0) + (temp_f20 * sp34), 1.0f) * 57.295776f;
+    var_f20 = temp_f2;
+    if (var_f22 >= 180.0f) {
+        var_f22 -= 360.0f;
+    }
+    if (temp_f2 >= 180.0f) {
+        var_f20 = temp_f2 - 360.0f;
+    }
+    temp_f0_2 = -arg4;
+    if (arg4 < var_f22) {
+        var_f22 = arg4;
+    }
+    if (var_f22 < temp_f0_2) {
+        var_f22 = temp_f0_2;
+    }
+    if (arg4 < var_f20) {
+        var_f20 = arg4;
+    }
+    if (var_f20 < temp_f0_2) {
+        var_f20 = temp_f0_2;
+    }
+    *arg3 = var_f20;
+    return var_f22;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1505210C.s")
+#endif
 s32 func_1505A770(struct127 *);
 
 void func_15052260(struct127 *arg0) {

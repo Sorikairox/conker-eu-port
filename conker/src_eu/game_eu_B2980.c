@@ -69,8 +69,75 @@ u8 func_15085890(struct_eu_B2980 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150858A0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_15085710.s")
+#ifdef NON_MATCHING
+extern u16 D_8009015C;
+extern s32 D_800D255C;
+extern s32 D_800D2560;
+extern s32 D_800D2564;
+extern s32 D_800D2565;
+extern s32 D_800D2566;
+extern s32 D_800D2568;
+extern s8 D_800E1050;
 
+void func_15085710(s16 arg0, s16 arg1, s32 arg2) {
+    s32 o;
+    u8 *e;
+    s8 b;
+    s32 w;
+
+    if (arg0 >= 0xFF || (u32)(s32)arg1 >= 12) {
+        return;
+    }
+    o = arg0 * 0x1C;
+    e = (u8 *)&D_800D2138 + o + 4;
+    switch (arg1) {
+        case 0: *(s32 *)((u8 *)&D_800D255C + o) = arg2; return;
+        case 1: *(s32 *)((u8 *)&D_800D2560 + o) = arg2; return;
+        case 2:
+            if (D_8009015C & 1) {
+                arg2 = 6;
+            }
+            *((u8 *)&D_800D2564 + o) = arg2;
+            return;
+        case 3:
+            *(s8 *)(e + 8) = *(s8 *)(e + 8) + arg2;
+            b = *(s8 *)(e + 8);
+            *(s8 *)(e + 8) = (b >= 0x65) ? 0x64 : b;
+            return;
+        case 4:
+            if (!(D_8009015C & 1)) {
+                *(s8 *)(e + 8) = *(s8 *)(e + 8) - arg2;
+            }
+            return;
+        case 5: *((u8 *)&D_800D2565 + o) = arg2; return;
+        case 6:
+            *(s8 *)(e + 9) = *(s8 *)(e + 9) + arg2;
+            b = *(s8 *)(e + 9);
+            *(s8 *)(e + 9) = (b >= 0x64) ? 0x63 : b;
+            return;
+        case 7:
+            *(s8 *)(e + 9) = *(s8 *)(e + 9) - arg2;
+            b = *(s8 *)(e + 9);
+            *(s8 *)(e + 9) = (b < 0) ? 0 : b;
+            return;
+        case 8: *((u8 *)&D_800D2566 + o) = arg2; return;
+        case 9: *(s32 *)((u8 *)&D_800D2568 + o) = arg2; return;
+        case 10:
+            if (D_800BE616 != 0 && D_800E1050 != 0) {
+                return;
+            }
+            *(s32 *)(e + 0xC) += arg2;
+            return;
+        case 11:
+            w = *(s32 *)(e + 0xC) - arg2;
+            *(s32 *)(e + 0xC) = w;
+            *(s32 *)(e + 0xC) = (w < 0) ? 0 : w;
+            return;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_15085710.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150859AC.s")
 
 void func_15085ABC(s16 arg0)

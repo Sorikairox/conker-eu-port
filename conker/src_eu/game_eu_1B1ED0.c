@@ -300,4 +300,44 @@ void func_15187EE8(struct102 *arg0) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15188008.s")
 
+#ifdef NON_MATCHING
+s32 func_151F05C0(u8 *);
+extern f32 D_8008D918;
+
+void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3) {
+    f32 sp44;
+    f32 sp3C;
+    f32 sp34;
+    f32 sp30;
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 temp_f12;
+    f32 temp_f20;
+    f32 temp_f22;
+
+    temp_f12 = arg1 * D_8008D918;
+    arg1 = temp_f12;
+    arg2 *= D_8008D918;
+    arg3 *= D_8008D918;
+    sp44 = sinf(temp_f12);
+    temp_f20 = cosf(arg1);
+    temp_f22 = sinf(arg2);
+    sp34 = cosf(arg2);
+    sp3C = sinf(arg3);
+    sp30 = cosf(arg3);
+    func_151F05C0(arg0);
+    temp_f0 = sp44 * temp_f22;
+    (*(f32 *)((u8 *)arg0 + 0x18)) = sp44;
+    (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((sp34 * sp30) - (temp_f0 * sp3C));
+    (*(f32 *)((u8 *)arg0 + 4)) = (f32) ((sp34 * sp3C) + (temp_f0 * sp30));
+    (*(f32 *)((u8 *)arg0 + 8)) = (f32) (-temp_f22 * temp_f20);
+    temp_f0_2 = sp44 * sp34;
+    (*(f32 *)((u8 *)arg0 + 0x10)) = (f32) (-temp_f20 * sp3C);
+    (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) (temp_f20 * sp30);
+    (*(f32 *)((u8 *)arg0 + 0x20)) = (f32) ((temp_f22 * sp30) + (temp_f0_2 * sp3C));
+    (*(f32 *)((u8 *)arg0 + 0x28)) = (f32) (temp_f20 * sp34);
+    (*(f32 *)((u8 *)arg0 + 0x24)) = (f32) ((temp_f22 * sp3C) - (temp_f0_2 * sp30));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_151882DC.s")
+#endif

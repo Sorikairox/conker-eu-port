@@ -446,7 +446,52 @@ void func_1513E134(void) {
 }
 
 // positions a 4-vertex quad of half-size (arg4, arg5) at (arg1, arg2, arg3), rotated by angle arg6
+#ifdef NON_MATCHING
+void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
+    f32 sp48;
+    f32 sp30;
+    f32 sp1C;
+    f32 temp_f0;
+    f32 temp_f10_2;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f2;
+    f32 temp_f8;
+    f32 temp_f8_2;
+    s32 temp_f10;
+
+    sp48 = func_151423D8((arg6 - 0x40) & 0xFF);
+    temp_f0 = func_151423D8(arg6);
+    temp_f14 = arg4 * temp_f0;
+    temp_f12 = arg5 * sp48;
+    temp_f18 = arg1 + temp_f14;
+    arg0->unk40 = (s16) (s32) (temp_f18 - temp_f12);
+    temp_f10 = (s32) arg2;
+    arg0->unk42 = (s16) temp_f10;
+    temp_f16 = arg5 * temp_f0;
+    temp_f2 = arg4 * sp48;
+    temp_f8 = arg3 + temp_f16;
+    sp1C = temp_f8;
+    arg0->unk44 = (s16) (s32) (temp_f8 + temp_f2);
+    temp_f8_2 = arg1 - temp_f14;
+    sp30 = temp_f8_2;
+    arg0->unk52 = (s16) temp_f10;
+    arg0->unk50 = (s16) (s32) (temp_f8_2 - temp_f12);
+    arg0->unk54 = (s16) (s32) (sp1C - temp_f2);
+    arg0->unk62 = (s16) temp_f10;
+    arg0->unk60 = (s16) (s32) (sp30 + temp_f12);
+    temp_f10_2 = arg3 - temp_f16;
+    sp30 = temp_f10_2;
+    arg0->unk72 = (s16) temp_f10;
+    arg0->unk70 = (s16) (s32) (temp_f18 + temp_f12);
+    arg0->unk64 = (s16) (s32) (temp_f10_2 - temp_f2);
+    arg0->unk74 = (s16) (s32) (sp30 + temp_f2);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E13C.s")
+#endif
 // NON-MATCHING: arg0 lives in a1 and stack layout differs (frame 0x50)
 // void func_1513E13C(struct210 *arg0_, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6) {
 //     Vtx *arg0 = (Vtx *)&arg0_->unk40;

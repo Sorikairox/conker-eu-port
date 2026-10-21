@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
+#endif
 
 
 struct151 *func_1000B1B0(s32 arg0) {
@@ -325,8 +328,49 @@ s32 func_1000C350(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C530.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C7E8.s")
+#ifdef NON_MATCHING
+s32 func_1000C7E8(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 arg4) {
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 var_f2;
+    s32 var_a2;
+    s32 var_v0;
 
+    var_a2 = arg0;
+    if (D_800BE9F0 == 0x31) {
+        if (var_a2 != 2) {
+            if (func_1000B1B0(9) == NULL) {
+                func_1000E704(0x3E, 0, 0xFFFF);
+                func_1000E40C(0x3E, 0x7FFF);
+                func_1000D96C(0x3D, 0x3E, 4);
+            }
+            return 2;
+        }
+        return 0;
+    }
+    var_v0 = D_8002B070;
+    if (var_v0 == 0) {
+        var_v0 = 1;
+        D_8002B070 = 1;
+    }
+    if (var_a2 != var_v0) {
+        var_a2 = var_v0;
+    }
+    temp_f14 = arg2 - -4000.0f;
+    temp_f12 = 24000.0f - (sqrtf((temp_f14 * temp_f14) + (arg4 * arg4)) * 10.0f);
+    var_f2 = temp_f12;
+    if (temp_f12 < 100.0f) {
+        var_f2 = 100.0f;
+    } else if (temp_f12 > 24000.0f) {
+        var_f2 = 24000.0f;
+    }
+    arg0 = var_a2;
+    func_1000E40C(0x3E, (s32) var_f2);
+    return arg0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C7E8.s")
+#endif
 s32 func_1000C934(s32 arg0, u8 arg1, f32 arg2, f32 arg3) {
     s32 vol;
     s32 max;
@@ -510,7 +554,76 @@ s32 func_1000CDA0(u8 arg0, s32 *arg1) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D2F8.s")
+#ifdef NON_MATCHING
+void func_1000CBF0(s32, s32, s32);
+void func_1000CEAC(s32);
+void func_1000D2F8(s32, f32, f32, s32);
+s32 func_151F2CDC(void);
+extern s8 D_800422A0;
+
+void func_1000D758(f32 arg0, f32 arg1, s32 arg2) {
+    s32 m5 = 0;
+    s32 m40 = 0;
+    s32 m34 = 0;
+    s32 m12 = 0;
+    s32 i;
+    s32 idx;
+    s32 w;
+    s32 t;
+    u16 lvl;
+
+    if ((u8)D_800422A0 != 0) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        if (D_800417B0[i] == NULL) {
+            continue;
+        }
+        idx = *(s32 *)((u8 *)D_800417B0[i] + 4);
+        if (idx <= 0) {
+            continue;
+        }
+        w = *(s32 *)((u8 *)D_8002B074 + idx * 16 + 4);
+        t = w & ~0xF0;
+        if (w & 0x40) {
+            m40 |= 1 << i;
+        }
+        if (t == 5) {
+            m5 |= 1 << i;
+        } else if (t == 4 || t == 3) {
+            m34 |= 1 << i;
+        } else if (t == 1 || t == 2) {
+            m12 |= 1 << i;
+        }
+    }
+    if (m5 != 0) {
+        func_1000CBF0(0x1770, 0x400, m5 ^ 0xFF ^ m40);
+        func_1000CBF0(0x8000, 0x6400, m5);
+    } else if (m34 != 0) {
+        func_1000CBF0(0x1F4, 0x400, m34 ^ 0xFF);
+        func_1000CBF0(0x8000, 0x800, m34);
+    } else {
+        lvl = D_800427F4;
+        if (func_151F2CDC() == 1) {
+            lvl = D_800427F4;
+            if ((lvl < 0x7D || lvl >= 0x81) && lvl < 0x1C9 && lvl != 0x170 && lvl != 0x171) {
+                func_1000CBF0(0x36B0, 0x200, m12 ^ 0xFF);
+                goto done;
+            }
+        }
+        func_1000CBF0(0x8000, 0x800, 0xFF);
+    }
+done:
+    for (i = 0; i < 3; i++) {
+        func_1000CEAC(i);
+    }
+    for (i = 0; i < 3; i++) {
+        func_1000D2F8(i, arg0, arg1, arg2);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D758.s")
+#endif
 #ifdef NON_MATCHING
 void func_1000D96C(s32 arg0, s32 arg1, s32 arg2) {
     struct137 *sp2C;

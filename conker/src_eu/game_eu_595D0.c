@@ -18,8 +18,59 @@ typedef struct {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C1D4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C494.s")
+#ifdef NON_MATCHING
+s32 func_15022A8C(struct127 *);
+s32 func_1506196C(struct127 *, s32);
+struct102 *func_1510DEF0(s32, struct127 *, s32, s32, s32);
+extern u8 D_800C3A7A;
 
+void func_1502C494(void) {
+    s32 var_a2;
+    s32 var_s0;
+    s32 var_s2;
+    s32 var_v0;
+    struct127 *var_s1;
+    u8 *temp_a0;
+
+    var_s1 = D_800CC2D0;
+    do {
+        if (var_s1->interaction_state != 0) {
+            var_s2 = 0;
+            if ((var_s1->unk5 != 3) && (var_s1->id != 0xFF) && (var_s1->unk123 == 0) && ((var_s1->unk66 & 0x10) != 0x10) && (var_s1->unk160 != 0) && (var_s1->unk65 == 0) && ((D_800C3638 == 0) || (D_800C3A7A != 0) || (func_15022A8C(var_s1) != 0)) && ((var_s1->unk88 == 0) || (var_s1->unkCC >= -0x96))) {
+                var_s0 = 0;
+                if (D_80082FA0 >= 0) {
+                    do {
+                        if (func_1506196C(var_s1, var_s0) != 0) {
+                            var_s2 = 1;
+                        }
+                        var_s0 += 1;
+                    } while (D_80082FA0 >= var_s0);
+                }
+            }
+            if (var_s2 != 0) {
+                if (var_s1->unk2D4 == NULL) {
+                    var_a2 = 0;
+                    var_v0 = 0;
+                    if (var_s1->id == 0x4D) {
+                        var_a2 = 2;
+                        var_v0 = 1;
+                    }
+                    var_s1->unk2D4 = func_1510DEF0(0, var_s1, var_a2, 0, var_v0);
+                }
+            } else {
+                temp_a0 = var_s1->unk2D4;
+                if (temp_a0 != NULL) {
+                    func_1516972C((struct102 *) temp_a0);
+                    var_s1->unk2D4 = NULL;
+                }
+            }
+        }
+        var_s1 = (struct127 *)((u8 *)var_s1 + (0x32C));
+    } while ((s32)var_s1 != (s32)&D_800D121C);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C494.s")
+#endif
 void func_1502C380(void) {
     D_800C42AC = D_800C42A8 = (&D_800C3E80)[D_800BE9C0];
     D_800C429A = 0;

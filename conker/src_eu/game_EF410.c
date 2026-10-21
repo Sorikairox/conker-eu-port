@@ -5,7 +5,109 @@
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
+#ifdef NON_MATCHING
+s32 func_15151FA8(f32 *, s32, s32);
+
+void func_150C2290(s32 arg0) {
+    struct {
+        f32 u18;
+        f32 u1C;
+        f32 u20;
+        f32 u24;
+        f32 u28;
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        s16 u3C;
+        s16 u3E;
+        s16 u40;
+        s16 u42;
+        s16 u44;
+        s16 u46;
+        s16 u48;
+        s16 u4A;
+        s16 u4C;
+        s16 u4E;
+        s8 u50;
+        s8 u51;
+        s8 u52;
+        u8 pad53[0x1];
+        s32 u54;
+        s32 u58;
+        s32 u5C;
+        s32 u60;
+        s32 u64;
+        s32 u68;
+        s8 u6C;
+        s8 u6D;
+        s8 u6E;
+        u8 pad6F[0x1];
+        s32 u70;
+        s32 u74;
+        s32 u78;
+        s32 u7C;
+        s32 u80;
+        s32 u84;
+        s32 u88;
+        s32 u8C;
+        s32 u90;
+        s8 u94;
+        s8 u95;
+        u8 pad96[0x2];
+        s16 u98;
+        s16 u9A;
+    } sp;
+
+    sp.u18 = 8152.0f;
+    sp.u1C = 40.0f;
+    sp.u3E = 3;
+    sp.u40 = -0x29;
+    sp.u44 = -0x16;
+    sp.u42 = 0x15;
+    sp.u46 = 0x16;
+    sp.u48 = 7;
+    sp.u4E = 0x15;
+    sp.u50 = 0xB;
+    sp.u20 = 309.0f;
+    sp.u3C = 2;
+    sp.u4C = 0x30;
+    sp.u52 = 0x28;
+    sp.u54 = 1;
+    sp.u58 = 4;
+    sp.u6C = 0xFF;
+    sp.u6D = 0xFF;
+    sp.u70 = 3;
+    sp.u4A = 0;
+    sp.u51 = 1;
+    sp.u5C = 0;
+    sp.u60 = 0;
+    sp.u64 = 0;
+    sp.u68 = 0;
+    sp.u6E = 0;
+    sp.u74 = 0xFF;
+    sp.u78 = 0;
+    sp.u7C = 0x220005;
+    sp.u80 = 0x1D0600;
+    sp.u84 = 1;
+    sp.u88 = 0x3B;
+    sp.u8C = 0x80;
+    sp.u90 = 0x20;
+    sp.u94 = 0;
+    sp.u95 = 7;
+    sp.u98 = 0xC;
+    sp.u9A = 0x15;
+    sp.u34 = 100.0f;
+    sp.u38 = 57.5f;
+    sp.u24 = 55.6f;
+    sp.u28 = 39.0f;
+    sp.u2C = 0.46f;
+    sp.u30 = 1.0f;
+    func_15151FA8(&sp.u18, arg0 & 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2290.s")
+#endif
 // TODO: figure out this struct!
 // void func_150C2290(s32 arg0) {
 //     s16 sp9A;

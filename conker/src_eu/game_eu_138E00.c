@@ -122,8 +122,60 @@ void func_1510BC10(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BC10.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BD34.s")
+#ifdef NON_MATCHING
+u8 *func_1510BD34(u8 *arg0, s32 arg1) {
+    u8 *temp_a0;
+    u8 *temp_a0_10;
+    u8 *temp_a0_11;
+    u8 *temp_a0_2;
+    u8 *temp_a0_3;
+    u8 *temp_a0_4;
+    u8 *temp_a0_5;
+    u8 *temp_a0_6;
+    u8 *temp_a0_7;
+    u8 *temp_a0_8;
+    u8 *temp_a0_9;
 
+    (*(s32 *)((u8 *)arg0 + 0)) = 0xE7000000;
+    (*(s32 *)((u8 *)arg0 + 4)) = 0;
+    temp_a0_2 = arg0 + 8;
+    (*(s32 *)((u8 *)temp_a0_2 + 4)) = 1;
+    (*(s32 *)((u8 *)temp_a0_2 + 0)) = 0xF9000000;
+    temp_a0_3 = temp_a0_2 + 8;
+    (*(s32 *)((u8 *)temp_a0_3 + 0)) = 0xDA380003;
+    (*(u8 **)((u8 *)temp_a0_3 + 4)) = D_80089810;
+    temp_a0_4 = temp_a0_3 + 8;
+    (*(s32 *)((u8 *)temp_a0_4 + 0)) = 0xDB0E0000;
+    temp_a0_5 = temp_a0_4 + 8;
+    (*(s32 *)((u8 *)temp_a0_4 + 4)) = (s32) (*(u16 *)((u8 *)((D_800BE628 + (arg1 * 0x180))) + 0xB8));
+    (*(s32 *)((u8 *)temp_a0_5 + 4)) = 3;
+    (*(s32 *)((u8 *)temp_a0_5 + 0)) = 0xDB040004;
+    temp_a0_6 = temp_a0_5 + 8;
+    (*(s32 *)((u8 *)temp_a0_6 + 0)) = 0xDB04000C;
+    (*(s32 *)((u8 *)temp_a0_6 + 4)) = 3;
+    temp_a0_7 = temp_a0_6 + 8;
+    (*(s32 *)((u8 *)temp_a0_7 + 0)) = 0xDB040014;
+    (*(s32 *)((u8 *)temp_a0_7 + 4)) = 0xFFFD;
+    temp_a0_8 = temp_a0_7 + 8;
+    (*(s32 *)((u8 *)temp_a0_8 + 0)) = 0xDB04001C;
+    (*(s32 *)((u8 *)temp_a0_8 + 4)) = 0xFFFD;
+    temp_a0_9 = temp_a0_8 + 8;
+    (*(s32 *)((u8 *)temp_a0_9 + 0)) = 0xD9EFFFFF;
+    (*(s32 *)((u8 *)temp_a0_9 + 4)) = 0;
+    temp_a0_10 = temp_a0_9 + 8;
+    (*(s32 *)((u8 *)temp_a0_10 + 0)) = 0xDA380007;
+    (*(s32 *)((u8 *)temp_a0_10 + 4)) = (s32) (D_800BE628 + (arg1 * 0x180) + (D_800BE9C0 << 6) + 0x100);
+    temp_a0_11 = temp_a0_10 + 8;
+    (*(s32 *)((u8 *)temp_a0_11 + 0)) = 0xDA380005;
+    temp_a0 = temp_a0_11 + 8;
+    (*(s32 *)((u8 *)temp_a0_11 + 4)) = (s32) (*(s32 *)((u8 *)&D_800DC6D0 + (D_800BE9C0 * 4)) + (arg1 << 6));
+    (*(s32 *)((u8 *)temp_a0 + 0)) = 0xEF082C3F;
+    (*(s32 *)((u8 *)temp_a0 + 4)) = 0x552230;
+    return temp_a0 + 8;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BD34.s")
+#endif
 #ifdef NON_MATCHING
 extern f32 D_800D3A00;
 

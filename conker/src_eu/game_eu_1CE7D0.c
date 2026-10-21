@@ -68,15 +68,79 @@ void func_151A14D8(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     func_151A177C(arg0, arg1, arg2, 163.0f, 2.019f, 0xA0, 0x4B, 0x41F, 0x4F6, 1, 2.019f, 0x87, 0x44, 0x41F, 0x4F6, 2, 1, 2.019f, 0x46, 0x42, 0x41F, 0x4F6, 7, 0x41, 4, 1, arg3, arg4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A15C0.s")
+#ifdef NON_MATCHING
+void func_151A15C0(f32 arg0, f32 arg1, f32 arg2, s16 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7) {
+    s16 temp_v0;
+    s16 var_t4;
+    s32 temp_f10;
+    s32 temp_f18;
+    s32 temp_f4;
+    s32 temp_f8;
 
+    temp_v0 = arg3 - 0x20;
+    var_t4 = temp_v0;
+    if (temp_v0 <= 0) {
+        var_t4 = 1;
+    }
+    temp_f18 = (s32) (70.0f * arg5);
+    temp_f8 = (s32) (30.0f * arg5);
+    temp_f4 = (s32) (1500.0f * arg4);
+    temp_f10 = (s32) (100.0f * arg4);
+    func_151A177C(arg0, arg1, arg2, 250.0f * arg4, 1.0f, (s32) (s16) temp_f18, (s32) (s16) temp_f8, (s32) (s16) temp_f4, (s32) (s16) temp_f10, 0x12, 1.0f, (s32) (90.0f * arg5), (s32) (20.0f * arg5), (s32) (s16) temp_f4, (s32) (s16) temp_f10, (s32) var_t4, 0x10, 1.0f, (s32) (s16) temp_f18, (s32) (s16) temp_f8, (s32) (s16) temp_f4, (s32) (s16) temp_f10, (s32) (15.0f * arg4), (s32) (10.0f * arg4), 0x12, temp_v0 + 0x10, (u8) (s32) arg6, arg7);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A15C0.s")
+#endif
 void func_151A177C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB, s32 argC, s32 argD, s32 argE, s32 argF, s32 arg10, f32 arg11, s32 arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, u8 arg1A, s32 arg1B) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1794.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1D0C.s")
+#ifdef NON_MATCHING
+void func_151A1D0C(u8 *arg0) {
+    s16 temp_lo;
+    s16 temp_lo_2;
+    s16 temp_v1;
+    s32 temp_t5;
+    s32 temp_t6;
+    s32 temp_t7;
+    u8 *temp_v0;
+    u8 *temp_v0_2;
 
+    temp_v1 = (*(s16 *)((u8 *)arg0 + 0x38));
+    temp_v0 = arg0 + 0x50;
+    if ((*(s16 *)((u8 *)arg0 + 0x54)) < temp_v1) {
+        (*(s8 *)((u8 *)arg0 + 0x3F)) = (s8) (((*(s16 *)((u8 *)temp_v0 + 2)) - temp_v1) * (*(s16 *)((u8 *)temp_v0 + 0)));
+    }
+    temp_v0_2 = arg0 + 0x50;
+    if ((*(s16 *)((u8 *)temp_v0_2 + 0xA)) < temp_v1) {
+        temp_lo = ((*(s16 *)((u8 *)temp_v0_2 + 8)) - temp_v1) * (*(s16 *)((u8 *)temp_v0_2 + 6));
+        (*(s16 *)((u8 *)arg0 + 0x36)) = temp_lo;
+        (*(s16 *)((u8 *)arg0 + 0x34)) = temp_lo;
+    }
+    if ((*(s16 *)((u8 *)temp_v0_2 + 0xC)) < temp_v1) {
+        temp_t7 = (((*(s16 *)((u8 *)arg0 + 0x20)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2C))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0xE)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x14))) * D_800BE9E4);
+        (*(s16 *)((u8 *)arg0 + 0x20)) = (s16) (temp_t7 >> 8);
+        (*(u8 *)((u8 *)arg0 + 0x2C)) = (u8) temp_t7;
+        temp_t6 = (((*(s16 *)((u8 *)arg0 + 0x22)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2E))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0x10)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x16))) * D_800BE9E4);
+        (*(s16 *)((u8 *)arg0 + 0x22)) = (s16) (temp_t6 >> 8);
+        (*(u8 *)((u8 *)arg0 + 0x2E)) = (u8) temp_t6;
+        temp_t5 = (((*(s16 *)((u8 *)arg0 + 0x24)) << 8) | (*(u8 *)((u8 *)arg0 + 0x2D))) + ((((*(s16 *)((u8 *)temp_v0_2 + 0x12)) << 8) | (*(s16 *)((u8 *)temp_v0_2 + 0x18))) * D_800BE9E4);
+        (*(s16 *)((u8 *)arg0 + 0x24)) = (s16) (temp_t5 >> 8);
+        (*(u8 *)((u8 *)arg0 + 0x2D)) = (u8) temp_t5;
+    }
+    if ((*(s16 *)((u8 *)arg0 + 0x38)) < (*(s16 *)((u8 *)temp_v0_2 + 0x1A))) {
+        (*(s8 *)((u8 *)arg0 + 0x3F)) = (s8) ((*(s16 *)((u8 *)arg0 + 0x38)) * (*(s16 *)((u8 *)temp_v0_2 + 0x1C)));
+    }
+    if ((*(s16 *)((u8 *)arg0 + 0x38)) < (*(s16 *)((u8 *)temp_v0_2 + 0x1E))) {
+        temp_lo_2 = (*(s16 *)((u8 *)arg0 + 0x38)) * (*(s16 *)((u8 *)temp_v0_2 + 0x20));
+        (*(s16 *)((u8 *)arg0 + 0x36)) = temp_lo_2;
+        (*(s16 *)((u8 *)arg0 + 0x34)) = temp_lo_2;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1D0C.s")
+#endif
 void func_151A1E8C(u8 *arg0) {
     typedef struct { s32 w[3]; } Blk12;
     struct260 *temp_v0;

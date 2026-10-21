@@ -551,8 +551,71 @@ void func_151D1990(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D19F8.s")
+#ifdef NON_MATCHING
+void func_151D19F8(u8 *arg0) {
+    struct {
+        s32 u50;
+        u8 pad54[0x8];
+        s16 u5C;
+        s16 u5E;
+        s32 u60;
+        s8 u64;
+        s8 u65;
+        u8 pad66[0x2];
+        s32 u68;
+        u8 * u6C;
+        f32 u70;
+        s8 u74;
+        u8 pad75[0x3];
+        f32 u78;
+        f32 u7C;
+        f32 u80;
+        f32 u84;
+        f32 u88;
+    } sp;
+    u8 *sp44;
+    u8 *temp_v0;
+    u8 *temp_v1;
 
+    sp.u6C = arg0;
+    sp.u74 = 0xFF;
+    sp.u70 = 0.0f;
+    temp_v1 = arg0 + 0x28;
+    if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x28))) + 4)) == 0x25) {
+        sp.u78 = 800.0f;
+        sp.u7C = 36.0f;
+        sp.u80 = 50.0f;
+        sp.u84 = 200.0f;
+    } else {
+        if (D_80082FA0 > 0) {
+            sp.u78 = 260.0f;
+        } else {
+            sp.u78 = 500.0f;
+        }
+        sp.u7C = 40.0f;
+        sp.u80 = 40.0f;
+        sp.u84 = 180.0f;
+    }
+    sp.u65 = 0x19;
+    sp.u88 = (*(f32 *)((u8 *)((*(u8 **)((u8 *)temp_v1 + 0))) + 0x14C));
+    (*(s32 *)((u8 *)(&sp.u50) + 0)) = (s32) (*(s32 *)((u8 *)temp_v1 + 0x18));
+    (*(s32 *)((u8 *)(&sp.u50) + 4)) = (s32) (*(s32 *)((u8 *)temp_v1 + 0x1C));
+    (*(s32 *)((u8 *)(&sp.u50) + 8)) = (s32) (*(s32 *)((u8 *)temp_v1 + 0x20));
+    sp.u5C = 0x12C;
+    sp.u5E = 0x36;
+    sp.u60 = 0x13;
+    sp.u64 = 6;
+    sp.u68 = 0;
+    sp44 = temp_v1;
+    temp_v0 = func_15147FF0(&sp.u50, 0x20, 0x28, 0, 0x11, 0x12, 0, 0, 0, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+    if (temp_v0 != NULL) {
+        memcpy((*(s32 *)((u8 *)temp_v0 + 0x98)), &sp.u6C, 0x20);
+        (*(u8 **)((u8 *)sp44 + 8)) = temp_v0;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D19F8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D1B80.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D1F2C.s")

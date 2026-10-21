@@ -73,4 +73,40 @@ s32 func_15035A04(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_150362D8.s")
 
+#ifdef NON_MATCHING
+s32 func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+s32 func_1507C7C0(struct127 *, s16 *, s32 *, s32 *);
+
+void func_15036438(void) {
+    struct {
+        s32 u8E;
+        s16 u92;
+    } sp;
+    f32 temp_f0;
+    f32 temp_f0_2;
+    s32 var_s1;
+    struct127 *var_s0;
+    u8 temp_v0;
+
+    var_s0 = D_800CC2D0;
+    var_s1 = 0;
+    if (!(D_800DBFF0->unk5F0 & 1)) {
+        do {
+            if ((var_s0->interaction_state != 0) && ((temp_v0 = var_s0->unk5, (temp_v0 == 0)) || (temp_v0 == 1))) {
+                temp_f0 = var_s0->unk118;
+                if ((temp_f0 != -10000.0f) && (temp_f0 < var_s0->y_position) && (var_s0->unk180 < temp_f0) && (var_s0->unk28 > 5.0f)) {
+                    func_1507C7C0(var_s0, &sp.u92, &(*(s32 *)((u8 *)&sp + 0x2)), &sp.u8E);
+                    temp_f0_2 = var_s0->unk118;
+                    if ((f32) sp.u92 < (temp_f0_2 - var_s0->unk180)) {
+                        func_15035AF8(1, var_s1, var_s0->x_position, temp_f0_2, var_s0->z_position, 0.0f, 0.0f, 100.0f, 150.0f, 127.0f);
+                    }
+                }
+            }
+            var_s1 += 1;
+            var_s0 = (struct127 *)((u8 *)var_s0 + (0x32C));
+        } while (var_s1 != 0x19);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15036438.s")
+#endif

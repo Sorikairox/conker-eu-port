@@ -110,4 +110,63 @@ Gfx *func_15177638(Gfx *gdl, u8 *arg1, s16 arg2) {
     return gdl;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_8008D450;
+
+void func_151777CC(u8 arg0) {
+    f32 sp28;
+    f32 temp_f12;
+    f32 temp_f20;
+    f32 temp_f20_2;
+    f32 temp_f2;
+    f32 temp_f2_2;
+    f32 temp_f2_3;
+    f32 temp_f2_4;
+    s32 temp_a0;
+    s32 temp_f16;
+    s32 temp_f18;
+    s32 temp_f6;
+    s32 temp_f8;
+    s32 temp_s1;
+    s32 temp_t6;
+    u8 *temp_s0;
+
+    temp_t6 = arg0;
+    temp_s0 = ((s32 *)((u8 *)&D_8008D450 + (temp_t6 * 0x38)));
+    temp_s1 = D_800DE2B8[temp_t6].x0;
+    temp_f2 = func_150AD78C((*(f32 *)((u8 *)temp_s0 + 0x24)) * 0.017453292f) * (*(f32 *)((u8 *)temp_s0 + 0x28));
+    (*(f32 *)((u8 *)temp_s0 + 0x18)) = temp_f2;
+    temp_f20 = temp_f2 * 0.017453292f;
+    sp28 = func_150AD78C(temp_f20);
+    temp_f2_2 = (*(f32 *)((u8 *)temp_s0 + 0x30));
+    temp_f18 = (s32) (temp_f2_2 * func_150AD780(temp_f20));
+    temp_f8 = (s32) (temp_f2_2 * sp28);
+    temp_a0 = -temp_f18;
+    (*(s16 *)((u8 *)temp_s1 + 0xA0)) = (s16) temp_a0;
+    (*(s16 *)((u8 *)temp_s1 + 0xB0)) = (s16) temp_a0;
+    (*(s16 *)((u8 *)temp_s1 + 0x110)) = (s16) temp_f18;
+    (*(s16 *)((u8 *)temp_s1 + 0x120)) = (s16) temp_f18;
+    (*(s16 *)((u8 *)temp_s1 + 0x112)) = (s16) temp_f8;
+    (*(s16 *)((u8 *)temp_s1 + 0x122)) = (s16) temp_f8;
+    (*(s16 *)((u8 *)temp_s1 + 0xA2)) = (s16) temp_f8;
+    (*(s16 *)((u8 *)temp_s1 + 0xB2)) = (s16) temp_f8;
+    temp_f2_3 = func_150AD78C(((*(f32 *)((u8 *)temp_s0 + 0x24)) - 30.0f) * 0.017453292f) * (*(f32 *)((u8 *)temp_s0 + 0x28));
+    (*(f32 *)((u8 *)temp_s0 + 0x18)) = temp_f2_3;
+    temp_f20_2 = temp_f2_3 * 0.017453292f;
+    sp28 = func_150AD78C(temp_f20_2);
+    temp_f2_4 = (*(f32 *)((u8 *)temp_s0 + 0x34));
+    temp_f16 = (s32) (temp_f2_4 * func_150AD780(temp_f20_2));
+    temp_f6 = (s32) (temp_f2_4 * sp28);
+    (*(s16 *)((u8 *)temp_s1 + 0xE0)) = (s16) -temp_f16;
+    (*(s16 *)((u8 *)temp_s1 + 0x130)) = (s16) temp_f16;
+    (*(s16 *)((u8 *)temp_s1 + 0xE2)) = (s16) temp_f6;
+    (*(s16 *)((u8 *)temp_s1 + 0x132)) = (s16) temp_f6;
+    (*(f32 *)((u8 *)temp_s0 + 0x24)) = (f32) ((*(f32 *)((u8 *)temp_s0 + 0x24)) + (*(f32 *)((u8 *)temp_s0 + 0x1C)));
+    temp_f12 = (*(f32 *)((u8 *)temp_s0 + 0x24));
+    if (temp_f12 >= 360.0f) {
+        (*(f32 *)((u8 *)temp_s0 + 0x24)) = (f32) (temp_f12 - 360.0f);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_151777CC.s")
+#endif

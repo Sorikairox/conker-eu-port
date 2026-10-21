@@ -974,7 +974,34 @@ void func_15077F34(void) {
     D_800D154C->unk250 = D_800D1891;
 }
 
+#ifdef NON_MATCHING
+void func_15077F64(void) {
+    u8 sp1E;
+    s32 temp_t3;
+    s32 var_a0;
+    s32 var_a1;
+    u8 temp_t6;
+    u8 *temp_v0;
+
+    temp_t6 = D_800D1890 - 1;
+    temp_v0 = D_800D2104[D_800D154C->unk13F] + (D_800D154C->unk21E * 8);
+    sp1E = temp_t6;
+    D_800D154C->unk78 = func_1505A630((f32) (*(s16 *)((u8 *)temp_v0 + 8)) - D_800D154C->x_position, D_800D154C->z_position - (f32) (*(s16 *)((u8 *)temp_v0 + 0xC)), 0);
+    temp_t3 = ((s32) (D_800D154C->unk78 - D_800D154C->unk76) >> 8) & 0xFF;
+    var_a1 = temp_t3;
+    var_a0 = temp_t3;
+    if (temp_t3 & 0x80) {
+        var_a0 = -temp_t3 & 0xFF;
+        var_a1 = var_a0;
+    }
+    if ((s32) *D_80099DFC[temp_t6] < var_a0) {
+        D_800D154C->unk250 = D_800D1891;
+        func_15056A00(D_800D154C, var_a1, temp_t6 & 0xFF);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15077F64.s")
+#endif
 // NON-MATCHING: what is D_800D2104 ???
 // void func_15056A00(s32, s32, u8);
 // void func_15077F64(void) {
