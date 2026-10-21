@@ -157,7 +157,29 @@ void func_1515A120(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A178.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A68C.s")
+s32 func_1515A68C(u8 *arg0, s32 arg1) {
+    u8 *p;
+    f32 s;
+    f32 t;
+    f32 c;
+
+    p = arg0 + 0xA8;
+    p[4] += *(s8 *)(p + 6) * D_800BE9E4;
+    p[5] += *(s8 *)(p + 7) * D_800BE9E4;
+    s = func_151423D8(p[4] - 0x40);
+    c = func_151423D8(p[5] - 0x40);
+    *(f32 *)(arg0 + 0x38) = *(f32 *)(p + 8) * s + *(f32 *)(p + 0);
+    *(f32 *)(arg0 + 0x3C) = *(f32 *)(p + 0xC) * c + *(f32 *)(p + 0);
+    if (D_800BE9E4 && D_800BE9E4 && D_800BE9E4) { // fakematch: permuter; orders the p[0x20] / D_800BE9A4 loads
+    }
+    *(f32 *)(p + 0x1C) += *(f32 *)(p + 0x20) * D_800BE9A4;
+    *(f32 *)(p + 0x1C) = t = func_15144B68(*(f32 *)(p + 0x1C));
+    s = sinf(t);
+    *(f32 *)(arg0 + 0x4C) = *(f32 *)(p + 0x10) * s;
+    *(f32 *)(arg0 + 0x50) = *(f32 *)(p + 0x14) * s;
+    *(f32 *)(arg0 + 0x54) = *(f32 *)(p + 0x18) * s;
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A7A8.s")
 

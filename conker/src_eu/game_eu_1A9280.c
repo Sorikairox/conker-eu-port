@@ -66,7 +66,28 @@ void func_1517DB6C(s16 arg0, s16 arg1, s16 arg2, s32 arg3, s32 arg4, s32 arg5) {
     func_1517DAE8(arg0, arg1, arg2, D_800DBFF0[arg3].unk380, arg4, arg5, (s32) D_800DDD1C >> 3);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517DC00.s")
+typedef struct { s16 x, y, z; u8 idx; u8 pad7; u16 a; u16 b; f32 s; } EntDC00;
+extern s32 D_800DE188;
+s32 func_1517D5E4(s32, s16, s16, s16, f32, s32, s32, s32, s32, s32);
+
+s32 func_1517DC00(s32 arg0, u16 *arg1) {
+    s32 saved;
+
+    saved = D_800DE188;
+    D_800DDD1C += 5;
+    
+    if (D_800DDD1C >= 200) {
+        D_800DDD1C -= 200;
+    }
+    while (D_8008CEB0 != 0) {
+        D_8008CEB0--;
+        if (arg1 != 0) {
+            arg0 = func_1517D5E4(arg0, ((EntDC00 *)D_800DE158)[D_8008CEB0].x, ((EntDC00 *)D_800DE158)[D_8008CEB0].y, ((EntDC00 *)D_800DE158)[D_8008CEB0].z, ((EntDC00 *)D_800DE158)[D_8008CEB0].s, ((EntDC00 *)D_800DE158)[D_8008CEB0].a, ((EntDC00 *)D_800DE158)[D_8008CEB0].b, 16, 32, (s32)(arg1 + ((EntDC00 *)D_800DE158)[D_8008CEB0].idx * 640));
+        }
+    }
+    D_800DE188 = saved;
+    return arg0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517D7B0.s")
 

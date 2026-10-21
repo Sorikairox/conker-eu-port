@@ -1194,3 +1194,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **Return expression after the early returns**: a single `return x == 0;` placed after `else { return 1; }` blocks, not inside the innermost if, gives the target's `b L; or a0,t1` + shared `sltiu` (`func_1000CDA0`).
 4. A repeated mask test written inline twice (`(w & ~0xF0) == 1 || (w & ~0xF0) == 3`) instead of a temp `t` changed the s-register roles to the target's (`func_1000E17C`, local permuter).
 5. Variables that may be read uninitialised (a `best` pointer only set inside the search loop) are stack-homed by IDO (`sw t1,0x78(sp)` after the loop, `lw` before it): keep them uninitialised in that branch, as the target does (`func_1000F6B8`).
+
+## s134 recipes (pointer-typed args, base pointer kept in an s-reg, homed args)
+1. **`multu x, K; sll t, 1; addu t, arg` after `K` was folded nowhere else** = pointer arithmetic on a `u16 *` arg: `(s32)(arg1 + idx * 640)`. Writing `idx * 640 * 2 + arg1` folds to one `1280` constant (`func_1517DC00`, SIZE+2 -> OK).
+2. **A base pointer `p = arg0 + K` held in its own s-reg (`addiu s0, s1, K` after the first call) while early accesses use `arg0 + K + off`**: write *every* access of that region through `p` (`p[4] += ...`), not `arg0[0xAC]`; mixing makes IDO fold `p` and drop an s-reg (`func_1515A68C`).
+3. **A pointer arg reloaded from its stack home before every use, even twice inside one `a || b`**: declare the parameter `u8 *volatile arg1`; a byte arg homed (`sw a2`) and reloaded once for a late call = `(&arg2)[0]` at that call (`func_15191EF0`, size right, still DIFF31).
+4. Unused declared locals still take a frame slot at -O2 (s129 recipe 1): an unused `e` pointer moved the only spilled local from 0x4C to 0x48 (`func_1517DC00`).
+
