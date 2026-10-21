@@ -62,3 +62,5 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 156	wt	game 0x15130000-0x1518FFFF+dbg	2	468	130	last func_1516972C callers stuck on register allocation; US-name sweep found only 1
 158	wt	game 0x15130000-0x1518FFFF+dbg	6	2572	132	breadth: 11 fresh rows tried, 6 matched; game_161520 .rodata ownership blocked by duplicate literal
 155	main	game>=0x15190000	5	3152	135	func_15154488 spawner family solved (block-scoped pointer); display-list builders first try
+160	wt	game 0x15130000-0x1518FFFF+dbg	8	2736	130	game_161520 owns .rodata (externs kept for frame), 3 parked drafts applied; 5/10 fresh rows
+157	main	game>=0x15190000	4	1576	135	spawner param-block template converts; 5 display-list builders all stuck at DIFF2-53
