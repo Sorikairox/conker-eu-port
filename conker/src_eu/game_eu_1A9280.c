@@ -3,7 +3,36 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517BA70.s")
+s32 func_151EFDD0();
+extern u8 D_80096091[];
+s32 func_1517BA70(u8 *arg0, u8 *arg1, s32 *arg2, s32 arg3) {
+    s32 d;
+    s32 lim;
+    s32 r;
+
+    *arg2 = *arg2 * 3 / 2;
+    lim = D_80096091[arg0[8] * 0xA] << 8;
+    if (*arg2 >= lim) {
+        *arg2 -= lim;
+    }
+    *(s16 *)(arg1 + 0) = *(s16 *)(arg0 + 0);
+    *(s16 *)(arg1 + 2) = *(s16 *)(arg0 + 2);
+    *(s16 *)(arg1 + 4) = *(s16 *)(arg0 + 4);
+    d = 0x29 - *(s8 *)(arg0 + 0xD);
+    if (d == 0) {
+        *(s8 *)(arg0 + 0xD) = *(s8 *)(arg0 + 0xD) - func_151EFDD0() % 8 + 4;
+    } else if (d < 0) {
+        r = func_151EFDD0();
+        *(s8 *)(arg0 + 0xD) = *(s8 *)(arg0 + 0xD) - (func_151EFDD0() % -d >> 1) - r % 8 + 4;
+    } else {
+        r = func_151EFDD0();
+        *(s8 *)(arg0 + 0xD) += (func_151EFDD0() % d >> 1) + r % 8 - 4;
+    }
+    *(s16 *)(arg1 + 0) = *(s16 *)(arg0 + 0);
+    *(s16 *)(arg1 + 2) = *(s16 *)(arg0 + 2);
+    *(s16 *)(arg1 + 4) = *(s16 *)(arg0 + 4);
+    return 0;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517BC58.s")
 

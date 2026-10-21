@@ -1208,3 +1208,9 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. A u16 return value kept in `a0` (`andi a0,v0,0xFFFF` in each branch, `or v0,a0` at the join): assign the call results to `arg0` and `return arg0;`.
 4. A `bne` operand order DIFF1 that no operand swap or cast fixes: copy the compared local inside the comparison, `a == (tmp = id)` (permuter, fakematch, `func_1000EE70`).
 5. Busy-wait `while (flag != 0) {}` that reloads the byte each pass (`bnel t9,zero,L; lbu t9`) needs a `volatile` extern; without it IDO emits a one-load infinite loop.
+## s136 recipes (stack-arg types, s16 params, byte temps)
+1. **The types of a many-arg function's parameters can be read from how each stack arg is reloaded**: `lbu off+3(sp)` = u8, `lh off+2` = s16, `lhu off+2` = u16, `lw off` = s32 (arg i is at `frame + 4*i`). A wrong local prototype in the same file must be replaced, and matched callers rechecked: `(s32) arg` casts passed into a now-`s16` slot add `sll/sra` (`func_1516DF0C`, `func_1516FFF8`).
+2. **`sll a0,16; sra` at entry into s-regs with no `sw a0` home** = the parameter is declared `s32` and passed to an `s16` prototype parameter inside a loop. If it is declared `s16`, IDO homes it and reloads it with `lh` (`func_15170F24`).
+3. **The ref loads a later statement's source before an earlier store** (`lbu t9; sh v1; sb v1; sb t9`): the later statement was written first in the source. Swap the two statements; the stores keep their order (`func_1516DF0C`).
+4. **A table byte compared in `v0` instead of a t-reg**: assign it to a `u8` local first (`u8 t = D[i * 0x32C]; if (t == 0x3A)`) (`func_1516F2D8`).
+5. A switch whose jump table starts below its lowest real case: the low case shares the default body (`case 9: default:`). Empty cases (`return`) are separate table targets (`func_151CA150`).
