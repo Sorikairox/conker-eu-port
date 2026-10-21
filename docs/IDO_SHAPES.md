@@ -1195,3 +1195,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **A pointer arg reloaded from its stack home before every use, even twice inside one `a || b`**: declare the parameter `u8 *volatile arg1`; a byte arg homed (`sw a2`) and reloaded once for a late call = `(&arg2)[0]` at that call (`func_15191EF0`, size right, still DIFF31).
 4. Unused declared locals still take a frame slot at -O2 (s129 recipe 1): an unused `e` pointer moved the only spilled local from 0x4C to 0x48 (`func_1517DC00`).
 
+
+## s136 recipes (stack-arg types, s16 params, byte temps)
+1. **The types of a many-arg function's parameters can be read from how each stack arg is reloaded**: `lbu off+3(sp)` = u8, `lh off+2` = s16, `lhu off+2` = u16, `lw off` = s32 (arg i is at `frame + 4*i`). A wrong local prototype in the same file must be replaced, and matched callers rechecked: `(s32) arg` casts passed into a now-`s16` slot add `sll/sra` (`func_1516DF0C`, `func_1516FFF8`).
+2. **`sll a0,16; sra` at entry into s-regs with no `sw a0` home** = the parameter is declared `s32` and passed to an `s16` prototype parameter inside a loop. If it is declared `s16`, IDO homes it and reloads it with `lh` (`func_15170F24`).
+3. **The ref loads a later statement's source before an earlier store** (`lbu t9; sh v1; sb v1; sb t9`): the later statement was written first in the source. Swap the two statements; the stores keep their order (`func_1516DF0C`).
+4. **A table byte compared in `v0` instead of a t-reg**: assign it to a `u8` local first (`u8 t = D[i * 0x32C]; if (t == 0x3A)`) (`func_1516F2D8`).
+5. A switch whose jump table starts below its lowest real case: the low case shares the default body (`case 9: default:`). Empty cases (`return`) are separate table targets (`func_151CA150`).
