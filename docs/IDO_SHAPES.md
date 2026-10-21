@@ -1208,3 +1208,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 2. **Two values in `a0`/`a1` right before a call that takes no arguments**: the source passes them anyway through a K&R declaration (`s32 f(); f(hi, lo)`); m2c's extra call args are a hint, not noise (`func_15170D50`).
 3. **m2c spawner drafts with dozens of `spXX` locals and a `memcpy(ret + 0x70, &spB, 0x58)`**: rebuild them as two local structs (template at `&spA`, the 0x58 block at `&spB`); separate locals lose all their stores (SIZE-60..-120). `s138_drafts/spstruct.py` does it (`func_151CB128`).
 4. A `u8` param whose word home is reloaded with `andi 0xFF` at entry: declare it `u8` and drop m2c's `& 0xFF` uses.
+
+## s140 recipes (byte-store temps, FP compare order, parked-near-miss permuting)
+1. **Two byte stores of one shifted value with the low-byte temp in the wrong t-reg** (`sra t0; sra t9,t0; sb t9; sb t0`, mine t8): `p[k+1] = v & 0xFFFFu;` (fakematch) moves it (`func_1516FE5C`/`FE8C`). Both had to be `void` in the file prototypes first.
+2. **`add.s` operands of an FP compare in the wrong order** (`lo + x < dist`): the comma form `(lo + x) < (0, dist)` (permuter) flips them; source operand order alone is canonicalised (`func_151D91B0`). Declaring `f32 *p` before `f32 d[3]` moved the array 4 lower to the ref slot.
+3. **A search-loop flag** (`while (!found && i < n)`) that the ref keeps with `andi 0xFF`: declare it `u8` (`func_15143E94`).
+4. **Remote permuter on old parked near misses pays**: s139 4/6, s140 4/20 (all DIFF <= 7 starts). Screen all saved drafts at once with `ljsweep.py` (`s140_drafts/collect.py` + `rank.py`), permute the best per function.
+
