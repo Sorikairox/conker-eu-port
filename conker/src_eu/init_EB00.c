@@ -488,7 +488,36 @@ s32 func_1000FE88(struct15 *arg0, s32 arg1, s32 *arg2) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_1000FEF0(s32 arg0, s32 arg1, s32 arg2) {
+    s32 temp_t6;
+    s32 var_v1;
+    struct15 *var_a2;
+
+    temp_t6 = arg0 & 0xFFFF;
+    if (temp_t6 == 0) {
+        goto block_10;
+    }
+    var_v1 = 0;
+    if (D_80042B00 > 0) {
+        var_a2 = D_80041FE0;
+loop_4:
+        if ((temp_t6 == var_a2->unk24) && (arg1 == var_a2->unk18) && (arg2 == var_a2->unk1C) && !(var_a2->unk10 & 0x80)) {
+            return var_v1;
+        }
+        var_v1 += 1;
+        var_a2 = (struct15 *)((u8 *)var_a2 + (0x30));
+        if (var_v1 >= D_80042B00) {
+            goto block_10;
+        }
+        goto loop_4;
+    }
+block_10:
+    return -1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000FEF0.s")
+#endif
 // NON-MATCHING: needs a re-work
 // s32 func_1000FEF0(u16 arg0, struct127 *arg1, s32 arg2) {
 //     s32 i;

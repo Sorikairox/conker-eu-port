@@ -33,8 +33,24 @@ s16 *func_150346A0(s16 *arg0, s32 arg1)
   return arg0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034710.s")
+#ifdef NON_MATCHING
+extern s32 D_800CC9D4;
 
+u8 *func_15034710(u8 *arg0, s32 arg1) {
+    s32 temp_f16;
+    s32 temp_t1;
+
+    (*(s16 *)((u8 *)arg0 + 0)) = 0;
+    (*(s16 *)((u8 *)arg0 + 4)) = 0x18;
+    temp_f16 = (s32) ((f32) *(s32 *)((u8 *)&D_800CC9D4 + (arg1 * 0x32C)) * 18.204445f);
+    temp_t1 = (s16) temp_f16 >> 4;
+    (*(s16 *)((u8 *)arg0 + 2)) = (s16) temp_t1;
+    (*(s16 *)((u8 *)arg0 + 6)) = (s16) ((s16) temp_f16 - temp_t1);
+    return arg0 + 8;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_15034710.s")
+#endif
 extern f32 D_800980CC;
 s16 *func_15034790(s16 *arg0, s32 arg1) {
     struct127 *p;

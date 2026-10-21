@@ -7,8 +7,32 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104C44.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104FF8.s")
+#ifdef NON_MATCHING
+void func_1000FD38(s32, s32, s32);
 
+void func_15104FF8(s32 arg0, s32 arg1, s32 arg2) {
+    u8 *sp40;
+    s32 (*sp3C)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *);
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+    u8 *temp_v1;
+
+    temp_v1 = arg0 + 0x28;
+    if ((arg2 & 0xFF) == 0x38) {
+        temp_v0 = (*(u8 **)((u8 *)temp_v1 + 0));
+        if ((*(u8 *)((u8 *)temp_v0 + 0x14)) == 1) {
+            (*(s16 *)((u8 *)temp_v1 + 8)) = 0xFA;
+            sp3C = func_1000EF40;
+            sp40 = temp_v1;
+            func_1000FD38(func_1000EF40, temp_v0, 0);
+            temp_v0_2 = (*(u8 **)((u8 *)temp_v1 + 0));
+            func_1000FA64(0x236U, (*(s16 *)((u8 *)temp_v0_2 + 0)), (*(s16 *)((u8 *)temp_v0_2 + 2)), (*(s16 *)((u8 *)temp_v0_2 + 4)), 0x4000, 0x5DCU, 0x3E8, (s32) sp3C, temp_v0_2, 0, 8, 0);
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_15104FF8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_151050B0.s")
 
 void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2) {

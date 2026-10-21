@@ -4,8 +4,20 @@
 
 
 // ???
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3D9A0/func_150104F0.s")
+#ifdef NON_MATCHING
+u8 *func_151149AC(s32);
+extern s32 D_800D9D70;
 
+void func_150104F0(void) {
+    (*(s8 *)((u8 *)(&D_800D9D70) + 1)) = 0;
+    (*(s8 *)((u8 *)(&D_800D9D70) + 0)) = 0;
+    (*(s8 *)((u8 *)(&D_800D9D70) + 2)) = 0;
+    (*(f32 *)((u8 *)(func_151149AC(0xF6)) + 0x7C)) = 2.0f;
+    D_80088D20 = 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3D9A0/func_150104F0.s")
+#endif
 void func_15010538(struct127 *arg0) {
     struct175 tmp;
     struct37 *temp_v0;

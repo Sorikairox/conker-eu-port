@@ -22,8 +22,57 @@ void func_150064E0(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500707C.s")
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007168.s")
+#ifdef NON_MATCHING
+s32 func_15007168(u8 *, s32);
+
+void func_1500727C(void) {
+    s32 temp_t9;
+    s32 var_v0;
+    s32 var_v1;
+    u8 *var_a0;
+
+    func_151DD950(&D_800BE900, 0x44U, &D_800BE710, 0x70);
+    var_a0 = D_800BE714;
+    var_v0 = ((D_800BE712 * 4) + 0xCC + (D_800BE713 * 8)) & 0xFFFF;
+    var_v1 = 4;
+    do {
+        temp_t9 = (var_v0 + ((*(u8 *)((u8 *)var_a0 + 0)) << (var_v1 & 3)) + ((*(u8 *)((u8 *)var_a0 + 1)) << ((var_v1 + 1) & 3)) + ((*(u8 *)((u8 *)var_a0 + 2)) << ((var_v1 + 2) & 3)) + ((*(u8 *)((u8 *)var_a0 + 3)) << ((var_v1 + 3) & 3))) & 0xFFFF;
+        var_v1 += 4;
+        var_v0 = temp_t9;
+        var_a0 += 4;
+    } while (var_v1 != 0x68);
+    if (temp_t9 != D_800BE710.checksum) {
+        func_15007168(var_a0, 0x68);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500727C.s")
+#endif
+#ifdef NON_MATCHING
+void func_15007360(void) {
+    s32 sp18;
+    s32 var_v1;
+    u16 temp_t9;
+    u16 var_v0;
+    u8 *var_a0;
+
+    var_a0 = D_800BE714;
+    var_v0 = ((D_800BE712 * 4) + 0xCC + (D_800BE713 * 8)) & 0xFFFF;
+    var_v1 = 4;
+    do {
+        temp_t9 = (var_v0 + ((*(u8 *)((u8 *)var_a0 + 0)) << (var_v1 & 3)) + ((*(u8 *)((u8 *)var_a0 + 1)) << ((var_v1 + 1) & 3)) + ((*(u8 *)((u8 *)var_a0 + 2)) << ((var_v1 + 2) & 3)) + ((*(u8 *)((u8 *)var_a0 + 3)) << ((var_v1 + 3) & 3))) & 0xFFFF;
+        var_v1 += 4;
+        var_v0 = temp_t9;
+        var_a0 += 4;
+    } while (var_v1 != 0x68);
+    D_800BE710.checksum = temp_t9;
+    if (D_8002AC5C == 0) {
+        sp18 = func_151DD4A0(&D_800BE900, 0x44U, &D_800BE710, 0x70);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007360.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007440.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007558.s")
 

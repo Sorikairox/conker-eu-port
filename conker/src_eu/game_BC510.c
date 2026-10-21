@@ -128,5 +128,50 @@ void func_15093878(void) {
     D_800D244C = allocate_memory(0x80, 1, 1, 0);
 }
 
+#ifdef NON_MATCHING
+s32 func_150A7D00(s32, f32, f32, f32);
+s32 func_1510D66C(u8 *, s32, s32, s32);
+extern s32 D_11AF;
+extern s32 D_800D2870;
+
+s32 *func_150938BC(s32 *arg0) {
+    s32 *temp_v1;
+    s32 *var_s2;
+    s32 temp_v0;
+    s32 var_s0;
+    s32 var_s1;
+    u8 *temp_s2;
+
+    var_s2 = arg0;
+    var_s0 = 4;
+    var_s1 = (s32) ((s32) D_800D2870 / 25) % 60;
+loop_1:
+    temp_v0 = func_1510D66C(((s32 *)((u8 *)&D_11AF + (var_s1 % 10))), 0, 3, 0);
+    temp_v1 = var_s2;
+    if (temp_v0 == 0x80000000) {
+        return var_s2;
+    }
+    (*(s32 *)((u8 *)temp_v1 + 0)) = ((var_s0 * 4) & 0xFFFF) | 0xDB060000;
+    var_s2 = (s32 *)((u8 *)var_s2 + (8));
+    (*(s32 *)((u8 *)temp_v1 + 4)) = temp_v0;
+    if (var_s0 == 3) {
+        var_s1 = (s32) ((s32) D_800D2870 / 25) / 60;
+    } else {
+        var_s1 = var_s1 / 10;
+    }
+    var_s0 -= 1;
+    if (var_s0 == 0) {
+        func_150A7D00((D_800BE9C0 << 6) + D_800D244C, (f32) 0x78, (f32) 0x81, (f32) -0x12F);
+        (*(s32 *)((u8 *)var_s2 + 0)) = 0xDA380003;
+        temp_s2 = ((s32 *)((u8 *)var_s2 + 8));
+        (*(s32 *)((u8 *)var_s2 + 4)) = (s32) ((D_800BE9C0 << 6) + D_800D244C);
+        (*(s32 *)((u8 *)temp_s2 + 0)) = 0xDE000000;
+        (*(s32 *)((u8 *)temp_s2 + 4)) = (s32) D_800D2448;
+        return temp_s2 + 8;
+    }
+    goto loop_1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_150938BC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_15093B58.s")

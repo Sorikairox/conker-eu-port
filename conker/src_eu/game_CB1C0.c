@@ -33,7 +33,25 @@ s32 func_15084000(s32);
 void func_15178C34(u8, s32, s32, s32, s32);
 void func_15178BE4(u8, f32*, s32);
 s32 func_15178C9C(u8 arg0, s32 arg1);
+#ifdef NON_MATCHING
+void func_15179154(u8, s32, s16);
+void func_151791A4(u8, s32, s32, s32, s16);
+
+s32 func_1509DDFC(s32 arg0, s32 arg1, u8 *arg2) {
+    switch (arg1) {                                 /* irregular */
+    case 0:
+        func_15179154(arg0 & 0xFF, &D_800CC2D0[func_15084000((*(s32 *)((u8 *)arg2 + 8)) & ~0x2000)].x_position, (*(s16 *)((u8 *)arg2 + 0xE)));
+        return 1;
+    case 1:
+        func_151791A4(arg0 & 0xFF, (*(s32 *)((u8 *)arg2 + 8)), (*(s32 *)((u8 *)arg2 + 0xC)), (*(s32 *)((u8 *)arg2 + 0x10)), (*(s32 *)((u8 *)arg2 + 0x14)));
+        return 1;
+    default:
+        return 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_CB1C0/func_1509DDFC.s")
+#endif
 // NON-MATCHING: what is the logic here!?
 // s32 func_1509DDFC(s32 arg0, s32 arg1, struct215 *arg2) {
 //     // if (arg1 == 1) {

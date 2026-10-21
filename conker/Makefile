@@ -275,6 +275,11 @@ replace: $(VERIFY) $(TARGET).header.bin $(TARGET).boot.bin $(TARGET).init.bin $(
 
 $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 	$(CPP) -P -DBUILD_DIR=$(BUILD_DIR) $< | sed 's#\bbuild/#$(BUILD_DIR)/#g' > $@
+ifeq ($(NON_MATCHING),1)
+# the C .rodata of NON_MATCHING bodies (literals) has no home in the blob layout: park it NOLOAD at the
+# expansion-pak address so the ELF links (the NON_MATCHING ROM is not bootable yet: PLAN Phase 2)
+	sed -i '/\/DISCARD\/ :/i\    .nm_rodata 0x80400000 (NOLOAD) : { $(BUILD_DIR)/src_eu/*.o(.rodata*) }' $@
+endif
 
 $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
 	$(LD) $(LDFLAGS) -o $@

@@ -7,8 +7,28 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9424.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9A40.s")
+#ifdef NON_MATCHING
+s32 func_150B9A40(u8 *arg0) {
+    f32 *temp_v0;
 
+    if ((*(s16 *)((u8 *)arg0 + 0x1C)) < 0x50) {
+        temp_v0 = arg0 + 0x110;
+        *temp_v0 += 0.3f * D_800BE9A4;
+        (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) - *temp_v0);
+    }
+    if ((*(s16 *)((u8 *)arg0 + 0x1C)) >= 0x73) {
+        (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x2C)) * 1.35f);
+        (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x30)) * 1.35f);
+        return 1;
+    }
+    if ((*(s16 *)((u8 *)arg0 + 0x1C)) < 0x41) {
+        (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x30)) + 1.2f);
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9A40.s")
+#endif
 s32 func_150B9ADC(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);
     if (temp_v0 < 32) {

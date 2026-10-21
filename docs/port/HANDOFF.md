@@ -10,6 +10,38 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P2, 2026-10-21) — read `docs/port/sessions/P2.md` for details
+
+- The default build is byte-identical: full `verify_all.sh` OK, 3992/5913 matched (unchanged).
+- **127 NON_MATCHING bodies** (P1: 9). C coverage including NON_MATCHING: **4119/5913 (69.7%)**;
+  init 461/538, game 3622/5332, debugger 36/43; 1794 asm-only (208 under 60 insns).
+  Run `python3 tools/port/progress_nm.py` (after verify_all regenerates `conker/progress.csv`).
+- Pass rates with the P2 pipeline: pilot A 13/30 (43%, was 30%), pilot B 7/30 (23%, was 10%);
+  batch: boot path 22/121, small (<60 insns) 86/261 (33%).
+- `make VERSION=eu NON_MATCHING=1` links again (NM-only `.nm_rodata` NOLOAD section for C literals).
+- New tools: `tools/port/{cfix.py, nmrepair.sh, nmrepair.py, progress_nm.py, protocheck.py}`.
+  convert.py has the new fix chain (spframe, u8arith, cmp2, deref, rostr, passthru2, proto);
+  difftest learns pointer inputs when the reference faults, and `-v` explains a DIFFER.
+- **One prototype per function (P3/wasm):** run `python3 tools/port/protocheck.py` before every
+  commit that inserts bodies. convert.py flags `lint:proto` and repairs it with `cfix.fix_proto`. Open:
+  `func_150AD9A0` (callers disagree: 3 vs 4 args), `func_150A2280`; `func_10004074`/`func_10007D14`
+  not inserted (void vs s32 callers in matching code).
+
+## Next steps (from P2)
+
+1. difftest: the Unicorn `UC_ERR_EXCEPTION at 0x00000000` after a stubbed call returning into a branch
+   (UNSURE `func_150B0574`, `func_151DAE28`; many `fault only in cand` DIFFERs). This is likely a false
+   negative and the biggest single win. Also `sd`/`ld` (MIPS III) need UC_MODE_MIPS64 or emulating them in a hook.
+2. Boot path for P3: 99 boot asm-only functions remain (list `tools/port/pilot/boot_depth3.txt`, BFS depth 3 from `func_15007830`, see
+   P2.md). Hand repair with `tools/port/nmrepair.sh f` from `port_work/b_boot2/best/`; re-run
+   `func_150158D0`, `func_15084E80`.
+3. Fan-out hand repair of the batch near misses (`port_work/b_*/results.tsv`: 96 DIFFER, 68 CERR).
+   86 NODRAFT need hand drafts (gen2 rejects the m2c output).
+4. Caller-side prototype fixes for NON_MATCHING (wrap conflicting prototypes in matching files in
+   `#ifdef NON_MATCHING`), coordinated with P3's list of 262 mismatched calls.
+
+## P1 notes (still valid)
+
 ## State (session P1, 2026-10-21)
 
 - The default build is byte-identical: full `verify_all.sh` OK, 3992/5913 matched functions (unchanged).

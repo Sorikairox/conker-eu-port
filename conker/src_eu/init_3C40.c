@@ -10,7 +10,6 @@ s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/func_10003C6C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_3C40/func_10004074.s")
-
 void func_10004250(void) {
     s32 temp_v0;
     u32 temp_v1;

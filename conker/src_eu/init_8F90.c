@@ -655,7 +655,48 @@ void func_10009B90(struct54 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_150ADC50(struct147 *);
+
+void func_10009BE4(struct54 *arg0) {
+    struct54 *temp_a1;
+    struct54 *temp_v0;
+    struct54 *temp_v0_2;
+
+    if ((s32) arg0 & 1) {
+        D_8003C8E0 = 0x0F000004;
+        func_150ADC50(&D_800406A0);
+        return;
+    }
+    *(s32 *)arg0->unkC = (u32) arg0->unk8;
+    if ((s32)arg0 == (s32)D_800406A0.unk4) {
+        D_80040A44 = arg0->unk0;
+    }
+    temp_v0 = arg0->unk0;
+    if (temp_v0 != NULL) {
+        temp_v0->unk4 = arg0->unk4;
+    }
+    temp_v0_2 = arg0->unk4;
+    if (temp_v0_2 != NULL) {
+        temp_v0_2->unk0 = arg0->unk0;
+    }
+    if (D_800406A0.unk10 != NULL) {
+        arg0->unk4 = D_800406A0.unk10;
+        arg0->unk0 = D_800406A0.unk10->unk0;
+        temp_a1 = D_800406A0.unk10->unk0;
+        if (temp_a1 != NULL) {
+            temp_a1->unk4 = arg0;
+        }
+        D_800406A0.unk10->unk0 = arg0;
+        return;
+    }
+    D_80040A50 = arg0;
+    arg0->unk0 = NULL;
+    arg0->unk4 = NULL;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_10009BE4.s")
+#endif
 // void func_10009BE4(struct00 *arg0) {
 //     struct00 *temp_a1;
 //     struct00 *temp_v0;

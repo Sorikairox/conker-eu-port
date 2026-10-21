@@ -6,7 +6,44 @@
 
 // some mips3/64bit stuff going on here
 
+#ifdef NON_MATCHING
+s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
+    s32 temp_a1;
+    s32 temp_a2;
+    s32 temp_v0;
+    s32 temp_v0_2;
+    s32 temp_v0_3;
+    s32 temp_v0_4;
+    s32 var_a0;
+    s32 var_a1;
+    s32 var_a2;
+
+    temp_v0 = arg0 >> 0x1F;
+    var_a0 = (arg0 ^ temp_v0) - temp_v0;
+    temp_v0_2 = arg1 >> 0x1F;
+    var_a1 = (arg1 ^ temp_v0_2) - temp_v0_2;
+    temp_v0_3 = arg2 >> 0x1F;
+    var_a2 = (arg2 ^ temp_v0_3) - temp_v0_3;
+    if (var_a0 < var_a1) {
+        temp_a1 = var_a1 ^ var_a0;
+        var_a0 ^= temp_a1;
+        var_a1 = temp_a1 ^ var_a0;
+    }
+    temp_v0_4 = var_a2 ^ var_a0;
+    if (var_a0 < var_a2) {
+        var_a0 ^= temp_v0_4;
+        var_a2 = temp_v0_4 ^ var_a0;
+    }
+    if (var_a1 < var_a2) {
+        temp_a2 = var_a2 ^ var_a1;
+        var_a1 ^= temp_a2;
+        var_a2 = temp_a2 ^ var_a1;
+    }
+    return ((u32) (var_a1 * 0xB) >> 5) + (((u32) var_a2 >> 2) + var_a0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DAE50/func_150AD9A0.s")
+#endif
 // NON-MATCHING: I am nothing without mip2c.
 // s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2) {
 //     s32 v0;

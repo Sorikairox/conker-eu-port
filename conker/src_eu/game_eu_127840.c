@@ -91,22 +91,26 @@ void func_150FB348(u8 *arg0, s32 arg1, u8 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB398.s")
 
 #ifdef NON_MATCHING
+void func_1515835C(u8 *arg0, u8 *arg1);
+
 s32 func_150FB708(u8 *arg0) {
-    f32 sp2C;
-    f32 sp28;
-    f32 sp24;
-    f32 sp20;
-    f32 sp1C;
+    struct {
+        f32 u1C;
+        f32 u20;
+        f32 u24;
+        f32 u28;
+        f32 u2C;
+    } sp;
 
     (*(f32 *)((u8 *)arg0 + 0x5C)) = 0.0f;
     (*(f32 *)((u8 *)arg0 + 0x54)) = -95.0f;
     (*(f32 *)((u8 *)arg0 + 0x58)) = -80.0f;
-    sp1C = 0.0f;
-    sp20 = 0.0f;
-    sp24 = 0.0f;
-    sp28 = 0.3f;
-    sp2C = 0.3f;
-    func_1515835C(arg0, &sp1C);
+    sp.u1C = 0.0f;
+    sp.u20 = 0.0f;
+    sp.u24 = 0.0f;
+    sp.u28 = 0.3f;
+    sp.u2C = 0.3f;
+    func_1515835C(arg0, &sp.u1C);
     return 1;
 }
 #else

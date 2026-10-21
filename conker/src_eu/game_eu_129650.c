@@ -5,8 +5,24 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FBE40.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC8E8.s")
+#ifdef NON_MATCHING
+void func_150FC8E8(u8 *arg0) {
+    s32 var_v0;
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u8 *temp_v1_2;
 
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x1A0));
+    if ((temp_v0 == NULL) || ((*(s32 *)((u8 *)temp_v0 + 0)) == 0) || ((*(u8 *)((u8 *)temp_v0 + 4)) == 0xFF) || ((*(u8 *)((u8 *)arg0 + 0x1A4)) != (*(u8 *)((u8 *)temp_v0 + 0x3B))) || (temp_v1 = (*(u8 **)((u8 *)temp_v0 + 0x31C)), (temp_v1 == NULL)) || ((*(u8 *)((u8 *)temp_v1 + 0x84)) != 0) || ((*(u8 *)((u8 *)temp_v0 + 0x127)) == 0xFF) || (temp_v1_2 = (*(u8 **)((u8 *)temp_v0 + 0x318)), (temp_v1_2 == NULL))) {
+        var_v0 = 0xFF;
+    } else {
+        var_v0 = ~(1 << (*(u8 *)((u8 *)temp_v1_2 + 0x23D))) & 0xFF;
+    }
+    func_151C40BC((s32) arg0, 1.0f, 1.0f, 0.6f, 0.0f, 0xFFU, 0xFFU, (u8) var_v0);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC8E8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC438.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FCB94.s")

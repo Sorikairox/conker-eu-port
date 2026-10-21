@@ -35,4 +35,29 @@ void func_15192800(u8 *arg0, s32 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_15192E20(u8 *arg0, s32 *arg1) {
+    s32 var_v1;
+    u8 temp_v0;
+
+    temp_v0 = (*(u8 *)((u8 *)arg0 + 4));
+    var_v1 = 0;
+    switch ((s32) temp_v0) {                        /* irregular */
+    case 0x0:
+    case 0x1:
+    case 0x2:
+    case 0x3:
+    case 0x4:
+        var_v1 = 1;
+        *arg1 = 0;
+        break;
+    case 0x53:
+        var_v1 = 1;
+        *arg1 = 1;
+        break;
+    }
+    return var_v1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C0580/func_15192E20.s")
+#endif

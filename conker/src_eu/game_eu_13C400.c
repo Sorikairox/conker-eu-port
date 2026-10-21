@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1510F800(s32 arg0);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510EBF0.s")
@@ -22,8 +25,40 @@ void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510EED0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FBC8.s")
+#ifdef NON_MATCHING
+s32 func_150A48C0(s32, s32, s32, s32 *);
+s32 func_150A49D0(s32, s32 *, s32);
+s32 func_150A69A8(s16, s16, s32 *, s32);
+extern s32 D_800D3720;
+extern s32 D_800D3C50;
 
+f32 func_1510FBC8(f32 arg0, f32 arg1, f32 arg2) {
+    struct {
+        s32 u28;
+    } sp;
+    s32 sp20;
+    s32 sp1C;
+    f32 var_f2;
+    s32 temp_f10;
+    s32 temp_f6;
+
+    func_1510F800(2);
+    temp_f6 = (s32) arg0;
+    temp_f10 = (s32) arg2;
+    sp20 = temp_f6;
+    sp1C = temp_f10;
+    func_150A69A8((s16) temp_f6, (s16) temp_f10, &sp.u28, (s32) arg1);
+    func_150A49D0(sp.u28, &D_800D3C50, 0);
+    if (func_150A48C0(sp20, sp1C, sp.u28, &D_800D3C50) != 0) {
+        var_f2 = (f32) D_800D3720 * 0.00390625f;
+    } else {
+        var_f2 = -10000.0f;
+    }
+    return var_f2;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FBC8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FCA0.s")
 
 void func_1510F800(s32 arg0) {
