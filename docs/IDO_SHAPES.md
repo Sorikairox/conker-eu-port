@@ -1351,3 +1351,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **`multu` operand order of a product used twice** (`if (t * k < x) x = t * k;`): write the product twice instead of a `v = t * k` temp; the permuter needed a `dummy:` label before it (`func_1515C534`).
 4. **`lhu at / sh at` copies of 2-byte tables into stack locals**: struct copies of `typedef struct { u8 v[2]; } P; P a = D_8008D3A4;` (`func_1517E7FC`, draft only).
 5. **F3DEX2 `0x0214xxxx` / `0x05xxxxxx` runs** are `gSPModifyVertex(gdl++, v, G_MWO_POINT_ST, st)` and `gSP1Triangle(gdl++, a, b, c, 0)` (vertex index = low half / 2) (`func_151672D8`).
+
+## s170 recipes (store order, spawn blocks, uncse'd table calls)
+1. **Two adjacent `sh` constant stores in the wrong order** (`li t6,A; li t7,B; sh t7,+2; sh t6,+0`, constants loaded in source order but stored reversed): wrap the pair in `do { s.a = A; s.b = B; } while (0);` (fakematch; local permuter, `func_1514B30C`). Moving either store elsewhere, or swapping them, did not work.
+2. **func_15149AC0 spawn block at sp+0x30**: copy the `struct { f32 u30 ... f32 u74; } sp;` of `func_15013DE8` (game_40490.c); put a `rand()` call that the ref makes before a group of products *before* those products in C (`b = func_150ADA68(); sp.u3C = K * a; ...; b = (b * K2 + K3) * K4;`), and pad the frame with `s32 pad[2]` after the named floats (`func_1514B30C`).
+3. **Function-pointer table call that the ref re-loads after testing it** (`lw t9,0(t)` again, index re-shifted from a copy register): IDO CSEs the tested value in every C form tried (plain cast, `*(fn *)&tbl[i].unk0`): **OPEN** (`func_15141A7C`, SIZE-5).
+4. **Args stored to their home slots at entry and immediately re-loaded** (`sw a0,0x30(sp); lw v1,0x30(sp)`) is reproduced by plain C with `&`-taken locals / many calls; no special construct needed (`func_15185360`, `func_15133C18`).
+5. **Frame 8 short with an `s32 pad[2]`** fixed it only when the pad is declared **first** (above the named float locals) in `func_1514C9E0`; after the locals it changed nothing. In `func_1514C390` single `s32 padN` between struct locals placed the slots.

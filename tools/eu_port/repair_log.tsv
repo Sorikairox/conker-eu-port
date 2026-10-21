@@ -1066,3 +1066,4 @@ func_1514C390	SIZE-2	7	DIFF37	n	y	tgt/m/d struct17 locals + 2 pad slots; k*(t-p)
 func_1517FAD4	SIZE+3	7	SIZE+2	n	n	frame fixed by named r,g; t is uninitialised on the !D_800DE1BC path: ref keeps t=0 in f2 and loads 0x20(sp) on the other path, mine also stores t (swc1) -> +2
 func_1514B30C	SIZE-1	7	DIFF2	n	y	func_15013DE8 spawn-block struct + pad[2]; call before the a-products; left: sh order of u52/u50 only
 func_15187954	SIZE-2	4	SIZE-2	n	n	m2c-shaped loop with continue; ref stores a1/a2 lazily (bnel/jal delay slots), mine stores a2 at entry; loop regs differ
+func_1514C9E0	DIFF48	3	DIFF31	n	y	fn-table line spawner; identical odd/even step branches; s32 pad[2] declared first fixes frame; left: FP callee-saved reg roles (arg6 f26, arg0 f28, arg1 f30)
