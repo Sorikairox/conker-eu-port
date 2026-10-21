@@ -7,8 +7,26 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10005B04.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10005BE0.s")
+#ifdef NON_MATCHING
+extern s16 D_8003C218;
+extern u8 *D_8003C21C;
 
+/* fill the bitmap [D_8003BE70, D_8003C21C] with 0xFF, then mask the bits past the end in the last byte */
+void func_10005BE0(void) {
+    u8 *p = (u8 *)D_8003BE70;
+    s32 n;
+
+    do {
+        *p = 0xFF;
+    } while (p++ != D_8003C21C);
+    n = D_8003C218 & 7;
+    if (n != 0) {
+        *D_8003C21C = (2 << (n - 1)) - 1;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10005BE0.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10005F1C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_100061F8.s")

@@ -28,7 +28,7 @@ call (hash of non-stack bytes that differ from their initial value), final memor
 return value (by the candidate's declared return type) and the restoration of sp/s0-s8/f20-f30.
 Prints one line: EQUIV <func> (n trials ...) | DIFFER <func>: <reason> | ERROR <func>: <why>.
 """
-import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random
+import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random, gc
 # Unicorn 2.1.x mis-translates a call whose delay slot holds an FPU instruction (lwc1/swc1/...):
 # the callee's first block runs with stale delay-slot flags and jumps to 0 (UC_ERR_EXCEPTION at
 # 0x00000000).  2.0.1 is correct.  Pinned copy: pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1
@@ -48,6 +48,7 @@ HEAP_LO, HEAP_HI = 0x80400000, 0x80600000       # fake heap (lazy random)
 STK_LO, STK_TOP = 0x80600000, 0x80680000        # stack (zero-filled)
 TU_BASE = 0x80700000                            # candidate TU .rodata/.data/.bss
 RET_MAGIC = 0x807FF000
+CAND_ALT = 0x0F000000                           # (| the 256 MB jal region of vram) candidate code when it would overlap a callee
 SP_ENTRY = STK_TOP - 0x100
 
 
@@ -248,6 +249,7 @@ def link_candidate(opath, func, vram):
             if sym['st_info']['type'] == 'STT_SECTION':
                 if sym['st_shndx'] in base: return base[sym['st_shndx']]
                 raise RuntimeError('reloc against section %s' % secs[sym['st_shndx']].name)
+            if sym.name == func: return vram   # recursion: the candidate's own run address
             a = symaddr(sym.name) if sym.name else None
             if a is not None: return a
             if sym['st_shndx'] not in ('SHN_UNDEF', 'SHN_ABS') and sym['st_shndx'] in base:
@@ -509,6 +511,8 @@ class Run:
         self.stubs.add(a)
 
     def on_jalr(self, mu, addr, size, ud):
+        if len(self.stubs) > 400:   # random function pointers: every new target costs a fresh page; give up (timeout)
+            mu.emu_stop(); return
         w = self.words[(addr - self.vram) // 4]
         self.stub_at(mu.reg_read(UC_MIPS_REG_0 + ((w >> 21) & 31)) & 0xFFFFFFFF)
 
@@ -767,6 +771,7 @@ def learn_pointer(rwords, vram, trial, romdata, tu, maxi, inputs, forced):
     find the word the faulting base register came from (a memory word, an argument or a stack arg) and
     make it a valid heap pointer.  -> True if something was forced (forced / inputs are updated)"""
     R = Run(rwords, vram, [], trial, romdata, tu, maxi, forced, trace=True).run(inputs)
+    R.mu = None
     if not R.fault or not hasattr(R, 'fault_pc'): return False
     k = (R.fault_pc - vram) // 4
     if not 0 <= k < len(rwords): return False
@@ -833,6 +838,15 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         return dict(func=func, file=p, result='CERR', line='CERR %s: %s' % (func, str(e).replace('\n', ' | ')[:300]))
     except Exception as e:
         return dict(func=func, file=p, result='ERROR', line='ERROR %s: %s' % (func, e))
+    # a candidate longer than the reference would overlap the following functions: if it calls one of
+    # them (its code would sit where the stub must go), run the candidate at CAND_ALT instead
+    cvram = vram
+    rend, cend = vram + 4 * len(rwords), vram + 4 * len(cwords)
+    for k, w in enumerate(cwords):
+        if (w >> 26) in (2, 3) and rend <= ((((vram + 4 * k + 4) & 0xF0000000) | ((w & 0x3FFFFFF) << 2))) < cend:
+            cvram = (vram & 0xF0000000) | CAND_ALT
+            cwords, cdata = link_candidate(opath, func, cvram)
+            break
     rk = ret_kind(tu, func)
     kinds = param_kinds(tu, func)
     arity = {}
@@ -854,7 +868,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                 R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
                 if not R.fault: break
             if not R.fault: learned[0] += 1
-        C = Run(cwords, vram, cdata, (seed, t), romdata, tu, 4 * maxi, forced).run(inputs)
+        C = Run(cwords, cvram, cdata, (seed, t), romdata, tu, 4 * maxi, forced).run(inputs)
         for c in R.calls + C.calls:
             if c['name'] not in arity: arity[c['name']] = proto_arity(tu, c['name'])
         why = compare(R, C, rk, arity)
@@ -868,6 +882,10 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             break
         if R.fault or not R.done: inconcl += 1
         else: ok += 1
+        # free the emulators now: each Uc (2.0.1) holds a large translation buffer, and the hook
+        # callbacks make Run <-> Uc a cycle that only the cyclic GC would collect (workers ran out of memory)
+        R.mu = C.mu = None; del R, C
+        gc.collect()
     res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl, learned=learned[0])
     if differ:
         line = 'DIFFER %s: %s' % (func, differ); res['result'] = 'DIFFER'; res['why'] = differ
