@@ -14,8 +14,98 @@ void func_1501BB20(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501BBB8.s")
+#ifdef NON_MATCHING
+extern u8 D_8002AE18;
+extern OSMesg D_800BEDB0;
+extern u8 D_800BEB60;
+extern u8 D_800E0FC5;
+extern u16 D_800BEB20[4];
+extern u16 D_800BEB28[4];
+extern u16 D_800BEB30[4];
+extern u16 D_800BEB38[4];
+extern OSContPad D_800BED38[4];
+extern u16 D_800BED50[4];
+void func_151DDE70(void);
+void func_1501C55C(void);
 
+/* Stick dead zone: |v| < 8 -> 0, otherwise move v 7 towards 0. */
+#define DEADZONE(v) ((((v) < 0) ? -(v) : (v)) >= 8 ? (v) - (((v) < 0) ? -1 : 1) * 7 : 0)
+
+/* Per-frame controller read: fetch the 4 pads, map them to players, compute the edge masks
+ * and apply the stick dead zone. Returns the player input block. */
+struct14 *func_1501BBB8(void) {
+    OSContPad pads[4];
+    OSContPad *player = (OSContPad *)D_800BE748;
+    s32 i;
+    s32 nplayers;
+    s32 replay;
+    u8 idx;
+
+    for (i = 0; i < 4; i++) {
+        D_800BEB38[i] = player[i].button;
+    }
+    osRecvMesg(&D_800BE900, &D_800BEDB0, OS_MESG_BLOCK);
+    osContGetReadData(pads);
+    func_1501C55C();
+    D_8002AE18 = 1;
+    D_800BEB60 = 0;
+    for (i = 0; i < 4; i++) {
+        if (pads[i].errno != 0) {
+            pads[i].button = 0;
+            pads[i].stick_x = 0;
+            pads[i].stick_y = 0;
+        } else {
+            D_800BEB60 |= 1 << i;
+        }
+    }
+
+    nplayers = 4;
+    if (D_800BE9F0 != 0x1D) {
+        nplayers = D_80090130;
+    }
+    for (i = 0; i < 4; i++) {
+        idx = D_800843F0[i];
+        if (idx < 4 && i < nplayers) {
+            player[i].stick_x = pads[idx].stick_x;
+            player[i].stick_y = pads[idx].stick_y;
+            player[i].button = pads[idx].button | D_800BE720[idx];
+            D_800BE720[idx] = 0;
+        } else {
+            player[i].button = 0;
+            player[i].stick_x = 0;
+            player[i].stick_y = 0;
+        }
+    }
+
+    for (i = 0; i < 4; i++) {
+        D_800BED50[i] = ~D_800BEB28[i] & player[i].button;
+        D_800BED38[i].button = player[i].button;
+        D_800BEB28[i] = player[i].button;
+        D_800BED38[i].stick_x = DEADZONE(player[i].stick_x);
+        D_800BED38[i].stick_y = DEADZONE(player[i].stick_y);
+    }
+
+    if (D_800E0B94 == 2 || D_800E0FC5 == 2) {
+        replay = 1;
+        func_151DDE70();
+    } else {
+        replay = 0;
+    }
+
+    for (i = 0; i < 4; i++) {
+        D_800BEB30[i] = ~D_800BEB20[i] & player[i].button;
+        D_800BEB20[i] = player[i].button;
+        if (replay == 0) {
+            player[i].stick_x = DEADZONE(player[i].stick_x);
+            player[i].stick_y = DEADZONE(player[i].stick_y);
+        }
+    }
+    return &D_800BE730;
+}
+#undef DEADZONE
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_49310/func_1501BBB8.s")
+#endif
 extern f32 D_80096D10;
 void func_1501C0D0(u8, f32, f32);
 void func_1501BFF0(u8 arg0, u8 arg1)

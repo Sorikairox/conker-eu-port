@@ -2,6 +2,15 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_1501878C(void);
+void func_15018F80(s16 arg0);
+void func_1501905C(void);
+void func_15019414(void);
+Gfx *func_150198FC(u8 *arg0);
+Gfx *func_15019BB8(Gfx *gdl, s32 arg1);
+Gfx *func_15019E60(Gfx *arg0);
+#endif
 
 
 void* func_151674F8(void *arg0, s32 arg1, s16 arg2, s32 arg3);
@@ -28,8 +37,192 @@ void func_150186D0(void) {
 }
 
 // something big and interesting
-#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_1501878C.s")
+#ifdef NON_MATCHING
+extern OSMesgQueue D_800BEE30;
+extern u8 D_8002AFA0;
+extern s16 D_8002AFA4;
+extern u8 D_800BEA34;
+extern u8 D_800BEA35;
+extern s16 D_800BEEC8;
+extern u8 D_800BEA50[];
+extern u8 D_800BEFC0;
+extern u8 D_800D9F38;
+extern u8 D_800D9F10;
+extern void *D_800BEFBC;
+extern u8 D_800C1480[];
+extern u8 D_80089810[];
+extern s32 D_800BEFC4;
+extern u8 D_800BEEE2;
+extern Vp D_800D9FB0[][2];
+void func_10004074(s32);
+void func_151412BC(void);
+void func_1510B930(void);
+void func_1517D534(void);
+void func_151E5928(void);
+void func_1510BA9C(void);
+s32 func_15019130(void);
+Gfx *func_15019464(Gfx *, s16);
+Gfx *func_1515DC40(Gfx *, s32);
+Gfx *func_150195A0(Gfx *, s16);
+Gfx *func_15019CC8(Gfx *, s32);
+Gfx *func_15043384(Gfx *);
+void func_15084E80(void);
+void func_1510D984(void);
+void func_15114F9C(void);
+void func_eu_1501C860(s32, s32);
+void func_151F2BE8(void);
+void func_151F2C4C(void);
 
+/* Per-frame main step: wait for the frame message, then build and submit the frame's display list
+ * (message 1), release the DL buffers when the game is torn down (message 2) or halt (message 4).
+ * Returns 0 once the buffers were released, 1 otherwise. D_800BE9D0 is the DL write pointer. */
+#define GDL (*(Gfx **)&D_800BE9D0)
+s32 func_1501878C(void) {
+    OSMesg msg = NULL;
+    s16 i;
+    Gfx *saved;
+
+    osRecvMesg(&D_800BEE30, &msg, OS_MESG_BLOCK);
+    D_8002AFA0 = 0;
+    D_8002AFA4 = 800;
+    switch (*(s16 *)msg) {
+        case 1:
+            break;
+        case 2:
+            func_1517E71C();
+            if (D_800DCE20 != 0) {
+                func_151412BC();
+            }
+            D_800BEEC8--;
+            if (D_800BEA35 == 0 || D_800BEEC8 != 0) {
+                return 1;
+            }
+            func_10004074((s32)D_800BEDE8[0]);
+            func_10004074((s32)D_800BEDE8[1]);
+            D_800BEDE8[0] = NULL;
+            return 0;
+        case 4:
+            while (func_151DD588(1) != 0) {
+            }
+            for (;;) {
+            }
+        default:
+            return 1;
+    }
+
+    if (D_800BEA35 != 0) {
+        return 1;
+    }
+    func_151E5928();
+    if (D_800BEA35 != 0) {
+        return 1;
+    }
+    if (D_800BEA34 != 0) {
+        func_1501A39C();
+        D_800BEA34 = 0;
+    }
+    if (D_800D9F10 != 0) {
+        func_1510B930();
+    }
+    if (D_800D9F38 != 0) {
+        func_1510BA9C();
+    }
+    func_1501905C();
+    if (D_800BEAC0 == 0 && func_15019130() == 0) {
+        return 1;
+    }
+
+    GDL = func_1501A680(GDL);
+    func_1515DC0C();
+    func_15167310();
+    for (i = 0; i <= D_80082FA0; i++) {
+        D_80082FA4 = D_800BEA50[i];
+        func_15018F80(D_80082FA4);
+        GDL = func_15019464(GDL, D_80082FA4);
+    }
+
+    if (D_800BEFC0 == 0) {
+        /* Back to the main microcode (text D_800C1480, data D_800BEFBC), then the base render state. */
+        gSPLoadUcodeEx(GDL++, D_800C1480, D_800BEFBC, 0x800);
+        gSPGeometryMode(GDL++, 0x3D0605, 0);
+        gSPSetGeometryMode(GDL++, 0x220005);
+        gSPMatrix(GDL++, D_80089810, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        gDma2p(GDL++, G_MOVEMEM, &D_800D9FB0[D_800BE9C0][0], sizeof(Vp), G_MV_LIGHT, 0);
+        gDma2p(GDL++, G_MOVEMEM, &D_800D9FB0[D_800BE9C0][1], sizeof(Vp), G_MV_LIGHT, 48);
+    }
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        saved = GDL;
+        D_80082FA4 = D_800BEA50[i];
+        GDL = func_1515DC40(GDL, D_80082FA4);
+        GDL = func_150195A0(GDL, D_80082FA4);
+        /* Out of DL space: drop this player's view. */
+        if (D_800BEFC4 < GDL - D_800BEDE8[D_800BE9C0]) {
+            GDL = saved;
+        }
+    }
+    D_80082FA4 = 0;
+    func_15019414();
+    GDL = func_150198FC((u8 *)GDL);
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        D_80082FA4 = D_800BEA50[i];
+        GDL = func_1515DC40(GDL, D_80082FA4);
+        GDL = func_15019CC8(GDL, D_80082FA4);
+        if (D_800BEAC0 == 0 && D_80082FA0 > 0) {
+            GDL = func_15019BB8(GDL, D_80082FA4);
+        }
+    }
+    GDL = func_15019E60(GDL);
+    if (D_800BEAC0 == 0 && D_80082FA0 == 0) {
+        for (i = 0; i <= D_80082FA0; i++) {
+            D_80082FA4 = D_800BEA50[i];
+            GDL = func_15019BB8(GDL, D_80082FA4);
+        }
+    }
+    GDL = func_151E8C60(GDL);
+    GDL = func_15043384(GDL);
+    func_15034AD8();
+    func_1502E764();
+    func_15189688(0);
+    func_15084E80();
+    func_15125628();
+    gDPFullSync(GDL++);
+    gSPEndDisplayList(GDL++);
+    func_10004674();
+    func_1510D984();
+    func_15114F9C();
+    func_1517D534();
+    func_eu_1501C860(0, 1);
+    D_800BE9B4 = 0;
+
+    if (D_800BEAC0 != 0) {
+        D_800BEEE2 = 2;
+    } else if (D_800BEEE2 > 0) {
+        D_800BEEE2--;
+    }
+    if (D_800BEAC1 != D_800BEAC0) {
+        D_800BEAC0 = D_800BEAC1;
+        if (D_800BEAC0 != 0) {
+            func_1000E2F4(1);
+            func_10011E94(1);
+            if (func_151F2CDC() != 0) {
+                func_151F2BE8();
+            }
+        } else {
+            func_1000E2F4(0);
+            func_10011E94(0);
+            if (func_151F2CDC() != 0) {
+                func_151F2C4C();
+            }
+        }
+    }
+    return 1;
+}
+#undef GDL
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_1501878C.s")
+#endif
 void func_15018DFC(void) {
     func_150A09D0(D_800BE9E4);
     func_150619A8();
@@ -149,7 +342,7 @@ u8 * func_151D6D28(u8 *);
 extern s32 D_8002AE20;
 extern s8 D_80083320;
 
-void func_150198FC(u8 *arg0) {
+Gfx *func_150198FC(u8 *arg0) {
     s32 var_s0_3;
     u8 *temp_s0;
     u8 *temp_v0;
@@ -197,7 +390,7 @@ void func_150198FC(u8 *arg0) {
     if ((D_800BEAC0 == 0) && (D_800BEAC1 == 0)) {
         var_s0_4 = func_1508FD38(temp_v0);
     }
-    func_15096D44(func_151674F8(func_151674F8(var_s0_4, 3, 0, 0), 3, 0, 1));
+    return (Gfx *)func_15096D44(func_151674F8(func_151674F8(var_s0_4, 3, 0, 0), 3, 0, 1));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150198FC.s")
@@ -240,14 +433,14 @@ Gfx *func_15019BB8(Gfx *gdl, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019CC8.s")
 
-void func_15019E60(Gfx *arg0) {
+Gfx *func_15019E60(Gfx *arg0) {
     if (D_80082FA0 != 0) {
         D_80082FA4 = D_80082FA0 + 1;
         gSPViewport(arg0++, (D_80082FA4 * 0x180) + D_800BE628 + 64);
     } else {
         gSPViewport(arg0++, D_800BE628 + 64);
     }
-    func_15043384(func_151E8620(func_1501A490(arg0, 0xFF, 0, 0, 0, 0)));
+    return (Gfx *)func_15043384(func_151E8620(func_1501A490(arg0, 0xFF, 0, 0, 0, 0)));
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_15019F20.s")
