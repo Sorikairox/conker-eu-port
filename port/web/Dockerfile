@@ -8,4 +8,6 @@ FROM emscripten/emsdk:${EMSDK_TAG}
 RUN echo 'int main(void){return 0;}' > /tmp/w.c \
  && emcc -O1 /tmp/w.c -o /tmp/w.js -sASYNCIFY -sMAX_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 \
  && rm -f /tmp/w.*
+# P11: SDL2 port for the audio output (port/audio/aud_out.c), cached in the image so builds stay offline
+RUN embuilder build sdl2
 WORKDIR /src

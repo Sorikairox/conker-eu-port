@@ -1,12 +1,11 @@
 /* PC audio output (session P9): a ring buffer of stereo s16 frames drained by an SDL audio
- * callback. Under Emscripten this is emscripten's built-in SDL audio (library_sdl.js, Web Audio):
- * the pinned conker-emsdk image has no SDL2 port in its cache and the build must not download one.
- * The calls below are the SDL 1.2 subset that SDL2 also provides (SDL_OpenAudio/SDL_PauseAudio), so
- * moving to -sUSE_SDL=2 is a flag change once the image carries SDL2. In node (no AudioContext) the
+ * callback. Since P11 this is the SDL2 port (-sUSE_SDL=2; `embuilder build sdl2` in port/web/Dockerfile,
+ * so builds stay offline); P9 used emscripten's built-in SDL 1.2 audio. The calls are the subset both
+ * provide (SDL_OpenAudio/SDL_PauseAudio). In node (no AudioContext) the
  * device stays closed and pushed audio is only counted. */
 #include <stdint.h>
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h> /* SDL2 port (-sUSE_SDL=2, cached in the conker-emsdk image since P11) */
 #include <emscripten.h>
 #include "aud.h"
 #include "../ultra/pc_mem.h"

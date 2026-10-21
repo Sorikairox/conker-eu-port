@@ -324,12 +324,13 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
 `docs/port/sessions/P8.md` (address space, PC overrides, texture ids, re-rank) and
-`docs/port/sessions/P9.md` (ROM-offset symbols, KSEG0 tests, audio HLE). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P9.md` (ROM-offset symbols, KSEG0 tests, audio HLE) and
+`docs/port/sessions/P11.md` (runtime check of the C scheduler/allocator/asset walker, live-frame path, SDL2). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -337,6 +338,7 @@ port/web/run.sh image     # once: conker-emsdk image (emscripten/emsdk:4.0.15-ar
 port/web/run.sh build     # census + vbe IR build of the game TUs + memory tables + link + page (~2-3 min clean)
 port/web/run.sh serve     # http://localhost:8064/?app=demo   (stop: port/web/run.sh stop)
 port/web/boot.sh 10       # node boot, read-only mounts, compact summary; log in port/build/boot.log (GFXDEMO=1 for the viewer)
+port/web/rebuild.sh 10 [clean]   # P11: build + boot in one step (clean = after a merge / C change)
 python3 port/tools/priority.py port/build/boot.log 50   # conversion priority list (measured stubs + next wave)
 AUDTEST=26390 port/web/boot.sh 8   # P9: C n_audio synth + audio HLE on a ROM sound -> port/build/audio/audtest.wav (page: &audtest=26390, click)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
@@ -432,9 +434,36 @@ AUDTEST=26390 port/web/boot.sh 8   # P9: C n_audio synth + audio HLE on a ROM so
     func_15019130, func_15019464, func_1501A490, func_150195A0, func_15019CC8, func_15084E80,
     func_1510D984 (texture cache), func_15114F9C, func_eu_1501C860, func_1501C55C.
   - Texture path, for a later session: func_1510D66C, func_1510D3E0, func_10004514, func_10006530.
+- **Runtime check of converted C (P11, after merging port 17aafdb):**
+  - **No bug found** in `func_100049E0` (scheduler), `func_10003C6C` (allocator) or
+    `func_1502AC88` (asset walker).
+  - Boot self-tests: `[schedtest] PASS` (retrace client, gfx and audio tasks reach `gfx_run_task`
+    and `aud_run_alist`, done messages are right), `[heap]` walk with 0 errors, `[assettest] PASS`
+    (8 keys, the game's walk equals a direct DMA walk).
+  - Fixed on the PC side:
+    - the PC `func_10001194` lacked the scheduler queue and VI event;
+    - the heap bounds were K0 constants (`port_fix_heap_bounds`);
+    - the mirrors are now 4 KB aligned.
+  - Rule: gfx tasks go to `D_8003B1E8`, audio tasks to `D_8003B200`.
+  - Symbol trap: asm names listed in `undefined_syms.eu.txt` are US names. `D_800BE9C0` in asm
+    is address 0x800BEDE0, so PC code must use the mapped address.
+- **Live frames (P11):** the game steps every frame (70 stubs). Still missing, so no game DL renders:
+  - A game gfx task is never submitted, because the DL buffers `D_800BEDE8` are NULL. Only the
+    asm level loader **`func_15007B3C`** calls `func_15015E30`, which allocates them. It also
+    starts the first pad read; the PC `osContInit` posts one SI message as a shim until then.
+  - The TEMPORARY PC overrides `func_15019130` (world update) and `func_eu_1501C860` (frame
+    submit) are in `pc_overrides.c`. Remove them when the port branch converts these functions.
+  - DL stubs called as `x = f(x, …)` return `a0` (23 pass-through stubs).
+  - The first DL (written at NULL) is G_DL 0x8002CC90, G_SETZIMG z-buffer, G_MOVEMEM viewport;
+    see P11.md §2.
+- **Audio (P11):** the output is SDL2 (`-sUSE_SDL=2`; the image runs `embuilder build sdl2`).
+  `[audtest]` passes unchanged. MP3 ABI 7/8 is still not implemented.
 - **Next for the browser build:**
-  1. Convert `func_100049E0` and the frame builders (`func_1501878C`, `func_1501BBB8`) on the port
-     branch. Game frames then render with no further change.
+  1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
+     branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
+     overrides. After that, rerun `port/web/rebuild.sh 10` and look for `[gfx] task` lines with
+     real DLs. Then convert `func_1502AB04` (the asset-cache insert, 217 calls).
+     MP3 ABI 7/8 (voice clips) is still open.
   2. The texture cache (`func_1510D66C`, `func_1510D3E0`); ROM-offset symbols are done (P9).
      A PC override of the asset-table walker `func_1502AC88` (#3 stub, format in P9.md) unblocks
      the asset loader. Audio: `func_10008180`, `func_10008F90`, `func_10009CBC` as PC overrides, then

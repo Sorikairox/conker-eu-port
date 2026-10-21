@@ -16,7 +16,7 @@ GAME_CFLAGS  := -O1 -g0 -std=gnu89 -nostdinc -fno-builtin -fno-strict-aliasing -
                 -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=implicit-int \
                 -Wno-error=implicit-function-declaration
 
-LINK_COMMON := -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 \
+LINK_COMMON := -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 \
                -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=128MB -sSTACK_SIZE=1MB -sMODULARIZE=1 -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 \
                -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test \
                -sEXPORTED_RUNTIME_METHODS=HEAPU8,callMain,stringToNewUTF8 -sENVIRONMENT=web,node --profiling-funcs
@@ -43,7 +43,7 @@ $(B)/gfx/%.o: gfx/%.c gfx/gfx.h ultra/pc_mem.h
 
 $(B)/audio/%.o: audio/%.c audio/aud.h ultra/pc_mem.h
 	@mkdir -p $(@D)
-	emcc $(ULTRA_CFLAGS) -c $< -o $@
+	emcc $(ULTRA_CFLAGS) -sUSE_SDL=2 -c $< -o $@
 
 # ---- scheduler demo
 $(B)/demo.o: sched_demo/demo.c ultra/pc_ultra.h
