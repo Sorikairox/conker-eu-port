@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
-typedef struct { s16 x; s16 y; s16 z; u8 pad6[0xE]; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; u8 pad20[4]; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
+typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
 extern u64 D_800D3510[][3];
 
 
@@ -100,7 +100,44 @@ void func_150A28C4(u8 *arg0)
   *((s32 *) (((u8 *) arg0) + 0x20)) = 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A29A0.s")
+s32 func_15183800(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150A29A0(Unk34B8 *arg0, s32 arg1) {
+    s32 v;
+    s32 r;
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 d;
+    s32 e;
+    s32 f;
+    s32 g;
+    s32 w;
+
+    if (arg1 != 0xFF) {
+        w = arg0->unk1C;
+        v = w & 0xFF;
+        if (v == 0 || arg0->unk17 == 9) {
+            g = arg0->unk17;
+            a = arg0->unk18 & 0xFF;
+            b = *(s16 *)&arg0->unk18;
+            c = ((u8 *)&arg0->unk18)[2];
+            d = ((u8 *)&arg0->unk1C)[0];
+            e = ((u8 *)&arg0->unk1C)[1];
+            f = arg0->unk20;
+            r = func_15183800(arg0->x, arg0->y + (e << 4), arg0->z, a, g, arg0->unk6, arg1, b, c, d, f);
+            if (r != -1 && arg0->unk17 != 9) {
+                arg0->unk1C = ((r << 8) | 0xF0) | (arg0->unk1C & 0xFFFF0000);
+            }
+        } else {
+            r = v;
+            w = arg0->unk1C; // fakematch: re-read of the word swaps v/r into a0/v0
+            if (v < 2) {
+                r = 2;
+            }
+            arg0->unk1C = (w & ~0xFF) | r;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A2AB4.s")
 
