@@ -3,7 +3,32 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7680/func_15189E70.s")
+#define F(o) (*(f32 *)(p + (o)))
+void func_15189E70(void *arg0, u8 arg1) {
+    u8 *p;
+    s32 flag;
+
+    p = func_15167A68(0x1A, 1, 0x78, 1, 0xFF, 1);
+    if (p != NULL) {
+        memcpy(p + 0x10, arg0, 0x50);
+        func_1510F800(0);
+        *(s32 *)(p + 0x6C) = func_1510FD20((s32)(F(0x24) * 0.5f + F(0x18)), (s32)(F(0x2C) * 0.5f + F(0x20)));
+        if (arg1 != 0) {
+            flag = 1;
+        } else {
+            flag = 0;
+        }
+        p[0x70] = flag;
+        *(s16 *)(p + 0x60) = 0;
+        F(0x64) = 0.0f;
+        if (F(0x28) < 0.0f) {
+            F(0x68) = F(0x28) + F(0x1C);
+        } else {
+            F(0x68) = F(0x1C);
+        }
+    }
+}
+#undef F
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B7680/func_15189F70.s")
 

@@ -29,7 +29,30 @@ void func_15171734(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171B70.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171D6C.s")
+void func_15170648(f32 *, f32, f32, s32, f32, s32, s32, s32, u8, s32);
+void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, u8 argB, s32 argC) {
+    f32 pts[4][3];
+    f32 x;
+    f32 y;
+    f32 z;
+
+    x = arg0[8] + arg3;
+    y = arg0[9] + arg4;
+    z = arg0[10] + arg5;
+    pts[0][0] = arg1 + x;
+    pts[0][1] = y;
+    pts[0][2] = arg2 + z;
+    pts[1][0] = x - arg1;
+    pts[1][1] = y;
+    pts[1][2] = arg2 + z;
+    pts[2][0] = x - arg1;
+    pts[2][1] = y;
+    pts[2][2] = z - arg2;
+    pts[3][0] = arg1 + x;
+    pts[3][1] = y;
+    pts[3][2] = z - arg2;
+    func_15170648(pts[0], x, z, arg7, argA, arg6, arg8, arg9, argB, argC);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171E60.s")
 
