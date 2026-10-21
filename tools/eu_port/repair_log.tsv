@@ -1098,3 +1098,8 @@ func_151D4898	new	7	SIZE-1	n	n	f32->u32 conv angle ((conv - 0x4000) | 1) u16; mi
 func_151D7814	new	8	DIFF11	n	n	D_80090040 handler + func_15143E64 dist; pad above pos fixes locals; left: s->f5 folded to arg0+0x2D and v0 spill 0x18 vs 0x1C
 func_151A3AB4	new	7	OK	y	n	K&R 2-param def (arg2 never used; prototype with 3 params homes a2); file prototype at the caller made s32 func_151A3AB4();
 func_151D7EDC	CERR	6	DIFF13	n	y	0x1C tbl; elem ptr e = &tbl[2D] gives same size; delay-slot/addu order left; local perm 400s best SIZE+1
+func_151C75E8	SIZE-1	8	DIFF52	n	n	clamp: assign int 255 (not 255.0f) re-materializes the constant like the ref; left: li v0,1 (return 1) hoisted before the clamp in ref
+func_151AB874	CERR	6	DIFF4	n	y	func_1513418C block + 0xC memcpy block to ret+0x58; remote perm DIFF4 (lwc1 0x118 / lbu 0x3B load order), 2nd round nothing
+func_151C75E8	DIFF52	10	OK	y	y	int 255 assign + local perm: empty if (!arg0 && !arg0 && !arg0) {} before return 1 (fakematch)
+func_151C01F0	CERR	4	DIFF19	n	y	config setter: ternaries in shifts; store/const scheduling only; remote perm DIFF32 -> DIFF19
+func_151CEACC	CERR	5	SIZE+1	n	n	V3 pos + h,r for func_1515C710; s32 pad[6] after locals fixes frame; left: tbl in a0 + extra nop after c.le.s
