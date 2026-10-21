@@ -1202,6 +1202,14 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 4. Unused declared locals still take a frame slot at -O2 (s129 recipe 1): an unused `e` pointer moved the only spilled local from 0x4C to 0x48 (`func_1517DC00`).
 
 
+## s139 recipes (lo near misses, init sound helpers)
+1. **Stack struct offset off by 4/8 with the frame right**: the locals declared *before* the struct sit above it. Move pointer/float locals in front of the struct declaration (E909C: `f32 r` before it; twin E96F8: `p` and `n` too). Reordering locals after it does nothing.
+2. **`beql a,b` operand order that no swap fixes, with a mask**: write the mask unsigned, `x != (arg0 & 0x7FU)` (`func_1000C350`).
+3. **A branch that ends in `b L; nop` to a block holding only `b end; lw v0,home`**: an early `return arg0;` at the end of that if-branch (`func_1000C350`).
+4. **`or a3,a0; or a0,a3` before the first call, then `or a3,v0`**: the param is reassigned from the call, `arg0 = f(arg0);`, and used as the index afterwards (`func_10011EB8`). The return value masked only at the return (`or a0,v0; andi v0,a0,0xFFFF`) = an `s32` local returned from a `u16` function.
+5. **A global loaded with `lw %lo(D)` and its address `lui/addiu` built separately for a call (`f(&D)`)**: IDO CSEs both when the load is `D[0].x`; reading it through a neighbouring symbol (`((s32 *)&D_80042984)[1]`) keeps them apart (bytes identical after relocation; `func_10010BE8`).
+6. A rodata table only one function reads can move into C when the function matches: `// rodata_inject: cdefined <rom a> <rom b>` + `const T name[...] = {...}` right before the function; apply.py accepts it.
+
 ## s137 recipes (init_EB00 sound wrappers)
 1. **One float variable for successive roles**: a distance `f` and then its clamped scale (`if (f > 256) f = 1.0f; else if (f < 80) f = 0.3125f; else f = f * (1/256.0f);`) share `f0` in the target; a separate `scale` local took `f2` (DIFF4 -> OK, `func_10010FFC`).
 2. `x * 3` as `addu t,x,x; addu x,t,x` is `x + x + x`, not `x * 3` (`sll; subu`). A u16 field converted to float with the `0x4F800000` fix-up branch is `(u32) (u16) p->f`.
