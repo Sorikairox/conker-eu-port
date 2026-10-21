@@ -163,7 +163,51 @@ void *func_15168800(void *arg0, u8 arg1, s32 arg2) {
     bcopy(arg0, temp_v0 + 0x10, 0xA8);
     return temp_v0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168870.s")
+extern u8 *D_8008CDEC[];
+extern void (*D_8008CD68[])(u8 *);
+
+void func_15168870(u8 *arg0) {
+    s16 speed = *(s16 *)(arg0 + 0x9A);
+    s32 len;
+    s8 w;
+    s32 t;
+
+    if (speed != 0) {
+        t = D_8008CDEC[arg0[0xB0]][4];
+        len = (t << 8) - 1;
+        *(s16 *)(arg0 + 0x98) += speed * D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x98) > len) {
+            if (*(u16 *)(arg0 + 0xA8) & 0x40) {
+                *(s16 *)(arg0 + 0x98) = len - *(s16 *)(arg0 + 0x98) % len;
+                *(s16 *)(arg0 + 0x9A) = -speed;
+            } else if (*(u16 *)(arg0 + 0xA8) & 4) {
+                *(s16 *)(arg0 + 0x98) = -1;
+            } else {
+                do {
+                    *(s16 *)(arg0 + 0x98) -= len;
+                } while (*(s16 *)(arg0 + 0x98) > len);
+            }
+        } else if (*(s16 *)(arg0 + 0x98) < 0) {
+            if (*(u16 *)(arg0 + 0xA8) & 0x40) {
+                *(s16 *)(arg0 + 0x98) = -*(s16 *)(arg0 + 0x98) % len;
+                *(s16 *)(arg0 + 0x9A) = -speed;
+            } else if (*(u16 *)(arg0 + 0xA8) & 4) {
+                *(s16 *)(arg0 + 0x98) = -1;
+            } else {
+                do {
+                    *(s16 *)(arg0 + 0x98) += len;
+                } while (*(s16 *)(arg0 + 0x98) < 0);
+            }
+        }
+    }
+    w = arg0[0xB2];
+    if (w != -1 && D_8008CD68[w] != NULL) {
+        D_8008CD68[w](arg0);
+    }
+    if (*(s16 *)(arg0 + 0x98) == -1) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 void func_15168A2C(s32 arg0) {
     func_15168B10(arg0, 0);
 }

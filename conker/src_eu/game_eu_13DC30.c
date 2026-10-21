@@ -66,7 +66,44 @@ Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113D54.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114208.s")
+extern u8 D_800C3A7C;
+s32 func_15022BB0(s32, s32);
+void *func_1510DEF0(s32, struct131 *, s32, s32, s32);
+
+void func_15114208(void) {
+    s32 i;
+    s32 j;
+    s32 found;
+    s32 ok;
+    struct131 *e;
+
+    for (i = 0; i < D_800DC320; i++) {
+        e = &D_800DBEF4[i];
+        found = 0;
+        for (j = 0; j < D_80082FA0; j++) {
+            do {
+            } while (0); // fakematch: changes the s-register allocation
+            if (func_150859AC(j, 0) && ((u8 *)e)[0x8B + j] == 0) {
+                found = 1;
+                break;
+            }
+        }
+        if ((e->pad70[0] & 8) || ((u8 *)e)[0x4C] == 0 || (((u8 *)e)[0x4F] & 0x10) == 0x10 || found ||
+            (D_800C3A7C == 0 && D_800C35EA == 1 && !func_15022BB0(i, 0)) || !(((u8 *)e)[0x4F] & 1)) {
+            ok = 0;
+        } else {
+            ok = 1;
+        }
+        if (ok) {
+            if (*(void **)((u8 *)e + 0x94) == NULL) {
+                *(void **)((u8 *)e + 0x94) = func_1510DEF0(1, e, 0, 1, 0);
+            }
+        } else if (*(struct102 **)((u8 *)e + 0x94) != NULL) {
+            func_1516972C(*(struct102 **)((u8 *)e + 0x94));
+            *(struct102 **)((u8 *)e + 0x94) = NULL;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151143D4.s")
 
