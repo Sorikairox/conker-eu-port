@@ -66,3 +66,6 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 157	main	game>=0x15190000	4	1576	135	spawner param-block template converts; 5 display-list builders all stuck at DIFF2-53
 162	wt	game 0x15130000-0x1518FFFF+dbg	2	720	125	9 fresh rows tried, 2 matched (chained assignment); frame +8 from twice-read float extern
 159	main	game>=0x15190000	2	1344	137	param blocks declared inside the if; 10 spawner callers tried, 2 matched, 8 near misses
+164	wt	game 0x15130000-0x1518FFFF+dbg	7	3168	130	owned-rodata literals fix +8 frames; combine macros; 6/11 fresh rows
+166	wt	game 0x15130000-0x1518FFFF+dbg	10	2536	130	smallest-first fresh rows 9/12; literal sweep found nothing
+161	main	game>=0x15190000	3	1112	125	first func_151559FC spawner callers; ternary-to-u8 store shape open
