@@ -16,7 +16,40 @@ void func_151419B0(void *arg0) {
     func_15141970(arg0);
 }
 
+#ifdef NON_MATCHING
+void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
+    s32 temp_a0;
+    s32 temp_t6;
+    s32 temp_v1;
+    u8 *temp_v0_2;
+    u8 *temp_v0;
+
+    temp_t6 = arg2 & 0xFF;
+    if (temp_t6 == 0) {
+        temp_v0 = ((struct102 *)((u8 *)arg0 + 0x28));
+        if (((*(s32 *)((u8 *)arg1 + 0)) == (*(s32 *)((u8 *)temp_v0 + 4))) || ((*(u8 *)((u8 *)temp_v0 + 8)) == (*(u8 *)((u8 *)arg1 + 4)))) {
+            func_1516972C(arg0);
+        }
+    } else {
+        temp_v0_2 = &arg0->unk28;
+        if (temp_t6 == 0x2D) {
+            temp_a0 = (*(s32 *)((u8 *)temp_v0_2 + 4));
+            temp_v1 = (*(s32 *)((u8 *)arg1 + 0));
+            if (temp_v1 == temp_a0) {
+                (*(s32 *)((u8 *)temp_v0_2 + 4)) = (s32) (*(u8 *)((u8 *)arg1 + 4));
+                (*(u8 *)((u8 *)temp_v0_2 + 8)) = (u8) (*(u8 *)((u8 *)arg1 + 9));
+                return;
+            }
+            if ((s32) (*(u8 *)((u8 *)arg1 + 4)) == temp_a0) {
+                (*(s32 *)((u8 *)temp_v0_2 + 4)) = temp_v1;
+                (*(u8 *)((u8 *)temp_v0_2 + 8)) = (u8) (*(u8 *)((u8 *)arg1 + 8));
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_151419D0.s")
+#endif
 // NON-MATCHING: one operand swap in the last compare (bnel a0,t2 vs t2,a0)
 // void func_151419D0(struct_eu_151419D0 *arg0, struct_eu_151419D0_msg *arg1, u8 arg2) {
 //     struct_eu_151419D0_sub *sub = &arg0->unk28;

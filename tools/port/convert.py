@@ -61,7 +61,9 @@ def fix_args_count(code, err, func=None, src=None):
     if not m:
         return None
     n = m.group(1)
-    c = re.sub(r'(?<![\w*])%s\(' % n, '((s32 (*)())%s)(' % n, code)
+    bm = re.search(r'\b%s\s*\([^;{]*\)\s*\{' % re.escape(func or r'\w+'), code)
+    k = bm.end() if bm else 0
+    c = code[:k] + re.sub(r'(?<![\w*])%s\(' % n, '((s32 (*)())%s)(' % n, code[k:])
     # keep the definition name intact
     return c if c != code else None
 
@@ -102,7 +104,7 @@ def fix_fnptr(code, err, func=None, src=None):
     subprocess.run(['python3', os.path.join(HERE, '../eu_port/fnptrfix.py'), a, b], capture_output=True)
     return open(b).read() if os.path.exists(b) else None
 
-def fix_passthrough(code, why, func):
+def fix_passthrough(code, why, func, src=None):
     """DIFFER 'call #k X: aN ref=.. cand=..' where the reference leaves aN untouched (the caller's own argN
     passed through, which m2c drops): append the caller's params as extra arguments of X up to N"""
     m = re.search(r': call #\d+ (\w+): a(\d) ref=', why or '')
@@ -144,16 +146,28 @@ def fix_passthrough(code, why, func):
         out.append(code[i:mm.end()] + ', '.join(args) + ')'); i = j; ch = True
     return ''.join(out) if ch else None
 
-def lint(code):
+def lint(code, func=None):
     """EQUIV-but-fragile patterns that difftest cannot see (it never dereferences pointers inside stubs)"""
     out = []
+    if func and not os.environ.get('CONVERT_P1') and (cfix.proto_problems(code, func) or re.search(r'\(\(s32 \(\*\)\(\)\)\w+\)\(', code)):
+        out.append('lint:proto')   # a callee prototype that disagrees with its definition: a trap stub in wasm
     scal = set(re.findall(r'^\s+(?:s8|u8|s16|u16|s32|u32|f32|f64|s64|u64)\s+(sp[0-9A-F]+);', code, re.M))
     if any(re.search(r'&%s\b' % v, code) for v in scal):
         out.append('lint:stackaddr')   # &scalar stack local passed on: callee may read neighbours -> make it an array/struct (vecfix.py/spstruct.py)
     if re.search(r'\bsubroutine_arg|\bsaved_reg|M2C_', code): out.append('lint:m2cmacro')
     return out
 
-FIXES = [('implproto', fix_implicit_proto), ('cmpcast', fix_cmp_cast), ('fnptr', fix_fnptr), ('redecl', fix_redecl), ('qtypes', fix_question_types), ('undecl', fix_undeclared), ('argc', fix_args_count)]
+sys.path.insert(0, HERE)
+import cfix
+FIXES = [('implproto', fix_implicit_proto), ('spframe', cfix.fix_spframe), ('cmpcast', fix_cmp_cast), ('cmp2', cfix.fix_cmp),
+         ('deref', cfix.fix_deref), ('fnptr', fix_fnptr), ('redecl', fix_redecl), ('qtypes', fix_question_types),
+         ('undecl', fix_undeclared), ('argc', fix_args_count)]
+# DIFFER: tried in order, each at most once per draft
+DFIXES = [('passthru2', cfix.fix_passthru), ('passthru', fix_passthrough), ('u8arith', cfix.fix_u8arith),
+          ('spframe', lambda c, w, f, s: cfix.fix_spframe(c, w, f, s, force=True))]
+if os.environ.get('CONVERT_P1'):   # the P1 fix set, for before/after measurements
+    FIXES = [x for x in FIXES if x[0] in ('implproto', 'cmpcast', 'fnptr', 'redecl', 'qtypes', 'undecl', 'argc')]
+    DFIXES = [('passthru', fix_passthrough)]
 
 
 # ------------------------------------------------------------------ container side
@@ -183,14 +197,23 @@ def _eval_one(item):
     log = []
     import time
     t0 = time.time(); budget = float(os.environ.get('CONVERT_BUDGET', '150'))
+    def better(r):
+        if best is None: return True
+        a, b = rank[r['result']], rank[best['result']]
+        if a == b == 0: return bool(best.get('lint')) and not r.get('lint')
+        return a <= b
     for vname, code in drafts:
         if time.time() - t0 > budget: log.append('%s\t-\t-\tbudget exhausted' % func); break
-        fixes = []
-        for rnd in range(6):
+        fixes = []; dtried = set()
+        if not os.environ.get('CONVERT_P1'):
+            c0 = cfix.fix_rostr(code, '', func, src)
+            if c0: code = c0; fixes.append('rostr')
+        for rnd in range(7):
             res = difftest.check(func, code, False, trials, 1, 100000, False, tmp)
             res.update(variant=vname, fixes=','.join(fixes), code=code)
+            if res['result'] == 'EQUIV': res['lint'] = lint(code, func)
             log.append('%s\t%s\t%s\t%s' % (func, vname, ','.join(fixes), res['line'][:200]))
-            if best is None or rank[res['result']] <= rank[best['result']]: best = res
+            if better(res): best = res
             c2 = None
             if res['result'] == 'CERR':
                 for nm, fx in FIXES:
@@ -198,16 +221,24 @@ def _eval_one(item):
                     if c2 is not None and c2 != code: break
                     c2 = None
             elif res['result'] == 'DIFFER':
-                nm = 'passthru'; c2 = fix_passthrough(code, res.get('why'), func)
+                for nm, fx in DFIXES:
+                    if nm in dtried: continue
+                    c2 = fx(code, res.get('why'), func, src)
+                    if c2 is not None and c2 != code: dtried.add(nm); break
+                    c2 = None
+            elif res['result'] == 'EQUIV' and res['lint'] and 'lint:stackaddr' in res['lint'] and 'spframe' not in fixes \
+                    and not os.environ.get('CONVERT_P1'):
+                nm = 'spframe'; c2 = cfix.fix_spframe(code, '', func, src, force=True)
+            elif res['result'] == 'EQUIV' and 'lint:proto' in res['lint'] and 'proto' not in fixes and not os.environ.get('CONVERT_P1'):
+                nm = 'proto'; c2 = cfix.fix_proto(code, '', func, src)
             if c2 is None: break
             code = c2; fixes.append(nm)
-        if best['result'] == 'EQUIV': break
+        if best['result'] == 'EQUIV' and not best.get('lint'): break
     if best is None: best = dict(func=func, result='NODRAFT', line='NODRAFT %s' % func, variant='', fixes='')
     best['log'] = log
     if best['result'] == 'EQUIV':
-        lt = lint(best['code'])
+        lt = lint(best['code'], func)
         if lt: best['fixes'] = ','.join([x for x in [best.get('fixes', '')] + lt if x])
-    if best is None: best = dict(func=func, result='NODRAFT', line='NODRAFT %s' % func, variant='', fixes='')
     return best
 
 def inner_eval(d, funcs, trials, jobs):
@@ -220,12 +251,14 @@ def inner_eval(d, funcs, trials, jobs):
             if c in seen: continue
             seen.add(c); dr.append((os.path.basename(os.path.dirname(v)), c))
         items.append((f, dr, trials, 'build/convert_tmp/%s' % f))
-    os.makedirs(os.path.join(d, 'pass'), exist_ok=True)
+    os.makedirs(os.path.join(d, 'pass'), exist_ok=True); os.makedirs(os.path.join(d, 'best'), exist_ok=True)
     with Pool(jobs) as pool, open(os.path.join(d, 'results.tsv'), 'w') as fo, open(os.path.join(d, 'attempts.tsv'), 'w') as fd:
         for r in pool.imap_unordered(eval_one, items):
             reason = r['line'].split(': ', 1)[1] if ': ' in r['line'] else r['line']
             fo.write('\t'.join([r['func'], r['result'], r.get('variant', ''), r.get('fixes', ''), reason.replace('\t', ' ')]) + '\n'); fo.flush()
             fd.write('\n'.join(r.get('log', [])) + '\n'); fd.flush()
+            if r.get('code'):
+                open(os.path.join(d, 'best', r['func'] + '.c'), 'w').write(r['code'])
             if r['result'] == 'EQUIV':
                 open(os.path.join(d, 'pass', r['func'] + '.c'), 'w').write(r['code'])
             print(r['line'][:160], flush=True)
@@ -274,7 +307,8 @@ def host(argv):
                                    stdout=lg, stderr=subprocess.STDOUT, cwd=R, env=env)
     dk = os.environ.get('CONKERDEV', 'conkerdev')
     cw = '/conker/' + os.path.relpath(W, R)
-    subprocess.run(['docker', 'exec', '-w', '/conker/conker', dk, 'python3', '../tools/port/convert.py', '--eval', cw,
+    envs = [x for v in ('CONVERT_P1', 'DIFFTEST_NOLEARN', 'CONVERT_BUDGET', 'DIFFTEST_BUDGET') if v in os.environ for x in ('-e', v)]
+    subprocess.run(['docker', 'exec', '-w', '/conker/conker'] + envs + [dk, 'python3', '../tools/port/convert.py', '--eval', cw,
                     '--trials', str(trials), '--jobs', str(jobs)] + funcs)
     rows = [l.rstrip('\n').split('\t') for l in open(os.path.join(W, 'results.tsv'))]
     cnt = collections.Counter(r[1] for r in rows)
@@ -282,7 +316,7 @@ def host(argv):
     if insert:
         sys.path.insert(0, HERE); import insert_nm
         for r in rows:
-            if r[1] == 'EQUIV':
+            if r[1] == 'EQUIV' and 'lint:' not in r[3]:
                 print(r[0], insert_nm.insert(r[0], open(os.path.join(W, 'pass', r[0] + '.c')).read()))
 
 

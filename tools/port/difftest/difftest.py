@@ -32,7 +32,7 @@ import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
 from unicorn import Uc, UcError, UC_ARCH_MIPS, UC_MODE_MIPS32, UC_MODE_BIG_ENDIAN, \
-    UC_HOOK_MEM_UNMAPPED, UC_HOOK_MEM_WRITE, UC_HOOK_BLOCK, UC_PROT_ALL
+    UC_HOOK_MEM_UNMAPPED, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ, UC_HOOK_CODE, UC_HOOK_BLOCK, UC_PROT_ALL
 from unicorn.mips_const import *
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -127,6 +127,7 @@ def ref_from_s(spath):
             if vram is None: vram = int(m.group(2), 16)
             words.append(int(m.group(3), 16))
     while words and words[-1] == 0: words.pop()
+    if words and is_branch(words[-1]): words.append(0)   # keep the delay slot of the final jr ra
     return vram, words
 
 
@@ -450,7 +451,8 @@ SCRATCH = [UC_MIPS_REG_AT, UC_MIPS_REG_V0, UC_MIPS_REG_V1] + [UC_MIPS_REG_T0 + i
           [UC_MIPS_REG_T8, UC_MIPS_REG_T9]
 
 class Run:
-    def __init__(self, words, vram, extra, trial, romdata, tu, maxi):
+    def __init__(self, words, vram, extra, trial, romdata, tu, maxi, forced=None, trace=False):
+        self.forced = forced or {}; self.loads = []
         self.words, self.vram, self.end = words, vram, vram + 4 * len(words)
         self.seed, self.romdata, self.tu = trial, romdata, tu
         self.mu = mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
@@ -464,6 +466,18 @@ class Run:
         mu.hook_add(UC_HOOK_MEM_UNMAPPED, self.on_unmapped)
         mu.hook_add(UC_HOOK_MEM_WRITE, self.on_write)
         mu.hook_add(UC_HOOK_BLOCK, self.on_block)
+        self.last_pc = None
+        if trace:
+            mu.hook_add(UC_HOOK_MEM_READ, self.on_read)
+            mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
+
+    def on_code(self, mu, addr, size, ud):
+        self.last_pc = addr
+
+    def on_read(self, mu, access, addr, size, value, ud):
+        if size == 4 and not addr & 3:
+            try: self.loads.append((addr, struct.unpack('>I', mu.mem_read(phys(addr), 4))[0]))
+            except Exception: pass
 
     def page_init(self, pp):
         """initial content of the physical page pp"""
@@ -477,6 +491,10 @@ class Run:
                 lo = max(pp, p0); hi = min(pp + PAGE, p0 + len(b))
                 buf[lo - pp:hi - pp] = b[lo - p0:hi - p0]
         if buf is None: buf = self.rand_page(pp)
+        fw = [(a, v) for a, v in self.forced.items() if pp <= a < pp + PAGE]
+        if fw:
+            buf = bytearray(buf)
+            for a, v in fw: buf[a - pp:a - pp + 4] = struct.pack('>I', v)
         self.init[pp] = bytes(buf)
         return self.init[pp]
 
@@ -566,6 +584,8 @@ class Run:
             mu.emu_start(self.vram, RET_MAGIC, count=self.maxi)
         except UcError as e:
             self.fault = '%s at 0x%08X' % (e, mu.reg_read(UC_MIPS_REG_PC))
+            self.fault_pc = self.last_pc if self.last_pc is not None else mu.reg_read(UC_MIPS_REG_PC)
+            self.fault_regs = [mu.reg_read(UC_MIPS_REG_0 + i) for i in range(32)]
         pc = mu.reg_read(UC_MIPS_REG_PC)
         self.done = self.done or pc == RET_MAGIC
         self.out = dict(v0=mu.reg_read(UC_MIPS_REG_V0), v1=mu.reg_read(UC_MIPS_REG_V1),
@@ -646,6 +666,53 @@ def compare(R, C, rk, arity):
     return None
 
 
+LOADSTORE = set(range(32, 40)) | set(range(40, 47)) | {49, 53, 57, 61}
+
+def learn_pointer(rwords, vram, trial, romdata, tu, maxi, inputs, forced):
+    """automatic input template: the reference faulted (an invalid input).  Re-run it with a load trace,
+    find the word the faulting base register came from (a memory word, an argument or a stack arg) and
+    make it a valid heap pointer.  -> True if something was forced (forced / inputs are updated)"""
+    R = Run(rwords, vram, [], trial, romdata, tu, maxi, forced, trace=True).run(inputs)
+    if not R.fault or not hasattr(R, 'fault_pc'): return False
+    k = (R.fault_pc - vram) // 4
+    if not 0 <= k < len(rwords): return False
+    w = rwords[k]
+    if (w >> 26) not in LOADSTORE: return False
+    B = R.fault_regs[(w >> 21) & 31]
+    near = lambda v: 0 <= (B - v) & 0xFFFFFFFF < 0x8000
+    ptr = HEAP_LO + (h32('force', trial, B, len(forced)) % ((HEAP_HI - HEAP_LO) // 16)) * 16
+    stk = (phys(STK_LO), phys(STK_TOP) + PAGE)
+    for a, v in reversed(R.loads):
+        if near(v) and not stk[0] <= phys(a) < stk[1] and phys(a) not in forced:
+            forced[phys(a)] = ptr; return True
+    for i, v in enumerate(inputs['a']):
+        if near(v): inputs['a'][i] = ptr; return True
+    for i, v in enumerate(inputs['stk']):
+        if near(v): inputs['stk'][i] = ptr; return True
+    return False
+
+
+def explain(R, C, inputs, forced):
+    """-v: the diverging trial in detail (inputs, both call traces, the memory writes that differ)"""
+    print('--- diverging trial: a0-a3 %s  stack args %s%s' % (' '.join('%08X' % x for x in inputs['a']),
+          ' '.join('%08X' % x for x in inputs['stk'][:4]), '  learned pointers at ' + ' '.join('%08X' % a for a in forced) if forced else ''))
+    fmt = lambda c: '%-22s %s' % (c['name'][:22], ' '.join('%08X' % x for x in c['regs']))
+    n = max(len(R.calls), len(C.calls))
+    print('--- calls (ref | cand), a0-a3:')
+    for i in range(min(n, 24)):
+        a = fmt(R.calls[i]) if i < len(R.calls) else '-'
+        b = fmt(C.calls[i]) if i < len(C.calls) else '-'
+        print('%s#%-3d %-60s | %s' % ('*' if a != b else ' ', i, a, b))
+    dr, dc = dict(R.dirty()), dict(C.dirty())
+    ks = sorted(k for k in set(dr) | set(dc) if dr.get(k) != dc.get(k))
+    if ks:
+        print('--- final memory bytes that differ (addr: ref cand), %d total:' % len(ks))
+        for k in ks[:16]:
+            print('  %08X: %s %s' % (k, '%02X' % dr[k] if k in dr else '--', '%02X' % dc[k] if k in dc else '--'))
+    print('--- return v0 ref=%08X cand=%08X  f0 ref=%08X cand=%08X  fault ref=%s cand=%s' % (
+        R.out['v0'], C.out['v0'], R.out['f0'], C.out['f0'], R.fault, C.fault))
+
+
 def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verbose=False, tmp=None):
     """-> dict(result=EQUIV|DIFFER|UNSURE|ERROR|CERR, line=..., ...)"""
     p, spath, src = find_file(func)
@@ -675,7 +742,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     rk = ret_kind(tu, func)
     kinds = param_kinds(tu, func)
     arity = {}
-    differ = None; ok = inconcl = 0; ncalls = 0
+    differ = None; ok = inconcl = 0; ncalls = 0; learned = [0]
     import time
     t0 = time.time(); budget = float(os.environ.get('DIFFTEST_BUDGET', '30'))
     for t in range(trials):
@@ -684,8 +751,16 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         rng = random.Random(h32('trial', seed, t))
         inputs = make_inputs(rng, kinds)
         romdata = t % 2 == 1
+        forced = {}
         R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi).run(inputs)
-        C = Run(cwords, vram, cdata, (seed, t), romdata, tu, maxi).run(inputs)
+        if R.fault and not os.environ.get('DIFFTEST_NOLEARN'):
+            inputs = dict(a=list(inputs['a']), f=list(inputs['f']), stk=list(inputs['stk']))
+            for _ in range(int(os.environ.get('DIFFTEST_LEARN', '8'))):
+                if not learn_pointer(rwords, vram, (seed, t), romdata, tu, maxi, inputs, forced): break
+                R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
+                if not R.fault: break
+            if not R.fault: learned[0] += 1
+        C = Run(cwords, vram, cdata, (seed, t), romdata, tu, maxi, forced).run(inputs)
         for c in R.calls + C.calls:
             if c['name'] not in arity: arity[c['name']] = proto_arity(tu, c['name'])
         why = compare(R, C, rk, arity)
@@ -694,17 +769,20 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             print('trial %d: %s ref(done=%s fault=%s calls=%d) cand(done=%s fault=%s calls=%d)' % (
                 t, why or 'same', R.done, R.fault, len(R.calls), C.done, C.fault, len(C.calls)))
         if why:
-            differ = 'trial %d: %s' % (t, why); break
+            differ = 'trial %d: %s' % (t, why)
+            if verbose: explain(R, C, inputs, forced)
+            break
         if R.fault or not R.done: inconcl += 1
         else: ok += 1
-    res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl)
+    res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl, learned=learned[0])
     if differ:
         line = 'DIFFER %s: %s' % (func, differ); res['result'] = 'DIFFER'; res['why'] = differ
     elif ok < max(4, trials // 8):
         line = 'UNSURE %s: only %d trials ran to completion (%d faulted/timed out)' % (func, ok, inconcl); res['result'] = 'UNSURE'
     else:
-        line = 'EQUIV %s (%d trials ok, %d inconclusive, %d calls, ret=%s, ref %d words, cand %d words)' % (
-            func, ok, inconcl, ncalls, rk, len(rwords), len(cwords)); res['result'] = 'EQUIV'
+        line = 'EQUIV %s (%d trials ok, %d inconclusive, %d calls, ret=%s, ref %d words, cand %d words%s)' % (
+            func, ok, inconcl, ncalls, rk, len(rwords), len(cwords),
+            ', %d trials via learned pointer inputs' % learned[0] if learned[0] else ''); res['result'] = 'EQUIV'
     res['line'] = line
     return res
 

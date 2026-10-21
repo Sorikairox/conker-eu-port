@@ -95,12 +95,15 @@ void func_1511638C(u8 *arg0, u8 *arg1) {
 
 #ifdef NON_MATCHING
 s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
-    f32 sp24;
-    f32 sp1C;
+    struct {
+        f32 u1C;
+        u8 pad20[0x4];
+        f32 u24;
+    } sp;
 
-    sp1C = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x14)) - arg0);
-    sp24 = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x1C)) - arg1);
-    return (s32) ((*(f32 *)((u8 *)arg3 + 0x3C)) * func_15048A40(((0x40 - ((s32) (*(u16 *)((u8 *)arg3 + 0x76)) >> 8)) - func_150490A8(&sp1C, arg1, arg0)) & 0xFF));
+    sp.u1C = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x14)) - arg0);
+    sp.u24 = (f32) ((s32) (*(f32 *)((u8 *)arg3 + 0x1C)) - arg1);
+    return (s32) ((*(f32 *)((u8 *)arg3 + 0x3C)) * func_15048A40(((0x40 - ((s32) (*(u16 *)((u8 *)arg3 + 0x76)) >> 8)) - func_150490A8(&sp.u1C, arg1, arg0)) & 0xFF));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116E08.s")
