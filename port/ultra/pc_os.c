@@ -160,6 +160,7 @@ int osSetTimer(OSTimer *t, OSTime countdown, OSTime interval, OSMesgQueue *mq, O
     if (i == MAX_TIMERS) { port_log("[os] out of timers\n"); return -1; }
     timers[i].t = t; timers[i].due = osGetTime() + countdown; timers[i].interval = interval;
     timers[i].mq = mq; timers[i].msg = msg;
+    { static int n; if ((uintptr_t)msg == 6 && n++ < 3) port_log("[os] pad timer armed: %llu ticks\n", (unsigned long long)countdown); }
     return 0;
 }
 
@@ -291,9 +292,15 @@ s32 osContInit(OSMesgQueue *mq, u8 *bits, OSContStatus *st) {
         vbe_st8(&st[i].status, 0);
         vbe_st8(&st[i].errno, i == 0 ? 0 : CONT_NO_RESPONSE_ERROR);
     }
+    /* P11 PC shim: the game's first pad read (func_1501BBB8, C since P10) blocks on this queue before
+     * any read was started: reads are only started by the scheduler's message 6, from the 25 ms timer
+     * that func_1501BB20 arms *after* a read. No asm/C path found that starts the first one (P11.md),
+     * so one SI message is posted here, as if a read had completed. */
+    if (mq) osSendMesg(mq, NULL, OS_MESG_NOBLOCK);
     return 0;
 }
 s32 osContStartReadData(OSMesgQueue *mq) {
+    { static int n; if (n++ < 3) port_log("[os] osContStartReadData %p\n", (void *)mq); }
     if (mq) osSendMesg(mq, NULL, OS_MESG_NOBLOCK); /* SI transfer done at once */
     return 0;
 }

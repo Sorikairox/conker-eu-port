@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "pc_ultra.h"
 
 #define MAX_THREADS 32
@@ -298,8 +299,11 @@ EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
     for (int i = 0; i < MAX_THREADS; i++) {
         PcThread *p = &threads[i];
         if (p->state == P_FREE) continue;
-        port_log("[sched] thread id=%d pri=%d %s%s switches=%u\n", (int)p->t->id, (int)p->t->priority,
-                 state_name(p->state), p->waitq ? (p->waitfull ? " (send)" : " (recv)") : "", p->switches);
+        extern unsigned char n64_rdram[];
+        uintptr_t q = (uintptr_t)p->waitq, r = (uintptr_t)n64_rdram;
+        port_log("[sched] thread id=%d pri=%d %s%s switches=%u%s", (int)p->t->id, (int)p->t->priority,
+                 state_name(p->state), p->waitq ? (p->waitfull ? " (send)" : " (recv)") : "", p->switches, q ? "" : "\n");
+        if (q) port_log(" queue %08X (N64 %08X)\n", (unsigned)q, q >= r && q < r + 0x800000 ? (unsigned)(q - r + 0x80000000u) : 0u);
     }
 }
 

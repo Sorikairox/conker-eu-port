@@ -16,7 +16,7 @@ void port_glog(const char *fmt, ...);
 #define port_log port_glog
 extern unsigned port_frame_count;
 extern unsigned port_sp_tasks_by_type[8];
-extern OSMesgQueue D_8003B200;
+extern OSMesgQueue D_8003B200, D_8003B1E8;  /* audio/"timeout" task queue, gfx task queue */
 s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 top, s32 mayFail);
 
 static OSThread st_thread;
@@ -42,11 +42,15 @@ static int run_one(OSScTask *t, u32 type, u32 *list, u32 bytes, u32 tag) {
     bzero(t, sizeof(*t));
     t->msgQ = &st_q;
     t->msg = (OSMesg)tag;
-    t->flags = type == M_GFXTASK ? 1 : 2;
+    t->flags = type == M_GFXTASK ? 0 : 2;     /* gfx: no OS_SC_SWAPBUFFER */
+    t->framebuffer = type == M_GFXTASK ? (void *)list : 0; /* must differ from the VI framebuffers */
     t->list.t.type = type;
     t->list.t.data_ptr = (u64 *)list;
     t->list.t.data_size = bytes;
-    osSendMesg(&D_8003B200, (OSMesg)t, OS_MESG_BLOCK);
+    /* gfx tasks go through D_8003B1E8 (func_10004DB0 -> func_10004F00, done after SP + DP events,
+     * func_10004FE0 -> func_10005020); audio through D_8003B200 (timer msg 3, done on SP event).
+     * (A gfx task sent to D_8003B200 crashes func_10005020: its DP event completes a NULL D_8002AC50.) */
+    osSendMesg(type == M_GFXTASK ? &D_8003B1E8 : &D_8003B200, (OSMesg)t, OS_MESG_BLOCK);
     while (osRecvMesg(&st_q, &m, OS_MESG_NOBLOCK) == -1) {
         if (port_frame_count - f0 > 30) {
             port_log("[schedtest] type %u: no done message after 30 frames\n", type);
