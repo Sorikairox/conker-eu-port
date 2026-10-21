@@ -57,3 +57,5 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 149	main	game>=0x15190000 (new split)	7	1960	135	slice rebalanced to upper hi game; structure-first hand drafts
 152	wt	game 0x15130000-0x1518FFFF+dbg	6	2364	128	commented NON-MATCHING drafts above GLOBAL_ASM are cheap; permuter 2/5
 151	main	game>=0x15190000	5	1196	133	remote permuter int-typed temp fix; CERR rows are not near misses once prototypes are fixed
+154	wt	game 0x15130000-0x1518FFFF+dbg	7	1980	135	16 commented drafts inventoried, 4 converted (US callee names, late prototypes); permuter 3/9
+153	main	game>=0x15190000	1	300	131	few commented drafts in upper range; func_15154488 spawner family identified (DC260/DC484/D6F64)
