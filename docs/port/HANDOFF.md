@@ -267,18 +267,20 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
-model, boot, priority list) and `docs/port/sessions/P6.md` (indirect calls, renderer, microcode). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
+`docs/port/sessions/P8.md` (address space, PC overrides, texture ids, re-rank). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
 port/web/run.sh image     # once: conker-emsdk image (emscripten/emsdk:4.0.15-arm64, pinned)
 port/web/run.sh build     # census + vbe IR build of the game TUs + memory tables + link + page (~2-3 min clean)
 port/web/run.sh serve     # http://localhost:8064/?app=demo   (stop: port/web/run.sh stop)
-docker run --rm -v $PWD:/src -w /src conker-emsdk node port/tools/node_run.js port/build/web/conker.js createConker 10 baserom.eu.z64
-python3 port/tools/priority.py <that log> 50     # conversion priority list (measured stubs + next wave)
+port/web/boot.sh 10       # node boot, read-only mounts, compact summary; log in port/build/boot.log (GFXDEMO=1 for the viewer)
+python3 port/tools/priority.py port/build/boot.log 50   # conversion priority list (measured stubs + next wave)
+# after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
 - **Memory model (P4):** N64 data stays at its N64 offsets in two mirror arrays (`n64_rdram`
@@ -304,7 +306,7 @@ python3 port/tools/priority.py <that log> 50     # conversion priority list (mea
 - **Boot:**
   - PC `func_15007830` (`port/boot/game_entry.c`) → full init sequence → main loop. The state
     machine is read from the ROM's jump table; one pass per frame.
-  - 23 distinct asm stubs are hit. The top ones, per frame: `func_100061F8`, `func_10001420`,
+  - P4: 23 distinct asm stubs were hit (P8: 15, see the priority list below). The top ones per frame were: `func_100061F8`, `func_10001420`,
     `func_10005BE0`, `func_1501878C`, `func_1501BBB8`; during init: `func_1502AC88` (×201) and the
     allocator `func_10003C6C`.
   - Next wave: `func_10004074`, `func_1515DC40`, `func_151674F8`, and the `func_1501878C` callees.
@@ -329,13 +331,44 @@ python3 port/tools/priority.py <that log> 50     # conversion priority list (mea
   - The ROM has 8 microcodes: F3DEX / BS / BG / BGBS, each also as .NoN, all "fifo 2.08". The
     data block is 0x6C0 per ucode, and `G_LOAD_UCODE` switches between them per frame. Details in
     P6.md §2.
+- **Address space (P8):** the game is linked with `-sGLOBAL_BASE=256MB`, so every wasm data address
+  is `>= 0x10000000`. Display-list values `0x01000000..0x0FFFFFFF` are always RSP segment addresses,
+  and the renderer needs no heuristic. The cost is virtual only (node maxRSS +8 MB, noise). The
+  risk is 32-bit browser processes and an untested iOS device. MEMORY.md, "Address space and RSP
+  segments".
+- **PC overrides (P8):** `port/boot/pc_overrides.c` defines:
+  - `func_100061F8`: a TLB-invalidate loop, a no-op on the PC;
+  - `func_150ADA20`: `u64` guRandom (`[overrides] guRandom PASS`).
+
+  Game `.c` files are untouched.
+- **Texture ids (P8):** the engine resolves G_SETTIMG ids in place at model load:
+  - `func_1510D3E0` (asm) walks the DL;
+  - `func_1510D66C` (asm) is the cache;
+  - the bank is ROM `0x1A3B40 + sum D_800920D0[0..id)`, rzip files;
+  - `0x0040xxxx` / `0x0080xxxx` = the 256- / 16-colour TLUT at the end of the texture.
+
+  The viewer has a PC copy (`tex_patch_dl`) and draws real textures (`P8_screenshot.png`). Gap: the
+  port must give `&D_1A3B40` (one of 14 ROM-offset data stubs) its absolute value before game-driven
+  texture loads can work.
+- **Priority list (P8, after merging port fa5daf8, 10 s boot; full 50 in P8.md):**
+  15 distinct stubs are hit.
+  - Measured: func_1501878C (540), func_1501BBB8 (540), func_1502AC88 (201), func_150159E8 (95),
+    func_10003C6C (13), func_15085710 (3). Once each: func_100052A0, func_1000709C (missing),
+    func_10005B04, func_100049E0 (scheduler), func_10008180, func_15043384, func_1509BA04,
+    func_150A00F0, func_15007B3C.
+  - Next wave: func_1515DC40, func_151674F8, func_151412BC, func_151E5928, func_1510BA9C,
+    func_15019130, func_15019464, func_1501A490, func_150195A0, func_15019CC8, func_15084E80,
+    func_1510D984 (texture cache), func_15114F9C, func_eu_1501C860, func_1501C55C.
+  - Texture path, for a later session: func_1510D66C, func_1510D3E0, func_10004514, func_10006530.
 - **Next for the browser build:**
   1. Convert `func_100049E0` and the frame builders (`func_1501878C`, `func_1501BBB8`) on the port
      branch. Game frames then render with no further change.
-  2. Decide `-sGLOBAL_BASE=256MB`: wasm addresses 0x01–0x0F xxxxxx currently alias segments
-     1–15 (P6.md §3).
-  3. Resolve texture ids in `G_SETTIMG`.
-  4. Conker lighting: the normal array is at `G_MOVEMEM` index 0x0E.
+  2. Make the ROM-offset symbols (`&D_1A3B40` …) absolute in the port (vbe pass or icall-style
+     table). Then the texture cache (`func_1510D66C`, `func_1510D3E0`).
+  3. Test the 352 MB memory on 32-bit Android and iOS Safari. Add a `GLOBAL_BASE=16MB` fallback
+     only if needed.
+  4. Conker lighting (normal array at `G_MOVEMEM` 0x0E); the material DLs in segment 8 for the
+     viewer.
   5. Still open from P4.md, "Known gaps":
      - address constants and `K0_TO_PHYS` in C;
      - bitfields;

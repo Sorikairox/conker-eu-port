@@ -239,8 +239,12 @@ static void texel(const Tile *t, unsigned x, unsigned y, unsigned char *o) {
     unsigned bx = t->siz == 0 ? x >> 1 : x << (t->siz - 1);
     unsigned a = t->tmem * 8 + y * stride + bx;
     if (t->siz != 3 && (y & 1)) a ^= 4;
-    unsigned b0 = tmem8(a), v;
-    switch (t->fmt << 2 | t->siz) {
+    unsigned b0 = tmem8(a), v, fmt = t->fmt;
+    /* 4/8-bit texels are palette indices when TLUT mode is on (the RDP ignores the tile format then).
+     * RGBA4/RGBA8 do not exist: Conker's model DLs use them for CI textures and rely on the engine's
+     * material DL (segment 8) to turn TLUT mode on, so they are read as CI as well (P8). */
+    if (t->siz <= 1 && (fmt == 0 || (oth_h >> 14 & 3))) fmt = 2;
+    switch (fmt << 2 | t->siz) {
     case 0 << 2 | 2: v = b0 << 8 | tmem8(a + 1); /* RGBA16 */
         o[0] = (v >> 11 & 31) * 255 / 31; o[1] = (v >> 6 & 31) * 255 / 31; o[2] = (v >> 1 & 31) * 255 / 31;
         o[3] = (v & 1) ? 255 : 0; return;

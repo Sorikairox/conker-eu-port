@@ -7,9 +7,12 @@
  * interpreter reads it exactly like game memory. The viewer's own display list (viewport, matrices,
  * render state, segments, gsSPDisplayList into the asset) is built here with the GBI encodings.
  * Model DLs address their file through segments 0/1; bone matrices (segment 3) get copies of the
- * viewer's modelview; segment 8 (engine material DL) is an empty list. Textures are referenced by
- * texture id or through texture-bank segments, which the engine resolves; the viewer draws those
- * with a placeholder pattern (gfx_tex_unresolved_segs). */
+ * viewer's modelview; segment 8 (engine material DL) is an empty list.
+ * Texture ids (P8): G_SETTIMG words with segment nibble 0 are texture ids, which the engine resolves
+ * in place when it loads a model: func_1510D3E0 (asm) walks the DL and calls the texture cache
+ * func_1510D66C (asm). tex_patch_dl() below does the same on the PC side (see its comment), so these
+ * draw with their real texels and palettes. Texture-bank segments (2, 4-11) are still unresolved
+ * and draw with a placeholder pattern (gfx_tex_unresolved_segs). */
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,19 +44,83 @@ static const unsigned DEF[][2] = {
 
 static unsigned be32(const unsigned char *p) { return (unsigned)p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3]; }
 
-static int load(Asset *a) {
-    if (!port_rom || a->rom + 8 > port_rom_size) return -1;
-    unsigned n = be32(port_rom + a->rom);
-    if (n == 0 || n > 0x400000) return -1;
+/* one rzip file of the ROM (u32 BE size + raw DEFLATE) into a new buffer in the vbe layout */
+static unsigned char *inflate_rom(unsigned rom, unsigned *size) {
+    if (!port_rom || rom + 8 > port_rom_size) return 0;
+    unsigned n = be32(port_rom + rom);
+    if (n == 0 || n > 0x400000) return 0;
     unsigned char *tmp = malloc(n);
-    int got = port_inflate_raw(tmp, n, port_rom + a->rom + 4, port_rom_size - a->rom - 4);
-    if (got != (int)n) { free(tmp); return -1; }
-    a->size = n;
-    a->buf = calloc((n + 7) & ~3u, 1);
-    for (unsigned i = 0; i + 4 <= n; i += 4) *(unsigned *)(a->buf + i) = be32(tmp + i); /* vbe layout */
-    for (unsigned i = n & ~3u; i < n; i++) vbe_st8(a->buf + i, tmp[i]);
+    int got = port_inflate_raw(tmp, n, port_rom + rom + 4, port_rom_size - rom - 4);
+    if (got != (int)n) { free(tmp); return 0; }
+    unsigned char *buf = calloc((n + 7) & ~3u, 1);
+    for (unsigned i = 0; i + 4 <= n; i += 4) *(unsigned *)(buf + i) = be32(tmp + i); /* vbe layout */
+    for (unsigned i = n & ~3u; i < n; i++) vbe_st8(buf + i, tmp[i]);
     free(tmp);
-    return 0;
+    *size = n;
+    return buf;
+}
+
+static int load(Asset *a) {
+    a->buf = inflate_rom(a->rom, &a->size);
+    return a->buf ? 0 : -1;
+}
+
+/* ---- texture ids (P8; docs/port/sessions/P8.md "Texture ids")
+ * The texture bank: texture id i (0 <= i < 0x1E54) is an rzip file at ROM
+ *   D_1A3B40 (0x1A3B40) + sum of D_800920D0[0..i)       (u16 compressed sizes, game_data)
+ * which is func_1510D8F4 (C) + func_1510D66C (asm: cache D_800B1268[id], DMA, inflate). */
+#define TEX_IDS 0x1E54
+#define TEX_ROM 0x1A3B40u
+static unsigned char *tex_buf[TEX_IDS];
+static unsigned tex_size[TEX_IDS], *tex_rom, tex_loaded, tex_missing;
+
+static unsigned char *tex_get(unsigned id, unsigned *size) {
+    if (id >= TEX_IDS) return 0;
+    if (!tex_rom) {
+        /* prefix sums of D_800920D0, read from a private inflate of game_data (ROM 0x188688, vram
+         * 0x80082EB0; same constants as pc_mem.c SEGS) so that the viewer also works before
+         * port_mem_load() and whatever state the game is in */
+        unsigned gsz;
+        unsigned char *gd = inflate_rom(0x188688, &gsz);
+        if (!gd || gsz < 0x800920D0u - 0x80082EB0u + 2 * TEX_IDS) { free(gd); return 0; }
+        unsigned char *t = gd + (0x800920D0u - 0x80082EB0u);
+        tex_rom = malloc(TEX_IDS * 4);
+        unsigned o = TEX_ROM;
+        for (unsigned i = 0; i < TEX_IDS; i++) { tex_rom[i] = o; o += vbe_ld16(t + 2 * i); }
+        free(gd);
+    }
+    if (!tex_buf[id]) {
+        tex_buf[id] = inflate_rom(tex_rom[id], &tex_size[id]);
+        if (!tex_buf[id]) { tex_missing++; return 0; }
+        tex_loaded++;
+    }
+    *size = tex_size[id];
+    return tex_buf[id];
+}
+
+/* PC equivalent of func_1510D3E0 (asm, game_eu_13A8A0), the engine's model-DL texture resolver,
+ * applied once at load. For every G_SETTIMG (0xFD) up to G_ENDDL whose w1 has segment nibble 0 and
+ * top byte < 0x06: id = w1 & 0xF03FFFFF, flags = w1 >> 22; w1 := texture address (cache, loaded on
+ * demand), then flags & 1: + size - 0x200 (256-colour TLUT at the end of the texture), flags & 2:
+ * + size - 0x20 (16-colour TLUT). The engine runs it per model DL; the viewer also follows
+ * G_DL (0xDE) calls into the model file (segments 0/1) so that sub-lists get the same treatment. */
+static unsigned tex_patch_dl(Asset *a, unsigned off, int depth) {
+    unsigned n = 0;
+    for (; off + 8 <= a->size && depth < 8; off += 8) {
+        unsigned *c = (unsigned *)(a->buf + off), op = c[0] >> 24, w1 = c[1];
+        if (op == 0xDF) break;
+        if (op == 0xDE && (w1 >> 24) <= 1 && (w1 & 0xFFFFFF) < a->size)
+            n += tex_patch_dl(a, w1 & 0xFFFFFF, depth + 1);
+        if (op != 0xFD || (w1 >> 24) >= 0x06 || (w1 & 0x0F000000u)) continue;
+        unsigned size, fl = w1 >> 22;
+        unsigned char *t = tex_get(w1 & 0xF03FFFFFu, &size);
+        if (!t) continue;
+        if (fl & 1) t += size - 0x200;
+        else if (fl & 2) t += size - 0x20;
+        c[1] = (unsigned)(uintptr_t)t;   /* a wasm pointer (>= PORT_WASM_BASE): never read as a segment */
+        n++;
+    }
+    return n;
 }
 
 /* Mtx (s15.16, N64 layout: 8 words of integer halves, 8 words of fraction halves) */
@@ -143,6 +210,9 @@ int gfx_demo_init(const char *spec) {
     for (int k = 0; k < nA; k++) {
         Asset *a = &A[k];
         if (load(a)) { port_log("[gfxdemo] asset rom+0x%X: cannot inflate\n", a->rom); a->buf = 0; continue; }
+        unsigned np = tex_patch_dl(a, a->dl, 0);
+        port_log("[gfxdemo] asset rom+0x%X: %u G_SETTIMG texture ids resolved (%u textures loaded, %u missing)\n", a->rom, np,
+                 tex_loaded, tex_missing);
         /* measure pass: walk the DL once for the object-space bounds */
         float mn[3], mx[3];
         gfx_measure_only = 1;

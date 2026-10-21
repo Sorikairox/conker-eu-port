@@ -193,13 +193,76 @@ allocator's arithmetic stays consistent. Three things break:
    is not 0x80000000. The physical address of `p` is `port_wasm_to_n64(p) & 0x1FFFFFFF`. The PC
    `osVirtualToPhysical` returns the wasm address, which is what the PC renderer and audio need.
 3. **Writes through NULL.** Stubs return 0, so the game writes through null pointers. wasm
-   addresses 0..16 MB are kept free (`-sGLOBAL_BASE=16MB`) as a null zone, and
-   `port_mem_null_report()` counts what landed there. On the N64 these writes would TLB-miss.
+   addresses below 256 MB are kept free (`-sGLOBAL_BASE=256MB` since P8; it was 16 MB before) as a
+   null zone, and `port_mem_null_report()` counts what landed in its first 16 MB. On the N64 these
+   writes would TLB-miss. See "Address space and RSP segments" below for why the base is 256 MB.
 
 A 4 GB identity mapping (mirror base = 0x80000000, `-sMAXIMUM_MEMORY=4GB`) would make cases 1 and
 2 work unchanged. It was rejected for now: it needs 2 GB+ of linear memory, which mobile browsers
 and Safari can refuse; pointers above 2³¹ need care in the JS glue; and wasm-ld cannot place one
 section at a fixed address. It stays an option if constants turn out to be everywhere.
+
+### Address space and RSP segments (session P8)
+
+**Decision: link the game with `-sGLOBAL_BASE=256MB`** (`-sINITIAL_MEMORY=352MB`, growth on). Every
+wasm data address, static or heap, is then `>= PORT_WASM_BASE` (0x10000000, `pc_mem.h`), and
+the 32-bit values a display list can hold fall into four disjoint classes:
+
+| value | meaning | renderer (`gfx_addr`) |
+|---|---|---|
+| `>= 0x80000000` | N64 KSEG0/KSEG1 pointer left in ROM data | `port_n64_to_wasm` |
+| `0x10000000..0x7FFFFFFF` | wasm pointer stored by game C code or the PC layer | used as is |
+| `0x01000000..0x0FFFFFFF` | RSP segment address `seg << 24 \| off` | `segtab[seg] + off`; 0 (counted) if the segment was never set |
+| `< 0x01000000` | segment 0: N64 physical, or an id | `segtab[0]` if set, else the RDRAM mirror |
+
+`port_mem_load()` checks the invariant at start-up (fatal log if `n64_rdram` or the ROM copy is
+below the base), and logs the layout: `n64_rdram 0x10242CA0, n64_seg16 0x10A42CA0, rom 0x10B53378`.
+
+**The problem it removes (P6).** With `GLOBAL_BASE=16MB`, data, the RDRAM mirror (≈0x010A9F20), the
+64 MB ROM copy (up to ≈0x0B000000) and the heap all had addresses that read as segments 1–15. The
+game sets most of those segments every frame (1 model file, 3 bone matrices, 8 material DLs,
+2/4–11 texture banks), so a game pointer such as `gsSPDisplayList(p)` with `p = 0x03xxxxxx` would
+have been resolved through segment 3. The value alone cannot tell the two apart.
+
+**Cost, measured.** Linear memory is reserved and zero-filled on demand; pages that are never written
+cost no physical memory. The null zone is written only in its first 0x1530 bytes (1327 words in the
+10 s boot run). node 10 s boot, `maxRSS`: 1488 MB with the 16 MB base, 1496 MB with the 256 MB base
+(+8 MB, run-to-run noise; most of the RSS is V8 compiling the 2.7 MB module). The headless-Chrome
+viewer and the boot run are unchanged.
+
+**Browsers.**
+
+- *Desktop (Chrome, Firefox, Safari, 64-bit):* fine. wasm32 memories are allocated as a large
+  virtual reservation; V8 and SpiderMonkey reserve the whole 4 GB + guard region for every memory
+  whatever its size, so the base changes only how much is committed, not what is reserved.
+- *Android Chrome, 64-bit builds:* same as desktop.
+- *32-bit browser processes* (older Android devices and older 32-bit Chrome builds): the memory is
+  one contiguous ArrayBuffer inside a 4 GB address space. 352 MB is above the old 128 MB + 64 MB
+  ROM growth (≈200 MB) and can fail with a RangeError on a fragmented address space. That is the real risk,
+  and the build was already near that range because of the ROM copy. Mitigation if it matters: a
+  fallback link with `GLOBAL_BASE=16MB` and P6's "segment wins" rule, selected by the page when
+  the large `WebAssembly.Memory` fails.
+- *iOS / iPadOS Safari (64-bit only):* the per-tab limit (jetsam) counts dirty pages, and the
+  untouched zone has none. Allocation failures of large initial memories are known on older iOS
+  versions and devices. 352 MB has **not been tried on a device** (none in this setup), so check
+  it before relying on mobile Safari.
+
+**Alternatives evaluated and rejected:**
+
+- *Move only the RDRAM mirror to a high address (reserved region).* wasm linear memory is one range
+  starting at 0, so the cost is the same as moving everything. It also leaves the ROM copy, the
+  PC-side allocations and the C-defined game objects (`port_cdata`) in segment space, so it fixes
+  only part of the problem.
+- *A renderer rule ("a set segment wins", the P6 rule).* It is wrong exactly when the game sets
+  segment *n* and stores a pointer into `0x0n000000..`, and the game sets most segments every
+  frame. With the 64 MB ROM copy and the heap above 16 MB, that would happen as soon as frames were live.
+- *Translate only addresses that went through segmented form.* That needs the origin of every DL
+  word. The game writes DL words with plain stores (`gbi.h` macros) from constants, pointers and
+  ROM asset data alike, so tracking it would mean changing `gbi.h` or the game code. Rejected.
+- *4 GB identity mapping* (see above): fixes this too, but it costs 2 GB+ of linear memory.
+
+Rules for PC code: never construct wasm pointers below `PORT_WASM_BASE`. Treat any value below it that
+reaches the renderer as segmented or physical. `port_n64_to_wasm` results always satisfy this.
 
 ### DMA, PI and rzip
 
