@@ -5,9 +5,16 @@
 
 
 // wtf?
+#ifdef NON_MATCHING
+/* P20: the asm caller func_15002248 tests v0, which is func_150AB278's return value passed through */
+s32 func_15049260(struct_eu_bytes24 arg0) {
+    return func_150AB278(arg0);
+}
+#else
 void func_15049260(struct_eu_bytes24 arg0) {
     func_150AB278(arg0);
 }
+#endif
 
 void func_150492CC(f32 arg0, f32 arg1, f32 arg2) {
     D_800CC640 = arg0;

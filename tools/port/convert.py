@@ -32,6 +32,10 @@ def fix_redecl(code, err, func=None, src=None):
     for n in set(names):
         for l in _decl_lines(code, n):
             code = code.replace(l + '\n', '', 1); ch = True
+        # P20: also a //HOIST declaration (rostr's `extern u8 D_X[];` vs variables.h's `extern s32 D_X;`)
+        for l in code.split('\n'):
+            if l.startswith('//HOIST ') and _decl_lines(l[8:], n):
+                code = code.replace(l + '\n', '', 1); ch = True
     return code if ch else None
 
 def fix_question_types(code, err, func=None, src=None):
@@ -81,6 +85,15 @@ def fix_implicit_proto(code, err, func=None, src=None):
             m = re.search(r'^([A-Za-z_][^;{}()\n]*\b%s\s*\([^;{}]*?\))\s*\{' % n, text, re.M)
             if m:
                 add.append('//HOIST %s;' % ' '.join(m.group(1).split())); break
+        else:
+            # P20: no C definition, but the file prototypes X *after* the draft (an implicit `int X()` at the
+            # draft's call vs `s32 X(...)`, s32 being long): hoist the file's prototype. Only when the draft does
+            # not declare X itself (then it is fix_redecl's case).
+            if n == func or _decl_lines(code, n) or any(_decl_lines(l[8:], n) for l in code.split('\n') if l.startswith('//HOIST ')):
+                continue
+            ps = [l for l in (src or '').split('\n') if re.match(r'^(extern\s+)?[A-Za-z_][^;{}()=\n]*\b%s\s*\([^;{}]*\)\s*;\s*$' % n, l)]
+            if len(set(x.strip() for x in ps)) == 1:
+                add.append('//HOIST %s' % ps[0].strip())
     add = [a for a in add if a not in code]
     return '\n'.join(add) + '\n' + code if add else None
 

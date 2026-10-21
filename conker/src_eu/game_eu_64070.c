@@ -6,7 +6,7 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64070/func_15036860.s")
 
 #ifdef NON_MATCHING
-u8 * func_15031C4C(struct127 *, s32, s32, s32);
+u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
 s32 func_15036860(s32, struct254 **, u8 *, s32);
 u8 * func_1515EAB4(u8 *, s32, u8, u8, u8 *);
 extern s32 D_800846E0;
@@ -35,7 +35,7 @@ u8 *func_15036BB4(u8 *arg0, s32 arg1, s32 arg2) {
     if ((temp_v0_2 != 2) && (temp_v0_2 != 0x13)) {
         return arg0;
     }
-    temp_v0_3 = func_15031C4C(temp_s0, 8, 0, arg1);
+    temp_v0_3 = func_15031C4C((u8 *) temp_s0, 8, 0);   /* the callee never reads a3 */
     sp78 = temp_v0_3;
     if (temp_v0_3 == NULL) {
         return arg0;

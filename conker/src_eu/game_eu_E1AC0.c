@@ -271,7 +271,7 @@ void func_150B5540(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15148310(s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32 *, s32, s32, s32);
+u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
 extern s32 D_8009FFC0;
 
 void func_150B5568(u8 *arg0) {

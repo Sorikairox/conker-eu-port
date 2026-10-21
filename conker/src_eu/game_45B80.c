@@ -642,7 +642,11 @@ Gfx *func_150198FC(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_45B80/func_150198FC.s")
 #endif
 extern u16 D_800D1CC2;
+#ifdef NON_MATCHING
+void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+#else
 Gfx *func_15151FA8();
+#endif
 Gfx *func_15019BB8(Gfx *gdl, s32 arg1) {
     gSPViewport(gdl++, (u8 *)D_800BE628 + arg1 * 0x180 + 0x40 + D_800BE9C0 * 0x10);
     gdl = func_1501A490(gdl, (s16)arg1, 0, 0, 0, 0);

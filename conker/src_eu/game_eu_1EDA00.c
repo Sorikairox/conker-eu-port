@@ -386,8 +386,41 @@ s32 func_151C1730(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C1730.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C1B20.s")
+#ifdef NON_MATCHING
+void func_1000FD38(s32, s32, s32);
 
+void func_151C1B20(void * arg0_p) {
+    u8 * arg0 = (u8 *) arg0_p;
+    u8 *sp1C;
+    s32 temp_v1;
+    struct102 *temp_a0;
+    struct102 *temp_a0_2;
+    struct102 *temp_t7;
+    u8 *temp_a1;
+
+    temp_t7 = (*(struct102 **)((u8 *)arg0 + 0x1F0));
+    if (temp_t7 != NULL) {
+        func_1516972C(temp_t7);
+    }
+    temp_a0 = (*(struct102 **)((u8 *)arg0 + 0x1F4));
+    temp_a1 = arg0 + 0x170;
+    if (temp_a0 != NULL) {
+        sp1C = temp_a1;
+        func_1516972C(temp_a0);
+    }
+    temp_v1 = (*(s32 *)((u8 *)temp_a1 + 0x88));
+    if (temp_v1 != 0) {
+        *(s32 *)(temp_v1 + 0x110) = 0;
+    }
+    temp_a0_2 = (*(struct102 **)((u8 *)temp_a1 + 0x8C));
+    if (temp_a0_2 != NULL) {
+        func_1516972C(temp_a0_2);
+    }
+    func_1000FD38(func_151C16BC, arg0, 0);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C1B20.s")
+#endif
 void func_151C1B20(void *arg0);
 void func_15132AE0(void *arg0);
 void func_15132B0C(void *arg0);

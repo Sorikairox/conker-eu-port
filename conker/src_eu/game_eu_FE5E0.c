@@ -74,7 +74,11 @@ s32 func_150D16C4(u8 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
+#else
 s32 func_151DB5D0(s32, f32 *, f32 *, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32);
+#endif
 
 extern f32 D_800A0C68, D_800A0C6C, D_800A0C70, D_800A0C74;
 void func_150D1714(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, f32 arg4, u8 *arg5) {

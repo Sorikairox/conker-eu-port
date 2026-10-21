@@ -778,7 +778,102 @@ f32 func_1514462C(struct_eu_15144598 *arg0) {
     }
     return var_f2;
 }
+#ifdef NON_MATCHING
+void func_1514470C(u8 *arg0, u8 *arg1) {
+    f32 sp94;
+    f32 sp90;
+    f32 sp8C;
+    f32 sp88;
+    f32 sp84;
+    f32 sp80;
+    f32 sp7C;
+    f32 sp74;
+    f32 sp70;
+    f32 sp6C;
+    f32 sp64;
+    f32 sp5C;
+    f32 sp58;
+    f32 sp54;
+    f32 sp48;
+    u8 sp47;
+    struct17 sp38;
+    f32 sp2C;
+    f32 sp28;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f16_2;
+    f32 temp_f18;
+    f32 temp_f2;
+    f32 temp_f2_2;
+    f32 temp_f2_3;
+    f32 temp_f8;
+    f32 var_f6;
+    s32 temp_t9;
+    u8 temp_v0;
+
+    temp_f2 = (f32) (*(s16 *)((u8 *)arg0 + 6));
+    sp90 = (f32) (*(s16 *)((u8 *)arg0 + 8));
+    sp88 = (*(f32 *)((u8 *)arg0 + 0x24));
+    sp84 = (*(f32 *)((u8 *)arg0 + 0x28));
+    temp_f18 = (f32) (*(s16 *)((u8 *)arg0 + 0xA));
+    sp80 = (*(f32 *)((u8 *)arg0 + 0x2C));
+    sp7C = (*(f32 *)((u8 *)arg0 + 0x30));
+    temp_t9 = (*(u8 *)((u8 *)arg0 + 0x15)) & 3;
+    switch (temp_t9) {                              /* irregular */
+    default:
+        (*(f32 *)((u8 *)arg1 + 0)) = (f32) (*(s16 *)((u8 *)arg0 + 0));
+        (*(f32 *)((u8 *)arg1 + 4)) = (f32) (*(s16 *)((u8 *)arg0 + 2));
+        var_f6 = (f32) (*(s16 *)((u8 *)arg0 + 4));
+block_7:
+        (*(f32 *)((u8 *)arg1 + 8)) = var_f6;
+        return;
+    case 2:
+        sp8C = temp_f2;
+        sp94 = temp_f18;
+        temp_f14 = (func_150ADA68() * (2.0f * temp_f2)) - temp_f2;
+        sp70 = temp_f14;
+        temp_f16 = func_150ADA68() * sp90;
+        sp74 = temp_f16;
+        temp_f8 = func_150ADA68() * (2.0f * temp_f18);
+        sp64 = temp_f14;
+        temp_f2_2 = temp_f8 - temp_f18;
+        temp_f12 = (temp_f16 * sp88) + (temp_f2_2 * sp84);
+        sp6C = temp_f12;
+        (*(f32 *)((u8 *)arg1 + 0)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 0)) + ((temp_f14 * sp7C) + (temp_f12 * sp80)));
+        (*(f32 *)((u8 *)arg1 + 4)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 2)) + ((temp_f16 * sp84) - (temp_f2_2 * sp88)));
+        (*(f32 *)((u8 *)arg1 + 8)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 4)) + ((sp6C * sp7C) - (sp64 * sp80)));
+        return;
+    case 0:
+        sp8C = temp_f2;
+        sp48 = func_150ADA68() * temp_f2;
+        temp_v0 = func_150ADA20();
+        sp47 = temp_v0;
+        sp58 = func_151423D8((temp_v0 - 0x40) & 0xFF) * sp48;
+        temp_f16_2 = func_150ADA68() * sp90;
+        sp5C = temp_f16_2;
+        temp_f2_3 = func_151423D8(temp_v0) * sp48;
+        temp_f12_2 = (temp_f16_2 * sp88) + (temp_f2_3 * sp84);
+        sp54 = temp_f12_2;
+        (*(f32 *)((u8 *)arg1 + 0)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 0)) + ((sp58 * sp7C) + (temp_f12_2 * sp80)));
+        (*(f32 *)((u8 *)arg1 + 4)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 2)) + ((temp_f16_2 * sp84) - (temp_f2_3 * sp88)));
+        (*(f32 *)((u8 *)arg1 + 8)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 4)) + ((sp54 * sp7C) - (sp58 * sp80)));
+        return;
+    case 1:
+        sp8C = temp_f2;
+        sp28 = func_150ADA68();
+        sp2C = func_150ADA68();
+        func_151436B4(sp28 * 6.2831855f, sp2C * 6.2831855f, func_150ADA68() * temp_f2, &sp38);
+        (*(f32 *)((u8 *)arg1 + 0)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 0)) + (*(f32 *)&(sp38)));
+        (*(f32 *)((u8 *)arg1 + 4)) = (f32) ((f32) (*(s16 *)((u8 *)arg0 + 2)) + sp38.unk4);
+        var_f6 = (f32) (*(s16 *)((u8 *)arg0 + 4)) + sp38.unk8;
+        goto block_7;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514470C.s")
+#endif
 f32 func_15144A74(struct17 *arg0, struct17 *arg1) {
     return (arg0->unk0 * arg1->unk0) + (arg0->unk4 * arg1->unk4) + (arg0->unk8 * arg1->unk8);
 }

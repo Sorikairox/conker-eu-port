@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1511F8A4(u8 *arg0);
+u8 *func_151149AC(u8);
+#endif
 
 
 void func_15115630(s32 arg0) {
@@ -644,8 +648,53 @@ void func_151182BC(u8 *arg0, u8 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118324.s")
+#ifdef NON_MATCHING
+void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 temp_f10;
+    f32 temp_f12;
+    f32 temp_f20;
+    f32 temp_f20_2;
+    f32 temp_f22;
+    f32 temp_f22_2;
+    f32 temp_f2;
+    f32 var_f14;
+    u8 *temp_v0;
+    u8 *var_s0;
 
+    var_f14 = arg2;
+    var_s0 = arg0;
+    if (((*(u16 *)((u8 *)var_s0 + 0x54)) == 0x8006) && (D_800BE9F0 == 0x35)) {
+        temp_v0 = func_151149AC(0xFDU);
+        var_s0 = temp_v0;
+        func_1511F8A4(temp_v0);
+        var_f14 = -555.0f;
+        arg1 = 0.0f;
+        arg3 = 0.0f;
+    }
+    arg2 = var_f14;
+    temp_f20 = (*(f32 *)((u8 *)var_s0 + 0)) * 0.017453292f;
+    temp_f22 = sinf(temp_f20);
+    temp_f0 = cosf(temp_f20);
+    temp_f10 = arg2 * temp_f0;
+    (*(f32 *)((u8 *)arg4 + 0)) = arg1;
+    (*(f32 *)((u8 *)arg4 + 4)) = (f32) (temp_f10 - (arg3 * temp_f22));
+    (*(f32 *)((u8 *)arg4 + 8)) = (f32) ((arg2 * temp_f22) + (arg3 * temp_f0));
+    temp_f20_2 = (*(f32 *)((u8 *)var_s0 + 4)) * 0.017453292f;
+    temp_f22_2 = sinf(temp_f20_2);
+    temp_f0_2 = cosf(temp_f20_2);
+    temp_f12 = (*(f32 *)((u8 *)arg4 + 8));
+    temp_f2 = (*(f32 *)((u8 *)arg4 + 0));
+    (*(f32 *)((u8 *)arg4 + 0)) = (f32) ((temp_f12 * temp_f22_2) + (temp_f2 * temp_f0_2));
+    (*(f32 *)((u8 *)arg4 + 8)) = (f32) ((temp_f12 * temp_f0_2) + (-temp_f2 * temp_f22_2));
+    (*(f32 *)((u8 *)arg4 + 0)) = (f32) ((*(f32 *)((u8 *)arg4 + 0)) + (f32) (*(s16 *)((u8 *)var_s0 + 0x10)));
+    (*(f32 *)((u8 *)arg4 + 4)) = (f32) ((*(f32 *)((u8 *)arg4 + 4)) + (f32) (*(s16 *)((u8 *)var_s0 + 0x12)));
+    (*(f32 *)((u8 *)arg4 + 8)) = (f32) ((*(f32 *)((u8 *)arg4 + 8)) + (f32) (*(s16 *)((u8 *)var_s0 + 0x14)));
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118324.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151184BC.s")
 
 void func_15118EEC(s32 arg0) {

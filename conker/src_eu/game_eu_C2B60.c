@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
+#endif
 
 Gfx *func_15095350(Gfx *arg0) {
     gSPDisplayList(arg0++, D_80087770);
@@ -75,8 +78,38 @@ u8 *func_15095B70(u8 *arg0, u8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095B70.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095CC0.s")
+#ifdef NON_MATCHING
+s32 func_15095A4C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
 
+u8 *func_15095CC0(u8 *arg0, u8 *arg1, s32 *arg2) {
+    struct {
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+    } sp;
+    u8 *temp_s0;
+    u8 *var_s0;
+
+    var_s0 = arg0;
+    if (func_15095A4C((f32) (*(s16 *)((u8 *)arg1 + 0)), (f32) (*(s16 *)((u8 *)arg1 + 2)), (f32) (*(s16 *)((u8 *)arg1 + 4)), &sp.u44, &sp.u40, &sp.u3C, &sp.u38, 4000.0f) == 0) {
+        *arg2 = 0;
+        return var_s0;
+    }
+    func_15095F18((s32) arg1, sp.u44, sp.u40, sp.u38, 1, arg2);
+    if (*arg2 != 0) {
+        temp_s0 = var_s0 + 8;
+        (*(s32 *)((u8 *)var_s0 + 0)) = 0xE7000000;
+        (*(s32 *)((u8 *)var_s0 + 4)) = 0;
+        (*(s32 *)((u8 *)temp_s0 + 0)) = 0xEE000000;
+        var_s0 = temp_s0 + 8;
+        (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) ((u32) (((sp.u3C / sp.u38) * 16352.0f) + 16352.0f) << 0x10);
+    }
+    return var_s0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095CC0.s")
+#endif
 void func_15095E58(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     func_15095EA0(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
 }

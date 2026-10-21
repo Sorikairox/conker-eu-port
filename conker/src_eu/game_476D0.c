@@ -309,7 +309,47 @@ void func_1501B0A0(s32 arg0, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B0A0.s")
 #endif
+#ifdef NON_MATCHING
+void func_1501B22C(s32 arg0) {
+    f32 sp34;
+    f32 sp28;
+    f32 sp24;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f12_3;
+    f32 temp_f2;
+    f32 temp_f2_2;
+    u8 *temp_s0;
+
+    temp_s0 = (arg0 * 0x180) + D_800BE628;
+    temp_f12 = -((*(f32 *)((u8 *)temp_s0 + 0x74)) * 0.5f) * 0.017453292f;
+    sp28 = (*(f32 *)((u8 *)temp_s0 + 0x78)) * 0.5f;
+    sp24 = temp_f12;
+    sp34 = cosf(temp_f12);
+    temp_f0 = sinf(temp_f12);
+    (*(f32 *)((u8 *)temp_s0 + 0x9C)) = temp_f0;
+    temp_f2 = -sp34;
+    (*(f32 *)((u8 *)temp_s0 + 0x90)) = temp_f0;
+    (*(f32 *)((u8 *)temp_s0 + 0x94)) = temp_f2;
+    (*(f32 *)((u8 *)temp_s0 + 0x88)) = (f32) -temp_f2;
+    (*(f32 *)((u8 *)temp_s0 + 0x98)) = 0.0f;
+    (*(f32 *)((u8 *)temp_s0 + 0x8C)) = 0.0f;
+    temp_f12_2 = sp28 * 0.017453292f;
+    sp24 = temp_f12_2;
+    sp34 = cosf(temp_f12_2);
+    temp_f12_3 = -sinf(temp_f12_2);
+    (*(f32 *)((u8 *)temp_s0 + 0xA0)) = 0.0f;
+    (*(f32 *)((u8 *)temp_s0 + 0xA8)) = temp_f12_3;
+    (*(f32 *)((u8 *)temp_s0 + 0xB4)) = temp_f12_3;
+    temp_f2_2 = -sp34;
+    (*(f32 *)((u8 *)temp_s0 + 0xAC)) = 0.0f;
+    (*(f32 *)((u8 *)temp_s0 + 0xA4)) = temp_f2_2;
+    (*(f32 *)((u8 *)temp_s0 + 0xB0)) = (f32) -temp_f2_2;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B22C.s")
+#endif
 // JUSTREG: I think?
 // void func_1501B22C(s32 arg0) {
 //     f32 tmp0;

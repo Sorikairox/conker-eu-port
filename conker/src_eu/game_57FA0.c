@@ -182,8 +182,66 @@ s32 func_1502B224(u8 *arg0, s32 arg1, s32 arg2, s32 arg3)
   return (s32) var_s1;
 
 }
+#ifdef NON_MATCHING
+/* Asset load: allocate, DMA the record; when (info & 0x70000000) == 0x10000000 the record is packed
+ * (first word = unpacked size, rejected when 0 or >= 1000000): unpack it into a second buffer and free
+ * the packed copy. *size_out gets the loaded size (0 on failure). */
+s32 func_1502B350(u8 *rom, s32 info, s32 *size_out) {
+    u32 size = ((info & 0x0FFFFFFF) + 1) & ~1;
+    s32 *buf;
+    s32 *out;
+    u32 n;
+    s32 got;
+
+    buf = allocate_memory(size, 1, 2, 2);
+    if (buf == NULL) {
+        return 0;
+    }
+    func_10004514((s32) rom, buf, (size + 0xF) & ~0xF, 1);
+    if ((info & 0x70000000) != 0x10000000) {
+        *size_out = size;
+        return (s32) buf;
+    }
+    n = buf[0] & 0x7FFFFFFF;
+    *size_out = n;
+    out = NULL;
+    got = 0;
+    if (n != 0 && n < 1000000) {
+        out = allocate_memory(n, 1, 2, 2);
+        if (out != NULL) {
+            got = func_10006530(buf, (s32) out, D_8003809C);
+        }
+    }
+    func_10004074(buf);
+    *size_out = got;
+    return (s32) out;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B350.s")
+#endif
+#ifdef NON_MATCHING
+/* Relocates a loaded asset's sub-file table of {s32 offset, u32 info} entries. With count == 0 the
+ * table ends at the first entry whose info has bit 31 set. info &= 0x0FFFFFFF; offset becomes
+ * base + offset, or 0 when offset == -1 or info == 0. Returns the entry count. */
+s32 func_1502B4A8(s32 base, s32 count) {
+    s32 *tab = (s32 *) base;
+    s32 i;
+
+    if (count == 0) {
+        do {
+            count++;
+        } while (!(tab[(count - 1) * 2 + 1] & 0x80000000));
+    }
+    for (i = 0; i < count; i++) {
+        s32 *e = &tab[i * 2];
+        e[1] &= 0x0FFFFFFF;
+        e[0] = (e[0] == -1 || e[1] == 0) ? 0 : e[0] + base;
+    }
+    return count;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_57FA0/func_1502B4A8.s")
+#endif
 s32 func_1502B350(u8 *, s32, s32 *);
 
 s32 func_1502B5C8(s32 *arg0, s32 arg1, ...) {

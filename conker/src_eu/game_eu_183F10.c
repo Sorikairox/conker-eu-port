@@ -118,8 +118,8 @@ void func_15156928(struct102 *arg0p) {
 
 #ifdef NON_MATCHING
 s32 func_1513F4E4(s32, u8, s8 *);
-s32 func_15142B7C(s32, s32, s32);
-s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
+Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
 u8 *func_15142FBC(s32, s32, s32, s8 *);
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);

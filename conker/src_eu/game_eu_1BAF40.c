@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_1518FE50(s32);
+#endif
 
 typedef struct {
     /* 0x00 */ f32 x;
@@ -433,8 +436,29 @@ s32 func_1518FB40(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 ar
     return (s32)temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FD34.s")
+#ifdef NON_MATCHING
+extern s32 D_8008DA1C;
 
+s32 func_1518FD34(s32 arg0) {
+    u8 *sp1C;
+    s32 var_v0;
+    s8 temp_v1;
+    u8 *temp_v0;
+
+    temp_v0 = arg0 + 0x30;
+    (*(f32 *)((u8 *)temp_v0 + 0)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 0)) + (((*(f32 *)((u8 *)temp_v0 + 4)) + (func_150ADA68() * (*(f32 *)((u8 *)temp_v0 + 8)))) * D_800BE9A4));
+    sp1C = temp_v0;
+    func_1518FE50(arg0);
+    temp_v1 = (*(s8 *)((u8 *)temp_v0 + 0x58));
+    var_v0 = 1;
+    if (temp_v1 != -1) {
+        var_v0 = (*(s32 (**)())((u8 *)&D_8008DA1C + (temp_v1 * 4)))(arg0);
+    }
+    return var_v0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FD34.s")
+#endif
 void func_1518FDC8(u8 *arg0)
 {
   u8 *new_var;

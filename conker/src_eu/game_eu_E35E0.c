@@ -163,7 +163,7 @@ void func_150B5C38(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 
 s32 func_150B6314(u8 *arg0, u8 arg1, s32 arg2) {
     struct {

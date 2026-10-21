@@ -102,7 +102,7 @@ void func_151DCE6C(u8 *arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 extern s32 D_800AB8E0;
 extern s32 D_800AB8EC;
 

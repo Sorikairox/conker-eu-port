@@ -170,7 +170,11 @@ s32 func_150E9E10(s32 *arg0, s32 *arg1, f32 arg2, u8 arg3, s32 arg4) {
 
 void func_15143794(s16, s16, f32, void *);
 s32 func_150E9E10(s32 *, s32 *, f32, u8, s32);
+#ifdef NON_MATCHING
+void func_1514470C(u8 *arg0, u8 *arg1);
+#else
 s32 func_1514470C(s32, s32 *);
+#endif
 
 void func_150EA3B4(u8 *arg0)
 {

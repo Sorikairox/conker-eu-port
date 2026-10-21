@@ -1,14 +1,70 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1510F800(s32);
+#endif
 
 
 void func_15044660(void) {
     D_800CC1BC = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044670.s")
+#ifdef NON_MATCHING
+s32 func_15044950(u8 *, f32, f32, s32);
+s32 func_150AB6D0(f32, f32, s32, u8 *, s32);
+s32 func_150AC8C4(f32, f32, s32, u8 *, s32);
+extern u8 D_800894C0;
+extern u8 D_800894C3;
+extern u8 D_800CC1F3;
 
+s32 func_15044670(f32 arg0, f32 arg1, s32 arg2, u8 *arg3, s32 arg4, s32 arg5) {
+    s32 sp5C;
+    s32 var_s0;
+    s32 var_s0_2;
+    s32 var_s6;
+    u8 *var_s1;
+    u8 *var_s1_2;
+
+    D_800CC214 = -32768.0f;
+    D_800CC218 = -32768.0f;
+    var_s6 = 0;
+    (*(s8 *)((u8 *)arg3 + 0x275)) = 0;
+    func_15044950(arg3, arg0, arg1, arg2);
+    var_s1 = &D_800894C3;
+    var_s0 = 3;
+    sp5C = (s32) D_800CC1F3;
+    do {
+        if ((*var_s1 == 1) && ((var_s0 != 3) || !((*(s32 *)((u8 *)arg3 + 0xF8)) & 0x200))) {
+            func_1510F800(var_s0);
+            if (D_800DBE62 != 0) {
+                var_s6 += func_150AB6D0(arg0, arg1, arg2, arg3, arg4);
+            }
+        }
+        var_s0 -= 1;
+        var_s1 -= 1;
+    } while (var_s0 >= 0);
+    var_s1_2 = &D_800894C0;
+    var_s0_2 = 0;
+    if (arg5 != 0) {
+        do {
+            if (*var_s1_2 == 1) {
+                func_1510F800(var_s0_2);
+                if (D_800DBE62 != 0) {
+                    func_150AC8C4(arg0, arg1, arg2, arg3, 0);
+                }
+            }
+            var_s0_2 += 1;
+            var_s1_2 += 1;
+        } while (var_s0_2 != 3);
+    }
+    func_1510F800(0);
+    D_800CC1F3 = (u8) sp5C;
+    return var_s6;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_15044670.s")
+#endif
 #ifdef NON_MATCHING
 void func_1504481C(s32 *arg0, u8 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7) {
     f32 temp_f10;

@@ -144,9 +144,16 @@ void func_15132B38(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132BBC.s")
 
+#ifdef NON_MATCHING
+/* the asm passes func_15132BBC's v0 through, and func_150BCBBC tests it */
+s32 func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
+    return func_15132BBC(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+}
+#else
 void func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     func_15132BBC(arg0, arg1, arg2, 0, arg3, arg4, arg5);
 }
+#endif
 
 extern s32 (*D_80089D2C[])(Mtx *);
 u8 func_151464B8(s16 *arg0);
@@ -188,8 +195,8 @@ void func_15132FF8(Unk15132FF8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-void * func_15142B7C(void *, s32, s32);
-s32 func_15142C10(u8 *, s32, s32, s32, s32, s8 *);
+Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
 u8 *func_151462C8(u8 *, u8 *, u8, s32, s32, s32, u8 *, s32, s32);
 extern s32 D_80083AD0;
 extern s32 D_80083C50;

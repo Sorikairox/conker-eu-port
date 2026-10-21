@@ -61,7 +61,7 @@ s32 func_15046F70(f32 *, s32, f32, f32 *);
 void func_1504715C(void *, u8 *);
 void func_150E856C(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150E892C(void *, s16, u8, s32);
-s32 func_15153BA4(s16 *, s32, s32, s32);
+void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 void func_150D8ABC(struct127 *arg0) {
     struct {
@@ -242,7 +242,7 @@ s32 func_150D8F30(s32 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
-s32 func_15187B50(f32, f32, f32, s32, s32, s32, f32, f32);
+void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
 
 void func_150D8F44(u8 *arg0, u8 arg1, s32 arg2) {
     struct {

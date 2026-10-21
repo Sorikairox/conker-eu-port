@@ -1,6 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_1503E4E4(s32 arg0, s32 arg1);
+void func_1503E550(s32 arg0);
+extern u8 D_80098CC4[];
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503DE70.s")
@@ -32,8 +37,55 @@ s32 func_1503E4E4(s32 arg0, s32 arg1)
   return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E550.s")
+#ifdef NON_MATCHING
+void func_10004074(s32);
+extern s32 D_800847F0;
 
+void func_1503E550(s32 arg0) {
+    struct127 *sp3C;
+    s32 temp_v1_2;
+    s32 var_s0;
+    struct106 *temp_s7;
+    struct127 *temp_v0_2;
+    struct127 *temp_v0_3;
+    u8 *temp_v0;
+    u8 *var_s1;
+    u8 temp_s6;
+    u8 temp_v1;
+
+    temp_s7 = &D_800C6660[arg0];
+    if (temp_s7->unkF != 0) {
+        temp_v1 = (u8) temp_s7->pad[2];
+        temp_v0 = *(s32 *)((u8 *)&D_800847F0 + (temp_v1 * 4));
+        if (temp_v0 != NULL) {
+            temp_s6 = D_80098CC4[temp_v1];
+            var_s0 = 0;
+            var_s1 = temp_v0;
+            if ((s32) temp_s6 > 0) {
+                do {
+                    if ((*var_s1 != 0xFF) && (func_1503E4E4(var_s0, arg0) != 0)) {
+                        temp_v0_2 = &D_800CC2D0[arg0];
+                        temp_v0_2->unk94 |= 1 << *var_s1;
+                    }
+                    var_s0 += 1;
+                    var_s1 += 1;
+                } while (var_s0 != temp_s6);
+            }
+        }
+        temp_v1_2 = temp_s7->unk0;
+        temp_s7->unkF = 0;
+        temp_v0_3 = &D_800CC2D0[arg0];
+        if (temp_v1_2 != 0) {
+            sp3C = temp_v0_3;
+            func_10004074(temp_v1_2);
+        }
+        temp_s7->unk0 = 0;
+        temp_v0_3->unk74 &= 0xFF7F;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E550.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E6B4.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503E5F8.s")
@@ -155,7 +207,9 @@ void func_1503F3F8(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F45C.s")
 
+#ifndef NON_MATCHING
 s32 func_1503E550(s32);
+#endif
 void func_1503EF90(s32);
 s32 func_1503F23C(s32, s32, s32);
 

@@ -867,7 +867,7 @@ void func_1512623C(u8 *arg0, u8 *arg1, s32 arg2, f32 *arg3, f32 *arg4, f32 *arg5
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151279A0.s")
 
 #ifdef NON_MATCHING
-s32 func_151CA484(struct108 *);
+void func_151CA484(u8 *arg0);
 
 void func_15127EB8(struct108 *arg0) {
     struct127 *temp_v1;

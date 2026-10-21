@@ -142,7 +142,7 @@ def _ctx_lines(err):
 
 
 # ------------------------------------------------------------------ spframe
-DECL = re.compile(r'^    (?!return\b|goto\b|case\b)((?:struct\s+)?\w+)\s*(\**)\s*sp([0-9A-F]+)(\[(\w*)\])?;[ \t]*$', re.M)
+DECL = re.compile(r'^    (?!return\b|goto\b|case\b)((?:struct\s+)?\w+)\s*(\**)\s*sp([0-9A-F]+)(\[(\w*)\])?;[ \t]*(?:/\*[^\n]*?\*/[ \t]*)?$', re.M)   # P20: m2c's `/* compiler-managed */` tail
 
 def fix_spframe(code, err=None, func=None, src=None, force=False):
     if ' sp;' in code and 'struct {' in code: return None
@@ -518,10 +518,12 @@ def fix_selfproto(code, err, func=None, src=None):
     if not func or ("redeclaration of '%s'" % func) not in (err or ''): return None
     m = re.search(r"([^\s:|]+), line (\d+): redeclaration of '%s'; previous declaration at line (\d+) in file '([^']+)'" % re.escape(func), err)
     if not m: return None
+    # (P20: the draft's lines are taken before its own prototypes are dropped: a //HOIST of the definition (implproto)
+    # is one side of the conflict and must not be mistaken for the file's prototype)
+    dlines = set(l.strip() for l in code.split('\n'))
     # drop the draft's own prototypes of FUNC (//HOIST or plain): the definition is enough
     code = '\n'.join(l for l in code.split('\n')
                      if not re.match(r'^(//HOIST\s+)?[^(){};=]*\b%s\s*\([^{]*\)\s*;\s*$' % re.escape(func), l))
-    dlines = set(l.strip() for l in code.split('\n'))
     hm = None
     for fn, ln in ((m.group(4), int(m.group(3))), (m.group(1), int(m.group(2)))):
         try: lines = open(fn).read().split('\n')
@@ -531,6 +533,22 @@ def fix_selfproto(code, err, func=None, src=None):
         if hm: break
     dm = re.search(r'^([^\n;{}]*?)\b%s\s*\(([^)]*)\)\s*\{' % re.escape(func), code, re.M)
     if not hm or not dm: return None
+    r = _selfproto_retype(code, func, hm, dm)
+    if r is not None: return r
+    # P20: types that cannot be reconciled (void vs s32 return, pointer vs int): when the conflicting prototype is a
+    # plain line of the function's own source file (an m2c-era guess), //DROP it (#ifndef NON_MATCHING) and //HOIST
+    # the definition's prototype so the file's earlier users see the body's signature. The TU compiles every C caller
+    # in the file, and protocheck covers the other files.
+    if src is None: return None
+    pl = lines[ln - 1]
+    if not pl.strip().endswith(';') or (pl + '\n') not in src or src.count(pl + '\n') != 1 or '{' in pl: return None
+    if ('//DROP ' + pl) in code: return None
+    hoist = '//HOIST %s;' % ' '.join(dm.group(0).rstrip('{').split())
+    code = '//DROP %s\n' % pl + ('' if hoist in code else hoist + '\n') + code
+    return code
+
+
+def _selfproto_retype(code, func, hm, dm):
     hret, dret = _ptype(hm.group(1) + ' x')[0], _ptype(dm.group(1) + ' x')[0]
     hps, dps = _split_params(hm.group(2)), _split_params(dm.group(2))
     if len(hps) != len(dps) or any('...' in p for p in hps + dps): return None

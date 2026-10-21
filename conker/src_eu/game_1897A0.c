@@ -140,4 +140,135 @@ struct260 *func_1515D088(s32 *arg0) {
 }
 
 // fat struct
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+s32 func_151530A8(s32 *, u8, u8);
+
+void func_1515D130(u8 *arg0) {
+    struct {
+        s32 u5C;
+        s32 u60;
+        f32 u64;
+        f32 u68;
+        f32 u6C;
+        f32 u70;
+        f32 u74;
+        f32 u78;
+        f32 u7C;
+        f32 u80;
+        f32 u84;
+        s16 u88;
+        s16 u8A;
+        s16 u8C;
+        s16 u8E;
+        s32 u90;
+        s32 u94;
+        s16 u98;
+        s16 u9A;
+        s16 u9C;
+        s8 u9E;
+        s8 u9F;
+        s8 uA0;
+        s8 uA1;
+        s8 uA2;
+        s8 uA3;
+        s8 uA4;
+        s8 uA5;
+        s8 uA6;
+        s8 uA7;
+        s8 uA8;
+        s8 uA9;
+        s8 uAA;
+        s8 uAB;
+        s8 uAC;
+        s8 uAD;
+        s8 uAE;
+        s8 uAF;
+        s8 uB0;
+        s8 uB1;
+        s8 uB2;
+        s8 uB3;
+        s8 uB4;
+        u8 padB5[0x3];
+        s32 uB8;
+        s32 uBC;
+        s16 uC0;
+        s16 uC2;
+        s16 uC4;
+        s8 uC6;
+        u8 padC7[0x1];
+        f32 uC8;
+        s8 uCC;
+        s8 uCD;
+    } sp;
+    s32 temp_s2;
+    u8 *temp_s0;
+    u8 *temp_s1;
+
+    temp_s0 = ((*(u8 *)((u8 *)arg0 + 0x30)) << 6) + ((u8 *)&D_800A6880);
+    temp_s1 = arg0 + 0x28;
+    (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) + ((*(f32 *)((u8 *)temp_s0 + 0)) + (func_150ADA68() * (*(f32 *)((u8 *)temp_s0 + 4)))));
+    if ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f) {
+        do {
+            sp.u5C = (*(s32 *)((u8 *)temp_s0 + 8));
+            sp.u60 = (*(s32 *)((u8 *)temp_s0 + 0xC));
+            sp.u70 = (*(f32 *)((u8 *)temp_s0 + 0x10));
+            sp.u74 = (*(f32 *)((u8 *)temp_s0 + 0x14));
+            sp.u78 = (*(f32 *)((u8 *)temp_s0 + 0x18));
+            sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
+            sp.u80 = (*(f32 *)((u8 *)temp_s0 + 0x20));
+            sp.u88 = 0;
+            sp.u8A = 0xFF;
+            sp.u8C = -0x3F;
+            sp.u8E = 0x50;
+            sp.u84 = (*(f32 *)((u8 *)temp_s0 + 0x24));
+            sp.u90 = (*(s32 *)((u8 *)temp_s0 + 0x28));
+            sp.u94 = (*(s32 *)((u8 *)temp_s0 + 0x2C));
+            sp.u98 = (*(s16 *)((u8 *)temp_s0 + 0x30));
+            sp.u9C = 1;
+            sp.u9E = 0xC;
+            sp.u9F = 2;
+            sp.uA0 = 3;
+            sp.uA1 = 0xB4;
+            sp.uA4 = 0x9B;
+            sp.u9A = (*(s16 *)((u8 *)temp_s0 + 0x32));
+            sp.uA2 = 0;
+            sp.uA3 = 0;
+            sp.uA5 = 0x32;
+            sp.uA6 = 0x64;
+            sp.uA7 = 0;
+            sp.uA8 = 0x64;
+            sp.uA9 = 0xFF;
+            sp.uAA = 0xFF;
+            sp.uAB = 0xFF;
+            sp.uAC = 0xFF;
+            sp.uAD = 0;
+            sp.uAE = 0;
+            sp.uAF = 0;
+            sp.uB0 = 0;
+            sp.uB1 = 0xFF;
+            sp.uB2 = 0;
+            sp.uB3 = 1;
+            sp.uB4 = 0x24;
+            sp.uB8 = 0x200005;
+            sp.uBC = 0x60600;
+            sp.uC0 = (*(s16 *)((u8 *)temp_s0 + 0x34));
+            sp.uC2 = (*(s16 *)((u8 *)temp_s0 + 0x36));
+            sp.uC6 = 0;
+            sp.uC4 = (*(s16 *)((u8 *)temp_s0 + 0x38));
+            sp.uCC = -1;
+            sp.uCD = 0;
+            sp.uC8 = (*(f32 *)((u8 *)temp_s0 + 0x3C));
+            temp_s2 = func_150ADA20();
+            func_15143794((s16) (temp_s2 & 0xFF), (s16) (0x40 - (func_150ADA20() & 0x7F)), (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 6)), &sp.u64);
+            sp.u64 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 0));
+            sp.u68 += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 2));
+            sp.u6C += (f32) (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_s1 + 0))) + 4));
+            func_151530A8(&sp.u5C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+            (*(f32 *)((u8 *)temp_s1 + 4)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 4)) - 1.0f);
+        } while ((*(f32 *)((u8 *)temp_s1 + 4)) > 1.0f);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515D130.s")
+#endif

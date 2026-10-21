@@ -38,7 +38,7 @@ void func_150BF47C(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C04E0.s")
 
 #ifdef NON_MATCHING
-s32 func_15153BA4(s16 *, s32, u8, u8);
+void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04D4;
 
 s32 func_150C06DC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
@@ -275,7 +275,7 @@ void func_150C04C0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 #endif
 #ifdef NON_MATCHING
 s32 func_15134108(u8 *, s32, s32, s32, f32, s32);
-s32 func_15153BA4(s16 *, s32, u8, u8);
+void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04DC;
 
 s32 func_150C0B48(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {

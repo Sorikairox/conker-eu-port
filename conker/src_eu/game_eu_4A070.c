@@ -3,6 +3,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15080628(void);
+u8 *func_151149AC(u8);
 #endif
 // hoisted forward declaration(s) for func_1501E7A8
 s32 func_1507EE9C(struct127 *);
@@ -648,8 +649,31 @@ s32 func_15022440(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150226E8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022764.s")
+#ifdef NON_MATCHING
+s32 func_150226E8(u8, s32);
 
+s32 func_15022764(s32 arg0, s32 arg1) {
+    u8 *sp1C;
+    s32 var_v0;
+    u8 *temp_v1;
+
+    var_v0 = arg1 * 4;
+    if (D_800C39E8[arg1][arg0] != 0) {
+        temp_v1 = D_800C3A10[arg1] + (arg0 * 8);
+        if ((*(u16 *)((u8 *)temp_v1 + 0)) == 3) {
+            var_v0 = func_151149AC((*(u8 *)((u8 *)temp_v1 + 2)));
+            if ((var_v0 != 0) && ((*(u8 *)((u8 *)var_v0 + 0x6E)) == 1)) {
+                sp1C = (u8 *) var_v0;
+                var_v0 = func_150226E8((*(u8 *)((u8 *)var_v0 + 0x72)), arg1);
+                (*(s8 *)((u8 *)sp1C + 0x6E)) = 0;
+            }
+        }
+    }
+    return var_v0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022764.s")
+#endif
 s32 func_15022764(s32, s32);
 
 void func_150227FC(s32 arg0) {
@@ -736,8 +760,33 @@ void func_15022A40(s32 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022A8C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022BB0.s")
+#ifdef NON_MATCHING
+s32 func_15022BB0(s32 arg0, s32 arg1) {
+    s32 var_v0;
+    u16 *var_a2;
+    u8 temp_v1;
 
+    temp_v1 = D_800C3A5A[arg1];
+    var_v0 = 0;
+    if ((s32) temp_v1 > 0) {
+        var_a2 = D_800C39E8[arg1];
+loop_2:
+        if ((*var_a2 != 0) && ((*(u8 *)((u8 *)((D_800C3A10[arg1] + (var_v0 * 8))) + 2)) == D_800DBEF4[arg0].pad70[2])) {
+            return 1;
+        }
+        var_v0 += 1;
+        var_a2 = (u16 *)((u8 *)var_a2 + (2));
+        if (var_v0 >= (s32) temp_v1) {
+            /* Duplicate return node #6. Try simplifying control flow for better match */
+            return 0;
+        }
+        goto loop_2;
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022BB0.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022C4C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502330C.s")
@@ -770,8 +819,74 @@ void func_150234E8(s16 *arg0, s32 arg1) {
     *(s16 *)((u8 *)arg0) = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502354C.s")
+#ifdef NON_MATCHING
+extern s32 D_800C4168;
 
+s16 *func_1502354C(s32 arg0, s32 arg1) {
+    s16 *sp20;                                      /* compiler-managed */
+    struct163 *sp1C;
+    s16 *sp18;                                      /* compiler-managed */
+    s16 temp_v0;
+    s32 var_a3;
+    struct163 *var_a2;
+    struct163 *var_t0;
+    struct163 *var_t1;
+
+    var_a3 = arg0 + 1;
+    var_t1 = NULL;
+    var_t0 = NULL;
+    var_a2 = D_800C3CA0;
+loop_1:
+    temp_v0 = (s16) var_a2->unk0;
+    if (var_a3 == temp_v0) {
+        if ((arg1 != 0) && (var_a2->unkC != 0)) {
+            sp18 = (s16 *) var_a2;
+            arg0 = var_a3;
+            sp1C = D_800C3CA0;
+            sp20 = NULL;
+            func_150234E8((s16 *) D_800C3CA0, 1);
+            var_a3 = arg0;
+            var_t0 = sp1C;
+            var_t1 = NULL;
+        } else {
+            var_t1 = var_a2;
+        }
+    } else if (temp_v0 == 0) {
+        var_t0 = var_a2;
+        if ((arg1 != 0) && (var_a2->unkC != 0)) {
+            sp18 = var_a2;
+            arg0 = var_a3;
+            sp1C = var_t0;
+            sp20 = NULL;
+            func_150234E8((s16 *) var_a2, 1);
+            var_a3 = arg0;
+            var_t1 = NULL;
+        }
+    } else {
+        var_a2 = (struct163 *)((u8 *)var_a2 + (0x38));
+        if ((s32)var_a2 != (s32)&D_800C4168) {
+            goto loop_1;
+        }
+    }
+    if ((s32)var_a2 == (s32)&D_800C4168) {
+        sp1C = D_800C3CA0;
+        arg0 = var_a3;
+        sp20 = var_t1;
+        func_150234E8((s16 *) D_800C3CA0, 1);
+        var_a3 = arg0;
+        var_t0 = sp1C;
+    }
+    if (var_t1 != NULL) {
+        return (s16 *) var_t1;
+    }
+    if (var_t0 != NULL) {
+        var_t0->unk0 = (u16) var_a3;
+    }
+    return (s16 *) var_t0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1502354C.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15023684.s")
 
 #ifdef NON_MATCHING

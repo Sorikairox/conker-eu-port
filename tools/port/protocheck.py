@@ -112,6 +112,9 @@ def main():
         inner = re.sub(r'/\*.*?\*/|//[^\n]*', ' ', inner, flags=re.S)   # P10: words in comments are not calls
         for name in sorted(set(re.findall(r'\b((?:func_[0-9A-F]{8})|[a-z]\w*)\s*\(', inner))):
             if name in ('if', 'while', 'for', 'switch', 'return', 'sizeof') or name in defs or name in protos: continue
+            # P20: a type name before a declarator in parentheses is a cast, not a call: (f32 (*)[4]), (s8 (**)())
+            if name in ('s8', 'u8', 's16', 'u16', 's32', 'u32', 's64', 'u64', 'f32', 'f64', 'void', 'int', 'char', 'float', 'double') \
+                    and not re.search(r'(?<![\w(*])%s\s*\((?!\s*\*)' % name, inner): continue
             if name in macros and name not in defs and name not in protos: continue
             # P10: calls through a struct member (layer->pre(...)) or a local function pointer (Gfx *(*draw)(...))
             if re.search(r'(->|\.)\s*%s\s*\(' % name, inner) and not re.search(r'(?<![\w>.])%s\s*\(' % name, inner): continue

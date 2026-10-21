@@ -85,7 +85,11 @@ void func_150BDC20(u8 *arg0, u8 arg1, s32 arg2) {
 #endif
 s32 func_150ADA20(void);
 f32 func_150ADA68(void);
+#ifdef NON_MATCHING
+u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+#else
 s32 func_15148310(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32);
+#endif
 extern f32 D_800A03A0;
 extern f32 D_800A03A4;
 extern f32 D_800A03A8;

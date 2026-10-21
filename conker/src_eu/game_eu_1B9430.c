@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-void func_15132FBC(s32, s32, s32, s32, u8, s32);
+s32 func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 void func_151429E0(u8, u8 *, u8 *, u8 *);
 void func_1518CFF0(u8 *, s32);
 

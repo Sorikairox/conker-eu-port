@@ -513,7 +513,22 @@ def param_kinds(tu, func):
         else: out.append('int')
     return out
 
+# P20 (opt-in): DIFFTEST_ARG="N=V1|V2|...,..." (hex) gives integer argument slot N (0-3 = a0-a3, 4+ = stack) one of the
+# listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
+ARGFIX = {}
+for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
+    _a, _v = _p.split('=')
+    ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
+
 def make_inputs(rng, kinds):
+    r = _make_inputs(rng, kinds)
+    for n, vs in ARGFIX.items():
+        v = vs[rng.randrange(len(vs))]
+        if n < 4: r['a'][n] = v
+        elif n - 4 < 12: r['stk'][n - 4] = v
+    return r
+
+def _make_inputs(rng, kinds):
     a = [rand_arg(rng) for _ in range(4)]; f = [rand_float_bits(rng), 0, rand_float_bits(rng), 0]
     stk = [rand_arg(rng) for _ in range(12)]
     if kinds is None: return dict(a=a, f=f, stk=stk)

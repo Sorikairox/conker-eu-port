@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+u8 func_151D8E20(void);
+#endif
 
 
 s32 func_15045AF0(u8 *arg0, u16 arg1, f32 arg2, u8 *arg3);
@@ -277,7 +280,11 @@ void func_151AA814(u8 *arg0, u8 *arg1) {
 extern f32 D_800A9378;
 extern f32 D_800A937C;
 extern f32 D_800A9380;
+#ifdef NON_MATCHING
+s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s16 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+#else
 void func_1515A7A8(f32 *, f32 *, f32, s32, s32, f32, s32, s32, s32, s32, s32);
+#endif
 s32 func_1515AE90(u8 *, s32 *);
 void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, s32 arg3, f32 arg4, s32 arg5, u8 *arg6) {
     f32 pos[3];
@@ -296,8 +303,13 @@ void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, s32 arg3, f32 arg4, s32 arg5, u
         pos[0] = arg0;
         pos[1] = arg1;
         pos[2] = arg2;
+#ifdef NON_MATCHING
+        func_1515A7A8(pos, vel, (func_150ADA68() * D_800A937C + 454.0f) * D_800A9380, 0.972683f /* 0x3F7901C1 */, (u8 *) sp48,
+            func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 0x32, func_150ADA20() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
+#else
         func_1515A7A8(pos, vel, (func_150ADA68() * D_800A937C + 454.0f) * D_800A9380, 0x3F7901C1, sp48,
             func_150ADA68() * 101.0f + 101.0f, func_150ADA20() % 31U + 0x32, func_150ADA20() % 101U + 0x64, 1, arg6[0xC], arg6[1]);
+#endif
     }
 }
 
@@ -598,8 +610,108 @@ s32 func_151AB36C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB3A8.s")
+#ifdef NON_MATCHING
+extern s32 D_800AB7F4;
 
+void func_151AB3A8(u8 *arg0) {
+    struct {
+        u8 * u60;
+        s8 u64;
+        u8 pad65[0x3];
+        f32 u68;
+        f32 u6C;
+        f32 u70;
+        s16 u74;
+        s16 u76;
+        s16 u78;
+        u8 pad7A[0x2];
+        f32 u7C;
+        s32 u80;
+        s16 u84;
+        s8 u86;
+        u8 pad87[0x1];
+        s32 u88;
+        s32 u8C;
+        s8 u90;
+        s8 u91;
+        u8 u92;
+        u8 u93;
+        u8 u94;
+        s8 u95;
+        s8 u96;
+        s8 u97;
+        s32 u98;
+        u8 pad9C[0xC];
+        f32 uA8;
+        f32 uAC;
+        f32 uB0;
+    } sp;
+    f32 sp5C;
+    u8 sp5B;
+    s32 sp50;
+    s32 sp4C;
+    f32 temp_f0;
+    f32 temp_f18;
+    f32 temp_f6;
+    struct210 *temp_v0_3;
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+
+    temp_v0 = (*(u8 **)((u8 *)arg0 + 0x18));
+    if ((*(s32 *)((u8 *)arg0 + 0x70)) != 0) {
+        (*(s8 *)((u8 *)(((*(s32 *)((u8 *)arg0 + 0x70)) + 0xB0)) + 4)) = 1;
+        return;
+    }
+    sp.uA8 = (*(f32 *)((u8 *)temp_v0 + 0x14));
+    temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0x118));
+    if (temp_f0 > -9500.0f) {
+        sp.uAC = temp_f0 + 100.0f;
+    } else {
+        sp.uAC = (*(f32 *)((u8 *)temp_v0 + 0x18)) + 150.0f;
+    }
+    sp.uB0 = (*(f32 *)((u8 *)temp_v0 + 0x1C));
+    if (func_15045AF0((u8 *) &sp.uA8, 0U, sp.uAC - 300.0f, arg0 + 0x34) != 0) {
+        sp5B = func_151D8E20();
+        temp_f18 = (*(f32 *)((u8 *)arg0 + 0x34));
+        sp.uAC = temp_f18;
+        temp_f6 = func_150ADA68() * 30.0f;
+        sp.u64 = 1;
+        sp5C = temp_f6 + 50.0f;
+        sp.u76 = 0xA;
+        sp.u78 = 0xA;
+        temp_v0_2 = (sp5B * 3) + &D_800AB7F4;
+        sp.u86 = 0x38;
+        sp.u84 = 0x12C;
+        sp.u8C = (s32) ((32768.0f * 0.5f) + 26214.4f);
+        sp.u80 = 0x60300;
+        sp.u90 = 0x96;
+        sp.u60 = arg0;
+        sp.u74 = 0;
+        sp.u88 = 0;
+        sp.u91 = 0xFF;
+        sp.u95 = 0xFF;
+        sp.u98 = 0x440001;
+        sp.u96 = 0;
+        sp.u97 = 6;
+        sp.u68 = 26214.4f;
+        sp.u6C = 32768.0f;
+        sp.u7C = 0.231f;
+        sp.u70 = 0.0f;
+        sp.u92 = (*(u8 *)((u8 *)temp_v0_2 + 0));
+        sp.u93 = (*(u8 *)((u8 *)temp_v0_2 + 1));
+        sp.u94 = (*(u8 *)((u8 *)temp_v0_2 + 2));
+        sp4C = func_150ADA20();
+        sp50 = func_150ADA20();
+        temp_v0_3 = func_1513C73C((s32) &sp.u80, 7U, 1U, (s32) (arg0 + 0x38), sp.uA8, temp_f18, sp.uB0, sp5C, sp5C, (u8) (sp4C & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp50 & 1)), 0x20, 0xFFU, 1);
+        (*(struct210 **)((u8 *)((arg0 + 0x58)) + 0x18)) = temp_v0_3;
+        if (temp_v0_3 != NULL) {
+            memcpy(&temp_v0_3->unkA4[3], &sp.u60, 0x20);
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB3A8.s")
+#endif
 typedef struct {
     u8 pad0[4];
     u8 unk4;
