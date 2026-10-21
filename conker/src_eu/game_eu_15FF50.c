@@ -56,7 +56,53 @@ void func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_1513334C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_1513384C.s")
+s32 func_1513384C(u8 *arg0)
+{
+  f32 cs;
+  *((f32 *) (arg0 + 0x2C)) = 1.0f;
+  *((f32 *) (arg0 + 0x30)) = 1.0f;
+  *((f32 *) (arg0 + 0x34)) = 1.0f;
+  if ((*((s32 *) (arg0 + 0x60))) & 0x40)
+  {
+    *((f32 *) (arg0 + 0x20)) += (*((f32 *) (arg0 + 0x50))) * D_800BE9A4;
+    *((f32 *) (arg0 + 0x24)) += (*((f32 *) (arg0 + 0x54))) * D_800BE9A4;
+    *((f32 *) (arg0 + 0x28)) += (*((f32 *) (arg0 + 0x58))) * D_800BE9A4;
+  }
+  arg0[0x149] += ((s32) (576.0f * (*((f32 *) (arg0 + 0x144))))) * D_800BE9E4;
+  if (arg0[0x149] < 0x80)
+  {
+    f32 s;
+    s = func_151423D8(arg0[0x149] - 0x40);
+    s = ((1.0f - (*((f32 *) (arg0 + 0x144)))) * (1.0f - (*((f32 *) (arg0 + 0x14))))) * s;
+    if (arg0[0x148] & 8)
+    {
+      *((f32 *) (arg0 + 0x2C)) *= 1.0f + s;
+      *((f32 *) (arg0 + 0x30)) *= 1.0f - s;
+      *((f32 *) (arg0 + 0x34)) *= s + 1.0f;
+      *((f32 *) (arg0 + 0x3C)) = (*((f32 *) (arg0 + 0x138))) - ((*((f32 *) (arg0 + 0x10))) * (0, s)); // fakematch: comma puts s in fs
+    }
+    if (arg0[0x148] & 0x10)
+    {
+      f32 sn;
+      f32 d;
+      sn = func_151423D8(((s8) arg0[0x14A]) - 0x40);
+      cs = func_151423D8((u8) arg0[0x14A]);
+      *((f32 *) (arg0 + 0x2C)) *= 1.0f - s;
+      *((f32 *) (arg0 + 0x30)) *= 1.0f + s;
+      *((f32 *) (arg0 + 0x34)) *= 1.0f - s;
+      d = (*((f32 *) (arg0 + 0x10))) * (0, s); // fakematch: comma puts s in fs
+      *((f32 *) (arg0 + 0x38)) = (*((f32 *) (arg0 + 0x134))) - (d * cs);
+      *((f32 *) (arg0 + 0x40)) = (*((f32 *) (arg0 + 0x13C))) + (d * sn);
+    }
+  }
+  else
+  {
+    memcpy(arg0 + 0x38, arg0 + 0x134, 0xC);
+    arg0[0x149] = 0;
+    arg0[0x148] &= ~0x18;
+  }
+  return 1;
+}
 
 s32 func_151424F4(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 func_15133A80(s32 arg0, u8 *arg1) {

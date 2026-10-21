@@ -57,7 +57,55 @@ s32 func_151092A4(u8 *arg0, s32 arg1) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1365E0/func_15109390.s")
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, s32, s32, s32, f32);
+typedef struct { f32 x, y, z; } V3_09390;
+
+s32 func_15109390(u8 *arg0)
+{
+  u8 *base;
+  u8 *p;
+  float new_var;
+  V3_09390 out;
+  f32 mf[4][4];
+  s32 pad2[3]; // frame padding
+  V3_09390 hit;
+  base = *((u8 **) (arg0 + 0x18));
+  p = base;
+  p += *((s32 *) (base + 0x50));
+  p += 0xF8;
+  func_150A8050(mf, *((f32 *) (p + 0)), 0.0f, *((f32 *) (p + 4)));
+  mf[3][1] = *((f32 *) (p + 0x10));
+  mf[0][0] *= 0.157f;
+  mf[0][1] *= 0.157f;
+  mf[0][2] *= 0.157f;
+  mf[1][0] *= 0.157f;
+  mf[1][1] *= 0.157f;
+  mf[1][2] *= 0.157f;
+  mf[2][0] *= 0.157f;
+  mf[2][1] *= 0.157f;
+  mf[2][2] *= 0.157f;
+  func_150A7E40(mf, 0.0f, -1108.0f, 0.0f, &out.x, &out.y, &out.z);
+  if ((arg0 && arg0) && arg0) // fakematch: permuter, scheduling
+  {
+  }
+  new_var = out.y - (*((f32 *) (p + 0x10)));
+  if (func_150ACEA0(0.0f, *((f32 *) (p + 0x10)), 0.0f, out.x, new_var, out.z, 0, 0, &hit.x, &hit.y, &hit.z, 0, 0, 0, 0.0f) == 0)
+  {
+    hit = out;
+  }
+  *((s16 *) ((*((u8 **) (arg0 + 0x14))) + 0xE)) = hit.x;
+  *((s16 *) ((*((u8 **) (arg0 + 0x14))) + 0x10)) = hit.y;
+  *((s16 *) ((*((u8 **) (arg0 + 0x14))) + 0x12)) = hit.z;
+  if (p[0x20] != 0)
+  {
+    *((*((u8 **) (arg0 + 0x14))) + 9) = 0;
+  }
+  else
+  {
+    *((*((u8 **) (arg0 + 0x14))) + 9) = 1;
+  }
+  return 1;
+}
 
 void func_1510957C(s32 arg0, s32 arg1, u8 arg2) {
     struct {

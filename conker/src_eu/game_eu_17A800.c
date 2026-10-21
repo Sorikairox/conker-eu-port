@@ -408,7 +408,49 @@ s32 func_1514EE0C(u8 *arg0, s32 arg1, s32 arg2) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514EE90.s")
+s32 func_1514EE90(u8 *arg0, s32 arg1, s32 arg2)
+{
+  u8 *v = arg0 + 0x110;
+  s32 f;
+  switch (arg1)
+  {
+    case 0:
+      f = *((s32 *) (arg0 + 0x10));
+      if (f & 1)
+    {
+      *((s32 *) (arg0 + 0x10)) = f & (~1);
+      if ((*((u8 **) (v + 0x44))) != 0)
+      {
+        (*((u8 **) (v + 0x44)))[0x30] = 0;
+      }
+    }
+    else
+    {
+      *((s32 *) (arg0 + 0x10)) = f | 1;
+    }
+      break;
+
+    case 2:
+      *((s32 *) (arg0 + 0x10)) &= ~1;
+      if ((*((u8 **) (v + 0x44))) != 0)
+    {
+      (*((u8 **) (v + 0x44)))[0x30] = 0;
+      v++; // fakematch: permuter
+      v--;
+    }
+      break;
+
+    case 1:
+      *((s32 *) (arg0 + 0x10)) |= 1;
+      break;
+
+    default:
+      return func_1514EE0C(arg0, arg1, arg2);
+
+  }
+
+  return 1;
+}
 
 s32 func_1514EF4C(u8 *arg0, s32 arg1, s32 arg2) {
     return func_1514EE90(arg0, arg1, arg2);
