@@ -51,3 +51,4 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 144	wt	game>=0x130000+dbg	7	1932	138	fresh hand drafts + local permuter 3/4; old remote near-miss rows 0/6
 143	main	game<0x130000	7	1356	138	type a shared global table once, redo the file (4 from one struct); permuter 1/19
 146	wt	game>=0x130000+dbg	7	1980	129	structure-first hand drafts on fresh rows; local permuter 1/5 (register-only diffs convert)
+148	wt	game>=0x130000+dbg	7	2384	130	done-flag handler family; local permuter 2/3 on register-only diffs
