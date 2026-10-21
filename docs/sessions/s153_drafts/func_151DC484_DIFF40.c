@@ -1,0 +1,83 @@
+extern f32 D_800AB8C4;
+extern f32 D_800AB8C8;
+extern f32 D_800AB8CC;
+extern f32 D_800AB8D0;
+extern f32 D_800AB8D4;
+
+typedef struct {
+    s16 u0[4];
+    struct17 pos;
+    s16 u14;
+    s16 u16;
+    f32 u18;
+    f32 u1C;
+    s16 u20;
+    s16 u22;
+    f32 u24;
+    f32 u28;
+    u8 u2C;
+    u8 u2D;
+    f32 u30;
+    f32 u34;
+    u8 u38;
+    u8 u39;
+    f32 u3C;
+    u8 u40;
+    f32 u44;
+} S06E8;
+
+s32 func_151506E8(S06E8 *, struct17 *, s32, u8, s32);
+
+void func_151DC484(void *arg0, void *arg1, u8 arg2, u8 arg3, s32 arg4) {
+    struct_eu_15154488 s;
+    S06E8 t;
+
+    s.unk8 = *(struct17 *)arg0;
+    s.unk0 = 0;
+    s.unk14 = 3.0f;
+    s.unk18 = 2.0f;
+    s.unk1C = D_800AB8C4;
+    s.unk20 = D_800AB8C8;
+    s.unk24 = 8.0f;
+    s.unk28 = 5.0f;
+    s.unk2C = 8;
+    s.unk2E = 6;
+    s.unk2 = 0xFF;
+    s.unk4 = -0x40;
+    s.unk6 = 0x28;
+    s.unk30 = 3;
+    s.unk32 = 0;
+    s.unk34 = 0x3C;
+    s.unk36 = 0x28;
+    s.unk38 = 0x64;
+    s.unk3A = 0x64;
+    s.unk44 = 0x10;
+    s.unk46 = 0xF;
+    s.unk40 = 1.0f;
+    s.unk48 = 0;
+    s.unk3C = arg2;
+    func_15154488(&s, &s.unk8, (s32)arg1, arg3, arg4);
+    t.pos = *(struct17 *)arg0;
+    t.u18 = 7.0f;
+    t.u1C = 3.0f;
+    t.u24 = D_800AB8CC;
+    t.u28 = D_800AB8D0;
+    t.u30 = 59.0f;
+    t.u14 = 0xC;
+    t.u16 = 6;
+    t.u0[0] = 0;
+    t.u0[1] = 0xFF;
+    t.u0[2] = -0x40;
+    t.u0[3] = 0x1A;
+    t.u20 = 0x23;
+    t.u22 = 0xF;
+    t.u2C = 0x9B;
+    t.u2D = 0x64;
+    t.u34 = 59.0f;
+    t.u38 = 1;
+    t.u39 = arg2;
+    t.u3C = D_800AB8D4;
+    t.u40 = 1;
+    t.u44 = 0.0f;
+    func_151506E8(&t, &t.pos, (s32)arg1, arg3, arg4);
+}
