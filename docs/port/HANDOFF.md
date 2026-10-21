@@ -422,7 +422,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -430,7 +430,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P9.md` (ROM-offset symbols, KSEG0 tests, audio HLE) and
 `docs/port/sessions/P11.md` (runtime check of the C scheduler/allocator/asset walker, live-frame path, SDL2) and
 `docs/port/sessions/P14.md` (MP3 voice audio, Conker lighting, skeleton bind pose, browser audio fix) and
-`docs/port/sessions/P19.md` (real game frames, RCP/PIF model, level-loader stubs, real-time freeze guard). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P19.md` (real game frames, RCP/PIF model, level-loader stubs, real-time freeze guard) and
+`docs/port/sessions/P21.md` (browser heap corruption = fiber stack alignment, real-time Chrome, debug flags). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -614,12 +615,41 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
       checked (none traps in 10 s).
   - Top stubs: func_1000CEAC, func_1000D2F8, func_150A7A48, func_150A4ED4, func_1501B22C,
     func_15113B44, func_1502BDC0, func_1517D7B0, func_1000A03C, func_15173954. Top 30 in P19.md §9.
-  - **Open:**
-    - browser-only heap corruption before the first asset load: trap in `func_10003C6C` from the level
-      loader in real-time Chrome; node is clean (P19.md §6);
-    - the real-time freeze guard is not yet confirmed in the browser.
+  - Open items: both were closed in P21 (see below).
   - Screenshot (real-time CDP, `PROBE_SHOT=` in `audprobe.sh`): `docs/port/sessions/P19_screenshot.png`
-    shows a black canvas plus that crash. `shot.sh` no longer finishes for `app=game`.
+    shows a black canvas plus the crash that P21 fixed.
+- **P21: the game runs in real-time Chrome as far as in node.**
+  - **Heap corruption fixed.** The fiber C stacks came from `malloc`, which is only 8-byte aligned.
+    - wasm assumes a 16-aligned stack pointer, so clang folded the game's own
+      `((u32)buf + 15) & ~15` to `buf`.
+    - In the browser, WebGL's mallocs left the stacks at 8 mod 16, and `func_1502AC88` read its ROM
+      record 8 bytes off. Wrong assets were loaded and the heap broke.
+    - Now `aligned_alloc(16, …)`.
+    - **Rule: every C stack must be 16-byte aligned.**
+    - `mallocpad=8/16` in node, which reproduced the crash, now runs clean.
+  - **Real time:**
+    - Chrome stays responsive: evaluate answers throughout; slowest about 4 s at startup with
+      SwiftShader, where `getContext` alone takes 1.7 s.
+    - Metal: more than 480 gfx frames in 35 s.
+    - A spinning thread is now parked until the next frame.
+    - `port_sched_run` has a 40 ms wall-time budget, and frames slower than 250 ms are logged.
+  - **Tools:**
+    - `shot.sh OUT.png 'app=game' MS` uses the real-time CDP path. Screenshot:
+      `docs/port/sessions/P21_screenshot.png`.
+    - `[schedtest] PASS` again: it counts runs of its own task by `data_ptr`.
+  - **Debug flags:** set them as `?flag=N` on the page or `PORT_FLAG=N` for `boot.sh`.
+    - `det`: deterministic clock;
+    - `nogl`, `noselftest`;
+    - `heapwatch`: heap walk after every switch and `osSetIntMask`;
+    - `stubstack`;
+    - `dmalog` and `dmamin`;
+    - `mallocpad`.
+
+    `audprobe.js` adds `PROBE_LOG` (streamed console), `PROBE_EVAL_TIMEOUT`, `PROBE_PROFILE`,
+    `PROBE_ANGLE=metal` and `PROBE_SAMPLES`. Details: P21.md §5.
+  - **For the port branch:** `func_151E8620` calls the asm stub `func_151EC11C` (`v:` called as
+    `Gfx*(Gfx*)`) through `D_80090370`. It returns NULL, so every frame DL ends after the viewport.
+    Convert that table's functions next. `__osRunningThread` is never set (0).
   - Rule: after changing `port_prefix.h`, the `.ll` cache now rebuilds by itself.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port

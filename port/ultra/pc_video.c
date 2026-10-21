@@ -19,7 +19,7 @@ void port_video_init(void) {
     emscripten_webgl_init_context_attributes(&a);
     a.majorVersion = 2; a.minorVersion = 0; a.alpha = 0; a.antialias = 0;
     a.preserveDrawingBuffer = 1; /* so screenshots see the last frame */
-    ctx = emscripten_webgl_create_context("#canvas", &a);
+    ctx = port_flag("nogl") ? 0 : emscripten_webgl_create_context("#canvas", &a); /* P21: ?nogl=1 = node-like headless */
     if (ctx <= 0) { port_log("[video] no WebGL2 context (%d); running headless\n", (int)ctx); ctx = 0; return; }
     emscripten_webgl_make_context_current(ctx);
     port_log("[video] WebGL2: %s\n", (const char *)glGetString(GL_VERSION));

@@ -10,6 +10,8 @@
 
 /* console logging (goes to the page's console panel via stdout) */
 void port_log(const char *fmt, ...);
+int port_flag(const char *name);
+void port_js_stack(int skip, int n); /* P21 */ /* P21: ?name=N (page) or PORT_NAME=N (node); pc_os.c */
 /* called by every generated stub; logs the first PORT_STUB_LOG_MAX distinct hits */
 void port_stub_hit(const char *name, const char *what);
 extern int port_stub_hits;

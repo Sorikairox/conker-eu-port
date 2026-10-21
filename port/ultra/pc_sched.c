@@ -37,12 +37,14 @@ typedef struct {
     int waitfull;          /* 1 = blocked sending to a full queue */
     unsigned long long seq; /* FIFO among equal priorities */
     unsigned switches;
+    unsigned park_frame;   /* P21: spun out in this frame (port_spin_check); not picked again until the next */
+    unsigned spins;        /* P21: times it hit the spin limit */
 } PcThread;
 
 static PcThread threads[MAX_THREADS];
 static PcThread *cur;
 static emscripten_fiber_t sched_fiber;
-static char sched_astack[A_STACK];
+static char sched_astack[A_STACK] __attribute__((aligned(16)));
 static unsigned long long seq_counter;
 static int in_main_loop;
 unsigned port_frame_count;
@@ -83,6 +85,7 @@ static PcThread *pick(void) {
     for (int i = 0; i < MAX_THREADS; i++) {
         PcThread *p = &threads[i];
         if (p->state != P_READY || p->t->priority <= OS_PRIORITY_IDLE) continue;
+        if (p->park_frame == port_frame_count + 1) continue; /* P21: busy-waiting; resume next frame */
         if (!best || p->t->priority > best->t->priority ||
             (p->t->priority == best->t->priority && p->seq < best->seq))
             best = p;
@@ -116,16 +119,55 @@ static void fiber_entry(void *arg) {
     switch_out(); /* never resumed */
 }
 
+/* P21: ?heapwatch=1 / PORT_HEAPWATCH=1: walk the game heap after every scheduler switch and on every
+ * osSetIntMask (the allocator brackets its work with it); report the first broken walk with the
+ * thread that ran last and the last place the walk was still clean. */
+__attribute__((weak)) int port_heap_check(void); __attribute__((weak)) extern int port_heap_quiet;
+__attribute__((weak)) extern void *D_800380B4; /* game heap head (absent in the scheduler demo) */
+static int hw_mode = -1, hw_done;
+static char hw_good_where[48]; static int hw_good_tid; static unsigned hw_good_frame, hw_checks;
+void port_heapwatch(const char *where) {
+    if (hw_mode < 0) hw_mode = port_flag("heapwatch");
+    if (!hw_mode || hw_done) return;
+    if (!port_heap_check || !&D_800380B4 || !D_800380B4) return; /* heap not set up yet */
+    hw_checks++;
+    port_heap_quiet = 1;
+    int bad = port_heap_check();
+    port_heap_quiet = 0;
+    int tid = cur ? (int)cur->t->id : -1;
+    if (!bad) { snprintf(hw_good_where, sizeof hw_good_where, "%s", where); hw_good_tid = tid; hw_good_frame = port_frame_count; return; }
+    hw_done = 1;
+    port_log("[heapwatch] heap broken at %s (thread %d, frame %u, check %u); last clean: %s (thread %d, frame %u)\n",
+             where, tid, port_frame_count, hw_checks, hw_good_where[0] ? hw_good_where : "-", hw_good_tid, hw_good_frame);
+    port_js_stack(1, 14);
+}
+
+/* P21: besides the switch cap, a frame also returns to the browser after FRAME_BUDGET_MS of wall time,
+ * so threads that keep each other runnable (timers re-armed from port_spin_check, NOBLOCK polls) cannot
+ * hold the page. Frames slower than 250 ms are logged with the switches per thread. */
+#define FRAME_BUDGET_MS 40.0
+static unsigned slow_frames, budget_frames;
+static void slow_frame_report(double ms, int n, const char *why) {
+    if (ms < 250.0 || slow_frames++ >= 12) return;
+    port_log("[sched] slow frame %u: %.0f ms, %d switches (%s); switches so far:", port_frame_count, ms, n, why);
+    for (int i = 0; i < MAX_THREADS; i++)
+        if (threads[i].state != P_FREE) port_log(" t%d=%u", (int)threads[i].t->id, threads[i].switches);
+    port_log("\n");
+}
 void port_sched_run(void) {
+    static int det = -1; if (det < 0) det = port_flag("det"); /* ?det=1: no wall-time budget (reproducible) */
+    double t0 = emscripten_get_now();
     for (int n = 0; n < MAX_SWITCHES_PER_FRAME; n++) {
         PcThread *p = pick();
-        if (!p) return;
+        if (!p) { slow_frame_report(emscripten_get_now() - t0, n, "idle"); return; }
+        if (n && !det && emscripten_get_now() - t0 > FRAME_BUDGET_MS) { budget_frames++; slow_frame_report(emscripten_get_now() - t0, n, "budget"); return; }
         cur = p;
         p->state = P_RUNNING;
         p->t->state = OS_STATE_RUNNING;
         p->switches++;
         emscripten_fiber_swap(&sched_fiber, &p->fiber);
         cur = NULL;
+        if (hw_mode) { static char w[48]; snprintf(w, sizeof w, "switch out of thread %d", (int)p->t->id); port_heapwatch(w); }
         if (p->state == P_DEAD) {
             free(p->cstack); free(p->astack);
             memset(p, 0, sizeof *p);
@@ -147,7 +189,12 @@ void osCreateThread(OSThread *t, OSId id, void (*entry)(void *), void *arg, void
         for (int i = 0; i < MAX_THREADS && !p; i++)
             if (threads[i].state == P_FREE) p = &threads[i];
     if (!p) { port_log("[sched] out of thread slots\n"); abort(); }
-    if (!p->cstack) { p->cstack = malloc(C_STACK); p->astack = malloc(A_STACK); }
+    /* P21: the C stack MUST be 16-byte aligned. wasm code assumes a 16-aligned __stack_pointer: clang
+     * gives arrays 16-byte alignment and then folds the game's own ((u32)buf + 15) & ~15 to buf. malloc
+     * only guarantees 8, so whether a fiber stack was 16-aligned depended on earlier mallocs (WebGL
+     * context creation in the browser, none in node): the asset-table walk func_1502AC88 then read
+     * its record 8 bytes off, loaded the wrong assets and corrupted the game heap (P19 §6). */
+    if (!p->cstack) { p->cstack = aligned_alloc(16, C_STACK); p->astack = aligned_alloc(16, A_STACK); }
     p->t = t; p->entry = entry; p->arg = arg; p->state = P_STOPPED; p->waitq = NULL;
     memset(t, 0, sizeof *t);
     t->id = id; t->priority = pri; t->state = OS_STATE_STOPPED;
@@ -240,10 +287,16 @@ static int block_on(OSMesgQueue *mq, int full, const char *what) {
 #define SPIN_LIMIT 4096
 static unsigned spin_count;
 void port_timers_poll(void);
+/* P21: the spinning thread is parked until the next frame (pick() skips it), so a busy-wait no longer
+ * burns the whole frame budget: on the N64 the time it waits for passes between retraces anyway. Before,
+ * it was picked again at once and the frame ran to the wall-time cap every time; with WebGL on a software
+ * GPU (headless Chrome, SwiftShader) the page then stopped answering (rAF work starved every other task). */
 void port_spin_check(void) {
     if (!cur || ++spin_count < SPIN_LIMIT) return;
     spin_count = 0;
     port_timers_poll();
+    cur->spins++;
+    cur->park_frame = port_frame_count + 1; /* +1: frame 0 is a valid frame number */
     make_ready(cur);
     switch_out();
 }
@@ -310,6 +363,7 @@ static void frame(void) {
 void port_dump_stubs(int max);
 EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
     port_dump_stubs(60);
+    port_log("[sched] %u frames, %u ended by the %.0f ms budget, %u slow (>= 250 ms)\n", port_frame_count, budget_frames, FRAME_BUDGET_MS, slow_frames);
     { void port_mem_null_report(void); port_mem_null_report(); }
     { void port_sp_report(void); port_sp_report(); }
     { void port_icall_report(void); port_icall_report(); }
@@ -318,14 +372,15 @@ EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
         if (p->state == P_FREE) continue;
         extern unsigned char n64_rdram[];
         uintptr_t q = (uintptr_t)p->waitq, r = (uintptr_t)n64_rdram;
-        port_log("[sched] thread id=%d pri=%d %s%s switches=%u%s", (int)p->t->id, (int)p->t->priority,
-                 state_name(p->state), p->waitq ? (p->waitfull ? " (send)" : " (recv)") : "", p->switches, q ? "" : "\n");
+        port_log("[sched] thread id=%d pri=%d %s%s switches=%u spins=%u%s", (int)p->t->id, (int)p->t->priority,
+                 state_name(p->state), p->waitq ? (p->waitfull ? " (send)" : " (recv)") : "", p->switches, p->spins, q ? "" : "\n");
         if (q) port_log(" queue %08X (N64 %08X)\n", (unsigned)q, q >= r && q < r + 0x800000 ? (unsigned)(q - r + 0x80000000u) : 0u);
     }
 }
 
 void port_run(port_boot_fn boot) {
     emscripten_fiber_init_from_current_context(&sched_fiber, sched_astack, sizeof sched_astack);
+    { int pad = port_flag("mallocpad"); if (pad) port_log("[sched] mallocpad %d at %p\n", pad, malloc(pad)); } /* P21 test aid: shift the malloc layout */
     port_video_init();
     boot();
     in_main_loop = 1;

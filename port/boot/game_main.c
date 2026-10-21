@@ -80,7 +80,7 @@ void func_10001194(s32 arg0) {
     func_10001420();
     port_log("[boot] func_10005BE0\n");
     func_10005BE0();
-    { void port_sched_test_start(void); port_sched_test_start(); } /* P11: C scheduler runtime check */
+    { void port_sched_test_start(void); int port_selftest_on(void); if (port_selftest_on()) port_sched_test_start(); } /* P11: C scheduler runtime check */
     port_log("[boot] entering game: func_15007830\n");
     func_15007830();
     port_log("[boot] func_15007830 returned\n");

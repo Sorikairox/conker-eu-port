@@ -12,6 +12,16 @@ docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$ROOT/port/build/w
   -v "$ROOT/baserom.eu.z64":/www/dev/rom.z64:ro -w /www conker-emsdk python3 -m http.server 8000 >/dev/null
 trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
+# P21: the running game (app=game without gfxdemo) never lets virtual time run out (rAF main loop and
+# AudioContext), so it is shot in real time over the DevTools protocol (audprobe.js PROBE_SHOT) after
+# BUDGET ms instead. PROBE_ANGLE=metal uses the real GPU (default SwiftShader).
+if [[ "$Q" == *app=game* && "$Q" != *gfxdemo* ]]; then
+  case $OUT in /*) ;; *) OUT=$PWD/$OUT;; esac
+  PROBE_SHOT=$OUT PROBE_EVAL_TIMEOUT=${PROBE_EVAL_TIMEOUT:-30000} PROBE_SAMPLES=0 \
+    node "$ROOT/port/web/audprobe.js" "http://localhost:$PORT/app/index.html?$Q&romurl=../dev/rom.z64" $(( (BUDGET + 999) / 1000 )) \
+    | grep -E "screenshot|evaluate|respond" || true
+  exit 0
+fi
 TMP=$(mktemp -d)
 CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 URL="http://localhost:$PORT/app/index.html?$Q&romurl=../dev/rom.z64"

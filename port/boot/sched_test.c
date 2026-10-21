@@ -16,6 +16,8 @@ void port_glog(const char *fmt, ...);
 #define port_log port_glog
 extern unsigned port_frame_count;
 extern unsigned port_sp_tasks_by_type[8];
+extern void *port_sp_watch;          /* P21: osSpTaskStartGo counts runs of this data_ptr */
+extern unsigned port_sp_watch_runs;
 extern OSMesgQueue D_8003B200, D_8003B1E8;  /* audio/"timeout" task queue, gfx task queue */
 s32 func_10003C6C(s32 size, s32 tag, s32 align, s32 top, s32 mayFail);
 
@@ -40,6 +42,7 @@ static int run_one(OSScTask *t, u32 type, u32 *list, u32 bytes, u32 tag) {
     OSMesg m = 0;
     unsigned f0 = port_frame_count, before = port_sp_tasks_by_type[type & 7];
     bzero(t, sizeof(*t));
+    port_sp_watch = list; port_sp_watch_runs = 0;
     t->msgQ = &st_q;
     t->msg = (OSMesg)tag;
     t->flags = type == M_GFXTASK ? 0 : 2;     /* gfx: no OS_SC_SWAPBUFFER */
@@ -58,9 +61,12 @@ static int run_one(OSScTask *t, u32 type, u32 *list, u32 bytes, u32 tag) {
         }
         wait_retrace();
     }
-    port_log("[schedtest] type %u: done message %08X after %u frame(s), tasks run %u\n", type, (u32)m,
-             port_frame_count - f0, port_sp_tasks_by_type[type & 7] - before);
-    return ((u32)m != tag) + (port_sp_tasks_by_type[type & 7] - before != 1);
+    /* P21: the game's own tasks interleave (tasks of this type run in all: informational); the test's
+     * task must have run exactly once */
+    port_log("[schedtest] type %u: done message %08X after %u frame(s), own task run %u time(s), tasks of this type run %u\n",
+             type, (u32)m, port_frame_count - f0, port_sp_watch_runs, port_sp_tasks_by_type[type & 7] - before);
+    port_sp_watch = 0;
+    return ((u32)m != tag) + (port_sp_watch_runs != 1);
 }
 
 /* walk the allocator's block list (func_10003C6C / func_10003BD0 layout: next, prev, info = tag<<24 |

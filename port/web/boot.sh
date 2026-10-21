@@ -5,7 +5,7 @@ set -uo pipefail
 export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 SEC=${1:-10}; LOG=${2:-$ROOT/port/build/boot.log}
-envs=(); for v in GFXDEMO AUDTEST VOICETEST; do [ -n "${!v:-}" ] && envs+=(-e "$v=${!v}"); done
+envs=(); for v in GFXDEMO AUDTEST VOICETEST $(compgen -e | grep "^PORT_" || true); do [ -n "${!v:-}" ] && envs+=(-e "$v=${!v}"); done  # P21: PORT_* = runtime flags (pc_os.c port_flag)
 out=(); if [ -n "${AUDTEST:-}${VOICETEST:-}" ]; then mkdir -p "$ROOT/port/build/audio"; w=audtest.wav; [ -n "${VOICETEST:-}" ] && w=voice.wav; out=(-v "$ROOT/port/build/audio":/out -e AUDTEST_WAV=/out/$w); fi
 docker run --rm ${envs[@]+"${envs[@]}"} ${out[@]+"${out[@]}"} -v "$ROOT/port":/src/port:ro -v "$ROOT/conker":/src/conker:ro \
   -v "$ROOT/baserom.eu.z64":/rom/baserom.eu.z64:ro -w /src conker-emsdk \

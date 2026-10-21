@@ -23,6 +23,25 @@
 #include <PR/os_tlb.h>
 #include "pc_ultra.h"
 
+/* ---------------- P21: runtime flags ----------------
+ * port_flag("det") reads ?det=N from the page URL, or PORT_DET=N from the node environment
+ * (port/web/boot.sh passes PORT_* through). Absent = 0; present without a value = 1. */
+EM_JS(int, __port_flag_js, (const char *name), {
+    var n = UTF8ToString(name), v = null;
+    if (typeof location !== 'undefined') { var m = new RegExp('[?&]' + n + '(=([^&]*))?(&|$)').exec(location.search); if (m) v = m[2] === undefined ? '1' : m[2]; }
+    else if (typeof process !== 'undefined' && process.env) { var e = process.env['PORT_' + n.toUpperCase()]; if (e !== undefined) v = e; }
+    return v === null ? 0 : (parseInt(v, 0) || (v === '' ? 1 : 0));
+});
+int port_flag(const char *name) { return __port_flag_js(name); }
+/* P21: print the current wasm/JS call stack (function names only), skipping `skip` frames */
+EM_JS(void, __port_js_stack, (int skip, int n), {
+    var l = new Error().stack.split('\n').slice(1 + skip, 1 + skip + n);
+    out(l.map(function (x) { x = x.trim(); var i = x.indexOf(' ('); return '    ' + (i > 0 ? x.slice(0, i) : x); }).join('\n'));
+});
+void port_js_stack(int skip, int n) { __port_js_stack(skip, n); }
+/* ?noselftest=1: skip the P11 scheduler self-test thread (called from the vbe TU game_main.c) */
+int port_selftest_on(void) { return !port_flag("noselftest"); }
+
 /* ---------------- logging & stubs ---------------- */
 
 #define PORT_STUB_LOG_MAX 50
@@ -103,6 +122,8 @@ void port_stub_hit(const char *name, const char *what) {
         OSThread *t = port_current_thread();
         port_log("[stub %2d] %s (%s) thread=%d frame=%u\n", stub_logged, name, what, t ? (int)t->id : -1,
                  port_frame_count);
+        { static int ss = -1; if (ss < 0) ss = port_flag("stubstack"); /* P21: ?stubstack=1: wasm stack of each first hit */
+          if (ss) port_js_stack(3, 9); }
         if (stub_logged == PORT_STUB_LOG_MAX) port_log("[stub] further first-hits are not logged\n");
     }
 }
@@ -132,6 +153,7 @@ int port_heap_check(void); extern int port_heap_quiet;
 #endif
 OSIntMask osSetIntMask(OSIntMask m) {
     (void)m;
+    { void port_heapwatch(const char *where); port_heapwatch("osSetIntMask"); }
 #ifdef PORT_HEAPDBG
     { static int done, calls; calls++; if (calls >= 108 && calls <= 111) { port_log("[heapdbg] call %d\n", calls); emscripten_log(EM_LOG_CONSOLE | EM_LOG_JS_STACK, "heapdbg"); }
       if (!done) { port_heap_quiet = 1; if (port_heap_check()) { done = 1; port_log("[heapdbg] heap broken at osSetIntMask call %d\n", calls); emscripten_log(EM_LOG_CONSOLE | EM_LOG_JS_STACK, "heapdbg"); } port_heap_quiet = 0; } }
@@ -159,8 +181,22 @@ static double now_ms(void) {
     if (!t0) t0 = t;
     return t - t0;
 }
+/* P21: ?det=1 / PORT_DET=1: deterministic clock for node-vs-browser comparisons. Time is
+ * frame * 1/60 s plus 1000 ticks (~21 us) per read, so busy-waits still progress; it never depends
+ * on the host's speed or on wall time. */
+static int det_mode = -1;
+extern unsigned port_frame_count;
+static OSTime det_now(void) {
+    static OSTime vt; static unsigned vf;
+    if (vf != port_frame_count) { OSTime f = (OSTime)port_frame_count * (OS_CPU_COUNTER / 60); if (f > vt) vt = f; vf = port_frame_count; }
+    return vt += 1000;
+}
 void port_spin_check(void); /* P19: busy-waits on the clock yield too (pc_sched.c) */
-OSTime osGetTime(void) { port_spin_check(); return (OSTime)(now_ms() * (OS_CPU_COUNTER / 1000.0)); }
+static OSTime raw_time(void) {
+    if (det_mode < 0) det_mode = port_flag("det");
+    return det_mode ? det_now() : (OSTime)(now_ms() * (OS_CPU_COUNTER / 1000.0));
+}
+OSTime osGetTime(void) { port_spin_check(); return raw_time(); }
 u32 osGetCount(void) { return (u32)osGetTime(); }
 
 #define MAX_TIMERS 16
@@ -171,7 +207,7 @@ int osSetTimer(OSTimer *t, OSTime countdown, OSTime interval, OSMesgQueue *mq, O
     for (i = 0; i < MAX_TIMERS; i++)
         if (timers[i].t == t || !timers[i].t) break;
     if (i == MAX_TIMERS) { port_log("[os] out of timers\n"); return -1; }
-    timers[i].t = t; timers[i].due = osGetTime() + countdown; timers[i].interval = interval;
+    timers[i].t = t; timers[i].due = raw_time() + countdown; timers[i].interval = interval;
     timers[i].mq = mq; timers[i].msg = msg;
     { static int n; if ((uintptr_t)msg == 6 && n++ < 3) port_log("[os] pad timer armed: %llu ticks\n", (unsigned long long)countdown); }
     return 0;
@@ -186,7 +222,7 @@ int osStopTimer(OSTimer *t) {
 static void timers_poll(void);
 void port_timers_poll(void) { timers_poll(); }
 static void timers_poll(void) {
-    OSTime now = osGetTime();
+    OSTime now = raw_time();
     for (int i = 0; i < MAX_TIMERS; i++) {
         if (!timers[i].t || now < timers[i].due) continue;
         if (timers[i].mq) osSendMesg(timers[i].mq, timers[i].msg, OS_MESG_NOBLOCK);
@@ -340,6 +376,10 @@ s32 osPiRawStartDma(s32 dir, u32 dev, void *dram, u32 size) {
 s32 osPiStartDma(OSIoMesg *mb, s32 pri, s32 dir, u32 dev, void *dram, u32 size, OSMesgQueue *mq) {
     (void)pri;
     if (dir == OS_READ) rom_copy(dev, dram, size);
+    { static int lim = -1, n; static u32 lo; if (lim < 0) { lim = port_flag("dmalog"); lo = (u32)port_flag("dmamin"); } /* P21: ?dmalog=N[&dmamin=DEV] logs the first N PI DMAs from DEV up */
+      if (n < lim && (dev & 0x0FFFFFFF) >= lo) { OSThread *t = port_current_thread(); n++;
+        port_log("[dma] #%d t%d dev %08X dram %08X size %X mq %08X: %08X %08X\n", n, t ? (int)t->id : -1, dev, (u32)(uintptr_t)dram, size,
+                 (u32)(uintptr_t)mq, ((u32 *)dram)[0], size > 4 ? ((u32 *)dram)[1] : 0); } }
     if (mb) { mb->hdr.retQueue = mq; mb->dramAddr = dram; mb->devAddr = dev; mb->size = size; }
     if (mq) osSendMesg(mq, (OSMesg)mb, OS_MESG_NOBLOCK);
     return 0;
@@ -358,9 +398,14 @@ static int sp_tasks;
 unsigned port_sp_tasks_by_type[8];
 extern unsigned port_gfx_frame_tasks;
 void osSpTaskLoad(OSTask *tp) { (void)tp; }
+/* P21: the scheduler self-test (port/boot/sched_test.c) counts runs of its own task by data_ptr, since
+ * the game submits gfx/audio tasks of its own at the same time */
+void *port_sp_watch;
+unsigned port_sp_watch_runs;
 void osSpTaskStartGo(OSTask *tp) {
     unsigned type = (unsigned)tp->t.type;
     port_sp_tasks_by_type[type & 7]++;
+    if (port_sp_watch && (void *)tp->t.data_ptr == port_sp_watch) port_sp_watch_runs++;
     if (sp_tasks++ < 8)
         port_log("[sp] task %u: type %u%s ucode %08X data_ptr %08X size %u\n", sp_tasks, type,
                  type == M_GFXTASK ? " (gfx)" : type == M_AUDTASK ? " (audio)" : "",
