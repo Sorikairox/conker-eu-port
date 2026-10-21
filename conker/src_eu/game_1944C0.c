@@ -2,6 +2,8 @@
 
 #include "functions.h"
 #include "variables.h"
+typedef struct { u8 pad0[0xC]; void (*fn0C)(struct_eu_node *); u8 pad10[0xC]; void (*fn)(struct_eu_node *, s32, u8); u8 pad20[0x14]; } Tbl9070;
+extern Tbl9070 D_8008B848[];
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167010.s")
@@ -261,7 +263,42 @@ void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2) {
         }
     }
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168C4C.s")
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+extern s16 D_800DD5F0;
+extern s16 D_800DD5F2;
+extern s16 D_800DD5F4;
+extern s16 D_800DD5F6;
+
+Gfx *func_15168C4C(Gfx *gfx, u8 *arg1, s32 arg2) {
+    s32 pad; // fakematch: frame
+    s32 mode;
+    u8 flag;
+    s32 pad2; // fakematch: frame
+
+    func_15043D90(&((Mtx *)(arg1 + 0x10))[D_800BE9C0], *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), *(f32 *)(arg1 + 0xA4), *(f32 *)(arg1 + 0xC0), *(f32 *)(arg1 + 0xC4), *(f32 *)(arg1 + 0xC8), *(f32 *)(arg1 + 0x90), *(f32 *)(arg1 + 0x94), *(f32 *)(arg1 + 0x98));
+    gDPPipeSync(gfx++);
+    gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, arg1[0xE5]);
+    D_800DD5F6 = arg1[0xE5];
+    D_800DD5F0 = D_800DD5F2 = D_800DD5F4 = 0;
+    gDPSetEnvColor(gfx++, 0, 0, 0, 0);
+    gDPSetTileSize(gfx++, 0, 2, arg1[0xE6], 0x7E, 0xFE);
+    switch (arg1[0xEC]) {
+    case 1:
+        mode = 0x552230;
+        break;
+    case 2:
+        mode = 0x504A50;
+        break;
+    }
+    flag = 0;
+    gfx = func_15142FBC(gfx, 0x8ACA0, mode, &flag);
+    if (arg1[0xED] == 1) {
+        gDPSetCombineLERP(gfx++, TEXEL0, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0, TEXEL0, 0, SHADE, 0, PRIMITIVE, 0, SHADE, 0);
+    }
+    gSPMatrix(gfx++, &((Mtx *)(arg1 + 0x10))[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(gfx++, *(Gfx **)(arg1 + 0xD0));
+    return gfx;
+}
 void func_15168E34(s32 *arg0, s32 arg1) {
     s32 temp_v0 = *arg0;
     if (!(temp_v0 & 0x0F000000)) {
@@ -331,7 +368,37 @@ void func_15169040(s32 arg0, u8 arg1) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169070.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169260.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_1516944C.s")
+void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2);
+void func_1516944C(s32 j, s32 arg1, u8 arg2) {
+    s32 i;
+    struct_eu_node *node;
+
+    if (j >= 0x68) {
+        j = 0x67;
+    }
+    for (i = 0; i < 2; i++) {
+        if (D_8008B848[j].fn != NULL) {
+            node = D_800DD280[i][j];
+            D_800DD5C0++;
+            while (node != NULL) {
+                D_800DD5C8[D_800DD5C0] = node->next;
+                func_1516968C((struct102 *)node, (u8 *)arg1, arg2);
+                D_8008B848[j].fn(node, arg1, arg2);
+                node = D_800DD5C8[D_800DD5C0];
+            }
+            D_800DD5C0--;
+        } else {
+            node = D_800DD280[i][j];
+            D_800DD5C0++;
+            while (node != NULL) {
+                D_800DD5C8[D_800DD5C0] = node->next;
+                func_1516968C((struct102 *)node, (u8 *)arg1, arg2);
+                node = D_800DD5C8[D_800DD5C0];
+            }
+            D_800DD5C0--;
+        }
+    }
+}
 void func_151695F0(u8 *arg0, u8 arg1) {
     struct {
         u8 *unk0;

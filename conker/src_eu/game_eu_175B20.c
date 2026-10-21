@@ -11,7 +11,28 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15148E34.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15149064.s")
+typedef struct { f32 x; f32 y; f32 z; f32 vy; s16 a; s16 pad12; } Part9064;
+s32 func_15149064(u8 *arg0) {
+    Part9064 *base;
+    f32 *v;
+    s32 i;
+    Part9064 *p;
+
+    base = *(Part9064 **)(arg0 + 0x94);
+    v = *(f32 **)(arg0 + 0x98);
+    i = *(s8 *)(arg0 + 0x2E);
+    do {
+        i--;
+        if (i < 0) {
+            i = *(u8 *)(arg0 + 0x25) - 1;
+        }
+            base[i].vy -= v[4] * D_800BE9A4;
+        base[i].x += v[1] * D_800BE9A4;
+        base[i].y += base[i].vy * D_800BE9A4;
+        base[i].z += v[3] * D_800BE9A4;
+    } while (i != *(s8 *)(arg0 + 0x2D));
+    return 1;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_175B20/func_15149114.s")
 
