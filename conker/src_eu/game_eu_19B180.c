@@ -133,7 +133,14 @@ void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F21C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F2D8.s")
+void func_1516F2D8(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    u8 t;
+
+    t = D_800CC2D4[arg0 * 0x32C];
+    if (t == 0x3A) {
+        func_1516DF0C(5, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0x124, 0x124, 0, 0, arg1, 0, 0, arg0, 0xC, 0, 0, 0x81, 2, 0, 1, 0, 0, 0, 5, 0, arg2, arg3);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516EED4.s")
 
