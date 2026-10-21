@@ -21,6 +21,7 @@ void *port_n64_to_wasm(unsigned n64addr);      /* data or function; 0 if unknown
 unsigned port_wasm_to_n64(const void *p);      /* inverse for mirror addresses; 0 otherwise */
 int port_mem_load(void);                       /* copy data segments from the ROM + relocate */
 void port_rom_read(void *dst, unsigned romoff, unsigned size); /* ROM -> game memory (vbe layout) */
+int port_inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *in, unsigned inlen);
 
 #define VBE8(p)  ((unsigned char *)((unsigned long)(p) ^ 3))
 #define VBE16(p) ((unsigned short *)((unsigned long)(p) ^ 2))

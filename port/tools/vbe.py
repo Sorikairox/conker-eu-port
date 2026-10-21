@@ -356,7 +356,14 @@ def main():
         st = collections.Counter()
         p.lines = sigs.normalize(p.lines, json.load(open(sys.argv[3])), p.tmp, st)
         p.st.update(st)
-    open(dst, 'w').write(p.run())
+    # indirect calls -> site-typed trampolines with a signature check (port/tools/icall.py)
+    import icall
+    st2 = collections.Counter()
+    p.lines, need = icall.rewrite(p.lines, st2)
+    regs = icall.registrations(p.lines)
+    p.st.update(st2)
+    open(dst, 'w').write(icall.epilogue(p.run(), need, regs))
+    open(dst + '.isig', 'w').write(''.join(sorted({w + '\n' for _, w in regs})))
     print(src, ' '.join(f'{k}={v}' for k, v in p.st.items() if v))
 
 

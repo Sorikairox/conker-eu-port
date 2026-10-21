@@ -312,3 +312,8 @@ void port_mem_null_report(void) {
         if (*(const volatile uint32_t *)(z + a)) { if (!dirty++) first = a; last = a; }
     port_log("[mem] null zone: %u dirty words (0x%X..0x%X)\n", dirty, first, last);
 }
+
+/* raw DEFLATE for other PC-side users (ROM asset viewer, port/gfx/gfx_demo.c); returns bytes out */
+int port_inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *in, unsigned inlen) {
+    return inflate_raw(out, outlen, in, inlen);
+}

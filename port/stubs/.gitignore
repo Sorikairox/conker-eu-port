@@ -5,3 +5,4 @@ n64mem_tab.c
 n64mem_labels.s
 n64mem_report.txt
 memtest_expect.h
+icall_tab.c

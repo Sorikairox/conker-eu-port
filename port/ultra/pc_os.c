@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pc_ultra.h"
+#include "../gfx/gfx.h"
 #include "pc_mem.h"
 #include <PR/os_exception.h>
 #include <PR/os_convert.h>
@@ -245,11 +246,27 @@ s32 osEPiStartDma(OSPiHandle *h, OSIoMesg *mb, s32 dir) {
 /* ---------------- RSP / RDP / audio: tasks complete at once (Fast3D / audio HLE go here) ---------------- */
 
 static int sp_tasks;
+/* RSP tasks. The OSTask lives in game memory: its fields are 32-bit (plain loads). M_GFXTASK goes
+ * to the F3DEX2 interpreter (port/gfx), M_AUDTASK to the audio HLE (not written yet). */
+unsigned port_sp_tasks_by_type[8];
+extern unsigned port_gfx_frame_tasks;
 void osSpTaskLoad(OSTask *tp) { (void)tp; }
 void osSpTaskStartGo(OSTask *tp) {
-    if (sp_tasks++ < 3) port_log("[sp] task type %u (not executed yet)\n", (unsigned)tp->t.type);
+    unsigned type = (unsigned)tp->t.type;
+    port_sp_tasks_by_type[type & 7]++;
+    if (sp_tasks++ < 8)
+        port_log("[sp] task %u: type %u%s ucode %08X data_ptr %08X size %u\n", sp_tasks, type,
+                 type == M_GFXTASK ? " (gfx)" : type == M_AUDTASK ? " (audio, not executed)" : "",
+                 (unsigned)(uintptr_t)tp->t.ucode, (unsigned)(uintptr_t)tp->t.data_ptr, (unsigned)tp->t.data_size);
+    if (type == M_GFXTASK) { gfx_run_task(tp); port_gfx_frame_tasks++; }
     port_post_event(OS_EVENT_SP);
-    if (tp->t.type == M_GFXTASK) port_post_event(OS_EVENT_DP);
+    if (type == M_GFXTASK) port_post_event(OS_EVENT_DP);
+}
+void port_sp_report(void) {
+    port_log("[sp] tasks submitted: %u (gfx %u, audio %u, other %u); gfx: %u DLs, %u commands, %u triangles\n", sp_tasks,
+             port_sp_tasks_by_type[M_GFXTASK], port_sp_tasks_by_type[M_AUDTASK],
+             sp_tasks - port_sp_tasks_by_type[M_GFXTASK] - port_sp_tasks_by_type[M_AUDTASK],
+             gfx_stats.dls, gfx_stats.cmds, gfx_stats.tris);
 }
 void osSpTaskYield(void) {}
 OSYieldResult osSpTaskYielded(OSTask *tp) { (void)tp; return 0; }

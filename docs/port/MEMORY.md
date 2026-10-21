@@ -102,10 +102,78 @@ and searched with a binary search by `port_n64_to_wasm`. `port/boot/game_entry.c
 case: a jump table whose words are code labels is read from the loaded data and turned back into
 cases.
 
-Indirect calls are still type-checked by `call_indirect`. A C caller whose function-pointer type
-differs from the target's definition traps. Today `sigs.py` normalizes only direct calls. The
-fallback is emscripten's `-sEMULATE_FUNCTION_POINTER_CASTS`, which costs speed on every indirect
-call. The planned fix is a pass that types the function-pointer tables from their call sites.
+### Indirect calls (session P6)
+
+`call_indirect` traps when the caller's function-pointer type differs from the target's
+definition. IDO-era code does this constantly: handler tables mix `void f(void)`, `void f(s32)` and
+`f32 f(s32)` entries that are called through one pointer type. On MIPS o32 such calls just work.
+
+**Chosen: site-typed trampolines with a runtime signature check** (`port/tools/icall.py`, applied by
+`vbe.py` to every game TU; `port/tools/icall_gen.py`; `port/ultra/pc_icall.{c,h}`):
+
+- Each indirect call `call R %fp(args)` is rewritten into a direct call to
+  `@__icall.<hash>(ptr %fp, args)`. This trampoline has exactly the site's type and is emitted
+  `linkonce_odr` per TU, so the linker merges duplicates. 209 call sites today.
+- The trampoline reads the target's wasm signature id from `port_fsig[table index]`. This table is
+  filled before `main`:
+  - each vbe TU registers every function it defines, `static` ones included, from a constructor;
+  - `icall_tab.c` registers the asm stubs, the n64mem stubs and the PC layer, with exact wasm
+    prototypes read from the objects.
+- **Fast path:** the ids are equal, or the target is unknown. This is a plain `call_indirect`, and
+  the cost is one table load and one compare.
+- **Slow path:** the arguments go into an i64 register file with a 2-bit kind mask.
+  `__port_icall_slow` switches over the 218 target signatures and calls the target with its own
+  type. Arguments and the result are converted as `sigs.py` converts direct calls:
+  - int↔int: sign-extend or truncate;
+  - f32↔int: bitcast;
+  - f32↔f64: widen or narrow;
+  - missing arguments become 0, extra arguments are dropped;
+  - a void result becomes 0.
+
+  The first 16 mismatches are logged, and `port_icall_report()` gives the totals.
+- Ids are a CRC of the wasm-level signature (`"f:i"` = `f32(i32)`), which is exactly what
+  `call_indirect` checks. `icall_gen.py` asserts that no two signatures collide.
+
+Why this option and not the others:
+
+- **`-sEMULATE_FUNCTION_POINTER_CASTS`** makes *every* indirect call slow, including the 99% that
+  match. It converts by reinterpreting raw i64 bits, so f32↔int and f32→f64 are wrong. It also
+  makes the table thunk-based, which breaks function-pointer identity with the PC layer.
+- **A uniform `(i32 × N) → i32` thunk table** has three problems:
+  - every function pointer stored by game code or relocated from ROM data would have to be a
+    thunk index;
+  - comparisons against `&func` from the PC layer and from libultra would no longer agree;
+  - f32 and f64 arguments still need per-type handling.
+- **Typing `call_indirect` per table in the IR** needs the set of targets of each call site. That
+  set is unknown for pointers loaded from data. Most of the 3244 relocated function pointers are
+  only reachable that way.
+
+The trampolines keep function pointers as real table entries and are exact on the fast path. They
+reproduce the o32 behaviour on the slow path. The remaining gaps:
+
+- Variadic call sites and variadic targets are left alone; they are registered as "unknown", so
+  they take the fast path.
+- An o32 call with an f32 first argument passes it in `$f12`. A caller that typed it as int and a
+  callee that reads a float disagree on MIPS too. The bitcast rule reproduces that.
+
+**Self-test** (`port/boot/game_icalltest.c` plus the generated `port_icall_check()`):
+
+- *Registry check:* 654 entries of five ROM function tables (`D_8008FC10`, `D_80084840`,
+  `D_8008A860`, `D_80089E10`, `D_80086634`). For each entry, the pointer relocated at load is
+  looked up in the registry and compared with the signature that Python derives from the ROM and
+  the signature DB. This checks the whole relocation → table → registry chain.
+- *Calls:* real handlers of `D_8008FC10` (the characterflamethrower effect table) are called
+  through mismatching types:
+  - `f32(s32)` called as `s32(s32)`: result is the bits;
+  - called as `f32(void)`: missing argument;
+  - `void(s32)` called as `f32(s32)` and as `s32(s32,s32,s32,s32)`: result 0;
+  - called as `void(void)`;
+  - called as `f64(...)`: result widened.
+
+  Without the pass, every one of these calls traps. The test passes in node and in headless
+  Chrome.
+- The main-loop state table `jtbl_80095DE0` holds code labels (class J), not functions. It is
+  decoded into `switch` cases (P4) and is not called indirectly.
 
 ### Heap and allocator regions
 

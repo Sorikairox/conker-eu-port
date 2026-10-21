@@ -293,6 +293,8 @@ void port_dump_stubs(int max);
 EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
     port_dump_stubs(60);
     { void port_mem_null_report(void); port_mem_null_report(); }
+    { void port_sp_report(void); port_sp_report(); }
+    { void port_icall_report(void); port_icall_report(); }
     for (int i = 0; i < MAX_THREADS; i++) {
         PcThread *p = &threads[i];
         if (p->state == P_FREE) continue;

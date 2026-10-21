@@ -122,6 +122,10 @@ What the in-place `NON_MATCHING=1` build does today is in `docs/port/HANDOFF.md`
 
 ### 3.3 Renderer: F3DEX2 display-list interpreter (Fast3D, libultraship style)
 
+Status (P6): `port/gfx/` is an F3DEX2 interpreter on WebGL2, written fresh rather than ported
+from Fast3D. It is wired to `osSpTaskStartGo`. Conker's custom TRI4 opcodes and its ucode
+variants are documented in `docs/port/sessions/P6.md`.
+
 - Conker builds with `F3DEX_GBI_2`. Port the **Fast3D interpreter** (sm64-port `gfx_pc.c`, as
   maintained in libultraship's `Fast3D`). It interprets `Gfx` command lists in software: geometry,
   matrices and lighting run on the CPU, and the rasterisation, combiner and texture state go to a

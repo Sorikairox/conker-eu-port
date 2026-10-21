@@ -241,10 +241,10 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3 + P4, branch `port-web`)
+## Browser build (sessions P3, P4, P6; branch `port-web`)
 
-Full notes: `docs/port/sessions/P3.md` (platform skeleton) and `docs/port/sessions/P4.md` (memory
-model, boot, priority list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
+model, boot, priority list) and `docs/port/sessions/P6.md` (indirect calls, renderer, microcode). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -271,7 +271,7 @@ python3 port/tools/priority.py <that log> 50     # conversion priority list (mea
     exceptions. See MEMORY.md, "What this implies for the C code".
 - **Signatures (P4):** `port/tools/sigs.py` gives every function one wasm signature (definition, or
   majority call site for stubs) and rewrites 791 mismatching call sites. Link signature warnings
-  went from 288 to 1. Indirect calls are not normalized yet.
+  went from 288 to 1. Indirect calls: see P6 below.
 - **Endianness test:** `port_memtest` checks real converted functions (`func_1509CE20/40/60/88`,
   `func_15041770`) against BE values decoded from the ROM in Python. 45/45 pass in node and in
   headless Chrome.
@@ -286,10 +286,32 @@ python3 port/tools/priority.py <that log> 50     # conversion priority list (mea
 - **Scheduler (P3):** libultra threads as emscripten fibers (ASYNCIFY). Priority scheduling, one VI
   retrace per frame, priority-0 idle threads park. `port_wait_frame()` paces PC-written loops.
 - **Census (P3):** 7 of 719 TUs fail under clang and are left out (`port/build/census/summary.txt`).
-- **Next for the browser build** (P4.md, "Known gaps"):
-  - indirect-call signatures;
-  - address constants and `K0_TO_PHYS` in C;
-  - bitfields;
-  - `va_arg` doubles;
-  - review of the pointer scan;
-  - then Fast3D, once the frame builders are C.
+- **Indirect calls (P6):** every indirect call in game code goes through a site-typed
+  trampoline (`port/tools/icall.py`). Matching signatures take a plain `call_indirect`. Mismatches
+  are converted with o32-like rules through `__port_icall_slow`, so they no longer trap.
+  - 5270 functions are registered, with 218 target signatures.
+  - The registry check over 5 ROM function tables passes, 654/654.
+  - `[icalltest] PASS` in node and in headless Chrome.
+  - Design: MEMORY.md, "Indirect calls (session P6)".
+- **Renderer (P6):** `port/gfx/` is an F3DEX2 interpreter on WebGL2, written fresh.
+  - It covers TMEM, all common texture formats, the two-cycle combiner, and Conker's Rare `TRI4`
+    opcodes 0x10–0x1F.
+  - `osSpTaskStartGo(M_GFXTASK)` → `gfx_run_task`. This path is ready, but **no task arrives
+    yet**: the scheduler `func_100049E0` and the frame builders are asm stubs.
+  - Proof: `?app=game&gfxdemo=1` draws six real model display lists inflated from ROM assets.
+    Screenshot: `docs/port/sessions/P6_screenshot.png`. Tool: `port/web/shot.sh OUT.png 'app=game&gfxdemo=1'`.
+  - The ROM has 8 microcodes: F3DEX / BS / BG / BGBS, each also as .NoN, all "fifo 2.08". The
+    data block is 0x6C0 per ucode, and `G_LOAD_UCODE` switches between them per frame. Details in
+    P6.md §2.
+- **Next for the browser build:**
+  1. Convert `func_100049E0` and the frame builders (`func_1501878C`, `func_1501BBB8`) on the port
+     branch. Game frames then render with no further change.
+  2. Decide `-sGLOBAL_BASE=256MB`: wasm addresses 0x01–0x0F xxxxxx currently alias segments
+     1–15 (P6.md §3).
+  3. Resolve texture ids in `G_SETTIMG`.
+  4. Conker lighting: the normal array is at `G_MOVEMEM` index 0x0E.
+  5. Still open from P4.md, "Known gaps":
+     - address constants and `K0_TO_PHYS` in C;
+     - bitfields;
+     - `va_arg` doubles;
+     - review of the pointer scan.

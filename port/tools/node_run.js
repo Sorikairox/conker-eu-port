@@ -7,6 +7,7 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
   if (rom) {
     const b = fs.readFileSync(rom); const p = M._malloc(b.length); M.HEAPU8.set(b, p); M._port_set_rom(p, b.length);
   }
+  if (process.env.GFXDEMO) { const t = M.stringToNewUTF8 ? M.stringToNewUTF8(process.env.GFXDEMO) : 0; M._port_gfx_demo_test(t); }
   M.callMain([]);
   setTimeout(() => { M._port_dump_threads(); process.exit(0); }, +secs * 1000);
 });
