@@ -10,8 +10,8 @@ never touch ~/conker-wt/a, the `conkerdev-a` container, or branch `eu-wt-a`.
 - **Never pkill/pgrep by name on the host** (e.g. `pkill -f permuter.py`), since that
   kills the other agent's jobs. Kill only PIDs you started, or your own /work/<id> jobs on
   the Mac mini.
-- **Slice:** init segment (conker/src_eu/init*.c); lo game slice parked. Don't touch
-  debugger or game files at 0x130000 and above.
+- **Slice:** game files with first function ≥ 0x15190000 (+ init, lo game parked). Don't touch
+  debugger or game files with first function 0x15130000–0x1518FFFF.
 - Shared headers: only add lines or change single prototypes, then run check_files.py on
   everything.
 - Budget: 2 work commits or about 40 functions tried, plus the hand-off commit. No
