@@ -157,7 +157,23 @@ FIXES = [('implproto', fix_implicit_proto), ('cmpcast', fix_cmp_cast), ('fnptr',
 
 
 # ------------------------------------------------------------------ container side
+class _Hang(Exception): pass
+
+def _alarm(sig, frm): raise _Hang()
+
 def eval_one(item):
+    import signal
+    signal.signal(signal.SIGALRM, _alarm)
+    signal.alarm(int(float(os.environ.get('CONVERT_BUDGET', '150')) + 90))
+    try:
+        return _eval_one(item)
+    except _Hang:
+        return dict(func=item[0], result='HANG', line='HANG %s: hard time limit (a compile or emulation never returned)' % item[0],
+                    variant='', fixes='', log=[])
+    finally:
+        signal.alarm(0)
+
+def _eval_one(item):
     func, drafts, trials, tmp = item
     sys.path.insert(0, os.path.join(HERE, 'difftest'))
     import difftest

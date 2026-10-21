@@ -1,3 +1,5 @@
+> **Branch `port` (native/browser source port):** start with `docs/port/HANDOFF.md` and `docs/port/PLAN.md`.
+
 Last updated: 2026-10-21 (session 165, main checkout, game files >= 0x15190000 (+ init, lo parked), 3985/5913, 658,272 bytes). Older stamps below are history.
 Last updated: 2026-10-21 (session 163, main checkout, game files >= 0x15190000 (+ init, lo parked), 3979/5913, 655,548 bytes). Older stamps below are history.
 Last updated: 2026-10-21 (session 161, main checkout, game files >= 0x15190000 (+ init, lo parked), 3960/5913, 650,336 bytes). Older stamps below are history.

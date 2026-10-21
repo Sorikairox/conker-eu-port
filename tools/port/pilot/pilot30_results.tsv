@@ -1,0 +1,30 @@
+func_1507DFE4	CERR	au5		cfe: Error: build/convert_tmp/func_1507DFE4/func_1507DFE4.c, line 171: 'sp5E' undefined; reoccurrences will not be reported. | cfe: Error: build/convert_tmp/func_1507DFE4/func_1507DFE4.c, line 171: 'sp60' undefined; reoccurrences will not be reported. | @@func_15022238(sp5C, sp5E, sp60, ((f32) (sp4E
+func_1510B9D8	DIFFER	au5		trial 3: call #0 0x1510BB78: a1 ref=0x3F8000B8 cand=0xC2B71E4F
+func_15088360	NODRAFT			NODRAFT func_15088360
+func_15007440	CERR	au5	cmpcast	cfe: Error: build/convert_tmp/func_15007440/func_15007440.c, line 68: Unacceptable operand of == or != | cfe: Error: build/convert_tmp/func_15007440/func_15007440.c, line 83: Unacceptable operand of == or != | @@} while (var_v0_2 != (s32)&D_800E102C); | @@} while (var_v0_3 != (s32)&D_800E102C);
+func_15116E08	EQUIV	au0	passthru,lint:stackaddr	EQUIV func_15116E08 (64 trials ok, 0 inconclusive, 192 calls, ret=int, ref 39 words, cand 36 words)
+func_151D469C	DIFFER	u5	fnptr	trial 0: call #0 0x804F42C0: a0 ref=0x80479F70 cand=0xFFFFFFFF
+guMtxIdentF	EQUIV	v0		EQUIV guMtxIdentF (64 trials ok, 0 inconclusive, 0 calls, ret=void, ref 19 words, cand 23 words)
+func_150D247C	CERR	nu5	cmpcast	cfe: Error: build/convert_tmp/func_150D247C/func_150D247C.c, line 26: Unacceptable operand of == or != | @@if (arg1 == (*(s32 *)((u8 *)(s32)temp_v0_2 + 0x40))) {
+func_15085170	EQUIV	v0		EQUIV func_15085170 (59 trials ok, 5 inconclusive, 0 calls, ret=int, ref 27 words, cand 34 words)
+func_15081974	CERR	au5	cmpcast	cfe: Error: build/convert_tmp/func_15081974/func_15081974.c, line 56: Unacceptable operand of == or != | @@if (var_s0 == (s32)&D_800D121C) {
+func_150C8190	DIFFER	au7		trial 0: call count ref=1 cand=2 (func_151149AC)
+func_1506AEA0	DIFFER	au5	passthru,passthru,passthru,passthru,passthru	trial 0: call #0 func_15137610: a0 ref=0x800D2618 cand=0x1
+func_150ADA68	CERR	v5		cfe: Error: build/convert_tmp/func_150ADA68/func_150ADA68.c, line 210: Syntax Error | cfe: Error: build/convert_tmp/func_150ADA68/func_150ADA68.c, line 212: Syntax Error | cfe: Error: build/convert_tmp/func_150ADA68/func_150ADA68.c, line 227: Syntax Error | cfe: Error: build/convert_tmp/func_150ADA6
+func_15103310	EQUIV	v0		EQUIV func_15103310 (56 trials ok, 8 inconclusive, 12 calls, ret=int, ref 74 words, cand 75 words)
+func_150C5870	EQUIV	v0	lint:stackaddr	EQUIV func_150C5870 (43 trials ok, 21 inconclusive, 270 calls, ret=int, ref 47 words, cand 40 words)
+func_150A7D00	UNSURE	v5		only 0 trials ran to completion (64 faulted/timed out)
+func_1508F120	EQUIV	v0		EQUIV func_1508F120 (41 trials ok, 23 inconclusive, 0 calls, ret=int, ref 63 words, cand 68 words)
+func_15131F34	CERR	au5	implproto	cfe: Error: build/convert_tmp/func_15131F34/func_15131F34.c, line 297: Non-function name referenced in function call. | @@var_v1 = *(&D_80089C14 + ((*(s8 *)((u8 *)arg2 + 1)) * 4))(arg0, arg1, &sp24, arg2) & 0xFF;
+func_1507EB1C	NODRAFT			NODRAFT func_1507EB1C
+func_150ADDE0	EQUIV	v0		EQUIV func_150ADDE0 (64 trials ok, 0 inconclusive, 0 calls, ret=f32, ref 12 words, cand 14 words)
+func_15102C3C	DIFFER	au5		trial 0: call count ref=2 cand=0 (0x15100B80)
+func_1518C900	CERR	au7	undecl	cfe: Error: build/convert_tmp/func_1518C900/func_1518C900.c, line 52: redeclaration of 'D_800DFDE8'; previous declaration at line 4 in file 'build/convert_tmp/func_1518C900/func_1518C900.c' | cfe: Error: build/convert_tmp/func_1518C900/func_1518C900.c, line 53: redeclaration of 'D_800E0578'; previou
+func_1517F910	NODRAFT			NODRAFT func_1517F910
+func_15168B44	EQUIV	v0		EQUIV func_15168B44 (64 trials ok, 0 inconclusive, 0 calls, ret=void, ref 25 words, cand 26 words)
+func_150FB708	EQUIV	au0	passthru,lint:stackaddr	EQUIV func_150FB708 (64 trials ok, 0 inconclusive, 64 calls, ret=int, ref 23 words, cand 19 words)
+func_151419D0	DIFFER	nu5		trial 3: call count ref=0 cand=1 (func_1516972C)
+func_151008C0	DIFFER	au5	passthru,passthru,passthru,passthru	trial 3: fault only in cand: Unhandled CPU exception (UC_ERR_EXCEPTION) at 0x00000000
+func_1503DF2C	DIFFER	v5		trial 1: call #0 0x1510D66C: a0 ref=0x805BF1A0 cand=0x41B5EB85
+func_1502F1E4	DIFFER	v5		trial 1: timeout only in cand
+func_150416EC	HANG			worker never returned (pre-alarm run)
