@@ -90,7 +90,7 @@ s32  func_10010894(struct127 *arg0);
 void func_100109D0(struct127 *arg0);
 void func_10010A3C(struct127 *arg0);
 void func_10010AA8(struct127 *arg0);
-void func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
+u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
 void func_100111C8(u16 arg0);
 void func_1001123C(u16 arg0);
 s32  func_100112BC(s32 arg0, s32 arg1);

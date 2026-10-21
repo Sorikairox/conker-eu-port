@@ -36,7 +36,55 @@ void func_15195D9C(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195DD8.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195EF4.s")
+typedef struct {
+    DNode node;
+    s16 x8;
+    s16 w;
+    s16 h;
+    u16 xE;
+    u16 x10;
+    s16 x12;
+    s8 x14;
+    s32 x18;
+    s16 a[5];
+    s16 b[5];
+    s16 x30[6];
+} Ent3C;
+
+Ent3C *func_15195EF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    Ent3C *p;
+    s32 i;
+    s32 w;
+    s32 h;
+    s32 x;
+    s32 y;
+
+    p = (Ent3C *)func_15195D20(0x3C, (DNode **)&D_800E0D18, (DNode **)&D_800E0D1C);
+    if (p != NULL) {
+        p->x18 = 0;
+        for (i = 0; i < 5; i++) {
+            p->a[i] = -1;
+        }
+        for (i = 0; i < 5; i++) {
+            p->b[i] = -1;
+        }
+        p->x8 = arg0;
+        w = ((arg1 >> 12) & 0xFFF) + 2;
+        h = (arg1 & 0xFFF) + 2;
+        if (arg3 != 0) {
+            w *= 2;
+            h *= 2;
+        }
+        p->w = w;
+        p->h = h;
+        p->xE = (arg2 >> 12) & 0xFFF;
+        p->x10 = arg2 & 0xFFF;
+        p->xE <<= 3;
+        p->x10 <<= 3;
+        p->x14 = 1;
+    }
+    return p;
+}
 
 s32 func_15195FF4(s16 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;

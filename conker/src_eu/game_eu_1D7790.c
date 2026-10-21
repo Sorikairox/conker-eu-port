@@ -257,7 +257,76 @@ void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, s32 arg3, f32 arg4, s32 arg5, u
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AAA3C.s")
+typedef struct {
+    u8 u0;
+    u8 *u4;
+    s8 u8_;
+    f32 uC;
+    f32 u10;
+    f32 u14;
+    f32 u18;
+    f32 u1C;
+    f32 u20;
+    s8 u24;
+    s16 u26;
+    s16 u28;
+    s16 u2A;
+    s16 u2C;
+    s8 u2E;
+    s8 u2F;
+    s8 u30;
+    f32 u34;
+    s8 u38;
+    s8 u39;
+} SpA3C;
+typedef struct {
+    s32 a;
+    u8 b;
+    s32 c;
+    s32 d;
+    f32 e;
+    f32 f;
+} SpB3C;
+s32 func_15134DAC(SpA3C *, s32, ...);
+extern f32 D_800A9384;
+extern f32 D_800A9388;
+
+s32 func_151AAA3C(u8 *arg0, s32 arg1) {
+    SpA3C s;
+    s32 v;
+    SpB3C b;
+
+    b.a = arg1;
+    b.b = 1;
+    s.u0 = arg0[0x3B];
+    s.u4 = arg0;
+    s.u8_ = 15;
+    s.uC = -11.0f;
+    s.u10 = -2.0f;
+    s.u14 = 8.0f;
+    s.u18 = -11.0f;
+    s.u1C = -2.0f;
+    s.u20 = 20.0f;
+    s.u24 = 0;
+    s.u26 = 60;
+    s.u28 = 60;
+    s.u2A = 300;
+    s.u2E = 1;
+    s.u2F = 0;
+    s.u30 = 1;
+    s.u34 = 0.5f;
+    s.u38 = 1;
+    s.u39 = 0;
+    b.c = 0;
+    b.d = 0x11111;
+    b.e = D_800A9384;
+    b.f = D_800A9388;
+    v = func_15134DAC(&s, 0x18);
+    if (v != 0) {
+        memcpy((void *)(v + 0x80), &b, 0x18);
+    }
+    return v;
+}
 
 s32 func_151EFDD0();
 
@@ -401,7 +470,31 @@ void func_151AB774(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB954.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151ABC68.s")
+typedef struct {
+    u8 pad0[4];
+    u8 unk4;
+    u8 pad5;
+    u16 unk6;
+} SndC68;
+
+u8 func_151ABC68(u8 *arg0) {
+    u8 ret;
+    SndC68 *s;
+
+    ret = 1;
+    s = (SndC68 *)(arg0 + 0x58);
+    if (s->unk6 != 0 && !(D_800DBFF0->unk5F0 & 1)) {
+        func_100111C8(*(s16 *)&s->unk6);
+        s->unk6 = 0;
+    } else if (s->unk6 == 0 && (D_800DBFF0->unk5F0 & 1)) {
+        s->unk6 = func_10010F30(0x355, 0x7D00, 0x40, 0, 0);
+    }
+    if (s->unk4 == 0) {
+        ret = 0;
+    }
+    s->unk4 = 0;
+    return ret;
+}
 
 void func_151ABD38(u8 *arg0) {
     s32 pad;
