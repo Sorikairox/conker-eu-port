@@ -45,7 +45,47 @@ void func_15155D6C(s32 arg0, s32 arg1, f32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/func_15155E0C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183500/func_1515626C.s")
+extern Gfx **D_800E0810;
+typedef struct {
+    /* 0x00 */ u8 pad0[0x10];
+    /* 0x10 */ u8 obj;
+    /* 0x11 */ u8 mode;
+    /* 0x12 */ u8 ang;
+    /* 0x13 */ u8 pad13[5];
+    /* 0x18 */ Mtx mtx[2];
+    /* 0x98 */ f32 yoff;
+} Unk1515626C;
+Gfx *func_15096D44(Gfx *arg0);
+
+Gfx *func_1515626C(Gfx *gdl, Unk1515626C *arg1, s16 arg2) {
+    u8 mode;
+    u8 obj;
+    struct127 *p;
+
+    mode = arg1->mode;
+    obj = arg1->obj;
+    if (mode == 1 || mode == 3) {
+        f32 rot;
+        s32 pad; // fakematch: slot 0x58 between rot and h
+        f32 h;
+
+        p = &D_800CC2D0[obj];
+        if (p->unk31C->unk75 == 5) {
+            h = 85.0f;
+        } else {
+            h = 0.0f;
+        }
+        rot = D_800DBFF0[arg2].unk380;
+        gdl = func_15096D44(gdl);
+        func_15043D90(&arg1->mtx[D_800BE9C0], 0.0f, rot, 0.0f, 2.25f, 2.25f, 2.25f, p->x_position,
+                      func_15048A40(arg1->ang) * 15.0f + (p->y_position + 160.0f + h + arg1->yoff), p->z_position);
+        gSPMatrix(gdl++, &arg1->mtx[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPClearGeometryMode(gdl++, G_ZBUFFER);
+        gSPDisplayList(gdl++, *D_800E0810);
+        gSPSetGeometryMode(gdl++, G_ZBUFFER);
+    }
+    return gdl;
+}
 
 void func_1515F10C(s32);
 s32 func_1518CF74(s32);

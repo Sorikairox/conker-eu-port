@@ -100,39 +100,39 @@ typedef struct {
     u8  unk24;
 } struct_eu_15167B44;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167B44.s")
-// NON-MATCHING: a1/a2 register swap for the unk14 / -unk22 temporaries
-// void func_15167B44(struct_eu_15167B44 *arg0) {
-//     u8 idx = arg0->unk24;
-//     s32 step;
-//
-//     if (idx != 0) {
-//         D_8008CDC0[idx]();
-//     }
-//     step = arg0->unk22;
-//     if (step > 0) {
-//         if (step < arg0->unk23) {
-//             arg0->unk23 -= step;
-//         } else {
-//             arg0->unk14 = arg0->unk10[4] << 8;
-//         }
-//     } else if (step < 0) {
-//         s16 cur = arg0->unk14;
-//
-//         if (cur / 256 >= arg0->unk10[4] - 1) {
-//             s32 neg = -step;
-//
-//             if (neg < arg0->unk23) {
-//                 arg0->unk23 -= neg;
-//                 arg0->unk14 = cur - arg0->unk16;
-//             }
-//         }
-//     }
-//     arg0->unk14 += arg0->unk16;
-//     if (arg0->unk14 / 256 >= arg0->unk10[4]) {
-//         func_1516972C((struct102 *)arg0);
-//     }
-// }
+void func_15167B44(struct_eu_15167B44 *arg0) {
+    u8 idx = arg0->unk24;
+    s32 step;
+    s32 neg;
+
+    if (idx != 0) {
+        D_8008CDC0[idx]();
+    }
+    step = arg0->unk22;
+    if (step > 0) {
+        if (step < arg0->unk23) {
+            arg0->unk23 -= step;
+        } else {
+            arg0->unk14 = arg0->unk10[4] << 8;
+        }
+    } else {
+        neg = -step; // fakematch: hoisted out of the step < 0 block (permuter)
+        if (step < 0) {
+            s16 cur = arg0->unk14;
+
+            if (cur / 256 >= arg0->unk10[4] - 1) {
+                if (neg < arg0->unk23) {
+                    arg0->unk23 -= neg;
+                    arg0->unk14 = cur - arg0->unk16;
+                }
+            }
+        }
+    }
+    arg0->unk14 += arg0->unk16;
+    if (arg0->unk14 / 256 >= arg0->unk10[4]) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167C58.s")
 void *func_15167D84(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 arg5) {
     u8 *temp_v0;
