@@ -48,3 +48,5 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 140	wt	game>=0x130000+dbg	5	1428	126	near-miss sweep: remote permuter converts ~20%
 142	wt	game>=0x130000+dbg	9	3240	141	comma trick for FP operand order; struct access for FP register pairs
 141	main	game<0x130000	5	852	128	nearmiss.py inventory; remote permuter only 2/72 runs; bitfield-struct recipe
+144	wt	game>=0x130000+dbg	7	1932	138	fresh hand drafts + local permuter 3/4; old remote near-miss rows 0/6
+143	main	game<0x130000	7	1356	138	type a shared global table once, redo the file (4 from one struct); permuter 1/19
