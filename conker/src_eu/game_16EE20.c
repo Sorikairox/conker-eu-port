@@ -128,7 +128,46 @@ void func_15141DA4(void *arg0, s32 arg1, s32 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 memcpy(u8 *, s32 *, s32);
+
+void func_15141E38(struct127 *arg0, s32 arg1) {
+    struct_eu_link *sp58;
+    struct { s32 id; struct127 *owner; u8 uid; } rec;   /* sp40: 0xC bytes copied to the new object +0x28 */
+    struct260 *temp_v0_2;
+    struct_eu_attached *temp_v0;
+    struct_eu_link *temp_a0;
+    struct_eu_link *temp_t4;
+    struct_eu_link *var_s1;
+
+    var_s1 = NULL;
+    temp_a0 = arg0->unk2F4;
+    sp58 = temp_a0;
+    if (func_1514F250(temp_a0, 0x1A, &sp58) != 0) {
+        do {
+            temp_v0 = sp58->unk10;
+            if (arg1 == temp_v0->unk28) {
+                var_s1 = sp58;
+                temp_v0->unkE = (s16) D_8008A0B4[arg1].unk4;
+            }
+            temp_t4 = sp58->unk14;
+            sp58 = temp_t4;
+        } while (func_1514F250(temp_t4, 0x1A, &sp58) != 0);
+    }
+    if (var_s1 == NULL) {
+        rec.id = arg1;
+        rec.owner = arg0;
+        rec.uid = arg0->unique_id;
+        temp_v0_2 = func_15149130((*(s16 *)((u8 *)(&D_8008A0B4[arg1]) + 6)), -1, -1, -1, 1U, 0x32U, (struct37 *)0xC, 0xFFU, 1);
+        if (temp_v0_2 != NULL) {
+            memcpy((u8 *)temp_v0_2 + 0x28, (s32 *)&rec, 0xC);
+            func_1514F18C(temp_v0_2, arg0, 0x1A);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141E38.s")
+#endif
 // NON-MATCHING: stack layout (sp40 should be at 0x40, list cursor at 0x58) and loop temp
 // void func_15141E38(struct127 *arg0, s32 arg1) {
 //     struct_eu_link *sp58;

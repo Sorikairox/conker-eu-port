@@ -28,8 +28,152 @@ void func_1507EF98(s32 arg0, s32 *arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F018.s")
+#ifdef NON_MATCHING
+s32 func_1507F018(u8 *arg0, s32 arg1, u8 *arg2, s32 *arg3, u8 *arg4) {
+    struct {
+        s32 u2C;
+    } sp;
+    s32 temp_a0;
+    s32 temp_a1;
+    s32 temp_t1;
+    s32 temp_t7;
+    s32 temp_t8;
+    s32 temp_t9;
+    s32 var_a0;
+    s32 var_a0_2;
+    s32 var_t0;
+    s32 var_t0_2;
+    s32 var_t0_3;
+    s32 var_v0;
+    s32 var_v0_2;
+    s32 var_v1;
+    s32 var_v1_2;
+    u8 *var_t1;
+    u8 *var_t2;
+    u8 *var_t4;
+    u8 *var_t5;
+    u8 temp_t2;
+    u8 temp_t2_2;
+    u8 *var_v0_3;
 
+    var_v1 = 0;
+    *arg3 = 0;
+    var_v0 = 0;
+    if (arg1 > 0) {
+        do {
+            temp_t1 = *arg3;
+            var_a0 = 0;
+            var_t0 = 0;
+            var_t2 = arg2;
+            if (temp_t1 > 0) {
+loop_4:
+                var_t0 += 1;
+                if (*var_t2 == *(arg0 + var_v0)) {
+                    var_a0 = 1;
+                } else {
+                    var_t2 += 1;
+                    if (var_t0 < temp_t1) {
+                        goto loop_4;
+                    }
+                }
+            }
+            if (var_a0 == 0) {
+                temp_t2 = *(arg0 + var_v0);
+                var_t0_2 = 0;
+                var_t5 = arg4;
+loop_9:
+                var_t0_2 += 1;
+                if (*var_t5 == temp_t2) {
+                    var_a0 = 1;
+                } else {
+                    var_t5 += 1;
+                    if (var_t0_2 != 5) {
+                        goto loop_9;
+                    }
+                }
+                if (var_a0 == 0) {
+                    *(arg2 + temp_t1) = temp_t2;
+                    *arg3 += 1;
+                }
+            }
+            var_v0 += 1;
+        } while (var_v0 != arg1);
+    }
+    var_a0_2 = 0;
+    var_v0_2 = 0;
+    if (*arg3 == 0) {
+        var_t1 = arg4;
+        do {
+            temp_t2_2 = *var_t1;
+            var_v0_2 += 1;
+            if (temp_t2_2 != 0) {
+                var_t0_3 = 0;
+                if (arg1 > 0) {
+                    var_t4 = arg0;
+loop_20:
+                    var_t0_3 += 1;
+                    if (temp_t2_2 == *var_t4) {
+                        *(&sp.u2C + var_a0_2) = temp_t2_2;
+                        var_a0_2 += 1;
+                    } else {
+                        var_t4 += 1;
+                        if (var_t0_3 != arg1) {
+                            goto loop_20;
+                        }
+                    }
+                }
+            }
+            var_t1 += 1;
+        } while (var_v0_2 < 5);
+        if (var_a0_2 == 0) {
+            *arg2 = 0;
+            *arg3 = 1;
+        } else {
+            var_v1_2 = var_a0_2 >> 1;
+            if (var_v1_2 == 0) {
+                var_v1_2 = 1;
+            }
+            if (var_v1_2 != 0) {
+                temp_a1 = -(var_v1_2 & 3);
+                var_v0_3 = var_a0_2 + &sp.u2C;
+                if (temp_a1 != 0) {
+                    temp_a0 = temp_a1 + var_v1_2;
+                    do {
+                        var_v1_2 -= 1;
+                        *(arg2 + *arg3) = (*(u8 *)((u8 *)var_v0_3 + -1));
+                        var_v0_3 -= 1;
+                        *arg3 += 1;
+                    } while (temp_a0 != var_v1_2);
+                    if (var_v1_2 != 0) {
+                        goto loop_33;
+                    }
+                } else {
+                    do {
+loop_33:
+                        var_v1_2 -= 4;
+                        *(arg2 + *arg3) = (*(u8 *)((u8 *)var_v0_3 + -1));
+                        var_v0_3 -= 4;
+                        temp_t8 = *arg3 + 1;
+                        *arg3 = temp_t8;
+                        *(arg2 + temp_t8) = (*(u8 *)((u8 *)var_v0_3 + 2));
+                        temp_t9 = *arg3 + 1;
+                        *arg3 = temp_t9;
+                        *(arg2 + temp_t9) = (*(u8 *)((u8 *)var_v0_3 + 1));
+                        temp_t7 = *arg3 + 1;
+                        *arg3 = temp_t7;
+                        *(arg2 + temp_t7) = (*(u8 *)((u8 *)var_v0_3 + 0));
+                        *arg3 += 1;
+                    } while (var_v1_2 != 0);
+                }
+            }
+            var_v1 = 1;
+        }
+    }
+    return var_v1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1507F018.s")
+#endif
 void func_1507F238(u8 arg0, u8 *arg1) {
     func_1507F298(arg0, arg1);
     if (arg0 == 0x11) {

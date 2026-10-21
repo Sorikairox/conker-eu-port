@@ -58,8 +58,48 @@ s32 func_15037B70(s32 arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_150383B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038758.s")
+#ifdef NON_MATCHING
+extern f32 D_800989F8;
+void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 var_f0;
 
+    switch (arg5) {                                 /* irregular */
+    case 0:
+        *arg0 = func_150484A0(arg2, arg4);
+        var_f0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
+block_9:
+        *arg1 = var_f0;
+        break;
+    case 1:
+        *arg0 = func_150484A0(-arg4, arg2);
+        var_f0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
+        goto block_9;
+    case 2:
+        *arg0 = func_150484A0(arg4, -arg2);
+        var_f0 = func_150484A0(arg3, sqrtf((arg2 * arg2) + (arg4 * arg4)));
+        goto block_9;
+    case 3:
+        *arg0 = func_150484A0(arg4, -arg3);
+        var_f0 = func_150484A0(-arg2, sqrtf((arg3 * arg3) + (arg4 * arg4)));
+        goto block_9;
+    }
+    *arg0 *= D_800989F8;
+    *arg1 *= D_800989F8;
+    temp_f0 = *arg0;
+    if (temp_f0 > 180.0f) {
+        *arg0 = temp_f0 - 360.0f;
+    }
+    temp_f0_2 = *arg1;
+    if (temp_f0_2 > 180.0f) {
+    s32 pad;
+        *arg1 = temp_f0_2 - 360.0f;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038758.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038910.s")
 
 void *func_15039D44(s32 arg0, s32 arg1) {

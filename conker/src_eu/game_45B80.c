@@ -583,7 +583,7 @@ s32 func_1517E7FC(s32, s32);
 u8 * func_1517FAD4(s32);
 s32 func_15182450(s32);
 s32 func_151D6440(u8 *, s32, s32, s32);
-s32 func_151D6760(s32);
+void func_151D6760(s32);
 u8 * func_151D6D28(u8 *);
 extern s32 D_8002AE20;
 extern s8 D_80083320;

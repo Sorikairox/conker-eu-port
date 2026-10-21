@@ -1,9 +1,88 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+extern u8 D_800A0370[];
+extern u8 D_800A0340[];
+#endif
 
+#ifdef NON_MATCHING
+void func_150BDC20(u8 *arg0, u8 arg1, s32 arg2) {
+    struct {
+        f32 u8C;
+        f32 u90;
+        f32 u94;
+        f32 u98;
+        f32 u9C;
+        f32 uA0;
+        u8 padA4[0x4];
+        s32 uA8;
+        u8 padAC[0x14];
+        s32 uC0;
+        s32 uC4;
+        s32 uC8;
+        s32 uCC;
+        s32 uD0;
+        s32 uD4;
+        s32 uD8;
+        u8 padDC[0x14];
+        s32 uF0;
+        s32 uF4;
+        s32 uF8;
+        s32 uFC;
+        s32 u100;
+        s32 u104;
+        f32 u108;
+        f32 u10C;
+        f32 u110;
+        u8 pad114[0xC];
+        s32 u120;
+        s32 u124;
+        s32 u128;
+        s32 u12C;
+        s32 u130;
+        s32 u134;
+    } sp;
+    s32 *var_s0;
+    s32 *var_s3;
+    s32 *var_s4;
+    s32 *var_s5;
+    f32 *var_s1;
+    f32 *var_s2;
+
+    if (arg0 != NULL) {
+        var_s1 = &D_800A0310;
+        var_s2 = &sp.u108;
+        if ((*(u8 **)((u8 *)arg0 + 0x1D4)) != NULL) {
+            var_s5 = ((u8 *)&D_800A0370);
+            var_s3 = ((u8 *)&D_800A0340);
+            var_s4 = &sp.uD8;
+            var_s0 = &sp.uA8;
+            do {
+                func_15143134(var_s1, var_s2, (*(u8 **)((u8 *)arg0 + 0x1D4)));
+                func_15143134(var_s3, var_s4, (*(u8 **)((u8 *)arg0 + 0x1D4)));
+                func_15143134(var_s5, var_s0, (*(u8 **)((u8 *)arg0 + 0x1D4)));
+                var_s0 = (s32 *)((u8 *)var_s0 + (0xC));
+                var_s1 = (f32 *)((u8 *)var_s1 + (0xC));
+                var_s2 = (f32 *)((u8 *)var_s2 + (0xC));
+                var_s3 = (s32 *)((u8 *)var_s3 + (0xC));
+                var_s4 = (s32 *)((u8 *)var_s4 + (0xC));
+                var_s5 = (s32 *)((u8 *)var_s5 + (0xC));
+            } while (var_s0 != &sp.uD8);
+            sp.u8C = sp.uC0 - sp.uF0;
+            sp.u90 = sp.uC4 - sp.uF4;
+            sp.u94 = sp.uC8 - sp.uF8;
+            func_1514C9E0(sp.u120, sp.u124, sp.u128, sp.u12C, sp.u130, sp.u134, (func_150ADA68() * 6.0f) + 14.0f, 0xDU, 0, 0.0f, (s32) &sp.u8C, (u8) (s32) arg1);
+            sp.u98 = sp.uCC - sp.uFC;
+            sp.u9C = sp.uD0 - sp.u100;
+            sp.uA0 = sp.uD4 - sp.u104;
+            func_1514C9E0(sp.u12C, sp.u130, sp.u134, sp.u108, sp.u10C, sp.u110, (func_150ADA68() * 6.0f) + 14.0f, 0xDU, 0, 0.0f, (s32) &sp.u98, (u8) (s32) arg1);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EB430/func_150BDC20.s")
-
+#endif
 s32 func_150ADA20(void);
 f32 func_150ADA68(void);
 s32 func_15148310(void *, void *, s32, s32, s32, s32, s32, s32, s32, s32, s32, void *, s32, s32, s32);

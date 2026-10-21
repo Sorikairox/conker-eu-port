@@ -553,3 +553,62 @@ def fix_selfproto(code, err, func=None, src=None):
     head = '%s %s(%s) {' % (ret, func, ', '.join(newp))
     if locs: head += '\n' + '\n'.join(locs)
     return code[:dm.start()] + head + code[dm.end():]
+
+
+# ---------------------------------------------------------------- P17: float literals -> the rodata symbol the asm loads
+def fix_litsym(code, why=None, func=None, src=None):
+    """DIFFER workaround (P17): in some candidates a TU float literal reads back as 0 in difftest (seen in
+    func_1503EE68 -0.3f, func_151B97C4 0.0234f; the literal value is bit-exact). Replace each f32 literal whose
+    bits equal a word the asm loads with `lwc1 %lo(D_X)` by D_X itself (extern f32), which reads the ROM's rodata."""
+    import glob as _g, struct as _st
+    if not func: return None
+    sp = _g.glob('asm/nonmatchings/*/%s.s' % func)
+    if not sp: return None
+    syms = sorted(set(re.findall(r'lwc1\s+\$f\d+, %lo\((D_[0-9A-F]{8})\)', open(sp[0]).read())))
+    if not syms: return None
+    try:
+        import difftest as _dt
+        rom = open('conker.eu.bin', 'rb').read()
+    except Exception:
+        return None
+    vals = {}
+    for s in syms:
+        o = _dt.vram2rom(int(s[2:], 16))
+        if o is not None: vals.setdefault(rom[o:o + 4], s)
+    used = set()
+    def rep(m):
+        try: b = _st.pack('>f', float(m.group(1)))
+        except Exception: return m.group(0)
+        s = vals.get(b)
+        if not s: return m.group(0)
+        used.add(s); return s
+    c = re.sub(r'(?<![\w.])(-?\d+\.\d*(?:[eE][-+]?\d+)?)f\b', rep, code)
+    if not used or c == code: return None
+    decl = ''.join('extern f32 %s;\n' % s for s in sorted(used) if not re.search(r'\b%s\b' % s, code))
+    return decl + c
+
+
+# ---------------------------------------------------------------- P17: m2c call through a function-pointer table
+def fix_fptab(code, err=None, func=None, src=None):
+    """IDO 'Non-function name referenced in function call' for m2c's `*(&D_X + (i * 4))(args)`:
+    rewrite as a call through the table word, `((s32 (*)()) *(s32 *)((u8 *)&D_X + (i * 4)))(args)`."""
+    if err is not None and 'Non-function name referenced in function call' not in err: return None
+    out, i, ch = '', 0, False
+    while True:
+        k = code.find('*(&D_', i)
+        if k < 0: out += code[i:]; break
+        j, d = k + 1, 0
+        while j < len(code):
+            if code[j] == '(': d += 1
+            elif code[j] == ')':
+                d -= 1
+                if d == 0: break
+            j += 1
+        if j >= len(code) or not code[j + 1:j + 2] == '(':
+            out += code[i:k + 1]; i = k + 1; continue
+        inner = code[k + 2:j]                       # &D_X + (...)
+        m = re.match(r'&(D_\w+) \+ (.*)$', inner, re.S)
+        if not m: out += code[i:k + 1]; i = k + 1; continue
+        out += code[i:k] + '((s32 (*)()) *(s32 *)((u8 *)&%s + %s))' % (m.group(1), m.group(2))
+        i = j + 1; ch = True
+    return out if ch else None

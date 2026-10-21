@@ -160,12 +160,12 @@ def lint(code, func=None):
 
 sys.path.insert(0, HERE)
 import cfix
-FIXES = [('implproto', fix_implicit_proto), ('spframe', cfix.fix_spframe), ('cmpcast', fix_cmp_cast), ('cmp2', cfix.fix_cmp),
+FIXES = [('fptab', cfix.fix_fptab), ('implproto', fix_implicit_proto), ('spframe', cfix.fix_spframe), ('cmpcast', fix_cmp_cast), ('cmp2', cfix.fix_cmp),
          ('deref', cfix.fix_deref), ('fnptr', fix_fnptr), ('redecl', fix_redecl), ('qtypes', fix_question_types),
          ('undecl', fix_undeclared), ('argc', fix_args_count)]
 # P17: cfix.fix_selfproto (definition vs the header's own prototype of FUNC) is written but untested, not registered
 # DIFFER: tried in order, each at most once per draft
-DFIXES = [('passthru2', cfix.fix_passthru), ('passthru', fix_passthrough), ('u8arith', cfix.fix_u8arith),
+DFIXES = [('litsym', cfix.fix_litsym), ('passthru2', cfix.fix_passthru), ('passthru', fix_passthrough), ('u8arith', cfix.fix_u8arith),
           ('spframe', lambda c, w, f, s: cfix.fix_spframe(c, w, f, s, force=True))]
 if os.environ.get('CONVERT_P1'):   # the P1 fix set, for before/after measurements
     FIXES = [x for x in FIXES if x[0] in ('implproto', 'cmpcast', 'fnptr', 'redecl', 'qtypes', 'undecl', 'argc')]

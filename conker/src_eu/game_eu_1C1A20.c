@@ -277,7 +277,11 @@ void func_15195418(s32 arg0, u8 *arg1, s32 arg2) {
 }
 
 s32 func_1507CD64(struct127 *, s32);
+#ifdef NON_MATCHING
+void func_151C0648(f32 *, struct127 *, s32, s32, s32);
+#else
 s32 func_151C0648(f32 *, struct127 *, s32, s32, s32);
+#endif
 void func_151954B8(s32 arg0, struct127 *arg1, s32 arg2) {
     f32 sp34[3];
 

@@ -419,7 +419,7 @@ void func_150A29A0(Unk34B8 *arg0, s32 arg1) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150E6E30(struct127 *, s32, u8 *, u8);
+void func_150E6E30(struct127 *, s32, u8 *, u8);
 void func_151CEACC(struct127 *, u8 *);
 extern u8 D_800D34B0;
 extern s32 D_800DA2D8;

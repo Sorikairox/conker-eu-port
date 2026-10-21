@@ -8,8 +8,75 @@ void func_15023980(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023988.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023C60.s")
+#ifdef NON_MATCHING
+extern s32 D_800C3AA8;
+extern s32 D_eu_800C3A60;
 
+s32 func_15023C60(u32 arg0, s32 arg1, s32 arg2, u8 **arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+    s16 var_v1;
+    s32 var_a1;
+    u16 temp_t0;
+    u8 var_v0;
+    u8 *temp_v0;
+    u8 *var_a0;
+
+    temp_v0 = *(((s32 *)((u8 *)&D_800C3AA8 + ((argA * 0x78) + (arg2 * 4)))));
+    if (temp_v0 != NULL) {
+        var_a0 = temp_v0 + 0x20;
+        temp_t0 = D_800C39F8[argA][arg2];
+        var_a1 = var_a0 - temp_v0;
+        var_v1 = (*(s16 *)((u8 *)temp_v0 + 2));
+        if ((u32) (var_a1 >> 3) < temp_t0) {
+loop_3:
+            var_v0 = (*(u8 *)((u8 *)var_a0 + 1));
+            if ((var_v0 == 0) && ((*(s8 *)((u8 *)var_a0 + 0)) == 0)) {
+                var_v1 = (*(s16 *)((u8 *)var_a0 + 2));
+                goto block_37;
+            }
+            if ((arg0 < (u32) var_a0) && (arg1 == (*(s8 *)((u8 *)var_a0 + 0))) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == (*(s16 *)((u8 *)var_a0 + 2))))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == (*(s8 *)((u8 *)var_a0 + 4))))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == (*(s8 *)((u8 *)var_a0 + 5)))))) {
+                *arg3 = var_a0;
+                return (s32) (var_v1 * 0x32) / 60;
+            }
+            if (var_v0 == 0) {
+loop_19:
+                if ((*(s8 *)((u8 *)var_a0 + 0)) == 0) {
+                    var_v1 = (*(s16 *)((u8 *)var_a0 + 2));
+                    goto block_36;
+                }
+                var_a1 += 8;
+                var_a0 += 8;
+                if ((u32) (var_a1 >> 3) >= temp_t0) {
+                    var_v0 = (*(u8 *)((u8 *)var_a0 + 1));
+                    goto block_36;
+                }
+                if ((arg0 < (u32) var_a0) && (arg1 == (*(s8 *)((u8 *)var_a0 + 0))) && ((arg4 == 0) || ((arg4 == 1) && (arg5 == (*(s16 *)((u8 *)var_a0 + 2))))) && ((arg6 == 0) || ((arg6 == 1) && (arg7 == (*(s8 *)((u8 *)var_a0 + 4))))) && ((arg8 == 0) || ((arg8 == 1) && (arg9 == (*(s8 *)((u8 *)var_a0 + 5)))))) {
+                    *arg3 = var_a0;
+                    return (s32) (var_v1 * 0x32) / 60;
+                }
+                var_v0 = (*(u8 *)((u8 *)var_a0 + 1));
+                if (var_v0 != 0) {
+                    goto block_36;
+                }
+                goto loop_19;
+            }
+block_36:
+            var_v1 += var_v0;
+block_37:
+            var_a1 += 8;
+            var_a0 += 8;
+            if ((u32) (var_a1 >> 3) >= temp_t0) {
+                goto block_38;
+            }
+            goto loop_3;
+        }
+    }
+block_38:
+    *arg3 = NULL;
+    return *(s32 *)((u8 *)&D_eu_800C3A60 + (argA * 4));
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023C60.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_51190/func_15023EC4.s")
 
 s32 func_1502AB94(s32, u8, u16, s32, s32);

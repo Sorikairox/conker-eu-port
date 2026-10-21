@@ -711,8 +711,69 @@ f32 func_15144C8C(f32 arg0, f32 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15144CEC.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15144E80.s")
+#ifdef NON_MATCHING
+s32 func_15144E80(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
+    struct {
+        f32 u18;
+        f32 u1C;
+        f32 u20;
+        f32 u24;
+        f32 u28;
+        f32 u2C;
+        struct17 u30;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        f32 u48;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        f32 u5C;
+    } sp;
+    f32 temp_f10;
+    struct17 *var_a3;
 
+    var_a3 = arg3;
+    if (var_a3 == NULL) {
+        var_a3 = &sp.u30;
+    }
+    sp.u3C = (f32) (*(s16 *)((u8 *)arg0 + 0));
+    sp.u40 = (f32) (*(s16 *)((u8 *)arg0 + 2));
+    sp.u44 = (f32) (*(s16 *)((u8 *)arg0 + 4));
+    temp_f10 = (f32) (*(s16 *)((u8 *)arg0 + 6));
+    sp.u48 = temp_f10;
+    sp.u4C = (f32) (*(s16 *)((u8 *)arg0 + 8));
+    sp.u50 = (f32) (*(s16 *)((u8 *)arg0 + 0xA));
+    sp.u54 = (f32) (*(s16 *)((u8 *)arg0 + 0xC));
+    sp.u58 = (f32) (*(s16 *)((u8 *)arg0 + 0xE));
+    sp.u5C = (f32) (*(s16 *)((u8 *)arg0 + 0x10));
+    if ((sp.u3C == temp_f10) && (sp.u40 == sp.u4C) && (sp.u44 == sp.u50)) {
+        return 0;
+    }
+    if ((sp.u3C == sp.u54) && (sp.u40 == sp.u58) && (sp.u44 == sp.u5C)) {
+        return 0;
+    }
+    if ((sp.u48 == sp.u54) && (sp.u4C == sp.u58) && (sp.u50 == sp.u5C)) {
+        return 0;
+    }
+    sp.u24 = sp.u3C - sp.u48;
+    sp.u18 = sp.u54 - sp.u48;
+    sp.u2C = sp.u44 - sp.u50;
+    sp.u28 = sp.u40 - sp.u4C;
+    sp.u1C = sp.u58 - sp.u4C;
+    arg3 = var_a3;
+    sp.u20 = sp.u5C - sp.u50;
+    func_151450B4((struct17 *) &sp.u24, (struct17 *) &sp.u18, var_a3);
+    func_151450B4((struct17 *) &sp.u24, arg3, arg1);
+    (*(f32 *)((u8 *)arg2 + 0)) = (f32) (*(f32 *)((u8 *)(&sp.u24) + 0));
+    (*(s32 *)((u8 *)arg2 + 4)) = (s32) (*(s32 *)((u8 *)(&sp.u24) + 4));
+    (*(s32 *)((u8 *)arg2 + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u24) + 8));
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15144E80.s")
+#endif
 void func_151450B4(struct17 *arg0, struct17 *arg1, struct17 *arg2) {
     arg2->unk0 = arg0->unk4 * arg1->unk8 - arg0->unk8 * arg1->unk4;
     arg2->unk4 = arg0->unk8 * arg1->unk0 - arg0->unk0 * arg1->unk8;

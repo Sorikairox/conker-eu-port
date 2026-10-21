@@ -947,7 +947,11 @@ void func_151284C4(struct108 *arg0) {
         func_15128774(arg0, arg0->unk3D0);
     }
 }
+#ifdef NON_MATCHING
+void func_15121F40(struct108 *);
+#else
 s32 func_15121F40(struct108 *);
+#endif
 s32 func_151236D0(struct108 *);
 s32 func_151256BC(struct108 *);
 s32 func_15126378(struct108 *);

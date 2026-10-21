@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+extern u8 D_800A5860[];
+#endif
 
 
 void func_151D6F20(s32 arg0, s32 arg1) {
@@ -97,8 +100,133 @@ void func_151D6F64(s16 *arg0, struct127 *arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/func_151D71AC.s")
+#ifdef NON_MATCHING
+u8 *func_1509B570(s32);
+u8 *func_150D0420(s32, s32 *, s32, s32, s32, s32, s32, s32);
+s32 func_15157580(s8 *, s32, s32, s32, s32, s32, s32, s32);
+s32 memcpy(s32, u8 **, s32);
+extern s32 D_800AB630;
 
+void func_151D71AC(u8 *arg0, u8 arg1, s32 arg2) {
+    struct {
+        s32 u38;
+        u8 * u3C;
+        u8 u40;
+        u8 pad41[0x3];
+        s32 u44;
+        s16 u48;
+        s16 u4A;
+        u8 pad4C[0x4];
+        s8 u50;
+        s8 u51;
+        s8 u52;
+        s8 u53;
+        s8 u54;
+        u8 pad55[0x1];
+        s16 u56;
+        s32 u58;
+        s32 u5C;
+        s32 u60;
+        s32 u64;
+        s32 u68;
+        s32 u6C;
+        s32 u70;
+        s32 u74;
+        s32 u78;
+        s8 u7C;
+        s8 u7D;
+        u8 pad7E[0x2];
+        s8 u80;
+        s8 u81;
+        s8 u82;
+        s8 u83;
+        s8 u84;
+        s8 u85;
+        s8 u86;
+        s8 u87;
+        s8 u88;
+        u8 pad89[0x3];
+        u8 * u8C;
+        u8 u90;
+        s8 u91;
+        u8 pad92[0x2];
+        s32 u94;
+        u8 pad98[0xC];
+        s16 uA4;
+        s16 uA6;
+    } sp;
+    s32 temp_v1;
+    u8 *temp_t4;
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+
+    sp.u53 = 1;
+    sp.u54 = -1;
+    sp.u50 = 0x27;
+    sp.u51 = -1;
+    sp.u52 = 3;
+    sp.u74 = 0x80;
+    sp.u78 = 0x20;
+    sp.u56 = 0x96;
+    sp.u58 = 0xA5;
+    sp.u5C = 0x17;
+    sp.u64 = 0x220405;
+    sp.u68 = 0x40200;
+    sp.u7D = 8;
+    sp.u6C = 1;
+    sp.u70 = 0x38;
+    sp.u88 = 0;
+    sp.u60 = 0;
+    sp.u7C = 0;
+    sp.u80 = 0xFF;
+    sp.u81 = 0xFF;
+    sp.u82 = 0xFF;
+    sp.u83 = 0xFF;
+    sp.u84 = 0xFF;
+    sp.u85 = 0xFF;
+    sp.u86 = 0xFF;
+    sp.u87 = 0xFF;
+    sp.u8C = arg0;
+    temp_t4 = ((u8 *)&D_800A5860);
+    sp.u91 = 1;
+    sp.u90 = (*(u8 *)((u8 *)arg0 + 0x3B));
+    (*(s32 *)((u8 *)(&sp.u94) + 0)) = (s32) (*(s32 *)((u8 *)temp_t4 + 0));
+    (*(s32 *)((u8 *)(&sp.u94) + 4)) = (s32) (*(s32 *)((u8 *)temp_t4 + 4));
+    (*(s32 *)((u8 *)(&sp.u94) + 8)) = (s32) (*(s32 *)((u8 *)temp_t4 + 8));
+    sp.uA4 = 8;
+    sp.uA6 = 0x1F;
+    func_15157580(&sp.u50, 0, 0x3F800000, 0, 0, 0, (s32) arg1, arg2);
+    sp.u3C = arg0;
+    sp.u38 = D_800AB630;
+    sp.u48 = 8;
+    sp.u4A = 0x1F;
+    sp.u40 = (*(u8 *)((u8 *)arg0 + 0x3B));
+    sp.u44 = func_150859AC(0, 6);
+    temp_v0 = func_1509B570(0x83);
+    if (temp_v0 != NULL) {
+        temp_v1 = (*(s32 *)((u8 *)temp_v0 + 0x64)) + 1;
+        if (temp_v1 == 0xFF) {
+            sp.u44 += 0x64;
+        } else {
+            if (temp_v1 == 0) {
+                goto block_7;
+            }
+            if (temp_v1 < 3) {
+                sp.u44 = (s32) (sp.u44 * temp_v1) / 3;
+            }
+        }
+    } else {
+block_7:
+        sp.u44 = 0;
+    }
+    temp_v0_2 = func_150D0420(0x63, &sp.u38, 0x96, 0x10, 3, 1, (s32) arg1, arg2);
+    if (temp_v0_2 != NULL) {
+        memcpy((*(s32 *)((u8 *)temp_v0_2 + 0x48)), &sp.u3C, 0x10);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/func_151D71AC.s")
+#endif
 f32 func_15144AA8(s32);
 #define MTX_7410(a) (((f32 (*)[16])((a) + 0x7C))[D_800BE9C0])
 s32 func_151D7410(u8 *arg0) {

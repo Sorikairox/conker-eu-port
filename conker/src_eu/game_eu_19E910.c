@@ -75,8 +75,16 @@ void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171E60.s")
 
+#ifdef NON_MATCHING
+void func_150AEEB0(struct127 *, u8);
+#else
 s32 func_150AEEB0(struct127 *, u8);
+#endif
+#ifdef NON_MATCHING
+void func_150BDC20(struct127 *, u8, s32);
+#else
 s32 func_150BDC20(struct127 *, u8, s32);
+#endif
 s32 func_150CE0C0(struct127 *, u8, s32);
 
 void func_15172164(struct127 *arg0, u8 arg1) {

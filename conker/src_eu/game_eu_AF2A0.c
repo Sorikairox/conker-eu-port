@@ -122,8 +122,97 @@ void func_150836AC(S836AC *arg0)
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083784.s")
+#ifdef NON_MATCHING
+void func_15083784(struct127 *arg0, s32 arg1) {
+    s32 sp1C;
+    s32 temp_t5;
+    s32 temp_v0_2;
+    s32 temp_v1;
+    struct126 *temp_v0;
 
+    sp1C = -1;
+    switch (arg1) {
+    case 37:
+    case 38:
+        temp_v0 = arg0->unk31C;
+        if (temp_v0 != NULL) {
+            (*(s8 *)((u8 *)temp_v0 + 0x1B2)) = 1;
+        }
+        break;
+    case 9:
+        arg0->unk94 |= 2;
+        break;
+    case 13:
+        sp1C = 0x76;
+        break;
+    case 14:
+        sp1C = 0x78;
+        break;
+    case 15:
+        sp1C = 0x77;
+        arg0->unk94 |= 2;
+        break;
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+        temp_v1 = arg1 - 0x1D;
+        arg0->unk94 = 0x1E;
+        if (temp_v1 < 2) {
+            arg0->unk94 = 0x1E & ~0x14;
+        } else {
+            arg0->unk94 &= ~8;
+        }
+        if ((temp_v1 >> 1) != 0) {
+            arg0->unk94 &= ~2;
+        }
+        break;
+    case 17:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
+    case 28:
+        temp_t5 = (s32) (arg1 - 0x11) >> 2;
+        arg0->unk94 = 0x3E;
+        switch (temp_t5) {                          /* switch 1; irregular */
+        case 0:                                     /* switch 1 */
+            arg0->unk94 &= ~4;
+            break;
+        case 1:                                     /* switch 1 */
+            arg0->unk94 &= ~8;
+            break;
+        case 2:                                     /* switch 1 */
+            arg0->unk94 &= ~0x10;
+            break;
+        }
+        temp_v0_2 = (arg1 - (temp_t5 * 4)) - 0x11;
+        switch (temp_v0_2) {                        /* switch 2; irregular */
+        case 1:                                     /* switch 2 */
+            arg0->unk94 &= ~2;
+            break;
+        case 2:                                     /* switch 2 */
+            arg0->unk94 &= ~0x20;
+            break;
+        case 3:                                     /* switch 2 */
+            arg0->unk94 &= ~0x22;
+            break;
+        }
+        break;
+    }
+    if (sp1C != -1) {
+        func_15083568(arg0, sp1C, 0.0f, 0);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083784.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083568.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150836CC.s")

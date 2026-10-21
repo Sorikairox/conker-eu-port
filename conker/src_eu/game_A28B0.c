@@ -66,7 +66,81 @@ void func_15075548(void) {
     func_15075498();
 }
 
+#ifdef NON_MATCHING
+void func_15075650(void) {
+    u8 sp1F;
+    u8 sp1D;
+    f32 var_f6;
+    s32 var_a0;
+    struct127 *var_v1;
+    u8 temp_a1;
+    u8 temp_t2;
+    u8 temp_t4;
+    u8 temp_v0;
+    u8 temp_v0_2;
+    u8 temp_v0_3;
+    u8 var_a2;
+
+    var_v1 = D_800D154C;
+    temp_v0 = var_v1->unk21F;
+    var_a0 = (D_800D2528[var_v1->unk13F] - 1) & 0xFF;
+    if (temp_v0 != 0) {
+        var_a0 = temp_v0 & 0xFF;
+    }
+    temp_a1 = var_v1->unk220;
+    temp_t2 = (var_a0 - temp_a1) & 0xFF;
+    if (D_800D1891 == 0xFF) {
+        if (var_v1->unk223 != 0xD) {
+            sp1F = temp_t2;
+            D_800D154C->unk21E = (func_150ADA20() % sp1F) + D_800D154C->unk220;
+            goto block_14;
+        }
+    } else if (D_800D1891 == 0xFE) {
+        if (var_v1->unk223 != 0xD) {
+            temp_v0_2 = var_v1->unk21E;
+            var_a2 = (temp_v0_2 - 1) & 0xFF;
+            if ((s32) temp_a1 >= (s32) temp_v0_2) {
+                var_a2 = (var_a0 - 1) & 0xFF;
+            }
+            sp1D = var_a2;
+            sp1F = temp_t2;
+            var_v1 = D_800D154C;
+            temp_t4 = ((func_150ADA20() % temp_t2) + var_v1->unk220) & 0xFF;
+            if (var_a2 != temp_t4) {
+                var_v1->unk21E = temp_t4;
+                var_v1 = D_800D154C;
+            }
+        }
+    } else {
+        if (D_800D1891 == 0xFF) {
+            var_v1->unk21E = var_a0 - 1;
+        } else {
+            var_v1->unk21E = D_800D1891;
+        }
+block_14:
+        var_v1 = D_800D154C;
+    }
+    var_v1->unk223 = 0;
+    D_800D154C->unk21C = D_800D1890 * 0x64;
+    if (D_800D1892 != 0xFF) {
+        var_f6 = (f32) D_800D1892;
+        if ((s32) D_800D1892 < 0) {
+            var_f6 += 4294967296.0f;
+        }
+        D_800D154C->unk44 = var_f6;
+        if (D_800D154C->unk44 == 1.0f) {
+            D_800D154C->unk44 = 0.5f;
+        }
+    }
+    temp_v0_3 = D_800D154C->unk220;
+    if ((s32) D_800D154C->unk21E < (s32) temp_v0_3) {
+        D_800D154C->unk21E = temp_v0_3;
+    }
+    func_15075498();
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075650.s")
+#endif
 // NON-MATCHING: 95% there
 // void func_15075650(void) {
 //     u8 phi_a0;

@@ -80,8 +80,44 @@ void func_150D6944(s32 arg0, u8 arg1, s32 arg2) {
     func_15154DF4(arg0, (sp24 * 3.0f) + 8.0f, (sp28 * D_800A0E80) + D_800A0E84, (func_150ADA68() * 50.0f) + 100.0f, (s32) arg1, arg2);
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A0E88;
+extern f32 D_800A0E8C;
+extern f32 D_800A0E90;
+extern f32 D_800A0E94;
+extern f32 D_800A0E98;
+void func_150D69F8(u8 *arg0, f32 *arg1) {
+    (*(s32 *)((u8 *)arg0 + 0)) = 6;
+    (*(s32 *)((u8 *)arg0 + 4)) = 3;
+    *arg1 = D_800A0E88;
+    (*(f32 *)((u8 *)arg0 + 0x14)) = D_800A0E8C;
+    (*(s32 *)((u8 *)arg0 + 0x2C)) = 4;
+    (*(s32 *)((u8 *)arg0 + 0x30)) = 3;
+    (*(f32 *)((u8 *)arg0 + 0x18)) = D_800A0E90;
+    (*(f32 *)((u8 *)arg0 + 0x1C)) = 150.0f;
+    (*(f32 *)((u8 *)arg0 + 0x20)) = 105.0f;
+    (*(f32 *)((u8 *)arg0 + 0x24)) = 396.0f;
+    (*(f32 *)((u8 *)arg0 + 0x28)) = 612.0f;
+    (*(f32 *)((u8 *)arg0 + 0x34)) = 25.0f;
+    (*(f32 *)((u8 *)arg0 + 0x38)) = D_800A0E94;
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = -2.0f;
+    (*(s16 *)((u8 *)arg0 + 0x44)) = 0x14;
+    (*(s16 *)((u8 *)arg0 + 0x46)) = 0x1E;
+    (*(s16 *)((u8 *)arg0 + 0x48)) = 0x64;
+    (*(s16 *)((u8 *)arg0 + 0x4A)) = 0x64;
+    (*(s16 *)((u8 *)arg0 + 0x4C)) = 0xC;
+    (*(s16 *)((u8 *)arg0 + 0x4E)) = 0x14;
+    (*(f32 *)((u8 *)arg0 + 0x40)) = D_800A0E98;
+    if ((D_80082FA0 >= 2) || (D_8008FD8C >= 8)) {
+    s32 pad;
+        (*(s8 *)((u8 *)arg0 + 0x50)) = -1;
+        return;
+    }
+    (*(s8 *)((u8 *)arg0 + 0x50)) = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_103160/func_150D69F8.s")
-
+#endif
 s32 func_151A6308(f32, s32, s32, s32, s16, u8, u8, u8, s32);
 
 void func_150D6B00(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {

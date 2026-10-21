@@ -3,8 +3,61 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1110/func_15193900.s")
+#ifdef NON_MATCHING
+extern f32 D_800A8590;
+s32 func_1516865C(s32 *, s32, s32, s32, s32);
 
+void func_15193900(u8 *arg0) {
+    struct {
+        s32 u28;
+        u8 pad2C[0x82];
+        s16 uAE;
+        u8 padB0[0x4];
+        s16 uB4;
+        s16 uB6;
+        s16 uB8;
+        s16 uBA;
+        s16 uBC;
+        s16 uBE;
+        s16 uC0;
+        u8 padC2[0x6];
+        s8 uC8;
+        u8 padC9[0x1];
+        s8 uCA;
+        u8 uCB;
+        s8 uCC;
+    } sp;
+    s16 temp_v1;
+    u8 *temp_v0;
+
+    bzero(&sp.u28, 0xA8);
+    temp_v1 = (*(s16 *)((u8 *)arg0 + 0x2E));
+    temp_v0 = arg0 + 0x28;
+    if ((f32) temp_v1 != D_800A8590) {
+    s32 pad;
+        sp.uBE = temp_v1;
+    } else {
+        sp.uBE = (s16) (s32) ((f32) (*(s16 *)((u8 *)temp_v0 + 2)) - 200.0f);
+        (*(u8 *)((u8 *)temp_v0 + 8)) = 0U;
+    }
+    sp.uB4 = (*(s16 *)((u8 *)temp_v0 + 0));
+    sp.uB6 = (*(s16 *)((u8 *)temp_v0 + 2));
+    sp.uBA = 0;
+    sp.uBC = 0;
+    sp.uCA = 0xF;
+    sp.uC8 = 0x45;
+    sp.uAE = 0xA;
+    sp.uB8 = (*(s16 *)((u8 *)temp_v0 + 4));
+    sp.uC0 = 0x4880;
+    sp.uCC = 0x80;
+    sp.uCB = (*(u8 *)((u8 *)temp_v0 + 8));
+    func_1516865C(&sp.u28, 0xFF, 0xFF, 0xFF, 0x80);
+    func_15168800(&sp.u28, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+    (*(s16 *)((u8 *)arg0 + 0xE)) = (s16) ((func_150ADA20() & 0x7F) + 0x64);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1110/func_15193900.s")
+#endif
 void func_15193A24(u8 *arg0) {
     s16 temp_v0;
     f32 sp38[3];
