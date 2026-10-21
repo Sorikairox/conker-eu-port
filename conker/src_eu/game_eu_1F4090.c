@@ -19,7 +19,28 @@ void func_151C6F50(s32 arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C6A28.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C7320.s")
+s32 func_151030B8(s32, u8, u8 *, u8 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+extern u32 D_800AAEE0[];
+extern u8 D_800AAEE8[];
+extern u8 D_800AAF00[];
+extern f32 D_800AAFF0;
+extern f32 D_800AAFF4;
+extern f32 D_800AAFF8;
+extern f32 D_800AAFFC;
+extern f32 D_800AB000;
+
+void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5)
+{
+  f32 v[2];
+  f32 t; // fakematch: named rand temp (s162 recipe: named float temps)
+  s32 r[2];
+  v[1] = (func_150ADA68() * D_800AAFF0) + D_800AAFF4;
+  v[0] = (func_150ADA68() * D_800AAFF8) + D_800AAFFC;
+  r[0] = func_150ADA20();
+  r[1] = func_150ADA20();
+  t = func_150ADA68();
+  func_151030B8(arg0, D_800AAEE0[arg1] >> 6, D_800AAEE8 + (arg1 * 12), D_800AAF00 + (arg1 * 12), v, (r[0] & 3) + 6, 0xFF, (t * 270.0f) + D_800AB000, arg2, 0xFF, 0, arg3, arg4, arg5);
+}
 
 void *memcpy(void *, const void *, s32);
 typedef struct { f32 x, y, z; } V3_151C7450;

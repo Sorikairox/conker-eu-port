@@ -8,12 +8,12 @@ s32 func_151CA398(u8 *, s32, s32, s32, s32);
 s32 func_151CA484(u8 *);
 s32 func_151CA4E8(u8 *, s32, s32, s32, s32);
 s32 func_151CAC50(u8 *, s32);
-s32 func_151CB128(u8 *, s32);
+void func_151CB128(u8 *, u8);
 s32 func_151CB2D8(u8 *, s32);
-s32 func_151CBBAC(u8 *, s32, s32, s32, s32);
-s32 func_151CCAD4(u8 *, s32, s32, s32, s32, s32);
+void func_151CBBAC(u8 *, u8, u8, s8, u8);
+void func_151CCAD4(u8 *, u8, u8, u8, u8, u8);
 s32 func_151CCDF0(u8 *, s32, s32, s32, s32, s32);
-s32 func_151CD2CC(u8 *, s32, s32, s32);
+void func_151CD2CC(u8 *, u8, u8, u8);
 extern u8 D_800CC3C8[];
 
 void func_151CA150(u8 *arg0, s32 arg1)
@@ -115,7 +115,114 @@ void func_151CB07C(struct102 *arg0, u8 **arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CB128.s")
+s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+
+typedef struct {
+    f32 u0;
+    f32 u4;
+    f32 u8;
+    f32 uC;
+    u8 u10;
+    s16 u12;
+    u16 u14;
+    s16 u16;
+    s16 u18;
+    u8 u1A;
+    u8 u1B;
+    u8 u1C;
+    u8 u1D;
+    u8 u1E;
+    u8 u1F;
+    u8 u20;
+    u8 u21;
+    u8 u22;
+    u8 u23;
+    s32 u24;
+    s32 u28;
+    s32 u2C;
+    s32 u30;
+    s32 u34;
+    s32 u38;
+    s32 u3C;
+    u8 u40;
+    u8 u41;
+    u8 pad42[2];
+    u8 u44;
+    f32 u48;
+    f32 u4C;
+    f32 u50;
+    f32 u54;
+} Spawn559A;
+
+typedef struct {
+    u8 *u0;
+    f32 u4;
+    f32 u8;
+    u8 uC;
+    u8 uD;
+    u8 uE;
+    u8 padF;
+    f32 u10;
+    f32 u14;
+    f32 u18;
+    f32 u1C;
+    f32 u20;
+    u8 pad24[0x30];
+    s8 u54;
+    u8 pad55[3];
+} Spawn559B;
+
+void func_151CB128(u8 *arg0, u8 arg1) {
+    Spawn559A a;
+    s32 pad2; // fakematch: 4-byte hole between blocks
+    Spawn559B b;
+    f32 f;
+    s32 ret;
+
+    b.u0 = arg0;
+    b.u4 = 0.0f;
+    b.u8 = 130.0f;
+    b.uD = 0;
+    b.uC = 0;
+    if (D_80082FA0 > 0) {
+        f = 2.0f;
+    } else {
+        f = 1.0f;
+    }
+    a.u10 = 0x64;
+    a.u12 = 0x12C;
+    a.uC = f * 12.0f;
+    a.u8 = a.uC;
+    a.u14 = (1 << (arg0[0x23D] + 0xB)) | 0x50;
+    a.u16 = 1;
+    a.u18 = 0xFF;
+    a.u1A = 7;
+    a.u1B = 0xFF;
+    a.u1C = 0xC8;
+    a.u1D = 0;
+    a.u1E = 0x82;
+    a.u1F = 0xFF;
+    a.u20 = 0xFF;
+    a.u21 = 0xFF;
+    a.u22 = 0xFF;
+    a.u23 = 0xFF;
+    a.u24 = 0;
+    a.u28 = 0x200004;
+    a.u2C = 0x1F0601;
+    a.u30 = 8;
+    a.u34 = 0x44;
+    a.u38 = 0x80;
+    a.u3C = 0x20;
+    a.u40 = 0;
+    a.u41 = 0xA;
+    a.u0 = 0.0f;
+    a.u4 = 0.0f;
+    a.u44 = arg0[0x23D];
+    ret = func_151559FC(&a, (u8)(arg1 ? 4 : 0), 0, 0, 0x58, 0xFF, 1);
+    if (ret != 0) {
+        memcpy((void *)(ret + 0x70), &b, 0x58);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CB2D8.s")
 
@@ -256,7 +363,51 @@ void func_151CC840(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CCDF0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CD2CC.s")
+void func_151CD2CC(u8 *arg0, u8 arg1, u8 arg2, u8 arg3) {
+    Spawn559A a;
+    s32 pad2; // fakematch: 4-byte hole between blocks
+    Spawn559B b;
+    s32 ret;
+
+    b.u0 = arg0;
+    b.u4 = 0.0f;
+    b.u8 = 130.0f;
+    b.uD = 0;
+    b.uC = 0;
+    a.u12 = 0x12C;
+    a.u14 = (1 << (arg0[0x23D] + 0xB)) | 0x50;
+    a.u16 = 1;
+    a.u18 = 0xFF;
+    a.u1A = 7;
+    a.u1B = arg1;
+    a.u1C = arg2;
+    a.u1D = arg3;
+    a.u1E = 0xB4;
+    a.u1F = 0xFF;
+    a.u20 = 0xFF;
+    a.u21 = 0xFF;
+    a.u22 = 0xFF;
+    a.u23 = 0xFF;
+    a.u24 = 0;
+    a.u28 = 0x200004;
+    a.u2C = 0x1F0601;
+    a.u30 = 8;
+    a.u34 = 0x44;
+    a.u38 = 0x80;
+    a.u3C = 0x20;
+    a.u40 = 0;
+    a.u41 = 0xA;
+    a.u0 = 0.0f;
+    a.u4 = 0.0f;
+    a.u44 = arg0[0x23D];
+    a.u10 = 0xB4;
+    a.u8 = 65.0f;
+    a.uC = 65.0f;
+    ret = func_151559FC(&a, 0, 0, 0, 0x58, 0xFF, 1);
+    if (ret != 0) {
+        memcpy((void *)(ret + 0x70), &b, 0x58);
+    }
+}
 
 s32 func_151A5580(s32, s32, s32, s32, s32, s32, u8, s32);
 

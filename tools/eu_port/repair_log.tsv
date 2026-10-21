@@ -1077,3 +1077,12 @@ func_151BF490	DIFF21	6	DIFF7	n	y	func_15132FBC 0x78 block; pad + trailing s32 u7
 func_151B61A0	SIZE-1	6	SIZE-1	n	n	checksum loop + 15132FBC block; trailing empty func_151B643C in .s
 func_151AB3A8	SIZE-2	4	SIZE-2	n	n	1513C73C block; early-return addiu v0,0xB0 not folded in ref
 func_151925AC	DIFF39	3	OK	y	y	func_151308E4 block; u8 before u0, pad2 spill slot, remote perm (s16) rand cast
+func_151C7320	DIFF18	3	OK	y	y	s32 r[2] array (DIFF3) + remote perm: named f32 rand temp for the 270.0f term
+func_151CD2CC	new	5	OK	n	n	func_151559FC Spawn559A/B blocks, pad between, u8 params, u44/u10 order sweep
+func_151CB128	new	5	OK	n	n	Spawn559A/B, (u8)(arg1 ? 4 : 0) call arg, u8 = uC copy after
+func_151BF490	DIFF7	4	DIFF2	n	y	u14 = arg0 late, uC/u8 swap; left mtc1 zero vs lwc1 order; remote perm none
+func_1519D320	SIZE-11	3	SIZE-11	n	n	812 divisor not hoisted (ref fp + traps); f28 extra
+func_151DBCBC	DIFF101	5	DIFF80	n	n	inside-if r0/r1 no frame change; frame +8 stays
+func_151CCAD4	new	7	DIFF118	n	y	Spawn559A 0x58; frame +8 unexplained (ret-in-hole no)
+func_151CD4B8	new	8	SIZE+2	n	y	frame fixed with block-scoped tbl/ret; arg3 u8 copy a3->s4 extra
+func_151CBBAC	new	6	SIZE+1	n	n	ret in the A/B hole fixes frame; uC ternary stored per branch
