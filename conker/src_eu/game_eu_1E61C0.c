@@ -3,7 +3,78 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E61C0/func_151B89B0.s")
+void *memcpy(void *, const void *, s32);
+extern u8 D_800AA870[];
+typedef struct { f32 x, y, z; } V3_151B89B0;
+
+typedef struct {
+    u8 u0;
+    s8 u1;
+    s16 u2;
+    s16 u4;
+    s16 pad6;
+    s32 u8;
+    s32 uC;
+    u8 u10[4];
+    f32 u14;
+    f32 u18;
+    V3_151B89B0 u1C;
+    V3_151B89B0 u28;
+    f32 u34[3];
+    s32 u40;
+    u8 u44;
+    u8 u45;
+    s8 u46;
+    s8 u47;
+    s32 u48;
+    u8 u4C;
+    s32 u50;
+    s16 u54;
+    s16 u56;
+} Blk58_89B0;
+
+u8 *func_151B89B0(u8 *arg0) {
+    s32 pad; // fakematch: 4-byte hole above tmp
+    u8 *tmp;
+    Blk58_89B0 blk;
+    V3_151B89B0 pos;
+    u8 *temp_v0;
+
+    tmp = arg0;
+    blk.u0 = 0xFF;
+    blk.u1 = 0;
+    blk.u2 = 0x5901;
+    blk.u4 = 0x32;
+    blk.u8 = 0;
+    blk.uC = 0;
+    blk.u10[0] = 0xFF;
+    blk.u10[1] = 0xE6;
+    blk.u10[2] = 0xB6;
+    blk.u10[3] = 0xFF;
+    blk.u14 = 9.0f;
+    blk.u18 = 1.0f;
+    pos = *(V3_151B89B0 *)(arg0 + 0x38);
+    blk.u28 = pos;
+    blk.u1C = pos;
+    blk.u34[0] = *(f32 *)(arg0 + 0x44) * 0.25f;
+    blk.u34[1] = *(f32 *)(arg0 + 0x48) * 0.25f;
+    blk.u34[2] = *(f32 *)(arg0 + 0x4C) * 0.25f;
+    blk.u40 = 0x0CCC0000;
+    blk.u44 = 0xC8;
+    blk.u45 = 0xFF;
+    blk.u46 = 0;
+    blk.u47 = 6;
+    blk.u48 = 0;
+    blk.u4C = 0xFF;
+    blk.u50 = 0;
+    blk.u54 = 0x32;
+    blk.u56 = 5;
+    temp_v0 = func_1513D2F0(&blk, (s32)D_800AA870, 0x1B, 0, 0, 0x19, 0, 0, 0, 4, arg0[0xC], arg0[1]);
+    if (temp_v0 != NULL) {
+        memcpy(temp_v0 + 0x110, &tmp, 4);
+    }
+    return temp_v0;
+}
 
 s32 func_151B8B5C(u8 *arg0)
 {

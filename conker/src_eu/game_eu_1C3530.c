@@ -485,7 +485,39 @@ void func_1519C5DC(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519C60C.s")
+struct225 *func_151602C0(Header *header, Header2 *header2, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, u8 arg7, s32 offset, u8 arg9, s32 argA);
+void *memcpy(void *, const void *, s32);
+
+struct225 *func_1519C60C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7) {
+    struct225 *temp_v0;
+    Header header;
+    Header2 header2;
+    s32 tmp;
+    f32 data[8];
+
+    tmp = arg0;
+    header.unk0 = 2;
+    header.unk1 = 2;
+    header.unk2 = 300;
+    header.unk4 = 0x22;
+    data[0] = 35.0f;
+    data[1] = 5.0f;
+    data[2] = 110.0f;
+    data[3] = 1.0f;
+    data[4] = 0.0f;
+    data[5] = 7.0f;
+    data[6] = 0.2489f;
+    data[7] = 127.0f;
+    header2.unk0 = arg1[0];
+    header2.unk4 = arg1[1];
+    header2.unk8 = arg1[2];
+    temp_v0 = func_151602C0(&header, &header2, arg2, arg3, arg4, arg5, 0xFF, 0, 0x24, arg6, arg7);
+    if (temp_v0 != NULL) {
+        memcpy(&temp_v0->unk18, data, sizeof(data));
+        memcpy((u8 *)temp_v0 + 0x38, &tmp, sizeof(tmp));
+    }
+    return temp_v0;
+}
 
 void func_1519C770(void *arg0) {
     func_1519C7C8(arg0);
