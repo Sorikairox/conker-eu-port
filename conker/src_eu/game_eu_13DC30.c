@@ -66,7 +66,44 @@ Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113D54.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114208.s")
+extern u8 D_800C3A7C;
+s32 func_15022BB0(s32, s32);
+void *func_1510DEF0(s32, struct131 *, s32, s32, s32);
+
+void func_15114208(void) {
+    s32 i;
+    s32 j;
+    s32 found;
+    s32 ok;
+    struct131 *e;
+
+    for (i = 0; i < D_800DC320; i++) {
+        e = &D_800DBEF4[i];
+        found = 0;
+        for (j = 0; j < D_80082FA0; j++) {
+            do {
+            } while (0); // fakematch: changes the s-register allocation
+            if (func_150859AC(j, 0) && ((u8 *)e)[0x8B + j] == 0) {
+                found = 1;
+                break;
+            }
+        }
+        if ((e->pad70[0] & 8) || ((u8 *)e)[0x4C] == 0 || (((u8 *)e)[0x4F] & 0x10) == 0x10 || found ||
+            (D_800C3A7C == 0 && D_800C35EA == 1 && !func_15022BB0(i, 0)) || !(((u8 *)e)[0x4F] & 1)) {
+            ok = 0;
+        } else {
+            ok = 1;
+        }
+        if (ok) {
+            if (*(void **)((u8 *)e + 0x94) == NULL) {
+                *(void **)((u8 *)e + 0x94) = func_1510DEF0(1, e, 0, 1, 0);
+            }
+        } else if (*(struct102 **)((u8 *)e + 0x94) != NULL) {
+            func_1516972C(*(struct102 **)((u8 *)e + 0x94));
+            *(struct102 **)((u8 *)e + 0x94) = NULL;
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151143D4.s")
 
@@ -135,7 +172,41 @@ void func_15114E8C(f32 (*arg0)[4], u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15115114.s")
+extern s32 D_800DC3C8;
+
+void func_15115114(u32 arg0) {
+    struct131 *p;
+    u32 j;
+
+    j = arg0 * 0xA0; // fakematch: j doubles as the row offset
+    if (arg0 < D_800DC320) {
+        p = (struct131 *)((u8 *)D_800DBEF4 + j);
+        if (*(struct102 **)((u8 *)p + 0x94) != NULL) {
+            func_1516972C(*(struct102 **)((u8 *)p + 0x94));
+            *(struct102 **)((u8 *)D_800DBEF4 + arg0 * 0xA0 + 0x94) = NULL;
+            p = (struct131 *)((u8 *)D_800DBEF4 + arg0 * 0xA0);
+        }
+        p->pad70[0] |= 8;
+        D_800DBEF4[arg0].pad5A[0x14] = 1;
+    }
+    arg0 = D_800DC320 - 1;
+    j = D_800DC320 - D_800DC3C8;
+    if (D_800DC320 != 0) {
+        p = (struct131 *)((u8 *)D_800DBEF4 + arg0 * 0xA0);
+        if (p->pad70[0] & 8) {
+            do {
+                if (arg0 >= j && D_800DC3C8 != 0) {
+                    D_800DC3C8--;
+                } else {
+                    j--;
+                }
+                D_800DC320--;
+                arg0--;
+                p--;
+            } while (D_800DC320 != 0 && (p->pad70[0] & 8));
+        }
+    }
+}
 
 s32 func_15115244(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     u8 *temp_v1;
