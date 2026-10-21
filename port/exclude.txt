@@ -1,0 +1,3 @@
+# TUs that compile under clang but must stay out of the wasm link (their functions get stubs).
+# file (relative to conker/src_eu) <TAB> reason
+game_eu_12A7C0.c	declares func_1000EC24 as `extern s32` to take its address: wasm-ld "symbol type mismatch" (function vs data)

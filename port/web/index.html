@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conker Port</title>
+<style>
+  :root { --bg: #111317; --panel: #1b1e24; --fg: #d8dde6; --muted: #8a93a3; --accent: #e0a63a; --ok: #6cc070; --bad: #e06060; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; background: var(--panel); }
+  header h1 { font-size: 16px; margin: 0 12px 0 0; color: var(--accent); }
+  button, label.btn { background: #2a2f38; color: var(--fg); border: 1px solid #3a404b; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  button:disabled { opacity: .45; cursor: default; }
+  #status { color: var(--muted); margin-left: auto; }
+  main { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 16px; padding: 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  canvas { width: 100%; aspect-ratio: 4 / 3; background: #000; display: block; border-radius: 4px; }
+  #console { background: #0b0c0f; border-radius: 4px; padding: 8px 10px; margin: 0; height: 480px; overflow: auto;
+             font: 12px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
+  .pass { color: var(--ok); } .fail { color: var(--bad); } .stub { color: var(--accent); }
+  input[type=file] { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Conker port (wasm32)</h1>
+  <button id="demo">Scheduler demo</button>
+  <label class="btn">Load ROM… <input id="rom" type="file" accept=".z64,.n64,.v64,.rom"></label>
+  <button id="game" disabled>Boot game</button>
+  <button id="threads" disabled>Dump threads</button>
+  <span id="status">no ROM loaded</span>
+</header>
+<main>
+  <canvas id="canvas" width="640" height="480"></canvas>
+  <pre id="console"></pre>
+</main>
+<script src="main.js"></script>
+</body>
+</html>
