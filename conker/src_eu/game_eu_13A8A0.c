@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
+s32 func_1510D8F4(s32 arg0);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D090.s")
@@ -11,10 +15,188 @@ Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     return gdl;
 }
 
+#ifdef NON_MATCHING
+s32 allocate_memory(s32, s32, s32, s32);
+
+#define TEXCACHE_MISSING 0x80000000
+#define TEXID_COUNT 0x1E54
+
+/* Resolve the texture ids of a model display list (up to G_ENDDL). For each G_SETTIMG (0xFD) whose w1 is
+ * a texture id (top byte < 6, segment nibble 0): w1 = id | flags << 22, id = w1 & 0xF03FFFFF. The id is
+ * looked up in the texture cache (func_1510D66C, with `age` and `addRef`) and w1 becomes the address;
+ * flag 1 (0x00400000) points at the 256-colour palette at size - 0x200, flag 2 (0x00800000) at the
+ * 16-colour palette at size - 0x20. `skipResolved` leaves w1 alone when its top byte is set.
+ * With `outList`, a newly allocated s16 list {n, id_0, ..., id_n-1} of the distinct ids (ascending) is
+ * stored there. Returns 1 when every texture was found, 0 if one was missing. */
+s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList) {
+    u8 seen[(TEXID_COUNT + 7) / 8];
+    s32 count;
+    s32 missing = 0;
+    s32 i;
+    u32 w1;
+    s32 flags;
+    s32 id;
+    s32 last = 0;
+    s32 size;
+    s32 bit;
+    s32 k;
+    s16 *list;
+
+    if (outList != NULL) {
+        for (i = 0; i < (s32)sizeof(seen); i++) {
+            seen[i] = 0;
+        }
+        count = 0;
+    }
+    for (i = 0; (u8)(dl[i].words.w0 >> 24) != 0xDF; i++) {
+        if ((u8)(dl[i].words.w0 >> 24) != 0xFD) {
+            continue;
+        }
+        w1 = dl[i].words.w1;
+        if (skipResolved && (w1 & 0xFF000000)) {
+            continue;
+        }
+        if ((w1 & 0xFF000000) >= 0x06000000) {
+            continue;
+        }
+        flags = (s32)w1 >> 22;
+        id = w1 & 0xF03FFFFF;
+        if ((w1 & 0x0F000000) == 0) {
+            last = func_1510D66C(id, &size, age, addRef);
+            dl[i].words.w1 = last;
+            /* The original has no bound check here (an id >= TEXID_COUNT, which the cache rejects, would
+             * write past the bitmap on the stack). */
+            if (outList != NULL && id < TEXID_COUNT && !(seen[id >> 3] & (1 << (id & 7)))) {
+                seen[id >> 3] |= 1 << (id & 7);
+                count++;
+            }
+        } else {
+            flags = 0;
+        }
+        if (last == TEXCACHE_MISSING) {
+            missing = 1;
+        }
+        if (flags == 0) {
+            continue;
+        }
+        if (flags & 1) {
+            dl[i].words.w1 += size - 0x200;
+        } else if (flags & 2) {
+            dl[i].words.w1 += size - 0x20;
+        }
+        dl[i].words.w1 |= (flags & 0x3C) << 22;
+    }
+
+    if (outList != NULL) {
+        list = (s16 *)allocate_memory((count + 1) * 2, 1, 0, 2);
+        *outList = list;
+        if (list != NULL) {
+            list[0] = count;
+            i = 0;
+            for (k = 0; i < count; k++) {
+                bit = 1 << (k & 7);
+                if (seen[k >> 3] & bit) {
+                    list[1 + i] = k;
+                    i++;
+                }
+            }
+        }
+    }
+    return missing == 0;
+}
+#undef TEXCACHE_MISSING
+#undef TEXID_COUNT
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D3E0.s")
+#endif
+#ifdef NON_MATCHING
+extern u16 D_800920D0[];
+extern u16 D_800B8BB8[];
+extern s32 D_800B1268[];
+extern u8 D_800DC1DC;
+s32 func_10003C6C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+void func_10004074(s16 *);
+s32 func_10006530(s32, s32 *, u32);
 
+#define TEXCACHE_MISSING 0x80000000
+
+/* Texture cache lookup. Returns the expanded data of texture `id` (D_800B1268[id]), loading it on a miss:
+ * DMA the compressed block (ROM offset func_1510D8F4(id), D_800920D0[id] bytes) into a temporary buffer,
+ * expand it into a D_800B8BB8[id]-byte buffer. Returns 0x80000000 for a bad id or when out of memory.
+ * `*outSize` gets the expanded size; the slot's age is raised to `age`; `addRef` bumps its use count. */
+s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef) {
+    s32 *slot;
+    u16 len;
+    s32 rom;
+    s32 skew;
+    s32 size;
+    s32 tmp;
+    s32 dst;
+    s32 data;
+
+    if (id < D_800DA378) {
+        D_800DA378 = id;
+    }
+    if (D_800DA37C < id) {
+        D_800DA37C = id;
+    }
+    if (id >= 0x1E54 || id < 0) {
+        return TEXCACHE_MISSING;
+    }
+    len = D_800920D0[id];
+    slot = &D_800B1268[id];
+    if (len == 0) {
+        *slot = TEXCACHE_MISSING;
+    } else if (*slot == -1) {
+        D_800DC1DC = 5;
+        if (age == 0x3F) {
+            age = 0x3E;
+        }
+        /* DMA needs an even ROM address and a 16-byte multiple length. */
+        rom = func_1510D8F4(id);
+        if (rom & 1) {
+            rom -= 1;
+            skew = 1;
+        } else {
+            skew = 0;
+        }
+        size = len + skew;
+        if (size & 1) {
+            size += 1;
+        }
+        size = (size + 15) & ~15;
+        tmp = func_10003C6C(size, 1, 2, 1, 2);
+        if (tmp == 0) {
+            return TEXCACHE_MISSING;
+        }
+        func_10004514(rom, (void *)tmp, size, 1);
+        dst = func_10003C6C(D_800B8BB8[id], 1, 1, 0, 2);
+        if (dst == 0) {
+            func_10004074((s16 *)tmp);
+            return TEXCACHE_MISSING;
+        }
+        func_10006530(tmp + skew, (s32 *)dst, D_8003809C);
+        func_10004074((s16 *)tmp);
+        *slot = dst;
+        D_800DA388[id] = 0;
+    }
+    if (outSize != NULL) {
+        *outSize = D_800B8BB8[id];
+    }
+    data = *slot;
+    if (D_800BC860[id] < age) {
+        D_800BC860[id] = age;
+    }
+    if (addRef != 0 && D_800DA388[id] < 0xFF) {
+        D_800DA388[id]++;
+    }
+    return data;
+}
+#undef TEXCACHE_MISSING
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D66C.s")
-
+#endif
 extern u16 D_800920D0[];
 extern s32 D_1A3B40;
 s32 func_1510D8F4(s32 arg0) {
@@ -28,8 +210,77 @@ s32 func_1510D8F4(s32 arg0) {
     return sum;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D984.s")
+#ifdef NON_MATCHING
+extern u8 D_800DC1DC;
+extern u8 D_800DA380;
+extern s32 D_800DC1E0;
+extern s32 D_800B1268[];
+void func_10004074(s16 *);
+s32 func_10006530(s32, s32 *, u32);
+void func_150ADC50(void);
 
+/* Texture cache ageing, once per frame. Slots lo..hi (D_800DA378..D_800DA37C) are pending: an age 1..3
+ * counts down and frees the slot at 0; flag 0x40 asks for a refresh (re-expand the slot's data in
+ * place, free the old buffer). Slots that still need work set the pending range for the next frame. */
+void func_1510D984(void) {
+    s32 hi = D_800DA37C;
+    s32 lo;
+    s32 i;
+    s8 age;
+    s32 *slot;
+    s32 buf;
+
+    if (hi == -1) {
+        return;
+    }
+    if (D_800DC1DC == 0 && D_800DA380 != 0) {
+        return;
+    }
+    if (D_800DC1DC != 0) {
+        D_800DC1DC--;
+    }
+    lo = D_800DA378;
+    D_800DA378 = 0xFFFF;
+    D_800DA37C = -1;
+    if (lo < 0 || hi >= 0x1E55) {
+        D_8003C8E0 = 0x0C000046;
+        func_150ADC50();
+    }
+    D_800DC1E0 = -1;
+    for (i = lo; i <= hi; i++) {
+        age = D_800BC860[i];
+        if (age == 0) {
+            continue;
+        }
+        if (age < 4) {
+            D_800BC860[i] = age - 1;
+            if (D_800BC860[i] == 0) {
+                D_800DC1E0 = i;
+                func_10004074((s16 *)D_800B1268[i]);
+                D_800B1268[i] = -1;
+                continue;
+            }
+        } else if (age & 0x40) {
+            slot = (s32 *)D_800B1268[i];
+            buf = slot[0];
+            func_10006530(buf + slot[1], slot, D_8003809C);
+            func_10004074((s16 *)buf);
+            D_800BC860[i] &= ~0x40;
+        } else {
+            continue;
+        }
+        if (i < D_800DA378) {
+            D_800DA378 = i;
+        }
+        if (D_800DA37C < i) {
+            D_800DA37C = i;
+        }
+    }
+    D_800DC1E0 = -2;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D984.s")
+#endif
 void func_1510DB88(s32 arg0, s32 arg1) {
     s8 *p = &D_800BC860[arg0];
     s8 v = *p;

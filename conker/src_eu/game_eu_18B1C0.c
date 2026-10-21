@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1515F4E4(s16 *arg0);
+#endif
 // hoisted forward declaration(s) for func_1515D5F8
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
 
@@ -107,8 +110,63 @@ void func_1515DC0C(void) {
 void func_1515DC38(void) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DC40.s")
+#ifdef NON_MATCHING
+extern s32 D_800DD140;
 
+/* Per-player view setup: no lights, lighting on, then func_1515F4E4 turns the player's current viewport
+ * (D_800BE628 + player * 0x180 + 0x100 + frame * 0x40) into the s15.16 values D_800DD140[0..3], which are
+ * loaded with the custom G_MOVEWORD index 0x10: integer halves at offsets 0x00..0x0C, fractions at 0x10..0x1C,
+ * then 0x20..0x2C. */
+Gfx *func_1515DC40(Gfx *gdl, s32 player) {
+    s32 *m = &D_800DD140;
+
+    gdl->words.w0 = 0xDB020000; /* G_MOVEWORD G_MW_NUMLIGHT: 0 */
+    gdl->words.w1 = 0;
+    gdl++;
+    gSPSetGeometryMode(gdl++, G_LIGHTING);
+    func_1515F4E4((s16 *)(D_800BE628 + player * 0x180 + D_800BE9C0 * 0x40 + 0x100));
+
+    gdl->words.w0 = 0xDB100000;
+    gdl->words.w1 = ((m[0] >> 16) << 16) | ((m[1] >> 16) & 0xFFFF);
+    gdl++;
+    gdl->words.w0 = 0xDB100008;
+    gdl->words.w1 = ((m[0] >> 16) << 16) | ((m[1] >> 16) & 0xFFFF);
+    gdl++;
+    gdl->words.w0 = 0xDB100004;
+    gdl->words.w1 = (m[2] >> 16) << 16;
+    gdl++;
+    gdl->words.w0 = 0xDB10000C;
+    gdl->words.w1 = (m[2] >> 16) << 16;
+    gdl++;
+    gdl->words.w0 = 0xDB100010;
+    gdl->words.w1 = (m[0] << 16) | (m[1] & 0xFFFF);
+    gdl++;
+    gdl->words.w0 = 0xDB100018;
+    gdl->words.w1 = (m[0] << 16) | (m[1] & 0xFFFF);
+    gdl++;
+    gdl->words.w0 = 0xDB100014;
+    gdl->words.w1 = m[2] << 16;
+    gdl++;
+    gdl->words.w0 = 0xDB10001C;
+    gdl->words.w1 = m[2] << 16;
+    gdl++;
+    gdl->words.w0 = 0xDB100020;
+    gdl->words.w1 = 0;
+    gdl++;
+    gdl->words.w0 = 0xDB100024;
+    gdl->words.w1 = m[3] << 16;
+    gdl++;
+    gdl->words.w0 = 0xDB100028;
+    gdl->words.w1 = 0;
+    gdl++;
+    gdl->words.w0 = 0xDB10002C;
+    gdl->words.w1 = m[3] << 16;
+    gdl++;
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DC40.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DE84.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E7E8.s")

@@ -381,7 +381,19 @@ def h32(*xs):
 
 SMALLF = [0.0, 1.0, -1.0, 0.5, 2.0, 100.0]
 
+# P10 (opt-in): DIFFTEST_POKE="ADDR=VAL[*N],..." (hex) fixes lazily created memory words (N consecutive words),
+# identically for the reference and the candidate, to reach paths random words never take (e.g. a -1
+# "empty slot" sentinel). It only narrows the inputs; nothing about the comparison changes.
+POKES = {}
+for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
+    _a, _v = _p.split('=')
+    _v, _n = (_v.split('*') + ['1'])[:2]
+    for _k in range(int(_n)):
+        POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
+
 def rand_word(seed, addr):
+    if POKES and (addr & 0x1FFFFFFF) in POKES:
+        return POKES[addr & 0x1FFFFFFF]
     h = h32('m', seed, addr)
     c = h % 100; r = h32('v', seed, addr)
     if c < 20: return 0

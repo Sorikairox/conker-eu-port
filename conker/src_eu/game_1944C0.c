@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15168F84(s32 arg0, s32 *arg1, s32 *arg2);
+#endif
 typedef struct { u8 pad0[0xC]; void (*fn0C)(struct_eu_node *); u8 pad10[0xC]; void (*fn)(struct_eu_node *, s32, u8); u8 pad20[0x14]; } Tbl9070;
 extern Tbl9070 D_8008B848[];
 
@@ -105,7 +108,183 @@ dummy: ; // fakematch: label splits the block (permuter)
         }
     }
 }
+#ifdef NON_MATCHING
+/* The fields of a D_8008B848 render layer (0x34 bytes) that func_151674F8 uses. */
+typedef struct {
+    u8 pad0[0x8];
+    Gfx *(*draw)(Gfx *, struct_eu_node *, s16); /* per node */
+    void (*fn0C)(struct_eu_node *);
+    Gfx *dlPre;
+    Gfx *(*pre)(Gfx *, s32, s32, s16);
+    u8 pad18[0x8];
+    Gfx *(*post)(Gfx *, s32, s16);
+    Gfx *dlPost;
+    u8 pad28[0x8];
+    s8 type; /* 0: dropped whole on DL overflow, 1: per-node overflow check */
+    u8 pad31[0x3];
+} RenderLayer;
+extern struct_eu_node *D_800DD5C8[];
+extern s8 D_800DD5C0;
+extern struct_eu_node *D_800DD280[][104];
+extern u8 D_800D31CB;
+extern s32 D_800DD5E0;
+extern s32 D_800DD5E4;
+extern s32 D_800DD5E8;
+extern s16 D_800DD5EC;
+extern s16 D_800DD5EE;
+extern s16 D_800DD5F0;
+extern s16 D_800DD5F2;
+extern s16 D_800DD5F4;
+extern s16 D_800DD5F6;
+extern s16 D_800DD5F8;
+extern s16 D_800DD5FA;
+extern s16 D_800DD5FC;
+extern s16 D_800DD5FE;
+extern s16 D_800DD628;
+extern s32 D_800DD62C;
+extern s32 D_800DD630;
+extern s16 D_800DD634;
+extern s16 D_800DD636;
+extern s32 D_800DD638;
+extern s32 D_800DD63C;
+extern s32 D_800DD640;
+extern s32 D_800DD644;
+extern s32 D_800DD648;
+extern s32 D_800DD64C;
+extern s32 D_800DD650;
+extern s32 D_800DD654;
+extern s32 D_800DD658;
+extern Gfx *D_800BEDE8[];
+extern s32 D_800BEFC4;
+extern u8 D_80089810[];
+
+#define DL_FULL(g) (D_800BEFC4 < (g) - D_800BEDE8[D_800BE9C0])
+
+/* Draw the render layers of `group` (func_15168F84 gives the index range) from node list `list`:
+ * per layer the pre DL / callback, every node's draw callback, then the post DL / callback.
+ * The node walk keeps its cursor in D_800DD5C8[depth] so a callback can unlink nodes. When the DL buffer
+ * runs out, a type 1 layer drops the node that overflowed and a type 0 layer is dropped whole; the
+ * layer's start is then returned with a G_SETGEOMETRYMODE(1) at the cut instead of the rest. */
+void *func_151674F8(void *arg0, s32 group, s16 arg2, s32 list) {
+    Gfx *gdl = arg0;
+    RenderLayer *layer;
+    struct_eu_node **head;
+    struct_eu_node *node;
+    Gfx *before;
+    Gfx *start0;
+    Gfx *start1;
+    s32 first;
+    s32 last;
+    s32 i;
+    s32 dropped;
+    Gfx *(*draw)(Gfx *, struct_eu_node *, s16);
+
+    gSPMatrix(gdl++, D_80089810, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    func_15168F84(group, &first, &last);
+    layer = &((RenderLayer *)D_8008B848)[first];
+    for (i = first; i < last; i++, layer++) {
+        if (layer->draw == NULL) {
+            continue;
+        }
+        head = &D_800DD280[list][i];
+        if (*head == NULL) {
+            continue;
+        }
+        D_8003C8E0 = (i & 0xFFFFFF) | 0x07000000;
+        dropped = 0;
+        if (layer->type == 0) {
+            start0 = gdl;
+        }
+        if (layer->type == 1) {
+            start1 = gdl;
+        }
+        D_800D31CB = 0;
+        D_800DD658 = 0;
+        D_800DD650 = 0;
+        D_800DD654 = 2;
+        D_800DD5E0 = -1;
+        D_800DD5E4 = -1;
+        D_800DD5E8 = -1;
+        D_800DD5EC = 0;
+        D_800DD5EE = 0;
+        D_800DD5F6 = -1;
+        D_800DD5F4 = D_800DD5F6;
+        D_800DD5F2 = D_800DD5F4;
+        D_800DD5F0 = D_800DD5F2;
+        D_800DD5FE = -1;
+        D_800DD5FC = D_800DD5FE;
+        D_800DD5FA = D_800DD5FC;
+        D_800DD5F8 = D_800DD5FA;
+        D_800DD628 = 0;
+        D_800DD62C = 0;
+        D_800DD630 = 0;
+        D_800DD634 = -1;
+        D_800DD636 = -1;
+        D_800DD638 = -1;
+        D_800DD63C = -1;
+        D_800DD640 = -1;
+        D_800DD644 = 0;
+        D_800DD648 = 0;
+        D_800DD64C = 0;
+        if (layer->dlPre != NULL) {
+            gdl->words.w0 = 0xDE000000; /* G_DL */
+            gdl->words.w1 = (u32)layer->dlPre;
+            gdl++;
+        }
+        if (layer->pre != NULL) {
+            gdl = layer->pre(gdl, i, list, arg2);
+        }
+        gSPClearGeometryMode(gdl++, G_LIGHTING);
+
+        node = *head;
+        D_800DD5C0++;
+        if (layer->type == 1) {
+            while (node != NULL) {
+                draw = layer->draw;
+                D_800DD5C8[D_800DD5C0] = node->next;
+                before = gdl;
+                gdl = draw(gdl, node, arg2);
+                if (DL_FULL(gdl)) {
+                    dropped = 1;
+                    gdl = before;
+                }
+                node = D_800DD5C8[D_800DD5C0];
+            }
+        } else {
+            while (node != NULL) {
+                draw = layer->draw;
+                D_800DD5C8[D_800DD5C0] = node->next;
+                gdl = draw(gdl, node, arg2);
+                node = D_800DD5C8[D_800DD5C0];
+            }
+        }
+        D_800DD5C0--;
+
+        if (layer->dlPost != NULL) {
+            gdl->words.w0 = 0xDE000000; /* G_DL */
+            gdl->words.w1 = (u32)layer->dlPost;
+            gdl++;
+        }
+        if (layer->post != NULL) {
+            gdl = layer->post(gdl, i, arg2);
+        }
+        if (dropped && DL_FULL(gdl)) {
+            gSPSetGeometryMode(gdl, 1);
+            return start1;
+        }
+        if (layer->type == 0 && DL_FULL(gdl)) {
+            gSPSetGeometryMode(gdl, 1);
+            return start0;
+        }
+        D_8003C8E0 = 0;
+    }
+    gSPSetGeometryMode(gdl++, 1);
+    return gdl;
+}
+#undef DL_FULL
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_151674F8.s")
+#endif
 void *func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5) {
     struct_eu_node *node = (struct_eu_node *)func_10003C6C(arg2, 1, arg3, 0, arg5);
 

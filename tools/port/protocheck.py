@@ -74,8 +74,13 @@ def main():
     files = glob.glob(os.path.join(ROOT, 'conker/src_eu/**/*.c'), recursive=True)
     hdrs = glob.glob(os.path.join(ROOT, 'conker/include/**/*.h'), recursive=True) + glob.glob(os.path.join(ROOT, 'conker/src_eu/**/*.h'), recursive=True)
     defs, protos, blocks = {}, {}, []
+    macros = set()   # P10: function-like macros (gSPMatrix, gDma2p, ...) are not calls
     for p in files + hdrs:
         s = open(p, errors='replace').read()
+        macros.update(re.findall(r'^\s*#\s*define\s+(\w+)\(', s, re.M))
+        if p.endswith('.h'):   # P10: prototypes with function-pointer parameters (osCreateThread) that SIG misses
+            for m in re.finditer(r'^\s*extern\s+[\w\s\*]+?\b(\w+)\s*\(', s, re.M):
+                protos.setdefault(m.group(1), [])
         nmb = nm_blocks(s) if p.endswith('.c') else []
         for f, b in nmb: blocks.append((f, b, p))
         if p.endswith('.c'): s = nm_view(s)   # the NON_MATCHING side of every #ifdef/#ifndef NON_MATCHING
@@ -104,8 +109,13 @@ def main():
             if ref and not any(compat(sg, r[0]) for r in ref):
                 print('%s: declares %s %s, but %s is %s (%s)' % (f, name, sg, name, ref[0][0], ref[0][1])); bad += 1
         inner = body[bdef.end():] if bdef else ''
+        inner = re.sub(r'/\*.*?\*/|//[^\n]*', ' ', inner, flags=re.S)   # P10: words in comments are not calls
         for name in sorted(set(re.findall(r'\b((?:func_[0-9A-F]{8})|[a-z]\w*)\s*\(', inner))):
             if name in ('if', 'while', 'for', 'switch', 'return', 'sizeof') or name in defs or name in protos: continue
+            if name in macros and name not in defs and name not in protos: continue
+            # P10: calls through a struct member (layer->pre(...)) or a local function pointer (Gfx *(*draw)(...))
+            if re.search(r'(->|\.)\s*%s\s*\(' % name, inner) and not re.search(r'(?<![\w>.])%s\s*\(' % name, inner): continue
+            if re.search(r'\(\s*\*\s*%s\s*\)\s*\(' % name, body): continue
             print('%s: calls %s with no prototype anywhere (implicit int)' % (f, name)); bad += 1
     print('# %d NON_MATCHING bodies checked, %d problems' % (len([b for b in blocks if not want or b[0] in want]), bad))
     return 1 if bad else 0

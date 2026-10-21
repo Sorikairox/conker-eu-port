@@ -1,12 +1,42 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+Gfx *func_150417F8(Gfx *gdl, s32 x, s32 y, s32 idx);
+s32 func_15041770(u8 arg0);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150415B0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150416EC.s")
+#ifdef NON_MATCHING
+Gfx *func_150416EC(Gfx *arg0, s32 arg1, s32 arg2, u8 *arg3) {
+    Gfx *temp_v0;
+    Gfx *var_s2;
+    s32 var_s1;
+    u8 *var_s0;
+    u8 temp_t6;
+    u8 var_a0;
 
+    var_s2 = arg0;
+    temp_t6 = *arg3;
+    var_s0 = arg3;
+    var_s1 = arg1;
+    var_a0 = temp_t6 & 0xFF;
+    if (temp_t6 != 0) {
+        do {
+            temp_v0 = func_150417F8(var_s2, var_s1, arg2, func_15041770(var_a0));
+            var_a0 = (*(u8 *)((u8 *)var_s0 + 1));
+            var_s2 = temp_v0;
+            var_s0 += 1;
+            var_s1 += 8;
+        } while (var_a0 != 0);
+    }
+    return var_s2;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6EDC0/func_150416EC.s")
+#endif
 extern u8 D_80084C60[];
 s32 func_15041770(u8 arg0) {
     s32 i;
