@@ -1067,3 +1067,9 @@ func_1517FAD4	SIZE+3	7	SIZE+2	n	n	frame fixed by named r,g; t is uninitialised o
 func_1514B30C	SIZE-1	7	DIFF2	n	y	func_15013DE8 spawn-block struct + pad[2]; call before the a-products; left: sh order of u52/u50 only
 func_15187954	SIZE-2	4	SIZE-2	n	n	m2c-shaped loop with continue; ref stores a1/a2 lazily (bnel/jal delay slots), mine stores a2 at entry; loop regs differ
 func_1514C9E0	DIFF48	3	DIFF31	n	y	fn-table line spawner; identical odd/even step branches; s32 pad[2] declared first fixes frame; left: FP callee-saved reg roles (arg6 f26, arg0 f28, arg1 f30)
+func_1514DA28	DIFF2	1	OK	y	n	s172: drop named ptr v, repeat D_8008AF88[arg0] (CSE temp takes spill slot 0x1C)
+func_15172D80	DIFF2	2	OK	y	n	s172: no named p/c locals, repeat array exprs (frame 0x40->0x38)
+func_15183EE4	DIFF15	2	OK	y	n	s172: 0x14 struct cast array [arg0]/[arg0+1], no ptr local
+func_1514E014	DIFF2	4	OK	y	y	s172: local perm fakematch if ((arg0&&arg0)&&arg0){}
+func_1517BD68	DIFF4	1	OK	y	n	s172: d = 0x190000 - d*d reuses d
+func_1518B748	DIFF11	2	OK	y	n	s172: c = (s32)d >> 1 without a trunc local

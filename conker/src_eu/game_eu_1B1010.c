@@ -28,7 +28,16 @@ void func_15183E20(s32 arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1010/func_15183EE4.s")
+typedef struct { s32 a; s32 b; s32 c; s32 d; s32 e; } StructDDE80;
+void func_15183EE4(s32 arg0) {
+    if (((StructDDE80 *)D_800DDE80)[arg0].a == 0) {
+        func_1518403C(arg0);
+    }
+    if (((StructDDE80 *)D_800DDE80)[arg0 + 1].a == 0) {
+        func_1518403C(arg0 + 1);
+        ((StructDDE80 *)D_800DDE80)[arg0 + 1].d = ((StructDDE80 *)D_800DDE80)[arg0].d;
+    }
+}
 
 void func_15183F60(s32 arg0, s32 arg1)
 {
