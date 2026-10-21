@@ -26,6 +26,23 @@ extern u32 D_80000318; /* osMemSize */
 void func_10003BD0(void);
 void func_15007830(void); /* port/boot/game_entry.c */
 
+/* P11 (PC fix-up, port-only): func_10003930 (C, init_3930.c) stores the heap / scratch bounds as
+ * KSEG0 constants (0x803F5000 / 0x803FE000). func_10003BD0 then computes the heap size as
+ * D_80038098 - &D_800EA140, which mixes a K0 constant with a wasm address (gap "address constants"
+ * in P4.md): the size came out ~1.9 GB and the first top-down allocation wrote out of bounds.
+ * Rebase the four words into the n64_rdram mirror, where &D_800EA140 lives. */
+extern u8 n64_rdram[];
+extern u32 D_80038090, D_80038094, D_80038098, D_8003809C;
+void *port_n64_to_wasm(unsigned n64addr);
+static void port_fix_heap_bounds(void) {
+    u32 base = (u32)n64_rdram;
+    D_80038090 = base + (D_80038090 & 0x7FFFFF);
+    D_80038094 = base + (D_80038094 & 0x7FFFFF);
+    D_80038098 = base + (D_80038098 & 0x7FFFFF);
+    D_8003809C = base + (D_8003809C & 0x7FFFFF);
+    port_log("[boot] heap bounds rebased: end %08X (n64_rdram %08X)\n", D_80038098, base);
+}
+
 void func_10001194(s32 arg0) {
     s32 *fb;
 
@@ -34,6 +51,7 @@ void func_10001194(s32 arg0) {
     port_log("[boot] memory init\n");
     func_10003920();
     func_10003930();
+    port_fix_heap_bounds(); /* P11: K0 constants from func_10003930 -> n64_rdram mirror */
     func_10003BD0();
     func_1000709C();
     fb = D_8002AAE8;
@@ -41,6 +59,20 @@ void func_10001194(s32 arg0) {
     fb[1] = func_10003C6C(126144, 0xFF, 3, 1, 0);
     port_log("[boot] framebuffers %08X %08X\n", fb[0], fb[1]);
     osCreateViManager(OS_PRIORITY_VIMGR);
+    /* P11: the asm (cold-boot branch at 0x100012D8) creates the scheduler queue (EU 0x8003B578, the C
+     * name is D_8003B218) with 8 slots at 0x8003BC10, sets the VI mode, blacks the screen and makes
+     * every retrace post message 0 to it. The P4 PC version had left this out, so the C scheduler
+     * func_100049E0 never woke up. (func_10003570 = osCreateViManager(0xFE), PC no-op above.) */
+    {
+        extern OSMesgQueue D_8003B218;
+        extern OSViMode D_8002AF20;
+        OSMesg *buf = (OSMesg *)port_n64_to_wasm(0x8003BC10);
+        if ((void *)&D_8003B218 != port_n64_to_wasm(0x8003B578)) port_log("[boot] WARNING: D_8003B218 is not EU 0x8003B578\n");
+        osCreateMesgQueue(&D_8003B218, buf, 8);
+        osViSetMode(&D_8002AF20);
+        osViBlack(1);
+        osViSetEvent(&D_8003B218, (OSMesg)0, 1);
+    }
     /* N64: DMA + rzip-decompress the game code/data segments, map TLB 0x15000000. Skipped (PLAN 3.2). */
     D_8003BE74 = 0;
     func_10005B04(0xEB);
@@ -48,6 +80,7 @@ void func_10001194(s32 arg0) {
     func_10001420();
     port_log("[boot] func_10005BE0\n");
     func_10005BE0();
+    { void port_sched_test_start(void); port_sched_test_start(); } /* P11: C scheduler runtime check */
     port_log("[boot] entering game: func_15007830\n");
     func_15007830();
     port_log("[boot] func_15007830 returned\n");

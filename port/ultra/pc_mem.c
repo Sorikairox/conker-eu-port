@@ -319,6 +319,9 @@ void port_mem_null_report(void) {
     for (unsigned a = 0x10; a < PORT_NULL_SCAN; a += 4)
         if (*(const volatile uint32_t *)(z + a)) { if (!dirty++) first = a; last = a; }
     port_log("[mem] null zone: %u dirty words (0x%X..0x%X)\n", dirty, first, last);
+    if (dirty && dirty <= 16) /* P11: list them (storage order; game words are native u32) */
+        for (unsigned a = 0x10; a < PORT_NULL_SCAN; a += 4)
+            if (*(const volatile uint32_t *)(z + a)) port_log("[mem]   null+0x%X = %08X\n", a, *(const volatile uint32_t *)(z + a));
 }
 
 /* raw DEFLATE for other PC-side users (ROM asset viewer, port/gfx/gfx_demo.c); returns bytes out */

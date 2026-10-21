@@ -71,7 +71,7 @@ GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>
 # renderer can tell RSP segment addresses (0x01..0x0F << 24) from wasm pointers exactly. The untouched
 # zone costs address space only (pages are committed on first write); INITIAL_MEMORY covers it +
 # ~10 MB data + the 64 MB ROM copy + heap.
-BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c audio/aud_test.c
+BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c boot/sched_test.c audio/aud_test.c
 BOOT_OBJS := $(patsubst %.c,$(B)/vobj/port__%.o,$(notdir $(BOOT_SRC)))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
