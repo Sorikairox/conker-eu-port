@@ -1336,3 +1336,11 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 2. **`FC......`/`FF......` combine stores with swapped `ori` order**: write `gDPSetCombineLERP(...)` (the macro computes w1 first) instead of raw `words.w0/w1` stores. Decode the 16 arguments from the two words (a0 >>20 &0xF, c0 >>15 &0x1F, Aa0 >>12 &7, Ac0 >>9 &7, a1 >>5 &0xF, c1 &0x1F; b0 >>28, b1 >>24 &0xF, Aa1 >>21 &7, Ac1 >>18 &7, d0 >>15 &7, Ab0 >>12 &7, Ad0 >>9 &7, d1 >>6 &7, Ab1 >>3 &7, Ad1 &7).
 3. **game_1944C0 `D_800DD280[2][0x68]` iterators**: `for (i = 0; i < 2; i++) { if (tbl[j].fn) { node = D_800DD280[i][j]; D_800DD5C0++; while (node) { D_800DD5C8[D_800DD5C0] = node->next; ...; node = D_800DD5C8[D_800DD5C0]; } D_800DD5C0--; } }`. With an outer `j` loop, declare `node` inside it (else the inner end pointer is recomputed per outer iteration).
 4. **A loop counter shared by two loops gets spilled**: give the first loop its own counter (`k`) when the target keeps it in an s-register.
+
+## s166 recipes (base-pointer registers, element pointers, FP order)
+1. **`addiu v0,a0,0x110` then `swc1 f0,0x18(v0)` where IDO folds to `0x128(a0)`**: put the offset in a variable, `off = 0x110; v = arg0 + off;` (fakematch, `func_1518A784`; remote permuter). Typed struct pointers, `f32 *`, `v = arg0; v += 0x110;` all fold.
+2. **`addu v0, offset, base` with the element address kept in `v0`**: an element pointer `e = &D_800DBFF0[i]; obj = e->unk3D0;` (`func_15164CF0`).
+3. **FP order of a comparison operand** (`(f32)dist` conversion vs `r * s - e`): assign the expression inside the comparison, `if (d < (t = r * s - e))` (fakematch, `func_151601D0`).
+4. **`beqz t0,L; nop; b L; addiu v0,1`** is `s32 flag; if (arg1 != 0) flag = 1; else flag = 0;` (u8 flag or `flag = 0; if (..) flag = 1;` give other code, `func_15189E70`).
+5. **An extern float loaded once into `f0` and used twice**: copy it to a block-local `f32 f = D_...;` (two direct reads gave `lui/addiu` + two `lwc1`, SIZE+3; `func_1516A964`, `func_1518A784`).
+6. A byte store of the low part of an int: `p[0x2D] = h & 0xFF;` can shift temp registers by one (`func_1516ABB8`, remote permuter).
