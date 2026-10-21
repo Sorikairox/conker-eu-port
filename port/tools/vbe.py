@@ -411,11 +411,41 @@ def k0_checks(text, st):
         return m[0]
     return re.sub(r'icmp (\w+) i32 (%[\w.$-]+), (-?\d+)', cmp, text)
 
+# P19: RCP / PI / SI register accesses through a constant KSEG1 address (rcp.h IO_READ / IO_WRITE in
+# matched game C, e.g. `IO_READ(AI_LEN_REG)` in func_100095A0) are not memory on the PC. Constant
+# 32-bit loads/stores in 0xA4000000..0xA4FFFFFF become calls to the PC register model
+# (port/ultra/pc_os.c __port_io_read / __port_io_write). Non-constant addresses are left alone.
+IO_LD = re.compile(r'^(\s*)(%[\w.$-]+) = load (?:volatile )?i32, ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?$', re.M)
+IO_ST = re.compile(r'^(\s*)store (?:volatile )?i32 ([^,]+), ptr inttoptr \(i32 (-?\d+) to ptr\)(?:, align \d+)?$', re.M)
+
+
+def rcp_io(text, st):
+    def isio(n):
+        return 0xA4000000 <= (int(n) & 0xFFFFFFFF) <= 0xA4FFFFFF
+    def ld(m):
+        if not isio(m[3]):
+            return m[0]
+        st['rcp_io'] += 1
+        return f'{m[1]}{m[2]} = call i32 @__port_io_read(i32 {m[3]})'
+    def stv(m):
+        if not isio(m[3]):
+            return m[0]
+        st['rcp_io'] += 1
+        return f'{m[1]}call void @__port_io_write(i32 {m[3]}, i32 {m[2]})'
+    n = st['rcp_io']
+    text = IO_ST.sub(stv, IO_LD.sub(ld, text))
+    if st['rcp_io'] != n:
+        if not re.search(r'^declare [^\n]*@__port_io_read\(', text, re.M):
+            text += '\ndeclare i32 @__port_io_read(i32)\n'
+        if not re.search(r'^declare [^\n]*@__port_io_write\(', text, re.M):
+            text += '\ndeclare void @__port_io_write(i32, i32)\n'
+    return text
+
 
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
-    p = Pass(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0).split('\n'))
+    p = Pass(rcp_io(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0).split('\n'))
     p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs

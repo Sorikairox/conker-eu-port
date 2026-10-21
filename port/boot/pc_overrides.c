@@ -80,166 +80,118 @@ int port_romsym_test(void) {
     return bad;
 }
 
-/* ---- P11: TEMPORARY PC override of func_15019130 (game_45B80.c, still GLOBAL_ASM) ----
- * The per-frame world update ("few loops"). func_1501878C (C since P10) returns before building the
- * frame when this returns 0, which the asm stub always did, so no gfx task was ever sent.
- * Written by hand from asm/nonmatchings/game_45B80/func_15019130.s (EU, 0x150190E0); delay-slot
- * arguments resolved. Remove when the port branch converts func_15019130.
- * Callee prototypes are as called; port/tools/sigs.py adapts call sites to the definitions. */
-extern u8 D_800BEAC0, D_800BE616, D_800CC2B0, D_800DD157, D_800BE9C0;
-extern s32 D_80082FA0, D_800BE9F0;
-extern u32 D_80043ED0[], D_80044B20[];
-void *port_n64_to_wasm(unsigned n64addr);
-void func_1510DDE4(void); void func_1509BA04(s32); void func_1509BBA0(s32); void func_10004250(void);
-void func_1501E46C(s32); void func_15035210(void); void func_1510BC10(void); void func_1510F800(s32);
-void func_15113700(void); void func_151143D4(s32); void func_15114708(void); void func_15044D18(void);
-void func_15018DFC(void); void func_1502457C(s32, s32); void func_1501ECA4(s32); void func_15020F6C(s32);
-void func_1501E364(s32); void func_15088130(void); void func_15122AE0(void); void func_1504ADD0(void);
-void func_151101B4(s32); void func_150952B0(s32); void func_15113000(s32); void func_15174F68(s32, s32);
-void func_1501C860(void); void func_1511FC20(s32); void func_151890E4(s32); void func_1516706C(void);
-void func_151671E8(void); void func_1502C1D4(void); void func_150A126C(void); void func_15113798(void);
-void func_15173E34(s32); void func_1502C494(void); void func_15114208(void); void func_15063AA0(void);
-void func_15184298(void); void func_151670C0(void); void func_15178004(void); void func_15181A6C(void);
-void func_1517FCCC(void); void func_1517FD24(void); void func_15036438(void); void func_1515DC38(void);
+/* P19: the P11 TEMPORARY overrides of func_15019130 and func_eu_1501C860 were removed: both are
+ * NON_MATCHING C on the port branch since P15-P17 (game_45B80.c, game_eu_4A070.c). */
 
-s32 func_15019130(void) {
-    s32 i;
-    u32 *p;
-    func_1510DDE4();
-    func_1509BA04(0);
-    func_1509BBA0(2);
-    D_800DD157 = 0;
-    func_10004250();
-    func_1501E46C(0);
-    func_15035210();
-    func_1510BC10();
-    func_1510F800(0);
-    func_15113700();
-    if (D_800BEAC0 == 0) func_151143D4(1);
-    if (D_800BEAC0 == 0) func_15114708();
-    func_15044D18();
-    func_15018DFC();
-    func_1502457C(1, 0);
-    func_1501ECA4(0);
-    func_1502457C(0, 0);
-    func_15020F6C(0);
-    func_1501E364(0);
-    if (*(s8 *)port_n64_to_wasm(0x800D27C9) != 0) func_15088130();
-    func_15122AE0();
-    func_1504ADD0();
-    func_1510F800(0);
-    for (i = 0; i <= D_80082FA0; i++) func_151101B4(i);
-    func_1510BC10();
-    if (D_80082FA0 >= 0) {
-        u8 j = 0;
-        do { func_150952B0(j); j++; } while (j <= D_80082FA0);
+/* ---- P19: TEMPORARY PC override of func_1502B350 (game_57FA0.c, still GLOBAL_ASM) ----
+ * The asset load behind func_1502B6BC / func_1502B5C8 / func_1502B020 callers: allocate, DMA the
+ * record, and when (info & 0x70000000) == 0x10000000 inflate it into a second buffer (rzip; the first
+ * word is the inflated size, rejected when 0 or >= 1000000) and free the packed copy. *ok receives the
+ * loaded size (0 on failure). Hand-translated from the EU asm at 0x1502B640 (48 insns). Without it the
+ * stub returned 0 and the level record D_800B0DF0 (EU 0x800B1200) was never loaded, so
+ * func_15174B48 called through D_8008D11C[garbage]. The 3rd func_10006530 argument is the word at
+ * EU 0x80038404 (US name D_800380A4). Remove when the port branch converts func_1502B350. */
+void *port_n64_to_wasm(unsigned n64addr);
+int port_heap_check(void);
+s32 *allocate_memory(s32, s32, s32, s32);
+s32 func_10004514(s32 devAddr, void *dramAddr, u32 size, s32 arg3);
+s32 func_10006530(s32 *, s32 *, u32);
+void func_10004074(s32 *);
+s32 func_1502B350(u8 *rom, s32 info, s32 *ok) {
+    u32 size = ((info & 0x0FFFFFFF) + 1) & ~1;
+    s32 *buf = allocate_memory(size, 1, 2, 2);
+    s32 *out;
+    s32 n, got;
+    static int ncall; int dbg = ncall++ < 4;
+    if (dbg) { port_glog("[b350] #%d rom %X info %X size %X buf %X\n", ncall, (u32)rom, info, size, (u32)buf); port_heap_check(); }
+    if (buf == NULL) return 0;
+    func_10004514((s32)rom, buf, (size + 15) & ~15, 1);
+    if (dbg) port_heap_check();
+    if ((info & 0x70000000) != 0x10000000) {
+        *ok = size;
+        return (s32)buf;
     }
-    func_15113000(0);
-    func_15174F68(D_800BE9F0, 0);
-    func_1501C860();
-    func_1511FC20(D_800BE9C0);
-    func_151890E4(0);
-    if (D_800BEAC0 == 0) { func_1516706C(); func_151671E8(); }
-    func_1502C1D4();
-    if (D_800BE616 == 0) func_150A126C();
-    func_15113798();
-    func_151890E4(1);
-    func_15173E34(D_800BE9F0);
-    func_1502C494();
-    func_15114208();
-    if (D_800CC2B0 != 0) func_15063AA0();
-    if (D_800BEAC0 == 0) { func_15184298(); func_151670C0(); func_15178004(); }
-    if (D_800BEAC0 == 0) func_15181A6C();
-    func_1517FCCC();
-    func_1517FD24();
-    func_15036438();
-    func_1515DC38();
-    for (p = D_80043ED0; p != D_80044B20; p += 8) { p[1]++; p[3]++; p[5]++; p[7]++; }
-    return 1;
+    n = buf[0] & 0x7FFFFFFF;
+    *ok = n;
+    out = NULL; got = 0;
+    if (n != 0 && (u32)n < 1000000) {
+        out = allocate_memory(n, 1, 2, 2);
+        if (out != NULL) got = func_10006530(buf, out, *(u32 *)port_n64_to_wasm(0x80038404));
+        if (dbg) { port_glog("[b350] n %X out %X got %X\n", n, (u32)out, got); port_heap_check(); }
+    }
+    func_10004074(buf);
+    *ok = got;
+    return (s32)out;
 }
 
-/* ---- P11: TEMPORARY PC override of func_eu_1501C860 (game_eu_4A070.c, still GLOBAL_ASM) ----
- * End of frame: closes the DL (rolls back to the reserve when it overflows), fills the gfx OSScTask
- * D_800BEEF8[idx] (stride 0x60) and sends it to the scheduler's gfx queue (EU 0x8003B548 = C name
- * D_8003B1E8). Hand-translated from asm/nonmatchings/game_eu_4A070/func_eu_1501C860.s (EU 0x1501C860).
- * Data are addressed through port_n64_to_wasm (vbe TU: N64 semantics) at the address the asm's symbol
- * resolves to: names listed in conker/undefined_syms.eu.txt are US names remapped to EU addresses
- * (D_800BE9C0 -> 0x800BEDE0, D_800BE9D0 -> 0x800BEDF0, D_800BE9D8 -> 0x800BEDF8, D_80038090/94 ->
- * 0x800383F0/F4, D_80082FA0 -> 0x80083330, D_8002AAE8 -> 0x8002AE1C); the others are literal.
- * Remove when the port branch converts it. */
-#define P11W(a) ((u32 *)port_n64_to_wasm(a))
-void func_1501A39C(void);
-void func_1501CC1C(s32);
-s32 func_eu_1501C860(s32 a0, s32 a1) {
-    u8 *idx = (u8 *)port_n64_to_wasm(0x800BEDE0);
-    u32 *gdlp = P11W(0x800BEDF0);          /* current DL pointer */
-    u32 *bufs = P11W(0x800BEDE8);          /* DL buffers [2] */
-    u32 *rsv = P11W(0x800BEDF8);           /* reserve position per buffer */
-    u32 *task, *g;
-    s32 cap, n;
-    (void)a0;
-    { static int nlog; if (nlog++ < 3) port_log("[frame] submit: idx %d gdl %08X bufs %08X %08X reserve %08X %08X\n", *idx, *gdlp, bufs[0], bufs[1], rsv[0], rsv[1]); }
-    if (!bufs[0] || !bufs[1] || *gdlp < bufs[0]) {
-        /* The DL buffers come from func_15015E30 (C), called only by the level loader func_15007B3C
-         * (asm stub). Drop the frame, and wake the main loop as func_10004F00 would on task start
-         * (the retrace message, case 1 in func_1501878C), so the game keeps stepping. */
-        extern u16 D_8003B240;
-        static int ndrop;
-        if (ndrop++ < 2) port_log("[frame] no DL buffers (func_15007B3C is asm): frame dropped\n");
-        osSendMesg((OSMesgQueue *)port_n64_to_wasm(0x800BEE30), (OSMesg)&D_8003B240, OS_MESG_NOBLOCK);
-        if (a1 != 0) *idx ^= 1;
-        return 0;
+/* ---- P19: TEMPORARY PC override of func_15002248 (game_eu_2F180.c, still GLOBAL_ASM) ----
+ * Quadtree build helper of func_15001DE0: keeps the entries of the u16 index list `in` (in[0] = count)
+ * whose triangle passes the box test, writes them to a new list *out (allocate_memory; the caller frees
+ * it), and returns the count plus the grid-snapped x min / z max of the kept entries in *xmin / *zmax.
+ * The stub left *out as stack garbage, so func_15001DE0 freed a garbage pointer and the heap free list
+ * went cyclic (func_10004074 then spun forever). Hand-translated from the EU asm at 0x15002248
+ * (200 insns). Data at EU addresses: grid shift 0x80083330 (US D_80082FA0), triangle table
+ * 0x800DC26C (3 vertex pointers per entry, s16 xyz), grid table 0x800DC274 (s16 x, z per entry).
+ * The box test: func_15049260 is declared void in C, but this caller uses its v0 (the result of
+ * func_150AB278, still asm). Until both are C every entry is kept, as the stub's v0 = 0 implies.
+ * Vertex pointers are valid when >= 0x10000000 (wasm data) instead of the asm's > 0x80000000. */
+typedef struct { s32 unk0[9]; } P19Tri;
+void func_150492CC(f32, f32, f32);
+void func_15049260(P19Tri);
+s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out) {
+    s32 shift = *(s32 *)port_n64_to_wasm(0x80083330) + 1;
+    s32 step = 1 << shift, lo = step - 1, mask = -step;
+    s32 n = in[0] + 1, cnt = 0, found = 0, i, k;
+    u16 *list;
+    func_150492CC((f32)(x1 - x0), 32000.0f, (f32)(z1 - z0));
+    list = (u16 *)allocate_memory(n * 2, 1, 0, 0);
+    *out = list;
+    *xmin = 0;
+    *zmax = 0;
+    for (i = 1; i < n; i++) {
+        u16 idx = in[i];
+        u32 *tri = (u32 *)(*(u32 *)port_n64_to_wasm(0x800DC26C) + idx * 12);
+        f32 v[9];
+        P19Tri t;
+        for (k = 0; k < 3; k++) {
+            s16 *p = (s16 *)tri[k];
+            if ((u32)p >= 0x10000000) {
+                v[k * 3 + 0] = (f32)(p[0] - ((x0 + x1) >> 1));
+                v[k * 3 + 1] = (f32)p[1];
+                v[k * 3 + 2] = (f32)(p[2] - ((z0 + z1) >> 1));
+            } else {
+                v[k * 3 + 0] = v[k * 3 + 1] = v[k * 3 + 2] = 0.0f;
+            }
+        }
+        for (k = 0; k < 9; k++) t.unk0[k] = *(s32 *)&v[k];
+        func_15049260(t);
+        {
+            s16 *g = (s16 *)(*(u32 *)port_n64_to_wasm(0x800DC274) + idx * 4);
+            s32 a = (g[0] - lo) & mask, b = ((g[1] + lo) & mask) + lo;
+            list[++cnt] = idx;
+            if (!found) { found = 1; *xmin = a; *zmax = b; }
+            else { if (a < *xmin) *xmin = a; if (*zmax < b) *zmax = b; }
+        }
     }
-    task = (u32 *)((u8 *)P11W(0x800BEEF8) + *idx * 0x60);
-    *P11W(0x800BEEF4) = (u32)task;
-    task[0] = 0;
-    cap = (s32)(bufs[1] - bufs[0]) >> 3;
-    n = (s32)(*gdlp - bufs[*idx]) >> 3;
-    if (n < 0 || cap < n) {                 /* overflowed: reset to the reserve, close it */
-        func_1501A39C();
-        *gdlp = rsv[*idx];
-        g = (u32 *)*gdlp; *gdlp += 8; g[1] = 0; g[0] = 0xE9000000;
-        g = (u32 *)*gdlp; *gdlp += 8; g[1] = 0; g[0] = 0xDF000000;
-        n = (s32)(*gdlp - bufs[*idx]) >> 3;
+    list[0] = cnt;
+    return cnt;
+}
+
+/* ---- P19: TEMPORARY PC override of func_1502B4A8 (game_57FA0.c, still GLOBAL_ASM) ----
+ * Relocates a loaded asset's sub-file table: entries are {s32 offset, u32 info}. With n == 0, n is the
+ * index of the first entry whose info has bit 31 set, plus one. For each entry info &= 0x0FFFFFFF and
+ * offset becomes base + offset (0 when offset == -1 or info == 0). Returns n. Hand-translated from the
+ * EU asm at 0x1502B798. The stub's 0 left the level record D_800B0DF0 (EU 0x800B1200) NULL in
+ * func_15002FB4, so func_15174B48 indexed D_8008D11C with a null-zone byte. */
+s32 func_1502B4A8(s32 *base, s32 n) {
+    s32 i;
+    if (n == 0) {
+        do { n++; } while (!(base[(n - 1) * 2 + 1] & 0x80000000));
     }
-    if (n < 0 || cap - 0x190 < n) {         /* past the safety margin: cut at cap - 0x190 */
-        *gdlp = bufs[*idx] + (cap - 0x190) * 8;
-        g = (u32 *)*gdlp; *gdlp += 8; g[1] = 0; g[0] = 0xE9000000;
-        g = (u32 *)*gdlp; *gdlp += 8; g[1] = 0; g[0] = 0xDF000000;
+    for (i = 0; i < n; i++) {
+        s32 *e = &base[i * 2];
+        e[1] &= 0x0FFFFFFF;
+        e[0] = (e[0] == -1 || e[1] == 0) ? 0 : e[0] + (s32)base;
     }
-    task[0x48 / 4] = bufs[*idx];                                    /* data_ptr */
-    task[0x4C / 4] = ((*gdlp - bufs[*idx]) >> 3) << 3;              /* data_size */
-    func_1501CC1C(n);
-    task[0x18 / 4] = M_GFXTASK;
-    task[0x1C / 4] = 4;                                             /* OS_TASK_LOADABLE */
-    task[0x20 / 4] = 0x10029400;                                    /* ucode_boot (D_10029400) */
-    task[0x24 / 4] = 0xD0;                                          /* D_100294D0 - D_10029400 */
-    if (*(u8 *)port_n64_to_wasm(0x800BEFC0) == 0) {
-        task[0x28 / 4] = (u32)port_n64_to_wasm(0x800C1480);         /* ucode text */
-        task[0x30 / 4] = *P11W(0x800BEFBC);                         /* ucode data */
-    } else {
-        task[0x28 / 4] = (u32)port_n64_to_wasm(0x800BEFD0);
-        task[0x30 / 4] = *P11W(0x800BEEF0);
-    }
-    task[0x34 / 4] = 0x800;
-    task[0x38 / 4] = (u32)port_n64_to_wasm(0x800CC230);             /* dram_stack */
-    task[0x3C / 4] = 0x400;
-    task[0x40 / 4] = *P11W(0x800383F0);                             /* output_buff */
-    task[0x44 / 4] = *P11W(0x800383F4);                             /* output_buff_size (end) */
-    task[0x50 / 4] = (u32)port_n64_to_wasm(0x8003A948);             /* yield_data_ptr */
-    task[0x54 / 4] = 0xC00;
-    task[0x0C / 4] = 0x23;                                          /* OSScTask flags */
-    if (a1 != 0) task[0x0C / 4] |= 0x40;
-    if (*(u8 *)port_n64_to_wasm(0x800BEA37) != 0) {
-        task[0x0C / 4] |= (u32)(*P11W(0x80083330) + 1) << 16;
-        *(u8 *)port_n64_to_wasm(0x800BEA37) = 0;
-    }
-    task[0x58 / 4] = (u32)port_n64_to_wasm(0x800BEE30);             /* msgQ: the main loop's queue */
-    task[0x5C / 4] = (u32)((u8 *)port_n64_to_wasm(0x800BEE88) + *idx * 0x20);
-    task[0x10 / 4] = P11W(0x8002AE1C)[*idx];                        /* framebuffer */
-    osWritebackDCacheAll();
-    osSendMesg((OSMesgQueue *)port_n64_to_wasm(0x8003B548), (OSMesg)task, OS_MESG_BLOCK);
-    if (a1 != 0) *idx ^= 1;
-    (*(s16 *)port_n64_to_wasm(0x800BEEC8))++;
-    return 0;
+    return n;
 }

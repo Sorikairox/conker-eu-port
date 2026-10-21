@@ -20,7 +20,7 @@ def to_ll(path):
     """phase 1: C -> -O0 IR (incremental)"""
     tag = tag_of(path)
     ll = f'{LL}/{tag}.ll'
-    if os.path.exists(ll) and os.path.getmtime(ll) > os.path.getmtime(path):
+    if os.path.exists(ll) and os.path.getmtime(ll) > max(os.path.getmtime(path), os.path.getmtime('port/ultra/port_prefix.h')):  # P19: prefix too
         return tag, 0, ''
     base = [a for a in census.BASE if a not in ('-c', '-O1')]
     p = subprocess.run(base + census.PORT_RELAX + ['-Wno-everything', '-S', '-emit-llvm', '-O0', '-Xclang',

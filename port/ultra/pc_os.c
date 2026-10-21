@@ -125,7 +125,19 @@ s32 __osRestoreInt(u32 m) { (void)m; return 0; } /* game TUs define it returning
 u32 __osGetSR(void) { return 0; }
 s32 __osSetSR(u32 v) { (void)v; return 0; }
 u32 __osSetFpcCsr(u32 v) { (void)v; return 0; }
-OSIntMask osSetIntMask(OSIntMask m) { (void)m; return OS_IM_ALL; }
+/* P19 debug: HEAPDBG builds walk the game heap on every osSetIntMask (the allocator brackets with it)
+ * and print a stack at the first broken heap. */
+#ifdef PORT_HEAPDBG
+int port_heap_check(void); extern int port_heap_quiet;
+#endif
+OSIntMask osSetIntMask(OSIntMask m) {
+    (void)m;
+#ifdef PORT_HEAPDBG
+    { static int done, calls; calls++; if (calls >= 108 && calls <= 111) { port_log("[heapdbg] call %d\n", calls); emscripten_log(EM_LOG_CONSOLE | EM_LOG_JS_STACK, "heapdbg"); }
+      if (!done) { port_heap_quiet = 1; if (port_heap_check()) { done = 1; port_log("[heapdbg] heap broken at osSetIntMask call %d\n", calls); emscripten_log(EM_LOG_CONSOLE | EM_LOG_JS_STACK, "heapdbg"); } port_heap_quiet = 0; } }
+#endif
+    return OS_IM_ALL;
+}
 void __osInitialize_common(void) { port_log("[os] __osInitialize_common\n"); }
 
 /* ---------------- caches / TLB: no-ops (code is native wasm, memory is coherent) ---------------- */
@@ -209,6 +221,82 @@ void port_vi_retrace(void) {
     port_post_event(OS_EVENT_VI);
 }
 
+/* ---------------- RCP registers (P19) ----------------
+ * port/tools/vbe.py rcp_io rewrites constant IO_READ / IO_WRITE in game C (0xA4xxxxxx, KSEG1) to these.
+ * Modelled: AI_LEN (queued bytes of the audio ring), AI/PI/SI/SP/DP status = idle. Everything else reads
+ * back the last value written (0 at start); the first use of each address is logged. */
+#define IO_SLOTS 64
+static u32 io_addr[IO_SLOTS], io_val[IO_SLOTS];
+static int io_n;
+static int io_slot(u32 a, const char *what) {
+    for (int i = 0; i < io_n; i++) if (io_addr[i] == a) return i;
+    if (io_n == IO_SLOTS) return -1;
+    port_log("[io] first %s of RCP register 0x%08X\n", what, a);
+    io_addr[io_n] = a; io_val[io_n] = 0;
+    return io_n++;
+}
+u32 __port_io_read(u32 a) {
+    int i = io_slot(a, "read");
+    switch (a) {
+    case 0xA4500004: return aud_out_queued() * 4;   /* AI_LEN_REG: bytes left in the current DMA */
+    case 0xA450000C: return 0;                      /* AI_STATUS_REG: not full, not busy */
+    case 0xA4600010: return 0;                      /* PI_STATUS_REG: idle */
+    case 0xA4800018: return 0;                      /* SI_STATUS_REG: idle */
+    case 0xA4040010: return 1;                      /* SP_STATUS_REG: halted */
+    case 0xA410000C: return 0;                      /* DPC_STATUS_REG */
+    }
+    return i < 0 ? 0 : io_val[i];
+}
+/* PIF (P19): the game's own libultra SI code (EEPROM probe/read/write in game_eu_20B220.c etc.,
+ * __osSiRawStartDma in init_eu_25AA0.c / game_eu_21E320.c) writes SI_DRAM_ADDR, then
+ * SI_PIF_ADDR_WR64B (DRAM -> PIF RAM, the PIF runs the command block) or SI_PIF_ADDR_RD64B
+ * (PIF RAM -> DRAM), and waits for the SI interrupt (OS_EVENT_SI). Devices: pad 0 (standard
+ * controller, no pak, nothing pressed), pads 1-3 absent, channel 4 = 16K EEPROM (in memory only). */
+void port_post_event(int e);
+static u8 pif_ram[64];
+static u8 eeprom[2048];
+static void pif_run(void) {
+    int ch = 0, i = 0;
+    static int nlog;
+    while (i < 63) {
+        u8 t = pif_ram[i];
+        if (t == 0xFE) break;
+        if (t == 0xFF || t == 0xFD) { i++; continue; }
+        if (t == 0) { ch++; i++; continue; }
+        if (i + 1 >= 63) break;
+        int tx = t & 0x3F, rx = pif_ram[i + 1] & 0x3F;
+        u8 *c = &pif_ram[i + 2], *r = &pif_ram[i + 2 + tx];
+        if (i + 2 + tx + rx > 64) break;
+        int ok = 1;
+        if (nlog++ < 6) port_log("[pif] ch %d cmd %02X tx %d rx %d\n", ch, c[0], tx, rx);
+        if (ch == 0) {                                  /* controller 1 */
+            if (c[0] == 0x00 || c[0] == 0xFF) { if (rx >= 3) { r[0] = 0x05; r[1] = 0x00; r[2] = 0x02; } }
+            else if (c[0] == 0x01) memset(r, 0, rx);
+            else ok = 0;                                /* pak commands: no pak */
+        } else if (ch == 4) {                           /* EEPROM 16K */
+            if (c[0] == 0x00 || c[0] == 0xFF) { if (rx >= 3) { r[0] = 0x00; r[1] = 0xC0; r[2] = 0x00; } }
+            else if (c[0] == 0x04 && tx >= 2) memcpy(r, &eeprom[(c[1] & 0xFF) * 8], rx < 8 ? rx : 8);
+            else if (c[0] == 0x05 && tx >= 10) { memcpy(&eeprom[(c[1] & 0xFF) * 8], &c[2], 8); if (rx) r[0] = 0; }
+            else ok = 0;
+        } else ok = 0;
+        if (!ok) pif_ram[i + 1] |= 0x80;                /* no response */
+        i += 2 + tx + rx;
+        ch++;
+    }
+    pif_ram[63] = 0;
+}
+void __port_io_write(u32 a, u32 v) {
+    int i = io_slot(a, "write");
+    if (i >= 0) io_val[i] = v;
+    if (a == 0xA4800010 || a == 0xA4800004) {           /* SI_PIF_ADDR_WR64B / RD64B */
+        u8 *d = (u8 *)(uintptr_t)__port_io_read(0xA4800000);   /* SI_DRAM_ADDR: osVirtualToPhysical = wasm ptr */
+        if ((uintptr_t)d < 0x10000000u) d = (u8 *)port_n64_to_wasm(0x80000000u | (u32)(uintptr_t)d);
+        if (a == 0xA4800010) { for (int k = 0; k < 64; k++) pif_ram[k] = (u8)vbe_ld8(d + k); pif_run(); }
+        else for (int k = 0; k < 64; k++) vbe_st8(d + k, pif_ram[k]);
+        port_post_event(OS_EVENT_SI);
+    }
+}
+
 /* ---------------- PI: DMA from the user's ROM, completes immediately ---------------- */
 
 static OSMesgQueue *pi_cmd_mq;
@@ -225,6 +313,20 @@ static void rom_copy(u32 dev, void *dst, u32 size) {
         return;
     }
     port_rom_read(dst, off, size); /* big-endian ROM bytes -> vbe game memory */
+}
+
+/* P19: libultra osPiRawReadIo (game TU init_eu_26AD0.c; weak via port_prefix.h) polls PI_STATUS and reads
+ * IO_READ(osRomBase | devAddr), i.e. a KSEG1 hardware address. Used by the anti-piracy check in
+ * func_15002FB4 (ROM word 0xA5C). PC: the big-endian ROM word at the cart-domain offset. */
+s32 osPiRawReadIo(u32 devAddr, u32 *data) {
+    u32 off = devAddr & 0x0FFFFFFC;
+    u32 v = 0;
+    if (port_rom && off + 4 <= port_rom_size)
+        v = (u32)port_rom[off] << 24 | (u32)port_rom[off + 1] << 16 | (u32)port_rom[off + 2] << 8 | port_rom[off + 3];
+    else
+        port_log("[pi] raw read 0x%08X out of ROM\n", devAddr);
+    *data = v; /* aligned word in game memory: native store = BE value (word-swapped storage) */
+    return 0;
 }
 
 s32 osPiRawStartDma(s32 dir, u32 dev, void *dram, u32 size) {
@@ -292,19 +394,20 @@ s32 osContInit(OSMesgQueue *mq, u8 *bits, OSContStatus *st) {
         vbe_st8(&st[i].status, 0);
         vbe_st8(&st[i].errno, i == 0 ? 0 : CONT_NO_RESPONSE_ERROR);
     }
-    /* P11 PC shim: the game's first pad read (func_1501BBB8, C since P10) blocks on this queue before
-     * any read was started: reads are only started by the scheduler's message 6, from the 25 ms timer
-     * that func_1501BB20 arms *after* a read. No asm/C path found that starts the first one (P11.md),
-     * so one SI message is posted here, as if a read had completed. */
-    if (mq) osSendMesg(mq, NULL, OS_MESG_NOBLOCK);
+    /* P19: the P11 SI shim (one posted message) is gone: the level loader func_15007B3C is C now
+     * and starts the first read through func_1501BB20. */
     return 0;
 }
 s32 osContStartReadData(OSMesgQueue *mq) {
-    { static int n; if (n++ < 3) port_log("[os] osContStartReadData %p\n", (void *)mq); }
-    if (mq) osSendMesg(mq, NULL, OS_MESG_NOBLOCK); /* SI transfer done at once */
+    s32 r = mq ? osSendMesg(mq, NULL, OS_MESG_NOBLOCK) : -1; /* SI transfer done at once */
+    { static int n; if (n++ < 3) port_log("[os] osContStartReadData %p: send %d, queue %d/%d\n", (void *)mq, r, mq ? mq->validCount : 0, mq ? mq->msgCount : 0); }
     return 0;
 }
 void osContGetReadData(OSContPad *pad) {
+    { static int n; if (n++ < 3) { u32 *r = (u32 *)port_n64_to_wasm(0x800B1200); u32 *q = (u32 *)(uintptr_t)*r;
+        port_log("[os] osContGetReadData #%d; D_800B0DF0 (EU 800B1200) = %08X", n, *r);
+        if ((uintptr_t)q >= 0x10000000u) port_log(" -> %08X %08X %08X %08X", q[0], q[1], q[2], q[3]);
+        port_log("\n"); } }
     memset(pad, 0, sizeof(OSContPad) * MAXCONTROLLERS);
     for (int i = 1; i < MAXCONTROLLERS; i++) vbe_st8(&pad[i].errno, CONT_NO_RESPONSE_ERROR);
 }

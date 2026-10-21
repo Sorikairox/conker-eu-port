@@ -56,6 +56,7 @@
 #pragma weak osCreatePiManager
 #pragma weak osPiStartDma
 #pragma weak osPiRawStartDma
+#pragma weak osPiRawReadIo
 #pragma weak osEPiStartDma
 #pragma weak osPiGetStatus
 /* SP / DP / AI */

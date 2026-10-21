@@ -68,6 +68,7 @@ static int run_one(OSScTask *t, u32 type, u32 *list, u32 bytes, u32 tag) {
 extern void *D_800380B4, *D_800380B8;
 extern u32 D_80038098;
 extern u8 D_800EA140;
+int port_heap_quiet;
 int port_heap_check(void) {
     u32 *b = (u32 *)D_800380B4, *prev = 0;
     u32 lo = (u32)&D_800EA140, hi = D_80038098, used = 0, freeb = 0, n = 0, nfree = 0, bad = 0;
@@ -82,9 +83,9 @@ int port_heap_check(void) {
         if (tag == 0x7E) tags[0]++; else if (tag == 0xFF) tags[1]++; else if (tag) tags[2]++;
         prev = b;
     }
-    for (b = (u32 *)D_800380B8; b && nfree < 100000; b = (u32 *)b[3], nfree++)
+    for (b = (u32 *)D_800380B8; b && nfree < 100000 && !(nfree > 5000 && ++bad); b = (u32 *)b[3], nfree++)
         if (b[2] >> 24) { port_log("[heap] free-list entry %08X has tag %X\n", (u32)b, b[2] >> 24); bad++; break; }
-    port_log("[heap] %u blocks (%u free-list), used %u bytes, free %u bytes; tag FF %u, tag 7E %u, other tags %u; %u errors\n",
+    if (!port_heap_quiet || bad) port_log("[heap] %u blocks (%u free-list), used %u bytes, free %u bytes; tag FF %u, tag 7E %u, other tags %u; %u errors\n",
              n, nfree, used, freeb, tags[1], tags[0], tags[2], bad);
     return bad != 0;
 }
