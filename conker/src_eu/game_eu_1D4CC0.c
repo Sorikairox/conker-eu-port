@@ -18,7 +18,58 @@ s32 func_151A799C(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D4CC0/func_151A79EC.s")
+s32 func_1514B0CC(f32, f32, s32, f32, s32, f32, f32, f32, f32, s32, s32, u8);
+s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
+{
+  u8 *p;
+  u8 b;
+  p = arg0 + 0x170;
+  *((f32 *) (arg0 + 0x3C)) = (*((f32 *) (arg0 + 0x10))) + arg4;
+  if ((*((s32 *) (arg0 + 0x174))) != 0)
+  {
+    func_1516972C(*((struct102 **) (p + 4)));
+    *((struct102 **) (p + 4)) = 0;
+  }
+  if ((*((f32 *) p)) < (*((f32 *) (arg0 + 0x48))))
+  {
+    *((s32 *) (arg0 + 0x60)) &= ~7;
+    *((s32 *) (arg0 + 0x60)) &= ~8;
+    *((s32 *) (arg0 + 0x60)) &= ~0x40;
+    *((s32 *) (arg0 + 0x60)) &= ~0x20;
+    *((f32 *) (arg0 + 0x44)) = 0.0f;
+    *((f32 *) (arg0 + 0x48)) = 0.0f;
+    *((f32 *) (arg0 + 0x4C)) = 0.0f;
+    if ((*((s16 *) (arg0 + 0x64))) > 0x20)
+    {
+      *((s16 *) (arg0 + 0x64)) = 0x20;
+    }
+    if (p[8] != 0)
+    {
+      b = 0;
+      if (p[9] != 0)
+      {
+        b = 1;
+      }
+      func_1514B0CC(arg1, arg4, arg3, (*((f32 *) (arg0 + 0x18))) * 35.0f, (func_150ADA20() % 3U) + 2, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((f32 *) (arg0 + 0x18)), (*((f32 *) (arg0 + 0x18))) * 0.5f, *((s16 *) (p + 0xA)), *((s16 *) (p + 0xC)), b);
+    }
+  }
+  else
+  {
+    *((f32 *) (arg0 + 0x44)) *= *((f32 *) (arg0 + 0x14));
+    *((f32 *) (arg0 + 0x48)) = (*((f32 *) (arg0 + 0x14))) * (-(*((f32 *) (arg0 + 0x48))));
+    *((f32 *) (arg0 + 0x4C)) *= *((f32 *) (arg0 + 0x14));
+    *((f32 *) (arg0 + 0x50)) *= *((f32 *) (arg0 + 0x14));
+    *((f32 *) (arg0 + 0x54)) *= *((f32 *) (arg0 + 0x14));
+    *((f32 *) (arg0 + 0x58)) *= *((f32 *) (arg0 + 0x14));
+  }
+  return 1;
+}
+
+s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6);
+void func_151A7D70(u8 *arg0);
+void func_151A7E2C(u8 *arg0);
+void func_151A7EB8(u8 *arg0);
 
 s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 

@@ -3,7 +3,64 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3940.s")
+typedef struct {
+    u8 *p;
+    u8 u4;
+    s8 u5;
+    u8 pad6[2];
+    f32 v8[3];
+    f32 u14;
+    s16 u18;
+    s16 u1A;
+    s16 u1C;
+    u8 pad1E[2];
+    f32 u20;
+    f32 u24;
+    s8 u28;
+    s8 u29;
+    s8 u2A;
+    s8 u2B;
+    u8 u2C;
+    s8 u2D;
+    s8 u2E;
+    u8 pad2F;
+} S3940;
+s32 func_151A3AB4();
+s32 func_15160A58(u8 *, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 func_151A4B40(u8 *, u8);
+void func_151A4F4C(u8 *arg0, u8 arg1);
+void func_151A3940(u8 *arg0, u8 arg1) {
+    S3940 s;
+    f32 v[3];
+
+    s.p = arg0;
+    s.u4 = arg0[0x3B];
+    s.u5 = 1;
+    s.v8[0] = 0.0f;
+    s.v8[1] = 0.0f;
+    s.v8[2] = 0.0f;
+    s.u2B = 1;
+    s.u2C = 0xFF;
+    s.u2D = 8;
+    s.u2E = 0x1F;
+    s.u18 = 0xAA;
+    s.u1A = 0x28;
+    s.u1C = 7;
+    s.u28 = 2;
+    s.u29 = 4;
+    s.u2A = 1;
+    s.u14 = 0.018000001f;
+    s.u20 = 30.0f;
+    s.u24 = 0.98100007f;
+    func_151A3AB4(&s, arg1);
+    func_151A4B40(arg0, arg1);
+    func_151A4F4C(arg0, arg1);
+    func_10010154(0x1AA, arg0, 0x55F0, 0x3E8, 0xFA0);
+    v[0] = 0.0f;
+    v[1] = 0.0f;
+    v[2] = 0.0f;
+    func_15160A58(arg0, 1, v, 2, 0x12C, 0x50, 0xFF, 0xFF, 0x75, 0xFF, 0, -1, 0, 0, arg1, 1);
+}
 
 typedef struct { f32 x, y, z; } V33AB4;
 typedef struct { V33AB4 pos; s16 u0C; u16 u0E; s32 u10; s8 u14; s8 u15; u8 pad16[2]; s32 u18; } SA3AB4;

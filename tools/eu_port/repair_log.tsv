@@ -1103,3 +1103,15 @@ func_151AB874	CERR	6	DIFF4	n	y	func_1513418C block + 0xC memcpy block to ret+0x5
 func_151C75E8	DIFF52	10	OK	y	y	int 255 assign + local perm: empty if (!arg0 && !arg0 && !arg0) {} before return 1 (fakematch)
 func_151C01F0	CERR	4	DIFF19	n	y	config setter: ternaries in shifts; store/const scheduling only; remote perm DIFF32 -> DIFF19
 func_151CEACC	CERR	5	SIZE+1	n	n	V3 pos + h,r for func_1515C710; s32 pad[6] after locals fixes frame; left: tbl in a0 + extra nop after c.le.s
+func_151A3940	CERR	4	OK	y	n	0x30 param struct for K&R func_151A3AB4; u8 15th param of func_15160A58 so arg1 is reloaded not CSEd with the promoted K&R arg
+func_151A1D0C	DIFF	1	DIFF	n	n	same arg0+0x50 recompute-at-join shape as func_151A2B90 (IDO CSEs it); skipped
+func_151CDA70	SIZE-1	8	SIZE-2	n	n	func_15147FF0 caller SA 0x1C at 0x98 + SB 0x50; each named f32 temp takes a slot (frame +4); chained a.x=b.f6= fixes frame but h reloaded (SIZE+4); draft build_port/s165/DA70_c.c
+func_15195160	CERR	3	SIZE-1	n	n	decoded jtbl cases; left: ref reloads arg1 from its home slot at first use, mine keeps it in a0
+func_15193660	CERR	4	DIFF46	n	n	0x78 param block for func_15152A90; ref lw 0x1D4 into v0 (mine a3) and two 0.0f regs
+func_151C8D90	CERR	2	SIZE+2	n	n	hand draft 8D90_b: ref spills arg0 to its home across func_1507C7C0, mine keeps it in s1; frame layout r,pos,a,..,len,o1,o2,o3,o4,h,w,l,t
+func_151A79EC	DIFF75	6	DIFF7	n	y	ref call is 12 args (f12/f14 floats, arg0 not passed); u8 b slot 0x47 vs 0x43, 0x170 load order, mul.s operand order
+func_151B76F4	DIFF87	6	DIFF71	n	n	func_151307F0 0x68 block (call has 6 args, m2c f32 first is bogus); block lands 4 high (0x2C vs 0x28), a spill 0x28 vs 0x20; draft 76F4_e.c
+func_151CB2D8	CERR	9	DIFF147	n	n	Spawn559A/B + 0x14 block for func_151604E4; arg1 must be u8 (lbu 0x107; file prototype says s32); ref a.u14 &= ~6 then |= 6 as two stores; store scheduling left; draft B2D8_c.c
+func_151AB874	DIFF4	3	DIFF4	n	n	s165: moving ex.u8 load earlier gives DIFF12/19; perm DIFF4 draft stays best
+func_151D4898	SIZE-1	3	DIFF26	n	n	s165: missing or t7,v0 copy before -0x4000; separate temp, chained, inline cast forms all DIFF26+
+func_151A79EC	DIFF75	11	OK	y	y	12-arg func_1514B0CC call; perm: decl p before b, single p; then f14 * -f48 operand order by hand
