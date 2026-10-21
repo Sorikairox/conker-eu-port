@@ -1294,3 +1294,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 5. **Row pointer `(u8 *)D_800DBEF4 + i * 0xA0`** gives `addu base,off`; `&D_800DBEF4[i]` gives `addu off,base`. A CSE'd `i * 0xA0` spilled one slot too low was fixed by assigning it to the later loop variable first (`j = arg0 * 0xA0;`, permuter; `func_15115114`).
 6. **`(f32)(u32 % s16) + s16` with the add done as float**: two statements, `*p = (f32)((u32)rand() % n); *p += m;` (one store survives; `func_151770F4`). Rows of a 20-byte table indexed `idx*5`: cast to a `{ s32 x0; s32 pad[4]; }` row struct to get `sll; addu; sll` into one register.
 7. **`if (D != 0 && (p->f & 8))` loop over a strength-reduced row pointer**: `if (D) { p = ...; if (p->f & 8) { do { ...; p--; } while (D != 0 && (p->f & 8)); } }` matches; a `while` puts the pointer computation before the first test (`func_15115114`).
+
+## s151 recipes (int constant temp, spawner templates, written-back stack params)
+1. **`beq a2,v0` (constant register first) for `v != 0xFF`**: `int ff; ... ff = 0xFF;` right after the first load, then `v != ff` (permuter; `func_151E564C`). Keep the permuter's `int`/`unsigned int` spelling: `s32`/`u32` gave the old DIFF1 here.
+2. **Spawner templates are reusable across files**: `SpA3C` (game_eu_1D7790) for `func_15134DAC(&s, 0, arg0)` callers and the 0x3C `func_15152700` template (`s32 a, b; V3 pos; s16 x14..x1A; f32 x1C..x28; s16 x2C, x2E; f32 x30..x38`) matched on the first try (`func_151937F4`, `func_1519EFE8`). Rodata floats as `extern f32 D_...`.
+3. **`(K - x) * 4` distributed into `negu; sll; addiu K*4`**: write `(K - x) << 2` (`func_151D2D0C`).
+4. **m2c `u8` params with no `andi` in the ref** (`bnez a1`, `sb a0` straight from the arg register): declare them `s32` (`func_151D6CA0`).
+5. **A stack-passed param (arg4+) loaded into an s-register and stored back to its home slot at loop exit**: IDO does this when the param is assigned *and read* (`func_15196344` reads `arg4`); in `func_15195AA8` nothing visible reads it and no fake read reproduced it (open).
