@@ -80,7 +80,7 @@ f32 func_150488C8(f32 arg0) {
 
     temp_f2 = fabsf(arg0) * 255.99998f;
     temp_f6 = (s32) temp_f2;
-    temp_v1 = &((u8 *)&D_80098E00)[temp_f6];
+    temp_v1 = &((u16 *)&D_80098E00)[temp_f6];   /* P18: u16 table (sll 1) */
     temp_t9 = (*(u16 *)((u8 *)temp_v1 + 0));
     var_f16 = (f32) temp_t9;
     if ((s32) temp_t9 < 0) {

@@ -10,8 +10,127 @@ void func_150D513C(u8 *arg0);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D3F78.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D44E4.s")
+#ifdef NON_MATCHING
+f32 func_15143E64(s32);
+s32 func_1515C668(s32, s32 *, u8 *);
 
+s32 func_150D44E4(u8 *arg0) {
+    struct {
+        s32 u7C;
+        f32 u80;
+        f32 u84;
+        s32 u88;
+        s32 * u8C;
+    } sp;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f2;
+    f32 var_f0;
+    f32 var_f12;
+    f32 var_f24;
+    f32 var_f26;
+    f32 var_f2;
+    s32 *temp_t6;
+    s32 temp_a1;
+    s32 var_a0;
+    s32 var_t0;
+    s8 var_v0;
+    u8 *temp_v0;
+    u8 *temp_v1;
+    u8 *temp_v1_2;
+
+    temp_t6 = (*(s32 **)((u8 *)arg0 + 0x98));
+    sp.u8C = temp_t6;
+    var_t0 = (*(s32 *)((u8 *)arg0 + 0x94));
+    if (D_800C35EA != 1) {
+        sp.u88 = var_t0;
+        var_t0 = sp.u88;
+        if (func_1515C668(*temp_t6, &sp.u7C, arg0) != 0) {
+            var_f2 = func_15143E64(sp.u7C);
+        } else {
+            var_f2 = 0.0f;
+        }
+    } else if (D_800DBFF0->unk5F0 & 4) {
+        var_f2 = 0.0f;
+    } else {
+        var_f2 = 128.0f;
+    }
+    if (var_f2 < 10.0f) {
+        var_f26 = 0.0f;
+    } else if (var_f2 > 70.0f) {
+        var_f26 = 600.0f;
+    } else {
+        var_f26 = (var_f2 - 10.0f) * 0.016666668f * 600.0f;
+    }
+    if ((*(s8 *)((u8 *)arg0 + 0x2C)) >= 2) {
+        var_f24 = 0.0f;
+        var_a0 = (*(s8 *)((u8 *)arg0 + 0x2E)) - 1;
+        if (var_a0 < 0) {
+            var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
+        }
+        if (var_a0 != (*(s8 *)((u8 *)arg0 + 0x2D))) {
+            do {
+                temp_a1 = var_a0;
+                var_a0 -= 1;
+                if (var_a0 < 0) {
+                    var_a0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
+                }
+                temp_v1 = (temp_a1 * 0x14) + var_t0;
+                temp_f16 = (*(f32 *)((u8 *)temp_v1 + 0xC));
+                var_f24 += temp_f16;
+                if (var_f26 < var_f24) {
+                    if (temp_f16 != 0.0f) {
+                        temp_f14 = (var_f24 - var_f26) / temp_f16;
+                        temp_v0 = (var_a0 * 0x14) + var_t0;
+                        temp_f0 = (*(f32 *)((u8 *)temp_v0 + 0));
+                        temp_f2 = (*(f32 *)((u8 *)temp_v0 + 4));
+                        temp_f12 = (*(f32 *)((u8 *)temp_v0 + 8));
+                        (*(f32 *)((u8 *)temp_v0 + 0)) = (f32) (temp_f0 - ((temp_f0 - (*(f32 *)((u8 *)temp_v1 + 0))) * temp_f14));
+                        (*(f32 *)((u8 *)temp_v0 + 4)) = (f32) (temp_f2 - ((temp_f2 - (*(f32 *)((u8 *)temp_v1 + 4))) * temp_f14));
+                        (*(f32 *)((u8 *)temp_v0 + 8)) = (f32) (temp_f12 - ((temp_f12 - (*(f32 *)((u8 *)temp_v1 + 8))) * temp_f14));
+                        (*(f32 *)((u8 *)temp_v1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_v1 + 0xC)) * (1.0f - temp_f14));
+                    }
+                    var_f24 = var_f26;
+                    if (var_a0 != (*(s8 *)((u8 *)arg0 + 0x2D))) {
+                        do {
+                            (*(s8 *)((u8 *)arg0 + 0x2D)) = (s8) ((*(s8 *)((u8 *)arg0 + 0x2D)) + 1);
+                            if ((*(u8 *)((u8 *)arg0 + 0x25)) == (*(s8 *)((u8 *)arg0 + 0x2D))) {
+                                (*(s8 *)((u8 *)arg0 + 0x2D)) = 0;
+                            }
+                            (*(s8 *)((u8 *)arg0 + 0x2C)) = (s8) ((*(s8 *)((u8 *)arg0 + 0x2C)) - 1);
+                        } while (var_a0 != (*(s8 *)((u8 *)arg0 + 0x2D)));
+                    }
+                }
+            } while (var_a0 != (*(s8 *)((u8 *)arg0 + 0x2D)));
+        }
+        if (var_f24 != 0.0f) {
+            var_f12 = 1.0f / var_f24;
+        } else {
+            var_f12 = 0.0f;
+        }
+        sp.u80 = var_f12;
+        sp.u84 = var_f24;
+    }
+    if ((*(s8 *)((u8 *)arg0 + 0x2C)) >= 2) {
+        var_v0 = (*(s8 *)((u8 *)arg0 + 0x2E));
+        var_f0 = sp.u84;
+        do {
+            var_v0 -= 1;
+            if (var_v0 < 0) {
+                var_v0 = (*(u8 *)((u8 *)arg0 + 0x25)) - 1;
+            }
+            temp_v1_2 = (var_v0 * 0x14) + var_t0;
+            (*(f32 *)((u8 *)temp_v1_2 + 0x10)) = (f32) (var_f0 * ((*(f32 *)((u8 *)sp.u8C + 0x14)) * sp.u80));
+            var_f0 -= (*(f32 *)((u8 *)temp_v1_2 + 0xC));
+        } while (var_v0 != (*(s8 *)((u8 *)arg0 + 0x2D)));
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D44E4.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D4810.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D4ED0.s")

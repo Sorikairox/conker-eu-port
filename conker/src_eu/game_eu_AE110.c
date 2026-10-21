@@ -68,8 +68,108 @@ void func_15080BF4(s32 arg0, s32 arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080C28.s")
+#ifdef NON_MATCHING
+s32 allocate_memory(s32, s32, s32, s32);
+s32 func_1502B6BC(s32, s32, s32, s32, s32, s32, s32);
+s32 func_1516AD20(s32, s32, s32, void (*)(s32, s32, s32), s32 *, s32);
+s32 strlen(u8 *);
+extern u8 D_800BEECB;
+extern u8 D_800D3260;
 
+void func_15080C28(s32 arg0) {
+    s32 sp40;
+    s32 sp3C;
+    s32 sp38;
+    s32 sp30;
+    u32 sp2C;
+    s32 temp_v0;
+    s32 temp_v0_2;
+    s32 temp_v0_3;
+    s32 temp_v0_4;
+    s32 temp_v0_5;
+    s32 temp_v0_6;
+    s32 temp_v1;
+    s32 var_t3;
+    u32 temp_t6;
+
+    if (arg0 == 0) {
+        if (!(D_800D2E68 & 0x10)) {
+            sp40 = 1;
+        } else {
+            goto block_4;
+        }
+    } else {
+block_4:
+        sp40 = 0;
+    }
+    temp_v0 = func_1502B6BC(0, 0, 0, 3, 0x1A, (s32) D_800BEECB, (s32) D_800D1940);
+    D_800D1944 = temp_v0;
+    if (temp_v0 != 0) {
+        D_800D1994 = 0;
+        D_800D1998 = (*(s32 *)((u8 *)temp_v0 + 8));
+        D_800D1995 = (u8) ((u32) (*(u32 *)((u8 *)temp_v0 + 0xC)) >> 1);
+        if (sp40 != 0) {
+            temp_v0_2 = func_1502B6BC(0, 0, 0, 3, 0x1A, (s32) D_800BEECB, 0x43);
+            D_800D1948 = temp_v0_2;
+            if (D_800D1944 != 0) {
+                sp3C = strlen(*(s32 *)temp_v0_2) + 1;
+                temp_v0_3 = strlen((*(u8 **)((u8 *)D_800D1944 + 0)));
+                sp38 = temp_v0_3 + 1;
+                temp_v0_4 = allocate_memory(sp3C + temp_v0_3 + 2, 1, 0, 0);
+                D_800D194C = temp_v0_4;
+                bcopy((*(u8 **)((u8 *)D_800D1948 + 0)), (u8 *) temp_v0_4, sp3C);
+                (*(s8 *)((u8 *)((D_800D194C + sp3C)) + -1)) = 0xBD;
+                bcopy((*(u8 **)((u8 *)D_800D1944 + 0)), D_800D194C + sp3C, sp38);
+                temp_t6 = (u32) (*(u32 *)((u8 *)D_800D1948 + 0xC)) >> 1;
+                temp_v1 = D_800D1995 + temp_t6;
+                sp30 = temp_v1;
+                sp2C = temp_t6;
+                temp_v0_5 = allocate_memory(temp_v1 * 2, 1, 0, 0);
+                D_800D1998 = temp_v0_5;
+                bcopy((*(u8 **)((u8 *)D_800D1948 + 8)), (u8 *) temp_v0_5, sp2C * 2);
+                bcopy((*(u8 **)((u8 *)D_800D1944 + 8)), (temp_t6 * 2) + D_800D1998, D_800D1995 * 2);
+                D_800D1995 = (u8) sp30;
+                goto block_10;
+            }
+        } else {
+            D_800D1948 = 0;
+block_10:
+            D_800D1941 = 1;
+            if (sp40 != 0) {
+                var_t3 = D_800D194C;
+            } else {
+                var_t3 = (s32) (*(u8 **)((u8 *)D_800D1944 + 0));
+            }
+            (*(s32 *)((u8 *)D_800D1958 + 0)) = 0x38013;
+            if (((sp40 != 0) || (arg0 != 0) || !(D_800D2E60[(s32) D_800D1940 >> 3] & (1 << (D_800D1940 & 7)))) && (D_800D3260 == 0)) {
+                (*(s32 *)((u8 *)D_800D1958 + 0)) |= 0x60;
+            }
+            if ((arg0 != 0) || (D_800D1940 == 0x42)) {
+                (*(s32 *)((u8 *)D_800D1958 + 0)) |= 0x80;
+            }
+            D_800D1958[1] = var_t3;
+            (*(s16 *)((u8 *)D_800D1958 + 0x26)) = 0x64;
+            (*(s8 *)((u8 *)D_800D1958 + 8)) = 1;
+            (*(s16 *)((u8 *)D_800D1958 + 0x24)) = 0;
+            (*(s8 *)((u8 *)D_800D1958 + 0x2B)) = 0;
+            D_800D1958[6] = (s32) &D_800D1988;
+            D_800D1958[7] = (s32) &D_800D198C;
+            D_800D1958[8] = (s32) &D_800D1990;
+            (*(s8 *)((u8 *)D_800D1958 + 0x28)) = 0xFF;
+            (*(s8 *)((u8 *)D_800D1958 + 0x29)) = 0xFF;
+            (*(s8 *)((u8 *)D_800D1958 + 0x2A)) = 0xFF;
+            D_800D1988 = 78.0f;
+            D_800D198C = 48.0f;
+            D_800D1990 = 9.0f;
+            temp_v0_6 = func_1516AD20(0, 0, 0, func_15080BF4, D_800D1958, 0);
+            D_800D1950 = temp_v0_6;
+            (*(s8 *)((u8 *)temp_v0_6 + 0x14)) = 0;
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AE110/func_15080C28.s")
+#endif
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
 void func_10004074(s32);
 #else

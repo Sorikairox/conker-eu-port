@@ -31,8 +31,140 @@ void func_150AF7C0(s32 arg0, s16 *arg1) {
     func_151CFE48(arg0, (f32)(arg1[4] + arg1[1]), (f32)arg1[1], arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AF808.s")
+#ifdef NON_MATCHING
+s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+s32 memcpy(s32, s8 *, s32);
 
+void func_150AF808(u8 *arg0) {
+    struct {
+        s8 u8C;
+        s8 u8D;
+        s8 u8E;
+        s8 u8F;
+        f32 u90;
+        f32 u94;
+        f32 u98;
+        s32 u9C;
+        s32 uA0;
+        s16 uA4;
+        s16 uA6;
+        s32 uA8;
+        s32 uAC;
+        s8 uB0;
+        s8 uB1;
+        s8 uB2;
+        s8 uB3;
+        s8 uB4;
+        s8 uB5;
+        s8 uB6;
+        s8 uB7;
+        s8 uB8;
+        s8 uB9;
+        s16 uBA;
+        s16 uBC;
+        s16 uBE;
+        f32 uC0;
+        f32 uC4;
+        f32 uC8;
+        s32 uCC;
+        u8 padD0[0x8];
+        f32 uD8;
+        f32 uDC;
+        f32 uE0;
+        f32 uE4;
+        f32 uE8;
+        f32 uEC;
+        f32 uF0;
+        s32 uF4;
+        u8 padF8[0x4];
+        s8 uFC;
+        s8 uFD;
+        s8 uFE;
+        s8 uFF;
+        s8 u100;
+        s8 u101;
+    } sp;
+    f32 temp_f10;
+    f32 temp_f6;
+    s32 temp_v0;
+    s32 var_s0;
+    s32 var_v0;
+    u8 *temp_s1;
+
+    temp_s1 = arg0 + 0x28;
+    (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) + ((1352.0f + (func_150ADA68() * 1698.0f)) * 0.0001f * D_800BE9A4));
+    if ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f) {
+        sp.uB9 = 0x6C;
+        sp.uA4 = 0x5103;
+        sp.u9C = 0x200005;
+        sp.uBA = 0x46;
+        sp.uBC = 3;
+        sp.uF4 = 0x80DE07;
+        sp.uFC = 8;
+        sp.uFD = 6;
+        sp.uFE = 0x16;
+        sp.u8C = 0;
+        sp.u8D = 0;
+        sp.uA0 = 0;
+        sp.uA8 = 0;
+        sp.uAC = 0;
+        sp.uFF = -1;
+        sp.u100 = -1;
+        sp.u101 = 0;
+        sp.uBE = 0x46;
+        sp.uB0 = 0xC7;
+        sp.uB1 = 0x78;
+        sp.uB2 = 8;
+        sp.uB3 = 0xFF;
+        sp.uB4 = 0x30;
+        sp.uB5 = 0xE;
+        sp.uB6 = 0;
+        sp.uB8 = 0xFF;
+        sp.u98 = 0.97047f;
+        sp.uC0 = 1.021029f;
+        (*(s32 *)((u8 *)(&sp.uCC) + 0)) = (s32) (*(s32 *)((u8 *)temp_s1 + 0));
+        (*(s32 *)((u8 *)(&sp.uCC) + 4)) = (s32) (*(s32 *)((u8 *)temp_s1 + 4));
+        (*(s32 *)((u8 *)(&sp.uCC) + 8)) = (s32) (*(s32 *)((u8 *)temp_s1 + 8));
+        sp.uD8 = 0.0f;
+        sp.uDC = 0.0f;
+        sp.uE0 = 0.0f;
+        sp.uE4 = 0.0f;
+        sp.uE8 = 0.0f;
+        sp.uEC = 0.0f;
+        do {
+            sp.u8E = (func_150ADA20() % 5U) + 4;
+            sp.u8F = (func_150ADA20() % 5U) + 4;
+            sp.u90 = func_150ADA68() * 11.0f;
+            sp.u94 = func_150ADA68() * 11.0f;
+            temp_f10 = func_150ADA68() * 0.172f;
+            sp.uF4 &= ~0xC0;
+            sp.uF0 = temp_f10 + 0.098000005f;
+            var_s0 = 0;
+            if (func_150ADA20() & 1) {
+                var_s0 = 0x80;
+            }
+            if (func_150ADA20() & 1) {
+                var_v0 = 0x40;
+            } else {
+                var_v0 = 0;
+            }
+            sp.uF4 |= var_v0 | var_s0;
+            sp.uB7 = (func_150ADA20() % 101U) + 0x64;
+            sp.uA6 = (func_150ADA20() % 51U) + 0x50;
+            temp_f6 = (func_150ADA68() * 71.0f) + 80.0f;
+            sp.uC8 = temp_f6;
+            sp.uC4 = temp_f6;
+            temp_v0 = func_151307F0(&sp.u9C, 0, 0, 0x10, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            if (temp_v0 != 0) {
+                memcpy(temp_v0 + 0xA8, &sp.u8C, 0x10);
+            }
+            (*(f32 *)((u8 *)temp_s1 + 0xC)) = (f32) ((*(f32 *)((u8 *)temp_s1 + 0xC)) - 1.0f);
+        } while ((*(f32 *)((u8 *)temp_s1 + 0xC)) > 1.0f);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AF808.s")
+#endif
 s32 func_150AFBC4(u8 *arg0, s32 arg1) {
     u8 *p = arg0 + 0xA8;
 
@@ -65,7 +197,6 @@ void func_150AFC70(s32 arg0, s32 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150AFCA4.s")
-
 s32 func_150B00D4(u8 *arg0) {
     u8 *v = arg0 + 0x70;
     *(f32 *)(arg0 + 0x78) = *(f32 *)(arg0 + 0x7C) * D_800BE9A4 + *(f32 *)(arg0 + 0x78);

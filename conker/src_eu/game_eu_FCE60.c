@@ -3,8 +3,67 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CF650.s")
+#ifdef NON_MATCHING
+void func_1504715C(void *, u8 *);
+void func_15143794(s16, s16, f32, void *);
+void func_1515C7B4(u8 *, f32 *, f32 *, f32 *);
 
+void func_150CF650(u8 *arg0) {
+    struct {
+        f32 uBC;
+        u8 padC0[0x8];
+        f32 uC8;
+        f32 uCC;
+        f32 uD0;
+        f32 uD4;
+        f32 uD8;
+        s32 uDC;
+        u8 padE0[0x20];
+        f32 u100;
+        f32 u104;
+        f32 u108;
+        f32 u10C;
+    } sp;
+    f32 temp_f20;
+    s16 temp_s0_2;
+    s32 temp_s0_3;
+    s32 temp_s0_4;
+    s32 temp_s1;
+    u8 *temp_s0;
+    u8 *temp_s2;
+
+    temp_s0 = (*(u8 **)((u8 *)arg0 + 0x28));
+    temp_s2 = arg0 + 0x28;
+    if (((*(s32 *)((u8 *)temp_s0 + 0)) == 0) || ((*(u8 *)((u8 *)temp_s2 + 4)) != (*(u8 *)((u8 *)temp_s0 + 0x3B)))) {
+        (*(s16 *)((u8 *)arg0 + 0xE)) = -1;
+        return;
+    }
+    if ((*(s32 *)((u8 *)temp_s0 + 0x1D4)) != 0) {
+        (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) + ((0.06f + (func_150ADA68() * 0.0704f)) * D_800BE9A4));
+        func_1515C7B4(temp_s0, &sp.u104, &sp.uD8, &sp.uD4);
+        sp.u100 = (sp.uD8 + sp.uD4) * 0.5f;
+        func_1504715C(&sp.uDC, temp_s0);
+        if ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f) {
+            do {
+                temp_s0_2 = func_150ADA20() & 0xFF;
+                func_15143794(temp_s0_2, (s16) ((func_150ADA20() % 76U) - 0x40), sp.u100, &sp.uC8);
+                sp.uC8 += sp.u104;
+                sp.uCC += sp.u108;
+                sp.uD0 += sp.u10C;
+                temp_s0_3 = func_150ADA20();
+                func_15143794(temp_s0_2, (s16) (((u32) temp_s0_3 % 54U) - 0x38), (func_150ADA68() * 1.4430001f) + 2.2680001f, &sp.uBC);
+                temp_f20 = func_150ADA68();
+                temp_s1 = func_150ADA20();
+                temp_s0_4 = func_150ADA20();
+                func_151D9014(&sp.uC8, &sp.uBC, 5U, (temp_f20 * 0.286f) + -0.78700006f, (s16) (((u32) temp_s1 % 21U) + 0x1E), (u8) (((u32) temp_s0_4 % 156U) + 0x64), (func_150ADA68() * 50.0f) + 48.0f, 1U, 1.0f, 1.0f, 0U, (s32) &sp.uDC, 1U, 0U, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                (*(f32 *)((u8 *)temp_s2 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s2 + 8)) - 1.0f);
+            } while ((*(f32 *)((u8 *)temp_s2 + 8)) > 1.0f);
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FCE60/func_150CF650.s")
+#endif
 void func_150CF994(struct102 *arg0, u8 *arg1, u8 arg2) {
     u8 *v = (u8 *)arg0 + 0x28;
     if (arg2 == 0) {

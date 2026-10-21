@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_15141CC0(u32 arg0);
+#endif
 
 
 void func_15141970(struct37 *arg0) {
@@ -73,7 +76,51 @@ void func_151419D0(struct102 *arg0, u8 *arg1, s32 arg2) {
 //         }
 //     }
 // }
+#ifdef NON_MATCHING
+u32 func_1510FE4C(s32);
+s32 func_15141C0C(struct127 *);
+
+void func_15141A7C(struct127 *arg0, s32 arg1) {
+    struct_eu_link *sp3C;
+    s32 temp_v0;
+    s32 temp_v0_2;
+    struct32 *temp_v1;
+    struct_eu_attached *temp_v0_3;
+    struct_eu_link *temp_a0;
+    struct_eu_link *temp_t8;
+
+    if (D_800BE616 == 0) {
+        temp_v0 = func_15141C0C(arg0);
+        if (D_8008A084[temp_v0] != 0) {
+            temp_v0_2 = ((s32 (*)(s32, struct127 *)) D_8008A084[temp_v0])(func_15141CC0(func_1510FE4C(arg0->unk184)), arg0);
+            if (temp_v0_2 != -1) {
+                temp_v1 = &D_8008A0B4[temp_v0_2];
+                if (temp_v1->unk0 != 0) {
+                    if (temp_v1->unk4 > 0) {
+                        func_15141E38(arg0, temp_v0_2);
+                    } else {
+                        ((s32 (*)(struct127 *, s32, s32, s32)) D_8008A0B4[temp_v0_2].unk0)(arg0, arg1, 0, temp_v0_2);
+                    }
+                }
+            }
+        }
+        temp_a0 = arg0->unk2F4;
+        sp3C = temp_a0;
+        if (func_1514F250(temp_a0, 0x1A, &sp3C) != 0) {
+            do {
+                temp_v0_3 = sp3C->unk10;
+                if (D_8008A0B4[temp_v0_3->unk28].unk0 != 0) {
+                    ((s32 (*)(struct127 *, s32, s16)) D_8008A0B4[temp_v0_3->unk28].unk0)(arg0, arg1, temp_v0_3->unkE);
+                }
+                temp_t8 = sp3C->unk14;
+                sp3C = temp_t8;
+            } while (func_1514F250(temp_t8, 0x1A, &sp3C) != 0);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141A7C.s")
+#endif
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15141C0C.s")
 s32 func_15141CC0(u32 arg0) {

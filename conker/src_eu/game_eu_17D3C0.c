@@ -202,7 +202,6 @@ void func_15151500(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15151BE0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15151FA8.s")
-
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151522DC.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152700.s")
@@ -273,11 +272,98 @@ void func_1515302C(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151530A8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151534E0.s")
+#ifdef NON_MATCHING
+s32 func_15167D84(s32 *, s32, s32, s32, s32, s32);
 
+void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
+    struct {
+        s32 u88;
+        u8 pad8C[0x8];
+        s16 u94;
+        s16 u96;
+        s16 u98;
+        s16 u9A;
+        s16 u9C;
+        s16 u9E;
+        s16 uA0;
+        u8 padA2[0x2];
+        s8 uA4;
+        s8 uA5;
+        s8 uA6;
+        s8 uA7;
+        s16 uA8;
+        s16 uAA;
+        s16 uAC;
+        s16 uAE;
+        s16 uB0;
+        s8 uB2;
+        u8 padB3[0x1];
+        u8 uB4;
+        u8 uB5;
+        u8 uB6;
+        u8 uB7;
+        s8 uB8;
+        s8 uB9;
+        s8 uBA;
+        u8 padBB[0x1];
+        s16 uBC;
+    } sp;
+    f32 temp_f0;
+    f32 temp_f20;
+    f32 temp_f22;
+    f32 temp_f24;
+    f32 temp_f26;
+    f32 temp_f28;
+    s16 temp_s1;
+    s16 temp_s2;
+    s32 var_s3;
+
+    sp.u98 = (s16) (s32) (*(f32 *)((u8 *)arg0 + 0));
+    sp.u9A = (s16) (s32) (*(f32 *)((u8 *)arg0 + 4));
+    sp.u9C = (s16) (s32) (*(f32 *)((u8 *)arg0 + 8));
+    sp.uA4 = (s8) (s32) ((*(f32 *)((u8 *)arg0 + 0)) * 256.0f);
+    sp.uA5 = (s8) (s32) ((*(f32 *)((u8 *)arg0 + 4)) * 256.0f);
+    sp.uA6 = (s8) (s32) ((*(f32 *)((u8 *)arg0 + 8)) * 256.0f);
+    sp.uB4 = (*(u8 *)((u8 *)arg0 + 0x3C));
+    sp.uB5 = (*(u8 *)((u8 *)arg0 + 0x3C));
+    sp.uB8 = 0;
+    sp.uB9 = 0;
+    sp.uBA = 0;
+    sp.uB6 = (*(u8 *)((u8 *)arg0 + 0x3C));
+    sp.uB7 = (*(u8 *)((u8 *)arg0 + 0x3D));
+    sp.uA7 = (*(s8 *)((u8 *)arg0 + 0x28));
+    sp.u94 = 0;
+    sp.uBC = (s16) (*(u8 *)((u8 *)arg0 + 0x29));
+    sp.u96 = (*(s16 *)((u8 *)arg0 + 0x2E));
+    sp.u88 = (*(s32 *)((u8 *)arg0 + 0x38));
+    var_s3 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0xE)) + 1)) + (*(s16 *)((u8 *)arg0 + 0xC));
+    if (var_s3 != 0) {
+        do {
+            temp_s1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x12)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x10));
+            temp_s2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x16)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x14));
+            temp_f28 = func_151423D8(temp_s2 & 0xFF);
+            temp_f22 = func_151423D8((temp_s2 - 0x40) & 0xFF);
+            temp_f24 = func_151423D8(temp_s1 & 0xFF);
+            temp_f26 = func_151423D8((temp_s1 - 0x40) & 0xFF);
+            temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x1C))) + (*(f32 *)((u8 *)arg0 + 0x18));
+            temp_f0 = temp_f20 * temp_f28;
+            sp.uB0 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x22)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x20));
+            sp.u9E = (s16) (s32) (temp_f0 * temp_f26);
+            sp.uA8 = (s16) (s32) (-temp_f20 * temp_f22);
+            sp.uA0 = (s16) (s32) (temp_f0 * temp_f24);
+            sp.uAA = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x26)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x24));
+            sp.uB2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x2C)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x2A));
+            sp.uAC = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x32)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x30));
+            sp.uAE = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x36)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x34));
+            func_15167D84(&sp.u88, 0, 0, -1, arg1 & 0xFF, arg2);
+            var_s3 -= 1;
+        } while (var_s3 != 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15153808.s")
-
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15153BA4.s")
-
 typedef struct { f32 v[3]; } V3_3f24;
 typedef struct {
     V3_3f24 pos;

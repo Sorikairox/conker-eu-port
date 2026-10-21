@@ -47,13 +47,45 @@ WORD_RE = re.compile(r"/\*\s+([0-9A-F]+)\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(
 PAGE = 0x1000
 HEAP_LO, HEAP_HI = 0x80400000, 0x80600000       # fake heap (lazy random)
 STK_LO, STK_TOP = 0x80600000, 0x80680000        # stack (zero-filled)
-TU_BASE = 0x80700000                            # candidate TU .rodata/.data/.bss
+TU_BASE = 0x80705000                            # candidate TU .rodata/.data/.bss
+# P18: NOT 0x80700000. Unicorn 2.0.1 bug: after an access to virtual page 0 (a null pointer + offset), a kseg0
+# page in the same softmmu TLB slot ((vaddr >> 12) & 0xFF == 0: 0x80000000, 0x80100000, ..., 0x80700000)
+# reads wrong data or segfaults (port_work/p18/uc_alias.py). With TU_BASE there, a candidate's own float
+# literal read 0 whenever the function had touched page 0 first: the P17 "literal reads as 0" false DIFFER.
+# Heap pointers skip those pages too (heap_ptr).
+def heap_ptr(v):
+    return v + PAGE if (v >> 12) & 0xFF == 0 else v
 RET_MAGIC = 0x807FF000
 CAND_ALT = 0x0F000000                           # (| the 256 MB jal region of vram) candidate code when it would overlap a callee
 SP_ENTRY = STK_TOP - 0x100
+# P18: Unicorn 2.0.1's reg_read/reg_write of the MIPS FPRs are no-ops (reg_write(F4) then mfc1 reads the old
+# value; reg_read(Fn) is always 0). So float args were never set, stubs never returned a float, and f0 returns
+# / FP call args / f20-f31 were compared as 0 == 0. Leftover f0 after a stubbed float callee then differed by
+# register allocation: the "candidate float literal reads as 0" false DIFFER of P17. FPRs now move through
+# memory with real lwc1/swc1 code: a prologue loads the inputs, every stub jumps to a helper that saves
+# f12-f15 and loads the random f0/f1/f2, and an epilogue at RET_MAGIC saves f0/f1/f20-f31. Base register k0
+# (never used by compiled code) = SCR, a scratch page whose writes are not recorded.
+SCR = 0x807FE000
+HELPER_OFF = 0x0E000000                         # (| region) the FPR helper every stub jumps to
+PROLOGUE = SCR + 0x400
+_K0 = 26
+def _lwc1(ft, off): return (49 << 26) | (_K0 << 21) | (ft << 16) | off
+def _swc1(ft, off): return (57 << 26) | (_K0 << 21) | (ft << 16) | off
+# SCR layout: +0x00 f12-f15 at the last call, +0x10 f0/f1/f2 a stub returns, +0x40 f12-f15 inputs,
+# +0x50 f20-f31 inputs, +0x100 f0/f1 at return, +0x108 f20-f31 at return
+HELPER_CODE = [_swc1(12 + i, 4 * i) for i in range(4)] + [_lwc1(i, 0x10 + 4 * i) for i in range(3)] + [0x03E00008, 0]
+PROLOGUE_CODE = [_lwc1(12 + i, 0x40 + 4 * i) for i in range(4)] + [_lwc1(20 + i, 0x50 + 4 * i) for i in range(12)] + \
+    [0x03600008, 0]   # jr k1 (= the function)
+EPILOGUE_CODE = [_swc1(0, 0x100), _swc1(1, 0x104)] + [_swc1(20 + i, 0x108 + 4 * i) for i in range(12)] + \
+    [(43 << 26) | (_K0 << 21) | 0x13C, 0, 0]   # sw zero, 0x13C(k0): the epilogue completed
+RET_END = RET_MAGIC + 4 * len(EPILOGUE_CODE)
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 OUTPARAMS = os.environ.get('DIFFTEST_OUTPARAMS') == '1' or '--outparams' in sys.argv
 NOFORK = os.environ.get('DIFFTEST_NOFORK') == '1'   # P16: run trials in-process (old behaviour)
+
+
+def words2b(ws):
+    return b''.join(struct.pack('>I', w) for w in ws)
 
 
 def phys(a):
@@ -125,7 +157,7 @@ def find_file(func):
         src = open(p).read()
         for m in PRAG.finditer(src):
             if m.group(2) == func: return p, m.group(1) + '/' + func + '.s', src
-        if re.search(r'^[^\n;#/]*\b%s\s*\([^;]*?\)\s*\{' % func, src, re.M):
+        if re.search(r'^[A-Za-z_][^\n;#/]*\b%s\s*\([^;]*?\)\s*\{' % func, src, re.M):
             return p, None, src
     return None, None, None
 
@@ -157,7 +189,7 @@ def _cc_cmd(p):
 
 def func_span(src, func):
     """(start, end) of the definition of func in src (start of its declarator line .. closing brace)"""
-    m = re.search(r'^[^\n;#/]*\b%s\s*\([^;{]*?\)\s*\{' % func, src, re.M)
+    m = re.search(r'^[A-Za-z_][^\n;#/]*\b%s\s*\([^;{]*?\)\s*\{' % func, src, re.M)
     if not m: return None
     i = m.end() - 1; depth = 0
     while i < len(src):
@@ -380,6 +412,23 @@ def proto_fslots(tu, name):
         return out
     return set()
 
+FREGS = {}
+def proto_fregs(tu, name):
+    """P18: FP argument registers (f12-f15) the prototype of name passes (o32: only leading float/double params
+    travel in FPRs), None if unknown"""
+    for m in re.finditer(r'\b%s\s*\(([^()]*)\)\s*[;{]' % re.escape(name), tu):
+        ps = [p.strip() for p in m.group(1).split(',') if p.strip()]
+        if ps == ['void'] or not ps: return set()
+        out = set(); fr = 12
+        for p in ps[:2]:
+            if '*' in p: break
+            if re.search(r'\b(f32|float)\b', p): out.add(fr); fr += 2
+            elif re.search(r'\b(f64|double)\b', p): out |= {fr, fr + 1}; fr += 2
+            else: break
+        return out
+    return None
+
+
 def ret_kind(tu, func):
     m = re.search(r'^([^\n;#/(){}]*?)\b%s\s*\([^;{]*?\)\s*\{' % func, tu, re.M)
     if not m:
@@ -425,7 +474,7 @@ def rand_word(seed, addr):
     if c < 35: return r % 9
     if c < 45: return ((r % 5) << 16) | ((r >> 8) % 5)                     # two small halfwords
     if c < 55: return ((r % 4) << 24) | (((r >> 4) % 4) << 16) | (((r >> 8) % 4) << 8) | ((r >> 12) % 4)
-    if c < 77: return HEAP_LO + (r % ((HEAP_HI - HEAP_LO) // 16)) * 16
+    if c < 77: return heap_ptr(HEAP_LO + (r % ((HEAP_HI - HEAP_LO) // 16)) * 16)
     if c < 83: return fbits(SMALLF[r % len(SMALLF)])
     if c < 92: return fbits(((r % 20001) - 10000) / 100.0)
     return r
@@ -436,7 +485,7 @@ def fbits(x):
 def rand_arg(rng, kind='any'):
     c = rng.random()
     if kind == 'ptr':
-        return 0 if c < 0.04 else HEAP_LO + rng.randrange((HEAP_HI - HEAP_LO) // 16) * 16
+        return 0 if c < 0.04 else heap_ptr(HEAP_LO + rng.randrange((HEAP_HI - HEAP_LO) // 16) * 16)
     if kind == 'float':
         return fbits(rng.choice(SMALLF)) if c < 0.3 else rand_float_bits(rng)
     if kind == 'int':
@@ -444,7 +493,7 @@ def rand_arg(rng, kind='any'):
         if c < 0.7: return 0xFFFFFFFF
         if c < 0.85: return rng.randrange(0, 0x10000)
         return rng.getrandbits(32)
-    if c < 0.45: return HEAP_LO + rng.randrange((HEAP_HI - HEAP_LO) // 16) * 16
+    if c < 0.45: return heap_ptr(HEAP_LO + rng.randrange((HEAP_HI - HEAP_LO) // 16) * 16)
     if c < 0.80: return rng.randrange(0, 9)
     if c < 0.85: return 0xFFFFFFFF
     if c < 0.95: return rng.randrange(0, 0x10000)
@@ -516,7 +565,9 @@ class Run:
         code = b''.join(struct.pack('>I', w) for w in mwords)
         self.premap(vram, code, overlay=True)
         self.premap(STK_LO, bytes(STK_TOP - STK_LO + 0x1000))
-        self.premap(RET_MAGIC, bytes(PAGE))
+        self.premap(RET_MAGIC, words2b(EPILOGUE_CODE) + bytes(PAGE - 4 * len(EPILOGUE_CODE)))
+        self.premap(SCR, bytes(0x400) + words2b(PROLOGUE_CODE) + bytes(PAGE - 0x400 - 4 * len(PROLOGUE_CODE)))
+        self.helpers = set(); self.pending = None
         mu.hook_add(UC_HOOK_MEM_UNMAPPED, self.on_unmapped)
         mu.hook_add(UC_HOOK_MEM_WRITE, self.on_write)
         mu.hook_add(UC_HOOK_BLOCK, self.on_block)
@@ -549,7 +600,13 @@ class Run:
         try:
             p = phys(a)
             for pp in {p & ~(PAGE - 1), (p + 7) & ~(PAGE - 1)}: self.ensure(pp)
-            self.mu.mem_write(p, b'\x03\xe0\x00\x08\x00\x00\x00\x00')
+            h = ((a + 4) & 0xF0000000) | HELPER_OFF
+            if h < 0xC0000000:   # P18: j helper (saves f12-f15, loads the stub's f0/f1/f2, jr ra)
+                if h not in self.helpers:
+                    self.ensure(phys(h)); self.mu.mem_write(phys(h), words2b(HELPER_CODE)); self.helpers.add(h)
+                self.mu.mem_write(p, struct.pack('>II', 0x08000000 | ((h >> 2) & 0x3FFFFFF), 0))
+            else:
+                self.mu.mem_write(p, b'\x03\xe0\x00\x08\x00\x00\x00\x00')
             self.mu.ctl_remove_cache(a, a + 8)
         except Exception:
             pass
@@ -650,7 +707,7 @@ class Run:
 
     def on_write(self, mu, access, addr, size, value, ud):
         p = phys(addr)
-        if phys(STK_LO) <= p < phys(STK_TOP) + PAGE: return
+        if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return
         v = value & ((1 << (8 * size)) - 1)
         for i in range(size):
             self.writes[p + i] = (v >> (8 * (size - 1 - i))) & 0xFF
@@ -665,11 +722,21 @@ class Run:
     def norm(self, v):
         return 'STK' if phys(STK_LO) <= phys(v) < phys(STK_TOP) + PAGE else v
 
+    def flush_fregs(self):
+        """P18: f12-f15 of the last call, saved by the helper after its on_block"""
+        if self.pending is not None:
+            v = struct.unpack('>4I', bytes(self.mu.mem_read(phys(SCR), 16)))
+            self.calls[self.pending]['fregs'] = {12 + i: v[i] for i in range(4)}
+            self.pending = None
+
     def on_block(self, mu, addr, size, ud):
+        if (addr & 0x0FFFFFFF) == HELPER_OFF and (addr & 0xF0000000) | HELPER_OFF in self.helpers: return
+        if addr == PROLOGUE: return
+        self.flush_fregs()
         if self.vram <= addr < self.end:
             self.icount += max(1, size // 4); return
         if addr == RET_MAGIC:
-            self.done = True; mu.emu_stop(); return
+            self.done = True; return   # the epilogue saves the FPRs, emu_start stops at RET_END
         ra = mu.reg_read(UC_MIPS_REG_RA)
         site = (ra - 8 - self.vram) // 4
         # tail call: ra still points at the caller
@@ -680,15 +747,15 @@ class Run:
         sp = mu.reg_read(UC_MIPS_REG_SP)
         regs = [mu.reg_read(r) for r in A_REGS]
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40, 4)]
-        fregs = {n: mu.reg_read(FREG(n)) & 0xFFFFFFFF for n in (12, 13, 14, 15)}
+        fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
+        self.pending = len(self.calls) - 1
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
         r = random.Random(h32('ret', self.seed, addr, k))
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
         if (addr & 0x1FFFFFFF) in STUBRET: mu.reg_write(UC_MIPS_REG_V0, STUBRET[addr & 0x1FFFFFFF])
-        mu.reg_write(FREG(0), rand_float_bits(r)); mu.reg_write(FREG(1), rand_float_bits(r))
-        mu.reg_write(FREG(2), rand_float_bits(r))
+        mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
         # word through each aligned aN that points into the caller's frame (out-params such as
         # osRecvMesg's &msg). Keyed by (callee, call number, arg index), so both runs see the same value.
@@ -709,17 +776,19 @@ class Run:
         mu = self.mu
         self.done = False
         for r, v in zip(A_REGS, inputs['a']): mu.reg_write(r, v)
-        for i, v in enumerate(inputs['f']): mu.reg_write(FREG(12 + i), v)
+        mu.mem_write(phys(SCR) + 0x40, struct.pack('>4I', *inputs['f']))
+        mu.mem_write(phys(SCR) + 0x50, struct.pack('>12I', *[0x3F800000 + n for n in range(20, 32)]))
+        mu.reg_write(UC_MIPS_REG_K0, SCR); mu.reg_write(UC_MIPS_REG_K1, self.vram)
+        mu.mem_write(phys(SCR) + 0x13C, b'\x00\x00\x00\x01')
         for i, v in enumerate(inputs['stk']): mu.mem_write(phys(SP_ENTRY) + 16 + 4 * i, struct.pack('>I', v))
         for i, r in enumerate(S_REGS): mu.reg_write(r, 0x5EED0000 + i)
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
-        for n in range(20, 32): mu.reg_write(FREG(n), 0x3F800000 + n)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
-        self.fault = None; self.icount = 0; pc = self.vram; self.d64fault = None
+        self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
         while True:
             self.resume = None
             try:
-                mu.emu_start(pc, RET_MAGIC, count=max(1, self.maxi - self.icount))
+                mu.emu_start(pc, RET_END, count=max(1, self.maxi - self.icount))
             except UcError as e:
                 self.fault = '%s at 0x%08X' % (e, mu.reg_read(UC_MIPS_REG_PC))
                 self.fault_pc = self.last_pc if self.last_pc is not None else mu.reg_read(UC_MIPS_REG_PC)
@@ -732,14 +801,15 @@ class Run:
                 break
             if self.resume is None or self.done: break
             pc = self.resume
-            if pc == RET_MAGIC: self.done = True; mu.reg_write(UC_MIPS_REG_PC, pc); break
             if self.icount >= self.maxi or len(self.calls) > 20000: break
+        self.flush_fregs()
         pc = mu.reg_read(UC_MIPS_REG_PC)
-        self.done = self.done or pc == RET_MAGIC
+        fo = struct.unpack('>16I', bytes(mu.mem_read(phys(SCR) + 0x100, 64)))
+        self.done = self.done and fo[15] == 0   # (Unicorn may stop with PC short of RET_END)
         self.out = dict(v0=mu.reg_read(UC_MIPS_REG_V0), v1=mu.reg_read(UC_MIPS_REG_V1),
-                        f0=mu.reg_read(FREG(0)) & 0xFFFFFFFF, f1=mu.reg_read(FREG(1)) & 0xFFFFFFFF,
+                        f0=fo[0], f1=fo[1],
                         sp=mu.reg_read(UC_MIPS_REG_SP), s=[mu.reg_read(r) for r in S_REGS],
-                        fs=[mu.reg_read(FREG(n)) & 0xFFFFFFFF for n in range(20, 32)])
+                        fs=list(fo[2:]))
         return self
 
 
@@ -797,7 +867,9 @@ def compare(R, C, rk, arity):
             j = (o - 16) // 4
             if j < len(a['stkw']) and not same_val(R, a['stkw'][j], C, b['stkw'][j]):
                 return 'call #%d %s: stack arg sp+0x%X ref=0x%X cand=0x%X' % (i, a['name'], o, a['stkw'][j], b['stkw'][j])
-        for fr in sorted(a['f'] | b['f']):
+        pf = FREGS.get(a['name'])
+        # unknown prototype: only FPRs both sides set right before the call (a lone scratch f12 is not an argument)
+        for fr in sorted(a['f'] & b['f'] if pf is None else pf):
             if a['fregs'][fr] != b['fregs'][fr]:
                 return 'call #%d %s: f%d ref=0x%X cand=0x%X' % (i, a['name'], fr, a['fregs'][fr], b['fregs'][fr])
         if a['mem'] != b['mem']:
@@ -843,7 +915,7 @@ def learn_pointer(rwords, vram, trial, romdata, tu, maxi, inputs, forced):
     if (w >> 26) not in LOADSTORE: return False
     B = R.fault_regs[(w >> 21) & 31]
     near = lambda v: 0 <= (B - v) & 0xFFFFFFFF < 0x8000
-    ptr = HEAP_LO + (h32('force', trial, B, len(forced)) % ((HEAP_HI - HEAP_LO) // 16)) * 16
+    ptr = heap_ptr(HEAP_LO + (h32('force', trial, B, len(forced)) % ((HEAP_HI - HEAP_LO) // 16)) * 16)
     stk = (phys(STK_LO), phys(STK_TOP) + PAGE)
     for a, v in reversed(R.loads):
         if near(v) and not stk[0] <= phys(a) < stk[1] and phys(a) not in forced:
@@ -885,6 +957,43 @@ def strip_pad(words):
                            or ((words[n - 1] >> 26) == 0 and (words[n - 1] & 0x3E) == 8)):
         n += 1   # the last instruction has a delay slot (a nop)
     return words[:n]
+
+
+def die_with_parent(ppid):
+    """P18: SIGKILL this process when its parent dies (Linux prctl PR_SET_PDEATHSIG). A hung trial child used to
+    survive convert.py killing its function process and kept a core at 100% (P17)."""
+    try:
+        import ctypes, signal
+        ctypes.CDLL(None, use_errno=True).prctl(1, signal.SIGKILL, 0, 0, 0)
+        if os.getppid() != ppid: os._exit(0)   # the parent died before prctl
+    except Exception:
+        pass
+
+
+def wait_child(pid, rfd, wall):
+    """P18: read a trial child's pickled result with a wall-clock limit -> (bytes or None, status, hung).
+    The child is killed on timeout, and also if anything (convert.py's SIGALRM _Hang) interrupts the wait."""
+    import select, time, signal
+    chunks = []; hung = False; deadline = time.time() + wall; reaped = False; st = 0
+    try:
+        while True:
+            left = deadline - time.time()
+            if left <= 0:
+                hung = True; break
+            r, _, _ = select.select([rfd], [], [], min(left, 5.0))
+            if not r: continue
+            c = os.read(rfd, 1 << 16)
+            if not c: break
+            chunks.append(c)
+        if hung:
+            os.kill(pid, signal.SIGKILL)
+        _, st = os.waitpid(pid, 0); reaped = True
+    finally:
+        if not reaped:
+            try: os.kill(pid, signal.SIGKILL); os.waitpid(pid, 0)
+            except OSError: pass
+        os.close(rfd)
+    return (b''.join(chunks) if chunks and not hung else None), st, hung
 
 
 def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verbose=False, tmp=None):
@@ -948,15 +1057,16 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         for c in R.calls + C.calls:
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
-                new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn))
-                arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]
+                new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
+                arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
         why = compare(R, C, rk, arity)
         if verbose:
             print('trial %d: %s ref(done=%s fault=%s calls=%d) cand(done=%s fault=%s calls=%d)' % (
                 t, why or 'same', R.done, R.fault, len(R.calls), C.done, C.fault, len(C.calls)))
             if why: explain(R, C, inputs, forced)
         return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new)
-    crashed = 0
+    crashed = 0; hung = 0
+    twall = float(os.environ.get('DIFFTEST_TRIAL_WALL', '0')) or max(60.0, 2 * budget)
     for t in range(trials):
         if time.time() - t0 > budget and t >= 8:
             break
@@ -971,10 +1081,13 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             # through them the convert.py Pool deadlock. A child that still dies counts as inconclusive.
             sys.stdout.flush()
             rfd, wfd = os.pipe()
+            ppid = os.getpid()
             pid = os.fork()
             if pid == 0:
+                die_with_parent(ppid)
                 os.close(rfd)
                 gc.disable()   # no collection = no uc_close inside the child (dropped learn_pointer runs)
+                if os.environ.get('DIFFTEST_TEST_HANG') == str(t): time.sleep(1e9)   # P18 test knob: a hung trial
                 try: o = one(t)
                 except BaseException as e: o = dict(exc='%s: %s' % (type(e).__name__, e))
                 try:
@@ -984,26 +1097,21 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                 finally:
                     os._exit(0)
             os.close(wfd)
-            chunks = []
-            while True:
-                c = os.read(rfd, 1 << 16)
-                if not c: break
-                chunks.append(c)
-            os.close(rfd); _, st = os.waitpid(pid, 0)
-            if not chunks:
-                crashed += 1; inconcl += 1
-                if verbose: print('trial %d: child died (status %d), inconclusive' % (t, st))
+            data, st, hg = wait_child(pid, rfd, twall)
+            if data is None:
+                crashed += 1; inconcl += 1; hung += hg
+                if verbose: print('trial %d: child %s, inconclusive' % (t, 'killed after %ds wall' % twall if hg else 'died (status %d)' % st))
                 continue
-            o = pickle.loads(b''.join(chunks))
+            o = pickle.loads(data)
             if 'exc' in o: raise RuntimeError('trial %d: %s' % (t, o['exc']))
-            for k, (ar, fs) in o['new'].items(): arity[k] = ar; FSKIP[k] = fs
+            for k, (ar, fs, fr) in o['new'].items(): arity[k] = ar; FSKIP[k] = fs; FREGS[k] = fr
         ncalls += o['ncalls']; learned[0] += o['learned']
         if o['why']:
             differ = 'trial %d: %s' % (t, o['why'])
             break
         if o['ok']: ok += 1
         else: inconcl += 1
-    res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl, learned=learned[0], crashed=crashed)
+    res = dict(func=func, file=p, ret=rk, ref_words=len(rwords), cand_words=len(cwords), ok=ok, inconclusive=inconcl, learned=learned[0], crashed=crashed, hung=hung)
     if differ:
         line = 'DIFFER %s: %s' % (func, differ); res['result'] = 'DIFFER'; res['why'] = differ
     elif ok < max(4, trials // 8):
@@ -1011,7 +1119,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     else:
         line = 'EQUIV %s (%d trials ok, %d inconclusive, %d calls, ret=%s, ref %d words, cand %d words%s)' % (
             func, ok, inconcl, ncalls, rk, len(rwords), len(cwords),
-            ', %d trials via learned pointer inputs' % learned[0] if learned[0] else '') + (' [%d trials crashed]' % crashed if crashed else ''); res['result'] = 'EQUIV'
+            ', %d trials via learned pointer inputs' % learned[0] if learned[0] else '') + (' [%d trials crashed%s]' % (crashed, ', %d hung' % hung if hung else '') if crashed else ''); res['result'] = 'EQUIV'
     res['line'] = line
     return res
 

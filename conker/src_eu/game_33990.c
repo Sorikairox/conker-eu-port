@@ -137,7 +137,7 @@ void func_15007440(void) {
         var_v1 += 1;
     } while (var_a0 < 0x1E);
     temp_a1 = (*(s8 *)((u8 *)D_800E1010 + 0x10));
-    if (temp_t9 != *D_800BE778) {
+    if (temp_t9 != *(u16 *)D_800BE778) {   /* P18: the asm reads a halfword (lhu) */
         var_v0_2 = D_800E1010;
         do {
             var_v0_2 += 4;

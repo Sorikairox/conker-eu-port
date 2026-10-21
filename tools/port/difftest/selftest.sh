@@ -6,7 +6,7 @@ R=${CONKER_ROOT:-$HOME/conker}; T=$R/conker/build/difftest_self; mkdir -p $T
 ext() { python3 - "$R/conker/$1" "$2" <<'PY'
 import sys,re
 src=open(sys.argv[1]).read(); f=sys.argv[2]
-m=re.search(r'^[^\n;#/]*\b%s\s*\([^;{]*?\)\s*\{'%f,src,re.M); i=m.end()-1; d=0
+m=re.search(r'^[A-Za-z_][^\n;#/]*\b%s\s*\([^;{]*?\)\s*\{'%f,src,re.M); i=m.end()-1; d=0
 while True:
     d+= {'{':1,'}':-1}.get(src[i],0); i+=1
     if d==0: break
@@ -53,4 +53,12 @@ chkc DIFFER func_151DAE28 's/arg1, 0x40, \&sp4C/arg1, 0x41, \&sp4C/'
 # P5: daddiu (64-bit add feeding an sd)
 chkc EQUIV  func_150ADACC
 chkc DIFFER func_150ADACC 's/(s64)arg0 + 1/(s64)arg0 + 2/'
+# P18: FPRs move through memory (Unicorn 2.0.1 ignores FPR reg_read/reg_write): float args, f0 return
+chk EQUIV  func_15048A70 src_eu/game_75E60.c
+chk DIFFER func_15048A70 src_eu/game_75E60.c 's/return arg1 - arg0;/return arg0 - arg1;/'
+chk DIFFER func_15048A70 src_eu/game_75E60.c 's/arg0 -= 360.0f;/arg0 -= 361.0f;/'
+# P18: a candidate's own float literal (TU .rodata) after a null-pointer access (was read as 0: TU_BASE aliased page 0)
+chkc EQUIV  func_151B97C4
+chkc DIFFER func_151B97C4 's/0.0234f/0.0235f/g'
+chkc DIFFER func_151B97C4 's/sinf(temp_f0)/sinf(temp_f2)/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

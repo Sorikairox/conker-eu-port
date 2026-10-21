@@ -311,7 +311,6 @@ void func_15187820(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187954.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187B50.s")
-
 #ifdef NON_MATCHING
 void func_15187EE8(struct102 *arg0) {
     f32 temp_f0;

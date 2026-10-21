@@ -156,6 +156,8 @@ def lint(code, func=None):
     if any(re.search(r'&%s\b' % v, code) for v in scal):
         out.append('lint:stackaddr')   # &scalar stack local passed on: callee may read neighbours -> make it an array/struct (vecfix.py/spstruct.py)
     if re.search(r'\bsubroutine_arg|\bsaved_reg|M2C_', code): out.append('lint:m2cmacro')
+    if not os.environ.get('CONVERT_P1') and cfix.table_problems(code, func):
+        out.append('lint:table')   # P18: a table the body defines itself: values/size not the ROM's, or indexed past its size
     return out
 
 sys.path.insert(0, HERE)
@@ -249,6 +251,11 @@ def _eval_one(item):
 
 def _child(item, out):
     """one function in its own forked process: a Unicorn segfault / hang kills only this child"""
+    try:   # P18: die with convert.py (its trial grandchildren die with this process the same way)
+        import ctypes, signal
+        ctypes.CDLL(None).prctl(1, signal.SIGKILL, 0, 0, 0)
+    except Exception:
+        pass
     try:
         r = eval_one(item)
     except Exception as e:

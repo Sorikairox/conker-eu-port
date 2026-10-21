@@ -612,3 +612,101 @@ def fix_fptab(code, err=None, func=None, src=None):
         out += code[i:k] + '((s32 (*)()) *(s32 *)((u8 *)&%s + %s))' % (m.group(1), m.group(2))
         i = j + 1; ch = True
     return out if ch else None
+
+
+# ---------------------------------------------------------------- P18: table lint
+# difftest cannot see a wrong table (P17 func_1516295C: its values only reached a callee's stack struct). A body
+# that defines its own array (static / const / initialized local) must hold the ROM's values and size, and must not
+# be indexed past its declared size.
+_TSZ = {'s8': 1, 'u8': 1, 'char': 1, 's16': 2, 'u16': 2, 's32': 4, 'u32': 4, 'f32': 4, 'int': 4, 'float': 4,
+        'f64': 8, 'double': 8, 's64': 8, 'u64': 8}
+_ROM = None
+
+def _rom_bytes(vram, n):
+    """ROM bytes at vram (container side, cwd conker/), None if unknown"""
+    global _ROM
+    try:
+        if _ROM is None:
+            _pgs.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'difftest'))
+            import difftest
+            _ROM = (difftest, open('conker.eu.bin', 'rb').read())
+        dt, rom = _ROM
+        r = dt.vram2rom(vram)
+        return rom[r:r + n] if r is not None else None
+    except Exception:
+        return None
+
+def _pack(t, v):
+    import struct
+    v = v.strip().rstrip('fFuUlL') if not re.match(r'^0[xX]', v.strip()) else v.strip().rstrip('uUlL')
+    sz = _TSZ[t]
+    if t in ('f32', 'float'): return struct.pack('>f', float(v))
+    if t in ('f64', 'double'): return struct.pack('>d', float(v))
+    x = int(v, 0) & ((1 << (8 * sz)) - 1)
+    return x.to_bytes(sz, 'big')
+
+def table_problems(code, func=None):
+    """-> list of 'NAME: why' for arrays the body defines itself"""
+    out = []
+    body = code
+    decl = re.compile(r'^\s*((?:static\s+)?(?:const\s+)?)(?:static\s+)?(s8|u8|char|s16|u16|s32|u32|f32|int|float|f64|double|s64|u64)\s+'
+                      r'(\w+)\s*\[\s*(0x[0-9A-Fa-f]+|\d*)\s*\]\s*(=\s*\{([^}]*)\})?\s*;', re.M)
+    for m in decl.finditer(body):
+        quals, t, name, n, init, vals = m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6)
+        local = m.group(0).startswith((' ', '\t'))
+        if not (quals.strip() or init): continue   # plain local array: a stack buffer, not a table
+        if 'extern' in m.group(0): continue
+        vl = [v for v in (vals or '').split(',') if v.strip()]
+        n = int(n, 0) if n else len(vl)
+        why = []
+        # indexing past the declared size: a constant index >= n, or any variable index into a 1-entry array
+        for im in re.finditer(r'\b%s\s*\[([^\]]+)\]' % re.escape(name), body[m.end():]):
+            ix = im.group(1).strip()
+            try:
+                if int(ix, 0) >= n: why.append('index %s >= size %d' % (ix, n)); break
+            except ValueError:
+                if n <= 1: why.append('variable index [%s] into a %d-entry array' % (ix, n)); break
+        am = re.match(r'D_([0-9A-F]{8})$', name)
+        if not am:
+            why.append('table not named after a ROM address (values unverifiable)')
+        elif not vl:
+            why.append('no initializer (.bss/.data at NM link, not the ROM values)')
+        else:
+            _rom_bytes(0, 0)
+            x0 = (_ROM[0].symaddr(name) if _ROM else None) or int(am.group(1), 16)   # the EU address of the (US) name
+            rb = _rom_bytes(x0, n * _TSZ[t])
+            try: cb = b''.join(_pack(t, v) for v in vl) + bytes((n - len(vl)) * _TSZ[t])
+            except Exception: cb = None
+            x1 = x0 + n * _TSZ[t]
+            inside = sorted(v for k, v in (_ROM[0].symtab().items() if _ROM else []) if x0 < v < x1 and k.startswith('D_'))
+            if inside: why.append('size %d runs into the symbol at 0x%08X' % (n, inside[0]))
+            if rb is None: why.append('ROM bytes unknown')
+            elif cb is None: why.append('initializer not numeric (unverifiable)')
+            elif cb != rb: why.append('values differ from the ROM at 0x%08X (%s)' % (x0, rb.hex()))
+        if why: out.append('%s: %s' % (name, '; '.join(why)))
+    return out + width_problems(code, func)
+
+
+_WID = {'lb': 1, 'lbu': 1, 'sb': 1, 'lh': 2, 'lhu': 2, 'sh': 2, 'lw': 4, 'sw': 4, 'lwc1': 4, 'swc1': 4, 'ldc1': 8, 'sdc1': 8}
+_VARH = None
+
+def width_problems(code, func):
+    """P18: `*D_X` / `D_X[0]` read with the declared element type while the asm accesses %lo(D_X) with another width
+    (func_15008BF0: rodata f32 words declared u8[] in variables.h, read as one byte)"""
+    global _VARH
+    p = asm_path(func) if func else None
+    if not p: return []
+    widths = {}
+    for m in re.finditer(r'\b(lbu?|lhu?|lw|lwc1|ldc1|sb|sh|sw|swc1|sdc1)\s+\$\w+,\s*%lo\((D_[0-9A-F]{8})\)', open(p).read()):
+        widths.setdefault(m.group(2), set()).add(_WID[m.group(1)])
+    if _VARH is None:
+        _VARH = ''
+        for h in glob.glob(os.path.join(ROOT, 'conker/include/*.h')): _VARH += open(h).read()
+    out = []
+    for name, ws in widths.items():
+        if not re.search(r'(?<![\w)])\*\s*%s\b|\b%s\s*\[\s*0\s*\]' % (name, name), code): continue
+        m = re.search(r'\b(s8|u8|char|s16|u16|s32|u32|f32|int|float|f64|double|s64|u64)\s+%s\s*\[' % name, code) or \
+            re.search(r'extern\s+(?:const\s+)?(s8|u8|char|s16|u16|s32|u32|f32|int|float|f64|double|s64|u64)\s+%s\s*\[' % name, _VARH)
+        if m and _TSZ[m.group(1)] not in ws:
+            out.append('%s: read as %s (%d bytes), the asm accesses %s bytes' % (name, m.group(1), _TSZ[m.group(1)], '/'.join(map(str, sorted(ws)))))
+    return out

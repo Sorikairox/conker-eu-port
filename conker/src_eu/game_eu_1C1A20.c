@@ -296,8 +296,87 @@ void func_151954B8(s32 arg0, struct127 *arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195564.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195750.s")
+#ifdef NON_MATCHING
+void * func_1505ED34(void);
+s32 func_15083D54(struct127 *, u16, s32, f32);
+void func_150D15F4(u8 *, s32);
 
+void func_15195750(struct127 *arg0) {
+    f32 temp_f8;
+    f32 var_f16;
+    f32 var_f18;
+    f32 var_f4;
+    f32 var_f8;
+    struct127 *temp_v0;
+    u16 temp_t2;
+    u32 temp_hi;
+    u32 temp_hi_2;
+    u32 temp_hi_3;
+
+    arg0->health = 0;
+    func_1507CD64(arg0, 5);
+    func_15195024((s32) arg0);
+    arg0->interaction_state = 0x28;
+    arg0->xz_velocity = -3.0f;
+    arg0->unkBC = -10.0f - (f32) (func_150ADA20() % 5U);
+    temp_f8 = (f32) (func_150ADA20() % 10U);
+    arg0->y_velocity = 0.0f;
+    arg0->gravity = 0.0f;
+    arg0->unk148 = temp_f8 - 5.0f;
+    temp_v0 = func_1505ED34();
+    temp_v0->interaction_state = 0x28;
+    temp_v0->immune = 0xFF;
+    temp_v0->stunned = 0xFF;
+    temp_v0->id = arg0->id;
+    temp_v0->x_position = arg0->x_position;
+    temp_v0->y_position = arg0->y_position;
+    temp_v0->z_position = arg0->z_position;
+    temp_v0->unk40 = arg0->unk40;
+    temp_v0->unk76 = arg0->unk76;
+    temp_v0->unk7A = arg0->unk7A;
+    temp_v0->unkB8 = arg0->unkB8;
+    temp_v0->xz_scale = arg0->xz_scale;
+    temp_v0->xz_velocity = 10.0f;
+    temp_v0->y_scale = arg0->y_scale;
+    temp_hi = func_150ADA20() % 5U;
+    var_f8 = (f32) temp_hi;
+    if ((s32) temp_hi < 0) {
+        var_f8 += 4294967296.0f;
+    }
+    temp_v0->unkBC = var_f8 + 10.0f;
+    temp_hi_2 = func_150ADA20() % 10U;
+    var_f16 = (f32) temp_hi_2;
+    if ((s32) temp_hi_2 < 0) {
+        var_f16 += 4294967296.0f;
+    }
+    temp_v0->unk148 = var_f16 - 5.0f;
+    temp_v0->unk68 = arg0->unk68;
+    temp_v0->unk69 = arg0->unk69;
+    temp_v0->unk6A = arg0->unk6A;
+    temp_v0->unk6B = arg0->unk6B;
+    (*(u8 *)((u8 *)temp_v0 + 0x6C)) = (u8) (*(u8 *)((u8 *)arg0 + 0x6C));
+    (*(u8 *)((u8 *)temp_v0 + 0x6D)) = (u8) (*(u8 *)((u8 *)arg0 + 0x6D));
+    temp_hi_3 = func_150ADA20() % 10922U;
+    var_f4 = (f32) temp_hi_3;
+    if ((s32) temp_hi_3 < 0) {
+        var_f4 += 4294967296.0f;
+    }
+    temp_t2 = temp_v0->unk76;
+    var_f18 = (f32) temp_t2;
+    if ((s32) temp_t2 < 0) {
+        var_f18 += 4294967296.0f;
+    }
+    temp_v0->unk76 = (u16) (u32) (var_f18 + (var_f4 - 5461.3335f));
+    temp_v0->unk40 = (f32) (arg0->unk76 + 0x4000) * 0.005493164f;
+    temp_v0->unk9C |= 0x0FFF0000;
+    temp_v0->unkF8 = arg0->unkF8;
+    func_15083D54(temp_v0, arg0->unk84.uh, 0, arg0->animation_speed);
+    func_150D15F4(arg0, 0);
+    func_150D15F4(temp_v0, 1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15195750.s")
+#endif
 void func_1514373C(f32 arg0, f32 arg1, f32 *arg2, f32 *arg3);
 void func_15137610(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, s32 arg4, s32 arg5);
 void func_15195A98(u8 *arg0, u8 *arg1, s32 arg2) {
