@@ -3,6 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 
+// owner-less u16 table at the start of this file's .rodata (no code reference)
+const u16 D_eu_1FFF60_ro[20] = {
+    0x01B0, 0x01B2, 0x01B3, 0x01B4, 0x01B5, 0x01B6, 0x01B7, 0x01B8, 0x01B9, 0x01BA,
+    0x01BB, 0x01BC, 0x01BE, 0x01BD, 0x01C0, 0x01C1, 0x01C2, 0x01C3, 0x01C4, 0x01B1,
+};
+
 void func_151D3354(struct224 *arg0);
 void func_151D3308(struct224 *arg0);
 
@@ -164,7 +170,50 @@ void *func_151D2F00(void *arg0, s32 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1FFF60/func_151D2F90.s")
+extern s32 (*D_8008FFEC[])(u8 *);
+extern void (*D_8008FFF0[])(u8 *);
+extern void (*D_8008FFF4[])(u8 *);
+extern void (*D_8008FFF8[])(u8 *);
+
+void func_151D2F90(u8 *arg0) {
+    u8 *p = *(u8 **)(arg0 + 0x10);
+    u8 old = arg0[0x18] & 2;
+    s8 w;
+    u8 cur;
+
+    if (*(s32 *)p == 0 || p[4] == 0xFF || arg0[0x14] != p[0x3B]) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    if (*(s32 *)(p + 0x1D4) != 0 && (p[0x74] & 0xF) != 0xF) {
+        arg0[0x18] |= 2;
+    } else {
+        arg0[0x18] &= ~2;
+    }
+    if (arg0[0x18] & 1) {
+        *(s16 *)(arg0 + 0x16) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x16) < 0) {
+            w = arg0[0x1C];
+            if (w != -1) {
+                D_8008FFF8[w](arg0);
+            }
+            func_1516972C((struct102 *)arg0);
+            return;
+        }
+    }
+    cur = arg0[0x18] & 2;
+    if (old != cur) {
+        if (cur) {
+            D_8008FFF0[(s8)arg0[0x1A]](arg0);
+        } else {
+            D_8008FFF4[(s8)arg0[0x1B]](arg0);
+        }
+    }
+    w = arg0[0x19];
+    if (w != -1 && !D_8008FFEC[w](arg0)) {
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 void func_151D3130(struct_eu_1FFF60 *arg0) {
     struct_eu_1FFF60_child *child;

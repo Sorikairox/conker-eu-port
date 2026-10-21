@@ -135,7 +135,41 @@ void func_15114E8C(f32 (*arg0)[4], u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15115114.s")
+extern s32 D_800DC3C8;
+
+void func_15115114(u32 arg0) {
+    struct131 *p;
+    u32 j;
+
+    j = arg0 * 0xA0; // fakematch: j doubles as the row offset
+    if (arg0 < D_800DC320) {
+        p = (struct131 *)((u8 *)D_800DBEF4 + j);
+        if (*(struct102 **)((u8 *)p + 0x94) != NULL) {
+            func_1516972C(*(struct102 **)((u8 *)p + 0x94));
+            *(struct102 **)((u8 *)D_800DBEF4 + arg0 * 0xA0 + 0x94) = NULL;
+            p = (struct131 *)((u8 *)D_800DBEF4 + arg0 * 0xA0);
+        }
+        p->pad70[0] |= 8;
+        D_800DBEF4[arg0].pad5A[0x14] = 1;
+    }
+    arg0 = D_800DC320 - 1;
+    j = D_800DC320 - D_800DC3C8;
+    if (D_800DC320 != 0) {
+        p = (struct131 *)((u8 *)D_800DBEF4 + arg0 * 0xA0);
+        if (p->pad70[0] & 8) {
+            do {
+                if (arg0 >= j && D_800DC3C8 != 0) {
+                    D_800DC3C8--;
+                } else {
+                    j--;
+                }
+                D_800DC320--;
+                arg0--;
+                p--;
+            } while (D_800DC320 != 0 && (p->pad70[0] & 8));
+        }
+    }
+}
 
 s32 func_15115244(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     u8 *temp_v1;

@@ -13,7 +13,66 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15176DCC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_151770F4.s")
+s32 func_150ADE40(s32, s32, s32, s32);
+void func_15175EC8(u8 *);
+typedef struct { s32 x0; s32 pad[4]; } Row20;
+extern Row20 D_800DE2B4[];
+extern Row20 D_800DE2B8[];
+
+void func_151770F4(u8 *arg0) {
+    s32 v;
+
+    if (((Row20 *)D_800DDE80)[arg0[0xED]].x0 == 0 || D_800DDF78[arg0[0xED]] == 0) {
+        func_1516972C((struct102 *)arg0);
+        return;
+    }
+    v = arg0[0xF0];
+    if (arg0[0xF1] == 0) {
+        if (D_800DDF5C[arg0[0x90]] == 0) {
+            arg0[0xF1] = 1;
+        } else if (v != 0xFF) {
+            v += D_800BE9E4 * 4;
+            if (v > 0xFF) {
+                v = 0xFF;
+            }
+            arg0[0xF0] = v;
+        }
+    } else {
+        if (v == 0) {
+            func_1516972C((struct102 *)arg0);
+            return;
+        }
+        v -= D_800BE9E4 * 4;
+        if (v < 0) {
+            v = 0;
+        }
+        arg0[0xF0] = v;
+    }
+    D_800DDF68[arg0[0xED]] = 1;
+    switch (arg0[0x91]) {
+        case 0:
+            if (func_150ADE40(*(f32 *)((u8 *)D_800CC2D0 + 0x14), *(f32 *)((u8 *)D_800CC2D0 + 0x1C),
+                              *(f32 *)(arg0 + 0x98), *(f32 *)(arg0 + 0xA0)) < 200) {
+                arg0[0x91] = 2;
+                *(f32 *)(arg0 + 0xE4) = (f32)((u32)func_150ADA20() % *(s16 *)(arg0 + 0xDA));
+                *(f32 *)(arg0 + 0xE4) += *(s16 *)(arg0 + 0xD2);
+                *(s32 *)(arg0 + 0x94) = D_800DE2B8[arg0[0xED]].x0;
+            } else {
+                *(s32 *)(arg0 + 0x94) = D_800DE2B4[arg0[0xED]].x0;
+            }
+            return;
+        case 2:
+        case 3:
+            break;
+        case 4:
+            if (*(f32 *)(arg0 + 0x9C) < *(f32 *)(arg0 + 0xC8)) {
+                func_1516972C((struct102 *)arg0);
+                return;
+            }
+            break;
+    }
+    func_15175EC8(arg0);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15177360.s")
 

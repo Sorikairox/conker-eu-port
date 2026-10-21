@@ -5,7 +5,58 @@
 s32 func_15134108(u8 *, f32, f32, f32, f32, s32);
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132740.s")
+extern s32 (*D_80089C50[])(u8 *);
+extern s32 (*D_80089CB4[])(u8 *);
+extern void (*D_80089D1C[])(u8 *);
+extern s32 (*D_80089D28[])(u8 *);
+s32 func_1514672C(u8 *);
+
+void func_15132740(u8 *arg0) {
+    s32 pad;
+    u8 done = 0;
+    s16 t;
+
+    *(s32 *)(arg0 + 0x60) &= ~0x200000;
+    if ((*(s32 *)(arg0 + 0x60) & 0x10) && (arg0[0x148] & 0x18)) {
+        if (!D_80089D28[arg0[0x77]](arg0)) {
+            done = 1;
+        }
+    } else if (arg0[0x71] != 0) {
+        if (!D_80089C50[arg0[0x71]](arg0)) {
+            done = 1;
+        }
+    }
+    if (arg0[0x72] != 0 && !done) {
+        if (!D_80089CB4[arg0[0x72]](arg0)) {
+            done = 1;
+        }
+    }
+    if ((*(s32 *)(arg0 + 0x60) & 0x80) && !done) {
+        *(s16 *)(arg0 + 0x64) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x64) < 0) {
+            done = 1;
+        }
+    }
+    if ((*(s32 *)(arg0 + 0x60) & 0x2000) && !done) {
+        t = *(s16 *)(arg0 + 0x64);
+        if (t < *(s16 *)(arg0 + 0x82)) {
+            if ((t * *(s16 *)(arg0 + 0x84)) < arg0[0x70]) {
+                if (!(t * *(s16 *)(arg0 + 0x84))) { // fakematch: empty if fixes the multu operand order
+                }
+                arg0[0x70] = (t * *(s16 *)(arg0 + 0x84));
+            }
+        }
+    }
+    if (!done && !(*(s32 *)(arg0 + 0x60) & 0x80000)) {
+        done = !func_1514672C(arg0 + 0x38);
+    }
+    if (done) {
+        if (arg0[0x76] != 0) {
+            D_80089D1C[arg0[0x76]](arg0);
+        }
+        func_1516972C((struct102 *)arg0);
+    }
+}
 
 void func_1513291C(u8 *arg0) {
     u8 var_v0 = (*(s32 *)(arg0 + 0x60) & 0x100) ? arg0[0x68] : 0;
