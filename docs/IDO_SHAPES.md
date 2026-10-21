@@ -1201,3 +1201,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **A pointer arg reloaded from its stack home before every use, even twice inside one `a || b`**: declare the parameter `u8 *volatile arg1`; a byte arg homed (`sw a2`) and reloaded once for a late call = `(&arg2)[0]` at that call (`func_15191EF0`, size right, still DIFF31).
 4. Unused declared locals still take a frame slot at -O2 (s129 recipe 1): an unused `e` pointer moved the only spilled local from 0x4C to 0x48 (`func_1517DC00`).
 
+
+## s137 recipes (init_EB00 sound wrappers)
+1. **One float variable for successive roles**: a distance `f` and then its clamped scale (`if (f > 256) f = 1.0f; else if (f < 80) f = 0.3125f; else f = f * (1/256.0f);`) share `f0` in the target; a separate `scale` local took `f2` (DIFF4 -> OK, `func_10010FFC`).
+2. `x * 3` as `addu t,x,x; addu x,t,x` is `x + x + x`, not `x * 3` (`sll; subu`). A u16 field converted to float with the `0x4F800000` fix-up branch is `(u32) (u16) p->f`.
+3. A u16 return value kept in `a0` (`andi a0,v0,0xFFFF` in each branch, `or v0,a0` at the join): assign the call results to `arg0` and `return arg0;`.
+4. A `bne` operand order DIFF1 that no operand swap or cast fixes: copy the compared local inside the comparison, `a == (tmp = id)` (permuter, fakematch, `func_1000EE70`).
+5. Busy-wait `while (flag != 0) {}` that reloads the byte each pass (`bnel t9,zero,L; lbu t9`) needs a `volatile` extern; without it IDO emits a one-load infinite loop.
