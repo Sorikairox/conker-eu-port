@@ -1268,3 +1268,10 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **A single byte-spill slot 4 bytes too high** (`sb v1, 0x23` vs mine `0x27`) with the frame size right: declare `s32 pad;` *before* the variable (after it does nothing) (`func_1515C050`).
 4. **An uninitialised local read in a switch default** (`lw v1, 0(sp)` in an 8-byte frame): its slot follows the declaration order; `s32 i; u8 *p;` put `p` at 0 (`func_1516CDE8`).
 5. **Store-order-only DIFFs on a freshly allocated struct**: generate all permutations of the 4-5 field stores and `tryall` them (`func_15188EBC`, 1 of 24 OK). Cheap and exact.
+
+## s147 recipes (union fields of a call, s64 args, struct-table sweeps)
+1. **A callee's 6th-arg read at `0x14 + frame` with no `sw a3` home, while yours homes `a3`**: look at the caller. If it never sets `a3` and stores a pair of words at sp+0x10/0x14, the 4th parameter is an **`s64`** (aligned to stack offset 16, `a3` is padding); `x & 1` reads only the low word (`func_150A2AB4`).
+2. **Call args read from overlapping fields of one word** (`lw 0x18` + `lh 0x18` + `lbu 0x1A`, `lbu 0x1C/0x1D`) loaded in address order before the other args: assign them to locals in that order first, then call (DIFF43 -> DIFF32); a field used both in the condition and as a call arg (`unk17`) wants its own local inside the block (-> DIFF7) (`func_150A29A0`).
+3. **`sll t, r, 8; ... ori t, t, 0xF0; and u, w, 0xFFFF0000; or`**: write `((r << 8) | 0xF0) | (w & 0xFFFF0000)` (operand order follows the ref's `or` operands).
+4. **A loop-invariant float in a callee-saved FPR loaded with `lwc1 %lo(D_...)` from `.rodata`** is a literal: dump it (`objdump -s --start-address=...`) and write it (`0.2f`); a global extern keeps one FPR fewer and the frame 8 smaller (`func_150A126C`).
+5. `tools/eu_port/sharedsym.py lo|init` ranks files by symbols shared across their asm functions (with nearmiss keys); in the lo slice most such tables are already typed, so check the file's typedef first and look for **fresh draftless functions** on that table.
