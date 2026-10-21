@@ -75,3 +75,22 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 170	wt	game 0x15130000-0x1518FFFF+dbg	1	472	150	fresh pool nearly empty (14 rows, all <46-insn funcs already tried); 1/12
 167	main	game>=0x15190000	0	0		interrupted by weekly usage limit; func_151B99B8 OK draft found but not applied
 172	wt	game 0x15130000-0x1518FFFF+dbg	6			interrupted by usage limit after committing 6 near-miss matches
+P1	port	infra			106	plan, NON_MATCHING switch, difftest, convert.py; pilot 12/60 EQUIV
+P3	web	port-web			79	wasm skeleton, fiber scheduler demo 4/4, boots to game entry
+P2	port	nm convert	118		132	convert fixes (A 43%, B 23%); 127 NM bodies; total C 4119
+P4	web	port-web			105	memory model (hybrid, virtual big-endian), ROM data loaded, boots into main loop
+P5	port	nm convert	21		154	difftest unicorn bugs fixed; boot-path conversions; total C 4140
+P6	web	port-web			119	indirect-call trampolines; F3DEX2 WebGL2 renderer draws ROM models
+P7	port	nm convert	3		128	wrong-checkout guard; scheduler, allocator, init converted; total C 4143
+P8	web	port-web			85	GLOBAL_BASE 256MB; PC overrides; real textures in viewer
+P9	web	port-web			123	ROM-offset symbols; CPU audio ABI interpreter verified
+P10	port	nm convert	12		121	frame builders + texture cache converted; total C 4155
+P11	web	port-web			148	runtime check of scheduler/allocator/assets; SDL2 audio
+P12	port	nm convert	4		77	audio init converted; total C 4159
+P13	port	nm convert	9		127	level loader, world update, frame submit; total C 4168
+P14	web	port-web			118	MP3 voices; lighting + bones; real Web Audio output fixed
+P15	port	nm convert	67		146	difftest timeout; breadth 60-79 insns 42%; total C 4235
+P16	port	nm convert	88		158	pool deadlock root cause (unicorn uc_close); total C 4323
+P17	port	nm convert	175		141	reruns + breadth 121-200 33%; total C 4498
+P18	port	nm convert	110		132	difftest float-register blind spot fixed; table lint; total C 4608
+P19	web	port-web			136	game C submits real gfx tasks (12-cmd empty frames); browser-only heap corruption found; freeze fix
