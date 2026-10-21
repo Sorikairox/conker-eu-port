@@ -101,8 +101,25 @@ s32 func_151EC0E0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC300.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC928.s")
+#ifdef NON_MATCHING
+s32 func_151EC928(s32 arg0) {
+    s32 temp_t6;
+    s32 var_v0;
 
+    if (D_800E0EC0 >= 0x5DD) {
+        temp_t6 = (D_800E0EC0 - 0x5DC) * 8;
+        var_v0 = temp_t6;
+        if (temp_t6 >= 0x100) {
+            var_v0 = 0xFF;
+        }
+        func_1504332C(0xFFU, 0xFFU, 0xFFU, var_v0 & 0xFF);
+        func_15042D94(0xDC, 0x130, 1, (*(u8 **)((u8 *)D_800E1008 + 0x1D0)));
+    }
+    return arg0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC928.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EC9A0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ECB98.s")

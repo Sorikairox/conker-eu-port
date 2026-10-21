@@ -1013,7 +1013,35 @@ f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D6F0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DADC.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DDA8.s")
+#ifdef NON_MATCHING
+f32 func_1505DF10(u8 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4) {
+    f32 sp20;
+    f32 sp1C;
+    f32 sp18;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f14;
+    f32 temp_f14_2;
+    f32 temp_f2;
+    struct127 *temp_v0;
+
+    temp_v0 = &D_800CC2D0[arg1];
+    temp_f2 = (*(f32 *)((u8 *)arg0 + 0x18)) - temp_v0->y_position;
+    temp_f12_2 = temp_v0->x_position - (*(f32 *)((u8 *)arg0 + 0x14));
+    *arg4 = temp_f2;
+    temp_f14_2 = (*(f32 *)((u8 *)arg0 + 0x1C)) - temp_v0->z_position;
+    sp20 = temp_f12_2;
+    sp1C = temp_f2;
+    sp18 = temp_f14_2;
+    temp_f12 = temp_f12_2 * temp_f12_2;
+    *arg2 = func_1505A630(temp_f12_2, temp_f14_2, 0);
+    temp_f14 = temp_f14_2 * temp_f14_2;
+    *arg3 = temp_f12 + temp_f14;
+    return temp_f12 + (temp_f2 * temp_f2) + temp_f14;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DF10.s")
+#endif
 void func_1505DFDC(struct127 *arg0) {
     s32 id;
     struct_eu_anim *anim = (struct_eu_anim *)arg0->unk2D0;

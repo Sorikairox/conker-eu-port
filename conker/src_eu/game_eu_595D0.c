@@ -90,8 +90,29 @@ void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5,
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CFEC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D83C.s")
+#ifdef NON_MATCHING
+void func_1502D83C(s32 arg0, u8 *arg1) {
+    s32 temp_t1;
+    struct127 *temp_v0;
 
+    temp_v0 = &D_800CC2D0[arg0];
+    if ((temp_v0->unk66 & 0xC) == 4) {
+        (*(s32 *)((u8 *)arg1 + 0)) = (s32) ((s32) (temp_v0->unk1DD + temp_v0->unk1E0) / 2);
+        (*(s32 *)((u8 *)arg1 + 4)) = (s32) ((s32) (temp_v0->unk1DE + temp_v0->unk1E1) / 2);
+        temp_t1 = (s32) (temp_v0->unk1DF + temp_v0->unk1E2) / 2;
+        (*(s32 *)((u8 *)arg1 + 8)) = temp_t1;
+        (*(s32 *)((u8 *)arg1 + 0)) = (s32) (0xFF - (*(s32 *)((u8 *)arg1 + 0)));
+        (*(s32 *)((u8 *)arg1 + 4)) = (s32) (0xFF - (*(s32 *)((u8 *)arg1 + 4)));
+        (*(s32 *)((u8 *)arg1 + 8)) = (s32) (0xFF - temp_t1);
+        return;
+    }
+    (*(s32 *)((u8 *)arg1 + 8)) = 0xFF;
+    (*(s32 *)((u8 *)arg1 + 4)) = 0xFF;
+    (*(s32 *)((u8 *)arg1 + 0)) = 0xFF;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D83C.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D920.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502DB14.s")

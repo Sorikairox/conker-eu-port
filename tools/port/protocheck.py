@@ -13,7 +13,7 @@ exit 1 if any.  Run from the repo root.
 import sys, os, re, glob
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SIG = re.compile(r'^(?!\s*(?:return|else|if|while|for|switch)\b)\s*((?:extern\s+|static\s+)?[A-Za-z_][\w\s\*]*?)\b(\w+)\s*\(([^;{}()]*(?:\([^()]*\)[^;{}()]*)*)\)\s*([;{])', re.M)
+SIG = re.compile(r'^(?!\s*(?:return|else|if|while|for|switch)\b)[ \t]*((?:extern[ \t]+|static[ \t]+)?[A-Za-z_][\w \t\*]*?)\b(\w+)[ \t]*\(([^;{}\n]*)\)[ \t]*([;{])', re.M)
 
 
 def cls(t):

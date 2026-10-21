@@ -27,8 +27,22 @@ u8 *func_1515D9F0(s32 arg0) {
     return p;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515D4D4.s")
+#ifdef NON_MATCHING
+void func_1515D4D4(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
+    s32 temp_t6;
 
+    temp_t6 = arg3 & 0xFF;
+    if (temp_t6 >= (s32) D_800DD157) {
+        (*(s8 *)((u8 *)(&D_800DCD20) + 0)) = (s8) arg0;
+        (*(s8 *)((u8 *)(&D_800DCD20) + 1)) = (s8) arg1;
+        (*(s8 *)((u8 *)(&D_800DCD20) + 2)) = (s8) arg2;
+        D_800DCD7C = 1;
+        D_800DD157 = (u8) temp_t6;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515D4D4.s")
+#endif
 struct lnode_1515DA90 { struct lnode_1515DA90 *next; };
 struct lnode_1515DA90 *func_1515DA90(void) {
     struct lnode_1515DA90 *p;

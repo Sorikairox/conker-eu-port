@@ -126,8 +126,33 @@ void func_150836AC(S836AC *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083C3C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083D54.s")
+#ifdef NON_MATCHING
+struct197 *allocate_memory(s32, s32, s32, s32);
 
+s32 func_15083D54(struct127 *arg0, u16 arg1, s32 arg2, f32 arg3) {
+    struct197 *temp_v0_2;
+    u8 temp_v0;
+
+    temp_v0 = arg0->id;
+    if (D_800D1588[temp_v0] == 0) {
+        goto block_7;
+    }
+    if ((u16) D_800C5A90[temp_v0] == 0) {
+        goto block_7;
+    }
+    temp_v0_2 = allocate_memory(0x3E0, 1, 2, 0);
+    arg0->unk2D0 = temp_v0_2;
+    if (temp_v0_2 == NULL) {
+        return 1;
+    }
+    bzero(arg0->unk2D0, 0x40);
+    func_1505E650(arg0, arg1, arg3, 0.0f, 0.0f, 0.0f, arg2);
+block_7:
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083D54.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E20.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083F30.s")

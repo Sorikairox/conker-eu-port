@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15009334(s32 arg0);
+#endif
 
 
 void func_150091D0(void) {
@@ -52,8 +55,94 @@ void func_150092DC(void) {
 }
 
 // requires jumptable
-#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_15009334.s")
+#ifdef NON_MATCHING
+u8 *allocate_memory(s32, s32, s32, s32);
 
+void func_15009334(s32 arg0) {
+    s32 sp70;
+    s32 sp6C;
+    s32 sp68;
+    s32 sp44;
+    s32 sp34;
+    s32 temp_t0;
+    s32 temp_t4;
+    s32 temp_t7;
+    s32 temp_v0_3;
+    u32 temp_t0_2;
+    u32 temp_v1;
+    u32 temp_v1_2;
+    u8 *temp_v0;
+    u8 *temp_v0_2;
+    u8 *temp_v0_4;
+    u8 *temp_v0_5;
+    u8 *temp_v0_6;
+
+    temp_t4 = arg0 * 0x34;
+    temp_v0 = D_800D34B8 + temp_t4;
+    temp_t7 = (s32) (*(u8 *)((u8 *)temp_v0 + 0x15)) >> 2;
+    switch (temp_t7) {
+    case 9:
+    case 10:
+    case 16:
+        temp_v1 = (*(u32 *)((u8 *)temp_v0 + 0x18));
+        sp70 = temp_v1 & 0xFF;
+        sp6C = (temp_v1 >> 8) & 0xFF;
+        sp68 = (temp_v1 >> 0x10) & 0xFF;
+        (*(u8 *)((u8 *)temp_v0 + 0x16)) = (u8) ((*(u8 *)((u8 *)temp_v0 + 0x16)) | 4);
+        switch (temp_t7) {                          /* switch 1; irregular */
+        case 10:                                    /* switch 1 */
+            sp34 = temp_t4;
+            func_1515D4D4(sp70, sp6C, sp68, 0U);
+            temp_t0 = (*(s32 *)((u8 *)((D_800D34B8 + temp_t4)) + 0x20));
+            if (temp_t0 != 0) {
+                func_1500AB5C(temp_t0);
+                return;
+            }
+        default:
+            return;
+        case 9:                                     /* switch 1 */
+            temp_v0_2 = D_800D34B8 + temp_t4;
+            temp_v1_2 = (*(u32 *)((u8 *)temp_v0_2 + 0x18));
+            temp_t0_2 = (*(u32 *)((u8 *)temp_v0_2 + 0x20));
+            sp44 = temp_t0_2 & 0xFFFF;
+            temp_v0_3 = func_1515DB1C((*(s16 *)((u8 *)temp_v0_2 + 0)), (*(s16 *)((u8 *)temp_v0_2 + 2)), (*(s16 *)((u8 *)temp_v0_2 + 4)), ((u32) (*(u32 *)((u8 *)temp_v0_2 + 0x1C)) >> 8) & 0xFF, sp70, sp6C, sp68, (temp_v1_2 >> 0x18) & 0x7F, (temp_v1_2 >> 0x1F) & 1, (temp_t0_2 >> 0x10) & 0xFFFF);
+            if ((temp_v0_3 != 0) && (sp44 != 0)) {
+                func_1500A94C(temp_v0_3, sp44);
+                return;
+            }
+            break;
+        case 16:                                    /* switch 1 */
+            (*(s8 *)((u8 *)D_800DCD24 + 0)) = (s8) sp70;
+            D_800DCD24[1] = (s8) sp6C;
+            D_800DCD24[2] = (s8) sp68;
+            temp_v0_4 = D_800D34B8 + temp_t4;
+            (*(u8 *)((u8 *)D_800DCD28 + 0)) = (u8) (*(u32 *)((u8 *)temp_v0_4 + 0x1C));
+            D_800DCD28[1] = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 8);
+            D_800DCD28[2] = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 0x10);
+            D_800DCD3C = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x1C)) >> 0x18);
+            D_800DCD3D = (u8) ((u32) (*(u32 *)((u8 *)temp_v0_4 + 0x18)) >> 0x18);
+            return;
+        }
+        break;
+    case 15:
+        sp34 = temp_t4;
+        temp_v0_5 = allocate_memory(8, 1, 0, 0);
+        (*(u8 **)((u8 *)temp_v0_5 + 4)) = (u8 *) (temp_t4 + D_800D34B8);
+        (*(s32 *)((u8 *)temp_v0_5 + 0)) = (s32) D_800DCD80;
+        D_800DCD80 = (s32) temp_v0_5;
+        return;
+    case 24:
+        sp34 = temp_t4;
+        temp_v0_6 = allocate_memory(8, 1, 0, 0);
+        (*(u8 **)((u8 *)temp_v0_6 + 4)) = (u8 *) (temp_t4 + D_800D34B8);
+        (*(s32 *)((u8 *)temp_v0_6 + 0)) = (s32) D_800DCD84;
+        D_800DCD84 = (s32) temp_v0_6;
+        break;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_36680/func_15009334.s")
+#endif
 void func_150095D8(s32 arg0, s32 arg1) {
     func_1516127C(arg0, 0xFF, 1);
 }

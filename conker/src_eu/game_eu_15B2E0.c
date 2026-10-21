@@ -13,8 +13,24 @@ extern struct_eu_15B2E0 *D_800DC6E0;
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B2E0/func_1512DAD0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B2E0/func_1512DB74.s")
+#ifdef NON_MATCHING
+u8 *func_1512DB74(u8 *arg0) {
+    s32 temp_a1;
+    struct_eu_15B2E0 *temp_v0;
+    struct_eu_15B2E0 *temp_v0_2;
 
+    temp_v0 = &D_800DC6E0[(*(u8 *)((u8 *)arg0 + 0x23D))];
+    temp_a1 = temp_v0->unkA8;
+    temp_v0->unkA8 = temp_a1 + 1;
+    temp_v0_2 = &D_800DC6E0[(*(u8 *)((u8 *)arg0 + 0x23D))];
+    if (temp_v0_2->unkA8 == 0x14) {
+        temp_v0_2->unkA8 = 0;
+    }
+    return ((struct_eu_15B2E0 *)((u8 *)temp_v0 + (temp_a1 * 8)));
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15B2E0/func_1512DB74.s")
+#endif
 void func_1512DBDC(u8 *arg0) {
     D_800DC6E0[arg0[0x23D]].unkA8 = 0;
     D_800DC6E0[arg0[0x23D]].unkAC = 0;

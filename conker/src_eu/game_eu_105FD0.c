@@ -200,4 +200,23 @@ s32 func_150D8F30(s32 arg0, s32 arg1) {
     return 8;
 }
 
+#ifdef NON_MATCHING
+void func_151664F0(s32, s32, s32, s32, s32, s32, s32, u8, s32);
+s32 func_15187B50(f32, f32, f32, s32, s32, s32, f32, f32);
+
+void func_150D8F44(u8 *arg0, u8 arg1, s32 arg2) {
+    struct {
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+    } sp;
+
+    if ((*(s32 *)((u8 *)arg0 + 0x1D4)) != 0) {
+        func_150D8DF0(&sp.u34, arg0, arg1);
+        func_15187B50(sp.u34, sp.u38, sp.u3C, 0x1E, 0xF, 7, 0.1f, 0.03f);
+        func_151664F0(-1, (s32) sp.u34, (s32) ((*(f32 *)((u8 *)arg0 + 0x180)) + 4.0f), (s32) sp.u3C, 4, 0x32, 0, 0xFF, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D8F44.s")
+#endif

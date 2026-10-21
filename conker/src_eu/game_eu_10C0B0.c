@@ -10,8 +10,18 @@ void func_150DE8A0(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DE9D8.s")
 
+#ifdef NON_MATCHING
+void func_150DEC58(u8 *arg0) {
+    (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) ((func_15048A40(((s32) (*(s32 *)((u8 *)arg0 + 0x7C)) >> 3) & 0xFF) * 10.2f) + 1130.0f);
+    (*(f32 *)((u8 *)arg0 + 0)) = (f32) (func_15048A40(((s32) (*(s32 *)((u8 *)arg0 + 0x80)) >> 3) & 0xFF) * 1.1f);
+    (*(f32 *)((u8 *)arg0 + 8)) = (f32) (func_15048A40(((s32) (*(s32 *)((u8 *)arg0 + 0x84)) >> 3) & 0xFF) * 1.1f);
+    (*(s32 *)((u8 *)arg0 + 0x7C)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x7C)) + (D_800BE9E4 * 0xC));
+    (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x80)) + (D_800BE9E4 * 0x10));
+    (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) + (D_800BE9E4 * 0x18));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DEC58.s")
-
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DED40.s")
 
 s32 func_150DF04C(u8 *arg0) {

@@ -2024,7 +2024,34 @@ void func_15073A28(void) {
     D_800D154C->unk44 = (f32) D_800D1580;
 }
 
+#ifdef NON_MATCHING
+s32 func_1505D024(struct127 *, s32, s32, u8);
+
+void func_15073A50(void) {
+    s32 sp20;
+    struct127 *sp18;
+    s32 temp_v0;
+    struct127 *temp_a0;
+
+    temp_a0 = &D_800CC2D0[D_800D154C->unk124];
+    if (temp_a0->unk65 != 0) {
+        temp_v0 = D_800D1580;
+        D_800D154C->unk13C = 0;
+        temp_a0->immune = 0;
+        sp18 = temp_a0;
+        sp20 = temp_v0;
+        func_1505D024(temp_a0, D_800D1580 & 0xFF00FF, 0, D_800C3E78);
+        temp_a0->unk1CC = 100000.0f;
+        if (temp_v0 & 0x40000000) {
+            temp_a0->unk1CC = D_800D154C->y_position;
+        }
+        temp_a0->immune = 0x14;
+        temp_a0->unk76 = D_800D154C->unk7A + temp_v0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073A50.s")
+#endif
 void func_15073B38(void)
 {
   f32 new_var; // fakematch: permuter temps (new_var/new_var2/new_var3) and ^ 0 set registers and load order
@@ -2156,8 +2183,21 @@ void func_150746F0(void) {
     }
 }
 // ?
-#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_150747E4.s")
+#ifdef NON_MATCHING
+void func_150747E4(void) {
+    struct127 *temp_a0;
+    u8 temp_v0;
 
+    temp_v0 = D_800D154C->unk65;
+    if (temp_v0 != 0) {
+        temp_a0 = &D_800CC2D0[temp_v0 - 1];
+        temp_a0->unk218 = NULL;
+        temp_a0->unk232 = (u8) D_800D1580;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_150747E4.s")
+#endif
 void func_15074840(void) {
     if (D_800D154C->unk31C != 0) {
         D_800D154C->unk31C->unk1AA += D_800D1580;
@@ -2214,7 +2254,33 @@ void func_15074A6C(void) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15074A94(void) {
+    f32 temp_f0;
+    f32 temp_f14;
+    f32 var_f2;
+
+    temp_f0 = func_1505A72C(D_800CC2D0, D_800D154C);
+    if (D_800D154C->unk148 < 0.2f) {
+        D_800D154C->unk148 = D_800D154C->unk154;
+    }
+    if (temp_f0 < 200.0f) {
+        var_f2 = 0.3f;
+    } else {
+        temp_f14 = D_800D154C->unk148;
+        if (temp_f0 > 1500.0f) {
+            var_f2 = temp_f14;
+        } else {
+            var_f2 = (((temp_f0 - 200.0f) / 1300.0f) * (temp_f14 - 0.3f)) + 0.3f;
+        }
+    }
+    D_800D154C->unk158 = var_f2;
+    D_800D154C->unk154 = D_800D154C->unk158;
+    D_800D154C->unk15C = 0.02f;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15074A94.s")
+#endif
 // NON-MATCHING: JUSTREG
 // void func_15074A94(void) {
 //     f32 phi_f2;

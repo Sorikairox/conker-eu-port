@@ -193,8 +193,57 @@ ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *ou
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186D04.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187820.s")
+#ifdef NON_MATCHING
+extern s32 D_800DE44C;
+extern s32 D_800DE450;
+extern s32 D_800DE454;
+extern s32 D_800DE460;
+extern s32 D_800DE464;
+extern s32 D_800DE468;
+extern f32 D_800DE46C;
+extern s8 D_800DE470;
+extern s8 D_800DE471;
 
+void func_15187820(s32 arg0) {
+    D_800DE44C = 0x258;
+    D_800DE450 = 0xB4;
+    D_800DE454 = 0x5A;
+    D_800DE460 = 0x3F8;
+    D_800DE464 = 0;
+    D_800DE468 = 1;
+    D_800DE46C = 1.0f;
+    D_800DE470 = 1;
+    D_800DE471 = 1;
+    switch (arg0) {                                 /* irregular */
+    case 33:
+        D_800DE44C = 0x12C0;
+        D_800DE450 = 0x12BF;
+        D_800DE454 = 0x12BE;
+        D_800DE460 = 0x3F2;
+        D_800DE464 = 1;
+        D_800DE468 = 4;
+        D_800DE470 = 0;
+        return;
+    case 34:
+        D_800DE44C = 0x960;
+        D_800DE450 = 0x95F;
+        D_800DE454 = 0x95E;
+        D_800DE468 = 4;
+        D_800DE470 = 0;
+        return;
+    case 20:
+        D_800DE471 = 0;
+        return;
+    case 41:
+        D_800DE44C = 0x4B0;
+        D_800DE450 = 0x258;
+        D_800DE454 = 0x12C;
+        return;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187820.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187954.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187B50.s")

@@ -61,8 +61,32 @@ s32 func_151B1DD8(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1EC8.s")
+#ifdef NON_MATCHING
+void func_151B1EC8(u8 *arg0) {
+    s32 var_s3;
+    u8 *var_s0;
+    u8 *var_s2;
 
+    var_s2 = arg0 + 0x28;
+    (*(s32 *)((u8 *)arg0 + 0x30)) = 0;
+    var_s0 = var_s2 + 0xC;
+    var_s3 = 0;
+    (*(f32 *)((u8 *)arg0 + 0xB8)) = 0.0f;
+    do {
+        if ((*(s32 *)((u8 *)var_s2 + 0xC)) != 0) {
+            func_1516972C((*(struct102 **)((u8 *)var_s0 + 0)));
+        }
+        (*(struct102 **)((u8 *)var_s0 + 0)) = NULL;
+        (*(s32 *)((u8 *)var_s0 + 4)) = 0;
+        (*(s32 *)((u8 *)var_s0 + 8)) = 0;
+        var_s3 += 0xC;
+        var_s2 += 0xC;
+        var_s0 += 0xC;
+    } while (var_s3 != 0x84);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1EC8.s")
+#endif
 void func_151B1F54(struct102 *arg0, u8 *arg1, u8 arg2) {
     s32 cur;
     u8 *temp_v0;

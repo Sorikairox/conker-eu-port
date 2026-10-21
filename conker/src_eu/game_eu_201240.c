@@ -214,8 +214,36 @@ void func_151D56F8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5724.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D58E4.s")
+#ifdef NON_MATCHING
+s32 func_1516547C(s32, s32, s32 *, s32, s32);
 
+void func_151D58E4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6) {
+    struct {
+        s32 u3C;
+        u8 pad40[0x8];
+        f32 u48;
+        f32 u4C;
+        f32 u50;
+    } sp;
+    s32 var_s0;
+
+    var_s0 = 0;
+    (*(s32 *)((u8 *)(&sp.u3C) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0));
+    (*(s32 *)((u8 *)(&sp.u3C) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 4));
+    (*(s32 *)((u8 *)(&sp.u3C) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 8));
+    sp.u48 = arg1;
+    sp.u4C = arg2;
+    sp.u50 = arg3;
+    if ((D_80082FA0 + 1) > 0) {
+        do {
+            func_1516547C(arg4 & 0xFF, var_s0 & 0xFF, &sp.u3C, arg5 & 0xFF, arg6);
+            var_s0 += 1;
+        } while (D_80082FA0 >= var_s0);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D58E4.s")
+#endif
 typedef struct {
     struct17 pos;
     f32 unkC;

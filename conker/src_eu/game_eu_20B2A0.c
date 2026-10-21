@@ -148,4 +148,34 @@ s32 func_151DDCC0(OSMesgQueue *mq, OSContStatus *data) {
     return data->errno;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800E0EA0;
+extern s32 D_800E0EA4;
+extern s8 D_800E1002;
+
+void func_151DDE70(void) {
+    s32 temp_t5;
+    u16 temp_v0;
+    u8 *temp_a0;
+
+    temp_a0 = D_800E0EA0 + (D_800E0EA4 * 6);
+    (*(s8 *)((u8 *)D_800BE748 + 2)) = (s8) (*(s8 *)((u8 *)temp_a0 + 0));
+    (*(s8 *)((u8 *)D_800BE748 + 3)) = (s8) (*(s8 *)((u8 *)temp_a0 + 1));
+    D_800E1002 = 0;
+    (*(u16 *)((u8 *)D_800BE748 + 0)) = (*(u16 *)((u8 *)temp_a0 + 4)) | ((*(u16 *)((u8 *)D_800BE748 + 0)) & 0x1000);
+    if (D_800E0EA4 < 0x1F3) {
+        temp_v0 = (*(u16 *)((u8 *)temp_a0 + 8));
+        if (D_800BE9E4 < (s32) temp_v0) {
+            D_800E1002 = temp_v0 - D_800BE9E4;
+        }
+    }
+    temp_t5 = D_800E0EA4 + 1;
+    D_800BE9E4 = (s32) (*(u16 *)((u8 *)temp_a0 + 2));
+    D_800E0EA4 = temp_t5;
+    if (temp_t5 >= 0x1F3) {
+        D_800E0EA4 = 0x1F3;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B2A0/func_151DDE70.s")
+#endif

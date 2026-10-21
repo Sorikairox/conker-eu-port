@@ -58,8 +58,33 @@ Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113000.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113700.s")
+#ifdef NON_MATCHING
+void func_15113700(void) {
+    s32 var_v0;
+    s32 var_v1;
+    u8 *temp_a0;
+    u8 *temp_a0_2;
+    u8 temp_a1;
 
+    var_v0 = 0;
+    var_v1 = 0;
+    if (D_800DC320 > 0) {
+        do {
+            temp_a0 = &D_800DBEF4->pad[var_v1];
+            (*(u8 *)((u8 *)temp_a0 + 0x6F)) = (u8) ((*(u8 *)((u8 *)temp_a0 + 0x6F)) & ~0x40);
+            temp_a0_2 = &D_800DBEF4->pad[var_v1];
+            temp_a1 = (*(u8 *)((u8 *)temp_a0_2 + 0x6F));
+            if (((temp_a1 & 0xF) || (((*(u8 *)((u8 *)temp_a0_2 + 0x70)) & 4) == 4)) && ((*(s32 *)((u8 *)temp_a0_2 + 0x38)) != 0)) {
+                (*(u8 *)((u8 *)temp_a0_2 + 0x6F)) = (u8) (temp_a1 | 0x40);
+            }
+            var_v0 += 1;
+            var_v1 += 0xA0;
+        } while (var_v0 < D_800DC320);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113700.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113798.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113B44.s")

@@ -4,7 +4,30 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+void func_1508EF80(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3) {
+    f32 sp3C;
+    f32 sp38;
+    f32 sp28;
+    f32 sp24;
+    f32 temp_f20;
+    f32 temp_f8;
+    f32 temp_f8_2;
+
+    temp_f8 = (*(f32 *)((u8 *)arg0 + 0)) - (*(f32 *)((u8 *)arg1 + 0));
+    sp3C = temp_f8;
+    temp_f20 = arg2 * 0.017453292f;
+    sp38 = (*(f32 *)((u8 *)arg0 + 8)) - (*(f32 *)((u8 *)arg1 + 8));
+    sp24 = cosf(temp_f20);
+    sp28 = (sinf(temp_f20) * sp38) + (sp24 * temp_f8) + (*(f32 *)((u8 *)arg1 + 0));
+    sp24 = sinf(temp_f20);
+    temp_f8_2 = cosf(temp_f20) * sp38;
+    (*(f32 *)((u8 *)arg3 + 0)) = sp28;
+    (*(f32 *)((u8 *)arg3 + 8)) = (f32) (temp_f8_2 + (-sp24 * sp3C) + (*(f32 *)((u8 *)arg1 + 8)));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_BC430/func_1508EF80.s")
+#endif
 // NON-MATCHING: only the stack slots of x and the cosf() spill differ
 // extern f32 D_8009E050; // degrees to radians
 //

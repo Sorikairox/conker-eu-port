@@ -191,8 +191,13 @@ s32 func_151A2FC4(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, f32 arg5, s3
     return func_151A31D4(arg0, 0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg10, arg11, arg12, arg13, 1);
 }
 
+#ifdef NON_MATCHING
+void func_151A3084(s32 arg0, s32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, s16 arg9, s16 argA, s16 argB, s16 argC, s16 argD, s16 argE, s8 argF, u8 arg10, s32 arg11) {
+    func_151A31D4(arg0, arg1, 0, 0, 0.0f, arg2, arg3, arg4, arg5, arg6, arg7, arg8, (s16) (s32) arg9, (s16) (s32) argA, (s16) (s32) argB, (s16) (s32) argC, (s16) (s32) argD, (s16) (s32) argE, (s8) (s32) argF, (u8) (s32) arg10, arg11, 0U);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3084.s")
-
+#endif
 void func_151A3134(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 *arg5) {
     f32 temp_f0 = 1.0f - arg4;
 

@@ -24,8 +24,21 @@ void func_1515BB9C(u8 *arg0, s16 *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515BBE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515BF04.s")
+#ifdef NON_MATCHING
+s32 func_1515BF04(u8 *arg0) {
+    f32 temp_f14;
+    f32 temp_f2;
 
+    temp_f2 = (*(f32 *)((u8 *)arg0 + 0x78));
+    temp_f14 = (*(f32 *)((u8 *)arg0 + 0x74));
+    (*(f32 *)((u8 *)arg0 + 0x14)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x14)) + ((temp_f2 * D_800BE9A4) + (0.5f * temp_f14 * D_800BE9A4)));
+    (*(f32 *)((u8 *)arg0 + 0x78)) = (f32) (temp_f2 + (temp_f14 * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x1C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x7C)) + ((*(f32 *)((u8 *)arg0 + 0x80)) * ((*(f32 *)((u8 *)arg0 + 0x78)) + temp_f2) * 0.5f));
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515BF04.s")
+#endif
 void func_1515BF80(s32 arg0) {
 }
 

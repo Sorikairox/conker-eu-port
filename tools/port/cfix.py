@@ -141,7 +141,7 @@ def _ctx_lines(err):
 
 
 # ------------------------------------------------------------------ spframe
-DECL = re.compile(r'^    ((?:struct\s+)?\w+)\s*(\**)\s*sp([0-9A-F]+)(\[(\w*)\])?;[ \t]*$', re.M)
+DECL = re.compile(r'^    (?!return\b|goto\b|case\b)((?:struct\s+)?\w+)\s*(\**)\s*sp([0-9A-F]+)(\[(\w*)\])?;[ \t]*$', re.M)
 
 def fix_spframe(code, err=None, func=None, src=None, force=False):
     if ' sp;' in code and 'struct {' in code: return None
@@ -150,6 +150,7 @@ def fix_spframe(code, err=None, func=None, src=None, force=False):
     for m in DECL.finditer(code):
         if m.start() < bs: continue
         t, stars, off, arr, n = m.groups(); off = int(off, 16)
+        if off in decls: continue
         size = 4 if stars else TSZ.get(t)
         decls[off] = dict(t=t + (' ' + stars if stars else ''), size=size, n=(int(n, 0) if n else (0 if arr is not None else None)), m=m)
     body = code[bs:]
@@ -407,11 +408,18 @@ if __name__ == '__main__':
 
 # ------------------------------------------------------------------ prototypes (one signature per function, for wasm)
 _CANON = None
+_PCM = []
+def _pc():
+    if _PCM: return _PCM[0]
+    import importlib.util
+    sp = importlib.util.spec_from_file_location('nm_protocheck', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'protocheck.py'))
+    m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m); _PCM.append(m); return m
+
 def canon():
     """name -> (prototype text, ABI signature) of every C definition in src_eu (matching or NON_MATCHING)"""
     global _CANON
     if _CANON is None:
-        import protocheck as pc
+        pc = _pc()
         _CANON = {}
         for p in glob.glob(os.path.join(ROOT, 'conker/src_eu/**/*.c'), recursive=True):
             for m in pc.SIG.finditer(open(p, errors='replace').read()):
@@ -439,7 +447,7 @@ def _gen(t):
     return base
 
 def proto_problems(code, func):
-    import protocheck as pc
+    pc = _pc()
     C = canon(); out = []
     bdef = re.search(r'\b%s\s*\([^;{]*\)\s*\{' % re.escape(func), code)
     head = code[:bdef.start()] if bdef else code

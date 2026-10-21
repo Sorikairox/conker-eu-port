@@ -33,10 +33,105 @@ void func_1503D774(u8 *arg0, s32 arg1)
   D_800C5A90[arg1] = (arg0 - start) >> 3;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800847A0;
+extern u8 D_80098C38;
+
+void func_1503D800(s32 arg0) {
+    s16 *temp_t3;
+    s32 var_v0;
+    s32 var_v0_2;
+    s32 var_v1;
+    u8 *temp_a3;
+    u8 *var_a1;
+    u8 *var_t0;
+    u8 *var_v1_2;
+    u8 temp_a0;
+
+    var_a1 = &D_80098C38;
+    var_v0 = 0;
+loop_1:
+    temp_a0 = *var_a1;
+    var_v1 = 0;
+    if ((s32) temp_a0 > 0) {
+        temp_a3 = *(s32 *)((u8 *)&D_800847A0 + (var_v0 * 4));
+        var_t0 = temp_a3;
+loop_3:
+        var_v1 += 1;
+        if (arg0 == *var_t0) {
+            var_v0_2 = 0;
+            if ((s32) temp_a0 > 0) {
+                var_v1_2 = temp_a3;
+                do {
+                    var_v0_2 += 1;
+                    D_800D1588[*var_v1_2] = D_800D1588[arg0];
+                    temp_t3 = &D_800C5A90[*var_v1_2];
+                    var_v1_2 += 1;
+                    *temp_t3 = (s16) (u16) D_800C5A90[arg0];
+                } while (var_v0_2 < (s32) temp_a0);
+            }
+        } else {
+            var_t0 += 1;
+            if (var_v1 >= (s32) temp_a0) {
+                goto block_9;
+            }
+            goto loop_3;
+        }
+    } else {
+block_9:
+        var_v0 += 1;
+        var_a1 += 1;
+        if (var_v0 == 5) {
+            return;
+        }
+        goto loop_1;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D800.s")
+#endif
+#ifdef NON_MATCHING
+extern s32 D_800847A0;
+extern u8 D_80098C38;
 
+s32 func_1503D8E0(s32 arg0) {
+    s32 var_v0;
+    s32 var_v1;
+    u8 *temp_a3;
+    u8 *var_a1;
+    u8 *var_t0;
+    u8 temp_a0;
+
+    var_a1 = &D_80098C38;
+    var_v0 = 0;
+loop_1:
+    temp_a0 = *var_a1;
+    var_v1 = 0;
+    if ((s32) temp_a0 > 0) {
+        temp_a3 = *(s32 *)((u8 *)&D_800847A0 + (var_v0 * 4));
+        var_t0 = temp_a3;
+loop_3:
+        var_v1 += 1;
+        if (arg0 == *var_t0) {
+            return (s32) *temp_a3;
+        }
+        var_t0 += 1;
+        if (var_v1 >= (s32) temp_a0) {
+            goto block_6;
+        }
+        goto loop_3;
+    }
+block_6:
+    var_v0 += 1;
+    var_a1 += 1;
+    if (var_v0 == 5) {
+        return arg0;
+    }
+    goto loop_1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D8E0.s")
-
+#endif
 s32 func_1503D8E0(s32);
 void func_1503D800(s32);
 s32 func_1502B350(u8 *, s32, s32 *);

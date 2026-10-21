@@ -193,8 +193,24 @@ void func_151CEA8C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CEC80.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CEFD0.s")
+#ifdef NON_MATCHING
+s32 func_151CEFD0(u8 *arg0) {
+    f32 temp_f12;
+    f32 temp_f2;
 
+    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x40));
+    temp_f2 = (*(f32 *)((u8 *)arg0 + 0x44));
+    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) (temp_f2 + (temp_f12 * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + ((temp_f2 + (0.5f * temp_f12 * D_800BE9A4)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x50)) + ((*(f32 *)((u8 *)arg0 + 0x4C)) * D_800BE9A4));
+    if ((*(f32 *)((u8 *)arg0 + 0x50)) > 1.0f) {
+        (*(f32 *)((u8 *)arg0 + 0x50)) = 1.0f;
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CEFD0.s")
+#endif
 typedef struct {
     f32 x;
     f32 y;
