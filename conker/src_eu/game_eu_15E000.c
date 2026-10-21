@@ -60,12 +60,124 @@ void func_1513092C(s32 arg0, u8 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513100C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_151318EC.s")
+typedef struct {
+    u8 pad0[0x24];
+    u8 u24;
+    u8 u25;
+    u8 u26;
+    u8 u27;
+    u8 u28;
+    u8 u29;
+    u8 u2A;
+    u8 u2B;
+    u8 u2C;
+    u8 pad2D[0x43];
+    u8 u70;
+    u8 u71;
+} struct_15E000_col;
+void func_151318EC(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
+    s16 *arg0 = (s16 *)arg0_;
+    s16 *arg1 = (s16 *)arg1_;
+    s16 *arg2 = (s16 *)arg2_;
+    s16 *arg3 = (s16 *)arg3_;
+    struct_15E000_col *arg4 = (struct_15E000_col *)arg4_;
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_15131A84.s")
+    switch (arg4->u70) {
+    case 1:
+        *arg0 = *arg1 = *arg2 = 0;
+        *arg3 = (arg4->u27 * arg4->u2B) >> 8;
+        break;
+    case 2:
+        *arg0 = arg4->u24;
+        *arg1 = arg4->u25;
+        *arg2 = arg4->u26;
+        *arg3 = (arg4->u27 * arg4->u2B) >> 8;
+        break;
+    case 3:
+        *arg0 = arg4->u28;
+        *arg1 = arg4->u29;
+        *arg2 = arg4->u2A;
+        *arg3 = (arg4->u27 * arg4->u2B) >> 8;
+        break;
+    case 4:
+    case 6:
+        *arg0 = *arg1 = *arg2 = *arg3 = 0;
+        break;
+    case 5:
+        *arg0 = *arg1 = *arg2 = 0;
+        *arg3 = arg4->u2B;
+        break;
+    case 7:
+        *arg0 = arg4->u24;
+        *arg1 = arg4->u25;
+        *arg2 = arg4->u26;
+        *arg3 = arg4->u2B;
+        break;
+    case 8:
+        *arg0 = arg4->u24;
+        *arg1 = arg4->u25;
+        *arg2 = arg4->u26;
+        *arg3 = 0;
+        break;
+    default:
+        *arg0 = (arg4->u24 * arg4->u2C) >> 8;
+        *arg1 = (arg4->u25 * arg4->u2C) >> 8;
+        *arg2 = (arg4->u26 * arg4->u2C) >> 8;
+        *arg3 = 0;
+        break;
+    }
+}
 
-void func_151318EC(s32, s32, s32, s32, s32);
-s32 func_15131A84(s32, s32, s32, s32, s32);
+void func_15131A84(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_) {
+    s16 *arg0 = (s16 *)arg0_;
+    s16 *arg1 = (s16 *)arg1_;
+    s16 *arg2 = (s16 *)arg2_;
+    s16 *arg3 = (s16 *)arg3_;
+    struct_15E000_col *arg4 = (struct_15E000_col *)arg4_;
+
+    switch (arg4->u71) {
+    case 1:
+    case 5:
+        *arg0 = *arg1 = *arg2 = 0;
+        *arg3 = 0;
+        break;
+    case 2:
+        *arg0 = *arg1 = *arg2 = arg4->u2C;
+        *arg3 = 0;
+        break;
+    case 8:
+        *arg0 = *arg1 = *arg2 = 0;
+        *arg3 = arg4->u2B;
+        break;
+    case 3:
+        *arg0 = arg4->u24;
+        *arg1 = arg4->u25;
+        *arg2 = arg4->u26;
+        *arg3 = 0;
+        break;
+    case 4:
+    case 6:
+        *arg0 = arg4->u28;
+        *arg1 = arg4->u29;
+        *arg2 = arg4->u2A;
+        *arg3 = arg4->u2B;
+        break;
+    case 7:
+        *arg0 = *arg1 = *arg2 = arg4->u2C;
+        *arg3 = arg4->u2B;
+        break;
+    case 9:
+        *arg0 = arg4->u24;
+        *arg1 = arg4->u25;
+        *arg2 = arg4->u26;
+        *arg3 = arg4->u2B;
+        break;
+    default:
+        *arg0 = *arg1 = *arg2 = arg4->u2C;
+        *arg3 = (arg4->u27 * arg4->u2B) >> 8;
+        break;
+    }
+}
 
 void func_15131BBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     func_15131A84(arg4, arg5, arg6, arg7, arg8);
