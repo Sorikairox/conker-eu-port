@@ -1048,3 +1048,8 @@ func_1514AB04	SIZE-2	3	DIFF21	n	y	s128 F() macro draft DIFF23
 func_1514C860	SIZE+1	4	DIFF15	n	y	s128 callee-saved f24/f26/f28 roles
 func_15168F08	DIFF30	4	DIFF5	n	y	s128 perm gfx++;gfx--; fakematch
 func_151AEB40	DIFF31	3	DIFF15	n	n	s128 bnel delay n=next
+func_150B0F40	s139	3	OK	y	y	s117 DIFF69 -> term order swap + arg4[1] mid DIFF5 -> local perm OK (step temp fakematch)
+func_1000C350	s139	3	OK	y	y	hand: early return arg0 in branch1 + (arg0 & 0x7FU) unsigned mask for beql operand order (permuter)
+func_150E752C	s139	1	OK	y	y	s117 perm DIFF2 -> remote perm OK (p declared block-local)
+func_150E909C	s139	1	OK	y	y	s117 perm DIFF7 -> remote perm OK (f32 r declared before s)
+func_150E96F8	s139	3	OK	y	n	twin of E909C OK: struct 0x3C (v[4] + u30/u34/u35/u38), p,n declared before s
