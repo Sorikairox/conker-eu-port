@@ -3,8 +3,11 @@
 #include <emscripten.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "pc_ultra.h"
+#include "pc_mem.h"
 #include <PR/os_exception.h>
 #include <PR/os_convert.h>
 #include <PR/mbi.h>
@@ -32,9 +35,68 @@ void port_log(const char *fmt, ...) {
     fflush(stdout);
 }
 
+/* logging from game TUs (vbe memory): the format string lives in game memory, so it is read through
+ * the vbe byte accessor first. %s arguments that point into game memory are not converted. */
+void port_glog(const char *fmt, ...) {
+    char buf[512];
+    unsigned i = 0;
+    for (; i < sizeof buf - 1 && vbe_ld8(fmt + i); i++) buf[i] = (char)vbe_ld8(fmt + i);
+    buf[i] = 0;
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf(buf, ap);
+    va_end(ap);
+    fflush(stdout);
+}
+
+/* native copy of a game (vbe) string, for %s arguments of port_glog; 8-entry ring */
+const char *port_gstr(const char *g) {
+    static char ring[8][256];
+    static unsigned k;
+    char *b = ring[k++ & 7];
+    unsigned i = 0;
+    for (; i < 255 && vbe_ld8(g + i); i++) b[i] = (char)vbe_ld8(g + i);
+    b[i] = 0;
+    return b;
+}
+
+/* per-stub call counters (names are string literals: pointer identity), for the priority list */
+#define STUB_SLOTS 4096
+static struct { const char *name, *what; unsigned n, first_frame, order; } stub_tab[STUB_SLOTS];
+static unsigned stub_distinct;
+
+static int stub_count(const char *name, const char *what) {
+    unsigned h = (unsigned)(uintptr_t)name * 2654435761u % STUB_SLOTS;
+    while (stub_tab[h].name && stub_tab[h].name != name) h = (h + 1) % STUB_SLOTS;
+    if (!stub_tab[h].name) {
+        stub_tab[h].name = name; stub_tab[h].what = what;
+        stub_tab[h].first_frame = port_frame_count; stub_tab[h].order = ++stub_distinct;
+    }
+    return ++stub_tab[h].n == 1;
+}
+
+static int stub_cmp(const void *a, const void *b) {
+    const unsigned *x = a, *y = b;
+    if (stub_tab[*x].n != stub_tab[*y].n) return stub_tab[*x].n < stub_tab[*y].n ? 1 : -1;
+    return stub_tab[*x].order < stub_tab[*y].order ? -1 : 1;
+}
+
+/* ranked list of stub hits (calls into functions that are still asm), most frequent first */
+EMSCRIPTEN_KEEPALIVE void port_dump_stubs(int max) {
+    static unsigned idx[STUB_SLOTS];
+    unsigned n = 0;
+    for (unsigned i = 0; i < STUB_SLOTS; i++) if (stub_tab[i].name) idx[n++] = i;
+    qsort(idx, n, sizeof idx[0], stub_cmp);
+    port_log("[stubs] %u distinct asm stubs hit, %d calls; ranked by calls (first-hit order, frame):\n",
+             n, port_stub_hits);
+    for (unsigned i = 0; i < n && (int)i < max; i++)
+        port_log("  %3u. %-14s %8u  #%-3u f%-4u %s\n", i + 1, stub_tab[idx[i]].name, stub_tab[idx[i]].n,
+                 stub_tab[idx[i]].order, stub_tab[idx[i]].first_frame, stub_tab[idx[i]].what);
+}
+
 void port_stub_hit(const char *name, const char *what) {
     port_stub_hits++;
-    if (stub_logged < PORT_STUB_LOG_MAX) {
+    if (stub_count(name, what) && stub_logged < PORT_STUB_LOG_MAX) { /* first hit of each stub */
         stub_logged++;
         OSThread *t = port_current_thread();
         port_log("[stub %2d] %s (%s) thread=%d frame=%u\n", stub_logged, name, what, t ? (int)t->id : -1,
@@ -57,9 +119,9 @@ EMSCRIPTEN_KEEPALIVE void port_set_rom(unsigned char *p, unsigned size) {
 /* ---------------- interrupts / CPU ---------------- */
 
 u32 __osDisableInt(void) { return 1; }
-void __osRestoreInt(u32 m) { (void)m; }
+s32 __osRestoreInt(u32 m) { (void)m; return 0; } /* game TUs define it returning s32 */
 u32 __osGetSR(void) { return 0; }
-void __osSetSR(u32 v) { (void)v; }
+s32 __osSetSR(u32 v) { (void)v; return 0; }
 u32 __osSetFpcCsr(u32 v) { (void)v; return 0; }
 OSIntMask osSetIntMask(OSIntMask m) { (void)m; return OS_IM_ALL; }
 void __osInitialize_common(void) { port_log("[os] __osInitialize_common\n"); }
@@ -159,7 +221,7 @@ static void rom_copy(u32 dev, void *dst, u32 size) {
         memset(dst, 0, size);
         return;
     }
-    memcpy(dst, port_rom + off, size);
+    port_rom_read(dst, off, size); /* big-endian ROM bytes -> vbe game memory */
 }
 
 s32 osPiRawStartDma(s32 dir, u32 dev, void *dram, u32 size) {
@@ -201,11 +263,12 @@ s32 osAiSetFrequency(u32 f) { return (s32)f; }
 
 s32 osContInit(OSMesgQueue *mq, u8 *bits, OSContStatus *st) {
     (void)mq;
-    *bits = 1;
+    vbe_st8(bits, 1);
     for (int i = 0; i < MAXCONTROLLERS; i++) {
-        st[i].type = i == 0 ? CONT_TYPE_NORMAL : 0;
-        st[i].status = 0;
-        st[i].errno = i == 0 ? 0 : CONT_NO_RESPONSE_ERROR;
+        /* sub-word fields of game memory: vbe accessors (port/ultra/pc_mem.h) */
+        vbe_st16(&st[i].type, i == 0 ? CONT_TYPE_NORMAL : 0);
+        vbe_st8(&st[i].status, 0);
+        vbe_st8(&st[i].errno, i == 0 ? 0 : CONT_NO_RESPONSE_ERROR);
     }
     return 0;
 }
@@ -215,5 +278,5 @@ s32 osContStartReadData(OSMesgQueue *mq) {
 }
 void osContGetReadData(OSContPad *pad) {
     memset(pad, 0, sizeof(OSContPad) * MAXCONTROLLERS);
-    for (int i = 1; i < MAXCONTROLLERS; i++) pad[i].errno = CONT_NO_RESPONSE_ERROR;
+    for (int i = 1; i < MAXCONTROLLERS; i++) vbe_st8(&pad[i].errno, CONT_NO_RESPONSE_ERROR);
 }

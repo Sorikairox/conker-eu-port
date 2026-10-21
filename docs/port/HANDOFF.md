@@ -241,31 +241,55 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (session P3, branch `port-web`)
+## Browser build (sessions P3 + P4, branch `port-web`)
 
-Full notes: `docs/port/sessions/P3.md` (screenshot `docs/port/sessions/P3_screenshot.png`).
-Everything is under `port/`; nothing shared was changed, so the matching build is unaffected.
+Full notes: `docs/port/sessions/P3.md` (platform skeleton) and `docs/port/sessions/P4.md` (memory
+model, boot, priority list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
 port/web/run.sh image     # once: conker-emsdk image (emscripten/emsdk:4.0.15-arm64, pinned)
-port/web/run.sh build     # census + scheduler demo + game + page -> port/build/web/ (~50 s clean)
+port/web/run.sh build     # census + vbe IR build of the game TUs + memory tables + link + page (~2-3 min clean)
 port/web/run.sh serve     # http://localhost:8064/?app=demo   (stop: port/web/run.sh stop)
-docker run --rm -v $PWD:/src -w /src conker-emsdk node port/tools/node_run.js port/build/web/conker.js createConker 4 baserom.eu.z64
+docker run --rm -v $PWD:/src -w /src conker-emsdk node port/tools/node_run.js port/build/web/conker.js createConker 10 baserom.eu.z64
+python3 port/tools/priority.py <that log> 50     # conversion priority list (measured stubs + next wave)
 ```
 
-- **Census** (`port/build/census/summary.txt`): 719 TUs; clang defaults reject 176 TUs (718 errors,
-  nearly all int↔pointer / pointer-type laxity). With the port's `-Wno-error=` flags only **7 TUs**
-  fail (array-from-global initialisers, lvalue cast, `char`/`unsigned char` pointer difference,
-  K&R arity mismatch). They are left out and stubbed. No inline asm, no pragma or header blockers.
-- **Link**: 262 functions are called with a wasm signature that differs from the definition
-  (implicit `int f()`, conflicting local prototypes, f32 vs s32): these calls trap at runtime.
-  One function declared as data (`port/exclude.txt`). 46 absolute low data symbols (ROM offsets)
-  cannot be expressed. Stubs are generated from the objects (`port/tools/gen_stubs.py`): 537
-  functions, 1635 data symbols (zeroed; the data blobs are not loaded yet).
-- **Scheduler** (`port/ultra/pc_sched.c`): libultra threads as emscripten fibers (ASYNCIFY),
-  priority scheduling with preemption at libultra calls, one VI retrace per
-  `emscripten_set_main_loop` frame, priority-0 idle threads park. Demo: 4/4 PASS in Chrome and node.
-  ASYNCIFY makes the full game code 1.86× bigger (no `ASYNCIFY_ONLY` list yet).
-- **Game entry**: thread 1 (`func_100010F8`, real C) → PC `func_10001194` → stubs. It reaches
-  `func_15007830` (game entrypoint, asm) in frame 1 and stops: the boot spine is asm.
-  `port/tools/bootpath.py` lists the 129 asm-only functions within 3 calls of it: a priority list for Phase 1.
+- **Memory model (P4):** N64 data stays at its N64 offsets in two mirror arrays (`n64_rdram`
+  8 MB, `n64_seg16`). Data symbols are labels there (`port/stubs/n64mem_labels.s`).
+  `port_mem_load()` copies `init_data`, `game_data` (rzip, inflated) and `debugger_data` from the
+  user's ROM and relocates 5354 pointer words: 3244 become wasm function-table entries, 2110 data
+  pointers. The pointer list comes from a scan of the blobs with range and function-start rules
+  (`port/tools/n64mem.py`). Only 14 zero-filled data stubs remain (ROM offsets used as `&sym`).
+- **Endianness (P4): game memory is virtual big-endian.**
+  - Storage is word-swapped; byte accesses use `A^3`, halfword accesses `A^2`, 64-bit accesses swap
+    halves.
+  - `port/tools/vbe.py` applies this to every game TU at the LLVM IR level before optimization.
+  - Game C code needs **no** swaps, and mixed-width access works.
+  - ROM data and assets need no per-format swappers: DMA is a bswap32 copy.
+  - Bitfields and the PC layer's sub-word accesses (`vbe_*` in `port/ultra/pc_mem.h`) are the
+    exceptions. See MEMORY.md, "What this implies for the C code".
+- **Signatures (P4):** `port/tools/sigs.py` gives every function one wasm signature (definition, or
+  majority call site for stubs) and rewrites 791 mismatching call sites. Link signature warnings
+  went from 288 to 1. Indirect calls are not normalized yet.
+- **Endianness test:** `port_memtest` checks real converted functions (`func_1509CE20/40/60/88`,
+  `func_15041770`) against BE values decoded from the ROM in Python. 45/45 pass in node and in
+  headless Chrome.
+- **Boot:**
+  - PC `func_15007830` (`port/boot/game_entry.c`) → full init sequence → main loop. The state
+    machine is read from the ROM's jump table; one pass per frame.
+  - 23 distinct asm stubs are hit. The top ones, per frame: `func_100061F8`, `func_10001420`,
+    `func_10005BE0`, `func_1501878C`, `func_1501BBB8`; during init: `func_1502AC88` (×201) and the
+    allocator `func_10003C6C`.
+  - Next wave: `func_10004074`, `func_1515DC40`, `func_151674F8`, and the `func_1501878C` callees.
+    The full 50-entry list is in P4.md.
+- **Scheduler (P3):** libultra threads as emscripten fibers (ASYNCIFY). Priority scheduling, one VI
+  retrace per frame, priority-0 idle threads park. `port_wait_frame()` paces PC-written loops.
+- **Census (P3):** 7 of 719 TUs fail under clang and are left out (`port/build/census/summary.txt`).
+- **Next for the browser build** (P4.md, "Known gaps"):
+  - indirect-call signatures;
+  - address constants and `K0_TO_PHYS` in C;
+  - bitfields;
+  - `va_arg` doubles;
+  - review of the pointer scan;
+  - then Fast3D, once the frame builders are C.

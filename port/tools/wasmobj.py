@@ -29,7 +29,7 @@ def read(path):
     b = open(path, 'rb').read()
     assert b[:4] == b'\0asm', path
     p = 8
-    types, fimports, syms = [], [], []
+    types, fimports, syms, funcsec = [], [], [], []
     while p < len(b):
         sid = b[p]; r = R(b, p + 1); size = r.leb(); start = r.p; end = start + size; p = end
         if sid == 1:
@@ -51,6 +51,8 @@ def read(path):
                     r.u8(); r.u8()
                 elif kind == 4:
                     r.u8(); r.leb()
+        elif sid == 3:
+            funcsec = [r.leb() for _ in range(r.leb())]
         elif sid == 0:
             name = r.str()
             if name != 'linking':
@@ -70,6 +72,8 @@ def read(path):
                             sig = None
                             if kind == SYM_FUNC and (flags & UNDEF) and idx < len(fimports):
                                 sig = types[fimports[idx][1]]
+                            elif kind == SYM_FUNC and not (flags & UNDEF) and 0 <= idx - len(fimports) < len(funcsec):
+                                sig = types[funcsec[idx - len(fimports)]]
                             syms.append((nm, kind, flags, sig))
                         elif kind == SYM_DATA:
                             nm = r.str()

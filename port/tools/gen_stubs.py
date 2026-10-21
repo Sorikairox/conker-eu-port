@@ -14,6 +14,7 @@ Writes OUTDIR/asm_stubs.c, OUTDIR/data_stubs.c and OUTDIR/stubs_report.txt.
 import os, re, sys, glob, subprocess, collections
 sys.path.insert(0, os.path.dirname(__file__))
 import wasmobj
+import n64mem
 
 CT = {'i32': 'int', 'i64': 'long long', 'f32': 'float', 'f64': 'double'}
 SRC = 'conker/src_eu'
@@ -64,6 +65,7 @@ def lib_defined(libdir):
 def main():
     outdir, libdir, objs = sys.argv[1], sys.argv[2], sys.argv[3:]
     defined, undef_f, undef_d = set(), collections.defaultdict(collections.Counter), set()
+    defined_f, defined_d = {}, set()
     for o in objs:
         runtime = '/ultra/' in o  # PC runtime: its definitions count, its imports (emscripten/GL) do not
         for nm, kind, flags, sig in wasmobj.read(o):
@@ -78,11 +80,23 @@ def main():
                     undef_d.add(nm)
             elif kind in (wasmobj.SYM_FUNC, wasmobj.SYM_DATA):
                 defined.add(nm)
+                if kind == wasmobj.SYM_FUNC:
+                    defined_f.setdefault(nm, sig)
+                else:
+                    defined_d.add(nm)
     libs = lib_defined(libdir)
     asm = asm_only()
     addr = addresses()
     funcs = sorted(n for n in undef_f if n not in defined and n not in libs)
     datas = sorted(n for n in undef_d if n not in defined and n not in libs)
+
+    # ---- N64 memory model: mirror labels, relocations, function table (port/tools/n64mem.py)
+    stub_sig = {n: undef_f[n].most_common(1)[0][0] for n in funcs}
+    extra, mirrored = n64mem.generate(outdir, defined_f, defined_d, stub_sig, datas, addr)
+    for n, sig in extra.items():
+        undef_f[n][sig] += 1
+    funcs = sorted(set(funcs) | set(extra))
+    datas = [n for n in datas if n not in mirrored]
 
     # ---- function stubs
     cat = collections.Counter(); conflicts = []
@@ -94,10 +108,22 @@ def main():
         if len(sigs) > 1:
             conflicts.append((n, len(sigs)))
         what = ('asm:' + asm[n]) if n in asm else ('absolute' if n in addr else 'missing')
-        cat[what.split(':')[0]] += 1
         ret = CT.get(rs[0], 'int') if rs else 'void'
         args = ', '.join(f'{CT.get(t, "int")} a{i}' for i, t in enumerate(ps)) or 'void'
         body = f'port_stub_hit("{n}", "{what}");' + ('' if ret == 'void' else ' return 0;')
+        # an "absolute" name (e.g. a US name in undefined_syms.eu.txt = EU address) whose address is a
+        # function with a C body under its EU name: forward to it instead of stubbing
+        real = f'func_{addr[n]:08X}' if what == 'absolute' else None
+        if real and real in defined_f and real != n and defined_f[real]:
+            rp, rr = defined_f[real]
+            fwd_ret = CT.get(rr[0], 'int') if rr else 'void'
+            L.append(f'{fwd_ret} {real}({", ".join(CT.get(t, "int") for t in rp) or "void"});')
+            call = f'{real}({", ".join(f"a{i}" if i < len(ps) else "0" for i in range(len(rp)))})'
+            body = (f'{call};' if ret == 'void' else (f'return {call};' if fwd_ret != 'void' else f'{call}; return 0;'))
+            what = 'alias:' + real
+        elif real and real in asm:
+            what = f'absolute={real}:asm:{asm[real]}'
+        cat[what.split(':')[0].split('=')[0]] += 1
         L.append(f'__attribute__((weak)) {ret} {n}({args}) {{ {body} }}')
     open(f'{outdir}/asm_stubs.c', 'w').write('\n'.join(L) + '\n')
 

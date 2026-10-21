@@ -17,12 +17,14 @@
 #include "variables.h"
 
 void port_run(void (*boot)(void));
-void port_log(const char *fmt, ...);
+void port_glog(const char *fmt, ...);
+#define port_log port_glog /* format strings live in vbe game memory */
 
 extern u32 D_80000318; /* osMemSize */
 /* asm-only callees are left undeclared on purpose: the game's other callers use implicit `int f()`
  * declarations, and the generated stub takes the majority wasm signature. */
 void func_10003BD0(void);
+void func_15007830(void); /* port/boot/game_entry.c */
 
 void func_10001194(s32 arg0) {
     s32 *fb;
@@ -51,7 +53,13 @@ void func_10001194(s32 arg0) {
     port_log("[boot] func_15007830 returned\n");
 }
 
+int port_mem_load(void);
+int port_memtest(void);
+
 static void port_boot(void) {
+    /* N64 data segments from the user's ROM into the RDRAM mirror + pointer relocation
+     * (docs/port/MEMORY.md); on the N64 the IPL3 / func_10001194 load these. */
+    if (port_mem_load() == 0) port_memtest();
     /* libultra boot globals the IPL3 leaves in low RDRAM */
     D_80000300 = 1;          /* osTvType: NTSC=1 / PAL=0; EU ROM -> PAL */
     D_80000300 = 0;

@@ -100,10 +100,19 @@ $('demo').onclick = () => start('demo');
 $('game').onclick = () => start('game');
 
 (async () => {
-  try {
+  const q = new URLSearchParams(location.search);
+  if (!q.get('romurl')) try {
     const cached = await idb('readonly', (s) => s.get('eu'));
     if (cached) await setRom(new Uint8Array(cached), 'IndexedDB cache');
   } catch (e) { /* no IndexedDB: fine */ }
-  const app = new URLSearchParams(location.search).get('app');
+  // dev/test aid: &romurl=PATH fetches the ROM from the (local) server instead of the picker; it is
+  // not cached. Used by the headless browser test with a read-only mount (docs/port/sessions/P4.md).
+  if (q.get('romurl')) {
+    try { await setRom(new Uint8Array(await (await fetch(q.get('romurl'))).arrayBuffer()), q.get('romurl')); }
+    catch (e) { log('romurl: ' + e.message, 'fail'); }
+  }
+  // &dump=MS: dump threads + the ranked stub-hit list after MS milliseconds
+  if (q.get('dump')) setTimeout(() => window.Module && window.Module._port_dump_threads(), +q.get('dump'));
+  const app = q.get('app');
   if (app === 'demo' || (app === 'game' && romBytes)) start(app);
 })();

@@ -18,16 +18,16 @@ GAME_CFLAGS  := -O1 -g0 -std=gnu89 -nostdinc -fno-builtin -fno-strict-aliasing -
 
 LINK_COMMON := -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VERSION=2 -sMIN_WEBGL_VERSION=2 \
                -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=128MB -sSTACK_SIZE=1MB -sMODULARIZE=1 -sINVOKE_RUN=0 -sEXIT_RUNTIME=0 \
-               -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads \
+               -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs \
                -sEXPORTED_RUNTIME_METHODS=HEAPU8,callMain -sENVIRONMENT=web,node --profiling-funcs
 
-ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_video.c
+ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_video.c ultra/pc_mem.c
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 
 .PHONY: all demo objs game web clean
 all: demo game web
 
-$(B)/ultra/%.o: ultra/%.c ultra/pc_ultra.h
+$(B)/ultra/%.o: ultra/%.c ultra/pc_ultra.h ultra/pc_mem.h
 	@mkdir -p $(@D)
 	emcc $(ULTRA_CFLAGS) -c $< -o $@
 
@@ -45,28 +45,41 @@ $(WEB)/sched_demo.js: $(B)/demo.o $(ULTRA_OBJ)
 objs:
 	cd .. && python3 port/tools/census.py
 
-# TUs that still fail under clang (see census) are left out; their functions get stubs
-GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>1 && $$4=="ok" && !($$1 in ex) {gsub("/","__",$$1); print "$(B)/obj/" $$1 ".o"}' exclude.txt $(B)/census/files.tsv 2>/dev/null)
+# TUs that still fail under clang (see census) are left out; their functions get stubs.
+# Game TUs (and port/boot) are compiled through the vbe IR pass (virtual big-endian memory,
+# docs/port/MEMORY.md): port/tools/vbe_build.py -> $(B)/vobj/*.o
+GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>1 && $$4=="ok" && !($$1 in ex) {gsub("/","__",$$1); print "$(B)/vobj/" $$1 ".o"}' exclude.txt $(B)/census/files.tsv 2>/dev/null)
+# GLOBAL_BASE: wasm addresses 0..16 MB stay unused, a "null zone" that absorbs writes through the
+# NULL pointers that asm stubs return (port_mem_null_report); on the N64 these would TLB-miss.
+BOOT_SRC  := boot/game_main.c boot/game_entry.c
+BOOT_OBJS := $(patsubst boot/%.c,$(B)/vobj/port__%.o,$(BOOT_SRC))
+STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o
 
-$(B)/boot.o: boot/game_main.c
+$(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt tools/vbe.py tools/vbe_build.py tools/sigs.py $(BOOT_SRC) ultra/pc_mem.h $(GEN)/memtest_expect.h
+	cd .. && python3 port/tools/vbe_build.py $(addprefix port/,$(BOOT_SRC))
+	@touch $@
+
+$(GEN)/memtest_expect.h: tools/n64mem.py
+	cd .. && python3 port/tools/n64mem.py port/$(GEN)
+
+$(B)/stubs/%.o: $(GEN)/%.c ultra/pc_mem.h
 	@mkdir -p $(@D)
-	emcc $(GAME_CFLAGS) -c $< -o $@
-
-$(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o: $(B)/stubs/%.o: $(GEN)/%.c
+	emcc -O1 -g0 -Wno-incompatible-library-redeclaration -c $< -o $@
+$(B)/stubs/n64mem_labels.o: $(GEN)/n64mem_labels.s
 	@mkdir -p $(@D)
-	emcc -O1 -g0 -c $< -o $@
+	emcc -c $< -o $@
 
-$(GEN)/asm_stubs.c $(GEN)/data_stubs.c &: $(B)/census/files.tsv exclude.txt $(B)/boot.o $(ULTRA_OBJ) tools/gen_stubs.py
-	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(B)/boot.o $(ULTRA_OBJ))
+$(GEN)/asm_stubs.c $(GEN)/data_stubs.c $(GEN)/n64mem_tab.c $(GEN)/n64mem_labels.s &: $(B)/vbe.stamp $(ULTRA_OBJ) tools/gen_stubs.py tools/n64mem.py
+	cd .. && python3 port/tools/gen_stubs.py port/$(GEN) $(LIBDIR) $(addprefix port/,$(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ))
 
 $(B)/census/files.tsv:
 	cd .. && python3 port/tools/census.py
 
 game: $(WEB)/conker.js
-$(WEB)/conker.js: $(B)/census/files.tsv $(B)/boot.o $(ULTRA_OBJ) $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o
+$(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
-	emcc $(GAME_OBJS) $(B)/boot.o $(ULTRA_OBJ) $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o -o $@ \
-	  $(LINK_COMMON) -sEXPORT_NAME=createConker -Wl,--error-limit=0 2> $(B)/link_warnings.txt \
+	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(STUB_OBJS) -o $@ \
+	  $(LINK_COMMON) -sGLOBAL_BASE=16MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -Wl,--error-limit=0 2> $(B)/link_warnings.txt \
 	  || (tail -40 $(B)/link_warnings.txt; exit 1)
 	@echo "link warnings: $$(grep -c warning $(B)/link_warnings.txt) (port/build/link_warnings.txt)"
 	@ls -l $(WEB)/conker.wasm
@@ -78,7 +91,7 @@ $(WEB)/%: web/%
 	cp $< $@
 
 clean:
-	rm -rf $(B)/obj $(B)/ultra $(B)/stubs $(B)/census $(B)/*.o $(WEB) $(GEN)/asm_stubs.c $(GEN)/data_stubs.c
+	rm -rf $(B)/obj $(B)/vobj $(B)/ll $(B)/vbe.stamp $(B)/ultra $(B)/stubs $(B)/census $(B)/*.o $(WEB) $(GEN)/asm_stubs.c $(GEN)/data_stubs.c
 
 print-objs:
 	@echo $(GAME_OBJS)

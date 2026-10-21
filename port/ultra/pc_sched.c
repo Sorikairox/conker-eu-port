@@ -47,6 +47,16 @@ static int in_main_loop;
 unsigned port_frame_count;
 void (*port_frame_hook)(void);
 
+/* PC-only pacing: block the calling thread until the next frame. Used where the N64 code would block
+ * on a VI message inside a function that is still an asm stub (port/boot/game_entry.c main loop). */
+static OSMesgQueue frame_mq;
+static OSMesg frame_buf[1];
+static int frame_mq_init;
+void port_wait_frame(void) {
+    if (!frame_mq_init) { osCreateMesgQueue(&frame_mq, frame_buf, 1); frame_mq_init = 1; }
+    osRecvMesg(&frame_mq, NULL, OS_MESG_BLOCK);
+}
+
 static const char *state_name(int s) {
     static const char *n[] = {"free", "stopped", "ready", "running", "blocked", "dead"};
     return n[s];
@@ -274,11 +284,15 @@ static void frame(void) {
     port_frame_count++;
     if (port_frame_hook) port_frame_hook();
     port_vi_retrace();
+    if (frame_mq_init) osSendMesg(&frame_mq, NULL, OS_MESG_NOBLOCK);
     port_sched_run();
     port_video_frame();
 }
 
+void port_dump_stubs(int max);
 EMSCRIPTEN_KEEPALIVE void port_dump_threads(void) {
+    port_dump_stubs(60);
+    { void port_mem_null_report(void); port_mem_null_report(); }
     for (int i = 0; i < MAX_THREADS; i++) {
         PcThread *p = &threads[i];
         if (p->state == P_FREE) continue;

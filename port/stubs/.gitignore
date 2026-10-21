@@ -1,3 +1,7 @@
 asm_stubs.c
 data_stubs.c
 stubs_report.txt
+n64mem_tab.c
+n64mem_labels.s
+n64mem_report.txt
+memtest_expect.h

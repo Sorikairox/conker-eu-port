@@ -163,6 +163,9 @@ What the in-place `NON_MATCHING=1` build does today is in `docs/port/HANDOFF.md`
 
 ### 3.6 Endianness and assets
 
+> **Superseded (P4):** the browser build uses *virtual big-endian* game memory (IR pass, no per-format
+> swappers) and a mirror + load-time relocation for the data blobs. See `docs/port/MEMORY.md`.
+
 - The ROM is big-endian. Code that reads asset structures through typed pointers
   (`*(s16 *)(p + 4)` on data loaded from ROM) needs byte-swapping. Plan:
   1. Inventory the asset loaders: every `osPiStartDma` destination and every rzip decompress
