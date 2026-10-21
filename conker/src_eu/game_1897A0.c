@@ -17,7 +17,40 @@ void *func_1515C2F0(s32 *arg0, s32 arg1, void *arg2, s32 arg3, u8 arg4, s32 arg5
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C388.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C534.s")
+extern s32 (*D_8008B424[])(u8 *, u8 *);
+
+s32 func_1515C534(u8 *arg0) {
+    u8 *b;
+    s32 i;
+    u8 done;
+    s16 t;
+
+    b = *(u8 **)(arg0 + 0x98);
+    done = 0;
+    if (((s8 *)b)[0x39] != -1) {
+        done = D_8008B424[((s8 *)b)[0x39]](arg0, b) == 0;
+    }
+    if (!done) {
+        if (b[0x14] & 4) {
+            t = *(s16 *)(arg0 + 0x1C);
+            if (t < *(s16 *)(b + 0x2C)) {
+            dummy: ; // fakematch: label splits the block (permuter)
+                if (t * *(s16 *)(b + 0x2E) < b[0x1A]) {
+                    b[0x1A] = t * *(s16 *)(b + 0x2E);
+                }
+            }
+        }
+        if ((b[0x14] & 8) && *(s16 *)(arg0 + 0x1C) < *(s16 *)(b + 0x30) && b[0x32] == 0) {
+            for (i = D_800BE9E4; i != 0; i--) {
+                *(f32 *)b *= *(f32 *)(b + 0x34);
+            }
+        }
+    }
+    if (done) {
+        return 0;
+    }
+    return 1;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515C6F4.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1897A0/func_1515CF9C.s")
 // s32 func_1515CF9C(void *arg0, void *arg1) {
