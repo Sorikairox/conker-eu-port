@@ -136,7 +136,45 @@ s32 func_151598E0(struct127 *arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515999C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159B04.s")
+s32 func_15046EF0(f32 *, s32, s32, u8 *);
+s32 func_1514672C(f32 *);
+s32 func_15159C2C(u8 *, u8 *);
+s32 func_151D8E20();
+
+u8 func_15159B04(u8 *arg0, u8 *arg1)
+{
+  u8 flag;
+  flag = 1;
+  if (func_15159C2C(arg0, arg1) != 0)
+  {
+    f32 v[4];
+    if ((*((f32 *) (arg0 + 0x5C))) > 0.0f)
+    {
+      v[0] = (*((f32 *) (arg0 + 0x4C))) + (*((f32 *) (arg0 + 0x40)));
+      v[1] = *((f32 *) (arg1 + 4));
+      v[2] = (*((f32 *) (arg0 + 0x54))) + (*((f32 *) (arg0 + 0x48)));
+      if (func_1514672C(v) == 0)
+      {
+        return 0;
+      }
+      if (func_15046EF0(v, 0, *((s32 *) (arg0 + 0x44)), arg0 + 0x80) != 0)
+      {
+        flag = 3; // fakematch: permuter, flag reused as the 3 constant (makes flag = 0 share the tail)
+        v[1] = *((f32 *) (arg0 + 0x80));
+        if (arg0[0x9D] == flag)
+        {
+          func_151DBCBC(func_151D8E20(), (*((f32 *) (arg0 + 0xA8))) * 0.2f, 0xFF, (s32) (arg0 + 0x84), v, arg0[0xC], arg0[1]);
+        }
+        flag = 0;
+      }
+    }
+  }
+  else
+  {
+    flag = 0;
+  }
+  return flag;
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159C2C.s")
 
@@ -222,6 +260,23 @@ s32 func_1515AE90(u8 *arg0, u8 **arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515AEE4.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515AFF4.s")
+typedef struct { f32 x, y, z; } V3_AFF4;
+typedef struct { s32 w[10]; } Blk_AFF4;
+typedef struct { f32 u0; V3_AFF4 pos; f32 u10; Blk_AFF4 blk; } Sp_AFF4;
+void func_1515AFF4(u8 *arg0, V3_AFF4 *arg1, f32 arg2, s32 arg3) {
+    Sp_AFF4 sp;
+    s16 *r;
+    struct260 *p;
+
+    sp.u0 = 0.0f;
+    sp.pos = *arg1;
+    sp.u10 = arg2;
+    sp.blk = *(Blk_AFF4 *)(arg0 + 0x84);
+    r = (s16 *)(arg0 + 0x80);
+    p = func_15149130((s16)(r[0] + (u32)func_150ADA20() % (r[1] + 1)), -1, 0x3F, -1, 1, 0, (struct37 *)0x3C, arg0[0xC], arg0[1]);
+    if (p != NULL) {
+        memcpy((u8 *)p + 0x28, &sp, 0x3C);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515B0F8.s")
