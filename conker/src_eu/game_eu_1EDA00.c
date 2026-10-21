@@ -56,7 +56,11 @@ s32 func_151C0894(u8 *arg0, u8 *arg1, s32 arg2, u8 **arg3) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+void func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+#else
 s32 func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+#endif
 
 void func_151C0910(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     s32 pad;

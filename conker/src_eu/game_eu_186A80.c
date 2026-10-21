@@ -99,8 +99,53 @@ s32 func_151597A0(u8 *arg0, u8 *arg1, u8 arg2) {
     return r;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159828.s")
+#ifdef NON_MATCHING
+extern u16 D_8008B3E0;
 
+s32 func_15159828(u8 *arg0, s32 arg1) {
+    struct {
+        u16 uC;
+        u8 padE[0xA];
+    } sp;
+    s32 var_v0;
+    s32 var_v1;
+    u8 *var_a2;
+    u8 temp_t8;
+
+    var_v0 = 0;
+    if (!(arg1 & 0xFF)) {
+        var_v0 = 0;
+        var_a2 = &(*(u8 *)((u8 *)&sp + 0x1));
+        sp.uC = D_8008B3E0;
+loop_2:
+        temp_t8 = *var_a2;
+        var_a2 -= 1;
+        if ((*(u16 *)((u8 *)arg0 + 0x84)) == temp_t8) {
+            var_v0 = 1;
+        }
+        if (var_v0 == 0) {
+            if ((u32) var_a2 < (u32) &sp.uC) {
+
+            } else {
+                goto loop_2;
+            }
+        }
+    }
+    if (var_v0 != 0) {
+        var_v1 = 3;
+    } else if ((*(u8 *)((u8 *)arg0 + 0xAD)) != 0) {
+        var_v1 = 2;
+    } else {
+        var_v1 = 4;
+        if ((*(f32 *)((u8 *)arg0 + 0x28)) != 0.0f) {
+            var_v1 = 1;
+        }
+    }
+    return var_v1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_15159828.s")
+#endif
 s32 func_151598E0(struct127 *arg0, u8 *arg1) {
     s32 ret = 0;
 

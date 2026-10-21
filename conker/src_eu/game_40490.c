@@ -18,7 +18,30 @@ typedef struct {
 
 extern void (*D_800831C0[])();
 
+#ifdef NON_MATCHING
+void func_15013000(void) {
+    s32 var_s0;
+    u32 var_s1;
+    void (*temp_a1)(u8 *, s32);
+
+    D_800DCDC4 = 0;
+    D_800DCD90 = 0.0f;
+    var_s1 = 0;
+    var_s0 = 0;
+    if (D_800D3094 != 0) {
+        do {
+            temp_a1 = D_800831C0[((s32) (*(u8 *)((u8 *)(&D_800D34B8[var_s0]) + 0x15)) >> 2) & 0xFF];
+            if (temp_a1 != NULL) {
+                temp_a1(&D_800D34B8[var_s0], temp_a1);
+            }
+            var_s1 += 1;
+            var_s0 += 0x34;
+        } while (var_s1 < (u32) D_800D3094);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013000.s")
+#endif
 // NON-MATCHING: global stores/loads scheduled differently, regalloc
 // void func_15013000(void) {
 //     u32 i;

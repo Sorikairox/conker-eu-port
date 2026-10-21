@@ -156,7 +156,11 @@ void func_151BC494(u8 *arg0, u8 arg1, s32 arg2) {
     func_151602C0(sp48, sp3C, (func_150ADA20() % 21U) + 0x1E, 0xFF, 0x61, 0x36, 0xFFU, 0U, 0, arg1, arg2);
 }
 
+#ifdef NON_MATCHING
+void func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+#else
 s32 func_150E856C(f32, s32, s32, s32, s16, u8, u8, u8, u8, u8, u8, s32);
+#endif
 
 void func_151BC56C(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     s32 pad;

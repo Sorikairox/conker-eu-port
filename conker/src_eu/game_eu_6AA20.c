@@ -1,12 +1,42 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1503D728(s32 *arg0, s32 arg1);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D210.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D658.s")
+#ifdef NON_MATCHING
+void func_1503D658(s8 *arg0, s32 arg1) {
+    s32 var_s0;
+    s8 *var_v0;
+    s8 var_v1;
 
+    if (arg0 != NULL) {
+        var_s0 = 0;
+        var_v0 = arg0;
+        if (*arg0 != -0x21) {
+            var_v1 = *arg0;
+            do {
+                if (var_v1 != -0x24) {
+                    if (var_v1 == 1) {
+                        func_1503D728(var_v0 + 4, arg1);
+                    }
+                } else if ((*(u8 *)((u8 *)var_v0 + 3)) == 0xE) {
+                    func_1503D728(var_v0 + 4, arg1);
+                }
+                var_s0 += 1;
+                var_v0 = (var_s0 * 8) + arg0;
+                var_v1 = *var_v0;
+            } while (var_v1 != -0x21);
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D658.s")
+#endif
 void func_1503D728(s32 *arg0, s32 arg1) {
     s32 temp_v0 = *arg0;
     if ((temp_v0 != 0) && !(temp_v0 & 0x0F000000)) {
@@ -346,4 +376,37 @@ s32 func_1503DF2C(s32 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DF2C.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_1510DD2C(s32, s32, u16);
+extern s32 D_800C5758;
+extern s32 D_800C5A48;
+
+void func_1503E00C(s32 arg0) {
+    s32 temp_a1;
+    s32 temp_v1;
+    s32 var_s0;
+    s32 var_s1;
+    u16 *temp_s3;
+    u8 *temp_v0;
+
+    temp_s3 = ((s32 *)((u8 *)&D_800C5A48 + (arg0 * 2)));
+    var_s0 = 0;
+    if ((s32) *temp_s3 > 0) {
+        var_s1 = 0;
+        do {
+            temp_v0 = *(((s32 *)((u8 *)&D_800C5758 + (arg0 * 4)))) + var_s1;
+            temp_v1 = (*(s32 *)((u8 *)temp_v0 + 0));
+            if (temp_v1 != 0x80000000) {
+                temp_a1 = (*(s32 *)((u8 *)temp_v0 + 4));
+                if (temp_v1 != temp_a1) {
+                    func_1510DD2C(temp_a1, temp_a1, *temp_s3);
+                }
+            }
+            var_s0 += 1;
+            var_s1 += 0xC;
+        } while (var_s0 < (s32) *temp_s3);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503E00C.s")
+#endif

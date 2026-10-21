@@ -59,7 +59,7 @@ s16 *func_150D8AA0(s16 *arg0, s32 arg1) {
 #ifdef NON_MATCHING
 s32 func_15046F70(f32 *, s32, f32, f32 *);
 void func_1504715C(void *, u8 *);
-s32 func_150E856C(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_150E856C(f32, s32, s32 *, f32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 void func_150E892C(void *, s16, u8, s32);
 s32 func_15153BA4(s16 *, s32, s32, s32);
 

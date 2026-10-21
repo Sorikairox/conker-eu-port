@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 *func_1513445C(u8 *arg0, u16 arg1, u8 arg2, s32 arg3);
+#endif
 // hoisted forward declaration(s) for func_151341C8, func_15134290
 s32 func_15134108(u8 *, f32, f32, f32, f32, s32);
 
@@ -382,8 +385,47 @@ void func_15134428(s32 arg0, u8 *arg1, s32 arg2) {
     func_1513445C(arg0, *(u16 *)(arg1 + 0x174), arg1[0x176], *(s32 *)(arg1 + 0x178));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_1513445C.s")
+#ifdef NON_MATCHING
+s32 func_1510D66C(s32, s32 *, s32, s32);
 
+s32 *func_1513445C(u8 *arg0, u16 arg1, u8 arg2, s32 arg3) {
+    struct {
+        s32 u30;
+        u8 pad34[0x6];
+        u8 u3A;
+        u8 u3B;
+    } sp;
+    s32 *temp_v1;
+    s32 *var_s0;
+    s32 temp_t2;
+    s32 temp_v0_2;
+    s32 var_a0;
+    struct_eu_80090F10 *temp_v0;
+
+    temp_v0 = &D_80090F10[arg1];
+    sp.u3B = temp_v0->padA[0];
+    sp.u3A = temp_v0->padA[1];
+    temp_v0_2 = func_1510D66C(*(*(s32 **)((u8 *)temp_v0 + 0)), &sp.u30, arg3, 0);
+    (*(s32 *)((u8 *)arg0 + 4)) = temp_v0_2;
+    temp_t2 = arg2 * 4;
+    (*(s32 *)((u8 *)arg0 + 0)) = (s32) ((temp_t2 & 0xFFFF) | 0xDB060000);
+    var_s0 = arg0 + 8;
+    temp_v1 = var_s0;
+    if (sp.u3B == 2) {
+        (*(s32 *)((u8 *)temp_v1 + 0)) = ((temp_t2 + 4) & 0xFFFF) | 0xDB060000;
+        var_s0 = (s32 *)((u8 *)var_s0 + (8));
+        if (sp.u3A == 1) {
+            var_a0 = 0x200;
+        } else {
+            var_a0 = 0x20;
+        }
+        (*(s32 *)((u8 *)temp_v1 + 4)) = (s32) ((temp_v0_2 + sp.u30) - var_a0);
+    }
+    return var_s0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_1513445C.s")
+#endif
 s32 func_15134548(s32 arg0, u8 *arg1, s32 arg2) {
     u8 *p = arg1 + 0x170;
     u8 *q = p;

@@ -953,7 +953,11 @@ s32 func_151256BC(struct108 *);
 s32 func_15126378(struct108 *);
 s32 func_15128030(struct108 *);
 s32 func_1512A8D0(struct108 *);
+#ifdef NON_MATCHING
+void func_1512EA20(struct108 *);
+#else
 s32 func_1512EA20(struct108 *);
+#endif
 
 s32 func_15128540(struct108 *arg0) {
     if (func_151253CC(arg0) != 0) {

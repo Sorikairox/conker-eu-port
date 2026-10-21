@@ -118,7 +118,11 @@ int func_15147168(arg0, arg1, arg2, arg3)
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151473F4.s")
 
 s32 func_15146E00(f32 *, u8 *, s32, u8);
+#ifdef NON_MATCHING
+void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+#else
 s32 func_1514CBE8(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+#endif
 void func_151475B0(u8 *arg0, volatile u8 arg1, s32 arg2) {
     f32 sp44[3];
     s16 sp42;
@@ -127,7 +131,11 @@ void func_151475B0(u8 *arg0, volatile u8 arg1, s32 arg2) {
         do {} while (0); // fakematch: permuter
         func_15146E00(sp44, *q, 0, arg1);
         sp42 = (func_150ADA20() % 11U) + 5;
+#ifdef NON_MATCHING
+        func_1514CBE8(sp44[0], sp44[1], sp44[2], func_150ADA68() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
+#else
         func_1514CBE8(sp44[0], sp44[1], *(s32 *)&sp44[2], func_150ADA68() * 11.0f, 0, 0xFF, sp42, 0x16, 0, 0.0f, 0, 0xFF);
+#endif
     }
 }
 

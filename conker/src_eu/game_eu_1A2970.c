@@ -76,7 +76,11 @@ void func_151770F4(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15177360.s")
 
+#ifdef NON_MATCHING
+s32 func_1510B460(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
+#else
 s32 func_1510B460(u8 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
+#endif
 Gfx *func_15177360(Gfx *, u8 *, s16);
 extern f32 D_800D3A00;
 extern f32 D_800D3A04;
@@ -87,7 +91,11 @@ Gfx *func_15177638(Gfx *gdl, u8 *arg1, s16 arg2) {
     f32 mf[4][4];
     s32 pad[2];
 
+#ifdef NON_MATCHING
+    if (func_1510B460(&D_800DA030[arg2 << 6], *(f32 *)(arg1 + 0x98), *(f32 *)(arg1 + 0x9C), *(f32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
+#else
     if (func_1510B460(&D_800DA030[arg2 << 6], *(s32 *)(arg1 + 0x98), *(s32 *)(arg1 + 0x9C), *(s32 *)(arg1 + 0xA0), D_800D9F40, 4000.0f, D_800D3A00, D_800D3A04, 0, 0) == 0) {
+#endif
         switch (arg1[0x91]) {
         case 0:
             func_150A8050(mf, *(f32 *)(arg1 + 0xA8), *(f32 *)(arg1 + 0xAC), *(f32 *)(arg1 + 0xB0));

@@ -57,7 +57,7 @@ s32 func_150BAEE0(s32 arg0, s32 arg1) {
 
 #ifdef NON_MATCHING
 s32 func_15143E94(s32, s32);
-s32 func_1514CBE8(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
+void func_1514CBE8(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 s32 func_151664F0(s32, s32, s32, s32, s32, s32, s32, s32, s32);
 
 void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2) {

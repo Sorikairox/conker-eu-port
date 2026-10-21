@@ -249,7 +249,85 @@ void func_150E7C50(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E821C.s")
 
+#ifdef NON_MATCHING
+void func_150E856C(f32 arg0, u8 arg1, s32 arg2, u8 *arg3, s16 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, s32 argB) {
+    struct {
+        s32 u5C;
+        s16 u60;
+        s8 u62;
+        s8 u63;
+        s32 u64;
+        s32 u68;
+        u8 u6C;
+        s8 u6D;
+        u8 u6E;
+        u8 u6F;
+        u8 u70;
+        s8 u71;
+        s8 u72;
+        s8 u73;
+        s32 u74;
+        u8 pad78[0x6];
+        s16 u7E;
+        s16 u80;
+    } sp;
+    s32 sp58;
+    s32 sp54;
+    s32 sp4C;
+    s32 sp48;
+    s32 var_v0;
+    s32 var_v0_2;
+    s32 var_v1;
+
+    sp.u7E = 0x14;
+    sp.u80 = 0xC;
+    sp.u62 = 0x4F;
+    sp.u63 = 0;
+    if (arg4 == -1) {
+        var_v1 = 0;
+    } else {
+        var_v1 = 1;
+    }
+    var_v0 = 0;
+    if (arg5 != 0) {
+        var_v0 = 0x400;
+    }
+    sp.u5C = var_v0 | var_v1 | 0x9300 | 0x40000;
+    if (arg4 == -1) {
+        sp.u60 = 0x12C;
+    } else {
+        sp.u60 = arg4 + 0x14;
+    }
+    sp.u64 = 0;
+    sp.u68 = 0;
+    sp.u6D = 0xFF;
+    sp.u71 = 0xFF;
+    sp.u6C = arg1;
+    sp.u6E = arg7;
+    sp.u6F = arg8;
+    sp.u70 = arg9;
+    if (arg6 != 0) {
+        var_v0_2 = 2;
+    } else {
+        var_v0_2 = 1;
+    }
+    sp.u74 = var_v0_2 + 0x480000;
+    sp.u72 = 0;
+    sp.u73 = 6;
+    if (arg5 != 0) {
+        sp58 = 3;
+        sp54 = 0xFF;
+    } else {
+        sp58 = 0;
+        sp54 = 0;
+    }
+    sp48 = func_150ADA20();
+    sp4C = func_150ADA20();
+    func_1513C650((s32) &sp.u5C, 0U, 0U, arg2, (*(f32 *)((u8 *)arg3 + 0)), (*(f32 *)((u8 *)arg3 + 4)), (*(f32 *)((u8 *)arg3 + 8)), arg0, arg0, (u8) (sp48 & 0xFF), (u8) (((func_150ADA20() & 1) * 2) + (sp4C & 1)), sp58, sp54, 0, (u8) (s32) argA, argB);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E856C.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E8728.s")
 
 typedef struct { f32 x, y, z; } Vec3_150E892C;

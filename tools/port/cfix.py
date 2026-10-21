@@ -486,3 +486,70 @@ def fix_proto(code, why=None, func=None, src=None):
             if res: body = ''.join(res) + body[i:]
         out = out[:bdef.end()] + body
     return out if out != code else None
+
+
+# ---------------------------------------------------------------- P17: draft definition vs the header's own prototype
+_CKW = {'int', 'char', 'short', 'long', 'float', 'double', 'void', 'unsigned', 'signed', 'const', 'volatile'}
+
+def _split_params(s):
+    out, d, cur = [], 0, ''
+    for ch in s:
+        if ch == '(' : d += 1
+        elif ch == ')': d -= 1
+        if ch == ',' and d == 0: out.append(cur.strip()); cur = ''
+        else: cur += ch
+    if cur.strip(): out.append(cur.strip())
+    return out
+
+def _ptype(p):
+    """'u8 *arg0' -> ('u8 *', 'arg0'); 's32' -> ('s32', None)"""
+    m = re.match(r'^(.*?[\s\*])(\w+)$', p.strip())
+    if m and m.group(2) not in _CKW and m.group(1).strip():
+        return re.sub(r'\s+', ' ', m.group(1).strip()).replace(' *', '*').replace('*', ' *').strip(), m.group(2)
+    return re.sub(r'\s+', ' ', p.strip()).replace(' *', '*').replace('*', ' *').strip(), None
+
+def _norm(t):
+    return re.sub(r'\s+', '', t)
+
+def fix_selfproto(code, err, func=None, src=None):
+    """IDO 'redeclaration of FUNC' where FUNC is the function being converted: the header/file prototype and the
+    draft's definition disagree in pointer types (void * vs u8 *) or integer widths. Re-declare the definition with
+    the prototype's types; a pointer parameter of another type is renamed and copied into a local of the draft's type."""
+    if not func or ("redeclaration of '%s'" % func) not in (err or ''): return None
+    m = re.search(r"([^\s:|]+), line (\d+): redeclaration of '%s'; previous declaration at line (\d+) in file '([^']+)'" % re.escape(func), err)
+    if not m: return None
+    # drop the draft's own prototypes of FUNC (//HOIST or plain): the definition is enough
+    code = '\n'.join(l for l in code.split('\n')
+                     if not re.match(r'^(//HOIST\s+)?[^(){};=]*\b%s\s*\([^{]*\)\s*;\s*$' % re.escape(func), l))
+    dlines = set(l.strip() for l in code.split('\n'))
+    hm = None
+    for fn, ln in ((m.group(4), int(m.group(3))), (m.group(1), int(m.group(2)))):
+        try: lines = open(fn).read().split('\n')
+        except Exception: continue
+        if lines[ln - 1].strip() in dlines or ('//HOIST ' + lines[ln - 1].strip()) in dlines: continue
+        hm = re.search(r'([\w\s\*]*?)\b%s\s*\(([^;{]*)\)\s*;' % re.escape(func), ' '.join(lines[ln - 1:ln + 3]))
+        if hm: break
+    dm = re.search(r'^([^\n;{}]*?)\b%s\s*\(([^)]*)\)\s*\{' % re.escape(func), code, re.M)
+    if not hm or not dm: return None
+    hret, dret = _ptype(hm.group(1) + ' x')[0], _ptype(dm.group(1) + ' x')[0]
+    hps, dps = _split_params(hm.group(2)), _split_params(dm.group(2))
+    if len(hps) != len(dps) or any('...' in p for p in hps + dps): return None
+    if hps == ['void'] or dps == ['void']: return None
+    newp, locs = [], []
+    isf = lambda t: t in ('f32', 'f64', 'float', 'double')
+    for hp, dp in zip(hps, dps):
+        ht, _ = _ptype(hp); dt, dn = _ptype(dp)
+        if dn is None: return None
+        if _norm(ht) == _norm(dt): newp.append(dp); continue
+        if '*' in ht and '*' in dt:
+            newp.append('%s %s_p' % (ht, dn)); locs.append('    %s %s = (%s) %s_p;' % (dt, dn, dt, dn)); continue
+        if '*' in ht or '*' in dt or isf(ht) or isf(dt) or '(' in ht or '(' in dt: return None
+        newp.append('%s %s' % (ht, dn))
+    if _norm(hret) != _norm(dret):
+        if not ('*' in hret and '*' in dret): return None
+        ret = hret
+    else:
+        ret = dm.group(1).strip()
+    head = '%s %s(%s) {' % (ret, func, ', '.join(newp))
+    if locs: head += '\n' + '\n'.join(locs)
+    return code[:dm.start()] + head + code[dm.end():]

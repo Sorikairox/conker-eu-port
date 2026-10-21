@@ -130,8 +130,57 @@ void func_151E2A1C(void) {
     D_80090120 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2A54.s")
+#ifdef NON_MATCHING
+s32 func_151DDF6C(s8, s8);
+extern s32 D_80082F4C;
+extern s32 D_800ABA74;
 
+void func_151E2A54(void) {
+    s8 temp_a1;
+    u8 var_v1;
+    u8 *temp_v0;
+
+    temp_a1 = *(s8 *)((u8 *)&D_800ABA74 + *(s8 *)((u8 *)D_80090174 + 0x42) * 0xA);
+    temp_v0 = (temp_a1 * 0xA) + D_80082F4C;
+    var_v1 = (*(u8 *)((u8 *)temp_v0 + 3));
+    if ((s32) var_v1 >= 5) {
+        (*(u8 *)((u8 *)temp_v0 + 3)) = 4U;
+        var_v1 = 4 & 0xFF;
+    }
+    if ((s32) var_v1 < 0) {
+        (*(u8 *)((u8 *)temp_v0 + 3)) = 0U;
+    }
+    if ((*(s8 *)((u8 *)temp_v0 + 1)) <= 0) {
+        (*(s8 *)((u8 *)temp_v0 + 1)) = 1;
+    }
+    (*(s8 *)((u8 *)D_800E1010 + 2)) = (*(s8 *)((u8 *)temp_v0 + 1));
+    (*(s8 *)((u8 *)D_800E1010 + 0xB)) = 0;
+    (*(s8 *)((u8 *)D_800E1010 + 3)) = (s8) (*(s8 *)((u8 *)temp_v0 + 2));
+    (*(u8 *)((u8 *)D_800E1010 + 0x10)) = (u8) (*(u8 *)((u8 *)temp_v0 + 3));
+    (*(u8 *)((u8 *)D_800E1010 + 0x11)) = (u8) (*(u8 *)((u8 *)temp_v0 + 4));
+    if (temp_a1 == 0) {
+        (*(u8 *)((u8 *)D_800E1010 + 4)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+    } else if (temp_a1 == 1 || temp_a1 == 2) {
+        (*(u8 *)((u8 *)D_800E1010 + 0xD)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+        (*(u8 *)((u8 *)D_800E1010 + 0xE)) = (u8) (*(u8 *)((u8 *)temp_v0 + 6));
+    } else if (temp_a1 == 7) {
+        (*(u8 *)((u8 *)D_800E1010 + 0x12)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+    } else if (temp_a1 == 5) {
+        (*(u8 *)((u8 *)D_800E1010 + 0x11)) = 0U;
+        (*(u8 *)((u8 *)D_800E1010 + 0x12)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+    } else if (temp_a1 == 8 || temp_a1 == 9) {
+        (*(u8 *)((u8 *)D_800E1010 + 7)) = (u8) (*(u8 *)((u8 *)temp_v0 + 5));
+        (*(u8 *)((u8 *)D_800E1010 + 0x11)) = 1U;
+        (*(s8 *)((u8 *)D_800E1010 + 3)) = 2;
+        (*(u8 *)((u8 *)D_800E1010 + 0x13)) = (u8) (*(u8 *)((u8 *)temp_v0 + 6));
+    }
+    (*(u8 *)((u8 *)D_800E1010 + 0x16)) = (u8) (*(u8 *)((u8 *)temp_v0 + 8));
+    (*(u8 *)((u8 *)D_800E1010 + 6)) = (u8) (*(u8 *)((u8 *)temp_v0 + 9));
+    func_151DDF6C((*(s8 *)((u8 *)temp_v0 + 1)), temp_a1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2A54.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2B9C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2C88.s")

@@ -19,7 +19,38 @@ void func_150064E0(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006590.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006BEC.s")
+#ifdef NON_MATCHING
+void func_1500707C(s32 arg0) {
+    s32 temp_v0;
+    s32 var_s0;
+    s32 var_s0_2;
+    s8 *var_s2;
+    u8 *temp_t6;
+
+    var_s0 = 0;
+    do {
+        temp_t6 = &D_800BE778[var_s0];
+        var_s0 += 1;
+        *temp_t6 = 0xFF;
+    } while (var_s0 < 8);
+    osWritebackDCacheAll();
+    var_s2 = D_800BE7F8;
+    var_s0_2 = 0;
+    if (D_8002AC5C == 0) {
+        do {
+            temp_v0 = (var_s0_2 * 0x10) + 4;
+            if (arg0 == *var_s2) {
+                func_151DDA90(&D_800BE900, temp_v0 & 0xFF, D_800BE778);
+                func_151DDA90(&D_800BE900, (temp_v0 + 1) & 0xFF, D_800BE778);
+            }
+            var_s0_2 += 1;
+            var_s2 += 1;
+        } while (var_s0_2 != 4);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_1500707C.s")
+#endif
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007168.s")
 #ifdef NON_MATCHING

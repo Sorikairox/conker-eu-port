@@ -230,13 +230,21 @@ s32 func_150CA57C(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150CA150.s")
 
+#ifdef NON_MATCHING
+void func_1514CBE8(f32, f32, f32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+#else
 s32 func_1514CBE8(f32, f32, s32, f32, s16, s16, s16, u8, s32, f32, s32, u8);
+#endif
 
 void func_150CAE30(u8 *arg0) {
     s16 sp3E;
 
     sp3E = (func_150ADA20() % 21U) + 0xA;
+#ifdef NON_MATCHING
+    func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), (func_150ADA68() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+#else
     func_1514CBE8((*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(s32 *)((u8 *)arg0 + 8)), (func_150ADA68() * 59.0f) + 170.0f, 0, 0xFF, (s32) sp3E, 0x13, 0, 0.0f, 0, 0xFF);
+#endif
 }
 
 s32 func_150CAED0(u8 *arg0) {
