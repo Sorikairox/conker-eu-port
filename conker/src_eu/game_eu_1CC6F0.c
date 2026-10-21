@@ -38,7 +38,56 @@ void func_1519EF74(struct102 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519EFE8.s")
+typedef struct { f32 x, y, z; } V3_1519EFE8;
+typedef struct {
+    s32 a;
+    s32 b;
+    V3_1519EFE8 pos;
+    s16 x14;
+    s16 x16;
+    s16 x18;
+    s16 x1A;
+    f32 x1C;
+    f32 x20;
+    f32 x24;
+    f32 x28;
+    s16 x2C;
+    s16 x2E;
+    f32 x30;
+    f32 x34;
+    f32 x38;
+} Sp_1519EFE8;
+extern f32 D_800A90A0;
+extern f32 D_800A90A4;
+extern f32 D_800A90A8;
+extern f32 D_800A90AC;
+extern f32 D_800A90B0;
+
+void func_1519EFE8(V3_1519EFE8 *arg0, u16 arg1, f32 arg2, u8 arg3, s32 arg4) {
+    Sp_1519EFE8 s;
+    s32 i;
+    f32 f;
+
+    s.a = 10;
+    s.b = 7;
+    s.pos = *arg0;
+    s.x1C = 10.0f;
+    s.x20 = 8.0f;
+    s.x14 = 0;
+    s.x16 = 0xFF;
+    s.x18 = -0x35;
+    s.x1A = 0x18;
+    s.x2C = 0x32;
+    s.x2E = 0x14;
+    f = arg2;
+    s.x24 = D_800A90A0;
+    s.x28 = D_800A90A4;
+    s.x30 = D_800A90A8;
+    s.x34 = D_800A90AC;
+    s.x38 = D_800A90B0;
+    i = arg1;
+    func_15152700(&s, &i, &f, 1, 0.0f, 0, arg3, arg4);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CC6F0/func_1519F0FC.s")
 
