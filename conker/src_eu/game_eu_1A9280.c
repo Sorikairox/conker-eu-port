@@ -98,7 +98,11 @@ s32 func_1517BD68(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517C11C.s")
 
+#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+void func_10004074(s32);
+#else
 s32 func_10004074(s32);
+#endif
 s32 func_10006530(s32, s32, u32);
 
 void func_1517D534(void)

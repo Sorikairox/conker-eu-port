@@ -3,8 +3,22 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/func_15172C50.s")
+#ifdef NON_MATCHING
+extern s8 D_800DD6E0[];
 
+/* reset the two 16-byte tables, then keep arg0 in the first entry */
+void func_15172C50(u8 arg0) {
+    s32 i;
+
+    for (i = 0; i < 16; i++) {
+        D_800DD6E0[i] = -1;
+        (&D_800DD2C0)[i] = 0;
+    }
+    D_800DD2C0 = arg0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A09D0/func_15172C50.s")
+#endif
 s32 func_1517F3B0(s32, s32, s32, s32, s32, s32);
 extern s8 D_800DD6E0[];
 

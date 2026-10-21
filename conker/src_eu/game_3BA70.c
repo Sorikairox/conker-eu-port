@@ -4,8 +4,78 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/func_1500E5C0.s")
+#ifdef NON_MATCHING
+void func_15012470(void);
+extern s32 D_800D9CF0;
+extern s8 D_800D9D40;
+extern s8 D_800D9D41;
+extern s8 D_800D9D48;
+extern s8 D_800D9D49;
+extern s32 D_800D9D4A;
+extern s8 D_800D9D58;
+extern s8 D_800D9D59;
+extern s32 D_800D9D5A;
+extern s32 D_800D9D66;
+extern s32 D_800D9D70;
+extern s32 D_800E0D94;
 
+void func_1500E5C0(void) {
+    s32 *var_v0_2;
+    s32 *var_v1;
+    u8 *var_v0;
+
+    func_15012470();
+    func_15008A10();
+    func_15012770();
+    var_v0 = &D_800E0950;
+    do {
+        var_v0 += 4;
+        (*(s8 *)((u8 *)var_v0 + -3)) = 0;
+        (*(s8 *)((u8 *)var_v0 + -2)) = 0;
+        (*(s8 *)((u8 *)var_v0 + -1)) = 0;
+        (*(s8 *)((u8 *)var_v0 + -4)) = 0;
+    } while ((s32)var_v0 != (s32)&D_800E0D94);
+    D_800D9D41 = 0;
+    D_800D9D40 = 0;
+    D_800D9D48 = 0;
+    D_800D9D58 = 0;
+    D_800D9D49 = 0;
+    var_v0_2 = &D_800D9D5A;
+    var_v1 = &D_800D9D4A;
+    D_800D9D59 = 0;
+    do {
+        var_v0_2 = (s32 *)((u8 *)var_v0_2 + (4));
+        (*(s8 *)((u8 *)var_v1 + 1)) = 0;
+        (*(s8 *)((u8 *)var_v0_2 + -3)) = 0;
+        (*(s8 *)((u8 *)var_v1 + 2)) = 0;
+        (*(s8 *)((u8 *)var_v0_2 + -2)) = 0;
+        (*(s8 *)((u8 *)var_v1 + 3)) = 0;
+        (*(s8 *)((u8 *)var_v0_2 + -1)) = 0;
+        var_v1 = (s32 *)((u8 *)var_v1 + (4));
+        (*(s8 *)((u8 *)var_v1 + -4)) = 0;
+        (*(s8 *)((u8 *)var_v0_2 + -4)) = 0;
+    } while (var_v0_2 != &D_800D9D66);
+    D_800D9CB0 = 0;
+    D_800D9CB4 = 0;
+    (*(s32 *)((u8 *)(&D_800D9CF0) + 0)) = 0;
+    (*(s32 *)((u8 *)(&D_800D9CF0) + 4)) = 0;
+    (*(s32 *)((u8 *)(&D_800D9CF0) + 8)) = 0;
+    (*(s32 *)((u8 *)(&D_800D9CF0) + 0xC)) = 0;
+    D_80088C10 = NULL;
+    bzero(D_800BE500, 5);
+    (*(s8 *)((u8 *)(&D_800D9D70) + 2)) = 0;
+    (*(s8 *)((u8 *)(&D_800D9D70) + 1)) = 0;
+    (*(s8 *)((u8 *)(&D_800D9D70) + 0)) = 0;
+    D_80088D20 = 0;
+    (*(struct134 **)((u8 *)D_800D9AA0 + 0)) = NULL;
+    (*(s32 *)((u8 *)D_800D9AA0 + 4)) = 0;
+    (*(s32 *)((u8 *)D_800D9AA0 + 8)) = 0;
+    D_800BE4F0 = NULL;
+    D_80088B40 = 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_3BA70/func_1500E5C0.s")
+#endif
 void func_1500E70C(s32 arg0) {
     if (arg0 == 0x2B) {
         func_15011C70();

@@ -385,7 +385,11 @@ s32 func_15171770(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s3
 s32 func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_150C3D48(s32 arg0);
 s32 func_151EF800(u32, u32 *);
+#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+void func_10004074(s32);
+#else
 s32 func_10004074(s32);
+#endif
 
 void func_150C3D5C(struct127 *arg0) {
     s32 sum;

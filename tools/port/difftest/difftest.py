@@ -29,6 +29,11 @@ return value (by the candidate's declared return type) and the restoration of sp
 Prints one line: EQUIV <func> (n trials ...) | DIFFER <func>: <reason> | ERROR <func>: <why>.
 """
 import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random
+# Unicorn 2.1.x mis-translates a call whose delay slot holds an FPU instruction (lwc1/swc1/...):
+# the callee's first block runs with stale delay-slot flags and jumps to 0 (UC_ERR_EXCEPTION at
+# 0x00000000).  2.0.1 is correct.  Pinned copy: pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1
+_UC = os.environ.get('DIFFTEST_UNICORN', os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../port_work/pyuc201'))
+if os.path.isdir(_UC): sys.path.insert(0, os.path.abspath(_UC))
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
 from unicorn import Uc, UcError, UC_ARCH_MIPS, UC_MODE_MIPS32, UC_MODE_BIG_ENDIAN, \
@@ -452,14 +457,21 @@ SCRATCH = [UC_MIPS_REG_AT, UC_MIPS_REG_V0, UC_MIPS_REG_V1] + [UC_MIPS_REG_T0 + i
 
 class Run:
     def __init__(self, words, vram, extra, trial, romdata, tu, maxi, forced=None, trace=False):
-        self.forced = forced or {}; self.loads = []
+        self.forced = forced or {}; self.loads = []; self.trace = trace
         self.words, self.vram, self.end = words, vram, vram + 4 * len(words)
         self.seed, self.romdata, self.tu = trial, romdata, tu
         self.mu = mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
         self.mapped = set(); self.writes = {}; self.calls = []; self.ncall = {}; self.maxi = maxi
         self.init = {}  # phys page -> initial bytes
         for v, b in extra: self.premap(v, b)
-        code = b''.join(struct.pack('>I', w) for w in words)
+        # MIPS III ld/sd are not in Unicorn's MIPS32 CPU: they are patched to nop in the mapped
+        # code and their memory effect is done by a code hook on that address (delay slots work)
+        self.d64 = {}; self.d64hi = {}
+        mwords = list(words)
+        for k, w in enumerate(words):
+            if (w >> 26) in (25, 55, 63):   # daddiu, ld, sd
+                self.d64[vram + 4 * k] = w; mwords[k] = 0
+        code = b''.join(struct.pack('>I', w) for w in mwords)
         self.premap(vram, code, overlay=True)
         self.premap(STK_LO, bytes(STK_TOP - STK_LO + 0x1000))
         self.premap(RET_MAGIC, bytes(PAGE))
@@ -467,12 +479,74 @@ class Run:
         mu.hook_add(UC_HOOK_MEM_WRITE, self.on_write)
         mu.hook_add(UC_HOOK_BLOCK, self.on_block)
         self.last_pc = None
+        for a in self.d64: mu.hook_add(UC_HOOK_CODE, self.on_d64, begin=a, end=a)
+        # callee stubs are real code: `jr ra; nop` written at every call target before it runs.
+        # (Redirecting PC from the block hook let the callee's first block execute anyway, and a
+        # branch right after the call then raised UC_ERR_EXCEPTION at 0x00000000.)
+        self.stubs = set()
+        for k, w in enumerate(words):
+            op = w >> 26
+            if op in (2, 3):     # j / jal outside the body: a call or tail call
+                self.stub_at(((vram + 4 * k + 4) & 0xF0000000) | ((w & 0x3FFFFFF) << 2))
+            elif op == 0 and (w & 0x3F) in (8, 9) and not ((w & 0x3F) == 8 and (w >> 21) & 31 == 31):
+                mu.hook_add(UC_HOOK_CODE, self.on_jalr, begin=vram + 4 * k, end=vram + 4 * k)
         if trace:
             mu.hook_add(UC_HOOK_MEM_READ, self.on_read)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
 
     def on_code(self, mu, addr, size, ud):
         self.last_pc = addr
+
+    def stub_at(self, a):
+        if a in self.stubs or self.vram <= a < self.end or a == RET_MAGIC or a & 3: return
+        try:
+            p = phys(a)
+            for pp in {p & ~(PAGE - 1), (p + 7) & ~(PAGE - 1)}: self.ensure(pp)
+            self.mu.mem_write(p, b'\x03\xe0\x00\x08\x00\x00\x00\x00')
+            self.mu.ctl_remove_cache(a, a + 8)
+        except Exception:
+            pass
+        self.stubs.add(a)
+
+    def on_jalr(self, mu, addr, size, ud):
+        w = self.words[(addr - self.vram) // 4]
+        self.stub_at(mu.reg_read(UC_MIPS_REG_0 + ((w >> 21) & 31)) & 0xFFFFFFFF)
+
+    def on_d64(self, mu, addr, size, ud):
+        w = self.d64.get(addr)
+        if w is None: return
+        self.last_pc = addr
+        base, rt = (w >> 21) & 31, (w >> 16) & 31
+        off = w & 0xFFFF; off -= (off & 0x8000) << 1
+        if (w >> 26) == 25:   # daddiu: 64-bit add on the (shadowed or sign-extended) register
+            lo = mu.reg_read(UC_MIPS_REG_0 + base) & 0xFFFFFFFF if base else 0
+            sh = self.d64hi.get(base)
+            hi = sh[1] if sh and sh[0] == lo else (0xFFFFFFFF if lo & 0x80000000 else 0)
+            v = (((hi << 32) | lo) + off) & 0xFFFFFFFFFFFFFFFF
+            if rt:
+                mu.reg_write(UC_MIPS_REG_0 + rt, v & 0xFFFFFFFF); self.d64hi[rt] = (v & 0xFFFFFFFF, v >> 32)
+            return
+        ea = (mu.reg_read(UC_MIPS_REG_0 + base) + off) & 0xFFFFFFFF
+        p = phys(ea)
+        try:
+            if ea & 7 or ea >= 0xC0000000: raise ValueError
+            for pp in {p & ~(PAGE - 1), (p + 7) & ~(PAGE - 1)}: self.ensure(pp)
+        except Exception:
+            self.d64fault = addr; mu.emu_stop(); return
+        if (w >> 26) == 63:   # sd: the upper word is the one ld loaded if the register still holds its low word
+            lo = mu.reg_read(UC_MIPS_REG_0 + rt) & 0xFFFFFFFF if rt else 0
+            sh = self.d64hi.get(rt)
+            hi = sh[1] if sh and sh[0] == lo else (0xFFFFFFFF if lo & 0x80000000 else 0)
+            b = struct.pack('>II', hi, lo)
+            mu.mem_write(p, b)
+            if self.trace: self.loads.append((ea, lo))
+            if not phys(STK_LO) <= p < phys(STK_TOP) + PAGE:
+                for i in range(8): self.writes[p + i] = b[i]
+        else:                 # ld
+            hi, lo = struct.unpack('>II', bytes(mu.mem_read(p, 8)))
+            if self.trace: self.loads.append((ea + 4, lo))
+            if rt:
+                mu.reg_write(UC_MIPS_REG_0 + rt, lo); self.d64hi[rt] = (lo, hi)
 
     def on_read(self, mu, access, addr, size, value, ud):
         if size == 4 and not addr & 3:
@@ -543,7 +617,8 @@ class Run:
         return 'STK' if phys(STK_LO) <= phys(v) < phys(STK_TOP) + PAGE else v
 
     def on_block(self, mu, addr, size, ud):
-        if self.vram <= addr < self.end: return
+        if self.vram <= addr < self.end:
+            self.icount += max(1, size // 4); return
         if addr == RET_MAGIC:
             self.done = True; mu.emu_stop(); return
         ra = mu.reg_read(UC_MIPS_REG_RA)
@@ -567,7 +642,8 @@ class Run:
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
             mu.reg_write(reg, r.getrandbits(32))
-        mu.reg_write(UC_MIPS_REG_PC, ra)
+        if addr not in self.stubs:   # not stubbed in time (should not happen): old PC redirect
+            mu.reg_write(UC_MIPS_REG_PC, ra)
 
     def run(self, inputs):
         mu = self.mu
@@ -579,13 +655,25 @@ class Run:
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         for n in range(20, 32): mu.reg_write(FREG(n), 0x3F800000 + n)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
-        self.fault = None
-        try:
-            mu.emu_start(self.vram, RET_MAGIC, count=self.maxi)
-        except UcError as e:
-            self.fault = '%s at 0x%08X' % (e, mu.reg_read(UC_MIPS_REG_PC))
-            self.fault_pc = self.last_pc if self.last_pc is not None else mu.reg_read(UC_MIPS_REG_PC)
-            self.fault_regs = [mu.reg_read(UC_MIPS_REG_0 + i) for i in range(32)]
+        self.fault = None; self.icount = 0; pc = self.vram; self.d64fault = None
+        while True:
+            self.resume = None
+            try:
+                mu.emu_start(pc, RET_MAGIC, count=max(1, self.maxi - self.icount))
+            except UcError as e:
+                self.fault = '%s at 0x%08X' % (e, mu.reg_read(UC_MIPS_REG_PC))
+                self.fault_pc = self.last_pc if self.last_pc is not None else mu.reg_read(UC_MIPS_REG_PC)
+                self.fault_regs = [mu.reg_read(UC_MIPS_REG_0 + i) for i in range(32)]
+                break
+            if self.d64fault is not None:
+                self.fault = 'ld/sd address error at 0x%08X' % self.d64fault
+                self.fault_pc = self.d64fault
+                self.fault_regs = [mu.reg_read(UC_MIPS_REG_0 + i) for i in range(32)]
+                break
+            if self.resume is None or self.done: break
+            pc = self.resume
+            if pc == RET_MAGIC: self.done = True; mu.reg_write(UC_MIPS_REG_PC, pc); break
+            if self.icount >= self.maxi or len(self.calls) > 20000: break
         pc = mu.reg_read(UC_MIPS_REG_PC)
         self.done = self.done or pc == RET_MAGIC
         self.out = dict(v0=mu.reg_read(UC_MIPS_REG_V0), v1=mu.reg_read(UC_MIPS_REG_V1),
@@ -609,14 +697,18 @@ def same_val(R, a, C, b):
 
 def compare(R, C, rk, arity):
     """-> None if equal, else a reason string"""
-    if R.fault or C.fault:
+    if C.fault and not R.fault and not R.done:
+        pass   # the reference timed out first (the candidate has a larger cap): prefix compare only
+    elif R.fault or C.fault:
         if bool(R.fault) != bool(C.fault):
             if R.fault: return None   # ref faulted on an input the candidate did not touch: inconclusive trial
             return 'fault only in cand: %s' % C.fault
         if R.fault.split(' at ')[0] != C.fault.split(' at ')[0]:
             return 'different faults: ref %s / cand %s' % (R.fault, C.fault)
-    elif R.done != C.done:
-        return 'timeout only in %s' % ('ref' if not R.done else 'cand')
+    elif R.done != C.done and R.done:
+        return 'timeout only in cand'   # the candidate gets 4x the reference's instruction cap
+    elif not R.done:
+        pass   # the reference timed out (inconclusive): only the common call prefix is compared below
     n = min(len(R.calls), len(C.calls))
     for i in range(n):
         a, b = R.calls[i], C.calls[i]
@@ -642,7 +734,9 @@ def compare(R, C, rk, arity):
                 return 'call #%d %s: f%d ref=0x%X cand=0x%X' % (i, a['name'], fr, a['fregs'][fr], b['fregs'][fr])
         if a['mem'] != b['mem']:
             return 'memory state before call #%d (%s) differs' % (i, a['name'])
-    if R.fault or C.fault or not R.done:
+    if not R.done and not R.fault:
+        return None
+    if R.fault or C.fault:
         return None if len(R.calls) == len(C.calls) else 'call count differs before fault/timeout'
     if len(R.calls) != len(C.calls):
         return 'call count ref=%d cand=%d (%s)' % (len(R.calls), len(C.calls),
@@ -666,7 +760,7 @@ def compare(R, C, rk, arity):
     return None
 
 
-LOADSTORE = set(range(32, 40)) | set(range(40, 47)) | {49, 53, 57, 61}
+LOADSTORE = set(range(32, 40)) | set(range(40, 47)) | {49, 53, 55, 57, 61, 63}
 
 def learn_pointer(rwords, vram, trial, romdata, tu, maxi, inputs, forced):
     """automatic input template: the reference faulted (an invalid input).  Re-run it with a load trace,
@@ -760,7 +854,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                 R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
                 if not R.fault: break
             if not R.fault: learned[0] += 1
-        C = Run(cwords, vram, cdata, (seed, t), romdata, tu, maxi, forced).run(inputs)
+        C = Run(cwords, vram, cdata, (seed, t), romdata, tu, 4 * maxi, forced).run(inputs)
         for c in R.calls + C.calls:
             if c['name'] not in arity: arity[c['name']] = proto_arity(tu, c['name'])
         why = compare(R, C, rk, arity)

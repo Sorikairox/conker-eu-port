@@ -13,6 +13,13 @@ print(src[m.start():i])
 PY
 }
 pass=0; fail=0
+C=$R/tools/port/difftest/cases
+chkc() { # expect func case-file [sed-expr]: a draft kept in tools/port/difftest/cases
+  local exp=$1 f=$2 cf=$C/$2.c ex=$3 out
+  if [ -n "$ex" ]; then sed -e "$ex" $cf > $T/$f.mut.c; cmp -s $cf $T/$f.mut.c && { echo "BADMUT $f $ex"; fail=$((fail+1)); return; }; cf=$T/$f.mut.c; fi
+  out=$($R/tools/port/difftest.sh $f $cf --trials ${TRIALS:-32})
+  case "$out" in $exp*) pass=$((pass+1)); echo "ok   [$exp] case ${ex:-as is}  $out";; *) fail=$((fail+1)); echo "FAIL [want $exp] case ${ex:-as is}  $out";; esac
+}
 chk() { # expect func file sed-expr
   local exp=$1 f=$2 file=$3 ex=$4 out
   if [ -z "$ex" ]; then out=$($R/tools/port/difftest.sh $f --self --trials ${TRIALS:-32})
@@ -35,4 +42,14 @@ chk DIFFER func_15141564 src_eu/game_16DC80.c 's/temp->unkC \* D_800BE9A4/temp->
 chk DIFFER func_15141564 src_eu/game_16DC80.c 's/return 1;/return 2;/'
 chk DIFFER func_15141928 src_eu/game_16DC80.c 's/temp_v0\[0\], temp_v0\[2\]/temp_v0[2], temp_v0[0]/'
 chk DIFFER func_15123934 src_eu/game_14FF90.c 's/STK->unk2C\[0\] = arg1;/STK->unk2C[0] = arg2;/'
+# P5: MIPS III sd/ld in the reference (emulated by a code hook)
+chkc EQUIV  func_150A7D00
+chkc DIFFER func_150A7D00 's/mtx\[15\] = 1;/mtx[15] = 2;/'
+chkc DIFFER func_150A7D00 's/i < 16;/i < 15;/'
+# P5: branch right after a stubbed call whose delay slot is an FPU store (was UC_ERR_EXCEPTION at 0)
+chkc EQUIV  func_151DAE28
+chkc DIFFER func_151DAE28 's/arg1, 0x40, \&sp4C/arg1, 0x41, \&sp4C/'
+# P5: daddiu (64-bit add feeding an sd)
+chkc EQUIV  func_150ADACC
+chkc DIFFER func_150ADACC 's/(s64)arg0 + 1/(s64)arg0 + 2/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

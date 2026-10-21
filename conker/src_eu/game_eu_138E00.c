@@ -3,8 +3,31 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B5F0.s")
+#ifdef NON_MATCHING
+extern f32 D_800D3A90;
+extern f32 D_800D9F3C;
+extern f32 D_800D9F40;
+extern Mtx D_800D9F48;
+extern s16 D_800DD722;
+extern s16 D_800DD724;
+extern f32 D_800A2FF0;
+void func_151F0114(void *, float, float, float, float, float, float, float);
 
+/* screen size from D_800DD722/4, then an orthographic projection (guOrtho) over the current camera extent */
+void func_1510B5F0(s32 arg0) {
+    f32 w;
+    f32 h;
+
+    D_800D9F40 = (f32)D_800DD722;
+    D_800D9F3C = (f32)D_800DD724;
+    D_800D3A90 = 100.0f - D_800D9F3C;
+    h = ((f32 *)((u8 *)D_800BE628 + 0x10))[0];
+    w = ((f32 *)((u8 *)D_800BE628 + 0xC))[0];
+    func_151F0114(&D_800D9F48, -w, w, -h, h, 1.0f, D_800A2FF0, 1.0f);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B5F0.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B6A8.s")
 
 s32 func_1510B6A8(s32, f32, f32, f32, f32);

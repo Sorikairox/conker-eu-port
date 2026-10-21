@@ -59,7 +59,17 @@ void func_10007CC8(s32 *arg0, s32 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10007CC8.s")
 #endif
+#ifdef NON_MATCHING
+/* __osPopThread: unlink and return the head of a thread queue */
+OSThread *func_10007D14(OSThread **queue) {
+    OSThread *t = *queue;
+
+    *queue = t->next;
+    return t;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10007D14.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/func_10007D28.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_5DA0/__osCleanupThread.s")

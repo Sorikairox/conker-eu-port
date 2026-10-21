@@ -67,7 +67,11 @@ s32 func_1502B110(u8 *arg0, s32 arg1, s32 arg2, u32 arg3, ...) {
     return ret;
 }
 s32 *allocate_memory(s32, s32, s32, s32);
+#ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
+void func_10004074(s32 *);
+#else
 s32 func_10004074(s32 *);
+#endif
 s32 func_10006530(s32 *, s32, u32);
 s32 func_150ADC50();
 
