@@ -1296,3 +1296,12 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 4. **`addu s0,a0,t6` (base first) for `arg0 + *(s32 *)(arg0 + 0x50) + 0xF8`**: wrap the constant in a comma, `+ (0, 0xF8)` (permuter; `func_1513BEB0`). A file that does not own `.rodata` still converts with `extern f32 D_800A4E64;` etc. in place of the literals (`apply.py` rejects the literal version).
 5. **Read-modify-write flag word, then tests on the result**: `arg0->flags &= ~X; if (arg0->flags & Y)` gives the extra `t6`→`t7` temp of the target; `f = arg0->flags & ~X; arg0->flags = f;` lands in `v0` (`func_15132FF8`).
 6. **`neg = -step` that must be computed before a `step < 0` test**: hoist it into the enclosing `else` (`func_15167B44`, permuter).
+
+## s154 recipes (commented drafts, display-list loops, call results into args)
+1. **Old commented drafts that CERR are usually cheap**: the errors are implicit declarations of functions defined later in the file (move their prototypes, and any typedef they use, to the top of the file) and US callee names (check every `jal` target in the target asm against the draft). `func_1513C350`, `func_15143134`.
+2. **"JUSTREG" at the end of a function with `lw at,0 / sw at / lw t6,4 / sw t6 / lw at,8 / sw at`**: a 12-byte struct copy (`*(struct167 *)dst = *src;`), not three field stores (`func_1513C350`).
+3. **gbi macro vs its hand expansion**: `gDPPipeSync(arg0++)` and a hand-written `{ Gfx *_g = (Gfx *)(arg0++); ... }` schedule differently; for the next command, putting the `_g->words.w0 = ...; _g->words.w1 = ...;` block on one line fixed the last store order (`func_1513F4E4`, s68 recipe 1).
+4. **Display-list walkers that load `cmd` twice at entry** (`lb t6,0(a0)` test, then `lb a1,0(a0)`): drop the `cmd` local and test `gfx->cmd` directly in a `while`; the permuter needed a `goto next; next:;` label at the end of the loop body to get the register order (`func_15168F08`).
+5. **`move s1,a0` at entry and the call result also in s1**: the result is assigned back to the argument (`arg0 = f(arg0, ...)`); returning another call's result directly needs `if (x != 0) return tbl[x](...); return arg0;` (`func_151481BC`).
+6. **`lh v0,field` then `addu v0,v0,mflo`**: write `v = field; v += a * b;` as two statements, not `v = field + a * b` (`func_15169EF8`).
+7. **Spilled byte local at sp+0x1B with the frame right**: `s32 pad;` declared before it (`func_15155200`). A large local array spilled 8 bytes off: declare it in the block that uses it (`func_15143134`, s152 recipe 1).
