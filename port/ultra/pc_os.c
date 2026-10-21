@@ -263,10 +263,10 @@ void osSpTaskStartGo(OSTask *tp) {
     if (type == M_GFXTASK) port_post_event(OS_EVENT_DP);
 }
 void port_sp_report(void) {
-    port_log("[sp] tasks submitted: %u (gfx %u, audio %u, other %u); gfx: %u DLs, %u commands, %u triangles\n", sp_tasks,
+    port_log("[sp] tasks submitted: %u (gfx %u, audio %u, other %u); gfx: %u DLs, %u commands, %u triangles, %u bad/unset-segment addresses\n", sp_tasks,
              port_sp_tasks_by_type[M_GFXTASK], port_sp_tasks_by_type[M_AUDTASK],
              sp_tasks - port_sp_tasks_by_type[M_GFXTASK] - port_sp_tasks_by_type[M_AUDTASK],
-             gfx_stats.dls, gfx_stats.cmds, gfx_stats.tris);
+             gfx_stats.dls, gfx_stats.cmds, gfx_stats.tris, gfx_stats.bad_addr + gfx_stats.unset_seg);
 }
 void osSpTaskYield(void) {}
 OSYieldResult osSpTaskYielded(OSTask *tp) { (void)tp; return 0; }

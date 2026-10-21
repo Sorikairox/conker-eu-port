@@ -177,9 +177,10 @@ void gfx_demo_frame(void) {
     }
     gfx_frame_end();
     if (frame++ == 2)
-        port_log("[gfxdemo] frame: %u commands, %u triangles (%u from Conker TRI4), %u draws, %u texture uploads, %u texture ids unresolved\n",
+        port_log("[gfxdemo] frame: %u commands, %u triangles (%u from Conker TRI4), %u draws, %u texture uploads, %u texture ids unresolved, %u bad addresses\n",
                  gfx_stats.cmds - before.cmds, gfx_stats.tris - before.tris, (gfx_stats.tri4 - before.tri4) * 4,
-                 gfx_stats.draws - before.draws, gfx_stats.tex_uploads - before.tex_uploads, gfx_stats.tex_ids - before.tex_ids);
+                 gfx_stats.draws - before.draws, gfx_stats.tex_uploads - before.tex_uploads, gfx_stats.tex_ids - before.tex_ids,
+                 gfx_stats.bad_addr + gfx_stats.unset_seg - before.bad_addr - before.unset_seg);
 }
 
 /* node / test hook: the viewer without a GL context (interpreter + stats only) */

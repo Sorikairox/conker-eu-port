@@ -14,6 +14,13 @@
 typedef struct { unsigned n64; void *fn; const char *name; } PortFn;
 typedef struct { unsigned n64; unsigned size; void *p; const char *name; } PortCData;
 
+/* Address space (session P8, docs/port/MEMORY.md "Address space and RSP segments"): the game is linked
+ * with -sGLOBAL_BASE=256MB, so every wasm data address is >= PORT_WASM_BASE. Values below it are
+ * never wasm pointers: 0..16 MB is the null zone / N64 physical, 0x01000000..0x0FFFFFFF is RSP segment
+ * space (seg << 24 | off). The renderer relies on this; port_mem_load() checks it. */
+#define PORT_WASM_BASE 0x10000000u
+#define PORT_NULL_SCAN 0x01000000u /* port_mem_null_report scans 0..16 MB of the null zone */
+
 extern unsigned char n64_rdram[0x800000]; /* KSEG0 0x80000000 / KSEG1 0xA0000000 / physical 0 */
 extern unsigned char n64_seg16[0x10000];  /* TLB-mapped 0x16000000 (debugger data) */
 

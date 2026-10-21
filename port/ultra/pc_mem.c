@@ -209,6 +209,13 @@ static const struct { const char *name; unsigned vram, size, rom; int rzip; } SE
 
 int port_mem_load(void) {
     if (!port_rom) { port_log("[mem] no ROM\n"); return -1; }
+    if ((uintptr_t)n64_rdram < PORT_WASM_BASE || (uintptr_t)port_rom < PORT_WASM_BASE) {
+        port_log("[mem] FATAL: wasm data below PORT_WASM_BASE (n64_rdram %p, rom %p): link with -sGLOBAL_BASE=256MB\n",
+                 (void *)n64_rdram, (void *)port_rom);
+        return -1;
+    }
+    port_log("[mem] address space: n64_rdram %p, n64_seg16 %p, rom %p (all >= 0x%X; below is null zone + RSP segments)\n",
+             (void *)n64_rdram, (void *)n64_seg16, (void *)port_rom, PORT_WASM_BASE);
     for (unsigned i = 0; i < sizeof SEGS / sizeof SEGS[0]; i++) {
         unsigned char *dst = mirror(SEGS[i].vram);
         if (!SEGS[i].rzip) {
@@ -304,11 +311,12 @@ void __vbe_fix(unsigned char *g, const unsigned *desc, unsigned n) {
     free(tmp);
 }
 
-/* writes through NULL (+offset) pointers land in wasm 0..GLOBAL_BASE (16 MB, see port/Makefile) */
+/* writes through NULL (+offset) pointers land in wasm 0..GLOBAL_BASE (256 MB, see port/Makefile); only the
+ * first 16 MB are scanned, so that the report doesn't fault in the rest of the zone */
 void port_mem_null_report(void) {
     const unsigned char *z = (const unsigned char *)0;
     unsigned dirty = 0, first = 0, last = 0;
-    for (unsigned a = 0x10; a < 0x1000000; a += 4)
+    for (unsigned a = 0x10; a < PORT_NULL_SCAN; a += 4)
         if (*(const volatile uint32_t *)(z + a)) { if (!dirty++) first = a; last = a; }
     port_log("[mem] null zone: %u dirty words (0x%X..0x%X)\n", dirty, first, last);
 }

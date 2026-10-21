@@ -58,9 +58,13 @@ objs:
 # Game TUs (and port/boot) are compiled through the vbe IR pass (virtual big-endian memory,
 # docs/port/MEMORY.md): port/tools/vbe_build.py -> $(B)/vobj/*.o
 GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>1 && $$4=="ok" && !($$1 in ex) {gsub("/","__",$$1); print "$(B)/vobj/" $$1 ".o"}' exclude.txt $(B)/census/files.tsv 2>/dev/null)
-# GLOBAL_BASE: wasm addresses 0..16 MB stay unused, a "null zone" that absorbs writes through the
-# NULL pointers that asm stubs return (port_mem_null_report); on the N64 these would TLB-miss.
-BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c
+# GLOBAL_BASE=256MB (P8, docs/port/MEMORY.md "Address space and RSP segments"): wasm addresses below
+# 0x10000000 are never data, so (1) 0..16 MB is a "null zone" that absorbs writes through the NULL
+# pointers that asm stubs return (port_mem_null_report; on the N64 these would TLB-miss) and (2) the
+# renderer can tell RSP segment addresses (0x01..0x0F << 24) from wasm pointers exactly. The untouched
+# zone costs address space only (pages are committed on first write); INITIAL_MEMORY covers it +
+# ~10 MB data + the 64 MB ROM copy + heap.
+BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c
 BOOT_OBJS := $(patsubst boot/%.c,$(B)/vobj/port__%.o,$(BOOT_SRC))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
@@ -92,7 +96,7 @@ game: $(WEB)/conker.js
 $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
 	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(STUB_OBJS) -o $@ \
-	  $(LINK_COMMON) -sGLOBAL_BASE=16MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -Wl,--error-limit=0 2> $(B)/link_warnings.txt \
+	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -Wl,--error-limit=0 2> $(B)/link_warnings.txt \
 	  || (tail -40 $(B)/link_warnings.txt; exit 1)
 	@echo "link warnings: $$(grep -c warning $(B)/link_warnings.txt) (port/build/link_warnings.txt)"
 	@ls -l $(WEB)/conker.wasm

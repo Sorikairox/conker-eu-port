@@ -9,14 +9,14 @@
  * virtual big-endian (pc_mem.h): Gfx/Mtx words are plain 32-bit loads, Vtx s16 fields vbe_ld16,
  * texture bytes vbe_ld8.
  * Addresses: segmented (seg << 24 | off) through the segment table, N64 KSEG0 pointers through
- * port_n64_to_wasm(), N64 physical (< 8 MB) into the RDRAM mirror, anything >= 16 MB is a wasm
- * pointer that game C code stored (see gfx_addr()). */
+ * port_n64_to_wasm(), N64 physical (< 8 MB) into the RDRAM mirror, anything >= PORT_WASM_BASE
+ * (256 MB, -sGLOBAL_BASE) is a wasm pointer that game C code stored (see gfx_addr()). */
 #ifndef PORT_GFX_H
 #define PORT_GFX_H
 
 typedef struct {
     unsigned tasks, dls, cmds, tris, verts, draws, tex_uploads, unknown_ops, frames;
-    unsigned ucode_loads, bad_addr, tri4, tex_ids;
+    unsigned ucode_loads, bad_addr, tri4, tex_ids, unset_seg;
 } GfxStats;
 extern GfxStats gfx_stats;
 

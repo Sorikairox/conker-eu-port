@@ -23,20 +23,27 @@ unsigned gfx_tex_unresolved_segs; /* viewer: segments whose textures the engine 
 /* ------------------------------------------------------------------ addresses */
 static unsigned segtab[16], segset;
 
+/* Address classes (P8, MEMORY.md "Address space and RSP segments"); the game is linked with
+ * -sGLOBAL_BASE=256MB so the classes are disjoint, without heuristics:
+ *   >= 0x80000000              N64 KSEG0/KSEG1 pointer left in ROM data -> port_n64_to_wasm
+ *   PORT_WASM_BASE..0x7FFFFFFF  wasm pointer that game C code (or the PC layer) stored
+ *   0x01000000..0x0FFFFFFF      RSP segment address: segtab[a >> 24] + (a & 0xFFFFFF)
+ *   < 0x01000000                segment 0: N64 physical (RDRAM mirror) unless segment 0 was set */
 static unsigned char *phys(unsigned a) {
-    if (a >= 0x01000000u) return (unsigned char *)(uintptr_t)a; /* wasm pointer (null zone is < 16 MB) */
-    if (a < sizeof n64_rdram) return n64_rdram + a;              /* N64 physical -> RDRAM mirror */
+    if (a >= 0x80000000u) return (unsigned char *)port_n64_to_wasm(a);
+    if (a >= PORT_WASM_BASE) return (unsigned char *)(uintptr_t)a;
+    if (a < sizeof n64_rdram) return n64_rdram + a;   /* N64 physical -> RDRAM mirror */
     return 0;
 }
 
 void *gfx_addr(unsigned a) {
-    if (a >= 0x80000000u) return port_n64_to_wasm(a);   /* KSEG0/KSEG1 pointer left in ROM data */
-    if (a >= 0x10000000u) return (void *)(uintptr_t)a;  /* wasm pointer above the segment space */
+    if (a >= PORT_WASM_BASE) return phys(a);
     unsigned seg = a >> 24;
-    if (segset & (1u << seg)) {                          /* gsSPSegment wins (see P6.md: ambiguity) */
+    if (segset & (1u << seg)) {
         unsigned char *b = phys(segtab[seg]);
         return b ? b + (a & 0xFFFFFF) : 0;
     }
+    if (seg) { gfx_stats.unset_seg++; return 0; }      /* segment never set in this task */
     return phys(a);
 }
 
