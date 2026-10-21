@@ -28,7 +28,58 @@ s32 func_15146E00(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15146EE0.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147008.s")
+typedef struct { f32 x, y, z; } V3_15147008;
+typedef struct {
+    s32 a;
+    s32 b;
+    V3_15147008 pos;
+    f32 f2C;
+    f32 f30;
+    s16 s34;
+    s16 s36;
+    s16 s38;
+    s16 s3A;
+    f32 f3C;
+    f32 f40;
+    f32 f44;
+    f32 f48;
+    f32 f4C;
+    f32 f50;
+    u8 b54;
+    s16 s56;
+    s16 s58;
+} Spawn_15147008;
+void func_15151500(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
+void func_15147008(u8 *arg0, int arg1, s32 arg2) {
+    V3_15147008 p;
+    Spawn_15147008 s;
+
+    if (*(s32 *)(arg0 + 0x1D4)) {
+        if (0) // fakematch: empty if keeps the arg0 reload schedule
+        {
+        }
+        func_15146E00((f32 *)&p, arg0, 0, arg1);
+        s.a = 5;
+        s.b = 0x16;
+        s.pos = p;
+        s.f2C = 0.024999999f;
+        s.f30 = 0.0199f;
+        s.s34 = 0;
+        s.s36 = 0xFF;
+        s.s38 = -20;
+        s.s3A = 14;
+        s.f3C = 6.0f;
+        s.f40 = 3.0f;
+        s.f44 = 7.9760003f;
+        s.f48 = -0.40300003f;
+        s.f4C = 0.284f;
+        s.f50 = 0.95355f;
+        s.b54 = 3;
+        s.s56 = 25;
+        s.s58 = 25;
+        func_15151500((u8 *)&s, 0, 0xFF, 1);
+    }
+}
 
 void func_15147128(s32 arg0, s32 arg1, s32 arg2) {
     func_15147168(arg0, arg1, arg2, 0);
@@ -38,7 +89,29 @@ void func_15147148(s32 arg0, s32 arg1, s32 arg2) {
     func_15147168(arg0, arg1, arg2, 1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147168.s")
+void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
+void func_15142180(u8, f32 *, s32, f32, f32);
+int func_15147168(arg0, arg1, arg2, arg3)
+    u8 *arg0;
+    int arg1;
+    s32 arg2;
+    u8 arg3;
+{
+    f32 sp4C[3];
+    s32 sp28[9];
+
+    if (*(s32 *)(arg0 + 0x1D4)) {
+        if (0) // fakematch: empty if keeps the arg0 reload schedule
+        {
+        }
+        if (func_15146E00(sp4C, arg0, (s32)sp28, arg1) != 0) {
+            func_15141F78(arg3 ? 0xC : 0xB, sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
+            if (arg2 >= 0x73) {
+                func_15142180(2, sp4C, sp28[6], 1.0f, 1.0f);
+            }
+        }
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151472D0.s")
 
@@ -146,7 +219,25 @@ s32 func_1514766C(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147888.s")
+extern u8 (*D_800900A4)(void);
+void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
+void func_15142180(u8, f32 *, s32, f32, f32);
+void func_15147888(u8 *arg0, int arg1, s32 arg2) {
+    f32 sp4C[3];
+    s32 sp28[9];
+
+    if (*(s32 *)(arg0 + 0x1D4)) {
+        if (0) // fakematch: empty if keeps the arg0 reload schedule
+        {
+        }
+        if (func_15146E00(sp4C, arg0, (s32)sp28, arg1) != 0) {
+            if (arg2 >= 0x73) {
+                func_15142180(0, sp4C, sp28[6], 1.0f, 1.0f);
+            }
+            func_15141F78(D_800900A4(), sp28, arg2 * 0.0076923077f, (u8)(*(f32 *)(arg0 + 0x40) * 0.7111111f), sp4C, arg1);
+        }
+    }
+}
 
 void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
 void func_15142180(u8, f32 *, s32, f32, f32);
