@@ -1067,3 +1067,12 @@ func_151E8A64	none	1	OK	y	n	first try; (u8 **)D_800E1008 scan
 func_151E564C	SIZE+11	5	DIFF1	n	y	fade; local perm DIFF1 (beq a2,v0 operand order)
 func_151E5928	none	3	SIZE-1	n	n	int args (x-16)*2 kept undistributed; f12/f14 consts
 func_151E5B94	none	1	OK	y	n	first try; D_800ABA70 [][10] s8 table, D_800CC2D0[i] +0x31C ptr
+func_151A6618	DIFF94	4	OK	y	n	func_1513D2F0 Blk58 + Tmp 0x1C; second block and pos declared in the if block (frame)
+func_151C7320	DIFF28	6	DIFF18	n	y	func_151030B8 rand spawner; f32 v[2]/s32 r[2] layout off by 4 (r0 at 0x44)
+func_151DBCBC	DIFF101	4	DIFF96	n	n	func_1513C73C 0x28 block; frame +8 in every decl order
+func_151DAB58	DIFF96	4	DIFF96	n	n	func_1513D2F0 Blk58; u8 arg4 CSE-spilled vs ref reload; file proto s32 args
+func_151CEC80	SIZE-1	5	DIFF17	n	y	Blk58 loop spawner; blk+n in the if block fix layout; s2/s3 swap left
+func_151C34F8	DIFF93	6	DIFF37	n	y	151602C0 + 151530A8 0x74 block; all decls in the if block fix layout; mtc1 f0 sched left
+func_151BF490	DIFF21	6	DIFF7	n	y	func_15132FBC 0x78 block; pad + trailing s32 u78; perm barrier (arg4&&arg4)&&arg4 DIFF7
+func_151B61A0	SIZE-1	6	SIZE-1	n	n	checksum loop + 15132FBC block; trailing empty func_151B643C in .s
+func_151AB3A8	SIZE-2	4	SIZE-2	n	n	1513C73C block; early-return addiu v0,0xB0 not folded in ref
