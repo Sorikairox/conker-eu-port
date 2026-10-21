@@ -127,7 +127,11 @@ void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516E100.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516ECE8.s")
+void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
+    if (arg1) { // fakematch: permuter, forces arg1 home/reload order
+    }
+    func_1516DF0C(arg0 >> 0x10, arg0 & 0xFFFF, 0, arg2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1, 0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1, 0, 0, 0, 0, 0, arg3, arg4);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516EE3C.s")
 
@@ -173,7 +177,12 @@ void func_1516F2D8(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516EED4.s")
+void func_1516EED4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
+    if ((arg0 < 4) && ((&D_800DD2A0)[arg0 ^ 0] >= arg1)) { // fakematch: ^ 0 (permuter), keeps one arg0 reload
+        (&D_800DD2A0)[arg0 ^ 0] = 0;
+        func_1516DF0C(0, 0, 0, 4, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x200, 0x200, 0, 0, 0x1E, 0, 0, arg0, 0x14, 0, 0, 0x81, 8, 0, 1, 0, 0, 0, 0xC, 0, arg2, arg3);
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F594.s")
 
