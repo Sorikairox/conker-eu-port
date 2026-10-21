@@ -158,7 +158,30 @@ s32 func_1000EDA0(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, 
     sfx->unk18 = (sfx->unk18 & 0xFFFF0000) | timer;
     return 0;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000EE70.s")
+s32 func_1000EE70(void *arg0, s32 arg1, void *arg2, s32 arg3, s32 arg4, void *arg5)
+{
+  unsigned short new_var; // fakematch
+  struct_eu_sfx *sfx = arg0;
+  SfxObj *obj = (SfxObj *) sfx->unk18;
+  unsigned short id;
+  if ((obj != 0) && ((*((s32 *) arg2)) != 0))
+  {
+    id = sfx->unk1C & 0xFF;
+    if ((obj->unk0 != 0) && (((u8 *) obj)[0x3B] == (new_var = id)))
+    {
+      *((s32 *) arg5) = ((obj->unk184 >> 3) & 0x30) * 2;
+      sfx->unk2 = obj->unk14;
+      sfx->unk4 = obj->unk18;
+      sfx->unk6 = obj->unk1C;
+      return 0;
+    }
+    if (func_1000F44C(sfx->unk24) == 0)
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
 
 s32 func_1000EF40(struct57 *arg0, struct57 *arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6) {
     if (arg0->unk10 & 0x80) {
@@ -705,7 +728,46 @@ void func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
 void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
     func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010FFC.s")
+u16 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
+{
+  f32 f;
+  u8 idx;
+  if ((arg5 == NULL) || (*(s32 *) (arg5 + 0) == 0))
+  {
+    return 0;
+  }
+  if (*(s32 *) (arg5 + 0x318) != 0)
+  {
+    arg0 = func_10010BE8(arg0, arg1, arg2, 0x40, arg3, arg4, D_80041FD9);
+  }
+  else
+  {
+    arg2 = (arg2 + arg2 + arg2) >> 2;
+    idx = arg5[4];
+    if (idx != 0xFF)
+    {
+      f = *(f32 *) (arg5 + 0x14C) * (u32) (u16) D_800D1C90[idx]->unkE;
+    }
+    else
+    {
+      f = 0.0f;
+    }
+    if (f > 256.0f)
+    {
+      f = 1.0f;
+    }
+    else if (f < 80.0f)
+    {
+      f = 0.3125f;
+    }
+    else
+    {
+      f = f * 0.00390625f;
+    }
+    arg0 = func_10010E78(arg0, arg1, arg2, arg3, arg4, 0, *(f32 *) (arg5 + 0x14), *(f32 *) (arg5 + 0x18), *(f32 *) (arg5 + 0x1C), 500, (s32) (2000.0f * f) + 501);
+  }
+  return arg0;
+}
 
 void func_100111C8(u16 arg0) {
     struct120 *tmp = &D_800425E0[arg0 & 0xF];
@@ -745,7 +807,61 @@ s32 func_100112BC(s32 arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10011310.s")
+typedef struct { u16 id; u8 timer; u8 slot; } SfxPend;
+#define PEND ((SfxPend *)D_80041F10)
+
+void func_10011310(void)
+{
+  s32 slot;
+  s32 removed;
+  s32 j;
+  s32 n;
+  SfxPend *pend;
+  s32 i;
+  struct120 *e;
+  removed = 0;
+  j = 0;
+  n = D_80041F50;
+  for (i = 0; i < ((s32) D_80041F50); i++)
+  {
+    pend = (SfxPend *) D_80041F10; // fakematch: pointer local only for the timer test, slot read and copy (permuter)
+    if (pend[i].timer > 0)
+    {
+      ((SfxPend *) D_80041F10)[i].timer--;
+    }
+    else
+    {
+      removed = 1;
+      slot = pend[i].slot;
+      if (D_800425E0[slot].unk0 == ((SfxPend *) D_80041F10)[i].id)
+      {
+        D_800425E0[slot].unk0 = 0;
+        D_800425E0[slot].unk4 = 0;
+        if (D_800425E0[slot].unk8 != 0)
+        {
+          func_10017594(D_800425E0[slot].unk8);
+        }
+        D_800425E0[slot].unk8 = 0;
+      }
+      n--;
+      ; // fakematch: empty statement after n-- (permuter)
+    }
+    if (j != i)
+    {
+      ((SfxPend *) D_80041F10)[j] = pend[i];
+    }
+    if (removed)
+    {
+      j++;
+    }
+    else
+    {
+      removed = 0;
+    }
+  }
+
+  D_80041F50 = n;
+}
 
 s32 func_1001147C(u16 arg0) {
     struct120 *tmp;
