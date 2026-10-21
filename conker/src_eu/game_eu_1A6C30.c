@@ -13,7 +13,38 @@ void func_15179420(void) {
     D_800DD870 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_1517946C.s")
+extern u16 D_800DD860;
+s32 func_10004074(s32 *);
+void func_1517946C(s32 arg0) {
+    s32 i;
+
+    if (arg0 == 2) {
+        D_800DD864 = 0;
+        D_800DD876 = 0;
+        if ((s32 *)D_800DD870 != NULL) {
+            for (i = 0; i < 300; i++) {
+                if (((s32 **)D_800DD870)[i] != NULL) {
+                    func_1516972C((struct102 *)((s32 **)D_800DD870)[i]);
+                    ((s32 **)D_800DD870)[i] = NULL;
+                }
+            }
+            func_10004074((s32 *)(D_800DD870 & 0xFFFFFFFF)); // fakematch: permuter mask (puts the table in v0)
+            D_800DD870 = 0;
+        }
+        func_100111C8(D_800DD860);
+        D_800DD444 = 0;
+        D_800DD866 = 0;
+    } else if (arg0 == 3) {
+        if (*(s8 *)&D_800DD876 == 0) {
+            D_800DD444 = 600;
+        } else if (*(s8 *)&D_800DD876 == 3) {
+            D_800DD876 = 1;
+        }
+        D_800DD864 = arg0;
+    } else {
+        D_800DD864 = arg0;
+    }
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179008.s")
 
