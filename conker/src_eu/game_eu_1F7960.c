@@ -52,7 +52,21 @@ void func_151CBA4C(struct102 *arg0, u8 **arg1, u8 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CBAC0.s")
+void func_151CBAC0(u8 *arg0) {
+    f32 target;
+    u8 *t;
+    u8 *p;
+
+    p = arg0 + 0x70;
+    t = *(u8 **)p;
+    if ((**(u16 **)(t + 0x36C) & 0x2000) && *(u16 *)(*(u8 **)(t + 0x3D4) + 0x19E) == 0) {
+        target = *(f32 *)(p + 8);
+    } else {
+        target = 0.0f;
+    }
+    *(f32 *)(p + 4) += (target - *(f32 *)(p + 4)) * 0.4f;
+    arg0[0x2E] = *(f32 *)(p + 4);
+}
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CBBAC.s")
 
