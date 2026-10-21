@@ -308,7 +308,43 @@ s32 func_1000F4D8(u16 arg0) {
     return 0;
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F568.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F6B8.s")
+s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32 *, s32);
+
+s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5, s16 arg6) {
+    s32 vol;
+    SfxListener *best;
+    s32 i;
+    u32 min;
+    u32 d;
+    s32 dx, dy, dz;
+    s32 tx, ty, tz;
+
+    if (D_80082FA0 != 0) {
+        min = -1;
+        for (i = 0; i <= D_80082FA0; i++) {
+            tx = x - D_80042308[i].ex;
+            ty = y - D_80042308[i].ey;
+            tz = z - D_80042308[i].ez;
+            d = tx * tx + ty * ty + tz * tz;
+            if (d < min) {
+                min = d;
+                best = &D_80042308[i];
+                dx = tx;
+                dy = ty;
+                dz = tz;
+            }
+        }
+        goto block_end; // fakematch: empty goto moves the best->x reload into the b delay slot (permuter)
+    block_end:;
+    } else {
+        best = D_80042308;
+        dx = x - best->ex;
+        dy = y - best->ey;
+        dz = z - best->ez;
+    }
+    func_1000A420(dx, dy, dz, best->f, x - best->x, y - best->y, z - best->z, arg6, arg5, arg4, &vol, 0);
+    return vol;
+}
 typedef struct {
     s32 unk0;
     s32 unk4;

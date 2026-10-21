@@ -587,7 +587,34 @@ s32 func_1000E134(s32 arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000E17C.s")
+void func_1000E17C(void) {
+    s32 i;
+
+    for (i = 0; i < 12; i++) {
+        if (D_800419A8[i].unk4 > 0) {
+            if (((((s32 *)&D_8002B074[D_800419A8[i].unk4])[1] & ~0xF0) == 1 || (((s32 *)&D_8002B074[D_800419A8[i].unk4])[1] & ~0xF0) == 3) && D_800419A8[i].unk0 == -1) {
+                D_800419A8[i].unk4 = -1;
+            }
+        }
+    }
+    for (i = 0; i < 12; i++) {
+        if (D_800419A8[i].unk4 > 0) {
+            if (D_800419A8[i].unk60 != 0 && ((struct137 *)D_800419A8[i].unk60)->unk4 == -1) {
+                D_800419A8[i].unk60 = 0;
+            }
+            if (D_800419A8[i].unk10 != NULL && D_800419A8[i].unk10->unk4 == -1) {
+                D_800419A8[i].unk10 = NULL;
+            }
+        }
+    }
+    for (i = 0; i < 12; i++) {
+        if (D_800419A8[i].unk4 > 0) {
+            if (((((s32 *)&D_8002B074[D_800419A8[i].unk4])[1] & ~0xF0) == 1 || (((s32 *)&D_8002B074[D_800419A8[i].unk4])[1] & ~0xF0) == 3) && D_800419A8[i].unk0 != -1) {
+                func_1000DE1C(D_800419A8[i].unk4, 4);
+            }
+        }
+    }
+}
 extern s8 D_800422A0;
 
 void func_1000E2F4(s32 arg0) {

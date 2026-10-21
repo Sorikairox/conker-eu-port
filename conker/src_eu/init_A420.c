@@ -81,7 +81,43 @@ void func_1000E40C(s32, s32);
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A750.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000B060.s")
+extern f32 D_8002C574;
+extern f64 D_8002C578;
+
+s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
+    s16 a;
+    s16 flag;
+    f32 d;
+    s32 t;
+
+    d = sqrtf(arg0 * arg0 + arg1 * arg1);
+    if (d > D_8002C574) {
+        d = arg0 / d;
+    }
+    flag = 0x80;
+    t = func_150487E0(d) * D_8002C578;
+    a = t;
+    if (arg1 > 0.0f) {
+        if ((s16)t < 0) {
+            a = -0x80 - (s16)t;
+        } else {
+            a = 0x80 - (s16)t;
+        }
+    }
+    a += arg2;
+    a = (s8)a;
+    if (a >= 0x60 || a < -0x60) {
+        a = 0;
+    } else if (a >= 0x20) {
+        a = 0x5F - a;
+    } else if (a < -0x20) {
+        a = -0x5F - a;
+    } else {
+        flag = 0;
+        a = a + a;
+    }
+    return (a + 0x40) | flag;
+}
 // NON-MATCHING: fair amount to fix up
 // s32 func_1000B060(f32 arg0, f32 arg1, s32 arg2) {
 //     s16 phi_a1;
