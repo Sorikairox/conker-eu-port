@@ -1268,3 +1268,8 @@ OPEN: `func_150B6314` perm DIFF8 (`func_151307F0` spawner, s92 struct at sp28 wi
 3. **A single byte-spill slot 4 bytes too high** (`sb v1, 0x23` vs mine `0x27`) with the frame size right: declare `s32 pad;` *before* the variable (after it does nothing) (`func_1515C050`).
 4. **An uninitialised local read in a switch default** (`lw v1, 0(sp)` in an 8-byte frame): its slot follows the declaration order; `s32 i; u8 *p;` put `p` at 0 (`func_1516CDE8`).
 5. **Store-order-only DIFFs on a freshly allocated struct**: generate all permutations of the 4-5 field stores and `tryall` them (`func_15188EBC`, 1 of 24 OK). Cheap and exact.
+
+## s148 recipes (handler flags, implicit-int K&R, register-only regs via unsigned)
+1. **Update handlers `done = 0; if (flags & 1) { y -= D_800BE9E4; if (y < 0) done = 1; } ... fn-table calls; if (done) func_1516972C(arg0);`** (byte spilled around each `jalr`): write `u8`/`s8 done` (match `lbu`/`lb` reload) and put `s32 pad;` before it for the spill slot; read table indices straight from the field (`D[arg0[0x2F]](arg0)`), a named `u8 v` temp swaps v0/v1 (`func_151B3734`, `func_15147CB0`).
+2. **"Incompatible function return type" for a function called earlier in the same file without a prototype**: the implicit declaration is `int`, and `s32` is `long`; define it K&R with an `int` return (`int f(a, b) u8 *a; int b; {`), which also gives `lbu` from the homed `u8` arg (`func_15147168`).
+3. **A copied stack value stored three times landing in `t8` instead of `v0`**: `*arg9 = v = sp48;` then `*arg8 = v; *arg7 = v;`, and the permuter's `u32 sp48` finished it (`func_151B4FC4`). Frame holes above and below a group of locals: `s32 pad[2];` / `s32 pad2;` at those spots (fakematch).
