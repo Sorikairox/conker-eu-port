@@ -85,7 +85,54 @@ s32 func_1513BAD4(s32 arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BAE8.s")
+typedef struct { u8 pad[0x50]; s32 off; u8 pad54[0xA4]; u8 data[1]; } BAE8Obj;
+typedef struct {
+    s8 b0; s8 b1; s8 b2; s8 pad3;
+    s16 h4; s16 pad6;
+    s32 w8; s32 wC; s32 w10; s32 w14; s32 w18; s32 w1C; s32 w20;
+    s8 b24; s8 b25; s8 pad26[2];
+    s32 w28; s32 w2C;
+    s32 w30; s32 w34;
+    s8 b38; s8 pad39[3];
+} BAE8Params;
+struct102 *func_1513B5E0(BAE8Params *, s32, s32, s32, s32);
+void *memcpy(void *, const void *, s32);
+struct102 *func_1513BAE8(void) {
+    struct102 *p;
+    BAE8Params s;
+    f32 f[5];
+
+    s.b1 = 2;
+    s.b2 = 5;
+    s.h4 = 0x12C;
+    s.w30 = 9;
+    f[0] = 0.0f;
+    f[1] = 0.0f;
+    f[3] = 0.0f;
+    f[4] = 0.0f;
+    f[2] = 0.0f;
+    s.b0 = 0;
+    s.w34 = 0x1AE;
+    s.w8 = 1;
+    s.wC = 0x220205;
+    s.w10 = 0x40600;
+    s.b24 = 0;
+    s.b25 = 0;
+    s.w14 = 1;
+    s.w18 = 0x36;
+    s.w1C = 0x80;
+    s.w20 = 0x20;
+    s.b38 = 3;
+    p = func_1513B5E0(&s, 1, 0x14, 0xFF, 1);
+    if (p != NULL) {
+        if (*(s32 *)((u8 *)p + 0x50) != 0x1180) {
+            func_1516972C(p);
+        } else {
+            memcpy(&((BAE8Obj *)p)->data[((BAE8Obj *)p)->off], f, 0x14);
+        }
+    }
+    return p;
+}
 #pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BBFC.s")
 extern f32 D_800A4E64; // 0.037f (file does not own .rodata)
 extern f32 D_800A4E68; // 1.9f
