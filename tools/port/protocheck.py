@@ -83,7 +83,7 @@ def main():
                 protos.setdefault(m.group(1), [])
         nmb = nm_blocks(s) if p.endswith('.c') else []
         for f, b in nmb: blocks.append((f, b, p))
-        if p.endswith('.c'): s = nm_view(s)   # the NON_MATCHING side of every #ifdef/#ifndef NON_MATCHING
+        s = nm_view(s)   # P15: headers too. The NON_MATCHING side of every #ifdef/#ifndef NON_MATCHING
         # strip GLOBAL_ASM-only: definitions anywhere (matching C and NON_MATCHING) count
         for m in SIG.finditer(s):
             ret, name, ps, end = m.groups()

@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_151A6618(u8 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A5C10.s")
@@ -37,8 +40,50 @@ void func_151A62DC(u16 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6308.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6520.s")
+#ifdef NON_MATCHING
+void func_151A6520(u8 *arg0, u8 *arg1, s32 arg2) {
+    u8 *sp2C;
+    s32 temp_a1;
+    s32 var_a0;
+    s32 var_v0;
+    u8 *temp_a0;
+    u8 *var_v1;
+    u8 temp_v1;
+    u8 *temp_v0;
 
+    if ((arg2 & 0xFF) == 0x35) {
+        temp_a1 = (*(s32 *)((u8 *)arg1 + 0));
+        var_v0 = 0;
+        var_a0 = 0;
+        if (temp_a1 > 0) {
+            var_v1 = (*(u8 **)((u8 *)arg1 + 4));
+loop_3:
+            if ((*(u8 *)((u8 *)arg0 + 0x2C)) == *var_v1) {
+                var_a0 = 1;
+            } else {
+                var_v0 += 1;
+                var_v1 += 1;
+            }
+            if ((var_v0 < temp_a1) && (var_a0 == 0)) {
+                goto loop_3;
+            }
+        }
+        if (var_a0 != 0) {
+            temp_v0 = arg0 + 0x28;
+            temp_a0 = (*(u8 **)((u8 *)temp_v0 + 0));
+            if ((*(u8 *)((u8 *)temp_a0 + 0x14)) == 1) {
+                temp_v1 = (*(u8 *)((u8 *)temp_v0 + 0xC));
+                sp2C = temp_v0;
+                func_151A6618(temp_a0, (*(s32 *)((u8 *)temp_v0 + 8)), temp_v1 & 1, temp_v1 & 2, (u8) (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+                (*(s8 *)((u8 *)((*(u8 **)((u8 *)temp_v0 + 0))) + 0x14)) = 0;
+                (*(s32 *)((u8 *)temp_v0 + 0x10)) = (s32) (*(s32 *)((u8 *)arg1 + 8));
+            }
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6520.s")
+#endif
 s32 func_1516284C(void *, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 void *memcpy(void *, const void *, s32);
 extern f32 D_800A9178;

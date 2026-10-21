@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void func_1501B22C(s32);
+#endif
 
 
 #ifdef NON_MATCHING
@@ -96,8 +100,28 @@ void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BB78.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BC10.s")
+#ifdef NON_MATCHING
+extern f32 D_800DA030[][4][4];   /* per player: view matrix (float) */
+extern f32 D_800DA130[][4][4];   /* per player: product */
+extern u8 *D_800DC6D0[];         /* per DL buffer: fixed-point view matrices, 0x40 per player */
 
+/* Per-player matrix refresh (P15, hand C from the asm): converts this frame's fixed-point projection
+ * (player record + 0x100 in D_800BE628, 0x180 per player, 0x40 per DL buffer) and view matrix to float,
+ * multiplies them into D_800DA130[i] and runs the per-player update func_1501B22C(i). */
+void func_1510BC10(void) {
+    f32 proj[4][4];
+    s16 i;
+
+    for (i = 0; i <= D_80082FA0; i++) {
+        guMtxL2F(proj, (Mtx *)(D_800BE628 + i * 0x180 + D_800BE9C0 * 0x40 + 0x100));
+        guMtxL2F(D_800DA030[i], (Mtx *)(D_800DC6D0[D_800BE9C0] + i * 0x40));
+        func_150A7A48(D_800DA030[i], proj, D_800DA130[i]);
+        func_1501B22C(i);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BC10.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BD34.s")
 
 #ifdef NON_MATCHING

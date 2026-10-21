@@ -3,6 +3,9 @@
 #include "functions.h"
 #include "variables.h"
 #include "libc/math.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1501AF44(f32 *x0, f32 *y0, f32 *x1, f32 *y1);
+#endif
 
 
 #ifdef NON_MATCHING
@@ -129,8 +132,53 @@ void func_1501A39C(void) {
 //     return tmp;
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A490.s")
+#ifdef NON_MATCHING
+s32 func_1501A490(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    struct {
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+    } sp;
+    f32 temp_f0;
+    f32 temp_f2;
+    u8 *temp_s0;
+    u8 *temp_v0;
+    u8 *var_s0;
 
+    (*(s32 *)((u8 *)arg0 + 0)) = 0xE7000000;
+    (*(s32 *)((u8 *)arg0 + 4)) = 0;
+    temp_s0 = arg0 + 8;
+    if (arg1 == 0xFF) {
+        (*(s32 *)((u8 *)temp_s0 + 0)) = 0xED008000;
+        var_s0 = temp_s0 + 8;
+        (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) (((arg5 & 3) << 0x18) | (((s32) ((f32) (D_800BE620 - 2) * 4.0f) & 0xFFF) << 0xC) | ((s32) ((f32) D_800BE624 * 4.0f) & 0xFFF));
+    } else {
+        temp_v0 = D_800BE628 + (arg1 * 0x180);
+        sp.u3C = (*(f32 *)((u8 *)temp_v0 + 0x2C));
+        sp.u38 = (*(f32 *)((u8 *)temp_v0 + 0x30));
+        sp.u34 = (*(f32 *)((u8 *)temp_v0 + 0x24));
+        if (arg4 != 0) {
+            temp_f2 = (*(f32 *)((u8 *)temp_v0 + 0x28));
+            temp_f0 = (f32) arg4;
+            if (temp_f0 < temp_f2) {
+                sp.u30 = temp_f0;
+            } else {
+                sp.u30 = temp_f2;
+            }
+        } else {
+            sp.u30 = (*(f32 *)((u8 *)temp_v0 + 0x28));
+        }
+        func_1501AF44(&sp.u3C, &sp.u34, &sp.u38, &sp.u30);
+        var_s0 = temp_s0 + 8;
+        (*(s32 *)((u8 *)temp_s0 + 0)) = (s32) ((((s32) (sp.u3C * 4.0f) & 0xFFF) << 0xC) | 0xED000000 | ((s32) (sp.u34 * 4.0f) & 0xFFF));
+        (*(s32 *)((u8 *)temp_s0 + 4)) = (s32) (((arg5 & 3) << 0x18) | (((s32) (sp.u38 * 4.0f) & 0xFFF) << 0xC) | ((s32) (sp.u30 * 4.0f) & 0xFFF));
+    }
+    return (s32) var_s0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A490.s")
+#endif
 Gfx *func_1501A680(Gfx *arg0) {
     gDPSetColorImage(arg0++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_800BE620, D_8002AAE8[D_800BE9C0]);
     return arg0;

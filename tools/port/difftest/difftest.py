@@ -212,7 +212,8 @@ def compile_tu(func, p, tu, tmp):
     cpath = os.path.join(tmp, func + '.c'); opath = os.path.join(tmp, func + '.o')
     open(cpath, 'w').write(tu)
     if os.path.exists(opath): os.remove(opath)
-    r = subprocess.run(cmd + ['-o', opath, cpath], capture_output=True, text=True)
+    # P15: headers as the NON_MATCHING build sees them (the TU's own NM blocks are already resolved)
+    r = subprocess.run(cmd + ['-DNON_MATCHING', '-o', opath, cpath], capture_output=True, text=True)
     if r.returncode or not os.path.exists(opath):
         em = [l for l in (r.stdout + r.stderr).split('\n') if 'rror' in l]
         tl = tu.split('\n'); ctx = []

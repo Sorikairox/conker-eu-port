@@ -65,8 +65,43 @@ s16 func_15063D6C(u8 *arg0) {
     return D_800CC6D2;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063DE8.s")
+#ifdef NON_MATCHING
+extern u8 *D_800CC6A4;
+extern f32 D_800CC6D4;
 
+s32 func_15063DE8(u8 *arg0, s32 arg1, s32 arg2) {
+    s32 var_v0;
+    u16 temp_t0;
+    u16 temp_t3;
+
+    var_v0 = 0;
+    if (arg1 & arg2) {
+        D_800CC6D2 = (*(s8 *)((u8 *)D_800CC6A4 + 2)) * 0xC8;
+        if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x84)) != 0) {
+            D_800CC6D2 = func_15063D6C(arg0);
+        }
+        D_800CC6D4 = 12.0f;
+        D_800CC6D2 = (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12)) + ((s32) (D_800CC6D2 * D_800CC264) / 2000);
+        if (D_800CC6D2 < -0x2328) {
+            temp_t0 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - D_800CC6D2) - 0x2328;
+            (*(u16 *)((u8 *)arg0 + 0x7A)) = temp_t0;
+            (*(u16 *)((u8 *)arg0 + 0x76)) = temp_t0;
+            D_800CC6D2 = -0x2328;
+        }
+        if (D_800CC6D2 >= 0x2329) {
+            temp_t3 = ((*(u16 *)((u8 *)arg0 + 0x7A)) - D_800CC6D2) + 0x2328;
+            (*(u16 *)((u8 *)arg0 + 0x7A)) = temp_t3;
+            (*(u16 *)((u8 *)arg0 + 0x76)) = temp_t3;
+            D_800CC6D2 = 0x2328;
+        }
+        var_v0 = 1;
+        (*(s16 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x12)) = D_800CC6D2;
+    }
+    return var_v0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063DE8.s")
+#endif
 s32 func_15031C4C(struct127 *, s32, s32);
 void func_1506B04C(struct127 *, s32, void *);
 
@@ -105,8 +140,45 @@ void func_15063F14(struct127 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_1506401C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064240.s")
+#ifdef NON_MATCHING
+s32 func_15064240(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 arg4) {
+    s32 temp_t6;
+    struct126 *temp_v0;
+    u8 temp_a1;
 
+    temp_t6 = arg1 & 0xFFFF;
+    if ((arg4 & 0x4000) && (arg0->unk28 == 0.0f) && (arg0->y_velocity <= 0.0f)) {
+        temp_v0 = arg0->unk31C;
+        if (((u8) temp_v0->unk95 == 0) && (temp_t6 != arg0->unk84.uh) && ((temp_a1 = temp_v0->unk11A, (temp_a1 == 0)) || (temp_a1 == 2)) && (temp_v0->unk27 == 0)) {
+            if ((arg3 != 0) && (arg0->disable_jump != 0)) {
+                return 0x3E7;
+            }
+            if (arg2 & 0xFFFF & 1) {
+                arg0->disable_jump = 0x14;
+            }
+            if (arg3 != 0) {
+                if (arg0->unk31C->unk11A == 2) {
+                    return 0x3E7;
+                }
+                arg0->unk31C->unk11A = 1;
+                /* Duplicate return node #18. Try simplifying control flow for better match */
+                arg0->unk31C->unk78 = (u8) arg3;
+                arg0->disable_run = 0xFF;
+                arg0->unk83 = 0xFF;
+                return temp_t6;
+            }
+            arg0->unk31C->unk11A = 3;
+            arg0->unk31C->unk78 = (u8) arg3;
+            arg0->disable_run = 0xFF;
+            arg0->unk83 = 0xFF;
+            return temp_t6;
+        }
+    }
+    return 0x3E7;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064240.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_1506435C.s")
 
 s32 func_1505DADC(u8 *, u16 *, s32, s32, s32);

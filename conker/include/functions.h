@@ -1147,7 +1147,11 @@ void func_15168A9C(struct_eu_node *arg0);
 s32  func_150A2FCC(); // 3 params (u32, s32, s32 *); the caller in game_16EE20 passes a 4th
 s32 func_150027F8(Gfx *arg0);
 u16  func_10010E78(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, s32 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, s16 argA);
+#ifdef NON_MATCHING
+void func_1506D584(void);
+#else
 s32 func_1506D584(void);
+#endif
 void func_151043C0(struct127 *arg0, struct127 *arg1, f32 *arg2, u8 arg3, s32 arg4, u8 arg5, s32 arg6);
 void *func_15167A68(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, u8 arg5);
 s32  func_151452C4(struct17 *arg0, struct17 *arg1, struct17 *arg2, f32 arg3, s32 arg4, s32 arg5, f32 *arg6, f32 *arg7);

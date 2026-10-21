@@ -6,8 +6,48 @@
 void func_150D87C0(s32 arg0) {
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D87CC.s")
+#ifdef NON_MATCHING
+extern s32 D_80090648;
 
+s32 func_150D87CC(u8 *arg0, u8 *arg1) {
+    f32 temp_f0;
+    s32 *temp_a0;
+    s32 temp_f6;
+    s32 var_a1;
+    s32 var_a2;
+    s8 *temp_v1;
+    u8 *temp_v0;
+
+    temp_v0 = (*(u8 **)((u8 *)arg1 + 0x2D0));
+    if (temp_v0 == NULL) {
+        return 0;
+    }
+    (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) (*(s32 *)((u8 *)(&D_80090648) + 0x18));
+    if ((*(u16 *)((u8 *)arg1 + 0x84)) == 0xD) {
+        temp_f0 = (*(f32 *)((u8 *)temp_v0 + 8));
+        if ((temp_f0 >= 23.0f) && (temp_f0 <= 40.0f)) {
+            (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) (*(s32 *)((u8 *)(&D_80090648) + 0x1C));
+            temp_v1 = *(*(s8 ***)((u8 *)arg0 + 0x24));
+            var_a1 = 0;
+            if (*temp_v1 != -0xE) {
+                do {
+                    var_a1 += 1;
+                } while (*((var_a1 * 8) + temp_v1) != -0xE);
+            }
+            temp_a0 = temp_v1 + (var_a1 * 8);
+            temp_f6 = (s32) ((70.0f * (((*(f32 *)((u8 *)temp_v0 + 8)) - 23.0f) * 0.05882353f)) + 2.0f);
+            var_a2 = temp_f6;
+            if (temp_f6 < 0) {
+                var_a2 = temp_f6 + (((s32) *temp_a0 >> 0xC) & 0xFFF);
+            }
+            *temp_a0 = ((var_a2 & 0xFFF) << 0xC) | 0xF2000000 | 2;
+        }
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D87CC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D88E8.s")
 
 s16 *func_150D8AA0(s16 *arg0, s32 arg1) {

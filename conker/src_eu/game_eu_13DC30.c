@@ -195,8 +195,38 @@ void func_15114E8C(f32 (*arg0)[4], u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151149AC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
+#ifdef NON_MATCHING
+/* Per-frame release of the per-entry blocks D_800DC328[i] (P15, hand C from the asm). Entries are the
+ * 0xA0-byte D_800DBEF4 records. A disabled entry (flag 0x70 & 1) drops its block pointer unless it is
+ * kept (0x6F & 0x80). Otherwise a live block is freed at once, or, for kept / type-3 entries (0x4E),
+ * after its D_800DC32C[i] frame countdown reaches 0. */
+void func_10004074(s32);
+void func_15114F9C(void) {
+    s32 i;
 
+    for (i = 0; i < D_800DC320; i++) {
+        u8 *e = (u8 *)D_800DBEF4 + i * 0xA0;
+
+        if ((e[0x70] & 1) == 1) {
+            if (!(e[0x6F] & 0x80)) {
+                D_800DC328[i] = 0;
+            }
+        } else if (D_800DC328[i] != 0) {
+            if (e[0x4E] != 3 && !(e[0x6F] & 0x80)) {
+                func_10004074(D_800DC328[i]);
+                D_800DC328[i] = 0;
+            } else if (D_800DC32C[i] != 0) {
+                D_800DC32C[i]--;
+            } else {
+                func_10004074(D_800DC328[i]);
+                D_800DC328[i] = 0;
+            }
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114F9C.s")
+#endif
 extern s32 D_800DC3C8;
 
 void func_15115114(u32 arg0) {

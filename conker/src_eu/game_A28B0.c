@@ -154,7 +154,51 @@ void func_15075884(void) {
 //     D_800D154C->unk44 = 2.0f * (temp_f0 / D_800D1891);
 // }
 
+#ifdef NON_MATCHING
+void func_15075938(void) {
+    s32 var_a0;
+    s32 var_a2;
+    u8 var_v0;
+    u8 var_v1;
+
+    var_a2 = 0;
+    var_a0 = D_800D154C->unk21E - D_800D154C->unk221;
+    if (var_a0 < 0) {
+        var_v0 = D_800D2528[D_800D154C->unk13F];
+        var_a0 = (var_a0 + var_v0) - 1;
+    } else {
+        var_v0 = D_800D2528[D_800D154C->unk13F];
+        if (var_a0 >= (var_v0 - 1)) {
+            var_a0 = (var_a0 - var_v0) + 1;
+        }
+    }
+    var_v1 = D_800D1891;
+    if (D_800D1891 == 0xFF) {
+        var_v1 = var_v0 - 2;
+    }
+    if (D_800D1892 == 0) {
+        if (var_v1 == var_a0) {
+            goto block_16;
+        }
+    } else if (D_800D1892 == 1) {
+        if (var_v1 != var_a0) {
+            goto block_16;
+        }
+    } else if (D_800D1892 == 2) {
+        if ((s32) var_v1 < var_a0) {
+            goto block_16;
+        }
+    } else if (var_a0 < (s32) var_v1) {
+block_16:
+        var_a2 = 1;
+    }
+    if (var_a2 != 0) {
+        func_15075400((s32) D_800D1890);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15075938.s")
+#endif
 // NON-MATCHING: 2nd half ok, 1st is a mystery
 // void func_15075938(void) {
 //     u8 tmp;

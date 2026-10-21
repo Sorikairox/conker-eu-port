@@ -694,7 +694,38 @@ void func_1512623C(u8 *arg0, u8 *arg1, s32 arg2, f32 *arg3, f32 *arg4, f32 *arg5
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151277B0.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151279A0.s")
 
+#ifdef NON_MATCHING
+s32 func_151CA484(struct108 *);
+
+void func_15127EB8(struct108 *arg0) {
+    struct127 *temp_v1;
+    struct127 *var_v0;
+    u8 temp_a0;
+
+    func_151239CC(arg0, 1);
+    arg0->unk3D4->unk197 = 0;
+    func_151CA484(arg0);
+    arg0->unk19C = 0.0f;
+    arg0->unk1A0 = 0.0f;
+    arg0->unk1A4 = 0.0f;
+    arg0->unk1A8 = 0.0f;
+    func_1510B8AC(arg0->unk23D, 0, 0, 0x3F800000);
+    (*(f32 *)((u8 *)((D_800BE628 + (arg0->unk23D * 0x180))) + 0x84)) = 1.0f;
+    func_150627D4(arg0->unk3D0);
+    D_800DBFF4[arg0->unk23D] = 2;
+    temp_v1 = arg0->unk3D0;
+    temp_a0 = temp_v1->unk65;
+    var_v0 = temp_v1;
+    if (temp_a0 != 0) {
+        var_v0 = &(*(struct127 *)((u8 *)(&D_800CC2D0[temp_a0]) + -0x32C));
+    }
+    var_v0->unk2FC &= ~(1 << arg0->unk23D);
+    var_v0->unk74 &= ~(1 << arg0->unk23D);
+    arg0->unk23C = 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15127EB8.s")
+#endif
 // NON-MATCHING: not too far away
 // void func_15127EB8(struct108 *arg0) {
 //     struct127 *phi_v0;

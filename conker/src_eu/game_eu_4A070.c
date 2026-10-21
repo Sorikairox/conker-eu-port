@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15080628(void);
+#endif
 // hoisted forward declaration(s) for func_1501E7A8
 s32 func_1507EE9C(struct127 *);
 
@@ -253,10 +256,79 @@ void func_1501E220(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_1501E46C(s32);
+s32 func_1501E888(s32, s32);
+s32 func_1501ECA4(s32);
+s32 func_15020F6C(s32);
+void func_1502457C(s32, s32);
+extern u8 D_800C40AC;
+
+void func_1501E364(s32 arg0) {
+    s32 var_s1;
+    u8 *temp_s0;
+
+    var_s1 = arg0;
+loop_1:
+    temp_s0 = &(&D_800C35EA)[var_s1];
+    if ((*temp_s0 == 1) && ((&D_800C39D0)[var_s1] >= (&D_eu_800C3A60)[var_s1])) {
+        if (D_800C40AC == 0) {
+            func_1501E888(0, var_s1);
+            if (*temp_s0 == 1) {
+                var_s1 = 0;
+                func_1501E46C(0);
+                func_1502457C(1, 0);
+                func_1501ECA4(0);
+                func_1502457C(0, 0);
+                func_15020F6C(0);
+                goto loop_1;
+            }
+        } else {
+            D_800C40AC = 2;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E364.s")
+#endif
+#ifdef NON_MATCHING
+extern s32 D_800C39D8[];
+extern u8 D_800C39E0[];
+extern u16 D_800C40AE;
+extern u8 D_eu_800C3E78;
 
+/* Per-player counter step (P15, hand C from the asm): remembers the previous value D_800C39D8[i] of
+ * D_800C39D0[i], and for an active player (D_800C35EA[i] == 1) advances it by D_800BEA08 (player 0
+ * only when D_800BEAC0 == 0), clamped to D_eu_800C3A60[i]. */
+void func_1501E46C(s32 i) {
+    s32 *cur = &(&D_800C39D0)[i];
+    s32 lim;
+
+    if (D_eu_800C3E78 != 0) {
+        D_eu_800C3E78--;
+    }
+    D_800C39D8[i] = *cur;
+    if ((&D_800C35EA)[i] != 1) {
+        return;
+    }
+    func_1501E220(i);
+    if (i != 0 || D_800BEAC0 == 0) {
+        *cur += D_800BEA08;
+    }
+    if (D_800C39E0[i] == 0 && D_800C40AE == D_800C39D8[i] && D_800C40AE != *cur) {
+        D_800C39D8[i] = -1;
+    }
+    if (func_151F2CDC() == 1) {
+        func_15080628();
+    }
+    lim = (&D_eu_800C3A60)[i];
+    if (*cur >= lim) {
+        *cur = lim;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E46C.s")
-
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E5AC.s")
 
 extern u8 *D_800C3A10[];
@@ -527,7 +599,7 @@ s32 func_15022A8C(s32 *);
 s32 func_1504A730();
 s32 func_15061B4C();
 s32 func_1507EB1C(s32 *);
-s32 func_150802A8(s32 *);
+void func_150802A8(s32 *);
 extern u8 D_800C3A78;
 
 void func_1502378C(void) {

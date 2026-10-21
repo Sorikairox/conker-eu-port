@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+u8 *func_160014F0(s16 *arg0, s32 arg1);
+#endif
 
 s32 func_1600160C();
 void func_16001044(s32 arg0, s32 arg1, s32 arg2);
@@ -166,8 +169,57 @@ void func_16000424(struct118 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000590.s")
+#ifdef NON_MATCHING
+void func_16000590(struct118 *arg0) {
+    s32 temp_s2;
+    s32 var_s0;
+    s32 var_s0_2;
+    s32 var_s1;
+    s32 var_s1_2;
+    s32 var_s2_2;
+    s32 var_s4;
+    s32 var_v0;
+    u32 var_s2;
+    u8 *var_s3;
 
+    var_s4 = 0;
+    temp_s2 = (*(s32 *)((u8 *)arg0 + 0x12C));
+    func_160012B0(3, D_160047A4);
+    func_16001044(0xA, 0, temp_s2);
+    var_s2 = (u32) temp_s2 >> 0xC;
+    var_s0 = 0x2C;
+    var_s1 = 0;
+    do {
+        if (var_s2 & 1) {
+            func_160012B0(var_s0, (u8 *) D_16003B30[var_s1]);
+            var_s0 += 0x20;
+        }
+        var_s1 += 1;
+        var_s2 = var_s2 >> 1;
+    } while (var_s1 < 6);
+    var_s1_2 = 0;
+    var_s0_2 = 0xC3;
+    if (D_16003B28 == 1) {
+        var_v0 = 0x4C;
+    } else {
+        var_v0 = 0x6C;
+        var_s4 = 0x10;
+    }
+    var_s2_2 = var_s4;
+    var_s3 = ((struct118 *)((u8 *)arg0 + (var_v0 * 4)));
+    do {
+        func_160012B0(var_s0_2, D_160047AC);
+        func_16001044(var_s0_2 + 2, 1, var_s2_2);
+        func_16001044(var_s0_2 + 5, 2, (*(s32 *)((u8 *)var_s3 + 4)));
+        var_s1_2 += 1;
+        var_s3 += 8;
+        var_s0_2 += 0x20;
+        var_s2_2 += 1;
+    } while (var_s1_2 < 0x10);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16000590.s")
+#endif
 typedef struct {
     u8 c[4];
 } struct_16003B48;
@@ -475,7 +527,85 @@ void func_16001390(s16 x0, s16 y0, s16 x1, s16 y1) {
         fb += D_160038A8 - x1;
     }
 }
+#ifdef NON_MATCHING
+extern s32 D_16003CE0;
+
+u8 *func_160014F0(s16 *arg0, s32 arg1) {
+    s16 *temp_v0;
+    s16 *temp_v0_2;
+    s16 *temp_v0_3;
+    s16 *var_v0;
+    s16 var_t2;
+    s16 var_t2_2;
+    s16 var_t2_3;
+    s16 var_t2_4;
+    s32 temp_t1;
+    s32 temp_t1_2;
+    s32 temp_t1_3;
+    s32 temp_t6;
+    s32 var_a1;
+    s32 var_a2;
+    s32 var_a3;
+    u8 *var_t0;
+    u8 var_a2_2;
+
+    temp_t6 = arg1 & 0xFF;
+    var_v0 = arg0;
+    var_a2 = temp_t6;
+    if (temp_t6 < 0x20) {
+        var_a2 = 0x20;
+    }
+    var_t0 = ((s32 *)((u8 *)&D_16003CE0 + ((var_a2 - 0x20) * 8)));
+    var_a3 = 0;
+    do {
+        var_a1 = 0;
+        var_a2_2 = *var_t0;
+loop_4:
+        if (var_a2_2 & 0x80) {
+            var_t2 = D_1600388C & 0xFFFF;
+        } else {
+            var_t2 = 1;
+        }
+        temp_t1 = (var_a2_2 * 2) & 0xFFFF;
+        *var_v0 = var_t2;
+        temp_v0 = ((s16 *)((u8 *)var_v0 + 2));
+        if (temp_t1 & 0x80) {
+            var_t2_2 = D_1600388C & 0xFFFF;
+        } else {
+            var_t2_2 = 1;
+        }
+        temp_t1_2 = (temp_t1 * 2) & 0xFFFF;
+        *temp_v0 = var_t2_2;
+        temp_v0_2 = ((s16 *)((u8 *)temp_v0 + 2));
+        if (temp_t1_2 & 0x80) {
+            var_t2_3 = D_1600388C & 0xFFFF;
+        } else {
+            var_t2_3 = 1;
+        }
+        temp_t1_3 = (temp_t1_2 * 2) & 0xFFFF;
+        *temp_v0_2 = var_t2_3;
+        temp_v0_3 = ((s16 *)((u8 *)temp_v0_2 + 2));
+        if (temp_t1_3 & 0x80) {
+            var_t2_4 = D_1600388C & 0xFFFF;
+        } else {
+            var_t2_4 = 1;
+        }
+        var_a1 += 4;
+        var_a2_2 = (temp_t1_3 * 2) & 0xFFFF;
+        *temp_v0_3 = var_t2_4;
+        var_v0 = ((s16 *)((u8 *)temp_v0_3 + 2));
+        if (var_a1 != 8) {
+            goto loop_4;
+        }
+        var_a3 += 1;
+        var_t0 += 1;
+        var_v0 = (s16 *)((u8 *)var_v0 + ((D_160038A8 - 8) * 2));
+    } while (var_a3 != 8);
+    return ((s16 *)((u8 *)arg0 + 0x10));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_160014F0.s")
+#endif
 // NON-MATCHING: only glyph/j registers swapped (t0/a1)
 // extern u8 D_16003CE0[];
 //

@@ -787,7 +787,40 @@ void func_15145548(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
+    struct {
+        f32 u10;
+        u8 pad14[0xC];
+    } sp;
+    f32 sp0;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f2;
+    f32 temp_f6;
+
+    if (arg4 == NULL) {
+        arg4 = &sp.u10;
+    }
+    temp_f2 = arg1->unk0;
+    temp_f12 = arg1->unk4;
+    temp_f14 = arg1->unk8;
+    temp_f0 = (temp_f2 * temp_f2) + (temp_f12 * temp_f12) + (temp_f14 * temp_f14);
+    if (temp_f0 == 0.0f) {
+        return 0;
+    }
+    temp_f6 = (((temp_f2 * arg2->unk0) + (temp_f12 * arg2->unk4) + (temp_f14 * arg2->unk8)) - ((temp_f2 * arg0->unk0) + (temp_f12 * arg0->unk4) + (temp_f14 * arg0->unk8))) / temp_f0;
+    sp0 = temp_f6;
+    *arg4 = temp_f6;
+    arg3->unk0 = (temp_f6 * arg1->unk0) + arg0->unk0;
+    arg3->unk4 = (*arg4 * arg1->unk4) + arg0->unk4;
+    arg3->unk8 = (*arg4 * arg1->unk8) + arg0->unk8;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514563C.s")
+#endif
 // NON-MATCHING: t is also stored to an unused stack slot at sp+0 (frame 0x20); closest draft:
 // s32 func_1514563C(struct17 *arg0, struct17 *arg1, struct17 *arg2, struct17 *arg3, f32 *arg4) {
 //     f32 sp10;

@@ -44,8 +44,29 @@ struct_eu_size0C *func_150359B8(void) {
     return &D_800C4328[D_800C4320 - 1];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15035A04.s")
+#ifdef NON_MATCHING
+s32 func_150A6840(s32, s32 *, s32, f32, f32, f32, f32, f32);
+extern s32 D_800DA030;
+extern f32 D_80098120;
 
+s32 func_15035A04(s32 arg0, u8 *arg1, u8 *arg2, f32 arg3) {
+    s32 sp28 = D_800BE628;
+    struct124 *e = D_800D1C90[arg1[4]];
+    f32 w = (f32)(u16)e->unkE;
+    f32 h = (f32)*(s16 *)((u8 *)e + 0x10) * *(f32 *)(arg1 + 0x150);
+    f32 y;
+
+    if (arg0 == 1 || arg0 == 0) {
+        y = arg3 - ((*(f32 *)(arg1 + 0x18) + h) - arg3);
+    } else {
+        y = *(f32 *)(arg1 + 0x18) + h;
+    }
+    return func_150A6840(sp28, &D_800DA030, *(s32 *)(arg2 + 0x30), y, *(f32 *)(arg2 + 0x38),
+                         w * *(f32 *)(arg1 + 0x14C), w * *(f32 *)(arg1 + 0x150), D_80098120) == 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15035A04.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15035AF8.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_1503605C.s")

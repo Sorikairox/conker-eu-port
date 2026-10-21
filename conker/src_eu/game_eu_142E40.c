@@ -101,8 +101,36 @@ void func_1511638C(u8 *arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511645C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151164E8.s")
+#ifdef NON_MATCHING
+void func_151164E8(u8 *arg0) {
+    f32 temp_f0;
+    f32 var_f2;
+    s32 temp_a1;
+    s32 temp_v1;
 
+    temp_v1 = (*(s32 *)((u8 *)arg0 + 0x3C));
+    temp_a1 = temp_v1 >> 0x10;
+    if ((s8) temp_v1 != 0) {
+        (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((*(f32 *)((u8 *)arg0 + 0)) + (((*(f32 *)((u8 *)arg0 + 0x7C)) / (f32) (s8) temp_v1) + (f32) (s8) temp_a1));
+    } else {
+        (*(f32 *)((u8 *)arg0 + 0)) = (f32) ((*(f32 *)((u8 *)arg0 + 0)) + (f32) ((s8) temp_a1 * D_800BE9E4));
+    }
+    temp_f0 = (*(f32 *)((u8 *)arg0 + 0));
+    var_f2 = (f32) (s8) (temp_v1 >> 8);
+    if (var_f2 < temp_f0) {
+        goto block_6;
+    }
+    var_f2 = (f32) (s8) (temp_v1 >> 0x18);
+    if (temp_f0 < var_f2) {
+block_6:
+        (*(f32 *)((u8 *)arg0 + 0)) = var_f2;
+    }
+    (*(f32 *)((u8 *)arg0 + 0x80)) = 0.0f;
+    (*(f32 *)((u8 *)arg0 + 0x7C)) = 0.0f;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151164E8.s")
+#endif
 #ifdef NON_MATCHING
 void func_151165D8(u8 *arg0) {
     s32 temp_t4;
@@ -602,8 +630,40 @@ void func_1511E320(u8 *arg0, struct127 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ED08.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F1D8.s")
+#ifdef NON_MATCHING
+void func_1511F1D8(u8 *arg0) {
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 var_f2;
 
+    if ((*(s32 *)((u8 *)arg0 + 0x7C)) == 0) {
+        (*(f32 *)((u8 *)arg0 + 0x84)) = (f32) (*(s16 *)((u8 *)arg0 + 0x12));
+    }
+    temp_f0 = (f32) (*(s16 *)((u8 *)arg0 + 0x12));
+    var_f2 = (f32) D_800BE9E4 * 4.0f;
+    if ((*(s32 *)((u8 *)arg0 + 0x3C)) != 0) {
+        var_f2 *= 0.25f;
+    }
+    if ((*(s32 *)((u8 *)arg0 + 0x80)) != 0) {
+        temp_f12 = (*(f32 *)((u8 *)arg0 + 0x84)) + 500.0f;
+        (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) (temp_f0 + (var_f2 * 5.0f));
+        if (temp_f12 < (f32) (*(s16 *)((u8 *)arg0 + 0x12))) {
+            (*(s8 *)((u8 *)arg0 + 0x6E)) = 1;
+            (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) temp_f12;
+        }
+    } else {
+        temp_f12_2 = (*(f32 *)((u8 *)arg0 + 0x84));
+        (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) (temp_f0 - var_f2);
+        if ((f32) (*(s16 *)((u8 *)arg0 + 0x12)) < temp_f12_2) {
+            (*(s16 *)((u8 *)arg0 + 0x12)) = (s16) (s32) temp_f12_2;
+        }
+    }
+    (*(s32 *)((u8 *)arg0 + 0x7C)) = 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F1D8.s")
+#endif
 void func_1511F30C(u8 *arg0) {
     s32 dir;
     f32 step;
@@ -668,8 +728,40 @@ void func_1511F8A4(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F970.s")
+#ifdef NON_MATCHING
+void func_1511F970(u8 *arg0) {
+    s32 temp_t2;
+    s32 temp_t4;
+    s32 temp_v1;
+    s32 temp_v1_2;
 
+    if ((*(s32 *)((u8 *)arg0 + 0x7C)) == 0) {
+        (*(s32 *)((u8 *)arg0 + 0x7C)) = 1;
+        (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) ((((s32) (*(s32 *)((u8 *)arg0 + 0x3C)) >> 0x10) & 0xFFFF) * 0x32);
+    }
+    temp_v1 = (*(s32 *)((u8 *)arg0 + 0x80));
+    temp_t2 = ((*(s32 *)((u8 *)arg0 + 0x3C)) & 0xFFFF) * 0x32;
+    if (temp_v1 != 0) {
+        if (D_800BE9E4 < temp_v1) {
+            (*(s32 *)((u8 *)arg0 + 0x80)) = (s32) (temp_v1 - D_800BE9E4);
+            return;
+        }
+        (*(s32 *)((u8 *)arg0 + 0x80)) = 0;
+        (*(s32 *)((u8 *)arg0 + 0x84)) = temp_t2;
+        return;
+    }
+    temp_v1_2 = (*(s32 *)((u8 *)arg0 + 0x84));
+    temp_t4 = temp_v1_2 - D_800BE9E4;
+    if (D_800BE9E4 < temp_v1_2) {
+        (*(s32 *)((u8 *)arg0 + 0x84)) = temp_t4;
+        (*(s8 *)((u8 *)arg0 + 0x8A)) = (s8) ((s32) (temp_t4 * 0xFF) / temp_t2);
+        return;
+    }
+    (*(s8 *)((u8 *)arg0 + 0x6E)) = 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511F970.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511FA68.s")
 
 void func_1511FD00(s32 *arg0, s32 arg1) {

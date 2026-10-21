@@ -100,8 +100,31 @@ void func_150B72DC(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B731C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B757C.s")
+#ifdef NON_MATCHING
+void func_150B757C(u8 *arg0) {
+    s32 temp_v0;
+    s32 var_v0;
+    s32 var_v1;
 
+    temp_v0 = (*(s32 *)((u8 *)arg0 + 0x18));
+    if (temp_v0 == 0x1E) {
+        var_v1 = (*(u8 *)((u8 *)arg0 + 0x45)) + (D_800BE9E4 * 8);
+        if (var_v1 >= 0x100) {
+            var_v1 = 0;
+        }
+        (*(u8 *)((u8 *)arg0 + 0x45)) = (u8) var_v1;
+    }
+    var_v0 = temp_v0 + (D_800BE9E4 * 2);
+    if (var_v0 >= 0x1F) {
+        var_v0 = 0x1E;
+    }
+    (*(s32 *)((u8 *)arg0 + 0x18)) = var_v0;
+    (*(f32 *)((u8 *)arg0 + 0x2C)) = (f32) (((s32) (var_v0 * -0x54) / 30) + 0xE6);
+    (*(f32 *)((u8 *)arg0 + 0x30)) = (f32) (((s32) (var_v0 * -0x32) / 30) + 0xAA);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B757C.s")
+#endif
 void func_150B7688(u8 *arg0) {
     if (*(s16 *)(arg0 + 0x38) != 0x1000) {
         *(s16 *)(arg0 + 0x38) += D_800BE9E4 << 8;

@@ -586,7 +586,19 @@ void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 
     }
 }
 
+#ifdef NON_MATCHING
+void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
+    if (arg1->interaction_state != 0) {
+        if (arg1->camera != NULL) {
+            func_10010F30((s32) arg0, arg2 & 0xFFFF, 0x40U, 0, (u8) ((((u32) arg1->unk184 >> 3) & 0x30) * 2));
+            return;
+        }
+        func_1000FA64(arg0, (s16) (s32) arg1->x_position, (s16) (s32) arg1->y_position, (s16) (s32) arg1->z_position, arg2, (u16) (s32) arg4, (s16) (s32) arg3, (s32) func_1000EE70, arg1, (s32) arg1->unique_id, 0, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010630.s")
+#endif
 // void func_10010630(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4) {
 //     if (arg1->interaction_state != 0) {
 //         if (arg1->camera != 0) {

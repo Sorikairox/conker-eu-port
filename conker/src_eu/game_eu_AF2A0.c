@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+extern s32 D_8008704C;
+void func_15036F60(u8 *arg0);
+#endif
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x1C9];
@@ -153,8 +157,50 @@ block_7:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083D54.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E20.s")
+#ifdef NON_MATCHING
+/* Copy an object's per-type parameters from its type record D_800D1C90[type] (P15, hand C). */
+void func_15083E20(u8 *arg0, u16 type, u8 *arg2) {
+    u8 *t;
 
+    if (type == 0xFF) {
+        return;
+    }
+    t = (u8 *)D_800D1C90[type];
+    if (arg2 != NULL) {
+        u16 v = *(u16 *)(arg2 + 0x2C);
+
+        if (v == 0) {
+            *(u16 *)(arg0 + 0x10) = *(u16 *)(t + 0x2A);
+        } else if (v == 1) {
+            *(u16 *)(arg0 + 0x10) = 0;
+        } else {
+            *(u16 *)(arg0 + 0x10) = v;
+        }
+        if (D_800BE9F0 == 0x1D) {
+            *(u16 *)(arg0 + 0x10) = 1000;
+        }
+    } else {
+        *(u16 *)(arg0 + 0x10) = 0;
+    }
+    arg0[0x13B] = t[0x39];
+    *(s8 *)(arg0 + 0x2CB) = *(s8 *)(t + 0x33);
+    *(s32 *)(arg0 + 0x2CC) = *(s32 *)(t + 0x34);
+    arg0[5] = t[0x12];
+    arg0[0x68] = t[0x3B];
+    arg0[0x69] = t[0x3C];
+    *(s16 *)(arg0 + 0x160) = *(s16 *)(t + 2);
+    if (t[4] != 0) {
+        *(s32 *)(arg0 + 0x2C4) = (&D_8008704C)[t[5]];
+        arg0[0x2C8] = t[4];
+    }
+    arg0[0x2C9] = arg0[0x2C8] + t[0x38];
+    if (t[0x29] != 0) {
+        func_15036F60(arg0);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E20.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083F30.s")
 
 s32 func_15084208(void) {
@@ -179,8 +225,56 @@ s32 func_15084208(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E0C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E90.s")
+#ifdef NON_MATCHING
+extern u8 D_800CC72B;
+extern struct127 D_800CCA1C;
 
+struct127 *func_15083E90(u8 arg0) {
+    s32 temp_t6;
+    s32 var_a0;
+    struct127 *temp_v1;
+    struct127 *temp_v1_2;
+    struct127 *temp_v1_3;
+    struct127 *var_v1;
+
+    temp_t6 = arg0 & 0xFF;
+    if (temp_t6 == 0) {
+        return NULL;
+    }
+    if ((D_800CC2D0->interaction_state != 0) && (temp_t6 == D_800CC72B)) {
+        return D_800CC2D0;
+    }
+    var_a0 = 2;
+    if ((D_800CCA1C.interaction_state != 0) && (temp_t6 == D_800CCA1C.unique_id)) {
+        return &D_800CCA1C;
+    }
+    var_v1 = ((struct127 *)((u8 *)&D_800CCA1C + 0x32C));
+loop_9:
+    if ((var_v1->interaction_state != 0) && (temp_t6 == var_v1->unique_id)) {
+        return var_v1;
+    }
+    temp_v1_3 = ((struct127 *)((u8 *)var_v1 + 0x32C));
+    if ((var_v1[1].interaction_state != 0) && (temp_t6 == temp_v1_3->unique_id)) {
+        return temp_v1_3;
+    }
+    temp_v1_2 = ((struct127 *)((u8 *)temp_v1_3 + 0x32C));
+    if ((temp_v1_3[1].interaction_state != 0) && (temp_t6 == temp_v1_2->unique_id)) {
+        return temp_v1_2;
+    }
+    temp_v1 = ((struct127 *)((u8 *)temp_v1_2 + 0x32C));
+    var_a0 += 4;
+    if ((temp_v1_2[1].interaction_state != 0) && (temp_t6 == temp_v1->unique_id)) {
+        return temp_v1;
+    }
+    var_v1 = ((struct127 *)((u8 *)temp_v1 + 0x32C));
+    if (var_a0 == 0x1A) {
+        return NULL;
+    }
+    goto loop_9;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E90.s")
+#endif
 s32 func_15083FB0(u8 arg0) {
     struct127 *p = func_15083E90(arg0);
 
@@ -284,8 +378,70 @@ u8 func_15084E34(struct_eu_AF2A0 *arg0, s32 *arg1) {
     return arg0->unk2C4[temp_v1];
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E80.s")
+#ifdef NON_MATCHING
+/* Per-frame countdown of the 187 resource slots (P15, hand C from the asm). D_800D2040 holds one
+ * byte timer per slot (0 = idle, 0xFF = pinned). When a timer reaches 1 and the slot owns a block
+ * (D_800D19A0[i]) that is not locked (D_800C5C08[i] == 0), the block is released: object references to
+ * it (struct127 words 0x28C.., two per entry, unk2C9 entries) are cleared, objects whose entry list
+ * (unk2C4) names slot i are notified through func_15084814, the slot's 12-byte records
+ * (D_800C5758[i], D_800C5A48[i] of them) free their texture through func_1510DCA0, then the block
+ * (minus its 0x38-byte header) goes back to the allocator. */
+void func_1510DCA0(s32);
+extern u16 D_800C5A48[];         /* record count per slot */
+extern u8 *D_800C5758[];         /* 12-byte records per slot */
+void func_15084E80(void) {
+    u8 *timers = (u8 *)D_800D2040;
+    s32 *blocks = &D_800D19A0;
+    u16 *counts = D_800C5A48;
+    u8 **records = D_800C5758;
+    s32 i;
 
+    for (i = 0; i != 187; i++) {
+        u8 t = timers[i];
+
+        if (t == 0xFF || t == 0) {
+            continue;
+        }
+        if (t == 1 && blocks[i] != 0 && D_800C5C08[i] == 0) {
+            struct127 *obj;
+            u8 *rec;
+            s32 j;
+
+            for (obj = D_800CC2D0; (u32)obj < (u32)&D_800D121C; obj++) {
+                if (obj->interaction_state == 0) {
+                    continue;
+                }
+                for (j = 0; j < obj->unk2C9; j++) {
+                    s32 *ref = &obj->unk28C + j * 2;
+
+                    if (ref[0] == blocks[i]) {
+                        ref[0] = 0;
+                    }
+                    if (ref[1] == blocks[i]) {
+                        ref[1] = 0;
+                    }
+                    if (((u8 *)obj->unk2C4)[j] == i) {
+                        func_15084814(obj, j);
+                    }
+                }
+            }
+            rec = records[i];
+            for (j = 0; j < counts[i]; j++, rec += 0xC) {
+                if (*(u32 *)rec >= 0x10000000U) {
+                    func_1510DCA0(*(s32 *)(rec + 4));
+                }
+            }
+            func_10004074(blocks[i] - 0x38);
+            ((u8 *)D_800D1F80)[i] = 0;
+            blocks[i] = 0;
+            t = timers[i];
+        }
+        timers[i] = t - 1;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15084E80.s")
+#endif
 void func_15085098(u8 *arg0) {
     u8 *p;
     f32 r;

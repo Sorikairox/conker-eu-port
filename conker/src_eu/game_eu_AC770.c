@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1508039C(u8 *arg0);
+#endif
 
 
 void func_1507EF60(u8 *arg0, s32 *arg1, u8 arg2) {
@@ -143,8 +146,52 @@ void func_1507F92C(struct127 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_1508000C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150802A8.s")
+#ifdef NON_MATCHING
+void func_1508000C(struct127 *);
 
+void func_150802A8(struct127 *arg0) {
+    s16 temp_v0_2;
+    struct126 *temp_a1;
+    struct126 *temp_a1_3;
+    u16 temp_a1_2;
+    u8 *temp_v0;
+    u8 temp_v1;
+
+    temp_a1 = arg0->unk31C;
+    if ((temp_a1 != NULL) && (arg0->unk127 != 0xFF)) {
+        temp_v1 = arg0->unk13A;
+        temp_v0 = &temp_a1->unk58;
+        if (temp_v1 != 0) {
+            arg0->unk13A = temp_v1 - 1;
+        }
+        if (((*(u8 *)((u8 *)temp_v0 + 0)) == 1) && (D_800C35EA != 1)) {
+            temp_a1_2 = (*(u16 *)((u8 *)temp_v0 + 2));
+            if ((s32) temp_a1_2 < (0xFFFF - D_800BE9E4)) {
+                (*(u16 *)((u8 *)temp_v0 + 2)) = (u16) (temp_a1_2 + D_800BE9E4);
+            }
+        } else {
+            (*(u16 *)((u8 *)temp_v0 + 2)) = 0U;
+            (*(s8 *)((u8 *)temp_v0 + 4)) = 0;
+            (*(s8 *)((u8 *)temp_v0 + 5)) = 0;
+            (*(s8 *)((u8 *)temp_v0 + 0xC)) = 0;
+            (*(s8 *)((u8 *)temp_v0 + 0xD)) = 0;
+        }
+        temp_a1_3 = arg0->unk31C;
+        temp_v0_2 = (s16) temp_a1_3->unk66;
+        if (temp_v0_2 != 0) {
+            if (D_800BE9E4 < temp_v0_2) {
+                temp_a1_3->unk66 = temp_v0_2 - D_800BE9E4;
+            } else {
+                func_1508039C((u8 *) arg0);
+                arg0->unk31C->unk66 = 0;
+            }
+        }
+        func_1508000C(arg0);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150802A8.s")
+#endif
 void func_1508039C(u8 *arg0)
 {
   u8 *sp20[2];

@@ -175,8 +175,67 @@ void func_1502ED88(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     (*(u8 *)((u8 *)arg0 + 0xA4)) = 6U;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EDEC.s")
+#ifdef NON_MATCHING
+void func_1502EDEC(struct127 *arg0) {
+    s32 temp_lo;
+    s32 temp_lo_2;
+    s32 temp_lo_3;
+    s32 temp_t1;
+    u8 temp_t6;
+    u8 temp_v1;
+    u8 temp_v1_2;
+    u8 temp_v1_3;
+    u8 temp_v1_4;
 
+    temp_t6 = arg0->unkA4;
+    switch (temp_t6) {
+    case 2:
+    case 3:
+        temp_v1 = arg0->unkA5;
+        temp_lo = arg0->unkA6 * D_800BE9E4;
+        if (temp_lo < (s32) temp_v1) {
+            arg0->unkA5 = temp_v1 - temp_lo;
+            return;
+        }
+        arg0->unkA5 = 0;
+        return;
+    case 5:
+        temp_v1_2 = arg0->unkA7;
+        temp_t1 = D_800BE9E4 * 0xA;
+        if (temp_t1 < (s32) temp_v1_2) {
+            arg0->unkA7 = temp_v1_2 - temp_t1;
+        } else {
+            arg0->unkA4 = 0;
+        }
+        /* fallthrough */
+    case 4:
+        arg0->unkA5 += arg0->unkA6 * D_800BE9E4;
+        return;
+    case 6:
+        temp_v1_3 = arg0->unkA5;
+        temp_lo_2 = arg0->unkA6 * D_800BE9E4;
+        if ((s32) temp_v1_3 < (0xFF - temp_lo_2)) {
+            arg0->unkA5 = temp_v1_3 + temp_lo_2;
+        } else {
+            arg0->unkA5 = 0xFF;
+        }
+        arg0->unkA4 = 7;
+        return;
+    case 7:
+        temp_v1_4 = arg0->unkA5;
+        temp_lo_3 = arg0->unkA6 * D_800BE9E4;
+        if (temp_lo_3 < (s32) temp_v1_4) {
+            arg0->unkA5 = temp_v1_4 - temp_lo_3;
+            return;
+        }
+        arg0->unkA4 = 0;
+    default:
+        return;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EDEC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EF24.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F17C.s")

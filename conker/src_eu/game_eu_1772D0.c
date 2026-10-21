@@ -252,8 +252,44 @@ s32 func_1514AA5C(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514AA5C.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514AB04.s")
+#ifdef NON_MATCHING
+s32 func_1514AB04(u8 *arg0) {
+    f32 sp4;
+    f32 temp_f0;
+    f32 temp_f0_2;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f2;
+    f32 temp_f6;
 
+    temp_f0 = (*(f32 *)((u8 *)arg0 + 0x140));
+    (*(f32 *)((u8 *)arg0 + 0x130)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x130)) * temp_f0);
+    (*(f32 *)((u8 *)arg0 + 0x134)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x134)) + ((*(f32 *)((u8 *)arg0 + 0x13C)) * D_800BE9A4));
+    (*(f32 *)((u8 *)arg0 + 0x138)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x138)) * temp_f0);
+    temp_f12 = (*(f32 *)((u8 *)arg0 + 0x130)) * D_800BE9A4;
+    temp_f14 = (*(f32 *)((u8 *)arg0 + 0x134)) * D_800BE9A4;
+    temp_f16 = (*(f32 *)((u8 *)arg0 + 0x138)) * D_800BE9A4;
+    (*(f32 *)((u8 *)arg0 + 0x34)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x34)) + temp_f12);
+    (*(f32 *)((u8 *)arg0 + 0x38)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x38)) + temp_f14);
+    (*(f32 *)((u8 *)arg0 + 0x3C)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + temp_f16);
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x40)) + temp_f12);
+    temp_f6 = (*(f32 *)((u8 *)arg0 + 0x54));
+    temp_f18 = (*(f32 *)((u8 *)arg0 + 0x34));
+    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x44)) + temp_f14);
+    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) ((*(f32 *)((u8 *)arg0 + 0x48)) + temp_f16);
+    sp4 = temp_f6;
+    temp_f0_2 = (*(f32 *)((u8 *)arg0 + 0x38));
+    temp_f2 = (*(f32 *)((u8 *)arg0 + 0x3C));
+    (*(f32 *)((u8 *)arg0 + 0x40)) = (f32) (temp_f18 + (((*(f32 *)((u8 *)arg0 + 0x40)) - temp_f18) * sp4));
+    (*(f32 *)((u8 *)arg0 + 0x44)) = (f32) (temp_f0_2 + (((*(f32 *)((u8 *)arg0 + 0x44)) - temp_f0_2) * temp_f6));
+    (*(f32 *)((u8 *)arg0 + 0x48)) = (f32) (temp_f2 + (((*(f32 *)((u8 *)arg0 + 0x48)) - temp_f2) * sp4));
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514AB04.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514AC10.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514B0CC.s")

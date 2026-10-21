@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_1507E7E4(struct127 *, u8, u8, u16, s32);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506AD30.s")
@@ -87,7 +90,49 @@ void func_1506B370(void) {
 void func_1506B3B0(void) {
 }
 
+#ifdef NON_MATCHING
+extern u8 D_80099DFE;
+extern u8 D_80099E03;
+
+void func_1506B3B8(void) {
+    u8 sp19;
+    s16 temp_t0;
+    s32 temp_a3;
+    s32 temp_v1;
+    s32 var_a0_2;
+    s32 var_a2;
+    u8 var_a0;
+
+    sp19 = 0;
+    var_a0 = sp19;
+    temp_t0 = (D_800D154C->unk7A + (D_800D154C->unk1FD << 8)) - func_1505A630(D_800CC2D0->x_position - D_800D154C->x_position, D_800D154C->z_position - D_800CC2D0->z_position, 0);
+    temp_v1 = temp_t0 >> 8;
+    temp_a3 = temp_v1 & 0xFF;
+    var_a2 = temp_v1 & 0xFF;
+    if (temp_a3 & 0x80) {
+        var_a2 = -temp_a3 & 0xFF;
+    }
+    if (var_a2 < (s32) D_80099DFC[0][0]) {
+        var_a0_2 = 1;
+    } else {
+        if ((s32) D_80099E03 < var_a2) {
+            var_a0 = 5;
+        } else if ((s32) D_80099DFE < var_a2) {
+            var_a0 = 2;
+        }
+        if (temp_t0 < 0) {
+            var_a0_2 = (var_a0 + 4) & 0xFF;
+        } else {
+            var_a0_2 = (var_a0 + 3) & 0xFF;
+        }
+    }
+    D_800D154C->unk138 = 0;
+    D_800D154C->unk244 = (s16) (*D_80099DFC)[var_a0_2];
+    D_800D154C->unk21C = 0x4E20;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506B3B8.s")
+#endif
 // NON-MATCHING: 5% there...
 // void func_1506B3B8(void) {
 //     u8 sp19;
@@ -507,7 +552,31 @@ void func_1506D570(void) {
     D_800D154C->unk6E = 0;
 }
 
+#ifdef NON_MATCHING
+/* Re-issue the current object's packed command D_800D1580 (bytes 3 and 2, low half = a duration in
+ * frames scaled by the speed at unk2D0 + 0x10, 0xFFFF = none) through func_1507E7E4, unless the object
+ * is in state 0x2A (P15, hand C). The asm returns junk (a %hi) on the early path, so this is void. */
+void func_1506D584(void) {
+    struct127 *obj = D_800D154C;
+    f32 speed;
+    u16 t;
+
+    if (obj->unk70 == 0x2A) {
+        return;
+    }
+    speed = *(f32 *)((u8 *)obj->unk2D0 + 0x10);
+    if (speed == 0.0f) {
+        speed = D_8009A108;
+    }
+    t = D_800D1580 & 0xFFFF;
+    if (t != 0xFFFF) {
+        t = (u32)(t / speed);
+    }
+    func_1507E7E4(obj, D_800D1580 >> 24, D_800D1580 >> 16, t, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D584.s")
+#endif
 // ???
 void func_1506D6B4(void) {
     s32 var_v0;
