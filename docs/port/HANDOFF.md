@@ -20,6 +20,29 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   world-object matrices). Frame DL: func_15110948 (default camera callback), func_1517485C (occlusion probes).
 - difftest: `DIFFTEST_EXACT='*'` (known prototypes are exact); `proto_arity` ignores commented-out drafts.
 
+## Next steps (from P43)
+
+Port-b owns game_14FF90.c, game_eu_B2980.c, game_32740.c, the shadow chain, and the player movement files
+game_eu_78230.c (func_1504CB98, func_1504ADD0), game_eu_CE6C0.c (func_150A16A4), game_83300.c (func_15056B08).
+1. When port-b merges: game_14FF90.c's func_15127FEC calls `func_1512A390();` with no argument (wasm trap now that
+   func_1512A390 is C); it must pass arg0.
+2. func_15180AF0 (convert: NODRAFT this time; P38's m2c draft in `port_work/p38/m2c/`), func_15041A9C (boot text,
+   raw draft `port_work/p38/m2c/raw/`), the rest of P32's list (all CERR in `port_work/p43e/`: func_151E7110,
+   func_1501B300, func_151143D4, ...).
+Runtime checks: P43.md UNVERIFIED (D_80088838 handler types for the now-variadic func_1509BE40, func_1509CBD8 is void).
+
+## State (session P43, 2026-10-22). Details: `docs/port/sessions/P43.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (798 bodies).
+- progress_nm: C coverage including NON_MATCHING **4792/5915 (81.0%)** (P40: 4784), bytes 50.0% → **50.3%**;
+  init 489/538, game 4264/5334, debugger 39/43; **1123 asm-only** (157 under 60 insns).
+- **Level lighting:** func_1515E7E8 (the start colour `col` of func_1515DE84; the level was black / stack-coloured
+  without it). func_1515E9AC was already C; game_eu_18B1C0 is all C under NM.
+- Frame DL: func_1502CC64 (object draw), func_15196560 (texture scroll). Level load: func_15017B20 (zone overlap masks).
+- Camera: func_1512E6B0 (eye height), func_1512A390 (eye base / floor clamp), func_1512C6C0 (top stub by hits).
+- func_1509BE40 is a real variadic function under NM; every caller's NM prototype is `s32 func_1509BE40(s32, s32, ...)`.
+- difftest: `DIFFTEST_ARGMEM` accepts stack arguments (N >= 4).
+
 ## Next steps (from P40)
 
 Browser priorities (P39, sent during P40): the camera chain (func_150858A0 / func_150851E0, func_15005818,

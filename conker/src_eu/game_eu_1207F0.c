@@ -122,7 +122,7 @@ f32 func_150F3A20(s32 arg0, f32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3A74.s")
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, s32, s32);
+s32 func_1509BE40(s32, s32, ...);
 
 void func_150F4970(struct108 *arg0) {
     s32 temp_t0;

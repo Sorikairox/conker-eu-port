@@ -208,7 +208,7 @@ void func_1509BA04(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BA04.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, s32);
+s32 func_1509BE40(s32, s32, ...);
 s32 func_150ADFD0(struct249 *, s32);
 extern s16 D_800BEE12;
 extern s32 D_800D3268;
@@ -296,7 +296,39 @@ block_26:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BBA0.s")
 #endif
 //
+#ifdef NON_MATCHING
+#include <stdarg.h>
+extern s32 D_800D3380[];
+extern s32 D_800D3C60;
+extern s32 (*D_80088838[])(s32, s32, s32 *);
+
+/* P43: variadic event dispatch. func_1509BE40(n, id, arg, x1 .. xn): D_800D3380 = {id & 0xFFF, arg, x1 .. xn},
+ * D_800D3C60 = n + 2 during the call (restored after), returns D_80088838[(id >> 12 & 0xF) - 1](id & 0xFFF, arg,
+ * D_800D3380). Callers pass 3 to 8 words; every caller's NON_MATCHING prototype is now `(s32, s32, ...)`. */
+s32 func_1509BE40(s32 n, s32 id, ...) {
+    va_list ap;
+    s32 saved;
+    s32 arg;
+    s32 i;
+    s32 r;
+
+    va_start(ap, id);
+    saved = D_800D3C60;
+    arg = va_arg(ap, s32);
+    D_800D3380[0] = id & 0xFFF;
+    D_800D3380[1] = arg;
+    for (i = 0; i < n; i++) {
+        D_800D3380[i + 2] = va_arg(ap, s32);
+    }
+    va_end(ap);
+    D_800D3C60 = n + 2;
+    r = D_80088838[((id & 0xF000) >> 12) - 1](id & 0xFFF, arg, D_800D3380);
+    D_800D3C60 = saved;
+    return r;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BE40.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509BFB0.s")
 

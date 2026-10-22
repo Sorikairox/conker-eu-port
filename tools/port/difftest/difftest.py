@@ -494,6 +494,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
 
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
+# N >= 4 (P43): the stack argument at sp+0x10+4*(N-4).
 ARGMEM = {}
 for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     _a, _v = _p.split('=')
@@ -803,7 +804,8 @@ class Run:
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
             for _n, _l in ARGMEM[addr & 0x1FFFFFFF]:
-                try: am.append(bytes(mu.mem_read(phys(regs[_n]), _l)).hex())
+                # P43: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
+                try: am.append(bytes(mu.mem_read(phys(regs[_n] if _n < 4 else stkw[_n - 4]), _l)).hex())
                 except Exception: am.append('unmapped')
             self.calls[-1]['argmem'] = am
         self.pending = len(self.calls) - 1

@@ -3,7 +3,11 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+#else
 s32 func_1509BE40(s32, s32, s32, s32);
+#endif
 
 void func_151039B0(u8 *arg0) {
     s32 temp_t6;

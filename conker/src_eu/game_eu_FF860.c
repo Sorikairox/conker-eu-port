@@ -11,7 +11,11 @@ void func_150D2050(s32 arg0) {
     func_1515D4D4(*sp28, ((u8 *)&D_800DCD20)[1], ((u8 *)&D_800DCD20)[2], 0);
 }
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+#else
 s32 func_1509BE40(s32, s32, s32, s32);
+#endif
 
 void func_150D20E0(u8 *arg0) {
     if (func_1509BE40(1, 0x402C, 6, 0x2000) != 0) {

@@ -295,7 +295,7 @@ s8 func_151E5DF8(void);
 void func_1510DC14(s32);
 u8 *func_1509B570(s32);
 u8 *func_151EB5AC(u8 *, s32, s32, s32);
-s32 func_1509BE40(s32, s32, s32);
+s32 func_1509BE40(s32, s32, ...);
 u8 * func_151E9150(u8 *, s32, s32);
 u8 * func_151EA90C(Gfx *, s32, s16, s32);
 s32 func_151EE0C4(s32, s32, s32, f32);

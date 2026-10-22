@@ -211,7 +211,80 @@ void func_1502C8F8(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C9D8.s")
 
+#ifdef NON_MATCHING
+s32 func_15022A8C(struct127 *);
+void func_1502C9D8(s32, s16, s32);
+void func_1502D920(u8 *, s32 *, s32);
+u8 func_15084E34(struct127 *, s32 *);
+Gfx *func_1502CFEC(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
+void func_1502D83C(s32 arg0, u8 *arg1);
+extern u8 D_800C3A7A;
+extern s32 D_800BEFC4;
+extern s32 D_800DFBF0;
+extern u8 D_800DFBF4;
+
+/* P43: one object of the frame DL (object arg1, part arg2, mode arg3). Skipped (returns gdl) when the object is
+ * culled, part bit arg2 of +0x74 is set, func_1506196C(obj, part) == 0 or +0x1D4 == NULL. Colour block col[6]
+ * (sp40): func_1502D83C fills it, func_1502D920 adjusts it when D_800B0DF0->+0x3E != 0 (else col[3] = 0xFF);
+ * col[5] = +0x1C8 (func_1502C9D8 path) or from func_15084E34 (modes 3 / 4 / 5). Alpha = func_1506196C, 0xFF when the
+ * object's camera record is in mode 0x100 and the part is not +0x127; mode 4 scales it by D_800DFBF4 and draws
+ * D_800DFBF0 instead of +0x1D4. The DL from func_1502CFEC is dropped (gdl returned) when it overflows
+ * D_800BEFC4 commands of the frame buffer D_800BEDE8[D_800BE9C0]. */
+u8 *func_1502CC64(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
+    s32 col[6];   /* sp40 */
+    s32 model;    /* sp38 */
+    u8 *rec;
+    u8 *cam;
+    s32 alpha;
+    u8 *r;
+
+    if (D_800C3638 != 0 && D_800C3A7A == 0 && func_15022A8C(&D_800CC2D0[arg1]) == 0) {
+        return gdl;
+    }
+    rec = (u8 *)&D_800CC2D0[arg1];
+    if ((rec[0x74] & (1 << arg2)) == (1 << arg2)) {
+        return gdl;
+    }
+    if (func_1506196C((struct127 *)rec, arg2) == 0) {
+        return gdl;
+    }
+    if (*(s32 *)(rec + 0x1D4) == 0) {
+        return gdl;
+    }
+    if (arg3 != 4 && arg3 != 5 && arg3 != 3) {
+        func_1502C9D8(arg1, arg2, arg3);
+        col[5] = rec[0x1C8];
+    } else {
+        func_15084E34((struct127 *)rec, &col[5]);
+    }
+    func_1502D83C(arg1, (u8 *)col);
+    if (*(s16 *)((u8 *)D_800B0DF0 + 0x3E) != 0) {
+        func_1502D920(rec, col, arg2);
+    } else {
+        col[3] = 0xFF;
+    }
+    alpha = func_1506196C((struct127 *)rec, arg2);
+    if (alpha < 0xFF) {
+        cam = *(u8 **)(rec + 0x318);
+        if (cam != NULL && *(s32 *)(cam + 0x2C) == 0x100 && arg2 != rec[0x127]) {
+            alpha = 0xFF;
+        }
+    }
+    if (arg3 == 4) {
+        model = D_800DFBF0;
+        alpha = (s32)(D_800DFBF4 * (u32)alpha) >> 8;
+    } else {
+        model = *(s32 *)(rec + 0x1D4);
+    }
+    r = (u8 *)func_1502CFEC((Gfx *)gdl, arg1, arg2, model, alpha, col, arg3, arg4);
+    if (D_800BEFC4 < (s32)((u32)r - (u32)D_800BEDE8[D_800BE9C0]) >> 3) {
+        return gdl;
+    }
+    return r;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CC64.s")
+#endif
 
 s32 func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
 
