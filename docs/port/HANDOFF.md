@@ -2265,6 +2265,29 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
   - **func_150D1D20 gate.** func_15110420 calls `D_80089578[header +8]` (mode 2 = func_150D1D20) only when
     func_15110E44 ≠ 0. For level 0, that is 0 when player y < 1600 and the camera angle > 26. After the 0x2C round
     trip the angle is 27-47 (before: 13-18), so this is game logic, not a stub effect (`?p78sky`).
+- **P79 (tooling only; arity scanner).** Full notes: P79.md.
+  - **`tools/port/arity_scan.py`** compares the C call sites (pre-sigs IR in `port/build/ll`) with the EU ELF asm
+    (objdump in the container, cached in `port/build/arity/`). It looks at a0..a3 / stack-arg liveness at each `jal` /
+    `jalr`, the asm live-in of the callees, and the function-pointer tables read from the ELF data. It writes
+    `docs/port/arity_scan.tsv`. The method and the columns are in the docstring.
+  - Results on port-web at a09d170 (D1 / D2 / D3 / I are defined in P79.md):
+
+    | kind | rows | severity > 0 |
+    |---|---|---|
+    | D1 | 21 | 12 |
+    | D2 | 6 | 6 |
+    | D3 | 8 | 8 |
+    | I | 106 | 54 |
+
+    The rows are ranked by severity, then by browser-log / reachability tier.
+  - It finds the three known cases:
+    - func_1501396C `D_80082ECC[idx]()` (rank 2);
+    - func_1503482C `func_1503BCAC()` (rank 4);
+    - func_15059C84 → func_15049350 1 < 9 (rank 17).
+
+    All 18 sites of P75's `missing_args.txt` are D1 rows.
+  - It is a may-analysis: check each row's asm (`asm_regs` column: W = written, E = caller's entry value) before
+    fixing. Rerun it after every merge.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
