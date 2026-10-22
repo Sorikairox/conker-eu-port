@@ -919,14 +919,15 @@ typedef struct {
     u8  unk14;
     u8  pad15;
     u8  unk16;
-    u8  pad17[0xF];
+    u8  pad17[0xF]; // +0x17 / +0x1A flags (pad17[0] / pad17[3]), +0x21 .. +0x23 timers
     s8  unk26;
     u8  unk27;
     s32 unk28;
     s32 unk2C;
     u8  unk30;
     u8  unk31;
-    u8  pad32[0x4];
+    u16 unk32;
+    u8  pad34[0x2];
     u8  unk36;
     u8  pad37;
     s32 unk38;
@@ -946,7 +947,10 @@ typedef struct {
     u8  unk57;
     u8  unk58;   // used
     u8  unk59;   // used
-    u8  pad5A[0xC];
+    s16 unk5A;
+    u8  unk5C;
+    u8  unk5D;
+    u8  pad5E[0x8];
     u16 unk66;
     u8  pad68[0x3];
     u8  unk6B;
@@ -1006,6 +1010,8 @@ typedef struct {
     u8  unk1A8;
     u8  unk1A9;
     s16 unk1AA;
+    u8  pad1AC[0x6];
+    u8  unk1B2;
 } struct126;
 
 typedef struct {
@@ -3118,7 +3124,7 @@ typedef struct {
 } struct_eu_1897A0_b;
 // animation state hanging off struct127.unk2D0 (game_83300); two 0x1D0 blocks
 typedef struct {
-    u8  pad0[0x4];
+    s32 unk0;   // end-of-animation callback (D_800866AC[entry +2])
     u16 unk4;
     u16 unk6;
     f32 unk8;
@@ -3135,7 +3141,9 @@ typedef struct {
     s32 unk34;
     s8  unk38;
     s8  unk39;
-    u8  pad3A[0x6];
+    s16 unk3A;  // blend step (500 / blend frames)
+    s16 unk3C;  // blend countdown
+    u8  pad3E[0x2];
     u8  unk40[0x1D0];
     u8  unk210[0x1D0];
 } struct_eu_anim; // size 0x3E0
