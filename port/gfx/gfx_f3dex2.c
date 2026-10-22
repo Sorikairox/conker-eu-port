@@ -1019,6 +1019,7 @@ void gfx_run_dl(const void *dl) {
             unsigned where = w0 >> 16 & 0xFF;
             if (where == 0x10) { v->r = (w1 >> 24) / 255.0f; v->g = (w1 >> 16 & 255) / 255.0f; v->b = (w1 >> 8 & 255) / 255.0f; v->a = (w1 & 255) / 255.0f; }
             else if (where == 0x14) { v->s = (short)(w1 >> 16) / 32.0f; v->t = (short)w1 / 32.0f; }
+            if (p78_on) port_log("[p78vtx] G_MODIFYVTX %08X %08X: vertex %u where %02X\n", w0, w1, (w0 & 0xFFFF) / 2, where); /* P88 */
             break;
         }
         case 0x03: {                                          /* G_CULLDL (P35) */

@@ -2540,3 +2540,18 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
   - With both measures the game runs (heap 0 errors, null zone clean), but level 0 is entered at frame ~950 and the view then freezes: no Conker, no respawn / 0x2C warp.
   - The sky shows as a solid green quad. Look points = 8, but there is no head target. The dark overlay was not seen in 3 walks (inconclusive).
   - **Next:** port branch converts func_1501CE34 (+ func_1501ECA4 / func_15020F6C) and func_151DDF6C, then remove both P84 TEMPORARY measures. Then redo the respawn / 0x2C / callback-5 / overlay checks.
+- **P88 (merge port-b e3312cf P83 and port 6484e09 P85 + checks).** Full notes: P88.md.
+  - Merges f6887a5 (HANDOFF union only) and 077e609 (no conflicts).
+    - verify_all OK, NM links, protocheck 951 / 0, clean port rebuild.
+  - **P84 measures dropped:** the PC func_151DDF6C (language 0, no out-of-ROM DMA) and the func_1501E364 length guard (scene length is now 250).
+  - **New TEMPORARY guards (p84_checks.c, Makefile wraps):**
+    - func_1501E888 (scene end) is a stub, so func_1501E364 looped at the scene end. The wrap writes state 0 and D_800C3638 = 0 (`?p88noguard`).
+    - func_1501ECA4 (scene step) is a stub, so the C func_150225D0 / func_15021834 copied uninitialised D_800C3958 blocks into the player (y = -7.69e11). That caused an endless respawn loop. The func_1501D348 wrap restores the records it moved (`?p88noactor`).
+  - **Playable again:** respawn, then the 250-frame scene, then walk, the 0x2C warp and back. Node and 2 Chrome walks; heap 0 errors.
+    - The callback-5 prop is now removed.
+    - No dark overlay in 3 walks.
+    - Head target still -99999.
+    - The sky gradient shows; the green part is the clamped tile (t 290..665 vs tile 256..511), so no renderer fix.
+  - Null-zone writes (+0xB8 / +0xF8) by C func_1507342C from the NULL returned by the stub func_15073118.
+  - Arity: 111 rows / 56 with severity > 0.
+  - **Next:** port-b converts func_1501ECA4 + func_15020F6C + func_1501E888 (with func_15022C4C / func_15020430 / func_1501DB18 / func_1501D044) together. Then remove both P88 guards and recheck the respawn / scene. Then func_15073118 and func_151552F0.
