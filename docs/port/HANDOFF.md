@@ -18,7 +18,7 @@ Branch `port-b` (from P68 2f9d323); the orchestrator merges it into `port`.
 - **difftest bug fixed**: for an NM block holding more than one function (func_1501B300 + func_1501B640) the candidate
   was put in the dropped `#else` side, so the src_eu body was tested instead (all mutants "survived"). `build_tu` now
   replaces the definition on the NM side and errors out if the candidate is missing from the TU. Selftest case added
-  (28/28). func_1501B300's rate mutants are now killed. Same layout: func_150183D0/184B0, func_1507F3B0/F834.
+  (28/28). func_1501B300's rate mutants are now killed (11/15 overall, survivors boundary / equivalent). Same layout: func_150183D0/184B0, func_1507F3B0/F834.
 - P67 setups (func_1505C7D8, func_150D5F7C, func_1507E7E4, func_150453BC, func_150D71D4) already used EU addresses
   (`port_work/p73/knobcheck.py`); re-run: all EQUIV.
 - func_1512C080 full mutant run: 27/31 killed; 4 survivors (+0x23E / +0x2B0 / mode 0x100 / floor boundary) UNVERIFIED.
