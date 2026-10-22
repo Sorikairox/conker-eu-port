@@ -6,7 +6,7 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10E600/func_150E0DF0.s")
 
 #ifdef NON_MATCHING
-s32 func_15021834(struct127 *, s32, s32);
+void func_15021834(struct127 *, s32, s32);
 s32 func_150535F4(struct127 *);
 void func_15056B08(struct127 *);
 s32 func_150585F0(struct127 *, s32);

@@ -46,7 +46,7 @@ void func_150B15D0(struct127 *arg0) {
 #ifdef NON_MATCHING
 extern f32 D_8009FC8C;
 extern f32 D_8009FC90;
-s32 func_15021834(struct127 *, s32, s32);
+void func_15021834(struct127 *, s32, s32);
 void func_15056B08(struct127 *);
 
 void func_150B17DC(struct127 *arg0) {

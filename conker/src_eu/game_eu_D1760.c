@@ -5,7 +5,129 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A3F50.s")
 
+#ifdef NON_MATCHING
+/*
+ * P53: func_150A44A4.s is hand-written: the height of a floor triangle under the point (x, z), in 24.8 fixed point.
+ * The triangle is either 3 vertex pointers (tri, when packed == NULL) or 9 inline s16 (packed: x, y, z per vertex;
+ * all-zero first or second 8 bytes = no triangle). The vertices are sorted by z, the two edges crossing z = pz give
+ * the x / y span, and the result is clamped to the triangle's y range. Returns `out` (as an s32) on a hit, else 0.
+ * The asm keeps s5-s7 / fp in f1-f4 while it uses them; integer products wrap (mult / mflo), and a zero x span (a
+ * point exactly on a vertical edge) divides by zero on the VR4300 without effect on the result.
+ */
+#define A44A4_RINT(f)                                                                                \
+    (((f) >= 8388608.0f || (f) <= -8388608.0f) ? (s32)(f)                                            \
+     : ((f) >= 0.0f) ? (s32)(((f) + 8388608.0f) - 8388608.0f)                                       \
+                     : -(s32)((-(f) + 8388608.0f) - 8388608.0f))
+#define A44A4_MUL(a, b) ((s32)((u32)(a) * (u32)(b)))
+#define A44A4_SHL8(a) ((s32)((u32)(a) << 8))
+
+static s32 a44a4_div(s32 a, s32 b) {
+    if (b == 0) return (a < 0) ? 1 : -1; /* VR4300 lo for a zero divisor */
+    if (b == -1) return (s32)(0u - (u32)a);
+    return a / b;
+}
+
+s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out) {
+    s32 px, pz;
+    s32 ax, ay, az, bx, by, bz, cx, cy, cz, t;
+    s32 dz1, rz1, dz2, rz2, rzb, k, x1, x2, sx, ex, sy, ey, d1, d2, s, ymax, ymin, y1, y2, v;
+    s16 **vp;
+    s32 i;
+
+    px = A44A4_RINT(x);
+    pz = A44A4_RINT(z);
+    if (packed == NULL) {
+        vp = (s16 **)tri;
+        ax = vp[0][0]; ay = vp[0][1]; az = vp[0][2];
+        bx = vp[1][0]; by = vp[1][1]; bz = vp[1][2];
+        cx = vp[2][0]; cy = vp[2][1]; cz = vp[2][2];
+    } else {
+        for (i = 0; i < 8; i++) {
+            if (packed[i] != 0) break;
+        }
+        if (i == 8) return 0;
+        for (i = 8; i < 16; i++) {
+            if (packed[i] != 0) break;
+        }
+        if (i == 16) return 0;
+        ax = ((s16 *)packed)[0]; ay = ((s16 *)packed)[1]; az = ((s16 *)packed)[2];
+        bx = ((s16 *)packed)[3]; by = ((s16 *)packed)[4]; bz = ((s16 *)packed)[5];
+        cx = ((s16 *)packed)[6]; cy = ((s16 *)packed)[7]; cz = ((s16 *)packed)[8];
+    }
+    /* A = the lowest z */
+    if (az < bz ? (cz < az) : !(bz < cz)) {
+        t = ax; ax = cx; cx = t;
+        t = ay; ay = cy; cy = t;
+        t = az; az = cz; cz = t;
+    } else if (!(az < bz)) {
+        t = ax; ax = bx; bx = t;
+        t = ay; ay = by; by = t;
+        t = az; az = bz; bz = t;
+    }
+    if (pz < az) return 0;
+    /* C = the highest z */
+    if (cz < bz) {
+        t = bx; bx = cx; cx = t;
+        t = by; by = cy; cy = t;
+        t = bz; bz = cz; cz = t;
+    }
+    if (cz < pz) return 0;
+    /* x on the edge A-C and on A-B / B-C at z = pz */
+    dz1 = cz - az + 1;
+    k = a44a4_div(A44A4_SHL8(cx - ax), dz1);
+    rz1 = pz - az;
+    x1 = (A44A4_MUL(rz1, k) >> 8) + ax;
+    dz2 = cz - bz;
+    rzb = pz - bz;
+    rz2 = rzb;
+    ex = cx;
+    sx = bx;
+    if (rzb < 0) {
+        dz2 = bz - az;
+        rz2 = pz - az;
+        ex = bx;
+        sx = ax;
+    }
+    dz2 += 1;
+    k = a44a4_div(A44A4_SHL8(ex - sx), dz2);
+    x2 = (A44A4_MUL(rz2, k) >> 8) + sx;
+    d2 = x2 - px;
+    d1 = x1 - px;
+    s = (d2 < d1) ? 1 : -1;
+    d2 -= s;
+    d1 += s;
+    if ((d1 ^ d2) >= 0) return 0;
+    /* y range of the triangle */
+    ymax = ay;
+    if (ymax < by) ymax = by;
+    if (ymax < cy) ymax = cy;
+    ymax = A44A4_SHL8(ymax);
+    k = a44a4_div(A44A4_SHL8(cy - ay), dz1);
+    ymin = ay;
+    if (by < ymin) ymin = by;
+    if (cy < ymin) ymin = cy;
+    y1 = A44A4_SHL8(ay) + A44A4_MUL(rz1, k);
+    ey = cy;
+    sy = by;
+    if (rzb < 0) {
+        ey = by;
+        sy = ay;
+    }
+    k = a44a4_div(A44A4_SHL8(ey - sy), dz2);
+    ymin = A44A4_SHL8(ymin);
+    y2 = A44A4_MUL(rz2, k) + A44A4_SHL8(sy);
+    k = a44a4_div(A44A4_SHL8(y1 - y2), x1 - x2);
+    v = y2 + (A44A4_MUL(px - x2, k) >> 8);
+    if (ymax < v) v = ymax;
+    if (v < ymin) v = ymin;
+    *out = (1.0f / 256.0f) * (f32)v;
+    return (s32)out;
+}
+
+#pragma GLOBAL_ASM("src_eu/nm_asm/func_150A44A4_tail.s")
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A44A4.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A48C0.s")
 
