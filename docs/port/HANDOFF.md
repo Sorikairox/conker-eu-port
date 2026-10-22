@@ -13,6 +13,7 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 ## P60 (port-b) (session P60, 2026-10-22). Details: `docs/port/sessions/P60.md`
 
 Branch `port-b` (from P59 649a7fa, `port` merged in at the end); the orchestrator merges it into `port`.
+- After `git merge port` (5d0322c): full `verify_all.sh` OK (`port_work/p60/verify_merge.log`), NM links, protocheck 0 problems (850 bodies).
 
 - The default build is byte-identical (full `verify_all.sh`, `port_work/p60/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (830 bodies).
 - New hand-written NM C (no asm2c): **func_1505E0C4** (animation driver: fills anim +0x40 / +0x28 / +0x18, the
