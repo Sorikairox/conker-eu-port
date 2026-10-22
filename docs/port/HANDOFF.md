@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P73 (port-b) (session P73, 2026-10-22). Details: `docs/port/sessions/P73.md`
+
+Branch `port-b` (from P68 2f9d323); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p73/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- **difftest bug fixed**: for an NM block holding more than one function (func_1501B300 + func_1501B640) the candidate
+  was put in the dropped `#else` side, so the src_eu body was tested instead (all mutants "survived"). `build_tu` now
+  replaces the definition on the NM side and errors out if the candidate is missing from the TU. Selftest case added
+  (28/28). func_1501B300's rate mutants are now killed. Same layout: func_150183D0/184B0, func_1507F3B0/F834.
+- P67 setups (func_1505C7D8, func_150D5F7C, func_1507E7E4, func_150453BC, func_150D71D4) already used EU addresses
+  (`port_work/p73/knobcheck.py`); re-run: all EQUIV.
+- func_1512C080 full mutant run: 27/31 killed; 4 survivors (+0x23E / +0x2B0 / mode 0x100 / floor boundary) UNVERIFIED.
+- New hand-written NM C (no asm2c): **func_151BF8F0** (lives pop-up, 132 setups, mutants 20/21), **func_1501D348**
+  (scene loader, `void`, 123 setups, 27/27), **func_1509A024** (object query handler, 99-case switch, 622 setups x2,
+  44/46, survivors equivalent). func_15084000 has a one-argument NM body (wasm signature).
+- Tools: `docs/port/sessions/p73/knobs.sh` (KTMP) / `mut.sh` (own tmp dir; random phase without DIFFTEST_ARGMEM).
+  Never run a setup run and a mutant run of one function with the p68 scripts at the same time (shared tmp dir).
+
+## Next steps (from P73)
+
+1. func_1512C080 survivors: setups with +0x23E not in {2, 3}, +0x2B8 equal / +0x2B0 different, mode 0x100.
+2. Other entries of func_1509BE40's table still asm: func_150A09B8 (3), func_150A02EC (4).
+3. Browser: lives pop-up, cutscene start (func_1501D348), script queries (func_1509A024) -- P73.md UNVERIFIED.
+
 ## P68 (port-b) (session P68, 2026-10-22). Details: `docs/port/sessions/P68.md`
 
 Branch `port-b` (from P67 8c057c9); the orchestrator merges it into `port`.

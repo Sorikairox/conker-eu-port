@@ -487,7 +487,7 @@ void func_151E49C8(void) {
     }
 }
 
-s32 func_1501D348(s32, s32, s32, s32, s32);
+void func_1501D348(s32, s32, s32, s32, s32);
 extern u8 D_800ABA76[][10];
 extern s16 D_800ABB88[][2];
 void func_151E4A78(void) {
@@ -1060,7 +1060,7 @@ void func_151E8A64(void) {
     }
 }
 
-s32 func_1501D348(s32, s32, s32, s32, s32);
+void func_1501D348(s32, s32, s32, s32, s32);
 
 void func_151E8B94(void) {
     if (D_800E0EB0 == 0) {

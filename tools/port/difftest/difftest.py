@@ -226,9 +226,18 @@ def build_tu(func, p, src, code):
     if pm:
         m = pm[-1]; a, b = m.start(), m.end()
         k = src.rfind('#ifdef NON_MATCHING\n', 0, a)
+        e = src.rfind('#else\n', 0, a)
+        nmside = func_span(src[k:e], func) if k >= 0 and k < e and '#endif' not in src[k:a] else None
         if k >= 0 and src[:a].endswith('#else\n') and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
             a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
-        tu = src[:a] + '\n' + code + '\n' + src[b:]
+            tu = src[:a] + '\n' + code + '\n' + src[b:]
+        elif nmside:
+            # P73: the NON_MATCHING side holds more than this function (func_1501B300 + func_1501B640): replace
+            # only its definition there. Before, the candidate went into the #else side, which nm_resolve drops,
+            # so the src_eu body was tested instead of the candidate (every mutant "survived").
+            tu = src[:k + nmside[0]] + code + src[k + nmside[1]:]
+        else:
+            tu = src[:a] + '\n' + code + '\n' + src[b:]
     else:
         sp = func_span(src, func)
         if sp is None: raise RuntimeError('no definition or pragma of %s in %s' % (func, p))
@@ -238,6 +247,10 @@ def build_tu(func, p, src, code):
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0
         tu = tu[:k] + '\n'.join(hoist) + '\n' + tu[k:]
     tu = nm_resolve(tu, True)   # other NON_MATCHING blocks: keep the C side
+    # P73: the candidate must survive the NON_MATCHING resolution (else a different body would be tested)
+    body = code.strip()
+    if body and body not in tu:
+        raise RuntimeError('candidate body for %s was dropped from the TU (NON_MATCHING layout of %s)' % (func, p))
     return PRAG.sub('', tu)
 
 def nm_resolve(text, on=True):

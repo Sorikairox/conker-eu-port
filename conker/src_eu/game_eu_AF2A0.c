@@ -774,6 +774,18 @@ s32 func_15083FB0(u8 arg0) {
     return -1;
 }
 
+#ifdef NON_MATCHING
+/* P73: one argument under NM (wasm needs one signature; every caller passes only the object id, the matching
+ * body below forwards its unused a1..a3 to func_1505EEF4) */
+s32 func_15084000(s32 id) {
+    struct127 *obj = func_1505EEF4(id);
+
+    if (obj != NULL) {
+        return obj - D_800CC2D0;
+    }
+    return -1;
+}
+#else
 s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct127 *temp_v0 = func_1505EEF4(arg0, arg1, arg2, arg3);
 
@@ -782,6 +794,7 @@ s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
     return -1;
 }
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150844AC.s")
 
