@@ -148,3 +148,4 @@ P68	port-b	nm convert	7			camera flags/push-out/eye probe, text bank loader, vie
 P72	web	port-web				bisected respawn hang to func_150D1D20 writing via NULL buffers (allocator func_15000AD0 still asm); guard; reaches 0x2C warp
 P71	port	nm convert	13		152	difftest callee arity from declarations; 13 hand C (5D910/64770/595D0/6B970); 4884/5915 82.6% 55.4% bytes; func_15000AD0 analysed not converted
 P74	port	nm convert	8		~150	func_15000AD0 allocator hand C (118/118 EQUIV, 22/22 mutants); game_eu_6B970.c fully C; 4892/5915 82.7% 55.6% bytes
+P73	port-b	nm convert	3		145	difftest fix: candidate ignored in multi-function NM blocks (func_1501B300 mutants now die); P67 knobs rechecked EU OK; func_1512C080 27/31; hand C func_151BF8F0, func_1501D348, func_1509A024
