@@ -1075,7 +1075,7 @@ f32 func_1505A3A8(f32, struct127 *, f32, f32, u8); // P47: a1 = the record (left
 void func_1505A9AC(struct127 *, f32);
 s32 func_1505D024(struct127 *, s32, u16, s32); 
 void func_1505D6F0(struct127 *, s32); /* P59: void in the NM definition */
-s32 func_1505F298(struct127 *, struct49 *);     
+void func_1505F298(struct127 *, struct49 *); /* P64: void in the NM definition */
 void func_1506045C(struct127 *, s32, s32, s32, s32);
 void func_15063168(struct127 *);                 
 void func_150802A8(struct127 *);                 
