@@ -796,12 +796,22 @@ static void load_tlut(unsigned w0, unsigned w1) {
 }
 
 static unsigned unk_seen[256 / 32];
+/* P55: the last G_DL / G_BRANCH_DL jumps (from, w0, w1), logged once at the first unknown opcode of a task */
+static unsigned dl_ring[8][3], dl_ring_n, dl_ring_logged_task = ~0u;
 
 static void unknown(unsigned op, unsigned w0, unsigned w1) {
     gfx_stats.unknown_ops++;
     if (!(unk_seen[op >> 5] & (1u << (op & 31)))) {
         unk_seen[op >> 5] |= 1u << (op & 31);
         port_log("[gfx] unknown command %02X: %08X %08X\n", op, w0, w1);
+    }
+    if (dl_ring_logged_task != gfx_stats.tasks) {
+        unsigned i;
+        dl_ring_logged_task = gfx_stats.tasks;
+        for (i = 0; i < 8 && i < dl_ring_n; i++) {
+            unsigned *e = dl_ring[(dl_ring_n - 1 - i) & 7];
+            port_log("[gfx] task %u first unknown op %02X: G_DL[-%u] at %08X: %08X %08X\n", gfx_stats.tasks, op, i, e[0], e[1], e[2]);
+        }
     }
 }
 
@@ -1019,6 +1029,14 @@ void gfx_run_dl(const void *dl) {
         case 0xDE: {                                          /* G_DL / G_BRANCH_DL */
             const unsigned char *t = gfx_addr(w1);
             if (!t) { gfx_stats.bad_addr++; break; }
+            if (w1 == 0) { /* P55: G_DL 0 only comes from an asm stub that returned a NULL DL (func_150900F0 draws
+                            * D_800D29A8 = stub func_1518C900(0xB8)); RDRAM 0 is code, running it crashed the renderer */
+                static int logged;
+                gfx_stats.bad_addr++;
+                if (!logged++) port_log("[gfx] G_DL to address 0 at %p skipped (a stub returned a NULL display list)\n", (const void *)(pc - 8));
+                break;
+            }
+            { unsigned *e = dl_ring[dl_ring_n++ & 7]; e[0] = (unsigned)(uintptr_t)(pc - 8); e[1] = w0; e[2] = w1; }
             if (!(w0 >> 16 & 0xFF)) { if (sp >= 32) break; stack[sp++] = pc; }
             pc = t;
             break;

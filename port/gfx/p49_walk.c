@@ -55,6 +55,14 @@ void __wrap_func_1504CB98(void *arg0) {
     calls++;
     log = calls <= (unsigned)flag || calls % (unsigned)every == 0;
     x0 = F(0x14); z0 = F(0x1C);
+    { /* P55 ?p55drop=Y (diagnostic): at walk-handler call 8 put record 0 at height Y (y and +0x1CC, the fall start) so
+       * the C gravity / floor query / landing can be watched on a fall onto the level 0x21 floor */
+      static int drop = -1;
+      if (drop < 0) drop = port_flag("p55drop");
+      if (drop && calls == 8) {
+          *(float *)(r + 0x18) = (float)drop; *(float *)(r + 0x1CC) = (float)drop;
+          port_log("[p55] drop: record 0 y set to %d at frame %u\n", drop, port_frame_count);
+      } }
     if (log) p49_line("pre ", r);
     for (i = 0; i < st_count; i++) st_n[i] = 0;
     port_stub_trace_hook = p49_hook;
@@ -116,19 +124,232 @@ void __wrap_func_1502C1D4(void) {
     }
 }
 
-/* P52 diagnostic ?p52void=1: the floor query func_1510EE3C (C) only forwards to the asm stub func_1510EED0, so the
- * walk handler's floor height (its local spC4, arg 3) is never written and stays at whatever the stack held (0 in
- * practice): the handler then snaps y to spC4 - 1 = -1 every call. With p52void the wrapper writes "no floor"
- * (-10000, what the real query returns off the level) to arg 3 and arg 4 (+0x118), so gravity is visible. */
+/* P52 diagnostic ?p52void=1 (P55: now off by default and only a diagnostic; the floor query is real C since P53/P54):
+ * forces "no floor" (-10000) into arg 3 (spC4) and arg 4 (+0x118) after the real query.
+ * P55 ?p49walk: for record 0 (argB == D_800CC2D0) logs the query's inputs / outputs and an independent float floor
+ * height: every level triangle (D_800DC26C, D_800DBE4C of them, vertices s16 at the offsets) whose x/z projection
+ * holds (x, z), with the plane y there; the highest such y that is <= y + 15 (step), and the count of hits. */
+extern unsigned D_800DC26C, D_800DBE4C;
+extern unsigned char D_800DBE62;
+extern int D_800D3720[];
+static int p55_ref(float x, float z, float ylim, float *best, float *top, int *ntri) {
+    const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC26C;
+    unsigned i, n = D_800DBE4C;
+    int hits = 0, bi = -1;
+    *best = -10000.0f; *top = -10000.0f;
+    if (!vo || n > 20000) { *ntri = 0; return -1; }
+    *ntri = (int)n;
+    for (i = 0; i < n; i++) {
+        float v[3][3], d, l0, l1, l2, y;
+        int k;
+        for (k = 0; k < 3; k++) {
+            const unsigned char *q = (const unsigned char *)(uintptr_t)vo[i * 3 + k];
+            v[k][0] = (short)vbe_ld16(q); v[k][1] = (short)vbe_ld16(q + 2); v[k][2] = (short)vbe_ld16(q + 4);
+        }
+        d = (v[1][2] - v[2][2]) * (v[0][0] - v[2][0]) + (v[2][0] - v[1][0]) * (v[0][2] - v[2][2]);
+        if (d == 0.0f) continue;
+        l0 = ((v[1][2] - v[2][2]) * (x - v[2][0]) + (v[2][0] - v[1][0]) * (z - v[2][2])) / d;
+        l1 = ((v[2][2] - v[0][2]) * (x - v[2][0]) + (v[0][0] - v[2][0]) * (z - v[2][2])) / d;
+        l2 = 1.0f - l0 - l1;
+        if (l0 < -1e-4f || l1 < -1e-4f || l2 < -1e-4f) continue;
+        y = l0 * v[0][1] + l1 * v[1][1] + l2 * v[2][1];
+        hits++;
+        if (y > *top) *top = y;
+        if (y <= ylim && y > *best) { *best = y; bi = (int)i; }
+    }
+    return hits ? bi : -2;
+}
+static float r_best, r_top, r_y; static int r_bi = -3, r_ntri, r_n3f50 = -1, r_calls, r_on;
+static int r_n48c0 = -1, r_n5480 = -1;
+int __real_func_150A48C0(int x, int z, int cnt, int ids);
+int __wrap_func_150A48C0(int x, int z, int cnt, int ids) {
+    int n = __real_func_150A48C0(x, z, cnt, ids);
+    if (r_on) r_n48c0 = n;
+    return n;
+}
+int __real_func_150A5480(int x, int z);
+int __wrap_func_150A5480(int x, int z) {
+    int n = __real_func_150A5480(x, z);
+    if (r_on) r_n5480 = n;
+    return n;
+}
+static float r_minx, r_maxx, r_minz, r_maxz, r_miny, r_maxy;
+int __real_func_150A3F50(int x, int z);
+int __wrap_func_150A3F50(int x, int z) {
+    int n = __real_func_150A3F50(x, z);
+    if (r_on) {
+        float b, t; int nt, bi;
+        r_calls++;
+        bi = p55_ref((float)x, (float)z, r_y + 15.0f, &b, &t, &nt);
+        if (nt > 0) { r_n3f50 = n; r_bi = bi; r_best = b; r_top = t; r_ntri = nt; } /* keep the area with triangles */
+        if (r_minx > r_maxx) { /* level extent, once */
+            const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC26C;
+            unsigned i;
+            for (i = 0; vo && i < D_800DBE4C * 3; i++) {
+                const unsigned char *q = (const unsigned char *)(uintptr_t)vo[i];
+                float vx = (short)vbe_ld16(q), vy = (short)vbe_ld16(q + 2), vz = (short)vbe_ld16(q + 4);
+                if (vx < r_minx) r_minx = vx; if (vx > r_maxx) r_maxx = vx;
+                if (vz < r_minz) r_minz = vz; if (vz > r_maxz) r_maxz = vz;
+                if (vy < r_miny) r_miny = vy; if (vy > r_maxy) r_maxy = vy;
+            }
+            port_log("[p55] level area tables: %u triangles, x %g..%g y %g..%g z %g..%g, D_800DBE62 %u\n", D_800DBE4C,
+                     r_minx, r_maxx, r_miny, r_maxy, r_minz, r_maxz, vbe_ld8(&D_800DBE62));
+        }
+    }
+    return n;
+}
+
+/* P55 ?p55synth=1: one-shot in-wasm check of the C floor query on sloped synthetic geometry (level 0x21 is flat, y 0).
+ * At the first record-0 floor query: only area 0 enabled (D_800894C0), and after func_150A4ED4(0) the area-0 tables
+ * D_800DC26C / D_800DC270 / D_800DBE4C / D_800DBE62 (0: all-triangles path) / D_800DBE5C point at PC buffers written
+ * through vbe (s16 vertices and bounds), then func_1510EE3C runs over an integer grid with y = prevY = 1000 (so the
+ * highest floor below wins) and record 0 = NULL. Its height is compared with a float barycentric reference. All
+ * globals are restored afterwards. */
+extern unsigned char D_800894C0[];
+void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
+                          unsigned short aA, int aB, int aC, int aD, int aE);
+extern unsigned D_800DC270, D_800DBE5C;
+static int synth_on;
+static short syn_v[8][3] = {
+    {-200, 0, -200}, {200, 80, -200}, {200, 120, 200}, {-200, 40, 200},   /* sloped quad: tris 0-1-2, 0-2-3 */
+    {-50, 300, -50}, {60, 330, -40}, {0, 270, 90}, {0, 0, 0}};           /* raised slanted shelf: 4-5-6 */
+static int syn_t[3][3] = {{0, 1, 2}, {0, 2, 3}, {4, 5, 6}};
+static unsigned syn_vbuf[8 * 2 + 2], syn_ofs[3 * 3], syn_bnd[3 * 2], syn_flags[4];
+static void synth_tables(void) {
+    int i, k;
+    for (i = 0; i < 7; i++)
+        for (k = 0; k < 3; k++) vbe_st16((char *)syn_vbuf + i * 6 + k * 2, (unsigned short)syn_v[i][k]);
+    for (i = 0; i < 3; i++) {
+        int a = syn_t[i][0], b = syn_t[i][1], c = syn_t[i][2], t;
+        float ux = syn_v[b][0] - syn_v[a][0], uz = syn_v[b][2] - syn_v[a][2];
+        float wx = syn_v[c][0] - syn_v[a][0], wz = syn_v[c][2] - syn_v[a][2];
+        short mnx = 32767, mnz = 32767, mxx = -32768, mxz = -32768;
+        if (uz * wx - ux * wz < 0) { t = b; b = c; c = t; } /* func_1510EBF0: cross(b - a, c - a).y >= 0 = floor */
+        syn_ofs[i * 3 + 0] = (unsigned)(uintptr_t)((char *)syn_vbuf + a * 6);
+        syn_ofs[i * 3 + 1] = (unsigned)(uintptr_t)((char *)syn_vbuf + b * 6);
+        syn_ofs[i * 3 + 2] = (unsigned)(uintptr_t)((char *)syn_vbuf + c * 6);
+        for (k = 0; k < 3; k++) {
+            short x = syn_v[syn_t[i][k]][0], z = syn_v[syn_t[i][k]][2];
+            if (x < mnx) mnx = x; if (x > mxx) mxx = x; if (z < mnz) mnz = z; if (z > mxz) mxz = z;
+        }
+        vbe_st16((char *)syn_bnd + i * 8 + 0, (unsigned short)mnx); vbe_st16((char *)syn_bnd + i * 8 + 2, (unsigned short)mnz);
+        vbe_st16((char *)syn_bnd + i * 8 + 4, (unsigned short)mxx); vbe_st16((char *)syn_bnd + i * 8 + 6, (unsigned short)mxz);
+    }
+}
+static float syn_ref(float x, float z, int *inside) {
+    int i, k; float best = -10000.0f; *inside = 0;
+    for (i = 0; i < 3; i++) {
+        float v[3][3], d, l0, l1, l2;
+        for (k = 0; k < 3; k++) { v[k][0] = syn_v[syn_t[i][k]][0]; v[k][1] = syn_v[syn_t[i][k]][1]; v[k][2] = syn_v[syn_t[i][k]][2]; }
+        d = (v[1][2] - v[2][2]) * (v[0][0] - v[2][0]) + (v[2][0] - v[1][0]) * (v[0][2] - v[2][2]);
+        l0 = ((v[1][2] - v[2][2]) * (x - v[2][0]) + (v[2][0] - v[1][0]) * (z - v[2][2])) / d;
+        l1 = ((v[2][2] - v[0][2]) * (x - v[2][0]) + (v[0][0] - v[2][0]) * (z - v[2][2])) / d;
+        l2 = 1.0f - l0 - l1;
+        if (l0 < 0 || l1 < 0 || l2 < 0) continue;
+        (*inside)++;
+        { float y = l0 * v[0][1] + l1 * v[1][1] + l2 * v[2][1]; if (y > best) best = y; }
+    }
+    return best;
+}
+void __real_func_150A4ED4(int area);
+void __wrap_func_150A4ED4(int area) {
+    __real_func_150A4ED4(area);
+    if (synth_on && area == 0) {
+        D_800DC26C = (unsigned)(uintptr_t)syn_ofs; D_800DC270 = (unsigned)(uintptr_t)syn_bnd; D_800DBE4C = 3;
+        vbe_st8(&D_800DBE62, 0); D_800DBE5C = (unsigned)(uintptr_t)syn_flags;
+    }
+}
+static void p55_synth(void) {
+    unsigned s26c = D_800DC26C, s270 = D_800DC270, s24c = D_800DBE4C, s25c = D_800DBE5C, s62 = vbe_ld8(&D_800DBE62);
+    unsigned char en[4]; int i, x, z, n = 0, nin = 0, miss = 0, extra = 0, bad = 0, edge = 0; float maxd = 0, sumd = 0;
+    char ex[400]; int exn = 0;
+    unsigned tri, vtx[5], flags; short area[2]; float h, ceil;
+    for (i = 0; i < 4; i++) { en[i] = vbe_ld8(&D_800894C0[i]); vbe_st8(&D_800894C0[i], i == 0); }
+    synth_tables();
+    synth_on = 1;
+    ex[0] = 0;
+    for (z = -197; z <= 197; z += 6)
+        for (x = -197; x <= 197; x += 6) {
+            int inside; float r = syn_ref((float)x, (float)z, &inside), d;
+            __real_func_1510EE3C((int)(uintptr_t)&tri, (int)(uintptr_t)vtx, (int)(uintptr_t)&h, (int)(uintptr_t)&ceil,
+                                 (int)(uintptr_t)&flags, (int)(uintptr_t)area, (float)x, 1000.0f, (float)z, 1000.0f, 0, 0,
+                                 0, 0, 0);
+            n++;
+            if (inside) nin++;
+            if (r == -10000.0f && h == -10000.0f) continue;
+            if (r == -10000.0f || h == -10000.0f) {
+                /* within 3 units of an edge the game's +-1 / +-2 widening may disagree with the exact test */
+                int in2; syn_ref((float)x + 3, (float)z, &in2); int in3; syn_ref((float)x - 3, (float)z, &in3);
+                int in4; syn_ref((float)x, (float)z + 3, &in4); int in5; syn_ref((float)x, (float)z - 3, &in5);
+                if ((in2 != inside) || (in3 != inside) || (in4 != inside) || (in5 != inside)) { edge++; continue; }
+                if (r == -10000.0f) extra++; else miss++;
+                if (exn < 360) exn += snprintf(ex + exn, sizeof ex - exn, " (%d,%d ref %g got %g)", x, z, r, h);
+                continue;
+            }
+            {   /* height mismatch next to a triangle edge (overlapping layers) */
+                int a1, a2, a3, a4; syn_ref((float)x + 2, (float)z, &a1); syn_ref((float)x - 2, (float)z, &a2);
+                syn_ref((float)x, (float)z + 2, &a3); syn_ref((float)x, (float)z - 2, &a4);
+                if ((a1 != inside || a2 != inside || a3 != inside || a4 != inside) && h != r) { edge++; continue; }
+            }
+            d = h - r; if (d < 0) d = -d;
+            sumd += d;
+            if (d > maxd) maxd = d;
+            if (d > 1.5f) { bad++; if (exn < 360) exn += snprintf(ex + exn, sizeof ex - exn, " (%d,%d ref %g got %g)", x, z, r, h); }
+        }
+    synth_on = 0;
+    for (i = 0; i < 4; i++) vbe_st8(&D_800894C0[i], en[i]);
+    D_800DC26C = s26c; D_800DC270 = s270; D_800DBE4C = s24c; D_800DBE5C = s25c; vbe_st8(&D_800DBE62, s62);
+    port_log("[p55] synth floor: %d grid points, %d inside a triangle; height |C - float| max %g mean %g; >1.5: %d; "
+             "missed %d, extra %d, edge-ambiguous %d;%s %s\n", n, nin, maxd, nin ? sumd / nin : 0, bad, miss, extra, edge,
+             ex, (bad || miss || extra) ? "FAIL" : "PASS");
+}
 void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
 void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE) {
-    static int flag = -1;
-    if (flag < 0) flag = port_flag("p52void");
+    static int flag = -1, walk = -1, every = -1;
+    static unsigned calls;
+    static int lastfloor = 2;
+    if (flag < 0) { flag = port_flag("p52void"); walk = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
+    if (r_minx == 0 && r_maxx == 0) { r_minx = 1e9f; r_maxx = -1e9f; r_minz = 1e9f; r_maxz = -1e9f; r_miny = 1e9f; r_maxy = -1e9f; }
+    r_on = walk && aB == (int)(uintptr_t)D_800CC2D0; r_y = a7; r_calls = 0; r_bi = -3; r_n3f50 = -1; r_n48c0 = -1; r_n5480 = -1; r_ntri = 0; r_best = r_top = -10000.0f;
     __real_func_1510EE3C(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE);
+    r_on = 0;
     if (flag) {
         if (a2) *(float *)(uintptr_t)a2 = -10000.0f;
         if (a3) *(float *)(uintptr_t)a3 = -10000.0f;
     }
+    if (walk && aB == (int)(uintptr_t)D_800CC2D0) {
+        static int synth = -1;
+        if (synth < 0) { synth = port_flag("p55synth"); if (synth) p55_synth(); }
+    }
+    if (walk && aB == (int)(uintptr_t)D_800CC2D0) {
+        float best = r_best, top = r_top, h = a2 ? *(float *)(uintptr_t)a2 : 0, f118 = a3 ? *(float *)(uintptr_t)a3 : 0;
+        int ntri = r_ntri, bi = r_bi, isfloor = h != -10000.0f;
+        calls++;
+        if (calls <= (unsigned)walk || calls % (unsigned)every == 0 || isfloor != lastfloor)
+            port_log("[p55] floor call %u frame %u: in x %g y %g z %g prevY(a9) %g | out spC4 %g +118 %g tri %08X "
+                     "flags %08X area %d | n 3F50 %d (x%d) 48C0 %d 5480 %d | ref best %g (tri %d) top %g, %d tris, all-tri path %d | ref-out %g%s\n",
+                     calls, port_frame_count, a6, a7, a8, a9, h, f118, a0 ? *(unsigned *)(uintptr_t)a0 : 0,
+                     a4 ? *(unsigned *)(uintptr_t)a4 : 0, a5 ? (short)vbe_ld16((void *)(uintptr_t)a5) : -1, r_n3f50, r_calls, r_n48c0, r_n5480, best, bi, top, ntri,
+                     vbe_ld8(&D_800DBE62) == 0, best - h, isfloor != lastfloor ? " (floor/void change)" : "");
+        lastfloor = isfloor;
+    }
+}
+
+/* P55 ?p49walk: landing func_1505A9AC (P54 C, called by the walk handler with +0x180): y / vy / +0x28 / +0x180 before and
+ * after, and the record state. */
+void __real_func_1505A9AC(void *rec, float a1);
+void __wrap_func_1505A9AC(void *rec, float a1) {
+    static int flag = -1, every = -1;
+    static unsigned calls;
+    const unsigned char *r = (const unsigned char *)rec;
+    float y0 = F(0x18), v0 = F(0x20), h0 = F(0x28);
+    int s0 = *(const int *)r;
+    if (flag < 0) { flag = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
+    __real_func_1505A9AC(rec, a1);
+    calls++;
+    if (flag && (calls <= (unsigned)flag || calls % (unsigned)every == 0 || v0 != F(0x20) || s0 != *(const int *)r))
+        port_log("[p55] landing call %u frame %u: arg1 %g | state %d -> %d y %g -> %g yv %g -> %g +28 %g -> %g +180 %g\n",
+                 calls, port_frame_count, a1, s0, *(const int *)r, y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180));
 }

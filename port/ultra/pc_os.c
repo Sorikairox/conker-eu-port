@@ -160,6 +160,24 @@ void port_stub_hit(const char *name, const char *what) {
           OSThread *t = port_current_thread();
           port_log("[gdl] %s thread=%d GDL %08X (buf %08X %08X)\n", name, t ? (int)t->id : -1, D_800BE9D0, D_800BEDE8[0], D_800BEDE8[1]);
       } }
+    { /* P55: ?gdlzero=N: find where a "G_DL 0" (DE000000 00000000) enters the frame DL: at each stub hit scan the
+       * commands written since the previous hit; log the first N finds with the previous / current stub and JS stack */
+      static int gz = -1, found; static unsigned last; static const char *prev = "";
+      if (gz < 0) gz = port_flag("gdlzero");
+      if (gz) {
+          unsigned cur = D_800BE9D0, a;
+          if (cur < last || cur - last > 0x10000) last = cur > 0x800 ? cur - 0x800 : cur;
+          for (a = (last + 7) & ~7u; a + 8 <= cur; a += 8)
+              if (*(unsigned *)(uintptr_t)a == 0xDE000000u && *(unsigned *)(uintptr_t)(a + 4) == 0 && found < gz) {
+                  found++;
+                  port_log("[gdlzero] G_DL 0 at %08X (GDL now %08X) frame %u, between stub %s and stub %s\n", a, cur,
+                           port_frame_count, prev, name);
+                  port_js_stack(2, 14);
+                  if (found == 1) { unsigned b; for (b = a - 0x90; b < a + 0x48 && b + 8 <= cur; b += 8)
+                      port_log("[gdlzero]   %08X: %08X %08X\n", b, *(unsigned *)(uintptr_t)b, *(unsigned *)(uintptr_t)(b + 4)); }
+              }
+          last = cur; prev = name;
+      } }
     if (stub_count(name, what) && stub_logged < PORT_STUB_LOG_MAX) { /* first hit of each stub */
         stub_logged++;
         OSThread *t = port_current_thread();

@@ -842,7 +842,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -866,7 +866,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P44.md` (runtime check of P41's camera chain, the game's own view, what blocks player movement) and
 `docs/port/sessions/P46.md` (runtime check of P43 / P45, srcfix array initializers, the first lit and framed game-camera frame) and
 `docs/port/sessions/P49.md` (merge port-b P47, the player walks and the camera follows, the movement-path stub order) and
-`docs/port/sessions/P52.md` (P50 / P48 movement and model C at runtime, P49 overrides removed, why the view goes black). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P52.md` (P50 / P48 movement and model C at runtime, P49 overrides removed, why the view goes black) and
+`docs/port/sessions/P55.md` (P53 / P54 floor and landing C at runtime: stand, walk off, land; G_DL 0 crash). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -887,6 +888,9 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 # P49: PROBE_STEPS also takes MS:shot:/abs/path.png (real-time screenshots during a run; frame sequences)
 # P52: ?p49walk also logs [p52] gravity (dt D_800D1550[0]) and func_1502C1D4 (record 0 +0x1D4 / model) lines;
 #      ?p52void=1 makes the floor query answer "no floor" (diagnostic); audprobe needs PROBE_LOG=/abs/file for the console
+# P55: ?p49walk also logs [p55] floor (record 0's floor query + float reference) and [p55] landing lines;
+#      ?p55synth=1 sloped synthetic floor check (PASS/FAIL); ?p55drop=Y drops the player from height Y; ?gdlzero=N
+#      finds a "G_DL 0" writer; ?p52void is now an opt-in diagnostic only
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1632,6 +1636,35 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
   - **For the port branch:** no bug found in func_15059C84 / func_1504C0E8 / func_1505A770 / func_1502C1D4 at
     runtime. Next: func_1510EED0 (floor), func_150A44A4, func_15021834, func_1505A9AC; for the model func_1503D210,
     then func_150A86B0, func_150342D0 / func_1502DB14, func_1502CFEC.
+- **P55 (after merging port-b P53 + P54, 6bc3909): standing, walking off and landing with the real floor C.** Full
+  notes: P55.md.
+  - Clean rebuild; none of the P53 / P54 functions is a stub any more. The P54 nm_asm tails do not matter for wasm
+    (`.s` is never built; all four collectors are C). Node 40 s and real-time Chrome (Metal, `heapwatch=1`, W holds):
+    8/8 PASS, heap 0 errors, no heapwatch break, no RuntimeError. 91 distinct stubs.
+  - **The walk handler gets a real floor height:** spC4 = 0 on level 0x21 (288 floor triangles, all y = 0, x / z in
+    -240..240; area 0, func_150A3F50 BSP path). A float barycentric reference over the same triangles agrees.
+  - **Stand / walk / fall / land work:** standing y = 0 with vy reset to -4 by the landing C every call; walking keeps
+    y = 0; past the edge (z ≈ 267) the query gives -10000 and the player falls; a diagnostic drop from y = 300
+    (`?p55drop=300`) lands: y → 0, vy -88 → -4, +0x28 → 0. The 10000-unit fall takes the fall-death branch
+    (health = 0, stubs func_1513783C / func_1507CD64), game-consistent.
+  - **Slopes:** level 0x21 is flat, so `?p55synth=1` runs the C query on a synthetic sloped quad + overlapping shelf
+    through vbe memory: 4356 points, 0 misses / extras, |C − float| max 0.92, mean 0.41. PASS.
+  - **P54 `$gp` tag item closed:** no reader of D_800D3720 +0xC uses area-0/1 entries (func_1510EED0 reads it for
+    areas 2 / 3 only; the game_eu_71E70 readers use func_150A48C0 entries; func_15104BB4's `lw 0xC` is a stack index
+    list).
+  - **Crash fixed (port side):** after the fall the C func_150900F0 (game_BC510.c) emits `G_DL D_800D29A8` with
+    `D_800D29A8 = func_1518C900(0xB8)`, an asm stub that returns 0; the renderer ran RDRAM 0 as a DL and hit
+    `memory access out of bounds`. The renderer now skips a G_DL to address 0 (logged once). New `?gdlzero=N`.
+  - Camera: `at` follows x / z, but at.y stays 1 and eye.y 400 while the player falls (its own floor height).
+  - **No bug found in the converted C** (func_1510EED0, func_150A3F50, func_150A44A4, func_1505A9AC, func_15021834).
+  - Screenshot `P55_screenshot.png`; sequence `docs/port/sessions/p55/walk_00_stand.png .. walk_06_4000ms.png`.
+  - **Stubs, movement path** (per walk-handler call): func_150AB6D0 x4 / func_150AC8C4 x3 (wall engine, body
+    func_150AB708, converting on port-b), func_1507C7C0, func_1508000C, func_1505F298 (jump), func_1505D6F0,
+    func_15051558, func_1507F640, moving: func_1505E0C4, func_1506E46C, func_1507D4F8; also func_1507C170; ray cast
+    **func_150ACEA0** (one per frame, converting on port-b). **Model path** (P51 on port, not merged here):
+    func_1503D210, func_1502F17C (top stub), func_1502F554, func_1503A37C, func_15030758, func_150A9B0C, func_1507E7A0,
+    then func_150A86B0, func_150342D0 / func_1502DB14, func_1502CFEC. **New for the port branch:** func_1518C900
+    (+ func_1518CF74), the DL getter behind the G_DL 0.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
