@@ -1861,7 +1861,54 @@ struct127 *func_1505F0AC(s32 arg0) {
     }
     return NULL;
 }
+#ifdef NON_MATCHING
+void func_1505F188(struct127 *arg0) {
+    struct127 *temp_v1;
+    struct127 *var_v0;
+
+    temp_v1 = ((struct127 *)((u8 *)arg0 + 0x32C));
+    var_v0 = arg0;
+    if ((u32) arg0 < (u32) temp_v1) {
+        do {
+            var_v0 = (struct127 *)((u8 *)var_v0 + (4));
+            (*(s32 *)((u8 *)var_v0 + -4)) = 0;
+        } while ((u32) var_v0 < (u32) temp_v1);
+    }
+    arg0->unk2FD = 2;
+    (*(s16 *)((u8 *)arg0 + 0x38)) = -0x2710;
+    arg0->xz_scale = 1.0f;
+    arg0->y_scale = 1.0f;
+    arg0->unk118 = -10000.0f;
+    arg0->unk180 = -10000.0f;
+    arg0->unk1DC = 0xFF;
+    arg0->unk127 = 0xFF;
+    arg0->unk84.uh = 0xFFFF;
+    arg0->unk13F = 0xFF;
+    arg0->unk2C4 = (s32) &arg0->id;
+    arg0->unk2C8 = 1;
+    arg0->unk2C9 = 1;
+    arg0->id = 0xFF;
+    arg0->unk2CB = 0x32;
+    arg0->unk48 = 1.0f;
+    arg0->gravity = 3.3f;
+    arg0->unk6E = (func_150ADA20() % 50U) + 0x32;
+    func_150615DC(arg0);
+    arg0->unk1DD = 0xFF;
+    arg0->unk1DE = 0xFF;
+    arg0->unk1DF = 0xFF;
+    (*(s16 *)((u8 *)arg0 + 0x18C)) = 0;
+    (*(s16 *)((u8 *)arg0 + 0x18E)) = 0;
+    arg0->unk190 = 0;
+    arg0->unk192 = 0;
+    arg0->unk194 = 0;
+    (*(s16 *)((u8 *)arg0 + 0x196)) = 0xA;
+    (*(s16 *)((u8 *)arg0 + 0x198)) = 0xA;
+    (*(s16 *)((u8 *)arg0 + 0x19A)) = 0;
+    arg0->unk19C = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F188.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
 #ifdef NON_MATCHING
 s32 func_15064668(struct127 *, s32, s32, s32, s32);

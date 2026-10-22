@@ -1039,6 +1039,7 @@ void func_1512623C(u8 *arg0, u8 *arg1, s32 arg2, f32 *arg3, f32 *arg4, f32 *arg5
 
 #ifdef NON_MATCHING
 void func_151CA484(u8 *arg0);
+void func_1510B8AC(s32 arg0, f32 arg1, f32 arg2, f32 arg3);
 
 void func_15127EB8(struct108 *arg0) {
     struct127 *temp_v1;
@@ -1052,7 +1053,7 @@ void func_15127EB8(struct108 *arg0) {
     arg0->unk1A0 = 0.0f;
     arg0->unk1A4 = 0.0f;
     arg0->unk1A8 = 0.0f;
-    func_1510B8AC(arg0->unk23D, 0, 0, 0x3F800000);
+    func_1510B8AC(arg0->unk23D, 0.0f, 0.0f, 1.0f);
     (*(f32 *)((u8 *)((D_800BE628 + (arg0->unk23D * 0x180))) + 0x84)) = 1.0f;
     func_150627D4(arg0->unk3D0);
     D_800DBFF4[arg0->unk23D] = 2;

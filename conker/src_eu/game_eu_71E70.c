@@ -1171,8 +1171,103 @@ void func_15047978(Mtx *arg0, f32 arg1, f32 arg2, volatile f32 arg3, f32 arg4, f
     guMtxF2L((f32 (*)[4]) sp30, arg0);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150479F0.s")
+#ifdef NON_MATCHING
+/* Rare's guLookAtReflectF: view matrix mf (look-at, right-handed, w row = -eye . axis) and the LookAt light
+ * directions l (+8.. right, +0x18.. up; bytes = min(v * 128, 127) truncated, no lower clamp; +0x11 / +0x15 = 0x80,
+ * other colour bytes 0, +0xB / +0x1B left alone). Degenerate inputs: look = (0, 0, 1) when at == eye, right = (1, 0, 0)
+ * and up = (0, 1, 0) when their cross products vanish. sqrt is the sqrt.s instruction. */
+#pragma intrinsic (sqrtf)
+void func_150479F0(f32 mf[4][4], LookAt *lp, f32 xEye, f32 yEye, f32 zEye, f32 xAt, f32 yAt, f32 zAt, f32 xUp, f32 yUp,
+                   f32 zUp) {
+    u8 *l = (u8 *)lp;
+    f32 xLook, yLook, zLook;
+    f32 xRight, yRight, zRight;
+    f32 len;
+    f32 v;
 
+    guMtxIdentF(mf);
+    yLook = yAt - yEye;
+    zLook = zAt - zEye;
+    xLook = xAt - xEye;
+    if (xAt == xEye && yLook == 0.0f && zLook == 0.0f) {
+        zLook = 1.0f;
+        xLook = 0.0f;
+        yLook = 0.0f;
+    }
+    len = -1.0f / sqrtf(xLook * xLook + yLook * yLook + zLook * zLook);
+    xLook *= len;
+    yLook *= len;
+    zLook *= len;
+    xRight = yUp * zLook - zUp * yLook;
+    yRight = zUp * xLook - xUp * zLook;
+    zRight = xUp * yLook - yUp * xLook;
+    len = xRight * xRight + yRight * yRight + zRight * zRight;
+    if (0.0f == len) {
+        xRight = 1.0f;
+        yRight = 0.0f;
+        zRight = 0.0f;
+    } else {
+        len = 1.0f / sqrtf(len);
+        xRight *= len;
+        yRight *= len;
+        zRight *= len;
+    }
+    xUp = yLook * zRight - zLook * yRight;
+    yUp = zLook * xRight - xLook * zRight;
+    zUp = xLook * yRight - yLook * xRight;
+    len = xUp * xUp + yUp * yUp + zUp * zUp;
+    if (0.0f == len) {
+        xUp = 0.0f;
+        zUp = 0.0f;
+        yUp = 1.0f;
+    } else {
+        len = 1.0f / sqrtf(len);
+        xUp *= len;
+        yUp *= len;
+        zUp *= len;
+    }
+    v = xRight * 128.0f;
+    l[8] = (s32)(v < 127.0f ? v : 127.0f);
+    v = yRight * 128.0f;
+    l[9] = (s32)(v < 127.0f ? v : 127.0f);
+    v = zRight * 128.0f;
+    l[0xA] = (s32)(v < 127.0f ? v : 127.0f);
+    v = xUp * 128.0f;
+    l[0x18] = (s32)(v < 127.0f ? v : 127.0f);
+    v = yUp * 128.0f;
+    l[0x19] = (s32)(v < 127.0f ? v : 127.0f);
+    v = zUp * 128.0f;
+    l[0x1A] = (s32)(v < 127.0f ? v : 127.0f);
+    l[0] = l[1] = l[2] = l[3] = l[4] = l[5] = l[6] = l[7] = 0;
+    l[0x10] = 0;
+    l[0x11] = 0x80;
+    l[0x12] = 0;
+    l[0x13] = 0;
+    l[0x14] = 0;
+    l[0x15] = 0x80;
+    l[0x16] = 0;
+    l[0x17] = 0;
+    mf[0][0] = xRight;
+    mf[1][0] = yRight;
+    mf[2][0] = zRight;
+    mf[3][0] = -(xEye * xRight + yEye * yRight + zEye * zRight);
+    mf[0][1] = xUp;
+    mf[1][1] = yUp;
+    mf[2][1] = zUp;
+    mf[3][1] = -(xEye * xUp + yEye * yUp + zEye * zUp);
+    mf[0][2] = xLook;
+    mf[1][2] = yLook;
+    mf[2][2] = zLook;
+    mf[3][2] = -(xEye * xLook + yEye * yLook + zEye * zLook);
+    mf[0][3] = 0.0f;
+    mf[1][3] = 0.0f;
+    mf[2][3] = 0.0f;
+    mf[3][3] = 1.0f;
+}
+#pragma function sqrtf
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150479F0.s")
+#endif
 void func_150479F0(f32 (*)[4], LookAt *, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 void func_15047E70(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA) {
     f32 sp38[4][4];

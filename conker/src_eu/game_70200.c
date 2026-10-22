@@ -5,6 +5,18 @@
 #include <stdarg.h>
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 Gfx *func_15043384(Gfx *arg0);
+void func_15042ECC(s32 fmtArg, s32 *args);
+u8 *allocate_memory(s32, s32, s32, s32);
+int func_151F0754(char *s, const char *fmt, ...);
+extern u8 D_800CC18C;
+extern u8 D_800CC18D;
+extern u8 D_800CC18E;
+extern u8 D_800CC18F;
+extern s32 D_800CC188;
+extern char D_80086060[];
+extern char D_80086064[];
+extern char D_80098F40[];
+extern char D_80098F44[];
 #endif
 
 
@@ -42,8 +54,127 @@ void func_15042E3C(s32 arg0, ...) {
     }
     func_15042ECC(arg0, args);
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042ECC.s")
+#ifdef NON_MATCHING
+/* Text queue printf (used by func_15042D94 / func_15042E3C): one 0x5C node per line ('\n' splits) appended to the
+ * D_800CBD64 list (tail D_800CC188), text at +0x1C. Conversions are copied to D_80086064 and handed to sprintf
+ * (func_151F0754): d/x/X/s take an int word; f/F take a float pointer and use D_80086060 = "%s%s" + spec (two empty
+ * strings). "#c" puts the next argument in +0xD (icon). Position/scale/colour come from the D_800CBD6x/7x state. */
+void func_15042ECC(s32 fmtArg, s32 *args) {
+    u8 *fmt = (u8 *)fmtArg;
+    s32 argi = 0;
+    u8 *node;
+    char *out;
+    s32 done;
+    s32 n;
+    u8 c;
 
+    if (*fmt != 0) {
+        do {
+            node = allocate_memory(0x5C, 1, 0, 1);
+            if (node == NULL) {
+                return;
+            }
+            *(s32 *)(node + 0x18) = 0;
+            done = 0;
+            out = (char *)node + 0x1C;
+            if (D_800CC188 == 0) {
+                D_800CBD64 = (s32)node;
+            } else {
+                *(u8 **)(D_800CC188 + 0x18) = node;
+            }
+            node[0xD] = 0;
+            do {
+                c = *fmt;
+                if (c == '%') {
+                    D_80086064[0] = '%';
+                    fmt++;
+                    n = 1;
+                    do {
+                        c = *fmt;
+                        D_80086064[n + 1] = 0;
+                        D_80086064[n] = c;
+                        switch (c) {
+                            case '%':
+                                *out++ = *fmt;
+                                *out = 0;
+                                n = 0;
+                                break;
+                            case 'X':
+                            case 'd':
+                            case 'x':
+                            case 's':
+                                func_151F0754(out, D_80086064, args[argi++]);
+                                while (*out != 0) {
+                                    out++;
+                                }
+                                n = 0;
+                                break;
+                            case 'F':
+                            case 'f':
+                                func_151F0754(out, D_80086060, D_80098F40, D_80098F44, (f64) *(f32 *)args[argi++]);
+                                while (*out != 0) {
+                                    out++;
+                                }
+                                n = 0;
+                                break;
+                            default:
+                                n++;
+                                break;
+                        }
+                        fmt++;
+                    } while (n != 0);
+                } else if (c == '#') {
+                    node[0xD] = args[argi++];
+                    fmt += 2;
+                } else if (c == '\n') {
+                    fmt++;
+                    done = 1;
+                } else if (c == 0) {
+                    done = 1;
+                } else {
+                    *out++ = c;
+                    *out = 0;
+                    fmt++;
+                }
+            } while (!done);
+            node[0xC] = D_800CBD74;
+            *(u32 *)node = D_800CBD78;
+            if (D_800CBD78 != 0) {
+                node[0xC] = D_800CBD74 | 1;
+                *(s16 *)(node + 0xA) = D_800CBD7C;
+                if (D_80090130 >= 2) {
+                    *(f32 *)(node + 4) = D_800CBD80 + D_800CBD80;
+                } else {
+                    *(f32 *)(node + 4) = D_800CBD80;
+                }
+            } else {
+                *(s16 *)(node + 8) = D_800CBD70;
+                *(s16 *)(node + 0xA) = D_800CBD72;
+                *(f32 *)(node + 4) = D_800CBD80;
+            }
+            node[0xE] = D_800CBD60;
+            node[0xF] = D_800CBD61;
+            node[0x10] = D_800CBD62;
+            node[0x11] = D_800CBD63;
+            node[0x12] = D_800CC18C;
+            node[0x13] = D_800CC18D;
+            node[0x14] = D_800CC18E;
+            node[0x15] = D_800CC18F;
+            D_800CC188 = (s32)node;
+            if (node[0xD] != 0) {
+                node[0xE] = 0xFF;
+                node[0xF] = 0xFF;
+                node[0x10] = 0xFF;
+            } else {
+                D_800CBD72 += 0xB;
+            }
+        } while (*fmt != 0);
+    }
+    D_800CBD78 = 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15042ECC.s")
+#endif
 void func_150432BC(f32 arg0) {
     D_800CBD80 = arg0;
 }

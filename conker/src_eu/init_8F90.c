@@ -2,6 +2,11 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1000A348(void);
+void func_10004074(s32);
+extern s32 D_8003E724;
+#endif
 
 typedef struct AMDMABuffer_s {
     ALLink node;
@@ -1027,7 +1032,121 @@ s32 func_10009FFC(void) {
     return func_10009CBC;
 }
 
+#ifdef NON_MATCHING
+/* Audio bank DMA bookkeeping: for each pending DMA (D_8002B1A0), poll D_80041A90; a finished message (+8 = bank
+ * address) moves its node from the loading list (D_800406A0.unkC) to the loaded list (.unk4), relocating the bank's
+ * pointer table once (unk16 == 1). Then nodes of the release list (.unk10) whose instruments are no longer in use
+ * (+0xA flags of each entry) are freed (func_10004074) and moved to the free list (.unk8). */
+void func_1000A03C(void) {
+    u32 pending = D_8002B1A0;
+    s32 received = 0;
+    u32 i, j;
+    s32 found;
+    u8 *msg = NULL;
+    struct54 *s;
+    struct54 *next;
+    struct54 *h;
+    u8 *bank;
+
+    for (i = 0; i < D_8002B1A0; i++) {
+        if (osRecvMesg(&D_80041A90, (OSMesg *)&msg, OS_MESG_NOBLOCK) != -1) {
+            received++;
+            found = 0;
+            s = D_800406A0.unkC;
+            while (s != NULL && !found) {
+                if (*(s32 *)(msg + 8) == s->unk10) {
+                    found = 1;
+                    if (s == D_800406A0.unkC) {
+                        D_800406A0.unkC = s->unk0;
+                    }
+                    if (s->unk0 != NULL) {
+                        s->unk0->unk4 = s->unk4;
+                    }
+                    if (s->unk4 != NULL) {
+                        s->unk4->unk0 = s->unk0;
+                    }
+                    s->unk0 = NULL;
+                    s->unk4 = NULL;
+                    if (D_800406A0.unk4 != 0) {
+                        h = (struct54 *)D_800406A0.unk4;
+                        s->unk4 = h;
+                        s->unk0 = h->unk0;
+                        if (h->unk0 != NULL) {
+                            h->unk0->unk4 = s;
+                        }
+                        h->unk0 = s;
+                    } else {
+                        D_800406A0.unk4 = (s32)s;
+                        s->unk0 = NULL;
+                        s->unk4 = NULL;
+                    }
+                    if (s->unk16 == 1) {
+                        bank = (u8 *)s->unk10;
+                        for (j = 0; j < (u32)*(s16 *)(bank + 0xE); j++) {
+                            ((s32 *)(bank + 0x10))[j] += s->unk10;
+                        }
+                    }
+                    s->unk15 = 1;
+                    s->unk14++;
+                } else {
+                    s = s->unk0;
+                }
+            }
+        }
+    }
+    s = D_800406A0.unk10;
+    D_8002B1A0 = pending - received;
+    while (s != NULL) {
+        found = 0;
+        next = s->unk0;
+        if (s->unk16 == 1) {
+            bank = (u8 *)s->unk10;
+            for (j = 0; j < (u32)*(s16 *)(bank + 0xE); j++) {
+                u8 *inst = *(u8 **)(((u8 **)(bank + 0x10))[j] + 8);
+                if (inst[0xA] != 0) {
+                    inst[0xA] = 0;
+                    found = 1;
+                }
+            }
+        }
+        if (found == 0) {
+            s->unk14 = 0;
+            s->unk15 = 0;
+            func_10004074(s->unk10);
+            s->unkC = 0;
+            if (s == D_800406A0.unk10) {
+                D_800406A0.unk10 = next;
+            }
+            if (s->unk0 != NULL) {
+                s->unk0->unk4 = s->unk4;
+            }
+            if (s->unk4 != NULL) {
+                s->unk4->unk0 = s->unk0;
+            }
+            if (D_800406A0.unk8 != 0) {
+                h = (struct54 *)D_800406A0.unk8;
+                s->unk4 = h;
+                s->unk0 = h->unk0;
+                if (h->unk0 != NULL) {
+                    h->unk0->unk4 = s;
+                }
+                h->unk0 = s;
+            } else {
+                D_800406A0.unk8 = (s32)s;
+                s->unk0 = NULL;
+                s->unk4 = NULL;
+            }
+        }
+        s = next;
+    }
+    if (D_8003E724 != 0) {
+        func_1000A348();
+        D_8003E724 = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_8F90/func_1000A03C.s")
+#endif
 typedef struct ACBuf_s {
     ALLink node;
     s32 unk8;

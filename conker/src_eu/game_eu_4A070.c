@@ -4,6 +4,7 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15080628(void);
 u8 *func_151149AC(u8);
+extern u8 D_800C3938[][0x19];
 #endif
 // hoisted forward declaration(s) for func_1501E7A8
 s32 func_1507EE9C(struct127 *);
@@ -555,8 +556,30 @@ void func_150222F0(s32 arg0) {
     D_800C396A[arg0] = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022304.s")
+#ifdef NON_MATCHING
+/* P36: add id to the list `list` (D_800C3938[list], 25 bytes, count D_800C3930[list]) unless present. Returns the
+ * 1-based position when found, else the old count (the new entry's index). */
+s32 func_15022304(s32 id, s32 list) {
+    u8 *cnt = (u8 *) &D_800C3930 + list;
+    u8 *a = (u8 *) &D_800C3938 + list * 25;
+    s32 n = *cnt;
+    s32 i = 0;
 
+    if (n > 0) {
+        do {
+            i++;
+            if (id == a[i - 1]) {
+                return i;
+            }
+        } while (i < n);
+    }
+    a[n] = id;
+    *cnt = n + 1;
+    return i;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022304.s")
+#endif
 extern u16 *D_800C39E8[];
 extern u8 *D_800C3A10[];
 void func_15022388(s32 arg0, s32 arg1) {

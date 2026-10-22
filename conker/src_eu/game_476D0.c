@@ -5,6 +5,18 @@
 #include "libc/math.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1501AF44(f32 *x0, f32 *y0, f32 *x1, f32 *y1);
+extern s32 D_800BEA58;
+extern s32 D_800BEA70;
+extern f32 D_80083338[];
+extern f32 D_80096C94;
+extern f32 D_80096C98;
+extern f32 D_80096C9C;
+extern f32 D_80096CA0;
+extern s16 D_800BEA88[];
+extern u8 D_800BEA50[];
+s32 func_1501AE94(s32);
+void func_1501B0A0(s32, s32);
+void func_1510B8AC(s32, f32, f32, f32);
 #endif
 
 
@@ -223,8 +235,108 @@ void func_150A7A00(f32 arg0, f32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f
 //     *arg6 = (((f32) temp_v0_2->unk4C + (sp2C * sp28 * (f32) temp_v0_2->unk44)) * 32.0f);
 // }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A8C0.s")
+#ifdef NON_MATCHING
+/* Per-player camera record D_800BE628 + p * 0x180 for a screen split into n + 1 views: viewport w/h (+4/+8, from
+ * D_800BEA58/D_800BEA70[n], minus 2 when split; the 2-player width also * D_800BEAD8), +0x64 aspect table
+ * D_80083338[n], +0x68 = 2, base fov +0x6C (D_80096C98, 2 players: D_80096C94 * D_800BEAD8) / +0x70 = 50, current fov
+ * +0x74/+0x78, +0x60 w/h, half size +0xC/+0x10, centre +0x34/+0x38 (D_800BEA88 table: 20 bytes per n, 4 per player),
+ * clip rect +0x2C/+0x24/+0x30/+0x28, scale +0x14/+0x18 (func_1501B0A0 when flag), tan factors +0x7C/+0x80, the Vp
+ * at D_800BEA4C + p * 16 (scale (w + 10) * 2, depth zmax >> 1, translate centre * 4) copied into both frame
+ * buffers' Vp at +0x40, +0x84 = 1.0, +1 = func_1501AE94(p); clip rect via func_1501AF44, func_1510B8AC(p, 0, 0, 1). */
+#define CAMREC(o) (*(f32 *)((u8 *)D_800BE628 + p * 0x180 + (o)))
+s32 func_1501A8C0(s32 p, s32 n, s32 zmax, s32 flag) {
+    f32 sw;
+    f32 sh;
+    f32 w;
+    f32 h;
+    f32 a;
+    f32 s;
+    s16 *ctr;
+    s16 *vp;
+    s32 *src;
+    s32 *dst;
+    u8 *rec;
 
+    CAMREC(4) = (&D_800BEA58)[n];
+    CAMREC(8) = (&D_800BEA70)[n];
+    if (n != 0) {
+        CAMREC(4) = CAMREC(4) - 2.0f;
+        CAMREC(8) = CAMREC(8) - 2.0f;
+    }
+    CAMREC(0x64) = D_80083338[n];
+    CAMREC(0x68) = 2.0f;
+    if (n == 1) {
+        CAMREC(4) = CAMREC(4) * D_800BEAD8;
+        CAMREC(0x6C) = D_80096C94 * D_800BEAD8;
+        CAMREC(0x70) = 50.0f;
+    } else {
+        CAMREC(0x6C) = D_80096C98;
+        CAMREC(0x70) = 50.0f;
+    }
+    CAMREC(0x74) = CAMREC(0x6C);
+    CAMREC(0x78) = CAMREC(0x70);
+    CAMREC(0x60) = CAMREC(4) / CAMREC(8);
+    CAMREC(0xC) = CAMREC(4) * 0.5f;
+    CAMREC(0x10) = CAMREC(8) * 0.5f;
+    ctr = (s16 *)((u8 *)D_800BEA88 + n * 20 + p * 4);
+    CAMREC(0x34) = ctr[0];
+    CAMREC(0x38) = ctr[1];
+    CAMREC(0x2C) = CAMREC(0x34) - CAMREC(0xC);
+    CAMREC(0x24) = CAMREC(0x38) - CAMREC(0x10);
+    CAMREC(0x30) = CAMREC(0xC) + CAMREC(0x34);
+    CAMREC(0x28) = CAMREC(0x10) + CAMREC(0x38);
+    if ((s16)flag != 0) {
+        func_1501B0A0(p, n);
+    } else {
+        sw = (&D_800BEA58)[0];
+        sh = (&D_800BEA70)[0];
+        w = CAMREC(4);
+        h = CAMREC(8);
+        CAMREC(0x14) = (w / sw) * ((sw / sh) / (w / h));
+        CAMREC(0x18) = CAMREC(8) / (f32)(&D_800BEA70)[0];
+    }
+    a = CAMREC(0x6C) * 0.5f * D_80096C9C;
+    s = sinf(a);
+    CAMREC(0x7C) = s / (CAMREC(0xC) * cosf(a));
+    a = CAMREC(0x70) * 0.5f * D_80096CA0;
+    s = sinf(a);
+    CAMREC(0x80) = s / (CAMREC(0x10) * cosf(a));
+    vp = (s16 *)(D_800BEA4C + p * 16);
+    w = CAMREC(4) + 10.0f;
+    vp[0] = w + w;
+    vp = (s16 *)(D_800BEA4C + p * 16);
+    h = CAMREC(8) + 10.0f;
+    vp[1] = h + h;
+    ((s16 *)(D_800BEA4C + p * 16))[2] = zmax >> 1;
+    ((s16 *)(D_800BEA4C + p * 16))[3] = 0;
+    ((s16 *)(D_800BEA4C + p * 16))[4] = CAMREC(0x34) * 4.0f;
+    ((s16 *)(D_800BEA4C + p * 16))[5] = CAMREC(0x38) * 4.0f;
+    ((s16 *)(D_800BEA4C + p * 16))[6] = zmax >> 1;
+    ((s16 *)(D_800BEA4C + p * 16))[7] = 0;
+    src = (s32 *)(D_800BEA4C + p * 16);
+    dst = (s32 *)((u8 *)D_800BE628 + p * 0x180 + D_800BE9C0 * 16 + 0x40);
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+    rec = (u8 *)D_800BE628 + p * 0x180;
+    src = (s32 *)(rec + D_800BE9C0 * 16 + 0x40);
+    dst = (s32 *)(rec + (D_800BE9C0 == 0) * 16 + 0x40);
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+    CAMREC(0x84) = 1.0f;
+    *((u8 *)D_800BE628 + p * 0x180 + 1) = func_1501AE94(p);
+    rec = (u8 *)D_800BE628 + p * 0x180;
+    func_1501AF44((f32 *)(rec + 0x2C), (f32 *)(rec + 0x24), (f32 *)(rec + 0x30), (f32 *)(rec + 0x28));
+    func_1510B8AC(p, 0.0f, 0.0f, CAMREC(0x84));
+    D_800BEA50[p] = p;
+}
+#undef CAMREC
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501A8C0.s")
+#endif
 s32 func_1501AE94(s32 arg0) {
     f32 w = (f32)D_800BE620 - 2.0f;
     f32 h = D_800BE624;
