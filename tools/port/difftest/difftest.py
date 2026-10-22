@@ -226,9 +226,13 @@ def build_tu(func, p, src, code):
     if pm:
         m = pm[-1]; a, b = m.start(), m.end()
         k = src.rfind('#ifdef NON_MATCHING\n', 0, a)
+        # P80: comment / blank lines may sit between the #else and the pragma (game_981E0.c "// ??" notes)
         e = src.rfind('#else\n', 0, a)
+        between = src[e + len('#else\n'):a] if e >= 0 else None
+        only_notes = between is not None and all(not l.strip() or l.strip().startswith('//') for l in between.split('\n'))
+        # P73: the NON_MATCHING side may hold more functions than this one
         nmside = func_span(src[k:e], func) if k >= 0 and k < e and '#endif' not in src[k:a] else None
-        if k >= 0 and src[:a].endswith('#else\n') and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
+        if k >= 0 and e > k and only_notes and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
             a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
             tu = src[:a] + '\n' + code + '\n' + src[b:]
         elif nmside:
@@ -247,10 +251,12 @@ def build_tu(func, p, src, code):
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0
         tu = tu[:k] + '\n'.join(hoist) + '\n' + tu[k:]
     tu = nm_resolve(tu, True)   # other NON_MATCHING blocks: keep the C side
-    # P73: the candidate must survive the NON_MATCHING resolution (else a different body would be tested)
-    body = code.strip()
-    if body and body not in tu:
-        raise RuntimeError('candidate body for %s was dropped from the TU (NON_MATCHING layout of %s)' % (func, p))
+    # P73 / P80: the candidate must survive the splice and the NON_MATCHING resolution (else a different body would be
+    # tested). P80's form: compare the candidate's own NM-resolved definition (P73 compared the raw text, which fails
+    # when the candidate itself holds #ifdef NON_MATCHING lines).
+    cr = nm_resolve(code, True); cs = func_span(cr, func)
+    if cs is not None and cr[cs[0]:cs[1]] not in tu:
+        raise RuntimeError('candidate %s was dropped when splicing it into %s' % (func, p))
     return PRAG.sub('', tu)
 
 def nm_resolve(text, on=True):

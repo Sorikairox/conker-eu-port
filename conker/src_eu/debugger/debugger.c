@@ -7,7 +7,7 @@ u8 *func_160014F0(s16 *arg0, s32 arg1);
 void func_16001678(void);
 #endif
 
-s32 func_1600160C();
+s32 func_1600160C(s32);
 void func_16001044(s32 arg0, s32 arg1, s32 arg2);
 
 
@@ -659,7 +659,7 @@ void func_16000F8C(s32 arg0, f32 arg1)
 
 void func_160012B0(s32 arg0, u8 *arg1) {
     if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {
-        s32 fb = func_1600160C();
+        s32 fb = func_1600160C(arg0);   /* P80: a0 still holds arg0 at the jal (the text cell) */
         while (*arg1 != 0) {
             fb = func_160014F0(fb, *arg1 & 0xFF);
             *arg1++;

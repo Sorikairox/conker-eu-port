@@ -69,4 +69,8 @@ chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
 # and src_eu's body was tested instead (every mutant EQUIV). The mutant must be DIFFER.
 chk EQUIV  func_1501B300 src_eu/game_eu_48B10.c
 chk DIFFER func_1501B300 src_eu/game_eu_48B10.c 's/out\[1\] = negSinPitch \* 127.0f;/out[1] = x * 127.0f;/'
+# P80: a converted function whose #else holds a note line before the pragma (game_981E0.c "// TBD ..."): the candidate
+# used to be dropped (the old NM C was tested, every mutant survived); now spliced, and a dropped candidate is an ERROR
+chkc EQUIV  func_1506EF5C
+chkc DIFFER func_1506EF5C 's/= 0xFFFF;/= 0xFFFE;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

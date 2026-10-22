@@ -9,7 +9,8 @@ extern u8 D_800A0BC0[];
 #ifdef NON_MATCHING
 s32 memcpy(s32, u8 **, s32);
 
-s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2) {
+/* P80: arg3 goes on to func_151604E4 (its 2nd func_15167A68 argument); the only caller, func_150268BC, passes 0 */
+s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2, s32 arg3) {
     struct {
         u8 * u20;
         u8 u24;
@@ -42,7 +43,7 @@ s32 func_150CE660(u8 *arg0, s16 arg1, s32 arg2) {
     sp.u914 = arg1;
     sp.u20 = arg0;
     sp.u24 = (*(u8 *)((u8 *)arg0 + 0x3B));
-    var_v0 = func_151604E4(&sp.u910, 0x8F0, arg2 & 0xFF);
+    var_v0 = func_151604E4(&sp.u910, 0x8F0, arg2 & 0xFF, arg3);
     if (var_v0 != 0) {
         var_v0 = memcpy(var_v0 + 0x18, &sp.u20, 0x8F0);
     }
