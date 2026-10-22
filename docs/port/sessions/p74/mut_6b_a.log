@@ -1,0 +1,27 @@
+== func_1503F45C
+m1 KILLED by k00_i24_b0: s/= 300;/= 301;/
+m2 KILLED by k01_i23_b1: s/unk94 |= 0x40;/unk94 |= 0x20;/
+m3 KILLED by k03_i0_b3: s/unk94 \&= ~0x200;/unk94 \&= ~0x100;/
+m4 KILLED by k00_i24_b0: s/func_1503F23C(2, 1, i)/func_1503F23C(2, 0, i)/
+m5 KILLED by k02_i22_b2: s/unk94 |= 0x80;/unk94 |= 0x40;/
+m6 KILLED by k12_i19_b4: s/unk94 \&= ~0x400;/unk94 \&= ~0x401;/
+m7 KILLED by k00_i24_b0: s/func_1503F23C(2, 2, i) != 0/func_1503F23C(2, 2, i) == 0/
+== func_1503ED44
+m1 KILLED by k00_i2_n0: s/pc\[0x64\] == 0 ||/0 ||/
+m2 KILLED by k00_i2_n0: s/!= -1) {/!= -2) {/
+m3 KILLED by k00_i2_n0: s/(pc + 0x48) \* dt/(pc + 0x48) * 2.0f/
+m4 KILLED by k00_i2_n0: s/\*(f32 \*) (pc + 0x28) += \*(f32 \*) (pc + 0x4C) \* dt;/*(f32 *) (pc + 0x28) += *(f32 *) (pc + 0x50) * dt;/
+m5 KILLED by k00_i2_n0: s/(pc + 0x4C) += \*(f32 \*) (pc + 0x60)/(pc + 0x4C) += *(f32 *) (pc + 0x5C)/
+m6 KILLED by k00_i2_n0: s/k \* 0x68;/k * 0x64;/
+m7 LIVE: s/k < n;/k <= n;/
+m8 KILLED by k00_i2_n0: s/(pc + 0x38) +=/(pc + 0x38) -=/
+== func_1503EF90
+m1 KILLED by k01_i0_n8: s/NULL) + 5;/NULL) + 4;/
+m2 KILLED by k23_i2_n3: s/< -4.0f/< -3.0f/
+m3 KILLED by k21_i2_n3: s/(pc + 0x48) \*= 0.8f/(pc + 0x48) *= 0.7f/
+m4 KILLED by k19_i3_n1: s/(pc + 0x4C) \*= -0.5f/(pc + 0x4C) *= 0.5f/
+m5 KILLED by k19_i3_n1: s/(pc + 0x58) \*= 0.4f/(pc + 0x58) *= 0.8f/
+m6 KILLED by k00_i2_n0: s/(pc + 0x60) == 0.0f/(pc + 0x60) != 0.0f/
+m7 KILLED by k01_i0_n8: s/\*(f32 \*) (pc + 0x60) = 0.0f;//
+m8 KILLED by k00_i2_n0: s/func_1510F800(0);/func_1510F800(1);/
+m9 KILLED by k19_i3_n1: s/(pc + 0x5C) \*= -1.0f/(pc + 0x5C) *= 1.0f/
