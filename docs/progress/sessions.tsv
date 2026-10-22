@@ -123,3 +123,11 @@ P43	port	nm convert	8		133	level lighting, object draw, tex scroll, eye height/b
 P46	web	port-web				level lit by game lights (game_36680 IDO array-copy fixed via srcfix), correct eye height; objects need func_1502C1D4
 P47	port-b	nm convert				u64 re-check: 0 false EQUIV; walk handler func_1504CB98 (4700 insns) inserted; total C 4804 (81.2%) bytes 51.6%
 P49	web	port-web				player WALKS + camera follows (temp overrides func_15059C84 integrator, func_1504C0E8 partial); no collision yet
+P48	port	nm convert				object update loop + model pointer chain C; Conker blocked by func_150A86B0 (hand-asm skeleton anim); total C 4810 (81.3%)
+P50	port-b	nm convert	4			walk callee func_15056B08, movement integrator/anim choice/gravity C; wall fns = entries into hand-asm engine func_150AB708
+P52	web	port-web				real C walking = P49 behaviour (overrides removed); gravity ok; floor query + model loader func_1503D210 asm; black screen = player leaves floor
+P53	port-b	nm convert	4			floor lookup func_1510EED0, floor height hand-asm func_150A44A4 (new nmasm_vr VR4300 lib), marker placement, wall cylinder
+P54	port-b	nm convert	5			floor routines (hand asm, real ROM levels) + landing C; floor lookup fully C
+P51	port	nm convert	5			model loader + skeleton anim evaluator func_150A86B0 (hand asm, 950 real-ROM trials 0 diff) + keyframe copy; total C 4813 (81.4%)
+P55	web	port-web				standing/landing/falling on real floor verified; G_DL-to-0 renderer guard; stub lists
+P56	port-b	nm convert	3		129	wall engine + ray cast via mechanical asm2c (hand asm only, user-approved stopgap); real-ROM levels 0 diff

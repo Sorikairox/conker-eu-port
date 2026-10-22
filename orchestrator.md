@@ -89,6 +89,11 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - For port branches: `git merge --no-edit`, resolve `docs/*` conflicts with `tools/eu_port/merge_union.py <file>` (pass each path explicitly — zsh doesn't word-split), stop on code conflicts; after a code-bearing merge run `verify_all.sh` + `port_work/p28h/nmcheck.sh`.
 - `port-web` must clear `port/build/census/files.tsv` and `port/build/vbe.stamp` and rebuild clean after any merge.
 
+### Mechanical asm→C translation (user decision 2026-10-23)
+- `tools/port/asm2c_hand.py` (P56) writes register-level C, one statement per instruction. It is allowed **only for code Rare hand-wrote in assembly** (e.g. the D5E90.s engines). That is a stopgap; each such file is listed for a later readable rewrite.
+- Code that was compiled from C (GLOBAL_ASM functions in src_eu) must still get real, readable C written from the asm — never the translator. The user explicitly rejected recompilation-style output for the game code.
+- Current translated files: `src_eu/nm_asm/D5E90_walls.inc`, `D5E90_ray.inc` (wall engine, ray cast).
+
 ### Verification culture
 - Conversions are accepted only with difftest EQUIV **plus mutants that DIFFER**; anything unreachable is marked UNVERIFIED and runtime-checked in the browser.
 - Whole-function harnesses (`tools/port/difftest/nmasm_*.py`) for hand-asm / multi-entry code; compare against real ROM data where possible.
