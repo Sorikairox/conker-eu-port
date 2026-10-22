@@ -372,6 +372,7 @@ void func_150A16A4(struct127 *arg0) {
         *ps = 0;
     } else {
         ps = NULL;
+        prev = 0; // P47: the asm leaves prev (sp+0x80) uninitialised for players >= 16; 0 = what the zeroed difftest stack gives
     }
     i = 0;
     mask = w[0];
