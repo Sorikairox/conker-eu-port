@@ -12,7 +12,7 @@ s32 func_151E6710(s32);
 void func_15083E20(u8 *, u16, u8 *);
 void func_15083C3C(s32, s32, s32);
 s32 func_15083D54(struct127 *, u16, s32, f32);
-void func_1503DD8C(struct127 *, s32, s32, s32);
+s32 func_1503DD8C(struct127 *, s32, s32, s32);
 void func_15083784(struct127 *, s32);
 s32 func_15085118(s32);
 s32 func_1514D6CC(struct127 *);
