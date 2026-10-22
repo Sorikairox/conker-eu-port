@@ -1,0 +1,2 @@
+# P85 third round
+s/(w \* isx) \/ 4096)/(w * isx) \/ 4095)/ % g_sx4095

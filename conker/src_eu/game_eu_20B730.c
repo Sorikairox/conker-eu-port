@@ -18,7 +18,27 @@ void func_151DDF20(void) {
     }
 }
 
+#ifdef NON_MATCHING
+extern s8 D_80090210[];        /* settings minimum (0x1C bytes) */
+extern s8 D_8009022C[];        /* settings maximum */
+
+/*
+ * P85: clamp the 0x1C settings bytes D_800E1010 (signed): a value outside [D_80090210[i], D_8009022C[i]] is reset to
+ * its default D_800901F4[i] (as func_151DDF20 resets all of them). After a failed save checksum the settings are 0xFF
+ * (-1) and this puts e.g. the language D_800E101A back in range. Callers pass arguments it ignores.
+ */
+void func_151DDF6C(void) {
+    s32 i;
+
+    for (i = 0; i < 0x1C; i++) {
+        if (D_800E1010[i] < D_80090210[i] || D_8009022C[i] < D_800E1010[i]) {
+            D_800E1010[i] = D_800901F4[i];
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DDF6C.s")
+#endif
 
 s32 func_151DE074(s32 arg0) {
     return ~arg0;
@@ -131,7 +151,7 @@ void func_151E2A1C(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_151DDF6C(s8, s8);
+void func_151DDF6C(void); /* P85: takes no arguments (the asm reads none) */
 extern s32 D_80082F4C;
 extern s32 D_800ABA74;
 
@@ -176,7 +196,7 @@ void func_151E2A54(void) {
     }
     (*(u8 *)((u8 *)D_800E1010 + 0x16)) = (u8) (*(u8 *)((u8 *)temp_v0 + 8));
     (*(u8 *)((u8 *)D_800E1010 + 6)) = (u8) (*(u8 *)((u8 *)temp_v0 + 9));
-    func_151DDF6C((*(s8 *)((u8 *)temp_v0 + 1)), temp_a1);
+    func_151DDF6C();
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2A54.s")
