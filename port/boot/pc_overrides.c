@@ -6,6 +6,8 @@
  *
  *   func_100061F8  handwritten TLB loop (init_eu_5DA0.c)
  *   func_150ADA20  libultra guRandom on 64-bit registers (game_DAE50.c)
+ *   func_15059C84  P49 TEMPORARY: position integrator of the walk handler (game_83300.c; remove when converted)
+ *   func_1504C0E8  P49 TEMPORARY, PARTIAL: prefix of the walk handler's animation choice (game_eu_78230.c)
  */
 #include <ultra64.h>
 
@@ -167,3 +169,137 @@ void port_cam_probe(unsigned task) {
  * link-time wrapper of the game's C func_150A5858 (port/gfx/gfx_f3dex2.c, -Wl,--wrap). */
 
 /* P39: the ?camwatch write watch lives in port/gfx/gfx_f3dex2.c (a host TU: port_flag / %s need host strings). */
+
+/* P49 TEMPORARY: func_15059C84 (game_83300.c, GLOBAL_ASM, 341 lines), the per-frame position integrator of the
+ * player walk handler func_1504CB98 (P47). With the asm stub the walk handler set the speed (+0x3C rises to 35)
+ * and the heading (+0x76), but x / z never changed. This is an instruction-by-instruction C version of the asm,
+ * written in the port only so movement can be observed; REMOVE it when the port branch converts the function
+ * (the faithful order below is a good starting point for its NON_MATCHING body). Not difftested.
+ *   - D_800D1968 == 1: return.  +0x1FC bit 8: clear it, return.
+ *   - +0x127 != 0xFF and unk31C+0x46 (s16) > 0: heading = +0x76 + unk31C+0x10 (u16), also stored to +0x7A.
+ *   - 0 <= speed < 1 and !(+0x1FC & 1): +0x7E counts up to 0xFA; if the push vectors +0x164..+0x170 are all 0,
+ *     +0x1F4 = 0 and return. Otherwise +0x7E = 0.
+ *   - pitch (a2 of func_1505A184) = clamp(+0xB8, -90, 90) when (+0x22C & 8), or in water with unk31C+0x21 != 0
+ *     (or no unk31C); else 0.
+ *   - +0x1FC bit 1: clear it, speed = 2 * (+0x1F4 * +0x14C / D_800D1550[0]) (if the frame scale is not 0),
+ *     heading = +0x7A.  +0x1F4 = speed.
+ *   - func_1505A184(heading, speed, pitch, &dx, &dz, &dy); dx += +0x164 + +0x16C; dz += +0x168 + +0x170;
+ *     +0xAD == 10: dy = 0.
+ *   - slope: on the ground (+0x28 <= 0), not in water, !(+0x22C & 8), and (state != 1 or unk31C+0x4F == 0): the
+ *     floor triangle (s16 x3 x3 at +0x18C) -> func_15049350 -> normal D_800CC630/634/638; if ny != 0,
+ *     dy' = (-nx dx - nz dz) / ny and, unless (dy' <= 4 and state 1 and unk31C+0x4E == 2), (dx, dy', dz) is
+ *     rescaled to the horizontal length.
+ *   - pos += (dx, dy, dz) * D_800D1550[0]. */
+extern s32 D_800D1968;
+extern f32 D_800D1550[];
+extern f32 D_800CC630, D_800CC634, D_800CC638;
+void func_1505A184(u16, f32, f32, f32 *, f32 *, f32 *);
+void func_15049350(s32, f32, f32, f32, f32, f32, f32, f32, f32);
+s32 func_15059C84(u8 *r) {
+#define RF(o) (*(f32 *)(r + (o)))
+    u8 *u;
+    f32 speed = RF(0x3C), f0 = speed, pitch, dx, dz, dy, ny, nd, h2, tot, h;
+    u16 yaw = *(u16 *)(r + 0x76);
+    u8 v;
+    f32 tri[9];
+    s32 i;
+    if (D_800D1968 == 1) return 0;
+    v = r[0x1FC];
+    if (v & 8) { r[0x1FC] = v & 0xF7; return 0; }
+    if (r[0x127] != 0xFF) {
+        u = *(u8 **)(r + 0x31C);
+        if (*(s16 *)(u + 0x46) > 0) {
+            yaw = yaw + *(u16 *)(u + 0x10);
+            f0 = RF(0x3C);
+            *(u16 *)(r + 0x7A) = yaw;
+        }
+    }
+    if (f0 < 1.0f && 0.0f <= f0 && !(r[0x1FC] & 1)) {
+        if (r[0x7E] < 0xFA) r[0x7E] = r[0x7E] + 1;
+        if (RF(0x164) == 0.0f && RF(0x168) == 0.0f && RF(0x16C) == 0.0f && RF(0x170) == 0.0f) {
+            RF(0x1F4) = 0.0f;
+            return 0;
+        }
+    } else {
+        r[0x7E] = 0;
+    }
+    u = *(u8 **)(r + 0x31C);
+    if ((r[0xAD] != 0 && (u == NULL || u[0x21] == 0)) || (*(u16 *)(r + 0x22C) & 8)) {
+        pitch = RF(0xB8);
+        if (90.0f < pitch) pitch = 90.0f;
+        else if (pitch < -90.0f) pitch = -90.0f;
+    } else {
+        pitch = 0.0f;
+    }
+    v = r[0x1FC];
+    if (v & 1) {
+        r[0x1FC] = v & 0xFE;
+        if (D_800D1550[0] != 0.0f) speed = (RF(0x1F4) * RF(0x14C)) / D_800D1550[0] * 2.0f;
+        yaw = *(u16 *)(r + 0x7A);
+    }
+    RF(0x1F4) = speed;
+    dx = pitch;
+    func_1505A184(yaw, speed, pitch, &dx, &dz, &dy);
+    dx = dx + (RF(0x164) + RF(0x16C));
+    dz = dz + (RF(0x168) + RF(0x170));
+    if (r[0xAD] == 10) dy = 0.0f;
+    if (!(*(s32 *)r == 1 && (*(u8 **)(r + 0x31C))[0x4F] != 0) && RF(0x28) <= 0.0f && r[0xAD] == 0 &&
+        !(*(u16 *)(r + 0x22C) & 8)) {
+        for (i = 0; i < 9; i++) tri[i] = (f32) *(s16 *)(r + 0x18C + i * 2);
+        func_15049350(*(s32 *)&tri[0], tri[1], tri[2], tri[3], tri[4], tri[5], tri[6], tri[7], tri[8]);
+        ny = D_800CC634;
+        if (ny != 0.0f) {
+            nd = ((-D_800CC630 * dx) - (D_800CC638 * dz)) / ny;
+            if (4.0f < nd || *(s32 *)r != 1 || (*(u8 **)(r + 0x31C))[0x4E] != 2) {
+                h2 = dx * dx + dz * dz;
+                tot = sqrtf(h2 + nd * nd);
+                if (tot != 0.0f) {
+                    h = sqrtf(h2);
+                    dx = dx * h / tot;
+                    dy = nd * h / tot;
+                    dz = dz * h / tot;
+                }
+            }
+        }
+    }
+    dx = dx * D_800D1550[0];
+    dz = dz * D_800D1550[0];
+    dy = dy * D_800D1550[0];
+    RF(0x14) = RF(0x14) + dx;
+    RF(0x1C) = RF(0x1C) + dz;
+    RF(0x18) = RF(0x18) + dy;
+    return 0;
+#undef RF
+}
+
+/* P49 TEMPORARY, PARTIAL: func_1504C0E8 (game_eu_78230.c, GLOBAL_ASM, 531 lines), the walk handler's last call
+ * (animation choice). Only its prefix is here, up to the first animation call; the rest (func_15064F50,
+ * func_1505E650, func_1504C078 / func_1504C0B8 ...) is NOT done. Why: with the stub, record +0x80 was never set,
+ * so func_150599C8 never turned the body yaw +0x7A toward the heading +0x76; it then returned an angle >= 0x5B
+ * and the walk handler cut the target speed to 0 whenever +0x3C > 12 (speed saw-toothed 7..14 instead of 35).
+ *   - unk31C+0x12 (s16) eases toward D_800CC6D2 (snaps to 0 when D_800CC6D2 == 0 and |+0x12| is small);
+ *   - unk31C+0x6B != 0: return;  +0x65 != 0 and not stunned: (func_15064DD0, not called here) return;
+ *   - on the ground path (+0x81, +0x104, +0xAD, +0x83 all 0, unk31C+0x11A != 3): +0x80 = 1, +0x100 &= 0xF3,
+ *     D_800CC6DC |= 0x80.  REMOVE when the port branch converts func_1504C0E8. */
+extern s16 D_800CC6D2;
+extern f32 D_800CC6D4;
+extern s32 D_800CC6DC;
+s32 func_1504C0E8(u8 *r, s32 arg1, f32 arg2) {
+    u8 *u = *(u8 **)(r + 0x31C);
+    s16 a2 = D_800CC6D2, v = *(s16 *)(u + 0x12);
+    (void)arg1;
+    (void)arg2;
+    if (a2 == 0 && !(v < -0x1D) && v < 0x1E) {
+        *(s16 *)(u + 0x12) = 0;
+    } else {
+        *(s16 *)(u + 0x12) = v + (s32)((D_800D1550[0] / D_800CC6D4) * (f32)(a2 - v));
+    }
+    u = *(u8 **)(r + 0x31C);
+    if (u[0x6B] != 0) return 0;
+    if (r[0x65] != 0 && r[0x104] == 0) return 0;
+    if (r[0x81] != 0 || r[0x104] != 0 || r[0xAD] != 0 || r[0x83] != 0 || u[0x11A] == 3) return 0;
+    r[0x80] = 1;
+    r[0x100] = r[0x100] & 0xF3;
+    D_800CC6DC |= 0x80;
+    return 0;
+}

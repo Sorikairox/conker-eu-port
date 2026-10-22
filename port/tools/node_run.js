@@ -20,6 +20,15 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
     setTimeout(() => { M.HEAP32[p + 1] = 0x9000; M.HEAP32[p + 2] = 80; M.HEAP32[p + 3] = -40; console.log('[padtest] press A+Start, stick 80,-40'); }, 3000);
     setTimeout(() => { M.HEAP32[p + 1] = 0; M.HEAP32[p + 2] = 0; M.HEAP32[p + 3] = 0; console.log('[padtest] release'); }, 4000);
   }
+  // P49 PADSCRIPT="ms:buttons:x:y; ...": pad 0 state from wall time ms (buttons hex N64 bits, stick x / y, y > 0 = up)
+  if (process.env.PADSCRIPT && M._port_pad_state) {
+    const p = M._port_pad_state() >> 2;
+    for (const step of process.env.PADSCRIPT.split(';').map((x) => x.trim()).filter(Boolean)) {
+      const [t, b, x, y] = step.split(':');
+      setTimeout(() => { M.HEAP32[p + 1] = parseInt(b || '0', 16); M.HEAP32[p + 2] = +(x || 0); M.HEAP32[p + 3] = +(y || 0);
+        console.log(`[padscript] t ${t} ms: buttons ${b || 0} stick ${x || 0},${y || 0}`); }, +t);
+    }
+  }
   // P27 EEPTEST=seed: EEPROM write then read back through PIF commands 05/04 (no IndexedDB in node)
   if (process.env.EEPTEST && M._port_eep_test) setTimeout(() => { M._port_eep_test(1, +process.env.EEPTEST); M._port_eep_test(2, +process.env.EEPTEST); }, 2000);
   setTimeout(() => { M._port_dump_threads(); process.exit(0); }, +secs * 1000);

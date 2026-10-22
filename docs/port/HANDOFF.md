@@ -760,7 +760,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -782,7 +782,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P39.md` (merge port P38, camera eye/at writer and its stubbed inputs, runtime checks of the P38 C) and
 `docs/port/sessions/P42.md` (merge port P40, KSEG0 pointer tests and computed IO_READ, the real visibility walk on level data) and
 `docs/port/sessions/P44.md` (runtime check of P41's camera chain, the game's own view, what blocks player movement) and
-`docs/port/sessions/P46.md` (runtime check of P43 / P45, srcfix array initializers, the first lit and framed game-camera frame). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P46.md` (runtime check of P43 / P45, srcfix array initializers, the first lit and framed game-camera frame) and
+`docs/port/sessions/P49.md` (merge port-b P47, the player walks and the camera follows, the movement-path stub order). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -799,6 +800,8 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
 PADTEST=1 EEPTEST=77 port/web/boot.sh 10   # P27: scripted pad input -> [pad] lines; EEPROM write/read [eeptest] PASS
 PROBE_NOAUDIO=1 PROBE_STEPS="6000:keydown:Space; 7500:keyup:Space" port/web/audprobe.sh "app=game" 10   # P27: real key events
 PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audonly=1&audtest=26390" 12  # P27: audio starts on the gesture
+PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/boot.sh 30   # P49: scripted stick (ms:buttons:x:y) + walk-handler log
+# P49: PROBE_STEPS also takes MS:shot:/abs/path.png (real-time screenshots during a run; frame sequences)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1496,6 +1499,37 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
     func_1502E7B4 (Conker's model); func_1504CB98 + func_1507E690 (movement); func_1510EED0 / func_150A44A4 (floor);
     func_1509A024. game_36680.c and game_2062D0.c build on the PC only through srcfix; write explicit copies if they
     get NON_MATCHING bodies.
+- **P49 (after merging port-b P47, cd88fdd): the player walks and the camera follows.** Full notes: P49.md.
+  - Clean rebuild. The P46 `A0_KEEP` entry is gone (`A0_KEEP = set()`). Node 40 s: 8/8 PASS, heap 0 errors, no
+    heapwatch break, 83 distinct stubs. Real-time Chrome (Metal, `heapwatch=1`, W / D / S keys): 8/8 PASS, heap 0
+    errors, no RuntimeError.
+  - **The C walk handler func_1504CB98 works:** the stick sets the target speed +0x44 = 35, the camera-relative
+    heading +0x76 and the speed +0x3C. **x / z did not change because the integrator func_15059C84 (asm) was a
+    stub.** TEMPORARY PC version (full, step by step from the asm) in `port/boot/pc_overrides.c`.
+  - Second blocker: **func_1504C0E8** (stub) never set +0x80, so func_150599C8 never turned the body yaw +0x7A.
+    The handler then cut the speed whenever +0x3C > 12 (it saw-toothed 7..14). TEMPORARY **partial** PC version
+    (prefix only: the unk31C+0x12 easing and `+0x80 = 1` on the ground path; no animation choice). Speed now 35,
+    +0x7A follows.
+  - Camera: `at` = the record every frame; the eye trails 530 to 680 behind at height 401 and swings behind on turns.
+    The stick is camera-relative. Screenshot `P49_screenshot.png`; frame sequence `docs/port/sessions/p49/walk_*.png`.
+  - No floor or wall collision yet: at about 600 units/s the player leaves level 0x21's floor in about a second (a long
+    W hold turns the view black about 2 s in).
+  - **UNVERIFIED branches of func_1504CB98:** the C-button steering (needs D_800BE616 or unk31C+0x78 in 9 / 0x16 /
+    0x3B), unk31C+0x4E == 2 and the in-water turn rate are not reachable on level 0x21. All three were read against
+    the asm instruction by instruction: **no bug found**.
+  - **For the port branch, the movement path in order:**
+    1. **func_15059C84** (341 lines, integrator);
+    2. **func_1504C0E8** (531, animation choice + +0x80);
+    3. **func_1505A770** (163, gravity: y / y_velocity);
+    4. func_1510EED0 (932) / func_150A44A4 (282): floor, +0x118 stays -10000;
+    5. walls: func_15044950 (169), then **func_150AB6D0 / func_150AC8C4**, which are in the unsplit `asm/D5E90.s`;
+    6. func_15021834 (423, x2: +0x28, old position);
+    7. then func_1505F298 (1281, jump / attack), func_1505A9AC (893, landing), func_15051558 (824), func_1505D6F0,
+       func_1508000C.
+
+    Drop both P49 overrides when 1 and 2 are converted.
+  - Tools: `?p49walk=N` / `?p49every=N` (`port/gfx/p49_walk.c`, wrap of func_1504CB98; logs the record and the stubs
+    reached inside the call through `port_stub_trace_hook`), node `PADSCRIPT`, audprobe `MS:shot:PATH`.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

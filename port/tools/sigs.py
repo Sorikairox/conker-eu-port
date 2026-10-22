@@ -116,11 +116,11 @@ def conv(ind, v, src, dst, tmp, out):
     return t
 
 
-# TEMPORARY (P46, port-web): o32 leaves a missing argument in its register. Calls listed here pass
-# the CALLER's first parameter (still in a0 in the asm) instead of zero. Remove each entry when the
-# port branch fixes the call in source.
-#   game_14FF90.c func_15127FEC: `func_1512A390();`, which takes `struct108 *` since P43.
-A0_KEEP = {('@func_15127FEC', '@func_1512A390')}
+# P46 mechanism (port-web): o32 leaves a missing argument in its register. Calls listed here pass
+# the CALLER's first parameter (still in a0 in the asm) instead of zero. Add an entry only as a
+# TEMPORARY fix, and remove it when the port branch fixes the call in source.
+#   P49: the func_15127FEC -> func_1512A390 entry is gone (P47 passes arg0 in game_14FF90.c).
+A0_KEEP = set()
 DEFINE_A0 = re.compile(r'^define [^@]*(@[\w.$]+)\((ptr|i32)[^%,)]*(%[\w.]+)?')
 
 

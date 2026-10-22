@@ -150,8 +150,10 @@ int port_stub_pt(int a0) { port_stub_dlret(a0); return a0; }
  * (game_45B80.c GDL) and the DL buffers, to find where the frame DL leaves its buffer. */
 extern unsigned D_800BE9D0;
 void port_camwatch(const char *where); /* P39: pc_overrides.c, ?camwatch=N */
+void (*port_stub_trace_hook)(const char *name); /* P49: ?p49walk records the stubs hit inside the walk handler */
 void port_stub_hit(const char *name, const char *what) {
     port_stub_hits++;
+    if (port_stub_trace_hook) port_stub_trace_hook(name);
     port_camwatch(name);
     { static int gt = -1; if (gt < 0) gt = port_flag("gdltrack");
       if (gt && port_frame_count >= (unsigned)gt && port_frame_count < (unsigned)gt + 8) {
