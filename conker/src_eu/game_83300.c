@@ -3,6 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15049350(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
 s32 func_15022A8C(struct127 *);
 extern u8 D_800C3A78;
 s32 func_1505E0C4(struct127 *, s32, u8 *, s32, s32, s32, s32, f32, f32, f32, f32, s32);
@@ -1915,7 +1916,9 @@ block_17:
                 for (i = 0; i < 9; i++) {
                     tri[i] = (f32) (*(s16 *)((u8 *)arg0 + 0x18C + i * 2));
                 }
-                func_15049350(*(struct_eu_bytes24 *)tri);
+                /* P77: the nine floats as arguments (the asm passes them in a0..a3 and the stack; the old call
+                 * passed one 36-byte struct, a single argument in the port) */
+                func_15049350(*(s32 *)&tri[0], tri[1], tri[2], tri[3], tri[4], tri[5], tri[6], tri[7], tri[8]);
                 if ((D_800CC634 != 0.0f) && ((temp_f12 = ((-D_800CC630 * sp84) - (D_800CC638 * sp80)) / D_800CC634, (temp_f12 > 4.0f)) || ((*(s32 *)((u8 *)arg0 + 0)) != 1) || ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x31C))) + 0x4E)) != 2))) {
                     temp_f14 = (sp84 * sp84) + (sp80 * sp80);
                     temp_f2 = sqrtf(temp_f14 + (temp_f12 * temp_f12));

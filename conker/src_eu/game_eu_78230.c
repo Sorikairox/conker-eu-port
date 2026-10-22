@@ -3483,7 +3483,11 @@ struct127 *func_15052F58(s32 arg0, s32 arg1) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+s32 func_15053430(struct127 *);   /* P77: the asm reads a0 (the object) */
+#else
 s32 func_15053430(void);
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15053430.s")
 
 s32 func_150535F4(struct127 *arg0) {
@@ -3498,7 +3502,11 @@ s32 func_150535F4(struct127 *arg0) {
         if (((tmp & 0x10) != 0) ||
             (((tmp & 8) != 0) && (arg0->unk28 == 0.0f)) ||
             (arg0->unk10F == 0)) {
+#ifdef NON_MATCHING
+            return func_15053430(arg0);
+#else
             return func_15053430();
+#endif
         }
     }
     return 0;

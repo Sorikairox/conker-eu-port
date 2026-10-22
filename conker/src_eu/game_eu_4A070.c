@@ -163,7 +163,23 @@ void func_1501CC1C(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CC1C.s")
 #endif
+#ifdef NON_MATCHING
+extern void *D_800C3D80[][30];   /* 16-byte block per actor */
+
+/* Clears (0xFF) the 16-byte block of every actor of sequence slot `slot`. */
+void func_1501CDA0(s32 slot) {
+    s32 i;
+    s32 j;
+
+    for (i = 0; i < D_800C3A5A[slot]; i++) {
+        for (j = 0; j < 16; j++) {
+            ((u8 *)D_800C3D80[slot][i])[j] = 0xFF;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CDA0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CE34.s")
 
@@ -972,7 +988,30 @@ s32 func_15022440(s32 arg0, s32 arg1) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150225D0.s")
 
+#ifdef NON_MATCHING
+extern u8 D_800C3970[];
+
+/* Adds `id` to sequence slot `slot`'s id list (D_800C3970, 30 bytes per slot, count D_800C396A[slot]) unless it
+ * is already there. Returns i + 1 for an id found at index i, else the old count (the loop counter, as the
+ * original). The list is not bounded. */
+s32 func_150226E8(u8 id, s32 slot) {
+    u8 *list = &D_800C3970[slot * 30];
+    s32 count = D_800C396A[slot];
+    s32 i = 0;
+
+    while (i < count) {
+        i++;
+        if (list[i - 1] == id) {
+            return i;
+        }
+    }
+    list[count] = id;
+    D_800C396A[slot] = count + 1;
+    return i;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150226E8.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_150226E8(u8, s32);

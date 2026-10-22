@@ -278,7 +278,11 @@ void func_1512B670(u8 *arg0) {
             if ((temp_v0_2 & 8) && !(temp_v0_2 & 0x200) && ((*(u8 *)((u8 *)arg0 + 0x23C)) == 0)) {
                 temp_v0_3 = (*(s32 *)((u8 *)arg0 + 0x5F0));
                 if (!(temp_v0_3 & 0x80) && !(temp_v0_3 & 0x40)) {
+#ifdef NON_MATCHING
+                    func_1512B2C4(arg0);   /* P77: the asm passes arg0 in a0 (the callee reads it) */
+#else
                     func_1512B2C4();
+#endif
                     return;
                 }
             }
