@@ -1,0 +1,33 @@
+s|if (pl\[0x120\] != 0 \|\| D_80084810 != 0) {|if (pl[0x120] != 0) {| %
+s|if (pl\[0x120\] != 0 \|\| D_80084810 != 0) {|if (D_80084810 != 0) {| %
+s|        MASK = 0;|        MASK = 1;| %
+s|    if (mode == 0) {|    if (mode == 1) {| %
+s|        if (CAM_W(0x2C) \& 0x100) {|        if (CAM_W(0x2C) \& 0x200) {| %
+s|mode == 2 \|\| mode == 0x12 \|\||mode == 0x12 \|\|| %
+s|mode == 0x34 \|\| mode == 0x10 \|\||mode == 0x34 \|\|| %
+s|            mode == 0xF) {|            mode == 0xE) {| %
+s|func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 0x1E0);|func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 0x1E1);| %
+s|            CTL \&= 0xFFF0;|            CTL \&= 0xFFE0;| %
+s|MASK = D_800BEB30\[CAM_H(0x368)\];|MASK = D_800BEB30[CAM_H(0x368) + 1];| %
+s|if (mode == 3 \|\| mode == 0xD \|\||if (mode == 0xD \|\|| %
+s|mode == 0x1A \|\| mode == 0x2A) {|mode == 0x1A) {| %
+s|        if (mode == 0x29) {|        if (mode == 0x28) {| %
+s|\[0xAD\] == 1 \&\& (CAM_W(0x2C) \& 0x80)) {|[0xAD] == 1) {| %
+s|        MASK \&= 0xFFE3;|        MASK \&= 0xFFF3;| %
+s|        CTL \&= 0xFFF3;|        CTL \&= 0xFFE3;| %
+s|if (CAM_W(0x84) \& 0x200000) {|if (CAM_W(0x84) \& 0x100000) {| %
+s|if (D_800C3671 != 0 \|\| (CAM_W(0x5F0) \& 0x80)) {|if (D_800C3671 != 0) {| %
+s|if (D_800C3671 != 0 \|\| (CAM_W(0x5F0) \& 0x80)) {|if (CAM_W(0x5F0) \& 0x80) {| %
+s|pl\[0x7D\] != 0 \|\| pl\[0x1AC\] != 0 \|\| pl\[0x27\] != 0|pl[0x7D] != 0 \|\| pl[0x1AC] != 0| %
+s|pl\[0x7D\] != 0 \|\| pl\[0x1AC\] != 0 \|\| pl\[0x27\] != 0|pl[0x7D] != 0 \|\| pl[0x27] != 0| %
+s|pl\[0x7D\] != 0 \|\| pl\[0x1AC\] != 0 \|\| pl\[0x27\] != 0|pl[0x1AC] != 0 \|\| pl[0x27] != 0| %
+s|        MASK \&= 0xFFEF;|        MASK \&= 0xFFCF;| %
+s|if (pl\[0x95\] != 0 \|\| (CAM_H(0x5FC) != 0 \&\& pl\[0x1B3\] != 0)) {|if (pl[0x95] != 0 \|\| pl[0x1B3] != 0) {| %
+s|if (pl\[0x95\] != 0 \|\| (CAM_H(0x5FC) != 0 \&\& pl\[0x1B3\] != 0)) {|if (CAM_H(0x5FC) != 0 \&\& pl[0x1B3] != 0) {| %
+s|        MASK \&= ~0x1F;|        MASK \&= ~0x0F;| %
+s|((CAM_W(0x2C) \& 0x100) \&\& CAM_H(0x73C) == 0) \|\| CAM_H(0x73C) == 3|CAM_H(0x73C) == 3| %
+s|((CAM_W(0x2C) \& 0x100) \&\& CAM_H(0x73C) == 0) \|\| CAM_H(0x73C) == 3|((CAM_W(0x2C) \& 0x100) \&\& CAM_H(0x73C) == 0)| %
+s|if ((CAM_W(0x2C) \& 0x40) \&\& CAM_H(0x84A) != 0) {|if (CAM_W(0x2C) \& 0x40) {| %
+s|CAM_H(0x84A) -= D_800BE9E4;|CAM_H(0x84A) -= 1;| %
+s|        if (CAM_H(0x84A) <= 0) {|        if (CAM_H(0x84A) < 0) {| %
+s|    if (mode == 0) {|    if (mode == 0 \&\& 0) {| %

@@ -5,6 +5,16 @@
 void func_15080628(void);
 u8 *func_151149AC(u8);
 extern u8 D_800C3938[][0x19];
+void func_15021834(struct127 *, s32, s32);
+extern s32 D_eu_800C3A60;
+extern s32 D_800C39D0;
+extern s32 D_800C3A68;
+extern u16 *D_800C39E8[];
+extern u16 *D_800C39F0[];
+extern s32 D_800C3B98[][30];
+extern s32 D_800C3AA8[][30];
+s32 func_15022A8C(s32 *);
+struct127 *func_15083E90(u8);
 #endif
 // hoisted forward declaration(s) for func_1501E7A8
 s32 func_1507EE9C(struct127 *);
@@ -181,7 +191,72 @@ void func_1501CDA0(s32 slot) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CDA0.s")
 #endif
 
+#ifdef NON_MATCHING
+/* Length of cutscene slot `slot` (P84 browser blocker: func_1501E364 waits for it): the end frame of the first
+ * camera track when it has one (record +0x12 != -9999 and the slot's first camera word >= 4), else the latest end
+ * (+0x0A) of the camera tracks of the active actors, else the last key (frame at -2 of key k, D_800C39F0 count)
+ * of their actor tracks. D_800C3A68 = the length in 60 Hz frames, D_eu_800C3A60[slot] = it in 50 Hz frames
+ * (EU: * 50 / 60). */
+void func_1501CE34(s32 slot) {
+    s32 *len = &(&D_eu_800C3A60)[slot];
+    u16 *cams;
+    u8 n;
+    s32 i;
+    s32 found;
+    s32 end;
+    s32 v;
+    u16 k;
+
+    *len = 0;
+    D_800C3A68 = 0;
+    n = D_800C3A5A[slot];
+    if (n == 0) {
+        return;
+    }
+    cams = D_800C39F8[slot];
+    if (cams[0] >= 4) {
+        v = *(s16 *)((u8 *)D_800C3AA8[slot][0] + 0x12);
+        if (v != -9999) {
+            D_800C3A68 = v;
+            *len = v * 50 / 60;
+            return;
+        }
+    }
+    found = FALSE;
+    for (i = 0; i < n; i++) {
+        if (D_800C39E8[slot][i] != 0 && cams[i] != 0) {
+            v = *(s16 *)((u8 *)D_800C3AA8[slot][i] + 0xA);
+            if (*len < v) {
+                *len = v;
+                found = TRUE;
+            }
+        }
+    }
+    if (found) {
+        end = *len;
+        D_800C3A68 = end;
+        *len = end * 50 / 60;
+        return;
+    }
+    end = *len;
+    for (i = 0; i < n; i++) {
+        if (D_800C39E8[slot][i] != 0) {
+            k = D_800C39F0[slot][i];
+            if (k != 0) {
+                v = *(s16 *)((u8 *)D_800C3B98[slot][i] + k * 8 - 2);
+                if (end < v) {
+                    *len = v;
+                    end = v;
+                }
+            }
+        }
+    }
+    D_800C3A68 = end;
+    *len = end * 50 / 60;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501CE34.s")
+#endif
 
 s32 func_1501D064(s32 arg0) {
     s32 sum = 0;
@@ -414,7 +489,33 @@ void func_1501D348(s32 level, s32 scene, s32 slot, s32 callback, s32 callbackArg
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DB18.s")
 
+#ifdef NON_MATCHING
+/* Starts cutscene slot `slot`: script position D_800C39D0[slot] = start D_eu_800C3A60[slot] + D_800BEA08, runs the
+ * camera / actor tracks once (func_1501ECA4, func_15020F6C, with func_1502457C around them), then gives every
+ * live object that takes part (func_15022A8C, current object index in D_800C3E78) its first actor frame
+ * (func_15021834(obj, slot, -1)) and ends with func_1501E888(1, slot). */
+void func_1501DE84(s32 slot) {
+    struct127 *obj;
+    s32 i;
+
+    (&D_800C39D0)[slot] = (&D_eu_800C3A60)[slot] + D_800BEA08;
+    func_1502457C(1, 0);
+    func_1501ECA4(0);
+    func_1502457C(0, 0);
+    func_15020F6C(0);
+    for (i = 0, obj = D_800CC2D0; i < 25; i++, obj++) {
+        if (*(s32 *)obj != 0) {
+            D_800C3E78 = i;
+            if (func_15022A8C((s32 *)obj) != 0) {
+                func_15021834(obj, slot, -1);
+            }
+        }
+    }
+    func_1501E888(1, slot);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DE84.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501DF70.s")
 
@@ -1099,7 +1200,31 @@ s32 func_15022440(s32 arg0, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_15022440.s")
 #endif
+#ifdef NON_MATCHING
+/* Actor pass of cutscene slot `slot`: for each of its D_800C3A5A[slot] actors that has a camera and actor track
+ * (D_800C39F0 / D_800C39E8 words != 0) and a record of kind 2 (D_800C3A10[slot] + 8 i), finds the object
+ * (func_15083E90(record[2])) and gives it its actor frame (func_15021834(obj, slot, i)). */
+void func_150225D0(s32 slot) {
+    struct127 *obj;
+    u8 *rec;
+    s32 i;
+
+    for (i = 0; i < D_800C3A5A[slot]; i++) {
+        if (D_800C39F0[slot][i] == 0 || D_800C39E8[slot][i] == 0) {
+            continue;
+        }
+        rec = D_800C3A10[slot] + i * 8;
+        if (*(u16 *)rec == 2) {
+            obj = func_15083E90(rec[2]);
+            if (obj != NULL) {
+                func_15021834(obj, slot, i);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_150225D0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u8 D_800C3970[];
@@ -1368,9 +1493,11 @@ loop_1:
 
 #ifdef NON_MATCHING
 void func_15021834(struct127 *, s32, s32);
+extern s32 D_eu_800C3A60;
+extern s32 D_800C39D0;
 s32 func_15022A8C(s32 *);
 void func_1504A730(void);
-s32 func_15061B4C();
+void func_15061B4C(void);
 void func_1507EB1C(s32 *);
 void func_150802A8(s32 *);
 extern u8 D_800C3A78;

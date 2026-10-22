@@ -1,0 +1,23 @@
+s|    if (cmd >= 8) {|    if (cmd >= 9) {| %
+s|        if (cmd == 10) {|        if (cmd == 11) {| %
+s|            o\[0xF\] \|= (1 << p) << 4;|            o[0xF] \|= (1 << p) << 3;| %
+s|            if (cmd == 8) {|            if (cmd == 9) {| %
+s|                target = 0xFF;|                target = 0xFE;| %
+s|            if (o\[0xF\] \& (bit << 4)) {|            if (1) {| %
+s|            o\[0xF\] \&= ~(bit << 4);|            o[0xF] \&= ~(bit << 5);| %
+s|        if (o\[0x2FD\] != 0 \|\| D_800DBFF4\[p\] != 0) {|        if (o[0x2FD] != 0) {| %
+s|        if (o\[0x2FD\] != 0 \|\| D_800DBFF4\[p\] != 0) {|        if (D_800DBFF4[p] != 0) {| %
+s|        if (o\[0x2FD\] != 0 \|\| D_800DBFF4\[p\] != 0) {|        if (o[0x2FC] != 0 \|\| D_800DBFF4[p] != 0) {| %
+s|    if (cmd < o\[0xA\]) {|    if (cmd <= o[0xA]) {| %
+s|            o\[7\] = 0;|            o[7] = 1;| %
+s|            o\[9\] = 8;|            o[9] = 9;| %
+s|            o\[8\] = a3;|            o[8] = a3;| %
+s|            o\[9\] = a3;|            o[9] = a2;| %
+s|            o\[0xA\] = 0;|            o[0xA] = cmd;| %
+s|            o\[7\] = a2;|            o[7] = a3;| %
+s|    if (\*(s32 \*)D_800DBFF4 != 0) {|    if (D_800DBFF4[0] != 0) {| %
+s|        o\[7\] = o\[8\];|        o[7] = o[9];| %
+s|        case 5:|        case 7:| %
+s|            o\[8\] = 0xFF;|            o[8] = 0xFE;| %
+s|        case 1:|        case 3:| %
+s|        case 6:|        case 7:| %

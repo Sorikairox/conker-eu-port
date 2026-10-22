@@ -1,0 +1,15 @@
+s|    if (n == 0) {|    if (0) {| %
+s|    if (cams\[0\] >= 4) {|    if (cams[0] >= 3) {| %
+s|D_800C3AA8\[slot\]\[0\] + 0x12);|D_800C3AA8[slot][0] + 0x10);| %
+s|        if (v != -9999) {|        if (v != -9998) {| %
+s|            \*len = v \* 50 / 60;|            *len = v * 5 / 6 + 1;| %
+s|        if (D_800C39E8\[slot\]\[i\] != 0 \&\& cams\[i\] != 0) {|        if (cams[i] != 0) {| %
+s|        if (D_800C39E8\[slot\]\[i\] != 0 \&\& cams\[i\] != 0) {|        if (D_800C39E8[slot][i] != 0) {| %
+s|D_800C3AA8\[slot\]\[i\] + 0xA);|D_800C3AA8[slot][i] + 0x8);| %
+s|            if (\*len < v) {|            if (*len <= v) {| %
+s|        if (D_800C39E8\[slot\]\[i\] != 0) {|        if (1) {| %
+s|            if (k != 0) {|            if (1) {| %
+s|D_800C3B98\[slot\]\[i\] + k \* 8 - 2);|D_800C3B98[slot][i] + k * 8 - 4);| %
+s|                if (end < v) {|                if (end <= v) {| %
+s|    \*len = end \* 50 / 60;|    *len = end * 50 / 59;| %
+s|    D_800C3A68 = end;$|    D_800C3A68 = *len;| %

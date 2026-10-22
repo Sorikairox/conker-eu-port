@@ -12,6 +12,32 @@ void func_1505A770(struct127 *);
 void func_15060A9C(s32 arg0, struct127 *arg1);
 void func_1505D6F0(struct127 *, s32);
 s32 func_1505C7D8(struct127 *self, s32 skip);
+void func_15060F28(struct127 *obj, s32 mode);
+void func_150849C0(struct127 *);
+void func_150626EC(struct127 *, s32);
+void func_15060D54(struct127 *);
+void func_1504AF10(struct127 *, s32, s32);
+void func_1503E550(s32 arg0);
+void func_10004074(s32 arg0);
+s32 func_1514D880(u8 *arg0);
+void func_151695F0(u8 *arg0, u8 arg1);
+s32 func_150306D4(u8 *arg0);
+void func_15189040(s32 arg0);
+extern u8 *D_800D252C;
+void func_15061B4C(void);
+void func_15062D10(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
+void func_15062E24(s32, s32, s32, s32, s32, s32, s32);
+void func_15062FC0(u8 *, s32, s32, s32, s32, s32, s32, s32);
+s32 func_150ADA20(void);
+f32 func_150489B0(u8);
+void func_eu_1501B640(struct127 *, f32 *, s32);
+void func_eu_150F2230(u8 *arg0);
+extern s32 D_800997EC[];
+extern s32 D_80086490;
+extern s32 D_800C4440;
+extern s32 D_800CC298;
+extern s32 D_800D121C;
+extern s32 D_800BE9F0;
 #endif
 
 
@@ -425,7 +451,44 @@ s32 func_1505693C(struct127 *arg0, s32 arg1) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* Hit reaction of an object: row D_80099DFC[row] gives an animation per strength (a1 above row[7]: heavy,
+ * above row[2]: medium, else light) and side (front / back from the angles +0x76 / +0x78); 0xFF = none. Starts
+ * it: health +0x218 -5, stun timer +0x21C, state 13, speed +0x44 = 0, move flags +0xF4 = 4, faces +0x76. */
+void func_15056A00(struct127 *obj, s32 arg1, u8 row) {
+    u8 *o = (u8 *)obj;
+    u8 strength = arg1;
+    u8 *anims = D_80099DFC[row];
+    u8 idx;
+    u16 angle;
+
+    idx = 0;
+    if (anims[7] < strength) {
+        idx = 5;
+    } else if (anims[2] < strength) {
+        idx = 2;
+    }
+    angle = *(u16 *)(o + 0x76);
+    if ((*(u16 *)(o + 0x78) - angle) & 0x8000) {
+        idx += 3;
+    } else {
+        idx += 4;
+    }
+    if (anims[idx] != 0xFF) {
+        *(s32 *)(o + 0x218) -= 5;
+        *(s16 *)(o + 0x21C) = 20000;
+        o[0x223] = 13;
+        *(f32 *)(o + 0x44) = 0.0f;
+        *(s32 *)(o + 0xF4) = (*(s32 *)(o + 0xF4) & ~0xE) | 4;
+        *(u16 *)(o + 0x78) = angle;
+        *(u16 *)(o + 0x7A) = angle;
+        o[0x138] = 0;
+        *(s16 *)(o + 0x244) = anims[idx];
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15056A00.s")
+#endif
 #ifdef NON_MATCHING
 void func_15047680(f32 mf[4][4], f32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 func_15059B54(struct127 *arg0, u16 arg1);
@@ -4444,7 +4507,96 @@ void func_15060BE0(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060BE0.s")
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060D54.s")
+#ifdef NON_MATCHING
+/* Removal of an object (struct127, ends its fade mode 5 / 6 in func_150617BC). mode 0 = plain, 1 = killed
+ * (func_1504AF10(obj, 1, 0) and func_1503E550(slot)), 2 = removed without a trace (marker byte cleared).
+ * Releases its model / sound / effect, gives back the map marker byte D_800D252C[+0x13F] (kept as 0x80 or
+ * cleared, depending on the marker record +0x144), frees the buffers +0x260.. and the per-player handles +0x304. */
+void func_15060F28(struct127 *obj, s32 mode) {
+    u8 *o = (u8 *)obj;
+    u8 *rec;
+    u8 *p;
+    u8 slot;
+    s32 i;
+
+    func_1514D880(o);
+    func_151695F0(o, 0);
+    if (o[5] != 2 && o[5] != 3) {
+        func_150849C0(obj);
+        func_150626EC(obj, mode);
+    }
+    if (mode == 1) {
+        func_1504AF10(obj, 1, 0);
+        func_1503E550(obj - D_800CC2D0);
+    }
+    slot = o[0x13F];
+    if (slot != 0xFF) {
+        if (mode == 2) {
+            D_800D252C[slot] = 0;
+        } else {
+            rec = *(u8 **)(o + 0x144);
+            if (rec == NULL) {
+                D_800D252C[slot] &= 0x80;
+            } else if (*(u16 *)rec & 0x20) {
+                rec[2] = 1;
+                D_800D252C[o[0x13F]] = 0;
+            } else if (*(u16 *)rec & 1) {
+                D_800D252C[slot] = 0;
+            } else {
+                rec[2] = 1;
+                p = D_800D252C + o[0x13F];
+                *p &= 0x80;
+            }
+        }
+    }
+    if (*(s32 *)(o + 0x260) != 0) {
+        func_10004074(*(s32 *)(o + 0x260));
+    }
+    if (*(s32 *)(o + 0x264) != 0) {
+        func_10004074(*(s32 *)(o + 0x264));
+    }
+    if (*(s32 *)(o + 0x268) != 0) {
+        func_10004074(*(s32 *)(o + 0x268));
+    }
+    if (*(s32 *)(o + 0x26C) != 0) {
+        func_10004074(*(s32 *)(o + 0x26C));
+    }
+    if (*(s32 *)(o + 0x1D8) != 0) {
+        func_10004074(*(s32 *)(o + 0x1D8));
+    }
+    if (*(s32 *)(o + 0x2D4) != 0) {
+        func_1516972C(*(struct102 **)(o + 0x2D4));
+    }
+    /* per-player handles: only the first one is tested */
+    if (*(s32 *)(o + 0x304) != 0) {
+        for (i = 0; i <= D_80082FA0; i = (i + 1) & 0xFF) {
+            func_100043B4(*(s32 **)(o + 0x304 + i * 4), 4);
+        }
+    }
+    if (*(s32 *)(o + 0x314) != 0) {
+        func_100043B4(*(s32 **)(o + 0x314), 4);
+    }
+    if (*(s32 *)(o + 0x2D0) != 0) {
+        func_10004074(*(s32 *)(o + 0x2D0));
+    }
+    if (*(s32 *)(o + 0x324) != 0) {
+        func_10004074(*(s32 *)(o + 0x324));
+    }
+    if (*(u8 **)(o + 0x31C) != NULL && *(s32 *)(*(u8 **)(o + 0x31C) + 0x11C) != 0) {
+        func_10004074(*(s32 *)(*(u8 **)(o + 0x31C) + 0x11C));
+    }
+    func_10010AA8(obj);
+    func_150306D4(o);
+    func_15060D54(obj);
+    func_15189040((s32)obj);
+    if (*(s32 *)(o + 0x31C) != 0) {
+        func_10004074(*(s32 *)(o + 0x31C));
+    }
+    func_1505F188(obj);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15060F28.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150611E8.s")
 
 // TODO: is this really struct127?
@@ -4457,7 +4609,80 @@ void func_150615DC(struct127 *arg0) {
     arg0->unkB = arg0->unkC = arg0->unkD = arg0->unkE.ub[0] = 0xFF;
 }
 
+#ifdef NON_MATCHING
+/* Fade / visibility command for an object (struct127). Commands >= 8 work on player p's visibility:
+ * 8 = hide (bit p of +0x0F set, target 0), 10 = hide at once (bit p + 4 set), others = show (bit p cleared,
+ * target 0xFF); a pending "at once" bit p + 4 sets the byte +0x0B + p and is cleared; the byte also jumps to the
+ * target when +0x2FD or D_800DBFF4[p] is set. Commands < 8 start an alpha fade (+0x0A mode, +0x07 alpha,
+ * +0x08 target, +0x09 step) unless a fade of a higher mode runs: 4 = fade in from 0, 5 / 6 = fade out (then
+ * removal, func_150617BC), 2 = fade to a2 by a3, 1 = set alpha a2 and stop. With D_800DBFF4 set the alpha
+ * jumps to the target. */
+void func_1506160C(struct127 *obj, u8 cmd, u8 a2, u8 a3, u8 p) {
+    u8 *o = (u8 *)obj;
+    u8 target;
+    s32 bit;
+
+    if (cmd >= 8) {
+        if (cmd == 10) {
+            o[0xF] |= (1 << p) << 4;
+            target = 0;
+        } else {
+            bit = 1 << p;
+            if (cmd == 8) {
+                o[0xF] |= bit;
+                target = 0;
+            } else {
+                o[0xF] &= ~bit;
+                target = 0xFF;
+            }
+            if (o[0xF] & (bit << 4)) {
+                o[0xB + p] = target;
+            }
+            o[0xF] &= ~(bit << 4);
+        }
+        if (o[0x2FD] != 0 || D_800DBFF4[p] != 0) {
+            o[0xB + p] = target;
+        }
+        return;
+    }
+    if (cmd < o[0xA]) {
+        return;
+    }
+    switch (cmd) {
+        case 4:
+            o[0xA] = cmd;
+            o[7] = 0;
+            o[8] = 0xFF;
+            o[9] = 0x20;
+            break;
+        case 5:
+            o[0xA] = cmd;
+            o[8] = 0;
+            o[9] = 0x20;
+            break;
+        case 6:
+            o[0xA] = cmd;
+            o[8] = 0;
+            o[9] = 8;
+            break;
+        case 2:
+            o[0xA] = cmd;
+            o[8] = a2;
+            o[9] = a3;
+            break;
+        case 1:
+            o[0xA] = 0;
+            o[7] = a2;
+            o[8] = a2;
+            break;
+    }
+    if (*(s32 *)D_800DBFF4 != 0) {
+        o[7] = o[8];
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1506160C.s")
+#endif
 #ifdef NON_MATCHING
 /* Per-frame fades of an object (struct127): per player i (0..D_80082FA0) the visibility byte +0x0B + i moves by
  * 50 towards 0 when bit i of +0x0F is set, else towards 0xFF (jumps there when D_800DBFF4[i] is set). With a
@@ -4612,7 +4837,202 @@ loop_16:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150619A8.s")
 #endif
+#ifdef NON_MATCHING
+/* Shared animation state of some object kinds (D_800CC298, 0x18 bytes). */
+struct ObjAnimShared {
+    /* 0x00 */ f32 scrollU;   /* kind 0x24: texture scroll, degrees */
+    /* 0x04 */ f32 scrollV;
+    /* 0x08 */ s8 jitter;     /* kind 0x24: random -2..2 */
+    /* 0x09 */ s8 pulse;      /* kind 0x2C: 0..41 ping-pong */
+    /* 0x0A */ s8 pulseStep;
+    /* 0x0B */ u8 phase[4];   /* kind 0x3A: colour phases, stepped by the bytes of D_80086490 */
+    /* 0x0F */ u8 frameTimer; /* kind 0x4B */
+    /* 0x10 */ u8 glow;       /* kind 0x54: 0..255 */
+};
+#define OBJ_ANIM (*(struct ObjAnimShared *)&D_800CC298)
+
+/* Per-frame texture / colour animation of the live objects (D_800CC2D0[], +0x2FA visible), by kind (+0x04).
+ * Effects shared by every object of one kind (func_15062D10 texture scroll, func_15062E24, func_eu_1501B640
+ * colours) run for the first such object only (done[]). */
+void func_15061B4C(void) {
+    u8 done[10];
+    u8 *obj;
+    u8 type;
+    s32 i;
+    s32 v;
+    u8 steps[4];
+    f32 colours[4];
+    f32 glow;
+    s32 **tex;
+
+    bzero(done, sizeof(done));
+    for (obj = (u8 *)D_800CC2D0; obj != (u8 *)&D_800D121C; obj += sizeof(struct127)) {
+        if (*(s32 *)obj == 0 || obj[0x2FA] == 0) {
+            continue;
+        }
+        type = obj[4];
+        switch (type) {
+            case 0x13:
+                if (!done[0]) {
+                    func_15062D10(type, 0x5E, 0, -1, 0, 0);
+                    func_15062D10(type, 0x60, 0, -1, 0, 0);
+                    func_15062D10(type, 0x62, 0, -1, 0, 0);
+                    func_15062D10(type, 0x64, 0, -1, 0, 0);
+                    done[0] = 1;
+                }
+                break;
+            case 0x23:
+                if (!done[1]) {
+                    func_15062D10(type, 0x1E9, 0, -1, 0, 0);
+                    func_15062D10(type, 0x1EB, 0, -1, 0, 0);
+                    func_15062D10(type, 0x1ED, 0, -1, 0, 0);
+                    func_15062D10(type, 0x1EF, 0, -1, 0, 0);
+                    done[1] = 1;
+                }
+                break;
+            case 0x24:
+                if (!done[2]) {
+                    if ((u32)func_150ADA20() % 1000 < 300) {
+                        OBJ_ANIM.jitter = (u32)func_150ADA20() % 5 - 2;
+                    }
+                    func_15062D10(type, 4, -4, OBJ_ANIM.jitter, 0, 0);
+                    tex = &((s32 **)&D_800C4440)[type];
+                    if (*tex != NULL) {
+                        func_15062E24(type, (*tex)[0], 0x37, 0, (s32)OBJ_ANIM.scrollV, 2, 1);
+                        func_15062E24(type, (*tex)[1], 0x27, 0x37, (s32)OBJ_ANIM.scrollU, 1, 0);
+                    }
+                    OBJ_ANIM.scrollU += -4.0f * (f32)D_800BE9E4;
+                    if (OBJ_ANIM.scrollU <= 0.0f) {
+                        OBJ_ANIM.scrollU += 360.0f;
+                    }
+                    OBJ_ANIM.scrollV += -0.5f * (f32)D_800BE9E4;
+                    if (OBJ_ANIM.scrollV <= 0.0f) {
+                        OBJ_ANIM.scrollV += 360.0f;
+                    }
+                    done[2] = 1;
+                }
+                break;
+            case 0x2C:
+                if (!done[3]) {
+                    v = OBJ_ANIM.pulse;
+                    if (v > 40) {
+                        OBJ_ANIM.pulseStep = -1;
+                    } else if (v <= 0) {
+                        OBJ_ANIM.pulseStep = 1;
+                    }
+                    OBJ_ANIM.pulse = v + OBJ_ANIM.pulseStep;
+                    func_15062D10(type, 0xAA, OBJ_ANIM.pulse, 0, 0, 1);
+                    done[3] = 1;
+                }
+                break;
+            case 0x3A:
+                if (!done[4]) {
+                    *(s32 *)steps = D_80086490;
+                    if (*(s32 *)(obj + 0x1D4) != 0) {
+                        for (i = 0; i < 4; i++) {
+                            colours[i] = (func_150489B0(OBJ_ANIM.phase[i]) + 1.0f) * 0.5f;
+                            OBJ_ANIM.phase[i] += steps[i];
+                        }
+                        func_eu_1501B640((struct127 *)obj, colours, 1);
+                        done[4] = 1;
+                    }
+                }
+                break;
+            case 0x3F:
+                if (!done[5]) {
+                    func_15062D10(type, 4, 0, -4, 0, 0);
+                    done[5] = 1;
+                }
+                break;
+            case 0x4B:
+                if (!done[6]) {
+                    done[6] = 1;
+                    func_15062D10(type, 0x173, -4, 0, 0, 0);
+                    func_15062D10(type, 0x175, -2, 0, 0, 0);
+                    func_15062D10(type, 0x177, -1, 0, 0, 0);
+                }
+                /* frame +0x68 cycles 15, 16, 17, 18, 17, 16 (+0x69 = 0..5), one step every 4 ticks */
+                if (OBJ_ANIM.frameTimer >= 4) {
+                    OBJ_ANIM.frameTimer = 0;
+                    if (obj[0x69] == 5) {
+                        obj[0x69] = 0;
+                    } else {
+                        obj[0x69]++;
+                    }
+                    if (obj[0x69] >= 3) {
+                        obj[0x68] = 5 - obj[0x69];
+                    } else {
+                        obj[0x68] = obj[0x69];
+                    }
+                    obj[0x68] += 15;
+                } else {
+                    OBJ_ANIM.frameTimer += D_800BE9E4;
+                }
+                break;
+            case 0x45:
+                v = obj[0x6D];
+                obj[0x68] = (v >= 10) ? v - 10 : v * 2 + 6;
+                break;
+            case 0x5B:
+                for (i = 0; i < 2; i++) {
+                    v = obj[0x6C + i];
+                    obj[0x68 + i] = (v >= 10) ? v - 10 : D_800997EC[v];
+                }
+                break;
+            case 0x54:
+                if (*(s32 *)(obj + 0x2EC) != 0) {
+                    OBJ_ANIM.glow = (OBJ_ANIM.glow < 0xEB) ? OBJ_ANIM.glow + 20 : 0xFF;
+                } else {
+                    OBJ_ANIM.glow = (OBJ_ANIM.glow <= 20) ? 0 : OBJ_ANIM.glow - 20;
+                }
+                glow = OBJ_ANIM.glow * (1.0f / 255.0f);
+                func_eu_1501B640((struct127 *)obj, &glow, 0);
+                break;
+            case 0x8A:
+                if (D_800BE9F0 != 0x30) {
+                    if (*(u16 *)(obj + 0x84) == 1) {
+                        func_15062D10(type, 0x253, 0, 0x10, 0, 0);
+                        func_15062D10(type, 0x255, 0, 8, 0, 0);
+                        func_15062D10(type, 0x257, 0, 4, 0, 0);
+                    }
+                } else {
+                    func_15062FC0(obj, 0, 0, 0x1000, 0x1000, 0xC, 0,
+                                  (*(u16 *)(obj + 0x84) == 1) ? -D_800BE9E4 * 40 : 0);
+                }
+                break;
+            case 0x42:
+                v = *(u16 *)(obj + 0x84);
+                if (v == 2 || v == 1) {
+                    if (obj[0x68] == 0xD) {
+                        obj[0x68] = 0xC;
+                    }
+                    if ((func_150ADA20() & 3) == 0) {
+                        obj[0x68] = (obj[0x68] == 0x15) ? 0xC : 0x15;
+                    }
+                } else {
+                    obj[0x68] = 0xD;
+                }
+                break;
+            case 0x7B:
+                func_eu_150F2230(obj);
+                break;
+            case 0x92:
+                if (!done[9]) {
+                    func_15062D10(type, 4, 0, -2, 0, 0);
+                    func_15062D10(type, 0x13B, 0, -2, 0, 0);
+                    func_15062D10(type, 0x20D, 0, -2, 0, 0);
+                    done[9] = 1;
+                }
+                break;
+            case 0x43:
+                func_15062D10(type, 4, 0x14, 8, 0, 0);
+                break;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15061B4C.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_15022A8C(struct127 *);
 s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
@@ -4739,7 +5159,20 @@ loop_29:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150623F4.s")
 #endif
+#ifdef NON_MATCHING
+/* Removes the objects attached to obj (+0x65 = obj's slot + 1, +0x127 = 0xFF) with func_15060F28(child, mode). */
+void func_150626EC(struct127 *obj, s32 mode) {
+    struct127 *o;
+
+    for (o = D_800CC2D0; o != (struct127 *)&D_800D121C; o++) {
+        if (*(s32 *)o != 0 && ((u8 *)o)[0x65] == (obj - D_800CC2D0) + 1 && ((u8 *)o)[0x127] == 0xFF) {
+            func_15060F28(o, mode);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150626EC.s")
+#endif
 
 void func_150627D4(struct127 *arg0) {
     arg0->unk2FB = 0;

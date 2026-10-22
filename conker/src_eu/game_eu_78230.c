@@ -15,7 +15,7 @@ s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 #ifdef NON_MATCHING
 /* P38: per-frame object update (UNVERIFIED parts: see P38.md) */
 void func_1504AF10(struct127 *, s32, s32);
-s32 func_15061B4C();
+void func_15061B4C(void);
 void func_1507D4F8(s32); /* P59: void in the NM definition */
 void func_1507EB1C(struct127 *);
 void func_15081064(void);
