@@ -496,7 +496,43 @@ u8 func_1503DD2C(s32 arg0, s32 arg1) {
     return v;
 }
 
+#ifdef NON_MATCHING
+s32 func_150844AC(struct127 *, s32);
+/* func_1503DD8C (P57): make model id ready for object obj (variant var). Not loaded (D_800D19A0[id] == 0):
+ * func_1503D210(id, 0, obj+0x144, flag, obj[0xAC]). Loaded: func_150028BC(id) once (D_800C5C08[id] == 0) when
+ * obj+0x144 has +0x18 & 0x4000 or obj[0xAC] & 1; with flag, a vertex block (D_800C5A48[id]) and its first word
+ * still below 0x10000000 (not yet relocated): func_1503DF2C(id) and func_1510D3E0 on each display list.
+ * If that all returned 0: func_150844AC(obj, var). Non-zero = not drawable (func_1502CFEC returns). */
+s32 func_1503DD8C(struct127 *obj, s32 id, s32 var, s32 flag) {
+    u8 *o = (u8 *)obj;
+    u8 *rec = *(u8 **)(o + 0x144);
+    s32 r;
+    s32 i;
+
+    if (((s32 *)&D_800D19A0)[id] == 0) {
+        r = func_1503D210(id, 0, (s32)rec, flag, o[0xAC]);
+    } else {
+        r = 0;
+        if ((rec != NULL && (*(u32 *)(rec + 0x18) & 0x4000)) || (o[0xAC] & 1)) {
+            if (D_800C5C08[id] == 0) {
+                func_150028BC(id);
+            }
+        }
+        if (flag != 0 && ((u16 *)&D_800C5A48)[id] != 0 && **(u32 **)&((s32 *)&D_800C5758)[id] < 0x10000000) {
+            r = func_1503DF2C(id);
+            for (i = 0; i < D_800C4B98[id]; i++) {
+                func_1510D3E0(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
+            }
+        }
+    }
+    if (r == 0) {
+        r = func_150844AC(obj, var);
+    }
+    return r;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DD8C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1510D66C(s32, s32, s32, s32);

@@ -451,7 +451,192 @@ void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5,
     }
 }
 
+#ifdef NON_MATCHING
+u8 *func_1502FCEC(u8 *arg0, s32 arg1);
+void func_15030060(u8 *arg0);
+u8 *func_1502F30C(u8 *, s32);
+s32 func_1503DD8C(struct127 *, s32, s32, s32);
+u8 func_15084E34(struct127 *, s32 *);
+Gfx *func_1515DE84(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
+s32 func_15031284(s32 arg0, u8 *arg1, s32 arg2, s32 arg3);
+void func_151F0648(Mtx *arg0);
+extern u8 D_80083350[];
+extern u8 D_800834D0[];
+extern u8 D_80083650[];
+extern s32 D_800844F0;
+extern s32 D_80084520;
+extern Mtx D_800C42B8;
+extern u16 D_800C4B98[];
+extern u8 **D_800C48A8[];
+extern u8 **D_800C4D10[];
+extern u8 D_800DA248[];
+extern u8 D_800DD714[];
+
+/* func_1502CFEC (P57): the model display list of object arg1, part arg2. arg3 = model (segment 6 base, from
+ * +0x1D4 or D_800DFBF0), arg4 = alpha, color = colour block (func_1502CF24 unpacks it), arg6 = mode (0 normal,
+ * 3 / 4 / 5 special; 3 draws the D_800C4D10 DLs without matrix), arg7: wrap in D_800844F0 / D_80084520.
+ * model = obj+4 (or func_15084E34 in modes 3-5), variant +0x1C8; returns gdl unchanged when func_1503DD8C fails or
+ * the variant has no vertex block (+0x28C + variant * 8 + frame * 4). Emits: segment 6 = arg3, segment 1 =
+ * that block - 0x38, the combiner DL (segment 8), geometry mode, lights (func_1515DE84) when lit, then per DL k
+ * of D_800C4B98[model] not hidden by +0x94 bit k: prim / env / blend colours (+0x98 bit k: fixed white ones),
+ * G_MTX D_800C42B8 (physical address) + G_DL D_800C48A8[model][k]. Then func_15030060, +0x2FE = 1, func_15031284. */
+Gfx *func_1502CFEC(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7) {
+    u32 *g = (u32 *)gdl;
+    u8 *o = (u8 *)&D_800CC2D0[arg1];
+    s32 model;    /* sp140 */
+    s32 var;      /* sp144 */
+    s32 fog;      /* sp130 */
+    s32 c0, c1, c2, c3, c4, c5, c6, c7, c8, c9;
+    s32 lit, mode, k, n, fl, a;
+    u16 *cnt;
+
+    model = o[4];
+    if (arg6 == 3 || arg6 == 4 || arg6 == 5) {
+        model = func_15084E34((struct127 *)o, &var);
+    } else {
+        var = o[0x1C8];
+    }
+    if (func_1503DD8C((struct127 *)o, model, var, (arg6 == 3) ? 0 : 1) != 0) {
+        return (Gfx *)g;
+    }
+    if (*(s32 *)(o + var * 8 + D_800BE9C0 * 4 + 0x28C) == 0) {
+        return (Gfx *)g;
+    }
+    if (arg7 != 0) {
+        g[1] = (u32)&D_800844F0;
+        g[0] = 0xDE000000;
+    } else {
+        g[0] = 0xE7000000;
+        g[1] = 0;
+    }
+    g += 2;
+    g = (u32 *)func_1502FCEC(func_1502F30C((u8 *)g, arg1), arg1);
+    g[0] = 0xDB06000C;
+    g[1] = arg3;
+    g[2] = 0xDB060004;
+    g[3] = *(s32 *)(o + var * 8 + D_800BE9C0 * 4 + 0x28C) - 0x38;
+    g += 4;
+    func_1502CF24(o, arg2, arg4, (u8 *)color, &c0, &c1, &c2, &c3, &c4, &c5, &c6, &c7, &c8, &c9);
+    g[0] = 0xDB060020;
+    if (arg6 == 5) g[1] = (u32)D_80083650;
+    else if (arg6 == 3) g[1] = (u32)D_80083650;
+    else if (arg4 < 0xFF) g[1] = (u32)D_80083350;
+    else g[1] = (u32)D_800834D0;
+    g += 2;
+    g[0] = 0xD9FFF9FF;
+    g[1] = 0;
+    g += 2;
+    g[1] = (arg6 == 0) ? 0x200 : 0x400;
+    g[0] = 0xD9FFFFFF;
+    g += 2;
+    lit = 1;
+    fog = *(s16 *)((u8 *)D_800B0DF0 + 0x3E);
+    fl = o[0x66] & 0xC;
+    if (fl == 0xC) {
+        g[0] = 0xD9FFFFFF;
+        g[1] = 0x20000;
+        g[2] = 0xD9BFFFFF;
+        g[3] = 0;
+        g += 4;
+    } else if (fl == 8 && D_800DCD7C != 0) {
+        g[1] = 0x420000;
+        g[0] = 0xD9FFFFFF;
+        g += 2;
+    } else {
+        g[0] = 0xD9BDFFFF;
+        g[1] = 0;
+        g += 2;
+        lit = 0;
+    }
+    if (arg6 == 3) {
+        g[0] = 0xD9BDFFFF;
+        g[1] = 0;
+        g += 2;
+        lit = 0;
+    }
+    if (lit) {
+        s32 v = 2;
+        if (o[0x2FE] == 0) v = 0xA;
+        if (D_800D9D20 != 0) v |= 8;
+        g = (u32 *)func_1515DE84((Gfx *)g, arg2, (s32)*(f32 *)(o + 0x14), (s32)*(f32 *)(o + 0x18),
+                                 (s32)*(f32 *)(o + 0x1C), *(s32 *)(o + 0x184), *(s32 *)(o + arg2 * 4 + 0x304),
+                                 o[0x301], *(u8 **)(o + 0x314) + D_800BE9C0 * 8, o + 0x302, 2, o + 0x1DD, v,
+                                 D_800DA248);
+    }
+    cnt = &D_800C4B98[model];
+    n = *cnt;
+    mode = -1;
+    for (k = 0; k < n; k++) {
+        if (*(u32 *)(o + 0x94) & (1 << k)) continue;
+        if (!(*(u32 *)(o + 0x98) & (1 << k))) {
+            if (mode != 0) {
+                g[0] = 0xE7000000;
+                g[1] = 0;
+                g += 2;
+                a = arg4 & 0xFF;
+                mode = 0;
+                g[0] = 0xF8000000;
+                if (fog == 0) {
+                    g[1] = (c6 << 24) | ((c7 & 0xFF) << 16) | ((c8 & 0xFF) << 8) | (c9 & 0xFF);
+                } else {
+                    g[1] = (D_800DD714[0] << 24) | (D_800DD714[1] << 16) | (D_800DD714[2] << 8) | (c9 & 0xFF);
+                }
+                g += 2;
+                g[0] = 0xFA00F200;
+                g[1] = (c0 << 24) | ((c1 & 0xFF) << 16) | ((c2 & 0xFF) << 8);
+                g += 2;
+                g[0] = 0xFB000000;
+                g[1] = (c3 << 24) | ((c4 & 0xFF) << 16) | ((c5 & 0xFF) << 8) | a;
+                g += 2;
+            }
+        } else if (mode != 1) {
+            g[0] = 0xE7000000;
+            g[1] = 0;
+            g[2] = 0xF8000000;
+            g[3] = 0xFF;
+            g[4] = 0xFA00F200;
+            g[5] = 0;
+            g[6] = 0xFB000000;
+            g[7] = 0xFF;
+            g += 8;
+            mode = 1;
+        }
+        if (arg6 == 3) {
+            if (D_800C4D10[model] != NULL) {
+                g[0] = 0xDE000000;
+                g[1] = (u32)D_800C4D10[model][k];
+                g += 2;
+            }
+        } else {
+            func_151F0648(&D_800C42B8);
+            g[0] = 0xDA380003;
+            g[1] = (u32)&D_800C42B8 & 0x1FFFFFFF; /* the asm stores D_C42B8 (physical) */
+            g[2] = 0xDE000000;
+            g[3] = (u32)D_800C48A8[model][k];
+            g += 4;
+        }
+        n = *cnt;
+    }
+    func_15030060(o);
+    o[0x2FE] = 1;
+    if (arg6 == 0) {
+        g = (u32 *)func_15031284((s32)g, o, arg2, 1);
+    }
+    if (arg7 != 0) {
+        g[0] = 0xDE000000;
+        g[1] = (u32)&D_80084520;
+        g += 2;
+    }
+    if (arg6 == 0) {
+        g[1] = 0x400;
+        g[0] = 0xD9FFFDFF;
+        g += 2;
+    }
+    return (Gfx *)g;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CFEC.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1502D83C(s32 arg0, u8 *arg1) {
@@ -1107,11 +1292,23 @@ void func_1502EDEC(struct127 *arg0) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EF24.s")
 
+#ifdef NON_MATCHING
+/* func_1502F17C (P57): object arg0's mode byte +0x6A + arg1 folded to 0..2 (values 2 / 3 map to 0 / 1). */
+s32 func_1502F17C(s32 arg0, s32 arg1) {
+    s32 v = ((u8 *)&D_800CC2D0[arg0])[0x6A + arg1];
+    if (v >= 2) {
+        if (v < 4) v -= 2;
+        else v = 2;
+    }
+    return v;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F17C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1502F17C(s32, s32);
-s32 func_1507E7A0(struct127 *);
+void func_1507E7A0(struct127 *);
 
 void func_1502F1E4(s32 arg0) {
     s32 temp_v1;
@@ -1147,9 +1344,110 @@ void func_1502F1E4(s32 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F1E4.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F30C.s")
+#ifdef NON_MATCHING
+u8 *func_1507ECE8(u8 *, s32);
+extern s32 D_800C5758;
+/* func_1502F30C (P57): segments 6 +0x18 / +0x1C / +0x28 / +0x2C of object arg1's model: vertex blocks
+ * D_800C5758[type][k * 12] for k = the two selector bytes +0x6C / +0x6D (>= 10: k = byte - 10; else the model
+ * header table (D_800D1C90[type])[i * 3 + byte + 8], overridden by func_1507ECE8(obj, +0x6F)'s
+ * pair when that matches the table's +0xA entry or the byte is 0) and the bytes +0x68 / +0x69. */
+u8 *func_1502F30C(u8 *gdl, s32 arg1) {
+    u8 *o = (u8 *)&D_800CC2D0[arg1];
+    s32 type = o[4];
+    u8 *ov = NULL;
+    u8 sel[2];
+    s32 pr[2];
+    s32 i;
+    s32 v;
+    u8 *p;
 
+    for (i = 0; i < 2; i++) {
+        v = o[0x6C + i];
+        if (v >= 10) {
+            sel[i] = v - 10;
+            continue;
+        }
+        sel[i] = ((u8 *)D_800D1C90[type])[i * 3 + v + 8];
+        if (o[0x6F] != 0 && ov == NULL) {
+            ov = func_1507ECE8(o, o[0x6F]);
+        }
+        if (ov == NULL) continue;
+        pr[0] = ov[0];
+        pr[1] = ov[1];
+        v = pr[i];
+        if (v == ((u8 *)D_800D1C90[type])[i * 3 + 0xA] || o[0x6C + i] == 0) {
+            sel[i] = v;
+        }
+    }
+    p = ((u8 **)&D_800C5758)[o[4]];
+    if (p != NULL) {
+        u32 *g = (u32 *)gdl;
+        g[0] = 0xDB060018;
+        g[1] = *(u32 *)(p + sel[0] * 12);
+        g[2] = 0xDB06001C;
+        g[3] = *(u32 *)(p + sel[1] * 12);
+        g[4] = 0xDB060028;
+        g[5] = *(u32 *)(p + o[0x68] * 12);
+        g[6] = 0xDB06002C;
+        g[7] = *(u32 *)(p + o[0x69] * 12);
+        gdl += 0x20;
+    }
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F30C.s")
+#endif
+
+#ifdef NON_MATCHING
+/* func_1502F554 (P57): object arg0 attached to parent obj+0x65 (1-based): copy the parent's position
+ * (its joint obj+0x5C translation when the parent has a skeleton +0x1D4), +0x180, z offset -4; unless
+ * +0x101 & 0x20 the parent's +0x3C / +0x40 / angles; unless & 0x40 the bytes +7..+0xA, +0xF, +0xB.. */
+void func_1502F554(s32 arg0) {
+    u8 *o = (u8 *)&D_800CC2D0[arg0];
+    u8 *p;
+    u8 *m;
+    s32 i;
+    u8 fl;
+
+    if (o[0x65] == 0) return;
+    if ((o[0x101] & 2) == 2) return;
+    p = (u8 *)&D_800CC2D0[o[0x65]] - 0x32C;
+    m = *(u8 **)(p + 0x1D4);
+    if (m == NULL) {
+        *(f32 *)(o + 0x14) = *(f32 *)(p + 0x14);
+        *(f32 *)(o + 0x18) = *(f32 *)(p + 0x18);
+        *(f32 *)(o + 0x1C) = *(f32 *)(p + 0x1C);
+    } else {
+        m += *(s32 *)(o + 0x5C) << 6;
+        *(f32 *)(o + 0x14) = *(f32 *)(m + 0x30);
+        *(f32 *)(o + 0x18) = *(f32 *)(m + 0x34);
+        *(f32 *)(o + 0x1C) = *(f32 *)(m + 0x38);
+    }
+    fl = o[0x101];
+    *(f32 *)(o + 0x180) = *(f32 *)(p + 0x180);
+    *(f32 *)(o + 0x20) = -4.0f;
+    if (!(fl & 0x20)) {
+        *(u16 *)(o + 0x76) = *(u16 *)(p + 0x76);
+        fl = o[0x101];
+        *(f32 *)(o + 0x3C) = *(f32 *)(p + 0x3C);
+        *(f32 *)(o + 0x40) = *(f32 *)(p + 0x40);
+        *(u16 *)(o + 0x76) = *(u16 *)(p + 0x76);
+        *(u16 *)(o + 0x7A) = *(u16 *)(p + 0x7A);
+        *(u16 *)(o + 0x78) = *(u16 *)(p + 0x78);
+    }
+    if (fl & 0x40) return;
+    o[7] = p[7];
+    o[8] = p[8];
+    o[9] = p[9];
+    o[0xA] = p[0xA];
+    o[0xF] = p[0xF];
+    for (i = 0; i <= D_80082FA0; i++) {
+        o[0xB + i] = p[0xB + i];
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F554.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1502F780(struct127 *arg0, f32 *x, f32 *y, f32 *z, s32 arg4);

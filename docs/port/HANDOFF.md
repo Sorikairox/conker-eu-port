@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P57, 2026-10-22). Details: `docs/port/sessions/P57.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (829 bodies).
+- progress_nm: C coverage including NON_MATCHING **4823/5915 (81.5%)**, bytes **51.5%**; init 489/538,
+  game 4295/5334, debugger 39/43; **1092 asm-only** (152 under 60 insns); plus the nm_asm func_150A86B0.
+- **The model DL path is C:** func_1502CFEC (model display list) with func_1503DD8C (model ready check) and
+  func_1502F30C (vertex-block segments); the adjustment buffer is initialised: func_150342D0 + func_15034B50
+  (face blink / mouth entries, then the 0x1000 terminator). Also func_1502F17C, func_1502F554, func_1507E7A0 (now
+  `void`), func_1503A37C (bounds box), func_1518C900 (asset 9 DL load; func_1518CF74 was already C).
+  All difftested with knob scripts in `port_work/p57/` (k*.sh) plus mutants (P57.md table).
+- **Browser check first:** func_1502CFEC's G_MTX stores a *physical* address (0x000C42B8, `& 0x1FFFFFFF` of
+  D_800C42B8) as the asm does; the port's gfx path must map it.
+
+## Next steps (from P57)
+
+1. Browser: does Conker draw now? Watch the G_MTX physical address, func_1503DD8C's return (non-zero = no draw).
+2. Remaining model-path asm: func_15030758 (464, convert CERR), func_150A9B0C (D5E90.s hand asm), func_150028BC
+   (453, only for obj[0xAC] & 1 or +0x18 & 0x4000), func_150F20C8 (type 0x7B adjustments), func_150ADA20 (random).
+Runtime checks: P57.md UNVERIFIED.
+
 ## State (session P51, 2026-10-22). Details: `docs/port/sessions/P51.md`
 
 - The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (819 bodies).
