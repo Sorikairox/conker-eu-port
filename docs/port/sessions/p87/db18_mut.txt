@@ -1,0 +1,20 @@
+s|D_800C40B9 = 0;|D_800C40B9 = 2;| %
+s|D_800C39CA = 0;|D_800C39CA = 2;| %
+s|    D_800C40AE = 0;|    D_800C40AE = 1;| %
+s|best = -1;|best = 0;| %
+s|if (rec == NULL)|if (0)| %
+s|5, i, \&found, 1, 0x1E,|5, i, \&found, 1, 0x1F,| %
+s|D_800C40BC = 1;|D_800C40BC = 2;| %
+s|0x68, 0, 0, 0, 0, slot);|0x68, 0, 0, 0, 0, 0);| %
+s|D_800C39C9 = 1;|D_800C39C9 = 2;| %
+s|D_800C40AE = v;|D_800C40AE = v + 1;| %
+s|5, i, \&found, 1, 1, 1, 0, 0, 0, slot)|5, i, \&found, 1, 1, 0, 0, 0, 0, slot)| %
+s#best == -1 || v < best#best == -1 || v <= best# %
+s#best == -1 || v < best#v < best# %
+s|best = v;|best = v + 1;| %
+s|rgb = D_800844A0\[(s8)found\[5\]\];|rgb = D_800844A0[found[5]];| %
+s|if (\*(s16 \*)(found + 6) == 1)|if (*(s16 *)(found + 6) != 0)| %
+s|func_1517F3B0(rgb\[0\], rgb\[1\], rgb\[2\], 0, 1, 0);|func_1517F3B0(rgb[0], rgb[2], rgb[2], 0, 1, 0);| %
+s|func_1517F3B0(rgb\[0\], rgb\[1\], rgb\[2\], 0, 0, 0);|func_1517F3B0(rgb[0], rgb[1], rgb[1], 0, 0, 0);| %
+s|(&D_800C39D0)\[slot\] = D_800C40AE;|(\&D_800C39D0)[slot] = 0;| %
+s|func_15023C60((u32)(rec + 0x18), 5, i, \&found, 1, 0x77|func_15023C60((u32)(rec + 0x14), 5, i, \&found, 1, 0x77| %

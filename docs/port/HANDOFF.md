@@ -175,6 +175,29 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. func_1000480C in the browser: map `CART_WORD` (KSEG1 0xB0000000 | addr) to the ROM image and PI_STATUS to idle.
 3. After changing `NM_ASM_C_FUNCS_D5E90`, delete `build_nm/asm/D5E90.s.o` before the NM build.
 Code-segment tables: none in P62's C. Runtime checks: P62.md UNVERIFIED.
+## P87 (port-b) (session P87, 2026-10-23). Details: `docs/port/sessions/P87.md`
+
+Branch `port-b` (from P83 e3312cf); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p87/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (903 bodies).
+- **progress_nm (NM figure)**: total **4897/5915 (82.8%)**, game 4369/5334 (81.9%), C bytes 56.1%, 1018 asm-only.
+  (P83's 3994/5915 was the matched-only column.)
+- New hand-written NM C (no asm2c), setups EQUIV, mutants: the P88 trio in one commit, **func_1501ECA4** (camera
+  track pass, fills D_800C3958, 39/40, 1 equivalent), **func_15020F6C** (applies the records, 46/46),
+  **func_1501E888** (scene end, 22/23, 1 equivalent); func_1501D044 (21/21), func_1501DB18 (20/20),
+  func_15020430 (24/25, 1 equivalent), func_15022C4C (30/30), func_15022A8C (10/11, 1 invalid mutant),
+  func_15095A4C (game_eu_C2B60.c, 11/11).
+- Arity fix (NM): func_15020430 passes the key count to func_15020090 (4th argument read from a3).
+- P83 survivors killed: func_1501CE34 `<` -> `<=` (camera ends 0), func_1512317C `& 0xF` -> `& 7` (+0x4E = 9).
+- Harness: declarations for an NM body must sit in their own NM block (difftest replaces the function's block).
+
+## Next steps (from P87)
+
+1. Browser: level 0 / cutscenes without the P88 guards (P87.md UNVERIFIED).
+2. Scene-path asm left in game_eu_4A070.c: func_1501FD34 / func_1501FF10 (place / roll, called by func_1501ECA4),
+   func_1502330C, func_1501EA84, func_1501E5AC, func_15023684.
+3. game_14FF90.c: func_15124C38 (385), func_15126378 (1130).
+
 ## P83 (port-b) (session P83, 2026-10-23). Details: `docs/port/sessions/P83.md`
 
 Branch `port-b` (from P82 e7e2e1a); the orchestrator merges it into `port`.

@@ -1,0 +1,30 @@
+s|if (\*(u16 \*)ent == 6) {|if (*(u16 *)ent == 5) {| %
+s|if (D_800C39E8\[slot\]\[i\] == 0) {|if (0) {| %
+s|func_15022238(p\[0\], p\[1\], p\[2\], 0.0f);|func_15022238(p[0], p[2], p[2], 0.0f);| %
+s|if (ent\[2\] == 0) {|if (ent[2] == 2) {| %
+s|o = (u8 \*)func_15083E90(ent\[3\]);|o = (u8 *)func_15083E90(ent[2]);| %
+s|tx = \*(f32 \*)(o + 0x14);|tx = *(f32 *)(o + 0x18);| %
+s|tz = \*(f32 \*)(o + 0x1C);|tz = *(f32 *)(o + 0x18);| %
+s|ty = \*(s16 \*)(o + 0x12);|ty = *(s16 *)(o + 0x10);| %
+s|dy = ty - (f32)p\[1\];|dy = ty - (f32)p[0];| %
+s|q\[1\] = (s32)((f32)q\[1\] + dy);|q[1] = (s32)((f32)q[1] - dy);| %
+s|q\[2\] = (s32)((f32)q\[2\] + dz);|q[2] = (s32)((f32)q[2] + dx);| %
+s|if (\*(u16 \*)ent == 7) {|if (*(u16 *)ent == 8) {| %
+s|ang = 0.0f;|ang = 1.0f;| %
+s|if (keys\[k\].channel == 7) {$|if (keys[k].channel == 6) {| %
+s|                    break;|                    ;| %
+s|func_15022238(p\[0\], p\[1\], p\[2\], ang);|func_15022238(p[0], p[1], p[2], 0.0f);| %
+s|rot = D_800C39B4 - ang;|rot = D_800C39B4 + ang;| %
+s|D_800C39C4 = rot;|D_800C39C4 = ang;| %
+s|r = rot \* 0.017453292f;|r = rot * 0.0175f;| %
+s|nx = ox \* c + oz \* s;|nx = ox * c - oz * s;| %
+s|nz = -ox \* s + oz \* c;|nz = ox * s + oz * c;| %
+s|q\[0\] = (s32)((f32)D_800C39AC\[0\] + nx);|q[0] = (s32)((f32)D_800C39AC[2] + nx);| %
+s|dy = (f32)D_800C39AC\[1\] - py;|dy = (f32)D_800C39AC[1];| %
+s|q\[2\] = (s32)((f32)D_800C39AC\[2\] + nz);|q[2] = (s32)((f32)D_800C39AC[2] - nz);| %
+s|if (D_800C39F8\[slot\]\[j\] != 0 \&\& |if (| %
+s|+ 0x20) == 7) {|+ 0x20) == 6) {| %
+s|keys\[k\].value += rot;|keys[k].value += ang;| %
+s|if (D_800C3663 == 0) {|if (1) {| %
+s|oz = (f32)q\[2\] - pz;|oz = (f32)q[2] - px;| %
+s|for (k = 0; k < D_800C39F0\[slot\]\[j\]; k++) {|for (k = 1; k < D_800C39F0[slot][j]; k++) {| %
