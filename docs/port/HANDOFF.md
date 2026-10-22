@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P70, 2026-10-22). Details: `docs/port/sessions/P70.md`
+
+- Merged `port-b` (P64, P67; RETF fix) into `port`. The default build is byte-identical (full `verify_all.sh` OK).
+  `NON_MATCHING=1` links. protocheck: 0 problems (877 bodies).
+- progress_nm: C coverage including NON_MATCHING **4871/5915 (82.3%)**, bytes **55.1%**; init 490/538,
+  game 4342/5334, debugger 39/43; **1044 asm-only** (150 under 60 insns).
+- **Conker's tail is C:** func_1503BCAC (1143, chain simulation; knobs per branch 138/138, mutants 17/19) and
+  func_1503CE88 (joint matrices). Model-path stubs done: func_1503B840, func_15039CC8. Breadth: func_1503A968,
+  func_1503216C, func_1502FED8. All hand C, knob setups + mutants in `docs/port/sessions/p70/`.
+- **Knob setups need EU data addresses** (`conker/undefined_syms_auto.txt`; D_800CC2D0 = 0x800CC6F0 etc., P70.md).
+  Callee prototypes must be in the candidate text for difftest to ignore stray arg registers.
+
+## Next steps (from P70)
+
+1. func_15030448 (written, `docs/port/sessions/p70/draft_0448.c`, difftest a2 issue on func_100043B4), func_150302C8,
+   func_15030100, then the other small asm-only functions of 5D910 / 595D0 / 64770 (P70.md list).
+2. Browser: tail runtime check (P70.md UNVERIFIED); P65 items (PC overrides, D_80084550 callbacks).
+
 ## State (session P65, 2026-10-22). Details: `docs/port/sessions/P65.md`
 
 - The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (858 bodies).

@@ -1,0 +1,21 @@
+  83 9cc8 base EQUIV
+   1 9cc8 base ERROR
+m1 KILLED (   1 DIFFER   83 EQUIV ): s/< 5.0f/<= 5.0f/
+m2 KILLED (   1 DIFFER   83 EQUIV ): s/obj->in_water \&\& //
+m3 KILLED (   6 DIFFER   78 EQUIV ): s/} else if (obj->health == 0)/} else if (0)/
+m1 KILLED (  28 DIFFER   12 EQUIV ): s/!= -14/!= -13/
+m2 KILLED (  28 DIFFER   12 EQUIV ): s/left = 4;/left = 3;/
+m3 KILLED (  28 DIFFER   12 EQUIV ): s/25.0f \* t + 2.0f/25.0f * t + 3.0f/
+m4 LIVE (  40 EQUIV ): s/y <= 120.0f/y < 120.0f/
+m5 KILLED (   8 DIFFER   32 EQUIV ): s/t = 1.0f;/t = 0.5f;/
+m6 LIVE (  40 EQUIV ): s/& 0xFFF)/\& 0x7FF)/
+m1 KILLED (  25 DIFFER   15 EQUIV ): s/0.015625f/0.03125f/
+m2 KILLED (  16 DIFFER   24 EQUIV ): s/sx.f = 1.0f \/ f;/sx.f = f;/
+m3 KILLED (  28 DIFFER   12 EQUIV ): s/m\[3\]\[1\] = pos\[1\];/m[3][1] = pos[0];/
+m4 KILLED (  28 DIFFER   12 EQUIV ): s/D_800C441A++;/D_800C441A += 2;/
+m5 KILLED (  40 DIFFER ): s/obj->id != 0x22/obj->id != 0x21/
+m1 KILLED (  23 DIFFER   27 EQUIV ): s/entry = req - 1;/entry = req;/
+m2 LIVE (  50 EQUIV ): s/if (anim < (u16) D_800C5A90\[model\])/if (anim <= (u16) D_800C5A90[model])/
+m3 KILLED (  10 DIFFER   40 EQUIV ): s/D_800C3638 = 1;/D_800C3638 = 2;/
+m4 KILLED (   9 DIFFER   41 EQUIV ): s/OBJ_U8(obj, 0x1C9) = 0;/OBJ_U8(obj, 0x1C9) = 1;/
+m5 KILLED (   7 DIFFER   43 EQUIV ): s/if (entry == OBJ_U8(obj, 0x1C8)) {/if (0) {/

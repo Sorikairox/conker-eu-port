@@ -175,7 +175,64 @@ void *func_15039D44(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039D68.s")
 
+#ifdef NON_MATCHING
+extern u8 D_800BE9B4;
+extern u8 D_8009822C[];
+extern u8 D_80098400[];
+extern u16 *D_80084710[];
+
+/*
+ * P70: look-at record setup and the "no look" flag (bit 2 of +0x2FB), after func_1503B840.
+ * With a look record (+0x324): object 0x53 in animation 0x15, or D_800BE9B4 set, resets the three look slots
+ * (+0x30.. = 40, +0x33.. = 0, +0x36.. = 4). Then, for object ids with a list (D_8009822C[id] = list number + 1;
+ * D_80098400 = list lengths, D_80084710 = u16 lists of +0x84 values), a listed +0x84 sets the flag.
+ * Otherwise the flag is set in state 1 when the health is 0, or (in water and xz speed < 5) or +0x31C[0x197] != 0
+ * or xz speed > 20; in the other states when the health is 0.
+ */
+void func_15039CC8(struct127 *obj) {
+    u8 *rec = obj->unk324;
+    s32 list;
+    s32 n;
+    s32 i;
+    u16 *ids;
+
+    if (rec == NULL) {
+        return;
+    }
+    if ((obj->id == 0x53 && obj->unk84.uh == 0x15) || D_800BE9B4 != 0) {
+        for (i = 0; i < 3; i++) {
+            rec[0x30 + i] = 40;
+            rec[0x33 + i] = 0;
+            rec[0x36 + i] = 4;
+        }
+    }
+    list = D_8009822C[obj->id];
+    if (list == 0) {
+        return;
+    }
+    list--;
+    n = D_80098400[list];
+    ids = D_80084710[list];
+    for (i = 0; i < n; i++) {
+        if (obj->unk84.uh == ids[i]) {
+            obj->unk2FB |= 4;
+            return;
+        }
+    }
+    if (obj->interaction_state == 1) {
+        if (obj->health == 0
+            || (obj->in_water && obj->xz_velocity < 5.0f)
+            || ((u8 *) obj->unk31C)[0x197] != 0
+            || obj->xz_velocity > 20.0f) {
+            obj->unk2FB |= 4;
+        }
+    } else if (obj->health == 0) {
+        obj->unk2FB |= 4;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039CC8.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15039D68(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
@@ -434,10 +491,65 @@ void func_1503A8FC(void) {
     *(f32 *)(p + 0x38) = *(f32 *)((u8 *)&D_800CC2D0[D_800C3E78] + 0x178);
 }
 
+#ifdef NON_MATCHING
+#define OBJ_U8(obj, off) (*(u8 *) ((u8 *) (obj) + (off)))
+extern u8 D_800C441A;
+extern u8 D_80084794[];
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+
+/*
+ * P70: per-frame joint callback of object 0x22 (D_800CC2D0[D_800C3E78]): scales joint D_80084794[n] (n = the
+ * call counter D_800C441A of this frame) by f = 1 + +0x20A / 64 in x and z on the first call, by 1 / f on the
+ * later ones, keeping the joint's translation, then counts the call.
+ */
+void func_1503A968(void) {
+    struct127 *obj = &D_800CC2D0[D_800C3E78];
+    f32 (*m)[4];
+    f32 tmp[4][4];
+    f32 out[4][4];
+    f32 pos[3];
+    f32 f;
+    union {
+        f32 f;
+        s32 bits;
+    } sx, sy, sz; /* functions.h declares func_150A7CB0 (scale matrix) with s32 arguments: f32 bit patterns */
+
+    if (obj->id != 0x22) {
+        return;
+    }
+    f = (f32) OBJ_U8(obj, 0x20A) * 0.015625f + 1.0f;
+    if (D_800C441A == 0) {
+        sx.f = f;
+        sy.f = 1.0f;
+        sz.f = f;
+    } else {
+        sy.f = 1.0f;
+        sx.f = 1.0f / f;
+        sz.f = 1.0f / f;
+    }
+    m = (f32 (*)[4]) ((u8 *) obj->unk1D4 + D_80084794[D_800C441A] * 0x40);
+    pos[0] = m[3][0];
+    m[3][3] = 1.0f;
+    m[0][3] = 0.0f;
+    m[1][3] = 0.0f;
+    m[2][3] = 0.0f;
+    pos[1] = m[3][1];
+    pos[2] = m[3][2];
+    guMtxIdentF(tmp);
+    func_150A7CB0(tmp, sx.bits, sy.bits, sz.bits);
+    func_150A7A48(m, tmp, out);
+    bcopy(out, m, 0x40);
+    m[3][0] = pos[0];
+    m[3][1] = pos[1];
+    m[3][2] = pos[2];
+    D_800C441A++;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A968.s")
+#endif
 
 s32 func_15037224();
-s32 func_1503A968();
+void func_1503A968(void);
 extern u8 D_800C441A;
 
 void func_1503AAE0(void) {

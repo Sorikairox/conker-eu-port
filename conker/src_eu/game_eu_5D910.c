@@ -746,7 +746,60 @@ s32 func_1503211C(u8 *arg0, s32 arg1) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_8009748C; /* 1 / 60 */
+
+/*
+ * P70: model callback: animates the tile size of a texture by the height +0x08 of the record +0x2D0 of obj.
+ * arg0 +0x24 points at the display list pointer; its 4th G_SETTILESIZE (0xF2) command gets s = 25 * t + 2 in
+ * its first word (t = 1 in animation 0x55, 0 in 0x56, else 1 - y / 60 for y in 0..120, 0 outside).
+ * Returns 0 (also when there is no record or display list).
+ */
+s32 func_1503216C(u8 *arg0, struct127 *obj) {
+    u8 *rec = (u8 *) obj->unk2D0;
+    u32 *dl;
+    f32 t;
+    f32 y;
+    s32 i;
+    s32 left;
+
+    if (rec == NULL) {
+        return 0;
+    }
+    dl = **(u32 ***) (arg0 + 0x24);
+    if (dl == NULL) {
+        return 0;
+    }
+    if (obj->unk84.uh == 0x55) {
+        t = 1.0f;
+    } else if (obj->unk84.uh == 0x56) {
+        t = 0.0f;
+    } else {
+        y = *(f32 *) (rec + 8);
+        if (0.0f <= y && y <= 120.0f) {
+            t = 1.0f - y * D_8009748C;
+        } else {
+            t = 0.0f;
+        }
+    }
+    /* find the 4th G_SETTILESIZE (first byte 0xF2) of the list */
+    i = 0;
+    left = 4;
+    do {
+        left--;
+        while (*(s8 *) &dl[i * 2] != -14) {
+            i++;
+        }
+        if (left != 0) {
+            i++;
+        }
+    } while (left != 0);
+    dl[i * 2] = 0xF2002000 | ((s32) (25.0f * t + 2.0f) & 0xFFF);
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503216C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150322B8.s")
 

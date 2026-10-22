@@ -1615,7 +1615,66 @@ u8 *func_1502FCEC(u8 *arg0, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FCEC.s")
 #endif
+#ifdef NON_MATCHING
+#define OBJ_U8(obj, off) (*(u8 *) ((u8 *) (obj) + (off)))
+void func_15083C3C(s32, s32, s32);
+void func_1507EE9C(struct127 *);
+
+/*
+ * P70: pending model switch of an object. +0x1C9 holds the requested entry + 1 of the object's model list
+ * +0x2C4 (+0x2C9 entries; 0xFF = entry 0 again). When it differs from the current entry +0x1C8, model
+ * list[entry] is set up by func_15083C3C; if that model has another animation set than the object's id
+ * (D_800D1588), the animation is restarted (func_1505E650: from +0x84 when it exists in the new set, i.e. below
+ * D_800C5A90[model], else from 0) with +0x84 = 0xFFFF. D_800C3638 is cleared around it in mode D_800C35EA == 1.
+ * The request +0x1C9 stays set (except 0xFF, which is consumed).
+ */
+void func_1502FED8(struct127 *obj) {
+    s32 req = OBJ_U8(obj, 0x1C9);
+    s32 entry;
+    s32 model;
+    s32 anims;
+    u16 anim;
+
+    if (req == 0) {
+        return;
+    }
+    anims = D_800D1588[obj->id];
+    if (req == 0xFF) {
+        OBJ_U8(obj, 0x1C9) = 0;
+        entry = 0;
+    } else {
+        entry = req - 1;
+        if (entry >= OBJ_U8(obj, 0x2C9)) {
+            return;
+        }
+        if (entry == OBJ_U8(obj, 0x1C8)) {
+            return;
+        }
+    }
+    model = (*(u8 **) ((u8 *) obj + 0x2C4))[entry];
+    func_15083C3C(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, model, 0);
+    OBJ_U8(obj, 0x1C8) = entry;
+    if (D_800C35EA == 1) {
+        D_800C3638 = 0;
+    }
+    if (anims != D_800D1588[model]) {
+        anim = obj->unk84.uh;
+        if (anim < (u16) D_800C5A90[model]) {
+            obj->unk84.uh = 0xFFFF;
+            func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        } else {
+            obj->unk84.uh = 0xFFFF;
+            func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        }
+    }
+    if (D_800C35EA == 1) {
+        D_800C3638 = 1;
+    }
+    func_1507EE9C(obj);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FED8.s")
+#endif
 
 void func_15030060(u8 *arg0)
 {
