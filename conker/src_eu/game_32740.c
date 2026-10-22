@@ -2,6 +2,13 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1510ED24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, f32 argC, f32 argD);
+void func_15123070(struct108 *arg0);
+void func_1512DAD0(struct108 *arg0, s32 arg1, void *arg2);
+extern f32 D_80095DA0;
+extern f32 D_800C3A20[];
+#endif
 
 
 #ifdef NON_MATCHING
@@ -281,7 +288,67 @@ void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     arg0->unk23C = (u8)1;
 // }
 
+#ifdef NON_MATCHING
+/* P41: initial camera eye. Controller arg0 (D_800DBFF0[player]) gets eye = arg2 (0x2F8, copied to 0x27C and 0x304),
+ * at = the record arg1's position (0x2A4, copied to 0x2BC / 0x2B0 / 0x2E0), the horizontal distance 0x374, the
+ * eye height state (func_1510ED24 → 0x354..0x360, 0x348 / 0x34C), then the camera setup callees. Outside level
+ * 0x21 and unless D_800C35EA == 1, camera events 5 / 8 (with D_800C3A20[3] = yaw 0x37C) / 6. */
+void func_15005818(struct108 *arg0, u8 *arg1, f32 *arg2) {
+    u8 *p = (u8 *)arg0;
+    f32 dx;
+    f32 dz;
+    f32 h;
+
+    p[0x23C] = 1;
+    *(f32 *)(p + 0x2F8) = arg2[0];
+    *(f32 *)(p + 0x2FC) = arg2[1];
+    *(f32 *)(p + 0x300) = arg2[2];
+    *(s32 *)(p + 0x27C) = *(s32 *)(p + 0x2F8);
+    *(s32 *)(p + 0x280) = *(s32 *)(p + 0x2FC);
+    *(s32 *)(p + 0x284) = *(s32 *)(p + 0x300);
+    *(s32 *)(p + 0x304) = *(s32 *)(p + 0x2F8);
+    *(s32 *)(p + 0x308) = *(s32 *)(p + 0x2FC);
+    *(s32 *)(p + 0x30C) = *(s32 *)(p + 0x300);
+    func_1510ED24((s32)(p + 0x644), (s32)(p + 0x648), (s32)(p + 0x354), (s32)(p + 0x360), (s32)(p + 0x640), 0,
+                  *(f32 *)(p + 0x2F8), *(f32 *)(p + 0x2FC), *(f32 *)(p + 0x300), *(f32 *)(p + 0x2FC), 0, 0, D_80095DA0, *(f32 *)(p + 0x2FC));
+    *(f32 *)(p + 0x358) = *(f32 *)(p + 0x354);
+    *(f32 *)(p + 0x35C) = *(f32 *)(p + 0x354);
+    *(f32 *)(p + 0x2A4) = *(f32 *)(arg1 + 0x14);
+    *(f32 *)(p + 0x2A8) = *(f32 *)(arg1 + 0x18);
+    *(f32 *)(p + 0x2AC) = *(f32 *)(arg1 + 0x1C);
+    *(s32 *)(p + 0x2BC) = *(s32 *)(p + 0x2A4);
+    *(s32 *)(p + 0x2C0) = *(s32 *)(p + 0x2A8);
+    *(s32 *)(p + 0x2C4) = *(s32 *)(p + 0x2AC);
+    dx = *(f32 *)(p + 0x2A4) - *(f32 *)(p + 0x2F8);
+    dz = *(f32 *)(p + 0x2AC) - *(f32 *)(p + 0x300);
+    *(s32 *)(p + 0x2B0) = *(s32 *)(p + 0x2A4);
+    *(s32 *)(p + 0x2B4) = *(s32 *)(p + 0x2A8);
+    *(s32 *)(p + 0x2B8) = *(s32 *)(p + 0x2AC);
+    h = *(f32 *)(p + 0x2FC) - *(f32 *)(p + 0x354);
+    *(f32 *)(p + 0x34C) = h;
+    *(f32 *)(p + 0x348) = h;
+    *(f32 *)(p + 0x374) = sqrtf(dx * dx + dz * dz);
+    *(s32 *)(p + 0x2E0) = *(s32 *)(p + 0x2BC);
+    *(s32 *)(p + 0x2E4) = *(s32 *)(p + 0x2C0);
+    *(s32 *)(p + 0x2E8) = *(s32 *)(p + 0x2C4);
+    *(s32 *)(p + 0x2EC) = *(s32 *)(p + 0x2F8);
+    *(s32 *)(p + 0x2F0) = *(s32 *)(p + 0x2FC);
+    *(s32 *)(p + 0x2F4) = *(s32 *)(p + 0x300);
+    func_15124B18(arg0);
+    func_15125330(arg0);
+    func_1512523C(arg0);
+    func_15123070(arg0);
+    *(s32 *)(p + 0x5F0) |= 4;
+    if (D_800BE9F0 != 0x21 && D_800C35EA != 1) {
+        func_1512DAD0(arg0, 5, NULL);
+        D_800C3A20[3] = *(f32 *)(p + 0x37C);
+        func_1512DAD0(arg0, 8, D_800C3A20);
+        func_1512DAD0(arg0, 6, NULL);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_15005818.s")
+#endif
 // void func_15005818(struct108 *arg0, void *arg1, void *arg2) {
 //     void *sp48;
 //     f32 temp_f0;

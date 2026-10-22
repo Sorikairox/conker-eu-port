@@ -917,7 +917,7 @@ s32 func_15021834(s32 *, s32, s32);
 s32 func_15022A8C(s32 *);
 void func_1504A730(void);
 s32 func_15061B4C();
-s32 func_1507EB1C(s32 *);
+void func_1507EB1C(s32 *);
 void func_150802A8(s32 *);
 extern u8 D_800C3A78;
 

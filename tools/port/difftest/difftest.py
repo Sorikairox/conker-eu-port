@@ -113,6 +113,19 @@ def symaddr(name):
     return int(m.group(1), 16) if m else None
 
 _ADDR2NAME = None
+def _s64(x): return x - (1 << 64) if x >> 63 else x
+def _tdiv(a, b): q = abs(a) // abs(b); return q if (a < 0) == (b < 0) else -q
+LL_HELPERS = {   # P45: emulated libultra 64-bit helpers (unsigned 64-bit operands in, None = leave random)
+    '__ll_lshift': lambda x, y: x << (y & 63),
+    '__ull_rshift': lambda x, y: x >> (y & 63),
+    '__ll_rshift': lambda x, y: _s64(x) >> (y & 63),
+    '__ll_mul': lambda x, y: x * y,
+    '__ull_div': lambda x, y: x // y if y else None,
+    '__ull_rem': lambda x, y: x % y if y else None,
+    '__ll_div': lambda x, y: _tdiv(_s64(x), _s64(y)) if y else None,
+    '__ll_rem': lambda x, y: _s64(x) - _tdiv(_s64(x), _s64(y)) * _s64(y) if y else None,
+}
+
 def addr2name(a):
     global _ADDR2NAME
     if _ADDR2NAME is None:
@@ -492,6 +505,14 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
     OUTA[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
+# P41 (opt-in): DIFFTEST_OUTB="ADDR=N:B0;B1;...,..." like DIFFTEST_OUTA but writes bytes (hex B), e.g. u8 out-params
+# that sit next to each other in the caller's frame (func_150851E0's angle / flag bytes).
+OUTB = {}
+for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
+    _a, _v = _p.split('=')
+    OUTB[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
+                                     for _x in _v.split('/')]
+
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
 # N >= 4 (P43): the stack argument at sp+0x10+4*(N-4).
@@ -814,6 +835,14 @@ class Run:
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
         if (addr & 0x1FFFFFFF) in STUBRET:
             _rs = STUBRET[addr & 0x1FFFFFFF]; mu.reg_write(UC_MIPS_REG_V0, _rs[min(k, len(_rs) - 1)])
+        # P45: the libultra 64-bit helpers are pure; compute them (a0:a1 op a2:a3 -> v0:v1) instead of a random
+        # return, so u64 bit-mask loops (func_150A16A4) run their real course on both sides.
+        if name in LL_HELPERS:
+            _x = (regs[0] << 32) | regs[1]; _y = (regs[2] << 32) | regs[3]
+            _r = LL_HELPERS[name](_x, _y)
+            if _r is not None:
+                _r &= (1 << 64) - 1
+                mu.reg_write(UC_MIPS_REG_V0, _r >> 32); mu.reg_write(UC_MIPS_REG_V1, _r & 0xFFFFFFFF)
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
         # word through each aligned aN that points into the caller's frame (out-params such as
@@ -832,6 +861,10 @@ class Run:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *_ws))
+        if (addr & 0x1FFFFFFF) in OUTB:
+            for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
+                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                mu.mem_write(phys(_p), bytes(_ws))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
             mu.reg_write(reg, r.getrandbits(32))

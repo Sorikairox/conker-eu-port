@@ -1,6 +1,11 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1507E690(u8 *);
+void func_1507EE9C();
+s32 func_1507EA98(u8 *);
+#endif
 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E690.s")
@@ -49,8 +54,41 @@ s32 func_1507EA98(u8 *arg0)
 
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507EB1C.s")
+#ifdef NON_MATCHING
+// P45: per-record animation / interaction timer step (after the state handler). +0x72 counts down by D_800BE9E4
+// (0xFFFE = frozen: return; 0xFFFF = forever); when func_1507EA98 says so, func_1507E690; once +0x72 is 0 and
+// +0x70 != +0x6F, func_1507EE9C. Records of type +5 == 2 are skipped.
+void func_1507EB1C(u8 *arg0) {
+    s32 t;
+    u16 v;
 
+    if (arg0[5] == 2) {
+        return;
+    }
+    v = *(u16 *)(arg0 + 0x72);
+    if (v != 0) {
+        if (v == 0xFFFE) {
+            return;
+        }
+        if (v != 0xFFFF) {
+            t = D_800BE9E4;
+            if (t < (s32)v) {
+                *(u16 *)(arg0 + 0x72) = v - t;
+            } else {
+                *(u16 *)(arg0 + 0x72) = 0;
+            }
+        }
+    }
+    if (func_1507EA98(arg0) != 0) {
+        func_1507E690(arg0);
+    }
+    if (*(u16 *)(arg0 + 0x72) == 0 && arg0[0x70] != arg0[0x6F]) {
+        func_1507EE9C(arg0);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507EB1C.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E7E4.s")
 
 s32 func_1507ECE8(s32 arg0, s32 arg1) {
