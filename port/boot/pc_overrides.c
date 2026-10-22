@@ -178,22 +178,5 @@ void port_cam_probe(unsigned task) {
 /* P69: the TEMPORARY PC func_1502AF04, func_150A69E0 and func_1510E908 (P63) were removed: the port branch
  * converted all three in P65 (game_57FA0.c, game_eu_D3880.c, game_eu_13B700.c, NON_MATCHING). */
 
-/* P84 TEMPORARY (remove when the port branch converts func_151DDF6C, game_eu_20B730.c, GLOBAL_ASM): settings clamp.
- * For each of the 0x1C settings bytes D_800E1010[i] (signed, lb): if it is below D_80090210[i] or above
- * D_8009022C[i] it becomes the default D_800901F4[i]. The asm returns v0 = 0x1C (its loop index); the one caller
- * (game_33990.c, after the save-settings checksum) ignores it. Why needed: with the asm stub a failed checksum leaves
- * every setting 0xFF, so the language D_800E101A = 0xFF reaches P68's text bank loader func_151E7110 (C since this
- * merge): a DMA out of ROM, a zeroed bank and string scans through the null zone on every frame (~400 ms frames). */
-extern s8 p84_D_800E1010[] __asm__("D_800E1010");
-extern s8 p84_D_800901F4[] __asm__("D_800901F4");
-extern s8 p84_D_80090210[] __asm__("D_80090210");
-extern s8 p84_D_8009022C[] __asm__("D_8009022C");
-s32 func_151DDF6C(s32 *a0, s32 a1, s32 a2) {
-    s32 i;
-    (void)a0; (void)a1; (void)a2;
-    for (i = 0; i < 0x1C; i++) {
-        s8 v = p84_D_800E1010[i];
-        if (v < p84_D_80090210[i] || p84_D_8009022C[i] < v) p84_D_800E1010[i] = p84_D_800901F4[i];
-    }
-    return 0x1C;
-}
+/* P88: the TEMPORARY PC func_151DDF6C (P84, settings clamp) was removed: the port branch converted it in P85
+ * (game_eu_20B730.c, NON_MATCHING, void (void)). */

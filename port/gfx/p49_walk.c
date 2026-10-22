@@ -65,9 +65,10 @@ void __wrap_func_1504CB98(void *arg0) {
       } }
     if (log) p49_line("pre ", r);
     for (i = 0; i < st_count; i++) st_n[i] = 0;
+    { void (*prev_hook)(const char *) = port_stub_trace_hook; /* P88: restore, don't clear (?p88watch) */
     port_stub_trace_hook = p49_hook;
     __real_func_1504CB98(arg0);
-    port_stub_trace_hook = 0;
+    port_stub_trace_hook = prev_hook; }
     if (log) {
         char buf[600]; int n = 0;
         p49_line("post", r);

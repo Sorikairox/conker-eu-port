@@ -182,9 +182,10 @@ void __wrap_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, 
         if (scan >= 65536) g_scan_long++;
     }
     st_count = 0;
+    { void (*prev_hook)(const char *) = port_stub_trace_hook; /* P88: restore, don't clear (?p88watch) */
     port_stub_trace_hook = p58_hook;
     __real_func_150A86B0(arena, m, anim, skel, n, buf, remap, h);
-    port_stub_trace_hook = 0;
+    port_stub_trace_hook = prev_hook; }
     if (!fl_model && !fl_pose) return;
     /* the joint matrices: model space (root matrix undone); column 3 is never written by the evaluator */
     {
