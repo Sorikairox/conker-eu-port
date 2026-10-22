@@ -56,6 +56,15 @@ SRC_DIRS := $(SRC_DIR) \
 						$(GAME_SRC_DIRS) \
 						$(LIBULTRA_SRC_DIRS)
 
+# P22: NON_MATCHING C for functions of raw asm files (splat `asm` segments; the file must not contain the word G-L-O-B-A-L_ASM, which the GLOBAL_ASM_C_FILES grep would pick up). src_eu/nm_asm/X.c
+# holds C for functions of asm/X.s; it is compiled and linked only with NON_MATCHING=1, and the asm copies of
+# the functions listed in NM_ASM_C_FUNCS_X are weakened in X.s.o so the C definitions win.
+NM_ASM_SRC_DIR := $(SRC_DIR)/nm_asm
+NM_ASM_C_FUNCS_D5E90 := func_150AB278
+ifeq ($(NON_MATCHING),1)
+SRC_DIRS += $(NM_ASM_SRC_DIR)
+endif
+
 
 S_FILES   = $(foreach dir,$(ASM_DIRS),$(wildcard $(dir)/*.s))
 C_FILES   = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
@@ -278,7 +287,8 @@ $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 ifeq ($(NON_MATCHING),1)
 # the C .rodata of NON_MATCHING bodies (literals) has no home in the blob layout: park it NOLOAD at the
 # expansion-pak address so the ELF links (the NON_MATCHING ROM is not bootable yet: PLAN Phase 2)
-	sed -i '/\/DISCARD\/ :/i\    .nm_rodata 0x80400000 (NOLOAD) : { $(BUILD_DIR)/src_eu/*.o(.rodata*) }' $@
+	sed -i '/\/DISCARD\/ :/i\    .nm_rodata 0x80400000 (NOLOAD) : { $(BUILD_DIR)/src_eu/*.o(.rodata*) $(BUILD_DIR)/src_eu/nm_asm/*.o(.rodata*) }' $@
+	sed -i 's#^\(\s*\)$(BUILD_DIR)/asm/D5E90.s.o(.text);#&\n\1$(BUILD_DIR)/$(NM_ASM_SRC_DIR)/D5E90.c.o(.text);#' $@
 endif
 
 $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
@@ -302,6 +312,12 @@ $(BUILD_DIR)/src_eu/init_eu_26B30.c.o: src_eu/init_eu_26B30.c
 
 $(BUILD_DIR)/%.s.o: %.s
 	$(AS) $(ASFLAGS) -o $@ $<
+
+ifeq ($(NON_MATCHING),1)
+$(BUILD_DIR)/asm/D5E90.s.o: asm/D5E90.s
+	$(AS) $(ASFLAGS) -o $@ $<
+	$(OBJCOPY) $(foreach f,$(NM_ASM_C_FUNCS_D5E90),--weaken-symbol=$(f)) $@
+endif
 
 $(BUILD_DIR)/%.bin.o: %.bin
 	$(LD) -r -b binary -o $@ $<

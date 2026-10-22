@@ -1,6 +1,10 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15179B70(s32 arg0, s32 arg1);
+void func_15179A38(void);
+#endif
 
 
 void func_15179420(void) {
@@ -51,7 +55,6 @@ void func_1517946C(s32 arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179008.s")
-
 extern s32 D_800DD868[];
 void func_15179A38(void) {
     s32 x;
