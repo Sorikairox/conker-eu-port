@@ -426,7 +426,9 @@ u32 osPiGetStatus(void) { return 0; }
 static void rom_copy(u32 dev, void *dst, u32 size) {
     u32 off = dev & 0x0FFFFFFF; /* PI cart domain 0x10000000 */
     if (!port_rom || off + size > port_rom_size) {
+        static int nstk;
         port_log("[pi] DMA 0x%08X+0x%X out of ROM (rom %s)\n", dev, size, port_rom ? "loaded" : "missing");
+        if (nstk++ < 4) port_js_stack(1, 10); /* P84: who asks for it */
         memset(dst, 0, size);
         return;
     }
