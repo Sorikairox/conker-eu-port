@@ -135,3 +135,6 @@ P58	web	port-web				CONKER posed by converted skeleton anim (preview); sine tabl
 P59	port-b	nm convert	6		118	walk-path: event resolver, floor material, respawn, record contact, collision cylinder, anim frame advance
 P57	port	nm convert	10			model display list func_1502CFEC + adjust buffer + model-path fns C; total C 4823 (81.5%)
 P61	web	port-web				MILESTONE Conker drawn by game code (831 cmds, 811 tris, 84 bone mtx); walks, respawns at checkpoint; walls literal-address bug found
+P60	port-b	nm convert	3			animation driver func_1505E0C4, idle chooser, floor push/slope C; port merged into port-b
+P62	port	nm convert	6		121	root mtx + f32->Mtx (VR4300 harness), PI cart read, LOD, vertex-block words; asm2c fixed for lui literals; total C 4845 (81.9%) bytes 53.6%
+P63	web	port-web				MILESTONE Conker animated by game code (idle/walk/run/skid/fall/land/death); 3 temp PCs (anim header lookup, slope solver, 69E0 wrapper); walk.gif

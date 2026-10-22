@@ -6,7 +6,7 @@ Two parts: (1) a **status snapshot** — overwrite it, don't append history (his
 
 ---
 
-## 1. Status snapshot (2026-10-23, after P61)
+## 1. Status snapshot (2026-10-23, after P63)
 
 ### Goal
 Conker's Bad Fur Day (EU ROM, user-owned) as a **native source port that runs in a web browser**:
@@ -37,7 +37,8 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
   boot, level load (inflater, level loader, visibility build/walk), camera chain, lighting.
 - Renders **level 0x21 from the game's own camera, lit by the game's lights** (P46 screenshot).
 - **Player walks and the camera follows** (P49) — via TEMPORARY overrides of func_15059C84 (integrator) and func_1504C0E8 (partial); then made real C by P50; floor, landing, gravity, wall engine and ray cast are C (P53–P56).
-- **Conker is drawn by the game's own code** (P61: func_1502C1D4 → func_1502CFEC, 811 tris), walks, falls, respawns at the checkpoint. Still in bind pose: animation driver func_1505E0C4 is asm (P60). TEMPORARY PC versions remain for func_150844AC, func_150A9E64, func_150A9B0C, func_1000480C.
+- **Conker is drawn AND animated by the game's own code** (P61/P63: idle, walk, run, skid, fall, land, death; walk.gif). Walks, falls, respawns, level warp works. Coverage 4845/5915 (81.9%), 53.6% bytes (port P62).
+- TEMPORARY PC versions still in port-web: func_1502AF04, func_1510E908, func_150A69E0 (P63), func_1000480C cartridge mapping; P62 converted func_150A9B0C/func_150A9E64/func_150844AC (drop on next merge).
 - Fiber scheduler (ASYNCIFY), virtual big-endian memory, function-pointer trampolines, F3DEX2/F3DEXBG
   WebGL2 renderer (blender, fog, 3-point filter), CPU audio ABI incl. MP3 voices, Web Audio out,
   keyboard + gamepad via PIF model, EEPROM saves in IndexedDB, page UX (drop zone, pause, volume).
