@@ -569,7 +569,52 @@ void func_1506BF1C(void) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506BF5C.s")
+#ifdef NON_MATCHING
+extern s32 D_800D1C9C;
+s32 func_1000F568(s32, s32);
+int func_1506BF5C(void);   /* int (not s32 = long): implicit int at the earlier call in func_1506BF1C */
+
+/*
+ * P80: script command "random jump": while the counter D_800D1C9C is not 0, count it down and pick one of up to four
+ * 11-bit targets: the counter's own low 11 bits (after the decrement) and the command word's fields 0..10 / 11..21
+ * / 22..32; with n = the highest non-zero field (2 / 3 / 4, else 0) the pick is func_1000F568(base, n) - base.
+ * A non-zero pick goes into D_800D1580 (with the counter's bits other than 0..10 and 16) and func_1506BF5C runs.
+ */
+void func_1506C32C(void) {
+    s32 v[4];
+    s32 n;
+    s32 keep;
+
+    if (D_800D1C9C == 0) {
+        return;
+    }
+    D_800D1C9C--;
+    v[0] = D_800D1C9C & 0x7FF;
+    v[1] = D_800D1580 & 0x7FF;
+    v[2] = (D_800D1580 >> 11) & 0x7FF;
+    v[3] = (D_800D1580 >> 22) & 0x7FF;
+    if (v[3] != 0) {
+        n = 4;
+    } else if (v[2] != 0) {
+        n = 3;
+    } else if (v[1] != 0) {
+        n = 2;
+    } else {
+        n = 0;
+    }
+    if (n != 0) {
+        n = func_1000F568(v[0], n) - v[0];
+    }
+    if (v[n] != 0) {
+        keep = D_800D1C9C & 0xFFFEF800;
+        D_800D1C9C = keep;
+        D_800D1580 = v[n] | keep;
+        func_1506BF5C();
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C32C.s")
+#endif
 
 void func_1506C418(void) {
     func_10010A3C(D_800D154C);
@@ -1286,7 +1331,23 @@ void func_1506EEF4(void) {
 }
 
 // TBD whats goins on here
+#ifdef NON_MATCHING
+/*
+ * P80: script command: +0x282 = 0xFFFF, +0x276 = 5, and the byte pair +0x284 + 2 * i (i = bits 16..23 of the
+ * command word D_800D1580) = bits 8..15, bits 0..7.
+ */
+void func_1506EF5C(void) {
+    s32 w = D_800D1580;
+    s32 i = ((w >> 16) & 0xFF) * 2;
+
+    *(u16 *) ((u8 *) D_800D154C + 0x282) = 0xFFFF;
+    *((u8 *) D_800D154C + 0x276) = 5;
+    *((u8 *) D_800D154C + 0x284 + i) = w >> 8;
+    *((u8 *) D_800D154C + 0x285 + i) = w;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506EF5C.s")
+#endif
 
 void func_1506EFB4(void) {
     D_800D154C->unk282 = (u16)0;
@@ -2673,7 +2734,26 @@ void func_15074870(void) {
 }
 
 // ??
+#ifdef NON_MATCHING
+/*
+ * P80: script command: add bits 24..31 of the command word D_800D1580 to the object's byte +0x138 when the flag
+ * test (word +0x2E4 + 4 * bits 16..23) & bits 8..15 matches bit 0 (bit 0 set: the flags are clear; clear: any set).
+ */
+void func_1507488C(void) {
+    s32 w = D_800D1580;
+    u8 *o = (u8 *) D_800D154C;
+    s32 add = w & 1;
+
+    if (*(s32 *) (o + 0x2E4 + ((w >> 16) & 0xFF) * 4) & ((w >> 8) & 0xFF)) {
+        add ^= 1;
+    }
+    if (add) {
+        o[0x138] += w >> 24;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1507488C.s")
+#endif
 
 void func_150748F4(void) {
     D_800CC3D7 = (s8) D_800D1580;
@@ -2794,7 +2874,7 @@ void func_15074C00(s32 arg0, struct127 *arg1, s32 arg2) {
     struct199 tmp; // is this actually 2 structs?
 
     if (((u8)arg1->unk239 & 0x7F) == 5) {
-        func_1504715C(&tmp);
+        func_1504715C(&tmp, arg1);   /* P80: a1 still holds arg1 at the jal; the callee reads the object */
         tmp.unk24 = D_800CC2C0;
         tmp.unk28 = D_800CC2C4;
         tmp.unk2C = D_800CC2C8;

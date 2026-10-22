@@ -1,0 +1,8 @@
+m1 KILLED by k275_k87_m9A_i5: s/(id == 5) ? 2 : 0/(id == 6) ? 2 : 0/
+m2 KILLED by k323_k8B_m9B_i13: s/idx = 7;/idx = 8;/
+m3 KILLED by k377_k8B_m9D_i21: s/id == 0x13 || id == 0x20/id == 0x13 || id == 0x21/
+m4 KILLED by k381_k75_m9E_i257: s/sync = 0;/sync = 1;/
+m5 KILLED by k381_k75_m9E_i257: s/\*(s16 \*) (att + 0x1E) = 0;/*(s16 *) (att + 0x1E) = 1;/
+m6 KILLED by k407_kB5_m9F_i35: s/idx = id - 0x33/idx = id - 0x32/
+m7 KILLED by k141_k7B_m91_i12: s/att\[2\] = 0xE;/att[2] = 0xF;/
+m8 KILLED by k348_k59_m9C_i0: s/idx = 8;/idx = 9;/

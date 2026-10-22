@@ -1,0 +1,22 @@
+m1 KILLED by t02_w01F2FF9F: s/add ^= 1;/add = 1;/
+m2 LIVE: s/((w >> 8) \& 0xFF)) {/((w >> 8) \& 0x7F)) {/
+m3 KILLED by t00_w80050488: s/0x2E4/0x2E8/
+m4 KILLED by t01_w0205F00D: s/w >> 24;/w >> 23;/
+m5 KILLED by t01_w0205F00D: s/add = w \& 1;/add = w \& 2;/
+m6 KILLED by t00_w80050488: s/if (add) {/if (!add) {/
+m1 KILLED by t00_w80050488: s/= 0xFFFF;/= 0xFFFE;/
+m2 KILLED by t00_w80050488: s/0x276) = 5;/0x276) = 4;/
+m3 KILLED by t00_w80050488: s/i) = w;/i) = w >> 1;/
+m4 KILLED by t00_w80050488: s/\& 0xFF) \* 2;/\& 0xFF) * 4;/
+m5 KILLED by t00_w80050488: s/= w >> 8;/= w >> 9;/
+m6 KILLED by t00_w80050488: s/0x284 + i/0x286 + i/
+m1 KILLED by t00_c801_w9_k1: s/D_800D1C9C--;/D_800D1C9C -= 2;/
+m2 KILLED by t04_c2_w1400009_k0: s/n = 4;/n = 3;/
+m3 KILLED by t08_c2_w3809_k2: s/(D_800D1580 >> 11) \& 0x7FF/(D_800D1580 >> 12) \& 0x7FF/
+m4 KILLED by t10_cFFFFFFFF_w200009_k2: s/0xFFFEF800/0xFFFFF800/
+m5 KILLED by t00_c801_w9_k1: s/D_800D1580 = v\[n\] | keep;/D_800D1580 = v[n];/
+m6 KILLED by t00_c801_w9_k1: s/if (v\[n\] != 0) {/if (v[n] == 0) {/
+m7 KILLED by t00_c801_w9_k1: s/func_1000F568(v\[0\], n) - v\[0\]/func_1000F568(v[0], n + 1) - v[0]/
+m8 KILLED by t10_cFFFFFFFF_w200009_k2: s/v\[0\] = D_800D1C9C \& 0x7FF;/v[0] = D_800D1C9C \& 0x3FF;/
+m9 KILLED by t11_cFFFFFFFF_w0_k0: s/} else if (v\[1\] != 0) {/} else if (v[1] != 1) {/
+m1 KILLED by t40_bit7: s/((w >> 8) \& 0xFF)) {/((w >> 8) \& 0x7F)) {/

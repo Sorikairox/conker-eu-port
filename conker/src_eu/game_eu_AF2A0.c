@@ -774,8 +774,9 @@ s32 func_15083FB0(u8 arg0) {
     return -1;
 }
 
-s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct127 *temp_v0 = func_1505EEF4(arg0, arg1, arg2, arg3);
+/* P80: one argument (func_1505EEF4 reads only the id); the callers in game_CB1C0.c pass one */
+s32 func_15084000(s32 arg0) {
+    struct127 *temp_v0 = func_1505EEF4(arg0);
 
     if (temp_v0 != NULL) {
         return temp_v0 - D_800CC2D0;

@@ -77,8 +77,63 @@ s32 func_1501374C(struct16 *arg0) {
     return 1;
 }
 
-// fat struct definition:
+#ifdef NON_MATCHING
+extern f32 D_800969F0;
+extern f32 D_800969F4;
+
+/*
+ * P80: effect spawn from a record (s16 x, y, z at +0 / +2 / +4, s16 +6, s16 radius +8, f32 angles +0xC / +0x10):
+ * nothing for radius 0. Else an effect (func_15149130 type 0x19) gets a 0x34-byte block: position, the unit
+ * direction (0, 2r, 0) rotated by the angles (func_150A8050 / func_150A7E40) times 1 / 2r, 2r, (f32) +6, the two
+ * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (func_1000FA64 0x67C) at (x, y + r, z).
+ */
+s32 func_15013778(s16 *rec) {
+    f32 m[4][4];
+    struct {
+        f32 pos[3];
+        f32 dir[3];
+        f32 size;
+        f32 height;
+        f32 angX;
+        f32 angY;
+        f32 zero;
+        f32 k1;
+        f32 k2;
+    } blk;
+    f32 inv;
+    u8 *e;
+    s32 r = rec[4];
+
+    if (r == 0) {
+        return 1;
+    }
+    blk.size = (f32) r + (f32) r;
+    inv = 1.0f / blk.size;
+    blk.height = rec[3];
+    blk.angX = *(f32 *) (rec + 6);
+    blk.angY = *(f32 *) (rec + 8);
+    blk.zero = 0.0f;
+    blk.k1 = D_800969F0;
+    blk.k2 = D_800969F4;
+    blk.pos[0] = rec[0];
+    blk.pos[1] = rec[1];
+    blk.pos[2] = rec[2];
+    func_150A8050(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
+    func_150A7E40(m, 0.0f, blk.size, 0.0f, &blk.dir[0], &blk.dir[1], &blk.dir[2]);
+    blk.dir[0] *= inv;
+    blk.dir[1] *= inv;
+    blk.dir[2] *= inv;
+    e = (u8 *) func_15149130(0x12C, -1, 0x19, -1, 0, 0x17, (struct37 *) 0x34, 0xFF, 0);
+    if (e != NULL) {
+        memcpy(e + 0x28, &blk, 0x34);
+    }
+    r = rec[4];
+    func_1000FA64(0x67C, rec[0], rec[1] + r, rec[2], 0x2EE0, r * 2, r / 2, (s32) func_1000EF40, NULL, 0, 8, 0);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013778.s")
+#endif
 
 s32 func_1501396C(struct16 *arg0) {
     u8 idx = arg0->unk17;

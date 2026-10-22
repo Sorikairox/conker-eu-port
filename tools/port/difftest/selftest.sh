@@ -65,4 +65,8 @@ chkc DIFFER func_151B97C4 's/sinf(temp_f0)/sinf(temp_f2)/'
 # a 3-argument prototype: the declared 2-argument func_100043B4 must not compare the scratch a2 (was a false DIFFER)
 chkc EQUIV  func_15030448
 chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
+# P80: a converted function whose #else holds a note line before the pragma (game_981E0.c "// TBD ..."): the candidate
+# used to be dropped (the old NM C was tested, every mutant survived); now spliced, and a dropped candidate is an ERROR
+chkc EQUIV  func_1506EF5C
+chkc DIFFER func_1506EF5C 's/= 0xFFFF;/= 0xFFFE;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

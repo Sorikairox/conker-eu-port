@@ -1,0 +1,12 @@
+m1 KILLED by t03_n5: s/ \/ 0x18;/ \/ 0x14;/
+m2 KILLED by t00_n0: s/count \* 0x14, 1, 1, 0/count * 0x14, 1, 0, 0/
+m3 KILLED by t00_n0: s/D_800C6A74 = count;/D_800C6A74 = count + 1;/
+m4 KILLED by t01_n2: s/0x6) = 0;/0x6) = 1;/
+m5 KILLED by t01_n2: s/0x8) = r \* r;/0x8) = r;/
+m6 KILLED by t01_n2: s/src\[i \* 6 + 3\] + src\[i \* 6 + 0\]/src[i * 6 + 3] + src[i * 6 + 1]/
+m7 KILLED by t01_n2: s/0x10) = src\[i \* 6 + 0\] - src\[i \* 6 + 3\]/0x10) = src[i * 6 + 3] - src[i * 6 + 0]/
+m8 KILLED by t01_n2: s/0x12) = src\[i \* 6 + 5\]/0x12) = src[i * 6 + 4]/
+m9 KILLED by t01_n2: s/0xC) = src\[i \* 6 + 4\]/0xC) = src[i * 6 + 5]/
+m10 LIVE: s/return i;/return count;/
+m11 KILLED by t00_n0: s/0xC, arg0, 3)/0xC, arg0, 2)/
+m12 KILLED by t00_n0: s/if (src != NULL) {/if (src == NULL) {/

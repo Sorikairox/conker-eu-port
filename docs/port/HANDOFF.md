@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P80, 2026-10-23). Details: `docs/port/sessions/P80.md`
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p80/verify2.log`). `NON_MATCHING=1` links.
+  protocheck: 0 problems (909 bodies).
+- progress_nm (P76: 4897, 82.8%, 1018 asm-only): C coverage including NON_MATCHING **4903/5915 (82.9%)**, bytes **56.4%**; **1012 asm-only**. 6 new hand-C functions, 5 arity sites resolved, one difftest harness fix.
+- **func_150322B8 is C (NM)** (game_eu_5D910.c, attachment callback 5 on the browser frame path): the seven jump tables
+  are generated from the ROM image by `docs/port/sessions/p80/gen_150322B8.py` (static const u8 tables + case lines);
+  1246/1246 knob setups EQUIV (every key of every table), mutants 37/39 (2 equivalent).
+- Also C (NM): func_15004FE0 (look point loader, game_32490.c: fills D_800C6A70 / D_800C6A74), func_15013778
+  (game_40490.c), func_1506C32C / func_1506EF5C / func_1507488C (game_981E0.c script commands). All EQUIV + mutants.
+- **Arity**: func_15074C00 -> func_1504715C(&tmp, arg1); func_15084000 is now 1-argument (callee reads only a0);
+  func_150CE660 (NM) takes and passes arg3 to func_151604E4 (its asm caller func_150268BC passes 0: keep that when it
+  becomes C); func_160012B0 -> func_1600160C(arg0); func_15194858 needs nothing (ignores arg2).
+- **difftest fix**: a note line between `#else` and the pragma made build_tu drop the candidate (old NM C tested, all
+  mutants LIVE); now accepted, and a dropped candidate raises. Selftest case func_1506EF5C. RET/OUTW addresses are EU
+  (func_1000F568 = 1000F858).
+
+## Next steps (from P80)
+
+1. Browser: runtime-check func_150322B8 (callback-5 prop now freed / animated), func_15004FE0 (look points ->
+   head turning), the arity fixes.
+2. func_15041A9C (1098, game_eu_6EDC0, 915 calls/run), func_15180AF0 (991, game_eu_1ACBC0, 601): display-list path.
+3. Remaining asm in owned files (P80.md "Not done").
+
 ## State (session P76, 2026-10-22). Details: `docs/port/sessions/P76.md`
 
 - The default build is byte-identical (full `verify_all.sh`). `NON_MATCHING=1` links. protocheck: 0 problems (903 bodies).

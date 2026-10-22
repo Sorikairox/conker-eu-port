@@ -226,7 +226,11 @@ def build_tu(func, p, src, code):
     if pm:
         m = pm[-1]; a, b = m.start(), m.end()
         k = src.rfind('#ifdef NON_MATCHING\n', 0, a)
-        if k >= 0 and src[:a].endswith('#else\n') and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
+        # P80: comment / blank lines may sit between the #else and the pragma (game_981E0.c "// ??" notes)
+        e = src.rfind('#else\n', 0, a)
+        between = src[e + len('#else\n'):a] if e >= 0 else None
+        only_notes = between is not None and all(not l.strip() or l.strip().startswith('//') for l in between.split('\n'))
+        if k >= 0 and e > k and only_notes and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
             a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
         tu = src[:a] + '\n' + code + '\n' + src[b:]
     else:
@@ -238,6 +242,10 @@ def build_tu(func, p, src, code):
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0
         tu = tu[:k] + '\n'.join(hoist) + '\n' + tu[k:]
     tu = nm_resolve(tu, True)   # other NON_MATCHING blocks: keep the C side
+    # P80: the candidate must survive the splice (an unrecognised layout used to keep the old NM C and test that)
+    cr = nm_resolve(code, True); cs = func_span(cr, func)
+    if cs is not None and cr[cs[0]:cs[1]] not in tu:
+        raise RuntimeError('candidate %s was dropped when splicing it into %s' % (func, p))
     return PRAG.sub('', tu)
 
 def nm_resolve(text, on=True):
