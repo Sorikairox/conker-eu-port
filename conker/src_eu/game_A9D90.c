@@ -5,6 +5,7 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1507E1D0(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 void func_1507CD0C(struct127 *arg0);
+void func_1507D4F8(s32);
 #endif
 
 
@@ -15,7 +16,6 @@ void func_1507C8E0(struct127 *arg0, s32 arg1) {
 
 // "goto" hell
 #ifdef NON_MATCHING
-s32 func_1507D4F8(s32);
 s32 func_1517FD84(s32, f32, f32, f32, s32);
 extern u16 D_8009015C;
 extern s32 D_800BEB30;
@@ -151,7 +151,77 @@ void func_1507D158(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D1D8.s")
 
+#ifdef NON_MATCHING
+void func_15085710(s16, s16, s32);
+s32 func_150859AC(s16 arg0, s32 arg1);
+void func_1507D1D8(struct127 *);
+void func_1501C710(s32, s32, s32, s32, s32);
+void func_1509C3A0(void);
+extern u16 D_8009015C;
+extern s8 D_8008726C;
+extern s8 D_80087260;
+extern u8 D_800BE800;
+extern s8 D_8008FDA8;
+extern s8 D_800E1050;
+extern u8 D_800BE616;
+extern u16 D_800D18A0;
+extern u8 D_800D2E43;
+extern u8 D_800D18A8;
+extern s8 D_80090134;
+extern s8 D_800BEA38;
+extern struct127 D_800CC2D0[];
+
+/* A player record (index idx) has lost a life. With lives left (func_150859AC(idx, 3)) the life counter (5) is
+ * reset and the record respawns: in multiplayer (D_800BE616) via func_1507D1D8 or a 10-frame timer, else a
+ * checkpoint restart (func_1501C710). Out of lives: game over (single player) or the player is marked out in
+ * D_800D18A0 (multiplayer); then the active-player counters drop. void: no caller uses a result. */
+void func_1507D4F8(s32 idx) {
+    struct127 *rec;
+    u8 *ctl;
+
+    if (!(D_8009015C & 1)) {
+        func_15085710(idx, 4, 1);
+    }
+    if (func_150859AC(idx, 3) != 0) {
+        func_15085710(idx, 5, D_8008726C);
+        rec = &D_800CC2D0[idx];
+        *(s16 *)((u8 *)rec + 0xB2) = 0;
+        if (D_800BE616 != 0) {
+            if (D_800E1050 == 0) {
+                func_1507D1D8(rec);
+                return;
+            }
+            *((u8 *)rec->unk31C + 0x120) = 10;
+            return;
+        }
+        D_800D18A8 = 1;
+        if (!(D_800D2E4C->unk19 & 4) && D_8008FDA8 >= 0) {
+            func_1501C710(1, 0x22, 0, 0, 0);
+        } else {
+            func_1501C710(2, (s8)D_800BE3DF, D_800BE800, 0, 0);
+        }
+        return;
+    }
+    if (D_800BE616 == 0) {
+        D_800D2E43 = 1;
+        func_1509C3A0();
+        D_800D18A8 = 1;
+        func_15085710(idx, 5, D_8008726C);
+        func_15085710(idx, 2, D_80087260);
+        func_1501C710(1, 0x18, 0, 0, 0);
+    } else {
+        D_800D18A0 |= 1 << idx;
+    }
+    ctl = (u8 *)D_800CC2D0[idx].unk31C;
+    if (ctl[0x84] == 0) {
+        D_80090134--;
+    }
+    ctl[0x120] = 10;
+    D_800BEA38--;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D4F8.s")
+#endif
 // NON-MATCHING: pretty far away!
 // void func_1507D4F8(s16 arg0) { // struct126 *
 //     // ?32 sp24;

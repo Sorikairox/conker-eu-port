@@ -1,0 +1,9 @@
+s/w & 0x200000/w \& 0x100000/ % a1 a2
+s/id - 2000\]/id - 1999]/ % b
+s/hi = w & 0xFF200000/hi = w \& 0xFF000000/ % b
+s/w = hi | (v & 0xFFFFFF)/w = hi | (v \& 0xFFFF)/ % b
+s/(w >> 16) & 0x1F/(w >> 16) \& 0xF/ % b e
+s/(w >> 24) < /(w >> 24) <= / % e
+s/func_151F2CDC() == 1/func_151F2CDC() != 0/ % a1 a2
+s/hi = w & 0xFF200000/hi = w \& 0xFF000000/ % b2
+s/func_151F2CDC() == 1/func_151F2CDC() != 0/ % a3

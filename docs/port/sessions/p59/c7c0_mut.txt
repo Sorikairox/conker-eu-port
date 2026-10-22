@@ -1,0 +1,12 @@
+s/h = rec->unkE6 \* 6.0f/h = rec->unkE6 * 5.0f/ % s4
+s/h = 180.0f + \*(u16/h = 181.0f + *(u16/ % p
+s/r = w = 120.0f/r = w = 121.0f/ % pcam p197
+s/< 40.0f/< 4.0f/ % pled pled2
+s/(c\[0x4E\] \& 0xF) == 1/(c[0x4E] \& 0x7) == 1/ % pled pled2
+s/r += 120.0f/r += 121.0f/ % hold
+s/h += 100.0f/h += 104.0f/ % hold2
+s/holder > 100/holder > 101/ % hold3
+s/w \*= \*(f32 \*)((u8 \*)rec + 0x14C)/w *= *(f32 *)((u8 *)rec + 0x150)/ % p id25
+s/case 0x89: case 0xBA:/case 0x89: case 0xBB:/ % idba
+s/case 0x9D: case 0x9F/case 0x9E: case 0x9F/ % p9d
+s/c\[0x1B3\] != 0/c[0x1B2] != 0/ % p1b3
