@@ -8,6 +8,8 @@ extern Gfx D_800903D8[];
 u8 *func_1501A6CC(u8 *, s32, s32, s32, s32);
 extern s32 D_80090410;
 extern s32 D_80091BA8;
+Gfx *func_151EDA54(Gfx *, u8 *, s32 *);
+extern u8 D_8009E28C[];
 #endif
 
 
@@ -923,8 +925,114 @@ Gfx *func_151ED998(Gfx *gdl) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDA54.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDBE8.s")
+#ifdef NON_MATCHING
+/* HUD image drawn as cols x rows tiles: each tile's texture comes from the texture cache (func_1510D66C, id
+ * desc+0 + idOffset, consecutive ids unless a block is larger than 0x1000 bytes and is split in halves), then
+ * SetTImg / LoadBlock / scissored TextureRectangle (gSPScisTextureRectangle) at the scaled screen position.
+ * desc: +0 base texture id, +6 tile width, +8 tile height (u16), +0xA format, +0xB size. idOffset < 0: x scale 1. */
+Gfx *func_151EDBE8(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f32 scale, s32 idOffset) {
+    u8 *desc = descArg;
+    s32 blockSize; /* spB0, from func_151EDA54 */
+    s32 texSize;   /* sp98 */
+    s32 haveTex;
+    s32 tex;
+    f32 xscale;
+    s32 tileW, tileH, dsdx, dtdy;
+    s32 texId;
+    s32 tx, ty, tyStart;
+    s32 c, r;
 
+    haveTex = 0;
+    tex = 0;
+    texSize = 0;
+    gdl = func_151EDA54(gdl, desc, &blockSize);
+    if (idOffset < 0) {
+        xscale = 1.0f;
+        idOffset = 0;
+    } else {
+        xscale = scale;
+    }
+    texId = *(s32 *)(desc + 0) + idOffset;
+    tileW = (s32)((f32)*(u16 *)(desc + 6) * xscale * D_800901BC);
+    tileH = (s32)((f32)*(u16 *)(desc + 8) * scale * D_800901C0);
+    dtdy = (s32)(1024.0f / (scale * D_800901C0));
+    dsdx = (s32)(1024.0f / (xscale * D_800901BC));
+    tx = (s32)((f32)x * D_800901BC) - ((tileW * cols) >> 1);
+    tyStart = (s32)((f32)y * D_800901C0) - ((tileH * rows) >> 1);
+    for (c = 0; c < cols; c++) {
+        ty = tyStart;
+        for (r = 0; r < rows; r++) {
+            if (haveTex == 0) {
+                tex = func_1510D66C(texId, &texSize, 3, 0);
+            }
+            if (tex != (s32)0x80000000) {
+                s32 xl4 = (s16)(tx * 4), xh4 = (s16)((tx + tileW) * 4);
+                s32 yl4 = (s16)(ty * 4), yh4 = (s16)((ty + tileH) * 4);
+                s32 lrs = blockSize - 1;
+                s32 s, t;
+
+                gdl->words.w0 = 0xE7000000;
+                gdl->words.w1 = 0;
+                gdl++;
+                gdl->words.w0 = 0xFD000000 | ((D_8009E28C[desc[0xB]] & 3) << 19) | ((desc[0xA] & 7) << 21);
+                gdl->words.w1 = tex;
+                gdl++;
+                gdl->words.w0 = 0xF3000000;
+                if (lrs >= 0x7FF) {
+                    lrs = 0x7FF;
+                }
+                gdl->words.w1 = 0x07000000 | ((lrs & 0xFFF) << 12);
+                gdl++;
+                gdl->words.w0 = 0xE4000000 | (((xh4 > 0 ? xh4 : 0) & 0xFFF) << 12) | ((yh4 > 0 ? yh4 : 0) & 0xFFF);
+                gdl->words.w1 = (((xl4 > 0 ? xl4 : 0) & 0xFFF) << 12) | ((yl4 > 0 ? yl4 : 0) & 0xFFF);
+                gdl++;
+                gdl->words.w0 = 0xE1000000;
+                s = 0;
+                if (xl4 < 0) {
+                    s32 v = (xl4 * (s16)dsdx) >> 7;
+                    if ((s16)dsdx < 0) {
+                        s = v > 0 ? v : 0;
+                    } else {
+                        s = v < 0 ? v : 0;
+                    }
+                }
+                t = 0;
+                if ((ty * 4) < 0) {
+                    s32 v = (yl4 * (s16)dtdy) >> 7;
+                    if ((s16)dtdy < 0) {
+                        t = v > 0 ? v : 0;
+                    } else {
+                        t = v < 0 ? v : 0;
+                    }
+                }
+                gdl->words.w1 = ((-s) << 16) | (-t & 0xFFFF);
+                gdl++;
+                gdl->words.w0 = 0xF1000000;
+                gdl->words.w1 = (dsdx << 16) | (dtdy & 0xFFFF);
+                gdl++;
+            }
+            ty += tileH;
+            haveTex = 0;
+            if (texSize > 0x1000) {
+                haveTex = 1;
+                if (tex != 0) {
+                    tex += (blockSize << desc[0xB]) >> 1;
+                }
+                texSize -= (blockSize << desc[0xB]) >> 1;
+            } else {
+                texId++;
+            }
+        }
+        tx += tileW;
+    }
+    gdl->words.w0 = 0xE7000000;
+    gdl->words.w1 = 0;
+    gdl++;
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDBE8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE0C4.s")
 
 void func_151EE310(u8 *arg0) {

@@ -15,19 +15,35 @@ void func_15095470(s32, s32, s32);
 s32 func_150954E4(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D30B0;
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
+s32 func_15095380(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
+    func_15095470(arg1, arg2, arg3);
+    return func_150954E4(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
+}
+#else
 void func_15095380(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     func_15095470(arg1, arg2, arg3);
     func_150954E4(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, 0x100, 0x100, arg8);
 }
+#endif
 
 void func_15095470(s32, s32, s32);
 s32 func_150954E4(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_800D30B0;
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
+s32 func_150953F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
+    func_15095470(arg1, arg2, arg3);
+    return func_150954E4(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
+}
+#else
 void func_150953F8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     func_15095470(arg1, arg2, arg3);
     func_150954E4(arg0, &D_800D30B0, arg4, arg5, 0, arg6, arg7, arg8, arg9, argA);
 }
+#endif
 
 void func_15095470(s32 arg0, s32 arg1, s32 arg2) {
     u32 temp_v0;
@@ -110,9 +126,17 @@ u8 *func_15095CC0(u8 *arg0, u8 *arg1, s32 *arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095CC0.s")
 #endif
+#ifdef NON_MATCHING
+/* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
+s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+s32 func_15095E58(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
+    return func_15095EA0(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
+}
+#else
 void func_15095E58(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
     func_15095EA0(arg0, arg1, arg2, arg3, 4096.0f, 0, 0, 0, 0);
 }
+#endif
 
 s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
 s32 func_15096144(s32, s32, s32, s32, s32);
@@ -127,9 +151,16 @@ s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095F18.s")
 
+#ifdef NON_MATCHING
+/* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
+s32 func_1509611C(s32 arg0, s32 arg1) {
+    return func_15096144(arg0, arg1, 0, 0, 0);
+}
+#else
 void func_1509611C(s32 arg0, s32 arg1) {
     func_15096144(arg0, arg1, 0, 0, 0);
 }
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15096144.s")
 

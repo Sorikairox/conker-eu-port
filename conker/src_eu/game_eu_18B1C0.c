@@ -3,6 +3,9 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1515F4E4(s16 *arg0);
+s32 func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
+void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
+void func_1515F1E8(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 #endif
 // hoisted forward declaration(s) for func_1515D5F8
 s32 func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
@@ -167,8 +170,191 @@ Gfx *func_1515DC40(Gfx *gdl, s32 player) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DC40.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DE84.s")
+#ifdef NON_MATCHING
+/* Per-object lighting: colours from func_1515E7E8 (fog/tint blend when flags & 2), then the (maxLights - 1) nearest
+ * enabled point lights of the D_800DCD78 list (insertion sort by squared distance; flags & 1: from the player's camera
+ * direction, flags & 4: no range cut-off), light structs (0x30 each) at base + (D_800BE9C0 * maxLights + i) * 0x30
+ * (func_1515F1E8 fills point lights), then gSPNumLights + one G_MOVEMEM per light, ambient and lookat (arg8).
+ * The asm keeps the previous light's distance for directional lights (+4 != 0); the first one gets an uninitialised value. */
+Gfx *func_1515DE84(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base, s32 maxLights, u8 *arg8,
+                   u8 *outCount, s32 mask, s32 arg11, s32 flags, u8 *outLights) {
+    s32 dist[11];  /* spB8 */
+    u8 *sel[12];   /* spE4 */
+    u8 col[4];     /* sp118 */
+    u8 col2[4];    /* sp114 */
+    u8 tintA[4];   /* spB0 */
+    u8 tintB[4];   /* spAC */
+    u8 fa, fb;     /* spAB, spAA */
+    s16 px, py, pz;
+    s32 d;
+    s32 count, extra, i, j, k;
+    s32 bit;
+    u8 *L;
+    u8 *amb;
+    u8 *lp;
+    u32 *g = (u32 *)gdl;
 
+    func_1515E7E8(x, y, z, mask, col, arg5, flags);
+    if (flags & 2) {
+        func_1515E9AC(x, y, z, mask, tintA, tintB, &fa, &fb);
+        for (i = 0; i < 3; i++) {
+            s32 v = col[i];
+            s32 inv = 0xFF - v;
+            col2[i] = (tintA[i] * ((v + ((inv * fa) >> 8)) & 0xFF)) >> 8;
+            col[i] = (tintB[i] * ((v + ((inv * fb) >> 8)) & 0xFF)) >> 8;
+        }
+    }
+    for (i = 0; i < 3; i++) {
+        if (arg11 != 0) {
+            u8 *p = (u8 *)arg11 + i;
+            if (!(flags & 8)) {
+                col[i] = ((*p * 3) + col[i]) >> 2;
+            }
+            *p = col[i];
+        }
+        arg8[i] = col[i];
+        arg8[i + 4] = col[i];
+    }
+    for (i = 0; i < maxLights; i++) {
+        dist[i] = 0x7FFFFFFF;
+    }
+    if (!(flags & 1)) {
+        px = x;
+        py = y;
+        pz = z;
+    } else {
+        u8 *cam = (u8 *)D_800DBFF0 + player * 0x9A0;
+        f32 dx = *(f32 *)(cam + 0x2BC) - *(f32 *)(cam + 0x2F8);
+        f32 dy = *(f32 *)(cam + 0x2C0) - *(f32 *)(cam + 0x2FC);
+        f32 dz = *(f32 *)(cam + 0x2C4) - *(f32 *)(cam + 0x300);
+        f32 len = sqrtf(dz * dz + (dx * dx + dy * dy));
+
+        if (len != 0.0f) {
+            f32 s = 1000.0f / len;
+            px = (s32)(dx * s + (f32)x);
+            py = (s32)(dy * s + (f32)y);
+            pz = (s32)(dz * s + (f32)z);
+        } else {
+            px = x;
+            py = y;
+            pz = z;
+        }
+    }
+    count = 0;
+    d = 0;
+    L = (u8 *)D_800DCD78;
+    if (L != NULL) {
+        bit = 1 << player;
+        do {
+            if (((L[0xC] & bit) || (flags & 0x20) || !(L[8] & 1)) && (L[8] & mask) && L[9] == 0 && !(L[0xA] & bit)) {
+                if (L[4] == 0) {
+                    s32 lx, ly, lz, ex, ey, ez;
+
+                    lx = *(s16 *)(L + 0xE);
+                    if (lx != -0x8000) {
+                        ly = *(s16 *)(L + 0x10);
+                        lz = *(s16 *)(L + 0x12);
+                    } else {
+                        f32 *v = (f32 *)((*(u16 *)(L + 0x12)) | (*(s16 *)(L + 0x10) << 16));
+                        lx = v[0];
+                        ly = v[1];
+                        lz = v[2];
+                    }
+                    ez = pz - lz;
+                    ex = px - lx;
+                    ey = py - ly;
+                    d = ez * ez + ex * ex + ey * ey;
+                    if (!(flags & 4) && (L[0x2F] << 17) < d) {
+                        d = 0x7FFFFFFF;
+                    }
+                }
+                for (j = 0; j < maxLights - 1; j++) {
+                    if (d < dist[j]) {
+                        for (k = maxLights - 2; k > j; k--) {
+                            dist[k] = dist[k - 1];
+                            sel[k] = sel[k - 1];
+                        }
+                        dist[j] = d;
+                        sel[j] = L;
+                        if (count + 1 != maxLights) {
+                            count++;
+                        }
+                        break;
+                    }
+                }
+            }
+            L = *(u8 **)L;
+        } while (L != NULL);
+    }
+    if (maxLights != 0) {
+        extra = (count & 1) ? 1 : 0;
+        if (extra && outLights != NULL) {
+            ((u8 **)outLights)[count] = NULL;
+        }
+        if (outCount != NULL) {
+            *outCount = extra ? ((count + extra + 1) | 0x80) : (count + extra + 1);
+        }
+        g[0] = 0xDB020000;
+        g[1] = (count + extra) * 0x30 + 0x30;
+        g += 2;
+    } else {
+        if (outCount != NULL) {
+            *outCount = count;
+        }
+        g[1] = count * 0x30;
+        g[0] = 0xDB020000;
+        g += 2;
+    }
+    if (maxLights != 0) {
+        amb = (u8 *)(((D_800BE9C0 * maxLights) + count) * 0x30 + base);
+        amb[8] = (&D_800DCD30)[player * 3 + 0];
+        amb[9] = (&D_800DCD30)[player * 3 + 1];
+        amb[10] = (&D_800DCD30)[player * 3 + 2];
+        if (flags & 2) {
+            amb[4] = amb[0] = col2[0];
+            amb[5] = amb[1] = col2[1];
+            amb[6] = amb[2] = col2[2];
+        } else {
+            amb[4] = amb[0] = 0;
+            amb[5] = amb[1] = 0;
+            amb[6] = amb[2] = 0;
+        }
+        lp = amb - count * 0x30;
+        for (i = 0; i < count; i++) {
+            u8 *s = sel[i];
+
+            if (outLights != NULL) {
+                ((u8 **)outLights)[i] = s;
+            }
+            if (flags & 0x20) {
+                s[0xC] |= 1 << player;
+            }
+            if (s[4] == 0) {
+                func_1515F1E8(s, player, lp, x, y, z, flags);
+            }
+            g[0] = ((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
+            g[1] = (u32)lp;
+            g += 2;
+            lp += 0x30;
+        }
+        if (extra) {
+            g[0] = ((((u32)(i * 0x30 + 0x60) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
+            g[1] = (u32)&D_800DCD40;
+            g += 2;
+        }
+        k = count + extra;
+        g[0] = ((((u32)((k + 1) * 0x30 + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
+        g[1] = ((D_800BE9C0 * maxLights) + count) * 0x30 + base;
+        g += 2;
+        g[0] = ((((u32)((k + 2) * 0x30 + 0x30) >> 3) & 0xFF) << 8) | 0xDC280000 | 0xA;
+        g[1] = (u32)arg8;
+        g += 2;
+    }
+    return (Gfx *)g;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DE84.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E7E8.s")
 
 u8 *func_1515F0F4(s32, s32, s32, s32, u8 **);
