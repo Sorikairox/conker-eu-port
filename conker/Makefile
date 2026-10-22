@@ -61,6 +61,7 @@ SRC_DIRS := $(SRC_DIR) \
 # the functions listed in NM_ASM_C_FUNCS_X are weakened in X.s.o so the C definitions win.
 NM_ASM_SRC_DIR := $(SRC_DIR)/nm_asm
 NM_ASM_C_FUNCS_D5E90 := func_150AB278 func_150AD780 func_150AD78C
+NM_ASM_C_FUNCS_D5E90 += func_150AB6D0 func_150AC8C4 func_150ACEA0
 ifeq ($(NON_MATCHING),1)
 SRC_DIRS += $(NM_ASM_SRC_DIR)
 endif

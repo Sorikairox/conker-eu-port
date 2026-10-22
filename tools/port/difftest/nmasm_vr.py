@@ -72,6 +72,7 @@ class Ref:
         self.secs = [section(elf, n) for n in ('.init', '.game')]
         self.s = syms(elf)
         self.ninsn = 0
+        self.trace = None     # a list: every executed pc is appended (debugging)
     def word(self, pc):
         for v, b in self.secs:
             if v <= pc < v + len(b): return struct.unpack('>I', b[pc - v:pc - v + 4])[0]
@@ -87,7 +88,10 @@ class Ref:
         def ea(base, off): return (r[base] + off) & M32
         def rd(ad, n):
             if ad < 0x80000000:
-                return int.from_bytes(b''.join(self.word((ad & ~3) + 4 * i).to_bytes(4, 'big') for i in range(3))[ad & 3:(ad & 3) + n], 'big')
+                try:
+                    return int.from_bytes(b''.join(self.word((ad & ~3) + 4 * i).to_bytes(4, 'big') for i in range(3))[ad & 3:(ad & 3) + n], 'big')
+                except RuntimeError:
+                    raise RuntimeError('ref read %08X at pc %08X' % (ad, pc))
             return int.from_bytes(mem[phys(ad):phys(ad) + n], 'big')
         def wr(ad, n, v):
             if ad < 0x80000000 or phys(ad) + n > RAM: raise RuntimeError('ref write %08X at %08X' % (ad, pc))
@@ -106,6 +110,7 @@ class Ref:
                 pc = r[31] & M32; npc = pc + 4; continue
             n += 1
             if n > maxi: raise RuntimeError('ref timeout at %08X' % pc)
+            if self.trace is not None: self.trace.append(pc)
             w = self.word(pc)
             op = w >> 26; rs = (w >> 21) & 31; rt = (w >> 16) & 31; rdr = (w >> 11) & 31; sa = (w >> 6) & 31
             fn = w & 63; imm = w & 0xFFFF; simm = imm - 0x10000 if imm & 0x8000 else imm
@@ -250,6 +255,22 @@ class Ref:
             if likely_skip: pc, npc = npc + 4, npc + 8; continue
             pc, npc = npc, (tgt if tgt is not None else npc + 4)
 
+def nm_rodata(elf):
+    """.nm_rodata is NOLOAD (NOBITS) in the NON_MATCHING link, so its bytes (float / double literals, switch jump
+    tables of the NM C, e.g. libultra sinf's coefficients) are not in the ELF. P56: relink with the same script minus
+    NOLOAD into /tmp and take the section from there (same layout)."""
+    d = os.path.dirname(elf) or '.'
+    ld = os.path.join(d, 'conker.ld')
+    v, b = section(elf, '.nm_rodata')
+    if b or not os.path.exists(ld): return v, b
+    tmpld, out = '/tmp/p56_nmro.ld', '/tmp/p56_nmro.elf'
+    open(tmpld, 'w').write(open(ld).read().replace('(NOLOAD)', ''))
+    subprocess.check_call(['mips-linux-gnu-ld', '-T', tmpld, '-T', 'undefined_syms.eu.txt', '-T', 'undefined_funcs.eu.txt',
+                           '-T', 'undefined_syms_auto.txt', '-T', 'undefined_funcs_auto.txt', '--no-check-sections',
+                           '-o', out])
+    v2, b2 = section(out, '.nm_rodata')
+    return v2, b2
+
 class Cand:
     def __init__(self, elf='build_nm/conker.eu.elf', data_from='build/conker.eu.elf'):
         self.s = syms(elf)
@@ -259,7 +280,7 @@ class Cand:
         mu.mem_map(0x80000, RAM - 0x80000, UC_PROT_ALL)   # not page 0 (P18 Unicorn TLB bug)
         for n in ('.init', '.game'):
             v, b = section(elf, n); mu.mem_write(v, b)
-        self.nmro = section(elf, '.nm_rodata')
+        self.nmro = nm_rodata(elf)
         # Unicorn 2.0.1's FPR reg_read / reg_write are no-ops (P18): FPRs go through SCR with real lwc1 / swc1 code
         K0 = 26
         lw = lambda ft, off: (49 << 26) | (K0 << 21) | (ft << 16) | off
