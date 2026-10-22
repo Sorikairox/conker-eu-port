@@ -131,3 +131,4 @@ P54	port-b	nm convert	5			floor routines (hand asm, real ROM levels) + landing C
 P51	port	nm convert	5			model loader + skeleton anim evaluator func_150A86B0 (hand asm, 950 real-ROM trials 0 diff) + keyframe copy; total C 4813 (81.4%)
 P55	web	port-web				standing/landing/falling on real floor verified; G_DL-to-0 renderer guard; stub lists
 P56	port-b	nm convert	3		129	wall engine + ray cast via mechanical asm2c (hand asm only, user-approved stopgap); real-ROM levels 0 diff
+P58	web	port-web				CONKER posed by converted skeleton anim (preview); sine table in code segment supplied; temp overrides func_150A9B0C/func_1000480C
