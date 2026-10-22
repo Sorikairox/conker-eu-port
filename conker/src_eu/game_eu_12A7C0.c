@@ -173,7 +173,7 @@ void func_150FD554(struct127 *arg0, u8 arg1, s32 arg2) {
         sp.u1A0 = arg0->z_position;
         sp.u190 = sp.u1A0;
         func_1504715C(&sp.u1A4, arg0);
-        if (func_15046F70(&sp.u188, 0, 0xC61C4000, &sp.u1A4) != 0) {
+        if (func_15046F70(&sp.u188, 0, -10000.0f, &sp.u1A4) /* P93: was the bit pattern 0xC61C4000 as an int */ != 0) {
             sp.u197 = 1;
             sp.u19C = sp.u1A4;
         } else {

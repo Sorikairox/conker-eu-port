@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P93, 2026-10-23). Details: `docs/port/sessions/P93.md`
+
+- Re-check of every NM body calling a >16-argument function (`p93/wide_scan.py`): 11 bodies + func_150268BC; 9 EQUIV with
+  wide-argument mutants DIFFER (new window) / EQUIV (old); **2 real DIFFERs fixed**: func_150E6060 (func_150E2030 call
+  in m2c's wrong 30-arg order; now the asm's 28) and func_150FD554 (0xC61C4000 passed as int to an f32: -10000.0f).
+  6 hand-asm shared-frame rows N/A. No DIFFER in port-b files.
+- difftest: callees declared only in include/functions.h with >16 args now get that arity (stack args 16+ of e.g.
+  func_1513D594 were never compared); result-line notes `[POKE unread: ...]`, `[POKE in ROM data ...]`,
+  `[knob callee never called: ...]`. Selftest 41/41 (5 new cases).
+- P90 "POKE on per-track records": the setups used the US address 800C395C of D_800C3958 (EU 0x800C3D78). With
+  800C3D7C: 26 record setups EQUIV, 12 record mutants killed incl. the 0x33 `rec + 0x18 -> 0x1C` survivor.
+- func_15035AF8 (object draw queue, game_eu_62360.c) in hand C (NM): 38 setups EQUIV, mutants 22/23.
+- Default build byte-identical, NM links, protocheck 0 (926 bodies), progress_nm 4920/5915 (83.2%), bytes 57.9%, 995 asm-only.
+
+## Next steps (from P93)
+
+1. func_15035220 (game_eu_62360.c, 526 asm lines, 19 args; prototype in the func_15035AF8 NM block).
+2. Knob setups: read the result-line notes; `POKE unread` can list byte-loaded words falsely (Unicorn read hook), the
+   callee note is reliable. Always take global addresses from the EU ELF (`mips-linux-gnu-nm build/conker.eu.elf`).
+3. Browser: func_15035AF8 draws (fade, attachments); the 31 asm callees of func_150268BC (P90 list).
+4. Possibly wrong hex-float int arguments (func_151D58E4, func_1514CBE8, func_15116A8C, func_151AD010 calls): check the
+   callee parameter types.
+
 ## State (session P90, 2026-10-23). Details: `docs/port/sessions/P90.md`
 
 - **func_150268BC** (script event interpreter, 3594 asm lines, game_eu_51190.c) is readable hand C under NON_MATCHING:

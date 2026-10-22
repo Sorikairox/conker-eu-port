@@ -88,4 +88,17 @@ DF0C="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80480000,1=2,2=99,3=10,4=1,5=804A0000,6=80
 chkce EQUIV  func_150268BC "$DF0C"
 chkce DIFFER func_150268BC "$DF0C" 's/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/'
 chkce EQUIV  func_150268BC "$DF0C DIFFTEST_STKW_OLD=1" 's/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/'
+# P93: knob notes. P90 poked D_800C3958 at its US address 0x800C395C (EU 0x800C3D78): the 0x33 record pokes never reached
+# the code and the rec + 0x18 -> 0x1C mutant survived. difftest now appends [POKE unread: ...] for poke words the
+# reference never reads (trials 0-1) and [knob callee never called: ...] for RET/RETF/OUT*/ARGMEM keys never called.
+S33="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80480000,1=2,2=99,3=10,4=1,5=804A0000,6=804C0000,7=804B0000,8=37 DIFFTEST_POKE=800C395C=80490000,800C3A04=804D2000,800C3D08=804D1000,800C3E00=804D0000,80480000=05070033,80480004=00030150,80490088=40B00000,8049008C=40D00000,80490090=C0F00000,80490094=41000000,80490098=41100000,804900A0=41300000,804900A4=41400000,804900A8=41500000,804900C0=41600000,804A0004=58123456,804A0014=42C90000,804A0018=43488000,804A001C=C3964000,804B0000=41280000,804B0004=41A20000,804B0008=C1F60000,804D1000=00050006,804D1004=00070000 DIFFTEST_RET=15023C60=40,150ADF00=12345,151905AC=0 DIFFTEST_RETF=150ADF48=3EC00000,15048D30=3F000000,15048CA0=BF400000"
+M33='s/O_F32(r, 0x18) \* 0.1f + 1.0f, scale/O_F32(r, 0x1C) * 0.1f + 1.0f, scale/'
+chkce "EQUIV*POKE unread: 800C395C"  func_150268BC "$S33"   # (the mutant below survives P90's TR=4 with the US address)
+chkce DIFFER func_150268BC "${S33/800C395C=/800C3D7C=}" "$M33"
+# P93: a callee declared only in include/functions.h had an unknown arity: stack args 16+ (sp+0x40..) were never compared
+# (func_150FD554 -> func_1513D594, 17 args). Prototypes with > 16 args are now taken from functions.h.
+FD554="DIFFTEST_EXACT=* DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450004=000000FF DIFFTEST_RET=15046F70=1,1513D860=80460000"
+chkce EQUIV  func_150FD554 "$FD554"
+chkce DIFFER func_150FD554 "$FD554" 's/0U, 0, (u8) (s32) arg1, arg2);/0U, 0, (u8) (s32) arg1, arg2 + 1);/'
+chkce "EQUIV*knob callee never called: RET 1513D2F0" func_150FD554 "${FD554/1513D860=/1513D2F0=}"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

@@ -154,7 +154,7 @@ void func_150A11F4(u8 *arg0)
 
 #ifdef NON_MATCHING
 extern f32 D_8009F978;
-s32 func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+void func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 
 void func_150A126C(void) {
     f32 temp_f2;
