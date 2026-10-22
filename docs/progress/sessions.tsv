@@ -100,3 +100,25 @@ P23	web	port-web				frame DLs now run end-to-end (~120 cmds, 0 tris); stub pass-
 P25	web	port-web				libultra/libgu/libc PC layer complete (guMtxF2L, bcopy/bzero vbe-aware, fast sin/cos); still 0 tris (camera asm)
 P27	web	port-web				input (kbd+gamepad via PIF, verified into game pad buffer), IndexedDB saves, page UX, audio resume
 P22	port	nm convert	42		131	D_80090370/D_800903A4 DL tables C; nm_asm mechanism for raw asm (D5E90.s); breadth 301-450; total C 4721 (79.8%)
+P24	port	nm convert	7		121	"camera" funcs were music sequencer; rotation+sin/cos C via nm_asm; 4/10 frame-path stubs; clang fixes; total C 4728 (80.0%)
+P26	web	port-web				merged P24; sqrtf self-call loop fixed; camera path traced (func_15005290 allocates view matrices)
+P28	port	nm convert	7		157	camera alloc func_15005290 + gate func_150859AC C; 49D0 blob C + harness; 3 frame-path stubs; total C 4735 (80.1%)
+P29	web	port-web				merged P28; camera buffers allocated; projection still zero (func_150006E0/func_1510B6A8 asm); Gfx* 2nd-arg stub rule
+P30	port	nm convert	11			whole camera path C (func_150006E0, 15122C5C, 1510B6A8, 1512C490, 150A82D0, 150045C4...); total C 4746 (80.3%)
+P31	web	port-web				camera matrices valid (temp C for func_1501A8C0/func_150479F0); game on 2D boot screen lvl 0x25 ~720 frames; level loader asm
+P32	port	nm convert	8			boot-screen text+HUD tiles, frame-path effects/lights; void-but-returns-DL bug in C2B60 fixed; total C 4754 (80.4%)
+P33	web	port-web				MILESTONE first real level geometry (lvl 0x21 floor, 288 tris); cause of heap break = inflater stub; freecam
+P34	port	nm convert	6			level loader + visibility walk (4-file hand asm, VR4300 harness) + camera record + lookat + level spawner; total C 4761 (80.5%)
+P36	port	nm convert	15			Rare inflater (gzip inflate.c in asm) C, verified on 5869 real assets; player spawn chain C; total C 4775 (80.7%)
+P35	web	port-web			75	renderer accuracy: F3DEXBG lighting from ucode disasm, blender/fog, scissor, 3-point filter, tile addressing
+P37	web	port-web				all temp stand-ins removed; real inflater/loader/spawn verified at runtime; player spawned; vis-walk inputs + camera eye still asm
+P38	port	nm convert	5			view test (odd-FP hand asm, harness), per-frame object update, shadows, fade; total C 4781 (80.8%)
+P39	web	port-web				merged P38; camwatch: eye/at writer is C func_1512C490, inputs from asm (player placement, initial eye, follow)
+P40	port	nm convert	5			level visibility build C (DL walk, node pool, leaf lists, PVS Huffman); 59 levels byte-identical vs asm; total C 4784 (80.9%)
+P42	web	port-web				real visibility walk draws lvl 0x21 (172/288 tris); k0 pointer-test rewrites; computed IO_READ; level colour needs func_1515E7E8
+P41	port-b	nm convert	8		124	camera chain C (player placement, initial eye, follow, orbit, mode handler); total C 4789 (81.0%)
+P44	web	port-web				FIRST frame from the game own camera (lvl 0x21, 288 tris, real vis walk); camera chain verified; player does not move yet (func_1504CB98 asm)
+P45	port-b	nm convert	3			trigger zones + 2 handlers C; difftest u64 helpers now computed (re-check needed); func_1504CB98 draft to DIFFER@call11
+P43	port	nm convert	8		133	level lighting, object draw, tex scroll, eye height/base, variadic event dispatcher; port+port-b merged: total C 4803 (81.2%), bytes 50.8%
+P46	web	port-web				level lit by game lights (game_36680 IDO array-copy fixed via srcfix), correct eye height; objects need func_1502C1D4
+P47	port-b	nm convert				u64 re-check: 0 false EQUIV; walk handler func_1504CB98 (4700 insns) inserted; total C 4804 (81.2%) bytes 51.6%
