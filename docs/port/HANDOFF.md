@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P64 (port-b) (session P64, 2026-10-22). Details: `docs/port/sessions/P64.md`
+
+Branch `port-b` (from P60 71183d1); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p64/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (854 bodies).
+- New hand-written NM C (no asm2c): **func_1505F298** (jump / swim / hang / glide handler, 5 commented sections;
+  stunned / dead and the hanging animation now return as the asm does), **func_1507F3B0** + **func_1507F834**
+  (idle-set chooser / advance: the idle path is all C), **func_15017FA4** (zone bounding boxes at level load),
+  **func_150D1D20** (scrolling view quad DL), **func_150ADE40** (approx. distance; raw hand .s as plain C).
+  Random seeds + knob setups EQUIV; mutants 87/89, 30/30, 5/5, 11/15, 15/15, 2/3 killed (survivors in P64.md).
+- func_15085710 has been C since P16: P61's "asm stub" report points at the browser build (game_eu_B2980.c TU?).
+- Tools: difftest DIFFTEST_OUTW takes stack arguments (N >= 4); `docs/port/sessions/p64/knobs.sh` / `mut.sh`
+  (7th setup field = DIFFTEST_OUTW, per-call out-params).
+
+## Next steps (from P64)
+
+1. Ray-cast callers of the walk handler: func_1505C7D8 (567, attack hit test; m2c draft's record loop is wrong)
+   and func_150D5F7C (603). Drafts: `port_work/p59/gen/`, `port_work/p64/gen/`.
+2. Browser: jumps / swimming / glide (func_1505F298), idle animations (func_1507F640 -> F834 / F3B0), and why
+   func_15085710 shows as a stub. Runtime checks: P64.md §3 UNVERIFIED.
+
 ## P60 (port-b) (session P60, 2026-10-22). Details: `docs/port/sessions/P60.md`
 
 Branch `port-b` (from P59 649a7fa, `port` merged in at the end); the orchestrator merges it into `port`.
