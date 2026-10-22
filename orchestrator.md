@@ -103,6 +103,9 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Twice a difftest bug made results meaningless while looking fine: callee arity taken from call statements (P71), and the candidate silently dropped when one NM block holds two functions (P73) — every mutant "survived" because the old copy was tested. A surviving mutant that should obviously die is a harness bug until proven otherwise; add a selftest case for every harness fix.
 - Concurrent knob and mutant runs of the same function must not share a temp dir (use the p73 knobs.sh / mut.sh).
 
+### Lesson: dropped arguments (P75, P78)
+- IDO code often leaves a value in a0..a3 and the callee uses it even though the decomp's C call passes nothing (`f()` or a `void (*)(void)` pointer). On N64 it works by accident; in the port the argument becomes 0 → wrong object or NULL writes. Whenever a callee becomes C, check its callers' argument counts (P75 `missing_args.txt`) and indirect calls through untyped function-pointer tables.
+
 ### Verification culture
 - Conversions are accepted only with difftest EQUIV **plus mutants that DIFFER**; anything unreachable is marked UNVERIFIED and runtime-checked in the browser.
 - Whole-function harnesses (`tools/port/difftest/nmasm_*.py`) for hand-asm / multi-entry code; compare against real ROM data where possible.
