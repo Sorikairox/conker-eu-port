@@ -75,7 +75,114 @@ void func_15005290(s32 arg0, s32 arg1) {
 //     D_800DC010 = allocate_memory((D_80082FA0 * 0x9A0) + 0x9A0, 1, 2, 0);
 // }
 
+#ifdef NON_MATCHING
+s32 func_151239CC(struct108 *arg0, s32 arg1);
+void func_15124B18(struct108 *arg0);
+void func_15124AB4(struct108 *arg0);
+void func_15125394(struct108 *arg0);
+void func_15005A60(struct108 *arg0, s32 arg1);
+void func_1512DBDC(struct108 *arg0);
+void func_15129E30(struct108 *arg0, s32 arg1);
+void func_1512DC60(struct108 *arg0);
+void func_15125924(struct108 *arg0);
+void func_150858A0(void *arg0, s32 arg1, s32 arg2);
+extern s32 D_800898C0;
+extern s32 D_800898C4[];
+extern s32 D_800898D4[];
+
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_H(o) (*(s16 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+
+/* Initialise one per-player camera controller (0x9A0 bytes, D_800DBFF0[player]): clear it, reset the 21 camera
+ * slots (func_151239CC, 999 timers), link it with the player's object record D_800CC2D0[player] (0x32C each,
+ * record +0x318 = controller, controller +0x3D0 = record, +0x3D4 = record +0x31C), mode arg2 (func_15129E30 /
+ * func_15005A60), then the default distances / limits. */
+void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
+    u8 *p = (u8 *)arg0;
+    u8 *rec;
+    u16 i;
+
+    bzero(p, 0x9A0);
+    p[0x23D] = arg1;
+    p[0x23C] = 1;
+    for (i = 0; i < 0x15; i++) {
+        func_151239CC(arg0, i);
+        CAM_H(0x1B6 + i * 2) = 999;
+    }
+    CAM_F(0x5D4) = ((f32)D_800BE624 * 60.0f) / 216.0f;
+    rec = (u8 *)D_800CC2D0 + p[0x23D] * 0x32C;
+    CAM_W(0x2C) = 1;
+    CAM_W(0xDC) = 0;
+    *(u8 **)(p + 0x3D0) = rec;
+    CAM_F(0x24C) = 1.0f;
+    CAM_F(0x250) = 1.0f;
+    CAM_H(0x3CC) = p[0x23D];
+    CAM_F(0x5D8) = ((f32)D_800BE624 * 40.0f) / 216.0f;
+    *(u8 **)(rec + 0x318) = p;
+    CAM_W(0x134) = 1;
+    CAM_W(0x84) = 0xE;
+    CAM_W(0x240) = 0;
+    CAM_H(0x1E0) = 0xD;
+    CAM_H(0x1B4) = 3;
+    CAM_F(0x5CC) = 1.0f;
+    CAM_F(0x3A8) = 0.0f;
+    func_15124B18(arg0);
+    CAM_H(0x272) = -1;
+    CAM_H(0x5FA) = 1;
+    p[0x3E8] = 1;
+    CAM_F(0x67C) = (f32)*(u16 *)((u8 *)D_800B0DF0 + 2);
+    CAM_F(0x2B0) = CAM_F(0x2A4);
+    CAM_F(0x2B4) = CAM_F(0x2A8);
+    CAM_F(0x2B8) = CAM_F(0x2AC);
+    CAM_W(0x5F0) |= 0x80000000;
+    CAM_F(0x384) = 999.0f; /* D_80095D90 */
+    func_15124AB4(arg0);
+    func_15125394(arg0);
+    CAM_H(0x5FC) = 10;
+    CAM_F(0x26C) = 1.0f;
+    func_1512DBDC(arg0);
+    CAM_W(0x238) = -1;
+    CAM_H(0x3CC) = p[0x23D];
+    CAM_H(0x368) = p[0x23D];
+    rec = (u8 *)D_800CC2D0 + p[0x23D] * 0x32C;
+    *(u8 **)(p + 0x3D0) = rec;
+    CAM_W(0x3D4) = *(s32 *)(rec + 0x31C);
+    func_15129E30(arg0, arg2);
+    CAM_W(0x7CC) = 2;
+    CAM_F(0x3F4) = -1.0f;
+    CAM_F(0x3F8) = -1.0f;
+    CAM_F(0x7BC) = 999.0f; /* D_80095D94 */
+    CAM_F(0x3E0) = CAM_F(0x3A0);
+    *(f32 *)(*(u8 **)(p + 0x3D4) + 0x18C) = 999.0f;
+    func_1512DC60(arg0);
+    func_15125924(arg0);
+    CAM_F(0x674) = 1.0f;
+    func_150858A0(*(void **)(p + 0x3D0), arg3, 0);
+    func_15005A60(arg0, arg2);
+    CAM_W(0x2E0) = CAM_W(0x2BC);
+    CAM_W(0x2E4) = CAM_W(0x2C0);
+    CAM_W(0x2E8) = CAM_W(0x2C4);
+    CAM_W(0x2EC) = CAM_W(0x2F8);
+    CAM_W(0x2F0) = CAM_W(0x2FC);
+    CAM_W(0x2F4) = CAM_W(0x300);
+    CAM_F(0x364) = -10000.0f; /* D_80095D98 */
+    CAM_F(0x7E8) = 50.0f;
+    CAM_F(0x86C) = 999.0f; /* D_80095D9C */
+    CAM_W(0x8BC) = D_800BE6D0[p[0x23D]];
+    D_800898C0 = 0;
+    D_800C3671 = 0;
+    D_800898C4[p[0x23D]] = 0;
+    D_800898D4[p[0x23D]] = 0;
+    CAM_H(0x5FE) = 0x32;
+    p[0x23C] = 1;
+}
+#undef CAM_W
+#undef CAM_H
+#undef CAM_F
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_150054C4.s")
+#endif
 // NON-MATCHING: not a terrible start.
 // void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3) {
 //     f32 temp_f2;

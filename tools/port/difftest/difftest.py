@@ -384,9 +384,16 @@ def call_site_writes(words, idx):
         if idx - j > 40: break
     return a, f, stk
 
+_NOC = {}
+def _nocomment(tu):
+    k = hash(tu)
+    if k not in _NOC: _NOC[k] = re.sub(r'/\*.*?\*/', ' ', re.sub(r'//[^\n]*', '', tu), flags=re.S)
+    return _NOC[k]
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
+    tu = _nocomment(tu)   # P30: commented-out old drafts (`//     func_X(a, b, c, d);`) are not prototypes
     for m in re.finditer(r'\b%s\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*[;{]' % re.escape(name), tu):
         ps = m.group(1).strip()
         if ps in ('', ): continue
@@ -858,6 +865,7 @@ def same_val(R, a, C, b):
 
 
 LIBULTRA_PREFIXES = ('os', '__os', 'gu', 'bzero', 'bcopy')
+EXACT = set(filter(None, os.environ.get('DIFFTEST_EXACT', '').split(',')))
 
 
 def compare(R, C, rk, arity):
@@ -886,6 +894,9 @@ def compare(R, C, rk, arity):
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
         # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
         if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
+        # P30 (opt-in): DIFFTEST_EXACT="NAME,..." or "*": those known prototypes are exact too (a scratch a2 left
+        # by the reference right before a 1-arg call is not an argument)
+        if na not in (None, 99) and (a['name'] in EXACT or '*' in EXACT): cnt = na
         for k in range(min(cnt, 4)):
             if k in FSKIP.get(a['name'], ()): continue
             if not same_val(R, a['regs'][k], C, b['regs'][k]):

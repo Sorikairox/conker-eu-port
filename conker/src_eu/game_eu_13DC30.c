@@ -128,8 +128,39 @@ void func_151108E0(s32 arg0, f32 (*arg1)[4], f32 arg2, f32 arg3, f32 arg4) {
     func_150A7A48(arg1, (f32 (*)[4])((u8 *)D_800BE628 + arg0 * 0x180 + 0xBC), arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110948.s")
+#ifdef NON_MATCHING
+Gfx *func_1501A6CC(Gfx *gdl, s32 ulx, s32 uly, s32 lrx, s32 lry);
+extern u8 D_800DC2D8[];
 
+/* Default camera callback (D_80089578[0], called by func_15110420): clear the current player's viewport
+ * (D_800BE628[D_80082FA4] +0x24..0x30) to the level colour D_800DC2D8 via func_15110AC4; in split screen, from
+ * player 0 only, draw the black divider bars (horizontal across the middle; vertical too with 3-4 players). The
+ * position / angle arguments are unused. */
+Gfx *func_15110948(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
+    u8 *cam = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
+    s32 h;
+
+    gdl = func_15110AC4(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24), (s32)(*(f32 *)(cam + 0x30) - 1.0f),
+                        (s32)*(f32 *)(cam + 0x28), D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
+    if (D_80082FA0 == 0 || D_80082FA4 != 0) {
+        return gdl;
+    }
+    gdl->words.w0 = 0xE7000000;
+    gdl->words.w1 = 0;
+    gdl = (Gfx *)func_1501A490((s32)(gdl + 1), 0xFF, 0, 0, 0, 0);
+    gdl->words.w0 = 0xF7000000;
+    gdl->words.w1 = 0x10001;
+    h = D_800BE624 >> 1;
+    gdl = func_1501A6CC(gdl + 1, 0, h - 6, D_800BE620, h + 6);
+    if (D_80082FA0 != 1) {
+        h = D_800BE620 >> 1;
+        gdl = func_1501A6CC(gdl, h - 1, 0, h + 1, D_800BE624);
+    }
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110948.s")
+#endif
 Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b) {
     gDPPipeSync(gdl++);
     gDPSetOtherMode(gdl++, 0x302C0F, 4);
