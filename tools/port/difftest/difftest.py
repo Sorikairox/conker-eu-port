@@ -463,7 +463,9 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
 STUBRET = {}
 for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
     _a, _v = _p.split('=')
-    STUBRET[int(_a, 16) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
+    # P24: "ADDR=V1;V2;..." returns V1 on the first call, V2 on the second, ... (the last value repeats),
+    # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
+    STUBRET[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -769,7 +771,8 @@ class Run:
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
         r = random.Random(h32('ret', self.seed, addr, k))
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
-        if (addr & 0x1FFFFFFF) in STUBRET: mu.reg_write(UC_MIPS_REG_V0, STUBRET[addr & 0x1FFFFFFF])
+        if (addr & 0x1FFFFFFF) in STUBRET:
+            _rs = STUBRET[addr & 0x1FFFFFFF]; mu.reg_write(UC_MIPS_REG_V0, _rs[min(k, len(_rs) - 1)])
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
         # word through each aligned aN that points into the caller's frame (out-params such as
@@ -878,6 +881,8 @@ def compare(R, C, rk, arity):
         w = a['stk'] | b['stk']; slots = set(); o = 16
         while o in w: slots.add(o); o += 4
         if na is not None and na != 99 and na > 4: slots |= {16 + 4 * j for j in range(na - 4)}
+        # P24: a known prototype with <= 4 args has no stack args (hand asm such as func_150A8050 keeps ra at sp+0x10)
+        if na is not None and na != 99 and na <= 4: slots = set()
         for o in sorted(slots):
             j = (o - 16) // 4
             if j < len(a['stkw']) and not same_val(R, a['stkw'][j], C, b['stkw'][j]):

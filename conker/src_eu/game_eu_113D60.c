@@ -128,7 +128,7 @@ s16 *func_150E6920(u8 *arg0, s16 arg1) {
         temp_f12 = sp.u90 - sp.u9C;
         temp_f18 = ((temp_f12 * 0.5f) + sp.u9C) - (*(f32 *)((u8 *)temp_v0_2 + 8));
         temp_f8 = (temp_f2 * temp_f18) - (temp_f16 * temp_f12);
-        (s32)sp38 = (s32)temp_f8;
+        sp38 = (u8 *)(s32)temp_f8;
         temp_f4 = (temp_f12 * temp_f14) - (temp_f18 * temp_f0_2);
         sp34 = temp_f4;
         temp_f10_2 = (temp_f0_2 * temp_f16) - (temp_f14 * temp_f2);

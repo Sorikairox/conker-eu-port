@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_1517F18C(u8 *arg0, u32 *arg1);
+#endif
 
 
 u8 *allocate_memory(s32, s32, s32, s32);
@@ -63,8 +66,73 @@ void func_1517E71C(void) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517E7FC.s")
+#ifdef NON_MATCHING
+s32 func_1517F01C(f32 x, f32 y, f32 z, f32 *outX, f32 *outY);
+Gfx *func_1517EA18(Gfx *gdl, u8 *node, s32 r, s32 g, s32 b, s32 alpha, u8 *flag);
+extern u8 D_8008D3A4[2];
+extern u8 D_8008D3A8[2];
+extern u8 D_8008D3AC[2];
+extern u8 D_800DE190;
 
+/* Node list D_800DDD64 (0x34-byte nodes, see func_1517E080): +0xC/+0x10 screen x/y, +0x24 next,
+ * +0x2A/+0x2C u16, +0x2E flags (1 = world-projected, 2 = clears D_800DD2D0 when hidden), +0x2F colour index,
+ * +0x30 enabled. Each visible node is drawn by func_1517EA18. */
+#define NM_E7FC_U8(n, o) (*((u8 *)(n) + (o)))
+#define NM_E7FC_U16(n, o) (*(u16 *)((u8 *)(n) + (o)))
+Gfx *func_1517E7FC(Gfx *gdl, s32 arg1) {
+    u8 rr[2], gg[2], bb[2];
+    u8 *node;
+    u8 *flag;
+    f32 *pos;
+    u32 t;
+    s32 hide;
+    s32 alpha = -1; /* the asm starts from a stale stack word; every drawn node sets it first */
+    u8 fl;
+
+    rr[0] = D_8008D3A4[0];
+    rr[1] = D_8008D3A4[1];
+    gg[0] = D_8008D3A8[0];
+    gg[1] = D_8008D3A8[1];
+    bb[0] = D_8008D3AC[0];
+    bb[1] = D_8008D3AC[1];
+    D_800DE190 = 0;
+    for (node = (u8 *)D_800DDD64; node != NULL; node = *(u8 **)(node + 0x24)) {
+        if (NM_E7FC_U8(node, 0x30) == 0) {
+            continue;
+        }
+        hide = 0;
+        fl = NM_E7FC_U8(node, 0x2E);
+        if (fl & 1) {
+            if (D_800DCDD0 == 0) {
+                hide = 1;
+            } else {
+                pos = (f32 *)D_8008CFFC[*((u8 *)D_800B0DF0 + 0x10)];
+                if (func_1517F01C(pos[0], pos[1], pos[2], (f32 *)(node + 0xC), (f32 *)(node + 0x10)) != 1) {
+                    hide = 1;
+                }
+                alpha = (NM_E7FC_U16(node, 0x2A) == 0xFFFC) ? 0xFF : -1;
+                fl = NM_E7FC_U8(node, 0x2E);
+            }
+        } else {
+            if (func_1517F18C(node, &t) != 1) {
+                hide = 1;
+            }
+            alpha = ((s32)(NM_E7FC_U16(node, 0x2C) - t) < 0x1E) ? 0x100 : -1;
+            fl = NM_E7FC_U8(node, 0x2E);
+        }
+        flag = (fl & 2) ? &D_800DD2D0 : NULL;
+        if (!hide) {
+            fl = NM_E7FC_U8(node, 0x2F);
+            gdl = func_1517EA18(gdl, node, rr[fl], gg[fl], bb[fl], alpha, flag);
+        } else if (flag != NULL) {
+            *flag = 0;
+        }
+    }
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517E7FC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517EA18.s")
 
 Gfx *func_1517EFBC(Gfx *arg0) {

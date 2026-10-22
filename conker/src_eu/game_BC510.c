@@ -2,6 +2,10 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1508F7BC(void);
+void func_1508F0D4(void);
+#endif
 
 
 // need to figure out D_800D2460
@@ -32,8 +36,218 @@ void func_1508F0A4(void) {
     func_1509093C();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F0D4.s")
+#ifdef NON_MATCHING
+extern s16 D_8009E084;
+extern s16 D_8009E08A;
+extern u8 D_800CC8BA;
+extern f32 D_800D2834;
+extern f32 D_800D2848;
+extern s32 D_800D2858;
+extern s32 D_800D2864;
 
+void func_1508F0D4(void) {
+    s32 sp40;
+    s32 sp34;
+    s32 *sp30;
+    s32 *sp2C;
+    f32 *temp_v0_2;
+    f32 *temp_v0_3;
+    f32 *temp_v1;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f12_2;
+    f32 temp_f12_3;
+    f32 temp_f12_4;
+    f32 temp_f12_5;
+    f32 temp_f12_6;
+    f32 temp_f12_7;
+    f32 temp_f12_8;
+    f32 var_f0;
+    f32 var_f10;
+    s32 temp_a2;
+    s32 temp_v0;
+    s32 var_a0_2;
+    s32 var_a0_3;
+    s32 var_a0_4;
+    s32 var_a3;
+    s32 var_v0_2;
+    s32 var_v0_3;
+    struct256 **var_v1;
+    struct256 *var_a0;
+    u8 var_v0;
+
+    var_a0 = D_800D245C;
+    var_v1 = &D_800D245C;
+    if (var_a0 != NULL) {
+        do {
+            var_a0->unk94 -= 5.0f;
+            var_a0->unk84 += var_a0->unk90;
+            var_a0->unk88 += var_a0->unk94;
+            var_a0->unk8C += var_a0->unk98;
+            var_a0->unk9C += var_a0->unkA8;
+            var_a0->unkA0 += var_a0->unkAC;
+            var_a0->unkA4 += var_a0->unkB0;
+            temp_v0 = var_a0->unkB4 - D_800BE9E4;
+            if (temp_v0 <= 0) {
+                *var_v1 = var_a0->unk80;
+                sp30 = (s32 *) var_a0;
+                sp2C = (s32 *) var_v1;
+                func_100043B4((s32 *) var_a0, 3U);
+            } else {
+                var_a0->unkB4 = (u8) temp_v0;
+                var_v1 = &var_a0->unk80;
+            }
+            var_a0 = var_a0->unk80;
+        } while (var_a0 != NULL);
+    }
+    var_v0 = D_800D2457;
+    if ((s32) D_800CC8BA < (s32) var_v0) {
+        D_800D2864 = 0xF0;
+        if (var_v0 != D_800CC8BA) {
+            do {
+                D_800D2457 = var_v0 - 1;
+                if (D_800D2848 == (f32) D_8009E08A) {
+                    func_1508F7BC();
+                }
+                var_v0 = D_800D2457;
+            } while (var_v0 != D_800CC8BA);
+        }
+        func_10010F30(0x1A6, 0x7FFFU, 0x40U, 0, 0U);
+    } else if ((s32) var_v0 < (s32) D_800CC8BA) {
+        D_800D2864 = 0xF0;
+        if (var_v0 != D_800CC8BA) {
+            do {
+                D_800D2457 = var_v0 + 1;
+                if (D_800D2848 == (f32) D_8009E08A) {
+                    func_1508F9C4();
+                }
+                var_v0 = D_800D2457;
+            } while (var_v0 != D_800CC8BA);
+        }
+    }
+    if (D_800D2864 != 0) {
+        var_a3 = 0;
+        temp_f0 = (f32) D_8009E08A;
+        if (D_800D2848 == temp_f0) {
+            D_800D2864 -= D_800BE9E4;
+            if (D_800D2864 <= 0) {
+                D_800D2864 = 0;
+            }
+            do {
+                if (D_800BE9E4 > 0) {
+                    temp_a2 = var_a3 * 4;
+                    temp_v0_2 = temp_a2 + &D_800D2890;
+                    temp_v1 = temp_a2 + &D_800D2858;
+                    temp_f12 = (f32) D_800BE9E4;
+                    var_a0_2 = 1;
+                    var_f10 = *temp_v1 * -0.1f;
+                    if (D_800BE9E4 > 1) {
+                        do {
+                            var_a0_2 += 1;
+                            *temp_v0_2 += var_f10;
+                            *temp_v0_2 *= 0.85f;
+                            *temp_v1 += *temp_v0_2 * temp_f12;
+                            var_f10 = *temp_v1 * -0.1f;
+                        } while (var_a0_2 < D_800BE9E4);
+                    }
+                    *temp_v0_2 += var_f10;
+                    *temp_v0_2 *= 0.85f;
+                    *temp_v1 += *temp_v0_2 * temp_f12;
+                }
+                var_a3 += 2;
+            } while (var_a3 != 4);
+        } else if ((s32) D_800D2457 < (s32) D_800D2456) {
+            var_v0_2 = D_800D2456 - D_800D2457;
+            var_a0_3 = 0;
+            D_800D2848 += 50.0f * (f32) D_800BE9E4;
+            if (temp_f0 <= D_800D2848) {
+                D_800D2848 = temp_f0;
+                if (var_v0_2 > 0) {
+                    do {
+                        sp34 = var_v0_2;
+                        sp40 = var_a0_3;
+                        func_1508F7BC();
+                        var_a0_3 += 1;
+                    } while (var_a0_3 != var_v0_2);
+                }
+                func_10010F30(0x1A6, 0x7FFFU, 0x40U, 0, 0U);
+            }
+        } else {
+            var_v0_3 = D_800D2457 - D_800D2456;
+            var_a0_4 = 0;
+            D_800D2848 += 50.0f * (f32) D_800BE9E4;
+            if (temp_f0 <= D_800D2848) {
+                D_800D2848 = temp_f0;
+                if (var_v0_3 > 0) {
+                    do {
+                        sp34 = var_v0_3;
+                        sp40 = var_a0_4;
+                        func_1508F9C4();
+                        var_a0_4 += 1;
+                    } while (var_a0_4 != var_v0_3);
+                }
+            }
+        }
+    } else {
+        temp_f12_2 = (f32) D_8009E084;
+        if (D_800D2848 != temp_f12_2) {
+            var_f0 = ((f32) D_8009E08A - D_800D2848) * 0.1f;
+            if (var_f0 < 0.01f) {
+                var_f0 = 0.01f;
+            }
+            D_800D2848 -= var_f0 * (f32) D_800BE9E4;
+            if (D_800D2848 < temp_f12_2) {
+                D_800D2848 = temp_f12_2;
+            }
+        }
+    }
+    temp_v0_3 = &D_800D2410[2];
+    if (*D_800D2410 != 1.0f) {
+        temp_f12_3 = *D_800D2410 + ((f32) D_800BE9E4 * 0.03f);
+        *D_800D2410 = temp_f12_3;
+        if (temp_f12_3 > 1.0f) {
+            *D_800D2410 = 1.0f;
+        }
+    }
+    if (D_800D2834 != 1.0f) {
+        temp_f12_4 = D_800D2834 + ((f32) D_800BE9E4 * 0.03f);
+        D_800D2834 = temp_f12_4;
+        if (temp_f12_4 > 1.0f) {
+            D_800D2834 = 1.0f;
+        }
+    }
+    temp_f12_5 = (*(f32 *)((u8 *)temp_v0_3 + 0));
+    if (temp_f12_5 != 1.0f) {
+        (*(f32 *)((u8 *)temp_v0_3 + 0)) = temp_f12_5 + ((f32) D_800BE9E4 * 0.03f);
+        if ((*(f32 *)((u8 *)temp_v0_3 + 0)) > 1.0f) {
+            (*(f32 *)((u8 *)temp_v0_3 + 0)) = 1.0f;
+        }
+    }
+    temp_f12_6 = (*(f32 *)((u8 *)temp_v0_3 + 4));
+    if (temp_f12_6 != 1.0f) {
+        (*(f32 *)((u8 *)temp_v0_3 + 4)) = (f32) (temp_f12_6 + ((f32) D_800BE9E4 * 0.03f));
+        if ((*(f32 *)((u8 *)temp_v0_3 + 4)) > 1.0f) {
+            (*(f32 *)((u8 *)temp_v0_3 + 4)) = 1.0f;
+        }
+    }
+    temp_f12_7 = (*(f32 *)((u8 *)temp_v0_3 + 8));
+    if (temp_f12_7 != 1.0f) {
+        (*(f32 *)((u8 *)temp_v0_3 + 8)) = (f32) (temp_f12_7 + ((f32) D_800BE9E4 * 0.03f));
+        if ((*(f32 *)((u8 *)temp_v0_3 + 8)) > 1.0f) {
+            (*(f32 *)((u8 *)temp_v0_3 + 8)) = 1.0f;
+        }
+    }
+    temp_f12_8 = (*(f32 *)((u8 *)temp_v0_3 + 0xC));
+    if (temp_f12_8 != 1.0f) {
+        (*(f32 *)((u8 *)temp_v0_3 + 0xC)) = (f32) (temp_f12_8 + ((f32) D_800BE9E4 * 0.03f));
+        if ((*(f32 *)((u8 *)temp_v0_3 + 0xC)) > 1.0f) {
+            (*(f32 *)((u8 *)temp_v0_3 + 0xC)) = 1.0f;
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_BC510/func_1508F0D4.s")
+#endif
 void func_1508F7BC(void) {
     f32 sp48[4][4];
     f32 sp44;
