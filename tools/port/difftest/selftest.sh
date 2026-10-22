@@ -65,4 +65,8 @@ chkc DIFFER func_151B97C4 's/sinf(temp_f0)/sinf(temp_f2)/'
 # a 3-argument prototype: the declared 2-argument func_100043B4 must not compare the scratch a2 (was a false DIFFER)
 chkc EQUIV  func_15030448
 chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
+# P73: func_1501B300's NON_MATCHING block also holds func_1501B640: the candidate went into the dropped #else side
+# and src_eu's body was tested instead (every mutant EQUIV). The mutant must be DIFFER.
+chk EQUIV  func_1501B300 src_eu/game_eu_48B10.c
+chk DIFFER func_1501B300 src_eu/game_eu_48B10.c 's/out\[1\] = negSinPitch \* 127.0f;/out[1] = x * 127.0f;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

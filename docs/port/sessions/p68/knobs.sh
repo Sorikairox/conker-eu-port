@@ -1,0 +1,16 @@
+#!/bin/bash
+# P68 copy of p67/knobs.sh (same fields). usage: knobs.sh FUNC cand.c setups.txt [names...]
+# P67: as p64/knobs.sh plus an 8th field DIFFTEST_OUTB (bytes). P64: as p60/knobs.sh plus a 7th field DIFFTEST_OUTW (per-call words; N >= 4 = stack arg since P64). Env DIFFTEST_ARGMEM passes through.
+# setups: name ! ARG ! POKE ! RET ! RETF ! OUTA ! OUTW  (fields may be empty; # comments)
+# Env: TR (trials, 16), SEED (1), SEEDS (list, overrides SEED). Prints one line per setup and seed.
+cd "$(dirname "$0")/../../../.." && eval "$(tools/eu_port/wt.sh env portb)"; export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
+F=$1; C=$2; S=$3; shift 3
+grep -vE '^\s*(#|$)' "$S" | while IFS='!' read -r n a p r rf ow ww wb; do
+  n=$(echo $n); [ $# -gt 0 ] && ! [[ " $* " == *" $n "* ]] && continue
+  for sd in ${SEEDS:-${SEED:-1}}; do
+    out=$(DIFFTEST_TMP=build/difftest_p68_$F DIFFTEST_EXACT='*' DIFFTEST_ARG="$(echo $a)" DIFFTEST_POKE="$(echo $p)" \
+      DIFFTEST_RET="$(echo $r)" DIFFTEST_RETF="$(echo $rf)" DIFFTEST_OUTA="$(echo $ow)" DIFFTEST_OUTW="$(echo $ww)" DIFFTEST_OUTB="$(echo $wb)" tools/port/difftest.sh $F $C --trials ${TR:-16} --seed $sd 2>&1 \
+      | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | cut -c1-200)
+    echo "$n/s$sd: $out"
+  done
+done

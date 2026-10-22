@@ -132,6 +132,99 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. func_1000480C in the browser: map `CART_WORD` (KSEG1 0xB0000000 | addr) to the ROM image and PI_STATUS to idle.
 3. After changing `NM_ASM_C_FUNCS_D5E90`, delete `build_nm/asm/D5E90.s.o` before the NM build.
 Code-segment tables: none in P62's C. Runtime checks: P62.md UNVERIFIED.
+## P82 (port-b) (session P82, 2026-10-22). Details: `docs/port/sessions/P82.md`
+
+Branch `port-b` (from P77 3ef8b97); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p82/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- New hand-written NM C (no asm2c), all EQUIV on random 100 + setups: the browser's top frame-path group
+  **func_151462C8** (model-part lights, DL, 25/25), **func_1514306C** (material texture address, 11/11),
+  **func_1513C060** (sprite effect update, 28/28); func_1513E2AC (sprite quad corners, 27/29, 2 equivalent);
+  **func_15021E60** (look target / fixed look angles, 24/24), func_150220CC (look limits, 14/14);
+  func_1504ADD0 (per-frame object pass, 12/12; stores a pointer to a stack local as the asm does, P82.md §2);
+  func_150617BC (object fades, 17/21, 4 equivalent; prototype now `void`).
+- Arity fixes (byte-identical, default build): handler tables D_80089EE8 / EF0 / EF8 / F2C now get arg0
+  (game_169510.c, scan rows 34-37); func_1501DF70(arg0) (game_eu_4A070.c, row 52).
+- `docs/port/sessions/p82/mut.sh`: sed errors and CERR / UNSURE setups no longer count as SURVIVED (selftest in
+  `selftest_mut.txt`). POKE into `.game_data` (0x80096DC4) had no effect: use the ELF value (P82.md §3).
+
+## Next steps (from P82)
+
+1. Browser: the DL group (lit parts, material textures, sprite effects), head turning (func_15021E60 /
+   func_150220CC), the corrected handler calls (P82.md UNVERIFIED).
+2. Frame-path asm left in P82's files: func_15060F28 (game_83300.c, called by func_150617BC mode 5 / 6),
+   func_1506160C (fade setter, 108 insns), func_15061B4C (601), game_14FF90.c group (func_15125DB4, 15128030,
+   15126378, 15124C38, 1512317C, 151256BC, 601 each), func_1501ECA4 / func_15020F6C (game_eu_4A070.c, 601).
+3. Remaining asm in game_eu_170760.c (func_151432BC, func_15144CEC, func_15146078, func_1514654C) and
+   game_169510.c (func_1513CFE4, func_1513EE14, func_1513FAB4, func_15140190, func_151406AC, ...): not hit in P81's run.
+
+## P77 (port-b) (session P77, 2026-10-22). Details: `docs/port/sessions/P77.md`
+
+Branch `port-b` (from P73 4498419); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p77/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- New hand-written NM C (no asm2c), all EQUIV with every mutant killed: **func_150A02EC** (query handler entry 4, 27/27),
+  **func_150A09B8** (entry 3, 32/32), **func_150954E4** (sky / sprite texture loader, browser blocker, 34/34),
+  func_1501CDA0 (5/5), func_150226E8 (7/7), func_15097D20 (8/8), func_15097DDC (8/8).
+- Arity fixes (NM): func_15049350 gets its nine floats (game_83300.c), func_1512B2C4(arg0) (game_eu_158110.c),
+  func_15053430(arg0) (game_eu_78230.c). Rows func_1512C6C0 / func_1512523C x3 / D_800863B4 handlers checked: no
+  argument in the asm (P77.md §1).
+- func_1512C080: the 4 P73 survivors are killed (31/31).
+- `docs/port/sessions/p77/mut.sh`: refuses the random phase when the draft itself DIFFERs on random trials (P77.md §3).
+
+## Next steps (from P77)
+
+1. Browser: sky quad (func_150954E4), script queries 0x3xxx / 0x4xxx, the three corrected calls (P77.md UNVERIFIED).
+2. Display-list producers func_151462C8 / func_1514306C (game_eu_170760.c), func_1513C060 (game_169510.c), once assigned.
+3. Breadth in owned files: asm-only game_eu_4A070.c func_1501DE84 (59), func_150225D0 (70); game_83300.c func_150626EC (58),
+   func_15056A00 (66); game_eu_78230.c func_1504ADD0 (73); game_eu_C2B60.c func_15095A4C (73).
+
+## P73 (port-b) (session P73, 2026-10-22). Details: `docs/port/sessions/P73.md`
+
+Branch `port-b` (from P68 2f9d323); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p73/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- **difftest bug fixed**: for an NM block holding more than one function (func_1501B300 + func_1501B640) the candidate
+  was put in the dropped `#else` side, so the src_eu body was tested instead (all mutants "survived"). `build_tu` now
+  replaces the definition on the NM side and errors out if the candidate is missing from the TU. Selftest case added
+  (28/28). func_1501B300's rate mutants are now killed (11/15 overall, survivors boundary / equivalent). Same layout: func_150183D0/184B0, func_1507F3B0/F834.
+- P67 setups (func_1505C7D8, func_150D5F7C, func_1507E7E4, func_150453BC, func_150D71D4) already used EU addresses
+  (`port_work/p73/knobcheck.py`); re-run: all EQUIV.
+- func_1512C080 full mutant run: 27/31 killed; 4 survivors (+0x23E / +0x2B0 / mode 0x100 / floor boundary) UNVERIFIED.
+- New hand-written NM C (no asm2c): **func_151BF8F0** (lives pop-up, 132 setups, mutants 20/21), **func_1501D348**
+  (scene loader, `void`, 123 setups, 27/27), **func_1509A024** (object query handler, 99-case switch, 622 setups x2,
+  44/46, survivors equivalent). func_15084000 has a one-argument NM body (wasm signature).
+- Tools: `docs/port/sessions/p73/knobs.sh` (KTMP) / `mut.sh` (own tmp dir; random phase without DIFFTEST_ARGMEM).
+  Never run a setup run and a mutant run of one function with the p68 scripts at the same time (shared tmp dir).
+
+## Next steps (from P73)
+
+1. func_1512C080 survivors: setups with +0x23E not in {2, 3}, +0x2B8 equal / +0x2B0 different, mode 0x100.
+2. Other entries of func_1509BE40's table still asm: func_150A09B8 (3), func_150A02EC (4).
+3. Browser: lives pop-up, cutscene start (func_1501D348), script queries (func_1509A024) -- P73.md UNVERIFIED.
+
+## P68 (port-b) (session P68, 2026-10-22). Details: `docs/port/sessions/P68.md`
+
+Branch `port-b` (from P67 8c057c9); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p68/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (865 bodies).
+- New hand-written NM C (no asm2c), P66 browser stub list: per frame **func_151236D0** (camera state flags + inside /
+  outside sound), **func_1512C77C** (camera cylinder push-out), **func_151E7110** (text bank loader), **func_1501B300**
+  (smoothed view direction; func_1501B640 forwards the player index under NM), **func_1512C080** (camera eye
+  collision probe); movement **func_1506BF5C** (script sound / footsteps), **func_1507342C** (projectile spawn).
+  Random seeds + knob setups EQUIV for all; mutants in P68.md.
+- **Knob addresses must be EU addresses** (US-style names: func_15048A70 is at 0x15048D60, D_800D154C at
+  0x800D196C ...): `port_work/p68_sym.sh SYM...`. OUTW is word-sized (use OUTB for u16 out-params).
+  `docs/port/sessions/p68/mut.sh` stops at the first DIFFER (random trials first).
+- Open harness question: writes of func_1501B300 to D_800BEAE0 / D_800BEAF0 do not seem to be compared (rate
+  mutants survive); its smoothing math is hand-checked only (UNVERIFIED).
+
+## Next steps (from P68)
+
+1. P66 stub list, still asm: func_151BF8F0 (311 lines, stack struct for func_15149130), func_1501D348 (473),
+   func_1509A024 (1571, in sections).
+2. Browser: camera collision / follow, menu and in-game text, footsteps, projectiles (P68.md UNVERIFIED).
+
 ## P67 (port-b) (session P67, 2026-10-22). Details: `docs/port/sessions/P67.md`
 
 Branch `port-b` (from P64 f0437f9); the orchestrator merges it into `port`.

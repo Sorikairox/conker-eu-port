@@ -1,0 +1,28 @@
+s|if (!(\*(s32 \*)(p + 0x10) \& 1)) {|if (0) {| %
+s|if (\*(s32 \*)(p + 0x18) \& 1) {|if (*(s32 *)(p + 0x18) \& 2) {| %
+s|-= D_800BE9E4;|-= 1;| %
+s|if (\*(s16 \*)(p + 0x1C) < 0) {|if (*(s16 *)(p + 0x1C) <= 0) {| %
+s|D_8008A010\[p\[0x80\]\](p) == 0|D_8008A010[p[0x80]](p) != 0| %
+s|if ((flags \& 0x8000) \&\& !done) {|if (flags \& 0x8000) {| %
+s|if ((flags \& 0x10000) \&\& !done) {|if (flags \& 0x10000) {| %
+s|if (life < \*(s16 \*)(p + 0x3A)) {|if (life <= *(s16 *)(p + 0x3A)) {| %
+s|                p\[0x2D\] = a;|                p[0x28] = a;| %
+s|            if (a < p\[0x28\]) {|            if (a < p[0x2D]) {| %
+s|a = life \* \*(s16 \*)(p + 0x3C);|a = life * *(u8 *)(p + 0x3C);| %
+s|speed \* D_800BE9E4;|speed;| %
+s|<< 16) - 1;|<< 16);| %
+s|D_80090F14\[p\[0x1E\]\]\[0\]|D_80090F14[p[0x1F]][0]| %
+s|if (top < pos) {|if (top <= pos) {| %
+s|            if (flags \& 2) {|            if (flags \& 8) {| %
+s|            if (flags \& 8) {|            if (flags \& 2) {| %
+s|        } else if (flags \& 0x40) {|        } else if (flags \& 0x80) {| %
+s|            } else if (flags \& 0x80) {|            } else if (flags \& 0x40) {| %
+s|= top - pos % top;|= top - pos;| %
+s|= -pos % top;|= -pos;| %
+s|\*(s32 \*)(p + 0x20) = top;|*(s32 *)(p + 0x20) = top + 1;| %
+s|} while (top < pos);|} while (0);| %
+s|} while (pos < 0);|} while (0);| %
+s|} else if (pos < 0) {|} else if (pos <= 0) {| %
+s|(p\[0x81\] == 0) \|\| || %
+s|D_8008A048\[p\[0x81\]\](p) != 0|D_8008A048[p[0x81]](p) == 0| %
+s|                \*(s32 \*)(p + 0x24) = -speed;|                *(s32 *)(p + 0x24) = speed;| %

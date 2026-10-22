@@ -1,0 +1,3 @@
+s|} else if (v < 0xFF) {|} else if (v < 0xFE) {| %
+s|if (v < o\[8\]) {|if (v < o[8] - 1) {| %
+s|        o\[0xA\] = 0;|| %

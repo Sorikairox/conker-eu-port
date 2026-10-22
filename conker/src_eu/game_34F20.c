@@ -102,7 +102,7 @@ void func_15017640(void);
 void func_15017868(void);
 void func_15017930(s32 arg0);
 void func_1501A220(s32 arg0, s32 arg1);
-void func_1501B640(void);
+void func_1501B640(s32 player); /* P68: forwards the player index to func_1501B300 */
 void func_1501BB20(void);
 void func_1501C51C(void);
 void func_1501CC1C(void);
@@ -251,7 +251,7 @@ void func_15007B3C(void) {
     func_15009150(D_800BE9F0);
     func_15085FE0(D_800BE9F0);
     func_15008DD0();
-    func_1501B640();
+    func_1501B640(0); /* the asm passes 0 */
     func_15080600();
     D_800BE9E4 = 2;
     func_150158C0();

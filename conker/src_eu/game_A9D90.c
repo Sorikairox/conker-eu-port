@@ -444,7 +444,7 @@ void func_1507DF10(u8 *arg0, s32 arg1) {
     }
 }
 #ifdef NON_MATCHING
-s32 func_1501D348(s32, s32, s32, s32, s32);
+void func_1501D348(s32, s32, s32, s32, s32);
 void func_15022238(s16, s16, s16, f32);
 s32 func_150851E0(s32, s32, s32, s16 *, s32 *, s32 *, u8 *, s32 *, s32 *, s32, s32 *);
 

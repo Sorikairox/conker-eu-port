@@ -1,0 +1,21 @@
+s|if (\*(s32 \*)o == 0) {|if (0) {| %
+s|i <= D_80082FA0;|i < D_80082FA0;| %
+s|bit <<= 1)|bit <<= 2)| %
+s|if (o\[0xF\] \& bit) {|if (o[0xE] \& bit) {| %
+s|if (v > 0) {|if (v > 1) {| %
+s|v -= 50;|v -= 49;| %
+s|if (v < 0) {|if (v < 1) {| %
+s|} else if (v < 0xFF) {|} else if (v < 0xFE) {| %
+s|                v = 0xFF;|                v = 0xFE;| %
+s|v += 50;|v += 51;| %
+s|if (v > 0xFF) {|if (v > 0xFE) {| %
+s|if (o\[0xA\] == 0) {|if (o[0xA] == 1) {| %
+s|if (o\[7\] < o\[8\]) {|if (o[7] <= o[8]) {| %
+s|v = o\[7\] + o\[9\];|v = o[7] + o[9] + 1;| %
+s|if (v > o\[8\]) {|if (v >= o[8] + 1) {| %
+s|v = o\[7\] - o\[9\];|v = o[7] - o[9] + 1;| %
+s|if (v < o\[8\]) {|if (v < o[8] - 1) {| %
+s|if (o\[0xA\] == 6) {|if (o[0xA] == 7) {| %
+s|func_15060F28(obj, 1);|func_15060F28(obj, 2);| %
+s|} else if (o\[0xA\] == 5) {|} else if (o[0xA] == 4) {| %
+s|            o\[0xA\] = 0;|| %

@@ -1,0 +1,31 @@
+s/(C080_W(0x84) \& 0x40000) ||/0 ||/ %
+s/target\[0x95\] != 0 ||/0 ||/ %
+s/C080_W(0x2C) == 0x40 ||/0 ||/ %
+s/(C080_W(0x84) \& 0x80) ||/0 ||/ %
+s/C080_F(0x950) = 72.0f;/C080_F(0x950) = 40.0f;/ %
+s/580.0f < C080_F(0x374)/580.0f <= C080_F(0x374)/ %
+s/p\[0x23E\] == 3/p[0x23E] != 2/ %
+s/view == 1 || //  %
+s/ || view == 3)/)/ %
+s/C080_F(0x2B8) == \*(f32 \*)(followed + 0x1C)/1/ %
+s/C080_F(0x2B0) == \*(f32 \*)(followed + 0x14) \&\&//  %
+s/target\[0x1B3\] == 0) {/1) {/ %
+s/C080_F(0x950) = 30.0f;/C080_F(0x950) = 60.0f;/ %
+s/C080_F(0x95C) = C080_F(0x94C);/C080_F(0x95C) = 0.0f;/ %
+s/4.0f, 6.0f, C080_F(0x7B4));/6.0f, 4.0f, C080_F(0x7B4));/ %
+s/probe.y_position = C080_F(0x2FC) + C080_F(0x18C);/probe.y_position = C080_F(0x2FC);/ %
+s/probe.unk188 = C080_W(0x644);// %
+s/probe.unk28 = probe.y_position - C080_F(0x354);/probe.unk28 = C080_F(0x354);/ %
+s/probe.unk40 = C080_F(0x37C);// %
+s/probe.camera = arg0;// %
+s/ || D_800BE9F0 == 0x37)/)/ %
+s/if (C080_W(0x84) \& 0x10000) {/if (0) {/ %
+s/D_800CC1F3 = saved1F3;// %
+s/D_800894C0\[1\] = savedStep;// %
+s/ \&\& !small/ \&\& 1/ %
+s/(1.0f - C080_F(0x26C)) \* 0.1f/(1.0f - C080_F(0x26C)) * 0.2f/ %
+s/C080_F(0x2FC) = probe.y_position - C080_F(0x18C);/C080_F(0x2FC) = probe.y_position;/ %
+s/if (C080_W(0x2C) != 0x100) {$/if (1) {/ %
+s/D_800BE9F0 != 0x1B \&\& //  %
+s/if (C080_F(0x2FC) < floorY + 40.0f)/if (C080_F(0x2FC) <= floorY + 40.0f)/ %
+s/D_800CC1F2 = 0;// %

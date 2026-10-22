@@ -1,0 +1,2 @@
+s|= top - pos [^;]*;|= top - pos;| %
+s|= -pos [^;]*;|= -pos;| %
