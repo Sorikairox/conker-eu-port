@@ -74,13 +74,66 @@ s32 func_150A69A8(s32 arg0, s32 arg1, s32 *arg2, s32 arg3) {
     return func_150A6A48(arg0, arg1, arg2, 0, arg0, arg1, -10000, arg3);
 }
 
-#pragma GLOBAL_ASM("src_eu/nm_asm/func_150A6840_tail.s")
+/* P54: func_150A6840_tail.s no longer needed (func_150A6A48 is C) */
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6840.s")
 #endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A69E0.s")
 
+#ifdef NON_MATCHING
+/*
+ * P54: func_150A6A48 (hand asm): the world objects (D_800DBEF4, D_800DC320 of them, 0xA0 bytes) whose box
+ * (+0x10 / +0x12 / +0x14 centre, +0x50 x/z half size, +0x52 y half size) overlaps (x .. x2, z .. z2) and, unless
+ * +0x4F & 0x40, (y .. y2), all bounds strict; skipped: +0x6E != 0, +0x4F & 0x60 == 0x20, index n - 1.
+ * Indices with +0x4F & 0x60 == 0 go to the u16 list D_800D3C00 (the count is returned), the others (0x40 / 0x60)
+ * to D_800D3C50 (count in *outCount).
+ */
+extern s32 D_800D3C00;
+extern s32 D_800D3C50;
+
+s32 func_150A6A48(s32 x, s32 z, s32 *outCount, s32 n, s32 x2, s32 z2, s32 y, s32 y2) {
+    u16 *l0 = (u16 *)&D_800D3C00;
+    u16 *l1 = (u16 *)&D_800D3C50;
+    u8 *obj, *end;
+    s32 n0 = 0, n1 = 0, i = 0;
+    s32 k, r, c;
+
+    *outCount = 0;
+    if (D_800DC320 == 0) return 0;
+    obj = (u8 *)D_800DBEF4;
+    end = obj + (s32)((u32)D_800DC320 * 0xA0u);
+    do {
+        if (obj[0x6E] != 0) goto next;
+        k = obj[0x4F] & 0x60;
+        if (k == 0x20) goto next;
+        r = *(u16 *)(obj + 0x50);
+        c = *(s16 *)(obj + 0x10);
+        if (!(c - r < x2) || !(x < c + r)) goto next;
+        c = *(s16 *)(obj + 0x14);
+        if (!(c - r < z2) || !(z < c + r)) goto next;
+        if ((obj[0x4F] & 0x40) != 0x40) {
+            r = *(u16 *)(obj + 0x52);
+            c = *(s16 *)(obj + 0x12);
+            if (!(c - r < y2) || !(y < c + r)) goto next;
+        }
+        if (i == n - 1) goto next;
+        if (k != 0) {
+            n1++;
+            *l1++ = i;
+        } else {
+            n0++;
+            *l0++ = i;
+        }
+    next:
+        obj += 0xA0;
+        i++;
+    } while (obj != end);
+    *outCount = n1;
+    return n0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6A48.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6C40.s")

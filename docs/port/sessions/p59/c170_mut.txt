@@ -1,0 +1,12 @@
+s/\* D_8009B860; \/\* 1.2/* 1.25f; \/* 1.2/ % b
+s/(D_800BE9A4 < 2.0f)/(D_800BE9A4 < 3.0f)/ % b2
+s/hold |= rec->unkF4 \& 0xE/hold |= rec->unkF4 \& 0xC/ % d6
+s/rec->unk1FC \&= ~4/rec->unk1FC \&= ~5/ % b4
+s/(rec->unk1FD << 8)/(rec->unk1FD << 7)/ % g
+s/rec->unk1FC |= 4;/rec->unk1FC |= 5;/ % c
+s/rec->unk1FC |= 2;/rec->unk1FC |= 3;/ % d4 d2
+s/if (anim->unk8 < 0.0f)/if (anim->unk8 < -1.0f)/ % d4
+s/D_800C3A82\[player\] != 0/D_800C3A82[player] != 1/ % k
+s/if (f != 0.0f)/if (f != 5.0f)/ % j
+s/rec->unk21C = 0;/rec->unk21C = 1;/ % d2 g2
+s/        \/\* the callback started another animation \*\//        resync = 0;/ % f

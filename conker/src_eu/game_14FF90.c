@@ -3,6 +3,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_1512A390(u8 *); // P47: one argument (a0 = arg0 is still live at the call)
 void func_15122C5C(struct108 *arg0);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_151206C8(struct108 *);
@@ -1458,7 +1459,11 @@ void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2) {
     arg0->unk7F8 = arg0->unk2A4;
     arg0->unk7FC = arg0->unk2A8;
     arg0->unk800 = *(f32*)&arg0->unk2AC;
+#ifdef NON_MATCHING
+    func_1512A390((u8 *)arg0); // P47: the matched call passes no argument, but a0 still holds arg0
+#else
     func_1512A390();
+#endif
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128030.s")

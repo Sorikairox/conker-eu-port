@@ -177,7 +177,7 @@ void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg
 #endif
 #ifdef NON_MATCHING
 s32 func_1503DA64(s32 arg0, s32 arg1);
-void func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *); /* s32: P59 definition returns 0 */
 /* func_1503A37C (P57, from the m2c draft): object bounds from the skeleton. With a skeleton (+0x1D4) and a model
  * header D_800D1C90[type] (func_1503DA64(type, 0) == 0): joint header+0x26's matrix rows scaled to the header
  * radii (+0x3A u8, +0 s16, +0x30 s8) * y scale +0x150 give the box +0x1A4..+0x1B6 (s16) and the direction bytes

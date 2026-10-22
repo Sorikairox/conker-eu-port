@@ -6,9 +6,9 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10E600/func_150E0DF0.s")
 
 #ifdef NON_MATCHING
-s32 func_15021834(struct127 *, s32, s32);
+void func_15021834(struct127 *, s32, s32);
 s32 func_150535F4(struct127 *);
-s32 func_15056B08(struct127 *, s32);
+void func_15056B08(struct127 *);
 s32 func_150585F0(struct127 *, s32);
 s32 func_150599C8(struct127 *, s32, u16);
 extern u16 D_800CC766;
@@ -55,7 +55,7 @@ void func_150E1160(struct127 *arg0) {
     }
     arg0->unk87 = 0;
     if (arg0->stunned == 0) {
-        func_15056B08(arg0, 0x3D4C0000);
+        func_15056B08(arg0);  // P50: one argument (the asm leaves 0x3D4C0000 in a1, unused)
     } else {
         func_150585F0(arg0, 0x3D4CCCCD);
     }

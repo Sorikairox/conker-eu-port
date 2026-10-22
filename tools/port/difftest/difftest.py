@@ -80,6 +80,10 @@ EPILOGUE_CODE = [_swc1(0, 0x100), _swc1(1, 0x104)] + [_swc1(20 + i, 0x108 + 4 * 
     [(43 << 26) | (_K0 << 21) | 0x13C, 0, 0]   # sw zero, 0x13C(k0): the epilogue completed
 RET_END = RET_MAGIC + 4 * len(EPILOGUE_CODE)
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
+# P47 (debug, opt-in): DIFFTEST_WLOG="LO-HI" (physical hex) + DIFFTEST_WLOG_T=trial prints every non-stack write
+# into [LO, HI) of that trial with the writing pc (R = reference, C = candidate). Debug aid for long functions.
+WLOG = tuple(int(x, 16) for x in os.environ['DIFFTEST_WLOG'].split('-')) if os.environ.get('DIFFTEST_WLOG') else None
+WLOG_T = os.environ.get('DIFFTEST_WLOG_T', '0'); WLOG_ON = [None]
 OUTPARAMS = os.environ.get('DIFFTEST_OUTPARAMS') == '1' or '--outparams' in sys.argv
 NOFORK = os.environ.get('DIFFTEST_NOFORK') == '1'   # P16: run trials in-process (old behaviour)
 
@@ -418,16 +422,28 @@ def proto_arity(tu, name):
         best = n
     return best
 
+_DECL_PRE = re.compile(r'^\s*(?:(?:extern|static|inline)\s+)*[A-Za-z_]\w*[\s*]+$')
+def _is_decl(tu, m):
+    """P47: the match is a declaration / definition (a type before the name on its line), not a call statement
+    such as `    func_X(temp_f12);` that would hide the real prototype's float slots"""
+    return bool(_DECL_PRE.match(tu[tu.rfind('\n', 0, m.start()) + 1:m.start()]))
+
+def _decl_first(tu, name):
+    """matches of `name(...)` followed by ; or {: the declarations first, then (as before P47) the other matches"""
+    ms = list(re.finditer(r'\b%s\s*\(([^()]*)\)\s*[;{]' % re.escape(name), tu))
+    return [m for m in ms if _is_decl(tu, m)] + [m for m in ms if not _is_decl(tu, m)]
+
 FSKIP = {}
 def proto_fslots(tu, name):
     """P13: a-register slots that the prototype's leading float/double parameters occupy under o32 (they travel in
     f12/f14, so a0/a1 at the call hold junk and must not be compared)"""
-    for m in re.finditer(r'\b%s\s*\(([^()]*)\)\s*[;{]' % re.escape(name), tu):
+    for m in _decl_first(tu, name):
         ps = [p for p in m.group(1).split(',') if p.strip()]
         out, slot = set(), 0
         for p in ps[:2]:
-            if re.search(r'\b(f32|float)\b', p) and '*' not in p: out.add(slot); slot += 1
-            elif re.search(r'\b(f64|double)\b', p) and '*' not in p: out |= {slot, slot + 1}; slot += 2
+            if '*' in p or '[' in p: break   # P50: array parameters (f32 mf[4][4]) are pointers
+            if re.search(r'\b(f32|float)\b', p): out.add(slot); slot += 1
+            elif re.search(r'\b(f64|double)\b', p): out |= {slot, slot + 1}; slot += 2
             else: break
         return out
     return set()
@@ -436,12 +452,12 @@ FREGS = {}
 def proto_fregs(tu, name):
     """P18: FP argument registers (f12-f15) the prototype of name passes (o32: only leading float/double params
     travel in FPRs), None if unknown"""
-    for m in re.finditer(r'\b%s\s*\(([^()]*)\)\s*[;{]' % re.escape(name), tu):
+    for m in _decl_first(tu, name):
         ps = [p.strip() for p in m.group(1).split(',') if p.strip()]
         if ps == ['void'] or not ps: return set()
         out = set(); fr = 12
         for p in ps[:2]:
-            if '*' in p: break
+            if '*' in p or '[' in p: break   # P50: array parameters are pointers
             if re.search(r'\b(f32|float)\b', p): out.add(fr); fr += 2
             elif re.search(r'\b(f64|double)\b', p): out |= {fr, fr + 1}; fr += 2
             else: break
@@ -486,6 +502,13 @@ for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
     # P24: "ADDR=V1;V2;..." returns V1 on the first call, V2 on the second, ... (the last value repeats),
     # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
     STUBRET[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
+
+# P50 (opt-in): DIFFTEST_RETF="ADDR=V1;V2;...,..." (hex float bits) makes the stub at ADDR return V in f0 (V1 on the
+# first call, ...; the last repeats), e.g. func_1504B0FC's speed in func_1504CB98 (a random f0 is often 0 / NaN).
+STUBRETF = {}
+for _p in filter(None, os.environ.get('DIFFTEST_RETF', '').split(',')):
+    _a, _v = _p.split('=')
+    STUBRETF[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
 # P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
 # writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
@@ -781,6 +804,8 @@ class Run:
         p = phys(addr)
         if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return
         v = value & ((1 << (8 * size)) - 1)
+        if WLOG and WLOG[0] <= p < WLOG[1] and WLOG_ON[0]:
+            print('WLOG %s pc=%08X addr=%08X size=%d val=%X' % (WLOG_ON[0], mu.reg_read(UC_MIPS_REG_PC), p, size, v))
         for i in range(size):
             self.writes[p + i] = (v >> (8 * (size - 1 - i))) & 0xFF
 
@@ -844,6 +869,8 @@ class Run:
                 _r &= (1 << 64) - 1
                 mu.reg_write(UC_MIPS_REG_V0, _r >> 32); mu.reg_write(UC_MIPS_REG_V1, _r & 0xFFFFFFFF)
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
+        if (addr & 0x1FFFFFFF) in STUBRETF:
+            _rs = STUBRETF[addr & 0x1FFFFFFF]; mu.mem_write(phys(SCR) + 0x10, struct.pack('>I', _rs[min(k, len(_rs) - 1)]))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
         # word through each aligned aN that points into the caller's frame (out-params such as
         # osRecvMesg's &msg). Keyed by (callee, call number, arg index), so both runs see the same value.
@@ -872,6 +899,7 @@ class Run:
             mu.reg_write(UC_MIPS_REG_PC, ra)
 
     def run(self, inputs):
+        if WLOG_ON[0]: print('WLOG %s --- run' % WLOG_ON[0])
         mu = self.mu
         self.done = False
         for r, v in zip(A_REGS, inputs['a']): mu.reg_write(r, v)
@@ -1042,7 +1070,7 @@ def explain(R, C, inputs, forced):
     fmt = lambda c: '%-22s %s' % (c['name'][:22], ' '.join('%08X' % x for x in c['regs']))
     n = max(len(R.calls), len(C.calls))
     print('--- calls (ref | cand), a0-a3:')
-    for i in range(min(n, 24)):
+    for i in range(int((os.environ.get('DIFFTEST_CALLS_FROM') or '0')), min(n, int((os.environ.get('DIFFTEST_CALLS_FROM') or '0')) + 24)):   # P47: window
         a = fmt(R.calls[i]) if i < len(R.calls) else '-'
         b = fmt(C.calls[i]) if i < len(C.calls) else '-'
         print('%s#%-3d %-60s | %s' % ('*' if a != b else ' ', i, a, b))
@@ -1152,6 +1180,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         inputs = make_inputs(rng, kinds)
         romdata = t % 2 == 1
         forced = {}; lrn = 0
+        WLOG_ON[0] = 'R' if WLOG and str(t) == WLOG_T else None
         R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi).run(inputs)
         if R.fault and not os.environ.get('DIFFTEST_NOLEARN'):
             inputs = dict(a=list(inputs['a']), f=list(inputs['f']), stk=list(inputs['stk']))
@@ -1160,7 +1189,9 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                 R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
                 if not R.fault: break
             if not R.fault: lrn = 1
+        WLOG_ON[0] = 'C' if WLOG and str(t) == WLOG_T else None
         C = Run(cwords, cvram, cdata, (seed, t), romdata, tu, 4 * maxi, forced).run(inputs)
+        WLOG_ON[0] = None
         new = {}
         for c in R.calls + C.calls:
             if c['name'] not in arity and c['name'] not in new:

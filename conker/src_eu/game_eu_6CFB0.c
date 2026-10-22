@@ -14,7 +14,11 @@ void func_1502DB14(u8 *, s32, s32);
 #else
 s32 func_1502DB14(u8 *, s32, s32);
 #endif
+#ifdef NON_MATCHING
+void func_1507C170(u8 *, f32, s32, s32); /* P59: void in the NM definition */
+#else
 s32 func_1507C170(u8 *, f32, s32, s32);
+#endif
 #ifdef NON_MATCHING
 void func_150A86B0(s32 *, s32, u8 *, s32, s32, s16 *, s32, s32);
 #else
