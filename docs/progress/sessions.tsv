@@ -149,3 +149,4 @@ P72	web	port-web				bisected respawn hang to func_150D1D20 writing via NULL buff
 P71	port	nm convert	13		152	difftest callee arity from declarations; 13 hand C (5D910/64770/595D0/6B970); 4884/5915 82.6% 55.4% bytes; func_15000AD0 analysed not converted
 P74	port	nm convert	8		~150	func_15000AD0 allocator hand C (118/118 EQUIV, 22/22 mutants); game_eu_6B970.c fully C; 4892/5915 82.7% 55.6% bytes
 P73	port-b	nm convert	3		145	difftest fix: candidate ignored in multi-function NM blocks (func_1501B300 mutants now die); P67 knobs rechecked EU OK; func_1512C080 27/31; hand C func_151BF8F0, func_1501D348, func_1509A024
+P75	web	port-web			~85	merged port e852da7; func_150D1D20 guard dropped (allocator now C), respawn+0x2C warp OK node+Chrome; tail/sky buffers/breakables verified at runtime (unkF branch OK); found arity bug func_1503BCAC() + 18 short-arg call sites; blockers: func_150954E4 sky texture, func_151462C8 group
