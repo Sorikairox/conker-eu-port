@@ -20,8 +20,6 @@ def to_ll(path):
     """phase 1: C -> -O0 IR (incremental)"""
     tag = tag_of(path)
     ll = f'{LL}/{tag}.ll'
-    if path.startswith(census.SRC):  # P61: static fixes (patched includes next to a copy of the TU)
-        srcfix.static_fix(path, os.path.relpath(path, census.SRC))
     fx = srcfix.path_for(os.path.relpath(path, census.SRC)) if path.startswith(census.SRC) else path
     if os.path.exists(ll) and os.path.getmtime(ll) > max(os.path.getmtime(path), os.path.getmtime('port/ultra/port_prefix.h'),
                                                          os.path.getmtime(fx) if os.path.exists(fx) else 0):  # P19: prefix too

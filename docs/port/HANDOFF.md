@@ -21,6 +21,7 @@ Branch `port-b` (from P60 71183d1); the orchestrator merges it into `port`.
   **func_150D1D20** (scrolling view quad DL), **func_150ADE40** (approx. distance; raw hand .s as plain C).
   Random seeds + knob setups EQUIV; mutants 87/89, 30/30, 5/5, 11/15, 15/15, 2/3 killed (survivors in P64.md).
 - func_15085710 has been C since P16: P61's "asm stub" report points at the browser build (game_eu_B2980.c TU?).
+  (P66: it is the C body in the wasm build too; P61's note came from an old log. Jump / idle checked at runtime, P66.md.)
 - Tools: difftest DIFFTEST_OUTW takes stack arguments (N >= 4); `docs/port/sessions/p64/knobs.sh` / `mut.sh`
   (7th setup field = DIFFTEST_OUTW, per-call out-params).
 
@@ -1074,7 +1075,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1103,7 +1104,9 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P58.md` (P51 model load + skeleton evaluator at runtime, four port-side blockers, posed preview) and
 `docs/port/sessions/P61.md` (Conker drawn by the game's func_1502CFEC, two TEMPORARY PC functions, walls K0-literal crash, P59 checks) and
 `docs/port/sessions/P63.md` (Conker animated by the game: func_1502AF04 / func_1510E908 / func_150A69E0 TEMPORARY PC,
-false slide and garbage-count crash, end callback verified, walk GIF). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+false slide and garbage-count crash, end callback verified, walk GIF) and
+`docs/port/sessions/P66.md` (P62 / P64 overrides dropped, osRomBase for the C func_1000480C, func_15085710 is C,
+jump / running jump / Z long jump and idle variations at runtime, jump GIF). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1134,6 +1137,9 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 # P63: ?p63anim=N (record 0's animation per func_1507C170 call + every func_1505E650 start + floor / slide state),
 #      ?p63stack=1 (JS stack per new id), ?p63cb=N (end-callback probe, diagnostic); port/web/p63shots.sh (Chrome
 #      stand / walk / idle frame sequence); python3 port/tools/png2gif.py (stdlib GIF / crop zoom from screenshots)
+# P66: ?p66jump=N (record 0 per func_1505F298 call: buttons, anim id, y / vy / +0x28, water, + idle-chooser state),
+#      ?p66lowg=1 (DIAGNOSTIC: D_800CC69C = 1 on A presses), ?p66hud=N (func_15085710 calls); port/web/p66shots.sh
+#      (Chrome jump frame sequence, Space held 400 ms)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1976,6 +1982,30 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
   - **For the port branch:** convert func_1502AF04, func_1510E908, func_150A69E0 (then drop the PC versions), then
     func_1507F834 / func_1507F3B0, func_1505F298, and the model-path stubs func_15036FD8, func_1503BCAC, func_1503AB20,
     func_15030758, func_1502C9D8. The P61 items are still open (walls literal, func_150844AC, func_150A9E64).
+- **P66 (after merging port P62 + port-b P64, ca891e7): overrides dropped, Conker jumps.** Full notes: P66.md.
+  - Removed the PC func_150A9B0C, func_150A9E64, func_150844AC (`pc_overrides.c`), func_1000480C (`pc_mem.c`) and
+    P61's walls srcfix (`srcfix.STATIC`; the regenerated D5E90_walls.inc uses HI / LO(&D_8009FAB0), the pattern no
+    longer matched). Kept the P63 PC func_1502AF04, func_1510E908, func_150A69E0 (P65 converts them).
+  - **The C func_1000480C needed osRomBase:** its CART_WORD KSEG1 loads already become `__port_io_read` (vbe.py P42
+    rule; the cart domain 0xB0000000.. answers the BE ROM word, PI_STATUS idle), but D_80000308 was 0, so it read
+    RDRAM 0xA0xxxxxx and the skeleton decoder crashed (*memory access out of bounds* in nmAnimDecode).
+    `game_main.c` now sets `D_80000308 = 0xB0000000` (IPL3 value).
+  - Clean rebuild (722 census TUs, 719 ok; 1 link warning). Node and real-time Chrome: 9 PASS, heap 0 errors, no
+    RuntimeError, no heapwatch break.
+  - **func_15085710 is the C body in the wasm** (not in asm_stubs.o; `?p66hud` logs its calls). P61's "asm stub" came
+    from an old GFXDEMO log, not a current build.
+  - **Jump (P64 C) works:** A → 0x32, vy 59, +0x28 80, A held -9.6 / call, release cuts (-14.88), apex ~210, land 0x36.
+    Running jump 0x37; Z crouch 0x16 / 0x1B, Z + A long jump 0xEB. Forced low gravity (`?p66lowg`): 0xEB with
+    +0x81 = 0x81, vy x 1.4 (P64 UNVERIFIED, now seen). Water / hang / glide / rides not reached (in_water stayed 0:
+    the sp+0x8C slot is still UNVERIFIED). No bug found in the converted C.
+  - **Idle variations play** (func_1507F834 / F3B0 C): after ~260 idle frames set 14 → 0x55, 0x57, 0x56, back to
+    0x0F, then 0x9A, 0x9B, 0x04; 0x47 seen in Chrome.
+  - Captures: `P66_screenshot.png` (rising), **`p66/jump.gif`**, `p66/jump_*.png`, `p66/chrome_jump.log`.
+  - **Stubs for the port branches** (node 44 s, 91 distinct): model path func_15036FD8 (1144), func_1503BCAC /
+    func_1503AB20 / func_15030758 (572), func_1503B840 / func_15039CC8 (15); movement func_1506BF5C (18),
+    func_1507E7E4 (9), func_150453BC, func_1501D348, func_151BF8F0, func_1507342C; per frame func_1509A024 (1598),
+    func_151236D0, func_1501B300, func_1512C77C, func_1512C080, func_151E7110, func_150A067C, func_10011624, ...
+    (~45 at once per frame). Full ranked list: P66.md §3 / `port/build/boot_p66_runjump.log`.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
