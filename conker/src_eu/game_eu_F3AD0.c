@@ -22,7 +22,7 @@ void func_150C62C0(u8 *arg0) {
         p += 0xB0;
         p[4] = 1;
     } else {
-    *(s32 *)(arg0 + 0x58) = func_150C6960();
+    *(s32 *)(arg0 + 0x58) = func_150C6960(arg0);
     }
 }
 

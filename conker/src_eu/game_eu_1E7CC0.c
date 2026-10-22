@@ -944,7 +944,7 @@ f32 func_151BDD00(s16 *arg0) {
 
 s32 func_15131C7C();
 
-void func_151BDD4C(u8 *arg0) {
+void func_151BDD4C(u8 *arg0, s32 arg1) {   /* P76: a0 / a1 pass through to func_15131C7C */
     u8 *temp_v0;
 
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0xB0));
@@ -953,7 +953,7 @@ void func_151BDD4C(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x18));
         (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x1C));
     }
-    func_15131C7C();
+    func_15131C7C(arg0, arg1);
 }
 
 void func_151BDDA4(u8 *arg0) {

@@ -335,14 +335,14 @@ void func_1514E088(struct127 *arg0) {
 void func_1514E0C8(s32 arg0) {
 }
 
-void func_1514E0D4(void) {
+void func_1514E0D4(u8 *arg0) {   /* P76: callback; a0 passes through */
     if (D_800BE9F0 == 0x14) {
-        func_151B2610();
+        func_151B2610(arg0);
     }
 }
 
-void func_1514E108(void) {
-    func_1514F704();
+void func_1514E108(struct127 *arg0) {   /* P76: callback; a0 passes through */
+    func_1514F704(arg0);
 }
 
 void func_1514E128(struct127 *arg0) {
@@ -719,8 +719,8 @@ void func_1514EDC0(struct102 *arg0) {
     func_1516972C(arg0);
 }
 
-void func_1514EDEC(void) {
-    func_1515F10C();
+void func_1514EDEC(s32 arg0) {   /* P76: callback; a0 passes through */
+    func_1515F10C(arg0);
 }
 
 s32 func_1514EE0C(u8 *arg0, s32 arg1, s32 arg2) {
@@ -990,8 +990,8 @@ void func_1514F3E0(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F43C.s")
 
-void func_1514F680(void) {
-    func_1514F704();
+void func_1514F680(struct127 *arg0) {   /* P76: callback; a0 passes through */
+    func_1514F704(arg0);
 }
 
 s32 func_1514F6A0(u8 *arg0, s32 arg1, s32 arg2) {

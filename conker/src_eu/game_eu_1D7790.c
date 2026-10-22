@@ -208,12 +208,12 @@ void func_151AA72C(u8 *arg0) {
     func_1519F928(arg0);
 }
 
-void func_151AA780(void) {
-    func_1519F970();
+void func_151AA780(u8 *arg0) {   /* P76: callback; a0 passes through */
+    func_1519F970(arg0);
 }
 
-void func_151AA7A0(void) {
-    func_1519F970();
+void func_151AA7A0(u8 *arg0) {   /* P76: callback; a0 passes through */
+    func_1519F970(arg0);
 }
 
 void func_151AA7C0(u8 *arg0) {

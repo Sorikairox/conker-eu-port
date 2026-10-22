@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P76, 2026-10-22). Details: `docs/port/sessions/P76.md`
+
+- The default build is byte-identical (full `verify_all.sh`). `NON_MATCHING=1` links. protocheck: 0 problems (903 bodies).
+- progress_nm: C coverage including NON_MATCHING **4897/5915 (82.8%)**, bytes **56.2%**; init 490/538, game 4368/5334, debugger 39/43; **1018 asm-only** (148 under 60 insns).
+- **Look target is C (NM)**: func_15037CCC (target search: fixed targets, objects, look points D_800C6A70, node
+  lists) and func_15038910 (joint turn, LookTrack state +0x324), plus func_15037224 (per-kind look config, C switch
+  for jtbl_80098714). Also func_1502F780 (carry a point with a carrier triangle) and func_150314B4 (attachment
+  draw, browser frame path). Knob setups 64 / 120 / 210 / 60 / 72 all EQUIV, mutants 19/20, 33/34, 19/20, 18/18,
+  22/23 (P76.md table; live ones explained there).
+- **Arity fixes** (browser P75 / P78 / P79 lists), all byte-identical: func_1503BCAC(arg0) in func_1503482C, 15 more
+  call sites and the D_80082ECC / D_80082BFC / D_80082D60 / D_800863B4 handler calls (P76.md table).
+- Tools: `docs/port/sessions/p76/` (gen*.py -> s*.txt, knobs.sh / mutfast.sh / mut_*.sh, logs);
+  `port_work/p76/jalobj.sh CALLEE TU` = asm before each jal from the built .o.
+
+## Next steps (from P76)
+
+1. func_150322B8 (1148, game_eu_5D910.c, browser frame path): five .late_rodata jump tables (model id -> values),
+   callees func_1503F8A8 / func_1505E060 only.
+2. Remaining arity sites (need the callee's use): game_981E0 func_1504715C x3 / func_15194858, game_CB1C0
+   func_15084000 x2 (a1 == 0 at the jals), game_eu_FBE70 func_151604E4, debugger func_1600160C; game_34F20
+   func_15007B3C -> func_1501B640 belongs to port-b's file.
+3. Browser: runtime-check the look target (P76.md UNVERIFIED), the attachment draw and the arity fixes.
+
 ## State (session P74, 2026-10-22). Details: `docs/port/sessions/P74.md`
 
 - The default build is byte-identical (full `verify_all.sh`). `NON_MATCHING=1` links. protocheck: 0 problems (898 bodies).

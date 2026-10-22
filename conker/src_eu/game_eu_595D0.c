@@ -1705,7 +1705,112 @@ void func_1502F6B8(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F6B8.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u16 D_800C6318[];    /* per model: number of D_800C5C08 vertex ranges */
+
+/*
+ * P76: carry a point (*x, *y, *z) along with triangle tri of the model of carrier obj (kind +4). D_800C6070[kind] =
+ * triangles (three vertex offsets into D_800D19A0[kind]), D_800C5C08[kind] = vertex ranges (start, count of 16-byte
+ * vertices, joint). The joint of each corner is looked up in the ranges (no range: nothing happens), the corners
+ * are transformed by their joint matrices of the previous (+0x1D8) and the current (+0x1D4) frame. The point's
+ * (u, v) on the old triangle (solved in x / z) must lie in [0, 1]; the point is then moved by the same (u, v)
+ * offset on the new triangle (y follows the old triangle's plane).
+ */
+void func_1502F780(struct127 *obj, f32 *x, f32 *y, f32 *z, s32 tri) {
+    s32 kind = ((u8 *) obj)[4];
+    u32 *tris;
+    u8 *vtx[3];
+    s32 joint[3];
+    s32 found;
+    s32 i, k, g;
+    u32 *range;
+    f32 *mtx;
+    f32 p[2][3][3];     /* [old / new][corner][xyz] */
+    f32 e1[2][3];
+    f32 e2[2][3];
+    f32 d[3];
+    f32 w[3];
+    f32 den;
+    f32 u, v;
+    s16 *s;
+
+    tris = (u32 *) D_800C6070[kind];
+    if (tris == NULL) {
+        return;
+    }
+    for (k = 0; k < 3; k++) {
+        vtx[k] = (u8 *) ((s32 *) &D_800D19A0)[kind] + tris[tri * 3 + k];
+    }
+    found = 0;
+    i = 0;
+    do {
+        if (i == D_800C6318[kind]) {
+            return;
+        }
+        for (k = 0; k < 3; k++) {
+            if (found & (1 << k)) {
+                continue;
+            }
+            range = (u32 *) (D_800C5C08[kind] + i * 12);
+            if ((u32) vtx[k] >= range[0] && (u32) vtx[k] < range[0] + range[1] * 16) {
+                joint[k] = range[2];
+                found |= 1 << k;
+            }
+        }
+        i++;
+    } while (found != 7);
+
+    if (obj->unk1D8 == NULL || obj->unk1D4 == NULL) {
+        return;
+    }
+    mtx = (f32 *) obj->unk1D8;
+    for (g = 0; g < 2; g++) {
+        if (g == 1) {
+            mtx = (f32 *) obj->unk1D4;
+        }
+        for (k = 0; k < 3; k++) {
+            s = (s16 *) vtx[k];
+            func_150A7E40((f32 (*)[4]) (mtx + joint[k] * 16), s[0], s[1], s[2], &p[g][k][0], &p[g][k][1],
+                          &p[g][k][2]);
+        }
+    }
+    for (g = 0; g < 2; g++) {
+        for (k = 0; k < 3; k++) {
+            e1[g][k] = p[g][1][k] - p[g][0][k];
+            e2[g][k] = p[g][2][k] - p[g][0][k];
+        }
+    }
+    d[0] = *x - p[0][0][0];
+    d[1] = *y - p[0][0][1];
+    d[2] = *z - p[0][0][2];
+    den = e1[0][0] * e2[0][2] - e2[0][0] * e1[0][2];
+    if (den == 0.0f) {
+        u = -100.0f;
+    } else {
+        u = (d[0] * e2[0][2] - e2[0][0] * d[2]) / den;
+    }
+    if (u < 0.0f || u > 1.0f) {
+        return;
+    }
+    if (e2[0][2] == 0.0f) {
+        v = -100.0f;
+    } else {
+        v = (d[2] - u * e1[0][2]) / e2[0][2];
+    }
+    if (v < 0.0f || v > 1.0f) {
+        return;
+    }
+    for (k = 0; k < 3; k++) {
+        w[k] = e2[1][k] * v + u * e1[1][k];
+    }
+    d[1] = e2[0][1] * v + u * e1[0][1];
+    *x += ((w[0] + p[1][0][0]) - d[0]) - p[0][0][0];
+    *y += ((w[1] + p[1][0][1]) - d[1]) - p[0][0][1];
+    *z += ((w[2] + p[1][0][2]) - d[2]) - p[0][0][2];
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F780.s")
+#endif
 
 u8 *allocate_memory(s32, s32, s32, s32);
 void func_1502FC38(u8 *arg0) {

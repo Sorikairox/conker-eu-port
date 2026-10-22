@@ -762,7 +762,156 @@ block_14:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031360.s")
 #endif
+#ifdef NON_MATCHING
+extern u8 D_80083350[];     /* segment 8: blended (alpha < 0xFF) material set */
+extern u8 D_800834D0[];     /* segment 8: opaque material set */
+extern u8 D_800DD714[];     /* fog colour r, g, b when the level fogs (header +0x3E) */
+extern u8 D_800DA248[];
+extern s32 D_800BEFC4;      /* display list capacity (commands) */
+s32 func_15031360(u8 *, u8 *, s32 *, s32 *);
+void func_1502D83C(s32 arg0, u8 *arg1);
+void func_1502D920(u8 *rec, s32 *col, s32 view);
+void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8,
+                   s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD);
+void func_150836AC(u8 *);
+u8 *func_1515EAB4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
+Gfx *func_1515DE84(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
+s32 func_1510D66C(s32, s32 *, s32, s32);
+u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
+
+/* one display list command */
+#define ATT_DL(g, a, b)              \
+    {                                \
+        ((u32 *) (g))[0] = (a);      \
+        ((u32 *) (g))[1] = (u32) (b); \
+        (g)++;                       \
+    }
+
+/*
+ * P76: draw attachment att (+3 alpha, +5 visible, +0x13 / +0x14 hidden-part mask / part count, +0x18 / +0x1A
+ * texture ids for segments 6 / 7, +0x24 part display lists, +0x28 per-buffer segment 1) of object obj for player
+ * view `player`: alpha scaled by func_1506196C, segment 8 = blended or opaque material set, matrix (segment 3) from
+ * func_15031360 (nothing drawn without one), fog / tint colours from func_1502D83C / func_1502D920 / func_1502CF24,
+ * lighting by the object's +0x66 mode (lights +0x304[player] built by func_150836AC on demand, func_1515EAB4 /
+ * func_1515DE84), then the parts (or func_1503605C when special != 0). When the display list would overflow
+ * (D_800BEFC4 commands from D_800BEDE8[D_800BE9C0]) the commands are dropped (the start pointer is returned).
+ */
+s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
+    Gfx *start = (Gfx *) gfxp;
+    Gfx *gfx = start;
+    u8 *obj = (u8 *) objp;
+    s32 alpha;
+    s32 v;
+    s32 mtx;
+    s32 unused110;
+    s32 col[4];
+    s32 i;
+    s32 lit;
+    s32 created;
+    s32 lights;
+    s32 fogs;
+    s32 size;
+    s32 fogA, primR, primG, primB, envR, envG, envB, fogR, fogG, fogB;
+
+    if (att[5] == 0) {
+        return (s32) gfx;
+    }
+    ATT_DL(gfx, 0xE7000000, 0);     /* pipe sync */
+    alpha = att[3];
+    v = func_1506196C(objp, player);
+    if (v != 0xFF) {
+        alpha = (v * alpha) >> 8;
+    }
+    if (alpha < 0xFF) {
+        ATT_DL(gfx, 0xDB060020, D_80083350);
+    } else {
+        ATT_DL(gfx, 0xDB060020, D_800834D0);
+    }
+    if (func_15031360(att, obj, &mtx, &unused110) == 0) {
+        return (s32) gfx;
+    }
+    i = (obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
+    func_1502D83C(i, (u8 *) col);
+    if (*(s16 *) ((u8 *) D_800B0DF0 + 0x3E) != 0) {
+        func_1502D920((u8 *) &D_800CC2D0[i], col, player);
+    } else {
+        col[3] = 0xFF;
+    }
+    func_1502CF24(obj, player, alpha, (u8 *) col, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+                  &fogA);
+    fogs = *(s16 *) ((u8 *) D_800B0DF0 + 0x3E);
+
+    lit = TRUE;
+    if ((obj[0x66] & 0xC) == 0xC) {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x20000);
+        ATT_DL(gfx, 0xD9BFFFFF, 0);
+    } else if ((obj[0x66] & 0xC) != 8 && !(att[4] & 1)) {
+        ATT_DL(gfx, 0xD9BDFFFF, 0);
+        lit = FALSE;
+    } else if (D_800DCD7C != 0) {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x420000);
+    } else {
+        ATT_DL(gfx, 0xD9BDFFFF, 0);
+        lit = FALSE;
+    }
+    if (lit) {
+        created = FALSE;
+        lights = *(s32 *) (obj + 0x304 + player * 4);
+        if (lights == 0) {
+            func_150836AC(obj);
+            created = TRUE;
+            lights = *(s32 *) (obj + 0x304 + player * 4);
+        }
+        if (lights != 0) {
+            size = (obj[0x2FD] != 0 || created) ? 10 : 2;
+            if (obj[5] != 5 && obj[0x302] != 0 && (obj[0x66] & 0xC) != 0 && !created) {
+                gfx = (Gfx *) func_1515EAB4((u8 *) gfx, lights, obj[0x301], obj[0x302],
+                                            *(s32 *) (obj + 0x314) + D_800BE9C0 * 8);
+            } else {
+                gfx = func_1515DE84(gfx, player, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C),
+                                    *(s32 *) (obj + 0x184), lights, obj[0x301],
+                                    (u8 *) (*(s32 *) (obj + 0x314) + D_800BE9C0 * 8), obj + 0x302, 2, obj + 0x1DD,
+                                    size, D_800DA248);
+            }
+        }
+    }
+    if (fogs == 0) {
+        ATT_DL(gfx, 0xF8000000, (fogR << 24) | ((fogG & 0xFF) << 16) | ((fogB & 0xFF) << 8) | (fogA & 0xFF));
+    } else {
+        ATT_DL(gfx, 0xF8000000, (D_800DD714[0] << 24) | (D_800DD714[1] << 16) | (D_800DD714[2] << 8) | (fogA & 0xFF));
+    }
+    ATT_DL(gfx, 0xF8000000, (fogR << 24) | ((fogG & 0xFF) << 16) | ((fogB & 0xFF) << 8) | (fogA & 0xFF));
+    ATT_DL(gfx, 0xFA00F200, (primR << 24) | ((primG & 0xFF) << 16) | ((primB & 0xFF) << 8));
+    ATT_DL(gfx, 0xFB000000, (envR << 24) | ((envG & 0xFF) << 16) | ((envB & 0xFF) << 8) | (alpha & 0xFF));
+    ATT_DL(gfx, 0xDB06000C, mtx);
+    ATT_DL(gfx, 0xDB060004, *(s32 *) (att + 0x28 + D_800BE9C0 * 4));
+    if (*(u16 *) (att + 0x18) != 0) {
+        v = func_1510D66C(*(u16 *) (att + 0x18), &size, 0x3E, 0);
+        ATT_DL(gfx, 0xDB060018, v);
+    }
+    if (*(u16 *) (att + 0x1A) != 0) {
+        v = func_1510D66C(*(u16 *) (att + 0x1A), &size, 0x3E, 0);
+        ATT_DL(gfx, 0xDB06001C, v);
+    }
+    if (!special) {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x400);
+        for (i = 0; i < att[0x14]; i++) {
+            if (!(att[0x13] & (1 << i))) {
+                ATT_DL(gfx, 0xDE000000, (*(s32 **) (att + 0x24))[i]);
+            }
+        }
+    } else {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x200);
+        gfx = (Gfx *) func_1503605C((u8 *) gfx, att, envR, envG, envB);
+    }
+    if (gfx - D_800BEDE8[D_800BE9C0] > D_800BEFC4) {
+        return (s32) start;
+    }
+    return (s32) gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150314B4.s")
+#endif
 
 void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *temp_v0 = func_15031C4C(arg0, arg1, arg3);
