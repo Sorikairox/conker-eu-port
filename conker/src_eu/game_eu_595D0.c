@@ -181,7 +181,81 @@ void func_1502C074(struct127 *arg0, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C074.s")
 #endif
+#ifdef NON_MATCHING
+void func_1503FC54(void);
+void func_1502C074(struct127 *arg0, s32 arg1);
+void func_1502F6B8(void);
+void func_1502FC38(u8 *arg0);
+void func_15030758(void);
+void func_1507C608(s32 arg0);
+extern s32 D_800C4294;
+extern u8 D_800C4290;
+/* P48: per-frame object update loop. D_800C4294 = mask of the +0x274 values (bit v - 1) of the 25 records.
+ * Records with no parent (+0x65 == 0) are updated (func_1502C074) in index order; the others afterwards, sorted
+ * by the depth of their +0x65 parent chain (1-based record index), so a parent is updated before its children. */
+void func_1502C1D4(void) {
+    u8 depth[25];
+    u8 order[0x30];
+    u8 *rec;
+    s32 i, j, d, n, maxd;
+
+    func_1503FC54();
+    D_800C42B0 = 0;
+    D_800C4294 = 0;
+    maxd = 0;
+    for (i = 0; i < 25; i++) {
+        u8 v = ((u8 *)&D_800CC2D0[i])[0x274];
+        if (v != 0) {
+            D_800C4294 |= 1 << ((v + 0x1F) & 0x1F);
+        }
+    }
+    bzero(depth, 25);
+    for (i = 0; i < 25; i++) {
+        rec = (u8 *)&D_800CC2D0[i];
+        if (*(s32 *)rec == 0) {
+            continue;
+        }
+        if (rec[0x65] == 0) {
+            func_1502C074((struct127 *)rec, i);
+            continue;
+        }
+        depth[i] = 0;
+        do {
+            depth[i]++;
+            rec = (u8 *)&D_800CC2D0[rec[0x65] - 1];
+        } while (rec[0x65] != 0);
+        if (maxd < depth[i]) {
+            maxd = depth[i];
+        }
+    }
+    if (maxd != 0) {
+        n = 0;
+        for (d = 1; d <= maxd; d++) {
+            for (j = 0; j < 25; j++) {
+                if (depth[j] == d) {
+                    order[n++] = j;
+                }
+            }
+        }
+        for (i = 0; i < n; i++) {
+            func_1502C074(&D_800CC2D0[order[i]], order[i]);
+        }
+    }
+    func_1502F6B8();
+    for (i = 0; i < 25; i++) {
+        if (*(s32 *)&D_800CC2D0[i] != 0) {
+            func_1502FC38((u8 *)&D_800CC2D0[i]);
+        }
+    }
+    func_15030758();
+    if (D_800BEAC0 == 0) {
+        func_1507C608(0);
+    }
+    D_800C4290 = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C1D4.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15022A8C(struct127 *);
@@ -406,11 +480,248 @@ void func_1502D83C(s32 arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502DB14.s")
 
+#ifdef NON_MATCHING
+/* P48: joint-matrix count of model id: D_800C52F0[id], minus 4 for the ids of the asm's jump table
+ * (jtbl_800971A8: 0x3B and 0x75 .. 0xB4 entries pointing at the "- 4" case). */
+s32 func_1502DE10(s32 id) {
+    switch (id) {
+        case 0x3B:
+        case 0x75: case 0x82: case 0x88: case 0x90: case 0x96: case 0x98: case 0x9C:
+        case 0x9D: case 0x9F: case 0xA0: case 0xB1: case 0xB2: case 0xB4:
+            return D_800C52F0[id] - 4;
+        default:
+            return D_800C52F0[id];
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502DE10.s")
+#endif
 
+#ifdef NON_MATCHING
+s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+s32 func_15083D54(struct127 *, u16, s32, f32);
+s32 func_1502DE10(s32);
+void func_15030060(u8 *arg0);
+void func_150342D0(u8 *arg0, s32 arg1);
+s32 func_1502DB14(u8 *, s32, s32);
+void func_150A86B0(s32 *arena, f32 (*mtx)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 h);
+extern u8 D_800C441A;
+extern u8 *D_800845BC[];
+extern s32 D_800C5000[];
+extern s32 D_800888F8;
+extern s32 D_800888F4;
+extern s32 D_8008891C;
+/* P48: model instance of object arg1 (record +0x1D4) from its root matrix m. Loads the model of id +4 when
+ * D_800D19A0[id] is empty (func_1503D210), makes sure the object has an animation state +0x2D0 (func_15083D54),
+ * then reserves func_1502DE10(id) joint matrices (0x40 bytes each) in the D_800C42A8 arena (none written and
+ * +0x1D4 = 0 when the D_800C3E7C-matrix arena would overflow), sets +0x1D4 to the first one and fills them with the
+ * hand-asm skeleton evaluator func_150A86B0 (D5E90.s). +0x29 of the model header selects a joint remap table
+ * (D_800845BC, pairs ending in 0xFF). The evaluator's outputs D_800888F4 / D_800888F8 give the animation
+ * position +0x1F8 / +0x1F4 (and +0x2D0 +0x10 with +0x246 & 0x40); +0x7C = D_8008891C. */
+void func_1502DE74(f32 (*m)[4], s32 arg1) {
+    u8 remap[0x44];
+    u8 dbuf[0x324];
+    u8 sbuf[0x54];
+    u8 *obj = (u8 *)&D_800CC2D0[arg1];
+    s32 id = obj[4];
+    s32 *slot = &((s32 *)&D_800D19A0)[id];
+    u8 *map = NULL;
+    u16 *cnt;
+    s32 n, f1, f2, h;
+    u8 *p;
+    u8 fl;
+    f32 t, old;
+
+    if (*slot == 0) {
+        if (func_1503D210(id, 0, *(s32 *)(obj + 0x144), 1, obj[0xAC]) != 0) {
+            *(s32 *)(obj + 0x1D4) = 0;
+            return;
+        }
+        if (*slot == 0) {
+            *(s32 *)(obj + 0x1D4) = 0;
+            return;
+        }
+    }
+    if (*(s32 *)(obj + 0x2D0) == 0) {
+        if (func_15083D54((struct127 *)obj, 0, 0, 1.0f) != 0) {
+            return;
+        }
+    }
+    cnt = &D_800C52F0[id];
+    if (*cnt >= 2 && *(s32 *)(obj + 0x2D0) == 0) {
+        return;
+    }
+    n = func_1502DE10(id);
+    if ((u32)(D_800C3E7C << 6) < (u32)(D_800C42A8 + (n << 6) - D_800C42AC)) {
+        *(s32 *)(obj + 0x1D4) = 0;
+        return;
+    }
+    func_15030060(obj);
+    *(s32 *)(obj + 0x1D4) = D_800C42A8;
+    if (((u8 *)D_800D1C90[id])[0x29] != 0) {
+        D_800C441A = 0;
+        bzero(remap, *cnt);
+        p = D_800845BC[((u8 *)D_800D1C90[id])[0x29]];
+        while (p[0] != 0xFF) {
+            remap[p[0]] = p[1];
+            p += 2;
+        }
+        map = remap;
+    }
+    func_150342D0(sbuf, arg1);
+    func_1502DB14(NULL, (s32)obj, (s32)dbuf);
+    if (D_800C35EA != 1) {
+        h = (s16)(s32)(*(f32 *)(obj + 0x150) * (f32)*(s16 *)(obj + 0xCC));
+    } else {
+        h = 0;
+    }
+    func_150A86B0(&D_800C42A8, m, *(s32 *)(obj + 0x2D0), D_800C5000[id], n, sbuf, map, h);
+    *(s16 *)(obj + 0x7C) = D_8008891C;
+    f1 = D_800888F8;
+    if (f1 != 0) {
+        t = (f32)D_800888F4 / 32768.0f;
+        fl = obj[0x1FC];
+        if (fl & 4) {
+            *(f32 *)(obj + 0x1F8) -= (f32)f1 * 0.03125f;
+            fl = obj[0x1FC];
+        }
+        old = *(f32 *)(obj + 0x1F8);
+        *(f32 *)(obj + 0x1F8) = t;
+        *(f32 *)(obj + 0x1F4) = t - old;
+        if (fl & 2) {
+            obj[0x1FC] = fl & 0xFC;
+            *(f32 *)(obj + 0x1F4) = *(f32 *)(obj + 0x3C);
+        } else {
+            obj[0x1FC] = fl | 1;
+        }
+        if (obj[0x246] & 0x40) {
+            u8 *an = *(u8 **)(obj + 0x2D0);
+            *(f32 *)(an + 0x10) = (*(f32 *)(obj + 0x3C) / ((*(f32 *)(obj + 0x14C) * ((f32)f1 * 0.03125f)) / *(f32 *)(an + 0x18))) * 0.5f;
+        }
+    }
+    D_800C429A += n;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502DE74.s")
+#endif
 
+#ifdef NON_MATCHING
+void func_1502DE74(f32 (*mtx)[4], s32 arg1);
+extern s32 D_800C4294;
+/* P48: object arg0's model matrix. Skipped (nothing written) when the object is hidden for every player (+0x74 low
+ * nibble 0xF, or every func_1506196C alpha 0), unless it is forced (+0x66 & 0x20, a player-controlled object
+ * (+0x31C +0x197), bit arg0 of D_800C4294, or id 0x8A whose func_15072208 target is player-controlled).
+ * A child (+0x65 = parent index + 1, without +0x101 & 0x10) takes the parent's joint +0x5C matrix (+0x1D4 + 0x40 *
+ * joint) with rows 0 / 2 scaled by +0x14C and row 1 by +0x150 (+0x101 & 4: rows normalised first); otherwise
+ * func_150A9B0C builds it from the angles (+0xB8, +0x40, +0xC4) and scales, at the position (with +0x101 & 0x10:
+ * the parent's joint position), raised by +0xCC when +0x2D0 +0x28 is 0.
+ * arg1 != 0: the matrix is copied to the D_800C42A8 arena and +0x1D4 points at it; else func_1502DE74(m, arg0). */
+void func_1502E228(s32 arg0, s32 arg1) {
+    f32 m[4][4];
+    u8 *obj = (u8 *)&D_800CC2D0[arg0];
+    u8 *src;
+    u8 *ref;
+    s32 force = 1;
+    s32 i, j, a, best;
+    f32 s;
+
+    if (*(f32 *)(obj + 0x14C) == 0.0f) {
+        *(f32 *)(obj + 0x14C) = 0.1f;
+        *(f32 *)(obj + 0x154) = 0.1f;
+    }
+    if (*(f32 *)(obj + 0x150) == 0.0f) {
+        *(f32 *)(obj + 0x150) = 0.1f;
+        *(f32 *)(obj + 0x158) = 0.1f;
+    }
+    if ((obj[0x66] & 0x20) == 0x20) {
+        force = 0;
+    }
+    if (*(u8 **)(obj + 0x31C) != NULL && (*(u8 **)(obj + 0x31C))[0x197] != 0) {
+        force = 0;
+    }
+    if ((1 << (arg0 & 0x1F)) & D_800C4294) {
+        force = 0;
+    }
+    if (obj[4] == 0x8A) {
+        u8 *t = (u8 *)func_15072208((struct127 *)obj, 0);
+        if (t != NULL && *(u8 **)(t + 0x31C) != NULL && (*(u8 **)(t + 0x31C))[0x197] != 0) {
+            force = 0;
+        }
+    }
+    if (force != 0) {
+        if ((obj[0x74] & 0xF) == 0xF) {
+            return;
+        }
+        best = 0;
+        for (i = 0; i <= D_80082FA4; i++) {
+            a = func_1506196C((struct127 *)obj, i);
+            if (best < a) {
+                best = a;
+            }
+        }
+        if (best == 0) {
+            return;
+        }
+    }
+    D_800C3E78 = arg0;
+    if (obj[0x65] != 0 && !(obj[0x101] & 0x10)) {
+        src = *(u8 **)((u8 *)&D_800CC2D0[obj[0x65] - 1] + 0x1D4);
+        if (src == NULL) {
+            return;
+        }
+        src += *(s32 *)(obj + 0x5C) << 6;
+        for (i = 0; i < 3; i++) {
+            f32 *row = (f32 *)(src + i * 0x10);
+            s = (i == 1) ? *(f32 *)(obj + 0x150) : *(f32 *)(obj + 0x14C);
+            if (obj[0x101] & 4) {
+                s = s / sqrtf(row[2] * row[2] + (row[0] * row[0] + row[1] * row[1]));
+            }
+            for (j = 0; j < 3; j++) {
+                m[i][j] = row[j] * s;
+            }
+            m[i][3] = 0.0f;
+            m[3][i] = ((f32 *)src)[12 + i];
+        }
+        m[3][3] = 1.0f;
+    } else {
+        func_150A9B0C(m, *(f32 *)(obj + 0xB8), *(f32 *)(obj + 0x40), *(f32 *)(obj + 0xC4),
+                      *(f32 *)(obj + 0x14C), *(f32 *)(obj + 0x150), *(f32 *)(obj + 0x14C));
+        if (obj[0x101] & 0x10) {
+            /* the parent (index +0x65 - 1; the asm does not check +0x65 != 0 here) */
+            ref = (u8 *)&D_800CC2D0[obj[0x65]] - 0x32C;
+            src = *(u8 **)(ref + 0x1D4);
+            if (src == NULL) {
+                m[3][0] = 0.0f;
+                m[3][1] = 0.0f;
+                m[3][2] = 0.0f;
+            } else {
+                src += *(s32 *)(obj + 0x5C) << 6;
+                m[3][0] = ((f32 *)src)[12];
+                m[3][1] = ((f32 *)src)[13];
+                m[3][2] = ((f32 *)src)[14];
+            }
+        } else {
+            ref = obj;
+            m[3][0] = *(f32 *)(obj + 0x14);
+            m[3][1] = *(f32 *)(obj + 0x18) + *(f32 *)(obj + 0x150) * *(f32 *)(obj + 0xC8);
+            m[3][2] = *(f32 *)(obj + 0x1C);
+        }
+        if (*(u8 **)(ref + 0x2D0) != NULL && *(s32 *)(*(u8 **)(ref + 0x2D0) + 0x28) == 0) {
+            m[3][1] += (f32)*(s16 *)(ref + 0xCC);
+        }
+    }
+    if (arg1 != 0) {
+        *(s32 *)(obj + 0x1D4) = D_800C42A8;
+        bcopy(m, (void *)D_800C42A8, 0x40);
+        D_800C42A8 += 0x40;
+        D_800C429A++;
+        return;
+    }
+    func_1502DE74(m, arg0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502E228.s")
+#endif
 
 void func_1502E764(void) {
     if ((u16)D_800C429A != 0) {
@@ -419,7 +730,176 @@ void func_1502E764(void) {
     D_800C42B0 = 1;
 }
 
+#ifdef NON_MATCHING
+void func_1502ECEC(s32 arg0, s32 arg1);
+s32 func_15022A8C(struct127 *);
+s32 func_1503FBF4(struct127 *, s32, s32);
+s32 func_1506196C(struct127 *, s32);
+s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
+extern u8 D_800C3A7A;
+extern u8 D_800C3A84;
+extern s32 D_800DA030;
+
+/* P48: visibility mask +0x74 of object arg0 (bit i set = hidden for player i). Type 7: low nibble cleared. Otherwise
+ * all four bits are set, and when the object is not culled and in an active view group (+0x127 bit of D_800D2340):
+ * a child (+0x65 = parent index + 1) copies its parent's mask; else each player's view test func_150A6840
+ * (radius from the model header D_800D1C90[id] +0xE / +0x10 and the scales) and the fade distance (+0x10, or
+ * 100000 for player-controlled cameras) choose func_1506160C events 8 / 9 / 10 and clear the player's bit.
+ * The m2c draft stepped D_800DA030 by 0x100 and D_800DBFF0 by sizeof(struct108) * 0x9A0: both are byte offsets. */
+void func_1502E7B4(s32 arg0) {
+    f32 sp7C;
+    f32 sp78;
+    f32 sp74;
+    f32 sp70;
+    s32 sp5C;
+    s32 sp54;
+    u8 *var_s5;
+    f32 temp_f0;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f2;
+    s32 temp_v0_6;
+    s32 var_fp;
+    s32 var_s0;
+    s32 var_s0_2;
+    s32 var_s2;
+    s32 var_s3;
+    s32 var_s4;
+    s32 var_s6;
+    s32 var_s7;
+    s32 var_v1;
+    struct108 *temp_v0_7;
+    struct124 **temp_v1;
+    struct124 *temp_v0_4;
+    struct127 *temp_s1;
+    u16 temp_v0_5;
+    u8 temp_s0;
+    u8 temp_v0;
+    u8 temp_v0_2;
+    u8 temp_v0_3;
+    u8 temp_v0_8;
+
+    var_s7 = 1;
+    temp_s1 = &D_800CC2D0[arg0];
+    temp_s0 = temp_s1->id;
+    if (temp_s1->unk5 == 7) {
+        temp_s1->unk74 &= 0xFFF0;
+        return;
+    }
+    temp_v0 = temp_s1->unk74;
+    temp_s1->unk74 = temp_v0 | 0xF;
+    sp54 = (s32) temp_v0;
+    if (((D_800C3638 == 0) || (D_800C3A7A != 0) || (func_15022A8C(temp_s1) != 0)) && ((temp_v0_2 = temp_s1->unk127, (temp_v0_2 == 0xFF)) || ((u16) D_800D2340 & (1 << (temp_v0_2 & 0x1F)))) && ((temp_s1->unk101 & 1) != 1) && (temp_s1->unk7 != 0)) {
+        temp_v0_3 = temp_s1->unk65;
+        if (temp_v0_3 != 0) {
+            temp_s1->unk74 = ((u8 *)&D_800CC2D0[temp_v0_3 - 1])[0x74] /* the parent's mask */;
+            return;
+        }
+        temp_v1 = &D_800D1C90[temp_s0];
+        temp_v0_4 = *temp_v1;
+        temp_f0 = (f32) (u16) temp_v0_4->unkE;
+        temp_f12 = temp_s1->xz_scale;
+        temp_f2 = temp_s1->y_scale;
+        temp_f14 = temp_f0 * temp_f12;
+        sp78 = temp_f0 * temp_f2;
+        sp74 = (f32) ((*(s16 *)((u8 *)temp_v0_4 + 0x10)) + temp_s1->unkCC) * temp_f2;
+        temp_s1->unk270 = temp_f14;
+        sp5C = (s32) (*(u16 *)((u8 *)temp_s1 + 0x10));
+        if ((D_800C35EA == 1) && (D_800C3A84 == 0)) {
+            sp5C = 0;
+        }
+        var_fp = 0;
+        if (temp_s1->unk101 & 0x80) {
+            sp70 = 0.0f;
+        } else {
+            temp_v0_5 = (*(u16 *)((u8 *)(*temp_v1) + 0x3E));
+            if (temp_v0_5 == 0) {
+                sp70 = (f32) temp_s1->unkE4;
+            } else if (temp_v0_5 == 1) {
+                sp70 = 0.0f;
+            } else {
+                sp70 = (f32) temp_v0_5 * temp_f12;
+            }
+        }
+        var_s2 = 0;
+        if (D_80082FA0 >= 0) {
+            var_s5 = (u8 *)&D_800DA030;
+            var_s4 = 0;
+            var_s6 = 0;
+            sp7C = temp_f14;
+            do {
+                var_s3 = 0;
+                if ((*(u8 *)((u8 *)((*(u8 **)((u8 *)D_800DBFF0 + var_s6 + 0x3D4))) + 0x197)) != 0) {
+                    var_s0 = 0x186A0;
+                } else {
+                    var_s0 = sp5C;
+                }
+                temp_v0_6 = func_150A6840(var_s4 + D_800BE628, (s32 *)var_s5, temp_s1->x_position, temp_s1->y_position + sp74, temp_s1->z_position, sp7C, sp78, 20000.0f);
+                var_v1 = temp_v0_6;
+                if (temp_v0_6 == 0) {
+                    goto block_37;
+                }
+                if (temp_v0_6 < 0) {
+                    var_v1 = -temp_v0_6;
+                }
+                if (var_fp < var_v1) {
+                    var_fp = var_v1;
+                }
+                if (((temp_s1->unk66 & 0x80) != 0x80) && ((f32) var_v1 <= sp70) && (D_800C35EA != 1)) {
+block_37:
+                    var_s3 = 1;
+                }
+                if (var_s3 == 0) {
+                    if ((var_s0 != 0) && (var_s2 != arg0)) {
+                        if (var_s0 < var_v1) {
+                            var_s0_2 = 8;
+                        } else {
+                            var_s0_2 = 9;
+                        }
+                        func_1506160C(temp_s1, var_s0_2 & 0xFF, 0U, 0U, (u8) var_s2);
+                    } else {
+                        temp_s1->unkE.ub[1] |= (1 << (var_s2 & 0x1F)) << 4;
+                        var_s0_2 = -1;
+                        func_1506160C(temp_s1, 9U, 0U, 0U, (u8) var_s2);
+                    }
+                    if ((temp_s1->unkF8 & 0x800000) && (var_s0_2 != 8) && (D_800C35EA != 1) && (func_1503FBF4(temp_s1, var_s2, sp54) != 0)) {
+                        var_s3 = 1;
+                    }
+                } else {
+                    var_s0_2 = 0xA;
+                }
+                if (var_s0_2 != -1) {
+                    func_1506160C(temp_s1, var_s0_2 & 0xFF, 1U, 0U, (u8) var_s2);
+                }
+                if (var_s3 == 0) {
+                    temp_s1->unk74 &= ~var_s7;
+                }
+                if (func_1506196C(temp_s1, var_s2) == 0) {
+                    temp_s1->unk74 |= var_s7;
+                }
+                var_s7 *= 2;
+                var_s2 += 1;
+                var_s4 += 0x180;
+                var_s5 += 0x40;
+                var_s6 += 0x9A0;
+            } while (D_80082FA0 >= var_s2);
+        }
+        func_1502ECEC((s32) temp_s1, var_fp);
+        temp_v0_7 = temp_s1->camera;
+        if ((temp_v0_7 != NULL) && ((temp_v0_7->unk2C == 0x10000) || (temp_s1->unk31C->unk197 != 0))) {
+            temp_s1->unk74 |= 1 << arg0;
+        }
+        if (D_800C35EA != 1) {
+            temp_v0_8 = temp_s1->unk2FC;
+            if (temp_v0_8 != 0) {
+                temp_s1->unk74 |= temp_v0_8;
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502E7B4.s")
+#endif
 
 void func_1502ECEC(s32 arg0, s32 arg1) {
 }
@@ -571,7 +1051,30 @@ void func_1502F1E4(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F554.s")
 
+#ifdef NON_MATCHING
+void func_1502F780(struct127 *arg0, f32 *x, f32 *y, f32 *z, s32 arg4);
+/* P48: objects attached to another one (+0x274 = its index + 1): y = +0x180, then func_1502F780 moves the position
+ * (+0x14 / +0x18 / +0x1C) with the carrier (+0x19E passed along); y never goes below +0x180, which keeps the max. */
+void func_1502F6B8(void) {
+    u8 *obj;
+
+    for (obj = (u8 *)D_800CC2D0; obj != (u8 *)&D_800CC2D0[25]; obj += 0x32C) {
+        if (*(s32 *)obj == 0 || obj[0x274] == 0) {
+            continue;
+        }
+        *(f32 *)(obj + 0x18) = *(f32 *)(obj + 0x180);
+        func_1502F780(&D_800CC2D0[obj[0x274] - 1], (f32 *)(obj + 0x14), (f32 *)(obj + 0x18), (f32 *)(obj + 0x1C),
+                      *(u16 *)(obj + 0x19E));
+        if (*(f32 *)(obj + 0x18) < *(f32 *)(obj + 0x180)) {
+            *(f32 *)(obj + 0x18) = *(f32 *)(obj + 0x180);
+        } else {
+            *(f32 *)(obj + 0x180) = *(f32 *)(obj + 0x18);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F6B8.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F780.s")
 

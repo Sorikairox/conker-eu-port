@@ -60,9 +60,16 @@ block_15:
 #endif
 s32 func_1503FAF0(u8 *, s16, s16, s32, s32);
 
+#ifdef NON_MATCHING
+/* P48: the matched void body leaves func_1503FAF0's v0 in place and func_1502E7B4 tests it: return it explicitly. */
+s32 func_1503FBF4(u8 *arg0, s32 arg1, s32 arg2) {
+    return func_1503FAF0(arg0 + 0x320, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), arg1, 1);
+}
+#else
 void func_1503FBF4(u8 *arg0, s32 arg1, s32 arg2) {
     func_1503FAF0(arg0 + 0x320, (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x14)), (s16) (s32) (*(f32 *)((u8 *)arg0 + 0x1C)), arg1, 1);
 }
+#endif
 
 void func_1503FC54(void)
 {
