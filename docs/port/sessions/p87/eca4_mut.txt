@@ -1,0 +1,40 @@
+s|\* 60 / 50|* 60 / 51| %
+s|(&D_800C39D0)\[slot\] < (&D_eu_800C3A60)\[slot\]|(\&D_800C39D0)[slot] <= (\&D_eu_800C3A60)[slot]| %
+s|cam\[1\] = pos\[1\];|cam[1] = pos[2];| %
+s|cam\[5\] = 20.0f;|cam[5] = 21.0f;| %
+s|cam\[7\] = 62.5f;|cam[7] = 62.0f;| %
+s|cam\[4\] = D_800C39C4;|cam[4] = 0.0f;| %
+s|            cam\[12\] = TRACK_NONE_F;|            cam[12] = 0.0f;| %
+s|cam\[14\] = 0.0f;|cam[14] = 1.0f;| %
+s|cam\[13\] = 1.0f;|cam[13] = 2.0f;| %
+s|if (key->frame < frame)|if (key->frame <= frame)| %
+s|if (first\[ch\] == TRACK_NONE_F)|if (1)| %
+s|out\[ch\] = first\[ch\];|out[ch] = last[ch];| %
+s|out\[ch\] = last\[ch\];|out[ch] = first[ch];| %
+s|if (mode\[ch\] == 0)|if (mode[ch] != 1)| %
+s|if (nextIdx\[ch\] - 2 >= 0)|if (nextIdx[ch] - 2 > 0)| %
+s|if (nextIdx\[ch\] + 1 < count\[ch\])|if (nextIdx[ch] + 1 <= count[ch])| %
+s|pts\[0\] = pts\[1\];|pts[0] = pts[2];| %
+s|pts\[3\] = pts\[2\];|pts[3] = pts[1];| %
+s|(s32 \*)pts, 0, t)|(s32 *)pts, 0, t * 0.5f)| %
+s|if (seen + 1 == nextIdx\[ch\])|if (seen == nextIdx[ch])| %
+s|(keys\[ib\].value - keys\[ia\].value) \* t|(keys[ib].value - keys[ia].value) * t * 0.5f| %
+s|out\[10\] = 0.0f;|out[10] = 1.0f;| %
+s|!= 0xFF) {|!= 0xFE) {| %
+s|cam\[4\] = out\[7\];|cam[4] = out[6];| %
+s|cam\[9\] = out\[1\];|cam[9] = out[2];| %
+s|cam\[16\] = out\[12\];|cam[16] = out[13];| %
+s|cam\[12\] = out\[14\];|cam[12] = out[13];| %
+s|func_1501FD34(i, out\[10\]|func_1501FD34(i, out[9]| %
+s|t = (f32)(frame - prevFrame\[ch\])|t = (f32)(frame - nextFrame[ch])| %
+s|D_800C3638 = 1;|D_800C3638 = 2;| %
+s|mode\[ch\] = 1;|mode[ch] = 0;| %
+s|cam\[3\] = out\[8\];|cam[3] = out[3];| %
+s|for (ch = 0; ch < 15; ch++) {|for (ch = 0; ch < 14; ch++) {| %
+s|pts\[at++\] = keys\[k\].value;|pts[at++] = keys[k].value + 1.0f;| %
+s|        if (\*(u16 \*)(D_800C3A10\[slot\] + i \* 8) == 4) {|        if (*(u16 *)(D_800C3A10[slot] + i * 8) == 6) {| %
+s|case 5:|case 6:| %
+s|if (D_800C39E8\[slot\]\[i\] != 0) {|if (1) {| %
+s|cam\[14\] = out\[11\];|cam[14] = out[12];| %
+s|func_1501FF10(i, out\[10\], &cam\[4\], slot);|func_1501FF10(i, out[10], \&cam[4], 0);| %
+s|frame = D_800C3A68;|frame = 0;| %
