@@ -89,7 +89,7 @@ block_3:
 
 #ifdef NON_MATCHING
 void func_15056B08(struct127 *);
-s32 func_1505A770(struct127 *);
+void func_1505A770(struct127 *);
 u8 *func_1505EEB0(s32, s32 *);
 
 void func_150B1CBC(struct127 *arg0) {
