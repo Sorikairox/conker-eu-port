@@ -104,7 +104,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Concurrent knob and mutant runs of the same function must not share a temp dir (use the p73 knobs.sh / mut.sh).
 
 ### Lesson: dropped arguments (P75, P78)
-- IDO code often leaves a value in a0..a3 and the callee uses it even though the decomp's C call passes nothing (`f()` or a `void (*)(void)` pointer). On N64 it works by accident; in the port the argument becomes 0 → wrong object or NULL writes. Whenever a callee becomes C, check its callers' argument counts (P75 `missing_args.txt`) and indirect calls through untyped function-pointer tables.
+- IDO code often leaves a value in a0..a3 and the callee uses it even though the decomp's C call passes nothing (`f()` or a `void (*)(void)` pointer). On N64 it works by accident; in the port the argument becomes 0 → wrong object or NULL writes. Whenever a callee becomes C, check its callers' argument counts (run `tools/port/arity_scan.py` after every merge; output `docs/port/arity_scan.tsv`, a may-analysis: check the asm before fixing a row).
 
 ### Verification culture
 - Conversions are accepted only with difftest EQUIV **plus mutants that DIFFER**; anything unreachable is marked UNVERIFIED and runtime-checked in the browser.
