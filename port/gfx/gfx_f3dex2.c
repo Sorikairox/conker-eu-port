@@ -643,6 +643,13 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
      * The other ucodes keep P35's model (record M = directional sun, M + 1 = ambient), not checked. */
     const unsigned char *amb = lbuf + 0x60 + 48 * (M + !light_bg), *sun = lbuf + 0x60 + 48 * M;
     float c[3] = {amb[0] / 255.0f, amb[1] / 255.0f, amb[2] / 255.0f};
+    {   /* P42 DIAGNOSTIC ?lvlwhite=1: the level's start colour (record M) is func_1515DE84's `arg8` = the colour that the
+         * still-asm func_1515E7E8 should write into its uninitialised local `col`; with the stub it is stack garbage
+         * (P39: a green tint, P42: 000000 = a black level). The flag makes a black BG start colour white. */
+        static int lw = -1;
+        if (lw < 0) lw = port_flag("lvlwhite");
+        if (lw && light_bg && !amb[0] && !amb[1] && !amb[2]) c[0] = c[1] = c[2] = 1.0f;
+    }
     if (!light_bg) {
         const float *d = lmdir[2 + M];
         float dot = nx * d[0] + ny * d[1] + nz * d[2];
@@ -1230,6 +1237,13 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
         return gdl;
     }
     r = __real_func_150A5858(dl, gdl, mtx, a3, a4, mask);
+    { /* P42: the first vlog calls of every (dl, tree) pair, so the level after the boot level is logged too */
+        static int lastdl, lasttree;
+        if (dl != lastdl || (int)D_800DC278 != lasttree) {
+            if (lastdl || lasttree) port_log("[vis] new dl/tree %08X / %08X after %d calls\n", (unsigned)dl, D_800DC278, calls);
+            lastdl = dl; lasttree = D_800DC278; calls = 0;
+        }
+    }
     if (calls++ < vlog && dl) {
         unsigned nsrc, nout, nvis = 0, nb = D_800D3A8C - D_800D3668;
         int tsrc = vis_tris((const uint32_t *)(uintptr_t)dl, NULL, &nsrc);
@@ -1237,22 +1251,44 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
         for (unsigned i = 0; i < nb && i < 0x100000; i++) nvis += vbe_ld8((void *)(uintptr_t)(D_800D3668 + i)) != 0;
         port_log("[vis] call %d dl %08X mask %X: src %u cmds %d tri slots; out %u cmds %d tri slots; vis bytes %u/%u\n",
                  calls - 1, (unsigned)dl, mask, nsrc, tsrc, nout, tout, nvis, nb);
+        if (calls == 1) { /* P42: first G_VTX of the source DL: its first 2 vertices (x y z f | s t | rgba) */
+            const uint32_t *c = (const uint32_t *)(uintptr_t)dl;
+            int k;
+            for (k = 0; k < 400 && (c[0] >> 24) != 0x01; k++) c += 2;
+            { const uint32_t *L = (const uint32_t *)port_n64_to_wasm(0x800D9FB0u);   /* light / Vp records D_800D9FB0 */
+              port_log("[vis] D_800D9FB0: %08X %08X %08X %08X | %08X %08X %08X %08X | %08X %08X %08X %08X | %08X %08X %08X %08X\n",
+                       L[0], L[1], L[2], L[3], L[4], L[5], L[6], L[7], L[8], L[9], L[10], L[11], L[12], L[13], L[14], L[15]); }
+            if (k < 400) {
+                const uint32_t *v = (const uint32_t *)(uintptr_t)c[1];
+                port_log("[vis] first VTX %08X: %08X %08X %08X %08X | %08X %08X %08X %08X\n", c[1], v[0], v[1], v[2], v[3],
+                         v[4], v[5], v[6], v[7]);
+            }
+        }
+        if (calls == 1 && vlog >= 3) { /* P42: dump the emitted commands of the first call per (dl, tree) */
+            const uint32_t *c;
+            for (c = gdl; c < r && c < gdl + 2 * 400; c += 2)
+                port_log("[vis]   out %08X %08X\n", c[0], c[1]);
+        }
         if (calls == 1) { /* P34 UNVERIFIED: prev index starts at 0 (asm: the caller's $gp). It matters only when the first
                            * visible leaf of a frame starts with a relative byte (1..0x7F). Count such leaves. */
-            unsigned node = D_800DC278, leaves = 0, rel = 0, nodes = 0, firstrel = 0;
+            unsigned node = D_800DC278, leaves = 0, rel = 0, nodes = 0, firstrel = 0, ents = 0, maxents = 0;
             while (node && nodes < 100000) {
                 int ch = (int16_t)vbe_ld16((void *)(uintptr_t)(node + 0xC)), off;
                 nodes++;
                 if (ch) { node += ch; continue; }
                 leaves++;
-                { unsigned b0 = vbe_ld8((void *)(uintptr_t)(node + 0xE));
-                  if (b0 && b0 < 0x80) { if (!rel) firstrel = node; rel++; } }
+                { unsigned b0 = vbe_ld8((void *)(uintptr_t)(node + 0xE)), q = node + 0xE, e = 0, b;
+                  if (b0 && b0 < 0x80) { if (!rel) firstrel = node; rel++; }
+                  /* P42: leaf list length (halfword | 0x8000 or a 1-byte delta, 0 ends) */
+                  while ((b = vbe_ld8((void *)(uintptr_t)q)) != 0 && e < 100000) { q += (b & 0x80) ? 2 : 1; e++; }
+                  ents += e; if (e > maxents) maxents = e; }
                 off = (int16_t)vbe_ld16((void *)(uintptr_t)(node + 4));
                 if (!off) break;
                 node += off;
             }
-            port_log("[vis] tree %08X: %u nodes, %u leaves, %u leaves start with a relative index (first %08X)\n",
-                     D_800DC278, nodes, leaves, rel, firstrel);
+            port_log("[vis] tree %08X: %u nodes, %u leaves, %u leaves start with a relative index (first %08X); "
+                     "leaf entries %u (max %u per leaf); pool counters (all areas) nodes %d leaves %d\n", D_800DC278, nodes, leaves, rel, firstrel, ents, maxents,
+                     *(const int *)port_n64_to_wasm(0x800B11DCu), *(const int *)port_n64_to_wasm(0x800B11E0u));
         }
     }
     return r;

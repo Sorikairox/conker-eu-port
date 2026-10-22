@@ -341,7 +341,16 @@ static int io_slot(u32 a, const char *what) {
     io_addr[io_n] = a; io_val[io_n] = 0;
     return io_n++;
 }
+s32 osPiRawReadIo(u32 devAddr, u32 *data);
 u32 __port_io_read(u32 a) {
+    if ((a & 0xF0000000u) == 0xB0000000u) {   /* P42: KSEG1 cart domain (IO_READ(osRomBase | dev), e.g. func_15001A08's
+                                                * ROM 0xD24 check word, 0x98CCE31A): the big-endian ROM word */
+        u32 v = 0;
+        static int logged;
+        osPiRawReadIo(a, &v);
+        if (logged++ < 4) port_log("[io] cart read 0x%08X = 0x%08X\n", a, v);
+        return v;
+    }
     int i = io_slot(a, "read");
     switch (a) {
     case 0xA4500004: return aud_out_queued() * 4;   /* AI_LEN_REG: bytes left in the current DMA */

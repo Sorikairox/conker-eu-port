@@ -264,6 +264,36 @@ viewer and the boot run are unchanged.
 Rules for PC code: never construct wasm pointers below `PORT_WASM_BASE`. Treat any value below it that
 reaches the renderer as segmented or physical. `port_n64_to_wasm` results always satisfy this.
 
+### Pointer-range tests in game C: every rewrite site (sessions P9, P42)
+
+Game C that tells "a resident KSEG0 pointer" from "an offset / id / no pointer" by comparing against the KSEG0
+boundary is wrong on the PC: real game pointers are wasm addresses `0x10000000..0x15FFFFFF`. `port/tools/vbe.py`
+rewrites each known site in the IR. Game `.c` files are not changed. Every site is listed here.
+
+| Site | N64 test | PC test | vbe.py pass |
+|---|---|---|---|
+| init_1AAE0, init_15550, init_214F0 (audio, 4 compares) | `(p & 0xFF000003) == 0x80000000` | `(p & 0xF0000003) == 0x10000000` | `k0_checks` (P9) |
+| same files | `K0_TO_PHYS(p) > 0x800000` | `> 0x16000000` | `k0_checks` (P9) |
+| func_15002008 (game_eu_2F180, leaf lists) | `(u32)p < 0x80000001` → vertex = (0, 0, 0) | `(u32)p < 0x10000000` | `k0_ptr_sites` (P42) |
+| func_15002248 (game_eu_2F180, quadtree helper) | `(u32)p < 0x80000001` → vertex = (0, 0, 0) | `(u32)p < 0x10000000` | `k0_ptr_sites` (P42) |
+| func_15004CE0 (game_30E90, MOVEMEM 0x0E relocation) | `unk4 < 0x80000000` → add the base | `unk4 < 0x10000000` | `k0_ptr_sites` (P42); its caller func_150039E0 is still asm, so not run yet |
+
+`k0_ptr_sites` is scoped by function name and logs a warning to stderr if the number of rewritten compares
+differs from the expected count (1 per function). Without the P42 rewrites, every level triangle would read as
+(0, 0, 0) in the quadtree box tests.
+
+Checked and **not** rewritten: func_15001460 (game_2DF70, level-DL triangle scan) recomputes bounds only when
+`(u32)verts[0] >= 0x100001`. Wasm pointers pass that test, and area-2 object vertex offsets (≤ 0x100000) fail it,
+as on the N64. Its G_VTX segment test `(addr >> 24) & 0xF` is 0 for every wasm address in the RDRAM mirror
+(0x105xxxxx..0x10Dxxxxx). Addresses at 0x11000000 and above would read as segments 1..15, so the mirror must stay
+below 0x11000000.
+
+**Hardware reads with a computed address (P42):** `IO_READ(osRomBase | dev)` is `or x, 0xA0000000` → inttoptr →
+volatile load. `vbe.py rcp_io` now turns that load into `__port_io_read(x)` as well, and the register model
+answers the cart domain 0xB0000000.. with the big-endian ROM word (func_15001A08 reads ROM 0xD24 = 0x98CCE31A, so
+the node pool is not doubled). This also catches the weak libultra `osPiRawReadIo`, `__osSpRawReadIo` and
+`osSpTaskLoad`. The first is overridden by the PC layer, and the other two are not run.
+
 ### DMA, PI and rzip
 
 `osPiStartDma`/`osEPiStartDma` → `port_rom_read()`. It copies ROM bytes into game memory in the vbe

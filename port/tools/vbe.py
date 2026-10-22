@@ -448,6 +448,36 @@ def k0_checks(text, st):
         return m[0]
     return re.sub(r'icmp (\w+) i32 (%[\w.$-]+), (-?\d+)', cmp, text)
 
+
+# P42: "is a KSEG0 pointer" tests on level-geometry vertex / DL pointers. Game pointers here are wasm addresses
+# (>= 0x10000000, GLOBAL_BASE), never above 0x80000000, so each listed compare against the KSEG0 boundary is moved
+# to the wasm data base 0x10000000. Small values (area-2 object vertex offsets <= 0x100000, segment addresses
+# 0x0Exxxxxx) stay on the "not a pointer" side, as on the N64. Scoped by function, with the expected count:
+#   func_15002008 (game_eu_2F180, leaf lists):        (u32)p < 0x80000001 -> (u32)p < 0x10000000
+#   func_15002248 (game_eu_2F180, quadtree helper):   (u32)p < 0x80000001 -> (u32)p < 0x10000000
+#   func_15004CE0 (game_30E90, DL MOVEWORD reloc):    unk4 < 0x80000000   -> unk4 < 0x10000000
+# Not rewritten: func_15001460's `>= 0x100001` holds for wasm pointers as it is. List: docs/port/MEMORY.md.
+K0_PTR_SITES = {
+    'func_15002008': ('ult', '-2147483647', 1),
+    'func_15002248': ('ult', '-2147483647', 1),
+    'func_15004CE0': ('ult', '-2147483648', 1),
+}
+
+
+def k0_ptr_sites(text, st):
+    out = []
+    for blk in re.split(r'(?=^define )', text, flags=re.M):
+        m = re.match(r'define [^@\n]*@(\w+)\(', blk)
+        site = K0_PTR_SITES.get(m[1]) if m else None
+        if site:
+            op, c, want = site
+            blk, n = re.subn(rf'icmp {op} i32 (%[\w.$-]+), {c}\b', rf'icmp {op} i32 \1, 268435456', blk)
+            st['k0_ptr'] += n
+            if n != want:
+                sys.stderr.write(f'vbe.py: k0_ptr_sites {m[1]}: {n} compares rewritten, expected {want}\n')
+        out.append(blk)
+    return ''.join(out)
+
 # P19: RCP / PI / SI register accesses through a constant KSEG1 address (rcp.h IO_READ / IO_WRITE in
 # matched game C, e.g. `IO_READ(AI_LEN_REG)` in func_100095A0) are not memory on the PC. Constant
 # 32-bit loads/stores in 0xA4000000..0xA4FFFFFF become calls to the PC register model
@@ -471,6 +501,23 @@ def rcp_io(text, st):
         return f'{m[1]}call void @__port_io_write(i32 {m[3]}, i32 {m[2]})'
     n = st['rcp_io']
     text = IO_ST.sub(stv, IO_LD.sub(ld, text))
+    # P42: IO_READ with a computed address, i.e. PHYS_TO_K1(x) = `or i32 x, 0xA0000000` -> inttoptr -> volatile
+    # load (func_15001A08: IO_READ(osRomBase | 0xB0000D24), the cart word). The load becomes __port_io_read(x);
+    # the register model answers the cart domain 0xB0000000.. with the big-endian ROM word.
+    k1 = set(re.findall(r'^\s*(%[\w.$-]+) = or i32 %[\w.$-]+, -1610612736$', text, re.M))
+    if k1:
+        ptr = {}
+        for m in re.finditer(r'^\s*(%[\w.$-]+) = inttoptr i32 (%[\w.$-]+) to ptr$', text, re.M):
+            if m[2] in k1:
+                ptr[m[1]] = m[2]
+        def dld(m):
+            if m[3] not in ptr:
+                return m[0]
+            st['rcp_io_dyn'] += 1
+            return f'{m[1]}{m[2]} = call i32 @__port_io_read(i32 {ptr[m[3]]})'
+        text = re.sub(r'^(\s*)(%[\w.$-]+) = load volatile i32, ptr (%[\w.$-]+)(?:, align \d+)?$', dld, text, flags=re.M)
+        if st['rcp_io_dyn']:
+            n = -1
     if st['rcp_io'] != n:
         if not re.search(r'^declare [^\n]*@__port_io_read\(', text, re.M):
             text += '\ndeclare i32 @__port_io_read(i32)\n'
@@ -482,7 +529,7 @@ def rcp_io(text, st):
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
-    p = Pass(self_intrinsic(rcp_io(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0).split('\n'))
+    p = Pass(self_intrinsic(rcp_io(k0_ptr_sites(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0), st0).split('\n'))
     p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs
