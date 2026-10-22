@@ -3,8 +3,257 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15A210/func_1512C490.s")
+#ifdef NON_MATCHING
+void func_150A7D00(Mtx *mtx, f32 x, f32 y, f32 z);
+void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+void func_15047E70(Mtx *arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA);
+void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2);
+f32 func_15048FC8(struct17 *arg0);
+f32 func_150484A0(f32 arg0, f32 arg1);
+void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+void func_1512523C(struct108 *arg0);
+void func_15125594(struct108 *arg0);
+void func_150A82D0(Mtx *m, f32 rx, f32 ry, f32 rz);
+void func_1512D5E0(u8 *arg0);
+void func_1512D8D8(s32 arg0);
+void func_1512D868(u8 *arg0);
+extern Mtx *D_800DC6D0[];         /* per DL buffer: the per-player view matrices (0x40 each) */
+extern u8 D_800BE9C0;             /* current DL buffer */
+extern u8 D_800D9FB0[];           /* per DL buffer: LookAt (0x20) */
+extern s32 D_800DC6B0[];         /* camera shake tables (func_1512D7A8): 6 floats (0x18) per step */
+/* D_800DD210 (u8[]): per player 6 floats (0x18): extra translation (0..2) and rotation (3..5) */
+/* D_800DC6F0 (u8[][0x68]): per player, +0x54 translation, +0x60 roll (the asm reads it as D_800DC750) */
 
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_H(o) (*(s16 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+#define CAM_OBJ() (*(u8 **)(p + 0x3D4))
+#define CAM_REC() (*(u8 **)(p + 0x3D0))
+#define CAM_MTX() ((Mtx *)((u8 *)D_800DC6D0[D_800BE9C0] + p[0x23D] * 0x40))
+
+/* Gameplay view matrix of one camera controller (func_15122AE0's in-game branch): ease the orbit distances
+ * (0x194 / 0x18C toward 0x198 / 0x190), pick eye (0x2F8) / target (0x2BC) (offset by the orbit around the
+ * yaw 0x3A0 unless the object (0x3D4) has its own view, +0x197), look-at matrix into D_800DC6D0[buffer][player]
+ * with the LookAt D_800D9FB0[buffer], then post-rotations: shake (0x854..0x868, decayed by 0.08 or driven by
+ * D_800DC6B0), roll 0x5EC, per-player D_800DD210 rotation / translation. */
+void func_1512C490(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    f32 eye[3];       /* sp+0xEC */
+    f32 at[3];        /* sp+0xE0 */
+    f32 dir[3];       /* sp+0xB8 */
+    f32 rot[4][4];    /* sp+0x64 */
+    f32 ox, oy, oz;   /* sp+0xA4..0xAC */
+    Mtx m158;
+    Mtx m118;
+    f32 scale;        /* sp+0xC4 */
+    f32 dist, height, offX, offZ, s, c;
+    f32 yaw;
+    f32 k, a, b;
+    u8 *obj;
+    u8 *v;
+    f32 *d;
+    s32 fl;
+
+    scale = *(f32 *)((u8 *)D_800BE628 + p[0x23D] * 0x180 + 0x84);
+    scale = (1.0f - scale) * 0.5f + scale;
+    if (CAM_OBJ()[0x120] != 0) {
+        CAM_F(0x198) = 0.0f;
+        CAM_F(0x190) = 0.0f;
+        CAM_F(0x74C) = 0.0f;
+        CAM_F(0x754) = 0.0f;
+    }
+    if (p[0x23C] != 0) {
+        CAM_F(0x7D0) = 0.0f;
+        CAM_F(0x7D4) = 0.0f;
+        CAM_F(0x194) = CAM_F(0x198);
+        CAM_F(0x18C) = CAM_F(0x190);
+    } else if (CAM_W(0x2C) == 0x100 || p[0x23E] != 0) {
+        func_150498A0((f32 *)(p + 0x194), CAM_F(0x198), (f32 *)(p + 0x7D0), 4.0f, 6.0f, CAM_F(0x7B4));
+        func_150498A0((f32 *)(p + 0x18C), CAM_F(0x190), (f32 *)(p + 0x7D4), 4.0f, 6.0f, CAM_F(0x7B4));
+    } else {
+        func_150498A0((f32 *)(p + 0x194), CAM_F(0x198), (f32 *)(p + 0x7D0), 0.75f, 1.1f, CAM_F(0x7B4));
+        func_150498A0((f32 *)(p + 0x18C), CAM_F(0x190), (f32 *)(p + 0x7D4), 0.75f, 1.1f, CAM_F(0x7B4));
+    }
+    CAM_W(0x2E0) = CAM_W(0x2BC);
+    CAM_W(0x2E4) = CAM_W(0x2C0);
+    CAM_W(0x2E8) = CAM_W(0x2C4);
+    CAM_W(0x2EC) = CAM_W(0x2F8);
+    CAM_W(0x2F0) = CAM_W(0x2FC);
+    CAM_W(0x2F4) = CAM_W(0x300);
+    fl = CAM_W(0x2C);
+    if ((fl & 0x40000) || (fl & 0x20)) {
+        eye[0] = CAM_F(0x2F8);
+        eye[1] = CAM_F(0x2FC);
+        eye[2] = CAM_F(0x300);
+        at[0] = CAM_F(0x2A4);
+        at[1] = CAM_F(0x2A8);
+        at[2] = CAM_F(0x2AC);
+    } else if (CAM_OBJ()[0x197] != 0) {
+        eye[0] = CAM_F(0x2F8);
+        eye[1] = CAM_F(0x2FC);
+        eye[2] = CAM_F(0x300);
+        at[0] = CAM_F(0x2BC);
+        at[1] = CAM_F(0x2C0);
+        at[2] = CAM_F(0x2C4);
+        func_1512523C(arg0);
+        func_15125594(arg0);
+    } else {
+        dist = CAM_F(0x194);
+        height = CAM_F(0x18C);
+        offX = CAM_F(0x74C);
+        offZ = CAM_F(0x754);
+        s = sinf(CAM_F(0x3A0) - 1.5707964f) * dist;
+        c = cosf(CAM_F(0x3A0) - 1.5707964f) * dist;
+        eye[0] = CAM_F(0x2F8) + offX + s;
+        eye[1] = CAM_F(0x2FC) + height;
+        eye[2] = CAM_F(0x300) + offZ + c;
+        at[0] = CAM_F(0x2BC) + offX + s;
+        at[1] = CAM_F(0x2C0) + height;
+        at[2] = CAM_F(0x2C4) + offZ + c;
+        CAM_F(0x2F8) = eye[0];
+        CAM_F(0x2FC) = eye[1];
+        CAM_F(0x300) = eye[2];
+        CAM_F(0x2BC) = at[0];
+        CAM_F(0x2C0) = at[1];
+        CAM_F(0x2C4) = at[2];
+        func_1512523C(arg0);
+        func_15125594(arg0);
+    }
+    func_150491EC((struct17 *)eye, (struct17 *)at, (struct17 *)dir);
+    obj = CAM_OBJ();
+    *(f32 *)(obj + 0x148) = at[0];
+    *(f32 *)(obj + 0x14C) = at[1];
+    *(f32 *)(obj + 0x150) = at[2];
+    obj = CAM_OBJ();
+    *(f32 *)(obj + 0x13C) = eye[0];
+    *(f32 *)(obj + 0x140) = eye[1];
+    *(f32 *)(obj + 0x144) = eye[2];
+    obj = CAM_OBJ();
+    *(f32 *)(obj + 0x130) = dir[0];
+    *(f32 *)(obj + 0x134) = dir[1];
+    *(f32 *)(obj + 0x138) = dir[2];
+    func_15047E70(CAM_MTX(), (s32)(D_800D9FB0 + D_800BE9C0 * 0x20), eye[0], eye[1], eye[2], at[0], at[1], at[2],
+                  0.0f, 1.0f, 0.0f);
+
+    fl = CAM_W(0x2C);
+    if (fl & 0x80000) {
+        func_1512D5E0(p);
+        func_1512D8D8((s32)p);
+        return;
+    }
+    if (fl == 0x40000) {
+        func_150A82D0(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
+        guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
+        func_1512D5E0(p);
+        return;
+    }
+
+    /* shake */
+    if (CAM_OBJ()[0x197] != 0) {
+        if (p[0x84D] == 2) {
+            d = (f32 *)(D_800DC6B0[CAM_W(0x850)] + p[0x84E] * 0x18);
+            CAM_F(0x854) += d[3];
+            CAM_F(0x858) += d[4];
+            CAM_F(0x85C) += d[5];
+            CAM_F(0x860) += d[0];
+            CAM_F(0x864) += d[1];
+            CAM_F(0x868) += d[2];
+        } else {
+            k = 0.08f; /* D_800A3A90 */
+            CAM_F(0x854) -= CAM_F(0x854) * k;
+            CAM_F(0x858) -= CAM_F(0x858) * k;
+            CAM_F(0x85C) -= CAM_F(0x85C) * k;
+            CAM_F(0x860) -= CAM_F(0x860) * k;
+            CAM_F(0x864) -= CAM_F(0x864) * k;
+            CAM_F(0x868) -= CAM_F(0x868) * k;
+        }
+        func_1512D868(p);
+    } else {
+        k = 0.08f; /* D_800A3A94 */
+        CAM_F(0x854) -= CAM_F(0x854) * k;
+        CAM_F(0x858) -= CAM_F(0x858) * k;
+        CAM_F(0x85C) -= CAM_F(0x85C) * k;
+        CAM_F(0x860) -= CAM_F(0x860) * k;
+        CAM_F(0x864) -= CAM_F(0x864) * k;
+        CAM_F(0x868) -= CAM_F(0x868) * k;
+    }
+    a = CAM_F(0x854) * scale;
+    CAM_F(0x5EC) = CAM_F(0x5EC) + a;
+    func_150A82D0(&m158, -CAM_F(0x858) * scale, CAM_F(0x85C) * scale, a);
+    guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
+
+    /* the object's view direction follows the shake */
+    if (CAM_OBJ() != NULL) {
+        yaw = func_15048FC8((struct17 *)(CAM_OBJ() + 0x130)) - 180.0f;
+        obj = CAM_OBJ();
+        a = *(f32 *)(obj + 0x130);
+        b = *(f32 *)(obj + 0x138);
+        a = func_150484A0(*(f32 *)(obj + 0x134), sqrtf(a * a + b * b));
+        func_150A8050(rot, -a * 57.2957764f - CAM_F(0x858) * scale, yaw - CAM_F(0x85C) * scale, 0.0f);
+        guMtxXFMF(rot, 0.0f, 0.0f, 1.0f, &ox, &oy, &oz);
+        *(f32 *)(CAM_OBJ() + 0x130) = ox;
+        *(f32 *)(CAM_OBJ() + 0x134) = oy;
+        *(f32 *)(CAM_OBJ() + 0x138) = oz;
+    }
+    if (CAM_OBJ()[0x197] != 0) {
+        d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+        func_150A82D0(&m158, d[3], d[4], d[5]);
+        d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+        func_150A7D00(&m118, d[0], d[1], d[2]);
+        guMtxCatL(&m158, &m118, &m158);
+        guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
+        return;
+    }
+
+    /* roll */
+    fl = CAM_W(0x2C);
+    if (((fl & 0x80) || CAM_REC()[0x102] != 0) && CAM_H(0x298) != 0) {
+        a = *(f32 *)(CAM_REC() + 0xC4) * 0.25f;
+    } else if ((CAM_W(0x5F0) & 0x80) && fl != 0x40) {
+        a = *(f32 *)(CAM_REC() + 0xC4) * 0.5f;
+    } else {
+        a = 0.0f;
+    }
+    if (!(fl & 0x40000)) {
+        if ((CAM_W(0x5F0) & 0x80) || CAM_REC()[0x102] != 0) {
+            func_150498A0((f32 *)(p + 0x5EC), a, (f32 *)(p + 0x264), 2.0f, 4.0f, CAM_F(0x7B4));
+        } else {
+            func_150498A0((f32 *)(p + 0x5EC), a, (f32 *)(p + 0x264), 4.0f, 8.0f, CAM_F(0x7B4));
+        }
+    }
+    func_1512D8D8((s32)p);
+    fl = CAM_W(0x2C);
+    if (fl != 0x8000) {
+        if (fl == 1) {
+            CAM_F(0x388) = CAM_F(0x388) - CAM_F(0x5D0);
+            CAM_F(0x398) = CAM_F(0x388) * 0.017453292f; /* D_800A3A9C */
+        }
+        d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+        func_150A82D0(&m158, d[3] + (CAM_F(0x5D0) + CAM_F(0x3A8) + CAM_F(0x38C)), d[4] + CAM_F(0x5E8),
+                      d[5] + (CAM_F(0x5EC) + *(f32 *)&D_800DC6F0[p[0x23D]][0x60] * 0.5f));
+        if (CAM_W(0x2C) == 0x40000) {
+            func_150A82D0(&m158, 0.0f, 0.0f, CAM_F(0x5EC));
+        }
+    }
+    guMtxCatL(CAM_MTX(), &m158, CAM_MTX());
+    func_1512D5E0(p);
+    if (CAM_W(0x2C) & 0x40000) {
+        return;
+    }
+    d = (f32 *)(D_800DD210 + p[0x23D] * 0x18);
+    v = D_800DC6F0[p[0x23D]];
+    func_150A7D00(&m118, d[0] + *(f32 *)(v + 0x54), d[1] + *(f32 *)(v + 0x58), d[2] + *(f32 *)(v + 0x5C));
+    guMtxCatL(CAM_MTX(), &m118, CAM_MTX());
+}
+#undef CAM_W
+#undef CAM_H
+#undef CAM_F
+#undef CAM_OBJ
+#undef CAM_REC
+#undef CAM_MTX
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15A210/func_1512C490.s")
+#endif
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
 extern Mtx *D_800DC6D0[];
 

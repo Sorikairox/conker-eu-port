@@ -271,7 +271,7 @@ void func_1501AF44(f32 *x0, f32 *y0, f32 *x1, f32 *y1) {
 #ifdef NON_MATCHING
 extern f32 D_80096CA4;
 extern f32 D_80096CA8;
-s32 func_1510B6A8(s32, f32, f32, s32, f32);
+void func_1510B6A8(s32, f32, f32, f32, f32);
 extern s32 D_800BEA58;
 extern s32 D_800BEA70;
 
@@ -304,7 +304,7 @@ void func_1501B0A0(s32 arg0, s32 arg1) {
     temp_t4 = arg1 * 0x180;
     sp34 = (func_150484A0((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0xC)), (f32) *(((s32 *)((u8 *)&D_800BEA58 + temp_t8))) / (2.0f * sp44)) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + temp_t4)) + 0x6C));
     sp24 = temp_t4;
-    func_1510B6A8(arg0, sp34, (func_150484A0((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 0x3F800000, 0.0f);
+    func_1510B6A8(arg0, sp34, (func_150484A0((*(f32 *)((u8 *)((D_800BE628 + sp28)) + 0x10)), sp38) * D_80096CA8) - (*(f32 *)((u8 *)((D_800BE628 + sp24)) + 0x70)), 1.0f, 0.0f);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_476D0/func_1501B0A0.s")

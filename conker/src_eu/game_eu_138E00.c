@@ -32,9 +32,58 @@ void func_1510B5F0(s32 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B5F0.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B6A8.s")
+#ifdef NON_MATCHING
+extern f32 D_800C3A6C;            /* extra angle added to both fields of view */
+extern f32 D_800C3A70;            /* viewport width override (0: use arg4 or the screen width) */
+extern f32 D_800C3A74;            /* viewport height override (0: the screen height) */
+extern f32 D_800D9F40;
+extern f32 D_800D9F3C;
+void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
+/* Per-player projection: camera record r = D_800BE628 + player * 0x180. Field of view r+0x74 / r+0x78 (degrees) =
+ * base r+0x6C / r+0x70 + fovX / fovY + D_800C3A6C; the half extents r+0x1C / r+0x20 = r+0x7C * r+0x14 * r+0xC *
+ * cot(fov / 2) * scale (r+0x80, r+0x18, r+0x10 for y); then func_1510BB78 builds the matrix into r+0xB8 with the
+ * viewport size (D_800C3A70 / width / the screen width, D_800C3A74 / the screen height). */
+void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width) {
+    s32 off = player * 0x180;
+    u8 *r;
+    f32 a, c, w, h;
+
+    r = (u8 *)D_800BE628 + off;
+    *(f32 *)(r + 0x74) = *(f32 *)(r + 0x6C) + fovX + D_800C3A6C;
+    r = (u8 *)D_800BE628 + off;
+    *(f32 *)(r + 0x78) = *(f32 *)(r + 0x70) + fovY + D_800C3A6C;
+    r = (u8 *)D_800BE628 + off;
+    a = *(f32 *)(r + 0x74) * 0.008726646f; /* pi / 360 */
+    c = cosf(a);
+    r = (u8 *)D_800BE628 + off;
+    *(f32 *)(r + 0x1C) = *(f32 *)(r + 0x7C) * (*(f32 *)(r + 0x14) * ((c * *(f32 *)(r + 0xC)) / sinf(a))) * scale;
+    r = (u8 *)D_800BE628 + off;
+    a = *(f32 *)(r + 0x78) * 0.008726646f;
+    c = cosf(a);
+    r = (u8 *)D_800BE628 + off;
+    *(f32 *)(r + 0x20) = *(f32 *)(r + 0x80) * (*(f32 *)(r + 0x18) * ((c * *(f32 *)(r + 0x10)) / sinf(a))) * scale;
+    if (D_800C3A70 != 0.0f) {
+        w = D_800C3A70;
+    } else if (width != 0.0f) {
+        w = width;
+    } else {
+        w = D_800D9F40;
+    }
+    if (D_800C3A74 != 0.0f) {
+        h = D_800C3A74;
+    } else {
+        h = D_800D9F3C;
+    }
+    r = (u8 *)D_800BE628 + off;
+    func_1510BB78(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), w, h, scale);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B6A8.s")
+#endif
+#ifndef NON_MATCHING
 s32 func_1510B6A8(s32, f32, f32, f32, f32);
+#endif
 struct V3 { f32 x, y, z; };
 extern struct V3 D_800D9EE0[];
 extern u8 D_800D9F10;
@@ -58,12 +107,40 @@ void func_1510B930(void)
     D_800D9F10 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B9D8.s")
+#ifdef NON_MATCHING
+struct PendingF2 { f32 x; f32 y; };
+extern struct PendingF2 D_800D9F18[];
+extern u8 D_800D9F38;
+extern f32 D_800D9F40;
+extern f32 D_800D9F3C;
+void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
 
+/* Rebuild the player's projection for a viewport of width x height (0: the screen size) now, and remember the size
+ * in D_800D9F18[player] (applied again by func_1510BA9C; D_800D9F38 = pending). */
+void func_1510B9D8(s32 player, f32 width, f32 height) {
+    u8 *r;
+
+    if (width == 0.0f) {
+        width = D_800D9F40;
+    }
+    if (height == 0.0f) {
+        height = D_800D9F3C;
+    }
+    r = (u8 *)D_800BE628 + player * 0x180;
+    func_1510BB78(player, (u16 *)(r + 0xB8), *(f32 *)(r + 0x78), *(f32 *)(r + 0x74), width, height, *(f32 *)(r + 0x84));
+    D_800D9F18[player].x = width;
+    D_800D9F18[player].y = height;
+    D_800D9F38 = 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510B9D8.s")
+#endif
 #ifdef NON_MATCHING
 // Apply the pending per-player requests queued in D_800D9F18 (x == -1.0f: none) through func_1510BB78,
 // with the player's camera record (D_800BE628, 0x180 bytes each).
+#ifndef NON_MATCHING
 struct PendingF2 { f32 x, y; };
+#endif
 extern struct PendingF2 D_800D9F18[];
 extern u8 D_800D9F38;
 void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
