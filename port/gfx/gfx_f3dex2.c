@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 int port_flag(const char *name);
+extern unsigned port_frame_count; /* P46: for ?lvlcol */
 __attribute__((weak)) void port_frame_probe(unsigned task) { (void)task; }
 #include <math.h>
 #include <GLES3/gl3.h>
@@ -650,6 +651,14 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
         if (lw < 0) lw = port_flag("lvlwhite");
         /* P44: ?lvlwhite=2 forces white for any BG start colour (the stack garbage can be a dim green, not 000000) */
         if (lw && light_bg && (lw >= 2 || (!amb[0] && !amb[1] && !amb[2]))) c[0] = c[1] = c[2] = 1.0f;
+        /* P46: ?lvlcol=N logs the first N changes of the BG start colour (P43: func_1515E7E8 is C and fills it) */
+        static int lc = -1, lcn;
+        static unsigned lcprev = 0xFFFFFFFFu;
+        if (lc < 0) lc = port_flag("lvlcol");
+        if (lc && light_bg && lcn < lc) {
+            unsigned cur = (unsigned)amb[0] << 16 | (unsigned)amb[1] << 8 | amb[2];
+            if (cur != lcprev) { lcprev = cur; lcn++; port_log("[lvlcol] BG start colour %06X (M %d), frame %u\n", cur, M, port_frame_count); }
+        }
     }
     if (!light_bg) {
         const float *d = lmdir[2 + M];
@@ -1381,6 +1390,16 @@ void __wrap_func_1512C490(void *arg0) {
                       *(float *)&v[12], *(float *)&v[13], *(float *)&v[14], *(float *)&v[15], *(float *)&v[16], *(float *)&v[17],
                       *(float *)&v[18], *(float *)&v[19], *(float *)&v[20], *(float *)&v[21], *(float *)&v[22], *(float *)&v[23],
                       v[27], *(float *)&v[3], *(float *)&v[4], *(float *)&v[5], *(float *)&v[6], *(float *)&v[7], *(float *)&v[8]);
+        if (cw_calls % (unsigned)every == 0 && D_800DBFF0) { /* P46: the eye-height state of P43's func_1512E6B0 / func_1512A390 */
+            const unsigned char *c = (const unsigned char *)D_800DBFF0;
+#define CWF(o) (*(const float *)(c + (o)))
+            port_log("[camwatch]   height: 344 dy %g 348 h %g 354 base %g 360 water %g 364 %g 6F0 %g 6F4 %g | 84 %08X 5F0 %08X "
+                     "920 %08X 92C %08X 23C %02X 7F4 %08X 5CC %g 384 %g\n", CWF(0x344), CWF(0x348), CWF(0x354), CWF(0x360),
+                     CWF(0x364), CWF(0x6F0), CWF(0x6F4), *(const unsigned *)(c + 0x84), *(const unsigned *)(c + 0x5F0),
+                     *(const unsigned *)(c + 0x920), *(const unsigned *)(c + 0x92C), c[0x23C ^ 3], *(const unsigned *)(c + 0x7F4),
+                     CWF(0x5CC), CWF(0x384));
+#undef CWF
+        }
         if ((cw_calls & 63) == 0 && v[28]) { /* P39: the object array D_800CC2D0[] (EU 0x800CC6F0, 0x32C each): pos, +0x31C */
             int k;
             for (k = 0; k < 8; k++) {
@@ -1501,4 +1520,58 @@ int __wrap_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, 
                      ex[0], ex[1], ex[2], ex[3], ex[4], ex[5], ex[6]);
     }
     return got;
+}
+
+/* P46: ?p46check=N runtime checks of P43's frame-DL C (link-time wraps; N = how many calls to log in detail).
+ *  - func_1502BDC0 (object list draw; calls the now-C func_1502CC64 per object part): commands it appends per mode.
+ *  - func_15196560 (texture scrolling): the D_800E0D18 list, scroll position (+0xE / +0x10) and speed (+0x12 / +0x13). */
+static int p46_flag = -1;
+extern unsigned char D_800CC2D0[], D_800C3638, D_800C3A7A;
+int func_1506196C(void *rec, int part);
+static unsigned p46_bdc0_calls, p46_bdc0_cmds[4], p46_bdc0_n[4], p46_6560_calls;
+void *__real_func_1502BDC0(void *gdl, int mode, short player);
+void *__wrap_func_1502BDC0(void *gdl, int mode, short player) {
+    void *r;
+    if (p46_flag < 0) p46_flag = port_flag("p46check");
+    r = __real_func_1502BDC0(gdl, mode, player);
+    if (p46_flag) {
+        unsigned d = (unsigned)((char *)r - (char *)gdl) / 8, k = (unsigned)mode & 3;
+        p46_bdc0_cmds[k] += d; p46_bdc0_n[k]++;
+        if (p46_bdc0_calls < (unsigned)p46_flag || (p46_bdc0_calls & 255) == 0) {
+            const unsigned char *r0 = D_800CC2D0;
+            port_log("[p46] func_1502BDC0 #%u frame %u mode %d player %d: %u commands appended | rec0 state %u id %02X "
+                     "unk5 %02X +74 %02X +1D4 %08X +1C8 %02X alpha(func_1506196C) %d | D_800C3638 %u D_800C3A7A %u\n",
+                     p46_bdc0_calls, port_frame_count, mode, player, d, *(const unsigned *)r0, vbe_ld8(r0 + 4),
+                     vbe_ld8(r0 + 5), vbe_ld8(r0 + 0x74), *(const unsigned *)(r0 + 0x1D4), vbe_ld8(r0 + 0x1C8),
+                     func_1506196C((void *)r0, player), vbe_ld8(&D_800C3638), vbe_ld8(&D_800C3A7A));
+        }
+        if ((p46_bdc0_calls & 1023) == 1023)
+            port_log("[p46] func_1502BDC0 %u calls: mode1 %u calls %u cmds, mode2 %u calls %u cmds, other %u calls %u cmds\n",
+                     p46_bdc0_calls + 1, p46_bdc0_n[1], p46_bdc0_cmds[1], p46_bdc0_n[2], p46_bdc0_cmds[2],
+                     p46_bdc0_n[0] + p46_bdc0_n[3], p46_bdc0_cmds[0] + p46_bdc0_cmds[3]);
+    }
+    p46_bdc0_calls++;
+    return r;
+}
+extern unsigned D_800E0D18;
+int __real_func_15196560(int a0, int a1);
+int __wrap_func_15196560(int a0, int a1) {
+    int r;
+    if (p46_flag < 0) p46_flag = port_flag("p46check");
+    r = __real_func_15196560(a0, a1);
+    if (p46_flag && (p46_6560_calls < (unsigned)p46_flag || (p46_6560_calls & 255) == 0)) {
+        const unsigned char *e = (const unsigned char *)D_800E0D18;
+        int n = 0;
+        port_log("[p46] func_15196560 #%u frame %u (DLs %08X %08X):\n", p46_6560_calls, port_frame_count, a0, a1);
+        while (e && n < 6) {
+            port_log("[p46]   ent %08X pos %u %u size %u %u speed %d %d levels %u\n", (unsigned)e, vbe_ld16(e + 0xE),
+                     vbe_ld16(e + 0x10), vbe_ld16(e + 0xA), vbe_ld16(e + 0xC), (signed char)vbe_ld8(e + 0x12),
+                     (signed char)vbe_ld8(e + 0x13), vbe_ld8(e + 0x14));
+            e = *(const unsigned char *const *)(e + 4);
+            n++;
+        }
+        if (!n) port_log("[p46]   (list empty)\n");
+    }
+    p46_6560_calls++;
+    return r;
 }

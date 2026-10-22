@@ -116,9 +116,21 @@ def conv(ind, v, src, dst, tmp, out):
     return t
 
 
+# TEMPORARY (P46, port-web): o32 leaves a missing argument in its register. Calls listed here pass
+# the CALLER's first parameter (still in a0 in the asm) instead of zero. Remove each entry when the
+# port branch fixes the call in source.
+#   game_14FF90.c func_15127FEC: `func_1512A390();`, which takes `struct108 *` since P43.
+A0_KEEP = {('@func_15127FEC', '@func_1512A390')}
+DEFINE_A0 = re.compile(r'^define [^@]*(@[\w.$]+)\((ptr|i32)[^%,)]*(%[\w.]+)?')
+
+
 def normalize(lines, can, tmp, stats):
     out = []
+    cur = (None, None, None)
     for l in lines:
+        if l.startswith('define '):
+            m = DEFINE_A0.match(l)
+            cur = (m[1], m[2], m[3]) if m else (None, None, None)
         if l.startswith('declare '):
             m = DECLARE.match(l)
             if m and m[2] in can and not m[2].startswith('@llvm.'):
@@ -160,6 +172,9 @@ def normalize(lines, can, tmp, stats):
                             if {sa[i][0], p} == {'float', 'i32'}:
                                 stats['fp_int_arg'] += 1
                             args.append(f'{p} {conv(ind, sa[i][1], sa[i][0], p, tmp, new)}')
+                        elif i == 0 and (cur[0], m[5]) in A0_KEEP and cur[2] and cur[1] == p:
+                            args.append(f'{p} {cur[2]}')
+                            stats['a0_keep'] += 1
                         else:
                             args.append(f'{p} {zero(p)}')
                     call = f'{m[3]}{r} {m[5]}({", ".join(args)})'

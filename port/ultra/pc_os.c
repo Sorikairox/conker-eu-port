@@ -405,6 +405,10 @@ s32 osPiRawReadIo(u32 devAddr, u32 *data) {
         v = (u32)port_rom[off] << 24 | (u32)port_rom[off + 1] << 16 | (u32)port_rom[off + 2] << 8 | port_rom[off + 3];
     else
         port_log("[pi] raw read 0x%08X out of ROM\n", devAddr);
+    {   /* P46: log the first raw reads (func_15002FB4's 0xA5C check; func_150A16A4's kind-8 trigger reads 0xB0000454) */
+        static int n;
+        if (n++ < 8) port_log("[pi] raw read 0x%08X = 0x%08X\n", devAddr, v);
+    }
     *data = v; /* aligned word in game memory: native store = BE value (word-swapped storage) */
     return 0;
 }

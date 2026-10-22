@@ -12,6 +12,9 @@ clang diagnostics, so only the reported lines change:
       a K&R-defined function called with another arity in the same TU (IDO passes the registers
       through; clang knows the definition's parameter count). The call goes through an unprototyped
       pointer, which the icall/sigs layer already handles like any other mismatching call.
+  array initializer must be ...      `T a[N] = D_x;`  ->  `T a[N]; { element-wise copy from &D_x }`  (P46)
+      IDO copies a local array from a data symbol (m2c's rodata-table locals). The copy is element
+      by element in the array's type, so the vbe pass word-swaps both sides like any other access.
 """
 import os, re
 
@@ -19,6 +22,7 @@ OUT = 'port/build/srcfix'
 DIAG = re.compile(r'^(?P<file>[^:\s]+):(?P<line>\d+):(?P<col>\d+): error: (?P<msg>.*)$')
 LCAST = re.compile(r'\(\s*([A-Za-z_][\w ]*?\s*\**)\s*\)\s*([A-Za-z_][\w.\[\]>-]*)\s*=(?!=)')
 CALL = re.compile(r'([A-Za-z_]\w*)\s*\(')
+ARRINIT = re.compile(r'^(\s*)([A-Za-z_][\w ]*?)\s+([A-Za-z_]\w*)\s*\[([^\]]*)\]\s*=\s*([A-Za-z_][\w.\[\]>-]*)\s*;(.*)$')
 
 
 def path_for(rel):
@@ -35,6 +39,8 @@ def fix(path, rel, stderr):
             continue
         if 'assignment to cast is illegal' in m['msg']:
             todo.append(('cast', int(m['line']), int(m['col'])))
+        elif m['msg'].startswith('array initializer must be an initializer list'):
+            todo.append(('arrinit', int(m['line']), int(m['col'])))
         elif re.match(r'too (many|few) arguments to function call, expected (\d+)', m['msg']):
             todo.append(('arity', int(m['line']), int(m['col']),
                          int(re.search(r'expected (\d+)', m['msg'])[1])))
@@ -46,6 +52,14 @@ def fix(path, rel, stderr):
         s = lines[ln - 1]
         if kind == 'cast':
             new, n = LCAST.subn(lambda m: f'*({m[1]} *)&{m[2]} =', s, count=1)
+        elif kind == 'arrinit':
+            a = ARRINIT.match(s)
+            if not a:
+                return None
+            ind, t, nm, dim, src, rest = a.groups()
+            new = (f'{ind}{t} {nm}[{dim}]; {{ int __sf_i; for (__sf_i = 0; __sf_i < (int)(sizeof({nm}) / sizeof({nm}[0])); '
+                   f'__sf_i++) {nm}[__sf_i] = ((__typeof__({nm}[0]) *)&({src}))[__sf_i]; }}{rest}')
+            n = 1
         else:
             # the column points at the offending argument; the callee is the last call opened before it
             head = s[:col - 1]

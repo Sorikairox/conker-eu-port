@@ -741,7 +741,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -762,7 +762,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P37.md` (merge port P36, PC stand-ins removed, inflater / camera-target runtime checks, visibility-walk inputs) and
 `docs/port/sessions/P39.md` (merge port P38, camera eye/at writer and its stubbed inputs, runtime checks of the P38 C) and
 `docs/port/sessions/P42.md` (merge port P40, KSEG0 pointer tests and computed IO_READ, the real visibility walk on level data) and
-`docs/port/sessions/P44.md` (runtime check of P41's camera chain, the game's own view, what blocks player movement). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P44.md` (runtime check of P41's camera chain, the game's own view, what blocks player movement) and
+`docs/port/sessions/P46.md` (runtime check of P43 / P45, srcfix array initializers, the first lit and framed game-camera frame). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1448,6 +1449,34 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
     - func_1512E6B0, then func_1512A390: the eye height;
     - func_1504CB98 + func_150A16A4: the player moves;
     - func_1515E7E8: the level colour.
+- **P46 (after merging port P43 + P45, bb80ab1): the first lit, framed game-camera frame.** Full notes: P46.md.
+  - Clean rebuild. Node 40 s: 8/8 PASS, heap 0 errors, 74 distinct stubs (P44: 82). Real-time Chrome (Metal, three
+    runs): 0 RuntimeError, heap 0 errors, frame 600 at 347 commands and 288 triangles.
+  - **Screenshot** `P46_screenshot.png`: no freecam, no `lvlwhite`. Level 0x21's floor seen from above (about 37°
+    down), lit by the game's own lights.
+  - **Level colour:** still black after P43. The cause was a dropped TU, not P43's C. `game_36680.c` (the level light
+    init **func_150091D0**: `func_1515D4D4(255, 255, 255, 0)`) failed under clang on `u8 sp1C[4] = D_80095B70;`.
+    **`srcfix.py` kind `arrinit`** now copies such arrays element by element. It fixes game_36680.c and game_2062D0.c.
+    BG start colour: 000000 → 262626 with 3 point lights (`?lvlcol=N`).
+  - **Eye height correct:** eye.y = base 0x354 (1) + dy 0x344 (400 = h 0x348). No bug in func_1512E6B0 /
+    func_1512A390. Their floor query, the asm **func_1510EED0** (932 lines), is now the #2 stub; the floor stays at the
+    -10000 default.
+  - **TEMPORARY `sigs.py A0_KEEP`:** game_14FF90.c func_15127FEC calls `func_1512A390();` with no argument. sigs.py
+    padded it with NULL (no trap, a null-zone write if reached). Now it passes the caller's arg0, as a0 does in the
+    asm. Remove it when port-b fixes the source. func_15127FEC was not reached in 40 s.
+  - **func_1509BE40 → D_80088838:** mismatches (asm-stub `v:` entries, func_1509CBD8 `v:iii`) go through
+    `__port_icall_slow` with no trap. Entry 1 **func_1509A024** (1655 lines) is the stub that runs every frame.
+  - **Objects do not draw:** func_1502CC64 (C) returns early because the player record's model +0x1D4 is 0. It is set
+    by func_1502E228 through the C func_1502C074, whose only caller is the **asm func_1502C1D4** (198 lines, per-object
+    update; not a "shadow chain"). `?p46check=N` (wraps of func_1502BDC0 / func_15196560).
+  - **func_15196560:** runs every frame, but its list D_800E0D18 is empty on both levels. Not exercised.
+  - **func_150A16A4 kind 8:** not reached. The PI model is right: ROM 0x454 = 0x0109082B, + 0x400 = the tested
+    0x01090C2B. `[pi] raw read` logs the first 8.
+  - Movement: unchanged; func_1504CB98 is still a stub. func_1507E690 (76 lines, under func_1507EB1C) is a new stub.
+  - **For the port branch:** fix `func_1512A390(arg0)` in func_15127FEC; **func_1502C1D4**, func_1502E228,
+    func_1502E7B4 (Conker's model); func_1504CB98 + func_1507E690 (movement); func_1510EED0 / func_150A44A4 (floor);
+    func_1509A024. game_36680.c and game_2062D0.c build on the PC only through srcfix; write explicit copies if they
+    get NON_MATCHING bodies.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
