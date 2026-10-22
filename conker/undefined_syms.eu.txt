@@ -1788,3 +1788,4 @@ D_8003A581                      = 0x8003A8E1;
 D_8002AC54                      = 0x8002AF94;
 D_8002AC6C                      = 0x8002AFB0;
 D_8009FAB0                      = 0x8009FAB0; /* P22: eps of func_150AB278 (asm/D5E90.s, NON_MATCHING C) */
+D_8009FAA0 = 0x8009FAA0; /* P62: pi / 180 (func_150A9B0C, NON_MATCHING D5E90_mtx.c) */

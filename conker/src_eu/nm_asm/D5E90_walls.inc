@@ -227,8 +227,8 @@ L_150AACEC:
 L_150AACF4:
     at = 0x3F800000;
     F[12].u = at;
-    at = 0x800A0000;
-    F[8].u = LW(at + -1360);
+    at = HI((u32) &D_8009FAB0);
+    F[8].u = LW(at + LO((u32) &D_8009FAB0));
     t9 = ra | 0;
     F[6].f = F[23].f;
     F[7].f = F[23].f;
