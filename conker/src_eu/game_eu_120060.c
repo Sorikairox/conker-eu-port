@@ -108,7 +108,7 @@ s32 func_150F2B20(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, s32, s32);
+s32 func_1509BE40(s32, s32, ...);
 
 void func_150F2C20(struct108 *arg0) {
     f32 temp_f0;

@@ -3,7 +3,7 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1515F4E4(s16 *arg0);
-s32 func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
+void func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
 void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7);
 void func_1515F1E8(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 #endif
@@ -355,9 +355,51 @@ Gfx *func_1515DE84(Gfx *gdl, s16 player, s32 x, s32 y, s32 z, s32 arg5, s32 base
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515DE84.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E7E8.s")
-
 u8 *func_1515F0F4(s32, s32, s32, s32, u8 **);
+
+#ifdef NON_MATCHING
+/* Starting light colour of a position (P43): the colour zone of the D_800DCD80 list that contains (x, y, z) (word +0x18,
+ * bytes R, G, B from the low end), else the level colour D_800DCD20 scaled by (0x100 - ((arg5 >> 5) & 3) * 0x40) >> 8.
+ * flags & 0x10: blend with the fog / tint zone of func_1515E9AC: c' = (tintB * (c + ((0xFF - c) * fb >> 8))) >> 8,
+ * plus 7/8 of (tintA * (c + ((0xFF - c) * fa >> 8))) >> 8, clamped to 0xFF. The asm returns no value. */
+void func_1515E7E8(s32 x, s32 y, s32 z, s32 mask, u8 *col, s32 arg5, s32 flags) {
+    u8 tintA[4];  /* sp4C */
+    u8 tintB[4];  /* sp48 */
+    u8 fa, fb;    /* sp47, sp46 */
+    u8 add[3];    /* sp50 */
+    u8 *p;
+    s32 i;
+
+    p = func_1515F0F4(x, y, z, mask, (u8 **)D_800DCD80);
+    if (p != NULL) {
+        col[0] = *(u32 *)(p + 0x18);
+        col[1] = *(u32 *)(p + 0x18) >> 8;
+        col[2] = *(u32 *)(p + 0x18) >> 16;
+    } else {
+        u32 s = 0x100 - (((arg5 >> 5) & 3) << 6);
+        for (i = 0; i < 3; i++) {
+            col[i] = (s32)(((u8 *)&D_800DCD20)[i] * s) >> 8;
+        }
+    }
+    if (flags & 0x10) {
+        func_1515E9AC(x, y, z, mask, tintA, tintB, &fa, &fb);
+        for (i = 0; i < 3; i++) {
+            u32 v = col[i];
+            s32 c;
+            add[i] = (s32)(tintA[i] * ((v + ((s32)((0xFF - v) * fa) >> 8)) & 0xFF)) >> 8;
+            v = col[i];
+            col[i] = (s32)(tintB[i] * ((v + ((s32)((0xFF - v) * fb) >> 8)) & 0xFF)) >> 8;
+            c = ((s32)(add[i] * 7) >> 3) + col[i];
+            if (c >= 0x100) {
+                c = 0xFF;
+            }
+            col[i] = c;
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515E7E8.s")
+#endif
 
 void func_1515E9AC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
     u8 *p;
@@ -490,7 +532,7 @@ block_8:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18B1C0/func_1515EAB4.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
+void func_1515E7E8(s32, s32, s32, s32, u8 *, s32, s32);
 extern u8 D_800DA241;
 extern u8 *D_800DA248;
 

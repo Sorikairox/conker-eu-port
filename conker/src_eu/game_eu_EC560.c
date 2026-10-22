@@ -6,7 +6,7 @@
 #ifdef NON_MATCHING
 extern f32 D_800A0480;
 extern f32 D_800A0484;
-s32 func_1509BE40(s32, s32, s32);
+s32 func_1509BE40(s32, s32, ...);
 
 void func_150BED50(struct108 *arg0) {
     s32 sp28;

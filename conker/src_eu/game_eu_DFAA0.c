@@ -5,7 +5,11 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2290.s")
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+#else
 s32 func_1509BE40(s32, s32, s32, s32);
+#endif
 
 void func_150B2300(u8 *arg0) {
     u8 *temp_v0;

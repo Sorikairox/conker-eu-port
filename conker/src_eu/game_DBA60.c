@@ -2,6 +2,9 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+#endif
 
 
 void func_150AE5B0(struct108 *arg0) {

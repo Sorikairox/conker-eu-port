@@ -146,7 +146,92 @@ void func_15195FB0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s
     func_15196344(*(s32 *)(arg0 + 0x1C), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
+#ifdef NON_MATCHING
+/* P43: texture scrolling. For each entry of the D_800E0D18 list (next at +4): the scroll position (+0xE, +0x10, u16)
+ * gives up to 8 (+0x14) G_SETTILESIZE words (0xF2000000 | s << 12 | t, s and t halved per mip level), written to the
+ * level DLs arg0 (indices +0x1C[5], counts +0x30[5]) and arg1 (+0x26[5], +0x35[5]) and to the +0x18 chain of extra
+ * DLs (+8 base, +0xC index, +0xE count, next at +0x10); then the position moves by speed (+0x12, +0x13, s8) times
+ * D_800BE9E4 unless D_800BEAC0, wrapping once at the texture size (+0xA, +0xC) * 8. A count above the number of
+ * words built reads stale stack in the asm (C: uninitialised tbl[]). The asm returns no value. */
+s32 func_15196560(s32 arg0, s32 arg1) {
+    s32 tbl[8];  /* sp5C */
+    u8 *e;
+    u8 *p;
+    s32 u, v, w, h;
+    s32 su, sv;
+    s32 n, j, k;
+    s16 idx;
+
+    for (e = (u8 *)D_800E0D18; e != NULL; e = *(u8 **)(e + 4)) {
+        u = *(u16 *)(e + 0xE);
+        v = *(u16 *)(e + 0x10);
+        w = *(s16 *)(e + 0xA);
+        h = *(s16 *)(e + 0xC);
+        su = u / 8 + 2;
+        sv = v / 8 + 2;
+        if (su >= w) {
+            su -= w;
+        }
+        if (sv >= h) {
+            sv -= h;
+        }
+        n = 0;
+        if (e[0x14] > 0) {
+            do {
+                tbl[n++] = 0xF2000000 | ((su & 0xFFF) << 12) | (sv & 0xFFF);
+                su /= 2;
+                sv /= 2;
+            } while (n < 8 && n < e[0x14]);
+        }
+        w *= 8;
+        h *= 8;
+        if (D_800BEAC0 == 0) {
+            u += *(s8 *)(e + 0x12) * D_800BE9E4;
+            v += *(s8 *)(e + 0x13) * D_800BE9E4;
+        }
+        if (u < 0) {
+            u += w;
+        } else if (u >= w) {
+            u -= w;
+        }
+        if (v < 0) {
+            v += h;
+        } else if (v >= h) {
+            v -= h;
+        }
+        *(u16 *)(e + 0xE) = u;
+        *(u16 *)(e + 0x10) = v;
+        if (*(s16 *)(e + 0x1C) != -1) {
+            k = 0;
+            do {
+                idx = *(s16 *)(e + 0x1C + k * 2);
+                for (j = 0; j < e[0x30 + k]; j++) {
+                    *(s32 *)(arg0 + idx * 8 + j * 16) = tbl[j];
+                }
+                k++;
+            } while (k < 5 && *(s16 *)(e + 0x1C + k * 2) != -1);
+        }
+        if (*(s16 *)(e + 0x26) != -1) {
+            k = 0;
+            do {
+                idx = *(s16 *)(e + 0x26 + k * 2);
+                for (j = 0; j < e[0x35 + k]; j++) {
+                    *(s32 *)(arg1 + idx * 8 + j * 16) = tbl[j];
+                }
+                k++;
+            } while (k < 5 && *(s16 *)(e + 0x26 + k * 2) != -1);
+        }
+        for (p = *(u8 **)(e + 0x18); p != NULL; p = *(u8 **)(p + 0x10)) {
+            for (j = 0; j < p[0xE]; j++) {
+                *(s32 *)(*(s32 *)(p + 8) + *(u16 *)(p + 0xC) * 8 + j * 16) = tbl[j];
+            }
+        }
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15196560.s")
+#endif
 
 void func_15196888(u8 *arg0, s32 arg1, s32 arg2) {
     if (arg0 != NULL) {

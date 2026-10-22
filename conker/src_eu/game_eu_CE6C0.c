@@ -5,6 +5,28 @@
 void func_150A28C4(u8 *arg0);
 s32 func_150A2280(struct127 *arg0, u8 *arg1, s32 arg2);
 s32 func_150AD9A0(s32, s32, s32);
+s32 func_151733EC(struct127 *, u8, s32);
+void func_150A2AB4(u8 *, struct127 *, s32, u64);
+void func_150A29A0();
+void func_15080AA8(s32, s32);
+void func_15082DD8(struct127 *);
+void func_15055C88(struct127 *);
+void func_1000D96C(s32, s32, s32);
+void func_15080900(struct127 *, u8 *, s32, s32, s32);
+void func_151AE61C(struct127 *, u8 *);
+void func_1501D348(s32, s32, s32, s32, s32);
+void func_10023BC0(void);
+void func_10023C04(void);
+s32 osPiRawReadIo(u32, u32 *);
+extern u8 *D_800D34BC;
+extern u64 D_800D34C0[3];
+extern u64 D_800D34D8[3];
+extern u16 D_800D34F0[16];
+extern u8 **D_800D3690;
+extern s32 D_800D3694;
+extern s32 D_800D3698;
+extern u8 D_800DF510;
+extern u8 D_800DF511;
 #endif
 typedef struct { s16 x; s16 y; s16 z; s16 unk6; u8 pad8[8]; f32 unk10; u8 unk14; u8 unk15; u8 unk16; u8 unk17; s32 unk18; s32 unk1C; s32 unk20; f32 unk24; f32 unk28; f32 unk2C; f32 unk30; } Unk34B8; // 0x34 bytes, D_800D34B8[]
 extern u64 D_800D3510[][3];
@@ -232,8 +254,302 @@ void func_150A152C(struct108 *arg0, u8 **arg1, s32 arg2) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
+#ifdef NON_MATCHING
+// P45: trigger zones of a record, per frame, before its state handler (func_1504A730).
+// Zones: D_800D34BC, 0x28 bytes each: u64 mask[3] (which triggers the zone allows), u8 +0x18 priority, s16 box
+// +0x1A..+0x24 (x min/max, y min/max, z min/max, exclusive). w = the record's cached zone (D_800D34F0[player] - 1)
+// if it still contains the position, else D_800D34D8; then every zone set in w that contains the position ANDs its
+// mask in (the lowest priority one is cached for players), a zone that does not is cleared. w |= D_800D34C0 (always
+// on). Then each trigger set in w (D_800D34B8, 0x34 bytes) that func_150A2280 says the record touches fires by
+// kind (+0x15 >> 2) and is recorded in D_800D3510[player] (the bits of the previous frame are `prev`).
+void func_150A16A4(struct127 *arg0) {
+    u32 spCC;
+    s32 spC8;
+    struct108 *spB8;
+    u64 w[3];
+    u64 mask;
+    u64 prev;
+    u64 *ws;
+    u64 *ps;
+    u32 sp68;
+    s32 player;
+    s32 found;
+    s16 x, y, z;
+    u32 i;
+    u32 next;
+    u32 base;
+    s32 k;
+    u8 *zone;
+    u8 *e;
+    s32 off;
+    s32 v;
+    u32 ang;
+    s32 flip;
+    u8 *o;
 
+    spCC = 1000;
+    spC8 = arg0->unk127;
+    spB8 = arg0->camera;
+    if (spB8 == NULL) {
+        spC8 = 0xFF;
+    } else if (D_800D3694 != 0) {
+        func_150A152C(spB8, D_800D3690, D_800D3694);
+    }
+    x = (s32)arg0->x_position;
+    y = (s32)arg0->y_position;
+    z = (s32)arg0->z_position;
+    if (arg0->unk127 != 0xFF) {
+        func_15080AA8(arg0->unk127, arg0->unk127);
+    }
+    func_15082DD8(arg0);
+    *(s16 *)((u8 *)arg0 + 0x120) = -10000;
+    D_800D3698 = 0;
+    player = arg0 - D_800CC2D0;
+    found = 0;
+    if (player < 16) {
+        if (D_800D34F0[player] > 0) {
+            zone = D_800D34BC + D_800D34F0[player] * 0x28 - 0x28;
+            if (*(s16 *)(zone + 0x1A) < x && x < *(s16 *)(zone + 0x1C) && *(s16 *)(zone + 0x1E) < y &&
+                y < *(s16 *)(zone + 0x20) && *(s16 *)(zone + 0x22) < z && z < *(s16 *)(zone + 0x24)) {
+                for (k = 0; k < 3; k++) {
+                    w[k] = ((u64 *)zone)[k];
+                }
+                found = 1;
+            }
+        }
+        D_800D34F0[player] = 0;
+    }
+    ws = w;
+    if (found == 0) {
+        for (k = 0; k < 3; k++) {
+            w[k] = D_800D34D8[k];
+        }
+    }
+    i = 0;
+    base = 0;
+    mask = w[0];
+    if (D_800D3094 != 0) {
+        do {
+            if (mask == 0) {
+                base += 64;
+                i = base;
+                if (!(base < (u32)D_800D3094)) {
+                    next = i + 1;
+                    goto next1;
+                }
+                mask = ws[1];
+                ws++;
+            }
+            if ((u32)mask & 1) {
+                zone = D_800D34BC + i * 0x28;
+                if (*(s16 *)(zone + 0x1A) < x && x < *(s16 *)(zone + 0x1C) && *(s16 *)(zone + 0x1E) < y &&
+                    y < *(s16 *)(zone + 0x20) && *(s16 *)(zone + 0x22) < z && z < *(s16 *)(zone + 0x24)) {
+                    for (k = 0; k < 3; k++) {
+                        w[k] &= ((u64 *)zone)[k];
+                    }
+                    if (player < 16 && zone[0x18] < spCC) {
+                        D_800D34F0[player] = i + 1;
+                        spCC = zone[0x18];
+                    }
+                } else {
+                    *ws ^= 1ULL << (i - base);
+                }
+            }
+            next = i + 1;
+            mask >>= 1;
+        next1:
+            i = next;
+        } while (next < (u32)D_800D3094);
+        ws = w;
+        base = 0;
+    }
+    for (k = 0; k < 3; k++) {
+        w[k] |= D_800D34C0[k];
+    }
+    if (player < 16) {
+        ps = D_800D3510[player];
+        prev = *ps;
+        *ps = 0;
+    } else {
+        ps = NULL;
+    }
+    i = 0;
+    mask = w[0];
+    if (D_800D3094 != 0) {
+        do {
+            if (mask == 0) {
+                base += 64;
+                i = base;
+                if (!(base < (u32)D_800D3094)) {
+                    next = i + 1;
+                    goto next2;
+                }
+                mask = ws[1];
+                ws++;
+                if (ps != NULL) {
+                    prev = ps[1];
+                    ps++;
+                    *ps = 0;
+                }
+            }
+            if (((u32)mask & 1) && (off = i * 0x34, func_150A2280(arg0, D_800D34B8 + off, 0) == 0)) {
+                e = D_800D34B8 + off;
+                v = e[0x15] >> 2;
+                if (v < 26) {
+                    switch (v) {
+                    case 0:
+                        if (spB8 != NULL && e[0x17] != 0xC) {
+                            func_1512DAD0(spB8, 1, D_800D34B8 + off);
+                            *(u16 *)((u8 *)spB8 + 0x700) = i;
+                        }
+                        break;
+                    case 1:
+                        if (e[0x17] < 10) {
+                            switch (e[0x17]) {
+                            case 0:
+                                arg0->unkF8 &= ~4;
+                                break;
+                            case 1:
+                                arg0->unkF8 &= ~2;
+                                break;
+                            case 2:
+                                *(s16 *)((u8 *)arg0 + 0x120) = *(s16 *)(e + 8) + *(s16 *)(e + 2);
+                                break;
+                            case 3:
+                                arg0->unkF8 |= 2;
+                                break;
+                            case 4:
+                                func_15055C88(arg0);
+                                break;
+                            case 5:
+                                o = (u8 *)arg0->unk31C;
+                                if (o[0x95] == 0 && *((u8 *)arg0 + 0x104) == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
+                                    *((u8 *)arg0 + 0x89) == 0 && (o[0x11A] == 0 || D_800BE9F0 == 6) &&
+                                    8.0f < *(f32 *)((u8 *)arg0 + 0x44)) {
+                                    flip = 0;
+                                    ang = ((u32)(*(f32 *)(e + 0x10) * 182.04445f) - *(u16 *)(o + 0x4C)) & 0xFFFF;
+                                    if ((f32)(*(s16 *)(e + 8) + *(s16 *)(e + 2)) < arg0->y_position + 250.0f &&
+                                        *(f32 *)((u8 *)arg0 + 0x28) == 0.0f) {
+                                        ang = (ang - 0x8000) & 0xFFFF;
+                                        flip = 1;
+                                    }
+                                    if ((s32)ang >= 0x2001 && (s32)ang < 0x6000) {
+                                        o[0x97] = flip;
+                                        ((u8 *)arg0->unk31C)[0x96] = 0;
+                                        *((u8 *)arg0 + 0x8A) = 0x12;
+                                        ((u8 *)arg0->unk31C)[0x95] = i + 1;
+                                        if (*(s32 *)(D_800D34B8 + off + 0x18) != 0) {
+                                            o = (u8 *)arg0->unk31C;
+                                            o[0x95] |= 0x80;
+                                        }
+                                    }
+                                }
+                                break;
+                            case 6:
+                                arg0->unkF8 |= 4;
+                                break;
+                            case 7:
+                                arg0->unkF4 |= 0x100000;
+                                break;
+                            case 8:
+                                if (*(s32 *)(e + 0x18) != 0) {
+                                    D_800DF511 |= 1 << player;
+                                } else {
+                                    D_800DF510 |= 1 << player;
+                                }
+                                break;
+                            case 9:
+                                arg0->unkF8 |= 0x08000000;
+                                break;
+                            }
+                        }
+                        break;
+                    case 2:
+                        func_150A28C4(D_800D34B8 + off);
+                        break;
+                    case 3:
+                        if (e[0x17] == 5) {
+                            func_151AE61C(arg0, D_800D34B8 + off);
+                        }
+                        break;
+                    case 4:
+                        func_150A29A0(D_800D34B8 + off, spC8);
+                        break;
+                    case 7:
+                        if (*(s32 *)(e + 0x20) == 0) {
+                            if (func_1000E46C(e[0x17], 100, *(s32 *)(e + 0x18), 0) != 0) {
+                                e = D_800D34B8 + off;
+                                if (func_1000E46C(e[0x17], 0, *(s32 *)(e + 0x1C), 0) != 0) {
+                                    *(s32 *)(D_800D34B8 + off + 0x20) = 1;
+                                }
+                            }
+                        } else {
+                            *(s32 *)(e + 0x20) = 1;
+                        }
+                        break;
+                    case 8:
+                        func_10023BC0();
+                        osPiRawReadIo((u32)func_150A1520((u8 *)0xB0000054), &sp68);
+                        func_10023C04();
+                        if (func_150A1520((u8 *)sp68) == (u8 *)0x01090C2B && D_800C35EA == 0 &&
+                            *((u8 *)arg0 + 0x1CA) != 0) {
+                            e = D_800D34B8 + off;
+                            func_151733EC(arg0, e[0x17], *(s32 *)(e + 0x18));
+                            if (D_800BE9F0 != (D_800D34B8 + off)[0x17]) {
+                                *((u8 *)arg0 + 0x125) = 0xFF;
+                                *(f32 *)((u8 *)arg0 + 0x1CC) = arg0->y_position;
+                            }
+                        }
+                        break;
+                    case 11:
+                        func_15080900(arg0, D_800D34B8 + off, 1, e[0x17], *(s32 *)(e + 0x18));
+                        break;
+                    case 12:
+                        func_150A2AB4(D_800D34B8 + off, arg0, spC8, prev);
+                        break;
+                    case 13:
+                        if (spC8 != 0xFF && !((u32)prev & 1) && D_800E0B94 == 0 && *((u8 *)arg0 + 0x1CA) != 0 &&
+                            D_800C35EA == 0) {
+                            if (e[0x17] == 0) {
+                                e[0x14] = 1;
+                                e = D_800D34B8 + off;
+                            }
+                            func_1501D348(D_800BE9F0, *(s32 *)(e + 0x18), 0, 0, 0);
+                            e = D_800D34B8 + off;
+                            *(s32 *)(e + 0x1C) += 1;
+                        }
+                        break;
+                    case 14:
+                        if (spC8 != 0xFF && !((u32)prev & 1)) {
+                            func_1000D96C(e[0x17], *(s32 *)(e + 0x18), *(s32 *)(e + 0x1C) & 0xFF);
+                            e = D_800D34B8 + off;
+                            if (e[0x17] != 0) {
+                                func_1000E46C(e[0x17], 0, *(s32 *)(e + 0x20) & 0xFFFF, 0);
+                            }
+                        }
+                        break;
+                    case 25:
+                        if (e[0x17] == 0) {
+                            D_80041FD8 = *(s32 *)(e + 0x18);
+                        }
+                        break;
+                    }
+                }
+                if (ps != NULL) {
+                    *ps |= 1ULL << (i - base);
+                }
+            }
+            next = i + 1;
+            mask >>= 1;
+            prev >>= 1;
+        next2:
+            i = next;
+        } while (next < (u32)D_800D3094);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A16A4.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_150AD9A0(s32, s32, s32);
 s32 func_150ADE40(s16, s16, s32, s32);
@@ -480,7 +796,7 @@ void func_151CEACC(struct127 *, u8 *);
 extern u8 D_800D34B0;
 extern s32 D_800DA2D8;
 
-void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg5) {
+void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, u64 arg4) { // P45: was `s32 arg5` (read a3); the asm reads the low word of a u64 at sp+0x14
     u16 temp_v0_2;
     u8 temp_t1;
     u8 temp_t6;
@@ -511,7 +827,7 @@ void func_150A2AB4(u8 *arg0, struct127 *arg1, s32 arg2, s32 arg5) {
         }
         break;
     case 6:
-        if (!(arg5 & 1)) {
+        if (!(arg4 & 1)) {
             D_800D34B0 = 0x19;
             func_10010344(0x66FU, arg1, 0x5DC0, 0x190, 0x1F4U);
         }

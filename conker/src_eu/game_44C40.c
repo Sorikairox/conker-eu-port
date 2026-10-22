@@ -41,7 +41,7 @@ void func_15017868(void) {
 
 #ifdef NON_MATCHING
 u8 **allocate_memory(s32, s32, s32, s32);
-s32 func_15017B20(u8 *, u32);
+void func_15017B20(u8 *, u32);
 extern s32 D_800D34F0;
 extern s32 D_800D3510;
 extern u8 **D_800D3690;
@@ -143,5 +143,85 @@ block_18:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017930.s")
 #endif
+#ifdef NON_MATCHING
+void func_150A11F4(u8 *);
+void func_15017FA4(u8 *, u8 *);
+extern u8 *D_800D34BC;
+extern u64 D_800D34C0[3];
+extern u64 D_800D34D8[3];
+
+/* P43 (level load): per-zone records (0x28 bytes at D_800D34BC: u64 mask[3], u8 count at +0x18, s16 box x / y / z
+ * min-max at +0x1A..+0x24) from func_15017FA4 for each 0x34-byte zone of arg0; D_800D34C0 = zones with (+0x15 & 3) == 3
+ * or +0x16 & 8 (not +0x16 & 4), D_800D34D8 = the others without 8 / 4; then for every D_800D34D8 zone i the mask of the
+ * D_800D34D8 zones j whose box overlaps i's on all three axes (count in +0x18). The 64-bit masks are __ll_lshift calls in
+ * the asm (difftest compares the call sequence; the shift itself is the stub). The asm returns no value. */
+#define B20_OVL(a, b, lo, hi) \
+    ((*(s16 *)((b) + (lo)) >= *(s16 *)((a) + (lo)) && *(s16 *)((b) + (lo)) < *(s16 *)((a) + (hi))) \
+     || (*(s16 *)((b) + (lo)) < *(s16 *)((a) + (lo)) && *(s16 *)((a) + (lo)) < *(s16 *)((b) + (hi))) \
+     || (*(s16 *)((a) + (lo)) < *(s16 *)((b) + (hi)) && *(s16 *)((b) + (hi)) < *(s16 *)((a) + (hi))))
+
+void func_15017B20(u8 *arg0, u32 arg1) {
+    s32 n = arg1;
+    s32 i, j;
+    u8 *e;
+    u8 *ri;
+    u8 *rj;
+    u64 *wi;
+    u64 *wj;
+    u64 *mi;
+    u64 bi, bj;
+
+    D_800D34BC = (u8 *)allocate_memory(n * 0x28, 1, 1, 0);
+    for (i = 0; i < n; i++) {
+        func_150A11F4(arg0 + i * 0x34);
+        func_15017FA4(arg0 + i * 0x34, D_800D34BC + i * 0x28);
+    }
+    bzero(D_800D34C0, 0x18);
+    for (i = 0, e = arg0; i < n; i++, e += 0x34) {
+        if (((e[0x15] & 3) == 3 || (e[0x16] & 8)) && !(e[0x16] & 4)) {
+            D_800D34C0[i >> 6] |= (u64)1 << (i & 0x3F);
+        }
+    }
+    bzero(D_800D34D8, 0x18);
+    for (i = 0, e = arg0; i < n; i++, e += 0x34) {
+        if ((e[0x15] & 3) != 3 && !(e[0x16] & 8) && !(e[0x16] & 4)) {
+            D_800D34D8[i >> 6] |= (u64)1 << (i & 0x3F);
+        }
+    }
+    wi = D_800D34D8;
+    bi = 1;
+    for (i = 0; i < n; i++) {
+        ri = D_800D34BC + i * 0x28;
+        ri[0x18] = 0;
+        if (*wi & bi) {
+            bj = 1;
+            wj = D_800D34D8;
+            mi = (u64 *)ri;
+            bzero(ri, 0x18);
+            for (j = 0; j < n; j++) {
+                ri = D_800D34BC + i * 0x28;
+                rj = D_800D34BC + j * 0x28;
+                if ((*wj & bj) && B20_OVL(ri, rj, 0x1A, 0x1C) && B20_OVL(ri, rj, 0x1E, 0x20)
+                    && B20_OVL(ri, rj, 0x22, 0x24)) {
+                    *mi |= bj;
+                    ri[0x18]++;
+                }
+                bj <<= 1;
+                if (bj == 0) {
+                    wj++;
+                    mi++;
+                    bj = 1;
+                }
+            }
+        }
+        bi <<= 1;
+        if (bi == 0) {
+            wi++;
+            bi = 1;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017B20.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_44C40/func_15017FA4.s")

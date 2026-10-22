@@ -3,7 +3,11 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+#else
 s32 func_1509BE40(s32, s32, s32, s32, s32, s32);
+#endif
 
 void func_150C7850(u8 *arg0) {
     (*(s32 *)((u8 *)arg0 + 0x84)) = (s32) ((*(s32 *)((u8 *)arg0 + 0x84)) | 0x80004000);

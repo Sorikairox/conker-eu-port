@@ -4,7 +4,7 @@
 
 
 #ifdef NON_MATCHING
-s32 func_1509BE40(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_1509BE40(s32, s32, ...);
 
 void func_150D1A40(struct108 *arg0) {
     f32 sp34;
