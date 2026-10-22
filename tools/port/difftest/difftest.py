@@ -411,16 +411,28 @@ def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
     tu = _nocomment(tu)   # P30: commented-out old drafts (`//     func_X(a, b, c, d);`) are not prototypes
-    for m in re.finditer(r'\b%s\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*[;{]' % re.escape(name), tu):
+    ms = list(re.finditer(r'\b%s\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*[;{]' % re.escape(name), tu))
+    # P71: a declaration (type before the name) wins over call statements: `func_X((s32 *) M(rec, 0x28), 4);`
+    # counted the comma inside M(...) and made a 2-argument callee look like 3 (func_15030448 / func_100043B4)
+    decl = [m for m in ms if _is_decl(tu, m)]
+    for m in decl or ms:
         ps = m.group(1).strip()
         if ps in ('', ): continue
         if ps == 'void': return 0
         if '...' in ps: return 99
         n = 0
-        for p in ps.split(','):
+        for p in _split_top(ps):
             n += 2 if re.search(r'\b(f64|double|s64|u64|long long)\b', p) and '*' not in p else 1
         best = n
     return best
+
+def _split_top(ps):
+    """P71: split a parameter / argument list at the commas outside parentheses"""
+    out, d, cur = [], 0, ''
+    for ch in ps:
+        if ch == ',' and d == 0: out.append(cur); cur = ''; continue
+        d += {'(': 1, ')': -1}.get(ch, 0); cur += ch
+    return out + [cur]
 
 _DECL_PRE = re.compile(r'^\s*(?:(?:extern|static|inline)\s+)*[A-Za-z_]\w*[\s*]+$')
 def _is_decl(tu, m):

@@ -164,7 +164,7 @@ s16 *func_15034790(s16 *arg0, s32 arg1) {
     return arg0 + 4;
 }
 
-s32 func_1503BCAC();
+void func_1503BCAC();
 
 void func_1503482C(s32 arg0) {
     switch (D_800CC2D4[arg0 * 0x32C]) {

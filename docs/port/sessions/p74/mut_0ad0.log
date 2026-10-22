@@ -1,0 +1,22 @@
+m1 KILLED by k100_m4_f0_n1_l3C_c0: s/(D_80082FA0 == 1) ? 0x1C0 : 0x130/(D_80082FA0 == 2) ? 0x1C0 : 0x130/
+m2 KILLED by k96_m4_f0_n0_l3C_c0: s/D_800DC2B8\[p\]\[1\] = buf + n;/D_800DC2B8[p][1] = buf + n - 1;/
+m3 KILLED by k97_m4_f0_n0_l24_c1: s/i < 0x168/i < 0x167/
+m4 KILLED by k96_m4_f0_n0_l3C_c0: s/(D_80082FA0 + 1) \* 2 \* sizeof(Mtx), 1, 2, 0/(D_80082FA0 + 1) * 2 * sizeof(Mtx), 1, 1, 0/
+m5 KILLED by k96_m4_f0_n0_l3C_c0: s/(D_800BE9F0 == 0x3C) ? 1 : 0/(D_800BE9F0 == 0x3D) ? 1 : 0/
+m6 KILLED by k99_m4_f1_n0_l2A_c0: s/D_800B0DF0->unk8 = 2;/D_800B0DF0->unk8 = 1;/
+m7 KILLED by k39_m2_f0_n1_l24_c1: s/{ 0x03, 0x1C, 0x36 }/{ 0x03, 0x1C, 0x37 }/
+m8 KILLED by k42_m2_f0_n1_l2D_c0: s/case 0x2D:/case 0x2E:/
+m9 KILLED by k38_m2_f0_n1_l0_c1: s/(i - row) \/ (s->end - row)/(i - row + 1) \/ (s->end - row)/
+m10 KILLED by k38_m2_f0_n1_l0_c1: s/(col\[1\] << 16)/(col[1] << 15)/
+m11 KILLED by k38_m2_f0_n1_l0_c1: s/i < 0x100; i++/i < 0xFF; i++/
+m12 KILLED by k38_m2_f0_n1_l0_c1: s/buf = allocate_memory(2 \* 4 \* sizeof(Vtx), 1, 1, 0)/buf = allocate_memory(2 * 4 * sizeof(Vtx), 1, 2, 0)/
+m13 KILLED by k38_m2_f0_n1_l0_c1: s/v\[k\].v.ob\[2\] = -1000;/v[k].v.ob[2] = -999;/
+m14 KILLED by k38_m2_f0_n1_l0_c1: s/(k < 2) ? 0x6D6 : -0x6D6/(k < 1) ? 0x6D6 : -0x6D6/
+m15 KILLED by k00_m0_f0_n0_l7F_c0: s/D_800DC2D8\[2\] = D_800B0DF0->unk7/D_800DC2D8[2] = D_800B0DF0->unk6/
+m16 KILLED by k00_m0_f0_n0_l7F_c0: s/(D_800D2E4C->unk14 \& 1)/(D_800D2E4C->unk14 \& 2)/
+m17 KILLED by k08_m1_f0_n1_l2B_c1: s/} else if (D_800B0DF0->unk8 == 1) {/} else if (D_800B0DF0->unk8 == 3) {/
+m18 KILLED by k96_m4_f0_n0_l3C_c0: s/if (D_80038080 != 0) {/if (D_80038080 == 0) {/
+m19 KILLED by k44_m2_f0_n1_l3C_c1: s/{ 0x00, 0x67, 0x38 }/{ 0x00, 0x67, 0x39 }/
+m20 KILLED by k38_m2_f0_n1_l0_c1: s/v\[k\].v.tc\[0\] = 0x2000;/v[k].v.tc[1] = 0x2000;/
+m21 KILLED by k38_m2_f0_n1_l0_c1: s/for (p = 0; p <= D_80082FA0; p++) {/for (p = 0; p < D_80082FA0; p++) {/
+m22 KILLED by k96_m4_f0_n0_l3C_c0: s/if (D_800BE616 != 0 \&\& /if (/

@@ -61,4 +61,8 @@ chk DIFFER func_15048A70 src_eu/game_75E60.c 's/arg0 -= 360.0f;/arg0 -= 361.0f;/
 chkc EQUIV  func_151B97C4
 chkc DIFFER func_151B97C4 's/0.0234f/0.0235f/g'
 chkc DIFFER func_151B97C4 's/sinf(temp_f0)/sinf(temp_f2)/'
+# P71: a call statement with a comma inside a macro argument (`func_100043B4((s32 *) ATT_W(rec, 0x28), 4);`) is not
+# a 3-argument prototype: the declared 2-argument func_100043B4 must not compare the scratch a2 (was a false DIFFER)
+chkc EQUIV  func_15030448
+chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]
