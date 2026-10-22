@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P50 (port-b) (session P50, 2026-10-22). Details: `docs/port/sessions/P50.md`
+
+Branch `port-b` (from P47 c811a9e); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (814 bodies).
+- New NM C: **func_15056B08** (remote pad copy; P47's DIFFER was m2c `struct127 *` arithmetic `+= 0x32C`, not
+  rounding), and P49's movement path: **func_15059C84** (position integrator), **func_1505A770** (gravity),
+  **func_1504C0E8** (animation choice, sets +0x80). All void; their NM prototypes everywhere are void.
+- func_1504CB98: d-pad (34.0) and kind-2 floor branches now reached and mutant-killed (`p50/cbknobs.sh` m, o);
+  the in-water `/ 4` is unreachable under difftest (needs func_1504BC38 side effects): matches the asm by hand.
+- difftest: array parameters (`f32 mf[4][4]`) count as pointers in the float-slot logic; `DIFFTEST_RETF` (f0 of a stub).
+- D_800D1550 is `f32[]` (the frame-time float), not a pointer.
+
+## Next steps (from P50)
+
+1. Movement: func_150A44A4 + func_15021834 (NODRAFT: raw m2c), func_15044950 (CERR), func_1510EED0 when P48 hands it over.
+2. Walls func_150AB6D0 / func_150AC8C4 are 13-insn entry stubs into the hand-asm engine func_150AB708 (P50.md §3);
+   func_150ACEA0 is ~600 insns (P50.md §3): nm_asm C + whole-function harness.
+3. Browser: drop P49's PC overrides for func_15059C84 / func_1504C0E8 / func_1505A770 and recheck walking.
+Runtime checks: P50.md UNVERIFIED.
+
 ## P47 (port-b) (session P47, 2026-10-22). Details: `docs/port/sessions/P47.md`
 
 Branch `port-b` (fast-forwarded to `port` 1a26d1a during the session); the orchestrator merges it into `port`.

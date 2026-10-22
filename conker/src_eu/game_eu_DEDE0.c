@@ -47,7 +47,7 @@ void func_150B15D0(struct127 *arg0) {
 extern f32 D_8009FC8C;
 extern f32 D_8009FC90;
 s32 func_15021834(struct127 *, s32, s32);
-s32 func_15056B08(struct127 *);
+void func_15056B08(struct127 *);
 
 void func_150B17DC(struct127 *arg0) {
     f32 var_f2;
@@ -88,8 +88,8 @@ block_3:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1964.s")
 
 #ifdef NON_MATCHING
-s32 func_15056B08(struct127 *);
-s32 func_1505A770(struct127 *);
+void func_15056B08(struct127 *);
+void func_1505A770(struct127 *);
 u8 *func_1505EEB0(s32, s32 *);
 
 void func_150B1CBC(struct127 *arg0) {
