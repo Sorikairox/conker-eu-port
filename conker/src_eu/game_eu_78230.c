@@ -13,13 +13,13 @@ s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 
 #ifdef NON_MATCHING
 /* P38: per-frame object update (UNVERIFIED parts: see P38.md) */
-s32 func_1504AF10(struct127 *, s32, s32);
+void func_1504AF10(struct127 *, s32, s32);
 s32 func_15061B4C();
 s32 func_1507D4F8(u8);
-s32 func_1507EB1C(struct127 *);
+void func_1507EB1C(struct127 *);
 void func_15081064(void);
 void func_15082D5C(s32, s32, s32);
-s32 func_150A16A4(struct127 *);
+void func_150A16A4(struct127 *);
 s32 func_150A2C6C(struct127 *);
 extern s32 D_800863A4;
 extern s32 D_800863AC;
@@ -478,8 +478,59 @@ s32 func_1504AEF4(s32 arg0, s32 arg1) {
 }
 
 // bleurgh
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504AF10.s")
+#ifdef NON_MATCHING
+// P45: carried-object link of a record. +0x92 = (kind << 12) | index (bit 15 = only with arg1). Kind 0: resolve
+// through func_1504AEF4. Kind 3 (an entry of D_800DBEF4, 0xA0 bytes each): arg2 releases it (+0x4E = 0, link
+// cleared); else +0x4E = record index + 100 (arg1: 0 instead) and, without arg1, the entry follows the record
+// (+0x4F bits 5..6 = 1, +0x10/+0x12/+0x14 = position, y + s16 +0x90).
+void func_1504AF10(struct127 *rec, s32 arg1, s32 arg2) {
+    u8 *arg0 = (u8 *)rec;
+    s32 sp28;
+    s32 kind;
+    s32 r;
+    u16 v;
+    u8 *e;
 
+    v = *(u16 *)(arg0 + 0x92);
+    if (v == 0) {
+        return;
+    }
+    if (arg1 == 0 && ((s32)v >> 15) != 0) {
+        return;
+    }
+    kind = ((s32)v >> 12) & 7;
+    if (kind == 0) {
+        r = func_1504AEF4(v & 0x7FFF, (s32)&sp28);
+        kind = r;
+        if (r != 0) {
+            *(u16 *)(arg0 + 0x92) = (r << 12) | sp28;
+        }
+    }
+    sp28 = *(u16 *)(arg0 + 0x92) & 0xFFF;
+    if (kind != 3) {
+        return;
+    }
+    if (arg2 != 0) {
+        ((u8 *)D_800DBEF4)[(u32)sp28 * 0xA0 + 0x4E] = 0;
+        *(u16 *)(arg0 + 0x92) = 0;
+        return;
+    }
+    ((u8 *)D_800DBEF4)[(u32)sp28 * 0xA0 + 0x4E] = (s32)(rec - D_800CC2D0) + 100;
+    if (arg1 != 0) {
+        ((u8 *)D_800DBEF4)[(u32)sp28 * 0xA0 + 0x4E] = 0;
+        return;
+    }
+    e = (u8 *)D_800DBEF4 + (u32)sp28 * 0xA0;
+    e[0x4F] &= 0xFF9F;
+    e = (u8 *)D_800DBEF4 + (u32)sp28 * 0xA0;
+    e[0x4F] |= 0x20;
+    *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x10) = (s32)*(f32 *)(arg0 + 0x14);
+    *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x12) = (s32)(*(f32 *)(arg0 + 0x18) + (f32)*(s16 *)(arg0 + 0x90));
+    *(s16 *)((u8 *)D_800DBEF4 + (u32)sp28 * 0xA0 + 0x14) = (s32)*(f32 *)(arg0 + 0x1C);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504AF10.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504B0FC.s")
 #ifdef NON_MATCHING
 void func_1504BA38(struct127 *arg0) {
