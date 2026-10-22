@@ -2487,3 +2487,14 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
      - bitfields;
      - `va_arg` doubles;
      - review of the pointer scan.
+- **P84 (merge port-b e7e2e1a and port 8d63a7d + checks).** Full notes: P84.md.
+  - Merges 4c07f94 (P68 / P73 / P77 / P82) and 1fb63b3 (P80).
+    - Code conflicts in game_981E0.c, game_eu_AF2A0.c and difftest.py: both sides kept.
+    - verify_all OK, NM links, protocheck 933 / 0. The difftest selftest was not run (no unicorn in conkerdev-web).
+  - Arity: 112 rows / 56 with severity > 0 (P81: 123 / 69).
+  - **Two new blockers, both with TEMPORARY port measures:**
+    - func_151DDF6C (settings clamp, stub): language 0xFF made func_151E7110 DMA out of ROM and scan the null zone every frame. A PC copy is in pc_overrides.c.
+    - func_1501CE34 (scene length, stub): the C func_1501E364 loops forever at the level 0 load. `__wrap_func_1501E364` guard in p84_checks.c.
+  - With both measures the game runs (heap 0 errors, null zone clean), but level 0 is entered at frame ~950 and the view then freezes: no Conker, no respawn / 0x2C warp.
+  - The sky shows as a solid green quad. Look points = 8, but there is no head target. The dark overlay was not seen in 3 walks (inconclusive).
+  - **Next:** port branch converts func_1501CE34 (+ func_1501ECA4 / func_15020F6C) and func_151DDF6C, then remove both P84 TEMPORARY measures. Then redo the respawn / 0x2C / callback-5 / overlay checks.

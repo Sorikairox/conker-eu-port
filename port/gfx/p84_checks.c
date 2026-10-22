@@ -29,6 +29,8 @@ void __wrap_func_151E5928(void) {
     unsigned cur[6];
     int i, changed = 0;
     void p84_frame(void);
+    void p84_hang_init(void);
+    p84_hang_init();
     p84_frame();
     if (flag(&fnotext, "p84notext")) return;
     __real_func_151E5928();
@@ -72,4 +74,48 @@ static void lang_hook(const char *name) { lang_watch("stub"); l_last = name; }
 void p84_frame(void) {
     if (flang < 0) { flang = port_flag("p84lang"); if (flang) port_stub_trace_hook = lang_hook; }
     if (flang) lang_watch("text");
+}
+
+/* ?p84hang=N: hang finder. At every asm-stub hit (port_stub_trace_hook; don't combine with ?p84lang / ?p69watch /
+ * ?p49walk): when port_frame_count has not moved for 3 s of wall time, log the stub and the JS stack (N times, 3 s
+ * apart). Installed from main via p84_hang_init (called by the func_151E5928 wrap on its first call). */
+#include <emscripten.h>
+static int fhang = -1;
+static unsigned h_frame, h_n, h_hits;
+static double h_t0, h_last;
+static void hang_hook(const char *name) {
+    double t = emscripten_get_now();
+    h_hits++;
+    if (port_frame_count != h_frame) { h_frame = port_frame_count; h_t0 = t; h_hits = 0; return; }
+    if (t - h_t0 > 3000 && t - h_last > 3000 && h_n < (unsigned)fhang) {
+        h_n++; h_last = t;
+        port_log("[p84] hang? frame %u unchanged for %.0f ms, %u stub hits since; now in stub %s\n", h_frame, t - h_t0,
+                 h_hits, name);
+        port_js_stack(1, 14);
+    }
+}
+void p84_hang_init(void) {
+    if (fhang < 0) { fhang = port_flag("p84hang"); if (fhang) port_stub_trace_hook = hang_hook; }
+}
+
+/* P84 TEMPORARY guard (remove when the port branch converts func_1501CE34, game_eu_4A070.c, GLOBAL_ASM, 140 insns):
+ * func_1501CE34 writes the scene length D_eu_800C3A60[slot]; as an asm stub it leaves 0. Since this merge the scene
+ * loader func_1501D348 (P73 C) starts scenes (D_800C35EA[slot] = 1, D_800C39D0[slot] = 0), and the C func_1501E364
+ * ("run the scene to its end": loops while state == 1 and counter >= length) never ends at the level 0 load (V8 tick
+ * profile: 100 % in func_1501E364 -> func_1502457C / func_1501E888 / func_1501ECA4). The wrap (one caller,
+ * game_45B80.c) skips the call while the length is still 0. DIAGNOSTIC ?p84noguard=1 turns the guard off. */
+extern unsigned char D_800C35EA_g[] __asm__("D_800C35EA");
+extern unsigned char D_800C39D0_g[] __asm__("D_800C39D0");
+extern unsigned char D_eu_800C3A60_g[] __asm__("D_eu_800C3A60");
+void __real_func_1501E364(int slot);
+void __wrap_func_1501E364(int slot) {
+    static int fno = -1;
+    static unsigned n;
+    int len = *(const int *)(D_eu_800C3A60_g + slot * 4), cnt = *(const int *)(D_800C39D0_g + slot * 4);
+    if (!flag(&fno, "p84noguard") && B(D_800C35EA_g + slot) == 1 && len <= 0 && cnt >= len) {
+        if (n++ < 4) port_log("[p84] guard: func_1501E364(%d) skipped at frame %u (scene length %d, counter %d; "
+                              "func_1501CE34 is a stub)\n", slot, port_frame_count, len, cnt);
+        return;
+    }
+    __real_func_1501E364(slot);
 }
