@@ -20,6 +20,26 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   world-object matrices). Frame DL: func_15110948 (default camera callback), func_1517485C (occlusion probes).
 - difftest: `DIFFTEST_EXACT='*'` (known prototypes are exact); `proto_arity` ignores commented-out drafts.
 
+## Next steps (from P32)
+
+1. Frame-DL stubs still asm: func_15186D04 (711, character shadows; draft `port_work/p32/gen/v0/`), func_15182450 (484),
+   func_15180AF0 (991); func_150A5858 is **raw hand asm** (gp/t-register calling convention): whole-function nmasm harness.
+2. P29 top-15 list: func_1509BE40, func_1501B300, func_151E7110, func_150A067C, func_10011624, func_151143D4,
+   func_15044D18, func_1504A730, func_1501ECA4, func_15020F6C, func_1504ADD0 (drafts in `port_work/p32/gen`, all CERR/DIFFER).
+3. Runtime checks: P32.md UNVERIFIED list (func_15042ECC `%f` argument, func_1515DE84 directional-light distance) and P30's.
+4. D5E90.s raw asm.
+
+## State (session P32, 2026-10-22). Details: `docs/port/sessions/P32.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (760 bodies).
+- progress_nm: C coverage including NON_MATCHING **4753/5914 (80.4%)** (P30: 4746), bytes 48.5% → **48.9%**;
+  init 480/538, game 4234/5333, debugger 39/43; **1161 asm-only** (164 under 60 insns).
+- New C (hand, difftest EQUIV with knobs + mutants): frame-DL func_151EDBE8 (HUD tiles), func_150911F4, func_15090630,
+  func_150900F0, func_1515DE84 (lights); **func_15042ECC** (text-queue printf, top stub by hits); func_1000A03C (audio bank DMA).
+- Fix: game_eu_C2B60's void wrappers func_15095380 / func_150953F8 / func_15095E58 / func_1509611C return the
+  display-list pointer under NM (callers relied on IDO's leftover v0; the wasm build got garbage).
+- Reminder: source names are US names; POKE/RET/ARGMEM take EU addresses (`port_work/p28h/euaddr.sh`).
+
 ## Next steps (from P30)
 
 1. Frame-DL stubs (P29 runtime list): func_151EDBE8 (212 hits), func_1515DE84, func_150A5858 (DL pointer = 2nd arg),
