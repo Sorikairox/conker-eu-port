@@ -181,7 +181,7 @@ void func_1503482C(s32 arg0) {
 }
 
 s32 func_150351A4(struct127 *, s32, s32);
-s32 func_15036600(s32, s32, s32, s32);
+void func_15036600(s32, s32, s32, s32);
 s32 func_150F1F80(struct127 *);
 
 void func_150348D4(s32 arg0) {

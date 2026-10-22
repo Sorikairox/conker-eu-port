@@ -58,6 +58,10 @@ def heap_ptr(v):
 RET_MAGIC = 0x807FF000
 CAND_ALT = 0x0F000000                           # (| the 256 MB jal region of vram) candidate code when it would overlap a callee
 SP_ENTRY = STK_TOP - 0x100
+# P89: stack-range values below SP_ENTRY - STK_WIN (and below the lowest sp the run saw) are not frame addresses and
+# compare exactly. DIFFTEST_STK_OLD=1 restores the pre-P89 rule (the whole stack range compares equal).
+STK_WIN = 0x1000
+STK_OLD = os.environ.get('DIFFTEST_STK_OLD') == '1'
 # P18: Unicorn 2.0.1's reg_read/reg_write of the MIPS FPRs are no-ops (reg_write(F4) then mfc1 reads the old
 # value; reg_read(Fn) is always 0). So float args were never set, stubs never returned a float, and f0 returns
 # / FP call args / f20-f31 were compared as 0 == 0. Leftover f0 after a stubbed float callee then differed by
@@ -837,7 +841,13 @@ class Run:
         return out
 
     def norm(self, v):
-        return 'STK' if phys(STK_LO) <= phys(v) < phys(STK_TOP) + PAGE else v
+        # P89: only addresses in the part of the stack the function really used (its frame, or the window below
+        # the entry sp that a small frame covers) are frame addresses that may differ between ref and candidate.
+        # Other stack-range values (stub returns, pokes, random words such as 0x8066xxxx) did not come from sp and
+        # compare exactly (P86: a +0x10 / +0x14 mutant on a stub-returned 0x806xxxxx pointer compared equal as 'STK').
+        if STK_OLD: return v if not phys(STK_LO) <= phys(v) < phys(STK_TOP) + PAGE else 'STK'
+        lo = min(self.minsp, SP_ENTRY - STK_WIN)
+        return 'STK' if phys(lo) <= phys(v) < phys(STK_TOP) + PAGE else v
 
     def flush_fregs(self):
         """P18: f12-f15 of the last call, saved by the helper after its on_block"""
@@ -851,7 +861,11 @@ class Run:
         if addr == PROLOGUE: return
         self.flush_fregs()
         if self.vram <= addr < self.end:
-            self.icount += max(1, size // 4); return
+            self.icount += max(1, size // 4)
+            # P89: the frame is set up in the entry block; the next blocks see the function's own sp
+            if self.nblk < 4:
+                self.nblk += 1; self.minsp = min(self.minsp, mu.reg_read(UC_MIPS_REG_SP))
+            return
         if addr == RET_MAGIC:
             self.done = True; return   # the epilogue saves the FPRs, emu_start stops at RET_END
         ra = mu.reg_read(UC_MIPS_REG_RA)
@@ -862,6 +876,7 @@ class Run:
         name = addr2name(addr) or ('0x%08X' % addr)
         a, f, stk = call_site_writes(self.words, site) if site is not None else (set(), set(), set())
         sp = mu.reg_read(UC_MIPS_REG_SP)
+        self.minsp = min(self.minsp, sp)
         regs = [mu.reg_read(r) for r in A_REGS]
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
@@ -934,6 +949,7 @@ class Run:
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
         self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
+        self.minsp = SP_ENTRY; self.nblk = 0
         while True:
             self.resume = None
             try:
