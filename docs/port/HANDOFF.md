@@ -1215,7 +1215,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72, P75; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1249,7 +1249,8 @@ false slide and garbage-count crash, end callback verified, walk GIF) and
 jump / running jump / Z long jump and idle variations at runtime, jump GIF) and
 `docs/port/sessions/P69.md` (last PC versions dropped, D_80084550 mapped, P65 / P67 C at runtime, the walk-after-respawn
 hang) and `docs/port/sessions/P72.md` (the hang bisected to P64's func_150D1D20 writing through NULL buffers of the
-stubbed func_15000AD0; TEMPORARY guard; 0x2C warp reached again). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+stubbed func_15000AD0; TEMPORARY guard; 0x2C warp reached again) and `docs/port/sessions/P75.md` (merge P70 / P71 / P74,
+guard dropped, sky / tail / breakable runtime checks, missing-argument call sites, blocker list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1286,8 +1287,11 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 # P69: ?p69attach=N (D_80084550 check + attachment list), ?p69look=N (func_1503AB20), ?p69tri=N, ?p69att=N (attack /
 #      debris / object anim start), ?p69floor=N, ?p69free=1|2|FRAME (double free + object-list scan), ?p69watch=N,
 #      ?p69stub=MASK / ?p69pc=MASK (DIAGNOSTIC bisect wraps); port/web/p69shots.sh (Chrome stand / B / walk / jump / idle)
-# P72: ?p72quad=N (func_150D1D20 calls + buffer pointers), ?p72skip=1 (DIAGNOSTIC); port/web/p72shots.sh (Chrome walk
+# P72: port/web/p72shots.sh [OUTDIR] [WALK_MS] [HOLD_MS] [EXTRA_QUERY] (Chrome walk
 #      through the respawn to the 0x2C warp; DENSE="FROM TO" adds 200 ms shots)
+#      (P75: ?p72quad / ?p72skip are gone with the TEMPORARY func_150D1D20 guard)
+# P75: ?p75sky=1 (func_15000AD0 buffers / gradient / quads, null-zone first dirty frame), ?p75tail=N (func_1503BCAC),
+#      ?p75brk=N (func_1503E238), ?p75break=FRAME&p75bslot=S&p75bkind=K (DIAGNOSTIC break request); one node boot at a time
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -2204,6 +2208,38 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     - P63's walk reaches `func_1501C710(1, 0x2C)` at frame 1077 and comes back at 1157.
     - Real-time Chrome walks through the respawn and the 0x2C round trip (frames 1793 / 1873) with no break.
     - Screenshot: `P72_screenshot.png`.
+- **P75 (merge port P70 / P71 / P74 + checks): P72's TEMPORARY func_150D1D20 guard is dropped.** Full notes: P75.md.
+  - Merge 0149c7e: one docs conflict (HANDOFF, merge_union). verify_all OK, NM links, protocheck 0 (898), clean port
+    rebuild (vbe 727 ok, 1 old link warning).
+  - `p72_checks.c` and `--wrap=func_150D1D20` are removed; func_15000AD0 (P74 C) allocates the buffers.
+    - Node P72 repro: rc 0, 2272 frames, heap 0 errors.
+    - Node walk: warp 0x2C at 1077, back at 1157.
+    - Real-time Chrome: respawn 1741, warp 1813 / 1893, 0 heapwatch breaks.
+    - func_150D1D20 writes real t coordinates and the Mtx.
+  - **Sky (mode 2, level 0):** gradient blue → pale blue → green, quads ±1750 / z -1000. The texture is never loaded,
+    because **func_150954E4** (DL passthru stub) is the loader. After the 0x2C round trip, func_150D1D20 is not called
+    any more (gate unknown).
+  - **Tail (P70) works** (wave phase, sway, reset; visible in Chrome, `P75_screenshot.png`). **Latent bug:**
+    func_1503482C calls `func_1503BCAC()` without arguments, so the port passes 0 (`call @func_1503BCAC(i32 0)`).
+    Fix: pass arg0. `p75/missing_args.txt` lists 18 such C call sites with missing arguments.
+  - **Breakables (P74)** are not requested in play. With the DIAGNOSTIC request (kind 2 on record 0):
+    - pieces fly, fall and bounce (vy x -0.5);
+    - **the `unkF` branch is reached:** the timer ends, func_1503E550 sets state 0 and frees the pieces, and ED44 / EB1C
+      are skipped;
+    - no heap error.
+  - Attachments (func_150302C8 C) now load. That puts func_150322B8 (callback 5) and func_150314B4 (DL) on the frame path.
+  - Null zone: `null+0x14 = 0x400` (pre-existing) is first dirty at frame 1084 in level 0x2C. Candidate NULL producers:
+    func_151ACBD4, func_150156F4, func_15195AA8, func_151BEE00.
+  - **Blockers, in order:**
+    1. func_150954E4;
+    2. the arity fixes;
+    3. func_151462C8 / 1514306C / 1513C060;
+    4. func_15041A9C, func_15180AF0;
+    5. func_150314B4 / func_150322B8;
+    6. the look target func_15037CCC / func_15038910;
+    7. the per-frame group (func_1509A024, game_14FF90.c, ...).
+
+    Details: P75.md §3.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
