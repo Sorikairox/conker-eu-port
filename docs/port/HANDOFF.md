@@ -799,7 +799,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -822,7 +822,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P42.md` (merge port P40, KSEG0 pointer tests and computed IO_READ, the real visibility walk on level data) and
 `docs/port/sessions/P44.md` (runtime check of P41's camera chain, the game's own view, what blocks player movement) and
 `docs/port/sessions/P46.md` (runtime check of P43 / P45, srcfix array initializers, the first lit and framed game-camera frame) and
-`docs/port/sessions/P49.md` (merge port-b P47, the player walks and the camera follows, the movement-path stub order). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P49.md` (merge port-b P47, the player walks and the camera follows, the movement-path stub order) and
+`docs/port/sessions/P52.md` (P50 / P48 movement and model C at runtime, P49 overrides removed, why the view goes black). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -841,6 +842,8 @@ PROBE_NOAUDIO=1 PROBE_STEPS="6000:keydown:Space; 7500:keyup:Space" port/web/audp
 PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audonly=1&audtest=26390" 12  # P27: audio starts on the gesture
 PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/boot.sh 30   # P49: scripted stick (ms:buttons:x:y) + walk-handler log
 # P49: PROBE_STEPS also takes MS:shot:/abs/path.png (real-time screenshots during a run; frame sequences)
+# P52: ?p49walk also logs [p52] gravity (dt D_800D1550[0]) and func_1502C1D4 (record 0 +0x1D4 / model) lines;
+#      ?p52void=1 makes the floor query answer "no floor" (diagnostic); audprobe needs PROBE_LOG=/abs/file for the console
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1569,6 +1572,23 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     Drop both P49 overrides when 1 and 2 are converted.
   - Tools: `?p49walk=N` / `?p49every=N` (`port/gfx/p49_walk.c`, wrap of func_1504CB98; logs the record and the stubs
     reached inside the call through `port_stub_trace_hook`), node `PADSCRIPT`, audprobe `MS:shot:PATH`.
+- **P52 (after merging port-b P50 + port P48, f123763): the movement and model C at runtime.** Full notes: P52.md.
+  - **P49's TEMPORARY func_15059C84 / func_1504C0E8 overrides are removed**; the P50 C runs. Clean rebuild. Node 40 s
+    and real-time Chrome (Metal, `heapwatch=1`, W / D / S): 8/8 PASS, heap 0 errors, no heapwatch break, 91 stubs.
+  - **Walking with the real C equals P49's PC version:** speed 35, 42 units per call, +0x7A follows +0x76, camera
+    `at` follows. Gravity func_1505A770 (C) is right; **D_800D1550[0] = 1.2 then 2.4** (sane).
+  - **The player does not fall off the edge:** func_1510EE3C (C) forwards to the asm stub func_1510EED0, so the walk
+    handler's floor height `spC4` is never written (reads 0, uninitialised) and line 2569 snaps y to spC4 - 1 = -1
+    every call; vy sits at -500 (func_1505A9AC, landing, is a stub). With the diagnostic `?p52void=1` the player
+    falls under the C gravity. Not a bug in converted C.
+  - **+0x1D4 is still 0:** the C func_1502C1D4 runs every frame and reaches func_1502DE74, but D_800D19A0[0] is 0 and
+    the model loader **func_1503D210 is an asm stub**, so DE74 returns before +0x1D4 (func_150A86B0 is never reached).
+  - **Black screen = correct culling:** the camera follows the player off the floor; the floor ends up behind it and the
+    C visibility walk emits 0 / 288 triangle slots (288 → 252 → 172 → 114 → 0). No NaN. Screenshot
+    `P52_screenshot.png`, sequence `docs/port/sessions/p52/walk_00..05_*.png`.
+  - **For the port branch:** no bug found in func_15059C84 / func_1504C0E8 / func_1505A770 / func_1502C1D4 at
+    runtime. Next: func_1510EED0 (floor), func_150A44A4, func_15021834, func_1505A9AC; for the model func_1503D210,
+    then func_150A86B0, func_150342D0 / func_1502DB14, func_1502CFEC.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

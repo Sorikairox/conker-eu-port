@@ -75,3 +75,60 @@ void __wrap_func_1504CB98(void *arg0) {
         port_log("[p49] after %u calls, stub totals inside the walk handler:%s\n", calls, buf);
     }
 }
+
+/* P52: with ?p49walk set, also
+ *  - wrap func_1505A770 (P50 C gravity; the call from the walk handler): y / y_velocity / +0x28 before and after,
+ *    gravity +0x24 and the frame time D_800D1550[0] (an f32 array, P50), first p49walk calls then every p49every;
+ *  - wrap func_1502C1D4 (P48 C object update loop, called from game_45B80.c): record 0's model fields after it
+ *    (+0x1D4 model instance, +0x2D0 animation state, id +4, D_800D19A0[id] loaded model, D_800C52F0[id]). */
+extern float D_800D1550[];
+extern unsigned D_800D19A0[];
+extern unsigned short D_800C52F0[];
+extern unsigned char D_800CC2D0[];
+void __real_func_1505A770(void *rec);
+void __wrap_func_1505A770(void *rec) {
+    static int flag = -1, every = -1;
+    static unsigned calls;
+    const unsigned char *r = (const unsigned char *)rec;
+    float y0 = F(0x18), v0 = F(0x20), h0 = F(0x28);
+    if (flag < 0) { flag = port_flag("p49walk"); every = port_flag("p49every"); if (every <= 0) every = 32; }
+    __real_func_1505A770(rec);
+    calls++;
+    if (flag && (calls <= (unsigned)flag || calls % (unsigned)every == 0))
+        port_log("[p52] gravity call %u frame %u: dt D_800D1550[0] %g (bits %08X) grav %g | y %g -> %g yv %g -> %g "
+                 "+28 %g -> %g | +180 %g floor118 %g\n", calls, port_frame_count, D_800D1550[0],
+                 *(const unsigned *)D_800D1550, F(0x24), y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180), F(0x118));
+}
+void __real_func_1502C1D4(void);
+void __wrap_func_1502C1D4(void) {
+    static int flag = -1;
+    static unsigned calls;
+    const unsigned char *r = D_800CC2D0;
+    __real_func_1502C1D4();
+    if (flag < 0) { flag = port_flag("p49walk"); }
+    calls++;
+    if (flag && (calls <= 3 || (calls & 255) == 0)) {
+        unsigned id = U8(4);
+        port_log("[p52] func_1502C1D4 call %u frame %u: rec0 state %d id %02X +65 %02X +1D4 %08X +2D0 %08X "
+                 "D_800D19A0[id] %08X D_800C52F0[id] %u +74 %02X\n", calls, port_frame_count, *(const int *)r, id,
+                 U8(0x65), *(const unsigned *)(r + 0x1D4), *(const unsigned *)(r + 0x2D0), D_800D19A0[id],
+                 vbe_ld16(&D_800C52F0[id]), U8(0x74));
+    }
+}
+
+/* P52 diagnostic ?p52void=1: the floor query func_1510EE3C (C) only forwards to the asm stub func_1510EED0, so the
+ * walk handler's floor height (its local spC4, arg 3) is never written and stays at whatever the stack held (0 in
+ * practice): the handler then snaps y to spC4 - 1 = -1 every call. With p52void the wrapper writes "no floor"
+ * (-10000, what the real query returns off the level) to arg 3 and arg 4 (+0x118), so gravity is visible. */
+void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
+                          unsigned short aA, int aB, int aC, int aD, int aE);
+void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
+                          unsigned short aA, int aB, int aC, int aD, int aE) {
+    static int flag = -1;
+    if (flag < 0) flag = port_flag("p52void");
+    __real_func_1510EE3C(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aA, aB, aC, aD, aE);
+    if (flag) {
+        if (a2) *(float *)(uintptr_t)a2 = -10000.0f;
+        if (a3) *(float *)(uintptr_t)a3 = -10000.0f;
+    }
+}
