@@ -1,0 +1,195 @@
+Statistical profiling result from /out/v8.log, (29720 ticks, 4 unaccounted, 0 excluded).
+
+ [Shared libraries]:
+   ticks  total  nonlib   name
+   1012    3.4%          /emsdk/node/22.16.0_64bit/bin/node
+    134    0.5%          /usr/lib/aarch64-linux-gnu/libc.so.6
+      1    0.0%          [vdso]
+
+ [JavaScript]:
+   ticks  total  nonlib   name
+  27025   90.9%   94.6%  JS: *func_10003C6C
+     48    0.2%    0.2%  JS: *aud_run_alist
+     26    0.1%    0.1%  JS: *gfx_run_dl
+      5    0.0%    0.0%  JS: *inf_codes
+      5    0.0%    0.0%  JS: *<anonymous> /src/port/build/web/conker.js:466:10
+      3    0.0%    0.0%  JS: codes
+      2    0.0%    0.0%  JS: wasm-function[7038]
+      2    0.0%    0.0%  JS: need_state
+      2    0.0%    0.0%  JS: func_15122C5C
+      2    0.0%    0.0%  JS: func_150A16A4
+      2    0.0%    0.0%  JS: func_1509BE40
+      2    0.0%    0.0%  JS: func_10003C6C
+      2    0.0%    0.0%  JS: ^pushAsyncContext node:internal/async_hooks:539:26
+      2    0.0%    0.0%  JS: ^listOnTimeout node:internal/timers:528:25
+      2    0.0%    0.0%  JS: *tri
+      2    0.0%    0.0%  JS: *pad
+      2    0.0%    0.0%  JS: *osSendMesg
+      2    0.0%    0.0%  JS: *imports.<computed> /src/port/build/web/conker.js:880:26
+      2    0.0%    0.0%  JS: *_emscripten_fiber_swap /src/port/build/web/conker.js:1166:32
+      2    0.0%    0.0%  JS: *UTF8ArrayToString /src/port/build/web/conker.js:1295:27
+      1    0.0%    0.0%  Stub: js-to-wasm::i
+      1    0.0%    0.0%  JS: vfprintf
+      1    0.0%    0.0%  JS: vbe.sinf
+      1    0.0%    0.0%  JS: rect
+      1    0.0%    0.0%  JS: port_stub_hit
+      1    0.0%    0.0%  JS: port_sched_run
+      1    0.0%    0.0%  JS: port_post_event
+      1    0.0%    0.0%  JS: port_heapwatch
+      1    0.0%    0.0%  JS: pop_arg
+      1    0.0%    0.0%  JS: pif_run
+      1    0.0%    0.0%  JS: pad
+      1    0.0%    0.0%  JS: osSendMesg
+      1    0.0%    0.0%  JS: nmw_walls
+      1    0.0%    0.0%  JS: nmD5E90_checkPoint
+      1    0.0%    0.0%  JS: nmAnimBits
+      1    0.0%    0.0%  JS: n_alAudioFrame
+      1    0.0%    0.0%  JS: getint
+      1    0.0%    0.0%  JS: func_151EDBE8
+      1    0.0%    0.0%  JS: func_151E8620
+      1    0.0%    0.0%  JS: func_1517D534
+      1    0.0%    0.0%  JS: func_151674F8
+      1    0.0%    0.0%  JS: func_151670C0
+      1    0.0%    0.0%  JS: func_1516706C
+      1    0.0%    0.0%  JS: func_1515E9AC
+      1    0.0%    0.0%  JS: func_151307A0
+      1    0.0%    0.0%  JS: func_1512C5D8
+      1    0.0%    0.0%  JS: func_1512C490
+      1    0.0%    0.0%  JS: func_15128540
+      1    0.0%    0.0%  JS: func_15122EF0
+      1    0.0%    0.0%  JS: func_15114208
+      1    0.0%    0.0%  JS: func_1510D66C
+      1    0.0%    0.0%  JS: func_1510BD34
+      1    0.0%    0.0%  JS: func_150A7D00
+      1    0.0%    0.0%  JS: func_1509BA04
+      1    0.0%    0.0%  JS: func_1508F0D4
+      1    0.0%    0.0%  JS: func_1507C7C0
+      1    0.0%    0.0%  JS: func_1504A730
+      1    0.0%    0.0%  JS: func_15049260
+      1    0.0%    0.0%  JS: func_15042ECC
+      1    0.0%    0.0%  JS: func_15042D78
+      1    0.0%    0.0%  JS: func_1503DD8C
+      1    0.0%    0.0%  JS: func_15036BB4
+      1    0.0%    0.0%  JS: func_150348D4
+      1    0.0%    0.0%  JS: func_1501BBB8
+      1    0.0%    0.0%  JS: func_150198FC
+      1    0.0%    0.0%  JS: func_15019130
+      1    0.0%    0.0%  JS: func_15018F80
+      1    0.0%    0.0%  JS: func_1501878C
+      1    0.0%    0.0%  JS: func_1000D758
+      1    0.0%    0.0%  JS: func_1000D2F8
+      1    0.0%    0.0%  JS: func_100049E0
+      1    0.0%    0.0%  JS: func_10004674
+      1    0.0%    0.0%  JS: func_10004250
+      1    0.0%    0.0%  JS: func_10003ACC
+      1    0.0%    0.0%  JS: fiber_entry
+      1    0.0%    0.0%  JS: fflush
+      1    0.0%    0.0%  JS: dynCall_v
+      1    0.0%    0.0%  JS: aud_run_alist
+      1    0.0%    0.0%  JS: aud_out_push_game
+      1    0.0%    0.0%  JS: aud_init_tables
+      1    0.0%    0.0%  JS: __wrap_func_15196560
+      1    0.0%    0.0%  JS: __vbe_fix
+      1    0.0%    0.0%  JS: __towrite
+      1    0.0%    0.0%  JS: __port_io_read
+      1    0.0%    0.0%  JS: __port_icall_slow
+      1    0.0%    0.0%  JS: __n_CSPVoiceHandler
+      1    0.0%    0.0%  JS: __memcpy
+      1    0.0%    0.0%  JS: ^writeOrBuffer node:internal/streams/writable:548:23
+      1    0.0%    0.0%  JS: ^wrappedFn node:internal/errors:535:21
+      1    0.0%    0.0%  JS: ^removeListener node:events:680:28
+      1    0.0%    0.0%  JS: ^remove node:internal/linkedlist:16:16
+      1    0.0%    0.0%  JS: ^peek node:internal/priority_queue:37:7
+      1    0.0%    0.0%  JS: ^iterFunc /src/port/build/web/conker.js:1676:23
+      1    0.0%    0.0%  JS: ^callUserCallback /src/port/build/web/conker.js:850:26
+      1    0.0%    0.0%  JS: *port_stub_hit
+      1    0.0%    0.0%  JS: *port_sched_run
+      1    0.0%    0.0%  JS: *osRecvMesg
+      1    0.0%    0.0%  JS: *osPiStartDma
+      1    0.0%    0.0%  JS: *maybe_preempt
+      1    0.0%    0.0%  JS: *get node:internal/util:626:17
+      1    0.0%    0.0%  JS: *func_151670C0
+      1    0.0%    0.0%  JS: *func_1510D984
+      1    0.0%    0.0%  JS: *func_150AB278
+      1    0.0%    0.0%  JS: *codes
+      1    0.0%    0.0%  JS: *aud_out_push_game
+      1    0.0%    0.0%  JS: *assert /src/port/build/web/conker.js:210:16
+      1    0.0%    0.0%  JS: *_fd_write /src/port/build/web/conker.js:2040:19
+
+ [C++]:
+   ticks  total  nonlib   name
+   1093    3.7%    3.8%  epoll_pwait@@GLIBC_2.17
+    205    0.7%    0.7%  __write@@GLIBC_2.17
+     14    0.0%    0.0%  brk@@GLIBC_2.17
+      6    0.0%    0.0%  __mprotect@@GLIBC_PRIVATE
+      5    0.0%    0.0%  _IO_fwrite@@GLIBC_2.17
+      3    0.0%    0.0%  std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)@@GLIBCXX_3.4.9
+      3    0.0%    0.0%  pthread_cond_signal@@GLIBC_2.17
+      3    0.0%    0.0%  __read@@GLIBC_2.17
+      2    0.0%    0.0%  _IO_file_xsputn@@GLIBC_2.17
+      1    0.0%    0.0%  std::ostreambuf_iterator<char, std::char_traits<char> > std::num_put<char, std::ostreambuf_iterator<char, std::char_traits<char> > >::_M_insert_int<unsigned long>(std::ostreambuf_iterator<char, std::char_traits<char> >, std::ios_base&, char, unsigned long) const@@GLIBCXX_3.4
+      1    0.0%    0.0%  std::ostream::sentry::sentry(std::ostream&)@@GLIBCXX_3.4
+      1    0.0%    0.0%  std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)@@GLIBCXX_3.4
+      1    0.0%    0.0%  std::_Rb_tree_increment(std::_Rb_tree_node_base*)@@GLIBCXX_3.4
+      1    0.0%    0.0%  std::_Hash_bytes(void const*, unsigned long, unsigned long)@@CXXABI_1.3.5
+      1    0.0%    0.0%  __pthread_mutex_unlock@GLIBC_2.17
+      1    0.0%    0.0%  __open@@GLIBC_2.17
+      1    0.0%    0.0%  __clock_gettime@@GLIBC_PRIVATE
+
+ [Summary]:
+   ticks  total  nonlib   name
+  27227   91.6%   95.3%  JavaScript
+   1342    4.5%    4.7%  C++
+     10    0.0%    0.0%  GC
+   1147    3.9%          Shared libraries
+      4    0.0%          Unaccounted
+
+ [C++ entry points]:
+   ticks    cpp   total   name
+    140   78.7%    0.5%  __write@@GLIBC_2.17
+     14    7.9%    0.0%  brk@@GLIBC_2.17
+      6    3.4%    0.0%  __mprotect@@GLIBC_PRIVATE
+      5    2.8%    0.0%  _IO_fwrite@@GLIBC_2.17
+      3    1.7%    0.0%  std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)@@GLIBCXX_3.4.9
+      2    1.1%    0.0%  __read@@GLIBC_2.17
+      1    0.6%    0.0%  std::ostream::sentry::sentry(std::ostream&)@@GLIBCXX_3.4
+      1    0.6%    0.0%  std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)@@GLIBCXX_3.4
+      1    0.6%    0.0%  std::_Rb_tree_increment(std::_Rb_tree_node_base*)@@GLIBCXX_3.4
+      1    0.6%    0.0%  std::_Hash_bytes(void const*, unsigned long, unsigned long)@@CXXABI_1.3.5
+      1    0.6%    0.0%  pthread_cond_signal@@GLIBC_2.17
+      1    0.6%    0.0%  __open@@GLIBC_2.17
+      1    0.6%    0.0%  __clock_gettime@@GLIBC_PRIVATE
+      1    0.6%    0.0%  _IO_file_xsputn@@GLIBC_2.17
+
+ [Bottom up (heavy) profile]:
+  Note: percentage shows a share of a particular caller in the total
+  amount of its parent calls.
+  Callers occupying less than 1.0% are not shown.
+
+   ticks parent  name
+  27025   90.9%  JS: *func_10003C6C
+  27025  100.0%    JS: allocate_memory
+  27025  100.0%      JS: *func_15186D04
+  27025  100.0%        JS: __wrap_func_15186D04
+  27025  100.0%          JS: func_150195A0
+  27025  100.0%            JS: *func_1501878C
+
+   1093    3.7%  epoll_pwait@@GLIBC_2.17
+
+   1012    3.4%  /emsdk/node/22.16.0_64bit/bin/node
+    758   74.9%    JS: port_icalltest
+    758  100.0%      JS: port_boot
+    758  100.0%        JS: port_run
+    758  100.0%          JS: __original_main
+    758  100.0%            JS: main
+     21    2.1%    JS: __wrap_func_1504CB98
+     21  100.0%      JS: *func_1504A730
+     21  100.0%        JS: __wrap_func_1504A730
+     21  100.0%          JS: func_15018DFC
+     21  100.0%            JS: func_15019130
+     19    1.9%    JS: func_150AB6D0
+     19  100.0%      JS: func_15044670
+     19  100.0%        JS: func_1504CB98
+     19  100.0%          JS: __wrap_func_1504CB98
+     19  100.0%            JS: *func_1504A730
+

@@ -24,7 +24,7 @@ LINK_COMMON := -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VE
 ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_pif.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c ultra/pc_gu.c ultra/pc_libc.c ultra/pc_tables.c
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/sessions/P6.md)
-GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c
+GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c gfx/p61_checks.c gfx/p66_checks.c gfx/p69_checks.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))
 # audio HLE (n_audio ABI interpreter) + SDL output (docs/port/sessions/P9.md)
 AUD_SRC := audio/aud_abi.c audio/aud_out.c
@@ -71,7 +71,7 @@ GAME_OBJS = $(shell awk -F'\t' 'FNR==NR {if ($$0 !~ /^\#/) ex[$$1]=1; next} FNR>
 # renderer can tell RSP segment addresses (0x01..0x0F << 24) from wasm pointers exactly. The untouched
 # zone costs address space only (pages are committed on first write); INITIAL_MEMORY covers it +
 # ~10 MB data + the 64 MB ROM copy + heap.
-BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c boot/sched_test.c boot/gu_test.c audio/aud_test.c audio/mp3_pc.c
+BOOT_SRC  := boot/game_main.c boot/game_entry.c boot/game_icalltest.c boot/pc_overrides.c boot/p69_pcold.c boot/sched_test.c boot/gu_test.c audio/aud_test.c audio/mp3_pc.c
 BOOT_OBJS := $(patsubst %.c,$(B)/vobj/port__%.o,$(notdir $(BOOT_SRC)))
 STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_tab.o $(B)/stubs/n64mem_labels.o $(B)/stubs/icall_tab.o
 
@@ -103,7 +103,7 @@ game: $(WEB)/conker.js
 $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
 	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS) -o $@ \
-	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test,_port_voice_test,_port_audio_prepare,_port_pad_state,_port_eeprom_ptr,_port_eeprom_size,_port_eep_test,_port_set_paused -Wl,--error-limit=0 -Wl,--wrap=func_150A5858 -Wl,--wrap=func_10006530 -Wl,--wrap=func_1510D66C -Wl,--wrap=func_150031EC -Wl,--wrap=func_1512C490 -Wl,--wrap=func_15186D04 -Wl,--wrap=func_1504A730 -Wl,--wrap=func_150A6840 -Wl,--wrap=func_1502BDC0 -Wl,--wrap=func_15196560 -Wl,--wrap=func_1504CB98 -Wl,--wrap=func_1505A770 -Wl,--wrap=func_1502C1D4 -Wl,--wrap=func_1510EE3C -Wl,--wrap=func_1505A9AC -Wl,--wrap=func_150A3F50 -Wl,--wrap=func_150A48C0 -Wl,--wrap=func_150A5480 -Wl,--wrap=func_150A4ED4 -Wl,--wrap=func_1503D210 -Wl,--wrap=func_150342D0 -Wl,--wrap=func_150A86B0 -Wl,--wrap=func_1507D4F8 -Wl,--wrap=func_1501C710 -Wl,--wrap=func_1505D6F0 -Wl,--wrap=func_1000D96C -Wl,--wrap=func_1000DE1C -Wl,--wrap=func_1000E7A0 -Wl,--wrap=func_1000E8C4 -Wl,--wrap=func_1507C170 -Wl,--wrap=func_1505E650 -Wl,--wrap=func_1505F298 -Wl,--wrap=func_15085710 2> $(B)/link_warnings.txt \
+	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test,_port_voice_test,_port_audio_prepare,_port_pad_state,_port_eeprom_ptr,_port_eeprom_size,_port_eep_test,_port_set_paused -Wl,--error-limit=0 -Wl,--wrap=func_150A5858 -Wl,--wrap=func_10006530 -Wl,--wrap=func_1510D66C -Wl,--wrap=func_150031EC -Wl,--wrap=func_1512C490 -Wl,--wrap=func_15186D04 -Wl,--wrap=func_1504A730 -Wl,--wrap=func_150A6840 -Wl,--wrap=func_1502BDC0 -Wl,--wrap=func_15196560 -Wl,--wrap=func_1504CB98 -Wl,--wrap=func_1505A770 -Wl,--wrap=func_1502C1D4 -Wl,--wrap=func_1510EE3C -Wl,--wrap=func_1505A9AC -Wl,--wrap=func_150A3F50 -Wl,--wrap=func_150A48C0 -Wl,--wrap=func_150A5480 -Wl,--wrap=func_150A4ED4 -Wl,--wrap=func_1503D210 -Wl,--wrap=func_150342D0 -Wl,--wrap=func_150A86B0 -Wl,--wrap=func_1507D4F8 -Wl,--wrap=func_1501C710 -Wl,--wrap=func_1505D6F0 -Wl,--wrap=func_1000D96C -Wl,--wrap=func_1000DE1C -Wl,--wrap=func_1000E7A0 -Wl,--wrap=func_1000E8C4 -Wl,--wrap=func_1507C170 -Wl,--wrap=func_1505E650 -Wl,--wrap=func_1505F298 -Wl,--wrap=func_15085710 -Wl,--wrap=func_15030758 -Wl,--wrap=func_1503AB20 -Wl,--wrap=func_150028BC -Wl,--wrap=func_1505C7D8 -Wl,--wrap=func_150D5F7C -Wl,--wrap=func_1507E7E4 -Wl,--wrap=func_15046C6C -Wl,--wrap=func_10004074 -Wl,--wrap=func_1502AF04 -Wl,--wrap=func_150A69E0 -Wl,--wrap=func_1510E908 -Wl,--wrap=func_15036FD8 -Wl,--wrap=func_150D71D4 2> $(B)/link_warnings.txt \
 	  || (tail -40 $(B)/link_warnings.txt; exit 1)
 	@echo "link warnings: $$(grep -c warning $(B)/link_warnings.txt) (port/build/link_warnings.txt)"
 	@ls -l $(WEB)/conker.wasm

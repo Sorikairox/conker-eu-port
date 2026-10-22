@@ -1,0 +1,391 @@
+[rom] 67108864 bytes at 0x10e206d8, header "CONKER BFD          "
+Conker port: game entry
+[video] no WebGL2 context (0); running headless
+[mem] address space: n64_rdram 0x10510000, n64_seg16 0x10d10000, rom 0x10e206d8 (all >= 0x10000000; below is null zone + RSP segments)
+[mem] init_data 0x80029400+0x4410 -> wasm 0x10539400
+[mem] game_data 0x80082EB0+0x2E320 -> wasm 0x10592eb0
+[mem] debugger_data 0x16003700+0x1658 -> wasm 0x10d13700
+[mem] 5354 relocations (3244 function pointers, 0 unresolved), 18 C objects, rdram mirror 0x10510000
+[memtest] s32 read as s16[1] (lh +2)     i=0   got 00005678 want 00005678 ok
+[memtest] s32 read as u8[0] (lbu +0)     i=0   got 00000012 want 00000012 ok
+[memtest] u8[3] store then s32 read      i=0   got 1234569A want 1234569A ok
+[memtest] func_1509CE20 unk0 (ptr)       i=0   got 8009EC04 want 8009EC04 ok
+[memtest] func_1509CE88 unk4 s32         i=0   got A0000002 want A0000002 ok
+[memtest] func_1509CE40 unk8 u16         i=0   got 00000029 want 00000029 ok
+[memtest] func_1509CE60 (u16 +0xA)&0xFFF i=0   got 00000000 want 00000000 ok
+[memtest] func_1509CE20 unk0 (ptr)       i=1   got 00000000 want 00000000 ok
+[memtest] func_1509CE88 unk4 s32         i=1   got 60000000 want 60000000 ok
+[memtest] func_1509CE40 unk8 u16         i=1   got 00000029 want 00000029 ok
+[memtest] func_1509CE60 (u16 +0xA)&0xFFF i=1   got 00000000 want 00000000 ok
+[memtest] func_15041770 u8 table         i=0   got 00000050 want 00000050 ok
+[memtest] PASS (0 failures)
+[icall] registry check over 5 ROM function tables: 654/654 entries OK
+[icalltest] [0] as f32(s32) (exact)            got 3FA8F5C3 want 3FA8F5C3 ok
+[icalltest] [2] as f32(s32) (exact)            got 412E6666 want 412E6666 ok
+[icall] signature mismatch: fn #2644 is f:i, called as i:i (converted)
+[icalltest] [0] as s32(s32): f32 -> bits       got 3FA8F5C3 want 3FA8F5C3 ok
+[icall] signature mismatch: fn #2646 is f:i, called as f: (converted)
+[icalltest] [2] as f32(void): missing arg      got 412E6666 want 412E6666 ok
+[icall] signature mismatch: fn #2655 is v:i, called as f:i (converted)
+[icalltest] [11] as f32(s32): void -> 0        got 00000000 want 00000000 ok
+[icall] signature mismatch: fn #2655 is v:i, called as i:iiii (converted)
+[icalltest] [11] as s32(s32,s32,s32,s32): extra got 00000000 want 00000000 ok
+[icall] signature mismatch: fn #2644 is f:i, called as v: (converted)
+[icalltest] [0] as void(void): no trap         got 00000001 want 00000001 ok
+[icall] signature mismatch: fn #2646 is f:i, called as d:iii (converted)
+[icalltest] [2] as f64(s32,s32,s32): fpext     got 00000001 want 00000001 ok
+[icalltest] cam cb exact i:iffffffi            got 00000000 want 00000000 ok
+[icalltest]   ... returned gdl advance         got 00000018 want 00000018 ok
+[icall] signature mismatch: fn #4703 is i:iiiiiiii, called as i:iffffffi (converted)
+[icalltest] cam cb as s32 x8 (slow path)       got 00000000 want 00000000 ok
+[icalltest]   ... returned gdl advance         got 00000028 want 00000028 ok
+[icalltest] D_80089578[0] = fn #1807 sig i:iffffffi
+[icalltest] D_80089578[1] = fn #5098 sig v:
+[icalltest] D_80089578[2] = fn #4129 sig i:iiiifif
+[icalltest] D_80089578[3] = fn #1808 sig i:iiii
+[icalltest] PASS (0 failures)
+[overrides] guRandom PASS (0 failures)
+[romsym] tex 0xED0 @ROM 0x6F1618: 00000300 ED4F2156, size table 0
+[romsym] PASS (0 failures)
+[gutest] PASS (0 failures)
+[tables] sine table D_150AA11C PASS (checksum D7187CC3, ROM D7187CC3)
+[boot] func_100061F8(1, 31)
+[sched] create thread id=1 pri=5 entry=0x102f
+[sched] create thread id=3 pri=10 entry=0x1030
+[boot] main thread: func_10001194 (PC version)
+[sched] create thread id=21 pri=250 entry=0x108b
+[stub  1] func_100052A0 (asm:init_50A0.c) thread=21 frame=1
+[sched] thread 21 returned; destroyed
+[boot] memory init
+[boot] heap bounds rebased: end 10905000 (n64_rdram 10510000)
+[boot] framebuffers 108E6300 108C7600
+[stub  2] func_10005B04 (asm:init_eu_5DA0.c) thread=3 frame=1
+[boot] func_10001420
+[boot] func_10005BE0
+[sched] create thread id=30 pri=12 entry=0x126e
+[boot] entering game: func_15007830
+[entry] func_15007830 (PC version) jtbl 1500793C 15007944 15007970 1500797C 1500793C
+[sched] create thread id=20 pri=13 entry=0x1086
+[stub  3] func_15016170 (asm:game_43620.c) thread=3 frame=1
+[sched] create thread id=4 pri=12 entry=0x10b1
+[entry] init sequence done, entering main loop (state 5)
+[romsym] size table PASS (tex 0xED0 = 768, tex 0 = 1536)
+[entry] loop state 5 -> case 1500793C
+[p61] func_1501C710 call 1 frame 1: a0 6 a1 00000025 (0000) a2 0 a3 0 a4 1
+[stub  4] func_150A00F0 (asm:game_eu_CDDE0.c) thread=3 frame=1
+[pi] raw read 0xB0000A5C = 0x1740FFF9
+[stub  5] func_150039E0 (asm:game_30E90.c) thread=3 frame=1
+[io] first read of RCP register 0xA4600010
+[pi] raw read 0xB0000D24 = 0x98CCE31A
+[io] cart read 0xB0000D24 = 0x98CCE31A
+[stub  6] func_1501D044 (asm:game_eu_4A070.c) thread=3 frame=1
+[stub  7] func_150000B0 (asm:game_2D4B0.c) thread=3 frame=1
+[stub  8] func_150170C4 (asm:game_eu_44010.c) thread=3 frame=1
+[p63] start call 1 frame 1: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 0.00 xzv 0.00 +44 0.00 +80 0 +81 0 +83 0
+[pi] raw read 0xB0BB9E40 = 0x001DFD2D
+[io] cart read 0xB0BB9E40 = 0x001DFD2D
+[pi] raw read 0xB0BB9E44 = 0x0016094D
+[io] cart read 0xB0BB9E44 = 0x0016094D
+[pi] raw read 0xB0BB9E48 = 0x03001280
+[io] cart read 0xB0BB9E48 = 0x03001280
+[pi] raw read 0xB0BB9E4C = 0xE56A0000
+[pi] raw read 0xB0BB9E50 = 0x0000EC69
+[pi] raw read 0xB0BB9E54 = 0x00000000
+[stub  9] func_1503B840 (asm:game_eu_692C0.c) thread=3 frame=1
+[stub 10] func_15039CC8 (asm:game_eu_64770.c) thread=3 frame=1
+[stub 11] func_1514CFF0 (asm:game_eu_17A800.c) thread=3 frame=1
+[stub 12] func_1512DAD0 (asm:game_eu_15B2E0.c) thread=3 frame=1
+[stub 13] func_15000AD0 (asm:game_2DF70.c) thread=3 frame=1
+[stub 14] func_15004FE0 (asm:game_32490.c) thread=3 frame=1
+[stub 15] func_15012760 (asm:game_eu_3FF70.c) thread=3 frame=1
+[stub 16] func_1500BEC0 (asm:game_eu_38360.c) thread=3 frame=1
+[stub 17] func_1500AC14 (asm:game_eu_38360.c) thread=3 frame=1
+[stub 18] func_15086058 (asm:game_eu_B37F0.c) thread=3 frame=1
+[stub 19] func_1501B300 (asm:game_eu_48B10.c) thread=3 frame=1
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[stub 20] func_1509A024 (asm:game_eu_C5530.c) thread=3 frame=1
+[stub 21] func_1509BFB0 (asm:game_C8950.c) thread=3 frame=1
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[stub 22] func_15169260 (asm:game_1944C0.c) thread=3 frame=1
+[stub 23] func_151E7110 (asm:game_eu_20B730.c) thread=3 frame=1
+[io] first read of RCP register 0xA4500004
+[pad] read #1 (frame 2): pad0 buttons 0000 stick 0,0 errno 0
+[stub 24] func_150A067C (asm:game_eu_CDDE0.c) thread=3 frame=2
+[io] first read of RCP register 0xA4800018
+[io] first write of RCP register 0xA4800000
+[io] first write of RCP register 0xA4800010
+[pif] ch 0 cmd 03 tx 35 rx 1
+[io] first write of RCP register 0xA4800004
+[pif] ch 1 cmd 03 tx 35 rx 1
+[pif] ch 2 cmd 03 tx 35 rx 1
+[pif] ch 3 cmd 03 tx 35 rx 1
+[stub 25] func_10011624 (asm:init_EB00.c) thread=3 frame=2
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[stub 26] func_151143D4 (asm:game_eu_13DC30.c) thread=3 frame=2
+[stub 27] func_15044D18 (asm:game_eu_71E70.c) thread=3 frame=2
+[stub 28] func_150617BC (asm:game_83300.c) thread=3 frame=2
+[stub 29] func_15061B4C (asm:game_83300.c) thread=3 frame=2
+[stub 30] func_1501ECA4 (asm:game_eu_4A070.c) thread=3 frame=2
+[stub 31] func_15020F6C (asm:game_eu_4A070.c) thread=3 frame=2
+[stub 32] func_15097BA8 (asm:game_eu_C4590.c) thread=3 frame=2
+[stub 33] func_15129220 (asm:game_eu_156A30.c) thread=3 frame=2
+[stub 34] func_15125DB4 (asm:game_14FF90.c) thread=3 frame=2
+[stub 35] func_15128030 (asm:game_14FF90.c) thread=3 frame=2
+[stub 36] func_15126378 (asm:game_14FF90.c) thread=3 frame=2
+[stub 37] func_15124C38 (asm:game_14FF90.c) thread=3 frame=2
+[stub 38] func_1512317C (asm:game_14FF90.c) thread=3 frame=2
+[stub 39] func_1512EE50 (asm:game_eu_15C660.c) thread=3 frame=2
+[stub 40] func_151236D0 (asm:game_14FF90.c) thread=3 frame=2
+[stub 41] func_1512D900 (asm:game_eu_15B110.c) thread=3 frame=2
+[stub 42] func_151256BC (asm:game_14FF90.c) thread=3 frame=2
+[stub 43] func_1512C77C (asm:game_eu_158110.c) thread=3 frame=2
+[stub 44] func_1512C080 (asm:game_eu_158110.c) thread=3 frame=2
+[stub 45] func_15128D50 (asm:game_eu_156560.c) thread=3 frame=2
+[stub 46] func_1504ADD0 (asm:game_eu_78230.c) thread=3 frame=2
+[stub 47] func_150A6C40 (asm:game_eu_D3880.c) thread=3 frame=2
+[stub 48] func_15113000 (asm:game_eu_13DC30.c) thread=3 frame=2
+[stub 49] func_1510CE28 (asm:game_eu_138E00.c) thread=3 frame=2
+[stub 50] func_1517E3CC (asm:game_eu_1A9280.c) thread=3 frame=2
+[stub] further first-hits are not logged
+[light] ucode data DMEM 0x260: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] ucode data DMEM 0x290: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] ucode data DMEM 0x2C0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] ucode data DMEM 0x2F0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] ucode data DMEM 0x1D0..0x200: 00000000 FFFF0000 00000000 FFFF0000 95987760 028D0000 95987760 028D0000 00000000 00C90000 00000000 00C90000 
+[light] off 0x00: 00000000 00000000 92003F00 00000000 
+[light] off 0x30: 00800000 00800000 3B2D6700 00000000 
+[light] off 0x60: 00000000 00000000 7F000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x90: FFFFFF00 FFFFFF00 FFFFFF00 FFFFFF00 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x60: 00000000 00000000 7F000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x90: FFFFFF00 FFFFFF00 FFFFFF00 FFFFFF00 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[ucode] task data: 'RSP Gfx ucode F3DEXBG.NoN fifo 2.08  Yoshitaka Yasumoto 1999 Ni'
+[ucode] loaded data: ''
+[ucode] task ucode 105CEFD0 vs loaded 105D2990: 4226 of 0x1400 text bytes differ (first 0x0), 1545 of 0x800 data bytes
+[light] off 0x00: 00000000 00000000 92003F00 00000000 
+[light] off 0x30: 00800000 00800000 3B2D6700 00000000 
+[light] off 0x60: 00000000 00000000 7F000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x90: FFFFFF00 FFFFFF00 FFFFFF00 FFFFFF00 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x60: 00000000 00000000 7F000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x90: FEFEFE00 FEFEFE00 00000000 00000000 10654334 10654310 106542C4 01000020 24010000 00000000 00000000 FF90C810 
+[light] vtx n 0.00 0.05 -0.98 sun 0.00 0.00 0.00 M 1 c 0.29 0.42 0.35 rgb 0.53 0.00 0.00
+[light] vtx n 0.79 -0.59 0.09 sun 0.00 0.00 0.00 M 1 c 0.29 0.42 0.35 rgb 0.53 0.00 0.00
+[light] vtx n -0.80 -0.57 0.10 sun 0.00 0.00 0.00 M 1 c 0.29 0.42 0.35 rgb 0.53 0.00 0.00
+[light] vtx n 0.00 -0.87 0.47 sun 0.00 0.00 0.00 M 1 c 0.29 0.42 0.35 rgb 0.53 0.00 0.00
+[light] vtx n 0.64 0.74 0.13 sun 0.00 0.00 0.00 M 1 c 0.29 0.42 0.35 rgb 0.84 0.34 0.00
+[light] vtx n 0.31 0.66 -0.66 sun 0.00 0.00 0.00 M 1 c 0.29 0.42 0.35 rgb 0.84 0.34 0.00
+[light] off 0x60: 00000000 00000000 7F000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[light] off 0x90: FFFFFF00 FFFFFF00 FFFFFF00 FFFFFF00 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 
+[aud] resample table at ROM 0x2CD80
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[aud] no AudioContext (node): output disabled, 22020 Hz
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[heap] 126 blocks (10 free-list), used 833664 bytes, free 2355228 bytes; tag FF 8, tag 7E 3, other tags 105; 0 errors
+[assettest] (17,0): game 029AF960 ok 00001315, direct 029AF960 info 00001315
+[assettest] (17,1): game 029B0C78 ok 00069210, direct 029B0C78 info 00069210
+[assettest] (17,2): game 02A19E88 ok 014B3330, direct 02A19E88 info 014B3330
+[assettest] (17,3): game 03ECD1B8 ok 000A7658, direct 03ECD1B8 info 000A7658
+[assettest] PASS (0 failures)
+[sched] thread 30 returned; destroyed
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[icall] signature mismatch: fn #5003 is v:, called as i:iii (converted)
+[p61] func_1501C710 call 2 frame 715: a0 6 a1 00000021 (0000) a2 0 a3 0 a4 1
+[entry] loop state 2 -> case 15007944
+[pif] ch 4 cmd 00 tx 1 rx 3
+[pif] ch 4 cmd 00 tx 1 rx 3
+[p61] func_1505D6F0 call 1 frame 723: rec 0 idx 0 | x 27.00 -> 27.00 z 27.00 -> 27.00 | moved so far 0
+[p63] start call 3 frame 723: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 1 frame 723: id 000F prev 0000 frame 0.00 -> 1.20 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E59 (loops 0 cbs 0)
+[p63]   rec 0: pos 27.0 0.0 27.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p61] func_1507C170 call 1 frame 723: anim 106506E0 step 1 rec 0 player 0 | +28 00BB66C8 cb +0 00000E59 | frame 0 -> 1.2 (+10 speed 1, +18 52)
+[vis] new dl/tree 10645DB0 / 1064D548 after 179 calls
+[p61] func_1505D6F0 call 2 frame 725: rec 0 idx 0 | x 27.00 -> 27.00 z 27.00 -> 27.00 | moved so far 0
+[p61] func_1507C170 call 2 frame 725: anim 106506E0 step 1 rec 0 player 0 | +28 00BB66C8 cb +0 00000E59 | frame 1.2 -> 3.6 (+10 speed 1, +18 52)
+[p61] func_1505D6F0 call 3 frame 729: rec 0 idx 0 | x 27.00 -> 27.00 z 27.00 -> 27.00 | moved so far 0
+[p61] func_1507C170 call 3 frame 729: anim 106506E0 step 1 rec 0 player 0 | +28 00BB66C8 cb +0 00000E59 | frame 3.6 -> 6 (+10 speed 1, +18 52)
+[p63] anim call 22 frame 805: id 000F prev 0000 frame 49.20 -> 51.60 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E59 END-CB (loops 0 cbs 1)
+[p61] func_1507C170 call 23 frame 809: anim 106506E0 step 1 rec 0 player 0 | +28 00BB66C8 cb +0 00000E59 | frame 51.6 -> 2.00001 (+10 speed 1, +18 52) LOOP/END
+[padscript] t 15000 ms: buttons 0 stick 0,80
+[pad] read #213 (frame 849): pad0 buttons 0000 stick 0,80 errno 0
+[p63] start call 5 frame 849: id 0002 speed 1.755 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 2.40 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 33 frame 849: id 0002 prev 000F frame 0.00 -> 4.21 / last 28 (loop 0) speed 1.755 step 1.00 | +28 00BB5BC8 blend step 125 countdown 523 | hdr[3] 1C [5] 18 [7] 07 | cb 00000407 (loops 1 cbs 1)
+[p63]   rec 0: pos 24.1 0.0 27.0 +28 0.00 xzv 2.40 +44 35.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0002 | ctl +4E 00 +11A 00
+[pad] game after read #213: D_800BED38[0] buttons 0000 stick 0,73 (dead-zoned), D_800BED50[0] new 0000
+[padscript] t 15350 ms: buttons 8000 stick 0,80
+[pad] read #218 (frame 869): pad0 buttons 8000 stick 0,80 errno 0
+[p63] start call 10 frame 869: id 0037 speed 0.800 blend 2.00 frame 15.00 loop 0.00 hold 0 (same id 4 calls before) | rec y 0.00 +28 80.00 +118 -10000.00 +20 59.00 xzv 14.40 +44 35.00 +80 0 +81 2 +83 0
+[p63] anim call 38 frame 869: id 0037 prev 0002 frame 15.00 -> 16.92 / last 60 (loop 0) speed 0.800 step 1.00 | +28 00BB7248 blend step 250 countdown 23 | hdr[3] 3C [5] 29 [7] 00 | cb 000003C5 (loops 1 cbs 1)
+[p63]   rec 0: pos -10.2 64.8 73.3 +28 64.80 xzv 14.40 +44 35.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0037 | ctl +4E 00 +11A 00
+[pad] game after read #218: D_800BED38[0] buttons 8000 stick 0,73 (dead-zoned), D_800BED50[0] new 8000
+[padscript] t 15700 ms: buttons 0 stick 0,80
+[pad] read #222 (frame 885): pad0 buttons 0000 stick 0,80 errno 0
+[pad] game after read #222: D_800BED38[0] buttons 0000 stick 0,73 (dead-zoned), D_800BED50[0] new 0000
+[padscript] t 16000 ms: buttons 0 stick 0,0
+[pad] read #227 (frame 905): pad0 buttons 0000 stick 0,0 errno 0
+[pad] game after read #227: D_800BED38[0] buttons 0000 stick 0,0 (dead-zoned), D_800BED50[0] new 0000
+[p63] start call 11 frame 925: id 00CF speed 1.000 blend 2.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y -622.38 +28 9377.62 +118 -10000.00 +20 -143.08 xzv 21.00 +44 0.00 +80 0 +81 1 +83 0
+[p63] anim call 52 frame 925: id 00CF prev 0037 frame 0.00 -> 2.40 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown 23 | hdr[3] 10 [5] 0A [7] 00 | cb 00000407 (loops 1 cbs 1)
+[p63]   rec 0: pos -266.9 -622.4 419.4 +28 9377.62 xzv 21.00 +44 0.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 200 +84 00CF | ctl +4E 00 +11A 00
+[p63] anim call 58 frame 949: id 00CF prev 0037 frame 14.40 -> 0.80 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown -977 | hdr[3] 10 [5] 0A [7] 00 | cb 00000407 LOOP END-CB (loops 2 cbs 2)
+[p61] func_1507C170 call 58 frame 949: anim 106506E0 step 1 rec 0 player 0 | +28 00BBC3E0 cb +0 00000407 | frame 14.4 -> 0.799999 (+10 speed 1, +18 16) LOOP/END
+[p63] anim call 64 frame 973: id 00CF prev 0037 frame 12.80 -> 15.20 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown -977 | hdr[3] 10 [5] 0A [7] 00 | cb 00000407 END-CB (loops 2 cbs 3)
+[p63]   rec 0: pos -334.4 -3972.8 510.5 +28 6027.18 xzv 0.00 +44 0.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 200 +84 00CF | ctl +4E 00 +11A 00
+[p61] func_1501C710 call 3 frame 977 (inside func_1507D4F8): a0 2 a1 00000000 (0000) a2 0 a3 0 a4 0
+[p61] func_1507D4F8 call 1 frame 977: idx 0 | state 1 -> 1 pos -334.4 -4368.1 510.5 -> -334.4 -4368.1 510.5 +65 00 +E4 0019
+[p61] func_1507C170 call 65 frame 977: anim 106506E0 step 1 rec 0 player 0 | +28 00BBC3E0 cb +0 00000407 | frame 15.2 -> 1.6 (+10 speed 1, +18 16) LOOP/END
+[entry] loop state 3 -> case 15007970
+[p63] start call 25 frame 983: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 13 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 0.00 xzv 0.00 +44 0.00 +80 0 +81 0 +83 0
+[p63] start call 26 frame 984: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 66 frame 984: id 000F prev 0000 frame 0.00 -> 1.20 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E59 (loops 3 cbs 3)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[vis] new dl/tree 1065F2A8 / 1064C31C after 65 calls
+[p63] anim call 87 frame 1065: id 000F prev 0000 frame 49.20 -> 51.60 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E59 END-CB (loops 3 cbs 4)
+[p61] func_1507C170 call 88 frame 1069: anim 10651720 step 1 rec 0 player 0 | +28 00BB66C8 cb +0 00000E59 | frame 51.6 -> 2.00001 (+10 speed 1, +18 52) LOOP/END
+[p63] start call 28 frame 1153: id 000D speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 109 frame 1153: id 000D prev 000F frame 50.00 -> 0.00 / last 57 (loop 0) speed 1.000 step 1.00 | +28 00BCE348 blend step 71 countdown 739 | hdr[3] 39 [5] 4A [7] 00 | cb 00000E59 LOOP END-CB NEW (loops 5 cbs 5)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000D | ctl +4E 00 +11A 00
+[p61] func_1507C170 call 109 frame 1153: anim 10651720 step 1 rec 0 player 0 | +28 00BCE348 cb +0 00000E59 | frame 50 -> 0 (+10 speed 1, +18 57) LOOP/END
+[p63] anim call 128 frame 1229: id 000D prev 000F frame 43.20 -> 45.60 / last 57 (loop 0) speed 1.000 step 1.00 | +28 00BCE348 blend step 71 countdown -113 | hdr[3] 39 [5] 4A [7] 00 | cb 00000E59 (loops 5 cbs 5)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000D | ctl +4E 00 +11A 00
+[p63] start call 29 frame 1249: id 019F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 133 frame 1249: id 019F prev 000D frame 55.20 -> 0.00 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown 739 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 LOOP END-CB NEW (loops 6 cbs 6)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 019F | ctl +4E 00 +11A 00
+[p61] func_1507C170 call 133 frame 1249: anim 10651720 step 1 rec 0 player 0 | +28 00BCE858 cb +0 00000E59 | frame 55.2 -> 0 (+10 speed 1, +18 227) LOOP/END
+[p61] func_1000D96C (sound start) call 1 frame 1253: id 21 (0x15) 0 0 | D_800D1CE4 21
+[p63] anim call 192 frame 1485: id 019F prev 000D frame 139.20 -> 141.60 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 (loops 6 cbs 6)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 019F | ctl +4E 00 +11A 00
+[p63] anim call 228 frame 1629: id 019F prev 000D frame 225.60 -> 1.00 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 LOOP END-CB (loops 7 cbs 7)
+[p61] func_1507C170 call 228 frame 1629: anim 10651720 step 1 rec 0 player 0 | +28 00BCE858 cb +0 00000E59 | frame 225.6 -> 0.999802 (+10 speed 1, +18 227) LOOP/END
+[p61] func_1505D6F0 call 256 frame 1741: rec 0 idx 0 | x 348.00 -> 348.00 z -2284.00 -> -2284.00 | moved so far 0
+[p63] anim call 256 frame 1741: id 019F prev 000D frame 65.80 -> 68.20 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 (loops 7 cbs 7)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 019F | ctl +4E 00 +11A 00
+[p61] func_1507C170 call 256 frame 1741: anim 10651720 step 1 rec 0 player 0 | +28 00BCE858 cb +0 00000E59 | frame 65.7998 -> 68.1998 (+10 speed 1, +18 227)
+[p63] anim call 320 frame 1997: id 019F prev 000D frame 219.40 -> 221.80 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 (loops 7 cbs 7)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 019F | ctl +4E 00 +11A 00
+[p63] anim call 322 frame 2005: id 019F prev 000D frame 224.20 -> 226.60 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 END-CB (loops 7 cbs 8)
+[p61] func_1507C170 call 323 frame 2009: anim 10651720 step 1 rec 0 player 0 | +28 00BCE858 cb +0 00000E59 | frame 226.6 -> 1.9996 (+10 speed 1, +18 227) LOOP/END
+[p63] anim call 384 frame 2253: id 019F prev 000D frame 146.00 -> 148.40 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 (loops 8 cbs 8)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 019F | ctl +4E 00 +11A 00
+[p63] anim call 417 frame 2385: id 019F prev 000D frame 225.20 -> 0.60 / last 227 (loop 0) speed 1.000 step 1.00 | +28 00BCE858 blend step 71 countdown -113 | hdr[3] E3 [5] 34 [7] 00 | cb 00000E59 LOOP END-CB (loops 9 cbs 9)
+[gu] guMtxF2L calls: 2251 (P25 PC libgu)
+[stubs] 90 distinct asm stubs hit, 33562 calls; ranked by calls (first-hit order, frame):
+    1. func_1509A024      1758  #20  f1    asm:game_eu_C5530.c
+    2. func_15041A9C       869  #68  f2    asm:game_eu_6EDC0.c:passthru [DL]
+    3. func_151236D0       627  #40  f2    asm:game_14FF90.c
+    4. func_1501B300       624  #19  f1    asm:game_eu_48B10.c
+    5. func_1512C77C       624  #43  f2    asm:game_eu_158110.c
+    6. func_1512C080       624  #44  f2    asm:game_eu_158110.c
+    7. func_151E7110       622  #23  f1    asm:game_eu_20B730.c
+    8. func_150A067C       621  #24  f2    asm:game_eu_CDDE0.c
+    9. func_10011624       621  #25  f2    asm:init_EB00.c
+   10. func_151143D4       621  #26  f2    asm:game_eu_13DC30.c
+   11. func_15044D18       621  #27  f2    asm:game_eu_71E70.c
+   12. func_150617BC       621  #28  f2    asm:game_83300.c
+   13. func_15061B4C       621  #29  f2    asm:game_83300.c
+   14. func_1501ECA4       621  #30  f2    asm:game_eu_4A070.c
+   15. func_15020F6C       621  #31  f2    asm:game_eu_4A070.c
+   16. func_15097BA8       621  #32  f2    asm:game_eu_C4590.c
+   17. func_15129220       621  #33  f2    asm:game_eu_156A30.c
+   18. func_15125DB4       621  #34  f2    asm:game_14FF90.c
+   19. func_15128030       621  #35  f2    asm:game_14FF90.c
+   20. func_15126378       621  #36  f2    asm:game_14FF90.c
+   21. func_15124C38       621  #37  f2    asm:game_14FF90.c
+   22. func_1512317C       621  #38  f2    asm:game_14FF90.c
+   23. func_1512EE50       621  #39  f2    asm:game_eu_15C660.c
+   24. func_1512D900       621  #41  f2    asm:game_eu_15B110.c
+   25. func_151256BC       621  #42  f2    asm:game_14FF90.c
+   26. func_15128D50       621  #45  f2    asm:game_eu_156560.c
+   27. func_1504ADD0       621  #46  f2    asm:game_eu_78230.c
+   28. func_15113000       621  #48  f2    asm:game_eu_13DC30.c
+   29. func_1510CE28       621  #49  f2    asm:game_eu_138E00.c
+   30. func_1517E3CC       621  #50  f2    asm:game_eu_1A9280.c
+   31. func_15188630       621  #51  f2    asm:game_eu_1B5C40.c
+   32. func_1506160C       621  #52  f2    asm:game_83300.c
+   33. func_15037CCC       621  #53  f2    asm:game_eu_64770.c
+   34. func_15038910       621  #54  f2    asm:game_eu_64770.c
+   35. func_1503BCAC       621  #55  f2    asm:game_eu_692C0.c
+   36. func_150220CC       621  #56  f2    asm:game_eu_4A070.c
+   37. func_1517B270       621  #57  f2    asm:game_eu_1A8930.c
+   38. func_15113798       621  #58  f2    asm:game_eu_13DC30.c
+   39. func_15184298       621  #59  f2    asm:game_eu_1B1010.c
+   40. func_15178004       621  #60  f2    asm:game_eu_1A5190.c
+   41. func_15181A6C       621  #61  f2    asm:game_eu_1ACBC0.c
+   42. func_1517FCCC       621  #62  f2    asm:game_eu_1ACBC0.c
+   43. func_1510D090       621  #63  f2    asm:game_eu_13A8A0.c
+   44. func_15167010       621  #65  f2    asm:game_1944C0.c
+   45. func_1508F9F4       621  #66  f2    asm:game_BC510.c
+   46. func_1509093C       621  #67  f2    asm:game_BC510.c
+   47. func_15180AF0       621  #69  f2    asm:game_eu_1ACBC0.c:passthru [DL]
+   48. func_1515FDA0       619  #71  f5    absolute
+   49. func_15185360       609  #64  f2    asm:game_eu_1B1ED0.c
+   50. func_150954E4       410  #84  f849  asm:game_eu_C2B60.c:passthru [DL]
+   51. func_1512DAD0       384  #12  f1    asm:game_eu_15B2E0.c
+   52. func_150314B4       322  #90  f1201 asm:game_eu_5D910.c:passthru [DL]
+   53. func_1512B2C4       242  #70  f4    asm:game_eu_158110.c
+   54. func_1513C060        63  #81  f849  asm:game_169510.c
+   55. func_151462C8        63  #82  f849  asm:game_eu_170760.c:passthru [DL]
+   56. func_1514306C        63  #83  f849  asm:game_eu_170760.c
+   57. func_150ADA68        50  #77  f849  asm:game_DAE50.c
+   58. func_1507E9A8        24  #74  f849  asm:game_eu_ABEA0.c
+   59. func_151DA6F8        12  #79  f849  asm:game_2062D0.c
+   60. func_1503B840        10  #9   f1    asm:game_eu_692C0.c
+   61. func_15039CC8        10  #10  f1    asm:game_eu_64770.c
+   62. func_1000F568        10  #85  f869  asm:init_EB00.c:passthru
+   63. func_10010344        10  #86  f869  asm:init_EB00.c
+   64. func_1501D044         6  #6   f1    asm:game_eu_4A070.c
+   65. func_1509BFB0         6  #21  f1    asm:game_C8950.c
+   66. func_150A6C40         5  #47  f2    asm:game_eu_D3880.c
+   67. func_10005B04         4  #2   f1    asm:init_eu_5DA0.c
+   68. func_150039E0         3  #5   f1    asm:game_30E90.c
+   69. func_150000B0         3  #7   f1    asm:game_2D4B0.c
+   70. func_150170C4         3  #8   f1    asm:game_eu_44010.c
+   71. func_1514CFF0         3  #11  f1    asm:game_eu_17A800.c
+   72. func_15000AD0         3  #13  f1    asm:game_2DF70.c
+   73. func_15004FE0         3  #14  f1    asm:game_32490.c
+   74. func_15012760         3  #15  f1    asm:game_eu_3FF70.c
+   75. func_1500BEC0         3  #16  f1    asm:game_eu_38360.c
+   76. func_1500AC14         3  #17  f1    asm:game_eu_38360.c
+   77. func_15086058         3  #18  f1    asm:game_eu_B37F0.c
+   78. func_15169260         3  #22  f1    asm:game_1944C0.c
+   79. func_1509CBD4         3  #72  f722  asm:game_eu_CA630.c
+   80. func_150A00F0         2  #4   f1    asm:game_eu_CDDE0.c
+   81. func_15141C0C         2  #75  f849  asm:game_16EE20.c
+   82. func_15146EE0         2  #76  f849  asm:game_eu_174610.c
+   83. func_1513E2AC         2  #78  f849  asm:game_169510.c
+   84. func_1506BF5C         2  #80  f849  asm:game_981E0.c
+   85. func_100052A0         1  #1   f1    asm:init_50A0.c
+   86. func_15016170         1  #3   f1    asm:game_43620.c
+   87. func_151DDF6C         1  #73  f723  asm:game_eu_20B730.c
+   88. func_1501D348         1  #87  f983  asm:game_eu_4A070.c
+   89. func_151BF8F0         1  #88  f983  asm:game_eu_1EC610.c
+   90. func_150302C8         1  #89  f1201 asm:game_eu_5D910.c
+[stubs] 5 on the frame DL path (returned a frame-DL pointer; their output is missing):
+  DL  1. func_15041A9C       869 calls,      869 with a DL pointer  asm:game_eu_6EDC0.c:passthru
+  DL  2. func_15180AF0       621 calls,      621 with a DL pointer  asm:game_eu_1ACBC0.c:passthru
+  DL  3. func_150954E4       410 calls,      410 with a DL pointer  asm:game_eu_C2B60.c:passthru
+  DL  4. func_150314B4       322 calls,      322 with a DL pointer  asm:game_eu_5D910.c:passthru
+  DL  5. func_151462C8        63 calls,       63 with a DL pointer  asm:game_eu_170760.c:passthru
+[sched] 2486 frames, 1 ended by the 40 ms budget, 0 slow (>= 250 ms)
+[mem] null zone: 16 dirty words (0x14..0x7C)
+[mem]   null+0x14 = FFFEFFFF
+[mem]   null+0x18 = 00002450
+[mem]   null+0x1C = FF9B0000
+[mem]   null+0x20 = B6170000
+[mem]   null+0x28 = 00005330
+[mem]   null+0x34 = FD6D0000
+[mem]   null+0x38 = 00005330
+[mem]   null+0x3C = 7F5C0000
+[mem]   null+0x40 = 00010000
+[mem]   null+0x48 = 00000002
+[mem]   null+0x54 = FFFEFFFF
+[mem]   null+0x5C = FF9B0000
+[mem]   null+0x60 = B6170000
+[mem]   null+0x68 = 000024FE
+[mem]   null+0x74 = FD6D0000
+[mem]   null+0x7C = 7F5C0000
+[icall] 5938 functions registered (0 beyond table cap, 0 re-registered with another signature), 2280 mismatched calls converted
+[sched] thread id=1 pri=0 ready switches=2 spins=0
+[sched] thread id=3 pri=10 blocked (recv) switches=1249 spins=0 queue 105CEE30 (N64 800BEE30)
+[sched] thread id=20 pri=13 blocked (recv) switches=2486 spins=0 queue 1054B578 (N64 8003B578)
+[sched] thread id=4 pri=12 blocked (send) switches=2485 spins=0 queue 1054B560 (N64 8003B560)

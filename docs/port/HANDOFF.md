@@ -1116,7 +1116,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1147,7 +1147,9 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P63.md` (Conker animated by the game: func_1502AF04 / func_1510E908 / func_150A69E0 TEMPORARY PC,
 false slide and garbage-count crash, end callback verified, walk GIF) and
 `docs/port/sessions/P66.md` (P62 / P64 overrides dropped, osRomBase for the C func_1000480C, func_15085710 is C,
-jump / running jump / Z long jump and idle variations at runtime, jump GIF). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+jump / running jump / Z long jump and idle variations at runtime, jump GIF) and
+`docs/port/sessions/P69.md` (last PC versions dropped, D_80084550 mapped, P65 / P67 C at runtime, the walk-after-respawn
+hang). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1181,6 +1183,9 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 # P66: ?p66jump=N (record 0 per func_1505F298 call: buttons, anim id, y / vy / +0x28, water, + idle-chooser state),
 #      ?p66lowg=1 (DIAGNOSTIC: D_800CC69C = 1 on A presses), ?p66hud=N (func_15085710 calls); port/web/p66shots.sh
 #      (Chrome jump frame sequence, Space held 400 ms)
+# P69: ?p69attach=N (D_80084550 check + attachment list), ?p69look=N (func_1503AB20), ?p69tri=N, ?p69att=N (attack /
+#      debris / object anim start), ?p69floor=N, ?p69free=1|2|FRAME (double free + object-list scan), ?p69watch=N,
+#      ?p69stub=MASK / ?p69pc=MASK (DIAGNOSTIC bisect wraps); port/web/p69shots.sh (Chrome stand / B / walk / jump / idle)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -2047,6 +2052,37 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     func_1507E7E4 (9), func_150453BC, func_1501D348, func_151BF8F0, func_1507342C; per frame func_1509A024 (1598),
     func_151236D0, func_1501B300, func_1512C77C, func_1512C080, func_151E7110, func_150A067C, func_10011624, ...
     (~45 at once per frame). Full ranked list: P66.md §3 / `port/build/boot_p66_runjump.log`.
+- **P69 (after merging port P65 + port-b P67, 5d3f149): no TEMPORARY PC functions left; a respawn hang.** Full notes: P69.md.
+  - Removed the P63 PC func_1502AF04, func_1510E908 and func_150A69E0 (`pc_overrides.c` now holds only
+    func_100061F8 and func_150ADA20). Clean rebuild, 1 link warning (the old one).
+  - Node runs (30 s idle; P66's run-jump script, 44 s) and real-time Chrome (Metal, `heapwatch=1`; B, walk, fall,
+    respawn, idle): 9 PASS, heap 0 errors, no break. Animation as in P66.
+  - **D_80084550 is mapped:** its 24 entries are function starts (P4 class F → wasm table). The runtime check
+    `[p69] D_80084550 callback table: PASS` compares each word with `port_n64_to_wasm(ROM word)`. Stub entries [3] [5]
+    [19] [21] are converted by the icall layer. Callback 5 (func_150322B8, stub) runs for the B attachment.
+  - **Head aim (func_1503AB20 C) works** (mode 0, step 8, clamps), but its target D_800C43F0 stays (0, 0, 0): its
+    writers func_15037CCC / func_15038910 are stubs. Floor probe func_150453BC: flags 07, height 0 on the start floor.
+    func_1507E7E4 sets +6F / +71 / +72 as asked. No bug found in the P65 / P67 C that ran.
+  - **Not reached (UNVERIFIED):** attack func_1505C7D8 (B plays 0x171-0x173 and attaches model 1 at joint 9, but only
+    anim event 7, func_1506BEDC, arms +0xD0, and no animation used it); debris func_150D5F7C / func_150D71D4;
+    func_150028BC.
+  - **NEW BUG (open): walking after a checkpoint respawn hangs the game.**
+    - Repro (node): `PADSCRIPT="15000:0:0:80; 16800:0:0:0; 19500:0:0:80; 30000:0:0:0" port/web/boot.sh 42`, rc 124.
+    - A garbage node 0x0000243C reaches `D_800DD280[1][0]`. func_151670C0 → func_15169824 frees it twice, the free
+      list cycles, and func_10003C6C spins (V8 profile 91%).
+    - All called P65 / P67 C was wrapped out and the hang stayed. P63 walked here fine (and reached the 0x2C warp).
+    - Suspects: P64's func_15017FA4 (zone boxes, same-TU only), other P62 / P64 C, P66's osRomBase. Bisect tools:
+      `?p69free`, `?p69watch`, `?p69stub`, `?p69pc`.
+  - **After the respawn the level renders:** a textured, lit wooden platform between tree trunks
+    (`P69_screenshot.png`). Textures look smeared / blurry and the doorway is black. The 0x2C warp was not reached
+    (hang).
+  - **Stubs for the port branches** (node 44 s, 90 distinct):
+    - look target func_15037CCC / func_15038910, func_150220CC, func_1503BCAC;
+    - attachment callbacks func_150322B8 / func_1503216C / func_150D88E8 / func_150F5FD4;
+    - anim events func_1506BF5C (sound), func_1506C32C, func_1506CE6C, func_1506EF5C;
+    - per frame func_1509A024 (1758), func_151236D0, func_1501B300, func_1512C77C / func_1512C080, func_151E7110,
+      func_150A067C, func_10011624, func_151143D4, func_15044D18, func_150617BC / func_15061B4C / func_1506160C;
+    - DL passthru func_15041A9C, func_15180AF0, func_150314B4, func_150954E4.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
