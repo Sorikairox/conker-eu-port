@@ -478,7 +478,107 @@ void func_1502D83C(s32 arg0, u8 *arg1) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D920.s")
 
+#ifdef NON_MATCHING
+void func_1505DFDC(struct127 *arg0);
+/* P51: per-frame key-frame copy for the skeleton evaluator func_150A86B0. For the animation state a (arg0, or
+ * object arg1's +0x2D0 after func_1505DFDC when its animation +0x84 is 0xFFFF) and each active slot k (2 with a
+ * blend weight +0x3C > 0; slot k's header byte +0x45 = bytes per key frame, +0x48 = key-frame step - 1, at
+ * +0x40 + k * 0x1D0): the key frame of frame time +8 + 4k (frame count +0x18 + 4k) and the next one are DMA'd from
+ * the stream (ROM +0x28 + 4k, word-aligned down) to the next 16-byte boundary of arg2. +0x30 + 4k = the key frame,
+ * +0x38 + k = byte offset of the next one from it (at the last frame: frame 0 of the stream, copied separately).
+ * +0x38 + k = 0 for a static animation (no key bytes); a slot with no stream is left alone. NM: void (the asm's v0
+ * is left over; no caller uses it). */
+void func_1502DB14(u8 *arg0, s32 arg1, s32 arg2) {
+    u8 *obj = (u8 *)arg1;
+    u8 *a = arg0;
+    u8 *h;
+    u8 *s;
+    u32 dst = arg2;
+    u32 src;
+    u32 mis;
+    u32 n;
+    s32 slots = 1;
+    s32 k, kb, key, d, wrap;
+    f32 t, cnt, f2;
+
+    if (obj != NULL) {
+        if (*(u16 *)(obj + 0x84) == 0xFFFF) {
+            func_1505DFDC((struct127 *)obj);
+        }
+        a = *(u8 **)(obj + 0x2D0);
+    }
+    if (a == NULL) {
+        return;
+    }
+    if (*(s16 *)(a + 0x3C) > 0) {
+        slots = 2;
+    }
+    for (k = 0; k < slots; k++) {
+        h = a + k * 0x1D0;
+        s = a + k * 4;
+        kb = h[0x45];
+        if (kb == 0) {
+            a[0x38 + k] = 0;
+            continue;
+        }
+        if (*(u32 *)(s + 0x28) == 0) {
+            continue;
+        }
+        t = *(f32 *)(s + 8);
+        cnt = *(f32 *)(s + 0x18);
+        dst = (dst + 15) & ~15;
+        key = (s32)t;
+        if (cnt <= (f32)key) {
+            key = (s32)(cnt - 1.0f);
+        }
+        d = h[0x48] + 1;
+        if (d >= 2) {
+            f2 = cnt - 1.0f;
+            if (f2 <= (f32)key) {
+                key = (s32)((f2 + (f32)(d - 1)) / (f32)d);
+            } else {
+                key = key / d;
+            }
+        }
+        src = *(u32 *)(s + 0x28) + (u32)kb * key;
+        mis = src & 3;
+        src -= mis;
+        wrap = 0;
+        if (cnt <= t + 1.0f) {
+            wrap = 1;
+            n = kb;
+        } else {
+            a[0x38 + k] = kb;
+            n = kb * 2;
+        }
+        n += mis;
+        *(u32 *)(s + 0x30) = mis + dst;
+        if (n < 0xC8) {
+            func_1000480C(src, (void *)dst, n);
+        } else {
+            func_10004514(src, (void *)dst, (n + 15) & ~15, 1);
+        }
+        dst += n;
+        if (wrap) {
+            /* the stream's frame 0 after the last key frame */
+            src = *(u32 *)(s + 0x28);
+            dst = (dst + 15) & ~15;
+            mis = src & 1;
+            n = mis + kb;
+            src -= mis;
+            if (n < 0xC8) {
+                func_1000480C(src, (void *)dst, n);
+            } else {
+                func_10004514(src, (void *)dst, (n + 15) & ~15, 1);
+            }
+            a[0x38 + k] = (dst + mis) - *(u32 *)(s + 0x30);
+            dst += n;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502DB14.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P48: joint-matrix count of model id: D_800C52F0[id], minus 4 for the ids of the asm's jump table
@@ -503,7 +603,7 @@ s32 func_15083D54(struct127 *, u16, s32, f32);
 s32 func_1502DE10(s32);
 void func_15030060(u8 *arg0);
 void func_150342D0(u8 *arg0, s32 arg1);
-s32 func_1502DB14(u8 *, s32, s32);
+void func_1502DB14(u8 *, s32, s32);
 void func_150A86B0(s32 *arena, f32 (*mtx)[4], s32 anim, s32 skel, s32 n, u8 *arg5, u8 *remap, s32 h);
 extern u8 D_800C441A;
 extern u8 *D_800845BC[];
