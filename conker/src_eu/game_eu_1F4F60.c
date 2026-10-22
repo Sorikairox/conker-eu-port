@@ -90,7 +90,7 @@ u8 *func_151C8448(u8 *arg0, s16 arg1) {
         temp_f12 = sp.u6C - (*(f32 *)((u8 *)sp.u7C + 8));
         temp_f18 = (sp.u74 * temp_f12) - (temp_f2 * sp.u78);
         temp_f4 = (sp.u78 * temp_f0) - (temp_f12 * sp.u70);
-        (s32)sp30 = (s32)temp_f4;
+        sp30 = (u8 *)(s32)temp_f4;
         temp_f10 = (sp.u70 * temp_f2) - (temp_f0 * sp.u74);
         sp2C = temp_f10;
         temp_f14 = (temp_f18 * temp_f18) + (temp_f4 * temp_f4) + (temp_f10 * temp_f10);

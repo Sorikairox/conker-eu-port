@@ -4,6 +4,10 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
+void func_1000B294(s32 *arg0);
+void func_1000B3D4(struct00 *arg0, struct151 *arg1);
+void func_1000CC54(s32 arg0);
+s32 func_1000CDA0(u8 arg0, s32 *arg1);
 #endif
 
 
@@ -552,8 +556,258 @@ s32 func_1000CDA0(u8 arg0, s32 *arg1) {
     }
     return arg0 == 0;
 }
+#ifdef NON_MATCHING
+extern s32 D_80041C20[];
+extern s32 D_80041C30[];
+extern s32 D_80041C40[];
+extern s32 D_80041B60[][16];
+extern s32 D_80041C50[][16];
+extern u8 D_80041D10[][16];
+extern u8 D_80041D40;
+s32 func_1507E7E4(struct127 *, u8, u8, u16, s32);
+
+/* Music player slot arg0: drain its message queue (beat / marker messages from the sequencer)
+ * and update the per-channel fade state, then step the channel volume ramps. */
+void func_1000CEAC(s32 arg0) {
+    struct151 *pl = D_800417B0[arg0];
+    u16 *masks;
+    s32 *types;
+    OSMesg msg;
+    u32 m;
+    s32 kind;
+    u32 bits;
+    s32 i;
+    /* The asm keeps this in a stack slot it never initialises (in practice the value left by the previous
+     * call, func_1000D758 calls this for slots 0..2 back to back) until the first beat message sets 0x514.
+     * NM builds have no .data, so start from the beat value. */
+    s32 len = 0x514;
+    s32 t;
+
+    if (pl == NULL) {
+        return;
+    }
+    masks = (u16 *)pl->unkC;
+    types = (s32 *)pl->unk8;
+    D_800418AC[arg0] = 0;
+    while (osRecvMesg(&D_80041E58[arg0], &msg, OS_MESG_NOBLOCK) == 0) {
+        m = (u32)msg;
+        kind = m & 7;
+        if (m & 0x10) {
+            if ((u32)kind < 2) {
+                t = (s32)m >> 5;
+                len = 0x514;
+                if (D_80041C30[arg0] != 0) {
+                    D_80041C40[arg0] = t - D_80041C30[arg0];
+                }
+                D_80041C30[arg0] = t;
+                D_80041C20[arg0] = t;
+            }
+            bits = masks[kind];
+            if (bits != 0) {
+                D_800418AC[arg0] |= bits & 0x7F;
+                for (i = 0; bits != 0 && i < 16; i++, bits >>= 1) {
+                    if (!(bits & 1)) {
+                        continue;
+                    }
+                    switch (types[i]) {
+                        case 0:
+                            D_80041D10[arg0][i] ^= 1;
+                            D_80041C50[arg0][i] = 0x8000;
+                            D_80041B60[arg0][i] = len;
+                            break;
+                        case 1:
+                            D_80041D10[arg0][i] ^= 1;
+                            len >>= 1;
+                            if (D_80041D10[arg0][i] == 0) {
+                                D_80041C50[arg0][i] = len * D_800BE9E4 + 0x8000;
+                            }
+                            D_80041B60[arg0][i] = len;
+                            break;
+                        case 2:
+                            D_80041D10[arg0][i & 7] ^= 1;
+                            D_80041D10[arg0][i | 8] = D_80041D10[arg0][i & 7] ^ 1;
+                            D_80041C50[arg0][i & 7] = 0x8000;
+                            D_80041C50[arg0][i | 8] = 0x8000;
+                            D_80041B60[arg0][i] = 0;
+                            break;
+                        default:
+                            D_80041D10[arg0][i] |= 1;
+                            D_80041C50[arg0][i] = len * D_800BE9E4;
+                            D_80041B60[arg0][i] = len;
+                            break;
+                    }
+                }
+            }
+            D_80041D40 = arg0;
+        } else if (D_80041F04 & 1) {
+            func_1507E7E4(D_800CC2D0, 0x44, 1, 0x12, 5);
+        }
+    }
+    pl = D_800417B0[arg0];
+    if (pl->unk30 == 0) {
+        D_800418AC[arg0] |= 0x80;
+        if (pl->unk15 == 0) {
+            func_10008F58(arg0);
+            D_800417B0[arg0]->unk15 = 1;
+        }
+    } else if (pl->unk15 == 1) {
+        func_100084D8(arg0);
+        D_800417B0[arg0]->unk15 = 0;
+    }
+    for (i = 0; i < 16; i++) {
+        if (D_80041C50[arg0][i] != 0) {
+            t = D_80041C50[arg0][i] - D_80041B60[arg0][i] * D_800BE9E4;
+            D_80041C50[arg0][i] = (t < 0) ? 0 : t;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000CEAC.s")
+#endif
+#ifdef NON_MATCHING
+extern s32 D_80041C20[];
+extern s32 D_80041C30[];
+extern s32 D_80041C40[];
+void func_10008C04(u8 idx, u8 arg1, s32 arg2);
+s32 func_10008CE8(u8 idx, s32 arg1);
+
+/* Song-table record (D_8002B074, 16 bytes): +8 per-frame callback, +0xC initial tempo/volume byte. */
+typedef s32 (*NmSongCallback)(s32, u8, f32, f32, s32);
+#define NM_SONG_CB(id) (*(NmSongCallback *)((u8 *)D_8002B074 + (id) * 16 + 8))
+#define NM_PL34(p) (*(s32 *)((u8 *)(p) + 0x34)) /* the song callback's state */
+#define NM_SONG_B(id) (*((u8 *)D_8002B074 + (id) * 16 + 0xC))
+
+/* Music player slot arg0, once per frame: start a pending fade, switch to the queued song (unk60) when it
+ * may start, run the song's callback, step the three volume ramps and resync a linked player. */
+void func_1000D2F8(s32 arg0, f32 arg1, f32 arg2, s32 arg3) {
+    struct151 **slot = &D_800417B0[arg0];
+    struct151 *pl;
+    struct151 *nx;
+    NmSongCallback cb;
+    s32 state = func_1000853C(arg0);
+    s32 v;
+    s32 i;
+
+    pl = *slot;
+    if (pl == NULL) {
+        return;
+    }
+    if (pl->unk24 != 0 && func_1000CDA0(pl->unk20, pl->unk10) != 0) {
+        func_10008C6C(arg0, (*slot)->unk24 - 1);
+        pl = *slot;
+        v = pl->unk28;
+        if (v != 0) {
+            pl->unk30 = v;
+            (*slot)->unk2C = v;
+            pl = *slot;
+        }
+        pl->unk4C = 0x7FFF;
+        (*slot)->unk4E = 0x7FFF;
+        func_1000CC54(arg0);
+        (*slot)->unk24 = 0;
+        (*slot)->unk20 = 0;
+    }
+    pl = *slot;
+    if (state == 0) {
+        pl->unk4 = 0;
+        pl = *slot;
+    }
+    nx = (struct151 *)pl->unk60;
+    if (nx != NULL) {
+        if (pl->unk4 == 0) {
+            if (func_1000CDA0(nx->unk18, nx->unk10) != 0) {
+                (*slot)->unk4 = -1;
+                func_1000B294((s32 *)*slot);
+                nx = (struct151 *)(*slot)->unk60;
+                v = nx->unk4;
+                if (v <= 0) {
+                    nx->unk4 = -1;
+                    ((struct151 *)(*slot)->unk60)->unk10 = NULL;
+                    ((struct151 *)(*slot)->unk60)->unk18 = 0;
+                    (*slot)->unk0 = -1;
+                    *slot = NULL;
+                } else if (func_10008CE8(arg0, v) == -1) {
+                    ((struct151 *)(*slot)->unk60)->unk10 = NULL;
+                    ((struct151 *)(*slot)->unk60)->unk18 = 0;
+                    func_1000B3D4((*slot)->unk60, NULL);
+                    (*slot)->unk60 = NULL;
+                    *slot = NULL;
+                } else {
+                    nx = (struct151 *)(*slot)->unk60;
+                    *slot = nx;
+                    nx->unk0 = arg0;
+                    (*slot)->unk18 = 0;
+                    D_80041C40[arg0] = 0;
+                    D_80041C30[arg0] = 0;
+                    D_80041C20[arg0] = 0;
+                    pl = *slot;
+                    if (NM_SONG_B(pl->unk4) != 0) {
+                        func_10008C04(arg0, NM_SONG_B(pl->unk4), 100);
+                        pl = *slot;
+                    }
+                    if (pl->unk24 != 0) {
+                        func_10008C6C(arg0, pl->unk24 - 1);
+                        (*slot)->unk24 = 0;
+                        pl = *slot;
+                    }
+                    pl->unk30 = 0;
+                    func_1000CC54(arg0);
+                    func_100084D8(arg0);
+                    if ((*slot)->unk38 != 0) {
+                        func_100088F0(arg0, (*slot)->unk38, 0);
+                    }
+                    for (i = 0; i < 16; i++) {
+                        if ((*slot)->unk3C[i] != 0) {
+                            func_10008660(arg0, i, (*slot)->unk3C[i], 1);
+                            (*slot)->unk3C[i] = 0;
+                        }
+                    }
+                }
+            }
+        } else if (func_1000CDA0(nx->unk18, nx->unk10) != 0) {
+            (*slot)->unk15 = 0;
+            func_10008F24(arg0);
+        }
+        pl = *slot;
+    } else if (pl->unk4 == 0) {
+        func_1000B294((s32 *)pl);
+        (*slot)->unk4 = -1;
+        (*slot)->unk0 = -1;
+        *slot = NULL;
+        pl = NULL;
+    }
+    if (pl == NULL) {
+        return;
+    }
+    if (pl->unk4 > 0) {
+        cb = NM_SONG_CB(pl->unk4);
+        if (cb != NULL) {
+            NM_PL34(*slot) = (*cb)(NM_PL34(pl), arg0, arg1, arg2, arg3);
+            pl = *slot;
+        }
+    }
+    if (func_1000CDA0(pl->unk1C, pl->unk10) != 0) {
+        pl = *slot;
+        (*slot)->unk4C = func_1000CD40(pl->unk4C, pl->unk4E, pl->unk50);
+        pl = *slot;
+        (*slot)->unk52 = func_1000CD40(pl->unk52, *(u16 *)((u8 *)pl + 0x54), *(u16 *)((u8 *)pl + 0x56));
+        pl = *slot;
+        (*slot)->unk58 = func_1000CD40(pl->unk58, (u16)pl->unk5A, (u16)pl->unk5C);
+        (*slot)->unk1C = 0;
+    }
+    func_1000CC54(arg0);
+    pl = *slot;
+    if (pl->unk14 != 0) {
+        nx = (struct151 *)pl->unk10;
+        if (nx == NULL || nx == pl || nx->unk4 <= 0 || pl->unk4 <= 0 || nx->unk0 < 0) {
+            pl->unk14 = 0;
+            (*slot)->unk10 = (s32 *)*slot;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000D2F8.s")
+#endif
 #ifdef NON_MATCHING
 void func_1000CBF0(s32, s32, s32);
 void func_1000CEAC(s32);

@@ -25,8 +25,11 @@ def phys(a): return a & 0x1FFFFFFF if 0x80000000 <= a < 0xC0000000 else a
 f2w = lambda x: struct.unpack('>I', struct.pack('>f', x))[0]
 
 class Img:
-    def __init__(self, elf):
-        self.secs = [section(elf, n) for n in ('.game', '.game_data', '.nm_rodata') if n != '.nm_rodata' or 'build_nm' in elf]
+    def __init__(self, elf, data_from=None):
+        # P24: the NM build's .game_data moved (absolute D_ symbols such as D_8009FAB0 point into other data),
+        # so the candidate runs on the reference's data image
+        self.secs = [section(data_from if (data_from and n == '.game_data') else elf, n)
+                     for n in ('.game', '.game_data', '.nm_rodata') if n != '.nm_rodata' or 'build_nm' in elf]
         self.entry = sym(elf, 'func_150AB278')
     def run(self, box, verts):
         mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
@@ -45,7 +48,7 @@ class Img:
         mu.emu_start(self.entry, 0x80790000, count=200000)
         return mu.reg_read(UC_MIPS_REG_V0), bytes(mu.mem_read(phys(0x800CC630), 16))
 
-ref, cand = Img('build/conker.eu.elf'), Img('build_nm/conker.eu.elf')
+ref, cand = Img('build/conker.eu.elf'), Img('build_nm/conker.eu.elf', 'build/conker.eu.elf')
 assert ref.entry == 0x150AB278, hex(ref.entry or 0)
 rng = random.Random(int(sys.argv[2]) if len(sys.argv) > 2 else 1)
 n = int(sys.argv[1]) if len(sys.argv) > 1 else 2000

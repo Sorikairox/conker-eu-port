@@ -147,8 +147,42 @@ u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_1503605C.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_150362D8.s")
+#ifdef NON_MATCHING
+Gfx *func_1502CFEC(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 *color, s32 arg6, s32 arg7);
 
+/* Draw the D_800C4320 entries of D_800C4328 that have no unkB flag through func_1502CFEC, after a
+ * geometry-mode / othermode setup. */
+Gfx *func_150362D8(Gfx *gdl, s32 arg1) {
+    struct_eu_size0C *e;
+    s32 color[4];
+
+    if (D_800C4320 == 0) {
+        return gdl;
+    }
+    gdl->words.w0 = 0xD9FFFFFF;
+    gdl->words.w1 = 0x200004;
+    gdl++;
+    gdl->words.w0 = 0xD9EEFFFF;
+    gdl->words.w1 = 0;
+    gdl++;
+    gdl->words.w0 = 0xE2001E01;
+    gdl->words.w1 = 0;
+    gdl++;
+    for (e = D_800C4328; e < &D_800C4328[D_800C4320]; e++) {
+        if (e->unk0[0xB] != 0) {
+            continue;
+        }
+        color[0] = e->unk0[5];
+        color[1] = e->unk0[6];
+        color[2] = e->unk0[7];
+        color[3] = 0xFF;
+        gdl = func_1502CFEC(gdl, e->unk0[8], arg1, *(s32 *)e->unk0, e->unk0[4], color, 0, 1);
+    }
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_150362D8.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_15035AF8(s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 s32 func_1507C7C0(struct127 *, s16 *, s32 *, s32 *);

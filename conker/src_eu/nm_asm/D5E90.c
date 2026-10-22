@@ -254,4 +254,65 @@ inside:
     nmD5E90_plane(v, n);
     return 0;
 }
+/* ---- func_150AD780 / func_150AD78C: cosf / sinf (P24) ----
+ * sin: |x| < 2^-12 -> x; |x| < 1.5 -> odd polynomial; |x| < 2^28 -> reduce by n = round(x / pi) with a two-part
+ * pi (D_8009FAF8 + D_8009FAFC), polynomial, negate for odd n; else (and inf/NaN) 0. cos(x) = sin(x + pi/2).
+ * The asm tests the float bits: (bits >> 22) & 0x1FF is the exponent plus the top mantissa bit. */
+extern f32 D_8009FAE0; /* pi/2 */
+extern f32 D_8009FAE4, D_8009FAE8, D_8009FAEC, D_8009FAF0; /* small-range coefficients */
+extern f32 D_8009FAF4; /* 1/pi */
+extern f32 D_8009FAF8, D_8009FAFC; /* pi high / low part */
+extern f32 D_8009FB00, D_8009FB04, D_8009FB08, D_8009FB0C; /* reduced-range coefficients */
+
+/* cvt.w.s with the default FCSR mode: round to nearest, ties to even */
+static s32 nmD5E90_rint(f32 f) {
+    if (f >= 8388608.0f || f <= -8388608.0f) {
+        return (s32)f; /* already integral */
+    }
+    if (f >= 0.0f) {
+        return (s32)((f + 8388608.0f) - 8388608.0f);
+    }
+    return -(s32)((-f + 8388608.0f) - 8388608.0f);
+}
+
+f32 func_150AD78C(f32 x) {
+    union {
+        f32 f;
+        s32 w;
+    } u;
+    s32 e;
+    s32 n;
+    f32 nf;
+    f32 x2;
+    f32 r;
+
+    u.f = x;
+    e = (u.w >> 22) & 0x1FF;
+    if (e < 0xFF) {
+        if (e < 0xE6) {
+            return x;
+        }
+        x2 = x * x;
+        r = ((D_8009FAE4 * x2 + D_8009FAE8) * x2 + D_8009FAEC) * x2 + D_8009FAF0;
+        return r * (x2 * x) + x;
+    }
+    if (e >= 0x136) {
+        return 0.0f;
+    }
+    n = nmD5E90_rint(D_8009FAF4 * x);
+    nf = (f32)n;
+    x = x - D_8009FAF8 * nf;
+    x = x - D_8009FAFC * nf;
+    x2 = x * x;
+    r = (((D_8009FB00 * x2 + D_8009FB04) * x2 + D_8009FB08) * x2 + D_8009FB0C) * x2;
+    r = r * x + x;
+    if (n & 1) {
+        r = -r;
+    }
+    return r;
+}
+
+f32 func_150AD780(f32 x) {
+    return func_150AD78C(x + D_8009FAE0);
+}
 #endif

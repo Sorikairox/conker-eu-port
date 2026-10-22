@@ -275,11 +275,21 @@ void func_15088A68(s32 arg0, s32 arg1)
 
 s32 func_150889D8();
 
+#ifdef NON_MATCHING
+/* The asm never sets a0 before calling func_150889D8: the object pointer is this function's own a0,
+ * passed through (UNVERIFIED: check the asm callers pass a struct127 *). */
+void func_15088BFC(struct127 *arg0) {
+#else
 void func_15088BFC(void) {
+#endif
     s32 temp_v0;
 
     if (D_80087640 != NULL) {
+#ifdef NON_MATCHING
+        temp_v0 = func_150889D8(arg0);
+#else
         temp_v0 = func_150889D8();
+#endif
         D_80087640[temp_v0].unk31 = 0;
         D_800D27B4 &= ~(1 << (temp_v0 - D_800D27B8));
     }

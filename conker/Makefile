@@ -60,7 +60,7 @@ SRC_DIRS := $(SRC_DIR) \
 # holds C for functions of asm/X.s; it is compiled and linked only with NON_MATCHING=1, and the asm copies of
 # the functions listed in NM_ASM_C_FUNCS_X are weakened in X.s.o so the C definitions win.
 NM_ASM_SRC_DIR := $(SRC_DIR)/nm_asm
-NM_ASM_C_FUNCS_D5E90 := func_150AB278
+NM_ASM_C_FUNCS_D5E90 := func_150AB278 func_150AD780 func_150AD78C
 ifeq ($(NON_MATCHING),1)
 SRC_DIRS += $(NM_ASM_SRC_DIR)
 endif

@@ -452,7 +452,7 @@ extern s32 D_16003AF8;
 extern s32 D_16003B08;
 extern u8 *D_8002C130;
 extern s32 D_8003CC88;
-extern s32 func_150ADC50;
+void func_150ADC50(void); /* code (asm/D5E90.s), compared by address below */
 extern s32 func_160036F0;
 
 s32 func_16000B14(OSThread *arg0) {
@@ -553,7 +553,7 @@ s32 func_16000B14(OSThread *arg0) {
     }
     D_1600389C = (struct118 *) arg0;
     D_160038A4 = 0;
-    if ((arg0->context.cause == 0x20) && ((s32)&func_150ADC50 == arg0->context.pc)) {
+    if ((arg0->context.cause == 0x20) && ((s32)func_150ADC50 == arg0->context.pc)) {
         D_160038A4 = 1;
     }
     do {

@@ -432,7 +432,11 @@ void func_151A547C(u8 *arg0) {
     }
     if ((sp1B == 0) && (*(s32 *)(temp_v0 + 0x1D4) != 0) && ((temp_v0[0x74] & 0xF) != 0xF)) {
         sp1B = 1; // permuter: the flag is stored before and after the call
+#ifdef NON_MATCHING
+        func_151A3AB4(temp_a0, arg0[0xC]); /* the asm also loads a2 = arg0; the callee has 2 params */
+#else
         func_151A3AB4(temp_a0, arg0[0xC], arg0);
+#endif
         sp1B = 1;
     }
     if (sp1B) {

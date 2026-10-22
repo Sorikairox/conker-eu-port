@@ -103,8 +103,18 @@ Gfx *func_1517F5FC(Gfx *gfx, s32 a, s32 r, s32 g, s32 b, s32 i) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F910.s")
+#ifdef NON_MATCHING
+Gfx *func_1517F910(Gfx *gdl, s32 arg1) {
+    s32 r = func_1517F470(arg1);
 
+    if (r == 0) {
+        return gdl;
+    }
+    return func_1517F5FC(gdl, r, D_800DE1D0[arg1][0], D_800DE1D0[arg1][1], D_800DE1D0[arg1][2], arg1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517F910.s")
+#endif
 s32 func_1517F40C(s32 arg0) {
     if ((&D_800DDDB0)[arg0] >= (&D_800DDE28)[arg0]) {
         return 1;
@@ -143,8 +153,36 @@ s32 func_1517FA48(s32 arg0, s32 arg1) {
     return (s32)func_1517F5FC((u8 *)arg0, temp_a1, temp_v0[0], temp_v0[1], temp_v0[2], arg1);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FAD4.s")
+#ifdef NON_MATCHING
+extern u8 D_8008D3B0[][6];
 
+/* Pulsing overlay: alpha D_800DE1BB (scaled by a 0..1 wave from func_15048A40 when D_800DE1BC is set),
+ * colour D_8008D3B0[D_800DE1BA] (first of its two RGB triples). */
+Gfx *func_1517FAD4(Gfx *gdl) {
+    u8 *c;
+    s32 a;
+    f32 t;
+
+    if (D_800DDE08 == 0) {
+        return gdl;
+    }
+    a = D_800DE1BB;
+    if (a == 0) {
+        return gdl;
+    }
+    /* the asm leaves t uninitialised (a stale stack word) when D_800DE1BC == 0 and sets 0 on the wave path:
+     * use 0 on both paths (UNVERIFIED for the non-wave path) */
+    t = 0.0f;
+    if (D_800DE1BC != 0) {
+        a = (f32)D_800DE1BB * ((func_15048A40(D_800DE1B9) + 1.0f) * 0.5f);
+    }
+    c = D_8008D3B0[D_800DE1BA];
+    return func_1517F5FC(gdl, a, (s32)((c[3] - c[0]) * t + c[0]), (s32)((c[4] - c[1]) * t + c[1]),
+                         (s32)((c[5] - c[2]) * t + c[2]), 0);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FAD4.s")
+#endif
 void func_1517FC90(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800DDE08 = arg1;
     D_800DE1B8 = arg2;

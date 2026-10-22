@@ -1066,7 +1066,7 @@ s16 *func_1519CADC(u8 *arg0, s16 arg1) {
         temp_f12_2 = sp.u50 - (*(f32 *)((u8 *)sp.u84 + 8));
         temp_f18 = (sp.u7C * temp_f12_2) - (temp_f2_2 * sp.u80);
         temp_f16_2 = (sp.u80 * temp_f0_2) - (temp_f12_2 * sp.u78);
-        (s32)sp30 = (s32)temp_f16_2;
+        sp30 = (u8 *)(s32)temp_f16_2;
         temp_f8 = (sp.u78 * temp_f2_2) - (temp_f0_2 * sp.u7C);
         sp2C = temp_f8;
         temp_f14_2 = (temp_f18 * temp_f18) + (temp_f16_2 * temp_f16_2) + (temp_f8 * temp_f8);
