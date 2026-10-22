@@ -79,7 +79,7 @@ void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f
 #ifdef NON_MATCHING
 s32 func_150A48C0(s32, s32, s32, s32 *);
 s32 func_150A49D0(s32, s32 *, s32);
-s32 func_150A69A8(s16, s16, s32 *, s32);
+s32 func_150A69A8(s32, s32, s32 *, s32);
 extern s32 D_800D3720;
 extern s32 D_800D3C50;
 
