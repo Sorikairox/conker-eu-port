@@ -106,6 +106,10 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 ### Lesson: dropped arguments (P75, P78)
 - IDO code often leaves a value in a0..a3 and the callee uses it even though the decomp's C call passes nothing (`f()` or a `void (*)(void)` pointer). On N64 it works by accident; in the port the argument becomes 0 → wrong object or NULL writes. Whenever a callee becomes C, check its callers' argument counts (run `tools/port/arity_scan.py` after every merge; output `docs/port/arity_scan.tsv`, a may-analysis: check the asm before fixing a row).
 
+### Recovering after a host restart / power loss
+- `open -a Docker`, wait for `docker info`, then `docker start conkerdev-port conkerdev-portb conkerdev-web conker-web-serve`.
+- Check each worktree (`git log -1`, `git status`) for uncommitted work, then resume each interrupted agent with SendMessage (its context survives) — tell it the container is fresh, in-flight jobs are gone, and build outputs may be partial.
+
 ### Verification culture
 - Conversions are accepted only with difftest EQUIV **plus mutants that DIFFER**; anything unreachable is marked UNVERIFIED and runtime-checked in the browser.
 - Whole-function harnesses (`tools/port/difftest/nmasm_*.py`) for hand-asm / multi-entry code; compare against real ROM data where possible.
