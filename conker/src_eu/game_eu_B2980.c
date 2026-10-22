@@ -1,6 +1,18 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+extern s8 D_800E1013;
+extern f32 D_8009DD30;
+extern f32 D_8009DD34;
+f32 sinf(f32);
+f32 cosf(f32);
+void func_15005818(u8 *arg0, u8 *arg1, f32 *arg2);
+void func_1505D6F0(u8 *arg0, s32 arg1);
+f32 func_1506AD30(struct127 *arg0, f32 arg1, s32 arg2);
+s32 func_1507C7C0(struct127 *, u16 *, u16 *, u16 *);
+void func_15169040(s32 arg0, u8 arg1);
+#endif
 
 typedef struct {
     /* 0x000 */ u8 pad0[0x11B];
@@ -57,8 +69,146 @@ block_6:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_15085170.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150851E0.s")
+#ifdef NON_MATCHING
+/* Level start point lookup. Entries of D_800D212C are 0x18 bytes: s16 x/y/z +0, u8 +6 / +7 (angle), f32 x3 +8,
+ * u8 +0x14, s8 +0x15, s8 +0x16 (alias index). arg0 = player (0xFF: none), arg1 = start index (-1: the player's
+ * saved one at rec+0x31C->+0x11B). Multiplayer (D_800BE616 && D_800D18A8) picks the start farthest from the
+ * others. Returns 1 when there is no start table, else 0. arg9 is unused. */
+s32 func_150851E0(s32 arg0, s32 arg1, s32 arg2, s16 *arg3, f32 *arg4, u8 *arg5, u8 *arg6, s32 *arg7, s32 *arg8,
+                  s32 arg9, s32 *arg10) {
+    s32 save = 1;
+    s32 idx;
+    s32 v1;
+    s8 c;
+    u8 *tab;
+    u8 *e;
 
+    if (D_800BE9F0 == 0x2B) {
+        save = 0;
+        D_800D18A8 = 0;
+    }
+    if (D_800BE616 != 0 && *(s8 *)(D_80090174 + 0x42) == 0 && D_800E1013 != 0) {
+        save = 0;
+    }
+    if (arg0 != 0xFF) {
+        if (arg1 == -1) {
+            arg1 = (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x11B];
+        }
+        if (save) {
+            (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x11B] = 0;
+        }
+    }
+    idx = arg1 & 0xFFF;
+    if (!(idx < D_800D2128) || idx < 0) {
+        idx = 0;
+    }
+    tab = (u8 *)D_800D212C;
+    if (tab == NULL) {
+        return 1;
+    }
+    if (D_800BE616 != 0 && D_800D18A8 != 0) {
+        u8 *rec = (u8 *)D_800CC2D0 + arg0 * 0x32C;
+        u8 team = rec[0x128];
+        u8 *ctl = *(u8 **)(rec + 0x31C);
+        s32 mask = team ? D_800D2124 : D_800D2120;
+        u8 list[0x20];
+        s32 n = 0;
+        s32 i;
+        s32 best = 0;
+        f32 bestd = 0.0f;
+        s8 cur;
+
+        for (i = 0; i < D_800D2128; i++) {
+            if (mask & (1 << i)) {
+                list[n++] = i;
+            }
+        }
+        cur = *(s8 *)(ctl + 0x1B0);
+        for (i = 0; i < n; i++) {
+            u8 s = list[i];
+            f32 d;
+            f32 r;
+            u8 *o;
+            u8 *end;
+
+            if (cur == s) {
+                continue;
+            }
+            d = D_8009DD30;
+            end = (u8 *)D_800CC2D0 + D_8008FD8C * 0x32C;
+            for (o = (u8 *)D_800CC2D0; o < end; o += 0x32C) {
+                f32 dx, dz, q;
+                if (team == o[0x128]) {
+                    continue;
+                }
+                e = (u8 *)D_800D212C + s * 0x18;
+                dx = *(f32 *)(o + 0x14) - (f32)*(s16 *)(e + 0);
+                dz = *(f32 *)(o + 0x1C) - (f32)*(s16 *)(e + 4);
+                q = dx * dx + dz * dz;
+                if (q < d) {
+                    d = q;
+                }
+            }
+            r = func_150ADA68() * 500.0f;
+            d = d + r * r;
+            if (bestd < d) {
+                best = i;
+                bestd = d;
+            }
+        }
+        if (*(s8 *)(D_80090174 + 0x42) != 0 || D_800E1013 == 0) {
+            idx = list[best];
+        }
+        ctl = *(u8 **)(rec + 0x31C);
+        ctl[0x1B0] = idx;
+        arg2 = 0;
+        tab = (u8 *)D_800D212C;
+    }
+    v1 = idx;
+    if (arg2 != 0 && (c = *(s8 *)(tab + idx * 0x18 + 0x16)) != 0) {
+        if (c == -1 || !(c < D_800D2128)) {
+            v1 = idx;
+        } else {
+            v1 = c;
+        }
+        if (arg10 != NULL) {
+            c = *(s8 *)(tab + v1 * 0x18 + 0x15);
+            if (c >= 0) {
+                *arg10 = 0;
+            } else if (c == -1) {
+                *arg10 = 0;
+            } else {
+                *arg10 = 1;
+            }
+        }
+    } else if (arg2 != 0 && *(s8 *)(tab + idx * 0x18 + 0x16) == 0) {
+        D_800DDE38 = 2;
+    }
+    e = (u8 *)D_800D212C + v1 * 0x18;
+    arg4[0] = *(f32 *)(e + 8);
+    arg4[1] = *(f32 *)(e + 0xC);
+    arg4[2] = *(f32 *)(e + 0x10);
+    arg3[0] = *(s16 *)(e + 0);
+    arg3[1] = *(s16 *)(e + 2);
+    arg3[2] = *(s16 *)(e + 4);
+    *arg5 = e[6];
+    *arg6 = e[7];
+    *arg7 = e[0x14];
+    *arg8 = *(s8 *)(e + 0x15);
+    if (D_800BE616 != 0 && D_800D18A8 == 0) {
+        f32 ang = ((f32)*arg6 * D_8009DD34) * 0.0078125f;
+        f32 r = func_150ADA68() * 80.0f - 40.0f;
+        arg3[0] = (s16)(s32)((f32)arg3[0] + sinf(ang) * r);
+        arg3[2] = (s16)(s32)((f32)arg3[2] + cosf(ang) * r);
+    }
+    if (arg0 != 0xFF && save) {
+        (*(u8 **)((u8 *)&D_800CCA0C + arg0 * 0x32C))[0x11B] = idx;
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150851E0.s")
+#endif
 void func_15085880(struct_eu_B2980 *arg0, s32 arg1) {
     arg0->unk31C->unk11B = arg1;
 }
@@ -67,8 +217,88 @@ u8 func_15085890(struct_eu_B2980 *arg0) {
     return arg0->unk31C->unk11B;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150858A0.s")
+#ifdef NON_MATCHING
+/* Place object record arg0 (D_800CC2D0[i]) at level start arg1: func_150851E0 gives the start point, angle and
+ * flags; func_1506AD30 runs with D_800D154C / D_800C3E78 temporarily set to this record; then position
+ * (+0x14 / +0x2C / +0x180 / +0x1CC), yaw (+0x76..+0x7A, +0x40, +0xB8) and the camera controller's start eye
+ * (func_15005818). */
+void func_150858A0(void *arg0, s32 arg1, s32 arg2) {
+    u8 *rec = arg0;
+    s16 pos[3];
+    f32 eye[3];
+    u8 b6B;
+    u8 ang;
+    s32 o60;
+    s32 o64;
+    struct {
+        u8 *rec;
+        u8 b;
+    } msg;
+    s32 idx;
+    struct127 *save;
+    u8 saveb;
+    s32 v;
+    u8 *ctl;
 
+    func_150851E0(rec[0x127], arg1, D_800D18A8, pos, eye, &b6B, &ang, &o60, &o64, arg2, NULL);
+    idx = (s32)(rec - (u8 *)D_800CC2D0) / 0x32C;
+    save = D_800D154C;
+    saveb = D_800C3E78;
+    D_800D154C = (struct127 *)rec;
+    D_800C3E78 = idx;
+    func_1506AD30((struct127 *)rec, 800.0f, 1);
+    D_800D154C = save;
+    D_800C3E78 = saveb;
+    *(f32 *)(rec + 0x14) = (f32)pos[0];
+    *(f32 *)(rec + 0x18) = (f32)pos[1];
+    *(f32 *)(rec + 0x2C) = *(f32 *)(rec + 0x14);
+    *(f32 *)(rec + 0x30) = *(f32 *)(rec + 0x18);
+    *(f32 *)(rec + 0x1C) = (f32)pos[2];
+    *(f32 *)(rec + 0x34) = *(f32 *)(rec + 0x1C);
+    v = ang << 8;
+    *(s16 *)(rec + 0x7A) = v;
+    *(s16 *)(rec + 0x78) = v;
+    *(s16 *)(rec + 0x76) = v;
+    *(f32 *)(rec + 0x40) = (f32)(s16)(v + 0x4000) * 0.0054931640625f;
+    *(f32 *)(rec + 0xB8) = (f32)((b6B * 360) >> 8);
+    while (180.0f < *(f32 *)(rec + 0xB8)) {
+        *(f32 *)(rec + 0xB8) = *(f32 *)(rec + 0xB8) - 360.0f;
+    }
+    ctl = *(u8 **)(rec + 0x31C);
+    *(f32 *)(rec + 0x28) = 0.0f;
+    *(f32 *)(rec + 0x180) = *(f32 *)(rec + 0x18);
+    if (ctl != NULL) {
+        func_1507C7C0((struct127 *)rec, (u16 *)(ctl + 0x114), (u16 *)(ctl + 0x116), (u16 *)(ctl + 0x118));
+    }
+    *(f32 *)(rec + 0x1CC) = *(f32 *)(rec + 0x18);
+    *(u16 *)(rec + 0x2F8) &= 0xFFEF;
+    *(u16 *)(rec + 0x22C) |= 0x200;
+    *(f32 *)(rec + 0x164) = 0.0f;
+    *(f32 *)(rec + 0x168) = 0.0f;
+    *(f32 *)(rec + 0x16C) = 0.0f;
+    *(f32 *)(rec + 0x170) = 0.0f;
+    if (rec[0x127] == 0xFF) {
+        rec[0x83] = 0;
+    } else {
+        (*(u8 **)(rec + 0x31C))[0x23] = o64;
+        if (D_800BE616 != 0 && D_800D18A8 != 0) {
+            func_1505D6F0(rec, idx);
+        }
+        ctl = *(u8 **)(rec + 0x31C);
+        if (ctl[0x78] == 0 && ctl[0x19B] != 4 && ctl[0x19B] != 7) {
+            rec[0x83] = 0;
+        }
+    }
+    if (*(u8 **)(rec + 0x318) != NULL) {
+        func_15005818(*(u8 **)(rec + 0x318), rec, eye);
+    }
+    msg.rec = rec;
+    msg.b = rec[0x3B];
+    func_15169040((s32)&msg, 4);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150858A0.s")
+#endif
 #ifdef NON_MATCHING
 extern u16 D_8009015C;
 extern s32 D_800D255C;

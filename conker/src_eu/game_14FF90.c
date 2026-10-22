@@ -4,6 +4,15 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15122C5C(struct108 *arg0);
+void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+void func_151206C8(struct108 *);
+void func_151220D0(struct108 *);
+void func_151221F0(struct108 *, s32);
+void func_151226E0(struct108 *);
+void func_151229B0(struct108 *);
+void func_15122EF0(struct108 *);
+void func_15129EA4(struct108 *);
+void func_1512DEA4(struct108 *);
 #endif
 
 extern f32 D_800A34B0[4][2];
@@ -164,7 +173,7 @@ void func_15125394(struct108 *);
 void func_15123568(struct108 *);
 void func_1512C770(struct108 *);
 void func_15125924(struct108 *);
-s32 func_151283B8(struct108 *);
+void func_151283B8(struct108 *);
 void func_15125594(struct108 *);
 void func_15123508(struct108 *);
 s32 func_1512D900(struct108 *);
@@ -572,8 +581,77 @@ void func_15124770(struct108 *arg0, s32 arg1) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151247C0.s")
+#ifdef NON_MATCHING
+/* P41: per-frame camera target ("at"). 0x2A4..0x2AC eases (rate 0x670, smoothed by func_150498A0 toward 0x674 = 1,
+ * or 0.25 while the target object +0x9C / +0x95 is busy) toward the followed record's position (0x3D0 +0x14..+0x1C;
+ * the midpoint with record 0x248 while 0x244 is set; y is not eased). 0x23C (first frame) snaps. Then an offset of
+ * length 0x994 (eased toward 0x99C) along yaw 0x39C - pi/2, and at 0x2BC / 0x2C4 = the result (func_15125594). */
+void func_151247C0(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *o;
+    u8 *r;
+    u8 *q;
+    s32 busy;
+    f32 s;
+    f32 c;
 
+    if (*(u16 *)(p + 0x7F4) != 0) {
+        return;
+    }
+    o = *(u8 **)(p + 0x3D4);
+    busy = 0;
+    if (o != NULL) {
+        busy = (u8)(*(s32 *)(o + 0x9C) | o[0x95]);
+    }
+    *(f32 *)(p + 0x674) = busy ? 0.25f : 1.0f;
+    if (p[0x23C] != 0) {
+        *(f32 *)(p + 0x670) = *(f32 *)(p + 0x674);
+        *(f32 *)(p + 0x678) = 0.0f;
+    } else {
+        func_150498A0((f32 *)(p + 0x670), *(f32 *)(p + 0x674), (f32 *)(p + 0x678), *(f32 *)(p + 0x3B4) * 0.25f, *(f32 *)(p + 0x3B8) * 0.25f, *(f32 *)(p + 0x7B4));
+    }
+    if (*(s16 *)(p + 0x244) != 0) {
+        r = *(u8 **)(p + 0x3D0);
+        q = *(u8 **)(p + 0x248);
+        if (p[0x23C] != 0) {
+            *(f32 *)(p + 0x2A4) = (*(f32 *)(r + 0x14) + *(f32 *)(q + 0x14)) * 0.5f;
+            *(f32 *)(p + 0x2A8) = (*(f32 *)(r + 0x18) + *(f32 *)(q + 0x18)) * 0.5f;
+            *(f32 *)(p + 0x2AC) = (*(f32 *)(r + 0x1C) + *(f32 *)(q + 0x1C)) * 0.5f;
+        } else {
+            *(f32 *)(p + 0x2A4) = *(f32 *)(p + 0x2A4) + ((*(f32 *)(r + 0x14) + *(f32 *)(q + 0x14)) * 0.5f - *(f32 *)(p + 0x2A4)) * *(f32 *)(p + 0x670);
+            *(f32 *)(p + 0x2A8) = (*(f32 *)(r + 0x18) + *(f32 *)(q + 0x18)) * 0.5f;
+            *(f32 *)(p + 0x2AC) = *(f32 *)(p + 0x2AC) + ((*(f32 *)(r + 0x1C) + *(f32 *)(q + 0x1C)) * 0.5f - *(f32 *)(p + 0x2AC)) * *(f32 *)(p + 0x670);
+        }
+    } else {
+        r = *(u8 **)(p + 0x3D0);
+        if (p[0x23C] != 0) {
+            *(f32 *)(p + 0x2A4) = *(f32 *)(r + 0x14);
+            *(f32 *)(p + 0x2AC) = *(f32 *)(r + 0x1C);
+        } else {
+            *(f32 *)(p + 0x2A4) = *(f32 *)(p + 0x2A4) + (*(f32 *)(r + 0x14) - *(f32 *)(p + 0x2A4)) * *(f32 *)(p + 0x670);
+            *(f32 *)(p + 0x2AC) = *(f32 *)(p + 0x2AC) + (*(f32 *)(r + 0x1C) - *(f32 *)(p + 0x2AC)) * *(f32 *)(p + 0x670);
+        }
+        *(f32 *)(p + 0x2A8) = *(f32 *)(r + 0x18);
+    }
+    if (!(0.0f == *(f32 *)(p + 0x994)) || !(0.0f == *(f32 *)(p + 0x99C))) {
+        if (p[0x23C] != 0) {
+            *(f32 *)(p + 0x994) = *(f32 *)(p + 0x99C);
+            *(f32 *)(p + 0x998) = 0.0f;
+        } else {
+            func_150498A0((f32 *)(p + 0x994), *(f32 *)(p + 0x99C), (f32 *)(p + 0x998), 4.0f, 6.0f, *(f32 *)(p + 0x7B4));
+        }
+        s = sinf(*(f32 *)(p + 0x39C) - 1.5707964f) * *(f32 *)(p + 0x994);
+        c = cosf(*(f32 *)(p + 0x39C) - 1.5707964f) * *(f32 *)(p + 0x994);
+        *(f32 *)(p + 0x2A4) = *(f32 *)(p + 0x2A4) + s;
+        *(f32 *)(p + 0x2AC) = *(f32 *)(p + 0x2AC) + c;
+    }
+    *(f32 *)(p + 0x2BC) = *(f32 *)(p + 0x2A4);
+    *(f32 *)(p + 0x2C4) = *(f32 *)(p + 0x2AC);
+    func_15125594(arg0);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151247C0.s")
+#endif
 void func_15124AB4(struct108 *arg0) {
     arg0->unk668 = -sinf(arg0->unk398);
     arg0->unk66C = cosf(arg0->unk398);
@@ -1105,7 +1183,40 @@ void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128030.s")
+#ifdef NON_MATCHING
+/* P41: camera mode dispatcher on controller +0x2C (1 / 0x800: func_15122EF0, the follow camera). */
+void func_151283B8(struct108 *arg0) {
+    switch (*(s32 *)((u8 *)arg0 + 0x2C)) {
+        case 1:
+        case 0x800:
+            func_15122EF0(arg0);
+            break;
+        case 2:
+            func_151220D0(arg0);
+            break;
+        case 8:
+            func_151221F0(arg0, 0);
+            break;
+        case 0x40:
+            func_15129EA4(arg0);
+            break;
+        case 0x80:
+            func_151229B0(arg0);
+            break;
+        case 0x100:
+            func_151206C8(arg0);
+            break;
+        case 0x400:
+            func_151226E0(arg0);
+            break;
+        case 0x800000:
+            func_1512DEA4(arg0);
+            break;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151283B8.s")
+#endif
 void func_151284C4(struct108 *arg0) {
     func_1512C490(arg0);
     arg0->unk2B0 = arg0->unk3D0->x_position;

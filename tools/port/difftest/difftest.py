@@ -492,6 +492,14 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
     OUTA[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
+# P41 (opt-in): DIFFTEST_OUTB="ADDR=N:B0;B1;...,..." like DIFFTEST_OUTA but writes bytes (hex B), e.g. u8 out-params
+# that sit next to each other in the caller's frame (func_150851E0's angle / flag bytes).
+OUTB = {}
+for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
+    _a, _v = _p.split('=')
+    OUTB[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
+                                     for _x in _v.split('/')]
+
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
 ARGMEM = {}
@@ -830,6 +838,10 @@ class Run:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *_ws))
+        if (addr & 0x1FFFFFFF) in OUTB:
+            for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
+                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                mu.mem_write(phys(_p), bytes(_ws))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
             mu.reg_write(reg, r.getrandbits(32))
