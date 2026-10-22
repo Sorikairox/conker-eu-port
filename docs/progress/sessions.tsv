@@ -132,3 +132,6 @@ P51	port	nm convert	5			model loader + skeleton anim evaluator func_150A86B0 (ha
 P55	web	port-web				standing/landing/falling on real floor verified; G_DL-to-0 renderer guard; stub lists
 P56	port-b	nm convert	3		129	wall engine + ray cast via mechanical asm2c (hand asm only, user-approved stopgap); real-ROM levels 0 diff
 P58	web	port-web				CONKER posed by converted skeleton anim (preview); sine table in code segment supplied; temp overrides func_150A9B0C/func_1000480C
+P59	port-b	nm convert	6		118	walk-path: event resolver, floor material, respawn, record contact, collision cylinder, anim frame advance
+P57	port	nm convert	10			model display list func_1502CFEC + adjust buffer + model-path fns C; total C 4823 (81.5%)
+P61	web	port-web				MILESTONE Conker drawn by game code (831 cmds, 811 tris, 84 bone mtx); walks, respawns at checkpoint; walls literal-address bug found
