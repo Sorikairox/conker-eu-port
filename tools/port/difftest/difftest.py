@@ -441,8 +441,9 @@ def proto_fslots(tu, name):
         ps = [p for p in m.group(1).split(',') if p.strip()]
         out, slot = set(), 0
         for p in ps[:2]:
-            if re.search(r'\b(f32|float)\b', p) and '*' not in p: out.add(slot); slot += 1
-            elif re.search(r'\b(f64|double)\b', p) and '*' not in p: out |= {slot, slot + 1}; slot += 2
+            if '*' in p or '[' in p: break   # P50: array parameters (f32 mf[4][4]) are pointers
+            if re.search(r'\b(f32|float)\b', p): out.add(slot); slot += 1
+            elif re.search(r'\b(f64|double)\b', p): out |= {slot, slot + 1}; slot += 2
             else: break
         return out
     return set()
@@ -456,7 +457,7 @@ def proto_fregs(tu, name):
         if ps == ['void'] or not ps: return set()
         out = set(); fr = 12
         for p in ps[:2]:
-            if '*' in p: break
+            if '*' in p or '[' in p: break   # P50: array parameters are pointers
             if re.search(r'\b(f32|float)\b', p): out.add(fr); fr += 2
             elif re.search(r'\b(f64|double)\b', p): out |= {fr, fr + 1}; fr += 2
             else: break
@@ -501,6 +502,13 @@ for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
     # P24: "ADDR=V1;V2;..." returns V1 on the first call, V2 on the second, ... (the last value repeats),
     # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
     STUBRET[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
+
+# P50 (opt-in): DIFFTEST_RETF="ADDR=V1;V2;...,..." (hex float bits) makes the stub at ADDR return V in f0 (V1 on the
+# first call, ...; the last repeats), e.g. func_1504B0FC's speed in func_1504CB98 (a random f0 is often 0 / NaN).
+STUBRETF = {}
+for _p in filter(None, os.environ.get('DIFFTEST_RETF', '').split(',')):
+    _a, _v = _p.split('=')
+    STUBRETF[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
 # P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
 # writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
@@ -861,6 +869,8 @@ class Run:
                 _r &= (1 << 64) - 1
                 mu.reg_write(UC_MIPS_REG_V0, _r >> 32); mu.reg_write(UC_MIPS_REG_V1, _r & 0xFFFFFFFF)
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
+        if (addr & 0x1FFFFFFF) in STUBRETF:
+            _rs = STUBRETF[addr & 0x1FFFFFFF]; mu.mem_write(phys(SCR) + 0x10, struct.pack('>I', _rs[min(k, len(_rs) - 1)]))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
         # word through each aligned aN that points into the caller's frame (out-params such as
         # osRecvMesg's &msg). Keyed by (callee, call number, arg index), so both runs see the same value.
