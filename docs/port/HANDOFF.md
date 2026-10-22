@@ -31,6 +31,76 @@ Branch `port-b` (from P59 649a7fa, `port` merged in at the end); the orchestrato
 2. Browser: does Conker leave the bind pose with func_1505E0C4 in C (P60.md §3 UNVERIFIED)?
 Runtime checks: P60.md UNVERIFIED.
 
+## State (session P57, 2026-10-22). Details: `docs/port/sessions/P57.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (829 bodies).
+- progress_nm: C coverage including NON_MATCHING **4823/5915 (81.5%)**, bytes **51.5%**; init 489/538,
+  game 4295/5334, debugger 39/43; **1092 asm-only** (152 under 60 insns); plus the nm_asm func_150A86B0.
+- **The model DL path is C:** func_1502CFEC (model display list) with func_1503DD8C (model ready check) and
+  func_1502F30C (vertex-block segments); the adjustment buffer is initialised: func_150342D0 + func_15034B50
+  (face blink / mouth entries, then the 0x1000 terminator). Also func_1502F17C, func_1502F554, func_1507E7A0 (now
+  `void`), func_1503A37C (bounds box), func_1518C900 (asset 9 DL load; func_1518CF74 was already C).
+  All difftested with knob scripts in `port_work/p57/` (k*.sh) plus mutants (P57.md table).
+- **Browser check first:** func_1502CFEC's G_MTX stores a *physical* address (0x000C42B8, `& 0x1FFFFFFF` of
+  D_800C42B8) as the asm does; the port's gfx path must map it.
+
+## Next steps (from P57)
+
+Coordinator order after P58's browser run (Conker loads and is posed correctly by func_150A86B0):
+1. **func_150A9B0C** (root rotation / scale; US name, real EU code at **0x150A9FEC** in the unsplit D5E90.s):
+   hand asm, goes into `src_eu/nm_asm/D5E90_anim.c` (or a new nm_asm file); asm2c_hand.py is allowed only for such
+   raw hand-written .s code. **All GLOBAL_ASM functions get readable hand C** (user policy).
+2. **func_1000480C** (init_4470, 129 lines, not started): blocking cartridge read. Decoded: sets D_8003A8D2 = 1,
+   waits for D_8003A8D3 == 0 and PI status (0xA4600010) & 3 == 0, size rounded up to even, reads words from
+   KSEG1 0xA0000000 | (devAddr | D_80000308) into dramAddr (two paths: devAddr & 2 -> halfword-shifted copy with
+   head / tail halves; else word copy + a trailing halfword when size & 2), clears D_8003A8D2 and starts thread
+   D_80035C70 when D_8003A8D5 != 0. Difftest needs PI / ROM emulation (busy loops); the browser needs a ROM read.
+3. Draw path: func_150A9E64 (f32 arena -> Mtx), func_1502C9D8, func_1503AB20, func_1503BCAC, then
+   func_15030758 (464, convert CERR). Done in P57: func_1502CFEC, func_1503DD8C, func_1502F17C, func_1502F554,
+   func_1503A37C, func_1507E7A0.
+4. Other asm still reached: func_150028BC (453; obj[0xAC] & 1 or +0x18 & 0x4000), func_150F20C8 (type 0x7B
+   adjustments), func_150ADA20 (random).
+Code-segment tables: none of P57's C reads one (all its tables are in data / bss); func_150A86B0's D_150AA11C is
+the known one (the browser supplies it). Runtime checks: P57.md UNVERIFIED.
+
+## State (session P51, 2026-10-22). Details: `docs/port/sessions/P51.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (819 bodies).
+- progress_nm: C coverage including NON_MATCHING **4813/5915 (81.4%)**, bytes **51.1%**; init 489/538,
+  game 4285/5334, debugger 39/43; **1102 asm-only** (153 under 60 insns); plus the nm_asm func_150A86B0 (not counted).
+- **func_150A86B0** (skeleton / animation evaluator, D5E90.s hand asm) is C in the new **`src_eu/nm_asm/D5E90_anim.c`**
+  (separate Makefile lines; delete build_nm/conker.ld after merging), verified whole on real ROM animations of Conker
+  (model id 0) by **`tools/port/difftest/nmasm_anim86B0.py`** (VR4300 interpreter with 64-bit ops vs Unicorn C):
+  EQUIV in 950 trials, mutants DIFFER. Input builder `tools/port/difftest/anim_inputs.py`.
+- Also C: **func_1503D210** (model load; P52's blocker), func_1503DC74, **func_1502DB14** (key-frame DMA; NM `void`).
+- **Not yet:** func_150342D0 needs func_15034B50 (479, asm) first, so sbuf still reaches the evaluator
+  uninitialised (its adjustment loop scans until 0x1000); func_1502CFEC (model DL).
+
+## Next steps (from P51)
+
+1. func_15034B50 then func_150342D0 (decoded in P51.md §4), then func_1502CFEC (model DL, 571).
+2. P52's other stubs on the path: func_1503A37C, func_1502F554, func_1502F17C, func_15030758, func_150A9B0C, func_150028BC.
+Runtime checks: P51.md UNVERIFIED (animation header / stream read big-endian, skeleton floats typed, callback table
+function addresses, func_1503D210 only partly difftested).
+
+## State (session P48, 2026-10-22). Details: `docs/port/sessions/P48.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (816 bodies).
+- progress_nm: C coverage including NON_MATCHING **4810/5915 (81.3%)**, bytes **51.0%**; init 489/538,
+  game 4282/5334, debugger 39/43; **1105 asm-only** (154 under 60 insns).
+- **The object model chain is C** (game_eu_595D0): func_1502C1D4 (update loop, parents before children),
+  func_1502E228 (root matrix), func_1502DE74 (model instance, sets +0x1D4), func_1502DE10, func_1502E7B4 (visibility
+  mask; convert's "EQUIV" draft had two byte-offset bugs), func_1502F6B8. Also func_1507E690 (eye blink), and an NM
+  `s32` func_1503FBF4.
+- **Still asm on the model path:** func_150A86B0, the hand-asm skeleton evaluator in the unsplit D5E90.s (64-bit
+  ldl / ldr bitstream decode, own register conventions; it writes the joint matrices +0x1D4 points at), then
+  func_1502CFEC (model DL, 571), func_150342D0, func_1502DB14, func_1503D210 (P48.md §4).
+
+## Next steps (from P48)
+
+1. func_150A86B0 with a whole-function harness (nmasm_vis5858-style VR4300 interpreter, real ROM animation data).
+2. func_1502CFEC, func_150342D0, func_1502DB14, func_1503D210; then func_1510EED0 (floor), func_15180AF0, func_15041A9C.
+Runtime checks: P48.md UNVERIFIED (+0x1D4 now non-zero but its matrices unwritten while func_150A86B0 is a stub).
 ## P59 (port-b) (session P59, 2026-10-22). Details: `docs/port/sessions/P59.md`
 
 Branch `port-b` (from P56 155e9d9); the orchestrator merges it into `port`.

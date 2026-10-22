@@ -8,9 +8,80 @@ s32 func_1507EA98(u8 *);
 #endif
 
 
+#ifdef NON_MATCHING
+/* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of D_800BE9E4). Id 0x2B
+ * and D_800C35EA == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
+ * When the countdown runs out (and +0x6C != 1) both states toggle; reopened eyes wait 10 + random % 140. */
+void func_1507E690(u8 *obj) {
+    if (obj[4] == 0x2B || D_800C35EA == 1) {
+        return;
+    }
+    if (obj[0x127] != 0xFF && (*(u8 **)(obj + 0x31C))[0x120] != 0) {
+        obj[0x6A] = 1;
+        obj[0x6B] = 1;
+        return;
+    }
+    if (obj[0x6A] >= 3) {
+        obj[0x6A] = 0;
+    }
+    if (obj[0x6B] >= 3) {
+        obj[0x6B] = 0;
+    }
+    if (obj[0x6E] >= D_800BE9E4) {
+        obj[0x6E] -= D_800BE9E4;
+        return;
+    }
+    obj[0x6E] = 0;
+    if (obj[0x6C] == 1) {
+        return;
+    }
+    obj[0x6A] ^= 1;
+    obj[0x6B] ^= 1;
+    if (obj[0x6A] == 0) {
+        obj[0x6E] = (u32)func_150ADA20() % 140 + 10;
+    } else {
+        obj[0x6E] = 1;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E690.s")
+#endif
 
+#ifdef NON_MATCHING
+/* func_1507E7A0 (P57): for model types 0xF / 0x46 / 0x4C, the DL hide mask +0x94 from the selector bytes +0x6C / +0x6D:
+ * bits 1..6 set, then one of 8 / 0x10 / 4 (first selector 0 / 1 / other) and 0x20 / 0x40 / 2 (second) cleared.
+ * Selector: >= 10: (v - 10) == 5 -> 0, == 1 -> 1, else 2; below 2: v + 1; else v. */
+void func_1507E7A0(struct127 *arg0) {
+    u8 *o = (u8 *)arg0;
+    s32 s[2];
+    s32 i;
+    s32 v;
+    s32 type = o[4];
+
+    if (type != 0xF && type != 0x46 && type != 0x4C) return;
+    for (i = 0; i < 2; i++) {
+        v = o[0x6C + i];
+        s[i] = v;
+        if (v >= 10) {
+            v -= 10;
+            if (v == 5) s[i] = 0;
+            else if (v == 1) s[i] = 1;
+            else s[i] = 2;
+        } else if (v < 2) {
+            s[i] = v + 1;
+        }
+    }
+    *(u32 *)(o + 0x94) |= 0x7E;
+    if (s[0] == 0) *(u32 *)(o + 0x94) &= ~8;
+    else if (s[0] == 1) *(u32 *)(o + 0x94) &= ~0x10;
+    else *(u32 *)(o + 0x94) &= ~4;
+    if (s[1] == 0) *(u32 *)(o + 0x94) &= ~0x20;
+    else if (s[1] == 1) *(u32 *)(o + 0x94) &= ~0x40;
+    else *(u32 *)(o + 0x94) &= ~2;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E7A0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E8E0.s")
 

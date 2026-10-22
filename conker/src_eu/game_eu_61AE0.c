@@ -3,7 +3,52 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s16 *func_150344AC(s16 *arg0, s32 arg1);
+s16 *func_15034630(s16 *arg0, s32 arg1);
+s16 *func_150346A0(s16 *arg0, s32 arg1);
+u8 *func_15034710(u8 *arg0, s32 arg1);
+s16 *func_15034790(s16 *arg0, s32 arg1);
+s16 *func_150BE938(s16 *arg0, s32 arg1);
+s16 *func_150D8AA0(s16 *arg0, s32 arg1);
+u8 *func_150B5DD0(u8 *arg0, s32 arg1);
+s16 *func_150F20C8(s16 *arg0, s32 arg1);
+u8 func_1503DD2C(s32 arg0, s32 arg1);
+s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3);
+
+/* func_150342D0 (P57): build the per-object adjustment list for func_150A86B0 (sbuf of func_1502F6B8):
+ * {u16 offset, s16 value} pairs ending with 0x1000. No skeleton (+0x1D4 == 0): just the terminator.
+ * The player (obj+0 == 1) gets func_150344AC's entries, other objects a per-type helper; then the face
+ * entries of func_15034B50 for the model's two face joints (func_1503DD2C(type, 0 / 1)). */
+void func_150342D0(s16 *buf, s32 arg1) {
+    struct127 *obj = &D_800CC2D0[arg1];
+    s16 *p = buf;
+    s32 j0;
+
+    if (*(s32 *)((u8 *)obj + 0x1D4) == 0) {
+        buf[0] = 0x1000;
+        return;
+    }
+    if (*(s32 *)((u8 *)obj + 0) == 1) {
+        p = func_150344AC(buf, arg1);
+    } else {
+        switch (((u8 *)obj)[4]) {
+        case 0x21: p = func_150BE938(buf, arg1); break;
+        case 0x28: case 0x77: p = func_15034790(buf, arg1); break;
+        case 0x2B: p = func_150D8AA0(buf, arg1); break;
+        case 0x4B: p = (s16 *)func_150B5DD0((u8 *)buf, arg1); break;
+        case 0x5A: case 0x74: case 0x7A: case 0x8D: p = func_150346A0(buf, arg1); break;
+        case 0x7B: p = func_150F20C8(buf, arg1); break;
+        case 0x8A: p = (s16 *)func_15034710((u8 *)buf, arg1); break;
+        case 0x98: p = func_15034630(buf, arg1); break;
+        }
+    }
+    j0 = func_1503DD2C(((u8 *)obj)[4], 0);
+    *func_15034B50(p, (u8 *)obj, j0, func_1503DD2C(((u8 *)obj)[4], 1)) = 0x1000;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_61AE0/func_150342D0.s")
+#endif
 
 #ifdef NON_MATCHING
 s16 *func_150344AC(s16 *arg0, s32 arg1) {

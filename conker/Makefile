@@ -61,6 +61,8 @@ SRC_DIRS := $(SRC_DIR) \
 # the functions listed in NM_ASM_C_FUNCS_X are weakened in X.s.o so the C definitions win.
 NM_ASM_SRC_DIR := $(SRC_DIR)/nm_asm
 NM_ASM_C_FUNCS_D5E90 := func_150AB278 func_150AD780 func_150AD78C
+# P51: the skeleton / animation evaluator (src_eu/nm_asm/D5E90_anim.c)
+NM_ASM_C_FUNCS_D5E90 += func_150A86B0
 NM_ASM_C_FUNCS_D5E90 += func_150AB6D0 func_150AC8C4 func_150ACEA0
 ifeq ($(NON_MATCHING),1)
 SRC_DIRS += $(NM_ASM_SRC_DIR)
@@ -290,6 +292,7 @@ ifeq ($(NON_MATCHING),1)
 # expansion-pak address so the ELF links (the NON_MATCHING ROM is not bootable yet: PLAN Phase 2)
 	sed -i '/\/DISCARD\/ :/i\    .nm_rodata 0x80400000 (NOLOAD) : { $(BUILD_DIR)/src_eu/*.o(.rodata*) $(BUILD_DIR)/src_eu/nm_asm/*.o(.rodata*) }' $@
 	sed -i 's#^\(\s*\)$(BUILD_DIR)/asm/D5E90.s.o(.text);#&\n\1$(BUILD_DIR)/$(NM_ASM_SRC_DIR)/D5E90.c.o(.text);#' $@
+	sed -i 's#^\(\s*\)$(BUILD_DIR)/asm/D5E90.s.o(.text);#&\n\1$(BUILD_DIR)/$(NM_ASM_SRC_DIR)/D5E90_anim.c.o(.text);#' $@
 endif
 
 $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)

@@ -3,7 +3,117 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+/* func_15034B50 (P57): per-object adjustment entries for the face (eyelids / mouth), appended to buf as
+ * {u16 offset, s16 value} pairs for func_150A86B0; returns the end (func_150342D0 writes the 0x1000 terminator).
+ * obj = &D_800CC2D0[i] (bytes): +4 type, +0x1FE blink amount, +0x1FF blink state, +0x200 blink timer,
+ * +0x201 blink angle, +0x202 random blink offset, +0x203 blink speed; +0x204 mouth amount (s16), +0x206 mouth
+ * state, +0x207 mouth timer, +0x208 mouth angle (s8), +0x209 mouth speed. a2 / a3: joint indices (0xFF = none). */
+extern s16 D_800C4310;
+s16 *func_15034B50(s16 *buf, u8 *obj, s32 a2, s32 a3) {
+    s32 type = obj[4];
+    s32 noeye = (type == 0x70);
+    s32 off1, off2, rnd, sp, lo, r, sgn, v;
+    s32 go, neg;
+    f32 f;
+
+    if (type == 0x7C) { off1 = 4; off2 = 0; } else { off1 = 0; off2 = 2; }
+    if (type == 0x69 || type == 0x7C || type == 0x87) rnd = 0; else rnd = 10;
+
+    if (a2 != 0xFF) {
+        if (obj[0x201] == 0) f = 8191.875f;
+        else f = (f32)obj[0x201] * 182.04445f;
+        v = (s16)(s32)(((f32)obj[0x1FE] * f) * 0.003921569f);
+        if (!noeye) { buf[0] = a2 * 6 + off1; buf[1] = v; buf += 2; }
+        D_800C4310 = v;
+        r = ((s8)obj[0x202] * (s32)obj[0x1FE]) / 255;
+        v = (s16)(s32)(((f32)r * 65535.0f) * 0.003921569f);
+        if (!noeye) { buf[0] = a2 * 6 + off2; buf[1] = v; buf += 2; }
+
+        lo = 0x28; sp = 0x3C;
+        if (obj[4] == 0x42) { lo = 0x50; sp = 0x78; }
+        v = obj[0x1FF];
+        if (v == 0) {
+            obj[0x203] = -sp;
+        } else if (v == 2) {
+            obj[0x203] = sp;
+            obj[0x202] = 0;
+        } else if ((s8)obj[0x203] == 0 || obj[0x1FE] == 0 || obj[0x1FE] == 0xFF) {
+            r = func_150ADA20();
+            obj[0x203] = (u32)r % (u32)(sp - lo) + lo;
+            if (obj[0x1FE] == 0xFF) {
+                obj[0x203] = -(s8)obj[0x203];
+            } else if (obj[0x1FE] == 0 && rnd != 0) {
+                r = func_150ADA20();
+                obj[0x202] = (u32)r % (u32)(rnd * 2) - rnd;
+            }
+        }
+        v = (s16)(obj[0x1FE] + (s8)obj[0x203]);
+        if (v < 0) v = 0;
+        else if (v >= 0x100) v = 0xFF;
+        obj[0x1FE] = v;
+        if (obj[0x1FF] == 3) {
+            if ((s32)obj[0x200] < D_800BE9E4) { obj[0x200] = 0; obj[0x1FF] = 0; }
+            else obj[0x200] = obj[0x200] - D_800BE9E4;
+        }
+    }
+    if (a3 == 0xFF) return buf;
+
+    sgn = 1;
+    if ((s8)obj[0x208] == 0) f = 8191.875f;
+    else f = (f32)(s8)obj[0x208] * 182.04445f;
+    if (f < 0.0f) sgn = -1;
+    buf[0] = a3 * 6 + off1;
+    buf[1] = -(s32)(((f32)*(s16 *)(obj + 0x204) * (f < 0.0f ? -f : f)) * 0.003921569f);
+    buf += 2;
+    go = 0; neg = 0;
+    if (obj[0x206] == 0) {
+        obj[0x209] = (sgn > 0) ? -0x3C : 0x3C;
+    } else if (obj[0x206] == 2) {
+        obj[0x209] = (sgn > 0) ? 0x3C : -0x3C;
+    } else {
+        s32 s = (s8)obj[0x209];
+        if (s == 0) go = 1;
+        else {
+            v = *(s16 *)(obj + 0x204);
+            if (sgn > 0) {
+                if (v < 0 && s < 0) neg = 1;
+                else if (v == 0 && s < 0) go = 1;
+                else if (v == 0xFF) { neg = 1; go = 1; }
+            } else {
+                if (v > 0 && s > 0) neg = 1;
+                else if (v == 0 && s > 0) go = 1;
+                else if (v == -0xFF) { neg = 1; go = 1; }
+            }
+        }
+    }
+    if (go) {
+        r = func_150ADA20();
+        obj[0x209] = (u32)r % 20 + 0x28;
+        obj[0x209] = (s8)obj[0x209] * sgn;
+    }
+    if (neg) obj[0x209] = -(s8)obj[0x209];
+    {
+        s32 s = (s8)obj[0x209];
+        *(s16 *)(obj + 0x204) = *(s16 *)(obj + 0x204) + s;
+        v = *(s16 *)(obj + 0x204);
+        if (sgn > 0) {
+            if (v < 0 && s < 0) *(s16 *)(obj + 0x204) = 0;
+            else if (v >= 0x100) *(s16 *)(obj + 0x204) = 0xFF;
+        } else {
+            if (v > 0 && s > 0) *(s16 *)(obj + 0x204) = 0;
+            else if (v < -0xFF) *(s16 *)(obj + 0x204) = -0xFF;
+        }
+    }
+    if (obj[0x206] == 3) {
+        if ((s32)obj[0x207] < D_800BE9E4) { obj[0x207] = 0; obj[0x206] = 0; }
+        else obj[0x207] = obj[0x207] - D_800BE9E4;
+    }
+    return buf;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_62360/func_15034B50.s")
+#endif
 
 extern s16 D_800C4310;
 
