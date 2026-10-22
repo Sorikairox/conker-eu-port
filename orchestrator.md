@@ -6,7 +6,7 @@ Two parts: (1) a **status snapshot** — overwrite it, don't append history (his
 
 ---
 
-## 1. Status snapshot (2026-10-23, after P63)
+## 1. Status snapshot (2026-10-23, after P89)
 
 ### Goal
 Conker's Bad Fur Day (EU ROM, user-owned) as a **native source port that runs in a web browser**:
@@ -17,8 +17,8 @@ from the same C. **Not** N64Recomp / static recompilation, and not the existing 
 | | functions with C | code bytes | where |
 |---|---|---|---|
 | Matching decomp (byte-identical) | 3994 / 5915 (67.5%) | 29.3% | branch `eu` — paused since 2026-10-21 |
-| Port (matching + NON_MATCHING) | **4804 / 5915 (81.2%)** | **51.6%** | branch `port-b` (P47); `port` = 4803 |
-| Asm-only left | 1111 | | ~157 under 60 insns |
+| Port (matching + NON_MATCHING) | **4918 / 5915 (83.1%)** | **57.2%** | branch `port` (P89); `port-b` = 4897 (P87); merged total higher |
+| Asm-only left | ~997 | | ~148 under 60 insns |
 
 ### Branches / worktrees / containers
 | branch | worktree | container | role |
@@ -33,31 +33,27 @@ Mac mini worker `sorikairo@192.168.0.71` (container `conkerdev`) runs `remote_pe
 Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Browser build — what works
-- Boots from the user's ROM (dropped into the page, never leaves the browser); real game C runs the
-  boot, level load (inflater, level loader, visibility build/walk), camera chain, lighting.
-- Renders **level 0x21 from the game's own camera, lit by the game's lights** (P46 screenshot).
-- **Player walks and the camera follows** (P49) — via TEMPORARY overrides of func_15059C84 (integrator) and func_1504C0E8 (partial); then made real C by P50; floor, landing, gravity, wall engine and ray cast are C (P53–P56).
-- **Conker is drawn AND animated by the game's own code** (P61/P63: idle, walk, run, skid, fall, land, death; walk.gif). Walks, falls, respawns, level warp works. Coverage 4845/5915 (81.9%), 53.6% bytes (port P62).
-- TEMPORARY PC versions still in port-web: func_1502AF04, func_1510E908, func_150A69E0 (P63), func_1000480C cartridge mapping; P62 converted func_150A9B0C/func_150A9E64/func_150844AC (drop on next merge).
-- Fiber scheduler (ASYNCIFY), virtual big-endian memory, function-pointer trampolines, F3DEX2/F3DEXBG
-  WebGL2 renderer (blender, fog, 3-point filter), CPU audio ABI incl. MP3 voices, Web Audio out,
-  keyboard + gamepad via PIF model, EEPROM saves in IndexedDB, page UX (drop zone, pause, volume).
-- Node and real-time Chrome run 600+ frames with 0 heap errors.
+- Boots from the user's ROM; real game C runs boot, level load, camera, lighting, Conker's model/animation/tail, attachments, text, HUD sprites, sky gradient, breakables, scene loader.
+- Playable flow in node and real-time Chrome: walk, fall, respawn + 250-frame respawn scene, warp to 0x2C and back; 0 heap errors (P88).
+- TEMPORARY guards in port-web (P88): scene end (func_1501E888) and actor frame blocks (func_1501ECA4) — both now C on port-b (P87); P91 is dropping them.
+- Renderer: F3DEX2/F3DEXBG WebGL2, LOD/mip fixed (P78). Blurry near ground is the level data (low texel density), not a bug.
+- Arity scanner `tools/port/arity_scan.py` (P79): 111 rows / 56 severity>0 at P88.
 
 ### Running now
-- **P48** (`port`): object update loop func_1502C1D4 → func_1502E228/func_1502E7B4 (Conker's model pointer obj+0x1D4) — files game_eu_595D0.c, 13C400, ABEA0, 1ACBC0, 6EDC0.
-- **P50** (`port-b`): func_15056B08 (call #2 DIFFER), walk handler's 3 UNVERIFIED branches, walk-path stubs, ray casts func_150ACEA0 / func_150A44A4 — files game_eu_78230.c, game_83300.c, game_14FF90.c.
+- P90 (`port`): func_150268BC script event interpreter (3590 lines; P89 map + draft).
+- P91 (`port-web`): merge P86–P89 + P87, drop P88 guards, runtime checks.
+- P92 (`port-b`): remaining scene-path asm (func_1501FD34, func_1501FF10, ...), game_14FF90.
 
-### Next milestones (in order)
-1. Conker's model drawn (object loop, P48).
-2. Real movement C replacing P49's overrides: func_15059C84, func_1504C0E8, gravity func_1505A770, floor func_1510EED0/func_150A44A4, walls func_15044950 + func_150AB6D0/func_150AC8C4 (in raw asm/D5E90.s), func_15021834.
-3. Remaining frame-path stubs: func_15041A9C (boot text), func_15180AF0.
-4. Breadth: the 1111 asm-only functions; then Phase 2B (symbolic data) and native 64-bit build.
+### Next milestones
+1. No TEMPORARY guards in port-web; head turning works (look-target producer).
+2. func_150268BC (scripts/cutscenes) as C.
+3. Frame-path stubs to zero (blocker list in the latest web session doc); arity rows to zero.
+4. Breadth: the ~1000 asm-only functions; then Phase 2B (symbolic data) and native 64-bit build.
 
 ### Open items needing care
-- Merge order: `port-b` → `port` only when the `port` worktree is idle; then `port` (or `port-b`) → `port-web`.
-- `port-web` carries TEMPORARY PC overrides/wrappers (see its HANDOFF "Browser build"); remove each when the game C lands.
-- Licensing: SDK-derived libultra C in the decomp (e.g. `game_eu_21DCD0.c`) — fine privately, matters if ever distributed (`port/ultra/LICENSES.md`).
+- Merge order: `port` and `port-b` own disjoint files; both merge into `port-web` (browser session does it). `port-b`→`port` only when `port` is idle.
+- Licensing: SDK-derived libultra C in the decomp — fine privately, matters if ever distributed (`port/ultra/LICENSES.md`).
+- Container `conker-web-p6` is running and not owned by any current session (user's call).
 
 ---
 
