@@ -1,0 +1,20 @@
+s/< 2) {/< 3) {/
+s/< 2) {/< 1) {/
+s/t = 100.0f;/t = 99.0f;/
+s/t = 0.0f;/t = 1.0f;/
+s/D_80096D84/D_80096D8C/
+s/seg \* 8 + 6/seg * 8 + 4/
+s/+ 6) == 0)/+ 6) != 0)/
+s/state + k;/state + k + 1;/
+s/len\[0\] == 0.0f/len[0] != 0.0f/
+s/frac = 0.0f/frac = 1.0f/
+s/(dist - len\[0\])/(dist - len[1])/
+s/\*x = (ends\[3\]/*x = (ends[4]/
+s/(ends\[4\] - ends\[1\])/(ends[4] - ends[0])/
+s/frac + ends\[2\]/frac + ends[1]/
+s/\*x = ends\[0\];/*x = ends[3];/
+s/\*z = ends\[2\];/*z = ends[1];/
+s/func_1501F7D4(actor,/func_1501F7D4(slot,/
+s/ends, slot, &seg/ends, actor, \&seg/
+s/&D_800C3E70\[slot\]\[actor\]/\&D_800C3E70[slot][0]/
+s/t \* D_80096D84/D_80096D84/

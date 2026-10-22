@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P92 (port-b) (session P92, 2026-10-23). Details: `docs/port/sessions/P92.md`
+
+Branch `port-b` (from P87 431730a); the orchestrator merges it into `port`.
+
+- Default build byte-identical (full `verify_all.sh`, `port_work/p92/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (912 bodies).
+- **progress_nm (NM figure)**: total **4906/5915 (82.9%)**, game 4378/5334 (82.1%), C bytes 56.4%, 1009 asm-only.
+- New hand-written NM C (no asm2c), setups EQUIV + mutants: the scene-path producers in game_eu_4A070.c,
+  func_1501FD34 (20/20), func_1501FF10 (18/18), their producer func_1501F7D4 (26/26), func_1502330C (17/17),
+  func_1501EA84 (29/29), func_1501E5AC (12/12), func_15023684 (23/23); game_14FF90.c func_15124C38 (31/39: 5 open
+  survivors, 3 unrun, P92.md section 2).
+- No arity fixes needed (callers / callees checked, P92.md section 3).
+
+## Next steps (from P92)
+
+1. Browser: cutscene paths / camera pick / scene end / camera height (P92.md UNVERIFIED).
+2. func_15124C38 open mutants (`p92/4c38c_mut.txt` ready); func_15020920 (segment cubic, producer of func_1501F7D4).
+3. func_15126378 (game_14FF90.c, 1130 lines) not started.
+
 ## P87 (port-b) (session P87, 2026-10-23). Details: `docs/port/sessions/P87.md`
 
 Branch `port-b` (from P83 e3312cf); the orchestrator merges it into `port`.
