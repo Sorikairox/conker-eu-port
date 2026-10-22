@@ -4,10 +4,11 @@
 #include "variables.h"
 #ifdef NON_MATCHING
 void func_1507D4F8(s32); /* P59: was implicitly int */
+void func_1507F640(void); /* P60: idle animation, was implicitly int */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_151C0698();   /* still asm; called by func_15070300 */
-s32 func_1507E7E4(struct127 *, u8, u8, u16, s32);
+void func_1507E7E4(struct127 *, u8, u8, u16, s32);
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];
@@ -442,7 +443,11 @@ void func_1506B9C0(void) {
         temp_a0->unk78 = 0;
         D_800D2E60[D_800D1940 >> 3] |=  (1 << (D_800D1940 & 7));
     }
+#ifdef NON_MATCHING
+    func_1507F640(); /* takes no arguments (a0 is left over) */
+#else
     func_1507F640(temp_a0);
+#endif
 }
 
 void func_1506BA4C(s32 arg0, s32 arg1) {

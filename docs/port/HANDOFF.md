@@ -52,6 +52,70 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. func_1000480C in the browser: map `CART_WORD` (KSEG1 0xB0000000 | addr) to the ROM image and PI_STATUS to idle.
 3. After changing `NM_ASM_C_FUNCS_D5E90`, delete `build_nm/asm/D5E90.s.o` before the NM build.
 Code-segment tables: none in P62's C. Runtime checks: P62.md UNVERIFIED.
+## P67 (port-b) (session P67, 2026-10-22). Details: `docs/port/sessions/P67.md`
+
+Branch `port-b` (from P64 f0437f9); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p67/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (859 bodies).
+- New hand-written NM C (no asm2c): **func_1505C7D8** (attack hit test over all records, sphere / box, line-of-sight
+  ray cast), **func_150D5F7C** (debris burst: ray cast for the surface, two particle bursts), **func_1507E7E4**
+  (start an object animation + first sound), **func_150453BC** (floor probe), **func_150D71D4** (debris follows its
+  owner; batch EQUIV rewritten by hand). Random seeds + knob setups EQUIV; mutants 54/55, 44/44, 17/17, 13/13, 6/7.
+- `void` under NM: func_1507E7E4, func_150D5F7C (prototypes in game_981E0.c, game_eu_ABEA0.c, init_B1B0.c, game_eu_78230.c).
+- **difftest.sh did not forward DIFFTEST_RETF since P50** (every float-return knob was ignored, stubs returned random
+  floats). Fixed; P59 / P60 / P64 RETF setups re-run: all still EQUIV.
+- Tools: `docs/port/sessions/p67/knobs.sh` / `mut.sh` (8th setup field = DIFFTEST_OUTB), `port_work/p67_dbg.sh`.
+- Batch (17 small never-attempted functions): 1 EQUIV (func_150D71D4), results in `port_work/p67b/results.tsv`.
+
+## Next steps (from P67)
+
+1. P66 stub list, still asm: movement func_1506BF5C (244 lines), func_1501D348 (473), func_151BF8F0 (311),
+   func_1507342C (303); per frame func_1509A024 (1571), func_151236D0 (153), func_1501B300 (200), func_1512C77C (156),
+   func_1512C080 (342), func_151E7110 (166).
+2. Browser: attacks hitting enemies (func_1505C7D8), debris on destruction, floor detection (P67.md §4 UNVERIFIED).
+
+## P64 (port-b) (session P64, 2026-10-22). Details: `docs/port/sessions/P64.md`
+
+Branch `port-b` (from P60 71183d1); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p64/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (854 bodies).
+- New hand-written NM C (no asm2c): **func_1505F298** (jump / swim / hang / glide handler, 5 commented sections;
+  stunned / dead and the hanging animation now return as the asm does), **func_1507F3B0** + **func_1507F834**
+  (idle-set chooser / advance: the idle path is all C), **func_15017FA4** (zone bounding boxes at level load),
+  **func_150D1D20** (scrolling view quad DL), **func_150ADE40** (approx. distance; raw hand .s as plain C).
+  Random seeds + knob setups EQUIV; mutants 87/89, 30/30, 5/5, 11/15, 15/15, 2/3 killed (survivors in P64.md).
+- func_15085710 has been C since P16: P61's "asm stub" report points at the browser build (game_eu_B2980.c TU?).
+- Tools: difftest DIFFTEST_OUTW takes stack arguments (N >= 4); `docs/port/sessions/p64/knobs.sh` / `mut.sh`
+  (7th setup field = DIFFTEST_OUTW, per-call out-params).
+
+## Next steps (from P64)
+
+1. Ray-cast callers of the walk handler: func_1505C7D8 (567, attack hit test; m2c draft's record loop is wrong)
+   and func_150D5F7C (603). Drafts: `port_work/p59/gen/`, `port_work/p64/gen/`.
+2. Browser: jumps / swimming / glide (func_1505F298), idle animations (func_1507F640 -> F834 / F3B0), and why
+   func_15085710 shows as a stub. Runtime checks: P64.md §3 UNVERIFIED.
+
+## P60 (port-b) (session P60, 2026-10-22). Details: `docs/port/sessions/P60.md`
+
+Branch `port-b` (from P59 649a7fa, `port` merged in at the end); the orchestrator merges it into `port`.
+- After `git merge port` (5d0322c): full `verify_all.sh` OK (`port_work/p60/verify_merge.log`), NM links, protocheck 0 problems (850 bodies).
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p60/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (830 bodies).
+- New hand-written NM C (no asm2c): **func_1505E0C4** (animation driver: fills anim +0x40 / +0x28 / +0x18, the
+  bind-pose cause; s32 kept, returns 0), **func_1507F640** (idle animation chooser, `void (void)`; game_981E0.c's
+  one-argument call fixed under NM), **func_15051558** (floor push / slope slide / landing tilt, `void` under NM).
+  Random seeds + knob setups EQUIV; mutants: 38/39, 28/29, 40/50 killed (survivors in P60.md §1-2).
+- structs.h: struct_eu_anim unk0 / unk3A / unk3C; struct126 unk32 / unk5A / unk5C / unk5D / unk1B2 (layout unchanged
+  except struct126 now extends to 0x1B3).
+- Tools: `docs/port/sessions/p60/knobs.sh` / `mut.sh` (6th setup field = DIFFTEST_OUTA, out-params via stack args),
+  `gen_*.py` setup generators.
+
+## Next steps (from P60)
+
+1. func_1505F298 (jump, 1281 lines), ray-cast callers func_1505C7D8 (567) and func_150D5F7C (603); also still asm
+   on the idle path: func_1507F834, func_1507F3B0. m2c drafts: `port_work/p59/gen/`.
+2. Browser: does Conker leave the bind pose with func_1505E0C4 in C (P60.md §3 UNVERIFIED)?
+Runtime checks: P60.md UNVERIFIED.
 
 ## State (session P57, 2026-10-22). Details: `docs/port/sessions/P57.md`
 

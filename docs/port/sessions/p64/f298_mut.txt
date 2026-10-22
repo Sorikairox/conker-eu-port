@@ -1,0 +1,89 @@
+s/rec->stunned != 0 || rec->health == 0/rec->stunned != 0/ % s2
+s/ctl->unk36 >= 100/ctl->unk36 >= 101/ % s4
+s/ctl->unk6B != 0) {/0) {/ % s5
+s/rec->y_velocity = 46.0f;/rec->y_velocity = 45.0f;/ % w1
+s/rec->gravity = 3.3f;/rec->gravity = 3.2f;/ % w1
+s/(s16)ctl->unk8 <= 0)/1)/ % w1b
+s/rec->unk118 - 60.0f - 30.0f < rec->y_position/rec->unk118 - 60.0f < rec->y_position/ % w1e
+s/anim = 0x22;/anim = 0x23;/ % w2 w2b w2c w2d
+s/anim = 0xCE;/anim = 0xCF;/ % w3
+s/ctl->pad17\[0xB\] = 0xF;/ctl->pad17[0xB] = 0xE;/ % w2c w2d
+s/< 0x69) {/< 0x46) {/ % w2d
+s/rec->xz_velocity > 2.0f \&\&/rec->xz_velocity > 3.0f \&\&/ % w2b
+s/anim = 0xCC;/anim = 0xCD;/ % w4
+s/anim = 0xD1;/anim = 0xD2;/ % w5
+s/rec->target_speed -= 0.2f;/rec->target_speed -= 0.3f;/ % w6 w6b
+s/anim = 0xCB;/anim = 0xCA;/ % w7
+s/ctl->unk78 != 0x27))/ctl->unk78 != 0x28))/ % w8
+s/F298_BITS(height), 1)/F298_BITS(height), 2)/ % w7 w9
+s/rec->unk84.uh != 0x262/rec->unk84.uh != 0x263/ % w10
+s/(s8)pad\[3\] > 0x32/(s8)pad[3] > 0x33/ % h6
+s/anim = 0xEA;/anim = 0xEB;/ % h1
+s/rec->disable_run = 0x10;/rec->disable_run = 0x11;/ % h1
+s/anim = 0x38;/anim = 0x39;/ % h2
+s/anim = 0x40;/anim = 0x41;/ % h3 h5
+s/if (ctl->pad53 == 0) {/if (1) {/ % h4
+s/anim = 0x279;/anim = 0x27A;/ % j4
+s/rec->disable_jump = 0xA;/rec->disable_jump = 0xB;/ % j4
+s/func_1505E650(rec, 0x43, 1.3f/func_1505E650(rec, 0x44, 1.3f/ % j5
+s/rec->y_velocity = 47.0f;/rec->y_velocity = 46.0f;/ % j6
+s/anim = 0x19E;/anim = 0x19F;/ % j3
+s/rec->xz_velocity < 9.0f/rec->xz_velocity < 11.0f/ % j2
+s/rec->y_velocity = 59.0f;/rec->y_velocity = 58.0f;/ % j1
+s/sound = 0x7E2;/sound = 0x7E3;/ % j9
+s/rec->y_velocity \*= 0.7f;/rec->y_velocity *= 0.6f;/ % j10
+s/rec->y_velocity \*= 0.55f;/rec->y_velocity *= 0.5f;/ % j11
+s/rec->unk81 = 0x82;/rec->unk81 = 0x83;/ % j8
+s/anim = 0xEB;/anim = 0xEC;/ % j7
+s/rec->y_velocity \*= 1.4f;/rec->y_velocity *= 1.3f;/ % j7b
+s/rec->unk81 = 0x81;/rec->unk81 = 0x80;/ % j7b
+s/buttons = \*(u16 \*)pad \& ~0x2000;/buttons = *(u16 *)pad;/ % j7c
+s/rec->unk13C < 100 \&\&/rec->unk13C < 101 \&\&/ % j15
+s/rec->unk31C->unk11A != 3/rec->unk31C->unk11A != 4/ % j19
+s/rec->unk100 \&= 0xFE;/rec->unk100 \&= 0xFC;/ % j1
+s/rec->unk100 \&= 0x53;/rec->unk100 \&= 0x57;/ % j1
+s/rec->unk28 = 80.0f;/rec->unk28 = 81.0f;/ % j1
+s/rec->unkA9 = 5;/rec->unkA9 = 6;/ % j12
+s/if (sound != 0 \&\& func_1506E46C/if (func_1506E46C/ % j1
+s/height = 25.0f;/height = 26.0f;/ % j1
+s/rec->unk31C->unk55 = 0;/;/ % j20
+s/func_15052F58(rec->unk65 - 1, 5);/func_15052F58(rec->unk65 - 1, 6);/ % r8A r8Ab r8Ac
+s/rec->xz_velocity = 30.0f;/rec->xz_velocity = 31.0f;/ % r8A r8Ab r8Ac
+s/rec->unk7A = 0xB000;/rec->unk7A = 0xB001;/ % r8Ac
+s/rec->unk7A = 0x3000;/rec->unk7A = 0x3001;/ % r8Ab
+s/rec->xz_velocity = 27.0f;/rec->xz_velocity = 28.0f;/ % r23
+s/(id == 0x28 \&\& D_800BE9F0 != 0x23)/(id == 0x28)/ % r28b
+s/func_1506160C(rec, 1, 0xFF, 0, 0);/func_1506160C(rec, 1, 0xFE, 0, 0);/ % r8A r8Ab r8Ac
+s/rec->immune = 0x14;/rec->immune = 0x15;/ % r28
+s/rec->unk76 = rec->unk7A + 0x1200;/rec->unk76 = rec->unk7A + 0x1000;/ % r28
+s/rec->y_velocity = 30.0f;/rec->y_velocity = 31.0f;/ % r28
+s/rec->xz_velocity = rec->unk44 \* 0.6f + 15.0f;/rec->xz_velocity = rec->unk44 * 0.5f + 15.0f;/ % a1 a5
+s/rec->unk7A = rec->unk76 = rec->unk76 + 0x8000;/rec->unk7A = rec->unk76 + 0x8000;/ % a1 a3
+s/rec->unk100 \&= 0xDE;/rec->unk100 \&= 0xDF;/ % a1
+s/rec->gravity = 3.2f;/rec->gravity = 3.3f;/ % a1
+s/func_151AE814((u8 \*)rec);/;/ % a1
+s/rec->unk31C->unk97 = 0;/;/ % a1
+s/rec->unk118 - rec->unk180 > 100.0f/rec->unk118 - rec->unk180 > 10.0f/ % f2
+s/anim = 0x3B;/anim = 0x3C;/ % f1
+s/height > 55.0f/height > 45.0f/ % f4
+s/rec->unk137 == 0 \&\& rec->unk13C == 0/rec->unk13C == 0/ % f5
+s/rec->unk84.uh != 0x3B \&\&/1 \&\&/ % f3
+s/rec->xz_velocity \*= 0.3f;/rec->xz_velocity *= 0.4f;/ % g1
+s/0x7FFF, 0x1F4, 0xC8,/0x7FFF, 0x1F4, 0xC9,/ % g1
+s/func_151C7450((u8 \*)rec, 0xFF, 1);/func_151C7450((u8 *)rec, 0xFF, 2);/ % g1
+s/rec->unk28 > 1.0f/rec->unk28 > 0.4f/ % g1c
+s/rec->id != 0x96/rec->id != 0x97/ % g1d
+s/rec->unk13C <= 100/rec->unk13C <= 101/ % g1e
+s/rec->unk31C->unk31 < 0xD/rec->unk31C->unk31 < 0xE/ % g5
+s/rec->unk31C->unk31 < 0x11/rec->unk31C->unk31 < 0x12/ % g7
+s/rec->animation_speed += 0.25f;/rec->animation_speed += 0.3f;/ % g2
+s/(0.6f - rec->animation_speed) \* 0.1f/(0.6f - rec->animation_speed) * 0.2f/ % g7
+s/>= 0x3E)/>= 0x3F)/ % g4
+s/rec->unk31C->unk31 >= 0x13)/rec->unk31C->unk31 >= 0x21)/ % g3
+s/rec->unk100 = 0x55;/rec->unk100 = 0x56;/ % g3
+s/rec->unkAA = 0x4B;/rec->unkAA = 0x4C;/ % g2
+s/rec->y_velocity = -8.0f;/rec->y_velocity = -7.0f;/ % g5
+s/rec->unk31C->pad3C\[0\] = 6;/;/ % g2
+s/ctl->unk31 != 0 \&\& ctl->unk4E == 0/ctl->unk31 != 0/ % g8
+s/rec->gravity = 6.2f;/rec->gravity = 6.1f;/ % e1
+s/(rec->unk81 \& 7) == 2/(rec->unk81 \& 3) == 2/ % e2

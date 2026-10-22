@@ -564,7 +564,7 @@ extern s32 D_80041B60[][16];
 extern s32 D_80041C50[][16];
 extern u8 D_80041D10[][16];
 extern u8 D_80041D40;
-s32 func_1507E7E4(struct127 *, u8, u8, u16, s32);
+void func_1507E7E4(struct127 *, u8, u8, u16, s32);
 
 /* Music player slot arg0: drain its message queue (beat / marker messages from the sequencer)
  * and update the per-channel fade state, then step the channel volume ramps. */

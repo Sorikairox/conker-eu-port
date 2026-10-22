@@ -1,0 +1,45 @@
+s/type == 0x63/type == 0x64/ % t63
+s/pos\[1\] = arg0->y_position + 50.0f;/pos[1] = arg0->y_position + 40.0f;/ % base
+s/dir\[1\] = arg0->y_position - arg0->old_y_position;/dir[1] = arg0->y_position - arg0->old_x_position;/ % base
+s/(arg0->unk184 \& 0x1F) == 0xE/(arg0->unk184 \& 0xF) == 0xE/ % snd2
+s/0x4C8, arg0, -0x7D00/0x4C8, arg0, 0x7D00/ % base
+s/(func_150ADA20() \& 1) + 0x2B6/(func_150ADA20() \& 3) + 0x2B6/ % base
+s/arg0->unk1D4 == NULL ||/0 ||/ % n1d4
+s/(arg0->unk74 \& 0xF) == 0xF/(arg0->unk74 \& 0x1F) == 0xF/ % u74 u74b
+s/t < 397.0f/t < 396.0f/ % near
+s/t < 397.0f/t <= 397.0f/ % far
+s/moved \&\& func_150ACEA0/func_150ACEA0/ % nomove
+s/arg0->old_y_position, arg0->old_z_position, dir\[0\]/arg0->old_z_position, arg0->old_y_position, dir[0]/ % base
+s/useDefault = 1;$/useDefault = 0;/ % noe80
+s/func_15144A74(normal, dir) > 0.0f/func_15144A74(normal, dir) >= 0.0f/ % dot0
+s/normal\[1\] = -normal\[1\];/normal[1] = normal[1];/ % dotp
+s/normal\[1\] = -dir\[1\];/normal[1] = dir[1];/ % miss
+s/if (moved) {/if (!moved) {/ % miss nomove
+s/normal\[0\] = 0.0f; normal\[1\] = 1.0f;/normal[0] = 0.0f; normal[1] = 2.0f;/ % nomove
+s/axisB\[0\] = 0.0f;  axisB\[1\] = 0.0f;  axisB\[2\] = 1.0f;/axisB[0] = 0.0f;  axisB[1] = 0.0f;  axisB[2] = -1.0f;/ % nomove
+s/normal\[2\] \*= 1000.0f;/normal[2] *= 100.0f;/ % miss
+s/p.scale\[3\] = arg0->y_scale;/p.scale[3] = arg0->xz_scale;/ % base
+s/p.flags = 0x21E8;/p.flags = 0x21E9;/ % base
+s/p.u68 = 2;/p.u68 = 3;/ % base
+s/p.ownerId = arg0->unique_id;/p.ownerId = 0;/ % base
+s/for (i = 0; i < 3; i++)/for (i = 0; i < 2; i++)/ % base
+s/0.0132f + 0.0298f/0.0132f + 0.03f/ % base
+s/(ang \& 0xFF, func_150ADA68() \* 759.0f/(ang \& 0x7F, func_150ADA68() * 759.0f/ % base
+s/p.vel\[1\] = (axisA\[1\] \* c + axisB\[1\] \* d + normal\[1\]) \* speed;/p.vel[1] = (axisA[1] * c + axisB[1] * c + normal[1]) * speed;/ % base
+s/38.444f + -19.222f;/38.444f + -19.0f;/ % base
+s/0.648f + -1.3970001f/0.648f + -1.397f/ % base
+s/21 + 30;/21 + 31;/ % base
+s/p.sprite = D_800A0E00\[i\];/p.sprite = D_800A0E00[0];/ % base
+s/for (i = 2; i < D_800A42F4\[type\]; i++)/for (i = 3; i < D_800A42F4[type]; i++)/ % base ty0 ty1 ty3 ty5 ty9
+s/0.02f + 0.0052f/0.02f + 0.005f/ % base ty3
+s/723.0f/720.0f/ % base ty3
+s/40.45f + -20.225f;/40.45f + -20.0f;/ % base ty3
+s/0.62600005f + -1.0890001f/0.626f + -1.089f/ % base ty3
+s/41 + 40;/41 + 41;/ % base ty3
+s/p.sprite = D_80089DC0\[type\]\[i\];/p.sprite = D_80089DC0[type][i - 1];/ % base ty3
+s/D_80082FA0 <= 0/D_80082FA0 < 0/ % base fa0
+s/arg0->camera != NULL \&\& D_80082FA0/1 \&\& D_80082FA0/ % nocam
+s/hitWall \&\& arg0->camera != NULL/arg0->camera != NULL/ % miss
+s/(surface \& 0x1F) == 0xE/(surface \& 0xF) == 0xE/ % surf
+s/func_150D6944((s32)pos/func_150D6944((s32)dir/ % base
+s/u8 id = arg1 \& 0xFF;/u8 id = arg1 \& 0x7F;/ % args

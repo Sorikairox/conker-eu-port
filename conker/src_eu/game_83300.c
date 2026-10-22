@@ -10,6 +10,7 @@ void func_15059C84(struct127 *);
 void func_1505A770(struct127 *);
 void func_15060A9C(s32 arg0, struct127 *arg1);
 void func_1505D6F0(struct127 *, s32);
+s32 func_1505C7D8(struct127 *self, s32 skip);
 #endif
 
 
@@ -2754,8 +2755,188 @@ struct252 *func_1505C1A4(struct127 *arg0) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C1E4.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C7D8.s")
+#ifdef NON_MATCHING
+extern f32 D_800998E4; /* pi / 180 */
+extern struct127 D_800B30F0[];
+s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+f32 func_15143E64(f32 *vec);
 
+/* P67: one attack descriptor (0x28 bytes) of the table func_1505C1A4 returns; rec->unkD0 - 1 is the active one. */
+typedef struct {
+    /* 0x00 */ u8  pad0[9];
+    /* 0x09 */ u8  angle;   /* sphere: high byte of the angle offset from the facing; box: half length / 5 */
+    /* 0x0A */ u8  dist;    /* sphere: distance in front (/ 0.125 scale); box: half width / 5 */
+    /* 0x0B */ u8  padB;
+    /* 0x0C */ s16 height;  /* height of the hit point (/ 0.25 scale) */
+    /* 0x0E */ u8  radius;  /* sphere: radius / 4 (scale); box: s8 forward offset / 5 */
+    /* 0x0F */ u8  padF[0x15];
+    /* 0x24 */ u16 flags;   /* 0x80 box, 0x1000 may hit unk124, 0x2000 line of sight, 4 keep unk21C, 0x800 keep */
+    /* 0x26 */ u8  pad26[2];
+} AttackBox;
+
+/* P67: attack hit test. Tests the active attack (sphere in front of the attacker, or a box in its frame) against
+ * every live, vulnerable record except `skip`, optionally checks the line of sight (ray cast from the eyes), and
+ * calls func_1505C1E4 for each hit. Returns func_1505C1E4's last result (0 = no hit). */
+s32 func_1505C7D8(struct127 *self, s32 skip) {
+    AttackBox *boxes;
+    AttackBox *box;
+    struct127 *target;
+    s32 cur;
+    s32 i;
+    s32 count;
+    s32 hits = 0;
+    f32 hitX = 0.0f; /* the asm leaves these unset in box mode (reads its stack slot) */
+    f32 hitY;
+    f32 hitZ = 0.0f;
+    f32 radius = 0.0f;
+    f32 dx, dy, dz, ofs;
+    f32 dist, limit;
+
+    if (self->unk114 < 254.0f) {
+        self->unk114 -= D_800D1550[0];
+    }
+    if (self->unk114 < 0.0f) {
+        self->unkD0 = 0;
+        return 0;
+    }
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    skip = (skip & 0x7F) + 1;
+    cur = self->unkD0 - 1;
+    boxes = (AttackBox *)func_1505C1A4(self);
+    box = &boxes[cur];
+
+    /* the hit point: sphere centre in front of the attacker */
+    if (box->flags & 0x80) {
+        hitY = self->y_position;
+    } else {
+        func_1505A184(((box->angle << 8) + self->unk7A) & 0xFFFF, box->dist * (self->xz_scale / 0.125f), 0.0f,
+                      &hitX, &hitZ, &hitY);
+        hitX += self->x_position;
+        hitY += self->y_position;
+        hitZ += self->z_position;
+        radius = box->radius;
+        radius *= self->xz_scale * 4.0f;
+    }
+    hitY += box->height * (self->y_scale / 0.25f);
+
+    count = (self->unkF8 & 0x100) ? 4 : 26;
+    for (i = 1; i < count; i++) {
+        target = &D_800CC2D0[i - 1];
+        if (target->interaction_state == 0 || i == skip || target->health == 0 || target->immune != 0) {
+            continue;
+        }
+        box = &boxes[cur];
+        if (i == self->unk124 && !(box->flags & 0x1000)) {
+            continue;
+        }
+        if (box->flags & 0x80) {
+            /* box: target position in the attacker's frame (forward / side / up) */
+            f32 angle, s, c, fwd, side, halfY, halfF, halfS;
+
+            dx = target->x_position - self->x_position;
+            dz = target->z_position - self->z_position;
+            if (target->unkD8 != 0 || target->unkDA != 0) {
+                dx += func_1505D34C(target->unk40, target->unkDA, target->unkD8, 1.0f, &ofs);
+                dz += ofs;
+            }
+            angle = -((self->unk40 - 90.0f) * D_800998E4);
+            s = func_150AD780(angle);
+            c = func_150AD78C(angle);
+            fwd = (dx * s + dz * c) - (s16)((s8)box->radius * 5) * self->xz_scale;
+            side = -dx * c + dz * s;
+            dy = hitY - (target->y_position + target->unkD6);
+            halfY = target->unkD4 + 25.0f;
+            halfF = box->angle * 5 * self->xz_scale + target->unkD2;
+            halfS = box->dist * 5 * self->xz_scale + target->unkD2;
+            if (!(-halfY < dy && dy < halfY && -halfF < fwd && fwd < halfF && -halfS < side && side < halfS)) {
+                continue;
+            }
+        } else {
+            /* sphere against the target's ellipsoid (radius unkD2, half height unkD4) */
+            f32 r, h, k;
+
+            dx = hitX - target->x_position;
+            dz = hitZ - target->z_position;
+            if (target->unkD8 != 0 || target->unkDA != 0) {
+                dx -= func_1505D34C(target->unk40, target->unkDA, target->unkD8, 1.0f, &ofs);
+                dz -= ofs;
+            }
+            dy = hitY - (target->y_position + target->unkD6);
+            h = target->unkD4;
+            r = target->unkD2;
+            if (h == 0.0f) {
+                continue;
+            }
+            limit = (r + radius) * (r + radius);
+            k = h / (radius + h);
+            dy *= (r / h) * k + (1.0f - k);
+            dist = dx * dx + dy * dy + dz * dz;
+            if (!(dist < limit)) {
+                continue;
+            }
+        }
+
+        if ((box->flags & 0x2000) && i != self->unk13D) {
+            /* line of sight: ray from the attacker's eyes to the target's middle */
+            f32 eye[3];
+            f32 ray[3];
+            f32 hx, hy, hz, t;
+            f32 aim;
+            s16 eyeH;
+
+            if (self->unk2F4 != NULL) {
+                eye[0] = ((f32 *)self->unk2F4)[0];
+                eye[1] = ((f32 *)self->unk2F4)[1];
+                eye[2] = ((f32 *)self->unk2F4)[2];
+            } else {
+                func_1507C7C0(self, &eyeH, NULL, NULL);
+                eye[0] = self->x_position;
+                eye[1] = self->y_position + (eyeH >> 1);
+                eye[2] = self->z_position;
+            }
+            if (target->unk31C != NULL) {
+                aim = (s16)target->unk31C->unk114 * 0.5f;
+            } else {
+                aim = 20.0f;
+            }
+            ray[0] = target->x_position - eye[0];
+            ray[1] = (aim + target->y_position) - eye[1];
+            ray[2] = target->z_position - eye[2];
+            if (func_150ACEA0(eye[0], eye[1], eye[2], ray[0], ray[1], ray[2], 0, 0, &hx, &hy, &hz, &t, 0, 0, 0.0f) != 0
+                && t < func_15143E64(ray)) {
+                continue; /* blocked */
+            }
+        }
+
+        D_800CC2C0 = hitX;
+        D_800CC2C4 = hitY;
+        D_800CC2C8 = hitZ;
+        hits = func_1505C1E4(self, target, boxes, cur, i, hits, 15);
+        cur = self->unkD0 - 1;
+    }
+
+    if (hits != 0) {
+        box = &boxes[cur];
+        if (D_800B30F0[self->unk108].interaction_state == 1 && self->unk254 != 0) {
+            self->unk232 = self->unk254;
+            self->unk218 = NULL;
+        }
+        if (!(box->flags & 4)) {
+            self->unk21C = 0;
+        }
+        if (!(box->flags & 0x800)) {
+            self->unkD0 = 0;
+        }
+    }
+    return hits;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C7D8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D024.s")
 // NON-MATCHING: 1 line + regalloc
 // s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3) {
@@ -3057,7 +3238,174 @@ void func_1505E060(struct_eu_anim *arg0) {
     arg0->unk2C = arg0->unk28;
     bcopy(arg0->unk40, arg0->unk210, 0x1D0);
 }
+#ifdef NON_MATCHING
+s32 *func_1502AF04(s32, u8 *, s32, s32);
+s32 func_1502B110(u8 *, s32, s32, u32, ...);
+extern s32 D_800866AC[];
+extern u16 D_800997B8[];
+
+/* P60: start / restart animation `id` on the animation state `anim` (struct_eu_anim) of object `obj` (may be NULL;
+ * func_1503F8A8 passes NULL / NULL). entry: the object's animation table entry (u16 file id, u16 callback index,
+ * s32 value for obj +0x1C4), NULL = file id 2 * id.
+ * The animation restarts when `restart` is set (no blend then), the id differs from anim +4 (low 15 bits) or, with
+ * an object, from obj +0x84 (or that is 0xFFFF, or obj +0x103 is set). Else only the speed and the hold flag change
+ * (and the frame, when D_800C35EA == 1 and the animation holds).
+ * Restart: the previous animation is kept for blending (anim +6..+0x2C and the 0x1D0 block copied to +0x210) unless
+ * the blend countdown +0x3C is >= 600; the countdown restarts at 0x3FF (blend >= 1: step +0x3A = 500 / blend; a
+ * blend into the same animation reverses the countdown); the animation header (file `entry[0]`, 2 words: data
+ * address / size, +0x28 = the next word) is looked up with func_1502AF04 (object model +0x58) or func_1502B110,
+ * then DMAed to anim +0x40 (no header: func_1505DFDC). +0x18 = last frame (header byte 3; 0xFF: per type).
+ * With an object, its contact / flag state is reset and func_150627D4(obj) runs. */
+s32 func_1505E0C4(struct127 *obj, s32 entry_addr, u8 *anim_addr, s32 unused, s32 restart, s32 id, s32 set,
+                  f32 speed, f32 blend, f32 frame, f32 loop_start, s32 hold) {
+    struct_eu_anim *anim = (struct_eu_anim *) anim_addr;
+    u16 *entry = (u16 *) entry_addr;
+    s32 start = 0;
+    s32 kind;
+    s32 index;
+    s32 file;
+    s32 *hdr;
+    s32 data = 0;
+    s32 size = 0;
+    s16 count;
+    s32 size16;
+    u32 flags;
+    u8 buf[0x38];
+
+    if (restart != 0) {
+        start = 1;
+        blend = 0.0f;
+    } else if (id != (anim->unk4 & 0x7FFF)) {
+        start = 1;
+    } else if (obj != NULL && (id != obj->unk84.uh || obj->unk84.uh == 0xFFFF || obj->unk103 != 0)) {
+        start = 1;
+    }
+
+    if (start == 0) {
+        if (obj != NULL) {
+            obj->animation_speed = speed;
+        }
+        anim->unk10 = speed;
+        if (hold != 0) {
+            anim->unk4 |= 0x8000;
+        } else {
+            anim->unk4 &= 0x7FFF;
+        }
+        if (D_800C35EA == 1 && (anim->unk4 & 0x8000)) {
+            anim->unk8 = frame;
+        }
+    } else {
+        kind = 10;
+        if (obj != NULL) {
+            index = (s32) ((u8 *) obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
+            set = obj->unk6;
+            kind = 2;
+        }
+        file = (entry != NULL) ? entry[0] : id * 2;
+        if (obj != NULL) {
+            obj->unk84.uh = id;
+            obj->animation_speed = speed;
+            obj->unk138 = 0;
+            obj->unk103 = 0;
+            obj->unkB4 = 0.0f;
+            obj->unk1C4 = *(s32 *) (entry + 2);
+            if (index < D_8008FD8C) {
+                D_800CC2D0[index].unk31C->unk58 = 0;
+                D_800CC2D0[index].unk31C->unk5A = 0;
+                D_800CC2D0[index].unk31C->unk59 = 0;
+            }
+        }
+        if (anim->unk28 != 0) {
+            count = anim->unk3C;
+            if (1.0f <= blend) {
+                anim->unk3A = 500 / (s16) (s32) blend;
+                if (anim->unk3C > 0 && id == (anim->unk6 & 0x7FFF)) {
+                    anim->unk3C = 0x3FF - anim->unk3C;
+                    count = 0;
+                } else if (count < 600) {
+                    anim->unk3C = 0x3FF;
+                }
+            } else {
+                anim->unk3C = 0;
+            }
+            if (count < 600) {
+                anim->unk6 = anim->unk4;
+                anim->unkC = anim->unk8;
+                anim->unk14 = anim->unk10;
+                anim->unk24 = anim->unk20;
+                anim->unk1C = anim->unk18;
+                anim->unk39 = anim->unk38;
+                anim->unk2C = anim->unk28;
+                bcopy(anim->unk40, anim->unk210, 0x1D0);
+            }
+        }
+        anim->unk4 = id;
+        if (hold != 0) {
+            anim->unk4 = id | 0x8000;
+        }
+        anim->unk8 = frame;
+        anim->unk10 = speed;
+        anim->unk20 = loop_start;
+        anim->unk0 = (entry != NULL) ? D_800866AC[entry[1]] : 0;
+
+        if (obj != NULL && obj->unk58 != 0) {
+            hdr = func_1502AF04(obj->unk58, buf, file, 2);
+        } else {
+            hdr = (s32 *) func_1502B110(NULL, 2, (s32) buf, 3, kind, set, file);
+        }
+        /* asm: with no header, data / size are stack leftovers; 0 here (= no animation) */
+        if (hdr != NULL) {
+            anim->unk28 = hdr[2];
+            size = hdr[1];
+            data = hdr[0];
+        }
+        if (size == 0) {
+            func_1505DFDC(obj);
+            return 0;
+        }
+        size16 = (size + 15) & ~15;
+        if (size16 < 200) {
+            func_1000480C(data, anim->unk40, size16);
+        } else {
+            func_10004514(data, anim->unk40, size16, 1);
+        }
+
+        anim->unk18 = anim->unk40[3];
+        if (anim->unk40[3] == 0xFF && obj != NULL) {
+            switch (obj->id) {
+                case 0x92:
+                    anim->unk18 = D_800997B8[obj->unk84.uh];
+                    break;
+                case 0xB7:
+                case 0xB8:
+                case 0xB9:
+                    anim->unk18 = 641.0f;
+                    break;
+            }
+        }
+        if (obj != NULL) {
+            obj->unk24E = 0;
+            obj->unk1FC = (obj->unk1FC | 2) & ~1;
+            flags = (obj->stunned == 0) ? 0x30B : 0x303;
+            obj->unkF4 &= ~flags;
+            if (obj->unkF4 & 0x20) {
+                obj->unkF4 |= 2;
+                obj->unkF4 &= ~0x20;
+            }
+            obj->unk1FD = (anim->unk40[7] & 0x20) ? anim->unk40[0xB] : 0;
+        }
+        if (anim->unk40[5] == 0) {
+            anim->unk28 = 1;
+        }
+    }
+    if (obj != NULL && start != 0) {
+        func_150627D4(obj);
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E0C4.s")
+#endif
 #ifdef NON_MATCHING
 /* P38: start animation `anim` of an object (+4 = type): skipped when the cutscene flag D_800C3638 is set and
  * D_800C3A78 is clear or func_15022A8C(obj) says so, for type 0xFF, a type without animations (D_800C5A90[type] == 0),
@@ -3331,7 +3679,479 @@ void func_1505F188(struct127 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F188.s")
 #endif
+#ifdef NON_MATCHING
+void func_1506045C(struct127 *, s32, s32, s32, s32);
+s32 func_1506E46C(struct127 *, s32 *, s32);
+void func_151AE814(u8 *);
+void func_151C7450(u8 *, u8, s32);
+void func_15060A30(s32, struct127 *);
+void func_15052408(struct127 *);
+void func_1506160C(struct127 *, u8, u8, u8, u8);
+void func_1506AF74(void);
+void func_100109D0(struct127 *);
+extern s32 D_800CC3C8;
+extern u8 D_800CC69C;
+extern char D_800997E8[];
+s32 func_1000EFB4(struct_eu_sfx *, s32, s32 *, struct11 *, s32, s32 *, u16 *);
+
+/* P64: f32 bits of an argument that a prototype declares s32 (func_1506045C's height) */
+#define F298_BITS(f) (*(s32 *)&(f))
+
+/* P64: the jump / swim / glide handler of a walking record, once per walk-handler call (func_1505A9AC family).
+ * `pad` = the controller: +0 buttons (0x8000 = A / jump, 0x4000 = B, 0x2000 = Z, 0x10), +3 stick y (s8).
+ * D_800CC288 = the buttons pressed this frame. ctl = rec->unk31C. Sections:
+ *   1. guards: stunned / dead stop the record (target speed 0); nothing while ctl +0x46 > 0, ctl +0x36 >= 100 or
+ *      ctl +0x6B. `height` = rec +0x28 (ground clearance), -150 with ctl +0x4E == 2 (carried state), 0 with
+ *      ctl +0x4F == 2, +50 while rising.
+ *   2. in water (rec +0xAD, not ctl +0x95, anim != 0x262): surface jump-out (A near the surface), B / swim
+ *      strokes, treading water; animation and func_1506045C (in-water move); returns.
+ *   3. rec +0x137 == 1 (hanging): stick up climbs (0xEA), stick down drops (0x38), A / ctl +0x84 lets go (0x40);
+ *      returns when an animation was started.
+ *   4. jump start: riding a record of id 0x28 (not level 0x23) / 0x8A / 0x23 (rec +0x65), or on the ground / ctl
+ *      +0x55: A starts a jump (0x32, the run jump 0x37 / 0x19E, the high jump 0x279 with ctl +0x17, the item jump
+ *      0x43 with ctl +8, the super jump with ctl +0x1A, the Z long jump 0xEB) with floor-kind and D_800CC69C
+ *      (low gravity) adjustments; a ride is left (func_15052F58) with a push-off speed.
+ *   5. func_1506045C (air move), then the double jump (ctl +0x98 / +0x95: 0x37 again), the high-fall 0x3B, and
+ *      the helicopter glide (ctl +0x31: start 0xE9 with the sound 0x61E, then the spin-down counter); the
+ *      animation; the sound of section 4 (func_15060A30); releasing A cuts a rising jump (gravity 6.2). */
+void func_1505F298(struct127 *rec, u8 *pad) {
+    struct126 *ctl;
+    s32 sound = 0;         /* sp88: sound id resolved by func_1506E46C */
+    f32 speed = 1.0f;      /* sp84: animation speed */
+    f32 jump_v;            /* sp80 */
+    u8 glide = rec->unk31C->unk31;
+    f32 blend = 0.0f;      /* f12 */
+    f32 height;            /* f14 */
+    s32 buttons;           /* sp68 */
+    s32 anim;
+    s32 ride;              /* id + 1 of the ridden record */
+    s32 ride_jump;
+    s32 jumped;
+    u16 a;
+
+    /* 1. guards */
+    if (rec->stunned != 0 || rec->health == 0) {
+        rec->target_speed = 0.0f;
+        return;
+    }
+    ctl = rec->unk31C;
+    if (*(s16 *)((u8 *)ctl + 0x46) > 0 || ctl->unk36 >= 100 || ctl->unk6B != 0) {
+        return;
+    }
+    height = rec->unk28;
+    if (ctl->unk4E == 2) {
+        height = height - 150.0f;
+    } else if (ctl->pad4F[0] == 2) {
+        height = 0.0f;
+    } else if (rec->y_velocity > 0.0f) {
+        height += 50.0f;
+    }
+    if (rec->unk110 != 0) {
+        buttons = *(u16 *)pad & ~0x2000;
+    } else {
+        buttons = *(u16 *)pad;
+    }
+
+    /* 2. in water */
+    if (rec->in_water != 0 && ctl->unk95 == 0 && rec->unk84.uh != 0x262) {
+        anim = 0; /* the asm reads a stack slot here when in_water != 1 (never written on that path): UNVERIFIED */
+        if (rec->in_water == 1) {
+            blend = 2.0f;
+            anim = 0;
+            if ((D_800CC288 & 0x8000) && (D_800BE9F0 != 0x29 || (s16)ctl->unk8 <= 0)
+                && rec->unk118 - 60.0f - 30.0f < rec->y_position) {
+                /* jump out of the water */
+                func_15052408(rec);
+                rec->unk31C->unk31 = 0;
+                ctl = rec->unk31C;
+                anim = 0x32;
+                blend = 0.0f;
+                if (ctl->pad79[2] != 7 && ctl->pad79[2] != 8) {
+                    ctl->unk31 = 1;
+                }
+                ctl = rec->unk31C;
+                a = ctl->unk4C;
+                rec->unk78 = a;
+                rec->unk7A = a;
+                rec->unk76 = a;
+                if (*(u16 *)((u8 *)ctl + 0x68) != 0 && (((a - *(u16 *)((u8 *)ctl + 0x68)) + 0x4000) & 0x8000)) {
+                    rec->xz_velocity = 0.0f;
+                    rec->disable_run = 0xFF;
+                }
+                rec->unkAE = 0xC;
+                rec->y_velocity = 46.0f;
+                rec->unk81 = 2;
+                rec->unk83 = 0;
+                rec->gravity = 3.3f;
+            }
+            rec->target_speed = 0.0f;
+            if ((D_800CC288 & 0x4000) && !(*(u16 *)pad & 0x10)) {
+                ctl = rec->unk31C;
+                if ((s8)ctl->pad17[0xB] < 0x69) {
+                    ctl->pad17[0xB] = 0xF;
+                }
+            }
+            ctl = rec->unk31C;
+            if ((rec->xz_velocity > 2.0f && ctl->pad17[0xA] != 0)
+                || (ctl->pad17[0xA] == 0
+                    && ((s8)ctl->pad17[0xB] > 0 || (!(*(u16 *)pad & 0x10) && (*(u16 *)pad & 0x4000))))) {
+                if (anim != 0x32) {
+                    /* swim stroke */
+                    blend = 9.0f;
+                    rec->unk83 = 0;
+                    if (rec->unk118 - 60.0f < rec->y_position) {
+                        speed = 1.2f;
+                        anim = 0x22;
+                        rec->target_speed = 15.0f;
+                    } else {
+                        speed = 1.2f;
+                        anim = 0xCE;
+                        rec->target_speed = 23.0f;
+                    }
+                }
+            }
+        }
+        if (anim == 0) {
+            /* treading water */
+            blend = 10.0f;
+            speed = 1.2f;
+            anim = 0xD1;
+            if (rec->unk118 - rec->y_position < 70.0f) {
+                anim = 0xCC;
+                speed = 0.9f;
+            }
+            rec->target_speed -= 0.2f;
+            if (rec->target_speed < 0.0f) {
+                rec->target_speed = 0.0f;
+            }
+        }
+        ctl = rec->unk31C;
+        if (rec->in_water != 0 && rec->unk13C != 0) {
+            blend = 7.0f;
+            anim = 0xCB;
+        }
+        if (ctl->unk11A != 0 || (ctl->unk78 != 0 && ctl->unk78 != 0x27)) {
+            func_1506045C(rec, 0, 0, F298_BITS(height), 1);
+        }
+        if (anim != 0) {
+            func_1505E650(rec, anim, speed, blend, 0.0f, 0.0f, 0);
+        }
+        return;
+    }
+
+    /* 3. hanging */
+    if (rec->unk137 == 1) {
+        anim = 0;
+        if (ctl->pad53 == 0) {
+            if ((s8)pad[3] > 0x32) {
+                speed = 2.2f;
+                ctl->unk54 = 0xC;
+                anim = 0xEA;
+                rec->unk137 = 0;
+                rec->disable_run = 0x10;
+                rec->unk81 = 1;
+                rec->gravity = 5.0f;
+                rec->y_velocity = 48.0f;
+            } else if ((s8)pad[3] < -0x32) {
+                anim = 0x38;
+                rec->unk137 = 0;
+                rec->gravity = 3.5f;
+            }
+        }
+        if ((D_800CC288 & 0x8000) || rec->unk31C->unk84 != 0) {
+            rec->unk137 = 2;
+            anim = 0x40;
+            speed = 3.0f;
+        }
+        if (anim != 0) {
+            func_1505E650(rec, anim, speed, 4.0f, 0.0f, 0.0f, 0);
+            return;
+        }
+    }
+
+    /* 4. jump start */
+    ride = 0;
+    ride_jump = 0;
+    anim = 0;
+    if (rec->unk65 != 0) {
+        u8 id = ((u8 *)&D_800CC3C8)[rec->unk65 * 0x32C]; /* = D_800CC2D0[rec->unk65 - 1].id */
+        if ((id == 0x28 && D_800BE9F0 != 0x23) || id == 0x8A || id == 0x23) {
+            ride = id + 1;
+            ride_jump = 1;
+        }
+    }
+    if (ride != 0 || height <= 0.0f || rec->unk31C->unk55 != 0) {
+        rec->unk137 = 0;
+        jumped = 0;
+        jump_v = 0.0f;
+        if ((D_800CC288 & 0x8000) && rec->unk31C->unk11A != 1 && rec->unk31C->unk11A != 3
+            && (ride != 0 || (rec->unk13C < 100 && rec->disable_jump == 0 && rec->disable_run != 0xFF))) {
+            jumped = 1;
+            jump_v = 15.0f;
+            rec->unk100 &= 0xFE;
+            if (ride_jump != 0) {
+                func_1506160C(rec, 1, 0xFF, 0, 0);
+            }
+            ctl = rec->unk31C;
+            if (ctl->pad17[0] != 0) {
+                /* high jump */
+                jump_v = 0.0f;
+                anim = 0x279;
+                speed = 1.25f;
+                rec->unk84.uh = 0;
+                rec->disable_jump = 0xA;
+                rec->disable_run = 0xFF;
+                rec->unk83 = 0xFF;
+            } else if ((s16)ctl->unk8 != 0) {
+                /* item jump */
+                rec->unk83 = 0xFF;
+                rec->disable_run = 0xFF;
+                func_1505E650(rec, 0x43, 1.3f, 2.0f, 0.0f, 0.0f, 0);
+                anim = 0;
+                jumped = 0;
+            } else {
+                anim = 0x32;
+                if (ctl->pad17[3] != 0) {
+                    /* super jump */
+                    jump_v = 0.0f;
+                    rec->disable_run = 0xFF;
+                    rec->unk81 = 1;
+                    rec->y_velocity = 47.0f;
+                    rec->gravity = 6.0f;
+                } else if (!(buttons & 0x2000) || ctl->pad79[2] == 7 || ctl->pad79[2] == 8) {
+                    /* normal / run jump */
+                    if (rec->disable_run != 0) {
+                        rec->disable_run = 0;
+                        a = ctl->unk4C;
+                        rec->unk76 = a;
+                        rec->unk7A = a;
+                    }
+                    anim = 0x32;
+                    if (rec->xz_velocity < 9.0f) {
+                        jump_v = 0.0f;
+                        ctl->unk31 = 1;
+                    } else {
+                        speed = 0.8f;
+                        ctl->unk31 = 2;
+                        anim = 0x37;
+                        if (rec->unk31C->unk78 == 0x21) {
+                            anim = 0x19E;
+                            speed = 1.4f;
+                        }
+                    }
+                    if (rec->unk31C->pad79[2] == 7 || rec->unk31C->pad79[2] == 8) {
+                        rec->unk31C->unk31 = 0;
+                    }
+                    if (rec->unk31C->unk4E == 1) {
+                        rec->y_velocity = 40.0f;
+                    } else {
+                        rec->y_velocity = 59.0f;
+                    }
+                    if (rec->unk31C->unk4E == 2) {
+                        rec->y_velocity = 80.0f;
+                        sound = 0x7E2;
+                    }
+                    rec->gravity = 4.0f;
+                    if ((rec->unk184 & 0x1F) == 0xC) {
+                        rec->y_velocity *= 0.7f;
+                    }
+                    if ((rec->unk184 & 0x1F) == 0x13) {
+                        anim = 0x32;
+                        rec->y_velocity *= 0.55f;
+                    }
+                    if (D_800CC69C != 0) {
+                        rec->unk81 = 0x82;
+                    } else {
+                        rec->unk81 = 2;
+                    }
+                } else {
+                    /* Z long jump */
+                    if (D_800CC69C == 0) {
+                        rec->unk81 = 1;
+                    } else {
+                        rec->unk81 = 0x81;
+                    }
+                    jump_v = 0.0f;
+                    speed = 1.08f;
+                    rec->disable_run = 0x17;
+                    rec->unk83 = 0x64;
+                    anim = 0xEB;
+                    if (D_800CC69C != 0) {
+                        rec->xz_velocity = rec->xz_velocity;
+                        rec->y_velocity *= 1.4f;
+                        rec->gravity = 3.8f;
+                    }
+                }
+            }
+        }
+        if (jumped != 0) {
+            if (sound != 0 && func_1506E46C(rec, &sound, 1) != 0) {
+                func_15060A30(sound, rec);
+            }
+            glide = 0;
+            if (ride != 0) {
+                /* push off the ridden record */
+                rec->xz_velocity = 20.0f;
+                if (ride == 0x29) {
+                    func_15052F58(rec->unk65 - 1, 0xE);
+                } else if (ride == 0x8B) {
+                    func_15052F58(rec->unk65 - 1, 5);
+                    rec->xz_velocity = 30.0f;
+                    if (D_800BE616 != 0) {
+                        rec->unk7A = 0x3000;
+                        if (rec->z_position > 0.0f) {
+                            rec->unk7A = 0xB000;
+                        }
+                    }
+                } else if (ride == 0x24) {
+                    func_15052F58(rec->unk65 - 1, 0xE);
+                    rec->xz_velocity = 27.0f;
+                }
+                rec->unk31C->unk30 = 0;
+                rec->immune = 0x14;
+                rec->unk76 = rec->unk7A + 0x1200;
+                rec->unk65 = 0;
+                rec->disable_run = 0xFF;
+                rec->y_velocity = 30.0f;
+                rec->unk31C->unk31 = 0;
+            }
+            sound = 0;
+            rec->unk31C->unk55 = 0;
+            if (rec->unk31C->unk4E != 0) {
+                rec->unkA9 = 5;
+            }
+            if (anim != 0xEB && anim != 0x279) {
+                rec->unk83 = 0;
+                rec->unk28 = 80.0f;
+            }
+            if (rec->unk31C->unk4E != 2) {
+                func_1505E650(rec, anim, speed, 2.0f, jump_v, 0.0f, 0);
+            }
+            height = 25.0f;
+            rec->unkB8 = 0.0f;
+            rec->unk110 = 0;
+            rec->unk100 &= 0x53;
+        }
+    }
+
+    /* 5. in the air */
+    func_1506045C(rec, buttons, D_800CC288, F298_BITS(height), 0);
+    anim = 0;
+    ctl = rec->unk31C;
+    blend = 2.0f;
+    if ((ctl->pad98[0] != 0 || ctl->unk95 != 0) && rec->disable_jump == 0 && (D_800CC288 & 0x8000)) {
+        /* double jump */
+        a = ctl->unk4C;
+        rec->unk7A = a;
+        rec->unk76 = a;
+        ctl->unk31 = 1;
+        rec->unk80 = 0xA;
+        rec->unk83 = 0;
+        rec->unk100 |= 8;
+        rec->disable_run = 0;
+        rec->unk100 &= 0xDE;
+        anim = 0x37;
+        speed = 1.3f;
+        if (rec->in_water == 0) {
+            rec->y_velocity = 40.0f;
+            rec->gravity = 3.2f;
+        }
+        rec->xz_velocity = rec->unk44 * 0.6f + 15.0f;
+        if (rec->unk44 < 4.0f) {
+            rec->unk7A = rec->unk76 = rec->unk76 + 0x8000;
+        }
+        rec->unk31C->unk95 = 0;
+        rec->unk31C->unk97 = 0;
+        if (rec->unk31C->pad98[0] != 0) {
+            func_151AE814((u8 *)rec);
+            anim = 0x37;
+            blend = 2.0f;
+        }
+        rec->unk31C->unk54 = 0;
+    } else if ((D_800CC288 & 0x8000) && ctl->unk4E == 0) {
+        /* high fall */
+        if (rec->unk84.uh != 0x3B && rec->unk84.uh != 0x3C && rec->unk137 == 0 && rec->unk13C == 0
+            && ctl->unk95 == 0 && ctl->unk31 == 0 && height > 55.0f) {
+            if (rec->unk118 != -10000.0f && rec->unk118 - rec->unk180 > 100.0f) {
+                rec->unk81 = 1;
+                rec->disable_run = 0x78;
+                rec->unk137 = 0;
+                anim = 0x3B;
+                rec->gravity = 6.0f;
+                rec->unk1CC = rec->y_position;
+            }
+        }
+    }
+    if (D_800BE616 == 0 && glide != 0 && rec->in_water == 0 && rec->unk13C <= 100 && rec->id != 0x96) {
+        ctl = rec->unk31C;
+        if (ctl->unk31 != 0 && ctl->unk4E == 0) {
+            if (ctl->unk31 < 3) {
+                /* helicopter glide start */
+                if ((D_800CC288 & 0x8000) && rec->unk28 > 1.0f) {
+                    blend = 6.0f;
+                    anim = 0xE9;
+                    rec->xz_velocity *= 0.3f;
+                    ctl->unk31 = 3;
+                    rec->y_velocity = 0.0f;
+                    rec->unk81 = 1;
+                    rec->gravity = 1.0f;
+                    rec->unk1CC = rec->y_position;
+                    if (rec->unk84.uh != 0xE9) {
+                        func_100109D0(rec);
+                        func_1000FA64(0x61E, rec->x_position, rec->y_position, rec->z_position, 0x7FFF, 0x1F4, 0xC8,
+                                      (s32)func_1000EFB4, rec, (s32)D_800997E8, 0, 0);
+                        func_151C7450((u8 *)rec, 0xFF, 1);
+                        anim = 0xE9;
+                        blend = 6.0f;
+                    }
+                }
+            } else {
+                /* gliding: count up; A held keeps it to 0x3E frames, else 0x13 */
+                ctl->unk31 += D_800BE9A0;
+                if (rec->unk31C->unk31 < 0xD) {
+                    rec->y_velocity = 8.0f;
+                }
+                if (rec->unk31C->unk31 < 0x11) {
+                    rec->animation_speed += 0.25f;
+                } else {
+                    rec->animation_speed += (0.6f - rec->animation_speed) * 0.1f;
+                }
+                anim = 0xE9;
+                speed = rec->animation_speed;
+                rec->unk31C->pad3C[0] = 6;
+                if ((!(*(u16 *)pad & 0x8000) && rec->unk31C->unk31 >= 0x13) || rec->unk31C->unk31 >= 0x3E) {
+                    rec->disable_run = 0xFF;
+                    rec->unk100 = 0x55;
+                    rec->unk31C->unk31 = 0;
+                    rec->gravity = 4.5f;
+                    func_1506AF74();
+                    blend = 2.0f;
+                    anim = 0;
+                } else {
+                    rec->unk80 = 1;
+                    rec->unkAA = 0x4B;
+                    rec->unk83 = 1;
+                    if (rec->y_velocity < -8.0f) {
+                        rec->y_velocity = -8.0f;
+                    }
+                }
+            }
+        }
+    }
+    if (anim != 0) {
+        func_1505E650(rec, anim, speed, blend, 0.0f, 0.0f, 0);
+    }
+    if (sound != 0) {
+        func_15060A30(sound, rec);
+    }
+    if ((rec->unk81 & 7) == 2 && !(*(u16 *)pad & 0x8000)) {
+        rec->unk81 = rec->unk81 - 1;
+        rec->gravity = 6.2f;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_15064668(struct127 *, s32, s32, s32, s32);
 s32 func_15065E18(struct127 *, s32, s32, s32, s32, s32, s32, s32, s32);

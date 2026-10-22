@@ -512,7 +512,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_RETF', '').split(',')):
 
 # P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
 # writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
-# found / count out-params of func_1502B6BC. Several "N:V" for one ADDR are separated by '/'.
+# found / count out-params of func_1502B6BC. Several "N:V" for one ADDR are separated by '/'. P64: N >= 4 = stack argument.
 OUTW = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
     _a, _v = _p.split('=')
@@ -883,7 +883,9 @@ class Run:
                     mu.mem_write(phys(v), struct.pack('>I', rand_arg(ro)))
         if (addr & 0x1FFFFFFF) in OUTW:
             for _n, _vs in OUTW[addr & 0x1FFFFFFF]:
-                mu.mem_write(phys(regs[_n]), struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
+                # P64: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
+                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                mu.mem_write(phys(_p), struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
         if (addr & 0x1FFFFFFF) in OUTA:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
