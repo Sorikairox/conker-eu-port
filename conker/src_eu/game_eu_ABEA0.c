@@ -8,7 +8,44 @@ s32 func_1507EA98(u8 *);
 #endif
 
 
+#ifdef NON_MATCHING
+/* P48: eye blink of object obj (+0x6A / +0x6B eyelid states, +0x6E countdown in frames of D_800BE9E4). Id 0x2B
+ * and D_800C35EA == 1: nothing. A player-controlled object whose controller +0x120 is set keeps both eyes at 1.
+ * When the countdown runs out (and +0x6C != 1) both states toggle; reopened eyes wait 10 + random % 140. */
+void func_1507E690(u8 *obj) {
+    if (obj[4] == 0x2B || D_800C35EA == 1) {
+        return;
+    }
+    if (obj[0x127] != 0xFF && (*(u8 **)(obj + 0x31C))[0x120] != 0) {
+        obj[0x6A] = 1;
+        obj[0x6B] = 1;
+        return;
+    }
+    if (obj[0x6A] >= 3) {
+        obj[0x6A] = 0;
+    }
+    if (obj[0x6B] >= 3) {
+        obj[0x6B] = 0;
+    }
+    if (obj[0x6E] >= D_800BE9E4) {
+        obj[0x6E] -= D_800BE9E4;
+        return;
+    }
+    obj[0x6E] = 0;
+    if (obj[0x6C] == 1) {
+        return;
+    }
+    obj[0x6A] ^= 1;
+    obj[0x6B] ^= 1;
+    if (obj[0x6A] == 0) {
+        obj[0x6E] = (u32)func_150ADA20() % 140 + 10;
+    } else {
+        obj[0x6E] = 1;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E690.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ABEA0/func_1507E7A0.s")
 
