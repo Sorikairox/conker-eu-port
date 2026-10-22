@@ -147,3 +147,4 @@ P69	web	port-web				P63 temps removed; callback table D_80084550 mapped; second 
 P68	port-b	nm convert	7			camera flags/push-out/eye probe, text bank loader, view smoothing, footsteps, projectile spawn
 P72	web	port-web				bisected respawn hang to func_150D1D20 writing via NULL buffers (allocator func_15000AD0 still asm); guard; reaches 0x2C warp
 P71	port	nm convert	13		152	difftest callee arity from declarations; 13 hand C (5D910/64770/595D0/6B970); 4884/5915 82.6% 55.4% bytes; func_15000AD0 analysed not converted
+P74	port	nm convert	8		~150	func_15000AD0 allocator hand C (118/118 EQUIV, 22/22 mutants); game_eu_6B970.c fully C; 4892/5915 82.7% 55.6% bytes
