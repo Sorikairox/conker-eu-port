@@ -6,7 +6,7 @@ Two parts: (1) a **status snapshot** — overwrite it, don't append history (his
 
 ---
 
-## 1. Status snapshot (2026-10-23, after P47)
+## 1. Status snapshot (2026-10-23, after P49)
 
 ### Goal
 Conker's Bad Fur Day (EU ROM, user-owned) as a **native source port that runs in a web browser**:
@@ -36,6 +36,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Boots from the user's ROM (dropped into the page, never leaves the browser); real game C runs the
   boot, level load (inflater, level loader, visibility build/walk), camera chain, lighting.
 - Renders **level 0x21 from the game's own camera, lit by the game's lights** (P46 screenshot).
+- **Player walks and the camera follows** (P49) — via TEMPORARY overrides of func_15059C84 (integrator) and func_1504C0E8 (partial); no gravity/floor/wall collision yet.
 - Fiber scheduler (ASYNCIFY), virtual big-endian memory, function-pointer trampolines, F3DEX2/F3DEXBG
   WebGL2 renderer (blender, fog, 3-point filter), CPU audio ABI incl. MP3 voices, Web Audio out,
   keyboard + gamepad via PIF model, EEPROM saves in IndexedDB, page UX (drop zone, pause, volume).
@@ -43,12 +44,11 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Running now
 - **P48** (`port`): object update loop func_1502C1D4 → func_1502E228/func_1502E7B4 (Conker's model pointer obj+0x1D4) — files game_eu_595D0.c, 13C400, ABEA0, 1ACBC0, 6EDC0.
-- **P49** (`port-web`): does the player walk with the new C walk handler; root-cause blockers.
 - **P50** (`port-b`): func_15056B08 (call #2 DIFFER), walk handler's 3 UNVERIFIED branches, walk-path stubs, ray casts func_150ACEA0 / func_150A44A4 — files game_eu_78230.c, game_83300.c, game_14FF90.c.
 
 ### Next milestones (in order)
 1. Conker's model drawn (object loop, P48).
-2. Player walks + camera follows (P49/P50: walk handler callees, floor lookup func_1510EED0, ray casts).
+2. Real movement C replacing P49's overrides: func_15059C84, func_1504C0E8, gravity func_1505A770, floor func_1510EED0/func_150A44A4, walls func_15044950 + func_150AB6D0/func_150AC8C4 (in raw asm/D5E90.s), func_15021834.
 3. Remaining frame-path stubs: func_15041A9C (boot text), func_15180AF0.
 4. Breadth: the 1111 asm-only functions; then Phase 2B (symbolic data) and native 64-bit build.
 
