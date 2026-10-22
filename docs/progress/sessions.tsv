@@ -145,3 +145,4 @@ P65	port	nm convert	7			anim header lookup, slope solver, 69E0 wrapper, look-tar
 P70	port	nm convert	7			Conker tail chain + tail joints, model-path stubs, joint scale, tile-size cb, model switch; total C 4871 (82.3%) bytes 55.1%
 P69	web	port-web				P63 temps removed; callback table D_80084550 mapped; second area renders after respawn; NEW HANG walking after respawn (double free)
 P68	port-b	nm convert	7			camera flags/push-out/eye probe, text bank loader, view smoothing, footsteps, projectile spawn
+P72	web	port-web				bisected respawn hang to func_150D1D20 writing via NULL buffers (allocator func_15000AD0 still asm); guard; reaches 0x2C warp
