@@ -6,7 +6,134 @@ void func_1503D728(s32 *arg0, s32 arg1);
 #endif
 
 
+#ifdef NON_MATCHING
+s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+void func_1503D658(s8 *arg0, s32 arg1);
+s32 func_1503DF2C(s32 arg0);
+void func_1503DC74(s32 arg0);
+s32 func_1503DAF4(s32 arg0);
+s32 func_150028BC(s32 arg0);
+s32 func_1503DA64(s32 arg0, s32 arg1);
+s32 func_1503D950(s32 arg0, s32 arg1);
+void func_1503E00C(s32 arg0);
+void func_10004074(s32);
+s32 func_1510D3E0(Gfx *, s32, s32, s32, s16 **);
+extern s32 D_800C48A8[];
+extern s32 D_800C4D10[];
+extern s32 D_800C5000[];
+extern s32 D_800C5468[];
+extern u16 D_800C4730[];
+extern u16 D_800C5BC0[];
+extern u16 D_800C4B98[];
+extern s32 D_800C4440;
+extern s32 D_800C5758;
+extern s32 D_800C5A48;
+extern s32 D_800C6360[187];
+extern s32 D_800C5C08[187];
+extern s32 D_800C6070[187];
+/* P51: model load of id arg0 (< 0xBB, not 0xFF; nothing to do when D_800D19A0[id] is set). Model asset (1, id)
+ * through func_1502B6BC (7 relocated {offset, size} pairs): D_800D19A0[id] = base + 0x38, D_800C4440 (+0),
+ * D_800C48A8 (+8, display lists), D_800C4D10 (+0x28), D_800C5000 (+0x10, skeleton), D_800C5758 (+0x18),
+ * D_800C5468 (+0x20), the counts D_800C4730 (+4 / 4), D_800C5BC0, D_800C4B98 (+0xC / 4), D_800C5A48 (+0x1C / 12),
+ * D_800C52F0 (+0x14 / 16, joints). The display lists of +8 and +0x28 are relocated (func_1503D728 / func_1503D658).
+ * Then (arg3) func_1503DF2C and func_1510D3E0 per display list, func_1503DC74 / func_1503DAF4, (arg2 +0x18 & 0x4000
+ * or arg4 & 1) func_150028BC, func_1503DA64, func_1503D950 (animation bank); any error frees everything again.
+ * Returns 0, 1 (no asset) or the error bits. */
+s32 func_1503D210(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    s32 id = arg0;
+    s32 sz;
+    u8 *m;
+    s32 base;
+    s32 err = 0;
+    s32 i;
+    u32 n;
+
+    if (id == 0xFF) {
+        return 0;
+    }
+    if (id >= 0xBB) {
+        return 0;
+    }
+    if (((s32 *)&D_800D19A0)[id] != 0) {
+        return 0;
+    }
+    m = (u8 *)func_1502B6BC(&sz, 7, NULL, 2, 1, id);
+    if (m == NULL) {
+        return 1;
+    }
+    ((s32 *)&D_800D19A0)[id] = (s32)(m + 0x38);
+    ((s32 *)&D_800C4440)[id] = *(s32 *)(m + 0);
+    D_800C48A8[id] = *(s32 *)(m + 8);
+    D_800C4D10[id] = *(s32 *)(m + 0x28);
+    D_800C5000[id] = *(s32 *)(m + 0x10);
+    ((s32 *)&D_800C5758)[id] = *(s32 *)(m + 0x18);
+    D_800C5468[id] = *(s32 *)(m + 0x20);
+    D_800C4730[id] = *(u32 *)(m + 4) >> 2;
+    base = ((s32 *)&D_800C4440)[id];
+    if (base == 0) {
+        base = D_800C48A8[id];
+    }
+    D_800C5BC0[id] = (u32)(base - (s32)m - 0x38) >> 4;
+    D_800C4B98[id] = *(u32 *)(m + 0xC) >> 2;
+    for (i = 0; i < D_800C4B98[id]; i++) {
+        func_1503D728((s32 *)D_800C48A8[id] + i, (s32)m);
+        func_1503D658(((s8 **)D_800C48A8[id])[i], (s32)m);
+    }
+    n = *(u32 *)(m + 0x2C) >> 2;
+    for (i = 0; (u32)i < n; i++) {
+        func_1503D728((s32 *)D_800C4D10[id] + i, (s32)m);
+        func_1503D658(((s8 **)D_800C4D10[id])[i], (s32)m);
+    }
+    ((u16 *)&D_800C5A48)[id] = *(u32 *)(m + 0x1C) / 12;
+    D_800C52F0[id] = *(u32 *)(m + 0x14) >> 4;
+    if (arg3 != 0) {
+        err = func_1503DF2C(id);
+        if (err == 0) {
+            for (i = 0; i < D_800C4B98[id]; i++) {
+                func_1510D3E0(((Gfx **)D_800C48A8[id])[i], 0, 0, 0x3E, NULL);
+            }
+        }
+    }
+    if (err == 0) {
+        func_1503DC74(id);
+        err |= func_1503DAF4(id);
+    }
+    if (err == 0) {
+        if ((arg2 != 0 && (*(s32 *)(arg2 + 0x18) & 0x4000)) || (arg4 & 1)) {
+            if (func_150028BC(id) != 0) {
+                err |= 8;
+            }
+        }
+    }
+    if (err == 0) {
+        err |= func_1503DA64(id, 0);
+        if (err == 0) {
+            err |= func_1503D950(id, 0);
+        }
+    }
+    if (err != 0) {
+        if (D_800C6360[id] != 0) {
+            func_10004074(D_800C6360[id]);
+        }
+        func_1503E00C(id);
+        if (D_800C5C08[id] != 0) {
+            func_10004074(D_800C5C08[id]);
+            D_800C5C08[id] = 0;
+        }
+        if (D_800C6070[id] != 0) {
+            func_10004074(D_800C6070[id]);
+            D_800C6070[id] = 0;
+        }
+        if (((s32 *)&D_800D19A0)[id] != 0) {
+            func_10004074(((s32 *)&D_800D19A0)[id] - 0x38);
+            ((s32 *)&D_800D19A0)[id] = 0;
+        }
+    }
+    return err;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503D210.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1503D658(s8 *arg0, s32 arg1) {
@@ -314,7 +441,39 @@ block_18:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DAF4.s")
 #endif
+#ifdef NON_MATCHING
+extern u16 D_800C5D38[];
+extern s32 D_800C48A8[];
+/* P51: triangle count of model arg0's first display list (D_800C48A8[arg0][0]; the asm's loop over the list
+ * stops after one): G_TRI1 1, G_TRI2 2, opcodes 0x10-0x1F 4, up to G_ENDDL; into D_800C5D38[arg0]. */
+void func_1503DC74(s32 arg0) {
+    u32 **lst = (u32 **)D_800C48A8[arg0];
+    u32 *c;
+    s32 n = 0;
+    s32 k = 0;
+    s32 op;
+
+    do {
+        c = *lst++;
+        k += 4;
+        op = (s8)(c[0] >> 24);
+        while (op != -0x21) {
+            if (op == 5) {
+                n += 1;
+            } else if (op == 6) {
+                n += 2;
+            } else if ((op >> 4) == 1) {
+                n += 4;
+            }
+            c += 2;
+            op = (s8)(c[0] >> 24);
+        }
+    } while (k != 4);
+    D_800C5D38[arg0] = n;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6AA20/func_1503DC74.s")
+#endif
 
 u8 func_1503DD2C(s32 arg0, s32 arg1) {
     u8 *p = ((u8 **)&D_800D19A0)[arg0];
