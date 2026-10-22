@@ -1116,7 +1116,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1149,7 +1149,8 @@ false slide and garbage-count crash, end callback verified, walk GIF) and
 `docs/port/sessions/P66.md` (P62 / P64 overrides dropped, osRomBase for the C func_1000480C, func_15085710 is C,
 jump / running jump / Z long jump and idle variations at runtime, jump GIF) and
 `docs/port/sessions/P69.md` (last PC versions dropped, D_80084550 mapped, P65 / P67 C at runtime, the walk-after-respawn
-hang). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+hang) and `docs/port/sessions/P72.md` (the hang bisected to P64's func_150D1D20 writing through NULL buffers of the
+stubbed func_15000AD0; TEMPORARY guard; 0x2C warp reached again). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1186,6 +1187,8 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 # P69: ?p69attach=N (D_80084550 check + attachment list), ?p69look=N (func_1503AB20), ?p69tri=N, ?p69att=N (attack /
 #      debris / object anim start), ?p69floor=N, ?p69free=1|2|FRAME (double free + object-list scan), ?p69watch=N,
 #      ?p69stub=MASK / ?p69pc=MASK (DIAGNOSTIC bisect wraps); port/web/p69shots.sh (Chrome stand / B / walk / jump / idle)
+# P72: ?p72quad=N (func_150D1D20 calls + buffer pointers), ?p72skip=1 (DIAGNOSTIC); port/web/p72shots.sh (Chrome walk
+#      through the respawn to the 0x2C warp; DENSE="FROM TO" adds 200 ms shots)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -2083,6 +2086,25 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     - per frame func_1509A024 (1758), func_151236D0, func_1501B300, func_1512C77C / func_1512C080, func_151E7110,
       func_150A067C, func_10011624, func_151143D4, func_15044D18, func_150617BC / func_15061B4C / func_1506160C;
     - DL passthru func_15041A9C, func_15180AF0, func_150314B4, func_150954E4.
+- **P72 (c899e0c): the P69 respawn hang is fixed (port-side TEMPORARY guard).** Full notes: P72.md.
+  - **Bisect** (scratch worktree, read-only ROM / ELF mounts, `timeout` in the container): P66 tip dce8fee bad;
+    P66 with the six P64 files reverted good; one file at a time → only `game_eu_FF530.c` hangs. The first bad
+    merge is ca891e7 (port-b P64), the commit f0437f9, the function **func_150D1D20** (view quad). P62 and P66's
+    osRomBase are clean.
+  - **Cause:** func_150D1D20's C matches the asm (P72.md §2). But its buffers D_800DC2E0 (Mtx) and
+    D_800DC2B8[p][fb] (Vtx) are allocated by **func_15000AD0** (game_2DF70.c, asm stub; `sw` at 0x15000C70 /
+    0x150012DC). So both are NULL in the port.
+    - guMtxF2L and the vertex t-coordinate stores land in the null zone at 0x00..0xFF.
+    - Other stubs' NULL "objects" are read from there, so a garbage node (0x243C / 0x2450) reached
+      D_800DD280[1][0] and was freed twice.
+  - **For the port branch:** no bug in the converted C. Converting func_15000AD0 is what removes the guard.
+  - **Workaround:** `port/gfx/p72_checks.c` wraps func_150D1D20. A call with a NULL buffer returns gdl unchanged,
+    like the old stub (marked TEMPORARY, logs once).
+  - **Confirmed:**
+    - The repro gives rc 0 (2416 frames, heap 0 errors, also with heapwatch).
+    - P63's walk reaches `func_1501C710(1, 0x2C)` at frame 1077 and comes back at 1157.
+    - Real-time Chrome walks through the respawn and the 0x2C round trip (frames 1793 / 1873) with no break.
+    - Screenshot: `P72_screenshot.png`.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
