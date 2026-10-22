@@ -1,0 +1,10 @@
+s|                    func_15062D10(type, 0x1ED, 0, -1, 0, 0);|                    func_15062D10(type, 0x1ED, 0, -1, 0, 1);| %
+s| < 300) {| < 299) {| %
+s| < 300) {| <= 300) {| %
+s| 5 - 2;| 5 - 1;| %
+s|func_15062D10(type, 4, -4, OBJ_ANIM.jitter, 0, 0);|func_15062D10(type, 4, -4, OBJ_ANIM.pulse, 0, 0);| %
+s|if (\*tex != NULL) {|if (1) {| %
+s|(\*tex)\[0\], 0x37, 0, (s32)OBJ_ANIM.scrollV, 2, 1);|(*tex)[0], 0x37, 0, (s32)OBJ_ANIM.scrollU, 2, 1);| %
+s|if (obj\[0x69\] == 5) {|if (obj[0x69] == 4) {| % t4b69_4 t4b69_5
+s|if (obj\[0x69\] >= 3) {|if (obj[0x69] >= 4) {| % t4b69_2 t4b69_3 t4b69_4 t4b69_5
+s|(v >= 10) ? v - 10 : v \* 2 + 6;|(v >= 11) ? v - 10 : v * 2 + 6;| % t45b_9 t45b_10 t45b_11

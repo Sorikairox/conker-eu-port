@@ -3,6 +3,12 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+extern s16 D_80084810;
+void func_1508EF80(u8 *, u8 *, f32, u8 *);
+s32 func_15125490(struct108 *arg0);
+void func_151201D0(u8 *arg0);
+void func_15124C38(struct108 *, f32 *);
+extern f32 D_800DC434;
 void func_1512A390(u8 *); // P47: one argument (a0 = arg0 is still live at the call)
 void func_15122C5C(struct108 *arg0);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
@@ -169,7 +175,7 @@ void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
 s32 func_15097BA8(s32);
 void func_15125A6C(u8 *);
 s32 func_15129220(struct108 *);
-s32 func_15125DB4(struct108 *);
+void func_15125DB4(struct108 *);
 void func_15127EB8(struct108 *);
 s32 func_15128540(struct108 *);
 void func_15123070(u8 *arg0);
@@ -178,7 +184,7 @@ void func_151307A0(struct108 *, s32);
 void func_15126138(struct108 *);
 void func_15125C40(u8 *);
 void func_15128680(struct108 *);
-s32 func_1512317C(struct108 *);
+void func_1512317C(struct108 *);
 void func_15125394(struct108 *);
 void func_15123568(struct108 *);
 void func_1512C770(struct108 *);
@@ -187,13 +193,13 @@ void func_151283B8(struct108 *);
 void func_15125594(struct108 *);
 void func_15123508(struct108 *);
 s32 func_1512D900(struct108 *);
-s32 func_151256BC(struct108 *);
+void func_151256BC(struct108 *);
 void func_1512DEF0(struct108 *);
 void func_1512C5D8(struct108 *);
 void func_1512B670(u8 *);
 void func_1512C77C(struct108 *); /* P68: void, v0 is undefined in the asm */
 void func_1512C080(struct108 *); /* P68: void, v0 is undefined in the asm */
-s32 func_15128D50(struct108 *, s32, s32);
+s32 func_15128D50(struct108 *, f32 *, f32 *);
 s32 func_1512C6C0(struct108 *);
 void func_151284C4(struct108 *);
 extern u16 D_800BEB30[];
@@ -492,7 +498,74 @@ void func_15123070(u8 *arg0) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+/* First-person look toggle: the look button (control bit 0x10) enters the first-person view (func_15123934 mode
+ * 0x100, then func_151201D0) unless something blocks it (camera flag 0x80, forced views, the player swimming /
+ * holding / in some modes, func_15125490, ...). In the first-person mode (+0x2C == 0x100) the look state +0x73C
+ * is kept, the zoom / look bits leave the control masks, and the view limits +0x74C / +0x754 ease towards
+ * +0x79C / +0x7A0 (func_150498A0). */
+void func_1512317C(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *hold = *(u8 **)(p + 0x3D0);
+    s32 noLookA = *(s32 *)(p + 0x5F0) & 0x100;
+    s32 noLookB = *(s32 *)(p + 0x5F0) & 0x200;
+    u8 mode;
+    s32 badMode;
+    s32 blocked;
+
+#define PL (*(u8 **)(p + 0x3D4))
+#define HOLD (*(u8 **)(p + 0x3D0))
+#define MASK (*(u16 *)(p + 0x36A))
+#define CTL (**(u16 **)(p + 0x36C))
+#define LOOK (*(s16 *)(p + 0x73C))
+    badMode = hold[0x104] != 0;
+    if (badMode) {
+        mode = p[0x23E];
+        badMode = mode != 9 && mode != 0x38 && mode != 0x39 && mode != 0x3B && mode != 0x37 && mode != 0x15 &&
+                  mode != 0x26 && mode != 0x3A;
+    }
+    blocked = (*(s32 *)(p + 0x2C) & 0x80) || (*(s32 *)(p + 0x84) & 0x1000000) ||
+              (*(f32 *)(hold + 0x28) != 0.0f && hold[0xAD] == 0 && *(s32 *)(PL + 0x9C) == 0 && !noLookA &&
+               !noLookB && p[0x23E] != 3) ||
+              (hold[0x65] != 0 && !noLookA && !noLookB) || badMode || func_15125490(arg0) != 0 ||
+              HOLD[0x1CA] == 0 || ((PL[0x4E] & 0xF) == 1 && 15.0f < *(f32 *)(HOLD + 0x3C)) || PL[0x1AC] != 0;
+
+    if ((CTL & 0x10) && !blocked) {
+        if ((MASK & 0x10) && func_15123934(arg0, 0x100, 4, *(s32 *)(p + 0x134), 1) != 0) {
+            func_151201D0(p);
+        }
+        return;
+    }
+    if (*(s32 *)(p + 0x2C) == 0x100 && LOOK == 0) {
+        func_151239CC(arg0, 1);
+        PL[0x198] = 0;
+        PL[0x197] = 0;
+        *(s16 *)(p + 0x5F8) = 1;
+        *(s16 *)(p + 0x5FC) = 2;
+        MASK &= 0xFFEF;
+        CTL &= 0xFFEF;
+    }
+    if (*(s32 *)(p + 0x2C) == 0x100 || LOOK != 0) {
+        MASK &= ~0x10;
+        CTL &= ~0x10;
+    }
+    PL[0x198] = LOOK;
+    if (LOOK != 0) { /* the asm also tests == 3 after != 0 (dead) */
+        func_150498A0((f32 *)(p + 0x74C), 0.0f, (f32 *)(p + 0x79C), 4.0f, 9.0f, *(f32 *)(p + 0x7B4));
+        func_150498A0((f32 *)(p + 0x754), 0.0f, (f32 *)(p + 0x7A0), 4.0f, 9.0f, *(f32 *)(p + 0x7B4));
+    }
+    if (*(s32 *)(p + 0x2C) != 0x100 && LOOK != 0) {
+        LOOK = 0;
+    }
+#undef PL
+#undef HOLD
+#undef MASK
+#undef CTL
+#undef LOOK
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_1512317C.s")
+#endif
 
 void func_15123508(struct108 *arg0) {
     if ((arg0->unk84 & 2) != 0) {
@@ -1201,7 +1274,53 @@ void func_15125690(struct108 *arg0, s32 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+/* Camera shake: while shaking (flag 0x80000, or +0x5F0 bit 3 without flag 0x40000) the phase +0x29C advances
+ * by a random 0..4 degrees per tick (wrapped to 2 pi), else it decays by 8 % per frame. The amplitude +0x5EC
+ * follows 4 sin(phase) by 4 %; eye +0x2F8 and target +0x2BC are pulled towards each other by
+ * amp * 0.05 * (4, 4) when shaking hard, (1, 20) otherwise (func_1508EF80 = lerp). */
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_H(o) (*(s16 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+void func_151256BC(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    f32 t;
+    f32 eyeK;
+    f32 targetK;
+
+    if ((CAM_W(0x2C) & 0x80000) || ((CAM_W(0x5F0) & 8) && !(CAM_W(0x2C) & 0x40000))) {
+        CAM_F(0x29C) += (f32)((u32)func_150ADA20() % 3) * 2 * 0.017453292f * D_800BE9A4;
+        while (6.2831855f < CAM_F(0x29C)) {
+            CAM_F(0x29C) -= 6.2831855f;
+        }
+        CAM_F(0x5EC) += (sinf(CAM_F(0x29C)) * 4.0f - CAM_F(0x5EC)) * 0.04f;
+        t = CAM_F(0x5EC) * 0.05f;
+        if (CAM_W(0x2C) & 0x80000) {
+            eyeK = 4.0f;
+            targetK = 4.0f;
+        } else {
+            eyeK = 1.0f;
+            targetK = 20.0f;
+        }
+        func_1508EF80(p + 0x2F8, p + 0x2BC, t * eyeK, p + 0x2F8);
+        func_1508EF80(p + 0x2BC, p + 0x2F8, t * targetK, p + 0x2BC);
+        return;
+    }
+    if (CAM_F(0x29C) == 0.0f) {
+        return;
+    }
+    CAM_F(0x29C) -= CAM_F(0x29C) * 0.08f;
+    CAM_F(0x5EC) += (sinf(CAM_F(0x29C)) * 4.0f - CAM_F(0x5EC)) * 0.04f;
+    t = CAM_F(0x5EC) * 0.05f;
+    func_1508EF80(p + 0x2F8, p + 0x2BC, t, p + 0x2F8);
+    func_1508EF80(p + 0x2BC, p + 0x2F8, t * 20.0f, p + 0x2BC);
+}
+#undef CAM_W
+#undef CAM_H
+#undef CAM_F
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151256BC.s")
+#endif
 #ifdef NON_MATCHING
 void func_15125924(struct108 *arg0) {
     s32 sp2C;
@@ -1389,7 +1508,95 @@ void func_15125C40(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125C40.s")
 #endif
+#ifdef NON_MATCHING
+/* Allowed camera controls of this frame: +0x36A = mask of the camera buttons the player may use (from the
+ * camera mode +0x23E or the table D_800BEB30[+0x368]), *(+0x36C) = the control flags, both cut down by the
+ * player / camera state (paused or locked camera: nothing; first-person, aiming, swimming, ... : no zoom /
+ * rotate bits). +0x84A counts down a short lock (flag 0x40). */
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_H(o) (*(s16 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+void func_15125DB4(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *pl = *(u8 **)(p + 0x3D4);
+    u8 mode = p[0x23E];
+    u16 *ctl;
+
+#define MASK (*(u16 *)(p + 0x36A))
+#define CTL (**(u16 **)(p + 0x36C))
+    if (pl[0x120] != 0 || D_80084810 != 0) {
+        MASK = 0;
+        CTL &= 0xFFE0;
+        return;
+    }
+    if (mode == 0) {
+        if (CAM_W(0x2C) & 0x100) {
+            MASK &= 0xFFF0;
+            CTL &= 0xFFF0;
+        }
+    } else {
+        if (mode == 2 || mode == 0x12 || mode == 0x13 || mode == 0xA || mode == 0x34 || mode == 0x10 ||
+            mode == 0xF) {
+            if (mode == 0xF) {
+                func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 0x1E0);
+            }
+            CTL |= 0x10;
+            MASK |= 0x10;
+            CTL &= 0xFFF0;
+        } else {
+            MASK = D_800BEB30[CAM_H(0x368)];
+        }
+        if (mode == 3 || mode == 0xD || mode == 0x1A || mode == 0x2A) {
+            MASK &= ~0xF;
+            CTL &= ~0xF;
+        }
+        if (mode == 0x29) {
+            CTL |= 0x10;
+            MASK |= 0x10;
+        }
+    }
+    if ((*(u8 **)(p + 0x3D0))[0xAD] == 1 && (CAM_W(0x2C) & 0x80)) {
+        MASK &= 0xFFE3;
+        CTL &= 0xFFF3;
+    }
+    if (CAM_W(0x84) & 0x200000) {
+        MASK &= ~0xF;
+    }
+    if (D_800C3671 != 0 || (CAM_W(0x5F0) & 0x80)) {
+        MASK &= 0xFFE0;
+        CTL &= 0xFFE0;
+    }
+    pl = *(u8 **)(p + 0x3D4);
+    if (pl[0x7D] != 0 || pl[0x1AC] != 0 || pl[0x27] != 0) {
+        MASK &= 0xFFEF;
+        CTL &= 0xFFEF;
+    }
+    pl = *(u8 **)(p + 0x3D4);
+    if (pl[0x95] != 0 || (CAM_H(0x5FC) != 0 && pl[0x1B3] != 0)) {
+        MASK &= ~0x1F;
+        CTL &= ~0x1F;
+    }
+    if (((CAM_W(0x2C) & 0x100) && CAM_H(0x73C) == 0) || CAM_H(0x73C) == 3) {
+        MASK &= ~0x10;
+        CTL &= ~0x10;
+    }
+    if ((CAM_W(0x2C) & 0x40) && CAM_H(0x84A) != 0) {
+        CAM_H(0x84A) -= D_800BE9E4;
+        MASK &= ~0x10;
+        CTL &= ~0x10;
+        if (CAM_H(0x84A) <= 0) {
+            CAM_H(0x84A) = 0;
+        }
+    }
+#undef MASK
+#undef CTL
+}
+#undef CAM_W
+#undef CAM_H
+#undef CAM_F
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125DB4.s")
+#endif
 
 void func_15126138(struct108 *arg0) {
     struct127 *temp_v0_2;
@@ -1541,7 +1748,112 @@ void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2) {
 #endif
 }
 
+#ifdef NON_MATCHING
+/* Camera transition (+0x7F4 state: 0 idle, 1 start, 2 running): moves the eye +0x2BC from the start point +0x7F8
+ * to the end point +0x804 (end x / z follow the player, y from func_15124C38) over +0x834 ticks (countdown
+ * +0x840, progress t = +0x830), blending yaw +0x37C, distance D_800DC430, height D_800DC434 and the extra
+ * angles +0x5E8 / +0x3A8 (func_15048720 = angle lerp). The camera mode +0x23C cancels it. Returns 0 when idle,
+ * nonzero while it runs (on the last tick the asm returns the +0x3D0 pointer left in v0; func_15048720 does
+ * not touch v0), the state itself for an unknown state. */
+s32 func_15128030(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *t = p + 0x7F4;
+    u8 *pl;
+    f32 dx;
+    f32 dz;
+    f32 yaw;
+    s32 last;
+
+#define TF(o) (*(f32 *)(t + (o)))
+#define PF(o) (*(f32 *)(p + (o)))
+#define PL (*(u8 **)(p + 0x3D0))
+    if (p[0x23C] != 0) {
+        *(u16 *)(t + 0x40) = 0;
+        *(u16 *)t = 0;
+        TF(0x2C) = 999.0f;
+        return 0;
+    }
+    switch (*(u16 *)t) {
+        case 0:
+            return 0;
+        case 1:
+            pl = PL;
+            dx = PF(0x2F8) - *(f32 *)(pl + 0x14);
+            dz = PF(0x300) - *(f32 *)(pl + 0x1C);
+            TF(0x1C) = sqrtf(dx * dx + dz * dz);
+            PF(0x5E8) = 0.0f;
+            PF(0x660) = 0.0f;
+            PF(0x3A8) = 0.0f;
+            PF(0x65C) = 0.0f;
+            PF(0x83C) = PF(0x2FC) - PF(0x35C);
+            func_15125594(arg0);
+            TF(0x20) = PF(0x37C);
+            func_15128D50(arg0, &TF(0x34), &TF(0x38));
+            *(s16 *)(p + 0x840) = *(u16 *)(t + 0x40);
+            TF(0x3C) = 0.0f;
+            *(u16 *)t = 2;
+            /* fallthrough */
+        case 2:
+            break;
+        default:
+            return *(u16 *)t;
+    }
+    last = *(s16 *)(p + 0x840) == 0;
+    if (p[0x23C] != 0) {
+        TF(0x3C) = 1.0f;
+        last = TRUE;
+        *(s16 *)(p + 0x840) = 0;
+    } else {
+        TF(0x3C) = 1.0f - (f32) * (s16 *)(p + 0x840) / (f32) * (u16 *)(t + 0x40);
+    }
+    func_15123568(arg0);
+    TF(0x28) = PF(0x374);
+    PF(0x838) = PF(0x348);
+    TF(0x10) = *(f32 *)(PL + 0x14);
+    func_15124C38(arg0, &TF(0x14));
+    yaw = TF(0x2C);
+    TF(0x18) = *(f32 *)(PL + 0x1C);
+    while (yaw < 0.0f) {
+        yaw += 360.0f;
+    }
+    pl = PL;
+    PF(0x2A4) = *(f32 *)(pl + 0x14);
+    PF(0x2A8) = *(f32 *)(pl + 0x18);
+    PF(0x2AC) = *(f32 *)(pl + 0x1C);
+    PF(0x390) = yaw;
+    while (PF(0x390) < -360.0f) {
+        PF(0x390) += 360.0f;
+    }
+    PF(0x2BC) = TF(0x4) + (TF(0x10) - TF(0x4)) * TF(0x3C);
+    PF(0x2C0) = TF(0x8) + (TF(0x14) - TF(0x8)) * TF(0x3C);
+    PF(0x2C4) = TF(0xC) + (TF(0x18) - TF(0xC)) * TF(0x3C);
+    if (*(s32 *)(p + 0x2C) != 0x40) {
+        PF(0x37C) = yaw = func_15048720(TF(0x3C), TF(0x20), TF(0x2C));
+        PF(0x39C) = yaw * 0.017453292f;
+    }
+    D_800DC430 = TF(0x1C) + (TF(0x28) - TF(0x1C)) * TF(0x3C);
+    D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C)) * TF(0x3C);
+    PF(0x5E8) = func_15048720(TF(0x3C), 0.0f, TF(0x34));
+    PF(0x3A8) = func_15048720(TF(0x3C), 0.0f, TF(0x38));
+    if (last) {
+        *(u16 *)(t + 0x40) = 0;
+        *(u16 *)t = 0;
+        *(s32 *)(p + 0x84) |= 8;
+        TF(0x2C) = 999.0f;
+        return 1;
+    }
+    *(s16 *)(p + 0x840) -= D_800BE9E4;
+    if (*(s16 *)(p + 0x840) < 0) {
+        *(s16 *)(p + 0x840) = 0;
+    }
+    return 1;
+#undef TF
+#undef PF
+#undef PL
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128030.s")
+#endif
 #ifdef NON_MATCHING
 /* P41: camera mode dispatcher on controller +0x2C (1 / 0x800: func_15122EF0, the follow camera). */
 void func_151283B8(struct108 *arg0) {
@@ -1599,7 +1911,7 @@ void func_151236D0(struct108 *); /* P68: v0 is undefined in the asm */
 #else
 s32 func_151236D0(struct108 *);
 #endif
-s32 func_151256BC(struct108 *);
+void func_151256BC(struct108 *);
 s32 func_15126378(struct108 *);
 s32 func_15128030(struct108 *);
 s32 func_1512A8D0(struct108 *);
