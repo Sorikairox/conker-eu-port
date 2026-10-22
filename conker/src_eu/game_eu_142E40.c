@@ -1481,7 +1481,7 @@ s32 func_150B2C20(s32, s32);
 s32 func_151714BC(u8 *, s32, s32, s32);
 void func_151741D0(s32, s32);
 extern s32 D_800A3354;
-extern s32 func_1000EC24;
+s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
 
 void func_1511CBC0(u8 *arg0) {
     struct {
@@ -1573,7 +1573,7 @@ void func_1511CBC0(u8 *arg0) {
                     func_10010F30((s32) sp.u58, 0x7FFFU, 0x36U, 0, 0U);
                     sp.u5A = (u16) (func_150ADA20() % 5U);
                     temp_t5 = (u32) ((func_150ADA20() & 3) + sp.u5A + 1) % 5U;
-                    sp44 = &func_1000EC24;
+                    sp44 = (s32 *)&func_1000EC24;
                     sp.u58 = (u16) temp_t5;
                     func_1000FA64((sp.u5A + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) &func_1000EC24, (u8 *)0x1001E, 0, 0x200, 0);
                     func_1000FA64((sp.u58 + 0x2B1) & 0xFFFF, (*(s16 *)((u8 *)arg0 + 0x10)), (*(s16 *)((u8 *)arg0 + 0x12)), (*(s16 *)((u8 *)arg0 + 0x14)), 0x4000, 0x2711U, 0x2710, (s32) sp44, (u8 *)0x1001E, 0, 0, 0);

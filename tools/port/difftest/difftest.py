@@ -467,6 +467,14 @@ for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
     # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
     STUBRET[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
+# P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
+# that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
+ARGMEM = {}
+for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
+    _a, _v = _p.split('=')
+    _n, _l = _v.split(':')
+    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l)))
+
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
         return POKES[addr & 0x1FFFFFFF]
@@ -767,6 +775,12 @@ class Run:
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
+        if (addr & 0x1FFFFFFF) in ARGMEM:
+            am = []
+            for _n, _l in ARGMEM[addr & 0x1FFFFFFF]:
+                try: am.append(bytes(mu.mem_read(phys(regs[_n]), _l)).hex())
+                except Exception: am.append('unmapped')
+            self.calls[-1]['argmem'] = am
         self.pending = len(self.calls) - 1
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
         r = random.Random(h32('ret', self.seed, addr, k))
@@ -894,6 +908,9 @@ def compare(R, C, rk, arity):
                 return 'call #%d %s: f%d ref=0x%X cand=0x%X' % (i, a['name'], fr, a['fregs'][fr], b['fregs'][fr])
         if a['mem'] != b['mem']:
             return 'memory state before call #%d (%s) differs' % (i, a['name'])
+        if a.get('argmem') != b.get('argmem'):
+            return 'call #%d %s: argument memory (DIFFTEST_ARGMEM) differs: ref %s cand %s' % (
+                i, a['name'], a.get('argmem'), b.get('argmem'))
     if not R.done and not R.fault:
         return None
     if R.fault or C.fault:

@@ -138,8 +138,42 @@ void func_15085710(s16 arg0, s16 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_15085710.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150859AC.s")
+#ifdef NON_MATCHING
+extern s32 D_800D255C;          /* per-player records, 0x1C bytes each (fields at +0, +4, +8, +9, +0xA, +0xC) */
+extern s32 D_800D2560;
+extern s32 D_800D2564;
+extern s32 D_800D2565;
+extern s32 D_800D2566;
+extern s32 D_800D2568;
 
+/* Query field `field` of player `player`'s record (0: the bit in D_800D2340). Players >= 0xFF give 0. */
+s32 func_150859AC(s16 player, s32 field) {
+    s32 off = player * 0x1C;
+
+    if (player >= 0xFF) {
+        return 0;
+    }
+    switch ((s16)field) {
+    case 0:
+        return (u16)D_800D2340 & (1 << player);
+    case 1:
+        return *(s32 *)((u8 *)&D_800D255C + off);
+    case 2:
+        return *(s32 *)((u8 *)&D_800D2560 + off);
+    case 3:
+        return *(s8 *)((u8 *)&D_800D2564 + off);
+    case 4:
+        return *(s8 *)((u8 *)&D_800D2565 + off);
+    case 5:
+        return *(u8 *)((u8 *)&D_800D2566 + off);
+    case 6:
+        return *(s32 *)((u8 *)&D_800D2568 + off);
+    }
+    return 0; /* the asm returns whatever v0 held */
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B2980/func_150859AC.s")
+#endif
 void func_15085ABC(s16 arg0)
 {
   long var_s0;
