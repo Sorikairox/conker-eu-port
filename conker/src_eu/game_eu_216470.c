@@ -10,6 +10,9 @@ extern s32 D_80090410;
 extern s32 D_80091BA8;
 Gfx *func_151EDA54(Gfx *, u8 *, s32 *);
 extern u8 D_8009E28C[];
+extern u8 D_8009E280[];
+extern u8 D_8009E284[];
+extern u8 D_8009E288[];
 #endif
 
 
@@ -923,8 +926,49 @@ Gfx *func_151ED998(Gfx *gdl) {
     return (Gfx *)func_1501A6CC((u8 *)gdl, 0, 0, D_800BE620, D_800BE624);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDA54.s")
+#ifdef NON_MATCHING
+/* Tile setup for func_151EDBE8: LoadBlock word count (*outBlock, from the D_8009E280/84 size tables), then
+ * SetTile (load tile 7) / SetTile (render tile 0, line = w * D_8009E288[siz] bytes / 8, masks = ceil(log2(w/h)), wrap)
+ * and SetTileSize. desc: +6 width, +8 height, +0xA format, +0xB size. */
+Gfx *func_151EDA54(Gfx *gdl, u8 *desc, s32 *outBlock) {
+    s32 w = *(u16 *)(desc + 6);
+    s32 h;
+    s32 maskS = 1, maskT = 1;
+    s32 p;
+    u32 fmt;
+    u32 *g = (u32 *)gdl;
 
+    *outBlock = (s32)(D_8009E280[desc[0xB]] + w * *(u16 *)(desc + 8)) >> D_8009E284[desc[0xB]];
+    w = *(u16 *)(desc + 6);
+    if (w >= 3) {
+        p = 2;
+        do {
+            p <<= 1;
+            maskS++;
+        } while (p < w);
+    }
+    h = *(u16 *)(desc + 8);
+    if (h >= 3) {
+        p = 2;
+        do {
+            p <<= 1;
+            maskT++;
+        } while (p < h);
+    }
+    g[0] = 0xE7000000;
+    g[1] = 0;
+    fmt = ((desc[0xA] & 7) << 21) | 0xF5000000;
+    g[2] = ((D_8009E28C[desc[0xB]] & 3) << 19) | fmt;
+    g[3] = 0x07000000;
+    g[4] = ((((D_8009E288[desc[0xB]] * *(u16 *)(desc + 6) + 7) >> 3) & 0x1FF) << 9) | fmt | ((desc[0xB] & 3) << 19);
+    g[5] = ((maskT & 0xF) << 14) | 0x80200 | ((maskS & 0xF) << 4);
+    g[6] = 0xF2000000;
+    g[7] = ((((*(u16 *)(desc + 6) - 1) * 4) & 0xFFF) << 12) | (((*(u16 *)(desc + 8) - 1) * 4) & 0xFFF);
+    return (Gfx *)(g + 8);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDA54.s")
+#endif
 #ifdef NON_MATCHING
 /* HUD image drawn as cols x rows tiles: each tile's texture comes from the texture cache (func_1510D66C, id
  * desc+0 + idOffset, consecutive ids unless a block is larger than 0x1000 bytes and is split in halves), then
