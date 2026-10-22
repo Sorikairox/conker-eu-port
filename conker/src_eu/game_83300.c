@@ -2,6 +2,11 @@
 
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+s32 func_15022A8C(struct127 *);
+extern u8 D_800C3A78;
+s32 func_1505E0C4(struct127 *, s32, u8 *, s32, s32, s32, s32, f32, f32, f32, f32, s32);
+#endif
 
 
 void func_15058F24(struct127 *arg0, f32, f32);
@@ -1699,7 +1704,70 @@ void func_1505E060(struct_eu_anim *arg0) {
     bcopy(arg0->unk40, arg0->unk210, 0x1D0);
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E0C4.s")
+#ifdef NON_MATCHING
+/* P38: start animation `anim` of an object (+4 = type): skipped when the cutscene flag D_800C3638 is set and
+ * D_800C3A78 is clear or func_15022A8C(obj) says so, for type 0xFF, a type without animations (D_800C5A90[type] == 0),
+ * no model (+0x2D0) or anim out of range. No table D_800D1588[type] or an entry id >= 30000: func_1505DFDC(obj).
+ * Entry id 999 (or table[0] == 999): nothing. Else func_1505E0C4(obj, &table[anim], model, 0, 0, anim, 0, speed,
+ * arg3 (0 unless +0x2FF), arg4, arg5, arg6). */
+void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6) {
+    u8 *obj = (u8 *) arg0;
+    s32 type = obj[4];
+    s32 anim = arg1;
+    s32 n;
+    s32 model;
+    u16 *tbl;
+    u16 *e;
+
+    if (D_800C3638 != 0) {
+        if (D_800C3A78 == 0) {
+            return;
+        }
+        if (func_15022A8C(arg0) != 0) {
+            return;
+        }
+    }
+    if (obj[4] == 0xFF) {
+        return;
+    }
+    n = (u16) D_800C5A90[obj[4]];
+    if (n == 0) {
+        return;
+    }
+    model = *(s32 *) (obj + 0x2D0);
+    if (model == 0) {
+        return;
+    }
+    if (anim >= n) {
+        return;
+    }
+    tbl = (u16 *) D_800D1588[type];
+    if (tbl == NULL) {
+        func_1505DFDC(arg0);
+        return;
+    }
+    if (anim >= (u16) D_800C5A90[type]) {
+        return;
+    }
+    if (tbl[0] == 999) {
+        return;
+    }
+    e = tbl + anim * 4;
+    if (*e == 999) {
+        return;
+    }
+    if (*e >= 30000) {
+        func_1505DFDC(arg0);
+        return;
+    }
+    if (obj[0x2FF] == 0) {
+        arg3 = 0.0f;
+    }
+    func_1505E0C4(arg0, (s32) e, (u8 *) model, 0, 0, anim, 0, arg2, arg3, arg4, arg5, arg6);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E650.s")
+#endif
 u32 func_1505E7CC(s32 arg0, struct127 *arg1)
 {
   s32 temp_v1;

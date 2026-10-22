@@ -59,7 +59,7 @@ class Ref:
     def word(self, pc):
         o = pc - self.cv
         return struct.unpack('>I', self.cb[o:o + 4])[0]
-    def run(self, mem, args, gp=0, maxi=3000000):
+    def run(self, mem, args, gp=0, maxi=3000000, entry='func_150A5858'):
         r = [0] * 32; f = [0] * 32; cc = False
         for k, a in enumerate(args[:4]): r[4 + k] = sx32(a)
         r[28] = gp; r[29] = sx32(SP0); r[31] = sx32(RET)
@@ -70,7 +70,7 @@ class Ref:
             return int.from_bytes(mem[phys(a):phys(a) + n], 'big')
         def wr(a, n, v):
             mem[phys(a):phys(a) + n] = (v & ((1 << (8 * n)) - 1)).to_bytes(n, 'big')
-        pc = self.s['func_150A5858']; npc = pc + 4; n = 0
+        pc = self.s[entry]; npc = pc + 4; n = 0
         while True:
             if pc == RET: return r[2] & 0xFFFFFFFF
             n += 1
@@ -139,6 +139,12 @@ class Ref:
                     elif fn == 0x36: cc = a <= b; res = None
                     elif fn == 0x32: cc = a == b; res = None
                     elif fn == 0x3C: cc = a < b; res = None
+                    elif fn == 0x34: cc = a < b; res = None                          # c.olt (P38)
+                    elif fn == 0x35: cc = not (a >= b); res = None                   # c.ult
+                    elif fn == 0x37: cc = not (a > b); res = None                    # c.ule
+                    elif fn == 0x24:                                                 # cvt.w.s (round to nearest even)
+                        if a != a or abs(a) >= 2147483648.0: raise RuntimeError('cvt.w.s range at %08X' % pc)
+                        res = round(a) & 0xFFFFFFFF
                     else: raise RuntimeError('cop1.s %x at %08X' % (fn, pc))
                     if res is not None: f[fd] = (f[fd] & ~0xFFFFFFFF & M64) | res
                 elif fmt == 17:
@@ -191,14 +197,14 @@ class Cand:
         self.mu = mu
     def data(self):
         return [(v, b) for v, b in self.secs if v >= 0x80000000]
-    def run(self, mem, args):
+    def run(self, mem, args, entry='func_150A5858'):
         mu = self.mu
         mu.mem_write(0x80000, bytes(mem[0x80000:RAM]))
         for k, a in enumerate(args[:4]): mu.reg_write(UC_MIPS_REG_A0 + k, a & 0xFFFFFFFF)
         for k, a in enumerate(args[4:]): mu.mem_write(phys(SP0) + 0x10 + 4 * k, struct.pack('>I', a & 0xFFFFFFFF))
         mu.reg_write(UC_MIPS_REG_SP, SP0); mu.reg_write(UC_MIPS_REG_RA, RET); mu.reg_write(UC_MIPS_REG_GP, 0)
         try:
-            mu.emu_start(self.s['func_150A5858'], RET, count=20000000)
+            mu.emu_start(self.s[entry], RET, count=20000000)
         except Exception as e:
             raise RuntimeError('cand %s at pc %08X ra %08X' % (e, mu.reg_read(UC_MIPS_REG_PC), mu.reg_read(UC_MIPS_REG_RA)))
         if mu.reg_read(UC_MIPS_REG_PC) != RET: raise RuntimeError('cand timeout')
