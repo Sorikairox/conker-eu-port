@@ -69,16 +69,73 @@ static float tex_sc_s = 1, tex_sc_t = 1;
 static short vp_scale[4] = {640, 480, 511, 0}, vp_trans[4] = {640, 480, 511, 0};
 static short fog_mul, fog_off;
 static unsigned rdphalf1, rdphalf2, normal_base;
-/* lights (P14): directional lights 0..n-1, ambient = colour of light n (F3DEX2 convention) */
-static int num_lights;
-static float light_col[8][3], light_dir[8][3];
+static unsigned persp_norm, clip_ratio, cur_ucode, cur_udata;
+static int gfx_trace;   /* P19: dump every command of the first real frames */
+
+/* P35 light state (DMEM model, see light_vtx()) */
+static unsigned char lbuf[0x400];         /* DMEM 0x260.. (lookats, lights) */
+static unsigned char rare10[0x30];        /* DMEM 0x1D0..0x200 (Rare G_MOVEWORD 0x10 block) */
+static unsigned char nbuf[0x40];          /* DMEM 0x510 (G_MOVEMEM 0x0E normals, s8 x,y per vertex slot) */
+static unsigned light_nls;                /* numLightsxSize (48 N) */
+static int light_dirty = 1, light_seen, light_dbg, light_bg;
+static float lmdir[10][3];                /* model-space directions, index 0 = lookat X, 1 = lookat Y, 2+i = light i */
+static float proj_game[4][4], mp_game[4][4]; /* the game's own P and MVP (freecam replaces the view in proj) */
+static const unsigned char rare10_def[0x30] = {
+    0,0,0,0,0xFF,0xFF,0,0, 0,0,0,0,0xFF,0xFF,0,0, 0x95,0x98,0x77,0x60,0x02,0x8D,0,0, 0x95,0x98,0x77,0x60,0x02,0x8D,0,0,
+    0,0,0,0,0,0xC9,0,0, 0,0,0,0,0,0xC9,0,0};
+
+static void light_prepare(void) {
+    int n = (int)(light_nls / 48) + 3;    /* lookats, point lights, sun (the ambient has no direction) */
+    if (n > 10) n = 10;
+    for (int r = 0; r < n; r++) {
+        const unsigned char *d = lbuf + r * 48 + 8;
+        float x = (signed char)d[0], y = (signed char)d[1], z = (signed char)d[2];
+        float m0 = mv[0][0] * x + mv[0][1] * y + mv[0][2] * z;
+        float m1 = mv[1][0] * x + mv[1][1] * y + mv[1][2] * z;
+        float m2 = mv[2][0] * x + mv[2][1] * y + mv[2][2] * z;
+        float l = sqrtf(m0 * m0 + m1 * m1 + m2 * m2);
+        lmdir[r][0] = l > 0 ? m0 / l : 0; lmdir[r][1] = l > 0 ? m1 / l : 0; lmdir[r][2] = l > 0 ? m2 / l : 0;
+    }
+    light_dirty = 0;
+}
+
+/* P35b: the ucode's data segment is DMEM 0x000.. at task start and after every G_LOAD_UCODE, so the light
+ * records, lookats and the Rare 0x10 block the DL does not send hold the ucode data image's values (the level
+ * frame sends NUMLIGHT 0 and the sun only: its ambient, record 1 at DMEM 0x2F0, comes from this image). */
+static void dmem_seed(unsigned data_addr, unsigned size) {
+    const unsigned char *d = data_addr ? gfx_addr(data_addr) : 0;
+    if (!d || size < 0x660) return;
+    for (unsigned k = 0; k < sizeof lbuf; k++) lbuf[k] = vbe_ld8(d + 0x260 + k);
+    for (unsigned k = 0; k < sizeof rare10; k++) rare10[k] = vbe_ld8(d + 0x1D0 + k);
+    for (unsigned k = 0; k < sizeof nbuf && 0x510 + k < size; k++) nbuf[k] = vbe_ld8(d + 0x510 + k);
+    light_dirty = 1;
+    light_bg = 0;   /* the ucode name string in the data image (P6: "RSP Gfx ucode F3DEXBG.NoN ...") */
+    for (unsigned k = 0; k + 8 < size && k < 0x800; k++)
+        if (vbe_ld8(d + k) == 'F' && vbe_ld8(d + k + 1) == '3' && vbe_ld8(d + k + 5) == 'B' && vbe_ld8(d + k + 6) == 'G') { light_bg = 1; break; }
+    static int logged;
+    if (!logged++) {
+        char b[256]; int m = 0;
+        for (unsigned r = 0; r < 4; r++) {
+            m = 0;
+            for (unsigned k = 0; k < 48; k++) m += snprintf(b + m, sizeof b - m, "%02X%s", lbuf[48 * r + k], (k & 3) == 3 ? " " : "");
+            port_log("[light] ucode data DMEM 0x%03X: %s\n", 0x260 + 48 * r, b);
+        }
+        m = 0;
+        for (unsigned k = 0; k < sizeof rare10; k++) m += snprintf(b + m, sizeof b - m, "%02X%s", rare10[k], (k & 3) == 3 ? " " : "");
+        port_log("[light] ucode data DMEM 0x1D0..0x200: %s\n", b);
+    }
+}
+
+static inline float rare_s(int k) { return (short)(rare10[2 * k] << 8 | rare10[2 * k + 1]) + (rare10[0x10 + 2 * k] << 8 | rare10[0x10 + 2 * k + 1]) / 65536.0f; }
+static inline float rare_t(int k) { return (short)(rare10[0x20 + 2 * k] << 8 | rare10[0x20 + 2 * k + 1]); }
+
 static float bmin[3], bmax[3];
 static int bany;
 
 /* RDP state */
 static unsigned oth_h, oth_l, combine_w0, combine_w1;
 static unsigned prim_col, env_col, fog_col, blend_col, fill_col, prim_lod;
-static unsigned cimg_addr, zimg_addr, cimg_width = 320;
+static unsigned cimg_addr, zimg_addr, cimg_width = 320, prim_z;
 typedef struct { unsigned fmt, siz, line, tmem, pal, cms, cmt, masks, maskt, shifts, shiftt, uls, ult, lrs, lrt; } Tile;
 static Tile tiles[8];
 static struct { unsigned fmt, siz, width, raw; unsigned char *p; } timg;
@@ -117,8 +174,8 @@ static void mtx_ident(float m[4][4]) {
 
 /* ------------------------------------------------------------------ GL backend */
 static GLuint prog, vbo, vao;
-static GLint u_tex0, u_tex1, u_tile0, u_tile1, u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc,
-    u_primlod, u_acmp, u_blenda, u_fog, u_mode, u_texon;
+static GLint u_tex[4], u_tp[4], u_tm[4], u_ts[4], u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc, u_blendc,
+    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg;
 static int gl_ok, canvas_w = 640, canvas_h = 480;
 #define VF 11
 #define BATCH_TRIS 4096
@@ -126,45 +183,92 @@ static float batch[BATCH_TRIS * 3 * VF];
 static int nbatch;      /* vertices in batch */
 static int state_dirty = 1;
 static int rect_mode;   /* 0 tris, 1 fill rect, 2 tex rect (screen-space quads) */
+static unsigned k4k5;   /* G_SETCONVERT K4 (bits 9..17) / K5 (bits 0..8) */
 
 static const char *VS =
     "#version 300 es\n"
     "in vec4 aPos; in vec4 aCol; in vec2 aST; in float aFog;\n"
     "out vec4 vCol; out vec2 vST; out float vFog;\n"
-    "void main() { gl_Position = aPos; vCol = aCol; vST = aST; vFog = aFog; }\n";
+    /* P35: F3DEX2 does not clip at the far plane (the RDP z just saturates), so z is clamped to w here
+     * instead of letting the GPU clip far geometry such as level backdrops */
+    "void main() { vec4 p = aPos; if (p.w > 0.0 && p.z > p.w) p.z = p.w; gl_Position = p; vCol = aCol; vST = aST; vFog = aFog; }\n";
 
+/* P35: the RDP texture unit and blender in the shader.
+ *  - Tiles: up to 4 bound (the base tile and the next ones: 2-cycle TEXEL1 and LOD levels). Each is decoded
+ *    exactly (uTS.xy texels) and addressed with texelFetch, so clamp (to the tile size), mirror and wrap
+ *    (mask) are the RDP's per tile: clamp first, then mirror / mask (P35.md section 5).
+ *    uTP = (ul s, ul t in texels, shift scale s, shift scale t).
+ *  - Filter (uFilt): 0 point, 1 the RDP 3-point (triangle) bilinear with 5-bit fractions (default),
+ *    2 plain 4-tap bilinear (?filter4=1). No half-texel offset: the RDP samples texel i at s = i.
+ *  - LOD (uLod: x = on (G_TL_LOD), y = max level, z = sharpen/detail): lod = texels per N64 pixel; tile
+ *    base + floor(log2 lod); LOD_FRACTION = lod / 2^l - 1; magnification uses tile base and fraction 0.
+ *  - Blender: uBl1 = first cycle (2-cycle mode only; its result is the second cycle's IN), uBl2 = the final
+ *    cycle, selectors (P, A, M, B). uBlFin: 0 output P (no FORCE_BL), 1 blend in the shader (no memory
+ *    input), 2 the GL blend does the memory term: out rgb = the non-memory colour, alpha = the A factor. */
 static const char *FS =
     "#version 300 es\n"
-    "precision highp float;\n"
+    "precision highp float; precision highp int;\n"
     "in vec4 vCol; in vec2 vST; in float vFog;\n"
-    "uniform sampler2D uT0, uT1; uniform vec4 uTile0, uTile1;\n"
-    "uniform ivec4 uC0, uC1, uA0, uA1; uniform int u2cyc, uAcmp, uFog, uMode, uTexOn;\n"
-    "uniform vec4 uPrim, uEnv, uFogC; uniform float uPrimLod, uBlendA;\n"
+    "uniform highp sampler2D uT0, uT1, uT2, uT3; uniform vec4 uTP[4]; uniform ivec4 uTM[4], uTS[4];\n"
+    "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg;\n"
+    "uniform vec4 uPrim, uEnv, uFogC, uBlendC; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
     "out vec4 frag;\n"
-    "vec4 T0, T1, SH;\n"
+    "vec4 T0, T1, SH; float LF;\n"
+    "int wrapc(int c, int cl, int mi, int mk, int mx) {\n"
+    "  if (cl != 0) c = clamp(c, 0, mx);\n"
+    "  if (mk > 0) { if (mi != 0 && ((c >> mk) & 1) != 0) c = ~c; c &= (1 << mk) - 1; }\n"
+    "  return c; }\n"
+    "vec4 fetch(int k, ivec2 c) {\n"
+    "  ivec4 m = uTM[k], z = uTS[k];\n"
+    "  c.x = wrapc(c.x, m.x & 1, m.x & 2, m.y, z.z); c.y = wrapc(c.y, m.x & 4, m.x & 8, m.z, z.w);\n"
+    "  c = clamp(c, ivec2(0), z.xy - 1);\n"
+    "  if (k == 0) return texelFetch(uT0, c, 0); if (k == 1) return texelFetch(uT1, c, 0);\n"
+    "  if (k == 2) return texelFetch(uT2, c, 0); return texelFetch(uT3, c, 0); }\n"
+    "vec4 samp(int k) {\n"
+    "  if (((uTexOn >> k) & 1) == 0) return vec4(1.0);\n"
+    "  vec2 tc = vST * uTP[k].zw - uTP[k].xy;\n"
+    "  if (uFilt == 0 || uMode == 3) return fetch(k, ivec2(floor(tc)));\n"
+    "  vec2 fl = floor(tc), f = floor((tc - fl) * 32.0) / 32.0; ivec2 b = ivec2(fl);\n"
+    "  vec4 t00 = fetch(k, b), t10 = fetch(k, b + ivec2(1, 0)), t01 = fetch(k, b + ivec2(0, 1));\n"
+    "  if (uFilt == 2) { vec4 t11 = fetch(k, b + ivec2(1, 1)); return mix(mix(t00, t10, f.x), mix(t01, t11, f.x), f.y); }\n"
+    "  if (f.x + f.y < 1.0) return t00 + f.x * (t10 - t00) + f.y * (t01 - t00);\n"
+    "  vec4 t11 = fetch(k, b + ivec2(1, 1));\n"
+    "  return t11 + (1.0 - f.x) * (t01 - t11) + (1.0 - f.y) * (t10 - t11); }\n"
     "vec3 cA(int i, vec3 c) { if (i == 0) return c; if (i == 1) return T0.rgb; if (i == 2) return T1.rgb;"
     "  if (i == 3) return uPrim.rgb; if (i == 4) return SH.rgb; if (i == 5) return uEnv.rgb; if (i == 6) return vec3(1.0);"
-    "  if (i == 7) return vec3(0.5); return vec3(0.0); }\n"
+    "  if (i == 7) return vec3(fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453)); return vec3(0.0); }\n"
     "vec3 cB(int i, vec3 c) { if (i == 0) return c; if (i == 1) return T0.rgb; if (i == 2) return T1.rgb;"
-    "  if (i == 3) return uPrim.rgb; if (i == 4) return SH.rgb; if (i == 5) return uEnv.rgb; return vec3(0.0); }\n"
+    "  if (i == 3) return uPrim.rgb; if (i == 4) return SH.rgb; if (i == 5) return uEnv.rgb; if (i == 7) return vec3(uK45.x); return vec3(0.0); }\n"
     "vec3 cC(int i, vec3 c, float ca) { if (i == 0) return c; if (i == 1) return T0.rgb; if (i == 2) return T1.rgb;"
     "  if (i == 3) return uPrim.rgb; if (i == 4) return SH.rgb; if (i == 5) return uEnv.rgb; if (i == 6) return vec3(1.0);"
     "  if (i == 7) return vec3(ca); if (i == 8) return vec3(T0.a); if (i == 9) return vec3(T1.a);"
     "  if (i == 10) return vec3(uPrim.a); if (i == 11) return vec3(SH.a); if (i == 12) return vec3(uEnv.a);"
-    "  if (i == 13) return vec3(1.0); if (i == 14) return vec3(uPrimLod); return vec3(0.0); }\n"
+    "  if (i == 13) return vec3(LF); if (i == 14) return vec3(uPrimLod); if (i == 15) return vec3(uK45.y); return vec3(0.0); }\n"
     "vec3 cD(int i, vec3 c) { if (i == 0) return c; if (i == 1) return T0.rgb; if (i == 2) return T1.rgb;"
     "  if (i == 3) return uPrim.rgb; if (i == 4) return SH.rgb; if (i == 5) return uEnv.rgb; if (i == 6) return vec3(1.0);"
     "  return vec3(0.0); }\n"
     "float aX(int i, float a) { if (i == 0) return a; if (i == 1) return T0.a; if (i == 2) return T1.a;"
     "  if (i == 3) return uPrim.a; if (i == 4) return SH.a; if (i == 5) return uEnv.a; if (i == 6) return 1.0; return 0.0; }\n"
-    "float aC(int i, float a) { if (i == 0) return 1.0; if (i == 1) return T0.a; if (i == 2) return T1.a;"
+    "float aC(int i, float a) { if (i == 0) return LF; if (i == 1) return T0.a; if (i == 2) return T1.a;"
     "  if (i == 3) return uPrim.a; if (i == 4) return SH.a; if (i == 5) return uEnv.a; if (i == 6) return uPrimLod; return 0.0; }\n"
+    "vec3 bP(int i, vec3 c) { if (i == 2) return uBlendC.rgb; if (i == 3) return uFogC.rgb; return c; }\n"
+    "float bA(int i, float a) { if (i == 0) return a; if (i == 1) return uFogC.a; if (i == 2) return SH.a; return 0.0; }\n"
+    "float bB(int i, float a) { if (i == 0) return 1.0 - a; if (i == 3) return 0.0; return 1.0; }\n"
     "void main() {\n"
-    "  SH = vCol;\n"
+    "  SH = vCol; LF = 0.0;\n"
+    "  gl_FragDepth = uPrimZ >= 0.0 ? uPrimZ : gl_FragCoord.z;\n"
     "  if (uMode == 1) { frag = vCol; return; }\n"
-    "  T0 = (uTexOn & 1) != 0 ? texture(uT0, (vST - uTile0.xy) * uTile0.zw) : vec4(1.0);\n"
-    "  T1 = (uTexOn & 2) != 0 ? texture(uT1, (vST - uTile1.xy) * uTile1.zw) : T0;\n"
-    "  if (uMode == 3) { if (T0.a < 0.5) discard; frag = T0; return; }\n"
+    "  int lt = 0;\n"
+    "  if (uTexOn != 0) {\n"
+    "    vec2 tc = vST * uTP[0].zw; float l = max(length(dFdx(tc)), length(dFdy(tc))) * uPixScale;\n"
+    "    if (l >= 1.0) { float e = floor(log2(l)); LF = l / exp2(e) - 1.0; if (uLod.x != 0) { lt = int(e);"
+    "      if (lt >= uLod.y) { lt = uLod.y; LF = 1.0; } } }\n"
+    "    else if (uLod.z != 0) LF = l;\n"
+    "    lt = min(lt, 2);\n"
+    "  }\n"
+    "  T0 = lt == 0 ? samp(0) : lt == 1 ? samp(1) : samp(2);\n"
+    "  T1 = (uTexOn & (2 << lt)) != 0 ? (lt == 0 ? samp(1) : lt == 1 ? samp(2) : samp(3)) : T0;\n"
+    "  if (uMode == 3) { if (T0.a < 0.5) discard; frag = vec4(T0.rgb, 1.0); return; }\n"
     "  vec3 c = vec3(0.0); float a = 0.0;\n"
     "  vec3 c1 = (cA(uC0.x, c) - cB(uC0.y, c)) * cC(uC0.z, c, a) + cD(uC0.w, c);\n"
     "  float a1 = (aX(uA0.x, a) - aX(uA0.y, a)) * aC(uA0.z, a) + aX(uA0.w, a);\n"
@@ -172,10 +276,15 @@ static const char *FS =
     "    c1 = (cA(uC1.x, c) - cB(uC1.y, c)) * cC(uC1.z, c, a) + cD(uC1.w, c);\n"
     "    a1 = (aX(uA1.x, a) - aX(uA1.y, a)) * aC(uA1.z, a) + aX(uA1.w, a); }\n"
     "  c1 = clamp(c1, 0.0, 1.0); a1 = clamp(a1, 0.0, 1.0);\n"
-    "  if (uAcmp == 1 && a1 < uBlendA) discard;\n"
-    "  if (uAcmp == 2 && a1 < 0.5) discard;\n"
-    "  if (uFog == 1) c1 = mix(c1, uFogC.rgb, vFog);\n"
-    "  frag = vec4(c1, a1);\n"
+    "  if (uAcmp == 1 && a1 < uBlendC.a) discard;\n"
+    "  if (uAcmp == 3 && a1 < fract(sin(dot(gl_FragCoord.xy, vec2(41.31, 17.77))) * 1531.7)) discard;\n"
+    "  if (uCvg > 0 && a1 < (uCvg == 1 ? 0.5 : 0.125)) discard;\n"
+    "  if (uBl1.x >= 0) { float A = bA(uBl1.y, a1);\n"
+    "    c1 = clamp(bP(uBl1.x, c1) * A + bP(uBl1.z, c1) * bB(uBl1.w, A), 0.0, 1.0); }\n"
+    "  float A = bA(uBl2.y, a1);\n"
+    "  if (uBlFin == 0) frag = vec4(bP(uBl2.x, c1), 1.0);\n"
+    "  else if (uBlFin == 1) frag = vec4(clamp(bP(uBl2.x, c1) * A + bP(uBl2.z, c1) * bB(uBl2.w, A), 0.0, 1.0), 1.0);\n"
+    "  else frag = vec4(bP(uBl2.x == 1 ? uBl2.z : uBl2.x, c1), A);\n"
     "}\n";
 
 static GLuint sh(GLenum t, const char *src) {
@@ -206,12 +315,19 @@ int gfx_init(void) {
     if (!ok) { port_log("[gfx] program link failed\n"); return -1; }
     glUseProgram(prog);
 #define U(v, n) v = glGetUniformLocation(prog, n)
-    U(u_tex0, "uT0"); U(u_tex1, "uT1"); U(u_tile0, "uTile0"); U(u_tile1, "uTile1"); U(u_c0, "uC0"); U(u_c1, "uC1");
-    U(u_a0, "uA0"); U(u_a1, "uA1"); U(u_2cyc, "u2cyc"); U(u_prim, "uPrim"); U(u_env, "uEnv"); U(u_fogc, "uFogC");
-    U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp"); U(u_blenda, "uBlendA"); U(u_fog, "uFog"); U(u_mode, "uMode");
-    U(u_texon, "uTexOn");
-    glUniform1i(u_tex0, 0);
-    glUniform1i(u_tex1, 1);
+    static const char *tn[4] = {"uT0", "uT1", "uT2", "uT3"};
+    char nm[16];
+    for (int k = 0; k < 4; k++) {
+        u_tex[k] = glGetUniformLocation(prog, tn[k]);
+        snprintf(nm, sizeof nm, "uTP[%d]", k); u_tp[k] = glGetUniformLocation(prog, nm);
+        snprintf(nm, sizeof nm, "uTM[%d]", k); u_tm[k] = glGetUniformLocation(prog, nm);
+        snprintf(nm, sizeof nm, "uTS[%d]", k); u_ts[k] = glGetUniformLocation(prog, nm);
+        glUniform1i(u_tex[k], k);
+    }
+    U(u_c0, "uC0"); U(u_c1, "uC1"); U(u_a0, "uA0"); U(u_a1, "uA1"); U(u_2cyc, "u2cyc"); U(u_prim, "uPrim");
+    U(u_env, "uEnv"); U(u_fogc, "uFogC"); U(u_blendc, "uBlendC"); U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp");
+    U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale");
+    U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg");
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -272,35 +388,39 @@ static void texel(const Tile *t, unsigned x, unsigned y, unsigned char *o) {
     }
 }
 
+/* P35: the decoded image covers every texel the RDP can address after clamp / mirror / mask: 2^mask when
+ * masked, else the tile size (clamped). The shader does the addressing (texelFetch), so the GL wrap mode and
+ * filter are unused. */
 static void tile_dims(const Tile *t, unsigned *w, unsigned *h) {
     unsigned tw = ((t->lrs - t->uls) >> 2) + 1, th = ((t->lrt - t->ult) >> 2) + 1;
-    if (t->masks && !(t->cms & 2)) tw = 1u << t->masks;
-    if (t->maskt && !(t->cmt & 2)) th = 1u << t->maskt;
+    if (t->masks) tw = 1u << (t->masks > 10 ? 10 : t->masks);
+    if (t->maskt) th = 1u << (t->maskt > 10 ? 10 : t->maskt);
     if (tw > 1024) tw = 1024;
     if (th > 1024) th = 1024;
+    if (!tw) tw = 1;
+    if (!th) th = 1;
     *w = tw; *h = th;
 }
 
 static GLuint tex_for(int ti, unsigned *w, unsigned *h) {
     const Tile *t = &tiles[ti & 7];
     tile_dims(t, w, h);
-    unsigned key[6] = {tmem_gen, t->fmt | t->siz << 4 | t->pal << 8 | t->cms << 12 | t->cmt << 16 | (oth_h >> 12 & 0xF) << 20,
-                       t->tmem | t->line << 12, *w | *h << 16, t->masks | t->maskt << 8, 1};
+    if ((size_t)*w * *h * 4 > sizeof texbuf) *h = sizeof texbuf / 4 / *w;
+    unsigned key[6] = {tmem_gen, t->fmt | t->siz << 4 | t->pal << 8 | (oth_h >> 14 & 3) << 20,
+                       t->tmem | t->line << 12, *w | *h << 16, 0, 2};
     unsigned hsh = (key[0] * 2654435761u ^ key[1] * 40503u ^ key[2] * 97u ^ key[3]) & 255;
     TexEnt *e = &tcache[hsh];
     if (e->tex && !memcmp(e->key, key, sizeof key)) return e->tex;
     if (!e->tex) glGenTextures(1, &e->tex);
     memcpy(e->key, key, sizeof key);
-    if ((size_t)*w * *h * 4 > sizeof texbuf) *h = sizeof texbuf / 4 / *w;
     for (unsigned y = 0; y < *h; y++)
         for (unsigned x = 0; x < *w; x++) texel(t, x, y, texbuf + (y * *w + x) * 4);
     glBindTexture(GL_TEXTURE_2D, e->tex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, *w, *h, 0, GL_RGBA, GL_UNSIGNED_BYTE, texbuf);
-    GLint f = (oth_h >> 12 & 3) == 2 ? GL_LINEAR : GL_NEAREST; /* G_TF_BILERP */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, f);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, f);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (t->cms & 2) || !t->masks ? GL_CLAMP_TO_EDGE : (t->cms & 1) ? GL_MIRRORED_REPEAT : GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (t->cmt & 2) || !t->maskt ? GL_CLAMP_TO_EDGE : (t->cmt & 1) ? GL_MIRRORED_REPEAT : GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gfx_stats.tex_uploads++;
     return e->tex;
 }
@@ -311,47 +431,89 @@ static void rgba(GLint u, unsigned c) {
     glUniform4f(u, (c >> 24) / 255.0f, (c >> 16 & 255) / 255.0f, (c >> 8 & 255) / 255.0f, (c & 255) / 255.0f);
 }
 
+static float sc_box[4];   /* P35b: scissor in N64 pixels (ulx, uly, lrx, lry) */
+static int sc_on;
+static int filt_mode = -1;   /* P35: 1 = RDP 3-point (default), 2 = ?filter4=1 4-tap bilinear, 0 = ?filter0=1 point */
+/* P35 blender (othermode L): cycle-1 selectors at bits 30/26/22/18, cycle-2 at 28/24/20/16 (P, A, M, B);
+ * P/M: 0 IN, 1 MEM, 2 BLEND colour, 3 FOG colour; A: 0 IN alpha, 1 FOG alpha, 2 SHADE alpha, 3 zero;
+ * B: 0 1-A, 1 MEM alpha (coverage, taken as 1), 2 one, 3 zero. In 2-cycle mode the first cycle always runs
+ * (fog) and feeds IN of the second; the final cycle blends only with FORCE_BL (else the RDP keeps P). */
+static int bl_last_gl = -1;
+static void blend_state(unsigned cyc, int mode) {
+    unsigned L = oth_l;
+    int c1[4] = {(int)(L >> 30 & 3), (int)(L >> 26 & 3), (int)(L >> 22 & 3), (int)(L >> 18 & 3)};
+    int c2[4] = {(int)(L >> 28 & 3), (int)(L >> 24 & 3), (int)(L >> 20 & 3), (int)(L >> 16 & 3)};
+    int *fin = cyc == 1 ? c2 : c1;
+    if (cyc == 1) glUniform4i(u_bl1, c1[0] == 1 ? 0 : c1[0], c1[1], c1[2] == 1 ? 0 : c1[2], c1[3]);
+    else glUniform4i(u_bl1, -1, 0, 0, 0);
+    glUniform4i(u_bl2, fin[0], fin[1], fin[2], fin[3]);
+    int fb = (L & 0x4000) != 0, fm = 0, gl = 0;
+    GLenum sf = GL_ONE, df = GL_ZERO;
+    if (mode == 1 || cyc >= 2) fm = 0;
+    else if (!fb) { fm = 0; if (fin[0] == 1) fin[0] = 0; glUniform4i(u_bl2, fin[0], fin[1], fin[2], fin[3]); }
+    else if (fin[0] != 1 && fin[2] != 1) fm = 1;
+    else {
+        fm = 2; gl = 1;
+        if (fin[0] == 1 && fin[2] == 1) { sf = GL_ZERO; df = GL_ONE; }
+        else if (fin[2] == 1) { sf = GL_SRC_ALPHA; df = fin[3] == 0 ? GL_ONE_MINUS_SRC_ALPHA : fin[3] == 3 ? GL_ZERO : GL_ONE; }
+        else { df = GL_SRC_ALPHA; sf = fin[3] == 0 ? GL_ONE_MINUS_SRC_ALPHA : fin[3] == 3 ? GL_ZERO : GL_ONE; }
+    }
+    glUniform1i(u_blfin, fm);
+    if (gl) { glEnable(GL_BLEND); glBlendFunc(sf, df); } else glDisable(GL_BLEND);
+    bl_last_gl = gl;
+}
+
 static void apply_state(void) {
     unsigned cyc = oth_h >> 20 & 3; /* 0 1CYC, 1 2CYC, 2 COPY, 3 FILL */
     unsigned w0 = combine_w0, w1 = combine_w1;
+    if (filt_mode < 0) filt_mode = port_flag("filter0") ? 0 : port_flag("filter4") ? 2 : 1;
     glUniform4i(u_c0, w0 >> 20 & 15, w1 >> 28 & 15, w0 >> 15 & 31, w1 >> 15 & 7);
     glUniform4i(u_a0, w0 >> 12 & 7, w1 >> 12 & 7, w0 >> 9 & 7, w1 >> 9 & 7);
     glUniform4i(u_c1, w0 >> 5 & 15, w1 >> 24 & 15, w0 & 31, w1 >> 6 & 7);
     glUniform4i(u_a1, w1 >> 21 & 7, w1 >> 3 & 7, w1 >> 18 & 7, w1 & 7);
     glUniform1i(u_2cyc, cyc == 1);
-    rgba(u_prim, prim_col); rgba(u_env, env_col); rgba(u_fogc, fog_col);
+    rgba(u_prim, prim_col); rgba(u_env, env_col); rgba(u_fogc, fog_col); rgba(u_blendc, blend_col);
     glUniform1f(u_primlod, prim_lod / 255.0f);
-    glUniform1f(u_blenda, (blend_col & 255) / 255.0f);
+    glUniform2f(u_k45, (float)(signed char)(k4k5 >> 9 & 0xFF) / 255.0f, (k4k5 & 0x1FF) / 255.0f);
+    glUniform1f(u_primz, (oth_l & 4) && rect_mode == 0 ? (prim_z & 0x7FFF) / 32767.0f : -1.0f);
     unsigned ac = oth_l & 3;
-    glUniform1i(u_acmp, ac == 1 ? 1 : (oth_l & 0x2000) && (oth_l & 0x1000) ? 2 : 0); /* threshold / cvg x alpha */
-    glUniform1i(u_fog, (geom & G_FOG) && (oth_l >> 30) == 3);
+    glUniform1i(u_acmp, ac == 1 ? 1 : ac == 3 ? 3 : 0);
+    glUniform1i(u_cvg, (oth_l & 0x2000) ? ((oth_l & 0x4000) ? 2 : 1) : 0); /* ALPHA_CVG_SEL: coverage from alpha */
     int mode = rect_mode == 1 || cyc == 3 ? 1 : cyc == 2 ? 3 : 0;
     glUniform1i(u_mode, mode);
     int texon = 0;
     if (mode != 1 && (tex_on || rect_mode == 2)) {
-        for (int k = 0; k < 2; k++) {
+        /* tiles base .. base+3: TEXEL1 of 2-cycle mode and the LOD levels (G_TL_LOD, tex_level) */
+        int ntile = cyc == 1 ? 2 : 1, lod = (oth_h & 0x10000) && cyc == 1 && rect_mode == 0;
+        if (lod) ntile = (int)tex_level + 2 > 4 ? 4 : (int)tex_level + 2;
+        for (int k = 0; k < ntile; k++) {
             unsigned w, h;
             int ti = (tex_tile + k) & 7;
-            if (k == 1 && cyc != 1) break;
             glActiveTexture(GL_TEXTURE0 + k);
             glBindTexture(GL_TEXTURE_2D, tex_for(ti, &w, &h));
             const Tile *t = &tiles[ti];
-            /* shader: uv = (st * shift - ul) / size; the shift is folded into st per vertex (below) */
-            glUniform4f(k ? u_tile1 : u_tile0, t->uls / 4.0f, t->ult / 4.0f, 1.0f / w, 1.0f / h);
+            glUniform4f(u_tp[k], t->uls / 4.0f, t->ult / 4.0f, shiftscale(t->shifts), shiftscale(t->shiftt));
+            int cls = (t->cms & 2) || !t->masks, clt = (t->cmt & 2) || !t->maskt;
+            glUniform4i(u_tm[k], cls | (t->cms & 1) << 1 | clt << 2 | (t->cmt & 1) << 3, t->masks, t->maskt, 0);
+            int mxs = (int)((t->lrs >> 2) - (t->uls >> 2)), mxt = (int)((t->lrt >> 2) - (t->ult >> 2));
+            glUniform4i(u_ts[k], (int)w, (int)h, mxs < 0 ? 0 : mxs, mxt < 0 ? 0 : mxt);
             texon |= 1 << k;
         }
         glActiveTexture(GL_TEXTURE0);
-    }
+        glUniform4i(u_lod, lod, (int)tex_level, (oth_h & 0x60000) != 0, 0);
+    } else glUniform4i(u_lod, 0, 0, 0, 0);
     glUniform1i(u_texon, texon);
-    /* depth */
+    unsigned tf = oth_h >> 12 & 3;   /* G_TF_POINT 0, G_TF_BILERP 2, G_TF_AVERAGE 3 */
+    glUniform1i(u_filt, tf == 0 || cyc >= 2 ? 0 : filt_mode);
+    glUniform1f(u_pixscale, (float)cimg_width / canvas_w);
+    /* depth: Z_CMP / Z_UPD; ZMODE (bits 10-11) DEC -> polygon offset (the RDP's z-delta compare) */
     int zcmp = (geom & G_ZBUFFER) && (oth_l & 0x10) && rect_mode == 0, zupd = (oth_l & 0x20) && rect_mode == 0;
     if (zcmp || zupd) { glEnable(GL_DEPTH_TEST); glDepthFunc(zcmp ? GL_LEQUAL : GL_ALWAYS); } else glDisable(GL_DEPTH_TEST);
     glDepthMask(zupd ? GL_TRUE : GL_FALSE);
     if ((oth_l >> 10 & 3) == 3) { glEnable(GL_POLYGON_OFFSET_FILL); glPolygonOffset(-1, -2); }
     else glDisable(GL_POLYGON_OFFSET_FILL);
-    /* blending: FORCE_BL with an alpha blender (XLU render modes) */
-    if ((oth_l & 0x4000) && mode != 1 && cyc < 2) { glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); }
-    else glDisable(GL_BLEND);
+    blend_state(cyc, mode);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);  /* the blend factor goes through alpha; keep the canvas opaque */
     /* viewport */
     float sx = canvas_w / (float)cimg_width, sy = canvas_h / (cimg_width * 0.75f);
     if (rect_mode) glViewport(0, 0, canvas_w, canvas_h);
@@ -360,6 +522,11 @@ static void apply_state(void) {
         float x0 = (vp_trans[0] - vp_scale[0]) / 4.0f, y0 = (vp_trans[1] - vp_scale[1]) / 4.0f;
         glViewport((GLint)(x0 * sx), (GLint)(canvas_h - (y0 + h) * sy), (GLint)(w * sx), (GLint)(h * sy));
     }
+    /* P35b: G_SETSCISSOR (the RDP clips every primitive to it; the level frames use x 2..290, y 0..216) */
+    if (sc_on) {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor((GLint)(sc_box[0] * sx), (GLint)(canvas_h - sc_box[3] * sy), (GLint)((sc_box[2] - sc_box[0]) * sx + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
+    } else glDisable(GL_SCISSOR_TEST);
 }
 
 static int draw_log; /* P33: ?drawlog=N: one line per draw call of gfx task N (state + NDC box) */
@@ -372,6 +539,12 @@ static void draw_log_line(void) {
         if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
     }
     const float *o = batch;
+    unsigned ao = 0x60 + light_nls + (light_bg ? 0 : 48);   /* P35b: BG ambient = record M, else M + 1 */
+    port_log("[draw] lights %s %s nls %u ambient %02X%02X%02X L0 %02X%02X%02X dir %d %d %d att %02X pos %d %d %d | rare10 S %.4f %.4f %.4f T %.0f %.0f %.0f | blfin %d gl %d filt %d\n",
+             light_bg ? "BG" : "other", light_seen ? "set" : "none", light_nls, lbuf[ao % sizeof lbuf], lbuf[(ao + 1) % sizeof lbuf], lbuf[(ao + 2) % sizeof lbuf],
+             lbuf[0x60], lbuf[0x61], lbuf[0x62], (signed char)lbuf[0x68], (signed char)lbuf[0x69], (signed char)lbuf[0x6A], lbuf[0x6C],
+             (short)(lbuf[0x80] << 8 | lbuf[0x81]), (short)(lbuf[0x82] << 8 | lbuf[0x83]), (short)(lbuf[0x84] << 8 | lbuf[0x85]),
+             rare_s(0), rare_s(1), rare_s(2), rare_t(0), rare_t(1), rare_t(2), -1, bl_last_gl, filt_mode);
     port_log("[draw] vp scale %d %d %d trans %d %d %d cimg %u canvas %dx%d\n", vp_scale[0], vp_scale[1], vp_scale[2], vp_trans[0], vp_trans[1], vp_trans[2], cimg_width, canvas_w, canvas_h);
     port_log("[draw] %d verts (%d w<=0) rm %d ndc x %.2f..%.2f y %.2f..%.2f z %.3f..%.3f | geom %06X oth %06X/%08X cc %06X/%08X tex %d tile %d prim %08X env %08X fog %08X v0 rgba %.2f %.2f %.2f %.2f st %.1f %.1f fog %.2f\n",
              nbatch, behind, rect_mode, x0, x1, y0, y1, z0, z1, geom, oth_h, oth_l, combine_w0, combine_w1, tex_on, tex_tile,
@@ -413,9 +586,7 @@ static void tri(unsigned i0, unsigned i1, unsigned i2) {
         if ((geom & G_CULL_BACK) && cross >= 0) return;
     }
     need_state(0);
-    const Tile *t = &tiles[tex_tile & 7];
-    float ss = shiftscale(t->shifts), ts = shiftscale(t->shiftt);
-    put(a, ss, ts); put(b, ss, ts); put(c, ss, ts);
+    put(a, 1, 1); put(b, 1, 1); put(c, 1, 1);   /* P35: the tile shift is applied per tile in the shader */
 }
 
 /* screen-space rectangle in N64 pixels (fill / texture rectangles) */
@@ -434,40 +605,86 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
 }
 
 /* ------------------------------------------------------------------ RSP commands */
-/* Conker lighting (session P14). Conker's F3DEX2 variant keeps the Vtx rgba as the vertex colour
- * when G_LIGHTING is on and takes the normal from a separate array:
- *   G_MOVEMEM index 0x0E sets the array base for the following G_VTX loads; vertex slot k (the
- *   index in the 32-entry vertex buffer, not the index in the Vtx array) has its normal's x and y
- *   as s8 at base + 2k, and z is the low byte of the Vtx flag halfword (+7).
- * Checked on the ROM models: one array chunk is 0x40 bytes (32 slots x 2) per vertex batch, and a
- * flat panel at x = 1 has (127, 0, flag 0), i.e. +X. The colour is then
- *   rgb = vertex rgb * min(1, ambient + sum_l max(0, n . dir_l) * col_l)
- * with n rotated by the modelview and normalised, and the lights in the F3DEX2 Light layout
- * (G_MOVEMEM index 0x0A, col at +0, dir s8 at +8; numlights by G_MOVEWORD index 2). Rare's records
- * are 48 bytes (light n at offset (n + 2) * 48, numlights word = n * 48); their point-light fields
- * are not interpreted. Without any light command the ambient is 1 (unlit look, as before). */
-static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx) {
-    float nx = (signed char)vbe_ld8(n), ny = (signed char)vbe_ld8(n + 1), nz = (signed char)vbe_ld8(vtx + 7);
-    float ex = nx * mv[0][0] + ny * mv[1][0] + nz * mv[2][0];
-    float ey = nx * mv[0][1] + ny * mv[1][1] + nz * mv[2][1];
-    float ez = nx * mv[0][2] + ny * mv[1][2] + nz * mv[2][2];
-    float len = sqrtf(ex * ex + ey * ey + ez * ez);
-    float c[3];
-    int nl = num_lights > 7 ? 7 : num_lights;
-    if (len > 0) { ex /= len; ey /= len; ez /= len; }
-    for (int k = 0; k < 3; k++) c[k] = light_col[nl][k];
-    for (int l = 0; l < nl; l++) {
-        float d = ex * light_dir[l][0] + ey * light_dir[l][1] + ez * light_dir[l][2];
-        if (d > 0) for (int k = 0; k < 3; k++) c[k] += d * light_col[l][k];
+/* Conker lighting (P14, rewritten in P35 from the ROM's F3DEX2 lighting overlay).
+ * The RSP code is the overlay at text offset 0x1188 (0x388 bytes, IMEM 0x12D8) of the gfx ucodes in the
+ * ROM table D_80084408 (text ROM 0x2D810 + 0x4560, data + 0x10460; P35.md section 2). DMEM layout from
+ * the ucode's movemem/moveword tables (data +0x550):
+ *   G_MOVEMEM 0x0A -> DMEM 0x260 + offset. Records are 48 bytes: 0x260 lookat X, 0x290 lookat Y,
+ *     0x2C0 + 48 i light i (i < N), light N = ambient. G_MOVEMEM 0x0E -> DMEM 0x510 (normal x,y per slot).
+ *   G_MOVEWORD 2 (NUMLIGHT) w1 = 48 M; 0x0A (LIGHTCOL) -> 0x2C0 + offset; 0x10 (Rare) -> 0x1D0 + offset.
+ *   Record: +0 colour rgb, +8 direction s8 xyz, +0x0C attenuation (4.4), +0x18 the direction in model
+ *   space (ucode-written), +0x20 position s16 xyz (eye space).
+ * Per vertex (two at a time in the ucode):
+ *   n = (nx, ny from 0x510 + 2 slot, nz = Vtx flag low byte), raw s8 / 128, NOT normalised;
+ *   d_i = normalise(MV * dir_i) (row-vector MV, i.e. the light in model space);
+ *   NUMLIGHT w1 = 48 M: lights 0..M-1 are point lights.
+ *   P35b, checked in the F3DEXBG overlay (IMEM 0x13D8: luv $v29, 0x170($9), $9 = 0x150 + numLightsxSize):
+ *   record M (0x2C0 + numLightsxSize) is the start colour with no direction (the "ambient"); there is no
+ *   directional light and no normal in BG (the level DLs send no 0x0E normals). The level frames send M = 0
+ *   and record 0 = white, so the level keeps its prelit vertex colours. For the other ucodes (F3DEX/BS,
+ *   characters, with normals) P35's unchecked model stays: record M = directional sun, M + 1 = ambient,
+ *   c = ambient + col[M] * max(0, n.d[M])
+ *   for the point lights i = M-1 .. 0 (in pairs; an odd M also reads the lookat Y record):
+ *     att = min(1, 32768 * K_i / |pos_i - e|^2), K_i = byte +0x0C as 4.4, e = eye-space vertex position
+ *     c += col_i * att * (G_LIGHTING_POSITIONAL (0x400000) ? max(0, n.d_i) : 1)
+ *   rgb = vertex rgb * min(1, c); alpha = vertex alpha. Vtx flag high byte < 0: lighting skipped.
+ *   e = (clip + T) * S per component, clip = the vertex after the game's MVP, S = s16.16 at DMEM 0x1D0
+ *   (int) / 0x1E0 (frac), T = s16 at 0x1F0: Rare's G_MOVEWORD 0x10 block is the inverse projection.
+ *   G_TEXTURE_GEN: s = 512 (1 + n.lookatX) * scale_s, t = 512 (1 + n.lookatY) * scale_t (linear mode is
+ *   approximated by the same formula). */
+static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, float ox, float oy, float oz) {
+    if ((signed char)vbe_ld8(vtx + 6) < 0) { gfx_stats.unlit_flag++; return; } /* flag high byte < 0: unlit */
+    if (light_dirty) light_prepare();
+    float nx = (signed char)n[0] / 128.0f, ny = (signed char)n[1] / 128.0f, nz = (signed char)vbe_ld8(vtx + 7) / 128.0f;
+    int M = (int)(light_nls / 48);                                   /* point lights; record M = sun, M + 1 = ambient */
+    if (M > 6) M = 6;
+    /* P35b: F3DEXBG (the level ucode, checked in its overlay at IMEM 0x13D8): the accumulator starts at the colour
+     * of record M (0x2C0 + numLightsxSize) with no direction and no normal ("ambient"); only point lights follow.
+     * The other ucodes keep P35's model (record M = directional sun, M + 1 = ambient), not checked. */
+    const unsigned char *amb = lbuf + 0x60 + 48 * (M + !light_bg), *sun = lbuf + 0x60 + 48 * M;
+    float c[3] = {amb[0] / 255.0f, amb[1] / 255.0f, amb[2] / 255.0f};
+    if (!light_bg) {
+        const float *d = lmdir[2 + M];
+        float dot = nx * d[0] + ny * d[1] + nz * d[2];
+        if (dot > 0) for (int k = 0; k < 3; k++) c[k] += sun[k] / 255.0f * dot;
     }
+    if (M >= 1) {
+        float e[3];
+        for (int k = 0; k < 3; k++) {
+            float cl = k == 0 ? ox * mp_game[0][0] + oy * mp_game[1][0] + oz * mp_game[2][0] + mp_game[3][0]
+                     : k == 1 ? ox * mp_game[0][1] + oy * mp_game[1][1] + oz * mp_game[2][1] + mp_game[3][1]
+                              : ox * mp_game[0][2] + oy * mp_game[1][2] + oz * mp_game[2][2] + mp_game[3][2];
+            e[k] = (cl + rare_t(k)) * rare_s(k);
+        }
+        for (int i = M - 1; i >= (M & 1 ? -1 : 0); i--) {
+            const unsigned char *L = lbuf + 0x60 + 48 * i;          /* i = -1: the lookat Y record (odd M) */
+            float px = (short)(L[0x20] << 8 | L[0x21]) - e[0], py = (short)(L[0x22] << 8 | L[0x23]) - e[1], pz = (short)(L[0x24] << 8 | L[0x25]) - e[2];
+            float d2 = px * px + py * py + pz * pz, K = L[0x0C] / 16.0f;
+            float att = d2 > 0 ? 32768.0f * K / d2 : 1;
+            if (att > 1) att = 1;
+            float f = att;
+            if (!light_bg && (geom & 0x00400000)) {                                   /* G_LIGHTING_POSITIONAL: times n.d */
+                const float *d = lmdir[2 + i];
+                float dot = nx * d[0] + ny * d[1] + nz * d[2];
+                f *= dot > 0 ? dot : 0;
+            }
+            for (int k = 0; k < 3; k++) c[k] += L[k] / 255.0f * f;
+        }
+    }
+    if (gfx_trace && light_dbg++ < 6) port_log("[light] vtx n %.2f %.2f %.2f sun %.2f %.2f %.2f M %d c %.2f %.2f %.2f rgb %.2f %.2f %.2f\n",
+        nx, ny, nz, lmdir[2 + M][0], lmdir[2 + M][1], lmdir[2 + M][2], M, c[0], c[1], c[2], v->r, v->g, v->b);
     v->r *= c[0] > 1 ? 1 : c[0]; v->g *= c[1] > 1 ? 1 : c[1]; v->b *= c[2] > 1 ? 1 : c[2];
+    if (geom & G_TEXTURE_GEN) {
+        float dx = nx * lmdir[0][0] + ny * lmdir[0][1] + nz * lmdir[0][2];
+        float dy = nx * lmdir[1][0] + ny * lmdir[1][1] + nz * lmdir[1][2];
+        v->s = 512.0f * (1 + dx) * tex_sc_s; v->t = 512.0f * (1 + dy) * tex_sc_t;
+    }
     gfx_stats.lit++;
 }
 
 static void load_vtx(unsigned w0, unsigned w1) {
     unsigned n = w0 >> 12 & 0xFF, end = w0 >> 1 & 0x7F, v0 = end - n;
     const unsigned char *p = gfx_addr(w1);
-    const unsigned char *nrm = normal_base ? gfx_addr(normal_base) : 0;
     if (!p || v0 + n > 64) { gfx_stats.bad_addr++; return; }
     for (unsigned i = 0; i < n; i++, p += 16) {
         V *v = &vb[v0 + i];
@@ -493,12 +710,13 @@ static void load_vtx(unsigned w0, unsigned w1) {
          * from a separate array (MOVEMEM index 0x0E, normal_base), see light_vtx(). */
         v->r = vbe_ld8(p + 12) / 255.0f; v->g = vbe_ld8(p + 13) / 255.0f; v->b = vbe_ld8(p + 14) / 255.0f;
         v->a = vbe_ld8(p + 15) / 255.0f;
-        if ((geom & G_LIGHTING) && nrm) light_vtx(v, nrm + 2 * (v0 + i), p);
+        if (geom & G_LIGHTING) light_vtx(v, nbuf + ((2 * (v0 + i)) & 0x3F), p, x, y, z);
         if (!(geom & G_SHADE)) v->r = v->g = v->b = 1;
         v->fog = 0;
-        if (geom & G_FOG) {
+        if (geom & G_FOG) {   /* the RSP writes the fog factor into the shade alpha; the blender reads it (P35) */
             float f = v->w != 0 ? v->z / v->w * fog_mul + fog_off : 0;
             v->fog = (f < 0 ? 0 : f > 255 ? 255 : f) / 255.0f;
+            v->a = v->fog;
         }
     }
     gfx_stats.verts += n;
@@ -639,7 +857,6 @@ static void freecam_view(float m[4][4]) {
     m[0][3] = m[1][3] = m[2][3] = 0; m[3][3] = 1;
 }
 
-static int gfx_trace;   /* P19: dump every command of the first real frames */
 void gfx_run_dl(const void *dl) {
     const unsigned char *stack[32], *pc = dl;
     int sp = 0, guard = 0;
@@ -669,10 +886,34 @@ void gfx_run_dl(const void *dl) {
             else if (where == 0x14) { v->s = (short)(w1 >> 16) / 32.0f; v->t = (short)w1 / 32.0f; }
             break;
         }
-        case 0x03: break;                                     /* G_CULLDL: no culling (draw everything) */
-        case 0x04: {                                          /* G_BRANCH_Z: take the near (detailed) branch */
-            const unsigned char *t = gfx_addr(rdphalf1);
-            if (t) pc = t;
+        case 0x03: {                                          /* G_CULLDL (P35) */
+            /* F3DEX2: end this DL when every vertex vstart..vend is outside one and the same plane of the
+             * view volume (x, y against +-w, w <= 0 behind the eye, z > w beyond far). Vertices are those
+             * already loaded (clip space, after the renderer's MVP, so freecam culls for its own view). */
+            unsigned a0 = (w0 & 0xFFFF) / 2, a1 = (w1 & 0xFFFF) / 2, all = 0x7F;
+            if (a1 > 63) a1 = 63;
+            for (unsigned i = a0; i <= a1; i++) {
+                const V *v = &vb[i];
+                unsigned c = (v->x < -v->w) | (v->x > v->w) << 1 | (v->y < -v->w) << 2 | (v->y > v->w) << 3 |
+                             (v->w <= 0) << 4 | (v->z > v->w) << 5;
+                all &= c;
+            }
+            gfx_stats.culldl++;
+            if (all && a0 <= a1) { gfx_stats.culled++; pc = sp ? stack[--sp] : 0; }
+            break;
+        }
+        case 0x04: {                                          /* G_BRANCH_Z (P35) */
+            /* branch to RDPHALF_1 when the vertex's screen z (16.16, viewport-mapped as the RSP stores it)
+             * is <= w1, the gSPBranchLessZ value (G_DEPTOZS: depth 0..0x3FF in 16.16); else fall through
+             * to the following (coarser) DL. */
+            const V *v = &vb[((w0 & 0xFFF) / 2) & 63];
+            float zs = v->w != 0 ? (v->z / v->w) * vp_scale[2] + vp_trans[2] : 0;
+            double z16 = (double)zs * 65536.0;
+            gfx_stats.branchz++;
+            if (v->w > 0 && z16 <= (double)(int)w1) {
+                const unsigned char *t = gfx_addr(rdphalf1);
+                if (t) { pc = t; gfx_stats.branchz_taken++; }
+            }
             break;
         }
         case 0x05: tri((w0 >> 16 & 0xFF) / 2, (w0 >> 8 & 0xFF) / 2, (w0 & 0xFF) / 2); break;
@@ -686,7 +927,7 @@ void gfx_run_dl(const void *dl) {
             if ((w1 >> 16) == 0xFFFF) tex_sc_s = 1; if ((w1 & 0xFFFF) == 0xFFFF) tex_sc_t = 1;
             state_dirty = 1; break;
         case 0xD8: mvsp -= w1 / 64; if (mvsp < 0) mvsp = 0;  /* G_POPMTX */
-            memcpy(mv, mvstack[mvsp], sizeof mv); mtx_mul(mp, mv, proj); break;
+            memcpy(mv, mvstack[mvsp], sizeof mv); mtx_mul(mp, mv, proj); mtx_mul(mp_game, mv, proj_game); light_dirty = 1; break;
         case 0xD9: geom = (geom & (w0 & 0xFFFFFF)) | w1; state_dirty = 1; break; /* G_GEOMETRYMODE */
         case 0xDA: {                                          /* G_MTX */
             const unsigned char *p = gfx_addr(w1);
@@ -700,20 +941,28 @@ void gfx_run_dl(const void *dl) {
                            w1, prm & 4 ? "P" : "MV", prm & 2 ? " load" : " mul", prm & 1 ? " push" : "",
                            m[0][0], m[0][1], m[0][2], m[0][3], m[1][0], m[1][1], m[1][2], m[1][3],
                            m[2][0], m[2][1], m[2][2], m[2][3], m[3][0], m[3][1], m[3][2], m[3][3]); }
+            if (prm & 4) { if (prm & 2) memcpy(proj_game, m, sizeof m); else mtx_mul(proj_game, m, proj_game); }
             if ((prm & 6) == 4 && fc_on > 0 && fc_init) freecam_view(m); /* P33 ?freecam=1: the world view */
             if (prm & 4) { if (prm & 2) memcpy(proj, m, sizeof m); else mtx_mul(proj, m, proj); }
             else {
+                light_dirty = 1;
                 if ((prm & 1) && mvsp < 31) memcpy(mvstack[mvsp++], mv, sizeof mv);
                 if (prm & 2) memcpy(mv, m, sizeof m); else mtx_mul(mv, m, mv);
             }
-            mtx_mul(mp, mv, proj);
+            mtx_mul(mp, mv, proj); mtx_mul(mp_game, mv, proj_game);
             break;
         }
         case 0xDB: {                                          /* G_MOVEWORD */
             unsigned idx = w0 >> 16 & 0xFF, off = w0 & 0xFFFF;
             if (idx == 6) { segtab[(off / 4) & 15] = w1; segset |= 1u << ((off / 4) & 15); }
             else if (idx == 8) { fog_mul = (short)(w1 >> 16); fog_off = (short)w1; }
-            else if (idx == 2) num_lights = (int)(w1 / 48);  /* G_MW_NUMLIGHT, Rare 48-byte lights */
+            else if (idx == 2) { light_nls = w1 & 0xFFFF; light_dirty = 1; light_seen = 1; } /* G_MW_NUMLIGHT (48 N) */
+            else if (idx == 0x0A && 0x60 + off + 4 <= sizeof lbuf) {          /* G_MW_LIGHTCOL -> DMEM 0x2C0 + off */
+                for (int k = 0; k < 4; k++) lbuf[0x60 + off + k] = w1 >> (24 - 8 * k);
+            } else if (idx == 0x10 && off + 4 <= sizeof rare10) {             /* Rare: inverse projection block (DMEM 0x1D0) */
+                for (int k = 0; k < 4; k++) rare10[off + k] = w1 >> (24 - 8 * k);
+            } else if (idx == 0x0E) persp_norm = w1 & 0xFFFF;                /* G_MW_PERSPNORM (float math: unused) */
+            else if (idx == 4) clip_ratio = w1;                               /* G_MW_CLIP (GPU clips; unused) */
             break;
         }
         case 0xDC: {                                          /* G_MOVEMEM */
@@ -722,21 +971,33 @@ void gfx_run_dl(const void *dl) {
             if (idx == 8 && p) {                              /* G_MV_VIEWPORT */
                 for (int i = 0; i < 4; i++) { vp_scale[i] = (short)vbe_ld16(p + 2 * i); vp_trans[i] = (short)vbe_ld16(p + 8 + 2 * i); }
                 state_dirty = 1;
-            } else if (idx == 0x0E) normal_base = w1;         /* Conker: vertex normal array (not G_MV_MATRIX) */
-            else if (idx == 0x0A && p) {                      /* G_MV_LIGHT: see light_vtx() */
-                int n = (int)((w0 >> 8 & 0xFF) * 8 / 48) - 2;
-                if (n >= 0 && n < 8) {
-                    for (int k = 0; k < 3; k++) light_col[n][k] = vbe_ld8(p + k) / 255.0f;
-                    float d[3], l;
-                    for (int k = 0; k < 3; k++) d[k] = (signed char)vbe_ld8(p + 8 + k);
-                    l = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-                    for (int k = 0; k < 3; k++) light_dir[n][k] = l > 0 ? d[k] / l : 0;
-                }
+            } else if (idx == 0x0E) {                         /* Conker: vertex normals -> DMEM 0x510 (copied now) */
+                unsigned len = ((w0 >> 19 & 0x1F) + 1) * 8, off = (w0 >> 8 & 0xFF) * 8;
+                normal_base = w1;
+                for (unsigned k = 0; k < len && off + k < sizeof nbuf; k++) nbuf[off + k] = p ? vbe_ld8(p + k) : 0;
+            }
+            else if (idx == 0x0A && p) {                      /* G_MV_LIGHT -> DMEM 0x260 + offset, see light_vtx() */
+                unsigned off = (w0 >> 8 & 0xFF) * 8, len = ((w0 >> 19 & 0x1F) + 1) * 8;
+                for (unsigned k = 0; k < len && off + k < sizeof lbuf; k++) lbuf[off + k] = vbe_ld8(p + k);
+                light_dirty = 1; light_seen = 1;
+                if (gfx_trace) { char b[160]; int m = 0;   /* P35: record bytes under dltrace */
+                    for (unsigned k = 0; k < len && k < 48; k++) m += snprintf(b + m, sizeof b - m, "%02X%s", lbuf[off + k], (k & 3) == 3 ? " " : "");
+                    port_log("[light] off 0x%02X: %s\n", off, b); }
             }
             break;
         }
         case 0xDD:                                            /* G_LOAD_UCODE (+ RDPHALF_1 = text) */
             if (gfx_stats.ucode_loads++ < 4) port_log("[gfx] G_LOAD_UCODE text %08X data %08X size 0x%X\n", rdphalf1, w1, (w0 & 0xFFFF) + 1);
+            flush(); dmem_seed(w1, (w0 & 0xFFFF) + 1); light_nls = 0;   /* P35b: DMEM data reloaded */
+            { static int cmpd; const unsigned char *a = gfx_addr(cur_ucode), *b = gfx_addr(rdphalf1), *da = gfx_addr(cur_udata), *db = gfx_addr(w1);
+              if (!cmpd++ && a && b && da && db) { int dt = 0, dd = 0, first = -1;
+                for (int k = 0; k < 0x1400; k++) if (vbe_ld8(a + k) != vbe_ld8(b + k)) { dt++; if (first < 0) first = k; }
+                for (int k = 0; k < 0x800; k++) dd += vbe_ld8(da + k) != vbe_ld8(db + k);
+                for (int w = 0; w < 2; w++) { const unsigned char *q = w ? db : da; char nm[64]; int j = 0;
+                    for (int k = 0; k < 0x7C0 && !j; k++) if (vbe_ld8(q + k) == 'R' && vbe_ld8(q + k + 1) == 'S' && vbe_ld8(q + k + 2) == 'P')
+                        for (; j < 63 && vbe_ld8(q + k + j) >= 32; j++) nm[j] = vbe_ld8(q + k + j);
+                    nm[j] = 0; port_log("[ucode] %s data: '%s'\n", w ? "loaded" : "task", nm); }
+                port_log("[ucode] task ucode %08X vs loaded %08X: %d of 0x1400 text bytes differ (first 0x%X), %d of 0x800 data bytes\n", cur_ucode, rdphalf1, dt, first, dd); } }
             break;
         case 0xDE: {                                          /* G_DL / G_BRANCH_DL */
             const unsigned char *t = gfx_addr(w1);
@@ -770,8 +1031,12 @@ void gfx_run_dl(const void *dl) {
             break;
         }
         case 0xE6: case 0xE7: case 0xE8: case 0xE9: break;   /* syncs */
-        case 0xED: case 0xEE: break;                          /* scissor, prim depth */
-        case 0xEC: break;  /* G_SETCONVERT (YUV coefficients, K4/K5). P26: the frame sends EC000000 000000FF
+        case 0xED:                                            /* G_SETSCISSOR (P35b) */
+            sc_box[0] = (w0 >> 12 & 0xFFF) / 4.0f; sc_box[1] = (w0 & 0xFFF) / 4.0f;
+            sc_box[2] = (w1 >> 12 & 0xFFF) / 4.0f; sc_box[3] = (w1 & 0xFFF) / 4.0f;
+            sc_on = sc_box[2] > sc_box[0] && sc_box[3] > sc_box[1]; state_dirty = 1; break;
+        case 0xEE: prim_z = w1 >> 16; state_dirty = 1; break; /* G_SETPRIMDEPTH (used with G_ZS_PRIM) */
+        case 0xEC: k4k5 = w1 & 0x3FFFF; state_dirty = 1; break;  /* G_SETCONVERT (YUV coefficients, K4/K5). P26: the frame sends EC000000 000000FF
                             * (K5 = 0xFF) twice; no YUV texture or K4/K5 combiner input is used yet. */
         case 0xF0: load_tlut(w0, w1); break;
         case 0xF2: {                                          /* G_SETTILESIZE */
@@ -795,7 +1060,13 @@ void gfx_run_dl(const void *dl) {
             unsigned c = fill_col >> 16, cyc = oth_h >> 20 & 3;
             unsigned col = cyc == 3 ? ((c >> 11 & 31) * 255 / 31) << 24 | ((c >> 6 & 31) * 255 / 31) << 16 | ((c >> 1 & 31) * 255 / 31) << 8 | 255 : prim_col;
             if (cyc >= 2) { lrx += 1; lry += 1; }
-            rect(ulx, uly, lrx, lry, 0, 0, 0, 0, col, 1);
+            /* P35b: in 1/2-cycle mode the RDP draws a fill rectangle through the combiner and blender, with no
+             * shade and no texture coefficients (shade 0, s = t = 0): the boot screen's fade quad (TEXEL0 x ENV,
+             * FORCE_BL alpha blend) covered the frame in opaque prim colour before */
+            { static int nfr = -1; if (nfr < 0) nfr = port_flag("nofillrect");   /* diagnostic: skip them */
+              if (cyc < 2 && nfr) break; }
+            if (cyc < 2) { (void)col; rect(ulx, uly, lrx, lry, 0, 0, 0, 0, 0, 2); }
+            else rect(ulx, uly, lrx, lry, 0, 0, 0, 0, col, 1);
             break;
         }
         case 0xF7: fill_col = w1; break;
@@ -827,12 +1098,19 @@ int gfx_bounds(float mn[3], float mx[3]) {
 }
 
 void gfx_frame_begin(float r, float g, float b) {
-    mtx_ident(mv); mtx_ident(proj); mtx_ident(mp); mvsp = 0;
+    mtx_ident(mv); mtx_ident(proj); mtx_ident(mp); mtx_ident(proj_game); mtx_ident(mp_game); mvsp = 0;
     segset = 0; geom = 0; oth_h = oth_l = 0; tex_on = 0;
-    normal_base = 0; num_lights = 0; light_col[0][0] = light_col[0][1] = light_col[0][2] = 1;
+    normal_base = 0; memset(nbuf, 0, sizeof nbuf);
+    /* lights persist in DMEM across tasks on the N64 only until the ucode reloads its data; without any light
+     * command in this task the ambient is white (unlit look, as before P35) */
+    memset(lbuf, 0, sizeof lbuf); light_nls = 0; light_dirty = 1; light_seen = 0;
+    lbuf[0x90] = lbuf[0x91] = lbuf[0x92] = 0xFF;   /* M = 0: ambient = record 1 */
+    memcpy(rare10, rare10_def, sizeof rare10);
     state_dirty = 1; rect_mode = 0; nbatch = 0;
     gfx_stats.frames++;
+    sc_on = 0;
     if (!gl_ok) return;
+    glDisable(GL_SCISSOR_TEST);
     glViewport(0, 0, canvas_w, canvas_h);
     glDepthMask(GL_TRUE);
     glClearColor(r, g, b, 1);
@@ -866,6 +1144,17 @@ void gfx_run_task(void *task) {
     { static int dlg = -1; if (dlg < 0) dlg = port_flag("drawlog"); draw_log = dlg && gfx_stats.tasks == (unsigned)dlg; }
     gfx_bounds_reset();
     gfx_frame_begin(0, 0, 0);
+    cur_ucode = ucode; cur_udata = rd32(t + 24);
+    if (port_flag("udump") && gfx_stats.tasks == 10) {   /* P35b ?udump=1: hex dump of the task ucode text + data */
+        const unsigned char *a = gfx_addr(ucode), *d = gfx_addr(cur_udata);
+        unsigned ts = 0x1800, ds = rd32(t + 28);
+        port_log("[udump] text size 0x%X data size 0x%X\n", ts, ds);
+        for (int w = 0; w < 2 && a && d; w++) { const unsigned char *q = w ? d : a; unsigned n = w ? ds : ts; 
+            for (unsigned o = 0; o < n; o += 32) { char b[80]; int m = 0;
+                for (unsigned k = 0; k < 32; k++) m += snprintf(b + m, sizeof b - m, "%02X", vbe_ld8(q + o + k));
+                port_log("[udump] %c %04X %s\n", w ? 'D' : 'T', o, b); } }
+    }
+    dmem_seed(rd32(t + 24), rd32(t + 28));   /* P35b: DMEM data image (lights, Rare block) */
     gfx_run_dl(dl);
     gfx_frame_end();
     if (draw_log && gl_ok) { /* P33: sample the framebuffer on a 5 x 5 grid (RGBA) */
@@ -880,8 +1169,9 @@ void gfx_run_task(void *task) {
     if (bany) { memcpy(fbmin, bmin, sizeof bmin); memcpy(fbmax, bmax, sizeof bmax); fbany = 1; }
     gfx_trace = 0;
     if (logf)
-        port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands\n", gfx_stats.tasks,
-                 gfx_stats.dls - d0, gfx_stats.cmds - c0, gfx_stats.tris - t0, gfx_stats.unknown_ops - u0);
+        port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands; culldl %u (%u culled), branch_z %u (%u taken), lit %u, unlit-flag %u\n", gfx_stats.tasks,
+                 gfx_stats.dls - d0, gfx_stats.cmds - c0, gfx_stats.tris - t0, gfx_stats.unknown_ops - u0,
+                 gfx_stats.culldl, gfx_stats.culled, gfx_stats.branchz, gfx_stats.branchz_taken, gfx_stats.lit, gfx_stats.unlit_flag);
     if (logf) {  /* P23: opcode histogram and segment use of this frame */
         char b[1024]; int n = 0;
         for (int i = 0; i < 256 && n < (int)sizeof b - 32; i++)

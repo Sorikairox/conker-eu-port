@@ -552,7 +552,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -568,7 +568,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume) and
 `docs/port/sessions/P29.md` (merge port P28, a2-position DL stubs, camera runtime, camera callback check) and
 `docs/port/sessions/P31.md` (merge port P30, valid projection + view, why the frame has no triangles) and
-`docs/port/sessions/P33.md` (inflater = the level-load heap break, level geometry on screen, freecam, renderer gap list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P33.md` (inflater = the level-load heap break, level geometry on screen, freecam, renderer gap list) and
+`docs/port/sessions/P35.md` (F3DEXBG lighting checked in the RSP code, CULLDL/BRANCH_Z, RDP blender, 3-point filter, per-tile wrap, LOD). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1083,6 +1084,47 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
     - func_150A5858;
     - func_150031EC / func_15003120;
     - the object spawners (the camera target).
+- **P35 (+P35b): renderer accuracy on level geometry.** Full notes: P35.md. Screenshots `P35_screenshot.png`
+  (level 0x21) and `P35_*.png` (0x21 from three views, plus point filter; 0x25 boot level).
+  - **The level ucode is F3DEXBG**: it is the task ucode, and the rest of the frame switches ucode with
+    `G_LOAD_UCODE`. Its light overlay was disassembled (IMEM 0x12D8..0x15EC, `?udump=1` + rabbitizer RSP).
+    - The colour is `vtx rgb × min(1, col[record M] + Σ point lights col × min(1, att))`, with M = NUMLIGHT/48.
+    - There are no normals and no directional light. Point-light distances use Rare's `G_MOVEWORD 0x10` block as an
+      inverse projection.
+    - The level sends M = 0 and record 0 = white, so it keeps its prelit vertex colours.
+    - The other ucode (characters, `0x0E` normals) uses P35's model: record M = directional sun (n·d), record
+      M + 1 = ambient. That model is **unverified**.
+  - DMEM light records, the Rare block and normals are seeded from the ucode data image at task start and on
+    `G_LOAD_UCODE`.
+  - **`G_CULLDL`** (all vertices outside one clip plane) and **`G_BRANCH_Z`** (screen z ≤ w1) are implemented. Levels
+    0x21 and 0x25 do not use them, so they are not exercised yet.
+  - **Blender:** the P/A/M/B selectors are decoded per cycle into shader blend or `glBlendFunc`, with alpha
+    compare/dither, coverage from alpha and prim depth.
+    - Fog: the fog factor goes into shade alpha and the blender reads it.
+    - Fill rects in 1/2-cycle mode now go through the combiner and blender. The boot level's end-of-frame fade quad
+      is black, so the boot screen is black; `?nofillrect=1` shows the level under it.
+    - `G_SETSCISSOR` → `glScissor`.
+  - **Textures:**
+    - exact `texelFetch` addressing per tile (clamp, then mirror, then mask; per-tile shift);
+    - the **3-point filter** is the default (`?filter4=1` gives bilinear, `?filter0=1` point);
+    - `G_TL_LOD` tile selection with `LOD_FRACTION` (unexercised).
+  - **Renderer gaps still open:**
+    1. no level visibility culling: `func_150A5858` is a stub, `dlapprox` draws all of D_800B0E00[0], and the LOD
+       parts 1..3 are unused;
+    2. the light model of the second ucode (F3DEX/BS, characters) is not checked against its RSP code, and neither
+       is BG's exact point-light attenuation scale (32768·K/d²) — no point lights exercised;
+    3. `G_CULLDL`, `G_BRANCH_Z`, fog, LOD/mip and detail/sharpen are implemented but no tested frame uses them;
+    4. the coverage model is approximate: no real 8-sample coverage, `CVG_DST`, `CLR_ON_CVG`, or memory alpha
+       (taken as 1), and decals use polygon offset instead of the z-delta compare;
+    5. level 0x25 from above: the −z half of the ±10000 plane is missing (not investigated; maybe near-plane or
+       w ≤ 0 handling);
+    6. a fill rect in 1/2-cycle mode uses shade 0 and s = t = 0 (RDP behaviour as understood; the boot fade quad is
+       opaque, so check it against the real boot sequence);
+    7. no guard band or clip ratio, and `G_MW_PERSPNORM` is ignored (harmless);
+    8. viewport overscan and aspect (H = cimg × 0.75);
+    9. combiner K4/K5 are passed in but unverified; the second-pass combiner `FFB3FF/FF64FE7F` is not checked;
+    10. the texture cache re-decodes on every TMEM load (performance);
+    11. no N64 reference frame to compare against.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
@@ -1096,7 +1138,8 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
   3. Test the 352 MB memory on 32-bit Android and iOS Safari. Add a `GLOBAL_BASE=16MB` fallback
      only if needed.
   4. Conker lighting and per-bone matrices are done (P14). Still open: the material DLs in segment 8
-     and the texture-bank segments for the viewer, and checking the light formula against the ucode.
+     and the texture-bank segments for the viewer. The BG (level) light formula was checked against the ucode in
+     P35b; the character ucode's formula is still unchecked.
   5. Still open from P4.md, "Known gaps":
      - address constants and `K0_TO_PHYS` in C;
      - bitfields;
