@@ -81,3 +81,49 @@ def fix(path, rel, stderr):
         fh.write('#line 1 "' + path + '"\n')
         fh.write('\n'.join(lines))
     return out
+
+
+# P61: fixes for converted C that compiles but is wrong for wasm: a literal N64 KSEG0 data address (the hand asm's
+# `lui at, 0x800A` + `lwc1 $f8, -0x550(at)` with no relocation, so tools/port/asm2c_hand.py emitted the constant).
+# On the N64 it is D_8009FAB0; in wasm 0x8009FAB0 is outside the memory and the first wall test traps ("memory access
+# out of bounds" in nmw_walls as soon as the player moves). Applied on every build (not diagnostic-driven): the main
+# file is copied (unless a diagnostic copy exists) and a patched copy of the include goes next to it, where
+# `#include "x.inc"` finds it first. A pattern that is no longer found (fixed on the port branch) is skipped.
+STATIC = {
+    'nm_asm/D5E90.c': {
+        'D5E90_walls.inc': [
+            ('    at = 0x800A0000;\n    F[8].u = LW(at + -1360);\n',
+             '    at = HI((u32) &D_8009FAB0); /* P61 srcfix: was the literal 0x800A0000 (+ -1360) */\n'
+             '    F[8].u = LW(at + LO((u32) &D_8009FAB0));\n'),
+        ],
+    },
+}
+
+
+def _write_if_changed(fn, text):
+    if os.path.exists(fn) and open(fn).read() == text:
+        return
+    with open(fn, 'w') as fh:
+        fh.write(text)
+
+
+def static_fix(path, rel):
+    """Write the P61 static fixes for TU rel (patched includes next to the copy); returns the copy path or None."""
+    if rel not in STATIC:
+        return None
+    out = path_for(rel)
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    done = 0
+    for inc, subs in STATIC[rel].items():
+        src = os.path.join(os.path.dirname(path), inc)
+        s = open(src).read()
+        for old, new in subs:
+            if old in s:
+                s = s.replace(old, new)
+                done += 1
+        _write_if_changed(os.path.join(os.path.dirname(out), inc),
+                          f'/* P61 srcfix copy of {src} (port/tools/srcfix.py STATIC) */\n#line 1 "{src}"\n' + s)
+    if not (os.path.exists(out) and open(out).read().startswith('/* P23 srcfix')):  # keep a diagnostic copy
+        _write_if_changed(out, f'/* P61 srcfix copy of {path} (static fixes in its includes) */\n#line 1 "{path}"\n'
+                          + open(path).read())
+    return out

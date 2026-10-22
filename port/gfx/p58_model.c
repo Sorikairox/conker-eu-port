@@ -8,15 +8,14 @@
  *     row norms (scale), the orthogonality of the 3x3 part, the distance to the parent joint against the skeleton's
  *     bone offset (all in the root matrix's frame, i.e. with the root matrix undone).
  * ?p58dump=K   at evaluator call K (of record 0), dump the root matrix and every joint matrix in full.
- * ?p58noterm=1 turn off the TEMPORARY 0x1000 terminator below (to measure the uninitialised buffer).
+ * (P61: ?p58noterm is gone with the terminator; see below.)
  * ?p58pose=1   preview: after every game gfx task, draw Conker's ROM model (the P6/P14 viewer asset whose bone table
  *              equals D_800C5000[id]) in a box on the right with the joint matrices of record 0's last evaluation
- *              (gfx_demo.c gfx_pose_overlay). Diagnostic only: the real model DL builder func_1502CFEC is asm.
+ *              (gfx_demo.c gfx_pose_overlay). Diagnostic only (P61: the game draws its own model through func_1502CFEC now).
  *
- * TEMPORARY (remove when func_150342D0 is C, port session P57): func_150342D0 fills the per-object adjustment buffer
- * of func_1502DE74 ({u16 offset, s16 value} pairs ending in 0x1000) and is still an asm stub, so the buffer reached
- * the evaluator uninitialised (P51 §4). The wrap writes the 0x1000 terminator first (= no adjustments, what the real
- * function writes for an object without adjustments), then calls the real one (the stub now; the C later). */
+ * P61: the P58 TEMPORARY 0x1000 terminator written before func_150342D0 is removed: func_150342D0 and
+ * func_15034B50 are C since port P57 (`*func_15034B50(...) = 0x1000`). The wrap only remembers the record for the
+ * evaluator check below, which still measures how far the 0x1000 scan runs (`adjust scan N`). */
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
@@ -39,10 +38,10 @@ void func_1503AAE0(void);
 void gfx_pose_overlay_set(const float (*J)[16], int n, const float *root, const unsigned char *skel);
 
 #define REC 0x32C  /* sizeof(struct127), D_800CC2D0[] */
-static int fl_model = -1, fl_dump, fl_noterm, fl_pose, fl_anim, fl_speed;
+static int fl_model = -1, fl_dump, fl_pose, fl_anim, fl_speed;
 static void p58_flags(void) {
     if (fl_model >= 0) return;
-    fl_model = port_flag("p58model"); fl_dump = port_flag("p58dump"); fl_noterm = port_flag("p58noterm");
+    fl_model = port_flag("p58model"); fl_dump = port_flag("p58dump"); 
     fl_pose = port_flag("p58pose"); fl_anim = port_flag("p58anim"); fl_speed = port_flag("p58speed");
 }
 
@@ -63,14 +62,13 @@ int __wrap_func_1503D210(int id, int a1, int a2, int a3, int a4) {
     return r;
 }
 
-/* ---- func_150342D0 (TEMPORARY terminator, see the top) */
+/* ---- func_150342D0 (P57 C; record for the scan check) */
 static int cur_rec = -1;
 static unsigned g_scan, g_scan_max, g_edit_ang, g_edit_scl, g_scan_long;
 void __real_func_150342D0(void *buf, int rec);
 void __wrap_func_150342D0(void *buf, int rec) {
     p58_flags();
     cur_rec = rec;
-    if (!fl_noterm) vbe_st16(buf, 0x1000);
     __real_func_150342D0(buf, rec);
 }
 
@@ -273,7 +271,7 @@ void __wrap_func_150A86B0(int *arena, float (*m)[4], int anim, int skel, int n, 
                      "stubs inside:%s\n", calls, port_frame_count, rec, ob ? vbe_ld8(ob + 4) : 0xFF, anim,
                      anim ? vbe_ld8((unsigned char *)(uintptr_t)anim + 0x41) : 0, anim ? *(float *)(uintptr_t)(anim + 8) : 0,
                      anim ? vbe_ld8((unsigned char *)(uintptr_t)anim + 0x46) : 0, anim ? vbe_ld8((unsigned char *)(uintptr_t)anim + 0x47) : 0,
-                     skel, n, (unsigned)(uintptr_t)a0, h, scan, ang, scl, maxoff, fl_noterm ? " (no terminator fix)" : "",
+                     skel, n, (unsigned)(uintptr_t)a0, h, scan, ang, scl, maxoff, "",
                      rb[0] ? rb : " none", q ? sb : " none");
             port_log("[p58]   joints: %d non-finite floats; model-space row norms %.4f..%.4f, max |cos| between axes %.5f; "
                      "bone lengths %d/%d match the skeleton (max err %.3f); root scale %.4f, root pos %.2f %.2f %.2f; "

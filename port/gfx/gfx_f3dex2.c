@@ -573,8 +573,21 @@ static void put(const V *v, float sshift, float tshift) {
     o[8] = v->s * sshift; o[9] = v->t * tshift; o[10] = v->fog;
 }
 
+/* P61 ?p61model=N: the game's own model DL. func_1502CFEC (port P57 C) emits, per visible sub-DL k of a model,
+ * G_MTX (MV load) D_800C42B8 + G_DL D_800C48A8[model][k]. Its G_MTX word is `&D_800C42B8 & 0x1FFFFFFF` like the asm's
+ * physical D_C42B8; in wasm the label is a mirror address (< 0x20000000), so the mask keeps it and gfx_addr takes the
+ * wasm class; a true N64 physical value (< 8 MB) takes the segment-0 / RDRAM-mirror class. That G_MTX word marks the
+ * model DL: the next G_DL is a model sub-DL, and everything below it (until it returns) is counted here. */
+extern unsigned char D_800C42B8[] __attribute__((weak));   /* weak: sched_demo links the renderer without the game */
+static int p61_flag = -1, p61_depth = -1, p61_pend, p61_tr, p61_trn;
+static unsigned p61_mark, p61_mtx, p61_dl, p61_tris, p61_verts, p61_imtx, p61_bad0, p61_bad, p61_cmds, p61_frames;
+static unsigned p61_icls[4], p61_vbad;
+static float p61_mn[2], p61_mx[2];
+static unsigned p61_cls(unsigned a) { return a >= 0x80000000u ? 0 : a >= PORT_WASM_BASE ? 1 : a >> 24 ? 2 : 3; }
+
 static void tri(unsigned i0, unsigned i1, unsigned i2) {
     gfx_stats.tris++;
+    if (p61_depth >= 0) p61_tris++;
     if (gfx_measure_only) return;
     const V *a = &vb[i0 & 63], *b = &vb[i1 & 63], *c = &vb[i2 & 63];
     if (geom & (G_CULL_FRONT | G_CULL_BACK)) {
@@ -737,6 +750,16 @@ static void load_vtx(unsigned w0, unsigned w1) {
         }
     }
     gfx_stats.verts += n;
+    if (p61_depth >= 0) {   /* P61: NDC extent of the model's vertices (w > 0) */
+        p61_verts += n;
+        for (unsigned k = v0; k < v0 + n; k++) {
+            const V *q = &vb[k];
+            if (!(q->w > 0) || q->x != q->x || q->y != q->y) { p61_vbad++; continue; }
+            float x = q->x / q->w, y = q->y / q->w;
+            if (x < p61_mn[0]) p61_mn[0] = x; if (x > p61_mx[0]) p61_mx[0] = x;
+            if (y < p61_mn[1]) p61_mn[1] = y; if (y > p61_mx[1]) p61_mx[1] = y;
+        }
+    }
 }
 
 static void load_block(unsigned w0, unsigned w1) {
@@ -893,6 +916,7 @@ void gfx_run_dl(const void *dl) {
         if (gfx_trace) port_log("[gfx]   %p: %08X %08X\n", (const void *)pc, w0, w1);
         pc += 8;
         gfx_stats.cmds++;
+        if (p61_depth >= 0) p61_cmds++;
         fr_ops[op]++;
         if (op >= 0x10 && op <= 0x1F) {
             /* Conker (Rare F3DEX2 variant): four triangles in one command, 12 five-bit indices */
@@ -926,7 +950,8 @@ void gfx_run_dl(const void *dl) {
                 all &= c;
             }
             gfx_stats.culldl++;
-            if (all && a0 <= a1) { gfx_stats.culled++; pc = sp ? stack[--sp] : 0; }
+            if (all && a0 <= a1) { gfx_stats.culled++; pc = sp ? stack[--sp] : 0;
+                if (p61_depth >= 0 && sp <= p61_depth) { p61_depth = -1; if (p61_tr) { p61_tr = 0; gfx_trace = 0; } } }
             break;
         }
         case 0x04: {                                          /* G_BRANCH_Z (P35) */
@@ -958,10 +983,25 @@ void gfx_run_dl(const void *dl) {
         case 0xD9: geom = (geom & (w0 & 0xFFFFFF)) | w1; state_dirty = 1; break; /* G_GEOMETRYMODE */
         case 0xDA: {                                          /* G_MTX */
             const unsigned char *p = gfx_addr(w1);
+            if (p61_flag && D_800C42B8 && w1 == ((unsigned)(uintptr_t)D_800C42B8 & 0x1FFFFFFF)) {   /* P61: func_1502CFEC's G_MTX */
+                p61_mtx++; p61_pend = 1;
+                if (!p61_mark++) {
+                    port_log("[p61] first model G_MTX %08X %08X at %p (task %u): resolves to %p, &D_800C42B8 %p (%s)\n", w0, w1,
+                             (const void *)(pc - 8), gfx_stats.tasks, (const void *)p, (const void *)D_800C42B8,
+                             p == D_800C42B8 ? "same" : "DIFFERENT");
+                    for (int k = -24; k < 0; k++)   /* func_1502CFEC's setup before it */
+                        port_log("[p61]   %p: %08X %08X\n", (const void *)(pc - 8 + 8 * k), rd32(pc - 8 + 8 * k), rd32(pc - 4 + 8 * k));
+                }
+            } else if (p61_depth >= 0) p61_icls[p61_cls(w1)]++, p61_imtx++;
             if (!p) { gfx_stats.bad_addr++; break; }
             unsigned prm = (w0 & 0xFF) ^ 1;                  /* ^ G_MTX_PUSH */
             float m[4][4];
             mtx_read(m, p);
+            if (p61_tr && p61_trn < 40) { p61_trn++;
+                port_log("[p61] G_MTX %08X %08X %s%s%s: %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.2f %.2f %.2f %.4f\n",
+                         w0, w1, prm & 4 ? "P" : "MV", prm & 2 ? " load" : " mul", prm & 1 ? " push" : "",
+                         m[0][0], m[0][1], m[0][2], m[0][3], m[1][0], m[1][1], m[1][2], m[1][3],
+                         m[2][0], m[2][1], m[2][2], m[2][3], m[3][0], m[3][1], m[3][2], m[3][3]); }
             { static int md = -1; if (md < 0) md = port_flag("mtxdump"); /* P25: ?mtxdump=1 + dltrace: G_MTX contents */
               if (md && gfx_trace)
                   port_log("[mtx] %08X %s%s%s: %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f | %.4f %.4f %.4f %.4f\n",
@@ -1037,11 +1077,20 @@ void gfx_run_dl(const void *dl) {
                 break;
             }
             { unsigned *e = dl_ring[dl_ring_n++ & 7]; e[0] = (unsigned)(uintptr_t)(pc - 8); e[1] = w0; e[2] = w1; }
+            if (p61_pend && p61_depth < 0) {   /* P61: a model sub-DL D_800C48A8[model][k] */
+                p61_pend = 0; p61_dl++; p61_depth = sp; p61_bad0 = gfx_stats.bad_addr + gfx_stats.unset_seg;
+                if (p61_flag && p61_mark == 1 && p61_dl == 1) { p61_tr = 1; gfx_trace = 1; port_log("[p61] sub-DL %08X:\n", w1); }
+            }
             if (!(w0 >> 16 & 0xFF)) { if (sp >= 32) break; stack[sp++] = pc; }
             pc = t;
             break;
         }
-        case 0xDF: pc = sp ? stack[--sp] : 0; break;          /* G_ENDDL */
+        case 0xDF: pc = sp ? stack[--sp] : 0;                 /* G_ENDDL */
+            if (p61_depth >= 0 && sp <= p61_depth) {   /* P61: back from the model sub-DL */
+                p61_depth = -1; p61_bad += gfx_stats.bad_addr + gfx_stats.unset_seg - p61_bad0;
+                if (p61_tr) { p61_tr = 0; gfx_trace = 0; }
+            }
+            break;
         case 0xE0: break;                                     /* G_SPNOOP */
         case 0xE1: rdphalf1 = w1; break;
         case 0xF1: rdphalf2 = w1; break;
@@ -1202,7 +1251,15 @@ void gfx_run_task(void *task) {
                 port_log("[udump] %c %04X %s\n", w ? 'D' : 'T', o, b); } }
     }
     dmem_seed(rd32(t + 24), rd32(t + 28));   /* P35b: DMEM data image (lights, Rare block) */
+    if (p61_flag < 0) p61_flag = port_flag("p61model");
+    p61_mtx = p61_dl = p61_tris = p61_verts = p61_imtx = p61_bad = p61_cmds = p61_vbad = 0; p61_depth = -1; p61_pend = 0;
+    memset(p61_icls, 0, sizeof p61_icls); p61_mn[0] = p61_mn[1] = 1e30f; p61_mx[0] = p61_mx[1] = -1e30f;
     gfx_run_dl(dl);
+    if (p61_flag && p61_mtx && (++p61_frames <= (unsigned)p61_flag || p61_frames % 256 == 0))
+        port_log("[p61] task %u: model G_MTX %u, sub-DLs %u: %u commands, %u vertices, %u triangles, inner G_MTX %u "
+                 "(K0 %u wasm %u seg %u phys %u), bad/unset addresses %u, NDC x %.2f..%.2f y %.2f..%.2f (%u verts w<=0/NaN)\n",
+                 gfx_stats.tasks, p61_mtx, p61_dl, p61_cmds, p61_verts, p61_tris, p61_imtx, p61_icls[0], p61_icls[1],
+                 p61_icls[2], p61_icls[3], p61_bad, p61_mn[0], p61_mx[0], p61_mn[1], p61_mx[1], p61_vbad);
     if (gfx_post_task_hook) gfx_post_task_hook();
     gfx_frame_end();
     if (draw_log && gl_ok) { /* P33: sample the framebuffer on a 5 x 5 grid (RGBA) */

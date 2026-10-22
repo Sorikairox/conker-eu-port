@@ -1008,7 +1008,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1034,7 +1034,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P49.md` (merge port-b P47, the player walks and the camera follows, the movement-path stub order) and
 `docs/port/sessions/P52.md` (P50 / P48 movement and model C at runtime, P49 overrides removed, why the view goes black) and
 `docs/port/sessions/P55.md` (P53 / P54 floor and landing C at runtime: stand, walk off, land; G_DL 0 crash) and
-`docs/port/sessions/P58.md` (P51 model load + skeleton evaluator at runtime, four port-side blockers, posed preview). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P58.md` (P51 model load + skeleton evaluator at runtime, four port-side blockers, posed preview) and
+`docs/port/sessions/P61.md` (Conker drawn by the game's func_1502CFEC, two TEMPORARY PC functions, walls K0-literal crash, P59 checks). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1060,6 +1061,8 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 #      finds a "G_DL 0" writer; ?p52void is now an opt-in diagnostic only
 # P58: ?p58model=N (model load + evaluator checks), ?p58dump=K, ?p58noterm=1, ?p58anim=K (+ p58speed: drive a ROM
 #      animation, the driver func_1505E0C4 is asm), ?p58pose=1 (+ p58ang: posed ROM Conker drawn after each frame)
+# P61: ?p61model=N (the game's model DL: commands / vertices / triangles / bone G_MTX per frame; first frame dumped),
+#      ?p61check=N (P59 C: func_1507D4F8 + func_1501C710, func_1505D6F0, the sound calls of func_1508000C, func_1507C170)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1862,6 +1865,26 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     arena f32 → Mtx), func_1502CFEC, func_1502C9D8, func_1503AB20, func_1503BCAC, func_1503DD8C, func_1502F17C,
     func_1502F554, func_1503A37C, func_15030758, func_1507E7A0, callbacks func_15036FD8 / func_15037224 / func_1503A968.
     Drop the three P58 TEMPORARY pieces when their functions are C (the func_150342D0 wrap can stay: it calls the C).
+- **P61 (after merging port 5d0322c: P51-P59): Conker drawn by the game's own code.** Full notes: P61.md.
+  - Clean rebuild (nm_asm D5E90.c / D5E90_anim.c + .inc compile). Node and real-time Chrome (Metal, `heapwatch=1`,
+    walking): 9 PASS, heap 0 errors, no RuntimeError. The P58 func_150342D0 terminator is removed (P57 C writes it; the
+    evaluator scan now finds 3 face entries). Kept: TEMPORARY func_150A9B0C, func_1000480C.
+  - **Drawn without p58pose** via func_1502C1D4 → func_1502BDC0 → func_1502CC64 → func_1502CFEC: 831 commands, 913
+    vertices, **811 triangles**, 84 bone G_MTX (segment 3), 0 bad addresses. Needed two more **TEMPORARY PC** functions
+    (`pc_overrides.c`): **func_150844AC** (vertex block words +0x28C/+0x290; the stub left them 0 and CFEC returned
+    early) and **func_150A9E64** (arena f32 → Mtx in place; the stub left float bits). `P61_screenshot.png` (standing,
+    bind pose), `p61/walk_30000ms.png` (walking), `p61/after_33000ms.png` (after a fall: checkpoint restart).
+  - **Physical G_MTX address works:** `&D_800C42B8 & 0x1FFFFFFF` keeps the wasm mirror address (< 0x20000000) and
+    resolves to the label; true physical (< 8 MB) values map to the RDRAM mirror as before.
+  - **Bug in P56 converted C (crash, fixed port-side):** `D5E90_walls.inc` line 230 loads from the **literal 0x8009FAB0**
+    (`at = 0x800A0000; LW(at + -1360)`, = D_8009FAB0) → *memory access out of bounds* in nmw_walls when the player
+    moves. Port fix: `srcfix.py` STATIC (patched include copy). Port branch: use `HI/LO((u32) &D_8009FAB0)`.
+  - **P59 at runtime:** func_1507D4F8 runs on a fall (lives left → `func_1501C710(2, 0, 0, 0, 0)`, checkpoint restart,
+    the player reappears at x 348 z -2284 and walks on); func_1505D6F0 runs (no second record, no push);
+    func_1508000C's sounds never fire on level 0x21 (UNVERIFIED); func_1507C170 returns at once (anim +0x28 = 0 until
+    func_1505E0C4). No bug found in P59's C.
+  - **Stubs:** model path func_15036FD8 (x2), func_1503BCAC, func_1503AB20, func_15030758, func_1502C9D8, func_1505E0C4;
+    movement func_1505F298, func_15051558, func_1507F640, func_15017FA4, after respawn func_150ADE40, func_150D1D20.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

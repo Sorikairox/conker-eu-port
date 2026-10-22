@@ -6,6 +6,7 @@
  *
  *   func_100061F8  handwritten TLB loop (init_eu_5DA0.c)
  *   func_150ADA20  libultra guRandom on 64-bit registers (game_DAE50.c)
+ *   TEMPORARY (until the port branch converts them): func_150A9B0C (P58), func_150A9E64 and func_150844AC (P61)
  */
 #include <ultra64.h>
 
@@ -218,4 +219,124 @@ void func_150A9B0C(f32 *m, f32 a1, f32 a2, f32 a3, f32 sx, f32 sy, f32 sz) {
     m[8] = f16 * sz;
     m[9] = f12 * sz;
     m[10] = f17 * sz;
+}
+
+/* P61: TEMPORARY PC func_150A9E64 (remove when the port branch converts it; "missing" in the unsplit asm/D5E90.s at
+ * 0x150A9E64, 0x60 instructions, hand asm). func_1502E764 calls it once per frame with the arena of the frame,
+ * (&D_800C3E80)[D_800BE9C0], and the count D_800C429A: it converts that many row-major f32 4x4 matrices IN PLACE into
+ * N64 Mtx (s15.16; integer halves at +0x00, fractions at +0x20). Only columns 0-2 of each row are read (12 floats,
+ * all loaded before the first store); column 3 is written as 0, 0, 0, 1 (the asm stores (v & 0xFFFF0000) / v << 16
+ * as one word for the column 2/3 pair and adds 1 to the last integer word). The scale is 65536.0 (0x47800000) and
+ * cvt.w.s rounds to nearest (the default FCSR). As a gen_stubs stub it wrote nothing, so the model DL's matrices
+ * (record +0x1D4 and the joint matrices in the arena) stayed f32 bit patterns. This TU is vbe: plain N64 stores. */
+static s32 p61_fix(f32 v) {
+    v = __builtin_rintf(v * 65536.0f);
+    if (!(v > -2147483648.0f)) return (s32)0x80000000;   /* NaN / overflow: no defined value in the asm */
+    if (v >= 2147483648.0f) return 0x7FFFFFFF;
+    return (s32)v;
+}
+s32 func_150A9E64(s32 a0, s32 a1) {
+    u8 *p = (u8 *)a0;
+    u32 n = (u32)a1;
+    s32 i, j, v[12];
+
+    if (n == 0) return 0;   /* the asm's loop is a do-while; the only caller guards count != 0 */
+    do {
+        for (i = 0; i < 3 * 4; i++) v[i] = p61_fix(*(f32 *)(p + (i / 3) * 0x10 + (i % 3) * 4));
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 3; j++) {
+                *(s16 *)(p + (i * 4 + j) * 2) = (s16)((u32)v[i * 3 + j] >> 16);
+                *(s16 *)(p + 0x20 + (i * 4 + j) * 2) = (s16)v[i * 3 + j];
+            }
+            *(s16 *)(p + (i * 4 + 3) * 2) = i == 3;
+            *(s16 *)(p + 0x20 + (i * 4 + 3) * 2) = 0;
+        }
+        p += 0x40;
+    } while (--n != 0);
+    return 0;
+}
+
+/* P61: TEMPORARY PC func_150844AC (game_eu_AF2A0.c, asm, 210 instructions; remove when the port branch converts it).
+ * Called at the end of the C func_1503DD8C (model ready check) for object o and variant var; func_1502CFEC draws a
+ * model only when the object has a vertex block for this variant and frame, o +0x28C + var * 8 + frame * 4. This
+ * function sets those two words up (as a gen_stubs stub it set nothing, so the game's model DL was never emitted).
+ * Read from the asm:
+ *   rec = o[0x65] ? D_800CC2D0[o[0x65] - 1] +0x144 (the asm's D_800CC508 + 0x32C * o[0x65], EU) : o +0x144;
+ *   slot = ((u8 *)o->+0x2C4)[var]; mode = rec ? rec[0x10] & 3 : 0; slot 0 forces mode 2;
+ *   both words set already -> 0; D_800D19A0[slot] (the model block) NULL -> 0;
+ *   mode 0: both words = the shared block, D_800D1F80[slot] += 2;
+ *   mode 1: if +0x28C is 0 or the shared block: the first user (D_800D1F80[slot] == 0) shares it (+2), later users get
+ *           a private copy (allocate_memory(D_800C5BC0[slot] * 16, 1, 2, 2) + bcopy; failure -> result 1);
+ *           then +0x290 = +0x28C (one block for both frames);
+ *   mode 2: per frame word w (0, 1): a word that is 0 or the shared block (or w = 1 when the two words are equal) gets
+ *           the shared block if D_800D1F80[slot] == 0 (+1), else a private copy; an allocation failure gives result 1
+ *           and, on the second word, frees the first copy (or takes back its share) and clears +0x28C;
+ *   mode 3: nothing. Returns 0, or 1 when an allocation failed. */
+extern u8 D_800D1F80[];
+extern u16 D_800C5BC0[];
+extern s32 D_800D19A0[];
+s32 allocate_memory(s32, s32, s32, s32);
+void func_10004074(s32);
+s32 func_150844AC(s32 a0, s32 a1) {
+    u8 *o = (u8 *)a0;
+    s32 *w = (s32 *)(o + a1 * 8 + 0x28C);   /* s4: w[0] = +0x28C, w[1] = +0x290 */
+    u8 *rec;
+    u32 mode = 0, slot, size;
+    s32 blk, fail = 0, k, v;
+
+    rec = o[0x65] ? *(u8 **)((u8 *)D_800CC2D0 + (o[0x65] - 1) * 0x32C + 0x144) : *(u8 **)(o + 0x144);
+    slot = (*(u8 **)(o + 0x2C4))[a1];
+    if (rec != NULL) mode = rec[0x10] & 3;
+    if (slot == 0) mode = 2;
+    if (w[0] != 0 && w[1] != 0) return 0;
+    blk = D_800D19A0[slot];
+    if (blk == 0) return 0;
+    if (mode == 0) {
+        w[1] = blk;
+        w[0] = blk;
+        D_800D1F80[slot] += 2;
+        return 0;
+    }
+    if (mode == 1) {
+        if (w[0] == 0 || w[0] == blk) {
+            if (D_800D1F80[slot] != 0) {
+                size = (u32)D_800C5BC0[slot] << 4;
+                w[0] = allocate_memory(size, 1, 2, 2);
+                if (w[0] == 0) fail = 1;
+                else bcopy((void *)D_800D19A0[slot], (void *)w[0], size);
+            } else {
+                w[1] = blk;
+                w[0] = blk;
+                D_800D1F80[slot] += 2;
+            }
+        }
+        w[1] = w[0];
+        return fail;
+    }
+    if (mode == 2) {
+        for (k = 0; k < 2; k++) {
+            v = w[k];
+            if (v != 0 && v != D_800D19A0[slot]) {
+                if (k != 1 || w[0] != w[1]) continue;
+            }
+            if (D_800D1F80[slot] == 0) {
+                w[k] = D_800D19A0[slot];
+                D_800D1F80[slot]++;
+                continue;
+            }
+            size = (u32)D_800C5BC0[slot] << 4;
+            w[k] = allocate_memory(size, 1, 2, 2);
+            if (w[k] == 0) {
+                fail = 1;
+                if (k == 1) {
+                    if (w[0] == D_800D19A0[slot]) D_800D1F80[slot]--;
+                    else func_10004074(w[0]);
+                    w[0] = 0;
+                }
+                return fail;
+            }
+            bcopy((void *)D_800D19A0[slot], (void *)w[k], size);
+        }
+    }
+    return fail;
 }
