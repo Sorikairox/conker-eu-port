@@ -25,10 +25,22 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 
 ## Next steps (from P57)
 
-1. Browser: does Conker draw now? Watch the G_MTX physical address, func_1503DD8C's return (non-zero = no draw).
-2. Remaining model-path asm: func_15030758 (464, convert CERR), func_150A9B0C (D5E90.s hand asm), func_150028BC
-   (453, only for obj[0xAC] & 1 or +0x18 & 0x4000), func_150F20C8 (type 0x7B adjustments), func_150ADA20 (random).
-Runtime checks: P57.md UNVERIFIED.
+Coordinator order after P58's browser run (Conker loads and is posed correctly by func_150A86B0):
+1. **func_150A9B0C** (root rotation / scale; US name, real EU code at **0x150A9FEC** in the unsplit D5E90.s):
+   hand asm, goes into `src_eu/nm_asm/D5E90_anim.c` (or a new nm_asm file); asm2c_hand.py is allowed only for such
+   raw hand-written .s code. **All GLOBAL_ASM functions get readable hand C** (user policy).
+2. **func_1000480C** (init_4470, 129 lines, not started): blocking cartridge read. Decoded: sets D_8003A8D2 = 1,
+   waits for D_8003A8D3 == 0 and PI status (0xA4600010) & 3 == 0, size rounded up to even, reads words from
+   KSEG1 0xA0000000 | (devAddr | D_80000308) into dramAddr (two paths: devAddr & 2 -> halfword-shifted copy with
+   head / tail halves; else word copy + a trailing halfword when size & 2), clears D_8003A8D2 and starts thread
+   D_80035C70 when D_8003A8D5 != 0. Difftest needs PI / ROM emulation (busy loops); the browser needs a ROM read.
+3. Draw path: func_150A9E64 (f32 arena -> Mtx), func_1502C9D8, func_1503AB20, func_1503BCAC, then
+   func_15030758 (464, convert CERR). Done in P57: func_1502CFEC, func_1503DD8C, func_1502F17C, func_1502F554,
+   func_1503A37C, func_1507E7A0.
+4. Other asm still reached: func_150028BC (453; obj[0xAC] & 1 or +0x18 & 0x4000), func_150F20C8 (type 0x7B
+   adjustments), func_150ADA20 (random).
+Code-segment tables: none of P57's C reads one (all its tables are in data / bss); func_150A86B0's D_150AA11C is
+the known one (the browser supplies it). Runtime checks: P57.md UNVERIFIED.
 
 ## State (session P51, 2026-10-22). Details: `docs/port/sessions/P51.md`
 
