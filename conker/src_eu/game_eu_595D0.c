@@ -324,7 +324,63 @@ s32 func_1502C6AC(s32 arg0) {
     return temp_v1;
 }
 
+#ifdef NON_MATCHING
+u8 *func_15095380(u8 *, u8 *, s32, void *, s32, s32, s32, s32, s32);
+u8 *func_15095B70(u8 *arg0, u8 *arg1);
+extern u8 *D_8008CDEC[];
+
+/*
+ * P71: ground shadow of object idx (none while D_800BEAC0 is set or when the alpha +7 is 0). Shadow quad: position
+ * (x, y + half the size +0x122, z), extent 19 * size (15 * size for state +0 == 3), alpha +7; texture
+ * D_8008CDEC[func_1502C6AC(idx)] with +0x60 (func_15095380, which also fills the quad), drawn by func_15095B70
+ * between the D_80087770 / D_800877A8 display lists.
+ */
+u8 *func_1502C6F8(u8 *gdl, s32 idx, s16 unused) {
+    struct {
+        s16 x, y, z;
+        s16 sizeX, sizeZ;
+        u8 alpha;
+        u8 pad[2];
+        u8 flag;
+    } quad;   /* sp6C */
+    u8 *obj;
+    s32 size;
+    s32 ext;
+    s32 tex;
+
+    if (D_800BEAC0 != 0) {
+        return gdl;
+    }
+    obj = (u8 *) &D_800CC2D0[idx];
+    size = obj[0x122];
+    if (obj[7] == 0) {
+        return gdl;
+    }
+    ext = size * 19;
+    if (*(s32 *) obj == 3) {
+        ext = size * 15;
+    }
+    tex = func_1502C6AC(idx);
+    ((s32 *) gdl)[0] = 0xDE000000;
+    ((s32 *) gdl)[1] = (s32) D_80087770;
+    ((s32 *) gdl)[2] = 0xE7000000;
+    ((s32 *) gdl)[3] = 0;
+    gdl = func_15095380(gdl + 16, D_8008CDEC[tex], *(s16 *) (obj + 0x60), &quad, 0, 0, 0, 2, 3);
+    quad.flag = 0;
+    quad.alpha = obj[7];
+    quad.sizeX = ext;
+    quad.sizeZ = ext;
+    quad.x = *(f32 *) (obj + 0x14);
+    quad.z = *(f32 *) (obj + 0x1C);
+    quad.y = *(f32 *) (obj + 0x18) + (f32) (size / 2);
+    gdl = func_15095B70(gdl, (u8 *) &quad);
+    ((s32 *) gdl)[0] = 0xDE000000;
+    ((s32 *) gdl)[1] = (s32) D_800877A8;
+    return gdl + 8;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C6F8.s")
+#endif
 
 extern u8 *D_8008CDEC[];
 
@@ -495,7 +551,7 @@ u8 *func_1502CC64(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CC64.s")
 #endif
 
-s32 func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
+void func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
 
 void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD) {
     s32 temp_a2;
@@ -730,7 +786,51 @@ void func_1502D83C(s32 arg0, u8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D83C.s")
 #endif
+#ifdef NON_MATCHING
+void func_150A7EE0(f32 *mtx, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
+extern f32 D_800D9F3C;
+extern f32 D_800D9F40;
+extern u16 D_800DD718;
+extern u16 D_800DD71C;
+extern f32 D_800D30C8[][4][4];
+
+/*
+ * P71: fog alpha col[3] of object rec for view matrix view (D_800D30C8[view]). In 1 / depth units (0.001 instead
+ * of 1 / 0): a = 1 / D_800D9F3C, b = 1 / D_800D9F40, the fog range from b + (a - b) * 0.001 * D_800DD718 (full
+ * fog colour) to b + (a - b) * 0.001 * D_800DD71C (none). The object position (+0x14) is transformed
+ * (func_150A7EE0, w); 1 / w in that range interpolates, outside it the alpha is 0xFF (behind / closer) or 0.
+ */
+void func_1502D920(u8 *rec, s32 *col, s32 view) {
+    f32 near;
+    f32 far;
+    f32 step;
+    f32 fogMin;
+    f32 fogMax;
+    f32 sx, sy, sz, w;
+    f32 t;
+
+    near = (D_800D9F3C == 0.0f) ? 0.001f : 1.0f / D_800D9F3C;
+    far = (D_800D9F40 == 0.0f) ? 0.001f : 1.0f / D_800D9F40;
+    step = (near - far) * 0.001f;
+    fogMin = D_800DD718 * step + far;
+    fogMax = D_800DD71C * step + far;
+    func_150A7EE0((f32 *) D_800D30C8[view], *(f32 *) (rec + 0x14), *(f32 *) (rec + 0x18), *(f32 *) (rec + 0x1C),
+                  &sx, &sy, &sz, &w);
+    w = (w == 0.0f) ? 0.001f : 1.0f / w;
+    if (w < 0.0f) {
+        t = 0.0f;
+    } else if (fogMax <= w) {
+        t = 0.0f;
+    } else if (w <= fogMin) {
+        t = 1.0f;
+    } else {
+        t = (w - fogMax) / (fogMin - fogMax);
+    }
+    col[3] = (1.0f - t) * 255.0f;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D920.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1505DFDC(struct127 *arg0);
@@ -1359,7 +1459,69 @@ void func_1502EDEC(struct127 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EDEC.s")
 #endif
+#ifdef NON_MATCHING
+/*
+ * P71: colour (*r, *g, *b) and alpha *a of a model's tint block (+0xA4 kind, +0xA5..+0xA7 bytes, +0xA0 word).
+ * 1: colour +0xA5..A7, alpha +0xA0 itself when < 0x100, else a pointer to a percentage (clamped 0..255) * 2.55.
+ * 2 / 3: black, alpha +0xA5 (3: 255 - +0xA5). 4 / 5: colour = the low bytes of +0xA0, its top byte pulses by up to
+ * 64 with cos(+0xA5 * pi / 128), then moves towards 255 by (255 - +0xA7) / 256. 6 / 7: colour = the low bytes of
+ * +0xA0, alpha 255 - +0xA5 * top byte / 256. Other kinds leave the outputs alone.
+ */
+void func_1502EF24(u8 *rec, s32 *r, s32 *g, s32 *b, s32 *a) {
+    u32 word;
+    f32 f;
+    s32 top;
+
+    switch (rec[0xA4]) {
+        case 1:
+            *r = rec[0xA5];
+            *g = rec[0xA6];
+            *b = rec[0xA7];
+            word = *(u32 *) (rec + 0xA0);
+            if (word < 0x100) {
+                *a = word;
+            } else {
+                f = *(f32 *) word;
+                if (f < 0.0f) {
+                    f = 0.0f;
+                } else if (255.0f < f) {
+                    f = 255.0f;
+                }
+                *a = f * 2.55f;
+            }
+            break;
+        case 2:
+        case 3:
+            *r = 0;
+            *g = 0;
+            *b = 0;
+            *a = rec[0xA5];
+            if (rec[0xA4] == 3) {
+                *a = 255 - rec[0xA5];
+            }
+            break;
+        case 4:
+        case 5:
+            top = (*(s32 *) (rec + 0xA0) >> 24) & 0xFF;
+            *r = (*(s32 *) (rec + 0xA0) >> 16) & 0xFF;
+            *g = (*(s32 *) (rec + 0xA0) >> 8) & 0xFF;
+            *b = *(s32 *) (rec + 0xA0) & 0xFF;
+            *a = (f32) top + 64.0f * ((cosf(rec[0xA5] * 0.024543693f) + 1.0f) * 0.5f);
+            *a += ((255 - *a) * (255 - rec[0xA7])) >> 8;
+            break;
+        case 6:
+        case 7:
+            *r = (*(s32 *) (rec + 0xA0) >> 16) & 0xFF;
+            top = (*(s32 *) (rec + 0xA0) >> 24) & 0xFF;
+            *g = (*(s32 *) (rec + 0xA0) >> 8) & 0xFF;
+            *b = *(s32 *) (rec + 0xA0) & 0xFF;
+            *a = 255 - ((rec[0xA5] * top) >> 8);
+            break;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EF24.s")
+#endif
 
 #ifdef NON_MATCHING
 /* func_1502F17C (P57): object arg0's mode byte +0x6A + arg1 folded to 0..2 (values 2 / 3 map to 0 / 1). */

@@ -8,7 +8,27 @@ extern u8 D_80098CC4[];
 #endif
 
 
+#ifdef NON_MATCHING
+void func_1503E1FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+extern s32 *D_800847FC[];
+
+/*
+ * P71 (EU 0x1503E160): sets the flags of entry `entry` of flag set D_800847FC[set] on object obj's record
+ * (func_1503E1FC with its slot index); entry -1 sets all bits.
+ */
+void func_1503DE70(struct127 *obj, s32 set, s32 entry) {
+    s32 *e;
+
+    if (entry != -1) {
+        e = &D_800847FC[set][entry * 2];
+        func_1503E1FC(obj - D_800CC2D0, set, e[0], e[1]);
+    } else {
+        func_1503E1FC(obj - D_800CC2D0, set, -1, -1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503DE70.s")
+#endif
 
 void func_1503E1FC(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     struct106 *temp_v0;
@@ -165,7 +185,28 @@ void func_1503F1B0(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 *D_800847FC[];
+
+/*
+ * P71: entry (flagsA, flagsB) of flag set D_800847FC[set] is satisfied by object slot i when every non-zero word
+ * shares a bit with the slot's flags D_800C6A84 / D_800C6A88 (the +4 / +8 words of its 16-byte record, as in
+ * func_1503E4E4). Returns 1 / 0.
+ */
+s32 func_1503F23C(s32 set, s32 entry, s32 i) {
+    s32 *e = &D_800847FC[set][entry * 2];
+
+    if (e[0] != 0 && !(e[0] & *(s32 *) ((u8 *) &D_800C6A84 + i * 0x10))) {
+        return 0;
+    }
+    if (e[1] != 0 && !(e[1] & *(s32 *) ((u8 *) &D_800C6A88 + i * 0x10))) {
+        return 0;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_6B970/func_1503F23C.s")
+#endif
 
 extern u8 D_80098CC4[];
 

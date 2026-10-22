@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P71, 2026-10-22). Details: `docs/port/sessions/P71.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (890 bodies).
+- progress_nm: C coverage including NON_MATCHING **4884/5915 (82.6%)**, bytes **55.4%**; init 490/538,
+  game 4355/5334, debugger 39/43; **1031 asm-only** (148 under 60 insns).
+- **difftest fix:** callee arity now comes from declarations first, argument lists split at top-level commas (a call
+  `f((s32 *) M(a, b), 4)` was read as a 3-argument prototype). Selftest case func_15030448: 28 ok.
+- Hand C + knobs + mutants (P71.md table): func_15030448, func_15030100, func_150302C8, func_15031F04, func_15033ECC
+  (attachments, game_eu_5D910.c), func_15037988, func_15039D68, func_150383B0 (look target, 64770), func_1502C6F8
+  (shadow), func_1502D920 (fog alpha), func_1502EF24 (tint) (595D0), func_1503F23C, func_1503DE70 (6B970).
+- Tools: `docs/port/sessions/p71/knobs.sh` (p67 8-field format for this worktree), `mut.sh`, `mut_small.sh`, `nmcheck.sh`.
+  DIFFTEST_ARG `A|B` choices follow the per-trial rng (same in every setup): fix them per setup in the generator.
+
+## Next steps (from P71)
+
+1. **func_15000AD0** (coordinator / P72 browser, HIGH PRIORITY: D_800DC2E0 / D_800DC2B8 stay NULL while it is asm,
+   func_150D1D20 then writes to address 0). Not started beyond reading; structure + buffer sizes in P71.md "Not done".
+2. Remaining asm in the model / object files (P71.md list), smallest first: 6B970 func_1503ED44 / F45C / EF90 ...
+
 ## State (session P70, 2026-10-22). Details: `docs/port/sessions/P70.md`
 
 - Merged `port-b` (P64, P67; RETF fix) into `port`. The default build is byte-identical (full `verify_all.sh` OK).

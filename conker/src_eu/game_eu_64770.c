@@ -85,7 +85,56 @@ void func_15036FD8(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037224.s")
 
+#ifdef NON_MATCHING
+void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
+
+/*
+ * P71: is point (x, y, z) inside the range of joint j2 of object id? The joint matrices are
+ * D_800CC2D0[id].unk1D4 (64 bytes each). The translation column of joints j1 and j2 is cleared (w = 1), the point
+ * relative to j1's origin is rotated by j2's rows and func_15038758 measures it (with mode); when the measure is
+ * within (-lim, lim) the point is copied to out and 1 returned. force skips the test (copies, returns 1); no
+ * matrices: 0. (The asm also saves j1's second row to an unused local.)
+ */
+s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode) {
+    f32 *mtx;
+    f32 *a;
+    f32 *b;
+    f32 dx, dy, dz;
+    f32 dist;
+    f32 unused;
+
+    if (force) {
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        return 1;
+    }
+    mtx = (f32 *) D_800CC2D0[id].unk1D4;
+    if (mtx == NULL) {
+        return 0;
+    }
+    a = mtx + j1 * 16;
+    b = mtx + j2 * 16;
+    b[11] = b[7] = b[3] = 0.0f;
+    a[3] = a[7] = a[11] = 0.0f;
+    b[15] = 1.0f;
+    a[15] = 1.0f;
+    dx = x - a[12];
+    dy = y - a[13];
+    dz = z - a[14];
+    func_15038758(&dist, &unused, dx * b[0] + dy * b[1] + b[2] * dz, dx * b[4] + dy * b[5] + b[6] * dz,
+                  dx * b[8] + dy * b[9] + b[10] * dz, mode);
+    if (dist < lim && -lim < dist) {
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        return 1;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037988.s")
+#endif
 extern s32 D_800C4414;
 
 s32 func_15037B70(s32 arg0, u8 *arg1) {
@@ -123,7 +172,95 @@ s32 func_15037B70(s32 arg0, u8 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037CCC.s")
 
+#ifdef NON_MATCHING
+s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode);
+
+/*
+ * P71: look target search of object id: the nearest other active object (of the first 25; not 0xFF kinds) whose
+ * look point (+0x1A4 / +0x1AA / +0x1A8, s16) lies within the joint range test func_15037988 (j1, j2, lim, force,
+ * mode). Candidates: closer than the sight range (squared: (+0x23D * 8)^2, or 1.6e9 with anyRange) and than *best,
+ * or of kind prefer (+4) at any distance; a found object of kind prefer ends the search. Skipped: objects linked to
+ * each other by +0x65 (index + 1), the same kind (except for kinds 5 / 0xAD..0xAF), kind 0x2C for 0x2D, and by
+ * +0x127 == 0xFF when needVisible or look mode (+0x2F8 & 7) 4, or +0x127 != 0xFF in look mode 5. The current
+ * target (+0x222 with +0x223 1 / 0xC) counts as distance 0. Returns the found object's +0x13B + 1 (out = the look
+ * point), else 0 with out = -99999 (also during cutscenes, D_800C35EA / D_800C35EB).
+ */
+s32 func_150383B0(u8 *outp, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 bestp, s32 force, s32 needVisible,
+                  s32 anyRange, s32 mode) {
+    f32 *out = (f32 *) outp;     /* the parameter types of the declaration used by func_1503B9F8 */
+    f32 *best = (f32 *) bestp;
+    u8 *self;
+    u8 *o;
+    s32 kind;
+    s32 sameKindOk;
+    s32 exclKind;
+    s32 found;
+    s32 i;
+    f32 range2;
+    f32 r;
+    f32 dx, dy, dz;
+    f32 d2;
+
+    if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
+        out[0] = out[1] = out[2] = -99999.0f;
+        return 0;
+    }
+    self = (u8 *) &D_800CC2D0[id];
+    kind = self[4];
+    sameKindOk = !(kind == 5 || kind == 0xAD || kind == 0xAE || kind == 0xAF);
+    exclKind = (kind == 0x2D) ? 0x2C : -1;
+    if (anyRange == 0) {
+        r = self[0x23D] * 8;
+        range2 = r * r;
+    } else {
+        range2 = 1.6e9f;
+    }
+    found = -1;
+    for (i = 0; i != 25; i++) {
+        o = (u8 *) &D_800CC2D0[i];
+        if (*(s32 *) o == 0 || o[4] == 0xFF || i == id) {
+            continue;
+        }
+        if (o[0x65] == id + 1 || self[0x65] == i + 1) {
+            continue;
+        }
+        if ((!sameKindOk && kind == o[4]) || exclKind == o[4]) {
+            continue;
+        }
+        if ((needVisible != 0 || (*(u16 *) (self + 0x2F8) & 7) == 4) && o[0x127] == 0xFF) {
+            continue;
+        }
+        if ((*(u16 *) (self + 0x2F8) & 7) == 5 && o[0x127] != 0xFF) {
+            continue;
+        }
+        dx = *(f32 *) (self + 0x14) - *(f32 *) (o + 0x14);
+        dz = *(f32 *) (self + 0x1C) - *(f32 *) (o + 0x1C);
+        dy = *(f32 *) (self + 0x18) - *(f32 *) (o + 0x18);
+        d2 = dx * dx + dz * dz + dy * dy;
+        if (self[0x222] == i && (self[0x223] == 1 || self[0x223] == 0xC)) {
+            d2 = 0.0f;
+        }
+        if (!(d2 < range2 && d2 < *best) && prefer != o[4]) {
+            continue;
+        }
+        if (func_15037988(id, j1, j2, *(s16 *) (o + 0x1A4), *(s16 *) (o + 0x1AA), *(s16 *) (o + 0x1A8), out, lim,
+                          force, mode) != 0) {
+            *best = d2;
+            found = i;
+            if (prefer == o[4]) {
+                break;
+            }
+        }
+    }
+    if (found != -1) {
+        return ((u8 *) &D_800CC2D0[found])[0x13B] + 1;
+    }
+    out[0] = out[1] = out[2] = -99999.0f;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_150383B0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800989F8;
@@ -173,7 +310,60 @@ void *func_15039D44(s32 arg0, s32 arg1) {
     return &D_80098418[arg1];
 }
 
+#ifdef NON_MATCHING
+/*
+ * P71: limits of the look angles (*yaw, *pitch) of object id, set 0 of func_15039D44: f[0] / f[1] yaw max / min,
+ * f[2] / f[3] pitch max / min, f[4] / f[5] yaw / pitch margins. Without a camera record (+0x318) or in camera
+ * mode 0x100 both are clamped. Else an angle beyond its range by more than the margin resets to rest (restYaw /
+ * restPitch; a reset yaw also resets the pitch and copies both to *outYaw / *outPitch); otherwise the incoming
+ * angles go to *outYaw / *outPitch (when given) and are clamped.
+ */
+void func_15039D68(f32 *yaw, f32 *pitch, f32 *outYaw, f32 *outPitch, f32 restYaw, f32 restPitch, s32 id) {
+    u8 *cam = *(u8 **) ((u8 *) &D_800CC2D0[id] + 0x318);
+    f32 *lim = func_15039D44(id, 0);
+
+    if (cam != NULL && *(s32 *) (cam + 0x2C) != 0x100) {
+        if (lim[0] + lim[4] < *yaw || *yaw < lim[1] - lim[4]) {
+            *yaw = restYaw;
+            *pitch = restPitch;
+            if (outYaw != NULL) {
+                *outYaw = *yaw;
+                *outPitch = *pitch;
+            }
+            return;
+        }
+        if (outYaw != NULL) {
+            *outYaw = *yaw;
+            *outPitch = *pitch;
+        }
+        if (*yaw < lim[1]) {
+            *yaw = lim[1];
+        } else {
+            *yaw = (lim[0] < *yaw) ? lim[0] : *yaw;
+        }
+        if (lim[2] + lim[5] < *pitch || *pitch < lim[3] - lim[5]) {
+            *pitch = restPitch;
+        } else if (*pitch < lim[3]) {
+            *pitch = lim[3];
+        } else {
+            *pitch = (lim[2] < *pitch) ? lim[2] : *pitch;
+        }
+        return;
+    }
+    if (*yaw < lim[1]) {
+        *yaw = lim[1];
+    } else {
+        *yaw = (lim[0] < *yaw) ? lim[0] : *yaw;
+    }
+    if (*pitch < lim[3]) {
+        *pitch = lim[3];
+    } else {
+        *pitch = (lim[2] < *pitch) ? lim[2] : *pitch;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15039D68.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u8 D_800BE9B4;
@@ -235,7 +425,7 @@ void func_15039CC8(struct127 *obj) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15039D68(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
+void func_15039D68(f32 *, f32 *, f32 *, f32 *, f32, f32, s32);
 
 void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7) {
     f32 temp_f0;
