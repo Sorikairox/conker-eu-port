@@ -794,3 +794,15 @@ void gfx_run_task(void *task) {
         if (logf == 2) port_frame_probe(gfx_stats.tasks);
     }
 }
+
+/* P31: flag getter for the vbe TU pc_overrides.c (string literals there are in virtual big-endian memory). */
+int port_flag_dlapprox(void) {
+    static int v = -1;
+    if (v < 0) v = port_flag("dlapprox");
+    return v;
+}
+int port_flag_lvlload(void) {
+    static int v = -1;
+    if (v < 0) v = port_flag("lvlload");
+    return v;
+}

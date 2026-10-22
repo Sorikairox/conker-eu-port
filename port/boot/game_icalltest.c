@@ -26,7 +26,7 @@ typedef f64 (*FnD_III)(s32, s32, s32);
 typedef s32 (*FnI_IIII)(s32, s32, s32, s32);
 
 static int fails;
-static void check(const char *what, u32 got, u32 want) {
+static void ict_check(const char *what, u32 got, u32 want) {
     if (got != want) fails++;
     port_log("[icalltest] %-34s got %08X want %08X %s\n", port_gstr(what), got, want,
              port_gstr(got == want ? "ok" : "FAIL"));
@@ -60,25 +60,25 @@ static void cam_site_check(const char *what, void *fn, int adv) {
     r = f(buf, v[0], v[1], v[2], v[3], v[4], v[5], 0x1234567);
     if (cam_seen[0] != (u32)buf || cam_seen[7] != 0x1234567) bad++;
     for (i = 0; i < 6; i++) if (cam_seen[1 + i] != fbits(v[i])) bad++;
-    check(what, bad, 0);
-    check("  ... returned gdl advance", (u32)((u8 *)r - (u8 *)buf), adv * 8);
+    ict_check(what, bad, 0);
+    ict_check("  ... returned gdl advance", (u32)((u8 *)r - (u8 *)buf), adv * 8);
 }
 
 int port_icalltest(void) {
     void **t = (void **)port_n64_to_wasm(0x8008FC10);
     union { f64 d; u32 w[2]; } d;
     fails = port_icall_check() ? 1 : 0;
-    check("[0] as f32(s32) (exact)", fbits(((FnF_I)t[0])(5)), fbits(1.32f));
-    check("[2] as f32(s32) (exact)", fbits(((FnF_I)t[2])(5)), fbits(10.9f));
-    check("[0] as s32(s32): f32 -> bits", (u32)((FnI_I)t[0])(5), fbits(1.32f));
-    check("[2] as f32(void): missing arg", fbits(((FnF_V)t[2])()), fbits(10.9f));
-    check("[11] as f32(s32): void -> 0", fbits(((FnF_I)t[11])(7)), 0);
-    check("[11] as s32(s32,s32,s32,s32): extra", (u32)((FnI_IIII)t[11])(1, 2, 3, 4), 0);
+    ict_check("[0] as f32(s32) (exact)", fbits(((FnF_I)t[0])(5)), fbits(1.32f));
+    ict_check("[2] as f32(s32) (exact)", fbits(((FnF_I)t[2])(5)), fbits(10.9f));
+    ict_check("[0] as s32(s32): f32 -> bits", (u32)((FnI_I)t[0])(5), fbits(1.32f));
+    ict_check("[2] as f32(void): missing arg", fbits(((FnF_V)t[2])()), fbits(10.9f));
+    ict_check("[11] as f32(s32): void -> 0", fbits(((FnF_I)t[11])(7)), 0);
+    ict_check("[11] as s32(s32,s32,s32,s32): extra", (u32)((FnI_IIII)t[11])(1, 2, 3, 4), 0);
     ((FnV_V)t[0])();
-    check("[0] as void(void): no trap", 1, 1);
+    ict_check("[0] as void(void): no trap", 1, 1);
     d.d = ((FnD_III)t[2])(1, 2, 3);
     d.d = d.d - (f64)10.9f; /* f32 result widened to f64 */
-    check("[2] as f64(s32,s32,s32): fpext", d.d == 0.0, 1);
+    ict_check("[2] as f64(s32,s32,s32): fpext", d.d == 0.0, 1);
     cam_site_check("cam cb exact i:iffffffi", (void *)cam_exact, 3);
     cam_site_check("cam cb as s32 x8 (slow path)", (void *)cam_ints, 5);
     { void **ct = (void **)port_n64_to_wasm(0x80089578); /* the ROM table D_80089578 */

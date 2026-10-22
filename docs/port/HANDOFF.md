@@ -552,7 +552,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -566,7 +566,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P25.md` (libultra/libgu/libc PC layer complete, `[gutest]`, licenses) and
 `docs/port/sessions/P26.md` (merge port P24, sqrtf hang, runtime checks, **camera path**) and
 `docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume) and
-`docs/port/sessions/P29.md` (merge port P28, a2-position DL stubs, camera runtime, camera callback check). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P29.md` (merge port P28, a2-position DL stubs, camera runtime, camera callback check) and
+`docs/port/sessions/P31.md` (merge port P30, valid projection + view, why the frame has no triangles). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1003,6 +1004,38 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
       - func_1501B300 (137);
       - at 136 each: func_151E7110, func_150A067C, func_10011624, func_151143D4, func_15044D18, func_1504A730,
         func_1501ECA4, func_15020F6C, func_15122C5C, func_1504ADD0.
+- **P31 (after merging port P30, 2c94c13): valid projection and view; the frame has no triangles because level
+  0x25 is the 2D boot screen.** Full notes: P31.md.
+  - **Merge regression fixed:** `[memtest]` failed with every `want` = 0. `sigs.py` keys signatures by name, statics
+    included, and P29's `static check()` in game_icalltest.c (3 args) rewrote game_entry.c's `check()` (4 args).
+    It is renamed `ict_check`. **Rule: no static PC function name may be reused with another signature.**
+  - **Checks:** node: 7/7 self-tests PASS, heap 0 errors. Chrome (Metal, 45 s, heapwatch): past frame 600, 0 heap
+    breaks. Screenshot `P31_screenshot.png`: the clear colour.
+  - **Projection:** it was saturated (NaN), because the camera record was zero. The **TEMPORARY PC func_1501A8C0**
+    (camera record init, from the asm) fixes it. 0x10622690 is now `1.7113 / 2.1445 / -1.0101 / -1 / -100.50`:
+    fov 60.6 x 50 degrees, near 50, far 10000, viewport 292 x 216.
+  - **View:** it was zero, because func_1512C490 → func_15047E70 → the asm stub **func_150479F0** (guLookAtReflectF
+    variant). The **TEMPORARY PC func_150479F0** gives a valid rotation. Eye = at = 0, because the camera target
+    object `D_800CC2D0[0]+0x31C` is NULL: no object is spawned yet.
+  - **Geometry:**
+    - Level 0x25 (VI frames 0 to about 720, then level 0x21) is the boot screen func_151EC300. It shows text through
+      the asm func_15042ECC + func_15041A9C and sprites through the asm func_151EDBE8. It has no 3D model: asset
+      (2, 0x25) is not found.
+    - For the world, the stubs in order are **func_150031EC** (level model loader, sets D_800B0E00) and then
+      **func_150A5858** (hand asm visibility walk).
+    - PC func_150031EC + func_15003120 are behind `?lvlload=1`. **That breaks the heap at the switch to level
+      0x21** (not diagnosed).
+    - `?dlapprox=1` makes func_150A5858 emit the whole level DL. It is a diagnostic only.
+  - **For the port branch:**
+    - **bug**: `game_14FF90.c` func_15127EB8 calls `func_1510B8AC(…, 0, 0, 0x3F800000)` with no prototype. The
+      asm passes 1.0f, so it must be `1.0f` with a prototype `void (s32, f32, f32, f32)`.
+    - Convert: func_1501A8C0, func_150479F0, func_150031EC/func_15003120, func_15042ECC, func_151EDBE8/func_151EDA54,
+      and the object spawners func_15082E44 / func_1506C460.
+    - P30's UNVERIFIED items:
+      - func_150006E0 is OK (it receives the level, 37);
+      - the func_1512C490 `obj == NULL` reads run every frame with no trap; the 0x8000 case is not exercised;
+      - the func_150A82D0 constant is π/180 (static check);
+      - func_150045C4 and func_1517485C are not exercised.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
