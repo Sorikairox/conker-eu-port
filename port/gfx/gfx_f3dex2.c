@@ -648,7 +648,8 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
          * (P39: a green tint, P42: 000000 = a black level). The flag makes a black BG start colour white. */
         static int lw = -1;
         if (lw < 0) lw = port_flag("lvlwhite");
-        if (lw && light_bg && !amb[0] && !amb[1] && !amb[2]) c[0] = c[1] = c[2] = 1.0f;
+        /* P44: ?lvlwhite=2 forces white for any BG start colour (the stack garbage can be a dim green, not 000000) */
+        if (lw && light_bg && (lw >= 2 || (!amb[0] && !amb[1] && !amb[2]))) c[0] = c[1] = c[2] = 1.0f;
     }
     if (!light_bg) {
         const float *d = lmdir[2 + M];
@@ -1370,8 +1371,10 @@ void __wrap_func_1512C490(void *arg0) {
     __real_func_1512C490(arg0);
     if (cw_flag) {
         unsigned v[CW_N];
+        static int every = -1; /* P44: ?camevery=N logs the summary line every N calls (default 64) */
+        if (every < 0) { every = port_flag("camevery"); if (every <= 0) every = 64; }
         port_camwatch("func_1512C490 exit");
-        if ((cw_calls & 63) == 0 && cw_snap(v))
+        if (cw_calls % (unsigned)every == 0 && cw_snap(v))
             port_log("[camwatch] func_1512C490 call %u frame %u: mode %08X rec %08X pos %g %g %g | cam 2A4 %g %g %g at %g %g %g eye %g %g %g "
                       "orbit 18C %g 190 %g 194 %g 198 %g yaw %g | obj %08X eye %g %g %g at %g %g %g\n", cw_calls, port_frame_count,
                       v[29], v[28], *(float *)&v[24], *(float *)&v[25], *(float *)&v[26], *(float *)&v[10], *(float *)&v[11],

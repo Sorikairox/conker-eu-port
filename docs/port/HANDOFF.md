@@ -697,7 +697,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -717,7 +717,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P35.md` (F3DEXBG lighting checked in the RSP code, CULLDL/BRANCH_Z, RDP blender, 3-point filter, per-tile wrap, LOD) and
 `docs/port/sessions/P37.md` (merge port P36, PC stand-ins removed, inflater / camera-target runtime checks, visibility-walk inputs) and
 `docs/port/sessions/P39.md` (merge port P38, camera eye/at writer and its stubbed inputs, runtime checks of the P38 C) and
-`docs/port/sessions/P42.md` (merge port P40, KSEG0 pointer tests and computed IO_READ, the real visibility walk on level data). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P42.md` (merge port P40, KSEG0 pointer tests and computed IO_READ, the real visibility walk on level data) and
+`docs/port/sessions/P44.md` (runtime check of P41's camera chain, the game's own view, what blocks player movement). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1379,6 +1380,30 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
     - convert func_1515E7E8 (+ func_1515E9AC): the level light colour;
     - then P39's camera list.
     - No bug was found in the P40 C.
+- **P44 (after merging port-b P41, 52baa69): the game's own camera view.** Full notes: P44.md.
+  - Clean rebuild. Node 30 s: 8/8 PASS, heap 0 errors. Real-time Chrome (Metal, 45 s, three runs): 0 RuntimeError,
+    heap 0 errors, frame 600 at 340 commands and **288 triangles**: the whole floor is in the game's view.
+  - **P41's camera chain is correct at runtime (`?camwatch`). No C bug was found.**
+    - D_800CC2D0[0] is placed at the level start: (27, 1, 27) on level 0x21, (-245, 14, 9464) on boot level 0x25.
+    - at follows it, and eye = at + (sin, cos)(yaw) * 530.
+    - obj+0x130..0x150 are non-zero.
+    - The lookat and perspective matrices check out (`mtxdump` + `dltrace`).
+  - **Screenshot** `P44_screenshot.png`: no freecam, the real walk, `?lvlwhite=2` (new: forces white for any BG start
+    colour; the func_1515E7E8 stack garbage is dim green again). It shows the floor at a grazing angle.
+    - **eye.y stays at the start table's 40:** the eye height writers func_1512E6B0 (0x2FC = 0x354 + offset) and
+      func_1512A390 (clamp 0x354 + 30) are asm stubs.
+  - **Moving:** scripted W / C-right reach `D_800BED38[0]`, but the record, at, eye and yaw never change. The state
+    handler **func_1504CB98** (5006 lines; 12 of its 61 callees are stubs, func_15056B08 1752 lines the largest) and
+    func_150A16A4 (799 lines, before it in func_1504A730) are stubs. So "does the camera follow" waits on them.
+  - **func_150ACEA0** (ray cast) is in the unsplit `asm/D5E90.s` (kind `missing`). On level 0x21 (open floor), its
+    "no hit" stub breaks nothing visible.
+  - Frame-DL-path stubs are unchanged. 82 distinct stubs; 16 camera-helper stubs run per frame (table in P44 §5).
+    func_1512C6C0 (48 lines) is the top stub.
+  - New flag `?camevery=N`: the camwatch summary every N calls.
+  - **For the port branch:**
+    - func_1512E6B0, then func_1512A390: the eye height;
+    - func_1504CB98 + func_150A16A4: the player moves;
+    - func_1515E7E8: the level colour.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
