@@ -191,8 +191,81 @@ u8 *func_15174270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s1
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/func_15174270.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/func_1517485C.s")
+#ifdef NON_MATCHING
+typedef struct {
+    f32 x, y, z;
+    u8 state;
+    u8 pad[3];
+    struct_eu_bytes24 info;
+    s8 b34;
+    s32 v38;
+} Ent_DD778_nm; /* = Ent_DD778 below, size 0x3C */
+extern Ent_DD778_nm D_800DD778[];
+extern u16 D_800DD740[][4];       /* per entry: z-buffer word read back (0xFFFF = pending) */
+extern u16 D_800DD758[][4];       /* per entry: colour-buffer word read back (RGBA5551) */
+extern s32 D_800DD730[];          /* per entry: projected depth */
+extern s32 D_800DD770;
+extern s32 D_800899D0[][2];       /* z-buffer decode table: (shift, add) per exponent */
+extern void (*D_8008A420[])(Ent_DD778_nm *, s32, s32, s32);
+void func_1501A764(s32 arg0, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
 
+/* Occlusion probes (3 entries, e.g. lens flares): first, for entries read back in the current DL buffer
+ * (state == D_800BE9C0 + 1), decode the z-buffer word and, when within 300 of the projected depth, call the entry's
+ * callback with the pixel colour; then for new requests (state 3) project the point for player 0 and, when it lands
+ * inside the viewport, queue the readback (func_15174270). Only runs when player == 0. */
+Gfx *func_1517485C(Gfx *gdl, s16 player) {
+    s32 i;
+    s32 z, c, d;
+    s32 x, y;
+    f32 sx, sy, sz;
+    u8 *cam;
+    Ent_DD778_nm *e;
+
+    if (player != 0) {
+        return gdl;
+    }
+    for (i = 0, e = D_800DD778; i < 3; i++, e++) {
+        if (e->state == D_800BE9C0 + 1) {
+            z = D_800DD740[i][0];
+            d = (u32)(D_800899D0[z >> 13][1] + (((z >> 2) & 0x7FF) << D_800899D0[z >> 13][0])) >> 3;
+            d -= D_800DD730[i];
+            if (d < 0) {
+                d = -d;
+            }
+            if (d < 300) {
+                c = D_800DD758[i][0];
+                D_800DD770 = c;
+                if (e->b34 != -1) {
+                    D_8008A420[e->b34](e, (c >> 8) & 0xF8, (c >> 3) & 0xF8, (c << 2) & 0xF8);
+                }
+            }
+            e->state = 0;
+        }
+    }
+    for (i = 0, e = D_800DD778; i != 3; i++, e++) {
+        if (e->state != 3) {
+            continue;
+        }
+        D_800DD740[i][0] = 0xFFFF;
+        e->state = D_800BE9C0 + 1;
+        func_1501A764(player, e->x, e->y, e->z, &sx, &sy, &sz);
+        D_800DD730[i] = (s32)sz;
+        cam = (u8 *)D_800BE628 + player * 0x180;
+        x = (s32)sx;
+        y = (s32)sy;
+        if (x < (s32)*(f32 *)(cam + 0x2C) || !(x < (s32)*(f32 *)(cam + 0x30))) {
+            continue;
+        }
+        if (y < (s32)*(f32 *)(cam + 0x24) || !(y < (s32)*(f32 *)(cam + 0x28))) {
+            continue;
+        }
+        gdl = (Gfx *)func_15174270((u8 *)gdl, x, y, 1, (s32)D_800DD740[i], (s32)D_800DD758[i], player);
+    }
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A1A80/func_1517485C.s")
+#endif
 typedef struct {
     f32 x, y, z;
     u8 state;
@@ -201,7 +274,9 @@ typedef struct {
     s8 b34;
     s32 v38;
 } Ent_DD778; // size 0x3C
+#ifndef NON_MATCHING
 extern Ent_DD778 D_800DD778[];
+#endif
 
 s32 func_15174B60(f32 arg0, f32 arg1, f32 arg2, struct_eu_bytes24 *arg3, s8 arg4, s32 arg5) {
     s32 i;
