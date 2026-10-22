@@ -1081,7 +1081,7 @@ void func_15063168(struct127 *);
 void func_150802A8(struct127 *);                 
 s32 func_150882C4(u8, struct127 *);             
 s32 func_150A44A4(f32, f32, s32, f32 *, f32 *);     
-s32 func_150D5F7C(struct127 *, s32, s32); 
+void func_150D5F7C(struct127 *, s32, s32); 
 void func_150D7CA0(struct127 *, s32);            
 void func_1510EE3C(s32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32, f32, f32, f32, s32, struct127 *, s32, s32, s32); // P47: args 12/13 are f32 bits 
 void func_15121A00(struct127 *, struct49 *);     

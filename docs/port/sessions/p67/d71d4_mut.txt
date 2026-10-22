@@ -1,0 +1,7 @@
+s/owner->interaction_state == 0 ||/0 ||/ % k
+s/arg0\[0xAC\] != owner->unique_id/0/ % k
+s/vel\[1\] += \*(f32 \*)(arg0 + 0x64) \* D_800BE9A4;/vel[1] += *(f32 *)(arg0 + 0x64);/ % k
+s/func_15131EC8(vel, \*(s32 \*)(arg0 + 0xB0), arg0);/func_15131EC8(vel, 0.0f);/ % k
+s/pos\[1\] += old\[1\] \* D_800BE9A4 + (vel\[1\] - old\[1\]) \* D_800BEDC8/pos[1] += old[1] * D_800BE9A4 + (vel[1] - old[0]) * D_800BEDC8/ % k
+s/D_800BE9A4 \* D_800BE9A4 \* 0.5f;$/D_800BE9A4 * 0.5f;/ % k
+s/old\[2\] = vel\[2\];/old[2] = vel[1];/ % k

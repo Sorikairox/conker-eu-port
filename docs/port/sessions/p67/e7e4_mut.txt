@@ -1,0 +1,17 @@
+s/obj->unk72 == time) {/1) {/ % same2
+s/obj->unk71 == prio \&\&/1 \&\&/ % same3
+s/prio != 3 \&\&/1 \&\&/ % p3
+s/obj->unk70 != obj->unk6F \&\&/1 \&\&/ % dflt
+s/anim != obj->unk6F \&\&/1 \&\&/ % self
+s/obj->unk72 != 0 \&\&/1 \&\&/ % t0
+s/obj->unk71 >= prio/obj->unk71 > prio/ % keep
+s/(s32)anim < (s32)func_1507ED48/(s32)anim <= (s32)func_1507ED48/ % cnt
+s/(s32)anim < (s32)func_1507ED48((s32)obj)/anim < func_1507ED48((s32)obj)/ % cntneg
+s/obj->unk6F);$/anim);/ % base
+s/if (entry\[4\] != 0) {/if (1) {/ % e0
+s/sounds\[entry\[4\] - 1\]/sounds[entry[4]]/ % base e1
+s/if (sounds != NULL) {/if (1) {/ % nosnd
+s/obj->unk72 = time;/obj->unk72 = 0;/ % base
+s/obj->unk71 = prio;/obj->unk71 = 0;/ % base
+s/obj->unk6F = anim;/obj->unk6F = 0;/ % base
+s/func_1507E9A8(obj, arg4);/func_1507E9A8(obj, 0);/ % base
