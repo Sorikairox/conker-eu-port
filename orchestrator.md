@@ -102,6 +102,8 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 ### Lesson: test the harness itself (P71, P73)
 - Twice a difftest bug made results meaningless while looking fine: callee arity taken from call statements (P71), and the candidate silently dropped when one NM block holds two functions (P73) — every mutant "survived" because the old copy was tested. A surviving mutant that should obviously die is a harness bug until proven otherwise; add a selftest case for every harness fix.
 - Concurrent knob and mutant runs of the same function must not share a temp dir (use the p73 knobs.sh / mut.sh).
+- Use the newest mutant script (port-b `docs/port/sessions/p82/mut.sh`): it checks the unmutated draft before random trials (P77) and reports `SED ERROR` / `INVALID` instead of counting a mutant that never compiled as "survived" (P82).
+- DIFFTEST_POKE can't change ROM rodata or `.game_data`; take the real value from the ELF instead.
 
 ### Lesson: dropped arguments (P75, P78)
 - IDO code often leaves a value in a0..a3 and the callee uses it even though the decomp's C call passes nothing (`f()` or a `void (*)(void)` pointer). On N64 it works by accident; in the port the argument becomes 0 → wrong object or NULL writes. Whenever a callee becomes C, check its callers' argument counts (run `tools/port/arity_scan.py` after every merge; output `docs/port/arity_scan.tsv`, a may-analysis: check the asm before fixing a row).
