@@ -9,7 +9,11 @@ extern u8 D_800A22BC[];
 
 s32 func_150FD140(s32);
 s32 func_1516547C(s32, s32, s32, s32, s32);
+#ifdef NON_MATCHING
+s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
+#else
 extern s32 func_1000EC24;
+#endif
 
 void func_150FCFB0(void) {
     s32 var_s0;

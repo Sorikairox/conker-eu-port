@@ -189,8 +189,151 @@ void func_1510BED8(s32 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BED8.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BF50.s")
+#ifdef NON_MATCHING
+Gfx *func_150A55A0(s32, Gfx *, u8 *, s32, s32, s32);
+Gfx *func_150A5858(s32, Gfx *, u8 *, s32, s32, s32);
+Gfx *func_150C8B00(Gfx *);
+Gfx *func_150CFAF8(Gfx *);
+Gfx *func_150D7B6C(Gfx *);
+Gfx *func_150E0150(Gfx *);
+Gfx *func_151009E4(Gfx *);
+void func_1510D090(s16);
+Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
+Gfx *func_1512EB60(Gfx *, struct108 *);
+Gfx *func_1515DE84(Gfx *, s16, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, s32, s32, u8 *);
+Gfx *func_1515EAB4(Gfx *, s32, u8, s32, u8 *);
+Gfx *func_15173948(Gfx *, s32);
+Gfx *func_1517485C(Gfx *, s16);
+extern s32 D_800B1214;          /* optional display lists */
+extern s32 D_800B1218;
+extern u8 D_800BEECA;
+extern u8 D_800BEFC0;
+extern u8 D_800C3A86;
+extern u8 D_800D9FB0[];         /* viewports: [buffer][2] x 16 bytes */
+extern u8 D_800D9FF0[];         /* per player: [buffer] x 8 bytes */
+extern s32 D_800DA230[];        /* per player */
+extern u8 D_800DA240;
+extern u8 D_800DA241;
+extern u8 D_800DA248;
 
+/* Build the display list of player `player`'s view. */
+Gfx *func_1510BF50(Gfx *gdl, s16 player) {
+    struct108 *p = &D_800DBFF0[player];
+    s32 skipWorld;
+    s32 mask;
+    u8 *vpPtr;
+    s32 *dataPtr;
+
+    D_800BEFC0 = 1;
+    skipWorld = FALSE;
+    if ((D_800C35EA == 1) && (D_800C3A86 != 0)) {
+        skipWorld = TRUE;
+    }
+    mask = 1 << player;
+    if (D_800D18A0 & mask) {
+        skipWorld = TRUE;
+    }
+
+    gdl = (Gfx *)func_1510BD34((u8 *)gdl, player);
+    gdl[0].words.w0 = 0xDC08000A;
+    gdl[0].words.w1 = (u32)(D_800D9FB0 + (D_800BE9C0 << 5));
+    gdl[1].words.w0 = 0xDC08060A;
+    gdl[1].words.w1 = (u32)(D_800D9FB0 + (D_800BE9C0 << 5) + 0x10);
+    gdl += 2;
+    func_1510D090(player);
+    gdl = func_15173948(func_1510D338(gdl, 0xFF, 0xFF, player), 1);
+    gdl->words.w0 = 0xDA380003;
+    gdl->words.w1 = (u32)D_80089810;
+    gdl++;
+
+    if (!skipWorld) {
+        switch (D_800BE9F0) {
+        case 0x14:
+            gdl = func_150C8B00(gdl);
+            break;
+        case 0x1A:
+            gdl = func_151009E4(gdl);
+            break;
+        case 0x13:
+            gdl = func_150E0150(gdl);
+            break;
+        case 0x35:
+            gdl = func_150CFAF8(gdl);
+            break;
+        case 0x33:
+            gdl = func_150D7B6C(gdl);
+            break;
+        }
+    }
+
+    func_1510F800(0);
+    if (D_800DCD7C == 0) {
+        gdl->words.w0 = 0xDC280C0A;
+        gdl->words.w1 = (u32)(D_800D9FF0 + player * 0x10 + D_800BE9C0 * 8);
+        gdl++;
+    }
+
+    p = (struct108 *)((u8 *)D_800DBFF0 + player * 0x9A0);
+    dataPtr = &D_800DA230[player];
+    vpPtr = D_800D9FF0 + player * 0x10;
+    gdl = func_1515DE84(gdl, player, (s32)p->unk2F8, (s32)p->unk2FC, (s32)p->unk300, 0, *dataPtr, D_800DA240,
+                        vpPtr + D_800BE9C0 * 8, &D_800DA241, 1, 0, 0x25, &D_800DA248);
+
+    if (!skipWorld) {
+        if (D_800BE9F0 != 5) {
+            if (D_800BEECA != 0) {
+                gDPPipeSync(gdl++);
+                if (D_800DBE62 != 0) {
+                    if ((D_800BE9F0 != 0x14) && (D_800BE9F0 != 0x33) && (D_800BE9F0 != 0x32)) {
+                        gdl = func_150A5858(D_800B0E00[0], gdl, (u8 *)D_800DA030[player], 0, 0, mask);
+                    } else {
+                        gdl->words.w0 = 0xDE000000;
+                        gdl->words.w1 = D_800B0E00[0];
+                        gdl++;
+                    }
+                    if (D_800B1214 != 0) {
+                        gDPPipeSync(gdl++);
+                        gdl = func_15173948(func_1510D338(gdl, 0xFF, 0xFF, player), 1);
+                        if (D_800BE9F0 == 0x35) {
+                            gdl = func_150CFAF8(gdl);
+                        }
+                        gdl->words.w0 = 0xDE000000;
+                        gdl->words.w1 = D_800B1214;
+                        gdl++;
+                    }
+                    D_800BEFC0 = 0;
+                    p = &D_800DBFF0[player];
+                    if ((p->pad880[0x38] != 0) && (p->unk84 & 8)) {
+                        gdl = func_1512EB60(gdl, p);
+                        gDPPipeSync(gdl++);
+                    }
+                } else {
+                    gdl->words.w0 = 0xDE000000;
+                    gdl->words.w1 = D_800B0E00[0];
+                    gdl++;
+                }
+            } else {
+                gdl->words.w0 = 0xDE000000;
+                gdl->words.w1 = D_800B0E00[0];
+                gdl++;
+            }
+        }
+        gdl = func_1515EAB4(gdl, *dataPtr, D_800DA240, D_800DA241, vpPtr + D_800BE9C0 * 8);
+        if (D_800B1218 != 0) {
+            gDPPipeSync(gdl++);
+            gdl = func_1510D338(gdl, 0xFF, 0xFF, player);
+            gdl->words.w0 = 0xDE000000;
+            gdl->words.w1 = D_800B1218;
+            gdl++;
+        }
+    }
+    gdl = func_1517485C(gdl, player);
+    gDPPipeSync(gdl++);
+    return gdl;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510BF50.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510C4E0.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_138E00/func_1510CA2C.s")

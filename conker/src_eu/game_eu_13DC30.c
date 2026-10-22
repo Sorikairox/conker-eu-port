@@ -5,8 +5,112 @@
 s32 func_15115244();
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110420.s")
+#ifdef NON_MATCHING
+Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g, u8 b);
+u8 *func_15110C28(u8 *);
+s32 func_15110E44(f32 arg0, f32 arg1, f32 arg2, f32 arg3);
+extern u8 D_800D9F89, D_800D9F8A, D_800D9F8B, D_800D9F8C, D_800D9F8D, D_800D9F8E, D_800D9F8F, D_800D9F90;
+extern u8 D_800D9F91, D_800D9F92, D_800D9F93, D_800D9F99, D_800D9F9A, D_800D9F9B, D_800D9F9C, D_800D9F9D;
+extern u8 D_800D9F9E, D_800D9F9F, D_800D9FA0, D_800D9FA1, D_800D9FA2, D_800D9FA3;
+extern u8 D_800BEA55;
+extern s32 D_800BE624;
+extern s16 D_80083336;
+/* camera/overlay draw callbacks, indexed by D_800B0DF0->unk8 */
+extern Gfx *(*D_80089578[])(Gfx *, f32, f32, f32, f32, f32, f32, s32);
 
+Gfx *func_15110420(Gfx *gdl, s32 arg1) {
+    u8 *view;
+    struct108 *player;
+    f32 yaw;
+    f32 pitch;
+    f32 roll;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 handle;
+
+    D_800D9F88[0] = 0;
+    D_800D9F89 = 0;
+    D_800D9F8A = 0;
+    D_800D9F98[0] = 0;
+    D_800D9F99 = 0;
+    D_800D9F9A = 0;
+    D_800D9F8B = 0;
+    D_800D9F8C = 0;
+    D_800D9F8D = 0;
+    D_800D9F9B = 0;
+    D_800D9F9C = 0;
+    D_800D9F9D = 0;
+    D_800D9F8E = 0;
+    D_800D9F8F = 0;
+    D_800D9F90 = 0;
+    D_800D9F9E = 0;
+    D_800D9F9F = 0;
+    D_800D9FA0 = 0;
+    D_800D9F91 = 0;
+    D_800D9F92 = 0;
+    D_800D9F93 = 0;
+    D_800D9FA1 = 0;
+    D_800D9FA2 = 0;
+    D_800D9FA3 = 0;
+
+    gdl->words.w0 = 0xD9FFF9FF;
+    gdl->words.w1 = 0;
+    gdl = (Gfx *)func_15110C28((u8 *)(gdl + 1));
+    gDPPipeSync(gdl++);
+    if (D_800BEA55 != 0) {
+        gdl = func_15110AC4(gdl, 0, 0, D_800BE620, D_800BE624, 0, 0, 0);
+    }
+    if ((D_800C35EA == 1) && (D_800C3681 != 0)) {
+        return gdl;
+    }
+
+    view = D_800DD210 + D_80082FA4 * 0x18;
+    player = &D_800DBFF0[D_80082FA4];
+    /* wrap the three angles (degrees): yaw and roll into [-180, 180), pitch into [0, 360) */
+    yaw = 360.0f - (*(f32 *)(view + 0xC) + player->unk388);
+    while (yaw < -180.0f) {
+        yaw += 360.0f;
+    }
+    while (yaw >= 180.0f) {
+        yaw -= 360.0f;
+    }
+    pitch = 360.0f - (*(f32 *)(view + 0x10) + player->unk380);
+    while (pitch < 0.0f) {
+        pitch += 360.0f;
+    }
+    while (pitch >= 360.0f) {
+        pitch -= 360.0f;
+    }
+    roll = *(f32 *)(view + 0x14) + *(f32 *)&player->pad5EC;
+    while (roll < -180.0f) {
+        roll += 360.0f;
+    }
+    while (roll >= 180.0f) {
+        roll -= 360.0f;
+    }
+    x = player->unk2F8;
+    y = player->unk2FC;
+    z = player->unk300;
+
+    if (D_800C3682 != 0) {
+        u8 *cam = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
+        return func_15110AC4(gdl, (s32)*(f32 *)(cam + 0x2C), (s32)*(f32 *)(cam + 0x24),
+                             (s32)(*(f32 *)(cam + 0x30) - 1.0f), (s32)*(f32 *)(cam + 0x28), 0x16, 0x1C, 0x1B);
+    }
+
+    handle = func_15110E44(x, y, z, yaw);
+    if (handle != 0) {
+        gdl = D_80089578[D_800B0DF0->unk8](gdl, x, y, z, yaw, pitch, roll, handle);
+    }
+    gdl = (Gfx *)func_1501A490((s32)gdl, D_80083336, 0, 0, 0, 0);
+    gdl->words.w1 = 0x400;
+    gdl->words.w0 = 0xD9FFFFFF;
+    return gdl + 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110420.s")
+#endif
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void func_1511084C(f32 (*arg0)[4], f32 arg1, f32 arg2, f32 arg3) {
     f32 sp28[4][4];

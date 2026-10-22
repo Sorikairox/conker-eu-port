@@ -4,7 +4,48 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 allocate_memory(s32, s32, s32, s32);
+s32 func_1502B5C8(s32 *arg0, s32 arg1, ...);
+void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
+void func_1512B168(void);
+void func_1512D7A8(void);
+extern s32 D_800DC450;
+extern s16 D_800898F0;
+extern s32 D_800DC6E0;
+extern Mtx *D_800DC6D0[];       /* per DL buffer: view matrices, 0x40 per player */
+extern s32 D_800BE6D0[];
+extern s32 D_800DC440;
+
+/* Level init: load the 0x18-byte records (D_800DC450), allocate the per-player camera controllers (D_800DBFF0,
+ * 0x9A0 each) and view matrices, initialise each controller, then the camera tables. */
+void func_15005290(s32 arg0, s32 arg1) {
+    s32 size;
+    s32 n;
+    u32 i;
+
+    D_800DC450 = func_1502B5C8(&size, 3, 0xC, arg0, 8);
+    D_800898F0 = (u32)size / 0x18;
+    n = D_80082FA0 + 1;
+    D_800DBFF0 = (struct108 *)allocate_memory(n * 0x9A0, 1, 1, 0);
+    D_800DC6E0 = allocate_memory(n * 0xB0, 1, 0, 0);
+    D_800DC6D0[0] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
+    D_800DC6D0[1] = (Mtx *)allocate_memory(n << 6, 1, 1, 0);
+    i = 0;
+    do {
+        D_800BE6D0[i] = allocate_memory(D_800BE620 * 2, 1, 2, 0);
+        func_150054C4((struct108 *)((u8 *)D_800DBFF0 + i * 0x9A0), i, (s16)arg0, arg1);
+        D_800DBFF4[i] = 0;
+        i++;
+    } while (i <= (u32)D_80082FA0);
+    func_1512B168();
+    func_1512D7A8();
+    D_800894B0 = 0;
+    D_800DC440 = allocate_memory(D_80082FA0 * 0x9A0 + 0x9A0, 1, 2, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_32740/func_15005290.s")
+#endif
 // NON-MATCHING: first half ok, second half needs work
 // void func_15005290(s32 arg0, s32 arg1) {
 //     s32 pad0;
