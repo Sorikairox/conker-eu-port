@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P65, 2026-10-22). Details: `docs/port/sessions/P65.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (858 bodies).
+- progress_nm: C coverage including NON_MATCHING **4852/5915 (82.0%)**, bytes **53.9%**; init 490/538,
+  game 4323/5334, debugger 39/43; **1063 asm-only** (151 under 60 insns).
+- Coordinator items first (browser P63 TEMPORARY PC versions can go): **func_1502AF04** (animation header lookup),
+  **func_1510E908** (slope solver), **func_150A69E0** (func_150A6A48 wrapper; plain C in game_eu_D3880.c).
+- Model path: **func_15036FD8**, **func_15030758** (attachments; D_80084550 = .data table of code pointers),
+  **func_150028BC** (model vertex ranges / triangles from the DL), **func_1503AB20** (head / eye aim). All hand C,
+  knob setups + mutants (P65.md table; setups in `docs/port/sessions/p65/`).
+- difftest: known prototypes now fix the compared stack / register argument slots; `DIFFTEST_RET` / `ARGMEM` keys
+  must be **EU** callee addresses (from the jal word), not the US-style names.
+
+## Next steps (from P65)
+
+1. **func_1503BCAC** (1143, game_eu_692C0.c): split by branch, knobs + mutants per branch (as func_1503AB20).
+2. Browser: drop the PC overrides of func_1502AF04, func_1510E908, func_150A69E0; map D_80084550's callback
+   addresses (func_15030758). Runtime checks: P65.md UNVERIFIED.
+
 ## State (session P62, 2026-10-22). Details: `docs/port/sessions/P62.md`
 
 - The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (851 bodies).

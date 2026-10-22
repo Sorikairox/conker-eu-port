@@ -979,6 +979,9 @@ def compare(R, C, rk, arity):
         # with a known prototype, only the reference's call-site writes widen it (P7: a candidate that
         # happens to compute something in a2 right before a 1-arg call was a false DIFFER)
         cnt = max(na if na is not None else 0, max(a['a'] if na not in (None, 99) else a['a'] | b['a'], default=-1) + 1)
+        # P65: a known prototype fixes the register arguments (func_1503AB20 reloads a spilled a2 right before a
+        # one-argument call to func_15048A40, which made a2 look like an argument)
+        if na is not None and na != 99 and os.environ.get('DIFFTEST_PROTO_ARGS', '1') == '1': cnt = min(cnt, na)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
         # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
         if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
@@ -993,7 +996,9 @@ def compare(R, C, rk, arity):
         # (other sp+0x10..0x3F stores can be locals), plus what a known prototype says
         w = a['stk'] | b['stk']; slots = set(); o = 16
         while o in w: slots.add(o); o += 4
-        if na is not None and na != 99 and na > 4: slots |= {16 + 4 * j for j in range(na - 4)}
+        # P65: a known prototype with > 4 args fixes the slots exactly (hand asm func_150A69E0 keeps ra at sp+0x20,
+        # right after its 8th argument, so the contiguous run took it for a 9th)
+        if na is not None and na != 99 and na > 4: slots = {16 + 4 * j for j in range(na - 4)}
         # P24: a known prototype with <= 4 args has no stack args (hand asm such as func_150A8050 keeps ra at sp+0x10)
         if na is not None and na != 99 and na <= 4: slots = set()
         for o in sorted(slots):
@@ -1202,6 +1207,8 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         if verbose:
             print('trial %d: %s ref(done=%s fault=%s calls=%d) cand(done=%s fault=%s calls=%d)' % (
                 t, why or 'same', R.done, R.fault, len(R.calls), C.done, C.fault, len(C.calls)))
+            if R.fault and getattr(R, 'fault_pc', None) is not None:   # P65: where the reference faulted
+                print('  ref fault pc 0x%08X regs %s' % (R.fault_pc, ' '.join('%X' % x for x in R.fault_regs)))
             if why: explain(R, C, inputs, forced)
         return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new)
     crashed = 0; hung = 0
