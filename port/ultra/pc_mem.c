@@ -80,10 +80,10 @@ typedef struct {
     unsigned bitbuf, bitcnt;
     unsigned char *out; unsigned outlen, outpos;
     int err;
-    int vbe; /* P33: in/out are game memory in the vbe layout (byte A at A ^ 3) */
+    int vbe; /* P33: game memory in the vbe layout (byte A at A ^ 3); P37: bit 0 = in, bit 1 = out */
 } Inf;
-#define INB(s, i)  (*((s)->vbe ? (const unsigned char *)(((unsigned long)((s)->in + (i))) ^ 3) : (s)->in + (i)))
-#define OUTB(s, i) (*((s)->vbe ? (unsigned char *)(((unsigned long)((s)->out + (i))) ^ 3) : (s)->out + (i)))
+#define INB(s, i)  (*(((s)->vbe & 1) ? (const unsigned char *)(((unsigned long)((s)->in + (i))) ^ 3) : (s)->in + (i)))
+#define OUTB(s, i) (*(((s)->vbe & 2) ? (unsigned char *)(((unsigned long)((s)->out + (i))) ^ 3) : (s)->out + (i)))
 typedef struct { short count[16], symbol[288]; } Huff;
 
 static int bits(Inf *s, int need) {
@@ -334,25 +334,93 @@ int port_inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *i
     return inflate_raw(out, outlen, in, inlen);
 }
 
-/* P33, TEMPORARY until the port branch converts init_eu_5DA0.s: func_1000654C, Rare's inflater entry
- * (asm, 58 lines + func_1000661C .. func_100070F0 with private FPU-register state), called by the C
- * wrapper func_10006530(src, dst, limit) from the asset loader func_1502B350 and others. From the asm:
- * the deflate stream starts at src + 2 when the first BE halfword is 0x1172, else at src + 4 (after the
- * rzip BE u32 size); the output limit is 0x70000000, lowered to src - dst when src is above dst
- * (in-place) and to limit - dst when that is >= 0 and smaller; the return value is the number of bytes
- * written (f17), or 0 on an error. Both buffers are game memory in the vbe layout. As a weak stub it
- * returned a1 and wrote nothing, so every compressed asset loaded as zeros (P33: the level 0x21 model
- * list was zero, func_1502B4A8 scanned past it for a terminator and relocated the next heap block). */
-int func_1000654C(int src, int dst, unsigned limit) {
-    const unsigned char *in = (const unsigned char *)(unsigned long)src;
-    unsigned hw = (unsigned)*(const unsigned char *)(((unsigned long)in) ^ 3) << 8 | *(const unsigned char *)(((unsigned long)in + 1) ^ 3);
-    unsigned lim = 0x70000000u;
-    int d = src - dst, got;
-    in += (hw == 0x1172) ? 2 : 4;
-    if (d > 0) lim = (unsigned)d;
-    d = (int)limit - dst;
-    if (d >= 0 && (unsigned)d < lim) lim = (unsigned)d;
-    got = inflate_raw2((unsigned char *)(unsigned long)dst, lim, in, 0x1000000u, 1);
-    { static int n; if (n++ < 8 || got <= 0) port_log("[inflate] src %08X dst %08X limit %08X -> %d\n", (unsigned)src, (unsigned)dst, limit, got); }
-    return got > 0 ? got : 0;
+/* P37: the P33 TEMPORARY PC func_1000654C is gone: Rare's inflater is the game's C (init_eu_5DA0.c, port P36).
+ * ?infcheck=1 checks it at run time through a link-time wrapper of its entry func_10006530(src, dst, work)
+ * (-Wl,--wrap=func_10006530, port/Makefile; the callers are in other TUs): before the call the stream is inflated
+ * here into a host buffer (independent decoder, input read through the vbe layout), then the game's C runs and
+ * its return value and output bytes (vbe) are compared with it and with the rzip header's BE u32 size.
+ * Lines: [infcheck] per call (first 12 and every mismatch), and a running total every 64 calls. */
+int port_flag(const char *name);
+void port_js_stack(int skip, int n);
+int __real_func_10006530(int src, int dst, unsigned work);
+int __wrap_func_10006530(int src, int dst, unsigned work) {
+    static int on = -1;
+    static unsigned calls, ok, bad, bytes;
+    unsigned hw, hdr, cap, i, diff = 0, firstdiff = 0;
+    unsigned char *ref;
+    int got, ret, good;
+    if (on < 0) on = port_flag("infcheck");
+    if (!on) return __real_func_10006530(src, dst, work);
+    if ((unsigned)src < 0x10000000u || (unsigned)dst < 0x10000000u) { /* not game memory: report, don't decode */
+        static int nbad;
+        if (nbad++ < 4) {
+            extern signed char D_800BC860[]; extern unsigned D_800B1268[];
+            unsigned k, nf = 0;
+            port_log("[infcheck] bad pointers: src %08X dst %08X work %08X; texture cache entries with flag 0x40:\n",
+                     (unsigned)src, (unsigned)dst, work);
+            for (k = 0; k < 0x1E54; k++) {
+                int age = (signed char)vbe_ld8(&D_800BC860[k]);
+                if (age & 0x40 && nf++ < 12)
+                    port_log("[infcheck]   id 0x%X age %02X slot %08X\n", k, age & 0xFF, D_800B1268[k]);
+            }
+            port_log("[infcheck]   %u entries\n", nf);
+            { extern int D_800DA378, D_800DA37C; extern unsigned D_800B1268[];
+              port_log("[infcheck]   range D_800DA378 %d D_800DA37C %d; D_800BC860 at %p, D_800B1268 at %p\n", D_800DA378, D_800DA37C,
+                       (void *)D_800BC860, (void *)D_800B1268);
+              for (k = 0; k < 0x200000; k++) if (D_800B1268[k] == (unsigned)dst) {
+                  port_log("[infcheck]   slot index %u (age byte %02X)\n", k, vbe_ld8(&D_800BC860[k])); break; } }
+            port_js_stack(1, 6);
+        }
+        return __real_func_10006530(src, dst, work);
+    }
+    hw = vbe_ld8((void *)(uintptr_t)src) << 8 | vbe_ld8((void *)(uintptr_t)(src + 1));
+    hdr = hw == 0x1172 ? 0 : (unsigned)vbe_ld8((void *)(uintptr_t)src) << 24 | vbe_ld8((void *)(uintptr_t)(src + 1)) << 16 |
+                             vbe_ld8((void *)(uintptr_t)(src + 2)) << 8 | vbe_ld8((void *)(uintptr_t)(src + 3));
+    cap = hdr && hdr < 0x800000 ? hdr : 0x400000;
+    ref = malloc(cap);
+    got = inflate_raw2(ref, cap, (const unsigned char *)(uintptr_t)(src + (hw == 0x1172 ? 2 : 4)), 0x1000000u, 1);
+    ret = __real_func_10006530(src, dst, work);
+    if (got > 0 && ret == got)
+        for (i = 0; i < (unsigned)got; i++)
+            if (vbe_ld8((void *)(uintptr_t)(dst + i)) != ref[i]) { if (!diff++) firstdiff = i; }
+    calls++;
+    good = got > 0 && ret == got && !diff && (!hdr || (unsigned)ret == hdr);
+    if (good) { ok++; bytes += ret; }
+    else bad++;
+    if (calls <= (on > 1 ? 100000u : 12u) || !good)
+        port_log("[infcheck] #%u src %08X dst %08X work %08X: header %u, game C %d, reference %d, %u byte diffs (first +%u)%s\n",
+                 calls, (unsigned)src, (unsigned)dst, work, hdr, ret, got, diff, firstdiff,
+                 good ? " ok" : " MISMATCH");
+    if (calls % 64 == 0) port_log("[infcheck] %u calls: %u ok, %u mismatch, %u bytes\n", calls, ok, bad, bytes);
+    free(ref);
+    return ret;
 }
+
+/* P37 (diagnostic, ?infcheck=1): texture ids outside the cache (>= 0x1E54). func_1510D66C stores the id in the dirty
+ * range D_800DA378 / D_800DA37C before its range check, and func_1510D984 then walks past the end of its tables. */
+int __real_func_1510D66C(int id, int *outSize, int age, int addRef);
+int __wrap_func_1510D66C(int id, int *outSize, int age, int addRef) {
+    static int on = -1, n;
+    if (on < 0) on = port_flag("infcheck");
+    if (on && ((unsigned)id >= 0x1E54) && n++ < 6) {
+        port_log("[texid] func_1510D66C id 0x%X age %d addRef %d\n", (unsigned)id, age, addRef);
+        port_js_stack(1, 5);
+    }
+    return __real_func_1510D66C(id, outSize, age, addRef);
+}
+/* P37: ?infcheck=2 also logs which level asset func_150031EC asks for (to tie inflate calls to the level model list) */
+void __real_func_150031EC(int level);
+void __wrap_func_150031EC(int level) {
+    static int on = -1;
+    if (on < 0) on = port_flag("infcheck");
+    if (on > 1) port_log("[infcheck] level loader func_150031EC(0x%X) begins\n", level);
+    __real_func_150031EC(level);
+    if (on > 1) port_log("[infcheck] level loader func_150031EC(0x%X) ends\n", level);
+    if (on && level == 0x21) { /* texture 0xED0 through the game's own cache once the level is loaded (slots are -1 now);
+                                * the func_10006530 wrapper checks the C inflater's output against the 768-byte header */
+        extern unsigned D_800B1268[];
+        int sz = 0, had = D_800B1268[0xED0] != 0xFFFFFFFFu, p = __wrap_func_1510D66C(0xED0, &sz, 3, 0);
+        port_log("[infcheck] texture 0xED0 via func_1510D66C: %s, data %08X size %d\n", had ? "already cached" : "loaded", p, sz);
+    }
+}
+int port_infcheck_on(void) { return port_flag("infcheck"); } /* for the vbe TU game_entry.c (its literals are vbe) */

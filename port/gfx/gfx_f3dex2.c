@@ -1184,15 +1184,76 @@ void gfx_run_task(void *task) {
     }
 }
 
-/* P31: flag getter for the vbe TU pc_overrides.c (string literals there are in virtual big-endian memory). */
-int port_flag_dlapprox(void) {
-    static int v = -1;
-    if (v < 0) v = port_flag("dlapprox");
-    return v;
+/* P37: ?dlapprox=1 and the visibility-walk check, as a link-time wrapper (-Wl,--wrap=func_150A5858, port/Makefile)
+ * of the game's C func_150A5858 (game_eu_D2DB0.c, port P34; the P31 PC stand-in is gone). The level loader is the
+ * game's C func_150031EC (P34), so the P33 ?nolvlload flag is gone too.
+ *   default: call the game C; with ?vislog=N log the first N calls: source tris (0x05: 1, 0x06: 2, 0x10-0x1F: 4 vis
+ *            slots), kept tris and commands in the emitted DL, visible tri slots, and once the leaf-list check below.
+ *   dlapprox: emit gSPDisplayList(dl) instead (the whole level DL, no culling; diagnostic only).
+ * Game memory: words are native, bytes / halfwords go through vbe_ld8 / vbe_ld16. */
+uint32_t *__real_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask);
+extern unsigned D_800D3668, D_800D3A8C, D_800DC278;
+static int vis_tris(const uint32_t *p, const uint32_t *end, unsigned *ncmd) {
+    int t = 0; unsigned n = 0;
+    for (; end ? p < end : 1; p += 2, n++) {
+        unsigned op = p[0] >> 24;
+        if (!end && op == 0xDF) break;
+        if (op == 0x05) t += 1; else if (op == 0x06) t += 2; else if (op >= 0x10 && op <= 0x1F) t += 4;
+        if (n > 200000) break;
+    }
+    if (ncmd) *ncmd = n;
+    return t;
 }
-/* P33: the PC level loader is on by default; ?nolvlload=1 restores the stub (P31 had it opt-in as ?lvlload=1) */
-int port_flag_lvlload(void) {
-    static int v = -1;
-    if (v < 0) v = !port_flag("nolvlload");
-    return v;
+uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3, int a4, int mask) {
+    static int dla = -1, vlog = -1, calls;
+    uint32_t *r;
+    if (dla < 0) { dla = port_flag("dlapprox"); vlog = port_flag("vislog"); }
+    if (dla && dl != 0) {
+        gdl[0] = 0xDE000000;
+        gdl[1] = (uint32_t)dl;
+        return gdl + 2;
+    }
+    static int npre;
+    if (npre++ < vlog)
+        port_log("[vis] pre %d: dl %08X gdl %08X mtx %08X mask %X vis [%08X, %08X) tree %08X\n", npre - 1, (unsigned)dl,
+                 (unsigned)(uintptr_t)gdl, (unsigned)(uintptr_t)mtx, mask, D_800D3668, D_800D3A8C, D_800DC278);
+    (void)npre;
+    if (D_800D3A8C <= D_800D3668 || (D_800D3A8C - D_800D3668) & 7 || !D_800DC278) {
+        /* P37 GUARD (not a stand-in): the walk's inputs are missing. The visibility-byte range [D_800D3668, D_800D3A8C)
+         * (EU 0x800D3A88 / 0x800D3A8C) is sized by func_15003668 from func_15002878() = the largest per-area triangle
+         * count D_800DBE18[], which the still-asm func_15001460 (game_2DF70, the level-DL triangle walk) counts in
+         * D_800DBE38; the node tree D_800DC278 = D_800DBE08[area] (func_150A4ED4) is built from those triangles.
+         * With func_15001460 stubbed the range is empty, and the clear loop (a do-while, as in the asm) runs off the end
+         * of memory. Do what the old stub did: emit nothing. */
+        static int nlog;
+        if (nlog++ < 2) port_log("[vis] skipped (inputs missing): vis [%08X, %08X) tree %08X\n", D_800D3668, D_800D3A8C, D_800DC278);
+        return gdl;
+    }
+    r = __real_func_150A5858(dl, gdl, mtx, a3, a4, mask);
+    if (calls++ < vlog && dl) {
+        unsigned nsrc, nout, nvis = 0, nb = D_800D3A8C - D_800D3668;
+        int tsrc = vis_tris((const uint32_t *)(uintptr_t)dl, NULL, &nsrc);
+        int tout = vis_tris((const uint32_t *)gdl, (const uint32_t *)r, &nout);
+        for (unsigned i = 0; i < nb && i < 0x100000; i++) nvis += vbe_ld8((void *)(uintptr_t)(D_800D3668 + i)) != 0;
+        port_log("[vis] call %d dl %08X mask %X: src %u cmds %d tri slots; out %u cmds %d tri slots; vis bytes %u/%u\n",
+                 calls - 1, (unsigned)dl, mask, nsrc, tsrc, nout, tout, nvis, nb);
+        if (calls == 1) { /* P34 UNVERIFIED: prev index starts at 0 (asm: the caller's $gp). It matters only when the first
+                           * visible leaf of a frame starts with a relative byte (1..0x7F). Count such leaves. */
+            unsigned node = D_800DC278, leaves = 0, rel = 0, nodes = 0, firstrel = 0;
+            while (node && nodes < 100000) {
+                int ch = (int16_t)vbe_ld16((void *)(uintptr_t)(node + 0xC)), off;
+                nodes++;
+                if (ch) { node += ch; continue; }
+                leaves++;
+                { unsigned b0 = vbe_ld8((void *)(uintptr_t)(node + 0xE));
+                  if (b0 && b0 < 0x80) { if (!rel) firstrel = node; rel++; } }
+                off = (int16_t)vbe_ld16((void *)(uintptr_t)(node + 4));
+                if (!off) break;
+                node += off;
+            }
+            port_log("[vis] tree %08X: %u nodes, %u leaves, %u leaves start with a relative index (first %08X)\n",
+                     D_800DC278, nodes, leaves, rel, firstrel);
+        }
+    }
+    return r;
 }

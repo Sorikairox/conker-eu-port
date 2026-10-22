@@ -378,7 +378,15 @@ def self_intrinsic(text, st):
 # must keep their absolute value, so every reference becomes a constant `inttoptr` and the external
 # declaration is dropped (no zero-filled data stub is generated any more). Values: the symbol
 # addresses in conker.eu.ld / port/stubs/stubs_report.txt (session P9).
-ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240': 0xAB2240}
+ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240': 0xAB2240,
+           # P37: more absolute symbols used as numbers (undefined_syms_auto.txt): texture ids passed as &D_D11 /
+           # &D_A4A to func_1510D66C (game_A9D90.c, game_eu_200480.c) and values &D_2C1 / &D_1C0 (game_eu_F2A30.c).
+           # As data stubs they were wasm addresses: func_1510D66C stored the id in D_800DA37C (before its range
+           # check), so func_1510D984 walked its cache tables up to 0x10xxxxxx and fed garbage to the inflater.
+           'D_D11': 0xD11, 'D_A4A': 0xA4A, 'D_2C1': 0x2C1, 'D_1C0': 0x1C0,
+           # P37: texture ids stored as D_89C / D_85D (boot screen func_151EC300, game_eu_216470.c), and the ROM range of
+           # the fixed player-slot setup table that func_15016950 (game_eu_44010.c) DMAs: D_1A3750..D_1A3840..D_1A3B40.
+           'D_89C': 0x89C, 'D_85D': 0x85D, 'D_1A3750': 0x1A3750, 'D_1A3840': 0x1A3840}
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. func_151DE100 is left alone: it is read as code bytes.

@@ -53,7 +53,10 @@ void func_10001194(s32 arg0) {
     func_10003930();
     port_fix_heap_bounds(); /* P11: K0 constants from func_10003930 -> n64_rdram mirror */
     func_10003BD0();
-    func_1000709C();
+    /* P37: the inflater's fixed huffman tables (D_8003C230). The asm jal target is 0x1000738C (EU); the commented C
+     * in init_1050.c names it func_1000709C (the US name, a "missing" stub until now). Now that Rare's inflater is C
+     * (init_eu_5DA0.c, port P36) a fixed block needs these tables: without them inf_codes read wild pointers. */
+    { void func_1000738C(void); func_1000738C(); }
     fb = D_8002AAE8;
     fb[0] = func_10003C6C(126144, 0xFF, 3, 1, 0);
     fb[1] = func_10003C6C(126144, 0xFF, 3, 1, 0);
