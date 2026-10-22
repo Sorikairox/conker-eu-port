@@ -224,7 +224,7 @@ void func_15003570(void) {
 // }
 
 #ifdef NON_MATCHING
-s32 func_15001460(s32);
+void func_15001460(s32);
 void func_15002754(void);
 s32 func_15002878(void);
 void func_1510F800(s32);

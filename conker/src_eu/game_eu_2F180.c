@@ -7,6 +7,9 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_15002248(s32 x0, s32 x1, s32 z0, s32 z1, s32 *xmin, s32 *zmax, u16 *in, u16 **out);
 s32 func_15049260(struct_eu_bytes24 arg0);
+void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list);
+extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
+extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
 #endif
 
 void func_15001970(void) {
@@ -25,8 +28,44 @@ void func_15001970(void) {
     D_800B0DC4 = D_800B0DC0;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_80091EA0[];   /* node pool size per level (rodata) */
+extern s32 D_800B11EC;     /* node pool base */
+extern s16 D_800DC260;
+extern s16 D_800DC262;
+extern s16 D_800DC264;
+extern s16 D_800DC266;
+void func_10023BC0(void);  /* __osPiGetAccess */
+void func_10023C04(void);  /* __osPiRelAccess */
+
+/* Node pool for the level quadtrees (func_15001B10 hands out 14-byte nodes, func_15002008 appends the leaf lists).
+ * The size per level doubles unless the cart word at ROM 0xD24 is 0x98CCE31A. */
+void func_15001A08(void) {
+    s32 size;
+    s32 word;
+
+    size = D_80091EA0[D_800BE9F0];
+    func_10023BC0();
+    while (IO_READ(PI_STATUS_REG) & 3) {
+    }
+    word = IO_READ(D_80000308 | 0xB0000D24);
+    func_10023C04();
+    if (word != 0x98CCE31A) {
+        size <<= 1;
+    }
+    D_800B11EC = allocate_memory(size, 1, 0, 0);   /* implicit int declaration (func_15001970) */
+    D_800B0DE0 = (u8 *) D_800B11EC;
+    D_800B0DCC = 0;
+    D_800B0DD0 = 0;
+    D_800DC260 = 0;
+    D_800DC262 = 0;
+    D_800DC264 = 0;
+    D_800DC266 = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15001A08.s")
-// NON-MATCHING: JUSTREG
+#endif
+// NON-MATCHING: JUSTREG (US draft)
 // void func_15001A08(void) {
 //     s32 sp24;
 //     s32 tmp;
@@ -202,10 +241,68 @@ u16 *func_15001DE0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
 }
 
 // 3 loops
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15002008.s")
 #ifdef NON_MATCHING
-extern s32 D_800DC26C;   /* triangle table: 3 vertex pointers (s16 x, y, z) per entry */
-extern s32 D_800DC274;   /* grid table: s16 x, z per entry */
+/* Leaf list of a quadtree node, appended to the node pool after the node: the entries of the u16 index list
+ * `list` (list[0] = count) whose triangle (relative to the box centre, (x0 + x1) / 2 and (z0 + z1) / 2) passes
+ * the box test func_15049260 (0 = inside). The first kept index is written as a big-endian halfword | 0x8000;
+ * the next ones as one byte (index - previous) when that is below 0x80, else again as a halfword | 0x8000.
+ * A 0 byte ends the list. Vertex pointers up to 0x80000000 count as (0, 0, 0). */
+void func_15002008(s32 x0, s32 x1, s32 z0, s32 z1, u16 *list) {
+    s32 n;
+    s32 prev;
+    s32 k;
+    s32 d;
+    u16 *src;
+    u16 *end;
+    union {
+        struct_eu_bytes24 s;
+        f32 v[9];
+    } tri;
+
+    func_150492CC((f32) (x1 - x0), 32000.0f, (f32) (z1 - z0));
+    prev = -1;
+    n = list[0];
+    if (n > 0) {
+        src = &list[1];
+        end = &list[n + 1];
+        do {
+            u16 idx = *src;
+            u32 *verts = (u32 *) (D_800DC26C + idx * 12);
+
+            for (k = 0; k < 3; k++) {
+                s16 *p = (s16 *) verts[k];
+                if ((u32) p < 0x80000001) {
+                    tri.v[k * 3 + 0] = 0.0f;
+                    tri.v[k * 3 + 1] = 0.0f;
+                    tri.v[k * 3 + 2] = 0.0f;
+                } else {
+                    tri.v[k * 3 + 0] = (f32) (p[0] - (x0 + x1) / 2);
+                    tri.v[k * 3 + 1] = (f32) p[1];
+                    tri.v[k * 3 + 2] = (f32) (p[2] - (z0 + z1) / 2);
+                }
+            }
+            if (func_15049260(tri.s) == 0) {
+                if (prev == -1) {
+                    func_15001B8C(idx | 0x8000);
+                } else {
+                    d = idx - prev;
+                    if (d < 0x80) {
+                        func_15001B5C(d & 0xFF);
+                    } else {
+                        func_15001B8C(idx | 0x8000);
+                    }
+                }
+                prev = idx;
+            }
+            src++;
+        } while (src != end);
+    }
+    func_15001B5C(0);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2F180/func_15002008.s")
+#endif
+#ifdef NON_MATCHING
 
 /* Quadtree build helper of func_15001DE0: keeps the entries of the u16 index list `in` (in[0] = count)
  * whose triangle (relative to the box centre) passes the box test func_15049260 (0 = inside), writes
