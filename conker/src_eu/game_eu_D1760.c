@@ -3,7 +3,227 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+/*
+ * P54: func_150A3F50 / func_150A48C0 / func_150A5480 are hand-written asm (one shared register convention): each
+ * walks a set of triangles and runs the per-triangle floor test func_150A408C (a label inside func_150A3F50.s,
+ * here floor_tri) on the integer point (x, z). A triangle passes when (x, z) is inside its x / z bounds (+-2) and
+ * between the two edges at z; its floor height (24.8, clamped to the triangle's y range) goes to the next 16-byte
+ * entry of D_800D3720: +0 height, +4 pointer to the 3 vertex offsets, +8 vertex base, +0xC tag. The count stops at
+ * 0x27 (later hits overwrite entry 0x27). Returns the count.
+ * - func_150A3F50: area 0 / 1 (level). D_800DBE62 == 0: every triangle 0 .. D_800DBE4C - 1 (the asm leaves the tag
+ *   = the caller's $gp; 0 here). Else D_800D39A4 = 0 and the BSP tree D_800DC278 (+4 sibling offset, +6 radius,
+ *   +8 / +0xA centre x / z, +0xC child offset, leaf byte list at +0xE: b < 0x80 = previous index + b, else 15-bit
+ *   index ((b & 0x7F) << 8 | next byte), 0 = end): only the first leaf reached is tested, tag 0. The first delta
+ *   adds to the caller's $v1 (0 here; level data starts each leaf with an absolute index).
+ * - func_150A48C0: area 2, the world objects in the u16 list ids[0 .. count - 1] (D_800DBEF4 + id * 0xA0: +0x56
+ *   triangle count, +0x58 first triangle; vertex base D_800DC328[id], skipped when 0), tag = id.
+ * - func_150A5480: area 3, the 25 records D_800CC2D0 except D_800D39FC - 1, with +0 != 0, +0xF8 & 0x4000,
+ *   +0x264 (vertex base) and +0x268 (bounds) set; byte +4 = model: D_800C5D38[m] triangles, offsets D_800C6070[m].
+ */
+extern u8 D_800DBE62;
+extern s32 D_800DBE4C;          /* level triangle count */
+extern s32 D_800D39A4;
+extern s32 D_800D3720;          /* candidate floors, 16 bytes each */
+extern s32 D_800DC26C;          /* triangle vertex offsets (3 words per triangle) */
+extern s32 D_800DC270;          /* triangle x/z bounds (4 halfwords per triangle) */
+extern s32 D_800DC278;          /* BSP tree */
+extern u8 D_800D39FC;
+extern u16 D_800C5D38[];
+
+static s32 floor_div(s32 a, s32 b) {
+    if (b == 0) return (a < 0) ? 1 : -1; /* VR4300 lo for a zero divisor */
+    if (b == -1) return (s32)(0u - (u32)a);
+    return a / b;
+}
+#define FLOOR_MUL(a, b) ((s32)((u32)(a) * (u32)(b)))
+#define FLOOR_SHL8(a) ((s32)((u32)(a) << 8))
+
+/* func_150A408C: floor test of triangle i (tables vofs / bnd, vertices at base + offset); n = entries so far */
+static s32 floor_tri(s32 x, s32 z, s32 i, u8 *vofs, u8 *bnd, s32 base, s32 tag, s32 n) {
+    s16 *b = (s16 *)(bnd + i * 8);
+    s32 *vo;
+    s16 *p;
+    s32 ax, ay, az, bx, by, bz, cx, cy, cz, t;
+    s32 dzAC, dz, k, xAC, dz2, dzB, lx, ux, x2, d1, d2, s;
+    s32 ymax, ymin, yAC, ly, uy, y2, v;
+    u8 *e;
+
+    if (x < b[0] - 2 || z < b[1] - 2 || b[2] + 2 < x || b[3] + 2 < z) return n;
+    vo = (s32 *)(vofs + i * 12);
+    p = (s16 *)(vo[0] + base); ax = p[0]; ay = p[1]; az = p[2];
+    p = (s16 *)(vo[1] + base); bx = p[0]; by = p[1]; bz = p[2];
+    p = (s16 *)(vo[2] + base); cx = p[0]; cy = p[1]; cz = p[2];
+    /* A = the lowest z */
+    if (az < bz ? (cz < az) : !(bz < cz)) {
+        t = ax; ax = cx; cx = t;
+        t = ay; ay = cy; cy = t;
+        t = az; az = cz; cz = t;
+    } else if (!(az < bz)) {
+        t = ax; ax = bx; bx = t;
+        t = ay; ay = by; by = t;
+        t = az; az = bz; bz = t;
+    }
+    if (z < az) return n;
+    /* C = the highest z */
+    if (cz < bz) {
+        t = bx; bx = cx; cx = t;
+        t = by; by = cy; cy = t;
+        t = bz; bz = cz; cz = t;
+    }
+    if (cz < z) return n;
+    dzAC = cz - az + 1;
+    k = floor_div(FLOOR_SHL8(cx - ax), dzAC);
+    dz = z - az;
+    xAC = (FLOOR_MUL(dz, k) >> 8) + ax;
+    dzB = z - bz;
+    if (dzB < 0) {
+        dz2 = bz - az + 1; s = z - az; lx = ax; ux = bx;
+    } else {
+        dz2 = cz - bz + 1; s = dzB; lx = bx; ux = cx;
+    }
+    k = floor_div(FLOOR_SHL8(ux - lx), dz2);
+    x2 = (FLOOR_MUL(s, k) >> 8) + lx;
+    d1 = x2 - x;
+    d2 = xAC - x;
+    t = (d1 < d2) ? 1 : -1;
+    d1 -= t;
+    d2 += t;
+    if ((d2 ^ d1) >= 0) return n;
+
+    e = (u8 *)&D_800D3720 + n * 16;
+    *(s32 *)(e + 4) = (s32)vo;
+    ymax = ay;
+    if (ymax < by) ymax = by;
+    if (ymax < cy) ymax = cy;
+    ymax = FLOOR_SHL8(ymax);
+    ymin = (by < ay) ? by : ay;
+    if (cy < ymin) ymin = cy;
+    k = floor_div(FLOOR_SHL8(cy - ay), dzAC);
+    yAC = FLOOR_SHL8(ay) + FLOOR_MUL(dz, k);
+    if (dzB < 0) {
+        ly = ay; uy = by;
+    } else {
+        ly = by; uy = cy;
+    }
+    ymin = FLOOR_SHL8(ymin);
+    k = floor_div(FLOOR_SHL8(uy - ly), dz2);
+    y2 = FLOOR_MUL(s, k) + FLOOR_SHL8(ly);
+    k = floor_div(FLOOR_SHL8(yAC - y2), xAC - x2);
+    v = y2 + (FLOOR_MUL(x - x2, k) >> 8);
+    if (ymax < v) v = ymax;
+    if (v < ymin) v = ymin;
+    *(s32 *)(e + 0) = v;
+    *(s32 *)(e + 8) = base;
+    *(s32 *)(e + 0xC) = tag;
+    if (n != 0x27) n++;
+    return n;
+}
+
+s32 func_150A3F50(s32 x, s32 z) {
+    u8 *vofs = (u8 *)D_800DC26C;
+    u8 *bnd = (u8 *)D_800DC270;
+    u8 *node;
+    s32 n = 0;
+    s32 i, d, off;
+    u32 c;
+
+    if (D_800DBE62 == 0) {
+        for (i = 0; i != D_800DBE4C; i++) {
+            n = floor_tri(x, z, i, vofs, bnd, 0, 0, n);
+        }
+        return n;
+    }
+    D_800D39A4 = 0;
+    node = (u8 *)D_800DC278;
+    for (;;) {
+        d = (s32)((u32)x - (u32)*(s16 *)(node + 8));
+        if (d <= 0) d = (s32)(0u - (u32)d);
+        if (!(*(u16 *)(node + 6) < d)) {
+            d = (s32)((u32)z - (u32)*(s16 *)(node + 0xA));
+            if (d < 0) d = (s32)(0u - (u32)d);
+            if (!(*(u16 *)(node + 6) < d)) {
+                off = *(s16 *)(node + 0xC);
+                if (off == 0) break;
+                node += off;
+                continue;
+            }
+        }
+        off = *(s16 *)(node + 4);
+        if (off == 0) return n;
+        node += off;
+    }
+    node += 0xE;
+    i = 0;
+    while ((c = node[0]) != 0) {
+        if (c & 0x80) {
+            node++;
+            i = ((c & 0x7F) << 8) | node[0];
+        } else {
+            i += c;
+        }
+        n = floor_tri(x, z, i, vofs, bnd, 0, 0, n);
+        node++;
+    }
+    return n;
+}
+
+s32 func_150A48C0(s32 x, s32 z, s32 count, s32 *idList) {
+    u16 *ids = (u16 *)idList;
+    u16 *end;
+    u8 *obj;
+    u8 *vofs, *bnd;
+    s32 n = 0;
+    s32 id, base, cnt, i;
+
+    if (count == 0) return 0;
+    end = ids + count;
+    while (ids != end) {
+        id = *ids++;
+        obj = (u8 *)D_800DBEF4 + id * 0xA0;
+        bnd = (u8 *)D_800DC270 + *(u16 *)(obj + 0x58) * 8;
+        vofs = (u8 *)D_800DC26C + *(u16 *)(obj + 0x58) * 12;
+        base = D_800DC328[id];
+        if (base == 0) continue;
+        cnt = *(u16 *)(obj + 0x56);
+        for (i = 0; i != cnt; i++) {
+            n = floor_tri(x, z, i, vofs, bnd, base, id, n);
+        }
+    }
+    return n;
+}
+
+s32 func_150A5480(s32 x, s32 z) {
+    u8 *rec = (u8 *)D_800CC2D0;
+    u8 *end = rec + 0x4F4C;
+    s32 skip = D_800D39FC - 1;
+    s32 n = 0;
+    s32 idx = -1;
+    s32 base, cnt, m, i;
+    u8 *bnd, *vofs;
+
+    for (;;) {
+        idx++;
+        if (end == rec) return n;
+        rec += 0x32C;
+        if (idx == skip) continue;
+        if (*(s32 *)(rec - 0x32C) == 0) continue;
+        if (!(*(s32 *)(rec - 0x32C + 0xF8) & 0x4000)) continue;
+        base = *(s32 *)(rec - 0x32C + 0x264);
+        bnd = *(u8 **)(rec - 0x32C + 0x268);
+        if (base == 0) continue;
+        m = *(rec - 0x32C + 4);
+        cnt = D_800C5D38[m];
+        vofs = (u8 *)D_800C6070[m];
+        if (bnd == NULL) continue;
+        for (i = 0; i != cnt; i++) {
+            n = floor_tri(x, z, i, vofs, bnd, base, idx, n);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A3F50.s")
+#endif
 
 #ifdef NON_MATCHING
 /*
@@ -124,12 +344,14 @@ s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out) {
     return (s32)out;
 }
 
-#pragma GLOBAL_ASM("src_eu/nm_asm/func_150A44A4_tail.s")
+/* P54: func_150A44A4_tail.s no longer needed (func_150A3F50 / func_150A48C0 are C) */
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A44A4.s")
 #endif
 
+#ifndef NON_MATCHING /* P54: C above */
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A48C0.s")
+#endif
 
 #ifdef NON_MATCHING
 /*
@@ -348,11 +570,13 @@ void func_150A4ED4(s32 area) {
     D_800DC280 = area;
 }
 
-#pragma GLOBAL_ASM("src_eu/nm_asm/func_150A49D0_tail.s")
+/* P54: func_150A49D0_tail.s no longer needed (func_150A3F50 / func_150A48C0 are C) */
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A49D0.s")
 #endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A4FE4.s")
 
+#ifndef NON_MATCHING /* P54: C above */
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A5480.s")
+#endif

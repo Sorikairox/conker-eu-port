@@ -1072,7 +1072,7 @@ s32 func_15044670(f32, f32, s32, struct127 *, s32, s32); // P47: arg 2 = f32 bit
 void func_15055E50(struct127 *, u8);             
 s32 func_150599C8(struct127 *, u8, u16);            
 f32 func_1505A3A8(f32, struct127 *, f32, f32, u8); // P47: a1 = the record (left in a1 by the asm) 
-s32 func_1505A9AC(struct127 *, f32);            
+void func_1505A9AC(struct127 *, f32);
 s32 func_1505D024(struct127 *, s32, u16, s32); 
 s32 func_1505D6F0(struct127 *, u8);             
 s32 func_1505F298(struct127 *, struct49 *);     
