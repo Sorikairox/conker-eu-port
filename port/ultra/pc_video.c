@@ -34,7 +34,12 @@ void port_video_frame(void) {
         demo = gfx_demo_init(spec) == 0 ? 2 : 0;
     }
     if (demo == 2) { gfx_demo_frame(); return; }
-    if (port_gfx_frame_tasks) { port_gfx_frame_tasks = 0; return; } /* the game drew this frame */
+    /* P33: only until the game's first frame. Before, every VI frame without a gfx task (the game draws at
+     * 25-30 fps or less in the browser) cleared the canvas to the animated colour, so screenshots and the
+     * page often showed it instead of the last game frame (preserveDrawingBuffer keeps that frame). */
+    static int drawn;
+    if (port_gfx_frame_tasks) { port_gfx_frame_tasks = 0; drawn = 1; return; } /* the game drew this frame */
+    if (drawn) return;
     float t = port_frame_count / 60.0f;
     glClearColor(0.10f + 0.08f * sinf(t), 0.12f, 0.20f + 0.10f * sinf(t * 0.7f), 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

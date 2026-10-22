@@ -80,14 +80,17 @@ typedef struct {
     unsigned bitbuf, bitcnt;
     unsigned char *out; unsigned outlen, outpos;
     int err;
+    int vbe; /* P33: in/out are game memory in the vbe layout (byte A at A ^ 3) */
 } Inf;
+#define INB(s, i)  (*((s)->vbe ? (const unsigned char *)(((unsigned long)((s)->in + (i))) ^ 3) : (s)->in + (i)))
+#define OUTB(s, i) (*((s)->vbe ? (unsigned char *)(((unsigned long)((s)->out + (i))) ^ 3) : (s)->out + (i)))
 typedef struct { short count[16], symbol[288]; } Huff;
 
 static int bits(Inf *s, int need) {
     unsigned val = s->bitbuf;
     while (s->bitcnt < (unsigned)need) {
         if (s->inpos >= s->inlen) { s->err = 1; return 0; }
-        val |= (unsigned)s->in[s->inpos++] << s->bitcnt;
+        val |= (unsigned)INB(s, s->inpos) << s->bitcnt; s->inpos++;
         s->bitcnt += 8;
     }
     s->bitbuf = val >> need;
@@ -129,7 +132,7 @@ static void codes(Inf *s, const Huff *lc, const Huff *dc) {
         if (s->err) return;
         if (sym < 256) {
             if (s->outpos >= s->outlen) { s->err = 3; return; }
-            s->out[s->outpos++] = (unsigned char)sym;
+            OUTB(s, s->outpos) = (unsigned char)sym; s->outpos++;
         } else if (sym == 256) {
             return;
         } else {
@@ -140,14 +143,14 @@ static void codes(Inf *s, const Huff *lc, const Huff *dc) {
             if (ds < 0 || ds >= 30) { s->err = 5; return; }
             unsigned dist = DBASE[ds] + bits(s, DEXT[ds]);
             if (dist > s->outpos || s->outpos + len > s->outlen) { s->err = 6; return; }
-            while (len--) { s->out[s->outpos] = s->out[s->outpos - dist]; s->outpos++; }
+            while (len--) { OUTB(s, s->outpos) = OUTB(s, s->outpos - dist); s->outpos++; }
         }
     }
 }
 
-static int inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *in, unsigned inlen) {
+static int inflate_raw2(unsigned char *out, unsigned outlen, const unsigned char *in, unsigned inlen, int vbe) {
     static Huff lc, dc;
-    Inf st = {in, inlen, 0, 0, 0, out, outlen, 0, 0}, *s = &st;
+    Inf st = {in, inlen, 0, 0, 0, out, outlen, 0, 0, vbe}, *s = &st;
     int last;
     do {
         last = bits(s, 1);
@@ -155,11 +158,10 @@ static int inflate_raw(unsigned char *out, unsigned outlen, const unsigned char 
         if (type == 0) {
             s->bitbuf = s->bitcnt = 0;
             if (s->inpos + 4 > s->inlen) return -1;
-            unsigned len = in[s->inpos] | in[s->inpos + 1] << 8;
+            unsigned len = INB(s, s->inpos) | INB(s, s->inpos + 1) << 8;
             s->inpos += 4;
             if (s->inpos + len > inlen || s->outpos + len > outlen) return -1;
-            memcpy(out + s->outpos, in + s->inpos, len);
-            s->inpos += len; s->outpos += len;
+            while (len--) { OUTB(s, s->outpos) = INB(s, s->inpos); s->outpos++; s->inpos++; }
         } else if (type == 1) {
             static short l[288 + 30];
             int i;
@@ -197,6 +199,9 @@ static int inflate_raw(unsigned char *out, unsigned outlen, const unsigned char 
         if (s->err) return -1;
     } while (!last);
     return (int)s->outpos;
+}
+static int inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *in, unsigned inlen) {
+    return inflate_raw2(out, outlen, in, inlen, 0);
 }
 
 /* ---------------------------------------------------------------- segment loader */
@@ -327,4 +332,27 @@ void port_mem_null_report(void) {
 /* raw DEFLATE for other PC-side users (ROM asset viewer, port/gfx/gfx_demo.c); returns bytes out */
 int port_inflate_raw(unsigned char *out, unsigned outlen, const unsigned char *in, unsigned inlen) {
     return inflate_raw(out, outlen, in, inlen);
+}
+
+/* P33, TEMPORARY until the port branch converts init_eu_5DA0.s: func_1000654C, Rare's inflater entry
+ * (asm, 58 lines + func_1000661C .. func_100070F0 with private FPU-register state), called by the C
+ * wrapper func_10006530(src, dst, limit) from the asset loader func_1502B350 and others. From the asm:
+ * the deflate stream starts at src + 2 when the first BE halfword is 0x1172, else at src + 4 (after the
+ * rzip BE u32 size); the output limit is 0x70000000, lowered to src - dst when src is above dst
+ * (in-place) and to limit - dst when that is >= 0 and smaller; the return value is the number of bytes
+ * written (f17), or 0 on an error. Both buffers are game memory in the vbe layout. As a weak stub it
+ * returned a1 and wrote nothing, so every compressed asset loaded as zeros (P33: the level 0x21 model
+ * list was zero, func_1502B4A8 scanned past it for a terminator and relocated the next heap block). */
+int func_1000654C(int src, int dst, unsigned limit) {
+    const unsigned char *in = (const unsigned char *)(unsigned long)src;
+    unsigned hw = (unsigned)*(const unsigned char *)(((unsigned long)in) ^ 3) << 8 | *(const unsigned char *)(((unsigned long)in + 1) ^ 3);
+    unsigned lim = 0x70000000u;
+    int d = src - dst, got;
+    in += (hw == 0x1172) ? 2 : 4;
+    if (d > 0) lim = (unsigned)d;
+    d = (int)limit - dst;
+    if (d >= 0 && (unsigned)d < lim) lim = (unsigned)d;
+    got = inflate_raw2((unsigned char *)(unsigned long)dst, lim, in, 0x1000000u, 1);
+    { static int n; if (n++ < 8 || got <= 0) port_log("[inflate] src %08X dst %08X limit %08X -> %d\n", (unsigned)src, (unsigned)dst, limit, got); }
+    return got > 0 ? got : 0;
 }

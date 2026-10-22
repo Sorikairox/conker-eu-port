@@ -362,7 +362,23 @@ static void apply_state(void) {
     }
 }
 
+static int draw_log; /* P33: ?drawlog=N: one line per draw call of gfx task N (state + NDC box) */
+static void draw_log_line(void) {
+    float x0 = 1e9f, x1 = -1e9f, y0 = 1e9f, y1 = -1e9f, z0 = 1e9f, z1 = -1e9f; int behind = 0;
+    for (int i = 0; i < nbatch; i++) {
+        const float *o = batch + i * VF;
+        if (o[3] <= 0) { behind++; continue; }
+        float x = o[0] / o[3], y = o[1] / o[3], z = o[2] / o[3];
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
+    }
+    const float *o = batch;
+    port_log("[draw] vp scale %d %d %d trans %d %d %d cimg %u canvas %dx%d\n", vp_scale[0], vp_scale[1], vp_scale[2], vp_trans[0], vp_trans[1], vp_trans[2], cimg_width, canvas_w, canvas_h);
+    port_log("[draw] %d verts (%d w<=0) rm %d ndc x %.2f..%.2f y %.2f..%.2f z %.3f..%.3f | geom %06X oth %06X/%08X cc %06X/%08X tex %d tile %d prim %08X env %08X fog %08X v0 rgba %.2f %.2f %.2f %.2f st %.1f %.1f fog %.2f\n",
+             nbatch, behind, rect_mode, x0, x1, y0, y1, z0, z1, geom, oth_h, oth_l, combine_w0, combine_w1, tex_on, tex_tile,
+             prim_col, env_col, fog_col, o[4], o[5], o[6], o[7], o[8], o[9], o[10]);
+}
 static void flush(void) {
+    if (draw_log && nbatch) draw_log_line();
     if (!nbatch || !gl_ok) { nbatch = 0; return; }
     glBufferData(GL_ARRAY_BUFFER, nbatch * VF * 4, batch, GL_STREAM_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, nbatch);
@@ -554,6 +570,75 @@ static void unknown(unsigned op, unsigned w0, unsigned w1) {
     }
 }
 
+/* P33 DIAGNOSTIC: ?freecam=1 replaces the world camera's view matrix (the G_MTX "P mul" that follows the
+ * projection load; the game multiplies its view into the projection) by a fly camera driven by pad 0,
+ * i.e. P27's input layer: stick (WASD) = move/strafe, C-buttons (IJKL) = look, R (E) / Z (Q) = up/down,
+ * Ctrl = half speed. Start pose: ?fcx=&fcy=&fcz= (world units), ?fcyaw=&fcpitch= (degrees; yaw 0 looks
+ * down -Z); without fcx/fcy/fcz the camera starts outside the bounds of the vertices of the previous frame.
+ * The game is not told: it still gets the pad, and its own view is only replaced in the renderer. */
+static int fc_on = -1, fc_init, fc_moved;
+static float fc_ibmin[3], fc_ibmax[3];
+static float fc_pos[3], fc_yaw, fc_pitch, fc_speed = 20;
+static float fbmin[3], fbmax[3];
+static int fbany;
+int32_t *port_pad_state(void);
+static void freecam_update(void) {
+    if (fc_on < 0) fc_on = port_flag("freecam");
+    if (!fc_on) return;
+    /* until the first input, follow the scene (the level changes at the switch from 0x25 to 0x21) */
+    if (fc_init && !fc_moved && fbany && (memcmp(fc_ibmin, fbmin, sizeof fbmin) || memcmp(fc_ibmax, fbmax, sizeof fbmax))) fc_init = 0;
+    if (!fc_init && fbany) {
+        memcpy(fc_ibmin, fbmin, sizeof fbmin); memcpy(fc_ibmax, fbmax, sizeof fbmax);
+        float size = 0;
+        for (int k = 0; k < 3; k++) { float d = fbmax[k] - fbmin[k]; if (d > size) size = d; }
+        int px = port_flag("fcx"), py = port_flag("fcy"), pz = port_flag("fcz");
+        if (px || py || pz) { fc_pos[0] = (float)px; fc_pos[1] = (float)py; fc_pos[2] = (float)pz; }
+        else {
+            fc_pos[0] = (fbmin[0] + fbmax[0]) / 2;
+            fc_pos[1] = (fbmin[1] + fbmax[1]) / 2 + size * 0.35f;
+            fc_pos[2] = fbmax[2] + size * 0.6f;
+        }
+        fc_yaw = port_flag("fcyaw") * 3.14159265f / 180;
+        fc_pitch = port_flag("fcpitch") * 3.14159265f / 180;
+        if (!px && !py && !pz && !port_flag("fcpitch")) fc_pitch = -0.35f;
+        fc_speed = size > 0 ? size / 300 : 20;
+        fc_init = 1;
+        port_log("[freecam] bounds %.0f %.0f %.0f .. %.0f %.0f %.0f; start %.0f %.0f %.0f yaw %.1f pitch %.1f speed %.1f\n",
+                 fbmin[0], fbmin[1], fbmin[2], fbmax[0], fbmax[1], fbmax[2], fc_pos[0], fc_pos[1], fc_pos[2],
+                 fc_yaw * 57.29578f, fc_pitch * 57.29578f, fc_speed);
+    }
+    if (!fc_init) return;
+    const int32_t *pad = port_pad_state();
+    unsigned b = (unsigned)pad[1];
+    float sx = pad[2] / 80.0f, sy = pad[3] / 80.0f;
+    if (b || pad[2] || pad[3]) fc_moved = 1;
+    if (b & 0x0002) fc_yaw -= 0.03f;   /* C left */
+    if (b & 0x0001) fc_yaw += 0.03f;   /* C right */
+    if (b & 0x0008) fc_pitch += 0.03f; /* C up */
+    if (b & 0x0004) fc_pitch -= 0.03f; /* C down */
+    if (fc_pitch > 1.5f) fc_pitch = 1.5f; if (fc_pitch < -1.5f) fc_pitch = -1.5f;
+    float fx = sinf(fc_yaw) * cosf(fc_pitch), fy = sinf(fc_pitch), fz = -cosf(fc_yaw) * cosf(fc_pitch);
+    float rx = cosf(fc_yaw), rz = sinf(fc_yaw);
+    fc_pos[0] += (fx * sy + rx * sx) * fc_speed; fc_pos[1] += fy * sy * fc_speed; fc_pos[2] += (fz * sy + rz * sx) * fc_speed;
+    if (b & 0x0010) fc_pos[1] += fc_speed; /* R */
+    if (b & 0x2000) fc_pos[1] -= fc_speed; /* Z */
+    if (gfx_stats.tasks % 120 == 0)
+        port_log("[freecam] pos %.0f %.0f %.0f yaw %.1f pitch %.1f\n", fc_pos[0], fc_pos[1], fc_pos[2], fc_yaw * 57.29578f, fc_pitch * 57.29578f);
+}
+/* the view in the N64 row-vector convention (as guLookAtF): v' = v * m */
+static void freecam_view(float m[4][4]) {
+    float lx = -sinf(fc_yaw) * cosf(fc_pitch), ly = -sinf(fc_pitch), lz = cosf(fc_yaw) * cosf(fc_pitch); /* look = -forward */
+    float ux = 0, uy = 1, uz = 0;
+    float rx = uy * lz - uz * ly, ry = uz * lx - ux * lz, rz = ux * ly - uy * lx, l = sqrtf(rx * rx + ry * ry + rz * rz);
+    rx /= l; ry /= l; rz /= l;
+    ux = ly * rz - lz * ry; uy = lz * rx - lx * rz; uz = lx * ry - ly * rx;
+    const float *e = fc_pos;
+    m[0][0] = rx; m[1][0] = ry; m[2][0] = rz; m[3][0] = -(e[0] * rx + e[1] * ry + e[2] * rz);
+    m[0][1] = ux; m[1][1] = uy; m[2][1] = uz; m[3][1] = -(e[0] * ux + e[1] * uy + e[2] * uz);
+    m[0][2] = lx; m[1][2] = ly; m[2][2] = lz; m[3][2] = -(e[0] * lx + e[1] * ly + e[2] * lz);
+    m[0][3] = m[1][3] = m[2][3] = 0; m[3][3] = 1;
+}
+
 static int gfx_trace;   /* P19: dump every command of the first real frames */
 void gfx_run_dl(const void *dl) {
     const unsigned char *stack[32], *pc = dl;
@@ -615,6 +700,7 @@ void gfx_run_dl(const void *dl) {
                            w1, prm & 4 ? "P" : "MV", prm & 2 ? " load" : " mul", prm & 1 ? " push" : "",
                            m[0][0], m[0][1], m[0][2], m[0][3], m[1][0], m[1][1], m[1][2], m[1][3],
                            m[2][0], m[2][1], m[2][2], m[2][3], m[3][0], m[3][1], m[3][2], m[3][3]); }
+            if ((prm & 6) == 4 && fc_on > 0 && fc_init) freecam_view(m); /* P33 ?freecam=1: the world view */
             if (prm & 4) { if (prm & 2) memcpy(proj, m, sizeof m); else mtx_mul(proj, m, proj); }
             else {
                 if ((prm & 1) && mvsp < 31) memcpy(mvstack[mvsp++], mv, sizeof mv);
@@ -776,9 +862,22 @@ void gfx_run_task(void *task) {
     gfx_trace = gfx_stats.tasks <= 2 || (dltrace && gfx_stats.tasks == (unsigned)dltrace);
     if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;
     memset(fr_ops, 0, sizeof fr_ops); memset(fr_seguse, 0, sizeof fr_seguse);
+    freecam_update();
+    { static int dlg = -1; if (dlg < 0) dlg = port_flag("drawlog"); draw_log = dlg && gfx_stats.tasks == (unsigned)dlg; }
+    gfx_bounds_reset();
     gfx_frame_begin(0, 0, 0);
     gfx_run_dl(dl);
     gfx_frame_end();
+    if (draw_log && gl_ok) { /* P33: sample the framebuffer on a 5 x 5 grid (RGBA) */
+        unsigned char px[4]; char b[512]; int n = 0;
+        for (int gy = 0; gy < 5; gy++) for (int gx = 0; gx < 5; gx++) {
+            glReadPixels(canvas_w * (2 * gx + 1) / 10, canvas_h * (2 * gy + 1) / 10, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px);
+            n += snprintf(b + n, sizeof b - n, " %02X%02X%02X%02X", px[0], px[1], px[2], px[3]);
+        }
+        port_log("[draw] pixels (bottom row first):%s glError %X\n", b, glGetError());
+    }
+    draw_log = 0;
+    if (bany) { memcpy(fbmin, bmin, sizeof bmin); memcpy(fbmax, bmax, sizeof bmax); fbany = 1; }
     gfx_trace = 0;
     if (logf)
         port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands\n", gfx_stats.tasks,
@@ -801,8 +900,9 @@ int port_flag_dlapprox(void) {
     if (v < 0) v = port_flag("dlapprox");
     return v;
 }
+/* P33: the PC level loader is on by default; ?nolvlload=1 restores the stub (P31 had it opt-in as ?lvlload=1) */
 int port_flag_lvlload(void) {
     static int v = -1;
-    if (v < 0) v = port_flag("lvlload");
+    if (v < 0) v = !port_flag("nolvlload");
     return v;
 }

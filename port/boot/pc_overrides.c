@@ -320,7 +320,8 @@ void func_150031EC(s32 level) {
     s32 size;
 
     if (!port_flag_lvlload()) {
-        return; /* default: the stub behaviour (P31: the second level load at VI frame 722 broke the heap in Chrome) */
+        return; /* ?nolvlload=1: the old stub behaviour. P31's heap break at the level 0x21 load was the stubbed
+                 * inflater (P33, pc_mem.c func_1000654C), not this function. */
     }
     if (level >= 0x45) {
         level = 0;

@@ -552,7 +552,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -567,7 +567,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P26.md` (merge port P24, sqrtf hang, runtime checks, **camera path**) and
 `docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume) and
 `docs/port/sessions/P29.md` (merge port P28, a2-position DL stubs, camera runtime, camera callback check) and
-`docs/port/sessions/P31.md` (merge port P30, valid projection + view, why the frame has no triangles). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P31.md` (merge port P30, valid projection + view, why the frame has no triangles) and
+`docs/port/sessions/P33.md` (inflater = the level-load heap break, level geometry on screen, freecam, renderer gap list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1036,6 +1037,52 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
       - the func_1512C490 `obj == NULL` reads run every frame with no trap; the 0x8000 case is not exercised;
       - the func_150A82D0 constant is π/180 (static check);
       - func_150045C4 and func_1517485C are not exercised.
+- **P33: the level-load heap break is fixed, and real level geometry is on screen.** Full notes: P33.md.
+  Screenshot `P33_screenshot.png` (`shot.sh OUT 'app=game&dlapprox=1&freecam=1' 45000`): level 0x21's wooden floor,
+  288 textured, lit triangles.
+  - **Root cause of P31's break:** Rare's inflater **func_1000654C** (init_eu_5DA0.s, hand asm, state in $f16..$f18)
+    was a weak stub, so every compressed asset loaded as zeros.
+    - The C func_1502B4A8 then searched the zero model list (asset (4, level), not (2, level)) for a bit-31
+      terminator. It found one 0xF34 entries further on and "relocated" the next heap headers.
+    - The PC func_150031EC and allocate_memory were correct.
+  - **TEMPORARY PC func_1000654C** (`pc_mem.c`, from the asm entry; the raw-DEFLATE decoder now has a vbe mode):
+    - the stream starts at src+4, or src+2 after a 0x1172 halfword;
+    - the limit is min(src−dst if src>dst, limit−dst);
+    - it returns the bytes written.
+
+    All rzip assets now load. Node 60 s and Chrome 45 s with heapwatch: no break, 7/7 PASS.
+  - **The PC level loader func_150031EC is now the default** (`?nolvlload=1` restores the stub). Level 37 gets a model
+    too (4 entries). Without `dlapprox` the frame still has 0 triangles: func_150A5858 is a stub.
+  - **Screenshots since P21 showed the animated "alive" colour, not the game frame.** pc_video.c cleared on every
+    VI frame without a gfx task. It now clears only until the first game frame.
+  - **`?freecam=1`** (diagnostic) replaces the world view, i.e. the `G_MTX` P-multiply after the projection load,
+    with a fly camera on pad 0:
+    - WASD moves, IJKL looks, E/Q go up/down, Ctrl gives half speed;
+    - `fcx/fcy/fcz/fcyaw/fcpitch` set the start pose; otherwise it frames the previous frame's bounds;
+    - verified with CDP key events.
+  - **`?drawlog=N`:** per-draw state, NDC box and a 5x5 `glReadPixels` grid for gfx task N.
+  - **Renderer: still wrong or unverified (precise list in P33.md §3):**
+    1. no level visibility culling (func_150A5858 stub; dlapprox draws everything; LOD parts 1..3 unused);
+    2. `G_CULLDL` is ignored and `G_BRANCH_Z` always takes the near branch;
+    3. the Conker light formula is unchecked, and the `G_MOVEMEM 0x0A` records at offsets 0x00/0x30 are dropped
+       (n < 0);
+    4. the Rare `G_MOVEWORD` index 0x10 block (12 words per frame) is ignored;
+    5. GL bilinear instead of 3-point; no mip/LOD/detail; mask+clamp is approximated;
+    6. the CI-as-RGBA heuristic is not exercised;
+    7. blender: only FORCE_BL alpha; P/A/M/B, coverage and dither are not decoded; decals use polygon offset;
+    8. depth: no prim depth / `G_ZS_PRIM`; the z clear is recognised only as cimg == zimg;
+    9. fog is not exercised (no G_FOG in level 0x21);
+    10. no guard band or clip ratio (`G_MW_CLIP` ignored);
+    11. `G_MW_PERSPNORM` is ignored (harmless);
+    12. viewport overscan and aspect: Vp 302x226 on a 292-wide cimg, H = cimg × 0.75;
+    13. the second-pass combiner `FFB3FF/FF64FE7F` and K4/K5/noise are not handled;
+    14. the texture cache re-decodes on every TMEM load (performance);
+    15. no N64 reference frame to compare colours.
+  - **For the port branch:**
+    - convert func_1000654C + func_1000661C..func_100070F0 (inflater);
+    - func_150A5858;
+    - func_150031EC / func_15003120;
+    - the object spawners (the camera target).
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
