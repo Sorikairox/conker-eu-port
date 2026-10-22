@@ -39,6 +39,9 @@ static const char *site_str(int n, unsigned k, unsigned rk, char *buf) {
 /* the generated port/stubs/icall_tab.c has the real one (the scheduler demo links without it) */
 __attribute__((weak)) const char *port_fsig_name(unsigned id) { (void)id; return "?"; }
 
+/* P29: the registered signature of a function pointer, for game-TU self-tests (icall.py owns __port_fsig there) */
+const char *port_fsig_of(void *fp) { return port_fsig_name(__port_fsig(fp)); }
+
 void port_icall_note(void *fp, unsigned tsig, int n, unsigned k, unsigned rk) {
     if (port_icall_slow_calls++ < 16) {
         char b[24];

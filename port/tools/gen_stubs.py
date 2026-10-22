@@ -112,13 +112,20 @@ def main():
     # P23: also any function declared (prototype or definition) as `Gfx *f(Gfx *, ...)`, e.g. one only
     # used as `return f(gdl, ...)` (func_1510BF50 in func_15019464).
     gfx_re = re.compile(r'\bGfx\s*\*\s*(func_\w+)\s*\(\s*Gfx\s*\*')
-    passthru = set()
+    passthru = set(); passthru_k = {}
+    gfx_any_re = re.compile(r'\bGfx\s*\*\s*(func_\w+)\s*\(([^()]*)\)')
     for src in glob.glob('conker/src_eu/**/*.c', recursive=True):
         text = open(src, errors='replace').read()
         for m in pt_re.finditer(text):
             if m.group(1) == m.group(3):
                 passthru.add(m.group(2))
         passthru.update(gfx_re.findall(text))
+        # P29: `Gfx *f(T, Gfx *, ...)`: the DL pointer is not the first argument (func_150A5858 in the now-C
+        # func_1510BF50 takes it as a1), so the stub returns that argument instead of 0 / a0.
+        for m in gfx_any_re.finditer(text):
+            parms = [x.strip() for x in m.group(2).split(',')]
+            k = next((i for i, x in enumerate(parms) if re.match(r'Gfx\s*\*', x)), None)
+            if k: passthru_k[m.group(1)] = k
     npass = ndl = 0
     for n in funcs:
         sigs = undef_f[n]
@@ -129,7 +136,11 @@ def main():
         ret = CT.get(rs[0], 'int') if rs else 'void'
         args = ', '.join(f'{CT.get(t, "int")} a{i}' for i, t in enumerate(ps)) or 'void'
         body = f'port_stub_hit("{n}", "{what}");' + ('' if ret == 'void' else ' return 0;')
-        if n in passthru and ps and ret != 'void' and what.startswith('asm'):
+        if n in passthru_k and n not in passthru and len(ps) > passthru_k[n] and ret != 'void' and what.startswith('asm'):
+            k = passthru_k[n]
+            body = f'port_stub_hit("{n}", "{what}:passthru{k}"); port_stub_dlret((int)a{k}); return ({ret})a{k};'
+            npass += 1
+        elif n in passthru and ps and ret != 'void' and what.startswith('asm'):
             body = (f'port_stub_hit("{n}", "{what}:passthru"); return port_stub_pt(a0);' if ret == 'int' and CT.get(ps[0], 'int') == 'int'
                     else f'port_stub_hit("{n}", "{what}:passthru"); return ({ret})a0;')
             npass += 1

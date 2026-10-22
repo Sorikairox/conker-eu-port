@@ -535,7 +535,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -548,7 +548,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P23.md` (merge P20, srcfix, frame DL end to end, DL-path stub list) and
 `docs/port/sessions/P25.md` (libultra/libgu/libc PC layer complete, `[gutest]`, licenses) and
 `docs/port/sessions/P26.md` (merge port P24, sqrtf hang, runtime checks, **camera path**) and
-`docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume) and
+`docs/port/sessions/P29.md` (merge port P28, a2-position DL stubs, camera runtime, camera callback check). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -932,6 +933,59 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
     - 1× view multiply at address 0.
 
     Screenshot `P26_screenshot.png`: the clear colour.
+- **P29 (after merging port P28, 1fbb219): the camera buffers are allocated, but the projection is still zero.**
+  Full notes: P29.md.
+  - **Merge:**
+    - The merge was clean.
+    - `func_1000EC24` is dropped from `vbe.py FUNC_AS_DATA`; port P28 declares it as a function.
+    - `self_intrinsic` now makes 0 rewrites (`NM_SQRTF` = `__builtin_sqrtf`). The pass is kept as a harmless
+      safety net.
+    - `src_eu/nm_asm/func_150A49D0_tail.s` is never built: the census only globs `.c`, and clang ignores
+      `GLOBAL_ASM`. **func_150A3F50 stays a weak stub** (not hit).
+  - **Regression fixed:** the now-C func_1510BF50 calls the asm `func_150A5858(D_800B0E00[0], gdl, …)`, whose
+    DL pointer is **a1**. The stub returned 0, the frame overran, and it was dropped (12 commands).
+    - `gen_stubs.py`: `Gfx *f(T, Gfx *, …)` stubs now return the first `Gfx *` argument (tag `:passthruK`).
+    - Frame DL is now 212 to 230 commands, 0 triangles.
+  - **Checks:**
+    - Node: all self-tests PASS, heap 0 errors.
+    - Real-time Chrome, Metal, 45 s, heapwatch: past frame 600 with 0 heap breaks.
+    - Screenshot `P29_screenshot.png`: the clear colour.
+  - **Camera:**
+    - `D_800DC6D0[0..1]` and `D_800DBFF0` are allocated (the C func_15005290).
+    - func_15122AE0 runs for player 0 and takes the front-end branch → the asm func_15122C5C (136 per 10 s).
+      The gate func_150859AC is C; there is one player, and i = 0 always passes.
+    - The asm camera functions hit are func_150006E0 (2), func_150045C4, func_150054C4, func_1512B168 (1 each)
+      and func_15122C5C. Never hit: func_1510B6A8, func_1512C490, func_150A82D0 and func_1510B9D8.
+    - **The projection 0x10622690 is still zero.** Its only writer, the C func_1510BB78, is reached only through
+      the asm func_1510B6A8 or the request queue that the asm func_150006E0 sets up.
+    - The view `D_800DC6D0[0]` is non-NULL but **uninitialised heap**; only the asm func_1512C490 writes it.
+    - A new valid `DA380007 105D87F0` (the level-load perspective) comes through the C func_1510BF50.
+  - **func_15110420's callback (P28 UNVERIFIED): no bug.**
+    - The C `i:iffffffi` site matches the asm o32 layout: x/y/z in a1..a3 as bits, yaw/pitch/roll/handle at
+      sp+0x10..0x1C.
+    - `D_80089578` = {func_15110948, func_150FA030, func_150D1D20, func_15110B80, func_15112074}. At runtime
+      `unk8 = 0`, which calls the stub func_15110948; the DL pointer stays valid.
+    - New `[icalltest]` cases: an exact `Gfx *(Gfx *, f32 ×6, s32)` callee, and an `s32 ×8` callee through the
+      slow path, which receives the f32 bit patterns. Both ok.
+    - **Note for the port branch:** the C `func_15110B80(Gfx *, s32, s32, s32)` receives x/y/z as float bits.
+      It does not use them; type them `f32` if it ever does.
+  - **For the port branch:**
+    - **Camera, asm, in call order:**
+      1. func_150006E0 (request queue: the shortest route to a non-zero projection);
+      2. func_150045C4;
+      3. func_150054C4 / func_1512B168;
+      4. func_15122C5C → func_1510B6A8;
+      5. not reached yet: func_1512C490 + func_150A82D0, then func_1510B9D8.
+    - **Frame-DL-path stubs (11):** func_151EDBE8, func_15110948, func_1515DE84 (world), func_150A5858,
+      func_1517485C, func_15186D04, func_15182450, func_150911F4, func_15090630, func_15180AF0, func_150900F0.
+    - **Top 15 stubs:**
+      - func_15042ECC (869);
+      - func_1000A03C (270);
+      - func_151EDBE8 (212);
+      - func_1509BE40 (138);
+      - func_1501B300 (137);
+      - at 136 each: func_151E7110, func_150A067C, func_10011624, func_151143D4, func_15044D18, func_1504A730,
+        func_1501ECA4, func_15020F6C, func_15122C5C, func_1504ADD0.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

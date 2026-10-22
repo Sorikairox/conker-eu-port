@@ -385,8 +385,8 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
 FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
                 # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / func_16001830.
-                # func_1000EC24 became C (init_EB00.c, port P24), so its data declaration clashed at link.
-                'func_1000EC24', 'func_15103AA0', 'func_15103910', 'func_150DE8AC', 'func_160036F0']
+                # func_1000EC24 (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
+                'func_15103AA0', 'func_15103910', 'func_150DE8AC', 'func_160036F0']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
 EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)
 
