@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P45 (port-b) (session P45, 2026-10-22). Details: `docs/port/sessions/P45.md`
+
+Branch `port-b`, worktree `~/conker-wt/portb` (from P41 50cb17e); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (798 bodies).
+- progress_nm: C coverage including NON_MATCHING **4792/5915 (81.0%)**, bytes **50.4%**; **1123 asm-only**.
+- New C: **func_150A16A4** (trigger zones, before the state handler), **func_1507EB1C**, **func_1504AF10** (both
+  after it; now `void`). Fixed NM C: **func_150A2AB4**'s last parameter is a `u64` on the stack (was read from a3).
+- difftest: the libultra 64-bit helpers (`__ll_lshift`, `__ull_rshift`, ...) are **emulated** instead of returning
+  random values; u64 code was only half exercised before. selftest 26/26.
+- State table `D_800863B4` holds EU addresses: state 1 = 0x1504CE90 = **func_1504CB98** (one function, ~4700 insns).
+  Its cleaned m2c draft compiles and agrees up to call #10: `docs/port/sessions/p45/func_1504CB98_draft.c` (+ the
+  fixm2c.py / fixloop.sh used to make it). Not inserted.
+
+## Next steps (from P45)
+
+1. func_1504CB98: continue from the saved draft (P45.md §4: first DIFFER = memory before call #11, func_15021834).
+   Check struct127 field widths against the asm (unk31C+8 was s16), then knob setups per branch + mutants.
+2. Then its stubs on the walk path (P45.md §5), func_15056B08 first (called at the top of the handler).
+3. Browser: func_150A16A4 now runs real trigger zones; watch kind 8 (PI read of 0xB0000054).
+
 ## P41 (port-b) (session P41, 2026-10-22). Details: `docs/port/sessions/P41.md`
 
 Branch `port-b`, worktree `~/conker-wt/portb` (from `port` at 8e17fd1); the orchestrator merges it into `port`.
