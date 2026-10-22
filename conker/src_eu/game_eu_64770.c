@@ -83,7 +83,247 @@ void func_15036FD8(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15036FD8.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u8 D_800C441A;
+extern f32 D_800C4408[3];
+void func_1503B9F8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA);
+void func_15038910(s32, s32, f32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+/*
+ * P76: head / body look of the current object D_800CC2D0[D_800C3E78] by object kind (+4; jump table jtbl_80098714,
+ * .late_rodata data: now a C switch; kinds without a case do nothing). Each kind picks the joint / parent joint pair
+ * (slot D_800C441A = 0 / 1 / 2 may differ), the look limit row lookArg, follow factors limits, keepMask, wrap
+ * (passed as the force flag of the joint range test), postMul, the target search options (needVisible, anyRange, mode, prefer) and a
+ * y offset. The target D_800C4408 comes from func_1503B9F8 on the first slot or when `always` is set (range: the sum
+ * of floats 0 and 4 of row lookArg - 1 of D_80098418), or is cleared (-99999) for `noTarget`; then func_15038910
+ * turns the joint and D_800C441A counts up.
+ */
+void func_15037224(void) {
+    u8 *self = (u8 *) &D_800CC2D0[D_800C3E78];
+    s32 prefer = 0x100;
+    s32 joint, parent;
+    s32 limits = 1;
+    s32 lookArg = 2;
+    s32 keepMask = 3;
+    s32 always = FALSE;
+    s32 wrap = FALSE;
+    s32 needVisible = FALSE;
+    s32 postMul = FALSE;
+    s32 anyRange = FALSE;
+    s32 mode = 0;
+    s32 later = TRUE;
+    s32 noTarget = FALSE;
+    f32 yOfs = 0.0f;
+    f32 best = 1.6e9f;
+
+    switch (self[4]) {
+        case 0x82:
+            joint = 0xC;
+            parent = 1;
+            break;
+        case 0x0C: case 0x16: case 0x22: case 0x34: case 0x58: case 0x5B: case 0x5E: case 0x69: case 0x76:
+        case 0x7D: case 0x87: case 0x97: case 0xA2: case 0xA4: case 0xB3: case 0xB5:
+            joint = 4;
+            parent = 3;
+            break;
+        case 0x31:
+            joint = 5;
+            parent = 4;
+            break;
+        case 0x8B:
+            joint = 0x21;
+            parent = 0x20;
+            break;
+        case 0x11: case 0x14: case 0x86: case 0x99:
+            parent = 3;
+            joint = 5;
+            if (D_800C441A == 0) {
+                joint = 4;
+                limits = 10;
+            } else {
+                parent = 4;
+            }
+            break;
+        case 0x79:
+            joint = 0x1B;
+            parent = 0x1A;
+            break;
+        case 0x21:
+            joint = 0x19;
+            parent = 0x18;
+            break;
+        case 0x7B:
+            joint = 3;
+            parent = 2;
+            if (D_800C441A == 0) {
+                anyRange = TRUE;
+                break;
+            }
+            yOfs = -165.0f;
+            lookArg = 10;
+            limits = 7;
+            if (*(u16 *) (self + 0x84) == 7 || *(u16 *) (self + 0x84) == 9) {
+                needVisible = TRUE;
+            } else if (*(u16 *) (self + 0x84) == 0x14) {
+                prefer = 0x7E;
+                yOfs = 0.0f;
+                limits = 9;
+                lookArg = 0xB;
+            } else {
+                noTarget = TRUE;
+            }
+            if (D_800C441A == 1) {
+                joint = 0x16;
+                parent = 0x16;
+                mode = 2;
+                always = TRUE;
+            } else {
+                joint = 0x1A;
+                parent = 0x1A;
+                mode = 1;
+            }
+            anyRange = TRUE;
+            break;
+        case 0x7C:
+            joint = 1;
+            parent = 0;
+            needVisible = TRUE;
+            mode = 3;
+            break;
+        case 0x6C:
+            joint = 0x11;
+            parent = 0x10;
+            break;
+        case 0x8A:
+            if (D_800BE616 != 0) {
+                return;
+            }
+            joint = 4;
+            parent = 0;
+            if (*(s32 *) (self + 0x2E8) == 1) {
+                return;
+            }
+            yOfs = -100.0f;
+            keepMask = 2;
+            lookArg = 0xC;
+            break;
+        case 0x20: case 0x5A: case 0x5F: case 0x74: case 0x7A: case 0x8C: case 0x8D: case 0x93:
+            joint = (self[4] == 0x20 || self[4] == 0x8C || self[4] == 0x93) ? 2 : 3;
+            parent = joint - 1;
+            break;
+        case 0x54:
+            joint = 0x1D;
+            parent = 0x1C;
+            needVisible = TRUE;
+            break;
+        case 0x29:
+            joint = 2;
+            parent = 1;
+            break;
+        case 0x4B:
+            joint = 0x2C;
+            parent = 4;
+            needVisible = TRUE;
+            if (D_800C441A == 0) {
+                joint = 0x2B;
+                limits = 6;
+                later = FALSE;
+            }
+            anyRange = TRUE;
+            break;
+        case 0x50: case 0x9A: case 0x9B:
+            joint = 0xD;
+            parent = 2;
+            break;
+        case 0x47: case 0x4A:
+            joint = 1;
+            parent = 0;
+            keepMask = 1;
+            wrap = TRUE;
+            break;
+        case 0x44:
+            joint = 3;
+            parent = 3;
+            break;
+        case 0x28:
+            joint = 3;
+            parent = 2;
+            keepMask = 2;
+            if (D_800C441A == 0) {
+                joint = 2;
+                parent = 0;
+                keepMask = 1;
+            }
+            postMul = TRUE;
+            wrap = TRUE;
+            limits = 4;
+            break;
+        case 0x2B:
+            joint = 1;
+            parent = 0;
+            lookArg = 3;
+            limits = 3;
+            keepMask = 1;
+            wrap = TRUE;
+            needVisible = TRUE;
+            break;
+        case 0x3A: case 0x3D:
+            joint = 5;
+            parent = 4;
+            lookArg = 5;
+            break;
+        case 0x53: case 0xA5:
+            joint = 5;
+            parent = 0;
+            lookArg = 7;
+            break;
+        case 0x36:
+            joint = 4;
+            parent = 3;
+            lookArg = 4;
+            break;
+        case 0x2D:
+            joint = 5;
+            parent = 4;
+            needVisible = TRUE;
+            break;
+        case 0x05: case 0xAD: case 0xAE: case 0xAF:
+            parent = 0;
+            joint = 0x10;
+            if (D_800C441A == 0) {
+                joint = 1;
+                limits = 2;
+                later = FALSE;
+            } else {
+                parent = 1;
+            }
+            break;
+        case 0x12:
+            keepMask = 2;
+            lookArg = 8;
+            anyRange = TRUE;
+            parent = 0;
+            joint = (D_800C441A == 0) ? 1 : (D_800C441A == 1) ? 3 : 5;
+            needVisible = TRUE;
+            break;
+        default:
+            return;
+    }
+    if (noTarget) {
+        D_800C4408[0] = D_800C4408[1] = D_800C4408[2] = -99999.0f;
+    } else if (D_800C441A == 0 || always) {
+        func_1503B9F8((u8 *) D_800C4408, joint, parent, D_800C3E78,
+                      ((f32 *) D_80098418[lookArg - 1])[4] + ((f32 *) D_80098418[lookArg - 1])[0], prefer,
+                      (s32) &best, wrap, needVisible, anyRange, mode);
+        D_800C4408[1] += yOfs;
+    }
+    func_15038910(joint, parent, D_800C4408, D_800C3E78, lookArg, limits, D_800C441A, keepMask, wrap, postMul, 0,
+                  later, mode);
+    D_800C441A++;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037224.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
@@ -170,7 +410,171 @@ s32 func_15037B70(s32 arg0, u8 *arg1) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* P76: look point table (D_800C6A70[D_800C6A74], 0x14-byte records; func_1503E0C0 marks removed ones with unk6 = 2) */
+typedef struct {
+    s16 x, y, z;    /* 0x00: the point (+50 is added to y for the joint range test) */
+    u16 unk6;       /* 0x06: nonzero = not usable */
+    u32 range2;     /* 0x08: squared reach */
+    s16 unkC;
+    s16 xMax;       /* 0x0E: the looker's x must lie in (xMin, xMax) */
+    s16 xMin;       /* 0x10 */
+    s16 anim;       /* 0x12: 1 + animation to play when chosen, 0: none */
+} LookPoint;
+extern LookPoint *D_800C6A70;
+extern u32 D_800C6A74;
+extern u32 D_80084790;      /* round-robin start into D_800C6A70 (the last chosen point) */
+extern s32 D_80084770[8];   /* the node list indices searched in D_800DD280[0..1] */
+extern s32 D_800C43F0;      /* f32 x, y, z: default aim point */
+u8 *func_15031CBC(s32, u8 *);
+void func_1507EDC8(u8 *, s32);
+s32 func_15037B70(s32, u8 *);
+s32 func_150383B0(u8 *, s32, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+s32 func_15037988(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
+
+/*
+ * P76: look target of object id (out = point, -99999 when there is none; D_800C43F0 is reset to -99999 too).
+ * Nothing during cutscenes (D_800C35EA / D_800C35EB). Fixed targets first: a sub-object +0x318 with +0x2C == 0x100
+ * and a +0x73C flag gives its point +0x740; func_15037B70 (look modes 1..3). Object 0 in state 0x81 (+0x84) aims at
+ * the object of its attachment 0x1F (+0x48 matrices +0x3E8[D_800BE9C0], enabled by +0x3F6): its position for kind
+ * 5, else that matrix's point. Otherwise the nearest candidate that passes the joint range test func_15037988 wins
+ * (squared distance from the object, with x truncated to s16): the object search func_150383B0 (from 1.6e9), the
+ * look points of D_800C6A70 (round robin from D_80084790, within each point's x window and reach) and the nodes of
+ * the D_80084770 lists in both D_800DD280 groups (within 500; lists 25 and 72 use +0x38 when +0x66 is 0, the
+ * others +0x98). An object or a look point with an animation then starts it on id (func_1507EDC8).
+ */
+void func_15037CCC(f32 *out, s32 j1, s32 j2, s32 id, f32 lim, s32 prefer, s32 mode) {
+    u8 *self;
+    u8 *ext;
+    u8 *sub;
+    u8 *mtxs;
+    s32 mtx;
+    u8 *other;
+    u8 *node;
+    f32 pt[3];
+    f32 best;
+    f32 d2;
+    f32 dx, dy, dz;
+    s32 found;      /* 1: object, 2: look point, 3: node */
+    s32 objRet;
+    s32 sx;
+    u32 i;
+    s32 bestPoint;
+    LookPoint *lp;
+    s32 g, k, idx;
+
+    out[0] = out[1] = out[2] = -99999.0f;
+    ((f32 *) &D_800C43F0)[0] = ((f32 *) &D_800C43F0)[1] = ((f32 *) &D_800C43F0)[2] = -99999.0f;
+    if ((&D_800C35EA)[0] == 1 || (&D_800C35EA)[1] == 1) {
+        return;
+    }
+    self = (u8 *) &D_800CC2D0[id];
+    ext = *(u8 **) (self + 0x318);
+    if (ext != NULL && *(s32 *) (ext + 0x2C) == 0x100 && *(s16 *) (ext + 0x73C) != 0) {
+        out[0] = *(f32 *) (ext + 0x740);
+        out[1] = *(f32 *) (ext + 0x744);
+        out[2] = *(f32 *) (ext + 0x748);
+        return;
+    }
+    if (func_15037B70(id, (u8 *) out) != 0) {
+        return;
+    }
+    if (id == 0 && *(u16 *) (self + 0x84) == 0x81) {
+        sub = func_15031CBC(0x1F, self);
+        if (sub != NULL && (mtxs = *(u8 **) (sub + 0x48)) != NULL && mtxs[0x3F6] != 0
+            && (mtx = ((s32 *) (mtxs + 0x3E8))[D_800BE9C0]) != 0) {
+            other = (u8 *) func_15083E90(sub[0]);
+            if (other != NULL) {
+                if (other[5] == 5) {
+                    pt[0] = *(f32 *) (other + 0x14);
+                    pt[1] = *(f32 *) (other + 0x18);
+                    pt[2] = *(f32 *) (other + 0x1C);
+                } else {
+                    func_15043FF0((vertex *) pt, (struct113 *) mtx);
+                }
+                if (func_15037988(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
+                    return;
+                }
+            }
+        }
+    }
+
+    sx = (s16) *(f32 *) (self + 0x14);
+    best = 1.6e9f;
+    found = 0;
+    objRet = func_150383B0((u8 *) out, j1, j2, id, lim, prefer, (s32) &best, 0, 0, 0, mode);
+    if (objRet != 0 && best != 1.6e9f) {
+        found = 1;
+    }
+
+    if (D_80084790 >= D_800C6A74) {
+        D_80084790 = 0;
+    }
+    if (D_800C6A74 != 0) {
+        bestPoint = -1;
+        i = D_80084790;
+        do {
+            lp = &D_800C6A70[i];
+            if (sx < lp->xMax && lp->xMin < sx && lp->unk6 == 0) {
+                dx = (f32) sx - lp->x;
+                dz = *(f32 *) (self + 0x1C) - lp->z;
+                dy = *(f32 *) (self + 0x18) - lp->y;
+                d2 = dx * dx + dz * dz + dy * dy;
+                if (d2 < (f32) lp->range2 && d2 < best
+                    && func_15037988(id, j1, j2, lp->x, lp->y + 50.0f, lp->z, out, lim, 0, mode) != 0) {
+                    bestPoint = i;
+                    best = d2;
+                }
+            }
+            i++;
+            if (i == D_800C6A74) {
+                i = 0;
+            }
+        } while (i != D_80084790);
+        if (bestPoint != -1) {
+            D_80084790 = bestPoint;
+            found = 2;
+        }
+    }
+
+    for (g = 0; g < 2; g++) {
+        for (k = 0; k < 8; k++) {
+            idx = D_80084770[k];
+            for (node = (u8 *) D_800DD280[g][idx]; node != NULL; node = *(u8 **) (node + 8)) {
+                if (idx == 25 || idx == 72) {
+                    if (*(u16 *) (node + 0x66) != 0) {
+                        continue;
+                    }
+                    pt[0] = *(f32 *) (node + 0x38);
+                    pt[1] = *(f32 *) (node + 0x3C);
+                    pt[2] = *(f32 *) (node + 0x40);
+                } else {
+                    pt[0] = *(f32 *) (node + 0x98);
+                    pt[1] = *(f32 *) (node + 0x9C);
+                    pt[2] = *(f32 *) (node + 0xA0);
+                }
+                dz = *(f32 *) (self + 0x1C) - pt[2];
+                dy = *(f32 *) (self + 0x18) - pt[1];
+                dx = (f32) sx - pt[0];
+                d2 = dx * dx + dz * dz + dy * dy;
+                if (d2 < 250000.0f && d2 < best
+                    && func_15037988(id, j1, j2, pt[0], pt[1], pt[2], out, lim, 0, mode) != 0) {
+                    found = 3;
+                    best = d2;
+                }
+            }
+        }
+    }
+
+    if (found == 1) {
+        func_1507EDC8(self, objRet - 1);
+    } else if (found == 2 && D_800C6A70[bestPoint].anim != 0) {
+        func_1507EDC8(self, D_800C6A70[bestPoint].anim - 1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15037CCC.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15037988(s32 id, s32 j1, s32 j2, f32 x, f32 y, f32 z, f32 *out, f32 lim, s32 force, s32 mode);
@@ -304,7 +708,426 @@ block_9:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038758.s")
 #endif
+#ifdef NON_MATCHING
+/* P76: per-object look state (object +0x324, func_15036F60: 0x48 bytes), three slots (D_800C441A) */
+typedef struct {
+    f32 yaw[3];       /* 0x00: current angles (degrees), -99999 = unset */
+    f32 pitch[3];     /* 0x0C */
+    f32 yawVel[3];    /* 0x18: per-frame steps */
+    f32 pitchVel[3];  /* 0x24 */
+    u8 hold[3];       /* 0x30: frames the last target is still held (40 while there is one) */
+    u8 fade[3];       /* 0x33: blend frames (10 = start of a blend toward / away from the target) */
+    u8 flag4[3];      /* 0x36: the object's +0x2FB & 4 of the previous call */
+    u8 pad39;
+    s16 yawOfs[3];    /* 0x3A: extra angles, decay by D_800BE9E4 * 10 per call */
+    s16 pitchOfs[3];  /* 0x40 */
+    u8 pad46[2];
+} LookTrack;
+extern s32 D_800C43F0;      /* f32 x, y, z: default aim point */
+extern u8 D_800BEE2C;
+extern u8 D_800BEAC0;
+extern u8 D_800BE9B4;
+extern s32 D_800BE9E4;
+extern u8 D_800C43FC;
+extern f32 D_800C4400;
+extern f32 D_800C4404;
+extern f32 D_80098550[][4];  /* per limit set: yaw / pitch follow factors, yaw / pitch max steps */
+s32 func_15021E60(f32 *, f32 *, f32 *, f32 *, s32, s32);
+void func_15038758(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5);
+void func_1503A1C0(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4, f32 arg5, f32 arg6, s32 arg7);
+void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void func_15049F30(f32 q1[4], f32 q2[4]);
+void func_15049FA8(f32 mtx[4][4], f32 arg1[4]);
+void func_1504A1CC(f32 q1[4], f32 q2[4], f32 t, f32 result[4]);
+void func_1504A430(f32 quat[4], f32 mtx[4][4]);
+
+/*
+ * P76: turn joint `joint` of object id toward target (x, y, z; all -99999 = no target). The angles (yaw, pitch,
+ * degrees) of the target relative to the joint come from func_15038758 in the frame of joint `parent` (axis picks
+ * the joint axis that should point at it, 0..3), unless func_15021E60 supplies fixed angles. Look state slot
+ * `slot` of the object's LookTrack (+0x324) follows them: with a blend running (fade / hold) by the factors of
+ * D_80098550[limits] scaled toward 1, else by per-frame velocity steps limited by its max steps. keepMask bit 0 / 1
+ * keeps the new yaw / pitch (else the raw ones), wrap keeps yaw continuous across +-180 and skips func_1503A1C0
+ * (look limits), postMul multiplies the rotation onto the joint matrix instead of replacing it, yawBias is taken off
+ * the yaw. The rotation (yawOfs / pitchOfs added) is rotation matrix * parent's matrix; during a blend it is slerped
+ * (quaternions) from the joint's current orientation by the fade factor and the column scales are kept. Also
+ * sets the aim point D_800C43F0 (target pushed 100x out from the joint), the object +0x2CA byte angle (slot 0) and,
+ * for fixed angles, D_800C43FC / D_800C4400 / D_800C4404. The 9th argument of the asm's func_1503A1C0 calls (slot)
+ * is not read by func_1503A1C0 and is left out.
+ */
+void func_15038910(s32 joint, s32 parent, f32 *target, s32 id, s32 lookArg, s32 limits, s32 slot, s32 keepMask,
+                   s32 wrap, s32 postMul, s32 yawBias, s32 unused, s32 axis) {
+    u8 *self;
+    LookTrack *lt;
+    f32 *mtx;
+    f32 (*P)[4];
+    f32 (*J)[4];
+    f32 yaw, pitch, roll;
+    f32 fixedYaw, fixedPitch;
+    f32 rawYaw, rawPitch;
+    f32 lim0, lim1;     /* func_1503A1C0 outputs */
+    f32 ax, ay, az;
+    f32 d[3];
+    f32 wx, wy, wz;
+    s32 fixed;
+    s32 noTarget;
+    s32 flag4;
+    s32 expired;
+    s32 blend;          /* 0: steps, 1: hold blend, 2: fade blend */
+    f32 t;
+    f32 kYaw, kPitch, stepYaw, stepPitch;
+    f32 dYaw, dPitch;
+    f32 a, b;
+    s32 n;
+    s32 i, k;
+    s32 step;
+    s32 v;
+    f32 len, inv;
+    f32 scale[3];
+    f32 rot1[4][4];
+    f32 rot2[4][4];
+    f32 rot[4][4];
+    f32 res[4][4];
+    f32 q1[4], q2[4], q[4];
+
+    self = (u8 *) &D_800CC2D0[id];
+    lt = *(LookTrack **) (self + 0x324);
+    if (lt == NULL) {
+        return;
+    }
+    yaw = pitch = roll = 0.0f;
+    if (D_800C441A == 0) {
+        self[0x2CA] = 0;
+    }
+    fixed = func_15021E60(&yaw, &pitch, &roll, target, id, 0);
+    if (fixed) {
+        fixedYaw = yaw;
+        fixedPitch = pitch;
+    }
+    blend = 0;
+    D_800C43FC = 0;
+    lim1 = 0.0f;
+    lim0 = 0.0f;
+    noTarget = target[0] == -99999.0f && target[1] == -99999.0f && target[2] == -99999.0f;
+    if (noTarget && !fixed && lt->hold[slot] == 0) {
+        lt->yawVel[slot] = 0.0f;
+        lt->pitchVel[slot] = 0.0f;
+        lt->fade[slot] = 10;
+        lt->yaw[slot] = -99999.0f;
+        lt->pitch[slot] = -99999.0f;
+        lt->yawOfs[slot] = 0;
+        lt->pitchOfs[slot] = 0;
+        return;
+    }
+    flag4 = self[0x2FB] & 4;
+    if (!fixed && flag4) {
+        if (lt->flag4[slot] == 0) {
+            lt->fade[slot] = 10;
+        }
+        if (lt->fade[slot] == 0) {
+            lt->yawVel[slot] = 0.0f;
+            lt->pitchVel[slot] = 0.0f;
+            lt->yaw[slot] = -99999.0f;
+            lt->pitch[slot] = -99999.0f;
+            lt->yawOfs[slot] = 0;
+            lt->pitchOfs[slot] = 0;
+            return;
+        }
+    }
+    expired = FALSE;
+    lt->flag4[slot] = flag4;
+    if (lt->fade[slot] < 2 && lt->hold[slot] > 0) {
+        n = lt->hold[slot];
+        if (D_800BEAC0 == 0 && D_800BEE2C == 0) {
+            n = --lt->hold[slot];
+        }
+        if (n == 0) {
+            expired = TRUE;
+        }
+    }
+    if (!noTarget) {
+        n = lt->hold[slot];
+        if (n != 0 && n < 10) {
+            lt->fade[slot] = (100 - n * 10) / 10.0f;
+            lt->hold[slot] = 0;
+        }
+    }
+
+    ay = 0.0f;
+    switch (axis) {
+        case 0:
+            ax = 0.0f;
+            az = 1.0f;
+            break;
+        case 1:
+            az = 0.0f;
+            ax = 1.0f;
+            break;
+        case 2:
+            az = 0.0f;
+            ax = -1.0f;
+            break;
+        case 3:
+            ax = 0.0f;
+            az = 0.0f;
+            ay = -1.0f;
+            break;
+    }
+    mtx = *(f32 **) (self + 0x1D4);
+    P = (f32 (*)[4]) (mtx + parent * 16);
+    J = (f32 (*)[4]) (mtx + joint * 16);
+    P[2][3] = P[1][3] = P[0][3] = 0.0f;
+    J[2][3] = J[1][3] = J[0][3] = 0.0f;
+    P[3][3] = 1.0f;
+    J[3][3] = 1.0f;
+    if (!fixed) {
+        /* the joint's current axis direction, as angles in the parent's frame */
+        wx = ax * J[0][0] + ay * J[1][0] + J[2][0] * az;
+        wy = ax * J[0][1] + ay * J[1][1] + J[2][1] * az;
+        wz = ax * J[0][2] + ay * J[1][2] + J[2][2] * az;
+        func_15038758(&yaw, &pitch, wx * P[0][0] + wy * P[0][1] + P[0][2] * wz,
+                      wx * P[1][0] + wy * P[1][1] + P[1][2] * wz, wx * P[2][0] + wy * P[2][1] + P[2][2] * wz, axis);
+    }
+    if (yaw > 180.0f) {
+        yaw -= 360.0f;
+    }
+    if (pitch > 180.0f) {
+        pitch -= 360.0f;
+    }
+    if (lt->yaw[slot] == -99999.0f) {
+        lt->yaw[slot] = yaw;
+        lt->yawVel[slot] = 0.0f;
+        lt->pitchVel[slot] = 0.0f;
+        lt->pitch[slot] = pitch;
+    }
+    if (D_800C441A == 0) {
+        self[0x2CA] = (s32) (yaw * 0.7111111f);
+    }
+    rawYaw = yaw;
+    rawPitch = pitch;
+    if ((expired && !fixed) || D_800BE9B4 != 0) {
+        func_1503A1C0(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
+        lt->yawVel[slot] = 0.0f;
+        lt->pitchVel[slot] = 0.0f;
+        lt->yaw[slot] = yaw;
+        lt->fade[slot] = 10;
+        lt->yaw[slot] = -99999.0f;
+        lt->pitch[slot] = -99999.0f;
+        return;
+    }
+
+    d[0] = target[0] - J[3][0];
+    d[1] = target[1] - J[3][1];
+    d[2] = target[2] - J[3][2];
+    if (noTarget && !fixed) {
+        yaw = rawYaw;
+        pitch = rawPitch;
+    } else {
+        if (!fixed) {
+            func_15038758(&yaw, &pitch, d[0] * P[0][0] + d[1] * P[0][1] + P[0][2] * d[2],
+                          d[0] * P[1][0] + d[1] * P[1][1] + P[1][2] * d[2],
+                          d[0] * P[2][0] + d[1] * P[2][1] + P[2][2] * d[2], axis);
+            if (yaw > 0.0f) {
+                yaw -= yawBias;
+            } else if (yaw < 0.0f) {
+                yaw += yawBias;
+            }
+        } else {
+            D_800C43FC = 1;
+            D_800C4400 = yaw;
+            D_800C4404 = pitch;
+        }
+        {
+            u8 *ext = *(u8 **) ((u8 *) &D_800CC2D0[D_800C3E78] + 0x318);
+
+            /* behind the player's sub-object: look at the mirrored point 20 up instead */
+            if (ext != NULL && *(s32 *) (ext + 0x2C) == 0x100 && (yaw > 100.0f || yaw < -100.0f)) {
+                d[0] = -d[0];
+                d[1] = 20.0f - d[1];
+                d[2] = -d[2];
+                func_15038758(&yaw, &pitch, d[0] * P[0][0] + d[1] * P[0][1] + P[0][2] * d[2],
+                              d[0] * P[1][0] + d[1] * P[1][1] + P[1][2] * d[2],
+                              d[0] * P[2][0] + d[1] * P[2][1] + P[2][2] * d[2], axis);
+            }
+        }
+        ((f32 *) &D_800C43F0)[0] = d[0] * 100.0f + J[3][0];
+        ((f32 *) &D_800C43F0)[1] = d[1] * 100.0f + J[3][1];
+        ((f32 *) &D_800C43F0)[2] = d[2] * 100.0f + J[3][2];
+        if (!wrap) {
+            func_1503A1C0(lookArg, &yaw, &pitch, &lim1, &lim0, rawYaw, rawPitch, id);
+        }
+    }
+
+    if (D_800BEAC0 == 0 && D_800BEE2C == 0) {
+        kYaw = D_80098550[limits][0];
+        kPitch = D_80098550[limits][1];
+        stepYaw = D_80098550[limits][2];
+        stepPitch = D_80098550[limits][3];
+        if (D_800C35EA == 1) {
+            stepYaw = stepPitch = 5.0f;
+            kPitch = 1.0f;
+            kYaw = kPitch;
+        }
+        if (lt->fade[slot] > 0) {
+            t = (f32) (10 - lt->fade[slot]) / 10.0f;
+            blend = 2;
+            if (!flag4) {
+                t = 1.0f - t;
+            }
+        } else {
+            n = lt->hold[slot];
+            if (n != 0 && n < 10) {
+                t = (f32) (10 - n) / 10.0f;
+                blend = 1;
+            }
+        }
+        if (blend == 1) {
+            kYaw += (1.0f - kYaw) * t;
+            kPitch += (1.0f - kPitch) * t;
+        }
+        if (wrap) {
+            if (yaw > 90.0f) {
+                if (lt->yaw[slot] < -90.0f) {
+                    lt->yaw[slot] += 360.0f;
+                }
+            } else if (yaw < -90.0f) {
+                if (lt->yaw[slot] > 90.0f) {
+                    lt->yaw[slot] -= 360.0f;
+                }
+            }
+        }
+        dYaw = (yaw - lt->yaw[slot]) * kYaw;
+        dPitch = (pitch - lt->pitch[slot]) * kPitch;
+        if (blend) {
+            yaw = lt->yaw[slot] + dYaw;
+            pitch = lt->pitch[slot] + dPitch;
+        } else {
+            if (fabsf(dYaw) < fabsf(lt->yawVel[slot]) + stepYaw) {
+                lt->yawVel[slot] = dYaw;
+            } else {
+                lt->yawVel[slot] += stepYaw * (f32) ((dYaw < 0.0f) ? -1 : 1);
+            }
+            if (fabsf(dPitch) < fabsf(lt->pitchVel[slot]) + stepPitch) {
+                lt->pitchVel[slot] = dPitch;
+            } else {
+                lt->pitchVel[slot] += stepPitch * (f32) ((dPitch < 0.0f) ? -1 : 1);
+            }
+            yaw = lt->yawVel[slot] + lt->yaw[slot];
+            pitch = lt->pitchVel[slot] + lt->pitch[slot];
+        }
+        if (!wrap) {
+            func_1503A1C0(lookArg, &yaw, &pitch, NULL, NULL, rawYaw, rawPitch, id);
+        }
+    } else {
+        yaw = lt->yaw[slot];
+        pitch = lt->pitch[slot];
+    }
+    if (!(keepMask & 1)) {
+        yaw = rawYaw;
+    }
+    if (!(keepMask & 2)) {
+        pitch = rawPitch;
+    }
+    if (fixed) {
+        blend = 0;
+        yaw = fixedYaw;
+        pitch = fixedPitch;
+    }
+    if (D_800C441A == 0) {
+        self[0x2CA] = (s32) (yaw * 0.7111111f);
+    }
+
+    a = lt->yawOfs[slot] + yaw;
+    b = lt->pitchOfs[slot] + pitch;
+    switch (axis) {
+        case 0:
+            func_150A8050(rot1, 0.0f, 0.0f, roll);
+            func_150A8050(rot2, -b, a, 0.0f);
+            break;
+        case 1:
+            func_150A8050(rot1, 0.0f, 0.0f, b);
+            func_150A8050(rot2, roll, a, 0.0f);
+            break;
+        case 2:
+            func_150A8050(rot1, 0.0f, 0.0f, -b);
+            func_150A8050(rot2, roll, a, 0.0f);
+            break;
+        case 3:
+            func_150A8050(rot1, 0.0f, 0.0f, -b);
+            func_150A8050(rot2, -a, roll, 0.0f);
+            break;
+    }
+    func_150A7A48(rot1, rot2, rot);
+    func_150A7A48(rot, P, res);
+    res[3][0] = J[3][0];    /* keep the joint's position */
+    res[3][1] = J[3][1];
+    res[3][2] = J[3][2];
+    if (blend) {
+        /* slerp from the joint's orientation (columns normalised by the row lengths) toward the new one */
+        bcopy(J, rot1, sizeof(rot1));
+        bcopy(res, rot2, sizeof(rot2));
+        for (i = 0; i < 3; i++) {
+            len = sqrtf(J[i][0] * J[i][0] + J[i][1] * J[i][1] + J[i][2] * J[i][2]);
+            scale[i] = len;
+            inv = 1.0f / len;
+            for (k = 0; k < 3; k++) {
+                rot1[k][i] = J[k][i] * inv;
+            }
+            len = sqrtf(res[i][0] * res[i][0] + res[i][1] * res[i][1] + res[i][2] * res[i][2]);
+            inv = 1.0f / len;
+            for (k = 0; k < 3; k++) {
+                rot2[k][i] = res[k][i] * inv;
+            }
+        }
+        func_15049FA8(rot2, q1);
+        func_15049FA8(rot1, q2);
+        func_15049F30(q1, q2);
+        func_1504A1CC(q1, q2, t, q);
+        func_1504A430(q, res);
+    } else {
+        scale[0] = scale[1] = scale[2] = 1.0f;
+    }
+    if (postMul) {
+        func_150A7A48(rot, J, rot1);
+        bcopy(rot1, J, sizeof(rot1));
+    } else {
+        bcopy(res, J, sizeof(res));
+        if (blend) {
+            for (i = 0; i < 3; i++) {
+                if (scale[i] != 1.0f) {
+                    J[0][i] *= scale[i];
+                    J[1][i] *= scale[i];
+                    J[2][i] *= scale[i];
+                }
+            }
+        }
+    }
+    lt->yaw[slot] = yaw;
+    lt->pitch[slot] = pitch;
+    if (D_800BEAC0 == 0 && D_800BEE2C == 0 && lt->fade[slot] > 0) {
+        lt->fade[slot]--;
+    }
+    if (!noTarget) {
+        lt->hold[slot] = 40;
+    }
+    step = D_800BE9E4 * 10;
+    v = lt->yawOfs[slot];
+    if (step < ((v < 0) ? -v : v)) {
+        lt->yawOfs[slot] = v - step * ((v < 0) ? -1 : 1);
+    } else {
+        lt->yawOfs[slot] = 0;
+    }
+    v = lt->pitchOfs[slot];
+    if (step < ((v < 0) ? -v : v)) {
+        lt->pitchOfs[slot] = v - step * ((v < 0) ? -1 : 1);
+    } else {
+        lt->pitchOfs[slot] = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_15038910.s")
+#endif
 
 void *func_15039D44(s32 arg0, s32 arg1) {
     return &D_80098418[arg1];
@@ -738,7 +1561,7 @@ void func_1503A968(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_64770/func_1503A968.s")
 #endif
 
-s32 func_15037224();
+void func_15037224(void);
 void func_1503A968(void);
 extern u8 D_800C441A;
 

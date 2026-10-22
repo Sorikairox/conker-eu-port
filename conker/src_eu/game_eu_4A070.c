@@ -897,7 +897,7 @@ void func_15022A40(s32 *arg0) {
 
     if ((v == 27) || (v == 4)) {
         if (D_800863B4[v] != NULL) {
-            D_800863B4[v]();
+            ((void (*)(s32 *)) D_800863B4[v])(arg0);   /* P76: a0 still holds arg0 */
         }
     }
 }

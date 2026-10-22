@@ -348,7 +348,7 @@ void func_15012020(s32 arg0, s32 arg1);
 u8   func_15012720(void);
 void func_15012770(void);
 void func_15012780(void);
-s32  func_150150A4(void);
+s32  func_150150A4(s32);
 s32  func_15015300(struct134 *arg0);
 void func_15016370(void);
 void func_15016500(void);

@@ -175,7 +175,7 @@ void func_1503482C(s32 arg0) {
     case 4:
     case 0x80:
     case 0xB0:
-        func_1503BCAC();
+        func_1503BCAC(arg0);   /* P76: a0 still holds arg0 at the jal */
         break;
     }
 }

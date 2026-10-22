@@ -82,10 +82,11 @@ s32 func_1501374C(struct16 *arg0) {
 
 s32 func_1501396C(struct16 *arg0) {
     u8 idx = arg0->unk17;
-    void (*func)(void) = D_80082ECC[idx];
+    /* P76: the handlers take the record (a0 still holds arg0 at the jalr; func_15013D38 writes arg0->unk16) */
+    void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082ECC[idx];
 
     if (func != NULL) {
-        func();
+        func(arg0);
     }
     return 1;
 }
@@ -531,8 +532,8 @@ s32 func_15014F6C(struct134 *arg0) {
     return 1;
 }
 
-s32 func_150150A4(void) {
-    struct17 *temp_v0 = func_1515F1B0();
+s32 func_150150A4(s32 arg0) {   /* P76: a0 passes through to func_1515F1B0 */
+    struct17 *temp_v0 = func_1515F1B0(arg0);
     if (temp_v0 == NULL) {
         return 1;
     }

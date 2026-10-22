@@ -110,7 +110,7 @@ s32 func_1507EA98(u8 *arg0)
   {
     return 1;
   }
-  temp_v0 = func_15084E08();
+  temp_v0 = func_15084E08(arg0);
   new_var = *((u8 *) (((u8 *) arg0) + 0x6F));
   if (temp_v0 == 0)
   {
