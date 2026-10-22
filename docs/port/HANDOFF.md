@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P90, 2026-10-23). Details: `docs/port/sessions/P90.md`
+
+- **func_150268BC** (script event interpreter, 3594 asm lines, game_eu_51190.c) is readable hand C under NON_MATCHING:
+  270 knob setups (every type / sub-type / b4 / b5 variant, ARGMEM on all structs) EQUIV except 0x5F/4 (UNSURE, harness
+  fault after the call); mutants 115 killed / 6 survived (explained in P90.md). 0x60 passes 0 as func_150CE660's 4th arg.
+- Prototypes: func_150EA560 / func_150EAA80 / func_150F6E10 arg2 `f32` -> `u8` (byte-identical); func_1516DF0C kept at its
+  49-arg C prototype (pointer halves in a0 / a1, as on N64); 31 asm callees declared in the NM block from the call sites.
+- Harness: stack arguments 16+ were never compared (only sp+0x10..0x3C captured); now up to arg 63,
+  `DIFFTEST_STKW_OLD=1` = old window. Selftest 36/36 (new case func_150268BC).
+- Default build byte-identical, NM links, protocheck 0, progress_nm 4919/5915 (83.2%), bytes 57.8%, 996 asm-only.
+- UNVERIFIED: 0x5F/4; b5 < 0 paths of 0x11 / 0x34 / 0x5F/10 (N64 reads uninitialised / out-of-range stack, C is
+  defined); u8 args are narrowed where the asm passes full words; browser runtime of the cutscene effects.
+
+## Next steps (from P90)
+
+1. Browser: run a cutscene with scripted effects (func_1502AB94 -> func_150268BC) and log stub hits of the 31 asm callees
+   now reachable from C (list in P90.md) - they become the next blockers.
+2. difftest: check why the rec pokes (D_800C3958[1] = 0x80490000 -> 0x80490088) did not reach the 0x33 reference
+   (rec->0x18 read 0.0); then re-run the 0x33 mutant (`docs/port/sessions/p90/muts_r.txt`).
+3. func_15035AF8, func_15035220 (game_eu_62360.c), remaining game_981E0 asm.
+
 ## State (session P89, 2026-10-23). Details: `docs/port/sessions/P89.md`
 
 - The default build is byte-identical (full `verify_all.sh`, `port_work/p89/verify.log`). `NON_MATCHING=1` links.

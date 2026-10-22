@@ -62,6 +62,7 @@ SP_ENTRY = STK_TOP - 0x100
 # compare exactly. DIFFTEST_STK_OLD=1 restores the pre-P89 rule (the whole stack range compares equal).
 STK_WIN = 0x1000
 STK_OLD = os.environ.get('DIFFTEST_STK_OLD') == '1'
+STKW_OLD = os.environ.get('DIFFTEST_STKW_OLD') == '1'   # P90
 # P18: Unicorn 2.0.1's reg_read/reg_write of the MIPS FPRs are no-ops (reg_write(F4) then mfc1 reads the old
 # value; reg_read(Fn) is always 0). So float args were never set, stubs never returned a float, and f0 returns
 # / FP call args / f20-f31 were compared as 0 == 0. Leftover f0 after a stubbed float callee then differed by
@@ -878,7 +879,10 @@ class Run:
         sp = mu.reg_read(UC_MIPS_REG_SP)
         self.minsp = min(self.minsp, sp)
         regs = [mu.reg_read(r) for r in A_REGS]
-        stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40, 4)]
+        # P90: all outgoing stack words a prototype can name (args 4..63); before P90 only sp+0x10..0x3C (args 4..15)
+        # were captured, so arguments 16+ (func_1516DF0C's 49, func_150E2030's 28, func_1516FAB8's 17) were never
+        # compared. DIFFTEST_STKW_OLD=1 restores the old window.
+        stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
