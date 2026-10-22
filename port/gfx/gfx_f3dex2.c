@@ -175,7 +175,7 @@ static void mtx_ident(float m[4][4]) {
 
 /* ------------------------------------------------------------------ GL backend */
 static GLuint prog, vbo, vao;
-static GLint u_tex[4], u_tp[4], u_tm[4], u_ts[4], u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc, u_blendc,
+static GLint u_tex[6], u_tp[6], u_tm[6], u_ts[6], u_lodviz, u_splitx, u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc, u_blendc,
     u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg;
 static int gl_ok, canvas_w = 640, canvas_h = 480;
 #define VF 11
@@ -195,7 +195,7 @@ static const char *VS =
     "void main() { vec4 p = aPos; if (p.w > 0.0 && p.z > p.w) p.z = p.w; gl_Position = p; vCol = aCol; vST = aST; vFog = aFog; }\n";
 
 /* P35: the RDP texture unit and blender in the shader.
- *  - Tiles: up to 4 bound (the base tile and the next ones: 2-cycle TEXEL1 and LOD levels). Each is decoded
+ *  - Tiles: up to 6 bound (P78; the base tile and the next ones: 2-cycle TEXEL1 and LOD levels 0..4 + 1). Each is decoded
  *    exactly (uTS.xy texels) and addressed with texelFetch, so clamp (to the tile size), mirror and wrap
  *    (mask) are the RDP's per tile: clamp first, then mirror / mask (P35.md section 5).
  *    uTP = (ul s, ul t in texels, shift scale s, shift scale t).
@@ -203,6 +203,10 @@ static const char *VS =
  *    2 plain 4-tap bilinear (?filter4=1). No half-texel offset: the RDP samples texel i at s = i.
  *  - LOD (uLod: x = on (G_TL_LOD), y = max level, z = sharpen/detail): lod = texels per N64 pixel; tile
  *    base + floor(log2 lod); LOD_FRACTION = lod / 2^l - 1; magnification uses tile base and fraction 0.
+ *    P78: lod = max(|ds|, |dt|) over an x and a y pixel step (the RDP's per-component max, not the vector length),
+ *    scaled by canvas pixels per N64 pixel (uPixScale was the inverse, so lod was ~4.8x too small at 640 / 292:
+ *    distant LOD surfaces sampled 2+ levels too fine); "distant" (l_tile >= max level) takes both texels from
+ *    tile base + max with LOD_FRACTION 1 (was TEXEL1 = the tile after the max level); levels up to 4 (was 2).
  *  - Blender: uBl1 = first cycle (2-cycle mode only; its result is the second cycle's IN), uBl2 = the final
  *    cycle, selectors (P, A, M, B). uBlFin: 0 output P (no FORCE_BL), 1 blend in the shader (no memory
  *    input), 2 the GL blend does the memory term: out rgb = the non-memory colour, alpha = the A factor. */
@@ -210,7 +214,7 @@ static const char *FS =
     "#version 300 es\n"
     "precision highp float; precision highp int;\n"
     "in vec4 vCol; in vec2 vST; in float vFog;\n"
-    "uniform highp sampler2D uT0, uT1, uT2, uT3; uniform vec4 uTP[4]; uniform ivec4 uTM[4], uTS[4];\n"
+    "uniform highp sampler2D uT0, uT1, uT2, uT3, uT4, uT5; uniform vec4 uTP[6]; uniform ivec4 uTM[6], uTS[6]; uniform int uLodViz; uniform float uSplitX;\n"
     "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg;\n"
     "uniform vec4 uPrim, uEnv, uFogC, uBlendC; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
     "out vec4 frag;\n"
@@ -224,7 +228,8 @@ static const char *FS =
     "  c.x = wrapc(c.x, m.x & 1, m.x & 2, m.y, z.z); c.y = wrapc(c.y, m.x & 4, m.x & 8, m.z, z.w);\n"
     "  c = clamp(c, ivec2(0), z.xy - 1);\n"
     "  if (k == 0) return texelFetch(uT0, c, 0); if (k == 1) return texelFetch(uT1, c, 0);\n"
-    "  if (k == 2) return texelFetch(uT2, c, 0); return texelFetch(uT3, c, 0); }\n"
+    "  if (k == 2) return texelFetch(uT2, c, 0); if (k == 3) return texelFetch(uT3, c, 0);\n"
+    "  if (k == 4) return texelFetch(uT4, c, 0); return texelFetch(uT5, c, 0); }\n"
     "vec4 samp(int k) {\n"
     "  if (((uTexOn >> k) & 1) == 0) return vec4(1.0);\n"
     "  vec2 tc = vST * uTP[k].zw - uTP[k].xy;\n"
@@ -259,16 +264,22 @@ static const char *FS =
     "  SH = vCol; LF = 0.0;\n"
     "  gl_FragDepth = uPrimZ >= 0.0 ? uPrimZ : gl_FragCoord.z;\n"
     "  if (uMode == 1) { frag = vCol; return; }\n"
-    "  int lt = 0;\n"
+    "  int lt = 0; bool distant = false;\n"
     "  if (uTexOn != 0) {\n"
-    "    vec2 tc = vST * uTP[0].zw; float l = max(length(dFdx(tc)), length(dFdy(tc))) * uPixScale;\n"
+    /* P78: the RDP's LOD is the largest of |ds|, |dt| over one N64 pixel step in x and in y (tile 0 texels,
+     * unshifted). dFdx is per canvas pixel, so uPixScale = canvas pixels per N64 pixel (was the inverse). */
+    "    vec2 tc = vST * uTP[0].zw, gx = abs(dFdx(tc)), gy = abs(dFdy(tc));\n"
+    "    float l = max(max(gx.x, gx.y), max(gy.x, gy.y)) * uPixScale;\n"
+    /* DIAGNOSTIC ?p78split=1: left of uSplitX the pre-P78 LOD (vector length, inverse scale), for a same-frame comparison */
+    "    if (gl_FragCoord.x < uSplitX) l = max(length(dFdx(tc)), length(dFdy(tc))) / uPixScale;\n"
     "    if (l >= 1.0) { float e = floor(log2(l)); LF = l / exp2(e) - 1.0; if (uLod.x != 0) { lt = int(e);"
-    "      if (lt >= uLod.y) { lt = uLod.y; LF = 1.0; } } }\n"
+    /* distant (l_tile at the max level): both texels come from tile base + max, LOD_FRACTION 0xFF */
+    "      if (lt >= uLod.y) { lt = uLod.y; LF = 1.0; distant = true; } } }\n"
     "    else if (uLod.z != 0) LF = l;\n"
-    "    lt = min(lt, 2);\n"
+    "    lt = min(lt, 4);\n"
     "  }\n"
-    "  T0 = lt == 0 ? samp(0) : lt == 1 ? samp(1) : samp(2);\n"
-    "  T1 = (uTexOn & (2 << lt)) != 0 ? (lt == 0 ? samp(1) : lt == 1 ? samp(2) : samp(3)) : T0;\n"
+    "  T0 = samp(lt);\n"
+    "  T1 = !distant && (uTexOn & (2 << lt)) != 0 ? samp(lt + 1) : T0;\n"
     "  if (uMode == 3) { if (T0.a < 0.5) discard; frag = vec4(T0.rgb, 1.0); return; }\n"
     "  vec3 c = vec3(0.0); float a = 0.0;\n"
     "  vec3 c1 = (cA(uC0.x, c) - cB(uC0.y, c)) * cC(uC0.z, c, a) + cD(uC0.w, c);\n"
@@ -286,6 +297,8 @@ static const char *FS =
     "  if (uBlFin == 0) frag = vec4(bP(uBl2.x, c1), 1.0);\n"
     "  else if (uBlFin == 1) frag = vec4(clamp(bP(uBl2.x, c1) * A + bP(uBl2.z, c1) * bB(uBl2.w, A), 0.0, 1.0), 1.0);\n"
     "  else frag = vec4(bP(uBl2.x == 1 ? uBl2.z : uBl2.x, c1), A);\n"
+    /* P78 DIAGNOSTIC ?p78lodviz=1: tint by the LOD tile (0 none, 1 red, 2 green, 3 blue, 4 magenta; LOD materials) */
+    "  if (uLodViz != 0 && uLod.x != 0 && lt > 0) frag.rgb = mix(frag.rgb, lt == 1 ? vec3(1,0,0) : lt == 2 ? vec3(0,1,0) : lt == 3 ? vec3(0,0,1) : vec3(1,0,1), 0.5);\n"
     "}\n";
 
 static GLuint sh(GLenum t, const char *src) {
@@ -316,9 +329,9 @@ int gfx_init(void) {
     if (!ok) { port_log("[gfx] program link failed\n"); return -1; }
     glUseProgram(prog);
 #define U(v, n) v = glGetUniformLocation(prog, n)
-    static const char *tn[4] = {"uT0", "uT1", "uT2", "uT3"};
+    static const char *tn[6] = {"uT0", "uT1", "uT2", "uT3", "uT4", "uT5"};
     char nm[16];
-    for (int k = 0; k < 4; k++) {
+    for (int k = 0; k < 6; k++) {
         u_tex[k] = glGetUniformLocation(prog, tn[k]);
         snprintf(nm, sizeof nm, "uTP[%d]", k); u_tp[k] = glGetUniformLocation(prog, nm);
         snprintf(nm, sizeof nm, "uTM[%d]", k); u_tm[k] = glGetUniformLocation(prog, nm);
@@ -327,7 +340,7 @@ int gfx_init(void) {
     }
     U(u_c0, "uC0"); U(u_c1, "uC1"); U(u_a0, "uA0"); U(u_a1, "uA1"); U(u_2cyc, "u2cyc"); U(u_prim, "uPrim");
     U(u_env, "uEnv"); U(u_fogc, "uFogC"); U(u_blendc, "uBlendC"); U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp");
-    U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale");
+    U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale"); U(u_lodviz, "uLodViz"); U(u_splitx, "uSplitX");
     U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg");
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -486,7 +499,7 @@ static void apply_state(void) {
     if (mode != 1 && (tex_on || rect_mode == 2)) {
         /* tiles base .. base+3: TEXEL1 of 2-cycle mode and the LOD levels (G_TL_LOD, tex_level) */
         int ntile = cyc == 1 ? 2 : 1, lod = (oth_h & 0x10000) && cyc == 1 && rect_mode == 0;
-        if (lod) ntile = (int)tex_level + 2 > 4 ? 4 : (int)tex_level + 2;
+        if (lod) ntile = (int)tex_level + 2 > 6 ? 6 : (int)tex_level + 2;   /* P78: up to 6 tiles (levels 0..4 + 1) */
         for (int k = 0; k < ntile; k++) {
             unsigned w, h;
             int ti = (tex_tile + k) & 7;
@@ -506,7 +519,10 @@ static void apply_state(void) {
     glUniform1i(u_texon, texon);
     unsigned tf = oth_h >> 12 & 3;   /* G_TF_POINT 0, G_TF_BILERP 2, G_TF_AVERAGE 3 */
     glUniform1i(u_filt, tf == 0 || cyc >= 2 ? 0 : filt_mode);
-    glUniform1f(u_pixscale, (float)cimg_width / canvas_w);
+    { static int ol = -1; if (ol < 0) ol = port_flag("p78oldlod");   /* DIAGNOSTIC ?p78oldlod=1: the pre-P78 (inverted) scale */
+      glUniform1f(u_pixscale, ol ? (float)cimg_width / canvas_w : (float)canvas_w / cimg_width); }   /* P78: canvas px per N64 px */
+    { static int lv = -1; if (lv < 0) lv = port_flag("p78lodviz"); glUniform1i(u_lodviz, lv); }
+    { static int sp = -1; if (sp < 0) sp = port_flag("p78split"); glUniform1f(u_splitx, sp ? canvas_w / 2.0f : -1.0f); }
     /* depth: Z_CMP / Z_UPD; ZMODE (bits 10-11) DEC -> polygon offset (the RDP's z-delta compare) */
     int zcmp = (geom & G_ZBUFFER) && (oth_l & 0x10) && rect_mode == 0, zupd = (oth_l & 0x20) && rect_mode == 0;
     if (zcmp || zupd) { glEnable(GL_DEPTH_TEST); glDepthFunc(zcmp ? GL_LEQUAL : GL_ALWAYS); } else glDisable(GL_DEPTH_TEST);
@@ -551,8 +567,68 @@ static void draw_log_line(void) {
              nbatch, behind, rect_mode, x0, x1, y0, y1, z0, z1, geom, oth_h, oth_l, combine_w0, combine_w1, tex_on, tex_tile,
              prim_col, env_col, fog_col, o[4], o[5], o[6], o[7], o[8], o[9], o[10]);
 }
+/* P78: ?p78tex=N: per-material dump of gfx task N (node too: no GL needed). At each state change before
+ * triangles: othermode, combiner, G_TEXTURE, the tiles base..base+4 (fmt siz line tmem pal cm mask shift, tile
+ * size in texels), and once per distinct (TMEM generation, tile) the decoded texels as hex rows
+ * ([p78hex], port/tools/p78tex.py turns them into PNGs). At the flush: the batch's texel density in N64 pixels
+ * per axis (|ds/dx| etc. from each triangle's screen-space gradients, tile 0 units): what the RDP's LOD sees. */
+static int p78_task = -1, p78_on, p78_mat, p78_ntex;
+static void p78_material(void) {
+    if (!p78_on || !tex_on) return;
+    p78_mat++;
+    port_log("[p78] mat %d: oth %06X/%08X cc %06X/%08X tex lvl %u tile %u on %u sc %.4f %.4f prim %08X env %08X lodfrac %02X\n",
+             p78_mat, oth_h, oth_l, combine_w0, combine_w1, tex_level, tex_tile, tex_on, tex_sc_s, tex_sc_t, prim_col, env_col, prim_lod);
+    unsigned nt = tex_level + 2; if (nt > 6) nt = 6;
+    for (unsigned k = 0; k < nt; k++) {
+        const Tile *t = &tiles[(tex_tile + k) & 7];
+        port_log("[p78]   tile %u: fmt %u siz %u line %u tmem %03X pal %u cms %u cmt %u mask %u/%u shift %u/%u ul %.2f %.2f lr %.2f %.2f\n",
+                 (tex_tile + k) & 7, t->fmt, t->siz, t->line, t->tmem, t->pal, t->cms, t->cmt, t->masks, t->maskt, t->shifts,
+                 t->shiftt, t->uls / 4.0, t->ult / 4.0, t->lrs / 4.0, t->lrt / 4.0);
+        static unsigned seen[256][3]; static unsigned nseen;
+        unsigned key0 = tmem_gen, key1 = t->tmem | t->line << 12 | t->siz << 24 | t->fmt << 28, key2 = t->masks | t->maskt << 4 | t->pal << 8;
+        int dup = 0;
+        for (unsigned j = 0; j < nseen; j++) if (seen[j][0] == key0 && seen[j][1] == key1 && seen[j][2] == key2) dup = 1;
+        if (dup || nseen >= 256 || p78_ntex >= 60) continue;
+        seen[nseen][0] = key0; seen[nseen][1] = key1; seen[nseen][2] = key2; nseen++;
+        unsigned w, h; tile_dims(t, &w, &h);
+        if (w > 64 || h > 64) continue;
+        p78_ntex++;
+        port_log("[p78hex] T%d mat %d tile %u %ux%u\n", p78_ntex, p78_mat, (tex_tile + k) & 7, w, h);
+        for (unsigned y = 0; y < h; y++) {
+            char b[64 * 8 + 1]; int m = 0;
+            for (unsigned x = 0; x < w; x++) { unsigned char o[4]; texel(t, x, y, o); m += snprintf(b + m, sizeof b - m, "%02X%02X%02X%02X", o[0], o[1], o[2], o[3]); }
+            port_log("[p78hex] %s\n", b);
+        }
+    }
+}
+static void p78_density(void) {
+    if (!p78_on || !tex_on || nbatch < 3) return;
+    float dmin = 1e9f, dmax = 0, ssum = 0; int n = 0;
+    const Tile *t0 = &tiles[tex_tile & 7];
+    float shs = t0->shifts == 0 ? 1.0f : t0->shifts <= 10 ? 1.0f / (1 << t0->shifts) : (float)(1 << (16 - t0->shifts));
+    for (int i = 0; i + 2 < nbatch; i += 3) {
+        const float *p[3] = {batch + i * VF, batch + (i + 1) * VF, batch + (i + 2) * VF};
+        if (p[0][3] <= 0 || p[1][3] <= 0 || p[2][3] <= 0) continue;
+        float X[3], Y[3];
+        for (int k = 0; k < 3; k++) { X[k] = (p[k][0] / p[k][3] * 0.5f + 0.5f) * cimg_width; Y[k] = (p[k][1] / p[k][3] * 0.5f + 0.5f) * cimg_width * 0.75f; }
+        float a = (X[1] - X[0]) * (Y[2] - Y[0]) - (X[2] - X[0]) * (Y[1] - Y[0]);
+        if (a > -0.5f && a < 0.5f) continue;
+        float ds1 = (p[1][8] - p[0][8]) * shs, ds2 = (p[2][8] - p[0][8]) * shs, dt1 = p[1][9] - p[0][9], dt2 = p[2][9] - p[0][9];
+        float dsdx = (ds1 * (Y[2] - Y[0]) - ds2 * (Y[1] - Y[0])) / a, dsdy = (ds2 * (X[1] - X[0]) - ds1 * (X[2] - X[0])) / a;
+        float dtdx = (dt1 * (Y[2] - Y[0]) - dt2 * (Y[1] - Y[0])) / a, dtdy = (dt2 * (X[1] - X[0]) - dt1 * (X[2] - X[0])) / a;
+        float m = fabsf(dsdx); if (fabsf(dsdy) > m) m = fabsf(dsdy); if (fabsf(dtdx) > m) m = fabsf(dtdx); if (fabsf(dtdy) > m) m = fabsf(dtdy);
+        if (m < dmin) dmin = m; if (m > dmax) dmax = m; ssum += m; n++;
+        if (fabsf(a) > 2000)   /* big (near) triangles: the gradients and the vertices */
+            port_log("[p78]     big tri area %.0f: ds/dx %.3f ds/dy %.3f dt/dx %.3f dt/dy %.3f | (%.0f,%.0f s %.1f t %.1f w %.0f) (%.0f,%.0f s %.1f t %.1f w %.0f) (%.0f,%.0f s %.1f t %.1f w %.0f)\n",
+                     fabsf(a) / 2, dsdx, dsdy, dtdx, dtdy, X[0], Y[0], p[0][8], p[0][9], p[0][3], X[1], Y[1], p[1][8], p[1][9], p[1][3],
+                     X[2], Y[2], p[2][8], p[2][9], p[2][3]);
+    }
+    if (n) port_log("[p78]   draw %d tris (%d front): texels per N64 pixel (affine, tile %u) min %.3f mean %.3f max %.3f\n",
+                    nbatch / 3, n, tex_tile, dmin, ssum / n, dmax);
+}
 static void flush(void) {
     if (draw_log && nbatch) draw_log_line();
+    if (nbatch) p78_density();
     if (!nbatch || !gl_ok) { nbatch = 0; return; }
     glBufferData(GL_ARRAY_BUFFER, nbatch * VF * 4, batch, GL_STREAM_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, nbatch);
@@ -562,7 +638,7 @@ static void flush(void) {
 
 static void need_state(int rm) {
     if (rm != rect_mode) { flush(); rect_mode = rm; state_dirty = 1; }
-    if (state_dirty) { flush(); if (gl_ok) apply_state(); state_dirty = 0; }
+    if (state_dirty) { flush(); if (gl_ok) apply_state(); if (p78_on && rm == 0) p78_material(); state_dirty = 0; }
     if (nbatch + 6 > BATCH_TRIS * 3) flush();
 }
 
@@ -716,6 +792,14 @@ static void load_vtx(unsigned w0, unsigned w1) {
     unsigned n = w0 >> 12 & 0xFF, end = w0 >> 1 & 0x7F, v0 = end - n;
     const unsigned char *p = gfx_addr(w1);
     if (!p || v0 + n > 64) { gfx_stats.bad_addr++; return; }
+    if (p78_on && tex_on) {   /* P78: raw Vtx records (x y z flag s t rgba) of the dumped task */
+        port_log("[p78vtx] G_VTX %08X %08X: %u at slot %u, ucode %08X geom %06X\n", w0, w1, n, v0, cur_ucode, geom);
+        for (unsigned i = 0; i < n; i++)
+            port_log("[p78vtx]   %2u: %6d %6d %6d  flag %04X  st %6d %6d (%.2f %.2f)  rgba %08X\n", v0 + i, (short)vbe_ld16(p + 16 * i),
+                     (short)vbe_ld16(p + 16 * i + 2), (short)vbe_ld16(p + 16 * i + 4), vbe_ld16(p + 16 * i + 6),
+                     (short)vbe_ld16(p + 16 * i + 8), (short)vbe_ld16(p + 16 * i + 10), (short)vbe_ld16(p + 16 * i + 8) / 32.0,
+                     (short)vbe_ld16(p + 16 * i + 10) / 32.0, (unsigned)vbe_ld16(p + 16 * i + 12) << 16 | vbe_ld16(p + 16 * i + 14));
+    }
     for (unsigned i = 0; i < n; i++, p += 16) {
         V *v = &vb[v0 + i];
         float x = (short)vbe_ld16(p), y = (short)vbe_ld16(p + 2), z = (short)vbe_ld16(p + 4);
@@ -1234,6 +1318,8 @@ void gfx_run_task(void *task) {
     if (dltrace < 0) { dltrace = port_flag("dltrace"); dlstat = port_flag("dlstat"); }
     /* P23: ?dltrace=N dumps every command of gfx task N too; ?dlstat=N logs the opcode histogram every N tasks */
     gfx_trace = gfx_stats.tasks <= 2 || (dltrace && gfx_stats.tasks == (unsigned)dltrace);
+    if (p78_task < 0) p78_task = port_flag("p78tex");
+    p78_on = p78_task > 0 && gfx_stats.tasks == (unsigned)p78_task; p78_mat = 0;
     if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;
     memset(fr_ops, 0, sizeof fr_ops); memset(fr_seguse, 0, sizeof fr_seguse);
     freecam_update();

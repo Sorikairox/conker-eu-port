@@ -86,6 +86,29 @@ void __wrap_func_1503BCAC(int arg0) {
         tail_frame = port_frame_count; tail_inframe = 0;
         static unsigned next = 256;
         if (flag(&fsky, "p75sky") && port_frame_count >= next) { next = port_frame_count + 256; quad_dump("frame"); }
+        { /* P78: ?p78sky=N: every N frames the inputs of func_15110420's backdrop dispatch (game_eu_13DC30.c):
+           * D_800C3682 (viewport-clear path instead), mode = header +8 (index into D_80089578: 2 = func_150D1D20),
+           * and func_15110E44's level-0 case: handle 0 (no backdrop call) when player y < 1600 and yaw > 26 */
+            static int f78 = -1; static unsigned n78;
+            extern unsigned char D_800C3682_[] __asm__("D_800C3682"), D_800BE9F0_[] __asm__("D_800BE9F0"),
+                D_800DBFF0_[] __asm__("D_800DBFF0"), D_800DD210_[] __asm__("D_800DD210"), D_80082FA4_[] __asm__("D_80082FA4");
+            if (flag(&f78, "p78sky") && port_frame_count >= n78) {
+                n78 = port_frame_count + (unsigned)f78;
+                const unsigned char *h = (const unsigned char *)(uintptr_t)W(D_800B0DF0_, 0);
+                const unsigned char *pl = (const unsigned char *)(uintptr_t)W(D_800DBFF0_, 0);
+                int idx = (int)W(D_80082FA4_, 0);
+                float x = 0, y = 0, z = 0, vy = 0, p388 = 0;
+                if (pl && idx == 0) { unsigned u; u = W(pl, 0x2F8); memcpy(&x, &u, 4); u = W(pl, 0x2FC); memcpy(&y, &u, 4);
+                    u = W(pl, 0x300); memcpy(&z, &u, 4); u = W(pl, 0x388); memcpy(&p388, &u, 4); }
+                { unsigned u = W(D_800DD210_ + idx * 0x18, 0xC); memcpy(&vy, &u, 4); }
+                float yaw = 360.0f - (vy + p388);
+                while (yaw < -180.0f) yaw += 360.0f;
+                while (yaw >= 180.0f) yaw -= 360.0f;
+                port_log("[p78] sky frame %u level %d mode %u D_800C3682 %u player %d pos %.0f %.0f %.0f yaw %.1f -> level-0 handle %s\n",
+                         port_frame_count, (int)W(D_800BE9F0_, 0), h ? vbe_ld8(h + 8) : 0xFFFF, vbe_ld8(D_800C3682_), idx,
+                         x, y, z, yaw, (y < 1600.0f && yaw > 26.0f) ? "0 (no backdrop)" : "!= 0");
+            }
+        }
     }
     tail_inframe++;
     { /* ?p75sky also reports the first frame a word of the null zone 0x10..0xFF becomes nonzero */

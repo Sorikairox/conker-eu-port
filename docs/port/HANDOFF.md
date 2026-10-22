@@ -1215,7 +1215,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72, P75; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72, P75, P78; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1250,7 +1250,8 @@ jump / running jump / Z long jump and idle variations at runtime, jump GIF) and
 `docs/port/sessions/P69.md` (last PC versions dropped, D_80084550 mapped, P65 / P67 C at runtime, the walk-after-respawn
 hang) and `docs/port/sessions/P72.md` (the hang bisected to P64's func_150D1D20 writing through NULL buffers of the
 stubbed func_15000AD0; TEMPORARY guard; 0x2C warp reached again) and `docs/port/sessions/P75.md` (merge P70 / P71 / P74,
-guard dropped, sky / tail / breakable runtime checks, missing-argument call sites, blocker list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+guard dropped, sky / tail / breakable runtime checks, missing-argument call sites, blocker list)) and `docs/port/sessions/P78.md` (per-material DL dump,
+LOD fixes in the renderer, the null-zone writer = func_1501396C's argument-less icall, the func_150D1D20 gate). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1292,6 +1293,10 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 #      (P75: ?p72quad / ?p72skip are gone with the TEMPORARY func_150D1D20 guard)
 # P75: ?p75sky=1 (func_15000AD0 buffers / gradient / quads, null-zone first dirty frame), ?p75tail=N (func_1503BCAC),
 #      ?p75brk=N (func_1503E238), ?p75break=FRAME&p75bslot=S&p75bkind=K (DIAGNOSTIC break request); one node boot at a time
+# P78: ?p78tex=TASK (per-material dump: othermode / combiner / tiles / decoded texels / raw Vtx / texel density;
+#      python3 port/tools/p78tex.py LOG OUTDIR -> PNGs), ?p78null=1 (first null-zone write: last stubs + JS stack),
+#      ?p78sky=N (func_15110420 backdrop gate inputs), DIAGNOSTIC ?p78split=1 (left half old LOD, right half new),
+#      ?p78lodviz=1 (tint by LOD tile), ?p78oldlod=1 (old LOD scale)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -2240,6 +2245,26 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     7. the per-frame group (func_1509A024, game_14FF90.c, ...).
 
     Details: P75.md §3.
+- **P78 (no merge; renderer LOD fixes + three findings).** Full notes: P78.md.
+  - **Second-area blur is in the data, not the sampler.** The per-material dump (`?p78tex`) shows level textures of
+    32x32 / 64x32 CI8 / CI4 with planar UVs at ~9.4 world units per texel. The near ground is drawn at 0.07-0.43
+    texels per N64 pixel (2-15 px per texel), and some lip / wall pieces have UVs stretched 4x along one axis. TMEM
+    decode, odd-row xor, tile shifts / ul, masks, TLUT were checked against the dump. `?p78split=1` shows the field is
+    mip 0 with the old and the new LOD.
+  - **Fixed in gfx_f3dex2.c (LOD, RDP semantics):**
+    - uPixScale was inverted, so lod was ~4.8x too small and far LOD surfaces sampled 2+ levels too fine;
+    - lod is now the per-component max, not the vector length;
+    - "distant" now takes both texels from tile base + max (it was the stale tile after it);
+    - levels go up to 4 (6 tiles bound; was 2).
+
+    Same-frame screenshot: `P78_screenshot.png` (left old, right new).
+  - **Null-zone writer found.** func_1501396C (game_40490.c) calls `D_80082ECC[idx]()` with no argument; on N64 a0
+    still holds arg0. The callee func_15013D38 then does `arg0->unk16 |= 4` with arg0 = 0, which is null+0x14 =
+    0x400. **Port-branch fix:** `void (*)(struct16 *)` + `func(arg0)` (check byte identity / NON_MATCHING). The P75
+    stub candidates are only neighbours. No guard: it does not crash.
+  - **func_150D1D20 gate.** func_15110420 calls `D_80089578[header +8]` (mode 2 = func_150D1D20) only when
+    func_15110E44 ≠ 0. For level 0, that is 0 when player y < 1600 and the camera angle > 26. After the 0x2C round
+    trip the angle is 27-47 (before: 13-18), so this is game logic, not a stub effect (`?p78sky`).
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

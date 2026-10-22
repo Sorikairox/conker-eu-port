@@ -178,6 +178,24 @@ void port_stub_hit(const char *name, const char *what) {
               }
           last = cur; prev = name;
       } }
+    { /* P78: ?p78null=1: at every stub hit check the null zone (wasm 0x10..0xFF); on the first dirty word log the
+       * last 12 stub hits before it (the write happened after the previous one returned) and the JS stack */
+      static int nz = -1, done; static const char *ring[12]; static unsigned rfr[12], rn;
+      if (nz < 0) nz = port_flag("p78null");
+      if (nz && !done) {
+          unsigned a;
+          for (a = 0x10; a < 0x100; a += 4)
+              if (*(volatile unsigned *)(uintptr_t)a) break;
+          if (a < 0x100) {
+              done = 1;
+              port_log("[p78] null zone dirty: null+0x%X = %08X, frame %u, seen at the entry of stub %s; previous hits (newest first):\n",
+                       a, *(volatile unsigned *)(uintptr_t)a, port_frame_count, name);
+              for (unsigned k = 1; k <= 12 && k <= rn; k++)
+                  port_log("[p78]   -%u %s (frame %u)\n", k, ring[(rn - k) % 12], rfr[(rn - k) % 12]);
+              port_js_stack(1, 24);
+          }
+          ring[rn % 12] = name; rfr[rn % 12] = port_frame_count; rn++;
+      } }
     if (stub_count(name, what) && stub_logged < PORT_STUB_LOG_MAX) { /* first hit of each stub */
         stub_logged++;
         OSThread *t = port_current_thread();
