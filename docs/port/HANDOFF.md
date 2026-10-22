@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P82 (port-b) (session P82, 2026-10-22). Details: `docs/port/sessions/P82.md`
+
+Branch `port-b` (from P77 3ef8b97); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p82/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- New hand-written NM C (no asm2c), all EQUIV on random 100 + setups: the browser's top frame-path group
+  **func_151462C8** (model-part lights, DL, 25/25), **func_1514306C** (material texture address, 11/11),
+  **func_1513C060** (sprite effect update, 28/28); func_1513E2AC (sprite quad corners, 27/29, 2 equivalent);
+  **func_15021E60** (look target / fixed look angles, 24/24), func_150220CC (look limits, 14/14);
+  func_1504ADD0 (per-frame object pass, 12/12; stores a pointer to a stack local as the asm does, P82.md §2);
+  func_150617BC (object fades, 17/21, 4 equivalent; prototype now `void`).
+- Arity fixes (byte-identical, default build): handler tables D_80089EE8 / EF0 / EF8 / F2C now get arg0
+  (game_169510.c, scan rows 34-37); func_1501DF70(arg0) (game_eu_4A070.c, row 52).
+- `docs/port/sessions/p82/mut.sh`: sed errors and CERR / UNSURE setups no longer count as SURVIVED (selftest in
+  `selftest_mut.txt`). POKE into `.game_data` (0x80096DC4) had no effect: use the ELF value (P82.md §3).
+
+## Next steps (from P82)
+
+1. Browser: the DL group (lit parts, material textures, sprite effects), head turning (func_15021E60 /
+   func_150220CC), the corrected handler calls (P82.md UNVERIFIED).
+2. Frame-path asm left in P82's files: func_15060F28 (game_83300.c, called by func_150617BC mode 5 / 6),
+   func_1506160C (fade setter, 108 insns), func_15061B4C (601), game_14FF90.c group (func_15125DB4, 15128030,
+   15126378, 15124C38, 1512317C, 151256BC, 601 each), func_1501ECA4 / func_15020F6C (game_eu_4A070.c, 601).
+3. Remaining asm in game_eu_170760.c (func_151432BC, func_15144CEC, func_15146078, func_1514654C) and
+   game_169510.c (func_1513CFE4, func_1513EE14, func_1513FAB4, func_15140190, func_151406AC, ...): not hit in P81's run.
+
 ## P77 (port-b) (session P77, 2026-10-22). Details: `docs/port/sessions/P77.md`
 
 Branch `port-b` (from P73 4498419); the orchestrator merges it into `port`.
