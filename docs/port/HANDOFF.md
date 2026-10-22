@@ -20,6 +20,29 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   world-object matrices). Frame DL: func_15110948 (default camera callback), func_1517485C (occlusion probes).
 - difftest: `DIFFTEST_EXACT='*'` (known prototypes are exact); `proto_arity` ignores commented-out drafts.
 
+## Next steps (from P40)
+
+Browser priorities (P39, sent during P40): the camera chain (func_150858A0 / func_150851E0, func_15005818,
+func_151247C0, func_15123A54, func_151283B8 → func_15122EF0) and the shadow chain (func_1502C1D4 → func_1502C074 →
+func_1502E228) **belong to the parallel session on branch `port-b`** (worktree `~/conker-wt/portb`). Do not take them
+here, and do not edit game_eu_B2980.c, game_32740.c, game_14FF90.c or the files of those shadow functions.
+1. Here: func_15180AF0 (m2c raw draft, see P38.md §6), func_15041A9C (raw draft with 3 `unksp`), the P29 top-hit list.
+Runtime checks: P40.md UNVERIFIED (**vertex-pointer range tests** `> 0x100000` / `> 0x80000000` in func_15001460 /
+func_15002008 / func_15002248 vs wasm heap addresses; PI_STATUS + cart word reads in func_15001A08), P38's list.
+
+## State (session P40, 2026-10-22). Details: `docs/port/sessions/P40.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (790 bodies).
+- progress_nm: C coverage including NON_MATCHING **4784/5915 (80.9%)** (P38: 4781), bytes 49.9% → **50.0%**;
+  init 489/538, game 4256/5334, debugger 39/43; **1131 asm-only** (158 under 60 insns).
+- **The level-load visibility build is all C:** func_15001460 (triangle scan), func_15001A08 (node pool), func_15002008
+  (leaf lists), and the PVS row index func_150183D0 + func_150184B0 (hand asm). func_150A5858 now gets a range
+  (D_800D3668..D_800D3A8C) and a tree (D_800DC278).
+- **New whole-pipeline harness `tools/port/difftest/nmasm_level.py`:** real level assets from the ROM (zlib), func_15003668
+  + func_150038A0 through asm and C in Unicorn, all RDRAM compared: **EQUIV on all 59 levels with a model list**
+  (PVS on 19 of them), plus `--synth` random DLs through func_15001460; func_150A5858 (C) smoke on the C tree (asm agrees).
+  Masked: area-2 (object) triangle bounds, which the asm fills from stale stack slots (P40.md §1).
+
 ## Next steps (from P38)
 
 Browser priorities (P37, sent during P38). The player spawns and the camera target is non-NULL. Two blockers remain:
