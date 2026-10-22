@@ -4,6 +4,28 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 extern s32 D_8008704C;
 void func_15036F60(u8 *arg0);
+struct197 *allocate_memory(s32, s32, s32, s32);
+void func_1505F188(struct127 *);
+struct127 *func_1505ED34(void);
+void func_150848F0(u8 *, s32, s32);
+s32 func_151E6710(s32);
+void func_15083E20(u8 *, u16, u8 *);
+void func_15083C3C(s32, s32, s32);
+s32 func_15083D54(struct127 *, u16, s32, f32);
+void func_1503DD8C(struct127 *, s32, s32, s32);
+void func_15083784(struct127 *, s32);
+s32 func_15085118(s32);
+s32 func_1514D6CC(struct127 *);
+void func_15085098(u8 *);
+extern s8 D_8008FD8C;
+extern u8 *D_800D252C;
+extern s8 D_800901E4[];
+extern s8 D_800D2550;
+extern u16 D_800D2132;
+extern u8 D_800C67F0;
+extern u8 D_80038080;
+extern u8 D_800A7610[];
+extern u8 D_800A7620[];
 #endif
 
 typedef struct {
@@ -87,8 +109,219 @@ void func_15082DD8(u8 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082E44.s")
+#ifdef NON_MATCHING
+/* Spawns the level-setup object e (0x30-byte entry of D_800D20FC) into an object slot of D_800CC2D0 (0x32C each):
+ * slot = reuse+reset (func_1505F188) of slot reuse - 1 when reuse != 0, of slot idx when idx < D_8008FD8C (the
+ * player / character slots), else a new one (func_1505ED34). Returns slot + 1, or 0 when D_800D252C[idx] & 0x7F
+ * (already spawned) or no slot is free (25). Fills position (+0x14.., from e+6/8/A), angle (e+0xC << 8), the setup
+ * flags e+0x18 (+0xF8), model / type (e+4) via func_15083E20 / func_15083C3C / func_15083D54, the player record
+ * (+0x31C, 0x1C0 bytes) for character slots and types 0x98 / 0x28, and the other per-type defaults. */
+#define O8(o) (*(u8 *)(obj + (o)))
+#define O16(o) (*(s16 *)(obj + (o)))
+#define O32(o) (*(s32 *)(obj + (o)))
+#define OF(o) (*(f32 *)(obj + (o)))
+#define REC(o) (*(u8 *)(*(u8 **)(obj + 0x31C) + (o)))
+s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse) {
+    u8 *obj;
+    s32 type;
+    s32 slot;
+    s32 flags;
+    s32 v;
+    s32 n;
+    s32 i;
+    u8 *p;
+    u8 *t;
+    s32 found;
+    void func_150836AC();
+    u8 func_15084E08(struct_eu_AF2A0 *);
 
+    if (D_800D252C[idx] & ~0x80) {
+        return 0;
+    }
+    type = e[4];
+    if (reuse != 0) {
+        obj = (u8 *)D_800CC2D0 + reuse * 0x32C - 0x32C;
+        func_1505F188((struct127 *)obj);
+    } else if (idx != -1 && idx < D_8008FD8C) {
+        obj = (u8 *)D_800CC2D0 + idx * 0x32C;
+        func_1505F188((struct127 *)obj);
+    } else {
+        obj = (u8 *)func_1505ED34();
+    }
+    slot = (s32)(obj - (u8 *)D_800CC2D0) / 0x32C;
+    if (slot == 0x19) {
+        return 0;
+    }
+    if (idx != -1) {
+        if (*(u16 *)e & 0x21) {
+            D_800D252C[idx] = slot + 1;
+        } else {
+            D_800D252C[idx] = slot + 0x81;
+        }
+        O8(0x13F) = idx;
+        if (idx < D_8008FD8C) {
+            O8(0x127) = idx;
+        } else {
+            O8(0x127) = 0xFF;
+        }
+    }
+    *(u8 **)(obj + 0x144) = e;
+    func_150848F0(e, O8(0x13F), arg3);
+    if (slot < D_8008FD8C || type == 0x98 || type == 0x28) {
+        *(struct197 **)(obj + 0x31C) = allocate_memory(0x1C0, 1, 0, 0);
+        bzero(*(void **)(obj + 0x31C), 0x1C0);
+        *(f32 *)(*(u8 **)(obj + 0x31C) + 0x1B8) = 5.0f;
+    }
+    O8(0x1D0) = 2;
+    O8(0x3B) = e[0x28];
+    OF(0x14C) = *(f32 *)(e + 0x20);
+    OF(0x150) = *(f32 *)(e + 0x24);
+    OF(0x154) = *(f32 *)(e + 0x20);
+    OF(0x158) = *(f32 *)(e + 0x24);
+    O32(0x0) = e[3];
+    OF(0x14) = *(s16 *)(e + 6);
+    OF(0x18) = *(s16 *)(e + 8);
+    O8(0x212) = 0xFF;
+    O8(0x20F) = 0xFF;
+    O8(0x210) = 0xFF;
+    O8(0x211) = 0xFF;
+    O8(0x128) = 0xFF;
+    OF(0x2C) = OF(0x14);
+    OF(0x30) = OF(0x18);
+    OF(0x1CC) = OF(0x18);
+    OF(0x1C) = *(s16 *)(e + 0xA);
+    OF(0x34) = OF(0x1C);
+    if (*(u16 *)e & 6) {
+        func_1506160C((struct127 *)obj, 4, 0, 0, 0);
+    }
+    O8(0x232) = e[0xD];
+    if (idx < D_8008FD8C && D_800901E4[idx] == -2) {
+        REC(0x84) = 1;
+        O8(0x232) = 1;
+    }
+    if (O8(0x127) != 0xFF) {
+        O8(0x128) = func_151E6710(O8(0x127));
+        REC(0x19A) = D_800D2550;
+        REC(0x1AF) = 0x40;
+        REC(0x1B0) = 0xFF;
+    }
+    O8(0x1CA) = e[0xE] & 0xF;
+    O8(0x221) = 1;
+    O8(0x1E5) = e[0xF];
+    O8(0x1E6) = e[0xF];
+    O8(0x23C) = e[0x1C];
+    O8(0x23D) = e[0x1D];
+    v = e[0xC] << 8;
+    O16(0x76) = v;
+    O16(0x7A) = v & 0xFFFF;
+    O16(0x78) = v & 0xFFFF;
+    OF(0x40) = (f32)((v & 0xFFFF) + 0x4000) * 0.0054931640625f;
+    OF(0x24) = 6.0f;
+    O8(0x140) = arg2;
+    flags = *(s32 *)(e + 0x18);
+    O32(0xF8) = flags;
+    if (flags & 0x200000) {
+        O16(0x224) = (s32)OF(0x18);
+    }
+    if (flags & 0x10000000) {
+        O16(0x38) = (s32)(OF(0x18) - 500.0f);
+    }
+    if (flags & 0x800000) {
+        D_800C67F0 = 1;
+    }
+    O8(0x1E4) = e[0x11];
+    O8(0x1DD) = 0x78;
+    O8(0x1DE) = 0x78;
+    O8(0x1DF) = 0x78;
+    O8(0x1E0) = 0xFF;
+    O8(0x1E1) = 0xFF;
+    O8(0x1E2) = 0xFF;
+    O8(0x23E) = 4;
+    O8(0x246) = 1;
+    O8(0x247) = 0x64;
+    O8(0x248) = 0x64;
+    O8(0x1FC) |= 2;
+    O8(0x66) = e[0x10];
+    func_15083E20(obj, type, e);
+    O16(0x92) = ((e[0x13] & 0x80) << 8) | (e[0x13] & 0x7F);
+    O16(0x90) = *(s16 *)(e + 0x14);
+    func_15083C3C(slot, type, 1);
+    if (type != 0xFF) {
+        func_15083D54((struct127 *)obj, 0, 0, 1.0f);
+    } else {
+        O8(5) = 3;
+    }
+    if (O32(0xF8) & 0x4000) {
+        func_1503DD8C((struct127 *)obj, O8(4), 0, 0);
+    }
+    if (e[0x29] != 0) {
+        func_15083568((struct127 *)obj, e[0x29], 1.0f, 0);
+    }
+    if (O8(0x127) != 0xFF) {
+        O8(0x1CA) = func_150859AC((s16)O8(0x127), 4);
+        O16(0xB2) = (s16)D_800D2132;
+        func_15082DD8(obj);
+        func_15083784((struct127 *)obj, func_150859AC((s16)slot, 1));
+    }
+    if ((O8(0x66) & 0xC) == 8 || (O8(0x66) & 0xC) == 0xC) {
+        func_150836AC(obj);
+    } else {
+        O32(0x314) = 0;
+    }
+    O8(0x288) = func_15085118(type);
+    if (D_800BE616 != 0) {
+        v = func_151E6710(O8(0x127));
+        if (v >= 4) {
+            v = 3;
+        }
+        if (type == 0x3B) {
+            O8(0x68) = v + 1;
+        } else if (type == 0x77) {
+            O8(0x68) = v + 0x10;
+        }
+    }
+    if (D_80038080 == 0 && D_800BE9F0 != 0x1D && e[0x2E] == 0xFF) {
+        n = O8(0x2C9);
+        if (n == 0) {
+            n = 1;
+        }
+        for (i = 0; i < n; i++) {
+            ((u8 *)D_800D2040)[(*(u8 **)(obj + 0x2C4))[i]] = 0xFF;
+        }
+    }
+    if (D_800BE9F0 == 0x1D) {
+        O8(0x66) &= 0xDF;
+    }
+    func_1514D6CC((struct127 *)obj);
+    v = func_15084E08((struct_eu_AF2A0 *)obj);
+    found = 0;
+    for (t = D_800A7610; t != D_800A7620; t += 8) {
+        if (v == t[0]) {
+            found = 1;
+            break;
+        }
+    }
+    if (found) {
+        p = (u8 *)allocate_memory(0xC, 1, 0, 2);
+        *(u8 **)(obj + 0x260) = p;
+        if (p != NULL) {
+            p[8] = 0;
+            p[9] = 0xFF;
+            *(f32 *)(p + 0) = 0.0f;
+            *(f32 *)(p + 4) = 1.0f;
+        }
+    }
+    func_15085098(obj);
+    return slot + 1;
+}
+#undef O8
+#undef O16
+#undef O32
+#undef OF
+#undef REC
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082E44.s")
+#endif
 typedef struct {
     u8 pad0[0x127];
     u8 unk127;
