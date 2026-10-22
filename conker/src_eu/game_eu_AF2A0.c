@@ -26,6 +26,8 @@ extern u8 D_800C67F0;
 extern u8 D_80038080;
 extern u8 D_800A7610[];
 extern u8 D_800A7620[];
+u8 func_15085170(u8 *arg0);
+u8 *func_1502B020(s32 *arg0, s32 arg1, ...);
 #endif
 
 typedef struct {
@@ -55,7 +57,98 @@ void func_1508220C(u8 *arg0, u16 v, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15082278.s")
 
+#ifdef NON_MATCHING
+s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+s32 func_150A6840(s32, s32 *, f32, f32, f32, f32, f32, f32);
+extern s32 D_800DA030[];
+
+/* P36: level-setup entry idx (0x30 bytes at D_800D20FC): spawn it with func_15082E44(e, idx, 0, 0, 0) and return
+ * that, or return 0 when: already spawned (D_800D252C[idx] != 0); a placeholder (e[2] == 1); no position
+ * (x == 0x7FFF); its respawn timer D_800D2530[idx] is running (lowered by D_800BE9A0 this frame); idx >= 5 with a
+ * range class e[1] & 6 (2: 650, 4: 1300, else 2750 units) and no player object D_800CC2D0[0 .. D_8008FD8C)
+ * (+0 != 0, +0x127 != 0xFF and enabled in the u16 mask at D_800D2138 + 0x208) within that XZ distance; or
+ * e[1] & 8 and the spot (x, y + 150, z), radius 150, is in view of one of the cameras 0 .. D_80082FA0
+ * (func_150A6840 on D_800BE628 + i * 0x180, D_800DA030 + i * 0x10). Player slots (idx < 5) skip the range test.
+ * arg1 is unused. */
+s32 func_150829C0(s32 idx, s32 arg1) {
+    u8 *e;
+    u16 *timer;
+    u8 *obj;
+    u8 *end;
+    s32 x, flags, cls, n, ok, i, b;
+    f32 r2, dx, dz;
+
+    if (D_800D252C[idx] != 0) {
+        return 0;
+    }
+    e = (u8 *) D_800D20FC + idx * 0x30;
+    if (e[2] == 1) {
+        return 0;
+    }
+    x = *(s16 *) (e + 6);
+    if (x == 0x7FFF) {
+        return 0;
+    }
+    timer = (u16 *) D_800D2530 + idx;
+    if (*timer != 0) {
+        if (D_800BE9A0 < *timer) {
+            *timer = *timer - D_800BE9A0;
+        } else {
+            *timer = 0;
+        }
+        return 0;
+    }
+    flags = e[1];
+    if (idx >= 5 && (cls = flags & 6) != 0) {
+        if (cls == 2) {
+            r2 = 422500.0f;
+        } else if (cls == 4) {
+            r2 = 1690000.0f;
+        } else {
+            r2 = 7562500.0f;
+        }
+        n = D_8008FD8C;
+        ok = 1;
+        if (n > 0) {
+            obj = (u8 *) D_800CC2D0;
+            end = (u8 *) D_800CC2D0 + n * 0x32C;
+            do {
+                if (*(s32 *) obj != 0) {
+                    b = obj[0x127];
+                    if (b != 0xFF && ((1 << b) & *(u16 *) ((u8 *) &D_800D2138 + 0x208))) {
+                        dx = *(f32 *) (obj + 0x14) - (f32) x;
+                        dz = *(f32 *) (obj + 0x1C) - (f32) *(s16 *) (e + 0xA);
+                        if (dx * dx + dz * dz <= r2) {
+                            ok = 0;
+                            break;
+                        }
+                    }
+                }
+                obj += 0x32C;
+            } while ((u32) obj < (u32) end);
+        }
+        if (ok) {
+            return 0;
+        }
+    }
+    if (flags & 8) {
+        ok = 1;
+        for (i = 0; i <= D_80082FA0; i++) {
+            e = (u8 *) D_800D20FC + idx * 0x30;
+            if (func_150A6840(D_800BE628 + i * 0x180, D_800DA030 + i * 0x10, (f32) *(s16 *) (e + 6),
+                              (f32) (*(s16 *) (e + 8) + 150), (f32) *(s16 *) (e + 0xA), 150.0f, 150.0f, 20000.0f) != 0) {
+                ok = 0;
+            }
+        }
+        if (!ok) {
+            return 0;
+        }
+    }
+    return func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150829C0.s")
+#endif
 
 s32 func_150829C0(s32, s32);
 extern u8 D_800D2520;
@@ -450,8 +543,40 @@ void func_15083784(struct127 *arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150836CC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083C3C.s")
+#ifdef NON_MATCHING
+/* P36: set object slot's type (+4). 0xFF (no type): clears +0xE4/E6/E8, +0xD2 = +0xD4 = 0x46, +0xD6, +0x160, +0xC8 = 0.
+ * Else +0xC8 = type record D_800D1C90[type]->+6 (s16), func_15062BDC(obj, +0x14C, +0x150), +5 = record +0x12.
+ * Then +6 = func_15085170(obj) (model id); +0x58 = func_1502B020(0, 2, 2, id) when D_800C5A90[id] != 0. arg2 unused. */
+void func_15083C3C(s32 slot, s32 type, s32 arg2) {
+    u8 *obj = (u8 *) D_800CC2D0 + slot * 0x32C;
+    u8 *rec;
+    u8 id;
 
+    obj[4] = type;
+    if (type == 0xFF) {
+        *(s16 *) (obj + 0xE4) = 0;
+        *(s16 *) (obj + 0xE6) = 0;
+        *(s16 *) (obj + 0xE8) = 0;
+        *(s16 *) (obj + 0xD2) = 0x46;
+        *(s16 *) (obj + 0xD4) = 0x46;
+        *(s16 *) (obj + 0xD6) = 0;
+        *(s16 *) (obj + 0x160) = 0;
+        *(f32 *) (obj + 0xC8) = 0.0f;
+    } else {
+        rec = (u8 *) D_800D1C90[type];
+        *(f32 *) (obj + 0xC8) = (f32) *(s16 *) (rec + 6);
+        func_15062BDC((struct127 *) obj, *(f32 *) (obj + 0x14C), *(f32 *) (obj + 0x150));
+        obj[5] = ((u8 *) D_800D1C90[type])[0x12];
+    }
+    id = func_15085170(obj);
+    obj[6] = id;
+    if ((u16) D_800C5A90[id] != 0) {
+        *(u8 **) (obj + 0x58) = func_1502B020(0, 2, 2, id);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083C3C.s")
+#endif
 #ifdef NON_MATCHING
 struct197 *allocate_memory(s32, s32, s32, s32);
 
