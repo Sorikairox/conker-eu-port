@@ -474,6 +474,15 @@ for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
     # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
     STUBRET[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
+# P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
+# writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
+# found / count out-params of func_1502B6BC. Several "N:V" for one ADDR are separated by '/'.
+OUTW = {}
+for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
+    _a, _v = _p.split('=')
+    OUTW[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
+                                     for _x in _v.split('/')]
+
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
 ARGMEM = {}
@@ -805,6 +814,9 @@ class Run:
                 if v & 3 == 0 and sp <= v < STK_TOP - 4:
                     ro = random.Random(h32('out', self.seed, addr, k, i))
                     mu.mem_write(phys(v), struct.pack('>I', rand_arg(ro)))
+        if (addr & 0x1FFFFFFF) in OUTW:
+            for _n, _vs in OUTW[addr & 0x1FFFFFFF]:
+                mu.mem_write(phys(regs[_n]), struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
             mu.reg_write(reg, r.getrandbits(32))
