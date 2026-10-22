@@ -1053,7 +1053,7 @@ u16 func_1505A630(f32, f32, s32);
 f32 func_150AD78C(f32);
 s32 func_150585F0(struct127 *, s32);
 void func_15056B08(struct127 *);
-s32 func_15021834(struct127 *, s32, s32);
+void func_15021834(struct127 *, s32, s32);
 void func_1505250C(struct127 *arg0, s32 arg1);
 void func_15052260(struct127 *arg0);
 void func_1505A770(struct127 *);
@@ -1072,7 +1072,7 @@ s32 func_15044670(f32, f32, s32, struct127 *, s32, s32); // P47: arg 2 = f32 bit
 void func_15055E50(struct127 *, u8);             
 s32 func_150599C8(struct127 *, u8, u16);            
 f32 func_1505A3A8(f32, struct127 *, f32, f32, u8); // P47: a1 = the record (left in a1 by the asm) 
-s32 func_1505A9AC(struct127 *, f32);            
+void func_1505A9AC(struct127 *, f32);
 s32 func_1505D024(struct127 *, s32, u16, s32); 
 s32 func_1505D6F0(struct127 *, u8);             
 s32 func_1505F298(struct127 *, struct49 *);     
@@ -2994,7 +2994,7 @@ void func_1505250C(struct127 *arg0, s32 arg1) {
 
 void func_15053750(struct127 *arg0);
 s32 func_150535F4(struct127 *arg0);
-s32 func_15021834(struct127 *, s32, s32);
+void func_15021834(struct127 *, s32, s32);
 s32 func_15022A8C(struct127 *);
 s32 func_15054F74(struct127 *);
 s32 func_150562FC(struct127 *);
