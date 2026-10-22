@@ -862,7 +862,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -887,7 +887,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P46.md` (runtime check of P43 / P45, srcfix array initializers, the first lit and framed game-camera frame) and
 `docs/port/sessions/P49.md` (merge port-b P47, the player walks and the camera follows, the movement-path stub order) and
 `docs/port/sessions/P52.md` (P50 / P48 movement and model C at runtime, P49 overrides removed, why the view goes black) and
-`docs/port/sessions/P55.md` (P53 / P54 floor and landing C at runtime: stand, walk off, land; G_DL 0 crash). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P55.md` (P53 / P54 floor and landing C at runtime: stand, walk off, land; G_DL 0 crash) and
+`docs/port/sessions/P58.md` (P51 model load + skeleton evaluator at runtime, four port-side blockers, posed preview). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -911,6 +912,8 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 # P55: ?p49walk also logs [p55] floor (record 0's floor query + float reference) and [p55] landing lines;
 #      ?p55synth=1 sloped synthetic floor check (PASS/FAIL); ?p55drop=Y drops the player from height Y; ?gdlzero=N
 #      finds a "G_DL 0" writer; ?p52void is now an opt-in diagnostic only
+# P58: ?p58model=N (model load + evaluator checks), ?p58dump=K, ?p58noterm=1, ?p58anim=K (+ p58speed: drive a ROM
+#      animation, the driver func_1505E0C4 is asm), ?p58pose=1 (+ p58ang: posed ROM Conker drawn after each frame)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1685,6 +1688,34 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     func_1503D210, func_1502F17C (top stub), func_1502F554, func_1503A37C, func_15030758, func_150A9B0C, func_1507E7A0,
     then func_150A86B0, func_150342D0 / func_1502DB14, func_1502CFEC. **New for the port branch:** func_1518C900
     (+ func_1518CF74), the DL getter behind the G_DL 0.
+- **P58 (after merging port P51, 8f18a3f): the model load and the skeleton evaluator at runtime.** Full notes: P58.md.
+  - Clean rebuild; `nm_asm/D5E90_anim.c` compiles in the census glob. Node 40 s (W hold, `heapwatch=1`) and real-time
+    Chrome (Metal, `heapwatch=1`): 8/8 PASS + `[tables] PASS`, heap 0 errors, no heapwatch break, no RuntimeError.
+    97 distinct stubs.
+  - **Model loads:** the C func_1503D210 returns 0 for id 0 (frames 2 and 723); `D_800D19A0[0]` set; **+0x1D4 non-zero**
+    every frame; func_150A86B0 runs once per frame for record 0.
+  - **Four port-side blockers fixed** (no bug in the converted C):
+    1. **`D_150AA11C`** (evaluator sine table, code segment) was a zero 0x100-byte weak data stub → every joint 3x3 was 0.
+       Now real data in `port/ultra/pc_tables.c` (sin rounded to 6 decimals + 12 ROM corrections), bit-exact,
+       `[tables] PASS`. **Rule:** tables in the code segment are not loaded on the PC; a C function that reads one gets
+       a zero stub from `data_stubs.c`.
+    2. **TEMPORARY PC func_150A9B0C** (`pc_overrides.c`; EU code at 0x150A9FEC in the unsplit D5E90.s, 76 insns): the stub
+       left func_1502E228's root matrix as stack garbage (NaN joints on level 0x21).
+    3. **TEMPORARY PC func_1000480C** (`pc_mem.c`; small blocking PI read): func_1502DB14's key-frame copies were empty.
+    4. **TEMPORARY wrap of func_150342D0** (`p58_model.c`) writes the 0x1000 terminator first: with the stub the
+       evaluator applied ~200 garbage angle and ~110 scale edits per call (`?p58noterm=1` shows it).
+  - **Evaluator verified under vbe:** header / key-frame bytes equal the ROM; on three ROM animations (`?p58anim`) every
+    matrix is finite and orthonormal, all 27 bone lengths equal the skeleton, the pose moves smoothly and loops.
+    **Callback table:** jtbl_8008891C_game[1..5] are relocated by P4 to the right wasm functions; Conker's slots 7 / 12
+    call entry 1 (func_15036FD8, asm stub) through the icall layer with no trap.
+  - **In the game Conker stays in the bind pose:** the animation driver **func_1505E0C4** (asm) never fills the state.
+  - **Preview `?p58pose=1`:** the closest ROM viewer Conker (0xAFA400) drawn after each frame with the evaluated joints.
+    `P58_screenshot.png` (`p58anim=1`: his stride), `p58/anim0_a.png` (bind pose, assembled).
+  - **For the port branch** (in order): func_1505E0C4 (animation driver); func_150A9B0C (**EU 0x150A9FEC**, see
+    pc_overrides.c); func_1000480C; func_150342D0 + func_15034B50 (P57); the draw: func_150A9E64 (`missing`, D5E90.s,
+    arena f32 → Mtx), func_1502CFEC, func_1502C9D8, func_1503AB20, func_1503BCAC, func_1503DD8C, func_1502F17C,
+    func_1502F554, func_1503A37C, func_15030758, func_1507E7A0, callbacks func_15036FD8 / func_15037224 / func_1503A968.
+    Drop the three P58 TEMPORARY pieces when their functions are C (the func_150342D0 wrap can stay: it calls the C).
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

@@ -170,3 +170,52 @@ void port_cam_probe(unsigned task) {
 
 /* P52: the P49 TEMPORARY overrides func_15059C84 (position integrator) and func_1504C0E8 (partial animation
  * choice) were removed: the port-b branch converted both in P50 (game_83300.c, game_eu_78230.c, NON_MATCHING). */
+
+/* P58: TEMPORARY PC func_150A9B0C (remove when the port branch converts it). The EU function at 0x150A9FEC in the
+ * unsplit asm/D5E90.s (the name is the US one; 76 instructions, raw .word) builds the 3x3 part of an object's model
+ * matrix for func_1502E228 from three angles and three scales; rows 0-2 / columns 0-2 only (nothing else is written).
+ * As a gen_stubs stub it wrote nothing, so func_1502E228 passed stack garbage (0 / NaN / the projection's 1.711 and
+ * 2.144) to the skeleton evaluator func_150A86B0 as the root rotation, and every joint matrix came out NaN (P58.md).
+ * Instruction order of the asm: K = the f32 at 0x8009FAA0 (D_8009FAE0 - 0x40); for each angle t: c = func_150AD780
+ * (cos, entry 0x150ADC60), s = func_150AD78C (sin, 0x150ADC6C); a1 = obj +0xB8, a2 = +0x40, a3 = +0xC4 (passed in
+ * a1..a3 as float bits), the scales sx / sy / sz on the stack (0x10 / 0x14 / 0x18). */
+extern f32 D_8009FAE0;
+f32 func_150AD780(f32);
+f32 func_150AD78C(f32);
+void func_150A9B0C(f32 *m, f32 a1, f32 a2, f32 a3, f32 sx, f32 sy, f32 sz) {
+    f32 k = *(f32 *)((u8 *)&D_8009FAE0 - 0x40);
+    f32 t, c1, s1, n1, c2, s2, n2, c3, s3, n3;
+    f32 f10, f12, f9, f11, f2, f5, f14, f15, f16, f17;
+
+    t = a1 * k;
+    c1 = func_150AD780(t);
+    s1 = func_150AD78C(t);
+    n1 = -s1;
+    t = a2 * k;
+    c2 = func_150AD780(t);
+    s2 = func_150AD78C(t);
+    t = a3 * k;
+    n2 = -s2;
+    c3 = func_150AD780(t);
+    s3 = func_150AD78C(t);
+    n3 = -s3;
+    f10 = c1 * c3;
+    f12 = n1 * c3;
+    f9 = c1 * n3;
+    f11 = n1 * n3;
+    f2 = c3 * c2;
+    f5 = c3 * n2;
+    f14 = f9 * c2 + s1 * s2;
+    f15 = f9 * n2 + s1 * c2;
+    f16 = f11 * c2 + c1 * s2;
+    f17 = f11 * n2 + c1 * c2;
+    m[0] = f2 * sx;
+    m[1] = s3 * sx;
+    m[2] = f5 * sx;
+    m[4] = f14 * sy;
+    m[5] = f10 * sy;
+    m[6] = f15 * sy;
+    m[8] = f16 * sz;
+    m[9] = f12 * sz;
+    m[10] = f17 * sz;
+}

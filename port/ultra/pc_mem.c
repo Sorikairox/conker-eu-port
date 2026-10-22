@@ -73,6 +73,15 @@ void port_rom_read(void *dst, unsigned off, unsigned size) {
     be_to_vbe(dst, port_rom + off, size);
 }
 
+/* P58: TEMPORARY PC func_1000480C (init_4470.c, asm; remove when the port branch converts it). The small blocking
+ * cartridge read: it takes a lock byte (D_8003A8D2 / D_8003A8D3), waits for the PI to be idle (0xA4600010 & 3) and
+ * copies (n + 1) & ~1 bytes from ROM offset `rom` (| osRomBase, through KSEG1) to dst with word reads and halfword
+ * stores (src may be 2-aligned). func_1502DB14 uses it for key-frame copies under 0xC8 bytes; as a stub it copied
+ * nothing, so the skeleton evaluator read zero key frames (every animation stood in its header pose, P58.md). */
+void func_1000480C(unsigned rom, void *dst, unsigned n) {
+    port_rom_read(dst, rom, (n + 1) & ~1u);
+}
+
 /* ---------------------------------------------------------------- raw DEFLATE (rzip = BE u32 size + deflate) */
 
 typedef struct {

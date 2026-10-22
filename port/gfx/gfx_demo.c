@@ -172,6 +172,8 @@ static unsigned cc(unsigned a, unsigned b, unsigned c, unsigned d, unsigned Aa, 
 
 /* viewer DL for asset k in grid cell (cx, cy) of size (cw, ch) N64 pixels; returns the DL */
 static int measuring;
+static float pose_L[72][16];  /* P58: posed joint matrices in model space (gfx_pose_overlay_set); 0 joints = bind pose */
+static int pose_nn, pose_on;
 static unsigned *build(Asset *a, float cx, float cy, float cw, float ch, float ang) {
     unsigned *vp = work, *mp = work + 4, *mm = work + 20, *dl = work + 64, *d = dl;
     unsigned char *v = (unsigned char *)vp;
@@ -195,6 +197,7 @@ static unsigned *build(Asset *a, float cx, float cy, float cw, float ch, float a
         float B[4][4], BM[4][4];
         ident(B);
         if (i < a->nbones) { B[3][0] = a->bone[i][0]; B[3][1] = a->bone[i][1]; B[3][2] = a->bone[i][2]; }
+        if (pose_on && i < pose_nn) memcpy(B, pose_L[i], 64);   /* P58: the evaluator's joint matrix */
         mul(BM, B, M);
         put_mtx((unsigned *)(bones + 64 * i), BM);
     }
@@ -302,4 +305,66 @@ void gfx_demo_frame(void) {
 void port_gfx_demo_test(const char *spec) {
     if (gfx_demo_init(spec)) return;
     for (int i = 0; i < 3; i++) gfx_demo_frame();
+}
+
+/* P58 ?p58pose=1: preview of the game's posed skeleton. p58_model.c passes record 0's joint matrices (model space)
+ * after each evaluation; after each game gfx task the matching ROM model (the viewer asset whose bone table equals the
+ * skeleton D_800C5000[id] entry for entry) is drawn in a box on the right with them. Framing from the bind-pose joints. */
+static Asset PA;
+static int pa_state; /* 0 not tried, 1 ready, -1 none */
+static float pa_ang, pa_err;
+extern void (*gfx_post_task_hook)(void);
+int port_flag(const char *name);
+void gfx_overlay_begin(void);
+static void p58_pose_draw(void) {
+    if (pa_state != 1) return;
+    gfx_overlay_begin();
+    pose_on = 1;
+    gfx_run_dl(build(&PA, 224, 120, 184, 236, pa_ang));
+    pose_on = 0;
+}
+void gfx_pose_overlay_set(const float (*J)[16], int n, const float *root, const unsigned char *skel) {
+    (void)root;
+    if (n > 72) n = 72;
+    memcpy(pose_L, J, sizeof(float) * 16 * n);
+    pose_nn = n;
+    if (pa_state) return;
+    pa_state = -1;
+    if (!work) work = calloc(4096, 4);
+    if (!bones) bones = calloc(64, 64);
+    if (!enddl) { enddl = calloc(0x10000, 1); for (int i = 0; i < 0x10000; i += 8) *(unsigned *)(enddl + i) = 0xDF000000; }
+    for (unsigned k = 0; k < sizeof DEF / sizeof DEF[0]; k++) {
+        Asset t; memset(&t, 0, sizeof t);
+        t.rom = DEF[k][0]; t.dl = DEF[k][1];
+        if (load(&t) || t.nbones != n) { free(t.buf); continue; }
+        unsigned off = *(unsigned *)(t.buf + 0x10);
+        float err = 0;
+        for (int i = 0; i < n; i++)
+            for (int c = 0; c < 3; c++) {
+                float d = fabsf(*(float *)(t.buf + off + 16 * i + 4 + 4 * c) - *(const float *)(skel + 16 * i + 4 + 4 * c));
+                if (d > err) err = d;
+            }
+        port_log("[p58] pose preview: ROM asset 0x%X has %d bones, max bone-offset difference to the game skeleton %g\n",
+                 t.rom, t.nbones, err);
+        /* the game's skeleton (model asset (1, id)) is not one of these files exactly; the two 28-bone viewer Conkers
+         * differ from it by up to 0.006 / 0.003 units, so take the closest one under 0.05 */
+        if (err > 0.05f || (pa_state == 1 && err >= pa_err)) { free(t.buf); continue; }
+        if (pa_state == 1) free(PA.buf);
+        pa_err = err;
+        PA = t;
+        tex_patch_dl(&PA, PA.dl, 0);
+        float mn[3] = {1e9f, 1e9f, 1e9f}, mx[3] = {-1e9f, -1e9f, -1e9f}, r = 0;
+        for (int i = 0; i < n; i++) for (int c = 0; c < 3; c++) {
+            if (PA.bone[i][c] < mn[c]) mn[c] = PA.bone[i][c];
+            if (PA.bone[i][c] > mx[c]) mx[c] = PA.bone[i][c];
+        }
+        for (int c = 0; c < 3; c++) { PA.c[c] = (mn[c] + mx[c]) / 2; if ((mx[c] - mn[c]) / 2 > r) r = (mx[c] - mn[c]) / 2; }
+        PA.r = r * 2.2f + 10;   /* room for poses that reach past the bind-pose bounds */
+        pa_state = 1;
+        pa_ang = (float)(port_flag("p58ang")) * 0.0174533f;
+        gfx_post_task_hook = p58_pose_draw;
+        port_log("[p58] pose preview: drawing ROM asset 0x%X DL +0x%X (centre %.1f %.1f %.1f, radius %.1f)\n", PA.rom, PA.dl,
+                 PA.c[0], PA.c[1], PA.c[2], PA.r);
+    }
+    if (pa_state != 1) port_log("[p58] pose preview: no viewer asset matches the %d-joint skeleton\n", n);
 }

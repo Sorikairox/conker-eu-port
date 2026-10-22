@@ -21,10 +21,10 @@ LINK_COMMON := -sUSE_SDL=2 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sMAX_WEBGL_VE
                -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test \
                -sEXPORTED_RUNTIME_METHODS=HEAPU8,HEAP32,callMain,stringToNewUTF8 -sENVIRONMENT=web,node --profiling-funcs
 
-ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_pif.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c ultra/pc_gu.c ultra/pc_libc.c
+ULTRA_SRC := ultra/pc_sched.c ultra/pc_os.c ultra/pc_pif.c ultra/pc_video.c ultra/pc_mem.c ultra/pc_icall.c ultra/pc_gu.c ultra/pc_libc.c ultra/pc_tables.c
 ULTRA_OBJ := $(patsubst ultra/%.c,$(B)/ultra/%.o,$(ULTRA_SRC))
 # F3DEX2 interpreter + WebGL2 backend + ROM asset viewer (docs/port/sessions/P6.md)
-GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c
+GFX_SRC := gfx/gfx_f3dex2.c gfx/gfx_demo.c gfx/p49_walk.c gfx/p58_model.c
 GFX_OBJ := $(patsubst gfx/%.c,$(B)/gfx/%.o,$(GFX_SRC))
 # audio HLE (n_audio ABI interpreter) + SDL output (docs/port/sessions/P9.md)
 AUD_SRC := audio/aud_abi.c audio/aud_out.c
@@ -103,7 +103,7 @@ game: $(WEB)/conker.js
 $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
 	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS) -o $@ \
-	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test,_port_voice_test,_port_audio_prepare,_port_pad_state,_port_eeprom_ptr,_port_eeprom_size,_port_eep_test,_port_set_paused -Wl,--error-limit=0 -Wl,--wrap=func_150A5858 -Wl,--wrap=func_10006530 -Wl,--wrap=func_1510D66C -Wl,--wrap=func_150031EC -Wl,--wrap=func_1512C490 -Wl,--wrap=func_15186D04 -Wl,--wrap=func_1504A730 -Wl,--wrap=func_150A6840 -Wl,--wrap=func_1502BDC0 -Wl,--wrap=func_15196560 -Wl,--wrap=func_1504CB98 -Wl,--wrap=func_1505A770 -Wl,--wrap=func_1502C1D4 -Wl,--wrap=func_1510EE3C -Wl,--wrap=func_1505A9AC -Wl,--wrap=func_150A3F50 -Wl,--wrap=func_150A48C0 -Wl,--wrap=func_150A5480 -Wl,--wrap=func_150A4ED4 2> $(B)/link_warnings.txt \
+	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test,_port_voice_test,_port_audio_prepare,_port_pad_state,_port_eeprom_ptr,_port_eeprom_size,_port_eep_test,_port_set_paused -Wl,--error-limit=0 -Wl,--wrap=func_150A5858 -Wl,--wrap=func_10006530 -Wl,--wrap=func_1510D66C -Wl,--wrap=func_150031EC -Wl,--wrap=func_1512C490 -Wl,--wrap=func_15186D04 -Wl,--wrap=func_1504A730 -Wl,--wrap=func_150A6840 -Wl,--wrap=func_1502BDC0 -Wl,--wrap=func_15196560 -Wl,--wrap=func_1504CB98 -Wl,--wrap=func_1505A770 -Wl,--wrap=func_1502C1D4 -Wl,--wrap=func_1510EE3C -Wl,--wrap=func_1505A9AC -Wl,--wrap=func_150A3F50 -Wl,--wrap=func_150A48C0 -Wl,--wrap=func_150A5480 -Wl,--wrap=func_150A4ED4 -Wl,--wrap=func_1503D210 -Wl,--wrap=func_150342D0 -Wl,--wrap=func_150A86B0 2> $(B)/link_warnings.txt \
 	  || (tail -40 $(B)/link_warnings.txt; exit 1)
 	@echo "link warnings: $$(grep -c warning $(B)/link_warnings.txt) (port/build/link_warnings.txt)"
 	@ls -l $(WEB)/conker.wasm

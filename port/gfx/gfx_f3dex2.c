@@ -1154,6 +1154,18 @@ void gfx_frame_begin(float r, float g, float b) {
 
 void gfx_frame_end(void) { flush(); }
 
+/* P58: a diagnostic drawn after the game's frame DL (p58_model.c ?p58pose, gfx_demo.c gfx_pose_overlay_draw); it
+ * starts with gfx_overlay_begin(): pending triangles drawn, no scissor, depth cleared */
+void (*gfx_post_task_hook)(void);
+void gfx_overlay_begin(void) {
+    flush();
+    sc_on = 0; rect_mode = 0; state_dirty = 1;
+    if (!gl_ok) return;
+    glDisable(GL_SCISSOR_TEST);
+    glDepthMask(GL_TRUE);
+    glClear(GL_DEPTH_BUFFER_BIT);
+}
+
 /* The RSP gfx task (OSTask in game memory): t.data_ptr is the display list. Field offsets of
  * OSTask_t: type 0, flags 4, ucode_boot 8, ucode_boot_size 12, ucode 16, ucode_size 20,
  * ucode_data 24, ucode_data_size 28, dram_stack 32, dram_stack_size 36, output_buff 40,
@@ -1191,6 +1203,7 @@ void gfx_run_task(void *task) {
     }
     dmem_seed(rd32(t + 24), rd32(t + 28));   /* P35b: DMEM data image (lights, Rare block) */
     gfx_run_dl(dl);
+    if (gfx_post_task_hook) gfx_post_task_hook();
     gfx_frame_end();
     if (draw_log && gl_ok) { /* P33: sample the framebuffer on a 5 x 5 grid (RGBA) */
         unsigned char px[4]; char b[512]; int n = 0;
