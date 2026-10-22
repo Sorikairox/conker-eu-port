@@ -8,7 +8,7 @@ void func_1507F640(void); /* P60: idle animation, was implicitly int */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_151C0698();   /* still asm; called by func_15070300 */
-s32 func_1507E7E4(struct127 *, u8, u8, u16, s32);
+void func_1507E7E4(struct127 *, u8, u8, u16, s32);
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];

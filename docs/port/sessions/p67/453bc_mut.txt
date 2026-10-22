@@ -1,0 +1,13 @@
+s/if (pos\[1\] < maxY) {/if (pos[1] <= maxY) {/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/func_1510F800(0);/func_1510F800(1);/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/D_800DC29C = pos\[1\];/D_800DC29C = pos[0];/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/D_800DC2A4 = maxY;/D_800DC2A4 = 0.0f;/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/d <= pos\[1\] \&\& out->unk0 < d/d < pos[1] \&\& out->unk0 < d/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/out->unk0 < d) {/out->unk0 <= d) {/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/off = D_800D3720\[best\].unk8 \* 16;/off = D_800D3720[best].unk8 * 8;/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/out->unk4\[j\]\[2\] = p\[2\];/out->unk4[j][2] = p[1];/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/- D_800DC26C) \/ 12\]/- D_800DC26C) \/ 8]/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/out->unk1D = 1;/out->unk1D = 4;/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/out->unk1C |= 7;/out->unk1C |= 6;/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/if (maxY <= out->unk0) {/if (maxY < out->unk0) {/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
+s/out->unk18 = 0;/out->unk18 = 1;/ % base eqY eqD tie maxeq maxhi lowY none n0 n1 nosurf idx neg
