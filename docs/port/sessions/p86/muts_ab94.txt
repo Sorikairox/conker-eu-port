@@ -1,0 +1,15 @@
+s/if (ref->kind == 2) {/if (ref->kind == 1) {/ %
+s/} else if (ref->kind == 3) {/} else if (ref->kind >= 3) {/ %
+s/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/ %
+s/if (data == NULL) {/if (rec == NULL) {/ %
+s/(\&D_800C3958)\[player\] + arg1/(\&D_800C3958)[player] + arg1 + 1/ %
+s/flag = (\&D_800C3A08)\[player\];/flag = (\&D_800C3A08)[0];/ %
+s/ref = \&D_800C3A10\[player\]\[arg1\];/ref = \&D_800C3A10[player][arg1 + 1];/ %
+s/if (D_800C3C88 != 2) {/if (D_800C3C88 != 1) {/ %
+s/flag, 0);/flag, 1);/ %
+s/flag, 1);/flag, 0);/ %
+s/player, obj, rec, data, flag);/player, obj, obj, data, flag);/ %
+s/return 0;/return 1;/ %
+s/return 0;/return 1;/2 %
+s/obj = func_15083E90(ref->id);/obj = func_15083E90(ref->id + 1);/ %
+s/rec = func_151149AC(ref->id);/rec = func_151149AC(arg1);/ %

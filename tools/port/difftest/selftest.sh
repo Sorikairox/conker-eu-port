@@ -73,4 +73,17 @@ chk DIFFER func_1501B300 src_eu/game_eu_48B10.c 's/out\[1\] = negSinPitch \* 127
 # used to be dropped (the old NM C was tested, every mutant survived); now spliced, and a dropped candidate is an ERROR
 chkc EQUIV  func_1506EF5C
 chkc DIFFER func_1506EF5C 's/= 0xFFFF;/= 0xFFFE;/'
+# P89: a stub-returned pointer in the harness stack range (0x80660000, below every frame) is not a frame address: a
+# +0x14 -> +0x10 mutant on it must DIFFER (P86: same_val normalised every 0x806xxxxx value to 'STK', the mutant survived).
+# DIFFTEST_STK_OLD=1 restores the old rule; the case then shows the hole (EQUIV).
+AB94="DIFFTEST_EXACT=* DIFFTEST_ARG=0=4002,1=2,2=1234,3=77,4=0 DIFFTEST_POKE=800C3A08=01000509,800C3A10=80520000,800C3A14=80520400,800C3A18=80520800,800C3A1C=80520C00,800C3D78=80530000,800C3D7C=80532000,800C3D80=80534000,800C3D84=80536000,800C40A8=00000000,80520010=00021211,80520014=22334455 DIFFTEST_RET=150842F8=80660000,15114F2C=80470000,15024910=0,150268BC=0,15029EA8=0"
+chkce() { # expect func "ENV=.. ..." [sed-expr]
+  local exp=$1 f=$2 ev=$3 ex=$4 cf=$C/$2.c out
+  if [ -n "$ex" ]; then sed -e "$ex" $cf > $T/$f.mut.c; cmp -s $cf $T/$f.mut.c && { echo "BADMUT $f $ex"; fail=$((fail+1)); return; }; cf=$T/$f.mut.c; fi
+  out=$(set -f; env $ev $R/tools/port/difftest.sh $f $cf --trials ${TRIALS:-8})
+  case "$out" in $exp*) pass=$((pass+1)); echo "ok   [$exp] env case ${ex:-as is}  $out";; *) fail=$((fail+1)); echo "FAIL [want $exp] env case ${ex:-as is}  $out";; esac
+}
+chkce EQUIV  func_1502AB94 "$AB94"
+chkce DIFFER func_1502AB94 "$AB94" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
+chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_STK_OLD=1" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

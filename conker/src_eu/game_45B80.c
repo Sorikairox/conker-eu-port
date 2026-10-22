@@ -726,7 +726,7 @@ Gfx *func_15019E60(Gfx *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_150A067C();
+void func_150A067C(void);
 extern u32 D_800BEA30;
 extern u8 D_800BEA39;
 extern u8 D_800BEA3A;

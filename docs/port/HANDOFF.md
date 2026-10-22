@@ -10,6 +10,47 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P89, 2026-10-23). Details: `docs/port/sessions/P89.md`
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p89/verify.log`). `NON_MATCHING=1` links.
+  protocheck: 0 problems (924 bodies). difftest selftest 33/33.
+- progress_nm (P86: 4916, 83.1%, 999 asm-only): **4918/5915 (83.1%)**, bytes **57.2%**, **997 asm-only**.
+- **difftest fix**: only addresses in the stack the function used (>= min(lowest sp, SP_ENTRY - 0x1000)) compare as
+  'STK'; other 0x806xxxxx values (stub returns, pokes) compare exactly. `DIFFTEST_STK_OLD=1` = old rule. Selftest case
+  func_1502AB94 (+0x14 -> +0x10 mutant on a 0x80660000 object now DIFFERs).
+- Hand C (NM): **func_15073118** (game_981E0, child object spawn: the browser P88 NULL-stub blocker for func_1507342C),
+  func_15036600 (game_eu_63E10, joint look-at); game_eu_61AE0 declares func_15036600 `void`.
+- **func_150268BC still asm**: structure map + partial draft in `docs/port/sessions/p89/` (func_150268BC_map.md,
+  draft_268bc.c).
+
+## Next steps (from P89)
+
+1. Browser: runtime-check func_15073118 / func_1507342C (spawned child objects) and func_15036600.
+2. func_150268BC: resolve the callee prototype conflicts listed in the map (func_150EA560 / func_150EAA80 /
+   func_150F6E10 f32 arg2; asm callees without prototypes), then finish the draft's TODO sub-types and test per sub-type.
+3. func_15035AF8 / func_15035220 (game_eu_62360), remaining game_981E0 asm.
+
+## State (session P86, 2026-10-23). Details: `docs/port/sessions/P86.md`
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p86/verify.log`). `NON_MATCHING=1` links.
+  protocheck: 0 problems (922 bodies).
+- progress_nm (P85: 4909, 83.0%, 1006 asm-only): **4916/5915 (83.1%)**, bytes **57.1%**, **999 asm-only**.
+- Hand C (NM), knob setups EQUIV + mutants (P86.md table): **func_151552F0** (sprite drawer, game_eu_182A10, 318
+  calls/run), **func_1502AB94** (dispatcher, 51190, 1590 calls), **func_1509BFB0** (variadic dispatch, C8950, 573),
+  **func_150A067C** (slot timers, CDDE0), **func_151143D4** (record / group update, 13DC30), **func_10011624**
+  (sound entry update, init_EB00), func_150CE960 (frame-buffer zoom, FBE70).
+- Prototype: game_45B80.c NM `void func_150A067C(void)`. No caller drops arguments to the new functions.
+- Harness gotcha: stub return pointers in 0x80600000..0x8067FFFF are the harness stack and compare equal as 'STK';
+  keep fake objects in 0x804xxxxx / 0x805xxxxx. New helpers `docs/port/sessions/p86/jals.sh` (decoded jal targets) and
+  `draft.sh` (extract a function's NM block).
+
+## Next steps (from P86)
+
+1. Browser: runtime-check HUD sprites (func_151552F0), sounds (func_10011624: Doppler, voice end), the P84 frame-path
+   functions now in C (func_1502AB94, func_1509BFB0, func_150A067C, func_151143D4).
+2. func_150268BC (51190, ~3590 asm lines: split over sessions; pass 0 as func_150CE660's 4th argument).
+3. Remaining owned asm: func_15036600 (63E10), func_15035AF8, func_15035220, game_981E0 smalls.
+
 ## State (session P85, 2026-10-23). Details: `docs/port/sessions/P85.md`
 
 - The default build is byte-identical (full `verify_all.sh`, `port_work/p85/verify.log`). `NON_MATCHING=1` links.
