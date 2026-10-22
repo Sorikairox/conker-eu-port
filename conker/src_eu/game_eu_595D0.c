@@ -3,6 +3,20 @@
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_1506196C(struct127 *, s32);
+void func_1502E228(s32 arg0, s32 arg1);
+void func_1502C8F8(s32 arg0);
+void func_1502FED8(struct127 *arg0);
+void func_1502E7B4(s32 arg0);
+void func_1503A37C(struct127 *arg0);
+void func_150348D4(s32 arg0);
+void func_1503AB20(struct127 *arg0);
+void func_1503E238(s32 arg0);
+void func_1502F1E4(s32 arg0);
+void func_1502F554(s32 arg0);
+void func_1502EDEC(struct127 *arg0);
+void func_150A4FE4(struct127 *arg0);
+void func_1517B270(s32 arg0, s32 arg1, s32 arg2);
+extern u8 D_800C6A8F[];
 #endif
 
 typedef struct {
@@ -113,8 +127,60 @@ block_39:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502BDC0.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C074.s")
+#ifdef NON_MATCHING
+/* P41: per-object update of object arg1 (record arg0): clears +0x1D4 (the shadow / model pointer), type +5 == 5 →
+ * func_1502E228(arg1, 1) only; type +4 == 0xFF or +5 == 3: nothing; +5 == 2: func_1502C8F8. Otherwise the model setup
+ * (func_1502E7B4, func_1502E228(arg1, 0) which sets +0x1D4, func_1503A37C), +0x1FC = 2 without a model, and the
+ * per-frame callees (D_800C6A8F[arg1 * 16], +0x0, +0xA4, +0xF8 & 0x4000, +0x260). */
+void func_1502C074(struct127 *arg0, s32 arg1) {
+    u8 *obj = (u8 *)arg0;
+    s32 t = obj[5];
 
+    *(s32 *)(obj + 0x1D4) = 0;
+    if (t == 5) {
+        func_1502E228(arg1, 1);
+        return;
+    }
+    if (obj[4] == 0xFF || t == 3) {
+        return;
+    }
+    if (t == 2) {
+        func_1502C8F8(arg1);
+        return;
+    }
+    if (obj[0x1C9] != 0) {
+        func_1502FED8(arg0);
+    }
+    func_1502E7B4(arg1);
+    func_1502E228(arg1, 0);
+    func_1503A37C(arg0);
+    if (*(s32 *)(obj + 0x1D4) == 0) {
+        obj[0x1FC] = 2;
+    } else {
+        func_150348D4(arg1);
+        func_1503AB20(arg0);
+    }
+    if (D_800C6A8F[arg1 * 16] != 0) {
+        func_1503E238(arg1);
+    }
+    if (*(s32 *)obj == 0) {
+        return;
+    }
+    func_1502F1E4(arg1);
+    func_1502F554(arg1);
+    if (obj[0xA4] != 0) {
+        func_1502EDEC(arg0);
+    }
+    if (*(s32 *)(obj + 0xF8) & 0x4000) {
+        func_150A4FE4(arg0);
+    }
+    if (*(s32 *)(obj + 0x260) != 0) {
+        func_1517B270(obj[0x134], obj[0x135], arg1);
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C074.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C1D4.s")
 
 #ifdef NON_MATCHING
