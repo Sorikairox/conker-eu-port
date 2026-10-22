@@ -1,0 +1,36 @@
+# P85 mutants of func_15180AF0
+s/if (zoom > 1.0f) {/if (zoom > 1.5f) {/ % a_hi
+s/} else if (zoom < 0.0f) {/} else if (zoom < -1.0f) {/ % a_neg
+s/(\*D_800DE278 \* k)/(*D_800DE27C * k)/ % a_on a_rec0
+s/\* -(\*D_800DE27C \* k)/* (*D_800DE27C * k)/ % a_on a_rec0
+s/((u8 \*) D_800BE628 + 4)/((u8 *) D_800BE628 + 8)/ % a_rec0
+s/if (D_800C35EA == 1)/if (D_800C35EA != 0)/ % a_off2
+s/zoom = 1.0f;$/zoom = 0.5f;/ % a_off a_hi
+s/if (zoom == 0.0f)/if (zoom <= 0.0f)/ % zneg
+s/gDPSetFillColor(gdl++, 0x00010001)/gDPSetFillColor(gdl++, 0x00010000)/ % z_q
+s/if (zoom < 1.0f)/if (zoom <= 1.0f)/ % z1
+s/r = S16F(D_800A7670 \* zoom + 400.0f)/r = S16F(D_800A7670 * zoom + 401.0f)/ % z_q
+s/y1 = SCOPE_VIEW_F(view, 0x10) + centre\[1\] + fr;/y1 = SCOPE_VIEW_F(view, 0x10) + centre[1] - fr;/ % z_q
+s/x1 = SCOPE_VIEW_F(view, 0xC) + centre\[0\] - fr;/x1 = SCOPE_VIEW_F(view, 0xC) + centre[1] - fr;/ % z_q
+s/x0 = SCOPE_VIEW_F(view, 0xC) + centre\[0\] + fr;/x0 = SCOPE_VIEW_F(view, 0xC) + fr;/ % z_q
+s/SCOPE_RECT(left, top, right, y0);/SCOPE_RECT(left, top, right, bottom);/ % z_q
+s/x0 = SCOPE_VIEW_F(view, 0xC) - 1.0f;/x0 = SCOPE_VIEW_F(view, 0xC) - 2.0f;/ % v0_m1
+s/SCOPE_RECT(left, y0 - i, right, y1 + i);/SCOPE_RECT(left, y0, right, y1 + i);/ % v0_m1
+s/(s16) (cx - 30) + i, (s16) (cy - 58) + i)/(s16) (cx - 30) + i, (s16) (cy - 57) + i)/ % v0_m1 m1_off
+s/(s16) (cx + 58) - i, (s16) (cy - 30) - i/(s16) (cx + 58) - i, (s16) (cy + 30) - i/ % v0_m1 m1_off
+s/SCOPE_RECT((s16) (cx - 60) - i, (s16) (cy + 60) - i, (s16) (cx - 30) + i/SCOPE_RECT((s16) (cx - 60) - i, (s16) (cy + 60) + i, (s16) (cx - 30) + i/ % v0_m1 m1_off
+s/if ((\&D_800DDE1C)\[view\] == 1) {/if ((\&D_800DDE1C)[view] >= 1) {/ % v0_m2 v1_m2
+s/if (i == 0) {/if (i == 1) {/ % v0_m1
+s/gDPSetPrimColor(gdl++, 0, 0, 0xFF, 0xFF, 0xFF, 0);/gDPSetPrimColor(gdl++, 0, 0, 0xFF, 0xFF, 0xFF, 1);/ % v0_m1
+s/left--;/left++;/ % v0_m1
+s/bottom++;/bottom--;/ % v0_m1
+s/func_1510D66C(D_80090648\[1\], 0, 3, 0)/func_1510D66C(D_80090648[2], 0, 3, 0)/ % v0_m0
+s/gdl = func_1518010C(gdl, r, 0x40/gdl = func_1518010C(gdl, r + 1, 0x40/ % v0_m0
+s/gdl = func_1518010C(gdl, r \/ 2, 0x40/gdl = func_1518010C(gdl, r >> 1, 0x40/ % v0_m1 v1_m1 big2 huge
+s/func_1510D66C(D_80090648\[3 + D_800DE1A8\[view\]\], 0, 3, 0)/func_1510D66C(D_80090648[2 + D_800DE1A8[view]], 0, 3, 0)/ % m2_f0
+s/32.0f, 28.0f, view/28.0f, 28.0f, view/ % m2_f0
+s/if (D_800DE1A8\[view\] < 2) {/if (D_800DE1A8[view] < 3) {/ % m2_f2
+s/gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3FF, 0);/gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 0x3FE, 0);/ % m2_f0
+s/gSPGeometryMode(gdl++, 0, 1);/gSPGeometryMode(gdl++, 0, 3);/ % z_q
+s/SCOPE_VIEW_F(view, 0x24), SCOPE_VIEW_F(view, 0x30)/SCOPE_VIEW_F(view, 0x28), SCOPE_VIEW_F(view, 0x30)/ % fill_odd z1
+s/r \/ 4, 0x20, 32.0f/r \/ 2, 0x20, 32.0f/ % m2_f0

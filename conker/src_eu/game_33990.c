@@ -105,7 +105,7 @@ void func_15007360(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15007360.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151DDF6C(s32 *, s8, s8 *);
+void func_151DDF6C(void); /* P85: takes no arguments (the asm reads none) */
 void func_151E86A4(void);
 extern u8 D_800BE77A;
 extern s32 D_800E102C;
@@ -163,7 +163,7 @@ void func_15007440(void) {
         } while ((s32)var_v0_3 != (s32)&D_800E102C);
     }
     (*(s8 *)((u8 *)D_800E1010 + 0x10)) = temp_a1;
-    func_151DDF6C(&D_800E102C, temp_a1, D_800E1010);
+    func_151DDF6C();
     func_151E86A4();
     D_800901D0 = 1;
 }

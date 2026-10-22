@@ -1,0 +1,2 @@
+iA8/s1: EQUIV func_15041A9C (12 trials ok, 0 inconclusive, 180 calls, ret=int, ref 1098 words, cand 1070 words)
+i_flash/s1: EQUIV func_15041A9C (12 trials ok, 0 inconclusive, 132 calls, ret=int, ref 1098 words, cand 1070 words)
