@@ -1,0 +1,226 @@
+12D8 900B023C lbu         $11, 0x23C($zero)
+12DC 080004BD j           func_0012F4
+12E0 9406023E lhu         $6, 0x23E($zero)
+12E4 37FE0000 ori         $30, $ra, 0x0
+12E8 200B06B0 addi        $11, $zero, 0x6B0
+12EC 080007ED j           func_001FB4
+12F0 200C12E8 addi        $12, $zero, 0x12E8
+12F4 15600107 bnez        $11, . + 4 + (0x107 << 2)
+12F8 20C60150 addi        $6, $6, 0x150
+12FC A019023C sb          $25, 0x23C($zero)
+1300 C80C2002 lqv         $v12[0], 0x20($zero)
+1304 C8082000 lqv         $v8[0], 0x0($zero)
+1308 C80D0915 lsv         $v13[2], 0x2A($zero)
+130C C8090905 lsv         $v9[2], 0xA($zero)
+1310 4B2C4373 vmov        $v13[0], $v12[1]
+1314 C80E0A1A lsv         $v14[4], 0x34($zero)
+1318 4B284273 vmov        $v9[0], $v8[1]
+131C C80A0A0A lsv         $v10[4], 0x14($zero)
+1320 4B4C43B3 vmov        $v14[0], $v12[2]
+1324 20140120 addi        $20, $zero, 0x120
+1328 4B4842B3 vmov        $v10[0], $v8[2]
+132C CA873029 lpv         $v7[0], 0x148($20)
+1330 4BCC4BB3 vmov        $v14[1], $v12[6]
+1334 C80D0A19 lsv         $v13[4], 0x32($zero)
+1338 4BC84AB3 vmov        $v10[1], $v8[6]
+133C C8090A09 lsv         $v9[4], 0x12($zero)
+1340 4B8C4B33 vmov        $v12[1], $v12[4]
+1344 C80C0A18 lsv         $v12[4], 0x30($zero)
+1348 4B884A33 vmov        $v8[1], $v8[4]
+134C C8080A08 lsv         $v8[4], 0x10($zero)
+1350 4B276F46 vmudn       $v29, $v13, $v7[1]
+1354 4B274F4F vmadh       $v29, $v9, $v7[1]
+1358 4B07674E vmadn       $v29, $v12, $v7[0]
+135C EA8F302B spv         $v15[0], 0x158($20)
+1360 4B07474F vmadh       $v29, $v8, $v7[0]
+1364 8E8C0158 lw          $12, 0x158($20)
+1368 4B47774E vmadn       $v29, $v14, $v7[2]
+136C 4B47574F vmadh       $v29, $v10, $v7[2]
+1370 4B2B5ADD vsar        $v11, $v11, $v11[1]
+1374 AE8C015C sw          $12, 0x15C($20)
+1378 4B0F7BDD vsar        $v15, $v15, $v15[0]
+137C 128600E5 beq         $20, $6, . + 4 + (0xE5 << 2)
+1380 4A0B5F44 vmudl       $v29, $v11, $v11
+1384 4A0B7F4D vmadm       $v29, $v15, $v11
+1388 4A0F5C0E vmadn       $v16, $v11, $v15
+138C 11600002 beqz        $11, . + 4 + (0x2 << 2)
+1390 4A0F7C4F vmadh       $v17, $v15, $v15
+1394 22940030 addi        $20, $20, 0x30
+1398 4B308494 vaddc       $v18, $v16, $v16[1]
+139C 200B0001 addi        $11, $zero, 0x1
+13A0 4B318F50 vadd        $v29, $v17, $v17[1]
+13A4 4B509414 vaddc       $v16, $v18, $v16[2]
+13A8 4B51EC50 vadd        $v17, $v29, $v17[2]
+13AC 4B114776 vrsqh       $v29[0], $v17[0]
+13B0 CA87302F lpv         $v7[0], 0x178($20)
+13B4 4B104435 vrsql       $v16[0], $v16[0]
+13B8 4B004476 vrsqh       $v17[0], $v0[0]
+13BC 4B105F44 vmudl       $v29, $v11, $v16[0]
+13C0 4B107F4D vmadm       $v29, $v15, $v16[0]
+13C4 4B115ACE vmadn       $v11, $v11, $v17[0]
+13C8 4B117BCF vmadh       $v15, $v15, $v17[0]
+13CC 4B7E5AC6 vmudn       $v11, $v11, $v30[3]
+13D0 080004D4 j           func_001350
+13D4 4B7E7BCF vmadh       $v15, $v15, $v30[3]
+13D8 E808201B sqv         $v8[0], 0x1B0($zero)
+13DC E809201C sqv         $v9[0], 0x1C0($zero)
+13E0 E9BB381B suv         $v27[0], 0xD8($13)
+13E4 81C20007 lb          $2, 0x7($14)
+13E8 81C30017 lb          $3, 0x17($14)
+13EC 03212023 subu        $4, $25, $1
+13F0 848A0512 lh          $10, 0x512($4)
+13F4 84840510 lh          $4, 0x510($4)
+13F8 C93D382E luv         $v29[0], 0x170($9)
+13FC A1C2000E sb          $2, 0xE($14)
+1400 A1C3000A sb          $3, 0xA($14)
+1404 A5C4000C sh          $4, 0xC($14)
+1408 A5CA0008 sh          $10, 0x8($14)
+140C C9C73001 lpv         $v7[0], 0x8($14)
+1410 E9B81811 sdv         $v24[0], 0x88($13)
+1414 E9B81C10 sdv         $v24[8], 0x80($13)
+1418 C924302B lpv         $v4[0], 0x158($9)
+141C C9A92008 lqv         $v9[0], 0x80($13)
+1420 C802201F lqv         $v2[0], 0x1F0($zero)
+1424 4AA70190 vadd        $v6, $v0, $v7[1h]
+1428 E9B71811 sdv         $v23[0], 0x88($13)
+142C 4AC70150 vadd        $v5, $v0, $v7[2h]
+1430 E9B71C10 sdv         $v23[8], 0x80($13)
+1434 4A8438C1 vmulu       $v3, $v7, $v4[0h]
+1438 C9BC2008 lqv         $v28[0], 0x80($13)
+143C 4A024A50 vadd        $v9, $v9, $v2
+1440 C808201E lqv         $v8[0], 0x1E0($zero)
+1444 4AA430C9 vmacu       $v3, $v6, $v4[1h]
+1448 C802201D lqv         $v2[0], 0x1D0($zero)
+144C 4AC428C9 vmacu       $v3, $v5, $v4[2h]
+1450 4A08E544 vmudl       $v21, $v28, $v8
+1454 4A084D4D vmadm       $v21, $v9, $v8
+1458 C9283828 luv         $v8[0], 0x140($9)
+145C 4A02E54E vmadn       $v21, $v28, $v2
+1460 4A024D4F vmadh       $v21, $v9, $v2
+1464 4BFFEF40 vmulf       $v29, $v29, $v31[7]
+1468 4A834748 vmacf       $v29, $v8, $v3[0h]
+146C 112D0049 beq         $9, $13, . + 4 + (0x49 << 2)
+1470 2129FFD0 addi        $9, $9, -0x30
+1474 C9282016 lqv         $v8[0], 0x160($9)
+1478 C9292013 lqv         $v9[0], 0x130($9)
+147C 4A08AA11 vsub        $v8, $v21, $v8
+1480 9122014C lbu         $2, 0x14C($9)
+1484 4A09AA51 vsub        $v9, $v21, $v9
+1488 4A084087 vmudh       $v2, $v8, $v8
+148C 4B08421D vsar        $v8, $v8, $v8[0]
+1490 4B3FF89D vsar        $v2, $v31, $v31[1]
+1494 00021902 srl         $3, $2, 4
+1498 4A094F07 vmudh       $v28, $v9, $v9
+149C 48831800 mtc2        $3, $v3[0]
+14A0 4B094A5D vsar        $v9, $v9, $v9[0]
+14A4 00021B00 sll         $3, $2, 12
+14A8 4B3FFF1D vsar        $v28, $v31, $v31[1]
+14AC 4A621094 vaddc       $v2, $v2, $v2[1q]
+14B0 4A684210 vadd        $v8, $v8, $v8[1q]
+14B4 48831C00 mtc2        $3, $v3[8]
+14B8 4A7CE714 vaddc       $v28, $v28, $v28[1q]
+14BC 9122011C lbu         $2, 0x11C($9)
+14C0 4A694A50 vadd        $v9, $v9, $v9[1q]
+14C4 00021902 srl         $3, $2, 4
+14C8 4AC21114 vaddc       $v4, $v2, $v2[2h]
+14CC 4AC84210 vadd        $v8, $v8, $v8[2h]
+14D0 48831900 mtc2        $3, $v3[2]
+14D4 4ADCE6D4 vaddc       $v27, $v28, $v28[2h]
+14D8 00021B00 sll         $3, $2, 12
+14DC 4AC94A50 vadd        $v9, $v9, $v9[2h]
+14E0 4B084532 vrcph       $v20[0], $v8[0]
+14E4 4B0440B1 vrcpl       $v2[0], $v4[0]
+14E8 48831D00 mtc2        $3, $v3[10]
+14EC 4B884232 vrcph       $v8[0], $v8[4]
+14F0 4B8460B1 vrcpl       $v2[4], $v4[4]
+14F4 4B096232 vrcph       $v8[4], $v9[0]
+14F8 4B1B4731 vrcpl       $v28[0], $v27[0]
+14FC 4B894272 vrcph       $v9[0], $v9[4]
+1500 4B9B6731 vrcpl       $v28[4], $v27[4]
+1504 4B1F6272 vrcph       $v9[4], $v31[0]
+1508 4B831504 vmudl       $v20, $v2, $v3[4]
+150C 4B83450D vmadm       $v20, $v8, $v3[4]
+1510 4B03108E vmadn       $v2, $v2, $v3[0]
+1514 4B03420F vmadh       $v8, $v8, $v3[0]
+1518 4BA3E504 vmudl       $v20, $v28, $v3[5]
+151C C9243828 luv         $v4[0], 0x140($9)
+1520 4BA34D0D vmadm       $v20, $v9, $v3[5]
+1524 4B23E70E vmadn       $v28, $v28, $v3[1]
+1528 4B234A4F vmadh       $v9, $v9, $v3[1]
+152C C9233822 luv         $v3[0], 0x110($9)
+1530 4A822085 vmudm       $v2, $v4, $v2[0h]
+1534 4A88220F vmadh       $v8, $v4, $v8[0h]
+1538 4A044120 vlt         $v4, $v8, $v4
+153C C922302B lpv         $v2[0], 0x158($9)
+1540 4A9C1F05 vmudm       $v28, $v3, $v28[0h]
+1544 C9343025 lpv         $v20[0], 0x128($9)
+1548 4A891A4F vmadh       $v9, $v3, $v9[0h]
+154C 30A20040 andi        $2, $5, 0x40
+1550 4A0348E0 vlt         $v3, $v9, $v3
+1554 1040003A beqz        $2, . + 4 + (0x3A << 2)
+1558 4A823EC1 vmulu       $v27, $v7, $v2[0h]
+155C 4AA236C9 vmacu       $v27, $v6, $v2[1h]
+1560 4AC22EC9 vmacu       $v27, $v5, $v2[2h]
+1564 C9C83801 luv         $v8[0], 0x8($14)
+1568 4A943F01 vmulu       $v28, $v7, $v20[0h]
+156C 4AB43709 vmacu       $v28, $v6, $v20[1h]
+1570 212BFFD0 addi        $11, $9, -0x30
+1574 4AD42F09 vmacu       $v28, $v5, $v20[2h]
+1578 2129FFA0 addi        $9, $9, -0x60
+157C 4BFFDEE8 vand        $v27, $v27, $v31[7]
+1580 4BFFE728 vand        $v28, $v28, $v31[7]
+1584 4BFFEF40 vmulf       $v29, $v29, $v31[7]
+1588 4A9B2748 vmacf       $v29, $v4, $v27[0h]
+158C 156DFFB9 bne         $11, $13, . + 4 + (-0x47 << 2)
+1590 4A9C1F48 vmacf       $v29, $v3, $v28[0h]
+1594 4AFFF8E2 vne         $v3, $v31, $v31[3h]
+1598 C9BB381B luv         $v27[0], 0xD8($13)
+159C 4BBF00E7 vmrg        $v3, $v0, $v31[5]
+15A0 C9D61206 llv         $v22[4], 0x18($14)
+15A4 4A1BEF40 vmulf       $v29, $v29, $v27
+15A8 C922302B lpv         $v2[0], 0x158($9)
+15AC C9343025 lpv         $v20[0], 0x128($9)
+15B0 4A1BEF67 vmrg        $v29, $v29, $v27
+15B4 C808201B lqv         $v8[0], 0x1B0($zero)
+15B8 C809201C lqv         $v9[0], 0x1C0($zero)
+15BC 81C20006 lb          $2, 0x6($14)
+15C0 C9BB181B ldv         $v27[0], 0xD8($13)
+15C4 81C30016 lb          $3, 0x16($14)
+15C8 04410002 bgez        $2, . + 4 + (0x2 << 2)
+15CC E9DD3801 suv         $v29[0], 0x8($14)
+15D0 E9DB1203 slv         $v27[4], 0xC($14)
+15D4 04610002 bgez        $3, . + 4 + (0x2 << 2)
+15D8 00000000 nop
+15DC E9DB1002 slv         $v27[0], 0x8($14)
+15E0 4B7FCEE3 vge         $v27, $v25, $v31[3]
+15E4 30AB0004 andi        $11, $5, 0x4
+15E8 4A823D40 vmulf       $v21, $v7, $v2[0h]
+15EC 11600076 beqz        $11, . + 4 + (0x76 << 2)
+15F0 4AA23548 vmacf       $v21, $v6, $v2[1h]
+15F4 30AC0008 andi        $12, $5, 0x8
+15F8 4AC22D48 vmacf       $v21, $v5, $v2[2h]
+15FC 4BBF192C vxor        $v4, $v3, $v31[5]
+1600 4A943F00 vmulf       $v28, $v7, $v20[0h]
+1604 4AB43708 vmacf       $v28, $v6, $v20[1h]
+1608 4AD42F08 vmacf       $v28, $v5, $v20[2h]
+160C C8022023 lqv         $v2[0], 0x230($zero)
+1610 4BBF0D87 vmudh       $v22, $v1, $v31[5]
+1614 4A951D88 vmacf       $v22, $v3, $v21[0h]
+1618 1180006B beqz        $12, . + 4 + (0x6B << 2)
+161C 4A9C2588 vmacf       $v22, $v4, $v28[0h]
+1620 4B020D8F vmadh       $v22, $v1, $v2[0]
+1624 4A16B100 vmulf       $v4, $v22, $v22
+1628 4BFFB0C0 vmulf       $v3, $v22, $v31[7]
+162C 4B42B0C8 vmacf       $v3, $v22, $v2[2]
+1630 4BBF0D47 vmudh       $v21, $v1, $v31[5]
+1634 4B22B588 vmacf       $v22, $v22, $v2[1]
+1638 080005F2 j           func_0017C8
+163C 4A032588 vmacf       $v22, $v4, $v3
+1640 212BFFD0 addi        $11, $9, -0x30
+1644 2129FFA0 addi        $9, $9, -0x60
+1648 4A04EF50 vadd        $v29, $v29, $v4
+164C 156DFF89 bne         $11, $13, . + 4 + (-0x77 << 2)
+1650 4A03EF50 vadd        $v29, $v29, $v3
+1654 08000565 j           func_001594
+1658 00000000 nop
+165C 00000000 nop

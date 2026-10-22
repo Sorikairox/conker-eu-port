@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P94, 2026-10-23). Details: `docs/port/sessions/P94.md`
+
+- **The green hoodie in the respawn cutscene was a renderer bug.** Two bugs in character lighting
+  (`port/gfx/gfx_f3dex2.c`), both fixed:
+  1. G_LOAD_UCODE text and data were swapped, so DMEM was seeded from the RSP code. The "ambient" record 2 read the
+     instructions 4B6B58F2 as the green-grey colour 4B6B58.
+  2. The F3DEX.NoN lighting overlay was disassembled (`sessions/p94/f3dex_light.dis`). It shows:
+     - start = record M (the ambient);
+     - record M-1 = directional (n.d);
+     - records M-2..0 = point lights.
+     P35's model instead used the ambient as a sun (its direction was its own colour bytes) and ignored the white key
+     light.
+- The game's lights are fine and are the same in the scene and in play: white directional + ambient 7380B1 from
+  func_1515EAB4 (C). No game C change.
+- Before/after: `sessions/p94/P94_before_after_{36,41,45}000ms.png`, `P94_walk2_before_after_{50,58}000ms.png`.
+  Rollback flags: `?p94oldseed=1&p94oldlight=1`.
+- Green quad: the sky texture (4x256 RGBA32) is a blue -> white -> green gradient, and rows 222-255 are flat green.
+  cmt clamp to lrt shows that row below about 58 % of the quad, which is correct RDP behaviour. The game's t range was
+  not traced.
+
+## Next steps (from P94)
+
+1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
+2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
+   table-view camera.
+
 ## State (session P89, 2026-10-23). Details: `docs/port/sessions/P89.md`
 
 - The default build is byte-identical (full `verify_all.sh`, `port_work/p89/verify.log`). `NON_MATCHING=1` links.

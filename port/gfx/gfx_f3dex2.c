@@ -591,7 +591,7 @@ static void p78_material(void) {
         if (dup || nseen >= 256 || p78_ntex >= 60) continue;
         seen[nseen][0] = key0; seen[nseen][1] = key1; seen[nseen][2] = key2; nseen++;
         unsigned w, h; tile_dims(t, &w, &h);
-        if (w > 64 || h > 64) continue;
+        if (w > 64 || h > (w <= 8 ? 256u : 64u)) continue;   /* P94: narrow gradient strips (sky 4x256) too */
         p78_ntex++;
         port_log("[p78hex] T%d mat %d tile %u %ux%u\n", p78_ntex, p78_mat, (tex_tile + k) & 7, w, h);
         for (unsigned y = 0; y < h; y++) {
@@ -731,7 +731,17 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
     /* P35b: F3DEXBG (the level ucode, checked in its overlay at IMEM 0x13D8): the accumulator starts at the colour
      * of record M (0x2C0 + numLightsxSize) with no direction and no normal ("ambient"); only point lights follow.
      * The other ucodes keep P35's model (record M = directional sun, M + 1 = ambient), not checked. */
-    const unsigned char *amb = lbuf + 0x60 + 48 * (M + !light_bg), *sun = lbuf + 0x60 + 48 * M;
+    /* P94: the character ucode (F3DEX.NoN, loaded by G_LOAD_UCODE) was disassembled too (port_work/p94/f3dex_light.dis,
+     * IMEM 0x12D8..): 0x13F8 `luv $v29, 0x170($9)` = the colour of record M is the start ("ambient") as in BG;
+     * 0x1418..0x1468: record M - 1 is DIRECTIONAL, c += col[M-1] * max(0, n.d[M-1]) (vmulu/vmacu clamp at 0);
+     * 0x1474..0x1590: records M - 2 .. 0 are point lights in pairs (an even M also reads the lookat Y record), times
+     * max(0, n.d) when geom has 0x400000; 0x1594..: rgb = vertex rgb * min(1, c). P35's model (record M = sun with
+     * the n.d, M + 1 = ambient) read the game's ambient (gSPSetLights1 sends Ambient{7380B1 x4} as record 1) as a sun
+     * whose direction is the colour bytes, ignored the white key light (record 0, K = 0 -> attenuation 0) and took the
+     * start colour from record 2, which nobody writes. ?p94oldlight=1 restores P35's model for comparison. */
+    static int oldl = -1;
+    if (oldl < 0) oldl = port_flag("p94oldlight");
+    const unsigned char *amb = lbuf + 0x60 + 48 * (M + (!light_bg && oldl)), *sun = lbuf + 0x60 + 48 * (oldl ? M : M - 1);
     float c[3] = {amb[0] / 255.0f, amb[1] / 255.0f, amb[2] / 255.0f};
     {   /* P42 DIAGNOSTIC ?lvlwhite=1: the level's start colour (record M) is func_1515DE84's `arg8` = the colour that the
          * still-asm func_1515E7E8 should write into its uninitialised local `col`; with the stub it is stack garbage
@@ -749,12 +759,14 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
             if (cur != lcprev) { lcprev = cur; lcn++; port_log("[lvlcol] BG start colour %06X (M %d), frame %u\n", cur, M, port_frame_count); }
         }
     }
-    if (!light_bg) {
-        const float *d = lmdir[2 + M];
+    int np = M;                                                      /* point lights M - 1 .. 0 (BG) */
+    if (!light_bg && (oldl || M >= 1)) {
+        const float *d = lmdir[2 + (oldl ? M : M - 1)];
         float dot = nx * d[0] + ny * d[1] + nz * d[2];
         if (dot > 0) for (int k = 0; k < 3; k++) c[k] += sun[k] / 255.0f * dot;
+        if (!oldl) np = M - 1;                                       /* F3DEX: point lights M - 2 .. 0 */
     }
-    if (M >= 1) {
+    if (np >= 1) {
         float e[3];
         for (int k = 0; k < 3; k++) {
             float cl = k == 0 ? ox * mp_game[0][0] + oy * mp_game[1][0] + oz * mp_game[2][0] + mp_game[3][0]
@@ -762,7 +774,7 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
                               : ox * mp_game[0][2] + oy * mp_game[1][2] + oz * mp_game[2][2] + mp_game[3][2];
             e[k] = (cl + rare_t(k)) * rare_s(k);
         }
-        for (int i = M - 1; i >= (M & 1 ? -1 : 0); i--) {
+        for (int i = np - 1; i >= (np & 1 ? -1 : 0); i--) {
             const unsigned char *L = lbuf + 0x60 + 48 * i;          /* i = -1: the lookat Y record (odd M) */
             float px = (short)(L[0x20] << 8 | L[0x21]) - e[0], py = (short)(L[0x22] << 8 | L[0x23]) - e[1], pz = (short)(L[0x24] << 8 | L[0x25]) - e[2];
             float d2 = px * px + py * py + pz * pz, K = L[0x0C] / 16.0f;
@@ -776,6 +788,26 @@ static void light_vtx(V *v, const unsigned char *n, const unsigned char *vtx, fl
             }
             for (int k = 0; k < 3; k++) c[k] += L[k] / 255.0f * f;
         }
+    }
+    if (p78_on) {   /* P94: ?p78tex also logs every light state change (records 0..M+1, lookats) and its first 2 lit vertices */
+        static unsigned p94_h, p94_n;
+        unsigned h = 2166136261u ^ light_nls ^ (unsigned)light_bg << 20 ^ geom;
+        for (int k = 0; k < 48 * (M + 4) && k < (int)sizeof lbuf; k++) h = (h ^ lbuf[k]) * 16777619u;
+        for (int k = 0; k < 9; k++) h = (h ^ (unsigned)(lmdir[k][0] * 1000)) * 16777619u;
+        if (h != p94_h) {
+            p94_h = h; p94_n = 0;
+            port_log("[p94light] %s nls %u M %d geom %06X cc %06X/%08X prim %08X env %08X fog %08X\n", light_bg ? "BG" : "other",
+                     light_nls, M, geom, combine_w0, combine_w1, prim_col, env_col, fog_col);
+            for (int r = -2; r <= M + 1; r++) {
+                const unsigned char *L = lbuf + 0x60 + 48 * r;
+                port_log("[p94light]   rec %2d (DMEM %03X): col %02X%02X%02X/%02X%02X%02X dir %4d %4d %4d att %02X mdir %.2f %.2f %.2f%s\n",
+                         r, 0x2C0 + 48 * r, L[0], L[1], L[2], L[4], L[5], L[6], (signed char)L[8], (signed char)L[9], (signed char)L[10], L[12],
+                         lmdir[r + 2][0], lmdir[r + 2][1], lmdir[r + 2][2], r < 0 ? " (lookat)" : oldl ? (r == M ? " <- P35 sun" : r == M + 1 ? " <- P35 ambient" : " (point)")
+                         : r == M ? " <- start (ambient)" : r == M + 1 ? " (unused)" : r == M - 1 && !light_bg ? " <- directional" : " (point)");
+            }
+        }
+        if (p94_n++ < 2) port_log("[p94light]   vtx n %.2f %.2f %.2f c %.3f %.3f %.3f rgb %02X%02X%02X -> %.3f %.3f %.3f\n", nx, ny, nz, c[0], c[1], c[2],
+                                  vbe_ld8(vtx + 12), vbe_ld8(vtx + 13), vbe_ld8(vtx + 14), v->r * (c[0] > 1 ? 1 : c[0]), v->g * (c[1] > 1 ? 1 : c[1]), v->b * (c[2] > 1 ? 1 : c[2]));
     }
     if (gfx_trace && light_dbg++ < 6) port_log("[light] vtx n %.2f %.2f %.2f sun %.2f %.2f %.2f M %d c %.2f %.2f %.2f rgb %.2f %.2f %.2f\n",
         nx, ny, nz, lmdir[2 + M][0], lmdir[2 + M][1], lmdir[2 + M][2], M, c[0], c[1], c[2], v->r, v->g, v->b);
@@ -1138,10 +1170,21 @@ void gfx_run_dl(const void *dl) {
             }
             break;
         }
-        case 0xDD:                                            /* G_LOAD_UCODE (+ RDPHALF_1 = text) */
-            if (gfx_stats.ucode_loads++ < 4) port_log("[gfx] G_LOAD_UCODE text %08X data %08X size 0x%X\n", rdphalf1, w1, (w0 & 0xFFFF) + 1);
-            flush(); dmem_seed(w1, (w0 & 0xFFFF) + 1); light_nls = 0;   /* P35b: DMEM data reloaded */
-            { static int cmpd; const unsigned char *a = gfx_addr(cur_ucode), *b = gfx_addr(rdphalf1), *da = gfx_addr(cur_udata), *db = gfx_addr(w1);
+        case 0xDD:   /* G_LOAD_UCODE: w1 = ucode TEXT, the preceding RDPHALF_1 = DATA (gSPLoadUcodeEx: gDma0p(G_RDPHALF_1,
+                      * uc_dstart), gDma1p(G_LOAD_UCODE, uc_start, uc_dsize - 1)). P94: before, the two were swapped, so DMEM
+                      * (light records, Rare block, normals) was seeded from the ucode TEXT: record 2 (DMEM 0x320) read the
+                      * RSP instructions 4B6B58F2 4B6A58B1 as a green-grey "ambient" 4B6B58 for every character. */
+            if (gfx_stats.ucode_loads++ < 4) port_log("[gfx] G_LOAD_UCODE text %08X data %08X size 0x%X\n", w1, rdphalf1, (w0 & 0xFFFF) + 1);
+            { static int oldseed = -1; if (oldseed < 0) oldseed = port_flag("p94oldseed");   /* ?p94oldseed=1: the pre-P94 (wrong) seed */
+              flush(); dmem_seed(oldseed ? w1 : rdphalf1, (w0 & 0xFFFF) + 1); light_nls = 0; }   /* P35b: DMEM data reloaded */
+            { static int ud2;   /* P94 ?udump=2: hex dump of the loaded ucode text (0x1800) + data (0x800), once */
+              const unsigned char *ut = gfx_addr(w1), *uda = gfx_addr(rdphalf1);
+              if (!ud2 && ut && uda && port_flag("udump") == 2) { ud2 = 1;
+                for (unsigned w = 0; w < 2; w++) for (unsigned o = 0; o < (w ? 0x800u : 0x1800u); o += 32) {
+                    char b[80]; int m = 0;
+                    for (unsigned k = 0; k < 32; k++) m += snprintf(b + m, sizeof b - m, "%02X", vbe_ld8((w ? uda : ut) + o + k));
+                    port_log("[udump2] %c %04X %s\n", w ? 'D' : 'T', o, b); } } }
+            { static int cmpd; const unsigned char *a = gfx_addr(cur_ucode), *b = gfx_addr(w1), *da = gfx_addr(cur_udata), *db = gfx_addr(rdphalf1);
               if (!cmpd++ && a && b && da && db) { int dt = 0, dd = 0, first = -1;
                 for (int k = 0; k < 0x1400; k++) if (vbe_ld8(a + k) != vbe_ld8(b + k)) { dt++; if (first < 0) first = k; }
                 for (int k = 0; k < 0x800; k++) dd += vbe_ld8(da + k) != vbe_ld8(db + k);
@@ -1149,7 +1192,7 @@ void gfx_run_dl(const void *dl) {
                     for (int k = 0; k < 0x7C0 && !j; k++) if (vbe_ld8(q + k) == 'R' && vbe_ld8(q + k + 1) == 'S' && vbe_ld8(q + k + 2) == 'P')
                         for (; j < 63 && vbe_ld8(q + k + j) >= 32; j++) nm[j] = vbe_ld8(q + k + j);
                     nm[j] = 0; port_log("[ucode] %s data: '%s'\n", w ? "loaded" : "task", nm); }
-                port_log("[ucode] task ucode %08X vs loaded %08X: %d of 0x1400 text bytes differ (first 0x%X), %d of 0x800 data bytes\n", cur_ucode, rdphalf1, dt, first, dd); } }
+                port_log("[ucode] task ucode %08X vs loaded %08X: %d of 0x1400 text bytes differ (first 0x%X), %d of 0x800 data bytes\n", cur_ucode, w1, dt, first, dd); } }
             break;
         case 0xDE: {                                          /* G_DL / G_BRANCH_DL */
             const unsigned char *t = gfx_addr(w1);
