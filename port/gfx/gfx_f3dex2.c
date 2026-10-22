@@ -685,6 +685,8 @@ void gfx_run_dl(const void *dl) {
         }
         case 0xE6: case 0xE7: case 0xE8: case 0xE9: break;   /* syncs */
         case 0xED: case 0xEE: break;                          /* scissor, prim depth */
+        case 0xEC: break;  /* G_SETCONVERT (YUV coefficients, K4/K5). P26: the frame sends EC000000 000000FF
+                            * (K5 = 0xFF) twice; no YUV texture or K4/K5 combiner input is used yet. */
         case 0xF0: load_tlut(w0, w1); break;
         case 0xF2: {                                          /* G_SETTILESIZE */
             Tile *t = &tiles[w1 >> 24 & 7];

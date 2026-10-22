@@ -90,8 +90,36 @@ int port_romsym_test(void) {
 extern unsigned char D_800BEA35, D_800BEAC0, D_800E0B94;
 extern unsigned D_800BE9D0, D_800BE9D8[2], D_800BEDE8[2];
 extern short D_800BE9C0;
+void port_cam_probe(unsigned task);
 void port_frame_probe(unsigned task) {
     port_glog("[probe] task %u: BEA35 %u BEAC0 %u E0B94 %u GDL %08X BE9D8 %08X %08X BEDE8 %08X %08X BE9C0 %d\n", task,
               D_800BEA35, D_800BEAC0, D_800E0B94, D_800BE9D0, D_800BE9D8[0], D_800BE9D8[1],
               D_800BEDE8[0], D_800BEDE8[1], (int)D_800BE9C0); /* vbe TU: plain accesses are game memory */
+    port_cam_probe(task);
+}
+
+/* P26: camera / view-matrix state and the P24 / P22 runtime checks (logged with ?dlstat=N).
+ *   VIEW  D_800DC6D0[2]: per DL buffer, player view matrices (allocated by asm func_15005290, filled by
+ *         asm func_1512C490 via func_15047E70 + guMtxCatL); the frame DL multiplies them onto the projection.
+ *   CAMREC D_800BE628: camera records (0x180 per player); +0x100 + buf * 0x40 = projection Mtx, written by
+ *         func_1510BB78 (guPerspectiveF + guMtxF2L) from asm func_1510B6A8 / func_1510B9D8 or the request
+ *         queue D_800D9F18 drained by func_1510BA9C.
+ *   CAM   D_800DBFF0: struct108 camera-controller records (0x9A0 each, func_15122AE0 / func_15122C5C). */
+struct PendingF2_ { float x, y; };
+extern unsigned D_800DC6D0[2], D_800DBFF0, D_800DDD64;
+extern int D_800BE628, D_80082FA0, D_800D2DB4, D_80041C30[3];
+extern unsigned D_800417B0[3];
+extern unsigned char D_800DE1BB, D_800DE1BC, D_800C35EA;
+extern struct PendingF2_ D_800D9F18[];
+void port_cam_probe(unsigned task) {
+    int buf = D_800BE9C0 & 1;
+    unsigned *proj = D_800BE628 ? (unsigned *)(D_800BE628 + 0x100 + buf * 0x40) : 0;
+    unsigned *view = D_800DC6D0[buf] ? (unsigned *)D_800DC6D0[buf] : 0;
+    port_glog("[cam] task %u: players %d VIEW %08X %08X CAM %08X CAMREC %08X proj w0,w2,w5,w13 %08X %08X %08X %08X "
+              "view w0,w2 %08X %08X req0 %08X BEAC0 %u C35EA %u D2DB4 %d\n", task, D_80082FA0, D_800DC6D0[0], D_800DC6D0[1],
+              D_800DBFF0, D_800BE628, proj ? proj[0] : 0, proj ? proj[2] : 0, proj ? proj[5] : 0, proj ? proj[5 + 8] : 0,
+              view ? view[0] : 0, view ? view[2] : 0, *(unsigned *)&D_800D9F18[0].x, D_800BEAC0, D_800C35EA, D_800D2DB4);
+    port_glog("[chk] task %u: music players %08X %08X %08X beat C30 %d %d %d | FAD4 DE1BB %u DE1BC %u | E7FC DDD64 %08X\n",
+              task, D_800417B0[0], D_800417B0[1], D_800417B0[2], D_80041C30[0], D_80041C30[1], D_80041C30[2],
+              D_800DE1BB, D_800DE1BC, D_800DDD64);
 }

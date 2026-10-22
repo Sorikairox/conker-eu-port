@@ -513,7 +513,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P27; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -525,6 +525,7 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P21.md` (browser heap corruption = fiber stack alignment, real-time Chrome, debug flags) and
 `docs/port/sessions/P23.md` (merge P20, srcfix, frame DL end to end, DL-path stub list) and
 `docs/port/sessions/P25.md` (libultra/libgu/libc PC layer complete, `[gutest]`, licenses) and
+`docs/port/sessions/P26.md` (merge port P24, sqrtf hang, runtime checks, **camera path**) and
 `docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
@@ -849,6 +850,66 @@ PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audon
     - `audprobe.js PROBE_STEPS` (click, keydown, keyup, nav, eval), `PROBE_NOAUTOPLAY`, `PROBE_NOAUDIO`;
     - `boot.sh PADTEST` / `EEPTEST`.
   - **Not tested:** a real gamepad, because headless Chrome has none.
+- **P26 (after merging port P24, b742b0d): the camera path is located.** Full notes: P26.md.
+  - **Merge:**
+    - `src_eu/nm_asm/D5E90.c` is compiled by the census glob as is, and its strong definitions beat the
+      weak stubs.
+    - P25's PC fast sin/cos (`pc_gu.c`) are removed; the game C `func_150AD78C` / `func_150AD780` wins.
+    - `vbe.py FUNC_AS_DATA` += `func_1000EC24` (now C in init_EB00.c, but declared `extern s32` in two
+      TUs: a link type clash), `func_15103AA0`, `func_15103910`, `func_150DE8AC` and `func_160036F0`.
+    - srcfix is now used by 0 TUs.
+  - **Hang fixed:**
+    - The NON_MATCHING `sqrtf` (`init_eu_26860.c`: `return sqrtf(value);`, IDO intrinsic) is an endless
+      loop under clang, and the newly merged C calls it. node hung after 5 frames; V8 `--prof` put 97.5 %
+      of ticks in `vbe.sqrtf`.
+    - `vbe.py self_intrinsic` turns the self-call into `llvm.sqrt.f32`.
+  - **Renderer:** `G_SETCONVERT` (EC) is a no-op.
+  - **Results:**
+    - Node: all self-tests PASS, heap 0 errors.
+    - Real-time Chrome, Metal, 45 s, heapwatch: past frame 600 with 0 heap breaks.
+    - The frame DL is 175 commands, 0 triangles, 0 unknown.
+    - DL-path stubs went 13 → 7: func_15110420, func_1510BF50, func_15186D04, func_15182450, func_1508FD38,
+      func_15180AF0 and the new func_151EDBE8.
+    - Top stub: func_15042ECC (869 calls, vsprintf-like).
+  - **Probe:** `?dlstat=N` now also prints `[cam]` (D_800DC6D0, D_800DBFF0, camera record, projection and
+    view words, request queue) and `[chk]` (music players, D_800DE1BB/BC, D_800DDD64).
+  - **P24 / P22 runtime checks, no bug found:**
+    - CEAC / D2F8 are not exercised: the music players `D_800417B0[]` stay NULL, because the music init
+      is asm.
+    - The D2F8 callback goes through an `i:iiffi` site. The slow path bitcasts slot by slot, which is
+      o32-correct for all 9 song-table callbacks (listed in P26.md).
+    - FAD4's blend-0 path runs every frame (`D_800DE1BC = 0`, alpha 0).
+    - E7FC is not exercised: its node list is empty.
+    - func_15088BFC is verified statically: its only caller, func_150538CC, passes its own object.
+    - func_151EB81C (counter screen) is not reached.
+    - func_1517D7B0 runs with no trap.
+  - **For the port branch:**
+    - the sqrtf body;
+    - the `extern s32 func_1000EC24` declarations in game_eu_12A7C0.c / game_eu_142E40.c;
+    - **the camera list below.**
+  - **Camera:**
+    - The projection is `D_800BE628 + p*0x180 + buf*0x40 + 0x100`, written only by the C func_1510BB78
+      (guPerspectiveF + guMtxF2L).
+    - The view is `D_800DC6D0[buf] + p*0x40`, written only by the asm func_1512C490.
+    - `D_800DC6D0[]` and `D_800DBFF0` are **NULL** because their allocator is a stub.
+  - **Camera path, ordered (asm unless marked):**
+    1. **func_15005290** (level init in func_15007B3C; allocates D_800DBFF0, D_800DC6E0, D_800DC6D0[0..1],
+       D_800BE6D0[], D_800DC440) with **func_150054C4** and **func_1512B168**;
+    2. **func_150006E0** (D_800D9F18 projection requests and D_800D9F38);
+    3. per frame, C func_15122AE0 (gated by **func_150859AC**):
+       - front end: **func_15122C5C** → **func_1510B6A8** → C func_1510BB78;
+       - gameplay: **func_1512C490** (C func_15047E70 look-at, then guMtxCatL with **func_150A82D0**);
+    4. **func_1510B9D8** (← func_15024910), the other request source.
+
+    Also writing the projection: func_15126378 and func_15129220 (via func_1510B6A8), and func_1501B0A0
+    (NM-C).
+  - **Frame G_MTX:**
+    - 23× MV identity 0x1058F810;
+    - 2× MV identity by segment-0 address 0x00089810 (static DL 0x800844F0; resolved correctly);
+    - 2× projection 0x10622690 (zero);
+    - 1× view multiply at address 0.
+
+    Screenshot `P26_screenshot.png`: the clear colour.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

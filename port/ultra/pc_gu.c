@@ -8,8 +8,6 @@
  *   guMtxF2L        libultra/gu/guMtxF2L.s   (Rare's unrolled version: cvt.w.s, i.e. round to nearest)
  *   func_150A7B80   game_D5030.s             guMtxIdent (fixed-point identity)
  *   cosf            libultra/gu/cosf.s       (game TUs call it as vbe.cosf, port/tools/vbe.py LIBC_VBE)
- *   func_150AD780   asm/D5E90.s              Rare's fast cosf = sin(x + pi/2)
- *   func_150AD78C   asm/D5E90.s              Rare's fast sinf (constants read from game .rodata)
  */
 #include <stdint.h>
 #include <string.h>
@@ -90,37 +88,5 @@ float port_cosf(float x) {
     return 0.0f;
 }
 
-/* ---- Rare's fast sin/cos (asm/D5E90.s 0x150ADC60 / 0x150ADC6C). Constants are the game's .rodata
- * words at 0x8009FAE0..0x8009FB0C (addresses from the instruction bytes), read from the RDRAM mirror,
- * where data keeps its N64 offset. ---- */
-#define RD(a) (*(const float *)&n64_rdram[(a) - 0x80000000u])
-
-float func_150AD78C(float x) {
-    fu u = { .f = x };
-    int t0 = ((int32_t)u.i >> 22) & 0x1FF;
-    if (t0 < 0xFF) {                              /* |x| < 1.5 */
-        if (t0 < 0xE6) return x;
-        float xsq = x * x;
-        float p = RD(0x8009FAE4) * xsq;
-        p = RD(0x8009FAE8) + p; p = p * xsq;
-        p = RD(0x8009FAEC) + p; p = p * xsq;
-        p = RD(0x8009FAF0) + p;
-        return p * (xsq * x) + x;
-    }
-    if (t0 >= 0x136) return 0.0f;
-    float f = RD(0x8009FAF4) * x;
-    int n = cvt_w_s(f);
-    float dn = (float)n;
-    x = x - RD(0x8009FAF8) * dn;
-    x = x - RD(0x8009FAFC) * dn;
-    float xsq = x * x;
-    float p = RD(0x8009FB00) * xsq;
-    p = RD(0x8009FB04) + p; p = p * xsq;
-    p = RD(0x8009FB08) + p; p = p * xsq;
-    p = RD(0x8009FB0C) + p; p = p * xsq;
-    p = p * x;
-    float r = p + x;
-    return (n & 1) ? -r : r;
-}
-
-float func_150AD780(float x) { return func_150AD78C(x + RD(0x8009FAE0)); }
+/* P26: Rare's fast sin/cos (func_150AD78C / func_150AD780, asm/D5E90.s) were PC copies here in P25.
+ * The port branch now has them as game C (conker/src_eu/nm_asm/D5E90.c, P24), which wins. */

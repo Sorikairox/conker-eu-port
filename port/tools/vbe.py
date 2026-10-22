@@ -350,6 +350,27 @@ LIBC_CLASH = ['ldiv', 'lldiv', 'memcpy', 'sinf', 'sqrtf', 'strchr', 'strlen', 't
 # (cosf). They get the same @vbe.<name> rename; port/ultra/pc_libc.c and pc_gu.c define them.
 LIBC_VBE = ['bcopy', 'bzero', 'cosf']
 RENAME = re.compile(r'@(' + '|'.join(LIBC_CLASH + LIBC_VBE) + r')\b(?![.\w])')
+# P26: the decomp's NON_MATCHING `f32 sqrtf(f32 v) { return sqrtf(v); }` (init_eu_26860.c) relies on IDO's
+# `#pragma intrinsic(sqrtf)`. Under clang -fno-builtin it is self-recursion, which -O1 turns into an endless
+# loop (the first caller hung node after 5 frames). Inside a definition of one of these names, a call to
+# itself becomes the LLVM intrinsic (IEEE sqrt, as the R4300's sqrt.s).
+SELF_INTRINSIC = {'vbe.sqrtf': ('float', 'llvm.sqrt.f32')}
+
+
+def self_intrinsic(text, st):
+    for name, (ty, intr) in SELF_INTRINSIC.items():
+        m = re.search(r'^define [^\n]*@' + re.escape(name) + r'\([^\n]*\{$', text, re.M)
+        if not m:
+            continue
+        end = text.index('\n}', m.end())
+        body = text[m.end():end]
+        nb, n = re.subn(r'call (?:\w+ )*' + ty + r' @' + re.escape(name) + r'\(', f'call {ty} @{intr}(', body)
+        if n:
+            st['self_intrinsic'] += n
+            text = text[:m.end()] + nb + text[end:]
+            if not re.search(r'^declare [^\n]*@' + re.escape(intr) + r'\(', text, re.M):
+                text += f'\ndeclare {ty} @{intr}({ty})\n'
+    return text
 
 
 # Data symbols that the N64 link places at absolute addresses below the RAM range: ROM offsets (and a
@@ -362,7 +383,10 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. func_151DE100 is left alone: it is read as code bytes.
 FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690',
-                'func_150ADC50']  # P23: debugger.c compares a thread pc with &func_150ADC50
+                'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
+                # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / func_16001830.
+                # func_1000EC24 became C (init_EB00.c, port P24), so its data declaration clashed at link.
+                'func_1000EC24', 'func_15103AA0', 'func_15103910', 'func_150DE8AC', 'func_160036F0']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
 EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)
 
@@ -450,7 +474,7 @@ def rcp_io(text, st):
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
-    p = Pass(rcp_io(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0).split('\n'))
+    p = Pass(self_intrinsic(rcp_io(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0).split('\n'))
     p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs
