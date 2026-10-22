@@ -2619,3 +2619,22 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
   - Null-zone writes (+0xB8 / +0xF8) by C func_1507342C from the NULL returned by the stub func_15073118.
   - Arity: 111 rows / 56 with severity > 0.
   - **Next:** port-b converts func_1501ECA4 + func_15020F6C + func_1501E888 (with func_15022C4C / func_15020430 / func_1501DB18 / func_1501D044) together. Then remove both P88 guards and recheck the respawn / scene. Then func_15073118 and func_151552F0.
+- **P91 (merge port-b 431730a P87 and port 7127974 P86 + P89 + checks).** Full notes: P91.md.
+  - Merges:
+    - b69b918: HANDOFF union only.
+    - f290c6b: game_981E0.c conflict, both sides kept. func_1507342C's local `struct127 *func_15073118` prototype was removed; its two uses cast the NM `u8 *` result.
+    - difftest.py / selftest.sh merged automatically, with both fixes.
+    - verify_all OK, NM links, protocheck 960 / 0 and then 969 / 0, clean port rebuild.
+  - **Both P88 TEMPORARY guards are dropped** (`__wrap_func_1501E364`, `__wrap_func_1501D348` and their Makefile wraps):
+    - The respawn scene ends by itself: state 1 -> 0 and the cutscene flag D_800C3638 1 -> 0, 250 frames later.
+    - There is one death only; the player position stays sane.
+    - Conker walks and the 0x2C warp goes there and back.
+    - Seen in node (50 s and 80 s) and in 3 Chrome runs. Heap 0 errors, null zone 0 words, no `[p78]` line.
+  - The respawn scene now plays with its real cutscene camera (Conker steps out of the wooden passage). A HUD counter sprite is drawn.
+  - In Chrome, the audio reaches Web Audio (rms 0.024, peak 0.17). It was 0 in P88. Not judged by ear.
+  - Head target: real once, in Chrome walk2 (frame 3841). Otherwise still -99999.
+  - Arity: 113 rows / 57 with severity > 0. New row: func_151143D4 -> D_800DBEF4 callbacks, severity 2 (C passes 1 argument, the asm leaves a0..a2).
+  - **Next:**
+    - Scene path: func_1501FD34 (320 calls, "place", feeds func_1501ECA4's records), then func_1501E0C8 (63) and func_1512DAD0 (57, camera event 7).
+    - Then the per-frame stubs at about 668 calls: func_15129220, func_150ADA68, func_15097E9C, func_15044D18, func_15097BA8, game_14FF90 x2, ... (P91.md section 6).
+    - Check the func_151143D4 callback arity.
