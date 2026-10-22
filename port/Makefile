@@ -103,7 +103,7 @@ game: $(WEB)/conker.js
 $(WEB)/conker.js: $(B)/vbe.stamp $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS)
 	@mkdir -p $(@D)
 	emcc $(GAME_OBJS) $(BOOT_OBJS) $(ULTRA_OBJ) $(GFX_OBJ) $(AUD_OBJ) $(STUB_OBJS) -o $@ \
-	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test,_port_voice_test,_port_audio_prepare,_port_pad_state,_port_eeprom_ptr,_port_eeprom_size,_port_eep_test,_port_set_paused -Wl,--error-limit=0 -Wl,--wrap=func_150A5858 -Wl,--wrap=func_10006530 -Wl,--wrap=func_1510D66C -Wl,--wrap=func_150031EC 2> $(B)/link_warnings.txt \
+	  $(LINK_COMMON) -sGLOBAL_BASE=256MB -sINITIAL_MEMORY=352MB -sSTACK_OVERFLOW_CHECK=0 -sEXPORT_NAME=createConker -sEXPORTED_FUNCTIONS=_main,_malloc,_free,_port_set_rom,_port_dump_threads,_port_dump_stubs,_port_gfx_demo_test,_port_audio_test,_port_voice_test,_port_audio_prepare,_port_pad_state,_port_eeprom_ptr,_port_eeprom_size,_port_eep_test,_port_set_paused -Wl,--error-limit=0 -Wl,--wrap=func_150A5858 -Wl,--wrap=func_10006530 -Wl,--wrap=func_1510D66C -Wl,--wrap=func_150031EC -Wl,--wrap=func_1512C490 -Wl,--wrap=func_15186D04 -Wl,--wrap=func_1504A730 -Wl,--wrap=func_150A6840 2> $(B)/link_warnings.txt \
 	  || (tail -40 $(B)/link_warnings.txt; exit 1)
 	@echo "link warnings: $$(grep -c warning $(B)/link_warnings.txt) (port/build/link_warnings.txt)"
 	@ls -l $(WEB)/conker.wasm

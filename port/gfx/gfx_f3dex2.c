@@ -1257,3 +1257,209 @@ uint32_t *__wrap_func_150A5858(int dl, uint32_t *gdl, unsigned char *mtx, int a3
     }
     return r;
 }
+
+/* P39: ?camwatch=N: write watch on the camera chain, checked at every asm-stub entry (port_stub_hit) and around
+ * every func_1512C490 call (-Wl,--wrap). Watched: the camera target D_800DBFF0[0]+0x3D4 (= D_800CC2D0[0]+0x31C)
+ * +0x130..+0x154 (dir / eye / at), the controller's smoothed target 0x2A4..0x2AC, at 0x2BC..0x2C4, eye
+ * 0x2F8..0x300, orbit 0x18C..0x198 and yaw 0x3A0, and the followed record (+0x3D0) position +0x14..+0x1C.
+ * The first N changes are logged with the stub (or wrapper point) that saw them and a JS stack; func_1512C490
+ * calls are counted, and its inputs / outputs are logged at the first call and every 64th. */
+#define CW_N 36
+extern unsigned port_frame_count;
+void port_js_stack(int skip, int n);
+extern unsigned D_800DBFF0;
+static unsigned cw_prev[CW_N], cw_have, cw_logged, cw_calls;
+static int cw_flag = -1;
+static int cw_snap(unsigned *v) {
+    const unsigned char *p = (const unsigned char *)D_800DBFF0, *o, *r;
+    int i, n = 0;
+    if (!p) return 0;
+    o = *(const unsigned char *const *)(p + 0x3D4);
+    r = *(const unsigned char *const *)(p + 0x3D0);
+    for (i = 0; i < 10; i++) v[n++] = o ? *(const unsigned *)(o + 0x130 + i * 4) : 0;   /* 0..9 */
+    for (i = 0; i < 3; i++) v[n++] = *(const unsigned *)(p + 0x2A4 + i * 4);            /* 10..12 */
+    for (i = 0; i < 3; i++) v[n++] = *(const unsigned *)(p + 0x2BC + i * 4);            /* 13..15 */
+    for (i = 0; i < 3; i++) v[n++] = *(const unsigned *)(p + 0x2F8 + i * 4);            /* 16..18 */
+    for (i = 0; i < 4; i++) v[n++] = *(const unsigned *)(p + 0x18C + i * 4);            /* 19..22 */
+    v[n++] = *(const unsigned *)(p + 0x3A0);                                            /* 23 */
+    for (i = 0; i < 3; i++) v[n++] = r ? *(const unsigned *)(r + 0x14 + i * 4) : 0;     /* 24..26 */
+    v[n++] = (unsigned)o; v[n++] = (unsigned)r; v[n++] = *(const unsigned *)(p + 0x2C); /* 27..29 */
+    while (n < CW_N) v[n++] = 0;
+    return 1;
+}
+static const char *cw_name(int i) {
+    static const char *nm[] = {"obj+130 dir.x", "obj+134 dir.y", "obj+138 dir.z", "obj+13C eye.x", "obj+140 eye.y",
+        "obj+144 eye.z", "obj+148 at.x", "obj+14C at.y", "obj+150 at.z", "obj+154", "cam+2A4", "cam+2A8", "cam+2AC",
+        "cam+2BC at.x", "cam+2C0 at.y", "cam+2C4 at.z", "cam+2F8 eye.x", "cam+2FC eye.y", "cam+300 eye.z", "cam+18C",
+        "cam+190", "cam+194", "cam+198", "cam+3A0 yaw", "rec+14 x", "rec+18 y", "rec+1C z", "cam+3D4 obj",
+        "cam+3D0 rec", "cam+2C mode"};
+    return i < 30 ? nm[i] : "?";
+}
+void port_camwatch(const char *where) {
+    unsigned v[CW_N];
+    int i;
+    if (cw_flag < 0) cw_flag = port_flag("camwatch");
+    if (!cw_flag) return;
+    { /* first hit of the camera-path stubs: who calls them */
+        static const char *const who[] = {"func_1504CB98", "func_151247C0", "func_15123A54", "func_151283B8", "func_15124C38",
+                                          "func_15128030", "func_15126378"};
+        static unsigned seen;
+        for (i = 0; i < (int)(sizeof who / sizeof who[0]); i++)
+            if (!(seen & (1u << i)) && !strcmp(where, who[i])) {
+                seen |= 1u << i;
+                port_log("[camwatch] first %s, frame %u, stack:\n", where, port_frame_count);
+                port_js_stack(3, 8);
+            }
+    }
+    if (!cw_snap(v)) return;
+    if (cw_have && cw_logged < (unsigned)cw_flag) {
+        for (i = 0; i < CW_N; i++)
+            if (v[i] != cw_prev[i]) {
+                cw_logged++;
+                port_log("[camwatch] #%u frame %u at %s: %s %08X -> %08X (%g)\n", cw_logged, port_frame_count, where,
+                          cw_name(i), cw_prev[i], v[i], *(float *)&v[i]);
+                if (cw_logged <= 8) port_js_stack(2, 8);
+            }
+    }
+    for (i = 0; i < CW_N; i++) cw_prev[i] = v[i];
+    cw_have = 1;
+}
+void __real_func_1512C490(void *arg0);
+void __wrap_func_1512C490(void *arg0) {
+    if (cw_flag < 0) cw_flag = port_flag("camwatch");
+    if (cw_flag) {
+        port_camwatch("func_1512C490 entry");
+        if (cw_calls == 0) { port_log("[camwatch] first func_1512C490(%08X) call, stack:\n", (unsigned)arg0); port_js_stack(1, 10); }
+    }
+    __real_func_1512C490(arg0);
+    if (cw_flag) {
+        unsigned v[CW_N];
+        port_camwatch("func_1512C490 exit");
+        if ((cw_calls & 63) == 0 && cw_snap(v))
+            port_log("[camwatch] func_1512C490 call %u frame %u: mode %08X rec %08X pos %g %g %g | cam 2A4 %g %g %g at %g %g %g eye %g %g %g "
+                      "orbit 18C %g 190 %g 194 %g 198 %g yaw %g | obj %08X eye %g %g %g at %g %g %g\n", cw_calls, port_frame_count,
+                      v[29], v[28], *(float *)&v[24], *(float *)&v[25], *(float *)&v[26], *(float *)&v[10], *(float *)&v[11],
+                      *(float *)&v[12], *(float *)&v[13], *(float *)&v[14], *(float *)&v[15], *(float *)&v[16], *(float *)&v[17],
+                      *(float *)&v[18], *(float *)&v[19], *(float *)&v[20], *(float *)&v[21], *(float *)&v[22], *(float *)&v[23],
+                      v[27], *(float *)&v[3], *(float *)&v[4], *(float *)&v[5], *(float *)&v[6], *(float *)&v[7], *(float *)&v[8]);
+        if ((cw_calls & 63) == 0 && v[28]) { /* P39: the object array D_800CC2D0[] (EU 0x800CC6F0, 0x32C each): pos, +0x31C */
+            int k;
+            for (k = 0; k < 8; k++) {
+                const unsigned char *r = (const unsigned char *)v[28] + k * 0x32C;
+                port_log("[camwatch]   obj[%d] %08X pos %g %g %g +31C %08X w0 %08X w4 %08X\n", k, (unsigned)r,
+                         *(const float *)(r + 0x14), *(const float *)(r + 0x18), *(const float *)(r + 0x1C),
+                         *(const unsigned *)(r + 0x31C), *(const unsigned *)r, *(const unsigned *)(r + 4));
+            }
+        }
+    }
+    cw_calls++;
+}
+
+/* P39: ?p38check=N runtime checks of the P38 C (link-time wraps; N = how many calls to log in detail).
+ *  - func_15186D04 (shadows): opcode histogram of what it appends to the frame DL (VTX 01, TRI1 05, TRI2 06,
+ *    Rare TRI4 10..1F, DL / ENDDL), and per call the triangle slots per vertex load (the strip splitter output).
+ *  - func_1504A730 (per-frame object update): D_800CC6A4 after the call, and whether it is left pointing into
+ *    the dead stack frame (the 6-byte buffer used for objects >= 4).
+ *  - func_150A6840 (view test): every call is checked against an independent double-precision version of the
+ *    asm (c.ule / c.olt / c.ult NaN rules, cvt.w.s round-to-nearest-even), with an exit histogram. */
+static int p38_flag = -1;
+static int p38_on(void) { if (p38_flag < 0) p38_flag = port_flag("p38check"); return p38_flag; }
+uint8_t *__real_func_15186D04(uint8_t *gdl, int arg1);
+uint8_t *__wrap_func_15186D04(uint8_t *gdl, int arg1) {
+    static unsigned calls, tot_vtx, tot_t1, tot_t2, tot_t4, tot_cmd, tot_other;
+    uint8_t *r = __real_func_15186D04(gdl, arg1);
+    if (p38_on()) {
+        unsigned vtx = 0, t1 = 0, t2 = 0, t4 = 0, other = 0, n = 0, slots = 0, maxslots = 0;
+        const uint32_t *w;
+        char seq[160]; int sl = 0;
+        seq[0] = 0;
+        for (w = (const uint32_t *)gdl; (const uint8_t *)w < r && n < 100000; w += 2, n++) {
+            unsigned op = w[0] >> 24;
+            if (op == 0x01) { vtx++; if (slots > maxslots) maxslots = slots;
+                              if (slots && sl < 140) sl += snprintf(seq + sl, sizeof seq - sl, "%u ", slots); slots = 0; }
+            else if (op == 0x05) { t1++; slots += 1; }
+            else if (op == 0x06) { t2++; slots += 2; }
+            else if (op >= 0x10 && op <= 0x1F) { t4++; slots += 4; }
+            else other++;
+        }
+        if (slots && sl < 140) sl += snprintf(seq + sl, sizeof seq - sl, "%u", slots);
+        if (calls % 128 == 0) { /* why objects are skipped: the filter fields of objects 0..1 (vbe bytes: address ^ 3) */
+            extern unsigned char D_800CC2D0[]; extern unsigned D_800DF510;
+            int k;
+            for (k = 0; k < 2; k++) {
+                const unsigned char *o = D_800CC2D0 + k * 0x32C;
+                #define VB(off) (*(const unsigned char *)((uintptr_t)(o + (off)) ^ 3))
+                unsigned t31c = *(const unsigned *)(o + 0x31C);
+                port_log("[shadow] obj[%d]: state %d 1D4 %08X 74 %02X 5 %02X 66 %02X 84 %04X 65 %02X id %02X 31C %08X (95 %02X 98 %02X) mask DF510 %08X\n",
+                         k, *(const int *)o, *(const unsigned *)(o + 0x1D4), VB(0x74), VB(5), VB(0x66),
+                         *(const unsigned short *)((uintptr_t)(o + 0x84) ^ 2), VB(0x65), VB(4), t31c,
+                         t31c ? *(const unsigned char *)((uintptr_t)(t31c + 0x95) ^ 3) : 0,
+                         t31c ? *(const unsigned char *)((uintptr_t)(t31c + 0x98) ^ 3) : 0, D_800DF510);
+                #undef VB
+            }
+        }
+        calls++; tot_vtx += vtx; tot_t1 += t1; tot_t2 += t2; tot_t4 += t4; tot_cmd += n; tot_other += other;
+        if (calls <= (unsigned)p38_flag || (n > 1 && calls % 256 == 0))
+            port_log("[shadow] call %u frame %u arg1 %d: %u cmds (VTX %u TRI1 %u TRI2 %u TRI4 %u other %u), tri slots per VTX: %s\n",
+                     calls, port_frame_count, arg1, n, vtx, t1, t2, t4, other, seq);
+        if (calls % 64 == 0)
+            port_log("[shadow] totals after %u calls: %u cmds, VTX %u TRI1 %u TRI2 %u TRI4 %u other %u\n", calls, tot_cmd,
+                     tot_vtx, tot_t1, tot_t2, tot_t4, tot_other);
+    }
+    return r;
+}
+extern unsigned D_800CC6A4;
+void __real_func_1504A730(void);
+void __wrap_func_1504A730(void) {
+    static unsigned calls, stack_left;
+    volatile unsigned char here = 0;
+    unsigned before = D_800CC6A4, after, sp = (unsigned)(uintptr_t)&here;
+    __real_func_1504A730();
+    after = D_800CC6A4;
+    if (p38_on()) {
+        int in_stack = after < sp && sp - after < 0x10000; /* below our frame = the callee's dead frame */
+        calls++;
+        if (in_stack) stack_left++;
+        if (calls <= (unsigned)p38_flag || (in_stack && stack_left <= 4) || calls % 512 == 0)
+            port_log("[a730] call %u frame %u: D_800CC6A4 %08X -> %08X (sp %08X)%s; left in the dead stack %u of %u calls\n",
+                     calls, port_frame_count, before, after, sp, in_stack ? " DEAD STACK" : "", stack_left, calls);
+    }
+}
+extern float D_800D9F40;
+int __real_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, float ry, float far);
+static int v6840_ref(int cam, const float *m, float x, float y, float z, float r, float ry, float far, int *exitno) {
+    /* the asm order and grouping, in float (every product / sum rounded to f32 as on the FPU) */
+    const float *c = (const float *)(uintptr_t)cam;
+    float u, v, w, t;
+    w = (float)((float)(m[2] * x) + (float)(m[6] * y)) + (float)((float)(m[10] * z) + m[14]);
+    if (!(w - r <= -D_800D9F40)) { *exitno = 0; return 0; }
+    if (w + r < -far) { *exitno = 1; return 0; }
+    u = (float)((float)(m[0] * x) + (float)(m[4] * y)) + (float)((float)(m[8] * z) + m[12]);
+    t = (float)(u * c[0x88 / 4]) + (float)(w * c[0x90 / 4]); if (!(t >= -r)) { *exitno = 2; return 0; }
+    t = (float)(u * c[0x94 / 4]) + (float)(w * c[0x9C / 4]); if (!(t >= -r)) { *exitno = 3; return 0; }
+    v = (float)((float)(m[1] * x) + (float)(m[5] * y)) + (float)((float)(m[9] * z) + m[13]);
+    t = (float)(v * c[0xA4 / 4]) + (float)(w * c[0xA8 / 4]); if (!(t >= -ry)) { *exitno = 4; return 0; }
+    t = (float)(v * c[0xB0 / 4]) + (float)(w * c[0xB4 / 4]); if (!(t >= -ry)) { *exitno = 5; return 0; }
+    *exitno = 6;
+    { int k = (int)lrintf(w); return k ? k : 1; }
+}
+int __wrap_func_150A6840(int cam, int *mtx, float x, float y, float z, float r, float ry, float far) {
+    static unsigned calls, bad, ex[7];
+    int got = __real_func_150A6840(cam, mtx, x, y, z, r, ry, far);
+    if (p38_on()) {
+        int e, want = v6840_ref(cam, (const float *)mtx, x, y, z, r, ry, far, &e);
+        calls++; ex[e]++;
+        if (got != want) {
+            bad++;
+            if (bad <= 8) port_log("[view6840] MISMATCH call %u: cam %08X m %08X p (%g %g %g) r %g ry %g far %g: C %d, reference %d\n",
+                                   calls, cam, (unsigned)(uintptr_t)mtx, x, y, z, r, ry, far, got, want);
+        }
+        if (calls <= (unsigned)p38_flag)
+            port_log("[view6840] call %u frame %u: cam %08X p (%g %g %g) r %g ry %g far %g -> %d (exit %d)\n", calls,
+                     port_frame_count, cam, x, y, z, r, ry, far, got, e);
+        if (calls % 1024 == 0 || calls == 64)
+            port_log("[view6840] %u calls, %u mismatches; exits near %u far %u planes %u %u %u %u inside %u\n", calls, bad,
+                     ex[0], ex[1], ex[2], ex[3], ex[4], ex[5], ex[6]);
+    }
+    return got;
+}

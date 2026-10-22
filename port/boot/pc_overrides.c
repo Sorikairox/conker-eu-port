@@ -165,3 +165,5 @@ void port_cam_probe(unsigned task) {
  * loader), func_150479F0 (lookat) and the P31 diagnostic func_150A5858 were removed: the port branch converted
  * all of them in P34 (game_476D0.c, game_305D0.c, game_eu_71E70.c, game_eu_D2DB0.c). ?dlapprox=1 is now a
  * link-time wrapper of the game's C func_150A5858 (port/gfx/gfx_f3dex2.c, -Wl,--wrap). */
+
+/* P39: the ?camwatch write watch lives in port/gfx/gfx_f3dex2.c (a host TU: port_flag / %s need host strings). */
