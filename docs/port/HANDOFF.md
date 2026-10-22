@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P68 (port-b) (session P68, 2026-10-22). Details: `docs/port/sessions/P68.md`
+
+Branch `port-b` (from P67 8c057c9); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p68/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (865 bodies).
+- New hand-written NM C (no asm2c), P66 browser stub list: per frame **func_151236D0** (camera state flags + inside /
+  outside sound), **func_1512C77C** (camera cylinder push-out), **func_151E7110** (text bank loader), **func_1501B300**
+  (smoothed view direction; func_1501B640 forwards the player index under NM), **func_1512C080** (camera eye
+  collision probe); movement **func_1506BF5C** (script sound / footsteps), **func_1507342C** (projectile spawn).
+  Random seeds + knob setups EQUIV for all; mutants in P68.md.
+- **Knob addresses must be EU addresses** (US-style names: func_15048A70 is at 0x15048D60, D_800D154C at
+  0x800D196C ...): `port_work/p68_sym.sh SYM...`. OUTW is word-sized (use OUTB for u16 out-params).
+  `docs/port/sessions/p68/mut.sh` stops at the first DIFFER (random trials first).
+- Open harness question: writes of func_1501B300 to D_800BEAE0 / D_800BEAF0 do not seem to be compared (rate
+  mutants survive); its smoothing math is hand-checked only (UNVERIFIED).
+
+## Next steps (from P68)
+
+1. P66 stub list, still asm: func_151BF8F0 (311 lines, stack struct for func_15149130), func_1501D348 (473),
+   func_1509A024 (1571, in sections).
+2. Browser: camera collision / follow, menu and in-game text, footsteps, projectiles (P68.md UNVERIFIED).
+
 ## P67 (port-b) (session P67, 2026-10-22). Details: `docs/port/sessions/P67.md`
 
 Branch `port-b` (from P64 f0437f9); the orchestrator merges it into `port`.

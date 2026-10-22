@@ -1,0 +1,19 @@
+#!/bin/bash
+# P68 mutants. usage: mut.sh FUNC draft.c setups.txt muts.txt
+# muts.txt lines: sed-expression % setup names (space separated; empty = all setups).
+# P68: each mutant first runs 100 random trials (seed 1), then its setups one by one, and stops at the first
+# DIFFER (p67/mut.sh ran every setup of every mutant). Env TR = trials per setup (default 8).
+cd "$(dirname "$0")/../../../.." && eval "$(tools/eu_port/wt.sh env portb)"; export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
+F=$1; D=$2; S=$3; M=port_work/p68_mut_$F.c
+grep -vE '^\s*(#|$)' "$4" | while IFS='%' read -r e n; do
+  e=$(echo "$e" | sed 's/ *$//'); sed "$e" $D > $M; cmp -s $D $M && { echo "NOT APPLIED: $e"; continue; }
+  k=""
+  if DIFFTEST_TMP=build/difftest_p68_$F tools/port/difftest.sh $F $M --trials 100 --seed 1 2>&1 | grep -q "^DIFFER"; then k=random; fi
+  if [ -z "$k" ]; then
+    names=$(echo $n); [ -z "$names" ] && names=$(grep -vE '^\s*(#|$)' $S | awk '{print $1}')
+    for s in $names; do
+      if TR=${TR:-8} docs/port/sessions/p68/knobs.sh $F $M $S $s | grep -q DIFFER; then k=$s; break; fi
+    done
+  fi
+  echo "$([ -n "$k" ] && echo "KILLED by $k" || echo SURVIVED) [$e]"
+done

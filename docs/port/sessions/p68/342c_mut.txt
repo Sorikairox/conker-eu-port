@@ -1,0 +1,14 @@
+s/% 1000 < 200/% 1000 <= 200/ %
+s/aim = TRUE;/aim = FALSE;/ %
+s/if (180.0f < angle)/if (180.0f <= angle)/ %
+s/heading = angle - 360.0f;/heading = angle;/ %
+s/shot->gravity = 0.0f;// %
+s/\* dy \/ dist/* dz \/ dist/ %
+s/ - 0x4000;/;/ %
+s/shot->unk7A = dir;// %
+s/\* 0.01f;/* 0.1f;/ %
+s/% 40) - 20)/% 40) - 19)/ %
+s/shot->unkB8 = 180.0f;// %
+s/0x88, 0.0f, 0.0f, 16.0f, JITTER(10.0f), x, y/0x88, 0.0f, 0.0f, 16.0f, JITTER(10.0f), y, x/ %
+s/obj - D_800CC2D0/0/ %
+s/30.0f, 0, 0)/31.0f, 0, 0)/ %
