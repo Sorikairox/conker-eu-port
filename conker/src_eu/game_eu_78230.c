@@ -16,7 +16,7 @@ s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 /* P38: per-frame object update (UNVERIFIED parts: see P38.md) */
 void func_1504AF10(struct127 *, s32, s32);
 s32 func_15061B4C();
-s32 func_1507D4F8(u8);
+void func_1507D4F8(s32); /* P59: void in the NM definition */
 void func_1507EB1C(struct127 *);
 void func_15081064(void);
 void func_15082D5C(s32, s32, s32);
@@ -1074,7 +1074,7 @@ s32 func_150599C8(struct127 *, u8, u16);
 f32 func_1505A3A8(f32, struct127 *, f32, f32, u8); // P47: a1 = the record (left in a1 by the asm) 
 void func_1505A9AC(struct127 *, f32);
 s32 func_1505D024(struct127 *, s32, u16, s32); 
-s32 func_1505D6F0(struct127 *, u8);             
+void func_1505D6F0(struct127 *, s32); /* P59: void in the NM definition */
 s32 func_1505F298(struct127 *, struct49 *);     
 void func_1506045C(struct127 *, s32, s32, s32, s32);
 void func_15063168(struct127 *);                 

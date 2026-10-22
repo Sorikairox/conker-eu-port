@@ -1,0 +1,7 @@
+s/- 5462.0f) \* 1.2f/- 5462.0f) * 1.25f/ % f f2
+s/D_80041D40 \* 16/D_80041D40 * 15/ % f2
+s/k = 0.0f;/k = 1.0f;/ % f2
+s/D_800D1CE4++ == 0x17/D_800D1CE4++ == 0x16/ % c c3
+s/func_1000E8C4(1)/func_1000E8C4(2)/ % b
+s/rec->unk2F8 &= ~1/rec->unk2F8 \&= ~3/ % a
+s/ctl\[6\] = flags/ctl[6] = old/ % a c

@@ -63,6 +63,7 @@ NM_ASM_SRC_DIR := $(SRC_DIR)/nm_asm
 NM_ASM_C_FUNCS_D5E90 := func_150AB278 func_150AD780 func_150AD78C
 # P51: the skeleton / animation evaluator (src_eu/nm_asm/D5E90_anim.c)
 NM_ASM_C_FUNCS_D5E90 += func_150A86B0
+NM_ASM_C_FUNCS_D5E90 += func_150AB6D0 func_150AC8C4 func_150ACEA0
 ifeq ($(NON_MATCHING),1)
 SRC_DIRS += $(NM_ASM_SRC_DIR)
 endif

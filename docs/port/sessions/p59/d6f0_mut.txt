@@ -1,0 +1,10 @@
+s/\* 0.5f)/* 0.6f)/ % a b
+s/< 30000.0f/< 3000.0f/ % h
+s/ctl\[0x4A\] = 20/ctl[0x4A] = 21/ % a
+s/oradius < 2/oradius < 1/ % a
+s/o->unk65 == idx + 1/o->unk65 == idx/ % f
+s/count = 1;/count = 3;/ % d
+s/rec->unk127 == 0xFF/rec->unk127 == 0xFE/ % c
+s/130.0f, 140.0f/130.0f, 141.0f/ % b
+s/120.0f, 250.0f, 120.0f/120.0f, 250.0f, 121.0f/ % a
+s/(rec->unkF8 \& 0x4000)/(rec->unkF8 \& 0x2000)/ % g

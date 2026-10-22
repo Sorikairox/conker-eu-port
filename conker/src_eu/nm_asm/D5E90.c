@@ -315,4 +315,133 @@ f32 func_150AD78C(f32 x) {
 f32 func_150AD780(f32 x) {
     return func_150AD78C(x + D_8009FAE0);
 }
+
+/* ---- P56: wall engine func_150AB6D0 / func_150AC8C4 (-> func_150AB708) and ray cast func_150ACEA0 ----
+ * Hand asm with private register conventions: the helpers pass points / boxes / planes in FPRs, the engine keeps
+ * its state in s0-s7 / fp / gp / f23-f31 across helpers and jumps through 4 continuation pointers that each entry
+ * stub stores at sp+0x1D0..0x1DC (map: docs/port/sessions/P53.md section 5). Rather than a hand rewrite, the code is
+ * a mechanical register-level translation (tools/port/asm2c_hand.py, regenerate with tools/port/gen_d5e90_walls.sh):
+ * GPRs are u32 locals, FPRs the union array F, one C statement per instruction, branch delay slots honoured,
+ * internal jal / jr through the `dispatch` switch over the code addresses a register can hold, external callees as
+ * C calls. The asm frame (0x268 / 0x70 bytes) is a local buffer; sp holds its address.
+ * Includes: D5E90_walls.inc = func_150AA950 .. func_150AB264 (triangle / box test of func_150AAF00 and helpers)
+ * + func_150AB6D0 .. func_150ACE90; D5E90_ray.inc = func_150ACEA0 .. func_150ADC40 (with func_150AD844). */
+#include <libc/math.h>
+
+extern u8 D_8009FAC0[], D_8009FAC8[], D_8009FACC[], D_8009FAD0[], D_800C5D38[], D_800CC1B0[], D_800CC1B4[];
+extern u8 D_800CC1B8[], D_800CC1C0[], D_800CC1F2[], D_800CC1F3[], D_800CC1F4[], D_800CC1F8[], D_800CC1FC[];
+extern u8 D_800D3C00[], D_800DC26C[], D_800DC270[], D_800DC274[], D_800DC278[], D_800DC3C4[];
+s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+s32 func_150A69A8(s32, s32, s32 *, s32);
+s32 func_150A49D0(s32, s32 *, s32);
+void func_1510F800(s32);
+
+typedef union {
+    f32 f;
+    u32 u;
+    s32 i;
+} NmwReg;
+
+#define NMW_RET 0xFFFFFFF0u
+/* ASM2C_TRACE=1 tools/port/gen_d5e90_walls.sh puts NMW_TRACE(label) at every label (debugging: ring at 0x80700000) */
+#define NMW_TRACE(a) { u32 *tr_ = (u32 *) 0x80700000; tr_[1 + (tr_[0]++ & 0x3FFF)] = (a); }
+#define NMW_P(a) ((u8 *) (a))
+#define LW(a) (*(u32 *) NMW_P(a))
+#define LH(a) ((u32) (s32) *(s16 *) NMW_P(a))
+#define LHU(a) ((u32) *(u16 *) NMW_P(a))
+#define LB(a) ((u32) (s32) *(s8 *) NMW_P(a))
+#define LBU(a) ((u32) *(u8 *) NMW_P(a))
+#define SW(a, v) (*(u32 *) NMW_P(a) = (u32) (v))
+#define SH(a, v) (*(u16 *) NMW_P(a) = (u16) (v))
+#define SB(a, v) (*(u8 *) NMW_P(a) = (u8) (v))
+#define HI(x) (((u32) (x) + 0x8000) & 0xFFFF0000)
+#define LO(x) ((u32) (s32) (s16) ((u32) (x) & 0xFFFF))
+#define MULT(a, b) (lo = (u32) ((s32) (a) * (s32) (b)))
+/* VR4300 div: by zero lo = (rs < 0 ? 1 : -1); only lo is read */
+#define DIV(a, b) (lo = ((b) == 0 ? ((s32) (a) < 0 ? 1 : (u32) -1) \
+                       : ((a) == 0x80000000 && (b) == (u32) -1) ? 0x80000000 : (u32) ((s32) (a) / (s32) (b))))
+#define CVTW(f) nmD5E90_rint(f)
+
+static f32 nmw_u2f(u32 u) {
+    NmwReg r;
+
+    r.u = u;
+    return r.f;
+}
+#define U2F(x) nmw_u2f(x)
+
+/* the register file and frame of one machine run */
+#define NMW_REGS                                                                                         \
+    u32 at = 0, v0 = 0, v1 = 0, a0 = 0, a1 = 0, a2 = 0, a3 = 0, t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, \
+        t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, s0 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0, s6 = 0,  \
+        s7 = 0, gp = 0, fp = 0, ra = NMW_RET, sp, pc, lo = 0;                                            \
+    s32 c, cc = 0, k_;                                                                                   \
+    NmwReg F[32]
+
+/* f12 / f14 = target x / y, a2 = target z (float bits; the callers' prototype is (f32, f32, s32, u8 *, s32)), a3 = record, stack word 0x10 = mark touched objects.
+ * Returns 1 if a wall moved the record (rec+0x14..0x1C written back). */
+static s32 nmw_walls(u32 entry, f32 x, f32 y, u32 zbits, u32 rec, s32 mark) {
+    NMW_REGS;
+    u32 stk[(0x268 + 0x20) / 4];
+
+    for (k_ = 0; k_ < 32; k_++) {
+        F[k_].u = 0;
+    }
+    sp = (u32) stk + 0x268;
+    SW(sp + 0x10, mark);
+    F[12].f = x;
+    F[14].f = y;
+    a2 = zbits;
+    a3 = rec;
+    pc = entry;
+    goto dispatch;
+#include "D5E90_walls.inc"
+bad: /* a code address the translation does not know: cannot happen */
+    return 0xBAD00000 | (pc & 0xFFFFF);
+done:
+    return v0;
+}
+
+s32 func_150AB6D0(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
+    return nmw_walls(0x150AB6D0, x, y, zbits, (u32) rec, mark);
+}
+
+/* returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 */
+s32 func_150AC8C4(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
+    return nmw_walls(0x150AC8C4, x, y, zbits, (u32) rec, mark);
+}
+
+/* ray cast: o32 arguments (f12, f14, a2, a3, then the stack words 0x10..0x38 of the caller) */
+s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 a6, s32 a7, s32 a8, s32 a9, s32 a10, s32 a11,
+                  s32 a12, s32 a13, f32 a14) {
+    NMW_REGS;
+    u32 stk[(0x70 + 0x40) / 4];
+
+    for (k_ = 0; k_ < 32; k_++) {
+        F[k_].u = 0;
+    }
+    sp = (u32) stk + 0x70;
+    SW(sp + 0x10, *(u32 *) &dy);
+    SW(sp + 0x14, *(u32 *) &dz);
+    SW(sp + 0x18, a6);
+    SW(sp + 0x1C, a7);
+    SW(sp + 0x20, a8);
+    SW(sp + 0x24, a9);
+    SW(sp + 0x28, a10);
+    SW(sp + 0x2C, a11);
+    SW(sp + 0x30, a12);
+    SW(sp + 0x34, a13);
+    SW(sp + 0x38, *(u32 *) &a14);
+    F[12].f = x0;
+    F[14].f = y0;
+    a2 = *(u32 *) &z0;
+    a3 = *(u32 *) &dx;
+    pc = 0x150ACEA0;
+    goto dispatch;
+#include "D5E90_ray.inc"
+bad: /* a code address the translation does not know: cannot happen */
+    return 0xBAD00000 | (pc & 0xFFFFF);
+done:
+    return v0;
+}
 #endif
