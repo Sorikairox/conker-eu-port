@@ -1,0 +1,50 @@
+s/if (1.4f < m \&\& m < 1000.0f)/if (1.0f < m \&\& m < 1000.0f)/ % f f10
+s/m < 1000.0f)/m < 100.0f)/ % f10
+s/if (h < 80.0f \&\& rec->disable_run == 0)/if (h < 80.0f)/ % f4
+s/if (0.0f <= h) {/if (0.0f < h) {/ % f
+s/} else if ((h <= 0.0f || rec->unk110 != 0)/} else if ((h <= 0.0f)/ % a9
+s/\&\& ctl->pad4F\[0\] == 0)/)/ % a8
+s/if (kind == 0 \&\& ctl->unk84 == 0)/if (kind == 0)/ % a7
+s/dx \* dx + dz \* dz > 1.0f/dx * dx + dz * dz > 5.0f/ % a2
+s/: ctl->pad17\[0\] != 0)/: 1)/ % b b2
+s/\& 0xF) != 3)/\& 0xF) != 5)/ % a3
+s/\& 0xF) == 4)/\& 0xF) == 5)/ % a4
+s/D_800CC2D0\[rec->unk274 - 1\].id/D_800CC2D0[rec->unk274].id/ % a5 a6
+s/carrier == 8 ||/carrier == 9 ||/ % a5
+s/rec->disable_run = D_800BE9A0 + 1;/;/ % b
+s/if (rec->unk162 != was_sliding) {/if (1) {/ % a b
+s/rec->xz_velocity = 17.9f;/rec->xz_velocity = 17.0f;/ % b5 b6
+s/if (moved < 22.0f)/if (moved < 2.0f)/ % b7
+s/rec->unk16C = 0.0f;/;/ % b5
+s/rec->disable_jump = D_800BE9A0 + 8;/rec->disable_jump = D_800BE9A0 + 7;/ % a2 b
+s/push = (\&D_80099470)\[1\];/push = D_80099470;/ % a2 c
+s/push = D_80099490\[D_800CC69C\];/push = D_80099490[0];/ % b
+s/+ 0x30) \& 0xFF) < 0x60)/+ 0x30) \& 0xFF) < 0x40)/ % c12
+s/(rec->unk44 > 8.0f) ? angle/(rec->unk44 > 9.5f) ? angle/ % c3
+s/+ 0x58) \& 0xFF) < 0xB0)/+ 0x58) \& 0xFF) < 0xA0)/ % c13
+s/anim_speed = 2.0f;/;/ % c
+s/rec->stunned == 0 \&\& rec->unk13C == 0/rec->unk13C == 0/ % c4
+s/rec->unk83 < 0xFA)/rec->unk83 < 0xFB)/ % c7
+s/ctl->unk11A != 3 \&\& ctl->unk120/ctl->unk120/ % c9
+s/\&\& ctl->unk19B == 0)/)/ % c11
+s/(0.0f - rec->unk170) \* 0.15f/(0.0f - rec->unk170) * 0.25f/ % a
+s/anim == 0x101 ||/anim == 0x102 ||/ % d2 d6
+s/rec->unk83 = D_800BE9A0 + 1;/;/ % d d6
+s/rec->unk7A = turn;/;/ % d
+s/if (rec->xz_velocity < 2.0f \&\& 0.0f == rec->unk28)/if (rec->xz_velocity < 2.0f)/ % d3
+s/} else if (rec->xz_velocity < 12.0f) {/} else if (rec->xz_velocity < 11.5f) {/ % d4 d5
+s/dx = dx \* (\*(f32 \*) \&ctl->pad0\[0\] \* 0.009f + 0.2f);/dx = dx * 0.2f;/ % e2
+s/dz = 0.0f;/;/ % e3
+s/dx = dx \* 0.5f;/;/ % e3
+s/if (\*(s32 \*) \&ctl->pad0\[4\] == 0 \&\& rec->unk110 == 0/if (rec->unk110 == 0/ % e
+s/rate = 0.25f;/rate = 0.4f;/ % f5
+s/(s16) ((D_800CC670 \& 4) - 2)/(s16) ((D_800CC670 \& 4) - 1)/ % f5
+s/D_800D1580 = 0xFF020146;/;/ % f5
+s/if (wob < 20.0f)/if (wob < 2.0f)/ % f6
+s/rec->health != 0 \&\& //  % f7
+s/D_800BE616 == 0 \&\& //  % f8
+s/dz = dz - -30.0f;/dz = dz - rec->y_velocity;/ % f5
+s/m = (250.0f < m) ? 2.5f : m \* 0.01f;/m = m * 0.01f;/ % g2
+s/if (fabsf(rec->unkB8) < 35.0f \&\& 0.0f < m)/if (0.0f < m)/ % g3
+s/\&\& 0.0f < m)/)/ % g4
+s/func_1505A250(0.0f, 0.0f, 0.3f,/func_1505A250(0.0f, 0.0f, 0.2f,/ % g
