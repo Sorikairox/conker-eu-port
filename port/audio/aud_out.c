@@ -45,11 +45,15 @@ EM_JS(int, __port_web_audio_open, (int rate, int ring, int rdp, int wrp, int mas
         }
         HEAPU32[rdp >> 2] = r;
     };
-    node.connect(ctx.destination);
-    var resume = function () { if (ctx.state !== 'running') ctx.resume(); };
-    if (typeof document !== 'undefined') { document.addEventListener('click', resume); document.addEventListener('keydown', resume); }
-    resume();
-    globalThis.portAudio = { ctx: ctx, node: node };
+    /* P27: volume (the page's slider sets globalThis.portVolume and gain.gain) */
+    var gain = ctx.createGain();
+    gain.gain.value = typeof G.portVolume === 'number' ? G.portVolume : 1;
+    node.connect(gain); gain.connect(ctx.destination);
+    globalThis.portAudio = { ctx: ctx, node: node, gain: gain };
+    /* P27: the page (main.js armAudio) resumes it on the first click / key press; a context created
+     * after that gesture starts at once (sticky user activation). */
+    if (ctx.state !== 'running') ctx.resume().catch(function () {});
+    if (typeof G.portAudioReady === 'function') G.portAudioReady(ctx);
     return ctx.sampleRate | 0;
   } catch (e) { globalThis.portAudioErr = String(e && e.stack || e); return -1; }
 });

@@ -13,5 +13,14 @@ create({ print: (s) => console.log(s), printErr: (s) => console.error(s), noExit
   if (process.env.AUDTEST) setTimeout(() => { const [r, f] = process.env.AUDTEST.split(':'); M._port_audio_test(parseInt(r, 16), +(f || 150)); }, 1500);
   // VOICETEST=<hex voice clip id>[:calls]: voice stream handler + MP3 decoder + MP3 ABI (P14)
   if (process.env.VOICETEST) setTimeout(() => { const [r, f] = process.env.VOICETEST.split(':'); M._port_voice_test(parseInt(r, 16), +(f || 2000)); }, 1500);
+  // P27 PADTEST=1: scripted pad 0 input through the heap pad state (same path as the page's keyboard):
+  // A + Start + stick (80, -40) from 3 s, released at 4 s; the PIF model and func_1501BBB8 log [pad] lines
+  if (process.env.PADTEST && M._port_pad_state) {
+    const p = M._port_pad_state() >> 2;
+    setTimeout(() => { M.HEAP32[p + 1] = 0x9000; M.HEAP32[p + 2] = 80; M.HEAP32[p + 3] = -40; console.log('[padtest] press A+Start, stick 80,-40'); }, 3000);
+    setTimeout(() => { M.HEAP32[p + 1] = 0; M.HEAP32[p + 2] = 0; M.HEAP32[p + 3] = 0; console.log('[padtest] release'); }, 4000);
+  }
+  // P27 EEPTEST=seed: EEPROM write then read back through PIF commands 05/04 (no IndexedDB in node)
+  if (process.env.EEPTEST && M._port_eep_test) setTimeout(() => { M._port_eep_test(1, +process.env.EEPTEST); M._port_eep_test(2, +process.env.EEPTEST); }, 2000);
   setTimeout(() => { M._port_dump_threads(); process.exit(0); }, +secs * 1000);
 });

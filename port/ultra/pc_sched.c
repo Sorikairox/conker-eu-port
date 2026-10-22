@@ -351,7 +351,9 @@ void port_post_event(int e) {
 
 /* ---------------- main loop ---------------- */
 
+extern int port_paused; /* P27: pc_os.c port_set_paused */
 static void frame(void) {
+    if (port_paused) return;
     port_frame_count++;
     if (port_frame_hook) port_frame_hook();
     port_vi_retrace();

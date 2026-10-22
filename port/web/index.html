@@ -5,35 +5,115 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Conker Port</title>
 <style>
-  :root { --bg: #111317; --panel: #1b1e24; --fg: #d8dde6; --muted: #8a93a3; --accent: #e0a63a; --ok: #6cc070; --bad: #e06060; }
+  :root { --bg: #111317; --panel: #1b1e24; --panel2: #23272f; --line: #343a45; --fg: #d8dde6; --muted: #8a93a3;
+          --accent: #e0a63a; --ok: #6cc070; --bad: #e06060; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
-  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; background: var(--panel); }
-  header h1 { font-size: 16px; margin: 0 12px 0 0; color: var(--accent); }
-  button, label.btn { background: #2a2f38; color: var(--fg); border: 1px solid #3a404b; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: inherit; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.45 system-ui, sans-serif; display: flex; flex-direction: column; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 16px; margin: 0 8px 0 0; color: var(--accent); }
+  .spacer { flex: 1; }
+  button, label.btn { background: var(--panel2); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 5px 10px;
+                      cursor: pointer; font: inherit; white-space: nowrap; }
+  button:hover:not(:disabled), label.btn:hover { border-color: var(--muted); }
   button:disabled { opacity: .45; cursor: default; }
-  #status { color: var(--muted); margin-left: auto; }
-  main { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 16px; padding: 16px; }
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-  canvas { width: 100%; aspect-ratio: 4 / 3; background: #000; display: block; border-radius: 4px; }
-  #console { background: #0b0c0f; border-radius: 4px; padding: 8px 10px; margin: 0; height: 480px; overflow: auto;
+  button.primary { background: var(--accent); color: #1a1408; border-color: var(--accent); font-weight: 600; }
+  button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  input[type=file] { display: none; }
+  .vol { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+  .vol input { width: 90px; accent-color: var(--accent); }
+  #status { color: var(--muted); font-size: 13px; }
+  #status.ok { color: var(--ok); } #status.bad { color: var(--bad); }
+
+  main { flex: 1; display: flex; gap: 16px; padding: 16px; min-height: 0; }
+  #stage { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  /* aspect-correct 4:3 box, as large as the stage allows */
+  #screen { position: relative; width: min(100%, calc((100vh - 140px) * 4 / 3)); aspect-ratio: 4 / 3; background: #000; border-radius: 4px; overflow: hidden; }
+  #screen canvas:focus { outline: none; }
+  #screen canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: auto; }
+  #screen:fullscreen { width: 100vw; height: 100vh; border-radius: 0; display: flex; align-items: center; justify-content: center; }
+  #screen:fullscreen canvas { position: static; width: min(100vw, calc(100vh * 4 / 3)); height: auto; aspect-ratio: 4 / 3; }
+  .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+             text-align: center; padding: 24px; background: rgba(10, 11, 14, .88); }
+  .overlay[hidden] { display: none; }
+  #drop { border: 2px dashed var(--line); border-radius: 8px; margin: 18px; inset: 0; transition: border-color .15s, background .15s; }
+  #drop.over { border-color: var(--accent); background: rgba(40, 32, 14, .9); }
+  #drop h2 { margin: 0; font-size: 20px; }
+  #drop p { margin: 0; color: var(--muted); max-width: 440px; }
+  #drop .private { color: var(--ok); font-size: 13px; }
+  #paused { pointer-events: none; font-size: 22px; letter-spacing: .1em; background: rgba(0, 0, 0, .55); }
+  #soundhint { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, .7); color: var(--muted);
+               padding: 4px 10px; border-radius: 12px; font-size: 12px; pointer-events: none; }
+  #soundhint[hidden] { display: none; }
+  .hint { color: var(--muted); font-size: 12px; text-align: center; }
+
+  aside { width: 360px; flex: none; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: auto; }
+  aside[hidden] { display: none; }
+  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+  section.panel[hidden] { display: none; }
+  section.panel h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  section.panel h3 .spacer { flex: 1; }
+  table.binds { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.binds td { padding: 2px 4px; border-top: 1px solid var(--line); }
+  table.binds td:first-child { color: var(--muted); }
+  table.binds button { width: 100%; padding: 2px 6px; font-size: 12px; text-align: left; }
+  table.binds button.listen { border-color: var(--accent); color: var(--accent); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  #pads { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  #console { background: #0b0c0f; border-radius: 4px; padding: 8px 10px; margin: 8px 0 0; height: 360px; overflow: auto;
              font: 12px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-all; }
   .pass { color: var(--ok); } .fail { color: var(--bad); } .stub { color: var(--accent); }
-  input[type=file] { display: none; }
+  @media (max-width: 900px) { main { flex-direction: column; padding: 16px; } aside { width: 100%; } #screen { width: 100%; } }
 </style>
 </head>
 <body>
 <header>
-  <h1>Conker port (wasm32)</h1>
-  <button id="demo">Scheduler demo</button>
-  <label class="btn">Load ROM… <input id="rom" type="file" accept=".z64,.n64,.v64,.rom"></label>
-  <button id="game" disabled>Boot game</button>
-  <button id="threads" disabled>Dump threads</button>
+  <h1>Conker port</h1>
+  <button id="start" class="primary" disabled>Start</button>
+  <button id="pause" aria-pressed="false" disabled title="Pause (also automatic when the tab is hidden)">Pause</button>
+  <button id="fullscreen" title="Fullscreen (F11 or this button)">Fullscreen</button>
+  <label class="vol" title="Volume">Vol <input id="volume" type="range" min="0" max="100" value="80"></label>
+  <span class="spacer"></span>
   <span id="status">no ROM loaded</span>
+  <button id="t-controls" aria-pressed="false">Controls</button>
+  <button id="t-saves" aria-pressed="false">Saves</button>
+  <button id="t-debug" aria-pressed="false">Debug</button>
 </header>
 <main>
-  <canvas id="canvas" width="640" height="480"></canvas>
-  <pre id="console"></pre>
+  <div id="stage">
+    <div id="screen">
+      <canvas id="canvas" width="640" height="480" tabindex="0"></canvas>
+      <div id="drop" class="overlay">
+        <h2>Drop your Conker's Bad Fur Day ROM here</h2>
+        <p>PAL (EU) cartridge dump, .z64 / .n64 / .v64. It is checked by SHA-1.</p>
+        <label class="btn">Choose ROM file… <input id="rom" type="file" accept=".z64,.n64,.v64,.rom,.bin"></label>
+        <p class="private">Your ROM never leaves this browser: it is read locally and kept only in this browser's storage (IndexedDB).
+          Nothing is uploaded.</p>
+      </div>
+      <div id="paused" class="overlay" hidden>PAUSED</div>
+      <div id="soundhint" hidden>click or press a key to enable sound</div>
+    </div>
+    <div class="hint" id="keyhint">Keys: WASD stick · Space A · F B · Q Z · E R · R L · Enter Start · IJKL C-buttons · arrows D-pad · Ctrl half-tilt. Gamepads work too.</div>
+  </div>
+  <aside id="side" hidden>
+    <section class="panel" id="p-controls" hidden>
+      <h3>Controls <span class="spacer"></span><button id="bind-reset">Defaults</button></h3>
+      <table class="binds"><thead><tr><td>N64</td><td>Key</td><td>Gamepad</td></tr></thead><tbody id="binds"></tbody></table>
+      <div id="pads">no gamepad</div>
+    </section>
+    <section class="panel" id="p-saves" hidden>
+      <h3>Saves (EEPROM)</h3>
+      <div class="row">
+        <button id="eep-export" disabled>Export .eep</button>
+        <label class="btn">Import .eep… <input id="eep-import" type="file" accept=".eep,.bin"></label>
+      </div>
+      <p class="hint" id="eep-status" style="text-align:left">Saved automatically in this browser, per ROM and slot.</p>
+    </section>
+    <section class="panel" id="p-debug" hidden>
+      <h3>Debug <span class="spacer"></span><button id="demo">Scheduler demo</button><button id="threads" disabled>Dump threads</button></h3>
+      <pre id="console"></pre>
+    </section>
+  </aside>
 </main>
 <script src="main.js"></script>
 </body>

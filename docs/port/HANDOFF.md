@@ -464,7 +464,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P27; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -475,7 +475,8 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P19.md` (real game frames, RCP/PIF model, level-loader stubs, real-time freeze guard) and
 `docs/port/sessions/P21.md` (browser heap corruption = fiber stack alignment, real-time Chrome, debug flags) and
 `docs/port/sessions/P23.md` (merge P20, srcfix, frame DL end to end, DL-path stub list) and
-`docs/port/sessions/P25.md` (libultra/libgu/libc PC layer complete, `[gutest]`, licenses). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P25.md` (libultra/libgu/libc PC layer complete, `[gutest]`, licenses) and
+`docs/port/sessions/P27.md` (input, EEPROM saves in IndexedDB, page UX, audio resume). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -489,6 +490,9 @@ AUDTEST=26390 port/web/boot.sh 8   # P9: C n_audio synth + audio HLE on a ROM so
 VOICETEST=3 port/web/boot.sh 8      # P14: voice clip via func_151F2E88 + MP3 decoder + MP3 ABI -> port/build/audio/voice.wav
 port/web/audprobe.sh "app=game&audonly=1&audtest=26390" 10   # P14: real headless-Chrome Web Audio consumption check
 port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot (P14: keep the budget short)
+PADTEST=1 EEPTEST=77 port/web/boot.sh 10   # P27: scripted pad input -> [pad] lines; EEPROM write/read [eeptest] PASS
+PROBE_NOAUDIO=1 PROBE_STEPS="6000:keydown:Space; 7500:keyup:Space" port/web/audprobe.sh "app=game" 10   # P27: real key events
+PROBE_NOAUTOPLAY=1 PROBE_STEPS="6000:click" port/web/audprobe.sh "app=game&audonly=1&audtest=26390" 12  # P27: audio starts on the gesture
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -760,6 +764,42 @@ port/web/shot.sh OUT.png 'app=game&gfxdemo=1' 2500           # viewer screenshot
     - `func_150A4ED4` (296 calls) is **not an EU function**: it is inside `func_150A49D0`, so the call in
       `game_eu_13C400.c:173` uses an unmapped name;
     - `func_150A8050` (RPY rotate) is still asm.
+- **P27: input, saves, page UX, audio resume** (screenshots `P27_screenshot.png`, `P27_dropzone.png`).
+  - **`port/ultra/pc_pif.c`** now holds the PIF model, the controllers and the EEPROM (moved from `pc_os.c`).
+    - `osContStartReadData` runs libultra's read block through the PIF and keeps the replies in
+      `cont_ram` (`__osContPifRam`). `osContGetReadData` unpacks them.
+    - Unpacking PIF RAM directly read garbage, because the game's pak writes reuse PIF RAM in between.
+  - **Input:**
+    - The page writes `port_pads[4][4]` (present, N64 buttons, stick x/y) through `HEAP32`, with no wasm calls.
+    - Keyboard defaults: WASD stick, Space A, F B, Q Z, R L, E R, Enter Start, IJKL C, arrows D-pad, Ctrl half tilt.
+    - Gamepads use the Standard mapping; the right stick drives the C-buttons.
+    - The stick reaches 80 on the axes and (70, 70) on the diagonals of the octagon.
+    - The remap panel is stored in localStorage.
+    - **Verified:** a real CDP key press reaches the now-C `func_1501BBB8`. `D_800BED38[0]` buttons 8000, stick
+      70,70 → 63,63 after its dead zone; `D_800BED50` new-press mask 8000. `[pad]` lines; `?padlog=N`.
+  - **Saves:**
+    - The 2048-byte EEPROM goes to IndexedDB (`conker-port` v2, store `saves`, key
+      `<rom sha1>/eeprom/<slot>`, `?slot=N`).
+    - It is loaded before `callMain` and saved with a 400 ms debounce after each changing PIF write
+      (`Module.portEepDirty`).
+    - Export and import as `.eep`.
+    - If IndexedDB does not answer in 3 s, saving is turned off for the session (never overwrite with a blank).
+    - **Verified:** write → reload → read PASS, and another slot fails as expected (`&eeptest=w:SEED` / `r:SEED`).
+    - The game's own save path is not reached yet.
+  - **Page:**
+    - The ROM drop zone has a "never leaves this browser" note and the SHA-1 status.
+    - The 4:3 screen scales, and fullscreen keeps the aspect.
+    - Pause on tab hide: `port_set_paused` stops frames and the game clock, and suspends audio
+      (`?nohidepause=1`).
+    - The volume is a GainNode.
+    - The debug console sits behind the Debug toggle (`?debug=1`). All dev flags are unchanged.
+  - **Audio:** `main.js` resumes the AudioContext on the first pointer or key gesture. With the default
+    autoplay policy, audprobe shows it suspended until a CDP click, then running: PASS with 203864 non-zero
+    samples.
+  - **Tools:**
+    - `audprobe.js PROBE_STEPS` (click, keydown, keyup, nav, eval), `PROBE_NOAUTOPLAY`, `PROBE_NOAUDIO`;
+    - `boot.sh PADTEST` / `EEPTEST`.
+  - **Not tested:** a real gamepad, because headless Chrome has none.
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

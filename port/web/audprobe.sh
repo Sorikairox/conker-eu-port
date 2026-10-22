@@ -16,4 +16,6 @@ docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$ROOT/port/build/w
 trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
 URL="http://localhost:$PORT/app/index.html?$Q&audprobe=1&romurl=../dev/rom.z64"
+# P27: PROBE_STEPS that navigate (nav:QUERY) get the same romurl appended
+[ -n "${PROBE_STEPS:-}" ] && export PROBE_STEPS=$(echo "$PROBE_STEPS" | sed -E 's#(nav:[^;]*)#\1\&romurl=../dev/rom.z64#g')
 node "$ROOT/port/web/audprobe.js" "$URL" "$SECS"

@@ -8,7 +8,7 @@ const CH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'audprobe-'));
 const port = 9300 + (process.pid % 500);
 const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, `--use-angle=${process.env.PROBE_ANGLE || 'swiftshader'}`,
-  '--enable-unsafe-swiftshader', '--autoplay-policy=no-user-gesture-required', '--window-size=1000,900', url], { stdio: 'ignore' });
+  '--enable-unsafe-swiftshader', ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), '--window-size=1000,900', url], { stdio: 'ignore' });
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('audprobe: timeout'); done(2); }, (+secs + 90) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -69,6 +69,28 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     }
   }
   let last = null; const t0 = Date.now();
+  // P27: PROBE_STEPS="MS:click; MS:keydown:CODE; MS:keyup:CODE; MS:nav:QUERY; MS:eval:EXPR" (MS from now).
+  // Input goes through Input.dispatch*Event, so it counts as a real user gesture (audio resume test).
+  // PROBE_NOAUTOPLAY=1 keeps Chrome's default autoplay policy (a context starts suspended).
+  const keyInfo = (code) => {
+    if (/^Key[A-Z]$/.test(code)) return { key: code[3].toLowerCase(), keyCode: code.charCodeAt(3) };
+    return { Space: { key: ' ', keyCode: 32 }, Enter: { key: 'Enter', keyCode: 13 }, Escape: { key: 'Escape', keyCode: 27 },
+      ArrowLeft: { key: 'ArrowLeft', keyCode: 37 }, ArrowUp: { key: 'ArrowUp', keyCode: 38 }, ArrowRight: { key: 'ArrowRight', keyCode: 39 },
+      ArrowDown: { key: 'ArrowDown', keyCode: 40 }, ControlLeft: { key: 'Control', keyCode: 17 } }[code] || { key: code, keyCode: 0 };
+  };
+  for (const st of (process.env.PROBE_STEPS || '').split(';').map((x) => x.trim()).filter(Boolean)) {
+    const [ms, act, ...rest] = st.split(':'); const arg = rest.join(':');
+    setTimeout(async () => {
+      console.log(`step t=${((Date.now() - t0) / 1000).toFixed(1)}s ${act} ${arg}`);
+      if (act === 'click') {
+        for (const type of ['mousePressed', 'mouseReleased']) await call('Input.dispatchMouseEvent', { type, x: 300, y: 300, button: 'left', clickCount: 1 });
+      } else if (act === 'keydown' || act === 'keyup') {
+        const k = keyInfo(arg);
+        await call('Input.dispatchKeyEvent', { type: act === 'keydown' ? 'rawKeyDown' : 'keyUp', code: arg, key: k.key, windowsVirtualKeyCode: k.keyCode, nativeVirtualKeyCode: k.keyCode });
+      } else if (act === 'nav') await call('Page.navigate', { url: url.replace(/\?.*$/, '?' + arg) });
+      else if (act === 'eval') console.log('eval:', await ev(arg));
+    }, +ms);
+  }
   if (process.env.PROBE_EVAL) { await sleep(+(process.env.PROBE_AT || 3000)); console.log('eval:', await ev(process.env.PROBE_EVAL)); }
   for (let t = 0; t < +secs; t++) {
     await sleep(1000);
@@ -87,6 +109,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const lines = await ev(`Array.from(document.querySelectorAll('#console *')).map(e => e.textContent).filter(l => new RegExp(${grep}).test(l)).slice(-${tail}).join('\\n')`);
   if (lines) console.log(lines);
   console.log(`evaluate: slowest answer ${maxLat} ms`);
+  if (process.env.PROBE_NOAUDIO) return done(0);  // P27: input / save / screenshot runs
   const ok = last && last.frames > 0 && last.nonzero > 1000 && last.sq / last.nonzero > 1e-5;
   console.log(ok ? `[audprobe] PASS: Web Audio pulled ${last.frames} frames, ${last.nonzero} non-zero samples`
                  : '[audprobe] FAIL: no audible samples reached the Web Audio graph');
