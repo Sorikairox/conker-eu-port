@@ -64,6 +64,8 @@ NM_ASM_C_FUNCS_D5E90 := func_150AB278 func_150AD780 func_150AD78C
 # P51: the skeleton / animation evaluator (src_eu/nm_asm/D5E90_anim.c)
 NM_ASM_C_FUNCS_D5E90 += func_150A86B0
 NM_ASM_C_FUNCS_D5E90 += func_150AB6D0 func_150AC8C4 func_150ACEA0
+# P62: matrix helpers (src_eu/nm_asm/D5E90_mtx.c)
+NM_ASM_C_FUNCS_D5E90 += func_150A9B0C func_150A9E64
 ifeq ($(NON_MATCHING),1)
 SRC_DIRS += $(NM_ASM_SRC_DIR)
 endif
@@ -293,6 +295,7 @@ ifeq ($(NON_MATCHING),1)
 	sed -i '/\/DISCARD\/ :/i\    .nm_rodata 0x80400000 (NOLOAD) : { $(BUILD_DIR)/src_eu/*.o(.rodata*) $(BUILD_DIR)/src_eu/nm_asm/*.o(.rodata*) }' $@
 	sed -i 's#^\(\s*\)$(BUILD_DIR)/asm/D5E90.s.o(.text);#&\n\1$(BUILD_DIR)/$(NM_ASM_SRC_DIR)/D5E90.c.o(.text);#' $@
 	sed -i 's#^\(\s*\)$(BUILD_DIR)/asm/D5E90.s.o(.text);#&\n\1$(BUILD_DIR)/$(NM_ASM_SRC_DIR)/D5E90_anim.c.o(.text);#' $@
+	sed -i 's#^\(\s*\)$(BUILD_DIR)/asm/D5E90.s.o(.text);#&\n\1$(BUILD_DIR)/$(NM_ASM_SRC_DIR)/D5E90_mtx.c.o(.text);#' $@
 endif
 
 $(TARGET).elf: $(O_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(GLOBAL_ASM_O_FILES)
