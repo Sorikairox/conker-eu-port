@@ -1,0 +1,34 @@
+C funcs 4776, asm funcs 6588, logged 108, reachable 1704
+findings {'I': 102, 'D2': 6, 'D3': 8, 'D1': 7} | severity>0 (asm provides AND callee/targets read more than passed) {'I': 50, 'D2': 6, 'D3': 8, 'D1': 5}
+wrote docs/port/arity_scan.tsv
+rank	tier	kind	caller	callee/table	TU	passed	declC	callee_in	asm_n	match
+1	3	I	func_1507C170	?	game_eu_A9980	1	-	-	4	exact	a0:WE a1:W a2:E a3:W
+2	3	D2	func_1512B670	func_1512B2C4	game_eu_158110	0	-	1	1	exact	a0:E
+3	2	I	func_1504A730	D_800863B4[func_1504CB98,func_15052590,func_15053894,func_150538CC,+33]	game_eu_78230	1	-	2	2	exact	a0:W a1:W
+4	2	D3	func_150183D0	func_150184B0	game_eu_45B90	1	1	18	4	exact	a0:E a1:E a2:E a3:E
+5	2	D3	func_15007B3C	func_1501B640	game_34F20	0	0	1	1	exact	a0:W
+6	2	D3	func_15122C5C	func_1512C6C0	game_14FF90	1	1	2	2	exact	a0:W a1:W
+7	2	D3	func_1512A390	func_1512523C	game_eu_158110	1	1	2	2	exact	a0:W a1:W
+8	2	D3	func_1512C490	func_1512523C	game_eu_15A210	1	1	2	2	exact	a0:W a1:W
+9	2	D3	func_1512C490	func_1512523C	game_eu_15A210	1	1	2	2	exact	a0:W a1:W
+10	1	D1	func_15059C84	func_15049350	game_83300	1	9	9	4	exact	a0:W a1:W a2:W a3:W
+11	1	D1	func_1509DDFC	func_15084000	game_CB1C0	1	4	1	3	exact	a0:W a1:E a2:E
+12	1	D1	func_1509DEC4	func_15084000	game_CB1C0	1	4	1	3	exact	a0:W a1:E a2:E
+13	1	D1	func_15074C00	func_1504715C	game_981E0	1	2	2	3	exact	a0:W a1:E a2:E
+14	1	D1	func_160012B0	func_1600160C	debugger__debugger	0	1	1	2	exact	a0:E a1:E
+15	1	I	func_15114708	D_800DBEF4	game_eu_13DC30	4	-	-	9	exact	a0:W a1:W a2:W a3:W stk:5
+16	1	I	func_1517485C	D_8008A420	game_eu_1A1A80	4	-	-	8	exact	a0:W a1:W a2:W a3:W stk:4
+17	1	I	func_151674F8	?	game_1944C0	3	-	-	6	exact	a0:W a1:W a2:W a3:W stk:2
+18	1	I	func_151674F8	?	game_1944C0	3	-	-	6	exact	a0:W a1:W a2:W a3:W stk:2
+19	1	I	func_151674F8	?	game_1944C0	3	-	-	6	exact	a0:W a1:W a2:W a3:W stk:2
+20	1	I	func_151604A0	D_8008B4F0[func_15163FEC,func_15164134,func_15161F4C,func_151635A8,+4]	game_18D770	1	-	3	3	exact	a0:W a1:E a2:W
+21	1	I	func_151674F8	?	game_1944C0	4	-	-	6	exact	a0:W a1:W a2:W a3:W stk:2
+22	1	I	func_15174AA4	D_8008D114	game_eu_1A2720	2	-	-	4	exact	a0:W a1:W a2:E a3:W
+23	1	I	func_15174B48	D_8008D11C	game_eu_1A2720	2	-	-	4	exact	a0:W a1:W a2:E a3:W
+24	1	I	func_1501370C	D_80082EA0[func_1501374C,func_15013778,func_151C7750,func_15013FC4,+1]	game_40490	0	-	1	1	exact	a0:E
+25	1	I	func_15013FC4	D_80082F40[func_15014004,func_1501407C,func_15015104,func_15015300,+2]	game_40490	0	-	1	1	exact	a0:E
+26	1	I	func_15015300	D_80082F70[func_15015354,func_1500EE94]	game_40490	0	-	1	1	exact	a0:E
+27	1	I	func_150C5970	D_80088B58[func_150C5930,func_150C5A10]	game_eu_F3080	0	-	1	1	exact	a0:E
+28	1	I	func_150C59C0	D_80088B60[func_150C5950,func_150C5A3C]	game_eu_F3080	0	-	1	1	exact	a0:E
+29	1	I	func_15132FF8	D_80089D2C[func_15133A80,func_150BA1F4,func_15133CD0,func_150C7C3C,+2]	game_eu_15FF50	1	-	2	2	exact	a0:W a1:W
+30	1	I	func_1513472C	D_80089AAC[func_151346EC,func_151ABD38,func_150C6910,func_150C7240,+6]	game_161520	0	-	1	1	exact	a0:E

@@ -1,0 +1,81 @@
+t=1s (2.3s) {"ctx":0,"nodes":0,"calls":0,"frames":0,"nonzero":0,"sq":0,"peak":0,"rate":0,"state":""}
+t=2s (3.3s) {"ctx":1,"nodes":1,"calls":3,"frames":6144,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=3s (4.3s) {"ctx":1,"nodes":1,"calls":14,"frames":28672,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=4s (5.3s) {"ctx":1,"nodes":1,"calls":25,"frames":51200,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=5s (6.3s) {"ctx":1,"nodes":1,"calls":35,"frames":71680,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=6s (7.3s) {"ctx":1,"nodes":1,"calls":46,"frames":94208,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=8.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_8000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_8000ms.png
+t=7s (8.3s) {"ctx":1,"nodes":1,"calls":57,"frames":116736,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=9.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_9000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_9000ms.png
+t=8s (9.3s) {"ctx":1,"nodes":1,"calls":68,"frames":139264,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=10.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_10000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_10000ms.png
+t=9s (10.3s) {"ctx":1,"nodes":1,"calls":78,"frames":159744,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=11.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_11000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_11000ms.png
+t=10s (11.3s) {"ctx":1,"nodes":1,"calls":89,"frames":182272,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=12.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_12000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_12000ms.png
+t=11s (12.3s) {"ctx":1,"nodes":1,"calls":100,"frames":204800,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=13.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_13000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_13000ms.png
+t=12s (13.3s) {"ctx":1,"nodes":1,"calls":111,"frames":227328,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=14.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_14000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_14000ms.png
+t=13s (14.3s) {"ctx":1,"nodes":1,"calls":122,"frames":249856,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=15.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_15000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_15000ms.png
+t=14s (15.3s) {"ctx":1,"nodes":1,"calls":132,"frames":270336,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=16.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_16000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_16000ms.png
+t=15s (16.3s) {"ctx":1,"nodes":1,"calls":143,"frames":292864,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=17.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_17000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_17000ms.png
+t=16s (17.3s) {"ctx":1,"nodes":1,"calls":154,"frames":315392,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=18.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_18000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_18000ms.png
+t=17s (18.3s) {"ctx":1,"nodes":1,"calls":165,"frames":337920,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=19.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_19000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_19000ms.png
+t=18s (19.3s) {"ctx":1,"nodes":1,"calls":175,"frames":358400,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=20.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_20000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_20000ms.png
+t=19s (20.3s) {"ctx":1,"nodes":1,"calls":186,"frames":380928,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=21.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_21000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_21000ms.png
+t=20s (21.3s) {"ctx":1,"nodes":1,"calls":197,"frames":403456,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=22.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_22000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_22000ms.png
+t=21s (22.3s) {"ctx":1,"nodes":1,"calls":208,"frames":425984,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=23.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_23000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_23000ms.png
+t=22s (23.3s) {"ctx":1,"nodes":1,"calls":218,"frames":446464,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=24.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_24000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_24000ms.png
+t=23s (24.3s) {"ctx":1,"nodes":1,"calls":229,"frames":468992,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=25.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_25000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_25000ms.png
+t=24s (25.3s) {"ctx":1,"nodes":1,"calls":240,"frames":491520,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=26.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_26000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_26000ms.png
+t=25s (26.3s) {"ctx":1,"nodes":1,"calls":251,"frames":514048,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=27.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_27000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_27000ms.png
+t=26s (27.3s) {"ctx":1,"nodes":1,"calls":261,"frames":534528,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=28.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_28000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/idle/idle_28000ms.png
+t=27s (28.3s) {"ctx":1,"nodes":1,"calls":272,"frames":557056,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=28s (29.3s) {"ctx":1,"nodes":1,"calls":283,"frames":579584,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=29s (30.3s) {"ctx":1,"nodes":1,"calls":294,"frames":602112,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=30s (31.3s) {"ctx":1,"nodes":1,"calls":305,"frames":624640,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 226 callbacks, 462848 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 237 callbacks, 485376 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 248 callbacks, 507904 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 258 callbacks, 528384 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 269 callbacks, 550912 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 280 callbacks, 573440 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 291 callbacks, 595968 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 301 callbacks, 616448 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+evaluate: slowest answer 1252 ms

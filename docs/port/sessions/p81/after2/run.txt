@@ -1,0 +1,91 @@
+t=1s (2.4s) {"ctx":0,"nodes":0,"calls":0,"frames":0,"nonzero":0,"sq":0,"peak":0,"rate":0,"state":""}
+t=2s (3.4s) {"ctx":1,"nodes":1,"calls":6,"frames":12288,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=3s (4.4s) {"ctx":1,"nodes":1,"calls":16,"frames":32768,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=4s (5.4s) {"ctx":1,"nodes":1,"calls":27,"frames":55296,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=5s (6.4s) {"ctx":1,"nodes":1,"calls":38,"frames":77824,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=6s (7.4s) {"ctx":1,"nodes":1,"calls":49,"frames":100352,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=7s (8.4s) {"ctx":1,"nodes":1,"calls":59,"frames":120832,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=8s (9.4s) {"ctx":1,"nodes":1,"calls":70,"frames":143360,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=9s (10.4s) {"ctx":1,"nodes":1,"calls":81,"frames":165888,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=10s (11.4s) {"ctx":1,"nodes":1,"calls":92,"frames":188416,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=11s (12.4s) {"ctx":1,"nodes":1,"calls":102,"frames":208896,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=12s (13.4s) {"ctx":1,"nodes":1,"calls":113,"frames":231424,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=13s (14.4s) {"ctx":1,"nodes":1,"calls":124,"frames":253952,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=14s (15.4s) {"ctx":1,"nodes":1,"calls":135,"frames":276480,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=15s (16.4s) {"ctx":1,"nodes":1,"calls":146,"frames":299008,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=16s (17.4s) {"ctx":1,"nodes":1,"calls":156,"frames":319488,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=17s (18.4s) {"ctx":1,"nodes":1,"calls":167,"frames":342016,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=18s (19.4s) {"ctx":1,"nodes":1,"calls":178,"frames":364544,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=19s (20.4s) {"ctx":1,"nodes":1,"calls":189,"frames":387072,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=20s (21.4s) {"ctx":1,"nodes":1,"calls":199,"frames":407552,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=21s (22.4s) {"ctx":1,"nodes":1,"calls":210,"frames":430080,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=22s (23.4s) {"ctx":1,"nodes":1,"calls":221,"frames":452608,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=23s (24.4s) {"ctx":1,"nodes":1,"calls":232,"frames":475136,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=24s (25.4s) {"ctx":1,"nodes":1,"calls":242,"frames":495616,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=25s (26.5s) {"ctx":1,"nodes":1,"calls":253,"frames":518144,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=26s (27.5s) {"ctx":1,"nodes":1,"calls":264,"frames":540672,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=27s (28.5s) {"ctx":1,"nodes":1,"calls":275,"frames":563200,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=29.0s keydown KeyW
+t=28s (29.5s) {"ctx":1,"nodes":1,"calls":286,"frames":585728,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=30.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_30000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_30000ms.png
+t=29s (30.5s) {"ctx":1,"nodes":1,"calls":296,"frames":606208,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=31.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_31000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_31000ms.png
+t=30s (31.5s) {"ctx":1,"nodes":1,"calls":307,"frames":628736,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=32.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_32000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_32000ms.png
+t=31s (32.5s) {"ctx":1,"nodes":1,"calls":318,"frames":651264,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=33.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_33000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_33000ms.png
+t=32s (33.5s) {"ctx":1,"nodes":1,"calls":329,"frames":673792,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=34.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_34000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_34000ms.png
+t=33s (34.5s) {"ctx":1,"nodes":1,"calls":339,"frames":694272,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=35.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_35000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_35000ms.png
+t=34s (35.5s) {"ctx":1,"nodes":1,"calls":350,"frames":716800,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=36.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_36000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_36000ms.png
+t=35s (36.5s) {"ctx":1,"nodes":1,"calls":361,"frames":739328,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=37.0s keyup KeyW
+step t=37.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_37000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_37000ms.png
+t=36s (37.5s) {"ctx":1,"nodes":1,"calls":372,"frames":761856,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=38.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_38000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_38000ms.png
+t=37s (38.5s) {"ctx":1,"nodes":1,"calls":382,"frames":782336,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=39.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_39000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_39000ms.png
+t=38s (39.5s) {"ctx":1,"nodes":1,"calls":393,"frames":804864,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=40.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_40000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_40000ms.png
+t=39s (40.5s) {"ctx":1,"nodes":1,"calls":404,"frames":827392,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=41.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_41000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_41000ms.png
+t=40s (41.5s) {"ctx":1,"nodes":1,"calls":415,"frames":849920,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=42.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_42000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_42000ms.png
+t=41s (42.5s) {"ctx":1,"nodes":1,"calls":426,"frames":872448,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=43.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_43000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_43000ms.png
+t=42s (43.5s) {"ctx":1,"nodes":1,"calls":436,"frames":892928,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=44.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_44000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_44000ms.png
+t=43s (44.5s) {"ctx":1,"nodes":1,"calls":447,"frames":915456,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+step t=45.0s shot /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_45000ms.png
+screenshot: /Users/sorikairo/conker-wt/web/docs/port/sessions/p81/after2/walk_45000ms.png
+t=44s (45.5s) {"ctx":1,"nodes":1,"calls":458,"frames":937984,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=45s (46.5s) {"ctx":1,"nodes":1,"calls":469,"frames":960512,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=46s (47.5s) {"ctx":1,"nodes":1,"calls":479,"frames":980992,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=47s (48.5s) {"ctx":1,"nodes":1,"calls":490,"frames":1003520,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+t=48s (49.5s) {"ctx":1,"nodes":1,"calls":501,"frames":1026048,"nonzero":0,"sq":0,"peak":0,"rate":22020,"state":"running"}
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 421 callbacks, 862208 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 432 callbacks, 884736 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 442 callbacks, 905216 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 453 callbacks, 927744 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 464 callbacks, 950272 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 475 callbacks, 972800 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 485 callbacks, 993280 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+[audprobe] contexts 1 nodes 1 rate 22020 state running: 496 callbacks, 1015808 frames pulled, 0 non-zero samples, rms 0.0000 peak 0.000
+evaluate: slowest answer 1408 ms

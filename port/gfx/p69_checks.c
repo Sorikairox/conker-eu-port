@@ -278,7 +278,8 @@ void p69_watch_frame(void) {
 }
 
 void __real_func_15036FD8(void);
-void __wrap_func_15036FD8(void) { if (!stubbed(32)) __real_func_15036FD8(); }
+void p81_look_hook(int pre);
+void __wrap_func_15036FD8(void) { if (!stubbed(32)) { p81_look_hook(1); __real_func_15036FD8(); p81_look_hook(0); } }
 
 /* func_150D71D4 (P67 debris piece; reached through a ROM function table, so the wrap also replaces the table entry):
  * ?p69att logs the first N calls; ?p69stub bit 64 skips it (returns 0). */

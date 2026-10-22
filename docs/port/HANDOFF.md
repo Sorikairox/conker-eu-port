@@ -1238,7 +1238,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72, P75, P78; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63, P66, P69, P72, P75, P78, P81; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1274,7 +1274,8 @@ jump / running jump / Z long jump and idle variations at runtime, jump GIF) and
 hang) and `docs/port/sessions/P72.md` (the hang bisected to P64's func_150D1D20 writing through NULL buffers of the
 stubbed func_15000AD0; TEMPORARY guard; 0x2C warp reached again) and `docs/port/sessions/P75.md` (merge P70 / P71 / P74,
 guard dropped, sky / tail / breakable runtime checks, missing-argument call sites, blocker list)) and `docs/port/sessions/P78.md` (per-material DL dump,
-LOD fixes in the renderer, the null-zone writer = func_1501396C's argument-less icall, the func_150D1D20 gate). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+LOD fixes in the renderer, the null-zone writer = func_1501396C's argument-less icall, the func_150D1D20 gate) and `docs/port/sessions/P81.md` (merge P76, arity rescan, look target / attachment / null-zone / tail runtime checks,
+blocker list). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1320,6 +1321,8 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 #      python3 port/tools/p78tex.py LOG OUTDIR -> PNGs), ?p78null=1 (first null-zone write: last stubs + JS stack),
 #      ?p78sky=N (func_15110420 backdrop gate inputs), DIAGNOSTIC ?p78split=1 (left half old LOD, right half new),
 #      ?p78lodviz=1 (tint by LOD tile), ?p78oldlod=1 (old LOD scale)
+# P81: ?p81look=N (look slot / target / aim / LookTrack / joint 7, 12, 0 matrices after func_15036FD8), ?p81att=N (attachment
+#      passes func_150310F8 / func_15031284: commands, part DLs, seg 3 Mtx, list on change), DIAGNOSTIC ?p81noatt=1
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -2311,6 +2314,42 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     All 18 sites of P75's `missing_args.txt` are D1 rows.
   - It is a may-analysis: check each row's asm (`asm_regs` column: W = written, E = caller's entry value) before
     fixing. Rerun it after every merge.
+- **P81 (merge port P76 + checks).** Full notes: P81.md.
+  - Merge e4162f2 had no conflicts.
+    - verify_all OK; NM links; protocheck 0 (903).
+    - Clean port rebuild: vbe 727 ok.
+  - **Arity rescan:** 123 rows / 69 with severity > 0 (P79: 141 / 80).
+    - All 18 rows of the P76-fixed callers are gone and there are no new rows.
+    - D1 rows still open: func_15049350 (port-b), func_15084000 x2, func_1504715C, func_1600160C.
+  - **Null zone clean:** no `[p78]` dirty write in node or Chrome, and the end scan shows 0 dirty words. The null+0x14 write is
+    gone.
+  - **Look:**
+    - The target and the aim point D_800C43F0 are -99999 ("none"), no longer (0,0,0). No target is ever found, because
+      **func_15004FE0** (the look point loader, game_32490.c, asm stub) leaves D_800C6A74 = 0.
+    - The no-target hold / fade path runs. The slerp blend keeps the row lengths (0.5), orthogonality and the translation,
+      and the rotation is smooth.
+    - Head-turning toward targets is UNVERIFIED. func_15021E60 (fixed angles) is a stub.
+  - **Attachments are drawn:**
+    - Conker's prop on joint 9 (callback 5): 14-16 commands, 1 part DL, segment 3 Mtx; a second prop (callback 2) appears
+      later.
+    - **func_150322B8 (callback 5) stubbed** means the prop is never freed and stays drawn for the rest of the run. Its
+      per-model tables are missing too.
+    - One of three post-merge Chrome runs showed a large dark translucent overlay after the 0x2C round trip (37-45 s). It
+      is not in the before run, after2 or noatt. Suspect: the stale callback-5 prop (not proven).
+  - **Tail:** func_1503BCAC(arg0) gets arg0 = 0 for Conker and works.
+  - **Respawn + 0x2C:**
+    - node repro: 997 / 1173 / 1253;
+    - Chrome: 1713 / 1785 / 1865;
+    - heap 0 errors.
+  - Same-frame screenshots: `p81/P81_before_after_{36000,41000}ms.png` (left pre-merge, right post-merge).
+  - **Blockers, in order:**
+    1. func_150954E4;
+    2. func_151462C8 / 1514306C / 1513C060;
+    3. func_15041A9C / func_15180AF0;
+    4. func_150322B8;
+    5. func_15004FE0 + func_15021E60;
+    6. arity rows (top: func_1507C170 icall, func_1512B670 -> func_1512B2C4, func_1504A730 D_800863B4[]);
+    7. the per-frame group (func_1509A024, func_150ADA68, game_14FF90.c).
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC
