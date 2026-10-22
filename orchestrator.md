@@ -76,7 +76,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Safety rules (put in every brief)
 - `eval "$(tools/eu_port/wt.sh env <name>)"` before **every** repo tool; every Edit/Write path must start with the worktree root. Port tools refuse to run without the right `CONKER_ROOT` (portguard).
-- Never `pgrep`/`pkill` on the host; kill only PIDs you started. Background jobs only via `run_in_background`, never `&`.
+- Never `pkill` on the host (the real hazard: it can kill another agent's jobs); kill only PIDs you started. Agents keep slipping into read-only `pgrep` in wait loops — harmless but against the rule; tell them to wait with `tools/eu_port/waitjob.sh` or log polling. Background jobs only via `run_in_background`, never `&`.
 - Never run convert.py batches while `verify_all.sh` runs (it regenerates `asm/`).
 - Default build must stay byte-identical: full `verify_all.sh` before every commit; NM build must link; protocheck 0.
 - difftest knobs use **EU addresses** (the source uses US names) — `euaddr.sh`.

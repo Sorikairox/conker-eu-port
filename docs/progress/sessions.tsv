@@ -138,3 +138,10 @@ P61	web	port-web				MILESTONE Conker drawn by game code (831 cmds, 811 tris, 84 
 P60	port-b	nm convert	3			animation driver func_1505E0C4, idle chooser, floor push/slope C; port merged into port-b
 P62	port	nm convert	6		121	root mtx + f32->Mtx (VR4300 harness), PI cart read, LOD, vertex-block words; asm2c fixed for lui literals; total C 4845 (81.9%) bytes 53.6%
 P63	web	port-web				MILESTONE Conker animated by game code (idle/walk/run/skid/fall/land/death); 3 temp PCs (anim header lookup, slope solver, 69E0 wrapper); walk.gif
+P64	port-b	nm convert	6		117	jump handler, idle set chooser/advance, zone boxes, scrolling quad DL, 2D distance
+P66	web	port-web				jump/running jump/Z long jump + idle variations verified; osRomBase set; 4 overrides dropped; jump.gif
+P67	port-b	nm convert	5			attack hit test, debris burst, object anim start, floor probe; difftest RETF passthrough bug fixed
+P65	port	nm convert	7			anim header lookup, slope solver, 69E0 wrapper, look-target cb, attachments, model tri tables, head aiming; total C 4852 (82.0%)
+P70	port	nm convert	7			Conker tail chain + tail joints, model-path stubs, joint scale, tile-size cb, model switch; total C 4871 (82.3%) bytes 55.1%
+P69	web	port-web				P63 temps removed; callback table D_80084550 mapped; second area renders after respawn; NEW HANG walking after respawn (double free)
+P68	port-b	nm convert	7			camera flags/push-out/eye probe, text bank loader, view smoothing, footsteps, projectile spawn
