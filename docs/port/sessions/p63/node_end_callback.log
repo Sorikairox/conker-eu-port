@@ -1,0 +1,19 @@
+[p63]   rec 0: pos 27.0 0.0 27.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p63] END CALLBACK called (probe 1, frame 805): argument 1064F6E0 (= the anim block), game callback 00000E46 skipped
+    at imports.<computed>
+    at conker.wasm.port_js_stack
+    at conker.wasm.p63cb_probe
+    at conker.wasm.func_1507C170
+[p63] anim call 22 frame 805: id 000F prev 0000 frame 49.20 -> 51.60 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 END-CB (loops 0 cbs 1)
+[p63] END CALLBACK called (probe 2, frame 893): argument 1064F6E0 (= the anim block), game callback 00000E46 skipped
+    at imports.<computed>
+    at conker.wasm.port_js_stack
+    at conker.wasm.p63cb_probe
+    at conker.wasm.func_1507C170
+--
+[p63]   rec 0: pos 27.0 0.0 27.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p63] END CALLBACK called (probe 3, frame 981): argument 1064F6E0 (= the anim block), game callback 00000E46 skipped
+    at imports.<computed>
+    at conker.wasm.port_js_stack
+    at conker.wasm.p63cb_probe
+    at conker.wasm.func_1507C170

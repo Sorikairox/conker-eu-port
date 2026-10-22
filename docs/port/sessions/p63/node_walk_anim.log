@@ -1,0 +1,78 @@
+[p61] func_1501C710 call 1 frame 1: a0 6 a1 00000025 (0000) a2 0 a3 0 a4 1
+[p63] start call 1 frame 1: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 0.00 xzv 0.00 +44 0.00 +80 0 +81 0 +83 0
+[p61] func_1501C710 call 2 frame 715: a0 6 a1 00000021 (0000) a2 0 a3 0 a4 1
+[p63] start call 3 frame 723: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 1 frame 723: id 000F prev 0000 frame 0.00 -> 1.20 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 (loops 0 cbs 0)
+[p63]   rec 0: pos 27.0 0.0 27.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p63] anim call 22 frame 805: id 000F prev 0000 frame 49.20 -> 51.60 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 0 countdown 0 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 END-CB (loops 0 cbs 1)
+[p63] start call 5 frame 841: id 0002 speed 1.755 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 2.40 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 31 frame 841: id 0002 prev 000F frame 0.00 -> 4.21 / last 28 (loop 0) speed 1.755 step 1.00 | +28 00BB5BC8 blend step 125 countdown 523 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 1 cbs 1)
+[p63]   rec 0: pos 24.1 0.0 27.0 +28 0.00 xzv 2.40 +44 35.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0002 | ctl +4E 00 +11A 00
+[p63] anim call 37 frame 865: id 0002 prev 000F frame 26.77 -> 3.58 / last 28 (loop 0) speed 2.005 step 1.00 | +28 00BB5BC8 blend step 125 countdown -477 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB (loops 2 cbs 2)
+[p63] anim call 42 frame 885: id 0002 prev 000F frame 23.84 -> 1.15 / last 28 (loop 0) speed 2.214 step 1.00 | +28 00BB5BC8 blend step 125 countdown -477 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB (loops 3 cbs 3)
+[p63] start call 18 frame 893: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 12 calls before) | rec y -19.20 +28 9980.80 +118 -10000.00 +20 -16.00 xzv 33.60 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 44 frame 893: id 0038 prev 0002 frame 0.00 -> 1.20 / last 16 (loop 0) speed 0.500 step 1.00 | +28 00BB6158 blend step 125 countdown 523 | hdr[3] 10 [5] 0C [7] 00 | cb 00000402 (loops 3 cbs 3)
+[p63]   rec 0: pos -154.3 -19.2 267.6 +28 9980.80 xzv 33.60 +44 35.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0038 | ctl +4E 00 +11A 00
+[p63] start call 26 frame 925: id 00CF speed 1.000 blend 2.00 frame 0.00 loop 0.00 hold 0 (same id 7 calls before) | rec y -636.00 +28 9364.00 +118 -10000.00 +20 -112.00 xzv 35.00 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 52 frame 925: id 00CF prev 0038 frame 0.00 -> 2.40 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown 23 | hdr[3] 10 [5] 0A [7] 00 | cb 00000402 (loops 3 cbs 3)
+[p63]   rec 0: pos -354.5 -636.0 537.5 +28 9364.00 xzv 35.00 +44 35.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 200 +84 00CF | ctl +4E 00 +11A 00
+[p63] anim call 58 frame 949: id 00CF prev 0038 frame 14.40 -> 0.80 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown -977 | hdr[3] 10 [5] 0A [7] 00 | cb 00000402 LOOP END-CB (loops 4 cbs 4)
+[p63] anim call 64 frame 973: id 00CF prev 0038 frame 12.80 -> 15.20 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown -977 | hdr[3] 10 [5] 0A [7] 00 | cb 00000402 END-CB (loops 4 cbs 5)
+[p63]   rec 0: pos -654.7 -3289.2 942.3 +28 6710.80 xzv 35.00 +44 35.00 | floor +184 00000000 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 200 +84 00CF | ctl +4E 00 +11A 00
+[p61] func_1501C710 call 3 frame 985 (inside func_1507D4F8): a0 2 a1 00000000 (0000) a2 0 a3 0 a4 0
+[p61] func_1507D4F8 call 1 frame 985: idx 0 | state 1 -> 1 pos -729.7 -4276.5 1043.5 -> -729.7 -4276.5 1043.5 +65 00 +E4 0019
+[p63] start call 42 frame 991: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 15 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 0.00 xzv 0.00 +44 0.00 +80 0 +81 0 +83 0
+[p63] start call 43 frame 992: id 0002 speed 1.734 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 1.20 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 68 frame 992: id 0002 prev 0000 frame 0.00 -> 2.08 / last 28 (loop 0) speed 1.734 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 5 cbs 5)
+[p63]   rec 0: pos 348.0 0.0 -2284.0 +28 0.00 xzv 1.20 +44 35.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0002 | ctl +4E 00 +11A 00
+[p63] anim call 74 frame 1013: id 0002 prev 0000 frame 24.39 -> 1.15 / last 28 (loop 0) speed 1.984 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB (loops 6 cbs 6)
+[p63] anim call 80 frame 1037: id 0002 prev 0000 frame 26.47 -> 3.83 / last 28 (loop 0) speed 2.235 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB (loops 7 cbs 7)
+[p63] start call 58 frame 1049: id 0021 speed 0.500 blend 3.00 frame 0.00 loop 0.00 hold 0 (same id 14 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 28.80 +44 0.00 +80 1 +81 0 +83 17
+[p63] anim call 83 frame 1049: id 0021 prev 0002 frame 0.00 -> 1.20 / last 43 (loop 0) speed 0.500 step 1.00 | +28 00BB95C0 blend step 166 countdown 359 | hdr[3] 2B [5] 27 [7] 00 | cb 00000402 (loops 7 cbs 7)
+[p63]   rec 0: pos 445.4 0.0 -2623.0 +28 0.00 xzv 28.80 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 17 +84 0021 | ctl +4E 00 +11A 00
+[p61] func_1501C710 call 4 frame 1057: a0 1 a1 0000002C (0000) a2 0 a3 0 a4 0
+[p63] start call 59 frame 1063: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 0.00 xzv 0.00 +44 0.00 +80 0 +81 0 +83 0
+[p63] start call 60 frame 1064: id 0001 speed 1.710 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 1.20 +44 18.00 +80 1 +81 0 +83 0
+[p63] anim call 86 frame 1064: id 0001 prev 0000 frame 0.00 -> 2.05 / last 32 (loop 0) speed 1.710 step 1.00 | +28 00BB5DE8 blend step 0 countdown 0 | hdr[3] 20 [5] 1A [7] 00 | cb 00000402 (loops 7 cbs 7)
+[p63]   rec 0: pos -2598.0 659.0 -1759.0 +28 0.00 xzv 1.20 +44 18.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0001 | ctl +4E 00 +11A 00
+[p63] start call 63 frame 1073: id 0002 speed 1.416 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 2 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 8.40 +44 18.00 +80 1 +81 0 +83 0
+[p63] anim call 89 frame 1073: id 0002 prev 0001 frame 0.00 -> 3.40 / last 28 (loop 0) speed 1.416 step 1.00 | +28 00BB5BC8 blend step 125 countdown 523 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 7 cbs 7)
+[p63]   rec 0: pos -2577.0 659.0 -1764.2 +28 0.00 xzv 8.40 +44 18.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0002 | ctl +4E 00 +11A 00
+[p63] start call 64 frame 1077: id 0002 speed 1.457 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 10.80 +44 18.00 +80 1 +81 0 +83 0
+[p63] start call 69 frame 1097: id 0001 speed 0.800 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 5 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 10.00 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 95 frame 1097: id 0001 prev 0002 frame 0.00 -> 1.92 / last 32 (loop 0) speed 0.800 step 1.00 | +28 00BB5DE8 blend step 125 countdown 523 | hdr[3] 20 [5] 1A [7] 00 | cb 00000402 (loops 7 cbs 7)
+[p63]   rec 0: pos -2477.4 659.0 -1789.2 +28 0.00 xzv 10.00 +44 35.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0001 | ctl +4E 00 +11A 00
+[p63] start call 71 frame 1105: id 0002 speed 1.790 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 4.40 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 97 frame 1105: id 0002 prev 0001 frame 0.00 -> 4.29 / last 28 (loop 0) speed 1.790 step 1.00 | +28 00BB5BC8 blend step 125 countdown 500 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 7 cbs 7)
+[p63]   rec 0: pos -2475.9 659.0 -1795.0 +28 0.00 xzv 4.40 +44 35.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0002 | ctl +4E 00 +11A 00
+[p63] anim call 102 frame 1125: id 0002 prev 0001 frame 22.48 -> 27.27 / last 28 (loop 0) speed 1.998 step 1.00 | +28 00BB5BC8 blend step 125 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 END-CB (loops 7 cbs 8)
+[p63] start call 77 frame 1129: id 0001 speed 0.820 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 5 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 10.40 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 103 frame 1129: id 0001 prev 0002 frame 0.00 -> 1.97 / last 32 (loop 0) speed 0.820 step 1.00 | +28 00BB5DE8 blend step 125 countdown 523 | hdr[3] 20 [5] 1A [7] 00 | cb 00000402 (loops 7 cbs 8)
+[p63]   rec 0: pos -2556.5 659.0 -1780.2 +28 0.00 xzv 10.40 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0001 | ctl +4E 00 +11A 00
+[p63] start call 79 frame 1137: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y 659.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 105 frame 1137: id 000F prev 0001 frame 0.00 -> 2.40 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 71 countdown 739 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 (loops 7 cbs 8)
+[p63]   rec 0: pos -2561.7 659.0 -1779.2 +28 0.00 xzv 0.00 +44 0.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p61] func_1501C710 call 5 frame 1137: a0 1 a1 00000000 (0000) a2 0 a3 0 a4 0
+[p63] start call 80 frame 1143: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 0.00 xzv 0.00 +44 0.00 +80 0 +81 0 +83 0
+[p63] start call 81 frame 1144: id 0002 speed 1.734 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y 0.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 1.20 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 106 frame 1144: id 0002 prev 0000 frame 0.00 -> 2.08 / last 28 (loop 0) speed 1.734 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 7 cbs 8)
+[p63]   rec 0: pos 419.0 0.0 -2517.0 +28 0.00 xzv 1.20 +44 35.00 | floor +184 00000004 (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0002 | ctl +4E 00 +11A 00
+[p63] anim call 112 frame 1165: id 0002 prev 0000 frame 24.39 -> 1.15 / last 28 (loop 0) speed 1.984 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB (loops 8 cbs 9)
+[p63] anim call 118 frame 1189: id 0002 prev 0000 frame 26.47 -> 3.83 / last 28 (loop 0) speed 2.235 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB (loops 9 cbs 10)
+[p63] start call 95 frame 1197: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 13 calls before) | rec y -19.20 +28 88.80 +118 -10000.00 +20 -16.00 xzv 34.80 +44 35.00 +80 1 +81 0 +83 0
+[p63] anim call 120 frame 1197: id 0038 prev 0002 frame 0.00 -> 1.20 / last 16 (loop 0) speed 0.500 step 1.00 | +28 00BB6158 blend step 125 countdown 523 | hdr[3] 10 [5] 0C [7] 00 | cb 00000402 (loops 9 cbs 10)
+[p63]   rec 0: pos 333.0 -19.2 -2206.1 +28 88.80 xzv 34.80 +44 35.00 | floor +184 0000000A (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0038 | ctl +4E 00 +11A 00
+[p63] start call 97 frame 1205: id 0001 speed 1.440 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before) | rec y -87.00 +28 21.00 +118 -10000.00 +20 -40.00 xzv 22.80 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 122 frame 1205: id 0001 prev 0038 frame 0.00 -> 3.46 / last 32 (loop 0) speed 1.440 step 1.00 | +28 00BB5DE8 blend step 125 countdown 523 | hdr[3] 20 [5] 1A [7] 00 | cb 00000402 (loops 9 cbs 10)
+[p63]   rec 0: pos 316.5 -87.0 -2146.4 +28 21.00 xzv 22.80 +44 0.00 | floor +184 0000000A (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 0001 | ctl +4E 00 +11A 00
+[p63] start call 98 frame 1209: id 0036 speed 1.000 blend 2.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y -109.00 +28 21.00 +118 -10000.00 +20 -52.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 13
+[p63] anim call 123 frame 1209: id 0036 prev 0001 frame 0.00 -> 2.40 / last 22 (loop 0) speed 1.000 step 1.00 | +28 00BB6250 blend step 250 countdown 23 | hdr[3] 16 [5] 1E [7] 05 | cb 00000E46 (loops 9 cbs 10)
+[p63]   rec 0: pos 311.1 -108.0 -2127.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 0000000A (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 11 +84 0036 | ctl +4E 00 +11A 00
+[p63] start call 99 frame 1229: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before) | rec y -108.00 +28 0.00 +118 -10000.00 +20 -4.00 xzv 0.00 +44 0.00 +80 1 +81 0 +83 0
+[p63] anim call 128 frame 1229: id 000F prev 0036 frame 0.00 -> 2.40 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 71 countdown 739 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 (loops 9 cbs 10)
+[p63]   rec 0: pos 311.1 -108.0 -2127.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 0000000A (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p63] anim call 149 frame 1313: id 000F prev 0036 frame 50.40 -> 0.80 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 71 countdown -113 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 LOOP END-CB (loops 10 cbs 11)
+[p63] anim call 170 frame 1397: id 000F prev 0036 frame 48.80 -> 51.20 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 71 countdown -113 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 END-CB (loops 10 cbs 12)
+[p63] anim call 192 frame 1485: id 000F prev 0036 frame 49.60 -> 0.00 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 71 countdown -113 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 LOOP END-CB (loops 12 cbs 13)
+[p63]   rec 0: pos 311.1 -108.0 -2127.0 +28 0.00 xzv 0.00 +44 0.00 | floor +184 0000000A (slide class 0, kind 0) +188 00000000 +110 0 +162 0 D_800CC69C 0 +83 0 +84 000F | ctl +4E 00 +11A 00
+[p63] anim call 214 frame 1573: id 000F prev 0036 frame 50.40 -> 0.80 / last 52 (loop 0) speed 1.000 step 1.00 | +28 00BB66C8 blend step 71 countdown -113 | hdr[3] 34 [5] 25 [7] 00 | cb 00000E46 LOOP END-CB (loops 13 cbs 14)

@@ -1030,7 +1030,7 @@ Known tool issues:
 - Never run two convert.py jobs on the same `--tag`: they share `results.tsv`.
 
 
-## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61; branch `port-web`)
+## Browser build (sessions P3, P4, P6, P8, P9, P11, P14, P19, P21, P23, P25, P26, P27, P29, P31, P33, P35, P37, P39, P42, P44, P46, P49, P52, P55, P58, P61, P63; branch `port-web`)
 
 Full notes: `docs/port/sessions/P3.md` (platform skeleton), `docs/port/sessions/P4.md` (memory
 model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, renderer, microcode) and
@@ -1057,7 +1057,9 @@ model, boot, priority list), `docs/port/sessions/P6.md` (indirect calls, rendere
 `docs/port/sessions/P52.md` (P50 / P48 movement and model C at runtime, P49 overrides removed, why the view goes black) and
 `docs/port/sessions/P55.md` (P53 / P54 floor and landing C at runtime: stand, walk off, land; G_DL 0 crash) and
 `docs/port/sessions/P58.md` (P51 model load + skeleton evaluator at runtime, four port-side blockers, posed preview) and
-`docs/port/sessions/P61.md` (Conker drawn by the game's func_1502CFEC, two TEMPORARY PC functions, walls K0-literal crash, P59 checks). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
+`docs/port/sessions/P61.md` (Conker drawn by the game's func_1502CFEC, two TEMPORARY PC functions, walls K0-literal crash, P59 checks) and
+`docs/port/sessions/P63.md` (Conker animated by the game: func_1502AF04 / func_1510E908 / func_150A69E0 TEMPORARY PC,
+false slide and garbage-count crash, end callback verified, walk GIF). The memory-model design is in **`docs/port/MEMORY.md`**. Everything is
 under `port/`; nothing shared was changed, so the matching build is unaffected.
 
 ```sh
@@ -1085,6 +1087,9 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
 #      animation, the driver func_1505E0C4 is asm), ?p58pose=1 (+ p58ang: posed ROM Conker drawn after each frame)
 # P61: ?p61model=N (the game's model DL: commands / vertices / triangles / bone G_MTX per frame; first frame dumped),
 #      ?p61check=N (P59 C: func_1507D4F8 + func_1501C710, func_1505D6F0, the sound calls of func_1508000C, func_1507C170)
+# P63: ?p63anim=N (record 0's animation per func_1507C170 call + every func_1505E650 start + floor / slide state),
+#      ?p63stack=1 (JS stack per new id), ?p63cb=N (end-callback probe, diagnostic); port/web/p63shots.sh (Chrome
+#      stand / walk / idle frame sequence); python3 port/tools/png2gif.py (stdlib GIF / crop zoom from screenshots)
 # after merging port: rm port/build/census/files.tsv port/build/vbe.stamp, then build (make doesn't track src_eu)
 ```
 
@@ -1907,6 +1912,26 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     func_1505E0C4). No bug found in P59's C.
   - **Stubs:** model path func_15036FD8 (x2), func_1503BCAC, func_1503AB20, func_15030758, func_1502C9D8, func_1505E0C4;
     movement func_1505F298, func_15051558, func_1507F640, func_15017FA4, after respawn func_150ADE40, func_150D1D20.
+- **P63 (after merging port-b 71183d1: P60): Conker animated by the game's own code.** Full notes: P63.md.
+  - Clean rebuild: 725 vbe TUs, 1 link warning; P61's walls srcfix still applies. Node (idle 40 s, walk 32 s) and
+    real-time Chrome (Metal, `heapwatch=1`, W held): 9 PASS, heap 0 errors, no RuntimeError.
+  - **func_1505E0C4 needed its header lookup func_1502AF04 (asm stub → TEMPORARY PC):** anim +0x28 was 0, so nothing
+    advanced. Now func_1505E650 → func_1505E0C4 → func_1507C170 → func_150A86B0 → func_1502CFEC animate Conker: idle
+    0x0F, walk 0x01 / run 0x02, skid 0x21, fall 0x38, land 0x36, death 0xCF; walk → idle works. The pose looks right
+    (no blend / header / block copy / endianness bug found). Open: the tail looks pale with dark triangles while
+    running away from the camera (UNVERIFIED, compare with an emulator).
+  - **func_1510E908 (slope solver, asm stub → TEMPORARY PC):** the stub left func_1510FDA0's dx / dz as stack garbage,
+    so P60's func_15051558 slid Conker (0x28E, D_800CC69C = 1) off the flat start floor every frame. That was P61's
+    "walk off the edge", and it blocked the walk / idle choice (+0x83).
+  - **func_150A69E0 (asm stub → TEMPORARY PC):** the uninitialised count gave func_150A49D0 a garbage id list, a *memory
+    access out of bounds* that depended on the stack layout (latent in every earlier build).
+  - **End-of-animation callback runs** (P59 UNVERIFIED): called from func_1507C170 with the anim block (`?p63cb`).
+  - Not reached: real slope slides, the turn-around 0xA5, the ice wobble sound; no idle variant in 13 s (func_1507F834
+    is a stub).
+  - Screens: `P63_screenshot.png` (idle, facing the camera), `p63/` (150 ms frame sequence) and **`p63/walk.gif`**.
+  - **For the port branch:** convert func_1502AF04, func_1510E908, func_150A69E0 (then drop the PC versions), then
+    func_1507F834 / func_1507F3B0, func_1505F298, and the model-path stubs func_15036FD8, func_1503BCAC, func_1503AB20,
+    func_15030758, func_1502C9D8. The P61 items are still open (walls literal, func_150844AC, func_150A9E64).
 - **Next for the browser build:**
   1. (P11) Convert **`func_15007B3C`** (level loader: DL buffers, first pad read) on the port
      branch, then `func_15019130` and `func_eu_1501C860`, which replace the temporary PC

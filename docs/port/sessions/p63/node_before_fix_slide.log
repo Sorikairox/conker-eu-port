@@ -1,0 +1,40 @@
+[p63] start call 1 frame 1: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 3 frame 723: id 028E speed 2.000 blend 6.00 frame 0.00 loop 0.00 hold 0 (same id 1 calls before)
+[p63] anim call 1 frame 723: id 028E prev 0000 frame 0.00 -> 2.40 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 0 cbs 
+[p63] anim call 2 frame 725: id 028E prev 0000 frame 2.40 -> 7.20 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 0 cbs 
+[p63] anim call 3 frame 729: id 028E prev 0000 frame 7.20 -> 12.00 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 0 cbs
+[p63] anim call 4 frame 733: id 028E prev 0000 frame 12.00 -> 16.80 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 0 cb
+[p63] anim call 5 frame 737: id 028E prev 0000 frame 16.80 -> 21.60 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 0 cb
+[p63] anim call 6 frame 741: id 028E prev 0000 frame 21.60 -> 26.40 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 0 cb
+[p63] anim call 7 frame 745: id 028E prev 0000 frame 26.40 -> 3.20 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB 
+[p63] anim call 8 frame 749: id 028E prev 0000 frame 3.20 -> 8.00 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 1 cbs 
+[p63] start call 4 frame 761: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] anim call 11 frame 761: id 0038 prev 028E frame 0.00 -> 1.20 / last 16 (loop 0) speed 0.500 step 1.00 | +28 00BB6158 blend step 125 countdown 523 | hdr[3] 10 [5] 0C [7] 00 | cb 00000402 (loops 1
+[p63] start call 7 frame 773: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 2 calls before)
+[p63] start call 8 frame 773: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 9 frame 777: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 10 frame 777: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 11 frame 781: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 12 frame 781: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 13 frame 785: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 14 frame 785: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 15 frame 789: id 000F speed 1.000 blend 7.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 16 frame 789: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 17 frame 793: id 00CF speed 1.000 blend 2.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] anim call 19 frame 793: id 00CF prev 0038 frame 0.00 -> 2.40 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown 23 | hdr[3] 10 [5] 0A [7] 00 | cb 00000402 (loops 1 
+[p63] anim call 25 frame 817: id 00CF prev 0038 frame 14.40 -> 0.80 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown -977 | hdr[3] 10 [5] 0A [7] 00 | cb 00000402 LOOP E
+[p63] anim call 31 frame 841: id 00CF prev 0038 frame 12.80 -> 15.20 / last 16 (loop 0) speed 1.000 step 1.00 | +28 00BBC3E0 blend step 250 countdown -977 | hdr[3] 10 [5] 0A [7] 00 | cb 00000402 END-C
+[p63] start call 33 frame 859: id 0000 speed 1.000 blend 0.00 frame 0.00 loop 0.00 hold 0 (same id 15 calls before)
+[p63] start call 34 frame 860: id 028E speed 2.000 blend 6.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] anim call 35 frame 860: id 028E prev 0000 frame 0.00 -> 2.40 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 3 cbs
+[p63] anim call 41 frame 881: id 028E prev 0000 frame 26.40 -> 3.20 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 0 countdown 0 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP END-CB
+[p63] start call 35 frame 889: id 0038 speed 0.500 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] anim call 43 frame 889: id 0038 prev 028E frame 0.00 -> 1.20 / last 16 (loop 0) speed 0.500 step 1.00 | +28 00BB6158 blend step 125 countdown 523 | hdr[3] 10 [5] 0C [7] 00 | cb 00000402 (loops 4
+[p63] start call 36 frame 893: id 0002 speed 1.957 blend 4.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] anim call 44 frame 893: id 0002 prev 0038 frame 0.00 -> 4.70 / last 28 (loop 0) speed 1.957 step 1.00 | +28 00BB5BC8 blend step 125 countdown 523 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 4
+[p63] start call 37 frame 897: id 0036 speed 1.000 blend 2.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] start call 38 frame 897: id 028E speed 2.000 blend 6.00 frame 0.00 loop 0.00 hold 0 (same id 0 calls before)
+[p63] anim call 45 frame 897: id 028E prev 0002 frame 0.00 -> 4.80 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 83 countdown 691 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 (loops 4 
+[p63] anim call 50 frame 917: id 028E prev 0002 frame 24.00 -> 0.80 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 83 countdown -305 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP EN
+[p63] anim call 56 frame 941: id 028E prev 0002 frame 24.80 -> 1.60 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 83 countdown -305 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP EN
+[p63] anim call 62 frame 965: id 028E prev 0002 frame 25.60 -> 2.40 / last 28 (loop 0) speed 2.000 step 1.00 | +28 00BB5BC8 blend step 83 countdown -305 | hdr[3] 1C [5] 18 [7] 07 | cb 00000402 LOOP EN
