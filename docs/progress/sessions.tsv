@@ -94,3 +94,9 @@ P16	port	nm convert	88		158	pool deadlock root cause (unicorn uc_close); total C
 P17	port	nm convert	175		141	reruns + breadth 121-200 33%; total C 4498
 P18	port	nm convert	110		132	difftest float-register blind spot fixed; table lint; total C 4608
 P19	web	port-web			136	game C submits real gfx tasks (12-cmd empty frames); browser-only heap corruption found; freeze fix
+P20	port	nm convert	71			selfproto/implproto loop fixed; CERR re-run 50 EQUIV; browser overrides converted; total C 4679 (79.1%)
+P21	web	port-web				browser heap corruption = 8-aligned fiber stacks (aligned_alloc fix); real-time Chrome runs 480+ frames
+P23	web	port-web				frame DLs now run end-to-end (~120 cmds, 0 tris); stub pass-through rules; frame-path stub list
+P25	web	port-web				libultra/libgu/libc PC layer complete (guMtxF2L, bcopy/bzero vbe-aware, fast sin/cos); still 0 tris (camera asm)
+P27	web	port-web				input (kbd+gamepad via PIF, verified into game pad buffer), IndexedDB saves, page UX, audio resume
+P22	port	nm convert	42		131	D_80090370/D_800903A4 DL tables C; nm_asm mechanism for raw asm (D5E90.s); breadth 301-450; total C 4721 (79.8%)
