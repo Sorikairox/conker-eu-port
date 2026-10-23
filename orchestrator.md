@@ -6,7 +6,7 @@ Two parts: (1) a **status snapshot** — overwrite it, don't append history (his
 
 ---
 
-## 1. Status snapshot (2026-10-23, after P129)
+## 1. Status snapshot (2026-10-23, after P156)
 
 ### Goal
 Conker's Bad Fur Day (EU ROM, user-owned) as a **native source port that runs in a web browser**:
@@ -17,7 +17,7 @@ from the same C. **Not** N64Recomp / static recompilation, and not the existing 
 | | functions with C | code bytes | where |
 |---|---|---|---|
 | Matching decomp (byte-identical) | 3994 / 5915 (67.5%) | 29.3% | branch `eu` — paused |
-| Port (matching + NON_MATCHING), combined | **~5060 / 5915 (85.5%)** | **~64%** | port-b P129 (has port merged up to P114); port alone 4966 (P127) |
+| Port (matching + NON_MATCHING), combined | **~5170 / 5915 (87.4%)** | **~68%** | port-b P153 (synced with port P150) |
 | Asm-only left | ~855 | | |
 
 ### Branches / worktrees / containers
@@ -33,10 +33,11 @@ Mac mini worker `sorikairo@192.168.0.71` (container `conkerdev`) runs `remote_pe
 Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Browser build — what works (port-web)
-- Boot → logo screen event (level 0x21, LogoScreen scene) → title menu (mode 3, level 0x1D) fading in by the game's own code; START opens the save slot; NEW GAME starts mode 0 / level 0x18 (P126) — then traps on the mode-0 handler (now C on `port`, P131 merging).
-- Gameplay test path (?p110noev=1): walk, death, respawn scene, 0x2C warp, 0 heap errors; level music; lighting fixed (P94); camera eye/target real C.
-- TEMPORARY in port-web: P113 camera-retarget guard (likely removable), P116 +0x65 cycle log-only guard.
-- Tools: arity_scan, floatint_scan, protoasm_check, stubcalls, m2c_sanity (run after merges), event/scene disassemblers (p112/evdis.py, p114/scdis.py); names table (eu: tools/eu_port/names_table.py).
+- Boot → logo screen → title menu → NEW GAME → opening (title cards, throne cutscene) → Conker wakes → Gregg cutscene → **player control in the first room** (P154, retrace ~18485): walk, camera, collision, jump/hover, tail pickup, idle, pause.
+- PAL 50 Hz fixed-timestep pacing, audio in sync (P147); VI-row framing; frame-based test input `?padf` (P149).
+- Shadows (render-to-texture), particles, title cards, iris transition, music.
+- No TEMPORARY guards left (P113 removed in P137).
+- Next blocker: B / context action func_15064668 (asm) to leave the first room; sound-effect emitters; pause menu text gfx.
 
 ### Running now
 - P131 (port-web): merge P127 + port-b P125–P129, drop mode-0 data stub, start a new game.
