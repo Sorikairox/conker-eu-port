@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P159 (port-b) (session P159, 2026-10-24). Details: `docs/port/sessions/P159.md`
+
+Branch `port-b` (from P155 d2c5c53). Took game_eu_125200.c, 12C0B0.c, 12BB30.c, 12D5D0.c.
+Hand C (NM), difftest EQUIV + setups + mutants: func_15154728 `spark_shower_spawn` (17D3C0; NM prototypes now s32 in
+125200 / 201240 / 1EDA00 / 1D3420), func_151D441C `object_sound_between` (201240; void, 12D5D0 prototype void),
+func_151D611C `objects_hit_by_segment` (201240), func_150F85AC `record_particle_spawn` (125200), func_151C0434
+`impact_effects_spawn` (1EDA00), func_1514FE68 `spray_particles_spawn` (17D3C0; its spray chain is now all C),
+func_150F0BEC `object_glow_spawn` (11CB90).
+- func_151C1EF0 (D_80087030 filter 3, matching C `void`) returns func_151C0894's result under NM (the table callers
+  func_151D611C / func_15081A90 test it; a void function through an s32 table pointer traps on wasm).
+- func_151D469C held: D_80090010 handlers 0 / 1 (func_151C6F24 / func_151C6F50) call func_151C6F7C, asm-only in
+  game_eu_1F4090.c (not port-b); func_151D5308 uses kinds 0 and 1.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1189 bodies), selftest 62/62.
+  progress_nm total 5183/5915 (87.6%), game 4652/5334, C bytes 68.6%, 732 asm-only.
+
+## Next steps (from P159)
+
+1. func_151D469C after func_151C6F7C (game_eu_1F4090) is C — give 1F4090 to port-b or convert it in the port slot.
+2. Next port-b asm with C callers (`p159/asmlist.py`): func_151C230C (151, 1EDA00), func_151A2C9C (157, 1CE7D0),
+   func_150A6070 (173, D3880), func_151DA08C (183, 2062D0), func_151A31D4 (186, 1CE7D0).
+3. Browser: P159.md UNVERIFIED (spark showers, impact sprays, segment hit masks, filter-3 ray casts).
+
 ## P155 (port-b) (session P155, 2026-10-23). Details: `docs/port/sessions/P155.md`
 
 Branch `port-b` (from P153 d394089). Coordinator decisions: func_151AC3F0 inserted (1EDA00:292 prototype `void`);
