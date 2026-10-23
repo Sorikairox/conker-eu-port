@@ -160,7 +160,148 @@ struct260 *func_1510A8C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+void func_15143134(void *arg0, void *arg1, void *arg2);
+s32 func_151308E4(void *, u8, s32, u8, s32);
+
+/* func_1510A98C's model-space vent points (D_800A29D4 / D_800A29E0) and aim points (D_800A29EC / D_800A29F8) */
+static const f32 sVentPoints[4][3] = {
+    { -11.0f, -24.0f, 43.0f }, { 31.0f, -24.0f, 43.0f },  /* vents 0 / 1 */
+    { -51.0f, -24.0f, 43.0f }, { 81.0f, -24.0f, 43.0f },  /* their aim points */
+};
+
+/* func_1510A98C's puff request (func_151308E4) */
+typedef struct {
+    /* 0x00 */ s32 kind;
+    /* 0x04 */ s32 u04;
+    /* 0x08 */ s16 sprite;
+    /* 0x0A */ s16 life;
+    /* 0x0C */ s32 u0C;
+    /* 0x10 */ s32 u10;
+    /* 0x14 */ u8  color[10];
+    /* 0x1E */ s16 u1E;
+    /* 0x20 */ s16 u20;
+    /* 0x22 */ s16 u22;
+    /* 0x24 */ f32 growth;
+    /* 0x28 */ f32 sizeX;
+    /* 0x2C */ f32 sizeY;
+    /* 0x30 */ f32 pos[3];
+    /* 0x3C */ f32 rot[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ s32 flags;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8  u60[6];
+} VentPuff;
+
+// vent_smoke_emitter_update: update handler of the emitter made by func_1510A8C4 (data at +0x28: owner object,
+// its unique id, an accumulator, base rate, random rate). Kills the emitter (+0xE = -1) when the owner is gone or
+// was replaced; otherwise adds (base + random * rand) * D_800BE9A4 to the accumulator and, while it is above 1,
+// spawns one puff from one of the two vents of the owner's model (bone matrix +0x240), blowing outward at
+// 0.096..0.299 with a random size 60..120 and life 20..35 and random flip flags. Without a model the
+// accumulator is just drained (P156).
+void func_1510A98C(u8 *arg0) {
+    struct {
+        u8 *obj;
+        u8 uid;
+        f32 accum;
+        f32 rate;
+        f32 rateRand;
+    } *rec = (void *)(arg0 + 0x28);
+    f32 pts[2][3];
+    f32 dirs[2][3];
+    VentPuff puff;
+    f32 fade;
+    f32 speed;
+    s32 side;
+    u8 *model;
+    u8 *e;
+
+    if (*(s32 *)rec->obj == 0 || rec->uid != rec->obj[0x3B]) {
+        *(s16 *)(arg0 + 0xE) = -1;
+        return;
+    }
+    rec->accum += (rec->rate + func_150ADA68() * rec->rateRand) * D_800BE9A4;
+    if (1.0f < rec->accum && *(u8 **)(rec->obj + 0x1D4) != NULL) {
+        model = *(u8 **)(rec->obj + 0x1D4) + 0x240;
+        func_15143134((void *)sVentPoints[0], pts[0], model);
+        func_15143134((void *)sVentPoints[1], pts[1], model);
+        func_15143134((void *)sVentPoints[2], dirs[0], model);
+        func_15143134((void *)sVentPoints[3], dirs[1], model);
+        dirs[0][0] -= pts[0][0];
+        dirs[0][1] -= pts[0][1];
+        dirs[0][2] -= pts[0][2];
+        dirs[1][0] -= pts[1][0];
+        dirs[1][1] -= pts[1][1];
+        dirs[1][2] -= pts[1][2];
+
+        fade = 0.91080099f;
+        puff.kind = 0x200005;
+        puff.u04 = 0;
+        puff.sprite = 0xE03;
+        puff.u0C = 0;
+        puff.u10 = 0;
+        puff.color[0] = 0xDD;
+        puff.color[1] = 0xD3;
+        puff.color[2] = 0xCD;
+        puff.color[3] = 0xFF;
+        puff.color[4] = 0x57;
+        puff.color[5] = 0x55;
+        puff.color[6] = 0x5A;
+        puff.color[7] = 0xFF;
+        puff.color[8] = 0xFF;
+        puff.color[9] = 0x29;
+        puff.u1E = 0x19;
+        puff.u20 = 0xA;
+        puff.u22 = 0x19;
+        puff.growth = 1.043206f;
+        puff.rot[0] = 0.0f;
+        puff.rot[1] = 0.0f;
+        puff.rot[2] = 0.0f;
+        puff.u54 = 0.0f;
+        puff.flags = 0xCE05;
+        puff.u60[0] = 3;
+        puff.u60[1] = 3;
+        puff.u60[2] = 0x10;
+        puff.u60[3] = 0xFF;
+        puff.u60[4] = 0xFF;
+        puff.u60[5] = 0;
+        do {
+            if (func_150ADA20() & 1) {
+                puff.flags |= 0x40;
+            } else {
+                puff.flags &= ~0x40;
+            }
+            if (func_150ADA20() & 1) {
+                puff.flags |= 0x80;
+            } else {
+                puff.flags &= ~0x80;
+            }
+            side = func_150ADA20() & 1;
+            speed = (func_150ADA68() * 203.0f + 96.0f) * 0.001f;
+            puff.life = (func_150ADA20() & 0xF) + 20;
+            puff.sizeX = puff.sizeY = func_150ADA68() * 60.0f + 60.0f;
+            puff.pos[0] = pts[side][0];
+            puff.pos[1] = pts[side][1];
+            puff.pos[2] = pts[side][2];
+            puff.vel[0] = dirs[side][0] * speed;
+            puff.vel[1] = dirs[side][1] * speed;
+            puff.vel[2] = dirs[side][2] * speed;
+            e = (u8 *)func_151308E4(&puff, 1, 4, arg0[0xC], arg0[1]);
+            if (e != NULL) {
+                memcpy(e + 0xA8, &fade, 4);
+            }
+            rec->accum -= 1.0f;
+        } while (1.0f < rec->accum);
+        return;
+    }
+    while (1.0f < rec->accum) {
+        rec->accum -= 1.0f;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/func_1510A98C.s")
+#endif
 
 void func_1510ADF0(u8 *arg0, struct212 *arg1, u8 arg2) {
     struct212 *temp_v0 = (struct212 *)(arg0 + 0x28);

@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P156, 2026-10-23). Details: `docs/port/sessions/P156.md`
+
+- New hand C (NM): func_1507CD64 player_hit_reaction (func_1507D754 callee; 72 setups, mutants 55/55; returns s32 0
+  because every prototype, also port-b's, says s32 and no caller reads it), func_150B8020 object_break_effects
+  (func_1507D754 callee; 24 + 10 setups, mutants 57/58, 1 beyond the ARGMEM window, asm-checked), its callee
+  func_150B87B0 debris_burst_spawn (6 parameters, mutants 18/18), coordinator item func_1510A98C
+  vent_smoke_emitter_update (18 + 3 setups, mutants 40/42, 2 beyond the ARGMEM window, asm-checked).
+- D_8008A3CC (func_151416E8 handler table): entries 10..17 are all C (list in P156.md); entries >= 18 are another table.
+- difftest: opt-in `DIFFTEST_TUCMP_LEN=N` (bytes compared for a candidate TU-local object argument, default 32) and
+  `DIFFTEST_OUTA_PERCALL=1` (OUTA words + k * 0x10000 on call k: different out-arrays per call); both forwarded by
+  difftest.sh. New `docs/port/sessions/p156/isasm.py ROOT func...` (real C / ASM status; callees.py / romtab.py ASM
+  marks come from the stale p98 asmonly list).
+- Checks: verify_all OK (full ROM OK, after the last code edit), NM links, protocheck 0 (1151), selftest 62/62, progress_nm 5145/5915 (87.0%), C bytes 67.6%.
+
+## Next steps (from P156)
+
+1. func_1507D754 still blocked: this slot's func_151BAAC8 (715), func_150BC968 / func_150BC03C (461 / 587),
+   func_150C04E0 (127), func_151C9740 (224), func_151CFFFC (374); port-b's func_15150D7C (via func_15136C3C ->
+   func_1513A24C) and func_15154728 (via func_150E0DF0, func_151C9740); func_151D5AC4 / func_151D4684 (game_eu_201240).
+2. func_15132BBC (game_eu_15FF50, 256): asm worker behind the C wrapper func_15132FBC (particle spawn used by
+   func_150B8020 and many C callers).
+3. Browser: hit reactions (func_1507CD64), vent smoke (func_1510A98C).
+4. P138 / P141 leftovers (not started).
+
 ## State (session P151, 2026-10-23). Details: `docs/port/sessions/P151.md`
 
 - New hand C (NM): func_1514CFF0 character_handler_indices (new-game scene start; 192 setups, mutants 24/24),
