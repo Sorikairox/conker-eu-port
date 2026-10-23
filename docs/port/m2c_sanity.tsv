@@ -63,6 +63,8 @@ func_1510EED0	conker/src_eu/game_eu_13C400.c	width	med	2	O:0 asm{b1L,h3LS,w33LS}
 func_1512BCA0	conker/src_eu/game_eu_158110.c	width	med	2	O:0 asm{b1S,w10LS} IR{w3LS}
 func_15173954	conker/src_eu/game_eu_1A1060.c	width	med	2	O:0 asm{h8LS} IR{b1S,h8LS,w4LS}
 func_15179008	conker/src_eu/game_eu_1A6C30.c	width	med	2	O:0 asm{b4S,w1S} IR{w1S}
+func_1517B270	conker/src_eu/game_eu_1A8930.c	width	med	2	O:0 asm{h3L,w36LS} IR{b4L,h4LS,w36LS}
+func_1517B270	conker/src_eu/game_eu_1A8930.c	width	med	2	O:4 asm{b2S,w4LS} IR{b2S,h4LS,w4LS}
 func_151BEE00	conker/src_eu/game_eu_1EC610.c	width	med	2	O:0 asm{w2L} IR{b1L,w3L}
 func_1507DB6C	conker/src_eu/game_A9D90.c	width	med	1	O:0 asm{b3LS,w12S} IR{w1S}
 func_15081A90	conker/src_eu/game_eu_AF2A0.c	width	med	1	O:0 asm{b4L,w3S} IR{w3S}
