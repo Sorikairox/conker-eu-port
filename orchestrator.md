@@ -111,6 +111,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Batch m2c bodies (P15–P22) contain pointer-stride / access-width bugs (`p += 4` on `u8 **`, `(x*K)+&SYM` on non-byte symbols, word reads where asm uses lb): run port-web `port/tools/m2c_sanity.py` after merges (P118).
 - difftest precedence since P132: learned pointers > DIFFTEST_POKE > ROM image > random; stack-arg scan now passes IDO div trap checks (varargs printers with a division before the call were unchecked before P132).
 - Functions reached through function-pointer tables must have the signature the dispatcher uses (return type too): a `void` C function called through an `s32` table pointer whose result is tested is wrong on N64 semantics and traps on wasm (P159 func_151C1EF0).
+- Batch m2c bodies sometimes declared a function `void` and dropped every `return` even though callers (often through s32 handler tables) use the result (P174: func_1509CBD8 made every event scene query answer 0 and sent the new game off-route). When a C function sits in a handler table, check its asm for v0.
 - Watch for float bit patterns passed as ints (`0xC61C4000` to an `f32` parameter) — an m2c artefact that is wrong on wasm.
 
 ### Lesson: dropped arguments (P75, P78)
