@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P184, 2026-10-24). Details: `docs/port/sessions/P184.md`
+
+- Hand C (NM), difftest EQUIV + setups + mutants (table in P184.md): **func_15170A70** spark_particle_spawn
+  (game_eu_19B180; the only stub the P182 ambient emitters reached), **func_1506B04C** obj_effect_dispatch
+  (game_eu_981C0; table D_800864B0 = 15 C handlers; func_1506AEA0 now takes the dispatch arguments `(u8 *, void *)`),
+  **func_150D0C40** level_ambient_cue_update (game_eu_FE450, level table D_8008D0A4[14]), **func_15008E10**
+  area_points_alloc (game_362B0), **func_150611E8** path_face_nearest_segment (game_83300; browser P178 level 0x29 path
+  reader; NM hoisted prototype added), **func_151B76F4** obj_smoke_puff_spawn (game_eu_1E40E0, effect handler 8).
+- Stubs still reached through func_1506B04C's C handlers: func_151BBBCC, func_151D3A30 (port-b), func_151B78D8,
+  func_151043C0.
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0),
+  protocheck 0 (1295 NM bodies), selftest 65/65, progress_nm 5289/5915 (89.4%), C bytes 72.9%. No difftest processes left.
+
+## Next steps (from P184)
+
+1. Browser: P184.md section 5 (sparks / flare-ups, object effects, level 0x29 cue sounds and path turning).
+2. func_151B78D8 (game_eu_1E40E0, 212): check its D_8008FF30 handler table first, then convert; func_151BBBCC
+   (1E7CC0, 288), func_151043C0 (131BD0, 204): the other stubs behind func_1506B04C (func_151D3A30 is port-b's).
+3. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged from P182).
+4. Breadth: p184/asmlist.py (skipped: func_150882C4 port-b caller prototype; libultra / hand-written asm).
+5. P138 / P141 leftovers.
+
 ## State (session P182, 2026-10-24). Details: `docs/port/sessions/P182.md`
 
 - **func_1517C11C ambient_emitters_update** (game_eu_1A9280, 1286 insns) hand C (NM), from the P104 draft re-checked
