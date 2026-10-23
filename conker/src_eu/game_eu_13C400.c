@@ -573,7 +573,7 @@ block_13:
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13C400/func_1510FE58.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_150A6C40(s32);
+void func_150A6C40(s32);
 void func_150F3978(s32);
 extern s32 D_800DC1F0;
 extern s32 D_800DC1F4;

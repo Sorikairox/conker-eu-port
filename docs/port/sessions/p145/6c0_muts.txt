@@ -1,0 +1,23 @@
+s/D_800BEAC1 != 0 || //%f1
+s/ || D_800BEEE2 != 0//%f2
+s/i < 24;/i < 23;/%
+s/src += D_800BE620;/src += D_800BE620 + 1;/%
+s/i \* 24, fb + src, 48/i * 24, fb + src, 46/%
+s/y < 0.0f; y += 0.083333336f/y < 0.0f; y += 0.1f/%
+s/fabsf(y), 1.0f, 1.0f/fabsf(y), 1.0f, ry/%
+s/if (ry == 0.0f)/if (ry <= 0.0f)/%zero1 zeros neg
+s/dy = y \* 12.0f;/dy = y * 11.0f;/%
+s/rowB = (s32)(\*(f32 \*)(target + 0x38) - dy)/rowB = (s32)(*(f32 *)(target + 0x34) - dy)/%
+s/if (!(x < 0.0f))/if (!(x <= 0.0f))/%neg
+s/inv = 1.0f \/ ry;/inv = 2.0f \/ ry;/%
+s/k = 1.0f - (1.0f - ry \* 0.669312179f);/k = ry * 0.669312179f;/%seq frac small
+s/fabsf(x), ry, inv/fabsf(x), inv, ry/%
+s/colB = (s32)(\*(f32 \*)(target + 0x34) - dx);/colB = (s32)(*(f32 *)(target + 0x34) + dx);/%
+s/s = 1.0f - r \* k;/s = 1.0f + r * k;/%
+s/sx = x \* s \* 12.0f;/sx = x * (s * 12.0f);/%seq frac small
+s/v0 = (s32)(sy + 12.0f) \* 24;/v0 = (s32)(sy + 12.0f) * 23;/%
+s/u1 = (s32)(12.0f - sx);/u1 = (s32)(11.0f - sx);/%
+s/fb\[rowB + colB\] = buf\[u1 + v1\];/fb[rowB + colB] = buf[u0 + v1];/%
+s/fb\[rowB + colA\] = buf\[u0 + v1\];//%
+s/x += 0.083333336f;/x += 0.0833f;/%
+s/} while (x < 0.0f);/} while (x <= 0.0f);/%

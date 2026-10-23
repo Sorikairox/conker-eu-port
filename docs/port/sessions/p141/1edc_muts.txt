@@ -1,0 +1,58 @@
+s/alpha = D_800E0EC5 - (D_800BE9E4 << 5);/alpha = D_800E0EC5 - (D_800BE9E4 << 4);/
+s/        if (alpha <= 0) {/        if (alpha < 0) {/
+s/mainPage = D_800E0EC6;/mainPage = 3;/
+s/alpha = D_800E0EC5 + (D_800BE9E4 << 5);/alpha = D_800E0EC5 + (D_800BE9E4 << 4);/
+s/        if (alpha >= 0x100) {/        if (alpha >= 0xFF) {/
+1,/func_1504332C(0xFF, 0xFF, 0xFF, alpha);/s/func_1504332C(0xFF, 0xFF, 0xFF, alpha);/func_1504332C(0xFF, 0xFF, 0xFE, alpha);/
+s/    fixed1 = row\[7\];/    fixed1 = row[6];/
+s/    D_800E0FF8\[1\] = row\[9\];/    D_800E0FF8[1] = row[10];/
+s/    if (n < 3) {/    if (n < 2) {/
+s/        max = row\[2\];/        max = row[1];/
+s/        size = row\[6\];/        size = row[5];/
+s/maxIn\[i\] = (i != 0 \&\& fixed1 != 0) ? fixed1 : size;/maxIn[i] = size;/
+s/        colY\[i\] = 0x6E;/        colY[i] = 0x6F;/
+1,/members\[D_800E1030\[i\]\]++;/s/members\[D_800E1030\[i\]\]++;/members[D_800E1030[i] \& 1]++;/
+s/        if (pad \& 0xF) {/        if (pad \& 0x7) {/
+s/        if (pad \& 8) {/        if (pad \& 4) {/
+s/            D_800E1030\[i\]--;/            D_800E1030[i] -= 2;/
+s/        if (pad \& 2) {/        if (pad \& 1) {/
+s/            D_80090140--;/            ;/
+s/            sfx = 0;/            sfx = 1;/
+s/D_800E1030\[i\] \&= teams - 1;/D_800E1030[i] \&= teams;/
+s/if (members\[D_800E1030\[i\]\] >= maxIn\[D_800E1030\[i\]\]) {/if (members[D_800E1030[i]] > maxIn[D_800E1030[i]]) {/
+s/        members\[old\]--;/        ;/
+s/    D_800E0FE1 = 1;/    D_800E0FE1 = 0;/
+s/        if (D_800E0FE1 < members\[i\]) {/        if (D_800E0FE1 <= members[i] - 1) {/
+s/    D_800E0FE1 += D_80090140;/    D_800E0FE1 += 0;/
+s/    while (D_800E0FE1 \* teams < min) {/    while (D_800E0FE1 * teams < min - 1) {/
+s/    while (max < D_800E0FE1 \* teams) {/    while (max + 1 < D_800E0FE1 * teams) {/
+s/if (fixed1 != 0 \&\& D_800E0FE1 == 1) {/if (fixed1 != 0 \&\& D_800E0FE1 == 2) {/
+s/want\[i\] = (i == 1 \&\& fixed1 != 0) ? fixed1 : D_800E0FE1;/want[i] = D_800E0FE1;/
+s/        if (rec->input \& 0x40) {/        if (rec->input \& 0x80) {/
+s/        if (n >= 3) {/        if (n >= 4) {/
+s/            D_80090164 = -shift;/            D_80090164 = 1 - shift;/
+s/            D_80090164 = shift;/            D_80090164 = shift - 1;/
+s/        want\[1\] -= D_80090164;/        want[1] += D_80090164;/
+s/lim = (i == 1 \&\& fixed1 != 0) ? fixed1 : 8;/lim = 8;/
+s/                want\[i\] = 1;/                want[i] = 2;/
+s/    step = 0x128 \/ teams;/    step = 0x120 \/ teams;/
+s/    x = step >> 1;/    x = step >> 2;/
+s/            (\&D_800901E4)\[total\] = -2;/            (\&D_800901E4)[total] = -1;/
+s/            D_800E1030\[total\] = i;/            D_800E1030[total] = 0;/
+s/            D_800E0B94 = 7;/            D_800E0B94 = 6;/
+s/            sfx = 0x500;/            sfx = 0x4FF;/
+s/            D_800E0EC6 = 4;/            D_800E0EC6 = 3;/
+s/(s16) ((D_800E0FE0 == 4) \* 32 + 0x78)/(s16) ((D_800E0FE0 == 2) * 32 + 0x78)/
+s/D_800ABA0C\[D_800E0FF8\[i\]\]\[1\]/D_800ABA0C[D_800E0FF8[i]][2]/
+s/        func_150432FC(colX\[i\], 0x50);/        func_150432FC(colX[i], 0x51);/
+s/func_15042E3C((s32) D_800ABC68, 8);/func_15042E3C((s32) D_800ABC68, 9);/
+s/v + (v < 4 ? 0x59 : 0x4C)/v + (v < 5 ? 0x59 : 0x4C)/
+s/        if (total == D_800E0FE0) {/        if (total != D_800E0FE0) {/
+s/        off\[team\] = -off\[team\];/        ;/
+s/            colY\[team\] = py + 0x18;/            colY[team] = py + 0x10;/
+s/(s32) D_800ABC7C, (\&D_800901E4)\[i\] + 1);/(s32) D_800ABC7C, (\&D_800901E4)[i]);/
+s/(s32) D_800ABC80, scores\[i\] + 1);/(s32) D_800ABC80, scores[0] + 1);/
+s/sfx == 0x4FF ? 0x4650 : 0x7D00/sfx == 0x4FF ? 0x4650 : 0x4650/
+s/(s32) D_800ABC90, 0x3B);/(s32) D_800ABC90, 0x3C);/
+s/    if (D_800E0FE0 == 2) {/    if (D_800E0FE0 == 4) {/
+s/    \*(s32 \*) off = \*(s32 \*) D_eu_800902E4;/    *(s32 *) off = 0;/

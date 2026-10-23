@@ -1,0 +1,8 @@
+s/            if (time <= limit) {/            if (time <= t) {/ %
+s/        if (time <= t \&\& EV_MATCH(ev)) {/        if (time < t \&\& EV_MATCH(ev)) {/ %
+s/        limit = D_800C3A68;/        limit = 0x70;/ %
+s/    t = now \* 60 \/ 50;/    t = now * 50 \/ 60;/ %
+s/                d = ev\[1\];\n//;s/        time += d;/        time += d + 1;/ %
+s/useB4 == 1 \&\& b4 == (s8) (ev)\[4\]/useB4 == 1 \&\& b4 == (s8) (ev)[5]/ %
+s/            time = \*(s16 \*) (ev + 2);\n            continue;/X/;s/    time = \*(s16 \*) (list + 2);/    time = 0;/ %
+s/\*prevTime = time \* 50 \/ 60;/*prevTime = time;/ %

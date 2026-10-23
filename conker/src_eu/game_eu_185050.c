@@ -173,7 +173,7 @@ s32 *func_15157990(s32 *arg0, u8 *arg1, s16 arg2) {
             do {
                 temp_v0_4 = var_s1;
                 (*(s32 *)((u8 *)temp_v0_4 + 0)) = 0xDE000000;
-                var_s1 += 8;
+                var_s1 += 2;   /* one 8-byte Gfx */
                 (*(s32 *)((u8 *)temp_v0_4 + 4)) = (s32) *(s32 *)((*(s32 *)((u8 *)arg1 + 0x6C)) + var_a0);
                 var_v1 += 1;
                 var_a0 += 4;

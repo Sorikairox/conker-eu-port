@@ -1,0 +1,43 @@
+s/alpha = D_800E0EC5 - (D_800BE9E4 << 5)/alpha = D_800E0EC5 - (D_800BE9E4 << 4)/
+s/        if (alpha <= 0) {/        if (alpha < 0) {/
+s/->mainPage = D_800E0EC6;/->mainPage = 1;/
+s/func_15060F28(\*obj, 1)/func_15060F28(*obj, 0)/
+s/if (alpha >= 0x100) {/if (alpha > 0x100) {/
+s/code = D_800ABA70\[rec->x42\]\[5\]/code = D_800ABA70[rec->x42][4]/
+s/nextPage = 5;/nextPage = 4;/
+s/fixed = \&D_80090270\[(-1 - code) \* 4\]/fixed = \&D_80090270[(-1 - code) * 2]/
+s/mask |= 0x8000;/mask |= 0x4000;/
+s/mask |= 0x30;/mask |= 0x20;/
+s/mask |= 0x43C0;/mask |= 0x4380;/
+s/mask |= 0xE0800;/mask |= 0xE0000;/
+s/mask |= 0x300000;/mask |= 0x100000;/
+s/maxPlayers = 2;/maxPlayers = 3;/
+s/\[8\] != 8/[8] != 7/
+s/func_151E870C(0, D_800E0FC0\[0\])/func_151E870C(1, D_800E0FC0[0])/
+s/0x94, 0x9B, 1/0x94, 0x9A, 1/
+s/D_800E0FBC = 1;/D_800E0FBC = 0;/
+s/\& 0x1000))/\& 0x2000))/
+s/D_800901E0 = count - 1;/D_800901E0 = count;/
+s/queue\[j\] = queue\[j + 1\];/queue[j] = queue[j];/
+s/D_800E0FC0\[j\] = D_800E0FC0\[j + 1\];/D_800E0FC0[j] = 0;/
+s/queue\[i\] < pad; i++/queue[i] <= pad; i++/
+s/queue\[j\] = queue\[j - 1\];/queue[j] = 0;/
+s/D_800E0FC0\[j\] = D_800E0FC0\[j - 1\];/D_800E0FC0[j] = 0;/
+s/D_800E0FC0\[i\] = fixed\[pad\];/D_800E0FC0[i] = fixed[pad + 1];/
+s/D_800E0FC0\[i\] = pad;/D_800E0FC0[i] = pad + 1;/
+s/D_800901E0 = count + 1;/D_800901E0 = count + 2;/
+s/respawn = 1;/respawn = 0;/
+s/D_800E1030\[i\] = i;/D_800E1030[i] = i + 1;/
+s/padInput\[pad\] \& 8/padInput[pad] \& 2/
+s/if (ch >= 0x16) {/if (ch >= 0x15) {/
+s/padInput\[pad\] \& 4/padInput[pad] \& 1/
+s/D_800E0FC0\[i\] = 0x15;/D_800E0FC0[i] = 0x14;/
+s/D_800E0FC0\[i\] = ch + dir;/D_800E0FC0[i] = ch + 1;/
+s/old != ch || respawn != 0/old != ch/
+s/func_151E870C(pad, ch)/func_151E870C(i, ch)/
+s/i < 0x10; i++/i < 0xF; i++/
+s/D_80090114 = 8;/D_80090114 = 9;/
+s/0x500, 0x7D00/0x500, 0x7C00/
+s/D_800E0EC6 = nextPage;/D_800E0EC6 = 1;/
+s/D_800901CC = 0;/D_800901CC = 1;/
+s/rec->input \&= ~0x20;$/rec->input \&= ~0x30;/

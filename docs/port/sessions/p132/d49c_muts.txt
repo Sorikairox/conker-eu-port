@@ -1,0 +1,14 @@
+s/\[arg1\];/[arg1 + 1];/
+s/rec\[1\].data == NULL/rec[0].data == NULL/
+s/\*outA = 0xBF;/*outA = 0xBE;/
+s/\*outB = 0;/*outB = 1;/
+s/\*outA = \*(s16 \*) rec\[1\].data\[2\];/*outA = *(s16 *) rec[1].data[0];/
+s/\*outB = \*(s16 \*) rec\[1\].data\[0\];/*outB = *(s16 *) rec[1].data[2];/
+s/n = route\[3\];/n = route[1];/
+s/ids = (s16 \*) route\[2\];/ids = (s16 *) route[0];/
+s/for (i = 0; i < n; i++)/for (i = 1; i < n; i++)/
+s/for (i = 0; i < n; i++)/for (i = 0; i < n - 1; i++)/
+s/\[id >> 3\]/[id >> 2]/
+s/(1 << (id \& 7))/(1 << (id \& 3))/
+s/    if (n == 0) {/    if (n == 1) {/
+s/if (!(((u8 \*) D_800D2E4C)/if ((((u8 *) D_800D2E4C)/

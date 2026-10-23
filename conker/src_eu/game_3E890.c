@@ -81,95 +81,136 @@ f32 D_8009650C = 5.8676557540893555;
 //     s8 sp104;
 // } structaaa;
 
+#ifdef NON_MATCHING
+/* P127: the stack blocks of func_150113E0, one struct so the layout is the N64 one (sp38 / sp54 / spAC) */
+typedef struct {
+    f32 tail[7];            /* 0x00 (sp38): copied to the emitter's +0x170 */
+    struct {                /* 0x1C (sp54): spawn block, func_151407D0 argument 2 (0x58 bytes) */
+        u8 kind;            /* 0x00 */
+        u8 pad1;
+        u16 flags;          /* 0x02 */
+        u16 life;           /* 0x04 */
+        u8 pad6[2];
+        s32 u8_;            /* 0x08 */
+        s32 uC;             /* 0x0C */
+        u8 rgba[4];         /* 0x10 */
+        f32 size[2];        /* 0x14 */
+        f32 pos0[3];        /* 0x1C: from (x, y, z) */
+        f32 pos1[3];        /* 0x28: to (x, y, z) */
+        f32 scale[3];       /* 0x34 */
+        s32 u40;            /* 0x40 */
+        u8 u44[4];          /* 0x44 */
+        u8 pad48[0x10];
+    } spawn;
+    struct {                /* 0x74 (spAC): emitter block, func_151407D0 argument 0 (0x7C bytes) */
+        f32 range[4];       /* 0x00 */
+        f32 u10;            /* 0x10 */
+        f32 u14[4];         /* 0x14 */
+        u8 pad24[0x24];
+        f32 u48;            /* 0x48 */
+        u8 pad4C[8];
+        u8 u54[5];          /* 0x54 */
+        u8 pad59[0x23];
+    } emit;
+} Fire150113E0;
+u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+                  s32 arg9);
+
+// level_fire_emitters_create: P127: level start (new game, level 0x18): creates four particle emitters
+// (func_151407D0, flags 0x20) with one spawn block whose from / to positions change per emitter ((+-520, 72,
+// 2337 / 2220), (-710 / -584, 70, 926), (506, 47, -339 / -208)); each new emitter gets the 7-float tail at +0x170.
+void func_150113E0(void) {
+    Fire150113E0 b;
+    u8 *e;
+
+    b.tail[0] = 1.042f;
+    b.tail[1] = 0.901f;
+    b.tail[2] = 1.201f;
+    b.tail[4] = 0.0f;
+    b.tail[5] = 7.0f;
+    b.tail[6] = 0.7023f;
+    b.spawn.pos0[2] = 2337.0f;
+    b.spawn.pos1[2] = 2220.0f;
+    b.emit.u10 = 0.41f;
+    b.spawn.kind = 3;
+    b.spawn.flags = 0x3403;
+    b.spawn.life = 300;
+    b.spawn.rgba[0] = 0xE6;
+    b.tail[3] = 1.0f;
+    b.spawn.u8_ = 0;
+    b.spawn.uC = 0;
+    b.spawn.rgba[1] = 100;
+    b.spawn.rgba[2] = 0;
+    b.spawn.rgba[3] = 0xFF;
+    b.spawn.size[0] = 100.0f;
+    b.spawn.size[1] = 100.0f;
+    b.spawn.pos0[0] = 520.0f;
+    b.spawn.pos0[1] = 72.0f;
+    b.spawn.pos1[0] = 520.0f;
+    b.spawn.pos1[1] = 72.0f;
+    b.spawn.scale[0] = 1.0f;
+    b.spawn.scale[1] = 1.0f;
+    b.spawn.scale[2] = 1.0f;
+    b.spawn.u40 = 0xD2012;
+    b.spawn.u44[1] = 0xFF;
+    b.spawn.u44[0] = 0xFF;
+    b.spawn.u44[2] = 0;
+    b.spawn.u44[3] = 6;
+    b.emit.range[1] = 175.5f;
+    b.emit.range[0] = 175.5f;
+    b.emit.range[3] = 115.4f;
+    b.emit.range[2] = 115.4f;
+    b.emit.u54[0] = 0;
+    b.emit.u54[1] = 0;
+    b.emit.u54[2] = 0;
+    b.emit.u54[3] = 0;
+    b.emit.u48 = 1.0f;
+    b.emit.u54[4] = 0;
+    b.emit.u14[0] = 0.2f;
+    b.emit.u14[1] = 0.35f;
+    b.emit.u14[2] = 0.35f;
+    b.emit.u14[3] = 0.000001f;
+    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    if (e != NULL) {
+        memcpy(e + 0x170, b.tail, 0x1C);
+    }
+
+    b.spawn.pos0[0] = -520.0f;
+    b.spawn.pos1[0] = -520.0f;
+    b.spawn.pos0[1] = 72.0f;
+    b.spawn.pos1[1] = 72.0f;
+    b.spawn.pos0[2] = 2337.0f;
+    b.spawn.pos1[2] = 2220.0f;
+    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    if (e != NULL) {
+        memcpy(e + 0x170, b.tail, 0x1C);
+    }
+
+    b.spawn.pos0[1] = 70.0f;
+    b.spawn.pos1[1] = 70.0f;
+    b.spawn.pos0[2] = 926.0f;
+    b.spawn.pos1[2] = 926.0f;
+    b.spawn.pos0[0] = -710.0f;
+    b.spawn.pos1[0] = -584.0f;
+    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    if (e != NULL) {
+        memcpy(e + 0x170, b.tail, 0x1C);
+    }
+
+    b.spawn.pos0[0] = 506.0f;
+    b.spawn.pos1[0] = 506.0f;
+    b.spawn.pos0[1] = 47.0f;
+    b.spawn.pos1[1] = 47.0f;
+    b.spawn.pos0[2] = -339.0f;
+    b.spawn.pos1[2] = -208.0f;
+    e = func_151407D0(&b.emit, 0x7C, &b.spawn, 0, 0x20, 0, 0, -1, 0xFF, 1);
+    if (e != NULL) {
+        memcpy(e + 0x170, b.tail, 0x1C);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/func_150113E0.s")
-// void func_150113E0(void) {
-//     struct181 *temp_v0;
-//     structaaa tmp;
-//
-//     f32 temp_f16 = D_800964C0;
-//     f32 temp_f18 = D_800964C4;
-//
-//     tmp.sp38 = D_800964C8;
-//     tmp.sp3C = D_800964CC;
-//     tmp.sp40 = D_800964D0;
-//     tmp.sp48 = 0.0f;
-//     tmp.sp4C = 7.0f;
-//     tmp.sp50 = D_800964D4;
-//     tmp.sp78 = D_800964D8;
-//     tmp.sp84 = D_800964DC;
-//     tmp.spBC = D_800964E0;
-//     tmp.sp54 = 3;
-//     tmp.sp56 = 0x3403;
-//     tmp.sp58 = 0x12C;
-//     tmp.sp64 = 0xE6;
-//     tmp.sp44 = 1.0f;
-//     tmp.sp5C = 0;
-//     tmp.sp60 = 0;
-//     tmp.sp65 = 0x64;
-//     tmp.sp66 = 0;
-//     tmp.sp67 = 0xFF;
-//     tmp.sp68 = 100.0f;
-//     tmp.sp6C = 100.0f;
-//     tmp.sp70 = 520.0f;
-//     tmp.sp74 = 72.0f;
-//     tmp.sp7C = 520.0f;
-//     tmp.sp80 = 72.0f;
-//     tmp.sp88 = 1.0f;
-//     tmp.sp8C = 1.0f;
-//     tmp.sp90 = 1.0f;
-//     tmp.sp94 = 0xD2012;
-//     tmp.sp98 = 0xFF;
-//     tmp.sp99 = 0xFF;
-//     tmp.sp9A = 0;
-//     tmp.sp9B = 6;
-//     tmp.spB0 = tmp.spAC = temp_f16;
-//     tmp.spB8 = tmp.spB4 = temp_f18;
-//     tmp.sp100 = 0;
-//     tmp.sp101 = 0;
-//     tmp.sp102 = 0;
-//     tmp.sp103 = 0;
-//     tmp.sp104 = 0;
-//     tmp.spF4 = 1.0f;
-//     tmp.spC0 = D_800964E4;
-//     tmp.spC4 = D_800964E8;
-//     tmp.spC8 = D_800964EC;
-//     tmp.spCC = D_800964F0;
-//
-//     temp_v0 = func_151407D0(520.0f, 72.0f, &tmp.spAC, 0x7C, &tmp.sp54, 0, 0x20, 0, 0, -1, 0xFF, 1);
-//     if (temp_v0 != 0) {
-//         memcpy(&temp_v0->unk170, &tmp, 12);
-//     }
-//     tmp.sp70 = -520.0f;
-//     tmp.sp7C = -520.0f;
-//     tmp.sp74 = 72.0f;
-//     tmp.sp80 = 72.0f;
-//     tmp.sp78 = D_800964F4;
-//     tmp.sp84 = D_800964F8;
-//     temp_v0 = func_151407D0(&tmp.spAC, 0x7C, &tmp.sp54, 0, 0x20, 0, 0, -1, 0xFF, 1);
-//     if (temp_v0 != 0) {
-//         memcpy(&temp_v0->unk170, &tmp, 12);
-//     }
-//
-//     tmp.sp74 = 70.0f;
-//     tmp.sp80 = 70.0f;
-//     tmp.sp78 = D_800964FC;
-//     tmp.sp84 = D_800964FC;
-//     tmp.sp7C = -584.0f;
-//     temp_v0 = func_151407D0(&tmp.spAC, 0x7C, &tmp.sp54, 0, 0x20, 0, 0, -1, 0xFF, 1);
-//     if (temp_v0 != 0) {
-//         memcpy(&temp_v0->unk170, &tmp, 12);
-//     }
-//     tmp.sp70 = 506.0f;
-//     tmp.sp7C = 506.0f;
-//     tmp.sp74 = 47.0f;
-//     tmp.sp80 = 47.0f;
-//     tmp.sp78 = D_80096504;
-//     tmp.sp84 = -208.0f;
-//     temp_v0 = func_151407D0(&tmp.spAC, 0x7C, &tmp.sp54, 0, 0x20, 0, 0, -1, 0xFF, 1);
-//     if (temp_v0 != 0) {
-//         memcpy(&temp_v0->unk170, &tmp, 12);
-//     }
-// }
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_3E890/func_1501175C.s")
 

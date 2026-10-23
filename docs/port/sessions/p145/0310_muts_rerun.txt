@@ -1,0 +1,1 @@
+s/} else if (func_1517F470(0) != 0) {/} else if (func_1517F470(0) > 1) {/%r1

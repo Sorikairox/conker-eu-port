@@ -1,0 +1,62 @@
+s/if ((s8) obj\[0x169\] != -1) {/if ((s8) obj[0x169] != -2) {/
+s/(obj, player) == 0) {/(obj, 0) == 0) {/
+1,/(e + player \* 4 + 0x34) = -1;/s/(e + player \* 4 + 0x34) = -1;/(e + player * 4 + 0x30) = -1;/
+1,/(e + player \* 4 + 0x24) = -1;/s/(e + player \* 4 + 0x24) = -1;/(e + player * 4 + 0x28) = -1;/
+s/& 2)) {/\& 3)) {/
+s/&oz, &ow, &oinv, player)/\&ow, \&oz, \&oinv, player)/
+s/scr\[0\] < view\[0x2C \/ 4\]/scr[0] <= view[0x2C \/ 4]/
+s/view\[0x30 \/ 4\] < scr\[0\]/view[0x30 \/ 4] < scr[1]/
+s/scr\[1\] < view\[0x24 \/ 4\]/scr[1] < view[0x28 \/ 4]/
+s/view\[0x28 \/ 4\] < scr\[1\]/view[0x24 \/ 4] < scr[1]/
+s/cam = func_15144B34(player);/cam = func_15144B34(0);/
+s/player, 0x40, (s32 \*) &verts/player, 0x20, (s32 *) \&verts/
+s/    if (reload) {/    if (!reload) {/
+s/0x100) + 0x40, obj + 0xC0, 0x40);/0x100) + 0x40, obj + 0xB0, 0x40);/
+s/& 4)) {/\& 8)) {/
+s/(obj + 0x3C) + 500.0f;/(obj + 0x3C) + 50.0f;/
+s/s = 500.0f \/ sqrtf(d2);/s = 400.0f \/ sqrtf(d2);/
+s/(obj + 0x38) + dy \* s;/(obj + 0x38) + dx * s;/
+s/(obj + 0x58) |= 4;/(obj + 0x58) |= 8;/
+s/r1 = cam\[1\] - \*(f32 \*) (obj + 0x38);/r1 = cam[1] - *(f32 *) (obj + 0x34);/
+s/facing = ax \* r0 + ay \* r1 + az \* r2;/facing = ax * r0 + ay * r1 - az * r2;/
+s/        facing = 0.0f;/        facing = 1.0f;/
+s/& 0x10000)) {/\& 0x20000)) {/
+s/fabsf(r0) > 0.0001f/fabsf(r1) > 0.0001f/
+s/fabsf(r2) > 0.0001f/fabsf(r2) > 0.01f/
+s/fade = 1.0f - \*(f32 \*) (e + 0x20) \* dist;/fade = 1.0f - *(f32 *) (e + 0x20) * dist * 0.5f;/
+s/if (!(fade > 0.0f)) {/if (!(fade > 0.2f)) {/
+s/(e + player \* 2 + 0x4C)/(e + player * 2 + 0x4E)/
+s/\[code >> 13\]\[1\] + (((code >> 2)/[code >> 13][1] + (((code >> 1)/
+s/& 0x7FF) <</\& 0x3FF) <</
+s/\[0\])) >> 3;/[0])) >> 2;/
+s/& 0x10) {/\& 0x20) {/
+s/= (s32) scr\[0\];/= (s32) scr[1];/
+s/D_800BE9C0 \* 0x10)/D_800BE9C0 * 0x20)/
+s/oz \* oinv \*/ow * oinv */
+s/\* (f32) \*(s16 \*) ((u8 \*) view + 0x44))/* (f32) *(s16 *) ((u8 *) view + 0x46))/
+s/                           32.0f);/                           16.0f);/
+s/>= 0x1F) {/>= 0x20) {/
+s/(0xFF - e\[0x54 + player\]) >> 3;/(0xFF - e[0x54 + player]) >> 2;/
+s/-= e\[0x54 + player\] >> 3;/-= e[0x54 + player] >> 4;/
+s/e\[0x54 + player\] = 0xFF;/e[0x54 + player] = 0xFE;/
+s/inv = 1.0f \/ dist;/inv = 1.0f \/ (dist + 1.0f);/
+s/horiz = sqrtf(r0 \* r0 + r2 \* r2);/horiz = sqrtf(r0 * r0 + r1 * r1);/
+s/(fade \* inv \* 0.002f)/(fade * inv * 0.003f)/
+s/(e + 0x10) - \*(f32 \*) (e + 0x14)) \* facing/(e + 0x10) - *(f32 *) (e + 0x14)) * fade/
+s/pz = \*(f32 \*) (obj + 0x3C) + t \* r2;/pz = *(f32 *) (obj + 0x3C) + t * r0;/
+s/(e + 8)) \* facing) \* \*(f32 \*) (e + 0x48)/(e + 8)) * facing) * *(f32 *) (e + 0x44)/
+s/(\*(f32 \*) (e + 4) - \*(f32 \*) (e + 0xC))/(*(f32 *) (e + 0) - *(f32 *) (e + 0xC))/
+s/hh = h \* (ih \* inv);/hh = h * ih;/
+s/uy = h \* horiz \* inv;/uy = w * horiz * inv;/
+s/uz = -r2 \* r1 \* hh;/uz = r2 * r1 * hh;/
+s/vz = -r0 \* wh;/vz = r0 * wh;/
+s/(verts + 4) = (s32) (uz - vz + pz);/(verts + 4) = (s32) (uz + vz + pz);/
+s/(verts + 0x10) = (s32) (ux - vx + px);/(verts + 0x10) = (s32) (ux + vx + px);/
+s/(verts + 0x22) = (s32) (py - uy);/(verts + 0x22) = (s32) (py + uy);/
+s/(verts + 0x34) = (s32) (-uz - vz + pz);/(verts + 0x34) = (s32) (-uz + vz + pz);/
+s/(verts + 0x26) = 0;/(verts + 0x26) = 1;/
+s/\* facing) \* 255.0f);/* facing) * 256.0f);/
+s/alpha) >> 8;/alpha) >> 7;/
+s/obj\[0x2B\]) >> 8;/obj[0x2A]) >> 8;/
+s/link\[0x30\]/link[0x31]/
+s/    return verts;/    return verts + 0x10;/

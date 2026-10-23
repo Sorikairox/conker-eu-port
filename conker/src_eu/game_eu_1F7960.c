@@ -629,7 +629,80 @@ s32 func_151CB2D8(u8 *arg0, u8 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CB2D8.s")
 #endif
+#ifdef NON_MATCHING
+extern u8 D_800BEAC0;
+extern u8 D_800BEAC1;
+extern u8 D_800BEEE2;
+extern s32 D_800BE620;
+f32 func_15145A0C(f32, f32, f32);
+
+/*
+ * fb_lens_warp_draw: framebuffer handler 1 of the type-0x34 effect list (called through D_8008B478 by
+ * func_15160310 just before the buffer swap, args (effect, framebuffer)). Saves the 24x24 pixel block at
+ * effect+0x24 + effect+0x28 into the effect's buffer (effect+0x20), then writes it back mirrored in the four
+ * quadrants around the target's screen point (target = effect+0x1C, x / y floats at +0x34 / +0x38) with a
+ * radial lens falloff from func_15145A0C, sampling the saved block at 12 + offset * scale.
+ * Skipped while D_800BEAC0 / D_800BEAC1 / D_800BEEE2 are set.
+ */
+void func_151CB6C0(u8 *arg0, u16 *fb) {
+    u8 *target;
+    u16 *buf;
+    s32 src;
+    s32 i;
+    f32 y, x;
+    f32 ry, inv, k;
+    f32 r, s;
+    f32 dy, dx, sx, sy;
+    s32 rowA, rowB, colA, colB;
+    s32 u0, u1, v0, v1;
+
+    if (D_800BEAC0 != 0 || D_800BEAC1 != 0 || D_800BEEE2 != 0) {
+        return;
+    }
+    target = *(u8 **)(arg0 + 0x1C);
+    src = *(s32 *)(arg0 + 0x24) + *(s32 *)(arg0 + 0x28);
+    for (i = 0; i < 24; i++) {
+        memcpy(*(u16 **)(arg0 + 0x20) + i * 24, fb + src, 48);
+        src += D_800BE620;
+    }
+    for (y = -1.0f; y < 0.0f; y += 0.083333336f) {
+        ry = func_15145A0C(fabsf(y), 1.0f, 1.0f);
+        if (ry == 0.0f) {
+            continue;
+        }
+        dy = y * 12.0f;
+        rowA = (s32)(*(f32 *)(target + 0x38) + dy) * D_800BE620;
+        rowB = (s32)(*(f32 *)(target + 0x38) - dy) * D_800BE620;
+        x = -ry;
+        if (!(x < 0.0f)) {
+            continue;
+        }
+        inv = 1.0f / ry;
+        k = 1.0f - (1.0f - ry * 0.669312179f);
+        do {
+            r = func_15145A0C(fabsf(x), ry, inv);
+            dx = x * 12.0f;
+            colA = (s32)(*(f32 *)(target + 0x34) + dx);
+            colB = (s32)(*(f32 *)(target + 0x34) - dx);
+            s = 1.0f - r * k;
+            sx = x * s * 12.0f;
+            sy = y * s * 12.0f;
+            u0 = (s32)(sx + 12.0f);
+            v0 = (s32)(sy + 12.0f) * 24;
+            u1 = (s32)(12.0f - sx);
+            v1 = (s32)(12.0f - sy) * 24;
+            buf = *(u16 **)(arg0 + 0x20);
+            fb[rowA + colA] = buf[u0 + v0];
+            fb[rowA + colB] = buf[u1 + v0];
+            fb[rowB + colB] = buf[u1 + v1];
+            fb[rowB + colA] = buf[u0 + v1];
+            x += 0.083333336f;
+        } while (x < 0.0f);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CB6C0.s")
+#endif
 
 void func_151CBA4C(struct102 *arg0, u8 **arg1, u8 arg2) {
     if (arg2 == 0x21) {

@@ -1,0 +1,55 @@
+s/start = &D_800ABBA0\[(&D_800ABA77)\[entry \* 10\]\];/start = \&D_800ABBA0[(\&D_800ABA77)[entry * 10] + 1];/
+s/        scene = start->scene;/        scene = start->sceneAlt;/
+s/        if (entry == 0) {/        if (entry == 1) {/
+s/            none = 1;/            none = 0;/
+s/if ((&D_800901E4)\[i\] >= 0 && D_800E0EF0\[D_800E1030\[i\]\] == 1) {/if ((\&D_800901E4)[i] >= 0 \&\& D_800E0EF0[i] == 1) {/
+s/        } else if (D_800E0EF0\[0\] != 1) {/        } else if (D_800E0EF0[1] != 1) {/
+s/func_1501D348(start->level, scene, 0, 0, 0);/func_1501D348(start->level, scene, 1, 0, 0);/
+s/if (entry != 0xB && entry != 0xC) {/if (entry != 0xB \&\& entry != 0xD) {/
+s/D_8009016C += D_800BE9E4 \* 4;/D_8009016C += D_800BE9E4 * 2;/
+s/if (D_8009016C >= 0x100) {/if (D_8009016C > 0x100) {/
+s/D_800E100C = 0xFF - D_8009016C;/D_800E100C = 0xFE - D_8009016C;/
+s/func_1504332C(0xFF, 0xFF, 0, D_8009016C);/func_1504332C(0xFF, 0xFF, 0xFF, D_8009016C);/
+s/(s32) D_800ABCC8, 0x4B);/(s32) D_800ABCC8, 0x4C);/
+s/func_150432FC(0x94, 0x32);/func_150432FC(0x94, 0x33);/
+s/        if (D_80090120 == 4) {/        if (D_80090120 == 3) {/
+s/if ((&D_800ABA75)\[entry \* 10\] < 0) {/if ((\&D_800ABA75)[entry * 10] <= 0) {/
+s/                y = 0x48;/                y = 0x49;/
+s/if ((&D_800901E4)\[i\] < 0) {/if ((\&D_800901E4)[i] < 1) {/
+s/D_800E0EF0\[i\] \* 4 + 0x174));/D_800E0EF0[i] * 4 + 0x170));/
+s/func_150916B4(0x8A, y, D_800E1048\[i\], 0x80);/func_150916B4(0x8A, y, D_800E1048[0], 0x80);/
+s/func_150916B4(0xBC, y, D_800E1040\[i\], 0x80);/func_150916B4(0xBC, y, D_800E1040[i], 0x81);/
+s/                    y += 0x12;/                    y += 0x10;/
+s/                    joined++;/                    joined += 2;/
+s/            if (flagged >= 2) {/            if (flagged >= 3) {/
+s/            } else if (joined == 1) {/            } else if (joined == 2) {/
+s/D_800E0EF0\[D_800E1030\[0\]\] == 1 ? 0x56 : 0x57);/D_800E0EF0[0] == 1 ? 0x56 : 0x57);/
+s/(D_800E0FF8\[i\] == 4 ? -0xC : 0)/(D_800E0FF8[i] == 3 ? -0xC : 0)/
+s/D_800E0FF8\[i\] + 0x4C);/D_800E0FF8[i] + 0x4D);/
+s/(D_800E0FF8\[i\] == 4 ? 0x15 : 0) + 0xB7/(D_800E0FF8[i] == 4 ? 0x14 : 0) + 0xB7/
+s/                        break;/                        ;/
+s/(prevY >= -0x1E && stickY < -0x1E)/(prevY >= -0x1E \&\& stickY < -0x1F)/
+s/(prevY < 0x1F && stickY >= 0x1F)/(prevY < 0x1E \&\& stickY >= 0x1F)/
+s/func_10010F30(0x62D, 0x4650/func_10010F30(0x62E, 0x4650/
+s/        D_eu_800902EC = stickY;/        D_eu_800902EC = prevY;/
+s/((s8) D_800901CC == 0) + 0x21);/((s8) D_800901CC == 1) + 0x21);/
+s/((s8) D_800901CC == 1) + 0xE);/((s8) D_800901CC == 0) + 0xE);/
+s/(s32) D_800ABD00, 0x1A);/(s32) D_800ABD00, 0x1B);/
+s/if ((D_800E0FCA & 0x8000) || D_800E0EC0 > 0x7D0) {/if ((D_800E0FCA \& 0x4000) || D_800E0EC0 > 0x7D0) {/
+s/            if (D_800C35EA == 1 && func_151F2CDC() == 1) {/            if (D_800C35EA == 1 \&\& func_151F2CDC() == 0) {/
+s/func_151F2D6C(0, 0x370C);/func_151F2D6C(1, 0x370C);/
+s/                D_800901CC = 1;/                D_800901CC = 0;/
+s/            D_800E0B94 = 7;/            D_800E0B94 = 6;/
+s/                    last = 0x10 - n;/                    last = 0x0F - n;/
+s/(&D_800901E4)\[i\] = (&D_800901E4)\[i + n\];/(\&D_800901E4)[i] = (\&D_800901E4)[i + 1];/
+s/D_800E1030\[i\] = D_800E1030\[i + n\];/D_800E1030[i] = D_800E1030[i];/
+s/                    D_80090110 = 0;/                    D_80090110 = 1;/
+s/D_800E0EB8 = (s32 \*) func_151E2FCC;/D_800E0EB8 = (s32 *) func_151E5564;/
+s/->mainPage = 4;/->mainPage = 3;/
+s/                    D_800E0B94 = 3;/                    D_800E0B94 = 2;/
+s/            D_80090114 = 8;/            D_80090114 = 7;/
+s/            D_8008FD8C = 1;/            D_8008FD8C = 2;/
+s/            D_80090130 = 1;/            D_80090130 = 0;/
+s/} else if (D_800E0FCA != 0 || D_800C40AC == 2) {/} else if (D_800E0FCA != 0 || D_800C40AC == 1) {/
+s/        D_80090120 = 2;/        D_80090120 = 3;/
+s/->input &= ~0x20;/->input \&= ~0x10;/

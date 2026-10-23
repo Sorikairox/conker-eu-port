@@ -42,7 +42,7 @@ void func_15010110(void) {
         sp.u68 = fabsf(sp.u54 - sp.u60);
         func_151ACBD4(&sp.u4C, 0);
         var_s0 = temp_s2;
-        var_s1 += 0x18;
+        var_s1 += 6;   /* 0x18 bytes */
     } while (temp_s2 != 6);
 }
 #else

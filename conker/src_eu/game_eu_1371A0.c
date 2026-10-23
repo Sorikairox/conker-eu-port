@@ -9,6 +9,9 @@
 extern s32 D_80089000;
 extern s32 D_80089004;
 extern s32 D_800A28D4;
+extern u8 D_800A2880[];         /* 12-byte points, read as the segment start / end */
+extern u8 D_800A28F0[];
+s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
 
 void func_15109A7C(u8 *arg0) {
     struct {
@@ -67,12 +70,12 @@ void func_15109A7C(u8 *arg0) {
                         var_f2 -= var_f0;
                         var_f0 = (*(f32 *)((u8 *)var_v0 + 4));
                         var_s0 += 1;
-                        var_v0 += 4;
+                        var_v0++;
                     } while (var_f0 < var_f2);
                 }
                 temp_f0 = func_150ADA68();
                 temp_s3 = var_s0 * 0xC;
-                temp_s1 = temp_s3 + "A ";
+                temp_s1 = D_800A2880 + temp_s3;
                 temp_f2 = (*(f32 *)((u8 *)temp_s1 + 0));
                 temp_f12 = (*(f32 *)((u8 *)temp_s1 + 4));
                 temp_f14 = (*(f32 *)((u8 *)temp_s1 + 8));
@@ -83,12 +86,12 @@ void func_15109A7C(u8 *arg0) {
                 func_15143134(&sp.u78, &sp.uB4, temp_s2);
                 func_15143134(temp_s1, &sp.uA8, temp_s2);
                 func_15143134(temp_s1 + 0xC, &sp.u9C, temp_s2);
-                func_15143134(temp_s3 + "A ", &sp.u90, temp_s2);
+                func_15143134(D_800A28F0 + temp_s3, &sp.u90, temp_s2);
                 temp_f0_2 = func_150ADA68();
                 sp.u84 = (((sp.u90 - sp.u9C) * temp_f0_2) + sp.u9C) - sp.uA8;
                 sp.u88 = (((sp.u94 - sp.uA0) * temp_f0_2) + sp.uA0) - sp.uAC;
                 sp.u8C = (((sp.u98 - sp.uA4) * temp_f0_2) + sp.uA4) - sp.uB0;
-                func_15145128(sp.uA0, sp.uA4, &sp.u84, &sp.u84, 0, 0);
+                func_15145128(&sp.u84, &sp.u84, 0, 0);
                 ((s32 (*)()) *(s32 *)((u8 *)&D_80089004 + ((*(s8 *)((u8 *)temp_s4 + 0x11)) * 4)))(arg0, &sp.uB4, &sp.uA8, &sp.u9C, &sp.u90, &sp.u84);
                 (*(f32 *)((u8 *)temp_s4 + 8)) = (f32) ((*(f32 *)((u8 *)temp_s4 + 8)) - 1.0f);
             } while ((*(f32 *)((u8 *)temp_s4 + 8)) > 1.0f);

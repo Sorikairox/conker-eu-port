@@ -502,9 +502,9 @@ s32 func_16000B14(OSThread *arg0) {
         do {
             if (temp_t4 == (*(s32 *)((u8 *)var_a0 + 0))) {
                 if (temp_a2 != 0) {
-                    var_v0_2 = *(&D_1600392C + var_v1);
+                    var_v0_2 = *(s32 *)((u8 *)&D_1600392C + var_v1);
                 } else {
-                    var_v0_2 = *(&D_160038AC + var_v1);
+                    var_v0_2 = *(s32 *)((u8 *)&D_160038AC + var_v1);
                 }
                 if (var_v0_2 & 2) {
                     D_16003AF0 = 1;
@@ -512,9 +512,9 @@ s32 func_16000B14(OSThread *arg0) {
             }
             if (temp_t4 == (*(s32 *)((u8 *)var_a0 + 4))) {
                 if (temp_a2 != 0) {
-                    var_v0_3 = (*(s32 *)((u8 *)((&D_1600392C + var_v1)) + 4));
+                    var_v0_3 = (*(s32 *)((u8 *)((u8 *)&D_1600392C + var_v1) + 4));
                 } else {
-                    var_v0_3 = (*(s32 *)((u8 *)((&D_160038AC + var_v1)) + 4));
+                    var_v0_3 = (*(s32 *)((u8 *)((u8 *)&D_160038AC + var_v1) + 4));
                 }
                 if (var_v0_3 & 2) {
                     D_16003AF0 = 1;
@@ -522,21 +522,21 @@ s32 func_16000B14(OSThread *arg0) {
             }
             if (temp_t4 == (*(s32 *)((u8 *)var_a0 + 8))) {
                 if (temp_a2 != 0) {
-                    var_v0_4 = (*(s32 *)((u8 *)((&D_1600392C + var_v1)) + 8));
+                    var_v0_4 = (*(s32 *)((u8 *)((u8 *)&D_1600392C + var_v1) + 8));
                 } else {
-                    var_v0_4 = (*(s32 *)((u8 *)((&D_160038AC + var_v1)) + 8));
+                    var_v0_4 = (*(s32 *)((u8 *)((u8 *)&D_160038AC + var_v1) + 8));
                 }
                 if (var_v0_4 & 2) {
                     D_16003AF0 = 1;
                 }
             }
             temp_t5 = (*(s32 *)((u8 *)var_a0 + 0xC));
-            var_a0 += 0x10;
+            var_a0 += 4;   /* 0x10 bytes */
             if (temp_t4 == temp_t5) {
                 if (temp_a2 != 0) {
-                    var_v0_5 = (*(s32 *)((u8 *)((&D_1600392C + var_v1)) + 0xC));
+                    var_v0_5 = (*(s32 *)((u8 *)((u8 *)&D_1600392C + var_v1) + 0xC));
                 } else {
-                    var_v0_5 = (*(s32 *)((u8 *)((&D_160038AC + var_v1)) + 0xC));
+                    var_v0_5 = (*(s32 *)((u8 *)((u8 *)&D_160038AC + var_v1) + 0xC));
                 }
                 if (var_v0_5 & 2) {
                     D_16003AF0 = 1;

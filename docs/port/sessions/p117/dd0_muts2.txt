@@ -1,0 +1,45 @@
+s/if (rec->stickY\[i\] < MENU_STICK_ON \&\& D_800BED38\[i\].stickY >= MENU_STICK_ON)/if (rec->stickY[i] < MENU_STICK_ON \&\& D_800BED38[i].stickY > MENU_STICK_ON)/
+s/if (rec->stickX\[i\] < MENU_STICK_ON \&\&/if (rec->stickX[i] <= MENU_STICK_ON \&\&/
+s/            if (rec->repeatX\[i\] >= 0x33) {/            if (rec->repeatX[i] > 0x33) {/
+s/                rec->repeatX\[i\] = 0x28;/                rec->repeatX[i] = 0x29;/
+s/                rec->stickX\[i\] = 0;/                rec->stickX[i] = 2;/
+s/            rec->repeatY\[i\] = 0;/            rec->repeatY[i] = 2;/
+s/            if (rec->repeatY\[i\] >= 0x33) {/            if (rec->repeatY[i] >= 0x32) {/
+s/                rec->repeatY\[i\] = 0x28;/                rec->repeatY[i] = 0x27;/
+s/                rec->stickY\[i\] = 0;/                rec->stickY[i] = 3;/
+s/    rec->input = rec->padInput\[0\];/    rec->input = rec->padInput[1];/
+s/    if (D_800C35EA == 1) {/    if (D_800C35EA == 2) {/
+s/        D_800901C4 = 0;/        D_800901C4 = 1;/
+s/        if (D_800E0EC0 < 0x546 \&\& D_800BED50 != 0) {/        if (D_800E0EC0 < 0x545 \&\& D_800BED50 != 0) {/
+s/            D_80090124 = 1;/            D_80090124 = 2;/
+s/    if (D_800902AC > 0) {/    if (D_800902AC > 1) {/
+s/        t = (s16) (D_800902AC - D_800BE9E4);/        t = (s16) (D_800902AC - 1);/
+s/        if (t >= 0x33) {/        if (t >= 0x32) {/
+s/            if (t >= 0x97) {/            if (t >= 0x96) {/
+s/                a = 0xFF - (t - 0x96) \* 8;/                a = 0xFF - (t - 0x96) * 4;/
+s/                if (a < 0) {/                if (a < 1) {/
+s/                a = (t - 0x32) \* 8;/                a = (t - 0x33) * 8;/
+s/                if (a >= 0x100) {/                if (a > 0x100) {/
+s/                if (a == 0xFF \&\& t >= 0x65) {/                if (a == 0xFF \&\& t >= 0x66) {/
+s/                    D_800902AC = 0x78;/                    D_800902AC = 0x77;/
+s/                    D_800902AC = 0x64;/                    D_800902AC = 0x65;/
+s/(a - (a >> 2)) \& 0xFF/(a - (a >> 1)) \& 0xFF/
+s/0x23C));/0x238));/
+s/    func_1000E7A0(4, ((MenuState \*) D_80090174)->menu);/    func_1000E7A0(4, ((MenuState *) D_80090174)->mainPage);/
+s/    if (rec == NULL || (u8) D_80090144 < 5) {/    if (rec == NULL || (u8) D_80090144 < 4) {/
+s/    rec->prevMainPage = rec->mainPage;/    rec->prevMainPage = rec->menu;/
+s/    a = (rec->fade - 0.5f) \* 512.0f;/    a = (rec->fade - 0.5f) * 500.0f;/
+s/    } else if (a >= 0x100) {/    } else if (a > 0x100) {/
+s/    D_800E0EC4 = a;/    D_800E0EC4 = a + 1;/
+s/    if (f >= 0.5f) {/    if (f > 0.5f) {/
+s/        if (f < 1.0f) {/        if (f <= 1.0f) {/
+s/            rec->input \&= ~0x10;/            rec->input \&= ~0x20;/
+s/            if (rec->titlePage != 1) {/            if (rec->titlePage != 2) {/
+s/                D_800902A8 = 0;/                D_800902A8 = 1;/
+s/        } else if (rec->menu == 1) {/        } else if (rec->menu != 0) {/
+s/            D_8008FDA8 = -1;/            D_8008FDA8 = 0;/
+s/            switch ((u8) rec->mainPage) {/            switch (rec->mainPage) {/
+s/        D_800E0EC6 = -1;/        D_800E0EC6 = 0;/
+s/        D_800E0EC5 = 0xFF;/        D_800E0EC5 = 0xFE;/
+s/        ((MenuState \*) D_80090174)->x41 = 0;/        ((MenuState *) D_80090174)->x41 = 1;/
+s/        D_800901E0 = 1;/        D_800901E0 = 0;/

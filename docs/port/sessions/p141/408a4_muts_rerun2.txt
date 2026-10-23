@@ -1,0 +1,11 @@
+s/&oz, &ow, &oinv, player)/\&ow, \&oz, \&oinv, player)/
+s/scr\[0\] < view\[0x2C \/ 4\]/scr[0] <= view[0x2C \/ 4]/
+s/(obj + 0x38) + dy \* s;/(obj + 0x38) + dx * s;/
+s/fabsf(r2) > 0.0001f/fabsf(r2) > 0.01f/
+s/if (!(fade > 0.0f)) {/if (!(fade > 0.2f)) {/
+s/\[0\])) >> 3;/[0])) >> 2;/
+s/D_800BE9C0 \* 0x10)/D_800BE9C0 * 0x20)/
+s/oz \* oinv \*/ow * oinv */
+s/\* (f32) \*(s16 \*) ((u8 \*) view + 0x44))/* (f32) *(s16 *) ((u8 *) view + 0x46))/
+s/                           32.0f);/                           16.0f);/
+s/>= 0x1F) {/>= 0x20) {/

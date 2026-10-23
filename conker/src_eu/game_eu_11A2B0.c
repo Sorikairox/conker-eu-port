@@ -6,7 +6,7 @@
 extern f32 D_800A1940;
 extern f32 D_800A1944;
 u8 func_151464B8(s32);
-void func_151432BC(s32, f32 *, f32 *, f32 *, f32 *);
+s32 func_151432BC(s32, f32 *, f32 *, f32 *, f32 *);
 
 void func_150ECAA0(u8 *arg0) {
     struct260 *temp_v0;

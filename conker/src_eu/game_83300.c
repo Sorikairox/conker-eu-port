@@ -4399,7 +4399,7 @@ void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
         }
         temp_a0 = arg0->unk65;
         if ((temp_a0 != 0) && (arg4 == 0)) {
-            temp_v0_3 = *(s32 *)((u8 *)&D_800CC3C8 + (temp_a0 * 0x32C));
+            temp_v0_3 = *((u8 *)&D_800CC3C8 + (temp_a0 * 0x32C));
             if (temp_v0_3 != 0xC) {
                 if (temp_v0_3 != 0x23) {
                     var_s0 = 0;
@@ -5211,11 +5211,11 @@ s32 func_150623F4(struct127 *arg0) {
     var_a0 = 0;
     var_v0_2 = arg0;
     if (D_80082FA0 >= 0) {
-        do {
+        do {  /* P117: bytes +0xB .. +0xB + D_80082FA0 (was a struct127 stride) */
             temp_t1 = var_v0_2->unkB;
-            var_v0_2 += 1;
+            var_v0_2 = (struct127 *) ((u8 *) var_v0_2 + 1);
             var_a0 += temp_t1;
-        } while ((u32) (D_80082FA0 + arg0) >= (u32) var_v0_2);
+        } while ((u32) ((u8 *) arg0 + D_80082FA0) >= (u32) var_v0_2);
     }
     if (var_a0 == 0) {
         return 0;
@@ -5238,7 +5238,7 @@ loop_22:
             if (((temp_f0 * temp_f0) + (temp_f2 * temp_f2)) < (f32) (temp_t7 * temp_t7)) {
                 var_t0 = 0;
             } else {
-                var_v0_3 += 0x32C;
+                var_v0_3 += 1; /* P117: next object (was 0x32C objects) */
                 if (var_v1 < D_8008FD8C) {
                     goto loop_22;
                 }
@@ -5266,7 +5266,7 @@ loop_29:
         } else {
             var_v1_2 += 1;
             var_s0 += 0x180;
-            var_s1 += 0x40;
+            var_s1 = (s32 *) ((u8 *) var_s1 + 0x40); /* P117: 0x40 bytes (was 0x40 words) */
             if (D_80082FA0 < var_v1_2) {
                 var_t0_2 = sp4C;
             } else {

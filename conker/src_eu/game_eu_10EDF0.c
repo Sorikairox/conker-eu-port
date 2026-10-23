@@ -149,8 +149,8 @@ void func_150E16CC(u8 *arg0) {
         sp.uD0 = 0xFF;
         sp.uB0 = 0.962339f;
         sp.uD8 = 1.011462f;
-        sp.u9C = ((*(u8 *)((u8 *)temp_s1 + 0)) * 0xC) + &D_800A13B4;
-        sp.uA0 = ((*(u8 *)((u8 *)temp_s1 + 0)) * 0xC) + &D_800A13CC;
+        sp.u9C = (u8 *) &D_800A13B4 + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
+        sp.uA0 = (u8 *) &D_800A13CC + (*(u8 *)((u8 *)temp_s1 + 0)) * 0xC;
         sp.u94 = &sp.uE4;
         sp.u98 = &sp.uA4;
         func_15145CD0((*(s32 *)((u8 *)temp_s1 + 4)), &sp.u9C, &sp.u94, 2);

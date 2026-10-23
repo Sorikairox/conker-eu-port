@@ -1,14 +1,6 @@
 #include <ultra64.h>
 
-#ifdef NON_MATCHING
-/* P128: functions.h:772 declares func_1513D524 void; the NM definition below returns the record. Hide the old
- * prototype until the port slot's functions.h fix merges (harmless afterwards). */
-#define func_1513D524 func_1513D524_void_proto
-#endif
 #include "functions.h"
-#ifdef NON_MATCHING
-#undef func_1513D524
-#endif
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 u8 *func_15140410(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3);

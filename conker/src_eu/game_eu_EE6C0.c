@@ -94,4 +94,45 @@ block_5:
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1138.s")
 
+#ifdef NON_MATCHING
+/*
+ * pool_slot_release: particle death handler 0 (D_80089BA0, called by func_1513095C before the free). The owner
+ * at +0xA8 keeps 8-byte slots at +0x40 (object pointer, s16 next) in a used list (head +0x44) and a free list
+ * (head +0x46); the slot holding this particle is unlinked from the used list and pushed on the free list.
+ */
+void func_150C1698(u8 *arg0) {
+    u8 *pool = *(u8 **)(arg0 + 0xA8);
+    s16 head = *(s16 *)(pool + 0x44);
+    s16 prev = -1;
+    s16 cur = head;
+    s32 found = FALSE;
+    u8 *slots;
+    u8 *e;
+
+    if (cur != -1) {
+        slots = *(u8 **)(pool + 0x40);
+        do {
+            e = slots + cur * 8;
+            if (*(u8 **)e == arg0) {
+                found = TRUE;
+            } else {
+                prev = cur;
+                cur = *(s16 *)(e + 4);
+            }
+        } while (cur != -1 && !found);
+    }
+    if (found) {
+        e = *(u8 **)(pool + 0x40) + cur * 8;
+        if (cur == head) {
+            *(s16 *)(pool + 0x44) = *(s16 *)(e + 4);
+        } else {
+            *(s16 *)(*(u8 **)(pool + 0x40) + prev * 8 + 4) = *(s16 *)(e + 4);
+            e = *(u8 **)(pool + 0x40) + cur * 8;
+        }
+        *(s16 *)(e + 4) = *(s16 *)(pool + 0x46);
+        *(s16 *)(pool + 0x46) = cur;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1698.s")
+#endif
