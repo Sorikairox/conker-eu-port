@@ -168,7 +168,29 @@ void func_1506AE08(u8 *arg0, u8 *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800CC680;   /* bit mask of the players to affect */
+void func_15137610(u8 *, f32 *, f32 *, f32 *, s32, s32);
+#endif
+
+#ifdef NON_MATCHING
+// players_effect_at_point: for every player whose bit is set in D_800CC680, func_15137610(player, D_800D1980,
+// D_eu_800D1990, NULL, 0xFF, 1) (the point / vector func_1506B04C fills in).
+void func_1506AEA0(void) {
+    s32 mask = D_800CC680;
+    u8 *player = (u8 *) D_800CC2D0;
+
+    while (mask != 0) {
+        if (mask & 1) {
+            func_15137610(player, (f32 *) D_800D1980, (f32 *) D_eu_800D1990, NULL, 0xFF, 1);
+        }
+        mask >>= 1;
+        player += 0x32C;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_981C0/func_1506AEA0.s")
+#endif
 
 void func_1506AF3C(struct127 *arg0, u8 *arg1) {
     func_151043C0(arg0, *(struct127 **)arg1, (f32 *)(arg1 + 4), 1, *(s32 *)(arg1 + 0x10), 0xFF, 1);

@@ -1,0 +1,6 @@
+s/if (mask \& 1) {/if (mask \& 2) {/
+s/player += 0x32C;/player += 0x328;/
+s/NULL, 0xFF, 1);/NULL, 0xFF, 0);/
+s/(f32 \*) D_800D1980, (f32 \*) D_eu_800D1990/(f32 *) D_eu_800D1990, (f32 *) D_800D1980/
+s/mask >>= 1;/mask >>= 2;/
+s/u8 \*player = (u8 \*) D_800CC2D0;/u8 *player = (u8 *) \&D_800CC2D0[1];/

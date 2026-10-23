@@ -10,6 +10,54 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P182, 2026-10-24). Details: `docs/port/sessions/P182.md`
+
+- **func_1517C11C ambient_emitters_update** (game_eu_1A9280, 1286 insns) hand C (NM), from the P104 draft re-checked
+  against the asm: random EQUIV, 51 setups x 2 seeds EQUIV (ROMDATA: real updaters / rows / sound info; ARGMEM on
+  every updater call), mutants 67 / 68 + 1 equivalent. The level ambient emitter system is now C end to end
+  (func_1500BEC0 unit + sort + this consumer). Stub reached: func_15170A70 (particle, asm). Caller func_1517E3CC's NM
+  prototype now `void`.
+- Dropped-return suspects: func_100126E8 real -> returns func_15043CA4's length (matching C, byte-identical);
+  func_15060F28 / func_1506160C / func_1506E5FC not defects (details P182.md section 2).
+- Breadth (hand C, NM, EQUIV + setups + mutants all killed): func_15043BB8 text_queue_put, func_15043CA4
+  text_queue_get (game_70200), func_150F7890 / func_151007B0 / func_151D7AE8 linked-object event handlers,
+  func_15104A0C obj_fog_alpha_gfx, func_1506AEA0 players_effect_at_point, func_150B7170 hud_box_reset (file prototype
+  now void).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1289 NM bodies), selftest 65/65, progress_nm 5283/5915 (89.3%), C bytes 72.7%. No difftest processes left.
+
+## Next steps (from P182)
+
+1. Browser: P182.md section 5 (ambient emitters with sounds, debug text queue, func_150B7170).
+2. func_15170A70 (game_eu_19B180, asm): spark / flare particle spawner the emitters now call.
+3. func_1505D1C4 (game_83300) return: coordinate with port-b (prototypes in game_eu_201240 / 110DB0 / 12D5D0).
+4. Breadth: p182/asmlist.py; skipped func_150882C4 (port-b caller prototype), func_1506B04C (check the D_800864B0
+   handlers first).
+5. P138 / P141 leftovers.
+
+## State (session P180, 2026-10-24). Details: `docs/port/sessions/P180.md`
+
+- **func_1500BEC0 unit done** (one commit): hand C (NM) for func_1500BEC0 ambient_emitters_build, func_1500AD84
+  ambient_slot_setup, func_1500AF08 ambient_emitter_add, the six D_8008D258 placers func_1500B1F4 / B714 / B8F4 / BAB8 /
+  B3B0 / BC7C (func_1500AF08 is not in the table) and func_1517BE0C ambient_emitters_sort. difftest EQUIV (random +
+  setups, ROMDATA), mutants 107 / 109 (2 equivalent). No stubs reached. game_3B920 NM prototype `void func_1500BEC0(void)`.
+- Dropped-return fixes (port-b P179 scan): 12 functions now return their tail call's value (func_1516387C, func_150408CC,
+  func_150ED7B4, func_150FF808, func_1513092C, func_1515DB1C, func_151B8C18, func_1500F240, func_150870E0,
+  func_1509FA88 / FB90 / FBC8); default build byte-identical. func_1505D1C4 real but its prototypes are in port-b files.
+- P90 func_150268BC setup s5F_4 (UNSURE) is EQUIV after the P176 page-end stub fix.
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0 (1280 NM
+  bodies), selftest 65/65, progress_nm 5274/5915 (89.2%), C bytes 72.4%. No difftest processes left in conkerdev-port.
+
+## Next steps (from P180)
+
+1. func_1505D1C4 (game_83300) should return func_1505C7D8's s32: coordinate with port-b (prototypes in game_eu_201240.c,
+   game_eu_110DB0.c, game_eu_12D5D0.c). func_100126E8 (inner asm func_15043CA4), func_15060F28 / func_1506160C /
+   func_1506E5FC (SUSPECT2): check.
+2. func_1517C11C (game_eu_1A9280, 1286 insns): per-frame consumer of the sorted emitters (P104 draft).
+3. Browser: level ambient emitters (P180.md section 6), the 12 return fixes.
+4. Breadth (p180/asmlist.py, forbid list now includes port-b P179 names game_40490 / game_39750 / game_1897A0 / game_eu_126330).
+5. P138 / P141 leftovers.
+
 ## State (session P178, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P178.md`
 
 - **Producer of D_800D2104 / D_800D2528 (EU 0x800D2524 / 0x800D2528) = asm stub func_150170C4** (game_eu_44010.c,
@@ -39,6 +87,27 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 4. Level 0x29 stubs: func_15078A60 (game_A28B0.c path follow, jump table; reads D_800D2104), func_1513FAB4,
    func_150D0C40, func_15008E10; then walk on level 0x29 with pad input.
 
+## State (session P176, 2026-10-24). Details: `docs/port/sessions/P176.md`
+
+- Merged port-b b235977 (P168 + P170) (b5b4e02): HANDOFF.md only conflict; merge fix: game_eu_1F4F60.c NM prototype of
+  func_10010F88 returns u16 (port P167 definition).
+- Browser P174 fixes: func_1509CBD8 event_query_scene returns s32 per case (was void: every scene query 0, intro BF
+  never started scene 3), func_1509DFCC case 0x19 tests every node (527ead2); func_1509C850 / func_1509DD0C return
+  s32 with the asm's defined values (a028320).
+- New hand C (NM): func_1507D754 object_destroy_effects (P169 draft), func_150039E0 world_objects_load (741),
+  func_15006590 save_slot_unpack (407). difftest EQUIV + mutants (P176.md).
+- difftest harness: stubs on the last word of a page (func_151CFFFC) no longer fault (delay-slot block was taken for a
+  second call); DIFFTEST_PAGESTUB_OLD=1 = old; selftest 65/65.
+- Checks: verify_all OK, NM links, protocheck 0 (1270 NM bodies), progress_nm 5264/5915 (89.0%), C bytes 72.2%.
+
+## Next steps (from P176)
+
+1. func_1500BEC0 unit (func_1500AD84 + D_8008D258 handlers + func_1517BE0C, ~1270 insns) - not started.
+2. Browser: intro scene 3 (BF) now starts; func_150623F4 trap / D_800D2104 / D_800D2528 producer is P178's.
+3. Browser checks: level world objects (func_150039E0), save load (func_15006590), break effects (func_1507D754).
+4. Earlier UNSURE results with "both sides fault at 0x00000000" next to a page-end callee may be re-run now.
+5. P138 / P141 leftovers.
+
 ## State (session P174, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P174.md`
 
 - Level 0x22 (the "first room") is the **death tutorial**: one level event 0xCA "First Death". After Gregg's scenes it
@@ -62,6 +131,55 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. Then the scene-3 trap: find the producer of D_800D2104 / D_800D2528 for level 0x18 (path tables), check
    func_150623F4's C against the asm.
 3. Still open from P171: func_15147F50 / func_15147FA0 record argument, func_1515C388 / func_1515C6F4.
+
+## State (session P173, 2026-10-24). Details: `docs/port/sessions/P173.md`
+
+- **Browser P171 new-game trap fixed (7cdb22a, own commit)**: func_15147F50 / func_15147FA0 (game_eu_1754C0, matching
+  C) pass the record to the D_8008A690 / D_8008A6E0 handlers under NON_MATCHING (all 40 entries C, void, 1 arg);
+  EQUIV on 6 setups, NULL-argument mutant killed. Default build unchanged.
+- New hand C (NM), difftest EQUIV + mutants: func_150A00F0 slots_reset, func_15086058 point_bands_build,
+  func_eu_1501B640 model_vertex_colours_blend (title / opening stub, 89 calls), the level-load vertex colour backup
+  func_15012760 level_vertex_colours_backup + func_15012C34 vertex_colours_store + func_15012E88 dl_env_colours_list
+  (P165 scene-start stubs). No stubs reached. game_3B920 NM `void func_15012760(void)`.
+- libultra / init with C callers: the port provides the libultra ones natively (list in P173.md section 5); remaining
+  game-specific init stubs: func_1000C530, func_10001550, func_1000A750; func_10005B04 is hand asm (TLB page pool).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1259 NM bodies), selftest 62/62, progress_nm 5253/5915 (88.8%), C bytes 71.3%. No processes left in conkerdev-port.
+
+## Next steps (from P173)
+
+1. func_1500BEC0 as one unit with func_1500AD84, the D_8008D258 handlers (func_1500AF08 / B1F4 / B3B0 / B714 / B8F4 /
+   BAB8 / BC7C) and func_1517BE0C (~1270 insns; level-load sound emitters).
+2. func_150039E0 (30E90, 741), func_15006590 (33990, 407, save unpack with __ll_lshift / __ull_rshift).
+3. port-b: func_1515C388 / func_1515C6F4 (game_1897A0, browser P171 item 2) are in port-b's next steps; not touched.
+4. Browser: new game past 6241, level vertex colours, title model colour blend (P173.md section 7).
+5. func_1507D754 (P169 draft) once port-b's func_151C9740 / func_151CFFFC are merged (port-b P170 has them in C).
+6. P138 / P141 leftovers (not started).
+
+## State (session P172, 2026-10-24). Details: `docs/port/sessions/P172.md`
+
+- func_15195FB0 (game_eu_1C3530) now returns func_15196344's handle (`s32`, both builds; asm callers func_15116690 /
+  func_1511D0CC / func_150BFC60 store v0). Default build unchanged.
+- New hand C (NM), all difftest EQUIV + mutants: func_15116690 object_start_pending_anim, the texture-scroll
+  registration cluster func_15195DD8 dl_find_scroll_texture / func_15195AA8 level_dl_add_texture_scroll (P165 level-load
+  stub) / func_15196344 dl_add_texture_scroll, func_15109990 event_object_effect_spawn, func_15016170
+  audio_mixer_init (boot stub), func_15007168 save_data_reset (boot stub), func_1500AC14 ambient_sounds_load and
+  func_150170C4 level_entry_data_load (scene-start stubs), func_15116854 object_bob_update, func_1517E6A4
+  object_node_remove. No stubs reached.
+- NM-only prototype fixes in game_eu_51190 / game_3B920 / game_eu_44010 / game_33990 (func_1500727C no longer passes
+  two unused arguments); game_eu_142E40 `void func_15116854(u8 *)`.
+- New tools: `docs/port/sessions/p172/asmlist.py` (this slot's asm-only functions with C calls), `mkdraft.py`.
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0 (1253 NM bodies), selftest 62/62, progress_nm 5247/5915 (88.7%), C bytes 71.1%. No processes left in conkerdev-port.
+
+## Next steps (from P172)
+
+1. func_1507D754: insert the P169 draft once port-b converts func_151C9740 / func_151CFFFC (unchanged).
+2. port-b: game_eu_78230.c declares func_150882C4 `s32` (asm returns nothing): fix, then convert it (39 insns).
+3. Remaining P165 scene-start / boot stubs in this slot: func_1500BEC0 (38360, 200), func_15012760 (3FF70, 309),
+   func_150039E0 (30E90, 741), func_15006590 (33990, 407), func_100052A0 (init_50A0, 195), func_1000BF60
+   (init_B1B0, 252), func_eu_1501B640 (48E50, 304).
+4. Browser: texture scrolling at level loads, ambient sounds, P172.md section 6.
+5. P138 / P141 leftovers (not started).
 
 ## State (session P171, 2026-10-24, port-web). Details: `docs/port/sessions/P171.md`
 
@@ -88,6 +206,53 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. func_1516BC2C + func_1516CEA4 (text box draw), then func_1513FAB4, func_151D9014.
 4. port-web: first-room puzzle (gargoyle tongue): find the grab / pull trigger in the event script or player code and
    test it with `?p171tb=1&p171fix=1&p165hits=1` (padpull.py); drop `?p171fix` once (1) is merged.
+## P170 (port-b) (session P170, 2026-10-24). Details: `docs/port/sessions/P170.md`
+
+Branch `port-b` (from P168 6dcbf88). Hand C (NM), difftest EQUIV + setups + mutants (table in P170.md):
+- **Text box draw unit** (commit 851e6f3, game_eu_1984F0.c): func_1516BC2C `text_box_draw` (shadow pass + colour
+  pass: box / pointer / thought dots sprites via func_15095380 + func_15095E58, box corner +0x48 / +0x4C, text colour
+  D_800D31C8..CA) and func_1516CEA4 `text_box_draw_text` (`Gfx *(Gfx *, box, u8 r, g, b, a)`). Mutants 44/44, 27/27.
+- func_1513FAB4 `beam_quad_build` (game_169510; prototype + `(u8 *)` casts in its callers func_1513FA2C / FA70),
+  func_151C9740 `object_explode` (game_eu_1F4F60), func_151CFFFC `object_shatter_effects` (game_eu_1FB080),
+  func_151D9014 `particle_spawn` (game_2062D0, Gregg cutscene; D_80090070 = no-argument u8 texture getters).
+- NM-build pitfall: a local array initializer (`s32 k[7] = {...}`) in game_eu_1FB080 emits a `.data` section the NM
+  link discards (link error); read the ROM table (D_800AB320) instead.
+- Not touched: game_eu_1C3530.c (moved to port per coordinator).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1217 bodies), selftest 62/62. progress_nm total 5211/5915
+  (88.1%), game 4680/5334, C bytes 70.0%, 704 asm-only. No difftest processes left.
+
+## Next steps (from P170)
+
+0. **PRIORITY (coordinator, browser P171), not started in P170 (budget):** func_1515C388 (update) and func_1515C6F4
+   (draw) in game_1897A0.c, the kind-8 particle record handlers created by P164's func_151530A8, are asm stubs; the
+   draw stub returns 0 as the Gfx pointer and the caller writes its DL at NULL (null-zone writes from retrace 6257).
+   Convert both in one commit; the draw must return the advanced Gfx pointer. Also check m2c_sanity "width high" on
+   func_1500D8C8 (P164, game_39750): asm word read vs IR halfword.
+1. Browser (port-web): text boxes should now be visible (first-room gargoyle); check the shadow / pointer / text
+   colour and the thought-dot variant. P170.md UNVERIFIED list.
+2. port-b: beam unit func_151C7B1C (24 args) + func_151C9748 (draft `p168/d_9748.c`) + func_151C957C (P168 notes below).
+3. Next port-b asm with C callers: `python3 docs/port/sessions/p168/asmlist.py`.
+
+## State (session P169, 2026-10-24). Details: `docs/port/sessions/P169.md`
+
+- Merged port-b 9eebdac (P150-P164) as 53b9728: only HANDOFF.md conflicted (union + sections sorted by session).
+  Merge checks: verify_all OK, NM links, protocheck 0 (1240), selftest 62/62.
+- D_80089E10 handlers now all `void (f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *obj)`: func_151348F0,
+  func_151AA8BC, func_150C65D8, func_150C6F08, func_150EAB4C (changed parameters unused; default build unchanged).
+- New hand C (NM): func_151342BC trail_emitter_update (list-0x28 update, dispatches D_80089E10 / D_80089E40;
+  32/32 mutants), func_150E0DF0 object_explode (30/31 + 1 equivalent). Both EQUIV on random + setups; no stubs.
+- func_1507D754: verified draft `docs/port/sessions/p169/d754_draft.c` (35/35 mutants), not inserted: func_151C9740 /
+  func_151CFFFC still asm here and on port-b 9eebdac.
+- Checks: verify_all OK (full ROM), NM links, protocheck 0 (1242), selftest 62/62, progress_nm 5236/5915 (88.5%),
+  C bytes 70.9%.
+
+## Next steps (from P169)
+
+1. func_1507D754: insert the P169 draft (game_A9D90.c, NM) once port-b converts func_151C9740 / func_151CFFFC.
+2. func_15116690 (game_eu_142E40) needs func_15195FB0 (game_eu_1C3530) to return func_15196344's v0 under NM.
+3. Browser: trails / emitters (func_151342BC), explosions (func_150E0DF0), P167's list.
+4. Don't `git stash` during an unfinished merge (P169.md section 1).
+5. P138 / P141 leftovers (not started).
 
 ## P168 (port-b) (session P168, 2026-10-24). Details: `docs/port/sessions/P168.md`
 
@@ -550,6 +715,7 @@ Branch `port-b` (from P150 53f4db6). Hand C (NM), difftest EQUIV + setups + muta
    func_150E0DF0 (+ func_151D5AC4 / func_151D4684, port-b's func_15154728), port-b's func_151A7240.
 3. Browser: check the null+0x14 = 0x400 write at the new-game scene start is gone (func_1514CFF0 now real).
 4. P138 / P141 leftovers.
+
 ## P150 (port-b) (session P150, 2026-10-23). Details: `docs/port/sessions/P150.md`
 
 Branch `port-b` (from P146 b8f1ce7); merged port 37085b5 (merge commit 1457344, only HANDOFF.md conflicted).
@@ -1879,6 +2045,52 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
 3. func_150039E0 (world objects, 741 insns, all callees C; map in P112.md).
 4. Web: re-run level 0x21 after func_1501D348 is C; the event handlers 0x5xxx (func_1509FD30 / func_150A02EC) are C now.
 
+## P111 (port-b) (session P111, 2026-10-23). Details: `docs/port/sessions/P111.md`
+
+Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
+
+- **func_1512EE50 in C** (`camera_apply_request`, game_eu_15C660.c): the per-frame camera request handler that
+  writes the eye height cam +0x2FC (P105 camera bug). Map `p111/func_1512EE50_map.md`. 213 setups EQUIV, mutants
+  78/78. Caller declaration in game_14FF90.c changed to `void`. Only stub callee: func_15128D50 (mode 2, not a
+  port-b file).
+- Free camera: func_1512B728 (`free_camera_scan_depth`, 16/16 mutants) and func_1512BCA0 (`free_camera_turn`,
+  returns s32; 28/29 mutants, 1 equivalent). func_1512B2C4's three callees are all C now.
+- func_150B3CA8 (`trail_hit_splash`, game_eu_E0430.c): the last asm trail hit handler; mutants 33/33.
+- Default build byte-identical (verify_all rc 0), NM links, protocheck 1 known problem. **progress_nm** total
+  4928/5915 (83.3%), game 4400/5334, C bytes 57.7%, 987 asm-only.
+
+## Next steps (from P111)
+
+1. Browser: re-run the P105 camera scenario. The pre-death view should no longer look straight down. Also check
+   the free camera and the trail splashes (P111.md UNVERIFIED).
+2. func_15128D50 (game_eu_156560.c), func_15129220 (game_eu_156A30.c) and func_1512EB60 (game_eu_15C370.c) are
+   not in port-b files and need an owner.
+3. Smallest asm-only left in port-b files (from P108): func_15144CEC (101), func_1505327C (109), func_15053430
+   (113). func_15060D54 is now owned by port (game_83300.c moved).
+
+## P108 (port-b) (session P108, 2026-10-23). Details: `docs/port/sessions/P108.md`
+
+Branch `port-b` (from P102 b2a5c1f); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all rc 0, `port_work/p108/verify2.log`). `NON_MATCHING=1` links. protocheck:
+  1 expected problem (func_15157580, gone after merging port; 930 bodies). **progress_nm**: total 4924/5915 (83.2%),
+  game 4396/5334 (82.4%), C bytes 57.4%, 991 asm-only (142 under 60 insns).
+- **Landed P102's pair** (commit 1b05b54): func_1507BB28 (game_A28B0.c, script producer) + func_15097E9C (object
+  command handler). game_A28B0.c's census lvalue cast left alone (P107 fixed it port-side).
+- **Trail particle chain in C** (game_eu_175B20.c): func_15148428 (step), func_151485AC (draw), and the sub-handlers
+  they reach from func_151DA6F8 trails: func_15148E34 (grow), func_15149114 (fall + hit), func_15149350 (shrink).
+  All setups EQUIV + mutants killed (P108.md section 2). **The P105 guard on func_151DA6F8 can be dropped.**
+- func_1505D024 (game_83300.c, hit message, used by func_15097E9C) in C, 12/12.
+- New rule applied: every converted function has a `// snake_case_name: ...` first comment line.
+
+## Next steps (from P108)
+
+1. Browser: drop the P105 guard; check trails (P108.md UNVERIFIED) and the object command scripts.
+2. Particle type tables still have asm entries for other kinds (list in P108.md section 2, none in port-b files);
+   trail hit handler func_150B3CA8 (game_eu_E0430.c) is asm.
+3. Smallest asm-only left in port-b files: func_15144CEC (101), func_1505327C (109), func_15053430 (113),
+   func_15060D54 (117).
+
 ## State (session P106, 2026-10-23). Details: `docs/port/sessions/P106.md`
 
 - **Level event system committed as one unit** (NM hand C): func_1509CBD4 (prereqs), func_1509B950 (relocate),
@@ -1925,6 +2137,30 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
 2. Float re-check: finish the 137 bodies (`p104/hfrun.sh` on the unrun rows), investigate func_15075884
    (game_A28B0) and func_150E7104 (game_eu_114640); func_15123A54 / func_151247C0 are port-b (game_14FF90).
 3. func_1512EE50 (camera eye, 1352 insns): not started.
+
+## P102 (port-b) (session P102, 2026-10-23). Details: `docs/port/sessions/P102.md`
+
+Branch `port-b` (from P96 66dffbc); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all). `NON_MATCHING=1` links. protocheck: 1 expected problem
+  (func_15157580, gone after merging port). **progress_nm**: total 4916/5915 (83.1%), game 4388/5334 (82.3%),
+  C bytes 56.8%, 999 asm-only.
+- P98 rows done: func_1506045C arg3 / func_15064668 arg2 / func_15065E18 arg3 are f32 (NM, all callers NM).
+- **func_15097E9C (object command handler, 142 cases): verified but NOT committed.** Draft
+  `sessions/p102/func_15097E9C.c`, map `func_15097E9C_map.md`, 1471 setups EQUIV, mutants 85/87 + 2 equivalent.
+  Blocked by its producer **func_1507BB28** (game_A28B0.c, asm, stub returns 0 -> object +0x218 script pointer
+  NULL for cmds 0x14 / 0x35 / 0x60). Verified draft `sessions/p102/func_1507BB28.c` (7/7). Commit both together.
+- New hand-written NM C: func_1512BAAC (producer for func_1512B2C4), func_1512BBA0, func_1505D5D0, func_151406AC,
+  func_1505DDA8, func_1501DF70 (all mutants killed).
+
+## Next steps (from P102)
+
+1. Whoever owns game_A28B0.c: `insert_nm.py func_1507BB28 docs/port/sessions/p102/func_1507BB28.c` and, in the
+   same commit, `insert_nm.py func_15097E9C docs/port/sessions/p102/func_15097E9C.c` (port-b file
+   game_eu_C5530.c); then browser check of script commands.
+2. Browser: P102.md UNVERIFIED list.
+3. Smallest asm-only left in port-b files: func_15144CEC (101), func_1505D024 (104, used by func_15097E9C),
+   func_1505327C (109), func_15053430 (113), func_15060D54 (117).
 
 ## State (session P100, 2026-10-23). Details: `docs/port/sessions/P100.md`
 
@@ -1982,6 +2218,31 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
    func_15181A6C, func_1517B270, func_1509093C, func_15129220, func_1512EE50; func_150ADA20.
 4. Browser: func_15044D18 hooks (D_8008622C[] gets no a0), func_15097BA8 push-back, func_15185360 aim.
 
+## P96 (port-b) (session P96, 2026-10-23). Details: `docs/port/sessions/P96.md`
+
+Branch `port-b` (from P92 99d4923); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all). `NON_MATCHING=1` links. protocheck: 1 expected problem (func_15157580 f32 in
+  game_eu_1EC610.c vs port-b's old s32 definition; gone after merging port). **progress_nm**: total 4910/5915 (83.0%),
+  game 4382/5334 (82.2%), C bytes 56.7%, 1005 asm-only.
+- **func_15124C38 "survivors" resolved: 39/39 killed.** `&0xF -> &7` was a harness race: two `p82/mut.sh` jobs of
+  one function share `port_work/p82_mut_FUNC.c` / `build/difftest_p73m_FUNC`. Use **`docs/port/sessions/p96/mut.sh`**
+  (per-run paths). The other 4 were setup holes (no setup reached the paths; `4c38c.txt` was a copy of 4c38b with
+  out != NULL); `p96/gen4c38t.py` kills them.
+- New hand-written NM C: **func_15020920** (segment cubic + length table, the producer the browser P97 needs;
+  25/26 + 1 equivalent), func_1501E0C8 (cutscene skip, 16/16), func_1512B2C4 (free camera, 23/23 + 2 equivalent),
+  **func_15126378** (aim mode, 1130 asm lines, 61/61 + 1 equivalent).
+- func_15020090 / func_15020430 were already NM C here (P87); func_15157580 arg 3 f32 in game_eu_1EC610.c's NM
+  block; func_151221F0 arg1 f32 (P98 protoasm).
+- Harness hole for P95: callee FP args are compared only with a prototype in the TU text (sinf / cosf from
+  libc/math.h were not); workaround: declare them in the TU.
+
+## Next steps (from P96)
+
+1. Browser: drop the FD34 / FF10 guard (func_15020920 is C); scene path, aim mode, free camera (P96.md UNVERIFIED).
+2. P98 protoasm rows left: game_83300 func_15064668 arg2 / func_15065E18 arg3 (float bits as s32).
+3. func_1512EE50 (eye height?) is in game_eu_15C660.c (not port-b). Frame-path stubs in port-b files: func_15097E9C (game_eu_C5530.c, 2146 lines, 678 calls/boot).
+
 ## State (session P95, 2026-10-23). Details: `docs/port/sessions/P95.md`
 
 - **Float bit patterns as ints** (`docs/port/sessions/p95/floatint_scan.py [--all] [--protos]`, NM-selected text of all
@@ -2032,6 +2293,24 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
 4. Possibly wrong hex-float int arguments (func_151D58E4, func_1514CBE8, func_15116A8C, func_151AD010 calls): check the
    callee parameter types.
 
+## P92 (port-b) (session P92, 2026-10-23). Details: `docs/port/sessions/P92.md`
+
+Branch `port-b` (from P87 431730a); the orchestrator merges it into `port`.
+
+- Default build byte-identical (full `verify_all.sh`, `port_work/p92/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (912 bodies).
+- **progress_nm (NM figure)**: total **4906/5915 (82.9%)**, game 4378/5334 (82.1%), C bytes 56.4%, 1009 asm-only.
+- New hand-written NM C (no asm2c), setups EQUIV + mutants: the scene-path producers in game_eu_4A070.c,
+  func_1501FD34 (20/20), func_1501FF10 (18/18), their producer func_1501F7D4 (26/26), func_1502330C (17/17),
+  func_1501EA84 (29/29), func_1501E5AC (12/12), func_15023684 (23/23); game_14FF90.c func_15124C38 (31/39: 5 open
+  survivors, 3 unrun, P92.md section 2).
+- No arity fixes needed (callers / callees checked, P92.md section 3).
+
+## Next steps (from P92)
+
+1. Browser: cutscene paths / camera pick / scene end / camera height (P92.md UNVERIFIED).
+2. func_15124C38 open mutants (`p92/4c38c_mut.txt` ready); func_15020920 (segment cubic, producer of func_1501F7D4).
+3. func_15126378 (game_14FF90.c, 1130 lines) not started.
+
 ## State (session P90, 2026-10-23). Details: `docs/port/sessions/P90.md`
 
 - **func_150268BC** (script event interpreter, 3594 asm lines, game_eu_51190.c) is readable hand C under NON_MATCHING:
@@ -2073,6 +2352,29 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
    func_150F6E10 f32 arg2; asm callees without prototypes), then finish the draft's TODO sub-types and test per sub-type.
 3. func_15035AF8 / func_15035220 (game_eu_62360), remaining game_981E0 asm.
 
+## P87 (port-b) (session P87, 2026-10-23). Details: `docs/port/sessions/P87.md`
+
+Branch `port-b` (from P83 e3312cf); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p87/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (903 bodies).
+- **progress_nm (NM figure)**: total **4897/5915 (82.8%)**, game 4369/5334 (81.9%), C bytes 56.1%, 1018 asm-only.
+  (P83's 3994/5915 was the matched-only column.)
+- New hand-written NM C (no asm2c), setups EQUIV, mutants: the P88 trio in one commit, **func_1501ECA4** (camera
+  track pass, fills D_800C3958, 39/40, 1 equivalent), **func_15020F6C** (applies the records, 46/46),
+  **func_1501E888** (scene end, 22/23, 1 equivalent); func_1501D044 (21/21), func_1501DB18 (20/20),
+  func_15020430 (24/25, 1 equivalent), func_15022C4C (30/30), func_15022A8C (10/11, 1 invalid mutant),
+  func_15095A4C (game_eu_C2B60.c, 11/11).
+- Arity fix (NM): func_15020430 passes the key count to func_15020090 (4th argument read from a3).
+- P83 survivors killed: func_1501CE34 `<` -> `<=` (camera ends 0), func_1512317C `& 0xF` -> `& 7` (+0x4E = 9).
+- Harness: declarations for an NM body must sit in their own NM block (difftest replaces the function's block).
+
+## Next steps (from P87)
+
+1. Browser: level 0 / cutscenes without the P88 guards (P87.md UNVERIFIED).
+2. Scene-path asm left in game_eu_4A070.c: func_1501FD34 / func_1501FF10 (place / roll, called by func_1501ECA4),
+   func_1502330C, func_1501EA84, func_1501E5AC, func_15023684.
+3. game_14FF90.c: func_15124C38 (385), func_15126378 (1130).
+
 ## State (session P86, 2026-10-23). Details: `docs/port/sessions/P86.md`
 
 - The default build is byte-identical (full `verify_all.sh`, `port_work/p86/verify.log`). `NON_MATCHING=1` links.
@@ -2113,6 +2415,55 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
 2. func_151552F0 (318 calls/run, DL path).
 3. Remaining asm in owned files (P85.md "Not done").
 
+## P83 (port-b) (session P83, 2026-10-23). Details: `docs/port/sessions/P83.md`
+
+Branch `port-b` (from P82 e7e2e1a); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p83/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (895 bodies). progress_nm: game 3502/5334 funcs (65.7%), total 3994/5915 (67.5%).
+- New hand-written NM C (no asm2c), random 100 + setups EQUIV: **func_1501CE34** (cutscene length, P84 level-0
+  freeze; 12/15, 1 boundary survivor UNVERIFIED), func_15060F28 (object removal, 23/23), func_1506160C (fade
+  command, 22/22), func_15061B4C (object-kind texture / colour animation, 50/50), func_150626EC (4/4),
+  func_15056A00 (12/12); camera func_15125DB4 (controls mask, 32/32), func_151256BC (shake, 18/18),
+  func_1512317C (look toggle, 23/26), func_15128030 (transition, 18/20, 2 equivalent); cutscene func_1501DE84
+  (8/8), func_150225D0 (8/8).
+- Harness: DIFFTEST_ARG values are hex (a decimal `1=10` setup hid a path); stack arrays passed to callees need
+  DIFFTEST_ARGMEM; INVALID under load is reported correctly (P83.md §2).
+- No dropped-argument fixes needed (C callers all pass full lists).
+
+## Next steps (from P83)
+
+1. Browser: level 0 start without the P84 guard (func_1501CE34), object removal / fades, camera (P83.md UNVERIFIED).
+2. Scene loader producers still asm in game_eu_4A070.c: **func_1501ECA4** (716 insns) and **func_15020F6C** (562),
+   then func_1501D044, func_1501DB18, func_1501E888, func_15020430, func_15022C4C (P83.md §4).
+3. game_14FF90.c: func_15124C38 (385, prototype now `(struct108 *, f32 *)`), func_15126378 (1130).
+4. Setups for the two UNVERIFIED survivors (func_1501CE34 all-zero camera ends, func_1512317C +0x4E nibble 9).
+
+## P82 (port-b) (session P82, 2026-10-22). Details: `docs/port/sessions/P82.md`
+
+Branch `port-b` (from P77 3ef8b97); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p82/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- New hand-written NM C (no asm2c), all EQUIV on random 100 + setups: the browser's top frame-path group
+  **func_151462C8** (model-part lights, DL, 25/25), **func_1514306C** (material texture address, 11/11),
+  **func_1513C060** (sprite effect update, 28/28); func_1513E2AC (sprite quad corners, 27/29, 2 equivalent);
+  **func_15021E60** (look target / fixed look angles, 24/24), func_150220CC (look limits, 14/14);
+  func_1504ADD0 (per-frame object pass, 12/12; stores a pointer to a stack local as the asm does, P82.md §2);
+  func_150617BC (object fades, 17/21, 4 equivalent; prototype now `void`).
+- Arity fixes (byte-identical, default build): handler tables D_80089EE8 / EF0 / EF8 / F2C now get arg0
+  (game_169510.c, scan rows 34-37); func_1501DF70(arg0) (game_eu_4A070.c, row 52).
+- `docs/port/sessions/p82/mut.sh`: sed errors and CERR / UNSURE setups no longer count as SURVIVED (selftest in
+  `selftest_mut.txt`). POKE into `.game_data` (0x80096DC4) had no effect: use the ELF value (P82.md §3).
+
+## Next steps (from P82)
+
+1. Browser: the DL group (lit parts, material textures, sprite effects), head turning (func_15021E60 /
+   func_150220CC), the corrected handler calls (P82.md UNVERIFIED).
+2. Frame-path asm left in P82's files: func_15060F28 (game_83300.c, called by func_150617BC mode 5 / 6),
+   func_1506160C (fade setter, 108 insns), func_15061B4C (601), game_14FF90.c group (func_15125DB4, 15128030,
+   15126378, 15124C38, 1512317C, 151256BC, 601 each), func_1501ECA4 / func_15020F6C (game_eu_4A070.c, 601).
+3. Remaining asm in game_eu_170760.c (func_151432BC, func_15144CEC, func_15146078, func_1514654C) and
+   game_169510.c (func_1513CFE4, func_1513EE14, func_1513FAB4, func_15140190, func_151406AC, ...): not hit in P81's run.
+
 ## State (session P80, 2026-10-23). Details: `docs/port/sessions/P80.md`
 
 - The default build is byte-identical (full `verify_all.sh`, `port_work/p80/verify2.log`). `NON_MATCHING=1` links.
@@ -2136,6 +2487,27 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
    head turning), the arity fixes.
 2. func_15041A9C (1098, game_eu_6EDC0, 915 calls/run), func_15180AF0 (991, game_eu_1ACBC0, 601): display-list path.
 3. Remaining asm in owned files (P80.md "Not done").
+
+## P77 (port-b) (session P77, 2026-10-22). Details: `docs/port/sessions/P77.md`
+
+Branch `port-b` (from P73 4498419); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p77/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- New hand-written NM C (no asm2c), all EQUIV with every mutant killed: **func_150A02EC** (query handler entry 4, 27/27),
+  **func_150A09B8** (entry 3, 32/32), **func_150954E4** (sky / sprite texture loader, browser blocker, 34/34),
+  func_1501CDA0 (5/5), func_150226E8 (7/7), func_15097D20 (8/8), func_15097DDC (8/8).
+- Arity fixes (NM): func_15049350 gets its nine floats (game_83300.c), func_1512B2C4(arg0) (game_eu_158110.c),
+  func_15053430(arg0) (game_eu_78230.c). Rows func_1512C6C0 / func_1512523C x3 / D_800863B4 handlers checked: no
+  argument in the asm (P77.md §1).
+- func_1512C080: the 4 P73 survivors are killed (31/31).
+- `docs/port/sessions/p77/mut.sh`: refuses the random phase when the draft itself DIFFERs on random trials (P77.md §3).
+
+## Next steps (from P77)
+
+1. Browser: sky quad (func_150954E4), script queries 0x3xxx / 0x4xxx, the three corrected calls (P77.md UNVERIFIED).
+2. Display-list producers func_151462C8 / func_1514306C (game_eu_170760.c), func_1513C060 (game_169510.c), once assigned.
+3. Breadth in owned files: asm-only game_eu_4A070.c func_1501DE84 (59), func_150225D0 (70); game_83300.c func_150626EC (58),
+   func_15056A00 (66); game_eu_78230.c func_1504ADD0 (73); game_eu_C2B60.c func_15095A4C (73).
 
 ## State (session P76, 2026-10-22). Details: `docs/port/sessions/P76.md`
 
@@ -2422,6 +2794,31 @@ Branch `port-b` (from P77 3ef8b97); the orchestrator merges it into `port`.
    game_169510.c (func_1513CFE4, func_1513EE14, func_1513FAB4, func_15140190, func_151406AC, ...): not hit in P81's run.
 
 ## P77 (port-b) (session P77, 2026-10-22). Details: `docs/port/sessions/P77.md`
+## P73 (port-b) (session P73, 2026-10-22). Details: `docs/port/sessions/P73.md`
+
+Branch `port-b` (from P68 2f9d323); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p73/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems.
+- **difftest bug fixed**: for an NM block holding more than one function (func_1501B300 + func_1501B640) the candidate
+  was put in the dropped `#else` side, so the src_eu body was tested instead (all mutants "survived"). `build_tu` now
+  replaces the definition on the NM side and errors out if the candidate is missing from the TU. Selftest case added
+  (28/28). func_1501B300's rate mutants are now killed (11/15 overall, survivors boundary / equivalent). Same layout: func_150183D0/184B0, func_1507F3B0/F834.
+- P67 setups (func_1505C7D8, func_150D5F7C, func_1507E7E4, func_150453BC, func_150D71D4) already used EU addresses
+  (`port_work/p73/knobcheck.py`); re-run: all EQUIV.
+- func_1512C080 full mutant run: 27/31 killed; 4 survivors (+0x23E / +0x2B0 / mode 0x100 / floor boundary) UNVERIFIED.
+- New hand-written NM C (no asm2c): **func_151BF8F0** (lives pop-up, 132 setups, mutants 20/21), **func_1501D348**
+  (scene loader, `void`, 123 setups, 27/27), **func_1509A024** (object query handler, 99-case switch, 622 setups x2,
+  44/46, survivors equivalent). func_15084000 has a one-argument NM body (wasm signature).
+- Tools: `docs/port/sessions/p73/knobs.sh` (KTMP) / `mut.sh` (own tmp dir; random phase without DIFFTEST_ARGMEM).
+  Never run a setup run and a mutant run of one function with the p68 scripts at the same time (shared tmp dir).
+
+## Next steps (from P73)
+
+1. func_1512C080 survivors: setups with +0x23E not in {2, 3}, +0x2B8 equal / +0x2B0 different, mode 0x100.
+2. Other entries of func_1509BE40's table still asm: func_150A09B8 (3), func_150A02EC (4).
+3. Browser: lives pop-up, cutscene start (func_1501D348), script queries (func_1509A024) -- P73.md UNVERIFIED.
+
+## State (session P71, 2026-10-22). Details: `docs/port/sessions/P71.md`
 
 Branch `port-b` (from P73 4498419); the orchestrator merges it into `port`.
 
@@ -2484,6 +2881,10 @@ Branch `port-b` (from P67 8c057c9); the orchestrator merges it into `port`.
 
 ## Next steps (from P68)
 
+
+
+
+
 1. P66 stub list, still asm: func_151BF8F0 (311 lines, stack struct for func_15149130), func_1501D348 (473),
    func_1509A024 (1571, in sections).
 2. Browser: camera collision / follow, menu and in-game text, footsteps, projectiles (P68.md UNVERIFIED).
@@ -2510,6 +2911,25 @@ Branch `port-b` (from P64 f0437f9); the orchestrator merges it into `port`.
    func_1512C080 (342), func_151E7110 (166).
 2. Browser: attacks hitting enemies (func_1505C7D8), debris on destruction, floor detection (P67.md §4 UNVERIFIED).
 
+## State (session P65, 2026-10-22). Details: `docs/port/sessions/P65.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (858 bodies).
+- progress_nm: C coverage including NON_MATCHING **4852/5915 (82.0%)**, bytes **53.9%**; init 490/538,
+  game 4323/5334, debugger 39/43; **1063 asm-only** (151 under 60 insns).
+- Coordinator items first (browser P63 TEMPORARY PC versions can go): **func_1502AF04** (animation header lookup),
+  **func_1510E908** (slope solver), **func_150A69E0** (func_150A6A48 wrapper; plain C in game_eu_D3880.c).
+- Model path: **func_15036FD8**, **func_15030758** (attachments; D_80084550 = .data table of code pointers),
+  **func_150028BC** (model vertex ranges / triangles from the DL), **func_1503AB20** (head / eye aim). All hand C,
+  knob setups + mutants (P65.md table; setups in `docs/port/sessions/p65/`).
+- difftest: known prototypes now fix the compared stack / register argument slots; `DIFFTEST_RET` / `ARGMEM` keys
+  must be **EU** callee addresses (from the jal word), not the US-style names.
+
+## Next steps (from P65)
+
+1. **func_1503BCAC** (1143, game_eu_692C0.c): split by branch, knobs + mutants per branch (as func_1503AB20).
+2. Browser: drop the PC overrides of func_1502AF04, func_1510E908, func_150A69E0; map D_80084550's callback
+   addresses (func_15030758). Runtime checks: P65.md UNVERIFIED.
+
 ## P64 (port-b) (session P64, 2026-10-22). Details: `docs/port/sessions/P64.md`
 
 Branch `port-b` (from P60 71183d1); the orchestrator merges it into `port`.
@@ -2532,6 +2952,29 @@ Branch `port-b` (from P60 71183d1); the orchestrator merges it into `port`.
 2. Browser: jumps / swimming / glide (func_1505F298), idle animations (func_1507F640 -> F834 / F3B0), and why
    func_15085710 shows as a stub. Runtime checks: P64.md §3 UNVERIFIED.
 
+## State (session P62, 2026-10-22). Details: `docs/port/sessions/P62.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (851 bodies).
+- progress_nm: C coverage including NON_MATCHING **4845/5915 (81.9%)**, bytes **53.6%**; init 490/538,
+  game 4316/5334, debugger 39/43; **1070 asm-only** (152 under 60 insns); plus the nm_asm func_150A86B0,
+  func_150A9B0C, func_150A9E64.
+- New hand-written C (no asm2c): **func_150A9B0C** (root rotation x scale) and **func_150A9E64** (f32 -> Mtx) in the new
+  `src_eu/nm_asm/D5E90_mtx.c` (harness `tools/port/difftest/nmasm_mtx.py`); **func_1000480C** (blocking cartridge
+  read; new Unicorn harness with PI / ROM emulation `tools/port/difftest/pi480C.py`); **func_1502C9D8** (model LOD),
+  **func_150F20C8** (type 0x7B adjustments), **func_150844AC** (vertex-block words +0x28C / +0x290). All EQUIV,
+  mutants killed (P62.md table; knob setups in `docs/port/sessions/p62/`).
+- **Walls literal-address bug fixed** in the generator: `asm2c_hand.py` relocates raw-word `lui 0x80xx` + offset pairs
+  to `(u32) &D_X` (`D5E90_walls.inc` now reads `&D_8009FAB0`); regenerated, walls harness 0 diffs.
+- The browser can drop its PC overrides of func_150A9B0C, func_150A9E64 and func_150844AC.
+
+## Next steps (from P62)
+
+1. Still asm on the model / draw path: **func_15036FD8** (147, twice per frame, callback-table entry; convert CERR),
+   func_15030758 (464), func_150028BC (453; obj[0xAC] & 1 or rec +0x18 & 0x4000), func_1503AB20 (950),
+   func_1503BCAC (1143). All need hand C (user policy). Drafts in `port_work/p62*/gen/`, `port_work/p57/gen/`.
+2. func_1000480C in the browser: map `CART_WORD` (KSEG1 0xB0000000 | addr) to the ROM image and PI_STATUS to idle.
+3. After changing `NM_ASM_C_FUNCS_D5E90`, delete `build_nm/asm/D5E90.s.o` before the NM build.
+Code-segment tables: none in P62's C. Runtime checks: P62.md UNVERIFIED.
 ## P60 (port-b) (session P60, 2026-10-22). Details: `docs/port/sessions/P60.md`
 
 Branch `port-b` (from P59 649a7fa, `port` merged in at the end); the orchestrator merges it into `port`.
@@ -2596,6 +3039,26 @@ Runtime checks: P60.md UNVERIFIED.
 3. After changing `NM_ASM_C_FUNCS_D5E90`, delete `build_nm/asm/D5E90.s.o` before the NM build.
 Code-segment tables: none in P62's C. Runtime checks: P62.md UNVERIFIED.
 
+## P59 (port-b) (session P59, 2026-10-22). Details: `docs/port/sessions/P59.md`
+
+Branch `port-b` (from P56 155e9d9); the orchestrator merges it into `port`.
+
+- The default build is byte-identical (full `verify_all.sh`, `port_work/p59/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (827 bodies).
+- game_eu_17D3C0.c: func_150ACEA0 arg 2 is `f32` under NM (`RAY_Z0` macro keeps the matching call text).
+- New hand-written NM C (no asm2c): **func_1506E46C** (sound id resolver), **func_1508000C** (floor-material effects),
+  **func_1507D4F8** (life lost / respawn, now `void`), **func_1505D6F0** (record contact pass, `void`),
+  **func_1507C7C0** (collision cylinder; m2c's switch was wrong, rebuilt from the jump tables), **func_1507C170**
+  (animation advance, `void`). Each: random seeds + knob setups EQUIV, mutants killed except those in P59.md §2.
+- Tools: `docs/port/sessions/p59/knobs.sh` / `mut.sh` (setup / mutant files), `pk.py` (poke words from record field
+  specs), `sym.sh` (EU addresses). difftest pokes into `.game_data` are ignored: use real table entries there.
+
+## Next steps (from P59)
+
+1. Still asm on the walk path: func_15051558 (824 lines), func_1505F298 (jump, 1281), func_1507F640 (417),
+   func_1505E0C4 (401); ray-cast callers func_1505C7D8 (567) and func_150D5F7C (603). m2c drafts: `port_work/p59/gen/`.
+2. func_1507C170: the two unexplained surviving mutants (P59.md §2), and what the end-of-animation callbacks expect in a0.
+Runtime checks: P59.md UNVERIFIED.
+
 ## State (session P57, 2026-10-22). Details: `docs/port/sessions/P57.md`
 
 - The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (829 bodies).
@@ -2627,64 +3090,6 @@ Coordinator order after P58's browser run (Conker loads and is posed correctly b
    adjustments), func_150ADA20 (random).
 Code-segment tables: none of P57's C reads one (all its tables are in data / bss); func_150A86B0's D_150AA11C is
 the known one (the browser supplies it). Runtime checks: P57.md UNVERIFIED.
-
-## State (session P51, 2026-10-22). Details: `docs/port/sessions/P51.md`
-
-- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (819 bodies).
-- progress_nm: C coverage including NON_MATCHING **4813/5915 (81.4%)**, bytes **51.1%**; init 489/538,
-  game 4285/5334, debugger 39/43; **1102 asm-only** (153 under 60 insns); plus the nm_asm func_150A86B0 (not counted).
-- **func_150A86B0** (skeleton / animation evaluator, D5E90.s hand asm) is C in the new **`src_eu/nm_asm/D5E90_anim.c`**
-  (separate Makefile lines; delete build_nm/conker.ld after merging), verified whole on real ROM animations of Conker
-  (model id 0) by **`tools/port/difftest/nmasm_anim86B0.py`** (VR4300 interpreter with 64-bit ops vs Unicorn C):
-  EQUIV in 950 trials, mutants DIFFER. Input builder `tools/port/difftest/anim_inputs.py`.
-- Also C: **func_1503D210** (model load; P52's blocker), func_1503DC74, **func_1502DB14** (key-frame DMA; NM `void`).
-- **Not yet:** func_150342D0 needs func_15034B50 (479, asm) first, so sbuf still reaches the evaluator
-  uninitialised (its adjustment loop scans until 0x1000); func_1502CFEC (model DL).
-
-## Next steps (from P51)
-
-1. func_15034B50 then func_150342D0 (decoded in P51.md §4), then func_1502CFEC (model DL, 571).
-2. P52's other stubs on the path: func_1503A37C, func_1502F554, func_1502F17C, func_15030758, func_150A9B0C, func_150028BC.
-Runtime checks: P51.md UNVERIFIED (animation header / stream read big-endian, skeleton floats typed, callback table
-function addresses, func_1503D210 only partly difftested).
-
-## State (session P48, 2026-10-22). Details: `docs/port/sessions/P48.md`
-
-- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (816 bodies).
-- progress_nm: C coverage including NON_MATCHING **4810/5915 (81.3%)**, bytes **51.0%**; init 489/538,
-  game 4282/5334, debugger 39/43; **1105 asm-only** (154 under 60 insns).
-- **The object model chain is C** (game_eu_595D0): func_1502C1D4 (update loop, parents before children),
-  func_1502E228 (root matrix), func_1502DE74 (model instance, sets +0x1D4), func_1502DE10, func_1502E7B4 (visibility
-  mask; convert's "EQUIV" draft had two byte-offset bugs), func_1502F6B8. Also func_1507E690 (eye blink), and an NM
-  `s32` func_1503FBF4.
-- **Still asm on the model path:** func_150A86B0, the hand-asm skeleton evaluator in the unsplit D5E90.s (64-bit
-  ldl / ldr bitstream decode, own register conventions; it writes the joint matrices +0x1D4 points at), then
-  func_1502CFEC (model DL, 571), func_150342D0, func_1502DB14, func_1503D210 (P48.md §4).
-
-## Next steps (from P48)
-
-1. func_150A86B0 with a whole-function harness (nmasm_vis5858-style VR4300 interpreter, real ROM animation data).
-2. func_1502CFEC, func_150342D0, func_1502DB14, func_1503D210; then func_1510EED0 (floor), func_15180AF0, func_15041A9C.
-Runtime checks: P48.md UNVERIFIED (+0x1D4 now non-zero but its matrices unwritten while func_150A86B0 is a stub).
-## P59 (port-b) (session P59, 2026-10-22). Details: `docs/port/sessions/P59.md`
-
-Branch `port-b` (from P56 155e9d9); the orchestrator merges it into `port`.
-
-- The default build is byte-identical (full `verify_all.sh`, `port_work/p59/verify.log`). `NON_MATCHING=1` links. protocheck: 0 problems (827 bodies).
-- game_eu_17D3C0.c: func_150ACEA0 arg 2 is `f32` under NM (`RAY_Z0` macro keeps the matching call text).
-- New hand-written NM C (no asm2c): **func_1506E46C** (sound id resolver), **func_1508000C** (floor-material effects),
-  **func_1507D4F8** (life lost / respawn, now `void`), **func_1505D6F0** (record contact pass, `void`),
-  **func_1507C7C0** (collision cylinder; m2c's switch was wrong, rebuilt from the jump tables), **func_1507C170**
-  (animation advance, `void`). Each: random seeds + knob setups EQUIV, mutants killed except those in P59.md §2.
-- Tools: `docs/port/sessions/p59/knobs.sh` / `mut.sh` (setup / mutant files), `pk.py` (poke words from record field
-  specs), `sym.sh` (EU addresses). difftest pokes into `.game_data` are ignored: use real table entries there.
-
-## Next steps (from P59)
-
-1. Still asm on the walk path: func_15051558 (824 lines), func_1505F298 (jump, 1281), func_1507F640 (417),
-   func_1505E0C4 (401); ray-cast callers func_1505C7D8 (567) and func_150D5F7C (603). m2c drafts: `port_work/p59/gen/`.
-2. func_1507C170: the two unexplained surviving mutants (P59.md §2), and what the end-of-animation callbacks expect in a0.
-Runtime checks: P59.md UNVERIFIED.
 
 ## P56 (port-b) (session P56, 2026-10-22). Details: `docs/port/sessions/P56.md`
 
@@ -2753,6 +3158,26 @@ Branch `port-b` (from P50 346c2d9); the orchestrator merges it into `port`.
    Then the ray cast func_150ACEA0.
 Runtime checks: P53.md UNVERIFIED (real floor tables, walking height).
 
+## State (session P51, 2026-10-22). Details: `docs/port/sessions/P51.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (819 bodies).
+- progress_nm: C coverage including NON_MATCHING **4813/5915 (81.4%)**, bytes **51.1%**; init 489/538,
+  game 4285/5334, debugger 39/43; **1102 asm-only** (153 under 60 insns); plus the nm_asm func_150A86B0 (not counted).
+- **func_150A86B0** (skeleton / animation evaluator, D5E90.s hand asm) is C in the new **`src_eu/nm_asm/D5E90_anim.c`**
+  (separate Makefile lines; delete build_nm/conker.ld after merging), verified whole on real ROM animations of Conker
+  (model id 0) by **`tools/port/difftest/nmasm_anim86B0.py`** (VR4300 interpreter with 64-bit ops vs Unicorn C):
+  EQUIV in 950 trials, mutants DIFFER. Input builder `tools/port/difftest/anim_inputs.py`.
+- Also C: **func_1503D210** (model load; P52's blocker), func_1503DC74, **func_1502DB14** (key-frame DMA; NM `void`).
+- **Not yet:** func_150342D0 needs func_15034B50 (479, asm) first, so sbuf still reaches the evaluator
+  uninitialised (its adjustment loop scans until 0x1000); func_1502CFEC (model DL).
+
+## Next steps (from P51)
+
+1. func_15034B50 then func_150342D0 (decoded in P51.md §4), then func_1502CFEC (model DL, 571).
+2. P52's other stubs on the path: func_1503A37C, func_1502F554, func_1502F17C, func_15030758, func_150A9B0C, func_150028BC.
+Runtime checks: P51.md UNVERIFIED (animation header / stream read big-endian, skeleton floats typed, callback table
+function addresses, func_1503D210 only partly difftested).
+
 ## P50 (port-b) (session P50, 2026-10-22). Details: `docs/port/sessions/P50.md`
 
 Branch `port-b` (from P47 c811a9e); the orchestrator merges it into `port`.
@@ -2774,6 +3199,24 @@ Branch `port-b` (from P47 c811a9e); the orchestrator merges it into `port`.
 3. Browser: drop P49's PC overrides for func_15059C84 / func_1504C0E8 / func_1505A770 and recheck walking.
 Runtime checks: P50.md UNVERIFIED.
 
+## State (session P48, 2026-10-22). Details: `docs/port/sessions/P48.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (816 bodies).
+- progress_nm: C coverage including NON_MATCHING **4810/5915 (81.3%)**, bytes **51.0%**; init 489/538,
+  game 4282/5334, debugger 39/43; **1105 asm-only** (154 under 60 insns).
+- **The object model chain is C** (game_eu_595D0): func_1502C1D4 (update loop, parents before children),
+  func_1502E228 (root matrix), func_1502DE74 (model instance, sets +0x1D4), func_1502DE10, func_1502E7B4 (visibility
+  mask; convert's "EQUIV" draft had two byte-offset bugs), func_1502F6B8. Also func_1507E690 (eye blink), and an NM
+  `s32` func_1503FBF4.
+- **Still asm on the model path:** func_150A86B0, the hand-asm skeleton evaluator in the unsplit D5E90.s (64-bit
+  ldl / ldr bitstream decode, own register conventions; it writes the joint matrices +0x1D4 points at), then
+  func_1502CFEC (model DL, 571), func_150342D0, func_1502DB14, func_1503D210 (P48.md §4).
+
+## Next steps (from P48)
+
+1. func_150A86B0 with a whole-function harness (nmasm_vis5858-style VR4300 interpreter, real ROM animation data).
+2. func_1502CFEC, func_150342D0, func_1502DB14, func_1503D210; then func_1510EED0 (floor), func_15180AF0, func_15041A9C.
+Runtime checks: P48.md UNVERIFIED (+0x1D4 now non-zero but its matrices unwritten while func_150A86B0 is a stub).
 ## P47 (port-b) (session P47, 2026-10-22). Details: `docs/port/sessions/P47.md`
 
 Branch `port-b` (fast-forwarded to `port` 1a26d1a during the session); the orchestrator merges it into `port`.
@@ -2884,6 +3327,28 @@ Branch `port-b`, worktree `~/conker-wt/portb` (from P41 50cb17e); the orchestrat
 2. Then its stubs on the walk path (P45.md §5), func_15056B08 first (called at the top of the handler).
 3. Browser: func_150A16A4 now runs real trigger zones; watch kind 8 (PI read of 0xB0000054).
 
+## State (session P43, 2026-10-22). Details: `docs/port/sessions/P43.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (798 bodies).
+- progress_nm: C coverage including NON_MATCHING **4792/5915 (81.0%)** (P40: 4784), bytes 50.0% → **50.3%**;
+  init 489/538, game 4264/5334, debugger 39/43; **1123 asm-only** (157 under 60 insns).
+- **Level lighting:** func_1515E7E8 (the start colour `col` of func_1515DE84; the level was black / stack-coloured
+  without it). func_1515E9AC was already C; game_eu_18B1C0 is all C under NM.
+- Frame DL: func_1502CC64 (object draw), func_15196560 (texture scroll). Level load: func_15017B20 (zone overlap masks).
+- Camera: func_1512E6B0 (eye height), func_1512A390 (eye base / floor clamp), func_1512C6C0 (top stub by hits).
+- func_1509BE40 is a real variadic function under NM; every caller's NM prototype is `s32 func_1509BE40(s32, s32, ...)`.
+- difftest: `DIFFTEST_ARGMEM` accepts stack arguments (N >= 4).
+
+## Next steps (from P40)
+
+Browser priorities (P39, sent during P40): the camera chain (func_150858A0 / func_150851E0, func_15005818,
+func_151247C0, func_15123A54, func_151283B8 → func_15122EF0) and the shadow chain (func_1502C1D4 → func_1502C074 →
+func_1502E228) **belong to the parallel session on branch `port-b`** (worktree `~/conker-wt/portb`). Do not take them
+here, and do not edit game_eu_B2980.c, game_32740.c, game_14FF90.c or the files of those shadow functions.
+1. Here: func_15180AF0 (m2c raw draft, see P38.md §6), func_15041A9C (raw draft with 3 `unksp`), the P29 top-hit list.
+Runtime checks: P40.md UNVERIFIED (**vertex-pointer range tests** `> 0x100000` / `> 0x80000000` in func_15001460 /
+func_15002008 / func_15002248 vs wasm heap addresses; PI_STATUS + cart word reads in func_15001A08), P38's list.
+
 ## P41 (port-b) (session P41, 2026-10-22). Details: `docs/port/sessions/P41.md`
 
 Branch `port-b`, worktree `~/conker-wt/portb` (from `port` at 8e17fd1); the orchestrator merges it into `port`.
@@ -2907,49 +3372,6 @@ Branch `port-b`, worktree `~/conker-wt/portb` (from `port` at 8e17fd1); the orch
    (camera events), func_15123070, func_1512A390, func_1512E6B0.
 Runtime checks: P41.md UNVERIFIED (second-ray branch of func_15123A54, multiplayer start choice, func_1502C074's
 `+0x1D4 != 0` branch).
-
-## State (session P30, 2026-10-22). Details: `docs/port/sessions/P30.md`
-
-- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (753 bodies). difftest selftest 26/26.
-- progress_nm: C coverage including NON_MATCHING **4746/5914 (80.3%)** (P28: 4735), bytes 48.1% → **48.5%**; init 479/538, game 4228/5333, debugger 39/43; **1168 asm-only**.
-- **The camera path is C:** func_150054C4, func_1512B168, func_150006E0 (forwards the level in a0 to func_15000940),
-  func_15122C5C, func_1510B6A8 (now `void (s32, f32 x4)`; the NM caller passed 1.0f as an int), func_1510B9D8,
-  **func_1512C490** (gameplay view matrix), func_150A82D0 (hand-asm rotation Mtx), and func_150045C4 (P29's runtime list:
-  world-object matrices). Frame DL: func_15110948 (default camera callback), func_1517485C (occlusion probes).
-- difftest: `DIFFTEST_EXACT='*'` (known prototypes are exact); `proto_arity` ignores commented-out drafts.
-
-## Next steps (from P43)
-
-Port-b owns game_14FF90.c, game_eu_B2980.c, game_32740.c, the shadow chain, and the player movement files
-game_eu_78230.c (func_1504CB98, func_1504ADD0), game_eu_CE6C0.c (func_150A16A4), game_83300.c (func_15056B08).
-1. When port-b merges: game_14FF90.c's func_15127FEC calls `func_1512A390();` with no argument (wasm trap now that
-   func_1512A390 is C); it must pass arg0.
-2. func_15180AF0 (convert: NODRAFT this time; P38's m2c draft in `port_work/p38/m2c/`), func_15041A9C (boot text,
-   raw draft `port_work/p38/m2c/raw/`), the rest of P32's list (all CERR in `port_work/p43e/`: func_151E7110,
-   func_1501B300, func_151143D4, ...).
-Runtime checks: P43.md UNVERIFIED (D_80088838 handler types for the now-variadic func_1509BE40, func_1509CBD8 is void).
-
-## State (session P43, 2026-10-22). Details: `docs/port/sessions/P43.md`
-
-- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (798 bodies).
-- progress_nm: C coverage including NON_MATCHING **4792/5915 (81.0%)** (P40: 4784), bytes 50.0% → **50.3%**;
-  init 489/538, game 4264/5334, debugger 39/43; **1123 asm-only** (157 under 60 insns).
-- **Level lighting:** func_1515E7E8 (the start colour `col` of func_1515DE84; the level was black / stack-coloured
-  without it). func_1515E9AC was already C; game_eu_18B1C0 is all C under NM.
-- Frame DL: func_1502CC64 (object draw), func_15196560 (texture scroll). Level load: func_15017B20 (zone overlap masks).
-- Camera: func_1512E6B0 (eye height), func_1512A390 (eye base / floor clamp), func_1512C6C0 (top stub by hits).
-- func_1509BE40 is a real variadic function under NM; every caller's NM prototype is `s32 func_1509BE40(s32, s32, ...)`.
-- difftest: `DIFFTEST_ARGMEM` accepts stack arguments (N >= 4).
-
-## Next steps (from P40)
-
-Browser priorities (P39, sent during P40): the camera chain (func_150858A0 / func_150851E0, func_15005818,
-func_151247C0, func_15123A54, func_151283B8 → func_15122EF0) and the shadow chain (func_1502C1D4 → func_1502C074 →
-func_1502E228) **belong to the parallel session on branch `port-b`** (worktree `~/conker-wt/portb`). Do not take them
-here, and do not edit game_eu_B2980.c, game_32740.c, game_14FF90.c or the files of those shadow functions.
-1. Here: func_15180AF0 (m2c raw draft, see P38.md §6), func_15041A9C (raw draft with 3 `unksp`), the P29 top-hit list.
-Runtime checks: P40.md UNVERIFIED (**vertex-pointer range tests** `> 0x100000` / `> 0x80000000` in func_15001460 /
-func_15002008 / func_15002248 vs wasm heap addresses; PI_STATUS + cart word reads in func_15001A08), P38's list.
 
 ## State (session P40, 2026-10-22). Details: `docs/port/sessions/P40.md`
 
@@ -3068,6 +3490,27 @@ Runtime checks: P32.md UNVERIFIED list and P30's.
    func_150911F4, func_15090630, func_150900F0, func_15186D04, func_15182450, func_15180AF0; func_15042ECC (vsprintf-like, top hits).
 2. Runtime checks: the P30.md UNVERIFIED list (func_150006E0's a0 pass-through, func_1512C490's uninitialised Mtx at 0x2C == 0x8000).
 3. func_1000A03C, D5E90.s raw asm.
+
+## State (session P30, 2026-10-22). Details: `docs/port/sessions/P30.md`
+
+- The default build is byte-identical (full `verify_all.sh` OK). `NON_MATCHING=1` links. protocheck: 0 problems (753 bodies). difftest selftest 26/26.
+- progress_nm: C coverage including NON_MATCHING **4746/5914 (80.3%)** (P28: 4735), bytes 48.1% → **48.5%**; init 479/538, game 4228/5333, debugger 39/43; **1168 asm-only**.
+- **The camera path is C:** func_150054C4, func_1512B168, func_150006E0 (forwards the level in a0 to func_15000940),
+  func_15122C5C, func_1510B6A8 (now `void (s32, f32 x4)`; the NM caller passed 1.0f as an int), func_1510B9D8,
+  **func_1512C490** (gameplay view matrix), func_150A82D0 (hand-asm rotation Mtx), and func_150045C4 (P29's runtime list:
+  world-object matrices). Frame DL: func_15110948 (default camera callback), func_1517485C (occlusion probes).
+- difftest: `DIFFTEST_EXACT='*'` (known prototypes are exact); `proto_arity` ignores commented-out drafts.
+
+## Next steps (from P43)
+
+Port-b owns game_14FF90.c, game_eu_B2980.c, game_32740.c, the shadow chain, and the player movement files
+game_eu_78230.c (func_1504CB98, func_1504ADD0), game_eu_CE6C0.c (func_150A16A4), game_83300.c (func_15056B08).
+1. When port-b merges: game_14FF90.c's func_15127FEC calls `func_1512A390();` with no argument (wasm trap now that
+   func_1512A390 is C); it must pass arg0.
+2. func_15180AF0 (convert: NODRAFT this time; P38's m2c draft in `port_work/p38/m2c/`), func_15041A9C (boot text,
+   raw draft `port_work/p38/m2c/raw/`), the rest of P32's list (all CERR in `port_work/p43e/`: func_151E7110,
+   func_1501B300, func_151143D4, ...).
+Runtime checks: P43.md UNVERIFIED (D_80088838 handler types for the now-variadic func_1509BE40, func_1509CBD8 is void).
 
 ## State (session P28, 2026-10-22). Details: `docs/port/sessions/P28.md`
 

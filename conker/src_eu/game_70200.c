@@ -447,6 +447,59 @@ s32 func_15043B70(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     }
     return arg2;
 }
-#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043BB8.s")
+#ifdef NON_MATCHING
+// text_queue_put: appends a record (u32 length padded to 4, then the bytes) to the ring buffer q (D_800427A0:
+// +0 buffer, +4 size, +8 read, +C write); returns 1 when it does not fit, else 0 (also for no data). The padded
+// length is copied from src too (up to 3 bytes past len, as on N64).
+s32 func_15043BB8(struct105 *q, u8 *src, s32 len) {
+    s32 total;
+    s32 pos;
 
+    if (len == 0) {
+        return 0;
+    }
+    if (src != NULL) {
+        total = (len + 4 + 3) & ~3;
+        len = total;
+        if (q->unkC < q->unk8) {
+            if (!(q->unkC + total < q->unk8)) {
+                return 1;
+            }
+        } else if (!(q->unkC + len - q->unk4 < q->unk8)) {
+            return 1;
+        }
+        len -= 4;
+        pos = func_15043A20((u8 *) q->unk0, q->unk4, q->unkC, (u8 *) &len, 4);
+        q->unkC = func_15043A20((u8 *) q->unk0, q->unk4, pos, src, len);
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043BB8.s")
+#endif
+
+#ifdef NON_MATCHING
+// text_queue_get: takes the next record from the ring buffer q (see func_15043BB8) into dst (at most max - 1 bytes
+// plus a 0 when it is longer; the rest is skipped); returns the record's length, 0 when the queue is empty.
+s32 func_15043CA4(struct105 *q, u8 *dst, s32 max) {
+    s32 len = 0;
+    s32 pos = q->unk8;
+
+    if (pos == q->unkC) {
+        return 0;
+    }
+    pos = func_15043AC8((u8 *) q->unk0, q->unk4, pos, (u8 *) &len, 4);
+    if (max < len) {
+        max--;
+        pos = func_15043AC8((u8 *) q->unk0, q->unk4, pos, dst, max);
+        dst[max] = 0;
+        pos = func_15043B70(q->unk0, q->unk4, pos, len - max);
+    } else if (len != 0) {
+        pos = func_15043AC8((u8 *) q->unk0, q->unk4, pos, dst, len);
+    }
+    q->unk8 = pos;
+    return len;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_70200/func_15043CA4.s")
+#endif

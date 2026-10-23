@@ -109,7 +109,7 @@ void func_10012560(s32 arg0);
 void func_10012588(s32 arg0);
 void func_100125CC(s32 arg0);
 void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
-void func_100126E8(s32 arg0, s32 arg1);
+s32 func_100126E8(s32 arg0, s32 arg1);
 s32  func_10012718(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
 s32  func_100127D0(void);
 void func_10012A28(struct121 *arg0, s32 arg1, s32 arg2, s32 arg3);
@@ -365,7 +365,7 @@ void func_1501C870(void);
 
 void func_15040350(void *arg0, u32 arg1);
 s32  func_1504082C(u32 *arg0);
-void func_150408CC(struct148 *arg0);
+s32 func_150408CC(struct148 *arg0);
 void func_15042D50(void);
 void func_15042D78(u8 arg0);
 void func_150432BC(f32 arg0);

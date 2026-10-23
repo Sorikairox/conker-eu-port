@@ -1,0 +1,40 @@
+s/        case 0x05:/        case 0x06:/ % t05
+s/        case 0xAD:/        case 0xAC:/ % tAD
+s/            obj\[0x328\] = 0;/            obj[0x329] = 0;/ % tAE
+s/func_1507DB44((s32) obj, 0);/func_1507DB44((s32) obj, 1);/ % tAF
+s/            return 1;/            return 3;/ % t05
+s/        case 0x0D:/        case 0x0E:/ % t0D
+s/        case 0x38:/        case 0x39:/ % t38
+s/        case 0x91:/        case 0x92:/ % t91
+s/< -20.0f) {/< -21.0f) {/ % t20_hard t20_soft
+s/func_150BC968(obj);/func_150BC03C(obj);/ % t20_hard
+s/        case 0x77:/        case 0x76:/ % t77_mp
+s/func_151BAAC8(obj, 0xFF, 1);/func_151BAAC8(obj, 0xFE, 1);/ % t28_mp
+s/func_1507CD64(arg0, 6);/func_1507CD64(arg0, 7);/ % t28_mp
+s/obj\[0x127\] + 0xB/obj[0x127] + 0xC/ % t28_mp
+s/D_800BE9F0 == 0x23) {/D_800BE9F0 == 0x24) {/ % t28_sp23
+s/item != NULL \&\& D_800C35EA != 1/item != NULL \&\& D_800C35EA != 2/ % t28_sp23q
+s/item != NULL \&\& /1 \&\& / % t28_spnoitem
+s/func_15136C3C((u8 \*) item, 1, 1, 1, 1, 0,/func_15136C3C((u8 *) item, 1, 1, 1, 0, 0,/ % t28_sp23
+s/rec\[0x6E\] = 0;/rec[0x6F] = 0;/ % t28_mp
+s/(rec + 0x12) = \*(f32 \*) (obj + 0x18)/(rec + 0x12) = *(f32 *) (obj + 0x1C)/ % t28_mp
+s/(rec + 0x4) = \*(f32 \*) (obj + 0x40)/(rec + 0x4) = *(f32 *) (obj + 0x44)/ % t28_mp
+s/rec\[0x8A\] = 0xFF;/rec[0x8A] = 0xFE;/ % t28_mp
+s/(rec + 0x80) = 0;/(rec + 0x80) = 1;/ % t28_mp
+s/? 2 : 0;/? 2 : 1;/ % t28_sp
+s/        case 0x34:/        case 0x35:/ % t34
+s/        case 0x3D:/        case 0x3E:/ % t3D
+s/        case 0x44:/        case 0x45:/ % t44
+s/        case 0x47:/        case 0x48:/ % t47
+s/        case 0x4A:/        case 0x4B:/ % t4A
+s/        case 0x83:/        case 0x84:/ % t83
+s/func_1507CD64(arg0, 10);/func_1507CD64(arg0, 11);/ % t53_mp
+s/D_800BE9F0 == 0x33) {/D_800BE9F0 == 0x32) {/ % t90_mp33 t90_mp
+s/func_1507CD64(arg0, 8);/func_1507CD64(arg0, 9);/ % t90_mp33
+s/        case 0x79:/        case 0x7A:/ % t79
+s/func_150B0828(obj, 0xFF, 1);/func_150B0828(obj, 0xFF, 0);/ % t7F
+s/(obj + 0x2EC) != 0 ||/(obj + 0x2EC) == 0 ||/ % t25_2ec
+s/D_800BE9F0 == 6 ||/D_800BE9F0 == 7 ||/ % t25_l6
+s/D_800BE9F0 == 0x3B)/D_800BE9F0 == 0x3C)/ % t25_l3b
+s/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFE, 1);/ % t25_2ec
+s/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFF, 0);/ % t25_2ec

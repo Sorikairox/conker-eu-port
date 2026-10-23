@@ -1,0 +1,25 @@
+s/(u8 \*) obj + 0x18) + 135.0f;/(u8 *) obj + 0x18) + 136.0f;/
+s/pos.unk8 = \*(f32 \*) ((u8 \*) obj + 0x1C);/pos.unk8 = *(f32 *) ((u8 *) obj + 0x14);/
+s/(\*(f32 \*) ((u8 \*) obj + 0x2D8) != 0.0f) ? 1 : 0;/(*(f32 *) ((u8 *) obj + 0x2D8) > 0.0f) ? 1 : 0;/
+s/        probe = pos;/        probe = pos; probe.unk4 += 1.0f;/
+s/pos.unk4 - 200.0f, ground) != 0/pos.unk4 - 100.0f, ground) != 0/
+s/(((u8 \*) ground)\[0x1C\] \& 1)/(((u8 *) ground)[0x1C] \& 2)/
+s/            mark.unk0 = probe.unk0;/            mark.unk0 = pos.unk0 + 1.0f;/
+s/            mark.unk4 = \*(f32 \*) \&ground\[0\];/            mark.unk4 = pos.unk4;/
+s/r \* 125.0f + 204.0f/r * 125.0f + 200.0f/
+s/a % 101 + 155/a % 100 + 155/
+s/\&ground\[1\], (f32 \*) \&mark/\&ground[2], (f32 *) \&mark/
+s/b % 302 + 500, 0, 1, 0, 0,/b % 302 + 500, 0, 0, 0, 0,/
+s/            scorched = 1;/            scorched = 0;/
+s/506.0f, 1013.0f, 0.000987166888f, 15, 20/506.0f, 1013.0f, 0.000987166888f, 15, 21/
+s/0.000987166888f, 5, arg1/0.000987166888f, 6, arg1/
+s/    func_151D5AC4(\&pos, arg1, arg2);/    func_151D5AC4(\&pos, arg1, 0);/
+s/func_150ADA20() % 62 + 120/func_150ADA20() % 62 + 121/
+s/r + r + 8.0f/r + 8.0f/
+s/2.4641099f/2.5f/
+s/(u32) func_150ADA20() % 56 + 200/(s32) func_150ADA20() % 56 + 200/
+s/func_15136C3C(obj, 0, 0, 1, 0, 0, arg1, arg2)/func_15136C3C(obj, 0, 1, 1, 0, 0, arg1, arg2)/
+s/(0x60D, 0x7D00, 0, 0, 0, (s32) pos.unk0, (s32) pos.unk4/(0x60D, 0x7D00, 0, 0, 0, (s32) pos.unk0, (s32) pos.unk8/
+s/500, 1000);/500, 1001);/
+s/    if (inAir) {/    if (!inAir) {/
+s/    if (obj == NULL) {/    if (obj == (struct127 *) 1) {/

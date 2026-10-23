@@ -1,0 +1,25 @@
+s/COLOUR_GROUPS = NULL;// %
+s/if (LEVEL_FLAGS == 0) {/if (LEVEL_FLAGS == 1) {/ %
+s/D_800B1250\[2\] + D_800B1250\[3\]/D_800B1250[2]/ %
+s/total += \*(u16 \*) (ROOM_REC(i) + 0x16);/total += 1;/ %
+s/allocate_memory(total \* 3, 1, 0, 0)/allocate_memory(total * 4, 1, 0, 0)/ %
+s/D_800BE930\[1\] = NULL;// % nomem
+s/COLOURS_STORED = 0;// %
+s/D_800BE984 = 0;// %
+s/D_800BE930\[i\] = D_800BE930\[0\] + COLOURS_STORED \* 3;/D_800BE930[i] = D_800BE930[0] + COLOURS_STORED;/ %
+s/D_800BE930\[i\] = NULL;/D_800BE930[i] = D_800BE930[0];/ %
+s/func_15012C34(D_800B1220\[i\], D_800B1250\[i\]);/func_15012C34(D_800B1220[i], 3);/ %
+s/allocate_memory(D_800DC320 \* 2, 1, 0, 0)/allocate_memory(D_800DC320 * 4, 1, 0, 0)/ %
+s/ROOM_COLOUR_BASE\[i\] = 0xFFFF;/ROOM_COLOUR_BASE[i] = 0;/ %
+s/ROOM_COLOUR_BASE\[i\] = COLOURS_STORED;/ROOM_COLOUR_BASE[i] = i;/ %
+s/func_15012C34(\*(u8 \*\*) (ROOM_REC(i) + 0x28)/func_15012C34(*(u8 **) (ROOM_REC(i) + 0x24)/ %
+s/bzero(COLOUR_GROUPS, D_800B1248 \* 4);// %
+s/if (D_800B1244\[i\] == 0) {/if (D_800B1244[i] == 1) {/ %
+s/allocate_memory(D_800B1244\[i\] \* 4, 1, 0, 0)/allocate_memory(D_800B1244[i] * 3, 1, 0, 0)/ %
+s/j++, ent += 0xC/j++, ent += 0x10/ %
+s/(i < 4) ?/(i < 3) ?/ %
+s/(ROOM_REC(i - 4) + 0x28)/(ROOM_REC(i - 3) + 0x28)/ %
+s/COLOUR_GROUPS\[i\]\[j\]\[k \* 3 + 1\] = vtx\[idx\[k\] \* 16 + 0xD\];/COLOUR_GROUPS[i][j][k * 3 + 1] = vtx[idx[k] * 16 + 0xC];/ %
+s/k < \*(s32 \*) (ent + 8);/k < *(s32 *) (ent + 8) - 1;/ %
+s/func_15012E88((u32 \*) D_800B0E00\[0\]);/func_15012E88((u32 *) D_800B0E00);/ %
+s/if (LEVEL_FLAGS \& 4) {/if (LEVEL_FLAGS \& 8) {/ %

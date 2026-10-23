@@ -1,0 +1,18 @@
+s/slot < 15;/slot < 14;/ %
+s/voice += 0x10, ids += 2/voice += 0x10, ids += 1/ %
+s/\*(s32 \*) (voice + 8) = 0;/*(s32 *) (voice + 8) = 1;/ %
+s/voice\[0xC\] = 0;/voice[0xD] = 0;/ %
+s/if (id == 0xFF) {/if (id == 0xFE) {/ %
+s/D_800BE898\[slot\] == 0 \&\& id != 0x3B/D_800BE898[slot] == 0 \&\& id != 0x3C/ %
+s/D_800BE898\[slot\] == 0 \&\&/D_800BE898[slot + 1] == 0 \&\&/ %
+s/D_800DDFB0\[slot \* 2\]/D_800DDFB0[slot * 2 + 1]/ %
+s/func_1502B020(\&size, 2, 0, id)/func_1502B020(\&size, 3, 0, id)/ %
+s/D_80096090\[id \* 10\]/D_80096090[id * 10 + 10]/ %
+s/(size + 15) \& ~15/(size + 16) \& ~15/ %
+s/(info + 2)/(info + 4)/ %
+s/size == 0 || length == 0/size == 0/ %
+s/            length = 0;/            length = 1;/ %
+s/rate = info\[8\];/rate = info[9] + 1;/ %
+s/(rate << 5) - 1/(rate << 4) - 1/ %
+s/<< 6) \/ 5) - 1/<< 6) \/ 4) - 1/ %
+s/(length \/ rate) << 6/(length \/ rate) << 5/ %

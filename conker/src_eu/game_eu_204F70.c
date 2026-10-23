@@ -96,7 +96,24 @@ void func_151D7A60(u8 *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
+#ifdef NON_MATCHING
+// linked_obj_event_3d: event handler of an object whose link record sits at +0x40 ({ s32 id, u8 key }): event 0x3D removes the
+// object (func_1516972C) when the event's record matches by id or by key; any other event goes to the common
+// handler func_15149514.
+void func_151D7AE8(struct102 *obj, u8 *ev, u8 type) {
+    u8 *link = (u8 *) obj + 0x40;
+
+    if (type == 0x3D) {
+        if (*(s32 *) link == *(s32 *) ev || link[4] == ev[4]) {
+            func_1516972C(obj);
+        }
+    } else {
+        func_15149514((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7AE8.s")
+#endif
 
 extern u8 D_800AB660[];
 extern u8 D_800AB6B4[];

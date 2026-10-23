@@ -1,0 +1,10 @@
+s/if (id != 0xFF)/if (id != 0xFE)/
+s/infoFlags \& 0x10/infoFlags \& 0x20/
+s/D_800DE010\[slot\] = info\[1\] - 1;/D_800DE010[slot] = info[1];/
+s/D_800DE020\[slot\] = 2;/D_800DE020[slot] = 3;/
+s/(info + 6)/(info + 8)/
+s/flags \& 0xFF7F/flags \& 0xFFFF/
+s/D_800DDC04 |= 1 << slot/D_800DDC04 |= 2 << slot/
+s/infoFlags \& 8)/infoFlags \& 4)/
+s/D_800DE050\[slot \* 2 + 1\] = b;/D_800DE050[slot * 2 + 1] = 0;/
+s/D_800BE898\[slot\] = 0;/D_800BE898[slot] = 1;/

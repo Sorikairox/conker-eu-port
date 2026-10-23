@@ -48,7 +48,7 @@ struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg
 struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32  func_15163704(struct225 *arg0);
 void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+struct225 *func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32  func_151639D0(struct225 *arg0, s32 arg1, u8 arg2);
 void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2);
 struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2);
@@ -1255,14 +1255,14 @@ void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
     func_1516037C(&tmp, arg0, 0, arg2, arg3);
 }
 
-void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
+struct225 *func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
     Header tmp;
     tmp.unk0 = arg1;
     tmp.unk1 = arg2;
     tmp.unk2 = arg3;
     tmp.unk4 = arg4;
 
-    func_1516037C(&tmp, arg0, offset, arg6, arg7);
+    return func_1516037C(&tmp, arg0, offset, arg6, arg7);
 }
 
 typedef struct {

@@ -1,0 +1,8 @@
+s/if (type == 0x3D) {/if (type == 0x3E) {/
+s/ || link\[4\] == ev\[4\]/ \&\& link[4] == ev[4]/
+s/link\[4\] == ev\[4\]/link[5] == ev[4]/
+s/(u8 \*) obj + 0x40;/(u8 *) obj + 0x44;/
+s/(s32) (link + 4)/(s32) (link + 8)/
+s/(s32) link, (s32) (link + 4), (s32) obj)/(s32) link, (s32) (link + 4), (s32) ev)/
+s/func_15149514((s32) ev, type,/func_15149514((s32) obj, type,/
+s/\*(s32 \*) link == \*(s32 \*) ev/*(s32 *) link != *(s32 *) ev/
