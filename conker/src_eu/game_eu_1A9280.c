@@ -94,7 +94,55 @@ s32 func_1517BD68(s16 *arg0, s16 *arg1, s32 *arg2, s32 arg3) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    s16 pos[3];     /* +0 x, y, z */
+    u8 rest[8];
+} AmbientEmitterRec;  /* 14 bytes (func_1500AF08 layout) */
+extern AmbientEmitterRec *D_800DE148;
+extern s32 D_8008D254;   /* sort key: 0 = x, else z */
+#endif
+
+#ifdef NON_MATCHING
+// ambient_emitters_sort: quicksort of the emitter records D_800DE148[lo..hi] (14 bytes) by x, or by z when
+// D_8008D254 is set; pivot = the last record (Rare's partition loop, literal).
+void func_1517BE0C(s32 lo, s32 hi) {
+    AmbientEmitterRec tmp;
+    s32 i = lo;
+    s32 j = hi;
+    s32 k;
+    s16 pivot;
+
+    if (!(lo < hi)) {
+        return;
+    }
+    for (;;) {
+        k = (D_8008D254 != 0) ? 2 : 0;
+        pivot = D_800DE148[hi].pos[k];
+        while (D_800DE148[i].pos[k] < pivot && i < hi) {
+            i++;
+        }
+        while (pivot < D_800DE148[j].pos[k] && lo < j) {
+            j--;
+        }
+        if (!(i < j)) {
+            break;
+        }
+        tmp = D_800DE148[i];
+        D_800DE148[i] = D_800DE148[j];
+        D_800DE148[j] = tmp;
+        i++;
+        j--;
+    }
+    tmp = D_800DE148[i];
+    D_800DE148[i] = D_800DE148[hi];
+    D_800DE148[hi] = tmp;
+    func_1517BE0C(lo, i - 1);
+    func_1517BE0C(i + 1, hi);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517BE0C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517C11C.s")
 
