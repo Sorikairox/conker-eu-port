@@ -124,9 +124,30 @@ static void fiber_entry(void *arg) {
  * thread that ran last and the last place the walk was still clean. */
 __attribute__((weak)) int port_heap_check(void); __attribute__((weak)) extern int port_heap_quiet;
 __attribute__((weak)) extern void *D_800380B4; /* game heap head (absent in the scheduler demo) */
+void (*p113_watch_hook)(unsigned addr); /* P113: set by p103_boot.c (scans the camera records) */
 static int hw_mode = -1, hw_done;
 static char hw_good_where[48]; static int hw_good_tid; static unsigned hw_good_frame, hw_checks;
+/* P113 ?p113watch=ADDR (decimal or 0x hex via the URL value, wasm address) [&p113wf=FROM_FRAME]: at every heapwatch
+ * point (osSetIntMask, thread switch) compare the 4 words at ADDR-8..ADDR+4 with the last check; log the first 24 changes
+ * with the JS stack (allocator header updates show func_10004250 / func_10004074; anything else is a stale writer). */
+void p113_watch(const char *where) {
+    static int a = -1, wf = -1, n; static unsigned last[4]; static int have;
+    if (a < 0) { a = port_flag("p113watch"); wf = port_flag("p113wf"); }
+    if (a <= 0 || port_frame_count < (unsigned)wf || n >= 24) return;
+    const unsigned *w = (const unsigned *)(uintptr_t)(unsigned)(a - 8);
+    { static int tf = -1, nt; if (tf < 0) tf = port_flag("p113wtrace"); /* ?p113wtrace=FRAME: every checkpoint of that frame */
+      if (tf > 0 && port_frame_count == (unsigned)tf && nt++ < 200) { port_log("[p113t] %s\n", where); port_js_stack(3, 6); } }
+    if (have && (w[0] != last[0] || w[1] != last[1] || w[2] != last[2] || w[3] != last[3])) {
+        n++;
+        port_log("[p113w] %08X changed at %s (thread %d, frame %u): %08X %08X %08X %08X -> %08X %08X %08X %08X\n", a - 8, where,
+                 cur ? (int)cur->t->id : -1, port_frame_count, last[0], last[1], last[2], last[3], w[0], w[1], w[2], w[3]);
+        port_js_stack(1, 8);
+        if (p113_watch_hook) p113_watch_hook((unsigned)a);
+    }
+    last[0] = w[0]; last[1] = w[1]; last[2] = w[2]; last[3] = w[3]; have = 1;
+}
 void port_heapwatch(const char *where) {
+    p113_watch(where);
     if (hw_mode < 0) hw_mode = port_flag("heapwatch");
     if (!hw_mode || hw_done) return;
     if (!port_heap_check || !&D_800380B4 || !D_800380B4) return; /* heap not set up yet */
@@ -167,6 +188,7 @@ void port_sched_run(void) {
         p->switches++;
         emscripten_fiber_swap(&sched_fiber, &p->fiber);
         cur = NULL;
+        { static char w2[48]; snprintf(w2, sizeof w2, "switch out of thread %d", (int)p->t->id); p113_watch(w2); }
         if (hw_mode) { static char w[48]; snprintf(w, sizeof w, "switch out of thread %d", (int)p->t->id); port_heapwatch(w); }
         if (p->state == P_DEAD) {
             free(p->cstack); free(p->astack);

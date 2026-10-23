@@ -81,6 +81,8 @@ int port_heap_check(void) {
     u32 tags[4] = {0};
     if ((u32)b - lo >= 64) { /* the first block is aligned (class 3: 64 bytes) */ port_log("[heap] first block %08X, want %08X\n", (u32)b, lo); bad++; }
     for (; b && n < 100000; b = (u32 *)b[0], n++) {
+        if ((u32)b < lo || (u32)b >= hi + 0x14) { /* P113: check before reading the header (a garbage next pointer trapped) */
+            port_log("[heap] block %u %08X out of the heap (link from %08X)\n", n, (u32)b, (u32)prev); bad++; break; }
         u32 size = b[2] & 0xFFFFFF, tag = b[2] >> 24;
         if ((u32)b < lo || (u32)b + 0xC + size > hi + 0x14) { port_log("[heap] block %u %08X size %X out of the heap\n", n, (u32)b, size); bad++; break; }
         if ((u32 *)b[1] != prev) { port_log("[heap] block %u %08X: prev %08X, want %08X\n", n, (u32)b, b[1], (u32)prev); bad++; }

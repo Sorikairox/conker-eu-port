@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P113, 2026-10-23, port-web). Details: `docs/port/sessions/P113.md`
+
+- Merged port 8ed5688 (P112) as 8e79558.
+  - game_83300.c: both kept (func_15060D54 from port, func_15060F28 C from port-web).
+  - game_eu_CD540.c: port's version taken whole (func_1509FD30 + the new func_150A02EC). The port-b P77
+    func_150A02EC is dropped, so **port-b will get the same conflict**.
+  - verify_all OK, NM link, protocheck 0 (1021), float-int BUG 0, census 722 ok / 0 FAIL.
+- **LogoScreen scene end: the heap corruption was not the object removal.**
+  - With func_150849C0 / func_15060D54 as C, the heap still broke at frame 2137.
+  - Cause: camera D_800DBFF0[0].unk3D4 (target = the object's +0x31C record) still points at the record that
+    func_15060F28 freed at frame 2133. func_15122AE0 -> func_15122C5C writes floats into it.
+  - Producer: nothing retargets the camera. On N64 the scene VM func_15024910 (asm stub) should leave level 0x21
+    by opcode 0x67 first.
+  - TEMPORARY guard `--wrap=func_15060F28` (p103_boot.c) points such a camera at a zeroed parking record.
+    `?p113noguard=1` turns it off.
+- With the guard: node 150 s and Chrome run past the scene with heap 0 and no trap. The game then **stalls on level
+  0x21, mode 1, black screen**, and no new stub is hit after frame 2133. func_151DECB4 / mode 3 are never reached.
+- `?p110noev=1` regression: node and 2 Chrome walks clean (death, scene, 0x2C and back, heap 0).
+- New diagnostics: `?p113watch=ADDR&p113wf=F` (16-byte write watch at osSetIntMask / thread switch / 19
+  checkpoint wraps in func_15019130), `?p113wtrace=F`, `?p113free=F`, opt-in func_15084814 emulation
+  `?p113g84=1`. The heap walk no longer traps on a garbage link.
+
+## Next steps (from P113)
+
+1. Conversion: the scene VM func_15024910 / func_15029EA8 (game_eu_51190). Check that opcode 0x67 reaches
+   func_151DECB4, and find the camera retarget at scene end, so the P113 guard can be dropped.
+2. Then mode 3 func_151DEDD0 and its pages (game_eu_20B730), func_151EE704, func_15007778, event 0xC8 natives
+   (port-b C5530).
+3. func_15084814 (small, last stub of the removal chain), then the LogoScreen stubs and the P110 per-frame list.
+
 ## State (session P110, 2026-10-23, port-web). Details: `docs/port/sessions/P110.md`
 
 - Merged port a658cf8 (P104 music), port-b 7d59c9c (P102 / P108) and port 1888378 (P106 event system).

@@ -215,6 +215,17 @@ void __wrap_func_10004074(int p) {
             if (fd == 2) return;
         }
     }
+    { /* P113 ?p113free=FRAME: from that frame on, log each free (block header) with a heap walk before it and the
+       * JS stack (first 30) - finds the free that breaks the heap after the LogoScreen scene end */
+        static int ff = -1, nf; extern __attribute__((weak)) int port_heap_check(void); extern unsigned port_frame_count;
+        if (flag(&ff, "p113free") && port_frame_count >= (unsigned)ff && p && nf < 30) {
+            const unsigned *h = (const unsigned *)(uintptr_t)(p - 0xC);
+            nf++;
+            port_log("[p113] free %08X frame %u: header next %08X prev %08X info %08X; heap before:\n", p, port_frame_count, h[0], h[1], h[2]);
+            if (port_heap_check) port_heap_check();
+            port_js_stack(1, 6);
+        }
+    }
     __real_func_10004074(p);
 }
 

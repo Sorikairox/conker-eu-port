@@ -111,3 +111,100 @@ void __wrap_func_1501D348(int level, int scene, int slot, int cb, int cbarg) {
                  cbarg, port_frame_count, vbe_ld8(&D_800E0B94));
     __real_func_1501D348(level, scene, slot, cb, cbarg);
 }
+
+/* P113 DIAGNOSTIC: on a ?p113watch hit, list the words of the camera records D_800DBFF0 (struct108 *, 2 x 0x800+)
+ * that point within +-0x400 of the watched address (a stale camera target into a freed block). */
+extern unsigned char *D_800DBFF0;
+extern void (*p113_watch_hook)(unsigned addr);
+static void p113_cam_scan(unsigned a) {
+    unsigned o;
+    for (o = 0; o < 0x1000; o += 4) {
+        unsigned v = *(const unsigned *)(D_800DBFF0 + o);
+        if (v + 0x400 - a < 0x800) port_log("[p113w]   D_800DBFF0+%03X = %08X (ADDR%+d)\n", o, v, (int)(v - a));
+    }
+}
+
+/* P113 OPT-IN emulation ?p113g84=1 (remove when func_15084814 is game C): func_15084814 (game_eu_AF2A0, asm stub) is the
+ * part-reference release under the object removal chain func_15060F28 -> func_150849C0 (C since port P112) ->
+ * func_150847B4 (C). The stub left the object's part words +0x28C + j*8 set, the shared-block reference counts
+ * D_800D1F80[slot] up and the private copies allocated, and the heap was corrupt right after the LogoScreen scene
+ * end (frame 2133-2137). This wrap does what the asm does (EU asm read by hand, 0x60 bytes): for both words of
+ * part j: word == D_800D19A0[slot] -> D_800D1F80[slot]--, else func_100043B4(word, 3); then the word = 0.
+ * Result: it is NOT the cause of the heap corruption (same corruption with it), so it is opt-in; default = the stub. */
+extern unsigned D_800D19A0[];
+extern unsigned char D_800D1F80[];
+void func_100043B4(int *p, unsigned tag);
+void __real_func_15084814(unsigned char *obj, int j);
+void __wrap_func_15084814(unsigned char *obj, int j) {
+    static int fnog = -1, n;
+    p113_watch_hook = p113_cam_scan; /* (set here: a constructor would pull game data into the scheduler demo) */
+    unsigned *w = (unsigned *)(obj + 0x28C + j * 8);
+    unsigned slot;
+    int k;
+    if (flag(&fboot, "p103boot") && n++ < 40)
+        port_log("[p113] func_15084814(obj %08X, part %d) frame %u: words %08X %08X\n", (unsigned)(uintptr_t)obj, j,
+                 port_frame_count, w[0], w[1]);
+    if (!flag(&fnog, "p113g84")) { __real_func_15084814(obj, j); return; }
+    if (w[0] == 0 && w[1] == 0) return;
+    slot = (*(unsigned char **)(obj + 0x2C4))[j];
+    for (k = 0; k < 2; k++) {
+        if (w[k] == 0) continue;
+        if (w[k] == D_800D19A0[slot]) D_800D1F80[slot]--;
+        else func_100043B4((int *)(uintptr_t)w[k], 3);
+        w[k] = 0;
+    }
+}
+
+/* P113 DIAGNOSTIC: checkpoints of the ?p113watch write watch (pc_sched.c) around the calls of func_15019130 between its
+ * func_10004250 and func_151670C0, to find the stale writer after the LogoScreen scene end (pass-through wraps). */
+void p113_watch(const char *where);
+#define P113W0(f) void __real_##f(void); void __wrap_##f(void) { p113_watch(#f " in"); __real_##f(); p113_watch(#f " out"); }
+#define P113W1(f) void __real_##f(int); void __wrap_##f(int a) { p113_watch(#f " in"); __real_##f(a); p113_watch(#f " out"); }
+#define P113W2(f) void __real_##f(int, int); void __wrap_##f(int a, int b) { p113_watch(#f " in"); __real_##f(a, b); p113_watch(#f " out"); }
+P113W0(func_15035210)
+P113W0(func_1510BC10)
+P113W1(func_1510F800)
+P113W0(func_15113700)
+P113W0(func_15044D18)
+P113W2(func_1502457C)
+P113W1(func_1501ECA4)
+P113W1(func_15020F6C)
+P113W1(func_1501E364)
+P113W0(func_15122AE0)
+P113W0(func_1504ADD0)
+P113W1(func_151101B4)
+P113W2(func_15174F68)
+P113W0(func_1501C860)
+P113W1(func_1511FC20)
+P113W1(func_151890E4)
+P113W0(func_1502C494)
+P113W0(func_15114208)
+P113W1(func_15173E34)
+
+/* P113 TEMPORARY guard (remove when the scene end retargets the camera itself): after the LogoScreen scene on level
+ * 0x21 ends (frame 2133) the object removal func_15060F28 (from func_1502298C) frees the removed object's +0x31C
+ * record, but camera record D_800DBFF0[i] (struct108, 0x9A0 bytes) keeps it as its target unk3D4 (set by
+ * func_1512868C from D_800CC2D0[unk23D].unk31C). func_15122AE0 -> func_15122C5C then writes floats into the freed
+ * block (+0x138..) and the next heap walk / alloc traps (frame 2137). On N64 the scene VM func_15024910 (asm stub
+ * here) ends LogoScreen with opcode 0x67 -> func_151DECB4 -> mode 3 before that; the stub never does, so the producer
+ * that should retarget / drop the camera is in the stubbed scene path. Guard: a camera whose unk3D4 is the freed
+ * record is pointed at a zeroed parking record instead. ?p113noguard=1 / PORT_P113NOGUARD=1 turns it off. */
+extern int D_80082FA0;
+static unsigned p113_park[0x200] __attribute__((aligned(16)));
+void __real_func_15060F28(unsigned char *obj, int mode);
+void __wrap_func_15060F28(unsigned char *obj, int mode) {
+    static int fng = -1, n;
+    unsigned rec = *(unsigned *)(obj + 0x31C);
+    int i;
+    __real_func_15060F28(obj, mode);
+    if (flag(&fng, "p113noguard") || rec == 0) return;
+    for (i = 0; i <= D_80082FA0 && i < 4; i++) {
+        unsigned *t = (unsigned *)(D_800DBFF0 + i * 0x9A0 + 0x3D4);
+        if (*t == rec) {
+            if (n++ < 16)
+                port_log("[p113] guard: camera %d target %08X freed with object %08X (mode %d) frame %u -> parking record\n", i, rec,
+                         (unsigned)(uintptr_t)obj, mode, port_frame_count);
+            *t = (unsigned)(uintptr_t)p113_park;
+        }
+    }
+}
