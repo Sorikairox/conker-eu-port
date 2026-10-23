@@ -393,6 +393,27 @@ def is_branch(w):
     op = w >> 26
     return (op == 0 and (w & 63) in (8, 9)) or op in (1, 2, 3, 4, 5, 6, 7, 20, 21, 22, 23) or (op == 17 and ((w >> 21) & 31) == 8)
 
+TRAPSCAN_OLD = os.environ.get('DIFFTEST_TRAPSCAN_OLD') == '1'   # P132: stop at trap checks too (pre-P132 scan)
+
+def _trap_guard(words, b, idx):
+    """P132: words[b] is a non-likely conditional forward branch whose not-taken path only reaches a `break`
+    (an IDO division trap check): its target t is at or before the call idx, words[t - 1] is a break and words
+    b+2 .. t-1 are breaks, nops or branches to the same target (with their delay slots)"""
+    w = words[b]
+    if (w >> 26) not in (4, 5, 6, 7): return False
+    off = w & 0xFFFF; off -= (off & 0x8000) << 1
+    t = b + 1 + off
+    if not (b + 2 < t <= idx) or words[t - 1] & 0xFC00003F != 0x0D: return False
+    k = b + 2
+    while k < t:
+        x = words[k]
+        if x & 0xFC00003F == 0x0D or x == 0: k += 1; continue
+        if (x >> 26) in (4, 5, 6, 7):
+            o = x & 0xFFFF; o -= (o & 0x8000) << 1
+            if k + 1 + o == t: k += 2; continue
+        return False
+    return True
+
 def call_site_writes(words, idx):
     """arg registers / FP arg registers / stack arg slots written in the straight-line run before the
     call at idx (delay slot included)"""
@@ -402,7 +423,12 @@ def call_site_writes(words, idx):
         w = words[j] if j < len(words) else 0
         # P13: also stop at the delay slot of an earlier branch/jump (j - 1 is that branch): its writes belong
         # to the earlier call or path (a jal's delay slot a2=3 widened a 1-arg call to 3 args)
-        if j < idx and (is_branch(w) or (0 < j and is_branch(words[j - 1]))): break
+        if j < idx and (is_branch(w) or (0 < j and is_branch(words[j - 1]))):
+            # P132: IDO's division trap checks (`bnez d, +2; nop; break 7` and `bne d, -1, L; ...; break 6`) sit
+            # between the argument stores and the jal (func_151DE100: secs / 60, secs % 60 stored at sp+0x10 / 0x14
+            # before the checks of `secs / 60`): they only skip `break`, so the scan goes on through them. Before
+            # P132 the scan stopped there and a varargs callee's stack arguments were never compared.
+            if TRAPSCAN_OLD or not _trap_guard(words, j if is_branch(w) else j - 1, idx): break
         d = gpr_dest(w)
         if d is not None and 4 <= d <= 7: a.add(d - 4)
         fd = fpr_dest(w)
@@ -548,6 +574,8 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
 
 # P106 (opt-in): DIFFTEST_MEMSTK="ADDR,..." (hex): memory words that hold a stack address (a function that saves
 # its sp in a global, e.g. func_150ADFD0 -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
+POKE_OLD = os.environ.get('DIFFTEST_POKE_OLD') == '1'   # P132: pre-P132 precedence (the ROM image overwrites pokes)
+
 MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTEST_MEMSTK', '').split(','))]
 
 # P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
@@ -762,7 +790,13 @@ class Run:
         if pwatch and POKES:   # P93: which DIFFTEST_POKE words the reference really reads (one hook per poked page)
             # one global hook: Unicorn 2.0.1 range-bound read hooks missed some lbu reads (func_15035AF8: obj+4 / +7 / +0x74)
             self.ppages = {a & ~(PAGE - 1) for a in POKES}
-            mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
+            if os.environ.get('DIFFTEST_PREAD_OLD') == '1':
+                mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
+            else:
+                # P132: Unicorn 2.0.1 also skips some reads in the global hook (func_151DE100: `lbu D_800BE616`
+                # at 151DE340 and `lb D_800E1013` were never reported, so [POKE unread] listed words the reference
+                # had read). Decode the function's own loads in a code hook instead (stubs read nothing).
+                mu.hook_add(UC_HOOK_CODE, self.on_pload, begin=vram, end=self.end - 1)
         if trace:
             mu.hook_add(UC_HOOK_MEM_READ, self.on_read)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
@@ -829,6 +863,19 @@ class Run:
             if rt:
                 mu.reg_write(UC_MIPS_REG_0 + rt, lo); self.d64hi[rt] = (lo, hi)
 
+    _LSIZE = {32: 1, 36: 1, 33: 2, 37: 2, 34: 4, 38: 4, 35: 4, 49: 4, 53: 8, 55: 8}   # lb lbu lh lhu lwl lwr lw lwc1 ldc1 ld
+
+    def on_pload(self, mu, addr, size, ud):
+        k = (addr - self.vram) // 4
+        if not 0 <= k < len(self.words): return
+        w = self.words[k]; n = self._LSIZE.get(w >> 26)
+        if n is None: return
+        off = w & 0xFFFF; off -= (off & 0x8000) << 1
+        b = (w >> 21) & 31
+        ea = ((mu.reg_read(UC_MIPS_REG_0 + b) if b else 0) + off) & 0xFFFFFFFF
+        if (w >> 26) in (34, 38): ea &= ~3   # lwl / lwr touch their aligned word
+        self.on_pread(mu, None, ea, n, 0, None)
+
     def on_pread(self, mu, access, addr, size, value, ud):
         if phys(addr) & ~(PAGE - 1) not in self.ppages: return
         for a in range(phys(addr) & ~3, phys(addr) + size, 4):
@@ -851,6 +898,15 @@ class Run:
                 lo = max(pp, p0); hi = min(pp + PAGE, p0 + len(b))
                 buf[lo - pp:hi - pp] = b[lo - p0:hi - p0]
         if buf is None: buf = self.rand_page(pp)
+        elif POKES and not POKE_OLD:
+            # P132: a DIFFTEST_POKE word wins over the ROM image (.data in odd trials / always with DIFFTEST_ROMDATA=1,
+            # .rodata in every trial): before P132 the image was copied over the poke, so a poke of e.g. D_80082FA0
+            # (.game_data, 0x80083330) held only in even trials, and a poke into rodata never. Code is never poked.
+            # Precedence now: forced (learned) pointers > DIFFTEST_POKE > ROM image > random. DIFFTEST_POKE_OLD=1 = old rule.
+            buf = bytearray(buf)
+            for a, v in POKES.items():
+                if pp <= a < pp + PAGE and not any(phys(cv) <= a < phys(cv) + len(cb) for cv, cb, ck in image() if ck == 'code'):
+                    buf[a - pp:a - pp + 4] = struct.pack('>I', v)
         fw = [(a, v) for a, v in self.forced.items() if pp <= a < pp + PAGE]
         if fw:
             buf = bytearray(buf)
@@ -1429,7 +1485,7 @@ def poke_notes(pread, nwatched):
     if POKES and nwatched:
         un = sorted(a for a in POKES if a not in pread)
         if un: out += ' [POKE unread: %s]' % ','.join('%08X' % (0x80000000 | a) for a in un[:12]) + ('...' if len(un) > 12 else '')
-    if POKES:
+    if POKES and POKE_OLD:
         rom = sorted(a for a in POKES if any(phys(v) <= a < phys(v) + len(b) for v, b, k in image() if k != 'code'))
         if rom: out += ' [POKE in ROM data (even trials only): %s]' % ','.join('%08X' % (0x80000000 | a) for a in rom[:12])
     return out

@@ -113,7 +113,7 @@ typedef struct {
         u8 pad59[0x23];
     } emit;
 } Fire150113E0;
-u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
                   s32 arg9);
 
 // level_fire_emitters_create: P127: level start (new game, level 0x18): creates four particle emitters

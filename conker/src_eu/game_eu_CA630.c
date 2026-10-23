@@ -126,11 +126,77 @@ s32 func_1509D104(s32 arg0) {
     return cnt;
 }
 
+#ifdef NON_MATCHING
+// save_unlocks_propagate: unlocks arg0's list (func_1509D104), then keeps expanding every entry of the state bytes
+// D_800D2E70 (0xCC of them) that is in state 3 until a whole pass unlocks nothing new. The asm returns no value.
+void func_1509D1EC(s32 arg0) {
+    s32 added;
+    s32 i;
+
+    func_1509D104(arg0);
+    do {
+        added = 0;
+        for (i = 0; i < 0xCC; i++) {
+            if (((u8 *) &D_800D2E70)[i] == 3) {
+                added += func_1509D104(i);
+            }
+        }
+    } while (added != 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D1EC.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D274.s")
 
+#ifdef NON_MATCHING
+/* P132: the save-route table func_1502B6BC loads (asset 3, 8-byte records): record 0's info word gets the record
+ * count - 1; record i >= 1 points at its own block, a list of (offset, flags) pairs ended by flag 0x80000000. */
+typedef struct SaveRouteRec {
+    u32 *data;
+    u32 info;
+} SaveRouteRec;
+s32 func_1502B6BC(s32 *, s32, s32 *, s32, ...);
+
+// save_route_table_load: loads the save-route table into D_800D33D0 (arg0 selects it), stores the number of routes
+// (records - 1) in record 0 and *count, and relocates each route block: every pair's first word gets the block
+// address added (up to the pair flagged 0x80000000; the flags are cleared), and the block's word 3 becomes
+// (word 3 & 0x0FFFFFFF) >> 1. Returns 0 (and *count = 0) when nothing was loaded, else 1.
+s32 func_1509D338(s32 arg0, s32 *count) {
+    u32 n;
+    u32 i;
+    u32 *p;
+    s32 last;
+    SaveRouteRec *tbl;
+
+    n = 0;
+    D_800D33D0 = func_1502B6BC(NULL, 0, (s32 *) &n, 3, 8, 0, arg0);
+    tbl = (SaveRouteRec *) D_800D33D0;
+    if (tbl == NULL) {
+        *count = 0;
+        return 0;
+    }
+    tbl[0].info = n - 1;
+    *count = n - 1;
+    for (i = 1; i < n; i++) {
+        p = tbl[i].data;
+        last = 0;
+        do {
+            p[0] += (u32) tbl[i].data;
+            if (p[1] & 0x80000000) {
+                last = 1;
+            }
+            p[1] &= 0x0FFFFFFF;
+            p += 2;
+        } while (!last);
+        p = tbl[i].data;
+        p[3] = (p[3] & 0x0FFFFFFF) >> 1;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D338.s")
+#endif
 
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
 void func_10004074(s32);
@@ -146,7 +212,52 @@ void func_1509D464(void) {
     }
 }
 
+#ifdef NON_MATCHING
+// save_route_check: route arg1 of the table D_800D33D0 (record arg1 + 1, relocated by func_1509D338): writes the
+// first id of its requirement list through outA and the id its word 0 points at through outB (0xBF / 0 when there
+// is no table or no route; NULL out-pointers are skipped) and returns 1 when every id of the list (word 2, count
+// word 3, s16 each) has its bit set in D_800D2E4C, else 0. arg0 is unused.
+s32 func_1509D49C(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
+    SaveRouteRec *rec;
+    u32 *route;
+    s16 *ids;
+    u32 i;
+    u32 n;
+    s32 id;
+
+    rec = &((SaveRouteRec *) D_800D33D0)[arg1];
+    if (D_800D33D0 == 0 || rec[1].data == NULL) {
+        if (outA != NULL) {
+            *outA = 0xBF;
+        }
+        if (outB != NULL) {
+            *outB = 0;
+        }
+        return 0;
+    }
+    if (outA != NULL) {
+        *outA = *(s16 *) rec[1].data[2];
+    }
+    if (outB != NULL) {
+        *outB = *(s16 *) rec[1].data[0];
+    }
+    route = rec[1].data;
+    n = route[3];
+    if (n == 0) {
+        return 1;
+    }
+    ids = (s16 *) route[2];
+    for (i = 0; i < n; i++) {
+        id = ids[i];
+        if (!(((u8 *) D_800D2E4C)[id >> 3] & (1 << (id & 7)))) {
+            return 0;
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D49C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D590.s")
 

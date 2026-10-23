@@ -1,10 +1,46 @@
 #include <ultra64.h>
 
+#ifdef NON_MATCHING
+/* P132: functions.h:772 declares func_1513D524 void; it returns the new record (port-b P128, game_169510.c). Hide
+ * the old prototype until the functions.h fix merges (as game_eu_1772D0.c does). */
+#define func_1513D524 func_1513D524_void_proto
+#endif
 #include "functions.h"
+#ifdef NON_MATCHING
+#undef func_1513D524
+struct210 *func_1513D524(s32, u8, u8, u8, u8, u8, s32, u8, s32);
+#endif
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+// particle_emitter_spawn: spawns a particle record from the spawn block (type byte 1 = 3, flags 0x40400000 set
+// first) through func_1513D524, copies the emitter block (emitSize bytes) to rec + 0x110, clears its word +0x44,
+// stores arg7 at +0x59 and counts the record in D_800DCE20. Returns the record or NULL. func_150113E0 passes
+// (emit, 0x7C, spawn, 0, 0x20, 0, 0, -1, 0xFF, 1).
+struct210 *func_151407D0(void *emit, s32 emitSize, u8 *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+                         s32 arg9) {
+    struct210 *rec;
+    u8 *e;
+
+    spawn[1] = 3;
+    *(u32 *) (spawn + 0x40) |= 0x40400000;
+    rec = func_1513D524((s32) spawn, arg3, arg4, arg5, 1, arg6, emitSize, arg8, arg9);
+    if (rec == NULL) {
+        return NULL;
+    }
+    e = (u8 *) rec + 0x110;
+    memcpy(e, emit, emitSize);
+    *(s32 *) (e + 0x44) = 0;
+    e[0x59] = arg7;
+    if (rec != NULL) {
+        D_800DCE20++;
+    }
+    return rec;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151407D0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151408A4.s")
 

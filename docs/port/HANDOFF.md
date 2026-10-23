@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P132, 2026-10-23). Details: `docs/port/sessions/P132.md`
+
+- difftest fixes (selftest 57 / 57): (1) varargs / unknown callees' stack arguments behind IDO division trap checks
+  were never compared (the call-site scan stopped at `bnez; break 7`) - the real cause of P127's "ineffective poke"
+  survivors; (2) DIFFTEST_POKE now wins over the ROM image in every trial (also with DIFFTEST_ROMDATA=1 and in
+  rodata); precedence learned pointers > POKE > ROM image > random; (3) `[POKE unread]` from decoded loads (Unicorn's
+  global read hook misses some loads). Old behaviour: DIFFTEST_TRAPSCAN_OLD / DIFFTEST_POKE_OLD / DIFFTEST_PREAD_OLD = 1.
+- func_151DE100's 7 non-equivalent P127 survivors all killed (new gap setups, `p132/gende100.py`).
+- New hand C (NM): func_151407D0 particle_emitter_spawn (game_16DC80; needs port-b's returning func_1513D524),
+  func_1509D1EC / func_1509D338 / func_1509D49C (game_eu_CA630; load-game save-route producers of func_151DFD0C),
+  func_151E0BBC menu_mode_select_page (main menu page 0).
+- Checks: verify_all OK, NM links, protocheck 0 (977), selftest 57/57, progress_nm 4971/5915 (84.0%), bytes 60.2%.
+
+## Next steps (from P132)
+
+0. Web: merge together with port-b's P128 game_169510.c (func_1513D524 returns the record; func_151407D0 uses it).
+   func_1515AEE4 (game_eu_186A80) on the new-game frame is port-b's.
+1. func_151DFD0C (title page 2; its producers D338 / D464 / D49C are now C), then func_151E1308, func_151E4B40,
+   func_151E1EDC (same alpha / pending-page head as func_151E0BBC).
+2. func_151E19AC mutants; the 68 errored func_151E3AE4 setups.
+3. Varargs printers verified before P132 had their stack args unchecked when a division preceded the call: re-run
+   mutants of such functions if one matters.
+
 ## State (session P127, 2026-10-23). Details: `docs/port/sessions/P127.md`
 
 - P124 gap closed: func_15029EA8 t6 / ta setups EQUIV with ARGMEM on the func_1000FA64 record (allocate_memory key
