@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P173, 2026-10-24). Details: `docs/port/sessions/P173.md`
+
+- **Browser P171 new-game trap fixed (7cdb22a, own commit)**: func_15147F50 / func_15147FA0 (game_eu_1754C0, matching
+  C) pass the record to the D_8008A690 / D_8008A6E0 handlers under NON_MATCHING (all 40 entries C, void, 1 arg);
+  EQUIV on 6 setups, NULL-argument mutant killed. Default build unchanged.
+- New hand C (NM), difftest EQUIV + mutants: func_150A00F0 slots_reset, func_15086058 point_bands_build,
+  func_eu_1501B640 model_vertex_colours_blend (title / opening stub, 89 calls), the level-load vertex colour backup
+  func_15012760 level_vertex_colours_backup + func_15012C34 vertex_colours_store + func_15012E88 dl_env_colours_list
+  (P165 scene-start stubs). No stubs reached. game_3B920 NM `void func_15012760(void)`.
+- libultra / init with C callers: the port provides the libultra ones natively (list in P173.md section 5); remaining
+  game-specific init stubs: func_1000C530, func_10001550, func_1000A750; func_10005B04 is hand asm (TLB page pool).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1259 NM bodies), selftest 62/62, progress_nm 5253/5915 (88.8%), C bytes 71.3%. No processes left in conkerdev-port.
+
+## Next steps (from P173)
+
+1. func_1500BEC0 as one unit with func_1500AD84, the D_8008D258 handlers (func_1500AF08 / B1F4 / B3B0 / B714 / B8F4 /
+   BAB8 / BC7C) and func_1517BE0C (~1270 insns; level-load sound emitters).
+2. func_150039E0 (30E90, 741), func_15006590 (33990, 407, save unpack with __ll_lshift / __ull_rshift).
+3. port-b: func_1515C388 / func_1515C6F4 (game_1897A0, browser P171 item 2) are in port-b's next steps; not touched.
+4. Browser: new game past 6241, level vertex colours, title model colour blend (P173.md section 7).
+5. func_1507D754 (P169 draft) once port-b's func_151C9740 / func_151CFFFC are merged (port-b P170 has them in C).
+6. P138 / P141 leftovers (not started).
+
 ## State (session P172, 2026-10-24). Details: `docs/port/sessions/P172.md`
 
 - func_15195FB0 (game_eu_1C3530) now returns func_15196344's handle (`s32`, both builds; asm callers func_15116690 /

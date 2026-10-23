@@ -10,7 +10,7 @@ void func_1500AC14(void);
 s32 func_1500BEC0();
 void func_1500E5C0(void);
 void func_15012370(void);
-s32 func_15012760();
+void func_15012760(void);
 void func_15012FE0(void);
 void func_151645C4(u8);
 void func_15173850(s32);
