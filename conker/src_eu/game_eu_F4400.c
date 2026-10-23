@@ -298,6 +298,24 @@ s32 func_150C721C(u8 *arg0) {
     return ret;
 }
 
+#ifdef NON_MATCHING
+s32 func_151346EC(u8 *);
+s32 func_1513470C(u8 *);
+
+/* D_80089E40 table entries 6 / 16 (s32 (*)(obj), see func_151342BC): clear the data's word +0x70, then return
+ * func_151346EC / func_1513470C's result (the asm tail value). */
+s32 func_150C7240(u8 *arg0) {
+    u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
+    *(s32 *)(temp_v0 + 0x18) = 0;
+    return func_151346EC(arg0);
+}
+
+s32 func_150C7268(u8 *arg0) {
+    u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
+    *(s32 *)(temp_v0 + 0x18) = 0;
+    return func_1513470C(arg0);
+}
+#else
 void func_150C7240(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x58) + 0x58;
     *(s32 *)(temp_v0 + 0x18) = 0;
@@ -309,6 +327,7 @@ void func_150C7268(u8 *arg0) {
     *(s32 *)(temp_v0 + 0x18) = 0;
     func_1513470C(arg0);
 }
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15045AF0(f32 *, s32, f32, u8 *);

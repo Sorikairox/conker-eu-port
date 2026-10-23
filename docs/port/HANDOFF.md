@@ -41,6 +41,53 @@ boxes that open but never advance).
    s16 args 10..12 and 10+11, +0x86 option bits, +0x88 rec, +0x8C / +0x90 ground ids, +0x94 arg17, +0x98 / +0x9C
    arg19 / arg20. If func_15144E80 fails, func_151C9748 leaves out[] unwritten (N64 frees stack garbage then).
 
+## State (session P167, 2026-10-24). Details: `docs/port/sessions/P167.md`
+
+- New hand C (NM): func_151BAAC8 object_model_shatter (func_1507D754 callee, 715 insns: smoke burst + model pieces
+  0x27..0x2C), func_15136C3C object_hit_effects (hit kind effects; returns s32 0) and its callee func_1513A24C
+  object_debris_burst (calls port-b's func_15150D7C: stub here until the sync). All EQUIV with setups + ARGMEM;
+  mutants 43/44 + 1 equivalent, 19/19, 25/26 + 1 equivalent.
+- func_10010F88 (init_EB00): NM returns func_10010E78's u16 (asm callers keep it as a sound handle); functions.h
+  u16 under NM. func_151AB954 (D_80089E10 entry 3): NM C lacked a parameter (read dy / dz instead of dz / obj): fixed.
+- func_1507D754: not written: func_151C9740 / func_151CFFFC are asm in port-b files on port-b HEAD 9eebdac too;
+  func_150E0DF0 (this slot, asm) depends on port-b's func_151D5AC4 / func_151D4684 / func_15154728.
+- func_151342BC: decoded, not converted: 5 D_80089E10 handlers have NM signatures other than
+  `void (f32 x6, u8 *)` (list in P167.md section 3; wasm call_indirect would trap).
+- Checks: verify_all OK (code build, check_files, full ROM OK; after the last code edit), NM links (rc 0), protocheck 0 (1164), selftest 62/62, progress_nm 5158/5915 (87.2%), C bytes 68.4%.
+
+## Next steps (from P167)
+
+1. Unify the D_80089E10 handler NM signatures (func_151348F0, func_151AA8BC, func_150C65D8, func_150C6F08,
+   func_150EAB4C -> `void (f32, f32, f32, f32, f32, f32, u8 *)`), then convert func_151342BC (decoding in P167.md).
+2. func_150E0DF0 (game_eu_10E600, 220 insns) after the port-b sync (its port-b callees are C there).
+3. func_1507D754 once port-b converts func_151C9740 / func_151CFFFC.
+4. Browser: hit / break effects (func_15136C3C), sound handles from func_10010F88, P166's list.
+5. P138 / P141 leftovers (not started).
+
+## State (session P166, 2026-10-24). Details: `docs/port/sessions/P166.md`
+
+- New hand C (NM): pause / money screen HUD model func_151EE0C4 hud_model_load (display list copies: 0xEF -> render
+  mode 0x5041C8, 0xFC -> no-op) and func_151EE394 hud_model_draw (per frame; head blink textures 0x507 / 0x508);
+  func_1507D754 callees func_150BC968 object_impact_debris_hard, func_150BC03C object_impact_debris (both void),
+  func_150C04E0 object_land_puff. All difftest EQUIV with setups / ARGMEM + mutants (24/24, 30/31 + 1 equivalent,
+  50/50, 52/52, 15/15).
+- D_80089E40 (func_151342BC per-type table, 23 entries) confirmed real (result 0 -> func_1516972C(obj)). NM return
+  types fixed: func_151346EC returns obj[1] (asm: func_15168A4C's lbu), func_1513470C returns 1 (free's nonzero v0),
+  wrappers func_151ABD38 / 151ABD88 / 150C6910 / 150C6938 / 150C7240 / 150C7268 return the tail call (matching
+  bodies in #else). func_151342BC itself still asm.
+- func_1507D754: not written. Left: func_151BAAC8 (this slot, 715 insns, all callees C), func_15136C3C (this slot,
+  blocked by port-b's func_15150D7C), func_151CFFFC / func_151C9740 / func_150E0DF0 chain (port-b files).
+- New `docs/port/sessions/p166/dis.sh func...`: objdump of matching-build functions (return-value checks of C code).
+- Checks: verify_all OK (full ROM OK, after the last code edit), NM links, protocheck 0 (1161), selftest 62/62,
+  progress_nm 5155/5915 (87.2%), C bytes 68.2%.
+
+## Next steps (from P166)
+
+1. func_151BAAC8 (game_eu_1E7CC0, 715 insns): last func_1507D754 callee in this slot with only C callees.
+2. func_151342BC (game_161520, D_80089E40 dispatcher) now that its table entries have s32 NM signatures.
+3. Browser: pause / money screen head model (func_151EE0C4 / func_151EE394), plus P157's list.
+4. P138 / P141 leftovers (not started).
+
 ## State (session P165, 2026-10-24, port-web). Details: `docs/port/sessions/P165.md`
 
 - Merged port 902871d (P157) and port-b 8bd88bc (P155-P163): HANDOFF.md conflicts only. After each: verify_all OK,

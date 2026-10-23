@@ -1,0 +1,44 @@
+s/smoke.bRange = 0x34;/smoke.bRange = 0x35;/ %
+s/smoke.countRange = 5 >>/smoke.countRange = 4 >>/ %
+s/((D_80082FA0 >= 2) ? 1 : 0)/((D_80082FA0 >= 1) ? 1 : 0)/ %
+s/D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1/D_80082FA0 >= 2 || D_8008FD8C >= 7) ? 1/ %
+s/D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1/D_80082FA0 >= 2 \&\& D_8008FD8C >= 8) ? -1/ %
+s/+ 25.0f;/+ 26.0f;/ %
+s/smoke.v2Range = 271.0f;/smoke.v2Range = 272.0f;/ %
+s/smoke.f44 = -0.16900001f;/smoke.f44 = 0.16900001f;/ %
+s/smoke.s4C\[3\] = 0x64;/smoke.s4C[3] = 0x65;/ %
+s/smoke.life = 6;/smoke.life = 7;/ %
+s/(obj\[0x74\] \& 0xF) == 0xF/(obj[0x74] \& 0x7) == 0x7/ %
+s/req.flags = 0x39E9;/req.flags = 0x39E8;/ %
+s/req.u61 = 0xD;/req.u61 = 0xE;/ %
+s/req.u62\[1\] = 0xC;/req.u62[1] = 0xD;/ %
+s/req.u68 = 2;/req.u68 = 3;/ %
+s/req.u04 = 0.7f;/req.u04 = 0.75f;/ %
+s/req.u74 = 0x15;/req.u74 = 0x16;/ %
+s/req.ownerId = obj\[0x3B\];/req.ownerId = obj[0x3A];/ %
+s/req.scale\[2\] = 1.0f;/req.scale[2] = 2.0f;/ %
+s/+ 83.0f/+ 84.0f/ %
+s/+ -14432.0f/+ -14433.0f/ %
+s/U) + 30;/U) + 31;/ %
+1,/req.model = 0x27;/s/req.model = 0x27;/req.model = 0x26;/ %
+s/req.pos\[0\] += 109.0f;/req.pos[2] += 109.0f;/ %
+s/req.gravity = -0.48800004f; \/\*/req.gravity = -0.488f; \/*/ %
+s/func_15143134(D_800AA97C, req.vel, mtx);/func_15143134(D_800AA970 + 1, req.vel, mtx);/ %
+s/D_800AA994\[func_150ADA20() \& 1\]/D_800AA994[(func_150ADA20() \& 1) ^ 1]/ %
+s/req.sizeZ = 0.5f;/req.sizeZ = 0.55f;/ %
+s/req.sizeX = D_800AAA0C\[i\];/req.sizeX = D_800AAA0C[3 - i];/ %
+s/func_15143134(D_800AA9DC\[i\], req.vel, mtx);/func_15143134(D_800AA9AC[i], req.vel, mtx);/ %
+s/req.sizeX = 0.551f;/req.sizeX = 0.55f;/ %
+s/req.pos\[1\] += D_800AAA40\[i\]\[1\];/req.pos[1] += D_800AAA40[i][0];/ %
+s/func_15143134(D_800AAA28\[i\], req.vel, mtx);/func_15143134(D_800AAA28[1 - i], req.vel, mtx);/ %
+s/req.pos\[2\] += D_800AAAB8\[i\]\[2\];/req.pos[2] -= D_800AAAB8[i][2];/ %
+s/req.pos\[0\] += D_800AAAB8\[i\]\[0\];/req.pos[0] += D_800AAAB8[i][1];/ %
+s/req.sizeZ = D_800AAAE8\[i\];/req.sizeZ = D_800AAA0C[i];/ %
+s/func_15143134(D_800AAA88\[i\], req.vel, mtx);/func_15143134(D_800AAA58[i], req.vel, mtx);/ %
+s/req.vel\[1\] = (req.vel\[1\] - req.from\[1\]) \* speed;/req.vel[1] = (req.vel[1] - req.from[0]) * speed;/ %
+s/for (i = 0; i < 2; i++)/for (i = 0; i < 1; i++)/ %
+s/req.model = 0x2C;/req.model = 0x2D;/ %
+s/req.pos\[1\] = origin\[1\];/req.pos[1] = origin[2];/ %
+s/req.spinY = 0.0f;/req.spinY = 1.0f;/ %
+s/func_15132BBC((u8 \*)\&req, 3, 0xFF, bounds, 0, arg1, arg2);/func_15132BBC((u8 *)\&req, 3, 0xFE, bounds, 0, arg1, arg2);/ %
+s/func_1503F6F4(mtx, \&scl\[0\], \&scl\[1\], \&scl\[2\], \&origin\[0\], \&origin\[1\], \&origin\[2\]/func_1503F6F4(mtx, \&scl[0], \&scl[1], \&scl[2], \&origin[0], \&origin[2], \&origin[1]/ %
