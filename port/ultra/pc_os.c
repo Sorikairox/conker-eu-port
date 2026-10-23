@@ -83,7 +83,7 @@ const char *port_gstr(const char *g) {
 
 /* per-stub call counters (names are string literals: pointer identity), for the priority list */
 #define STUB_SLOTS 4096
-static struct { const char *name, *what; unsigned n, first_frame, order, dl; } stub_tab[STUB_SLOTS];
+static struct { const char *name, *what; unsigned n, first_frame, order, dl, win; } stub_tab[STUB_SLOTS];
 static unsigned stub_last = STUB_SLOTS;  /* P23: slot of the latest stub hit */
 static unsigned stub_distinct;
 
@@ -205,6 +205,23 @@ void port_stub_hit(const char *name, const char *what) {
           if (ss) port_js_stack(3, 9); }
         if (stub_logged == PORT_STUB_LOG_MAX) port_log("[stub] further first-hits are not logged\n");
     }
+    { /* P140: ?p140win=F: per-stub call counts in 250-frame windows from VI frame F to F+2500 (which stubs run in a
+       * given stretch, e.g. the opening cutscene); one log block per window, printed at the first hit after it */
+      static int wf = -1; static unsigned wstart;
+      if (wf < 0) { wf = port_flag("p140win"); wstart = (unsigned)wf; }
+      if (wf > 0 && stub_last < STUB_SLOTS) {
+          if (port_frame_count >= wstart + 250 && wstart < (unsigned)wf + 2500) {
+              static char wb[4096]; int o = snprintf(wb, sizeof wb, "[p140win] frames %u..%u:", wstart, wstart + 249);
+              for (unsigned i = 0; i < STUB_SLOTS; i++)
+                  if (stub_tab[i].name && stub_tab[i].win) {
+                      if (o < (int)sizeof wb - 64) o += snprintf(wb + o, sizeof wb - o, " %s=%u", stub_tab[i].name, stub_tab[i].win);
+                      stub_tab[i].win = 0;
+                  }
+              port_log("%s\n", wb);
+              while (port_frame_count >= wstart + 250) wstart += 250;
+          }
+          if (port_frame_count >= wstart && port_frame_count < (unsigned)wf + 2500) stub_tab[stub_last].win++;
+      } }
 }
 
 /* ---------------- ROM ---------------- */

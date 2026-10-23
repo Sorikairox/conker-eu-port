@@ -144,8 +144,12 @@ static unsigned cimg_addr, zimg_addr, cimg_width = 320, prim_z;
  * the colour image switches back / the task ends. Before P137 the renderer drew such passes onto the screen,
  * scaled as a 64-wide frame (white screen + black shadow polygons). ?p137nooff=1 turns it off (old behaviour). */
 static int off_on, off_saved_w, off_saved_h;
-static unsigned off_addr, off_w, off_fbo_w, off_siz;
-#define CIMG_H ((float)(off_on ? cimg_width : cimg_width * 0.75f))
+static unsigned off_addr, off_w, off_fbo_w, off_siz, off_rows;
+/* P140: the FBO is always OFF_FBO_H rows (1:1, N64 row y = GL row OFF_FBO_H - 1 - y), so images need not be square.
+ * The rows written back are off_rows: the image width (square, as before) unless the game sets a scissor while the
+ * image is bound (the RDP cannot write below the scissor, so its lry bounds the image's height). */
+#define OFF_FBO_H 256
+#define CIMG_H ((float)(off_on ? OFF_FBO_H : cimg_width * 0.75f))
 typedef struct { unsigned fmt, siz, line, tmem, pal, cms, cmt, masks, maskt, shifts, shiftt, uls, ult, lrs, lrt; } Tile;
 static Tile tiles[8];
 static struct { unsigned fmt, siz, width, raw; unsigned char *p; } timg;
@@ -693,13 +697,13 @@ static GLuint off_fbo, off_tex;
 static void off_writeback(void) {
     static unsigned char px[256 * 256 * 4];
     unsigned char *dst = gfx_addr(off_addr);
-    unsigned w = off_w, x, y;
+    unsigned w = off_w, h = off_rows, x, y;
     flush();
-    if (!dst || w > 256) return;
-    glReadPixels(0, 0, w, w, GL_RGBA, GL_UNSIGNED_BYTE, px);
-    for (y = 0; y < w; y++)                 /* GL row 0 is the bottom: N64 row y = GL row w - 1 - y */
+    if (!dst || w > 256 || h == 0 || h > OFF_FBO_H) return;
+    glReadPixels(0, OFF_FBO_H - h, w, h, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    for (y = 0; y < h; y++)                 /* GL row 0 is the bottom: N64 row y = read row h - 1 - y (P140) */
         for (x = 0; x < w; x++) {
-            const unsigned char *q = px + ((w - 1 - y) * w + x) * 4;
+            const unsigned char *q = px + ((h - 1 - y) * w + x) * 4;
             unsigned i = y * w + x;
             if (off_siz == 1) *VBE8(dst + i) = q[0];       /* the shadow pass: CI/I 8-bit, 64 wide (4 KB) */
             else if (off_siz == 2) {
@@ -715,20 +719,21 @@ static void off_begin(unsigned addr, unsigned w, unsigned siz) {
     if (!off_fbo || off_fbo_w != w) {
         if (!off_fbo) { glGenFramebuffers(1, &off_fbo); glGenTextures(1, &off_tex); }
         glBindTexture(GL_TEXTURE_2D, off_tex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, w, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, OFF_FBO_H, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, off_fbo);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, off_tex, 0);
         off_fbo_w = w;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, off_fbo);
     off_saved_w = canvas_w; off_saved_h = canvas_h;
-    canvas_w = canvas_h = w;
-    off_on = 1; off_addr = addr; off_w = w; off_siz = siz; state_dirty = 1;
-    { static unsigned n; if (n++ < 4) port_log("[p137] offscreen colour image %08X %ux%u siz %u (frame %u)\n", addr, w, w, siz, port_frame_count); }
+    canvas_w = w; canvas_h = OFF_FBO_H;
+    off_on = 1; off_addr = addr; off_w = w; off_siz = siz; off_rows = w; state_dirty = 1;
+    { static unsigned n; if (n++ < 4) port_log("[p137] offscreen colour image %08X %u wide siz %u (frame %u)\n", addr, w, siz, port_frame_count); }
 }
 static void off_end(void) {
     if (!off_on) return;
     off_writeback();
+    { static unsigned n; if (n++ < 4) port_log("[p140] offscreen image %08X written back as %ux%u siz %u (frame %u)\n", off_addr, off_w, off_rows, off_siz, port_frame_count); }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     canvas_w = off_saved_w; canvas_h = off_saved_h;
     off_on = 0; state_dirty = 1;
@@ -1301,7 +1306,9 @@ void gfx_run_dl(const void *dl) {
         case 0xED:                                            /* G_SETSCISSOR (P35b) */
             sc_box[0] = (w0 >> 12 & 0xFFF) / 4.0f; sc_box[1] = (w0 & 0xFFF) / 4.0f;
             sc_box[2] = (w1 >> 12 & 0xFFF) / 4.0f; sc_box[3] = (w1 & 0xFFF) / 4.0f;
-            sc_on = sc_box[2] > sc_box[0] && sc_box[3] > sc_box[1]; state_dirty = 1; break;
+            sc_on = sc_box[2] > sc_box[0] && sc_box[3] > sc_box[1]; state_dirty = 1;
+            if (off_on && sc_on) { unsigned r = (unsigned)(sc_box[3] + 0.75f); off_rows = r < 1 ? 1 : r > OFF_FBO_H ? OFF_FBO_H : r; }  /* P140 */
+            break;
         case 0xEE: prim_z = w1 >> 16; state_dirty = 1; break; /* G_SETPRIMDEPTH (used with G_ZS_PRIM) */
         case 0xEC: k4k5 = w1 & 0x3FFFF; state_dirty = 1; break;  /* G_SETCONVERT (YUV coefficients, K4/K5). P26: the frame sends EC000000 000000FF
                             * (K5 = 0xFF) twice; no YUV texture or K4/K5 combiner input is used yet. */
@@ -1356,7 +1363,7 @@ void gfx_run_dl(const void *dl) {
             unsigned w = (w0 & 0xFFF) + 1;
             int off = gl_ok && !nooff && !gfx_measure_only && w >= 16 && w < 320 && w <= 256 && w1 != zimg_addr && gfx_addr(w1);
             if (off_on && (!off || w1 != off_addr)) off_end();
-            cimg_addr = w1; cimg_width = w; if (cimg_width < 64) cimg_width = 320;
+            cimg_addr = w1; cimg_width = w; if (cimg_width < 64 && !off) cimg_width = 320;   /* P140: !off (16..63 wide offscreen images keep their width) */
             if (off && !off_on) off_begin(w1, w, w0 >> 19 & 3);
             break;
         }

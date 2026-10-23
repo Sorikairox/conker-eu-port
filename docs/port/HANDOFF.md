@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P140, 2026-10-23, port-web, diagnostic). Details: `docs/port/sessions/P140.md`
+
+- Node noev "stall" (P137) is a log artefact: without PORT_P61CHECK no frame-bearing lines after the padscript ends;
+  scheduler frames / gfx DLs match the P131-knob run (4482 / 1120 vs 4486 / 1121), same level switches. p140/sum.py
+  now prints a `progress:` line. 40dc311 not implicated.
+- Opening black (level 0x18 scene 1) is scene-scripted: fade-in event 5/1 at t 2040 (60ths) = frame 1700 PAL; the port
+  starts it at 1682 + 17 fade frames, so timing is right. During the black part the N64 shows 3 title cards (5/0x5C ->
+  func_150F59A0 -> image effect 0x5E) drawn by **asm stub func_15169FB8** (called every game frame only in that
+  stretch, `?p140win`); it needs func_150966AC (asm) too.
+- Renderer: offscreen images no longer square-only (FBO w x 256, rows from the scissor set while bound; shadow pass
+  64x63); 8-bit images keep the red byte (RDP behaviour). Chrome noev walk clean, shadows unchanged.
+- New knob `?p140win=F` / PORT_P140WIN: per-stub call counts in 250-frame windows from frame F.
+
+## Next steps (from P140)
+
+1. Conversion slot: func_15169FB8 + func_150966AC (image-effect draw; opening title cards, title screen).
+2. Frame-DL stubs func_1513095C / func_1513100C, func_151432BC, func_151408A4, func_1518010C; func_1513CFE4.
+3. After (1): check the cards draw above the fade (fade level 255 during the cards).
+
 ## State (session P137, 2026-10-23, port-web). Details: `docs/port/sessions/P137.md`
 
 - Merged port-b 48f7258 (P130/P133), port caf7013 (P132), port 40dc311 (P134). Only HANDOFF conflicts; game_16DC80.c
