@@ -11,7 +11,6 @@ func_150E8728	conker/src_eu/game_eu_114640.c	scaled	high	1	(x*12)+&D_800A1660 on
 func_1518A930	conker/src_eu/game_eu_1B8140.c	scaled	high	1	(x*4)+&D_8008D950 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
 func_1518A930	conker/src_eu/game_eu_1B8140.c	scaled	high	1	(x*4)+&D_8008D958 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
 func_151992F8	conker/src_eu/game_eu_1C3530.c	scaled	high	1	(x*36)+&D_800A8B08 on i32 (size 4): byte scale 144, m2c meant 36; asm has x36 
-func_1519961C	conker/src_eu/game_eu_1C3530.c	scaled	high	1	(x*24)+&D_800A8B50 on i32 (size 4): byte scale 96, m2c meant 24; asm has x24 
 func_151AB3A8	conker/src_eu/game_eu_1D7790.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
 func_151C2CE4	conker/src_eu/game_eu_1EFE10.c	scaled	high	1	(x*4)+&D_8008FF88 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
 func_151DBCBC	conker/src_eu/game_2062D0.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
