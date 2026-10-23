@@ -1,0 +1,13 @@
+s/if (count < 2.0f) {/if (count < 1.0f) {/
+s/inv = 1.0f \/ (count - 1.0f);/inv = 1.0f \/ count;/
+s/dx = (x1 - x0) \* inv;/dx = (x1 - y0) * inv;/
+s/dz = (z1 - z0) \* inv;/dz = (z1 - x0) * inv;/
+s/handler(0, i, x, y, z, x0, y0, z0,/handler(1, i, x, y, z, x0, y0, z0,/
+s/handler(0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f,/handler(0, i, x, y, z, x1, y0, z0, 0, 0, 0.0f,/
+s/0, 0, 0.0f, arg8, arg9, argA, argB) == 0) {/0, 0, 0.0f, arg8, arg9, argA, argB) == 1) {/
+s/count -= 1.0f;/count -= 2.0f;/
+s/        y += dy;/        y += dx;/
+s/        z += dz;/        z -= dz;/
+s/    } while (count > 0.0f);/    } while (count > 1.0f);/
+s/handler = ((void \*\*) \&D_8008ADA0)\[kind\];/handler = ((void **) \&D_8008ADA0)[kind + 1];/
+s/    s16 i = 0;/    s16 i = 1;/

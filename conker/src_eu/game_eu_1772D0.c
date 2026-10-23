@@ -1377,7 +1377,51 @@ s32 func_1514C860(f32 x, f32 y, f32 z, f32 r, u8 angle0, s8 step, s16 count, u8 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514C860.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P139 */
+extern s32 D_8008ADA0;
+
+/*
+ * spawn_line_emit: emits count (a float, at least 2) evenly spaced points on the segment from (x0, y0, z0) to
+ * (x1, y1, z1), step = (end - start) * (1 / (count - 1)) per axis. Each point goes to the spawn handler kind of
+ * D_8008ADA0 as (0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) (mode 0 = line; the ring emitter
+ * func_1514C860 uses mode 1); the walk stops early when a handler returns 0, a missing handler skips the point.
+ * The loop counts count down by 1 while it stays > 0. (The asm tests the parity of (s32) count and computes the
+ * same step in both branches.)
+ */
+void func_1514C9E0(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, s32 argA,
+                   u8 argB) {
+    s32 (*handler)(s32, s16, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, f32, s32, s32);
+    f32 inv;
+    f32 dx, dy, dz;
+    f32 x, y, z;
+    s16 i = 0;
+
+    if (count < 2.0f) {
+        return;
+    }
+    inv = 1.0f / (count - 1.0f);
+    dx = (x1 - x0) * inv;
+    dy = (y1 - y0) * inv;
+    dz = (z1 - z0) * inv;
+    x = x0;
+    y = y0;
+    z = z0;
+    do {
+        handler = ((void **) &D_8008ADA0)[kind];
+        if (handler != NULL && handler(0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) == 0) {
+            break;
+        }
+        count -= 1.0f;
+        x += dx;
+        i++;
+        y += dy;
+        z += dz;
+    } while (count > 0.0f);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514C9E0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_8008ADA0;
@@ -1425,4 +1469,59 @@ block_9:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514CBE8.s")
 #endif
+#ifdef NON_MATCHING
+/* P139 */
+extern s32 D_8008ADA0;
+
+/*
+ * spawn_arc_emit: emits count random points on a vertical circle of radius r around (x, y, z) whose plane faces
+ * the byte angle yaw: each point takes a random byte angle a in [min(a0, a1), max(a0, a1)] and goes to the spawn
+ * handler kind of D_8008ADA0 as (3, i, x + r * sin(yaw - 0x40) * sin(a), y - r * sin(a - 0x40),
+ * z + r * sin(yaw) * sin(a), x, y, z, a & 0xFF, yaw, r, arg9, argA, argB, argC) (mode 3 = arc; func_151423D8 =
+ * byte-angle sine). The walk stops when a handler returns 0; a missing handler skips the point.
+ */
+void func_1514CDC8(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 count, u8 kind, s32 arg9, f32 argA,
+                   s32 argB, u8 argC) {
+    s32 (*handler)(s32, s16, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, f32, s32, s32);
+    f32 cosYaw = func_151423D8((yaw - 0x40) & 0xFF);
+    f32 sinYaw = func_151423D8(yaw & 0xFF);
+    f32 rc;
+    f32 rs;
+    f32 c, s;
+    f32 px, pz;
+    s16 n;
+    s16 lo;
+    s16 i;
+    s32 a;
+    s32 b;
+
+    if (a1 < a0) {
+        n = a0 - a1 + 1;
+        lo = a1;
+    } else {
+        n = a1 - a0 + 1;
+        lo = a0;
+    }
+    if (count <= 0) {
+        return;
+    }
+    rc = r * cosYaw;
+    rs = r * sinYaw;
+    i = 0;
+    do {
+        a = (u32) func_150ADA20() % (u32) n + lo;
+        b = a & 0xFF;
+        c = func_151423D8((a - 0x40) & 0xFF);
+        s = func_151423D8(b);
+        handler = ((void **) &D_8008ADA0)[kind];
+        px = rc * s + x;
+        pz = rs * s + z;
+        if (handler != NULL && handler(3, i, px, y - r * c, pz, x, y, z, b, yaw, r, arg9, argA, argB, argC) == 0) {
+            return;
+        }
+        i++;
+    } while (i < count);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514CDC8.s")
+#endif

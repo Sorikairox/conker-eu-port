@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P139 (port-b) (session P139, 2026-10-23). Details: `docs/port/sessions/P139.md`
+
+Branch `port-b` (from P136 b894dda); the orchestrator merges it into `port`.
+
+- Hand C (NM), readable, with name comments, all difftest EQUIV + mutants: func_150B3394 `pipe_explode_spawn_chunk` +
+  func_150B3668 `pipe_explode_spawn_debris` (E0430, D_8008ADA0 handlers 9 / 10), func_151432BC
+  `spawn_region_random_point` (170760, P137 mode-0 stub), func_151277B0 `scope_zoom_sound_update` + func_15127520
+  `scope_motion_sound_update` (14FF90), func_1514C9E0 `spawn_line_emit` + func_1514CDC8 `spawn_arc_emit` (1772D0),
+  func_15095F18 `sprite_screen_rect` (C2B60, void), func_151BF490 `ring_particle_spawn` (1EC610), func_1517A550
+  `drift_object_spawn` (1A7B30, void).
+- D_8008B848 +0x1C handlers: all C. D_8008ADA0 asm handlers outside port-b: func_150C2334 (EF6D0), func_150C2558
+  (EF410), func_150C1BC0 (EF370), func_151A11BC (1CE7D0), func_150B2A50 (E0170), func_150B40EC (E17A0),
+  func_151AC628 / func_151ACBCC (1D9C00). func_1507D754 is game_A9D90 (not port-b).
+- protocheck: new row game_eu_11A2B0.c:9 declares `void func_151432BC` (not port-b; must become s32 like the other
+  three files). The func_15179008 -> func_15179A38 arity row is a false positive (callee reads no a0).
+- Checks: verify_all rc 0 (default build byte-identical), NM build links rc 0, protocheck 5 lines = the 4 known pair lines + game_eu_11A2B0.c:9 func_151432BC (not port-b). progress_nm total 5092/5915 (86.1%), game 4562/5334, C bytes 64.8%, 823 asm-only.
+
+## Next steps (from P139)
+
+1. Fix game_eu_11A2B0.c:9 prototype (port slot) -> protocheck back to the known pairs.
+2. Browser: new-game opening (func_151432BC), scope sounds, pipe explosions, sprite clipping.
+3. Convert the remaining D_8008ADA0 asm handlers (list above) in their owners' slots.
+4. Owned asm with C callers next (`python3 port_work/p139/asmlist.py`): func_15146078 (12 C calls), func_151BF678,
+   func_151BEE00 ...
+
 ## P136 (port-b) (session P136, 2026-10-23). Details: `docs/port/sessions/P136.md`
 
 Branch `port-b` (from P133 48f7258); the orchestrator merges it into `port`.

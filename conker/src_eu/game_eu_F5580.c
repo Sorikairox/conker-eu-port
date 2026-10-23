@@ -41,7 +41,7 @@ void func_150C7E30(u8 *arg0) {
 void func_1000D96C(s32, s32, s32);
 void func_1000DE1C(s32, s32);
 f32 func_150489B0(s32);
-s32 func_1517A550(s32, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
+void func_1517A550(s32, s16, s32, s16, s32, s32, s32, s32, s32, s32, s32);
 extern s32 D_80088B94;
 
 void func_150C7EBC(s32 arg0) {
