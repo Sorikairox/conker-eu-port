@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P165, 2026-10-24, port-web). Details: `docs/port/sessions/P165.md`
+
+- Merged port 902871d (P157) and port-b 8bd88bc (P155-P163): HANDOFF.md conflicts only. After each: verify_all OK,
+  NM link OK, protocheck 0 (1225 NM bodies), float-int 0 bugs (REVIEW 4), census 0 FAIL after a clean rebuild.
+  arity_scan 128 -> 130 (func_151D611C / func_151D469C table rows, game_eu_201240), m2c_sanity 228 -> 236 (port-b new C;
+  "high": func_151A9940 game_eu_1D5710, func_151AC3F0 game_eu_1D9C00).
+- First room (Chrome chR + node ngR, `padroom.py`, new `?p165hits=1`): **B swings the frying pan**; func_15064F50
+  returns walk / run animation ids on every call; the object sound emitters start voices (footstep ids 577-582,
+  run 299 / 300, pan swing 90); audio rms does not separate idle / walk (music dominates). Pause shows the frozen
+  frame. Heap 0, traps 0, null zone only the known null+0x14 (port-b P164).
+- **Conker still cannot leave the room**: no context action (ctx+0x7B stays 0 at 14 B presses around the room), no new
+  event / scene. Text box handlers func_1516AFE0 (update) / func_1516BC2C (draw, DL stub) of the C text_box_open
+  func_1516AD20 are asm stubs hit every frame since 12157: the box opens and never advances / closes / draws, so the
+  gargoyle's dialogue cannot run (likely blocker).
+- Regression: node noev 925 / 1249 / 1329, Chrome noev 1530 / 2302 / 2382, heap 0, null zone clean.
+
+## Next steps (from P165)
+
+1. Conversion: func_1516AFE0 + func_1516BC2C (game_eu_1984F0.c, text box update / draw, together), then
+   func_1513FAB4 (game_169510.c, every frame), func_151EE0C4 (pause menu), func_151D9014 (game_2062D0.c).
+2. Browser after (1): padroom.py again; look for the gargoyle's text and a ctx+0x7B / event change (`?p165hits=1`).
+3. port-b: review the m2c_sanity high rows and the two new arity rows (section 1 of P165.md).
+
 ## P163 (port-b) (session P163, 2026-10-24). Details: `docs/port/sessions/P163.md`
 
 Branch `port-b` (from P162 720e4c3). Took game_eu_1C3530.c.
