@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P145, 2026-10-23). Details: `docs/port/sessions/P145.md`
+
+- Scans on this tree: protoasm_check 0 real rows (RETNONE 14 info), floatint_scan BUG 0 / REVIEW 4 (known);
+  arity_scan / m2c_sanity need port-web's `port/build/ll` (run them there after the next merge).
+- New lister `docs/port/sessions/p145/asmlist.py` (asm-only functions in this slot's files with C callers).
+- New hand C (NM): func_15160310 framebuffer_effects_apply (= US func_1515FDA0; init_49E0 aliases the name under NM),
+  func_151CB6C0 fb_lens_warp_draw, func_1513095C particle_update (frame path), its handlers func_151A4DEC
+  spark_burst_update and func_150C1698 pool_slot_release. All EQUIV on setups + mutants killed (equivalents listed).
+- func_1513095C update handlers 14 func_151928C8 (game_eu_1BF960, this slot) and 17 func_151A2F10 (game_eu_1CE7D0,
+  port-b) are still asm: those particles die on their first tick in the port.
+- Checks: verify_all OK, NM links, protocheck 0 (1133), selftest 62/62, progress_nm 5127/5915 (86.7%), bytes 66.8%.
+
+## Next steps (from P145)
+
+1. func_151928C8 (water splash handler, 137 lines); ask port-b for func_151A2F10.
+2. func_1513100C (game_eu_15E000, frame DL, 568 lines), func_1517B270 (game_eu_1A8930, 512 lines).
+3. func_1507D754 (game_A9D90) after its 13 asm callees; P138 / P141 leftovers.
+
 ## State (session P141, 2026-10-23). Details: `docs/port/sessions/P141.md`
 
 - Merged port-b 9c9369d (P115-P139) as 904c686: HANDOFF conflict only (merge_union); functions.h func_1513D524
