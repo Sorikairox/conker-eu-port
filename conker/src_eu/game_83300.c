@@ -4516,7 +4516,7 @@ void func_1505F298(struct127 *rec, u8 *pad) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15064668(struct127 *, s32, f32, s32, s32); /* P102: arg2 = height (f32, was float bits in s32) */
+void func_15064668(struct127 *, s32, f32, s32, s32); /* P157: no return value (asm leaves a scratch v0). P102: arg2 = height (f32, was float bits in s32) */
 s32 func_15065E18(struct127 *, s32, s32, f32, s32, s32, s32, s32, s32); /* P102: arg3 = height */
 s32 func_15080B38(u8);
 extern s32 D_800CC3C8;

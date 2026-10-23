@@ -300,7 +300,207 @@ u16 func_15064594(u8 *arg0, u16 arg1, u16 arg2, u16 arg3) {
     return r;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800CC6AC;               /* pad buttons pressed this frame */
+void func_15074664(void);
+void func_1505A250(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4);
+void func_15060A30(s32 arg0, struct127 *arg1);
+
+#define P_U8(o) (((u8 *)player)[o])
+#define P_F32(o) (*(f32 *)((u8 *)player + (o)))
+#define CTX(pl) (*(u8 **)((u8 *)(pl) + 0x31C)) /* the player's context / action state */
+
+// player_context_action: B / context button of the player. First runs a pending context action (ctx+0x7B, set by
+// the level: sit down, pick up / put down, open, push, ...), then, when B was pressed with nothing pending and the
+// player is on the ground, starts the B animation (attack / slap, or a level variant). arg3 != 0 only updates the
+// state (no animation); noPad != 0 swallows the B press (buttons and D_800CC6AC lose 0x4000).
+void func_15064668(struct127 *player, s32 buttons, f32 height, s32 arg3, s32 noPad) {
+    u8 *ctx;
+    struct127 *o;
+    s32 anim = 0;
+    f32 speed = 1.0f;
+    f32 blend = 4.0f;
+    f32 dx, dz, dist;
+    f32 x, y, z;
+    u8 mode;
+    s32 w;
+    u8 *m;
+
+    if (noPad) {
+        buttons &= ~0x4000;
+        D_800CC6AC &= ~0x4000;
+    }
+    ctx = CTX(player);
+    if (ctx[0x7B] != 0) {
+        switch (ctx[0x7B]) {
+        case 1: /* sit down at the stored spot */
+            w = *(s32 *)((u8 *)player + 0x2E4);
+            P_U8(0x83) = 0xFF;
+            P_U8(0x89) = 0xFF;
+            *(s16 *)((u8 *)player + 0x84) = 0;
+            ctx[0x30] = 0xD;
+            *(f32 *)(CTX(player) + 0x28) = (s16)(w >> 16);
+            *(f32 *)(CTX(player) + 0x2C) = (s16)w;
+            anim = 0x96;
+            *(s16 *)((u8 *)player + 0x76) = *(s32 *)((u8 *)player + 0x2E8);
+            break;
+        case 2:
+            speed = 0.8f; /* D_80099B90 */
+            anim = 0xDD;
+            P_U8(0x89) = 0xFF;
+            P_U8(0x83) = 0xFF;
+            break;
+        case 3:
+            D_800D1580 = 1;
+            func_15074664();
+            if (P_U8(0xAD) != 0 || (s32)P_F32(0x28) != 0) {
+                func_15083568(player, 0x17, 1.0f, 0);
+                CTX(player)[0x11A] = 2;
+            } else {
+                P_U8(0x89) = 0xFF;
+                P_U8(0x8A) = 0xFF;
+                P_U8(0x83) = 0xFF;
+                speed = 3.0f;
+                anim = 0x151;
+                CTX(player)[0x11A] = 1;
+            }
+            break;
+        case 4:
+            D_800D1580 = 0;
+            func_15074664();
+            if (P_U8(0xAD) != 0 || (s32)P_F32(0x28) != 0) {
+                func_150836CC(player, 0x17);
+                CTX(player)[0x11A] = 0;
+            } else {
+                P_U8(0x89) = 0xFF;
+                P_U8(0x8A) = 0xFF;
+                P_U8(0x83) = 0xFF;
+                speed = 3.0f;
+                anim = 0x14E;
+                CTX(player)[0x11A] = 3;
+            }
+            break;
+        case 5: /* ride object 0x6C */
+            o = func_1505F0AC(0x6C);
+            P_U8(0x81) = 1;
+            w = *(s32 *)((u8 *)o + 0x2E4);
+            if (w == 0) {
+                P_F32(0x1CC) = P_F32(0x18);
+                w = 100;
+                anim = 0x38;
+                *(s32 *)((u8 *)o + 0x2E4) = 100;
+            }
+            if (w >= 100) {
+                m = *(u8 **)((u8 *)o + 0x1D4);
+                if (m != NULL) {
+                    P_F32(0x18) = *(s16 *)(m + 0x15A) + 20;
+                }
+            }
+            if ((buttons & 0x8000) && *(s32 *)((u8 *)o + 0x2E4) == 100) {
+                *(s32 *)((u8 *)o + 0x2E4) = 0x7A;
+                *(s32 *)((u8 *)o + 0x2E8) = 0x7A;
+                anim = 0x16;
+                func_15060A30(0x38E, player);
+            }
+            break;
+        case 6:
+        case 8:
+            if ((buttons & 0x4000) && height <= 0.0f) {
+                speed = 2.0f;
+                P_U8(0x83) = 0xFF;
+                P_U8(0x89) = 0xFF;
+                anim = 0x33;
+            }
+            break;
+        case 9:
+            anim = 0x22D;
+            P_U8(0x89) = 0xFF;
+            P_U8(0x83) = 0xFF;
+            break;
+        case 10:
+        case 12:
+            if (P_F32(0x28) <= 1.0f) {
+                anim = (ctx[0x7B] == 10) ? 0x19A : 0x2E7;
+                P_U8(0x83) = 0xFF;
+            }
+            P_U8(0x89) = 200;
+            P_U8(0x8A) = 200;
+            break;
+        case 11: /* camera pull towards the point (-1884, 100) */
+            dx = P_F32(0x14) - -1884.0f; /* D_80099B94 */
+            dz = P_F32(0x1C) - 100.0f;
+            dist = sqrtf(dx * dx + dz * dz);
+            if (dist < 1000.0f) {
+                func_1505A184(func_1505A630(-dx, dz, 0), 20.0f, 0.0f, &x, &y, &z);
+                func_1505A250(x, y, (1200.0f - dist) * 0.001f /* D_80099B98 */, (f32 *)((u8 *)player + 0x16C),
+                              (f32 *)((u8 *)player + 0x170));
+            }
+            break;
+        }
+        CTX(player)[0x7B] = 0;
+    }
+
+    ctx = CTX(player);
+    if (ctx[0x198] == 0 && anim == 0 && (buttons & 0x4000)) {
+        mode = ctx[0x4E];
+        if ((mode & 0xF) != 1 && height <= 0.0f && P_U8(0x89) != 0xFF) {
+            if (P_U8(0x13C) >= 100) {
+                if (!(*(s32 *)((u8 *)player + 0x25C) & 0x20)) {
+                    anim = 0xD6;
+                    speed = 1.15f; /* D_80099B9C */
+                    if (D_800BE616) {
+                        anim = 0x118;
+                        speed = 1.0f;
+                    }
+                    if (D_800BE9F0 == 0x30) {
+                        anim = 0x28D;
+                    }
+                    P_U8(0x83) = 0xFF;
+                    P_U8(0x89) = 0xFF;
+                }
+            } else if (((ctx[0x75] == 0 && ctx[0x7C] == 0) || mode == 2) && D_800BE9F0 != 0x2D &&
+                       D_800BE9F0 != 0x2B && D_800BE9F0 != 0x30 && D_800BE9F0 != 0x34) {
+                anim = 0x33;
+                if (*(s16 *)(ctx + 8) != 0) {
+                    P_U8(0x83) = 0xFF;
+                    P_U8(0x89) = 0xFF;
+                    speed = 1.6f; /* D_80099BA0 */
+                } else {
+                    P_U8(0x83) = 0xFF;
+                    if (D_800BE616 == 0) {
+                        anim = 0x1DC;
+                    } else if (D_800E9D00 & 0x400) {
+                        anim = 0x355;
+                    } else if (D_800E9D00 & 0x800) {
+                        anim = 0x1DC;
+                    } else {
+                        anim = 0x354;
+                    }
+                    ctx = CTX(player);
+                    speed = 1.35f; /* D_80099BA4 */
+                    if (ctx[0x84] == 0 && ctx[0x4E] == 0) {
+                        P_U8(0x89) = 0xFF;
+                        P_F32(0x20) = -4.0f;
+                        *(u16 *)((u8 *)player + 0x76) = *(u16 *)(ctx + 0x4C);
+                        speed = 1.0f;
+                        anim = 0x46;
+                    }
+                    P_U8(0x80) = 1;
+                    blend = 0.0f;
+                }
+            }
+        }
+    }
+    if (anim != 0 && anim != 999 && arg3 == 0) {
+        func_1505E650(player, anim, speed, blend, 0.0f, 0.0f, 0);
+    }
+}
+#undef P_U8
+#undef P_F32
+#undef CTX
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064668.s")
+#endif
 
 void func_15064D5C(s32 arg0, s32 arg1) {
     f32 temp_f0;
@@ -375,6 +575,318 @@ void func_15064DD0(struct127 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064DD0.s")
 #endif
+#ifdef NON_MATCHING
+extern u8 D_800B89C4[];              /* per-player record (stride 0x32C): character kind byte */
+
+#define P_U8(o) (((u8 *)player)[o])
+#define P_F32(o) (*(f32 *)((u8 *)player + (o)))
+
+// player_move_animation: picks the walk / run / carry animation of the player for this frame from the movement
+// speed (vel = stick speed, ground speed at +0x44, +0x3C), the player's state (ctx = +0x31C: carried / held object
+// kind at +0x78, swim, ladder, ...) and the multiplayer character kind, and starts it (func_1505E650) with a playback
+// speed that follows the movement. moveAnim (when no object is held) overrides the choice; stickMag is the raw
+// stick magnitude, pushSpeed the push speed (+0x32 bit 2). Returns the animation id, 0 for none, 999 for "keep".
+s32 func_15064F50(struct127 *player, f32 vel, f32 stickMag, s32 moveAnim, f32 pushSpeed) {
+    u8 *ctx = *(u8 **)((u8 *)player + 0x31C);
+    s32 anim = 0;
+    f32 speed = 1.0f;
+    f32 blend = 4.0f;
+    f32 v;
+
+    if (*(s16 *)(ctx + 0x46) > 0) {
+        anim = 0x4C;
+        speed = vel / 24.0f;
+    } else if (ctx[0x4E] == 2) {
+        anim = (*(s8 *)(ctx + 0x50) > 0) ? 0x54 : 5;
+        blend = 2.0f;
+    } else if (P_U8(0x13C) >= 100) {
+        /* multiplayer characters */
+        v = P_F32(0x3C);
+        if (v < 1.0f) {
+            anim = func_1504C078();
+        } else {
+            switch (D_800B89C4[((u8 *)D_800D154C)[0x13C] * 0x32C]) {
+            case 0x8C:
+                P_U8(0xAA) = 0x5A;
+                anim = 0x1A6;
+                speed = vel / 6.0f + 0.4f;
+                if (14.0f < v) {
+                    anim = 0x1A7;
+                    speed = vel / 26.0f + 0.5f;
+                }
+                break;
+            case 0x57:
+                P_U8(0xAA) = 0x5A;
+                anim = 0x116;
+                speed = vel / 6.0f + 0.4f;
+                if (14.0f < v) {
+                    anim = 0x117;
+                    speed = vel / 26.0f + 0.5f;
+                }
+                break;
+            case 0xA8:
+            case 0xA9:
+                if (14.0f < v) {
+                    anim = 0x1B1;
+                    speed = vel / 22.0f + 0.4f;
+                } else {
+                    anim = 0x1B0;
+                    speed = vel * 0.0625f + 0.6f;
+                }
+                break;
+            case 0x13:
+                anim = 0x14C;
+                speed = vel / 6.0f;
+                break;
+            case 0x89:
+                anim = 0x1FB;
+                speed = vel / 6.0f;
+                break;
+            default:
+                if (14.0f < v) {
+                    anim = 0x2E4;
+                    speed = vel * 0.0625f + 0.5f;
+                } else {
+                    anim = 0xD7;
+                    speed = vel / 6.0f + 0.4f;
+                }
+                break;
+            }
+        }
+    } else if (moveAnim != 0 && ctx[0x78] == 0) {
+        anim = moveAnim;
+        speed = vel / 15.0f + 0.6f;
+    } else if (v = P_F32(0x44), 2.6f < v && (*(u16 *)(ctx + 0x32) & 1)) {
+        blend = 5.0f;
+        P_U8(0xAA) = 0x28;
+        speed = v / 15.0f + 0.5f;
+        anim = func_1504C0B8();
+    } else {
+        /* walking while holding an object of kind ctx[0x78]: walk animation below 20, run animation from 20 */
+        switch (ctx[0x78]) {
+        case 0x16:
+            if (1.0f <= v) {
+                anim = ctx[0x1B2] ? 0x2C6 : 0xE8;
+                P_U8(0xAA) = 0x1E;
+                speed = vel * 0.0625f + 0.6f;
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x09:
+            if (1.0f <= v) {
+                if (!D_800BE616) {
+                    P_U8(0xAA) = 0x37;
+                }
+                anim = 0x7E;
+                if (!D_800BE616) {
+                    speed = vel * 0.0625f + 0.6f;
+                } else if (20.0f <= P_F32(0x44)) {
+                    anim = 0x22C;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x38:
+            if (1.0f <= v) {
+                anim = 0x1E1;
+                if (20.0f <= v) {
+                    anim = 0x1E2;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x39:
+            if (*(u16 *)((u8 *)player + 0x84) == 0x1EB) {
+                anim = 999;
+            } else if (1.0f <= v) {
+                anim = 0x1EC;
+                if (20.0f <= v) {
+                    anim = 0x1ED;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x37:
+            if (*(u16 *)((u8 *)player + 0x84) == 0x1F4) {
+                anim = 999;
+            } else if (1.0f <= v) {
+                anim = 0x1F5;
+                if (20.0f <= v) {
+                    anim = 0x1F6;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x3B:
+            if (*(u16 *)((u8 *)player + 0x84) == 0x222 || *(u16 *)((u8 *)player + 0x84) == 0x236) {
+                anim = 999;
+            } else if (1.0f <= v || *(s8 *)(ctx + 0x23) > 0) {
+                P_U8(0xAA) = 0x37;
+                anim = 0x223;
+                if (20.0f <= v) {
+                    anim = 0x224;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x12:
+        case 0x18:
+        case 0x41:
+        case 0x24:
+        case 0x22:
+        case 0x26:
+        case 0x23:
+        case 0x15:
+        case 0x25:
+            if (1.0f <= v) {
+                s32 walk, run;
+                switch (ctx[0x78]) {
+                case 0x24: walk = 0x158; run = 0x159; break;
+                case 0x22: walk = 0x15B; run = 0x15C; break;
+                case 0x26: walk = 0x178; run = 0x179; break;
+                case 0x23: walk = 0x161; run = 0x162; break;
+                case 0x15: walk = 0xED; run = 0xED; break;
+                case 0x25: walk = 0xD7; run = 0xD7; break;
+                default: walk = 0xEC; run = 0xF8; break;
+                }
+                P_U8(0xAA) = 0x50;
+                anim = walk;
+                speed = vel * 0.0625f + 0.6f;
+                if (20.0f <= v) {
+                    anim = run;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x21:
+            if (1.0f <= v) {
+                P_U8(0xAA) = 0x6E;
+                anim = 0x123;
+                speed = vel * 0.0625f + 0.6f;
+                if (15.0f <= v) {
+                    anim = 0x124;
+                    speed = vel / 27.0f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x3A:
+            if (1.0f <= v) {
+                P_U8(0xAA) = 0x50;
+                anim = 0x1FB;
+                speed = vel * 0.0625f + 0.6f;
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x2D:
+        case 0x2E:
+            if (1.0f <= v) {
+                anim = 0x1B0;
+                speed = vel * 0.0625f + 0.6f;
+                if (20.0f <= v) {
+                    anim = 0x1B1;
+                    speed = vel / 22.0f + 0.4f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        case 0x19:
+        case 0x40:
+            v = P_F32(0x3C);
+            if (1.0f <= v) {
+                blend = 8.0f;
+                anim = 0x112;
+                speed = vel * 0.125f + 0.3f;
+                if (18.0f <= v) {
+                    anim = 0x111;
+                    speed = vel / 20.0f + 0.3f;
+                }
+            } else {
+                anim = func_1504C078();
+            }
+            break;
+        default:
+            if (ctx[0x1A] != 0 && 1.0f < stickMag) {
+                /* swimming */
+                speed = vel / 6.5f + 0.3f;
+                P_U8(0xAA) = 0x28;
+                anim = 0x6D;
+                blend = 8.0f;
+            } else if (*(s16 *)(ctx + 8) > 0) {
+                if (stickMag < 1.0f) {
+                    anim = func_1504C078();
+                } else {
+                    speed = vel / 6.0f + 0.3f;
+                    anim = *(u16 *)(ctx + 0xE);
+                    blend = 16.0f;
+                }
+            } else if (ctx[0x17] != 0) {
+                blend = 5.0f;
+                if (*(u16 *)D_800CC6A4 & 0x2000) {
+                    if (*(u16 *)((u8 *)player + 0x84) != 0x283) {
+                        P_F32(0x3C) *= 0.2f;
+                        D_800D1580 = 0xFF010604;
+                        func_1506E5FC();
+                    }
+                    P_U8(0x89) = 3;
+                    P_U8(0x8A) = 3;
+                    anim = 0x283;
+                } else {
+                    if (*(u16 *)((u8 *)player + 0x84) == 0x283) {
+                        D_800D1580 = 0xFF010604;
+                        func_1506E5FC();
+                        v = P_F32(0x44);
+                    }
+                    if (1.0f <= v && P_U8(0x89) == 0) {
+                        P_U8(0xAA) = 0x2D;
+                        anim = 0x4E;
+                        speed = P_F32(0x3C) / 9.0f;
+                    } else {
+                        anim = func_1504C078();
+                    }
+                }
+            } else if ((*(u16 *)(ctx + 0x32) & 2) && 1.0f <= v) {
+                /* pushing */
+                ctx[0x3C] = 0x1C;
+                P_U8(0xAA) = 0xF;
+                blend = 8.0f;
+                speed = pushSpeed / 5.0f + 0.3f;
+                anim = 100;
+                if ((u32)func_150ADA20() % 1000 >= 988) {
+                    anim = (func_150ADA20() & 1) + 0x65;
+                    speed = 0.65f;
+                    P_U8(0x89) = 0xFF;
+                    P_U8(0x83) = 0xFF;
+                }
+            }
+            break;
+        }
+    }
+    if (anim != 0 && anim != 999) {
+        func_1505E650(player, anim, speed, blend, 0.0f, 0.0f, 0);
+    }
+    return anim;
+}
+#undef P_U8
+#undef P_F32
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15064F50.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15065E18.s")
