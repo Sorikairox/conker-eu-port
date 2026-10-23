@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P122 (port-b) (session P122, 2026-10-23). Details: `docs/port/sessions/P122.md`
+
+Branch `port-b` (from P119 3b9eea1); the orchestrator merges it into `port`.
+
+- m2c_sanity: the 3 high rows in port-b files (func_15051558, func_1509A024, func_15180AF0; all pooled `O:` width
+  rows) are false positives (reasons in P122.md); no change.
+- C (NM): func_151848D8 `shadow_light_projection` (52/58, 4 equivalent, 2 boundary survivors), func_15178004
+  `vtx_anims_update` (19/19) with its five hand-asm wave animators in game_eu_D4C90.c: func_150A7480
+  `vtx_wave_y_per_vertex`, func_150A75A0 `vtx_wave_y`, func_150A76A8 `vtx_wave_y_colour`, func_150A7840
+  `vtx_wave_y_colour_per_vertex`, func_150A79FC `vtx_wave_y_normal_colour` (func_150A7BD0 stays GLOBAL_ASM).
+- verify_all OK, NM links, protocheck = only the known game_A9D90.c func_1517FD84 line. progress_nm total
+  5040/5915 (85.2%), game 4510/5334, C bytes 63.1%, 875 asm-only.
+
+## Next steps (from P122)
+
+1. game_A9D90.c:19 `void func_1517FD84(...)` (port session).
+2. func_15184298 (game_eu_1B1010.c) with func_151661F0 (game_eu_193A00.c) and func_1517A320 (game_eu_1A7B30.c):
+   needs a session owning those files.
+3. Boundary survivors: func_151848D8 `min_h < 10` / `m < 32767`; P119's 7 threshold gaps.
+4. Browser: shadows, vertex wave animations (water), plus the P119 list.
+
 ## P119 (port-b) (session P119, 2026-10-23). Details: `docs/port/sessions/P119.md`
 
 Branch `port-b` (from P115 9f8e18a); the orchestrator merges it into `port`.
