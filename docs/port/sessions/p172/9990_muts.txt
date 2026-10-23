@@ -1,0 +1,16 @@
+s/if (obj == NULL) {/if (obj == (u8 *) 4) {/ %
+s/n = 300;/n = 299;/ %
+s/timed = 1;/timed = 2;/ %
+s/if (span < 0) {/if (span <= 0) {/ %
+s/tmp.unk8 = 0.0f;/tmp.unk8 = 1.0f;/ %
+s/tmp.unkC = arg4;/tmp.unkC = -arg4;/ %
+s/tmp.unk10 = arg2;/tmp.unk10 = arg3;/ %
+s/tmp.unk11 = arg3;/tmp.unk11 = arg2;/ %
+s/obj\[0x3B\]/obj[0x3A]/ %
+s/n, -1, 0x1A, -1, timed, 0x1A/n, -1, 0x1B, -1, timed, 0x1A/ %
+s/timed, 0x1A,/timed, 0x1B,/ %
+s/(arg5 + 0x14)/(arg5 + 0x10)/ %
+s/arg6, arg7);/arg7, arg6);/ %
+s/(u8 \*) fx + 0x28/(u8 *) fx + 0x2C/ %
+s/tmp.obj = obj;/tmp.obj = obj + 1;/ %
+s/    return fx;/    return NULL;/ %

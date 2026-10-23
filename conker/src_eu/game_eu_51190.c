@@ -1446,7 +1446,7 @@ f32 func_150489B0(u8 angle);
 void func_1516FAB8(s32 x, s32 y, s32 z, s32 span, s32 dx, s32, s32 dz, s32, s32, s32, s32, s32, s32, s32, s32, s32 flag, s32);
 s32 func_150E2030(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, struct127 *, s32, s32,
                   s32, s32, s32, f32, f32, f32, f32, f32, f32);
-void func_15109990(u8 *obj, s16 span, s32, s32, f32, s32, s32 flag, s32);
+struct260 *func_15109990(u8 *obj, s16 span, s8, s8, f32, s32, u8 flag, s32);
 void func_150F85AC(u8 *rec, s16 span, u8 flag, s32);
 void func_150C4620(u8 *obj, s16 span, u8 flag, s32);
 void func_150CFB90(s16 span, u8 flag, s32);

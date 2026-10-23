@@ -1,0 +1,15 @@
+s/s32 i = -1;/s32 i = 0;/ %
+s/op != 0xFD \&\& op != 0xDF/op != 0xFC \&\& op != 0xDF/ %
+s/if (op == 0xDF) {/if (op == 0xDE) {/ %
+s/return -1;/return -2;/ %
+s/texId == 0 ||/texId == 1 ||/ %
+s/D_800B1268\[texId\]/D_800B1268[texId + 1]/ %
+s/if (skip <= 0) {/if (skip < 0) {/ %
+s/skip--;/skip -= 2;/ %
+s/!= 0xF2);/!= 0xF5);/ %
+s/(\*tileCount)++;/(*tileCount) += 2;/ %
+s/next == 0xF5 \&\&/next == 0xF4 \&\&/ %
+s/next2 == 0xF2);/next2 == 0xF3);/ %
+s/j += 2;/j += 1;/ %
+s/    return i;/    return j;/ %
+s/\*tileCount = 0;/*tileCount = 1;/ %

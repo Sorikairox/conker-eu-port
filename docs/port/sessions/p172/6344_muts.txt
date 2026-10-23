@@ -1,0 +1,20 @@
+s/if (gdl == NULL) {/if (gdl == (Gfx *) 4) {/ %
+s/if (D_800BEAC0 != 0) {/if (D_800BEAC0 != 1) {/ %
+s/skip = 0;/skip = 1;/ %
+s/if (texId == 0) {/if (texId == 1) {/ %
+s/texId = D_800E0D20;/texId = D_800E0D20 + 1;/ %
+s/key = alwaysNew ? -1 : texId;/key = alwaysNew ? -2 : texId;/ %
+s/key = alwaysNew ? -1 : texId;/key = texId;/ %
+s/e = func_15195EF4(texId, w1, w0, doubled);/e = func_15195EF4(texId, w0, w1, doubled);/ %
+s/e->x12 = speedS;/e->x12 = speedT;/ %
+s/e->x13 = speedT;/e->x13 = speedS;/ %
+s/idx = func_15195FF4(idx, (s32) e, w1, doubled);/idx = func_15195FF4(idx, (s32) e, w0, doubled);/ %
+/func_15195FF4/{n;s/alwaysNew = 0;/;/;} %
+/return 0;/{n;n;s/alwaysNew = 0;/;/;} %
+s/if (e->x14 < tileCount) {/if (e->x14 <= tileCount - 2) {/ %
+s/func_15196270((u8 \*) e, dl, idx, tileCount);/func_15196270((u8 *) e, dl, idx + 1, tileCount);/ %
+s/func_15196270((u8 \*) e, dl, idx, tileCount);/func_15196270((u8 *) e, dl, idx, tileCount - 1);/ %
+s/skip++;/skip += 2;/ %
+s/if (texId == D_800E0D20) {/if (texId != D_800E0D20) {/ %
+s/D_800E0D20--;/D_800E0D20++;/ %
+s/return (s32) e;/return (s32) e + 4;/ %

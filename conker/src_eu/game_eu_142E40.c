@@ -420,7 +420,24 @@ void func_151165D8(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151165D8.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
+
+// object_start_pending_anim: if the object has no animation handle yet (+0x7C), starts the one requested in +0x3C
+// (bits 0-14 id, bits 15+ passed as is, bits 16-23 / 24-31 as the last two arguments) and clears the request.
+void func_15116690(u8 *obj) {
+    s32 req;
+
+    if (*(s32 *)(obj + 0x7C) != 0) {
+        return;
+    }
+    req = *(s32 *)(obj + 0x3C);
+    *(s32 *)(obj + 0x7C) = func_15195FB0(obj, req & 0x7FFF, req >> 15, -1, 0, (req >> 24) & 0xFF, (req >> 16) & 0xFF);
+    *(s32 *)(obj + 0x3C) = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116690.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 func_1510FBC8(f32, f32, f32);
@@ -458,7 +475,29 @@ void func_151166FC(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151166FC.s")
 #endif
+#ifdef NON_MATCHING
+// object_bob_update: cosine bob around the base value +0x12 (s16): the offset +0x18 (f32) becomes
+// cos(phase +0x7C * 360/65536) * amplitude (low half of +0x3C, s16), the phase advances by the speed (high half of
+// +0x3C) * D_800BE9E4, and +0x5C (s16) = the change of the bobbed value (base + offset, truncated) this frame.
+void func_15116854(u8 *obj) {
+    s16 before;
+    s32 cfg;
+    f32 amplitude;
+    u32 speed;
+    f32 offset;
+
+    before = (s32) ((f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18));
+    cfg = *(s32 *) (obj + 0x3C);
+    amplitude = (s16) cfg;
+    speed = (cfg >> 16) & 0xFFFF;
+    offset = cosf(*(s32 *) (obj + 0x7C) * 0.0054931640625f) * amplitude;
+    *(f32 *) (obj + 0x18) = offset;
+    *(s32 *) (obj + 0x7C) += speed * D_800BE9E4;
+    *(s16 *) (obj + 0x5C) = (s32) (((f32) *(s16 *) (obj + 0x12) + offset) - before);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116854.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15116940(u8 *arg0) {
@@ -996,7 +1035,7 @@ void func_1511AC84(u8 *arg0) {
 }
 
 s32 func_15022BB0(s32, s32);
-s32 func_15116854(u8 *);
+void func_15116854(u8 *);
 
 void func_1511ACC0(u8 *arg0) {
     if ((D_800C35EA == 1) && (func_15022BB0((arg0 - (u8 *)D_800DBEF4) / 160, 0) != 0)) {

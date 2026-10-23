@@ -5,6 +5,9 @@
 extern u8 D_800A8E7C;
 
 void func_1519C7C8(u8 *arg0);
+extern s32 D_800B1268[]; /* texture cache: expanded data per texture id */
+s32 func_15195DD8(Gfx *dl, s32 texId, s32 skip, s32 *tileCount);
+s32 func_15196270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 
 
 typedef struct DNode { struct DNode *next; struct DNode *prev; } DNode;
@@ -34,7 +37,49 @@ void func_15195D9C(void) {
     D_800E0D20 = -2;
 }
 
+#ifdef NON_MATCHING
+// dl_find_scroll_texture: finds, in display list `dl`, the (skip+1)-th G_SETTIMG (0xFD) that loads texture `texId`
+// (w1 == D_800B1268[texId]; texId 0 = any texture). Returns the index of the first G_SETTILESIZE (0xF2) after it and
+// stores in *tileCount the number of G_SETTILESIZE commands of the run there (1, plus one per following
+// G_SETTILE / G_SETTILESIZE pair); returns -1 at G_ENDDL (0xDF) when there is no such texture.
+s32 func_15195DD8(Gfx *dl, s32 texId, s32 skip, s32 *tileCount) {
+    s32 i = -1;
+    s32 j;
+    u8 op;
+    u8 next;
+    u8 next2;
+
+    *tileCount = 0;
+    for (;;) {
+        do {
+            i++;
+            op = dl[i].words.w0 >> 24;
+        } while (op != 0xFD && op != 0xDF);
+        if (op == 0xDF) {
+            return -1;
+        }
+        if (texId == 0 || dl[i].words.w1 == D_800B1268[texId]) {
+            if (skip <= 0) {
+                break;
+            }
+            skip--;
+        }
+    }
+    do {
+        i++;
+    } while ((u8)(dl[i].words.w0 >> 24) != 0xF2);
+    j = i;
+    do {
+        (*tileCount)++;
+        next = dl[j + 1].words.w0 >> 24;
+        next2 = dl[j + 2].words.w0 >> 24;
+        j += 2;
+    } while (next == 0xF5 && next2 == 0xF2);
+    return i;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195DD8.s")
+#endif
 
 typedef struct {
     DNode node;
@@ -91,7 +136,83 @@ s32 func_15195FF4(s16 arg0, s32 arg1, s32 arg2, s32 arg3) {
     return arg0;
 }
 
+#ifdef NON_MATCHING
+// level_dl_add_texture_scroll: registers texture scrolling for texture `texId` (0: any texture, with a new id
+// from D_800E0D20) in level display list `dl` (s32 address): for the `which`-th matching G_SETTIMG (-1: every one),
+// the G_SETTILESIZE index and its tile count go into the first free slot of the scroll entry's level-DL-0 list
+// (+0x1C / +0x30) or, with `secondDl`, its level-DL-1 list (+0x26 / +0x35). The entry is the first in D_800E0D18
+// (oldest first, link +4) with id 0 (none: a new one from func_15195EF4 with `doubled`, speeds speedS / speedT).
+// `unused` is not read. On later matches texId may be the new negative id, which then indexes D_800B1268 below 0
+// (as in the asm).
+// Returns the last entry used (NULL when dl is NULL, nothing matched or allocation failed).
+void *func_15195AA8(s32 dl, s32 texId, s32 doubled, s32 which, s32 unused, s32 secondDl, s32 speedS, s32 speedT) {
+    Gfx *gdl = (Gfx *) dl;
+    Ent3C *e = NULL;
+    s32 skip;
+    s32 idx;
+    s32 tileCount;
+    u32 w0;
+    u32 w1;
+    s32 k;
+
+    if (gdl == NULL) {
+        return NULL;
+    }
+    skip = which;
+    if (which == -1) {
+        skip = 0;
+    }
+    do {
+        idx = func_15195DD8(gdl, texId, skip, &tileCount);
+        if (idx == -1) {
+            which = 0;
+            continue;
+        }
+        if (texId == 0) {
+            texId = D_800E0D20;
+        }
+        w1 = gdl[idx].words.w1;
+        w0 = gdl[idx].words.w0;
+        for (e = (Ent3C *) D_800E0D18; e != NULL && e->x8 != 0; e = (Ent3C *) e->node.prev) {
+        }
+        if (e == NULL) {
+            e = func_15195EF4(texId, w1, w0, doubled);
+            if (e == NULL) {
+                return NULL;
+            }
+            e->x12 = speedS;
+            e->x13 = speedT;
+        } else {
+            idx = func_15195FF4(idx, (s32) e, w1, doubled);
+        }
+        skip++;
+        if (e->x14 < tileCount) {
+            e->x14 = tileCount;
+        }
+        if (!secondDl) {
+            for (k = 0; k < 5 && e->a[k] != -1; k++) {
+            }
+            if (k < 5) {
+                e->a[k] = idx;
+                ((u8 *) e)[0x30 + k] = tileCount;
+            }
+        } else {
+            for (k = 0; k < 5 && e->b[k] != -1; k++) {
+            }
+            if (k < 5) {
+                e->b[k] = idx;
+                ((u8 *) e)[0x35 + k] = tileCount;
+            }
+        }
+    } while (which == -1);
+    if (texId == D_800E0D20) {
+        D_800E0D20--;
+    }
+    return e;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15195AA8.s")
+#endif
 
 typedef struct Ent6270 {
     struct Ent6270 *dnext;
@@ -140,10 +261,77 @@ s32 func_15196270(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) // fakematch: non-void
   n->next = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15196344.s")
+#ifdef NON_MATCHING
+// dl_add_texture_scroll: as func_15195AA8 for a model display list `dl` (s32 address): each matching G_SETTIMG
+// (`which`-th, -1: every one) is linked to the scroll entry with id texId (or, with `alwaysNew`, a new one for the
+// first match) through func_15196270 (+0x18 chain: dl, G_SETTILESIZE index, tile count). New entries get speeds
+// speedS / speedT. Does nothing while D_800BEAC0 is set. Returns the last entry used as s32 (0: none).
+// The asm returns an uninitialised stack word when the very first search finds nothing (C: 0).
+s32 func_15196344(s32 dl, s32 texId, s32 doubled, s32 which, s32 alwaysNew, s32 speedS, s32 speedT) {
+    Gfx *gdl = (Gfx *) dl;
+    Ent3C *e = NULL;
+    s32 skip;
+    s32 idx;
+    s32 key;
+    s32 tileCount;
+    u32 w0;
+    u32 w1;
 
-void func_15195FB0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
-    func_15196344(*(s32 *)(arg0 + 0x1C), arg1, arg2, arg3, arg4, arg5, arg6);
+    if (gdl == NULL) {
+        return 0;
+    }
+    if (D_800BEAC0 != 0) {
+        return 0;
+    }
+    skip = which;
+    if (which == -1) {
+        skip = 0;
+    }
+    do {
+        idx = func_15195DD8(gdl, texId, skip, &tileCount);
+        if (idx == -1) {
+            which = 0;
+            continue;
+        }
+        if (texId == 0) {
+            texId = D_800E0D20;
+        }
+        key = alwaysNew ? -1 : texId;
+        for (e = (Ent3C *) D_800E0D18; e != NULL && e->x8 != key; e = (Ent3C *) e->node.prev) {
+        }
+        w1 = gdl[idx].words.w1;
+        w0 = gdl[idx].words.w0;
+        if (e == NULL) {
+            e = func_15195EF4(texId, w1, w0, doubled);
+            if (e == NULL) {
+                return 0;
+            }
+            alwaysNew = 0;
+            e->x12 = speedS;
+            e->x13 = speedT;
+        } else {
+            idx = func_15195FF4(idx, (s32) e, w1, doubled);
+            alwaysNew = 0;
+        }
+        if (e->x14 < tileCount) {
+            e->x14 = tileCount;
+        }
+        func_15196270((u8 *) e, dl, idx, tileCount);
+        skip++;
+    } while (which == -1);
+    if (texId == D_800E0D20) {
+        D_800E0D20--;
+    }
+    return (s32) e;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15196344.s")
+#endif
+
+// texture_anim_start_for: starts a texture animation on the model's texture set (arg0 +0x1C) and returns
+// func_15196344's handle (asm callers func_15116690 / func_1511D0CC / func_150BFC60 store v0; P172).
+s32 func_15195FB0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6) {
+    return func_15196344(*(s32 *)(arg0 + 0x1C), arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
 #ifdef NON_MATCHING
