@@ -259,7 +259,7 @@ void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
 }
 
 s32 func_1513092C(void *, s32, s32);
-void func_150EAB4C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5) {
+void func_150EAB4C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         s32 u34;
         s32 u38;

@@ -1,0 +1,29 @@
+s/if (obj\[0x3A\] \& 4) {/if (obj[0x3A] \& 0x40) {/ % life_die life_ok
+s/< 0) {/<= 0) {/ % life_die life_ok
+s/prev = pos;/prev = prev;/ % first
+s/if (flags \& 1) {/if (flags \& 0x80) {/ % par1
+s/(parent + 0x18)/(parent + 0x14)/ % par1
+s/\*(s32 \*) parent == 8 ||/\*(s32 *) parent == 9 ||/ % bone_k8
+s/obj\[0x18\] != parent\[0x3B\]/obj[0x18] != parent[0x3A]/ % bone_id bone
+s/(parent\[0x74\] \& 0xF) == 0xF/(parent[0x74] \& 0x7) == 0x7/ % bone_hid bone
+s/obj\[0x3A\] = flags | 8;/obj[0x3A] = flags | 0x18;/ % bone_nomdl bone_hid
+s/matrix + (obj\[0x20\] << 6)/matrix + (obj[0x20] << 5)/ % bone
+s/(D_800BE9C0 ? 0 : 1)/(D_800BE9C0 ? 1 : 0)/ % mtx0 mtx1
+s/if (flags \& 0x10) {/if (flags \& 0x20) {/ % static
+s/dy = prev\[1\] - pos\[1\];/dy = pos[1] - prev[1];/ % par1
+s/dz \* dz);/dy * dz);/ % par1
+s/ + 1.0f) \* D_800BE9A4/ + 0.5f) * D_800BE9A4/ % par1
+s/\* \*(f32 \*) (obj + 0x34);/* *(f32 *) (obj + 0x30);/ % par1
+s/> 7.0f) {/> 8.0f) {/ % cap7
+s/D_800C35EA == 1)/D_800C35EA == 2)/ % nospawn flag20
+s/size2 = \*(f32 \*) (obj + 0x30) + \*(f32 \*) (obj + 0x30);/size2 = *(f32 *) (obj + 0x30);/ % par1
+s/pos\[0\] + dx \* t/pos[0] + dy * t/ % par1
+s/- jy \* size2/- jx * size2/ % par1
+s/pos\[2\] + dz \* t + \*(f32 \*) (obj + 0x30)/pos[2] + dz * t + *(f32 *) (obj + 0x34)/ % par1
+s/, dx, dy, dz, obj);/, dx, dz, dy, obj);/ % par1
+s/, dx, dy, dz, obj);/, dx, dy, dz, prev);/ % par1
+s/((f32 \*) (obj + 0x40))\[1\] = pos\[1\];/((f32 *) (obj + 0x40))[1] = pos[2];/ % par1
+s/obj\[0x3A\] \&= ~8;/obj[0x3A] \&= ~0x18;/ % first par1
+s/(s8) obj\[0x3C\] != -1)/(s8) obj[0x3C] != 0)/ % par1 par1_tm1
+s/if (!dead \&\& /if (/ % life_die
+s/if (D_80089E40\[(s8) obj\[0x3C\]\](obj) == 0) {/if (D_80089E40[(s8) obj[0x3C]](obj) != 0) {/ % par1 par1_r0

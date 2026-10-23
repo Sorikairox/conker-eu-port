@@ -164,7 +164,7 @@ s32 func_150C6DC4(s32 arg0, u8 *arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F4400/func_150C6DC4.s")
 #endif
 s32 func_1513092C(void *, s32, s32);
-void func_150C6F08(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, u8 *arg6) {
+void func_150C6F08(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         s32 u34;
         s32 u38;
