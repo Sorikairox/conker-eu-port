@@ -1,0 +1,116 @@
+s/type == 0xE \&\& D_800BEECB != 4/type == 0xE \&\& D_800BEECB != 3/ % LE_b0 LE_off
+s/type == 0x12 \&\& D_800BEECB != 1/type == 0x12 \&\& D_800BEECB != 0/ % L12_b0 L12_off
+s/if (D_800E1024 != 0 \&\& (type == 7/if (D_800E1024 == 0 \&\& (type == 7/ % L7_b0 L7_disabled
+s/light = func_1502354C(track, ev->b4 == 0);/light = func_1502354C(track, 1);/ % L7_b4_1 L7_b4_2_0_0
+s/SA_S32(light, 4) = 0x8013;/SA_S32(light, 4) = 0x8011;/ % L7_id0 L7_id1 L7_id2
+s/text++;$/;/ % L7_id1 L7_id2
+s/SA_S16(light, 0x2A) = 100;/SA_S16(light, 0x2A) = 101;/ % L7_b0
+s/SA_PTR(light, 0x20) = rec + 0x10;/SA_PTR(light, 0x20) = rec + 0x14;/ % L7_b0
+s/SA_U8(light, 0x2C) = colours\[ev->b5\]\[0\];/SA_U8(light, 0x2C) = colours[ev->b5][1];/ % L7_b0 L7_id0
+s/if (ev->b5 == 2) {/if (ev->b5 == 1) {/ % L7_id0 L7_b0 L7_b2
+s/(s32 \*) ((u8 \*) light + 4), flag);/(s32 *) ((u8 *) light + 8), flag);/ % L7_b0
+s/if (SA_U8(light, 0xC) != 0) {/if (SA_U8(light, 0xC) == 0) {/ % L7_b0 L7_c0
+s/func_150234E8(light, ev->b5);/func_150234E8(light, ev->b4);/ % L7_b4_1
+s/k = ev->w6 - 1;/k = ev->w6;/ % L7_b4_2_0_1 L7_b4_2_1_1 L7_b4_2_0_2
+s/SA_S32(light, 4) \&= ~0x40000;/SA_S32(light, 4) \&= ~0x4000;/ % L7_b4_5 L7_b4_2_0_1
+s/if (ev->b5 == 0) {$/if (ev->b5 != 0) {/ % L7_b4_2_0_0 L7_b4_2_1_0 5_03_b5_0
+s/            func_1507EB4C(obj, ev->id);/            func_1507EB4C(obj, ev->w6);/ % C_w6
+s/span = 0xFFFF;/span = 0xFFFE;/ % C_b5
+s/func_1507E7E4(obj, ev->id, 3, span, ev->b4);/func_1507E7E4(obj, ev->id, 2, span, ev->b4);/ % C_span
+s/0, 0, 0, 0, 0, 0, player) - now;$/0, 0, 0, 0, 0, 0, player);/ % C_span 4_mid
+s/func_15083568(obj, ev->id + 1, 1.0f, 0);/func_15083568(obj, ev->id, 1.0f, 0);/ % D_b40
+s/func_150836CC(obj, ev->id + 1);/func_150836CC(obj, ev->id + 2);/ % D_b41
+s/SA_S16(att, 0x18) = D_800905C4\[ev->b5\];/SA_S16(att, 0x1A) = D_800905C4[ev->b5];/ % D_b42 D_b2_neg
+s/SA_S16(att, 0x1A) = D_800905C4\[ev->b5\];/SA_S16(att, 0x1A) = D_800905C4[ev->b4];/ % D_b43
+s/span = 0xFF;/span = 0xFE;/ % 4_big 4_negbig
+s/span = 1;/span = 2;/ % 4_zero 4_one
+s/SA_U8(o, 0x134) = ev->id;/SA_U8(o, 0x134) = ev->b5;/ % 4_mid
+s/ev->id < D_800C3A5A\[player\]/ev->id <= D_800C3A5A[player]/ % 3_count
+s/D_800C3A10\[player\]\[ev->id\].kind == 1/D_800C3A10[player][ev->id].kind != 2/ % 3_ok 3_kind2
+s/ev->id != D_800C3A18) {/ev->id != 0) {/ % 3_same 3_ok
+s/SA_S32(D_800DBFF0, 0x5F0) |= 4;/SA_S32(D_800DBFF0, 0x5F0) |= 8;/ % 3_ok
+s/SA_U8(o + ev->b4, 0x6C) = ev->id + 10;/SA_U8(o + ev->b4, 0x6C) = ev->id + 11;/ % 9_b40
+s/ev->id != 0 ? ev->id : 0xFF;/ev->id != 0 ? ev->id : 0xFE;/ % 1_id0
+s/D_800C3A7C\[player\] = ev->b4 == 0;/D_800C3A7C[player + 1] = ev->b4 == 0;/ % 5_09_b0 5_09_b3
+s/D_800C3A80\[player\] = ev->b4;/D_800C3A80[player] = ev->b5;/ % 5_13_b0 5_13_bFD 5_13_b45
+s/func_15060F28(obj, 0);/func_15060F28(obj, 1);/ % 5_14_b1
+s/SA_PTR(o, 0xA0) = SA_REC(player, track) + 0x30;/SA_PTR(o, 0xA0) = SA_REC(player, track) + 0x34;/ % 5_41_b0_0
+s/SA_U8(o, 0xA7) = colours\[ev->b5\]\[2\];/SA_U8(o, 0xA7) = colours[ev->b5][1];/ % 5_41_b0_0 5_41_b0_1
+s/func_1501C710(2, (u16 \*) (s32) ev->b4, ev->w6, 0, 0);/func_1501C710(2, (u16 *) (s32) ev->b4, 0, 0, 0);/ % 5_44_b5
+s/SA_U8(o, 0x1FF) += ev->b5;/SA_U8(o, 0x1FF) += ev->b4;/ % 5_17_b0 5_17_b0_neg
+s/SA_U8(o, 0x208) = ev->w6;/SA_U8(o, 0x208) = ev->b5;/ % 5_16_b0
+s/D_800C3A10\[player\]\[track\].kind == 3/D_800C3A10[player][track].kind != 1/ % 5_1D_k1 5_1D_k3_b0
+s/D_800C39E2 = ev->b4 + 1;/D_800C39E2 = ev->b4;/ % 5_1E_b4
+s/func_151149AC(ev->w6);/func_151149AC(ev->b5);/ % 5_03_b5_0 5_03_b5_1
+s/SA_U8(r, 0x73) \&= ~3;/SA_U8(r, 0x73) \&= ~2;/ % 5_03_b5_0 5_03_b5_1
+s/func_151BEE00(pos, SA_F32(rec, 0x10), 1, 0, 2, 0xFF, 1);/func_151BEE00(pos, SA_F32(rec, 0xC), 1, 0, 2, 0xFF, 1);/ % 5_6C_b0
+s/pos\[2\] = SA_F32(rec, 8);/pos[2] = SA_F32(rec, 4);/ % 5_6C_b0 5_6C_b1
+s/-10000.0f, 100.0f, -1, flag, 1);/-10000.0f, 100.0f, -1, flag, 0);/ % 5_6C_b1
+s/? 0x2B : 0x2C);/? 0x2C : 0x2B);/ % 5_6C_b2 5_6C_b2_b5
+s/func_1515F170(2, 1);/func_1515F170(2, 0);/ % 5_6C_b3 5_6C_b3_b5
+s/func_151616D0(0x28, 0x17, 0);/func_151616D0(0x28, 0x18, 0);/ % 5_6C_b5
+s/func_1515F170(3, ev->b5 != 0 ? 0 : 1);/func_1515F170(3, ev->b5 != 0 ? 1 : 0);/ % 5_6C_b7 5_6C_b7_b5
+s/0x12, 0x13, 0x14, 0x15 }/0x12, 0x13, 0x14, 0x16 }/ % 5_6C_b9
+s/func_151CA398((u8 \*) D_800DBFF0, 0, (s8) track, (u8) flag, 1);/func_151CA398((u8 *) D_800DBFF0, 0, (s8) track, flag, 1);/ % 5_6C_b10_flag
+s/func_150F58C0(9);/func_150F58C0(8);/ % 5_6C_b14
+s/func_15169040(0, 0x4F);/func_15169040(0, 0x4E);/ % 5_6C_b17
+s/func_1518F9CC(0, 0x49);/func_1518F9CC(0, 0x48);/ % 5_6C_b20
+s/? 0x55 : 0x56);/? 0x56 : 0x55);/ % 5_6C_b21 5_6C_b21_b5
+s/func_151920FC((s32) \&ref, 0x50);/func_151920FC((s32) \&ref, 0x51);/ % 5_6C_b23
+s/ref.kind = SA_U8(o, 0x3B);/ref.kind = SA_U8(o, 0x3A);/ % 5_6C_b23 5_36_b1
+s/if (list != NULL \&\& ev->w6 < n) {/if (list != NULL \&\& ev->w6 <= n) {/ % 5_6E_n
+s/list\[ev->w6\], -1, -1, -1, -1, 0, 0, 0xFF, 1);/list[ev->w6], -1, -1, -1, -1, 0, 0, 0xFF, 0);/ % 5_6E_ok
+s/k = ev->b5 >= 4 ? 3 : ev->b5;/k = ev->b5 >= 3 ? 3 : ev->b5;/ % 5_05_b5_3
+s/kinds\[k\]\[1\]/kinds[k][0]/ % 5_05_b5_1
+s/span = 999;/span = 998;/ % 5_05_w6
+s/f = (u8) flag;/f = flag;/ % 5_05_b5_0 5_05_flag
+s/func_1519D5A0((s32) obj, 0, 300, 0, flag, 0);/func_1519D5A0((s32) obj, 0, 299, 0, flag, 0);/ % 5_36_b0
+s/anim = 7;/anim = 8;/ % 5_30_b2
+s/anim = 12;/anim = 13;/ % 5_30_b0 5_30_bFF 5_30_b4
+s/func_150C6174((s32) obj);/func_150C619C((s32) obj);/ % 5_46_b1
+s/? (f32) ev->b4 : D_800D9F40;/? (f32) ev->b4 : D_800D9F3C;/ % 5_25_b0
+s/(f32) (ev->w6 \* 10)/(f32) (ev->w6 * 11)/ % 5_58_w
+s/(ev->b4 << 16) | ev->w6;/(ev->b4 << 16) | (u16) ev->w6;/ % 5_3C_b5_0 5_3C_b5_1
+s/SA_S32(o, 0x94) \&= ~(bits | 1);/SA_S32(o, 0x94) \&= ~bits;/ % 5_3C_b5_2
+s/SA_U8(o, 0x65) = target + 1;/SA_U8(o, 0x65) = target;/ % 5_3D_b0
+s/SA_S32(o, 0x5C) = ev->b5;/SA_S32(o, 0x5C) = ev->b4;/ % 5_3D_b0
+s/D_800D9CB0 = 2;/D_800D9CB0 = 3;/ % 5_42_b3
+s/D_800D9CB0 = 10;/D_800D9CB0 = 11;/ % 5_42_b9
+s/func_150B7700((s32) SA_F32(rec, 0x24), (s32) SA_F32(rec, 0x28),/func_150B7700((s32) SA_F32(rec, 0x28), (s32) SA_F32(rec, 0x24),/ % 5_43_b0
+s/D_800BEE08, 0, 0);/D_800BEE08, 1, 0);/ % 5_45_b0
+s/if (obj != NULL \&\& ev->b4 < 3) {/if (obj != NULL \&\& ev->b4 <= 3) {/ % 5_49_b3
+s/((u8) ev->b5 << 16)/(ev->b5 << 16)/ % 5_4B_a 5_4B_b
+s/func_10011FB0(ev->b4 == 0 ? ev->b5 : 0);/func_10011FB0(ev->b5);/ % 5_4A_b1
+s/D_800C3A84\[player\] = ~ev->b4;/D_800C3A84[player] = -ev->b4;/ % 5_54_a
+s/func_15052F9C(obj, 180.0f, 5, 0x44, 1, 1, 0xFF, 0, 1, 0);/func_15052F9C(obj, 180.0f, 5, 0x44, 1, 2, 0xFF, 0, 1, 0);/ % 5_5A_k28
+s/func_15052F9C(obj, 156.0f, 0x19, 4, 0, 15, 0xFF, 0, 1, 0);/func_15052F9C(obj, 156.0f, 0x19, 4, 0, 10, 0xFF, 0, 1, 0);/ % 5_5A_k21
+s/SA_S32(D_800CC2D0, 0xF8) \&= ~0x01000000;/SA_S32(D_800CC2D0, 0xF8) \&= ~0x02000000;/ % 5_71_obj
+s/v = ev->w6 != 0 ? ev->w6 : 0x7F;/v = ev->w6 != 0 ? ev->w6 : 0x7E;/ % 5_37_b0_0
+s/colours\[ev->b5\]\[2\], (s16) v, span, 0);/colours[ev->b5][1], (s16) v, span, 0);/ % 5_37_b0_1 5_37_b0_2
+s/func_1517FC90(ev->b5, span, ev->w6 != 0 ? ev->w6 : 4, 0x7F, 1);/func_1517FC90(ev->b5, span, ev->w6 != 0 ? ev->w6 : 5, 0x7F, 1);/ % 5_38_b0
+s/ev->id, 1, 1, 1, ev->b5, player);/ev->id, 1, 1, 0, ev->b5, player);/ % 5_5C_lv21 5_5C_lv18
+s/func_150F59A0(in, end - now - out - in, out, ev->b5);/func_150F59A0(in, end - out - in, out, ev->b5);/ % 5_5C_lv18
+s/func_1510AEB0(in, end - now - out - in, out);/func_1510AEB0(out, end - now - out - in, in);/ % 5_5C_lv21
+s/} else if (D_800BE9F0 == 0x21) {/} else if (D_800BE9F0 == 0x1D) {/ % 5_5C_lv21 5_5C_lv1D
+s/D_800DE278 = rec + 0x24;/D_800DE278 = rec + 0x20;/ % 5_64_b0
+s/        func_151DECB4();/        ;/ % 5_67_a
+s/func_151E5B94(0);/func_151E5B94(1);/ % 5_73_a
+s/SA_F32(o, 0x20) = 20.0f;/SA_F32(o, 0x20) = 21.0f;/ % 5_69_b0
+s/SA_U8(D_800CC2D0, 0x13C) = D_800C3E78 + 100;/SA_U8(D_800CC2D0, 0x13C) = D_800C3E78 + 101;/ % 5_69_b3
+s/SA_U8(SA_PTR(D_800CC2D0, 0x31C), 0x17) = 1;/SA_U8(SA_PTR(D_800CC2D0, 0x31C), 0x17) = 2;/ % 5_69_b4
+s/D_800D154C = obj;/D_800D154C = NULL;/ % 5_69_b5
+s/SA_U8(SA_PTR(o, 0x31C), 0x4E) = 0;/SA_U8(SA_PTR(o, 0x31C), 0x4D) = 0;/ % 5_69_b6
+s/D_800C3A9C = ev->b5 \* 50;/D_800C3A9C = ev->b5 * 60;/ % 5_7A_a
+s/SA_U8(o + ev->b4, 0x68) = ev->b5;/SA_U8(o + ev->b4, 0x69) = ev->b5;/ % 5_6F_a
+s/SA_F32(o, 0xC8) = SA_S16(D_800D1C90\[SA_U8(o, 4)\], 6);/SA_F32(o, 0xC8) = SA_S16(D_800D1C90[SA_U8(o, 4)], 4);/ % 5_72_a
+s/SA_S32(wrec, 0x80) = 0;/;/ % 5_79_a
+s/if (D_800BE9F0 == 0x1D) {/if (D_800BE9F0 != 0x1D) {/ % 5_7B_lv1D 5_7B_lv21
+s/if (obj != NULL \&\& ev->b4 == 0) {/if (obj != NULL) {/ % 5_7D_b1
+s/D_800D18D0 = SA_OBJ_INDEX(obj);/D_800D18D0 = SA_OBJ_INDEX(obj) + 1;/ % 5_7E_a
+s/func_15093818(ev->b4 ^ 1);/func_15093818(ev->b4);/ % 5_81_b0
+s/D_800D2870 = ev->w6 \* 25;/D_800D2870 = ev->w6 * 24;/ % 5_81_b0
+s/(u8) ev->b4 >= 101 ? 100 : ev->b4;/ev->b4 >= 101 ? 100 : ev->b4;/ % 5_82_bFF 5_82_b65
+s/D_800C40BE = ev->w6;/D_800C40BE = ev->b5;/ % 5_83_a
+s/    case 0x66:$// % 5_66_nop
+s/^    case 0x6B:$// % 5_6B_nop
+s/    case 0x18:$// % 5_18_nop

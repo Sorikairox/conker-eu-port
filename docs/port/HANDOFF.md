@@ -275,6 +275,28 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P114, 2026-10-23). Details: `docs/port/sessions/P114.md`
+
+- **func_15024910 (scene event handler A, scene_event_run_a) in hand C (NM)**: compiled C, not a VM: one 8-byte scene
+  event per call (type switch, type-5 id switch). 293 synthetic + 154 real ROM event setups EQUIV, mutants 115/118
+  (2 equivalent, 1 open). Fix from the setups: sub 0x3C uses w6 sign-extended.
+- **Level 0x21 scene 1 reaches 5/0x67 at t = 1700 (= frame 1416, the scene end)** on track 13, together with
+  `type 3 id 0xD` (camera track switch / retarget) and the 0x5C fade companions (`p114/scdis.py ROM 21 1`).
+  Browser: the scene ended by its counter because A was a stub; re-run now.
+- Producers for scene 1's type 0xD: func_15083F30 (object_spawn_attached, mutants 20/20) and func_150836CC
+  (object_setup_undo, 9/9) in hand C (game_eu_AF2A0). func_151149AC verified but NOT committed (13DC30 -> port-b).
+- Tools: `p114/scasset.py` (asset path loader), `p114/scdis.py` (scene disassembler, `--scan TYPE ID`).
+- Checks: verify_all OK, NM links, protocheck 0 (954), selftest 51/51, progress_nm 4948/5915 (83.7%), bytes 58.9%.
+
+## Next steps (from P114)
+
+0. Web: merge; run LogoScreen to t = 1700: does 5/0x67 fire (func_151DECB4 -> mode 3, level 0x1D)? Does the type-3
+   camera switch fix the stale camera target (P113 retarget guard)?
+1. port-b: func_151149AC (28 insns, game_eu_13DC30) - candidate + setups + mutants ready in `p114/c/`, `9ac_*`.
+2. func_15029EA8 (handler C, 827): map in `p114/scene_vm_map.md`; convert with func_1000FA64 (init_EB00),
+   its callback func_15023988, func_15023EC4, func_15188D80 (producer / handler first).
+3. func_150039E0 (P112 map), func_15084814 (AF2A0 removal chain): not started.
+
 ## State (session P112, 2026-10-23). Details: `docs/port/sessions/P112.md`
 
 - **game_eu_CD540.c fully hand C (NM)**: func_1509FD30 (event_action_game_state, D_80088874[4]: 23 actions incl.
