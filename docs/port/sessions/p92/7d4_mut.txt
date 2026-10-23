@@ -1,0 +1,26 @@
+s/hi = D_800C39E8\[slot\]\[actor\] - 1;/hi = D_800C39E8[slot][actor] - 2;/
+s/if (dist < tab\[mid\])/if (dist <= tab[mid])/
+s/hi = mid - 1;/hi = mid;/
+s/lo = mid + 1;/lo = mid;/
+s/dist <= tab\[mid + 1\]/dist < tab[mid + 1]/
+s/} while (lo <= hi);/} while (lo < hi);/
+s/\*segOut = seg;/*segOut = seg + 1;/
+s/if (seg != a->pad3C\[0\])/if (seg == a->pad3C[0])/
+s/func_15020920(actor, seg, slot)/func_15020920(actor, seg, 0)/
+s/seg \* 8 + 6/seg * 8 + 4/
+s/if (shape == 0)/if (shape != 0)/
+s/hi = 100;/hi = 99;/
+s/if (dist < tab\[k\])/if (dist <= tab[k])/
+s/tab\[k\] <= dist \&\& //
+s/(f32)(k + j) \* D_80096D80/(f32)(k + j) * D_80096D84 * 2.0f/
+s/c\[0\] + ((c\[9\]/c[0] + ((c[10]/
+s/\* u + c\[7\])/* u + c[6])/
+s/\* u + c\[5\]) \* u;/* u + c[4]) * u;/
+s/o = out + j \* 3;/o = out + j * 2;/
+s/return k;/return k + 1;/
+s/tab\[seg + 1\] - tab\[seg\] == 0.0f/tab[seg + 1] - tab[seg] != 0.0f/
+s/frac = 0.0f;/frac = 1.0f;/
+s/(dist - tab\[seg\])/(dist - tab[seg + 1])/
+s/pts\[3\] + (pts\[6\] - pts\[3\])/pts[0] + (pts[6] - pts[0])/
+s/pts\[4\] + (pts\[7\] - pts\[4\])/pts[4] + (pts[7] - pts[3])/
+s/(pts\[8\] - pts\[5\]) \* frac/(pts[8] - pts[5]) * 0.5f/
