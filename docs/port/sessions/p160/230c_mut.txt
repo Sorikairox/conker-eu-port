@@ -1,0 +1,26 @@
+s/    dist = 0.0f;/    dist = 1.0f;/
+s/\*passDist = 0.0f;/*passDist = 2.0f;/
+s/step = D_800AADA4;/step = 1.0f;/
+s/dir\[0\], dir\[1\], dir\[2\]/dir[0], dir[0], dir[2]/
+s/(s32 \*)hit, arg4, arg5, arg6/(s32 *)hit, 0.0f, arg5, arg6/
+s/arg7, arg8,/arg7, 3,/
+s/arg9, argD)/arg9, 0)/
+s/(hit + 0x5C)/(hit + 0x58)/
+s/dist += \*(f32 \*)(hit + 4)/dist = *(f32 *)(hit + 4)/
+s/(obj\[0x4F\] \& 0x60) == 0x40/(obj[0x4F] \& 0x40) == 0x40/
+s/obj\[0x4F\] \& 0x60/obj[0x4E] \& 0x60/
+s/(hit + 0x38) \* step/(hit + 0x38) + step/
+s/(hit + 0x3C) \* step/(hit + 0x38) * step/
+s/\*(f32 \*)(hit + 0x10) + /*(f32 *)(hit + 0xC) + /
+s/(V3_151C230C \*)(hit + 8);/(V3_151C230C *)(hit + 0xC);/
+s/\*passDist = dist;/*passDist = dist + step;/
+s/    dist += step;/    dist -= step;/
+s/(pass + 0) = \*(f32 \*)(hit + 0xC)/(pass + 0) = *(f32 *)(hit + 0x8)/
+s/(Blk12_151C230C \*)(hit + 0x44)/(Blk12_151C230C *)(hit + 0x46)/
+s/u16 h\[9\]/u16 h[8]/
+s/(hit + 0x60)/(hit + 0x5C)/
+s/pass\[0x1C\] = 7/pass[0x1C] = 6/
+s/pass\[0x1D\] = 3/pass[0x1E] = 3/
+s/(pass + 0x20) = obj/(pass + 0x20) = hit/
+s/(hit + 0x2C) = \*(V3_151C230C \*)start/(hit + 0x2C) = pos/
+s/(f32 \*)(hit + 4) = dist;/(f32 *)(hit + 4) = step;/

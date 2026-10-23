@@ -1,0 +1,4 @@
+s/extra.gravity = -18.0f;/extra.gravity = -16.0f;/
+s/extra.u55 = s->u55;/extra.u55 = s->u54;/
+s/extra.u58 = s->u58;/extra.u58 = s->u56;/
+s/memcpy(p + 0x170, \&extra, 0x10);/memcpy(p + 0x170, \&extra, 0xC);/

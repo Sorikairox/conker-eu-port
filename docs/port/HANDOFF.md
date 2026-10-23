@@ -10,6 +10,65 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P163 (port-b) (session P163, 2026-10-24). Details: `docs/port/sessions/P163.md`
+
+Branch `port-b` (from P162 720e4c3). Took game_eu_1C3530.c.
+- Table signatures: D_8008FC30 / D_8008FC58 are one-entry start-sound tables (FC34.. / FC5C.. are separate update /
+  stop tables with their own index bytes); the asm dispatchers store v0 as the u16 voice handle. NM variants
+  `u16 func_151991D0` / `u16 func_1519C4FC` return func_10010F30's handle (EQUIV + mutants).
+- The 11 tablesig "maybe" rows: port-b ones (B730, FC10, 90070, 900D0, BA4) are false positives (next named address
+  is a separately indexed table). Possibly real, not port-b: D_80089E40 (func_151342BC, game_161520) looks like one
+  23-entry table whose default entries func_151346EC / func_1513470C are void wrappers; the dispatcher tests v0.
+- m2c_sanity (port-web tsv): 12 high/medium rows in port-b files, all checked, 0 real (reasons in P163.md).
+- func_151C6A28 `object_muzzle_fire` (1F4090) hand C (NM): 200 random + 9 setups + ARGMEM, mutants 18/20 + 2/2;
+  returns 0 for game_981E0's undeclared call. func_15142A5C is 1-argument under NM in 1F4090 (was 2: wasm mismatch).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1202 bodies), selftest 62/62. progress_nm total 5196/5915 (87.8%), game 4665/5334, C bytes 69.0%, 719 asm-only. No difftest processes left.
+
+## Next steps (from P163)
+
+0. **PRIORITY (coordinator, browser P161), not done in P163 (budget):** func_1501370C (game_40490.c:64, now port-b)
+   calls `D_80082EA0[arg0->unk17]()` without the record; the asm (EU 150136BC) keeps a0 = arg0 at the jalr, so every
+   level-start record handler gets NULL (the null+0x14 writer). Fix under NM like func_1501396C:
+   `void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082EA0[idx]; if (func) func(arg0);` — **in the same commit
+   as func_151530A8** (game_eu_17D3C0, asm, 102 calls from frame 4773; 287 asm lines; callees func_150ADA20 x14,
+   func_150ADA68 x3, func_15143794 (jal 15143D04), func_1515C2F0 (jal 1515C860); its C prototypes disagree:
+   1897A0 `(s32 *, u8, u8)`, 11CB90 `(s32 *, s32, s32, u8 *)`, 126330 `(s32 *, s32, s32)` — check the asm's real
+   arity). D_80082EA0 = EU 0x80083230, entries 0..0x2F (see P163.md); still asm besides 151530A8's path:
+   func_151C7750 (idx 8, 1F4F60), func_1500C2F0 (idx 0x22) and func_1500D8C8 (idx 0x26) (game_39750).
+1. Owner of game_161520.c: D_80089E40 (func_151342BC) index obj+0x3C may reach func_151346EC / func_1513470C (void
+   C, v0 = func_15169804 / func_15169824's result, tested by `bnez v0`) and the void 1D7790 / F3AD0 / F4400 entries.
+2. func_150F79F0 (125200, asm, port-b): consumer of func_151C6A28 / func_150FF604; 20-argument prototype in P163.md.
+3. Next port-b asm with C callers (`p163/asmlist.py`): func_15152A90 (213, 17D3C0), func_150FD140 (215, 12A7C0),
+   func_15081120 (219, AE930), func_150511E8 (220, 78230), func_15152700 (228, 15 calls).
+4. Browser: P163.md / P162.md UNVERIFIED.
+
+## P162 (port-b) (session P162, 2026-10-24). Details: `docs/port/sessions/P162.md`
+
+Branch `port-b` (from P160 9151c20). Took game_eu_F6060.c, game_eu_192500.c, game_eu_1BAF40.c, game_eu_1FB080.c.
+- Table signatures (P160 list), each jalr traced to its table: real and fixed under NM: D_8008B734 (func_151660F0
+  returns f32: func_15164E0C stores f0), D_8008FFD0 (func_151D1654 / 1674 return func_151D1694's s32; func_151D1694
+  `object_offset_point` converted). False positives: D_80088BF8, D_8008D9C0, D_80089E9C (the v0 test after
+  func_151349D0's first jalr belongs to D_80089EB8; func_151A7BC0 needs nothing), D_80082FA4 (US name for EU
+  0x80083334; the real table is C-dispatched D_80082BFC in game_36680, result unused).
+- New real cases in game_eu_1C3530.c (not port-b): D_8008FC30 (func_151991D0 ..) and D_8008FC58 (func_1519C4FC ..),
+  results stored with `sh v0`.
+- `p162/tablesig.py` v2 (EU symbol resolution, per-jalr table trace, f0 results, single named entries, "maybe" rows);
+  `p162/asmlist.py` skips functions defined in multi-function NM blocks.
+- Hand C (NM), EQUIV + setups + mutants: func_151CEBE4 `node_find_kind11_by_id`, func_151CDA70 `splash_effect_spawn`
+  (1FB080), func_150C8850 `wobblers_update` (F6060), func_1518FE50 `bone_sparks_emit` (1BAF40), func_150F1C5C
+  `limb_burst_spawn` (11CB90), func_150FF840 `gun_fire_effects` (12D5D0, returns 0 for 981E0's undeclared calls).
+- Bug fix: func_150F03F8 (11CB90 NM m2c body) pointer stride on `&D_800A1A10 / 1A28 / 1A40` (wrong for arg1 = 1).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1201 bodies), selftest 62/62. progress_nm total 5195/5915 (87.8%), game 4664/5334, C bytes 68.9% (P160: 5189, 68.8%), 720 asm-only. No difftest processes left.
+
+## Next steps (from P162)
+
+1. Owner of game_eu_1C3530.c: D_8008FC30 / D_8008FC58 entries must return s16/s32 (P162.md). Check the "maybe"
+   rows of `p162/tablesig.py` (dispatcher index ranges).
+2. Next port-b asm with C callers (`p162/asmlist.py`): func_151C6A28 (210, 1F4090), func_15152A90 (213, 17D3C0),
+   func_150FD140 (215, 12A7C0), func_15081120 (219, AE930), func_150511E8 (220, 78230), func_15152700 (228, 15 calls).
+3. Run port-web `port/tools/m2c_sanity.py` over port-b files: func_150F03F8's stride bug was still in an NM body.
+4. Browser: P162.md UNVERIFIED.
+
 ## State (session P161, 2026-10-24, port-web). Details: `docs/port/sessions/P161.md`
 
 - **null+0x14 = 0x400 writer found**: func_1501374C (game_40490.c) `arg0->unk16 |= 4` with arg0 = NULL, because
@@ -33,6 +92,54 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. The P158 list stays: func_15064668, func_15064F50, init_EB00 sound emitters, func_1505528C, func_151EE0C4 (pause).
 3. Other arity_scan rows of the same shape (handler tables called with no argument) deserve the same check; the store
    watch finds any null-zone writer in one run (change the range in storewatch_inst.py).
+
+## P160 (port-b) (session P160, 2026-10-24). Details: `docs/port/sessions/P160.md`
+
+Branch `port-b` (from P159 4bb281f). Took game_eu_1F4090.c.
+Hand C (NM), difftest EQUIV + setups + mutants: func_151C6F7C `object_bone_point` (1F4090; its matching callers
+func_151C6F24 / func_151C6F50 get typed 3-argument NM variants), func_151D469C `object_point_effect_spawn` (201240;
+returns 0 for 981E0's undeclared calls; func_151D5308 NM casts), func_151C230C `ray_cast_through_passable` (1EDA00;
+NM prototype + func_151C1F1C casts), func_151A2C9C `particle_puff_spawn` (1CE7D0), func_151DA08C `smoke_puff_spawn`
+(2062D0), func_151A31D4 `particle_burst_spawn` (1CE7D0).
+- func_1513D668 (169510 + functions.h) returns func_1513D594's record under NM (func_151DA08C uses it).
+- func_151A3134 NM signature = func_151A3180's (both called through one pointer in func_151A31D4).
+- func_150A6070 (D3880) was already C (P130); asmlist.py misses multi-function NM blocks.
+- New `docs/port/sessions/p160/tablesig.py`: function-pointer tables vs NM C signatures / asm v0 use after jalr.
+  Real P159-class cases (void C entries, asm dispatcher reads v0): D_80089E9C (func_151349D0 frees the object when
+  v0 == 0; includes port-b's func_151A7BC0), D_80089E40, D_80089ED8, D_80089E10 (game_161520 dispatchers),
+  D_80088BF8, D_8008B734, D_8008D9C0, D_8008FFD0, D_80082FA4 — listed in P160.md, none fixed.
+- Harness: DIFFTEST_OUTW `@ADDR` faults on a page not touched yet (workaround in P160.md).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1195 bodies), selftest 62/62. progress_nm total 5189/5915 (87.7%), game 4658/5334, C bytes 68.8% (P159: 5183, 68.6%), 726 asm-only. No difftest processes left.
+
+## Next steps (from P160)
+
+1. Table-scan cases: work out what v0 the void entries leave (D_80089E9C / func_151349D0 first: it decides whether
+   objects are freed) and give the entries s32 NM returns; needs the game_161520 / other slots' files.
+2. Next port-b asm with C callers (`p160/asmlist.py`): func_1501B300 (200, 48B10), func_150F1C5C (201, 11CB90),
+   func_150FF840 (203, 12D5D0), func_151C6A28 (210, 1F4090), func_15152A90 (213, 17D3C0), func_150FD140 (215, 12A7C0).
+3. Browser: P160.md UNVERIFIED (object point effects, see-through ray casts, particle puffs / bursts, smoke puffs).
+
+## P159 (port-b) (session P159, 2026-10-24). Details: `docs/port/sessions/P159.md`
+
+Branch `port-b` (from P155 d2c5c53). Took game_eu_125200.c, 12C0B0.c, 12BB30.c, 12D5D0.c.
+Hand C (NM), difftest EQUIV + setups + mutants: func_15154728 `spark_shower_spawn` (17D3C0; NM prototypes now s32 in
+125200 / 201240 / 1EDA00 / 1D3420), func_151D441C `object_sound_between` (201240; void, 12D5D0 prototype void),
+func_151D611C `objects_hit_by_segment` (201240), func_150F85AC `record_particle_spawn` (125200), func_151C0434
+`impact_effects_spawn` (1EDA00), func_1514FE68 `spray_particles_spawn` (17D3C0; its spray chain is now all C),
+func_150F0BEC `object_glow_spawn` (11CB90).
+- func_151C1EF0 (D_80087030 filter 3, matching C `void`) returns func_151C0894's result under NM (the table callers
+  func_151D611C / func_15081A90 test it; a void function through an s32 table pointer traps on wasm).
+- func_151D469C held: D_80090010 handlers 0 / 1 (func_151C6F24 / func_151C6F50) call func_151C6F7C, asm-only in
+  game_eu_1F4090.c (not port-b); func_151D5308 uses kinds 0 and 1.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1189 bodies), selftest 62/62.
+  progress_nm total 5183/5915 (87.6%), game 4652/5334, C bytes 68.6%, 732 asm-only.
+
+## Next steps (from P159)
+
+1. func_151D469C after func_151C6F7C (game_eu_1F4090) is C — give 1F4090 to port-b or convert it in the port slot.
+2. Next port-b asm with C callers (`p159/asmlist.py`): func_151C230C (151, 1EDA00), func_151A2C9C (157, 1CE7D0),
+   func_150A6070 (173, D3880), func_151DA08C (183, 2062D0), func_151A31D4 (186, 1CE7D0).
+3. Browser: P159.md UNVERIFIED (spark showers, impact sprays, segment hit masks, filter-3 ray casts).
 
 ## State (session P158, 2026-10-24, port-web). Details: `docs/port/sessions/P158.md`
 
@@ -111,6 +218,31 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. Browser: hit reactions (func_1507CD64), vent smoke (func_1510A98C).
 4. P138 / P141 leftovers (not started).
 
+## P155 (port-b) (session P155, 2026-10-23). Details: `docs/port/sessions/P155.md`
+
+Branch `port-b` (from P153 d394089). Coordinator decisions: func_151AC3F0 inserted (1EDA00:292 prototype `void`);
+func_151AE694 returns instead of spinning forever when no path exists (NM only, documented port divergence; no log
+hook in the NM build). Took game_eu_1D4CC0.c and game_eu_201240.c (not on the port slot's list).
+Hand C (NM), difftest EQUIV + setups + mutants: func_151A9940 `kind_effect_spawn` (1D5710), func_1516AD20
+`text_box_open` (1984F0), func_1505528C `thrown_object_update` (78230), func_151506E8 `particle_spray_spawn` (17D3C0),
+func_151D5AC4 `smoke_cloud_spawn`, func_151A74B0 `debris_spray_spawn` (1D4CC0), func_151D5714 `bone_beam_spawn`,
+func_151D4898 `object_sound_at`, func_151A7F00 `path_record_create` (1D5710), func_151D5FC8 `object_mouth_point`,
+func_151D4684 `object_sounds_at` (201240). func_15081974 (AE930) takes `f32` for its second parameter.
+- func_15154728 `spark_shower_spawn` verified (draft `p155/d_4728.c`) but NOT committed: game_eu_125200.c:36 (not
+  port-b) declares it `void`; 1191C0 needs `s32`. Fix that prototype (+ port-b NM prototypes 201240:398, 1EDA00:12,
+  1D3420:743 -> s32), then insert.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1182 bodies), selftest 62/62.
+  progress_nm total 5176/5915 (87.5%), game 4645/5334, C bytes 68.5%, 739 asm-only.
+
+## Next steps (from P155)
+
+1. func_15154728: after the 125200 prototype fix, insert `p155/d_4728.c`.
+2. func_151D441C: prototypes in 12C0B0 / 12BB30 (void) vs 12D5D0 (s32) must agree first.
+3. func_151D469C / func_151D611C (201240): check the D_80090010 / D_80087030 handler tables (C or stubs) first.
+4. Next port-b asm with C callers (`p155/asmlist.py`): func_151C0434 (133, 1EDA00), func_150F0BEC (151, 11CB90),
+   func_151C230C (151, 1EDA00), func_151A2C9C (157, 1CE7D0), func_1514FE68 (168, 17D3C0).
+5. Browser: P155.md UNVERIFIED (post-opening cutscene text boxes, level-0 thrown objects).
+
 ## State (session P154, 2026-10-23, port-web, runtime). Details: `docs/port/sessions/P154.md`
 
 - **A new game reaches player control**: the Gregg cutscene (level 0x22 scene 2, 12441) ends at retrace **18485**.
@@ -140,7 +272,6 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    - then the P152 list.
 2. After func_15064668 is C: run padtongue.py (`NOSTART=1`) with B presses at the gargoyle / pillar to get past the
    first room. Also check the pause-menu text noise and the shadow streak / hatched floor patches (gfx).
-
 ## P153 (port-b) (session P153, 2026-10-23). Details: `docs/port/sessions/P153.md`
 
 Branch `port-b` (from P150 53f4db6). Hand C (NM), difftest EQUIV + setups + mutants:
