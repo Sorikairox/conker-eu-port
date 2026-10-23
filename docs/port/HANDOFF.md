@@ -63,6 +63,29 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. Gfx: write the frozen frame back to the colour image for the pause screen (read back on the pause transition).
    Compare the level 0x22 shadows with real hardware if possible.
 4. After func_15064668 is C: padtongue.py with `NOSTART=1` B presses at the pillar, to get past the first room.
+## State (session P157, 2026-10-23). Details: `docs/port/sessions/P157.md`
+
+- New hand C (NM): func_15132BBC particle_spawn (worker of the C wrapper func_15132FBC: every particle spawn now runs C)
+  + its asm callee func_15133C18 particle_model_load; coordinator priorities from browser P154: func_15064668
+  player_context_action (B button; game_83300's prototype now `void`), func_15064F50 player_move_animation (walk /
+  run / carry animation, 946 insns); sound emitters func_10010154 object_sound_play, func_10010344
+  object_sound_play2, func_1000F568 sound_pick_variant. All difftest EQUIV with setups + mutants (P157.md table).
+- A setup batch found a real draft bug in func_15064668 (D_800E9D00 0x800 bit picks 0x1DC, else 0x354): fixed,
+  re-verified (79 setups).
+- func_1507D754: still blocked (port-b HEAD d394089: func_15150D7C / func_15154728 asm; func_151D5AC4 / func_151D4684
+  now port-b's). Its asm callees in this branch were not started (re-prioritised).
+- Checks: verify_all OK (full ROM OK, after the last code edit), NM links, protocheck 0 (1156), selftest 62/62,
+  progress_nm 5150/5915 (87.1%), C bytes 67.9%.
+
+## Next steps (from P157)
+
+1. Pause menu func_151EE0C4 (game_eu_216470.c), queued by the coordinator.
+2. func_1507D754 callees in this branch: func_151BAAC8 (715), func_150BC968 / func_150BC03C (461 / 587),
+   func_150C04E0 (127), func_151CFFFC (374), func_151C9740 (224, needs port-b's func_15154728).
+3. Browser: B button / context actions, walk animations, object sounds, particles (func_15132BBC).
+4. P138 / P141 leftovers (not started).
+5. (Coordinator note, retracted by port-b P162: the game_161520 table-signature flags D_80089E9C / E40 / ED8 / E10
+   are false positives; no action.)
 
 ## State (session P156, 2026-10-23). Details: `docs/port/sessions/P156.md`
 

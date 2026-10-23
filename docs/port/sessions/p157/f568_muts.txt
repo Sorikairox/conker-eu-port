@@ -1,0 +1,19 @@
+s/if (base >= 0x6E2) {/if (base > 0x6E2) {/ %
+s/        return 1;/        return 2;/ %
+s/if (n < 2) {/if (n < 1) {/ %
+s/        return base;/        return base + 1;/ %
+s/        return base + pick;/        return base;/ %
+s/played = (u8 \*)D_80041F5C + base;/played = (u8 *)D_80041F5C + base + 1;/ %
+s/if (n < 8) {/if (n < 7) {/ %
+s/mask = (1 << n) - 1;/mask = (1 << n);/ %
+s/if (!(bits \& 0x80) || !(bits \& mask))/if (!(bits \& 0x80))/ %
+s/if (!(bits \& 0x80) || !(bits \& mask))/if (!(bits \& 0x40) || !(bits \& mask))/ %
+s/            bits = 0xFF;/            bits = 0xFE;/ %
+s/pick = (s32)(pick + 1)/pick = (s32)(pick + 2)/ %
+s/\*played = bits ^ (1 << pick);/*played = bits;/ %
+s/((bits ^ (1 << pick)) \& 0xFF \& mask) == 0/((bits ^ (1 << pick)) \& mask) == 0/ %
+s/((bits ^ (1 << pick)) \& 0xFF \& mask) == 0/(bits \& 0xFF \& mask) == 0/ %
+s/\[base\] = bits ^ mask;/[base] = bits;/ %
+s/\*played = pick + 1;/*played = pick;/ %
+s/    return base + pick;/    return base + pick + 1;/ %
+s/pick = (u32)func_150ADA20() .* n;/pick = (u32)func_150ADA20() \& n;/ %

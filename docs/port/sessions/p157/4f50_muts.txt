@@ -1,0 +1,122 @@
+13s/yer + 0x31C/yer + 0x31D/ %
+15s/eed = 1\.0f/eed = 1.5f/ %
+19s/ctx + 0x46/ctx + 0x47/ %
+21s/vel \/ 24\.0f/vel \/ 24.5f/ %
+23s/ctx + 0x50/ctx + 0x51/ %
+25s/(P_U8(0x13C/(P_U8(0x13D/ %
+28s/ (v < 1\.0f/ (v < 1.5f/ %
+32s/ case 0x8C/ case 0x8D/ %
+34s/nim = 0x1A6/nim = 0x1A7/ %
+36s/  if (14\.0f/  if (14.5f/ %
+38s/vel \/ 26\.0f/vel \/ 26.5f/ %
+42s/ P_U8(0xAA/ P_U8(0xAB/ %
+44s/vel \/ 6\.0f/vel \/ 6.5f/ %
+46s/nim = 0x117/nim = 0x118/ %
+50s/ case 0xA8/ case 0xA9/ %
+52s/  if (14\.0f/  if (14.5f/ %
+54s/vel \/ 22\.0f/vel \/ 22.5f/ %
+57s/vel \* 0\.0625f/vel \* 0.125f/ %
+61s/nim = 0x14C/nim = 0x14D/ %
+64s/ case 0x89/ case 0x8A/ %
+66s/vel \/ 6\.0f/vel \/ 6.5f/ %
+70s/nim = 0x2E4/nim = 0x2E5/ %
+73s/nim = 0xD7/nim = 0xD8/ %
+79s/im != 0/im != 1/ %
+82s/P_F32(0x44/P_F32(0x45/ %
+84s/ P_U8(0xAA/ P_U8(0xAB/ %
+89s/ (ctx\[0x78/ (ctx\[0x79/ %
+91s/  if (1\.0f/  if (1.5f/ %
+93s/ P_U8(0xAA/ P_U8(0xAB/ %
+99s/ case 0x09/ case 0xA/ %
+102s/ P_U8(0xAA/ P_U8(0xAB/ %
+106s/vel \* 0\.0625f/vel \* 0.125f/ %
+108s/nim = 0x22C/nim = 0x22D/ %
+115s/ case 0x38/ case 0x39/ %
+117s/nim = 0x1E1/nim = 0x1E2/ %
+119s/nim = 0x1E2/nim = 0x1E3/ %
+126s/ case 0x39/ case 0x3A/ %
+128s/nim = 999/nim = 1000/ %
+130s/nim = 0x1EC/nim = 0x1ED/ %
+132s/nim = 0x1ED/nim = 0x1EE/ %
+139s/ case 0x37/ case 0x38/ %
+141s/nim = 999/nim = 1000/ %
+143s/nim = 0x1F5/nim = 0x1F6/ %
+145s/nim = 0x1F6/nim = 0x1F7/ %
+152s/ case 0x3B/ case 0x3C/ %
+154s/nim = 999/nim = 1000/ %
+156s/ P_U8(0xAA/ P_U8(0xAB/ %
+158s/  if (20\.0f/  if (20.5f/ %
+160s/vel \/ 22\.0f/vel \/ 22.5f/ %
+167s/ case 0x18/ case 0x19/ %
+169s/ case 0x24/ case 0x25/ %
+171s/ case 0x26/ case 0x27/ %
+173s/ case 0x15/ case 0x16/ %
+175s/  if (1\.0f/  if (1.5f/ %
+178s/ case 0x24/ case 0x25/ %
+180s/ case 0x26/ case 0x27/ %
+182s/ case 0x15/ case 0x16/ %
+184s/alk = 0xEC/alk = 0xED/ %
+188s/vel \* 0\.0625f/vel \* 0.125f/ %
+191s/vel \/ 22\.0f/vel \/ 22.5f/ %
+198s/  if (1\.0f/  if (1.5f/ %
+200s/nim = 0x123/nim = 0x124/ %
+202s/  if (15\.0f/  if (15.5f/ %
+204s/vel \/ 27\.0f/vel \/ 27.5f/ %
+211s/  if (1\.0f/  if (1.5f/ %
+213s/nim = 0x1FB/nim = 0x1FC/ %
+219s/ case 0x2D/ case 0x2E/ %
+221s/  if (1\.0f/  if (1.5f/ %
+223s/vel \* 0\.0625f/vel \* 0.125f/ %
+225s/nim = 0x1B1/nim = 0x1B2/ %
+232s/ case 0x19/ case 0x1A/ %
+234s/P_F32(0x3C/P_F32(0x3D/ %
+236s/end = 8\.0f/end = 8.5f/ %
+238s/vel \* 0\.125f/vel \* 0.25f/ %
+240s/nim = 0x111/nim = 0x112/ %
+248s/ (ctx\[0x1A/ (ctx\[0x1B/ %
+251s/ P_U8(0xAA/ P_U8(0xAB/ %
+253s/end = 8\.0f/end = 8.5f/ %
+255s/Mag < 1\.0f/Mag < 1.5f/ %
+259s/ctx + 0xE/ctx + 0xF/ %
+262s/ (ctx\[0x17/ (ctx\[0x18/ %
+264s/6A4 \& 0x2000/6A4 \& 0x2001/ %
+266s/P_F32(0x3C/P_F32(0x3D/ %
+270s/ P_U8(0x89/ P_U8(0x8A/ %
+272s/nim = 0x283/nim = 0x284/ %
+275s/580 = 0xFF010604/580 = 0xFF010605/ %
+279s/  if (1\.0f/  if (1.5f/ %
+281s/nim = 0x4E/nim = 0x4F/ %
+287s/ctx + 0x32/ctx + 0x33/ %
+290s/ P_U8(0xAA/ P_U8(0xAB/ %
+292s/eed \/ 5\.0f/eed \/ 5.5f/ %
+295s/0() \& 1/0() \& 2/ %
+297s/ P_U8(0x89/ P_U8(0x8A/ %
+304s/im != 0/im != 1/ %
+s/if (\*(s16 \*)(ctx + 0x46) > 0)/if (*(s16 *)(ctx + 0x46) >= 0)/ %
+s/(\*(s8 \*)(ctx + 0x50) > 0)/(*(u8 *)(ctx + 0x50) > 0)/ %
+s/if (v < 1.0f) {/if (v <= 1.0f) {/ %
+s/((u8 \*)D_800D154C)\[0x13C\] \* 0x32C/((u8 *)D_800D154C)[0x13C] * 0x32B/ %
+s/moveAnim != 0 \&\& ctx\[0x78\] == 0/moveAnim != 0/ %
+s/2.6f < v \&\& (\*(u16 \*)(ctx + 0x32) \& 1)/2.6f <= v \&\& (*(u16 *)(ctx + 0x32) \& 1)/ %
+s/speed = v \/ 15.0f + 0.5f;/speed = vel \/ 15.0f + 0.5f;/ %
+s/anim = ctx\[0x1B2\] ? 0x2C6 : 0xE8;/anim = 0xE8;/ %
+s/1.0f <= v || \*(s8 \*)(ctx + 0x23) > 0/1.0f <= v || *(u8 *)(ctx + 0x23) > 0/ %
+s/if (ctx\[0x1A\] != 0 \&\& 1.0f < stickMag)/if (ctx[0x1A] != 0 \&\& 1.0f <= stickMag)/ %
+s/if (stickMag < 1.0f) {/if (stickMag <= 1.0f) {/ %
+s/anim = \*(u16 \*)(ctx + 0xE);/anim = *(u16 *)(ctx + 0xC);/ %
+s/if (\*(u16 \*)D_800CC6A4 \& 0x2000)/if (*(u16 *)D_800CC6A4 \& 0x4000)/ %
+s/P_F32(0x3C) \*= 0.2f;/P_F32(0x3C) *= 0.25f;/ %
+s/                        v = P_F32(0x44);/                        ;/ %
+s/if (1.0f <= v \&\& P_U8(0x89) == 0)/if (1.0f <= v)/ %
+s/speed = P_F32(0x3C) \/ 9.0f;/speed = P_F32(0x44) \/ 9.0f;/ %
+s/} else if ((\*(u16 \*)(ctx + 0x32) \& 2) \&\& 1.0f <= v)/} else if ((*(u16 *)(ctx + 0x32) \& 2) \&\& 1.0f < v)/ %
+s/speed = pushSpeed \/ 5.0f + 0.3f;/speed = vel \/ 5.0f + 0.3f;/ %
+s/>= 988) {/>= 989) {/ %
+s/(u32)func_150ADA20() .* 1000/(u32)func_150ADA20() \/ 1000/ %
+s/anim = (func_150ADA20() \& 1) + 0x65;/anim = (func_150ADA20() \& 3) + 0x65;/ %
+s/if (anim != 0 \&\& anim != 999) {/if (anim != 0) {/ %
+s/func_1505E650(player, anim, speed, blend, 0.0f, 0.0f, 0);/func_1505E650(player, anim, speed, speed, 0.0f, 0.0f, 0);/ %
+s/    return anim;/    return 0;/ %
+s/                if (!D_800BE616) {/                if (D_800BE616) {/ %
+s/            v = P_F32(0x3C);/            v = P_F32(0x44);/ %
+s/        v = P_F32(0x3C);/        v = P_F32(0x44);/ %

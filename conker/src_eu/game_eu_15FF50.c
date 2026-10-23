@@ -142,12 +142,145 @@ void func_15132B38(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+/* one shared model per particle model id (D_800DC468 counts the users, D_800DC460 / D_800DC464 = list head / tail) */
+typedef struct ParticleModelRef {
+    s32 *model;                      /* loaded model file (func_1502B6BC) */
+    struct ParticleModelRef *next;
+    struct ParticleModelRef *prev;
+    u16 modelId;
+    u8 keep;                         /* 1: not freed when the last user dies (func_151329B4) */
+} ParticleModelRef;
+/* D_800DC460 / D_800DC464: list head / tail (ParticleModelRef *), D_800DC468: s16 users per model id,
+   D_800DC63C: live particles */
+
+void func_10004074(void *);
+u8 *func_1515D9F0(s32);
+void *func_1515D9B0(void);
+s32 func_15133C18(s32 modelId, ParticleModelRef *ref, void *particle);
+
+// particle_spawn: creates a particle object from a 0x7C-byte request (model id at +0x56, flags at +0x50); loads
+// the request's model on first use (shared, reference counted per model id), copies the request to +0x10, sets
+// the spin / scale state, the optional 9-word bounds (else "no bounds": y min -10000), and allocates nTrails
+// trail buffers (one per player). Returns the particle or 0 (more than 300 alive, out of memory, model missing).
+u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner) {
+    u8 *p;
+    ParticleModelRef *ref;
+    s16 *users;
+    s32 kind;
+    s32 heap;
+    s32 n;
+    s32 i;
+    u16 id;
+    f32 x, y, z;
+
+    if (D_800DC63C > 300) {
+        return 0;
+    }
+    kind = (*(s32 *)(req + 0x50) & 0x4000) ? 0x48 : 0x19;
+    heap = (*(s32 *)(req + 0x50) & 0x400000) ? 2 : 1;
+    p = func_15167A68(kind, owner, extraSize + 0x170, 1, arg5, heap);
+    if (p == NULL) {
+        return 0;
+    }
+    id = *(u16 *)(req + 0x56);
+    users = &((s16 *)D_800DC468)[id];
+    if (*users == 0) {
+        ref = (ParticleModelRef *)allocate_memory(0x10, 1, 2, (*(s32 *)(req + 0x50) & 0x400000) ? 2 : 1);
+        if (ref == NULL) {
+            func_15168A9C((struct_eu_node *)p);
+            func_10004074(p);
+            return 0;
+        }
+        if (!func_15133C18(*(u16 *)(req + 0x56), ref, p)) {
+            func_15168A9C((struct_eu_node *)p);
+            func_10004074(p);
+            func_10004074(ref);
+            return 0;
+        }
+        /* push at the head of the model list */
+        ref->next = (ParticleModelRef *)D_800DC460;
+        if (D_800DC460 != 0) {
+            ((ParticleModelRef *)D_800DC460)->prev = ref;
+        } else {
+            D_800DC464 = (s32)ref;
+        }
+        D_800DC460 = (s32)ref;
+        ref->prev = NULL;
+        ref->modelId = *(u16 *)(req + 0x56);
+        if ((*(s32 *)(req + 0x50) & 0x100000) && D_800BE9F0 != 0x3B && D_800BE9F0 != 6 && D_800BE9F0 != 0x13 &&
+            D_800BE616 == 0 && D_800BE9F0 != 2) {
+            ref->keep = 1;
+        } else {
+            ref->keep = 0;
+        }
+        users = &((s16 *)D_800DC468)[*(u16 *)(req + 0x56)];
+    } else {
+        /* find the loaded model (at most 100 entries) */
+        ref = (ParticleModelRef *)D_800DC460;
+        n = 100;
+        while (ref->modelId != id) {
+            n--;
+            ref = ref->next;
+            if (n <= 0) {
+                break;
+            }
+        }
+        if (n <= 0) {
+            func_15168A9C((struct_eu_node *)p);
+            func_10004074(p);
+            return 0;
+        }
+    }
+    (*users)++;
+    *(ParticleModelRef **)(p + 0x8C) = ref;
+    memcpy(p + 0x10, req, 0x7C);
+    p[0x149] = 0;
+    *(f32 *)(p + 0x134) = 0.0f;
+    *(f32 *)(p + 0x138) = 0.0f;
+    *(f32 *)(p + 0x13C) = 0.0f;
+    x = *(f32 *)(req + 0x34);
+    y = *(f32 *)(req + 0x38);
+    z = *(f32 *)(req + 0x3C);
+    p[0x148] = 0;
+    *(f32 *)(p + 0x144) = 1.0f;
+    *(f32 *)(p + 0x140) = sqrtf(x * x + y * y + z * z);
+    if (bounds != NULL) {
+        for (i = 0; i < 9; i++) {
+            ((s32 *)(p + 0x110))[i] = bounds[i];
+        }
+    } else {
+        *(s32 *)(p + 0x130) = 0;
+        p[0x12D] = 0;
+        p[0x12C] = 0;
+        *(s32 *)(p + 0x128) = 0;
+        *(f32 *)(p + 0x110) = -10000.0f; /* D_800A3C48 */
+    }
+    D_800DC63C++;
+    p[0x150] = 0;
+    *(s32 *)(p + 0x14C) = nTrails;
+    *(s32 *)(p + 0x168) = arg2;
+    for (i = 0; i < 4; i++) {
+        ((s32 *)(p + 0x154))[i] = 0;
+    }
+    *(s32 *)(p + 0x164) = 0;
+    if (nTrails != 0) {
+        for (i = 0; i <= D_80082FA0; i++) {
+            ((u8 **)(p + 0x154))[i] = func_1515D9F0(nTrails);
+        }
+        *(void **)(p + 0x164) = func_1515D9B0();
+    }
+    *(s32 *)(p + 0x60) &= ~0x200000;
+    return p;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15132BBC.s")
+#endif
 
 #ifdef NON_MATCHING
 /* the asm passes func_15132BBC's v0 through, and func_150BCBBC tests it */
 s32 func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
-    return func_15132BBC(arg0, arg1, arg2, 0, arg3, arg4, arg5);
+    return (s32)func_15132BBC((u8 *)arg0, arg1, arg2, NULL, arg3, arg4, arg5);
 }
 #else
 void func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
@@ -383,7 +516,29 @@ void func_15133AF8(u8 *arg0, u8 *arg1, u8 arg2)
   if (D_80089D98[idx] != NULL) { D_80089D98[idx](arg0, arg1, arg2); }
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800A3C60[];             /* model file per particle model id (ROM table) */
+s32 func_1502B6BC(s32 *arg0, s32 arg1, s32 *arg2, s32 arg3, ...);
+s32 func_1510D3E0(Gfx *dl, s32 skipResolved, s32 addRef, s32 age, s16 **outList);
+void func_15168E54(s8 *arg0, s32 arg1);
+
+// particle_model_load: loads the model file of particle model id modelId into ref->model, resolves its display
+// list (D_800DCA70[modelId]) and registers it; returns 0 when the file is missing. The particle is unused.
+s32 func_15133C18(s32 modelId, ParticleModelRef *ref, void *particle) {
+    s32 found;
+    s32 size;
+
+    ref->model = (s32 *)func_1502B6BC(&found, 0, &size, 2, 9, D_800A3C60[modelId]);
+    if (ref->model == NULL) {
+        return 0;
+    }
+    func_1510D3E0((Gfx *)*ref->model, 0, 1, 0x3E, (s16 **)&D_800DCA70[modelId] /* resolved segment list per model id */);
+    func_15168E54((s8 *)*ref->model, (s32)ref->model);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15133C18.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15142838(s32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */

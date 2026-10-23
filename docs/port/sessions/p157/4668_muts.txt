@@ -1,0 +1,109 @@
+s/        buttons \&= ~0x4000;/        buttons \&= ~0x8000;/ %
+s/        D_800CC6AC \&= ~0x4000;/        ;/ %
+s/    f32 blend = 4.0f;/    f32 blend = 3.0f;/ %
+s/    f32 speed = 1.0f;/    f32 speed = 1.5f;/ %
+s/            ctx\[0x30\] = 0xD;/            ctx[0x30] = 0xC;/ %
+s/+ 0x28) = (s16)(w >> 16);/+ 0x28) = (s16)w;/ %
+s/+ 0x2C) = (s16)w;/+ 0x2C) = (u16)w;/ %
+s/            anim = 0x96;/            anim = 0x97;/ %
+s/\*(s16 \*)((u8 \*)player + 0x84) = 0;/*(s16 *)((u8 *)player + 0x84) = 1;/ %
+s/= \*(s32 \*)((u8 \*)player + 0x2E8);/= *(s32 *)((u8 *)player + 0x2E4);/ %
+s/            speed = 0.8f;/            speed = 0.75f;/ %
+s/            anim = 0xDD;/            anim = 0xDE;/ %
+s/            D_800D1580 = 1;/            D_800D1580 = 2;/ %
+s/            D_800D1580 = 0;/            D_800D1580 = 3;/ %
+s/func_15083568(player, 0x17, 1.0f, 0);/func_15083568(player, 0x17, 2.0f, 0);/ %
+s/                CTX(player)\[0x11A\] = 2;/                CTX(player)[0x11A] = 5;/ %
+s/                anim = 0x151;/                anim = 0x150;/ %
+s/                CTX(player)\[0x11A\] = 1;/                CTX(player)[0x11A] = 5;/ %
+s/                func_150836CC(player, 0x17);/                func_150836CC(player, 0x18);/ %
+s/                CTX(player)\[0x11A\] = 0;/                CTX(player)[0x11A] = 5;/ %
+s/                anim = 0x14E;/                anim = 0x14F;/ %
+s/                CTX(player)\[0x11A\] = 3;/                CTX(player)[0x11A] = 5;/ %
+s/            speed = 3.0f;/            speed = 2.0f;/ %
+s/                P_U8(0x8A) = 0xFF;/                ;/ %
+s/            o = func_1505F0AC(0x6C);/            o = func_1505F0AC(0x6D);/ %
+s/            P_U8(0x81) = 1;/            P_U8(0x81) = 2;/ %
+s/                P_F32(0x1CC) = P_F32(0x18);/                ;/ %
+s/                anim = 0x38;/                anim = 0x39;/ %
+s/            if (w >= 100) {/            if (w > 100) {/ %
+s/P_F32(0x18) = \*(s16 \*)(m + 0x15A) + 20;/P_F32(0x18) = *(u16 *)(m + 0x15A) + 20;/ %
+s/P_F32(0x18) = \*(s16 \*)(m + 0x15A) + 20;/P_F32(0x18) = *(s16 *)(m + 0x15A) + 21;/ %
+s/if ((buttons \& 0x8000) \&\& \*(s32/if ((buttons \& 0x4000) \&\& *(s32/ %
+s/                \*(s32 \*)((u8 \*)o + 0x2E8) = 0x7A;/                ;/ %
+s/                anim = 0x16;/                anim = 0x17;/ %
+s/func_15060A30(0x38E, player);/func_15060A30(0x38F, player);/ %
+s/            if ((buttons \& 0x4000) \&\& height <= 0.0f) {/            if ((buttons \& 0x4000) \&\& height < 0.0f) {/ %
+s/                speed = 2.0f;/                speed = 2.5f;/ %
+s/        case 8:/        case 7:/ %
+s/            anim = 0x22D;/            anim = 0x22E;/ %
+s/            if (P_F32(0x28) <= 1.0f) {/            if (P_F32(0x28) < 1.0f) {/ %
+s/(ctx\[0x7B\] == 10) ? 0x19A : 0x2E7/(ctx[0x7B] == 10) ? 0x19B : 0x2E7/ %
+s/(ctx\[0x7B\] == 10) ? 0x19A : 0x2E7/(ctx[0x7B] == 10) ? 0x19A : 0x2E8/ %
+s/            P_U8(0x89) = 200;/            P_U8(0x89) = 201;/ %
+s/            P_U8(0x8A) = 200;/            P_U8(0x8A) = 201;/ %
+s/P_F32(0x14) - -1884.0f;/P_F32(0x14) - -1880.0f;/ %
+s/P_F32(0x1C) - 100.0f;/P_F32(0x1C) - 101.0f;/ %
+s/dist = sqrtf(dx \* dx + dz \* dz);/dist = sqrtf(dx * dx + dz * dx);/ %
+s/if (dist < 1000.0f)/if (dist < 900.0f)/ %
+s/func_1505A630(-dx, dz, 0)/func_1505A630(dx, dz, 0)/ %
+s/20.0f, 0.0f, \&x, \&y, \&z/21.0f, 0.0f, \&x, \&y, \&z/ %
+s/func_1505A250(x, y, (1200.0f/func_1505A250(y, x, (1200.0f/ %
+s/(1200.0f - dist) \* 0.001f/(1201.0f - dist) * 0.001f/ %
+s/(1200.0f - dist) \* 0.001f/(1200.0f - dist) * 0.002f/ %
+s/player + 0x16C)/player + 0x168)/ %
+s/        CTX(player)\[0x7B\] = 0;/        CTX(player)[0x7B] = 1;/ %
+s/    if (ctx\[0x198\] == 0 \&\& anim == 0/    if (ctx[0x199] == 0 \&\& anim == 0/ %
+s/\&\& anim == 0 \&\& (buttons \& 0x4000)) {/\&\& (buttons \& 0x4000)) {/ %
+s/if ((mode \& 0xF) != 1 \&\& height/if ((mode \& 0x7) != 1 \&\& height/ %
+s/P_U8(0x89) != 0xFF) {/P_U8(0x89) != 0xFE) {/ %
+s/if (P_U8(0x13C) >= 100) {/if (P_U8(0x13C) > 100) {/ %
+s/+ 0x25C) \& 0x20)) {/+ 0x25C) \& 0x40)) {/ %
+s/                    anim = 0xD6;/                    anim = 0xD7;/ %
+s/speed = 1.15f;/speed = 1.25f;/ %
+s/                        anim = 0x118;/                        anim = 0x119;/ %
+s/                    if (D_800BE9F0 == 0x30) {/                    if (D_800BE9F0 == 0x31) {/ %
+s/                        anim = 0x28D;/                        anim = 0x28E;/ %
+s/ctx\[0x75\] == 0 \&\& ctx\[0x7C\] == 0) || mode == 2)/ctx[0x75] == 0 \&\& ctx[0x7C] == 0) || mode == 3)/ %
+s/ctx\[0x75\] == 0 \&\& ctx\[0x7C\] == 0)/ctx[0x75] == 0 || ctx[0x7C] == 0)/ %
+s/D_800BE9F0 != 0x2D \&\&/D_800BE9F0 != 0x2E \&\&/ %
+s/D_800BE9F0 != 0x2B \&\& D_800BE9F0 != 0x30/D_800BE9F0 != 0x2A \&\& D_800BE9F0 != 0x30/ %
+s/D_800BE9F0 != 0x30 \&\& D_800BE9F0 != 0x34) {/D_800BE9F0 != 0x31 \&\& D_800BE9F0 != 0x34) {/ %
+s/D_800BE9F0 != 0x34) {/D_800BE9F0 != 0x35) {/ %
+s/                anim = 0x33;/                anim = 0x34;/ %
+s/if (\*(s16 \*)(ctx + 8) != 0)/if (*(s16 *)(ctx + 10) != 0)/ %
+s/speed = 1.6f;/speed = 1.5f;/ %
+s/                    if (D_800BE616 == 0) {/                    if (D_800BE616 != 0) {/ %
+s/                        anim = 0x355;/                        anim = 0x356;/ %
+s/                    } else if (D_800E9D00 \& 0x800) {/                    } else if (D_800E9D00 \& 0x1000) {/ %
+s/                        anim = 0x354;/                        anim = 0x353;/ %
+s/speed = 1.35f;/speed = 1.3f;/ %
+s/if (ctx\[0x84\] == 0 \&\& ctx\[0x4E\] == 0)/if (ctx[0x84] == 0)/ %
+s/if (ctx\[0x84\] == 0 \&\& ctx\[0x4E\] == 0)/if (ctx[0x4E] == 0)/ %
+s/P_F32(0x20) = -4.0f;/P_F32(0x20) = -3.0f;/ %
+s/= \*(u16 \*)(ctx + 0x4C);/= *(u16 *)(ctx + 0x4E);/ %
+s/                        anim = 0x46;/                        anim = 0x47;/ %
+s/                    P_U8(0x80) = 1;/                    P_U8(0x80) = 2;/ %
+s/                    blend = 0.0f;/                    blend = 1.0f;/ %
+s/anim != 999 \&\& arg3 == 0/anim != 999 \&\& arg3 != 1/ %
+s/func_1505E650(player, anim, speed, blend, 0.0f, 0.0f, 0);/func_1505E650(player, anim, speed, blend, 0.0f, 0.0f, 1);/ %
+s/func_1505E650(player, anim, speed, blend, 0.0f, 0.0f, 0);/func_1505E650(player, anim, blend, speed, 0.0f, 0.0f, 0);/ %
+36s/= 0xFF;/= 0xFE;/ %
+37s/= 0xFF;/= 0xFE;/ %
+48s/= 0xFF;/= 0xFE;/ %
+49s/= 0xFF;/= 0xFE;/ %
+58s/= 0xFF;/= 0xFE;/ %
+60s/= 0xFF;/= 0xFE;/ %
+74s/= 0xFF;/= 0xFE;/ %
+75s/= 0xFF;/= 0xFE;/ %
+108s/= 0xFF;/= 0xFE;/ %
+109s/= 0xFF;/= 0xFE;/ %
+115s/= 0xFF;/= 0xFE;/ %
+116s/= 0xFF;/= 0xFE;/ %
+122s/= 0xFF;/= 0xFE;/ %
+156s/= 0xFF;/= 0xFE;/ %
+157s/= 0xFF;/= 0xFE;/ %
+163s/= 0xFF;/= 0xFE;/ %
+164s/= 0xFF;/= 0xFE;/ %
+167s/= 0xFF;/= 0xFE;/ %
+180s/= 0xFF;/= 0xFE;/ %
