@@ -59,6 +59,33 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 4. Browser: texture scrolling at level loads, ambient sounds, P172.md section 6.
 5. P138 / P141 leftovers (not started).
 
+## P170 (port-b) (session P170, 2026-10-24). Details: `docs/port/sessions/P170.md`
+
+Branch `port-b` (from P168 6dcbf88). Hand C (NM), difftest EQUIV + setups + mutants (table in P170.md):
+- **Text box draw unit** (commit 851e6f3, game_eu_1984F0.c): func_1516BC2C `text_box_draw` (shadow pass + colour
+  pass: box / pointer / thought dots sprites via func_15095380 + func_15095E58, box corner +0x48 / +0x4C, text colour
+  D_800D31C8..CA) and func_1516CEA4 `text_box_draw_text` (`Gfx *(Gfx *, box, u8 r, g, b, a)`). Mutants 44/44, 27/27.
+- func_1513FAB4 `beam_quad_build` (game_169510; prototype + `(u8 *)` casts in its callers func_1513FA2C / FA70),
+  func_151C9740 `object_explode` (game_eu_1F4F60), func_151CFFFC `object_shatter_effects` (game_eu_1FB080),
+  func_151D9014 `particle_spawn` (game_2062D0, Gregg cutscene; D_80090070 = no-argument u8 texture getters).
+- NM-build pitfall: a local array initializer (`s32 k[7] = {...}`) in game_eu_1FB080 emits a `.data` section the NM
+  link discards (link error); read the ROM table (D_800AB320) instead.
+- Not touched: game_eu_1C3530.c (moved to port per coordinator).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1217 bodies), selftest 62/62. progress_nm total 5211/5915
+  (88.1%), game 4680/5334, C bytes 70.0%, 704 asm-only. No difftest processes left.
+
+## Next steps (from P170)
+
+0. **PRIORITY (coordinator, browser P171), not started in P170 (budget):** func_1515C388 (update) and func_1515C6F4
+   (draw) in game_1897A0.c, the kind-8 particle record handlers created by P164's func_151530A8, are asm stubs; the
+   draw stub returns 0 as the Gfx pointer and the caller writes its DL at NULL (null-zone writes from retrace 6257).
+   Convert both in one commit; the draw must return the advanced Gfx pointer. Also check m2c_sanity "width high" on
+   func_1500D8C8 (P164, game_39750): asm word read vs IR halfword.
+1. Browser (port-web): text boxes should now be visible (first-room gargoyle); check the shadow / pointer / text
+   colour and the thought-dot variant. P170.md UNVERIFIED list.
+2. port-b: beam unit func_151C7B1C (24 args) + func_151C9748 (draft `p168/d_9748.c`) + func_151C957C (P168 notes below).
+3. Next port-b asm with C callers: `python3 docs/port/sessions/p168/asmlist.py`.
+
 ## State (session P169, 2026-10-24). Details: `docs/port/sessions/P169.md`
 
 - Merged port-b 9eebdac (P150-P164) as 53b9728: only HANDOFF.md conflicted (union + sections sorted by session).
@@ -79,6 +106,37 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. Browser: trails / emitters (func_151342BC), explosions (func_150E0DF0), P167's list.
 4. Don't `git stash` during an unfinished merge (P169.md section 1).
 5. P138 / P141 leftovers (not started).
+
+## P168 (port-b) (session P168, 2026-10-24). Details: `docs/port/sessions/P168.md`
+
+Branch `port-b` (from P164 9eebdac). Re-prioritised by the coordinator (browser P165: first room blocked by text
+boxes that open but never advance).
+- **func_1516AFE0** `text_box_update` and its every-frame callee **func_1516D1C8** `text_box_place`
+  (game_eu_1984F0.c) hand C (NM), one unit: the +0x15 state machine (open / grow / wait / dots / line fade-in /
+  shown (A / B on D_800BEB30[0]) / fade-out + next line / close with callbacks 0x2000 / 0x4000 / 0x1000), and the
+  box / pointer placement. AFE0: 36 setups EQUIV, mutants 26/26; D1C8: 10 setups EQUIV, mutants 18/20 + 2 equivalent.
+- **Not done (budget): the draw func_1516BC2C (1127 words) + its callee func_1516CEA4 (201)** — still asm, so boxes
+  now advance / close but are invisible. Structure notes in P168.md.
+- m2c_sanity "high" rows func_151A9940 / func_151AC3F0: both false positives (same offset on different bases).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1211 bodies), selftest 62/62. progress_nm total 5205/5915
+  (88.0%), game 4674/5334, C bytes 69.5%, 710 asm-only. No difftest processes left.
+
+## Next steps (from P168)
+
+1. Browser (port-web): first room with the C text box update: does the gargoyle dialogue advance with B / close,
+   and does the room open? Expect no visible boxes (draw still asm).
+2. port-b: func_1516BC2C text box draw + func_1516CEA4 (one unit; P168.md has the layout of the stack sprite block
+   and the callees func_15095380 / func_15095E58).
+3. port-b (coordinator order): func_1513FAB4 (game_169510, every frame), then func_151C9740 (game_eu_1F4F60) and
+   func_151CFFFC (game_eu_1FB080) (last port-b asm callees of port's item switch func_1507D754), then func_151D9014
+   (game_2062D0, Gregg cutscene).
+4. port-b: beam unit func_151C7B1C (24 args) + producers func_151C9748 (writes the 3 piece pointers it reads back;
+   draft `p168/d_9748.c`, not difftested) + func_151C957C (glow records via func_151407D0). Layout of the 0xA0-byte
+   emitter block (copied to rec +0x110, read by func_151C8880 / func_151C8448): +0x00..+0x24 random sizes / phases
+   (8 func_150ADA68 calls), +0x28 rec, +0x2C sound (func_1516284C, only with arg9), +0x30..+0x3B never written,
+   +0x3C / +0x48 piece pointers [3], +0x54 0.0f, +0x58 0, +0x5A / +0x6C the two 0x12-byte hit triangles, +0x7E..+0x84
+   s16 args 10..12 and 10+11, +0x86 option bits, +0x88 rec, +0x8C / +0x90 ground ids, +0x94 arg17, +0x98 / +0x9C
+   arg19 / arg20. If func_15144E80 fails, func_151C9748 leaves out[] unwritten (N64 frees stack garbage then).
 
 ## State (session P167, 2026-10-24). Details: `docs/port/sessions/P167.md`
 
@@ -126,7 +184,6 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. func_151342BC (game_161520, D_80089E40 dispatcher) now that its table entries have s32 NM signatures.
 3. Browser: pause / money screen head model (func_151EE0C4 / func_151EE394), plus P157's list.
 4. P138 / P141 leftovers (not started).
-
 ## P164 (port-b) (session P164, 2026-10-24). Details: `docs/port/sessions/P164.md`
 
 Branch `port-b` (from P163 8bd88bc). Took game_40490.c, game_eu_1F4F60.c, game_39750.c; prototype-only edits in

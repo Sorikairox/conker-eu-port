@@ -1,0 +1,39 @@
+s/(obj + 0x18) + 200.0f;/(obj + 0x18) + 100.0f;/
+s/    s.scale\[0\] = 1.0f;/    s.scale[0] = 2.0f;/
+s/(obj + 0x150)) \* 0.5f;/(obj + 0x150)) * 0.25f;/
+s/    s.pos\[1\] = root\[1\];/    s.pos[1] = rot[1];/
+s/    s.axis\[1\] = 0.0f;/    s.axis[1] = 1.0f;/
+s/    s.u60\[1\] = 0xD;/    s.u60[1] = 0xE;/
+s/    s.u60\[3\] = 7;/    s.u60[3] = 6;/
+s/    s.u6A = 1;/    s.u6A = 2;/
+s/    s.u70 = obj\[0x3B\];/    s.u70 = obj[0x3A];/
+s/    s.u74 = 0x15;/    s.u74 = 0x16;/
+s/    s.u50 = 0x39E9;/    s.u50 = 0x39E8;/
+s/    for (i = 0; i < 7; i++) {/    for (i = 0; i < 6; i++) {/
+s/        s.kind = kinds\[i\];/        s.kind = kinds[6 - i];/
+s/func_15143134(D_800AB2CC\[i\], s.offset/func_15143134(D_800AB2CC[0], s.offset/
+s/func_15143794((u8) a, b/func_15143794((s8) a, b/
+s/b \(.\) 25 - 64/b \1 25 - 63/
+s/11.45f + 16.93f/11.45f + 16.0f/
+s/        s.u48 = func_150ADA68() \* 19.752f/        s.u48 = func_150ADA68() * 19.0f/
+s/0.518f + -1.539f/0.518f + 1.539f/
+s/\(.\) 101 + 100;/\1 101 + 101;/
+s/func_15132FBC(\&s, 3, 0xFF, 0, arg1, arg2);/func_15132FBC(\&s, 3, 0xFF, 1, arg1, arg2);/
+s/    f.pos\[2\] = pos\[2\];/    f.pos[2] = pos[1];/
+s/    f.f0C\[4\] = 23.0f;/    f.f0C[4] = 24.0f;/
+s/    f.s24\[4\] = -0x40;/    f.s24[4] = 0x40;/
+s/    f.b38\[2\] = 0x48;/    f.b38[2] = 0x47;/
+s/    f.w3C\[0\] = 1;/    f.w3C[0] = 2;/
+s/    f.b54\[2\] = 0x69;/    f.b54[2] = 0x6A;/
+s/    f.w58\[4\] = 0x1D0600;/    f.w58[4] = 0x1D0601;/
+s/    f.b7C\[1\] = 7;/    f.b7C[1] = 8;/
+s/    f.s80\[1\] = 0x19;/    f.s80[1] = 0x18;/
+s/func_15151FA8((u8 \*) \&f, arg1, arg2);/func_15151FA8((u8 *) \&f, arg1, 0);/
+s/    r.u04 = 6;/    r.u04 = 7;/
+s/    r.s14\[2\] = -0x1D;/    r.s14[2] = -0x1C;/
+s/    r.f1C\[0\] = 375.0f;/    r.f1C[0] = 376.0f;/
+s/    r.u2C = 2;/    r.u2C = 3;/
+s/    debrisKind = 2;/    debrisKind = 3;/
+s/pos\[1\] - 2000.0f, 200.0f/pos[1] - 2000.0f, 100.0f/
+s/(func_150ADA20() \& 3) + 7/(func_150ADA20() \& 7) + 7/
+s/    if (\*(Mtx \*\*) (obj + 0x1D4) == NULL) {/    if (*(Mtx **) (obj + 0x1D0) == NULL) {/

@@ -1,0 +1,27 @@
+s/(box + 0x50) - \*(f32 \*) (box + 0x30)/(box + 0x50) + *(f32 *) (box + 0x30)/
+s/(box + 0x54) - \*(f32 \*) (box + 0x34)/(box + 0x54) - *(f32 *) (box + 0x30)/
+s/gSPDisplayList(gfx++, D_80085D30);/gSPDisplayList(gfx++, D_80085D30 + 1);/
+s/    first = 1;/    first = 0;/
+s/\[0\] == '\\n') {/[0] == ' ') {/
+s/\[i\] == '\\n');/[i] == ' ');/
+s/> D_800BEFC4) {/>= D_800BEFC4) {/
+s/            return start;/            return gfx;/
+s/            line\[n\] = 0;/            line[n] = 1;/
+s/            c = 0;/            c = 1;/
+s/            y += (f32) height;/            y += (f32) width;/
+s/                first = 0;/                y += 1.0f;/
+s/if (flags \& 0x20000)/if (flags \& 0x10000)/
+s/(f32) (width >> 1) - 1.0f/(f32) (width >> 2) - 1.0f/
+s/(f32) (width >> 1) - 1.0f/(f32) (width >> 1)/
+s/                dx = 0.0f;/                dx = 1.0f;/
+s/if (flags \& 0x40000)/if (flags \& 0x80000)/
+s/x + dx + 1.0f, y, line, 0xFF, 0xFF, 0xFF/x + dx, y, line, 0xFF, 0xFF, 0xFF/
+s/0xFF, 0xFF, 0xFF, a,/0xFF, 0xFF, 0xFE, a,/
+s/(!(flags \& 4))/(!(flags \& 8))/
+s/line, 0, 0, 0, a, 4096.0f/line, 0, 0, 0, a, 2048.0f/
+s/line, r, g, b, a/line, r, b, g, a/
+s/4096.0f, 4096.0f, n);$/4096.0f, 4096.0f, n + 1);/
+s/            n = 0;/            n = 1;/
+s/            y += (f32) advance;/            y += (f32) advance * 2.0f;/
+s/\[i++\] != 0);/[++i] != 0);/
+s/x + dx, y, line, r/x + dx + 1.0f, y, line, r/
