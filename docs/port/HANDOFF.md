@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P152, 2026-10-23, port-web). Details: `docs/port/sessions/P152.md`
+
+- Merged port-b 53f4db6 (P143 / P146 / P150, merge 7d3c2ff) and port d9785e0 (P148, merge 6d8dfff): only HANDOFF
+  conflicted (merge_union, then section order fixed by hand). After each: verify OK, NM links, protocheck 0 (1167),
+  float-int BUG 0, census 722 ok / 0 FAIL (clean), arity_scan 127 rows, m2c_sanity 226 rows (new width-high rows on
+  hand C func_151018F8 / func_150EF90C: owners to check), stubcalls: the new frame-path C calls no stubs.
+- **func_1513CFE4 list bounded**: ~1.6k calls per 250 retraces, flat (P149 stub: 2.9k -> 19.9k). Asm-stub calls in a
+  new game 7.7k (P149 293k); no stub at all between ~4750 and 10721; 0 frame-DL stubs.
+- **New game plays past the throne opening**: opening cutscene ends at 10728, next cutscenes at 10822 / 12448 (Conker
+  wakes on the stone floor, Gregg the Reaper at 271 s). Particle sprite draw func_1513100C active there. Heap 0,
+  traps 0, only the known null+0x14 (stub func_1514CFF0).
+- Noev regressions clean: node 925 / 1249 / 1329; Chrome x2 1528 / 2304 / 2384. No water-drop splashes reached.
+- New diagnostic `?p152hits=1` / PORT_P152HITS (p144_hits.c + 8 wraps).
+
+## Next steps (from P152)
+
+1. Blockers: func_1514CFF0 (port, in progress), func_151416E8 (end of opening), func_15058898 (title phase),
+   func_100114D0, func_151A9940 / func_1516AD20 (post-opening cutscenes), func_eu_1501B640, func_1510A98C; level 0:
+   func_1505528C, func_10010154 / func_1000F568.
+2. Longer new-game run with `?padf` presses through the Gregg cutscene to first player control.
+3. Check m2c_sanity width-high rows on func_151018F8 / func_150EF90C (port-b) and med rows on func_1517B270 (port).
+
 ## P150 (port-b) (session P150, 2026-10-23). Details: `docs/port/sessions/P150.md`
 
 Branch `port-b` (from P146 b8f1ce7); merged port 37085b5 (merge commit 1457344, only HANDOFF.md conflicted).

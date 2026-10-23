@@ -73,3 +73,36 @@ void __real_func_1513095C(u8 *r);              void __wrap_func_1513095C(u8 *r) 
 s32  __real_func_151A4DEC(u8 *r, f32 *p);      s32  __wrap_func_151A4DEC(u8 *r, f32 *p) { hit149(5); return __real_func_151A4DEC(r, p); }
 void __real_func_150C1698(u8 *r);              void __wrap_func_150C1698(u8 *r) { hit149(6); __real_func_150C1698(r); }
 void __real_func_1516972C(void *o);            void __wrap_func_1516972C(void *o) { hit149(7); __real_func_1516972C(o); }
+
+/* P152 DIAGNOSTIC ?p152hits=1 / PORT_P152HITS=1: per-250-retrace call counts of the P143-P150 (port-b) and P148 (port)
+ * frame-path conversions: 3D effect update func_1513CFE4 and its draw func_1513DB00, particle sprite draw
+ * func_1513100C, player morph blend func_1517B270, func_150A7EE0 / func_1501A764 (projection), water drop
+ * func_151928C8, burst spawner func_15153BA4. Same --wrap limits (calls from other TUs / tables in other TUs only). */
+static const char *p152_names[] = { "fx3d_1513CFE4", "fx3d_draw_1513DB00", "psprite_1513100C", "morph_1517B270",
+                                    "xform_150A7EE0", "w2s_1501A764", "drop_151928C8", "burst_15153BA4" };
+static unsigned p152_n[8], p152_w = ~0u;
+static void hit152(int i) {
+    static int f = -1;
+    if (f < 0) f = port_flag("p152hits");
+    if (!f) return;
+    unsigned w = port_frame_count / 250;
+    if (w != p152_w) {
+        if (p152_w != ~0u) {
+            char b[512]; int o = snprintf(b, sizeof b, "[p152hits] retraces %u..%u:", p152_w * 250, p152_w * 250 + 249);
+            for (int k = 0; k < 8; k++) if (p152_n[k]) o += snprintf(b + o, sizeof b - o, " %s=%u", p152_names[k], p152_n[k]);
+            port_log("%s\n", b);
+        }
+        p152_w = w; for (int k = 0; k < 8; k++) p152_n[k] = 0;
+    }
+    p152_n[i]++;
+}
+void __real_func_1513CFE4(u8 *fx); void __wrap_func_1513CFE4(u8 *fx) { hit152(0); __real_func_1513CFE4(fx); }
+u8 *__real_func_1513DB00(u8 *a, u8 *b, s16 c); u8 *__wrap_func_1513DB00(u8 *a, u8 *b, s16 c) { hit152(1); return __real_func_1513DB00(a, b, c); }
+void *__real_func_1513100C(void *g, u8 *p, s16 v); void *__wrap_func_1513100C(void *g, u8 *p, s16 v) { hit152(2); return __real_func_1513100C(g, p, v); }
+s32 __real_func_1517B270(s32 t, s32 f, s32 i); s32 __wrap_func_1517B270(s32 t, s32 f, s32 i) { hit152(3); return __real_func_1517B270(t, f, i); }
+void __real_func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
+void __wrap_func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow) { hit152(4); __real_func_150A7EE0(mf, x, y, z, ox, oy, oz, ow); }
+void __real_func_1501A764(s32 v, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz);
+void __wrap_func_1501A764(s32 v, f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz) { hit152(5); __real_func_1501A764(v, x, y, z, sx, sy, sz); }
+s32 __real_func_151928C8(u8 *a, s32 b); s32 __wrap_func_151928C8(u8 *a, s32 b) { hit152(6); return __real_func_151928C8(a, b); }
+void __real_func_15153BA4(u8 *r, s32 t, s32 o, s32 a); void __wrap_func_15153BA4(u8 *r, s32 t, s32 o, s32 a) { hit152(7); __real_func_15153BA4(r, t, o, a); }
