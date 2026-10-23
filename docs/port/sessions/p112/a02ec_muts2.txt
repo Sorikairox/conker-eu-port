@@ -1,0 +1,1 @@
+s/pick = func_150ADA68() \* (f32) sum;/pick = func_150ADA68() * (f32) sum + 0.5f;/ % q22w_3F333333
