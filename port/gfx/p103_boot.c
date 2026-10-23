@@ -136,7 +136,19 @@ void *__wrap_func_1509B5AC(int id, int a1) {
         static int fnoev = -1;
         if (flag(&fnoev, "p110noev")) return 0;
     }
-    return __real_func_1509B5AC(id, a1);
+    { /* P178: the started event's struct (+0 = flags | id) */
+        void *e = __real_func_1509B5AC(id, a1);
+        /* P178 TEST ?p178evid=1: func_1509B8FC (game_C8950.c) loses the event id: its s16 parameter copy sits at
+         * (sp+14)^2 = sp+12 and `s16 sp18[2]` at sp+10 (2-aligned) is passed to func_1502B5C8 as an s32 out-param;
+         * the 32-bit store *q at sp+10..13 overwrites the copy, so `unk0 |= id` ORs 0 (N64: sp18 is 4-aligned).
+         * Every event struct then has id 0: func_1509B704 never finds it, actions 1/3 (finish / stop) do nothing,
+         * func_1509B5AC loads duplicates. Test: put the id back into +0 after the start (list order is left as is). */
+        static int fid = -1;
+        if (e && id && flag(&fid, "p178evid") && (vbe_ld16(e) & 0x3FF) == 0) vbe_st16(e, vbe_ld16(e) | (id & 0x3FF));
+        if (flag(&fboot, "p103boot"))
+            port_log("[p103]   -> e %08x unk0 %04x unk2 %04x w0 %08x\n", (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0, e ? vbe_ld16((char *)e + 2) : 0, e ? *(unsigned *)e : 0);
+        return e;
+    }
 }
 
 void __real_func_1501D348(int level, int scene, int slot, int cb, int cbarg);

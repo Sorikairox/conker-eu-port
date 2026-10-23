@@ -10,6 +10,35 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P178, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P178.md`
+
+- **Producer of D_800D2104 / D_800D2528 (EU 0x800D2524 / 0x800D2528) = asm stub func_150170C4** (game_eu_44010.c,
+  called only by the C level loader func_15016950). `docs/port/sessions/p178/stscan.py` (constant propagation over all
+  asm) finds no other store to either word. It allocates the per-spawn-record path tables (player records: 0x10-byte
+  path, count 2; level records from asset (2, 0x10, level) = {offset, count} entries). Convert it (spec in P178 1; test
+  body `port/gfx/p178_path.c`, `?p178fix=1`).
+- With `?p174fix=1&p171fix=1&p178fix=1` the scene-3 trap is gone: the intro plays scene 3 / 4 / 2 on level 0x1D,
+  scene 0x14 on level 6, scenes 2 / 4 on level 0x18, then BF changes to **level 0x29**, which then reloads every 4
+  retraces until the heap breaks (24343).
+- Cause: **every event struct has id 0** (func_1509B8FC, game_C8950.c: the s16 parameter copy at (sp+14)^2 = sp+12 is
+  overwritten by func_1502B5C8's 32-bit out-param store into the 2-aligned `s16 sp18[2]` at sp+10, a vbe stack-layout
+  bug). func_1509B704 never finds an event, so finish / stop actions fail and starts load duplicates (two BF copies).
+  Test `?p178evid=1` puts the id back.
+- With `?p178evid=1` too (node fixF, Chrome chB, without ?p103boot): level 0x29 loads once, its scene 1 (Conker hung
+  over) plays 22771-23937, then gameplay on level 0x29 (Conker by the fence), no trap / heap error to 28337 / 27966.
+- `?p103boot` Chrome run trapped at 19183 inside the P116 / P121 logger in `__wrap_func_1502457C` (diagnostic only).
+- Regression node noev: death 925, 0x2C 1249, level 0 1329, heap 0 errors, null zone clean, no trap (= P174).
+
+## Next steps (from P178)
+
+1. Convert **func_150170C4** (game_eu_44010.c) from the asm (P178 1).
+2. **vbe.py: align every alloca to 4** (fixes func_1509B8FC's lost event id and any other sub-word stack slot next to a
+   2-aligned array used as a word); full port rebuild (delete vbe.stamp) + noev / new-game regressions. Alternative,
+   local: `s32 sp18` in func_1509B8FC (src_eu).
+3. P174 blockers 1 / 2 (func_1509CBD8 s32 return, func_1509DFCC case 0x19) still needed.
+4. Level 0x29 stubs: func_15078A60 (game_A28B0.c path follow, jump table; reads D_800D2104), func_1513FAB4,
+   func_150D0C40, func_15008E10; then walk on level 0x29 with pad input.
+
 ## State (session P174, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P174.md`
 
 - Level 0x22 (the "first room") is the **death tutorial**: one level event 0xCA "First Death". After Gregg's scenes it

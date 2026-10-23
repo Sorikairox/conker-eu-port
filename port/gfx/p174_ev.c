@@ -73,6 +73,14 @@ void __wrap_func_150ADFD0(void *blk, s32 entry) {
      * (ROM headers: CA 003E 0114, BF 00A0 01DC, CB 0190 01E0) */
     unsigned h8 = blk ? vbe_ld16((u8 *)blk + 0x10) : 0, h9 = blk ? vbe_ld16((u8 *)blk + 0x12) : 0;
     cur_ev = h8 == 0x3E && h9 == 0x114 ? 0xCA : h8 == 0xA0 && h9 == 0x1DC ? 0xBF : h8 == 0x190 && h9 == 0x1E0 ? 0xCB : 0x1000 | h8;
+    if (on() && cur_ev == 0xBF) {   /* P178: which BF instance runs, its flags (on change, and from 22760) */
+        static unsigned nb; static void *lb[8]; static unsigned lf[8];
+        int j, chg = 1; unsigned fl = vbe_ld16(blk);
+        for (j = 0; j < 8 && lb[j]; j++) if (lb[j] == blk) { chg = lf[j] != fl; break; }
+        if (j < 8) { lb[j] = blk; lf[j] = fl; }
+        if ((chg || port_frame_count >= 22760) && nb++ < 80) port_log("[p178bf] frame %u VM BF blk %08x entry %d flags %04x (before)\n", port_frame_count,
+                                (unsigned)(uintptr_t)blk, (int)entry, vbe_ld16(blk));
+    }
     __real_func_150ADFD0(blk, entry);
     cur_ev = sv;
 }
@@ -104,15 +112,26 @@ s32 __wrap_func_150AE5F8(s32 *args) {
 }
 /* native 6: game-state actions D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_func_150AE60C(s32 *args);
+extern u8 D_800877B0[]; extern s32 D_800D3268; extern u8 *D_800D2E4C; void *func_1509B704(s32);
+static void p178fin(const char *w, s32 id) {   /* P178: state around action 1 (finish event) */
+    u8 *e = (u8 *)func_1509B704(id);
+    port_log("[p178bf] frame %u %s 5%03X(1): 877B0[1] %u running %X save[%X] %02x bit %u ev %08x flags %04x\n", port_frame_count, w,
+             (unsigned)id, vbe_ld8(D_800877B0 + 1), (unsigned)D_800D3268, (unsigned)(id >> 3),
+             D_800D2E4C ? vbe_ld8(D_800D2E4C + (id >> 3)) : 0xFFu, (unsigned)(id & 7), (unsigned)(uintptr_t)e, e ? vbe_ld16(e) : 0);
+}
 s32 __wrap_func_150AE60C(s32 *args) {
+    static unsigned nf;
+    int fin = on() && (args[0] & 0xF000) == 0x5000 && args[1] == 1 && nf < 40;
+    if (fin) nf++, p178fin("before", args[0] & 0xFFF);
     s32 r = __real_func_150AE60C(args);
+    if (fin) p178fin("after ", args[0] & 0xFFF);
     if (on()) {
         static unsigned nlog; static s32 lid[64], la1[64]; static int nl;
         /* one line per (id, arg1) pair seen first (the menu's 0x2000 action runs every 4 retraces) */
         int j; for (j = 0; j < nl; j++) if (lid[j] == args[0] && la1[j] == args[1]) break;
         if (j == nl && nl < 64) { lid[nl] = args[0]; la1[nl] = args[1]; nl++; } else if (j < nl && (args[0] & 0xF000) == 0x2000) j = -1;
         if (j >= 0 && nlog++ < 400)
-            port_log("[p174ev] frame %u act6 id %04X args %d %d %d -> %d\n", port_frame_count, args[0] & 0xFFFF, args[1],
+            port_log("[p174ev] frame %u ev %X act6 id %04X args %d %d %d -> %d\n", port_frame_count, cur_ev, args[0] & 0xFFFF, args[1],
                      args[2], args[3], r);
     }
     return r;
