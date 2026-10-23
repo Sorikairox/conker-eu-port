@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P190, 2026-10-24). Details: `docs/port/sessions/P190.md`
+
+- **func_150A4FE4** obj_floor_mesh_update (game_eu_D1760, 295, Rare hand asm): readable hand C (NM) verified with the
+  new whole-function harness `tools/port/difftest/nmasm_objmesh4FE4.py` (VR4300 ref vs NM ELF, allocate_memory / free
+  as a shared MIPS stub with a log in RDRAM): 860 trials EQUIV, NM mutants 24 killed + 1 crash + 1 equivalent
+  (`docs/port/sessions/p190/mutnm.sh` runs mutants through a harness).
+- **func_15189F70** area_drift_emitter_update (game_eu_1B7680, 303; D_8008B848 type 0x1A update): EQUIV random + 17
+  setups, mutants 32 / 32.
+- Breadth (hand C, NM, EQUIV + setups + mutants): func_151F9150 mp3util_get_bits (hand asm), func_150E394C,
+  func_151A4B40 (prototype now void), func_15063920, func_151CC784, func_1508CE28 (table in P190.md).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1309 NM bodies), selftest 65/65, progress_nm 5303/5915 (89.7%), C bytes 73.3%. No difftest processes left.
+- game_eu_1CCD10.c / game_eu_1D7790.c moved to port-b (not touched; added to p190/asmlist.py's forbid list).
+
+## Next steps (from P190)
+
+1. Browser: P190.md section 4 (area 3 floors on moving objects, drifting particles, mp3 music / speech).
+2. Breadth: p190/asmlist.py smallest first (next: func_1509D274 49, func_151AF820 50, func_1507E8E0 50, func_15088760 /
+   func_15088360 (B37F0), func_150F58C0, func_150637B4, func_15007558, func_150B7B9C); P138 / P141 leftovers.
+3. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged from P182).
+4. Other hand-asm functions with C callers can follow the nmasm_objmesh4FE4.py + mutnm.sh pattern.
+
 ## State (session P187, 2026-10-24). Details: `docs/port/sessions/P187.md`
 
 - Hand C (NM), difftest EQUIV + setups + mutants (table in P187.md): the three port stubs behind func_1506B04C's

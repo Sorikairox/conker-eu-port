@@ -1,0 +1,7 @@
+s/u8 \*p = buffer + (pos >> 3);/u8 *p = buffer + (pos >> 2);/
+s/((u32)p\[1\] << 16)/((u32)p[1] << 8)/
+s/| p\[3\];/| p[2];/
+s/word <<= pos \& 7;/word <<= pos \& 3;/
+s/\*offset = pos + numbits;/*offset = pos + numbits - 1;/
+s/return word >> ((32 - numbits) \& 0x1F);/return word >> (32 - numbits);/
+s/return word >> ((32 - numbits) \& 0x1F);/return (s32)word >> ((32 - numbits) \& 0x1F);/
