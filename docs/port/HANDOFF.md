@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P164 (port-b) (session P164, 2026-10-24). Details: `docs/port/sessions/P164.md`
+
+Branch `port-b` (from P163 8bd88bc). Took game_40490.c, game_eu_1F4F60.c, game_39750.c; prototype-only edits in
+game_1897A0.c / game_eu_126330.c (func_151530A8).
+- **P161 fix**: func_1501370C (NM) calls the D_80082EA0 (EU 0x80083230) start handler with the record. Same commit:
+  producer func_151530A8 `particle_burst_from_spec` (3 arguments; all prototypes `s32 (s32 *, u8, s32)`, 4-arg calls
+  dropped under NM in 1CE7D0 / 11CB90) and the three still-asm entries func_151C7750 `record_beam_start` (idx 8),
+  func_1500C2F0 `record_debris_spawn` (0x22), func_1500D8C8 `record_debris_spawn_b` (0x26). All D_80082EA0 entries
+  are C now. 0x22 / 0x26 take `(rec, f32 scale)`; from the dispatcher a1 is func_15013000's jalr register (the
+  dispatcher's own address, ~3e-26 as f32) so they spawn nothing there, in the port too (missing argument = 0).
+- func_15150D7C `debris_burst_spawn` (17D3C0, coordinator request: port's func_1507D754 item path), func_150F79F0
+  `light_effect_spawn` (125200, muzzle-fire light) and func_15152A90 `particle_burst_from_spec_b`
+  (17D3C0) hand C. func_150F79F0 calls func_10010E78 directly: the C func_10010F88 (init_EB00) is void but the asm
+  callers use its v0 (sound handle).
+- All EQUIV + setups + mutants (P164.md); old func_1501370C is EQUIV on MIPS too (a0 survives), the NULL-argument
+  mutant (wasm behaviour) DIFFERs.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1209 bodies), selftest 62/62. progress_nm total 5203/5915
+  (88.0%), game 4672/5334, C bytes 69.3%, 712 asm-only. No difftest processes left.
+
+## Next steps (from P164)
+
+1. Browser (port-web): re-run the P161 null-zone check without `?p161fix` (null+0x14 should stay clean); level-start
+   records now run func_151530A8 / func_151C7750 (beam) for real. UNVERIFIED list in P164.md.
+2. Owner of init_EB00.c: func_10010F88 should return func_10010E78's u16 under NM (asm callers read v0: P164
+   func_150F79F0; check the other C callers with `arity_scan` / tablesig-style v0 use).
+3. Next port-b asm with C callers (`p163/asmlist.py`): func_150FD140 (215, 12A7C0), func_15081120 (219, AE930),
+   func_150511E8 (220, 78230), func_15152700 (228, 15 calls). func_151C7B1C (1F4F60, 24 args, beam builder) is now
+   reached from C (func_151C7750).
+4. Owner of game_161520.c: D_80089E40 (P163 next step 1, unchanged).
+
 ## P163 (port-b) (session P163, 2026-10-24). Details: `docs/port/sessions/P163.md`
 
 Branch `port-b` (from P162 720e4c3). Took game_eu_1C3530.c.

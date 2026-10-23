@@ -1,0 +1,28 @@
+s/allocate_memory(n, 2, 2, 1)/allocate_memory(n, 2, 2, 0)/
+s/    left = n;/    left = n + 1;/
+s/fx.u04 = 0.561000049f;/fx.u04 = 0.561f;/
+s/0x13968 | ((u8) arg12 ? 0x100000 : 0)/0x13968 | ((u8) arg11 ? 0x100000 : 0)/
+s/((u8) arg7 ? 0x80 : 0)/((u8) arg7 ? 0x40 : 0)/
+s/    if (n < count) {/    if (n <= count) {/
+s/fx.u58 = arg6;/fx.u58 = arg8;/
+s/fx.u72 = 0xC;/fx.u72 = 0xD;/
+s/fx.u69 = arg8;/fx.u69 = arg6;/
+s/b = RAND_SPREAD(sp->angYBase, sp->angYExtra);/b = RAND_SPREAD(sp->angYBase, sp->angXExtra);/
+s/func_15143794(a, b, arg10, fx.pos);/func_15143794(b, a, arg10, fx.pos);/
+s/fx.pos\[1\] += sp->pos\[1\];/fx.pos[1] += sp->pos[2];/
+s/fx.spin\[2\] = func_150ADA68() \* 360.0f;/fx.spin[2] = func_150ADA68() * 180.0f;/
+s/fx.swayZ = func_150ADA68() \* (sp->sway + sp->sway) - sp->sway;/fx.swayZ = func_150ADA68() * (sp->sway + sp->sway);/
+s/fx.u4C = func_150ADA68() \* sp->u24Range + sp->u24Base;/fx.u4C = func_150ADA68() * sp->u24Range;/
+s/fx.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);/fx.life = RAND_SPREAD(sp->lifeBase, 0);/
+s/            if (r == 0) {/            if (r == 1) {/
+s/            if (i >= n) {/            if (i > n) {/
+s/fx.id = ids\[i\];/fx.id = ids[0];/
+s/((f32 \*) scales)\[i\] \*/((f32 *) scales)[0] */
+s/        left--;/        left -= 0;/
+s/        \*p = 1;/        *p = 0;/
+s/fx.u63 = sp->solidKind;/fx.u63 = 0;/
+s/fx.u61 = 8;/fx.u61 = 9;/
+s/func_15132BBC(\&fx, 3, 0xFF, arg9, arg5, (u8) arg13, arg14)/func_15132BBC(\&fx, 3, 0xFF, arg9, arg5, arg13, arg14)/
+s/if (arg4 != 0 \&\& e != NULL) {/if (e != NULL) {/
+s/memcpy((s32) (e + 0x170)/memcpy((s32) (e + 0x16C)/
+s/fx.size\[0\] = fx.size\[1\];/fx.size[0] = 1.0f;/
