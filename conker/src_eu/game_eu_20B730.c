@@ -147,6 +147,9 @@ typedef struct MenuState {
     s8 mainPage;        /* 0x3F: page of the main menu (menu 1) */
     s8 prevMainPage;    /* 0x40 */
     s8 x41;
+    s8 x42;
+    s8 x43;             /* 0x43: P120: set when the main menu camera slid back to the title (carousel) */
+    s8 x44;
 } MenuState;
 
 typedef struct MenuPad {
@@ -770,12 +773,182 @@ void func_151E06D0(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E0BBC.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1174.s")
+#ifdef NON_MATCHING
+void func_15042D78(u8);
+void func_151E2B9C(void);
+void func_151E3AE4(s32, s32, s32, s32, s32);
+extern s8 D_80090180;
+extern s32 D_800ABA74;            /* s8 table, per save slot (rows of 10): settings set (declared s32 in the TU) */
+extern s32 D_800ABB38[];        /* settings set -> item mask for func_151E3AE4 */
+extern u8 D_800ABC4C[];         /* "#" */
 
+// main_settings_page: main menu page 2, the settings list of the current slot (rec->x42): title text 0x1A, the ring
+// list func_151E3AE4 with its own alpha D_800E0EC5 (fades in by 32 per tick; back (0x20) starts the fade-out,
+// D_800E0EC6 = 0). At the end of the fade-out it leaves the page (mainPage 0) and saves the settings (func_151E2B9C)
+// when they changed (D_80090180).
+void func_151E1174(void) {
+    MenuState *rec;
+    s32 mask;
+    s32 alpha;
+
+    func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+    func_15042D94(0x94, 0x7E, 1, (s32) D_800ABC4C, 0x1A);
+    func_15042D78(0x81);
+    rec = (MenuState *) D_80090174;
+    mask = D_800ABB38[((s8 *) &D_800ABA74)[rec->x42 * 10]];
+    if ((s8) D_800E0EC6 == 0) {
+        rec->input &= ~0x20;
+        alpha = D_800E0EC5 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
+            ((MenuState *) D_80090174)->mainPage = 0;
+            if (D_80090180 != 0) {
+                func_151E2B9C();
+            }
+            D_80090180 = 0;
+            D_800E0EC6 = -1;
+            return;
+        }
+        D_800E0EC5 = alpha;
+    } else {
+        alpha = D_800E0EC5 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        D_800E0EC5 = alpha;
+    }
+    if (alpha != 0xFF) {
+        ((MenuState *) D_80090174)->input = 0;
+    }
+    func_151E3AE4(mask, 1, 0, alpha & 0xFF, 0);
+    rec = (MenuState *) D_80090174;
+    if (rec->input & 0x20) {
+        D_800E0EC6 = 0;
+    }
+    rec->input &= ~0x20;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1174.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1308.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E19AC.s")
+#ifdef NON_MATCHING
+void func_15042E3C(s32, ...);
+void func_151E2FCC(void);
+void func_151E4A78(void);
+extern s8 D_80090140;           /* first queue slot shown / number of extra slots */
+extern s8 D_8009028F;           /* (s8 table, indexed backwards by the slot's mode) */
+extern s8 D_800ABA75;           /* s8 table, per save slot (rows of 10): byte 1 */
+extern u8 D_800ABA76[][10];
+extern s8 D_800ABB30;           /* rows of 4 bytes: max players per player count */
+extern s32 *D_800E0EB8;         /* callback run when the menu fade-out ends */
+extern u8 D_800ABC54[];         /* "#" */
+extern u8 D_800ABC58[];         /* "#" */
+extern u8 D_800ABC5C[];         /* "#" */
 
+// main_players_page: main menu page 5, the player / controller queue (D_800901E4[16], D_800901E0 controllers joined).
+// Fades the page alpha D_800E0EC5 in (32 per tick) or, while D_800E0EC6 != -1, out and then switches to mainPage =
+// D_800E0EC6. Each joined controller's up / right (9) adds and down / left (6) removes a slot (D_80090140, with a
+// click sound), limited by the slot table D_800ABB30; slots after the controllers are -2 ("open") and the rest of the
+// queue -1. Accept at full alpha starts the game (mode 7 fade, D_80090114 = 8, callback func_151E2FCC or
+// func_151E4A78); back fades out to page 4. Draws the title text 0x1A and one entry per slot (controller n + 1 or
+// text 5).
+void func_151E19AC(void) {
+    MenuState *rec;
+    s32 alpha;
+    s32 joined;
+    s32 slots;
+    s32 i;
+    s16 x;
+
+    if ((s8) D_800E0EC6 != -1) {
+        rec = (MenuState *) D_80090174;
+        rec->input &= ~0x20;
+        alpha = D_800E0EC5 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
+            D_800E0EC5 = 0;
+            ((MenuState *) D_80090174)->mainPage = D_800E0EC6;
+            D_800E0EC6 = -1;
+            return;
+        }
+        D_800E0EC5 = alpha;
+    } else {
+        alpha = D_800E0EC5 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        D_800E0EC5 = alpha;
+    }
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha & 0xFF);
+
+    joined = D_800901E0;
+    rec = (MenuState *) D_80090174;
+    slots = ((s8 *) &D_800ABB30)[(&D_8009028F)[-(&D_800ABA75)[rec->x42 * 10]] * 4 + joined - 1];
+    for (i = 0; i < joined; i++) {
+        if ((&D_800901E4)[i] >= 0) {
+            if (((MenuState *) D_80090174)->padInput[(&D_800901E4)[i]] & 9) {
+                D_80090140++;
+                if (slots >= joined + D_80090140) {
+                    func_10010F30(0x4FF, 0x4650, 0x40, 0, 0);
+                }
+            }
+            if (((MenuState *) D_80090174)->padInput[(&D_800901E4)[i]] & 6) {
+                D_80090140--;
+                if (D_80090140 >= 0) {
+                    func_10010F30(0x4FF, 0x4650, 0x40, 0, 0);
+                }
+            }
+            joined = D_800901E0;
+            if (D_80090140 < 0) {
+                D_80090140 = 0;
+            }
+        }
+    }
+    if (slots < joined + D_80090140) {
+        D_80090140 = slots - joined;
+    }
+    slots = joined + D_80090140;
+    if (slots < 2) {
+        slots = 2;
+    }
+    D_80090140 = slots - joined;
+    for (i = joined; i < slots; i++) {
+        (&D_800901E4)[i] = -2;
+        D_800E1030[i] = 0;
+    }
+    for (i = slots; i < 0x10; i++) {
+        (&D_800901E4)[i] = -1;
+    }
+
+    if (alpha == 0xFF && (((MenuState *) D_80090174)->input & 0x10)) {
+        D_800E0B94 = 7;
+        D_80090114 = 8;
+        func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
+        if ((s8) D_800ABA76[((MenuState *) D_80090174)->x42][0] == -1) {
+            D_800E0EB8 = (s32 *) func_151E2FCC;
+        } else {
+            D_800E0EB8 = (s32 *) func_151E4A78;
+        }
+    }
+    func_15042D94(0x94, 0x55, 1, (s32) D_800ABC54, 0x1A);
+    x = 0xA1 - D_800901E0 * 13 - D_80090140 * 10;
+    for (i = 0; i < slots; i++) {
+        func_150432FC(x, 0x82);
+        if ((&D_800901E4)[i] >= 0) {
+            func_15042E3C((s32) D_800ABC58, (&D_800901E4)[i] + 1);
+            x += 0x1A;
+        } else {
+            func_15042E3C((s32) D_800ABC5C, 5);
+            x += 0x14;
+        }
+    }
+    if (alpha == 0xFF && (((MenuState *) D_80090174)->input & 0x20)) {
+        D_800E0EC6 = 4;
+    }
+    ((MenuState *) D_80090174)->input &= ~0x20;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E19AC.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1EDC.s")
 
 void func_151E5AB8(void);
@@ -1122,8 +1295,420 @@ void func_151E3A1C(void) {
     func_151E86A4();
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3AE4.s")
+#ifdef NON_MATCHING
+f32 func_15049AD0(s32 points, s32 segment, f32 t);
+f32 sinf(f32);
+extern s8 D_800ABA2C[];         /* settings item table: per item label text, type, then (type >= 0) max + 1 choice texts */
+extern s8 D_80090180;           /* settings changed */
+extern s16 D_800E0EB2;          /* value fade: 0xFF = steady, -0xFF.. = fading in a changed value */
+extern s8 D_800E0EB4;           /* the value before the change */
+extern s8 D_800E1013;
+extern u8 D_800ABC98[];         /* "#" */
+extern u8 D_800ABC9C[];         /* "#" */
+extern u8 D_800ABCA0[];         /* "%d" */
+extern u8 D_800ABCA4[];         /* "%s" */
+extern u8 D_800ABCA8[];         /* "%d" */
+extern u8 D_800ABCAC[];         /* "%s" */
+extern u8 D_800ABCB0[];         /* "%d" */
+extern u8 D_800ABCB4[];         /* "%d" */
+extern u8 D_800ABCB8[];         /* "%d %s" */
+extern u8 D_800ABCC0[];         /* "#" */
+extern u8 D_800ABCC4[];         /* "#" */
 
+// settings_list_draw: draws and edits the settings list (28 items, bit i of mask = item i shown; values D_800E1010[i],
+// clamped to D_80090210 / D_8009022C[i]). arg1 != 0: the items sit on a rotating ring (Catmull-Rom over 2 columns,
+// x 74 / 148 / 222, scrolled by D_800901D8), up / down change the value and left / right move the selection;
+// arg1 == 0: a plain column at x 0x94 from y 0x46 (0x22 apart), left / right change the value and up / down move.
+// The selection D_800901D4 skips hidden items; a changed value fades in from its old value when arg4 != 0
+// (D_800E0EB2 / D_800E0EB4). arg2 != 0 draws the "#" cursor arrows that slide to the selected row
+// (D_80090184 / D_80090188). arg3 = alpha.
+void func_151E3AE4(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    u8 alpha = arg3;
+    s8 fadeIn = arg4;
+    MenuState *rec;
+    f32 x[32];
+    f32 y[32];
+    s32 count;
+    s32 half;
+    s32 step;
+    s32 pos;
+    s32 i;
+    s32 ring;
+    f32 t;
+    s32 itemAlpha;
+    s32 a;
+    s8 shownValue;
+    s32 offset;
+    s8 *item;
+    s32 type;
+    s32 value;
+    s32 drawn;
+    s32 cursorRow;
+    s32 px;
+    s32 py;
+    s32 sel;
+    s32 oldSel;
+    s8 *p;
+    s8 old;
+    s32 changed;
+    s32 forward;
+    s32 arrowX;
+    s32 arrowY;
+
+    count = 0;
+    for (i = 0; i < 0x1C; i++) {
+        if ((1 << i) & mask) {
+            count++;
+        }
+    }
+    half = count >> 1;
+    ring = half;
+    if (arg2 != 0 && D_80090188 != 0.0f) {
+        ((MenuState *) D_80090174)->input &= ~3;
+    }
+    pos = 0x46;
+    if (arg1 != 0) {
+        /* ring layout: column x per slot (148 top, 222 right side going down, 148 bottom, 74 left side going up) */
+        a = half;
+        if (count >= 4 && (count & 1)) {
+            a = half + 1;
+        }
+        step = 0x82 / (a + 1);
+        if (count >= 4) {
+            step -= 5;
+        }
+        i = 0;
+        if (count > 0) {
+            if (count & 1) {
+                i = 1;
+                pos = step + 0x46;
+                y[1] = (f32) 0x46;
+                x[1] = 148.0f;
+            }
+            for (; i != count; i += 2) {
+                y[i + 1] = (f32) pos;
+                if (i == 0) {
+                    pos += step;
+                    x[i + 1] = 148.0f;
+                } else if (i < half) {
+                    x[i + 1] = 222.0f;
+                    pos += step;
+                    if (i + 1 != half || (count & 1)) {
+                        pos += 0x10;
+                    }
+                } else if (i == half) {
+                    if (count & 1) {
+                        x[i + 1] = 222.0f;
+                    } else {
+                        pos -= step;
+                        x[i + 1] = 148.0f;
+                    }
+                } else {
+                    pos = pos - step - 0x10;
+                    x[i + 1] = 74.0f;
+                }
+                y[i + 2] = (f32) pos;
+                if (i < half - 1) {
+                    x[i + 2] = 222.0f;
+                    pos += step;
+                    if (i + 2 != half || (count & 1)) {
+                        pos += 0x10;
+                    }
+                } else if (i == half - 1) {
+                    if (count & 1) {
+                        x[i + 2] = 222.0f;
+                    } else {
+                        x[i + 2] = 148.0f;
+                        pos -= step;
+                    }
+                } else {
+                    pos = pos - step - 0x10;
+                    x[i + 2] = 74.0f;
+                }
+            }
+            pos = 0x46;
+        }
+        /* wrap the ring for the spline */
+        x[0] = x[count];
+        y[0] = y[count];
+        x[count + 1] = x[1];
+        y[count + 1] = y[1];
+        x[count + 2] = x[2];
+        y[count + 2] = y[2];
+        t = sinf(D_800901D8 * 3.14159f - 1.570795f) * 0.5f + 0.5f;
+        /* ring slot of the first item = number of shown items before the selection */
+        ring = 0;
+        for (i = 0; i < 0x1C; i++) {
+            if (i < D_800901D4 && ((1 << i) & mask)) {
+                ring++;
+            }
+        }
+        if (ring >= count) {
+            ring = 0;
+        }
+    }
+
+    if (fadeIn != 0) {
+        D_800E0EB2 += 0x5C;
+        if (D_800E0EB2 >= 0x100) {
+            D_800E0EB2 = 0xFF;
+        }
+        a = D_800E0EB2;
+        if (a < 0) {
+            a = -a;
+        }
+        a = (alpha * a) >> 8;
+        if (a >= 0xFE) {
+            a = 0xFF;
+        }
+        if (D_800E0EB2 < 0) {
+            shownValue = D_800E0EB4;
+        } else {
+            shownValue = D_800E1010[D_800901D4];
+        }
+        itemAlpha = a;
+    } else {
+        D_800E0EB2 = 0xFF;
+        itemAlpha = alpha;
+    }
+
+    cursorRow = 0;
+    offset = 0;
+    drawn = 0;
+    for (i = 0; i < 0x1C; i++) {
+        item = &D_800ABA2C[offset];
+        type = item[1];
+        if ((1 << i) & mask) {
+            value = D_800E1010[i];
+            if (i == D_800901D4) {
+                cursorRow = drawn;
+            }
+            if (arg1 != 0) {
+                px = (s32) func_15049AD0((s32) x, ring, t);
+                py = (s32) func_15049AD0((s32) y, ring, t);
+                ring--;
+                if (ring < 0) {
+                    ring += count;
+                }
+            } else {
+                py = pos;
+                px = 0x94;
+                pos += 0x22;
+            }
+            /* label */
+            func_1504332C(0xFF, 0xFF, 0xFF, (u8) itemAlpha);
+            func_150432FC(px, py);
+            if (item[0] >= 0) {
+                func_15042E3C(((s32 *) D_800E1008)[item[0]]);
+            } else if (item[0] < -1) {
+                func_150432FC(px, py + 9);
+                func_15042E3C((s32) D_800ABC98, -item[0]);
+                func_150432FC(px, py + 0x16);
+            }
+            /* value */
+            if (i == D_800901D4 && D_800901D8 <= 0.0f) {
+                func_1504332C(0xFF, 0xFF, 0xFF, (u8) itemAlpha);
+                if (fadeIn != 0) {
+                    value = shownValue;
+                }
+            } else if (fadeIn != 0) {
+                func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+            } else {
+                func_1504332C(0xFF, 0xFF, 0xFF, (alpha >> 2) & 0xFF);
+            }
+            if (type < 0) {
+                if (type < -1) {
+                    func_15042E3C((s32) D_800ABC9C, value - type);
+                }
+            } else {
+                switch (type) {
+                    case 0x79:
+                        break;
+                    case 0x7A:
+                        if (value == 0) {
+                            func_15042E3C((s32) D_800ABCA4, ((s32 *) D_800E1008)[0x73]);
+                        } else {
+                            func_15042E3C((s32) D_800ABCA8, value);
+                        }
+                        break;
+                    case 0x7B:
+                        if (D_800E1013 >= 3) {
+                            func_15042E3C((s32) D_800ABCAC, ((s32 *) D_800E1008)[0x2D]);
+                        } else {
+                            func_15042E3C((s32) D_800ABCB0, value);
+                        }
+                        break;
+                    case 0x7C:
+                        func_15042E3C((s32) D_800ABCB4, value * 1000);
+                        break;
+                    case 0x7D:
+                        if (value >= 3) {
+                            func_15042E3C((s32) D_800ABCB8, value, ((s32 *) D_800E1008)[0x72]);
+                        } else {
+                            func_15042E3C(((s32 *) D_800E1008)[0x73]);
+                        }
+                        break;
+                    case 0x7E:
+                        func_15042E3C((s32) D_800ABCA0, value);
+                        break;
+                    case 0x7F:
+                        func_15042E3C(((s32 *) D_800E1008)[value != 0]);
+                        break;
+                    default:
+                        func_15042E3C(((s32 *) D_800E1008)[item[1 + value]]);
+                        break;
+                }
+            }
+            drawn++;
+        }
+        /* next item: label + type, plus the choice texts of a list item */
+        if (type >= 0x79 && type <= 0x7F) {
+            offset += 2;
+        } else if (type >= 0) {
+            offset += D_8009022C[i] + 2;
+        } else {
+            offset += 2;
+        }
+        if (D_800E1010[i] < D_80090210[i]) {
+            D_800E1010[i] = D_80090210[i];
+            D_80090180 = 1;
+        }
+        if (D_8009022C[i] < D_800E1010[i]) {
+            D_800E1010[i] = D_8009022C[i];
+            D_80090180 = 1;
+        }
+    }
+
+    /* input */
+    sel = D_800901D4;
+    forward = 1;
+    rec = (MenuState *) D_80090174;
+    if (D_800E0EB2 != 0xFF) {
+        rec->input = 0;
+    }
+    p = &D_800E1010[sel];
+    old = *p;
+    oldSel = sel;
+    if (D_800901D8 <= 0.0f) {
+        changed = 0;
+        rec = (MenuState *) D_80090174;
+        if (arg1 != 0) {
+            if (rec->input & 1) {
+                *p = old + 1;
+                D_80090180 = 1;
+                changed = 1;
+            } else if (rec->input & 2) {
+                *p = old - 1;
+                D_80090180 = 1;
+                changed = 1;
+            } else if (rec->input & 8) {
+                D_800901DC = 0.075f;
+            } else if (rec->input & 4) {
+                sel--;
+                p--;
+                if (sel < 0) {
+                    sel += 0x1C;
+                    p += 0x1C;
+                }
+                forward = 0;
+                D_800901DC = -0.075f;
+                D_800901D8 = 1.0f;
+            }
+        } else {
+            if (rec->input & 4) {
+                *p = old - 1;
+                D_80090180 = 1;
+                changed = 1;
+            } else if (rec->input & 8) {
+                *p = old + 1;
+                D_80090180 = 1;
+                changed = 1;
+            } else if (rec->input & 2) {
+                D_800901DC = 1.0f;
+            } else if (rec->input & 1) {
+                sel--;
+                p--;
+                if (sel < 0) {
+                    sel += 0x1C;
+                    p += 0x1C;
+                }
+                forward = 0;
+                D_800901D8 = 0.0f;
+            }
+        }
+        if (changed != 0 && sel == 2) {
+            D_800E1010[3] = 2;
+        }
+        if (rec->input & 0xF) {
+            func_10010F30(0x4FF, 0x4650, 0x40, 0, 0);
+        }
+        /* values wrap around */
+        if (*p < D_80090210[sel]) {
+            *p = D_8009022C[sel];
+            D_80090180 = 1;
+        }
+        if (D_8009022C[sel] < *p) {
+            *p = D_80090210[sel];
+            D_80090180 = 1;
+        }
+    }
+    D_800901D8 += D_800901DC * (f32) D_800BE9E4;
+    if (D_800901D8 >= 1.0f) {
+        sel++;
+        p++;
+        if (sel >= 0x1C) {
+            sel -= 0x1C;
+            p -= 0x1C;
+        }
+        D_800901DC = 0.0f;
+        D_800901D8 = 0.0f;
+    } else if (D_800901D8 <= 0.0f) {
+        D_800901DC = 0.0f;
+        D_800901D8 = 0.0f;
+    }
+    /* skip hidden items */
+    while (forward != 0 && !((1 << sel) & mask)) {
+        sel++;
+        p++;
+        if (sel >= 0x1C) {
+            sel -= 0x1C;
+            p -= 0x1C;
+        }
+    }
+    while (forward == 0 && !((1 << sel) & mask)) {
+        sel--;
+        p--;
+        if (sel < 0) {
+            sel += 0x1C;
+            p += 0x1C;
+        }
+    }
+    if (sel == oldSel && old != *p) {
+        D_800E0EB2 = -0xFF;
+        D_800E0EB4 = old;
+    }
+    D_800901D4 = sel;
+
+    if (arg2 != 0) {
+        /* cursor arrows left and right of the selected row */
+        arrowX = (s32) ((100.0f + D_80090188 * (f32) 0) * 0.5f);
+        arrowY = (s32) ((f32) (D_80090184 * 0x22 + 0x46) + D_80090188 * (f32) ((cursorRow - D_80090184) * 0x22));
+        arrowX = (s32) ((f32) arrowX + 20.0f * sinf(D_80090188 * 3.1415f));
+        func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+        func_15042D94(arrowX + 0x94, arrowY, 1, (s32) D_800ABCC0, 0x1A);
+        func_15042D94(0x94 - arrowX, arrowY, 1, (s32) D_800ABCC4, 0x1A);
+        if (cursorRow != D_80090184) {
+            D_80090188 += 0.1f * (f32) D_800BE9E4;
+            if (D_80090188 >= 1.0f) {
+                D_80090184 = cursorRow;
+                D_80090188 = 0.0f;
+            }
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E3AE4.s")
+#endif
 s32 func_151F2CDC();
 void func_151F2D6C(s32, s32);
 extern s32 *D_800E0EB8;
@@ -1512,8 +2097,399 @@ void func_151E73A8(void) {
     D_80090178 = 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E73C8.s")
+#ifdef NON_MATCHING
+s32 func_150871B8(s32 id);
+s32 func_1508712C(s32 point, f32 *x, f32 *y, f32 *z);
+f32 func_15049AD0(s32 points, s32 segment, f32 t);
+void func_1000D96C(s32 sound, s32 prevSound, s32 arg2);
+u8 *func_151149AC(u8 id);
+f32 sinf(f32);
+extern u8 D_800902F0[];         /* menu 0: carousel stop -> path point id (6 stops) */
+extern f32 D_800902F8[];        /* menu 0: zoom speed per stop */
+extern u8 D_80090338[];         /* menu 1: carousel stop -> path point id (8 stops) */
+extern f32 D_80090340[];        /* menu 1: zoom speed per stop */
+extern u16 D_800ABD04[][2];     /* menu 0: sound per stop: [0] accept, [1] back */
+extern u16 D_800ABD1C[][2];     /* menu 1 */
+extern f32 D_eu_80090310[];     /* menu 0: per-page zoom damping (scaled by D_80090170) */
+extern f32 D_80090170;
+extern s8 D_80090328[];         /* menu 0: per-page zoom percent that shows the page objects */
+extern s8 D_80090330[];         /* menu 0: per-page zoom percent that hides them again */
+extern u8 D_80090360[][6];      /* menu 0: 2 world objects (ids) per title page, 0xFF = none */
+extern u8 D_800AB950[];         /* menu 1: carousel stop -> main menu page */
+extern u8 D_800E0EC7;           /* last menu sound */
 
+// menu_camera_update: the title / main menu camera (object behaviour of the menu camera, arg0 = camera index into
+// D_800DBFF0). It is the carousel: left / right (input 4 / 8) slide the camera to the previous / next stop
+// (rec->x0 runs 1 -> 0 or 0 -> 1 at rec->x4 per tick, rec->x2B is the target stop), accept (0x10) zooms in towards the
+// stop (rec->fade 0 -> 1 at rec->xC, the zoom speed of the stop; the handler shows the page from fade 0.5), back
+// (0x20) zooms out. A full zoom into stop 0 toggles title <-> main menu (rec->menu) and restarts at fade 0.99 going
+// back out. The eye moves along a path of world points: from the base point (0 / 0x10) to the stop's point and
+// on through the point graph D_800D2778 (5 links per 16-byte node, never back to the previous node), with a
+// Catmull-Rom spline (func_15049AD0) when the path has 4+ points, linear otherwise; when not zoomed the look-at
+// point follows the carousel between the previous, current and next stops. rec->x10 * (x14, x18, x1C) is a decaying
+// offset used when the main menu camera jumps to the "back" stop 4 (rec->x2A modes 1 / 2 / 3). Writes
+// rec->titlePage (the page shown: the stop, +1 past the slide midpoint; main menu through D_800AB950) and x2D,
+// and the visibility (+0x80) of the page's world objects and of objects 0xF6 / 0xF7 / 0xF8 (+0x6E).
+void func_151E73C8(s32 arg0) {
+    MenuState *rec;
+    struct108 *cam;
+    s32 base;
+    s32 stops;
+    u8 *stopPoints;
+    f32 *zoomSpeed;
+    u16 (*sounds)[2];
+    f32 slide;
+    f32 zoom;
+    f32 rawZoom;
+    s8 ids[16];
+    f32 x[16];
+    f32 y[16];
+    f32 z[16];
+    u8 *node;
+    u8 *cur;
+    u8 next;
+    s32 count;
+    s32 i;
+    s32 k;
+    s32 segment;
+    f32 t;
+    f32 bx, by, bz;
+    f32 px, py, pz;
+    f32 qx, qy, qz;
+    s32 jump;
+    u8 *obj;
+    u8 *objB;
+
+    cam = &D_800DBFF0[arg0];
+    if (((MenuState *) D_80090174)->menu == 0) {
+        base = 0;
+        stops = 6;
+        stopPoints = D_800902F0;
+        zoomSpeed = D_800902F8;
+        sounds = D_800ABD04;
+    } else {
+        base = 0x10;
+        stops = 8;
+        stopPoints = D_80090338;
+        zoomSpeed = D_80090340;
+        sounds = D_800ABD1C;
+    }
+    func_1508712C(func_150871B8(base), &cam->unk2F8, &cam->unk2FC, &cam->unk300);
+
+    rec = (MenuState *) D_80090174;
+    if (rec->x4 != 0.0f) {
+        /* sliding to the neighbouring stop */
+        rec->x0 += rec->x4 * (f32) D_800BE9E4;
+        if (rec->x0 <= 0.0f) {
+            rec->x0 = 0.0f;
+            rec->x4 = 0.0f;
+        }
+        if (rec->x0 >= 1.0f) {
+            rec->x0 = 0.0f;
+            rec->x4 = 0.0f;
+            rec->x2B++;
+            if (rec->x2B >= stops) {
+                rec->x2B -= stops;
+            }
+        }
+    } else if (rec->xC != 0.0f || rec->fade != 0.0f) {
+        /* zoomed in or zooming: back zooms out, accept zooms in */
+        if ((rec->input & 0x20) && (rec->menu == 0 || rec->x2B != 0)) {
+            rec->xC = -zoomSpeed[rec->x2B];
+            func_1000D96C(sounds[rec->x2B][1], D_800E0EC7, 0);
+            D_800E0EC7 = sounds[rec->x2B][1];
+        }
+        if (rec->x2A != 0 && rec->menu == 1 && rec->x2B == 0) {
+            if (rec->input & 0x20) {
+                rec->xC = zoomSpeed[rec->x2B];
+            }
+        } else if (rec->input & 0x10) {
+            rec->xC = zoomSpeed[rec->x2B];
+        }
+        rec->fade += rec->xC * (f32) D_800BE9E4;
+        if (rec->fade >= 1.0f) {
+            rec->fade = 1.0f;
+            rec->xC = 0.0f;
+        } else if (rec->fade < 0.0f) {
+            rec->fade = 0.0f;
+            rec->xC = 0.0f;
+            if (rec->titlePage == 0 && rec->menu == 1 && rec->x44 != 0) {
+                rec->x43 = 1;
+                rec->x44 = 0;
+            }
+        }
+    } else if (rec->input & 0x10) {
+        /* at rest: accept starts the zoom */
+        rec->xC = zoomSpeed[rec->x2B];
+        func_1000D96C(sounds[rec->x2B][0], D_800E0EC7, 0);
+        D_800E0EC7 = sounds[rec->x2B][0];
+    } else {
+        /* at rest: left goes back one stop (sliding 1 -> 0), right / x43 starts the slide to the next */
+        if (rec->input & 4) {
+            rec->x2B--;
+            rec->x0 = 1.0f;
+            rec->x4 = -0.05f;
+            if (rec->x2B < 0) {
+                rec->x2B += stops;
+            }
+        }
+        if ((rec->input & 8) || rec->x43 != 0) {
+            rec->x4 = 0.05f;
+        }
+        rec->x43 = 0;
+        if (rec->x2B < 0) {
+            rec->x2B += stops;
+        }
+        if (rec->x2B >= stops) {
+            rec->x2B -= stops;
+        }
+    }
+
+    rawZoom = rec->fade;
+    if (rec->menu == 0) {
+        rawZoom *= 1.0f - D_eu_80090310[rec->titlePage] * D_80090170;
+    } else if (rec->titlePage != 0) {
+        rawZoom *= 0.6f;
+    }
+    slide = sinf(rec->x0 * 3.14159f - 1.570795f) * 0.5f + 0.5f;
+    zoom = sinf(rawZoom * 3.14159f - 1.570795f) * 0.5f + 0.5f;
+
+    if (((MenuState *) D_80090174)->menu == 0) {
+        /* the title page's world objects appear / disappear at the page's zoom percentages */
+        for (i = 0; i < 2; i++) {
+            if (D_80090360[i][rec->titlePage] != 0xFF) {
+                obj = func_151149AC(D_80090360[i][rec->titlePage]);
+                if (obj != NULL) {
+                    rec = (MenuState *) D_80090174;
+                    if (rec->xC > 0.0f || D_80090170 < 1.0f) {
+                        if (D_80090328[rec->titlePage] < (s32) (rawZoom * 100.0f)) {
+                            *(s32 *) (obj + 0x80) = 1;
+                        }
+                    } else if (rec->xC < 0.0f) {
+                        if (D_80090330[rec->titlePage] >= (s32) (rawZoom * 100.0f)) {
+                            *(s32 *) (obj + 0x80) = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    cam->unk3D0->unk25C |= 0x200;
+    cam->unk3D0->y_position = 1000.0f;
+
+    if (rawZoom > 0.0f) {
+        /* zooming: path from the base point through the stop's point along the point graph */
+        ids[0] = func_150871B8(base);
+        ids[1] = func_150871B8(stopPoints[((MenuState *) D_80090174)->x2B]);
+        count = 1;
+        node = (u8 *) D_800D2778 + ids[1] * 16;
+        while (node != NULL) {
+            cur = node;
+            node = NULL;
+            for (k = 0; k < 5; k++) {
+                next = cur[9 + k];
+                if (next != 0xFF && next != ids[count - 1]) {
+                    ids[count + 1] = next;
+                    count++;
+                    k = 5;
+                    node = (u8 *) D_800D2778 + next * 16;
+                }
+            }
+        }
+        count++;
+        if (count >= 4) {
+            t = zoom * ((f32) count - 2.0f);
+            segment = (s32) t;
+            t -= (f32) segment;
+            if (segment >= count - 2) {
+                segment--;
+                t = 1.0f;
+            }
+            for (i = 0; i < count; i++) {
+                func_1508712C(ids[i], &x[i + 1], &y[i + 1], &z[i + 1]);
+            }
+            /* end points mirrored for the spline */
+            x[0] = x[1] - (x[2] - x[1]);
+            y[0] = y[1] - (y[2] - y[1]);
+            z[0] = z[1] - (z[2] - z[1]);
+            x[count + 1] = (x[count - 1] - x[count]) + x[count];
+            y[count + 1] = (y[count - 1] - y[count]) + y[count];
+            z[count + 1] = (z[count - 1] - z[count]) + z[count];
+            cam->unk2F8 = func_15049AD0((s32) x, segment, t);
+            cam->unk2FC = func_15049AD0((s32) y, segment, t);
+            cam->unk300 = func_15049AD0((s32) z, segment, t);
+            cam->unk2A4 = func_15049AD0((s32) x, segment + 1, t);
+            cam->unk2A8 = func_15049AD0((s32) y, segment + 1, t);
+            *(f32 *) &cam->unk2AC = func_15049AD0((s32) z, segment + 1, t);
+        } else {
+            func_1508712C(ids[0], &x[0], &y[0], &z[0]);
+            func_1508712C(ids[1], &x[1], &y[1], &z[1]);
+            if (count == 3) {
+                func_1508712C(ids[2], &x[2], &y[2], &z[2]);
+            } else {
+                x[2] = (x[1] - x[0]) + x[1];
+                y[2] = (y[1] - y[0]) + y[1];
+                z[2] = (z[1] - z[0]) + z[1];
+            }
+            cam->unk2F8 = (x[1] - x[0]) * zoom + x[0];
+            cam->unk2FC = (y[1] - y[0]) * zoom + y[0];
+            cam->unk300 = (z[1] - z[0]) * zoom + z[0];
+            cam->unk2A4 = (x[2] - x[1]) * zoom + x[1];
+            cam->unk2A8 = (y[2] - y[1]) * zoom + y[1];
+            *(f32 *) &cam->unk2AC = (z[2] - z[1]) * zoom + z[1];
+        }
+    } else {
+        /* not zoomed: look at the carousel (previous, current, next, next + 1 stops) */
+        k = ((MenuState *) D_80090174)->x2B - 1;
+        if (k < 0) {
+            k += stops;
+        }
+        for (i = 0; i < 4; i++) {
+            func_1508712C(func_150871B8(stopPoints[k]), &x[i], &y[i], &z[i]);
+            k++;
+            if (k >= stops) {
+                k -= stops;
+            }
+        }
+        cam->unk2A4 = func_15049AD0((s32) x, 0, slide);
+        cam->unk2A8 = func_15049AD0((s32) y, 0, slide);
+        *(f32 *) &cam->unk2AC = func_15049AD0((s32) z, 0, slide);
+    }
+
+    rec = (MenuState *) D_80090174;
+    if (rec->x2A != 0) {
+        /* look away from the eye: mirror the look-at point through it */
+        cam->unk2A4 = cam->unk2F8 + (cam->unk2F8 - cam->unk2A4);
+        cam->unk2A8 = cam->unk2FC + (cam->unk2FC - cam->unk2A8);
+        *(f32 *) &cam->unk2AC = cam->unk300 + (cam->unk300 - *(f32 *) &cam->unk2AC);
+    }
+    cam->unk2A4 += rec->x10 * rec->x14;
+    cam->unk2A8 += rec->x10 * rec->x18;
+    *(f32 *) &cam->unk2AC += rec->x10 * rec->x1C;
+    if (rec->x2A != 3) {
+        rec->x10 *= 0.85f;
+    } else {
+        rec->x10 = -((0.25f - rec->fade) * 4.0f);
+    }
+
+    jump = 0;
+    if (rec->menu == 1) {
+        /* main menu: back at stop 0 jumps to stop 4 (x2A 1 -> 2 -> 3), with a decaying look-at offset */
+        func_1508712C(func_150871B8(base), &bx, &by, &bz);
+        k = rec->x2B;
+        if (k >= stops) {
+            k = 0;
+        }
+        func_1508712C(func_150871B8(stopPoints[k]), &px, &py, &pz);
+        px -= bx;
+        py -= by;
+        pz -= bz;
+        if (rec->x2A != 0) {
+            px = -px;
+            py = -py;
+            pz = -pz;
+        }
+        if (rec->fade == 0.0f && (rec->input & 0x20) && rec->x10 < 0.01f && rec->x4 == 0.0f) {
+            rec->x2B = 0;
+            if (rec->x2D >= 2 && rec->x2D < 7) {
+                rec->x2A = 2;
+            }
+            jump = 1;
+            rec->xC = zoomSpeed[rec->x2B];
+            func_1000D96C(sounds[rec->x2B][0], D_800E0EC7, 0);
+            D_800E0EC7 = sounds[rec->x2B][0];
+        }
+        if (rec->fade < 0.25f && rec->x2A == 1) {
+            rec->x2B = 4;
+            jump = 2;
+            rec->x2A = 0;
+        }
+        if (rec->fade == 0.0f && rec->x2A == 3) {
+            rec->x2B = 4;
+            rec->x2A = 0;
+            rec->x10 = 0.0f;
+        }
+        if (jump != 0) {
+            func_1508712C(func_150871B8(stopPoints[rec->x2B]), &qx, &qy, &qz);
+            qx -= bx;
+            qy -= by;
+            qz -= bz;
+            if (rec->x2A != 0) {
+                qx = -qx;
+                qy = -qy;
+                qz = -qz;
+            }
+            rec->x10 = 1.0f;
+            rec->x14 = px - qx;
+            rec->x18 = py - qy;
+            rec->x1C = pz - qz;
+        }
+        if (jump == 2) {
+            rec->x10 = 0.0f;
+            rec->x2B = 0;
+            rec->x2A = 3;
+        }
+    }
+
+    if (rec->fade >= 1.0f && rec->x2B == 0) {
+        /* fully zoomed into stop 0: switch title <-> main menu and zoom back out */
+        rec->menu = 1 - rec->menu;
+        rec->fade = 0.99f;
+        if (rec->menu != 0) {
+            rec->xC = -D_80090340[0];
+        } else {
+            rec->xC = -D_800902F8[0];
+        }
+        if (rec->menu != 0) {
+            rec->x2A = 1;
+        } else {
+            rec->x2A = 0;
+        }
+    }
+    rec->titlePage = rec->x2B;
+    if (rec->x0 > 0.5f) {
+        rec->titlePage++;
+    }
+    if (rec->titlePage < 0) {
+        rec->titlePage += stops;
+    }
+    if (rec->titlePage >= stops) {
+        rec->titlePage -= stops;
+    }
+    rec->x2D = rec->titlePage;
+    if (rec->menu == 1) {
+        rec->titlePage = D_800AB950[rec->titlePage];
+    }
+
+    cam->unk2BC = cam->unk2A4;
+    cam->unk2C0 = cam->unk2A8;
+    cam->unk2C4 = *(f32 *) &cam->unk2AC;
+    cam->unk390 = 0.0f;
+    cam->unk1A4 = 20.0f;
+    cam->unk19C = 20.0f;
+    cam->unk1A8 = 15.0f;
+    cam->unk1A0 = 15.0f;
+
+    obj = func_151149AC(0xF8);
+    if (obj != NULL) {
+        obj[0x6E] = 1;
+    }
+    obj = func_151149AC(0xF6);
+    objB = func_151149AC(0xF7);
+    if (obj != NULL && objB != NULL) {
+        if (((MenuState *) D_80090174)->menu == 0) {
+            obj[0x6E] = 0;
+            objB[0x6E] = 1;
+        } else {
+            obj[0x6E] = 1;
+            objB[0x6E] = 0;
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E73C8.s")
+#endif
 extern f32 D_800ABE94;
 u8 *func_151149AC(u8);
 extern u8 D_80090360[][6];

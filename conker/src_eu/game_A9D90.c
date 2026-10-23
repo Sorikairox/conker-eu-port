@@ -16,7 +16,7 @@ void func_1507C8E0(struct127 *arg0, s32 arg1) {
 
 // "goto" hell
 #ifdef NON_MATCHING
-s32 func_1517FD84(s32, f32, f32, f32, s32);
+void func_1517FD84(s32, f32, f32, f32, s32);
 extern u16 D_8009015C;
 extern s32 D_800BEB30;
 extern u16 D_800D1CC2;
