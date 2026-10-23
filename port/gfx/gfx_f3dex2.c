@@ -1908,21 +1908,7 @@ uint8_t *__real_func_15186D04(uint8_t *gdl, int arg1);
 /* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers func_1514D6CC (game_eu_17A800) dispatches D_8008AE10 handlers by
  * the indices of character_handler_indices func_1514CFF0 (C, side-effect free). Logs the call when the null zone word
  * null+0x14 changes across it (the 0x400 written at the new-game scene start, frame 4560), with the indices / handlers. */
-/* P161 ?p161fix=1 (TEST of the null+0x14 writer): func_1501370C (game_40490.c, D_800831C0 handler 0 of the level-start
- * record pass func_15013000) calls D_80082EA0[rec->unk17]() with no argument, but its asm leaves a0 = the record at the
- * jalr, and the handlers take it (func_1501374C: rec->unk16 |= 4; func_1515D088(rec)). With the dropped argument the
- * handler gets NULL: func_1501374C sets byte 0x16 (null+0x14 = 0x00000400) and spawns a type-0x11 effect whose owner is
- * NULL. This wrap passes the record (what the game C fix must do); off = the game C as it is. */
-#include "../ultra/pc_icall.h"
-int __real_func_1501370C(unsigned char *arg0);
-int __wrap_func_1501370C(unsigned char *arg0) {
-    static int on = -1; extern void *D_80082EA0[];
-    if (on < 0) on = port_flag("p161fix");
-    if (on <= 0) return __real_func_1501370C(arg0);
-    void *fp = D_80082EA0[vbe_ld8(arg0 + 0x17)];
-    if (fp) { u64_ b[1] = { (unsigned)(uintptr_t)arg0 }; __port_icall_slow(fp, __port_fsig(fp), b, 1, 0, 4); }
-    return 1;
-}
+/* P161 ?p161fix=1 test wrap of func_1501370C removed in P171: port-b P164 passes the record in the game C. */
 int __real_func_1514D6CC(void *arg0);
 int func_1514CFF0(void *arg0, int *outSub, int *outMode, int *outType);
 int __wrap_func_1514D6CC(void *arg0) {

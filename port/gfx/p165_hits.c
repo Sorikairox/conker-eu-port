@@ -7,6 +7,7 @@
  * Signatures = the NM definitions (init_EB00.c, game_eu_90F50.c). */
 #include <stdint.h>
 #include <stdio.h>
+#include "../ultra/pc_mem.h" /* P171: ctx bytes via vbe_ld8 (virtual big-endian; P165 read the wrong bytes) */
 typedef float f32; typedef int32_t s32; typedef uint8_t u8; typedef int16_t s16; typedef uint16_t u16;
 int port_flag(const char *name);
 void port_log(const char *fmt, ...);
@@ -56,11 +57,11 @@ void __wrap_func_15064668(void *pl, s32 buttons, f32 h, s32 a3, s32 noPad) {
     if (on()) {
         tick(S668);
         u8 *ctx = pl ? *(u8 **)((u8 *)pl + 0x31C) : 0;
-        if (ctx && ((buttons & 0x4000) || ctx[0x7B])) {
+        if (ctx && ((buttons & 0x4000) || vbe_ld8(ctx + 0x7B))) {
             static unsigned nlog;
             if (nlog++ < 200)
                 port_log("[p165ctx] frame %u buttons %04x h %.1f a3 %d nopad %d ctx7B %u 75 %u 7C %u 4E %u 198 %u pos %.0f %.0f %.0f\n",
-                         port_frame_count, buttons & 0xFFFF, h, a3, noPad, ctx[0x7B], ctx[0x75], ctx[0x7C], ctx[0x4E], ctx[0x198],
+                         port_frame_count, buttons & 0xFFFF, h, a3, noPad, vbe_ld8(ctx + 0x7B), vbe_ld8(ctx + 0x75), vbe_ld8(ctx + 0x7C), vbe_ld8(ctx + 0x4E), vbe_ld8(ctx + 0x198),
                          *(f32 *)((u8 *)pl + 0x14), *(f32 *)((u8 *)pl + 0x18), *(f32 *)((u8 *)pl + 0x1C));
         }
     }

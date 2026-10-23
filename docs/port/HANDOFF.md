@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P171, 2026-10-24, port-web). Details: `docs/port/sessions/P171.md`
+
+- Merged port-b 6dcbf88 (P164, P168) and port 7b18642 (P166, P167): HANDOFF.md conflicts only. After each: verify_all OK,
+  NM link OK, protocheck 0 (1242 NM bodies), float-int 0 bugs, census 0 FAIL after a clean rebuild. arity_scan: the
+  func_1501370C row is gone, +3 func_1516AFE0 callback rows; m2c_sanity +3 (func_1500D8C8 width **high**, port-b check).
+- **New-game trap at retrace 6241 after the merges**: func_15147F50 (game_eu_1754C0.c, matching C) calls
+  `D_8008A690[idx]()` without the record (asm keeps a0); func_15147E64 frees garbage at rec + 0x84. Reached now because
+  P164's func_151530A8 creates kind-8 particle records. Port test `?p171fix=1` (p171_tb.c) passes the record: run OK.
+  Same shape func_15147FA0 / D_8008A6E0.
+- **null+0x14 = 0x400 gone** (P164); the P161 `?p161fix` wrap is removed. New null-zone writer from 6257: the kind-8
+  particle draw func_1515C6F4 (asm stub) returns gdl 0, the caller writes its DL at NULL (671 words); its update
+  func_1515C388 is a stub too (both game_1897A0.c).
+- **Text boxes advance and close** (C func_1516AFE0): the Gregg cutscene's 10 boxes run their states and close by
+  script requests (0x100); A / B are ignored by these caller-owned boxes (by design). Boxes invisible (draw asm).
+  Control at 18485 as before; after it no box opens, ctx+0x7B stays 0 (now read via vbe_ld8), jumps at the pillar reach
+  y 190 by the gargoyle's tongue but nothing triggers: the first room is still closed.
+- Regression: node noev 925 / 1249 / 1329, Chrome noev 1530 / 2302 / 2382, heap 0, null zone clean, traps 0.
+
+## Next steps (from P171)
+
+1. Conversion slot: func_15147F50 / func_15147FA0 pass the record under NON_MATCHING (blocker: default new game traps).
+2. Conversion slot: func_1515C388 + func_1515C6F4 (game_1897A0.c, kind-8 particle update / draw; the draw returns gdl).
+3. func_1516BC2C + func_1516CEA4 (text box draw), then func_1513FAB4, func_151D9014.
+4. port-web: first-room puzzle (gargoyle tongue): find the grab / pull trigger in the event script or player code and
+   test it with `?p171tb=1&p171fix=1&p165hits=1` (padpull.py); drop `?p171fix` once (1) is merged.
+
 ## P168 (port-b) (session P168, 2026-10-24). Details: `docs/port/sessions/P168.md`
 
 Branch `port-b` (from P164 9eebdac). Re-prioritised by the coordinator (browser P165: first room blocked by text
