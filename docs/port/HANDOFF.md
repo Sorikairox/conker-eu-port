@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P175 (port-b) (session P175, 2026-10-24). Details: `docs/port/sessions/P175.md`
+
+Branch `port-b` (from P170 b235977). Hand C (NM), difftest EQUIV + setups + mutants (table in P175.md):
+- **Kind-8 streak particle** (commit a6d93bd, game_1897A0.c): func_1515C388 `particle_streak_step` and
+  func_1515C6F4 `particle_streak_draw`; the draw now **returns the advanced Gfx pointer** (browser P171 null-zone DL
+  writes from 6257). The step's motion handler D_8008B420[block +0x38] gets (rec, block) (asm a1 = block).
+  Mutants 16/16, 38/38.
+- **Beam unit** (game_eu_1F4F60.c): func_151C7B1C `beam_create` (now `u8 *` with u8 / s16 args; the prototype in
+  func_151C7750's NM block updated, one line for protocheck), func_151C9748 `beam_end_pieces_spawn`, func_151C957C
+  `beam_glow_spawn`. Piece pointers NULL-initialised before func_151C9748 (N64 leaves garbage when func_15144E80 fails).
+- Reviews (no change): m2c_sanity func_1500D8C8 width high = false positive (asm word copy of the u16 table to the
+  stack, then lhu); the 3 arity rows on func_1516AFE0's callback = false positives (a3 is a temp; the only callback,
+  func_15080BF4, is `void (s32, s32, s32)` and uses a2).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1222 bodies), selftest 62/62. progress_nm total 5216/5915
+  (88.2%), game 4685/5334, C bytes 70.2%, 699 asm-only. No difftest processes left.
+
+## Next steps (from P175)
+
+1. Browser (port-web): kind-8 streak particles render, null zone clean after 6257; beams from record_beam_start
+   (D_80082EA0 entry 8) if a level has one. P175.md UNVERIFIED list.
+2. port-b breadth: `python3 docs/port/sessions/p168/asmlist.py` (owned asm with C callers), smallest first.
+3. game_eu_1F4F60.c still has asm func_151C8D90 / func_151C8F4C (no references found in .data / C).
+
 ## P170 (port-b) (session P170, 2026-10-24). Details: `docs/port/sessions/P170.md`
 
 Branch `port-b` (from P168 6dcbf88). Hand C (NM), difftest EQUIV + setups + mutants (table in P170.md):
