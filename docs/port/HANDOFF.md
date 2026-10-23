@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P119 (port-b) (session P119, 2026-10-23). Details: `docs/port/sessions/P119.md`
+
+Branch `port-b` (from P115 9f8e18a); the orchestrator merges it into `port`.
+
+- **Merged port 28b8fa3** (275614d): CD540 = port's file; 83300 / 981E0 adjacent NM blocks kept; AF2A0 = port's
+  one-argument func_15084000; difftest.py = P80 splice + P73 nmside; selftest 53/53. Fixes: func_15073118 `u8 *`
+  declaration (NM build), duplicate func_1506BF5C prototype, game_eu_F5580.c one-argument func_151149AC.
+- C (NM): func_1512DAD0 `camera_queue_event` (8/8), func_150A7B80 `mtx_set_identity` (5/5), func_15113000
+  `world_records_build_visible` (30/35, 3 equivalent), func_1517FD84 `hud_lens_set_target` (12/13, 1 equivalent),
+  func_15181A6C `hud_lens_update` (33/40, 2 equivalent), func_1510D090 `tint_channels_update` (16/18, 2 equivalent).
+- verify_all OK, NM links. **protocheck 2 lines = 1 mismatch**: game_A9D90.c:19 declares `s32 func_1517FD84`, the
+  function returns nothing: make it `void` (not a port-b file). **progress_nm** total 5033/5915 (85.1%), game
+  4503/5334, C bytes 62.8%, 882 asm-only.
+
+## Next steps (from P119)
+
+1. game_A9D90.c:19: `void func_1517FD84(s32, f32, f32, f32, s32);` (protocheck back to 0).
+2. Boundary survivors listed in P119.md (func_15113000 depth == far / near; func_15181A6C exact-threshold cases):
+   targeted setups if wanted.
+3. Shadow func_151848D8 (674 insns, game_eu_1B1ED0.c); func_15178004 / func_15184298 (asm callees, see P115).
+4. Browser: camera requests, visible world records, HUD lens / zoom, tint channels.
+
 ## P115 (port-b) (session P115, 2026-10-23). Details: `docs/port/sessions/P115.md`
 
 Branch `port-b` (from P111 5a19134); the orchestrator merges it into `port`.
