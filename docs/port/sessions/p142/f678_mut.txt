@@ -1,0 +1,16 @@
+s/    debris.countRand = 10;/    debris.countRand = 11;/
+s/    debris.pos\[1\] = pos\[1\];/    debris.pos[1] = pos[2];/
+s/    debris.angleB = -50;/    debris.angleB = 50;/
+s/    debris.u3C = 3;/    debris.u3C = 2;/
+s/    debris.lifeRand = 30;/    debris.lifeRand = 31;/
+s/    debris.u38 = 0.942411f;/    debris.u38 = 0.94241f;/
+s/    func_15151500((u8 \*) \&debris, 1, 0xFF, 1);/    func_15151500((u8 *) \&debris, 0, 0xFF, 1);/
+s/    flash.u4 = 0x6C;/    flash.u4 = 0x6D;/
+s/    flash.u1D = 0x91;/    flash.u1D = 0x90;/
+s/    flash.u2A = 50;/    flash.u2A = 51;/
+s/    flash.pos\[2\] = pos\[2\];/    flash.pos[2] = pos[0];/
+s/    flash.u46 = -51;/    flash.u46 = -50;/
+s/    flash.u5C = 0x840E07;/    flash.u5C = 0x840E05;/
+s/    flash.u61 = -1;/    flash.u61 = 1;/
+s/    flash.u68 = 0.941177f;/    flash.u68 = 0.94117f;/
+s/    func_15153BA4((u8 \*) \&flash, 0xFF, 0xFF, 1);/    func_15153BA4((u8 *) \&flash, 0xFF, 0xFE, 1);/

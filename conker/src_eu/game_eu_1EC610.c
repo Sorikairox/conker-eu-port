@@ -2,10 +2,130 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+typedef struct {
+    u8 u0;          /* 0xC0 */
+    s8 u1;
+    u8 u2;
+    u8 u3;
+    u8 u4;
+    u8 pad5;
+    s16 u6;
+    s32 texture;    /* +0x08 */
+    s32 uC;
+    s32 u10;
+    s32 u14;
+    s32 u18;
+    s32 u1C;
+    s32 u20;
+    s32 u24;
+    s32 u28;
+    u8 u2C;
+    u8 u2D;
+    u8 pad2E[2];
+    u8 color[8];    /* +0x30 */
+    u8 u38;
+    u8 pad39[3];
+    s32 u3C;
+    u8 u40;
+    u8 u41;
+    u8 pad42[2];
+    f32 x;          /* +0x44 */
+    f32 y;
+    f32 z;
+    s32 u50;        /* room (func_151BEE00); unset by the lives pop-up */
+    s16 u54;
+    s16 u56;
+} LivesSprite;      /* 0x58 bytes, argument of func_15157580 */
 s32 func_151BF444(u8 *arg0);
 #endif
 
+#ifdef NON_MATCHING
+/* P142 */
+void func_1510F800(s32);
+s32 func_1510FD20(s32 x, s32 z);
+void func_151436B4(f32 yaw, f32 pitch, f32 dist, struct17 *out);
+s32 func_15157580(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32);
+s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8);
+s32 memcpy(void *, void *, s32);
+/* marker_sprite_spawn: spawns a marker at pos facing `angle` (degrees). size 0..2 (3 or more: nothing,
+ * returns 0). In the level types with D_800D2E4C->unk19 & 4, or for size 2, it is a HUD-style sprite (texture
+ * 0xA2, func_15157580) placed 39 units out along the angle and 40 lower, with sprite size {3, 1, 2}[size], flag
+ * 0x10 set when `flag`; the angle, that position and `kind` go to the sprite object + 0x120 (func_151BF0D0
+ * turns it). Otherwise the 3D ring particle func_151BF490. Returns the object (0 when none). arg5 / arg6 unused. */
+s32 func_151BEE00(f32 *pos, f32 angle, u8 kind, u8 flag, u8 size, s32 arg5, s32 arg6) {
+    static const u8 sizes[3] = { 3, 1, 2 };
+    struct {
+        u8 pad50[4];
+        f32 angle;      // +0x54: the 0x18 bytes from here go to the sprite object + 0x120
+        f32 pos[3];
+        u8 kind;
+        u8 pad65[3];
+        LivesSprite spr; // +0x68
+    } sp;
+    f32 dir[3];
+    s32 room;
+    s32 obj;
+
+    func_1510F800(0);
+    room = func_1510FD20((s32) pos[0], (s32) pos[2]);
+    if (size >= 3) {
+        return 0;
+    }
+    if ((D_800D2E4C->unk19 & 4) || size == 2) {
+        sp.angle = angle;
+        sp.spr.u3C = 0;
+        sp.spr.u40 = 0;
+        sp.spr.u41 = 0;
+        sp.spr.x = pos[0];
+        sp.spr.y = pos[1];
+        sp.spr.z = pos[2];
+        sp.kind = kind;
+        sp.spr.u50 = room;
+        func_151436B4(angle * 0.017453292f, 0.0f, 39.0f, (struct17 *) dir);
+        sp.pos[0] = pos[0] + dir[0];
+        sp.pos[1] = pos[1] + dir[1] - 40.0f;
+        sp.pos[2] = pos[2] + dir[2];
+        sp.spr.u38 = sizes[size];
+        sp.spr.u0 = (flag ? 0x10 : 0) | 0xE;
+        sp.spr.u1 = 1;
+        if (D_800BE9F0 == 7) {
+            sp.spr.u2 = 6;
+        } else {
+            sp.spr.u2 = 2;
+        }
+        sp.spr.u4 = 0xFF;
+        sp.spr.u6 = 300;
+        sp.spr.texture = 0xA2;
+        sp.spr.u14 = 0x620405;
+        sp.spr.uC = 8;
+        sp.spr.u18 = 0x40200;
+        sp.spr.u1C = 0x14;
+        sp.spr.u20 = 0x37;
+        sp.spr.u24 = 0x80;
+        sp.spr.u28 = 0x20;
+        sp.spr.u2D = 8;
+        sp.spr.color[0] = 0xFF;
+        sp.spr.color[2] = 0xFF;
+        sp.spr.u3 = 0;
+        sp.spr.u10 = 0;
+        sp.spr.u2C = 0;
+        sp.spr.color[1] = 0xFF;
+        sp.spr.color[3] = 0xFF;
+        sp.spr.color[4] = 0xFF;
+        sp.spr.color[5] = 0xFF;
+        sp.spr.color[6] = 0xFF;
+        sp.spr.color[7] = 0xFF;
+        obj = func_15157580(&sp.spr, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);
+        if (obj != 0) {
+            memcpy((u8 *) obj + 0x120, &sp.angle, 0x18);
+        }
+        return obj;
+    }
+    return func_151BF490(angle, (s32) pos, 3, 0xFF, size, flag, room, 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BEE00.s")
+#endif
 
 s32 func_151BF0D0(u8 *arg0) {
     func_150A8050(((f32 (*)[4][4])(arg0 + 0x7C))[D_800BE9C0], 0.0f, *(f32 *)(arg0 + 0x120), 0.0f);
@@ -33,7 +153,7 @@ s32 func_151BF244(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 *arg4) {
 f32 func_15143E64(f32 *);
 void func_1515C710(u8 *, f32 *, f32 *, f32 *);
 s32 func_151BF490(f32, s32, s32, u8, s32, s32, s32, s32, s32);
-s32 func_151BF678(u8 *);
+void func_151BF678(f32 *);
 void func_151BF8F0(u8, s32);
 extern s32 D_800D1968;
 
@@ -68,7 +188,7 @@ s32 func_151BF268(u8 *arg0) {
                 func_15085710((s16) var_s3->unk127, 3, (s32) (*(u8 *)((u8 *)temp_s1 + 0x10)));
                 func_10010F30(0x511, 0x7D00U, 0x40U, 0, 0U);
                 func_151BF8F0((*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
-                func_151BF678(temp_s1 + 4);
+                func_151BF678((f32 *) (temp_s1 + 4));
                 temp_v0 = (*(u8 *)((u8 *)arg0 + 0x48));
                 var_v1 = 0;
                 switch (temp_v0) {                  /* irregular */
@@ -110,9 +230,253 @@ s32 func_151BF444(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF490.s")
+#ifdef NON_MATCHING
+/* P139 */
+/* P139: particle request passed to func_15132FBC (0x7C bytes; layout as game_eu_103160.c's DebrisParticle). */
+typedef struct {
+    /* 0x00 */ f32 scale[4];
+    /* 0x10 */ f32 rot[3];
+    /* 0x1C */ f32 one[3];
+    /* 0x28 */ s32 pos[3];      /* copied as words */
+    /* 0x34 */ f32 vel[3];
+    /* 0x40 */ f32 spin[3];
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 life;
+    /* 0x56 */ s16 sprite;
+    /* 0x58 */ u8 colour;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8 alpha;
+    /* 0x61 */ u8 u61;
+    /* 0x62 */ u8 u62[6];
+    /* 0x68 */ u8 u68;
+    /* 0x69 */ u8 pad69;
+    /* 0x6A */ u8 u6A;
+    /* 0x6C */ void *owner;
+    /* 0x70 */ u8 ownerId;
+    /* 0x72 */ s16 u72;
+    /* 0x74 */ s16 u74;
+    /* 0x78 */ s32 u78;
+} ParticleReq1EC;
 
+extern u8 D_8008FF60[3];   /* colours per index 0..2: 4, 2, 3 */
+s32 func_15132FBC(void *req, s32, s32, s32, s32, s32);
+s32 func_15133CD0(s32 arg0, u8 *arg1);
+
+/*
+ * ring_particle_spawn: spawns one ring particle (sprite 0x26, life 300, scale (1, 1, 0.923, 0.923; 0x3F6C49BB), rotated by
+ * yaw about y, no motion) at the 3 words at pos (copied as they are), colour D_8008FF60[colour] (only colours 0..2;
+ * else nothing and 0), flags 0xC1D00 | 0x4000 when flag (u8) is set, +0x5C = arg6, +0x61 = 0x18 in game mode 7
+ * (D_800BE9F0). Request (arg2, (u8) arg3, 0, (u8) arg7, arg8). On success func_15133CD0(p + 0x90 + 0x40 * k, p)
+ * for k = 0, 1. Returns the particle (0 on failure).
+ */
+s32 func_151BF490(f32 yaw, s32 posArg, s32 arg2, u8 arg3, s32 colour, s32 flag, s32 arg6, s32 arg7, s32 arg8) {
+    s32 *pos = (s32 *) posArg;
+    ParticleReq1EC req;
+    u8 *p;
+    s32 k;
+
+    if ((u8) colour >= 3) {
+        return 0;
+    }
+    req.scale[0] = 1.0f;
+    req.scale[1] = 1.0f;
+    req.scale[3] = 0.92300004f;
+    req.scale[2] = 0.92300004f;
+    req.rot[0] = 0.0f;
+    req.rot[1] = yaw;
+    req.rot[2] = 0.0f;
+    req.one[0] = 1.0f;
+    req.one[1] = 1.0f;
+    req.one[2] = 1.0f;
+    req.pos[0] = pos[0];
+    req.pos[1] = pos[1];
+    req.pos[2] = pos[2];
+    req.vel[0] = 0.0f;
+    req.vel[1] = 0.0f;
+    req.vel[2] = 0.0f;
+    req.spin[0] = 0.0f;
+    req.spin[1] = 0.0f;
+    req.spin[2] = 0.0f;
+    req.gravity = 0.0f;
+    req.flags = ((u8) flag != 0 ? 0x4000 : 0) | 0x1D00 | 0x80000 | 0x40000;
+    req.life = 300;
+    req.sprite = 0x26;
+    req.alpha = 0xFF;
+    req.colour = D_8008FF60[(u8) colour];
+    req.u5C = arg6;
+    req.u61 = (D_800BE9F0 == 7) ? 0x18 : 0;
+    req.u62[0] = 0;
+    req.u62[1] = 0;
+    req.u62[2] = 0;
+    req.u62[3] = 0;
+    req.u62[4] = 0;
+    req.u62[5] = 0;
+    req.u68 = 2;
+    req.u6A = 0;
+    req.owner = NULL;
+    req.ownerId = 0;
+    req.u72 = 1;
+    req.u74 = 0xFF;
+    p = (u8 *) func_15132FBC(&req, arg2, arg3, 0, (u8) arg7, arg8);
+    if (p != NULL) {
+        for (k = 0; k != 0x80; k += 0x40) {
+            func_15133CD0((s32) (p + 0x90 + k), p);
+        }
+    }
+    return (s32) p;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF490.s")
+#endif
+
+#ifdef NON_MATCHING
+/* P142 */
+void func_15151500(u8 *req, u8, u8, s32);
+void func_15153BA4(u8 *req, s32, s32, s32);
+// pickup_burst_spawn: the burst played when a pickup at pos is collected: a debris spray (func_15151500 request:
+// 24..34 pieces) and a flash particle (func_15153BA4 request, the same layout as in func_150D8ABC).
+void func_151BF678(f32 *pos) {
+    struct {
+        s16 u0;
+        s16 u2;
+        u8 u4;
+        u8 pad5;
+        s16 u6;
+        s32 u8;
+        s32 uC;
+        s16 u10;
+        s16 u12;
+        s32 u14;
+        s32 u18;
+        u8 u1C;
+        u8 u1D;
+        u8 u1E;
+        u8 u1F;
+        u8 u20;
+        u8 u21;
+        u8 u22;
+        u8 u23;
+        u8 u24;
+        u8 u25;
+        s16 u26;
+        s16 u28;
+        s16 u2A;
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        f32 pos[3];
+        s16 u44;
+        s16 u46;
+        s16 u48;
+        s16 u4A;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        s32 u5C;
+        u8 u60;
+        s8 u61;
+        u8 u62;
+        u8 u63;
+        u8 u64;
+        u8 pad65[3];
+        f32 u68;
+    } flash;
+    struct {
+        s32 countMin;   // pieces: countMin + rand % (countRand + 1)
+        s32 countRand;
+        f32 pos[3];
+        f32 scaleMin;   // + rand * scaleRand
+        f32 scaleRand;
+        s16 angleA;     // direction angles: base, random range
+        s16 angleARand;
+        s16 angleB;
+        s16 angleBRand;
+        f32 speedMin;
+        f32 speedRand;
+        f32 spread;     // horizontal start offset -spread..spread
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        u8 u3C;
+        u8 pad3D;
+        s16 lifeMin;
+        s16 lifeRand;
+        u8 pad42[2];
+    } debris;
+
+    debris.countMin = 24;
+    debris.countRand = 10;
+    debris.pos[0] = pos[0];
+    debris.pos[1] = pos[1];
+    debris.pos[2] = pos[2];
+    debris.angleA = 0;
+    debris.angleARand = 0xFF;
+    debris.angleB = -50;
+    debris.angleBRand = 60;
+    debris.speedMin = 13.0f;
+    debris.speedRand = 13.0f;
+    debris.u3C = 3;
+    debris.lifeMin = 65;
+    debris.lifeRand = 30;
+    debris.scaleMin = 0.0626f;
+    debris.scaleRand = 0.0581f;
+    debris.spread = 10.376f;
+    debris.u30 = -1.0480001f;
+    debris.u34 = 0.99500006f;
+    debris.u38 = 0.942411f;
+    func_15151500((u8 *) &debris, 1, 0xFF, 1);
+
+    flash.u0 = 20;
+    flash.u1E = 6;
+    flash.u2 = 8;
+    flash.u4 = 0x6C;
+    flash.u6 = 0x5103;
+    flash.u8 = 0x200005;
+    flash.u10 = 40;
+    flash.u12 = 40;
+    flash.u1F = 0xFF;
+    flash.u1C = 0xFF;
+    flash.uC = 0;
+    flash.u14 = 0;
+    flash.u18 = 0;
+    flash.u1D = 0x91;
+    flash.u20 = 0xFF;
+    flash.u21 = 0xFF;
+    flash.u22 = 0;
+    flash.u23 = 0x14;
+    flash.u24 = 0xC8;
+    flash.u25 = 0xFF;
+    flash.u26 = 50;
+    flash.u28 = 5;
+    flash.u2A = 50;
+    flash.u2C = 1.017731f;
+    flash.u30 = 175.0f;
+    flash.u34 = 160.0f;
+    flash.pos[0] = pos[0];
+    flash.pos[1] = pos[1];
+    flash.pos[2] = pos[2];
+    flash.u44 = 0;
+    flash.u46 = -51;
+    flash.u48 = 0xFF;
+    flash.u4A = 0x50;
+    flash.u5C = 0x840E07;
+    flash.u60 = 0x10;
+    flash.u61 = -1;
+    flash.u62 = 8;
+    flash.u63 = 6;
+    flash.u64 = 1;
+    flash.u4C = 4.0f;
+    flash.u50 = 13.0f;
+    flash.u54 = -0.007f;
+    flash.u58 = -0.006f;
+    flash.u68 = 0.941177f;
+    func_15153BA4((u8 *) &flash, 0xFF, 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EC610/func_151BF678.s")
+#endif
 
 #ifdef NON_MATCHING
 /* Lives pop-up (called when a life pickup is collected, after sound 0x511): a HUD object (func_15149130, type
@@ -132,40 +496,6 @@ typedef struct {
     u8 done;
 } LivesPopup;       /* the 0x18 bytes copied to the HUD object + 0x28 */
 
-typedef struct {
-    u8 u0;          /* 0xC0 */
-    s8 u1;
-    u8 u2;
-    u8 u3;
-    u8 u4;
-    u8 pad5;
-    s16 u6;
-    s32 texture;    /* +0x08 */
-    s32 uC;
-    s32 u10;
-    s32 u14;
-    s32 u18;
-    s32 u1C;
-    s32 u20;
-    s32 u24;
-    s32 u28;
-    u8 u2C;
-    u8 u2D;
-    u8 pad2E[2];
-    u8 color[8];    /* +0x30 */
-    u8 u38;
-    u8 pad39[3];
-    s32 u3C;
-    u8 u40;
-    u8 u41;
-    u8 pad42[2];
-    f32 x;          /* +0x44 */
-    f32 y;
-    f32 z;
-    u8 pad50[4];
-    s16 u54;
-    s16 u56;
-} LivesSprite;      /* 0x58 bytes, argument of func_15157580 */
 
 typedef struct {
     f32 x;

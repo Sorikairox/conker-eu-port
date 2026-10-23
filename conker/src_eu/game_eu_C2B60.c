@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
+void func_15095F18(s32, f32, f32, f32, s32, s32 *);
 #endif
 
 Gfx *func_15095350(Gfx *arg0) {
@@ -269,7 +269,7 @@ void func_15095E58(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
 }
 #endif
 
-s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
+void func_15095F18(s32, f32, f32, f32, s32, s32 *);
 s32 func_15096144(s32, s32, s32, s32, s32);
 s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     s32 sp24;
@@ -280,7 +280,74 @@ s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return arg0;
 }
 
+#ifdef NON_MATCHING
+/* P139 */
+extern f32 D_80038400;     /* sprite size units -> screen x */
+extern f32 D_80038404;     /* sprite size units -> screen y */
+extern f32 D_800D3090;     /* last sprite rect: x scale */
+extern f32 D_eu_800D3094;  /* y scale */
+extern f32 D_800D309C;     /* top (D_800D3098 = left, declared as a struct array in variables.h) */
+extern f32 D_800D30A0;     /* depth */
+extern f32 D_800D30A4;     /* width */
+extern f32 D_800D30A8;     /* height */
+
+/*
+ * sprite_screen_rect: screen rectangle of the sprite `spr` (s16 scale +6 / +8, texture +0x10 with u16 size +4 / +6)
+ * centred on the screen point (sx, sy) at depth w, in the current player's viewport (D_800BE628 + D_80082FA4 *
+ * 0x180; scales +0x14 / +0x18, or +0x1C / +0x20 when alt): width = tex w * (scale x * D_80038400 * vp scale) / w,
+ * height likewise. *visible = 1 when the rectangle overlaps the viewport's clip box (x: +0x2C..+0x30, y:
+ * +0x24..+0x28), else 0. The scales, corner, depth and size are left in D_800D3090..D_800D30A8 for the sprite
+ * drawer. Nothing but *visible = 0 happens when a scale is 0. (void: the file prototypes said s32, no caller used it).
+ */
+void func_15095F18(s32 sprArg, f32 sx, f32 sy, f32 w, s32 alt, s32 *visible) {
+    u8 *spr = (u8 *) sprArg;
+    u8 *vp;
+    u8 *tex;
+    f32 scaleX;
+    f32 scaleY;
+    f32 inv;
+    f32 width;
+    f32 height;
+    f32 left;
+    f32 top;
+
+    *visible = 0;
+    if (*(s16 *) (spr + 6) == 0 || *(s16 *) (spr + 8) == 0) {
+        return;
+    }
+    scaleX = (f32) *(s16 *) (spr + 6) * D_80038400;
+    scaleY = (f32) *(s16 *) (spr + 8) * D_80038404;
+    if (alt != 0) {
+        vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+        scaleX *= *(f32 *) (vp + 0x1C);
+        scaleY *= *(f32 *) (vp + 0x20);
+    } else {
+        vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+        scaleX *= *(f32 *) (vp + 0x14);
+        scaleY *= *(f32 *) (vp + 0x18);
+    }
+    tex = *(u8 **) (spr + 0x10);
+    inv = 1.0f / w;
+    width = (f32) *(u16 *) (tex + 4) * scaleX * inv;
+    height = (f32) *(u16 *) (tex + 6) * scaleY * inv;
+    left = sx - width * 0.5f;
+    top = sy - height * 0.5f;
+    if (*(f32 *) (vp + 0x2C) <= left + width && left < *(f32 *) (vp + 0x30) && *(f32 *) (vp + 0x24) <= top + height &&
+        top < *(f32 *) (vp + 0x28)) {
+        *visible = 1;
+    }
+    D_800D3090 = scaleX;
+    D_eu_800D3094 = scaleY;
+    *(f32 *) D_800D3098 = left;
+    D_800D309C = top;
+    D_800D30A0 = w;
+    D_800D30A4 = width;
+    D_800D30A8 = height;
+    return;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095F18.s")
+#endif
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */
@@ -293,9 +360,329 @@ void func_1509611C(s32 arg0, s32 arg1) {
 }
 #endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15096144.s")
+#ifdef NON_MATCHING
+/* P142 */
+extern u8 D_800D31C8;   /* sprite primitive colour r, g, b (alpha from the sprite) */
+extern u8 D_800D31C9;
+extern u8 D_800D31CA;
+/* sprite_draw_rect: draws the sprite spr (+0xA alpha, +0xB animation speed, +0xC animation frame, +0xD flip x / y
+ * bits 1 / 2, +0x10 texture descriptor: u16 width +4 / height +6, u8 frame count +0xA, bit 7 = ping-pong) as one
+ * textured rectangle at the screen rectangle func_15095F18 left in D_800D3090..D_800D30A8 (x / y scale, left,
+ * top, depth, width, height). sOff / tOff shift the texture start; tOff != 0 also shrinks the rectangle by one
+ * texel on each side (the width / height globals keep the shrunk size). xAdd widens the right edge. Off-screen
+ * left / top edges are clipped with the matching s / t correction. Unless D_800D31CB, sets the primitive colour
+ * first. Then advances the animation frame (8 steps per frame, D_800BE9A0 ticks). Returns the new display-list
+ * end. */
+s32 func_15096144(s32 gfxAddr, s32 sprAddr, s32 sOff, s32 tOff, s32 xAdd) {
+    u32 *gfx = (u32 *) gfxAddr;
+    u8 *spr = (u8 *) sprAddr;
+    u8 *tex;
+    f32 xs;
+    f32 ys;
+    f32 left;
+    f32 top;
+    f32 depth;
+    f32 width;
+    f32 height;
+    s32 xsi;
+    s32 ysi;
+    s32 lefti;
+    s32 topi;
+    s32 dsdx;
+    s32 dtdy;
+    s32 sStart;
+    s32 tStart;
+    s32 tFrac;
+    s32 uly;
+    s32 sFix;
+    s32 tFix;
+    s16 lrx;
+    s16 lry;
+    s16 ulx;
+    s16 uly16;
+    u8 flip;
+    u8 frames;
+    u8 step;
+    u8 frame;
 
+    xs = D_800D3090;
+    ys = D_eu_800D3094;
+    left = *(f32 *) D_800D3098;
+    xsi = (s32) xs;
+    top = D_800D309C;
+    ysi = (s32) ys;
+    depth = D_800D30A0;
+    if (tOff != 0) {
+        D_800D30A4 -= (xs + xs) / depth;
+        D_800D30A8 -= (ys + ys) / depth;
+        left += xs / depth;
+        top += ys / depth;
+    }
+    width = D_800D30A4;
+    height = D_800D30A8;
+    if (width < 2.0f) {
+        width = 2.0f;
+    }
+    dsdx = ((s32) depth << 10) / xsi;
+    dtdy = ((s32) depth << 10) / ysi;
+    if (D_800D31CB == 0) {
+        // gDPSetPrimColor(0, 1, r, g, b, sprite alpha)
+        gfx[0] = 0xFA000100;
+        gfx[1] = (D_800D31C8 << 24) | (D_800D31C9 << 16) | (D_800D31CA << 8) | spr[0xA];
+        gfx += 2;
+    }
+    lefti = (s32) left;
+    sStart = (s32) ((32.0f - (left - (f32) lefti) * 32.0f) * depth / (f32) xsi) + sOff + 0x2000;
+    topi = (s32) top;
+    flip = spr[0xD];
+    tFrac = (s32) ((32.0f - (top - (f32) topi) * 32.0f) * depth / (f32) ysi);
+    tStart = tFrac + tOff + 0x2000;
+    if (flip != 0) {
+        if (flip & 1) {
+            dsdx = -dsdx & 0xFFFF;
+            sStart = (*(u16 *) (*(u8 **) (spr + 0x10) + 4) + 0xFF) << 5;
+        }
+        if (flip & 2) {
+            dtdy = -dtdy & 0xFFFF;
+            tStart = ((*(u16 *) (*(u8 **) (spr + 0x10) + 6) + 0xFF) << 5) - tFrac;
+        }
+    }
+    // gSPTextureRectangle (clamped at 0), then the s / t of the clipped left / top edge
+    lrx = ((s32) ((f32) xAdd + width - 1.0f) + lefti) * 4;
+    lry = ((s32) (height - 1.0f) + topi) * 4;
+    gfx[0] = 0xE4000000 | ((MAX(lrx, 0) & 0xFFF) << 12) | (MAX(lry, 0) & 0xFFF);
+    ulx = lefti * 4;
+    uly = topi * 4;
+    uly16 = uly;
+    gfx[1] = ((MAX(ulx, 0) & 0xFFF) << 12) | (MAX(uly16, 0) & 0xFFF);
+    gfx[2] = 0xE1000000;
+    sFix = 0;
+    if (ulx < 0) {
+        sFix = (ulx * (s16) dsdx) >> 7;
+        if ((s16) dsdx < 0) {
+            sFix = MAX(sFix, 0);
+        } else {
+            sFix = MIN(sFix, 0);
+        }
+    }
+    tFix = 0;
+    if (uly < 0) {
+        tFix = (uly16 * (s16) dtdy) >> 7;
+        if ((s16) dtdy < 0) {
+            tFix = MAX(tFix, 0);
+        } else {
+            tFix = MIN(tFix, 0);
+        }
+    }
+    gfx[3] = ((sStart - sFix) << 16) | ((tStart - tFix) & 0xFFFF);
+    gfx[4] = 0xF1000000;
+    gfx[5] = (dsdx << 16) | (dtdy & 0xFFFF);
+    gfx += 6;
+
+    // animation: frame counts in 1/8 frames; ping-pong textures use bit 7 of the counter as the direction
+    tex = *(u8 **) (spr + 0x10);
+    frames = tex[0xA];
+    if (frames != 0) {
+        step = spr[0xB] * D_800BE9A0;
+        if (frames & 0x80) {
+            frame = spr[0xC];
+            if (frame & 0x80) {
+                frame -= step;
+                spr[0xC] = frame;
+                if (!(frame & 0x80)) {
+                    spr[0xC] = (frame + step) & 0x7F;
+                }
+            } else {
+                frame += step;
+                spr[0xC] = frame;
+                if (frame >= (tex[0xA] & 0x7F) * 8) {
+                    spr[0xC] = (frame - step) | 0x80;
+                }
+            }
+        } else {
+            frame = spr[0xC] + step;
+            spr[0xC] = frame;
+            if (frame >= tex[0xA] * 8) {
+                spr[0xC] = frame - tex[0xA] * 8;
+            }
+        }
+    }
+    return (s32) gfx;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15096144.s")
+#endif
+
+#ifdef NON_MATCHING
+/* P142 */
+/* image_draw_tiled: draws the image described by img (the func_15095470 descriptor: +0 address or asset id, +4
+ * animated flag, +6 tile width, +8 tile height, +0xA format, +0xB texel size) as a grid of textured rectangles.
+ * The picture is w x h texels split into tiles of img's size whose asset ids follow each other (column-major,
+ * frame * cols * rows first); with flags & 1 each tile has a 1-texel border on every side (the step is 2 smaller,
+ * the s / t start skips the fraction). flags & 2 / & 4 mirror in x / y (negative dsdx / dtdy, s / t from the far
+ * edge). (x, y) is the screen centre (10.2 units are made here), scaleX / scaleY are 4096-based (pixels per texel
+ * * 4096); sOff is added to the s start, xAdd widens each rectangle's right edge. The top row and the right column
+ * hold the remainders. Off-screen left / top edges are clipped with the matching s / t correction. Returns the new
+ * display-list end. */
+typedef struct {
+    s32 tex;        // address or asset id
+    u8 animated;
+    u8 pad5;
+    u16 width;
+    u16 height;
+    u8 fmt;
+    u8 siz;
+} ImageTileDesc;
+
+// s / t start correction of a bordered tile: skips the sub-pixel part of the screen coordinate v (10.5 texels)
+#define IMAGE_TILE_BORDER_FIX(v, scale) ((s32) (32.0f - ((v) - (f32) (s32) (v)) * 32.0f * (4096.0f / (scale))))
+
+u32 *func_150966AC(u32 *gfx, ImageTileDesc *img, f32 scaleX, f32 scaleY, f32 x, f32 y, s32 w, s32 h, s32 flags, s32 sOff, s32 xAdd, s32 frame) {
+    ImageTileDesc tile;
+    s32 border;
+    s32 tileW;
+    s32 tileH;
+    s32 s0;
+    s32 t0;
+    s32 dsdx;
+    s32 dtdy;
+    s32 cols;
+    s32 rows;
+    s32 colW;
+    s32 topH;
+    s32 i;
+    s32 j;
+    s32 sStart;
+    s32 tStart;
+    s32 xi;
+    s32 yi;
+    s32 uly;
+    s32 sFix;
+    s32 tFix;
+    s16 ulx;
+    s16 lrx;
+    s16 lry;
+    s16 clipX;
+    s16 clipY;
+    u32 dsdt;
+    f32 nextX;
+    f32 nextY;
+    f32 curY;
+    f32 rowScreenH;
+    f32 topScreenH;
+
+    tileW = img->width;
+    tileH = img->height;
+    border = flags & 1;
+    if (border) {
+        tileW -= 2;
+        tileH -= 2;
+    }
+    if (flags & 2) {
+        s0 = (img->width + 0xFF) << 5;
+        dsdx = (s32) (-4194304.0f / scaleX) & 0xFFFF;
+    } else {
+        s0 = 0x2000;
+        dsdx = (s32) (4194304.0f / scaleX);
+    }
+    if (flags & 4) {
+        t0 = (img->height + 0xFF) << 5;
+        dtdy = (s32) (-4194304.0f / scaleY) & 0xFFFF;
+    } else {
+        t0 = 0x2000;
+        dtdy = (s32) (4194304.0f / scaleY);
+    }
+    cols = (w + tileW - 1) / tileW;
+    rows = (h + tileH - 1) / tileH;
+    x -= (f32) w * scaleX / 8192.0f;
+    tile.tex = img->tex;
+    tile.tex += frame * cols * rows;
+    y -= (f32) h * scaleY / 8192.0f;
+    tile.width = img->width;
+    tile.fmt = img->fmt;
+    tile.animated = 1;
+    tile.siz = img->siz;
+    topH = h - (rows - 1) * tileH;
+    colW = tileW;
+    topScreenH = (f32) topH * scaleY / 4096.0f;
+    for (i = 0; i < cols; i++) {
+        rowScreenH = topScreenH;
+        curY = y;
+        tile.height = topH;
+        if (i + 1 == cols) {
+            colW = w - (cols - 1) * tileW;
+            tile.width = colW;
+            if (border) {
+                tile.width = (u16) colW + 2;
+            }
+        }
+        sStart = s0;
+        nextX = x + (f32) colW * scaleX / 4096.0f;
+        if (border) {
+            sStart = s0 + IMAGE_TILE_BORDER_FIX(x, scaleX);
+        }
+        sStart += sOff;
+        if (border) {
+            tile.height = topH + 2;
+        }
+        if (rows > 0) {
+            dsdt = (dsdx << 16) | (dtdy & 0xFFFF);
+            xi = (s32) x;
+            ulx = xi * 4;
+            lrx = ((s32) nextX + xAdd) * 4;
+            for (j = 0; j < rows; j++) {
+                nextY = curY + rowScreenH;
+                tStart = t0;
+                if (border) {
+                    tStart = t0 + IMAGE_TILE_BORDER_FIX(curY, scaleY);
+                }
+                yi = (s32) curY;
+                gfx = (u32 *) func_15095380((s32) gfx, (s32) &tile, 0, 0, 0, 0, 0, 2, 3);
+                tile.tex++;
+                uly = yi * 4;
+                lry = (s32) nextY * 4;
+                // gSPTextureRectangle (clamped at 0), then the s / t of the clipped left / top edge
+                gfx[0] = 0xE4000000 | ((MAX(lrx, 0) & 0xFFF) << 12) | (MAX(lry, 0) & 0xFFF);
+                clipY = uly;
+                gfx[1] = ((MAX(ulx, 0) & 0xFFF) << 12) | (MAX(clipY, 0) & 0xFFF);
+                gfx[2] = 0xE1000000;
+                sFix = 0;
+                if (ulx < 0) {
+                    sFix = (ulx * (s16) dsdx) >> 7;
+                    if ((s16) dsdx < 0) {
+                        sFix = MAX(sFix, 0);
+                    } else {
+                        sFix = MIN(sFix, 0);
+                    }
+                }
+                tFix = 0;
+                if (uly < 0) {
+                    tFix = (clipY * (s16) dtdy) >> 7;
+                    if ((s16) dtdy < 0) {
+                        tFix = MAX(tFix, 0);
+                    } else {
+                        tFix = MIN(tFix, 0);
+                    }
+                }
+                gfx[3] = ((sStart - sFix) << 16) | ((tStart - tFix) & 0xFFFF);
+                gfx[4] = 0xF1000000;
+                gfx[5] = dsdt;
+                gfx += 6;
+                if (j == 0) {
+                    // rows after the top one are whole tiles
+                    tile.height = img->height;
+                    rowScreenH = (f32) tileH * scaleY / 4096.0f;
+                }
+                curY = nextY;
+            }
+        }
+        x = nextX;
+    }
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_150966AC.s")
+#endif
 
 Gfx *func_15096D44(Gfx *arg0) {
     gSPDisplayList(arg0++, D_800877A8);

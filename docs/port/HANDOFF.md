@@ -142,6 +142,79 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    p123fadeev wrap. Also func_1510AEB0 (P121).
 2. port-web: log func_1512868C / func_150054C4 / func_15097188 after 2133 and 3053 (no guard) to find the camera
    re-init that the port misses.
+## P142 (port-b) (session P142, 2026-10-23). Details: `docs/port/sessions/P142.md`
+
+Branch `port-b` (from P139 9c9369d); the orchestrator merges it into `port`.
+
+- Priority (P140): func_15169FB8 `image_effect_draw` (197680, the new-game title cards) + func_150966AC
+  `image_draw_tiled` (C2B60) converted together; browser check pending.
+- Also hand C (NM), difftest EQUIV + mutants: func_15096144 `sprite_draw_rect` (C2B60), func_15146078
+  `plane_axes_from_normal` (170760), func_151BF678 `pickup_burst_spawn` (1EC610, now void(f32 *)), func_151BEE00
+  `marker_sprite_spawn` (1EC610; LivesSprite typedef hoisted), func_15129EA4 `camera_follow_update` (156A30).
+- func_1513CFE4 (169510, hot) skipped: its three handler tables still hold 16 asm handlers (list in P142.md).
+- Checks: verify_all rc 0, NM build links rc 0, protocheck 5 lines = 4 known pairs + game_eu_11A2B0.c:9
+  func_151432BC. progress_nm total 5099/5915 (86.2%), game 4569/5334, C bytes 65.1%, 816 asm-only.
+
+## Next steps (from P142)
+
+1. Browser: new-game title cards (func_15169FB8), sprites (func_15096144), pickup bursts, camera mode 0x40.
+2. func_1513CFE4 after its handlers: port-b ones first (func_1513E83C, func_1513EE14, func_15140190 in 169510),
+   the others in their owners' slots.
+3. func_15153BA4 (17D3C0, not port-b) so func_151BF678's flash particle spawns.
+4. Owned asm with C callers next (`python3 port_work/p142/asmlist.py`): func_150511E8, func_1510CA2C,
+   func_15113D54, func_1514B8D4, func_1513FAB4, ...
+
+## P139 (port-b) (session P139, 2026-10-23). Details: `docs/port/sessions/P139.md`
+
+Branch `port-b` (from P136 b894dda); the orchestrator merges it into `port`.
+
+- Hand C (NM), readable, with name comments, all difftest EQUIV + mutants: func_150B3394 `pipe_explode_spawn_chunk` +
+  func_150B3668 `pipe_explode_spawn_debris` (E0430, D_8008ADA0 handlers 9 / 10), func_151432BC
+  `spawn_region_random_point` (170760, P137 mode-0 stub), func_151277B0 `scope_zoom_sound_update` + func_15127520
+  `scope_motion_sound_update` (14FF90), func_1514C9E0 `spawn_line_emit` + func_1514CDC8 `spawn_arc_emit` (1772D0),
+  func_15095F18 `sprite_screen_rect` (C2B60, void), func_151BF490 `ring_particle_spawn` (1EC610), func_1517A550
+  `drift_object_spawn` (1A7B30, void).
+- D_8008B848 +0x1C handlers: all C. D_8008ADA0 asm handlers outside port-b: func_150C2334 (EF6D0), func_150C2558
+  (EF410), func_150C1BC0 (EF370), func_151A11BC (1CE7D0), func_150B2A50 (E0170), func_150B40EC (E17A0),
+  func_151AC628 / func_151ACBCC (1D9C00). func_1507D754 is game_A9D90 (not port-b).
+- protocheck: new row game_eu_11A2B0.c:9 declares `void func_151432BC` (not port-b; must become s32 like the other
+  three files). The func_15179008 -> func_15179A38 arity row is a false positive (callee reads no a0).
+- Checks: verify_all rc 0 (default build byte-identical), NM build links rc 0, protocheck 5 lines = the 4 known pair lines + game_eu_11A2B0.c:9 func_151432BC (not port-b). progress_nm total 5092/5915 (86.1%), game 4562/5334, C bytes 64.8%, 823 asm-only.
+
+## Next steps (from P139)
+
+1. Fix game_eu_11A2B0.c:9 prototype (port slot) -> protocheck back to the known pairs.
+2. Browser: new-game opening (func_151432BC), scope sounds, pipe explosions, sprite clipping.
+3. Convert the remaining D_8008ADA0 asm handlers (list above) in their owners' slots.
+4. Owned asm with C callers next (`python3 port_work/p139/asmlist.py`): func_15146078 (12 C calls), func_151BF678,
+   func_151BEE00 ...
+
+## P136 (port-b) (session P136, 2026-10-23). Details: `docs/port/sessions/P136.md`
+
+Branch `port-b` (from P133 48f7258); the orchestrator merges it into `port`.
+
+- Hand C (NM), readable, with name comments, all difftest EQUIV + mutants: func_15111DD8 `star_field_generate` +
+  func_151148C8 `world_object_rotate_point` + func_151152A4 `object_sound_play` (13DC30), func_1518010C
+  `scope_lens_draw` (1ACBC0, P126 DL passthru: 4 mirrored scissored texrects), func_15169260 `node_lists_update_types`
+  (1944C0, new-game path), func_1514C860 `spawn_ring_emit` (1772D0), func_1514948C `trail_spawn_directed` (175B20),
+  func_15144CEC `world_to_screen` + func_1514654C `model_node_points_to_world` (170760), func_15159C2C
+  `orbit_object_step` (186A80), func_15053430 `object_death_resolve` (78230).
+- func_15111DD8 keeps Rare's float-upper-halfword star coordinates; its difftest needs DIFFTEST_STEP=1 + RETF
+  (`port_work/p136/dd8.sh`), prefix-only (8000 iterations exceed the call cap).
+- Stubs reached: guRotateF (libultra), func_150A7EE0 (D5650), func_1507D754, func_1000FA64; indirect handler tables
+  D_8008B848 +0x1C / D_8008ADA0 not checked.
+- P134's struct258 stride report (port line 774) = func_15022440, already fixed here in 4acf065 (port must merge it);
+  no other D_800D20FC scaling in port-b's game_eu_4A070.c.
+- Checks: verify_all rc 0, NM links, protocheck = known pairs (1088 bodies). progress_nm total 5082/5915 (85.9%),
+  C bytes 64.5%, 833 asm-only.
+
+## Next steps (from P136)
+
+1. Browser: scope lens (func_1518010C), star-field overlay, new-game frames past func_15169260.
+2. Owned asm with C callers next (`python3 port_work/p136/asmlist.py`): func_151277B0, func_1514C9E0, func_15095F18,
+   func_151BF490, func_1514CDC8, func_1517A550, func_15146078, func_151BF678 ...
+3. Remaining stubs from the new C: func_150A7EE0 (game_eu_D5650, not port-b), func_1507D754, func_1000FA64.
+
 ## P133 (port-b) (session P133, 2026-10-23). Details: `docs/port/sessions/P133.md`
 
 Branch `port-b` (from P130 54195bc); the orchestrator merges it into `port`.

@@ -1,0 +1,18 @@
+s/u32 set = packed >> 31;/u32 set = packed >> 30;/
+s/u32 last = packed \& 0xFFFFFF;/u32 last = packed \& 0x7FFFFF;/
+s/if (\*id == ids\[2\]) {/if (*id == ids[1]) {/
+s/\*(s16 \*) (voice + 6) = (s32) pos\[7\];/*(s16 *) (voice + 6) = (s32) pos[6];/
+s/\[0x197\] != 2) {/[0x197] == 1) {/
+s/f32 v = \*(f32 \*) (holder + 0x1A4) \* -10000.0f;/f32 v = *(f32 *) (holder + 0x1A4) * -1000.0f;/
+s/    } else if (v > -1.0f) {/    } else if (v > 0.0f) {/
+s/: 0xFFFFFFFF;/: 0;/
+s/        cur = 0xFFFFFFFF;/        cur = 0;/
+s/= (set << 31) | cur;/= cur;/
+s/        if (\*id != ids\[0\]) {/        if (*id != ids[1]) {/
+s/            \*id = ids\[0\];/            *id = ids[2];/
+s/        \*id = ids\[1\];/        *id = ids[0];/
+s/func_10010F30(ids\[1\], 20000, 0x40, 0, 0);/func_10010F30(ids[1], 20000, 0x80, 0, 0);/
+s/    } else if (\*(s32 \*) (voice + 0x10) \& 0x80) {/    } else if (*(s32 *) (voice + 0x10) \& 0x40) {/
+s/func_151CC840((s32) holder);/func_151CC840((s32) voice);/
+s/func_10010F30(ids\[2\], 20000/func_10010F30(ids[0], 20000/
+s/    return 0;/    return 3;/

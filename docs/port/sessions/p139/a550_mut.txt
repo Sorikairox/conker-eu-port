@@ -1,0 +1,16 @@
+s/u8 \*obj = func_15167A68(type, 0, 0xB8, 1, 0xFF, 1);/u8 *obj = func_15167A68(type, 0, 0xB8, 1, 0xFF, 0);/
+s/\*(s16 \*) (obj + 0x92) = y;/*(s16 *) (obj + 0x92) = z;/
+s/\*(s16 \*) (obj + 0xA2) = tilt;/*(s16 *) (obj + 0xA2) = (u8) tilt;/
+s/\*(s16 \*) (obj + 0xA0) = (u32) func_150ADA20()/*(s16 *) (obj + 0xA0) = (s16) func_150ADA20()/
+s/- (spread >> 1);/- spread;/
+s/    if (mode == 5) {/    if (mode == 4) {/
+s/\*(s16 \*) (obj + 0x92) -= \*(s16 \*) (obj + 0xA2) \* 4;/*(s16 *) (obj + 0x92) += *(s16 *) (obj + 0xA2) * 4;/
+s/\*(s16 \*) (obj + 0x94) += \*(s16 \*) (obj + 0xA4) \* 4;/*(s16 *) (obj + 0x94) += *(s16 *) (obj + 0xA4) * 2;/
+s/\*(s16 \*) (obj + 0x98) = 0;/;/
+s/obj\[0x9D\] = (u32) func_150ADA20()/obj[0x9D] = (u32) func_150ADA20() + 1/
+s/- (jitter >> 1);/- (jitter >> 2);/
+s/\& 0x7F) + 0x8C) \* 0.01f;/\& 0xFF) + 0x8C) * 0.01f;/
+s/\*(u16 \*) (obj + 0xA6) = arg5;/*(u16 *) (obj + 0xA6) = mode;/
+s/obj\[0x9F\] = colour;/obj[0x9F] = arg9;/
+s/obj\[0xB3\] = 0xFF;/obj[0xB3] = 0xFE;/
+s/\*(s16 \*) (obj + 0xAE) = arg9;/*(s16 *) (obj + 0xAE) = (s8) arg9;/

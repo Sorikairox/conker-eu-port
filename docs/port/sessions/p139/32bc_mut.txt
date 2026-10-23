@@ -1,0 +1,14 @@
+s/switch (rgn\[0x15\] \& 3) {/switch (rgn[0x15] \& 7) {/
+s/c = func_151423D8((ang - 0x40) \& 0xFF);/c = func_151423D8((ang + 0x40) \& 0xFF);/
+s/d = func_150ADA68() \* (f32) r\[3\];/d = func_150ADA68() * (f32) r[5];/
+s/\*z = (f32) r\[2\] - d \* c;/*z = (f32) r[2] + d * c;/
+s/\*bottom = (f32) (r\[1\] - r\[4\]);/*bottom = (f32) (r[1] - r[3]);/
+s/deg = \*(f32 \*) (rgn + 0x10) \* 0.7111111f;/deg = *(f32 *) (rgn + 0x10) * 0.75f;/
+s/a = 0xFFFFFFFF;/a = 0;/
+s/            } else if (deg > -1.0f) {/            } else if (deg > 0.0f) {/
+s/u = func_150ADA68() \* ((f32) r\[3\] + (f32) r\[3\]) + (f32) -r\[3\];/u = func_150ADA68() * ((f32) r[3] + (f32) r[3]) - (f32) -r[3];/
+s/v = func_150ADA68() \* ((f32) r\[5\] + (f32) r\[5\]) + (f32) -r\[5\];/v = func_150ADA68() * ((f32) r[5]) + (f32) -r[5];/
+s/\*x = (f32) r\[0\] + (u \* s + v \* c);/*x = (f32) r[0] + (u * c + v * s);/
+s/\*z = (f32) r\[2\] + (v \* s - u \* c);/*z = (f32) r[2] + (v * s + u * c);/
+s/        default:/        case 3:/
+s/            \*x = (f32) r\[0\];/            *x = (f32) r[1];/
