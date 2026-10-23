@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P177 (port-b) (session P177, 2026-10-24). Details: `docs/port/sessions/P177.md`
+
+Branch `port-b` (from P175 dd78307). Hand C (NM), difftest EQUIV + setups + mutants (table in P177.md):
+- **Beam break unit** (game_eu_1F4F60.c): func_151C8D90 `beam_hits_object` and func_151C8F4C `beam_hit_effects`.
+  **Not dead** (P175 next step 3): both are called by the beam message handler func_151C8C5C (C; message 0x20 hit test
+  then effects, 0x3A case 2 effects with obj NULL). Its forward declarations are now `(u8 *, u8 *)`.
+  The scorch-mark positions are the beam end points (the asm stores v0 = rec + 0x34 / + 0x40 in the delay slots of
+  the func_1515016C calls).
+- func_1516547C `screen_effect_preset` (game_eu_192500.c; the only asm callee of beam_hit_effects): 8 presets of a
+  15-float block for func_15165B98; kind >= 8 returns NULL (asm: stale v0). Mutants 32/32.
+- func_1518D1C0 `character_effect_attach` (game_eu_1BAF40.c, browser P171 boot / title stub): effect types 1..18
+  -> kind-0x21 effect record (func_1518E934), optional clear of obj's existing ones. The in-file prototype (2 copies,
+  s32 / s32 * args) is one `u8 *(u8 *, s16, s16, u8, u8, s32, char *)`; its two matching callers func_1518EBDC /
+  func_1518EC44 now pass typed args (default build byte-identical).
+- tablesig v2 on port-b HEAD: flagged 47 -> 43, no new flagged table, nothing to fix in port-b files.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1226 bodies), selftest 62/62. progress_nm total
+  5220/5915 (88.3%), game 4689/5334, C bytes 70.5%, 695 asm-only. No difftest processes left.
+
+## Next steps (from P177)
+
+1. Browser (port-web): P177.md UNVERIFIED list (beam break effects, screen effect presets, character effects).
+2. port-b breadth (`python3 docs/port/sessions/p168/asmlist.py`, drop game_eu_1C3530 rows): next smallest owned asm
+   with C callers: func_150FD140 (215, game_eu_12A7C0, 3 C calls: per-view effect with func_15154728 + a spark loop),
+   func_15081120 (219, AE930), func_150511E8 (220, 78230), func_15152700 (228, 17D3C0, 15 C calls), func_151D535C (231).
+3. mut.sh: mutant lines are split at `%` (sed expressions with `% 9U` become SED ERROR); mutate the constants instead.
+
 ## P175 (port-b) (session P175, 2026-10-24). Details: `docs/port/sessions/P175.md`
 
 Branch `port-b` (from P170 b235977). Hand C (NM), difftest EQUIV + setups + mutants (table in P175.md):
