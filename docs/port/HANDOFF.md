@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P172, 2026-10-24). Details: `docs/port/sessions/P172.md`
+
+- func_15195FB0 (game_eu_1C3530) now returns func_15196344's handle (`s32`, both builds; asm callers func_15116690 /
+  func_1511D0CC / func_150BFC60 store v0). Default build unchanged.
+- New hand C (NM), all difftest EQUIV + mutants: func_15116690 object_start_pending_anim, the texture-scroll
+  registration cluster func_15195DD8 dl_find_scroll_texture / func_15195AA8 level_dl_add_texture_scroll (P165 level-load
+  stub) / func_15196344 dl_add_texture_scroll, func_15109990 event_object_effect_spawn, func_15016170
+  audio_mixer_init (boot stub), func_15007168 save_data_reset (boot stub), func_1500AC14 ambient_sounds_load and
+  func_150170C4 level_entry_data_load (scene-start stubs), func_15116854 object_bob_update, func_1517E6A4
+  object_node_remove. No stubs reached.
+- NM-only prototype fixes in game_eu_51190 / game_3B920 / game_eu_44010 / game_33990 (func_1500727C no longer passes
+  two unused arguments); game_eu_142E40 `void func_15116854(u8 *)`.
+- New tools: `docs/port/sessions/p172/asmlist.py` (this slot's asm-only functions with C calls), `mkdraft.py`.
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0 (1253 NM bodies), selftest 62/62, progress_nm 5247/5915 (88.7%), C bytes 71.1%. No processes left in conkerdev-port.
+
+## Next steps (from P172)
+
+1. func_1507D754: insert the P169 draft once port-b converts func_151C9740 / func_151CFFFC (unchanged).
+2. port-b: game_eu_78230.c declares func_150882C4 `s32` (asm returns nothing): fix, then convert it (39 insns).
+3. Remaining P165 scene-start / boot stubs in this slot: func_1500BEC0 (38360, 200), func_15012760 (3FF70, 309),
+   func_150039E0 (30E90, 741), func_15006590 (33990, 407), func_100052A0 (init_50A0, 195), func_1000BF60
+   (init_B1B0, 252), func_eu_1501B640 (48E50, 304).
+4. Browser: texture scrolling at level loads, ambient sounds, P172.md section 6.
+5. P138 / P141 leftovers (not started).
+
 ## State (session P169, 2026-10-24). Details: `docs/port/sessions/P169.md`
 
 - Merged port-b 9eebdac (P150-P164) as 53b9728: only HANDOFF.md conflicted (union + sections sorted by session).
