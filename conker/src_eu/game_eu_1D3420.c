@@ -739,7 +739,7 @@ u8 *func_151A7188(s32 arg0) {
 s32 func_151A74B0(void *spray, s32 arg1, u8 arg2, s32 arg3);
 void func_151D58E4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
 void func_151D45A4(u8 *, u8, s32);
-void func_151D5AC4(u8 *, u8, s32);
+s32 func_151D5AC4(u8 *, u8, s32);
 void func_15154728(u8 *, f32, f32, f32, f32, u8, s32);
 
 /* the stack blocks of func_151A7240 (sp40 spray block for func_151A74B0, then the position at sp9C) */

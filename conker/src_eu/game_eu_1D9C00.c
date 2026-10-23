@@ -5,7 +5,71 @@
 s32 func_151AD0E8(u8 *, u8 *);
 
 
+#ifdef NON_MATCHING
+/* P155 */
+u8 func_151D8E20(void);
+void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9,
+                   s32 argA, u8 argB);
+void func_151DBE80(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9);
+typedef struct {
+    f32 size;         /* 0x0 */
+    s16 count;        /* 0x4 */
+    u16 countRange;   /* 0x6 */
+} DebrisDefAC3F0;
+typedef struct {
+    f32 u0;           /* 0x0 */
+    s16 u4;           /* 0x4 */
+    f32 u8;           /* 0x8 */
+} FlashDefAC3F0;
+extern s8 D_800A9400[][5];          /* per kind: chunk def, dust def, flash def (-1 = none) */
+extern DebrisDefAC3F0 D_800A9420[]; /* chunks (type 0xB) */
+extern DebrisDefAC3F0 D_800A9538[]; /* dust (type 0xC) */
+extern FlashDefAC3F0 D_800A963C[];  /* flash */
+
+// debris_burst_spawn: P153: the debris of a broken object of `kind` at pos (src = the owner): per D_800A9400[kind]
+// a chunk burst (func_1514CBE8 type 0xB, def D_800A9420) and a dust burst (type 0xC, D_800A9538) with count
+// +4 + random [0, +6], each with the owner block {src, arg4, light} (light = func_151D8E20()), and when src +0x1C
+// bit 0 is set a flash (func_151DBE80, D_800A963C, 150) at pos, src + 4.
+void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
+    struct {
+        u8 *src;
+        s32 arg;
+        u8 light;
+    } chunkOwner, dustOwner;
+    s8 *def;
+    DebrisDefAC3F0 *d;
+    FlashDefAC3F0 *fl;
+    u8 light;
+
+    light = func_151D8E20();
+    if (src == NULL) {
+        return;
+    }
+    def = D_800A9400[kind];
+    if (def[0] != -1) {
+        chunkOwner.src = src;
+        chunkOwner.light = light;
+        chunkOwner.arg = arg4;
+        d = &D_800A9420[def[0]];
+        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) func_150ADA20() % (u32) (d->countRange + 1) + d->count,
+                      0xB, kind, 0.0f, (s32) &chunkOwner, arg3);
+    }
+    if (def[2] != -1) {
+        dustOwner.src = src;
+        dustOwner.arg = arg4;
+        dustOwner.light = light;
+        d = &D_800A9538[def[2]];
+        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) func_150ADA20() % (u32) (d->countRange + 1) + d->count,
+                      0xC, kind, 0.0f, (s32) &dustOwner, arg3);
+    }
+    if (def[4] != -1 && (src[0x1C] & 1)) {
+        fl = &D_800A963C[def[4]];
+        func_151DBE80(light, fl->u0, fl->u8, fl->u4, (u8 *) pos, (s32) (src + 4), 0x96, 0, arg3, arg4);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC3F0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC628.s")
 
@@ -202,7 +266,7 @@ void func_151AE61C(u8 *arg0, u8 *arg1) {
 /* P150 */
 struct_eu_node *func_151AEB40(s32);
 void func_151AE86C(f32 *, u8 *, s32, f32);
-// path_try_attach: attaches obj to path node `id` (func_151AEB40; the original hangs when there is none) unless the
+// path_try_attach: attaches obj to path node `id` (func_151AEB40; the original hangs when there is none, the port returns) unless the
 // path is busy (+0x52), obj cannot ride (+0x1CA == 0) or is busy (+0x104). The rider record (+0x31C) gets its
 // progress along the path at +0xA0 (func_151AE86C from obj's height); when the path point at that progress
 // (points +0x38, 24 bytes each, count +0x42, spacing +0x3C, 140 units kept free at the end) is within 100 units
@@ -219,8 +283,11 @@ void func_151AE694(u8 *obj, u8 id) {
 
     path = (u8 *)func_151AEB40(id);
     if (path == NULL) {
-        for (;;) {
-        }
+        // Deliberate port divergence (coordinator decision, P155): the N64 code spins here forever (the console
+        // hangs) when no path object with this id is spawned. In the port that would freeze the browser tab, so
+        // the attach is simply skipped. The NM build has no port log hook to report it; the normal path is
+        // unchanged.
+        return;
     }
     if (*(s16 *)(path + 0x52) != 0 || obj[0x1CA] == 0 || obj[0x104] != 0) {
         return;

@@ -1,0 +1,11 @@
+s/if (obj->unk28 > 25.0f) {/if (obj->unk28 >= 25.0f) {/
+s/5U) + 0x3A4/4U) + 0x3A4/
+s/moved |= 2;/moved |= 0;/
+s/if ((obj->unk184 \& 0x1F) == 0xE) {/if ((obj->unk184 \& 0xF) == 0xE) {/
+s/obj->y_velocity > 5.0f \&\& kind == 0x1F/obj->y_velocity > 4.0f \&\& kind == 0x1F/
+s/if (moved != 0 \&\& kind == 0x35) {/if (moved == 1 \&\& kind == 0x35) {/
+s/pos\[1\] = obj->y_position + 20.0f;/pos[1] = obj->y_position + 10.0f;/
+s/(bounces = obj->unk7F) >= 0x1F/(bounces = obj->unk7F) >= 0x1E/
+s/if (life < 10) {/if (life <= 10) {/
+s/if (bounces >= 0x15) {/if (bounces >= 0x16) {/
+s/< 900.0f) {/< 800.0f) {/

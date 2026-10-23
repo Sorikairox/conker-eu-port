@@ -1,0 +1,1 @@
+s/if (life < 10) {/if (life <= 10) {/

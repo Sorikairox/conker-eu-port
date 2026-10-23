@@ -289,7 +289,7 @@ s32 func_151C16BC(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s
 #ifdef NON_MATCHING
 void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_15081A90(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
-s32 func_151AC3F0(u8 *, u8 *, s32, u8, s32);
+void func_151AC3F0(u8 *, u8 *, s32, u8, s32);
 s32 func_151C0434(f32 *, u8 *, u8 *, s32, s32, s32);
 
 s32 func_151C1730(u8 *arg0) {
