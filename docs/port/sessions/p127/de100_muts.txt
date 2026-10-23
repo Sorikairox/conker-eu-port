@@ -1,0 +1,53 @@
+s/if (D_800BE9F0 == 0x22) {/if (D_800BE9F0 == 0x21) {/
+s/D_800C35EA != 1 || D_800BE9F0 != 0x18 || D_800C3A08 != 1/D_800C35EA != 1 || D_800BE9F0 != 0x18/
+s/if (D_800C35EA == 1 \&\& D_800C3683 != 0) {/if (D_800C3683 != 0) {/
+s/for (i = 0; i <= nPads/for (i = 0; i < nPads/
+s/((&D_800BED50)\[i\] & 0x1000)/((\&D_800BED50)[i] \& 0x2000)/
+s/!(D_800D18A0 & (1 << i))/!(D_800D18A0 \& (2 << i))/
+s/D_800902A0 = D_800BED38\[i\].stickY;/D_800902A0 = D_800BED38[i].stickX;/
+s/                D_80090298 = 10;/                D_80090298 = 9;/
+s/if (D_800BEAC0 == 0 \&\& D_800D3268 != 0xC7) {/if (D_800D3268 != 0xC7) {/
+s/if (D_800E0EC9 >= 50) {/if (D_800E0EC9 > 50) {/
+s/y = 198;/y = 199;/
+s/if (D_80090118 > 0) {/if (D_80090118 >= 0) {/
+s/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/
+s/secs \/ 60, secs % 60);/secs \/ 60, secs % 50);/
+s/if (D_8009029C < 2) {/if (D_8009029C < 1) {/
+s/yOff = -0x24;/yOff = -0x23;/
+s/count = 3;/count = 4;/
+s/D_800E0FCA = 0;/D_800E0FCA = 1;/
+s/stickY = D_800BED38\[pad\].stickY;/stickY = D_800BED38[pad].stickX;/
+s/if ((D_800902A0 < 31 \&\& stickX >= 31)/if ((D_800902A0 < 30 \&\& stickX >= 31)/
+s/(D_800902A0 >= -30 \&\& stickX < -30)) {/(D_800902A0 >= -30 \&\& stickX < -31)) {/
+s/                D_800901CC = 1 - (s8) D_800901CC;/                D_800901CC = 2 - (s8) D_800901CC;/
+s/(D_800E0EB5 < 31 \&\& stickY >= 31)/(D_800E0EB5 < 31 \&\& stickY >= 30)/
+s/                D_800901CC = 1;/                D_800901CC = 0;/
+s/D_80090138 = 1 - D_80090138;/D_80090138 = 1;/
+s/D_800E0EB5 = stickY;/D_800E0EB5 = stickX;/
+s/y = yOff + 0x73;/y = yOff + 0x74;/
+s/(s32) D_800ABBC0, 0xD);/(s32) D_800ABBC0, 0xE);/
+s/((s8) D_800901CC == 0) + 0xC);/((s8) D_800901CC != 0) + 0xC);/
+s/func_150432FC(0x94, yOff + 0x55);/func_150432FC(0x94, yOff + 0x56);/
+s/} else if (count < (s8) D_800901CC) {/} else if (count <= (s8) D_800901CC) {/
+s/((s8) D_800901CC == 1) + 0x21);/((s8) D_800901CC == 2) + 0x21);/
+s/sel = 2;/sel = 3;/
+s/func_150432FC(0x53, yOff + 0x82);/func_150432FC(0x53, yOff + 0x81);/
+s/if (D_800E0FCA \& 0xC000) {/if (D_800E0FCA \& 0x8000) {/
+s/D_800901CC = (s8) D_800901CC + count - 1;/D_800901CC = (s8) D_800901CC + count;/
+s/if (count == 2) {/if (count == 3) {/
+s/D_80090138 + 0x1F);/D_80090138 + 0x20);/
+s/0x1E - D_80090138);/0x1F - D_80090138);/
+s/D_800E0B94 = 7;/D_800E0B94 = 6;/
+s/D_80090114 = 8;/D_80090114 = 7;/
+s/D_80090174\[0x3F\] = 4;/D_80090174[0x3E] = 4;/
+s/D_8009013C = 1;/D_8009013C = 2;/
+s/} else if (D_8008FDA8 >= 0) {/} else if (D_8008FDA8 > 0) {/
+s/D_80087270\[0\] = 0;/D_80087270[1] = 0;/
+s/i = func_151DE074(-0xF81);/i = func_151DE074(-0xF80);/
+s/((u32 \*) p)\[1\] -= 0x3E0EF0F0;/((u32 *) p)[1] -= 0x3E0EF0F1;/
+s/((u32 \*) p)\[1\] != 0xBCFCF506)/((u32 *) p)[1] != 0xBCFCF507)/
+s/(func_150ADA20() \& 0xFFFFE) + 0x80300000/(func_150ADA20() \& 0xFFFFF) + 0x80300000/
+s/osRecvMesg(&gMessageQueue\[0\], NULL, 1);/osRecvMesg(\&gMessageQueue[1], NULL, 1);/
+s/    if (sfx != 0) {/    if (sfx != 0x62D) {/
+s/func_10010F30(sfx, 0x5DC0, 0x40, 0, 0);/func_10010F30(sfx, 0x5DC0, 0x41, 0, 0);/
+s/sfx = 0x500;/sfx = 0x501;/

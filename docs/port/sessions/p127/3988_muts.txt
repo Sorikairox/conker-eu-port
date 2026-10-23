@@ -1,0 +1,18 @@
+s/\[r->player\] >= (&D_eu_800C3A60)/[r->player] > (\&D_eu_800C3A60)/
+s/(\*(s32 \*) (e + 0x10) & 0x80)/(*(s32 *) (e + 0x10) \& 0x40)/
+s/if (r->epoch == (&D_800C3A08)\[r->player\]/if (r->epoch != (\&D_800C3A08)[r->player]/
+s/\*(f32 \*) (base + 0x38) + \*(f32 \*) (base + 4)/*(f32 *) (base + 0x38) - *(f32 *) (base + 4)/
+s/r->track \* 0x44 + 8)/r->track * 0x44 + 0xC)/
+s/r->track \* 0x44 + 0);/r->track * 0x40 + 0);/
+s/if (D_800BE9E4 < left) {/if (D_800BE9E4 <= left) {/
+s/r->left = left - D_800BE9E4;/r->left = left - D_800BE9E4 - 1;/
+s/if (r->left < r->fadeOut) {/if (r->left <= r->fadeOut) {/
+s/if (r->left != 0) {/if (r->left != 1) {/
+s/\*vol = (u32) (r->volume \* r->left) \/ r->fadeOut;/*vol = (u32) (r->volume * r->left) \/ r->total;/
+s/r->total - r->fadeIn < r->left/r->total - r->fadeIn <= r->left/
+s/(r->total - r->left)) \/ r->fadeIn/(r->total - r->left + 1)) \/ r->fadeIn/
+s/if (r->left == 0xFFFF || D_800C3C88 == 0) {/if (r->left == 0xFFFF \&\& D_800C3C88 == 0) {/
+s/\/ 25;/\/ 24;/
+s/if (D_800BE9E4 < D_800C40A9) {/if (D_800BE9E4 <= D_800C40A9) {/
+s/    \*stop = 0;/    *stop = 1;/
+s/    func_10004074(r);/    func_10004074(e);/
