@@ -1,0 +1,21 @@
+s/    if (size >= 3) {/    if (size >= 4) {/
+s/    if ((D_800D2E4C->unk19 \& 4) || size == 2) {/    if ((D_800D2E4C->unk19 \& 8) || size == 2) {/
+s/    if ((D_800D2E4C->unk19 \& 4) || size == 2) {/    if ((D_800D2E4C->unk19 \& 4) || size == 1) {/
+s/        sp.spr.u40 = 0;/        sp.spr.u40 = 1;/
+s/        sp.spr.y = pos\[1\];/        sp.spr.y = pos[2];/
+s/        sp.kind = kind;/        sp.kind = flag;/
+s/        sp.spr.u50 = room;/        sp.spr.u50 = 0;/
+s/        func_151436B4(angle \* 0.017453292f, 0.0f, 39.0f, (struct17 \*) dir);/        func_151436B4(angle * 0.017453292f, 0.0f, 40.0f, (struct17 *) dir);/
+s/        sp.pos\[1\] = pos\[1\] + dir\[1\] - 40.0f;/        sp.pos[1] = pos[1] + dir[1];/
+s/        sp.pos\[2\] = pos\[2\] + dir\[2\];/        sp.pos[2] = pos[2] - dir[2];/
+s/    static const u8 sizes\[3\] = { 3, 1, 2 };/    static const u8 sizes[3] = { 3, 2, 1 };/
+s/        sp.spr.u0 = (flag ? 0x10 : 0) | 0xE;/        sp.spr.u0 = (flag ? 0x10 : 0) | 0xC;/
+s/            sp.spr.u2 = 6;/            sp.spr.u2 = 2;/
+s/        sp.spr.u6 = 300;/        sp.spr.u6 = 301;/
+s/        sp.spr.u14 = 0x620405;/        sp.spr.u14 = 0x620404;/
+s/        sp.spr.color\[6\] = 0xFF;/        sp.spr.color[6] = 0xFE;/
+s/        obj = func_15157580(\&sp.spr, 0, 1.0f, 3, 0xFF, 0x18, 0xFF, 1);/        obj = func_15157580(\&sp.spr, 0, 1.0f, 3, 0xFF, 0x19, 0xFF, 1);/
+s/            memcpy((u8 \*) obj + 0x120, \&sp.angle, 0x18);/            memcpy((u8 *) obj + 0x124, \&sp.angle, 0x18);/
+s/    return func_151BF490(angle, (s32) pos, 3, 0xFF, size, flag, room, 0xFF, 1);/    return func_151BF490(angle, (s32) pos, 3, 0xFF, flag, size, room, 0xFF, 1);/
+s/    room = func_1510FD20((s32) pos\[0\], (s32) pos\[2\]);/    room = func_1510FD20((s32) pos[0], (s32) pos[1]);/
+s/    func_1510F800(0);/    func_1510F800(1);/

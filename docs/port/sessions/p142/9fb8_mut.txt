@@ -1,0 +1,19 @@
+s/    if (\*(s16 \*) (fx + 0x38) == 0 || \*(s16 \*) (fx + 0x3A) == 0) {/    if (*(s16 *) (fx + 0x38) == 0) {/
+s/    needSync = 1;/    needSync = 2;/
+s/    gfx = func_1513F4E4(gfx, fx\[0x47\], \&needSync);/    gfx = func_1513F4E4(gfx, fx[0x46], \&needSync);/
+s/    gfx->words.w0 = 0xFA000100;/    gfx->words.w0 = 0xFA000000;/
+s/(fx\[0x43\] << 16)/(fx[0x43] << 8)/
+s/            sfrac = (\*(s16 \*) (fx + 0x34) \* 4) >> 5;/            sfrac = (*(s16 *) (fx + 0x34) * 4) >> 4;/
+s/        gfx = func_15095380(gfx, \*(s32 \*) (fx + 0x14), 0, 0, 0x100, 1, sfrac, 2, 3);/        gfx = func_15095380(gfx, *(s32 *) (fx + 0x14), 0, 0, 0x100, 1, sfrac, 2, 2);/
+s/        tileFlags = 1;/        tileFlags = 0;/
+s/        tileFlags |= 2;/        tileFlags |= 4;/
+s/    if (fl \& 8) {/    if (fl \& 0x80) {/
+s/        gfx->words.w1 = 0x795A0000;/        gfx->words.w1 = 0x795B0000;/
+s/        gfx++;\n    }\n    if (fx/X/
+s/    if (fx\[0x48\] == 2) {/    if (fx[0x48] != 0) {/
+s/(mode\[1\] | mode\[0\]) | 4/mode[1] | 4/
+s/modeL | D_800D30BC | 0x2CA0/modeL | 0x2CA0/
+s/\*(s16 \*) (fx + 0x26) >> 8);/*(s16 *) (fx + 0x26) >> 7);/
+s/\*(s16 \*) (fx + 0x36), /*(s16 *) (fx + 0x34), /
+s/\*(u16 \*) (fx + 0x3E), tileFlags/*(s16 *) (fx + 0x3E), tileFlags/
+s/(f32) \*(s16 \*) (fx + 0x3A),/(f32) *(s16 *) (fx + 0x38),/

@@ -1,0 +1,16 @@
+s/if (n\[0\] == 0.0f \&\& n\[1\] == 0.0f \&\& n\[2\] == 0.0f) {/if (n[0] == 0.0f \&\& n[1] == 0.0f) {/
+s/        zero = 1;/        zero = 0;/
+s/        nonzero = 2;/        nonzero = 1;/
+s/    if (zeros == 2) {/    if (zeros >= 1) {/
+s/                a\[1\] = 1.0f;/                a[1] = 0.5f;/
+s/                b\[2\] = 0.0f;/                b[2] = 2.0f;/
+s/                a\[0\] = 1.0f;/                a[2] = 1.0f;/
+s/        return 1;/        return 2;/
+s/    if (zeros == 1 \&\& zero == 2) {/    if (zero == 2) {/
+s/        j = 1;/        j = 0;/
+s/    a\[j\] = -n\[0\] - n\[i\] \/ n\[j\];/    a[j] = n[0] - n[i] \/ n[j];/
+s/    a\[j\] = -n\[0\] - n\[i\] \/ n\[j\];/    a[j] = -n[0] - n[j] \/ n[i];/
+s/(struct17 \*) b, (struct17 \*) n, (struct17 \*) a);/(struct17 *) n, (struct17 *) b, (struct17 *) a);/
+s/func_15145128((struct17 \*) b, (struct17 \*) b, \&len, \&scale);/func_15145128((struct17 *) b, (struct17 *) a, \&len, \&scale);/
+s/    return 0;/    return 1;/
+s/    a\[0\] = 1.0f;/    a[0] = -1.0f;/
