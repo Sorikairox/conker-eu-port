@@ -45,7 +45,7 @@ typedef struct {
 #ifdef NON_MATCHING
 /* P146 */
 extern s32 (*D_80087030[])(u8 *, s32, s32);
-s32 func_1508154C(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32 *, s32 *, u8 *);
+s32 func_1508154C(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, s32 *, s32 *, s32 *, s16 *);
 s32 func_15082020(f32 *, f32 *, u8 *, f32 *, f32 *, f32 *, f32 *);
 s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
 // ray_cast_world: casts the ray (x, y, z) + t * (dx, dy, dz) against the level (unless noLevel) and the 25 objects
@@ -76,7 +76,7 @@ s32 func_15081A90(struct127 *caster, f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz
     s32 modelA;
     s32 modelB;
     s32 modelC;
-    u8 modelD[8];
+    s16 modelD[4];
     s32 own;
     s32 last;
     s32 res;
