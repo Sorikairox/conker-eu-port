@@ -244,6 +244,22 @@ s32 func_151346D0(s32 arg0, struct102 *arg1, s32 arg2) {
     return arg0;
 }
 
+#ifdef NON_MATCHING
+/* object_list_move_1: D_80089E40 table entry (func_151342BC calls the entries as s32 (*)(obj) and runs
+ * func_1516972C on the object when the result is 0): moves the object to list 1 (func_15169804). The asm returns
+ * what func_15168A4C leaves in v0: the object's byte +1 (its type, read as the list index). */
+s32 func_151346EC(struct102 *arg0) {
+    func_15169804(arg0);
+    return ((u8 *) arg0)[1];
+}
+
+/* object_list_free: D_80089E40 table entry: unlinks and frees the object (func_15169824). The asm returns the free
+ * function's v0 (osSetIntMask's previous mask, never 0), so func_151342BC never touches the freed object: 1. */
+s32 func_1513470C(struct102 *arg0) {
+    func_15169824(arg0);
+    return 1;
+}
+#else
 void func_151346EC(struct102 *arg0) {
     func_15169804(arg0);
 }
@@ -251,6 +267,7 @@ void func_151346EC(struct102 *arg0) {
 void func_1513470C(struct102 *arg0) {
     func_15169824(arg0);
 }
+#endif
 
 void func_1513472C(struct102 *arg0) {
     s32 idx = arg0->unk3D;

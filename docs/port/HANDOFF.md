@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P166, 2026-10-24). Details: `docs/port/sessions/P166.md`
+
+- New hand C (NM): pause / money screen HUD model func_151EE0C4 hud_model_load (display list copies: 0xEF -> render
+  mode 0x5041C8, 0xFC -> no-op) and func_151EE394 hud_model_draw (per frame; head blink textures 0x507 / 0x508);
+  func_1507D754 callees func_150BC968 object_impact_debris_hard, func_150BC03C object_impact_debris (both void),
+  func_150C04E0 object_land_puff. All difftest EQUIV with setups / ARGMEM + mutants (24/24, 30/31 + 1 equivalent,
+  50/50, 52/52, 15/15).
+- D_80089E40 (func_151342BC per-type table, 23 entries) confirmed real (result 0 -> func_1516972C(obj)). NM return
+  types fixed: func_151346EC returns obj[1] (asm: func_15168A4C's lbu), func_1513470C returns 1 (free's nonzero v0),
+  wrappers func_151ABD38 / 151ABD88 / 150C6910 / 150C6938 / 150C7240 / 150C7268 return the tail call (matching
+  bodies in #else). func_151342BC itself still asm.
+- func_1507D754: not written. Left: func_151BAAC8 (this slot, 715 insns, all callees C), func_15136C3C (this slot,
+  blocked by port-b's func_15150D7C), func_151CFFFC / func_151C9740 / func_150E0DF0 chain (port-b files).
+- New `docs/port/sessions/p166/dis.sh func...`: objdump of matching-build functions (return-value checks of C code).
+- Checks: verify_all OK (full ROM OK, after the last code edit), NM links, protocheck 0 (1161), selftest 62/62,
+  progress_nm 5155/5915 (87.2%), C bytes 68.2%.
+
+## Next steps (from P166)
+
+1. func_151BAAC8 (game_eu_1E7CC0, 715 insns): last func_1507D754 callee in this slot with only C callees.
+2. func_151342BC (game_161520, D_80089E40 dispatcher) now that its table entries have s32 NM signatures.
+3. Browser: pause / money screen head model (func_151EE0C4 / func_151EE394), plus P157's list.
+4. P138 / P141 leftovers (not started).
+
 ## State (session P157, 2026-10-23). Details: `docs/port/sessions/P157.md`
 
 - New hand C (NM): func_15132BBC particle_spawn (worker of the C wrapper func_15132FBC: every particle spawn now runs C)

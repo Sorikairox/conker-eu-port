@@ -35,7 +35,109 @@ void func_150BF47C(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFF7C.s")
 
+#ifdef NON_MATCHING
+s32 func_15136C3C(u8 *, s32, s32, s32, s32, s32, s32, s32);
+void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
+
+/* func_15153BA4 effect request (0x6C bytes; fields named by offset) */
+typedef struct {
+    /* 0x00 */ s16 u00;
+    /* 0x02 */ s16 u02;
+    /* 0x04 */ u8  u04;
+    /* 0x06 */ s16 u06;
+    /* 0x08 */ s32 u08;
+    /* 0x0C */ s32 u0C;
+    /* 0x10 */ s16 u10;
+    /* 0x12 */ s16 u12;
+    /* 0x14 */ s32 u14;
+    /* 0x18 */ s32 u18;
+    /* 0x1C */ u8  rgba0[4];
+    /* 0x20 */ u8  rgba1[4];
+    /* 0x24 */ u8  rgba2[2];
+    /* 0x26 */ s16 u26;
+    /* 0x28 */ s16 u28;
+    /* 0x2A */ s16 u2A;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 u30;
+    /* 0x34 */ f32 u34;
+    /* 0x38 */ f32 pos[3];
+    /* 0x44 */ s16 u44;
+    /* 0x46 */ s16 u46;
+    /* 0x48 */ s16 u48;
+    /* 0x4A */ s16 u4A;
+    /* 0x4C */ f32 u4C;
+    /* 0x50 */ f32 u50;
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ f32 u58;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8  u60;
+    /* 0x61 */ s8  u61;
+    /* 0x62 */ u8  u62;
+    /* 0x63 */ u8  u63;
+    /* 0x64 */ u8  u64;
+    /* 0x68 */ f32 u68;
+} PuffRequest;
+
+/* object_land_puff: func_1507D754 callee: func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1), then one func_15153BA4
+ * effect (constant request: model 0x11 / 7, colours 4E 54 7B FF / A4 A1 C8 9B / 64 FF, flags 0x40040E07) 35 above
+ * the point 70 over the object's floor height (+0x180) at its x / z. */
+void func_150C04E0(u8 *obj) {
+    PuffRequest req;
+    f32 pos[3];
+
+    pos[0] = *(f32 *) (obj + 0x14);
+    pos[1] = *(f32 *) (obj + 0x180) + 70.0f;
+    pos[2] = *(f32 *) (obj + 0x1C);
+    func_15136C3C(obj, 0, 0, 1, 0, 0, 0xFF, 1);
+    req.u00 = 0x11;
+    req.u02 = 7;
+    req.u04 = 0x6C;
+    req.u06 = 0x5103;
+    req.u08 = 0x200005;
+    req.u0C = 0;
+    req.u10 = 0x28;
+    req.u12 = 0x14;
+    req.u14 = 0;
+    req.u18 = 0;
+    req.rgba0[0] = 0x4E;
+    req.rgba0[1] = 0x54;
+    req.rgba0[2] = 0x7B;
+    req.rgba0[3] = 0xFF;
+    req.rgba1[0] = 0xA4;
+    req.rgba1[1] = 0xA1;
+    req.rgba1[2] = 0xC8;
+    req.rgba1[3] = 0x9B;
+    req.rgba2[0] = 0x64;
+    req.rgba2[1] = 0xFF;
+    req.u26 = 0x1E;
+    req.u28 = 8;
+    req.u2A = 0x1E;
+    req.u2C = 1.02f;
+    req.u30 = 451.0f;
+    req.u34 = 501.0f;
+    req.pos[0] = pos[0];
+    req.pos[1] = pos[1] + 35.0f;
+    req.pos[2] = pos[2];
+    req.u44 = 0;
+    req.u46 = -0x14;
+    req.u48 = 0xFF;
+    req.u4A = 0x1E;
+    req.u4C = 15.0f;
+    req.u50 = 39.0f;
+    req.u54 = 0.354f;
+    req.u58 = 0.62600005f;
+    req.u5C = 0x40040E07;
+    req.u60 = 0x10;
+    req.u61 = -1;
+    req.u62 = 8;
+    req.u63 = 6;
+    req.u64 = 1;
+    req.u68 = 0.877551f;
+    func_15153BA4((u8 *) &req, 0xFF, 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C04E0.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);

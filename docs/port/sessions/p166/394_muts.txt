@@ -1,0 +1,31 @@
+s/if (D_800901BC != 1.0f)/if (D_800901BC == 1.0f)/ %
+s/y \*= D_800901C0/y *= D_800901BC/ %
+s/scale \*= D_800901BC/scale *= D_800901C0/ %
+s/\[3\]\[2\] = -100.0f/[3][2] = 100.0f/ %
+s/\[3\]\[0\] = x/[3][0] = y/ %
+s/\[3\]\[1\] = y/[3][1] = x/ %
+s/\[1\]\[1\] = scale/[1][2] = scale/ %
+s/guMtxIdentF(m->mtx\[D_800BE9C0\])/guMtxIdentF(m->mtx[0])/ %
+s/0xDA380003/0xDA380002/ %
+s/(u32) \&D_800E1068/(u32) D_80089810/ %
+s/0xFFFFFBFD/0xFFFFFBFC/ %
+s/= 0x200404/= 0x200405/ %
+s/(D_800E1060 \& 0xFF) | ~0xFF/(D_800E1060 \& 0x7F) | ~0xFF/ %
+s/0xF8000000;/0xF8000001;/ %
+s/0x3E8 + D_800BE9C0 \* 4/0x3E8/ %
+s/= m->seg6/= m->u20/ %
+s/if (m == (HudModel \*) D_80090408)/if (m != (HudModel *) D_80090408)/ %
+s/m->blink--;/m->blink -= 2;/ %
+s/if (m->blink == 0)/if (m->blink == 1)/ %
+s/\& 0x7F) + 15/\& 0xFF) + 15/ %
+s/m->blink < 7/m->blink < 6/ %
+s/? 0x507 : 0x508/? 0x508 : 0x507/ %
+s/0x507 : 0x508, 0, 3, 0/0x507 : 0x508, 0, 2, 0/ %
+s/return gdl;/return (u8 *) g;/ %
+s/0xDB06001C/0xDB060018/ %
+s/i < m->count/i <= m->count/ %
+s/(u32) m->copies\[i\]/(u32) m->copies[0]/ %
+s/(u32) D_800904D8/(u32) D_800904C0/ %
+s/tex == (s32) 0x80000000/tex == 0/ %
+s/m->blink = (func_150ADA20/m->blink += (func_150ADA20/ %
+s/\[2\]\[2\] = scale/[2][1] = scale/ %
