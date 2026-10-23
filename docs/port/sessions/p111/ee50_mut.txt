@@ -1,0 +1,79 @@
+# P111 mutants for func_1512EE50 (sed expression % setups)
+s/if (ES16(0x73C) != 0) {/if (ES16(0x73C) == 1) {/
+s/if (RQ_ID != ST_ID) {/if (RQ_ID == ST_ID) {/
+s/        p\[0x92C\] = 0;$/        p[0x92D] = 0;/
+s/ST_ID = RQ_ID;/ST_ID = RQ_ID + 1;/
+s/\[0x120\] != 0 \&\& p\[0x92C\] == 0/[0x121] != 0 \&\& p[0x92C] == 0/
+s/if (RQ_MODE != 4 \&\&/if (RQ_MODE != 5 \&\&/
+s/ST_PENDING == 0 \&\& ST_EASING == 0/ST_PENDING == 0/
+s/if (RQ_MODE != 0xA) {/if (RQ_MODE != 0xB) {/
+s/ES16(0x1C4) = ES16(0x1B4);/ES16(0x1C4) = ES16(0x1B6);/
+s/, 7, 0) \* 16;/, 7, 1) * 16;/
+s/bestD = 1e14f;/bestD = 1e4f;/
+s/for (i = 0; i != 5; i++)/for (i = 0; i != 4; i++)/
+s/l = node\[9 + i\];/l = node[8 + i];/
+s/if (d < bestD) {/if (d <= bestD) {/
+s/d = dx \* dx + dy \* dy + dz \* dz;/d = dx * dx + dz * dz;/
+s/best\[1\] = cand\[1\];/best[1] = cand[2];/
+s/ES32(0x84) \&= 0x7FFFFFF9;/ES32(0x84) \&= 0x7FFFFFFB;/
+s/if (EU16(0x920) \& 7) {/if (EU16(0x920) \& 3) {/
+s/        p\[0x92C\] = 1;/        p[0x92C] = 2;/
+s/EF(0x914) = 2.5f;/EF(0x914) = 1.5f;/
+s/\& 7)) {/\& 3)) {/
+s/k = (30.0f < /k = (30.0f <= /
+s/? 7.0f : 4.0f;/? 7.0f : 5.0f;/
+s/EF(0x90C) = EF(0x914);/EF(0x90C) = EF(0x910);/
+s/(f32 \*)(p + 0x91C), 1.5f, 2.0f/(f32 *)(p + 0x91C), 1.5f, 2.5f/
+s/EF(0x300) = best\[2\];/EF(0x300) = best[0];/
+s/if (!(EU16(0x920) \& 8)) {/if (!(EU16(0x920) \& 0x80)) {/
+s/(f32 \*)(p + 0x8FC), EF(0x908)/(f32 *)(p + 0x8FC), EF(0x90C)/
+s/EF(0x2FC) = best\[1\];/EF(0x2FC) = best[0];/
+s/EF(0x348) = EF(0x928);/EF(0x348) = EF(0x924);/
+s/ES32(0x734) = RQ_ID | 0x4000;/ES32(0x734) = RQ_ID | 0x400;/
+s/ES32(0x84) = (ES32(0x84) \& ~0xE) | 0x200;/ES32(0x84) = (ES32(0x84) \& ~0xC) | 0x200;/
+s/if (RQ_ARG == 5 || RQ_ARG == 0x11) {/if (RQ_ARG == 5 || RQ_ARG == 0x12) {/
+s/if ((s32)RQ_A != ES16(0x272)) {/if (1) {/
+s/ES16(0x272) \* 0x18;/ES16(0x272) * 0x10;/
+s/EF(0x28C) = \*(s16 \*)(D_800DC454 + 2);/EF(0x28C) = *(s16 *)(D_800DC454 + 4);/
+s/ES32(0x5F0) |= 4;/ES32(0x5F0) |= 8;/
+s/                    p\[0x23C\] = 1;/                    p[0x23C] = 2;/
+s/ES16(0x274) = RQ_ARG;/ES16(0x274) = RQ_A;/
+s/\*(f32 \*)(st + 0x2C) = (u32)RQ_ARG;/*(f32 *)(st + 0x2C) = RQ_ARG;/
+s/func_15083E0C(req\[0x1F\])/func_15083E0C(req[0x1E])/
+s/if (obj == NULL) {/if (obj == (u8 *)1) {/
+s/\/ 0x32C);/\/ 0x330);/
+s/\* 0.017453292f) \* dist + EF(0x2A4)/* 0.017453292f) * dist + EF(0x2A8)/
+s/EF(0x620) = -cosf/EF(0x620) = cosf/
+s/EF(0x384) = EF(0x37C);/EF(0x384) = EF(0x380);/
+s/p\[0x23D\] \* 0x32C;/p[0x23D] * 0x328;/
+s/EF(0x61C) += (\*(f32 \*)(obj + 0x18) - EF(0x61C)) \* 0.04f;/EF(0x61C) += (*(f32 *)(obj + 0x18) - EF(0x61C)) * 0.05f;/
+s/(EF(0x2A8) - EF(0x61C));/(EF(0x2A8) + EF(0x61C));/
+s/ES32(0x84) = (ES32(0x84) | 0x200) \& ~8;/ES32(0x84) = (ES32(0x84) | 0x200);/
+s/                ES32(0x134) = 0;/                ES32(0x134) = 1;/
+s/EF(0x618) = RQ_X;/EF(0x618) = RQ_Y;/
+s/if (func_15123934(arg0, 0x2000,/if (func_15123934(arg0, 0x1000,/
+s/if (dist < EF(0x374)) {/if (dist <= EF(0x374) + 1.0f) {/
+s/ST_PUSH += 0.005f;/ST_PUSH += 0.004f;/
+s/func_150AD780(EF(0x39C))/func_150AD78C(EF(0x39C))/
+s/if (ES32(0x6C8) == 0 || mode == 0) {/if (ES32(0x6C8) == 0) {/
+s/ES32(0x84) \&= ~4;/ES32(0x84) \&= ~5;/
+s/if (dist < EF(0x374) \&\& RQ_MODE == 1) {/if (dist < EF(0x374)) {/
+s/ST_PUSH += 0.0025f;/ST_PUSH += 0.005f;/
+s/ST_X += ((f32)RQ_X - ST_X) \* 0.04f;/ST_X += ((f32)RQ_Y - ST_X) * 0.04f;/
+s/EF(0x2AC) += (ST_Z - EF(0x2AC)) \* 0.5f;/EF(0x2AC) += (ST_Z - EF(0x2AC)) * 0.25f;/
+s/func_15124C38(arg0, NULL);/func_15124C38(arg0, (f32 *)p);/
+s/            func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 2);/            func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 3);/
+s/\*(f32 \*)(st + 0x28) = 0.0f;/;/
+s/if (ES32(0x6C8) == 1 \&\& ST_MODE == 1) {/if (ES32(0x6C8) == 1 \&\& ST_MODE == 0) {/
+s/        ST_PUSH = 0.0f;/        ST_PUSH = 1.0f;/
+s/if (ES32(0x2C) == 0x40) {/if (ES32(0x2C) \& 0x40) {/
+s/EF(0x670) = 0.01f;/EF(0x670) = 0.02f;/
+s/        ST_BLEND = 1.0f;/        ST_BLEND = 0.5f;/
+s/ST_X += (EF(0x2A4) - ST_X) \* ST_BLEND;/ST_X += (EF(0x2A4) - ST_X) * 0.5f;/
+s/ST_BLEND += 0.015f;/ST_BLEND += 0.02f;/
+s/if (ST_BLEND != 1.0f \&\& ST_MODE == 1) {/if (ST_BLEND != 1.0f) {/
+s/        RQ_MODE = 0xD;/        RQ_MODE = 0xC;/
+s/        EF(0x900) = 0.0f;/        ;/
+s/        p\[0x948\] = 0;/        ;/
+s/func_151239CC(arg0, 1);/func_151239CC(arg0, 3);/
+s/        \*(u8 \*\*)(p + 0x614) = NULL;/        ;/

@@ -11,6 +11,98 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 ```
 
 ## State (session P123, 2026-10-23, port-web). Details: `docs/port/sessions/P123.md`
+## P122 (port-b) (session P122, 2026-10-23). Details: `docs/port/sessions/P122.md`
+
+Branch `port-b` (from P119 3b9eea1); the orchestrator merges it into `port`.
+
+- m2c_sanity: the 3 high rows in port-b files (func_15051558, func_1509A024, func_15180AF0; all pooled `O:` width
+  rows) are false positives (reasons in P122.md); no change.
+- C (NM): func_151848D8 `shadow_light_projection` (52/58, 4 equivalent, 2 boundary survivors), func_15178004
+  `vtx_anims_update` (19/19) with its five hand-asm wave animators in game_eu_D4C90.c: func_150A7480
+  `vtx_wave_y_per_vertex`, func_150A75A0 `vtx_wave_y`, func_150A76A8 `vtx_wave_y_colour`, func_150A7840
+  `vtx_wave_y_colour_per_vertex`, func_150A79FC `vtx_wave_y_normal_colour` (func_150A7BD0 stays GLOBAL_ASM).
+- verify_all OK, NM links, protocheck = only the known game_A9D90.c func_1517FD84 line. progress_nm total
+  5040/5915 (85.2%), game 4510/5334, C bytes 63.1%, 875 asm-only.
+
+## Next steps (from P122)
+
+1. game_A9D90.c:19 `void func_1517FD84(...)` (port session).
+2. func_15184298 (game_eu_1B1010.c) with func_151661F0 (game_eu_193A00.c) and func_1517A320 (game_eu_1A7B30.c):
+   needs a session owning those files.
+3. Boundary survivors: func_151848D8 `min_h < 10` / `m < 32767`; P119's 7 threshold gaps.
+4. Browser: shadows, vertex wave animations (water), plus the P119 list.
+
+## P119 (port-b) (session P119, 2026-10-23). Details: `docs/port/sessions/P119.md`
+
+Branch `port-b` (from P115 9f8e18a); the orchestrator merges it into `port`.
+
+- **Merged port 28b8fa3** (275614d): CD540 = port's file; 83300 / 981E0 adjacent NM blocks kept; AF2A0 = port's
+  one-argument func_15084000; difftest.py = P80 splice + P73 nmside; selftest 53/53. Fixes: func_15073118 `u8 *`
+  declaration (NM build), duplicate func_1506BF5C prototype, game_eu_F5580.c one-argument func_151149AC.
+- C (NM): func_1512DAD0 `camera_queue_event` (8/8), func_150A7B80 `mtx_set_identity` (5/5), func_15113000
+  `world_records_build_visible` (30/35, 3 equivalent), func_1517FD84 `hud_lens_set_target` (12/13, 1 equivalent),
+  func_15181A6C `hud_lens_update` (33/40, 2 equivalent), func_1510D090 `tint_channels_update` (16/18, 2 equivalent).
+- verify_all OK, NM links. **protocheck 2 lines = 1 mismatch**: game_A9D90.c:19 declares `s32 func_1517FD84`, the
+  function returns nothing: make it `void` (not a port-b file). **progress_nm** total 5033/5915 (85.1%), game
+  4503/5334, C bytes 62.8%, 882 asm-only.
+
+## Next steps (from P119)
+
+1. game_A9D90.c:19: `void func_1517FD84(s32, f32, f32, f32, s32);` (protocheck back to 0).
+2. Boundary survivors listed in P119.md (func_15113000 depth == far / near; func_15181A6C exact-threshold cases):
+   targeted setups if wanted.
+3. Shadow func_151848D8 (674 insns, game_eu_1B1ED0.c); func_15178004 / func_15184298 (asm callees, see P115).
+4. Browser: camera requests, visible world records, HUD lens / zoom, tint channels.
+
+## P115 (port-b) (session P115, 2026-10-23). Details: `docs/port/sessions/P115.md`
+
+Branch `port-b` (from P111 5a19134); the orchestrator merges it into `port`.
+
+- **Camera** in C: func_15128D50 (`camera_lean_from_heading`, mutants 22/24, 2 equivalent), func_15129220
+  (`camera_process_events`, the per-frame event pump; 87 setups, mutants 41/42, 1 equivalent), func_1512EB60
+  (`camera_read_depth_row`, DL; mutants 18/20, 2 equivalent). func_15128D50 / func_15129220 return nothing: caller
+  declarations in game_14FF90.c, game_eu_15C660.c, game_eu_4A070.c are now `void`.
+- func_15113798 (`world_records_update_matrices`, per frame from func_15019130): mutants 20/20.
+- func_151149AC (`world_record_find`, P114 draft) inserted in game_eu_13DC30.c on the coordinator's request.
+- Default build byte-identical (verify_all, `port_work/p115/verify1.log`), NM links. protocheck: 3 problems = the
+  known func_15157580 + func_151149AC declared with 3 args in game_eu_F5580.c:93 (not a port-b file; fix the
+  declaration to `u8 *func_151149AC(u8)`). **progress_nm** total 4933/5915 (83.4%), game 4405/5334, C bytes 58.0%,
+  982 asm-only.
+
+## Next steps (from P115)
+
+1. Remaining stubs on the new C paths: func_1512DAD0 (41 insns, game_eu_15B2E0.c; script request start in
+   func_15129220) and func_150A7B80 (16 insns, game_D5030.c; Mtx of disabled records in func_15113798).
+2. game_eu_F5580.c:93 / 118: one-argument func_151149AC (protocheck).
+3. Per-frame handlers left: func_15113000 (448, callees C), func_15181A6C with its producer func_1517FD84 (same file),
+   func_15178004 (asm callees in game_eu_D4C90.c), func_15184298 (asm callees func_151661F0, func_1517A320), shadow
+   func_151848D8, func_1510D090.
+4. Browser: camera events (cut scenes, save / restore of the game camera), depth row, attached world records.
+
+## P111 (port-b) (session P111, 2026-10-23). Details: `docs/port/sessions/P111.md`
+
+Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
+
+- **func_1512EE50 in C** (`camera_apply_request`, game_eu_15C660.c): the per-frame camera request handler that
+  writes the eye height cam +0x2FC (P105 camera bug). Map `p111/func_1512EE50_map.md`. 213 setups EQUIV, mutants
+  78/78. Caller declaration in game_14FF90.c changed to `void`. Only stub callee: func_15128D50 (mode 2, not a
+  port-b file).
+- Free camera: func_1512B728 (`free_camera_scan_depth`, 16/16 mutants) and func_1512BCA0 (`free_camera_turn`,
+  returns s32; 28/29 mutants, 1 equivalent). func_1512B2C4's three callees are all C now.
+- func_150B3CA8 (`trail_hit_splash`, game_eu_E0430.c): the last asm trail hit handler; mutants 33/33.
+- Default build byte-identical (verify_all rc 0), NM links, protocheck 1 known problem. **progress_nm** total
+  4928/5915 (83.3%), game 4400/5334, C bytes 57.7%, 987 asm-only.
+
+## Next steps (from P111)
+
+1. Browser: re-run the P105 camera scenario. The pre-death view should no longer look straight down. Also check
+   the free camera and the trail splashes (P111.md UNVERIFIED).
+2. func_15128D50 (game_eu_156560.c), func_15129220 (game_eu_156A30.c) and func_1512EB60 (game_eu_15C370.c) are
+   not in port-b files and need an owner.
+3. Smallest asm-only left in port-b files (from P108): func_15144CEC (101), func_1505327C (109), func_15053430
+   (113). func_15060D54 is now owned by port (game_83300.c moved).
+
+## P108 (port-b) (session P108, 2026-10-23). Details: `docs/port/sessions/P108.md`
 
 - **Menu black = screen fade stuck at 0xFF.** The C menu handler (P117) now starts level 0x1D scene 1. Its scene start
   func_1501DB18 sets black (t = 0 event `5/0x01 w6 1`). The fade-in is the same event in **handler C func_15029EA8**

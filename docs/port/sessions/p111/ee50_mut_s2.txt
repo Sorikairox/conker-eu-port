@@ -1,0 +1,2 @@
+s/if (d < bestD) {/if (d <= bestD) {/
+s/if (EU16(0x920) \& 7) {/if (EU16(0x920) \& 3) {/

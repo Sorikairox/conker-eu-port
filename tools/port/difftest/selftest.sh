@@ -61,14 +61,14 @@ chk DIFFER func_15048A70 src_eu/game_75E60.c 's/arg0 -= 360.0f;/arg0 -= 361.0f;/
 chkc EQUIV  func_151B97C4
 chkc DIFFER func_151B97C4 's/0.0234f/0.0235f/g'
 chkc DIFFER func_151B97C4 's/sinf(temp_f0)/sinf(temp_f2)/'
-# P71: a call statement with a comma inside a macro argument (`func_100043B4((s32 *) ATT_W(rec, 0x28), 4);`) is not
-# a 3-argument prototype: the declared 2-argument func_100043B4 must not compare the scratch a2 (was a false DIFFER)
-chkc EQUIV  func_15030448
-chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
 # P73: func_1501B300's NON_MATCHING block also holds func_1501B640: the candidate went into the dropped #else side
 # and src_eu's body was tested instead (every mutant EQUIV). The mutant must be DIFFER.
 chk EQUIV  func_1501B300 src_eu/game_eu_48B10.c
 chk DIFFER func_1501B300 src_eu/game_eu_48B10.c 's/out\[1\] = negSinPitch \* 127.0f;/out[1] = x * 127.0f;/'
+# P71: a call statement with a comma inside a macro argument (`func_100043B4((s32 *) ATT_W(rec, 0x28), 4);`) is not
+# a 3-argument prototype: the declared 2-argument func_100043B4 must not compare the scratch a2 (was a false DIFFER)
+chkc EQUIV  func_15030448
+chkc DIFFER func_15030448 's/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/'
 # P80: a converted function whose #else holds a note line before the pragma (game_981E0.c "// TBD ..."): the candidate
 # used to be dropped (the old NM C was tested, every mutant survived); now spliced, and a dropped candidate is an ERROR
 chkc EQUIV  func_1506EF5C

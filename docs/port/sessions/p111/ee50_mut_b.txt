@@ -1,0 +1,34 @@
+s/EF(0x620) = -cosf/EF(0x620) = cosf/
+s/EF(0x384) = EF(0x37C);/EF(0x384) = EF(0x380);/
+s/p\[0x23D\] \* 0x32C;/p[0x23D] * 0x328;/
+s/EF(0x61C) += (\*(f32 \*)(obj + 0x18) - EF(0x61C)) \* 0.04f;/EF(0x61C) += (*(f32 *)(obj + 0x18) - EF(0x61C)) * 0.05f;/
+s/(EF(0x2A8) - EF(0x61C));/(EF(0x2A8) + EF(0x61C));/
+s/ES32(0x84) = (ES32(0x84) | 0x200) \& ~8;/ES32(0x84) = (ES32(0x84) | 0x200);/
+s/                ES32(0x134) = 0;/                ES32(0x134) = 1;/
+s/EF(0x618) = RQ_X;/EF(0x618) = RQ_Y;/
+s/if (func_15123934(arg0, 0x2000,/if (func_15123934(arg0, 0x1000,/
+s/if (dist < EF(0x374)) {/if (dist <= EF(0x374) + 1.0f) {/
+s/ST_PUSH += 0.005f;/ST_PUSH += 0.004f;/
+s/func_150AD780(EF(0x39C))/func_150AD78C(EF(0x39C))/
+s/if (ES32(0x6C8) == 0 || mode == 0) {/if (ES32(0x6C8) == 0) {/
+s/ES32(0x84) \&= ~4;/ES32(0x84) \&= ~5;/
+s/if (dist < EF(0x374) \&\& RQ_MODE == 1) {/if (dist < EF(0x374)) {/
+s/ST_PUSH += 0.0025f;/ST_PUSH += 0.005f;/
+s/ST_X += ((f32)RQ_X - ST_X) \* 0.04f;/ST_X += ((f32)RQ_Y - ST_X) * 0.04f;/
+s/EF(0x2AC) += (ST_Z - EF(0x2AC)) \* 0.5f;/EF(0x2AC) += (ST_Z - EF(0x2AC)) * 0.25f;/
+s/func_15124C38(arg0, NULL);/func_15124C38(arg0, (f32 *)p);/
+s/            func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 2);/            func_15123934(arg0, ES32(0x2C), 0, ES32(0x134), 3);/
+s/\*(f32 \*)(st + 0x28) = 0.0f;/;/
+s/if (ES32(0x6C8) == 1 \&\& ST_MODE == 1) {/if (ES32(0x6C8) == 1 \&\& ST_MODE == 0) {/
+s/        ST_PUSH = 0.0f;/        ST_PUSH = 1.0f;/
+s/if (ES32(0x2C) == 0x40) {/if (ES32(0x2C) \& 0x40) {/
+s/EF(0x670) = 0.01f;/EF(0x670) = 0.02f;/
+s/        ST_BLEND = 1.0f;/        ST_BLEND = 0.5f;/
+s/ST_X += (EF(0x2A4) - ST_X) \* ST_BLEND;/ST_X += (EF(0x2A4) - ST_X) * 0.5f;/
+s/ST_BLEND += 0.015f;/ST_BLEND += 0.02f;/
+s/if (ST_BLEND != 1.0f \&\& ST_MODE == 1) {/if (ST_BLEND != 1.0f) {/
+s/        RQ_MODE = 0xD;/        RQ_MODE = 0xC;/
+s/        EF(0x900) = 0.0f;/        ;/
+s/        p\[0x948\] = 0;/        ;/
+s/func_151239CC(arg0, 1);/func_151239CC(arg0, 3);/
+s/        \*(u8 \*\*)(p + 0x614) = NULL;/        ;/

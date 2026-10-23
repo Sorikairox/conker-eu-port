@@ -915,18 +915,6 @@ s32 func_15083FB0(u8 arg0) {
     return -1;
 }
 
-#ifdef NON_MATCHING
-/* P73: one argument under NM (wasm needs one signature; every caller passes only the object id, the asm
- * forwards its unused a1..a3 to func_1505EEF4) */
-s32 func_15084000(s32 id) {
-    struct127 *obj = func_1505EEF4(id);
-
-    if (obj != NULL) {
-        return obj - D_800CC2D0;
-    }
-    return -1;
-}
-#else
 /* P80: one argument (func_1505EEF4 reads only the id); the callers in game_CB1C0.c pass one */
 s32 func_15084000(s32 arg0) {
     struct127 *temp_v0 = func_1505EEF4(arg0);
@@ -936,7 +924,6 @@ s32 func_15084000(s32 arg0) {
     }
     return -1;
 }
-#endif
 
 #ifdef NON_MATCHING
 extern u16 D_800C5BC0[]; /* vertex block size of each model slot, in 16-byte vertices */

@@ -1,0 +1,18 @@
+s/+ 0x5F0) \& 1)) {/+ 0x5F0) \& 2)) {/ %
+s/step = D_800BE9E4 \* 2;/step = D_800BE9E4 * 3;/ %
+s/pending = D_800DA2D8\[player \* 3\];/pending = D_800DA2D8[player * 3 + 1];/ %
+s/target = pending ? D_800DA2D8\[j\] : D_800DA2D4\[i\];/target = pending ? D_800DA2D8[j] : D_800DA2D4[j];/ %
+s/if ((d < 0 ? -d : d) < step) {/if ((d < 0 ? -d : d) <= step) {/ %
+s/} else if (d >= 0) {/} else if (d < 0) {/ %
+s/level -= step;/level -= 1;/ %
+s/D_800DA2C8\[j\] = level;/D_800DA2C8[j] = target;/ %
+s/(D_800DA290\[j\] >> 4) \& 0xFF/(D_800DA290[j] >> 3) \& 0xFF/ %
+s/\* D_800DA2B8\[j\])/* D_800DA2A8[j])/ %
+s/+ level - 0x7F;/+ level - 0x80;/ %
+s/if (v >= 0) {/if (v > 0) {/ %
+s/D_800D9F98\[j\] -= v;/D_800D9F98[j] += v;/ %
+s/if (D_800D9F88\[j\] >= 0x80) {/if (D_800D9F88[j] > 0x80) {/ %
+s/D_800D9F98\[j\] = 0x7F;/D_800D9F98[j] = 0x80;/ %
+s/\& 0xFFF;/\& 0xFFFF;/ %
+s/D_800DA2D8\[player \* 3\] = 0;/D_800DA2D8[player * 3 + 1] = 0;/ %
+s/ + level - 0x7F; / + (u8) level - 0x7F; / %

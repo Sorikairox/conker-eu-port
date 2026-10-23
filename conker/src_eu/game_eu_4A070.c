@@ -1884,7 +1884,7 @@ void func_15020920(s32 actor, s32 seg, s32 slot) {
 #ifdef NON_MATCHING
 s32 func_1502330C(s32, s32);
 void func_1512DAD0(struct108 *, s32, void *);
-s32 func_15129220(struct108 *);
+void func_15129220(struct108 *);
 void func_1517DB6C(s16, s16, s16, s32, s32, s32);
 extern u8 D_800C3A18;
 extern s32 D_800C3A20;   /* camera event block (func_1512DAD0 event 7) */
