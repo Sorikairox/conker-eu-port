@@ -5,7 +5,7 @@
  * semantics: D_80088950 below is a big-endian u64 in virtual big-endian memory.
  *
  *   func_100061F8  handwritten TLB loop (init_eu_5DA0.c)
- *   func_150ADA20  libultra guRandom on 64-bit registers (game_DAE50.c)
+ *   (func_150ADA20 guRandom: game C since port P106, removed here in P110)
  *   (the TEMPORARY P58 / P61 / P63 versions were removed in P66 and P69; none are left)
  */
 #include <ultra64.h>
@@ -22,21 +22,10 @@ s32 func_100061F8(s32 lo, s32 hi) {
     return 0;
 }
 
-/* guRandom with the seed as a u64 (the asm uses ld/dsll32/dsrl/sd; difftest has no 64-bit shifts,
- * see P5.md). Instruction by instruction:
- *   a2 = x << 63 >> 31 | x << 31 >> 32;  a2 ^= x << 44 >> 32;  x = a2 ^ (a2 >> 20 & 0xFFF);
- *   return (s32)x   (dsll32/dsra32 sign-extends the low word)
- * The seed is set by func_150ADACC: D_80088950 = (s64)arg0 + 1. */
+/* P110: func_150ADA20 (guRandom on a u64 seed) was removed here: port P106 wrote the same formula as C in
+ * game_DAE50.c (NM), which caused a duplicate symbol. The self-test below now checks the game C. */
 extern u64 D_80088950;
-
-s32 func_150ADA20(void) {
-    u64 x = D_80088950;
-    u64 t = (x << 63 >> 31) | (x << 31 >> 32);
-    t ^= x << 44 >> 32;
-    x = t ^ ((t >> 20) & 0xFFF);
-    D_80088950 = x;
-    return (s32)(u32)x;
-}
+s32 func_150ADA20(void);
 
 /* self-test: three guRandom steps from a known seed (expected values from the u64 formula in
  * Python, docs/port/sessions/P8.md); checks the vbe 64-bit load/store of the seed too */

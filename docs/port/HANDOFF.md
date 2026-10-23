@@ -10,6 +10,35 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P110, 2026-10-23, port-web). Details: `docs/port/sessions/P110.md`
+
+- Merged port a658cf8 (P104 music), port-b 7d59c9c (P102 / P108) and port 1888378 (P106 event system).
+  - Only HANDOFF conflicts (merge_union).
+  - After each merge: verify_all OK, NM link, protocheck 0, float-int BUG 0. Census 722 ok / 0 FAIL.
+- port/boot/pc_overrides.c: func_150ADA20 removed (duplicate of the P106 game C).
+- port/tools/n64mem.py: maps the 10 event-VM natives in D_80088A44 (VM_NATIVES).
+- **P105 guard dropped.** The trail chain runs as C: spawns, then about 22000 draws, heap 0, null 0. func_150B3CA8
+  is not reached.
+- **Music plays.** Level 0 starts song 0x60 and level 0x2C starts song 0x35.
+  - Node meter `?p110aud=1`: non-zero output from frame 1012.
+  - Chrome: rms 0.0071, peak 0.135.
+- **The LogoScreen event 0xC9 now starts on level 0x21** and runs a 1416-frame scene.
+  - At its end, the object removal stubs func_150849C0 / func_15060D54 run, the heap is corrupted (block 43), and
+    the run traps at frame 2137. This happens in node and Chrome, idle or walking.
+  - `?p110noev=1` (TEST ONLY) skips event starts, so the old walk / death / 0x2C path can still be tested. With it:
+    3 Chrome walks clean.
+- Diagnostics: `?p110part=1` (particle counts), `?p110aud=1`. `?p101mus=1` now also logs the songs started inside
+  func_150000B0.
+
+## Next steps (from P110)
+
+1. Conversion slots: func_150849C0 (game_eu_AF2A0) + func_15060D54 (game_83300) together.
+   - These are the object removal chain under func_15060F28; run stubcalls on it first.
+   - After that, re-run `p103boot` idle with no `p110noev`. Expect the scene end, then func_1509FD30.
+2. Then the LogoScreen scene stubs: func_151149AC, func_150A4FE4, func_15083F30, func_1513095C / func_1513100C.
+3. Camera func_1512EE50, the per-frame stubs under func_15019130, the free-camera callees, func_151848D8.
+4. Remove `p110noev` once the event path survives the scene end.
+
 ## State (session P107, 2026-10-23, port-web). Details: `docs/port/sessions/P107.md`
 
 - No src_eu change; the default build is unchanged.

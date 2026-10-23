@@ -94,7 +94,13 @@ void __wrap_func_1509B4A0(int a0, int a1) {
 void *__real_func_1509B5AC(int id, int a1);
 void *__wrap_func_1509B5AC(int id, int a1) {
     if (flag(&fboot, "p103boot"))
-        port_log("[p103] func_1509B5AC(%X, %d) frame %u (start event; asm stub)\n", id, a1, port_frame_count);
+        port_log("[p103] func_1509B5AC(%X, %d) frame %u (start event)\n", id, a1, port_frame_count);
+    { /* P110 TEST ONLY ?p110noev=1: do not start events (= the pre-P106 asm stub, returns 0). Since port P106 the
+       * LogoScreen event 0xC9 starts a 1416-frame scene on level 0x21; at its end object removal (stubs
+       * func_150849C0 / func_15060D54) corrupts the heap. This keeps the old walk / death / 0x2C test path. */
+        static int fnoev = -1;
+        if (flag(&fnoev, "p110noev")) return 0;
+    }
     return __real_func_1509B5AC(id, a1);
 }
 

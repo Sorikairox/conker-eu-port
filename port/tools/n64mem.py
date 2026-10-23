@@ -25,6 +25,8 @@ SEGS = [('init_data', 0x80029400, 0x4410, 0x29400, False),
 CODE = [(0x10001000, 0x10029400), (0x15000000, 0x151FA920), (0x16000000, 0x16003700)]
 RDRAM = (0x80000000, 0x800000)
 SEG16 = (0x16000000, 0x10000)
+VM_NATIVES = ['func_150AE5D8', 'func_150AE5E8', 'func_150AE5F8', 'func_150AE60C', 'func_150AE674',
+              'func_150AE690', 'func_150AE6A0', 'func_150AE6BC', 'func_150AE6D4', 'func_150AE714']
 CT = {'i32': 'int', 'i64': 'long long', 'f32': 'float', 'f64': 'double'}
 
 
@@ -58,6 +60,12 @@ def generate(outdir, defined_f, defined_d, stubbed, undef_data, addr):
     for nm, a in addr.items():
         if re.match(r'func_[0-9A-F]{8}$', nm):
             fstart.setdefault(a, nm)
+    # P110: code entry points inside one asm function that the NM build defines as separate C functions named by their
+    # address (port P106: the event VM natives 3..12 inside func_150ADFD0, table D_80088A44). The default ELF has no
+    # symbol there, so without this the table words stay N64 addresses (jump-table class 'J').
+    for nm in VM_NATIVES:
+        if nm in defined_f:
+            fstart.setdefault(int(nm[5:], 16), nm)
     # C-defined data objects with their N64 extent (the wasm copy is authoritative)
     cobj = sorted((val, max(size, 1), nm) for nm, val, size, typ, bind, shndx, sec in syms
                   if nm in defined_d and val >= 0x80000000)
