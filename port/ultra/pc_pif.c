@@ -32,6 +32,45 @@ void *port_n64_to_wasm(unsigned n64addr);
 static int32_t port_pads[MAXCONTROLLERS][4] = { { 1, 0, 0, 0 } };
 EMSCRIPTEN_KEEPALIVE int32_t *port_pad_state(void) { return &port_pads[0][0]; }
 
+/* ---- P149: frame-based pad script for test runs (50 Hz retraces made wall-clock scripts drift).
+ * ?padf=F:BTN:X:Y,F:BTN:X:Y,...  (node: PORT_PADF=...): from VI retrace F (port_frame_count) on, pad 0 reports
+ * buttons BTN (hex N64 bits: START 1000, A 8000, B 4000, Z 2000) and stick X / Y (decimal, y > 0 = up) instead of the
+ * page's keyboard / gamepad state; before the first entry the page state is used. Entries in frame order. */
+extern unsigned port_frame_count;
+EM_JS(int, __port_padf_char, (int i), {
+    var v = null;
+    if (typeof location !== 'undefined') { var m = /[?&]padf=([^&]*)/.exec(location.search); if (m) v = decodeURIComponent(m[1]); }
+    else if (typeof process !== 'undefined' && process.env && process.env.PORT_PADF !== undefined) v = process.env.PORT_PADF;
+    return v === null || i >= v.length ? 0 : v.charCodeAt(i);
+});
+#define PADF_MAX 128
+static struct { unsigned f; int b, x, y; } padf[PADF_MAX];
+static int padf_n = -1, padf_cur = -1;
+static void padf_apply(void) {
+    if (padf_n < 0) {
+        char s[4096]; int n = 0, c;
+        while (n < (int)sizeof s - 1 && (c = __port_padf_char(n)) != 0) s[n++] = (char)c;
+        s[n] = 0; padf_n = 0;
+        for (char *p = s; *p && padf_n < PADF_MAX;) {
+            unsigned f = 0; int b = 0, x = 0, y = 0, neg;
+            while (*p >= '0' && *p <= '9') f = f * 10 + (unsigned)(*p++ - '0');
+            if (*p == ':') { p++; while ((c = *p) && c != ':' && c != ',') { b = b * 16 + (c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10); p++; } }
+            if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') x = x * 10 + (*p++ - '0'); if (neg) x = -x; }
+            if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') y = y * 10 + (*p++ - '0'); if (neg) y = -y; }
+            padf[padf_n].f = f; padf[padf_n].b = b; padf[padf_n].x = x; padf[padf_n].y = y; padf_n++;
+            while (*p && *p != ',') p++;
+            if (*p == ',') p++;
+        }
+        if (padf_n) port_log("[padf] %d entries, first at retrace %u\n", padf_n, padf[0].f);
+    }
+    if (!padf_n) return;
+    int k = padf_cur;
+    while (k + 1 < padf_n && padf[k + 1].f <= port_frame_count) k++;
+    if (k < 0) return;
+    if (k != padf_cur) { padf_cur = k; port_log("[padf] retrace %u: buttons %X stick %d,%d\n", port_frame_count, padf[k].b, padf[k].x, padf[k].y); }
+    port_pads[0][0] = 1; port_pads[0][1] = padf[k].b; port_pads[0][2] = padf[k].x; port_pads[0][3] = padf[k].y;
+}
+
 /* ---- EEPROM */
 #define EEP_SIZE 2048
 static u8 eeprom[EEP_SIZE];
@@ -117,6 +156,7 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     }
     pif_ram[i] = 0xFE;
     pif_ram[63] = 1;
+    padf_apply();                                      /* P149 ?padf frame script */
     pif_run();
     memcpy(cont_ram, pif_ram, sizeof cont_ram);         /* the RD64B DMA into libultra's __osContPifRam */
     s32 r = mq ? osSendMesg(mq, NULL, OS_MESG_NOBLOCK) : -1; /* SI transfer done at once */

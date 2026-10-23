@@ -2,34 +2,6 @@ function	file	kind	conf	path	detail
 func_150A44A4	conker/src_eu/game_eu_D1760.c	width	high	2	A3:0 asm{h1L} IR{b2L}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E4 asm{h2LS} IR{w3LS}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E8 asm{h2LS} IR{w3LS}
-func_1509DD0C	conker/src_eu/game_eu_CA630.c	scaled	high	1	(x*16)+&D_800A0D30 on i32 (size 4): byte scale 64, m2c meant 16; asm has x16 
-func_1509EDE0	conker/src_eu/game_eu_CC5F0.c	scaled	high	1	(x*12)+&D_80089030 on i32 (size 4): byte scale 48, m2c meant 12; asm has x12 
-func_150C6960	conker/src_eu/game_eu_F3AD0.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
-func_150C7290	conker/src_eu/game_eu_F4400.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
-func_150DE9D8	conker/src_eu/game_eu_10C0B0.c	scaled	high	1	(x*8)+&D_800905B4 on i32 (size 4): byte scale 32, m2c meant 8; asm has x8 
-func_150E16CC	conker/src_eu/game_eu_10EDF0.c	scaled	high	1	(x*12)+&D_800A13B4 on i32 (size 4): byte scale 48, m2c meant 12; asm has x12 
-func_150E16CC	conker/src_eu/game_eu_10EDF0.c	scaled	high	1	(x*12)+&D_800A13CC on i32 (size 4): byte scale 48, m2c meant 12; asm has x12 
-func_150E8728	conker/src_eu/game_eu_114640.c	scaled	high	1	(x*12)+&D_800A1660 on i32 (size 4): byte scale 48, m2c meant 12; asm has x12 
-func_1518A930	conker/src_eu/game_eu_1B8140.c	scaled	high	1	(x*4)+&D_8008D950 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
-func_1518A930	conker/src_eu/game_eu_1B8140.c	scaled	high	1	(x*4)+&D_8008D958 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
-func_151992F8	conker/src_eu/game_eu_1C3530.c	scaled	high	1	(x*36)+&D_800A8B08 on i32 (size 4): byte scale 144, m2c meant 36; asm has x36 
-func_151AB3A8	conker/src_eu/game_eu_1D7790.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
-func_151C2CE4	conker/src_eu/game_eu_1EFE10.c	scaled	high	1	(x*4)+&D_8008FF88 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
-func_151DBCBC	conker/src_eu/game_2062D0.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
-func_151DBE80	conker/src_eu/game_2062D0.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
-func_15010110	conker/src_eu/game_3D5C0.c	stride	high	1	IR ptr %.010 step 96, asm self-steps {24}
-func_1509E7EC	conker/src_eu/game_eu_CBB40.c	stride	high	1	IR ptr %.051 step 12992, asm self-steps {1,3248,65536,212860928}
-func_150DE9D8	conker/src_eu/game_eu_10C0B0.c	stride	high	1	IR ptr %.063 step 16, asm self-steps {2,4,512}
-func_1506045C	conker/src_eu/game_83300.c	width	high	1	G:800CC3C8 asm{b1L} IR{w1L}
-func_15070300	conker/src_eu/game_981E0.c	width	high	1	G:800E0FFE asm{b1L} IR{w1L}
-func_1519F738	conker/src_eu/game_eu_1CCD10.c	scaled	high	0	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
-func_151CE3D0	conker/src_eu/game_eu_1FB080.c	scaled	high	0	(x*4)+&D_800AB2C0 on i32 (size 4): byte scale 16, m2c meant 4; asm has x4 
-func_151E2C88	conker/src_eu/game_eu_20B730.c	scaled	high	0	(x*10)+&D_800ABA78 on i32 (size 4): byte scale 40, m2c meant 10; asm has x10 
-func_15157990	conker/src_eu/game_eu_185050.c	stride	high	0	IR ptr %.4 step 32, asm self-steps {1,4,8}
-func_16000B14	conker/src_eu/debugger/debugger.c	stride	high	0	IR ptr %.059 step 64, asm self-steps {16}
-func_1508A040	conker/src_eu/game_eu_B7840.c	width	high	0	G:80087690 asm{b1L} IR{w1L}
-func_1509DFCC	conker/src_eu/game_eu_CA630.c	width	high	0	G:800A6440 asm{w1L} IR{b1L}
-func_151E2C88	conker/src_eu/game_eu_20B730.c	width	high	0	G:800ABA78 asm{b1L} IR{w1L}
 func_10003C6C	conker/src_eu/init_3C40.c	width	high	2	O:0 asm{h2L,w15LS} IR{w13LS}
 func_15043384	conker/src_eu/game_70200.c	width	high	2	O:0 asm{b1L,w11LS} IR{w7LS}
 func_1509A024	conker/src_eu/game_eu_C5530.c	width	high	2	O:12 asm{h6L,w12L} IR{w10L}
@@ -44,8 +16,7 @@ func_15149DA8	conker/src_eu/game_eu_1772D0.c	width	high	1	O:36 asm{h4LS,w3LS} IR
 func_151A5C10	conker/src_eu/game_eu_1D3420.c	width	high	1	O:64 asm{b3L} IR{w1L}
 func_151DFD0C	conker/src_eu/game_eu_20B730.c	width	high	1	O:0 asm{b2L,w1L} IR{w1L}
 func_150A6070	conker/src_eu/game_eu_D3880.c	width	high	0	O:0 asm{h1L,w5LS} IR{w1L}
-func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:16 asm{b2L} IR{w1L}
-func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:4 asm{b1L} IR{w2L}
+func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:4 asm{b1L} IR{w1L}
 func_1518C628	conker/src_eu/game_eu_1B9810.c	width	high	0	O:4 asm{b5L,w9LS} IR{w5LS}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	pscale	med	2	L134/L135/L136 (x*8)+ptr on i16 (size 2): byte scale 16; asm adds {-} to that base, x8 elsewhere
 func_150A86B0	conker/src_eu/nm_asm/D5E90_anim.c	scaled	med	2	(x*2)+&D_8008891C on i32 (size 4): byte scale 8, m2c meant 2; asm has x2 x8
@@ -122,6 +93,8 @@ func_151ABF78	conker/src_eu/game_eu_1D7790.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_151BFDCC	conker/src_eu/game_eu_1EC610.c	width	med	1	O:20 asm{b4LS,w4S} IR{w4S}
 func_151CEC80	conker/src_eu/game_eu_1FB080.c	width	med	1	O:12 asm{w2L} IR{b1L}
 func_151E0BBC	conker/src_eu/game_eu_20B730.c	width	med	1	O:0 asm{b2LS,w8LS} IR{h1L}
+func_151E1EDC	conker/src_eu/game_eu_20B730.c	width	med	1	O:0 asm{b14LS,h2LS} IR{b3L}
+func_151E870C	conker/src_eu/game_eu_20B730.c	width	med	1	O:6 asm{b1L,h1S} IR{h1S}
 func_1503605C	conker/src_eu/game_eu_62360.c	width	med	0	O:4 asm{w8S} IR{b1L,w4S}
 func_150CE710	conker/src_eu/game_eu_FBE70.c	width	med	0	O:28 asm{w3LS} IR{b1L}
 func_150CE710	conker/src_eu/game_eu_FBE70.c	width	med	0	O:44 asm{w1L} IR{b6LS}
@@ -191,7 +164,6 @@ func_15059C84	conker/src_eu/game_83300.c	stride	low	1	IR idx %.0 step 4, asm sel
 func_10010BE8	conker/src_eu/init_EB00.c	sign	low	1	G:80042984 h: asm u, IR s
 func_1505841C	conker/src_eu/game_83300.c	sign	low	1	A0:582 b: asm u, IR s
 func_15157580	conker/src_eu/game_eu_183F10.c	sign	low	1	A0:0 b: asm u, IR s
-func_16000B14	conker/src_eu/debugger/debugger.c	stride	low	0	IR idx %.050 step 64, asm self-steps {16}
 func_150B3668	conker/src_eu/game_eu_E0430.c	spaddr	low	0	asm passes sp+0x38 (call near 150B3B5C) with store-only slots {0x3C,0x40,0x44,0x48,0x4C,0x50,0x54,0x58,0x5C,0x60,0x64,0x68,0x6C,0x70,0x74}; IR passes &scalar to memcpy, 7 store-only locals
 func_10004074	conker/src_eu/init_3C40.c	width	low	2	O:8 asm{b1S,w8LS} IR{w7LS}
 func_15000AD0	conker/src_eu/game_2DF70.c	width	low	2	O:24 asm{h1S} IR{w3L}
@@ -228,6 +200,12 @@ func_1512BBA0	conker/src_eu/game_eu_158110.c	width	low	1	O:0 asm{b3S} IR{b3S,h1L
 func_151ABF78	conker/src_eu/game_eu_1D7790.c	width	low	1	O:24 asm{b1L,w1L} IR{w1L}
 func_eu_15108850	conker/src_eu/game_eu_136060.c	width	low	1	O:8 asm{b1L,h1L} IR{h1L}
 func_15103438	conker/src_eu/game_eu_1306B0.c	width	low	0	O:32 asm{w4L} IR{h3S}
+func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:16 asm{w1L} IR{h1S}
+func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:20 asm{w1L} IR{h1S}
+func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:32 asm{w1L} IR{h1S}
+func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:36 asm{w4LS} IR{h1S,w1L}
+func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:48 asm{b1S,w1L} IR{b1S,h1S,w1L}
+func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:52 asm{w6LS} IR{h1S,w5L}
 func_151A831C	conker/src_eu/game_eu_1D5710.c	width	low	0	O:16 asm{w2L} IR{h3S,w7LS}
 func_151A831C	conker/src_eu/game_eu_1D5710.c	width	low	0	O:20 asm{w2L} IR{h3S,w7LS}
 func_151B2F24	conker/src_eu/game_eu_1DFE20.c	width	low	0	O:32 asm{w1L} IR{h3S}

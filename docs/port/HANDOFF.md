@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P149, 2026-10-23, port-web). Details: `docs/port/sessions/P149.md`
+
+- Merged port 37085b5 (P141 / P145): code conflicts comment-only (functions.h, game_16DC80.c, game_eu_20B730.c), HANDOFF
+  rebuilt (merge_union mixed blocks). verify OK, NM links, protocheck 0 (1140), float-int BUG 0, census 722 ok / 0 FAIL
+  (clean), arity_scan 121 rows (new func_1513095C rows severity 0), m2c_sanity 214 rows.
+- **Frame-based input**: `?padf=F:BTN:X:Y,...` / PORT_PADF (pc_pif.c) sets pad 0 from VI retrace F. New-game STARTs
+  3386 / 4458 (p131 + p149 newgame.sh, env F1 / F2), Chrome noev walk 1380-1780 + 2230-2630 (p149/chrome.sh),
+  p72shots.sh maps WALK_MS / HOLD_MS to retraces (WALLCLOCK=1 = old), node walk 775-1095 + 1160-1550 (p149/nb.sh).
+  Runs are now reproducible in frames (scene start 4560 / 4559, fade-in 6242 / 6241).
+- C particles (func_1513095C) bounded (120-426 calls per 250 retraces in the opening, then 0; P140 stub kept rising):
+  they die now. Framebuffer pass func_15160310 runs every game frame, no handler called (empty list) -> no visual
+  change. Handler 14 / 17 stubs not hit. Cards + throne fine at 50 Hz. Diagnostic `?p149hits=1`.
+- Regressions clean: node noev 925 / 1249 / 1329; Chrome walks 1527 / 2303 / 2383 and 1530; heap 0, null 0, traps 0.
+
+## Next steps (from P149)
+
+1. Blockers: func_1513CFE4 + its asm handlers (281k calls, list grows), func_1513100C (frame DL in the throne scene),
+   func_150A7EE0 / func_15058898 (mode 0), func_1517B270, func_1514CFF0, then func_151928C8 / func_151A2F10.
+2. Use `?padf` for all new scripted runs (screenshot times are still wall clock: ~50 retraces/s after ~1.4 s boot).
+3. Lens warp func_151CB6C0 still unexercised at runtime: find a level with a 0x34-list effect.
+
 ## State (session P147, 2026-10-23, port-web). Details: `docs/port/sessions/P147.md`
 
 - **Browser VI pacing is now 50 Hz for PAL** (pc_sched.c fixed-timestep accumulator on performance.now; present on
