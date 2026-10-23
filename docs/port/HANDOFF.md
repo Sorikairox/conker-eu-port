@@ -10,6 +10,35 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P133 (port-b) (session P133, 2026-10-23). Details: `docs/port/sessions/P133.md`
+
+Branch `port-b` (from P130 54195bc); the orchestrator merges it into `port`.
+
+- Hand C (NM), readable, each with a name comment: func_150A6D40 `sprite_billboard_draw` (game_eu_D4550.c, hand asm,
+  P126 menu DL stub; whole-function harness `docs/port/sessions/p133/whole6d40.py`, 3300 EQUIV, NM mutants 28/28),
+  func_1518403C `hud_model_load` (1B1010), func_15182BE0 `colour_fade_start` (1ACBC0), func_1514C390
+  `camera_look_follow` (1772D0), func_15111CAC `overlay_mode_set` + func_15114CBC `world_object_timer_update` (13DC30),
+  func_1515AEE4 `object_attach_effect_start` (186A80, P126 level-0x18 start stub). All difftest EQUIV + mutants.
+- func_150A6D40 keeps Rare's quirks (hide test through `&D_800DBFF0`, upper-half D_800DD5E4/E8, 64-bit leftover
+  compare); KSEG1 vertex address only `#ifndef PORT`; func_15095380's 9th argument (stale s0 in the asm) is 0x80000000.
+- Stubs reached: func_15111DD8 (from func_15111CAC mode 1) and func_151148C8 (from func_15114CBC), both 13DC30 asm; their
+  outputs are not read by the new C.
+- Urgent P131 fix, own commit 4acf065: func_15022440 (game_eu_4A070.c NM) scaled D_800D20FC entries by
+  sizeof(struct258) (now byte offset sp38 * 0x30) and divided the actor index twice (now byte difference / 812);
+  difftest old DIFFER / new EQUIV on 5 setups, mutants 2/2.
+- Checks: verify_all rc 0, NM links, protocheck = known pairs (1077 bodies). progress_nm total 5071/5915 (85.7%),
+  game 4541/5334, C bytes 64.1%, 844 asm-only.
+
+## Next steps (from P133)
+
+1. Browser: menu sprites (func_150A6D40, 820 calls per menu run in P126) and the level-0x18 start (func_1515AEE4).
+2. func_1518010C (game_eu_1ACBC0, 712 lines, scope range finder; P126 DL passthru) - not started.
+3. Owned asm with C callers, smallest first: func_1514C860, func_1514948C, func_15144CEC, func_15159C2C, func_15053430,
+   func_151152A4 (`python3 port_work/p133/asmlist.py`); func_15111DD8 / func_151148C8 are now reached from C.
+4. game_eu_1BAF40.c calls func_1514C390 with 3 arguments through an implicit declaration (asm uses a0): arity row.
+5. Whole-function harnesses on build_nm code cannot read `.nm_rodata` (NOBITS in the NM ELF: the switch jump tables
+   are not in the file), so a `switch` compiled to a table jumps to 0 there; func_150A6D40 uses an if chain.
+
 ## P130 (port-b) (session P130, 2026-10-23). Details: `docs/port/sessions/P130.md`
 
 Branch `port-b` (from P129 c2778a9); the orchestrator merges it into `port`.

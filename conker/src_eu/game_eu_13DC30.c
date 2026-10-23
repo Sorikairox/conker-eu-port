@@ -346,7 +346,46 @@ block_46:
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_1511127C.s")
 
+#ifdef NON_MATCHING
+/* P133 */
+void func_10004074(s32);
+void func_1510DC14(s32);
+void func_15111DD8(void);
+s32 func_1502B7F0(s32 *, s32, ...);
+extern s32 *D_8008955C[];
+
+/*
+ * overlay_mode_set: switches the camera overlay (D_800B0DF0: +8 state, +9 overlay id). mode 1: state 1, frees the
+ * overlay asset D_800DC2B0 (when loaded) and calls func_15111DD8. Other modes, only when the id changes and the
+ * state is 4: releases the 0x168 textures of the current overlay (D_8008955C[id], when D_80038080 is set), frees
+ * D_800DC2B0, stores the new id and loads its asset (type 0xD) into D_800DC2B0 with func_1502B7F0.
+ */
+void func_15111CAC(s32 mode) {
+    s32 i;
+
+    if (mode == 1) {
+        D_800B0DF0->unk8 = 1;
+        if (D_800DC2B0 != 0) {
+            func_10004074(D_800DC2B0);
+        }
+        func_15111DD8();
+        return;
+    }
+    if (mode == D_800B0DF0->unk9 || D_800B0DF0->unk8 != 4) {
+        return;
+    }
+    if (D_80038080 != 0) {
+        for (i = 0; i < 0x168; i++) {
+            func_1510DC14(*D_8008955C[D_800B0DF0->unk9] + i);
+        }
+    }
+    func_10004074(D_800DC2B0);
+    D_800B0DF0->unk9 = mode;
+    func_1502B7F0(&D_800DC2B0, 2, 0xD, D_800B0DF0->unk9);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111CAC.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111DD8.s")
 
@@ -1010,7 +1049,37 @@ void func_15114708(void) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151148C8.s")
 
+#ifdef NON_MATCHING
+/* P133 */
+void func_151148C8(s32, s32 *, s32 *, s32 *);
+extern f32 D_800A3330;   /* world-object timer scale */
+extern u16 D_800CC1C0[]; /* per object: world-object index + 1 it follows */
+
+/*
+ * world_object_timer_update: for a visible world-object record idx (< D_800DC320) and its object, refreshes the
+ * object's +0x14 / +0x18 / +0x1C (func_151148C8) and advances its u16 timer +0x76 by the record's +0x64 speed
+ * times D_800A3330 (float -> unsigned as IDO, stored as u16); when the object's +0x137 flag is set and its
+ * D_800CC1C0 entry (index from the 0x32C-byte array D_800CC2D0) is idx + 1, +0x7A gets the same value.
+ */
+void func_15114CBC(struct127 *arg0, s32 idx) {
+    u8 *obj = (u8 *) arg0;
+    u8 *rec;
+    u32 t;
+
+    if (obj == NULL || idx >= D_800DC320) {
+        return;
+    }
+    func_151148C8(idx, (s32 *) (obj + 0x14), (s32 *) (obj + 0x18), (s32 *) (obj + 0x1C));
+    rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    t = (f32) *(u16 *) (obj + 0x76) + *(f32 *) (rec + 0x64) * D_800A3330;
+    *(u16 *) (obj + 0x76) = t;
+    if (obj[0x137] != 0 && D_800CC1C0[(obj - (u8 *) D_800CC2D0) / 0x32C] == idx + 1) {
+        *(u16 *) (obj + 0x7A) = t;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114CBC.s")
+#endif
 
 void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
 void func_15114E28(f32 (*arg0)[4], u8 *arg1) {
