@@ -1040,9 +1040,17 @@ u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
     func_10010BE8(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
 }
 
+#ifdef NON_MATCHING
+// sound_play_at: plays a sound with no owner (func_10010E78 with arg0 0). The asm passes func_10010E78's v0
+// through, and the asm callers keep it as the sound handle, so the NM version returns it.
+u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
+    return func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+#else
 void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
     func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
+#endif
 u16 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
 {
   f32 f;

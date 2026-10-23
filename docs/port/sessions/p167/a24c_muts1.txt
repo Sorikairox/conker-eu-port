@@ -1,0 +1,6 @@
+s/if (i >= 4) {/if (i >= 3) {/ % k1_m0 k1_m2 k1_m5 k1_FF
+s/i = 3;/i = 2;/ % k1_m0 k1_m2 k1_m5 k1_FF
+s/extra.u6 = 6;/extra.u6 = 7;/ % k1_m0 k1_m2 k1_m5 k1_FF
+s/extra.u8 = 3;/extra.u8 = 2;/ % k1_m0 k1_m2 k1_m5 k1_FF
+s/models\[1\] = D_800A4638\[1\];/models[1] = D_800A4638[0];/ % k1_m0 k1_m2 k1_m5 k1_FF
+s/mode = 1;/mode = 2;/ % k1_m0 k1_m2 k1_m5 k1_FF

@@ -1,0 +1,20 @@
+s/spec.countBase = 0x28;/spec.countBase = 0x29;/ %
+s/spec.pos\[1\] = pos\[1\];/spec.pos[1] = pos[2];/ %
+s/spec.sizeMin = 1.0f \* scale;/spec.sizeMin = 2.0f * scale;/ %
+s/spec.u16 = 0xFF;/spec.u16 = 0xFE;/ %
+s/spec.u2E = 0xC8;/spec.u2E = 0xC9;/ %
+s/mode = -1;/mode = 0;/ %
+s/spec.u1A = 0xC;/spec.u1A = 0xD;/ %
+s/spec.solidChance = 1.0f;/spec.solidChance = 0.5f;/ %
+s/spec.u24 = -1.0070001f;/spec.u24 = -1.007f;/ %
+s/spec.u38 = 16.102001f;/spec.u38 = 16.1f;/ %
+s/spec.u40 = arg6;/spec.u40 = arg9;/ %
+s/if (kind == 1) {/if (kind == 2) {/ %
+s/spec.u28 = 0.49f;/spec.u28 = 0.5f;/ %
+s/spec.u1C = 15.0f;/spec.u1C = 14.0f;/ %
+s/kind == 0x13 \&\& D_800BE9F0 == 0x3C/kind == 0x13 \&\& D_800BE9F0 == 0x3D/ %
+s/(D_800BE616 != 0) ? 1 : 0/(D_800BE616 != 0) ? 1 : 2/ %
+s/(s32)bounds, 5.0f, 1,/(s32)bounds, 4.0f, 1,/ %
+s/0xC, 6, 1, mode/0xC, 6, 0, mode/ %
+s/func_151343AC(0, 0x45);/func_151343AC(0, 0x46);/ %
+s/extra.u0 = 4;/extra.u0 = 5;/ %

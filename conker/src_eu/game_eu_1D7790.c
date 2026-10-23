@@ -784,7 +784,7 @@ void func_151AB774(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB874.s")
 
 #ifdef NON_MATCHING
-void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg5, u8 *arg6) {
+void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         f32 u1C;
         s8 u20;

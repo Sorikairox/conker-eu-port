@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P167, 2026-10-24). Details: `docs/port/sessions/P167.md`
+
+- New hand C (NM): func_151BAAC8 object_model_shatter (func_1507D754 callee, 715 insns: smoke burst + model pieces
+  0x27..0x2C), func_15136C3C object_hit_effects (hit kind effects; returns s32 0) and its callee func_1513A24C
+  object_debris_burst (calls port-b's func_15150D7C: stub here until the sync). All EQUIV with setups + ARGMEM;
+  mutants 43/44 + 1 equivalent, 19/19, 25/26 + 1 equivalent.
+- func_10010F88 (init_EB00): NM returns func_10010E78's u16 (asm callers keep it as a sound handle); functions.h
+  u16 under NM. func_151AB954 (D_80089E10 entry 3): NM C lacked a parameter (read dy / dz instead of dz / obj): fixed.
+- func_1507D754: not written: func_151C9740 / func_151CFFFC are asm in port-b files on port-b HEAD 9eebdac too;
+  func_150E0DF0 (this slot, asm) depends on port-b's func_151D5AC4 / func_151D4684 / func_15154728.
+- func_151342BC: decoded, not converted: 5 D_80089E10 handlers have NM signatures other than
+  `void (f32 x6, u8 *)` (list in P167.md section 3; wasm call_indirect would trap).
+- Checks: verify_all OK (code build, check_files, full ROM OK; after the last code edit), NM links (rc 0), protocheck 0 (1164), selftest 62/62, progress_nm 5158/5915 (87.2%), C bytes 68.4%.
+
+## Next steps (from P167)
+
+1. Unify the D_80089E10 handler NM signatures (func_151348F0, func_151AA8BC, func_150C65D8, func_150C6F08,
+   func_150EAB4C -> `void (f32, f32, f32, f32, f32, f32, u8 *)`), then convert func_151342BC (decoding in P167.md).
+2. func_150E0DF0 (game_eu_10E600, 220 insns) after the port-b sync (its port-b callees are C there).
+3. func_1507D754 once port-b converts func_151C9740 / func_151CFFFC.
+4. Browser: hit / break effects (func_15136C3C), sound handles from func_10010F88, P166's list.
+5. P138 / P141 leftovers (not started).
+
 ## State (session P166, 2026-10-24). Details: `docs/port/sessions/P166.md`
 
 - New hand C (NM): pause / money screen HUD model func_151EE0C4 hud_model_load (display list copies: 0xEF -> render
