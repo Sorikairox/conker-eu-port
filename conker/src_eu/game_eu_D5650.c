@@ -12,7 +12,17 @@ void func_150A7E40(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7E40.s")
 #endif
+#ifdef NON_MATCHING
+/* matrix_transform_point_w: hand-asm trampoline in the original (calls func_150A7E40 with $ra set to the extra
+ * entry func_150A7EF4, which returns to the real caller). Transforms (x, y, z, 1) by the 4x4 matrix mf like
+ * func_150A7E40 and also writes the fourth (w) component: same summation order as the asm. */
+void func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 *outZ, f32 *outW) {
+    func_150A7E40(mf, x, y, z, outX, outY, outZ);
+    *outW = (mf[0][3] * x) + (mf[1][3] * y) + ((mf[2][3] * z) + mf[3][3]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7EE0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7EF4.s")
 

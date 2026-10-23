@@ -1,0 +1,31 @@
+s/(\*(u32 \*)(p + 0x68) \& 0x40000) \&\& !/(*(u32 *)(p + 0x68) \& 0x40000) \&\& /%
+s/blend = \*(u16 \*)(p + 0x18) >> 8;/blend = *(u16 *)(p + 0x18);/%
+s/if (!D_80089BA4\[(s8)p\[0x74\]\](p, view)) {/if (D_80089BA4[(s8)p[0x74]](p, view)) {/%
+s/(s8)p\[0x74\] != -1/(s8)p[0x74] != 0/%
+s/+ 2) \& (1 << view))/+ 0) \& (1 << view))/%
+s/pos\[1\] = \*(f32 \*)(p + 0x44) + \*(f32 \*)(p + 0x50);/pos[1] = *(f32 *)(p + 0x44);/%
+s/hw = \*(f32 \*)(p + 0x38) \* inv/hw = *(f32 *)(p + 0x3C) * inv/%
+s/\*(f32 \*)(cam + 0x20) \* D_800A3BDC/*(f32 *)(cam + 0x1C) * D_800A3BDC/%
+s/if (m < hh) {/if (m > hh) {/%
+s/if (hw < m) {/if (hw <= m \&\& 0) {/%
+s/if (!(left <= \*(f32 \*)(cam + 0x30)))/if (!(left < *(f32 *)(cam + 0x2C)))/%
+s/top4 = top \* 4.0f;/top4 = top * 2.0f;/%
+s/D_800BE9C0 \* 16;/D_800BE9C0 * 8;/%
+s/\* 32.0f) << 16;/* 16.0f) << 16;/%
+s/(D_80090F10\[p\[0x2D\]\].unk6 - 1) << 5;/(D_80090F10[p[0x2D]].unk6) << 5;/%
+s/dtdy = -dtdy \& 0xFFFF;/dtdy = -dtdy;/%
+s/env\[1\] = rgb\[1\];/env[1] = rgb[2];/%
+s/env\[3\] = p\[0x2B\];/env[3] = 0xFF;/%
+s/| 0x10000 | 0x100000);/| 0x10000);/%
+s/? 0x3E : 3)/? 0x3E : 2)/%
+s/? 0x100000 : 0) | D_800D30BC/? 0 : 0x100000) | D_800D30BC/%
+s/combine \* 8 + 4) | /combine * 8 + 4) \& /%
+s/(y > 0 ? y : 0) \& 0xFFF) | (((x > 0 ? x : 0) \& 0xFFF) << 12);/(y > 0 ? y : 0) \& 0xFFF) | (((x > 0 ? x : 0) \& 0xFFF) << 14);/%
+s/    if (yi < 0) {/    if (y < -1) {/%
+s/ds = v > 0 ? v : 0;/ds = v;/%
+s/dt = v < 0 ? v : 0;/dt = v > 0 ? 0 : -v;/%
+s/((t0 - dt) \& 0xFFFF) | ((s0 - ds) << 16)/((t0 + dt) \& 0xFFFF) | ((s0 - ds) << 16)/%
+s/(dsdx << 16) | (dtdy \& 0xFFFF)/(dtdy << 16) | (dsdx \& 0xFFFF)/%
+s/        sync = 0;//%
+s/if (left4 < right4) {/if (left4 <= right4) {/%
+s/v = (x \* d) >> 7;/v = (x * d) >> 6;/%
