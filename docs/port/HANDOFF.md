@@ -10,6 +10,23 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P135, 2026-10-23, port-web, tooling). Details: `docs/port/sessions/P135.md`
+
+- `port/tools/m2c_sanity.py` gains per-base kinds `pscale` / `pindex` (typed pointer LOADED from memory: pointer
+  variable, pointer-table entry, argument, pointer field, `&SYM[i]` in an m2c temp local; IR GEP scale S*K vs the
+  multipliers the asm `addu`s onto that same base) and a cheap `spaddr` (P124 scattered stack structs, low).
+  Tracker fixes: jal delay slots run before the call, pointer spills to sp slots followed. `--stats`; `--func` no
+  longer overwrites the TSV.
+- Validation: func_15022440 `pscale high` at game_eu_4A070.c:2447 (P131's trap). New TRUE bug, frame path:
+  **func_15036BB4 game_eu_64070.c:75** `temp_s0 + (arg2 * 4)` on struct127 * (scale 3248; asm `arg2*4 + s0`, lw 0x304).
+- TSV 220 rows (213 before): pscale high 2 / low 1, pindex low 3, spaddr low 2; high functions 40 (+2).
+  FP: high tier 0/2, low tier 6/6 FP (hand-asm bodies / separate out-params, downgraded on purpose).
+
+## Next steps (from P135)
+
+1. Port slot: fix game_eu_64070.c:75 (func_15036BB4) with game_eu_4A070.c:2447: `(u8 *) base + x * K`.
+2. Tool: embedded arrays (`p->arr[i]`, multi-index GEPs) as candidates; spaddr needs the callee's read size.
+
 ## State (session P131, 2026-10-23, port-web). Details: `docs/port/sessions/P131.md`
 
 - Merged port 40d3eaa (P127) as dc562bf and port-b c2778a9 (P125/P128/P129) as b03d7fa; only HANDOFF conflicts

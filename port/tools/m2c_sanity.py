@@ -33,6 +33,19 @@ Kinds
             byte idiom `(... * K) + &SYM` / `&SYM + (... * K)` / `SYM + (... * K)` on that symbol: effective byte
             scale K*k where m2c meant K. high if the asm has no access stride K*k ... (always reported high when the
             idiom matches; med for `mul` on a non-byte GEP of a global without the idiom).
+  pscale  : (P135) -O0 GEP with element size S > 1 whose base is a pointer LOADED from memory (pointer variable
+            `extern T *D_x`, entry argument, pointer field `p->f` / `*(T **)(p + off)`, entry of a pointer table
+            `D_x[i]`, or `&SYM[i]` / any of these kept in an m2c temp local) and whose index is `x*K (+c)` / `x<<c`:
+            effective byte scale K*S. asm side: each `addu r, base, idx` on a register holding that loaded pointer
+            records the index multiplier (lin tracker; spills to sp slots followed; jal delay slots run before the
+            call). high when the asm adds x*K to that same base and never x*K*S (func_15022440: `(sp38 * 0x30) +
+            D_800D20FC` on struct258 *, asm adds a1*0x30); med/low for an unknown base with K but no K*S anywhere.
+  pindex  : (P135) plain `p[i]` on such a base with sizeof(*p) = S while the asm indexes that base only with
+            multipliers != S. Bodies over hand-written asm (nm_asm/, "Handwritten" / "in assembly") are low.
+  spaddr  : (P135, P124 idea) asm passes a stack address (addiu aN,sp,OFF at a jal) with store-only stack slots
+            directly above it, and the -O0 IR passes the address of a scalar alloca and has store-only allocas
+            (m2c split a stack struct into separate locals). low: heuristic, callee read size not checked.
+  Use --stats for the per-base candidate counts (STAT lines), --func F writes port/build/m2c_sanity/func.tsv.
 Frame path: `path` column = 2 when the function name appears in the P113/P116 runtime logs / notes (port_work/p113,
 port_work/p116, docs/port/sessions/P113.md, P116.md), 1 when it is a direct C callee/caller of such a function, else 0.
 """
@@ -114,6 +127,7 @@ for line in open(SYM):
         syms.setdefault(f[-1], int(f[0], 16))
 
 asm = {}
+ASMX = {}
 cur = None
 for line in open(DIS):
     m = re.match(r'^([0-9a-f]+) <(\w+)>:', line)
@@ -149,9 +163,36 @@ def asm_facts(name):
             fresh[0] += 1
             lin[r] = (fresh[0], 1)
         return lin[r]
-    for addr, op, ops in asm.get(name, []):
+    # P135: per-base index scales. st value ('p', key) = pointer loaded from memory, key ('G', addr) (pointer
+    # variable), ('F', basekey, off) (pointer field of an arg / pointer variable) or ('A', i) (spilled arg);
+    # pidx[key] = multipliers seen in `addu r, base, idx*T`. Delay slots of jal/jalr run before the call.
+    pidx = collections.defaultdict(set)
+    spill, spoff, frame = {}, {}, [0]
+    spst, spld, passed = collections.defaultdict(set), set(), []
+    seq = list(asm.get(name, []))
+    i = 0
+    while i < len(seq) - 1:
+        if seq[i][1] in ('jal', 'jalr'):
+            seq[i], seq[i + 1] = seq[i + 1], seq[i]
+            i += 2
+        else:
+            i += 1
+    for addr, op, ops in seq:
         o = [x.strip() for x in ops.split(',')] if ops else []
         nl = None
+        pre = {r: lin.get(r) for r in o[1:3]}
+        if op == 'addiu' and len(o) == 3 and o[0] == 'sp' and o[1] == 'sp':
+            try:
+                if int(o[2], 0) < 0:
+                    frame[0] = -int(o[2], 0)
+            except ValueError:
+                pass
+        if op in ('addu', 'add') and len(o) == 3:
+            for r1, r2 in ((o[1], o[2]), (o[2], o[1])):
+                s1, s2 = st.get(r1), st.get(r2)
+                if s1 and s1[0] in 'pag' and r2 != 'zero' and not (s2 and s2[0] in 'cgpas'):
+                    key = s1[1] if s1[0] == 'p' else ('A', s1[1]) if s1[0] == 'a' else ('GA', s1[1] & 0xFFFFFFFF)
+                    pidx[key].add(abs(pre[r2][1]) if pre.get(r2) else 1)
         try:
             if op == 'sll' and len(o) == 3 and o[1] != 'zero':
                 a = L(o[1]); nl = (a[0], a[1] << int(o[2], 0))
@@ -189,9 +230,29 @@ def asm_facts(name):
         if op in MEM and len(o) == 2:
             w, sg, dr = MEM[op]
             mm = re.match(r'(-?\d+)\((\w+)\)', o[1])
+            nv = None
             if mm:
                 off, base = int(mm.group(1)), mm.group(2)
                 s = st.get(base)
+                if base == 'sp':
+                    if dr == 'S':
+                        spst[off].add(w)
+                        sv = st.get(o[0])
+                        spill[off] = ('p', ('A', sv[1])) if sv and sv[0] == 'a' else sv if sv and sv[0] == 'p' else None
+                        if o[0] in spoff and 16 <= off < 32:
+                            passed.append((spoff[o[0]], addr))
+                    else:
+                        spld.add(off)
+                        nv = spill.get(off) if w == 4 else None
+                elif dr == 'L' and w == 4 and s:
+                    if s[0] == 'c':
+                        nv = ('p', ('G', (s[1] + off) & 0xFFFFFFFF))
+                    elif s[0] == 'g':
+                        nv = ('p', ('GI', (s[1] + off) & 0xFFFFFFFF))
+                    elif s[0] == 'a':
+                        nv = ('p', ('F', ('A', s[1]), off))
+                    elif s[0] == 'p' and s[1][0] in 'GA':
+                        nv = ('p', ('F', s[1], off))
                 if base == 'sp' or (s and s[0] == 's'):
                     acc.append((('S',), w, sg, dr, addr, o[0]))
                 else:
@@ -203,18 +264,29 @@ def asm_facts(name):
                         loc = ('O', off)
                     acc.append((loc, w, sg, dr, addr, o[0]))
             if dr == 'L' and o[0] in GPR:
-                st[o[0]] = None
+                st[o[0]] = nv
+                spoff.pop(o[0], None)
             continue
         if op.startswith('b') and op not in ('break',):
             continue
         if op in ('jal', 'jalr'):
+            for r in ('a0', 'a1', 'a2', 'a3'):
+                if r in spoff:
+                    passed.append((spoff[r], addr))
             for r in CALLER:
                 st[r] = None
+                spoff.pop(r, None)
             continue
         if op in NOWRITE or not o or o[0] not in GPR:
             continue
         d = o[0]
         v = None
+        if op == 'addiu' and len(o) == 3 and o[1] == 'sp' and d != 'sp':
+            spoff[d] = int(o[2], 0)
+        elif op == 'move' and len(o) == 2 and o[1] in spoff:
+            spoff[d] = spoff[o[1]]
+        else:
+            spoff.pop(d, None)
         try:
             if op == 'lui':
                 v = ('c', int(o[1], 0) << 16)
@@ -276,6 +348,15 @@ def asm_facts(name):
     unroll = collections.Counter()
     for (r, c), m in stepcnt.items():
         unroll[abs(c)] = max(unroll[abs(c)], m)
+    # P124 scattered stack structs: a stack address passed to a callee with store-only slots right above it
+    sp_hits = []
+    pset = {p for p, _ in passed}
+    for off, a in sorted(set(passed)):
+        above = sorted(x for x in spst if off < x < off + 0x40 and x < frame[0] and x not in spld and x not in pset)
+        # the first store-only slot must follow the passed one directly (no other passed slot in between)
+        if above and above[0] - off <= 8 and not any(off < p < above[0] for p in pset):
+            sp_hits.append((off, a, above))
+    ASMX[name] = (pidx, sp_hits)
     return acc, (steps, unroll), eff, coefs
 
 # ---------------------------------------------------------------- IR
@@ -639,6 +720,157 @@ def scaled_raw(lines, body_src):
         res.append((sym or base, elem, k, K, idiom))
     return res
 
+def ptr_index_raw(lines, nparams):
+    """P135: -O0 GEPs with a non-constant single index on a pointer loaded from memory (pointer variable, argument,
+    pointer field). -> [(key, base desc, elem, elem size S, K, byte scale S*K)]; K = mul/shl multiplier of the index or 1."""
+    defs, palloca, lstores = {}, {}, collections.defaultdict(list)
+    for ln in lines:
+        m = re.match(r'\s*(%[\w.$]+) = (.*)$', ln)
+        if m:
+            defs[m.group(1)] = m.group(2)
+        m = re.match(r'\s*store (\S+) (?:noundef )?(\S+), ptr (%[\w.$]+)', ln)
+        if m and m.group(3) in defs and defs[m.group(3)].startswith('alloca'):
+            v = m.group(2)
+            if re.fullmatch(r'%\d+', v) and int(v[1:]) < nparams and m.group(3) not in palloca:
+                palloca[m.group(3)] = int(v[1:])
+            else:
+                lstores[m.group(3)].append(v if m.group(1) == 'ptr' else None)
+
+    def addr_key(a, depth=0):
+        """address expression -> key of the memory it names"""
+        a = a.strip()
+        if depth > 6:
+            return None
+        m = CEXPR_RE.match(a)
+        if m:
+            g = parse_gep_operands(m.group(1), T)
+            r = T.gep(g[0], g[2]) if g else None
+            b = addr_key(g[1], depth + 1) if g else None
+            if r and b and b[0] == 'G':
+                return ('GI' if r[1] else 'G', b[1] + r[0], b[2] + ('[i]' if r[1] else '') + ('+%d' % r[0] if r[0] else ''))
+            return None
+        if a.startswith('@'):
+            nm = a[1:].strip('"')
+            return ('G', syms[nm], nm) if nm in syms else None
+        if a in palloca:
+            return ('P', palloca[a], 'arg%d' % palloca[a])
+        if a in lstores:
+            # m2c temp local: every store puts the same-origin pointer in it
+            ks = {val_key(v, depth + 1) if v else None for v in lstores[a]}
+            if len(ks) == 1 and None not in ks:
+                return ('L', ks.pop())
+            return None
+        d = defs.get(a, '')
+        if d.startswith('getelementptr'):
+            g = parse_gep_operands(GEP_RE.match(d).group(1), T)
+            r = T.gep(g[0], g[2]) if g else None
+            if r and r[1] and g[1].startswith('@'):
+                b = addr_key(g[1], depth + 1)
+                if b and b[0] == 'G':
+                    return ('GI', b[1] + r[0], b[2] + '[i]' + ('+%d' % r[0] if r[0] else ''))
+            if r and not r[1]:
+                b = val_key(g[1], depth + 1)
+                if b:
+                    return ('F', b, r[0])
+        return None
+
+    def val_key(v, depth=0):
+        """pointer value -> origin key (as asm_facts names it)"""
+        d = defs.get(v.strip(), '')
+        m = re.match(r'load ptr, ptr (.+?), align', d)
+        if not m and d.startswith('getelementptr'):
+            # &SYM[i] kept in a local (temp_s0 = &D_800CC2D0[arg1]; temp_s0 + (arg2 * 4))
+            g = parse_gep_operands(GEP_RE.match(d).group(1), T)
+            r = T.gep(g[0], g[2]) if g else None
+            if r and r[1] and g[1].startswith('@') and g[1][1:].strip('"') in syms:
+                nm = g[1][1:].strip('"')
+                return (('GA', (syms[nm] + r[0]) & 0xFFFFFFFF), '&%s[i]' % nm)
+            return None
+        if not m:
+            return None
+        k = addr_key(m.group(1), depth + 1)
+        if not k:
+            return None
+        if k[0] in ('G', 'GI'):
+            return ((k[0], k[1] & 0xFFFFFFFF), k[2])
+        if k[0] == 'P':
+            return (('A', k[1]), k[2])
+        if k[0] == 'L':
+            return k[1]
+        return (('F', k[1][0], k[2]), '%s->+0x%X' % (k[1][1], k[2]))
+
+    res = []
+    for v, d in defs.items():
+        if not d.startswith('getelementptr'):
+            continue
+        g = parse_gep_operands(GEP_RE.match(d).group(1), T)
+        if not g or len(g[2]) != 1:
+            continue
+        elem, base, idx = g
+        S = T.size_align(elem)[0]
+        iv = idx[0][1]
+        if S <= 1 or re.fullmatch(r'-?\d+', iv):
+            continue
+        if base.startswith('@') or CEXPR_RE.match(base):
+            continue     # array symbols: the `scaled` kind
+        bk = val_key(base) or (None, 'ptr')
+        src = defs.get(iv, '')
+        for _ in range(6):
+            # look through extensions and `x*K + c` (vtx[rows[k] * 8 + 1])
+            mm = re.match(r'[sz]ext i\d+ (%[\w.$]+) to i32', src) or \
+                re.match(r'(?:add|sub|or) (?:nuw )?(?:nsw )?(?:disjoint )?i32 (%[\w.$]+), -?\d+$', src) or \
+                re.match(r'add (?:nuw )?(?:nsw )?i32 -?\d+, (%[\w.$]+)$', src)
+            if not mm:
+                # x*K + y: follow the multiplied side (D_80088910[ch * 3 + k])
+                m2 = re.match(r'add (?:nuw )?(?:nsw )?i32 (%[\w.$]+), (%[\w.$]+)$', src)
+                ms = [x for x in (m2.groups() if m2 else ()) if re.match(r'(?:mul|shl) ', defs.get(x, ''))]
+                if len(ms) == 1:
+                    src = defs.get(ms[0], '')
+                break
+            src = defs.get(mm.group(1), '')
+        K = 1
+        mm = re.match(r'mul (?:nuw )?(?:nsw )?i32 (\S+), (-?\d+)$', src) or re.match(r'mul (?:nuw )?(?:nsw )?i32 (-?\d+), (\S+)$', src)
+        if mm:
+            K = abs(int(mm.group(2)) if re.fullmatch(r'-?\d+', mm.group(2)) else int(mm.group(1)))
+        mm = re.match(r'shl (?:nuw )?(?:nsw )?i32 \S+, (\d+)$', src)
+        if mm:
+            K = 1 << int(mm.group(1))
+        if bk[0] or K > 1:
+            res.append((bk[0], bk[1], elem, S, K, S * K))
+    return res
+
+
+def stack_scalar_args(lines):
+    """P135 (P124 idea): raw -O0 call arguments that are the address of a scalar alloca, and allocas that are only
+    stored to (m2c's split struct fields). -> ([(callee, alloca type)], store-only count)"""
+    al, used, stored, args = {}, collections.Counter(), collections.Counter(), []
+    for ln in lines:
+        m = re.match(r'\s*(%[\w.$]+) = alloca (.+?), align', ln)
+        if m:
+            al[m.group(1)] = m.group(2)
+    for ln in lines:
+        if ' alloca ' in ln:
+            continue
+        m = re.match(r'\s*store .*, ptr (%[\w.$]+), align', ln)
+        if m and m.group(1) in al:
+            stored[m.group(1)] += 1
+            rest = ln[:m.start(1)]
+        else:
+            rest = ln
+        for x in re.findall(r'(%[\w.$]+)\b', rest):
+            if x in al:
+                used[x] += 1
+        m = re.search(r'call [^@]*@"?([\w.$]+)"?\((.*)\)', ln)
+        if m:
+            for a in split_top(m.group(2)):
+                t = a.split()[-1]
+                if t in al and al[t] in ('i8', 'i16', 'i32', 'i64', 'float', 'double', 'ptr'):
+                    args.append((m.group(1), al[t]))
+    # the lhs of a store line counts as a use only when the alloca is the stored value (address escape)
+    so = [a for a in al if stored[a] and not used[a]]
+    return args, len(so)
+
+
 # ---------------------------------------------------------------- frame path
 
 
@@ -739,6 +971,37 @@ def compare(name, aacc, iacc):
     return [r[:3] for r in rows]
 
 
+_ftext = {}
+
+
+def nm_handasm(n):
+    """NM C over code Rare wrote in assembly (nm_asm/ files, 'Handwritten' / 'in assembly' in the comment above):
+    the asm shape differs from any C (merged entry points, own loop forms) -> per-base rows are low"""
+    f, body = nmfuncs[n]
+    if '/nm_asm/' in f:
+        return True
+    if f not in _ftext:
+        _ftext[f] = open(f, errors='replace').read()
+    i = _ftext[f].find(body)
+    return i > 0 and bool(re.search(r'[Hh]andwritten|in assembly', _ftext[f][max(0, i - 2500):i]) or
+                          re.search(n + r'\b[^\n]*(?:[Hh]andwritten|in assembly)', _ftext[f]))
+
+
+def find_line(n, pats):
+    """best effort 'L<line> ' of the first body line matching all patterns"""
+    f, body = nmfuncs[n]
+    if not pats:
+        return ''
+    if f not in _ftext:
+        _ftext[f] = open(f, errors='replace').read()
+    i = _ftext[f].find(body)
+    if i < 0:
+        return ''
+    l0 = _ftext[f].count('\n', 0, i) + 1
+    hits = ['L%d' % (l0 + k) for k, line in enumerate(body.split('\n')) if all(re.search(x, line) for x in pats)]
+    return '/'.join(hits[:3]) + ' ' if hits else ''
+
+
 def main():
     ev = frame_path()
     # TU of each NM function: the .ll that defines it
@@ -805,6 +1068,45 @@ def main():
                         rows.append(('scaled', conf, '(x*%d)+&%s on %s (size %d): byte scale %d, m2c meant %d; %s' % (K, sym, elem, k, K * k, K, ev_)))
                     elif conf and idiom == 'local':
                         rows.append(('scaled', conf, '(x*%d)+ptr %s on %s (size %d): byte scale %d; %s' % (K, sym, elem, k, K * k, ev_)))
+            # P135: typed pointer loaded from memory, indexed / scaled differently from the asm's addu on that base
+            if n in rfun:
+                pidx, sp_hits = ASMX.get(n, ({}, []))
+                sc = acoef | aeff
+                handasm = nm_handasm(n)
+                for key, bdesc, elem, S, K, E in ptr_index_raw(rfun[n][1], rfun[n][0]):
+                    aset = pidx.get(key, set()) if key else set()
+                    known = aset - {1}
+                    if '--stats' in args:
+                        print('STAT %s K%s asm=%s %s S%d K%d' % (key[0] if key else '-', '>1' if K > 1 else '=1', 'none' if not aset else 'hit' if E in aset else 'only1' if not known else 'diff', n if (E not in aset and known) or (K > 1 and not aset) else '', S, K))
+                    if E in aset:
+                        continue
+                    if K > 1:
+                        if K in known:
+                            conf = 'high'
+                        elif not known and K in sc and E not in sc:
+                            conf = 'med'
+                        else:
+                            continue
+                        ln = find_line(n, [r'\*\s*(?:0x0*%X|0x0*%x|%d)\b' % (K, K, K)] +
+                                       ([re.escape(bdesc)] if key and key[0] == 'G' else []))
+                        if handasm:
+                            conf = 'low'
+                        if not key and conf == 'med':
+                            conf = 'low' if not ln else 'med'   # unknown base: need the source idiom
+                        rows.append(('pscale', conf, '%s(x*%d)+%s on %s (size %d): byte scale %d; asm adds {%s} to that base%s' % (
+                            ln, K, bdesc, elem, S, E, ','.join('x%d' % x for x in sorted(aset)) or '-',
+                            '' if aset else ', x%d elsewhere' % K)))
+                    elif known:
+                        conf = 'low' if handasm else 'high' if S not in sc and len(known) == 1 else 'med'
+                        ln = find_line(n, [re.escape(bdesc) + r'\s*\['] if key[0] == 'G' else [])
+                        rows.append(('pindex', conf, '%s%s[i] on %s (size %d) vs asm index scale {%s} on that base' % (
+                            ln, bdesc, elem, S, ','.join('x%d' % x for x in sorted(aset)))))
+                sargs, nso = stack_scalar_args(rfun[n][1])
+                if sp_hits and sargs and nso:
+                    off, a, above = sp_hits[0]
+                    rows.append(('spaddr', 'low', 'asm passes sp+0x%X (call near %08X) with store-only slots {%s}%s; IR passes &scalar to %s, %d store-only locals' % (
+                        off, a, ','.join('0x%X' % x for x in above), ' (+%d more)' % (len(sp_hits) - 1) if len(sp_hits) > 1 else '',
+                        ','.join(sorted({c for c, t in sargs}))[:80], nso)))
             path = 2 if n in ev else 0
             rows = list(dict.fromkeys(rows))
             for kind, conf, det in rows:
@@ -820,7 +1122,7 @@ def main():
     for f in ev:
         near |= calls.get(f, set())
     CONF = {'high': 3, 'med': 2, 'low': 1}
-    KORD = {'scaled': 0, 'stride': 1, 'width': 2, 'sign': 3}
+    KORD = {'scaled': 0, 'pscale': 0, 'pindex': 1, 'stride': 1, 'spaddr': 2, 'width': 2, 'sign': 3}
     res = []
     for n, file, kind, conf, path, det in results:
         if path == 0 and n in near:
@@ -830,7 +1132,7 @@ def main():
     res.sort(key=lambda r: (-CONF[r[3]] + (0.5 if r[2] == 'width' and r[5].startswith('O:') else 0), -r[4],
                             KORD[r[2]], r[0], r[5]))
     os.makedirs(os.path.dirname(OUT) or '.', exist_ok=True)
-    with open(OUT, 'w') as fh:
+    with open(OUT if not ONLY else os.path.join(CACHE, 'func.tsv'), 'w') as fh:
         fh.write('function\tfile\tkind\tconf\tpath\tdetail\n')
         for r in res:
             fh.write('%s\t%s\t%s\t%s\t%d\t%s\n' % r)
