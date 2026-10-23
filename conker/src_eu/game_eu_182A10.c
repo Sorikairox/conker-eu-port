@@ -195,7 +195,7 @@ Gfx *func_151552F0(Gfx *gdl, Sprite2D *spr, s16 view) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15155B1C(u8 *, f32 *);
+s32 func_15155B1C(u8 *, f32 *, s32, s32); /* P98: the asm reads a2 / a3 (the caller's arg2 / arg3, left in place) */
 s32 memcpy(u8 *, u8 *, s32);
 
 u8 *func_151559FC(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6) {
@@ -210,7 +210,7 @@ u8 *func_151559FC(u8 *arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     if ((arg2 != 0) && (arg3 > 0)) {
         sp.u2C = (*(f32 *)((u8 *)arg0 + 8));
         sp.u30 = (*(f32 *)((u8 *)arg0 + 0xC));
-        if (func_15155B1C(arg0, &sp.u2C) != 0) {
+        if (func_15155B1C(arg0, &sp.u2C, arg2, arg3) != 0) {
             return NULL;
         }
     }

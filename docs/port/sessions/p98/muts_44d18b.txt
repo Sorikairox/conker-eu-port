@@ -1,0 +1,11 @@
+s/if (e->delay == 0) {/if (e->delay != 0) {/ % keep
+s/if (t < 0) {/if (t < 1) {/ % keep
+s/t = 0;/t = 1;/ % keep
+s/if (e->life == -1) {/if (e->life == -2) {/ % keep
+s/if (t > 0) {/if (t >= 0) {/ % keep
+s/D_800CBE00 = (s32) e->next;/D_800CBE00 = (s32) next;/ % keep
+s/prev->next = e->next;/prev->next = next;/ % keep
+s/func_100043B4((s32 \*) e, 2);/func_100043B4((s32 *) e, 1);/ % keep
+s/^            prev = e;$/            ;/ % keep
+s/D_8008622C\[e->done\]/D_8008622C[e->update]/ % keep
+s/                e->life = t;/                e->life = t - 1;/ % keep

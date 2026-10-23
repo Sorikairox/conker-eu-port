@@ -10,6 +10,34 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P98, 2026-10-23). Details: `docs/port/sessions/P98.md`
+
+- **Prototype vs. asm check** (`docs/port/sessions/p98/protoasm_check.py [--func F] [--why F] [--src D --inc D]`):
+  every call from NM-selected C to an asm-only function, prototype in scope (o32 layout) vs. the callee's EU asm
+  (f12/f14 vs a-registers, mtc1 / lwc1-reload = float bits, cvt.s.w = int, pass-through resolved, stack words,
+  v0 / f0 at return). Rows FREG 4 / FLOAT 1 / INT 20 / ARITY 5 -> 0 / 0 / 3 / 3; the 6 left are port-b files
+  (list in P98.md). RETNONE 17 is info. Output `docs/port/sessions/p98/protoasm.tsv`.
+- Fixed (24 rows, 16 files, NM-only or `#ifdef NON_MATCHING`-wrapped): func_15152A90 (sp+0x20 block, u8),
+  func_15133E04 (object, not f32), func_15086508 (7 args, z in a2), func_151BEE00 arg1 f32 (functions.h NM),
+  func_150E6550 / func_151C64F4 / func_15081A90 / func_15142600 / func_15081120 / func_151848D8 float args,
+  func_15185360 f32 out-params, func_15155B1C dropped a2/a3, func_10012560 callback forwards a1/a2 to func_15043BB8.
+- Frame-path stubs in hand C (NM): func_15044D18 (timed effect list), func_15097BA8 (player push-back),
+  func_15185360 (aim distance gate). EQUIV + knob setups; mutants 9/12, 9/9, 9/9.
+- difftest selftest case func_150268BC.c updated for the func_151BEE00 f32 prototype (43/43).
+- Default build byte-identical (full verify_all), NM links, protocheck 0 (934 bodies), progress_nm 4928/5915 (83.3%),
+  bytes 58.0%, 987 asm-only.
+
+## Next steps (from P98)
+
+1. port-b: the 6 checker rows in its files (game_14FF90 func_151221F0 arg1 f32; game_83300 func_15064668 arg2 /
+   func_15065E18 arg3 float bits; func_1512B2C4() / func_1501B300() / func_1501DF70() missing the a0 the asm reads).
+2. Re-run `protoasm_check.py` after each merge (it needs `port_work/p98/asmonly.txt` = `progress_nm.py --list`;
+   regenerate it first).
+3. Frame-path stubs still asm (smallest first): func_1512D900, func_1517E3CC, func_151DA6F8, func_1510CE28,
+   func_1510D090, func_1508F9F4, func_15113798, func_15184298, func_15178004, func_15113000, func_15188630,
+   func_15181A6C, func_1517B270, func_1509093C, func_15129220, func_1512EE50; func_150ADA20.
+4. Browser: func_15044D18 hooks (D_8008622C[] gets no a0), func_15097BA8 push-back, func_15185360 aim.
+
 ## State (session P95, 2026-10-23). Details: `docs/port/sessions/P95.md`
 
 - **Float bit patterns as ints** (`docs/port/sessions/p95/floatint_scan.py [--all] [--protos]`, NM-selected text of all

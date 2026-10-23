@@ -316,7 +316,11 @@ s32 func_15013D38(struct134 *arg0) {
     pos[1] = (s16)arg0->unk2;
     pos[2] = arg0->unk4;
     temp_v0 = arg0->unk18;
+#ifdef NON_MATCHING
+    func_151BEE00(pos, *(f32 *)&arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
+#else
     func_151BEE00(pos, arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
+#endif
     return 1;
 }
 

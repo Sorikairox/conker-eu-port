@@ -4,9 +4,16 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+/* P98: D_800E1230 callback (func_151F86B0 calls it with (0, line, length)); a1 / a2 reach func_15043BB8 untouched */
+void func_10012560(s32 arg0, u8 *arg1, s32 arg2) {
+    func_15043BB8(&D_800427A0, arg1, arg2);
+}
+#else
 void func_10012560(s32 arg0) {
     func_15043BB8(&D_800427A0);
 }
+#endif
 
 void func_10012588(s32 arg0) {
     func_15016170(arg0);

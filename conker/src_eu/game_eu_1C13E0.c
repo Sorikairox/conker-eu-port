@@ -4,10 +4,12 @@
 
 
 #ifdef NON_MATCHING
-s32 func_15152A90(f32, f32, s32 *);
+s32 func_15152A90(void *, u8, s32); /* P98: asm reads a0 = sp+0x20 block, a1 & 0xFF, a2 */
 
 void func_15193660(u8 *arg0, u8 arg1, s32 arg2) {
     struct {
+        s32 u20;
+        s32 u24;
         s32 u28;
         u8 pad2C[0x8];
         s16 u34;
@@ -47,17 +49,15 @@ void func_15193660(u8 *arg0, u8 arg1, s32 arg2) {
         s16 u92;
         s16 u94;
     } sp;
-    s32 sp24;
-    s32 sp20;
     s32 temp_v0;
 
     if ((arg0 != NULL) && ((*(s32 *)((u8 *)arg0 + 0)) != 0)) {
         temp_v0 = (*(s32 *)((u8 *)arg0 + 0x1D4));
         if (temp_v0 != 0) {
             func_15142314(temp_v0, 0xA, &sp.u28);
-            sp20 = 8;
+            sp.u20 = 8;
             sp.u3C = 12.403001f;
-            sp24 = 7;
+            sp.u24 = 7;
             sp.u38 = -0x21;
             sp.u3A = 0x18;
             sp.u50 = 0x28;
@@ -93,7 +93,7 @@ void func_15193660(u8 *arg0, u8 arg1, s32 arg2) {
             sp.u74 = 0.0f;
             sp.u80 = 0.0f;
             sp.u68 = 0.307f;
-            func_15152A90(0, 25.38f, arg2);
+            func_15152A90(&sp.u20, arg1, arg2);
         }
     }
 }
