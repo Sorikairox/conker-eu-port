@@ -75,9 +75,9 @@ s32 func_1518A930(u8 *arg0, u8 *arg1, f32 arg2, u8 *arg3, u8 *arg4, f32 arg5, f3
     sp.u68 = arg7;
     sp.u6C = arg8;
     if (arg9 != 0) {
-        sp.u6E = (s8) *(&D_8008D958 + ((func_150ADA20() & 1) * 4));
+        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D958 + (func_150ADA20() & 1) * 4);
     } else {
-        sp.u6E = (s8) *(&D_8008D950 + ((func_150ADA20() & 1) * 4));
+        sp.u6E = (s8) *(s32 *) ((u8 *) &D_8008D950 + (func_150ADA20() & 1) * 4);
     }
     sp.u90 = 0xFF;
     sp.u74 = 0x220205;

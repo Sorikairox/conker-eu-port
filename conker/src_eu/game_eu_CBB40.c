@@ -120,7 +120,7 @@ block_45:
             if (((*(s32 *)((u8 *)var_v0 + 0x984)) != 0) && ((*(u8 *)((u8 *)var_v0 + 0x988)) == (*(s32 *)((u8 *)arg2 + 8)))) {
                 var_v1 += 1;
             }
-            var_v0 += 0xCB0;
+            var_v0 = (s32 *) ((u8 *) var_v0 + 0xCB0);
         } while (var_v0 != &D_800D121C);
         return var_v1;
     }

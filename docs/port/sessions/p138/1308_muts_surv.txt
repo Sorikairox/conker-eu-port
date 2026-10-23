@@ -1,0 +1,5 @@
+s/fixed = \&D_80090270\[(-1 - code) \* 4\]/fixed = \&D_80090270[(-1 - code) * 2]/
+s/mask |= 0x8000;/mask |= 0x4000;/
+s/mask |= 0x30;/mask |= 0x20;/
+s/mask |= 0x43C0;/mask |= 0x4380;/
+s/rec->input \&= ~0x20;$/rec->input \&= ~0x30;/

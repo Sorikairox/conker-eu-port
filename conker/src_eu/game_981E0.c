@@ -1714,7 +1714,7 @@ void func_15070300(s32 arg0) {
     if (temp_v0 == 0x77) {
         temp_t7 = ((s32) (D_800D154C - D_800CC2D0) / 812) & 0xFF;
         sp.uA8 = D_800D154C;
-        if ((temp_t7 < 2) && (temp_v1 = *(&D_800E0FFE + temp_t7), var_a1 = 1, (temp_v1 != 0))) {
+        if ((temp_t7 < 2) && (temp_v1 = *((s8 *)&D_800E0FFE + temp_t7), var_a1 = 1, (temp_v1 != 0))) {
             sp.uA0 = &D_800CC2D0[temp_v1];
         } else {
             var_a1 = 0;

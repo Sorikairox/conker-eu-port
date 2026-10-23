@@ -907,7 +907,7 @@ extern s8 D_800902D8;           /* previous list selection */
 extern s8 D_800902DC;           /* chapter step direction (-1 / 1) */
 extern u8 D_800902E0;           /* blink phase of the selected entry */
 extern s8 D_80090150;           /* list selection */
-extern s32 *D_800E0FB8;         /* text table (scene names) */
+extern u8 **D_800E0FB8;         /* text table (scene names) */
 extern s32 D_800E9D00;          /* cheat / unlock flags */
 extern u8 D_800BE7FE;
 extern u8 D_800E0B94;
@@ -1188,7 +1188,7 @@ void func_151DFD0C(void) {
         }
         func_1504332C((col[0] * rgb) >> 8, (col[1] * rgb) >> 8, (col[2] * rgb) >> 8, lineAlpha & 0xFF);
         if (y >= 0x46 && y < listEnd + 0x50 && pass == 0) {
-            func_15042D94(0x94, y + 0xF, 0x81, D_800E0FB8[rows[k] + first]);
+            func_15042D94(0x94, y + 0xF, 0x81, (s32) D_800E0FB8[rows[k] + first]);
         }
         y += 11;
         k++;
@@ -1589,7 +1589,229 @@ void func_151E1174(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1174.s")
 #endif
+#ifdef NON_MATCHING
+void func_15060F28(struct127 *arg0, s32 arg1);
+void func_151E870C(s32 slot, s32 character);
+void func_15042D94(s32, s32, u8, s32, ...);
+extern u8 D_800E0EC5;           /* page alpha */
+extern u8 D_800E0EC6;           /* pending page (read signed, -1 = none) */
+extern s32 D_800E0FD0;          /* struct127 *[4]: character object per controller */
+extern s8 D_800ABA70[][10];     /* menu modes (rows of 10, by MenuState x42) */
+extern s32 D_800E9D00;          /* cheat / unlock flags */
+extern s8 D_80090270[];         /* s8 per 4 bytes: setting for the negative mode codes */
+extern s32 D_80090250[];        /* character mask per negative mode code */
+extern u8 D_800E0FBC;           /* characters can be changed this frame */
+extern u8 D_800ABC50[];         /* page label */
+extern s8 D_800E0FC0[];         /* character per joined player */
+extern s8 D_800901E4;           /* first of the 16-byte player queue (controller numbers, sorted, -1 = free) */
+extern s8 D_800901E0;           /* joined players */
+extern u16 D_800BED50;          /* new button presses per controller (u16 each) */
+extern s8 D_800E1030[];         /* player -> slot */
+extern s8 D_80090114;
+extern u8 D_800901CC;
+extern s8 D_800901F4[];         /* end of the player queue */
+
+// menu_player_join_page: the multiplayer character page. Fades in (alpha D_800E0EC5 += 32 per tick) or, with a
+// pending page in D_800E0EC6, fades out, then switches the main page and frees the four character objects.
+// Controllers 1..3 (only 1 on title page 7) join / leave with START: the queue D_800901E4 (sorted controller numbers,
+// count D_800901E0) and the players' characters D_800E0FC0 (the mode's fixed character D_80090270[code][controller],
+// else the controller number). In a mode with a character mask (negative code at +5 of the mode row; cheat flags add
+// characters) controller 0's character is spawned and right / left cycle each player's character over the 22
+// characters allowed by the mask, respawning the object (func_151E870C) when it changed or a joined slot had one.
+// Accept goes to page 5 (mask modes) or 1, back to page 0.
+void func_151E1308(void) {
+    MenuState *rec;
+    s8 *queue = &D_800901E4;
+    s32 alpha;
+    s32 mask = -1;
+    s8 *fixed = NULL;
+    s8 respawn = 0;
+    s8 maxPlayers;
+    s32 nextPage;
+    s32 code;
+    s32 i;
+    s32 j;
+    s32 count;
+    s32 found;
+    s32 pad;
+    s32 old;
+    s32 ch;
+    s32 dir;
+    struct127 **obj;
+
+    if ((s8) D_800E0EC6 != -1) {
+        ((MenuState *) D_80090174)->input &= ~0x20;
+        alpha = D_800E0EC5 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
+            D_800E0EC5 = 0;
+            ((MenuState *) D_80090174)->mainPage = D_800E0EC6;
+            D_800E0EC6 = -1;
+            for (obj = (struct127 **) &D_800E0FD0; obj != (struct127 **) &D_800E0FD0 + 4; obj++) {
+                if (*obj != NULL) {
+                    func_15060F28(*obj, 1);
+                    *obj = NULL;
+                }
+            }
+            return;
+        }
+        D_800E0EC5 = alpha;
+    } else {
+        alpha = D_800E0EC5 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        D_800E0EC5 = alpha;
+    }
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha & 0xFF);
+    rec = (MenuState *) D_80090174;
+    code = D_800ABA70[rec->x42][5];
+    if (code < 0) {
+        nextPage = 5;
+        fixed = &D_80090270[(-1 - code) * 4];
+        mask = D_80090250[-1 - code];
+        if (D_800E9D00 & 0x20) {
+            mask |= 0x8000;
+        }
+        if (D_800E9D00 & 0x10) {
+            mask |= 0x10000;
+        }
+        if (D_800E9D00 & 0x40) {
+            mask |= 0x30;
+        }
+        if (D_800E9D00 & 0x80) {
+            mask |= 0x43C0;
+        }
+        if (D_800E9D00 & 0x100) {
+            mask |= 0xE0800;
+        }
+        if (D_800E9D00 & 0x10000) {
+            mask |= 0xA;
+        }
+        if (D_800E9D00 & 0x20000) {
+            mask |= 0x300000;
+        }
+    } else {
+        nextPage = 1;
+    }
+    if (rec->titlePage == 7) {
+        maxPlayers = 2;
+    } else {
+        maxPlayers = 4;
+    }
+    D_800E0FBC = 0;
+    if (nextPage == 5 && D_800ABA70[rec->x42][8] != 8) {
+        if (*(struct127 **) &D_800E0FD0 == NULL) {
+            func_151E870C(0, D_800E0FC0[0]);
+        }
+        func_15042D94(0x94, 0x9B, 1, (s32) D_800ABC50, 0x1A);
+        D_800E0FBC = 1;
+        rec = (MenuState *) D_80090174;
+    }
+
+    /* START on controllers 1.. joins or leaves */
+    for (pad = 1; pad < 4; pad++) {
+        if (pad < maxPlayers && alpha == 0xFF && ((&D_800BED50)[pad] & 0x1000)) {
+            count = D_800901E0;
+            found = 0;
+            for (i = 0; i < count; i++) {
+                if (pad == queue[i]) {
+                    D_800901E0 = count - 1;
+                    count = D_800901E0;
+                    found = 1;
+                    for (j = i; j < count; j++) {
+                        queue[j] = queue[j + 1];
+                        D_800E0FC0[j] = D_800E0FC0[j + 1];
+                    }
+                }
+            }
+            if (!found) {
+                obj = (struct127 **) &D_800E0FD0 + pad;
+                for (i = 0; i < count && queue[i] < pad; i++) {
+                }
+                for (j = count; j > i; j--) {
+                    queue[j] = queue[j - 1];
+                    D_800E0FC0[j] = D_800E0FC0[j - 1];
+                }
+                queue[i] = pad;
+                if (fixed != NULL) {
+                    D_800E0FC0[i] = fixed[pad];
+                } else {
+                    D_800E0FC0[i] = pad;
+                }
+                D_800901E0 = count + 1;
+                if (*obj != NULL) {
+                    respawn = 1;
+                }
+            }
+        }
+    }
+
+    /* character choice per joined player */
+    count = D_800901E0;
+    for (i = 0; i < count; i++) {
+        D_800E1030[i] = i;
+        if (D_800E0FBC == 0) {
+            continue;
+        }
+        pad = queue[i];
+        old = ch = D_800E0FC0[i];
+        dir = 1;
+        if (rec->padInput[pad] & 8) {
+            D_800E0FC0[i] = ch + 1;
+            ch = D_800E0FC0[i];
+            if (ch >= 0x16) {
+                D_800E0FC0[i] = 0;
+                ch = D_800E0FC0[i];
+            }
+        }
+        if (rec->padInput[pad] & 4) {
+            D_800E0FC0[i] = ch - 1;
+            ch = D_800E0FC0[i];
+            dir = -1;
+            if (ch < 0) {
+                D_800E0FC0[i] = 0x15;
+                ch = D_800E0FC0[i];
+            }
+        }
+        while (!((1 << ch) & mask)) {
+            D_800E0FC0[i] = ch + dir;
+            ch = D_800E0FC0[i];
+            if (ch < 0) {
+                D_800E0FC0[i] = 0x15;
+                ch = D_800E0FC0[i];
+            }
+            if (ch >= 0x16) {
+                D_800E0FC0[i] = 0;
+                ch = D_800E0FC0[i];
+            }
+        }
+        if (old != ch || respawn != 0) {
+            func_151E870C(pad, ch);
+            count = D_800901E0;
+            rec = (MenuState *) D_80090174;
+        }
+    }
+    for (i = count; i < 0x10; i++) {
+        queue[i] = -1;
+    }
+
+    if (alpha == 0xFF) {
+        if (rec->input & 0x10) {
+            D_80090114 = 8;
+            func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
+            D_800E0EC6 = nextPage;
+            rec = (MenuState *) D_80090174;
+        }
+        if (rec->input & 0x20) {
+            D_800E0EC6 = 0;
+            D_800901CC = 0;
+        }
+    }
+    rec->input &= ~0x20;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1308.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15042E3C(s32, ...);
@@ -1868,7 +2090,7 @@ s8 func_151E2C88(s32 arg0) {
         (*(s8 *)((u8 *)(&D_800E0FFE) + 0)) = 0;
         (*(s8 *)((u8 *)(&D_800E0FFE) + 1)) = 0;
     }
-    if (*(&D_800ABA78 + ((*(s8 *)((u8 *)D_80090174 + 0x42)) * 0xA)) == 8) {
+    if (*((s8 *) &D_800ABA78 + (*(s8 *)((u8 *)D_80090174 + 0x42)) * 0xA) == 8) {
         var_a2 = 0;
         var_v1 = 0;
         var_t0 = &sp.u2C;
@@ -2377,8 +2599,11 @@ void func_151E3AE4(s32 mask, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     u8 alpha = arg3;
     s8 fadeIn = arg4;
     MenuState *rec;
-    f32 x[32];
-    f32 y[32];
+    /* The ring points: y has only 14 slots and x follows it in one frame block, so with 13 or more shown items
+       y[14..] lands on x[0..] (y[count + 1] = y[1] overwrites x[0] after the wrap). Kept as in the game. */
+    f32 points[14 + 32];
+    f32 *y = points;
+    f32 *x = points + 14;
     s32 count;
     s32 half;
     s32 step;
@@ -3608,7 +3833,83 @@ void func_151E86A4(void) {
 }
 #endif
 
+#ifdef NON_MATCHING
+void func_15060F28(struct127 *arg0, s32 arg1);
+s32 func_15083E0C(u8);
+s32 func_15082E44(u8 *, s32, s32, s32, s32);
+void func_15083784(struct127 *, s32);
+void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
+void *allocate_memory(s32, s32, s32, s32);
+extern s32 D_800E0FD0;           /* struct127 *[4]: the menu's character object per slot */
+extern u8 D_800AB95C[][8];       /* characters: +0 f32 scale, +4 s8 y offset, +5 object type, +6 animation */
+extern u8 D_800ABD3C[][8];       /* menu slot placement: +0 x, +2 y, +4 z (s16), +6 byte */
+
+// menu_spawn_character: replaces the menu slot's character object: frees the old one (func_15060F28), fills a
+// spawn record (func_15083E0C(slot + 0x10) -> D_800D20FC[], 0x30 bytes) with the character's type (D_800AB95C[ch][5])
+// at the slot's position (D_800ABD3C[slot], the next slot's on title page 7, y + the character's offset) and spawns
+// it (func_15082E44, 1-based object index). The new object gets flags 3 at 0x2F8, state 7 at +5, the scale at
+// 0x14C / 0x150, a 0x1C0 zeroed work block at 0x31C if its +4 is 0 or 0x80, +0x68 = slot + 1 for type 0x3B, the
+// character's animation (func_15083784) and func_1505E650(obj, 0xF, 1.0, 0, 0, 0, 0).
+void func_151E870C(s32 slot, s32 character) {
+    struct127 **slotObj = &((struct127 **) &D_800E0FD0)[slot];
+    u8 *spawn;
+    u8 *ch;
+    s16 *place;
+    s32 rec;
+    s32 pos;
+    s32 type;
+    s32 index;
+    struct127 *obj;
+    void *work;
+
+    if (*slotObj != NULL) {
+        func_15060F28(*slotObj, 1);
+    }
+    rec = func_15083E0C((slot + 0x10) & 0xFF);
+    ch = D_800AB95C[character];
+    type = ch[5];
+    spawn = (u8 *) D_800D20FC + rec * 0x30;
+    pos = slot;
+    if (*(s8 *) ((u8 *) D_80090174 + 0x2C) == 7) { /* title page */
+        pos = slot + 1;
+    }
+    place = (s16 *) D_800ABD3C[pos];
+    spawn[4] = type;
+    *(s16 *) (spawn + 6) = place[0];
+    *(s16 *) (spawn + 8) = place[1];
+    *(s16 *) (spawn + 8) += (s8) ch[4];
+    *(s16 *) (spawn + 0xA) = place[2];
+    spawn[0xC] = ((u8 *) place)[6];
+    if (type == 0x53) {
+        spawn[0xD] = 0x24;
+    } else {
+        spawn[0xD] = 0xE;
+    }
+    index = func_15082E44(spawn, rec, 0, 0, 0);
+    if (index == 0) {
+        return;
+    }
+    obj = &D_800CC2D0[index - 1];
+    *slotObj = obj;
+    *(u16 *) ((u8 *) obj + 0x2F8) |= 3;
+    *((u8 *) obj + 5) = 7;
+    *(f32 *) ((u8 *) obj + 0x150) = *(f32 *) ch;
+    *(f32 *) ((u8 *) obj + 0x14C) = *(f32 *) ch;
+    if (*((u8 *) obj + 4) == 0 || *((u8 *) obj + 4) == 0x80) {
+        work = allocate_memory(0x1C0, 1, 0, 0);
+        *(void **) ((u8 *) obj + 0x31C) = work;
+        bzero(work, 0x1C0);
+    }
+    obj = &D_800CC2D0[index - 1];
+    if (type == 0x3B) {
+        *((u8 *) obj + 0x68) = slot + 1;
+    }
+    func_15083784(obj, ch[6]);
+    func_1505E650(obj, 0xF, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E870C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_800E0FD0;
