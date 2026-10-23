@@ -6,7 +6,7 @@
  * decomp's C reconstruction of it), not copied from ultralib: see port/ultra/LICENSES.md.
  *
  *   guMtxF2L        libultra/gu/guMtxF2L.s   (Rare's unrolled version: cvt.w.s, i.e. round to nearest)
- *   func_150A7B80   game_D5030.s             guMtxIdent (fixed-point identity)
+ *   (func_150A7B80 guMtxIdent: now game_D5030.c's NON_MATCHING C, P131)
  *   cosf            libultra/gu/cosf.s       (game TUs call it as vbe.cosf, port/tools/vbe.py LIBC_VBE)
  */
 #include <stdint.h>
@@ -51,16 +51,7 @@ void guMtxF2L(const float *mf, uint32_t *m) {
     }
 }
 
-/* func_150A7B80: zero the 64 bytes, then sh 1 at 0x0, 0xA, 0x14, 0x1E (integer parts of the diagonal).
- * v0 is left as it was; the canonical call-site signature is int(int), so return a0. */
-int func_150A7B80(uint32_t *m) {
-    for (int i = 0; i < 16; i++) m[i] = 0;
-    m[0] = 0x00010000u; /* 0x00: m[0][0] */
-    m[2] = 0x00000001u; /* 0x0A: m[1][1] */
-    m[5] = 0x00010000u; /* 0x14: m[2][2] */
-    m[7] = 0x00000001u; /* 0x1E: m[3][3] */
-    return (int)(uintptr_t)m;
-}
+/* func_150A7B80 (guMtxIdent): removed in P131, game_D5030.c has the NON_MATCHING C (void (Mtx *)). */
 
 /* ---- cosf (libultra; the game's copy: P in .rodata EU 0x23E3A0, scalars in .data 0x22B4C0; values
  * from the decomp's reconstruction in conker/src_eu/libultra/gu/cosf.c) ---- */

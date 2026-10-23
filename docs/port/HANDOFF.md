@@ -59,6 +59,85 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    p123fadeev wrap. Also func_1510AEB0 (P121).
 2. port-web: log func_1512868C / func_150054C4 / func_15097188 after 2133 and 3053 (no guard) to find the camera
    re-init that the port misses.
+## P129 (port-b) (session P129, 2026-10-23). Details: `docs/port/sessions/P129.md`
+
+Branch `port-b` (from P128 9328f02); the orchestrator merges it into `port`.
+
+- C (NM), all EQUIV + mutants: func_1515929C `watcher_state_update` (game_eu_186A80.c), func_1508F9F4
+  `underwater_bubbles_update` + func_1509093C `underwater_air_meter_update` (game_BC510.c), func_15188630
+  `light_fx_update` (game_eu_1B5C40.c, s32 for its caller, returns 0).
+- func_1515929C's rule table D_800A65E0 and the s8 lists behind D_8008B3CC (its rodata_inject block) are referenced
+  by symbol only: the browser's n64mem mirror holds the ROM game_data (rodata included) at N64 addresses and
+  relocates D_8008B3CC's five words; NM link symbols are absolute. No build-file change. All 23 handlers were C.
+- func_1508F9F4's uninitialised spawn flag: on the N64 the slot always holds func_1501878C's s1 (0x800BEDF0, saved
+  there by func_1517ABB0's prologue) -> spawning enabled unless the asm clears it; C uses `spawn = (delay != 0)`.
+  Verified with a test copy of difftest that presets the stack slot (`port_work/p129/difftest_stk.py`).
+- Harness note: a static helper function in a candidate is run as a callee stub by difftest (write helpers inline).
+- func_1513D524 `_void_proto` guards kept (functions.h:772 fix not in port-b yet).
+- verify_all OK, NM links, protocheck = the two known pairs (A9D90 func_1517FD84, func_150A6C40 / 13C400:576).
+  progress_nm total 5057/5915.
+
+## Next steps (from P129)
+
+1. After the functions.h:772 / game_eu_13C400.c:576 fixes merge: drop the `func_1513D524_void_proto` guards.
+2. func_1505528C (game_eu_78230.c): blocked on func_15058898 (game_83300.c, asm, produces the object position) and
+   func_10010344 (init_EB00.c, asm); convert together with / after them.
+3. Browser: UNVERIFIED list in P129.md (watchers, underwater HUD, light effects).
+4. Optional harness feature: DIFFTEST_STKFILL (P129 test copy) could go into tools/port/difftest (shared file, not
+   changed here) for other uninitialised-stack reads.
+
+## P128 (port-b) (session P128, 2026-10-23). Details: `docs/port/sessions/P128.md`
+
+Branch `port-b` (from P125 e8fb8b9); the orchestrator merges it into `port`.
+
+- C (NM), all EQUIV + mutants: func_15149AC0 `spark_spawn_from_desc` (game_eu_1772D0.c) with func_1513D524
+  `record_spawn_default` now returning its record in NM builds (game_169510.c); func_150A6C40 `pvs_row_apply`
+  (game_eu_D3880.c, void); func_15052F9C `object_catch_player` + func_1505327C `object_launch_player`
+  (game_eu_78230.c, keep the callers' f32 / s32 return types, return 0); func_1510CE28 `tex_scroll_update`
+  (game_eu_138E00.c, s32 for its caller).
+- Temporary: game_169510.c / game_eu_1772D0.c hide functions.h:772's void func_1513D524 prototype with a
+  `#define ... _void_proto` around the include (NM only). Remove once the port slot's functions.h fix merges.
+- verify_all OK, NM links, protocheck = the known game_A9D90.c pair + func_150A6C40 vs game_eu_13C400.c:576 (port
+  fixing). progress_nm total 5053/5915.
+
+## Next steps (from P128)
+
+1. After the functions.h:772 / game_eu_13C400.c:576 fixes merge: drop the `func_1513D524_void_proto` guards and
+   re-run protocheck (should be the A9D90 pair only).
+2. func_1515929C: its .data list table D_8008B3CC points into its own rodata_inject block (0x800A66C0..); decide how
+   the NM / port builds keep those bytes at their addresses before converting; check the 23 D_8008B370 handlers.
+3. func_1508F9F4: the spawn flag (sp+0x44) and level (s7) are uninitialised on some paths in the asm; decide the
+   intended values (spawn = 1?) with the orchestrator, then convert.
+4. Still open per-frame: func_15188630, func_1509093C, func_1505528C (its callee func_15058898 is a menu stub).
+5. func_10010154 (init_EB00.c, not port-b) is func_15054F74's last asm callee.
+6. Browser: UNVERIFIED list in P128.md.
+
+## P125 (port-b) (session P125, 2026-10-23). Details: `docs/port/sessions/P125.md`
+
+Branch `port-b` (from P122 422e5d3); the orchestrator merges it into `port`.
+
+- C (NM), all EQUIV + mutants: menu stubs func_1516865C `sprite_quad_init` (game_1944C0.c, now `s32 (u8 *, s32 x4)`
+  to match its callers), func_15054F74 `menu_object_update` (game_eu_78230.c, file prototype -> void),
+  func_1510E004 `blob_shadow_update` (game_eu_13B700.c), func_15179008 `rain_update` + its asm callee func_1517A084
+  `rain_spawn_splashes` (game_eu_1A6C30.c); func_15184298 `anim_meshes_update` (game_eu_1B1010.c) with its asm
+  callees func_151661F0 `mesh_swing_update` (game_eu_193A00.c) and func_1517A320 `flag_wave_update`
+  (game_eu_1A7B30.c).
+- Not done: func_15149AC0 (needs func_1513D524 to return its record: functions.h:772 + game_169510.c),
+  func_150A6C40 (caller game_eu_13C400.c:576 declares s32; asm is void), the rest of the per-frame group.
+- verify_all OK, NM links, protocheck = only the known game_A9D90.c func_1517FD84 lines. progress_nm total
+  5048/5915.
+
+## Next steps (from P125)
+
+1. func_15149AC0 (menu, 1451 hits): change `func_1513D524` to return `func_1513D2F0(...)` (game_169510.c, check
+   byte-identical) and functions.h:772 to `struct210 *` (or `u8 *`), then convert (stack struct sp44..spDC, one
+   struct: the record copy memcpy(rec + 0x110, &sp44, 0x50)).
+2. func_150A6C40: decide the caller prototype (game_eu_13C400.c:576 `s32` -> void), then convert (reading in P125.md).
+3. func_15179008 callers game_eu_1231B0.c:140 / game_eu_1387B0.c:10 have no prototype (implicit int): check the
+   wasm link for a signature-mismatch stub.
+4. Per-frame stubs still open: func_1510CE28, func_15188630, func_1508F9F4 + func_1509093C, func_1515929C,
+   func_1505528C (its callee func_15058898 is also a menu stub).
+5. Browser: menu sprites / shadows / rain / animated meshes (UNVERIFIED list in P125.md).
 
 ## P122 (port-b) (session P122, 2026-10-23). Details: `docs/port/sessions/P122.md`
 

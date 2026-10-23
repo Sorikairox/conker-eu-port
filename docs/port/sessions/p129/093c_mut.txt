@@ -1,0 +1,44 @@
+s/if (used < 0x5B) {/if (used < 0x5A) {/
+s/        am->active = 0;/        am->active = 1;/
+s/am->active = 0xFF;/am->active = 0xFE;/
+s/am->blend_vel = D_8009E0F8;/am->blend_vel = D_8009E0FC;/
+s/am->wobble_timer = (func_150ADA20() \& 0x3F) + 0x3C;/am->wobble_timer = (func_150ADA20() \& 0x3F) + 0x3D;/
+s/am->level = (f32)D_800CC2D0\[0\].unkB2 \/ 720.0f;/am->level = (f32)D_800CC2D0[0].unkB2 \/ 721.0f;/
+s/if (am->level > 1.0f) {/if (am->level >= 1.0f) {/
+s/if (used < 1441) {/if (used < 1440) {/
+s/lo = am->level - D_8009E100;/lo = am->level - D_8009E104;/
+s/if (lo < 0.0f) {/if (lo <= 0.0f) {/
+s/if (am->blend <= lo) {/if (am->blend < lo) {/
+s/am->blend = (lo + lo) - am->blend;/am->blend = (lo + lo) + am->blend;/
+s/if (hi > 1.0f) {/if (hi > 0.9f) {/
+s/am->blend = (hi + hi) - am->blend;/am->blend = (hi + lo) - am->blend;/
+s/am->count = ((u32)dls - (u32)data) >> 4;/am->count = ((u32)dls - (u32)data) >> 3;/
+s/am->vtx\[1\] = (u8 \*)allocate_memory(am->count \* 16, 1, 2, 0);/am->vtx[1] = (u8 *)allocate_memory(am->count * 16, 1, 1, 0);/
+s/bcopy((void \*)data, am->vtx\[1\], am->count \* 16);/bcopy((void *)data, am->vtx[1], am->count * 10);/
+s/am->base\[i \* 10 + 9\] = \*(u8 \*)(data + i \* 16 + 0xF);/am->base[i * 10 + 9] = *(u8 *)(data + i * 16 + 0xE);/
+s/func_1502B7F0((s32 \*)\&am->target, 2, 0x18, 0);/func_1502B7F0((s32 *)\&am->target, 2, 0x18, 1);/
+s/vtx = am->vtx\[D_800BE9C0\];/vtx = am->vtx[0];/
+s/(f32)\*(s16 \*)(base + i \* 10 + 2));/(f32)*(s16 *)(base + i * 10 + 4));/
+s/if (used < 480) {/if (used < 479) {/
+s/am->img\[1\] = am->img\[0\] = D_80090616;/am->img[1] = am->img[0] = D_80090612;/
+s/} else if (used < 960) {/} else if (used < 961) {/
+s/dark = ((used - 720) \* 255) \/ 480;/dark = ((used - 721) * 255) \/ 480;/
+s/} else if (dark > 0xFF) {/} else if (dark > 0xFE) {/
+s/tint_r = ((dark \* -151) >> 8) + 0xFF;/tint_r = ((dark * -150) >> 8) + 0xFF;/
+s/tint_g = ((dark \* -164) >> 8) + 0xFF;/tint_g = ((dark * -165) >> 8) + 0xFF;/
+s/if (i < 0xD0) {/if (i < 0xCF) {/
+s/} else if (i < 0xDC) {/} else if (i < 0xDD) {/
+s/dst\[0xD\] = ((dark \* -94) >> 8) + 0xFF;/dst[0xD] = ((dark * -95) >> 8) + 0xFF;/
+s/dst\[0xE\] = (s32)(base\[i \* 10 + 8\] \* 0xFF) >> 8;/dst[0xE] = base[i * 10 + 8];/
+s/if (used >= 1441) {/if (used >= 1442) {/
+s/} else if (used >= 1201) {/} else if (used >= 1200) {/
+s/if (fabsf(am->wobble_vel) < D_8009E108) {/if (am->wobble_vel < D_8009E108) {/
+s/        if (i <= 0) {/        if (i < 0) {/
+s/am->wobble = frames \* am->wobble_vel;/am->wobble = am->wobble_vel;/
+s/if (am->wobble > 2.0f) {/if (am->wobble >= 2.0f) {/
+s/am->wobble = -4.0f - am->wobble;/am->wobble = 4.0f - am->wobble;/
+s/} else if (am->wobble_timer == 0 \&\& used < 1200/} else if (am->wobble_timer == 0 \&\& used < 1201/
+s/am->wobble >= 0.0f \&\& am->wobble < step) {/am->wobble > 0.0f \&\& am->wobble < step) {/
+s/if (used >= 1440 \&\& am->drop_y > -22.0f) {/if (used >= 1441 \&\& am->drop_y > -22.0f) {/
+s/am->drop_vel -= 0.25f \* D_800BE9E4;/am->drop_vel -= 0.25f;/
+s/am->drop_y += am->drop_vel;/am->drop_y -= am->drop_vel;/

@@ -15,7 +15,7 @@ void port_glog(const char *fmt, ...);
 float cosf(float);
 float func_150AD78C(float);
 float func_150AD780(float);
-int func_150A7B80(Mtx *);
+void func_150A7B80(Mtx *); /* game_D5030.c (P131) */
 
 static int cmp_words(int what, /* 1 F2L, 2 L2F, 3 L2F->F2L, 4 perspF, 5 persp, 6 lookat, 7 ident */ const u32 *got, const unsigned *want, int n) {
     int bad = 0, i;
