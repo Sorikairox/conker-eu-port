@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P162 (port-b) (session P162, 2026-10-24). Details: `docs/port/sessions/P162.md`
+
+Branch `port-b` (from P160 9151c20). Took game_eu_F6060.c, game_eu_192500.c, game_eu_1BAF40.c, game_eu_1FB080.c.
+- Table signatures (P160 list), each jalr traced to its table: real and fixed under NM: D_8008B734 (func_151660F0
+  returns f32: func_15164E0C stores f0), D_8008FFD0 (func_151D1654 / 1674 return func_151D1694's s32; func_151D1694
+  `object_offset_point` converted). False positives: D_80088BF8, D_8008D9C0, D_80089E9C (the v0 test after
+  func_151349D0's first jalr belongs to D_80089EB8; func_151A7BC0 needs nothing), D_80082FA4 (US name for EU
+  0x80083334; the real table is C-dispatched D_80082BFC in game_36680, result unused).
+- New real cases in game_eu_1C3530.c (not port-b): D_8008FC30 (func_151991D0 ..) and D_8008FC58 (func_1519C4FC ..),
+  results stored with `sh v0`.
+- `p162/tablesig.py` v2 (EU symbol resolution, per-jalr table trace, f0 results, single named entries, "maybe" rows);
+  `p162/asmlist.py` skips functions defined in multi-function NM blocks.
+- Hand C (NM), EQUIV + setups + mutants: func_151CEBE4 `node_find_kind11_by_id`, func_151CDA70 `splash_effect_spawn`
+  (1FB080), func_150C8850 `wobblers_update` (F6060), func_1518FE50 `bone_sparks_emit` (1BAF40), func_150F1C5C
+  `limb_burst_spawn` (11CB90), func_150FF840 `gun_fire_effects` (12D5D0, returns 0 for 981E0's undeclared calls).
+- Bug fix: func_150F03F8 (11CB90 NM m2c body) pointer stride on `&D_800A1A10 / 1A28 / 1A40` (wrong for arg1 = 1).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1201 bodies), selftest 62/62. progress_nm total 5195/5915 (87.8%), game 4664/5334, C bytes 68.9% (P160: 5189, 68.8%), 720 asm-only. No difftest processes left.
+
+## Next steps (from P162)
+
+1. Owner of game_eu_1C3530.c: D_8008FC30 / D_8008FC58 entries must return s16/s32 (P162.md). Check the "maybe"
+   rows of `p162/tablesig.py` (dispatcher index ranges).
+2. Next port-b asm with C callers (`p162/asmlist.py`): func_151C6A28 (210, 1F4090), func_15152A90 (213, 17D3C0),
+   func_150FD140 (215, 12A7C0), func_15081120 (219, AE930), func_150511E8 (220, 78230), func_15152700 (228, 15 calls).
+3. Run port-web `port/tools/m2c_sanity.py` over port-b files: func_150F03F8's stride bug was still in an NM body.
+4. Browser: P162.md UNVERIFIED.
+
 ## P160 (port-b) (session P160, 2026-10-24). Details: `docs/port/sessions/P160.md`
 
 Branch `port-b` (from P159 4bb281f). Took game_eu_1F4090.c.

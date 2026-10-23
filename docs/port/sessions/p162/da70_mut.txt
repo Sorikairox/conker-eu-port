@@ -1,0 +1,17 @@
+s/size \* 0.875f/size * 0.75f/
+s/0.0300000012f/0.03f/
+s/0.0400000028f/0.04f/
+s/0.0550000034f/0.055f/
+s/src\[1\] + src\[4\]/src[1] + src[3]/
+s/params.y = src\[1\]/params.y = src[4]/
+s/params.min1 = -16384.0f/params.min1 = 16384.0f/
+s/rec.u14 = 7/rec.u14 = 8/
+s/rec.u15 = 0x23/rec.u15 = 0x24/
+s/rec.life = 300/rec.life = 301/
+s/0x1C, 9, 9, 9/0x1C, 9, 8, 9/
+s/arg3, arg4)/arg3, arg3)/
+s/params.owner_id = arg1/params.owner_id = arg3/
+s/params.owner = arg2/params.owner = 0/
+s/size \* 0.0625f/size * 0.125f/
+s/params.radius2 = params.radius/params.radius2 = params.size_x/
+s/obj + 0x98/obj + 0x94/
