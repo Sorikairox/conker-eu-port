@@ -1110,6 +1110,9 @@ def compare(R, C, rk, arity):
         # one-argument call to func_15048A40, which made a2 look like an argument)
         if na is not None and na != 99 and os.environ.get('DIFFTEST_PROTO_ARGS', '1') == '1': cnt = min(cnt, na)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
+        # P120 (opt-in): DIFFTEST_VARARGS_REF=1: a varargs callee's register arguments are the ones the reference's
+        # call site writes (the candidate's IDO code left a loop constant in a2 before a 2-argument func_15042E3C call)
+        if na == 99 and os.environ.get('DIFFTEST_VARARGS_REF') == '1': cnt = max(a['a'], default=-1) + 1
         # P112: an indirect call (jalr) of an unknown function: the reference may set an argument register in an
         # earlier block (event natives 5 / 6 load a1 before branching to their shared jalr tail), which the
         # straight-line scan above misses -> a1 was never compared (P106 args[1] -> args[0] mutant survived). Count

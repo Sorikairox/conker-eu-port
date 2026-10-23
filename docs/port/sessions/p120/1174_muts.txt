@@ -1,0 +1,13 @@
+s/    if ((s8) D_800E0EC6 == 0) {/    if ((s8) D_800E0EC6 != 0) {/ %
+s/alpha = D_800E0EC5 - (D_800BE9E4 << 5);/alpha = D_800E0EC5 - (D_800BE9E4 << 4);/ %
+s/        if (alpha <= 0) {/        if (alpha < 0) {/ %
+s/            ((MenuState \*) D_80090174)->mainPage = 0;/            ((MenuState *) D_80090174)->mainPage = 1;/ %
+s/            if (D_80090180 != 0) {/            if (1) {/ %
+s/            D_80090180 = 0;/            D_80090180 = 2;/ %
+s/        if (alpha >= 0x100) {/        if (alpha > 0x100) {/ %
+s/    if (alpha != 0xFF) {/    if (alpha != 0xFE) {/ %
+s/    func_151E3AE4(mask, 1, 0, alpha \& 0xFF, 0);/    func_151E3AE4(mask, 0, 0, alpha \& 0xFF, 0);/ %
+s/        D_800E0EC6 = 0;/        D_800E0EC6 = 1;/ %
+s/    rec->input &= ~0x20;/    rec->input \&= ~0x30;/ %
+s/rec->x42 \* 10/rec->x42 * 9/ %
+s/        rec->input &= ~0x20;/        rec->input \&= ~0x21;/ %

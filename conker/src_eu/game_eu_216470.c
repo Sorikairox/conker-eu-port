@@ -17,7 +17,12 @@ extern u8 D_8009E288[];
 
 
 Gfx *func_151ED998(Gfx *gdl);
+#ifdef NON_MATCHING
+/* P120: the definition (game_70200) is varargs; a fixed-arg prototype gives a different wasm signature. */
+void func_15042D94(s32, s32, s32, void *, ...);
+#else
 void func_15042D94(s32, s32, s32, void *);
+#endif
 extern Gfx *(*D_800903A4[])(Gfx *);
 extern u8 D_800BEB60;
 
@@ -1136,7 +1141,7 @@ void func_151EE704(void) {
             cmd = (dl[0] >> 24) & 0xFF;
             if (cmd == 1) {
                 dl[1] += (u32) asset;
-                vtx = (u8 *) (dl[1] | 0x80000000);
+                vtx = (u8 *) dl[1];   /* P121/P120: the asm ORs 0x80000000, a no-op for the KSEG0 asset address (w1 += asset); kept out: it breaks wasm addresses */
                 vtx[0xC] = 0;
                 vtx[0xD] = 0;
                 vtx[0xE] = 0;
