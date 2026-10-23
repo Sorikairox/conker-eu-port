@@ -185,7 +185,7 @@ void func_150076BC(s32 arg0);
 void func_15007684(void);
 void func_1500764C(void);
 void func_151E5AB8(void);
-s32 func_1501D348(s32, s32, s32, s32, s32);
+void func_1501D348(s32, s32, s32, s32, s32);
 void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 void func_15042D94(s32, s32, u8, s32, ...);  /* varargs, as its definition (game_70200) */
 void func_1000E7A0(u32, s32);

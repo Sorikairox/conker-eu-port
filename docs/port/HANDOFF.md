@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P121, 2026-10-23, port-web). Details: `docs/port/sessions/P121.md`
+
+- Merged port 4987bbc (P117) as 85aea50. NM build broke on a `func_1501D348` redeclaration in game_eu_20B730.c
+  (P117 `s32` at line 188 vs port-web `void`); line 188 -> `void`. verify_all OK, NM link, protocheck 0 (1029),
+  float-int BUG 0, m2c_sanity 199 rows / high 43 rows / 37 functions (P118 202 / 48 / 40; the 3 fixed functions gone),
+  arity unchanged, census 722 ok / 0 FAIL (clean). Run m2c_sanity after the web rebuild (it reads port/build/ll).
+- **Track 13 runs**: 3/0xD + 5/0x5C + 5/0x67 at frame 2133 -> func_151DECB4 -> mode 3 / level 0x1D at 2139.
+  P116 +0x65 cycle guard never fires (kept, log only). `?p116walk` removed (redundant).
+- **P113 camera guard kept**: at 2133 it still fires but is harmless now (`?p113noguard=1`: no trap); the menu level's
+  916-frame scene ends at 3053 with the same stale camera target and without the guard node traps at 3057
+  (func_1508F0D4).
+- **New trap: P117 C func_151EE704** (game_eu_216470) `dl[1] | 0x80000000` -> OOB store at 2139. TEST-ONLY copy
+  without the OR: `?p121spr=1`.
+- Menu: rec->fade stays 0 (2139..4301), pages hidden; music func_1000E7A0(4, 0) from 3057. **No 3D is drawn on the menu**
+  (black shots; triangle count frozen after the scene), unlike P116. Cause open.
+- Frame-1985 trap explained: track 13's 5/0x5C -> func_1510AEB0 (game_eu_1386C0, P15 m2c) passes `&sp24` of scattered
+  stack locals as a 0x3C-byte struct -> garbage table index in func_15169EF8.
+- `?p110noev=1` regression clean: node + 2 Chrome walks (death, 0x2C and back, heap 0, null 0).
+
+## Next steps (from P121)
+
+1. Conversion slot: func_151EE704 drop the K0 OR (1 line); func_1510AEB0 as one stack struct (S59A0 layout);
+   func_151E73C8 (menu carousel, producer of rec->fade).
+2. port-web: why the menu draws no 3D after mode 3 (handler camera +0x2C = 0x80000, menu scene camera track, stubs
+   func_1510E004 / func_15149AC0); then drop `?p121spr` once item 1 merges.
+3. Scene-end camera retarget producer (func_15029EA8 chain, func_151149AC) so the P113 guard can go (3053 case).
+
 ## State (session P118, 2026-10-23, port-web, tooling). Details: `docs/port/sessions/P118.md`
 
 - New `port/tools/m2c_sanity.py` (host, ~10 s): compares every NON_MATCHING body's clang IR (sroa+instcombine) with

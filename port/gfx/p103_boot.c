@@ -14,6 +14,7 @@
  * result; an empty list answers 1. */
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "../ultra/pc_mem.h"
 
 int port_flag(const char *name);
@@ -51,6 +52,33 @@ static int p103_prereq(int id, int depth) {
 void p103_frame(void) {
     static int lmode = -1, llevel = -1;
     int m = vbe_ld8(&D_800E0B94), l = D_800BE9F0;
+    if (flag(&fboot, "p103boot") && m == 3) { /* P121: menu record D_80090174 (P117 map): +8 page fade f32, +0x2C titlePage,
+                                                * +0x3E menu, +0x3F mainPage; on change of the bytes, else every 240 frames */
+        extern unsigned char *D_80090174; extern unsigned char D_800E0FC6, D_80090114, D_800E0EC4;
+        static unsigned lastkey = ~0u, nl, next;
+        const unsigned char *r = D_80090174;
+        if (memok(r) && nl < 60) {
+            unsigned fw = *(const unsigned *)(r + 8), key = vbe_ld8(r + 0x2C) | vbe_ld8(r + 0x3E) << 8 | vbe_ld8(r + 0x3F) << 16 |
+                (unsigned)vbe_ld8(&D_80090114) << 24;
+            float fade; memcpy(&fade, &fw, 4);
+            static unsigned lastfw;
+            if (key != lastkey || fw != lastfw || port_frame_count >= next) {
+                nl++; lastkey = key; lastfw = fw; next = port_frame_count + 240;
+                port_log("[p121] menu frame %u: rec %08X fade %g titlePage %d menu %d mainPage %d input %04X | overlay D_800E0FC6 %u speed D_80090114 %u page alpha D_800E0EC4 %u\n", port_frame_count,
+                         (unsigned)(uintptr_t)r, fade, (signed char)vbe_ld8(r + 0x2C), (signed char)vbe_ld8(r + 0x3E),
+                         (signed char)vbe_ld8(r + 0x3F), vbe_ld16(r + 0x20),
+                         vbe_ld8(&D_800E0FC6), vbe_ld8(&D_80090114), vbe_ld8(&D_800E0EC4));
+                { /* camera 0: non-finite floats, target */
+                    extern unsigned char *D_800DBFF0; const unsigned *c = (const unsigned *)D_800DBFF0; int o, bad = 0, first = -1;
+                    if (memok(c))
+                    for (o = 0; o < 0x9A0 / 4; o++) if (((c[o] >> 23) & 0xFF) == 0xFF) { bad++; if (first < 0) first = o * 4; }
+                    port_log("[p121]   camera 0: %d non-finite words (first +%X) target +3D4 %08X +5F0 %08X +18C %08X %08X %08X\n",
+                             bad, first, c[0x3D4 / 4], c[0x5F0 / 4],
+                             c[0x18C / 4], c[0x190 / 4], c[0x194 / 4]);
+                }
+            }
+        }
+    }
     if (!flag(&fboot, "p103boot") || (m == lmode && l == llevel)) return;
     port_log("[p103] frame %u: mode %d (prev %d) level %X timer %d tv %d | objects %d events %u scene0 %u\n",
              port_frame_count, m, vbe_ld8(&D_800E0FC5), l, D_800E0EC0, D_80000300, D_800DC320, vbe_ld8(&D_800D2F3C),
@@ -174,12 +202,28 @@ void __wrap_func_1502457C(int a, int b) {
     extern unsigned char *D_800C4170;
     static unsigned nlog;
     unsigned before = vbe_ld8(D_800CC2D0 + 0x65), after;
-    static int fwalk = -1;
-    void p116_walk_fixed(int, int);
     p113_watch("func_1502457C in");
-    if (flag(&fwalk, "p116walk")) p116_walk_fixed(a, b); /* TEST ONLY: fixed copy (port/boot/p69_pcold.c) */
-    else __real_func_1502457C(a, b);
+    __real_func_1502457C(a, b); /* (P121: the P116 test-only ?p116walk copy is gone: the game C has the fix since P117) */
     p113_watch("func_1502457C out");
+    { /* P121 (?p103boot): log queued events of the scene's last track (13: camera switch 3/0xD, exit 5/0x67) and any
+       * type-3 / 5-0x67 event, first 24 hits */
+        static int fb = -1; static unsigned n121; static const unsigned char *lastev;
+        int i;
+        if (flag(&fb, "p103boot") && D_800C4170)
+            for (i = 0; i < 16 && n121 < 24; i++) {
+                const unsigned char *e = D_800C4170 + i * 0xC;
+                const unsigned char *ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
+                int tr = (signed char)vbe_ld8(e + 8);
+                if (!memok(ev)) break;
+                if (ev == lastev) continue;
+                if (tr == 13 || (vbe_ld8(ev) == 3 && vbe_ld16(ev + 2) == 0xD) || (vbe_ld8(ev) == 5 && vbe_ld16(ev + 2) == 0x67)) {
+                    lastev = ev; n121++;
+                    port_log("[p121] walker(%d, %d) frame %u queued ev %08X time %d track %d: type %02X id %04X b4 %d b5 %d w6 %d\n",
+                             a, b, port_frame_count, (unsigned)(uintptr_t)ev, *(const int *)(e + 4) >> 8, tr, vbe_ld8(ev),
+                             vbe_ld16(ev + 2), (signed char)vbe_ld8(ev + 4), (signed char)vbe_ld8(ev + 5), (short)vbe_ld16(ev + 6));
+                }
+            }
+    }
     after = vbe_ld8(D_800CC2D0 + 0x65);
     if (after != before && nlog++ < 8) {
         int i;
@@ -227,7 +271,11 @@ P113W1(func_15173E34)
  * block (+0x138..) and the next heap walk / alloc traps (frame 2137). On N64 the scene VM func_15024910 (asm stub
  * here) ends LogoScreen with opcode 0x67 -> func_151DECB4 -> mode 3 before that; the stub never does, so the producer
  * that should retarget / drop the camera is in the stubbed scene path. Guard: a camera whose unk3D4 is the freed
- * record is pointed at a zeroed parking record instead. ?p113noguard=1 / PORT_P113NOGUARD=1 turns it off. */
+ * record is pointed at a zeroed parking record instead. ?p113noguard=1 / PORT_P113NOGUARD=1 turns it off.
+ * P121: since the P117 walker fix track 13 runs (3/0xD, 5/0x5C, 5/0x67 -> func_151DECB4 at frame 2133) and the
+ * 2133 case is harmless without the guard (mode 3 at 2139, no trap); but the menu level's scene 1 (916 frames) ends
+ * at 3053 with the same stale target (camera 0, object 105DF6F0) and without the guard node traps 4 frames later in
+ * func_1508F0D4 (particle list). Guard KEPT for that case. */
 extern int D_80082FA0;
 static unsigned p113_park[0x200] __attribute__((aligned(16)));
 void __real_func_15060F28(unsigned char *obj, int mode);
@@ -236,10 +284,14 @@ void __wrap_func_15060F28(unsigned char *obj, int mode) {
     unsigned rec = *(unsigned *)(obj + 0x31C);
     int i;
     __real_func_15060F28(obj, mode);
-    if (flag(&fng, "p113noguard") || rec == 0) return;
+    if (rec == 0) return;
     for (i = 0; i <= D_80082FA0 && i < 4; i++) {
         unsigned *t = (unsigned *)(D_800DBFF0 + i * 0x9A0 + 0x3D4);
-        if (*t == rec) {
+        if (*t == rec && flag(&fng, "p113noguard")) { /* P121: report the stale target with the guard off too */
+            if (n++ < 16)
+                port_log("[p113] NO GUARD: camera %d target %08X freed with object %08X (mode %d) frame %u\n", i, rec,
+                         (unsigned)(uintptr_t)obj, mode, port_frame_count);
+        } else if (*t == rec) {
             if (n++ < 16)
                 port_log("[p113] guard: camera %d target %08X freed with object %08X (mode %d) frame %u -> parking record\n", i, rec,
                          (unsigned)(uintptr_t)obj, mode, port_frame_count);
@@ -286,4 +338,20 @@ int __wrap_func_15083FB0(unsigned char id) {
     int r = __real_func_15083FB0(id);
     p116_find_log("func_15083FB0", id, r);
     return r;
+}
+
+/* P121 (?p103boot): log the scene-end menu request (func_151DECB4, from scene handler A event 5/0x67). */
+void __real_func_151DECB4(void);
+void __wrap_func_151DECB4(void) {
+    static int fb = -1;
+    if (flag(&fb, "p103boot")) port_log("[p121] func_151DECB4 (5/0x67 menu request) frame %u\n", port_frame_count);
+    __real_func_151DECB4();
+}
+
+/* P121 TEST ONLY ?p121spr=1: run the copy of func_151EE704 without the KSEG0 OR (port/boot/p69_pcold.c). */
+void __real_func_151EE704(void);
+void __wrap_func_151EE704(void) {
+    static int fs = -1;
+    void p121_sprites_fixed(void);
+    if (flag(&fs, "p121spr")) p121_sprites_fixed(); else __real_func_151EE704();
 }
