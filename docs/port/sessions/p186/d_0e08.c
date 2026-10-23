@@ -1,12 +1,6 @@
-typedef struct { s16 base; s16 range; u8 pad4[0x10]; } Rng14;
-extern Rng14 D_800AA120[];
 s32 func_1513F680(u8 *, s32, s32, s32, s32);
-void func_15143134(void *arg0, void *arg1, void *arg2);
+s32 memcpy(s32, f32 *, s32);
 void func_1504715C(void *, u8 *);
-u8 *func_1513D524(void *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
-u8 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
-void func_1516972C(void *arg0);
-s32 func_150ADA20(void);
 extern f32 D_800A83F4;
 extern u8 D_800AB6F0[];
 extern u8 D_800AB7E4[];
@@ -95,10 +89,10 @@ void func_15190E08(u8 *e) {
         owner = *(u8 **) (e + 0x10);
         if (*(u8 **) (owner + 0x1D4) == NULL) {
             kill = 1;
-            drop = (e[0x18] & 1) ? func_151491F4(*(s16 *) (e + 0x16), -1, 13, 1, 8, 12, 255, 0)
-                                 : func_151491F4(300, -1, 13, 0, 8, 12, 255, 0);
+            drop = (e[0x18] & 1) ? (u8 *) func_151491F4(*(s16 *) (e + 0x16), -1, 13, 1, 8, 12, 255, 0)
+                                 : (u8 *) func_151491F4(300, -1, 13, 0, 8, 12, 255, 0);
             if (drop != NULL) {
-                memcpy(drop + 0x28, e + 0x10, 12);
+                memcpy((s32) (drop + 0x28), (f32 *) (e + 0x10), 12);
             }
         } else {
             cfg = &D_8008FE10[e[0x1A]];
@@ -200,10 +194,10 @@ void func_15190E08(u8 *e) {
                         if (*(f32 *) (*(u8 **) (e + 0x10) + 0x118) <
                             spawn.pos[1] - *(f32 *) &blk.rng[1] - *(f32 *) &blk.rng[3]) {
                             func_150ADA20();
-                            drop = func_1513D524(&spawn, 12, 0, 0, 13, D_800AB7E4[e[0x2C]] ? 0 : 2, 96, 255, 0);
+                            drop = (u8 *) func_1513D524((s32) &spawn, 12, 0, 0, 13, D_800AB7E4[e[0x2C]] ? 0 : 2, 96, 255, 0);
                             head->obj = drop;
                             if (drop != NULL) {
-                                memcpy(drop + 0x110, &blk, 0x60);
+                                memcpy((s32) (drop + 0x110), (f32 *) &blk, 0x60);
                                 head->timer = (u32) func_150ADA20() % (u32) (cfg->range + 1) + cfg->base;
                                 n--;
                                 head = head->next;
@@ -218,6 +212,6 @@ void func_15190E08(u8 *e) {
         }
     }
     if (kill) {
-        func_1516972C(e);
+        func_1516972C((struct102 *) e);
     }
 }

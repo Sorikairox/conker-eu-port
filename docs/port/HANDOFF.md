@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P186 (port-b) (session P186, 2026-10-24). Details: `docs/port/sessions/P186.md`
+
+Branch `port-b` (from P183 6d46bb1). Hand C (NM):
+- func_15178CC0 (game_eu_1A5D10, now port-b's): NM branch passes (arg0, arg1, arg2) to func_15168118 (dropped args).
+- func_15168118 `billboard_sprite_draw` (1944C0): difftest EQUIV + 15 setups + mutants.
+- func_150A55A0 `mesh_dl_cull_copy` (game_eu_D2DB0, taken by port-b): Rare hand asm (+ loop func_150A563C, now
+  `#ifndef NON_MATCHING`); whole-function harness `docs/port/sessions/p186/nmasm_mesh55a0.py` EQUIV + mutants.
+- func_15183800 `weather_effect_start` (1B1010): difftest EQUIV + 17 setups + mutants 29/29.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1298), selftest 65/65; voidret_scan no SUSPECT. progress_nm total
+  5292/5915 (89.5%), game 4758/5334, C bytes 73.6%, 623 asm-only.
+
+## Next steps (from P186)
+
+1. Browser (port-web): P186.md UNVERIFIED list (sprites, culled world meshes, weather effect starts).
+2. func_15190E08 (449, game_eu_1BE5C0, level 0x29 stub): draft `p186/d_0e08.c`; DIFFER only on the leftover a3 of
+   the func_15143134 call (harness arity); hoist Rng14 / D_800AA120 above it, then setups (P186.md section 2).
+3. port-b breadth (`p168/asmlist.py`): func_15177410 (417, 1A5190, 6 calls), func_151C62D0 (425, 1F4090),
+   func_15082278 (466, AF2A0), func_150B2C20 (477, E0430); func_15112074 (651, 13DC30, level 0x29 stub).
+4. Other slots' level 0x29 stubs: func_150D0C40 (FE450), func_15008E10 (362B0), func_1514D3B0 (17A800),
+   func_150A4FE4 (D1760), func_151925C4 (1BF960), func_1000A750 (init_A420), func_15189F70 (1B7680).
+
 ## P183 (port-b) (session P183, 2026-10-24). Details: `docs/port/sessions/P183.md`
 
 Branch `port-b` (from P181 4c2d5a5).
