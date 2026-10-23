@@ -24,6 +24,11 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 
 ## Next steps (from P100)
 
+0. func_150000B0 (game_2D4B0, level music: the only blocker for music in the browser, P101): not started in P100.
+   It is ~400 instructions, not small: level header D_800B0DF0 +0x2C..0x39 copied to a 14-byte block (or defaults
+   when NULL), 5-case jump table on the mode byte, func_1000B548 fills 3 playing-song words (padded with -1), then
+   up to two songs are matched / stopped / started via func_1000E46C / func_1000E40C / func_1000DF68 /
+   func_1000DE1C / func_1000D96C and func_10017944(1, +0x6D). An old commented-out draft is in game_2D4B0.c line 27.
 1. func_1512EE50 (camera eye height, 1352 instructions, 49 calls): dedicated session; m2c raw draft in
    `port_work/p100/raw/func_1512EE50.c` (700 lines, one goto) as a reading aid only.
 2. func_1517C11C (asm-only, ~320 instructions): producer of the voice flags func_1517E3CC reads; until it is C every
