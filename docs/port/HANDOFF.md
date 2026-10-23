@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P176, 2026-10-24). Details: `docs/port/sessions/P176.md`
+
+- Merged port-b b235977 (P168 + P170) (b5b4e02): HANDOFF.md only conflict; merge fix: game_eu_1F4F60.c NM prototype of
+  func_10010F88 returns u16 (port P167 definition).
+- Browser P174 fixes: func_1509CBD8 event_query_scene returns s32 per case (was void: every scene query 0, intro BF
+  never started scene 3), func_1509DFCC case 0x19 tests every node (527ead2); func_1509C850 / func_1509DD0C return
+  s32 with the asm's defined values (a028320).
+- New hand C (NM): func_1507D754 object_destroy_effects (P169 draft), func_150039E0 world_objects_load (741),
+  func_15006590 save_slot_unpack (407). difftest EQUIV + mutants (P176.md).
+- difftest harness: stubs on the last word of a page (func_151CFFFC) no longer fault (delay-slot block was taken for a
+  second call); DIFFTEST_PAGESTUB_OLD=1 = old; selftest 65/65.
+- Checks: verify_all OK, NM links, protocheck 0 (1270 NM bodies), progress_nm 5264/5915 (89.0%), C bytes 72.2%.
+
+## Next steps (from P176)
+
+1. func_1500BEC0 unit (func_1500AD84 + D_8008D258 handlers + func_1517BE0C, ~1270 insns) - not started.
+2. Browser: intro scene 3 (BF) now starts; func_150623F4 trap / D_800D2104 / D_800D2528 producer is P178's.
+3. Browser checks: level world objects (func_150039E0), save load (func_15006590), break effects (func_1507D754).
+4. Earlier UNSURE results with "both sides fault at 0x00000000" next to a page-end callee may be re-run now.
+5. P138 / P141 leftovers.
+
 ## State (session P173, 2026-10-24). Details: `docs/port/sessions/P173.md`
 
 - **Browser P171 new-game trap fixed (7cdb22a, own commit)**: func_15147F50 / func_15147FA0 (game_eu_1754C0, matching
