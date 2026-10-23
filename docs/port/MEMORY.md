@@ -277,6 +277,7 @@ rewrites each known site in the IR. Game `.c` files are not changed. Every site 
 | func_15002008 (game_eu_2F180, leaf lists) | `(u32)p < 0x80000001` → vertex = (0, 0, 0) | `(u32)p < 0x10000000` | `k0_ptr_sites` (P42) |
 | func_15002248 (game_eu_2F180, quadtree helper) | `(u32)p < 0x80000001` → vertex = (0, 0, 0) | `(u32)p < 0x10000000` | `k0_ptr_sites` (P42) |
 | func_15004CE0 (game_30E90, MOVEMEM 0x0E relocation) | `unk4 < 0x80000000` → add the base | `unk4 < 0x10000000` | `k0_ptr_sites` (P42); its caller func_150039E0 is still asm, so not run yet |
+| func_151F3C4C (libultra/audio game_21FC90, mixer read callback) | `p = dma(..) + 0x80000000` (PHYS_TO_K0) | `+ 0` (the PC dma proc returns the wasm address) | `k0_add_sites` (P185) |
 
 `k0_ptr_sites` is scoped by function name and logs a warning to stderr if the number of rewritten compares
 differs from the expected count (1 per function). Without the P42 rewrites, every level triangle would read as
@@ -403,3 +404,10 @@ twice with different arity.
 3. When no labels are left, the mirror shrinks to the run-time heap and framebuffers, and the
    pointer scan is gone.
 4. The vbe model stays: run-time asset data remains big-endian, whatever the static data becomes.
+
+### Stack slots (session P185)
+
+`vbe.py` (`Pass.do_alloca`) gives every `alloca` IDO's layout: align >= 4 (8-byte types keep align 8) and a
+fixed-size slot padded to a multiple of 4 bytes (`<{ T, [n x i8] }>`). So no two locals share a word. Before P185
+clang packed 1- / 2-byte locals into one word: a 32-bit store through a 2-aligned `s16 x[2]` passed as `s32 *`
+overwrote the neighbouring s16 parameter copy (P178, func_1509B8FC: every event struct had id 0).

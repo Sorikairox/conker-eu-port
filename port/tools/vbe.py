@@ -122,6 +122,7 @@ LOAD = re.compile(r'^(\s*)(%[\w.$-]+) = load (volatile )?(.*)$')
 STORE = re.compile(r'^(\s*)store (volatile )?(.*)$')
 MEMI = re.compile(r'^(\s*)(?:tail )?call void @llvm\.(memcpy|memmove|memset)\.[\w.]+\((.*)\)(.*)$')
 GLOB = re.compile(r'^(@[\w.$"-]+) = ((?:[a-z_]+ )*?)(global|constant) (.*)$')
+ALLOCA = re.compile(r'^(\s*%[\w.$"-]+ = alloca )(.*)$')
 ALIGN = re.compile(r'align (\d+)')
 
 DECLS = {
@@ -141,7 +142,7 @@ class Pass:
         self.n = 0
         self.need = set()
         self.st = dict(ld8=0, st8=0, ld16=0, st16=0, ld64=0, st64=0, helper=0, mem=0, memkeep=0,
-                       glob=0, globfix=0, other=0)
+                       glob=0, globfix=0, other=0, alloca4=0, allocapad=0)
         named = {}
         for l in lines:
             m = re.match(r'^(%[\w.$"-]+) = type (.*)$', l)
@@ -243,6 +244,34 @@ class Pass:
             return False
         return True
 
+    def do_alloca(self, m, out):
+        """P185: stack slots get IDO's layout: every alloca starts on a word (align >= 4; 8-byte types keep clang's
+        align 8) and a fixed-size slot is padded to a multiple of 4 bytes. So no two locals share a word: a 32-bit
+        access to a 2-aligned `s16 x[2]` (passed as `s32 *`, P178 func_1509B8FC) or an xor-2 / xor-3 sub-word access
+        can no longer reach a neighbouring slot."""
+        parts = split_top(m[2])
+        ty, rest = parts[0].strip(), [x.strip() for x in parts[1:]]
+        al = next((int(x.split()[1]) for x in rest if x.startswith('align ')), 1)
+        hascount = any(not x.startswith('align ') and not x.startswith('addrspace') for x in rest)
+        try:
+            size = self.lay.info(ty)[0]
+        except (ValueError, TypeError, AttributeError):
+            size = None
+        nal = max(al, 4)
+        if size is not None and size >= 8 and self.lay.info(ty)[1] >= 8:
+            nal = max(nal, 8)
+        nty = ty
+        if not hascount and size is not None and size % 4:
+            nty = f'<{{ {ty}, [{4 - size % 4} x i8] }}>'
+            self.st['allocapad'] += 1
+        if nal == al and nty == ty:
+            return False
+        if nal != al:
+            self.st['alloca4'] += 1
+        rest = [x for x in rest if not x.startswith('align ')] + [f'align {nal}']
+        out.append(m[1] + ', '.join([nty] + rest))
+        return True
+
     def do_mem(self, m, out):
         ind, kind, args = m[1], m[2], split_top(m[3])
         def strip_attrs(a):  # "ptr align 4 %x" -> ("%x", 4)
@@ -312,6 +341,10 @@ class Pass:
                         m = MEMI.match(l)
                         if m:
                             done = self.do_mem(m, out)
+                        else:
+                            m = ALLOCA.match(l)
+                            if m:
+                                done = self.do_alloca(m, out)
             elif l.startswith('@'):
                 m = GLOB.match(l)
                 if m:
@@ -480,6 +513,27 @@ def k0_ptr_sites(text, st):
         out.append(blk)
     return ''.join(out)
 
+
+# P185: PHYS_TO_K0 on an address the PC layer already returns as a wasm pointer. func_151F3C4C (libultra/audio
+# game_21FC90, the mixer's read callback, installed by func_15016170 since port P172) does `p = dma(...); p +=
+# 0x80000000; bcopy(p, ...)`: the dma proc returns osVirtualToPhysical(buf), which is the wasm address on the PC
+# (pc_os.c), so the add is dropped (+0). Without it the first mixer read traps (bcopy out of bounds, boot ~retrace 120).
+K0_ADD_SITES = {'func_151F3C4C': 1}
+
+
+def k0_add_sites(text, st):
+    out = []
+    for blk in re.split(r'(?=^define )', text, flags=re.M):
+        m = re.match(r'define [^@\n]*@(\w+)\(', blk)
+        want = K0_ADD_SITES.get(m[1]) if m else None
+        if want:
+            blk, n = re.subn(r'= add i32 (%[\w.$-]+), -2147483648$', r'= add i32 \1, 0', blk, flags=re.M)
+            st['k0_add'] += n
+            if n != want:
+                sys.stderr.write(f'vbe.py: k0_add_sites {m[1]}: {n} adds rewritten, expected {want}\n')
+        out.append(blk)
+    return ''.join(out)
+
 # P19: RCP / PI / SI register accesses through a constant KSEG1 address (rcp.h IO_READ / IO_WRITE in
 # matched game C, e.g. `IO_READ(AI_LEN_REG)` in func_100095A0) are not memory on the PC. Constant
 # 32-bit loads/stores in 0xA4000000..0xA4FFFFFF become calls to the PC register model
@@ -531,7 +585,7 @@ def rcp_io(text, st):
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
-    p = Pass(self_intrinsic(rcp_io(k0_ptr_sites(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0), st0).split('\n'))
+    p = Pass(self_intrinsic(rcp_io(k0_add_sites(k0_ptr_sites(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0), st0), st0).split('\n'))
     p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs

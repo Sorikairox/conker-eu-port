@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P185, 2026-10-24, port-web). Details: `docs/port/sessions/P185.md`
+
+- Merged port f9c552b (P169-P182) and port-b 4c2d5a5 (P170-P181): HANDOFF.md conflicts only. After each: verify_all OK,
+  NM link OK, protocheck 0 (1309 NM bodies), float-int 0 bugs, census 0 FAIL (clean rebuild). arity +2 rows
+  (func_150F0448, func_1515C388), m2c_sanity +21 (func_1510C4E0 width high x3).
+- **vbe.py aligns stack slots like IDO** (`Pass.do_alloca`: align >= 4, sizes padded to words; 3852 allocas): event
+  structs keep their ids (P178 bug in func_1509B8FC gone), BF finishes and stops, level 0x29 loads once. wasm -0.9 %.
+- New vbe.py site **k0_add_sites** (func_151F3C4C mixer read callback: `+ 0x80000000` dropped; the C func_15016170 from
+  P172 made it run and it trapped at boot).
+- Test wraps removed: `?p171fix`, `?p174fix` (p174ev logging kept), `?p178fix` (p178_path.c deleted; its s32 wrap of the
+  now-void func_150170C4 broke wasm-emscripten-finalize), `?p178evid`.
+- **New game with no flags follows the real route** to level 0x29 scene 1 (22771) and gameplay (23937); walking works
+  (fence, slope, camera, sfx) until 25889, where stubs func_1504B0FC / func_151AC628 / func_151ACBCC / func_1519FD60 /
+  func_151AABC4 take over and player control is lost.
+- **Regression: noev level 0, the player rises forever** from ~1550 (node + Chrome; after the merges, not the alignment).
+
+## Next steps (from P185)
+
+1. Bisect the level-0 rise (P185 6.1) over the P169-P182 merged files (scratch worktree, node noevL with p81look).
+2. Convert func_1504B0FC (game_eu_78230, called by C func_1504CB98) and the D_8008ADA0 handlers func_151AC628 /
+   func_151ACBCC (1D9C00), func_1519FD60, func_151AABC4 (level 0x29 at 25889).
+3. func_15078A60 (path follow), func_15116F34, func_151184BC, func_150D0C40, func_15008E10, func_151831CC.
+4. Green ground decal / unlit torches on level 0x29; DL stubs func_15113D54 / func_15112074.
+
 ## State (session P182, 2026-10-24). Details: `docs/port/sessions/P182.md`
 
 - **func_1517C11C ambient_emitters_update** (game_eu_1A9280, 1286 insns) hand C (NM), from the P104 draft re-checked
