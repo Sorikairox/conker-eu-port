@@ -10,7 +10,56 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P126, 2026-10-23, port-web). Details: `docs/port/sessions/P126.md`
+
+- Merged port 9940126 (P124) as 7738b0a and port-b 422e5d3 (P119 + P122) as dd693f9. Code conflicts were in
+  game_981E0.c (comments / redundant prototype), game_eu_AF2A0.c (port-b = port's file), difftest.py (comment) and
+  selftest.sh (duplicate cases). After each merge: verify_all OK, NM link, protocheck 0 (1038 / 1060), float-int BUG 0,
+  arity 117 rows unchanged, census 722 ok / 0 FAIL (clean). m2c_sanity 207 rows, high 44 / 38 functions (new high:
+  func_15181A6C, func_1512EE50). HANDOFF union mis-nested port-b's sections into P123's: repaired by hand.
+- **The title menu fades in the game's way** (handler C func_15029EA8 C, P124): 2140 `func_1517F3B0(41 frames, dir 0)`
+  from func_15029EA8, fade 0 from 2285, 6626 triangles. **The `?p123fadeev` wrap is removed.**
+- **START works**: the first press zooms the carousel to GAME1 / NEW GAME. The second press sets mode 7 (4393), then
+  mode 0 (4485), then level 0x18 scene 1, then **traps at 4487**: `table index is out of bounds` in func_151E5928
+  `D_8009018C[0]()`. That is the raw 0x151DE100 that P103 predicted.
+- The frame-1985 trap is gone: 6 of 6 events-on node boots ran clean. `?p110noev=1`: node + 2 Chrome walks clean
+  (heap 0, null 0). P122 shadows and waves are not visible: the shadow draw functions func_15186A9C / func_15187954 are
+  still stubs.
+- P113 guard: the 3053 condition no longer occurs, and 2133 is harmless without the guard. The guard is not needed in
+  these runs. It is kept until a mode-0 run has been checked without it.
+
+## Next steps (from P126)
+
+1. Conversion slot, as one unit: **func_151DE100 (mode 0) to C** + a `#ifdef PORT` skip of the func_151E86A4
+   checksum + drop the func_151DE100 data stub (data_stubs.c / vbe.py note) so that D_8009018C[0] is relocated.
+2. Then the level 0x18 new-game stubs: func_150113E0 (game_3E890), func_1515AEE4 (game_eu_186A80), func_10024190
+   (init_eu_23CC0, a mode-0 callee). Run the stub census again with `docs/port/sessions/p126/menu.sh`.
+3. Shadow draw func_15186A9C / func_15187954 (game_eu_1B1ED0). Menu DL stubs func_1510E004 / func_1510E6A0.
+4. port-web: after item 1, run the new game with `?p113noguard=1`, then drop the guard. Remove the pc_gu.c copy of
+   func_150A7B80 (now game C).
+
 ## State (session P123, 2026-10-23, port-web). Details: `docs/port/sessions/P123.md`
+
+- **Menu black = screen fade stuck at 0xFF.** The C menu handler (P117) now starts level 0x1D scene 1. Its scene start
+  func_1501DB18 sets black (t = 0 event `5/0x01 w6 1`). The fade-in is the same event in **handler C func_15029EA8**
+  (game_eu_51190.c, asm stub), so func_1517F51C(0) stays 1 and func_15019464 / func_150195A0 skip every world draw
+  (114-command DLs, 0 triangles). The renderer is fine.
+- TEST ONLY `?p123fadeev=1` (5/1 `b4 == 0` branch of func_15029EA8 from the asm): the menu room is drawn (3119
+  triangles, Chrome shot). Other new flags: `?p123tri=N`, `?p123fade=1`, `?p123noscene=1`.
+- Merged port 0c14e92 (P120, carousel func_151E73C8 C, func_151EE704 OR dropped) as b00bd2c on coordinator request:
+  verify_all OK, NM link, protocheck 0 (1033), census 0 FAIL (clean). The carousel alone does not fix the black menu.
+  `?p121spr` is now obsolete: don't pass it.
+- Camera retarget (3053): no scene event retargets +0x3D4 (type 3 only switches the scene camera track; 1D/1's final
+  3/0 is a no-op). +0x3D4 comes only from the camera init func_1512868C / func_150054C4 (slot D_800CC2D0[+0x23D]
+  +0x31C). The removed object is slot 0 itself. P113 guard stays.
+
+## Next steps (from P123)
+
+1. Conversion slot: **func_15029EA8 to C** (handler C; type 5 id 1 = screen fade, types 6 / 0xA = sounds). Then drop the
+   p123fadeev wrap. Also func_1510AEB0 (P121).
+2. port-web: log func_1512868C / func_150054C4 / func_15097188 after 2133 and 3053 (no guard) to find the camera
+   re-init that the port misses.
+
 ## P122 (port-b) (session P122, 2026-10-23). Details: `docs/port/sessions/P122.md`
 
 Branch `port-b` (from P119 3b9eea1); the orchestrator merges it into `port`.
@@ -101,28 +150,6 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
    not in port-b files and need an owner.
 3. Smallest asm-only left in port-b files (from P108): func_15144CEC (101), func_1505327C (109), func_15053430
    (113). func_15060D54 is now owned by port (game_83300.c moved).
-
-## P108 (port-b) (session P108, 2026-10-23). Details: `docs/port/sessions/P108.md`
-
-- **Menu black = screen fade stuck at 0xFF.** The C menu handler (P117) now starts level 0x1D scene 1. Its scene start
-  func_1501DB18 sets black (t = 0 event `5/0x01 w6 1`). The fade-in is the same event in **handler C func_15029EA8**
-  (game_eu_51190.c, asm stub), so func_1517F51C(0) stays 1 and func_15019464 / func_150195A0 skip every world draw
-  (114-command DLs, 0 triangles). The renderer is fine.
-- TEST ONLY `?p123fadeev=1` (5/1 `b4 == 0` branch of func_15029EA8 from the asm): the menu room is drawn (3119
-  triangles, Chrome shot). Other new flags: `?p123tri=N`, `?p123fade=1`, `?p123noscene=1`.
-- Merged port 0c14e92 (P120, carousel func_151E73C8 C, func_151EE704 OR dropped) as b00bd2c on coordinator request:
-  verify_all OK, NM link, protocheck 0 (1033), census 0 FAIL (clean). The carousel alone does not fix the black menu.
-  `?p121spr` is now obsolete: don't pass it.
-- Camera retarget (3053): no scene event retargets +0x3D4 (type 3 only switches the scene camera track; 1D/1's final
-  3/0 is a no-op). +0x3D4 comes only from the camera init func_1512868C / func_150054C4 (slot D_800CC2D0[+0x23D]
-  +0x31C). The removed object is slot 0 itself. P113 guard stays.
-
-## Next steps (from P123)
-
-1. Conversion slot: **func_15029EA8 to C** (handler C; type 5 id 1 = screen fade, types 6 / 0xA = sounds). Then drop the
-   p123fadeev wrap. Also func_1510AEB0 (P121).
-2. port-web: log func_1512868C / func_150054C4 / func_15097188 after 2133 and 3053 (no guard) to find the camera
-   re-init that the port misses.
 
 ## State (session P121, 2026-10-23, port-web). Details: `docs/port/sessions/P121.md`
 

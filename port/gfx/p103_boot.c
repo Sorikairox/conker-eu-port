@@ -389,28 +389,5 @@ void p123_gates(void) {
 }
 
 
-/* P123 TEST ONLY ?p123fadeev=1: scene event type 5 id 1 (screen colour / fade) of handler C func_15029EA8
- * (game_eu_51190.c, still an asm stub), b4 == 0 branch only, from the EU asm 1502A61C..1502A79C:
- *   d = flag ? 0 : func_15023C60(ev, 5, track, &tmp, 1, 1, 0, 0, 0, 0, player) - now;   (time of the next 5/1 event)
- *   func_1517F3B0(D_800844A0[b5][0..2], d, w6 == 0, 0); D_800C40AA = (w6 == 0); return 1.
- * The menu level 0x1D scene 1 starts black (t = 0 5/1 w6 1 via func_1501DB18) and this event fades in over 60 frames;
- * with the stub the screen stays black and func_1517F51C(0) skips every world draw. */
-extern unsigned char D_800844A0[], D_800C40AA;
-int func_15023C60(unsigned, int, int, unsigned char **, int, int, int, int, int, int, int);
-void func_1517F3B0(int, int, int, int, int, int);
-int __real_func_15029EA8(int ev, int track, int value, int now, int player, void *obj, void *rec, void *data, int fl, int skip);
-int __wrap_func_15029EA8(int ev, int track, int value, int now, int player, void *obj, void *rec, void *data, int fl, int skip) {
-    static int fe = -1, nl;
-    const unsigned char *e = (const unsigned char *)(uintptr_t)(unsigned)ev;
-    if (flag(&fe, "p123fadeev") && memok(e) && (signed char)vbe_ld8(e) == 5 && (short)vbe_ld16(e + 2) == 1 && vbe_ld8(e + 4) == 0) {
-        unsigned char *tmp = 0; int b5 = (signed char)vbe_ld8(e + 5), w6 = (short)vbe_ld16(e + 6), d;
-        int t = func_15023C60((unsigned)ev, 5, track & 0xFF, &tmp, 1, 1, 0, 0, 0, 0, player);
-        d = skip ? 0 : t - now;
-        if (nl++ < 20) port_log("[p123] 5/1 fade event: track %d now %d next %d -> func_1517F3B0(row %d, %d frames, dir %d) frame %u\n",
-                                track & 0xFF, now, t, b5, d, w6 == 0, port_frame_count);
-        func_1517F3B0(vbe_ld8(D_800844A0 + 3 * b5), vbe_ld8(D_800844A0 + 3 * b5 + 1), vbe_ld8(D_800844A0 + 3 * b5 + 2), d, w6 == 0, 0);
-        vbe_st8(&D_800C40AA, w6 == 0);
-        return 1;
-    }
-    return __real_func_15029EA8(ev, track, value, now, player, obj, rec, data, fl, skip);
-}
+/* P123 ?p123fadeev (TEST-ONLY wrap of handler C func_15029EA8, 5/1 fade branch) removed in P126: port P124 converted
+ * func_15029EA8 to C and the menu fades in by itself. */
