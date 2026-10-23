@@ -279,7 +279,7 @@ void func_151BF8F0(u8 arg0, s32 arg1) {
     pos.pos[2] = ((f32 *)D_800A5860)[2];
     pos.scaleX = 0.30100003f;
     pos.scaleY = 0.30100003f;
-    popup->sprite = func_15157580(&spr, 0, 1.0f, 0, 0, 0x14, arg0, arg1);
+    popup->sprite = func_15157580(&spr, 0, 1.0f /* P96: f32 parameter (was its float bits) */, 0, 0, 0x14, arg0, arg1);
     if (popup->sprite != 0) {
         memcpy((u8 *)popup->sprite + 0x120, &pos, sizeof(LivesSpritePos));
     }
