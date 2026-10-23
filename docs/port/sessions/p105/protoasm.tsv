@@ -1,0 +1,19 @@
+verdict	file	nm	line	callee	n	detail	proto_src	callee_file
+INT	game_83300.c	[NM]	4338	func_15064668	1	param 2 int (word 2), asm uses float bits	tu	game_eu_90F50
+INT	game_83300.c	[NM]	4335	func_15065E18	1	param 3 int (word 3), asm uses float bits	tu	game_eu_90F50
+RETNONE	debugger/debugger.c	[NM]	487	func_16003650	1	non-void prototype, asm sets neither v0 nor f0	tu-knr	debugger_258ED0
+RETNONE	game_168A90.c	[M]	85	func_150A7B80	1	non-void prototype, asm sets neither v0 nor f0	implicit	game_D5030
+RETNONE	game_57FA0.c	[M]	196	func_150ADC50	1	non-void prototype, asm sets neither v0 nor f0	tu-knr	D5E90(hand .s)
+RETNONE	game_C8950.c	[NM]	195	func_150ADFD0	4	non-void prototype, asm sets neither v0 nor f0	tu	game_eu_DB7E0
+RETNONE	game_eu_114640.c	[M]	297	func_1516547C	2	non-void prototype, asm sets neither v0 nor f0	tu	game_eu_192500
+RETNONE	game_eu_1191C0.c	[NM]	103	func_1516547C	1	non-void prototype, asm sets neither v0 nor f0	tu	game_eu_192500
+RETNONE	game_eu_12A7C0.c	[M]	31	func_1516547C	1	non-void prototype, asm sets neither v0 nor f0	tu	game_eu_192500
+RETNONE	game_eu_13DC30.c	[M]	945	func_150ADC50	1	non-void prototype, asm sets neither v0 nor f0	tu-knr	D5E90(hand .s)
+RETNONE	game_eu_201240.c	[NM]	287	func_1516547C	1	non-void prototype, asm sets neither v0 nor f0	tu	game_eu_192500
+RETNONE	game_eu_CC5F0.c	[M]	445	func_150ADC50	1	non-void prototype, asm sets neither v0 nor f0	tu-knr	D5E90(hand .s)
+RETNONE	game_eu_DCEF0.c	[M]	196	func_150B2290	1	non-void prototype, asm sets neither v0 nor f0	implicit	game_eu_DFAA0
+RETNONE	game_eu_E66D0.c	[NM]	57	func_15142600	1	non-void prototype, asm sets neither v0 nor f0	tu	game_16EE20
+RETNONE	init_1050.c	[M]	11	func_100061F8	1	non-void prototype, asm sets neither v0 nor f0	implicit	init_eu_5DA0
+RETNONE	init_12560.c	[M]	19	func_15016170	1	non-void prototype, asm sets neither v0 nor f0	implicit	game_43620
+RETNONE	init_1420.c	[M]	53	func_100061F8	2	non-void prototype, asm sets neither v0 nor f0	implicit	init_eu_5DA0
+RETNONE	init_8F90.c	[NM]	817	func_150ADC50	1	non-void prototype, asm sets neither v0 nor f0	tu	D5E90(hand .s)

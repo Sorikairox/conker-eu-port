@@ -171,23 +171,25 @@ void p88_watch_init(void) {
 /* P91: the P88 TEMPORARY guard __wrap_func_1501D348 (restore of object records moved from uninitialised
  * D_800C3958 blocks) was removed: the port-b branch converted the producer func_1501ECA4 (and func_15020F6C) in P87. */
 
-/* P97 TEMPORARY guard (producer: the asm stubs func_15020920 (segment cubic: SceneActor +0x08..+0x38 coefficients and
- * the 101-sample length table) and func_15020090 (segment control points), both game_eu_4A070.c, still asm).
- * P92 made func_1501FD34 (place) / func_1501FF10 (heading) / func_1501F7D4 C; with the stubbed producers they read
- * never-written coefficients and stack points, and func_1501ECA4 copies the result into the player at the respawn
- * scene start (node: pos -1.4e29 / 3.4e15 / -2.1e34 at frame 943, more deaths, then a call_indirect trap in
- * func_1504A730). The guard returns without writing the outputs = the pre-P92 stub behaviour.
- * ?p97path=1 runs the real C (drop the guard once func_15020920 / func_15020090 / func_15020430 are C). */
-static int fpath = -1, npath = 0;
-void __real_func_1501FD34(int actor, float t, float *x, float *y, float *z, int slot);
-void __real_func_1501FF10(int actor, float t, float *out, int slot);
-void __wrap_func_1501FD34(int actor, float t, float *x, float *y, float *z, int slot) {
-    if (flag(&fpath, "p97path")) { __real_func_1501FD34(actor, t, x, y, z, slot); return; }
-    if (npath++ < 2) port_log("[p97] TEMPORARY guard: func_1501FD34 actor %d slot %d skipped (stub producer func_15020920) frame %u\n", actor, slot, port_frame_count);
-}
-void __wrap_func_1501FF10(int actor, float t, float *out, int slot) {
-    if (flag(&fpath, "p97path")) { __real_func_1501FF10(actor, t, out, slot); return; }
-    if (npath++ < 2) port_log("[p97] TEMPORARY guard: func_1501FF10 actor %d slot %d skipped (stub producer func_15020920) frame %u\n", actor, slot, port_frame_count);
+/* P105: the P97 TEMPORARY guard (__wrap_func_1501FD34 / __wrap_func_1501FF10 skipped the P92 path C while its
+ * producer func_15020920 was an asm stub) was removed: port-b P96 converted func_15020920 (segment cubic). */
+
+/* P105 TEMPORARY guard (stubbed producers: the particle type handlers func_15148428 (init) / func_151485AC (update /
+ * draw), game_eu_175B20.c, still asm). P100 made the particle spawn wrapper func_151DA6F8 (game_2062D0.c) C; before
+ * that the stub spawned nothing. Now its particles reach the stub handlers and, after the respawn scene (node frame
+ * ~1225-1265), the null zone gets dirty (null+0x10 = DC28120A, seen at func_151485AC) and func_100043B4 traps
+ * (memory access out of bounds via func_151D5E30 <- func_15147E40). The guard returns 0 without spawning = the
+ * pre-P100 stub behaviour. ?p105part=1 (node PORT_P105PART=1) runs the real C. Drop it once func_15148428 /
+ * func_151485AC are C. */
+static int fpart = -1, npart = 0;
+void *__real_func_151DA6F8(void *pos, void *vel, float scale, int sprite, int alpha, float speed, int tint, int fade,
+                           float sx, float sy, int a10, int a11, int a12, int a13, int a14, int a15, int a16, int a17);
+void *__wrap_func_151DA6F8(void *pos, void *vel, float scale, int sprite, int alpha, float speed, int tint, int fade,
+                           float sx, float sy, int a10, int a11, int a12, int a13, int a14, int a15, int a16, int a17) {
+    if (flag(&fpart, "p105part"))
+        return __real_func_151DA6F8(pos, vel, scale, sprite, alpha, speed, tint, fade, sx, sy, a10, a11, a12, a13, a14, a15, a16, a17);
+    if (npart++ < 2) port_log("[p105] TEMPORARY guard: func_151DA6F8 skipped (stub particle handlers func_15148428 / func_151485AC) frame %u\n", port_frame_count);
+    return 0;
 }
 
 /* P97 DIAGNOSTIC ?p97camh=N: first N calls (every 20th frame) of func_15124C38 (camera target height, P92 C): the

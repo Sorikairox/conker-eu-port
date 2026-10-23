@@ -10,6 +10,38 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P105, 2026-10-23, port-web). Details: `docs/port/sessions/P105.md`
+
+- Merged port c35d31d (P98 / P100) and port-b 66dffbc (P96).
+  - Conflicts: HANDOFF (merge_union) and game_eu_1EC610.c, where both sides made the same func_15157580 f32 change.
+  - Checks after each merge: verify_all OK, NM links, protocheck 0 (997), float-int scan BUG 0 / REVIEW 4 / OK-INT 12.
+  - Clean rebuild (census + vbe.stamp removed).
+- **P97 path guard dropped** (func_15020920 is C). The scene path C now moves the player sanely:
+  (346, -2078, -2266) -> (348, -2284, -2284).
+- **New TEMPORARY guard `__wrap_func_151DA6F8`** (p84_checks.c + Makefile `--wrap`).
+  - Why: P100's C particle spawn wrapper feeds the stub particle handlers func_15148428 / func_151485AC. After the
+    scene that dirties null+0x10 and traps in func_100043B4 (memory out of bounds).
+  - This happens on merge 1 alone, guard or not. `?p105part=1` / `PORT_P105PART=1` runs the real C.
+  - With the guard: node and 3 Chrome walks each give one death, the scene ends, the 0x2C warp works there and back,
+    heap 0, null zone 0, no trap.
+- Camera: still straight down before the death (pitch -78 deg at node frame 885). func_15126378 (C) runs every frame
+  but does not write the eye height. **func_1512EE50** (asm) writes +0x2FC: eye.y stays 400, 218 in the scene.
+- Scans:
+  - protoasm: INT 2 (game_83300, port-b), ARITY 0.
+  - arity: 112 rows / 56 with severity > 0 (no new rows).
+  - Census: 47 stubs (P101: 52). Newly reached: func_1512B728 / BAAC / BCA0, func_151848D8, func_1512EB60 (DL),
+    func_1501A764.
+- game_A28B0.c fails the census build (old lvalue cast at line 21) and has no vobj object: check it.
+
+## Next steps (from P105)
+
+1. Convert func_15148428 + func_151485AC (particle handlers, game_eu_175B20), then drop the P105 guard.
+2. func_1512EE50 (camera coordinator, eye height +0x2FC; 1352 insns).
+3. The free-camera callees func_1512B728 / func_1512BAAC / func_1512BCA0, func_1512EB60, func_151848D8 (shadow).
+4. P103's level-event unit (func_1509CBD4, func_1509B950 + func_1509B8FC return, func_1509B5AC, func_150ADFD0), then
+   func_150039E0, func_150000B0.
+5. game_83300 INT rows; game_A28B0.c port build failure.
+
 ## State (session P103, 2026-10-23, port-web). Details: `docs/port/sessions/P103.md`
 
 - **Boot path (from the code):**
