@@ -142,7 +142,7 @@ struct260 *func_1515D088(s32 *arg0) {
 // fat struct
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);
-s32 func_151530A8(s32 *, u8, u8);
+s32 func_151530A8(s32 *, u8, s32);
 
 void func_1515D130(u8 *arg0) {
     struct {

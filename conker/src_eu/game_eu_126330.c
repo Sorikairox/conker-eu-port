@@ -5,7 +5,7 @@
 void func_150F8EAC(u8 *arg0);
 
 typedef struct { s32 x, y, z; } V3i;
-s32 func_151530A8(s32 *, s32, s32);
+s32 func_151530A8(s32 *, u8, s32);
 
 void func_150F8B20(s32 arg0, u8 *arg1, s32 arg2) {
 

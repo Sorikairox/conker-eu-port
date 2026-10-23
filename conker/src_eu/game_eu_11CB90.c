@@ -611,7 +611,11 @@ void func_150F0EB8(s32 arg0) {
 }
 
 typedef struct { s32 x, y, z; } V3i;
+#ifdef NON_MATCHING
+s32 func_151530A8(s32 *, u8, s32); /* P164: 3 arguments (asm 151530A8 never reads a3) */
+#else
 s32 func_151530A8(s32 *, s32, s32, u8 *);
+#endif
 
 void func_150F0FA4(u8 *arg0) {
 
@@ -724,7 +728,11 @@ void func_150F0FA4(u8 *arg0) {
     sp.u8D = 0;
     sp.u8E = -1;
     sp.u8F = -1;
+#ifdef NON_MATCHING
+    func_151530A8(&sp.u1C, 0xFF, 1);
+#else
     func_151530A8(&sp.u1C, 0xFF, 1, arg0);
+#endif
 }
 
 #ifdef NON_MATCHING
