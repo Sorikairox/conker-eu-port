@@ -3003,7 +3003,56 @@ s32 func_1505C7D8(struct127 *self, s32 skip) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C7D8.s")
 #endif
+#ifdef NON_MATCHING
+struct252 *func_1505C1A4(struct127 *arg0);
+s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
+u8 func_1505B9C4(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
+extern s16 D_800D16B6; /* the asm's name for this halfword (D_800D1296 in the US list) */
+
+// object_send_hit: sends a hit / message of kind `flags & 0xFF` to the object `obj` from the current object.
+/* Nothing (returns 0) while D_800C35EA is 1, or when the object is immune (flag 0x20000), stunned (0x40000) or has
+ * no health (unless flag 0x100000). Sets the parameter D_800D1340 (arg3 + 1, 0 for -1) and the value `val` in
+ * D_800D1292 / D_800D16B6. The sender record is D_8009A9F8, or func_1505C1A4(D_800D154C) with flag 0x10000.
+ * Flag 0x80000 uses func_1505C1E4 and returns its result; else func_1505B9C4 and returns the object's bit
+ * (1 << its index in D_800CC2D0). */
+s32 func_1505D024(struct127 *obj, s32 flags, u16 val, s32 arg3) {
+    struct252 *from = &D_8009A9F8;
+    s32 idx;
+    s32 bit;
+
+    if (D_800C35EA == 1) {
+        return 0;
+    }
+    if ((flags & 0x20000) && obj->immune != 0) {
+        return 0;
+    }
+    if ((flags & 0x40000) && obj->stunned != 0) {
+        return 0;
+    }
+    if (!(flags & 0x100000) && obj->health == 0) {
+        return 0;
+    }
+    if (arg3 == -1) {
+        D_800D1340 = 0;
+    } else {
+        D_800D1340 = arg3 + 1;
+    }
+    D_800D1292 = val;
+    D_800D16B6 = val;
+    if (flags & 0x10000) {
+        from = func_1505C1A4(D_800D154C);
+    }
+    idx = ((s32)obj - (s32)D_800CC2D0) / 0x32C;
+    bit = 1 << idx;
+    if (flags & 0x80000) {
+        return func_1505C1E4((struct127 *)&D_800D121C, obj, from, flags & 0xFF, idx + 1, 0, 7);
+    }
+    func_1505B9C4((struct127 *)&D_800D121C, obj, (s32)from, (s32)from, flags & 0xFF, idx + 1, 7);
+    return bit;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D024.s")
+#endif
 // NON-MATCHING: 1 line + regalloc
 // s32 func_1505D024(struct127 *arg0, s32 arg1, u16 arg2, s32 arg3) {
 //     s32 pad;
@@ -3162,7 +3211,38 @@ void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D408.s")
 #endif
+#ifdef NON_MATCHING
+f32 func_1505D34C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4);
+void func_1505D408(struct127 *arg0, struct127 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s32 arg7);
+
+/* Box test of record `rec` (at x, y, z; height `scale`, radius `radius`) against object `o` (id 0x34, called by
+ * func_1505D6F0): o's box has radius r and height h (scaled by o +0x14C / +0x150), centre offset (ox, oz) turned
+ * by o's heading (func_1505D34C) and height cy (scaled by +0x150). The vertical distance is scaled by
+ * (scale + r / h) / 2; inside the sphere of radius radius + r: func_1505D408 (push out). */
+void func_1505D5D0(struct127 *rec, struct127 *o, f32 x, f32 y, f32 z, f32 scale, f32 radius, s32 i, f32 r, f32 h,
+                   f32 cy, f32 ox, f32 oz) {
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 d2;
+    f32 lim;
+
+    dx = func_1505D34C(o->unk40, ox, oz, *(f32 *)((u8 *)o + 0x14C), &oz);
+    r = r * *(f32 *)((u8 *)o + 0x14C);
+    h = h * *(f32 *)((u8 *)o + 0x150);
+    dx = x - (o->x_position + dx);
+    dz = z - (o->z_position + oz);
+    dy = y - (o->y_position + cy * *(f32 *)((u8 *)o + 0x150));
+    dy = dy * ((scale + r / h) * 0.5f);
+    d2 = dx * dx + dy * dy + dz * dz;
+    lim = radius + r;
+    if (d2 < lim * lim) {
+        func_1505D408(rec, o, dx, dy, dz, d2, lim, i);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D5D0.s")
+#endif
 #ifdef NON_MATCHING
 void func_1505D408(struct127 *, struct127 *, f32, f32, f32, f32, f32, s32);
 void func_1505D5D0(struct127 *, struct127 *, f32, f32, f32, f32, f32, s32, f32, f32, f32, f32, f32);
@@ -3249,7 +3329,36 @@ void func_1505D6F0(struct127 *rec, s32 idx) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D6F0.s")
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DADC.s")
+#ifdef NON_MATCHING
+f32 func_1505DF10(u8 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4);
+
+/* First player 0..D_80082FA0 (live object in D_800CC2D0) that `rec` sees: closer than rec +0x3C * scale / 2
+ * (func_1505DF10 gives the squared distance and the direction) and within the cone of width `cone` around rec's
+ * heading +0x76 ((u16)(heading - dir + cone / 2) < cone). Returns the player number, -1 for none. (The asm also
+ * stores a 6th argument 0 for func_1505DF10, which its definition does not take; `unused` is not read.) */
+s32 func_1505DDA8(struct127 *rec, s32 unused, u16 cone, f32 scale) {
+    s32 i;
+    f32 r;
+    f32 d;
+    u16 dir;
+    f32 dy;
+    f32 h;
+
+    for (i = 0; i <= D_80082FA0; i = (u8)(i + 1)) {
+        if (D_800CC2D0[i].interaction_state == 0) {
+            continue;
+        }
+        r = rec->xz_velocity * scale * 0.5f;
+        d = func_1505DF10((u8 *)rec, i, &dir, &dy, &h);
+        if (d < r * r && (u16)(*(u16 *)((u8 *)rec + 0x76) - dir + cone / 2) < cone) {
+            return (s8)i;
+        }
+    }
+    return -1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DDA8.s")
+#endif
 #ifdef NON_MATCHING
 f32 func_1505DF10(u8 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4) {
     f32 sp20;
@@ -3746,7 +3855,7 @@ void func_1505F188(struct127 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F188.s")
 #endif
 #ifdef NON_MATCHING
-void func_1506045C(struct127 *, s32, s32, s32, s32);
+void func_1506045C(struct127 *, s32, s32, f32, s32); /* P102: arg3 = height, f32 */
 s32 func_1506E46C(struct127 *, s32 *, s32);
 void func_151AE814(u8 *);
 void func_151C7450(u8 *, u8, s32);
@@ -3760,8 +3869,6 @@ extern u8 D_800CC69C;
 extern char D_800997E8[];
 s32 func_1000EFB4(struct_eu_sfx *, s32, s32 *, struct11 *, s32, s32 *, u16 *);
 
-/* P64: f32 bits of an argument that a prototype declares s32 (func_1506045C's height) */
-#define F298_BITS(f) (*(s32 *)&(f))
 
 /* P64: the jump / swim / glide handler of a walking record, once per walk-handler call (func_1505A9AC family).
  * `pad` = the controller: +0 buttons (0x8000 = A / jump, 0x4000 = B, 0x2000 = Z, 0x10), +3 stick y (s8).
@@ -3897,7 +4004,7 @@ void func_1505F298(struct127 *rec, u8 *pad) {
             anim = 0xCB;
         }
         if (ctl->unk11A != 0 || (ctl->unk78 != 0 && ctl->unk78 != 0x27)) {
-            func_1506045C(rec, 0, 0, F298_BITS(height), 1);
+            func_1506045C(rec, 0, 0, height, 1);
         }
         if (anim != 0) {
             func_1505E650(rec, anim, speed, blend, 0.0f, 0.0f, 0);
@@ -4101,7 +4208,7 @@ void func_1505F298(struct127 *rec, u8 *pad) {
     }
 
     /* 5. in the air */
-    func_1506045C(rec, buttons, D_800CC288, F298_BITS(height), 0);
+    func_1506045C(rec, buttons, D_800CC288, height, 0);
     anim = 0;
     ctl = rec->unk31C;
     blend = 2.0f;
@@ -4219,13 +4326,13 @@ void func_1505F298(struct127 *rec, u8 *pad) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505F298.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15064668(struct127 *, s32, s32, s32, s32);
-s32 func_15065E18(struct127 *, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15064668(struct127 *, s32, f32, s32, s32); /* P102: arg2 = height (f32, was float bits in s32) */
+s32 func_15065E18(struct127 *, s32, s32, f32, s32, s32, s32, s32, s32); /* P102: arg3 = height */
 s32 func_15080B38(u8);
 extern s32 D_800CC3C8;
 extern u16 *D_800CC6A4;
 
-void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
+void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
     s32 sp4C;
     s32 sp44;
     s32 sp40;

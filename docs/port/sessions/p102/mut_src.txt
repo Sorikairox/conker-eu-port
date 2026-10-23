@@ -1,0 +1,87 @@
+1|s/E9C_S32(o, 0x25C) &= ~args\[3\];/E9C_S32(o, 0x25C) \&= args[3];/
+6|s/E9C_S32(o, 0x25C) &= ~1;/E9C_S32(o, 0x25C) \&= ~2;/
+8|s/if (args\[3\] != 0x7FFFFFFF) {/if (args[3] != 0x7FFFFFFE) {/
+9,44|s/if (n != -1) {/if (n != -2) {/
+D|/    case 0x0D:/d
+10|s/u = E9C_TOU32(f) - 0x4000;/u = E9C_TOU32(f) + 0x4000;/
+10|s/(65536.0f \/ 360.0f)/(65536.0f \/ 361.0f)/
+11|s/E9C_U16(o, 0x76) = E9C_U16(o, 0x7A) = u;/E9C_U16(o, 0x76) = E9C_U16(o, 0x7A) = (s32)f;/
+14|s/D_800C3E78 = E9C_INDEX(o);/D_800C3E78 = E9C_INDEX(o) + 1;/
+17|s/func_1518C000(obj, 0xFF, 0);/func_1518C000(obj, 0xFE, 0);/
+19|s/if (func_15084000(args\[2\] & 0xFFFF0FFF) == -1) {/if (func_15084000(args[2] \& 0xFFFF0FFF) == 0) {/
+1B,6B|s/if (args\[2\] == 1) {/if (args[2] == 2) {/
+1D|s/E9C_U8(o, 0x83) = 0xFF;/E9C_U8(o, 0x83) = 0xFE;/
+1E|s/E9C_U8(o, 0x2FA) &= 0x7F;/E9C_U8(o, 0x2FA) \&= 0xFF;/
+1F|s/args\[2\] & 0xFFF);/args[2] \& 0xFF);/
+20|s/D_800D2457 = D_800D2456;/D_800D2457 = args[3];/
+21|s/func_15085710(id, args\[2\], args\[3\]);/func_15085710(id, args[3], args[3]);/
+22|s/if (args\[2 + i\] != 0x78000000) {/if (args[2 + i] != 0x7FFFFFFF) {/
+22|s/for (i = 0; i < D_800D3C60 - 2; i++) {/for (i = 0; i <= D_800D3C60 - 2; i++) {/
+23|s/E9C_S32(o, 0x2E4 + i \* 4) = args\[2 + i\];/E9C_S32(o, 0x2E4 + i * 4) = args[3 + i];/
+24|s/E9C_U8(E9C_REC(o), 0x16) = 0xFF;/E9C_U8(E9C_REC(o), 0x16) = 0xFE;/
+24|s/func_1507EB4C(obj, 0x15);/func_1507EB4C(obj, 0x16);/
+27|s/if (D_800D3C60 == 3 && args\[2\] == 0) {/if (D_800D3C60 == 3) {/
+2A|s/func_1505D024(obj, args\[2\], args\[3\], -1);/func_1505D024(obj, args[2], args[3], 0);/
+2C|s/func_1505D1C4(args\[3\], args\[4\], args\[5\], args\[2\]/func_1505D1C4(args[3], args[5], args[4], args[2]/
+2E|s/\*((u16 \*\*)D_800BE728\[0\])\[args\[2\]\] = args\[3\];/((u16 *)D_800BE728[0])[args[2]] = args[3];/
+2F|s/func_1505E650((struct127 \*)p, args\[4\]/func_1505E650(obj, args[4]/
+2F|s/E9C_U8(p, 0x232) = args\[4\];/E9C_U8(o, 0x232) = args[4];/
+33|s/D_800D1898\[args\[2\]\] = E9C_FIX(args\[3\]);/D_800D1898[args[2] + 1] = E9C_FIX(args[3]);/
+34|s/800 - 400;/800 - 399;/
+34|s/x = args\[3\] - x + args\[3\];/x = args[3];/
+34|s/} else if (args\[5\] < z) {/} else if (args[5] <= z) {/
+34|s/obj->y_position = (f32)args\[6\] + py;/obj->y_position = (f32)args[6] - py;/
+34|s/z = z - cosf(/z = z + cosf(/
+34|s/-10000.0f, 20000.0f);/-10000.0f, 2000.0f);/
+36|s/E9C_U8(E9C_REC(o), 0x20) |= args\[3\];/E9C_U8(E9C_REC(o), 0x20) |= args[2];/
+20,3B|s/if (D_800D3C60 == 4) {/if (D_800D3C60 == 5) {/
+3D|s/E9C_S32(o, 0x94) = ~(args\[3\] | 1);/E9C_S32(o, 0x94) = ~args[3];/
+42|s/E9C_U8(o, 0x246) = args\[2\] >> 8;/E9C_U8(o, 0x246) = args[2] >> 7;/
+43|s/E9C_PATH(o, args\[2\] + 1)\[1\] = args\[4\];/E9C_PATH(o, args[2])[1] = args[4];/
+44|s/E9C_PATH(o, args\[2\] + 1)\[2\] = (s32)pz;/E9C_PATH(o, args[2] + 1)[2] = (s32)px;/
+48|s/E9C_F32(o, 0x114) = args\[3\];/E9C_F32(o, 0x114) = args[2];/
+4B|s/func_15083568(obj, args\[2\], 0.0f, 0);/func_15083568(obj, args[2], 1.0f, 0);/
+4D|s/E9C_S32(p, 0x38) = args\[4\];/E9C_S32(p, 0x3C) = args[4];/
+4E|s/E9C_U8(o, 0x65) = E9C_INDEX(p) + 1;/E9C_U8(o, 0x65) = E9C_INDEX(p);/
+4E|s/        if (args\[4\] == 0) {/        if (args[4] != 0) {/
+50|s/(E9C_U8(o, 0x74) & ~args\[3\])/(E9C_U8(o, 0x74) \& args[3])/
+54|s/func_1506160C(obj, 2, args\[2\], args\[3\], 0);/func_1506160C(obj, 2, args[3], args[2], 0);/
+55|s/        if (n < 4) {/        if (n < 3) {/
+59|s/E9C_U8(o, 0x20B + args\[3\]) = args\[2\];/E9C_U8(o, 0x20B + args[2]) = args[2];/
+5B,60|s/E9C_U8(o, 0x211) = (args\[2\] < 0) ? 0xFF/E9C_U8(o, 0x211) = (args[2] <= 0) ? 0xFF/
+5F|s/if (f < E9C_F32(o, 0x44)) {/if (f > E9C_F32(o, 0x44)) {/
+60|s/E9C_S32(o, 0x25C) &= ~0x800;/E9C_S32(o, 0x25C) \&= ~0x400;/
+61|s/if (args\[2\] == -1 || args\[2\] == 4 || args\[2\] == 0x2000) {/if (args[2] == -1 || args[2] == 4) {/
+61|s/            n = 0x8000;/            n = 0x7FFF;/
+62|s/func_15085710(E9C_INDEX(o), 10, args\[2\]);/func_15085710(E9C_INDEX(o), 11, args[2]);/
+62,63|s/D_800BE804 = func_150859AC(E9C_INDEX(o), 6);/D_800BE804 = func_150859AC(E9C_INDEX(o), 7);/
+64|s/if (D_800BE616 == 0 && (D_800E9D00 & 0x200)) {/if (D_800BE616 == 0) {/
+67|s/func_150432FC((n & 1) \* 150 + 10, (n >> 1) \* 115);/func_150432FC((n \& 1) * 150 + 10, (n >> 1) * 116);/
+67|s/if (D_80082FA0 == 2 || D_80082FA0 == 3) {/if (D_80082FA0 == 2 || D_80082FA0 == 0) {/
+6B|s/            E9C_U8(o, 0x101) &= ~args\[3\];/            E9C_U8(o, 0x101) \&= args[3];/
+6C|s/        } else if (args\[2\] == 0x3B) {/        } else if (args[2] == 0x3A) {/
+6E|s/= args\[3\] + 10;/= args[3] + 11;/
+70|s/E9C_U8(E9C_REC(o), 0x128) &= ~args\[2\];/E9C_U8(E9C_REC(o), 0x128) \&= ~args[3];/
+71|s/if (!(args\[6\] < args\[7\])) {/if (!(args[6] <= args[7])) {/
+71|s/(u32)n + args\[6\];/(u32)n + args[7];/
+71|s/obj->z_position = cosf(f) \* -(f32)z + (f32)args\[3\];/obj->z_position = cosf(f) * (f32)z + (f32)args[3];/
+71|s/f = (f32)x \* 0.017453292f;/f = (f32)x * 0.017453f;/
+71|s/args\[4\]) + args\[4\];/args[4]) + args[5];/
+19,72|s/E9C_U8(o, 0x222) = args\[2\];/E9C_U8(o, 0x223) = args[2];/
+75|s/E9C_U16(o, 0x2F8) &= ~args\[3\];/E9C_U16(o, 0x2F8) \&= args[3];/
+77|s/D_800C4414\[2\] = args\[4\];/D_800C4414[2] = args[3];/
+78|s/if (E9C_INDEX(o) < D_80090130) {/if (E9C_INDEX(o) <= D_80090130) {/
+78|s/E9C_U8(E9C_REC(o), 0x4E) = 1;/E9C_U8(E9C_REC(o), 0x4E) = 2;/
+78|s/func_15052F9C((struct127 \*)p, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);/func_15052F9C((struct127 *)p, 50.0f, 0x17, 4, 0, 1, 0, 0, 0, 0);/
+78|s/func_1505E650(obj, 0x16, 1.0f/func_1505E650(obj, 0x16, 2.0f/
+78|s/E9C_U8(o, 0x1C9) = 6;/E9C_U8(o, 0x1C9) = 7;/
+7A|s/E9C_U8(o, 0x13C) = E9C_INDEX(p) + 100;/E9C_U8(o, 0x13C) = E9C_INDEX(p) + 99;/
+7A|s/func_1505959C((struct127 \*)p, E9C_INDEX(o));/func_1505959C(obj, E9C_INDEX(o));/
+7D|s/E9C_U8(o, 0x328) = args\[2\] + 1;/E9C_U8(o, 0x328) = args[2];/
+80|s/(f32)args\[4\] \* 0.01f);/(f32)args[4] * 0.1f);/
+82|s/        D_8009015C = n;/        D_8009015C = 1;/
+8A|s/E9C_S32(o, 0xA0) = args\[5\];/E9C_S32(o, 0xA0) = args[6];/
+8B|s/if (E9C_INDEX(o) <= D_80082FA0) {/if (E9C_INDEX(o) < D_80082FA0) {/
+8D|s/E9C_U8(p, 5) == 5) {/E9C_U8(p, 5) == 4) {/
+8D|s/E9C_U8(p, 0x124) == E9C_INDEX(o) + 1/E9C_U8(p, 0x124) == E9C_INDEX(o)/
+8E|s/E9C_F32(o, 0x180) = args\[2\];/E9C_F32(o, 0x180) = args[3];/

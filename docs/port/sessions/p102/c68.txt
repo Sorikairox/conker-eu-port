@@ -1,0 +1,208 @@
+    case 0x68:
+        E9C_U16(o, 0x10) = args[2];
+        return 1;
+    case 0x69:
+        D_800D18C0 |= args[2];
+        return 1;
+    case 0x6A:
+        if (args[2] != 0) {
+            E9C_U8(o, 0x101) |= 1;
+        } else {
+            E9C_U8(o, 0x101) &= ~1;
+        }
+        return 1;
+    case 0x6B:
+        if (args[2] == 1) {
+            E9C_U8(o, 0x101) |= args[3];
+        } else {
+            E9C_U8(o, 0x101) &= ~args[3];
+        }
+        return 1;
+    case 0x6C:
+        if (args[2] == 9) {
+            func_150637B4(obj);
+        } else if (args[2] == 0x3B) {
+            func_15063920(obj);
+        }
+        return 1;
+    case 0x6D:
+        if (args[2] == 9) {
+            func_15063894(obj);
+        }
+        return 1;
+    case 0x6E:
+        E9C_U8(o, 0x6C + args[2]) = args[3] + 10;
+        return 1;
+    case 0x6F:
+        E9C_U8(o, 0x68 + args[2]) = args[3];
+        return 1;
+    case 0x70:
+        if (args[3] != 0) {
+            E9C_U8(E9C_REC(o), 0x128) |= args[2];
+        } else {
+            E9C_U8(E9C_REC(o), 0x128) &= ~args[2];
+        }
+        return 1;
+    case 0x71: /* random point around (args[2], args[3]): distance args[4]..args[5], angle args[6]..args[7]
+                * (degrees; the bounds are put in order in args) */
+        if (!(args[6] < args[7])) {
+            n = args[6];
+            args[6] = args[7];
+            args[7] = n;
+        }
+        n = func_15048AD0((f32)args[6], (f32)args[7]);
+        x = (u32)func_150ADA20() % (u32)n + args[6];
+        z = (u32)func_150ADA20() % (u32)(args[5] - args[4]) + args[4];
+        f = (f32)x * 0.017453292f;
+        obj->x_position = sinf(f) * -(f32)z + (f32)args[2];
+        obj->z_position = cosf(f) * -(f32)z + (f32)args[3];
+        return 1;
+    case 0x72: /* record +0x129, or +0x222 without a record */
+        if (E9C_REC(o) != NULL) {
+            E9C_U8(E9C_REC(o), 0x129) = args[2];
+        } else {
+            E9C_U8(o, 0x222) = args[2];
+        }
+        return 1;
+    case 0x73:
+        E9C_S32(o, 0) = args[2];
+        return 1;
+    case 0x74:
+        E9C_U8(E9C_REC(o), 0x31) = args[2];
+        return 1;
+    case 0x75:
+        if (args[2] != 0) {
+            E9C_U16(o, 0x2F8) |= args[3];
+        } else {
+            E9C_U16(o, 0x2F8) &= ~args[3];
+        }
+        return 1;
+    case 0x76:
+        if (E9C_REC(o) != NULL) {
+            E9C_S8(E9C_REC(o), 0x1AE) = args[2];
+        }
+        return 1;
+    case 0x77:
+        D_800C4414[0] = args[2];
+        D_800C4414[1] = args[3];
+        D_800C4414[2] = args[4];
+        return 1;
+    case 0x78:
+        switch ((u32)args[2]) {
+        case 0:
+            func_15083568(obj, 0x79, 0.0f, 0);
+            if (E9C_INDEX(o) < D_80090130) {
+                E9C_U8(E9C_REC(o), 0x4E) = 2;
+                func_1505E650(obj, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            }
+            break;
+        case 1:
+            func_1514E404(obj);
+            break;
+        case 2:
+            E9C_U8(E9C_REC(o), 0x17) = 1;
+            E9C_U8(o, 0x1C9) = 6;
+            break;
+        case 3: /* object args[3] */
+            p = (u8 *)func_1505EEF4(args[3] & 0xFFFF0FFF);
+            if (p != NULL) {
+                E9C_U8(E9C_REC(o), 0x4E) = 1;
+                func_15052F9C((struct127 *)p, 50.0f, 0x17, 4, 0, 1, 0, 0, 1, 0);
+            }
+            break;
+        case 4:
+            func_15193660(o, 0xFF, 1);
+            func_151937F4(o, 0xFF, 1);
+            func_151D71AC(o, 0xFF, 1);
+            break;
+        case 5:
+            func_1505E650(obj, 0x16, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+            break;
+        }
+        return 1;
+    case 0x79:
+        E9C_U8(E9C_REC(o), 0x7D) = (args[2] != 0) ? 1 : 0;
+        return 1;
+    case 0x7A: /* grab entity args[2]: +0x13C = its object number + 100, stop, func_1505959C(it, this number) */
+        p = (u8 *)func_15083E90(args[2]);
+        if (p == NULL) {
+            return 1;
+        }
+        E9C_U8(o, 0x13C) = E9C_INDEX(p) + 100;
+        obj->xz_velocity = 0.0f;
+        func_1505959C((struct127 *)p, E9C_INDEX(o));
+        return 1;
+    case 0x7B:
+        E9C_U8(E9C_REC(o), 0x1AF) = args[2];
+        return 1;
+    case 0x7C:
+        E9C_U8(o, 0x23E) = args[2];
+        return 1;
+    case 0x7D:
+        E9C_U8(o, 0x328) = args[2] + 1;
+        return 1;
+    case 0x7E:
+        E9C_U8(E9C_REC(o), 0x7C) = args[2];
+        return 1;
+    case 0x7F:
+        **(u16 **)(o + 0x144) = args[2];
+        return 1;
+    case 0x80:
+        func_15063254(obj, args[2], args[3], (f32)args[4] * 0.01f);
+        return 1;
+    case 0x81:
+        E9C_U8(o, 0x275) = args[2];
+        return 1;
+    case 0x82: /* func_1507D1D8 with D_8009015C cleared */
+        n = D_8009015C;
+        D_8009015C = 0;
+        func_1507D1D8(obj);
+        D_8009015C = n;
+        return 1;
+    case 0x83:
+        E9C_U8(o, 0x238) = args[2];
+        return 1;
+    case 0x84:
+        E9C_U8(E9C_REC(o), 0x4E) = args[2];
+        return 1;
+    case 0x85:
+        func_1507D4F8(E9C_INDEX(o));
+        return 1;
+    case 0x86:
+        E9C_U8(o, 0x23D) = args[2];
+        return 1;
+    case 0x87:
+        func_1507CD64(obj, 0xF);
+        return 1;
+    case 0x88:
+        func_1507CD64(obj, 9);
+        return 1;
+    case 0x89:
+        E9C_U16(o, 0x22E) = args[2];
+        return 1;
+    case 0x8A:
+        E9C_U8(o, 0xA4) = args[2];
+        E9C_U8(o, 0xA5) = args[3];
+        E9C_U8(o, 0xA6) = args[4];
+        E9C_S32(o, 0xA0) = args[5];
+        E9C_U8(o, 0xA7) = args[6];
+        return 1;
+    case 0x8B: /* players up to D_80082FA0 */
+        if (E9C_INDEX(o) <= D_80082FA0) {
+            func_1517F3B0(args[2], args[3], args[4], args[5], args[6], E9C_INDEX(o));
+        }
+        return 1;
+    case 0x8C:
+        E9C_U8(E9C_REC(o), 0x11A) = args[2];
+        return 1;
+    case 0x8D: /* remove the live objects of kind 5 that belong to this one (+0x124 = its number + 1) */
+        for (i = 0; i < 25; i++) {
+            p = (u8 *)D_800CC2D0 + i * 0x32C;
+            if (E9C_S32(p, 0) != 0 && E9C_U8(p, 0x124) == E9C_INDEX(o) + 1 && E9C_U8(p, 5) == 5) {
+                func_15060F28((struct127 *)p, 0);
+            }
+        }
+        return 1;
+    case 0x8E:
+        E9C_F32(o, 0x180) = args[2];
+        return 1;

@@ -570,6 +570,53 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. func_1000480C in the browser: map `CART_WORD` (KSEG1 0xB0000000 | addr) to the ROM image and PI_STATUS to idle.
 3. After changing `NM_ASM_C_FUNCS_D5E90`, delete `build_nm/asm/D5E90.s.o` before the NM build.
 Code-segment tables: none in P62's C. Runtime checks: P62.md UNVERIFIED.
+## P108 (port-b) (session P108, 2026-10-23). Details: `docs/port/sessions/P108.md`
+
+Branch `port-b` (from P102 b2a5c1f); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all rc 0, `port_work/p108/verify2.log`). `NON_MATCHING=1` links. protocheck:
+  1 expected problem (func_15157580, gone after merging port; 930 bodies). **progress_nm**: total 4924/5915 (83.2%),
+  game 4396/5334 (82.4%), C bytes 57.4%, 991 asm-only (142 under 60 insns).
+- **Landed P102's pair** (commit 1b05b54): func_1507BB28 (game_A28B0.c, script producer) + func_15097E9C (object
+  command handler). game_A28B0.c's census lvalue cast left alone (P107 fixed it port-side).
+- **Trail particle chain in C** (game_eu_175B20.c): func_15148428 (step), func_151485AC (draw), and the sub-handlers
+  they reach from func_151DA6F8 trails: func_15148E34 (grow), func_15149114 (fall + hit), func_15149350 (shrink).
+  All setups EQUIV + mutants killed (P108.md section 2). **The P105 guard on func_151DA6F8 can be dropped.**
+- func_1505D024 (game_83300.c, hit message, used by func_15097E9C) in C, 12/12.
+- New rule applied: every converted function has a `// snake_case_name: ...` first comment line.
+
+## Next steps (from P108)
+
+1. Browser: drop the P105 guard; check trails (P108.md UNVERIFIED) and the object command scripts.
+2. Particle type tables still have asm entries for other kinds (list in P108.md section 2, none in port-b files);
+   trail hit handler func_150B3CA8 (game_eu_E0430.c) is asm.
+3. Smallest asm-only left in port-b files: func_15144CEC (101), func_1505327C (109), func_15053430 (113),
+   func_15060D54 (117).
+
+## P102 (port-b) (session P102, 2026-10-23). Details: `docs/port/sessions/P102.md`
+
+Branch `port-b` (from P96 66dffbc); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all). `NON_MATCHING=1` links. protocheck: 1 expected problem
+  (func_15157580, gone after merging port). **progress_nm**: total 4916/5915 (83.1%), game 4388/5334 (82.3%),
+  C bytes 56.8%, 999 asm-only.
+- P98 rows done: func_1506045C arg3 / func_15064668 arg2 / func_15065E18 arg3 are f32 (NM, all callers NM).
+- **func_15097E9C (object command handler, 142 cases): verified but NOT committed.** Draft
+  `sessions/p102/func_15097E9C.c`, map `func_15097E9C_map.md`, 1471 setups EQUIV, mutants 85/87 + 2 equivalent.
+  Blocked by its producer **func_1507BB28** (game_A28B0.c, asm, stub returns 0 -> object +0x218 script pointer
+  NULL for cmds 0x14 / 0x35 / 0x60). Verified draft `sessions/p102/func_1507BB28.c` (7/7). Commit both together.
+- New hand-written NM C: func_1512BAAC (producer for func_1512B2C4), func_1512BBA0, func_1505D5D0, func_151406AC,
+  func_1505DDA8, func_1501DF70 (all mutants killed).
+
+## Next steps (from P102)
+
+1. Whoever owns game_A28B0.c: `insert_nm.py func_1507BB28 docs/port/sessions/p102/func_1507BB28.c` and, in the
+   same commit, `insert_nm.py func_15097E9C docs/port/sessions/p102/func_15097E9C.c` (port-b file
+   game_eu_C5530.c); then browser check of script commands.
+2. Browser: P102.md UNVERIFIED list.
+3. Smallest asm-only left in port-b files: func_15144CEC (101), func_1505D024 (104, used by func_15097E9C),
+   func_1505327C (109), func_15053430 (113), func_15060D54 (117).
+
 ## P96 (port-b) (session P96, 2026-10-23). Details: `docs/port/sessions/P96.md`
 
 Branch `port-b` (from P92 99d4923); the orchestrator merges it into `port`.

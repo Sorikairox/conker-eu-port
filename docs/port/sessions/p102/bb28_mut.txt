@@ -1,0 +1,7 @@
+s/    if (type == NULL) {/    if (type != NULL \&\& 0) {/ %
+s/list = \*(u8 \*\*)(type - 0x10);/list = *(u8 **)(type - 0xC);/ %
+s/for (i = 0; list\[i \* 8 + 4\] != kind; i++) {/for (i = 1; list[i * 8 + 4] != kind; i++) {/ %
+s/if (\*(u8 \*\*)(list + i \* 8) == NULL) {/if (*(u8 **)(list + i * 8 + 8) == NULL) {/ %
+s/return \*(s32 \*)(D_80086E28 + i \* 8);/return *(s32 *)(D_80086E28 + i * 8 + 8);/ %
+s/    return \*(s32 \*)(list + i \* 8);/    return *(s32 *)(list + i * 8 + 4);/ %
+s/((u8 \*)D_800D154C + 4)/((u8 *)D_800D154C + 5)/ %

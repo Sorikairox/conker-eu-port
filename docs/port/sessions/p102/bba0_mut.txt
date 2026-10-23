@@ -1,0 +1,12 @@
+s/if (second == 0) {/if (second != 0) {/ % 
+s/cam\[0x23D\] \* 0x20/cam[0x23D] * 0x10/ % 
+s/\* 8;/* 4;/ % 
+s/v = (s16)(v << 1);/v = v << 1;/ % 
+s/\& 0x8000) {/\& 0x4000) {/ % 
+s/if (v < lo \&\& hi < value) {/if (v < lo \&\& hi <= value) {/ % 
+s/if (v < lo \&\& value < hi) {/if (v <= lo \&\& value < hi) {/ % 
+s/out\[0\] = 2;/out[0] = 3;/ % 
+s/func_1512BB6C((struct_eu_158110 \*)out, hi, lo);/func_1512BB6C((struct_eu_158110 *)out, hi, 0);/ % 
+s/out\[1\] = 0;/out[1] = 1;/ % 
+s/\*(s32 \*)(out + 8) = 0xFFFC;/*(s32 *)(out + 8) = 0xFFFD;/ % 
+s/    return 0;/    return 2;/ % 
