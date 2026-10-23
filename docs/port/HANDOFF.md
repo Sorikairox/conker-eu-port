@@ -670,6 +670,30 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P134, 2026-10-23). Details: `docs/port/sessions/P134.md`
+
+- Re-check after P132: 15 NM bodies with stack args stored before an IDO division trap check (`p134/trapscan.py`):
+  all EQUIV with whole-block candidates (func_150E7104's known P104 sinf artefact aside); 40 setup files with pokes
+  into ROM .data / .rodata (`p134/pokescan.py`) re-run: 0 DIFFER (func_1509CBD4 needs DIFFTEST_ROMDATA=1, func_151E19AC
+  DIFFTEST_VARARGS_REF=1). `difftest.sh --self` drops prototypes declared in the same NM block (false DIFFER / CERR):
+  use `p134/selfrun.sh` / `p132/cand.sh`. port-b files not run: func_15180AF0, func_151143D4.
+- func_15036BB4 (game_eu_64070): three m2c stride bugs fixed (struct127 * + arg2 * 4, struct222 * + 0x10 twice),
+  old DIFFER / new EQUIV, mutants 4/4; own commit. port-b: game_eu_4A070.c:774 `(sp38 * 0x30) + D_800D20FC` same bug.
+- New hand C (NM): func_150F1F80 object_7B_pulse_scale (mode-0 frame path; mutants 16/16), func_151DFD0C
+  title_chapter_select_page (378 setups 360 EQUIV / 18 UNSURE / 0 DIFFER; mutants 72 killed, 0 survived, 13 INVALID).
+- difftest: header-only callees (cosf) take arity / float slots from the header (DIFFTEST_HDRSLOT_OLD=1 = old).
+- Checks: verify_all OK, NM links, protocheck 0 (979), selftest 60/60, progress_nm 4973/5915 (84.1%), bytes 60.4%.
+
+## Next steps (from P134)
+
+1. func_151E3AE4: 20 of P120's 68 errored setups (the a1 ones) DIFFER on the ring array x[0] with
+   DIFFTEST_ARGMEM=15049AD0=0:52 / 0:56 (ref 83.0, cand 74.0); EQUIV without ARGMEM. Probably a real bug: check
+   the `x[0] = x[count - 1]` logic against the asm.
+2. func_151DFD0C: re-run the 13 INVALID mutants with `p134/dfd0c_mutsetups.txt` minus the nav_*_f1_0 setups.
+3. func_151E1308 with its producers func_151E870C (game_eu_20B730) and func_15060F28 (game_83300), then
+   func_151E1EDC, func_151E4B40; func_151E19AC mutants (run with DIFFTEST_VARARGS_REF=1).
+4. game_16DC80.c's #define hack for func_1513D524 stays until the browser merge changes functions.h.
+
 ## State (session P132, 2026-10-23). Details: `docs/port/sessions/P132.md`
 
 - difftest fixes (selftest 57 / 57): (1) varargs / unknown callees' stack arguments behind IDO division trap checks

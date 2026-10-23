@@ -145,4 +145,9 @@ chkce EQUIV  func_151DE100 "$DE DIFFTEST_ROMDATA=1 DIFFTEST_POKE_OLD=1" 's/y = 1
 # [POKE unread] comes from decoded loads since P132 (Unicorn's read hook missed `lbu D_800BE616` at 800BEA36)
 out=$(set -f; env $DE $R/tools/port/difftest.sh func_151DE100 $C/func_151DE100.c --trials 4)
 case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread] $out";; EQUIV*) pass=$((pass+1)); echo "ok   [no POKE unread] $out";; *) fail=$((fail+1)); echo "FAIL $out";; esac
+# P134: a callee declared only in a header (cosf in gu.h) takes its arity / float slots from there: a0 (written at the
+# call site, &D_800CC298) is not an argument of cosf(float). DIFFTEST_HDRSLOT_OLD=1 = pre-P134 (false DIFFER on a0).
+chkce EQUIV  func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1"
+chkce DIFFER func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1"
+chkce DIFFER func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1" 's/0.35000002f/0.35f/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]
