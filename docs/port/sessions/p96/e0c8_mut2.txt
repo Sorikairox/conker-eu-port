@@ -1,0 +1,3 @@
+s/D_800C39D0 >= 0xFB/D_800C39D0 > 0xFB/ % te0c8_0 te0c8_1 te0c8_2 te0c8_3 te0c8_4 te0c8_5 te0c8_6 te0c8_7 te0c8_8 te0c8_9 te0c8_10 te0c8_11 te0c8_12 te0c8_13 te0c8_14 te0c8_15 
+s/+ 25 </+ 24 </ % te0c8_0 te0c8_1 te0c8_2 te0c8_3 te0c8_4 te0c8_5 te0c8_6 te0c8_7 te0c8_8 te0c8_9 te0c8_10 te0c8_11 te0c8_12 te0c8_13 te0c8_14 te0c8_15 
+s/< (\&D_eu_800C3A60)\[slot\]/<= (\&D_eu_800C3A60)[slot]/ % te0c8_0 te0c8_1 te0c8_2 te0c8_3 te0c8_4 te0c8_5 te0c8_6 te0c8_7 te0c8_8 te0c8_9 te0c8_10 te0c8_11 te0c8_12 te0c8_13 te0c8_14 te0c8_15 

@@ -7,7 +7,69 @@ s32 func_1510D8F4(s32 arg0);
 #endif
 
 
+#ifdef NON_MATCHING
+extern u16 D_800DA290[]; /* [player * 3 + i]: wobble phase (12 bits, the sine angle is phase >> 4) */
+extern u8 D_800DA2A8[];  /* [player * 3 + i]: phase speed */
+extern u8 D_800DA2B8[];  /* [player * 3 + i]: wobble amplitude */
+extern u8 D_800DA2C8[];  /* [player * 3 + i]: current level */
+extern u8 D_800DA2D4[];  /* [i]: default level */
+extern u8 D_800DA2D8[];  /* [player * 3 + i]: requested level; element 0 != 0 = a request is pending */
+f32 func_150489B0(u8);
+
+/* tint_channels_update: per frame for a player whose D_800DBFF0 record has +0x5F0 & 1: three colour channels.
+ * Each level D_800DA2C8 moves by 2 * step (D_800BE9E4) toward the requested level (D_800DA2D8, when a request is
+ * pending, else the default D_800DA2D4); a sine wobble (func_150489B0(phase >> 4) * amplitude) around it, minus
+ * 0x7F, is added to the "up" byte D_800D9F88 when >= 0, else to the "down" byte D_800D9F98 (both capped at 0x7F);
+ * the phase advances by its speed (mod 0x1000). The request flag is cleared afterwards. */
+void func_1510D090(s32 player) { /* s32: the asm uses a0 as it is (callers pass an s16) */
+    s32 step;
+    s32 pending;
+    s32 i;
+    s32 j;
+    s32 level;
+    s32 target;
+    s32 d;
+    s32 v;
+
+    if (!(*(s32 *) ((u8 *) D_800DBFF0 + player * 0x9A0 + 0x5F0) & 1)) {
+        return;
+    }
+    step = D_800BE9E4 * 2;
+    pending = D_800DA2D8[player * 3];
+    for (i = 0; i < 3; i++) {
+        j = player * 3 + i;
+        level = D_800DA2C8[j];
+        target = pending ? D_800DA2D8[j] : D_800DA2D4[i];
+        d = target - level;
+        if (d != 0) {
+            if ((d < 0 ? -d : d) < step) {
+                level = target;
+            } else if (d >= 0) {
+                level += step;
+            } else {
+                level -= step;
+            }
+            D_800DA2C8[j] = level;
+        }
+        v = (s32) (func_150489B0((D_800DA290[j] >> 4) & 0xFF) * D_800DA2B8[j]) + level - 0x7F; /* level not truncated to u8 here (as in the asm) */
+        if (v >= 0) {
+            D_800D9F88[j] += v;
+        } else {
+            D_800D9F98[j] -= v;
+        }
+        if (D_800D9F88[j] >= 0x80) {
+            D_800D9F88[j] = 0x7F;
+        }
+        if (D_800D9F98[j] >= 0x80) {
+            D_800D9F98[j] = 0x7F;
+        }
+        D_800DA290[j] = (D_800DA290[j] + D_800DA2A8[j]) & 0xFFF;
+    }
+    D_800DA2D8[player * 3] = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510D090.s")
+#endif
 
 Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3) {
     gDPSetPrimColor(gdl++, 0xF2, 0, D_800D9F88[arg3 * 3], D_800D9F88[arg3 * 3 + 1], D_800D9F88[arg3 * 3 + 2], arg1);
@@ -349,7 +411,36 @@ void func_1510DCA0(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P130 */
+extern s32 D_800B1268[];  /* texture cache: expanded data per texture id */
+void func_10004074(s16 *);  /* free (as the file's other callers) */
+
+// texture_cache_release: drops one reference to texture id (D_800DA388[id]); when the last one goes and the
+// texture is cached (D_800BC860[id] != 0), frees its data (and first the block its first word points to when
+// D_800BC860[id] & 0x40) and empties the slot (D_800B1268[id] = -1, D_800BC860[id] = 0).
+// s32 with three parameters for game_eu_6AA20.c's prototype (its only caller passes id, id, a u16 and ignores the
+// result; the asm reads a0 only and leaves v0 undefined): returns 0. Verified as the void (s32 id) variant.
+s32 func_1510DD2C(s32 id, s32 unused1, u16 unused2) {
+    s8 state = D_800BC860[id];
+
+    if (state == 0 || D_800DA388[id] == 0) {
+        return 0;
+    }
+    if (--D_800DA388[id] != 0) {
+        return 0;
+    }
+    if (state & 0x40) {
+        func_10004074(*(s16 **) D_800B1268[id]);
+    }
+    func_10004074((s16 *) D_800B1268[id]);
+    D_800B1268[id] = -1;
+    D_800BC860[id] = 0;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13A8A0/func_1510DD2C.s")
+#endif
 
 extern s8 D_800DA2F0;
 

@@ -15,7 +15,7 @@ s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
 #ifdef NON_MATCHING
 /* P38: per-frame object update (UNVERIFIED parts: see P38.md) */
 void func_1504AF10(struct127 *, s32, s32);
-s32 func_15061B4C();
+void func_15061B4C(void);
 void func_1507D4F8(s32); /* P59: void in the NM definition */
 void func_1507EB1C(struct127 *);
 void func_15081064(void);
@@ -441,7 +441,42 @@ block_64:
 //     D_800D35DC = (u8)0;
 // }
 
+#ifdef NON_MATCHING
+/* Per-frame pass over the 25 object records outside cutscenes (D_800C35EA != 1): sets the current object
+ * (D_800C3E78 index, D_800D154C pointer), its controller (D_800CC6A4: pad i of D_800BE728 for the first four
+ * players, a zeroed 6-byte pad otherwise; only for i < D_8008FD8C) and runs func_150EDAF8 for objects 0x28 / 0x77.
+ * As in the asm, the zeroed pad is a local of this function (D_800CC6A4 keeps pointing at it afterwards). */
+void func_1504ADD0(void) {
+    u8 pad[8];
+    struct127 *obj;
+    s32 i;
+
+    if (D_800C35EA == 1) {
+        return;
+    }
+    for (i = 0; i < 25; i++) {
+        obj = &D_800CC2D0[i];
+        if (*(s32 *)obj == 0) {
+            continue;
+        }
+        D_800C3E78 = i;
+        D_800D154C = obj;
+        if (i < D_8008FD8C) {
+            if (i < 4) {
+                D_800CC6A4 = (u8 *)((s32 *)D_800BE728[0])[i];
+            } else {
+                bzero(pad, 6);
+                D_800CC6A4 = pad;
+            }
+        }
+        if ((((u8 *)obj)[4] == 0x28) || (((u8 *)obj)[4] == 0x77)) {
+            func_150EDAF8((u8 *)obj);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1504ADD0.s")
+#endif
 // NON-MATCHING: whats up with sp48
 // void func_1504ADD0(void) {
 //     struct127 *tmp;
@@ -1076,7 +1111,7 @@ void func_1505A9AC(struct127 *, f32);
 s32 func_1505D024(struct127 *, s32, u16, s32); 
 void func_1505D6F0(struct127 *, s32); /* P59: void in the NM definition */
 void func_1505F298(struct127 *, struct49 *); /* P64: void in the NM definition */
-void func_1506045C(struct127 *, s32, s32, s32, s32);
+void func_1506045C(struct127 *, s32, s32, f32, s32); /* P102: arg3 f32 */
 void func_15063168(struct127 *);                 
 void func_150802A8(struct127 *);                 
 s32 func_150882C4(u8, struct127 *);             
@@ -2120,7 +2155,7 @@ block_197:
             func_1504B0FC(arg0, sp1B0);
         }
         if (arg0->stunned != 0xFF) {
-            func_1506045C(arg0, (u16) ((struct49 *)D_800CC6A4)->unk0, D_800CC288, *(s32 *)&arg0->unk28, 0);
+            func_1506045C(arg0, (u16) ((struct49 *)D_800CC6A4)->unk0, D_800CC288, arg0->unk28, 0);
             temp_v0_23 = arg0->unk84.uh;
             arg0->unk54 = 0.0f;
             arg0->disable_run = 0;
@@ -3243,7 +3278,7 @@ void func_15053750(struct127 *arg0);
 s32 func_150535F4(struct127 *arg0);
 void func_15021834(struct127 *, s32, s32);
 s32 func_15022A8C(struct127 *);
-s32 func_15054F74(struct127 *);
+void func_15054F74(struct127 *);
 s32 func_150562FC(struct127 *);
 void func_15056B08(struct127 *);
 s32 func_150585F0(struct127 *, s32);
@@ -3346,7 +3381,100 @@ struct127 *func_15052F58(s32 arg0, s32 arg1) {
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+/* P128 */
+u8 *func_15034174(u8 *arg0);
+
+// object_catch_player: lands / catches the player record D_800CC2D0[obj->unk124] on object obj (lift, platform,
+// carrier). Unless `force`, it only fires when the player is below obj's top (obj y + height * obj->y_scale) and
+// falling. Then: obj->unk13C = player + 100, optional sound event D_800D1580 = sound (func_1506E5FC), the player
+// remembers its y (+0x1CC) and faces obj's angle, its state block mode is cleared. Objects in state 0x20 stop both
+// vertical speeds and align the player to obj's angle (+0x40 in degrees); type 0x48 objects carrying partner 0x7A
+// (func_15034174) start the ride animation 5 / 0x79 and call func_15060F28(obj, 0) at the end, other objects squash
+// (y_scale 0.75) and snap the player to obj's y (state 1, 0x81 in level 6). Other states hand the player over
+// (unk65 = D_800C3E78 + 1, unk5C = anim, unk101 |= flags). Finally immune = immune, unk239 = arg7, obj->unk232 =
+// timer; `reset` calls func_1506160C(player, 1, 0, 0, 0) and sets player flag 0x40. The asm returns nothing; the f32
+// return type matches the callers' prototypes (0).
+f32 func_15052F9C(struct127 *obj, f32 height, s32 anim, s32 flags, s32 reset, s32 timer, s32 immune, s32 arg7,
+                  s32 force, s32 sound) {
+    struct127 *pl;
+    s32 partner;
+    s32 ride;
+    s32 state;
+    u16 angle;
+
+    ride = 0;
+    partner = -1;
+    if (obj->id == 0x48) {
+        u8 *other = func_15034174((u8 *) obj);
+        if (other != NULL) {
+            partner = other[6];
+        }
+    }
+    pl = &D_800CC2D0[obj->unk124];
+    if (force != 0 ||
+        (pl->y_position < obj->y_position + height * obj->y_scale && pl->y_velocity < 0.0f)) {
+        obj->unk13C = obj->unk124 + 100;
+        if (sound != 0) {
+            D_800D1580 = sound;
+            func_1506E5FC();
+        }
+        pl->unk1CC = pl->y_position;
+        pl->unk76 = obj->unk7A;
+        pl->unk31C->unk30 = 0;
+        if (obj->interaction_state == 0x20) {
+            pl->y_velocity = 0.0f;
+            obj->y_velocity = 0.0f;
+            if (obj->id == 0x48) {
+                state = 2;
+                if (partner == 0x7A) {
+                    obj->unk65 = obj->unk124 + 1;
+                    obj->unk5C = anim;
+                    obj->unk101 |= flags;
+                    func_1505E650(pl, 5, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+                    func_15083568(pl, 0x79, 1.0f, 0);
+                    ride = 1;
+                }
+            } else {
+                obj->y_scale = 0.75f;
+                pl->y_position = obj->y_position;
+                state = 1;
+                if (D_800BE9F0 == 6) {
+                    state = 0x81;
+                }
+            }
+            angle = obj->unk7A;
+            pl->unk76 = angle;
+            pl->unk78 = angle;
+            pl->unk7A = angle;
+            pl->unk40 = (s16) (angle + 0x4000) * 0.0054931640625f; /* 360 / 65536 */
+            pl->unk31C->unk4E = state;
+            pl->unk83 = 0;
+            pl->disable_run = 0;
+        } else {
+            pl->unk65 = D_800C3E78 + 1;
+            pl->unk5C = anim;
+            pl->disable_run = 0;
+            pl->unk101 |= flags;
+        }
+        pl->immune = immune;
+        pl->unk239 = arg7;
+        pl->unk31C->unk27 = 0;
+        obj->unk218 = NULL;
+        obj->unk232 = timer;
+        if (reset != 0) {
+            func_1506160C(pl, 1, 0, 0, 0);
+            pl->unk101 |= 0x40;
+        }
+    }
+    if (ride != 0) {
+        func_15060F28(obj, 0);
+    }
+    return 0.0f;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15052F9C.s")
+#endif
 // NON-MATCHING: plenty still to do here
 // void func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9) {
 //     s32 sp40;
@@ -3448,7 +3576,48 @@ struct127 *func_15052F58(s32 arg0, s32 arg1) {
 // }
 
 
+#ifdef NON_MATCHING
+/* P128 */
+// object_launch_player: launches the player record D_800CC2D0[obj->unk124] off object obj (a spring / bounce pad):
+// unless the player is already airborne-locked (disable_run) or stunned, or its state block forbids it (+0x6B), sets
+// immune / unk83 / disable_run to 0xFF, vertical speed vy and gravity, faces it along obj's angle, starts animation
+// 0x32 (speed 1.3, blend 4), clears obj->unk218, sets obj->unk232 = timer and aims the state block at obj's x / z
+// (or, when obj has a path table unk1D4 and point != -1, at path point `point` read by func_15043FF0), with mode 70
+// and flag +0x27 = 1. The asm returns nothing; the s32 return type matches the callers' prototypes (0).
+s32 func_1505327C(struct127 *obj, f32 vy, f32 gravity, s32 timer, s32 point) {
+    struct127 *pl;
+    vertex target;
+
+    pl = &D_800CC2D0[obj->unk124];
+    if (pl->disable_run != 0 || pl->stunned != 0) {
+        return 0;
+    }
+    if (pl->unk31C != NULL && pl->unk31C->unk6B != 0) {
+        return 0;
+    }
+    pl->immune = 0xFF;
+    pl->y_velocity = vy;
+    pl->gravity = gravity;
+    pl->unk83 = 0xFF;
+    pl->disable_run = 0xFF;
+    pl->unk76 = obj->unk7A;
+    obj->unk218 = NULL;
+    obj->unk232 = timer;
+    func_1505E650(pl, 0x32, 1.3f, 4.0f, 0.0f, 0.0f, 0);
+    D_800CC2D0[obj->unk124].unk31C->unk30 = 70;
+    *(f32 *) &D_800CC2D0[obj->unk124].unk31C->unk28 = obj->x_position;
+    *(f32 *) &D_800CC2D0[obj->unk124].unk31C->unk2C = obj->z_position;
+    if (obj->unk1D4 != NULL && point != -1) {
+        func_15043FF0(&target, (struct113 *) ((u8 *) obj->unk1D4 + (point << 6)));
+        *(f32 *) &D_800CC2D0[obj->unk124].unk31C->unk28 = target.x;
+        *(f32 *) &D_800CC2D0[obj->unk124].unk31C->unk2C = target.z;
+    }
+    D_800CC2D0[obj->unk124].unk31C->unk27 = 1;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_1505327C.s")
+#endif
 // NON-MATCHING: plenty still to do here
 // void func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4) {
 //     // s32 sp44;
@@ -3483,8 +3652,74 @@ struct127 *func_15052F58(s32 arg0, s32 arg1) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+s32 func_15053430(struct127 *);   /* P77: the asm reads a0 (the object) */
+#else
 s32 func_15053430(void);
+#endif
+#ifdef NON_MATCHING
+/* P136 */
+s32 func_1507D754(struct127 *);
+void func_15055B0C(struct127 *, s32);
+
+/*
+ * object_death_resolve: what happens to a dead object (called by func_150535F4 and the event natives). id 0xFF:
+ * func_15060F28(obj, 1). Death timer +0x10E in 1..0xEF: func_1505D2B8(obj, 9), returns 0. Else by the type's
+ * death flags (byte +0x28 of D_800D1C90[id]): 0x20 (timer < 0xF0) puffs an effect at the object (func_15166F10,
+ * 50 above it, scale 0.5); 0x04 asks func_1507D754 for a result (1 / 0 below); then the first of 0x02 (state
+ * 0x2A), 0x80 (func_15055B0C(obj, 1000)), 0x01 (func_15053694), 0x40 (respawn timer D_800D2530[+0x13F] = 1250 and
+ * func_15060F28(obj, 1)); without those, result 1 -> func_150536D0, result 0 -> func_15060F28(obj, 1).
+ * Returns 1.
+ */
+s32 func_15053430(struct127 *obj) {
+    u8 flags;
+    s32 res;
+
+    if (obj->id == 0xFF) {
+        func_15060F28(obj, 1);
+        return 1;
+    }
+    flags = *((u8 *) D_800D1C90[obj->id] + 0x28);
+    if (obj->unk10E != 0 && obj->unk10E < 0xF0) {
+        func_1505D2B8(obj, 9);
+        return 0;
+    }
+    res = 0;
+    if (obj->unk10E < 0xF0 && (flags & 0x20)) {
+        func_15166F10((s32) obj->x_position, (s32) (obj->y_position + 50.0f), (s32) obj->z_position, 0.5f, 0xFF, 0);
+    }
+    if (flags & 4) {
+        res = func_1507D754(obj);
+    }
+    if (flags & 2) {
+        obj->interaction_state = 0x2A;
+        return 1;
+    }
+    if (flags & 0x80) {
+        func_15055B0C(obj, 1000);
+        return 1;
+    }
+    if (flags & 1) {
+        func_15053694(obj);
+        return 1;
+    }
+    if (flags & 0x40) {
+        D_800D2530[obj->unk13F] = 1250;
+        func_15060F28(obj, 1);
+        return 1;
+    }
+    if (res == 1) {
+        func_150536D0(obj);
+        return 1;
+    }
+    if (res == 0) {
+        func_15060F28(obj, 1);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15053430.s")
+#endif
 
 s32 func_150535F4(struct127 *arg0) {
     u8 tmp;
@@ -3498,7 +3733,11 @@ s32 func_150535F4(struct127 *arg0) {
         if (((tmp & 0x10) != 0) ||
             (((tmp & 8) != 0) && (arg0->unk28 == 0.0f)) ||
             (arg0->unk10F == 0)) {
+#ifdef NON_MATCHING
+            return func_15053430(arg0);
+#else
             return func_15053430();
+#endif
         }
     }
     return 0;
@@ -3601,7 +3840,71 @@ void func_15054A5C(struct127 *arg0, struct127 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15054A94.s")
 
+#ifdef NON_MATCHING
+/* P125 */
+f32 func_15052F9C(struct127 *arg0, f32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9);
+s32 func_1505327C(struct127 *arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+u16 func_1505A630(f32 arg0, f32 arg1, s32 arg2);
+u16 func_10010154(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4);
+void func_1505A184(u16 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, f32 *arg5);
+void func_1508B20C(f32, f32, f32, f32);
+
+/* menu_object_update: per-frame extras of some menu / scene objects by id.
+ * 0x0C: unless the object's target (D_800CC2D0[unk124]) has +0x65 == D_800C3E78 + 1: in state 0x12 run the
+ *   func_15052F9C move step (speed 50); else on odd D_800CC268 frames with flag 0x400 retarget to object 0 and
+ *   start func_1505327C (39, 3, state 0x12).
+ * 0x4B: point unk2EC (packed s16 x << 16 | s16 z) 500 units behind its facing, turn a third of the way towards
+ *   object 0 (or 0x800 off its facing when unk84 is 0xF), scale 2 and unk40 90.
+ * 0x1B / 0x7E with a timer unk2E4: optional func_1508B20C at its position; the timer counts down by the frame
+ *   step D_800BE9E4 (sound 0x3A1 when it passes 100); when it runs out, state 6 and unk218 = NULL. */
+void func_15054F74(struct127 *arg0) {
+    f32 dx, dz, dy;
+    f32 x, z;
+    s16 angle;
+    s32 step;
+
+    if (arg0->id == 0xC) {
+        if ((D_800C3E78 + 1) != D_800CC2D0[arg0->unk124].unk65) {
+            if (arg0->unk232 == 0x12) {
+                func_15052F9C(arg0, 50.0f, 0, 4, 0, 0xC, 0, 8, 0, 0);
+            } else if ((D_800CC268 & 1) && (arg0->unk25C & 0x400)) {
+                arg0->unk124 = 0;
+                func_1505327C(arg0, 39.0f, 3.0f, 0x12, 0);
+            }
+        }
+    } else if (arg0->id == 0x4B) {
+        func_1505A184(arg0->unk7A ^ 0x8000, 500.0f, 0.0f, &dx, &dz, &dy);
+        x = arg0->x_position;
+        z = arg0->z_position;
+        arg0->unk2EC = ((s32) ((s16) x + dx) << 16) | ((s32) ((s16) z + dz) & 0xFFFF);
+        if (arg0->unk84.uh != 0xF) {
+            angle = func_1505A630(D_800CC2D0->x_position - x, z - D_800CC2D0->z_position, 0);
+        } else {
+            angle = arg0->unk7A - 0x800;
+        }
+        arg0->unk7A += (s16) (angle - arg0->unk7A) / 3;
+        arg0->xz_scale = 2.0f;
+        arg0->y_scale = 2.0f;
+        arg0->unk40 = 90.0f;
+    } else if ((arg0->id == 0x1B || arg0->id == 0x7E) && arg0->unk2E4 != 0) {
+        if (D_800BE616 != 0) {
+            func_1508B20C(arg0->x_position, arg0->y_position, arg0->z_position, 900.0f);
+        }
+        step = D_800BE9E4;
+        if (step < arg0->unk2E4) {
+            if (arg0->unk2E4 >= 100 && arg0->unk2E4 < step + 100) {
+                func_10010154(0x3A1, arg0, 0x7D00, 500, 1000);
+            }
+            arg0->unk2E4 -= step;
+        } else {
+            arg0->unk232 = 6;
+            arg0->unk218 = NULL;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15054F74.s")
+#endif
 // void func_15054F74(struct127 *arg0) {
 //     s16 phi_v1;
 //

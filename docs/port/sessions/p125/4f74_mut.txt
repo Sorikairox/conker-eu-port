@@ -1,0 +1,27 @@
+s/(D_800C3E78 + 1) !=/(D_800C3E78 + 2) !=/
+s/unk232 == 0x12/unk232 == 0x13/
+s/50.0f, 0, 4, 0, 0xC/50.0f, 0, 4, 0, 0xD/
+s/(D_800CC268 \& 1)/(D_800CC268 \& 2)/
+s/unk25C \& 0x400/unk25C \& 0x200/
+s/arg0->unk124 = 0;/arg0->unk124 = 1;/
+s/39.0f, 3.0f/39.0f, 4.0f/
+s/unk7A ^ 0x8000/unk7A ^ 0x4000/
+s/(s16) x + dx) << 16)/(s16) x + dz) << 16)/
+s/(s16) z + dz) \& 0xFFFF/(s16) z + dy) \& 0xFFFF/
+s/unk84.uh != 0xF/unk84.uh != 0xE/
+s/x_position - x, z - /x_position - z, x - /
+s/unk7A - 0x800;/unk7A + 0x800;/
+s/arg0->unk7A) \/ 3;/arg0->unk7A) \/ 2;/
+s/arg0->y_scale = 2.0f/arg0->y_scale = 1.0f/
+s/unk40 = 90.0f/unk40 = 91.0f/
+s/arg0->id == 0x7E/arg0->id == 0x7F/
+s/arg0->unk2E4 != 0)/arg0->unk2E4 > 1)/
+s/D_800BE616 != 0/D_800BE616 == 0/
+s/z_position, 900.0f/x_position, 900.0f/
+s/step < arg0->unk2E4/step <= arg0->unk2E4/
+s/unk2E4 >= 100 \&\&/unk2E4 > 100 \&\&/
+s/< step + 100/<= step + 100/
+s/0x7D00, 500, 1000/0x7D00, 500, 999/
+s/unk2E4 -= step/unk2E4 -= 1/
+s/unk232 = 6;/unk232 = 7;/
+s/unk218 = NULL;/unk218 = (void *) 1;/

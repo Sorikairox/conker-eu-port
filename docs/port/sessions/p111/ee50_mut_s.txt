@@ -1,0 +1,5 @@
+s/if (ES16(0x73C) != 0) {/if (ES16(0x73C) == 1) {/
+s/if (d < bestD) {/if (d <= bestD) {/
+s/d = dx \* dx + dy \* dy + dz \* dz;/d = dx * dx + dz * dz;/
+s/ES32(0x84) \&= 0x7FFFFFF9;/ES32(0x84) \&= 0x7FFFFFFB;/
+s/if (EU16(0x920) \& 7) {/if (EU16(0x920) \& 3) {/

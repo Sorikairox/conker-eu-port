@@ -1,0 +1,27 @@
+s/if (state == 1 || D_800C35C4 != 0) {/if (state == 1) {/ %
+s/D_800C35C4 = scene + 1;/D_800C35C4 = scene;/ %
+s/D_800C35C5 = 0;/D_800C35C5 = 2;/ %
+s/if (state != 2) {/if (state != 0) {/ %
+s/D_800C40B8 = scene;/D_800C40B8 = level;/ %
+s/rec\[1 + i\].bits >> 3;/rec[1 + i].bits >> 2;/ %
+s/size = ((hdr\[1\] < hdr\[0\]) ? hdr\[0\] : hdr\[1\]) \* 2;/size = hdr[1] * 2;/ %
+s/size = ((hdr\[2\] < hdr\[0\]) ? hdr\[0\] : hdr\[2\]) \* 2;/size = hdr[2] * 2;/ %
+s/allocate_memory(hdr\[3\] \* 4,/allocate_memory(hdr[3] * 2,/ %
+s/if (D_800C39E8\[slot\]\[i\] != 0) {/if (1) {/ %
+s/allocate_memory(0x194,/allocate_memory(0x190,/ %
+s/hdr\[0\] \* 0x44/hdr[0] * 0x40/ %
+s/        D_800C39F0\[slot\]\[i\] = 0;$// %
+s/D_800C3A5A\[slot\] = hdr\[0\];/D_800C3A5A[slot] = hdr[1];/ %
+s/    k += hdr\[0\];// %
+s/D_800C3B98\[slot\]\[i\] = rec\[k\].value;/D_800C3B98[slot][i] = rec[k].bits;/ %
+s/D_800C3AA8\[slot\]\[i\] = rec\[k\].value;/D_800C3AA8[slot][i] = rec[k + 1].value;/ %
+s/D_800C3A00\[slot\]\[i\] = rec\[k + i\].value;/D_800C3A00[slot][i] = rec[k + i + 1].value;/ %
+s/if (callback != 0) {/if (callback != 2) {/ %
+s/(level, scene, slot, callbackArg);/(level, scene, callbackArg, slot);/ %
+s/(u16)n \* 12/n * 12/ %
+s/(&D_800C39D0)\[slot\] = 0;// %
+s/func_15020430(i, slot);/func_15020430(slot, i);/ %
+s/if (D_800C3A5A\[slot\] == 0) {/if (D_800C3A5A[slot] != 0) {/ %
+s/func_1502457C(1, slot);/func_1502457C(0, slot);/ %
+s/D_800DBFF4\[0\] = 4;/D_800DBFF4[0] = 3;/ %
+s/D_800C3638 = 1;// %

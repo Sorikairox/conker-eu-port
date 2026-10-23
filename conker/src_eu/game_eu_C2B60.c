@@ -2,7 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
-s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
+void func_15095F18(s32, f32, f32, f32, s32, s32 *);
 #endif
 
 Gfx *func_15095350(Gfx *arg0) {
@@ -63,9 +63,140 @@ void func_15095470(s32 arg0, s32 arg1, s32 arg2) {
     (*(u8 *)((u8 *)(&D_800D30B0) + 0xA)) = (u8) (*(u8 *)((u8 *)arg0 + 4));
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_150954E4.s")
+#ifdef NON_MATCHING
+/* Texture loader behind func_15095380 / func_150953F8 (the sky quad, sprites, ...): appends the display-list
+ * commands that load the texture `tex` into TMEM at `tmem` and set up render tile `tile`, and returns the new
+ * display-list end. `tex` is the descriptor func_15095470 fills (D_800D30B0): +0 address, or an asset id below
+ * 0x10000000 that the texture cache resolves (func_1510D66C with `age`), +4 width, +6 height, +8 format (G_IM_FMT_*;
+ * 5 = RGBA texels followed by an I4 plane that goes to tile + 1), +9 texel size (G_IM_SIZ_*), +0xA animated flag
+ * (`frame` selects one of several equal textures stored after each other; 0 when not animated). The address used
+ * is kept in D_800D30C0. Clamp / mirror `cm` applies to s and t; the tile rectangle starts at (uls, ult) with the
+ * s fraction `sfrac` (10.2). For CI textures the palette after the texels is loaded too (D_800D30BC = 0x8000,
+ * the CI flag for the caller's render mode; 0 otherwise). Note the I4 tile's ult is not shifted by 2 (as the
+ * original). */
+s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
+extern s32 D_800D30BC;
 
+static const u8 s954E4_incr[4] = { G_IM_SIZ_4b_INCR, G_IM_SIZ_8b_INCR, G_IM_SIZ_16b_INCR, G_IM_SIZ_32b_INCR };
+static const u8 s954E4_shift[4] = { G_IM_SIZ_4b_SHIFT, G_IM_SIZ_8b_SHIFT, G_IM_SIZ_16b_SHIFT, G_IM_SIZ_32b_SHIFT };
+static const u8 s954E4_lineBytes[4] = { 1, 1, 2, 2 };   /* D_8009E288: line = (bytes * lineW + 7) / 8 */
+static const u8 s954E4_loadSiz[4] = { G_IM_SIZ_4b_LOAD_BLOCK, G_IM_SIZ_8b_LOAD_BLOCK, G_IM_SIZ_16b_LOAD_BLOCK,
+                                      G_IM_SIZ_32b_LOAD_BLOCK };
+
+s32 func_150954E4(s32 gfxAddr, s32 *tex, s32 tmem, s32 tile, s32 frame, s32 sfrac, s32 cm, s32 uls, s32 ult,
+                  s32 age) {
+    Gfx *gfx = (Gfx *)gfxAddr;
+    u8 *t = (u8 *)tex;
+    s32 width, height, fmt, siz, imgFmt;
+    s32 texels, words, lineW, masks, maskt, n, line, lrs, lrt, ulsFixed;
+    s32 addr;
+    s32 palBits, palCount;
+
+    if (t[0xA] == 0) {
+        frame = 0;
+    }
+    width = *(u16 *)(t + 4);
+    height = *(u16 *)(t + 6);
+    siz = t[9];
+    texels = width * height;
+    words = s954E4_incr[siz] + texels;
+    if (t[8] == 5) {
+        words += texels / 4;   /* the I4 plane */
+    }
+    words >>= s954E4_shift[siz];
+
+    addr = *(s32 *)t;
+    D_800D30C0 = addr;
+    if ((u32)addr < 0x10000000) {
+        D_800D30C0 = func_1510D66C(addr, NULL, age, 0);
+        addr = D_800D30C0;
+    }
+    if (addr != (s32)0x80000000) {
+        D_800D30C0 = addr + words * 2 * frame;
+    }
+
+    lineW = (siz == G_IM_SIZ_4b) ? width >> 1 : width;
+    for (masks = 1, n = 2; n < width; n <<= 1) {
+        masks++;
+    }
+    for (maskt = 1, n = 2; n < height; n <<= 1) {
+        maskt++;
+    }
+    fmt = t[8];
+    imgFmt = (fmt == 5) ? G_IM_FMT_RGBA : fmt;
+
+    gDPPipeSync(gfx++);
+    gDPSetTextureImage(gfx++, imgFmt, s954E4_loadSiz[t[9]], 1, D_800D30C0);
+    gDPSetTile(gfx++, imgFmt, s954E4_loadSiz[t[9]], 0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);
+    gDPLoadBlock(gfx++, G_TX_LOADTILE, 0, 0, words - 1, 0);
+    siz = t[9];
+    line = (s954E4_lineBytes[siz] * lineW + 7) >> 3;
+    gDPSetTile(gfx++, imgFmt, siz, line, tmem, tile, 0, cm, maskt, 0, cm, masks, 0);
+    ulsFixed = uls * 4 + sfrac;
+    lrs = (*(u16 *)(t + 4) + uls - 1) * 4 + sfrac;
+    lrt = (*(u16 *)(t + 6) + ult - 1) * 4;
+    gDPSetTileSize(gfx++, tile, ulsFixed, ult * 4, lrs, lrt);
+    if (t[8] == 5) {
+        line = (s954E4_lineBytes[G_IM_SIZ_4b] * (lineW >> 1) + 7) >> 3;
+        gDPSetTile(gfx++, G_IM_FMT_I, G_IM_SIZ_4b, line, tmem + lineW * *(u16 *)(t + 6) / 4, tile + 1, 0, cm, maskt,
+                   0, cm, masks, 0);
+        lrs = (*(u16 *)(t + 4) + uls - 1) * 4 + sfrac;
+        lrt = (*(u16 *)(t + 6) + ult - 1) * 4;
+        gDPSetTileSize(gfx++, tile + 1, ulsFixed, ult, lrs, lrt);
+    }
+    if (t[8] == G_IM_FMT_CI) {
+        if (t[9] == G_IM_SIZ_4b) {
+            palBits = 4;
+            palCount = 15;
+        } else {
+            palBits = 8;
+            palCount = 255;
+        }
+        gDPSetTextureImage(gfx++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1,
+                           D_800D30C0 + *(u16 *)(t + 4) * *(u16 *)(t + 6) * palBits / 8);
+        gDPLoadSync(gfx++);
+        gDPLoadTLUTCmd(gfx++, 6, palCount);
+        D_800D30BC = 0x8000;
+    } else {
+        D_800D30BC = 0;
+    }
+    return (s32)gfx;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_150954E4.s")
+#endif
+
+#ifdef NON_MATCHING
+void func_150A7EE0(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+extern u8 D_800D30C8[][0x40];   /* view matrices per player */
+extern f32 D_800D9F40;
+#endif
+#ifdef NON_MATCHING
+/* Projects the world point (x, y, z) with the current player's view matrix D_800D30C8[D_80082FA4]
+ * (func_150A7EE0 -> *sx, *sy, *sz, *w). Behind / too far (w >= far) or too near (w <= D_800D9F40): returns 0.
+ * Else *sx / *sy become screen coordinates of that player's viewport (D_800BE628 + player * 0x180: half
+ * sizes +0x0C / +0x10 (+ 5), centre +0x34 / +0x38; y points down) and it returns 1. */
+s32 func_15095A4C(f32 x, f32 y, f32 z, f32 *sx, f32 *sy, f32 *sz, f32 *w, f32 far) {
+    u8 *vp;
+    f32 inv;
+    f32 px;
+    f32 py;
+
+    func_150A7EE0(D_800D30C8[D_80082FA4], x, y, z, sx, sy, sz, w);
+    if (far <= *w || *w <= D_800D9F40) {
+        return 0;
+    }
+    inv = 1.0f / *w;
+    vp = (u8 *)D_800BE628 + D_80082FA4 * 0x180;
+    px = *sx;
+    py = *sy;
+    *sx = (*(f32 *)(vp + 0xC) + 5.0f) * px * inv + *(f32 *)(vp + 0x34);
+    *sy = *(f32 *)(vp + 0x38) - (*(f32 *)(vp + 0x10) + 5.0f) * py * inv;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095A4C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15095A4C(f32, f32, f32, f32 *, f32 *, f32 *, f32 *, f32);
@@ -138,7 +269,7 @@ void func_15095E58(s32 arg0, s32 arg1, f32 arg2, f32 arg3) {
 }
 #endif
 
-s32 func_15095F18(s32, f32, f32, f32, s32, s32 *);
+void func_15095F18(s32, f32, f32, f32, s32, s32 *);
 s32 func_15096144(s32, s32, s32, s32, s32);
 s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8) {
     s32 sp24;
@@ -149,7 +280,74 @@ s32 func_15095EA0(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return arg0;
 }
 
+#ifdef NON_MATCHING
+/* P139 */
+extern f32 D_80038400;     /* sprite size units -> screen x */
+extern f32 D_80038404;     /* sprite size units -> screen y */
+extern f32 D_800D3090;     /* last sprite rect: x scale */
+extern f32 D_eu_800D3094;  /* y scale */
+extern f32 D_800D309C;     /* top (D_800D3098 = left, declared as a struct array in variables.h) */
+extern f32 D_800D30A0;     /* depth */
+extern f32 D_800D30A4;     /* width */
+extern f32 D_800D30A8;     /* height */
+
+/*
+ * sprite_screen_rect: screen rectangle of the sprite `spr` (s16 scale +6 / +8, texture +0x10 with u16 size +4 / +6)
+ * centred on the screen point (sx, sy) at depth w, in the current player's viewport (D_800BE628 + D_80082FA4 *
+ * 0x180; scales +0x14 / +0x18, or +0x1C / +0x20 when alt): width = tex w * (scale x * D_80038400 * vp scale) / w,
+ * height likewise. *visible = 1 when the rectangle overlaps the viewport's clip box (x: +0x2C..+0x30, y:
+ * +0x24..+0x28), else 0. The scales, corner, depth and size are left in D_800D3090..D_800D30A8 for the sprite
+ * drawer. Nothing but *visible = 0 happens when a scale is 0. (void: the file prototypes said s32, no caller used it).
+ */
+void func_15095F18(s32 sprArg, f32 sx, f32 sy, f32 w, s32 alt, s32 *visible) {
+    u8 *spr = (u8 *) sprArg;
+    u8 *vp;
+    u8 *tex;
+    f32 scaleX;
+    f32 scaleY;
+    f32 inv;
+    f32 width;
+    f32 height;
+    f32 left;
+    f32 top;
+
+    *visible = 0;
+    if (*(s16 *) (spr + 6) == 0 || *(s16 *) (spr + 8) == 0) {
+        return;
+    }
+    scaleX = (f32) *(s16 *) (spr + 6) * D_80038400;
+    scaleY = (f32) *(s16 *) (spr + 8) * D_80038404;
+    if (alt != 0) {
+        vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+        scaleX *= *(f32 *) (vp + 0x1C);
+        scaleY *= *(f32 *) (vp + 0x20);
+    } else {
+        vp = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+        scaleX *= *(f32 *) (vp + 0x14);
+        scaleY *= *(f32 *) (vp + 0x18);
+    }
+    tex = *(u8 **) (spr + 0x10);
+    inv = 1.0f / w;
+    width = (f32) *(u16 *) (tex + 4) * scaleX * inv;
+    height = (f32) *(u16 *) (tex + 6) * scaleY * inv;
+    left = sx - width * 0.5f;
+    top = sy - height * 0.5f;
+    if (*(f32 *) (vp + 0x2C) <= left + width && left < *(f32 *) (vp + 0x30) && *(f32 *) (vp + 0x24) <= top + height &&
+        top < *(f32 *) (vp + 0x28)) {
+        *visible = 1;
+    }
+    D_800D3090 = scaleX;
+    D_eu_800D3094 = scaleY;
+    *(f32 *) D_800D3098 = left;
+    D_800D309C = top;
+    D_800D30A0 = w;
+    D_800D30A4 = width;
+    D_800D30A8 = height;
+    return;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C2B60/func_15095F18.s")
+#endif
 
 #ifdef NON_MATCHING
 /* NON_MATCHING: the matching void wrappers return the callee's v0 (the new display-list pointer), which callers use. */

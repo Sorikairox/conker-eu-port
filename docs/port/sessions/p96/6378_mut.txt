@@ -1,0 +1,63 @@
+s/fov0 = -(A_F_OF(e, 0x6C) - 5.0f);/fov0 = -(A_F_OF(e, 0x6C) - 4.0f);/
+s/step = A_F_OF(e, 0x6C) \* 0.02f;/step = A_F_OF(e, 0x6C) * 0.03f;/
+s/!= 0x76) || type == 0x1B)/== 0x76) || type == 0x1B)/
+s/\*\*(u16 \*\*)(p + 0x36C) |= 0x10;//
+s/(s8)in\[2\] != 0 || (s8)in\[3\] != 0/(s8)in[2] != 0/
+s/(hold\[0x65\] - 1) \* 0x32C/hold[0x65] * 0x32C/
+s/pl\[0x11A\] == 2 ||/pl[0x11A] == 1 ||/
+s/case 0x41: //
+s/case 0x23: //
+s/\&\& (s32)A_F_OF(holder, 0x28) != 0)/)/
+s/if (hold\[0x104\] != 0 || st != 0) {/if (st != 0) {/
+s/A_PL\[0x198\] = 0;//
+s/\*(s16 \*)(p + 0x73C) = 0;//
+s/!(A_W(0x5F0) \& 4)/!(A_W(0x5F0) \& 0x10)/
+s/(f32)\*(s16 \*)(holder + 0x2E4) \* 0.02f/(f32)*(s16 *)(holder + 0x2E4) * 0.01f/
+s/ang = A_F_OF(A_HOLD, 0x40) - 90.0f;/ang = A_F_OF(A_HOLD, 0x40) + 90.0f;/
+s/rad = ang \* 0.017453292f;/rad = ang;/
+s/pl\[0x197\] = 2;/pl[0x197] = 1;/
+s/A_W(0x5F0) \& 0x10);/A_W(0x5F0) \& 0x14);/
+s/sinf(rad) \* 100.0f + A_F(0x2F8)/cosf(rad) * 100.0f + A_F(0x2F8)/
+s/0x114) \* 0.75f;/0x114) * 0.5f;/
+s/A_F_OF(pl, 0x18C) = A_F(0x37C);//
+s/A_F_OF(pl, 0x164) = A_F(0x2FC);//
+s/k = 0.75f;/k = 0.7f;/
+s/case 0x12) {/case 0x13) {/
+s/0.6f < k/0.4f < k/
+s/(0.0f - fov0) \* k + fov0/fov0 * k/
+s/A_F_OF(pl, 0x180) = 0.0f;//
+s/A_F_OF(pl, 0x16C) = A_F_OF(pl, 0x174);/A_F_OF(pl, 0x16C) = ang;/
+s/A_F_OF(pl, 0x188) = A_F_OF(pl, 0x184) \* aspect;/A_F_OF(pl, 0x188) = A_F_OF(pl, 0x184);/
+s/A_F(0x1A0), 1.0f);/A_F(0x1A0), 0.0f);/
+s/D_800DBFF4\[p\[0x23D\]\] = 2;/D_800DBFF4[p[0x23D]] = 1;/
+s/sf = -A_F(0x1A4) \* 10000.0f;/sf = A_F(0x1A4) * 10000.0f;/
+s/snd | 0x80000000, 0x100,/snd, 0x100,/
+s/0x3E80, 0x12C/0x3E81, 0x12C/
+s/holder\[0x74\] |= 1 << p\[0x23D\];//
+s/return st;/return 2;/
+s/zoom = A_F(0x19C) \/ fov0;/zoom = A_F(0x1A0) \/ fov0;/
+s/|| type == 0 ||/||/
+s/if (hold\[0x1CA\] == 0 \&\& type != 0x29)/if (hold[0x1CA] == 0)/
+s/(s32)A_F_OF(hold, 0x28) != 0 \&\& type != 0x1F/(s32)A_F_OF(hold, 0x28) != 0/
+s/lo = 19.0f;/lo = 20.0f;/
+s/hi = 90.0f;/hi = 80.0f;/
+s/inv = inv \* inv;//
+s/dx \*= 0.25f;/dx *= 0.5f;/
+s/dy \*= 1.5f;//
+s/A_F_OF(pl, 0x174) -= dx;/A_F_OF(pl, 0x174) += dx;/
+s/lo = -60.0f;/lo = -70.0f;/
+s/hi = 30.0f;/hi = 40.0f;/
+s/(f32 \*)(pl + 0x180), 6.0f/(f32 *)(pl + 0x17C), 6.0f/
+s/(flags \& 0xC) != 0xC/(flags \& 0xC) != 0x8/
+s/A_F(0x1A8) -= step \* aspect;/A_F(0x1A8) -= step;/
+s/A_F(0x1A4) < 0.0f) {/A_F(0x1A4) < -1.0f) {/
+s/lim = fov0 \* 0.5f;/lim = fov0 * 0.75f;/
+s/lim = lim \* aspect;//
+s/A_F_OF(pl, 0x188) = A_F(0x1A8);/A_F_OF(pl, 0x188) = A_F(0x1A4);/
+s/v\[1\] = sinf(A_F_OF(pl, 0x170)/v[1] = sinf(A_F_OF(pl, 0x16C)/
+s/r = v\[0\];/r = 1.0f;/
+s/A_F(0x2A8) = A_F_OF(hold, 0x18);//
+s/A_F_OF(pl, 0x134) = v\[1\];//
+s/-0.94f \* zoom + 1.0f/-0.94f * zoom + 0.9f/
+s/71.0f \* zoom + 54.0f/71.0f * zoom + 50.0f/
+s/return 1;/return 2;/

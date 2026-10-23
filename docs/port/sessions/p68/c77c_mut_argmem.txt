@@ -1,0 +1,3 @@
+s/ - 180.0f;/;/ %
+s/target.unk4 = 0.0f;// %
+s/func_15048A70(pushAngle, heading)/func_15048A70(heading, pushAngle)/ %

@@ -1,0 +1,52 @@
+s|if (\*(s32 \*)obj == 0 \|\| obj\[0x2FA\] == 0) {|if (obj[0x2FA] == 0) {| %
+s|if (\*(s32 \*)obj == 0 \|\| obj\[0x2FA\] == 0) {|if (*(s32 *)obj == 0 \|\| obj[0x2FB] == 0) {| %
+s|                    func_15062D10(type, 0x62, 0, -1, 0, 0);|                    func_15062D10(type, 0x62, 0, -2, 0, 0);| %
+s|                    done\[0\] = 1;|                    done[1] = 1;| %
+s|                    func_15062D10(type, 0x1ED, 0, -1, 0, 0);|                    func_15062D10(type, 0x1ED, 0, -1, 0, 1);| %
+s| < 300) {| < 299) {| %
+s| < 300) {| <= 300) {| %
+s| 5 - 2;| 5 - 1;| %
+s|func_15062D10(type, 4, -4, OBJ_ANIM.jitter, 0, 0);|func_15062D10(type, 4, -4, OBJ_ANIM.pulse, 0, 0);| %
+s|if (\*tex != NULL) {|if (1) {| %
+s|(\*tex)\[0\], 0x37, 0, (s32)OBJ_ANIM.scrollV, 2, 1);|(*tex)[0], 0x37, 0, (s32)OBJ_ANIM.scrollU, 2, 1);| %
+s|(\*tex)\[1\], 0x27|(*tex)[0], 0x27| %
+s|OBJ_ANIM.scrollU += -4.0f|OBJ_ANIM.scrollU += -4.5f| %
+s|if (OBJ_ANIM.scrollU <= 0.0f) {|if (OBJ_ANIM.scrollU < 0.0f) {| %
+s|OBJ_ANIM.scrollV += 360.0f;|OBJ_ANIM.scrollV += 359.0f;| %
+s|OBJ_ANIM.scrollV += -0.5f|OBJ_ANIM.scrollV += -0.25f| %
+s|if (v > 40) {|if (v > 41) {| %
+s|} else if (v <= 0) {|} else if (v < 0) {| %
+s|OBJ_ANIM.pulseStep = -1;|OBJ_ANIM.pulseStep = -2;| %
+s|func_15062D10(type, 0xAA, OBJ_ANIM.pulse, 0, 0, 1);|func_15062D10(type, 0xAA, v, 0, 0, 1);| %
+s|if (\*(s32 \*)(obj + 0x1D4) != 0) {|if (1) {| %
+s|OBJ_ANIM.phase\[i\] += steps\[i\];|OBJ_ANIM.phase[i] += steps[0];| %
+s|+ 1.0f) \* 0.5f;|+ 1.0f) * 0.25f;| %
+s|func_eu_1501B640((struct127 \*)obj, colours, 1);|func_eu_1501B640((struct127 *)obj, colours, 0);| %
+s|                    func_15062D10(type, 0x175, -2, 0, 0, 0);|                    func_15062D10(type, 0x175, -3, 0, 0, 0);| %
+s|if (OBJ_ANIM.frameTimer >= 4) {|if (OBJ_ANIM.frameTimer >= 3) {| %
+s|if (obj\[0x69\] == 5) {|if (obj[0x69] == 4) {| %
+s|if (obj\[0x69\] >= 3) {|if (obj[0x69] >= 4) {| %
+s|obj\[0x68\] = 5 - obj\[0x69\];|obj[0x68] = 6 - obj[0x69];| %
+s|obj\[0x68\] += 15;|obj[0x68] += 16;| %
+s|OBJ_ANIM.frameTimer += D_800BE9E4;|OBJ_ANIM.frameTimer += 1;| %
+s|(v >= 10) ? v - 10 : v \* 2 + 6;|(v >= 11) ? v - 10 : v * 2 + 6;| %
+s|(v >= 10) ? v - 10 : v \* 2 + 6;|(v >= 10) ? v - 10 : v * 2 + 5;| %
+s|for (i = 0; i < 2; i++) {|for (i = 0; i < 1; i++) {| %
+s|: D_800997EC\[v\];|: D_800997EC[v + 1];| %
+s|(OBJ_ANIM.glow < 0xEB)|(OBJ_ANIM.glow < 0xEA)| %
+s|(OBJ_ANIM.glow <= 20) ? 0|(OBJ_ANIM.glow < 20) ? 0| %
+s|glow = OBJ_ANIM.glow \* (1.0f / 255.0f);|glow = OBJ_ANIM.glow * (1.0f / 256.0f);| %
+s|if (\*(s32 \*)(obj + 0x2EC) != 0) {|if (*(s32 *)(obj + 0x2E8) != 0) {| %
+s|if (D_800BE9F0 != 0x30) {|if (D_800BE9F0 != 0x31) {| %
+s|func_15062D10(type, 0x255, 0, 8, 0, 0);|func_15062D10(type, 0x255, 0, 9, 0, 0);| %
+s|? -D_800BE9E4 \* 40 : 0);|? -D_800BE9E4 * 41 : 0);| %
+s|if (v == 2 \|\| v == 1) {|if (v == 2) {| %
+s|if (v == 2 \|\| v == 1) {|if (v == 1) {| %
+s|                    if (obj\[0x68\] == 0xD) {|                    if (obj[0x68] == 0xE) {| %
+s|if ((func_150ADA20() \& 3) == 0) {|if ((func_150ADA20() \& 1) == 0) {| %
+s|(obj\[0x68\] == 0x15) ? 0xC : 0x15;|(obj[0x68] == 0x14) ? 0xC : 0x15;| %
+s|                    obj\[0x68\] = 0xD;|                    obj[0x68] = 0xE;| %
+s|func_eu_150F2230(obj);|func_eu_150F2230(obj + 1);| %
+s|                    done\[9\] = 1;|                    done[8] = 1;| %
+s|func_15062D10(type, 4, 0x14, 8, 0, 0);|func_15062D10(type, 4, 0x14, 8, 1, 0);| %
+s|func_15062D10(type, 4, 0, -4, 0, 0);|func_15062D10(type, 4, 0, -4, 0, 1);| %

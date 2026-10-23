@@ -1,0 +1,46 @@
+s/if (cmd == 0xB7) {/if (cmd == 0xB6) {/ % cB7_0 cB7_1 cB7_2 cB7_3 cB7_4 cB7_5
+s/return (obj == NULL) ? 1 : 0;/return (obj == NULL) ? 0 : 1;/ % cB0_0 cB0_1 cB0_2 cB0_3 cB0_4 cB0_5
+s/A024_S32(obj, 0) == 0x27)/A024_S32(obj, 0) == 0x28)/ % cB1_0 cB1_1 cB1_2 cB1_3 cB1_4 cB1_5
+s/return A024_U8(obj, 0x232);/return A024_U8(obj, 0x233);/ % c91_0 c91_1 c91_2 c91_3 c91_4 c91_5
+s/func_15084000(args\[2\] \& 0xFFFF0FFF) + 100)/func_15084000(args[2] \& 0xFFFF0FFF) + 101)/ % c95_0 c95_1 c95_2 c95_3 c95_4 c95_5
+s/return (obj->in_water == 1) ? 1 : 0;/return (obj->in_water != 0) ? 1 : 0;/ % c96_0 c96_1 c96_2 c96_3 c96_4 c96_5
+s/return (s16)(s32)obj->y_position;/return (s32)obj->y_position;/ % c98_0 c98_1 c98_2 c98_3 c98_4 c98_5
+s/return 32000;/return 32001;/ % c9A_0 c9A_1 c9A_2 c9A_3 c9A_4 c9A_5
+s/(f32)(r + 0x4000) \* A024_DEG \* 65536.0f;/(f32)(r + 0x3000) * A024_DEG * 65536.0f;/ % c9C_0 c9C_1 c9C_2 c9C_3 c9C_4 c9C_5
+s/(r - 0x4000) \& 0xFFFF/(r - 0x4000) \& 0x7FFF/ % c9D_0 c9D_1 c9D_2 c9D_3 c9D_4 c9D_5
+s/return (ox \* ox + oz \* oz < args\[4\] \* args\[4\]) ? 1 : 0;/return (ox * ox + oz * oz <= args[4] * args[4]) ? 1 : 0;/ % c9E_0 c9E_1 c9E_2 c9E_3 c9E_4 c9E_5
+s/(150.0f < A024_F32(obj, 0x1CC)/(151.0f < A024_F32(obj, 0x1CC)/ % cA6_0 cA6_1 cA6_2 cA6_3 cA6_4 cA6_5
+s/return func_15085890(obj) | 0xD000;/return func_15085890(obj) | 0xC000;/ % cA7_0 cA7_1 cA7_2 cA7_3 cA7_4 cA7_5
+s/D_800D3C60 - 2, \&args\[2\]/D_800D3C60 - 1, \&args[2]/ % cAC_0 cAC_1 cAC_2 cAC_3 cAC_4 cAC_5
+s/return A024_S32(obj, 0x2E4 + args\[2\] \* 4);/return A024_S32(obj, 0x2E0 + args[2] * 4);/ % cB2_0 cB2_1 cB2_2 cB2_3 cB2_4 cB2_5
+s/\*p = n \& 0x7F;/*p = n \& 0x3F;/ % cB6_0 cB6_1 cB6_2 cB6_3 cB6_4 cB6_5
+s/return (list\[0\] << 16) | (list\[2\] \& 0xFFFF);/return (list[0] << 16) | (list[1] \& 0xFFFF);/ % cB9_0 cB9_1 cB9_2 cB9_3 cB9_4 cB9_5
+s/A024_U8(obj, 0x65) - 1\], 0x13F)/A024_U8(obj, 0x65)], 0x13F)/ % cBB_0 cBB_1 cBB_2 cBB_3 cBB_4 cBB_5
+s/+ A024_S16(obj, 0x216);/+ A024_S16(obj, 0x214);/ % cC8_0 cC8_1 cC8_2 cC8_3 cC8_4 cC8_5
+s/if (best < r) {/if (best <= r) {/ % cC8_0 cC8_1 cC8_2 cC8_3 cC8_4 cC8_5
+s/D_8008763C = A024_U8(obj, 0x213);/D_8008763C = A024_U8(obj, 0x212);/ % cCA_0 cCA_1 cCA_2 cCA_3 cCA_4 cCA_5
+s/obj->y_position + 100.0f, obj->z_position, dx, dy, dz/obj->y_position + 100.0f, obj->z_position, dx, dz, dy/ % cCB_0 cCB_1 cCB_2 cCB_3 cCB_4 cCB_5
+s/if (dist < hit\[0\]) {/if (dist < hit[1]) {/ % cCB_0 cCB_1 cCB_2 cCB_3 cCB_4 cCB_5
+s/return (p - D_800D34B8) \/ 0x34;/return (p - D_800D34B8) \/ 0x30;/ % cCC_0 cCC_1 cCC_2 cCC_3 cCC_4 cCC_5
+s/            d += -360.0f;/            d += -350.0f;/ % cCD_0 cCD_1 cCD_2 cCD_3 cCD_4 cCD_5 cCE_0 cCE_1 cCE_2 cCE_3 cCE_4 cCE_5
+s/if (args\[3\] == 1 \&\& d < 0.0f) {/if (args[3] == 2 \&\& d < 0.0f) {/ % cCD_0 cCD_1 cCD_2 cCD_3 cCD_4 cCD_5 cCE_0 cCE_1 cCE_2 cCE_3 cCE_4 cCE_5
+s/if (found\[count\] != 0xFF) {/if (found[count] != 0xFE) {/ % cCF_0 cCF_1 cCF_2 cCF_3 cCF_4 cCF_5
+s/D_80087638 = 0xFF;/D_80087638 = 0xFE;/ % cCF_0 cCF_1 cCF_2 cCF_3 cCF_4 cCF_5
+s/            return 30000;/            return 30001;/ % cD0_0 cD0_1 cD0_2 cD0_3 cD0_4 cD0_5
+s/A024_U16(obj, 0x22C) = n \& ~0x100;/A024_U16(obj, 0x22C) = n;/ % cD1_0 cD1_1 cD1_2 cD1_3 cD1_4 cD1_5
+s/        case 0x21:/        case 0x20:/ % cD3_0 cD3_1 cD3_2 cD3_3 cD3_4 cD3_5
+s/        case 0x3F:/        case 0x40:/ % cD3_0 cD3_1 cD3_2 cD3_3 cD3_4 cD3_5
+s/600.0f < A024_F32(obj, 0x1CC)/500.0f < A024_F32(obj, 0x1CC)/ % cD7_0 cD7_1 cD7_2 cD7_3 cD7_4 cD7_5
+s/return A024_S8(A024_REC(obj), 0x196) | 0x80;/return A024_S8(A024_REC(obj), 0x196);/ % cDC_0 cDC_1 cDC_2 cDC_3 cDC_4 cDC_5
+s/if (n < 0 || n >= D_8008FD8C) {/if (n < 0 || n > D_8008FD8C) {/ % cC6_0 cC6_1 cC6_2 cC6_3 cC6_4 cC6_5
+s/return (A024_U8(\&D_800CC2D0\[n - 1\], 4) == args\[2\]) ? 1 : 0;/return (A024_U8(\&D_800CC2D0[n - 1], 5) == args[2]) ? 1 : 0;/ % cE6_0 cE6_1 cE6_2 cE6_3 cE6_4 cE6_5
+s/if (r < maxD \&\& minD < r) {/if (r < maxD \&\& minD <= r) {/ % cE7_0 cE7_1 cE7_2 cE7_3 cE7_4 cE7_5
+s/                maxD = args\[4\] \* args\[4\];/                maxD = args[4];/ % cE7_0 cE7_1 cE7_2 cE7_3 cE7_4 cE7_5
+s/if (D_800D3C60 >= 4) {/if (D_800D3C60 >= 3) {/ % cE7_0 cE7_1 cE7_2 cE7_3 cE7_4 cE7_5
+s/        if (dist <= d \* d) {/        if (dist < d * d) {/ % cEB_0 cEB_1 cEB_2 cEB_3 cEB_4 cEB_5
+s/d = d \/ sqrtf(dist);/d = d \/ dist;/ % cEB_0 cEB_1 cEB_2 cEB_3 cEB_4 cEB_5
+s/A024_U16(obj, 0x7A) + 0x8000, (f32)args\[2\]/A024_U16(obj, 0x7A) + 0x4000, (f32)args[2]/ % cEE_0 cEE_1 cEE_2 cEE_3 cEE_4 cEE_5
+s/return ((A024_U8(obj, 0x74) \& 0xF) == 0xF) ? 1 : 0;/return ((A024_U8(obj, 0x74) \& 0x7) == 0x7) ? 1 : 0;/ % cF1_0 cF1_1 cF1_2 cF1_3 cF1_4 cF1_5
+s/A024_U8(obj, 0x13C)\], 0x13F) | 0x2000;/A024_U8(obj, 0x13C)], 0x13E) | 0x2000;/ % cF2_0 cF2_1 cF2_2 cF2_3 cF2_4 cF2_5
+s/return 0xFFFF;/return 0xFFFE;/ % cB5_0 cB5_1 cB5_2 cB5_3 cB5_4 cB5_5
+s/return D_800E0EF0\[A024_U8(obj, 0x128)\];/return D_800E0EF0[A024_U8(obj, 0x129)];/ % cF0_0 cF0_1 cF0_2 cF0_3 cF0_4 cF0_5

@@ -1,0 +1,2 @@
+s|!= 10)|!= 3)| % c1Dz_0 c1Dz_1 c1Dz_2 c1Dz_3
+s|target = func_150ADA68() \* total;|target = func_150ADA68() * (total + 1);| % c22_10 c22_11

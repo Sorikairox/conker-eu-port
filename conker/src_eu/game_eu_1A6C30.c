@@ -54,7 +54,130 @@ void func_1517946C(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P125 */
+void func_15179B70(s32 arg0, s32 arg1);
+int func_1517A028(void);
+void func_15179A38(void);
+void func_1517A084(s32 count);
+u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4);
+void func_100111C8(u16 arg0);
+void func_1000F85C(u16 arg0, s16 arg1, s32 arg2);
+s32 allocate_memory(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+s32 func_150ADA20(void);
+
+/* rain_update: per-frame rain state machine (view index arg0; D_800C35EA[arg0] != 0 pauses the timers).
+ * D_800DD862 / D_800DD863: random gust timer and strength (after a strong gust (>= 40) a weak one of 20..50 frames,
+ * else a strong one of 60..122). D_800DD876 is the state, D_800DD864 the requested mode (func_1517946C),
+ * D_800DD874 (US name D_800DD444, s16) the state timer, D_800DD866 the number of drops in the table D_800DD870
+ * (300 pointers), D_800DD860 the rain sound.
+ * 0 idle: on a request, after 600 frames (or at once for request 4) allocate the drop table, start the sound
+ *   (0x6F) and go to 1.
+ * 1 starting: add 4 drops per frame (func_15179B70) up to 300, raising the sound volume with the count; at 300 go
+ *   to 2.
+ * 2 raining: request 1 -> 4; request 0 or 120 frames -> 3 (request 3 keeps the timer counting).
+ * 3 stopping: retire 4 drops per frame (func_1517A028), lowering the volume; with no drops left free the table,
+ *   stop the sound and go to 0.
+ * 4 stop now: retire every drop, go to 3, clear the request.
+ * While there are drops: move the rain centre with the camera (func_15179A38) and spawn count / 30 splashes
+ * (func_1517A084). */
+void func_15179008(s32 arg0) {
+    s32 timer;
+    s32 i;
+    s16 t;
+
+    timer = D_800DD862 - D_800BE9E4;
+    if (timer <= 0) {
+        if (D_800DD863 < 40) {
+            timer = (u32) func_150ADA20() % 31 + 20;
+            D_800DD863 = (func_150ADA20() & 0xF) + 0xAA;
+        } else {
+            timer = (u32) func_150ADA20() % 63 + 60;
+            D_800DD863 = (func_150ADA20() & 0xF) + 0x14;
+        }
+    }
+    D_800DD862 = timer;
+
+    switch (D_800DD876) {
+        case 0:
+            if (D_800DD864 == 0) {
+                break;
+            }
+            t = D_800DD444;
+            if (D_800DD864 == 4 || t >= 600) {
+                D_800DD870 = allocate_memory(300 * 4, 1, 0, 0);
+                for (i = 0; i < 300; i++) {
+                    ((s32 *) D_800DD870)[i] = 0;
+                }
+                if (D_800DD870 != 0) {
+                    D_800DD876 = 1;
+                    D_800DD444 = 0;
+                    D_800DD860 = func_10010F30(0x6F, 200, 0x40, 0, 0x80);
+                }
+            } else if ((&D_800C35EA)[arg0] == 0) {
+                D_800DD444 = t + D_800BE9E4;
+            }
+            break;
+        case 1:
+            if (D_800DD866 == 300) {
+                D_800DD876 = 2;
+                D_800DD444 = 0;
+                break;
+            }
+            for (i = 0; i < 4; i++) {
+                if (D_800DD866 != 300) {
+                    func_15179B70(1, 1);
+                }
+            }
+            if ((s16) D_800DD444 >= 11 && D_800DD866 < 300) {
+                func_1000F85C(D_800DD860, 8, (D_800DD866 << 14) / 300);
+                func_1000F85C(D_800DD860, 0x2000, 0);
+            }
+            D_800DD444 = (s16) D_800DD444 + D_800BE9E4;
+            break;
+        case 2:
+            if (D_800DD864 == 1) {
+                D_800DD876 = 4;
+                D_800DD444 = D_800DD866;
+            } else if (D_800DD864 == 0 || (s16) D_800DD444 >= 120) {
+                D_800DD876 = 3;
+                D_800DD444 = D_800DD866;
+            } else if (D_800DD864 == 3 && (&D_800C35EA)[arg0] == 0) {
+                D_800DD444 = (s16) D_800DD444 + D_800BE9E4;
+            }
+            break;
+        case 3:
+            if (D_800DD866 == 0) {
+                D_800DD876 = 0;
+                D_800DD444 = 0;
+                func_100111C8(D_800DD860);
+                func_10004074((s32 *) D_800DD870);
+                D_800DD870 = 0;
+                break;
+            }
+            for (i = 0; i < 4; i++) {
+                func_1517A028();
+            }
+            if ((s16) D_800DD444 != 0) {
+                func_1000F85C(D_800DD860, 8, (D_800DD866 << 13) / (s16) D_800DD444);
+            }
+            break;
+        case 4:
+            for (i = 0; i < D_800DD866; i++) {
+                func_1517A028();
+            }
+            D_800DD876 = 3;
+            D_800DD864 = 0;
+            break;
+    }
+    if (D_800DD866 != 0) {
+        func_15179A38();
+        func_1517A084(D_800DD866 / 30);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_15179008.s")
+#endif
 extern s32 D_800DD868[];
 void func_15179A38(void) {
     s32 x;
@@ -280,7 +403,51 @@ int func_1517A028(void)
   }
 }
 
+#ifdef NON_MATCHING
+/* P125 */
+s32 func_1510FE58(s32 arg0, s32 arg1, s32 arg2, s32 *arg3);
+s32 func_150ADA20(void);
+
+/* rain_spawn_splashes: count times, picks a random point in the 500 x 500 square from the rain centre
+ * D_800DD868 (s16 x +0, z +4), finds the ground height there (func_1510FE58 from height 10000; -10000 = no ground)
+ * and spawns a splash sprite (texture 0x12, flags 0x9804, size 0x19, 0x80 at +0x8A) on it. The spawn record is one
+ * stack struct (func_15168800 copies 0xA8 bytes of it). */
+void func_1517A084(s32 count) {
+    Spawn9B70 sp;
+    s32 cx;
+    s32 cz;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 i;
+
+    cx = ((s16 *) D_800DD868)[0];
+    cz = ((s16 *) D_800DD868)[2];
+    for (i = 0; i < count; i++) {
+        x = func_150ADA20() % 500 + cx;
+        z = func_150ADA20() % 500 + cz;
+        y = func_1510FE58(x, 10000, z, NULL);
+        if ((f32) y != -10000.0f) {
+            sp.u80 = 0;
+            sp.u8A = 0x80;
+            sp.u8C = x;
+            sp.u8E = y;
+            sp.u90 = z;
+            sp.u94 = 0x19;
+            sp.u92 = 0x19;
+            *(s16 *) sp.pad96 = 0;
+            sp.uA2 = 0xE;
+            sp.uA0 = 0x12;
+            sp.u98 = 0x9804;
+            sp.uA1 = 0;
+            func_1516865C(&sp, 0xFF, 0xFF, 0xFF, 0xFF);
+            func_15168800(&sp, 0xFF, 0);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A6C30/func_1517A084.s")
+#endif
 
 void func_1517A220(u8 *arg0) {
     f32 temp_f12;

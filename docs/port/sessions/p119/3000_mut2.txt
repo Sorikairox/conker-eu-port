@@ -1,0 +1,8 @@
+s/(s32 \*) (D_800DA030 + player \* 0x40)/(s32 *) (D_800DA030 + player * 0x20)/ %
+s/depth\[i - first\] > far)/depth[i - first] >= far)/ %
+s/depth\[i - first\] >= far - 200/depth[i - first] > far - 200/ %
+s/(step > 255) ? 255 : step/step/ %
+s/depth\[i - first\] < \*(u16 \*) (rec + 0x88)/depth[i - first] <= *(u16 *) (rec + 0x88)/ %
+s/(\*alpha < 0xFF - step)/(*alpha <= 0xFF - step)/ %
+s/visible |= bit;/visible = 1;/ %
+s/\[0x6F\] |= bit;/[0x6F] |= 1;/ %

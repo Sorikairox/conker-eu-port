@@ -1,13 +1,172 @@
 #include <ultra64.h>
+#ifdef NON_MATCHING
+/* P128: functions.h:772 declares func_1513D524 void; it returns the new record (game_169510.c). Hide the old
+ * prototype until the port slot's functions.h fix merges (harmless afterwards). */
+#define func_1513D524 func_1513D524_void_proto
+#endif
 #include "functions.h"
+#ifdef NON_MATCHING
+#undef func_1513D524
+#endif
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1513F680(u8 *, u8, u8, u8, u8);
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
+struct210 *func_1513D524(s32, u8, u8, u8, u8, u8, s32, u8, s32);
 #endif
 
 
+#ifdef NON_MATCHING
+/* P128 */
+void func_1510F800(s32);
+s32 func_1510FD20(s32, s32);
+s32 func_150ADA20(void);
+
+/* P128: the two stack blocks of func_15149AC0. Spark15149AC0Wave is copied into the new record at +0x110 (0x50 bytes,
+ * three wave channels read by func_15149DA8); Spark15149AC0Params is the spawn parameter block that func_1513D2F0
+ * copies into the record at +0x18 (0x58 bytes: the last 0xC bytes are never written, as in the asm). */
+typedef struct {
+    f32 a0;    /* +00 rec[0xC] */
+    f32 a1;    /* +04 rec[0x14] */
+    f32 aMid;  /* +08 */
+    s16 aT;    /* +0C */
+    s16 aTMax; /* +0E */
+    f32 aRate; /* +10 */
+    f32 b0;    /* +14 rec[0x10] */
+    f32 b1;    /* +18 rec[0x18] */
+    f32 b2;    /* +1C rec[0x1C] */
+    f32 bMid;  /* +20 */
+    s16 bT;    /* +24 */
+    s16 bTMax; /* +26 */
+    f32 bRate; /* +28 */
+    s32 c0;    /* +2C rec s16 0x20 */
+    s32 c1;    /* +30 rec s16 0x22 */
+    s32 c2;    /* +34 */
+    s16 cT;    /* +38 */
+    s16 cTMax; /* +3A */
+    f32 cRate; /* +3C */
+    f32 d0;    /* +40 rec[0x40] */
+    f32 d1;    /* +44 rec[0x44] */
+    u8 d2;     /* +48 rec[0x34] */
+    u8 pad49[3];
+    f32 d3;    /* +4C rec[0x3C] */
+} Spark15149AC0Wave; /* size 0x50 */
+
+typedef struct {
+    u8 kind;       /* +00 0x13 / 0x14 / 0x71 */
+    u8 pad01;
+    s16 mode;      /* +02 0x301 */
+    s16 u04;       /* +04 rec s16 0x24 */
+    s16 pad06;
+    s32 u08;       /* +08 0 */
+    s32 u0C;       /* +0C (rec s16 0x20 + s16 0x22) >> 1 */
+    u8 col[4];     /* +10 rec[0x26..0x29] */
+    f32 u14;       /* +14 */
+    f32 u18;       /* +18 */
+    f32 pos[3];    /* +1C rec[0..2] */
+    f32 u28;       /* +28 */
+    f32 u2C;       /* +2C */
+    f32 u30;       /* +30 */
+    f32 u34;       /* +34 rec[0x38] */
+    f32 u38;       /* +38 */
+    f32 scale;     /* +3C 1.0 */
+    s32 flags;     /* +40 rec u16 0x2A | 0x40000000, bit 0x01000000 = on ground */
+    u8 u44;        /* +44 rec[0x2C] */
+    u8 u45;        /* +45 rec[0x2D] */
+    u8 pad46[2];
+    s32 ground;    /* +48 func_1510FD20 result or 0 */
+    u8 tail[0xC];  /* +4C never written (func_1513D2F0 copies 0x58 bytes) */
+} Spark15149AC0Params; /* size 0x58 */
+
+// spark_spawn_from_desc: spawns a menu spark/sprite record from the 0x48-byte descriptor desc (position +0, three wave
+// channels +0xC..+0x44, colour +0x26, flags +0x2A, sizes +0x2C/+0x2D/+0x2E/+0x2F, extra +0x30): builds the spawn
+// parameter block (kind 0x13/0x71 by kind_sel, random 0x13/0x14 otherwise; ground lookup when area != 0), creates
+// the record through func_1513D524 (texture desc[0x2E], 0xE, desc[0x2F], layer, random | 2, desc[0x30] + 0x50, u4,
+// owner) and copies the wave block to record + 0x110. Returns the record (0 when none was free).
+s32 func_15149AC0(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
+    u8 *desc = (u8 *) arg0;
+    Spark15149AC0Wave w;
+    Spark15149AC0Params p;
+    u8 area = arg2;
+    u8 kind_sel = arg3;
+    s32 layer = arg1 & 0xFF; /* the u8 arguments are narrowed here (callers pass s32) */
+    s32 u4 = arg4 & 0xFF;
+    struct210 *rec;
+
+    p.flags = *(u16 *) (desc + 0x2A) | 0x40000000;
+    p.pos[0] = ((f32 *) desc)[0];
+    p.pos[1] = ((f32 *) desc)[1];
+    p.pos[2] = ((f32 *) desc)[2];
+    if (area != 0) {
+        p.flags |= 0x01000000;
+        func_1510F800(0);
+        p.ground = func_1510FD20((s32) p.pos[0], (s32) p.pos[2]);
+    } else {
+        p.flags &= ~0x01000000;
+        p.ground = 0;
+    }
+    if (kind_sel == 1) {
+        p.kind = 0x13;
+    } else if (kind_sel == 2) {
+        p.kind = 0x71;
+    } else if (func_150ADA20() & 1) {
+        p.kind = 0x13;
+    } else {
+        p.kind = 0x14;
+    }
+    p.mode = 0x301;
+    p.u04 = *(s16 *) (desc + 0x24);
+    p.col[0] = desc[0x26];
+    p.col[1] = desc[0x27];
+    p.col[2] = desc[0x28];
+    p.col[3] = desc[0x29];
+    p.u44 = desc[0x2C];
+    p.u28 = 0.0f;
+    p.u2C = 0.0f;
+    p.u30 = 0.0f;
+    p.u45 = desc[0x2D];
+    p.u38 = 0.0f;
+    p.scale = 1.0f;
+    p.u34 = *(f32 *) (desc + 0x38);
+
+    w.a0 = *(f32 *) (desc + 0xC);
+    w.a1 = *(f32 *) (desc + 0x14);
+    w.aT = 0;
+    w.aTMax = 6;
+    w.aRate = 0.186f;
+    w.aMid = (w.a0 + w.a1) * 0.5f;
+    w.b0 = *(f32 *) (desc + 0x10);
+    w.b1 = *(f32 *) (desc + 0x18);
+    w.b2 = *(f32 *) (desc + 0x1C);
+    w.bT = 0;
+    w.bTMax = 0x11;
+    w.bRate = 0.359f;
+    w.bMid = (w.b0 + w.b1) * 0.5f;
+    w.c0 = *(s16 *) (desc + 0x20);
+    w.c1 = *(s16 *) (desc + 0x22);
+    w.c2 = 0;
+    w.cT = 0;
+    w.cTMax = 0xF;
+    w.cRate = 0.231f;
+    w.d0 = *(f32 *) (desc + 0x40);
+    w.d1 = *(f32 *) (desc + 0x44);
+    w.d2 = desc[0x34];
+    w.d3 = *(f32 *) (desc + 0x3C);
+    p.u08 = 0;
+    p.u0C = (w.c0 + w.c1) >> 1;
+    p.u14 = 0.0f;
+    p.u18 = 0.0f;
+
+    rec = func_1513D524((s32) &p, desc[0x2E], 0xE, desc[0x2F], layer, (func_150ADA20() & 1) | 2,
+                        *(s32 *) (desc + 0x30) + 0x50, u4, arg5);
+    if (rec != NULL) {
+        memcpy((u8 *) rec + 0x110, &w, sizeof(w));
+    }
+    return (s32) rec;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_15149AC0.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15149DA8(u8 *arg0) {
@@ -1019,7 +1178,46 @@ void func_1514C370(u8 *arg0) {
     func_1514C178(arg0, arg0 + 0x110);
 }
 
+#ifdef NON_MATCHING
+/* P133 */
+s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+
+/*
+ * camera_look_follow: moves the look point (cam + 0x40, 3 floats) towards the point 100 above the position
+ * (cam + 0x34) by the factor at cam + 0x15C, then puts it back at distance 100 from the position along that
+ * direction (normalised by func_15145128); when the direction cannot be normalised the look point becomes the
+ * position.
+ */
+void func_1514C390(u8 *cam) {
+    f32 *pos = (f32 *) (cam + 0x34);
+    f32 *look = (f32 *) (cam + 0x40);
+    f32 t = *(f32 *) (cam + 0x15C);
+    f32 goal[3];
+    f32 lerp[3];
+    f32 dir[3];
+    s32 len, unused;
+
+    goal[1] = pos[1] + 100.0f;
+    goal[2] = pos[2];
+    lerp[0] = look[0] + (pos[0] - look[0]) * t;
+    lerp[1] = look[1] + (goal[1] - look[1]) * t;
+    lerp[2] = look[2] + (goal[2] - look[2]) * t;
+    dir[0] = lerp[0] - pos[0];
+    dir[1] = lerp[1] - pos[1];
+    dir[2] = lerp[2] - pos[2];
+    if (func_15145128(dir, dir, &len, &unused) != 0) {
+        look[0] = pos[0] + dir[0] * 100.0f;
+        look[1] = pos[1] + dir[1] * 100.0f;
+        look[2] = pos[2] + dir[2] * 100.0f;
+    } else {
+        look[0] = pos[0];
+        look[1] = pos[1];
+        look[2] = pos[2];
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514C390.s")
+#endif
 
 void func_1514C4C0(f32 *arg0) {
     arg0[0x40 / 4] = arg0[0x34 / 4];
@@ -1146,9 +1344,84 @@ s32 func_1514C828(u8 *arg0) {
     return 1;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514C860.s")
+#ifdef NON_MATCHING
+/* P136 */
+extern s32 D_8008ADA0;
 
+/*
+ * spawn_ring_emit: emits count (s16) points on a circle of radius r around (x, y, z) in the x/z plane, starting at
+ * the byte angle angle0 and stepping by the signed byte step (wrapping at 256). Each point goes to the spawn
+ * handler kind of D_8008ADA0 as (1, i, x + r * sin(a - 0x40), y, z + r * sin(a), x, y, z, a, angle0, r, arg8,
+ * arg9, argA, argB) (func_151423D8 = byte-angle sine); the walk stops early when a handler returns 0, a missing
+ * handler skips the point. Returns 0 (callers declare s32 and ignore it; the asm leaves no defined value).
+ */
+s32 func_1514C860(f32 x, f32 y, f32 z, f32 r, u8 angle0, s8 step, s16 count, u8 kind, s32 arg8, f32 arg9, s32 argA,
+                  u8 argB) {
+    s32 (*handler)(s32, s16, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, f32, s32, s32);
+    s32 a = angle0;
+    f32 c, s;
+    s16 i;
+
+    for (i = 0; i < count; i++) {
+        c = func_151423D8((a - 0x40) & 0xFF);
+        s = func_151423D8(a & 0xFF);
+        handler = ((void **) &D_8008ADA0)[kind];
+        if (handler != NULL && handler(1, i, x + r * c, y, z + r * s, x, y, z, a, angle0, r, arg8, arg9, argA, argB) == 0) {
+            break;
+        }
+        a = (a + step) & 0xFF;
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514C860.s")
+#endif
+
+#ifdef NON_MATCHING
+/* P139 */
+extern s32 D_8008ADA0;
+
+/*
+ * spawn_line_emit: emits count (a float, at least 2) evenly spaced points on the segment from (x0, y0, z0) to
+ * (x1, y1, z1), step = (end - start) * (1 / (count - 1)) per axis. Each point goes to the spawn handler kind of
+ * D_8008ADA0 as (0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) (mode 0 = line; the ring emitter
+ * func_1514C860 uses mode 1); the walk stops early when a handler returns 0, a missing handler skips the point.
+ * The loop counts count down by 1 while it stays > 0. (The asm tests the parity of (s32) count and computes the
+ * same step in both branches.)
+ */
+void func_1514C9E0(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 count, u8 kind, s32 arg8, f32 arg9, s32 argA,
+                   u8 argB) {
+    s32 (*handler)(s32, s16, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, f32, s32, s32);
+    f32 inv;
+    f32 dx, dy, dz;
+    f32 x, y, z;
+    s16 i = 0;
+
+    if (count < 2.0f) {
+        return;
+    }
+    inv = 1.0f / (count - 1.0f);
+    dx = (x1 - x0) * inv;
+    dy = (y1 - y0) * inv;
+    dz = (z1 - z0) * inv;
+    x = x0;
+    y = y0;
+    z = z0;
+    do {
+        handler = ((void **) &D_8008ADA0)[kind];
+        if (handler != NULL && handler(0, i, x, y, z, x0, y0, z0, 0, 0, 0.0f, arg8, arg9, argA, argB) == 0) {
+            break;
+        }
+        count -= 1.0f;
+        x += dx;
+        i++;
+        y += dy;
+        z += dz;
+    } while (count > 0.0f);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514C9E0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_8008ADA0;
@@ -1196,4 +1469,59 @@ block_9:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514CBE8.s")
 #endif
+#ifdef NON_MATCHING
+/* P139 */
+extern s32 D_8008ADA0;
+
+/*
+ * spawn_arc_emit: emits count random points on a vertical circle of radius r around (x, y, z) whose plane faces
+ * the byte angle yaw: each point takes a random byte angle a in [min(a0, a1), max(a0, a1)] and goes to the spawn
+ * handler kind of D_8008ADA0 as (3, i, x + r * sin(yaw - 0x40) * sin(a), y - r * sin(a - 0x40),
+ * z + r * sin(yaw) * sin(a), x, y, z, a & 0xFF, yaw, r, arg9, argA, argB, argC) (mode 3 = arc; func_151423D8 =
+ * byte-angle sine). The walk stops when a handler returns 0; a missing handler skips the point.
+ */
+void func_1514CDC8(f32 x, f32 y, f32 z, f32 r, s16 yaw, s16 a0, s16 a1, s16 count, u8 kind, s32 arg9, f32 argA,
+                   s32 argB, u8 argC) {
+    s32 (*handler)(s32, s16, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, f32, s32, s32);
+    f32 cosYaw = func_151423D8((yaw - 0x40) & 0xFF);
+    f32 sinYaw = func_151423D8(yaw & 0xFF);
+    f32 rc;
+    f32 rs;
+    f32 c, s;
+    f32 px, pz;
+    s16 n;
+    s16 lo;
+    s16 i;
+    s32 a;
+    s32 b;
+
+    if (a1 < a0) {
+        n = a0 - a1 + 1;
+        lo = a1;
+    } else {
+        n = a1 - a0 + 1;
+        lo = a0;
+    }
+    if (count <= 0) {
+        return;
+    }
+    rc = r * cosYaw;
+    rs = r * sinYaw;
+    i = 0;
+    do {
+        a = (u32) func_150ADA20() % (u32) n + lo;
+        b = a & 0xFF;
+        c = func_151423D8((a - 0x40) & 0xFF);
+        s = func_151423D8(b);
+        handler = ((void **) &D_8008ADA0)[kind];
+        px = rc * s + x;
+        pz = rs * s + z;
+        if (handler != NULL && handler(3, i, px, y - r * c, pz, x, y, z, b, yaw, r, arg9, argA, argB, argC) == 0) {
+            return;
+        }
+        i++;
+    } while (i < count);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1772D0/func_1514CDC8.s")
+#endif

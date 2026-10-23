@@ -1,0 +1,15 @@
+s/A024_S32(obj, 0) == 0x27)/A024_S32(obj, 0) == 0x28)/ % tB1a tB1b
+s/func_15084000(args\[2\] \& 0xFFFF0FFF) + 100)/func_15084000(args[2] \& 0xFFFF0FFF) + 101)/ % t95
+s/return (s16)(s32)obj->y_position;/return (s32)obj->y_position;/ % t98
+s/return (ox \* ox + oz \* oz < args\[4\] \* args\[4\]) ? 1 : 0;/return (ox * ox + oz * oz <= args[4] * args[4]) ? 1 : 0;/ % t9E
+s/(150.0f < A024_F32(obj, 0x1CC)/(151.0f < A024_F32(obj, 0x1CC)/ % tA6
+s/if (best < r) {/if (best <= r) {/ % tC8
+s/if (dist < hit\[0\]) {/if (dist < hit[1]) {/ % tCB
+s/return (p - D_800D34B8) \/ 0x34;/return (p - D_800D34B8) \/ 0x30;/ % tCC
+s/if (found\[count\] != 0xFF) {/if (found[count] != 0xFE) {/ % tCF
+s/        case 0x21:/        case 0x20:/ % tD3a
+s/        case 0x3F:/        case 0x40:/ % tD3b
+s/600.0f < A024_F32(obj, 0x1CC)/500.0f < A024_F32(obj, 0x1CC)/ % tD7
+s/                maxD = args\[4\] \* args\[4\];/                maxD = args[4];/ % tE7
+s/        if (dist <= d \* d) {/        if (dist < d * d) {/ % tEB
+s/return ((A024_U8(obj, 0x74) \& 0xF) == 0xF) ? 1 : 0;/return ((A024_U8(obj, 0x74) \& 0x7) == 0x7) ? 1 : 0;/ % tF1

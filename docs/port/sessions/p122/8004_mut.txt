@@ -1,0 +1,19 @@
+s/        if (!(model\[0x6F\] \& 0xF)) {/        if (!(model[0x6F] \& 0x7)) {/ %
+s/        src = (anim\[2\] == 0) ? VTXANIM_BASE(model) : VTXANIM_FRAME(model);/        src = VTXANIM_BASE(model);/ %
+s/        switch (mode \& 3) {/        switch (mode \& 7) {/ %
+s/                    func_150A7840(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,/                    func_150A7840(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x14,/ %
+s/                                  \*(u8 \*\*) (anim + 0x24), \*(f32 \*\*) (anim + 0x20), src);/                                  *(u8 **) (anim + 0x20), *(f32 **) (anim + 0x24), src);/ %
+s/                    func_150A76A8(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,/                    func_150A76A8(VTXANIM_BASE(model), VTXANIM_COUNT(model), anim + 4, anim + 0x18,/ %
+s/                    func_150A75A0(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, \*(u8 \*\*) (anim + 0x24), src);/                    func_150A75A0(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 8, *(u8 **) (anim + 0x24), src);/ %
+s/                    func_150A79FC(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, \*(u8 \*\*) (anim + 0x28),/                    func_150A79FC(VTXANIM_FRAME(model), VTXANIM_COUNT(model), anim + 4, *(u8 **) (anim + 0x24),/ %
+s/            case 2:/            case 3:/ %
+s/        if (!(func_151149AC(anim\[0\])\[0x6F\] \& 0xF) || anim\[2\] != 0) {/        if (!(func_151149AC(anim[0])[0x6F] \& 0xF)) {/ %
+s/VTXANIM_F32(model, 4) == 0.0f/VTXANIM_F32(model, 0xC) == 0.0f/ %
+s/VTXANIM_F32(model, 0x30) == 1.0f/VTXANIM_F32(model, 0x30) == 0.0f/ %
+s/base\[j\].v.ob\[0\] + VTXANIM_S16(model, 0x10);/base[j].v.ob[0] + VTXANIM_S16(model, 0x12);/ %
+s/                out->v.ob\[1\] += VTXANIM_S16(model, 0x12);/                out->v.ob[1] = base[j].v.ob[1] + VTXANIM_S16(model, 0x12);/ %
+s/VTXANIM_BASE(model)\[j\].v.ob\[2\] + VTXANIM_S16(model, 0x14);/VTXANIM_FRAME(model)[j].v.ob[2] + VTXANIM_S16(model, 0x14);/ %
+s/func_150A7E40(mf, base->v.ob\[0\], VTXANIM_FRAME(model)\[j\].v.ob\[1\], base->v.ob\[2\]/func_150A7E40(mf, base->v.ob[0], base->v.ob[1], base->v.ob[2]/ %
+s/                VTXANIM_FRAME(model)\[j\].v.ob\[1\] = (s32) y;/                VTXANIM_FRAME(model)[j].v.ob[1] = (s32) z;/ %
+s/#define VTXANIM_FRAME(m) (((Vtx \*\*) ((m) + 0x20))\[D_800BE9C0\])/#define VTXANIM_FRAME(m) (((Vtx **) ((m) + 0x20))[0])/ %
+s/    for (i = 0; i < D_800DD418; i++) {/    for (i = 0; i < 1; i++) {/ %

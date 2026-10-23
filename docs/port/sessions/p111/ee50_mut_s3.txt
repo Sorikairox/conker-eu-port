@@ -1,0 +1,5 @@
+s/ST_PUSH += 0.005f;/ST_PUSH += 0.004f;/
+s/if (ES32(0x2C) == 0x40) {/if (ES32(0x2C) \& 0x40) {/
+s/if (RQ_ARG == 5 || RQ_ARG == 0x11) {/if (RQ_ARG == 5 || RQ_ARG == 0x12) {/
+s/\*(f32 \*)(st + 0x2C) = (u32)RQ_ARG;/*(f32 *)(st + 0x2C) = RQ_ARG;/
+s/if (dist < EF(0x374)) {/if (dist <= EF(0x374) + 1.0f) {/

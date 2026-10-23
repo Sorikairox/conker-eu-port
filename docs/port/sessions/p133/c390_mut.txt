@@ -1,0 +1,9 @@
+s/goal\[1\] = pos\[1\] + 100.0f;/goal[1] = pos[1] + 10.0f;/
+s/lerp\[0\] = look\[0\] + (pos\[0\] - look\[0\]) \* t;/lerp[0] = look[0] + (pos[0] - look[0]);/
+s/lerp\[2\] = look\[2\] + (goal\[2\] - look\[2\]) \* t;/lerp[2] = look[2] + (goal[2] - look[1]) * t;/
+s/dir\[1\] = lerp\[1\] - pos\[1\];/dir[1] = lerp[1] - pos[0];/
+s/!= 0) {/== 0) {/
+s/look\[1\] = pos\[1\] + dir\[1\] \* 100.0f;/look[1] = pos[1] + dir[1] * 10.0f;/
+s/look\[2\] = pos\[2\];/look[2] = pos[1];/
+s/(cam + 0x15C)/(cam + 0x158)/
+s/func_15145128(dir, dir, &len/func_15145128(dir, lerp, \&len/

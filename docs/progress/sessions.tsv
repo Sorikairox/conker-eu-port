@@ -75,3 +75,4 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 170	wt	game 0x15130000-0x1518FFFF+dbg	1	472	150	fresh pool nearly empty (14 rows, all <46-insn funcs already tried); 1/12
 167	main	game>=0x15190000	0	0		interrupted by weekly usage limit; func_151B99B8 OK draft found but not applied
 172	wt	game 0x15130000-0x1518FFFF+dbg	6			interrupted by usage limit after committing 6 near-miss matches
+P73	port-b	port NM C (151BF8F0, 1501D348, 1509A024)	3	0	130	difftest build_tu fix (multi-function NM blocks tested the src_eu body); 3 stubs in hand C, verify_all OK

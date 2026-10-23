@@ -1,0 +1,34 @@
+s|        frame = 0;|        frame = 1;| %
+s|words += texels / 4;|words += texels / 2;| %
+s|words >>= s954E4_shift\[siz\];|words >>= s954E4_shift[siz] + 1;| %
+s|if ((u32)addr < 0x10000000) {|if ((u32)addr <= 0x10000000) {| %
+s|func_1510D66C(addr, NULL, age, 0)|func_1510D66C(addr, NULL, 3, 0)| %
+s|if (addr != (s32)0x80000000) {|if (addr != 0) {| %
+s|addr + words \* 2 \* frame|addr + words * frame| %
+s|? width >> 1 : width|? width : width| %
+s|for (masks = 1, n = 2; n < width; n <<= 1) {|for (masks = 1, n = 2; n <= width; n <<= 1) {| %
+s|for (maskt = 1, n = 2; n < height; n <<= 1) {|for (maskt = 1, n = 1; n < height; n <<= 1) {| %
+s|imgFmt = (fmt == 5) ? G_IM_FMT_RGBA : fmt;|imgFmt = fmt;| %
+s|gDPPipeSync(gfx++);|gDPPipeSync(gfx);| %
+s|gDPSetTextureImage(gfx++, imgFmt, s954E4_loadSiz\[t\[9\]\], 1, D_800D30C0);|gDPSetTextureImage(gfx++, imgFmt, t[9], 1, D_800D30C0);| %
+s|0, tmem, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);|0, tmem + 1, G_TX_LOADTILE, 0, 0, 0, 0, 0, 0, 0);| %
+s|words - 1, 0);|words, 0);| %
+s|line = (s954E4_lineBytes\[siz\] \* lineW + 7) >> 3;|line = (s954E4_lineBytes[siz] * lineW + 8) >> 3;| %
+s|tile, 0, cm, maskt, 0, cm, masks, 0);|tile, 0, cm, masks, 0, cm, maskt, 0);| %
+s|ulsFixed = uls \* 4 + sfrac;|ulsFixed = uls * 4;| %
+s|lrs = (\*(u16 \*)(t + 4) + uls - 1) \* 4 + sfrac;|lrs = (*(u16 *)(t + 4) + uls) * 4 + sfrac;| %
+s|lrt = (\*(u16 \*)(t + 6) + ult - 1) \* 4;|lrt = (*(u16 *)(t + 6) + ult - 1) * 2;| %
+s|ulsFixed, ult \* 4, lrs, lrt);|ulsFixed, ult, lrs, lrt);| %
+s|(lineW >> 1) + 7) >> 3;|lineW + 7) >> 3;| %
+s|tmem + lineW \* \*(u16 \*)(t + 6) / 4, tile + 1|tmem + lineW * *(u16 *)(t + 6) / 8, tile + 1| %
+s|ulsFixed, ult, lrs, lrt);|ulsFixed, ult * 4, lrs, lrt);| %
+s|gDPSetTileSize(gfx++, tile + 1,|gDPSetTileSize(gfx++, tile,| %
+s|if (t\[8\] == G_IM_FMT_CI) {|if (t[8] == G_IM_FMT_IA) {| %
+s|            palBits = 4;|            palBits = 8;| %
+s|            palCount = 15;|            palCount = 16;| %
+s|palBits / 8);|palBits / 4);| %
+s|gDPLoadSync(gfx++);|gDPTileSync(gfx++);| %
+s|gDPLoadTLUTCmd(gfx++, 6, palCount);|gDPLoadTLUTCmd(gfx++, 7, palCount);| %
+s|D_800D30BC = 0x8000;|D_800D30BC = 0x4000;| %
+s|        D_800D30BC = 0;|        D_800D30BC = 1;| %
+s|    if (t\[0xA\] == 0) {|    if (t[0xA] == 1) {| %

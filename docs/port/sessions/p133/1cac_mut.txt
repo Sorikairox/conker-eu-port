@@ -1,0 +1,11 @@
+s/if (mode == 1) {/if (mode == 2) {/
+s/D_800B0DF0->unk8 = 1;/D_800B0DF0->unk8 = 0;/
+s/if (D_800DC2B0 != 0) {/if (D_800DC2B0 == 0) {/
+s/if (mode == D_800B0DF0->unk9 || D_800B0DF0->unk8 != 4) {/if (D_800B0DF0->unk8 != 4) {/
+s/D_800B0DF0->unk8 != 4) {/D_800B0DF0->unk8 != 3) {/
+s/if (D_80038080 != 0) {/if (D_80038080 == 0) {/
+s/i < 0x168;/i < 0x167;/
+s/\*D_8008955C\[D_800B0DF0->unk9\] + i/*D_8008955C[D_800B0DF0->unk9]/
+s/D_800B0DF0->unk9 = mode;/D_800B0DF0->unk9 = mode + 1;/
+s/(&D_800DC2B0, 2, 0xD,/(\&D_800DC2B0, 2, 0xC,/
+s/    func_10004074(D_800DC2B0);$//

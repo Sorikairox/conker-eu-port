@@ -1,0 +1,2 @@
+s#best == -1 || v < best#best == -1 || v <= best# %
+s|best = v;|best = v + 1;| %

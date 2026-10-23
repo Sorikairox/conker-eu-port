@@ -1,6 +1,14 @@
 #include <ultra64.h>
 
+#ifdef NON_MATCHING
+/* P128: functions.h:772 declares func_1513D524 void; the NM definition below returns the record. Hide the old
+ * prototype until the port slot's functions.h fix merges (harmless afterwards). */
+#define func_1513D524 func_1513D524_void_proto
+#endif
 #include "functions.h"
+#ifdef NON_MATCHING
+#undef func_1513D524
+#endif
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 u8 *func_15140410(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3);
@@ -20,7 +28,104 @@ s32 func_1515D9B0(void);
 s32 func_1515D9F0(s32);
 
 
+#ifdef NON_MATCHING
+extern s32 (*D_8008A010[])(u8 *);
+extern s32 (*D_8008A048[])(u8 *);
+/* Per-frame update of a sprite effect (struct210): +0x10 bit 0 active; +0x18 flags; +0x1C life (s16, counts down
+ * by D_800BE9E4 when flags & 1); +0x80 / +0x81 update / end handler index (D_8008A010 / D_8008A048, 0 = none);
+ * +0x3A fade start, +0x3C fade rate: alpha +0x28 (flags & 0x8000) or +0x2D (flags & 0x10000) follows life * rate;
+ * +0x20 frame position (16.16) advanced by speed +0x24, wrapped at the frame count of texture +0x1E
+ * (D_80090F10 entry byte 4): flags 2 / 8 end at the top / bottom, 0x40 / 0x80 clamp, 4 ping-pong, else wrap.
+ * When the effect ends, the end handler may veto the removal (func_1516972C). */
+void func_1513C060(u8 *p) {
+    s8 done;
+    s32 flags;
+    s32 life;
+    s32 a;
+    s32 speed;
+    s32 pos;
+    s32 top;
+
+    if (!(*(s32 *)(p + 0x10) & 1)) {
+        return;
+    }
+    done = 0;
+    if (*(s32 *)(p + 0x18) & 1) {
+        *(s16 *)(p + 0x1C) -= D_800BE9E4;
+        if (*(s16 *)(p + 0x1C) < 0) {
+            done = 1;
+        }
+    }
+    if ((p[0x80] != 0) && (D_8008A010[p[0x80]](p) == 0)) {
+        done = 1;
+    }
+    flags = *(s32 *)(p + 0x18);
+    if ((flags & 0x8000) && !done) {
+        life = *(s16 *)(p + 0x1C);
+        if (life < *(s16 *)(p + 0x3A)) {
+            a = life * *(s16 *)(p + 0x3C);
+            if (a < p[0x28]) {
+                p[0x28] = a;
+            }
+        }
+    }
+    flags = *(s32 *)(p + 0x18);
+    if ((flags & 0x10000) && !done) {
+        life = *(s16 *)(p + 0x1C);
+        if (life < *(s16 *)(p + 0x3A)) {
+            a = life * *(s16 *)(p + 0x3C);
+            if (a < p[0x28]) {
+                p[0x2D] = a;
+            }
+        }
+    }
+    if (!done && ((speed = *(s32 *)(p + 0x24)) != 0)) {
+        pos = *(s32 *)(p + 0x20) + speed * D_800BE9E4;
+        *(s32 *)(p + 0x20) = pos;
+        top = (D_80090F14[p[0x1E]][0] << 16) - 1;
+        if (top < pos) {
+            flags = *(s32 *)(p + 0x18);
+            if (flags & 2) {
+                done = 1;
+            } else if (flags & 0x40) {
+                *(s32 *)(p + 0x24) = 0;
+                *(s32 *)(p + 0x20) = top;
+            } else if (flags & 4) {
+                *(s32 *)(p + 0x20) = top - pos % top;
+                *(s32 *)(p + 0x24) = -speed;
+            } else {
+                do {
+                    pos -= top;
+                    *(s32 *)(p + 0x20) = pos;
+                } while (top < pos);
+            }
+        } else if (pos < 0) {
+            flags = *(s32 *)(p + 0x18);
+            if (flags & 8) {
+                done = 1;
+            } else if (flags & 0x80) {
+                *(s32 *)(p + 0x24) = 0;
+                *(s32 *)(p + 0x20) = 0;
+            } else if (flags & 4) {
+                *(s32 *)(p + 0x20) = -pos % top;
+                *(s32 *)(p + 0x24) = -speed;
+            } else {
+                do {
+                    pos += top;
+                    *(s32 *)(p + 0x20) = pos;
+                } while (pos < 0);
+            }
+        }
+    }
+    if (done) {
+        if ((p[0x81] == 0) || (D_8008A048[p[0x81]](p) != 0)) {
+            func_1516972C((struct102 *)p);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513C060.s")
+#endif
 
 struct210 *func_1513C350(struct210 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6, struct167 *arg7, s32 arg8, u8 arg9, s32 argA) {
     struct210 *temp_v0;
@@ -164,7 +269,8 @@ void func_1513C9B0(struct210 *arg0) {
     } else {
         idx = 0;
     }
-    D_80089EE8[idx]();
+    /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
+    ((void (*)(struct210 *))D_80089EE8[idx])(arg0);
 }
 
 void func_1513C9FC(struct210 *arg0) {
@@ -174,7 +280,8 @@ void func_1513C9FC(struct210 *arg0) {
     } else {
         idx = 0;
     }
-    D_80089EF0[idx]();
+    /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
+    ((void (*)(struct210 *))D_80089EF0[idx])(arg0);
 }
 
 void func_1513CA48(struct210 *arg0) {
@@ -214,7 +321,8 @@ void func_1513CB58(struct210 *arg0) {
     } else {
         idx = 0;
     }
-    D_80089EF8[idx]();
+    /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
+    ((void (*)(struct210 *))D_80089EF8[idx])(arg0);
 }
 
 void func_1513CBA4(struct210 *arg0) {
@@ -224,7 +332,8 @@ void func_1513CBA4(struct210 *arg0) {
     } else {
         idx = 0;
     }
-    D_80089F2C[idx]();
+    /* P82: the asm leaves arg0 in a0 and every handler takes the struct210 (arity scan row, dropped argument) */
+    ((void (*)(struct210 *))D_80089F2C[idx])(arg0);
 }
 
 #ifdef NON_MATCHING
@@ -434,9 +543,18 @@ void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 ar
     func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
 }
 
+#ifdef NON_MATCHING
+// record_spawn_default: func_1513D2F0 with the default parameter block D_800A4AA0 and no extra words; returns the
+// new record (the asm leaves func_1513D2F0's v0 in v0; func_15149AC0 copies into it). P128.
+// functions.h:772 still says void until the port slot changes it.
+struct210 *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+    return func_1513D2F0(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
+}
+#else
 void func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
     func_1513D2F0(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
 }
+#endif
 
 s32 func_1513D594(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10) {
     struct210 *temp_v0;
@@ -1010,7 +1128,100 @@ void func_1513E13C(struct210 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 
 void func_1513E2A4(void) {
 }
 
+#ifdef NON_MATCHING
+s32 func_1510E908(s32, s32, f32 *, f32 *);
+s32 func_15144E80(s32, f32 *, f32 *, s32 *);
+s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+/* Corners of a sprite quad (4 Vtx at vtx + 0x40): centre (x, y, z), half sizes w / h, rotated by angle in the
+ * screen plane. With a camera (arg2) the quad uses the camera's right / up axes (func_15144E80, normalised by
+ * func_15145128); without one it is built in x / z and tilted by the view slopes of func_1510E908(arg1).
+ * Returns 0 when the axes are not available. */
+s32 func_1513E2AC(s32 vtx, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, f32 w, f32 h, u8 angle) {
+    s16 *v = (s16 *)(vtx + 0x40);
+    f32 c = func_151423D8((u8)(angle - 0x40));
+    f32 s = func_151423D8(angle);
+    f32 right[3];
+    f32 up[3];
+    f32 rx, ry, rz;
+    f32 ux, uy, uz;
+    f32 ws, wc, hc, hs;
+    f32 slopeX, slopeZ;
+    f32 pt[4][2];
+    f32 a, b, ta, tb, fa, fb;
+    s16 i;
+
+    if (arg2 != 0) {
+        if (func_15144E80(arg2, right, up, NULL) == 0) {
+            return 0;
+        }
+        func_15145128(right, right, NULL, NULL);
+        func_15145128(up, up, NULL, NULL);
+        ws = w * s;
+        wc = w * c;
+        rx = ws * right[0] + wc * up[0];
+        ry = ws * right[1] + wc * up[1];
+        rz = ws * right[2] + wc * up[2];
+        hc = -h * c;
+        hs = h * s;
+        ux = hc * right[0] + hs * up[0];
+        uy = hc * right[1] + hs * up[1];
+        uz = hc * right[2] + hs * up[2];
+        v[0] = (s32)((x - rx) + ux);
+        v[1] = (s32)((y - ry) + uy);
+        v[2] = (s32)((z - rz) + uz);
+        v[8] = (s32)((x + rx) + ux);
+        v[9] = (s32)((y + ry) + uy);
+        v[10] = (s32)((z + rz) + uz);
+        v[16] = (s32)((x + rx) - ux);
+        v[17] = (s32)((y + ry) - uy);
+        v[18] = (s32)((z + rz) - uz);
+        v[24] = (s32)((x - rx) - ux);
+        v[25] = (s32)((y - ry) - uy);
+        v[26] = (s32)((z - rz) - uz);
+        return 1;
+    }
+    if (func_1510E908(arg1, arg2, &slopeX, &slopeZ) == 0) {
+        return 0;
+    }
+    ws = w * s;
+    hc = h * c;
+    hs = h * s;
+    wc = w * c;
+    pt[0][0] = ws - hc;
+    pt[0][1] = hs + wc;
+    pt[1][0] = -ws - hc;
+    pt[1][1] = hs - wc;
+    pt[2][0] = -ws + hc;
+    pt[2][1] = -hs - wc;
+    pt[3][0] = ws + hc;
+    pt[3][1] = -hs + wc;
+    for (i = 0; i < 4; i++) {
+        b = pt[i][0];
+        a = pt[i][1];
+        ta = a * slopeZ;
+        if (b == 0.0f) {
+            tb = 0.0f;
+            fb = 0.0f;
+        } else {
+            tb = b * slopeX;
+            fb = fabsf(b) / sqrtf(b * b + tb * tb);
+        }
+        if (a == 0.0f) {
+            ta = 0.0f;
+            fa = 0.0f;
+        } else {
+            fa = fabsf(a) / sqrtf(a * a + ta * ta);
+        }
+        v[0] = (s32)(b * fb + x);
+        v[1] = (s32)(((fb * tb + y) + fa * ta) + 0.5f);
+        v[2] = (s32)(pt[i][1] * fa + z);
+        v += 8;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E2AC.s")
+#endif
 
 typedef struct {
     u8  pad0[0x8];
@@ -1559,4 +1770,65 @@ u8 *func_15140410(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_15140410.s")
 #endif
+#ifdef NON_MATCHING
+#define L6AC_PREV(n) (*(u8 **)((n) + 4))
+#define L6AC_NEXT(n) (*(u8 **)((n) + 8))
+#define L6AC_KEY(n) (((n)[0x18] << 8) + (*(s32 *)((n) + 0x20) >> 16))
+
+/* Insertion sort of scene-node list D_800DD280[group][idx] by key (+0x18 << 8) + (+0x20 >> 16), ascending, stable;
+ * a node moves behind the last earlier node whose key is not greater. A stack node stands in for the list head
+ * (key 0, no prev); as in the asm the head's prev is set before the NULL test and the first node's prev is cleared
+ * at the end, so an empty list writes word 4. `skip` != 0: nothing. Returns `ret` (a0) unchanged. */
+s32 func_151406AC(s32 ret, s32 idx, s32 group, s16 skip) {
+    s32 dummy[9];
+    u8 *d = (u8 *)dummy;
+    u8 **slot;
+    u8 *head;
+    u8 *node;
+    u8 *prev;
+    u8 *next;
+    u8 *at;
+    s32 key;
+
+    if (skip != 0) {
+        return ret;
+    }
+    slot = (u8 **)((u8 *)D_800DD280 + group * 0x1A0 + idx * 4);   /* D_800DD280[2][104] list heads */
+    head = *slot;
+    d[0x18] = 0;
+    dummy[8] = 0;
+    L6AC_PREV(d) = NULL;
+    L6AC_NEXT(d) = head;
+    L6AC_PREV(head) = d;
+    if (head != NULL) {
+        for (node = L6AC_NEXT(head); node != NULL; node = next) {
+            key = L6AC_KEY(node);
+            prev = L6AC_PREV(node);
+            next = L6AC_NEXT(node);
+            for (at = prev; at != NULL; at = L6AC_PREV(at)) {
+                if (!(key < L6AC_KEY(at))) {
+                    break;
+                }
+            }
+            if (at == NULL || at == prev) {
+                continue;
+            }
+            L6AC_NEXT(prev) = next;
+            if (L6AC_NEXT(node) != NULL) {
+                L6AC_PREV(L6AC_NEXT(node)) = L6AC_PREV(node);
+            }
+            L6AC_NEXT(node) = L6AC_NEXT(at);
+            if (L6AC_NEXT(node) != NULL) {
+                L6AC_PREV(L6AC_NEXT(node)) = node;
+            }
+            L6AC_PREV(node) = at;
+            L6AC_NEXT(at) = node;
+        }
+    }
+    *slot = L6AC_NEXT(d);
+    L6AC_PREV(L6AC_NEXT(d)) = NULL;
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_151406AC.s")
+#endif

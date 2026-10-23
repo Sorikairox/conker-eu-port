@@ -381,7 +381,59 @@ void *func_15167D84(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 arg5) 
 }
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167E0C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15168118.s")
+#ifdef NON_MATCHING
+/* P125 */
+extern u8 *D_8008CDEC[];
+
+/* sprite_quad_init: fills the two 4-vertex quads at the start of a sprite spawn record (8 Vtx, 0x80 bytes) with
+ * colour (r, g, b, a) and flag 0, and their texture coordinates from the texture D_8008CDEC[rec[0xA0]] (u16 width
+ * +6, height +8; S10.5 coordinates (size + 256) << 5, the other edge 256 << 5). Record flags u16 +0x98: 0x80 flips
+ * t, 0x100 flips s. Also clears the s16 at +0x88, +0x9C and +0x9E. The colour parameters are bytes. Returns the
+ * last t value (what the asm leaves in v0; the callers, declared s32, ignore it). */
+s32 func_1516865C(u8 *rec, s32 r, s32 g, s32 b, s32 a) {
+    Vtx *v = (Vtx *) rec;
+    u8 *tex;
+    u16 flags;
+    s16 s0, s1, t0, t1;
+    s32 i;
+
+    tex = D_8008CDEC[rec[0xA0]];
+    s0 = 0x2000;
+    t0 = 0x2000;
+    s1 = (*(u16 *) (tex + 6) + 0x100) << 5;
+    t1 = (*(u16 *) (tex + 8) + 0x100) << 5;
+    for (i = 0; i < 8; i++) {
+        v[i].v.flag = 0;
+        v[i].v.cn[0] = r;
+        v[i].v.cn[1] = g;
+        v[i].v.cn[2] = b;
+        v[i].v.cn[3] = a;
+    }
+    flags = *(u16 *) (rec + 0x98);
+    if (flags & 0x80) {
+        t1 = 0x2000;
+        t0 = (*(u16 *) (D_8008CDEC[rec[0xA0]] + 8) + 0x100) << 5;
+    }
+    if (flags & 0x100) {
+        s1 = 0x2000;
+        s0 = (*(u16 *) (D_8008CDEC[rec[0xA0]] + 6) + 0x100) << 5;
+    }
+    v[6].v.tc[0] = s0;
+    v[7].v.tc[1] = t0;
+    v[7].v.tc[0] = s1;
+    v[1].v.tc[0] = v[5].v.tc[0] = v[2].v.tc[0] = v[6].v.tc[0];
+    v[5].v.tc[1] = t1;
+    *(s16 *) (rec + 0x88) = 0;
+    v[2].v.tc[1] = v[6].v.tc[1] = v[3].v.tc[1] = v[7].v.tc[1];
+    *(s16 *) (rec + 0x9C) = 0;
+    *(s16 *) (rec + 0x9E) = 0;
+    v[0].v.tc[0] = v[4].v.tc[0] = v[3].v.tc[0] = v[7].v.tc[0];
+    v[0].v.tc[1] = v[4].v.tc[1] = v[1].v.tc[1] = v[5].v.tc[1];
+    return t0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_1516865C.s")
+#endif
 void *func_15168800(void *arg0, u8 arg1, s32 arg2) {
     u8 *temp_v0 = func_15167A68(0xE, arg2, 0xB8, 1, arg1, 1);
 
@@ -676,7 +728,48 @@ void func_15169070(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
         }
     }
 }
+#ifdef NON_MATCHING
+/* P136 */
+/*
+ * node_lists_update_types: for each of the n type ids in types[] (arg0), walks that type's node lists in both rows of
+ * D_800DD280 and calls func_1516968C(node, arg2, arg3) on every node, then the type's D_8008B848 handler (+0x1C)
+ * when it has one. The next node is kept in D_800DD5C8[++D_800DD5C0] (as func_15169070) so a call may unlink or
+ * free the current node or the saved next one.
+ */
+void func_15169260(void *arg0, s32 n, s32 arg2, u8 arg3) {
+    s32 *types = arg0;
+    struct_eu_node *node;
+    s32 k;
+    s32 i;
+
+    for (k = 0; k < n; k++, types++) {
+        for (i = 0; i < 2; i++) {
+            if (D_8008B848[*types].fn != NULL) {
+                node = D_800DD280[i][*types];
+                D_800DD5C0++;
+                while (node != NULL) {
+                    D_800DD5C8[D_800DD5C0] = node->next;
+                    func_1516968C((struct102 *) node, (u8 *) arg2, arg3);
+                    D_8008B848[*types].fn(node, arg2, arg3);
+                    node = D_800DD5C8[D_800DD5C0];
+                }
+                D_800DD5C0--;
+            } else {
+                node = D_800DD280[i][*types];
+                D_800DD5C0++;
+                while (node != NULL) {
+                    D_800DD5C8[D_800DD5C0] = node->next;
+                    func_1516968C((struct102 *) node, (u8 *) arg2, arg3);
+                    node = D_800DD5C8[D_800DD5C0];
+                }
+                D_800DD5C0--;
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15169260.s")
+#endif
 void func_1516968C(struct102 *arg0, u8 *arg1, u8 arg2);
 void func_1516944C(s32 j, s32 arg1, u8 arg2) {
     s32 i;

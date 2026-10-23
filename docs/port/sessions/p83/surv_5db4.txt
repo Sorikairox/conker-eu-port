@@ -1,0 +1,2 @@
+s|        MASK \&= 0xFFE3;|        MASK \&= 0xFFF3;| % ad1m2 ad1
+s|        MASK \&= ~0x1F;|        MASK \&= ~0x0F;| % pl95m2 pl95

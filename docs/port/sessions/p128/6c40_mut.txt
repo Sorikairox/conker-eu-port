@@ -1,0 +1,20 @@
+s/if (D_800BE5D0 == 0) {/if (D_800BE5D0 == 1) {/
+s/keep = ~(1 << view);/keep = ~(2 << view);/
+s/D_800DC260\[view\] \* 4);/D_800DC260[view] * 2);/
+s/bit = row\[1\];/bit = row[1] - 1;/
+s/+ \*(u16 \*) row;/+ *(s16 *) row;/
+s/cur = \*p;$/cur = p[1];/
+s/if (rec == NULL) {/if (rec == (u8 *) 1) {/
+s/if (k == 0) {/if (k == 1) {/
+s/while ((sym = node\[0\]) < 0) {/while ((sym = node[0]) < -1) {/
+s/if (bit == 0) {/if (bit == 1) {/
+s/                    bit = 7;/                    bit = 6;/
+s/\& 1) ? node\[2\] : node\[1\]));/\& 1) ? node[1] : node[2]));/
+s/(cur >> (bit \& 0x1F))/(cur >> (bit \& 0x7))/
+s/(((sym >> k) \& 1) << view)/(((sym >> k) \& 1) << (view + 1))/
+s/(sym >> k)/(sym << k)/
+s/if (k < 7) {/if (k < 6) {/
+s/            k = 0;/            k = 1;/
+s/rec += \*(s16 \*) (rec + 0xC);/rec += *(s16 *) (rec + 0xC) + 0x10;/
+s/} else if (\*(s16 \*) (rec + 4) != 0) {/} else if (*(s16 *) (rec + 6) != 0) {/
+s/rec += \*(s16 \*) (rec + 4);/rec += 0x10;/

@@ -9,7 +9,7 @@ void func_15022238(s16, s16, s16, f32);
 
 
 #ifdef NON_MATCHING
-s32 func_1501D348(s32, s32, s32, s32, s32);
+void func_1501D348(s32, s32, s32, s32, s32);
 extern s8 D_800C39E2;
 extern s8 D_800C39E3;
 extern s8 D_800C40B9;

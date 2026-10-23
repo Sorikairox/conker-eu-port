@@ -1,15 +1,6 @@
 #include <ultra64.h>
 
-#ifdef NON_MATCHING
-/* P132: functions.h:772 declares func_1513D524 void; it returns the new record (port-b P128, game_169510.c). Hide
- * the old prototype until the functions.h fix merges (as game_eu_1772D0.c does). */
-#define func_1513D524 func_1513D524_void_proto
-#endif
 #include "functions.h"
-#ifdef NON_MATCHING
-#undef func_1513D524
-struct210 *func_1513D524(s32, u8, u8, u8, u8, u8, s32, u8, s32);
-#endif
 #include "variables.h"
 
 

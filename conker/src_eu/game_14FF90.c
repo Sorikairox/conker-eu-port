@@ -3,12 +3,18 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+extern s16 D_80084810;
+void func_1508EF80(u8 *, u8 *, f32, u8 *);
+s32 func_15125490(struct108 *arg0);
+void func_151201D0(u8 *arg0);
+void func_15124C38(struct108 *, f32 *);
+extern f32 D_800DC434;
 void func_1512A390(u8 *); // P47: one argument (a0 = arg0 is still live at the call)
 void func_15122C5C(struct108 *arg0);
 void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
 void func_151206C8(struct108 *);
 void func_151220D0(struct108 *);
-void func_151221F0(struct108 *, s32);
+void func_151221F0(struct108 *, f32); /* P96: arg1 is a float (P98 protoasm) */
 void func_151226E0(struct108 *);
 void func_151229B0(struct108 *);
 void func_15122EF0(struct108 *);
@@ -168,17 +174,17 @@ void func_15122AE0(void) {
 void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
 s32 func_15097BA8(s32);
 void func_15125A6C(u8 *);
-s32 func_15129220(struct108 *);
-s32 func_15125DB4(struct108 *);
+void func_15129220(struct108 *);
+void func_15125DB4(struct108 *);
 void func_15127EB8(struct108 *);
 s32 func_15128540(struct108 *);
 void func_15123070(u8 *arg0);
-s32 func_1512EE50(struct108 *);
+void func_1512EE50(struct108 *);
 void func_151307A0(struct108 *, s32);
 void func_15126138(struct108 *);
 void func_15125C40(u8 *);
 void func_15128680(struct108 *);
-s32 func_1512317C(struct108 *);
+void func_1512317C(struct108 *);
 void func_15125394(struct108 *);
 void func_15123568(struct108 *);
 void func_1512C770(struct108 *);
@@ -187,13 +193,13 @@ void func_151283B8(struct108 *);
 void func_15125594(struct108 *);
 void func_15123508(struct108 *);
 s32 func_1512D900(struct108 *);
-s32 func_151256BC(struct108 *);
+void func_151256BC(struct108 *);
 void func_1512DEF0(struct108 *);
 void func_1512C5D8(struct108 *);
 void func_1512B670(u8 *);
-s32 func_1512C77C(struct108 *);
-s32 func_1512C080(struct108 *);
-s32 func_15128D50(struct108 *, s32, s32);
+void func_1512C77C(struct108 *); /* P68: void, v0 is undefined in the asm */
+void func_1512C080(struct108 *); /* P68: void, v0 is undefined in the asm */
+void func_15128D50(struct108 *, f32 *, f32 *);
 s32 func_1512C6C0(struct108 *);
 void func_151284C4(struct108 *);
 extern u16 D_800BEB30[];
@@ -492,7 +498,74 @@ void func_15123070(u8 *arg0) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+/* First-person look toggle: the look button (control bit 0x10) enters the first-person view (func_15123934 mode
+ * 0x100, then func_151201D0) unless something blocks it (camera flag 0x80, forced views, the player swimming /
+ * holding / in some modes, func_15125490, ...). In the first-person mode (+0x2C == 0x100) the look state +0x73C
+ * is kept, the zoom / look bits leave the control masks, and the view limits +0x74C / +0x754 ease towards
+ * +0x79C / +0x7A0 (func_150498A0). */
+void func_1512317C(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *hold = *(u8 **)(p + 0x3D0);
+    s32 noLookA = *(s32 *)(p + 0x5F0) & 0x100;
+    s32 noLookB = *(s32 *)(p + 0x5F0) & 0x200;
+    u8 mode;
+    s32 badMode;
+    s32 blocked;
+
+#define PL (*(u8 **)(p + 0x3D4))
+#define HOLD (*(u8 **)(p + 0x3D0))
+#define MASK (*(u16 *)(p + 0x36A))
+#define CTL (**(u16 **)(p + 0x36C))
+#define LOOK (*(s16 *)(p + 0x73C))
+    badMode = hold[0x104] != 0;
+    if (badMode) {
+        mode = p[0x23E];
+        badMode = mode != 9 && mode != 0x38 && mode != 0x39 && mode != 0x3B && mode != 0x37 && mode != 0x15 &&
+                  mode != 0x26 && mode != 0x3A;
+    }
+    blocked = (*(s32 *)(p + 0x2C) & 0x80) || (*(s32 *)(p + 0x84) & 0x1000000) ||
+              (*(f32 *)(hold + 0x28) != 0.0f && hold[0xAD] == 0 && *(s32 *)(PL + 0x9C) == 0 && !noLookA &&
+               !noLookB && p[0x23E] != 3) ||
+              (hold[0x65] != 0 && !noLookA && !noLookB) || badMode || func_15125490(arg0) != 0 ||
+              HOLD[0x1CA] == 0 || ((PL[0x4E] & 0xF) == 1 && 15.0f < *(f32 *)(HOLD + 0x3C)) || PL[0x1AC] != 0;
+
+    if ((CTL & 0x10) && !blocked) {
+        if ((MASK & 0x10) && func_15123934(arg0, 0x100, 4, *(s32 *)(p + 0x134), 1) != 0) {
+            func_151201D0(p);
+        }
+        return;
+    }
+    if (*(s32 *)(p + 0x2C) == 0x100 && LOOK == 0) {
+        func_151239CC(arg0, 1);
+        PL[0x198] = 0;
+        PL[0x197] = 0;
+        *(s16 *)(p + 0x5F8) = 1;
+        *(s16 *)(p + 0x5FC) = 2;
+        MASK &= 0xFFEF;
+        CTL &= 0xFFEF;
+    }
+    if (*(s32 *)(p + 0x2C) == 0x100 || LOOK != 0) {
+        MASK &= ~0x10;
+        CTL &= ~0x10;
+    }
+    PL[0x198] = LOOK;
+    if (LOOK != 0) { /* the asm also tests == 3 after != 0 (dead) */
+        func_150498A0((f32 *)(p + 0x74C), 0.0f, (f32 *)(p + 0x79C), 4.0f, 9.0f, *(f32 *)(p + 0x7B4));
+        func_150498A0((f32 *)(p + 0x754), 0.0f, (f32 *)(p + 0x7A0), 4.0f, 9.0f, *(f32 *)(p + 0x7B4));
+    }
+    if (*(s32 *)(p + 0x2C) != 0x100 && LOOK != 0) {
+        LOOK = 0;
+    }
+#undef PL
+#undef HOLD
+#undef MASK
+#undef CTL
+#undef LOOK
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_1512317C.s")
+#endif
 
 void func_15123508(struct108 *arg0) {
     if ((arg0->unk84 & 2) != 0) {
@@ -540,7 +613,82 @@ void func_15123568(struct108 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15123568.s")
 #endif
+#ifdef NON_MATCHING
+/* Per-frame state flags of a struct108 controller (camera / player view), word unk5F0:
+ *   0x40  the followed object (unk3D4) is "active": +0x9C set, or +0x95 set while unk3D0 +0x137 is clear
+ *   0x400 cleared when unk3D0's unk28 is 0
+ *   0x08  unk3D4 +0x08 (s16) non-zero and +0x16 clear
+ *   0x80  unk3D4 +0x4E == 2
+ *   0x01  "inside": the f32 at +0x360 >= unk2FC, except in mode unk2C == 0x100
+ * Then the 0x01 flag (old value vs new value) picks one of the func_1515BFxx calls on channel unk23D.
+ * The asm leaves v0 undefined on return and every caller ignores it: void under NM. */
+#define F108_F32(p, o) (*(f32 *)((u8 *)(p) + (o)))
+#define OBJ_U8(p, o) (*(u8 *)((u8 *)(p) + (o)))
+void func_151236D0(struct108 *arg0) {
+    u8 *obj = (u8 *)arg0->unk3D4;
+    s32 wasInside = arg0->unk5F0 & 1;
+
+    if (obj != NULL) {
+        if (*(u32 *)(obj + 0x9C) != 0 || (OBJ_U8(obj, 0x95) != 0 && OBJ_U8(arg0->unk3D0, 0x137) == 0)) {
+            arg0->unk5F0 |= 0x40;
+        } else {
+            arg0->unk5F0 &= ~0x40;
+        }
+        if (arg0->unk3D0->unk28 == 0.0f) {
+            arg0->unk5F0 &= ~0x400;
+        }
+        obj = (u8 *)arg0->unk3D4;
+        if (*(s16 *)(obj + 0x8) != 0 && OBJ_U8(obj, 0x16) == 0) {
+            arg0->unk5F0 |= 8;
+        } else {
+            arg0->unk5F0 &= ~8;
+        }
+        if (OBJ_U8(arg0->unk3D4, 0x4E) == 2) {
+            arg0->unk5F0 |= 0x80;
+        } else {
+            arg0->unk5F0 &= ~0x80;
+        }
+    }
+    if (arg0->unk2FC <= F108_F32(arg0, 0x360) && arg0->unk2C != 0x100) {
+        arg0->unk5F0 |= 1;
+    } else {
+        arg0->unk5F0 &= ~1;
+    }
+
+    if (arg0->unk23C != 0) {
+        if (arg0->unk5F0 & 1) {
+            func_1515BFF0(arg0->unk23D);
+        } else {
+            func_1515BFB8(arg0->unk23D);
+            F108_F32(arg0, 0x7B0) = 0.0f;
+        }
+        return;
+    }
+    if (!wasInside && (arg0->unk5F0 & 1)) {
+        /* just entered */
+        if ((arg0->unk5F0 & 4) || (arg0->unk2C & 0x40000)) {
+            func_1515BFF0(arg0->unk23D);
+        } else {
+            func_1515C01C(arg0->unk23D);
+        }
+    } else if (wasInside && !(arg0->unk5F0 & 1)) {
+        /* just left */
+        if ((arg0->unk5F0 & 4) || (arg0->unk2C & 0x40000)) {
+            func_1515BFB8(arg0->unk23D);
+            F108_F32(arg0, 0x7B0) = 0.0f;
+        } else {
+            func_1515BFC4(arg0->unk23D);
+            func_15124B18(arg0);
+        }
+    } else if (arg0->unk5F0 & 1) {
+        func_1515BF8C(arg0->unk23D);
+    } else {
+        func_1515BF80(arg0->unk23D);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151236D0.s")
+#endif
 s32 func_15123934(struct108 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
 #define STK ((struct_eu_108_stack *)arg0)
     if (STK->unk20C[arg4] == 0) {
@@ -969,8 +1117,164 @@ void func_15124B18(struct108 *arg0) {
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15124C38.s")
+#ifdef NON_MATCHING
+/* P92: declarations for func_15124C38 */
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+#define PL (*(u8 **)(p + 0x3D4))
+#define HOLD (*(u8 **)(p + 0x3D0))
+s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+void func_1507E1D0(u8 *, f32 *, f32 *, f32 *);
+#endif
+#ifdef NON_MATCHING
+/* Camera target height (camera `arg0`). With `out` the height is only returned through it (also while the
+ * camera is frozen, +0x7F4); else it is eased into +0x2C0 (speed +0x2A0, func_150498A0 with the frame step +0x7B4).
+ * The base offset is the target's (PL = +0x3D4) height +0x114 scaled per mode (first person +0x2C bit 0x100,
+ * PL +0x4E kind 1, +0x23E / +0x23C / +0x600 states, look-up +0x77C) plus the holder's (HOLD = +0x3D0) +0xCC,
+ * raised by 50 / 150 or set to 135 by +0x5F0 bits 0x100 / 0x200 / 0x800; without a target it is the holder's
+ * model height (func_1507C7C0). A target on a vehicle (PL +0x120) follows the holder's position y
+ * (func_1507E1D0) at once. Otherwise the height is the holder's y +0x18 + 1/4 offset (+0x2C bit 0x80 or
+ * func_15125490), floor +0x180 + offset (+0x84 bit 0x20000000, or no water +0x360 and low / far:
+ * +0x28 < 170, +0x370 > 300), y + offset (cutscene D_800C3671, HOLD +0x137 / +0x84 == 0x194 / swimming +0xAD),
+ * else the floor + its height above it (+0x28) scaled by +0x28 / 300 (0..1) + offset. Hanging (HOLD +0x102):
+ * close to the camera (+0x370 < 100) 10 below / above y by the camera's height +0x2FC, else y. */
+void func_15124C38(struct108 *arg0, f32 *out) {
+    u8 *p = (u8 *)arg0;
+    u8 *pl;
+    u8 *hold;
+    s16 h;
+    s16 w;
+    s16 d;
+    f32 ofs;
+    f32 y;
+    f32 k;
+    f32 speed;
+    f32 rate;
+    f32 v[3];
+    u8 hang;
 
+    if (*(u16 *)(p + 0x7F4) != 0 && out == NULL) {
+        return;
+    }
+    pl = PL;
+    if (pl != NULL) {
+        if ((pl[0x4E] & 0xF) == 1) {
+            if (CAM_W(0x2C) & 0x100) {
+                ofs = (f32)*(s16 *)(pl + 0x114) * 0.65f;
+            } else {
+                ofs = (f32)*(s16 *)(pl + 0x114) * 0.55f;
+            }
+        } else if (CAM_W(0x2C) & 0x100) {
+            if (p[0x23E] == 0) {
+                if (CAM_F(0x77C) < -15.0f) {
+                    ofs = (f32)*(s16 *)(HOLD + 0xCC) + (f32)*(s16 *)(pl + 0x114) * 0.9f;
+                } else {
+                    ofs = (f32)*(s16 *)(HOLD + 0xCC) + (f32)*(s16 *)(pl + 0x114) * 0.75f;
+                }
+            } else {
+                ofs = (f32)*(s16 *)(HOLD + 0xCC) + (f32)*(s16 *)(pl + 0x114) * 0.85f;
+            }
+        } else if (p[0x23C] == 0 && p[0x600] != 0) {
+            ofs = (f32)*(s16 *)(HOLD + 0xCC) + (f32)*(s16 *)(pl + 0x114);
+        } else {
+            ofs = (f32)*(s16 *)(HOLD + 0xCC) + (f32)*(s16 *)(pl + 0x114) * 0.75f;
+        }
+        if (CAM_W(0x5F0) & 0x100) {
+            ofs += 50.0f;
+        } else if (CAM_W(0x5F0) & 0x200) {
+            ofs += 150.0f;
+        } else if (CAM_W(0x5F0) & 0x800) {
+            ofs = 135.0f;
+        }
+    } else {
+        func_1507C7C0((struct127 *)HOLD, &h, &w, &d);
+        ofs = (f32)h;
+        pl = PL;
+    }
+    if (pl[0x120] != 0) {
+        func_1507E1D0(HOLD, &v[0], &v[1], &v[2]);
+        func_150498A0((f32 *)(p + 0x2C0), v[1], (f32 *)(p + 0x2A0), 4.0f, 8.0f, CAM_F(0x7B4));
+        return;
+    }
+    switch (p[0x23E]) {
+        case 0xC: case 0x9: case 0x38: case 0x39: case 0x37: case 0x3B: case 0x12: case 0x15: case 0x26: case 0x3A:
+            if (CAM_W(0x2C) & 0x100) {
+                ofs += 30.0f;
+            }
+            break;
+    }
+    if ((CAM_W(0x2C) & 0x80) || func_15125490(arg0) != 0) {
+        hold = HOLD;
+        y = *(f32 *)(hold + 0x18) + ofs * 0.25f;
+    } else {
+        hold = HOLD;
+        if (CAM_W(0x84) & 0x20000000) {
+            y = *(f32 *)(hold + 0x180) + ofs;
+        } else if (D_800C3671 != 0 || hold[0x137] != 0 || *(u16 *)(hold + 0x84) == 0x194 || hold[0xAD] == 1) {
+            y = *(f32 *)(hold + 0x18) + ofs;
+        } else if (-10000.0f == CAM_F(0x360) && !(CAM_W(0x84) & 0x200000) && *(f32 *)(hold + 0x28) < 170.0f &&
+                   300.0f < CAM_F(0x370)) {
+            y = *(f32 *)(hold + 0x180) + ofs;
+        } else {
+            k = *(f32 *)(hold + 0x28) * 0.0033333334f;
+            if (k < 0.0f) {
+                k = 0.0f;
+            } else if (1.0f < k) {
+                k = 1.0f;
+            }
+            y = (*(f32 *)(hold + 0x180) + *(f32 *)(hold + 0x28) * k) + ofs;
+        }
+    }
+    hang = hold[0x102];
+    if (hang != 0) {
+        if (CAM_F(0x370) < 100.0f) {
+            if (CAM_F(0x2FC) < *(f32 *)(hold + 0x18)) {
+                y = *(f32 *)(hold + 0x18) - 10.0f;
+            } else {
+                y = *(f32 *)(hold + 0x18) + 10.0f;
+            }
+        } else {
+            y = *(f32 *)(hold + 0x18);
+        }
+    }
+    if (out != NULL) {
+        *out = y;
+        return;
+    }
+    if (p[0x23C] != 0) {
+        CAM_F(0x2C0) = y;
+        CAM_F(0x2A0) = 0.0f;
+        return;
+    }
+    if (CAM_W(0x5F0) & 0x80) {
+        speed = 5.0f;
+        rate = 8.0f;
+    } else if (CAM_W(0x2C) & 0x100) {
+        speed = 5.0f;
+        rate = 9.0f;
+    } else if (hang != 0) {
+        speed = 7.0f;
+        rate = 9.0f;
+    } else {
+        speed = 4.0f;
+        rate = 8.0f;
+    }
+    if ((CAM_W(0x84) & 0x200000) && y < CAM_F(0x2CC)) {
+        speed += speed;
+        rate += rate;
+    }
+    func_150498A0((f32 *)(p + 0x2C0), y, (f32 *)(p + 0x2A0), speed, rate, CAM_F(0x7B4));
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15124C38.s")
+#endif
+#ifdef NON_MATCHING
+/* P92: end of func_15124C38 */
+#undef CAM_W
+#undef CAM_F
+#undef PL
+#undef HOLD
+#endif
 void func_1512523C(struct108 *arg0) {
     f32 temp_f12;
     f32 temp_f2;
@@ -1126,7 +1430,53 @@ void func_15125690(struct108 *arg0, s32 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+/* Camera shake: while shaking (flag 0x80000, or +0x5F0 bit 3 without flag 0x40000) the phase +0x29C advances
+ * by a random 0..4 degrees per tick (wrapped to 2 pi), else it decays by 8 % per frame. The amplitude +0x5EC
+ * follows 4 sin(phase) by 4 %; eye +0x2F8 and target +0x2BC are pulled towards each other by
+ * amp * 0.05 * (4, 4) when shaking hard, (1, 20) otherwise (func_1508EF80 = lerp). */
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_H(o) (*(s16 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+void func_151256BC(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    f32 t;
+    f32 eyeK;
+    f32 targetK;
+
+    if ((CAM_W(0x2C) & 0x80000) || ((CAM_W(0x5F0) & 8) && !(CAM_W(0x2C) & 0x40000))) {
+        CAM_F(0x29C) += (f32)((u32)func_150ADA20() % 3) * 2 * 0.017453292f * D_800BE9A4;
+        while (6.2831855f < CAM_F(0x29C)) {
+            CAM_F(0x29C) -= 6.2831855f;
+        }
+        CAM_F(0x5EC) += (sinf(CAM_F(0x29C)) * 4.0f - CAM_F(0x5EC)) * 0.04f;
+        t = CAM_F(0x5EC) * 0.05f;
+        if (CAM_W(0x2C) & 0x80000) {
+            eyeK = 4.0f;
+            targetK = 4.0f;
+        } else {
+            eyeK = 1.0f;
+            targetK = 20.0f;
+        }
+        func_1508EF80(p + 0x2F8, p + 0x2BC, t * eyeK, p + 0x2F8);
+        func_1508EF80(p + 0x2BC, p + 0x2F8, t * targetK, p + 0x2BC);
+        return;
+    }
+    if (CAM_F(0x29C) == 0.0f) {
+        return;
+    }
+    CAM_F(0x29C) -= CAM_F(0x29C) * 0.08f;
+    CAM_F(0x5EC) += (sinf(CAM_F(0x29C)) * 4.0f - CAM_F(0x5EC)) * 0.04f;
+    t = CAM_F(0x5EC) * 0.05f;
+    func_1508EF80(p + 0x2F8, p + 0x2BC, t, p + 0x2F8);
+    func_1508EF80(p + 0x2BC, p + 0x2F8, t * 20.0f, p + 0x2BC);
+}
+#undef CAM_W
+#undef CAM_H
+#undef CAM_F
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151256BC.s")
+#endif
 #ifdef NON_MATCHING
 void func_15125924(struct108 *arg0) {
     s32 sp2C;
@@ -1171,7 +1521,7 @@ void func_15125924(struct108 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125924.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1512DAD0(u8 *, s32, s32 *);
+void func_1512DAD0(u8 *, s32, void *);
 extern s32 D_800C3A20;
 extern f32 D_800C3A34;
 extern f32 D_800C3A38;
@@ -1314,7 +1664,95 @@ void func_15125C40(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125C40.s")
 #endif
+#ifdef NON_MATCHING
+/* Allowed camera controls of this frame: +0x36A = mask of the camera buttons the player may use (from the
+ * camera mode +0x23E or the table D_800BEB30[+0x368]), *(+0x36C) = the control flags, both cut down by the
+ * player / camera state (paused or locked camera: nothing; first-person, aiming, swimming, ... : no zoom /
+ * rotate bits). +0x84A counts down a short lock (flag 0x40). */
+#define CAM_W(o) (*(s32 *)(p + (o)))
+#define CAM_H(o) (*(s16 *)(p + (o)))
+#define CAM_F(o) (*(f32 *)(p + (o)))
+void func_15125DB4(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *pl = *(u8 **)(p + 0x3D4);
+    u8 mode = p[0x23E];
+    u16 *ctl;
+
+#define MASK (*(u16 *)(p + 0x36A))
+#define CTL (**(u16 **)(p + 0x36C))
+    if (pl[0x120] != 0 || D_80084810 != 0) {
+        MASK = 0;
+        CTL &= 0xFFE0;
+        return;
+    }
+    if (mode == 0) {
+        if (CAM_W(0x2C) & 0x100) {
+            MASK &= 0xFFF0;
+            CTL &= 0xFFF0;
+        }
+    } else {
+        if (mode == 2 || mode == 0x12 || mode == 0x13 || mode == 0xA || mode == 0x34 || mode == 0x10 ||
+            mode == 0xF) {
+            if (mode == 0xF) {
+                func_1509BFB0(3, 0x9000, 0x18, 0x25, 0x13, 0x1E0);
+            }
+            CTL |= 0x10;
+            MASK |= 0x10;
+            CTL &= 0xFFF0;
+        } else {
+            MASK = D_800BEB30[CAM_H(0x368)];
+        }
+        if (mode == 3 || mode == 0xD || mode == 0x1A || mode == 0x2A) {
+            MASK &= ~0xF;
+            CTL &= ~0xF;
+        }
+        if (mode == 0x29) {
+            CTL |= 0x10;
+            MASK |= 0x10;
+        }
+    }
+    if ((*(u8 **)(p + 0x3D0))[0xAD] == 1 && (CAM_W(0x2C) & 0x80)) {
+        MASK &= 0xFFE3;
+        CTL &= 0xFFF3;
+    }
+    if (CAM_W(0x84) & 0x200000) {
+        MASK &= ~0xF;
+    }
+    if (D_800C3671 != 0 || (CAM_W(0x5F0) & 0x80)) {
+        MASK &= 0xFFE0;
+        CTL &= 0xFFE0;
+    }
+    pl = *(u8 **)(p + 0x3D4);
+    if (pl[0x7D] != 0 || pl[0x1AC] != 0 || pl[0x27] != 0) {
+        MASK &= 0xFFEF;
+        CTL &= 0xFFEF;
+    }
+    pl = *(u8 **)(p + 0x3D4);
+    if (pl[0x95] != 0 || (CAM_H(0x5FC) != 0 && pl[0x1B3] != 0)) {
+        MASK &= ~0x1F;
+        CTL &= ~0x1F;
+    }
+    if (((CAM_W(0x2C) & 0x100) && CAM_H(0x73C) == 0) || CAM_H(0x73C) == 3) {
+        MASK &= ~0x10;
+        CTL &= ~0x10;
+    }
+    if ((CAM_W(0x2C) & 0x40) && CAM_H(0x84A) != 0) {
+        CAM_H(0x84A) -= D_800BE9E4;
+        MASK &= ~0x10;
+        CTL &= ~0x10;
+        if (CAM_H(0x84A) <= 0) {
+            CAM_H(0x84A) = 0;
+        }
+    }
+#undef MASK
+#undef CTL
+}
+#undef CAM_W
+#undef CAM_H
+#undef CAM_F
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125DB4.s")
+#endif
 
 void func_15126138(struct108 *arg0) {
     struct127 *temp_v0_2;
@@ -1390,9 +1828,504 @@ void func_1512623C(u8 *arg0, u8 *arg1, s32 arg2, f32 *arg3, f32 *arg4, f32 *arg5
     }
 }
 // ooh mama
+#ifdef NON_MATCHING
+/* P96: func_15126378 */
+void func_151CA150(u8 *arg0, s32 arg1);
+s32 func_15127520(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *id);
+s32 func_151277B0(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *id);
+f32 sinf(f32);   /* declared here so difftest compares the f12 argument (P96) */
+f32 cosf(f32);
+void func_1510B8AC(s32 arg0, f32 arg1, f32 arg2, f32 arg3);
+#endif
+#ifdef NON_MATCHING
+/* Aim mode of camera `arg0` (first-person aim / turret / sniper; type +0x23E). Returns the aim state of the target
+ * PL (= +0x3D4) +0x197: 0 = off, 2 = aiming (this frame handled here), else as is.
+ * Start (state 0, a type of the aim list, the aim flag 0x10 of the input record +0x36C and an "aim" type (PL
+ * +0x11A == 2, 0x1B, 0x1F, 0x29), holder on the floor, not climbing): the yaw starts at the holder's facing
+ * (+0x40 - 90; for 0x1F / 0x29 the riding object's facing minus its turn +0x2E4 * 0.02), the camera sits at the
+ * aim point (func_1512623C) looking 100 units along the yaw, the field of view (+0x184 / +0x188 of PL) is set on
+ * a type change, the projection (func_1510B8AC) and the aim sounds (func_1000FA64: 0x605 for 0x23 / 0x24, 0x622
+ * twice for 0x1B / 0x1F / 0x29) start, and the holder object is marked for this player (+0x2FC / +0x74).
+ * Each frame (state 2): stick (+0x36C bytes 2 / 3) turns the yaw / pitch (PL +0x174 / +0x178) with a squared
+ * response scaled by the zoom, the pitch is clamped per type, both are eased (func_15049978) into +0x16C / +0x170,
+ * buttons 8 / 4 zoom in / out (0x1A4 / 0x1A8 by the frame step 0.02 * fov), the look vector is rebuilt
+ * (func_15048F90 with the aim point and the target 1 unit along it) and the projection and draw distance scale
+ * follow the zoom (func_1510B6A8). Leaving aim (no flag, no type, PL +0x1AC, holder not able to aim) calls
+ * func_15127EB8 and returns 0. */
+#define A_F(o) (*(f32 *)(p + (o)))
+#define A_W(o) (*(s32 *)(p + (o)))
+#define A_PL (*(u8 **)(p + 0x3D4))
+#define A_HOLD (*(u8 **)(p + 0x3D0))
+#define A_F_OF(b, o) (*(f32 *)((b) + (o)))
+s32 func_15126378(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *e;
+    u8 *pl;
+    u8 *hold;
+    u8 *holder;
+    u8 *in;
+    f32 fov0;
+    f32 aspect;
+    f32 step;
+    f32 ang;
+    f32 rad;
+    f32 k;
+    f32 zoom;
+    f32 lo;
+    f32 hi;
+    f32 inv;
+    f32 dx;
+    f32 dy;
+    f32 lim;
+    f32 r;
+    f32 v[3];
+    union {
+        f32 f;
+        s32 w;
+    } prod;
+    u32 snd;
+    f32 sf;
+    s32 type;
+    s32 ok;
+    s32 is1B;
+    s32 is1F;
+    s32 st;
+    u16 flags;
+
+    e = (u8 *)D_800BE628 + p[0x23D] * 0x180;
+    aspect = A_F_OF(e, 0x70) / A_F_OF(e, 0x6C);
+    pl = A_PL;
+    fov0 = -(A_F_OF(e, 0x6C) - 5.0f);
+    step = A_F_OF(e, 0x6C) * 0.02f;
+    type = p[0x23E];
+    if ((type == 0xC && *(u16 *)(A_HOLD + 0x84) != 0x76) || type == 0x1B) {
+        *(u16 *)(p + 0x36A) |= 0x10;
+        **(u16 **)(p + 0x36C) |= 0x10;
+    }
+    st = pl[0x197];
+    if (st == 0) {
+        in = *(u8 **)(p + 0x36C);
+        if ((s8)in[2] != 0 || (s8)in[3] != 0) {
+            pl[0x194] = 1;
+            st = pl[0x197];
+        }
+    }
+    hold = A_HOLD;
+    if (hold[0x65] != 0) {
+        holder = (u8 *)D_800CC2D0 + (hold[0x65] - 1) * 0x32C;
+    } else {
+        holder = hold;
+    }
+    ok = pl[0x11A] == 2 || type == 0x1B || type == 0x1F || type == 0x29;
+    switch (type) {
+        case 0x23: case 0x24: case 0x16: case 0x18: case 0x41: case 0xC: case 0x14: case 0x3F: case 0x1B:
+        case 0x1F: case 0x29:
+            break;
+        default:
+            goto done_start;
+    }
+    if (!(**(u16 **)(p + 0x36C) & 0x10) || !ok) {
+        goto done_start;
+    }
+    if ((s32)A_F_OF(hold, 0x28) != 0 && (s32)A_F_OF(holder, 0x28) != 0) {
+        goto done_start;
+    }
+    if (hold[0x104] != 0 || st != 0) {
+        goto done_start;
+    }
+    /* start aiming */
+    A_PL[0x198] = 0;
+    *(s16 *)(p + 0x73C) = 0;
+    is1F = type == 0x1F;
+    if ((is1F || type == 0x29) && !(A_W(0x5F0) & 4)) {
+        ang = (A_F_OF(holder, 0x40) - 90.0f) - (f32)*(s16 *)(holder + 0x2E4) * 0.02f;
+        pl[0x194] = 1;
+    } else {
+        ang = A_F_OF(A_HOLD, 0x40) - 90.0f;
+    }
+    func_15048758(&ang);
+    rad = ang * 0.017453292f;
+    func_151239CC(arg0, 1);
+    pl[0x197] = 2;
+    func_151CA150(p, type);
+    func_1512623C(holder, A_PL, type, (f32 *)(p + 0x2F8), (f32 *)(p + 0x2FC), (f32 *)(p + 0x300), A_W(0x5F0) & 0x10);
+    A_F(0x2BC) = sinf(rad) * 100.0f + A_F(0x2F8);
+    A_F(0x2C0) = A_F_OF(A_HOLD, 0x18) + (f32)*(s16 *)(A_PL + 0x114) * 0.75f;
+    A_F(0x2C4) = cosf(rad) * 100.0f + A_F(0x300);
+    A_F_OF(pl, 0x13C) = A_F(0x2F8);
+    A_F_OF(pl, 0x140) = A_F(0x2FC);
+    A_F_OF(pl, 0x144) = A_F(0x300);
+    A_F_OF(pl, 0x18C) = A_F(0x37C);
+    A_F_OF(pl, 0x160) = A_F(0x2F8);
+    A_F_OF(pl, 0x164) = A_F(0x2FC);
+    A_F_OF(pl, 0x168) = A_F(0x300);
+    if (type != *(s32 *)(pl + 0x190)) {
+        if (type == 0x1B) {
+            k = 1.0f;
+        } else if (type == 0x16) {
+            k = 0.75f;
+        } else {
+            k = 0.5f;
+        }
+        if (type == 0x18 || type == 0x41 || type == 0x3F || type == 0x14 || type == 0x12) {
+            if (k < 0.0f) {
+                k = 0.0f;
+            } else if (0.6f < k) {
+                k = 0.6f;
+            }
+        }
+        pl[0x194] = 1;
+        *(s32 *)(pl + 0x190) = type;
+        A_F_OF(pl, 0x184) = (0.0f - fov0) * k + fov0;
+    }
+    if (pl[0x194] != 0) {
+        A_F_OF(pl, 0x174) = ang;
+        A_F_OF(pl, 0x178) = 0.0f;
+        A_F_OF(pl, 0x170) = 0.0f;
+        A_F_OF(pl, 0x17C) = 0.0f;
+        A_F_OF(pl, 0x180) = 0.0f;
+        pl[0x194] = 0;
+        A_F_OF(pl, 0x16C) = A_F_OF(pl, 0x174);
+    }
+    A_F_OF(pl, 0x188) = A_F_OF(pl, 0x184) * aspect;
+    A_F(0x19C) = A_F_OF(pl, 0x184);
+    A_F(0x1A0) = A_F_OF(pl, 0x188);
+    A_F(0x1A4) = A_F_OF(pl, 0x184);
+    A_F(0x1A8) = A_F_OF(pl, 0x188);
+    func_1510B8AC(p[0x23D], A_F(0x19C), A_F(0x1A0), 1.0f);
+    A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84) = 1.0f;
+    func_150627D4((struct127 *)A_HOLD);
+    D_800DBFF4[p[0x23D]] = 2;
+    if (type == 0x24 || type == 0x23 || type == 0x1B || is1F || type == 0x29) {
+        /* f32 -> u32 as the asm converts it (truncation; negative / NaN give 0xFFFFFFFF) */
+        sf = -A_F(0x1A4) * 10000.0f;
+        if (sf >= 2147483648.0f) {
+            snd = (sf - 2147483648.0f < 2147483648.0f) ? ((u32)(s32)(sf - 2147483648.0f) | 0x80000000) : 0xFFFFFFFF;
+        } else if (sf > -1.0f) {
+            snd = (u32)(s32)sf;
+        } else {
+            snd = 0xFFFFFFFF;
+        }
+        if (type == 0x24 || type == 0x23) {
+            func_1000FA64(0x605, 0, 0, 0, 0x6590, 0x12C, 0x12B, (s32)func_15127520, arg0, snd, 0, 0);
+        } else {
+            prod.f = A_F_OF(pl, 0x174) * A_F_OF(pl, 0x178);
+            func_1000FA64(0x622, 0, 0, 0, 0x6590, 0x12C, 0x12B, (s32)func_15127520, arg0, snd | 0x80000000, 0x100,
+                          0);
+            func_1000FA64(0x622, 0, 0, 0, 0x3E80, 0x12C, 0x12B, (s32)func_151277B0, arg0, prod.w, 0x100, 0);
+        }
+    }
+    holder[0x2FC] |= 1 << p[0x23D];
+    holder[0x74] |= 1 << p[0x23D];
+    st = pl[0x197];
+done_start:
+    if (st == 0) {
+        return 0;
+    }
+    if (st != 2) {
+        return st;
+    }
+    /* aiming: one frame */
+    flags = **(u16 **)(p + 0x36C);
+    func_1512623C(holder, A_PL, type, (f32 *)(p + 0x2F8), (f32 *)(p + 0x2FC), (f32 *)(p + 0x300), A_W(0x5F0) & 0x10);
+    zoom = A_F(0x19C) / fov0;
+    if (zoom < 0.0f) {
+        zoom = 0.0f;
+    } else if (1.0f < zoom) {
+        zoom = 1.0f;
+    }
+    if (!(flags & 0x10) || type == 0 || pl[0x1AC] != 0) {
+        goto leave;
+    }
+    hold = A_HOLD;
+    if (hold[0x1CA] == 0 && type != 0x29) {
+        goto leave;
+    }
+    is1B = type == 0x1B;
+    if (hold[0x104] != 0 && hold[0x65] == 0 && (s32)A_F_OF(hold, 0x28) != 0 && type != 0x1F && type != 0x29) {
+        goto leave;
+    }
+    is1F = type == 0x1F;
+    if (is1B) {
+        lo = 19.0f;
+        hi = 31.0f;
+    } else {
+        lo = 25.0f;
+        hi = 90.0f;
+    }
+    in = *(u8 **)(p + 0x36C);
+    inv = 1.0f / ((hi - lo) * zoom + lo);
+    inv = inv * inv;
+    dx = (f32)(((s8)in[2] >= 0) ? 1 : -1) * ((f32)(s8)in[2] * (f32)(s8)in[2] * inv);
+    dy = (f32)(((s8)in[3] >= 0) ? 1 : -1) * ((f32)(s8)in[3] * (f32)(s8)in[3] * inv);
+    if (is1B) {
+        dx *= 0.25f;
+        dy *= 0.5f;
+        if (dx < -3.0f) {
+            dx = -3.0f;
+        } else if (3.0f < dx) {
+            dx = 3.0f;
+        }
+        if (dy < -3.0f) {
+            dy = -3.0f;
+        } else if (3.0f < dy) {
+            dy = 3.0f;
+        }
+    } else if (type == 0xC) {
+        dx *= 1.5f;
+        dy *= 1.5f;
+    }
+    A_F_OF(pl, 0x174) -= dx;
+    A_F_OF(pl, 0x178) += dy;
+    func_15048758((f32 *)(pl + 0x174));
+    if (is1F || type == 0x29) {
+        lo = -80.0f;
+        hi = 30.0f;
+    } else if (is1B) {
+        lo = -60.0f;
+        hi = 50.0f;
+    } else {
+        lo = -80.0f;
+        hi = 80.0f;
+    }
+    if (A_F_OF(pl, 0x178) < lo) {
+        A_F_OF(pl, 0x178) = lo;
+    } else if (hi < A_F_OF(pl, 0x178)) {
+        A_F_OF(pl, 0x178) = hi;
+    }
+    func_15049978((f32 *)(pl + 0x16C), A_F_OF(pl, 0x174), (f32 *)(pl + 0x17C), 6.0f, 8.0f, A_F(0x7B4));
+    func_15049978((f32 *)(pl + 0x170), A_F_OF(pl, 0x178), (f32 *)(pl + 0x180), 6.0f, 8.0f, A_F(0x7B4));
+    /* zoom buttons */
+    if (type != 0x16 && type != 0xC && (flags & 0xC) != 0xC) {
+        if ((flags & 8) && fov0 < A_F(0x1A4)) {
+            A_F(0x1A4) -= step;
+            A_F(0x1A8) -= step * aspect;
+        } else if ((flags & 4) && A_F(0x1A4) < 0.0f) {
+            A_F(0x1A4) += step;
+            A_F(0x1A8) += step * aspect;
+        }
+    }
+    if (type == 0x24) {
+        lim = fov0;
+    } else if (is1B) {
+        lim = fov0 * 0.5f;
+    } else {
+        lim = fov0 * 0.75f;
+    }
+    if (A_F(0x1A4) < lim) {
+        A_F(0x1A4) = lim;
+    } else if (0.0f < A_F(0x1A4)) {
+        A_F(0x1A4) = 0.0f;
+    }
+    lim = lim * aspect;
+    if (A_F(0x1A8) < lim) {
+        A_F(0x1A8) = lim;
+    } else if (0.0f < A_F(0x1A8)) {
+        A_F(0x1A8) = 0.0f;
+    }
+    A_F(0x19C) = A_F(0x1A4);
+    A_F(0x1A0) = A_F(0x1A8);
+    A_F_OF(pl, 0x184) = A_F(0x1A4);
+    A_F_OF(pl, 0x188) = A_F(0x1A8);
+    /* look vector: yaw +0x16C, pitch +0x170 (degrees, negated) */
+    r = 1.0f;
+    v[0] = cosf(A_F_OF(pl, 0x170) * -0.017453292f) * r;
+    v[1] = sinf(A_F_OF(pl, 0x170) * -0.017453292f) * r;
+    r = v[0];
+    v[0] = cosf(A_F_OF(pl, 0x16C) * -0.017453292f) * r;
+    v[2] = sinf(A_F_OF(pl, 0x16C) * -0.017453292f) * r;
+    A_F(0x2BC) = A_F(0x2F8) + v[0];
+    A_F(0x2C0) = A_F(0x2FC) + v[1];
+    A_F(0x2C4) = A_F(0x300) + v[2];
+    hold = A_HOLD;
+    A_F(0x2A4) = A_F_OF(hold, 0x14);
+    A_F(0x2A8) = A_F_OF(hold, 0x18);
+    A_F(0x2AC) = A_F_OF(hold, 0x1C);
+    A_F_OF(pl, 0x148) = A_F(0x2BC);
+    A_F_OF(pl, 0x14C) = A_F(0x2C0);
+    A_F_OF(pl, 0x150) = A_F(0x2C4);
+    A_F_OF(pl, 0x13C) = A_F(0x2F8);
+    A_F_OF(pl, 0x140) = A_F(0x2FC);
+    A_F_OF(pl, 0x144) = A_F(0x300);
+    A_F_OF(pl, 0x130) = v[0];
+    A_F_OF(pl, 0x134) = v[1];
+    A_F_OF(pl, 0x138) = v[2];
+    func_15048F90((struct17 *)(pl + 0x13C), (struct17 *)(pl + 0x148), (struct17 *)(pl + 0x130));
+    A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84) = -0.94f * zoom + 1.0f;
+    func_1510B6A8(p[0x23D], A_F(0x19C), A_F(0x1A0), A_F_OF((u8 *)D_800BE628 + p[0x23D] * 0x180, 0x84),
+                  71.0f * zoom + 54.0f);
+    return 1;
+leave:
+    func_15127EB8(arg0);
+    return 0;
+}
+#undef A_F
+#undef A_W
+#undef A_PL
+#undef A_HOLD
+#undef A_F_OF
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15126378.s")
+#endif
+#ifdef NON_MATCHING
+/* P139 */
+extern u16 D_80089880[2][3];   /* per sound set: { moving id, stop id, idle id }: { 0x603, 0x604, 0x605 }, { 0x620, 0x621, 0x622 } */
+void func_151CC840(s32 arg0);
+
+/*
+ * scope_motion_sound_update: per-frame callback of the scope's motion sounds (registered with func_1000FA64 by the
+ * scope code above with id 0x605, or 0x622 with bit 31 of the value set; voice +0x18 = the holder, voice +0x1C =
+ * (set << 31) | last value). The set (bit 31) picks a row of D_80089880. A pending idle id is cleared to 0, then
+ * the voice position (+2/+4/+6) follows the holder's position (holder +0x3D0, floats +0x14..+0x1C, truncated).
+ * While the holder's player (+0x3D4) is in state 2 (+0x197): the value is holder +0x1A4 * -10000 converted to u32
+ * (IDO conversion: out of range / negative -> 0xFFFFFFFF). When it changed it is stored and, unless the id is the
+ * row's moving id already, the voice's sound (+0x24) is stopped (func_100111C8) and the id becomes the moving
+ * id. When it did not change and the id is the moving id: the sound is stopped and the stop id is played
+ * (func_10010F30(id, 20000, 0x40, 0, 0)) and becomes the id; else, if flag 0x80 of +0x10 is set,
+ * func_151CC840(holder) and the idle sound is played. Flag 0x80 is always cleared. Returns 0 (keep the voice); 1
+ * when the player is not in state 2.
+ */
+s32 func_15127520(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *id) {
+    u32 packed = *(u32 *) (voice + 0x1C);
+    u8 *holder = *(u8 **) (voice + 0x18);
+    u32 set = packed >> 31;
+    u32 last = packed & 0xFFFFFF;
+    u16 *ids = D_80089880[set];
+    f32 v = *(f32 *) (holder + 0x1A4) * -10000.0f;
+    s32 changed = 0;
+    u32 cur;
+    f32 *pos;
+
+    if (*id == ids[2]) {
+        *id = 0;
+    }
+    pos = *(f32 **) (holder + 0x3D0);
+    *(s16 *) (voice + 2) = (s32) pos[5];
+    pos = *(f32 **) (holder + 0x3D0);
+    *(s16 *) (voice + 4) = (s32) pos[6];
+    pos = *(f32 **) (holder + 0x3D0);
+    *(s16 *) (voice + 6) = (s32) pos[7];
+    if ((*(u8 **) (holder + 0x3D4))[0x197] != 2) {
+        return 1;
+    }
+    /* f32 -> u32 as the asm converts it (truncation; negative / NaN / too large give 0xFFFFFFFF) */
+    if (v >= 2147483648.0f) {
+        cur = (v - 2147483648.0f < 2147483648.0f) ? ((u32) (s32) (v - 2147483648.0f) | 0x80000000) : 0xFFFFFFFF;
+    } else if (v > -1.0f) {
+        cur = (u32) (s32) v;
+    } else {
+        cur = 0xFFFFFFFF;
+    }
+    if (last != cur) {
+        changed = 1;
+        *(u32 *) (voice + 0x1C) = (set << 31) | cur;
+    }
+    if (changed) {
+        if (*id != ids[0]) {
+            if (*(u16 *) (voice + 0x24) != 0) {
+                func_100111C8(*(u16 *) (voice + 0x24));
+            }
+            *(u16 *) (voice + 0x24) = 0;
+            *(s32 *) (voice + 0x10) &= ~0x80;
+            *id = ids[0];
+        }
+    } else if (*id == ids[0]) {
+        if (*(u16 *) (voice + 0x24) != 0) {
+            func_100111C8(*(u16 *) (voice + 0x24));
+        }
+        *(u16 *) (voice + 0x24) = 0;
+        *id = ids[1];
+        func_10010F30(ids[1], 20000, 0x40, 0, 0);
+        *(s32 *) (voice + 0x10) &= ~0x80;
+    } else if (*(s32 *) (voice + 0x10) & 0x80) {
+        func_151CC840((s32) holder);
+        func_10010F30(ids[2], 20000, 0x40, 0, 0);
+    }
+    *(s32 *) (voice + 0x10) &= ~0x80;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15127520.s")
+#endif
+#ifdef NON_MATCHING
+/* P139 */
+/*
+ * scope_zoom_sound_update: per-frame callback of the 0x622 zoom sound (registered with func_1000FA64 by the scope
+ * code above; voice +0x18 = the holder, voice +0x1C = (stall count << 24) | low 24 bits of the last zoom product).
+ * A pending id 0x622 is cleared to 0 first, then the voice position (+2/+4/+6) follows the holder's position
+ * (holder +0x3D0, floats +0x14..+0x1C, truncated). While the holder's player (+0x3D4) is in state 2 (+0x197):
+ * the zoom product (+0x174 * +0x178, its low 24 float bits) is compared with the last one: equal -> count 0;
+ * changed by more than 100 (unsigned difference) -> the count grows by the frame time D_800BE9E4; a count of 10
+ * or more means the zoom has stopped: the voice's sound (+0x24) is stopped (func_100111C8), flag 0x80 of +0x10
+ * cleared and the id set to 0x61C (end sound) once. When it moves again after 0x61C, the sound is stopped and
+ * the id becomes 0x61D (restart). Without a sound and id the flag 0x80 is cleared. Returns 0 (keep the voice);
+ * 1 when the player is no longer in state 2.
+ */
+s32 func_151277B0(u8 *voice, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *id) {
+    u8 *holder = *(u8 **) (voice + 0x18);
+    u32 packed = *(u32 *) (voice + 0x1C);
+    u8 *pl = *(u8 **) (holder + 0x3D4);
+    u32 last = packed & 0xFFFFFF;
+    u32 count = packed >> 24;
+    s32 stopped = 0;
+    union {
+        f32 f;
+        u32 w;
+    } zoom;
+    u32 cur;
+    f32 *pos;
+
+    zoom.f = *(f32 *) (pl + 0x174) * *(f32 *) (pl + 0x178);
+    cur = zoom.w & 0xFFFFFF;
+    if (*id == 0x622) {
+        *id = 0;
+    }
+    pos = *(f32 **) (holder + 0x3D0);
+    *(s16 *) (voice + 2) = (s32) pos[5];
+    pos = *(f32 **) (holder + 0x3D0);
+    *(s16 *) (voice + 4) = (s32) pos[6];
+    pos = *(f32 **) (holder + 0x3D0);
+    *(s16 *) (voice + 6) = (s32) pos[7];
+    if ((*(u8 **) (holder + 0x3D4))[0x197] != 2) {
+        return 1;
+    }
+    if (last != cur) {
+        if (count < 10) {
+            if (last - cur > 100) {
+                count += D_800BE9E4;
+            }
+        } else {
+            stopped = 1;
+        }
+    } else {
+        count = 0;
+    }
+    *(u32 *) (voice + 0x1C) = (count << 24) | cur;
+    if (stopped) {
+        if (*id != 0x61C) {
+            if (*(u16 *) (voice + 0x24) != 0) {
+                func_100111C8(*(u16 *) (voice + 0x24));
+            }
+            *(u16 *) (voice + 0x24) = 0;
+            *(s32 *) (voice + 0x10) &= ~0x80;
+            *id = 0x61C;
+        }
+    } else if (*id == 0x61C) {
+        if (*(u16 *) (voice + 0x24) != 0) {
+            func_100111C8(*(u16 *) (voice + 0x24));
+        }
+        *(u16 *) (voice + 0x24) = 0;
+        *id = 0x61D;
+        *(s32 *) (voice + 0x10) &= ~0x80;
+    }
+    if (*(u16 *) (voice + 0x24) == 0 && *id == 0) {
+        *(s32 *) (voice + 0x10) &= ~0x80;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151277B0.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_151279A0.s")
 
 #ifdef NON_MATCHING
@@ -1466,7 +2399,112 @@ void func_15127FEC(struct108 *arg0, s32 arg1, s32 arg2) {
 #endif
 }
 
+#ifdef NON_MATCHING
+/* Camera transition (+0x7F4 state: 0 idle, 1 start, 2 running): moves the eye +0x2BC from the start point +0x7F8
+ * to the end point +0x804 (end x / z follow the player, y from func_15124C38) over +0x834 ticks (countdown
+ * +0x840, progress t = +0x830), blending yaw +0x37C, distance D_800DC430, height D_800DC434 and the extra
+ * angles +0x5E8 / +0x3A8 (func_15048720 = angle lerp). The camera mode +0x23C cancels it. Returns 0 when idle,
+ * nonzero while it runs (on the last tick the asm returns the +0x3D0 pointer left in v0; func_15048720 does
+ * not touch v0), the state itself for an unknown state. */
+s32 func_15128030(struct108 *arg0) {
+    u8 *p = (u8 *)arg0;
+    u8 *t = p + 0x7F4;
+    u8 *pl;
+    f32 dx;
+    f32 dz;
+    f32 yaw;
+    s32 last;
+
+#define TF(o) (*(f32 *)(t + (o)))
+#define PF(o) (*(f32 *)(p + (o)))
+#define PL (*(u8 **)(p + 0x3D0))
+    if (p[0x23C] != 0) {
+        *(u16 *)(t + 0x40) = 0;
+        *(u16 *)t = 0;
+        TF(0x2C) = 999.0f;
+        return 0;
+    }
+    switch (*(u16 *)t) {
+        case 0:
+            return 0;
+        case 1:
+            pl = PL;
+            dx = PF(0x2F8) - *(f32 *)(pl + 0x14);
+            dz = PF(0x300) - *(f32 *)(pl + 0x1C);
+            TF(0x1C) = sqrtf(dx * dx + dz * dz);
+            PF(0x5E8) = 0.0f;
+            PF(0x660) = 0.0f;
+            PF(0x3A8) = 0.0f;
+            PF(0x65C) = 0.0f;
+            PF(0x83C) = PF(0x2FC) - PF(0x35C);
+            func_15125594(arg0);
+            TF(0x20) = PF(0x37C);
+            func_15128D50(arg0, &TF(0x34), &TF(0x38));
+            *(s16 *)(p + 0x840) = *(u16 *)(t + 0x40);
+            TF(0x3C) = 0.0f;
+            *(u16 *)t = 2;
+            /* fallthrough */
+        case 2:
+            break;
+        default:
+            return *(u16 *)t;
+    }
+    last = *(s16 *)(p + 0x840) == 0;
+    if (p[0x23C] != 0) {
+        TF(0x3C) = 1.0f;
+        last = TRUE;
+        *(s16 *)(p + 0x840) = 0;
+    } else {
+        TF(0x3C) = 1.0f - (f32) * (s16 *)(p + 0x840) / (f32) * (u16 *)(t + 0x40);
+    }
+    func_15123568(arg0);
+    TF(0x28) = PF(0x374);
+    PF(0x838) = PF(0x348);
+    TF(0x10) = *(f32 *)(PL + 0x14);
+    func_15124C38(arg0, &TF(0x14));
+    yaw = TF(0x2C);
+    TF(0x18) = *(f32 *)(PL + 0x1C);
+    while (yaw < 0.0f) {
+        yaw += 360.0f;
+    }
+    pl = PL;
+    PF(0x2A4) = *(f32 *)(pl + 0x14);
+    PF(0x2A8) = *(f32 *)(pl + 0x18);
+    PF(0x2AC) = *(f32 *)(pl + 0x1C);
+    PF(0x390) = yaw;
+    while (PF(0x390) < -360.0f) {
+        PF(0x390) += 360.0f;
+    }
+    PF(0x2BC) = TF(0x4) + (TF(0x10) - TF(0x4)) * TF(0x3C);
+    PF(0x2C0) = TF(0x8) + (TF(0x14) - TF(0x8)) * TF(0x3C);
+    PF(0x2C4) = TF(0xC) + (TF(0x18) - TF(0xC)) * TF(0x3C);
+    if (*(s32 *)(p + 0x2C) != 0x40) {
+        PF(0x37C) = yaw = func_15048720(TF(0x3C), TF(0x20), TF(0x2C));
+        PF(0x39C) = yaw * 0.017453292f;
+    }
+    D_800DC430 = TF(0x1C) + (TF(0x28) - TF(0x1C)) * TF(0x3C);
+    D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C)) * TF(0x3C);
+    PF(0x5E8) = func_15048720(TF(0x3C), 0.0f, TF(0x34));
+    PF(0x3A8) = func_15048720(TF(0x3C), 0.0f, TF(0x38));
+    if (last) {
+        *(u16 *)(t + 0x40) = 0;
+        *(u16 *)t = 0;
+        *(s32 *)(p + 0x84) |= 8;
+        TF(0x2C) = 999.0f;
+        return 1;
+    }
+    *(s16 *)(p + 0x840) -= D_800BE9E4;
+    if (*(s16 *)(p + 0x840) < 0) {
+        *(s16 *)(p + 0x840) = 0;
+    }
+    return 1;
+#undef TF
+#undef PF
+#undef PL
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15128030.s")
+#endif
 #ifdef NON_MATCHING
 /* P41: camera mode dispatcher on controller +0x2C (1 / 0x800: func_15122EF0, the follow camera). */
 void func_151283B8(struct108 *arg0) {
@@ -1479,7 +2517,7 @@ void func_151283B8(struct108 *arg0) {
             func_151220D0(arg0);
             break;
         case 8:
-            func_151221F0(arg0, 0);
+            func_151221F0(arg0, 0.0f);
             break;
         case 0x40:
             func_15129EA4(arg0);
@@ -1519,8 +2557,12 @@ void func_15121F40(struct108 *);
 #else
 s32 func_15121F40(struct108 *);
 #endif
+#ifdef NON_MATCHING
+void func_151236D0(struct108 *); /* P68: v0 is undefined in the asm */
+#else
 s32 func_151236D0(struct108 *);
-s32 func_151256BC(struct108 *);
+#endif
+void func_151256BC(struct108 *);
 s32 func_15126378(struct108 *);
 s32 func_15128030(struct108 *);
 s32 func_1512A8D0(struct108 *);

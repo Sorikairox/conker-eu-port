@@ -1,0 +1,20 @@
+s|            return \*(u16 \*)t;|            return 1;| %
+s|            TF(0x1C) = sqrtf(dx \* dx + dz \* dz);|            TF(0x1C) = dx * dx + dz * dz;| %
+s|            PF(0x83C) = PF(0x2FC) - PF(0x35C);|            PF(0x83C) = PF(0x2FC) + PF(0x35C);| %
+s|            TF(0x20) = PF(0x37C);|            TF(0x20) = PF(0x374);| %
+s|            \*(u16 \*)t = 2;|            *(u16 *)t = 3;| %
+s|    last = \*(s16 \*)(p + 0x840) == 0;|    last = *(s16 *)(p + 0x840) <= 1;| %
+s|TF(0x3C) = 1.0f - (f32)|TF(0x3C) = 1.5f - (f32)| %
+s|    TF(0x28) = PF(0x374);|    TF(0x28) = PF(0x348);| %
+s|    TF(0x10) = \*(f32 \*)(PL + 0x14);|    TF(0x10) = *(f32 *)(PL + 0x18);| %
+s|    while (yaw < 0.0f) {|    if (yaw < 0.0f) {| %
+s|    PF(0x2A8) = \*(f32 \*)(pl + 0x18);|    PF(0x2A8) = *(f32 *)(pl + 0x1C);| %
+s|    while (PF(0x390) < -360.0f) {|    while (PF(0x390) < -10.0f) {| %
+s|    PF(0x2C0) = TF(0x8) + (TF(0x14) - TF(0x8)) \* TF(0x3C);|    PF(0x2C0) = TF(0x8) + (TF(0x14) - TF(0x4)) * TF(0x3C);| %
+s|    if (\*(s32 \*)(p + 0x2C) != 0x40) {|    if (*(s32 *)(p + 0x2C) != 0x41) {| %
+s|        PF(0x39C) = yaw \* 0.017453292f;|        PF(0x39C) = yaw * 0.0175f;| %
+s|    D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C)) \* TF(0x3C);|    D_800DC434 = PF(0x83C) + (PF(0x838) - PF(0x83C));| %
+s|    PF(0x3A8) = func_15048720(TF(0x3C), 0.0f, TF(0x38));|    PF(0x3A8) = func_15048720(TF(0x3C), 0.0f, TF(0x34));| %
+s|        \*(s32 \*)(p + 0x84) \|= 8;|        *(s32 *)(p + 0x84) \|= 4;| %
+s|    \*(s16 \*)(p + 0x840) -= D_800BE9E4;|    *(s16 *)(p + 0x840) -= 1;| %
+s|    if (\*(s16 \*)(p + 0x840) < 0) {|    if (*(s16 *)(p + 0x840) < 1) {| %

@@ -233,11 +233,19 @@ def build_tu(func, p, src, code):
         k = src.rfind('#ifdef NON_MATCHING\n', 0, a)
         # P80: comment / blank lines may sit between the #else and the pragma (game_981E0.c "// ??" notes)
         e = src.rfind('#else\n', 0, a)
+        nmside = func_span(src[k:e], func) if k >= 0 and k < e and '#endif' not in src[k:a] else None
         between = src[e + len('#else\n'):a] if e >= 0 else None
         only_notes = between is not None and all(not l.strip() or l.strip().startswith('//') for l in between.split('\n'))
         if k >= 0 and e > k and only_notes and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
             a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
-        tu = src[:a] + '\n' + code + '\n' + src[b:]
+            tu = src[:a] + '\n' + code + '\n' + src[b:]
+        elif nmside:
+            # P73: the NON_MATCHING side holds more than this function (func_1501B300 + func_1501B640): replace
+            # only its definition there. Before, the candidate went into the #else side, which nm_resolve drops,
+            # so the src_eu body was tested instead of the candidate (every mutant "survived").
+            tu = src[:k + nmside[0]] + code + src[k + nmside[1]:]
+        else:
+            tu = src[:a] + '\n' + code + '\n' + src[b:]
     else:
         sp = func_span(src, func)
         if sp is None: raise RuntimeError('no definition or pragma of %s in %s' % (func, p))
@@ -247,7 +255,8 @@ def build_tu(func, p, src, code):
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0
         tu = tu[:k] + '\n'.join(hoist) + '\n' + tu[k:]
     tu = nm_resolve(tu, True)   # other NON_MATCHING blocks: keep the C side
-    # P80: the candidate must survive the splice (an unrecognised layout used to keep the old NM C and test that)
+    # P80: the candidate must survive the splice (an unrecognised layout used to keep the old NM C and test that;
+    # P73: same for a multi-function NM block, where the candidate went into the dropped #else side)
     cr = nm_resolve(code, True); cs = func_span(cr, func)
     if cs is not None and cr[cs[0]:cs[1]] not in tu:
         raise RuntimeError('candidate %s was dropped when splicing it into %s' % (func, p))

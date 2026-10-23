@@ -1,0 +1,8 @@
+s|    for (i = 0; i < D_800C3A5A\[slot\]; i++) {|    for (i = 0; i <= D_800C3A5A[slot]; i++) {| %
+s|if (D_800C39F0\[slot\]\[i\] == 0 \|\| D_800C39E8\[slot\]\[i\] == 0) {|if (D_800C39E8[slot][i] == 0) {| %
+s|if (D_800C39F0\[slot\]\[i\] == 0 \|\| D_800C39E8\[slot\]\[i\] == 0) {|if (D_800C39F0[slot][i] == 0) {| %
+s|        rec = D_800C3A10\[slot\] + i \* 8;|        rec = D_800C3A10[slot] + i * 4;| %
+s|        if (\*(u16 \*)rec == 2) {|        if (*(u16 *)rec != 0) {| %
+s|            obj = func_15083E90(rec\[2\]);|            obj = func_15083E90(rec[3]);| %
+s|            if (obj != NULL) {|            if (1) {| %
+s|                func_15021834(obj, slot, i);|                func_15021834(obj, slot, -1);| %

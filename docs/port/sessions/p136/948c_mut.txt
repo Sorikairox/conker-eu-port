@@ -1,0 +1,16 @@
+s/f32 cp = func_151423D8((pitch - 0x40) \& 0xFF);/f32 cp = func_151423D8((pitch + 0x40) \& 0xFF);/
+s/f32 sy = func_151423D8((u8) yaw);/f32 sy = func_151423D8((u8) pitch);/
+s/    sb.model = 1;/    sb.model = 2;/
+s/(n == 0xA) ? 0x28 : 8;/(n == 0xB) ? 0x28 : 8;/
+s/    mb.kind = n;/    mb.kind = n + 1;/
+s/    sb.pos\[1\] = y;/    sb.pos[1] = z;/
+s/    mb.speed = drag;/    mb.speed = scale;/
+s/    sb.tint = tint + 3;/    sb.tint = tint;/
+s/    mb.alpha = 0xFF;/    mb.alpha = 0x7F;/
+s/    mb.vel\[0\] = h \* cy;/    mb.vel[0] = h * sy;/
+s/    mb.vel\[1\] = -speed \* cp;/    mb.vel[1] = speed * cp;/
+s/    rb.render\[2\] = 0x160600;/    rb.render[2] = 0x160601;/
+s/    rb.mode\[1\] = 0x10;/    rb.mode[1] = 0x11;/
+s/    rb.b1 = 9;/    rb.b1 = 8;/
+s/(u8 \*) \&rb, 0, flag, 1);/(u8 *) \&rb, 0, flag, 0);/
+s/    sb.sprite = sprite;/    sb.sprite = sprite + 1;/
