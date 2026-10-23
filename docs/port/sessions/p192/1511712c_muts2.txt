@@ -1,0 +1,4 @@
+s/s32 farthest = 0;/s32 farthest = 1;/
+s/dist = target\[i\] - pos\[i\];/dist = target[i] - pos[i] - 1;/
+s/if (dist < 0) {/if (dist < -1) {/
+s/if (farthest <= 0 \&\&/if (farthest < 0 \&\&/

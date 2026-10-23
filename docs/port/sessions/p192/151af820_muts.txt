@@ -1,0 +1,17 @@
+s/return 0;/return 1;/
+s/func_1516962C(0x28, obj, 0x16);/func_1516962C(0x28, obj, 0x17);/
+s/sp.u24 = 0;/sp.u24 = 1;/
+s/sp.u28 = 0;/sp.u28 = 1;/
+s/sp.u2C = obj\[0x3B\];/sp.u2C = obj[0x3A];/
+s/sp.u34 = 1;/sp.u34 = 2;/
+s/sp.u38 = 0.0f;/sp.u38 = 1.0f;/
+s/sp.u40 = 0.0f;/sp.u40 = 1.0f;/
+s/sp.u44 = 9.8f;/sp.u44 = 9.9f;/
+s/sp.u48 = 0.143f;/sp.u48 = 0.144f;/
+s/sp.u4C = 0x140;/sp.u4C = 0x141;/
+s/sp.u4E = 6;/sp.u4E = 7;/
+s/sp.u4F = 10;/sp.u4F = 11;/
+s/sp.u50 = -1;/sp.u50 = 1;/
+s/sp.u51 = 9;/sp.u51 = 8;/
+s/(\&sp, 0, arg1, arg2)/(\&sp, 1, arg1, arg2)/
+s/(\&sp, 0, arg1, arg2)/(\&sp, 0, arg1 + 1, arg2)/

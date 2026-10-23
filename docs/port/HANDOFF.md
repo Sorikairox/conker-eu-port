@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P192, 2026-10-24). Details: `docs/port/sessions/P192.md`
+
+- Level 0x29 stubs (browser P185 census) now hand C (NM), difftest EQUIV + setups + mutants: **func_15080628**
+  text_queue_tempo_events (3083 stub hits), **func_15116F34** mover_step + its callee **func_1511712C** mover_step_sfx,
+  **func_1511AA1C** obj_texture_anim_step (real D_800896C4 table via DIFFTEST_ROMDATA), **func_151831CC**
+  water_mesh_wave_update.
+- Breadth (hand C, NM): func_1509D274, func_151AF820, func_1507E8E0 (void under NM, ADE10 prototype), func_15088760,
+  func_15088360, func_150F58C0, func_150637B4, func_15007558, func_150B7B9C, func_15088B08 (table in P192.md).
+- game_981E0.c: `s32 func_151AABC4(struct127 *, s32);` under NON_MATCHING (coordinator request).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1324 NM bodies), selftest 65/65, progress_nm 5318/5915 (89.9%), C bytes 73.5%. No difftest processes left.
+
+## Next steps (from P192)
+
+1. Browser: P192.md section 3 (level 0x29 moving scenery / animated textures / water, text queue 'L' records).
+2. Remaining level 0x29 stubs in port files: func_1511ED08 (308), func_15118F2C (350), func_151184BC (652) (game_eu_142E40).
+3. Breadth: p192/asmlist.py smallest first (next: func_15088130 67, func_150DBA98 70, func_15080900 72, func_150DE8AC 75,
+   func_150E7B20 76, func_150D7B6C 77); P138 / P141 leftovers.
+4. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged).
+
 ## State (session P190, 2026-10-24). Details: `docs/port/sessions/P190.md`
 
 - **func_150A4FE4** obj_floor_mesh_update (game_eu_D1760, 295, Rare hand asm): readable hand C (NM) verified with the

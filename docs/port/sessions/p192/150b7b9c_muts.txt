@@ -1,0 +1,15 @@
+s/sp.u30 = 6;/sp.u30 = 5;/
+s/sp.u2E = 0x40;/sp.u2E = 0x41;/
+s/box = \&D_800D9CB8\[slot\];/box = \&D_800D9CB8[slot + 1];/
+s/sp.u31 = 1;/sp.u31 = 0;/
+s/sp.u2C = 0x58;/sp.u2C = 0x57;/
+s/sp.u1C = width;/sp.u1C = width + 1;/
+s/sp.u18 = 0;/sp.u18 = 1;/
+s/sp.u0 = \&D_80091C98;/sp.u0 = \&D_80091C98 + 1;/
+s/sp.u35 = 0xFF;/sp.u35 = 0xFE;/
+s/sp.u39 = 0;/sp.u39 = 1;/
+s/sp.u37 = 0x15;/sp.u37 = 0x16;/
+s/sp.u2A = 0x51;/sp.u2A = 0x50;/
+s/sp.u20 = 170.0f;/sp.u20 = 171.0f;/
+s/if (\*box != 0) {/if (*box == 0) {/
+s/\*box = (s32)func_15169ED8(\&sp);/func_15169ED8(\&sp);/

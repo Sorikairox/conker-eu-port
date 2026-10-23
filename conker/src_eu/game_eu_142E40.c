@@ -583,15 +583,137 @@ void func_15116EB0(struct_15116EB0 *arg0, struct_15116EB0_1 *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15116F34(u8 *obj);
+#endif
 void func_15116F04(u8 *arg0) {
     if (arg0[0x73] & 2) {
         func_15116F34(arg0);
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116F34.s")
+#ifdef NON_MATCHING
+// mover_step: moves the object's s16 position +0x10 towards its s32 target +0x7C (+0x3C: sound entry index >> 10,
+// speed in the other bits; +0x5A gets the per-axis delta). At the target the deltas are cleared and the entry's
+// stop sound plays if the move sound was on (+0x74); entries with a near-arrival sound go to func_1511712C;
+// otherwise the move sound starts (unless +0x74) and each axis steps by (speed * D_800BE9E4) / 2, clamped.
+typedef struct {
+    /* 0x0 */ s16 move_sfx;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 stop_sfx;
+    /* 0x6 */ s16 unk6;
+    /* 0x8 */ s16 near_sfx;
+    /* 0xA */ s16 near_lead;
+} MoverSfx; // 0xC
+extern MoverSfx D_80089600[];
+s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
 
+void func_1511712C(u8 *obj);
+
+void func_15116F34(u8 *obj) {
+    s32 bits = *(s32 *)(obj + 0x3C);
+    s32 kind = bits >> 10;
+    s16 *pos = (s16 *)(obj + 0x10);
+    s32 *target = (s32 *)(obj + 0x7C);
+    s16 *delta = (s16 *)(obj + 0x5A);
+    s32 step;
+    s32 i;
+
+    if (target[0] == pos[0] && target[1] == pos[1] && target[2] == pos[2]) {
+        delta[2] = 0;
+        delta[1] = delta[2];
+        delta[0] = delta[2];
+        if (*(u16 *)(obj + 0x74) != 0) {
+            if (kind != 0 && D_80089600[kind].stop_sfx != 0) {
+                func_151152A4(obj, D_80089600[kind].stop_sfx, 0x5DC0, 0x7D0, 0xFA0, 4);
+            }
+            *(u16 *)(obj + 0x74) = 0;
+        }
+        return;
+    }
+    if (kind != 0 && D_80089600[kind].near_sfx != 0) {
+        func_1511712C(obj);
+        return;
+    }
+    if (kind != 0 && *(u16 *)(obj + 0x74) == 0 && D_80089600[kind].move_sfx != 0) {
+        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+    }
+    step = ((bits & 0xFFFF03FF) * D_800BE9E4) >> 1;
+    for (i = 0; i < 3; i++) {
+        delta[i] = pos[i];
+        if (pos[i] != target[i]) {
+            if (target[i] < pos[i]) {
+                pos[i] -= step;
+                if (pos[i] < target[i]) {
+                    pos[i] = target[i];
+                }
+            } else {
+                pos[i] += step;
+                if (target[i] < pos[i]) {
+                    pos[i] = target[i];
+                }
+            }
+        }
+        delta[i] = pos[i] - delta[i];
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116F34.s")
+#endif
+
+#ifdef NON_MATCHING
+// mover_step_sfx: func_15116F34's path for movers whose sound entry has a near-arrival sound: starts the move sound
+// (entry +0, unless +0x74 says it already plays), steps the s16 position +0x10 towards the s32 target +0x7C by
+// ((+0x3C & 0xFFFF03FF) * D_800BE9E4) / 2 per axis (clamped; +0x5A gets the per-axis delta) and plays the entry's
+// +8 sound once the largest remaining distance minus +0xA * speed / 2 drops to 0 (on the frame it crosses, or
+// when the move sound started this frame).
+void func_1511712C(u8 *obj) {
+    s32 bits = *(s32 *)(obj + 0x3C);
+    s32 kind = bits >> 10;
+    s32 speed = bits & 0xFFFF03FF;
+    s16 *pos = (s16 *)(obj + 0x10);
+    s32 *target = (s32 *)(obj + 0x7C);
+    s16 *delta = (s16 *)(obj + 0x5A);
+    s32 started = FALSE;
+    s32 farthest = 0;
+    s32 step;
+    s32 dist;
+    s32 i;
+
+    if (kind != 0 && *(u16 *)(obj + 0x74) == 0 && D_80089600[kind].move_sfx != 0) {
+        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+        started = TRUE;
+    }
+    step = (speed * D_800BE9E4) >> 1;
+    for (i = 0; i < 3; i++) {
+        delta[i] = pos[i];
+        if (pos[i] != target[i]) {
+            if (target[i] < pos[i]) {
+                pos[i] -= step;
+                dist = pos[i] - target[i];
+            } else {
+                pos[i] += step;
+                dist = target[i] - pos[i];
+            }
+            if (dist < 0) {
+                pos[i] = target[i];
+            }
+            if (farthest < dist) {
+                farthest = dist;
+            }
+        }
+        delta[i] = pos[i] - delta[i];
+    }
+    if (kind != 0 && D_80089600[kind].near_sfx != 0) {
+        farthest -= (D_80089600[kind].near_lead * speed) >> 1;
+        if (farthest <= 0 && (-step < farthest || started)) {
+            func_151152A4(obj, D_80089600[kind].near_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511712C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151172FC.s")
 
@@ -1025,7 +1147,90 @@ loop_2:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511A998.s")
 #endif
+#ifdef NON_MATCHING
+// obj_texture_anim_step: steps the animated texture of a scenery object. The first D_800896C4 entry that applies
+// (level filter -1 or the current level D_800BE9F0; id 0xFF = any, else the object's +0x54 type, with 0x8000 set for
+// level-filtered entries) gives the frame table, frame count, ticks per frame and ping-pong flag. *slots holds the
+// object's texture slot (looked up once from its +0x1C texture list by func_1511A998: index << 16 | slot) and
+// *state the playing direction (high half) and the tick counter (low half). The frame texture is loaded
+// (func_1510D66C, age 3 on levels 6 / 0x3B else 0x3E) and patched into the display list (func_1510DDF4).
+typedef struct {
+    /* 0x0 */ s32 *frames;
+    /* 0x4 */ u8 count;
+    /* 0x5 */ u8 id;
+    /* 0x6 */ s8 level;
+    /* 0x7 */ u8 ticks;
+    /* 0x8 */ u8 pingpong;
+} TexAnim; // 0xC
+extern TexAnim D_800896C4[24];
+s32 func_1511A998(s8 *arg0, s32 *arg1);
+s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
+void func_1510DDF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+void func_1511AA1C(u8 *obj, s32 *slots, s32 *state) {
+    TexAnim *e;
+    TexAnim *found = NULL;
+    s32 id;
+    s32 second;
+    s32 dir;
+    s32 tick;
+    s32 tex;
+    s32 size;
+    s32 end;
+
+    for (e = D_800896C4; e != D_800896C4 + 24; e++) {
+        id = e->id;
+        if (e->level != -1) {
+            if (D_800BE9F0 != e->level) {
+                continue;
+            }
+            if (id != 0xFF) {
+                id |= 0x8000;
+            }
+        }
+        if (id == 0xFF || id == *(u16 *)(obj + 0x54)) {
+            found = e;
+            break;
+        }
+    }
+    if (found == NULL) {
+        return;
+    }
+    if (*slots == 0) {
+        *slots = func_1511A998(*(s8 **)(obj + 0x1C), &second);
+        *slots |= second << 16;
+    } else {
+        second = (*slots >> 16) & 0xFFFF;
+    }
+    dir = (s16)(*state >> 16);
+    if (dir == 0) {
+        dir = 1;
+    }
+    tick = (*state & 0xFFFF) + dir;
+    if (found->pingpong) {
+        if (tick < 0) {
+            dir = 1;
+            tick = found->ticks;
+        } else if (tick >= found->count * found->ticks) {
+            dir = -1;
+            tick = (found->count - 1) * found->ticks;
+        }
+    } else if (tick >= found->count * found->ticks) {
+        tick -= found->count * found->ticks;
+        dir = 1;
+    }
+    tex = func_1510D66C(found->frames[tick / found->ticks], &size,
+                        (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) ? 3 : 0x3E, 0);
+    end = 0;
+    if (second != 0) {
+        end = size + tex - 0x20;
+    }
+    func_1510DDF4((s32)obj, tex, end, 4, 5);
+    *state = (dir << 16) | tick;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511AA1C.s")
+#endif
 
 void func_1511AC84(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x3C) != 0) {

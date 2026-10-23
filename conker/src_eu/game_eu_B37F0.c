@@ -152,7 +152,39 @@ void func_1508823C(s32 arg0, s32 arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150882C4.s")
 
+#ifdef NON_MATCHING
+extern s8 D_800D27C8;
+
+// player_face_track_side: turns the object (+0x76 yaw) a quarter turn (+0x3600 / +0x4A00) from the direction of
+// player `player`'s track vector (+0x10 / +0xC, func_1505A630), the side picked by the track position +0 against 0.5
+// (mirrored when D_800D27C8 is set). Returns that direction (0 without player records); the one caller ignores it.
+s32 func_15088360(s32 player, struct127 *obj) {
+    struct_eu_80087640 *rec;
+    u16 dir;
+
+    if (D_80087640 == NULL) {
+        return 0;
+    }
+    rec = &D_80087640[player];
+    dir = func_1505A630(*(f32 *)((u8 *)rec + 0x10), *(f32 *)((u8 *)rec + 0xC), 0);
+    if (D_800D27C8 == 0) {
+        if (rec->unk0 < 0.5f) {
+            *(u16 *)((u8 *)obj + 0x76) = dir + 0x4A00;
+        } else {
+            *(u16 *)((u8 *)obj + 0x76) = dir + 0x3600;
+        }
+    } else {
+        if (0.5f <= rec->unk0) {
+            *(u16 *)((u8 *)obj + 0x76) = dir + 0x4A00;
+        } else {
+            *(u16 *)((u8 *)obj + 0x76) = dir + 0x3600;
+        }
+    }
+    return dir;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088360.s")
+#endif
 
 void func_15088434(s32 arg0, s32 arg1) {
     struct_eu_80087640 *temp_v1;
@@ -267,7 +299,35 @@ s32 func_1508872C(s32 arg0) {
     return temp_a0->unk27;
 }
 
+#ifdef NON_MATCHING
+// player_place_gap: finds the other player whose place (+0x29) is `player`'s place + `delta` and returns the absolute
+// track-progress gap to it (lap +0x24 * 16 + segment +8 * 16) << 8 | its index; 16 when there is none.
+s32 func_15088760(s32 player, s32 delta) {
+    struct_eu_80087640 *me;
+    struct_eu_80087640 *other;
+    s32 place;
+    s32 gap;
+    s32 i;
+
+    if (D_80087640 == NULL) {
+        return 16;
+    }
+    me = &D_80087640[player];
+    place = *(s8 *)((u8 *)me + 0x29) + delta;
+    for (i = 0, other = D_80087640; i < D_800D27B8; i++, other++) {
+        if (place == *(s8 *)((u8 *)other + 0x29) && i != player) {
+            gap = me->unk24 * 16 + (s32)(me->unk8 * 16.0f) - other->unk24 * 16 - (s32)(other->unk8 * 16.0f);
+            if (gap < 0) {
+                gap = -gap;
+            }
+            return (gap << 8) | i;
+        }
+    }
+    return 16;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088760.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_1508882C.s")
 
@@ -319,7 +379,34 @@ void func_15088A68(s32 arg0, s32 arg1)
   }
 }
 
+#ifdef NON_MATCHING
+// cpu_player_slot_claim: takes the first free computer-player slot (bit i of D_800D27B4, i < D_800D27B9), resets
+// its record D_80087640[D_800D27B8 + i] (func_15088CA0), marks it used (+0x30 = 1) for the object record objp
+// (+0x31 = its D_800CC2D0 index) and returns the record index; -1 when none is free or there are no records.
+// arg1 is unused (the caller passes the object twice).
+s32 func_15088B08(s32 objp, s32 arg1) {
+    s32 bit = 1;
+    s32 n = D_800D27B9;
+    s32 i;
+
+    if (D_80087640 == NULL) {
+        return -1;
+    }
+    for (i = 0; i < n; i++, bit <<= 1) {
+        if (!(D_800D27B4 & bit)) {
+            D_800D27B4 |= bit;
+            i += D_800D27B8;
+            func_15088CA0((u8 *)&D_80087640[i]);
+            *((u8 *)&D_80087640[i] + 0x30) = 1;
+            D_80087640[i].unk31 = ((u8 *)objp - (u8 *)D_800CC2D0) / 0x32C;
+            return i;
+        }
+    }
+    return -1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088B08.s")
+#endif
 
 s32 func_150889D8();
 

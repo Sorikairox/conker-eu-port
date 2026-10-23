@@ -1,0 +1,12 @@
+s/if (!(anim < (s32)func_1507ED48((s32)obj))) {/if (!(anim <= (s32)func_1507ED48((s32)obj))) {/
+s/if (!(anim < (s32)func_1507ED48((s32)obj))) {/if (!((u32)anim < func_1507ED48((s32)obj))) {/
+s/entry = (u8 \*)func_1507ECE8((s32)obj, obj->unk6F);/entry = (u8 *)func_1507ECE8((s32)obj, anim);/
+s/if (entry\[4\] != 0) {/if (entry[5] != 0) {/
+s/sounds\[entry\[4\] - 1\]/sounds[entry[4]]/
+s/if (sounds != NULL) {/if (sounds == NULL) {/
+s/obj->unk6F = anim;/obj->unk6F = anim + 1;/
+s/func_1507E9A8(obj, variant);/func_1507E9A8(obj, 0);/
+s/if (variant != 0) {/if (variant > 3) {/
+s/obj->unk135 = variant;/obj->unk135 = 0;/
+s/(s32)obj, anim))\[3\];/(s32)obj, anim))[2];/
+s/(s32)obj, anim))\[3\];/(s32)obj, obj->unk6F + 1))[3];/
