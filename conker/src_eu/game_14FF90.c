@@ -179,7 +179,7 @@ void func_15125DB4(struct108 *);
 void func_15127EB8(struct108 *);
 s32 func_15128540(struct108 *);
 void func_15123070(u8 *arg0);
-s32 func_1512EE50(struct108 *);
+void func_1512EE50(struct108 *);
 void func_151307A0(struct108 *, s32);
 void func_15126138(struct108 *);
 void func_15125C40(u8 *);

@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P111 (port-b) (session P111, 2026-10-23). Details: `docs/port/sessions/P111.md`
+
+Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
+
+- **func_1512EE50 in C** (`camera_apply_request`, game_eu_15C660.c): the per-frame camera request handler that
+  writes the eye height cam +0x2FC (P105 camera bug). Map `p111/func_1512EE50_map.md`. 213 setups EQUIV, mutants
+  78/78. Caller declaration in game_14FF90.c changed to `void`. Only stub callee: func_15128D50 (mode 2, not a
+  port-b file).
+- Free camera: func_1512B728 (`free_camera_scan_depth`, 16/16 mutants) and func_1512BCA0 (`free_camera_turn`,
+  returns s32; 28/29 mutants, 1 equivalent). func_1512B2C4's three callees are all C now.
+- func_150B3CA8 (`trail_hit_splash`, game_eu_E0430.c): the last asm trail hit handler; mutants 33/33.
+- Default build byte-identical (verify_all rc 0), NM links, protocheck 1 known problem. **progress_nm** total
+  4928/5915 (83.3%), game 4400/5334, C bytes 57.7%, 987 asm-only.
+
+## Next steps (from P111)
+
+1. Browser: re-run the P105 camera scenario. The pre-death view should no longer look straight down. Also check
+   the free camera and the trail splashes (P111.md UNVERIFIED).
+2. func_15128D50 (game_eu_156560.c), func_15129220 (game_eu_156A30.c) and func_1512EB60 (game_eu_15C370.c) are
+   not in port-b files and need an owner.
+3. Smallest asm-only left in port-b files (from P108): func_15144CEC (101), func_1505327C (109), func_15053430
+   (113). func_15060D54 is now owned by port (game_83300.c moved).
+
 ## P108 (port-b) (session P108, 2026-10-23). Details: `docs/port/sessions/P108.md`
 
 Branch `port-b` (from P102 b2a5c1f); the orchestrator merges it into `port`.
