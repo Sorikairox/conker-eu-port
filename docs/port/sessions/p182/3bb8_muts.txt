@@ -1,0 +1,10 @@
+s/if (len == 0) {/if (len == 1) {/
+s/if (src != NULL) {/if (src == NULL) {/
+s/(len + 4 + 3) \& ~3/(len + 4 + 3) \& ~7/
+s/if (q->unkC < q->unk8) {/if (q->unkC <= q->unk8) {/
+s/q->unkC + total < q->unk8/q->unkC + total <= q->unk8/
+s/q->unkC + len - q->unk4 < q->unk8/q->unkC + len - q->unk4 <= q->unk8/
+s/len -= 4;/len -= 3;/
+s/(u8 \*) \&len, 4)/(u8 *) \&len, 3)/
+s/pos, src, len);/pos, src, total);/
+s/                return 1;/                return 2;/

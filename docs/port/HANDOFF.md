@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P182, 2026-10-24). Details: `docs/port/sessions/P182.md`
+
+- **func_1517C11C ambient_emitters_update** (game_eu_1A9280, 1286 insns) hand C (NM), from the P104 draft re-checked
+  against the asm: random EQUIV, 51 setups x 2 seeds EQUIV (ROMDATA: real updaters / rows / sound info; ARGMEM on
+  every updater call), mutants 67 / 68 + 1 equivalent. The level ambient emitter system is now C end to end
+  (func_1500BEC0 unit + sort + this consumer). Stub reached: func_15170A70 (particle, asm). Caller func_1517E3CC's NM
+  prototype now `void`.
+- Dropped-return suspects: func_100126E8 real -> returns func_15043CA4's length (matching C, byte-identical);
+  func_15060F28 / func_1506160C / func_1506E5FC not defects (details P182.md section 2).
+- Breadth (hand C, NM, EQUIV + setups + mutants all killed): func_15043BB8 text_queue_put, func_15043CA4
+  text_queue_get (game_70200), func_150F7890 / func_151007B0 / func_151D7AE8 linked-object event handlers,
+  func_15104A0C obj_fog_alpha_gfx, func_1506AEA0 players_effect_at_point, func_150B7170 hud_box_reset (file prototype
+  now void).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1289 NM bodies), selftest 65/65, progress_nm 5283/5915 (89.3%), C bytes 72.7%. No difftest processes left.
+
+## Next steps (from P182)
+
+1. Browser: P182.md section 5 (ambient emitters with sounds, debug text queue, func_150B7170).
+2. func_15170A70 (game_eu_19B180, asm): spark / flare particle spawner the emitters now call.
+3. func_1505D1C4 (game_83300) return: coordinate with port-b (prototypes in game_eu_201240 / 110DB0 / 12D5D0).
+4. Breadth: p182/asmlist.py; skipped func_150882C4 (port-b caller prototype), func_1506B04C (check the D_800864B0
+   handlers first).
+5. P138 / P141 leftovers.
+
 ## State (session P180, 2026-10-24). Details: `docs/port/sessions/P180.md`
 
 - **func_1500BEC0 unit done** (one commit): hand C (NM) for func_1500BEC0 ambient_emitters_build, func_1500AD84
