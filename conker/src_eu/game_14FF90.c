@@ -1521,7 +1521,7 @@ void func_15125924(struct108 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_14FF90/func_15125924.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_1512DAD0(u8 *, s32, s32 *);
+void func_1512DAD0(u8 *, s32, void *);
 extern s32 D_800C3A20;
 extern f32 D_800C3A34;
 extern f32 D_800C3A38;

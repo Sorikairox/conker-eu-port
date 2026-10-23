@@ -6,7 +6,7 @@
 #ifdef NON_MATCHING
 s32 func_1512DC20(u8 *arg0);
 s32 func_1509BE40(s32, s32, ...);
-s32 func_1512DAD0(u8 *, s32, s32 *);
+void func_1512DAD0(u8 *, s32, void *);
 s32 func_151239CC(struct108 *arg0, s32 arg1);
 u8 *func_1512DB74(u8 *arg0);
 void func_15127EB8(struct108 *);
