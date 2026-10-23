@@ -369,7 +369,89 @@ s32 func_15185360(s32 obj, s32 player, f32 *x, f32 *y, f32 *z) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185360.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P130 */
+extern u16 D_800DF500[];   /* [slot]: perspNorm of the shadow projection */
+extern u8 D_800DF728[];    /* [slot][frame] Mtx (0x40 bytes) */
+extern s32 D_800DF4B8;     /* shadow texture (64-byte aligned) */
+extern s16 D_80083336;
+extern u8 D_800BE9C0;      /* frame buffer index */
+extern s32 D_8008D7E8;     /* static DLs / viewport / Mtx of the shadow pass */
+extern s32 D_8008D788;
+extern s32 D_89810;
+Gfx *func_1501A680(Gfx *);
+s32 func_1501A490(s32, s16, s32, s32, s32, s32);
+Gfx *func_1502CFEC(Gfx *, s32, s32, s32, s32, s32 *, s32, s32);
+s32 func_1506196C(struct127 *, s32);
+u8 *func_1510BD34(u8 *, s32);
+
+/* one GBI command: two words */
+#define SHADOW_GFX(g, hi, lo) ((g)->words.w0 = (hi), (g)->words.w1 = (lo), (g)++)
+
+// shadow_render_caster: starts the display list that renders object obj (light slot) into the shadow texture
+// D_800DF4B8: pipe sync, colour image = the texture (16-bit, 64 wide), the static setup DL D_8008D7E8,
+// perspNorm D_800DF500[slot], viewport D_8008D788, projection D_800DF728[slot][frame] and view D_89810, then the
+// object's model (func_1502CFEC with an all-zero colour and the object's shadow level). Shadow level 0 / 1
+// (unk1C8, + 1 when unk127 == 0xFF) blurs the texture twice / once with a 64x64 TEX rectangle over itself.
+// Ends with geometry mode on (D9FFFFFF / 0x200001), then func_1501A680 / func_1501A490 / func_1510BD34
+// restore the frame state. Marks the object (unk123 = 1). Returns the display list end.
+u8 *func_15185514(u8 *dl, s32 obj, s32 slot, s32 arg3) {
+    struct127 *o = &D_800CC2D0[obj];
+    Gfx *g = (Gfx *) dl;
+    s32 col[4];
+    s32 level;
+    s32 pass;
+
+    if (o->unk127 == 0xFF) {
+        level = o->unk1C8 + 1;
+    } else {
+        level = o->unk1C8;
+    }
+    SHADOW_GFX(g, 0xE7000000, 0);                                   /* gDPPipeSync */
+    SHADOW_GFX(g, 0xFF48003F, D_800DF4B8);                          /* gDPSetColorImage RGBA16, 64 wide */
+    SHADOW_GFX(g, 0xDE000000, (s32) &D_8008D7E8);                   /* gSPDisplayList */
+    SHADOW_GFX(g, 0xDB0E0000, D_800DF500[slot]);                    /* gSPPerspNormalize */
+    SHADOW_GFX(g, 0xDC080008, (s32) &D_8008D788);                   /* gSPViewport */
+    SHADOW_GFX(g, 0xDA380007, (s32) &D_800DF728[slot * 0x80 + D_800BE9C0 * 0x40]); /* projection */
+    SHADOW_GFX(g, 0xDA380003, (s32) &D_89810);                      /* gSPMatrix (identity view) */
+    col[0] = 0;
+    col[1] = 0;
+    col[2] = 0;
+    col[3] = level;
+    g = func_1502CFEC(g, obj, arg3, (s32) o->unk1D4, func_1506196C(o, arg3), col, 3, 1);
+    SHADOW_GFX(g, 0xD7000002, 0xFFFFFFFF);                          /* gSPTexture on */
+    SHADOW_GFX(g, 0xE7000000, 0);
+    if (level < 2) {
+        SHADOW_GFX(g, 0xFCFFFFFF, 0xFFFCF87C);                      /* combine: texture */
+        SHADOW_GFX(g, 0xFA000000, 0xFFFFFFFF);                      /* prim colour white */
+        SHADOW_GFX(g, 0xEF003C3F, 0x0F0A4000);                      /* other mode: 1 cycle, average */
+        pass = (level == 0) ? 2 : 1;
+        for (;;) {
+            SHADOW_GFX(g, 0xFD900000, D_800DF4B8);                  /* texture image = the shadow texture */
+            SHADOW_GFX(g, 0xF5900000, 0x07018060);
+            SHADOW_GFX(g, 0xE6000000, 0);                           /* load sync */
+            SHADOW_GFX(g, 0xF3000000, 0x077FF100);                  /* load block */
+            SHADOW_GFX(g, 0xE7000000, 0);
+            SHADOW_GFX(g, 0xF5881000, 0x00018060);
+            SHADOW_GFX(g, 0xF2000000, 0x000FC0FC);                  /* tile size 64x64 */
+            SHADOW_GFX(g, 0xE40FC0FC, 0);                           /* texture rectangle 64x64 */
+            SHADOW_GFX(g, 0xE1000000, 0x00100010);
+            SHADOW_GFX(g, 0xF1000000, 0x04000400);
+            if (--pass == 0) {
+                break;
+            }
+            SHADOW_GFX(g, 0xE7000000, 0);
+        }
+        SHADOW_GFX(g, 0xE7000000, 0);
+    }
+    SHADOW_GFX(g, 0xD9FFFFFF, 0x00200001);                          /* geometry mode */
+    dl = func_1510BD34((u8 *) func_1501A490((s32) func_1501A680(g), D_80083336, 0, 0, 0, 0), arg3);
+    o->unk123 = 1;
+    return dl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15185514.s")
+#endif
 
 u8 *func_151859C4(u8 *arg0, u8 *arg1, u8 *arg2) {
     f32 q;
@@ -547,9 +629,169 @@ ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *ou
     return out;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186494.s")
+#ifdef NON_MATCHING
+/* P130 */
+extern f32 D_800DE45C;  /* shadow alpha at the near depth */
+ClipVtx_60C4 *func_15186344(ClipVtx_60C4 *in, s32 n, s32 plane, ClipVtx_60C4 *out);
 
+// shadow_clip_triangle: clips one projected shadow polygon (n 20-byte shadow vertices at in: x, y, w, source
+// vertex pointer) and converts it into 16-byte Vtx at out. The polygon (with the source vertex's s16 x / y / z
+// as s / t / u) is clipped against planes 0..5 (|x| <= -w, |y| <= -w, near, far) in two ping-pong buffers. With
+// split, planes 6 / 7 cut it into the halves x <= 0 / x > 0 and planes 8 / 9 cut each half into y > 0 / y <= 0:
+// counts[0..4] are the start indices of the four quadrant pieces (A y>0, B y>0, A y<=0, B y<=0) and their end;
+// without split all four pieces are the whole polygon (counts = 0, n, n, n, n). Each output vertex: position =
+// the source vertex, texture s = 1024 - 1020 x / w, t = 1020 y / w + 1024, colour 0, alpha fading from
+// D_800DE45C at the near depth D_800D3AAC to 0 at the far depth D_800D3AA8. Returns the number of vertices.
+s32 func_15186494(s32 inAddr, s32 n, s32 unused, s32 outAddr, s32 *counts, s32 split) {
+    u8 *in = (u8 *) inAddr;
+    u8 *out = (u8 *) outAddr;
+    ClipVtx_60C4 buf[2][26];
+    s32 half[3];
+    ClipVtx_60C4 *src;
+    ClipVtx_60C4 *dst;
+    ClipVtx_60C4 *v;
+    s16 *pos;
+    f32 k, a;
+    s32 alpha;
+    s32 plane;
+    s32 i;
+
+    for (i = 0; i < n; i++) {
+        pos = *(s16 **) (in + i * 20 + 0xC);
+        buf[0][i] = *(ClipVtx_60C4 *) (in + i * 20);
+        buf[0][i].s = pos[0];
+        buf[0][i].t = pos[1];
+        buf[0][i].u = pos[2];
+    }
+    for (plane = 0; plane != 6; plane++) {
+        dst = buf[(plane & 1) ^ 1];
+        n = (u32) ((u8 *) func_15186344(buf[plane & 1], n, plane, dst) - (u8 *) dst) / 20;
+    }
+    half[0] = 0;
+    counts[0] = 0;
+    if (split != 0) {
+        src = buf[plane & 1];
+        dst = buf[(plane & 1) ^ 1];
+        for (i = 0; i < 2; i++) {
+            half[i + 1] = (u32) ((u8 *) func_15186344(src, n, i + 6, dst + half[i]) - (u8 *) dst) / 20;
+        }
+        plane++;
+        src = buf[plane & 1];
+        dst = buf[(plane & 1) ^ 1];
+        for (i = 0; i < 4; i += 2) {
+            counts[i + 1] = (u32) ((u8 *) func_15186344(src + half[0], half[1] - half[0], (i >> 1) + 8,
+                                                        dst + counts[i]) - (u8 *) dst) / 20;
+            counts[i + 2] = (u32) ((u8 *) func_15186344(src + half[1], half[2] - half[1], ((i + 1) >> 1) + 8,
+                                                        dst + counts[i + 1]) - (u8 *) dst) / 20;
+        }
+        n = counts[4];
+        plane++;
+    } else {
+        counts[4] = n;
+        counts[3] = n;
+        counts[2] = n;
+        counts[1] = n;
+    }
+    v = buf[plane & 1];
+    for (i = 0; i < n; i++, v++, out += 16) {
+        *(s16 *) (out + 0) = v->s;
+        *(s16 *) (out + 2) = v->t;
+        *(s16 *) (out + 4) = v->u;
+        k = 1020.0f / v->z;
+        v->x = v->x * k;
+        v->y = v->y * k;
+        *(s16 *) (out + 8) = (s32) (1024.0f - v->x);
+        out[0xC] = 0;
+        out[0xD] = 0;
+        out[0xE] = 0;
+        *(s16 *) (out + 0xA) = (s32) (v->y + 1024.0f);
+        a = D_800DE45C - ((v->z - D_800D3AAC) / (D_800D3AA8 - D_800D3AAC)) * D_800DE45C;
+        /* IDO's float -> u32 (written out: NaN, <= -1 and >= 2^32 give 0xFFFFFFFF) */
+        if (a != a || a <= -1.0f || a >= 4294967296.0f) {
+            alpha = -1;
+        } else if (a >= 2147483648.0f) {
+            alpha = (s32) (a - 2147483648.0f);
+        } else {
+            alpha = (s32) a;
+        }
+        out[0xF] = alpha;
+        *(s16 *) (out + 6) = 0;
+    }
+    return n;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186494.s")
+#endif
+
+#ifdef NON_MATCHING
+/* P130 */
+extern s8 D_800DE471;   /* != 0: only level triangles whose D_800D3668 flag is 1 cast shadows */
+extern s32 D_800D3AB0;  /* triangle table for func_150A6070 / func_150A6324 */
+extern s32 D_800D3AB4;  /* end of the triangle bit mask */
+extern s32 D_800DC26C;  /* level triangle table: 3 vertex pointers per triangle */
+extern s32 D_800DF518;  /* shadow box x min, x max, z min, z max */
+extern s32 D_800DF51C;
+extern s32 D_800DF520;
+extern s32 D_800DF524;
+void func_1510F800(s32);
+s32 func_1510FCA0(s32, s32, s32, u8 **);
+s32 func_150A6070(u32 *, s32, f32 *, s32);
+
+// shadow_level_vertices: collects the level triangles under a shadow (box x / z +- r) and projects them.
+// func_1510FCA0 returns up to 16 level cells around (x, z); each cell holds at +0xE a 0-terminated triangle list
+// (byte < 0x80: index += byte; else ((byte << 8) | next byte) & 0x7FFF is the index). The triangles (< 0x1760,
+// and with flag 1 in D_800D3668 when D_800DE471) become bits of a stack mask; func_150A6070 projects them with the
+// light matrix (4x4 f32) into the 20-byte shadow vertices at buf (up to end). Returns the number of vertices written.
+s32 func_15186A9C(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end) {
+    u8 *cells[16];
+    u32 mask[0x2EC / 4];
+    s32 n;
+    u8 *p;
+    u32 tri, last;
+    u32 c;
+
+    last = 0;
+    func_1510F800(0);
+    n = func_1510FCA0(x, z, r, cells);
+    if (n == 0) {
+        return 0;
+    }
+    bzero(mask, sizeof(mask));
+    while (n != 0) {
+        n--;
+        p = cells[n] + 0xE;
+        tri = 0;
+        while ((c = *p) != 0) {
+            if (c & 0x80) {
+                tri = ((c << 8) | p[1]) & 0x7FFF;
+                p += 2;
+            } else {
+                tri += c;
+                p += 1;
+            }
+            if (tri >= 0x1760) {
+                continue;
+            }
+            if (D_800DE471 != 0 && ((u8 *) D_800D3668)[tri] != 1) {
+                continue;
+            }
+            mask[tri >> 5] |= 1 << (tri & 0x1F);
+            if (last < tri) {
+                last = tri;
+            }
+        }
+    }
+    D_800D3AB0 = D_800DC26C;
+    D_800D3AB4 = (s32) &mask[(last >> 5) + 1];
+    D_800DF518 = x - r;
+    D_800DF51C = x + r;
+    D_800DF520 = z - r;
+    D_800DF524 = z + r;
+    return (func_150A6070(mask, buf, (f32 *) light, end) - buf) / 20;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15186A9C.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P38: shadow display list (m2c draft from P32, fixed by hand). UNVERIFIED: the strip emitter (TRI4 / TRI2 / TRI1 split, 16-vertex flushes); see P38.md */
@@ -954,7 +1196,66 @@ void func_15187820(s32 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187820.s")
 #endif
+#ifdef NON_MATCHING
+/* P130 */
+extern s32 D_800D3AB0;
+extern s32 D_800DC26C;
+extern s32 D_800DF514;  /* number of world object ids for func_150A6324 */
+extern s32 D_800DF518;
+extern s32 D_800DF51C;
+extern s32 D_800DF520;
+extern s32 D_800DF524;
+extern s16 D_800D3C00[]; /* visible world object ids */
+void func_1510F800(s32);
+s32 func_150A49D0(s32 count, s32 *idList, s32 force);
+s32 func_150A6324(u16 *, s32, f32 *, s32);
+
+// shadow_object_vertices: adds the world objects' triangles under a shadow (box x / z +- r) after the count level
+// shadow vertices at buf. Takes the D_800DC320 world objects (0xA0-byte records at D_800DBEF4) that are shown
+// (+0x6E == 0, no 0x60 flag at +0x4F) and whose x / z (s16 +0x10 / +0x14) +- their size (max of u16 +0x50, +0x52)
+// meet the box, refreshes their triangles (func_150A49D0) and projects them (func_150A6324).
+// Returns count plus the number of vertices added.
+u32 func_15187954(s32 x, s32 z, s32 r, s32 buf, u8 *light, s32 end, s32 count) {
+    u8 *obj;
+    s32 size;
+    s32 i, n;
+
+    if (D_800DC320 == 0) {
+        return count;
+    }
+    func_1510F800(2);
+    buf += count * 20;
+    D_800DF518 = x - r;
+    D_800DF51C = x + r;
+    D_800DF520 = z - r;
+    D_800DF524 = z + r;
+    n = 0;
+    obj = (u8 *) D_800DBEF4;
+    for (i = 0; i < D_800DC320; i++, obj += 0xA0) {
+        if (obj[0x6E] != 0 || (obj[0x4F] & 0x60)) {
+            continue;
+        }
+        size = *(u16 *) (obj + 0x52);
+        if (size < *(u16 *) (obj + 0x50)) {
+            size = *(u16 *) (obj + 0x50);
+        }
+        if (D_800DF51C < *(s16 *) (obj + 0x10) - size || *(s16 *) (obj + 0x10) + size < D_800DF518 ||
+            D_800DF524 < *(s16 *) (obj + 0x14) - size || *(s16 *) (obj + 0x14) + size < D_800DF520) {
+            continue;
+        }
+        D_800D3C00[n++] = i;
+    }
+    if (n != 0) {
+        func_150A49D0(n, (s32 *) D_800D3C00, 0);
+        D_800D3AB0 = D_800DC26C;
+        D_800DF514 = n;
+        count += (func_150A6324((u16 *) D_800D3C00, buf, (f32 *) light, end) - buf) / 20;
+    }
+    return count;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187954.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 allocate_memory(s32, s32, s32, s32);

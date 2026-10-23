@@ -1,0 +1,16 @@
+s/    if (x1 < x0) {/    if (x1 > x0) {/
+s/    if (y1 < y0) {/    if (y1 <= y0) {/
+s/left = \*(f32 \*) (cam + 0x2C);/left = *(f32 *) (cam + 0x24);/
+s/bottom = \*(f32 \*) (cam + 0x28);/bottom = *(f32 *) (cam + 0x30);/
+s/if (!(y0 < bottom \&\& /if (!(y0 <= bottom \&\& /
+s/ \&\& top < y1 \&\& / \&\& top <= y1 \&\& /
+s/ \&\& x0 < right \&\& / \&\& x0 <= right \&\& /
+s/ \&\& left < x1)) {/ \&\& left <= x1)) {/
+s/x0 = (x0 < left) ? left : (right < x0) ? right : x0;/x0 = (x0 <= left) ? left + 1 : (right < x0) ? right : x0;/
+s/y0 = (y0 < top) ? top : (bottom < y0) ? bottom : y0;/y0 = (y0 < top) ? top : y0;/
+s/x1 = (x1 < left) ? left : (right < x1) ? right : x1;/x1 = (x1 < left) ? left : (right < x1) ? right - 1 : x1;/
+s/y1 = (y1 < top) ? top : (bottom < y1) ? bottom : y1;/y1 = (y1 < top) ? top : (bottom < y1) ? top : y1;/
+s/((x0 \& 0x3FF) << 14)/((x0 \& 0x1FF) << 14)/
+s/((y1 \& 0x3FF) << 2)/((y1 \& 0x3FF) << 1)/
+s/0xF6000000 | /0xF7000000 | /
+s/cam = (u8 \*) D_800BE628 + view \* 0x180;/cam = (u8 *) D_800BE628 + view * 0x100;/

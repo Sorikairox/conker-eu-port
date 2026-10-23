@@ -1,0 +1,21 @@
+s/tri = ((c << 8) | p\[1\]) \& 0x7FFF;/tri = ((c << 8) | p[1]) \& 0xFFFF;/
+s/tri = ((c << 8) | p\[1\]) \& 0x7FFF;/tri += ((c << 8) | p[1]) \& 0x7FFF;/
+s/                p += 2;/                p += 1;/
+s/tri += c;/tri = c;/
+s/if (tri >= 0x1760) {/if (tri > 0x1760) {/
+s/if (tri >= 0x1760) {/if (tri >= 0x175F) {/
+s/\[tri\] != 1)/[tri] == 0)/
+s/if (D_800DE471 != 0 \&\& /if (/
+s/mask\[tri >> 5\] |= 1 << (tri \& 0x1F);/mask[tri >> 5] |= 1 << (tri \& 0xF);/
+s/mask\[tri >> 5\] |= /mask[tri >> 4] |= /
+s/if (last < tri) {/if (last > tri) {/
+s/tri = 0;/tri = 1;/
+s/p = cells\[n\] + 0xE;/p = cells[n] + 0xD;/
+s/while (n != 0) {/while (n > 1) {/
+s/D_800DF51C = x + r;/D_800DF51C = x - r;/
+s/D_800DF520 = z - r;/D_800DF520 = x - r;/
+s/D_800DF524 = z + r;/D_800DF524 = z + r + 1;/
+s/D_800D3AB0 = D_800DC26C;/D_800D3AB0 = D_800DC26C + 4;/
+s/- buf) \/ 20;/- buf) \/ 16;/
+s/    if (n == 0) {/    if (n == 1) {/
+s/(f32 \*) light, end)/(f32 *) light, end + 4)/

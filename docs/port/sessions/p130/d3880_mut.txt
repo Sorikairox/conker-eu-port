@@ -1,0 +1,26 @@
+# P130 mutants for game_eu_D3880.c func_150A6070 / func_150A6324 (port_work/p130/mutnm.py)
+if (w <= p->farW) ||| if (w < p->farW)
+} else if (p->nearW <= w) ||| } else if (p->nearW < w)
+clip = 0x10; ||| clip = 0x20;
+clip |= (su.i < 0) ? 2 : 8; ||| clip |= (su.i < 0) ? 8 : 2;
+clip |= (sv.i < 0) ? 4 : 1; ||| clip |= (sv.i < 0) ? 1 : 4;
+clip |= (su.i < 0) ? 2 : 8; ||| clip |= (u < 0.0f) ? 2 : 8;
+if (!(((u < 0.0f) ? -u : u) <= -w)) ||| if (!(((u < 0.0f) ? -u : u) < -w))
+if (!(((vv < 0.0f) ? -vv : vv) <= -w)) ||| if (!(((vv < 0.0f) ? -vv : vv) <= w))
++ y * m[4]) ||| + y * m[5])
+x * m[2] + m[14] ||| x * m[2] + m[13]
+p->sv = (&D_800D3AA0)[1]; ||| p->sv = (&D_800D3AA0)[0];
+D_800DF51C < box[0] ||| D_800DF51C <= box[0]
+box[3] < D_800DF520 ||| box[3] <= D_800DF520
+D_800DF524 < box[1] ||| D_800DF524 < box[3]
+all &= shadow_project_vertex(p, (s16 *) (vtx[2] ||| all |= shadow_project_vertex(p, (s16 *) (vtx[2]
+) <= (t[0].u - t[2].u) ||| ) < (t[0].u - t[2].u)
+o->vtx = (s32) v; ||| o->vtx = (s32) v + 2;
+out[1] = t[1]; ||| out[1] = t[0];
+(s32) (o + 3) >= end ||| (s32) (o + 3) > end ||| 1
+(s32) (o + 3) >= end ||| (s32) (o + 3) > end ||| 2
+tri = (tri + 31) & 0xFFE0; ||| tri = (tri + 32) & 0xFFE0;
+tri += 32; ||| tri += 31;
+tri = *(u16 *) (obj + 0x58); ||| tri = *(u16 *) (obj + 0x56);
+base = D_800DC328[*ids]; ||| base = D_800DC328[*ids] + 6;
+u16 *last = ids + D_800DF514; ||| u16 *last = ids + D_800DF514 + 1;
