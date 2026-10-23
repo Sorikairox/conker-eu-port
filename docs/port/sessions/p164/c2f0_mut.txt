@@ -1,0 +1,27 @@
+s/if (!(1.0f < n)) {/if (!(2.0f < n)) {/
+s/n = func_1514462C(rec) \* scale \* D_800964D0;/n = func_1514462C(rec) * D_800964D0;/
+s/blk.u1C\[2\] = 1.0f;/blk.u1C[2] = 0.0f;/
+s/blk.u50 = 0x5D40;/blk.u50 = 0x5D41;/
+s/blk.u60\[1\] = 0xE;/blk.u60[1] = 0xF;/
+s/blk.u68 = 2;/blk.u68 = 3;/
+s/blk.u72 = 1;/blk.u72 = 2;/
+s/h = hi - lo;/h = lo - hi;/
+s/y = RND() \* (h \* 0.5f) + (lo + h \* 0.25f);/y = RND() * (h * 0.5f) + (hi + h * 0.25f);/
+s/blk.y2 = y;/blk.y2 = h;/
+s/near = (db < da) ? db : da;/near = (db < da) ? da : db;/
+s/(RND() \* 0.75f + 0.25f) \* near/(RND() * 0.75f + 0.5f) * near/
+s/blk.angle = (RND() \* 2.0f) \* D_800964D8;/blk.angle = RND() * D_800964D8;/
+s/RND() \* D_800964DC + D_800964E0/RND() * D_800964E0 + D_800964DC/
+s/blk.spin\[1\] = RND() \* 360.0f;/blk.spin[1] = RND() * 180.0f;/
+s/blk.u48 = RND() \* D_800964E8;/blk.u48 = RND() * D_800964E4;/
+s/\& 0xFFFF) \* D_800964D4)/\& 0x7FFF) * D_800964D4)/
+s/ 9\];/ 8];/
+s/id == 0x4B || id == 0x48 ||/id == 0x4B ||/
+s/blk.size\[0\] = RND() \* 0.25f + 0.5f;/blk.size[0] = RND() * 0.25f + 0.75f;/
+s/blk.size\[1\] = blk.size\[0\];/blk.size[1] = 1.0f;/
+s/func_1510F800(0);/func_1510F800(1);/
+s/func_1510FD20((s32) blk.pos\[0\], (s32) blk.pos\[2\])/func_1510FD20((s32) blk.pos[0], (s32) blk.pos[1])/
+s/func_15132FBC((f32 \*) \&blk, 3, 0xFF, 0, 0xFF, 1);/func_15132FBC((f32 *) \&blk, 3, 0xFF, 0, 0xFF, 0);/
+s/n -= 1.0f;/n -= 2.0f;/
+s/func_15008340(rec, \&blk.pos\[0\], \&blk.pos\[2\], \&hi, \&lo);/func_15008340(rec, \&blk.pos[0], \&blk.pos[2], \&lo, \&hi);/
+s/da = (da < 0.0f) ? -da : da;/da = da;/

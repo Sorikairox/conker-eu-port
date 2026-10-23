@@ -313,7 +313,178 @@ s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150970.s")
 
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+s32 allocate_memory(s32, s32, s32, s32);
+s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
+s32 memcpy(s32, f32 *, s32);
+
+// base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
+#define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
+
+// debris_burst_spawn: spawns base + rand % (extra + 1) pieces (at most n) of the n kinds ids[] / scales[]; each
+// piece takes a random kind not used yet in this burst (a temporary n-byte used map from allocate_memory), at the
+// spec's point plus a random offset (func_15143794 with length arg10) moving in a random direction, with random
+// spins, sway, life and size (scales[k] x random), solid (+0x50 bit 0, +0x61 = 0xD, +0x63 = spec +0x40) with
+// chance spec +0x3C; effect kind 3 via func_15132BBC (arg9, extra bytes arg5 copied from arg4 to +0x170, arg13 /
+// arg14). Option bits: arg7 -> 0x80, arg11 -> 0x4000, arg12 -> 0x100000. The result is unused by all callers.
+s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+                  s32 arg9, f32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14) {
+    typedef struct {
+        s32 countBase;      /* 0x00 */
+        s32 countExtra;     /* 0x04 */
+        f32 pos[3];         /* 0x08 */
+        s16 angXBase;       /* 0x14 */
+        s16 angXExtra;      /* 0x16 */
+        s16 angYBase;       /* 0x18 */
+        s16 angYExtra;      /* 0x1A */
+        f32 speedBase;      /* 0x1C */
+        f32 speedRange;     /* 0x20 */
+        f32 u24Base;        /* 0x24 */
+        f32 u24Range;       /* 0x28 */
+        s16 lifeBase;       /* 0x2C */
+        s16 lifeExtra;      /* 0x2E */
+        f32 sizeBase;       /* 0x30 */
+        f32 sizeRange;      /* 0x34 */
+        f32 sway;           /* 0x38 */
+        f32 solidChance;    /* 0x3C */
+        u8 solidKind;       /* 0x40 */
+    } DebrisSpec;
+    struct {
+        f32 u00;            /* 0x00 = 1 */
+        f32 u04;            /* 0x04 = 0.5610 */
+        f32 size[2];        /* 0x08 */
+        f32 spin[3];        /* 0x10 */
+        f32 u1C[3];         /* 0x1C = 1 */
+        f32 pos[3];         /* 0x28 */
+        f32 vel[3];         /* 0x34 */
+        f32 swayX;          /* 0x40 */
+        f32 u44;            /* 0x44 = 0 */
+        f32 swayZ;          /* 0x48 */
+        f32 u4C;            /* 0x4C */
+        u32 flags;          /* 0x50 */
+        s16 life;           /* 0x54 */
+        s16 id;             /* 0x56 */
+        u8 u58;             /* 0x58 = arg6 */
+        s32 u5C;            /* 0x5C = 0 */
+        u8 u60;             /* 0x60 = 0xFF */
+        u8 u61;             /* 0x61 = 8 / 0xD */
+        u8 u62;             /* 0x62 = 0 */
+        u8 u63;             /* 0x63 */
+        u8 u64[4];          /* 0x64 = 0 */
+        u8 u68;             /* 0x68 = 2 */
+        s8 u69;             /* 0x69 = arg8 */
+        u8 u6A;             /* 0x6A = 0 */
+        s32 u6C;            /* 0x6C = 0 */
+        u8 u70;             /* 0x70 = 0 */
+        s16 u72;            /* 0x72 = 0xC */
+        s16 u74;            /* 0x74 = 0x15 */
+    } fx;
+    DebrisSpec *sp = (DebrisSpec *) arg0;
+    u8 *used;
+    u8 *p;
+    s32 count;
+    s32 left;
+    s32 i;
+    u32 r;
+    s16 a;
+    s16 b;
+    u8 *e;
+
+    used = (u8 *) allocate_memory(n, 2, 2, 1);
+    if (used == NULL) {
+        return 0;
+    }
+    for (i = 0; i < n; i++) {
+        used[i] = 0;
+    }
+    left = n;
+    fx.u00 = 1.0f;
+    fx.u1C[0] = 1.0f;
+    fx.u1C[1] = 1.0f;
+    fx.u1C[2] = 1.0f;
+    fx.u04 = 0.561000049f;
+    fx.u44 = 0.0f;
+    fx.flags = 0x13968 | ((u8) arg12 ? 0x100000 : 0) | ((u8) arg7 ? 0x80 : 0) | ((u8) arg11 ? 0x4000 : 0);
+    count = RAND_SPREAD(sp->countBase, sp->countExtra);
+    if (n < count) {
+        count = n;
+    }
+    fx.u58 = arg6;
+    fx.u5C = 0;
+    fx.u60 = 0xFF;
+    fx.u62 = 0;
+    fx.u64[0] = 0;
+    fx.u64[1] = 0;
+    fx.u64[2] = 0;
+    fx.u64[3] = 0;
+    fx.u68 = 2;
+    fx.u6A = 0;
+    fx.u6C = 0;
+    fx.u70 = 0;
+    fx.u72 = 0xC;
+    fx.u74 = 0x15;
+    fx.u69 = arg8;
+    for (; count != 0; count--) {
+        a = RAND_SPREAD(sp->angXBase, sp->angXExtra);
+        b = RAND_SPREAD(sp->angYBase, sp->angYExtra);
+        func_15143794(a, b, func_150ADA68() * sp->speedRange + sp->speedBase, fx.vel);
+        func_15143794(a, b, arg10, fx.pos);
+        fx.pos[0] += sp->pos[0];
+        fx.pos[1] += sp->pos[1];
+        fx.pos[2] += sp->pos[2];
+        fx.spin[0] = func_150ADA68() * 360.0f;
+        fx.spin[1] = func_150ADA68() * 360.0f;
+        fx.spin[2] = func_150ADA68() * 360.0f;
+        fx.swayX = func_150ADA68() * (sp->sway + sp->sway) - sp->sway;
+        fx.swayZ = func_150ADA68() * (sp->sway + sp->sway) - sp->sway;
+        fx.u4C = func_150ADA68() * sp->u24Range + sp->u24Base;
+        fx.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);
+        /* the r-th unused kind, counting round from 0 */
+        r = (u32) func_150ADA20() % (u32) left;
+        i = 0;
+        p = used;
+        for (;;) {
+            while (*p != 0) {
+                i++;
+                p++;
+            }
+            if (r == 0) {
+                break;
+            }
+            i++;
+            r--;
+            p++;
+            if (i >= n) {
+                i = 0;
+                p = used;
+            }
+        }
+        fx.id = ids[i];
+        fx.size[1] = ((f32 *) scales)[i] * (sp->sizeBase + func_150ADA68() * sp->sizeRange);
+        left--;
+        fx.size[0] = fx.size[1];
+        *p = 1;
+        if (func_150ADA68() < sp->solidChance) {
+            fx.flags |= 1;
+            fx.u61 = 0xD;
+            fx.u63 = sp->solidKind;
+        } else {
+            fx.flags &= ~1;
+            fx.u63 = 0;
+            fx.u61 = 8;
+        }
+        e = (u8 *) func_15132BBC(&fx, 3, 0xFF, arg9, arg5, (u8) arg13, arg14);
+        if (arg4 != 0 && e != NULL) {
+            memcpy((s32) (e + 0x170), (f32 *) arg4, arg5);
+        }
+    }
+    return 0;
+}
+#undef RAND_SPREAD
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150D7C.s")
+#endif
 
 void func_15143794(s16, s16, f32, void *);
 #ifdef NON_MATCHING
@@ -706,7 +877,153 @@ void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152700.s")
 
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+s32 func_15157E08(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
+
+// base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
+#define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
+
+// particle_burst_from_spec_b: as particle_burst_from_spec (func_151530A8) for the second spec layout: base +
+// rand % (extra + 1) particles (func_15157E08, kind spec +0x3C, size base + rand x range) at the spec's point,
+// each with a random life, three random angles (0..360), a random scalar, a random direction (func_15143794),
+// three random colour scalars and one more random scalar; flags / colours / the rest are copied once.
+// arg1 / arg2 go to func_15157E08. The result is unused by its caller (game_eu_1C13E0).
+s32 func_15152A90(s32 *arg0, u8 arg1, s32 arg2) {
+    typedef struct {
+        s32 countBase;      /* 0x00 */
+        s32 countExtra;     /* 0x04 */
+        s32 pos[3];         /* 0x08 */
+        s16 angXBase;       /* 0x14 */
+        s16 angXExtra;      /* 0x16 */
+        s16 angYBase;       /* 0x18 */
+        s16 angYExtra;      /* 0x1A */
+        f32 lenBase;        /* 0x1C */
+        f32 lenRange;       /* 0x20 */
+        f32 u24;            /* 0x24 */
+        f32 u28Base;        /* 0x28 */
+        f32 u28Range;       /* 0x2C */
+        s16 lifeBase;       /* 0x30 */
+        s16 lifeExtra;      /* 0x32 */
+        s32 u34;            /* 0x34 */
+        s32 u38;            /* 0x38 */
+        s32 kind;           /* 0x3C */
+        f32 sizeBase;       /* 0x40 */
+        f32 sizeRange;      /* 0x44 */
+        f32 u48Base;        /* 0x48 */
+        f32 u48Range;       /* 0x4C */
+        f32 colBase[3];     /* 0x50 */
+        f32 colRange[3];    /* 0x5C */
+        u8 colA[4];         /* 0x68 */
+        u8 colB[4];         /* 0x6C */
+        u8 flags;           /* 0x70 */
+        u8 u71;             /* 0x71 */
+        s16 u72;            /* 0x72 */
+        s16 u74;            /* 0x74 */
+    } BurstSpecB;
+    struct {
+        f32 ang[3];         /* 0x00 */
+        f32 u0C;            /* 0x0C */
+        f32 dir[3];         /* 0x10, func_15143794 */
+        f32 col[3];         /* 0x1C */
+        f32 u28;            /* 0x28 */
+        f32 u2C;            /* 0x2C */
+        u8 u30;             /* 0x30 */
+    } part;
+    struct {
+        u8 flags;           /* 0x00 */
+        u8 u01;             /* 0x01 = 0 */
+        u8 u02;             /* 0x02 = 1 */
+        s8 u03;             /* 0x03 = -1 */
+        s8 u04;             /* 0x04 = -1 */
+        s16 life;           /* 0x06 */
+        s32 u08;            /* 0x08 */
+        s32 u0C;            /* 0x0C */
+        s32 u10;            /* 0x10 = 0 */
+        s32 u14;            /* 0x14 = 0x220405 */
+        s32 u18;            /* 0x18 = 0x40200 */
+        s32 u1C;            /* 0x1C = 1 */
+        s32 u20;            /* 0x20 = 0x38 */
+        s32 u24;            /* 0x24 = 0x80 */
+        s32 u28;            /* 0x28 = 0x20 */
+        u8 u2C;             /* 0x2C = 0 */
+        u8 u2D;             /* 0x2D = 8 */
+        u8 pad2E[2];
+        u8 colA[4];         /* 0x30 */
+        u8 colB[4];         /* 0x34 */
+        u8 u38;             /* 0x38 = 0 */
+        s32 u3C;            /* 0x3C = 0 */
+        u8 u40;             /* 0x40 = 0 */
+        u8 u41;             /* 0x41 = 2 */
+        s32 pos[3];         /* 0x44 */
+        u8 pad50[4];
+        s16 u54;            /* 0x54 */
+        s16 u56;            /* 0x56 */
+    } blk;
+    BurstSpecB *sp = (BurstSpecB *) arg0;
+    u32 count;
+    u32 ra;
+    u32 rb;
+    f32 len;
+    f32 size;
+    s32 i;
+
+    blk.u38 = 0;
+    blk.flags = sp->flags | 2;
+    blk.u01 = 0;
+    blk.u02 = 1;
+    blk.u03 = -1;
+    blk.u04 = -1;
+    blk.u08 = sp->u34;
+    blk.u0C = sp->u38;
+    blk.u10 = 0;
+    blk.u14 = 0x220405;
+    blk.u18 = 0x40200;
+    blk.u1C = 1;
+    blk.u20 = 0x38;
+    blk.u24 = 0x80;
+    blk.u28 = 0x20;
+    blk.u2C = 0;
+    blk.u2D = 8;
+    blk.u3C = 0;
+    blk.u40 = 0;
+    blk.u41 = 2;
+    blk.pos[0] = sp->pos[0];
+    blk.pos[1] = sp->pos[1];
+    blk.pos[2] = sp->pos[2];
+    part.u2C = sp->u24;
+    for (i = 0; i < 4; i++) {
+        blk.colA[i] = sp->colA[i];
+        blk.colB[i] = sp->colB[i];
+    }
+    blk.u54 = sp->u72;
+    blk.u56 = sp->u74;
+    part.u30 = sp->u71;
+    count = RAND_SPREAD(sp->countBase, sp->countExtra);
+    for (; count != 0; count--) {
+        blk.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);
+        part.ang[0] = func_150ADA68() * 360.0f;
+        part.ang[1] = func_150ADA68() * 360.0f;
+        part.ang[2] = func_150ADA68() * 360.0f;
+        part.u0C = func_150ADA68() * sp->u48Range + sp->u48Base;
+        ra = func_150ADA20();
+        rb = func_150ADA20();
+        len = func_150ADA68() * sp->lenRange + sp->lenBase;
+        func_15143794(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
+                      len, part.dir);
+        for (i = 0; i < 3; i++) {
+            part.col[i] = func_150ADA68() * sp->colRange[i] + sp->colBase[i];
+        }
+        part.u28 = func_150ADA68() * sp->u28Range + sp->u28Base;
+        size = func_150ADA68() * sp->sizeRange + sp->sizeBase;
+        func_15157E08((s8 *) &blk, (f32 *) &part, sp->kind, size, 0, 0, 0, arg1, arg2);
+    }
+    return 0;
+}
+#undef RAND_SPREAD
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152A90.s")
+#endif
 
 void func_15143794(s16, s16, f32, void *);
 void func_150CD3C0(void *, u8, u8);
@@ -769,7 +1086,134 @@ void func_1515302C(u8 *arg0) {
     arg0[2] = e[2];
 }
 
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+void *func_1515C2F0(s32 *, s32, void *, s32, u8, s32);
+
+// base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
+#define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
+
+// particle_burst_from_spec: spawns base + rand % (extra + 1) particles (func_1515C2F0) at the spec's point; each
+// one gets random life / flag byte, two random scalars, a random direction (func_15143794: two s16 angles and a
+// length, each base + random) and two random 4-byte colours; the rest of the 0x3C-byte particle block is copied
+// from the spec once. arg1 / arg2 go to func_1515C2F0 (owner byte, extra word). The result is unused by all callers.
+s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
+    typedef struct {
+        s32 countBase;      /* 0x00 */
+        s32 countExtra;     /* 0x04 */
+        s32 pos[3];         /* 0x08 */
+        f32 aBase;          /* 0x14 */
+        f32 aRange;         /* 0x18 */
+        f32 bBase;          /* 0x1C */
+        f32 bRange;         /* 0x20 */
+        f32 lenBase;        /* 0x24 */
+        f32 lenRange;       /* 0x28 */
+        s16 angXBase;       /* 0x2C */
+        s16 angXExtra;      /* 0x2E */
+        s16 angYBase;       /* 0x30 */
+        s16 angYExtra;      /* 0x32 */
+        s32 flagBase;       /* 0x34 */
+        s32 flagExtra;      /* 0x38 */
+        s16 lifeBase;       /* 0x3C */
+        s16 lifeExtra;      /* 0x3E */
+        u16 u40;            /* 0x40 */
+        u8 u42[3];          /* 0x42 */
+        u8 colABase[4];     /* 0x45 */
+        u8 colAExtra[4];    /* 0x49 */
+        u8 colBBase[4];     /* 0x4D */
+        u8 colBExtra[4];    /* 0x51 */
+        u8 u55Base;         /* 0x55 */
+        u8 u55Extra;        /* 0x56 */
+        u8 u57[2];          /* 0x57 */
+        s32 u5C;            /* 0x5C */
+        s32 u60;            /* 0x60 */
+        s16 u64;            /* 0x64 */
+        s16 u66;            /* 0x66 */
+        s16 u68;            /* 0x68 */
+        u8 u6A;             /* 0x6A */
+        f32 u6C;            /* 0x6C */
+        s8 u70;             /* 0x70 */
+        s8 u71;             /* 0x71 */
+    } BurstSpec;
+    struct {
+        f32 a;              /* 0x00 */
+        f32 dir[3];         /* 0x04, func_15143794 */
+        f32 b;              /* 0x10 */
+        u8 u14[3];          /* 0x14 */
+        u8 colA[4];         /* 0x17 */
+        u8 colB[4];         /* 0x1B */
+        u8 u1F;             /* 0x1F */
+        u8 u20[2];          /* 0x20 */
+        s32 u24;            /* 0x24 */
+        s32 u28;            /* 0x28 */
+        s16 u2C;            /* 0x2C */
+        s16 u2E;            /* 0x2E */
+        s16 u30;            /* 0x30 */
+        u8 u32;             /* 0x32 */
+        f32 u34;            /* 0x34 */
+        s8 u38;             /* 0x38 */
+        s8 u39;             /* 0x39 */
+    } part;                 /* 0x3C bytes, copied by func_1515C2F0 */
+    struct {
+        s32 pos[3];         /* 0x00 */
+        s16 life;           /* 0x0C */
+        u16 u0E;            /* 0x0E */
+        s32 u10;            /* 0x10, func_1515C2F0 also sets 10 */
+        u8 pad14;
+        u8 flag;            /* 0x15 */
+    } spawn;
+    BurstSpec *sp = (BurstSpec *) arg0;
+    u32 count;
+    u32 ra;
+    u32 rb;
+    f32 len;
+    s32 i;
+
+    count = RAND_SPREAD(sp->countBase, sp->countExtra);
+    spawn.pos[0] = sp->pos[0];
+    spawn.pos[1] = sp->pos[1];
+    spawn.pos[2] = sp->pos[2];
+    spawn.u10 = 10;
+    spawn.u0E = sp->u40;
+    part.u14[0] = sp->u42[0];
+    part.u14[1] = sp->u42[1];
+    part.u14[2] = sp->u42[2];
+    part.u20[0] = sp->u57[0];
+    part.u20[1] = sp->u57[1];
+    part.u24 = sp->u5C;
+    part.u28 = sp->u60;
+    part.u2C = sp->u64;
+    part.u2E = sp->u66;
+    part.u38 = sp->u70;
+    part.u39 = sp->u71;
+    part.u30 = sp->u68;
+    part.u32 = sp->u6A;
+    part.u34 = sp->u6C;
+    for (; count != 0; count--) {
+        spawn.flag = RAND_SPREAD(sp->flagBase, sp->flagExtra);
+        spawn.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);
+        part.a = func_150ADA68() * sp->aRange + sp->aBase;
+        part.b = func_150ADA68() * sp->bRange + sp->bBase;
+        ra = func_150ADA20();
+        rb = func_150ADA20();
+        len = func_150ADA68() * sp->lenRange + sp->lenBase;
+        func_15143794(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
+                      len, part.dir);
+        for (i = 0; i < 4; i++) {
+            part.colA[i] = RAND_SPREAD(sp->colABase[i], sp->colAExtra[i]);
+        }
+        for (i = 0; i < 4; i++) {
+            part.colB[i] = RAND_SPREAD(sp->colBBase[i], sp->colBExtra[i]);
+        }
+        part.u1F = RAND_SPREAD(sp->u55Base, sp->u55Extra);
+        func_1515C2F0(spawn.pos, 0, &part, 0, arg1, arg2);
+    }
+    return 0;
+}
+#undef RAND_SPREAD
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151530A8.s")
+#endif
 
 #ifdef NON_MATCHING
 u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);

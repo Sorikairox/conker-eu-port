@@ -1,0 +1,30 @@
+s/    hasA = arg4;/    hasA = 0;/
+s/ptA\[2\] = ((s32 \*) a3)\[2\];/ptA[2] = ((s32 *) a3)[1];/
+s/(arg13 ? 4 : 0) | (arg11 ? 1 : 0)/(arg13 ? 4 : 0) | (arg12 ? 1 : 0)/
+s/lt.uB0 = arg15;/lt.uB0 = arg14;/
+s/if (a2 != NULL \&\& a3 != NULL) {/if (a2 != NULL || a3 != NULL) {/
+s/        if (!arg4) {/        if (arg4) {/
+s/hasB ? ptB : NULL, (s32 \*) lt.u68/hasA ? ptB : NULL, (s32 *) lt.u68/
+s/arg7, arg10, a2,/arg6, arg10, a2,/
+s/1, arg8, arg9, arg15, arg12, arg13, 0, arg17)/1, arg8, arg9, arg15, arg12, arg13, 0, arg18)/
+s/lt.u64 = arg14;/lt.u64 = arg16;/
+s/lt.u94 = 70.0f \* arg7;/lt.u94 = 70.0f * arg6;/
+s/lt.pos\[1\] = ((s32 \*) a0)\[1\];/lt.pos[1] = ((s32 *) a0)[0];/
+s/lt.dir70\[2\] = lt.dir\[2\] \* 70.0f;/lt.dir70[2] = lt.dir[1] * 70.0f;/
+s/lt.u6C = arg6;/lt.u6C = arg8;/
+s/(150.0f < lt.u04) ? 1 : 0/(150.0f < lt.u04) ? 8 : 0/
+s/fx.u08\[0\] = 0.0200000014f;/fx.u08[0] = 0.02f;/
+s/func_15145974(lt.dir, \&fx.angA, \&fx.angB);/func_15145974(lt.dir, \&fx.angB, \&fx.angA);/
+s/fx.u18 = 0.0f;/fx.u18 = 1.0f;/
+s/fx.vel\[1\] = lt.dir\[1\] \* arg6;/fx.vel[1] = lt.dir[1] * arg7;/
+s/((s32 \*) fx.colour)\[2\] = ((s32 \*) D_800A5860)\[2\];/((s32 *) fx.colour)[2] = ((s32 *) D_800A5860)[1];/
+s/fx.u56 = 0x2F;/fx.u56 = 0x2E;/
+s/fx.u60\[1\] = 0x13;/fx.u60[1] = 0x12;/
+s/fx.ownerKind = arg9\[0x3B\];/fx.ownerKind = arg9[0x3A];/
+s/fx.u74 = 0xFF;/fx.u74 = 0xFE;/
+s/(arg16, 0x4650, -500, 0, -1,/(arg16, 0x4650, -500, 0, 1,/
+s/1000, 2000);/1000, 2001);/
+s/0, 0, 0, 0xB4, arg18, arg19);/0, 0, 0, 0xB4, arg17, arg19);/
+s/memcpy((s32) (e + 0x170)/memcpy((s32) (e + 0x16C)/
+s/if (arg16 != 0) {/if (arg16 == 0) {/
+s/for (i = 2; i < 9; i++) {/for (i = 2; i < 8; i++) {/

@@ -61,13 +61,23 @@ void func_15013000(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150130B4.s")
 
+// record_start_dispatch: runs the record's start handler D_80082EA0[rec->unk17] (EU 0x80083230) on the record.
 s32 func_1501370C(struct16 *arg0) {
     u8 idx = arg0->unk17;
+#ifdef NON_MATCHING
+    /* P164 (P161 null+0x14 writer): the handlers take the record (asm 150136BC keeps a0 = arg0 at the jalr) */
+    void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082EA0[idx];
+
+    if (func != NULL) {
+        func(arg0);
+    }
+#else
     void (*func)(void) = D_80082EA0[idx];
 
     if (func != NULL) {
         func();
     }
+#endif
     return 1;
 }
 

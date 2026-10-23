@@ -1,0 +1,26 @@
+s/TB_F32(box, 0x2C) = skip ? 1.0f : D_800A7138;/TB_F32(box, 0x2C) = skip ? 0.5f : D_800A7138;/ %o1 o1k
+s/            box\[0x1E\] = 2;/            box[0x1E] = 3;/ %o1s
+s/            box\[0x15\] = 2;/            box[0x15] = 4;/ %o1
+s/        TB_F32(box, 0x30) = w >> 1;/        TB_F32(box, 0x30) = w >> 2;/ %g2
+s/if (0.75f < TB_F32(box, 0x28)/if (0.5f < TB_F32(box, 0x28)/ %g2 g2e
+s/            TB_S16(box, 0x16) = 180;/            TB_S16(box, 0x16) = 181;/ %g2e
+s/TB_S16(box, 0x16) -= D_800BE9A0 \* 45;/TB_S16(box, 0x16) -= D_800BE9A0 * 44;/ %w4
+s/(4.0f - TB_S16(box, 0x16)) \/ 4.0f \* 170.0f/(4.0f - TB_S16(box, 0x16)) \/ 4.0f * 171.0f/ %d8 d8m
+s/if (box\[0x1E\] < 101)/if (box[0x1E] < 100)/ %d8 d8e d8m
+s/(TB_S16(box, 0x16) \/ 10.0f \* 255.0f)/(TB_S16(box, 0x16) \/ 9.0f * 255.0f)/ %f40n
+s/((s8 \*) box)\[0x20\] - 1, box\[0x15\]);/((s8 *) box)[0x20], box[0x15]);/ %f40
+s/TB_S16(box, 0x18) = 5;/TB_S16(box, 0x18) = 6;/ %f40e
+s/TB_F32(box, 0x2C) = 0.25f;/TB_F32(box, 0x2C) = 0.5f;/ %f40e
+s/            TB_S16(box, 0x16) = TB_T(box)->width;/            TB_S16(box, 0x16) = TB_T(box)->width + 1;/ %l10
+s/TB_T(box)->flags |= 0x4000;/TB_T(box)->flags |= 0x2000;/ %l10
+s/            if ((flags \& 0x80) \&\& TB_T(box)->lines == ((s8 \*) box)\[0x20\] + 1)/            if ((flags \& 0x80) \&\& TB_T(box)->lines == ((s8 *) box)[0x20])/ %s20a s20a2
+s/                    box\[0x20\] = -1;/                    box[0x20] = 0;/ %s20a
+s/                    D_800D1994 = 0;/                    D_800D1994 = 1;/ %s20a
+s/} else if (!(flags \& 0x40) \&\& (pad \& 0x4000)) {/} else if (!(flags \& 0x20) \&\& (pad \& 0x4000)) {/ %s20c s20c2
+s/        if (!(flags \& 0x200) \&\& skip) {/        if (!(flags \& 0x100) \&\& skip) {/ %s20e
+s/(TB_S16(box, 0x18) \/ 5.0f \* 85.0f)/(TB_S16(box, 0x18) \/ 5.0f * 86.0f)/ %c80a c80a2
+s/if (TB_F32(box, 0x28) < 0.0f || TB_S16(box, 0x18) == 0) {/if (TB_F32(box, 0x28) < 0.0f \&\& TB_S16(box, 0x18) == 0) {/ %c80b c80c
+s/            \*(s16 \*) (pl + 0x6CC) = 0;/            *(s16 *) (pl + 0x6CA) = 0;/ %c80a c80b
+s/            D_800CC8D3\[TB_T(box)->player \* 0x32C\] = 0;/            D_800CC8D3[TB_T(box)->player * 0x32C] = 2;/ %c80a c80b
+s/    if (((u8 \*) t)\[0x2B\] != 0 \&\& D_800C35EA != 1) {/    if (((u8 *) t)[0x2B] != 0 \&\& D_800C35EA != 0) {/ %cls cls2
+s/        skip = 0;/        skip = skip;/ %f40k s20f
