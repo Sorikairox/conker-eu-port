@@ -1,0 +1,11 @@
+s/    if (D_800DDD20 == 0) {/    if (D_800DDD20 == 1) {/
+s/        voices\[i \* 0x10 + 0xC\] = 0;/        voices[i * 0x10 + 0xB] = 0;/
+s/    for (i = 0; i < 15; i++) {\n        voices/X/
+s/                  1500,/                  1501,/
+s/D_800DBFF0->unk380, (s32) D_800DBFF0->unk2F8/D_800DBFF0->unk380, (s32) D_800DBFF0->unk2FC/
+s/(s32) D_800CC2D0\[0\].z_position,/(s32) D_800CC2D0[1].z_position,/
+s/ \&\& voices\[i \* 0x10 + 0xC\] == 0) {/) {/
+s/            \*(s32 \*) (voices + i \* 0x10 + 8) = 0;/            *(s32 *) (voices + i * 0x10 + 4) = 0;/
+s/            \*(s32 \*) (slots + i \* 0x68) = 0;/            ;/
+s/    for (i = 0; i < 15; i++) {/    for (i = 0; i < 14; i++) {/2
+s/    for (i = 0; i < 15; i++) {/    for (i = 1; i < 15; i++) {/

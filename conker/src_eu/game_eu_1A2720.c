@@ -21,7 +21,11 @@ extern void (*D_8008D0A4[])(s32);
 extern u16 D_800CC16E;
 s32 func_15196560(s32, s32);
 s32 func_1510CE28();
+#ifdef NON_MATCHING
+void func_1517E3CC(void);
+#else
 s32 func_1517E3CC();
+#endif
 s32 func_15188630();
 
 void func_15174F68(s32 arg0, s32 arg1) {

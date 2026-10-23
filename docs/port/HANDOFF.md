@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P100, 2026-10-23). Details: `docs/port/sessions/P100.md`
+
+- Frame-path stubs in hand C (NM): func_15141C0C (object type -> interaction category), func_15146EE0 (D_8008A084
+  hook), func_1507E9A8 (apply animation entry), func_1512D900 (player tilt), func_1517E3CC (sound slot refresh),
+  func_151DA6F8 (particle spawn wrapper). All EQUIV + knob setups; mutants 11/11, 12/12, 14/14, 15/15, 13/13, 24/24.
+- Bug fixed in NM C: func_151D9B8C read the u8 table D_800AB710 as s32 at 4 * index (old body DIFFERs with ARGMEM).
+- difftest: FP argument registers of callees with no TU declaration were never compared (the call statement was
+  parsed as a prototype); now declarations only, falling back to include/**.h (sinf / cosf). New knob forms:
+  OUTA / OUTB / OUTW `ADDR=@MEM:...` (absolute address), ARGMEM `ADDR=N+OFF:LEN`. Selftest 49/49.
+- D_8008622C done hooks (func_15044D18): all four targets set a0 themselves; no argument needed (P98 item closed).
+- protoasm_check: same 6 port-b rows. Default build byte-identical (full verify_all), NM links, protocheck 0.
+
+## Next steps (from P100)
+
+1. func_1512EE50 (camera eye height, 1352 instructions, 49 calls): dedicated session; m2c raw draft in
+   `port_work/p100/raw/func_1512EE50.c` (700 lines, one goto) as a reading aid only.
+2. func_1517C11C (asm-only, ~320 instructions): producer of the voice flags func_1517E3CC reads; until it is C every
+   positional sound slot is switched off each frame.
+3. Remaining P97 stubs (smallest first): func_1510CE28, func_1515929C, func_1510D090, func_1508F9F4, func_15113798,
+   func_15184298, func_15178004, func_15113000, func_15188630, func_15181A6C, func_1517B270, func_1509093C,
+   func_15129220. func_1505528C is in a port-b file (game_eu_78230).
+4. Bodies verified before P100 that call header-only float functions may now show FPR diffs: re-run if touched.
+
 ## State (session P98, 2026-10-23). Details: `docs/port/sessions/P98.md`
 
 - **Prototype vs. asm check** (`docs/port/sessions/p98/protoasm_check.py [--func F] [--why F] [--src D --inc D]`):

@@ -1,0 +1,24 @@
+s/    sb.tint = tint;/    sb.tint = 1;/
+s/sb.pos\[2\] = ((s32 \*) pos)\[2\];/sb.pos[2] = ((s32 *) pos)[1];/
+s/sb.sprite = sprite + 0x10;/sb.sprite = sprite + 0x11;/
+s/sb.model = 0x35;/sb.model = 0x36;/
+s/sb.minus1 = -1;/sb.minus1 = 0;/
+s/sb.owner = owner;/sb.owner = argC;/
+s/mb.speed = speed;/mb.speed = scale;/
+s/mb.vel\[1\] = ((s32 \*) vel)\[1\];/mb.vel[1] = ((s32 *) vel)[0];/
+s/mb.floor = -10000.0f;/mb.floor = -1000.0f;/
+s/        f |= 0x20;/        f |= 0x10;/
+s/((u8 \*) \&D_800AB710)\[type\]/((s32 *) \&D_800AB710)[type]/
+s/mb.kind = D_800AB7D4\[type\];/mb.kind = D_800AB7D4[type + 1];/
+s/mb.alpha = alpha;/mb.alpha = 0;/
+s/mb.t1 = t1;/mb.t1 = t0;/
+s/        mb.flags = f | 3;/        mb.flags = f | 1;/
+s/        a8 = 4;/        a8 = 5;/
+s/extra.sy = sy;/extra.sy = sx;/
+s/extra.type = type;/extra.type = 0;/
+s/rb.render\[2\] = 0x50600;/rb.render[2] = 0x50601;/
+s/rb.b1 = 0xC;/rb.b1 = 0xD;/
+s/        a11 = 0xFF;/        a11 = 0xFE;/
+s/argC, arg10, arg11);/argC, arg10, arg10);/
+s/+ 0x48, (s32) \&extra, 0xC/+ 0x44, (s32) \&extra, 0xC/
+s/    return p;/    return NULL;/
