@@ -1931,7 +1931,278 @@ void func_151E19AC(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E19AC.s")
 #endif
+#ifdef NON_MATCHING
+extern s8 D_eu_800902E4[4];     /* initial column offsets of the 4 team columns */
+extern s8 D_800ABAF4[][12];     /* team layout per menu entry: count, min / max / per-team size (< 3 players),
+                                 * same for 3+ players, team 1 size, team colours [4] */
+extern u8 D_800ABA0C[][3];      /* team colour rgb */
+extern s8 D_800E0FE0;           /* number of teams */
+extern s8 D_800E0FE1;           /* team size */
+extern s8 D_800E0FF8[4];        /* team colour index */
+extern s8 D_80090164;           /* team 0 / 1 size shift (two teams) */
+extern u8 D_800ABC60[], D_800ABC64[], D_800ABC68[], D_800ABC6C[], D_800ABC70[], D_800ABC74[], D_800ABC78[],
+    D_800ABC7C[], D_800ABC80[], D_800ABC88[], D_800ABC8C[], D_800ABC90[], D_800ABC94[];
+s8 func_151E2C88(s32);
+// menu_team_select_page: multiplayer team page (main page 1). Fades the page alpha D_800E0EC5 (out to the pending
+// page D_800E0EC6). The menu entry's D_800ABAF4 row gives the team count D_800E0FE0, the team colours, and the
+// total min / max and per-team limits (by player count D_800901E0). Each joined player (queue D_800901E4) moves
+// between teams with left / right (team index masked by count - 1, refused when the team is full) and changes the
+// extra team size D_80090140 with up / down; the team size D_800E0FE1 = largest team + extra, clamped so
+// size * teams stays within min..max; team 1 may have a fixed size; with two teams C-left / C-right shift
+// D_80090164 sizes between them (not with 3+ players). Free places become computer players (queue -2). Draws the
+// team headers in their colours and one line per player (number, score from func_151E2C88 when it reports one,
+// or the CPU label), alternating columns. A / Start: mode 7 with fade callback func_151E4A78, B: page 4. Sfx 0x4FF
+// on moves, 0x500 on accept.
+void func_151E1EDC(void) {
+    MenuState *rec;
+    s8 *row;
+    s32 alpha;
+    s32 sfx;
+    s32 n;
+    s32 i;
+    s32 teams;
+    s32 min, max, size;
+    s32 old;
+    s32 team;
+    s32 total;
+    s32 shift;
+    s32 lim;
+    s32 v;
+    s16 step, x;
+    s16 px;
+    s16 py;
+    s8 fixed1;
+    /* as in the asm frame, want[] / maxIn[] / off[] and colY[] / colX[] are adjacent: a team index past the team
+     * count (stale D_800E1030 entries of removed players) reads the next array */
+    s8 bytes[12];
+    s16 cols[8];
+    s8 *want = bytes;
+    s8 *maxIn = bytes + 4;
+    s8 *off = bytes + 8;
+    s16 *colY = cols;
+    s16 *colX = cols + 4;
+    s8 members[8];
+    s32 scores[8];
+    s8 haveScores;
+    u16 pad;
+
+    *(s32 *) off = *(s32 *) D_eu_800902E4;
+    sfx = 0;
+    if ((s8) D_800E0EC6 != -1) {
+        ((MenuState *) D_80090174)->input &= ~0x20;
+        alpha = D_800E0EC5 - (D_800BE9E4 << 5);
+        if (alpha <= 0) {
+            D_800E0EC5 = 0;
+            ((MenuState *) D_80090174)->mainPage = D_800E0EC6;
+            D_800E0EC6 = -1;
+            return;
+        }
+        D_800E0EC5 = alpha;
+    } else {
+        alpha = D_800E0EC5 + (D_800BE9E4 << 5);
+        if (alpha >= 0x100) {
+            alpha = 0xFF;
+        }
+        D_800E0EC5 = alpha;
+    }
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    rec = (MenuState *) D_80090174;
+    row = D_800ABAF4[(&D_800ABA75)[rec->x42 * 10]];
+    D_800E0FE0 = row[0];
+    fixed1 = row[7];
+    D_800E0FF8[0] = row[8];
+    D_800E0FF8[1] = row[9];
+    D_800E0FF8[2] = row[10];
+    D_800E0FF8[3] = row[11];
+    n = D_800901E0;
+    if (n < 3) {
+        min = row[1];
+        max = row[2];
+        size = row[3];
+    } else {
+        min = row[4];
+        max = row[5];
+        size = row[6];
+    }
+    for (i = 0; i < 4; i++) {
+        maxIn[i] = (i != 0 && fixed1 != 0) ? fixed1 : size;
+    }
+    teams = D_800E0FE0;
+    for (i = 0; i < teams; i++) {
+        members[i] = 0;
+        colY[i] = 0x6E;
+    }
+    for (i = 0; i < n; i++) {
+        members[D_800E1030[i]]++;
+    }
+    for (i = n; i < 16; i++) {
+        (&D_800901E4)[i] = -1;
+    }
+    for (i = 0; i < n; i++) {
+        if ((&D_800901E4)[i] < 0) {
+            continue;
+        }
+        pad = rec->padInput[(&D_800901E4)[i]];
+        old = D_800E1030[i];
+        if (pad & 0xF) {
+            sfx = 0x4FF;
+        }
+        if (pad & 8) {
+            D_800E1030[i]++;
+        }
+        if (pad & 4) {
+            D_800E1030[i]--;
+        }
+        if (pad & 2) {
+            D_80090140++;
+        }
+        if (pad & 1) {
+            D_80090140--;
+        }
+        if (D_80090140 < 0) {
+            D_80090140 = 0;
+            sfx = 0;
+        }
+        D_800E1030[i] &= teams - 1;
+        if (members[D_800E1030[i]] >= maxIn[D_800E1030[i]]) {
+            D_800E1030[i] = old;
+        }
+        members[D_800E1030[i]]++;
+        members[old]--;
+    }
+    D_800E0FE1 = 1;
+    for (i = 0; i < teams; i++) {
+        if (D_800E0FE1 < members[i]) {
+            D_800E0FE1 = members[i];
+        }
+    }
+    D_800E0FE1 += D_80090140;
+    while (D_800E0FE1 * teams < min) {
+        D_800E0FE1++;
+        D_80090140++;
+    }
+    while (max < D_800E0FE1 * teams) {
+        D_800E0FE1--;
+        D_80090140--;
+        if (D_80090140 < 0) {
+            D_80090140 = 0;
+        }
+    }
+    if (fixed1 != 0 && D_800E0FE1 == 1) {
+        fixed1 = 1;
+    }
+    for (i = 0; i < 4; i++) {
+        want[i] = (i == 1 && fixed1 != 0) ? fixed1 : D_800E0FE1;
+    }
+    if (teams == 2) {
+        if (rec->input & 0x40) {
+            D_80090164++;
+        } else if (rec->input & 0x80) {
+            D_80090164--;
+        }
+        if (n >= 3) {
+            D_80090164 = 0;
+        }
+        shift = D_800E0FE1;
+        if (D_80090164 < -shift) {
+            D_80090164 = -shift;
+        } else if (shift < D_80090164) {
+            D_80090164 = shift;
+        } else if (rec->input & 0xC0) {
+            sfx = 0x4FF;
+        }
+        want[0] += D_80090164;
+        want[1] -= D_80090164;
+        for (i = 0; i < 2; i++) {
+            lim = (i == 1 && fixed1 != 0) ? fixed1 : 8;
+            if (want[i] <= 0) {
+                want[i] = 1;
+            }
+            if (lim < want[i]) {
+                want[i] = lim;
+            }
+        }
+    }
+    step = 0x128 / teams;
+    x = step >> 1;
+    total = (s16) n;
+    for (i = 0; i < teams; i++) {
+        colX[i] = x;
+        x += step;
+        while (members[i] < want[i]) {
+            (&D_800901E4)[total] = -2;
+            D_800E1030[total] = i;
+            members[i]++;
+            total = (s16) (total + 1);
+        }
+    }
+    if (alpha == 0xFF) {
+        if (rec->input & 0x10) {
+            D_800E0B94 = 7;
+            D_800E0EB8 = (s32 *) func_151E4A78;
+            D_80090114 = 8;
+            sfx = 0x500;
+        } else if (rec->input & 0x20) {
+            D_800E0EC6 = 4;
+        }
+    }
+    rec->input &= ~0x20;
+    func_1504332C(0xFF, 0xFF, 0, alpha);
+    func_150432FC(0x94, (s16) ((D_800E0FE0 == 4) * 32 + 0x78));
+    func_15042E3C((s32) D_800ABC60, 0x1A);
+    for (i = 0; i < D_800E0FE0; i++) {
+        func_1504332C(D_800ABA0C[D_800E0FF8[i]][0], D_800ABA0C[D_800E0FF8[i]][1], D_800ABA0C[D_800E0FF8[i]][2], alpha);
+        func_150432FC(colX[i], 0x50);
+        v = D_800E0FF8[i];
+        if (v == 4) {
+            func_15042E3C((s32) D_800ABC64, 9);
+        } else if (v == 5) {
+            func_15042E3C((s32) D_800ABC68, 8);
+        } else if (v == 7) {
+            func_15042E3C((s32) D_800ABC6C, 0xA);
+        } else if (v == 8) {
+            func_15042E3C((s32) D_800ABC70, 0xB);
+        } else if (v == 9) {
+            func_15042E3C((s32) D_800ABC74, 0x34);
+        } else {
+            func_15042E3C((s32) D_800ABC78, v + (v < 4 ? 0x59 : 0x4C));
+        }
+    }
+    haveScores = func_151E2C88((s32) scores);
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    for (i = 0; i < total; i++) {
+        team = D_800E1030[i];
+        if (total == D_800E0FE0) {
+            off[team] = 0;
+        }
+        px = off[team] + colX[team];
+        py = colY[team];
+        off[team] = -off[team];
+        if (off[team] < 0) {
+            colY[team] = py + 0x18;
+        }
+        func_150432FC(px, py);
+        if ((&D_800901E4)[i] < 0) {
+            func_15042E3C((s32) D_800ABC88, 5);
+        } else {
+            func_15042E3C((s32) D_800ABC7C, (&D_800901E4)[i] + 1);
+            if (haveScores) {
+                func_15042E3C((s32) D_800ABC80, scores[i] + 1);
+            }
+        }
+    }
+    if (sfx != 0) {
+        func_10010F30(sfx, sfx == 0x4FF ? 0x4650 : 0x7D00, 0x40, 0, 0);
+    }
+    if (D_800E0FE0 == 2) {
+        func_15042D94(0x94, 0xB4, 0x81, (s32) D_800ABC8C, 0x3A);
+        func_15042D94(0x7B, 0xB4, 0x81, (s32) D_800ABC90, 0x3B);
+        func_15042D94(0xAD, 0xB4, 0x81, (s32) D_800ABC94, 0x3C);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E1EDC.s")
+#endif
 
 void func_151E5AB8(void);
 void func_151E4B40(void);
@@ -3032,7 +3303,187 @@ void func_151E4A78(void) {
     func_151E2FCC();
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    s16 level;
+    s8 scene;     /* +2: scene to start */
+    s8 sceneAlt;  /* +3: alternative scene (see below) */
+} MenuLevelStart;
+extern s8 D_800ABA77;           /* per menu entry (rows of 10, as D_800ABA75): byte 2 = index into D_800ABBA0 */
+extern MenuLevelStart D_800ABBA0[];
+extern s8 D_800E0EF0[16];
+extern s8 D_800E0FF8[4];
+extern s8 D_eu_800902EC;        /* last stick y of this page (edge detection) */
+extern s8 D_800BED3A;           /* controller 1 stick y */
+extern u8 D_800C40AC;
+extern u8 D_800ABCC8[], D_800ABCCC[], D_800ABCD0[], D_800ABCDC[], D_800ABCE0[], D_800ABCE4[], D_800ABCE8[],
+    D_800ABCEC[], D_800ABCF0[], D_800ABCF4[], D_800ABCF8[], D_800ABD00[], D_800ABCFC[];
+void func_150916B4(s32 x, s32 y, s32 value, s32 arg3);
+extern s8 D_800E100C;
+void func_151E5564(void);
+// menu_level_start_page: main page 3 / level start prompt, driven by D_80090120. State 1 starts the level of
+// menu entry rec->x42 through func_1501D348 (scene byte 2 of its D_800ABBA0 row, byte 3 instead when no joined
+// player (entry 0) / player 0 (other entries) is flagged 1 in D_800E0EF0) and clears D_80090120. States 2..4:
+// fades in D_8009016C (+4 per tick to 0xFF; D_800E100C = its inverse), draws the title text, then for multiplayer
+// entries (D_800ABA75 row byte < 0, only entries 0xB / 0xC) one line per joined player (name text 0x174 + 4 *
+// character, two numbers D_800E1048 / D_800E1040, separators), else a "who" line (several players flagged / the
+// single player's flag / the first flagged player's character D_800E0FF8), and the yes / no choice D_800901CC
+// (stick y edge at +-30 toggles it with sfx 0x62D). Accept (D_800E0FCA & 0x8000) or the 2000-tick timeout (forces
+// "no") ends the page: yes drops the D_80090110 dropped queue entries and sets the fade callback func_151E2FCC,
+// no goes to main page 4 (state 3: mode 3, else callback func_151E5564); mode 7, D_80090114 = 8, func_151E5D28.
+// Other states: D_800E0FCA != 0 or D_800C40AC == 2 resets the fade and enters state 2. Clears input bit 0x20.
+void func_151E4B40(void) {
+    MenuState *rec;
+    MenuLevelStart *start;
+    s32 scene;
+    s32 entry;
+    s32 none;
+    s32 i;
+    s32 y;
+    s32 joined;
+    s8 flagged;
+    s8 stickY;
+    s8 prevY;
+    s8 n;
+    s32 last;
+
+    if (D_80090120 == 1) {
+        entry = ((MenuState *) D_80090174)->x42;
+        start = &D_800ABBA0[(&D_800ABA77)[entry * 10]];
+        scene = start->scene;
+        if (entry == 0) {
+            none = 1;
+            for (i = 0; i < D_80090128; i++) {
+                if ((&D_800901E4)[i] >= 0 && D_800E0EF0[D_800E1030[i]] == 1) {
+                    none = 0;
+                }
+            }
+            if (none) {
+                scene = start->sceneAlt;
+            }
+        } else if (D_800E0EF0[0] != 1) {
+            scene = start->sceneAlt;
+        }
+        func_1501D348(start->level, scene, 0, 0, 0);
+        D_80090120 = 0;
+        return;
+    }
+    entry = ((MenuState *) D_80090174)->x42;
+    if (entry != 0xB && entry != 0xC) {
+        func_151E5AB8();
+    }
+    if (D_80090120 == 2 || D_80090120 == 3 || D_80090120 == 4) {
+        D_8009016C += D_800BE9E4 * 4;
+        if (D_8009016C >= 0x100) {
+            D_8009016C = 0xFF;
+        }
+        D_800E100C = 0xFF - D_8009016C;
+        func_1504332C(0xFF, 0xFF, 0, D_8009016C);
+        func_15042D94(0x94, 0x14, 0x81, (s32) D_800ABCC8, 0x4B);
+        func_15042E3C((s32) D_800ABCCC);
+        func_1504332C(0xFF, 0xFF, 0xFF, D_8009016C);
+        func_150432FC(0x94, 0x32);
+        if (D_80090120 == 4) {
+            D_800DBFF0->unk2C = 0x80000;
+        }
+        entry = ((MenuState *) D_80090174)->x42;
+        if ((&D_800ABA75)[entry * 10] < 0) {
+            if (entry == 0xB || entry == 0xC) {
+                y = 0x48;
+                for (i = 0; i < D_80090128; i++) {
+                    if ((&D_800901E4)[i] < 0) {
+                        continue;
+                    }
+                    func_15042D94(0x58, y, 0x81, (s32) D_800ABCD0,
+                                  *(s32 *) ((u8 *) D_800E1008 + D_800E0EF0[i] * 4 + 0x174));
+                    func_150916B4(0x8A, y, D_800E1048[i], 0x80);
+                    func_150916B4(0xBC, y, D_800E1040[i], 0x80);
+                    func_15042D94(0xA8, y, 0x80, (s32) D_800ABCDC);
+                    func_15042D94(0xD6, y, 0x80, (s32) D_800ABCE0);
+                    y += 0x12;
+                }
+            }
+        } else {
+            joined = 0;
+            for (i = 0; i < D_80090128; i++) {
+                if ((&D_800901E4)[i] >= 0) {
+                    joined++;
+                }
+            }
+            flagged = 0;
+            for (i = 0; i < 4; i++) {
+                if (D_800E0EF0[i] == 1) {
+                    flagged++;
+                }
+            }
+            if (flagged >= 2) {
+                func_15042D94(0x94, 0x32, 0x81, (s32) D_800ABCE4, 0x58);
+            } else if (joined == 1) {
+                func_15042D94(0x76, 0x32, 0x81, (s32) D_800ABCE8, 0x52);
+                func_15042D94(0xB2, 0x32, 0x81, (s32) D_800ABCEC, D_800E0EF0[D_800E1030[0]] == 1 ? 0x56 : 0x57);
+            } else {
+                for (i = 0; i < 4; i++) {
+                    if (D_800E0EF0[i] == 1) {
+                        func_15042D94(0x71 - (D_800E0FF8[i] == 4 ? -0xC : 0), 0x32, 0x81, (s32) D_800ABCF0,
+                                      D_800E0FF8[i] + 0x4C);
+                        func_15042D94((D_800E0FF8[i] == 4 ? 0x15 : 0) + 0xB7, 0x32, 0x81, (s32) D_800ABCF4, 0x56);
+                        break;
+                    }
+                }
+            }
+        }
+        prevY = D_eu_800902EC;
+        stickY = D_800BED3A;
+        if ((prevY >= -0x1E && stickY < -0x1E) || (prevY < 0x1F && stickY >= 0x1F)) {
+            D_800901CC = 1 - (s8) D_800901CC;
+            func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+        }
+        D_eu_800902EC = stickY;
+        func_15042D94(0x53, 0xB4, 1, (s32) D_800ABCF8, ((s8) D_800901CC == 0) + 0x21);
+        func_15042D94(0xD5, 0xB4, 1, (s32) D_800ABCFC, ((s8) D_800901CC == 1) + 0xE);
+        func_15042D94(0x94, 0xB4, 1, (s32) D_800ABD00, 0x1A);
+        if ((D_800E0FCA & 0x8000) || D_800E0EC0 > 0x7D0) {
+            if (D_800C35EA == 1 && func_151F2CDC() == 1) {
+                func_151F2D6C(0, 0x370C);
+            }
+            if (D_800E0EC0 > 0x7D0) {
+                D_800901CC = 1;
+            }
+            D_800E0B94 = 7;
+            if ((s8) D_800901CC == 0) {
+                n = D_80090110;
+                if (n != 0) {
+                    last = 0x10 - n;
+                    for (i = n; i < last; i++) {
+                        (&D_800901E4)[i] = (&D_800901E4)[i + n];
+                        D_800E1030[i] = D_800E1030[i + n];
+                    }
+                    D_80090110 = 0;
+                }
+                D_800E0EB8 = (s32 *) func_151E2FCC;
+            } else {
+                ((MenuState *) D_80090174)->mainPage = 4;
+                if (D_80090120 == 3) {
+                    D_800E0B94 = 3;
+                } else {
+                    D_800E0EB8 = (s32 *) func_151E5564;
+                }
+            }
+            D_80090114 = 8;
+            D_80090120 = 0;
+            func_151E5D28();
+            D_8008FD8C = 1;
+            D_80090130 = 1;
+        }
+    } else if (D_800E0FCA != 0 || D_800C40AC == 2) {
+        D_8009016C = 0;
+        D_80090120 = 2;
+    }
+    ((MenuState *) D_80090174)->input &= ~0x20;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E4B40.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E533C.s")
 

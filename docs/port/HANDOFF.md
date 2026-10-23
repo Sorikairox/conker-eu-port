@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P141, 2026-10-23). Details: `docs/port/sessions/P141.md`
+
+- Merged port-b 9c9369d (P115-P139) as 904c686: HANDOFF conflict only (merge_union); functions.h func_1513D524
+  `struct210 *` under NM (game_16DC80 hack removed), game_eu_11A2B0 func_151432BC s32, game_eu_20B730:460
+  func_1501D348 void.
+- New hand C (NM): func_151408A4 particle_glow_update (game_16DC80, 38 setups, mutants 62/62), func_151E4B40
+  menu_level_start_page (67 setups, mutants 52/54 + 1 equivalent), func_151E1EDC menu_team_select_page (74 setups,
+  mutants 51/59, 8 equivalent; random garbage layouts with > 4 teams diverge, unreachable).
+- Checks: verify_all OK, NM links, protocheck 0 (1128), selftest 62/62, progress_nm 5122/5915 (86.6%) combined, bytes 66.7%.
+
+## Next steps (from P141)
+
+1. func_151E4B40: 2 coverage-gap mutants (fade exactly 0x100; state-1 queue loop with D_800E1030[i] != i).
+2. P138 re-runs: func_151E3AE4 mutant lists, func_151DFD0C terminating f1 setups, func_151E19AC mutants.
+3. arity_scan / m2c_sanity after the merge; port-b to drop the func_1513D524_void_proto defines (game_169510, game_eu_1772D0).
+
 ## State (session P138, 2026-10-23). Details: `docs/port/sessions/P138.md`
 
 - func_151E3AE4 real bug fixed: in the asm frame y[] (sp+0x90) has only 14 slots and x[] follows it, so with 13+ items
