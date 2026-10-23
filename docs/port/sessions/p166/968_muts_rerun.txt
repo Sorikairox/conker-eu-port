@@ -1,0 +1,19 @@
+s/if (n == 0 || !ok)/if (n == 0)/ %
+s/count = (b \& 1) + (a \& 1);/count = (b \& 1) + (b \& 1);/ %
+s/chunk.sprite = 0;/chunk.sprite = 3;/ %
+s/chunk.life = (func_150ADA20() \& 0xF) + 0x10;/chunk.life = (func_150ADA20() \& 0xF) + 0x11;/ %
+s/chunk.u04 = 0.6f;/chunk.u04 = 0.7f;/ %
+s/chunk.rot\[1\] = \*(f32 \*) (obj + 0x40);/chunk.rot[1] = *(f32 *) (obj + 0x44);/ %
+s/chunk.flags = 0x39E8;/chunk.flags = 0x39E9;/ %
+s/chunk.gravity = -1.6f;/chunk.gravity = -1.5f;/ %
+s/chunk.size = \*(f32 \*) (obj + 0x14C) \* 20.0f;/chunk.size = *(f32 *) (obj + 0x14C) * 21.0f;/ %
+s/chunk.sizeZ = chunk.sizeX;/chunk.sizeZ = chunk.size;/ %
+s/chunk.u72 = 0x10;/chunk.u72 = 0x11;/ %
+s/chunk.u74 = 0xF;/chunk.u74 = 0xE;/ %
+s/r = func_150ADA68() \* 5.0f + 8.0f;/r = func_150ADA68() * 5.0f + 7.0f;/ %
+s/yaw = func_150ADA20() \& 0x7F;/yaw = func_150ADA20() \& 0x3F;/ %
+s/pitch = 0x20 - (func_150ADA20() \& 0x3F);/pitch = 0x21 - (func_150ADA20() \& 0x3F);/ %
+s/chunk.vel\[0\] = r \* dx \* c;/chunk.vel[0] = r * dz * c;/ %
+s/chunk.vel\[1\] = -r \* dz;/chunk.vel[1] = r * dz;/ %
+s/chunk.spinY = 30.0f - func_150ADA68() \* 60.0f;/chunk.spinY = 30.0f - func_150ADA68() * 50.0f;/ %
+s/for (i = 0; i < count; i++)/for (i = 0; i <= count; i++)/ %

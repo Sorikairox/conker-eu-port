@@ -16,7 +16,107 @@ u8 *func_15160A58(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s3
 void *func_1518A560(void *, void *, void *, s32, s32, s32, s32);
 
 
+#ifdef NON_MATCHING
+// character_handler_indices: picks the handler-table indices for a character (P151). By the character type
+// (+0x4) it sets *outType (index into D_800A62B8, flag 4); by the game mode D_800BE9F0 it sets *outMode (index
+// into D_800A62A0, flag 2) and, when the character's sub-type (+0x3B) matches the mode, *outSub (column of
+// D_8008AF30[*outMode], flag 1). Returns the flags; outputs whose flag is clear are left unwritten.
+s32 func_1514CFF0(struct127 *arg0, s32 *outSub, s32 *outMode, s32 *outType) {
+    u8 *obj = (u8 *)arg0;
+    u8 flags = 0;
+    u8 sub;
+
+    switch (obj[4]) {
+        case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x96: *outType = 0; flags = 4; break;
+        case 0x08: *outType = 2; flags = 4; break;
+        case 0x0A: *outType = 3; flags = 4; break;
+        case 0x29: case 0x2A: *outType = 4; flags = 4; break;
+        case 0x53: *outType = 5; flags = 4; break;
+        case 0x77: *outType = 6; flags = 4; break;
+        case 0x47: *outType = 7; flags = 4; break;
+        case 0x28: *outType = 8; flags = 4; break;
+        case 0x7B: *outType = 9; flags = 4; break;
+        case 0x12: *outType = 0xA; flags = 4; break;
+        case 0x8D: *outType = 0xB; flags = 4; break;
+        case 0x93: *outType = 0xC; flags = 4; break;
+        case 0x9F: case 0xA0: *outType = 0xD; flags = 4; break;
+        case 0x94: *outType = 0xE; flags = 4; break;
+        case 0x92: *outType = 0xF; flags = 4; break;
+        case 0x6B: *outType = 0x10; flags = 4; break;
+        case 0xAD: *outType = 0x11; flags = 4; break;
+        case 0x86: *outType = 0x12; flags = 4; break;
+        case 0x52: *outType = 0x13; flags = 4; break;
+        case 0x89: case 0xBA: *outType = 0x14; flags = 4; break;
+        case 0x99: *outType = 0x15; flags = 4; break;
+        case 0x7F: *outType = 0x16; flags = 4; break;
+        case 0x10: case 0x2E: *outType = 0x17; flags = 4; break;
+        case 0x9A: *outType = 0x18; flags = 4; break;
+        case 0x5E: *outType = 0x19; flags = 4; break;
+        case 0x25: *outType = 0x1A; flags = 4; break;
+        case 0x5F: *outType = 0x1B; flags = 4; break;
+    }
+
+    sub = obj[0x3B];
+    switch ((u32)D_800BE9F0) {
+        case 0x00: *outMode = 0x10; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x02:
+            *outMode = 0;
+            flags |= 2;
+            switch (sub) {
+                case 7: *outSub = 1; flags |= 1; break;
+                case 9: *outSub = 0; flags |= 1; break;
+                case 0xD: *outSub = 3; flags |= 1; break;
+                case 0xE: case 0xF: case 0x17: case 0x19: *outSub = 2; flags |= 1; break;
+            }
+            break;
+        case 0x04: *outMode = 6; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x06: *outMode = 2; flags |= 2; break;
+        case 0x07: *outMode = 5; flags |= 2; if (sub == 0x10) { *outSub = 0; flags |= 1; } break;
+        case 0x0A:
+            *outMode = 1;
+            flags |= 2;
+            switch (sub) {
+                case 6: case 7: case 8: case 9: case 0xA: case 0xB: case 0xC: case 0xD:
+                    *outSub = sub - 6; flags |= 1; break;
+                case 0xF: *outSub = 8; flags |= 1; break;
+            }
+            break;
+        case 0x0C: *outMode = 3; flags |= 2; break;
+        case 0x0E:
+            *outMode = 7;
+            flags |= 2;
+            if (sub == 1) {
+                *outSub = 1; flags |= 1;
+            } else if (sub == 8) {
+                *outSub = 0; flags |= 1;
+            }
+            break;
+        case 0x10: *outMode = 4; flags |= 2; if (sub == 6) { *outSub = 0; flags |= 1; } break;
+        case 0x14: *outMode = 8; flags |= 2; if (sub == 0x10) { *outSub = 0; flags |= 1; } break;
+        case 0x17: *outMode = 9; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x1B: *outMode = 0xA; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x1E: *outMode = 0xB; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x26: *outMode = 0xC; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x1C: *outMode = 0xD; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x28: *outMode = 0xE; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x23: *outMode = 0xF; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x2C: *outMode = 0x11; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x2F: *outMode = 0x12; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x35: *outMode = 0x13; flags |= 2; if (sub == 1) { *outSub = 0; flags |= 1; } break;
+        case 0x1D: *outMode = 0x14; flags |= 2; if (sub == 9) { *outSub = 0; flags |= 1; } break;
+        case 0x2B:
+            *outMode = 0x15;
+            flags |= 2;
+            if (obj[4] == 0x9C || obj[4] == 0x9D) {
+                *outSub = 0; flags |= 1;
+            }
+            break;
+    }
+    return flags;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514CFF0.s")
+#endif
 
 s32 func_1514CFF0(struct127 *, s32 *, s32 *, s32 *);
 void func_15155CF0(s32, s32);

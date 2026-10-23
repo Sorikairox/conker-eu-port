@@ -1082,7 +1082,97 @@ Gfx *func_151EDBE8(Gfx *gdl, void *descArg, s32 x, s32 y, s32 cols, s32 rows, f3
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EDBE8.s")
 #endif
+#ifdef NON_MATCHING
+/* HUD model (0xA8 bytes; func_151EE0C4 builds it, func_151EE394 draws it, func_151EE310 frees it). The pause /
+ * counter screen keeps two: D_80090408 (file 0xA4, the blinking head) and D_8009040C (file 0xA2). */
+typedef struct {
+    Gfx **dls;          /* 0x00 the model's display lists (func_1503F91C) */
+    Gfx *copies[4];     /* 0x04 HUD copies of the display lists (count entries) */
+    u8 count;           /* 0x14 display list count */
+    u8 blink;           /* 0x15 frames until the next blink (D_80090408 only) */
+    u8 pad16[6];
+    s32 seg6;           /* 0x1C segment 6 base of the model data */
+    s32 u20;
+    u8 *inst;           /* 0x24 animated model instance (0x3F8 bytes) */
+    f32 mtx[2][4][4];   /* 0x28 model matrix, one per frame buffer (D_800BE9C0) */
+} HudModel;
+
+s32 func_1503F91C(s32, s32, void *, void *, void *, void *, void *);
+void func_1503F8A8(u8 *, s32, s32, f32, f32, s32);
+void func_1503F7A0(u8 *);
+void func_10004074(void *);
+u8 *allocate_memory(s32, s32, s32, s32);
+
+/* hud_model_load: allocates a HudModel, loads model `file` with animation table entry `entry` (func_1503F91C),
+ * starts animation `anim` at `speed`, and makes a HUD copy of each of its display lists: every
+ * G_RDPSETOTHERMODE (0xEF) gets bit 16 of w0 cleared and render mode 0x5041C8, every G_SETCOMBINE (0xFC) becomes a
+ * no-op, so the caller's combiner applies. Returns the HudModel, or 0 when an allocation or the load fails. */
+s32 func_151EE0C4(s32 file, s32 entry, s32 anim, f32 speed) {
+    HudModel *m;
+    Gfx *src;
+    Gfx *dst;
+    u32 w0;
+    u32 op;
+    s32 size;
+    s32 i;
+    s32 j;
+
+    m = (HudModel *) allocate_memory(sizeof(HudModel), 1, 0, 1);
+    if (m == NULL) {
+        return 0;
+    }
+    m->blink = 1;
+    if (func_1503F91C(file, entry, &m->dls, &m->count, &m->seg6, &m->u20, &m->inst) != 0) {
+        func_10004074(m);
+        return 0;
+    }
+    guMtxIdentF(m->mtx[0]);
+    guMtxIdentF(m->mtx[1]);
+    *(f32 **) (m->inst + 0x3E0) = (f32 *) m->mtx[0];
+    *(f32 **) (m->inst + 0x3E4) = (f32 *) m->mtx[1];
+    func_1503F8A8(m->inst, 1, anim, speed, 0.0f, 0);
+
+    /* size of each display list, up to and including its G_ENDDL (0xDF) */
+    for (i = 0; i < m->count; i++) {
+        src = m->dls[i];
+        size = 0;
+        do {
+            size += sizeof(Gfx);
+        } while (((src++)->words.w0 >> 24) != 0xDF);
+        m->copies[i] = (Gfx *) allocate_memory(size, 1, 1, 1);
+        if (m->copies[i] == NULL) {
+            for (j = 0; j < i; j++) {
+                func_10004074(m->copies[j]);
+            }
+            func_10004074(m);
+            return 0;
+        }
+    }
+
+    for (i = 0; i < m->count; i++) {
+        src = m->dls[i];
+        dst = m->copies[i];
+        do {
+            w0 = src->words.w0;
+            dst->words.w0 = w0;
+            dst->words.w1 = src->words.w1;
+            op = w0 >> 24;
+            if (op == 0xEF) {
+                dst->words.w0 = w0 & ~0x10000;
+                dst->words.w1 = 0x5041C8;
+            }
+            if (op == 0xFC) {
+                dst->words.w0 = 0;
+            }
+            src++;
+            dst++;
+        } while (op != 0xDF);
+    }
+    return (s32) m;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE0C4.s")
+#endif
 
 void func_151EE310(u8 *arg0) {
     s32 i;
@@ -1096,7 +1186,99 @@ void func_151EE310(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+extern Gfx D_800904C0[];
+extern Gfx D_800904D8[];
+
+/* hud_model_draw: draws a HudModel (func_151EE0C4) at screen position (x, y), z -100, with uniform `scale` (x and
+ * scale times D_800901BC, y times D_800901C0): sets this frame buffer's model matrix, advances the animation
+ * (func_1503F7A0), loads the HUD matrices and render state (D_800904C0, env alpha D_800E1060), segment 3 = the
+ * instance's matrices for this frame buffer, segment 1 = the model data, then calls the HUD display list copies and
+ * D_800904D8. D_80090408 (the head) blinks: a random 15..142 frame timer, texture 0x507 for its last 6 frames, else
+ * 0x508, bound to segments 6 / 7; when that texture is not loaded yet (func_1510D66C returns 0x80000000) nothing
+ * is drawn and gdl is returned unchanged. */
+u8 *func_151EE394(u8 *gdl, s32 model, f32 x, f32 y, f32 scale) {
+    HudModel *m = (HudModel *) model;
+    Gfx *g = (Gfx *) gdl;
+    s32 tex;
+    s32 i;
+
+    if (D_800901BC != 1.0f) {
+        x *= D_800901BC;
+        y *= D_800901C0;
+        scale *= D_800901BC;
+    }
+    guMtxIdentF(m->mtx[D_800BE9C0]);
+    m->mtx[D_800BE9C0][3][0] = x;
+    m->mtx[D_800BE9C0][3][1] = y;
+    m->mtx[D_800BE9C0][3][2] = -100.0f;
+    m->mtx[D_800BE9C0][0][0] = scale;
+    m->mtx[D_800BE9C0][1][1] = scale;
+    m->mtx[D_800BE9C0][2][2] = scale;
+    func_1503F7A0(m->inst);
+
+    g->words.w0 = 0xDA380003; /* gSPMatrix: load modelview */
+    g->words.w1 = (u32) D_80089810;
+    g++;
+    g->words.w0 = 0xDA380007; /* gSPMatrix: load projection */
+    g->words.w1 = (u32) &D_800E1068;
+    g++;
+    g->words.w0 = 0xDE000000;
+    g->words.w1 = (u32) D_800904C0;
+    g++;
+    g->words.w0 = 0xFC12FE25; /* combiner */
+    g->words.w1 = 0xFFFFFBFD;
+    g++;
+    g->words.w0 = 0xD9000000; /* geometry mode: clear all ... */
+    g->words.w1 = 0;
+    g++;
+    g->words.w0 = 0xD9FFFFFF; /* ... then set 0x200404 */
+    g->words.w1 = 0x200404;
+    g++;
+    g->words.w0 = 0xFA000000; /* prim color white */
+    g->words.w1 = 0xFFFFFFFF;
+    g++;
+    g->words.w0 = 0xFB000000; /* env color white, alpha D_800E1060 */
+    g->words.w1 = (D_800E1060 & 0xFF) | ~0xFF;
+    g++;
+    g->words.w0 = 0xF8000000; /* fog color */
+    g->words.w1 = 0xFF;
+    g++;
+    g->words.w0 = 0xDB06000C; /* segment 3 */
+    g->words.w1 = *(u32 *) (m->inst + 0x3E8 + D_800BE9C0 * 4);
+    g++;
+    g->words.w0 = 0xDB060004; /* segment 1 */
+    g->words.w1 = m->seg6;
+    g++;
+    if (m == (HudModel *) D_80090408) {
+        m->blink--;
+        if (m->blink == 0) {
+            m->blink = (func_150ADA20() & 0x7F) + 15;
+        }
+        tex = func_1510D66C(m->blink < 7 ? 0x507 : 0x508, 0, 3, 0);
+        if (tex == (s32) 0x80000000) {
+            return gdl;
+        }
+        g->words.w0 = 0xDB060018; /* segment 6 */
+        g->words.w1 = tex;
+        g++;
+        g->words.w0 = 0xDB06001C; /* segment 7 */
+        g->words.w1 = tex;
+        g++;
+    }
+    for (i = 0; i < m->count; i++) {
+        g->words.w0 = 0xDE000000;
+        g->words.w1 = (u32) m->copies[i];
+        g++;
+    }
+    g->words.w0 = 0xDE000000;
+    g->words.w1 = (u32) D_800904D8;
+    g++;
+    return (u8 *) g;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE394.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u8 *D_800904E8;   /* menu sprite entries (12 bytes each) */

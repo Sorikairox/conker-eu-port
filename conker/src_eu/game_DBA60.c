@@ -217,7 +217,32 @@ void func_150AE790(u8 *arg0) {
 // some funky xor going on
 // spawns the objects of D_80088A80[0]; also checksums the code range
 // func_15001A08..D_15001B08 and, if it was modified, clears object list 35 (anti-tamper)
+#ifdef NON_MATCHING
+// owner_spawn_children: spawns the objects of spawn list D_80088A80[0] (func_151491F4 kind 0x27) for `owner`
+// (P151): each new object gets the owner (+0x28), its sub-type (+0x2C = owner +0x3B) and the entry byte (+0x2D);
+// stops when a spawn fails. The N64 code also sums the code words func_15001A08..D_15001B08 and on a mismatch
+// (anti-tamper) clears the object lists D_800DD280 +0x8C / +0x22C; the port has no MIPS code there, so the
+// NON_MATCHING build skips the check (as func_151E86A4, P127).
+void func_150AEB9C(u8 *owner) {
+    s32 i;
+    u8 *obj;
+
+    if (owner == NULL) {
+        return;
+    }
+    for (i = 0; i < D_80088A80[0].count; i++) {
+        obj = (u8 *)func_151491F4(D_80088A80[0].entries[i].unk2, 0, -1, 1, 0x27, 8, 0xFF, 0);
+        if (obj == NULL) {
+            return;
+        }
+        *(u8 **)(obj + 0x28) = owner;
+        obj[0x2C] = owner[0x3B];
+        obj[0x2D] = D_80088A80[0].entries[i].unk0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_DBA60/func_150AEB9C.s")
+#endif
 // NON-MATCHING: regalloc; checksums code func_15001A08..D_15001B08 against 0x1B61AF60 (anti-tamper), clears object list 35 on mismatch
 // void func_150AEB9C(u8 *arg0) {
 //     u32 *p;

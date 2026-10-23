@@ -1,0 +1,4 @@
+s/func_1501D348(sp3C, arg0, 0, 0, 0);/func_1501D348(sp3C, arg0, 0, 0, 0); return 2;/ % c1_e0_m6
+s/D_800BE9F0 = temp_s0;/D_800BE9F0 = temp_s0; return 2;/ % c4_e0_m6
+s/func_1501D348(sp34, arg0, 0, sp30, temp_v1);/func_1501D348(sp34, arg0, 0, sp30, temp_v1); return 2;/ % c3_e0_m8
+0,/        return 0;/s//        return 1;/ % c1_e1_m6

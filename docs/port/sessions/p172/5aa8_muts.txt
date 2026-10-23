@@ -1,0 +1,21 @@
+s/if (gdl == NULL) {/if (gdl == (Gfx *) 4) {/ %
+s/skip = 0;/skip = 1;/ %
+s/if (texId == 0) {/if (texId == 1) {/ %
+s/texId = D_800E0D20;/texId = D_800E0D20 + 1;/ %
+s/e->x8 != 0;/e->x8 != 1;/ %
+s/e = func_15195EF4(texId, w1, w0, doubled);/e = func_15195EF4(texId, w0, w1, doubled);/ %
+s/e->x12 = speedS;/e->x12 = speedT;/ %
+s/e->x13 = speedT;/e->x13 = speedS;/ %
+s/idx = func_15195FF4(idx, (s32) e, w1, doubled);/idx = func_15195FF4(idx, (s32) e, w0, doubled);/ %
+s/skip++;/skip += 2;/ %
+s/if (e->x14 < tileCount) {/if (e->x14 <= tileCount - 2) {/ %
+s/if (!secondDl) {/if (secondDl) {/ %
+s/k < 5 \&\& e->a\[k\] != -1/k < 4 \&\& e->a[k] != -1/ %
+s/e->a\[k\] = idx;/e->a[k] = idx + 1;/ %
+s/\[0x30 + k\]/[0x31 + k]/ %
+s/\[0x35 + k\]/[0x34 + k]/ %
+s/e->b\[k\] = idx;/e->b[k] = idx - 1;/ %
+s/if (texId == D_800E0D20) {/if (texId != D_800E0D20) {/ %
+s/D_800E0D20--;/D_800E0D20++;/ %
+s/    } while (which == -1);/    } while (which == -2);/ %
+s/which = 0;/which = 0; break;/ %

@@ -286,7 +286,7 @@ s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s
 void func_1515A7A8(f32 *, f32 *, f32, s32, s32, f32, s32, s32, s32, s32, s32);
 #endif
 s32 func_1515AE90(u8 *, s32 *);
-void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, s32 arg3, f32 arg4, s32 arg5, u8 *arg6) {
+void func_151AA8BC(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     f32 pos[3];
     f32 vel[3];
     u8 *obj;
@@ -784,7 +784,7 @@ void func_151AB774(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB874.s")
 
 #ifdef NON_MATCHING
-void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg5, u8 *arg6) {
+void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     struct {
         f32 u1C;
         s8 u20;
@@ -939,6 +939,34 @@ u8 func_151ABC68(u8 *arg0) {
     return ret;
 }
 
+#ifdef NON_MATCHING
+s32 func_151346EC(u8 *);
+s32 func_1513470C(u8 *);
+
+/* D_80089E40 table entries 4 / 14 (s32 (*)(obj), see func_151342BC): stop the object's sound (+0x5E), clear the
+ * data's word +0x74, then return func_151346EC / func_1513470C's result (the asm tail value). */
+s32 func_151ABD38(u8 *arg0) {
+    s32 *temp_v0;
+
+    temp_v0 = (s32 *)(*(u8 **)(arg0 + 0x58) + 0x58);
+    if (*(u16 *)(arg0 + 0x5E) != 0) {
+        func_100111C8(*(s16 *)(arg0 + 0x5E));
+    }
+    temp_v0[7] = 0;
+    return func_151346EC(arg0);
+}
+
+s32 func_151ABD88(u8 *arg0) {
+    s32 *temp_v0;
+
+    temp_v0 = (s32 *)(*(u8 **)(arg0 + 0x58) + 0x58);
+    if (*(u16 *)(arg0 + 0x5E) != 0) {
+        func_100111C8(*(s16 *)(arg0 + 0x5E));
+    }
+    temp_v0[7] = 0;
+    return func_1513470C(arg0);
+}
+#else
 void func_151ABD38(u8 *arg0) {
     s32 pad;
     s32 *temp_v0;
@@ -962,6 +990,7 @@ void func_151ABD88(u8 *arg0) {
     temp_v0[7] = 0;
     func_1513470C(arg0);
 }
+#endif
 
 void func_151ABDD8(void **arg0) {
     func_15141DA4(arg0[0x18 / 4], 0, 4);

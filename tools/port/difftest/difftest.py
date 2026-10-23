@@ -84,6 +84,7 @@ PROLOGUE_CODE = [_lwc1(12 + i, 0x40 + 4 * i) for i in range(4)] + [_lwc1(20 + i,
 EPILOGUE_CODE = [_swc1(0, 0x100), _swc1(1, 0x104)] + [_swc1(20 + i, 0x108 + 4 * i) for i in range(12)] + \
     [(43 << 26) | (_K0 << 21) | 0x13C, 0, 0]   # sw zero, 0x13C(k0): the epilogue completed
 RET_END = RET_MAGIC + 4 * len(EPILOGUE_CODE)
+PAGESTUB_OLD = os.environ.get('DIFFTEST_PAGESTUB_OLD') == '1'   # P176: pre-P176 page-end stub behaviour (selftest)
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 # P47 (debug, opt-in): DIFFTEST_WLOG="LO-HI" (physical hex) + DIFFTEST_WLOG_T=trial prints every non-stack write
 # into [LO, HI) of that trial with the writing pc (R = reference, C = candidate). Debug aid for long functions.
@@ -621,6 +622,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
 # the words W0, W1, ... (an array) through argument N; N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)),
 # e.g. func_15186494's 5-word strip table. Several "N:W..." for one ADDR are separated by '/'.
 OUTA = {}
+OUTA_PERCALL = os.environ.get('DIFFTEST_OUTA_PERCALL') == '1'
 for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
     _a, _v = _p.split('=')
     OUTA[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
@@ -993,6 +995,10 @@ class Run:
     def on_block(self, mu, addr, size, ud):
         if (addr & 0x0FFFFFFF) == HELPER_OFF and (addr & 0xF0000000) | HELPER_OFF in self.helpers: return
         if addr == PROLOGUE: return
+        # P176: a stub on the last word of a page (e.g. func_151CFFFC) has its delay slot on the next page, which
+        # Unicorn runs as a separate block: that block is not a second call (it was logged as one and redirected PC
+        # to ra in the middle of the delay slot -> both sides faulted at 0x00000000).
+        if addr & (PAGE - 1) == 0 and (addr - 4) in self.stubs and addr not in self.stubs and not PAGESTUB_OLD: return
         self.flush_fregs()
         if self.vram <= addr < self.end:
             self.icount += max(1, size // 4)
@@ -1067,7 +1073,10 @@ class Run:
         if (addr & 0x1FFFFFFF) in OUTA:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
-                mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *_ws))
+                # P156 (opt-in): DIFFTEST_OUTA_PERCALL=1 adds k * 0x10000 to every word on call k (a different vector
+                # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
+                _dk = (k * 0x10000) if OUTA_PERCALL else 0
+                mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
@@ -1126,8 +1135,11 @@ def same_val(R, a, C, b):
     whose bytes equal those at the reference address"""
     if R.norm(a) == C.norm(b): return True
     if TU_BASE <= b < TU_BASE + 0x80000 or TU_BASE <= a < TU_BASE + 0x80000:
+        # P156 (opt-in): DIFFTEST_TUCMP_LEN=N compares N bytes instead of 32 (a 12-byte vector at the end of a
+        # candidate table is followed by other data than the reference's rodata vector, e.g. func_1510A98C)
+        n = int(os.environ.get('DIFFTEST_TUCMP_LEN') or '32')
         try:
-            return bytes(R.mu.mem_read(phys(a), 32)) == bytes(C.mu.mem_read(phys(b), 32))
+            return bytes(R.mu.mem_read(phys(a), n)) == bytes(C.mu.mem_read(phys(b), n))
         except Exception:
             return False
     return False

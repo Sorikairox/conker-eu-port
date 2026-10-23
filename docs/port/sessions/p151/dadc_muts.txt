@@ -1,0 +1,28 @@
+s/? 40000.0f : 10000000.0f/? 40000.0f : 1000.0f/% far three
+s/(u8)skip == 0xFE ?/(u8)skip == 0xFD ?/% fe_far fe_near
+s/for (i = 0; i < 25; i++)/for (i = 0; i < 24; i++)/% many
+s/((u8 \*)o)\[0x1CA\] == 0/((u8 *)o)[0x1CB] == 0/%
+s/!(o->unkF8 \& 0x40)/!(o->unkF8 \& 0x80)/%
+s/(u8)skip == i ||/(u8)skip == i + 1 ||/% skip2
+s/o->unk2FA == 0)/o->unk2FA == 1)/%
+s/(o->stunned != 0 || bestStunned == 0)/(o->stunned != 0 \&\& bestStunned == 0)/% stun_pref stun_both stun_late many
+s/(o->stunned != 0 || bestStunned == 0)/(bestStunned == 0)/% stun_pref stun_both stun_late many
+s/(s32)(dir - self->unk7A) >> 8/(u16)(dir - self->unk7A) >> 8/% cone_neg cone_neg2 cone_head cone_big
+s/(s32)(dir - self->unk7A) >> 8/(s32)(dir + self->unk7A) >> 8/% cone_head
+s/(u8)cone \* 2/cone * 2/% cone_hi cone_big
+s/- (u8)pitch + 0x10)/- (u8)pitch + 0x11)/% pitch_out pitch_in pitch_p pitch_lo pitch_big
+s/>= 0x20) {/>= 0x21) {/% pitch_out pitch_in pitch_p pitch_lo
+s/- (u8)pitch + 0x10)/- pitch + 0x10)/% pitch_big
+s/sqrtf(h2), -dy, 0)/sqrtf(h2), dy, 0)/% h2dy
+s/sqrtf(h2), -dy, 0)/h2, -dy, 0)/% h2dy
+s/self->y_position + 80.0f/self->y_position + 40.0f/%
+s/o->y_position - self->y_position,/o->y_position - self->z_position,/%
+s/if (t < d2) {/if (t > d2) {/% ray_block ray_beyond ray_eq many
+s/t = t \* t;/t = t + t;/% ray_block ray_beyond ray_eq many
+s/bestStunned = o->stunned;/bestStunned = 0;/% stun_pref stun_both stun_late many
+s/best = d2;/best = best;/% three three_inc many
+s/\*outDir = dir;/*outDir = dir + 1;/% one
+s/&t, 0, 0, 0.0f)/\&t, 0, 1, 0.0f)/% one
+s/(u8)(self - D_800CC2D0) == i ||//% self_in
+s/if (!(d2 < best) \&\&/if (!(d2 <= best) \&\&/% eq_init eq_two
+s/+ (u8)cone) >= (u8)cone \* 2/+ (u8)cone) > (u8)cone * 2/% cone_edge cone_neg cone_neg2 cone_out cone0

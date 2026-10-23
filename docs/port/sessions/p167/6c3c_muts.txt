@@ -1,0 +1,19 @@
+s/\* 0.5f;/* 0.25f;/ %
+s/if (kind == 0x63) {/if (kind == 0x62) {/ %
+s/if (fewer || (kind == 4/if (fewer || (kind == 5/ %
+s/obj\[4\] != 0x16/obj[4] != 0x15/ %
+s/n = D_800A42F4\[kind\] - 2;/n = D_800A42F4[kind] - 1;/ %
+s/D_800A4344\[kind\], obj, bounds, arg6, arg7);/D_800A4344[kind], obj, bounds, arg6, 0);/ %
+s/if (info\[0xE\] == 2) {/if (info[0xD] == 2) {/ %
+s/spec.u04 = 3;/spec.u04 = 4;/ %
+s/spec.pos\[2\] = pos\[2\];/spec.pos[2] = pos[1];/ %
+s/spec.u1A = 0x45;/spec.u1A = 0x46;/ %
+s/spec.u2A = 0x64;/spec.u2A = 0x65;/ %
+s/spec.u1C = 998.0f;/spec.u1C = 999.0f;/ %
+s/spec.dark = (kind == 2 || kind == 15 || kind == 18)/spec.dark = (kind == 2 || kind == 15 || kind == 17)/ %
+s/dark = (kind == 2 || kind == 15 || kind == 18) ? 1 : 0;$/dark = (kind == 2 || kind == 16 || kind == 18) ? 1 : 0;/ %
+s/pos\[1\] - 300.0f, 300.0f/pos[1] - 300.0f, 200.0f/ %
+s/U) + 18,/U) + 17,/ %
+s/if (kind == 2 || kind == 15) {/if (kind == 2 || kind == 14) {/ %
+s/func_1513A48C((struct17 \*)pos, arg6, arg7);/func_1513A48C((struct17 *)pos, arg6, 1);/ %
+s/if (splats) {/if (smoke) {/ %

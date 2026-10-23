@@ -1,0 +1,18 @@
+s/D_800BE9C0 \* 4/D_800BE9C0 * 8/ %
+s/o\[0x1C8\] \* 8/o[0x1C8] * 4/ %
+s/if (vtx == NULL) {/if (vtx == (u8 *) 1) {/ % nobuf
+s/& 0x7F00) >> 8;/\& 0xFF00) >> 8;/ %
+s/if (group == 0) {/if (group == 1) {/ %
+s/if (group >= 6) {/if (group >= 7) {/ %
+s/prev = group;/prev = -1;/ %
+s/x = perGroup ? vals\[k\] : vals\[0\];/x = perGroup ? vals[k] : vals[1];/ %
+s/x = perGroup ? vals\[k\] : vals\[0\];/x = vals[k];/ %
+s/(D_80096CD0\[k\] - 1)/(D_80096CD0[k])/ %
+s/idx \* 3;/idx * 4;/ %
+s/c1 = c0 + 3;/c1 = c0;/ %
+s/t = (x - (f32) idx \* seg) \/ seg;/t = x;/ %
+s/r = (u32) ((c1\[0\] - c0\[0\]) \* t + c0\[0\]);/r = c0[0];/ %
+s/(c1\[1\] - c0\[1\]) \* t + c0\[1\]/(c1[1] - c0[1]) * t + c0[2]/ %
+s/vtx\[0xE\] = b;/vtx[0xE] = g;/ %
+s/i++, vtx += 0x10/i++, vtx += 0xC/ %
+s/D_800C5BC0\[o\[4\]\]/D_800C5BC0[o[5]]/ %

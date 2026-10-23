@@ -1,0 +1,15 @@
+s/bottom\[i\] = 10000.0f;/bottom[i] = 1000.0f;/ %
+s/top\[i\] = -10000.0f;/top[i] = -1000.0f;/ %
+s/if (y < bottom\[p->pad6\])/if (y <= bottom[p->pad6])/ %
+s/if (top\[p->pad6\] < y)/if (top[p->pad6] > y)/ %
+s/y = p->unk2;/y = p->unk0;/ %
+s/bottom\[p->pad6\] = y;/bottom[p->unk7] = y;/ %
+s/if (bottom\[i\] <= top\[i\])/if (bottom[i] < top[i])/ %
+s/D_800D2770\[D_800D2780++\] = i;/D_800D2770[D_800D2780++] = i + 1;/ %
+s/i < D_800D2780 - 1;/i < D_800D2780;/ %
+s/\* 0.5f;/* 0.25f;/ %
+s/(bottom\[b\] + top\[a\])/(bottom[a] + top[b])/ %
+s/if (bottom\[b\] < top\[a\])/if (bottom[b] <= top[a])/ %
+s/D_800D2788\[i\] = 100000.0f;/D_800D2788[i + 1] = 100000.0f;/ %
+s/overlap = 1;/overlap = 2;/ %
+s/i < 6; i++) {$/i < 5; i++) {/ %

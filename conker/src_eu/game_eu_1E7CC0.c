@@ -132,7 +132,279 @@ void func_151BAA18(u8 *arg0, s32 arg1, u8 arg2)
   }
 }
 
+#ifdef NON_MATCHING
+/* func_15150258 smoke burst request (0x5C bytes): each value is base + random(0..range) */
+typedef struct {
+    /* 0x00 */ s16 a, aRange;
+    /* 0x04 */ s16 b, bRange;
+    /* 0x08 */ s32 count, countRange;
+    /* 0x10 */ f32 pos[3];
+    /* 0x1C */ f32 v0, v0Range;
+    /* 0x24 */ f32 v1, v1Range;
+    /* 0x2C */ f32 v2, v2Range;
+    /* 0x34 */ s32 life, lifeRange;
+    /* 0x3C */ f32 f3C, f40, f44, f48;
+    /* 0x4C */ s16 s4C[6];
+    /* 0x58 */ s8 u58;
+} SmokeBurst;
+
+/* func_15132BBC particle request (0x7C bytes; +0x34 velocity, +0x50 flags, +0x56 model id) */
+typedef struct {
+    /* 0x00 */ f32 u00;
+    /* 0x04 */ f32 u04;
+    /* 0x08 */ f32 sizeX;
+    /* 0x0C */ f32 sizeZ;
+    /* 0x10 */ f32 pos[3];
+    /* 0x1C */ f32 scale[3];
+    /* 0x28 */ f32 from[3];        /* launch point on the model (also the scratch for the direction) */
+    /* 0x34 */ f32 vel[3];
+    /* 0x40 */ f32 spinX;
+    /* 0x44 */ f32 spinY;
+    /* 0x48 */ f32 spinZ;
+    /* 0x4C */ f32 gravity;
+    /* 0x50 */ s32 flags;
+    /* 0x54 */ s16 life;
+    /* 0x56 */ s16 model;
+    /* 0x58 */ u8  u58;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8  alpha;
+    /* 0x61 */ u8  u61;
+    /* 0x62 */ u8  u62[6];
+    /* 0x68 */ u8  u68;
+    /* 0x69 */ u8  pad69;
+    /* 0x6A */ u8  u6A;
+    /* 0x6C */ u8 *owner;
+    /* 0x70 */ u8  ownerId;
+    /* 0x72 */ s16 u72;
+    /* 0x74 */ s16 u74;
+    /* 0x78 */ s32 u78;
+} ShardRequest;
+
+void func_1503F6F4(Mtx *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+void func_1504715C(void *, u8 *);
+void func_15150258(u8 *, u8, s32);
+u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
+/* model-space launch points (rodata of this function, read through the ROM image) */
+extern f32 D_800AA970[3];       /* piece 0x27: from / to */
+extern f32 D_800AA97C[3];
+extern f32 D_800AA988[3];       /* piece 0x28: from, to = one of two */
+extern f32 D_800AA994[2][3];
+extern f32 D_800AA9AC[4][3];    /* pieces 0x29: from / to / size */
+extern f32 D_800AA9DC[4][3];
+extern f32 D_800AAA0C[4];
+extern f32 D_800AAA1C[3];       /* pieces 0x2B: common from, to, position offset */
+extern f32 D_800AAA28[2][3];
+extern f32 D_800AAA40[2][3];
+extern f32 D_800AAA58[4][3];    /* pieces 0x2C: from / to / position offset / size */
+extern f32 D_800AAA88[4][3];
+extern f32 D_800AAAB8[4][3];
+extern f32 D_800AAAE8[4];
+
+/* random launch speed factor 0.083..0.283 and spin -14.4..14.4 */
+#define SHARD_SPEED() ((func_150ADA68() * 200.0f + 83.0f) * 0.001f)
+#define SHARD_SPIN() ((func_150ADA68() * 28864.0f + -14432.0f) * 0.001f)
+
+// object_model_shatter: an object's model breaks apart (func_1507D754, a0 = obj, 0xFF, 1): a smoke burst at the
+// object (25 above its position) and, when it has a visible model instance (+0x1D4, +0x74 low nibble != 0xF),
+// pieces 0x27 .. 0x2C flung from model-space points (transformed by the instance matrix +0x40) towards other
+// points, spawned at the model's origin plus an offset, with random speed, life 30..65 and spin. The pieces
+// 0x29 / 0x2B / 0x2C are each spawned with a 50 % chance.
+void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2) {
+    SmokeBurst smoke;
+    ShardRequest req;
+    s32 bounds[9];
+    f32 origin[3];
+    f32 rot[3];
+    f32 scl[3];
+    Mtx *mtx;
+    f32 speed;
+    s32 i;
+
+    smoke.a = 0;
+    smoke.aRange = 0xFF;
+    smoke.b = -0x3F;
+    smoke.bRange = 0x34;
+    smoke.count = 6;
+    smoke.countRange = 5 >> ((D_80082FA0 >= 2) ? 1 : 0);
+    smoke.pos[0] = *(f32 *)(obj + 0x14);
+    smoke.pos[1] = *(f32 *)(obj + 0x18) + 25.0f;
+    smoke.pos[2] = *(f32 *)(obj + 0x1C);
+    smoke.life = 6;
+    smoke.v0 = 50.0f;
+    smoke.v0Range = 42.0f;
+    smoke.v1 = 98.0f;
+    smoke.v1Range = 68.0f;
+    smoke.v2 = 609.0f;
+    smoke.v2Range = 271.0f;
+    smoke.lifeRange = 3 >> ((D_80082FA0 >= 2 || D_8008FD8C >= 8) ? 1 : 0);
+    smoke.s4C[0] = 0x19;
+    smoke.s4C[1] = 0xF;
+    smoke.s4C[2] = 0x64;
+    smoke.s4C[3] = 0x64;
+    smoke.s4C[4] = 0xC;
+    smoke.s4C[5] = 0x14;
+    smoke.f3C = 18.0f;
+    smoke.f40 = 0.76900005f;
+    smoke.f44 = -0.16900001f;
+    smoke.f48 = 0.0f;
+    smoke.u58 = (D_80082FA0 >= 2 || D_8008FD8C >= 8) ? -1 : 0;
+    func_15150258((u8 *)&smoke, arg1, arg2);
+
+    if (*(u8 **)(obj + 0x1D4) == NULL || (obj[0x74] & 0xF) == 0xF) {
+        return;
+    }
+    func_1504715C(bounds, obj);
+    mtx = (Mtx *)(*(u8 **)(obj + 0x1D4) + 0x40);
+    func_1503F6F4(mtx, &scl[0], &scl[1], &scl[2], &origin[0], &origin[1], &origin[2], &rot[0], &rot[1], &rot[2]);
+
+    req.u00 = 1.0f;
+    req.scale[0] = 1.0f;
+    req.scale[1] = 1.0f;
+    req.scale[2] = 1.0f;
+    req.flags = 0x39E9;
+    req.u58 = 0;
+    req.u5C = 0;
+    req.alpha = 0xFF;
+    req.u61 = 0xD;
+    req.u62[0] = 0;
+    req.u62[1] = 0xC;
+    req.u62[2] = 0;
+    req.u62[3] = 0;
+    req.u62[4] = 0;
+    req.u62[5] = 0;
+    req.u68 = 2;
+    req.u6A = 0;
+    req.owner = obj;
+    req.u04 = 0.7f;
+    req.spinY = 0.0f;
+    req.u72 = 0xC;
+    req.u74 = 0x15;
+    req.ownerId = obj[0x3B];
+
+    /* piece 0x27 */
+    speed = SHARD_SPEED();
+    req.life = (func_150ADA20() % 36U) + 30;
+    req.model = 0x27;
+    req.sizeZ = 0.75f;
+    req.sizeX = 0.75f;
+    func_150ADA68();
+    req.gravity = -0.48800004f; /* -488 * 0.001 */
+    func_15143134(D_800AA970, req.from, mtx);
+    func_15143134(D_800AA97C, req.vel, mtx);
+    req.vel[0] = (req.vel[0] - req.from[0]) * speed;
+    req.vel[1] = (req.vel[1] - req.from[1]) * speed;
+    req.vel[2] = (req.vel[2] - req.from[2]) * speed;
+    req.pos[0] = origin[0];
+    req.pos[1] = origin[1];
+    req.pos[2] = origin[2];
+    req.pos[0] += 109.0f;
+    req.spinX = SHARD_SPIN();
+    req.spinZ = SHARD_SPIN();
+    func_15132BBC((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
+
+    /* piece 0x28: towards one of two points */
+    speed = SHARD_SPEED();
+    req.life = (func_150ADA20() % 36U) + 30;
+    req.model = 0x28;
+    req.sizeZ = 0.5f;
+    req.sizeX = 0.5f;
+    func_150ADA68();
+    req.gravity = -0.48800004f;
+    func_15143134(D_800AA988, req.from, mtx);
+    func_15143134(D_800AA994[func_150ADA20() & 1], req.vel, mtx);
+    req.vel[0] = (req.vel[0] - req.from[0]) * speed;
+    req.vel[1] = (req.vel[1] - req.from[1]) * speed;
+    req.vel[2] = (req.vel[2] - req.from[2]) * speed;
+    req.pos[0] = origin[0];
+    req.pos[1] = origin[1];
+    req.pos[2] = origin[2];
+    req.spinX = SHARD_SPIN();
+    req.spinZ = SHARD_SPIN();
+    func_15132BBC((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
+
+    /* pieces 0x29 */
+    req.model = 0x29;
+    for (i = 0; i < 4; i++) {
+        if (func_150ADA20() & 1) {
+            speed = SHARD_SPEED();
+            req.life = (func_150ADA20() % 36U) + 30;
+            req.sizeX = D_800AAA0C[i];
+            req.sizeZ = D_800AAA0C[i];
+            func_150ADA68();
+            req.gravity = -0.48800004f;
+            func_15143134(D_800AA9AC[i], req.from, mtx);
+            func_15143134(D_800AA9DC[i], req.vel, mtx);
+            req.vel[0] = (req.vel[0] - req.from[0]) * speed;
+            req.vel[1] = (req.vel[1] - req.from[1]) * speed;
+            req.vel[2] = (req.vel[2] - req.from[2]) * speed;
+            req.pos[0] = origin[0];
+            req.pos[1] = origin[1];
+            req.pos[2] = origin[2];
+            req.spinX = SHARD_SPIN();
+            req.spinZ = SHARD_SPIN();
+            func_15132BBC((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
+        }
+    }
+
+    /* pieces 0x2B: from one common point */
+    req.model = 0x2B;
+    func_15143134(D_800AAA1C, req.from, mtx);
+    req.sizeX = 0.551f;
+    req.sizeZ = 0.551f;
+    for (i = 0; i < 2; i++) {
+        if (func_150ADA20() & 1) {
+            speed = SHARD_SPEED();
+            req.life = (func_150ADA20() % 36U) + 30;
+            func_150ADA68();
+            req.gravity = -0.48800004f;
+            func_15143134(D_800AAA28[i], req.vel, mtx);
+            req.vel[0] = (req.vel[0] - req.from[0]) * speed;
+            req.vel[1] = (req.vel[1] - req.from[1]) * speed;
+            req.vel[2] = (req.vel[2] - req.from[2]) * speed;
+            req.pos[0] = origin[0];
+            req.pos[1] = origin[1];
+            req.pos[2] = origin[2];
+            req.pos[0] += D_800AAA40[i][0];
+            req.pos[1] += D_800AAA40[i][1];
+            req.pos[2] += D_800AAA40[i][2];
+            req.spinX = SHARD_SPIN();
+            req.spinZ = SHARD_SPIN();
+            func_15132BBC((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
+        }
+    }
+
+    /* pieces 0x2C */
+    req.model = 0x2C;
+    for (i = 0; i < 4; i++) {
+        if (func_150ADA20() & 1) {
+            speed = SHARD_SPEED();
+            req.life = (func_150ADA20() % 36U) + 30;
+            req.sizeX = D_800AAAE8[i];
+            req.sizeZ = D_800AAAE8[i];
+            func_150ADA68();
+            req.gravity = -0.48800004f;
+            func_15143134(D_800AAA58[i], req.from, mtx);
+            func_15143134(D_800AAA88[i], req.vel, mtx);
+            req.vel[0] = (req.vel[0] - req.from[0]) * speed;
+            req.vel[1] = (req.vel[1] - req.from[1]) * speed;
+            req.vel[2] = (req.vel[2] - req.from[2]) * speed;
+            req.pos[0] = origin[0];
+            req.pos[1] = origin[1];
+            req.pos[2] = origin[2];
+            req.pos[0] += D_800AAAB8[i][0];
+            req.pos[1] += D_800AAAB8[i][1];
+            req.pos[2] += D_800AAAB8[i][2];
+            req.spinX = SHARD_SPIN();
+            req.spinZ = SHARD_SPIN();
+            func_15132BBC((u8 *)&req, 3, 0xFF, bounds, 0, arg1, arg2);
+        }
+    }
+}
+#undef SHARD_SPEED
+#undef SHARD_SPIN
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BAAC8.s")
+#endif
 
 extern s32 func_151BB690;
 

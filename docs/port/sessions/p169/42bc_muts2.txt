@@ -1,0 +1,3 @@
+s/< 0) {/<= 0) {/ % life_zero
+s/(parent\[0x74\] \& 0xF) == 0xF/(parent[0x74] \& 0x7) == 0x7/ % bone_7
+s/> 7.0f) {/> 8.0f) {/ % cap7b

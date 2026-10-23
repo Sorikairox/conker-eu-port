@@ -330,7 +330,52 @@ s32 func_1000F4D8(u16 arg0) {
     }
     return 0;
 }
+#ifdef NON_MATCHING
+// sound_pick_variant: picks one of n variants of sound `base` at random and returns base + pick. For n < 8 the byte
+// D_80041F5C[base] remembers the variants already played (bit 7 = valid) so every variant plays once before one
+// repeats, and the last one played is never picked first in the next round; for n >= 8 it only stores pick + 1.
+// base >= 0x6E2 returns 1, n < 2 returns base.
+s32 func_150ADA20(void);
+
+u16 func_1000F568(s32 base, u16 n) {
+    u8 *played;
+    u32 pick;
+    s32 mask;
+    s32 bits;
+
+    pick = (u32)func_150ADA20() % n;
+    if (base >= 0x6E2) {
+        return 1;
+    }
+    if (n < 2) {
+        return base;
+    }
+    if (D_80041F5C == NULL) {
+        return base + pick;
+    }
+    played = (u8 *)D_80041F5C + base;
+    if (n < 8) {
+        bits = *played;
+        mask = (1 << n) - 1;
+        if (!(bits & 0x80) || !(bits & mask)) {
+            bits = 0xFF; /* fresh round */
+        }
+        while (!(bits & (1 << pick))) {
+            pick = (s32)(pick + 1) % (s32)n;
+        }
+        *played = bits ^ (1 << pick);
+        if (((bits ^ (1 << pick)) & 0xFF & mask) == 0) {
+            /* round over: all but this pick are available again */
+            ((u8 *)D_80041F5C)[base] = bits ^ mask;
+        }
+    } else {
+        *played = pick + 1;
+    }
+    return base + pick;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_1000F568.s")
+#endif
 s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32, s32 *, s32);
 
 s32 func_1000F6B8(s32 arg0, s16 x, s16 y, s16 z, s32 arg4, s16 arg5, s16 arg6) {
@@ -633,8 +678,93 @@ void func_100100E0(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) {
         }
     }
 }
+#ifdef NON_MATCHING
+// object_sound_play: plays sound sfx at object obj (volume vol, arg3 / arg4 = distance range) and keeps the handle in
+// obj+0x8E. Players (+0x318) play it as a 2D sound through func_10010BE8 with the player's pan; other objects
+// get a 3D emitter that follows them (func_1000EE70, key unique_id | 0x10000). Dead objects (state 0 or 5) play nothing.
+u16 func_10010154(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
+    u16 handle = 0;
+    s32 flags = 0;
+    s16 near = arg3;
+    u8 *o = (u8 *)obj;
+
+    if (*(s32 *)o == 0 || *(s32 *)o == 5) {
+        return 0;
+    }
+    if (*(s32 *)(o + 0x318) != 0) {
+        handle = func_10010BE8(*(u16 *)(o + 0x8E), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1,
+                               D_80041FD9);
+        *(u16 *)(o + 0x8E) = handle;
+        return handle;
+    }
+    if (o[4] == 0x16) {
+        near = arg3 * 2;
+        if (arg4 < near) {
+            near = arg4 - 200;
+        }
+    } else if (o[4] == 5 || o[4] == 0x4F || o[4] == 0x83) {
+        flags = 4;
+    } else if (o[0x13C] != 0 && (o[4] == 0x8A || o[4] == 0x23)) {
+        flags = 0x100;
+    }
+    func_1000FD38((s32)func_1000EE70, (s32)obj, obj->unique_id | 0x10000);
+    if (*(s32 *)o != 0) {
+        handle = func_1000FA64(sfx, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position, vol, arg4, near,
+                               (s32)func_1000EE70, obj, obj->unique_id | 0x10000, flags, 0);
+    }
+    *(u16 *)(o + 0x8E) = handle;
+    return handle;
+}
+
+// object_sound_play2: as object_sound_play for the object's second sound slot (handle in obj+0x8C, emitter key
+// unique_id | 0x20000). A negative vol plays at -vol with flag 0x100; a player whose context has +0x94 == 1 plays at
+// full volume (0x7FFF) in mono.
+u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4) {
+    u16 handle;
+    s32 flags = 0;
+    s16 near = arg3;
+    u8 *o = (u8 *)obj;
+    u8 *ctx;
+    u8 mono;
+
+    if (*(s32 *)o == 0 || *(s32 *)o == 5) {
+        return 0;
+    }
+    if (vol < 0) {
+        vol = -vol;
+        flags = 0x100;
+    }
+    if (*(s32 *)(o + 0x318) != 0) {
+        ctx = *(u8 **)(o + 0x31C);
+        mono = D_80041FD9;
+        if (ctx != NULL && ctx[0x94] == 1) {
+            mono = 1;
+            vol = 0x7FFF;
+        }
+        handle = func_10010BE8(*(u16 *)(o + 0x8C), sfx, vol, 0x40, 0, ((*(u32 *)(o + 0x184) >> 3) & 0x30) << 1, mono);
+        *(u16 *)(o + 0x8C) = handle;
+        return handle;
+    }
+    if (o[4] == 0x16) {
+        near = arg3 * 2;
+        if (arg4 < near) {
+            near = arg4 - 200;
+        }
+    } else if (o[4] == 0x8A && o[0x13C] != 0) {
+        flags |= 0x100;
+    } else if (o[4] == 0x4F || o[4] == 0x83) {
+        flags |= 4;
+    }
+    func_1000FD38((s32)func_1000EE70, (s32)obj, obj->unique_id | 0x20000);
+    handle = func_1000FA64(sfx, (s32)obj->x_position, (s32)obj->y_position, (s32)obj->z_position, vol, arg4, near,
+                           (s32)func_1000EE70, obj, obj->unique_id | 0x20000, flags, 0);
+    *(u16 *)(o + 0x8C) = handle;
+    return handle;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010154.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_10010344.s")
+#endif
 void func_10010558(u16 arg0, struct127 *arg1, s32 arg2, s16 arg3, u16 arg4, s32 arg5) {
     if (arg5 <= 0) {
         func_10010344(arg0, arg1, arg2, arg3, arg4);
@@ -910,9 +1040,17 @@ u16 func_10010F30(s32 arg0, u16 arg1, u8 arg2, s16 arg3, u8 arg4) {
     func_10010BE8(0, arg0, arg1, arg2, arg3, arg4, D_80041FD9);
 }
 
+#ifdef NON_MATCHING
+// sound_play_at: plays a sound with no owner (func_10010E78 with arg0 0). The asm passes func_10010E78's v0
+// through, and the asm callers keep it as the sound handle, so the NM version returns it.
+u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
+    return func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+}
+#else
 void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9) {
     func_10010E78(0, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 }
+#endif
 u16 func_10010FFC(u16 arg0, s32 arg1, u16 arg2, s16 arg3, u8 arg4, u8 *arg5)
 {
   f32 f;
@@ -1060,7 +1198,43 @@ s32 func_1001147C(u16 arg0) {
     return -1;
 }
 
+#ifdef NON_MATCHING
+// sound_source_mix: volume / pan / distance of a sound at (x, y, z) for the nearest listener (P151). With more than
+// one listener (D_80082FA0 = last index) it picks the one whose ear position (ex, ey, ez) is closest; then
+// func_1000A420 with the source relative to the ear, the listener's heading and the source relative to the listener
+// (x, y, z) for the distance falloff between `outer` and `inner`. *outVol = that volume scaled by gain / 0x8000.
+// Returns the distance.
+s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist) {
+    SfxListener *best = D_80042308;
+    SfxListener *l;
+    u32 min;
+    u32 d;
+    s32 dx, dy, dz;
+    s32 i;
+    s32 vol;
+    s32 dist;
+
+    if (D_80082FA0 != 0) {
+        min = -1;
+        for (i = 0, l = D_80042308; i <= D_80082FA0; i++, l++) {
+            dx = x - l->ex;
+            dy = y - l->ey;
+            dz = z - l->ez;
+            d = dx * dx + dy * dy + dz * dz;
+            if (d < min) {
+                min = d;
+                best = l;
+            }
+        }
+    }
+    dist = func_1000A420(x - best->ex, y - best->ey, z - best->ez, best->f, x - best->x, y - best->y, z - best->z, outer,
+                         inner, (s32)outPan, &vol, (s32)outDist);
+    *outVol = (u32)(vol * gain) >> 15;
+    return dist;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_100114D0.s")
+#endif
 #ifdef NON_MATCHING
 /* SfxEnt.unk10 flags used by the update pass */
 #define SFX_PLAYING     0x0001 /* unk24 holds a live voice */
@@ -1309,7 +1483,11 @@ void func_10011E94(s32 arg0) {
 }
 
 s32 func_1510FE4C(s32);
+#ifdef NON_MATCHING
+u16 func_1000F568(s32, u16); /* P157: two parameters (the asm reads a0 / a1 only, as every other caller declares) */
+#else
 u16 func_1000F568(s32, u16, s32, s32);
+#endif
 typedef struct { u16 a; u16 b; } SndPair;
 // rodata_inject: cdefined 0x2C5A0 0x2C758
 const SndPair D_8002C5A0[22][5] = {
@@ -1359,7 +1537,11 @@ u16 func_10011EB8(s32 arg0, s16 *arg1, s32 arg2)
     new_var = &arg2; // fakematch: permuter, base table reg t0 and arg2 reloads
     if (!D_8002C5A0 && !D_8002C5A0 && !D_8002C5A0) { // fakematch: permuter, always false
     }
+#ifdef NON_MATCHING
+    v = func_1000F568(v, D_8002C5A0[arg0][*new_var].b);
+#else
     v = func_1000F568(v, D_8002C5A0[arg0][*new_var].b, *new_var, arg0);
+#endif
   }
   return v;
 }

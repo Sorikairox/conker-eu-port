@@ -411,7 +411,82 @@ void func_150E7C50(f32 arg0, s16 arg1, u8 arg2, u8 arg3, u8 arg4, s16 arg5, s16 
     func_151559FC(&sp, 0, arg7, arg8, 0, arg9, argA);
 }
 
+#ifdef NON_MATCHING
+f32 func_15142A80(f32);
+f32 func_15142AC0(f32);
+f32 func_15142B04(f32);
+f32 func_15142B44(f32);
+extern s32 D_800BEE08;
+
+// spawn_random_curve_object: spawns a kind-0x12C object holding a random curve of `count` points (P151). Plays
+// sound +0x9A0 * D_800BEE08 of D_800DBFF0 and a 30..40 tick rumble/effect (func_151D8E18), then func_151491F4
+// (group 0xC, count * 8 + 0x10 bytes, arg2 / arg3 passed on). The object gets {scale, 0, count, 0} at +0x28 and,
+// from +0x38, `count` (x, y) points of the cubic spline through four control points x = -146 / -50 / 50 / 146 with
+// random y in -80..80, sampled at t = -1 .. 2 (basis func_15142A80 / AC0 / B04 / B44). Returns the object or
+// NULL (also for count < 2).
+u8 *func_150E7F14(s16 count, f32 scale, u8 arg2, s32 arg3) {
+    structEU_151D8E18 fx;
+    struct {
+        f32 scale;
+        f32 zero;
+        s16 count;
+        s16 pad;
+    } hdr;
+    f32 cp[4][2];
+    u8 *obj;
+    f32 *pt;
+    f32 t, dt;
+    f32 b0, b1, b2, b3;
+    s16 i;
+
+    if (count < 2) {
+        return NULL;
+    }
+    func_1512D748((struct108 *)((u8 *)D_800DBFF0 + D_800BEE08 * 0x9A0), 0, 1);
+    fx.unk0 = 1;
+    fx.unk2 = (u32)func_150ADA20() % 11 + 30;
+    fx.unk4 = 8;
+    fx.unk6 = -1;
+    fx.unk5 = 1;
+    func_151D8E18(&fx, 0, 0xFF, 0);
+    hdr.scale = scale;
+    hdr.zero = 0.0f;
+    hdr.count = count;
+    hdr.pad = 0;
+    obj = (u8 *)func_151491F4(0x12C, -1, 0x10, 1, 0xC, count * 8 + 0x10, arg2, arg3);
+    if (obj == NULL) {
+        return NULL;
+    }
+    memcpy((s32)(obj + 0x28), (f32 *)&hdr, 0xC);
+    cp[0][0] = -146.0f;
+    cp[0][1] = func_150ADA68() * 160.0f - 80.0f;
+    cp[1][0] = -50.0f;
+    cp[1][1] = func_150ADA68() * 160.0f - 80.0f;
+    cp[2][0] = 50.0f;
+    cp[2][1] = func_150ADA68() * 160.0f - 80.0f;
+    cp[3][0] = 146.0f;
+    cp[3][1] = func_150ADA68() * 160.0f - 80.0f;
+    t = -1.0f;
+    dt = 3.0f / (f32)(count - 1);
+    for (i = 0; i < count; i++) {
+        pt = (f32 *)(obj + 0x38) + i * 2;
+        b0 = func_15142B04(t);
+        b1 = func_15142AC0(t);
+        b2 = func_15142A80(t);
+        b3 = func_15142B44(t);
+        pt[0] = cp[3][0] * b3 + ((b2 * cp[0][0] + b1 * cp[1][0]) + b0 * cp[2][0]);
+        b0 = func_15142B04(t);
+        b1 = func_15142AC0(t);
+        b2 = func_15142A80(t);
+        b3 = func_15142B44(t);
+        t += dt;
+        pt[1] = cp[3][1] * b3 + ((b2 * cp[0][1] + b1 * cp[1][1]) + b0 * cp[2][1]);
+    }
+    return obj;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E7F14.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_150E821C(u8 *arg0) {

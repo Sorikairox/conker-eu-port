@@ -1,0 +1,4 @@
+# func_1509DD0C case 0x1C / 5 out of range (the only defined v0 = 1)
+neg ! 0=1C,1=5,2=80440000 ! 80440008=FFFFFFFF ! ! ! ! !
+big ! 0=1C,1=5,2=80440000 ! 80440008=00000003 ! ! ! ! !
+huge ! 0=1C,1=5,2=80440000 ! 80440008=7FFFFFFF ! ! ! ! !

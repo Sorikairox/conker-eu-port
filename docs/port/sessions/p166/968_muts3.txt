@@ -1,0 +1,2 @@
+s/yaw = func_150ADA20() \& 0x7F;/yaw = func_150ADA20() \& 0x3F;/ % kC5 kFE
+s/chunk.vel\[0\] = r \* dx \* c;/chunk.vel[0] = r * dz * c;/ % kC5 kFE

@@ -15,7 +15,7 @@ void func_1502F1E4(s32 arg0);
 void func_1502F554(s32 arg0);
 void func_1502EDEC(struct127 *arg0);
 void func_150A4FE4(struct127 *arg0);
-void func_1517B270(s32 arg0, s32 arg1, s32 arg2);
+s32 func_1517B270(s32 arg0, s32 arg1, s32 arg2); /* P148: returns 0 / -1 (result unused) */
 extern u8 D_800C6A8F[];
 #endif
 

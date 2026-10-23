@@ -141,7 +141,59 @@ s32 func_15192878(u8 *arg0, s32 arg1) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A84DC;
+extern f32 D_800A84E0;
+extern f32 D_800A84E4;
+extern f32 D_800A84E8;
+extern f32 D_800A84EC;
+extern f32 D_800A84F0;
+extern f32 D_800A84F4;
+extern f32 D_800A84F8;
+void func_151436B4(f32, f32, f32, struct17 *);
+u8 *func_151DA6F8(u8 *, u8 *, f32, s16, u8, f32, s32, u8, f32, f32, u8, u8, s32, s16, s16, s32, u8, s32);
+
+// water_drop_splash_update: update handler 14 of the particle tick func_1513095C for drops spawned by func_151925AC.
+// The extra block at +0xA8 (scale f32, ..., water level f32 at +0x10, splash ring H12 at +0x14, type at +0x26) stays
+// unused while the drop is above the water. On the first tick its y (+0x44) is below the water level it spawns a
+// splash ring (func_151D9B8C) at (x, level + 2, z) and one spray droplet (func_151DA6F8) with a random direction,
+// and returns 0 (the drop dies); otherwise returns 1 (keep alive).
+s32 func_151928C8(u8 *arg0, s32 arg1) {
+    u8 *ext = arg0 + 0xA8;
+    struct17 pos;
+    struct17 vel;
+    f32 r0;
+    f32 r1;
+    f32 r2;
+    f32 r3;
+    u32 sprite;
+    u32 tint;
+    u8 alive = 1;
+
+    if (*(f32 *)(arg0 + 0x44) < *(f32 *)(ext + 0x10)) {
+        alive = 0;
+        pos.unk0 = *(f32 *)(arg0 + 0x40);
+        pos.unk4 = *(f32 *)(ext + 0x10) + 2.0f;
+        pos.unk8 = *(f32 *)(arg0 + 0x48);
+        func_151D9B8C(ext[0x26], *(f32 *)ext * D_800A84DC, arg0[0x2B], (s32)(ext + 0x14), &pos, 0x64, 0, 1, 0,
+                      arg0[0xC], arg0[0x1]);
+        r0 = func_150ADA68();
+        r1 = func_150ADA68();
+        r2 = func_150ADA68();
+        func_151436B4(r0 * D_800A84E4, (r1 * 1000.0f + D_800A84E8) * D_800A84E0, (r2 * D_800A84EC + D_800A84F0) * D_800A84E0,
+                      &vel);
+        r3 = func_150ADA68();
+        sprite = func_150ADA20();
+        tint = func_150ADA20();
+        func_151DA6F8((u8 *)&pos, (u8 *)&vel, r3 * D_800A84F4 + D_800A84F4, (s16)(sprite % 21 + 0x23), arg0[0x2B],
+                      *(f32 *)ext * D_800A84F8, tint % 7 + 5, 0, 1.0f, 1.0f, 1, ext[0x26], 0, 0x10, 0xF, 0, arg0[0xC],
+                      arg0[0x1]);
+    }
+    return alive;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/func_151928C8.s")
+#endif
 
 s32 func_151928C8(u8 *, s32);
 

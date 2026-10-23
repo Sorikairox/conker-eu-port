@@ -144,7 +144,182 @@ void func_1507CD0C(struct127 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15169040(s32 arg0, u8 arg1);
+void func_1504BAF0(struct127 *);
+u8 *func_150E7F14(s16 count, f32 scale, u8 arg2, s32 arg3);
+extern u16 D_8009015C;
+extern s16 D_800E0F00[];
+extern u8 D_800D1CC9;
+
+// player_hit_reaction: puts player object `obj` (D_800CC2D0 index below D_8008FD8C) into hit / death reaction
+// `kind` (0..16; stored in its controller +0x121) unless it is already reacting (only kind 9 can override a
+// different running reaction). In multiplayer it counts the hit (D_800E0F00[idx]) and may play sound 10; it
+// sends message 3, picks the reaction animation (D_800D1CC9 = camera / blend mode), resets the object's motion
+// fields, and sets the controller state (+0x120: 1, 2 via func_1507C8E0, 11, or func_1507D4F8 for kind 15).
+// Player 0 in mode 4 also spawns 4..6 random curve objects. Returns 0: every caller declares s32 but none
+// reads it (the asm leaves a scratch value in v0) (P156).
+s32 func_1507CD64(struct127 *obj, s32 kind) {
+    u8 *ctl = (u8 *)obj->unk31C;
+    struct {
+        struct127 *obj;
+        u8 uid;
+    } msg;
+    s32 idx;
+    s32 rerun;
+    s32 anim;
+    s32 animFlag;
+    s32 next;
+    struct127 *saved;
+    u32 r;
+    f32 f;
+
+    if (ctl == NULL) {
+        return 0;
+    }
+    idx = ((s32)obj - (s32)D_800CC2D0) / 0x32C;
+    if (idx >= D_8008FD8C) {
+        return 0;
+    }
+    rerun = FALSE;
+    if (ctl[0x120] != 0) {
+        if (kind != 9 || ctl[0x121] == kind) {
+            return 0;
+        }
+        rerun = TRUE;
+    }
+    ctl[0x121] = kind;
+    if (D_800BE616 != 0 && !rerun) {
+        if (idx < 16) {
+            D_800E0F00[idx]++;
+        }
+        if ((D_8009015C & 0x20) && obj->unk128 == 0) {
+            func_15085710(1, 10, 1);
+        }
+    }
+    msg.obj = obj;
+    msg.uid = obj->unique_id;
+    func_15169040((s32)&msg, 3);
+
+    D_800D1CC9 = 0;
+    if (((u8 *)obj->unk31C)[0x1AC] != 0) {
+        D_800D1CC9 = 2;
+    }
+    anim = -1;
+    animFlag = 0;
+    next = 0;
+    switch (kind) {
+        case 0:
+            anim = 0x58;
+            break;
+        case 1:
+            anim = 0x13;
+            animFlag = 1;
+            break;
+        case 2:
+            anim = 7;
+            animFlag = 1;
+            break;
+        case 3:
+            D_800D1CC9 = 1;
+            anim = 0x28;
+            break;
+        case 4:
+            D_800D1CC9 = 1;
+            anim = 0x24;
+            next = 1;
+            break;
+        case 5:
+            D_800D1CC9 = 3;
+            anim = 0x24;
+            next = 1;
+            break;
+        case 6:
+            if (obj->interaction_state == 1 || obj->interaction_state == 0x15 || obj->unk5 == 3 || obj->unk65 != 0) {
+                anim = 0x170;
+            }
+            next = 1;
+            break;
+        case 7:
+            anim = 0x16F;
+            break;
+        case 8:
+            D_800D1CC9 = 3;
+            anim = 0x170;
+            next = 1;
+            break;
+        case 9:
+            next = 2;
+            break;
+        case 10:
+            D_800D1CC9 = 3;
+            anim = 0x2F;
+            break;
+        case 11:
+            anim = 0x2D4;
+            break;
+        case 12:
+            anim = 0x2D6;
+            break;
+        case 13:
+            anim = 0x2D8;
+            next = 1;
+            break;
+        case 14:
+            anim = 0x1E;
+            next = 1;
+            break;
+        case 15:
+            D_800D1CC9 = 3;
+            anim = 0x170;
+            next = 3;
+            break;
+        case 16:
+            anim = 0xF6;
+            next = 1;
+            break;
+    }
+    if (anim != -1) {
+        func_1505E650(obj, anim, 1.0f, 3.0f, 0.0f, 0.0f, animFlag);
+    }
+
+    obj->unkF8 |= 0x200;
+    *((u8 *)obj + 0x1CA) = 0;
+    *((u8 *)obj + 0x125) = 0xFF;
+    *((u8 *)obj + 0x104) = 0xFF;
+    *((u8 *)obj + 0x89) = 0xFF;
+    obj->unkE4 = 0;
+    obj->unkE6 = 0;
+    *(f32 *)((u8 *)obj + 0x3C) = 0.0f;
+    *(s16 *)((u8 *)obj->unk31C + 0x46) = 0;
+    if (obj->unk13C != 0) {
+        saved = D_800D154C;
+        D_800D154C = obj;
+        func_1504BAF0(obj);
+        D_800D154C = saved;
+    }
+
+    if (next == 0 || next == 3) {
+        ((u8 *)obj->unk31C)[0x120] = 1;
+    } else {
+        func_1507C8E0(obj, 0);
+    }
+    if (next == 2) {
+        ((u8 *)obj->unk31C)[0x120] = 11;
+    } else if (next == 3) {
+        func_1507D4F8(idx);
+    }
+
+    if (idx == 0 && D_800BE9F0 == 4) {
+        r = func_150ADA20();
+        f = func_150ADA68();
+        func_150E7F14(r % 3 + 4, f * 0.1f + 0.3f, 0xFF, 0);
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507CD64.s")
+#endif
 void func_1507D158(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 tmp = D_800CC82F[arg0 * 812];
     func_1509BFB0(3, tmp | 0x2000, arg1, arg2, arg3, arg4);
@@ -270,7 +445,146 @@ void func_1507D4F8(s32 idx) {
 //     //return temp_a0_2->unk31C;
 // }
 
+#ifdef NON_MATCHING
+extern u8 D_800BE616;
+extern s32 D_800BE9F0;
+extern u8 D_800C35EA;
+void func_150B0828(u8 *arg0, u8 arg1, s32 arg2);
+void func_150C04E0(u8 *obj);
+void func_150D8ABC(struct127 *arg0);
+void func_150F2290(u8 *arg0, s32 arg1, s32 arg2);
+void func_151C9740(struct127 *obj, u8 arg1, s32 arg2);
+void func_151CFFFC(u8 *obj, u8 flag, s32 arg2);
+void func_150BE994(u8 *arg0, s32 arg1, s32 arg2);
+void func_1507DB44(s32 arg0, s32 arg1);
+void func_150AEB9C(u8 *owner);
+s32 func_1507CD64(struct127 *obj, s32 kind);
+void func_151BAAC8(u8 *obj, u8 arg1, s32 arg2);
+void func_15145A50(struct127 *arg0);
+u8 *func_151149AC(u8 id);
+struct127 *func_1507515C(struct127 *owner, struct127 *unused1, s32 unused2);
+s32 func_15136C3C(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7);
+void func_150B8020(u8 *obj, u8 owner, s32 arg2);
+void func_150BC968(u8 *obj);
+void func_150BC03C(u8 *obj);
+void func_151A7240(u8 *obj, u8 arg1, s32 arg2);
+void func_150E0DF0(u8 *obj, u8 owner, s32 arg2);
+void func_151D2860(struct127 *arg0, u8 arg1, s32 arg2);
+/* object_destroy_effects: the break / death effects of an object by its type (byte +4): one effect function per
+ * type (owner 0xFF, flag 1), the type-0x20 crate picks the hard / soft debris by its y speed +0x20. Types 5 /
+ * 0xAD..0xAF clear +0x328, release (func_1507DB44 / func_150AEB9C) and return 1. Types 0x28 / 0x77 shatter the
+ * model, drop the held item and spawn a pickup record (func_151149AC: multiplayer id obj[0x127] + 11 after
+ * func_1507CD64(obj, 6), else id 1 in level 0x23) placed at the object; multiplayer types 0x28 / 0x77 / 0x53 /
+ * 0x90 (level 0x33 only) return 2 (respawn), everything else 0. */
+s32 func_1507D754(struct127 *arg0) {
+    u8 *obj = (u8 *) arg0;
+    u8 *rec;
+    struct127 *item;
+
+    switch (obj[4]) {
+        case 0x05:
+        case 0xAD:
+        case 0xAE:
+        case 0xAF:
+            obj[0x328] = 0;
+            func_1507DB44((s32) obj, 0);
+            func_150AEB9C(obj);
+            return 1;
+        case 0x0D:
+            func_150B8020(obj, 0xFF, 1);
+            break;
+        case 0x10:
+        case 0x38:
+        case 0x91:
+            func_150C04E0(obj);
+            break;
+        case 0x20:
+            if (*(f32 *) (obj + 0x20) < -20.0f) {
+                func_150BC968(obj);
+            } else {
+                func_150BC03C(obj);
+            }
+            break;
+        case 0x25:
+            if (*(s32 *) (obj + 0x2EC) != 0 || D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) {
+                func_151CFFFC(obj, 0xFF, 1);
+            }
+            break;
+        case 0x28:
+        case 0x77:
+            rec = NULL;
+            func_151BAAC8(obj, 0xFF, 1);
+            func_15145A50(arg0);
+            if (D_800BE616 != 0) {
+                func_1507CD64(arg0, 6);
+                rec = func_151149AC(obj[0x127] + 0xB);
+            } else {
+                if (D_800BE9F0 == 0x23) {
+                    rec = func_151149AC(1);
+                }
+                item = func_1507515C(arg0, NULL, 0);
+                if (item != NULL && D_800C35EA != 1) {
+                    func_15136C3C((u8 *) item, 1, 1, 1, 1, 0, 0xFF, 1);
+                }
+            }
+            if (rec != NULL) {
+                rec[0x6E] = 0;
+                *(s16 *) (rec + 0x10) = *(f32 *) (obj + 0x14);
+                *(s16 *) (rec + 0x12) = *(f32 *) (obj + 0x18);
+                *(s16 *) (rec + 0x14) = *(f32 *) (obj + 0x1C);
+                *(f32 *) (rec + 0x0) = *(f32 *) (obj + 0xB8);
+                *(f32 *) (rec + 0x4) = *(f32 *) (obj + 0x40);
+                *(f32 *) (rec + 0x8) = *(f32 *) (obj + 0xC4);
+                rec[0x8A] = 0xFF;
+                *(s32 *) (rec + 0x7C) = 0;
+                *(s32 *) (rec + 0x80) = 0;
+                *(s32 *) (rec + 0x84) = 0;
+            }
+            return (D_800BE616 != 0) ? 2 : 0;
+        case 0x34:
+            func_150E0DF0(obj, 0xFF, 1);
+            break;
+        case 0x3A:
+        case 0x3D:
+            func_150D8ABC(arg0);
+            break;
+        case 0x44:
+            func_151D2860(arg0, 0xFF, 1);
+            break;
+        case 0x47:
+            func_151C9740((struct127 *) obj, 0xFF, 1);
+            break;
+        case 0x4A:
+            func_150F2290(obj, 0xFF, 1);
+            break;
+        case 0x4F:
+        case 0x83:
+            func_151A7240(obj, 0xFF, 1);
+            break;
+        case 0x53:
+            if (D_800BE616 != 0) {
+                func_1507CD64(arg0, 10);
+                return 2;
+            }
+            break;
+        case 0x79:
+            func_150BE994(obj, 0xFF, 1);
+            break;
+        case 0x7F:
+            func_150B0828(obj, 0xFF, 1);
+            break;
+        case 0x90:
+            if (D_800BE616 != 0 && D_800BE9F0 == 0x33) {
+                func_1507CD64(arg0, 8);
+                return 2;
+            }
+            break;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D754.s")
+#endif
 
 void func_1507DB44(s32 arg0, s32 arg1) {
     func_1503DE70(arg0, arg1, -1);

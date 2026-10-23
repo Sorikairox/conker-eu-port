@@ -1125,7 +1125,7 @@ void func_151D45A4(struct17 *, u8, s32);
 void func_150E892C(struct17 *, s16, u8, s32);
 s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
 s32 func_15136C3C(struct127 *, s32, s32, s32, s32, s32, s32, s32);
-void func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
+u16 func_10010F88(s32 arg0, u16 arg1, s16 arg2, u8 arg3, s32 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9);
 void func_151CA070(struct127 *arg0, u8 arg1, s32 arg2);
 
 // object_explode: the big explosion at an object (135 units above its position +0x14/+0x18/+0x1C). On the ground

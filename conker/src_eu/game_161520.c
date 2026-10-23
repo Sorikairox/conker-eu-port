@@ -237,13 +237,133 @@ struct102 *func_1513418C(u8 *arg0, s32 arg1, u8 arg2, s32 arg3) {
 //     return temp_ret;
 // }
 
+#ifdef NON_MATCHING
+/* trail_emitter_update: per-frame update of a trail / particle emitter object (list type 0x28, made by
+ * func_1513418C). Lifetime +0x38 counts down by D_800BE9E4 when flag 4 is set (dies below 0). Position: the
+ * parent's position (+0x1C, flag 1), the parent model's bone matrix obj[0x20] (flag 2; the emitter dies when the
+ * parent is gone or its slot id changed), or its own double-buffered matrix +0x10/+0x14 (no flag 0x10); the point
+ * +0x24 is transformed by func_15143134. The accumulator +0x50 grows with the distance moved since the last frame
+ * (+0x40; flag 8 = no previous position) and the rate +0x4C / +0x34 (capped at 7); one D_80089E10[obj[0x3B]]
+ * spawn per whole unit, spread along the movement and jittered by the size +0x30. Then the per-type handler
+ * D_80089E40[(s8) obj[0x3C]] (-1 = none); a 0 result (or the lifetime) frees the emitter (func_1516972C). */
+typedef void (*EmitterSpawnFn)(f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *obj);
+typedef s32 (*EmitterTypeFn)(u8 *obj);
+extern EmitterSpawnFn D_80089E10[];
+extern EmitterTypeFn D_80089E40[];
+void func_151342BC(u8 *obj) {
+    u8 dead;
+    f32 *prev;
+    u8 *parent;
+    u8 *matrix;
+    f32 pos[3];
+    f32 dx, dy, dz;
+    f32 dist;
+    f32 size2;
+    f32 t, jx, jy, jz;
+    u8 flags;
+
+    dead = FALSE;
+    prev = (f32 *) (obj + 0x40);
+    if (obj[0x3A] & 4) {
+        *(s16 *) (obj + 0x38) -= D_800BE9E4;
+        if (*(s16 *) (obj + 0x38) < 0) {
+            dead = TRUE;
+        }
+    }
+    flags = obj[0x3A];
+    if (flags & 8) {
+        prev = pos;
+    }
+    if (flags & 1) {
+        parent = *(u8 **) (obj + 0x1C);
+        pos[0] = *(f32 *) (parent + 0x14);
+        pos[1] = *(f32 *) (parent + 0x18);
+        pos[2] = *(f32 *) (parent + 0x1C);
+    } else if (flags & 2) {
+        parent = *(u8 **) (obj + 0x1C);
+        if (*(s32 *) parent == 0 || *(s32 *) parent == 8 || obj[0x18] != parent[0x3B]) {
+            func_1516972C((struct102 *) obj);
+            return;
+        }
+        matrix = *(u8 **) (parent + 0x1D4);
+        if (matrix == NULL || (parent[0x74] & 0xF) == 0xF) {
+            obj[0x3A] = flags | 8;
+            return;
+        }
+        func_15143134(obj + 0x24, pos, matrix + (obj[0x20] << 6));
+    } else {
+        if (flags & 0x10) {
+            return;
+        }
+        func_15143134(obj + 0x24, pos, *(u8 **) (obj + 0x10 + (D_800BE9C0 ? 0 : 1) * 4));
+    }
+
+    dx = prev[0] - pos[0];
+    dy = prev[1] - pos[1];
+    dz = prev[2] - pos[2];
+    dist = sqrtf(dx * dx + dy * dy + dz * dz);
+    *(f32 *) (obj + 0x50) += (*(f32 *) (obj + 0x4C) * dist + 1.0f) * D_800BE9A4 * *(f32 *) (obj + 0x34);
+    if (*(f32 *) (obj + 0x50) > 7.0f) {
+        *(f32 *) (obj + 0x50) = 7.0f;
+    }
+    if ((obj[0x3A] & 0x20) && D_800C35EA == 1) {
+        // no spawning (D_800C35EA == 1): drop the whole units
+        while (*(f32 *) (obj + 0x50) > 1.0f) {
+            *(f32 *) (obj + 0x50) -= 1.0f;
+        }
+    } else {
+        while (*(f32 *) (obj + 0x50) > 1.0f) {
+            size2 = *(f32 *) (obj + 0x30) + *(f32 *) (obj + 0x30);
+            t = func_150ADA68();
+            if (D_80089E10[obj[0x3B]] != NULL) {
+                jx = func_150ADA68();
+                jy = func_150ADA68();
+                jz = func_150ADA68();
+                D_80089E10[obj[0x3B]](pos[0] + dx * t + *(f32 *) (obj + 0x30) - jx * size2,
+                                      pos[1] + dy * t + *(f32 *) (obj + 0x30) - jy * size2,
+                                      pos[2] + dz * t + *(f32 *) (obj + 0x30) - jz * size2, dx, dy, dz, obj);
+            }
+            *(f32 *) (obj + 0x50) -= 1.0f;
+        }
+    }
+    ((f32 *) (obj + 0x40))[0] = pos[0];
+    ((f32 *) (obj + 0x40))[1] = pos[1];
+    ((f32 *) (obj + 0x40))[2] = pos[2];
+    obj[0x3A] &= ~8;
+    if (!dead && (s8) obj[0x3C] != -1) {
+        if (D_80089E40[(s8) obj[0x3C]](obj) == 0) {
+            dead = TRUE;
+        }
+    }
+    if (dead) {
+        func_1516972C((struct102 *) obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_151342BC.s")
+#endif
 
 s32 func_151346D0(s32 arg0, struct102 *arg1, s32 arg2) {
     arg1->unk3A &= 0xFFEF;
     return arg0;
 }
 
+#ifdef NON_MATCHING
+/* object_list_move_1: D_80089E40 table entry (func_151342BC calls the entries as s32 (*)(obj) and runs
+ * func_1516972C on the object when the result is 0): moves the object to list 1 (func_15169804). The asm returns
+ * what func_15168A4C leaves in v0: the object's byte +1 (its type, read as the list index). */
+s32 func_151346EC(struct102 *arg0) {
+    func_15169804(arg0);
+    return ((u8 *) arg0)[1];
+}
+
+/* object_list_free: D_80089E40 table entry: unlinks and frees the object (func_15169824). The asm returns the free
+ * function's v0 (osSetIntMask's previous mask, never 0), so func_151342BC never touches the freed object: 1. */
+s32 func_1513470C(struct102 *arg0) {
+    func_15169824(arg0);
+    return 1;
+}
+#else
 void func_151346EC(struct102 *arg0) {
     func_15169804(arg0);
 }
@@ -251,6 +371,7 @@ void func_151346EC(struct102 *arg0) {
 void func_1513470C(struct102 *arg0) {
     func_15169824(arg0);
 }
+#endif
 
 void func_1513472C(struct102 *arg0) {
     s32 idx = arg0->unk3D;
@@ -288,7 +409,7 @@ void func_151347CC(struct161520 *arg0, struct161520_msg *arg1, u8 arg2) {
     }
 }
 
-void func_151348F0(f32 arg0, f32 arg1, s32 arg2, s32 arg3) {
+void func_151348F0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
 }
 
 s32 memcpy(u8 *, u8 *, s32);
@@ -787,7 +908,111 @@ void func_15136AE4(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     func_151D9014(sp6C, sp60, 0, (sp4C * D_800A4A08) + D_800A4A0C, (sp50 & 0xF) + 0x19, (sp54 % 101) + 0x9B, (func_150ADA68() * 119.0f) + 129.0f, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg6->unkC, arg6->unk1);
 }
 
+#ifdef NON_MATCHING
+/* func_1515128C smoke spec (0x2D bytes used) */
+typedef struct {
+    /* 0x00 */ s32 u00;
+    /* 0x04 */ s32 u04;
+    /* 0x08 */ f32 pos[3];
+    /* 0x14 */ s16 u14;
+    /* 0x16 */ s16 u16;
+    /* 0x18 */ s16 u18;
+    /* 0x1A */ s16 u1A;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ s16 u28;
+    /* 0x2A */ s16 u2A;
+    /* 0x2C */ u8  dark;
+} HitSmokeSpec;
+void func_1504715C(void *, u8 *);
+void func_1515C7B4(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
+void func_1515128C(u8 *arg0, u8 arg1, s32 arg2);
+void func_151C6750(s32 arg0, s32 arg1, u8 arg2, s32 arg3);
+void func_1513A24C(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 kind, u8 arg6, u8 *obj, s32 *bounds, u8 arg9, s32 argA);
+void func_1513A48C(struct17 *arg0, u8 arg1, s32 arg2);
+void func_151A9DE4(f32 *arg0, f32 arg1, f32 arg2, void *arg3, s32 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+extern s32 *D_80089DC0[];       /* per hit kind: debris model ids */
+extern s32 D_800A4010[];        /* debris scales (all 1.0) */
+extern s32 D_800A42F4[];        /* per hit kind: debris kinds */
+extern s32 D_800A4344[];        /* per hit kind: debris spec byte +0x40 */
+extern u8 D_800A43B8[][16];     /* per hit kind: +0xE == 2: debris only */
+
+// object_hit_effects: the hit / break effects of an object by its hit kind (func_15134070, 0x63: none), at its
+// effect position (func_1515C7B4): debris pieces (debris; two kinds fewer with fewer, or for kind 4 unless the
+// object type is 0x16), then unless the kind's +0xE is 2: a smoke puff (smoke; dark for kinds 2 / 15 / 18),
+// 18..23 floor splats within 300 below (splats), and the finishing effect (finish: func_151C6750 for kinds 2 / 15,
+// else func_1513A48C). arg6 / arg7 are passed on to every spawner. The asm's v0 is left over from a callee; every
+// caller ignores it (func_151086A0 returns it to its asm caller, which does not read it).
+s32 func_15136C3C(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, u8 arg6, s32 arg7) {
+    HitSmokeSpec spec;
+    s32 bounds[9];
+    f32 pos[3];
+    f32 sizeY;
+    f32 sizeX;
+    f32 size;
+    s32 kind;
+    s32 n;
+    u8 *info;
+    u8 dark;
+
+    if (obj == NULL) {
+        return 0;
+    }
+    size = (*(f32 *)(obj + 0x14C) + *(f32 *)(obj + 0x150)) * 0.5f;
+    func_1515C7B4(obj, pos, &sizeX, &sizeY);
+    kind = func_15134070((struct127 *)obj);
+    if (kind == 0x63) {
+        return 0;
+    }
+    func_1504715C(bounds, obj);
+    if (debris) {
+        if (fewer || (kind == 4 && obj[4] != 0x16)) {
+            n = D_800A42F4[kind] - 2;
+        } else {
+            n = D_800A42F4[kind];
+        }
+        func_1513A24C(pos, D_80089DC0[kind], D_800A4010, n, size, kind, D_800A4344[kind], obj, bounds, arg6, arg7);
+    }
+    info = D_800A43B8[kind];
+    if (info[0xE] == 2) {
+        return 0;
+    }
+    if (smoke) {
+        spec.u00 = 0xC;
+        spec.u04 = 3;
+        spec.pos[0] = pos[0];
+        spec.pos[1] = pos[1];
+        spec.pos[2] = pos[2];
+        spec.u14 = 0;
+        spec.u16 = 0xFF;
+        spec.u18 = -0x40;
+        spec.u1A = 0x45;
+        spec.u28 = 0x96;
+        spec.u2A = 0x64;
+        spec.u1C = 998.0f;
+        spec.u20 = 25.0f;
+        spec.u24 = 10.0f;
+        spec.dark = (kind == 2 || kind == 15 || kind == 18) ? 1 : 0;
+        func_1515128C((u8 *)&spec, arg6, arg7);
+    }
+    if (splats) {
+        dark = (kind == 2 || kind == 15 || kind == 18) ? 1 : 0;
+        func_151A9DE4(pos, pos[1] - 300.0f, 300.0f, bounds, (func_150ADA20() % 6U) + 18, 0, (s32)&dark,
+                      arg6, arg7);
+    }
+    if (finish) {
+        if (kind == 2 || kind == 15) {
+            func_151C6750((s32)pos, (s32)bounds, arg6, arg7);
+            return 0;
+        }
+        func_1513A48C((struct17 *)pos, arg6, arg7);
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136C3C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136F50.s")
 
@@ -1130,7 +1355,103 @@ void func_15138C80(struct127 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139D74.s")
 
+#ifdef NON_MATCHING
+/* func_15150D7C debris burst spec (0x44 bytes) and the 0xC extra bytes copied to each piece (+0x170) */
+typedef struct {
+    /* 0x00 */ s32 countBase;
+    /* 0x04 */ s32 countExtra;
+    /* 0x08 */ f32 pos[3];
+    /* 0x14 */ s16 u14;
+    /* 0x16 */ s16 u16;
+    /* 0x18 */ s16 u18;
+    /* 0x1A */ s16 u1A;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 u28;
+    /* 0x2C */ s16 u2C;
+    /* 0x2E */ s16 u2E;
+    /* 0x30 */ f32 sizeMin;
+    /* 0x34 */ f32 sizeExtra;
+    /* 0x38 */ f32 u38;
+    /* 0x3C */ f32 solidChance;
+    /* 0x40 */ u8  u40;
+} DebrisSpec;
+typedef struct {
+    /* 0x00 */ s32 u0;
+    /* 0x04 */ u16 model;
+    /* 0x06 */ u8  u6;
+    /* 0x08 */ s32 u8;
+} DebrisExtra;
+s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+                  s32 arg9, f32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14);
+void func_151343AC(s32 arg0, u8 arg1);
+extern u16 D_800A4638[4];
+
+// object_debris_burst: 40 debris pieces of the kinds ids[] / scales[] (n kinds) at pos, sized scale (debris spec
+// for func_15150D7C, 0x0D: other spin / speed values; 0x13 in level 0x3C: never solid). Kind 1 adds the extra
+// bytes {4, model D_800A4638[obj +0x128, at most 3], 6, 3} and mode 1. Then func_151343AC(0, 0x45).
+void func_1513A24C(f32 *pos, s32 *ids, s32 *scales, s32 n, f32 scale, u8 kind, u8 arg6, u8 *obj, s32 *bounds,
+                   u8 arg9, s32 argA) {
+    DebrisSpec spec;
+    DebrisExtra extra;
+    u16 models[4];
+    s32 mode;
+    s32 i;
+
+    spec.countBase = 0x28;
+    spec.countExtra = 0;
+    spec.pos[0] = pos[0];
+    spec.pos[1] = pos[1];
+    spec.pos[2] = pos[2];
+    spec.sizeMin = 1.0f * scale;
+    spec.u14 = 0;
+    spec.u16 = 0xFF;
+    spec.u2C = 0x190;
+    spec.u2E = 0xC8;
+    spec.sizeExtra = (f32)0 * scale; /* computed: -0.0 for a negative scale (IDO folds "0.0f * scale") */
+    extra.u0 = 4;
+    mode = -1;
+    spec.u18 = -0x40;
+    spec.u1A = 0xC;
+    spec.u20 = 5.0f;
+    spec.solidChance = 1.0f;
+    spec.u1C = 13.0f;
+    spec.u24 = -1.0070001f;
+    spec.u28 = 0.252f;
+    spec.u38 = 16.102001f;
+    spec.u40 = arg6;
+    if (kind == 1) {
+        models[0] = D_800A4638[0];
+        models[1] = D_800A4638[1];
+        models[2] = D_800A4638[2];
+        models[3] = D_800A4638[3];
+        mode = 1;
+        i = obj[0x128];
+        if (i >= 4) {
+            i = 3;
+        }
+        extra.u6 = 6;
+        extra.u8 = 3;
+        extra.model = models[i];
+    } else if (kind == 0xD) {
+        spec.u18 = -0x2E;
+        spec.u1A = 0x14;
+        spec.u1C = 15.0f;
+        spec.u20 = 8.0f;
+        spec.u24 = -1.2620001f;
+        spec.u28 = 0.49f;
+        spec.u38 = 12.911f;
+    } else if (kind == 0x13 && D_800BE9F0 == 0x3C) {
+        spec.solidChance = 0.0f;
+    }
+    func_15150D7C((s32 *)&spec, ids, scales, n, (s32)&extra, 0xC, 6, 1, mode, (s32)bounds, 5.0f, 1,
+                  (D_800BE616 != 0) ? 1 : 0, arg9, argA);
+    func_151343AC(0, 0x45);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A24C.s")
+#endif
 
 extern u8 D_800A4648[];
 extern u8 D_800A4650[];
