@@ -9,9 +9,9 @@ typedef struct {
     u8 untilEnd;  /* stop when the scene time reaches its end */
     u8 pad3;
     u16 left;     /* frames left (0xFFFF = endless) */
-    u16 fadeFrom; /* fade-out start (frames left) */
-    u16 fadeLen;  /* fade-out length */
-    u16 fadeIn;   /* fade-in length */
+    u16 total;    /* frames at the start */
+    u16 fadeIn;   /* fade-in length (frames) */
+    u16 fadeOut;  /* fade-out length: the last fadeOut frames */
     u16 volume;
     u8 epoch;     /* D_800C3A08[player] when started */
     u8 padF;
@@ -46,12 +46,12 @@ s32 func_15023988(u8 *e, s32 *a1, u32 *vol, s32 *a3, s32 *a4, s32 *a5, u16 *stop
         }
     }
     *vol = r->volume;
-    if (r->left < r->fadeIn) {
+    if (r->left < r->fadeOut) {
         if (r->left != 0) {
-            *vol = (u32) (r->volume * r->left) / r->fadeIn;
+            *vol = (u32) (r->volume * r->left) / r->fadeOut;
         }
-    } else if (r->fadeLen != 0 && r->fadeFrom - r->fadeLen < r->left) {
-        *vol = (u32) (*vol * (r->fadeFrom - r->left)) / r->fadeLen;
+    } else if (r->fadeIn != 0 && r->total - r->fadeIn < r->left) {
+        *vol = (u32) (*vol * (r->total - r->left)) / r->fadeIn;
     }
     if (r->left == 0xFFFF || D_800C3C88 == 0) {
         return 0;
