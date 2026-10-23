@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P191 (port-b) (session P191, 2026-10-24). Details: `docs/port/sessions/P191.md`
+
+Branch `port-b` (from P188 a1667be). Hand C (NM), all difftest EQUIV + setups + mutants:
+- func_1504B0FC `player_swim_update` (78230, 591 words): **the level-0 rise / level-0x29 control loss (P189)**: clamps
+  y at the surface line (+0x118 - 60, +14, 0.65 of the excess), zeroes gravity / y_velocity when the buoyancy
+  pushes up, bob, buoyancy rise, air timer / drowning, swim pitch, bottom exit. 75 setups, mutants 92/95 (2
+  equivalent, 1 harness-blind). Callees all C.
+- func_151AC628 `debris_chunk_emit` / func_151ACBCC `debris_dust_emit` (1D9C00; D_8008ADA0 handlers 0xB / 0xC,
+  return 1): mutants 46/47 (1 equivalent) and 29/29.
+- func_1519FD60 `foot_trail_update` (1CCD10, D_8008A5DC handler 5): mutants 71/71.
+- func_151AABC4 `footstep_splash` (1D7790): s32 returning 0 because game_981E0 calls it without a prototype
+  (implicit int); tested as a void variant; mutants 40/40.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1307), selftest 65/65; voidret_scan no new suspect.
+  progress_nm total 5301/5915 (89.6%), game 4767/5334, C bytes 74.2%, 614 asm-only.
+
+## Next steps (from P191)
+
+1. Browser (port-web): func_1504B0FC on level 0 noev (no rise) and level 0x29 25889 (control kept); then the P191.md
+   UNVERIFIED list (debris, foot trails, footstep splashes).
+2. game_981E0 owner: add `s32 func_151AABC4(struct127 *, s32);` (no prototype today).
+3. port-b breadth (`p168/asmlist.py`): func_15082278 (466, AF2A0), func_150B2C20 (477, E0430), func_150CA150 (504,
+   F6060), func_151D3A30 (564, 201240), func_151C0698 (669, 1EDA00).
+
 ## P188 (port-b) (session P188, 2026-10-24). Details: `docs/port/sessions/P188.md`
 
 Branch `port-b` (from P186 791adfb). Hand C (NM), all difftest EQUIV + setups + mutants:

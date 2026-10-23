@@ -1,0 +1,3 @@
+s/key.side = \*(s32 \*) (t + 0x20);/key.side = 7;/ % endtrail
+s/fabsf(d0) > 0.0001f ||/fabsf(d0) > 0.01f ||/ % tiny
+s/if (pl->unk118 < -9500.0f) {/if (pl->unk118 < -9000.0f) {/ % surf9200
