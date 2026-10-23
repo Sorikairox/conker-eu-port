@@ -4,7 +4,6 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_1513F680(u8 *, u8, u8, u8, u8);
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
-struct210 *func_1513D524(s32, u8, u8, u8, u8, u8, s32, u8, s32);
 #endif
 
 

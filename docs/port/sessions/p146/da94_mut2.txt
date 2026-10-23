@@ -1,0 +1,3 @@
+s/} else if (life > 10.0f) {/} else if (life > 11.0f) {/
+s/pos\[1\] = \*(f32 \*)(st + 0x30);/pos[1] = *(f32 *)(st + 0x34);/
+s/pos\[2\] = \*(f32 \*)(fx + 0x3C);/pos[2] = *(f32 *)(fx + 0x38);/

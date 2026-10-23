@@ -1,0 +1,24 @@
+s/    mv\[0\] = vx0 \* (0.25f \* D_800BE9A4);/    mv[0] = vx0 * (0.5f * D_800BE9A4);/
+s/    mv\[2\] = vz0 \* (0.25f \* D_800BE9A4);/    mv[2] = vx0 * (0.25f * D_800BE9A4);/
+s/    dx = (mv\[0\] + vx0) \* 0.5f \* D_800BE9A4;/    dx = (mv[0] + vz0) * 0.5f * D_800BE9A4;/
+s/    dvy = mv\[3\] \* D_800BE9A4;/    dvy = mv[3];/
+s/dvy \* D_800BE9A4 \* 0.5f;/dvy * 0.5f;/
+s/    dz = (mv\[2\] + vz0) \* 0.5f \* D_800BE9A4;/    dz = mv[2] * D_800BE9A4;/
+s/    mv\[1\] = vy + dvy;/    mv[1] = vy - dvy;/
+s/    \*(f32 \*)(fx + 0x38) = y0 + dy;/    *(f32 *)(fx + 0x38) = y0;/
+s/    \*(f32 \*)(fx + 0x3C) += dz;/    *(f32 *)(fx + 0x3C) += dx;/
+s/    \*(f32 \*)(fx + 0x44) += dy;//
+s/    \*(f32 \*)(fx + 0x40) = x + (\*(f32 \*)(fx + 0x40) - x) \* D_800AA6D0;/    *(f32 *)(fx + 0x40) = x + (*(f32 *)(fx + 0x40) - x) * D_800AA6D4;/
+s/    \*(f32 \*)(fx + 0x48) = z + (\*(f32 \*)(fx + 0x48) - z) \* D_800AA6D0;/    *(f32 *)(fx + 0x48) = y + (*(f32 *)(fx + 0x48) - z) * D_800AA6D0;/
+s/    if (fx\[0x134\] != 0) {/    if (fx[0x135] != 0) {/
+s/        probe\[1\] = y0 - \*(f32 \*)(fx + 0x30);/        probe[1] = y0;/
+s/\*(f32 \*)(fx + 0x38) - \*(f32 \*)(fx + 0x30), (f32 \*)(fx + 0x78)/*(f32 *)(fx + 0x38), (f32 *)(fx + 0x78)/
+s/            hit\[1\] = \*(f32 \*)(fx + 0x78) + 5.0f;/            hit[1] = *(f32 *)(fx + 0x78) + 4.0f;/
+s/            hit\[2\] = probe\[2\];/            hit[2] = probe[1];/
+s/(mv\[6\] + mv\[8\] \* 0.5f)/(mv[6] + mv[8])/
+s/size \* D_800AA6D4, fx\[0x5C\], (s32)(fx + 0x7C), (struct17 \*)hit, 100, 0, 1, 0,/size * D_800AA6D4, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 1, 1, 0,/
+s/(struct17 \*)hit, 100,/(struct17 *)hit, 99,/
+s/                              fx\[0xC\], fx\[1\]);/                              fx[0xC], fx[0]);/
+s/size \* D_800AA6D8, fx\[0x5C\], hit, 1, fx\[0xC\], fx\[1\]);/size * D_800AA6D8, fx[0x5C], hit, 0, fx[0xC], fx[1]);/
+s/            if (func_150ADA20() & 1) {/            if (func_150ADA20() \& 2) {/
+s/            ret = 0;/            ret = 2;/
