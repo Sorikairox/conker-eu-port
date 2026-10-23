@@ -10,6 +10,42 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P103, 2026-10-23, port-web). Details: `docs/port/sessions/P103.md`
+
+- **Boot path (from the code):**
+  1. func_151E582C sets mode 11 and loads level 0x25: the boot screen func_151DEBB4 / func_151EC300 (NTSC
+     osTvType freezes it: region lock).
+  2. At timer 0x2C7 the game goes to **mode 1 / level 0x21 = "LogoScreen"**. This is correct and matches the N64.
+  3. Then the menu: mode 3 / level 0x1D (func_151DEDD0, asm), reached through event / scene actions (scene opcode
+     0x67 -> func_151DECB4).
+  4. Then a game: func_151E3864 / func_151E3A1C -> mode 0 (func_151DE100, asm).
+  - Mode table D_8009018C and render table D_80090370: P103.md section 1.
+- **Why the port stays on level 0x21: the level event system is asm.**
+  - Level 0x21 has one level event, **0xC9 "LogoScreen"**, with no prerequisites.
+  - The prerequisite check **func_1509CBD4** (stub, so 0) blocks it. Past that check, **func_1509B5AC** (start
+    event) is a stub too, and so is the event VM **func_150ADFD0**.
+  - Evidence: `?p103boot=1` / `?p103ev=1` logs in P103.md section 2.
+- **World objects are 0 on every level because func_150039E0 (world-object loader, 741 insns) is a stub.** This
+  corrects P101's "0 objects = level data".
+- **D_8009018C[0] = raw 0x151DE100:**
+  - Cause: func_151E86A4's code checksum uses func_151DE100 as data, so n64mem skips that word (the only `F-data`
+    word).
+  - It is not reached before the menu. When it is, it traps (`table index out of bounds`).
+  - Fix it together with converting func_151DE100: guard the checksum under PORT, then remove the data stub.
+- Port: DIAGNOSTICS `?p103boot=1`, `?p103ev=1` (port/gfx/p103_boot.c, 4 wraps, hook in p84_checks.c). No fix.
+
+## Next steps (from P103)
+
+1. Level events, as one unit:
+   - func_1509CBD4 (48 insns);
+   - func_1509B950 (45), together with the dropped-return fix: **func_1509B8FC must return func_1509B950(...)**;
+   - func_1509B5AC (86);
+   - func_150ADFD0 (485), with func_150ADA20 / func_150AE760.
+2. Re-run `?p103boot=1` and the census on level 0x21 for the LogoScreen script's action handlers (func_1509FD30 & co.).
+3. func_150039E0 (world objects). Then func_151DEDD0 (menu, mode 3).
+4. func_151DE100 (mode 0), with the PORT guard of func_151E86A4 and the D_8009018C[0] relocation.
+5. P101's list (func_150000B0 music etc.) still stands.
+
 ## State (session P101, 2026-10-23, port-web). Details: `docs/port/sessions/P101.md`
 
 - **The fall near (-179, 301) is not a collision bug.**

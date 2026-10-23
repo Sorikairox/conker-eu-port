@@ -40,6 +40,7 @@ void __wrap_func_151E5928(void) {
     p84_frame();
     if (flag(&fnotext, "p84notext")) return;
     __real_func_151E5928();
+    { void p103_frame(void); p103_frame(); } /* P103 ?p103boot */
     if (!flag(&ftext, "p84text")) return;
     cur[0] = B(D_800E101A_) | B(D_800BEECB_) << 8 | B(D_800E1003_) << 16;
     cur[1] = W(D_800E1004_); cur[2] = W(D_800E1008_); cur[3] = W(D_80090178_); cur[4] = W(D_800E0FB8_);
