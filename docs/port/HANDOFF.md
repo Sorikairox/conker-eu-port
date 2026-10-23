@@ -10,6 +10,34 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P188 (port-b) (session P188, 2026-10-24). Details: `docs/port/sessions/P188.md`
+
+Branch `port-b` (from P186 791adfb). Hand C (NM), all difftest EQUIV + setups + mutants:
+- func_15190E08 `drip_emitter_update` (1BE5C0, level 0x29 stub): P186 draft finished; the a3 DIFFER was an unknown
+  callee arity (difftest's call regex vs nested parentheses): the draft re-declares func_15143134's 3-argument
+  prototype. Rng14 / D_800AA120 moved above it; func_1513F680 declared void (its definition). Mutants 50/50.
+- func_15112074 `sky_box_draw` (13DC30, level 0x29 stub, D_80089578 camera callback): mutants 67/69 (2 equivalent).
+- func_15177410 `model_light_create` (1A5190; game_3DC30 callers, 16 args): mutants 45/46 (1 equivalent).
+- func_151C62D0 `object_gun_fire` (1F4090; void like game_eu_51190's prototype, nobody reads the asm's v0):
+  mutants 45/46 (1 harness-blind: dst array order).
+- Checks: verify_all rc 0, NM links, protocheck 0 (1302), selftest 65/65; voidret_scan no SUSPECT. progress_nm total
+  5296/5915 (89.5%), game 4762/5334, C bytes 73.9%, 619 asm-only.
+
+## Next steps (from P188)
+
+0. COORDINATOR RE-PRIORITY (received end of P188, browser P185, see ~/conker-wt/web/docs/port/sessions/P185.md):
+   (a) level 0: player rises forever after func_151AC628 (213 insns) / func_151ACBCC (125) (game_eu_1D9C00, D_8008ADA0
+   particle handlers) first run at frame 1473; (b) level 0x29 frame 25889: control lost when func_1504B0FC
+   (78230, called by C func_1504CB98), func_151AC628 / func_151ACBCC, func_1519FD60 (1CCD10) and func_151AABC4
+   (1D7790, 126) run. Order: func_151AC628 + func_151ACBCC (check what they write that the C caller reads), then
+   func_1504B0FC, then func_1519FD60 / func_151AABC4. Note: 1504B0FC and 1519FD60 already show an `#else` before
+   their pragma (check whether an NM body exists / whether the files are port's in-flight before taking them).
+1. Browser (port-web): P188.md UNVERIFIED list (drips, sky box, model lights, gun fire bone-path vectors).
+2. port-b breadth (`p168/asmlist.py`): func_15082278 (466, AF2A0), func_150B2C20 (477, E0430), func_150CA150 (504,
+   F6060), func_151D3A30 (564, 201240), func_1504B0FC (591, 78230), func_151C0698 (669, 1EDA00).
+3. Other slots' level 0x29 stubs (P186 list): func_150D0C40 (FE450), func_15008E10 (362B0), func_1514D3B0 (17A800),
+   func_150A4FE4 (D1760), func_151925C4 (1BF960), func_1000A750 (init_A420), func_15189F70 (1B7680).
+
 ## P186 (port-b) (session P186, 2026-10-24). Details: `docs/port/sessions/P186.md`
 
 Branch `port-b` (from P183 6d46bb1). Hand C (NM):

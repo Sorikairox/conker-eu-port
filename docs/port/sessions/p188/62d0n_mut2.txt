@@ -1,0 +1,2 @@
+s/if (D_800AAFDC < fabsf(x) ||/if (D_800AAFDC < x ||/ % nxneg
+s/156 + 100/155 + 100/ % nr200
