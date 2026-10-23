@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P187, 2026-10-24). Details: `docs/port/sessions/P187.md`
+
+- Hand C (NM), difftest EQUIV + setups + mutants (table in P187.md): the three port stubs behind func_1506B04C's
+  handlers **func_151B78D8** obj_attached_glow_spawn (game_eu_1E40E0; D_8008FF30 = 2 C handlers with matching
+  `s32 (u8 *, void *)`), **func_151BBBCC** shot_impact_effects (game_eu_1E7CC0; keyframe tables as `static const`),
+  **func_151043C0** ground_explosion (game_eu_131BD0); level 0x29 breadth **func_1514D3B0** obj_state_event_dispatch
+  (game_eu_17A800), **func_15192150** obj_dust_effect_spawn + **func_151925C4** obj_dust_effect (game_eu_1BF960,
+  producer with its caller), **func_1000A750** path_sound_pan_volume (init_A420).
+- Stubs still reached through func_1506B04C: func_151D3A30 (port-b), func_151522DC (port-b, from func_151BBBCC).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1302 NM bodies), selftest 65/65, progress_nm 5296/5915 (89.5%), C bytes 73.1%. No difftest processes left.
+
+## Next steps (from P187)
+
+1. Browser: P187.md section 5 (effect handlers 2 / 11 / 12 / 14, level 0x29 state events, dust, path sounds).
+2. func_15189F70 (game_eu_1B7680, 303; level 0x29 list, no C caller so asmlist.py skips it).
+3. func_150A4FE4 (game_eu_D1760, 295) is hand-written asm: needs an nmasm whole-function harness (or the asm2c
+   stopgap by user decision), not hand C.
+4. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged from P182).
+5. Breadth: p187/asmlist.py (smallest first); P138 / P141 leftovers.
+
 ## State (session P184, 2026-10-24). Details: `docs/port/sessions/P184.md`
 
 - Hand C (NM), difftest EQUIV + setups + mutants (table in P184.md): **func_15170A70** spark_particle_spawn
