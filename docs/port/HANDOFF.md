@@ -10,6 +10,37 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P168 (port-b) (session P168, 2026-10-24). Details: `docs/port/sessions/P168.md`
+
+Branch `port-b` (from P164 9eebdac). Re-prioritised by the coordinator (browser P165: first room blocked by text
+boxes that open but never advance).
+- **func_1516AFE0** `text_box_update` and its every-frame callee **func_1516D1C8** `text_box_place`
+  (game_eu_1984F0.c) hand C (NM), one unit: the +0x15 state machine (open / grow / wait / dots / line fade-in /
+  shown (A / B on D_800BEB30[0]) / fade-out + next line / close with callbacks 0x2000 / 0x4000 / 0x1000), and the
+  box / pointer placement. AFE0: 36 setups EQUIV, mutants 26/26; D1C8: 10 setups EQUIV, mutants 18/20 + 2 equivalent.
+- **Not done (budget): the draw func_1516BC2C (1127 words) + its callee func_1516CEA4 (201)** — still asm, so boxes
+  now advance / close but are invisible. Structure notes in P168.md.
+- m2c_sanity "high" rows func_151A9940 / func_151AC3F0: both false positives (same offset on different bases).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1211 bodies), selftest 62/62. progress_nm total 5205/5915
+  (88.0%), game 4674/5334, C bytes 69.5%, 710 asm-only. No difftest processes left.
+
+## Next steps (from P168)
+
+1. Browser (port-web): first room with the C text box update: does the gargoyle dialogue advance with B / close,
+   and does the room open? Expect no visible boxes (draw still asm).
+2. port-b: func_1516BC2C text box draw + func_1516CEA4 (one unit; P168.md has the layout of the stack sprite block
+   and the callees func_15095380 / func_15095E58).
+3. port-b (coordinator order): func_1513FAB4 (game_169510, every frame), then func_151C9740 (game_eu_1F4F60) and
+   func_151CFFFC (game_eu_1FB080) (last port-b asm callees of port's item switch func_1507D754), then func_151D9014
+   (game_2062D0, Gregg cutscene).
+4. port-b: beam unit func_151C7B1C (24 args) + producers func_151C9748 (writes the 3 piece pointers it reads back;
+   draft `p168/d_9748.c`, not difftested) + func_151C957C (glow records via func_151407D0). Layout of the 0xA0-byte
+   emitter block (copied to rec +0x110, read by func_151C8880 / func_151C8448): +0x00..+0x24 random sizes / phases
+   (8 func_150ADA68 calls), +0x28 rec, +0x2C sound (func_1516284C, only with arg9), +0x30..+0x3B never written,
+   +0x3C / +0x48 piece pointers [3], +0x54 0.0f, +0x58 0, +0x5A / +0x6C the two 0x12-byte hit triangles, +0x7E..+0x84
+   s16 args 10..12 and 10+11, +0x86 option bits, +0x88 rec, +0x8C / +0x90 ground ids, +0x94 arg17, +0x98 / +0x9C
+   arg19 / arg20. If func_15144E80 fails, func_151C9748 leaves out[] unwritten (N64 frees stack garbage then).
+
 ## P164 (port-b) (session P164, 2026-10-24). Details: `docs/port/sessions/P164.md`
 
 Branch `port-b` (from P163 8bd88bc). Took game_40490.c, game_eu_1F4F60.c, game_39750.c; prototype-only edits in

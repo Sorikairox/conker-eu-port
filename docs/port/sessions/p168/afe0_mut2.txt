@@ -1,0 +1,5 @@
+s/if (0.75f < TB_F32(box, 0x28)/if (0.5f < TB_F32(box, 0x28)/ %g2m
+s/if (box\[0x1E\] < 101)/if (box[0x1E] < 100)/ %d8x
+s/        if (!(flags \& 0x200) \&\& skip) {/        if (!(flags \& 0x100) \&\& skip) {/ %s20f
+s/(TB_S16(box, 0x18) \/ 5.0f \* 85.0f)/(TB_S16(box, 0x18) \/ 5.0f * 95.0f)/ %c80a2
+s/        skip = 0;/        skip = skip;/ %f40k2
