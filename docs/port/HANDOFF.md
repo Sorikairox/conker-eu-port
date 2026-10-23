@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P150 (port-b) (session P150, 2026-10-23). Details: `docs/port/sessions/P150.md`
+
+Branch `port-b` (from P146 b8f1ce7); merged port 37085b5 (merge commit 1457344, only HANDOFF.md conflicted).
+
+- func_1513D524 `_void_proto` hacks removed (game_169510.c, game_eu_1772D0.c).
+- Hand C (NM), difftest EQUIV + mutants: func_1508154C `object_ray_hit_model` (AE930; func_15081A90 model hits now
+  C), func_15153BA4 `particle_burst_spawn` (17D3C0, replaces the batch m2c body), func_15084814
+  `object_model_refs_release` (AF2A0), func_15102C3C `object_effect_start` (12E390; callee func_15100B80 still asm),
+  func_151AE694 `path_try_attach` (1D9C00), func_151B09BC `object_link_effect_spawn` (1DDE10); func_1510BA9C (138E00,
+  C since P13) verified and now counted (dead nested `#ifndef NON_MATCHING` removed).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1162 bodies), selftest 62/62.
+  progress_nm total 5156/5915 (87.2%), game 4625/5334, C bytes 67.8%, 759 asm-only.
+- Port-b asm lister: `docs/port/sessions/p150/asmlist.py` (port-b files; run progress_nm --list >
+  port_work/p150/asmonly.txt first). 91 asm-only left in port-b files, 42 with C calls.
+
+## Next steps (from P150)
+
+1. Next smallest port-b asm with C callers (asmlist): func_151AE958 (122, 1D9C00), func_150916B4 (123, BC510),
+   func_151B01B8 (128, 1DDE10), func_151DC034 (139, 2062D0), func_151504B4 (141, 17D3C0), func_151AC3F0 (142, 12 calls).
+2. func_15100B80 (12E390, 706 lines) so func_15102C3C's effects show.
+3. Browser: model ray hits, burst particles, path attach, linked effects (P150.md UNVERIFIED).
+
 ## P146 (port-b) (session P146, 2026-10-23). Details: `docs/port/sessions/P146.md`
 
 Branch `port-b` (from P143 3005439); the orchestrator merges it into `port`.

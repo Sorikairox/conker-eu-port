@@ -1,0 +1,20 @@
+s/if (target == NULL || target\[4\] == 0x53 || target\[4\] == 0xA5) {/if (target == NULL || target[4] == 0x53) {/
+s/if (target == NULL || target\[4\] == 0x53 || target\[4\] == 0xA5) {/if (target == NULL || target[4] == 0xA5) {/
+s/        class = 4;/        class = 5;/
+s/if (class == 0x63) {/if (class == 0x62) {/
+s/mode = D_800A43C6\[class \* 16\];/mode = D_800A43C6[class * 8];/
+s/if (mode == 2) {/if (mode == 3) {/
+s/state.single = (mode == 1) ? 1 : 0;/state.single = (mode == 0) ? 1 : 0;/
+s/key.id = obj\[0x3B\];/key.id = obj[0x3A];/
+s/func_151494E0((s32)&key, 0x13);/func_151494E0((s32)\&key, 0x12);/
+s/        life = 300;/        life = 200;/
+s/        fixed = 0;/        fixed = 1;/
+s/        fixed = 1;/        fixed = 0;/
+s/        life = span;/        life = 300;/
+s/state.id = obj\[0x3B\];/state.id = obj[0x3A];/
+s/for (i = 0; i < 0x22; i++) {/for (i = 1; i < 0x22; i++) {/
+s/state.f90 = 0.0f;/state.f90 = 1.0f;/
+s/0x13, fixed, 0xF, 0x98, arg3, arg4);/0x13, fixed, 0xE, 0x98, arg3, arg4);/
+s/0x13, fixed, 0xF, 0x98, arg3, arg4);/0x13, fixed, 0xF, 0x98, arg4, arg3);/
+s/(s32)(part + 0x28)/(s32)(part + 0x24)/
+s/    return (s32)part;/    return 1;/
