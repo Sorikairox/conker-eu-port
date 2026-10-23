@@ -274,7 +274,7 @@ void func_150C04C0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C04C0.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_15134108(u8 *, s32, s32, s32, f32, s32);
+s32 func_15134108(u8 *, f32, f32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
 void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04DC;
 
@@ -454,7 +454,7 @@ s32 func_150C0B48(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
         func_15153BA4(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
         return 0;
     }
-    return func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
+    return func_15134108(arg0, *(f32 *)&arg1, *(f32 *)&arg2, *(f32 *)&arg3, arg4, arg5); /* P95: f32 (float bits were passed as an int) */
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C0B48.s")

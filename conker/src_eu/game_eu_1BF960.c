@@ -126,10 +126,18 @@ u8 *func_151925AC(V3_25AC *arg0, V3_25AC *arg1, f32 arg2, s16 arg3, u8 arg4, u8 
     return ret;
 }
 
+#ifdef NON_MATCHING
+s32 func_151321F4(u8 *, u8 *, f32, u8 *, u8 *, u8 *); /* P95: f32 (float bits were passed as an int) */
+#else
 s32 func_151321F4(u8 *, u8 *, s32, u8 *, u8 *, u8 *);
+#endif
 
 s32 func_15192878(u8 *arg0, s32 arg1) {
+#ifdef NON_MATCHING
+    func_151321F4(arg0 + 0xAC, arg0 + 0xAE, (*(f32 *)((u8 *)arg0 + 0xA8)), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C); /* P95: f32 (float bits were passed as an int) */
+#else
     func_151321F4(arg0 + 0xAC, arg0 + 0xAE, (*(s32 *)((u8 *)arg0 + 0xA8)), arg0 + 0xB0, arg0 + 0x38, arg0 + 0x3C);
+#endif
     return 1;
 }
 

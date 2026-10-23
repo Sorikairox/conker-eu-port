@@ -1059,7 +1059,7 @@ void func_15138BC0(struct127 *arg0, u8 arg1, s32 arg2) {
 
 #ifdef NON_MATCHING
 s32 func_15138E98(struct127 *, s32 *, s32, s32 *, s32, s32);
-s32 func_15139768(struct127 *, s32 *, s32, s32 *, s32, s32);
+s32 func_15139768(struct127 *, s32 *, f32, s32 *, s32, s32); /* P95: f32 (was the bit pattern as an int) */
 s32 func_15139D74(struct127 *, s32 *, s32 *, s32, s32);
 s32 func_1513A6E0(struct127 *, s32 *, s32 *, s32, s32);
 s32 func_1513ABB8(struct127 *, s32 *, s32, s32 *, s32, s32);
@@ -1101,10 +1101,10 @@ void func_15138C80(struct127 *arg0, s32 arg1, s32 arg2) {
             func_15138E98(arg0, &sp.u60, 0, &sp.u38, temp_s1, arg2);
             return;
         case 15:
-            func_15139768(arg0, &sp.u60, 0x3F19999A, &sp.u38, temp_s1, arg2);
+            func_15139768(arg0, &sp.u60, 0.6f, &sp.u38, temp_s1, arg2); /* P95: was 0x3F19999A as an int */
             return;
         case 2:
-            func_15139768(arg0, &sp.u60, 0x3F800000, &sp.u38, temp_s1, arg2);
+            func_15139768(arg0, &sp.u60, 1.0f, &sp.u38, temp_s1, arg2); /* P95: was 0x3F800000 as an int */
             return;
         case 4:
             func_1513A594((u8 *) arg0, (s32) &sp.u60, (s32) &sp.u38, temp_s1 & 0xFF, arg2);

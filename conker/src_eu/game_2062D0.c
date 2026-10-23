@@ -901,7 +901,11 @@ s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DB5D0.s")
 #endif
 typedef struct { u8 fl; u8 pad1[3]; s32 unk4; u8 a[3]; u8 d[3]; u8 padE[2]; f32 s[3]; } S97C;
+#ifdef NON_MATCHING
+s32 func_15131E88(u8 *, f32); /* P95: f32 (float bits were passed as an int) */
+#else
 s32 func_15131E88(u8 *, s32);
+#endif
 s32 func_151DB97C(u8 *arg0, s32 arg1) {
     S97C *p;
     f32 z;
@@ -909,7 +913,11 @@ s32 func_151DB97C(u8 *arg0, s32 arg1) {
     f32 x;
     p = (S97C *)(arg0 + 0xA8);
     if (p->fl & 2) {
+#ifdef NON_MATCHING
+        func_15131E88(arg0 + 0x58, *(f32 *)(arg0 + 0xAC)); /* P95: f32 (float bits were passed as an int) */
+#else
         func_15131E88(arg0 + 0x58, *(s32 *)(arg0 + 0xAC));
+#endif
     }
     if (p->fl & 1) {
         p->a[0] += p->d[0] * D_800BE9E4;

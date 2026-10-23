@@ -35,6 +35,76 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P95, 2026-10-23). Details: `docs/port/sessions/P95.md`
+
+- **Float bit patterns as ints** (`docs/port/sessions/p95/floatint_scan.py [--all] [--protos]`, NM-selected text of all
+  src_eu C): 28 literal call rows (incl. the P93 suspects func_151D58E4 / func_15116A8C / func_151AD010; func_1514CBE8
+  was already right in NM) and 17 TU-prototype-vs-definition float/int rows (`*(s32 *)` float fields / out-params
+  passed to f32 parameters) fixed in 28 files, 0 left. Matching lines are duplicated under `#ifdef NON_MATCHING`, so
+  the default build is unchanged. No row in port-b files. 4 REVIEW rows are packed s32 constants, not floats.
+- **func_15035220** (game_eu_62360.c, reflection matrices + entry alpha) in hand C (NM): 30 setups EQUIV, mutants 23/23.
+- **difftest hole 3**: arguments 16+ of the function under test were never set (and `DIFFTEST_ARG` >= 16 ignored); now
+  generated up to sp+0xFC when needed. Selftest 43/43.
+- Frame-path stubs in hand C (NM): func_1517FCCC (timers), func_15167010 (per-frame hooks), func_150ADA68 (random
+  float; MIPS III, model-checked `p95/ada68/check.py`), func_15083E0C (setup entry by id).
+- Default build byte-identical (full verify_all), NM links, protocheck 0 (931 bodies), progress_nm 4925/5915 (83.3%),
+  bytes 58.0%, 990 asm-only.
+
+## Next steps (from P95)
+
+1. Frame-path stubs still asm (P91 list, by size): func_15044D18 (71E70), func_15097BA8 (C4590), func_15185360,
+   func_1512D900, func_1517E3CC, func_151DA6F8, func_1510CE28, func_1510D090, func_1508F9F4, func_15113798,
+   func_15184298, func_15178004, func_15113000, func_15188630, func_15181A6C, func_1517B270, func_1509093C,
+   func_15129220, func_1512EE50. func_150ADA20 (random int, same LFSR as func_150ADA68) is still asm too.
+2. Browser: water / mirror reflections (func_15035220 modes 0-2), func_15167010 hooks, random floats.
+3. Scan gap: TU prototypes of asm-only callees are only checked where a literal is passed; a float/int check of TU
+   prototypes against the callee asm (mtc1 / lwc1 of each argument) would close it.
+4. Mutant harness: stubbed matrix callees hide the contents of stack matrices passed by pointer (func_15035220 flip /
+   rotation); an option to run real C callees (func_150A7A48 / func_150A8050) would test them.
+
+## State (session P93, 2026-10-23). Details: `docs/port/sessions/P93.md`
+
+- Re-check of every NM body calling a >16-argument function (`p93/wide_scan.py`): 11 bodies + func_150268BC; 9 EQUIV with
+  wide-argument mutants DIFFER (new window) / EQUIV (old); **2 real DIFFERs fixed**: func_150E6060 (func_150E2030 call
+  in m2c's wrong 30-arg order; now the asm's 28) and func_150FD554 (0xC61C4000 passed as int to an f32: -10000.0f).
+  6 hand-asm shared-frame rows N/A. No DIFFER in port-b files.
+- difftest: callees declared only in include/functions.h with >16 args now get that arity (stack args 16+ of e.g.
+  func_1513D594 were never compared); result-line notes `[POKE unread: ...]`, `[POKE in ROM data ...]`,
+  `[knob callee never called: ...]`. Selftest 41/41 (5 new cases).
+- P90 "POKE on per-track records": the setups used the US address 800C395C of D_800C3958 (EU 0x800C3D78). With
+  800C3D7C: 26 record setups EQUIV, 12 record mutants killed incl. the 0x33 `rec + 0x18 -> 0x1C` survivor.
+- func_15035AF8 (object draw queue, game_eu_62360.c) in hand C (NM): 38 setups EQUIV, mutants 22/23.
+- Default build byte-identical, NM links, protocheck 0 (926 bodies), progress_nm 4920/5915 (83.2%), bytes 57.9%, 995 asm-only.
+
+## Next steps (from P93)
+
+1. func_15035220 (game_eu_62360.c, 526 asm lines, 19 args; prototype in the func_15035AF8 NM block).
+2. Knob setups: read the result-line notes; `POKE unread` can list byte-loaded words falsely (Unicorn read hook), the
+   callee note is reliable. Always take global addresses from the EU ELF (`mips-linux-gnu-nm build/conker.eu.elf`).
+3. Browser: func_15035AF8 draws (fade, attachments); the 31 asm callees of func_150268BC (P90 list).
+4. Possibly wrong hex-float int arguments (func_151D58E4, func_1514CBE8, func_15116A8C, func_151AD010 calls): check the
+   callee parameter types.
+
+## State (session P90, 2026-10-23). Details: `docs/port/sessions/P90.md`
+
+- **func_150268BC** (script event interpreter, 3594 asm lines, game_eu_51190.c) is readable hand C under NON_MATCHING:
+  270 knob setups (every type / sub-type / b4 / b5 variant, ARGMEM on all structs) EQUIV except 0x5F/4 (UNSURE, harness
+  fault after the call); mutants 115 killed / 6 survived (explained in P90.md). 0x60 passes 0 as func_150CE660's 4th arg.
+- Prototypes: func_150EA560 / func_150EAA80 / func_150F6E10 arg2 `f32` -> `u8` (byte-identical); func_1516DF0C kept at its
+  49-arg C prototype (pointer halves in a0 / a1, as on N64); 31 asm callees declared in the NM block from the call sites.
+- Harness: stack arguments 16+ were never compared (only sp+0x10..0x3C captured); now up to arg 63,
+  `DIFFTEST_STKW_OLD=1` = old window. Selftest 36/36 (new case func_150268BC).
+- Default build byte-identical, NM links, protocheck 0, progress_nm 4919/5915 (83.2%), bytes 57.8%, 996 asm-only.
+- UNVERIFIED: 0x5F/4; b5 < 0 paths of 0x11 / 0x34 / 0x5F/10 (N64 reads uninitialised / out-of-range stack, C is
+  defined); u8 args are narrowed where the asm passes full words; browser runtime of the cutscene effects.
+
+## Next steps (from P90)
+
+1. Browser: run a cutscene with scripted effects (func_1502AB94 -> func_150268BC) and log stub hits of the 31 asm callees
+   now reachable from C (list in P90.md) - they become the next blockers.
+2. difftest: check why the rec pokes (D_800C3958[1] = 0x80490000 -> 0x80490088) did not reach the 0x33 reference
+   (rec->0x18 read 0.0); then re-run the 0x33 mutant (`docs/port/sessions/p90/muts_r.txt`).
+3. func_15035AF8, func_15035220 (game_eu_62360.c), remaining game_981E0 asm.
 
 ## State (session P89, 2026-10-23). Details: `docs/port/sessions/P89.md`
 

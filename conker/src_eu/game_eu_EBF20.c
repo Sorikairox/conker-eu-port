@@ -6,7 +6,11 @@ extern u8 D_800A03E0[];
 extern u8 D_800A0430[];
 #endif
 
+#ifdef NON_MATCHING
+s32 func_15116A8C(u8 *, s32, s32, f32); /* P95: f32 parameter */
+#else
 s32 func_15116A8C(u8 *, s32, s32, s32);
+#endif
 
 void func_150BE710(u8 *arg0)
 {
@@ -17,7 +21,11 @@ void func_150BE710(u8 *arg0)
   new_var2 = arg0;
   if (((*((u8 *) (((u8 *) arg0) + 0x73))) & 3) != 3)
   {
+#ifdef NON_MATCHING
+    func_15116A8C(arg0, 1, 0x62C, 500.0f); /* P95: float literal (asm passes the bits 0x43FA0000) */
+#else
     func_15116A8C(arg0, 1, 0x62C, 0x43FA0000);
+#endif
     if ((*((u8 *) (((u8 *) arg0) + 0x4F))) & 4)
     {
       new_var3 = 0x64;

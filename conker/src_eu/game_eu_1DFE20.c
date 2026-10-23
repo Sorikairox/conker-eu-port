@@ -143,6 +143,7 @@ extern s32 D_800AA718;
 extern s32 D_800AA724;
 extern s32 D_800AA730;
 
+u8 *func_151B3660(void *, f32, s32, u8, s32); /* P95 */
 void func_151B28F8(u8 *arg0) {
     struct {
         u8 * u34;
@@ -222,7 +223,7 @@ void func_151B28F8(u8 *arg0) {
     sp.u90 = -0.02f;
     sp.u94 = 0.70000005f;
     sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
-    temp_v0 = func_151B3660(&sp.u64, 0x3AC49BA6, 0x30, 0xFF, 0);
+    temp_v0 = func_151B3660(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
     (*(s32 *)((u8 *)(&arg0[0x28]) + 0x18)) = temp_v0;
     if (temp_v0 != 0) {
         memcpy(temp_v0 + 0x150, &sp.u34, 0x30);
@@ -248,7 +249,7 @@ void func_151B28F8(u8 *arg0) {
     sp.u82 = 0;
     sp.u8C = 170.0f;
     sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
-    temp_v0_2 = func_151B3660(&sp.u64, 0x3AC49BA6, 0x30, 0xFF, 0);
+    temp_v0_2 = func_151B3660(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
     (*(s32 *)((u8 *)(&arg0[0x28]) + 0x14)) = temp_v0_2;
     if (temp_v0_2 != 0) {
         memcpy(temp_v0_2 + 0x150, &sp.u34, 0x30);
@@ -273,7 +274,7 @@ void func_151B28F8(u8 *arg0) {
     sp.u78 = (*(f32 *)((u8 *)temp_s0 + 0x18));
     sp.u82 = 0;
     sp.u7C = (*(f32 *)((u8 *)temp_s0 + 0x1C));
-    temp_v0_3 = func_151B3660(&sp.u64, 0x3AC49BA6, 0x30, 0xFF, 0);
+    temp_v0_3 = func_151B3660(&sp.u64, 0.0015f, 0x30, 0xFF, 0); /* P95: was 0x3AC49BA6 as an int */
     (*(s32 *)((u8 *)(&arg0[0x28]) + 0x10)) = temp_v0_3;
     if (temp_v0_3 != 0) {
         memcpy(temp_v0_3 + 0x150, &sp.u34, 0x30);

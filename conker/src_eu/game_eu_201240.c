@@ -325,14 +325,22 @@ void func_151D5404(struct17 *arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 a
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5AC4.s")
 
+#ifdef NON_MATCHING
+void func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
+#else
 void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
+#endif
 s32 func_151D5AC4(u8 *, u8, s32);
 
 void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2) {
 
     func_151D5AC4(arg0, arg1, arg2);
     func_151D45A4(arg0, arg1, arg2);
+#ifdef NON_MATCHING
+    func_15154728(arg0, (func_150ADA68() * 4.0f) + 12.0f, 1.6409999f, (func_150ADA20() % 56U) + 0xC8, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3FD20C49) */
+#else
     func_15154728(arg0, (func_150ADA68() * 4.0f) + 12.0f, 0x3FD20C49, (func_150ADA20() % 56U) + 0xC8, 0.0f, arg1, arg2);
+#endif
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5714.s")

@@ -288,9 +288,16 @@ void func_1514DEE8(struct127 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+u8 *func_151AD010(u8 *, f32, s32); /* P95 */
+#endif
 void func_1514DF64(struct127 *arg0) {
     func_1514DEE8(arg0);
+#ifdef NON_MATCHING
+    func_1514F18C(func_151AD010(arg0, 20.0f, 0), arg0, 0x14); /* P95: float literal (asm passes the bits 0x41A00000) */
+#else
     func_1514F18C(func_151AD010(arg0, 0x41A00000, 0), arg0, 0x14);
+#endif
 }
 
 void func_1514DFA8(struct127 *arg0) {

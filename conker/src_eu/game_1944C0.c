@@ -9,7 +9,21 @@ typedef struct { u8 pad0[0xC]; void (*fn0C)(struct_eu_node *); u8 pad10[0xC]; vo
 extern Tbl9070 D_8008B848[];
 
 
+#ifdef NON_MATCHING
+/* P95: per-frame update hooks: calls the +0x18 function of each of the 101 D_8008B848 entries that has one
+ * (no arguments are set up: a0 is the caller's, unused by the hooks as far as known). */
+void func_15167010(void) {
+    Tbl9070 *p;
+
+    for (p = D_8008B848; p < (Tbl9070 *) ((u8 *) D_8008B848 + 0x1484); p++) {
+        if (*(void (**)(void)) ((u8 *) p + 0x18) != NULL) {
+            (*(void (**)(void)) ((u8 *) p + 0x18))();
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167010.s")
+#endif
 // NON-MATCHING: EU table has 101 entries (D_8008B4A8 = 0x8008B848 in EU); register/loop shape differs
 // void func_15167010(void) {
 //     void (*func)(void);

@@ -713,7 +713,25 @@ s32 func_15084208(void) {
     return id;
 }
 
+#ifdef NON_MATCHING
+/* P95: index of the level-setup entry (0x30 bytes at D_800D20FC, D_800D2520 of them) whose byte +0x28 is `id`;
+ * -1 when id is 0 or not found. */
+s32 func_15083E0C(u8 id) {
+    s32 i;
+
+    if (id == 0) {
+        return -1;
+    }
+    for (i = 0; i < D_800D2520; i++) {
+        if (((u8 *) D_800D20FC + i * 0x30)[0x28] == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E0C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u8 D_800CC72B;

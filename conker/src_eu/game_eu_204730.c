@@ -103,7 +103,7 @@ void func_151D6F64(s16 *arg0, struct127 *arg1) {
 #ifdef NON_MATCHING
 u8 *func_1509B570(s32);
 u8 *func_150D0420(s32, s32 *, s32, s32, s32, s32, s32, s32);
-s32 func_15157580(s8 *, s32, s32, s32, s32, s32, s32, s32);
+s32 func_15157580(s8 *, s32, f32, s32, s32, s32, s32, s32); /* P95: f32 (float bits were passed as an int) */
 s32 memcpy(s32, u8 **, s32);
 extern s32 D_800AB630;
 
@@ -195,7 +195,7 @@ void func_151D71AC(u8 *arg0, u8 arg1, s32 arg2) {
     (*(s32 *)((u8 *)(&sp.u94) + 8)) = (s32) (*(s32 *)((u8 *)temp_t4 + 8));
     sp.uA4 = 8;
     sp.uA6 = 0x1F;
-    func_15157580(&sp.u50, 0, 0x3F800000, 0, 0, 0, (s32) arg1, arg2);
+    func_15157580(&sp.u50, 0, 1.0f, 0, 0, 0, (s32) arg1, arg2); /* P95: f32 (float bits were passed as an int) */
     sp.u3C = arg0;
     sp.u38 = D_800AB630;
     sp.u48 = 8;

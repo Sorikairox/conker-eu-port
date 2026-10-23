@@ -74,13 +74,21 @@ s32 func_151A79EC(u8 *arg0, f32 arg1, s32 arg2, s32 arg3, f32 arg4)
   return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+#else
 s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#endif
 void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6);
 void func_151A7D70(u8 *arg0);
 void func_151A7E2C(u8 *arg0);
 void func_151A7EB8(u8 *arg0);
 
+#ifdef NON_MATCHING
+s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+#else
 s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#endif
 
 void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     f32 sp74[9];
@@ -100,7 +108,11 @@ void func_151A7BC0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp74[3] = -arg3 * D_800BEDC8 * temp_f2;
     sp74[4] = -arg4 * D_800BEDC8 * temp_f2;
     sp74[5] = -arg5 * D_800BEDC8 * temp_f2;
+#ifdef NON_MATCHING
+    func_151A2C9C(&sp74[6], sp74, &sp74[3], 1.0f, ((func_150ADA68() * 591.0f) + -600.0f) * 0.001f, ((func_150ADA68() * 500.0f) + 400.0f) * sp6C, ((u32) func_150ADA20() % 21U) + 0xF, (func_150ADA20() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+#else
     func_151A2C9C(&sp74[6], sp74, &sp74[3], 0x3F800000, ((func_150ADA68() * 591.0f) + -600.0f) * 0.001f, ((func_150ADA68() * 500.0f) + 400.0f) * sp6C, ((u32) func_150ADA20() % 21U) + 0xF, (func_150ADA20() % 101U) + 0x64, 0xF, 0x14, 0, -1, 0x56, 0x27, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+#endif
 }
 
 void func_151A7D70(u8 *arg0)

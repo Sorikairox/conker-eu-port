@@ -62,6 +62,7 @@ SP_ENTRY = STK_TOP - 0x100
 # compare exactly. DIFFTEST_STK_OLD=1 restores the pre-P89 rule (the whole stack range compares equal).
 STK_WIN = 0x1000
 STK_OLD = os.environ.get('DIFFTEST_STK_OLD') == '1'
+STKW_OLD = os.environ.get('DIFFTEST_STKW_OLD') == '1'   # P90
 # P18: Unicorn 2.0.1's reg_read/reg_write of the MIPS FPRs are no-ops (reg_write(F4) then mfc1 reads the old
 # value; reg_read(Fn) is always 0). So float args were never set, stubs never returned a float, and f0 returns
 # / FP call args / f20-f31 were compared as 0 == 0. Leftover f0 after a stubbed float callee then differed by
@@ -430,6 +431,17 @@ def _nocomment(tu):
     if k not in _NOC: _NOC[k] = re.sub(r'/\*.*?\*/', ' ', re.sub(r'//[^\n]*', '', tu), flags=re.S)
     return _NOC[k]
 
+_HDR = None
+def hdr_protos():
+    """P93: include/functions.h. Callees declared only there had an unknown arity, so their stack arguments came from
+    the call-site stores (sp+0x10..0x3C only): arguments 16+ of e.g. func_1513D594 (17) were never compared. Only
+    prototypes with more than 16 arguments are taken from it (shorter ones keep the call-site rule)."""
+    global _HDR
+    if _HDR is None:
+        try: _HDR = open('include/functions.h').read()
+        except OSError: _HDR = ''
+    return _HDR
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
@@ -635,12 +647,24 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
     _a, _v = _p.split('=')
     ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
 
+STK_IN_MAX = 60   # P95: stack argument words sp+0x10 .. sp+0xFC (SP_ENTRY = STK_TOP - 0x100)
+
 def make_inputs(rng, kinds):
     r = _make_inputs(rng, kinds)
+    # P95: arguments 16+ (stack words 12+) were never set: a 19-argument function (func_15035220) read whatever the
+    # harness left there, and DIFFTEST_ARG N >= 16 was ignored silently. Only when needed (more than 16 parameters
+    # or an ARG knob >= 16), from a separate generator so the main random stream (and older results) do not move.
+    need = max([len(kinds) if kinds else 0] + [n + 1 for n in ARGFIX])
+    if need > 16:
+        xr = random.Random(r['stk'][0] ^ (r['a'][0] << 1))
+        for slot in range(16, min(need, STK_IN_MAX + 4)):
+            k = kinds[slot] if kinds and slot < len(kinds) else None
+            r['stk'].append(rand_arg(xr, k) if k not in (None, 'double') else rand_arg(xr))
     for n, vs in ARGFIX.items():
         v = vs[rng.randrange(len(vs))]
         if n < 4: r['a'][n] = v
-        elif n - 4 < 12: r['stk'][n - 4] = v
+        elif n - 4 < len(r['stk']): r['stk'][n - 4] = v
+        else: print('NOTE: DIFFTEST_ARG %d is beyond the %d stack words that can be set' % (n, STK_IN_MAX))
     return r
 
 def _make_inputs(rng, kinds):
@@ -677,8 +701,8 @@ SCRATCH = [UC_MIPS_REG_AT, UC_MIPS_REG_V0, UC_MIPS_REG_V1] + [UC_MIPS_REG_T0 + i
           [UC_MIPS_REG_T8, UC_MIPS_REG_T9]
 
 class Run:
-    def __init__(self, words, vram, extra, trial, romdata, tu, maxi, forced=None, trace=False):
-        self.forced = forced or {}; self.loads = []; self.trace = trace
+    def __init__(self, words, vram, extra, trial, romdata, tu, maxi, forced=None, trace=False, pwatch=False):
+        self.forced = forced or {}; self.loads = []; self.trace = trace; self.pread = set()
         self.words, self.vram, self.end = words, vram, vram + 4 * len(words)
         self.seed, self.romdata, self.tu = trial, romdata, tu
         self.mu = mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
@@ -718,6 +742,10 @@ class Run:
             # a 2.0.1 mis-run seen in func_100049E0 (a jump-table lw read 0 after a branch-likely that follows
             # a stubbed call); slower, so opt-in (DIFFTEST_STEP=1 or --step)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
+        if pwatch and POKES:   # P93: which DIFFTEST_POKE words the reference really reads (one hook per poked page)
+            # one global hook: Unicorn 2.0.1 range-bound read hooks missed some lbu reads (func_15035AF8: obj+4 / +7 / +0x74)
+            self.ppages = {a & ~(PAGE - 1) for a in POKES}
+            mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
         if trace:
             mu.hook_add(UC_HOOK_MEM_READ, self.on_read)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
@@ -783,6 +811,11 @@ class Run:
             if self.trace: self.loads.append((ea + 4, lo))
             if rt:
                 mu.reg_write(UC_MIPS_REG_0 + rt, lo); self.d64hi[rt] = (lo, hi)
+
+    def on_pread(self, mu, access, addr, size, value, ud):
+        if phys(addr) & ~(PAGE - 1) not in self.ppages: return
+        for a in range(phys(addr) & ~3, phys(addr) + size, 4):
+            if a in POKES: self.pread.add(a)
 
     def on_read(self, mu, access, addr, size, value, ud):
         if size == 4 and not addr & 3:
@@ -889,7 +922,10 @@ class Run:
         sp = mu.reg_read(UC_MIPS_REG_SP)
         self.minsp = min(self.minsp, sp)
         regs = [mu.reg_read(r) for r in A_REGS]
-        stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40, 4)]
+        # P90: all outgoing stack words a prototype can name (args 4..63); before P90 only sp+0x10..0x3C (args 4..15)
+        # were captured, so arguments 16+ (func_1516DF0C's 49, func_150E2030's 28, func_1516FAB8's 17) were never
+        # compared. DIFFTEST_STKW_OLD=1 restores the old window.
+        stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
@@ -1235,12 +1271,13 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         romdata = t % 2 == 1
         forced = {}; lrn = 0
         WLOG_ON[0] = 'R' if WLOG and str(t) == WLOG_T else None
-        R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi).run(inputs)
+        pw = t < 2
+        R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, pwatch=pw).run(inputs)
         if R.fault and not os.environ.get('DIFFTEST_NOLEARN'):
             inputs = dict(a=list(inputs['a']), f=list(inputs['f']), stk=list(inputs['stk']))
             for _ in range(int(os.environ.get('DIFFTEST_LEARN', '8'))):
                 if not learn_pointer(rwords, vram, (seed, t), romdata, tu, maxi, inputs, forced): break
-                R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
+                R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced, pwatch=pw).run(inputs)
                 if not R.fault: break
             if not R.fault: lrn = 1
         WLOG_ON[0] = 'C' if WLOG and str(t) == WLOG_T else None
@@ -1251,6 +1288,10 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
                 new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
+                if new[c['name']][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
+                    ha = proto_arity(hdr_protos(), pn)
+                    if ha is not None and 16 < ha < 99:
+                        new[c['name']] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
         why = compare(R, C, rk, arity)
         if verbose:
@@ -1259,8 +1300,9 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if R.fault and getattr(R, 'fault_pc', None) is not None:   # P65: where the reference faulted
                 print('  ref fault pc 0x%08X regs %s' % (R.fault_pc, ' '.join('%X' % x for x in R.fault_regs)))
             if why: explain(R, C, inputs, forced)
-        return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new)
+        return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new, pread=R.pread, pw=pw, called={c['addr'] & 0x1FFFFFFF for c in R.calls})
     crashed = 0; hung = 0
+    pread = set(); pwatched = [0]; called = set()
     twall = float(os.environ.get('DIFFTEST_TRIAL_WALL', '0')) or max(60.0, 2 * budget)
     for t in range(trials):
         if time.time() - t0 > budget and t >= 8:
@@ -1301,6 +1343,8 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if 'exc' in o: raise RuntimeError('trial %d: %s' % (t, o['exc']))
             for k, (ar, fs, fr) in o['new'].items(): arity[k] = ar; FSKIP[k] = fs; FREGS[k] = fr
         ncalls += o['ncalls']; learned[0] += o['learned']
+        if o.get('pw'): pread |= o['pread']; pwatched[0] += 1
+        called |= o.get('called', set())
         if o['why']:
             differ = 'trial %d: %s' % (t, o['why'])
             break
@@ -1315,8 +1359,32 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         line = 'EQUIV %s (%d trials ok, %d inconclusive, %d calls, ret=%s, ref %d words, cand %d words%s)' % (
             func, ok, inconcl, ncalls, rk, len(rwords), len(cwords),
             ', %d trials via learned pointer inputs' % learned[0] if learned[0] else '') + (' [%d trials crashed%s]' % (crashed, ', %d hung' % hung if hung else '') if crashed else ''); res['result'] = 'EQUIV'
-    res['line'] = line
+    res['line'] = line + poke_notes(pread, pwatched[0]) + knob_notes(called, ok + inconcl)
     return res
+
+
+def knob_notes(called, ntrials):
+    """P93: DIFFTEST_RET / RETF / OUTW / OUTA / OUTB / ARGMEM keys whose callee the reference never called (a US
+    address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
+    if not ntrials: return ''
+    un = []
+    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('ARGMEM', ARGMEM)):
+        un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called]
+    return ' [knob callee never called: %s]' % ', '.join(un) if un else ''
+
+
+def poke_notes(pread, nwatched):
+    """P93: DIFFTEST_POKE words the reference never read in trials 0-1 (a wrong address, e.g. the US address of a
+    symbol: P90 poked D_800C3958 at 0x800C395C, its EU address is 0x800C3D78, and the knob silently did nothing), and
+    pokes inside the ROM image (odd trials load the ROM .data / .rodata over them, so they only hold in even trials)."""
+    out = ''
+    if POKES and nwatched:
+        un = sorted(a for a in POKES if a not in pread)
+        if un: out += ' [POKE unread: %s]' % ','.join('%08X' % (0x80000000 | a) for a in un[:12]) + ('...' if len(un) > 12 else '')
+    if POKES:
+        rom = sorted(a for a in POKES if any(phys(v) <= a < phys(v) + len(b) for v, b, k in image() if k != 'code'))
+        if rom: out += ' [POKE in ROM data (even trials only): %s]' % ','.join('%08X' % (0x80000000 | a) for a in rom[:12])
+    return out
 
 
 def main():

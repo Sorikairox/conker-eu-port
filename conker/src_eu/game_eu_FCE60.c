@@ -85,10 +85,18 @@ void func_150CF994(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_151CFE48(struct127 *, f32, f32); /* P95: f32 parameter */
+#else
 void func_151CFE48(struct127 *, f32, s32);
+#endif
 
 void func_150CFA40(s32 arg0) {
+#ifdef NON_MATCHING
+    func_151CFE48(D_800CC2D0, D_800CC2D0->y_position + 300.0f, -10000.0f); /* P95: float literal (asm passes the bits 0xC61C4000) */
+#else
     func_151CFE48(D_800CC2D0, D_800CC2D0->y_position + 300.0f, 0xC61C4000);
+#endif
 }
 
 extern s32 D_80088C30;
