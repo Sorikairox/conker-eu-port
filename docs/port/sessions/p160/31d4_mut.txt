@@ -1,0 +1,25 @@
+s/if (useDir != 0)/if (useDir == 0)/
+s/(period2 < fade2) ? period2 : fade2/(period2 < fade2) ? fade2 : period2/
+s/step = 1.0f \/ count;/step = 0.5f;/
+s/(periodRange + 1) + periodBase/(periodRange + 2) + periodBase/
+s/(u8)a, (u8)b/(u8)b, (u8)a/
+s/(u8)a,/(s16)a,/
+s/func_150ADA68() \* speedMax/func_150ADA68() * arg9/
+s/accelFn((f32 \*)accel, dirA, dirB/accelFn((f32 *)accel, dirB, dirA/
+s/accelSpeed, t, acc/accelSpeed, step, acc/
+s/c = func_150ADA20() \& 3;/c = func_150ADA20() \& 1;/
+s/< 0.0802f) ? 0x19/<= 0.0802f) ? 0x19/
+s/0.0802f/0.08f/
+s/? 0x19 : -1/? 0x19 : 0/
+s/(pos, vel, acc, arg9/(pos, acc, vel, arg9/
+s/acc, arg9, lifeRand/acc, speedMax, lifeRand/
+s/lifeRand \* lifeRange + lifeBase/lifeRand * lifeBase + lifeRange/
+s/scaleSlope \* t + scaleBase/scaleSlope * step + scaleBase/
+s/period + minPeriod/period + period2/
+s/(fadeRange + 1) + fadeBase/(fadeRange + 1) + periodBase/
+s/period2, fade2, extra/fade2, period2, extra/
+s/extra, arg12,/extra, arg13,/
+s/colors\[c \* 3 + 0\]/colors[c * 3 + 1]/
+s/colors\[c \* 3 + 2\], arg13, arg14/colors[c * 3 + 2], arg13, 0/
+s/t += step;/t += 0.25f;/
+s/s8 arg12,/s16 arg12,/

@@ -5,6 +5,20 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C62D0.s")
 
+#ifdef NON_MATCHING
+/* P160: func_151C6F7C reads three arguments (the matching callers below leave a 4th in a3) */
+void func_151C6F7C(u8 *obj, f32 *out, u8 kind);
+
+// object_bone_point_0: D_80090010 handler 0 (func_151D469C): bone point 0 of obj into out (arg1 unused)
+void func_151C6F24(u8 *obj, s32 arg1, f32 *out) {
+    func_151C6F7C(obj, out, 0);
+}
+
+// object_bone_point_1: D_80090010 handler 1 (func_151D469C): bone point 1 of obj into out (arg1 unused)
+void func_151C6F50(u8 *obj, s32 arg1, f32 *out) {
+    func_151C6F7C(obj, out, 1);
+}
+#else
 void func_151C6F7C();
 
 void func_151C6F24(s32 arg0, s32 arg1, s32 arg2) {
@@ -14,8 +28,21 @@ void func_151C6F24(s32 arg0, s32 arg1, s32 arg2) {
 void func_151C6F50(s32 arg0, s32 arg1, s32 arg2) {
     func_151C6F7C(arg0, arg2, 1, arg2);
 }
+#endif
 
+#ifdef NON_MATCHING
+/* P160 */
+extern u32 D_800AAEE0[];
+extern u8 D_800AAEE8[];
+
+// object_bone_point: transforms point `kind` (0 or 1) of the D_800AAEE8 offset table (3 floats each) by the bone
+// matrix at byte offset D_800AAEE0[kind] in the object's matrix block (obj+0x1D4) and writes it to out.
+void func_151C6F7C(u8 *obj, f32 *out, u8 kind) {
+    func_15143134(D_800AAEE8 + kind * 12, out, *(u8 **)(obj + 0x1D4) + D_800AAEE0[kind]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C6F7C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C6A28.s")
 

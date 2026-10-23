@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P160 (port-b) (session P160, 2026-10-24). Details: `docs/port/sessions/P160.md`
+
+Branch `port-b` (from P159 4bb281f). Took game_eu_1F4090.c.
+Hand C (NM), difftest EQUIV + setups + mutants: func_151C6F7C `object_bone_point` (1F4090; its matching callers
+func_151C6F24 / func_151C6F50 get typed 3-argument NM variants), func_151D469C `object_point_effect_spawn` (201240;
+returns 0 for 981E0's undeclared calls; func_151D5308 NM casts), func_151C230C `ray_cast_through_passable` (1EDA00;
+NM prototype + func_151C1F1C casts), func_151A2C9C `particle_puff_spawn` (1CE7D0), func_151DA08C `smoke_puff_spawn`
+(2062D0), func_151A31D4 `particle_burst_spawn` (1CE7D0).
+- func_1513D668 (169510 + functions.h) returns func_1513D594's record under NM (func_151DA08C uses it).
+- func_151A3134 NM signature = func_151A3180's (both called through one pointer in func_151A31D4).
+- func_150A6070 (D3880) was already C (P130); asmlist.py misses multi-function NM blocks.
+- New `docs/port/sessions/p160/tablesig.py`: function-pointer tables vs NM C signatures / asm v0 use after jalr.
+  Real P159-class cases (void C entries, asm dispatcher reads v0): D_80089E9C (func_151349D0 frees the object when
+  v0 == 0; includes port-b's func_151A7BC0), D_80089E40, D_80089ED8, D_80089E10 (game_161520 dispatchers),
+  D_80088BF8, D_8008B734, D_8008D9C0, D_8008FFD0, D_80082FA4 — listed in P160.md, none fixed.
+- Harness: DIFFTEST_OUTW `@ADDR` faults on a page not touched yet (workaround in P160.md).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1195 bodies), selftest 62/62. progress_nm total 5189/5915 (87.7%), game 4658/5334, C bytes 68.8% (P159: 5183, 68.6%), 726 asm-only. No difftest processes left.
+
+## Next steps (from P160)
+
+1. Table-scan cases: work out what v0 the void entries leave (D_80089E9C / func_151349D0 first: it decides whether
+   objects are freed) and give the entries s32 NM returns; needs the game_161520 / other slots' files.
+2. Next port-b asm with C callers (`p160/asmlist.py`): func_1501B300 (200, 48B10), func_150F1C5C (201, 11CB90),
+   func_150FF840 (203, 12D5D0), func_151C6A28 (210, 1F4090), func_15152A90 (213, 17D3C0), func_150FD140 (215, 12A7C0).
+3. Browser: P160.md UNVERIFIED (object point effects, see-through ray casts, particle puffs / bursts, smoke puffs).
+
 ## P159 (port-b) (session P159, 2026-10-24). Details: `docs/port/sessions/P159.md`
 
 Branch `port-b` (from P155 d2c5c53). Took game_eu_125200.c, 12C0B0.c, 12BB30.c, 12D5D0.c.

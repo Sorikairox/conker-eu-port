@@ -1,0 +1,1 @@
+s/colors\[c \* 3 + 0\]/colors[c * 3 + 1]/

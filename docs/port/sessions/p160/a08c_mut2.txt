@@ -1,0 +1,3 @@
+s/(life < 256) ? 255 \/ life : 1/(life < 256) ? 256 \/ life : 1/
+s/(u32)func_150ADA20() / func_150ADA20() /
+s/+ 2;/+ 3;/

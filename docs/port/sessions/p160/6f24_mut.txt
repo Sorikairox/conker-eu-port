@@ -1,0 +1,2 @@
+s/out, 0)/out, 1)/
+s/(obj, out/(obj, (f32 *)arg1/
