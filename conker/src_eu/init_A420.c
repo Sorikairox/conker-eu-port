@@ -5,11 +5,85 @@
 
 typedef struct { s16 x, y, z, w; } PathPt;
 f32 func_150ADDE0(f32 *a, f32 *b);
-s32 func_1000A420(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_1000A420(s32, s32, s32, f32, s32, s32, s32, s32, s32, s32 *, s32 *, s32 *); /* P151: arg 3 is the f32 heading */
 
 
 void func_1000E40C(s32, s32);
+#ifdef NON_MATCHING
+s32 func_150ADE40(s32 x0, s32 z0, s32 x1, s32 z1);
+s32 func_150AD9A0(s32 arg0, s32 arg1, s32 arg2);
+
+// sound_pan_volume: stereo pan and volume of a sound source (P151). (dx, dy, dz) is the source relative to the
+// listener, `yaw` the listener's heading in degrees, (ox, oy, oz) the offset used for the distance (planar
+// func_150ADE40 when bit 0x8000 of `near` is set, else 3-D func_150AD9A0). Volume = 0x7FFF - ((far - dist) << 15) /
+// (far - near), clamped to 0..0x7FFF and 0 when <= 400. With `outPan` the pan is 0x40 +/- the source's angle
+// (acos of dx over the planar distance, mirrored for dz > 0, turned by the heading) folded into -95..95, with flag
+// 0x80 unless it is in the front +/-32 band (then doubled); sources within 31 units pan centre (0x40). The
+// distance goes to *outDist when given and is returned.
+s32 func_1000A420(s32 dx, s32 dy, s32 dz, f32 yaw, s32 ox, s32 oy, s32 oz, s32 near, s32 far, s32 *outPan,
+                  s32 *outVol, s32 *outDist) {
+    s32 behind = 0x80;
+    s32 dist;
+    s32 vol;
+    s32 span;
+    f32 len, c;
+    s16 ang;
+    s8 rel;
+
+    if (near & 0x8000) {
+        near &= 0x7FFF;
+        dist = func_150ADE40(ox, oz, 0, 0);
+    } else {
+        dist = func_150AD9A0(ox, oy, oz);
+    }
+    span = far - near;
+    vol = 0x7FFF - ((far - dist) << 15) / span;
+    if (vol > 400) {
+        if (outPan != NULL) {
+            if (func_150ADE40(dx, dz, 0, 0) >= 31) {
+                len = sqrtf((f32)(dx * dx + dz * dz));
+                c = len;
+                if (0.01f < len) {
+                    c = (f32)dx / len;
+                }
+                ang = (s16)(s32)(func_150487E0(c) * 40.74366543152521); /* 128 / pi */
+                if (dz > 0) {
+                    ang = (ang < 0) ? (s16)(-128 - ang) : (s16)(128 - ang);
+                }
+                rel = (s8)(s32)((f32)ang + yaw * 0.7111111f); /* 128 / 180 */
+                if (rel >= 96 || rel < -96) {
+                    ang = 0;
+                } else if (rel >= 32) {
+                    ang = 95 - rel;
+                } else if (rel < -32) {
+                    ang = -95 - rel;
+                } else {
+                    behind = 0;
+                    ang = rel * 2;
+                }
+                *outPan = (ang + 0x40) | behind;
+            } else {
+                *outPan = 0x40;
+            }
+        }
+        if (0x7FFF - ((far - dist) << 15) / span < 0) {
+            vol = 0;
+        }
+        if (vol >= 0x8000) {
+            vol = 0x7FFF;
+        }
+        *outVol = vol;
+    } else {
+        *outVol = 0;
+    }
+    if (outDist != NULL) {
+        *outDist = dist;
+    }
+    return dist;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_A420/func_1000A420.s")
+#endif
 // NON-MATCHING: mostly just regalloc
 // s32 func_150AD960(s32, s32, s32, s32);
 // s32 func_150AD9A0(s32, s32, s32);

@@ -3356,4 +3356,21 @@ void func_150750C4(struct127 *arg0, struct127 *arg1, u8 *arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+// player_find_owned_object: the first live object (state != 0, id != 0xFF) of D_800CC2D0[0..25] whose owner byte
+// +0x65 is `owner`'s player number + 1, or NULL (P151). The other two arguments are not read.
+struct127 *func_1507515C(struct127 *owner, struct127 *unused1, s32 unused2) {
+    struct127 *o;
+    s32 i;
+
+    for (i = 0; i < 26; i++) {
+        o = &D_800CC2D0[i];
+        if (o->interaction_state != 0 && o->id != 0xFF && o->unk65 == (owner - D_800CC2D0) + 1) {
+            return o;
+        }
+    }
+    return NULL;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1507515C.s")
+#endif

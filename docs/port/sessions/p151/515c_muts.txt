@@ -1,0 +1,7 @@
+s/i < 26;/i < 25;/% t25
+s/i = 0; i < 26/i = 1; i < 26/% t0
+s/o->interaction_state != 0 \&\&/o->interaction_state > 0 \&\&/% neg
+s/o->id != 0xFF/o->id != 0xFE/% ff
+s/(owner - D_800CC2D0) + 1/(owner - D_800CC2D0)/% wrong t3
+s/return NULL;/return D_800CC2D0;/% none
+s/            return o;/            return D_800CC2D0;/% t3

@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P151, 2026-10-23). Details: `docs/port/sessions/P151.md`
+
+- New hand C (NM): func_1514CFF0 character_handler_indices (new-game scene start; 192 setups, mutants 24/24),
+  func_15058898 object_move_collide (49 setups, mutants 48/49 + 1 equivalent; calls port-b's func_150BA3B0 with its
+  C signature `(u8 *, f32, f32, u8, s32)`), its callee func_1505DADC player_find_visible_target (mutants 26/28 + 2
+  equivalent), func_1000A420 sound_pan_volume (492 setups, mutants 30/36 + 6 equivalent; init_A420 prototype now
+  has f32 arg 3 and pointer outs), func_100114D0 sound_source_mix (mutants 14/14), func_1507D754 callees
+  func_150AEB9C owner_spawn_children (anti-tamper checksum skipped under NM, as P127), func_1507515C
+  player_find_owned_object, func_150E7F14 spawn_random_curve_object (func_1507CD64's asm callee), and coordinator
+  P152 item func_151416E8 effect_message_dispatch. All EQUIV + mutants killed (equivalents listed in P151.md).
+- game_83300 NM prototype of func_150ACEA0: args 7 / 8 are `void *`.
+- Checks: verify_all OK (after the last code edit), NM links, protocheck 0 (1147), selftest 62/62, progress_nm
+  5141/5915 (86.9%), C bytes 67.4%.
+
+## Next steps (from P151)
+
+1. Coordinator P152: func_1510A98C (game_eu_1379B0, 281 insns); func_1501B640 is in port-b's game_34F20 /
+   game_eu_48B10 (port-b).
+2. func_1507D754: remaining asm callees func_1507CD64 (now only C callees), func_151BAAC8, func_15136C3C (blocked by
+   port-b's func_15150D7C via func_1513A24C), func_150B8020 (+ func_150B87B0), func_150BC968 / func_150BC03C,
+   func_150E0DF0 (+ func_151D5AC4 / func_151D4684, port-b's func_15154728), port-b's func_151A7240.
+3. Browser: check the null+0x14 = 0x400 write at the new-game scene start is gone (func_1514CFF0 now real).
+4. P138 / P141 leftovers.
+
 ## State (session P148, 2026-10-23). Details: `docs/port/sessions/P148.md`
 
 - New hand C (NM): func_151928C8 water_drop_splash_update (func_1513095C update handler 14; mutants 16/16),
