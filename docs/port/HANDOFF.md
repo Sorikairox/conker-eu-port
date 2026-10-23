@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P181 (port-b) (session P181, 2026-10-24). Details: `docs/port/sessions/P181.md`
+
+Branch `port-b` (from P179 9ddc1a9).
+- **Merge** of `port` at b8b9829 (P165-P176) -> d6105ff. Conflict only in HANDOFF.md (merge_union.py, P176 section
+  reordered by hand); no code conflicts. verify_all rc 0, NM links, protocheck 0 (1285), selftest 65 ok.
+- Hand C (NM), difftest EQUIV + setups + mutants: func_1510C4E0 `dl_find_texture_vertices` + func_1510CA2C
+  `tex_scroll_create` (138E00, producer + consumer together), func_15150970 `spark_burst_spawn` (17D3C0),
+  func_150F0448 `smoke_emitter_spawn` + func_150EF500 `fire_effect_start` (11CB90; file prototype of func_150EF500
+  `void` -> `u8 *`, default build byte-identical).
+- Harness notes: DIFFTEST_RET entries are comma-separated (a space silently breaks the knob line); per-call
+  out-param values need OUTW (OUTA writes the same array on every call); stale-v0 functions kept `s32` for the
+  callers' prototype can be verified with a `void` copy of the draft (the harness then skips v0).
+- Checks: verify_all rc 0 (default build byte-identical), NM build links, protocheck 0 (1290 bodies), selftest 65/65.
+  progress_nm total 5284/5915 (89.3%), game 4750/5334, C bytes 73.1%, 631 asm-only. No difftest processes left.
+
+## Next steps (from P181)
+
+1. Browser (port-web): P181.md UNVERIFIED list (texture scroller at level load; fire / smoke / spark effects).
+2. func_15113D54 (301, game_eu_13DC30): decide how to call the debug hooks func_1511FC2C / FC44 (float bits in
+   a1..a3 + 2 stack args, functions.h has 4 s32 args) before converting (P181.md section 3).
+3. port-b breadth (`python3 docs/port/sessions/p168/asmlist.py` after `progress_nm.py --list > port_work/p162/asmonly.txt`):
+   func_1514B8D4 (312, 1772D0), func_151279A0 (326, 14FF90), func_15168118 (337, 1944C0), func_151ACBD4 (360, 7 calls),
+   func_15078A60 (363, A28B0).
+
 ## P179 (port-b) (session P179, 2026-10-24). Details: `docs/port/sessions/P179.md`
 
 Branch `port-b` (from P177 fc67ce4).
