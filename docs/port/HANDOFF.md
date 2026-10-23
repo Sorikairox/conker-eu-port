@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P161, 2026-10-24, port-web). Details: `docs/port/sessions/P161.md`
+
+- **null+0x14 = 0x400 writer found**: func_1501374C (game_40490.c) `arg0->unk16 |= 4` with arg0 = NULL, because
+  **func_1501370C (game_40490.c:64) calls `D_80082EA0[idx]()` without the record** (asm keeps a0 = record at the jalr;
+  same as func_1501396C / P76; arity_scan row 22). Not a stubbed producer. Not harmless: every D_80082EA0 level-start
+  record handler gets NULL (func_1515D088 spawns an effect with a NULL owner, func_15013778 spawns nothing).
+  Found with a whole-wasm store watch (`docs/port/sessions/p161/storewatch_inst.py` + `nrun.sh`, wasm-dis / wasm-as).
+  Port test `?p161fix=1`: null zone stays clean; exposes stub **func_151530A8** (game_eu_17D3C0.c, 102 calls from 4773).
+- **Pause background fixed** (gfx_f3dex2.c): the pause copies the previous screen image into the **z-buffer image**
+  (SETCIMG = zimg) and textures it from there. Now: per-screen-image GPU copies of the canvas, written back to RDRAM
+  only when a SETTIMG reads that image; SETCIMG of the z image is an offscreen image (own FBO, written back only after
+  draws; its z-clear rects still clear the canvas depth); canvas restore per image. Flags `?p161nofb`, `?p161nozc`,
+  `?p161norestore`, `?p161log=F`.
+- Regression: node new game to control (heap 0), Chrome pause in the first room (frozen frame shown, heap 0), noev
+  walk 1527 / 2303 / 2383 (= P158), heap 0, traps 0.
+
+## Next steps (from P161)
+
+1. Game C (conversion slot): fix func_1501370C's dropped argument (pass arg0, as func_1501396C) **together with**
+   func_151530A8 (game_eu_17D3C0.c), which the real record handlers then reach; check with stubcalls.py.
+2. The P158 list stays: func_15064668, func_15064F50, init_EB00 sound emitters, func_1505528C, func_151EE0C4 (pause).
+3. Other arity_scan rows of the same shape (handler tables called with no argument) deserve the same check; the store
+   watch finds any null-zone writer in one run (change the range in storewatch_inst.py).
+
 ## State (session P158, 2026-10-24, port-web). Details: `docs/port/sessions/P158.md`
 
 - Merged port 92789cc (P151 + P156) and port-b d394089 (P153): HANDOFF.md conflicts only (merge_union.py + section
