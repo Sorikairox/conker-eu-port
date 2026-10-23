@@ -389,7 +389,9 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
            'D_89C': 0x89C, 'D_85D': 0x85D, 'D_1A3750': 0x1A3750, 'D_1A3840': 0x1A3840}
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
-# instead of a zero-filled data stub. func_151DE100 is left alone: it is read as code bytes.
+# instead of a zero-filled data stub. (func_151DE100 used to be a data stub, read as code bytes by func_151E86A4's
+# checksum; since P127 the NON_MATCHING func_151E86A4 skips the checksum and func_151DE100 is C, so it is a
+# plain function and n64mem.py relocates D_8009018C[0] to its table slot - P131.)
 FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB690',
                 'func_150ADC50',  # P23: debugger.c compares a thread pc with &func_150ADC50
                 # P26: callbacks handed to func_1000FA64 / stored in D_800E0D64 / func_16001830.
