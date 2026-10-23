@@ -59,7 +59,8 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Session shape
 - **One budgeted session per agent**: hard cap ~150 tool calls; at ~135 stop new work and hand off. Long contexts degrade quality; rotate instead.
-- Every session ends with: a session doc (`docs/port/sessions/PNN.md`), HANDOFF.md updated (state + next steps), a commit, and a concise report. Never push.
+- Every session ends with: a session doc (`docs/port/sessions/PNN.md`), HANDOFF.md updated (state + next steps), a commit, and a concise report. Agents never push.
+- Backups (user request 2026-10-24): the orchestrator runs `tools/eu_port/backup_push.sh` regularly (after merges / a few sessions) — it pushes all 5 branches to the PRIVATE repo `origin` = github.com/Sorikairox/conker-eu-port. Never push to `upstream` (mkst/conker); the repo stays private (session docs contain ROM-derived screenshots/data).
 - Use Opus for conversion/debug sessions; Sonnet only for mechanical tooling or one-off utilities (e.g. the dashboard).
 - Brief = context paths to read + an ordered focus list + explicit skip list + rules. Pass forward concrete findings (function names, addresses, files), not summaries of summaries.
 
