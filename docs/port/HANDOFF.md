@@ -367,6 +367,26 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P124, 2026-10-23). Details: `docs/port/sessions/P124.md`
+
+- **m2c scattered stack structs fixed (NM, commit 1efdab2)**: func_1510AEB0 (the P121 frame-1985 trap), func_150B7700,
+  func_150B7DFC, func_1519961C, func_151ABE04, func_150D4FF0, func_15103310, func_1519E6BC: one struct / 2-element
+  arrays; ARGMEM on the passed memory: old bodies DIFFER, new EQUIV, mutants. func_15169ED8 returns its record (NM).
+  Scanner `p124/spaddr_scan.py` (+ triage tsv).
+- **Scene handler C chain (NM)**: func_15029EA8 scene_event_run_c with func_15023988 (sound callback),
+  func_15023EC4 (event lookup around now), func_1000FA64 (positional sound start), func_15188D80 (trail start).
+  Setups: 29EA8 444 EQUIV, EC4 168 EQUIV (mutants 5/8); 23988 / FA64 / 188D80 random EQUIV only. **UNVERIFIED**: types
+  6 / 0xA record path (wrong allocate_memory key in the setups) - see P124.md. Checks: verify_all OK, NM links,
+  protocheck 0 (968), selftest 51/51, progress_nm 4962/5915 (83.9%), bytes 59.9%.
+- Menu pages (task 2) and the 19AC / 3AE4 re-runs (task 3) NOT started (budget went to the coordinator's re-priority).
+
+## Next steps (from P124)
+
+0. Web: merge; the title menu should fade in (5/0x01 -> func_1517F3B0 from handler C); level 0x21 sounds start.
+1. Menu pages: func_151DFD0C, func_151E0BBC, func_151E1308, func_151E1EDC, func_151E4B40, func_151E2B9C, func_151E2FCC,
+   func_15042E3C (smallest / producers first). 19AC mutants, 68 3AE4 setups (P120 lists).
+2. Remaining handler-C callee still asm: func_15060F28 (game_83300, C on port-b; replay path of 5/4 only).
+
 ## State (session P120, 2026-10-23). Details: `docs/port/sessions/P120.md`, map `docs/port/sessions/p120/carousel_map.md`
 
 - **Menu camera / carousel func_151E73C8 (menu_camera_update) in hand C (NM)**: writes rec->fade / x2B / titlePage /

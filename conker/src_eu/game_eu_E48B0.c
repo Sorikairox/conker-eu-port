@@ -2,6 +2,40 @@
 #include "functions.h"
 #include "variables.h"
 
+#ifdef NON_MATCHING
+/* P124: the 0x3C-byte effect template func_15169ED8 / func_15169E70 copy into a new effect record (+0x10);
+ * same layout as S59A0 in game_eu_1231B0.c. */
+typedef struct {
+    void *u0;
+    s32 u4;
+    s32 u8;
+    s32 uC;
+    s32 u10;
+    s16 u14;
+    s16 u16;
+    s16 u18;
+    s16 pad1A;
+    f32 u1C;
+    f32 u20;
+    s16 u24;
+    s16 u26;
+    s16 u28;
+    s16 u2A;
+    s16 u2C;
+    s16 u2E;
+    u8 u30; /* effect type: index into D_8008CDC0 (record +0x40) */
+    u8 u31;
+    u8 u32;
+    u8 u33;
+    u8 u34;
+    u8 u35;
+    u8 u36;
+    u8 u37;
+    u8 u38;
+    u8 u39;
+    u8 pad3A[2];
+} EffectTemplateE48B0;
+#endif
 u8 *func_15169ED8(void *);
 
 void func_150B7B9C(s32, s32);
@@ -223,97 +257,66 @@ void func_150B7688(u8 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15169E70(s32 **, s32);
+u8 *func_15169E70(void *, s32);
 extern s32 D_80091CD4;
 extern s32 D_800BEA58;
 
+// effect_spawn_cross: spawns four type-7 effects (template D_80091CD4, priority arg3) around (arg0, arg1): above and
+// below (arg1 -/+ d, flag byte 0 / 8) and left and right (arg0 -/+ d, flag 4 / 0, u16 0x100), where d is the
+// distance of arg0 to the nearer screen edge (D_800BEA58 = screen width). arg2 goes to words 0xC and +0x14.
 void func_150B7700(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    s8 sp7D;
-    s8 sp7B;
-    s8 sp7A;
-    s8 sp79;
-    s8 sp78;
-    s8 sp77;
-    s8 sp76;
-    s8 sp75;
-    s8 sp74;
-    s16 sp72;
-    s16 sp70;
-    s16 sp6E;
-    s16 sp6C;
-    s16 sp6A;
-    s16 sp68;
-    f32 sp64;
-    f32 sp60;
-    s16 sp5C;
-    s16 sp5A;
-    s16 sp58;
-    s32 sp54;
-    s32 sp50;
-    s32 sp4C;
-    s32 *sp44;
-    s32 sp34;
-    s32 sp30;
-    s32 temp_t0;
-    s32 temp_v0;
-    s32 temp_v0_2;
-    s32 temp_v0_3;
-    s32 temp_v0_4;
-    s32 temp_v1;
-    s32 var_s1;
+    EffectTemplateE48B0 t;
+    s32 d;
+    s32 v;
 
-    temp_v1 = arg0 << 0x10;
-    temp_t0 = arg1 & 0xFFFF;
-    sp6E = 0x1000;
-    sp44 = &D_80091CD4;
-    sp4C = temp_v1 | temp_t0;
-    sp6C = 0x1000;
-    sp50 = arg2;
-    sp58 = (s16) arg2;
-    sp5C = 0;
-    sp68 = 0;
-    sp6A = 0;
-    sp70 = 0x10;
-    sp72 = 0x10;
-    sp74 = 7;
-    sp75 = 2;
-    sp76 = 0xFF;
-    sp77 = 0;
-    sp78 = 0;
-    sp79 = 0xFF;
-    sp7A = 7;
-    sp7B = 0x11;
-    if (arg0 < ((s32) D_800BEA58 >> 1)) {
-        var_s1 = D_800BEA58 - arg0;
+    t.u2A = 0x1000;
+    t.u0 = &D_80091CD4;
+    t.u8 = (arg0 << 16) | (arg1 & 0xFFFF);
+    t.u28 = 0x1000;
+    t.uC = arg2;
+    t.u14 = arg2;
+    t.u18 = 0;
+    t.u24 = 0;
+    t.u26 = 0;
+    t.u2C = 0x10;
+    t.u2E = 0x10;
+    t.u30 = 7;
+    t.u31 = 2;
+    t.u32 = 0xFF;
+    t.u33 = 0;
+    t.u34 = 0;
+    t.u35 = 0xFF;
+    t.u36 = 7;
+    t.u37 = 0x11;
+    if (arg0 < (D_800BEA58 >> 1)) {
+        d = D_800BEA58 - arg0;
     } else {
-        var_s1 = arg0;
+        d = arg0;
     }
-    temp_v0 = arg1 - var_s1;
-    sp54 = temp_v1 | (temp_v0 & 0xFFFF);
-    sp7D = 0;
-    sp5A = 0;
-    sp60 = (f32) arg0;
-    sp34 = temp_v1;
-    sp30 = temp_t0;
-    sp64 = (f32) temp_v0;
-    func_15169E70(&sp44, arg3);
-    temp_v0_2 = arg1 + var_s1;
-    sp54 = sp34 | (temp_v0_2 & 0xFFFF);
-    sp7D = 8;
-    sp64 = (f32) temp_v0_2;
-    func_15169E70(&sp44, arg3);
-    temp_v0_3 = arg0 - var_s1;
-    sp60 = (f32) temp_v0_3;
-    sp54 = (temp_v0_3 << 0x10) | sp30;
-    sp7D = 4;
-    sp5A = 0x100;
-    sp64 = (f32) arg1;
-    func_15169E70(&sp44, arg3);
-    temp_v0_4 = arg0 + var_s1;
-    sp54 = (temp_v0_4 << 0x10) | sp30;
-    sp7D = 0;
-    sp60 = (f32) temp_v0_4;
-    func_15169E70(&sp44, arg3);
+    v = arg1 - d;
+    t.u10 = (arg0 << 16) | (v & 0xFFFF);
+    t.u39 = 0;
+    t.u16 = 0;
+    t.u1C = arg0;
+    t.u20 = v;
+    func_15169E70(&t, arg3);
+    v = arg1 + d;
+    t.u10 = (arg0 << 16) | (v & 0xFFFF);
+    t.u39 = 8;
+    t.u20 = v;
+    func_15169E70(&t, arg3);
+    v = arg0 - d;
+    t.u1C = v;
+    t.u10 = (v << 16) | (arg1 & 0xFFFF);
+    t.u39 = 4;
+    t.u16 = 0x100;
+    t.u20 = arg1;
+    func_15169E70(&t, arg3);
+    v = arg0 + d;
+    t.u10 = (v << 16) | (arg1 & 0xFFFF);
+    t.u39 = 0;
+    t.u1C = v;
+    func_15169E70(&t, arg3);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7700.s")
@@ -548,109 +551,86 @@ void func_150B7C88(void) {
 }
 
 #ifdef NON_MATCHING
+u8 *func_15169ED8(void *);
 extern s32 D_80091CBC;
+extern s32 D_80091C98;
 
+// hud_bars_create: (re)creates the effect records D_800D9CB8[5..7] (three type-5 bars from template D_80091CBC at
+// y 150 / 170 / 190, alpha 0x80 / 0xFF / 0x80) and [9] (a type-0 effect from D_80091C98 at 230, 170); frees [2]
+// first. Returns the last record; sets D_800D9CB0 = 3. The free before [6] / [7] passes D_800D9CB8[5] (as the asm:
+// the original source frees the wrong slot there).
 s32 func_150B7DFC(void) {
-    s8 sp5D;
-    s8 sp5C;
-    s8 sp5B;
-    s8 sp5A;
-    s8 sp59;
-    s8 sp58;
-    s8 sp57;
-    s8 sp56;
-    s8 sp55;
-    s8 sp54;
-    s16 sp52;
-    s16 sp50;
-    s16 sp4E;
-    s16 sp4C;
-    s16 sp4A;
-    s16 sp48;
-    f32 sp44;
-    f32 sp40;
-    s16 sp3C;
-    s16 sp3A;
-    s16 sp38;
-    s32 sp34;
-    s32 sp30;
-    s32 sp2C;
-    s32 sp28;
-    s32 *sp24;
-    s32 temp_v0;
-    s32 temp_v0_2;
+    EffectTemplateE48B0 t;
 
     if (D_800D9CB8[2] != 0) {
         func_1516972C((struct102 *) D_800D9CB8[2]);
         D_800D9CB8[2] = 0;
     }
-    sp55 = 3;
-    sp50 = 0x40;
-    sp52 = 0x10;
-    sp54 = 5;
-    sp48 = 0;
-    sp4A = 0;
-    sp38 = 0;
-    sp3A = 0;
-    sp3C = 0;
-    sp24 = &D_80091CBC;
-    sp28 = 0;
-    sp2C = 0;
-    sp34 = 0;
-    sp56 = 0xFF;
-    sp57 = 0;
-    sp58 = 0;
-    sp59 = 0x80;
-    sp5A = 7;
-    sp5B = 0x11;
-    sp5C = 1;
-    sp5D = 0;
-    sp4C = 0x1000;
-    sp4E = 0x1000;
-    sp44 = 150.0f;
-    sp40 = 230.0f;
-    sp30 = (s32) 150.0f;
+    t.u31 = 3;
+    t.u2C = 0x40;
+    t.u2E = 0x10;
+    t.u30 = 5;
+    t.u24 = 0;
+    t.u26 = 0;
+    t.u14 = 0;
+    t.u16 = 0;
+    t.u18 = 0;
+    t.u0 = &D_80091CBC;
+    t.u4 = 0;
+    t.u8 = 0;
+    t.u10 = 0;
+    t.u32 = 0xFF;
+    t.u33 = 0;
+    t.u34 = 0;
+    t.u35 = 0x80;
+    t.u36 = 7;
+    t.u37 = 0x11;
+    t.u38 = 1;
+    t.u39 = 0;
+    t.u28 = 0x1000;
+    t.u2A = 0x1000;
+    t.u20 = 150.0f;
+    t.u1C = 230.0f;
+    t.uC = (s32) t.u20;
     if (D_800D9CB8[5] != 0) {
         func_1516972C((struct102 *) D_800D9CB8[5]);
     }
-    temp_v0_2 = func_15169ED8(&sp24);
-    D_800D9CB8[5] = temp_v0_2;
-    sp3A = 0x100;
-    sp2C = 0x100;
-    sp59 = 0xFF;
-    sp44 = 170.0f;
-    sp30 = (s32) 170.0f;
+    D_800D9CB8[5] = (s32) func_15169ED8(&t);
+    t.u16 = 0x100;
+    t.u8 = 0x100;
+    t.u35 = 0xFF;
+    t.u20 = 170.0f;
+    t.uC = (s32) t.u20;
     if (D_800D9CB8[6] != 0) {
-        func_1516972C((struct102 *) temp_v0_2);
+        func_1516972C((struct102 *) D_800D9CB8[5]);
     }
-    D_800D9CB8[6] = func_15169ED8(&sp24);
-    sp3A = 0x200;
-    sp2C = 0x200;
-    sp59 = 0x80;
-    sp44 = 190.0f;
-    sp30 = (s32) 190.0f;
+    D_800D9CB8[6] = (s32) func_15169ED8(&t);
+    t.u16 = 0x200;
+    t.u8 = 0x200;
+    t.u35 = 0x80;
+    t.u20 = 190.0f;
+    t.uC = (s32) t.u20;
     if (D_800D9CB8[7] != 0) {
         func_1516972C((struct102 *) D_800D9CB8[5]);
     }
-    D_800D9CB8[7] = func_15169ED8(&sp24);
-    sp38 = 0;
-    sp3A = 0;
-    sp3C = 0;
-    sp55 = 0;
-    sp50 = 0x58;
-    sp52 = 0x40;
-    sp59 = 0xFF;
-    sp54 = 0;
-    sp24 = &D_80091C98;
-    sp40 = 230.0f;
-    sp44 = 170.0f;
+    D_800D9CB8[7] = (s32) func_15169ED8(&t);
+    t.u14 = 0;
+    t.u16 = 0;
+    t.u18 = 0;
+    t.u31 = 0;
+    t.u2C = 0x58;
+    t.u2E = 0x40;
+    t.u35 = 0xFF;
+    t.u30 = 0;
+    t.u0 = &D_80091C98;
+    t.u1C = 230.0f;
+    t.u20 = 170.0f;
     if (D_800D9CB8[9] != 0) {
         func_1516972C((struct102 *) D_800D9CB8[9]);
     }
-    temp_v0 = func_15169ED8(&sp24);
-    D_800D9CB8[9] = temp_v0;
+    D_800D9CB8[9] = (s32) func_15169ED8(&t);
     D_800D9CB0 = 3;
-    return temp_v0;
+    return D_800D9CB8[9];
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7DFC.s")

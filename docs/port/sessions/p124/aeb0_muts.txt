@@ -1,0 +1,14 @@
+s/t.u30 = 0xA;/t.u30 = 0xB;/ %
+s/t.u2C = 0x40;/t.u2E = 0x40;/ %
+s/t.u36 = 7;/t.u37 = 7;/ %
+s/t.u8 = (arg0 << 16) | arg1;/t.u8 = (arg0 << 15) | arg1;/ %
+s/t.uC = (arg2 << 16) | sum;/t.uC = (arg2 << 16) | (s16) sum;/ %
+s/t.u14 = sum;/t.u16 = sum;/ %
+s/t.u16 = 0;/t.u18 = 0;/ %
+s/t.u31 = 1;/t.u31 = 0;/ %
+s/t.u34 = 0xFF;/t.u34 = 0xFE;/ %
+s/t.u20 = 252.59259f;/t.u20 = 252.5926f;/ %
+s/t.u1C = 228.0f;/t.u1C = 229.0f;/ %
+s/t.u0 = &D_80091B9C;/t.u0 = \&D_80091B9C + 1;/ %
+s/pad1A;/pad1A; s16 x;/ %
+s/    u8 u35;/    u8 u35; u8 x;/ %
