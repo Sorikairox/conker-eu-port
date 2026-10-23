@@ -1,0 +1,99 @@
+hdr 1000 0000 024A 0004 01DA 0000 0000 0026 003E 0114 011A 0000 0000 0000 0000 0000
+0020 enter  lab:0
+0024 ret    
+0026 enter  lab:0
+002A push   lab:1
+002E push   lab:1001
+0032 call   nat:6
+0036 mov    var:0, lab:0
+003C ret    
+003E enter  lab:1C
+0042 push   lab:5
+0046 push   lab:1000
+004A call   nat:5
+004E mov    fr:FFFFFFFC, res:0
+0054 jz     fr:FFFFFFFC, imm:66
+005A push   dat:0
+005E call   nat:2
+0062 call   imm:180
+0066 jmp    imm:E8
+006A push   lab:1
+006E push   lab:1001
+0072 call   nat:5
+0076 mov    fr:FFFFFFF8, res:0
+007C jz     fr:FFFFFFF8, imm:88
+0082 mov    var:0, lab:1
+0088 jmp    imm:112
+008C push   lab:4
+0090 push   lab:E019
+0096 call   nat:5
+009A mov    fr:FFFFFFF4, res:0
+00A0 jz     fr:FFFFFFF4, imm:C0
+00A6 push   dat:1F
+00AA call   nat:2
+00AE push   lab:1
+00B2 push   lab:1004
+00B6 call   nat:6
+00BA mov    var:0, lab:2
+00C0 jmp    imm:112
+00C4 push   lab:1
+00C8 push   lab:1004
+00CC call   nat:5
+00D0 mov    fr:FFFFFFF0, res:0
+00D6 jz     fr:FFFFFFF0, imm:E0
+00DC call   imm:180
+00E0 jmp    imm:112
+00E4 jmp    imm:112
+00E8 eq     fr:FFFFFFEC, var:0, lab:0
+00F0 jnz    fr:FFFFFFEC, imm:6A
+00F6 eq     fr:FFFFFFE8, var:0, lab:1
+00FE jnz    fr:FFFFFFE8, imm:8C
+0104 eq     fr:FFFFFFE4, var:0, lab:2
+010C jnz    fr:FFFFFFE4, imm:C4
+0112 ret    
+0114 enter  lab:0
+0118 ret    
+011A enter  lab:10
+011E mov    fr:FFFFFFFC, lab:3E8
+0124 gt     fr:FFFFFFF8, fr:FFFFFFFC, lab:0
+012C jz     fr:FFFFFFF8, imm:146
+0132 push   dat:3F
+0136 call   nat:2
+013A sub    fr:FFFFFFFC, fr:FFFFFFFC, lab:1
+0142 jmp    imm:124
+0146 push   lab:21
+014A push   lab:50CA
+014E call   nat:5
+0152 mov    fr:FFFFFFF4, res:0
+0158 push   lab:20
+015C push   lab:50CA
+0160 call   nat:5
+0164 mov    fr:FFFFFFF0, res:0
+016A push   fr:FFFFFFF4
+016E push   fr:FFFFFFF0
+0172 push   lab:7
+0176 push   lab:5000
+017A call   nat:6
+017E ret    
+0180 enter  lab:8
+0184 push   lab:3
+0188 push   lab:64
+018C push   lab:2000
+0190 call   nat:6
+0194 push   lab:21
+0198 push   lab:50CA
+019C call   nat:5
+01A0 mov    fr:FFFFFFFC, res:0
+01A6 push   lab:20
+01AA push   lab:50CA
+01AE call   nat:5
+01B2 mov    fr:FFFFFFF8, res:0
+01B8 push   fr:FFFFFFFC
+01BC push   fr:FFFFFFF8
+01C0 push   lab:7
+01C4 push   lab:5000
+01C8 call   nat:6
+01CC push   lab:1
+01D0 push   lab:50CA
+01D4 call   nat:6
+01D8 ret    

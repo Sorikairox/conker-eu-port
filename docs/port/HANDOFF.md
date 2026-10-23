@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P174, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P174.md`
+
+- Level 0x22 (the "first room") is the **death tutorial**: one level event 0xCA "First Death". After Gregg's scenes it
+  waits for the scene to end (`0x1001(1)`, func_1509CBD8), then for **the squirrel tail to be collected** (`0xE019(4)`,
+  func_1509DFCC: no node of lists 0x36 / 0x4C / 0x5B with +0x48 == 2; the tail hangs under the gargoyle at
+  (-421, 170, -21)), prints "LIFE COLLECTED", plays scene 4, then returns to the saved level (0x18).
+- Blockers (both batch m2c NON_MATCHING bodies): **func_1509CBD8** (game_eu_CA060.c) is `void`, every scene query
+  answers 0; **func_1509DFCC** (game_eu_CA630.c) case 0x19 reads +0x48 of node->next (skips the tail, reads NULL+0x48).
+  func_1509CBD8 also causes the detour itself: the intro event BF never starts scene 3 at 10725, Conker falls
+  (y -4759) and dies at 10813 -> level 0x22.
+- Test `?p174fix=3` (asm answers inside event CA only) + padpull.py (walk forward + jump at the pillar): tail collected
+  at 18613, scene 4, **level 0x22 left at 19113** (node evJ and Chrome chJ), back to level 0x18 (intro restarts). No B /
+  context action needed.
+- With the fix everywhere (`?p174fix=1`) the real route runs scene 3 of level 0x18 and traps at 10733 in func_150623F4
+  (game_83300.c): D_800D2104 / D_800D2528 (EU 0x800D2524 / 0x800D2528) are NULL; producer unknown.
+- New diagnostic port/gfx/p174_ev.c (`?p174ev`, `?p174fix=1|2|3`, 4 wraps). noev regression = P171.
+
+## Next steps (from P174)
+
+1. Conversion slot: real C for func_1509CBD8 (s32, 6 cases) and the func_1509DFCC case-0x19 loop fix, together.
+2. Then the scene-3 trap: find the producer of D_800D2104 / D_800D2528 for level 0x18 (path tables), check
+   func_150623F4's C against the asm.
+3. Still open from P171: func_15147F50 / func_15147FA0 record argument, func_1515C388 / func_1515C6F4.
+
 ## State (session P171, 2026-10-24, port-web). Details: `docs/port/sessions/P171.md`
 
 - Merged port-b 6dcbf88 (P164, P168) and port 7b18642 (P166, P167): HANDOFF.md conflicts only. After each: verify_all OK,
