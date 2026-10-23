@@ -49,8 +49,10 @@ static int p103_prereq(int id, int depth) {
     return 1;
 }
 
+void p123_gates(void);
 void p103_frame(void) {
     static int lmode = -1, llevel = -1;
+    p123_gates();
     int m = vbe_ld8(&D_800E0B94), l = D_800BE9F0;
     if (flag(&fboot, "p103boot") && m == 3) { /* P121: menu record D_80090174 (P117 map): +8 page fade f32, +0x2C titlePage,
                                                 * +0x3E menu, +0x3F mainPage; on change of the bytes, else every 240 frames */
@@ -137,6 +139,10 @@ void __wrap_func_1501D348(int level, int scene, int slot, int cb, int cbarg) {
     if (flag(&fboot, "p103boot"))
         port_log("[p103] func_1501D348(level %X, scene %d, slot %d, cb %d, %d) frame %u mode %d\n", level, scene, slot, cb,
                  cbarg, port_frame_count, vbe_ld8(&D_800E0B94));
+    { /* P123 TEST ONLY ?p123noscene=1: do not start the menu level's scene (mode 3), as when func_151DEDD0 was a stub */
+        static int fns = -1;
+        if (flag(&fns, "p123noscene") && vbe_ld8(&D_800E0B94) == 3) { port_log("[p123] menu scene start skipped\n"); return; }
+    }
     __real_func_1501D348(level, scene, slot, cb, cbarg);
 }
 
@@ -354,4 +360,57 @@ void __wrap_func_151EE704(void) {
     static int fs = -1;
     void p121_sprites_fixed(void);
     if (flag(&fs, "p121spr")) p121_sprites_fixed(); else __real_func_151EE704();
+}
+
+/* P123 DIAGNOSTIC ?p123fade=1: every screen-colour/fade request func_1517F3B0(r, g, b, frames, dir, player) with the
+ * frame and the JS stack, and (from p103_frame, mode 3 and every 120 frames) the world-render gates of
+ * func_15019464 / func_150195A0: D_800BEAC0, D_80084810, func_1517F51C(0) (fade level 0xFF = skip), D_800D18A0. */
+void p123_requests_stack(void);
+void __real_func_1517F3B0(int r, int g, int b, int n, int dir, int pl);
+void __wrap_func_1517F3B0(int r, int g, int b, int n, int dir, int pl) {
+    static int ff = -1, nl;
+    if (flag(&ff, "p123fade") && nl++ < 80) {
+        void port_js_stack(int skip, int n);
+        port_log("[p123] func_1517F3B0(rgb %d %d %d, frames %d, dir %d, player %d) frame %u mode %d\n", r, g, b, n,
+                 (signed char)dir, pl, port_frame_count, vbe_ld8(&D_800E0B94));
+        port_js_stack(1, 4);
+    }
+    __real_func_1517F3B0(r, g, b, n, dir, pl);
+}
+void p123_gates(void) {
+    static int ff = -1; static unsigned next;
+    extern unsigned char D_800BEAC0, D_800DDDAC, D_800DE1F0[]; extern int D_80084810; extern unsigned short D_800D18A0;
+    extern int D_800DDDB0, D_800DDE28; int func_1517F470(int);
+    if (!flag(&ff, "p123fade") || port_frame_count < next) return;
+    next = port_frame_count + 120;
+    port_log("[p123] gates frame %u mode %d level %X: D_800BEAC0 %u D_80084810 %d D_800D18A0 %X | fade level %d (dir %d timer %d/%d forced %u)\n",
+             port_frame_count, vbe_ld8(&D_800E0B94), D_800BE9F0, vbe_ld8(&D_800BEAC0), D_80084810, vbe_ld16(&D_800D18A0),
+             func_1517F470(0), (signed char)vbe_ld8(&D_800DDDAC), D_800DDDB0, D_800DDE28, vbe_ld8(&D_800DE1F0[0]));
+}
+
+
+/* P123 TEST ONLY ?p123fadeev=1: scene event type 5 id 1 (screen colour / fade) of handler C func_15029EA8
+ * (game_eu_51190.c, still an asm stub), b4 == 0 branch only, from the EU asm 1502A61C..1502A79C:
+ *   d = flag ? 0 : func_15023C60(ev, 5, track, &tmp, 1, 1, 0, 0, 0, 0, player) - now;   (time of the next 5/1 event)
+ *   func_1517F3B0(D_800844A0[b5][0..2], d, w6 == 0, 0); D_800C40AA = (w6 == 0); return 1.
+ * The menu level 0x1D scene 1 starts black (t = 0 5/1 w6 1 via func_1501DB18) and this event fades in over 60 frames;
+ * with the stub the screen stays black and func_1517F51C(0) skips every world draw. */
+extern unsigned char D_800844A0[], D_800C40AA;
+int func_15023C60(unsigned, int, int, unsigned char **, int, int, int, int, int, int, int);
+void func_1517F3B0(int, int, int, int, int, int);
+int __real_func_15029EA8(int ev, int track, int value, int now, int player, void *obj, void *rec, void *data, int fl, int skip);
+int __wrap_func_15029EA8(int ev, int track, int value, int now, int player, void *obj, void *rec, void *data, int fl, int skip) {
+    static int fe = -1, nl;
+    const unsigned char *e = (const unsigned char *)(uintptr_t)(unsigned)ev;
+    if (flag(&fe, "p123fadeev") && memok(e) && (signed char)vbe_ld8(e) == 5 && (short)vbe_ld16(e + 2) == 1 && vbe_ld8(e + 4) == 0) {
+        unsigned char *tmp = 0; int b5 = (signed char)vbe_ld8(e + 5), w6 = (short)vbe_ld16(e + 6), d;
+        int t = func_15023C60((unsigned)ev, 5, track & 0xFF, &tmp, 1, 1, 0, 0, 0, 0, player);
+        d = skip ? 0 : t - now;
+        if (nl++ < 20) port_log("[p123] 5/1 fade event: track %d now %d next %d -> func_1517F3B0(row %d, %d frames, dir %d) frame %u\n",
+                                track & 0xFF, now, t, b5, d, w6 == 0, port_frame_count);
+        func_1517F3B0(vbe_ld8(D_800844A0 + 3 * b5), vbe_ld8(D_800844A0 + 3 * b5 + 1), vbe_ld8(D_800844A0 + 3 * b5 + 2), d, w6 == 0, 0);
+        vbe_st8(&D_800C40AA, w6 == 0);
+        return 1;
+    }
+    return __real_func_15029EA8(ev, track, value, now, player, obj, rec, data, fl, skip);
 }

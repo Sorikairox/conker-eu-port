@@ -1403,6 +1403,15 @@ void gfx_run_task(void *task) {
     draw_log = 0;
     if (bany) { memcpy(fbmin, bmin, sizeof bmin); memcpy(fbmax, bmax, sizeof bmax); fbany = 1; }
     gfx_trace = 0;
+    { /* P123 ?p123tri=N: every N tasks (and on a zero/non-zero change) the game frame, commands and triangles of the task */
+        static int ptri = -1, lastz = -1; extern unsigned port_frame_count;
+        if (ptri < 0) ptri = port_flag("p123tri");
+        unsigned nt = gfx_stats.tris - t0; int z = nt == 0;
+        if (ptri > 0 && (gfx_stats.tasks % (unsigned)ptri == 0 || z != lastz))
+            port_log("[p123] task %u frame %u: %u commands, %u triangles, %u sub-DLs\n", gfx_stats.tasks, port_frame_count,
+                     gfx_stats.cmds - c0, nt, gfx_stats.dls - d0);
+        lastz = z;
+    }
     if (logf)
         port_log("[gfx] frame %u: %u DLs, %u commands, %u triangles, %u unknown commands; culldl %u (%u culled), branch_z %u (%u taken), lit %u, unlit-flag %u\n", gfx_stats.tasks,
                  gfx_stats.dls - d0, gfx_stats.cmds - c0, gfx_stats.tris - t0, gfx_stats.unknown_ops - u0,
