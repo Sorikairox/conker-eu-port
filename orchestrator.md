@@ -6,7 +6,7 @@ Two parts: (1) a **status snapshot** — overwrite it, don't append history (his
 
 ---
 
-## 1. Status snapshot (2026-10-23, after P89)
+## 1. Status snapshot (2026-10-23, after P129)
 
 ### Goal
 Conker's Bad Fur Day (EU ROM, user-owned) as a **native source port that runs in a web browser**:
@@ -16,9 +16,9 @@ from the same C. **Not** N64Recomp / static recompilation, and not the existing 
 ### Numbers
 | | functions with C | code bytes | where |
 |---|---|---|---|
-| Matching decomp (byte-identical) | 3994 / 5915 (67.5%) | 29.3% | branch `eu` — paused since 2026-10-21 |
-| Port (matching + NON_MATCHING) | **4918 / 5915 (83.1%)** | **57.2%** | branch `port` (P89); `port-b` = 4897 (P87); merged total higher |
-| Asm-only left | ~997 | | ~148 under 60 insns |
+| Matching decomp (byte-identical) | 3994 / 5915 (67.5%) | 29.3% | branch `eu` — paused |
+| Port (matching + NON_MATCHING), combined | **~5060 / 5915 (85.5%)** | **~64%** | port-b P129 (has port merged up to P114); port alone 4966 (P127) |
+| Asm-only left | ~855 | | |
 
 ### Branches / worktrees / containers
 | branch | worktree | container | role |
@@ -32,28 +32,25 @@ from the same C. **Not** N64Recomp / static recompilation, and not the existing 
 Mac mini worker `sorikairo@192.168.0.71` (container `conkerdev`) runs `remote_perm.sh` jobs.
 Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
-### Browser build — what works
-- Boots from the user's ROM; real game C runs boot, level load, camera, lighting, Conker's model/animation/tail, attachments, text, HUD sprites, sky gradient, breakables, scene loader.
-- Playable flow in node and real-time Chrome: walk, fall, respawn + 250-frame respawn scene, warp to 0x2C and back; 0 heap errors (P88).
-- TEMPORARY guards in port-web (P88): scene end (func_1501E888) and actor frame blocks (func_1501ECA4) — both now C on port-b (P87); P91 is dropping them.
-- Renderer: F3DEX2/F3DEXBG WebGL2, LOD/mip fixed (P78). Blurry near ground is the level data (low texel density), not a bug.
-- Arity scanner `tools/port/arity_scan.py` (P79): 111 rows / 56 severity>0 at P88.
+### Browser build — what works (port-web)
+- Boot → logo screen event (level 0x21, LogoScreen scene) → title menu (mode 3, level 0x1D) fading in by the game's own code; START opens the save slot; NEW GAME starts mode 0 / level 0x18 (P126) — then traps on the mode-0 handler (now C on `port`, P131 merging).
+- Gameplay test path (?p110noev=1): walk, death, respawn scene, 0x2C warp, 0 heap errors; level music; lighting fixed (P94); camera eye/target real C.
+- TEMPORARY in port-web: P113 camera-retarget guard (likely removable), P116 +0x65 cycle log-only guard.
+- Tools: arity_scan, floatint_scan, protoasm_check, stubcalls, m2c_sanity (run after merges), event/scene disassemblers (p112/evdis.py, p114/scdis.py); names table (eu: tools/eu_port/names_table.py).
 
 ### Running now
-- P90 (`port`): func_150268BC script event interpreter (3590 lines; P89 map + draft).
-- P91 (`port-web`): merge P86–P89 + P87, drop P88 guards, runtime checks.
-- P92 (`port-b`): remaining scene-path asm (func_1501FD34, func_1501FF10, ...), game_14FF90.
+- P131 (port-web): merge P127 + port-b P125–P129, drop mode-0 data stub, start a new game.
+- P132 (port): difftest poke fix, new-game stubs, menu pages.
+- P130 (port-b): shadow drawing, menu DL stubs.
 
 ### Next milestones
-1. No TEMPORARY guards in port-web; head turning works (look-target producer).
-2. func_150268BC (scripts/cutscenes) as C.
-3. Frame-path stubs to zero (blocker list in the latest web session doc); arity rows to zero.
-4. Breadth: the ~1000 asm-only functions; then Phase 2B (symbolic data) and native 64-bit build.
+1. New game playable from the menu (level 0x18 opening, then gameplay).
+2. Frame-path stubs to zero; m2c_sanity high rows to zero.
+3. Breadth: ~855 asm-only; describe pass + scripted rename at a quiet merge point; Phase 2B (symbolic data); native 64-bit build.
 
 ### Open items needing care
-- Merge order: `port` and `port-b` own disjoint files; both merge into `port-web` (browser session does it). `port-b`→`port` only when `port` is idle.
-- Licensing: SDK-derived libultra C in the decomp — fine privately, matters if ever distributed (`port/ultra/LICENSES.md`).
-- Container `conker-web-p6` is running and not owned by any current session (user's call).
+- Two conversion slots own disjoint file lists (see latest briefs); port-b merges port periodically (P119), port-web merges both.
+- Licensing: SDK-derived libultra C — fine privately, matters if distributed.
 
 ---
 
