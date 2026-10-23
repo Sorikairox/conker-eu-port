@@ -9,7 +9,7 @@ f32 func_150ADDE0(f32 *, f32 *);
 void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
 void func_151254F4(struct108 *, s32);
 void func_15124C38(struct108 *, f32 *);
-s32 func_15128D50(struct108 *, f32 *, f32 *);
+void func_15128D50(struct108 *, f32 *, f32 *);
 void func_1512DD50(u8 *);
 void func_1512E6B0(u8 *);
 struct127 *func_1505EEF4(s32);

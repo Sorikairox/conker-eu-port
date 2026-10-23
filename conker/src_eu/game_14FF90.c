@@ -174,7 +174,7 @@ void func_15122AE0(void) {
 void func_1510B6A8(s32 player, f32 fovX, f32 fovY, f32 scale, f32 width);
 s32 func_15097BA8(s32);
 void func_15125A6C(u8 *);
-s32 func_15129220(struct108 *);
+void func_15129220(struct108 *);
 void func_15125DB4(struct108 *);
 void func_15127EB8(struct108 *);
 s32 func_15128540(struct108 *);
@@ -199,7 +199,7 @@ void func_1512C5D8(struct108 *);
 void func_1512B670(u8 *);
 void func_1512C77C(struct108 *); /* P68: void, v0 is undefined in the asm */
 void func_1512C080(struct108 *); /* P68: void, v0 is undefined in the asm */
-s32 func_15128D50(struct108 *, f32 *, f32 *);
+void func_15128D50(struct108 *, f32 *, f32 *);
 s32 func_1512C6C0(struct108 *);
 void func_151284C4(struct108 *);
 extern u16 D_800BEB30[];

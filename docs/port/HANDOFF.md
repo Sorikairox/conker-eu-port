@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P115 (port-b) (session P115, 2026-10-23). Details: `docs/port/sessions/P115.md`
+
+Branch `port-b` (from P111 5a19134); the orchestrator merges it into `port`.
+
+- **Camera** in C: func_15128D50 (`camera_lean_from_heading`, mutants 22/24, 2 equivalent), func_15129220
+  (`camera_process_events`, the per-frame event pump; 87 setups, mutants 41/42, 1 equivalent), func_1512EB60
+  (`camera_read_depth_row`, DL; mutants 18/20, 2 equivalent). func_15128D50 / func_15129220 return nothing: caller
+  declarations in game_14FF90.c, game_eu_15C660.c, game_eu_4A070.c are now `void`.
+- func_15113798 (`world_records_update_matrices`, per frame from func_15019130): mutants 20/20.
+- func_151149AC (`world_record_find`, P114 draft) inserted in game_eu_13DC30.c on the coordinator's request.
+- Default build byte-identical (verify_all, `port_work/p115/verify1.log`), NM links. protocheck: 3 problems = the
+  known func_15157580 + func_151149AC declared with 3 args in game_eu_F5580.c:93 (not a port-b file; fix the
+  declaration to `u8 *func_151149AC(u8)`). **progress_nm** total 4933/5915 (83.4%), game 4405/5334, C bytes 58.0%,
+  982 asm-only.
+
+## Next steps (from P115)
+
+1. Remaining stubs on the new C paths: func_1512DAD0 (41 insns, game_eu_15B2E0.c; script request start in
+   func_15129220) and func_150A7B80 (16 insns, game_D5030.c; Mtx of disabled records in func_15113798).
+2. game_eu_F5580.c:93 / 118: one-argument func_151149AC (protocheck).
+3. Per-frame handlers left: func_15113000 (448, callees C), func_15181A6C with its producer func_1517FD84 (same file),
+   func_15178004 (asm callees in game_eu_D4C90.c), func_15184298 (asm callees func_151661F0, func_1517A320), shadow
+   func_151848D8, func_1510D090.
+4. Browser: camera events (cut scenes, save / restore of the game camera), depth row, attached world records.
+
 ## P111 (port-b) (session P111, 2026-10-23). Details: `docs/port/sessions/P111.md`
 
 Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
