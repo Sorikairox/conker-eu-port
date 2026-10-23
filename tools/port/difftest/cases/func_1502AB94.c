@@ -1,11 +1,4 @@
-/* one 8-byte entry of a player's D_800C3A10 table: what entry arg1 refers to */
-typedef struct {
-    u16 kind;   /* 2: object func_15083E90(id), 3: func_151149AC(id), else none */
-    u8  id;
-    u8  pad3[5];
-} struct_1502AB94_ref;
-
-extern struct_1502AB94_ref *D_800C3A10[];   /* per player */
+/* P114: struct_1502AB94_ref and D_800C3A10 are now in the hoisted NM block of game_eu_51190.c */
 u8 *func_151149AC(u8);
 s32 func_15024910(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
 s32 func_150268BC(s32, u8, u16, s32, s32, struct127 *, u8 *, u8 *, s32);
