@@ -1,0 +1,17 @@
+5094 C functions (998 NON_MATCHING), 700 stubs, census port_work/p107/final.log (49 stubs hit). 998 rows, 212 call stubs directly / via tables / by address, 33 of them call a stub hit in the census ->
+top (hit = census calls of the stubs it calls directly / through tables / by address):
+  func_15019130 NM game_45B80 hit 2980: func_15063AA0:0,func_15088130:0,func_15113000:596,func_15113798:596,func_15178004:596,func_15181A6C:596,func_15184298:596
+  func_1512B2C4 NM game_eu_158110 hit 2120: func_1501A764:530,func_1512B728:530,func_1512BAAC:530,func_1512BCA0:530
+  func_15122C5C NM game_14FF90 hit 1852: func_15128D50:596,func_15129220:660,func_1512EE50:596
+  func_1510BF50 NM game_eu_138E00 hit 1122: func_150D7B6C:0,func_151009E4:0,func_1510D090:594,func_1512EB60:528
+  func_15020F6C NM game_eu_4A070 hit 717: func_151149AC:0,func_15129220:660,func_1512DAD0:57
+  func_1509BFB0 NM game_C8950 hit 606: func_15097188:0@D_80088874,func_15097E9C:606@D_80088874,func_1509E3D4:0@D_80088874,func_1509FD30:0@D_80088874
+  func_1502C074 NM game_eu_595D0 hit 596: func_150A4FE4:0,func_1517B270:596
+  func_15128030 NM game_14FF90 hit 596: func_15128D50:596
+  func_1517485C NM game_eu_1A1A80 hit 530: func_1501A764:530
+  func_15186D04 NM game_eu_1B1ED0 hit 518: func_151848D8:518,func_15185514:0,func_15186494:0,func_15186A9C:0,func_15187954:0
+  func_1506BF5C NM game_981E0 hit 68: func_1000F568:27,func_10010154:40,func_10010344:1
+  func_1504A730 NM game_eu_78230 hit 64: func_150528C8:0@D_800863B4,func_150538CC:0@D_800863B4,func_15054A94:0@D_800863B4,func_1505528C:64@D_800863B4,func_150B1964:0@D_800863B4,func_150B1EC0:0@D_80086
+  func_150A16A4 NM game_eu_CE6C0 hit 57: func_15080900:0,func_1512DAD0:57
+  func_15005818 NM game_32740 hit 57: func_1512DAD0:57
+  func_1501EA84 NM game_eu_4A070 hit 57: func_1512DAD0:57

@@ -8,6 +8,12 @@ clang diagnostics, so only the reported lines change:
   assignment to cast is illegal      `(T)x = v;`  ->  `*(T *)&x = v;`
       m2c writes this for an integer store into a float / pointer slot (IDO's lvalue cast stores the
       bits of the cast type into the variable), so a reinterpreting store keeps the asm's semantics.
+      P107: also the parenthesised compound form `((T)x) op= v;`  ->  `*(T *)&x op= v;` (game_A28B0.c:21
+      `((u8*)p->unk218) += 1;` advances the pointer by one byte, as IDO does).
+  not pointers to compatible types   `a - b`  ->  `a - (__typeof__(a))(b)`  (P107)
+      pointer difference of `const unsigned char *` and `const char *` (the libc _Printf copies say
+      `#define char unsigned char`); IDO subtracts the addresses. The right operand takes the left one's
+      type, so the element size (and the result) stays that of the left pointer. The column must point at `-`.
   too many / too few arguments       `f(...)`  ->  `((__typeof__(f(0, ..)) (*)())f)(...)`
       a K&R-defined function called with another arity in the same TU (IDO passes the registers
       through; clang knows the definition's parameter count). The call goes through an unprototyped
@@ -21,6 +27,12 @@ import os, re
 OUT = 'port/build/srcfix'
 DIAG = re.compile(r'^(?P<file>[^:\s]+):(?P<line>\d+):(?P<col>\d+): error: (?P<msg>.*)$')
 LCAST = re.compile(r'\(\s*([A-Za-z_][\w ]*?\s*\**)\s*\)\s*([A-Za-z_][\w.\[\]>-]*)\s*=(?!=)')
+# P107: ((T)x) op= v
+LCAST2 = re.compile(r'\(\s*\(\s*([A-Za-z_][\w ]*?\s*\**)\s*\)\s*([A-Za-z_][\w.\[\]>-]*)\s*\)\s*(<<|>>|[-+*/%&|^]?)=(?!=)')
+# P107: a simple lvalue-ish operand (name, ->member, .member, [index]) next to a binary `-`
+OPND = r'[A-Za-z_]\w*(?:(?:->|\.)[A-Za-z_]\w*|\[[^\]]*\])*'
+LEFT = re.compile('(' + OPND + r')\s*$')
+RIGHT = re.compile(r'^\s*(' + OPND + ')')
 CALL = re.compile(r'([A-Za-z_]\w*)\s*\(')
 ARRINIT = re.compile(r'^(\s*)([A-Za-z_][\w ]*?)\s+([A-Za-z_]\w*)\s*\[([^\]]*)\]\s*=\s*([A-Za-z_][\w.\[\]>-]*)\s*;(.*)$')
 
@@ -39,6 +51,8 @@ def fix(path, rel, stderr):
             continue
         if 'assignment to cast is illegal' in m['msg']:
             todo.append(('cast', int(m['line']), int(m['col'])))
+        elif m['msg'].endswith('are not pointers to compatible types'):
+            todo.append(('ptrsub', int(m['line']), int(m['col'])))
         elif m['msg'].startswith('array initializer must be an initializer list'):
             todo.append(('arrinit', int(m['line']), int(m['col'])))
         elif re.match(r'too (many|few) arguments to function call, expected (\d+)', m['msg']):
@@ -48,10 +62,23 @@ def fix(path, rel, stderr):
             return None
     if not todo:
         return None
+    # P107: one fix per (line, column) (a macro argument is reported once per expansion use); right to left on a
+    # line so the earlier columns stay valid
+    todo = sorted({t[:3]: t for t in todo}.values(), key=lambda t: (t[1], -t[2]))
     for kind, ln, col, *nexp in todo:
         s = lines[ln - 1]
         if kind == 'cast':
             new, n = LCAST.subn(lambda m: f'*({m[1]} *)&{m[2]} =', s, count=1)
+            if not n:
+                new, n = LCAST2.subn(lambda m: f'*({m[1]} *)&{m[2]} {m[3]}=', s, count=1)
+        elif kind == 'ptrsub':
+            if s[col - 1:col] != '-':
+                return None
+            a, b = LEFT.search(s[:col - 1]), RIGHT.match(s[col:])
+            if not a or not b:
+                return None
+            new = s[:a.start(1)] + f'{a[1]} - (__typeof__({a[1]}))({b[1]})' + s[col + b.end(1):]
+            n = 1
         elif kind == 'arrinit':
             a = ARRINIT.match(s)
             if not a:

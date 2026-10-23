@@ -10,6 +10,34 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P107, 2026-10-23, port-web). Details: `docs/port/sessions/P107.md`
+
+- No src_eu change; the default build is unchanged.
+- **game_A28B0.c (202 functions) had never been in the port.** It failed the census because of
+  `((u8*)p->unk218) += 1;` at line 21 (upstream code). All its functions were weak `absolute` stubs. None was ever
+  hit, so it is not on the frame path.
+  - srcfix.py: new rule `((T)x) op= v` -> `*(T *)&x op= v`.
+- init_2070.c and debugger_257350.c (printf `s - fmt`, char vs unsigned char pointers) fixed by a new srcfix
+  `ptrsub` rule.
+- game_eu_12A7C0.c removed from port/exclude.txt (stale since P28).
+- Census: 0 FAIL. Function stubs 962 -> 762.
+- Node boot clean: 1 death, scene, 0x2C warp and back, heap 0, null zone 0, no trap.
+  - 47 -> 49 stubs. New: func_1515929C and func_1505528C (frame ~2130), reached through the 12A7C0 table handlers
+    that now run as C.
+- New **port/tools/stubcalls.py** (docstring = usage). For each C function it lists the stubs it calls:
+  direct / table / addr / deep, with census hits.
+  - Output: docs/port/stubcalls.tsv (NM) and stubcalls_all.tsv (all C).
+  - Top: func_15019130 (5 per-frame stubs), func_1512B2C4 (free camera), func_15122C5C (func_1512EE50 camera),
+    func_1510BF50, func_1509BFB0 (table D_80088874).
+
+## Next steps (from P107)
+
+1. Conversion slots: `python3 port/tools/stubcalls.py --func <funcs>` on a port build before committing a
+   frame-path function.
+2. The P105 list stands: particle handlers, then func_1512EE50, the free-camera callees, func_151848D8, the
+   level-event unit.
+3. Chrome check of the 12A7C0 handlers and the 2 new stubs. If they cause trouble, put the exclude line back.
+
 ## State (session P105, 2026-10-23, port-web). Details: `docs/port/sessions/P105.md`
 
 - Merged port c35d31d (P98 / P100) and port-b 66dffbc (P96).
