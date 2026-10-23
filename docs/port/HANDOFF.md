@@ -64,6 +64,30 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. After func_15064668 is C: run padtongue.py (`NOSTART=1`) with B presses at the gargoyle / pillar to get past the
    first room. Also check the pause-menu text noise and the shadow streak / hatched floor patches (gfx).
 
+## P153 (port-b) (session P153, 2026-10-23). Details: `docs/port/sessions/P153.md`
+
+Branch `port-b` (from P150 53f4db6). Hand C (NM), difftest EQUIV + setups + mutants:
+- func_15100B80 `object_burst_effect_spawn` (12E390, the effect of func_15102C3C; one frame struct keeps the
+  original stack layout incl. the 0x68-byte emitter copy), func_150BA3B0 `water_splash_spawn` (E7BC0, port-b now
+  owns game_eu_E7BC0.c; anti-tamper checksum left out), func_151A7240 `object_explosion_effects` (1D3420),
+  func_151AE958 `path_ride_place` (1D9C00), func_150916B4 `hud_time_draw` (BC510), func_151B01B8
+  `object_hit_flash_spawn` (1DDE10, returns 0 for int-declaring callers), func_151DC034 `glow_particle_spawn`
+  (2062D0), func_151504B4 `path_particles_spawn` (17D3C0, returns 0).
+- func_1513D4B8 returns its record under NM (game_169510.c + functions.h).
+- func_151AC3F0 `debris_burst_spawn` verified (draft `p153/d_c3f0.c`) but not committed: game_eu_1EDA00.c:292
+  declares it `s32` (protocheck); four other caller files say void. Fix that prototype, then insert.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1170 bodies), selftest 62/62.
+  progress_nm total 5164/5915 (87.3%), game 4633/5334, C bytes 68.1%, 751 asm-only.
+
+## Next steps (from P153)
+
+1. Coordinator additions (browser P152 stubs): func_151A9940 (game_eu_1D5710, 187 lines), func_1516AD20
+   (game_eu_1984F0, 192), func_151506E8 (17D3C0, 178), func_1505528C (game_eu_78230, 529).
+2. func_151AC3F0: after the 1EDA00 prototype fix, insert `p153/d_c3f0.c`.
+3. Remaining asm-only with C callers in port-b files (asmlist); still-asm callees of func_151A7240: func_15154728
+   (17D3C0), func_151A74B0, func_151D5AC4.
+4. func_151AE694 hang: decide a port policy (see P153.md); level-data scan of trigger ids vs path objects open.
+
 ## State (session P152, 2026-10-23, port-web). Details: `docs/port/sessions/P152.md`
 
 - Merged port-b 53f4db6 (P143 / P146 / P150, merge 7d3c2ff) and port d9785e0 (P148, merge 6d8dfff): only HANDOFF
@@ -109,7 +133,6 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    func_150E0DF0 (+ func_151D5AC4 / func_151D4684, port-b's func_15154728), port-b's func_151A7240.
 3. Browser: check the null+0x14 = 0x400 write at the new-game scene start is gone (func_1514CFF0 now real).
 4. P138 / P141 leftovers.
-
 ## P150 (port-b) (session P150, 2026-10-23). Details: `docs/port/sessions/P150.md`
 
 Branch `port-b` (from P146 b8f1ce7); merged port 37085b5 (merge commit 1457344, only HANDOFF.md conflicted).

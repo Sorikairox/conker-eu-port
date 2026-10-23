@@ -1,0 +1,7 @@
+s/life = 300;/life = 299;/
+s/    if (life == -1) {/    if (life == -2) {/
+s/f.main.owner23D = 0xFF;/f.main.owner23D = 0xFE;/
+s/f.main.sound = 0;/f.main.sound = 1;/
+s/f.rec2Spawn.mode = (f.timed ? 1 : 0) | 0x40000/f.rec2Spawn.mode = (f.timed ? 1 : 0) | 0x40001/
+s/f.light.unk0 = (f.timed ? 1 : 0) | 2;/f.light.unk0 = (f.timed ? 1 : 0) | 3;/
+s/f.spark.mode = bit80 | (f.timed ? 1 : 0) | bit40 | 0xC000;/f.spark.mode = bit40 | (f.timed ? 1 : 0) | bit40 | 0xC000;/

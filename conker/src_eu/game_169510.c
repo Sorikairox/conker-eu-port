@@ -628,9 +628,17 @@ void * func_1513D2F0(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513D2F0.s")
 #endif
+#ifdef NON_MATCHING
+// record_spawn: func_1513D2F0 without extra words; returns the new record (the asm leaves func_1513D2F0's v0 in
+// v0 and func_15100B80 uses it). P153.
+struct210 *func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    return func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
+}
+#else
 void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
 }
+#endif
 
 #ifdef NON_MATCHING
 // record_spawn_default: func_1513D2F0 with the default parameter block D_800A4AA0 and no extra words; returns the

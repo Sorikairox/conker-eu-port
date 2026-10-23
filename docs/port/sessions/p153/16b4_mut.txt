@@ -1,0 +1,17 @@
+s/if (ticks >= 297000) {/if (ticks > 297000) {/
+s/        ticks = 297000;/        ticks = 296999;/
+s/(ticks \/ 50) \* 0//
+s/ \* 100 \/ 50;/ * 100 \/ 49;/
+s/if (hundredths >= 100) {/if (hundredths >= 98) {/
+s/    x -= 8;/    x -= 7;/
+s/    if (ticks >= 0) {/    if (ticks > 0) {/
+s/seconds = ticks \/ 50;/seconds = ticks \/ 49;/
+s/minutes = seconds \/ 60;/minutes = seconds \/ 59;/
+s/if (minutes >= 10) {/if (minutes >= 9) {/
+s/            shift = 5;/            shift = 4;/
+s/(x - shift - 8, y/(x - shift - 7, y/
+s/(s32) D_8009E094, seconds/(s32) D_8009E09C, seconds/
+s/(x + 0x10, y, alpha, (s32) D_8009E09C/(x + 0x11, y, alpha, (s32) D_8009E09C/
+s/func_15042D94(x - 8, y, alpha, (s32) D_8009E0A4);/func_15042D94(x - 9, y, alpha, (s32) D_8009E0A4);/
+s/func_15042D94(x, y, alpha, (s32) D_8009E0A8);/func_15042D94(x, alpha, y, (s32) D_8009E0A8);/
+s/(s32) D_8009E0B0);/(s32) D_8009E0A8);/

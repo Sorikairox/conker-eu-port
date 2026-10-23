@@ -768,7 +768,11 @@ void func_1513CAA0(struct210 *arg0);
 void func_1513CAD4(struct210 *arg0);
 void func_1513CB58(struct210 *arg0);
 void func_1513CBA4(struct210 *arg0);
+#ifdef NON_MATCHING
+struct210 *func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+#else
 void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+#endif
 #ifdef NON_MATCHING
 /* P128/P131: the NM definition (game_169510.c) returns func_1513D2F0's record (the asm leaves it in v0) */
 struct210 *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
