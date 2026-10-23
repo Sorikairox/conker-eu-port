@@ -636,12 +636,24 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
     _a, _v = _p.split('=')
     ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
 
+STK_IN_MAX = 60   # P95: stack argument words sp+0x10 .. sp+0xFC (SP_ENTRY = STK_TOP - 0x100)
+
 def make_inputs(rng, kinds):
     r = _make_inputs(rng, kinds)
+    # P95: arguments 16+ (stack words 12+) were never set: a 19-argument function (func_15035220) read whatever the
+    # harness left there, and DIFFTEST_ARG N >= 16 was ignored silently. Only when needed (more than 16 parameters
+    # or an ARG knob >= 16), from a separate generator so the main random stream (and older results) do not move.
+    need = max([len(kinds) if kinds else 0] + [n + 1 for n in ARGFIX])
+    if need > 16:
+        xr = random.Random(r['stk'][0] ^ (r['a'][0] << 1))
+        for slot in range(16, min(need, STK_IN_MAX + 4)):
+            k = kinds[slot] if kinds and slot < len(kinds) else None
+            r['stk'].append(rand_arg(xr, k) if k not in (None, 'double') else rand_arg(xr))
     for n, vs in ARGFIX.items():
         v = vs[rng.randrange(len(vs))]
         if n < 4: r['a'][n] = v
-        elif n - 4 < 12: r['stk'][n - 4] = v
+        elif n - 4 < len(r['stk']): r['stk'][n - 4] = v
+        else: print('NOTE: DIFFTEST_ARG %d is beyond the %d stack words that can be set' % (n, STK_IN_MAX))
     return r
 
 def _make_inputs(rng, kinds):

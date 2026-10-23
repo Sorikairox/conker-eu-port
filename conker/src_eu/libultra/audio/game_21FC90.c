@@ -173,7 +173,11 @@ extern s32 D_800E1228;
 extern u8 D_800E1249;
 extern s16 D_8002BF60[];
 s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);
+#ifdef NON_MATCHING
+void func_1001CF38(void *, f32); /* P95: f32 parameter */
+#else
 void func_1001CF38(void *, s32);
+#endif
 s32 func_151F85C4(s32, s32, s32);
 s32 func_151F86B0(s32, s16 **, s32 *);
 void func_151F3D78(void);
@@ -291,7 +295,11 @@ s32 func_151F2E88(s32 count, Acmd **cmdp) {
             if (D_800E11D5 == 0) {
                 if (D_800E0DB2 > 0) {
                     if (D_800E0DD8 != 0) {
+#ifdef NON_MATCHING
+                        func_1001CF38((u8 *)&D_800E0D80 + 0x30, 22020.0f); /* P95: float literal (asm passes the bits 0x46AC0800) */
+#else
                         func_1001CF38((u8 *)&D_800E0D80 + 0x30, 0x46AC0800);
+#endif
                     }
                     CMD(*cmdp, 0x0B000020, osVirtualToPhysical((u8 *)&D_800E0D80 + 0x38) & 0xFFFFFF);
                     if (D_800E0DD8 == 2) {

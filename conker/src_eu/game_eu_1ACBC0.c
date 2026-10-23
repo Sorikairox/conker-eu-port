@@ -192,7 +192,30 @@ void func_1517FC90(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     D_800DE1BC = arg4;
 }
 
+#ifdef NON_MATCHING
+/* P95: per-frame countdown of the D_800DE240[0..D_80082FA0] timers by the frame time D_800BE9E4 (clamped at 0). */
+void func_1517FCCC(void) {
+    u16 *p = (u16 *) D_800DE240;
+    u16 *end;
+    s32 dt;
+
+    if (D_80082FA0 < 0) {
+        return;
+    }
+    end = (u16 *) &D_800DE240[D_80082FA0];
+    dt = D_800BE9E4;
+    do {
+        if (dt < *p) {
+            *p -= dt;
+        } else {
+            *p = 0;
+        }
+        p++;
+    } while (p <= end);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FCCC.s")
+#endif
 
 void func_1517FD24(void)
 {

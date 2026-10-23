@@ -262,7 +262,11 @@ s32 func_15107EA4(u8 *arg0, s8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107EA4.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_15143794(s16, s16, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
+#else
 s32 func_15143794(s16, s16, s32, u8 *);
+#endif
 s32 func_1515C7B4(u8 *, f32 *, s32 *, s32 *);
 
 void func_15107FA0(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4) {
@@ -271,7 +275,11 @@ void func_15107FA0(u8 *arg0, s16 arg1, s16 arg2, u8 *arg3, u8 *arg4) {
     s32 sp24;
 
     func_1515C7B4(arg0, sp2C, &sp28, &sp24);
+#ifdef NON_MATCHING
+    func_15143794(arg1, arg2, *(f32 *)&sp28, arg3); /* P95: f32 (float bits were passed as an int) */
+#else
     func_15143794(arg1, arg2, sp28, arg3);
+#endif
     *(f32 *)(arg3 + 4) *= *(f32 *)(arg0 + 0xF0);
     *(f32 *)(arg3 + 0) += sp2C[0];
     *(f32 *)(arg3 + 4) += sp2C[1];
@@ -302,7 +310,11 @@ void func_151080F8(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
 
     if (*(s32 *)(arg0 + 0x1D4) != 0) {
         func_1515C7B4(arg0, sp20, &sp1C, &sp18);
+#ifdef NON_MATCHING
+        func_15143794(arg1, arg2, *(f32 *)&sp1C, sp2C); /* P95: f32 (float bits were passed as an int) */
+#else
         func_15143794(arg1, arg2, sp1C, sp2C);
+#endif
         sp2C[1] *= *(f32 *)(arg0 + 0xF0);
         sp2C[0] += sp20[0];
         sp2C[1] += sp20[1];

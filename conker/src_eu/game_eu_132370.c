@@ -3,7 +3,11 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+void func_15104B60(s32 arg0, s32 arg1, f32 arg2) { /* P95: f32 (float bits were passed as an int) */
+#else
 void func_15104B60(s32 arg0, s32 arg1, s32 arg2) {
+#endif
 }
 
 s32 func_15104B74(s32 arg0, s32 arg1) {

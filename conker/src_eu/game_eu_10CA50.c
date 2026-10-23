@@ -10,6 +10,7 @@
 #ifdef NON_MATCHING
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);
 
+void func_15143874(s16, f32, f32 *, f32 *); /* P95 */
 void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     struct {
         f32 u88;
@@ -83,7 +84,7 @@ void func_150DFA38(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     var_s0 = (func_150ADA20() % 3U) + 1;
     if (var_s0 > 0) {
         do {
-            func_15143874((s16) (func_150ADA20() & 0xFF), 0x41F00000, &sp.u88, &sp.u90);
+            func_15143874((s16) (func_150ADA20() & 0xFF), 30.0f, &sp.u88, &sp.u90); /* P95: was 0x41F00000 as an int */
             sp.u88 += (*(f32 *)((u8 *)arg0 + 0));
             sp.u90 += (*(f32 *)((u8 *)arg0 + 8));
             temp_f20_2 = (func_150ADA68() * 0.5f) + 0.75f;

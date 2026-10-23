@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P95, 2026-10-23). Details: `docs/port/sessions/P95.md`
+
+- **Float bit patterns as ints** (`docs/port/sessions/p95/floatint_scan.py [--all] [--protos]`, NM-selected text of all
+  src_eu C): 28 literal call rows (incl. the P93 suspects func_151D58E4 / func_15116A8C / func_151AD010; func_1514CBE8
+  was already right in NM) and 17 TU-prototype-vs-definition float/int rows (`*(s32 *)` float fields / out-params
+  passed to f32 parameters) fixed in 28 files, 0 left. Matching lines are duplicated under `#ifdef NON_MATCHING`, so
+  the default build is unchanged. No row in port-b files. 4 REVIEW rows are packed s32 constants, not floats.
+- **func_15035220** (game_eu_62360.c, reflection matrices + entry alpha) in hand C (NM): 30 setups EQUIV, mutants 23/23.
+- **difftest hole 3**: arguments 16+ of the function under test were never set (and `DIFFTEST_ARG` >= 16 ignored); now
+  generated up to sp+0xFC when needed. Selftest 43/43.
+- Frame-path stubs in hand C (NM): func_1517FCCC (timers), func_15167010 (per-frame hooks), func_150ADA68 (random
+  float; MIPS III, model-checked `p95/ada68/check.py`), func_15083E0C (setup entry by id).
+- Default build byte-identical (full verify_all), NM links, protocheck 0 (931 bodies), progress_nm 4925/5915 (83.3%),
+  bytes 58.0%, 990 asm-only.
+
+## Next steps (from P95)
+
+1. Frame-path stubs still asm (P91 list, by size): func_15044D18 (71E70), func_15097BA8 (C4590), func_15185360,
+   func_1512D900, func_1517E3CC, func_151DA6F8, func_1510CE28, func_1510D090, func_1508F9F4, func_15113798,
+   func_15184298, func_15178004, func_15113000, func_15188630, func_15181A6C, func_1517B270, func_1509093C,
+   func_15129220, func_1512EE50. func_150ADA20 (random int, same LFSR as func_150ADA68) is still asm too.
+2. Browser: water / mirror reflections (func_15035220 modes 0-2), func_15167010 hooks, random floats.
+3. Scan gap: TU prototypes of asm-only callees are only checked where a literal is passed; a float/int check of TU
+   prototypes against the callee asm (mtc1 / lwc1 of each argument) would close it.
+4. Mutant harness: stubbed matrix callees hide the contents of stack matrices passed by pointer (func_15035220 flip /
+   rotation); an option to run real C callees (func_150A7A48 / func_150A8050) would test them.
+
 ## State (session P93, 2026-10-23). Details: `docs/port/sessions/P93.md`
 
 - Re-check of every NM body calling a >16-argument function (`p93/wide_scan.py`): 11 bodies + func_150268BC; 9 EQUIV with

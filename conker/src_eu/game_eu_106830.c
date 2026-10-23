@@ -266,7 +266,11 @@ void func_150DAB6C(u8 *arg0, f32 arg1) {
 }
 
 s32 func_15131D98(s32, s32, u8 *, s32);
+#ifdef NON_MATCHING
+void func_15131EC8(s32, f32, u8 *); /* P95: f32 (float bits were passed as an int) */
+#else
 void func_15131EC8(s32, s32, u8 *);
+#endif
 
 s32 func_150DABA8(s32 arg0, s32 arg1) {
     u8 *sp20;
@@ -275,7 +279,11 @@ s32 func_150DABA8(s32 arg0, s32 arg1) {
     temp_a2 = arg0 + 0xA8;
     sp20 = temp_a2;
     func_15131D98(arg0, arg0 + 0xAC, temp_a2, arg0 + 0xAA);
+#ifdef NON_MATCHING
+    func_15131EC8(arg0 + 0x58, (*(f32 *)((u8 *)temp_a2 + 0xC)), temp_a2); /* P95: f32 (float bits were passed as an int) */
+#else
     func_15131EC8(arg0 + 0x58, (*(s32 *)((u8 *)temp_a2 + 0xC)), temp_a2);
+#endif
     return 1;
 }
 
