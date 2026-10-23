@@ -1,0 +1,37 @@
+s/if (obj->id == 0x48) {$/if (obj->id == 0x49) {/
+s/partner = other\[6\];/partner = other[7];/
+s/if (force != 0 ||/if (force == 1 ||/
+s/pl->y_position < obj->y_position + height \* obj->y_scale/pl->y_position <= obj->y_position + height/
+s/pl->y_velocity < 0.0f))/pl->y_velocity <= 0.0f))/
+s/obj->unk13C = obj->unk124 + 100;/obj->unk13C = obj->unk124 + 101;/
+s/D_800D1580 = sound;/D_800D1580 = sound + 1;/
+s/pl->unk1CC = pl->y_position;/pl->unk1CC = obj->y_position;/
+s/pl->unk31C->unk30 = 0;/pl->unk31C->unk30 = 1;/
+s/if (obj->interaction_state == 0x20) {/if (obj->interaction_state == 0x21) {/
+s/obj->y_velocity = 0.0f;/obj->y_velocity = 1.0f;/
+s/                state = 2;/                state = 3;/
+s/if (partner == 0x7A) {/if (partner == 0x7B) {/
+s/obj->unk65 = obj->unk124 + 1;/obj->unk65 = obj->unk124;/
+s/obj->unk5C = anim;/obj->unk5C = flags;/
+s/obj->unk101 |= flags;/obj->unk101 = flags;/
+s/func_1505E650(pl, 5,/func_1505E650(pl, 6,/
+s/func_15083568(pl, 0x79,/func_15083568(obj, 0x79,/
+s/                    ride = 1;/                    ride = 0;/
+s/obj->y_scale = 0.75f;/obj->y_scale = 0.5f;/
+s/pl->y_position = obj->y_position;/pl->y_position = obj->x_position;/
+s/                state = 1;/                state = 0;/
+s/if (D_800BE9F0 == 6) {/if (D_800BE9F0 == 7) {/
+s/pl->unk78 = angle;/pl->unk78 = 0;/
+s/(s16) (angle + 0x4000)/(s16) (angle + 0x2000)/
+s/pl->unk31C->unk4E = state;/pl->unk31C->unk4E = 0;/
+s/pl->unk83 = 0;/pl->unk83 = 1;/
+s/pl->unk65 = D_800C3E78 + 1;/pl->unk65 = D_800C3E78;/
+s/pl->unk5C = anim;/pl->unk5C = 0;/
+s/pl->unk101 |= flags;/pl->unk101 = flags;/
+s/pl->immune = immune;/pl->immune = arg7;/
+s/pl->unk239 = arg7;/pl->unk239 = immune;/
+s/pl->unk31C->unk27 = 0;/pl->unk31C->unk27 = 1;/
+s/obj->unk232 = timer;/obj->unk232 = timer + 1;/
+s/func_1506160C(pl, 1, 0, 0, 0);/func_1506160C(pl, 0, 0, 0, 0);/
+s/pl->unk101 |= 0x40;/pl->unk101 |= 0x20;/
+s/func_15060F28(obj, 0);/func_15060F28(pl, 0);/

@@ -1,6 +1,14 @@
 #include <ultra64.h>
 
+#ifdef NON_MATCHING
+/* P128: functions.h:772 declares func_1513D524 void; the NM definition below returns the record. Hide the old
+ * prototype until the port slot's functions.h fix merges (harmless afterwards). */
+#define func_1513D524 func_1513D524_void_proto
+#endif
 #include "functions.h"
+#ifdef NON_MATCHING
+#undef func_1513D524
+#endif
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 u8 *func_15140410(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3);
@@ -535,9 +543,18 @@ void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 ar
     func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
 }
 
+#ifdef NON_MATCHING
+// record_spawn_default: func_1513D2F0 with the default parameter block D_800A4AA0 and no extra words; returns the
+// new record (the asm leaves func_1513D2F0's v0 in v0; func_15149AC0 copies into it). P128.
+// functions.h:772 still says void until the port slot changes it.
+struct210 *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
+    return func_1513D2F0(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
+}
+#else
 void func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8) {
     func_1513D2F0(arg0, &D_800A4AA0, arg1, arg2, arg3, arg4, arg5, 0, 0, arg6, arg7, arg8);
 }
+#endif
 
 s32 func_1513D594(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, u8 argD, s32 argE, u8 argF, s32 arg10) {
     struct210 *temp_v0;

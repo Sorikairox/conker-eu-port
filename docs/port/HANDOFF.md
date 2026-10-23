@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P128 (port-b) (session P128, 2026-10-23). Details: `docs/port/sessions/P128.md`
+
+Branch `port-b` (from P125 e8fb8b9); the orchestrator merges it into `port`.
+
+- C (NM), all EQUIV + mutants: func_15149AC0 `spark_spawn_from_desc` (game_eu_1772D0.c) with func_1513D524
+  `record_spawn_default` now returning its record in NM builds (game_169510.c); func_150A6C40 `pvs_row_apply`
+  (game_eu_D3880.c, void); func_15052F9C `object_catch_player` + func_1505327C `object_launch_player`
+  (game_eu_78230.c, keep the callers' f32 / s32 return types, return 0); func_1510CE28 `tex_scroll_update`
+  (game_eu_138E00.c, s32 for its caller).
+- Temporary: game_169510.c / game_eu_1772D0.c hide functions.h:772's void func_1513D524 prototype with a
+  `#define ... _void_proto` around the include (NM only). Remove once the port slot's functions.h fix merges.
+- verify_all OK, NM links, protocheck = the known game_A9D90.c pair + func_150A6C40 vs game_eu_13C400.c:576 (port
+  fixing). progress_nm total 5053/5915.
+
+## Next steps (from P128)
+
+1. After the functions.h:772 / game_eu_13C400.c:576 fixes merge: drop the `func_1513D524_void_proto` guards and
+   re-run protocheck (should be the A9D90 pair only).
+2. func_1515929C: its .data list table D_8008B3CC points into its own rodata_inject block (0x800A66C0..); decide how
+   the NM / port builds keep those bytes at their addresses before converting; check the 23 D_8008B370 handlers.
+3. func_1508F9F4: the spawn flag (sp+0x44) and level (s7) are uninitialised on some paths in the asm; decide the
+   intended values (spawn = 1?) with the orchestrator, then convert.
+4. Still open per-frame: func_15188630, func_1509093C, func_1505528C (its callee func_15058898 is a menu stub).
+5. func_10010154 (init_EB00.c, not port-b) is func_15054F74's last asm callee.
+6. Browser: UNVERIFIED list in P128.md.
+
 ## P125 (port-b) (session P125, 2026-10-23). Details: `docs/port/sessions/P125.md`
 
 Branch `port-b` (from P122 422e5d3); the orchestrator merges it into `port`.
