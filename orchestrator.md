@@ -106,6 +106,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Before P90, difftest compared only the first 16 call arguments (stack sp+0x10..0x3C); re-checked in P93 (2 real bugs fixed).
 - difftest now flags `[POKE unread]` / `[knob callee never called]` — read them; they catch US addresses in knobs.
 - Batch m2c bodies (P15–P22) contain pointer-stride / access-width bugs (`p += 4` on `u8 **`, `(x*K)+&SYM` on non-byte symbols, word reads where asm uses lb): run port-web `port/tools/m2c_sanity.py` after merges (P118).
+- difftest precedence since P132: learned pointers > DIFFTEST_POKE > ROM image > random; stack-arg scan now passes IDO div trap checks (varargs printers with a division before the call were unchecked before P132).
 - Watch for float bit patterns passed as ints (`0xC61C4000` to an `f32` parameter) — an m2c artefact that is wrong on wasm.
 
 ### Lesson: dropped arguments (P75, P78)
