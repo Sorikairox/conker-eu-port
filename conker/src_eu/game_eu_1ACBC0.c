@@ -284,7 +284,45 @@ void func_1517FD84(s32 project, f32 x, f32 y, f32 z, s32 player) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FD84.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P130 */
+// view_fill_rect: appends a G_FILLRECT (F6) for the rectangle (x0, y0) - (x1, y1) (either corner order) clipped
+// to view's screen box (camera D_800BE628 + view * 0x180: f32 left +0x2C, top +0x24, right +0x30, bottom +0x28,
+// truncated); nothing when it lies outside (touching counts as outside). Returns the DL end.
+u8 *func_1517FF64(u8 *dl, s32 x0, s32 y0, s32 x1, s32 y1, s32 view) {
+    u8 *cam;
+    s32 left, top, right, bottom;
+    s32 t;
+
+    if (x1 < x0) {
+        t = x0;
+        x0 = x1;
+        x1 = t;
+    }
+    if (y1 < y0) {
+        t = y0;
+        y0 = y1;
+        y1 = t;
+    }
+    cam = (u8 *) D_800BE628 + view * 0x180;
+    left = *(f32 *) (cam + 0x2C);
+    top = *(f32 *) (cam + 0x24);
+    bottom = *(f32 *) (cam + 0x28);
+    right = *(f32 *) (cam + 0x30);
+    if (!(y0 < bottom && top < y1 && x0 < right && left < x1)) {
+        return dl;
+    }
+    x0 = (x0 < left) ? left : (right < x0) ? right : x0;
+    y0 = (y0 < top) ? top : (bottom < y0) ? bottom : y0;
+    x1 = (x1 < left) ? left : (right < x1) ? right : x1;
+    y1 = (y1 < top) ? top : (bottom < y1) ? bottom : y1;
+    ((s32 *) dl)[1] = ((x0 & 0x3FF) << 14) | ((y0 & 0x3FF) << 2);
+    ((s32 *) dl)[0] = 0xF6000000 | ((x1 & 0x3FF) << 14) | ((y1 & 0x3FF) << 2);
+    return dl + 8;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1517FF64.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_1518010C.s")
 
@@ -1008,7 +1046,41 @@ u8 *func_15182450(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_15182450.s")
 #endif
+#ifdef NON_MATCHING
+/* P133 */
+void *memcpy(void *, const void *, size_t);
+
+/*
+ * colour_fade_start: starts a colour fade effect (func_15149130 type 0x39, 8-byte payload, lasting `frames`) with
+ * the colour (r, g, b, a), the byte `mode` and the per-frame alpha step a / frames; arg6 / arg7 go to
+ * func_15149130 as they are. Nothing when frames <= 0 or no effect slot is free. The asm leaves payload byte 5
+ * uninitialised (stack garbage); the C writes 0 there.
+ */
+s32 func_15182BE0(u8 r, u8 g, u8 b, u8 a, s16 frames, u8 mode, u8 arg6, s32 arg7) {
+    struct {
+        u8 r, g, b, a, mode, pad;
+        s16 step;
+    } fade;
+    struct260 *e;
+
+    if (frames > 0) {
+        fade.r = r;
+        fade.step = a / frames;
+        fade.a = a;
+        fade.g = g;
+        fade.b = b;
+        fade.mode = mode;
+        fade.pad = 0;
+        e = func_15149130(frames, -1, 0x39, 3, 1, 0, (struct37 *) 8, arg6, arg7);
+        if (e != NULL) {
+            memcpy((u8 *) e + 0x28, &fade, 8);
+        }
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ACBC0/func_15182BE0.s")
+#endif
 
 void func_15182CB8(struct_eu_1ACBC0 *arg0) {
     arg0->unk2B = arg0->unk2E * arg0->unkE;

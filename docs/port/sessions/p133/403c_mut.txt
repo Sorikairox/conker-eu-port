@@ -1,0 +1,12 @@
+s/if (slot\[0\] != 0) {/if (slot[1] != 0) {/
+s/idx + 0xAD)/idx + 0xAE)/
+s/0, 0, 0, 2, 9,/0, 0, 0, 2, 8,/
+s/slot\[1\] = asset\[0\];/slot[1] = asset[1];/
+s/slot\[2\] = asset\[2\];/slot[2] = asset[3];/
+s/slot\[3\] = asset\[6\];/slot[3] = asset[5];/
+s/D_800DDF78\[idx\] = asset\[4\];/D_800DDF78[idx] = asset[3];/
+s/0, 1, 0x3E,/0, 1, 0x3F,/
+s/(s16 \*\*) &slot\[4\]/(s16 **) \&slot[3]/
+s/D_800DDF68\[idx\] = 1;/D_800DDF68[idx] = 2;/
+s/    slot\[0\] = (s32) asset;//
+s/idx \* 0x14)/idx * 0x10)/
