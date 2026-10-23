@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P180, 2026-10-24). Details: `docs/port/sessions/P180.md`
+
+- **func_1500BEC0 unit done** (one commit): hand C (NM) for func_1500BEC0 ambient_emitters_build, func_1500AD84
+  ambient_slot_setup, func_1500AF08 ambient_emitter_add, the six D_8008D258 placers func_1500B1F4 / B714 / B8F4 / BAB8 /
+  B3B0 / BC7C (func_1500AF08 is not in the table) and func_1517BE0C ambient_emitters_sort. difftest EQUIV (random +
+  setups, ROMDATA), mutants 107 / 109 (2 equivalent). No stubs reached. game_3B920 NM prototype `void func_1500BEC0(void)`.
+- Dropped-return fixes (port-b P179 scan): 12 functions now return their tail call's value (func_1516387C, func_150408CC,
+  func_150ED7B4, func_150FF808, func_1513092C, func_1515DB1C, func_151B8C18, func_1500F240, func_150870E0,
+  func_1509FA88 / FB90 / FBC8); default build byte-identical. func_1505D1C4 real but its prototypes are in port-b files.
+- P90 func_150268BC setup s5F_4 (UNSURE) is EQUIV after the P176 page-end stub fix.
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0 (1280 NM
+  bodies), selftest 65/65, progress_nm 5274/5915 (89.2%), C bytes 72.4%. No difftest processes left in conkerdev-port.
+
+## Next steps (from P180)
+
+1. func_1505D1C4 (game_83300) should return func_1505C7D8's s32: coordinate with port-b (prototypes in game_eu_201240.c,
+   game_eu_110DB0.c, game_eu_12D5D0.c). func_100126E8 (inner asm func_15043CA4), func_15060F28 / func_1506160C /
+   func_1506E5FC (SUSPECT2): check.
+2. func_1517C11C (game_eu_1A9280, 1286 insns): per-frame consumer of the sorted emitters (P104 draft).
+3. Browser: level ambient emitters (P180.md section 6), the 12 return fixes.
+4. Breadth (p180/asmlist.py, forbid list now includes port-b P179 names game_40490 / game_39750 / game_1897A0 / game_eu_126330).
+5. P138 / P141 leftovers.
+
 ## State (session P176, 2026-10-24). Details: `docs/port/sessions/P176.md`
 
 - Merged port-b b235977 (P168 + P170) (b5b4e02): HANDOFF.md only conflict; merge fix: game_eu_1F4F60.c NM prototype of

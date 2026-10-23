@@ -98,10 +98,10 @@ s32 func_15086218(f32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15087040.s")
 
-void func_150870E0(s32 arg0) {
+s32 func_150870E0(s32 arg0) {
     s32 temp_v1 = D_800D2778[arg0].unk4;
 
-    func_150A3674(3, 0xB, D_800D2778[arg0].unk0, D_800D2778[arg0].unk2, temp_v1);
+    return func_150A3674(3, 0xB, D_800D2778[arg0].unk0, D_800D2778[arg0].unk2, temp_v1);
 }
 
 s32 func_1508712C(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {

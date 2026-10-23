@@ -1,0 +1,8 @@
+s/if (count == 0) {/if (count == 1) {/
+s/D_80096014\[i\]\[0\] + (f32) tri\[0\]\[0\]/D_80096014[i][0] + (f32) tri[1][0]/
+s/x = (s32) (((f32) tri\[2\]\[0\] - a)/x = (s32) (((f32) tri[2][1] - a)/
+s/z = (s32) (((f32) tri\[2\]\[2\] - a) \* D_80096014\[i\]\[1\]/z = (s32) (((f32) tri[2][2] - a) * D_80096014[i][0]/
+s/0x80, kind, index)/0x40, kind, index)/
+s/mode, x, y, z/mode, x, z, y/
+s/func_1500AF08(index, slot/func_1500AF08(index + 1, slot/
+s/kind, index);/kind, i);/

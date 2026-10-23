@@ -1,0 +1,9 @@
+s/(tri\[2\]\[0\] + tri\[0\]\[0\] + tri\[1\]\[0\]) \/ 3/(tri[2][0] + tri[0][0] + tri[1][0]) \/ 2/
+s/tri\[0\]\[1\] + tri\[1\]\[1\]/tri[0][1] + tri[1][2]/
+s/if (62.5f < /if (63.5f < /
+s/vol = 0x3E;/vol = 0x3F;/
+s/func_1000FA64(0x4D/func_1000FA64(0x4E/
+s/vol >> 3/vol >> 2/
+s/0x8000, vol/0x4000, vol/
+s/return index;/return index + 1;/
+s/(f32) (u16) volume/(f32) volume/

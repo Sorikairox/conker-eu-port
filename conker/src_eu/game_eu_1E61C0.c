@@ -95,7 +95,7 @@ void func_151B8BEC(s32 arg0, s16 arg1) {
 }
 
 extern f32 D_800DCE54;
-void func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
+s32 func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
     u8 *p;
     struct_eu_EF410 sp18;
 
@@ -110,7 +110,7 @@ void func_151B8C18(u8 *arg0, u8 arg1, s32 arg2) {
     sp18.unk16 = 0;
     sp18.unk17 = 3;
     sp18.unk18 = 0;
-    func_15134908(&sp18, 0, arg1, arg2);
+    return func_15134908(&sp18, 0, arg1, arg2);
 }
 
 void func_15143794(s16, s16, f32, void *);
