@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P129 (port-b) (session P129, 2026-10-23). Details: `docs/port/sessions/P129.md`
+
+Branch `port-b` (from P128 9328f02); the orchestrator merges it into `port`.
+
+- C (NM), all EQUIV + mutants: func_1515929C `watcher_state_update` (game_eu_186A80.c), func_1508F9F4
+  `underwater_bubbles_update` + func_1509093C `underwater_air_meter_update` (game_BC510.c), func_15188630
+  `light_fx_update` (game_eu_1B5C40.c, s32 for its caller, returns 0).
+- func_1515929C's rule table D_800A65E0 and the s8 lists behind D_8008B3CC (its rodata_inject block) are referenced
+  by symbol only: the browser's n64mem mirror holds the ROM game_data (rodata included) at N64 addresses and
+  relocates D_8008B3CC's five words; NM link symbols are absolute. No build-file change. All 23 handlers were C.
+- func_1508F9F4's uninitialised spawn flag: on the N64 the slot always holds func_1501878C's s1 (0x800BEDF0, saved
+  there by func_1517ABB0's prologue) -> spawning enabled unless the asm clears it; C uses `spawn = (delay != 0)`.
+  Verified with a test copy of difftest that presets the stack slot (`port_work/p129/difftest_stk.py`).
+- Harness note: a static helper function in a candidate is run as a callee stub by difftest (write helpers inline).
+- func_1513D524 `_void_proto` guards kept (functions.h:772 fix not in port-b yet).
+- verify_all OK, NM links, protocheck = the two known pairs (A9D90 func_1517FD84, func_150A6C40 / 13C400:576).
+  progress_nm total 5057/5915.
+
+## Next steps (from P129)
+
+1. After the functions.h:772 / game_eu_13C400.c:576 fixes merge: drop the `func_1513D524_void_proto` guards.
+2. func_1505528C (game_eu_78230.c): blocked on func_15058898 (game_83300.c, asm, produces the object position) and
+   func_10010344 (init_EB00.c, asm); convert together with / after them.
+3. Browser: UNVERIFIED list in P129.md (watchers, underwater HUD, light effects).
+4. Optional harness feature: DIFFTEST_STKFILL (P129 test copy) could go into tools/port/difftest (shared file, not
+   changed here) for other uninitialised-stack reads.
+
 ## P128 (port-b) (session P128, 2026-10-23). Details: `docs/port/sessions/P128.md`
 
 Branch `port-b` (from P125 e8fb8b9); the orchestrator merges it into `port`.

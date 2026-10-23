@@ -1,0 +1,31 @@
+--- tools/port/difftest/difftest.py	2026-10-23 13:41:57
++++ port_work/p129/difftest_stk.py	2026-10-23 16:43:35
+@@ -28,7 +28,7 @@
+ return value (by the candidate's declared return type) and the restoration of sp/s0-s8/f20-f30.
+ Prints one line: EQUIV <func> (n trials ...) | DIFFER <func>: <reason> | ERROR <func>: <why>.
+ """
+-import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.join(_pgo.path.dirname(_pgo.path.abspath(__file__)), '..')); import portguard  # wrong-checkout guard (P7)
++import sys as _pgs, os as _pgo; _pgs.path.insert(0, '/conker/tools/port'); import portguard  # wrong-checkout guard (P7)
+ import sys, os, re, glob, subprocess, shlex, struct, hashlib, json, random, gc, pickle
+ # Unicorn 2.1.x mis-translates a call whose delay slot holds an FPU instruction (lwc1/swc1/...):
+ # the callee's first block runs with stale delay-slot flags and jumps to 0 (UC_ERR_EXCEPTION at
+@@ -41,7 +41,7 @@
+     UC_HOOK_MEM_UNMAPPED, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ, UC_HOOK_CODE, UC_HOOK_BLOCK, UC_PROT_ALL
+ from unicorn.mips_const import *
+ 
+-HERE = os.path.dirname(os.path.abspath(__file__))
++HERE = '/conker/tools/port/difftest'  # P129 test copy
+ PRAG = re.compile(r'#pragma GLOBAL_ASM\("([^"]*)/(\w+)\.s"\)')
+ WORD_RE = re.compile(r"/\*\s+([0-9A-F]+)\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(.*)")
+ PAGE = 0x1000
+@@ -745,6 +745,10 @@
+         code = b''.join(struct.pack('>I', w) for w in mwords)
+         self.premap(vram, code, overlay=True)
+         self.premap(STK_LO, bytes(STK_TOP - STK_LO + 0x1000))
++        # P129 test copy: DIFFTEST_STKFILL='ADDR=VAL,...' presets stack words (the stack is zero-filled and premapped,
++        # so DIFFTEST_POKE cannot reach it). Used for func_1508F9F4's uninitialised spawn flag (sp+0x44).
++        for _p in filter(None, os.environ.get('DIFFTEST_STKFILL', '').split(',')):
++            _a, _v = _p.split('='); mu.mem_write(phys(int(_a, 16)), struct.pack('>I', int(_v, 16)))
+         self.premap(RET_MAGIC, words2b(EPILOGUE_CODE) + bytes(PAGE - 4 * len(EPILOGUE_CODE)))
+         self.premap(SCR, bytes(0x400) + words2b(PROLOGUE_CODE) + bytes(PAGE - 0x400 - 4 * len(PROLOGUE_CODE)))
+         self.helpers = set(); self.pending = None

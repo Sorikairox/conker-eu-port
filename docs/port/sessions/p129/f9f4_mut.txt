@@ -1,0 +1,30 @@
+s/        if (D_800D28E0 < 0) {/        if (D_800D28E0 < 1) {/
+s/value = D_800CC2D0\[0\].in_water ? D_800CC2D0\[0\].unkB2 : 0;/value = D_800CC2D0[0].in_water ? (s16)D_800CC2D0[0].unkB2 : 0;/
+s/value = D_800CC2D0\[0\].in_water/value = D_800CC2D0[0].unkAC/
+s/if (value >= 0x5B) {/if (value >= 0x5A) {/
+s/delay = value \/ 240;/delay = value \/ 239;/
+s/if (delay >= 7) {/if (delay >= 6) {/
+s/delay = (6 - delay) \* 9;/delay = (6 - delay) * 8;/
+s/spawn = (delay != 0);/spawn = 1;/
+s/            if (v > 0) {/            if (v >= 0) {/
+s/BUB_S16(r, 0xA) = 6;/BUB_S16(r, 0xA) = 5;/
+s/if (spawn \&\& D_800D28E0 == 0) {/if (spawn) {/
+s/D_800D28E0 = 10;/D_800D28E0 = 9;/
+s/BUB_S16(r, 2) = 0x60;/BUB_S16(r, 2) = 0x61;/
+s/BUB_S16(r, 8) = 0x500;/BUB_S16(r, 8) = 0x501;/
+s/BUB_S16(r, 0xA) = delay;/BUB_S16(r, 0xA) = delay + 1;/
+s/BUB_S16(r, 4) = 0xFC - ((s32)(sway \* BUB_S16(r, 8)) >> 8);/BUB_S16(r, 4) = 0xFC - ((s32)(sway * BUB_S16(r, 8)) >> 7);/
+s/v = BUB_S16(r, 6) + D_800BE9E4 \* 200;/v = BUB_S16(r, 6) + D_800BE9E4 * 201;/
+s/if (v >= 0x666) {/if (v > 0x666) {/
+s/if (r\[0xC\] < 0x20) {/if (r[0xC] < 0x1F) {/
+s/if (v > 0x20) {/if (v > 0x1F) {/
+s/BUB_S16(r, 2) -= (s32)(frames \* r\[0xC\]) >> 4;/BUB_S16(r, 2) -= (s32)(frames * r[0xC]) >> 3;/
+s/v = (v \* 0x104) >> 8;/v = (v * 0x105) >> 8;/
+s/for (i = 0; i < frames; i++) {/for (i = 1; i < frames; i++) {/
+s/r\[0xE\] += frames \* 5;/r[0xE] += frames * 4;/
+s/BUB_S16(r, 8) += frames \* 30;/BUB_S16(r, 8) += frames * 31;/
+s/r\[0xF\] += D_800BE9E4 \* 10;/r[0xF] += D_800BE9E4 * 11;/
+s/BUB_S16(r, 0) = ((s32)(sway \* BUB_S16(r, 8)) >> 8) + BUB_S16(r, 4);/BUB_S16(r, 0) = ((s32)(sway * BUB_S16(r, 8)) >> 8) + BUB_S16(r, 2);/
+s/            if (BUB_S16(r, 0xA) == 0) {/            if (BUB_S16(r, 0xA) <= 1) {/
+s/r\[0xC\] = 0;/r[0xC] = 1;/
+s/BUB_S16(r, 6) = 0;/BUB_S16(r, 6) = 1;/
