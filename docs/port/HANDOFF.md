@@ -10,6 +10,37 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P131, 2026-10-23, port-web). Details: `docs/port/sessions/P131.md`
+
+- Merged port 40d3eaa (P127) as dc562bf and port-b c2778a9 (P125/P128/P129) as b03d7fa; only HANDOFF conflicts
+  (merge_union.py, section order checked). Resolution: functions.h declares func_1513D524 `struct210 *` under
+  NON_MATCHING (void in #else), the `_void_proto` hack in game_169510.c / game_eu_1772D0.c is gone; pc_gu.c's duplicate
+  func_150A7B80 removed (link warning gone). verify_all OK, NM links, protocheck 0 (1081), float-int BUG 0, arity 117,
+  m2c_sanity 213 rows / 38 high functions, census 722 ok / 0 FAIL.
+- func_151DE100 is a plain function in the port (no data stub, n64mem F-data 0, D_8009018C[0] relocated): P126's mode-0
+  trap at 4487 is gone (node: ~940 mode-0 frames, no trap).
+- New game: menu -> START -> START reaches mode 0 / level 0x18 / scene 1 (cutscene). Chrome traps 6/6 on that frame in
+  func_1510D3E0 via func_15022440 -> func_15082E44 -> func_15083568 (setup list 178 -> asset (9, 189) one-list model
+  through the multi-list loader). Cause: **game_eu_4A070.c:2447** `(sp38 * 0x30) + D_800D20FC` on a `struct258 *`
+  (size 0x10) = stride 0x300; asm uses bytes. Fix `(u8 *) D_800D20FC + sp38 * 0x30` (port slot). Node survives by
+  luck but draws 0 triangles in mode 0 (opening cutscene black).
+- Cartridge check (func_151DE100 quit -> no): osPiStartDma = rom_copy of real ROM bytes; ROM 0xF80 gives the expected
+  0x3050A14A / 0xBCFCF506, so the random DMA path is not taken (not reached at runtime).
+- P113 guard kept (mode 0 not observable yet; noguard run: only the harmless 2133 case). noev regression clean (node +
+  2 Chrome walks, heap 0, traps 0).
+- DIAGNOSTIC `?p131mdl=1|FRAME` (p103_boot.c wraps of func_1510D3E0 / func_1502B6BC / func_15082E44 / func_1502B8E0).
+
+## Next steps (from P131)
+
+1. Port slot: fix func_15022440's entry stride (game_eu_4A070.c:2447) and audit other struct258 / D_800D20FC
+   arithmetic (game_eu_44010.c:46). Then re-run `docs/port/sessions/p131/newgame.sh DIR "&p131mdl=4300"`.
+2. Opening cutscene draws nothing: stub func_150F1F80 (game_eu_11F790, mode-0 per-frame), then frame-DL stubs
+   func_150A6D40 / func_1510E6A0 / func_15169FB8 / func_1517FF64 / func_1518010C.
+3. func_151407D0 (game_16DC80, emitters of P127's func_150113E0), func_1515AEE4 (game_eu_186A80).
+4. P113 guard: remove after a mode-0 run past the scene start without NO GUARD lines.
+5. Node new-game runs: START timing is unreliable in node (2 of 3 runs never left the menu); prefer Chrome or add a
+   third START.
+
 ## State (session P126, 2026-10-23, port-web). Details: `docs/port/sessions/P126.md`
 
 - Merged port 9940126 (P124) as 7738b0a and port-b 422e5d3 (P119 + P122) as dd693f9. Code conflicts were in

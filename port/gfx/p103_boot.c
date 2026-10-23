@@ -312,6 +312,8 @@ int __real_func_15083568(void *obj, int n, float f, int a3);
 int __wrap_func_15083568(void *obj, int n, float f, int a3) {
     static unsigned cnt;
     extern unsigned char D_800CC2D0[];
+    { static int f131 = -1; if (f131 < 0) f131 = port_flag("p131mdl"); /* P131: also log before the call (a trap inside never returns) */
+      if (f131 > 0 && port_frame_count >= (f131 > 1 ? (unsigned)f131 : 4400u)) port_log("[p131] func_15083568 enter obj %08X list %d frame %u\n", (unsigned)(uintptr_t)obj, n, port_frame_count); }
     int r = __real_func_15083568(obj, n, f, a3);
     if (flag(&fboot, "p103boot") && cnt++ < 60) {
         long so = ((unsigned char *)obj - D_800CC2D0), sr = ((unsigned char *)(uintptr_t)(unsigned)r - D_800CC2D0);
@@ -391,3 +393,104 @@ void p123_gates(void) {
 
 /* P123 ?p123fadeev (TEST-ONLY wrap of handler C func_15029EA8, 5/1 fade branch) removed in P126: port P124 converted
  * func_15029EA8 to C and the menu fades in by itself. */
+
+/* P131 (?p131mdl=1 or =FRAME, DIAGNOSTIC): log func_1510D3E0's display lists from frame 4400 (or FRAME) on (asset 9 models of the new
+ * game's level 0x18 trapped in it): dl, outList slot, first words, and how far the walk to G_ENDDL stays inside
+ * the wasm memory. */
+int __real_func_1510D3E0(void *dl, int skip, int addRef, int age, void *outList);
+int __wrap_func_1510D3E0(void *dl, int skip, int addRef, int age, void *outList) {
+    static int f = -1; static unsigned n;
+    extern unsigned char D_800DFDE8[];
+    if (f < 0) f = port_flag("p131mdl");
+    if (f > 0 && port_frame_count >= (f > 1 ? (unsigned)f : 4400u) && n < 200) {
+        unsigned lim = (unsigned)__builtin_wasm_memory_size(0) * 65536u, a = (unsigned)(uintptr_t)dl, k = 0, end = 0;
+        n++;
+        if (a >= 0x1000 && a + 8 <= lim) {
+            for (k = 0; a + 8 * k + 8 <= lim && k < 0x100000; k++)
+                if ((((uint32_t *)dl)[2 * k] >> 24) == 0xDF) { end = 1; break; }
+        }
+        port_log("[p131] func_1510D3E0 #%u frame %u: dl %08X (mem %08X) out %08X (idx %ld) age %X | w %08X %08X | %s after %u cmds\n",
+                 n, port_frame_count, a, lim, (unsigned)(uintptr_t)outList,
+                 outList ? (long)(((unsigned char *)outList - D_800DFDE8) / 4) : -1L, age,
+                 (a >= 0x1000 && a + 8 <= lim) ? ((uint32_t *)dl)[0] : 0, (a >= 0x1000 && a + 8 <= lim) ? ((uint32_t *)dl)[1] : 0,
+                 end ? "ENDDL" : "NO-END/OUT", k);
+    }
+    return __real_func_1510D3E0(dl, skip, addRef, age, outList);
+}
+
+/* P131 (?p131mdl, DIAGNOSTIC): asset loads of type 9 (models) from the same start frame: index, header, header words
+ * 0..4 and the first two words at header[0] (table of DL offsets for func_15030100, a DL for func_1518C900). The
+ * loader is variadic: forward up to 4 extra arguments (arg3 = their count). */
+#include <stdarg.h>
+int __real_func_1502B6BC(int *a0, int a1, int *a2, int a3, ...);
+int __wrap_func_1502B6BC(int *a0, int a1, int *a2, int a3, ...) {
+    static int f = -1; static unsigned n;
+    int v[4] = {0, 0, 0, 0}, r, k;
+    va_list ap;
+    va_start(ap, a3);
+    for (k = 0; k < a3 && k < 4; k++) v[k] = va_arg(ap, int);
+    va_end(ap);
+    switch (a3) {
+    case 0: r = __real_func_1502B6BC(a0, a1, a2, a3); break;
+    case 1: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0]); break;
+    case 2: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0], v[1]); break;
+    case 3: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0], v[1], v[2]); break;
+    default: r = __real_func_1502B6BC(a0, a1, a2, a3, v[0], v[1], v[2], v[3]); break;
+    }
+    if (f < 0) f = port_flag("p131mdl");
+    if (f > 0 && a3 == 2 && v[0] == 9 && port_frame_count >= (f > 1 ? (unsigned)f : 4400u) && n < 100) {
+        uint32_t *h = (uint32_t *)(uintptr_t)(unsigned)r;
+        n++;
+        if (h) {
+            uint32_t t = h[0];
+            int ok = t >= (unsigned)r && t < (unsigned)r + 0x100000;
+            port_log("[p131] asset(9, %d) frame %u -> %08X: hdr %08X %08X %08X %08X %08X | at hdr[0]: %08X %08X\n", v[1], port_frame_count,
+                     (unsigned)r, h[0], h[1], h[2], h[3], h[4], ok ? ((uint32_t *)(uintptr_t)t)[0] : 0, ok ? ((uint32_t *)(uintptr_t)t)[1] : 0);
+        } else
+            port_log("[p131] asset(9, %d) frame %u -> 0\n", v[1], port_frame_count);
+    }
+    return r;
+}
+
+/* P131 (?p131mdl, DIAGNOSTIC): level-setup entry spawns (func_15082E44, 0x30-byte entries of D_800D20FC): idx and the
+ * whole entry (+0x28 setup id, +0x29 setup command list), from the same start frame. */
+int __real_func_15082E44(unsigned char *e, int idx, int a2, int a3, int reuse);
+int __wrap_func_15082E44(unsigned char *e, int idx, int a2, int a3, int reuse) {
+    static int f = -1; static unsigned n;
+    extern unsigned char D_800D20FC[];
+    if (f < 0) f = port_flag("p131mdl");
+    if (f > 0 && port_frame_count >= (f > 1 ? (unsigned)f : 4400u) && n < 60) {
+        char hex[0x30 * 2 + 1]; int k;
+        n++;
+        for (k = 0; k < 0x30; k++) snprintf(hex + 2 * k, 3, "%02X", vbe_ld8(e + k));
+        port_log("[p131] func_15082E44 e %08X (entry %ld) idx %d a3 %d frame %u: %s\n", (unsigned)(uintptr_t)e,
+                 (long)(e - D_800D20FC) / 0x30, idx, a3, port_frame_count, hex);
+    }
+    return __real_func_15082E44(e, idx, a2, a3, reuse);
+}
+
+/* P131 (?p131mdl, DIAGNOSTIC): the level-setup asset load (func_1502B8E0(dst, 0, 2, 0xE, level), game_eu_44010.c):
+ * size and the first entry it wrote (entry 5 of D_800D20FC on level 0x18), logged at load time (any frame). */
+int __real_func_1502B8E0(int a0, int a1, int a2, ...);
+int __wrap_func_1502B8E0(int a0, int a1, int a2, ...) {
+    static int f = -1;
+    int v[4] = {0, 0, 0, 0}, r, k;
+    va_list ap;
+    va_start(ap, a2);
+    for (k = 0; k < a2 && k < 4; k++) v[k] = va_arg(ap, int);
+    va_end(ap);
+    switch (a2) {
+    case 0: r = __real_func_1502B8E0(a0, a1, a2); break;
+    case 1: r = __real_func_1502B8E0(a0, a1, a2, v[0]); break;
+    case 2: r = __real_func_1502B8E0(a0, a1, a2, v[0], v[1]); break;
+    case 3: r = __real_func_1502B8E0(a0, a1, a2, v[0], v[1], v[2]); break;
+    default: r = __real_func_1502B8E0(a0, a1, a2, v[0], v[1], v[2], v[3]); break;
+    }
+    if (f < 0) f = port_flag("p131mdl");
+    if (f > 0 && a2 == 2 && v[0] == 0xE) {
+        char hex[0x30 * 2 + 1]; unsigned char *e = (unsigned char *)(uintptr_t)(unsigned)a0;
+        for (k = 0; k < 0x30; k++) snprintf(hex + 2 * k, 3, "%02X", vbe_ld8(e + k));
+        port_log("[p131] setup asset (2, E, %X) frame %u -> dst %08X size %X: %s\n", v[1], port_frame_count, (unsigned)a0, (unsigned)r, hex);
+    }
+    return r;
+}
