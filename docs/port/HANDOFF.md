@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P169, 2026-10-24). Details: `docs/port/sessions/P169.md`
+
+- Merged port-b 9eebdac (P150-P164) as 53b9728: only HANDOFF.md conflicted (union + sections sorted by session).
+  Merge checks: verify_all OK, NM links, protocheck 0 (1240), selftest 62/62.
+- D_80089E10 handlers now all `void (f32 x, f32 y, f32 z, f32 dx, f32 dy, f32 dz, u8 *obj)`: func_151348F0,
+  func_151AA8BC, func_150C65D8, func_150C6F08, func_150EAB4C (changed parameters unused; default build unchanged).
+- New hand C (NM): func_151342BC trail_emitter_update (list-0x28 update, dispatches D_80089E10 / D_80089E40;
+  32/32 mutants), func_150E0DF0 object_explode (30/31 + 1 equivalent). Both EQUIV on random + setups; no stubs.
+- func_1507D754: verified draft `docs/port/sessions/p169/d754_draft.c` (35/35 mutants), not inserted: func_151C9740 /
+  func_151CFFFC still asm here and on port-b 9eebdac.
+- Checks: verify_all OK (full ROM), NM links, protocheck 0 (1242), selftest 62/62, progress_nm 5236/5915 (88.5%),
+  C bytes 70.9%.
+
+## Next steps (from P169)
+
+1. func_1507D754: insert the P169 draft (game_A9D90.c, NM) once port-b converts func_151C9740 / func_151CFFFC.
+2. func_15116690 (game_eu_142E40) needs func_15195FB0 (game_eu_1C3530) to return func_15196344's v0 under NM.
+3. Browser: trails / emitters (func_151342BC), explosions (func_150E0DF0), P167's list.
+4. Don't `git stash` during an unfinished merge (P169.md section 1).
+5. P138 / P141 leftovers (not started).
+
 ## State (session P167, 2026-10-24). Details: `docs/port/sessions/P167.md`
 
 - New hand C (NM): func_151BAAC8 object_model_shatter (func_1507D754 callee, 715 insns: smoke burst + model pieces
