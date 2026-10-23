@@ -1,0 +1,18 @@
+s/center\[1\] = \*(f32 \*)(obj + 0x18) + \*(s16 \*)(obj + 0xD6);/center[1] = *(f32 *)(obj + 0x18) + *(s16 *)(obj + 0xD4);/
+s/center\[2\] = \*(f32 \*)(obj + 0x1C);/center[2] = *(f32 *)(obj + 0x18);/
+s/yback = \*(f32 \*)(obj + 0xE0);/yback = *(f32 *)(obj + 0xDC);/
+s/p\[1\] = start\[1\] \* ys;/p[1] = start[1];/
+s/p\[2\] = start\[2\];/p[2] = start[1];/
+s/d\[1\] = dir\[1\] \* ys;/d[1] = dir[1] * yback;/
+s/d\[0\] = dir\[0\];/d[0] = dir[2];/
+s/func_15145128(d, d, NULL, NULL) == 0/func_15145128(d, p, NULL, NULL) == 0/
+s/c\[1\] = center\[1\] \* ys;/c[1] = center[1];/
+s/c\[0\] = center\[0\];/c[0] = center[2];/
+s/\*(s16 \*)(obj + 0xD2), (s32)hitIn/*(s16 *)(obj + 0xD0), (s32)hitIn/
+s/(s32)hitIn, (s32)hitOut, distIn,/(s32)hitOut, (s32)hitIn, distIn,/
+s/    hitIn\[1\] \*= yback;/    hitIn[1] *= ys;/
+s/    hitOut\[1\] \*= yback;/    hitOut[0] *= yback;/
+s/rel\[1\] = hitIn\[1\] - start\[1\];/rel[1] = hitIn[1] - start[0];/
+s/rel\[2\] = hitOut\[2\] - start\[2\];/rel[2] = hitOut[2] + start[2];/
+s/\*distIn = func_15143E64(rel);/*distOut = func_15143E64(rel);/
+s/    return 1;/    return 2;/

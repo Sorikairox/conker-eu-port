@@ -1,0 +1,46 @@
+s/st\[4\] != obj\[0x3B\]/st[4] != obj[0x3A]/
+s/    visible = 1;/    visible = 2;/
+s/D_800C35EA != 1 ||/D_800C35EA != 2 ||/
+s/(obj\[0x74\] & 0xF) != 0xF/(obj[0x74] \& 0x7) != 0x7/
+s/mtx = bones + (st\[0x20\] << 6);/mtx = bones + (st[0x21] << 6);/
+s/func_15143134(st + 0x8, fx + 0x34, mtx);/func_15143134(st + 0xC, fx + 0x34, mtx);/
+s/if (st\[0x23\] & 2) {/if (st[0x23] \& 4) {/
+s/hit = aim\[0x109\];/hit = aim[0x108];/
+s/(fx + 0x44) = \*(f32 \*)(aim + 0xBC);/(fx + 0x44) = *(f32 *)(aim + 0xB8);/
+s/(\*(u8 \*\*)(obj + 0x31C) + 0xB4);/(*(u8 **)(obj + 0x31C) + 0xB0);/
+s/surf\[i\] = aim\[0xF4 + i\];/surf[i] = aim[0xF3 + i];/
+s/for (i = 0; i < 0x12; i++) {/for (i = 0; i < 0x11; i++) {/
+s/dir\[1\] = \*(f32 \*)(fx + 0x44) - \*(f32 \*)(fx + 0x38);/dir[1] = *(f32 *)(fx + 0x44) - *(f32 *)(fx + 0x34);/
+s/                hit = 2;/                hit = 3;/
+s/(st + 0x44) = 2000.0f;/(st + 0x44) = 1000.0f;/
+s/+ 0xEC) \* 2000.0f;/+ 0xE8) * 2000.0f;/
+s/(fx + 0x48) = \*(f32 \*)(fx + 0x3C) + dir\[2\];/(fx + 0x48) = *(f32 *)(fx + 0x3C) - dir[2];/
+s/func_15143134(st + 0x14, end, mtx);/func_15143134(st + 0x18, end, mtx);/
+s/end\[2\] -= \*(f32 \*)(fx + 0x3C);/end[2] -= *(f32 *)(fx + 0x38);/
+s/end\[0\], end\[1\], end\[2\],/end[0], end[2], end[1],/
+s/(f32 \*)(fx + 0x48), NULL, 0,/(f32 *)(fx + 0x48), NULL, 1,/
+s/0, 0.0f) != 0) {/0, 1.0f) != 0) {/
+s/(st + 0x44) = func_15143E64(dir);/(st + 0x44) = func_15143E64(end);/
+s/                hit = 1;/                hit = 3;/
+s/st\[0x23\] |= 1;/st[0x23] |= 2;/
+s/if (hit == 1 && visible) {/if (hit == 1) {/
+s/(st + 0x44) > 40.0f)/(st + 0x44) >= 100.0f)/
+s/dir\[1\] \* inv \* 20.0f;/dir[1] * inv * 21.0f;/
+s/(p + 0x3C) = \*(f32 \*)(fx + 0x48);/(p + 0x3C) = *(f32 *)(fx + 0x44);/
+s/p\[0x112 + i\] = surf\[i\];/p[0x113 + i] = surf[i];/
+s/            p\[0x110\] &= ~1;/            p[0x110] \&= ~2;/
+s/if ((hit == 2 || hit == 3) && visible)/if ((hit == 2 || hit == 4) \&\& visible)/
+s/if ((hit == 2 || hit == 3) && visible)/if (hit == 2 || hit == 3)/
+s/                p\[0xAC\] |= 1;/                p[0xAD] |= 1;/
+s/(p + 0x14) + 0x10) = (s32) \* (f32 \*)(fx + 0x44);/(p + 0x14) + 0x10) = (s32) * (f32 *)(fx + 0x40);/
+s/(\*(u8 \*\*)(p + 0x14))\[9\] = visible ? 0 : 1;/(*(u8 **)(p + 0x14))[9] = visible ? 1 : 0;/
+s/(p + 0x38) = \*(f32 \*)(p + 0xA8) \* \*(f32 \*)(st + 0x38);/(p + 0x38) = *(f32 *)(p + 0xAC) * *(f32 *)(st + 0x38);/
+s/(p + 0x3C) = \*(f32 \*)(p + 0xAC) \* \*(f32 \*)(st + 0x38);/(p + 0x3C) = *(f32 *)(p + 0xAC) * *(f32 *)(st + 0x3C);/
+s/            p\[0xD4\] |= 1;/            p[0xD4] |= 2;/
+s/            p\[0x174\] |= 1;/            p[0x174] |= 3;/
+s/(p + 0x58) &= ~4;/(p + 0x58) \&= ~5;/
+s/        st\[0x23\] &= ~1;/        st[0x23] \&= ~3;/
+s/            (\*(u8 \*\*)(p + 0x14))\[9\] = 1;/            (*(u8 **)(p + 0x14))[9] = 2;/
+s/            p\[0xD4\] &= ~1;/            p[0xD4] \&= ~2;/
+s/            p\[0x174\] &= ~1;/            p[0x174] \&= ~2;/
+s/            p\[0xAC\] &= ~1;/            p[0xAC] \&= ~3;/
