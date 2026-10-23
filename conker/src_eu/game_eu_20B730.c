@@ -1040,7 +1040,174 @@ void func_151E06D0(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E06D0.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_151E2A54(void);
+extern s8 D_80090164;
+extern s8 D_80090180;
+extern s8 D_80090140;
+extern u8 D_800E0FBC;
+extern s8 D_800ABA70[][10];
+extern s8 D_80090248[];         /* main menu: items per page group (titlePage 1..) */
+extern s8 D_80090270[];         /* s8 per 4 bytes: setting for the negative mode codes */
+extern s8 D_800E0FC0[];
+extern u8 D_800ABC40[];         /* "#": text id */
+extern u8 D_800ABC44[];
+extern u8 D_800ABC48[];
+// menu_mode_select_page: main menu page 0, the mode list of the page group rec->titlePage (D_80090248[group - 1]
+// rows of D_800ABA70 starting after the earlier groups). The page alpha D_800E0EC5 fades in (8 per frame step) or,
+// with a pending page change D_800E0EC6, out; at 0 the page switches (mainPage = D_800E0EC6, page 2 resets
+// D_80090180 / D_8009017C / D_800901D4, func_151E2A54) and returns. Left / right toggles the yes / no cursor
+// D_800901CC; up / down moves the row x41 (wrapping, sound 0x62D; a 5-row group slides with D_80090188 instead of
+// drawing the rows). x42 = global row. Accept: on "yes" saves x41 in D_800E1010[0], D_800E0FC0 from the row's mode
+// code (D_80090270 for codes < 0), D_800901E0 = 1, page change 4; on "no" page change 2.
+void func_151E0BBC(void) {
+    MenuState *rec;
+    s32 alpha;
+    s32 textAlpha;
+    s32 v;
+    s32 n;
+    s32 row;
+    s32 first;
+    s32 i;
+    s16 x;
+    s16 id;
+    s8 *tab;
+    f32 step;
+    s8 code;
+
+    rec = (MenuState *) D_80090174;
+    if (rec->titlePage == 0) {
+        return;
+    }
+    alpha = D_800E0EC4;
+    if ((s8) D_800E0EC6 != -1) {
+        rec->input &= ~0x20;
+        v = D_800E0EC5 - (D_800BE9E4 << 5);
+        if (v <= 0) {
+            D_800E0EC5 = 0;
+            ((MenuState *) D_80090174)->mainPage = D_800E0EC6;
+            if ((s8) D_800E0EC6 == 2) {
+                D_80090180 = 0;
+                D_8009017C = 1;
+                D_800901D4 = 0;
+            }
+            func_151E2A54();
+            D_800E0EC6 = -1;
+            return;
+        }
+        D_800E0EC5 = v;
+        if ((s8) D_800E0EC6 != 2) {
+            alpha = v & 0xFF;
+        }
+        textAlpha = v & 0xFF;
+        rec = (MenuState *) D_80090174;
+    } else {
+        v = D_800E0EC5 + (D_800BE9E4 << 5);
+        if (v >= 0x100) {
+            v = 0xFF;
+        }
+        D_800E0EC5 = v;
+        textAlpha = (s32) (D_800E0EC4 * v) >> 8;
+        if (textAlpha >= 0xFE) {
+            textAlpha = 0xFF;
+        }
+    }
+    D_80090140 = 0;
+    D_80090164 = 0;
+    D_800E0FBC = 0;
+    n = D_80090248[rec->titlePage - 1];
+    if (rec->input & 0xC) {
+        D_800901CC = 1 - (s8) D_800901CC;
+        func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+    }
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha);
+    func_15042D94(0x94, 0x7E, 1, (s32) D_800ABC40, 0x1A);
+    func_1504332C(0xFF, 0xFF, 0xFF, textAlpha);
+    func_15042D94(0xD5, 0x7E, 1, (s32) D_800ABC44, ((s8) D_800901CC == 1) + 0x1B);
+    if (textAlpha == 0xFF && (s8) D_800901CC == 0 && (n != 5 || D_80090188 == 0.0f)) {
+        rec = (MenuState *) D_80090174;
+        if (rec->input & 1) {
+            D_80090188 = 1.0f;
+            rec->x41--;
+            func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+        } else if (rec->input & 2) {
+            D_80090188 = -1.0f;
+            rec->x41++;
+            func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+        }
+    }
+    rec = (MenuState *) D_80090174;
+    if (rec->x41 < 0) {
+        rec->x41 += n;
+    }
+    rec = (MenuState *) D_80090174;
+    if (rec->x41 >= n) {
+        rec->x41 -= n;
+    }
+    rec = (MenuState *) D_80090174;
+    row = rec->x41;
+    first = 0;
+    for (i = 0; i < rec->titlePage - 1; i++) {
+        first += D_80090248[i];
+    }
+    rec->x42 = row + first;
+    if (n != 5) {
+        x = 0x8C - ((n * 0x1C) >> 1);
+        tab = D_800ABA70[first];
+        for (i = 0; i < n; i++) {
+            func_150432FC(0x53, x);
+            id = *(s16 *) tab;
+            if (i == row && (s8) D_800901CC == 0) {
+                id++;
+            }
+            func_15042E3C((s32) D_800ABC48, id);
+            tab += 10;
+            x += 0x1C;
+        }
+    } else {
+        step = D_800BE9E4 * 0.05f;
+        if (D_80090188 < 0.0f) {
+            D_80090188 += step;
+            if (D_80090188 > 0.0f) {
+                D_80090188 = 0.0f;
+            }
+        } else if (D_80090188 > 0.0f) {
+            D_80090188 -= step;
+            if (D_80090188 < 0.0f) {
+                D_80090188 = 0.0f;
+            }
+        }
+        if ((s8) D_800901CC == 0 && D_80090188 != 0.0f) {
+            ((MenuState *) D_80090174)->input &= ~0x10;
+        }
+    }
+    if (textAlpha != 0xFF) {
+        return;
+    }
+    rec = (MenuState *) D_80090174;
+    if (!(rec->input & 0x10)) {
+        return;
+    }
+    rec->input &= ~0x20;
+    if ((s8) D_800901CC == 0) {
+        D_800E0EC6 = 4;
+        rec = (MenuState *) D_80090174;
+        D_800E1010[0] = rec->x41;
+        code = D_800ABA70[rec->x42][5];
+        if (code < 0) {
+            D_800E0FC0[0] = D_80090270[(-1 - code) * 4];
+        } else {
+            D_800E0FC0[0] = 0;
+        }
+        D_800901E0 = 1;
+    } else {
+        D_800E0EC6 = 2;
+        ((MenuState *) D_80090174)->input &= ~0x20;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E0BBC.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15042D78(u8);
@@ -1772,8 +1939,8 @@ extern s8 D_80090134;
 extern u8 D_800E0FC9;
 extern s16 D_8009015C;
 extern s8 D_800D27C8;
-s32 func_1509D1EC(s32);
-s32 func_1509D338(s8, s32 *);
+void func_1509D1EC(s32);
+s32 func_1509D338(s32, s32 *);
 s32 func_1509D49C(s8, u8, s32 *, s32 *);
 extern s8 D_80090110;
 extern s16 D_8009014C;

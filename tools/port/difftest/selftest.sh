@@ -130,4 +130,19 @@ chk DIFFER func_15141564 src_eu/game_16DC80.c 's/sinf(temp->unk8)/sinf(temp->unk
 AE60C="DIFFTEST_ROMDATA=1 DIFFTEST_EXACT=* DIFFTEST_REFLEN=104 DIFFTEST_SIGNORE=7 DIFFTEST_ARG=0=80490000,1=6,2=80491000 DIFFTEST_POKE=80490000=1001,80490004=1234"
 chkce EQUIV  func_150AE60C "$AE60C"
 chkce DIFFER func_150AE60C "$AE60C" 's/args\[1\], args)/args[0], args)/'
+# P132: func_151DE100 time limit (game_pause_update). DE: D_80082FA0 (.game_data 80083330) = 1, D_800BE616 = 1,
+# D_800E1013 = 3, D_80090118 = 3000, D_800BEA08 = 0x20, D_800BEAC0 / AC1 = 0, D_8009029C = 0.
+DE="DIFFTEST_EXACT=* DIFFTEST_POKE=80083330=1,800BEA34=100,800E1010=3,800BEEE0=0,80090118=BB8,8009029C=0,800BEE28=20"
+chkce EQUIV  func_151DE100 "$DE"
+# varargs stack args behind IDO's division trap checks (secs / 60, secs % 60 stored before the `bnez; break 7`
+# guard): the call-site scan goes through the guards since P132; DIFFTEST_TRAPSCAN_OLD=1 (old scan) misses it.
+chkce DIFFER func_151DE100 "$DE" 's/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/'
+chkce EQUIV  func_151DE100 "$DE DIFFTEST_TRAPSCAN_OLD=1" 's/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/'
+# a POKE wins over the ROM .data image (ROM D_80082FA0 = 0): with DIFFTEST_ROMDATA=1 every trial loads the image;
+# y = 100 needs D_80082FA0 > 0, so the mutant dies only if the poke holds. DIFFTEST_POKE_OLD=1 = pre-P132 order.
+chkce DIFFER func_151DE100 "$DE DIFFTEST_ROMDATA=1" 's/y = 100;/y = 101;/'
+chkce EQUIV  func_151DE100 "$DE DIFFTEST_ROMDATA=1 DIFFTEST_POKE_OLD=1" 's/y = 100;/y = 101;/'
+# [POKE unread] comes from decoded loads since P132 (Unicorn's read hook missed `lbu D_800BE616` at 800BEA36)
+out=$(set -f; env $DE $R/tools/port/difftest.sh func_151DE100 $C/func_151DE100.c --trials 4)
+case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread] $out";; EQUIV*) pass=$((pass+1)); echo "ok   [no POKE unread] $out";; *) fail=$((fail+1)); echo "FAIL $out";; esac
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

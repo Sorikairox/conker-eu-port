@@ -1,0 +1,7 @@
+s/    func_1509D104(arg0);/    func_1509D104(arg0 + 1);/
+s/for (i = 0; i < 0xCC; i++)/for (i = 1; i < 0xCC; i++)/
+s/for (i = 0; i < 0xCC; i++)/for (i = 0; i <= 0xCC; i++)/
+s/== 3) {/>= 3) {/
+s/added += func_1509D104(i);/added = func_1509D104(i);/
+s/} while (added != 0);/} while (added > 1);/
+s/        added = 0;/        added = 1;/
