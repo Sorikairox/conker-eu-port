@@ -4,11 +4,8 @@
  * (id, arg, result) per id, and every native-6 action. For table entry 0 (func_1509CBD8, scene queries) and entry 13 /
  * id 0x19 (func_1509DFCC, "no object in lists D_800A6440[0..2] has +0x48 == 2") it also computes what the asm answers.
  *
- * ?p174fix=1 everywhere, =2 only on level 0x22, =3 only inside event 0xCA (TEST, behind the flag): return the asm answer for those two handlers instead of the converted C's:
- *  - func_1509CBD8 (game_eu_CA060.c NON_MATCHING) is `void` and returns nothing; the asm returns 0 / 1 / D_800C3A92
- *    per case (jtbl_8009E828). Called through an s32 table, the port gets 0 for every scene query.
- *  - func_1509DFCC (game_eu_CA630.c NON_MATCHING) case 0x19/4 reads +0x48 of node->next (skips each list's first node
- *    and reads NULL+0x48 at the end); the asm reads +0x48 of every node. */
+ * P185: the ?p174fix test (return the asm answer) is gone: both handlers are fixed in the game C since P176 (port); the log
+ * still prints C and asm answers side by side. */
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -22,7 +19,6 @@ extern u8 *D_800DD280[][104];
 extern u8 D_800A6440[];
 extern s32 D_800BE9F0;
 static int on(void) { static int f = -1; if (f < 0) f = port_flag("p174ev"); return f; }
-static int fixon(void) { static int f = -1; if (f < 0) f = port_flag("p174fix"); return f; }
 
 static s32 asm_CBD8(s32 a0, s32 a1) {
     unsigned c4 = vbe_ld8(&D_800C35C4), ea = vbe_ld8(&D_800C35EA), sc = vbe_ld8(&D_800C40B8), s2 = vbe_ld8(&D_800C3A08);
@@ -87,14 +83,11 @@ void __wrap_func_150ADFD0(void *blk, s32 entry) {
 /* native 5: D_80088838[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_func_150AE5F8(s32 *args);
 s32 __wrap_func_150AE5F8(s32 *args) {
-    if (!on() && !fixon()) return __real_func_150AE5F8(args);
+    if (!on()) return __real_func_150AE5F8(args);
     s32 id = args[0], arg = args[1], n = (id & 0xF000) >> 12;
     s32 r = __real_func_150AE5F8(args), ra = r, fixed = 0;
     if (n == 1) { ra = asm_CBD8(id & 0xFFF, arg); }
     else if (n == 14 && (id & 0xFFF) == 0x19 && arg == 4) { ra = asm_DFCC19(); }
-    /* p174fix=1: everywhere; p174fix=2: only on level 0x22 (keeps the port's route into the death room: with =1 the
-     * intro event BF starts scene 3 of level 0x18 at 10725 and traps at 10733 in func_150623F4, NULL D_800D2104) */
-    if (ra != r && (fixon() == 1 || (fixon() == 2 && D_800BE9F0 == 0x22) || (fixon() == 3 && cur_ev == 0xCA))) { fixed = 1; }
     if (on()) {
         /* one line per (id, arg) whenever its result (C or asm) changes */
         static s32 kid[64], karg[64], kr[64], kra[64]; static int nk; static unsigned nlog;
@@ -108,7 +101,7 @@ s32 __wrap_func_150AE5F8(s32 *args) {
             kr[j] = r; kra[j] = ra;
         }
     }
-    return fixed ? ra : r;
+    return r;
 }
 /* native 6: game-state actions D_80088874[n - 1](id & 0xFFFF0FFF, args[1], args) */
 s32 __real_func_150AE60C(s32 *args);
