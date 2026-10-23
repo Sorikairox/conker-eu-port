@@ -216,6 +216,32 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P106, 2026-10-23). Details: `docs/port/sessions/P106.md`
+
+- **Level event system committed as one unit** (NM hand C): func_1509CBD4 (prereqs), func_1509B950 (relocate),
+  func_1509B5AC (start; `struct249 *`), func_1509B8FC returns func_1509B950(...), the event VM func_150ADFD0
+  (hand-written asm -> readable C interpreter, now `void`), func_150AE760 (abort = flag EV_ABORTED in D_800D3858,
+  checked after each native call) + func_150AE780 (ordinary function), the VM natives func_150AE5D8 / 5E8 / 5F8 / 60C /
+  674 / 690 / 6A0 / 6BC / 6D4 / 714 (code inside the asm VM, separate C functions named by address), func_150ADA20.
+  Verification: VM 258 synthetic + LogoScreen (0xC9) setups EQUIV, mutants 46/46; small functions setups + mutants;
+  64-bit natives + func_150ADA20 model-checked (`p106/ada20/check.py`, mutants 11/12, 1 equivalent).
+- difftest: `DIFFTEST_ROMDATA=1`, `DIFFTEST_MEMSTK=`, `DIFFTEST_SIGNORE=`; difftest.sh forwards DIFFTEST_REFLEN
+  (it never did before). Selftest 49/49.
+- Default build byte-identical (full verify_all), NM links, protocheck 0 (947 bodies), progress_nm 4941/5915 (83.5%),
+  bytes 58.3%.
+
+## Next steps (from P106)
+
+0. Browser (web slot): D_80088A44 entries 3..12 point into the asm VM (0x150AE5D8 ...): check that n64mem.py's
+   relocation maps them to the new C functions func_150AE5D8 ... (named by address). Then run level 0x21:
+   LogoScreen entry 1 = push 1, push 0x1001, native 6 -> D_80088874[0] = func_1509C850(1, 1, args) (C).
+   Asm-only handlers the VM can reach: D_800887C0 func_15097D20 / func_1509F4D0 / func_1509D590; D_800887FC
+   func_15097DDC; D_80088838 func_1509A024 / func_150A09B8 / func_150A02EC; D_80088874 func_15097E9C,
+   func_1509FD30 (port-b; must do `func_150AE760(); return 0;`), func_15097188, func_1509E3D4.
+1. Open harness question: a1 of the unnamed indirect handler call in func_150AE5F8 / 60C is not compared (mutant
+   survives; a1 is loaded in an earlier block). Fix difftest's argument count for jalr stubs + selftest case.
+2. func_1517C11C (P104 draft), float re-check (P104 item 2; func_15075884 is now port-b), func_1512EE50 is port-b now.
+
 ## State (session P104, 2026-10-23). Details: `docs/port/sessions/P104.md`
 
 - func_150000B0 (game_2D4B0, level music) in hand C (NM): random + 33 knob setups EQUIV, mutants 33/34 (1 equivalent). Music
