@@ -1,0 +1,2 @@
+s/xi = (hi < v) ? hi : v;/xi = v;/ % fb2c4_0 fb2c4_1 fb2c4_2 fb2c4_3 fb2c4_4 fb2c4_5 fb2c4_6 fb2c4_7 fb2c4_8 fb2c4_9 fb2c4_10 fb2c4_11 fb2c4_12 fb2c4_13 fb2c4_14 fb2c4_15 fb2c4_16 fb2c4_17 fb2c4_18 fb2c4_19 fb2c4_20 fb2c4_21 fb2c4_22 fb2c4_23 
+s/(f32)xi < \*(f32 \*)(e + 0x2C) ||// % fb2c4_0 fb2c4_1 fb2c4_2 fb2c4_3 fb2c4_4 fb2c4_5 fb2c4_6 fb2c4_7 fb2c4_8 fb2c4_9 fb2c4_10 fb2c4_11 fb2c4_12 fb2c4_13 fb2c4_14 fb2c4_15 fb2c4_16 fb2c4_17 fb2c4_18 fb2c4_19 fb2c4_20 fb2c4_21 fb2c4_22 fb2c4_23 

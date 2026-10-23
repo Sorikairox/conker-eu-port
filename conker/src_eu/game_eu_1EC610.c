@@ -120,7 +120,7 @@ s32 func_151BF444(u8 *arg0) {
  * sprites from the glyph table D_800AAC94. Lives = func_150859AC(0, 3) minus the current one, at most 99.
  * D_800D2458 (set by the 4:3 / wide screen code) moves the sprite and the digits. `arg0` / `arg1` are passed
  * through as the last two arguments of every HUD call (0xFF / 1 at the level start). */
-s32 func_15157580(void *sprite, s32, s32 alphaBits, s32, s32, s32 depth, s32, s32);
+s32 func_15157580(void *sprite, s32, f32 alpha, s32, s32, s32 depth, s32, s32);
 s32 func_151559FC(void *digit, s32, s32, s32, s32, s32, s32);
 extern s32 D_800AAC94[10];
 
@@ -279,7 +279,7 @@ void func_151BF8F0(u8 arg0, s32 arg1) {
     pos.pos[2] = ((f32 *)D_800A5860)[2];
     pos.scaleX = 0.30100003f;
     pos.scaleY = 0.30100003f;
-    popup->sprite = func_15157580(&spr, 0, 0x3F800000 /* 1.0f */, 0, 0, 0x14, arg0, arg1);
+    popup->sprite = func_15157580(&spr, 0, 1.0f /* P96: f32 parameter (was its float bits) */, 0, 0, 0x14, arg0, arg1);
     if (popup->sprite != 0) {
         memcpy((u8 *)popup->sprite + 0x120, &pos, sizeof(LivesSpritePos));
     }

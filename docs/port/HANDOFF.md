@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P96 (port-b) (session P96, 2026-10-23). Details: `docs/port/sessions/P96.md`
+
+Branch `port-b` (from P92 99d4923); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all). `NON_MATCHING=1` links. protocheck: 1 expected problem (func_15157580 f32 in
+  game_eu_1EC610.c vs port-b's old s32 definition; gone after merging port). **progress_nm**: total 4910/5915 (83.0%),
+  game 4382/5334 (82.2%), C bytes 56.7%, 1005 asm-only.
+- **func_15124C38 "survivors" resolved: 39/39 killed.** `&0xF -> &7` was a harness race: two `p82/mut.sh` jobs of
+  one function share `port_work/p82_mut_FUNC.c` / `build/difftest_p73m_FUNC`. Use **`docs/port/sessions/p96/mut.sh`**
+  (per-run paths). The other 4 were setup holes (no setup reached the paths; `4c38c.txt` was a copy of 4c38b with
+  out != NULL); `p96/gen4c38t.py` kills them.
+- New hand-written NM C: **func_15020920** (segment cubic + length table, the producer the browser P97 needs;
+  25/26 + 1 equivalent), func_1501E0C8 (cutscene skip, 16/16), func_1512B2C4 (free camera, 23/23 + 2 equivalent),
+  **func_15126378** (aim mode, 1130 asm lines, 61/61 + 1 equivalent).
+- func_15020090 / func_15020430 were already NM C here (P87); func_15157580 arg 3 f32 in game_eu_1EC610.c's NM
+  block; func_151221F0 arg1 f32 (P98 protoasm).
+- Harness hole for P95: callee FP args are compared only with a prototype in the TU text (sinf / cosf from
+  libc/math.h were not); workaround: declare them in the TU.
+
+## Next steps (from P96)
+
+1. Browser: drop the FD34 / FF10 guard (func_15020920 is C); scene path, aim mode, free camera (P96.md UNVERIFIED).
+2. P98 protoasm rows left: game_83300 func_15064668 arg2 / func_15065E18 arg3 (float bits as s32).
+3. func_1512EE50 (eye height?) is in game_eu_15C660.c (not port-b). Frame-path stubs in port-b files: func_15097E9C (game_eu_C5530.c, 2146 lines, 678 calls/boot).
+
 ## P92 (port-b) (session P92, 2026-10-23). Details: `docs/port/sessions/P92.md`
 
 Branch `port-b` (from P87 431730a); the orchestrator merges it into `port`.
