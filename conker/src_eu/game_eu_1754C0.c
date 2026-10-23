@@ -83,6 +83,7 @@ void func_15147ECC(u8 *arg0) {
     }
 }
 
+// record_free_dispatch: calls the record kind's (+0x20, 0..19, else 0) free handler D_8008A690 with the record.
 void func_15147F50(u8 *arg0) {
     s32 idx = *(s32 *)(arg0 + 0x20);
 
@@ -91,9 +92,16 @@ void func_15147F50(u8 *arg0) {
     } else if (idx >= 20) {
         idx = 0;
     }
+#ifdef NON_MATCHING
+    /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: func_15147E64 freed
+     * garbage at rec + 0x84 when it got no argument) */
+    ((void (*)(u8 *)) D_8008A690[idx])(arg0);
+#else
     D_8008A690[idx]();
+#endif
 }
 
+// record_dispatch_b: calls the record kind's (+0x20, 0..19, else 0) D_8008A6E0 handler with the record.
 void func_15147FA0(u8 *arg0) {
     s32 idx = *(s32 *)(arg0 + 0x20);
 
@@ -102,7 +110,13 @@ void func_15147FA0(u8 *arg0) {
     } else if (idx >= 20) {
         idx = 0;
     }
+#ifdef NON_MATCHING
+    /* P173: the handlers take the record (the asm keeps a0 = arg0 at the jalr; browser P171: func_15147E64 freed
+     * garbage at rec + 0x84 when it got no argument) */
+    ((void (*)(u8 *)) D_8008A6E0[idx])(arg0);
+#else
     D_8008A6E0[idx]();
+#endif
 }
 
 #ifdef NON_MATCHING
