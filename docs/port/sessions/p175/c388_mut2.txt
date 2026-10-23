@@ -1,0 +1,2 @@
+s/if (\*(s8 \*) (obj + 0x2C) > 0) {/if (*(s8 *) (obj + 0x2C) > 1) {/ % one
+s/        return 0;/        return 2;/ % h0 h2

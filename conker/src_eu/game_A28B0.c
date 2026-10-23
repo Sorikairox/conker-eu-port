@@ -1649,11 +1649,14 @@ void func_15079A58(void) {
     D_800D2530[D_800D154C->unk13F] = (D_800D1890 << 8) + D_800D1891;
 }
 
-void func_15079A98(s32 arg0) {
+// path_point_angle: angle (u16, func_1505A630) from object arg0 (D_800CC2D0) to the current path point of the
+// active character (D_800D2104[D_800D154C +0x13F]: x at +0, z at +4). P179: was `void` and dropped the return; its
+// asm caller func_15079B30 stores / subtracts the two results (`sh v0` / `subu` after the jal).
+u16 func_15079A98(s32 arg0) {
     s16 *temp_v0 = (s16 *)D_800D2104[D_800D154C->unk13F];
     struct127 *temp_v1 = &D_800CC2D0[arg0];
 
-    func_1505A630(temp_v0[0] - temp_v1->x_position, temp_v1->z_position - temp_v0[2], 0);
+    return func_1505A630(temp_v0[0] - temp_v1->x_position, temp_v1->z_position - temp_v0[2], 0);
 }
 
 // requires jump table

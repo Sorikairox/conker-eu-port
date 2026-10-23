@@ -1,0 +1,34 @@
+s/    reach \*= scale;/    reach *= 2.0f;/
+s/    grow \*= scale;/    grow *= 2.0f;/
+s/(att + 0xB8) \* 0.017453292f/(att + 0xB4) * 0.017453292f/
+s/(att + 0x40) \* 0.017453292f/(att + 0x44) * 0.017453292f/
+s/v\[1\] = -reach \* s;/v[1] = reach * s;/
+s/v\[2\] = reach \* c;/v[2] = reach * s;/
+s/x = v\[2\] \* s + v\[0\] \* c;/x = v[2] * s - v[0] * c;/
+s/v\[2\] = v\[2\] \* c + -v\[0\] \* s;/v[2] = v[2] * c + v[0] * s;/
+s/v\[0\] += \*(f32 \*)(att + 0x14);/v[0] += *(f32 *)(att + 0x18);/
+s/v\[1\] += \*(f32 \*)(att + 0x18);/v[1] += *(f32 *)(att + 0x14);/
+s/v\[2\] += \*(f32 \*)(att + 0x1C);/v[2] = *(f32 *)(att + 0x1C);/
+s/D_800D1C90\[target\[4\]\]/D_800D1C90[target[5]]/
+s/(type + 0xE) \* \*(f32 \*)(target + 0x14C)/(type + 0xC) * *(f32 *)(target + 0x14C)/
+s/(type + 0x10) \* \*(f32 \*)(target + 0x150)/(type + 0x10) * *(f32 *)(target + 0x14C)/
+s/(\*(f32 \*)(target + 0x18) + height)/(*(f32 *)(target + 0x18) - height)/
+s/dz = v\[2\] - \*(f32 \*)(target + 0x1C);/dz = v[2] - *(f32 *)(target + 0x14);/
+s/if (radius \* radius < dx \* dx + dy \* dy + dz \* dz) {/if (radius * radius <= dx * dx + dy * dy + dz * dz + 1.0f) {/
+s/count = D_8009CF9C\[kind\];/count = D_8009CF9C[kind] - 1;/
+s/rec = D_80087000\[kind\];/rec = D_80087000[kind + 1];/
+s/bones = \*(u8 \*\*)(target + 0x1D4);/bones = *(u8 **)(target + 0x1D0);/
+s/i++, rec += 10/i++, rec += 12/
+s/local\[0\] = \*(s16 \*)(rec + 4);/local[0] = *(s16 *)(rec + 6);/
+s/local\[2\] = \*(s16 \*)(rec + 8);/local[2] = 0.0f;/
+s/bones + rec\[0\] \* 64/bones + rec[0] * 48/
+s/dx = v\[0\] - world\[0\];/dx = v[0] - world[1];/
+s/dz = v\[2\] - world\[2\];/dz = v[2] + world[2];/
+s/(rec + 2) \* \*(f32 \*)(target + 0x14C) + grow/(rec + 2) * *(f32 *)(target + 0x14C) - grow/
+s/(f32) (u32) \*(u16 \*)(rec + 2)/(f32) (u32) *(u16 *)(rec + 4)/
+s/if (target\[0x125\] == 0)/if (target[0x124] == 0)/
+s/arg5,$/arg5 + 1,/
+s/(struct127 \*) att - D_800CC2D0, 0, 0, 0/0, 0, 0, 0/
+s/return rec\[0\] + 1;/return rec[0];/
+s/        return 0;\n    }\n    count/XX/
+s/^    return 0;$/    return -1;/

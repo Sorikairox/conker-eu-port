@@ -35,6 +35,30 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    handlers first).
 5. P138 / P141 leftovers.
 
+## P181 (port-b) (session P181, 2026-10-24). Details: `docs/port/sessions/P181.md`
+
+Branch `port-b` (from P179 9ddc1a9).
+- **Merge** of `port` at b8b9829 (P165-P176) -> d6105ff. Conflict only in HANDOFF.md (merge_union.py, P176 section
+  reordered by hand); no code conflicts. verify_all rc 0, NM links, protocheck 0 (1285), selftest 65 ok.
+- Hand C (NM), difftest EQUIV + setups + mutants: func_1510C4E0 `dl_find_texture_vertices` + func_1510CA2C
+  `tex_scroll_create` (138E00, producer + consumer together), func_15150970 `spark_burst_spawn` (17D3C0),
+  func_150F0448 `smoke_emitter_spawn` + func_150EF500 `fire_effect_start` (11CB90; file prototype of func_150EF500
+  `void` -> `u8 *`, default build byte-identical).
+- Harness notes: DIFFTEST_RET entries are comma-separated (a space silently breaks the knob line); per-call
+  out-param values need OUTW (OUTA writes the same array on every call); stale-v0 functions kept `s32` for the
+  callers' prototype can be verified with a `void` copy of the draft (the harness then skips v0).
+- Checks: verify_all rc 0 (default build byte-identical), NM build links, protocheck 0 (1290 bodies), selftest 65/65.
+  progress_nm total 5284/5915 (89.3%), game 4750/5334, C bytes 73.1%, 631 asm-only. No difftest processes left.
+
+## Next steps (from P181)
+
+1. Browser (port-web): P181.md UNVERIFIED list (texture scroller at level load; fire / smoke / spark effects).
+2. func_15113D54 (301, game_eu_13DC30): decide how to call the debug hooks func_1511FC2C / FC44 (float bits in
+   a1..a3 + 2 stack args, functions.h has 4 s32 args) before converting (P181.md section 3).
+3. port-b breadth (`python3 docs/port/sessions/p168/asmlist.py` after `progress_nm.py --list > port_work/p162/asmonly.txt`):
+   func_1514B8D4 (312, 1772D0), func_151279A0 (326, 14FF90), func_15168118 (337, 1944C0), func_151ACBD4 (360, 7 calls),
+   func_15078A60 (363, A28B0).
+
 ## State (session P180, 2026-10-24). Details: `docs/port/sessions/P180.md`
 
 - **func_1500BEC0 unit done** (one commit): hand C (NM) for func_1500BEC0 ambient_emitters_build, func_1500AD84
@@ -57,6 +81,31 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. Browser: level ambient emitters (P180.md section 6), the 12 return fixes.
 4. Breadth (p180/asmlist.py, forbid list now includes port-b P179 names game_40490 / game_39750 / game_1897A0 / game_eu_126330).
 5. P138 / P141 leftovers.
+
+## P179 (port-b) (session P179, 2026-10-24). Details: `docs/port/sessions/P179.md`
+
+Branch `port-b` (from P177 fc67ce4).
+- **Dropped-return audit**: `docs/port/sessions/p179/voidret_scan.py` (default-ELF asm: callee v0 / f0 at `jr ra`,
+  caller reads after each `jal`, transitive through `return g()` callers). port-b files: 890 void C functions,
+  **1 real dropped return, fixed**: func_15079A98 `path_point_angle` (game_A28B0, matching C) now returns the u16
+  angle its asm caller func_15079B30 stores (default build byte-identical). Other files: 16 SUSPECT + 3 SUSPECT2 for
+  port / coordinator (list in P179.md section 1, `p179/scan_others.tsv`). tablesig re-run: nothing in port-b files.
+- Hand C (NM), difftest EQUIV + setups + mutants: func_150FD140 `view_sparkle_burst` (12A7C0; prototype now
+  `void (u8)`), func_15081120 `object_reach_hit` (AE930; NM prototype kind s32), func_150511E8 `swim_push_update`
+  (78230), func_15152700 `particle_burst_spawn` (17D3C0), func_151D535C `object_take_hit` (201240),
+  func_15100304 `gun_shot_sparks` (12D5D0).
+- Harness notes: `difftest.sh F draft --self` ignores the draft (use no `--self` for matching-C drafts); OUTA with
+  several out-params of one callee uses `ADDR=5:W/6:W` (a second `ADDR=` entry replaces the first).
+- Checks: verify_all rc 0 (default build byte-identical), NM build links, protocheck 0 (1232 bodies), selftest 62/62. progress_nm total 5226/5915 (88.4%), game 4695/5334, C bytes 70.7%, 689 asm-only. No difftest processes left.
+
+## Next steps (from P179)
+
+1. Port / coordinator: the 16 SUSPECT rows of `p179/scan_others.tsv` (other slots' files), e.g. func_10010F88,
+   func_1505D1C4, func_15195FB0 (1C3530), func_1509FBC8 / func_1500F240 (NM bodies).
+2. Browser (port-web): P179.md UNVERIFIED list.
+3. port-b breadth (`python3 docs/port/sessions/p168/asmlist.py` after `progress_nm.py --list > port_work/p162/asmonly.txt`,
+   drop game_eu_1C3530): func_1510CA2C (255, 138E00), func_150EF500 (259, 11CB90), func_15150970 (259, 17D3C0),
+   func_15113D54 (301), func_1514B8D4 (312).
 
 ## State (session P178, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P178.md`
 
@@ -86,6 +135,31 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. P174 blockers 1 / 2 (func_1509CBD8 s32 return, func_1509DFCC case 0x19) still needed.
 4. Level 0x29 stubs: func_15078A60 (game_A28B0.c path follow, jump table; reads D_800D2104), func_1513FAB4,
    func_150D0C40, func_15008E10; then walk on level 0x29 with pad input.
+## P177 (port-b) (session P177, 2026-10-24). Details: `docs/port/sessions/P177.md`
+
+Branch `port-b` (from P175 dd78307). Hand C (NM), difftest EQUIV + setups + mutants (table in P177.md):
+- **Beam break unit** (game_eu_1F4F60.c): func_151C8D90 `beam_hits_object` and func_151C8F4C `beam_hit_effects`.
+  **Not dead** (P175 next step 3): both are called by the beam message handler func_151C8C5C (C; message 0x20 hit test
+  then effects, 0x3A case 2 effects with obj NULL). Its forward declarations are now `(u8 *, u8 *)`.
+  The scorch-mark positions are the beam end points (the asm stores v0 = rec + 0x34 / + 0x40 in the delay slots of
+  the func_1515016C calls).
+- func_1516547C `screen_effect_preset` (game_eu_192500.c; the only asm callee of beam_hit_effects): 8 presets of a
+  15-float block for func_15165B98; kind >= 8 returns NULL (asm: stale v0). Mutants 32/32.
+- func_1518D1C0 `character_effect_attach` (game_eu_1BAF40.c, browser P171 boot / title stub): effect types 1..18
+  -> kind-0x21 effect record (func_1518E934), optional clear of obj's existing ones. The in-file prototype (2 copies,
+  s32 / s32 * args) is one `u8 *(u8 *, s16, s16, u8, u8, s32, char *)`; its two matching callers func_1518EBDC /
+  func_1518EC44 now pass typed args (default build byte-identical).
+- tablesig v2 on port-b HEAD: flagged 47 -> 43, no new flagged table, nothing to fix in port-b files.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1226 bodies), selftest 62/62. progress_nm total
+  5220/5915 (88.3%), game 4689/5334, C bytes 70.5%, 695 asm-only. No difftest processes left.
+
+## Next steps (from P177)
+
+1. Browser (port-web): P177.md UNVERIFIED list (beam break effects, screen effect presets, character effects).
+2. port-b breadth (`python3 docs/port/sessions/p168/asmlist.py`, drop game_eu_1C3530 rows): next smallest owned asm
+   with C callers: func_150FD140 (215, game_eu_12A7C0, 3 C calls: per-view effect with func_15154728 + a spark loop),
+   func_15081120 (219, AE930), func_150511E8 (220, 78230), func_15152700 (228, 17D3C0, 15 C calls), func_151D535C (231).
+3. mut.sh: mutant lines are split at `%` (sed expressions with `% 9U` become SED ERROR); mutate the constants instead.
 
 ## State (session P176, 2026-10-24). Details: `docs/port/sessions/P176.md`
 
@@ -108,6 +182,28 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 4. Earlier UNSURE results with "both sides fault at 0x00000000" next to a page-end callee may be re-run now.
 5. P138 / P141 leftovers.
 
+## P175 (port-b) (session P175, 2026-10-24). Details: `docs/port/sessions/P175.md`
+
+Branch `port-b` (from P170 b235977). Hand C (NM), difftest EQUIV + setups + mutants (table in P175.md):
+- **Kind-8 streak particle** (commit a6d93bd, game_1897A0.c): func_1515C388 `particle_streak_step` and
+  func_1515C6F4 `particle_streak_draw`; the draw now **returns the advanced Gfx pointer** (browser P171 null-zone DL
+  writes from 6257). The step's motion handler D_8008B420[block +0x38] gets (rec, block) (asm a1 = block).
+  Mutants 16/16, 38/38.
+- **Beam unit** (game_eu_1F4F60.c): func_151C7B1C `beam_create` (now `u8 *` with u8 / s16 args; the prototype in
+  func_151C7750's NM block updated, one line for protocheck), func_151C9748 `beam_end_pieces_spawn`, func_151C957C
+  `beam_glow_spawn`. Piece pointers NULL-initialised before func_151C9748 (N64 leaves garbage when func_15144E80 fails).
+- Reviews (no change): m2c_sanity func_1500D8C8 width high = false positive (asm word copy of the u16 table to the
+  stack, then lhu); the 3 arity rows on func_1516AFE0's callback = false positives (a3 is a temp; the only callback,
+  func_15080BF4, is `void (s32, s32, s32)` and uses a2).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1222 bodies), selftest 62/62. progress_nm total 5216/5915
+  (88.2%), game 4685/5334, C bytes 70.2%, 699 asm-only. No difftest processes left.
+
+## Next steps (from P175)
+
+1. Browser (port-web): kind-8 streak particles render, null zone clean after 6257; beams from record_beam_start
+   (D_80082EA0 entry 8) if a level has one. P175.md UNVERIFIED list.
+2. port-b breadth: `python3 docs/port/sessions/p168/asmlist.py` (owned asm with C callers), smallest first.
+3. game_eu_1F4F60.c still has asm func_151C8D90 / func_151C8F4C (no references found in .data / C).
 ## State (session P174, 2026-10-24, port-web, diagnostic). Details: `docs/port/sessions/P174.md`
 
 - Level 0x22 (the "first room") is the **death tutorial**: one level event 0xCA "First Death". After Gregg's scenes it

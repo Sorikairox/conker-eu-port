@@ -1,0 +1,28 @@
+s/func_15145974(az, \&blk.spin\[1\], \&blk.spin\[0\]);/func_15145974(ay, \&blk.spin[1], \&blk.spin[0]);/
+s/    blk.spin\[0\] += 90.0f;/    blk.spin[0] += 91.0f;/
+s/    blk.size\[1\] = 0.4f;/    blk.size[1] = 0.5f;/
+s/    blk.pos\[2\] = pos\[2\];/    blk.pos[2] = pos[1];/
+s/for (i = 0; i < 7; i++) {/for (i = 0; i < 6; i++) {/
+s/(noshadow ? 0x400 : 0) | 0x900/(noshadow ? 0x400 : 0) | 0x800/
+s/| 0x40000 | 0x80000;/| 0x40000 | 0x100000;/
+s/    blk.ground = ground;/    blk.ground = arg8;/
+s/    blk.life = 300;/    blk.life = 301;/
+s/    blk.sound = 0x36;/    blk.sound = 0x35;/
+s/    blk.u60\[0\] = 0xFF;/    blk.u60[0] = 0xFE;/
+s/    blk.u68 = 2;/    blk.u68 = 3;/
+s/    blk.u74 = 0xFF;/    blk.u74 = 0xFE;/
+s/    blk.u69 = -1;/    blk.u69 = 1;/
+s/(\&blk, 3, 0xFF, 0, arg7, arg8);/(\&blk, 3, 0xFF, 1, arg7, arg8);/
+s/for (i = 0; i < 0x80; i += 0x40) {/for (i = 0; i < 0x40; i += 0x40) {/
+s/((s32) (out\[0\] + i + 0x90), out\[0\]);/((s32) (out[0] + i + 0x80), out[0]);/
+s/    blk.u69 = 2;/    blk.u69 = 3;/
+s/    anim.op1 = 4;/    anim.op1 = 5;/
+s/    anim.v1 = 0x3E;/    anim.v1 = 0x3F;/
+s/    blk.u68 = 0;/    blk.u68 = 1;/
+s/anim.id0 = alt ? 0x87 : 0x8B;/anim.id0 = alt ? 0x8B : 0x87;/
+s/anim.id1 = alt ? 0x8A : 0x8E;/anim.id1 = alt ? 0x8A : 0x8D;/
+s/            blk.sound = 0x38;/            blk.sound = 0x37;/
+s/(\&blk, 3, 0xFF, 0x14, arg7, arg8);/(\&blk, 3, 0xFF, 0x14, arg7, 0);/
+s/                continue;/                return;/
+s/((s32) (out\[k\] + 0x170), (u8 \*) \&anim, 0x14);/((s32) (out[k] + 0x160), (u8 *) \&anim, 0x14);/
+s/    if (func_15144E80(tri, ax, ay, az) == 0) {/    if (func_15144E80(tri, ax, ay, az) != 0) {/

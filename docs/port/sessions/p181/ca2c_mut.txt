@@ -1,0 +1,19 @@
+s/    if (D_800D9E64 != 0) {/    if (D_800D9E64 > 1) {/
+s/r = allocate_memory(20, 1, 0, 0);/r = allocate_memory(24, 1, 0, 0);/
+s/D_800DA280\[D_800D9E64++\] = r;/D_800DA280[D_800D9E64] = r;/
+s/    \*(s16 \*\*)(r + 4) = NULL;//
+s/    \*(u16 \*)(r + 0xE) = 0;/    *(u16 *)(r + 0xE) = 1;/
+s/    r\[0xC\] = off;/    r[0xD] = off;/
+s/    \*(u16 \*)(r + 0x10) = speed;/    *(u16 *)(r + 0x10) = radius;/
+s/    \*(u16 \*)(r + 0x12) = radius;/    *(u16 *)(r + 0x12) = speed;/
+s/D_800B0E00\[0\], key, \&v, 0/D_800B0E00[0], key, \&v, 1/
+s/(Gfx \*)D_800B1214, D_80091B68/(Gfx *)D_800B1214, key/
+s/        r\[8\] = n;/        r[8] = n + 1;/
+s/        r\[9\] = n;/        r[9] = n - 1;/
+s/(u8 \*)D_800B1220\[0\]) >> 4/(u8 *)D_800B1220[0]) >> 3/
+s/(u8 \*)D_800B1220\[1\]) >> 4/(u8 *)D_800B1220[0]) >> 4/
+s/allocate_memory(n \* 4, 1, 0, 0);\n        \*(s16 \*\*)(r + 0)/X/
+s/            base\[i \* 2\] = v\[i\].v.tc\[0\];/            base[i * 2] = v[i].v.tc[1];/
+s/            base\[i \* 2 + 1\] = v\[i\].v.tc\[1\];/            base[i * 2 + 1] = v[i].v.tc[0] + 1;/
+s/        \*(s16 \*\*)(r + 4) = base;/        *(s16 **)(r + 0) = base;/
+s/        return NULL;/        return r;/

@@ -1,0 +1,41 @@
+s/n = (u32) func_150ADA20() . 9 + 10;/n = (u32) func_150ADA20() \/ 9 + 10;/
+s/ 9 + 10;/ 9 + 11;/
+s/p.u08 = 0x2203;/p.u08 = 0x2202;/
+s/p.u00 = 0x200005;/p.u00 = 0x200004;/
+s/p.u04 = 0;/p.u04 = 1;/
+s/p.u10 = 0;/p.u10 = 1;/
+s/p.u14\[4\] = 0xFF;/p.u14[4] = 0xFE;/
+s/p.u1C = 0xFF;/p.u1C = 0xFE;/
+s/p.pos\[1\] = pos\[1\];/p.pos[1] = pos[0];/
+s/p.u3C\[2\] = ((f32 \*) D_800A5860)\[2\];/p.u3C[2] = ((f32 *) D_800A5860)[1];/
+s/p.u1E = 7;/p.u1E = 8;/
+s/p.u20 = 0x24;/p.u20 = 0x25;/
+s/p.u22 = 1;/p.u22 = 2;/
+s/p.flags = 0x4C207;/p.flags = 0x4C206;/
+s/p.u61 = 7;/p.u61 = 6;/
+s/p.u63 = -1;/p.u63 = 0;/
+s/p.u65 = 0;/p.u65 = 1;/
+s/p.u66 = 0xFF;/p.u66 = 0xFE;/
+s/p.u24 = 1.0f;/p.u24 = 2.0f;/
+s/    pitch = 0.0f;/    pitch = 1.0f;/
+s/(yaw \* 182.04445f) >> 8) - 0x8A/(yaw * 182.0f) >> 8) - 0x8A/
+s/(yaw \* 182.04445f) >> 8) - 0x8A/(yaw * 182.04445f) >> 7) - 0x8A/
+s/(yaw \* 182.04445f) >> 8) - 0x8A/(yaw * 182.04445f) >> 8) - 0x8B/
+s/(pitch \* 182.04445f) >> 8) - 0x8A/(pitch * 182.04445f) >> 8) - 0x8B/
+s/colours\[1\] = D_800A2530\[1\];/colours[1] = D_800A2530[2];/
+s/colours\[func_150ADA20() & 3\]/colours[func_150ADA20() \& 1]/
+s/ 13 + 10;/ 13 + 11;/
+s/ 101 + 0x9B;/ 101 + 0x9C;/
+s/func_150ADA68() \* 155.0f + 75.0f/func_150ADA68() * 155.0f + 76.0f/
+s/p.sizeX = size;/p.sizeX = 1.0f;/
+s/r1 . 21 + yawBase/r1 \/ 21 + yawBase/
+s/r2 . 21 + pitchBase/r2 \/ 21 + yawBase/
+s/func_150ADA68() \* 20.0f + 20.0f/func_150ADA68() * 20.0f + 21.0f/
+s/p.gravity = func_150ADA68() \* 0.62100005f + -0.657f;/p.gravity = func_150ADA68() * 0.62100005f + 0.657f;/
+s/0.62100005f/0.621f/
+s/p.flags &= ~0xC0;/p.flags \&= ~0x80;/
+s/? 0x80 : 0;/? 0x100 : 0;/
+s/? 0x40 : 0;/? 0x20 : 0;/
+s/func_151307F0((s32 \*) &p, 1, 0, 0, flag, arg3);/func_151307F0((s32 *) \&p, 2, 0, 0, flag, arg3);/
+s/0, 0, flag, arg3);/0, 0, arg3, flag);/
+s/} while (n > 0);/} while (n > 1);/
