@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P189, 2026-10-24, port-web). Details: `docs/port/sessions/P189.md`
+
+- Diagnostic only (no merges, no src_eu edits). New flags: `?p189y=F` (Conker y / vy / gravity / water log),
+  `?p189swim=1` (TEST: stand-in for func_1504B0FC), `?p189nopush=1` (TEST: `--wrap=func_150511E8` no-op), p158 dumps log
+  LOADTLUT and the CI8 palette (`[p189pal]`) and get their own texel budget.
+- **Level-0 rise (noev) = the asm stub func_1504B0FC** (swim update, called each frame by the C func_1504CB98 while
+  in_water != 0): Conker walks into water at 1481, gravity -3 (buoyancy) and nothing clamps at the surface. `?p189swim=1`
+  removes the rise. func_151AC628 / func_151ACBCC are only the water-entry splash particles (func_151AA250 ->
+  func_151AC3F0 -> func_1514CBE8 -> D_8008ADA0 0xB / 0xC). The new part from the merges: the post-death respawn now lands
+  in water (func_1504B0FC first hit 933, +80 frames to 0x2C); not bisected; not func_150511E8.
+- **Level 0x29 at 25889 = the same**: Conker falls into the pond (surface -79), in_water 1, rises to y ~1550 (rock wall).
+  func_1519FD60 (ripple particle, D_8008A5A0 / 5DC table via func_15147CB0) and func_151AABC4 (swim-stroke splash, anim
+  callbacks in game_981E0.c) are cosmetic.
+- **Green decal = port renderer**: one draw, CI8 32x32 mip chain, 2-cycle LOD, ALPHA_CVG_SEL; TLUT (256, resolved),
+  palette and texels are right (leaf cut-out, 62 % alpha 0), screen shows uniform 00C700 without cut-out. Not fixed.
+- Torches: unresolved (candidates func_15189F70, func_151184BC, func_151831CC, func_15116F34).
+
+## Next steps (from P189)
+
+1. Convert func_1504B0FC (game_eu_78230) — fixes both rises. Then re-run noev and padwalk29.
+2. Renderer: the 2-cycle CI8 mip / ALPHA_CVG_SEL material (cc 26A004/15FC92F8) renders uniform green: check tiles 1-4
+   upload, uTexOn bits, `?p78lodviz=1`.
+3. Bisect why the noev respawn after the death at 925 now lands in water (merged P169-P182).
+4. Torch flames on level 0x29: log emitter creations (func_151407D0 / func_151DA6F8) on level 0x29.
+
 ## State (session P185, 2026-10-24, port-web). Details: `docs/port/sessions/P185.md`
 
 - Merged port f9c552b (P169-P182) and port-b 4c2d5a5 (P170-P181): HANDOFF.md conflicts only. After each: verify_all OK,

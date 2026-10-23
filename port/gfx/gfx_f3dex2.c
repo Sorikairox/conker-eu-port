@@ -628,6 +628,14 @@ static void p78_material(void) {
         port_log("[p78]   tile %u: fmt %u siz %u line %u tmem %03X pal %u cms %u cmt %u mask %u/%u shift %u/%u ul %.2f %.2f lr %.2f %.2f\n",
                  (tex_tile + k) & 7, t->fmt, t->siz, t->line, t->tmem, t->pal, t->cms, t->cmt, t->masks, t->maskt, t->shifts,
                  t->shiftt, t->uls / 4.0, t->ult / 4.0, t->lrs / 4.0, t->lrt / 4.0);
+        if (k == 0 && p158_on && t->siz == 1 && (t->fmt == 2 || (oth_h >> 14 & 3))) {   /* P189 DIAGNOSTIC: CI8 palette */
+            static unsigned pgen = ~0u;
+            if (pgen != tmem_gen) {
+                char pb[256 * 4 + 1]; int m = 0; pgen = tmem_gen;
+                for (unsigned e = 0; e < 256; e++) m += snprintf(pb + m, sizeof pb - m, "%02X%02X", tmem8(0x800 + e * 2), tmem8(0x801 + e * 2));
+                port_log("[p189pal] mat %d tlut mode %u: %s\n", p78_mat, oth_h >> 14 & 3, pb);
+            }
+        }
         static unsigned seen[256][3]; static unsigned nseen;
         unsigned key0 = tmem_gen, key1 = t->tmem | t->line << 12 | t->siz << 24 | t->fmt << 28, key2 = t->masks | t->maskt << 4 | t->pal << 8;
         int dup = 0;
@@ -1124,6 +1132,8 @@ static void load_tile(unsigned w0, unsigned w1) {
 static void load_tlut(unsigned w0, unsigned w1) {
     Tile *t = &tiles[w1 >> 24 & 7];
     unsigned n = ((w1 >> 14 & 0x3FF) - (w0 >> 14 & 0x3FF)) + 1, dst = t->tmem * 8;
+    if (p158_on) port_log("[p189] LOADTLUT tile %u tmem %03X entries %u | timg %08X resolved %d\n", w1 >> 24 & 7, t->tmem, n,
+                          (unsigned)(uintptr_t)timg.p, timg.p != 0);   /* P189 DIAGNOSTIC (p158 dumps) */
     for (unsigned i = 0; i < n * 2 && dst + i < 4096; i++) {
         unsigned v;
         if (timg.p) v = vbe_ld8(timg.p + i);
@@ -1605,7 +1615,8 @@ void gfx_run_task(void *task) {
         int hit = 0;
         if (f1 > 0 && !d1 && port_frame_count >= (unsigned)f1) d1 = hit = 1;
         else if (f2 > 0 && !d2 && port_frame_count >= (unsigned)f2) d2 = hit = 1;
-        if (hit) { p78_on = 1; port_log("[p158] dump: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); }
+        if (hit) { p78_on = 1; p78_ntex = 0; /* P189: each p158 dump gets its own 60-texture budget */
+                   port_log("[p158] dump: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); }
         p158_on = hit; }
     if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;
     memset(fr_ops, 0, sizeof fr_ops); memset(fr_seguse, 0, sizeof fr_seguse);

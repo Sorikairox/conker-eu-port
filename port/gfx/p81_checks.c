@@ -47,6 +47,28 @@ void p81_look_hook(int pre) {
     static int slot0;
     int id = vbe_ld8(D_800C3E78_), s, fade = 0;
     const unsigned char *r, *lt, *mtx;
+    {   /* P189 TEST ONLY ?p189y=F: from frame F, 240 calls: Conker's state, y, y_velocity (+0x20), gravity (+0x24),
+         * +0x28, floor (+0x118), in_water (+0xAD), +0x31C, xz_velocity */
+        static int fy = -1, fsw = -1; static unsigned ny;
+        /* P189 TEST ONLY ?p189swim=1: stand-in for the asm stub func_1504B0FC (swim update, called by the C
+         * func_1504CB98 while in_water != 0): keep a swimming Conker at the water surface (+0x118 - 25) instead of
+         * letting the buoyancy (gravity -3) accelerate him upward forever. */
+        if (flag(&fsw, "p189swim") && !pre && id <= 64) {
+            unsigned char *q = D_800CC2D0 + id * REC;
+            float surf = F(q, 0x118);
+            if (vbe_ld8(q + 0xAD) == 1 && surf != -10000.0f && F(q, 0x18) > surf - 25.0f) {
+                *(float *)(q + 0x18) = surf - 25.0f;
+                *(float *)(q + 0x20) = 0.0f;
+                *(float *)(q + 0x24) = 0.0f;
+            }
+        }
+        if (flag(&fy, "p189y") && !pre && id <= 64 && port_frame_count >= (unsigned)fy && ny++ < 240) {
+            const unsigned char *q = D_800CC2D0 + id * REC;
+            port_log("[p189y] frame %u st %08x y %.2f vy %.3f g %.3f u28 %.3f floor %.2f water %d u31C %08x xzv %.2f old_y %.2f\n",
+                     port_frame_count, W(q, 0), F(q, 0x18), F(q, 0x20), F(q, 0x24), F(q, 0x28), F(q, 0x118),
+                     vbe_ld8(q + 0xAD), W(q, 0x31C), F(q, 0x3C), F(q, 0x30));
+        }
+    }
     if (!flag(&flook, "p81look") || id > 64) return;
     r = D_800CC2D0 + id * REC;
     if (pre) { slot0 = vbe_ld8(D_800C441A_); return; }
@@ -124,4 +146,22 @@ int __wrap_func_15031284(int gdl, unsigned char *obj, int a2, int a3) {
     if (flag(&fatt, "p81att") && (n <= (unsigned)fatt || n % 256 == 0))
         att_log("1284", n, (unsigned)gdl, (unsigned)out, obj ? (int)((obj - D_800CC2D0) / REC) : -1, a2);
     return out;
+}
+
+/* P189 TEST ONLY ?p189nopush=1: func_150511E8 (swim_push_update, C since port P179; an asm stub = no-op in the port
+ * before) returns without doing anything, as before the merge. Without the flag: the real function, plus a log
+ * of the first 40 calls that set a push (+0xF8 bits 19/20) when ?p189y is on. */
+void __real_func_150511E8(unsigned char *obj);
+void __wrap_func_150511E8(unsigned char *obj) {
+    static int fnp = -1, fy2 = -1; static unsigned n;
+    if (flag(&fnp, "p189nopush")) return;
+    if (flag(&fy2, "p189y") && n < 40 && port_frame_count >= (unsigned)fy2) {
+        n++;
+        port_log("[p189push] frame %u id %d F8 %08x u28 %.2f before 164 %.3f 168 %.3f\n", port_frame_count, vbe_ld8(obj + 4),
+                 W(obj, 0xF8), F(obj, 0x28), F(obj, 0x164), F(obj, 0x168));
+        __real_func_150511E8(obj);
+        port_log("[p189push]   after 164 %.3f 168 %.3f\n", F(obj, 0x164), F(obj, 0x168));
+        return;
+    }
+    __real_func_150511E8(obj);
 }
