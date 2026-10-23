@@ -86,6 +86,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - `tools/eu_port/merge_wt.sh` for `eu-wt-a`→`eu` (it verifies, unions append-only docs, logs history).
 - For port branches: `git merge --no-edit`, resolve `docs/*` conflicts with `tools/eu_port/merge_union.py <file>` (pass each path explicitly — zsh doesn't word-split), stop on code conflicts; after a code-bearing merge run `verify_all.sh` + `port_work/p28h/nmcheck.sh`.
 - `port-web` must clear `port/build/census/files.tsv` and `port/build/vbe.stamp` and rebuild clean after any merge.
+- **Any** game-C change in port-web (bisects, local fixes) needs `port/build/vbe.stamp` deleted before building: the stamp does not depend on sources, so make says "Nothing to be done" and you test the old build (P97 bisect was invalid because of this; P99).
 
 ### Mechanical asm→C translation (user decision 2026-10-23)
 - `tools/port/asm2c_hand.py` (P56) writes register-level C, one statement per instruction. It is allowed **only for code Rare hand-wrote in assembly** (e.g. the D5E90.s engines). That is a stopgap; each such file is listed for a later readable rewrite.
