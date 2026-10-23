@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P108 (port-b) (session P108, 2026-10-23). Details: `docs/port/sessions/P108.md`
+
+Branch `port-b` (from P102 b2a5c1f); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all rc 0, `port_work/p108/verify2.log`). `NON_MATCHING=1` links. protocheck:
+  1 expected problem (func_15157580, gone after merging port; 930 bodies). **progress_nm**: total 4924/5915 (83.2%),
+  game 4396/5334 (82.4%), C bytes 57.4%, 991 asm-only (142 under 60 insns).
+- **Landed P102's pair** (commit 1b05b54): func_1507BB28 (game_A28B0.c, script producer) + func_15097E9C (object
+  command handler). game_A28B0.c's census lvalue cast left alone (P107 fixed it port-side).
+- **Trail particle chain in C** (game_eu_175B20.c): func_15148428 (step), func_151485AC (draw), and the sub-handlers
+  they reach from func_151DA6F8 trails: func_15148E34 (grow), func_15149114 (fall + hit), func_15149350 (shrink).
+  All setups EQUIV + mutants killed (P108.md section 2). **The P105 guard on func_151DA6F8 can be dropped.**
+- func_1505D024 (game_83300.c, hit message, used by func_15097E9C) in C, 12/12.
+- New rule applied: every converted function has a `// snake_case_name: ...` first comment line.
+
+## Next steps (from P108)
+
+1. Browser: drop the P105 guard; check trails (P108.md UNVERIFIED) and the object command scripts.
+2. Particle type tables still have asm entries for other kinds (list in P108.md section 2, none in port-b files);
+   trail hit handler func_150B3CA8 (game_eu_E0430.c) is asm.
+3. Smallest asm-only left in port-b files: func_15144CEC (101), func_1505327C (109), func_15053430 (113),
+   func_15060D54 (117).
+
 ## P102 (port-b) (session P102, 2026-10-23). Details: `docs/port/sessions/P102.md`
 
 Branch `port-b` (from P96 66dffbc); the orchestrator merges it into `port`.
