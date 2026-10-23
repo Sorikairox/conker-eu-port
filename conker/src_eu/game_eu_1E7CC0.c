@@ -474,7 +474,11 @@ void func_151BC6B4(u8 *arg0, u8 arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7CC0/func_151BC6B4.s")
 #endif
 void func_15143794(s16, s16, f32, void *);
+#ifdef NON_MATCHING
+s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32); /* P95: f32 parameter */
+#else
 s32 func_151A2C9C(f32 *, f32 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#endif
 
 void func_151BC920(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {
     f32 sp6C[9];
@@ -492,7 +496,11 @@ void func_151BC920(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     sp6C[3] += -arg3 * D_800BEDC8 * temp_f2;
     sp6C[4] += -arg4 * D_800BEDC8 * temp_f2;
     sp6C[5] += -arg5 * D_800BEDC8 * temp_f2;
+#ifdef NON_MATCHING
+    func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 1.0f, ((func_150ADA68() * 1049.0f) + -1022.0f) * 0.001f, (func_150ADA68() * 124.0f) + 202.0f, (func_150ADA20() & 0xF) + 0x14, (func_150ADA20() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1))); /* P95: float literal (asm passes the bits 0x3F800000) */
+#else
     func_151A2C9C(&sp6C[6], sp6C, &sp6C[3], 0x3F800000, ((func_150ADA68() * 1049.0f) + -1022.0f) * 0.001f, (func_150ADA68() * 124.0f) + 202.0f, (func_150ADA20() & 0xF) + 0x14, (func_150ADA20() % 201U) + 0x37, 0xF, 0xF, 0, -1, 0xCB, 0, 0, (s32) (*(u8 *)((u8 *)arg6 + 0xC)), (s32) (*(u8 *)((u8 *)arg6 + 1)));
+#endif
 }
 
 s32 func_151BCB30(s32 **arg0) {
@@ -944,7 +952,7 @@ f32 func_151BDD00(s16 *arg0) {
 
 s32 func_15131C7C();
 
-void func_151BDD4C(u8 *arg0) {
+void func_151BDD4C(u8 *arg0, s32 arg1) {   /* P76: a0 / a1 pass through to func_15131C7C */
     u8 *temp_v0;
 
     temp_v0 = (*(u8 **)((u8 *)arg0 + 0xB0));
@@ -953,7 +961,7 @@ void func_151BDD4C(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 0x50)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x18));
         (*(f32 *)((u8 *)arg0 + 0x54)) = (f32) (*(f32 *)((u8 *)temp_v0 + 0x1C));
     }
-    func_15131C7C();
+    func_15131C7C(arg0, arg1);
 }
 
 void func_151BDDA4(u8 *arg0) {

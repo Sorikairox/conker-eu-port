@@ -1,0 +1,6 @@
+s/phase\[0\] += 0.065f/phase[0] += 0.0651f/ %
+s/phase\[1\] += 0.0484f \* D_800BE9A4/phase[1] += 0.0484f/ %
+s/phase\[1\] = func_15144B68(phase\[1\])/phase[1] = func_15144B68(phase[0])/ %
+s/(obj + 0x20) = sinf(phase\[0\])/(obj + 0x24) = sinf(phase[0])/ %
+s/\* 5.9140005f/* 5.914f/ %
+s/    return 1;/    return 0;/ %

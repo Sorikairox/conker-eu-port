@@ -4,7 +4,7 @@
 
 
 s32 func_15134DAC(void *, s32, u8 *, s16);
-s32 func_150EA560(u8 *arg0, s16 arg1, f32 arg2, u8 arg3) {
+s32 func_150EA560(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     struct {
         u8 u2C;
         u8 *u30;
@@ -227,7 +227,7 @@ typedef struct {
     u8 u6D;
 } sp_EAA80;
 u8 *func_1513418C(void *, s32, u8, s32);
-void func_150EAA80(u8 *arg0, s16 arg1, f32 arg2, u8 arg3) {
+void func_150EAA80(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     sp_EAA80 sp;
     s32 v;
 

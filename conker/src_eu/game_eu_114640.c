@@ -122,7 +122,7 @@ void func_150E6E30(s32 arg0, s32 arg1, s32 arg2, u8 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_114640/func_150E6E30.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_150E6550(u8 *, f32 *, s32, f32, f32, s32, s32, s32, s32, s32, s32);
+s32 func_150E6550(u8 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32); /* P98: asm mtc1 a2 */
 f32 func_15144528(f32, f32, f32);
 
 void func_150E7104(u8 *arg0) {
@@ -161,7 +161,7 @@ void func_150E7104(u8 *arg0) {
             temp_f20_2 = func_150ADA68();
             temp_f22 = func_150ADA68();
             temp_s1 = func_150ADA20();
-            func_150E6550(temp_s0 + 0x2C, &sp.uB4, (*(s32 *)((u8 *)temp_s0 + 0x38)), ((temp_f20_2 * 300.0f) + 100.0f) * 0.1f, ((temp_f22 * 700.0f) + 300.0f) * 0.1f, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)), (s32) (*(u8 *)((u8 *)temp_s0 + 0x40)), ((u32) temp_s1 % 86U) + 0xAA, (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x3E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x3C)), -1);
+            func_150E6550(temp_s0 + 0x2C, &sp.uB4, (*(f32 *)((u8 *)temp_s0 + 0x38)), ((temp_f20_2 * 300.0f) + 100.0f) * 0.1f, ((temp_f22 * 700.0f) + 300.0f) * 0.1f, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)), (s32) (*(u8 *)((u8 *)temp_s0 + 0x40)), ((u32) temp_s1 % 86U) + 0xAA, (func_150ADA20() % (u32) ((*(s16 *)((u8 *)temp_s0 + 0x3E)) + 1)) + (*(s16 *)((u8 *)temp_s0 + 0x3C)), -1);
             var_f24 += sp8C;
             var_f26 += sp88;
             sp.uDC -= sp.uD8;

@@ -232,7 +232,11 @@ u8 func_1515999C(u8 *arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515999C.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_15046EF0(f32 *, s32, f32, u8 *); /* P95: f32 parameter */
+#else
 s32 func_15046EF0(f32 *, s32, s32, u8 *);
+#endif
 s32 func_1514672C(f32 *);
 s32 func_15159C2C(u8 *, u8 *);
 s32 func_151D8E20();
@@ -253,7 +257,11 @@ u8 func_15159B04(u8 *arg0, u8 *arg1)
       {
         return 0;
       }
+#ifdef NON_MATCHING
+      if (func_15046EF0(v, 0, *((f32 *) (arg0 + 0x44)), arg0 + 0x80) != 0) /* P95: f32 field (prototype param is f32 in NM) */
+#else
       if (func_15046EF0(v, 0, *((s32 *) (arg0 + 0x44)), arg0 + 0x80) != 0)
+#endif
       {
         flag = 3; // fakematch: permuter, flag reused as the 3 constant (makes flag = 0 share the tail)
         v[1] = *((f32 *) (arg0 + 0x80));
@@ -604,7 +612,7 @@ s32 func_1515A7A8(f32 *arg0, u8 *arg1, f32 arg2, f32 arg3, u8 *arg4, f32 arg5, s
             sp.u48 = 0;
         }
         if (func_1514672C(arg0) != 0) {
-            if (func_15046EF0(arg0, 0, 0x46985800, &sp.u2C) != 0) {
+            if (func_15046EF0(arg0, 0, 19500.0f, &sp.u2C) != 0) { /* P95: was 0x46985800 as an int */
                 arg4 = &sp.u2C;
                 sp.u70 = (f32) sp.u2C;
             } else {
@@ -675,7 +683,7 @@ u8 func_1515ACFC(u8 *arg0, s32 arg1) {
         if (func_1514672C(&sp.u3C) == 0) {
             return 0U;
         }
-        if (func_15046EF0(&sp.u3C, 0, (*(s32 *)((u8 *)arg0 + 0x44)), arg0 + 0x80) != 0) {
+        if (func_15046EF0(&sp.u3C, 0, (*(f32 *)((u8 *)arg0 + 0x44)), arg0 + 0x80) != 0) { /* P95: f32 field (prototype param is f32 in NM) */
             sp.u4B = 0;
             sp.u40 = (*(f32 *)((u8 *)arg0 + 0x80));
         }

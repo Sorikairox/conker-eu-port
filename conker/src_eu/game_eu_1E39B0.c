@@ -6,7 +6,7 @@
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E39B0/func_151B61A0.s")
 
 #ifdef NON_MATCHING
-s32 func_15133E04(f32);
+s32 func_15133E04(u8 *); /* P98: the asm reads a0 = the object */
 
 void func_151B6444(u8 *arg0) {
     u8 *sp38;
@@ -35,7 +35,7 @@ void func_151B6444(u8 *arg0) {
         (*(f32 *)((u8 *)arg0 + 0x1C)) = temp_f2_2;
         (*(f32 *)((u8 *)arg0 + 0x18)) = temp_f2_2;
     }
-    func_15133E04(var_f12);
+    func_15133E04(arg0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E39B0/func_151B6444.s")

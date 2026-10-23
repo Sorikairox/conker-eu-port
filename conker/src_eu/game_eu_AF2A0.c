@@ -584,8 +584,44 @@ s32 func_15083568(struct127 *arg0, s32 arg1, f32 arg2, s32 arg3) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083568.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150836CC.s")
+#ifdef NON_MATCHING
+extern s32 D_80087064;
+void func_150305E0(s32 arg0, s32 arg1);
+struct127 *func_1505F0AC(s32 arg0);
+void func_15054A5C(struct127 *arg0, struct127 *arg1);
+void func_15060F28(struct127 *arg0, s32 arg1);
 
+// object_setup_undo: undoes setup command list D_80087064[n - 1] on obj (the list func_15083568 runs): first
+// func_150305E0(obj, n), then for every type-0 command (+3 == 0) the object it spawned (func_1505F0AC(cmd[0])) is
+// removed if it is still attached to obj (+0x65 == obj's index + 1): kinds 0x1D / 0x6E / 0x2F are detached with
+// func_15054A5C(o, owner), other kinds removed with func_15060F28(o, 0). No return value (callers ignore v0).
+s32 func_150836CC(struct127 *obj, s32 n) {
+    u8 *list = (u8 *) &D_80087064 + (n - 1) * 8;
+    u8 *cmd;
+    u8 *o;
+    s32 i;
+
+    func_150305E0((s32) obj, n);
+    cmd = *(u8 **) list;
+    for (i = 0; i < list[4]; i++, cmd += 0x10) {
+        if (cmd[3] != 0) {
+            continue;
+        }
+        o = (u8 *) func_1505F0AC(cmd[0]);
+        if (o == NULL || o[0x65] != ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C + 1) {
+            continue;
+        }
+        if (o[4] == 0x1D || o[4] == 0x6E || o[4] == 0x2F) {
+            func_15054A5C((struct127 *) o, (struct127 *) ((u8 *) D_800CC2D0 + o[0x65] * 0x32C - 0x32C));
+        } else {
+            func_15060F28((struct127 *) o, 0);
+        }
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150836CC.s")
+#endif
 #ifdef NON_MATCHING
 /* P36: set object slot's type (+4). 0xFF (no type): clears +0xE4/E6/E8, +0xD2 = +0xD4 = 0x46, +0xD6, +0x160, +0xC8 = 0.
  * Else +0xC8 = type record D_800D1C90[type]->+6 (s16), func_15062BDC(obj, +0x14C, +0x150), +5 = record +0x12.
@@ -691,8 +727,95 @@ void func_15083E20(u8 *arg0, u16 type, u8 *arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E20.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083F30.s")
+#ifdef NON_MATCHING
+s32 func_1503D950(s32, s32);
+s32 func_1503DA64(s32, s32);
+struct127 *func_1505ED34(void);
+void func_150615DC(struct127 *arg0);
+s32 func_1515D9F0(s32);
+s32 func_1515D9B0(void);
+void func_15083E20(u8 *, u16, u8 *);
+void func_15083C3C(s32 slot, s32 type, s32 arg2);
+s32 func_15083D54(struct127 *, u16, s32, f32);
 
+// object_spawn_attached: setup command type 0 (func_15083568): makes a new object of kind `kind` in a free slot
+// (func_1505ED34; no NULL check, as the asm) attached to owner: +0x65 = owner slot + 1, +0x3B = 0xFF - own slot,
+// +0x5C = mode, +0xAB = arg3, +0 = arg4, +0xAC = flags (bit 0: +0xF8 |= 0x4000 and +0x270 = kind record +0xE * scale;
+// bit 1: passed to func_15083D54), +0x101 = keepScale (0: scales 1.0, else the owner's), copies of the owner's
+// +0x66 (without bit 4) and +0x1DD..+0x1E2 (+0x1DF takes the owner's +0x1DE, as the asm does), per-camera slots
+// +0x304.. from func_1515D9F0(1). While D_800C35EA == 1 the D_800C3638 byte is 0 during the kind setup. Returns it.
+s32 func_15083F30(struct127 *owner, u8 mode, u8 kind, s32 arg3, s32 arg4, s32 flags, s32 keepScale, s32 arg7,
+                         f32 arg8) {
+    u8 *ow = (u8 *) owner;
+    u8 *o;
+    s32 *slot;
+    s32 i;
+    s32 flag2;
+    s32 single;
+
+    func_1503DA64(kind, 0);
+    func_1503D950(kind, 0);
+    o = (u8 *) func_1505ED34();
+    o[0x3B] = 0xFF - (o - (u8 *) D_800CC2D0) / 0x32C;
+    o[0xAB] = arg3;
+    *(s32 *) o = arg4;
+    func_150615DC((struct127 *) o);
+    o[0x232] = 1;
+    o[0x1CA] = 1;
+    o[0x125] = 0xFF;
+    o[0x65] = (ow - (u8 *) D_800CC2D0) / 0x32C + 1;
+    *(s32 *) (o + 0x5C) = mode;
+    o[0x123] = 1;
+    o[4] = kind;
+    o[0x66] = ow[0x66] & ~0x10;
+    o[0x1DD] = ow[0x1DD];
+    o[0x1DE] = ow[0x1DE];
+    o[0x1DF] = ow[0x1DE];
+    o[0x1E0] = ow[0x1E0];
+    o[0x1E1] = ow[0x1E1];
+    o[0x1E2] = ow[0x1E2];
+    if (keepScale == 0) {
+        *(f32 *) (o + 0x14C) = 1.0f;
+        *(f32 *) (o + 0x150) = 1.0f;
+        *(f32 *) (o + 0x154) = 1.0f;
+        *(f32 *) (o + 0x158) = 1.0f;
+    } else {
+        *(f32 *) (o + 0x14C) = *(f32 *) (ow + 0x14C);
+        *(f32 *) (o + 0x150) = *(f32 *) (ow + 0x150);
+        *(f32 *) (o + 0x154) = *(f32 *) (ow + 0x154);
+        *(f32 *) (o + 0x158) = *(f32 *) (ow + 0x158);
+    }
+    o[0x101] = keepScale;
+    o[0xAC] = flags;
+    func_1503DA64(kind, 0);
+    if (flags & 1) {
+        *(s32 *) (o + 0xF8) |= 0x4000;
+        *(f32 *) (o + 0x270) = (f32) *(u16 *) ((u8 *) D_800D1C90[kind] + 0xE) * *(f32 *) (o + 0x14C);
+    }
+    flag2 = (flags & 2) ? 1 : 0;
+    slot = (s32 *) (o + 0x304);
+    for (i = 0; i <= D_80082FA0; i++) {
+        slot[i] = func_1515D9F0(1);
+    }
+    if (slot[i - 1] != 0) {
+        o[0x301] = 1;
+    }
+    *(s32 *) (o + 0x314) = func_1515D9B0();
+    single = D_800C35EA == 1;
+    if (single) {
+        D_800C3638 = 0;
+    }
+    func_15083E20(o, kind, NULL);
+    func_15083C3C((o - (u8 *) D_800CC2D0) / 0x32C, kind, 1);
+    func_15083D54((struct127 *) o, arg7, flag2, arg8);
+    if (single) {
+        D_800C3638 = 1;
+    }
+    return (s32) o;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083F30.s")
+#endif
 s32 func_15084208(void) {
     s32 id;
     s32 i;
@@ -713,7 +836,25 @@ s32 func_15084208(void) {
     return id;
 }
 
+#ifdef NON_MATCHING
+/* P95: index of the level-setup entry (0x30 bytes at D_800D20FC, D_800D2520 of them) whose byte +0x28 is `id`;
+ * -1 when id is 0 or not found. */
+s32 func_15083E0C(u8 id) {
+    s32 i;
+
+    if (id == 0) {
+        return -1;
+    }
+    for (i = 0; i < D_800D2520; i++) {
+        if (((u8 *) D_800D20FC + i * 0x30)[0x28] == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E0C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u8 D_800CC72B;
@@ -774,29 +915,129 @@ s32 func_15083FB0(u8 arg0) {
     return -1;
 }
 
-#ifdef NON_MATCHING
-/* P73: one argument under NM (wasm needs one signature; every caller passes only the object id, the matching
- * body below forwards its unused a1..a3 to func_1505EEF4) */
-s32 func_15084000(s32 id) {
-    struct127 *obj = func_1505EEF4(id);
-
-    if (obj != NULL) {
-        return obj - D_800CC2D0;
-    }
-    return -1;
-}
-#else
-s32 func_15084000(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct127 *temp_v0 = func_1505EEF4(arg0, arg1, arg2, arg3);
+/* P80: one argument (func_1505EEF4 reads only the id); the callers in game_CB1C0.c pass one */
+s32 func_15084000(s32 arg0) {
+    struct127 *temp_v0 = func_1505EEF4(arg0);
 
     if (temp_v0 != NULL) {
         return temp_v0 - D_800CC2D0;
     }
     return -1;
 }
-#endif
 
+#ifdef NON_MATCHING
+extern u16 D_800C5BC0[]; /* vertex block size of each model slot, in 16-byte vertices */
+void func_10004074(void *);
+
+/*
+ * P62: vertex blocks of object o for variant var: the two frame words o +0x28C + var * 8 (+0 / +4) that
+ * func_1502CFEC draws from. The model slot is ((u8 *)o +0x2C4)[var]; its shared block is D_800D19A0[slot] with the
+ * user count D_800D1F80[slot]. The sharing mode is (rec +0x10) & 3, rec being the record +0x144 of the parent object
+ * o[0x65] - 1 (or o's own when o[0x65] is 0); no record: mode 0; slot 0: mode 2.
+ *   both words set, or no shared block: nothing (0);
+ *   mode 0: both words share the block (count += 2);
+ *   mode 1: word 0 (if 0 or the shared block): the first user shares it (count += 2), later users get a private copy;
+ *           then word 1 = word 0;
+ *   mode 2: each word that is 0 or the shared block (word 1 also when the two are equal): shared if the count is 0
+ *           (count += 1), else a private copy; an allocation failure stops there and, on word 1, gives word 0 back
+ *           (free its copy or count -= 1) and clears it;
+ *   mode 3: nothing.
+ * Returns 1 when an allocation failed, else 0.
+ */
+s32 func_150844AC(struct127 *o, s32 var) {
+    u8 *obj = (u8 *)o;
+    u32 *words = (u32 *)(obj + 0x28C + var * 8);
+    u8 *rec;
+    s32 slot;
+    s32 mode;
+    u32 *shared;
+    u8 *count;
+    s32 size;
+    s32 failed;
+    s32 w;
+
+    if (obj[0x65] != 0) {
+        rec = *(u8 **)((u8 *)&D_800CC2D0[obj[0x65] - 1] + 0x144);
+    } else {
+        rec = *(u8 **)(obj + 0x144);
+    }
+    slot = (*(u8 **)(obj + 0x2C4))[var];
+    mode = 0;
+    if (rec != NULL) {
+        mode = rec[0x10] & 3;
+    }
+    if (slot == 0) {
+        mode = 2;
+    }
+    shared = (u32 *)&D_800D19A0 + slot;
+    if (words[0] != 0 && words[1] != 0) {
+        return 0;
+    }
+    if (*shared == 0) {
+        return 0;
+    }
+    failed = 0;
+    count = (u8 *)D_800D1F80 + slot;
+
+    if (mode == 0) {
+        words[1] = *shared;
+        words[0] = *shared;
+        *count += 2;
+    } else if (mode == 1) {
+        if (words[0] == 0 || words[0] == *shared) {
+            if (*count != 0) {
+                size = D_800C5BC0[slot] * 16;
+                words[0] = (u32)allocate_memory(size, 1, 2, 2);
+                if (words[0] == 0) {
+                    failed = 1;
+                } else if (words[0] != 0) {
+                    bcopy((void *)*shared, (void *)words[0], size);
+                } else {
+                    words[0] = *shared; /* not reached (the asm has it) */
+                }
+            } else {
+                words[1] = *shared;
+                words[0] = *shared;
+                *count += 2;
+            }
+        }
+        words[1] = words[0];
+    } else if (mode == 2) {
+        for (w = 0; w < 2; w++) {
+            if (!(words[w] == 0 || words[w] == *shared || (w == 1 && words[0] == words[1]))) {
+                continue;
+            }
+            if (*count != 0) {
+                size = D_800C5BC0[slot] * 16;
+                words[w] = (u32)allocate_memory(size, 1, 2, 2);
+                if (words[w] == 0) {
+                    failed = 1;
+                    if (w == 1) {
+                        if (words[0] != *shared) {
+                            func_10004074((void *)words[0]);
+                        } else {
+                            *count -= 1;
+                        }
+                        words[0] = 0;
+                    }
+                    break;
+                }
+                if (words[w] != 0) {
+                    bcopy((void *)*shared, (void *)words[w], size);
+                } else {
+                    words[w] = *shared; /* not reached (the asm has it) */
+                }
+            } else {
+                words[w] = *shared;
+                *count += 1;
+            }
+        }
+    }
+    return failed;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150844AC.s")
+#endif
 
 void func_15084814(struct127 *, s32);
 
@@ -856,7 +1097,100 @@ void func_150848F0(u8 *arg0, s32 arg1, s32 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_150847B4(u8 *arg0);
+void func_100043B4(s32 *arg0, u32 arg1);
+void func_10004074(void *);
+
+// object_release_models: release the shared model resources of an object that goes away (called by the object
+// removal func_15060F28 for kinds other than 2 / 3). For each part id of the object (+0x2C4 list, +0x2C9 count):
+// the D_800D1588 and D_800D1C90 blocks of the part are freed unless another live object (of the first 25, kind byte
+// +4 != 0xFF, +5 != 2) has a part that uses the same block; then every D_800D1588 slot holding that block is
+// cleared. When no other object has the same part id, the per-kind buffers D_800C5C08 / D_800C6070 / D_800C6360
+// (indexed by the object's kind +4, as the asm does) are freed.
+void func_150849C0(struct127 *obj) {
+    u8 *o = (u8 *) obj;
+    u8 *parts;
+    u8 *other;
+    u8 *list;
+    s32 kind = o[4];
+    s32 nparts;
+    s32 self;
+    s32 freeModel;
+    s32 freeRecord;
+    s32 lastUser;
+    s32 j;
+    s32 k;
+    s32 q;
+    s32 id;
+    s32 model;
+    struct124 *record;
+
+    if (kind == 0xFF || (&D_800D19A0)[kind] == 0) {
+        return;
+    }
+    nparts = o[0x2C9];
+    parts = *(u8 **) (o + 0x2C4);
+    func_150847B4(o);
+    self = obj - D_800CC2D0;
+    lastUser = 1;
+    for (j = 0; j < nparts; j++) {
+        freeModel = 1;
+        freeRecord = 1;
+        for (k = 0; k < 25; k++) {
+            if (k == self) {
+                continue;
+            }
+            other = (u8 *) &D_800CC2D0[k];
+            if (*(s32 *) other == 0 || other[4] == 0xFF || other[5] == 2) {
+                continue;
+            }
+            list = *(u8 **) (other + 0x2C4);
+            id = parts[j];
+            model = D_800D1588[id];
+            record = D_800D1C90[id];
+            for (q = 0; q < other[0x2C9]; q++) {
+                if (list[q] == id) {
+                    lastUser = 0;
+                }
+                if (D_800D1588[list[q]] == model && model != 0) {
+                    freeModel = 0;
+                }
+                if (D_800D1C90[list[q]] == record && record != NULL) {
+                    freeRecord = 0;
+                }
+            }
+        }
+        if (freeModel && (model = D_800D1588[parts[j]]) != 0) {
+            func_100043B4((s32 *) (model - 0x10), 3);
+            for (k = 0; k < 187; k++) {
+                if (D_800D1588[k] == model) {
+                    D_800D1588[k] = 0;
+                }
+            }
+        }
+        if (freeRecord && D_800D1C90[parts[j]] != NULL) {
+            func_100043B4((s32 *) ((u8 *) D_800D1C90[parts[j]] - 0x10), 3);
+            D_800D1C90[parts[j]] = NULL;
+        }
+        if (lastUser && (&D_800D19A0)[parts[j]] != 0) {
+            if (D_800C5C08[kind] != 0) {
+                func_10004074((void *) D_800C5C08[kind]);
+                D_800C5C08[kind] = 0;
+                func_10004074((void *) D_800C6070[kind]);
+                D_800C6070[kind] = 0;
+            }
+            if (D_800C6360[kind] != 0) {
+                func_10004074((void *) D_800C6360[kind]);
+                D_800C6360[kind] = 0;
+            }
+        }
+        lastUser = 1;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_150849C0.s")
+#endif
 
 u8 func_15084E08(struct_eu_AF2A0 *arg0) {
     s32 temp_v1 = arg0->unk1C9;

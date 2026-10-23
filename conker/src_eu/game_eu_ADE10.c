@@ -54,7 +54,7 @@ void func_15080830(u8 *arg0, s32 arg1, s32 arg2)
   if (arg0 != 0)
   {
     arg2 = arg2;
-    if (func_1507ED48() > 0)
+    if (func_1507ED48(arg0) > 0)
     {
       new_var = 0xFFFE;
       if (arg1 == 0)

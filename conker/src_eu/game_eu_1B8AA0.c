@@ -234,6 +234,7 @@ void func_1518B7D4(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u8 arg4) {
 }
 
 #ifdef NON_MATCHING
+s32 func_15046F70(void *, u16, f32, void *); /* P95 */
 void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u8 arg6) {
     struct {
         f32 u90;
@@ -349,7 +350,7 @@ void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u
                 sp.uE4 = (*(f32 *)((u8 *)arg0 + 8)) - (func_151423D8((temp_s0 - 0x40) & 0xFF) * temp_f20);
                 sp.uF4 = 25.0f - (func_150ADA68() * 50.0f);
                 sp.uF8 = 25.0f - (func_150ADA68() * 50.0f);
-                if (func_15046F70(&sp.uDC, 0, 0xC61C4000, &sp.u90) != 0) {
+                if (func_15046F70(&sp.uDC, 0, -10000.0f, &sp.u90) != 0) { /* P95: was 0xC61C4000 as an int */
                     sp.u116 = 2;
                     temp_v0 = func_15132FBC(&sp.uB4, 3, 0xFF, 4, (s32) arg6, 0);
                     if (temp_v0 != NULL) {

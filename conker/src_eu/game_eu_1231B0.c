@@ -580,7 +580,7 @@ void func_150F6DD0(u8 *arg0, s32 arg1, u8 arg2) {
 extern f32 D_800A1F40;
 s32 func_15134DAC(void *, s32, u8 *, s16);
 
-void func_150F6E10(u8 *arg0, s16 arg1, f32 arg2, u8 arg3) {
+void func_150F6E10(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     struct {
         u8 u2C;
         u8 *u30;

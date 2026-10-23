@@ -341,9 +341,17 @@ s32 func_1513384C(u8 *arg0)
   return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_151424F4(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
+#else
 s32 func_151424F4(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+#endif
 s32 func_15133A80(s32 arg0, u8 *arg1) {
+#ifdef NON_MATCHING
+    func_151424F4(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
+#else
     func_151424F4(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
+#endif
     return 1;
 }
 
@@ -377,9 +385,17 @@ void func_15133AF8(u8 *arg0, u8 *arg1, u8 arg2)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15133C18.s")
 
+#ifdef NON_MATCHING
+s32 func_15142838(s32, f32, f32, f32, f32, f32, f32, f32, f32); /* P95: f32 (float bits were passed as an int) */
+#else
 s32 func_15142838(s32, s32, s32, s32, f32, f32, f32, f32, f32);
+#endif
 s32 func_15133CD0(s32 arg0, u8 *arg1) {
+#ifdef NON_MATCHING
+    func_15142838(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40)); /* P95: f32 (float bits were passed as an int) */
+#else
     func_15142838(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40));
+#endif
     return 1;
 }
 

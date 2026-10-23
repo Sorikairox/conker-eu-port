@@ -1,0 +1,20 @@
+s/o\[0x3B\] = 0xFF - /o[0x3B] = 0xFE - / %
+s/o\[0xAB\] = arg3;/o[0xAB] = arg4;/ %
+s/\*(s32 \*) o = arg4;/*(s32 *) o = arg3;/ %
+s/o\[0x125\] = 0xFF;/o[0x125] = 0xFE;/ %
+s/0x32C + 1;/0x32C;/ %
+s/= ow\[0x66\] \& ~0x10;/= ow[0x66];/ %
+s/o\[0x1DF\] = ow\[0x1DE\];/o[0x1DF] = ow[0x1DF];/ %
+s/if (keepScale == 0) {/if (keepScale != 0) {/ %
+s/= \*(f32 \*) (ow + 0x154);/= *(f32 *) (ow + 0x150);/ %
+s/o\[0x101\] = keepScale;/o[0x101] = flags;/ %
+s/if (flags \& 1) {/if (flags \& 4) {/ %
+s/|= 0x4000;/|= 0x8000;/ %
+s/(f32) \*(u16 \*)/(f32) *(s16 *)/ %
+s/flag2 = (flags \& 2) ? 1 : 0;/flag2 = flags \& 2;/ %
+s/i <= D_80082FA0/i < D_80082FA0/ %
+s/slot\[i - 1\] != 0/slot[i] != 0/ %
+s/func_1515D9F0(1)/func_1515D9F0(0)/ %
+s/single = D_800C35EA == 1;/single = D_800C35EA != 0;/ %
+s/func_15083E20(o, kind, NULL);/func_15083E20(o, kind, ow);/ %
+s/func_15083D54((struct127 \*) o, arg7, flag2, arg8);/func_15083D54((struct127 *) o, arg7, flag2, 1.0f);/ %

@@ -4,7 +4,8 @@
 
 
 #ifdef NON_MATCHING
-s32 func_150E2030(f32, f32, s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
+/* P93: 28 arguments as the asm passes them (a0 = 0, a1..a3 = the first three floats in integer registers) */
+s32 func_150E2030(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, f32, f32, f32, f32, f32, f32);
 void func_150E4A94(s32);
 int func_151EFDD0(void);
 extern s32 D_80088DA4;
@@ -92,7 +93,7 @@ void func_150E6060(void) {
                     temp_f2 = D_800DBFF0->unk2F8;
                     temp_f12 = D_800DBFF0->unk2FC;
                     temp_f14 = D_800DBFF0->unk300;
-                    func_150E2030(temp_f12, temp_f14, 0, temp_f20 + temp_f2, var_f28 + temp_f12, temp_f22_2 + temp_f14, temp_f24 + temp_f2, var_f26 + temp_f12, (cosf(temp_f30) * 3000.0f) + temp_f14, 160.0f, 10.0f, 4.0f, 360.0f, 0xF, 0x43, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                    func_150E2030(0, temp_f20 + temp_f2, var_f28 + temp_f12, temp_f22_2 + temp_f14, temp_f24 + temp_f2, var_f26 + temp_f12, (cosf(temp_f30) * 3000.0f) + temp_f14, 160.0f, 10.0f, 4.0f, 360.0f, 0xF, 0x43, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
                 }
                 var_s4 += 1;
                 var_s3 -= 0xA;

@@ -8,7 +8,11 @@ void func_151C1C04(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4);
 void func_151C0648(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
 #endif
 // hoisted forward declaration(s) for func_151C0AA8
+#ifdef NON_MATCHING
+void func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
+#else
 void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
+#endif
 // hoisted forward declaration(s) for func_151C0350
 void func_151C09C8(u8 *, u8, s32);
 void func_151C0B54(s32, u8, s32);
@@ -243,7 +247,11 @@ void func_151C0AA8(u8 *arg0, u8 arg1, s32 arg2) {
     sp28 = func_150ADA68();
     temp_t7 = (func_150ADA20() % 56U) + 0xC8;
     temp_f12 = sp28 * 4.0f + 14.0f;
+#ifdef NON_MATCHING
+    func_15154728(arg0, temp_f12, 1.1820899f, (f32) (u32) temp_t7, 0.0f, arg1, arg2); /* P95: float literal (asm passes the bits 0x3F974EB9) */
+#else
     func_15154728(arg0, temp_f12, 0x3F974EB9, (f32) (u32) temp_t7, 0.0f, arg1, arg2);
+#endif
 }
 
 void func_151D58E4(s32 arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);

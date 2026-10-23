@@ -1,0 +1,9 @@
+s/(n - 1) \* 8/n * 8/ %
+s/if (cmd\[3\] != 0)/if (cmd[3] == 0)/ %
+s/0x32C + 1)/0x32C)/ %
+s/o\[4\] == 0x6E/o[4] == 0x6F/ %
+s/o\[4\] == 0x2F/o[4] == 0x2E/ %
+s/o\[0x65\] \* 0x32C - 0x32C/o[0x65] * 0x32C/ %
+s/func_15060F28((struct127 \*) o, 0)/func_15060F28((struct127 *) o, 1)/ %
+s/func_1505F0AC(cmd\[0\])/func_1505F0AC(cmd[1])/ %
+s/cmd += 0x10/cmd += 8/ %

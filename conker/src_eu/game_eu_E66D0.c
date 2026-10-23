@@ -47,9 +47,17 @@ s32 func_150B9AFC(struct102 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9B1C.s")
 
+#ifdef NON_MATCHING
+s32 func_15142600(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+#else
 s32 func_15142600(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
+#endif
 s32 func_150BA1F4(s32 arg0, u8 *arg1) {
+#ifdef NON_MATCHING
+    func_15142600(arg0, *(f32 *)(arg1 + 0x18), *(f32 *)(arg1 + 0x1C), *(f32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
+#else
     func_15142600(arg0, *(s32 *)(arg1 + 0x18), *(s32 *)(arg1 + 0x1C), *(s32 *)(arg1 + 0x2C), *(f32 *)(arg1 + 0x30), *(f32 *)(arg1 + 0x34), *(f32 *)(arg1 + 0x38), *(f32 *)(arg1 + 0x3C), *(f32 *)(arg1 + 0x40), *(f32 *)(arg1 + 0x20), *(f32 *)(arg1 + 0x24), *(f32 *)(arg1 + 0x28));
+#endif
     return 1;
 }
 

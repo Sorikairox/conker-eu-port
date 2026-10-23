@@ -101,7 +101,11 @@ void func_10011FA0(s32 *arg0);
 void func_10011FB0(s32 arg0);
 void func_10011FDC(s32 arg0);
 void func_10011FEC(void);
+#ifdef NON_MATCHING
+void func_10012560(s32 arg0, u8 *arg1, s32 arg2);
+#else
 void func_10012560(s32 arg0);
+#endif
 void func_10012588(s32 arg0);
 void func_100125CC(s32 arg0);
 void func_1001263C(s32 arg0, s32 arg1, s32 arg2);
@@ -348,7 +352,7 @@ void func_15012020(s32 arg0, s32 arg1);
 u8   func_15012720(void);
 void func_15012770(void);
 void func_15012780(void);
-s32  func_150150A4(void);
+s32  func_150150A4(s32);
 s32  func_15015300(struct134 *arg0);
 void func_15016370(void);
 void func_15016500(void);
@@ -1044,7 +1048,11 @@ s32  func_1501A490(s32 arg0, s16 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5);
 s32  func_1502B7F0(s32 *, s32, ...);
 struct126 *func_1503195C(struct127 *, s32, s32);
 void func_150403C8(void *arg0, u32 arg1, s32 arg2);
+#ifdef NON_MATCHING
+s32 func_15043BB8(struct105 *arg0, u8 *arg1, s32 arg2); /* P98: the asm reads a1 / a2 (callback args left in place by func_10012560) */
+#else
 s32 func_15043BB8(struct105*arg0);
+#endif
 f32  func_15047C00(f32 arg0);
 f32  func_15047D60(f32 arg0);
 f32  func_150488C8(f32 arg0);
@@ -1181,7 +1189,11 @@ s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2);
 void func_15141E38(struct127 *arg0, s32 arg1);
 s32 func_151D9014(void *arg0, f32 *arg1, u8 arg2, f32 arg3, s16 arg4, u8 arg5, f32 arg6, u8 arg7, f32 arg8, f32 arg9, u8 argA, s32 argB, u8 argC, u8 argD, u8 argE, s32 argF);
 s32  func_1000ECCC(void *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u16 *arg6);
+#ifdef NON_MATCHING
+s32 func_151BEE00(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98: asm reloads a1 with lwc1 */
+#else
 s32 func_151BEE00(f32 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6);
+#endif
 void func_151A9940(u8 arg0, u8 arg1, void *arg2, s32 arg3, f32 arg4, f32 arg5, s16 arg6, u8 arg7, s32 arg8);
 void func_1000DEC4(void);
 s32  func_1502B224(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);

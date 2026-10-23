@@ -164,7 +164,7 @@ s16 *func_15034790(s16 *arg0, s32 arg1) {
     return arg0 + 4;
 }
 
-s32 func_1503BCAC();
+void func_1503BCAC();
 
 void func_1503482C(s32 arg0) {
     switch (D_800CC2D4[arg0 * 0x32C]) {
@@ -175,13 +175,13 @@ void func_1503482C(s32 arg0) {
     case 4:
     case 0x80:
     case 0xB0:
-        func_1503BCAC();
+        func_1503BCAC(arg0);   /* P76: a0 still holds arg0 at the jal */
         break;
     }
 }
 
 s32 func_150351A4(struct127 *, s32, s32);
-s32 func_15036600(s32, s32, s32, s32);
+void func_15036600(s32, s32, s32, s32);
 s32 func_150F1F80(struct127 *);
 
 void func_150348D4(s32 arg0) {

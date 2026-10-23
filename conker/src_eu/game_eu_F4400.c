@@ -10,7 +10,7 @@ void func_150C6BF0(u8 *arg0) {
         p += 0xB0;
         p[4] = 1;
     } else {
-    *(s32 *)(arg0 + 0x6C) = func_150C7290();
+    *(s32 *)(arg0 + 0x6C) = func_150C7290(arg0);
     }
 }
 

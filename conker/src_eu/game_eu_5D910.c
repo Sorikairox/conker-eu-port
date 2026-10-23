@@ -4,20 +4,206 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_15031D40(u8 *arg0, u8 *arg1);
 f32 *allocate_memory(s32, s32, s32, s32);
+s32 *func_1502B6BC(s32, s32, s32, s32, s32, s32);
+s32 func_1510D3E0(s32, s32, s32, s32, s32 *);
+void func_15168E54(s32, s32 *);
+void func_100043B4(s32 *arg0, u32 arg1);
+void func_10004074(s32);
+void func_15031F04(u8 *);
+void func_1503FAA8(s32);
+void func_1518CF74(s32);
+extern s32 D_800DFDE8[];
+extern s32 *D_800E0578[];
+/* P71: a word of an attachment record (the list D_800C3EE0, see func_15030758) */
+#define ATT_W(rec, off) (*(s32 *) ((rec) + (off)))
+s32 func_15033ECC();   /* P71: C under NON_MATCHING (else an extern s32 below, as the matching code uses it) */
+s32 func_1000FD38(s32 *, u8 *, u8 *);
 #endif
 
+#ifdef NON_MATCHING
+s32 func_1503F8A8(u8 *, s32, s32, f32, f32, s32); /* P95: f32 parameter */
+#else
 s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
+#endif
 
-s32 func_15030448(struct127 *, s32);
+void func_15030448(struct127 *, s32);
 
 s32 func_15030600(u8 *, s32, s32);
 
 
+#ifdef NON_MATCHING
+/*
+ * P71: reference-counted load of asset (9, idx) with several display lists (the one-list variant is
+ * func_1518C900; func_1518CF74 releases both). Header words: +0 the display-list offset table (+4 >> 2 entries),
+ * +8, +0xC (>> 4), +0x10, the data from +0x18. First use: func_1502B6BC(0, 0, 0, 2, 9, idx) (none: return 1),
+ * each table entry is relocated by the header address, func_1510D3E0 resolves its segments
+ * (&D_800DFDE8[idx] keeps the list), func_15168E54 patches its addresses; the header is kept in D_800E0578[idx].
+ * The count D_800DFC00[idx] is not saturated here. Returns 0 once loaded.
+ */
+s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC) {
+    u8 *refs = &D_800DFC00[idx];
+    s32 *hdr;
+    s32 i;
+
+    if (*refs == 0) {
+        hdr = func_1502B6BC(0, 0, 0, 2, 9, idx);
+        if (hdr == NULL) {
+            return 1;
+        }
+        *dls = (s32 *) hdr[0];
+        *count = (u32) hdr[1] >> 2;
+        for (i = 0; i < *count; i++) {
+            (*dls)[i] += (s32) hdr;
+            func_1510D3E0((*dls)[i], 0, 1, 0x3E, &D_800DFDE8[idx]);
+            func_15168E54((*dls)[i], hdr);
+        }
+        D_800E0578[idx] = hdr;
+    } else {
+        hdr = D_800E0578[idx];
+        *dls = (s32 *) hdr[0];
+        *count = (u32) hdr[1] >> 2;
+    }
+    (*refs)++;
+    *data = (s32) (hdr + 6);
+    if (out10 != NULL) {
+        *out10 = hdr[4];
+    }
+    if (out8 == NULL) {
+        return 0;
+    }
+    *out8 = hdr[2];
+    if (outC != NULL) {
+        *outC = (u32) hdr[3] >> 4;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030100.s")
+#endif
 
+#ifdef NON_MATCHING
+s32 func_15030100(s32 idx, s32 **dls, u8 *count, s32 *data, s32 *out10, s32 *out8, s32 *outC);
+s32 func_1503F91C(s32, s32, u8 *, u8 *, s32 *, u8 *, u8 *);
+
+/*
+ * P71: loads the model of attachment record rec (once: +0x24 set means loaded). +0x17 == -1: asset 9 entry +1
+ * (func_15030100, display lists to +0x24 / count +0x14 / +0x30), else entry (+1, +0x17) of func_1503F91C (also
+ * +0x48). Failure returns 1. The vertex data runs from the returned data pointer up to the list table (+0x24).
+ * Records without bit 0x10 of +4 whose owner has (obj[0x66] & 0xC) == 8 and a +0x30 get two private copies of it
+ * (+0x28 / +0x2C, +8 = 1 so func_15030448 frees them), the others share it. Marks the record loaded (+9).
+ */
+s32 func_150302C8(struct127 *arg0, u8 *obj) {
+    u8 *rec = (u8 *) arg0;
+    s32 data;
+    s32 size;
+
+    if (ATT_W(rec, 0x24) != 0) {
+        return 0;
+    }
+    if ((s8) rec[0x17] == -1) {
+        if (func_15030100(rec[1], (s32 **) (rec + 0x24), rec + 0x14, &data, (s32 *) (rec + 0x30), NULL, NULL)) {
+            return 1;
+        }
+    } else if (func_1503F91C(rec[1], (s8) rec[0x17], rec + 0x24, rec + 0x14, &data, rec + 0x30, rec + 0x48)) {
+        return 1;
+    }
+    size = ATT_W(rec, 0x24) - data;
+    if (!(rec[4] & 0x10) && (obj[0x66] & 0xC) == 8 && ATT_W(rec, 0x30) != 0) {
+        ATT_W(rec, 0x28) = (s32) allocate_memory(size, 1, 2, 2);
+        if (ATT_W(rec, 0x28) == 0) {
+            return 1;
+        }
+        ATT_W(rec, 0x2C) = (s32) allocate_memory(size, 1, 2, 2);
+        if (ATT_W(rec, 0x2C) == 0) {
+            func_10004074(ATT_W(rec, 0x28));
+            ATT_W(rec, 0x28) = 0;
+            return 1;
+        }
+        bcopy((void *) data, (void *) ATT_W(rec, 0x28), size);
+        bcopy((void *) data, (void *) ATT_W(rec, 0x2C), size);
+        rec[8] = 1;
+    } else {
+        ATT_W(rec, 0x28) = data;
+        ATT_W(rec, 0x2C) = data;
+    }
+    rec[9] = 1;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150302C8.s")
+#endif
 
+#ifdef NON_MATCHING
+/*
+ * P70: frees an attachment record of the list D_800C3EE0 (see func_15030758). now != 0 frees its buffers at
+ * once (func_10004074), else they are released deferred (func_100043B4(buf, 4)) after func_15031F04.
+ * Loaded records (+9) drop the two vertex copies +0x28 / +0x2C when they were made (+8), the +0x48 handle
+ * (func_1503FAA8) and their asset (func_1518CF74(+1)). Then +0x34, +0x44 (always at once), +0x4C, +0x50, the
+ * unlink from the doubly linked list (+0x54 next, +0x58 prev; the head D_800C3EE0) and the record itself.
+ */
+void func_15030448(struct127 *arg0, s32 now) {
+    u8 *rec = (u8 *) arg0;
+    u8 *next;
+    u8 *prev;
+
+    if (!now) {
+        func_15031F04(rec);
+    }
+    if (rec[9] != 0) {
+        if (rec[8] != 0) {
+            if (now) {
+                func_10004074(ATT_W(rec, 0x28));
+                func_10004074(ATT_W(rec, 0x2C));
+            } else {
+                func_100043B4((s32 *) ATT_W(rec, 0x28), 4);
+                func_100043B4((s32 *) ATT_W(rec, 0x2C), 4);
+            }
+        }
+        if (ATT_W(rec, 0x48) != 0) {
+            func_1503FAA8(ATT_W(rec, 0x48));
+        }
+        func_1518CF74(rec[1]);
+    }
+    if (ATT_W(rec, 0x34) != 0) {
+        if (now) {
+            func_10004074(ATT_W(rec, 0x34));
+        } else {
+            func_100043B4((s32 *) ATT_W(rec, 0x34), 4);
+        }
+    }
+    if (ATT_W(rec, 0x44) != 0) {
+        func_10004074(ATT_W(rec, 0x44));
+    }
+    if (ATT_W(rec, 0x4C) != 0) {
+        if (now) {
+            func_10004074(ATT_W(rec, 0x4C));
+        } else {
+            func_100043B4((s32 *) ATT_W(rec, 0x4C), 4);
+        }
+    }
+    if (ATT_W(rec, 0x50) != 0) {
+        if (now) {
+            func_10004074(ATT_W(rec, 0x50));
+        } else {
+            func_100043B4((s32 *) ATT_W(rec, 0x50), 4);
+        }
+    }
+    if ((u8 *) D_800C3EE0 == rec) {
+        D_800C3EE0 = ATT_W(rec, 0x54);
+    }
+    prev = (u8 *) ATT_W(rec, 0x58);
+    if (prev != NULL) {
+        ATT_W(prev, 0x54) = ATT_W(rec, 0x54);
+    }
+    next = (u8 *) ATT_W(rec, 0x54);
+    if (next != NULL) {
+        ATT_W(next, 0x58) = ATT_W(rec, 0x58);
+    }
+    func_10004074((s32) rec);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030448.s")
+#endif
 
 void func_150305E0(s32 arg0, s32 arg1) {
     func_15030600(arg0, arg1, 0xFF);
@@ -87,7 +273,208 @@ s32 func_150306D4(u8 *arg0) {
     return var_s1;
 }
 
+#ifdef NON_MATCHING
+/* P65: the attachment records of the D_800C3EE0 list (offsets read from func_15030758's asm). */
+typedef struct Attach {
+    /* 0x00 */ u8 model;            /* model id for func_15083E90 */
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ u8 joint;            /* joint matrix of the model (64 bytes each) */
+    /* 0x03 */ u8 pad3[2];
+    /* 0x05 */ u8 seen;
+    /* 0x06 */ u8 pad6;
+    /* 0x07 */ u8 callback;         /* index into D_80084550, 0 = none */
+    /* 0x08 */ u8 pad8[2];
+    /* 0x0A */ u16 ownerIds[3];     /* kept only while the model's +0x84 matches one of them (0 = unused) */
+    /* 0x10 */ u8 pad10[6];
+    /* 0x16 */ u8 mode;             /* 4: scale the joint rotation by +0x40 */
+    /* 0x17 */ u8 pad17[5];
+    /* 0x1C */ u16 timer;           /* 0xFFFF = forever, else frames left (D_800BE9E4 per call) */
+    /* 0x1E */ u16 subModel;        /* != 0: attached through func_15031C4C / func_15031360 (second pass) */
+    /* 0x20 */ u16 subMtx;
+    /* 0x22 */ s16 spin;            /* extra rotation (65536 = 360 degrees) */
+    /* 0x24 */ u8 pad24[0x10];
+    /* 0x34 */ Mtx *mtx;            /* two Mtx, one per DL buffer D_800BE9C0 */
+    /* 0x38 */ u8 pad38[8];
+    /* 0x40 */ f32 scale;
+    /* 0x44 */ f32 *transform;      /* x, y, z, then rotation angles at +0xC / +0x10 / +0x14 */
+    /* 0x48 */ u8 *target;          /* gets the matrix pointer at +0x3E0[D_800BE9C0], then func_1503F7A0 */
+    /* 0x4C */ u8 pad4C[8];
+    /* 0x54 */ struct Attach *next;
+} Attach;
+
+extern s32 (*D_80084550[])(Attach *, u8 *);
+s32 func_15031360(u8 *, u8 *, s32 *, s32 *);
+u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
+void func_1503F7A0(u8 *);
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+
+/*
+ * P65: per-frame update of the attachments (D_800C3EE0 list). Pass 0 handles the records without +0x1E (and notes
+ * whether any has one), pass 1, only when needed, those attached to a sub-model. For each: its model (func_15083E90)
+ * must exist and the optional callback D_80084550[+7] must return 0, else the record is freed (func_15030448).
+ * With a matrix buffer (+0x34) or a target (+0x48), the joint matrix (the model's joint +2, or the sub-model matrix
+ * from func_15031360 as f32) gives the record's matrix for this DL buffer: transformed by +0x44 (rotation, scale +0x40,
+ * translation) / scaled to +0x40 (mode 4) / as is, then rotated by +0x22. The target gets the pointer. Records whose
+ * owner ids no longer match the model's +0x84, or whose timer runs out, are freed.
+ */
+void func_15030758(void) {
+    Attach *rec;
+    Attach *next;
+    u8 *model;
+    u8 *sub;
+    u8 *joints;
+    f32 (*src)[4];
+    Mtx *out;
+    s32 pass;
+    s32 deferred;
+    s32 subMtx;
+    s32 unused;
+    s32 keep;
+    s32 i, r, c;
+    u16 t;
+    f32 k;
+    f32 (*m)[4];
+    f32 local[4][4];
+    f32 norm[4][4];
+    f32 xform[4][4];
+    f32 rot[4][4];
+    f32 res[4][4];
+
+    deferred = FALSE;
+    for (pass = 0; pass < 2; pass++) {
+        if (pass == 1 && !deferred) {
+            return;
+        }
+        for (rec = (Attach *) D_800C3EE0; rec != NULL; rec = next) {
+            next = rec->next;
+            if (pass == 0) {
+                if (rec->subModel != 0) {
+                    deferred = TRUE;
+                    continue;
+                }
+            } else if (rec->subModel == 0) {
+                continue;
+            }
+
+            model = (u8 *) func_15083E90(rec->model);
+            rec->seen = 1;
+            if (model == NULL) {
+                func_15030448((struct127 *) rec, 0);
+                continue;
+            }
+            if (rec->callback != 0 && D_80084550[rec->callback](rec, model) != 0) {
+                func_15030448((struct127 *) rec, 0);
+                continue;
+            }
+
+            src = NULL;
+            out = NULL;
+            if (rec->mtx != NULL || rec->target != NULL) {
+                joints = *(u8 **) (model + 0x1D4);
+                if (joints != NULL) {
+                    if (rec->subModel != 0) {
+                        sub = func_15031C4C(model, rec->subModel, 0);
+                        if (sub == NULL) {
+                            func_15030448((struct127 *) rec, 0);
+                            continue;
+                        }
+                        if (func_15031360(sub, model, &subMtx, &unused) == 0) {
+                            func_15030448((struct127 *) rec, 0);
+                            continue;
+                        }
+                        src = local;
+                        if (*(s32 *) (sub + 0x48) != 0) {
+                            subMtx += rec->subMtx * sizeof(Mtx);
+                        }
+                        guMtxL2F(local, (Mtx *) subMtx);
+                    } else {
+                        src = (f32 (*)[4]) (joints + rec->joint * 64);
+                    }
+
+                    if (rec->mtx != NULL) {
+                        out = &rec->mtx[D_800BE9C0];
+                        if (rec->transform != NULL || rec->mode == 4) {
+                            /* rotation rows scaled to length 1 (transform) or +0x40 (mode 4), column 3 cleared,
+                             * translation row kept */
+                            for (r = 0; r < 3; r++) {
+                                k = ((rec->transform != NULL) ? 1.0f : rec->scale) /
+                                    sqrtf(src[r][0] * src[r][0] + src[r][1] * src[r][1] + src[r][2] * src[r][2]);
+                                for (c = 0; c < 3; c++) {
+                                    norm[r][c] = src[r][c] * k;
+                                }
+                                norm[r][3] = 0.0f;
+                                norm[3][r] = src[3][r];
+                            }
+                            norm[3][3] = 1.0f;
+                            m = norm;
+                        } else {
+                            /* the joint matrix itself, made affine in place */
+                            src[0][3] = 0.0f;
+                            src[1][3] = 0.0f;
+                            src[2][3] = 0.0f;
+                            src[3][3] = 1.0f;
+                            m = src;
+                        }
+                        if (rec->transform != NULL) {
+                            /* rotation +0xC..+0x14 and scale +0x40, then translation +0..+8, applied first */
+                            func_150A9B0C(xform, rec->transform[3], rec->transform[4], rec->transform[5],
+                                          rec->scale, rec->scale, rec->scale);
+                            xform[0][3] = 0.0f;
+                            xform[1][3] = 0.0f;
+                            xform[2][3] = 0.0f;
+                            xform[3][0] = rec->transform[0];
+                            xform[3][1] = rec->transform[1];
+                            xform[3][2] = rec->transform[2];
+                            xform[3][3] = 1.0f;
+                            func_150A7A48(xform, norm, res);
+                            guMtxF2L(res, out);
+                        } else if (rec->spin != 0) {
+                            /* extra rotation by spin (65536 = 360 degrees) */
+                            func_150A8050(rot, 0.0f, 0.0f, rec->spin * (360.0f / 65536.0f));
+                            func_150A7A48(rot, m, res);
+                            guMtxF2L(res, out);
+                        } else {
+                            guMtxF2L(m, out);
+                        }
+                    }
+                }
+            }
+
+            if (rec->target != NULL) {
+                ((void **) (rec->target + 0x3E0))[D_800BE9C0] = (rec->mtx != NULL) ? (void *) out : (void *) src;
+                func_1503F7A0(rec->target);
+            }
+
+            if (rec->ownerIds[0] != 0) {
+                keep = FALSE;
+                for (i = 0; i < 3; i++) {
+                    if (rec->ownerIds[i] != 0 && *(u16 *) (model + 0x84) == rec->ownerIds[i]) {
+                        keep = TRUE;
+                        break;
+                    }
+                }
+                if (!keep) {
+                    func_15030448((struct127 *) rec, 0);
+                    continue;
+                }
+            }
+
+            t = rec->timer;
+            if (t != 0xFFFF) {
+                if (t == 0) {
+                    func_15030448((struct127 *) rec, 0);
+                } else if (D_800BE9E4 < t) {
+                    rec->timer = t - D_800BE9E4;
+                } else {
+                    rec->timer = 0;
+                }
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15030758.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_150302C8(struct127 *, u8 *);
@@ -379,7 +766,156 @@ block_14:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031360.s")
 #endif
+#ifdef NON_MATCHING
+extern u8 D_80083350[];     /* segment 8: blended (alpha < 0xFF) material set */
+extern u8 D_800834D0[];     /* segment 8: opaque material set */
+extern u8 D_800DD714[];     /* fog colour r, g, b when the level fogs (header +0x3E) */
+extern u8 D_800DA248[];
+extern s32 D_800BEFC4;      /* display list capacity (commands) */
+s32 func_15031360(u8 *, u8 *, s32 *, s32 *);
+void func_1502D83C(s32 arg0, u8 *arg1);
+void func_1502D920(u8 *rec, s32 *col, s32 view);
+void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8,
+                   s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD);
+void func_150836AC(u8 *);
+u8 *func_1515EAB4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
+Gfx *func_1515DE84(Gfx *, s32, s32, s32, s32, s32, s32, s32, u8 *, u8 *, s32, u8 *, s32, u8 *);
+s32 func_1510D66C(s32, s32 *, s32, s32);
+u8 *func_1503605C(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3, s32 arg4);
+
+/* one display list command */
+#define ATT_DL(g, a, b)              \
+    {                                \
+        ((u32 *) (g))[0] = (a);      \
+        ((u32 *) (g))[1] = (u32) (b); \
+        (g)++;                       \
+    }
+
+/*
+ * P76: draw attachment att (+3 alpha, +5 visible, +0x13 / +0x14 hidden-part mask / part count, +0x18 / +0x1A
+ * texture ids for segments 6 / 7, +0x24 part display lists, +0x28 per-buffer segment 1) of object obj for player
+ * view `player`: alpha scaled by func_1506196C, segment 8 = blended or opaque material set, matrix (segment 3) from
+ * func_15031360 (nothing drawn without one), fog / tint colours from func_1502D83C / func_1502D920 / func_1502CF24,
+ * lighting by the object's +0x66 mode (lights +0x304[player] built by func_150836AC on demand, func_1515EAB4 /
+ * func_1515DE84), then the parts (or func_1503605C when special != 0). When the display list would overflow
+ * (D_800BEFC4 commands from D_800BEDE8[D_800BE9C0]) the commands are dropped (the start pointer is returned).
+ */
+s32 func_150314B4(s32 gfxp, u8 *att, struct127 *objp, s32 player, s32 special) {
+    Gfx *start = (Gfx *) gfxp;
+    Gfx *gfx = start;
+    u8 *obj = (u8 *) objp;
+    s32 alpha;
+    s32 v;
+    s32 mtx;
+    s32 unused110;
+    s32 col[4];
+    s32 i;
+    s32 lit;
+    s32 created;
+    s32 lights;
+    s32 fogs;
+    s32 size;
+    s32 fogA, primR, primG, primB, envR, envG, envB, fogR, fogG, fogB;
+
+    if (att[5] == 0) {
+        return (s32) gfx;
+    }
+    ATT_DL(gfx, 0xE7000000, 0);     /* pipe sync */
+    alpha = att[3];
+    v = func_1506196C(objp, player);
+    if (v != 0xFF) {
+        alpha = (v * alpha) >> 8;
+    }
+    if (alpha < 0xFF) {
+        ATT_DL(gfx, 0xDB060020, D_80083350);
+    } else {
+        ATT_DL(gfx, 0xDB060020, D_800834D0);
+    }
+    if (func_15031360(att, obj, &mtx, &unused110) == 0) {
+        return (s32) gfx;
+    }
+    i = (obj - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
+    func_1502D83C(i, (u8 *) col);
+    if (*(s16 *) ((u8 *) D_800B0DF0 + 0x3E) != 0) {
+        func_1502D920((u8 *) &D_800CC2D0[i], col, player);
+    } else {
+        col[3] = 0xFF;
+    }
+    func_1502CF24(obj, player, alpha, (u8 *) col, &primR, &primG, &primB, &envR, &envG, &envB, &fogR, &fogG, &fogB,
+                  &fogA);
+    fogs = *(s16 *) ((u8 *) D_800B0DF0 + 0x3E);
+
+    lit = TRUE;
+    if ((obj[0x66] & 0xC) == 0xC) {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x20000);
+        ATT_DL(gfx, 0xD9BFFFFF, 0);
+    } else if ((obj[0x66] & 0xC) != 8 && !(att[4] & 1)) {
+        ATT_DL(gfx, 0xD9BDFFFF, 0);
+        lit = FALSE;
+    } else if (D_800DCD7C != 0) {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x420000);
+    } else {
+        ATT_DL(gfx, 0xD9BDFFFF, 0);
+        lit = FALSE;
+    }
+    if (lit) {
+        created = FALSE;
+        lights = *(s32 *) (obj + 0x304 + player * 4);
+        if (lights == 0) {
+            func_150836AC(obj);
+            created = TRUE;
+            lights = *(s32 *) (obj + 0x304 + player * 4);
+        }
+        if (lights != 0) {
+            size = (obj[0x2FD] != 0 || created) ? 10 : 2;
+            if (obj[5] != 5 && obj[0x302] != 0 && (obj[0x66] & 0xC) != 0 && !created) {
+                gfx = (Gfx *) func_1515EAB4((u8 *) gfx, lights, obj[0x301], obj[0x302],
+                                            *(s32 *) (obj + 0x314) + D_800BE9C0 * 8);
+            } else {
+                gfx = func_1515DE84(gfx, player, *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x18), *(f32 *) (obj + 0x1C),
+                                    *(s32 *) (obj + 0x184), lights, obj[0x301],
+                                    (u8 *) (*(s32 *) (obj + 0x314) + D_800BE9C0 * 8), obj + 0x302, 2, obj + 0x1DD,
+                                    size, D_800DA248);
+            }
+        }
+    }
+    if (fogs == 0) {
+        ATT_DL(gfx, 0xF8000000, (fogR << 24) | ((fogG & 0xFF) << 16) | ((fogB & 0xFF) << 8) | (fogA & 0xFF));
+    } else {
+        ATT_DL(gfx, 0xF8000000, (D_800DD714[0] << 24) | (D_800DD714[1] << 16) | (D_800DD714[2] << 8) | (fogA & 0xFF));
+    }
+    ATT_DL(gfx, 0xF8000000, (fogR << 24) | ((fogG & 0xFF) << 16) | ((fogB & 0xFF) << 8) | (fogA & 0xFF));
+    ATT_DL(gfx, 0xFA00F200, (primR << 24) | ((primG & 0xFF) << 16) | ((primB & 0xFF) << 8));
+    ATT_DL(gfx, 0xFB000000, (envR << 24) | ((envG & 0xFF) << 16) | ((envB & 0xFF) << 8) | (alpha & 0xFF));
+    ATT_DL(gfx, 0xDB06000C, mtx);
+    ATT_DL(gfx, 0xDB060004, *(s32 *) (att + 0x28 + D_800BE9C0 * 4));
+    if (*(u16 *) (att + 0x18) != 0) {
+        v = func_1510D66C(*(u16 *) (att + 0x18), &size, 0x3E, 0);
+        ATT_DL(gfx, 0xDB060018, v);
+    }
+    if (*(u16 *) (att + 0x1A) != 0) {
+        v = func_1510D66C(*(u16 *) (att + 0x1A), &size, 0x3E, 0);
+        ATT_DL(gfx, 0xDB06001C, v);
+    }
+    if (!special) {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x400);
+        for (i = 0; i < att[0x14]; i++) {
+            if (!(att[0x13] & (1 << i))) {
+                ATT_DL(gfx, 0xDE000000, (*(s32 **) (att + 0x24))[i]);
+            }
+        }
+    } else {
+        ATT_DL(gfx, 0xD9FFFFFF, 0x200);
+        gfx = (Gfx *) func_1503605C((u8 *) gfx, att, envR, envG, envB);
+    }
+    if (gfx - D_800BEDE8[D_800BE9C0] > D_800BEFC4) {
+        return (s32) start;
+    }
+    return (s32) gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150314B4.s")
+#endif
 
 void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
     u8 *temp_v0 = func_15031C4C(arg0, arg1, arg3);
@@ -529,7 +1065,95 @@ void func_15031D40(u8 *arg0, u8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031D40.s")
 #endif
+#ifdef NON_MATCHING
+struct127 *func_15083E90(u8);
+void func_15100700(u8 *);
+void func_151616D0(u8, u8, s32);
+void func_151482D4(s32, u8);
+void func_151494E0(s32, u8);
+void func_151BDDA4(u8 *);
+void func_151D4668(u8 *);
+void func_151D7A2C(u8 *);
+void func_151027E8(u8 *);
+
+/*
+ * P71: undoes what attachment record rec (model id +1) did to its owner object (func_15083E90(+0), none: nothing):
+ * flag bits of +0x9C are cleared per model (0x90: 0x70, 0x8F: 0xE00, 0x85 / 0x5E: 0x6000), models 0x37 / 0x4B / 0x4C
+ * queue func_15033ECC (func_1000FD38; 0x37 also func_15100700), 0x49 / 0x5D send messages with the owner and its
+ * +0x3B, 0x5A lowers +0x31C->+0x1A6 by 0xAA; others call per-model handlers. Records of kind +6 = 0x16 / 0x63 /
+ * 0x89 also call func_151027E8 and func_151D4668.
+ */
+void func_15031F04(u8 *rec) {
+    struct {
+        u8 *obj;
+        u8 id;
+    } msg;
+    u8 *obj;
+    u8 *p;
+
+    obj = (u8 *) func_15083E90(rec[0]);
+    if (obj == NULL) {
+        return;
+    }
+    switch (rec[1]) {
+        case 0x82:
+        case 0x1D:
+            func_151D7A2C(obj);
+            break;
+        case 0x85:
+        case 0x5E:
+            *(s32 *) (obj + 0x9C) &= ~0x6000;
+            break;
+        case 0x8F:
+            *(s32 *) (obj + 0x9C) &= ~0xE00;
+            break;
+        case 0x90:
+            *(s32 *) (obj + 0x9C) &= ~0x70;
+            break;
+        case 0x1A:
+        case 0x1B:
+        case 0x5F:
+        case 0x65:
+        case 0x66:
+            func_151D4668(obj);
+            break;
+        case 0x5A:
+            p = *(u8 **) (obj + 0x31C);
+            if (p != NULL) {
+                *(u16 *) (p + 0x1A6) -= 0xAA;
+            }
+            break;
+        case 0x37:
+        case 0x4B:
+        case 0x4C:
+            func_1000FD38((s32 *) func_15033ECC, rec, obj);
+            if (rec[1] == 0x37) {
+                func_15100700(obj);
+            }
+            break;
+        case 0x49:
+            msg.obj = obj;
+            msg.id = obj[0x3B];
+            func_151616D0(0x10, 0x29, (s32) &msg);
+            break;
+        case 0x5D:
+            msg.obj = obj;
+            msg.id = obj[0x3B];
+            func_151482D4((s32) &msg, 0x2E);
+            func_151494E0((s32) &msg, 0x2F);
+            break;
+        case 0x3D:
+            func_151BDDA4(obj);
+            break;
+    }
+    if (rec[6] == 0x16 || rec[6] == 0x63 || rec[6] == 0x89) {
+        func_151027E8(obj);
+        func_151D4668(obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15031F04.s")
+#endif
 
 s32 func_1503211C(u8 *arg0, s32 arg1) {
     s32 var_v0 = *(s32 *)(arg0 + 0x38);
@@ -545,9 +1169,390 @@ s32 func_1503211C(u8 *arg0, s32 arg1) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503216C.s")
+#ifdef NON_MATCHING
+extern f32 D_8009748C; /* 1 / 60 */
 
+/*
+ * P70: model callback: animates the tile size of a texture by the height +0x08 of the record +0x2D0 of obj.
+ * arg0 +0x24 points at the display list pointer; its 4th G_SETTILESIZE (0xF2) command gets s = 25 * t + 2 in
+ * its first word (t = 1 in animation 0x55, 0 in 0x56, else 1 - y / 60 for y in 0..120, 0 outside).
+ * Returns 0 (also when there is no record or display list).
+ */
+s32 func_1503216C(u8 *arg0, struct127 *obj) {
+    u8 *rec = (u8 *) obj->unk2D0;
+    u32 *dl;
+    f32 t;
+    f32 y;
+    s32 i;
+    s32 left;
+
+    if (rec == NULL) {
+        return 0;
+    }
+    dl = **(u32 ***) (arg0 + 0x24);
+    if (dl == NULL) {
+        return 0;
+    }
+    if (obj->unk84.uh == 0x55) {
+        t = 1.0f;
+    } else if (obj->unk84.uh == 0x56) {
+        t = 0.0f;
+    } else {
+        y = *(f32 *) (rec + 8);
+        if (0.0f <= y && y <= 120.0f) {
+            t = 1.0f - y * D_8009748C;
+        } else {
+            t = 0.0f;
+        }
+    }
+    /* find the 4th G_SETTILESIZE (first byte 0xF2) of the list */
+    i = 0;
+    left = 4;
+    do {
+        left--;
+        while (*(s8 *) &dl[i * 2] != -14) {
+            i++;
+        }
+        if (left != 0) {
+            i++;
+        }
+    } while (left != 0);
+    dl[i * 2] = 0xF2002000 | ((s32) (25.0f * t + 2.0f) & 0xFFF);
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_1503216C.s")
+#endif
+
+#ifdef NON_MATCHING
+extern s32 D_80090680;      /* att+0x18 for kinds 0x5A / 0x74 / 0x7A when obj+0x2E8 == 0 */
+extern s32 D_80090684;      /* ... and when obj+0x2E8 != 0 */
+void func_1505E060(u8 *);
+
+/* Tables of func_150322B8: animation index by animation id, generated from the ROM's jump tables by
+ * docs/port/sessions/p80/gen_150322B8.py (do not edit by hand). 0 = the model's default animation. */
+static const u8 sAnim_8009751C[0x2B] = {
+    /* 0x000 */ 0x05, 0x03, 0x06, 0x06, 0x09, 0x0A, 0x07, 0x02, 0x10, 0x06, 0x04, 0x06, 0x06, 0x06, 0x06, 0x08,
+    /* 0x010 */ 0x0B, 0x06, 0x06, 0x0D, 0x0E, 0x0E, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x08, 0x06,
+    /* 0x020 */ 0x06, 0x06, 0x06, 0x06, 0x06, 0x06, 0x0F, 0x0F, 0x06, 0x06, 0x03,
+};
+
+static const u8 sAnim_8009763C[0x10] = {
+    /* 0x014 */ 0x03, 0x04, 0x05, 0x06, 0x07, 0x00, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11,
+};
+
+static const u8 sAnim_8009767C[0x1CF] = {
+    /* 0x17F */ 0x1A, 0x1B, 0x1C, 0x1D, 0x00, 0x00, 0x00, 0x1E, 0x1F, 0x00, 0x20, 0x00, 0x00, 0x21, 0x22, 0x23,
+    /* 0x18F */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x19F */ 0x00, 0x24, 0x00, 0x00, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x1AF */ 0x00, 0x00, 0x00, 0x00, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x2D,
+    /* 0x1BF */ 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x00, 0x00, 0x00, 0x00,
+    /* 0x1CF */ 0x00, 0x00, 0x3A, 0x3B, 0x3C, 0x00, 0x3D, 0x7F, 0x86, 0x85, 0x3E, 0x3F, 0x40, 0x00, 0x00, 0x00,
+    /* 0x1DF */ 0x00, 0x00, 0x00, 0x00, 0x41, 0x42, 0x43, 0x44, 0x45, 0x47, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x1EF */ 0x00, 0x48, 0x49, 0x4A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4C, 0x00,
+    /* 0x1FF */ 0x00, 0x50, 0x4B, 0x4D, 0x4E, 0x4F, 0x51, 0x00, 0x00, 0x52, 0x53, 0x54, 0x55, 0x56, 0x00, 0x00,
+    /* 0x20F */ 0x00, 0x00, 0x57, 0x58, 0x00, 0x00, 0x00, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x6F, 0x00, 0x00,
+    /* 0x21F */ 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x62, 0x00, 0x00, 0x00, 0x00, 0x00, 0x63,
+    /* 0x22F */ 0x64, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x65, 0x66, 0x67, 0x00, 0x00,
+    /* 0x23F */ 0x00, 0xE9, 0x70, 0x00, 0x00, 0x00, 0x68, 0x69, 0x00, 0x6A, 0x6B, 0x6C, 0x6D, 0x00, 0x6E, 0x00,
+    /* 0x24F */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x71, 0x72, 0x73,
+    /* 0x25F */ 0x00, 0x74, 0x00, 0x00, 0x00, 0x00, 0x76, 0x77, 0x78, 0x79, 0x00, 0x7A, 0x7B, 0x7C, 0x7D, 0x00,
+    /* 0x26F */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7E, 0x80, 0x81, 0x82, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x27F */ 0x83, 0x84, 0x87, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x28F */ 0x00, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x00, 0x00, 0x8F, 0x00, 0x90, 0x91, 0x92, 0x93, 0x00,
+    /* 0x29F */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x94, 0x95, 0x00, 0x96, 0x97, 0x98,
+    /* 0x2AF */ 0x99, 0x9A, 0x00, 0x9B, 0x9C, 0x9D, 0x9E, 0x9F, 0x00, 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6,
+    /* 0x2BF */ 0xA7, 0xA8, 0xA9, 0x00, 0x00, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x2CF */ 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xB0, 0xAC, 0xAD, 0xAF, 0xAE, 0x00,
+    /* 0x2DF */ 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xB6, 0xB7, 0xB8,
+    /* 0x2EF */ 0xB9, 0xBA, 0xBB, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xBC, 0xBD, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x2FF */ 0x00, 0x00, 0xBE, 0x00, 0x00, 0xBF, 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9,
+    /* 0x30F */ 0xCA, 0x00, 0x00, 0x00, 0x00, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF, 0xD0, 0x00, 0x00, 0xD1, 0xD2, 0xD3,
+    /* 0x31F */ 0xD5, 0xD4, 0xD6, 0xD7, 0xD8, 0xD9, 0x00, 0xDA, 0xDB, 0xDC, 0x00, 0x00, 0xDD, 0xDE, 0xDF, 0xE0,
+    /* 0x32F */ 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x33F */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE8, 0x00, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF, 0xF0,
+};
+
+static const u8 sAnim_80097DB8[0x4E] = {
+    /* 0x104 */ 0x04, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x114 */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x08, 0x00, 0x00, 0x00, 0x00,
+    /* 0x124 */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    /* 0x134 */ 0x09, 0x0A, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x00,
+    /* 0x144 */ 0x00, 0x0F, 0x10, 0x12, 0x13, 0x14, 0x15, 0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18,
+};
+
+/*
+ * P80: attachment callback 5. Chooses the animation of attachment att's animation state (att+0x48) from the owner
+ * object's kind (obj[4]), the attachment's model id (att[1]) and the object's animation id (obj+0x84), setting the
+ * attachment's mode att[2] (and +0x18 / +0x1E / +0x20 for some models) on the way. The index starts the animation
+ * (func_1503F8A8); then the attachment's frame follows the object's animation obj+0x2D0 (frame +8, and +0x3A / +0x3C
+ * unless model 0x9E), clamped below the last frame (+0x18 - 1). Returns 1 (and changes nothing) for an animation id
+ * some models (0x83, 0x87, 0x89, 0x8E, 0x98) do not know, else 0. Index -1 = keep the current animation.
+ */
+s32 func_150322B8(u8 *att, u8 *obj) {
+    u8 *anim = *(u8 **) (att + 0x48);
+    u8 *src = *(u8 **) (obj + 0x2D0);
+    s32 idx = -1;
+    s32 sync = 1;
+    s32 cur;
+    s32 kind;
+    s32 id;
+    f32 last;
+
+    if (anim == NULL) {
+        return 0;
+    }
+    cur = *(u16 *) (anim + 4) & ~0x8000;
+    kind = obj[4];
+    id = *(u16 *) (obj + 0x84);
+    switch (kind) {                                    /* jtbl_80097490 */
+        case 0x58:
+            if (att[1] == 0x9B) {
+                att[2] = 0x12;
+            }
+            switch (id) {
+                case 2:    idx = 1; break;
+                case 3:    idx = 0; break;
+                case 0x27: idx = 3; break;
+                case 0x28: idx = 4; break;
+                default:   idx = (att[1] == 0x9B) ? 3 : 0; break;
+            }
+            break;
+        case 0x5B:
+            idx = 0;
+            break;
+        case 0x5A:
+        case 0x74:
+        case 0x7A:
+            *(s16 *) (att + 0x18) = (*(s32 *) (obj + 0x2E8) != 0) ? D_80090684 : D_80090680;
+            if (id < 0x2B) {
+                idx = sAnim_8009751C[id];
+            } else if (id == 0x50) {
+                idx = 0x13;
+            } else if (id == 0x51) {
+                idx = 0x14;
+            } else {
+                idx = 6;
+            }
+            break;
+        default:
+            switch (att[1]) {                          /* jtbl_800975C8 */
+                case 0x83:
+                    switch (id) {
+                        case 0x5E: idx = 0; break;
+                        case 0x5F:
+                        case 0xFA: idx = 1; break;
+                        case 0x60: idx = 2; break;
+                        case 0xB3: idx = 3; break;
+                        default:   return 1;
+                    }
+                    break;
+                case 0x85:
+                    if (id == 0x13E) {
+                        idx = 5;
+                    } else if (id == 0x13F) {
+                        idx = 4;
+                    } else if (id == 0x7C) {
+                        idx = 2;
+                    } else {
+                        idx = (*(f32 *) (obj + 0x3C) > 0.0f) ? 1 : 0;
+                    }
+                    break;
+                case 0x87:
+                    switch (id) {                      /* jtbl_80097EF0 */
+                        case 0x171: case 0x173: idx = 0x01; break;
+                        case 0x172: idx = 0x00; break;
+                        case 0x174: idx = 0x02; break;
+                        case 0x175: case 0x176: case 0x177: case 0x178: case 0x179: return 1;
+                        case 0x17A: idx = 0x03; break;
+                        default: return 1;
+                    }
+                    break;
+                case 0x88:
+                    idx = (id == 0x11) ? 0 : (id == 0x26) ? 1 : 2;
+                    break;
+                case 0x89:
+                    idx = 3;
+                    if (obj[5] == 5) {
+                        att[2] = 0;
+                        break;
+                    }
+                    switch (id) {
+                        case 0x47: idx = 1; att[2] = 9; break;
+                        case 0x49: idx = 0; att[2] = 9; break;
+                        case 0x81: idx = 2; att[2] = 0x13; break;
+                        default:   return 1;
+                    }
+                    break;
+                case 0x8D:
+                    idx = (id == 0x323) ? 1 : (id == 0x324) ? 2 : 0;
+                    break;
+                case 0x8E:
+                    switch (id) {
+                        case 0xB4: idx = 0; break;
+                        case 0xB5: idx = 2; break;
+                        case 0xB6: idx = 1; break;
+                        case 0xDD:
+                        case 0xDE: idx = 3; break;
+                        default:   return 1;
+                    }
+                    break;
+                case 0x8F:
+                case 0x90:
+                    if (id >= 0x104 && id < 0x104 + 0x4E) {
+                        idx = sAnim_80097DB8[id - 0x104];
+                    } else if (id >= 0x17F && id < 0x17F + 0x1CF) {
+                        idx = sAnim_8009767C[id - 0x17F];
+                    } else if (id == 0xA8) {
+                        idx = 0x5F;
+                    } else if (id == 0xAE) {
+                        idx = 2;
+                    } else if (id == 0xB9) {
+                        idx = 1;
+                    } else if (id == 0xDA) {
+                        idx = 3;
+                    } else {
+                        idx = 0;
+                    }
+                    break;
+                case 0x91:
+                    if (obj[5] == 5) {
+                        att[2] = 0;
+                        idx = (*(f32 *) (obj + 0x24) == 0.0f) ? 3 : 0;
+                    } else {
+                        att[2] = 0xE;
+                        idx = (id == 0x10) ? 1 : (id == 0x12) ? 2 : 4;
+                    }
+                    break;
+                case 0x98:
+                    if (kind == 0x8B) {
+                        att[2] = 6;
+                        idx = 5;
+                        break;
+                    }
+                    switch (id) {
+                        case 0x12C: idx = 0; break;
+                        case 0x12D: idx = 3; break;
+                        case 0x12E:
+                        case 0x358: idx = 2; break;
+                        case 0x142: idx = 4; break;
+                        case 0x2AA: idx = 6; break;
+                        default:    return 1;
+                    }
+                    break;
+                case 0x9A:
+                    if (kind == 0x87) {
+                        att[2] = 0x12;
+                        idx = (id == 1) ? 1 : (id == 5) ? 2 : 0;
+                    } else if (kind == 0x99) {
+                        att[2] = 0x15;
+                        idx = (id >= 0x14 && id < 0x14 + 0x10) ? sAnim_8009763C[id - 0x14] : 0;
+                    }
+                    break;
+                case 0x9B:
+                    idx = 0;
+                    if (obj[5] == 5) {
+                        att[2] = 0;
+                    } else if (kind == 0x8B) {
+                        att[2] = 6;
+                        if (id == 0xC) {
+                            idx = 6;
+                        } else if (id == 0x13) {
+                            idx = 7;
+                        }
+                    } else {
+                        att[2] = 9;
+                        if (id == 0x1B7) {
+                            idx = 1;
+                        } else if (id == 0x1B8) {
+                            idx = 2;
+                        } else if (id == 0x22E) {
+                            idx = 5;
+                        }
+                    }
+                    break;
+                case 0x9C:
+                    idx = 8;
+                    break;
+                case 0x9D:
+                    idx = 0;
+                    if (obj[5] == 5) {
+                        att[2] = 0;
+                    } else if (kind == 0x8B) {
+                        att[2] = 6;
+                        if (id == 0x13 || id == 0x20) {
+                            idx = 4;
+                        } else if (id == 0x22) {
+                            idx = 3;
+                        }
+                    } else {
+                        att[2] = 9;
+                        if (id == 0x21C) {
+                            idx = 1;
+                        } else if (id == 0x241) {
+                            idx = 2;
+                        }
+                    }
+                    break;
+                case 0x9E:
+                    att[2] = 9;
+                    *(s16 *) (att + 0x1E) = 0x41;
+                    *(s16 *) (att + 0x20) = 1;
+                    switch (id) {
+                        case 0x1D6: idx = 1; break;
+                        case 0x1D7: idx = 2; att[2] = 0x13; break;
+                        case 0x1D8: idx = 3; break;
+                        case 0x257: idx = 4; att[2] = 0x13; break;
+                        case 0x275: idx = 5; att[2] = 0x13; break;
+                    }
+                    sync = 0;
+                    if (att[2] == 0x13) {
+                        *(s16 *) (att + 0x1E) = 0;
+                    }
+                    break;
+                case 0x9F:
+                    idx = 0;
+                    if (obj[5] == 5) {
+                        att[2] = 0;
+                    } else if (kind == 0xB5) {
+                        att[2] = 0x12;
+                        if (id >= 0x34 && id <= 0x37) {
+                            idx = id - 0x33;
+                        }
+                    } else {
+                        att[2] = 9;
+                    }
+                    break;
+            }
+            break;
+    }
+
+    if (idx != -1) {
+        func_1503F8A8(*(u8 **) (att + 0x48), 0, idx, 0, 0.0f, 1);
+    }
+    if (src != NULL) {
+        anim = *(u8 **) (att + 0x48);
+        if (idx == cur && *(s16 *) (src + 0x3C) == 0x3FF) {
+            func_1505E060(anim);
+            anim = *(u8 **) (att + 0x48);
+        }
+        *(f32 *) (anim + 8) = *(f32 *) (src + 8);
+        anim = *(u8 **) (att + 0x48);
+        if (sync && (*(s8 *) (anim + 0x39) != 0 || anim[0x215] == 0)) {
+            *(s16 *) (anim + 0x3A) = *(s16 *) (src + 0x3A);
+            *(s16 *) (*(u8 **) (att + 0x48) + 0x3C) = *(s16 *) (src + 0x3C);
+            anim = *(u8 **) (att + 0x48);
+        }
+        last = *(f32 *) (anim + 0x18) - 1.0f;
+        if (last <= *(f32 *) (anim + 8)) {
+            *(f32 *) (anim + 8) = last;
+        }
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_150322B8.s")
+#endif
 
 s32 func_150334A8(u8 *arg0, u8 *arg1) {
     u8 *v;
@@ -561,7 +1566,11 @@ s32 func_150334A8(u8 *arg0, u8 *arg1) {
     }
     t = *(s32 *)(arg1 + 0x2E4) & 0xFF;
     if (t != 0xFF) {
+#ifdef NON_MATCHING
+        func_1503F8A8(s, 0, t, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
+#else
         func_1503F8A8(s, 0, t, 0x3F800000, 0.0f, 1);
+#endif
     }
     if (v != NULL) {
         *(f32 *)(*(u8 **)(arg0 + 0x48) + 8) = *(f32 *)(v + 8);
@@ -583,7 +1592,11 @@ s32 func_1503356C(u8 *arg0, s32 arg1) {
         return 0;
     }
     if ((*(u16 *)(var_s0 + 4) & 0x8000) != 0x8000) {
+#ifdef NON_MATCHING
+        func_1503F8A8(var_s0, 0, 0, 1.0f, 0.0f, 1); /* P95: float literal (asm passes the bits 0x3F800000) */
+#else
         func_1503F8A8(var_s0, 0, 0, 0x3F800000, 0.0f, 1);
+#endif
         var_s0 = *(u8 **)(arg0 + 0x48);
     }
     if ((*(f32 *)(var_s0 + 0x18) - 1.0f) <= *(f32 *)(var_s0 + 8)) {
@@ -843,7 +1856,9 @@ block_10:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033B28.s")
 #endif
+#ifndef NON_MATCHING
 extern s32 func_15033ECC;
+#endif
 s32 func_1000FD38(s32 *, u8 *, u8 *);
 s32 func_150337A8(u8 *, u8 *);
 extern u8 D_800BEE2C;
@@ -862,7 +1877,9 @@ s32 func_15033CB8(u8 *arg0, u8 *arg1) {
     return 0;
 }
 
+#ifndef NON_MATCHING
 extern s32 func_15033ECC;
+#endif
 
 s32 func_15033DC8(u8 *arg0, u8 *arg1) {
     s32 temp_v0;
@@ -882,7 +1899,65 @@ s32 func_15033DC8(u8 *arg0, u8 *arg1) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+s32 func_150ADA20(void);
+void func_10010FFC(s32, s32, s32, s32, s32, u8 *);
+
+/*
+ * P71: sound callback of the attachment sounds (func_1000FA64 / func_1000FD38 with rec, owner; voice +0x18 / +0x1C).
+ * Missing record / owner (or owner state 0): 1. Keeps the voice at the owner's position (+2 / +4 / +6). Playing
+ * (*playing): model 0x37 follows the owner's animation +0x84 (on a change to 0x15F one of sounds 0x444..0x447
+ * starts, func_10010FFC) and returns 0; others: when the owner's +0x31C->+0x19C < 100 the looping 0x513 sound
+ * becomes a new 0x3A1 voice (rec +0x38 / +0x3C, returns 1), else 0. Stopped: model 0x37 stops its +0x24 voice and
+ * clears *out (0), others return 1.
+ */
+s32 func_15033ECC(u8 *voice, s32 arg1, s32 *playing, s32 arg3, s32 arg4, s32 arg5, u16 *out) {
+    u8 *rec = *(u8 **) (voice + 0x18);
+    u8 *obj = *(u8 **) (voice + 0x1C);
+    u8 *p;
+    s32 snd;
+
+    if (rec == NULL || obj == NULL || *(s32 *) obj == 0) {
+        return 1;
+    }
+    *(s16 *) (voice + 2) = *(f32 *) (obj + 0x14);
+    *(s16 *) (voice + 4) = *(f32 *) (obj + 0x18);
+    *(s16 *) (voice + 6) = *(f32 *) (obj + 0x1C);
+    if (*playing == 0) {
+        if (rec[1] != 0x37) {
+            return 1;
+        }
+        if (*(u16 *) (voice + 0x24) != 0) {
+            func_100111C8(*(u16 *) (voice + 0x24));
+            *(u16 *) (voice + 0x24) = 0;
+        }
+        *out = 0;
+        return 0;
+    }
+    if (rec[1] == 0x37) {
+        snd = -1;
+        if ((*(s32 *) (rec + 0x38) & 0xFFFF) != *(u16 *) (obj + 0x84) && *(u16 *) (obj + 0x84) == 0x15F) {
+            snd = (func_150ADA20() & 3) + 0x444;
+        }
+        if (snd != -1) {
+            func_10010FFC(0, snd, 0x5DC0, 0, 0, obj);
+        }
+        *(s32 *) (rec + 0x38) = *(u16 *) (obj + 0x84);
+        return 0;
+    }
+    p = *(u8 **) (obj + 0x31C);
+    if (p != NULL && *(u16 *) (p + 0x19C) < 100 && *(s32 *) (rec + 0x38) == 0x513) {
+        *(s32 *) (rec + 0x38) = 0x3A1;
+        *(s32 *) (rec + 0x3C) = func_1000FA64(0x3A1, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x18),
+                                              (s32) *(f32 *) (obj + 0x1C), 0x7D00, 0x3E8, 0x1F4,
+                                              (s32) func_15033ECC, rec, (s32) obj, 0, 0);
+        return 1;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_5D910/func_15033ECC.s")
+#endif
 
 s32 func_150340F0(s32 arg0, u8 *arg1) {
     if (arg1[5] == 3) {

@@ -1,0 +1,12 @@
+# sed-expression % setups (random phase only: empty setups file)
+s/if (e->delay == 0) {/if (e->delay != 0) {/
+s/if (t < 0) {/if (t < 1) {/
+s/t = 0;/t = 1;/
+s/if (e->life == -1) {/if (e->life == -2) {/
+s/if (t > 0) {/if (t >= 0) {/
+s/D_800CBE00 = (s32) e->next;/D_800CBE00 = (s32) next;/
+s/prev->next = e->next;/prev->next = next;/
+s/func_100043B4((s32 \*) e, 2);/func_100043B4((s32 *) e, 1);/
+s/^            prev = e;$/            ;/
+s/D_8008622C\[e->done\]/D_8008622C[e->update]/
+s/                e->life = t;/                e->life = t - 1;/

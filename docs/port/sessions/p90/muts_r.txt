@@ -1,0 +1,16 @@
+# P90 re-run of the survivors of muts_268bc.txt (after the stack-window harness fix and new setups)
+s/grow = (size \* 40) \/ 4096;/grow = (size * 41) \/ 4096;/ % s11_b0 s11_b5_2_big
+s/(size >> 3) >> 8, (size >> 3) \& 0xFF/(size >> 3) >> 8, (size >> 4) \& 0xFF/ % s11_b0 s11_b5_2_big
+s/} else if (ev->w6 > 200) {/} else if (ev->w6 > 99) {/ % s11_b5n_w99
+s/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/ % s11_b0
+s/u8 n = ev->b4 >= 16 ? 15 : (u8) ev->b4;/u8 n = ev->b4 >= 15 ? 15 : (u8) ev->b4;/ % s33_b4_15
+s/O_F32(r, 0x18) \* 0.1f + 1.0f, scale/O_F32(r, 0x1C) * 0.1f + 1.0f, scale/ % s33_b0 s33_b4_15
+s/if (list != NULL \&\& ev->w6 < n) {/if (list != NULL \&\& ev->w6 <= n) {/ % s4C_k58_eq
+s/#define OBJ_INDEX(obj) ((s32) ((u8 \*) (obj) - (u8 \*) D_800CC2D0) \/ 812)/#define OBJ_INDEX(obj) ((s32) ((u8 *) (obj) - (u8 *) D_800CC2D0) \/ 800)/ % s23_b0 s2F_b0
+s/func_150C2290((u8) flag);/func_150C2290(flag);/ % s2E_flag
+s/60.0f, 600, 35, 0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f/60.0f, 600, 35, 0, 0, 0, NULL, 0, 0, 0, 0, 1, 0.0f/ % s1A_b0
+s/0xBE, 0xBE, (u8) flag, 0);/0xBE, 0xBE, (u8) flag, 1);/ % s1B_w2
+s/5 + 5;/5 + 6;/ % s4D_b0
+s/61 + 150;/61 + 151;/ % s5F_15 s5F_15_b0
+s/129 - 63/129 - 64/ % s5F_15 s5F_15_b0
+s/101 + 100, 0xFF/101 + 101, 0xFF/ % s48_b0

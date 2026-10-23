@@ -1,0 +1,14 @@
+s/    if (entry == NULL) {/    if (entry == (u8 *) 1) {/
+s/entry\[4\], \*(u16 \*) (entry + 6)/entry[5], *(u16 *) (entry + 6)/
+s/entry\[4\], \*(u16 \*) (entry + 6)/entry[4], *(u16 *) (entry + 4)/
+s/if (entry\[2\] != obj->unk134)/if (entry[3] != obj->unk134)/
+s/        obj->unk134 = entry\[2\];/        obj->unk134 = entry[1];/
+s/            obj->unk135 = variant;/            obj->unk135 = 1;/
+s/            obj->unk135 = entry\[3\];/            obj->unk135 = entry[2];/
+s/ob\[0x6C\] = entry\[0\] + 10;/ob[0x6C] = entry[0] + 11;/
+s/ob\[0x6D\] = entry\[1\] + 10;/ob[0x6D] = entry[0] + 10;/
+s/    if (entry\[8\] != 0) {/    if (entry[8] == 0) {/
+s/\[obj->id\])\[0x3B\]/[obj->id])[0x3A]/
+s/\[obj->id\])\[0x3C\]/[obj->id])[0x3B]/
+s/        obj->unk69 = entry\[9\];/        obj->unk69 = entry[8];/
+s/    if (variant != 0) {/    if (variant == 0) {/

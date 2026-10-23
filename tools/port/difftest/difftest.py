@@ -58,6 +58,11 @@ def heap_ptr(v):
 RET_MAGIC = 0x807FF000
 CAND_ALT = 0x0F000000                           # (| the 256 MB jal region of vram) candidate code when it would overlap a callee
 SP_ENTRY = STK_TOP - 0x100
+# P89: stack-range values below SP_ENTRY - STK_WIN (and below the lowest sp the run saw) are not frame addresses and
+# compare exactly. DIFFTEST_STK_OLD=1 restores the pre-P89 rule (the whole stack range compares equal).
+STK_WIN = 0x1000
+STK_OLD = os.environ.get('DIFFTEST_STK_OLD') == '1'
+STKW_OLD = os.environ.get('DIFFTEST_STKW_OLD') == '1'   # P90
 # P18: Unicorn 2.0.1's reg_read/reg_write of the MIPS FPRs are no-ops (reg_write(F4) then mfc1 reads the old
 # value; reg_read(Fn) is always 0). So float args were never set, stubs never returned a float, and f0 returns
 # / FP call args / f20-f31 were compared as 0 == 0. Leftover f0 after a stubbed float callee then differed by
@@ -226,9 +231,12 @@ def build_tu(func, p, src, code):
     if pm:
         m = pm[-1]; a, b = m.start(), m.end()
         k = src.rfind('#ifdef NON_MATCHING\n', 0, a)
+        # P80: comment / blank lines may sit between the #else and the pragma (game_981E0.c "// ??" notes)
         e = src.rfind('#else\n', 0, a)
         nmside = func_span(src[k:e], func) if k >= 0 and k < e and '#endif' not in src[k:a] else None
-        if k >= 0 and src[:a].endswith('#else\n') and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
+        between = src[e + len('#else\n'):a] if e >= 0 else None
+        only_notes = between is not None and all(not l.strip() or l.strip().startswith('//') for l in between.split('\n'))
+        if k >= 0 and e > k and only_notes and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
             a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
             tu = src[:a] + '\n' + code + '\n' + src[b:]
         elif nmside:
@@ -247,10 +255,11 @@ def build_tu(func, p, src, code):
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0
         tu = tu[:k] + '\n'.join(hoist) + '\n' + tu[k:]
     tu = nm_resolve(tu, True)   # other NON_MATCHING blocks: keep the C side
-    # P73: the candidate must survive the NON_MATCHING resolution (else a different body would be tested)
-    body = code.strip()
-    if body and body not in tu:
-        raise RuntimeError('candidate body for %s was dropped from the TU (NON_MATCHING layout of %s)' % (func, p))
+    # P80: the candidate must survive the splice (an unrecognised layout used to keep the old NM C and test that;
+    # P73: same for a multi-function NM block, where the candidate went into the dropped #else side)
+    cr = nm_resolve(code, True); cs = func_span(cr, func)
+    if cs is not None and cr[cs[0]:cs[1]] not in tu:
+        raise RuntimeError('candidate %s was dropped when splicing it into %s' % (func, p))
     return PRAG.sub('', tu)
 
 def nm_resolve(text, on=True):
@@ -420,20 +429,58 @@ def _nocomment(tu):
     if k not in _NOC: _NOC[k] = re.sub(r'/\*.*?\*/', ' ', re.sub(r'//[^\n]*', '', tu), flags=re.S)
     return _NOC[k]
 
+_HDR = None
+def hdr_protos():
+    """P93: include/functions.h. Callees declared only there had an unknown arity, so their stack arguments came from
+    the call-site stores (sp+0x10..0x3C only): arguments 16+ of e.g. func_1513D594 (17) were never compared. Only
+    prototypes with more than 16 arguments are taken from it (shorter ones keep the call-site rule)."""
+    global _HDR
+    if _HDR is None:
+        try: _HDR = open('include/functions.h').read()
+        except OSError: _HDR = ''
+    return _HDR
+
+_ALLHDR = None
+def all_hdr_protos():
+    """P100: every header under include/ (functions.h, libc/math.h, ...). Float-register and float-slot info for a
+    callee with no declaration in the TU comes from here: sinf / cosf are declared only in include/libc/math.h, so
+    their f12 argument was never compared and a `rad = ang` mutant survived (port-b P96)."""
+    global _ALLHDR
+    if _ALLHDR is None:
+        import glob as _g
+        parts = []
+        for f in sorted(_g.glob('include/**/*.h', recursive=True)):
+            try: parts.append(open(f, errors='replace').read())
+            except OSError: pass
+        _ALLHDR = '\n'.join(parts)
+    return _ALLHDR
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
     tu = _nocomment(tu)   # P30: commented-out old drafts (`//     func_X(a, b, c, d);`) are not prototypes
-    for m in re.finditer(r'\b%s\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*[;{]' % re.escape(name), tu):
+    ms = list(re.finditer(r'\b%s\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*[;{]' % re.escape(name), tu))
+    # P71: a declaration (type before the name) wins over call statements: `func_X((s32 *) M(rec, 0x28), 4);`
+    # counted the comma inside M(...) and made a 2-argument callee look like 3 (func_15030448 / func_100043B4)
+    decl = [m for m in ms if _is_decl(tu, m)]
+    for m in decl or ms:
         ps = m.group(1).strip()
         if ps in ('', ): continue
         if ps == 'void': return 0
         if '...' in ps: return 99
         n = 0
-        for p in ps.split(','):
+        for p in _split_top(ps):
             n += 2 if re.search(r'\b(f64|double|s64|u64|long long)\b', p) and '*' not in p else 1
         best = n
     return best
+
+def _split_top(ps):
+    """P71: split a parameter / argument list at the commas outside parentheses"""
+    out, d, cur = [], 0, ''
+    for ch in ps:
+        if ch == ',' and d == 0: out.append(cur); cur = ''; continue
+        d += {'(': 1, ')': -1}.get(ch, 0); cur += ch
+    return out + [cur]
 
 _DECL_PRE = re.compile(r'^\s*(?:(?:extern|static|inline)\s+)*[A-Za-z_]\w*[\s*]+$')
 def _is_decl(tu, m):
@@ -464,8 +511,9 @@ def proto_fslots(tu, name):
 FREGS = {}
 def proto_fregs(tu, name):
     """P18: FP argument registers (f12-f15) the prototype of name passes (o32: only leading float/double params
-    travel in FPRs), None if unknown"""
-    for m in _decl_first(tu, name):
+    travel in FPRs), None if unknown. P100: declarations only; a call statement such as `s = sinf(temp->unk8);` was
+    parsed as a prototype with an int parameter and gave set(), so no FPR argument was compared at all."""
+    for m in [m for m in _decl_first(_nocomment(tu), name) if _is_decl(_nocomment(tu), m)]:
         ps = [p.strip() for p in m.group(1).split(',') if p.strip()]
         if ps == ['void'] or not ps: return set()
         out = set(); fr = 12
@@ -507,6 +555,10 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
     for _k in range(int(_n)):
         POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
 
+# P106 (opt-in): DIFFTEST_MEMSTK="ADDR,..." (hex): memory words that hold a stack address (a function that saves
+# its sp in a global, e.g. func_150ADFD0 -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
+MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTEST_MEMSTK', '').split(','))]
+
 # P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
 # reach code behind a callee's result (e.g. an early return unless func_1517F51C() == 0).
 STUBRET = {}
@@ -526,10 +578,15 @@ for _p in filter(None, os.environ.get('DIFFTEST_RETF', '').split(',')):
 # P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
 # writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
 # found / count out-params of func_1502B6BC. Several "N:V" for one ADDR are separated by '/'. P64: N >= 4 = stack argument.
+def _outn(s):
+    # P100: N may be '@ADDR' (hex): the stub writes at that absolute address instead of through an argument
+    # (results a callee leaves in globals, e.g. func_1517C11C's per-voice flags read by func_1517E3CC).
+    return ('abs', int(s[1:], 16)) if s.startswith('@') else int(s)
+
 OUTW = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
     _a, _v = _p.split('=')
-    OUTW[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
+    OUTW[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
 # P38 (opt-in): DIFFTEST_OUTA="ADDR=N:W0;W1;...,..." (hex ADDR/W, decimal N): at every call to ADDR the stub writes
@@ -538,7 +595,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
 OUTA = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
     _a, _v = _p.split('=')
-    OUTA[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
+    OUTA[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
 # P41 (opt-in): DIFFTEST_OUTB="ADDR=N:B0;B1;...,..." like DIFFTEST_OUTA but writes bytes (hex B), e.g. u8 out-params
@@ -546,7 +603,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
 OUTB = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
     _a, _v = _p.split('=')
-    OUTB[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
+    OUTB[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
@@ -556,7 +613,10 @@ ARGMEM = {}
 for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     _a, _v = _p.split('=')
     _n, _l = _v.split(':')
-    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l)))
+    # P100: N may be 'N+OFF' (hex OFF): compare LEN bytes from aN + OFF (skips padding a struct argument leaves
+    # uninitialised, e.g. func_151DA6F8's spawn block: bytes 0x16-0x17 are stack garbage in both builds).
+    _n, _o = (_n.split('+') + ['0'])[:2]
+    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16)))
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -613,12 +673,24 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
     _a, _v = _p.split('=')
     ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
 
+STK_IN_MAX = 60   # P95: stack argument words sp+0x10 .. sp+0xFC (SP_ENTRY = STK_TOP - 0x100)
+
 def make_inputs(rng, kinds):
     r = _make_inputs(rng, kinds)
+    # P95: arguments 16+ (stack words 12+) were never set: a 19-argument function (func_15035220) read whatever the
+    # harness left there, and DIFFTEST_ARG N >= 16 was ignored silently. Only when needed (more than 16 parameters
+    # or an ARG knob >= 16), from a separate generator so the main random stream (and older results) do not move.
+    need = max([len(kinds) if kinds else 0] + [n + 1 for n in ARGFIX])
+    if need > 16:
+        xr = random.Random(r['stk'][0] ^ (r['a'][0] << 1))
+        for slot in range(16, min(need, STK_IN_MAX + 4)):
+            k = kinds[slot] if kinds and slot < len(kinds) else None
+            r['stk'].append(rand_arg(xr, k) if k not in (None, 'double') else rand_arg(xr))
     for n, vs in ARGFIX.items():
         v = vs[rng.randrange(len(vs))]
         if n < 4: r['a'][n] = v
-        elif n - 4 < 12: r['stk'][n - 4] = v
+        elif n - 4 < len(r['stk']): r['stk'][n - 4] = v
+        else: print('NOTE: DIFFTEST_ARG %d is beyond the %d stack words that can be set' % (n, STK_IN_MAX))
     return r
 
 def _make_inputs(rng, kinds):
@@ -655,8 +727,8 @@ SCRATCH = [UC_MIPS_REG_AT, UC_MIPS_REG_V0, UC_MIPS_REG_V1] + [UC_MIPS_REG_T0 + i
           [UC_MIPS_REG_T8, UC_MIPS_REG_T9]
 
 class Run:
-    def __init__(self, words, vram, extra, trial, romdata, tu, maxi, forced=None, trace=False):
-        self.forced = forced or {}; self.loads = []; self.trace = trace
+    def __init__(self, words, vram, extra, trial, romdata, tu, maxi, forced=None, trace=False, pwatch=False):
+        self.forced = forced or {}; self.loads = []; self.trace = trace; self.pread = set()
         self.words, self.vram, self.end = words, vram, vram + 4 * len(words)
         self.seed, self.romdata, self.tu = trial, romdata, tu
         self.mu = mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
@@ -696,6 +768,10 @@ class Run:
             # a 2.0.1 mis-run seen in func_100049E0 (a jump-table lw read 0 after a branch-likely that follows
             # a stubbed call); slower, so opt-in (DIFFTEST_STEP=1 or --step)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
+        if pwatch and POKES:   # P93: which DIFFTEST_POKE words the reference really reads (one hook per poked page)
+            # one global hook: Unicorn 2.0.1 range-bound read hooks missed some lbu reads (func_15035AF8: obj+4 / +7 / +0x74)
+            self.ppages = {a & ~(PAGE - 1) for a in POKES}
+            mu.hook_add(UC_HOOK_MEM_READ, self.on_pread)
         if trace:
             mu.hook_add(UC_HOOK_MEM_READ, self.on_read)
             mu.hook_add(UC_HOOK_CODE, self.on_code, begin=vram, end=self.end - 1)
@@ -762,6 +838,11 @@ class Run:
             if rt:
                 mu.reg_write(UC_MIPS_REG_0 + rt, lo); self.d64hi[rt] = (lo, hi)
 
+    def on_pread(self, mu, access, addr, size, value, ud):
+        if phys(addr) & ~(PAGE - 1) not in self.ppages: return
+        for a in range(phys(addr) & ~3, phys(addr) + size, 4):
+            if a in POKES: self.pread.add(a)
+
     def on_read(self, mu, access, addr, size, value, ud):
         if size == 4 and not addr & 3:
             try: self.loads.append((addr, struct.unpack('>I', mu.mem_read(phys(addr), 4))[0]))
@@ -824,13 +905,27 @@ class Run:
 
     def dirty(self):
         out = []
-        for p in sorted(self.writes):
+        w = self.writes
+        if MEMSTK:   # P106: words that hold a stack address (e.g. a saved sp) compare by class, like registers
+            w = dict(w)
+            for a in MEMSTK:
+                if all(a + i in w for i in range(4)):
+                    v = struct.unpack('>I', bytes(w[a + i] for i in range(4)))[0]
+                    if self.norm(v) == 'STK':
+                        for i in range(4): w[a + i] = 0x5A
+        for p in sorted(w):
             init = self.page_init(p & ~(PAGE - 1))[p & (PAGE - 1)]
-            if self.writes[p] != init: out.append((p, self.writes[p]))
+            if w[p] != init: out.append((p, w[p]))
         return out
 
     def norm(self, v):
-        return 'STK' if phys(STK_LO) <= phys(v) < phys(STK_TOP) + PAGE else v
+        # P89: only addresses in the part of the stack the function really used (its frame, or the window below
+        # the entry sp that a small frame covers) are frame addresses that may differ between ref and candidate.
+        # Other stack-range values (stub returns, pokes, random words such as 0x8066xxxx) did not come from sp and
+        # compare exactly (P86: a +0x10 / +0x14 mutant on a stub-returned 0x806xxxxx pointer compared equal as 'STK').
+        if STK_OLD: return v if not phys(STK_LO) <= phys(v) < phys(STK_TOP) + PAGE else 'STK'
+        lo = min(self.minsp, SP_ENTRY - STK_WIN)
+        return 'STK' if phys(lo) <= phys(v) < phys(STK_TOP) + PAGE else v
 
     def flush_fregs(self):
         """P18: f12-f15 of the last call, saved by the helper after its on_block"""
@@ -844,7 +939,15 @@ class Run:
         if addr == PROLOGUE: return
         self.flush_fregs()
         if self.vram <= addr < self.end:
-            self.icount += max(1, size // 4); return
+            self.icount += max(1, size // 4)
+            # P112: arg registers this run wrote since the last call (path-sensitive; see compare: indirect calls)
+            for k in range((addr - self.vram) // 4, min(len(self.words), (addr - self.vram + size) // 4)):
+                d = gpr_dest(self.words[k])
+                if d is not None and 4 <= d <= 7: self.awr.add(d - 4)
+            # P89: the frame is set up in the entry block; the next blocks see the function's own sp
+            if self.nblk < 4:
+                self.nblk += 1; self.minsp = min(self.minsp, mu.reg_read(UC_MIPS_REG_SP))
+            return
         if addr == RET_MAGIC:
             self.done = True; return   # the epilogue saves the FPRs, emu_start stops at RET_END
         ra = mu.reg_read(UC_MIPS_REG_RA)
@@ -855,16 +958,22 @@ class Run:
         name = addr2name(addr) or ('0x%08X' % addr)
         a, f, stk = call_site_writes(self.words, site) if site is not None else (set(), set(), set())
         sp = mu.reg_read(UC_MIPS_REG_SP)
+        self.minsp = min(self.minsp, sp)
         regs = [mu.reg_read(r) for r in A_REGS]
-        stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40, 4)]
+        # P90: all outgoing stack words a prototype can name (args 4..63); before P90 only sp+0x10..0x3C (args 4..15)
+        # were captured, so arguments 16+ (func_1516DF0C's 49, func_150E2030's 28, func_1516FAB8's 17) were never
+        # compared. DIFFTEST_STKW_OLD=1 restores the old window.
+        stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
-        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
+        ind = site is not None and (self.words[site] & 0xFC00003F) == 9   # P112: reached through jalr
+        awr = self.awr; self.awr = set()
+        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, awr=awr,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
-            for _n, _l in ARGMEM[addr & 0x1FFFFFFF]:
+            for _n, _l, _o in ARGMEM[addr & 0x1FFFFFFF]:
                 # P43: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
-                try: am.append(bytes(mu.mem_read(phys(regs[_n] if _n < 4 else stkw[_n - 4]), _l)).hex())
+                try: am.append(bytes(mu.mem_read(phys((regs[_n] if _n < 4 else stkw[_n - 4]) + _o), _l)).hex())
                 except Exception: am.append('unmapped')
             self.calls[-1]['argmem'] = am
         self.pending = len(self.calls) - 1
@@ -897,15 +1006,15 @@ class Run:
         if (addr & 0x1FFFFFFF) in OUTW:
             for _n, _vs in OUTW[addr & 0x1FFFFFFF]:
                 # P64: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
-                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
         if (addr & 0x1FFFFFFF) in OUTA:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
-                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *_ws))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
-                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), bytes(_ws))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
@@ -927,6 +1036,7 @@ class Run:
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
         self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
+        self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set()
         while True:
             self.resume = None
             try:
@@ -994,7 +1104,16 @@ def compare(R, C, rk, arity):
         # with a known prototype, only the reference's call-site writes widen it (P7: a candidate that
         # happens to compute something in a2 right before a 1-arg call was a false DIFFER)
         cnt = max(na if na is not None else 0, max(a['a'] if na not in (None, 99) else a['a'] | b['a'], default=-1) + 1)
+        # P65: a known prototype fixes the register arguments (func_1503AB20 reloads a spilled a2 right before a
+        # one-argument call to func_15048A40, which made a2 look like an argument)
+        if na is not None and na != 99 and os.environ.get('DIFFTEST_PROTO_ARGS', '1') == '1': cnt = min(cnt, na)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
+        # P112: an indirect call (jalr) of an unknown function: the reference may set an argument register in an
+        # earlier block (event natives 5 / 6 load a1 before branching to their shared jalr tail), which the
+        # straight-line scan above misses -> a1 was never compared (P106 args[1] -> args[0] mutant survived). Count
+        # every arg register the reference wrote on its path since the previous call. DIFFTEST_JALR_DYN=0 disables.
+        if na is None and a.get('ind') and os.environ.get('DIFFTEST_JALR_DYN', '1') != '0':
+            cnt = max(cnt, max(a['awr'], default=-1) + 1)
         # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
         if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
         # P30 (opt-in): DIFFTEST_EXACT="NAME,..." or "*": those known prototypes are exact too (a scratch a2 left
@@ -1008,7 +1127,9 @@ def compare(R, C, rk, arity):
         # (other sp+0x10..0x3F stores can be locals), plus what a known prototype says
         w = a['stk'] | b['stk']; slots = set(); o = 16
         while o in w: slots.add(o); o += 4
-        if na is not None and na != 99 and na > 4: slots |= {16 + 4 * j for j in range(na - 4)}
+        # P65: a known prototype with > 4 args fixes the slots exactly (hand asm func_150A69E0 keeps ra at sp+0x20,
+        # right after its 8th argument, so the contiguous run took it for a 9th)
+        if na is not None and na != 99 and na > 4: slots = {16 + 4 * j for j in range(na - 4)}
         # P24: a known prototype with <= 4 args has no stack args (hand asm such as func_150A8050 keeps ra at sp+0x10)
         if na is not None and na != 99 and na <= 4: slots = set()
         for o in sorted(slots):
@@ -1038,7 +1159,11 @@ def compare(R, C, rk, arity):
         k = min(set(sr) ^ set(sc) | {p for p in sr if p in sc and sr[p] != sc[p]})
         return 'memory differs at 0x%08X (ref=%s cand=%s)' % (k, '%02X' % sr[k] if k in sr else 'init', '%02X' % sc[k] if k in sc else 'init')
     o, p = R.out, C.out
-    if o['sp'] != p['sp'] or o['s'] != p['s'] or o['fs'][::2] != p['fs'][::2]:
+    # P106: DIFFTEST_SIGNORE="7,..." leaves s-registers out (hand asm that uses s7 as its ra save: the event VM's
+    # native helpers, whose caller saved s7 itself)
+    sig = {int(x) for x in filter(None, os.environ.get('DIFFTEST_SIGNORE', '').split(','))}
+    os_ = [v for k, v in enumerate(o['s']) if k not in sig]; ps_ = [v for k, v in enumerate(p['s']) if k not in sig]
+    if o['sp'] != p['sp'] or os_ != ps_ or o['fs'][::2] != p['fs'][::2]:
         return 'callee-saved registers not restored the same way'
     if rk == 'int' and not same_val(R, o['v0'], C, p['v0']):
         return 'return v0 ref=0x%X cand=0x%X' % (o['v0'], p['v0'])
@@ -1168,7 +1293,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         cwords = strip_pad(cwords)
         if not spath:   # C function: reference = ROM bytes, same length as the matched object
             rom = vram2rom(vram); raw = open('conker.eu.bin', 'rb').read()
-            n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN', '0')) // 4 or len(cwords)
+            n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN') or '0') // 4 or len(cwords)
             rwords = [struct.unpack_from('>I', raw, rom + 4 * k)[0] for k in range(n)]
     except CompileError as e:
         return dict(func=func, file=p, result='CERR', line='CERR %s: %s' % (func, str(e).replace('\n', ' | ')[:300]))
@@ -1193,15 +1318,16 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     def one(t):
         rng = random.Random(h32('trial', seed, t))
         inputs = make_inputs(rng, kinds)
-        romdata = t % 2 == 1
+        romdata = t % 2 == 1 or os.environ.get('DIFFTEST_ROMDATA') == '1'   # P106: always the ROM .data (jump / opcode tables)
         forced = {}; lrn = 0
         WLOG_ON[0] = 'R' if WLOG and str(t) == WLOG_T else None
-        R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi).run(inputs)
+        pw = t < 2
+        R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, pwatch=pw).run(inputs)
         if R.fault and not os.environ.get('DIFFTEST_NOLEARN'):
             inputs = dict(a=list(inputs['a']), f=list(inputs['f']), stk=list(inputs['stk']))
             for _ in range(int(os.environ.get('DIFFTEST_LEARN', '8'))):
                 if not learn_pointer(rwords, vram, (seed, t), romdata, tu, maxi, inputs, forced): break
-                R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced).run(inputs)
+                R = Run(rwords, vram, [], (seed, t), romdata, tu, maxi, forced, pwatch=pw).run(inputs)
                 if not R.fault: break
             if not R.fault: lrn = 1
         WLOG_ON[0] = 'C' if WLOG and str(t) == WLOG_T else None
@@ -1212,14 +1338,25 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
                 new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
+                if new[c['name']][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
+                    ha = proto_arity(hdr_protos(), pn)
+                    if ha is not None and 16 < ha < 99:
+                        new[c['name']] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
+                if new[c['name']][2] is None:   # P100: no declaration in the TU: FP argument registers from include/**.h
+                    hf = proto_fregs(all_hdr_protos(), pn)
+                    if hf:
+                        new[c['name']] = (new[c['name']][0], new[c['name']][1], hf)
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
         why = compare(R, C, rk, arity)
         if verbose:
             print('trial %d: %s ref(done=%s fault=%s calls=%d) cand(done=%s fault=%s calls=%d)' % (
                 t, why or 'same', R.done, R.fault, len(R.calls), C.done, C.fault, len(C.calls)))
+            if R.fault and getattr(R, 'fault_pc', None) is not None:   # P65: where the reference faulted
+                print('  ref fault pc 0x%08X regs %s' % (R.fault_pc, ' '.join('%X' % x for x in R.fault_regs)))
             if why: explain(R, C, inputs, forced)
-        return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new)
+        return dict(why=why, ok=bool(not R.fault and R.done), ncalls=len(R.calls), learned=lrn, new=new, pread=R.pread, pw=pw, called={c['addr'] & 0x1FFFFFFF for c in R.calls})
     crashed = 0; hung = 0
+    pread = set(); pwatched = [0]; called = set()
     twall = float(os.environ.get('DIFFTEST_TRIAL_WALL', '0')) or max(60.0, 2 * budget)
     for t in range(trials):
         if time.time() - t0 > budget and t >= 8:
@@ -1260,6 +1397,8 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if 'exc' in o: raise RuntimeError('trial %d: %s' % (t, o['exc']))
             for k, (ar, fs, fr) in o['new'].items(): arity[k] = ar; FSKIP[k] = fs; FREGS[k] = fr
         ncalls += o['ncalls']; learned[0] += o['learned']
+        if o.get('pw'): pread |= o['pread']; pwatched[0] += 1
+        called |= o.get('called', set())
         if o['why']:
             differ = 'trial %d: %s' % (t, o['why'])
             break
@@ -1274,8 +1413,32 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         line = 'EQUIV %s (%d trials ok, %d inconclusive, %d calls, ret=%s, ref %d words, cand %d words%s)' % (
             func, ok, inconcl, ncalls, rk, len(rwords), len(cwords),
             ', %d trials via learned pointer inputs' % learned[0] if learned[0] else '') + (' [%d trials crashed%s]' % (crashed, ', %d hung' % hung if hung else '') if crashed else ''); res['result'] = 'EQUIV'
-    res['line'] = line
+    res['line'] = line + poke_notes(pread, pwatched[0]) + knob_notes(called, ok + inconcl)
     return res
+
+
+def knob_notes(called, ntrials):
+    """P93: DIFFTEST_RET / RETF / OUTW / OUTA / OUTB / ARGMEM keys whose callee the reference never called (a US
+    address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
+    if not ntrials: return ''
+    un = []
+    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('ARGMEM', ARGMEM)):
+        un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called]
+    return ' [knob callee never called: %s]' % ', '.join(un) if un else ''
+
+
+def poke_notes(pread, nwatched):
+    """P93: DIFFTEST_POKE words the reference never read in trials 0-1 (a wrong address, e.g. the US address of a
+    symbol: P90 poked D_800C3958 at 0x800C395C, its EU address is 0x800C3D78, and the knob silently did nothing), and
+    pokes inside the ROM image (odd trials load the ROM .data / .rodata over them, so they only hold in even trials)."""
+    out = ''
+    if POKES and nwatched:
+        un = sorted(a for a in POKES if a not in pread)
+        if un: out += ' [POKE unread: %s]' % ','.join('%08X' % (0x80000000 | a) for a in un[:12]) + ('...' if len(un) > 12 else '')
+    if POKES:
+        rom = sorted(a for a in POKES if any(phys(v) <= a < phys(v) + len(b) for v, b, k in image() if k != 'code'))
+        if rom: out += ' [POKE in ROM data (even trials only): %s]' % ','.join('%08X' % (0x80000000 | a) for a in rom[:12])
+    return out
 
 
 def main():

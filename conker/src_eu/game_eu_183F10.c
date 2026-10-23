@@ -535,11 +535,19 @@ void func_15157554(struct102 *arg0) {
     func_15169824(arg0);
 }
 
+#ifdef NON_MATCHING
+s32 func_1503F8A8(u8 *, s32, s32, f32, f32, s32); /* P95: f32 (float bits were passed as an int) */
+#else
 s32 func_1503F8A8(u8 *, s32, s32, s32, f32, s32);
+#endif
 s32 func_1503F91C(s32, s32, u8 *, u8 *, u8 *, u8 *, u8 *);
 s32 func_1515D9B0();
 s32 func_1515D9F0(s32);
+#ifdef NON_MATCHING
+u8 *func_15157580(u8 *arg0, s32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) { /* P95: f32 (float bits were passed as an int) */
+#else
 u8 *func_15157580(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7) {
+#endif
     u8 *obj;
     s32 type;
     s32 i;

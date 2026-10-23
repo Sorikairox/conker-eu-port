@@ -17,6 +17,6 @@ void func_150CF5B0(u8 *arg0) {
             p[0x73] |= 2;
         }
     } else {
-        func_15117D18();
+        func_15117D18(arg0);
     }
 }

@@ -502,7 +502,8 @@ void func_1500A904(s32 arg0, s32 arg1) {
 void func_1500A94C(s32 arg0, s32 arg1) {
     if ((arg1 > 0) && (arg1 < 89)) {
         if (D_80082BFC[arg1]) {
-            D_80082BFC[arg1](arg0);
+            /* P76: the handlers read a1 too (still arg1 at the jalr) */
+            ((void (*)(s32, s32)) D_80082BFC[arg1])(arg0, arg1);
         }
     }
 }
@@ -544,7 +545,7 @@ void func_1500A990(s32 arg0) {
 void func_1500AB5C(s32 arg0) {
     if ((arg0 > 0) && (arg0 < 6)) {
         if (D_80082D60[arg0] != 0) {
-            D_80082D60[arg0]();
+            ((void (*)(s32)) D_80082D60[arg0])(arg0);   /* P76: a0 still holds arg0 */
         }
     }
 }

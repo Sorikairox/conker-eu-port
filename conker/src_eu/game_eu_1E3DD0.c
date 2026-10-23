@@ -105,7 +105,7 @@ s32 func_151B65C0(V3 *arg0, V3 *arg1, f32 arg2, V3 *arg3, V3 *arg4, f32 arg5, s1
 }
 
 #ifdef NON_MATCHING
-s32 func_15133E04(f32);
+s32 func_15133E04(u8 *); /* P98: the asm reads a0 = the object */
 
 void func_151B6804(u8 *arg0) {
     u8 *sp18;
@@ -127,7 +127,7 @@ void func_151B6804(u8 *arg0) {
     temp_f2 = temp_f12 + (sinf((*(f32 *)((u8 *)temp_v0_2 + 0))) * (0.061000004f * temp_f12));
     (*(f32 *)((u8 *)arg0 + 0x1C)) = temp_f2;
     (*(f32 *)((u8 *)arg0 + 0x18)) = temp_f2;
-    func_15133E04(temp_f12);
+    func_15133E04(arg0);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E3DD0/func_151B6804.s")

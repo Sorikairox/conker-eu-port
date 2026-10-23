@@ -324,7 +324,63 @@ s32 func_1502C6AC(s32 arg0) {
     return temp_v1;
 }
 
+#ifdef NON_MATCHING
+u8 *func_15095380(u8 *, u8 *, s32, void *, s32, s32, s32, s32, s32);
+u8 *func_15095B70(u8 *arg0, u8 *arg1);
+extern u8 *D_8008CDEC[];
+
+/*
+ * P71: ground shadow of object idx (none while D_800BEAC0 is set or when the alpha +7 is 0). Shadow quad: position
+ * (x, y + half the size +0x122, z), extent 19 * size (15 * size for state +0 == 3), alpha +7; texture
+ * D_8008CDEC[func_1502C6AC(idx)] with +0x60 (func_15095380, which also fills the quad), drawn by func_15095B70
+ * between the D_80087770 / D_800877A8 display lists.
+ */
+u8 *func_1502C6F8(u8 *gdl, s32 idx, s16 unused) {
+    struct {
+        s16 x, y, z;
+        s16 sizeX, sizeZ;
+        u8 alpha;
+        u8 pad[2];
+        u8 flag;
+    } quad;   /* sp6C */
+    u8 *obj;
+    s32 size;
+    s32 ext;
+    s32 tex;
+
+    if (D_800BEAC0 != 0) {
+        return gdl;
+    }
+    obj = (u8 *) &D_800CC2D0[idx];
+    size = obj[0x122];
+    if (obj[7] == 0) {
+        return gdl;
+    }
+    ext = size * 19;
+    if (*(s32 *) obj == 3) {
+        ext = size * 15;
+    }
+    tex = func_1502C6AC(idx);
+    ((s32 *) gdl)[0] = 0xDE000000;
+    ((s32 *) gdl)[1] = (s32) D_80087770;
+    ((s32 *) gdl)[2] = 0xE7000000;
+    ((s32 *) gdl)[3] = 0;
+    gdl = func_15095380(gdl + 16, D_8008CDEC[tex], *(s16 *) (obj + 0x60), &quad, 0, 0, 0, 2, 3);
+    quad.flag = 0;
+    quad.alpha = obj[7];
+    quad.sizeX = ext;
+    quad.sizeZ = ext;
+    quad.x = *(f32 *) (obj + 0x14);
+    quad.z = *(f32 *) (obj + 0x1C);
+    quad.y = *(f32 *) (obj + 0x18) + (f32) (size / 2);
+    gdl = func_15095B70(gdl, (u8 *) &quad);
+    ((s32 *) gdl)[0] = 0xDE000000;
+    ((s32 *) gdl)[1] = (s32) D_800877A8;
+    return gdl + 8;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C6F8.s")
+#endif
 
 extern u8 *D_8008CDEC[];
 
@@ -349,7 +405,76 @@ void func_1502C8F8(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15083C3C(s32, s32, s32);
+u8 func_15084E08(struct127 *);
+
+/*
+ * P62: model level of detail. For object i (not hidden by +0x1C9, not state 7) with +0x2C8 levels: pick a level from
+ * the squared distance to the camera record D_800DBFF0[cam] (a pointer; +0x2F8 / +0x2FC / +0x300): < 500 -> 0, < 730 -> 1,
+ * < 1500 -> 2, < 2000 -> 3, else 4; one level finer when slow (xz_velocity < 3). Overrides: func_15084E08's
+ * code 0x5A at level 0, or no code while D_800BE616 is set, -> 1; D_800C35EA == 1 -> 0. Clamped to the last level.
+ * A new level loads model ((u8 *)+0x2C4)[level] through func_15083C3C and is stored in +0x1C8.
+ */
+void func_1502C9D8(s32 i, s16 cam, s32 unused) {
+    struct127 *obj = &D_800CC2D0[i];
+    struct108 *view = &D_800DBFF0[cam];
+    f32 near0 = 500.0f;
+    f32 near1 = 730.0f;
+    f32 near2 = 1500.0f;
+    f32 near3 = 2000.0f;
+    s32 last;
+    s32 code;
+    s32 level;
+    f32 dx, dy, dz, d2;
+
+    if (obj->unk1C9 != 0 || obj->unk5 == 7) {
+        return;
+    }
+    last = obj->unk2C8 - 1;
+    if (last == -1) {
+        return;
+    }
+    code = func_15084E08(obj);
+    dx = view->unk2F8 - obj->x_position;
+    dy = view->unk2FC - obj->y_position;
+    dz = view->unk300 - obj->z_position;
+    d2 = dx * dx + dy * dy + dz * dz;
+    if (d2 < near0 * near0) {
+        level = 0;
+    } else if (d2 < near1 * near1) {
+        level = 1;
+    } else if (d2 < near2 * near2) {
+        level = 2;
+    } else if (d2 < near3 * near3) {
+        level = 3;
+    } else {
+        level = 4;
+    }
+    if (level >= 2 && obj->xz_velocity < 3.0f) {
+        level--;
+    }
+    if (code != 0) {
+        if (code == 0x5A && level == 0) {
+            level = 1;
+        }
+    } else if (D_800BE616 != 0) {
+        level = 1;
+    }
+    if (D_800C35EA == 1) {
+        level = 0;
+    }
+    if (last < level) {
+        level = last < 0 ? 0 : last;
+    }
+    if (level != -1 && level != obj->unk1C8) {
+        func_15083C3C(i, ((u8 *)obj->unk2C4)[level], 0);
+        obj->unk1C8 = level;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502C9D8.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15022A8C(struct127 *);
@@ -426,7 +551,7 @@ u8 *func_1502CC64(u8 *gdl, s32 arg1, s16 arg2, s32 arg3, s32 arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502CC64.s")
 #endif
 
-s32 func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
+void func_1502EF24(u8 *, s32 *, s32 *, s32 *, s32 *);
 
 void func_1502CF24(u8 *arg0, s32 arg1, s32 arg2, u8 *arg3, s32 *arg4, s32 *arg5, s32 *arg6, s32 *arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB, s32 *argC, s32 *argD) {
     s32 temp_a2;
@@ -661,7 +786,51 @@ void func_1502D83C(s32 arg0, u8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D83C.s")
 #endif
+#ifdef NON_MATCHING
+void func_150A7EE0(f32 *mtx, f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz, f32 *ow);
+extern f32 D_800D9F3C;
+extern f32 D_800D9F40;
+extern u16 D_800DD718;
+extern u16 D_800DD71C;
+extern f32 D_800D30C8[][4][4];
+
+/*
+ * P71: fog alpha col[3] of object rec for view matrix view (D_800D30C8[view]). In 1 / depth units (0.001 instead
+ * of 1 / 0): a = 1 / D_800D9F3C, b = 1 / D_800D9F40, the fog range from b + (a - b) * 0.001 * D_800DD718 (full
+ * fog colour) to b + (a - b) * 0.001 * D_800DD71C (none). The object position (+0x14) is transformed
+ * (func_150A7EE0, w); 1 / w in that range interpolates, outside it the alpha is 0xFF (behind / closer) or 0.
+ */
+void func_1502D920(u8 *rec, s32 *col, s32 view) {
+    f32 near;
+    f32 far;
+    f32 step;
+    f32 fogMin;
+    f32 fogMax;
+    f32 sx, sy, sz, w;
+    f32 t;
+
+    near = (D_800D9F3C == 0.0f) ? 0.001f : 1.0f / D_800D9F3C;
+    far = (D_800D9F40 == 0.0f) ? 0.001f : 1.0f / D_800D9F40;
+    step = (near - far) * 0.001f;
+    fogMin = D_800DD718 * step + far;
+    fogMax = D_800DD71C * step + far;
+    func_150A7EE0((f32 *) D_800D30C8[view], *(f32 *) (rec + 0x14), *(f32 *) (rec + 0x18), *(f32 *) (rec + 0x1C),
+                  &sx, &sy, &sz, &w);
+    w = (w == 0.0f) ? 0.001f : 1.0f / w;
+    if (w < 0.0f) {
+        t = 0.0f;
+    } else if (fogMax <= w) {
+        t = 0.0f;
+    } else if (w <= fogMin) {
+        t = 1.0f;
+    } else {
+        t = (w - fogMax) / (fogMin - fogMax);
+    }
+    col[3] = (1.0f - t) * 255.0f;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502D920.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1505DFDC(struct127 *arg0);
@@ -1290,7 +1459,69 @@ void func_1502EDEC(struct127 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EDEC.s")
 #endif
+#ifdef NON_MATCHING
+/*
+ * P71: colour (*r, *g, *b) and alpha *a of a model's tint block (+0xA4 kind, +0xA5..+0xA7 bytes, +0xA0 word).
+ * 1: colour +0xA5..A7, alpha +0xA0 itself when < 0x100, else a pointer to a percentage (clamped 0..255) * 2.55.
+ * 2 / 3: black, alpha +0xA5 (3: 255 - +0xA5). 4 / 5: colour = the low bytes of +0xA0, its top byte pulses by up to
+ * 64 with cos(+0xA5 * pi / 128), then moves towards 255 by (255 - +0xA7) / 256. 6 / 7: colour = the low bytes of
+ * +0xA0, alpha 255 - +0xA5 * top byte / 256. Other kinds leave the outputs alone.
+ */
+void func_1502EF24(u8 *rec, s32 *r, s32 *g, s32 *b, s32 *a) {
+    u32 word;
+    f32 f;
+    s32 top;
+
+    switch (rec[0xA4]) {
+        case 1:
+            *r = rec[0xA5];
+            *g = rec[0xA6];
+            *b = rec[0xA7];
+            word = *(u32 *) (rec + 0xA0);
+            if (word < 0x100) {
+                *a = word;
+            } else {
+                f = *(f32 *) word;
+                if (f < 0.0f) {
+                    f = 0.0f;
+                } else if (255.0f < f) {
+                    f = 255.0f;
+                }
+                *a = f * 2.55f;
+            }
+            break;
+        case 2:
+        case 3:
+            *r = 0;
+            *g = 0;
+            *b = 0;
+            *a = rec[0xA5];
+            if (rec[0xA4] == 3) {
+                *a = 255 - rec[0xA5];
+            }
+            break;
+        case 4:
+        case 5:
+            top = (*(s32 *) (rec + 0xA0) >> 24) & 0xFF;
+            *r = (*(s32 *) (rec + 0xA0) >> 16) & 0xFF;
+            *g = (*(s32 *) (rec + 0xA0) >> 8) & 0xFF;
+            *b = *(s32 *) (rec + 0xA0) & 0xFF;
+            *a = (f32) top + 64.0f * ((cosf(rec[0xA5] * 0.024543693f) + 1.0f) * 0.5f);
+            *a += ((255 - *a) * (255 - rec[0xA7])) >> 8;
+            break;
+        case 6:
+        case 7:
+            *r = (*(s32 *) (rec + 0xA0) >> 16) & 0xFF;
+            top = (*(s32 *) (rec + 0xA0) >> 24) & 0xFF;
+            *g = (*(s32 *) (rec + 0xA0) >> 8) & 0xFF;
+            *b = *(s32 *) (rec + 0xA0) & 0xFF;
+            *a = 255 - ((rec[0xA5] * top) >> 8);
+            break;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502EF24.s")
+#endif
 
 #ifdef NON_MATCHING
 /* func_1502F17C (P57): object arg0's mode byte +0x6A + arg1 folded to 0..2 (values 2 / 3 map to 0 / 1). */
@@ -1474,7 +1705,112 @@ void func_1502F6B8(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F6B8.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u16 D_800C6318[];    /* per model: number of D_800C5C08 vertex ranges */
+
+/*
+ * P76: carry a point (*x, *y, *z) along with triangle tri of the model of carrier obj (kind +4). D_800C6070[kind] =
+ * triangles (three vertex offsets into D_800D19A0[kind]), D_800C5C08[kind] = vertex ranges (start, count of 16-byte
+ * vertices, joint). The joint of each corner is looked up in the ranges (no range: nothing happens), the corners
+ * are transformed by their joint matrices of the previous (+0x1D8) and the current (+0x1D4) frame. The point's
+ * (u, v) on the old triangle (solved in x / z) must lie in [0, 1]; the point is then moved by the same (u, v)
+ * offset on the new triangle (y follows the old triangle's plane).
+ */
+void func_1502F780(struct127 *obj, f32 *x, f32 *y, f32 *z, s32 tri) {
+    s32 kind = ((u8 *) obj)[4];
+    u32 *tris;
+    u8 *vtx[3];
+    s32 joint[3];
+    s32 found;
+    s32 i, k, g;
+    u32 *range;
+    f32 *mtx;
+    f32 p[2][3][3];     /* [old / new][corner][xyz] */
+    f32 e1[2][3];
+    f32 e2[2][3];
+    f32 d[3];
+    f32 w[3];
+    f32 den;
+    f32 u, v;
+    s16 *s;
+
+    tris = (u32 *) D_800C6070[kind];
+    if (tris == NULL) {
+        return;
+    }
+    for (k = 0; k < 3; k++) {
+        vtx[k] = (u8 *) ((s32 *) &D_800D19A0)[kind] + tris[tri * 3 + k];
+    }
+    found = 0;
+    i = 0;
+    do {
+        if (i == D_800C6318[kind]) {
+            return;
+        }
+        for (k = 0; k < 3; k++) {
+            if (found & (1 << k)) {
+                continue;
+            }
+            range = (u32 *) (D_800C5C08[kind] + i * 12);
+            if ((u32) vtx[k] >= range[0] && (u32) vtx[k] < range[0] + range[1] * 16) {
+                joint[k] = range[2];
+                found |= 1 << k;
+            }
+        }
+        i++;
+    } while (found != 7);
+
+    if (obj->unk1D8 == NULL || obj->unk1D4 == NULL) {
+        return;
+    }
+    mtx = (f32 *) obj->unk1D8;
+    for (g = 0; g < 2; g++) {
+        if (g == 1) {
+            mtx = (f32 *) obj->unk1D4;
+        }
+        for (k = 0; k < 3; k++) {
+            s = (s16 *) vtx[k];
+            func_150A7E40((f32 (*)[4]) (mtx + joint[k] * 16), s[0], s[1], s[2], &p[g][k][0], &p[g][k][1],
+                          &p[g][k][2]);
+        }
+    }
+    for (g = 0; g < 2; g++) {
+        for (k = 0; k < 3; k++) {
+            e1[g][k] = p[g][1][k] - p[g][0][k];
+            e2[g][k] = p[g][2][k] - p[g][0][k];
+        }
+    }
+    d[0] = *x - p[0][0][0];
+    d[1] = *y - p[0][0][1];
+    d[2] = *z - p[0][0][2];
+    den = e1[0][0] * e2[0][2] - e2[0][0] * e1[0][2];
+    if (den == 0.0f) {
+        u = -100.0f;
+    } else {
+        u = (d[0] * e2[0][2] - e2[0][0] * d[2]) / den;
+    }
+    if (u < 0.0f || u > 1.0f) {
+        return;
+    }
+    if (e2[0][2] == 0.0f) {
+        v = -100.0f;
+    } else {
+        v = (d[2] - u * e1[0][2]) / e2[0][2];
+    }
+    if (v < 0.0f || v > 1.0f) {
+        return;
+    }
+    for (k = 0; k < 3; k++) {
+        w[k] = e2[1][k] * v + u * e1[1][k];
+    }
+    d[1] = e2[0][1] * v + u * e1[0][1];
+    *x += ((w[0] + p[1][0][0]) - d[0]) - p[0][0][0];
+    *y += ((w[1] + p[1][0][1]) - d[1]) - p[0][0][1];
+    *z += ((w[2] + p[1][0][2]) - d[2]) - p[0][0][2];
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502F780.s")
+#endif
 
 u8 *allocate_memory(s32, s32, s32, s32);
 void func_1502FC38(u8 *arg0) {
@@ -1546,7 +1882,66 @@ u8 *func_1502FCEC(u8 *arg0, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FCEC.s")
 #endif
+#ifdef NON_MATCHING
+#define OBJ_U8(obj, off) (*(u8 *) ((u8 *) (obj) + (off)))
+void func_15083C3C(s32, s32, s32);
+void func_1507EE9C(struct127 *);
+
+/*
+ * P70: pending model switch of an object. +0x1C9 holds the requested entry + 1 of the object's model list
+ * +0x2C4 (+0x2C9 entries; 0xFF = entry 0 again). When it differs from the current entry +0x1C8, model
+ * list[entry] is set up by func_15083C3C; if that model has another animation set than the object's id
+ * (D_800D1588), the animation is restarted (func_1505E650: from +0x84 when it exists in the new set, i.e. below
+ * D_800C5A90[model], else from 0) with +0x84 = 0xFFFF. D_800C3638 is cleared around it in mode D_800C35EA == 1.
+ * The request +0x1C9 stays set (except 0xFF, which is consumed).
+ */
+void func_1502FED8(struct127 *obj) {
+    s32 req = OBJ_U8(obj, 0x1C9);
+    s32 entry;
+    s32 model;
+    s32 anims;
+    u16 anim;
+
+    if (req == 0) {
+        return;
+    }
+    anims = D_800D1588[obj->id];
+    if (req == 0xFF) {
+        OBJ_U8(obj, 0x1C9) = 0;
+        entry = 0;
+    } else {
+        entry = req - 1;
+        if (entry >= OBJ_U8(obj, 0x2C9)) {
+            return;
+        }
+        if (entry == OBJ_U8(obj, 0x1C8)) {
+            return;
+        }
+    }
+    model = (*(u8 **) ((u8 *) obj + 0x2C4))[entry];
+    func_15083C3C(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, model, 0);
+    OBJ_U8(obj, 0x1C8) = entry;
+    if (D_800C35EA == 1) {
+        D_800C3638 = 0;
+    }
+    if (anims != D_800D1588[model]) {
+        anim = obj->unk84.uh;
+        if (anim < (u16) D_800C5A90[model]) {
+            obj->unk84.uh = 0xFFFF;
+            func_1505E650(obj, anim, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        } else {
+            obj->unk84.uh = 0xFFFF;
+            func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+        }
+    }
+    if (D_800C35EA == 1) {
+        D_800C3638 = 1;
+    }
+    func_1507EE9C(obj);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_595D0/func_1502FED8.s")
+#endif
 
 void func_15030060(u8 *arg0)
 {

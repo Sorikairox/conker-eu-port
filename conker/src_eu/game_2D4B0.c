@@ -22,400 +22,221 @@ void func_15000090(void) {
     func_1000DEC4();
 }
 
-// maybe next year...
+#ifdef NON_MATCHING
+void func_1000DEC4(void);
+void func_1000E40C(s32 arg0, s32 arg1);
+void func_1000DF68(s32 arg0, s32 arg1, s32 arg2);
+s32 func_1000E46C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_10017944(s32 arg0, u32 arg1);
+void func_1000E2F4(s32 arg0);
+s32 func_1000B548(s32 *arg0);
+void func_1000DE1C(s32 arg0, s32 arg1);
+void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
+extern s8 D_800422A0;
+
+// Level music block, level header (D_800B0DF0) +0x2C..+0x39.
+typedef struct {
+    s16 songA;  // +0x0: first song (< 0: none, 0: silence)
+    u16 volA;   // +0x2: func_1000E40C
+    u16 fadeA;  // +0x4: func_1000E46C
+    s16 songB;  // +0x6: second song
+    u16 volB;   // +0x8
+    u16 fadeB;  // +0xA
+    u8  mode;   // +0xC: 0..4, how songs already playing are handled
+    u8  unkD;   // +0xD: func_10017944(1, ...)
+} LevelMusic;
+
+// Level start: request the level's songs. Songs already playing that the level wants are kept (volume and
+// fade set again); the rest are stopped, oldest-slot songs reused for the new ones.
+void func_150000B0(void) {
+    LevelMusic m;
+    s32 playing[3];
+    s32 restart;
+    s32 count;
+    s32 needed;
+    s32 excess;
+    s32 slot;
+    s32 i;
+    s32 j;
+    s32 *p;
+
+    needed = 0;
+    restart = FALSE;
+    D_800422A0 = 0;
+    if (D_800B0DF0 != NULL) {
+        m = *(LevelMusic *) ((u8 *) D_800B0DF0 + 0x2C);
+    } else {
+        m.mode = 1;
+        m.volA = 0;
+        m.volB = 0;
+        m.unkD = 2;
+        m.songA = 0;
+        m.songB = 0;
+    }
+    D_80041F04 = 0;
+    D_80041F08 = 0;
+    D_80041F0C = 0;
+
+    if (m.songA == 1 && (D_800D2E4C->unk4 & 0x80)) {
+        m.fadeA = 0x10;
+        m.songA = 0x46;
+    }
+
+    switch (m.mode) {
+    case 0:
+    case 4:
+        func_1000DEC4();
+        break;
+    case 2:
+        restart = TRUE;
+        func_1000DEC4();
+        break;
+    case 3:
+        restart = TRUE;
+        /* fallthrough */
+    case 1:
+        if (D_800BE9B4 == 2) {
+            func_1000DEC4();
+        } else if (D_800BE9F8 != 0x22) {
+            restart = FALSE;
+            m.songA = -1;
+            m.songB = -1;
+        }
+        break;
+    }
+
+    count = func_1000B548(playing);
+    for (i = count; i < 3; i++) {
+        playing[i] = -1;
+    }
+
+    // Mode 4: when song B is already playing (and song A is not), it becomes the first song.
+    if (m.mode == 4 && m.songB >= 0) {
+        for (i = 0; i < 3; i++) {
+            if (m.songB == playing[i]) {
+                if (m.songA >= 0) {
+                    for (j = 0; j < 3; j++) {
+                        if (m.songA == playing[j]) {
+                            m.songB = 0;
+                        }
+                    }
+                }
+                if (m.songB >= 0) {
+                    m.songA = m.songB;
+                    m.fadeA = m.fadeB;
+                    m.volA = m.volB;
+                }
+            }
+        }
+        if (m.songB >= 0) {
+            m.songB = 0;
+        }
+    }
+
+    func_1000E2F4(0);
+
+    if (!restart) {
+        // Keep the wanted songs that are already playing.
+        for (i = 0; i < 3; i++) {
+            if (playing[i] == -1) {
+                continue;
+            }
+            if (m.songA == playing[i]) {
+                func_1000E46C(m.songA, 0, m.fadeA, 0);
+                func_1000E46C(m.songA, 100, m.fadeA ^ 0xFFFF, 0);
+                func_1000E40C(m.songA, m.volA);
+                func_1000DF68(m.songA, 0x7FFF, 0);
+                playing[i] = -1;
+                m.songA = -1;
+                count--;
+            } else if (m.songB == playing[i]) {
+                func_1000E46C(m.songB, 0, m.fadeB, 0);
+                func_1000E46C(m.songB, 100, m.fadeB ^ 0xFFFF, 0);
+                func_1000E40C(m.songB, m.volB);
+                func_1000DF68(m.songB, 0x7FFF, 0);
+                playing[i] = -1;
+                m.songB = -1;
+                count--;
+            }
+        }
+    }
+
+    // Stop the songs that are not needed, newest slot first.
+    if (m.songA >= 0) {
+        needed = 1;
+    }
+    if (m.songB >= 0) {
+        needed++;
+    }
+    if (count != 0 && needed < count) {
+        excess = count - needed;
+        if (excess != 0) {
+            for (p = &playing[2]; p >= playing && excess != 0; p--) {
+                if (*p != -1) {
+                    func_1000DE1C(*p, 4);
+                    *p = -1;
+                    excess--;
+                }
+            }
+        }
+    }
+
+    // Start song A in place of the last song still playing (or fresh).
+    if (m.songA >= 0) {
+        slot = -1;
+        for (i = 0; i < 3; i++) {
+            if (playing[i] != -1) {
+                slot = i;
+            }
+        }
+        if (slot == -1) {
+            if (m.songA > 0) {
+                func_1000D96C(m.songA, 0, 0);
+            }
+        } else {
+            if (m.songA > 0) {
+                func_1000D96C(m.songA, playing[slot], 5);
+            } else {
+                func_1000DE1C(playing[slot], 4);
+            }
+            playing[slot] = -1;
+        }
+        if (m.songA > 0) {
+            func_1000E46C(m.songA, 0, m.fadeA, 0);
+            func_1000E40C(m.songA, m.volA);
+        }
+    }
+
+    if (m.songB >= 0) {
+        slot = -1;
+        for (i = 0; i < 3; i++) {
+            if (playing[i] != -1) {
+                slot = i;
+            }
+        }
+        if (slot == -1) {
+            if (m.songB > 0) {
+                func_1000D96C(m.songB, 0, 0);
+            }
+        } else {
+            if (m.songB > 0) {
+                func_1000D96C(m.songB, playing[slot], 5);
+            } else {
+                func_1000DE1C(playing[slot], 4);
+            }
+            playing[slot] = -1;
+        }
+        if (m.songB > 0) {
+            func_1000E46C(m.songB, 0, m.fadeB, 0);
+            func_1000E40C(m.songB, m.volB);
+        }
+    }
+
+    func_10017944(1, m.unkD);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2D4B0/func_150000B0.s")
-// void func_150000B0(void) {
-//     u8 sp6D;
-//     u8 sp6C;
-//     u16 sp68;
-//     s16 sp66;
-//     u16 sp64;
-//     u16 sp62;
-//     s16 sp60;
-//     s32 sp58;
-//     ? sp4C;
-//     s32 sp44;
-//     s32 sp40;
-//     void *sp34;
-//     ? *temp_s0_2;
-//     ? *temp_s0_3;
-//     ? *temp_v0_3;
-//     s16 temp_a0_2;
-//     s16 temp_a0_4;
-//     s16 temp_a0_5;
-//     s16 temp_s3;
-//     s16 temp_s3_2;
-//     s32 temp_a0;
-//     s32 temp_a0_3;
-//     s32 temp_a2;
-//     s32 temp_a3;
-//     s32 temp_t2;
-//     s32 temp_v0_2;
-//     s32 temp_v1;
-//     s32 temp_v1_2;
-//     s32 temp_v1_3;
-//     void *temp_s0;
-//     void *temp_s0_4;
-//     void *temp_v0;
-//     void *temp_v0_4;
-//     void *temp_v0_5;
-//     void *temp_v0_6;
-//     void *temp_v0_7;
-//     s32 phi_a2;
-//     s32 phi_a2_2;
-//     s32 phi_a2_3;
-//     void *phi_s0;
-//     s32 phi_v1;
-//     void *phi_s0_2;
-//     s32 phi_s3;
-//     ? *phi_s0_3;
-//     s32 phi_s1;
-//     ? *phi_v0;
-//     s32 phi_s3_2;
-//     s16 phi_s1_2;
-//     s32 phi_s3_3;
-//     ? *phi_s0_4;
-//     s32 phi_s4;
-//     s32 phi_a0;
-//     void *phi_s0_5;
-//     s16 phi_s3_4;
-//     s16 phi_s1_3;
-//     s32 phi_a3;
-//     s32 phi_a3_2;
-//     s16 phi_s1_4;
-//     s16 phi_s3_5;
-//     ? *phi_s0_6;
-//     s32 phi_v1_2;
-//     s32 phi_a3_3;
-//     ? *phi_s0_7;
-//     s32 phi_v1_3;
-//     s32 phi_a3_4;
-//     s32 phi_v1_4;
-//     s32 phi_s3_6;
-//     s32 phi_s4_2;
-//     s32 phi_s4_3;
-//
-//     temp_v0 = D_800B0DF0;
-//     sp44 = 0;
-//     D_80041F00 = (u8)0;
-//     if (temp_v0 != 0) {
-//         sp60.unk0 = (?32) (unaligned s32) temp_v0->unk2C;
-//         sp60.unk4 = (?32) (unaligned s32) temp_v0->unk30;
-//         sp60.unk8 = (?32) (unaligned s32) temp_v0->unk34;
-//         sp60.unkC = (u16) temp_v0->unk38;
-//     } else {
-//         sp6C = 1;
-//         sp62 = 0;
-//         sp68 = 0;
-//         sp6D = 2;
-//         sp60 = 0;
-//         sp66 = 0;
-//     }
-//     D_80041F04 = 0;
-//     D_80041F08 = 0;
-//     D_80041F0C = 0;
-//     if ((sp60 == 1) && ((D_800D2E4C->unk4 & 0x80) != 0)) {
-//         sp64 = 0x10;
-//         sp60 = 0x46;
-//     }
-//     phi_a2_3 = 0;
-//     if ((u32) sp6C < 5U) {
-//         phi_a2 = 0;
-//         phi_a2_2 = 0;
-//         goto **(&jtbl_80091A30 + (sp6C * 4));
-//     case 2:
-//         phi_a2 = 1;
-//     default:
-//     case 0:
-//         sp40 = phi_a2;
-//         func_1000DEC4(phi_a2);
-//         phi_a2_3 = phi_a2;
-//         goto block_15;
-//     case 3:
-//         phi_a2_2 = 1;
-//     case 1:
-//         if (D_800BE9B4 == 2) {
-//             sp40 = phi_a2_2;
-//             func_1000DEC4(phi_a2_2);
-//             phi_a2_3 = phi_a2_2;
-//         } else {
-//             phi_a2_3 = phi_a2_2;
-//             if (D_800BE9F8 != 0x22) {
-//                 sp60 = -1;
-//                 sp66 = -1;
-//                 phi_a2_3 = 0;
-//             }
-//         }
-//     }
-// block_15:
-//     sp40 = phi_a2_3;
-//     temp_v0_2 = func_1000B548(&sp4C);
-//     temp_a2 = phi_a2_3;
-//     if (temp_v0_2 < 3) {
-//         temp_t2 = (3 - temp_v0_2) & 3;
-//         phi_v1_4 = temp_v0_2;
-//         if (temp_t2 != 0) {
-//             phi_s0 = (temp_v0_2 * 4) + &sp4C;
-//             phi_v1 = temp_v0_2;
-// loop_18:
-//             temp_v1 = phi_v1 + 1;
-//             *phi_s0 = -1;
-//             phi_s0 = phi_s0 + 4;
-//             phi_v1 = temp_v1;
-//             if ((temp_t2 + temp_v0_2) != temp_v1) {
-//                 goto loop_18;
-//             }
-//             phi_v1_4 = temp_v1;
-//             if (temp_v1 != 3) {
-// block_20:
-//                 phi_s0_2 = (phi_v1_4 * 4) + &sp4C;
-// loop_21:
-//                 temp_s0 = phi_s0_2 + 0x10;
-//                 temp_s0->unk-C = -1;
-//                 temp_s0->unk-8 = -1;
-//                 temp_s0->unk-4 = -1;
-//                 temp_s0->unk-10 = -1;
-//                 phi_s0_2 = temp_s0;
-//                 if (temp_s0 != &sp58) {
-//                     goto loop_21;
-//                 }
-//             }
-//         } else {
-//             goto block_20;
-//         }
-//     }
-//     if ((sp6C == 4) && ((s32) sp66 >= 0)) {
-//         phi_s3 = (s32) sp66;
-//         phi_s0_3 = &sp4C;
-//         phi_s1 = (s32) sp60;
-// loop_25:
-//         temp_s0_2 = phi_s0_3 + 4;
-//         phi_s1_2 = (s16) phi_s1;
-//         phi_s3_3 = phi_s3;
-//         if (phi_s3 == *phi_s0_3) {
-//             phi_v0 = &sp4C;
-//             phi_s3_2 = phi_s3;
-//             phi_s3_6 = phi_s3;
-//             if (phi_s1 >= 0) {
-// loop_27:
-//                 temp_v0_3 = phi_v0 + 4;
-//                 if (phi_s1 == *phi_v0) {
-//                     phi_s3_6 = 0;
-//                 }
-//                 phi_v0 = temp_v0_3;
-//                 phi_s3_2 = phi_s3_6;
-//                 if (temp_v0_3 != &sp58) {
-//                     goto loop_27;
-//                 }
-//             }
-//             phi_s1_2 = (s16) phi_s1;
-//             phi_s3_3 = phi_s3_2;
-//             if (phi_s3_2 >= 0) {
-//                 sp64 = sp6A;
-//                 sp62 = sp68;
-//                 phi_s1_2 = (s16) phi_s3_2;
-//                 phi_s3_3 = phi_s3_2;
-//             }
-//         }
-//         phi_s3 = phi_s3_3;
-//         phi_s0_3 = temp_s0_2;
-//         phi_s1 = (s32) phi_s1_2;
-//         if (temp_s0_2 != &sp58) {
-//             goto loop_25;
-//         }
-//         sp60 = phi_s1_2;
-//         sp66 = (s16) phi_s3_3;
-//         if (phi_s3_3 >= 0) {
-//             sp66 = 0;
-//         }
-//     }
-//     sp40 = temp_a2;
-//     func_1000E2F4(0);
-//     phi_s0_4 = &sp4C;
-//     phi_s4 = temp_v0_2;
-//     phi_s4_3 = temp_v0_2;
-//     if (temp_a2 == 0) {
-// loop_36:
-//         temp_a0 = *phi_s0_4;
-//         temp_s3 = sp66;
-//         phi_s4_2 = phi_s4_3;
-//         if (temp_a0 != -1) {
-//             if (sp60 == temp_a0) {
-//                 sp66 = temp_s3;
-//                 temp_a0_2 = sp60;
-//                 sp60 = sp60;
-//                 func_1000E46C(temp_a0_2, 0, sp64, 0);
-//                 func_1000E46C(sp60, 0x64, sp64 ^ 0xFFFF, 0);
-//                 func_1000E40C(sp60, sp62);
-//                 func_1000DF68(sp60, 0x7FFF, 0);
-//                 *phi_s0_4 = -1;
-//                 sp60 = (s16) -1;
-// block_41:
-//                 phi_s4_2 = phi_s4_3 - 1;
-//             } else {
-//                 sp60 = sp60;
-//                 sp66 = temp_s3;
-//                 phi_s4_2 = phi_s4_3;
-//                 if (temp_s3 == temp_a0) {
-//                     sp66 = temp_s3;
-//                     func_1000E46C(temp_s3, 0, sp6A, 0);
-//                     func_1000E46C(sp66, 0x64, sp6A ^ 0xFFFF, 0);
-//                     func_1000E40C(sp66, sp68);
-//                     func_1000DF68(sp66, 0x7FFF, 0);
-//                     *phi_s0_4 = -1;
-//                     sp66 = (s16) -1;
-//                     goto block_41;
-//                 }
-//             }
-//         }
-//         temp_s0_3 = phi_s0_4 + 4;
-//         phi_s0_4 = temp_s0_3;
-//         phi_s4_3 = phi_s4_2;
-//         if (temp_s0_3 != &sp58) {
-//             goto loop_36;
-//         }
-//         sp60 = sp60;
-//         sp66 = sp66;
-//         phi_s4 = phi_s4_2;
-//     }
-//     if ((s32) sp60 >= 0) {
-//         sp44 = 1;
-//     }
-//     phi_a0 = sp44;
-//     if ((s32) sp66 >= 0) {
-//         phi_a0 = sp44 + 1;
-//     }
-//     phi_s1_4 = sp60;
-//     phi_s3_5 = sp66;
-//     if (phi_s4 != 0) {
-//         temp_a3 = phi_s4 - phi_a0;
-//         phi_s1_4 = sp60;
-//         phi_s3_5 = sp66;
-//         if (phi_a0 < phi_s4) {
-//             phi_s1_4 = sp60;
-//             phi_s3_5 = sp66;
-//             if (temp_a3 != 0) {
-//                 phi_s0_5 = (2 * 4) + &sp4C;
-//                 phi_s3_4 = sp66;
-//                 phi_s1_3 = sp60;
-//                 phi_a3 = temp_a3;
-// loop_52:
-//                 temp_a0_3 = *phi_s0_5;
-//                 phi_a3_2 = phi_a3;
-//                 if (temp_a0_3 != -1) {
-//                     sp66 = phi_s3_4;
-//                     sp60 = phi_s1_3;
-//                     sp58 = phi_a3;
-//                     func_1000DE1C(temp_a0_3, 4);
-//                     *phi_s0_5 = -1;
-//                     phi_a3_2 = phi_a3 - 1;
-//                 }
-//                 temp_s0_4 = phi_s0_5 - 4;
-//                 phi_s1_4 = phi_s1_3;
-//                 phi_s3_5 = phi_s3_4;
-//                 if ((u32) temp_s0_4 >= (u32) &sp4C) {
-//                     phi_s0_5 = temp_s0_4;
-//                     phi_s3_4 = phi_s3_4;
-//                     phi_s1_3 = phi_s1_3;
-//                     phi_a3 = phi_a3_2;
-//                     phi_s1_4 = phi_s1_3;
-//                     phi_s3_5 = phi_s3_4;
-//                     if (phi_a3_2 != 0) {
-//                         goto loop_52;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     sp60 = phi_s1_4;
-//     sp66 = phi_s3_5;
-//     if ((s32) phi_s1_4 >= 0) {
-//         phi_s0_6 = &sp4C;
-//         phi_v1_2 = 0;
-//         phi_a3_3 = -1;
-// loop_58:
-//         if (*phi_s0_6 != -1) {
-//             phi_a3_3 = phi_v1_2;
-//         }
-//         temp_v1_2 = phi_v1_2 + 1;
-//         phi_s0_6 = phi_s0_6 + 4;
-//         phi_v1_2 = temp_v1_2;
-//         if (temp_v1_2 != 3) {
-//             goto loop_58;
-//         }
-//         if (phi_a3_3 == -1) {
-//             sp60 = phi_s1_4;
-//             sp66 = phi_s3_5;
-//             if ((s32) phi_s1_4 > 0) {
-//                 sp60 = phi_s1_4;
-//                 func_1000D96C(phi_s1_4, 0, 0, phi_a3_3);
-//             }
-//         } else {
-//             sp66 = phi_s3_5;
-//             if ((s32) phi_s1_4 > 0) {
-//                 temp_v0_4 = (phi_a3_3 * 4) + &sp4C;
-//                 sp60 = phi_s1_4;
-//                 sp34 = temp_v0_4;
-//                 func_1000D96C(phi_s1_4, *temp_v0_4, 5, phi_a3_3);
-//             } else {
-//                 sp60 = phi_s1_4;
-//                 temp_v0_5 = (phi_a3_3 * 4) + &sp4C;
-//                 sp34 = temp_v0_5;
-//                 func_1000DE1C(*temp_v0_5, 4);
-//             }
-//             *sp34 = -1;
-//         }
-//         temp_a0_4 = sp60;
-//         if ((s32) sp60 > 0) {
-//             sp60 = sp60;
-//             func_1000E46C(temp_a0_4, 0, sp64, 0);
-//             func_1000E40C(sp60, sp62);
-//         }
-//     }
-//     temp_s3_2 = sp66;
-//     if ((s32) temp_s3_2 >= 0) {
-//         phi_s0_7 = &sp4C;
-//         phi_v1_3 = 0;
-//         phi_a3_4 = -1;
-// loop_73:
-//         if (*phi_s0_7 != -1) {
-//             phi_a3_4 = phi_v1_3;
-//         }
-//         temp_v1_3 = phi_v1_3 + 1;
-//         phi_s0_7 = phi_s0_7 + 4;
-//         phi_v1_3 = temp_v1_3;
-//         if (temp_v1_3 != 3) {
-//             goto loop_73;
-//         }
-//         if (phi_a3_4 == -1) {
-//             sp66 = temp_s3_2;
-//             if ((s32) temp_s3_2 > 0) {
-//                 sp66 = temp_s3_2;
-//                 func_1000D96C(temp_s3_2, 0, 0, phi_a3_4);
-//             }
-//         } else {
-//             if ((s32) temp_s3_2 > 0) {
-//                 temp_v0_6 = (phi_a3_4 * 4) + &sp4C;
-//                 sp66 = temp_s3_2;
-//                 sp34 = temp_v0_6;
-//                 func_1000D96C(temp_s3_2, *temp_v0_6, 5, phi_a3_4);
-//             } else {
-//                 sp66 = temp_s3_2;
-//                 temp_v0_7 = (phi_a3_4 * 4) + &sp4C;
-//                 sp34 = temp_v0_7;
-//                 func_1000DE1C(*temp_v0_7, 4);
-//             }
-//             *sp34 = -1;
-//         }
-//         temp_a0_5 = sp66;
-//         if ((s32) sp66 > 0) {
-//             sp66 = sp66;
-//             func_1000E46C(temp_a0_5, 0, sp6A, 0);
-//             func_1000E40C(sp66, sp68);
-//         }
-//     }
-//     func_10017944(1, sp6D);
-// }
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800D9F3C;            /* screen height (D_800B0DF0->unk0) */

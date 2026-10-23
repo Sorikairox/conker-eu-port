@@ -1,0 +1,8 @@
+KILLED by jm1_mtx [s/joint != -1/joint != 0/]
+KILLED by j2_k5 [s/if (D_800C42B0 != 0)/if (D_800C42B0 == 0)/]
+KILLED by j2l2f_k5 [s/m = mf;/m = m;/]
+KILLED by ang90 [s/angle \* 182.04445f/angle * 182.0f/]
+KILLED by ang-720 [s/yaw <= -1.0f ? 0xFFFFFFFF/yaw <= -1.0f ? 0/]
+KILLED by nomtx_k42 [s/kind != 0x42/kind != 0x43/]
+KILLED by nomtx_k1F [s/kind == 0x1F/kind == 0x1E/]
+KILLED by nomtx_k5 [s/O_U8(o, 0x301) = 1;/O_U8(o, 0x300) = 1;/]

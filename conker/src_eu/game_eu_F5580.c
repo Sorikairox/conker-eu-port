@@ -90,7 +90,7 @@ void func_150C7EBC(s32 arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/func_150C7EBC.s")
 #endif
 #ifdef NON_MATCHING
-u8 *func_151149AC(s32, s32 *, u8 *);
+u8 *func_151149AC(u8 id); /* P119: one argument (world_record_find reads only the id) */
 
 void func_150C8190(u8 *arg0) {
     s32 *sp18;
@@ -115,7 +115,7 @@ void func_150C8190(u8 *arg0) {
     }
     temp_a1_2 = (*(s8 **)((u8 *)arg0 + 0x1C)) + (var_v1 * 8);
     sp18 = temp_a1_2;
-    var_v1_2 = -0x29D - (*(s16 *)((u8 *)(func_151149AC((*(s32 *)((u8 *)arg0 + 0x3C)) & 0xFF, temp_a1_2, arg0)) + 0x12));
+    var_v1_2 = -0x29D - (*(s16 *)((u8 *)(func_151149AC((*(s32 *)((u8 *)arg0 + 0x3C)) & 0xFF)) + 0x12));
     if ((*(s32 *)((u8 *)arg0 + 0x3C)) & 0x8000) {
         var_v1_2 = 0x344 - var_v1_2;
     }

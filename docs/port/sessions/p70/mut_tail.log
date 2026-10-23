@@ -1,0 +1,26 @@
+m1 KILLED (  42 DIFFER    8 EQUIV ): s/(rec->phase + 180.0f)/(rec->phase + 90.0f)/
+m2 KILLED (   2 DIFFER   48 EQUIV ): s/speed \*= 0.5f;/speed *= 0.25f;/
+m3 NOCHANGE: 0,/b = 23.0f;/s//b = 22.0f;/
+m4 KILLED (   3 DIFFER   47 EQUIV ): s/rec->timer = 60;/rec->timer = 61;/
+m5 KILLED (   4 DIFFER   46 EQUIV ): s/> -17.0f)/> -21.0f)/
+m6 KILLED (   6 DIFFER   44 EQUIV ): s/D_800C4428\[0\] = rec->p\[0\]\[0\] + s;/D_800C4428[0] = rec->p[0][0] - s;/
+m7 KILLED (  16 DIFFER   34 EQUIV ): s/lift = 60.0f - (speed + speed);/lift = 60.0f - speed;/
+m8 KILLED (   3 DIFFER   47 EQUIV ): s/lift_tbl = D_80098B18;/lift_tbl = D_80098AF0;/
+m9 KILLED (   3 DIFFER   47 EQUIV ): s/lift = 60.0f;/lift = 50.0f;/
+m10 KILLED (   8 DIFFER   42 EQUIV ): s/rec->timer = 0;/rec->timer = 1;/
+m11 LIVE (  50 EQUIV ): s/\* 5.0f;/* 4.0f;/
+m12 LIVE (  50 EQUIV ): s/fabsf(f) > 15.0f/fabsf(f) > 25.0f/
+m13 KILLED (  14 DIFFER   36 EQUIV ): s/rec->timer = 200;/rec->timer = 199;/
+m14 KILLED (  20 DIFFER   30 EQUIV ): s/(30 - rec->fade)/(29 - rec->fade)/
+m15 KILLED (  11 DIFFER   39 EQUIV ): s/f \*= D_80098AD0\[i\];/f *= D_80098AC0[i];/
+m16 KILLED (   5 DIFFER   45 EQUIV ): s/f = 1.0f;$/f = 0.5f;/
+m17 KILLED (  22 DIFFER   28 EQUIV ): s/p1\[1\] = len\[i\] \* dir\[1\] \* obj->y_scale/p1[1] = len[i] * dir[1] * obj->xz_scale/
+m18 KILLED (  28 DIFFER   22 EQUIV ): s/rec->swayAmp = 100.0f;/rec->swayAmp = 90.0f;/
+m19 KILLED (   8 DIFFER   42 EQUIV ): s/JOINT_POS(obj, 24 + i)\[1\];/JOINT_POS(obj, 23 + i)[1];/
+m20 KILLED (   2 DIFFER   48 EQUIV ): s/rec->fade -= D_800BE9E4;/rec->fade -= 1;/
+m1 KILLED (   3 DIFFER   27 EQUIV ): s/ax += 1.0f;/ax += 2.0f;/
+m2 KILLED (  12 DIFFER   18 EQUIV ): s/anim\[4\]\[1\] = anim\[3\]\[1\] + /anim[4][1] = anim[2][1] + /
+m3 KILLED (  12 DIFFER   18 EQUIV ): s/by += (anim\[i + 1\]\[1\] - by) \* fade;/by += (anim[i][1] - by) * fade;/
+m4 KILLED (  16 DIFFER   14 EQUIV ): s/rec\[0x4E\] = 30;/rec[0x4E] = 31;/
+m5 KILLED (  30 DIFFER ): s/up\[1\] = prev\[1\]\[1\];/up[1] = prev[1][0];/
+m6 KILLED (  21 DIFFER    9 EQUIV ): s/obj->y_scale, obj->xz_scale, ax/obj->xz_scale, obj->xz_scale, ax/

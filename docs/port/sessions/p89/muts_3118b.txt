@@ -1,0 +1,8 @@
+s/joint != -1/joint != 0/ %
+s/if (D_800C42B0 != 0)/if (D_800C42B0 == 0)/ %
+s/m = mf;/m = m;/ %
+s/angle \* 182.04445f/angle * 182.0f/ %
+s/yaw <= -1.0f ? 0xFFFFFFFF/yaw <= -1.0f ? 0/ %
+s/kind != 0x42/kind != 0x43/ %
+s/kind == 0x1F/kind == 0x1E/ %
+s/O_U8(o, 0x301) = 1;/O_U8(o, 0x300) = 1;/ %

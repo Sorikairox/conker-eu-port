@@ -79,7 +79,18 @@ s32 func_150A69A8(s32 arg0, s32 arg1, s32 *arg2, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A6840.s")
 #endif
 
+#ifdef NON_MATCHING
+/*
+ * P65: func_150A6A48 over the point box (x, z) .. (x, z) and y -10000 .. 20000 (all heights). Called by
+ * func_15045A04 with outCount = &count. The .s also holds a second, unreferenced entry at 0x150A6A18 (no caller,
+ * no symbol: it would pass its caller's stack words as the box), not translated.
+ */
+s32 func_150A69E0(s32 x, s32 z, s32 *outCount, s32 n) {
+    return func_150A6A48(x, z, outCount, n, x, z, -10000, 20000);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D3880/func_150A69E0.s")
+#endif
 
 #ifdef NON_MATCHING
 /*

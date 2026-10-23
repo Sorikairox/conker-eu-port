@@ -80,7 +80,47 @@ def parse(path):
             parts = txt.split(None, 1)
             op = parts[0]; args = [a.strip() for a in re.split(r',(?![^(]*\))', parts[1])] if len(parts) > 1 else []
         insns.append((addr, op, args))
+    reloc_data(insns, labels)
     return insns, labels
+
+CTRL = ('j', 'jal', 'jr', 'jalr', 'b', 'beq', 'bne', 'beql', 'bnel', 'beqz', 'bnez', 'blez', 'bgez', 'bltz', 'bgtz',
+        'beqzl', 'bnezl', 'bc1t', 'bc1f', 'bc1tl', 'bc1fl')
+
+def reloc_data(insns, labels):
+    """P62: a raw-word `lui r, 0x80xx` (RDRAM, kseg0) whose register is then used as the base of loads / stores /
+    addiu in the same straight-line run is a %hi / %lo pair of a data symbol: rewrite it to %hi(D_X) / %lo(D_X) so the C
+    takes `(u32) &D_X` (the literal N64 address does not exist in a port). D_X must be declared in the including file."""
+    at_label = set(labels.values())
+    for k, (a, op, args) in enumerate(insns):
+        if op != 'lui' or args[1].startswith('%'): continue
+        hi = eval(args[1], {}) & 0xFFFF
+        if not 0x8000 <= hi < 0x8080: continue
+        r = args[0]; uses = []; j = k + 1; stop = None
+        while j < len(insns) and stop is None:
+            a2, op2, ar2 = insns[j]
+            if a2 in at_label: break
+            if op2 in CTRL: stop = j + 1
+            for i, x in enumerate(ar2):
+                m = re.match(r'^(-?\d+)\((\$[a-z0-9]+)\)$', x)
+                if m and m.group(2) == r: uses.append((j, i, int(m.group(1))))
+            if op2 == 'addiu' and ar2[1] == r: uses.append((j, 2, int(ar2[2])))
+            if ar2 and ar2[0] == r and not op2.startswith(('s', 'b')) and op2 not in CTRL: break   # redefined
+            j += 1
+            if stop is not None and j <= stop and j < len(insns) and insns[j][0] not in at_label:
+                a2, op2, ar2 = insns[j]
+                for i, x in enumerate(ar2):
+                    m = re.match(r'^(-?\d+)\((\$[a-z0-9]+)\)$', x)
+                    if m and m.group(2) == r: uses.append((j, i, int(m.group(1))))
+        addrs = {(hi << 16) + off for _, _, off in uses}
+        if not uses: continue
+        if len(addrs) != 1:
+            raise ValueError('lui %s at %08X serves several data addresses %s' % (r, a, sorted(map(hex, addrs))))
+        sym = 'D_%08X' % addrs.pop()
+        insns[k] = (a, op, [r, '%%hi(%s)' % sym])
+        for j, i, off in uses:
+            a2, op2, ar2 = insns[j]; ar2 = list(ar2)
+            ar2[i] = ('%%lo(%s)(%s)' % (sym, r)) if '(' in ar2[i] else '%%lo(%s)' % sym
+            insns[j] = (a2, op2, ar2)
 
 TRACE = os.environ.get('ASM2C_TRACE')
 

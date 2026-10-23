@@ -1,0 +1,6 @@
+# P85 second round (first round: % in an expression splits the line; BSD sed has no 0,/re/ address)
+s/(D_800CC178\[2\] - 127)/(D_800CC178[2] - 128)/ % flash_hi flash_hi2
+s/x += 4.0f \* D_80038400;/x += 4.0f * D_80038404;/ % space_sc
+s/(D_800CC16E >> 8) . 10;/(D_800CC16E >> 8) \& 7;/ % iB1 i_d30c0
+s/curG = 0xFF;$/curG = 0xFE;/ % cA3 colours
+s/icon.alpha = primA;/icon.alpha = a;/ % i_flash

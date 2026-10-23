@@ -26,7 +26,43 @@ void func_151617E4(void *arg0);
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F1F80.s")
 
+#ifdef NON_MATCHING
+/*
+ * P62: adjustment entries of object type 0x7B for func_150342D0 (object i, buffer p): a shared angle (the s16 at
+ * D_800CC298 + 0x12) swings down by D_800BE9E4 * 0x222 per call while object i's +0x84 is 0x21 (to at least
+ * -0x1999, -6553.6 as a float) and back up otherwise (below 0x1555, 5461.33); the sum is compared as an int, not
+ * an s16. Then six entries {joint * 6 + 4, angle} for joints 29..34; returns the end of the entries.
+ */
+s16 *func_150F20C8(s16 *p, s32 i) {
+    s16 *angle = (s16 *)((u8 *)&D_800CC298 + 0x12);
+    s32 step = D_800BE9E4 * 0x222;
+    s32 v;
+    s32 k;
+
+    if (*(u16 *)((u8 *)&D_800CC2D0[i] + 0x84) == 0x21) {
+        v = *angle - step;
+        if ((f32)v > -6553.6f) {
+            *angle = v;
+        } else {
+            *angle = -0x1999;
+        }
+    } else {
+        v = *angle + step;
+        if ((f32)v < 5461.3335f) {
+            *angle = v;
+        } else {
+            *angle = 0x1555;
+        }
+    }
+    for (k = 0; k < 6; k++) {
+        p[k * 2] = 29 * 6 + 4 + k * 6;
+        p[k * 2 + 1] = *angle;
+    }
+    return p + 12;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F20C8.s")
+#endif
 
 void func_eu_150F2230(u8 *arg0) {
     if ((*(u16 *)((u8 *)arg0 + 0x84)) == 0x14) {
@@ -45,11 +81,12 @@ void func_eu_150F2230(u8 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_15150D7C(s32 *, s32 *, s32 *, s32, s32, s32, s32, s32, s32, s32, f32, s32, s32, s32, s32);
-s32 func_15154728(f32 *, f32, s32, f32, f32, s32, s32);
+s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32); /* P95: f32 (was the bit pattern as an int) */
 s32 func_151D5AC4(f32 *, s32, s32);
 extern s32 D_800A1C9C;
 extern s32 D_800A1CB0;
 
+void func_151D58E4(void *, f32, f32, f32, u8, u8, s32); /* P95 */
 void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
     struct {
         s32 u60;
@@ -106,7 +143,7 @@ void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
         sp.uEC = (*(f32 *)((u8 *)arg0 + 0x1C));
         sp.uE0 = ((*(f32 *)((u8 *)arg0 + 0x14C)) + (*(f32 *)((u8 *)arg0 + 0x150))) * 0.5f;
         func_151D5404((struct17 *) &sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, temp_s1, arg2);
-        func_151D58E4(&sp.uE4, 0x43FD0000, 0x447D4000, 0x3A8163D3, 5, temp_s1, arg2);
+        func_151D58E4(&sp.uE4, 506.0f, 1013.0f, 0.0009871669f, 5, temp_s1, arg2); /* P95: was 0x43FD0000 as an int */
         func_151D5AC4(&sp.uE4, temp_s1 & 0xFF, arg2);
         func_10010F88((func_150ADA20() & 8) + 0x2B6, 0x7FFFU, 0, 0U, 0, (s16) (s32) sp.uE4, (s16) (s32) sp.uE8, (s16) (s32) sp.uEC, 0xFA0, 0x1770);
         func_151D45A4(&sp.uE4, temp_s1 & 0xFF, arg2);
@@ -116,7 +153,7 @@ void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
         if (temp_t8 < 0) {
             var_f10 += 4294967296.0f;
         }
-        func_15154728(&sp.uE4, (sp58 * 4.0f) + 12.0f, 0x3FD20C49, var_f10, 0.0f, temp_s1, arg2);
+        func_15154728(&sp.uE4, (sp58 * 4.0f) + 12.0f, 1.6409999f, var_f10, 0.0f, temp_s1, arg2); /* P95: was 0x3FD20C49 as an int */
         sp.u9C = 3;
         sp.uA0 = 0;
         (*(f32 *)((u8 *)(&sp.uA4) + 0)) = (f32) (*(f32 *)((u8 *)(&sp.uE4) + 0));
@@ -164,7 +201,11 @@ void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F2670.s")
 
+#ifdef NON_MATCHING
+s32 func_15143874(s16, f32, f32 *, f32 *); /* P95: f32 parameter */
+#else
 s32 func_15143874(s16, s32, f32 *, f32 *);
+#endif
 
 void func_150F2230(u8 *arg0, u8 arg1, s32 arg2) {
     f32 sp2C[3];
@@ -174,7 +215,11 @@ void func_150F2230(u8 *arg0, u8 arg1, s32 arg2) {
         sp2C[0] = 0.0f;
         sp2C[1] = 0.0f;
         sp2C[2] = 0.0f;
+#ifdef NON_MATCHING
+        func_15143874(func_150ADA20() & 0xFF, 100.0f, sp2C, &sp2C[2]); /* P95: float literal (asm passes the bits 0x42C80000) */
+#else
         func_15143874(func_150ADA20() & 0xFF, 0x42C80000, sp2C, &sp2C[2]);
+#endif
         func_15143134(sp2C, sp20, *(s32 *)(arg0 + 0x1D4) + 0x4C0);
         func_151C384C(sp20, arg1, arg2);
     }

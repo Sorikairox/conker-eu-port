@@ -683,7 +683,51 @@ void func_1506BF5C(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506BF5C.s")
 #endif
+#ifdef NON_MATCHING
+extern s32 D_800D1C9C;
+s32 func_1000F568(s32, s32);
+
+/*
+ * P80: script command "random jump": while the counter D_800D1C9C is not 0, count it down and pick one of up to four
+ * 11-bit targets: the counter's own low 11 bits (after the decrement) and the command word's fields 0..10 / 11..21
+ * / 22..32; with n = the highest non-zero field (2 / 3 / 4, else 0) the pick is func_1000F568(base, n) - base.
+ * A non-zero pick goes into D_800D1580 (with the counter's bits other than 0..10 and 16) and func_1506BF5C runs.
+ */
+void func_1506C32C(void) {
+    s32 v[4];
+    s32 n;
+    s32 keep;
+
+    if (D_800D1C9C == 0) {
+        return;
+    }
+    D_800D1C9C--;
+    v[0] = D_800D1C9C & 0x7FF;
+    v[1] = D_800D1580 & 0x7FF;
+    v[2] = (D_800D1580 >> 11) & 0x7FF;
+    v[3] = (D_800D1580 >> 22) & 0x7FF;
+    if (v[3] != 0) {
+        n = 4;
+    } else if (v[2] != 0) {
+        n = 3;
+    } else if (v[1] != 0) {
+        n = 2;
+    } else {
+        n = 0;
+    }
+    if (n != 0) {
+        n = func_1000F568(v[0], n) - v[0];
+    }
+    if (v[n] != 0) {
+        keep = D_800D1C9C & 0xFFFEF800;
+        D_800D1C9C = keep;
+        D_800D1580 = v[n] | keep;
+        func_1506BF5C();
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C32C.s")
+#endif
 
 void func_1506C418(void) {
     func_10010A3C(D_800D154C);
@@ -1013,8 +1057,8 @@ void func_1506DE04(void) {
 }
 
 // jump table
-s32 func_1506E0EC();
-s32 func_1506E2CC();
+void func_1506E0EC(void);
+void func_1506E2CC(void);
 s32 func_150B0290();
 s32 func_150B0344(s32);
 void func_1516F730(s32, s32, u8, s32);
@@ -1081,8 +1125,96 @@ void func_1506DE84(void) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+void func_15187B50(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7);
+void func_15170648(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
+
+/*
+ * P85: script command 8: as func_1506E2CC (command 11) with a 540 x 540 square (corners (+-270, 0, +-270) through
+ * the object matrix +0x1D4, at the object's height +0x180); each corner also goes to func_15187B50 (corner x,
+ * transformed y, z, 30, 20, 7, 0.13, 0.1), and func_15170648 gets 4 and the full +0x14C size.
+ */
+void func_1506E0EC(void) {
+    f32 quad[4][3];
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 i;
+
+    if (*(void **) ((u8 *) D_800D154C + 0x1D4) == NULL) {
+        return;
+    }
+    x = 270.0f;
+    z = 270.0f;
+    for (i = 0; i < 4; i++) {
+        y = 0.0f;
+        func_150A7E40(*(f32 (**)[4]) ((u8 *) D_800D154C + 0x1D4), x, 0.0f, z, &x, &y, &z);
+        quad[i][0] = x;
+        quad[i][1] = *(f32 *) ((u8 *) D_800D154C + 0x180);
+        quad[i][2] = z;
+        func_15187B50(x, y, z, 30, 20, 7, 0.13f, 0.1f);
+        if (i == 0) {
+            z = 270.0f;
+            x = -270.0f;
+        } else if (i == 1) {
+            x = -270.0f;
+            z = -270.0f;
+        } else if (i == 2) {
+            x = 270.0f;
+            z = -270.0f;
+        }
+    }
+    func_15170648(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 4,
+                  *(f32 *) ((u8 *) D_800D154C + 0x14C), 0, 4, 4, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E0EC.s")
+#endif
+#ifdef NON_MATCHING
+void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+void func_15170648(f32 *quad, f32 x, f32 z, s32 arg3, f32 size, s32 arg5, s32 arg6, s32 arg7, s32 alpha, s32 arg9);
+
+/*
+ * P85: script command 11: a 200 x 200 square around the current object (D_800D154C) in its model space
+ * (corners (+-100, 0, +-100) through the object matrix +0x1D4, at the object's height +0x180) is passed to
+ * func_15170648 with the object position (+0x14 / +0x1C) and half the object's +0x14C size. Nothing without a matrix.
+ */
+void func_1506E2CC(void) {
+    f32 quad[4][3];
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 i;
+
+    if (*(void **) ((u8 *) D_800D154C + 0x1D4) == NULL) {
+        return;
+    }
+    x = 100.0f;
+    z = 100.0f;
+    for (i = 0; i < 4; i++) {
+        y = 0.0f;
+        func_150A7E40(*(f32 (**)[4]) ((u8 *) D_800D154C + 0x1D4), x, 0.0f, z, &x, &y, &z);
+        quad[i][0] = x;
+        quad[i][1] = *(f32 *) ((u8 *) D_800D154C + 0x180);
+        quad[i][2] = z;
+        if (i == 0) {
+            z = 100.0f;
+            x = -100.0f;
+        } else if (i == 1) {
+            x = -100.0f;
+            z = -100.0f;
+        } else if (i == 2) {
+            x = 100.0f;
+            z = -100.0f;
+        }
+    }
+    func_15170648(&quad[0][0], *(f32 *) ((u8 *) D_800D154C + 0x14), *(f32 *) ((u8 *) D_800D154C + 0x1C), 5,
+                  *(f32 *) ((u8 *) D_800D154C + 0x14C) * 0.5f, 0, 4, 4, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506E2CC.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_100107F8(struct127 *arg0);
 s32 func_10010894(struct127 *arg0);
@@ -1400,7 +1532,23 @@ void func_1506EEF4(void) {
 }
 
 // TBD whats goins on here
+#ifdef NON_MATCHING
+/*
+ * P80: script command: +0x282 = 0xFFFF, +0x276 = 5, and the byte pair +0x284 + 2 * i (i = bits 16..23 of the
+ * command word D_800D1580) = bits 8..15, bits 0..7.
+ */
+void func_1506EF5C(void) {
+    s32 w = D_800D1580;
+    s32 i = ((w >> 16) & 0xFF) * 2;
+
+    *(u16 *) ((u8 *) D_800D154C + 0x282) = 0xFFFF;
+    *((u8 *) D_800D154C + 0x276) = 5;
+    *((u8 *) D_800D154C + 0x284 + i) = w >> 8;
+    *((u8 *) D_800D154C + 0x285 + i) = w;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506EF5C.s")
+#endif
 
 void func_1506EFB4(void) {
     D_800D154C->unk282 = (u16)0;
@@ -2564,7 +2712,89 @@ void func_150730D0(void) {
       }
 }
 
+#ifdef NON_MATCHING
+void *func_1505ED34(void);
+u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2);
+u8 *func_1515D9F0(s32 arg0);
+void *func_1515D9B0(void);
+
+#define O_U8(o, off)  (*(u8 *) ((u8 *) (o) + (off)))
+#define O_S16(o, off) (*(s16 *) ((u8 *) (o) + (off)))
+#define O_S32(o, off) (*(s32 *) ((u8 *) (o) + (off)))
+#define O_F32(o, off) (*(f32 *) ((u8 *) (o) + (off)))
+
+/* Spawns a child object (type 0x21) of `parent` at offset (x, y, z) from joint `joint` (the parent's position when it
+ * has no joint matrices or joint == -1), yawed by `angle` degrees from the parent; scale-like fields 0x3C / 0x20 / 0x24
+ * = s3c / s20 / s24, byte 0x83 = b83. Returns the new object. */
+u8 *func_15073118(struct127 *parent, s32 joint, s32 kind, f32 x, f32 y, f32 z, f32 angle, f32 s3c, f32 s20, f32 s24,
+                         s32 b83) {
+    struct127 *o = func_1505ED34();
+    f32 mf[4][4];
+    f32 (*m)[4];
+    f32 px, py, pz;
+    f32 yaw;
+    u32 a;
+    s32 i;
+
+    O_F32(o, 0x24) = s24;
+    O_F32(o, 0x20) = s20;
+    O_F32(o, 0x3C) = s3c;
+    O_U8(o, 0x83) = b83;
+    if (parent->unk1D4 != NULL && joint != -1) {
+        m = (f32 (*)[4]) ((u8 *) parent->unk1D4 + joint * 64);
+        if (D_800C42B0 != 0) {
+            guMtxL2F(mf, (Mtx *) m);   /* fixed-point joint matrices */
+            m = mf;
+        }
+        func_150A7E40(m, x, y, z, &px, &py, &pz);
+    } else {
+        px = O_F32(parent, 0x14);
+        py = O_F32(parent, 0x18);
+        pz = O_F32(parent, 0x1C);
+    }
+    O_F32(o, 0x14) = px;
+    O_F32(o, 0x18) = py;
+    O_F32(o, 0x1C) = pz;
+    /* yaw in 1/65536 turns; float -> u32 as the asm: <= -1 gives 0xFFFFFFFF */
+    yaw = (f32) *(u16 *) ((u8 *) parent + 0x7A) + angle * 182.04445f;
+    a = yaw <= -1.0f ? 0xFFFFFFFF : (u32) yaw;
+    *(u16 *) ((u8 *) o + 0x7A) = a;
+    *(u16 *) ((u8 *) o + 0x76) = a;
+    O_S32(o, 0x0) = 0x21;
+    O_U8(o, 0x125) = 0xFF;
+    O_S32(o, 0xF8) = 2;
+    if (kind != 0x42) {
+        O_S32(o, 0xF8) = 0x100E;
+    }
+    O_U8(o, 0x66) = O_U8(parent, 0x66) & 0xC;
+    O_S16(o, 0xE4) = 10;
+    O_S16(o, 0xE6) = 10;
+    O_F32(o, 0xEC) = 1.0f;
+    O_F32(o, 0xF0) = 1.0f;
+    O_F32(o, 0xDC) = 1.0f;
+    O_F32(o, 0xE0) = 1.0f;
+    O_F32(o, 0x14C) = 0.5f;
+    O_F32(o, 0x150) = 0.5f;
+    if (kind == 0x1F) {
+        O_F32(o, 0xC8) = 10.0f;
+    }
+    O_S16(o, 0x278) = kind;
+    O_U8(o, 0x5) = 5;
+    O_U8(o, 0x3B) = 0xFF - (s32) ((u8 *) o - (u8 *) D_800CC2D0) / 0x32C;
+    func_15083568(o, kind, 1.0f, 0);
+    for (i = 0; i <= D_80082FA0; i++) {
+        O_S32(o, 0x304 + i * 4) = (s32) func_1515D9F0(1);
+    }
+    if (O_S32(o, 0x300 + i * 4) != 0) {   /* the last slot written (i == 0: the word at 0x300) */
+        O_U8(o, 0x301) = 1;
+    }
+    O_S32(o, 0x314) = (s32) func_1515D9B0();
+    func_1514F18C(func_15159140((u8 *) o, 1, 0), o, 0x13);
+    return (u8 *) o;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073118.s")
+#endif
 #ifdef NON_MATCHING
 /* Script command: spawn a projectile / effect object from the current object D_800D154C through
  * func_15073118 (owner, type, model, then offsets and speeds; 100 = lifetime). D_800D1580 picks the kind:
@@ -2577,7 +2807,7 @@ void func_150730D0(void) {
  *   3: type 0xE model 0x88, offsets jittered by +-200.
  * Jitter = (rand % 40 - 20) * scale (func_150ADA20, unsigned modulo). */
 s32 func_15037988(s32 index, s32 arg1, s32 arg2, f32 x, f32 y, f32 z, void *out, f32 radius, s32 arg8, s32 arg9);
-struct127 *func_15073118(struct127 *owner, s32 type, s32 model, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7,
+u8 *func_15073118(struct127 *owner, s32 type, s32 model, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7,
                          f32 arg8, f32 arg9, s32 life);
 #define JITTER(scale) ((f32)((s32)((u32)func_150ADA20() % 40) - 20) * (scale))
 
@@ -2605,7 +2835,7 @@ void func_1507342C(void) {
                 aim = TRUE;
             }
         }
-        shot = func_15073118(D_800D154C, 0x17, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
+        shot = (struct127 *) func_15073118(D_800D154C, 0x17, 0x1F, 0.0f, 0.0f, 16.0f, 0.0f, 42.8f, 49.9f, 2.9f, 100);
         shot->unkF8 |= 0x1000000;
         if (!aim) {
             shot->unk2E4 = 0;
@@ -2632,7 +2862,7 @@ void func_1507342C(void) {
         x = 42.8f + JITTER(scale);
         func_15073118(D_800D154C, 0xE, 0x42, 0.0f, 0.0f, 16.0f, JITTER(scale), x, y, 2.9f, 100);
     } else if (D_800D1580 == 2) {
-        shot = func_15073118(D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
+        shot = (struct127 *) func_15073118(D_800D154C, 9, 0x35, 0.0f, 27.3f, 0.0f, 180.0f, 23.4f, 45.2f, 3.5f, 100);
         shot->unkF8 |= 0x1000000;
         shot->unkB8 = 180.0f;
     } else if (D_800D1580 == 3) {
@@ -2865,7 +3095,26 @@ void func_15074870(void) {
 }
 
 // ??
+#ifdef NON_MATCHING
+/*
+ * P80: script command: add bits 24..31 of the command word D_800D1580 to the object's byte +0x138 when the flag
+ * test (word +0x2E4 + 4 * bits 16..23) & bits 8..15 matches bit 0 (bit 0 set: the flags are clear; clear: any set).
+ */
+void func_1507488C(void) {
+    s32 w = D_800D1580;
+    u8 *o = (u8 *) D_800D154C;
+    s32 add = w & 1;
+
+    if (*(s32 *) (o + 0x2E4 + ((w >> 16) & 0xFF) * 4) & ((w >> 8) & 0xFF)) {
+        add ^= 1;
+    }
+    if (add) {
+        o[0x138] += w >> 24;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1507488C.s")
+#endif
 
 void func_150748F4(void) {
     D_800CC3D7 = (s8) D_800D1580;
@@ -2986,7 +3235,7 @@ void func_15074C00(s32 arg0, struct127 *arg1, s32 arg2) {
     struct199 tmp; // is this actually 2 structs?
 
     if (((u8)arg1->unk239 & 0x7F) == 5) {
-        func_1504715C(&tmp);
+        func_1504715C(&tmp, arg1);   /* P80: a1 still holds arg1 at the jal; the callee reads the object */
         tmp.unk24 = D_800CC2C0;
         tmp.unk28 = D_800CC2C4;
         tmp.unk2C = D_800CC2C8;

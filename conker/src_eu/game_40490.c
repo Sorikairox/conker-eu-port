@@ -77,15 +77,71 @@ s32 func_1501374C(struct16 *arg0) {
     return 1;
 }
 
-// fat struct definition:
+#ifdef NON_MATCHING
+extern f32 D_800969F0;
+extern f32 D_800969F4;
+
+/*
+ * P80: effect spawn from a record (s16 x, y, z at +0 / +2 / +4, s16 +6, s16 radius +8, f32 angles +0xC / +0x10):
+ * nothing for radius 0. Else an effect (func_15149130 type 0x19) gets a 0x34-byte block: position, the unit
+ * direction (0, 2r, 0) rotated by the angles (func_150A8050 / func_150A7E40) times 1 / 2r, 2r, (f32) +6, the two
+ * angles, 0 and D_800969F0 / D_800969F4; then a sound / particle (func_1000FA64 0x67C) at (x, y + r, z).
+ */
+s32 func_15013778(s16 *rec) {
+    f32 m[4][4];
+    struct {
+        f32 pos[3];
+        f32 dir[3];
+        f32 size;
+        f32 height;
+        f32 angX;
+        f32 angY;
+        f32 zero;
+        f32 k1;
+        f32 k2;
+    } blk;
+    f32 inv;
+    u8 *e;
+    s32 r = rec[4];
+
+    if (r == 0) {
+        return 1;
+    }
+    blk.size = (f32) r + (f32) r;
+    inv = 1.0f / blk.size;
+    blk.height = rec[3];
+    blk.angX = *(f32 *) (rec + 6);
+    blk.angY = *(f32 *) (rec + 8);
+    blk.zero = 0.0f;
+    blk.k1 = D_800969F0;
+    blk.k2 = D_800969F4;
+    blk.pos[0] = rec[0];
+    blk.pos[1] = rec[1];
+    blk.pos[2] = rec[2];
+    func_150A8050(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
+    func_150A7E40(m, 0.0f, blk.size, 0.0f, &blk.dir[0], &blk.dir[1], &blk.dir[2]);
+    blk.dir[0] *= inv;
+    blk.dir[1] *= inv;
+    blk.dir[2] *= inv;
+    e = (u8 *) func_15149130(0x12C, -1, 0x19, -1, 0, 0x17, (struct37 *) 0x34, 0xFF, 0);
+    if (e != NULL) {
+        memcpy(e + 0x28, &blk, 0x34);
+    }
+    r = rec[4];
+    func_1000FA64(0x67C, rec[0], rec[1] + r, rec[2], 0x2EE0, r * 2, r / 2, (s32) func_1000EF40, NULL, 0, 8, 0);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15013778.s")
+#endif
 
 s32 func_1501396C(struct16 *arg0) {
     u8 idx = arg0->unk17;
-    void (*func)(void) = D_80082ECC[idx];
+    /* P76: the handlers take the record (a0 still holds arg0 at the jalr; func_15013D38 writes arg0->unk16) */
+    void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082ECC[idx];
 
     if (func != NULL) {
-        func();
+        func(arg0);
     }
     return 1;
 }
@@ -260,7 +316,11 @@ s32 func_15013D38(struct134 *arg0) {
     pos[1] = (s16)arg0->unk2;
     pos[2] = arg0->unk4;
     temp_v0 = arg0->unk18;
+#ifdef NON_MATCHING
+    func_151BEE00(pos, *(f32 *)&arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
+#else
     func_151BEE00(pos, arg0->unk10, temp_v0 ? temp_v0 : 1, ((u8 *)arg0)[0x1F], 1, 255, 1);
+#endif
     return 1;
 }
 
@@ -531,8 +591,8 @@ s32 func_15014F6C(struct134 *arg0) {
     return 1;
 }
 
-s32 func_150150A4(void) {
-    struct17 *temp_v0 = func_1515F1B0();
+s32 func_150150A4(s32 arg0) {   /* P76: a0 passes through to func_1515F1B0 */
+    struct17 *temp_v0 = func_1515F1B0(arg0);
     if (temp_v0 == NULL) {
         return 1;
     }
@@ -653,4 +713,64 @@ s32 func_15015644(struct134 *arg0) {
     }
     return 1;
 }
+#ifdef NON_MATCHING
+s32 func_151ACBD4(s8 *, s32);
+
+/*
+ * P85: spawn handler: a vertical zone from record rec (s16 position +0 / +2 / +4, s16 length +8, angles +0xC / +0x10
+ * as f32 bits, kind +0x18). Kinds below 6 / 7 / 2 are skipped on levels 0xB / 0x2C / 0x26. The far end is the
+ * (0, length, 0) direction rotated by the angles (not added to the position, as in the original); the upper / lower
+ * point (by y) and the height |dy| go to func_151ACBD4 with the kind. Always returns 1.
+ */
+s32 func_150156F4(u8 *rec) {
+    f32 m[4][4];
+    f32 pos[3];
+    f32 pts[2][3];
+    struct {
+        s8 kind;
+        u8 pad1[3];
+        f32 top[3];    /* the point with the larger y */
+        f32 bottom[3];
+        f32 height;
+        s8 flag;
+    } zone;
+    s32 i;
+
+    if (D_800BE9F0 == 0xB) {
+        if (*(u32 *) (rec + 0x18) < 6) {
+            return 1;
+        }
+    } else if (D_800BE9F0 == 0x2C) {
+        if (*(u32 *) (rec + 0x18) < 7) {
+            return 1;
+        }
+    } else if (D_800BE9F0 == 0x26) {
+        if (*(u32 *) (rec + 0x18) < 2) {
+            return 1;
+        }
+    }
+    func_150A8050(m, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
+    pos[0] = *(s16 *) (rec + 0);
+    pos[1] = *(s16 *) (rec + 2);
+    pos[2] = *(s16 *) (rec + 4);
+    func_150A7E40(m, 0.0f, *(s16 *) (rec + 8), 0.0f, &pts[1][0], &pts[1][1], &pts[1][2]);
+    pts[0][0] = *(s16 *) (rec + 0);
+    pts[0][1] = *(s16 *) (rec + 2);
+    pts[0][2] = *(s16 *) (rec + 4);
+    zone.kind = *(s32 *) (rec + 0x18);
+    i = (pts[0][1] < pts[1][1]) ? 1 : 0;
+    zone.top[0] = pts[i][0];
+    zone.top[1] = pts[i][1];
+    zone.top[2] = pts[i][2];
+    i = (pts[1][1] < pts[0][1]) ? 1 : 0;
+    zone.bottom[0] = pts[i][0];
+    zone.bottom[1] = pts[i][1];
+    zone.bottom[2] = pts[i][2];
+    zone.flag = 0;
+    zone.height = fabsf(pts[1][1] - pts[0][1]);
+    func_151ACBD4(&zone.kind, 0);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150156F4.s")
+#endif

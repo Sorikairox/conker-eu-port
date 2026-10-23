@@ -1,0 +1,45 @@
+== func_1503EB1C
+m1 KILLED by k01_i0_n8: s/att\[k\] == -2/att[k] == -1/
+m2 KILLED by k03_i3_n3: s/if (parent != -1) {/if (parent != -2) {/
+m3 KILLED by k01_i0_n8: s/parent \* 0x40), tmp);/parent * 0x40 + 0x40), tmp);/
+m4 KILLED by k01_i0_n8: s/func_150A7A48(m, tmp, m);/func_150A7A48(tmp, m, m);/
+m5 KILLED by k01_i0_n8: s/(pc + 0x3C), \*(s32 \*) (pc + 0x40)/(pc + 0x40), *(s32 *) (pc + 0x3C)/
+m6 KILLED by k01_i0_n8: s/k \* 0x40);/k * 0x40 + 4);/
+m7 KILLED by k03_i3_n3: s/(pc + 0x24), \*(f32 \*) (pc + 0x28), \*(f32 \*) (pc + 0x2C));/(pc + 0x24), *(f32 *) (pc + 0x2C), *(f32 *) (pc + 0x28));/
+m8 KILLED by k00_i2_n0: s/if (obj->unk1D4 == NULL) {/if (obj->unk1D4 != NULL) {/
+== func_1503E5F8
+m1 KILLED by k06_z0_d-1.5_c0: s/len = 0.0001f;/len = 0.001f;/
+m2 KILLED by k00_z-1_d-1.5_c0: s/\*sy = len;/*sz = len;/
+m3 KILLED by k02_z-1_d0_c0: s/< 0.0f) {/<= 0.0f) {/
+m4 KILLED by k00_z-1_d-1.5_c0: s/\*sz = -\*sz;//
+m5 KILLED by k00_z-1_d-1.5_c0: s/c < 3; c++/c < 2; c++/
+m6 KILLED by k00_z-1_d-1.5_c0: s/func_150487E0(-mat\[0\]\[2\])/func_150487E0(mat[0][2])/
+m7 KILLED by k00_z-1_d-1.5_c0: s/!= 0.0f) {/== 0.0f) {/
+m8 KILLED by k01_z-1_d-1.5_c0.5: s/func_150484A0(mat\[1\]\[2\], mat\[2\]\[2\])/func_150484A0(mat[2][2], mat[1][2])/
+m9 KILLED by k00_z-1_d-1.5_c0: s/az = 0.0f;/az = 1.0f;/
+m10 KILLED by k00_z-1_d-1.5_c0: s/\*ry = ay \* 57.295776f;/*ry = ay * 57.29578f;/
+m11 KILLED by k00_z-1_d-1.5_c0: s/\*y = mat\[3\]\[1\];/*y = mat[3][2];/
+m12 KILLED by k00_z-1_d-1.5_c0: s/1.0f \/ len/2.0f \/ len/
+== func_1503E6B4
+m1 KILLED by k00_i3_p4_d1: s/(piece + jointOffset) \* 0x40/(piece - jointOffset) * 0x40/
+m2 KILLED by k00_i3_p4_d1: s/if (detached != 0) {/if (detached == 0) {/
+m3 LIVE: s/mat\[3\]\[3\] = 1.0f;/mat[3][3] = 0.0f;/
+m4 LIVE: s/func_150A7A48(mat, inv, mat);/func_150A7A48(inv, mat, mat);/
+m5 KILLED by k00_i3_p4_d1: s/k < 9; k++/k < 8; k++/
+m6 KILLED by k00_i3_p4_d1: s/- 30.0f;/+ 30.0f;/
+m7 LIVE: s/len = 1.0f;$/len = 2.0f;/
+m8 KILLED by k01_i3_p5_d1: s/= dz \* len;/= dx * len;/
+m9 KILLED by k00_i3_p4_d1: s/(pc + 0x0C),/(pc + 0x10),/
+== func_1503E238
+m1 KILLED by k16_s2_i3_n1: s/if (state == 2) {/if (state == 4) {/
+m2 KILLED by k17_s2_i2_n0: s/|= 0x80;/|= 0x40;/
+m3 KILLED by k16_s2_i3_n1: s/state = 3;/state = 1;/
+m4 KILLED by k16_s2_i3_n1: s/n \* 0x68, 1, 0, 0/n * 0x68, 1, 1, 0/
+m5 KILLED by k16_s2_i3_n1: s/if (buf == NULL) {/if (buf != NULL) {/
+m6 KILLED by k16_s2_i3_n1: s/att\[k\] == -2/att[k] == -1/
+m7 KILLED by k16_s2_i3_n1: s/func_1503E4E4(k, i) == 0 ||/0 ||/
+m8 KILLED by k16_s2_i3_n1: s/pc\[0x64\] = 1;/pc[0x64] = 2;/
+m9 KILLED by k16_s2_i3_n1: s/rec->unkF = 1;/rec->unkF = 0;/
+m10 LIVE: s/if (rec->unkF != 0) {/if (rec->unkF == 1) {/
+m11 KILLED by k16_s2_i3_n1: s/func_1503E6B4(i, k, 0, pc, 0);/func_1503E6B4(i, k, 1, pc, 0);/
+m12 KILLED by k16_s2_i3_n1: s/D_800847CC\[(u8) rec->pad\[2\]\](i);/D_800847D8[(u8) rec->pad[2]](i);/
