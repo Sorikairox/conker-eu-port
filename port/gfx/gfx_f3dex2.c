@@ -399,7 +399,10 @@ static void texel(const Tile *t, unsigned x, unsigned y, unsigned char *o) {
     unsigned stride = t->line * 8 * (t->siz == 3 ? 2 : 1);
     unsigned bx = t->siz == 0 ? x >> 1 : x << (t->siz - 1);
     unsigned a = t->tmem * 8 + y * stride + bx;
-    if (t->siz != 3 && (y & 1)) a ^= 4;
+    /* odd rows: the RDP swaps the 32-bit halves of each 64-bit TMEM word. P158: 32-bit texels (kept here as 4 linear
+     * bytes, a TMEM word = 2 texels of each half) swap texel pairs, i.e. bytes ^ 8; before P158 they were not swapped,
+     * so 32-bit textures stored pre-swizzled for LOAD_BLOCK dxt 0 (pause-menu letters) showed shifted odd rows */
+    if (y & 1) a ^= t->siz == 3 ? 8 : 4;
     unsigned b0 = tmem8(a), v, fmt = t->fmt;
     /* 4/8-bit texels are palette indices when TLUT mode is on (the RDP ignores the tile format then).
      * RGBA4/RGBA8 do not exist: Conker's model DLs use them for CI textures and rely on the engine's
@@ -556,8 +559,12 @@ static void apply_state(void) {
     int zcmp = (geom & G_ZBUFFER) && (oth_l & 0x10) && rect_mode == 0, zupd = (oth_l & 0x20) && rect_mode == 0;
     if (zcmp || zupd) { glEnable(GL_DEPTH_TEST); glDepthFunc(zcmp ? GL_LEQUAL : GL_ALWAYS); } else glDisable(GL_DEPTH_TEST);
     glDepthMask(zupd ? GL_TRUE : GL_FALSE);
-    if ((oth_l >> 10 & 3) == 3) { glEnable(GL_POLYGON_OFFSET_FILL); glPolygonOffset(-1, -2); }
-    else glDisable(GL_POLYGON_OFFSET_FILL);
+    /* P158: overlays that compare z but do not write it (projected shadows, ZMODE_XLU, coplanar with the floor) get the
+     * decal offset too: the RDP's depth compare has a dz tolerance, GL's LEQUAL on differently clipped coplanar
+     * triangles z-fights (hatched floor patches under the shadow). ?p158nozofs=1: the old behaviour */
+    { static int nz = -1; if (nz < 0) nz = port_flag("p158nozofs");
+      if ((oth_l >> 10 & 3) == 3 || (!nz && zcmp && !zupd)) { glEnable(GL_POLYGON_OFFSET_FILL); glPolygonOffset(-1, -2); }
+      else glDisable(GL_POLYGON_OFFSET_FILL); }
     blend_state(cyc, mode);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);  /* the blend factor goes through alpha; keep the canvas opaque */
     /* viewport */
@@ -602,6 +609,7 @@ static void draw_log_line(void) {
  * ([p78hex], port/tools/p78tex.py turns them into PNGs). At the flush: the batch's texel density in N64 pixels
  * per axis (|ds/dx| etc. from each triangle's screen-space gradients, tile 0 units): what the RDP's LOD sees. */
 static int p78_task = -1, p78_on, p78_mat, p78_ntex;
+static int p158_on;   /* P158: ?p158f dump task (also logs texture loads) */
 static void p78_material(void) {
     if (!p78_on || !tex_on) return;
     p78_mat++;
@@ -620,11 +628,11 @@ static void p78_material(void) {
         if (dup || nseen >= 256 || p78_ntex >= 60) continue;
         seen[nseen][0] = key0; seen[nseen][1] = key1; seen[nseen][2] = key2; nseen++;
         unsigned w, h; tile_dims(t, &w, &h);
-        if (w > 64 || h > (w <= 8 ? 256u : 64u)) continue;   /* P94: narrow gradient strips (sky 4x256) too */
+        if (p158_on ? w > 256 || h > 128 : w > 64 || h > (w <= 8 ? 256u : 64u)) continue;   /* P94: narrow gradient strips (sky 4x256) too; P158: up to 256x128 */
         p78_ntex++;
         port_log("[p78hex] T%d mat %d tile %u %ux%u\n", p78_ntex, p78_mat, (tex_tile + k) & 7, w, h);
         for (unsigned y = 0; y < h; y++) {
-            char b[64 * 8 + 1]; int m = 0;
+            char b[256 * 8 + 1]; int m = 0;
             for (unsigned x = 0; x < w; x++) { unsigned char o[4]; texel(t, x, y, o); m += snprintf(b + m, sizeof b - m, "%02X%02X%02X%02X", o[0], o[1], o[2], o[3]); }
             port_log("[p78hex] %s\n", b);
         }
@@ -958,15 +966,22 @@ static void load_block(unsigned w0, unsigned w1) {
     Tile *t = &tiles[w1 >> 24 & 7];
     unsigned uls = w0 >> 12 & 0xFFF, ult = w0 & 0xFFF, lrs = w1 >> 12 & 0xFFF, dxt = w1 & 0xFFF;
     unsigned bytes = ((lrs - uls + 1) << timg.siz) >> 1, dst = t->tmem * 8;
+    if (p158_on) port_log("[p158] LOADBLOCK tile %u tmem %03X uls %u ult %u lrs %u dxt %u | timg %08X fmt %u siz %u width %u\n",
+                          w1 >> 24 & 7, t->tmem, uls, ult, lrs, dxt, timg.raw, timg.fmt, timg.siz, timg.width);
     if (timg.siz == 0) bytes = (lrs - uls + 2) >> 1;
     if (dst + bytes > 4096) bytes = 4096 - dst;
     const unsigned char *src = timg.p ? timg.p + ((((ult * timg.width + uls) << timg.siz) >> 1)) : 0;
     for (unsigned i = 0; i < bytes; i++)
         tmem[dst + i] = src ? vbe_ld8(src + i) : (unsigned char)(((i >> 3) ^ (i >> 8)) & 1 ? 0x30 + (timg.raw & 0x7F) : 0xC0 - (timg.raw & 0x3F));
     for (unsigned k = 0; k * 8 < bytes; k++)
-        if (((k * dxt) >> 11) & 1 && timg.siz != 3) { /* odd line: swap the 32-bit halves */
-            unsigned char *q = tmem + dst + k * 8, tmp[4];
-            memcpy(tmp, q, 4); memcpy(q, q + 4, 4); memcpy(q + 4, tmp, 4);
+        if (((k * dxt) >> 11) & 1) {
+            if (timg.siz != 3) { /* odd line: swap the 32-bit halves */
+                unsigned char *q = tmem + dst + k * 8, tmp[4];
+                memcpy(tmp, q, 4); memcpy(q, q + 4, 4); memcpy(q + 4, tmp, 4);
+            } else if (!(k & 1) && dst + k * 8 + 16 <= 4096) { /* P158: 32-bit: swap texel pairs (source words k, k + 1) */
+                unsigned char *q = tmem + dst + k * 8, tmp[8];
+                memcpy(tmp, q, 8); memcpy(q, q + 8, 8); memcpy(q + 8, tmp, 8);
+            }
         }
     tmem_gen++;
     state_dirty = 1;
@@ -977,11 +992,13 @@ static void load_tile(unsigned w0, unsigned w1) {
     unsigned x0 = (w0 >> 12 & 0xFFF) >> 2, y0 = (w0 & 0xFFF) >> 2, x1 = (w1 >> 12 & 0xFFF) >> 2, y1 = (w1 & 0xFFF) >> 2;
     unsigned stride = t->line * 8 * (timg.siz == 3 ? 2 : 1);
     unsigned rowb = timg.siz == 0 ? (x1 - x0 + 2) >> 1 : (x1 - x0 + 1) << (timg.siz - 1);
+    if (p158_on) port_log("[p158] LOADTILE tile %u tmem %03X line %u x %u..%u y %u..%u | timg %08X fmt %u siz %u width %u\n",
+                          w1 >> 24 & 7, t->tmem, t->line, x0, x1, y0, y1, timg.raw, timg.fmt, timg.siz, timg.width);
     for (unsigned y = y0; y <= y1 && (y - y0) * stride < 4096; y++) {
         const unsigned char *src = timg.p ? timg.p + (((y * timg.width + x0) << timg.siz) >> 1) : 0;
         for (unsigned i = 0; i < rowb && i < 4096; i++) {
             unsigned a = t->tmem * 8 + (y - y0) * stride + i;
-            if (timg.siz != 3 && ((y - y0) & 1)) a ^= 4;
+            if ((y - y0) & 1) a ^= timg.siz == 3 ? 8 : 4;   /* P158: 32-bit rows swap texel pairs (see texel()) */
             tmem[a & 0xFFF] = src ? vbe_ld8(src + i) : (unsigned char)((((i >> 1) ^ (y >> 2)) & 1) ? 0xF0 : 0x40);
         }
     }
@@ -1455,10 +1472,18 @@ void gfx_run_task(void *task) {
         if (tf > 0 && !done && port_frame_count >= (unsigned)tf) { done = 1; gfx_trace = 1; port_log("[p147] dltracef: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); } }
     if (p78_task < 0) p78_task = port_flag("p78tex");
     p78_on = p78_task > 0 && gfx_stats.tasks == (unsigned)p78_task; p78_mat = 0;
+    { /* P158 DIAGNOSTIC ?p158f=F[,?p158f2=F2]: the p78 material / texel dump plus the draw log (and texture-load lines) of the
+       * first gfx task at or after retrace F (and F2): task numbers differ from run to run */
+        static int f1 = -1, f2, d1, d2; if (f1 < 0) { f1 = port_flag("p158f"); f2 = port_flag("p158f2"); }
+        int hit = 0;
+        if (f1 > 0 && !d1 && port_frame_count >= (unsigned)f1) d1 = hit = 1;
+        else if (f2 > 0 && !d2 && port_frame_count >= (unsigned)f2) d2 = hit = 1;
+        if (hit) { p78_on = 1; port_log("[p158] dump: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); }
+        p158_on = hit; }
     if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;
     memset(fr_ops, 0, sizeof fr_ops); memset(fr_seguse, 0, sizeof fr_seguse);
     freecam_update();
-    { static int dlg = -1; if (dlg < 0) dlg = port_flag("drawlog"); draw_log = dlg && gfx_stats.tasks == (unsigned)dlg; }
+    { static int dlg = -1; if (dlg < 0) dlg = port_flag("drawlog"); draw_log = (dlg && gfx_stats.tasks == (unsigned)dlg) || p158_on; }
     gfx_bounds_reset();
     gfx_frame_begin(0, 0, 0);
     cur_ucode = ucode; cur_udata = rd32(t + 24);
@@ -1752,6 +1777,52 @@ void __wrap_func_1512C490(void *arg0) {
 static int p38_flag = -1;
 static int p38_on(void) { if (p38_flag < 0) p38_flag = port_flag("p38check"); return p38_flag; }
 uint8_t *__real_func_15186D04(uint8_t *gdl, int arg1);
+/* P158 DIAGNOSTIC ?p158null=1: character_spawn_handlers func_1514D6CC (game_eu_17A800) dispatches D_8008AE10 handlers by
+ * the indices of character_handler_indices func_1514CFF0 (C, side-effect free). Logs the call when the null zone word
+ * null+0x14 changes across it (the 0x400 written at the new-game scene start, frame 4560), with the indices / handlers. */
+int __real_func_1514D6CC(void *arg0);
+int func_1514CFF0(void *arg0, int *outSub, int *outMode, int *outType);
+int __wrap_func_1514D6CC(void *arg0) {
+    static int on = -1; static unsigned logged;
+    if (on < 0) on = port_flag("p158null");
+    if (on <= 0) return __real_func_1514D6CC(arg0);
+    unsigned before = *(volatile unsigned *)(uintptr_t)0x14;
+    int sub = -1, mode = -1, type = -1, fl = func_1514CFF0(arg0, &sub, &mode, &type);
+    int r = __real_func_1514D6CC(arg0);
+    unsigned after = *(volatile unsigned *)(uintptr_t)0x14;
+    if ((before != after || logged < 6) && logged < 40) {
+        extern unsigned char D_800A62B8[], D_800A62A0[], D_800CC2D0[]; extern unsigned D_8008AE10[]; extern unsigned char D_8008AF30[];
+        int vt = (fl & 4) ? vbe_ld8(D_800A62B8 + type) : -1, vm = (fl & 2) ? vbe_ld8(D_800A62A0 + mode) : -1;
+        logged++;
+        port_log("[p158null] frame %u obj %d ret %d flags %d sub %d mode %d type %d -> handler idx type %d (%08X) mode %d (%08X) | null+0x14 %08X -> %08X\n",
+                 port_frame_count, (int)(((unsigned char *)arg0 - D_800CC2D0) / 0x32C), r, fl, sub, mode, type,
+                 vt, vt >= 0 ? D_8008AE10[vt] : 0, vm, vm >= 0 ? D_8008AE10[vm] : 0, before, after);
+        (void)D_8008AF30;
+    }
+    return r;
+}
+/* P158 DIAGNOSTIC ?p158light=N: every Nth call of shadow_light_projection func_151848D8 (game_eu_1B1ED0): object, slot,
+ * the returned light distance, the slot's smoothed light position D_800DE3E0[slot], the object position and the default
+ * light direction D_800DE440 (why the shadow streak is long). */
+float __real_func_151848D8(int obj, int slot, float sx, float sy, float sz, float prev);
+float __wrap_func_151848D8(int obj, int slot, float sx, float sy, float sz, float prev) {
+    static int n = -1; static unsigned calls, logged;
+    float r = __real_func_151848D8(obj, slot, sx, sy, sz, prev);
+    if (n < 0) n = port_flag("p158light");
+    static int from = -1; if (from < 0) from = port_flag("p158f");
+    if (n > 0 && port_frame_count >= (unsigned)from && calls++ % (unsigned)n == 0 && logged < 400) {
+        extern float D_800DE3E0[][3], D_800DE440[3], D_800D3AA0[2], D_800D3AA8, D_800D3AAC, D_800DE46C; extern int D_800DE464;
+        extern unsigned char D_800CC2D0[];
+        const float *o = (const float *)(D_800CC2D0 + obj * 0x32C + 0x14);
+        logged++;
+        port_log("[p158light] frame %u obj %d slot %d box %.1f %.1f %.1f prev %.1f -> dist %.1f | light %.1f %.1f %.1f obj %.1f %.1f %.1f "
+                 "| default %.1f %.1f %.1f nolights %d scale %.3f | proj %.3f %.3f far %.1f near %.1f\n",
+                 port_frame_count, obj, slot, sx, sy, sz, prev, r, D_800DE3E0[slot & 7][0], D_800DE3E0[slot & 7][1], D_800DE3E0[slot & 7][2],
+                 o[0], o[1], o[2], D_800DE440[0], D_800DE440[1], D_800DE440[2], D_800DE464, D_800DE46C, D_800D3AA0[0], D_800D3AA0[1],
+                 D_800D3AA8, D_800D3AAC);
+    }
+    return r;
+}
 uint8_t *__wrap_func_15186D04(uint8_t *gdl, int arg1) {
     static unsigned calls, tot_vtx, tot_t1, tot_t2, tot_t4, tot_cmd, tot_other;
     static int p137 = -1;

@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P158, 2026-10-24, port-web). Details: `docs/port/sessions/P158.md`
+
+- Merged port 92789cc (P151 + P156) and port-b d394089 (P153): HANDOFF.md conflicts only (merge_union.py + section
+  order by hand), no code conflicts; func_15058898's func_150BA3B0 prototype matches the P153 definition.
+  After each merge: verify_all OK, NM link OK, protocheck 0, float-int 0 bugs (REVIEW 4), arity_scan 128,
+  m2c_sanity 228 (+1 func_1507CD64 width med, probably false positive), census 0 FAIL after a clean rebuild,
+  stubcalls: the new C calls no hit stubs.
+- New game: player control at **18485** again (node ng1 to 33101, Chrome x3); heap 0, traps 0; stub calls over the
+  whole new game 9233 -> 1758. **null+0x14 = 0x400 is still written**, at frame 4560, right after the scene-start
+  stub set (last stub func_15086058, game_eu_B37F0) and not by func_1514D6CC / func_1514CFF0 (checked with a wrap).
+- Renderer fixes (port/gfx/gfx_f3dex2.c): **32-bit textures' odd rows** were never swapped (pause-menu letters and
+  the HUD digit are RGBA32 loaded with dxt 0: noisy / interlaced text, now clean); **projected shadows z-fought**
+  with the floor (hatched patches): z-compare-without-update draws now get the decal polygon offset
+  (`?p158nozofs=1` = old). The long shadow streak is game behaviour: level 0x22's two shadow lights are 91 units
+  high, ~500 away, and func_15187820 disables the minimum-height rule for this level.
+- Pause background is black: the game reads the frozen frame from RDRAM, the port never writes its GL frame back.
+- Noev Chrome regression unchanged (1528 / 2304 / 2384). New diagnostics: `?p158f` / `?p158f2` (texture / draw dump
+  of the first task at retrace F), `?p158light`, `?p158null`.
+
+## Next steps (from P158)
+
+1. Gameplay blockers, in order: func_15064668 (game_eu_90F50, B action), func_15064F50 (game_eu_90F50, walking),
+   func_10010154 / func_1000F568 / func_10010344 (init_EB00, sound emitters), func_1505528C (game_eu_78230, idle sit),
+   func_151EE0C4 (game_eu_216470, pause menu); then the scene-start stub set and the P152 list (P158.md section 5).
+2. Find the null+0x14 writer: wrap the level-load functions that run after func_15085FE0 at the new-game level
+   load (frame 4559-4560) with before / after checks, as `__wrap_func_1514D6CC` does.
+3. Gfx: write the frozen frame back to the colour image for the pause screen (read back on the pause transition).
+   Compare the level 0x22 shadows with real hardware if possible.
+4. After func_15064668 is C: padtongue.py with `NOSTART=1` B presses at the pillar, to get past the first room.
+
 ## State (session P156, 2026-10-23). Details: `docs/port/sessions/P156.md`
 
 - New hand C (NM): func_1507CD64 player_hit_reaction (func_1507D754 callee; 72 setups, mutants 55/55; returns s32 0
