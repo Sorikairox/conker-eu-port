@@ -968,35 +968,40 @@ void func_151ABDD8(void **arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15190770(u8 **, s32, u8, u8);
+u8 *func_15190770(void *, s32, u8, s32);
 
+// character_spawn_aura: for characters of type 0..4 or 0x96 (arg0's data +0x18), spawns the 12-byte-template effect
+// func_15190770 (character, its +0x3B, life 300, mode 3 for type 0x96 else 0) and, when the character has a
+// partner (+0x127 != 0xFF), sets the partner's +0x66 timer to 500. P124: one struct instead of m2c's 6 locals.
 void func_151ABE04(u8 *arg0) {
-    s8 sp2A;
-    s8 sp29;
-    s8 sp28;
-    s16 sp26;
-    u8 sp24;
-    u8 *sp20;
-    u8 temp_v0;
-    u8 *temp_v1;
+    struct {
+        u8 *u0;
+        u8 u4;
+        s16 u6;
+        s8 u8;
+        s8 u9;
+        s8 uA;
+    } t;
+    u8 *chr;
+    u8 type;
 
-    temp_v1 = (*(u8 **)((u8 *)arg0 + 0x18));
-    temp_v0 = (*(u8 *)((u8 *)temp_v1 + 4));
-    if ((temp_v0 == 0) || (temp_v0 == 1) || (temp_v0 == 2) || (temp_v0 == 3) || (temp_v0 == 4) || (temp_v0 == 0x96)) {
-        sp20 = temp_v1;
-        sp26 = 0x12C;
-        sp28 = 0;
-        sp29 = 0;
-        sp24 = (*(u8 *)((u8 *)temp_v1 + 0x3B));
-        if ((*(u8 *)((u8 *)temp_v1 + 4)) == 0x96) {
-            sp2A = 3;
+    chr = *(u8 **)(arg0 + 0x18);
+    type = chr[4];
+    if (type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 0x96) {
+        t.u0 = chr;
+        t.u6 = 300;
+        t.u8 = 0;
+        t.u9 = 0;
+        t.u4 = chr[0x3B];
+        if (chr[4] == 0x96) {
+            t.uA = 3;
         } else {
-            sp2A = 0;
+            t.uA = 0;
         }
-        if ((*(u8 *)((u8 *)temp_v1 + 0x127)) != 0xFF) {
-            (*(s16 *)((u8 *)((*(u8 **)((u8 *)temp_v1 + 0x31C))) + 0x66)) = 0x1F4;
+        if (chr[0x127] != 0xFF) {
+            *(s16 *)(*(u8 **)(chr + 0x31C) + 0x66) = 500;
         }
-        func_15190770(&sp20, 0, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
+        func_15190770(&t, 0, arg0[0xC], arg0[1]);
     }
 }
 #else

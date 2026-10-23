@@ -13,9 +13,18 @@ u8 *func_15169E70(u8 *arg0, s32 arg1) {
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+// effect_spawn_template: spawns an effect record from a 0x3C-byte template (func_15169E70 with priority 0xFF) and
+// returns it. P124: the matching body is `void` and leaves the record in v0 for its callers (game_eu_E48B0 stores
+// it); in the port a void function returns nothing, so the NM body returns the record.
+u8 *func_15169ED8(void *arg0) {
+    return func_15169E70(arg0, 0xFF);
+}
+#else
 void func_15169ED8(s32 arg0) {
     func_15169E70(arg0, 0xFF);
 }
+#endif
 
 void func_15169EF8(u8 *arg0) {
     s32 v;
