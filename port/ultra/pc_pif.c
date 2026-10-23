@@ -43,12 +43,12 @@ EM_JS(int, __port_padf_char, (int i), {
     else if (typeof process !== 'undefined' && process.env && process.env.PORT_PADF !== undefined) v = process.env.PORT_PADF;
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
-#define PADF_MAX 128
+#define PADF_MAX 2048 /* P154: 128 -> 2048 (long new-game scripts) */
 static struct { unsigned f; int b, x, y; } padf[PADF_MAX];
 static int padf_n = -1, padf_cur = -1;
 static void padf_apply(void) {
     if (padf_n < 0) {
-        char s[4096]; int n = 0, c;
+        static char s[65536]; int n = 0, c;
         while (n < (int)sizeof s - 1 && (c = __port_padf_char(n)) != 0) s[n++] = (char)c;
         s[n] = 0; padf_n = 0;
         for (char *p = s; *p && padf_n < PADF_MAX;) {

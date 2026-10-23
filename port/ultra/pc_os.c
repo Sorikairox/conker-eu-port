@@ -207,10 +207,10 @@ void port_stub_hit(const char *name, const char *what) {
     }
     { /* P140: ?p140win=F: per-stub call counts in 250-frame windows from VI frame F to F+2500 (which stubs run in a
        * given stretch, e.g. the opening cutscene); one log block per window, printed at the first hit after it */
-      static int wf = -1; static unsigned wstart;
-      if (wf < 0) { wf = port_flag("p140win"); wstart = (unsigned)wf; }
+      static int wf = -1; static unsigned wstart, wlen = 2500; /* P154: ?p140len=N (default 2500) */
+      if (wf < 0) { int l = port_flag("p140len"); wf = port_flag("p140win"); wstart = (unsigned)wf; if (l > 0) wlen = (unsigned)l; }
       if (wf > 0 && stub_last < STUB_SLOTS) {
-          if (port_frame_count >= wstart + 250 && wstart < (unsigned)wf + 2500) {
+          if (port_frame_count >= wstart + 250 && wstart < (unsigned)wf + wlen) {
               static char wb[4096]; int o = snprintf(wb, sizeof wb, "[p140win] frames %u..%u:", wstart, wstart + 249);
               for (unsigned i = 0; i < STUB_SLOTS; i++)
                   if (stub_tab[i].name && stub_tab[i].win) {
@@ -220,7 +220,7 @@ void port_stub_hit(const char *name, const char *what) {
               port_log("%s\n", wb);
               while (port_frame_count >= wstart + 250) wstart += 250;
           }
-          if (port_frame_count >= wstart && port_frame_count < (unsigned)wf + 2500) stub_tab[stub_last].win++;
+          if (port_frame_count >= wstart && port_frame_count < (unsigned)wf + wlen) stub_tab[stub_last].win++;
       } }
 }
 

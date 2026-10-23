@@ -30,7 +30,12 @@ extern unsigned char D_800877D0[]; /* 0x14-byte records */
 static int fboot = -1, fev = -1;
 static int flag(int *f, const char *n) { if (*f < 0) *f = port_flag(n); return *f; }
 
-static int memok(const void *p) { uintptr_t a = (uintptr_t)p; return a >= 0x100 && a < 0x20000000u; }
+/* P154: the upper bound is the wasm memory size (was 0x20000000: a stale queue pointer in 0x16000000..0x1FFFFFFF trapped
+ * the ?p103boot event log in __wrap_func_1502457C at the Gregg scene load, frame 12441) */
+static int memok(const void *p) {
+    uintptr_t a = (uintptr_t)p;
+    return a >= 0x100 && a + 0x20 <= (uintptr_t)__builtin_wasm_memory_size(0) * 65536u;
+}
 
 static int p103_prereq(int id, int depth) {
     const unsigned char *rec = D_800877D0 + id * 0x14;
@@ -218,7 +223,9 @@ void __wrap_func_1502457C(int a, int b) {
         if (flag(&fb, "p103boot") && D_800C4170)
             for (i = 0; i < 16 && n121 < 24; i++) {
                 const unsigned char *e = D_800C4170 + i * 0xC;
-                const unsigned char *ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
+                const unsigned char *ev;
+                if (!memok(e)) break; /* P154 */
+                ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
                 int tr = (signed char)vbe_ld8(e + 8);
                 if (!memok(ev)) break;
                 if (ev == lastev) continue;

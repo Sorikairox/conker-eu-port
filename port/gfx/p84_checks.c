@@ -87,10 +87,11 @@ extern unsigned char p88_D_eu_800C3A60[] __asm__("D_eu_800C3A60");
  * the slot 0 scene state / counter. */
 extern unsigned char p88_D_800CC2D0[] __asm__("D_800CC2D0");
 static void p88_pos(void) {
-    static int f = -1;
+    static int f = -1, from = -1, to = -1; /* P154: ?p88from=F / ?p88to=F (default 940 / 3000) */
     static unsigned last;
     const unsigned char *r = p88_D_800CC2D0;
-    if (flag(&f, "p88pos") == 0 || port_frame_count < 940 || port_frame_count > 3000 || port_frame_count - last < (unsigned)f) return;
+    if (from < 0) { from = port_flag("p88from"); to = port_flag("p88to"); if (!from) from = 940; if (!to) to = 3000; }
+    if (flag(&f, "p88pos") == 0 || port_frame_count < (unsigned)from || port_frame_count > (unsigned)to || port_frame_count - last < (unsigned)f) return;
     last = port_frame_count;
     port_log("[p88] pos frame %u: player state %d pos %.1f %.1f %.1f | scene state %u counter %d cutscene %u\n", port_frame_count,
              (int)W(r), *(const float *)(r + 0x14), *(const float *)(r + 0x18), *(const float *)(r + 0x1C),

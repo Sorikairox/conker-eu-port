@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P154, 2026-10-23, port-web, runtime). Details: `docs/port/sessions/P154.md`
+
+- **A new game reaches player control**: the Gregg cutscene (level 0x22 scene 2, 12441) ends at retrace **18485**.
+  Conker is in the first room (dark round room, pillar, gargoyle, hanging squirrel tail). Node and Chrome agree to
+  +-3 retraces. Runs: node 30101, Chrome 24401. No trap, heap 0, null zone only the known null+0x14.
+- The cutscenes are timed: A / B / stick presses during them change nothing, so they need no input.
+- Gameplay checks in Chrome:
+  - Walking works, with the camera following.
+  - Collision works: the round wall at radius ~470 and the pillar.
+  - A jumps (held A hovers), and jumping collects the tail (starburst, lives "3").
+  - The pause menu opens.
+  - Audio runs.
+- **B does nothing**: it calls the stub func_15064668 (B / context action), probably the first room's blocker.
+- Fixed a `?p103boot` diagnostic trap: memok() in p103_boot.c accepted pointers beyond wasm memory. New knobs:
+  `?p140len`, `?p88from` / `?p88to`; `?padf` takes up to 2048 entries.
+- Scripts in docs/port/sessions/p154/: padgen.py (cutscene presses), padwalk.py (walk test), padtongue.py (tail
+  pick-up + B / pause); newgame.sh takes env PADF / SHOTFROM / SHOTSTEP.
+
+## Next steps (from P154)
+
+1. Gameplay blockers, in order:
+   - func_15064668 (game_eu_90F50, B action)
+   - func_15064F50 (game_eu_90F50, called while walking, the stub returns 0)
+   - func_10010154 / func_1000F568 / func_10010344 (init_EB00, sound-effect emitters)
+   - func_1505528C (game_eu_78230, idle sit)
+   - func_151EE0C4 (game_eu_216470, pause menu)
+   - then the P152 list.
+2. After func_15064668 is C: run padtongue.py (`NOSTART=1`) with B presses at the gargoyle / pillar to get past the
+   first room. Also check the pause-menu text noise and the shadow streak / hatched floor patches (gfx).
+
 ## State (session P152, 2026-10-23, port-web). Details: `docs/port/sessions/P152.md`
 
 - Merged port-b 53f4db6 (P143 / P146 / P150, merge 7d3c2ff) and port d9785e0 (P148, merge 6d8dfff): only HANDOFF
