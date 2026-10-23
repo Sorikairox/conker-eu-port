@@ -486,6 +486,26 @@ Branch `port-b` (from P108 7d59c9c); the orchestrator merges it into `port`.
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P127, 2026-10-23). Details: `docs/port/sessions/P127.md`
+
+- P124 gap closed: func_15029EA8 t6 / ta setups EQUIV with ARGMEM on the func_1000FA64 record (allocate_memory key
+  10003E90 was right; the "never called" notes came from setups that return early), mutants 27 / 28 (1 equivalent).
+  func_15023988 / func_1000FA64 / func_15188D80 setups + mutants done (only equivalent survivors).
+- New hand C (NM): func_151E2B9C settings_save, func_151E2FCC menu_game_start, func_151DE100 game_pause_update
+  (mode-0 handler, browser P126 blocker), func_150113E0 level_fire_emitters_create (game_3E890); func_151E86A4's
+  NM body skips the anti-tamper code checksum (no null-zone write in the port).
+- NM prototype fixes from P125: func_150A6C40 void, func_15179008 prototypes. func_1513D524 header change deferred
+  to the merge with port-b (its definition is in game_169510.c).
+
+## Next steps (from P127)
+
+0. Web: merge; drop func_151DE100's data stub (port/ side). Watch the pause menu's "no" path (cartridge check DMA,
+   P127.md) and func_151407D0 (game_16DC80, asm) on the new-game frame.
+1. func_1513D524 `void *` in functions.h under NM together with port-b's game_169510.c change.
+2. Menu pages still asm: func_151DFD0C, func_151E0BBC, func_151E1308, func_151E1EDC, func_151E4B40 (P120 drafts in
+   port_work/p120/gen, raw); func_151E19AC mutants; 68 func_151E3AE4 setups.
+3. func_10024190 (osWritebackDCache, hand asm cache loop): port no-op, keep as is.
+
 ## State (session P124, 2026-10-23). Details: `docs/port/sessions/P124.md`
 
 - **m2c scattered stack structs fixed (NM, commit 1efdab2)**: func_1510AEB0 (the P121 frame-1985 trap), func_150B7700,

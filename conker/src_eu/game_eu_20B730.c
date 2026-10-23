@@ -60,7 +60,283 @@ void func_151DE080(void) {
     D_80090130 = 1;
 }
 
+#ifdef NON_MATCHING
+typedef struct MenuPad {
+    u16 button;
+    s8 stickX;
+    s8 stickY;
+    u8 errno_;
+    u8 pad5;
+} MenuPad;
+extern MenuPad D_800BED38[4];   /* controller state, 6 bytes each */
+extern u16 D_800BED50;          /* new button presses per controller (u16 each) */
+extern u8 D_800901CC;           /* pause menu cursor (read signed) */
+extern s8 D_800E1013;
+extern s32 D_80090118;          /* time limit (frames) */
+extern s32 *D_800E0EB8;         /* callback run when the menu fade ends */
+extern s8 D_8009013C;
+extern u8 D_80090158;
+extern s8 D_80090298;           /* pause input delay */
+extern s8 D_8009029C;           /* unpause countdown */
+extern s8 D_800902A0;           /* last stick x */
+extern s8 D_800E0EB5;           /* last stick y */
+extern s8 D_80090138;           /* quit confirmation: 1 = yes */
+extern u8 D_8009016D;
+extern u8 D_800BEEE3;
+extern u8 D_800E0EC8;           /* controller that paused */
+extern s8 D_800E0EC9;           /* frame counter for the seconds of play time */
+extern s32 D_800D3268;
+extern OSIoMesg D_80038C40;
+extern u8 D_800ABBB8[];         /* "%d:%02d" */
+extern u8 D_800ABBC0[];         /* "#": text id (the next argument), likewise the following */
+extern u8 D_800ABBC4[];
+extern u8 D_800ABBC8[];
+extern u8 D_800ABBCC[];
+extern u8 D_800ABBD0[];
+extern u8 D_800ABBD4[];
+extern u8 D_800ABBD8[];
+extern u8 D_800ABBDC[];
+extern u8 D_800ABBE0[];
+s32 func_1517F54C();
+void func_15042E3C(s32, ...);   /* varargs, as its definition (game_70200) */
+void func_15042D94(s32, s32, u8, s32, ...);
+void func_1504332C(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
+void func_151E2FCC(void);
+void func_10024190(void *, s32); /* osWritebackDCache (hand-written cache loop) */
+
+// game_pause_update: P127: menu handler of mode 0 (story game, D_8009018C[0]): counts the play time (D_800BE3E8
+// seconds), shows the time limit (multiplayer, settings byte 3 >= 3), and runs the pause menu: START (0x1000) on a
+// controller that is not disabled (D_800D18A0) opens it (D_800BEAC1) unless blocked (func_1517F54C, scene states);
+// the stick moves the cursor D_800901CC over the 2 (story) / 3 (multiplayer) items with sfx 0x62D; past the last item
+// is the quit confirmation (D_80090138 no / yes). A on "yes" quits to the menu (D_800E0EB8 = func_151DE080, in
+// multiplayer func_151E2FCC to restart when the cursor was on "restart"); A on "no" goes back after Rare's cartridge
+// check (2 words at ROM 0xF80; a mismatch DMAs 0x100 bytes to a random 0x803xxxxx address); START / B closes it.
+void func_151DE100(void) {
+    u8 dmaBuf[0x20];
+    u8 *p;
+    s32 sfx;
+    u8 simple;
+    s32 blocked;
+    s32 nPads;
+    s32 i;
+    s32 yOff;
+    s32 count;
+    s32 y;
+    s32 secs;
+    s32 sel;
+    u8 pad;
+    s8 stickX;
+    s8 stickY;
+
+    D_800E0FC6 = 0;
+    sfx = 0;
+    blocked = 0;
+    simple = D_80090158;
+    if (D_800BE9F0 == 0x22) {
+        simple = 1;
+    }
+    if (D_800C35EA != 1 || D_800BE9F0 != 0x18 || D_800C3A08 != 1) {
+        if (func_1517F54C() != 0) {
+            blocked = 1;
+        }
+    }
+    if (D_800C35EA == 1 && D_800C3683 != 0) {
+        blocked = 1;
+    }
+    if (D_80090298 > 0) {
+        D_80090298--;
+    }
+
+    /* START opens the pause menu */
+    if (D_800BEAC0 == 0 && D_800BEAC1 == 0 && !blocked && D_80090298 == 0) {
+        nPads = D_80082FA0;
+        for (i = 0; i <= nPads && D_800BEAC1 == 0; i++) {
+            if (((&D_800BED50)[i] & 0x1000) && !(D_800D18A0 & (1 << i))) {
+                D_800BEAC1 = 1;
+                D_800BEEE3 = 1;
+                D_800E0EC8 = i;
+                D_800901CC = 0;
+                D_800902A0 = D_800BED38[i].stickY;
+                D_80090298 = 10;
+            }
+        }
+    }
+
+    /* play time */
+    if (D_800BEAC0 == 0 && D_800D3268 != 0xC7) {
+        D_800E0EC9 += D_800BE9E4;
+        if (D_800E0EC9 >= 50) {
+            D_800E0EC9 -= 50;
+            D_800BE3E8++;
+        }
+    }
+
+    /* time limit */
+    if (D_800BE616 != 0 && D_800BEAC1 == 0 && D_800E1013 >= 3) {
+        y = 198;
+        if (D_80082FA0 > 0) {
+            y = 100;
+        }
+        if (D_80090118 > 0) {
+            D_80090118 -= D_800BEA08;
+        } else {
+            D_80090118 = 0;
+        }
+        secs = D_80090118 / 50;
+        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        func_15042D94(0x87, y, 0x80, (s32) D_800ABBB8, secs / 60, secs % 60);
+    }
+
+    if (D_8009029C > 0) {
+        D_8009029C--;
+        if (D_8009029C < 2) {
+            D_800BEAC1 = 0;
+        }
+        return;
+    }
+    if (D_800BEAC0 == 0) {
+        return;
+    }
+
+    /* pause menu */
+    if (D_800BE616 != 0) {
+        yOff = -0x24;
+        count = 3;
+    } else {
+        yOff = 5;
+        count = 2;
+    }
+    pad = D_800E0EC8;
+    D_800E0FCA = (&D_800BED50)[pad];
+    if (D_80090298 != 0) {
+        D_800E0FCA = 0;
+    }
+    stickX = D_800BED38[pad].stickX;
+    stickY = D_800BED38[pad].stickY;
+    if ((s8) D_800901CC < count) {
+        if ((D_800902A0 < 31 && stickX >= 31) || (D_800902A0 >= -30 && stickX < -30)) {
+            if ((s8) D_800901CC == 2) {
+                D_800901CC = 0;
+            } else {
+                D_800901CC = 1 - (s8) D_800901CC;
+            }
+            sfx = 0x62D;
+        }
+        if ((s8) D_800901CC != 0 && count == 3
+            && ((D_800E0EB5 >= -30 && stickY < -30) || (D_800E0EB5 < 31 && stickY >= 31))) {
+            sfx = 0x62D;
+            if ((s8) D_800901CC == 2) {
+                D_800901CC = 1;
+            } else {
+                D_800901CC = 2;
+            }
+        }
+    } else if ((D_800902A0 >= -30 && stickX < -30) || (D_800902A0 < 31 && stickX >= 31)) {
+        D_80090138 = 1 - D_80090138;
+        sfx = 0x62D;
+    }
+    D_800902A0 = stickX;
+    D_800E0EB5 = stickY;
+    func_1504332C(0xFF, 0xFF, 0xFF, D_8009016D);
+    y = yOff + 0x73;
+    if (simple) {
+        D_800901CC = 0;
+        func_15042D94(0x94, y, 1, (s32) D_800ABBC0, 0xD);
+    } else {
+        func_15042D94(0x94, y, 1, (s32) D_800ABBC4, 0x1A);
+        if ((s8) D_800901CC < count) {
+            func_15042D94(0xD5, y, 1, (s32) D_800ABBC8, ((s8) D_800901CC == 0) + 0xC);
+        }
+        func_150432FC(0x94, yOff + 0x55);
+        if (count == (s8) D_800901CC) {
+            func_15042E3C((s32) D_800ABBCC, 0x32);
+        } else if (count < (s8) D_800901CC) {
+            func_15042E3C((s32) D_800ABBD0, 0x33);
+        }
+    }
+    func_150432FC(0x53, y);
+
+    if ((s8) D_800901CC < count) {
+        if (!simple) {
+            sel = 1;
+            if (count == 3) {
+                func_150432FC(0x53, yOff + 0x63);
+                func_15042E3C((s32) D_800ABBD4, ((s8) D_800901CC == 1) + 0x21);
+                sel = 2;
+                func_150432FC(0x53, yOff + 0x82);
+            }
+            func_15042E3C((s32) D_800ABBD8, (sel == (s8) D_800901CC) + 0xE);
+        }
+        if (D_800E0FCA & 0x1000) {
+            D_8009029C = 5;
+            D_80090298 = 10;
+        } else if ((s8) D_800901CC == 0 || (D_800E0FCA & 0x4000)) {
+            if (D_800E0FCA & 0xC000) {
+                D_8009029C = 5;
+                D_80090298 = 10;
+            }
+        } else if (D_800E0FCA & 0x8000) {
+            /* A on the last item: to the quit confirmation */
+            D_80090138 = 0;
+            D_800901CC = (s8) D_800901CC + count - 1;
+            if (count == 2) {
+                D_800901CC = (s8) D_800901CC + 1;
+            }
+            sfx = 0x500;
+        }
+    } else {
+        func_15042D94(0x6C, y, 1, (s32) D_800ABBDC, D_80090138 + 0x1F);
+        func_15042D94(0xBC, y, 1, (s32) D_800ABBE0, 0x1E - D_80090138);
+        if (D_800E0FCA & 0x8000) {
+            if (D_80090138 != 0) {
+                D_800E0B94 = 7;
+                D_800E0EB8 = (s32 *) func_151DE080;
+                D_80090114 = 8;
+                if (D_800BE616 != 0) {
+                    D_80090174[0x3F] = 4; /* MenuState mainPage */
+                    if (count == (s8) D_800901CC) {
+                        D_8009013C = 1;
+                        D_800E0EB8 = (s32 *) func_151E2FCC;
+                    }
+                } else if (D_8008FDA8 >= 0) {
+                    func_15007718(D_8008FDA8);
+                }
+                D_800901CC = 0;
+                D_80087270[0] = 0;
+            } else {
+                p = dmaBuf;
+                if ((u32) p & 0xF) {
+                    do {
+                        p += 4;
+                    } while ((u32) p & 0xF);
+                }
+                i = func_151DE074(-0xF81);
+                func_10024190(p, 0x10);
+                osPiStartDma(&D_80038C40, 0, 0, i, p, 0x10, &gMessageQueue[0]);
+                osRecvMesg(&gMessageQueue[0], NULL, 1);
+                osInvalDCache(p, 0x10);
+                ((u32 *) p)[0] -= 0x3E0EF0F0;
+                ((u32 *) p)[1] -= 0x3E0EF0F0;
+                if (((u32 *) p)[0] != 0x3050A14A || ((u32 *) p)[1] != 0xBCFCF506) {
+                    i = func_150ADA20();
+                    osPiStartDma(&D_80038C40, 0, 0, i & 0xFFFF, (void *) ((func_150ADA20() & 0xFFFFE) + 0x80300000), 0x100,
+                                 &gMessageQueue[0]);
+                    osRecvMesg(&gMessageQueue[0], NULL, 1);
+                }
+                D_800901CC = (s8) D_800901CC - 2;
+            }
+            sfx = 0x500;
+        } else if (D_800E0FCA & 0x4000) {
+            D_800901CC = (s8) D_800901CC - 2;
+        }
+    }
+    if (sfx != 0) {
+        func_10010F30(sfx, 0x5DC0, 0x40, 0, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DE100.s")
+#endif
 
 void func_151E5AB8(void);
 void func_151DEBB4(void) {
@@ -152,14 +428,7 @@ typedef struct MenuState {
     s8 x44;
 } MenuState;
 
-typedef struct MenuPad {
-    u16 button;
-    s8 stickX;
-    s8 stickY;
-    u8 errno_;
-    u8 pad5;
-} MenuPad;
-
+/* P127: MenuPad is defined before func_151DE100 */
 extern MenuPad D_800BED38[4];   /* controller state, 6 bytes each */
 extern s8 D_80090110;           /* queue entries to drop */
 extern s8 D_800901E4;           /* first of a 16-byte queue */
@@ -1012,7 +1281,48 @@ void func_151E2A54(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2A54.s")
 #endif
+#ifdef NON_MATCHING
+// settings_save: P127: the inverse of func_151E2A54: copies the settings bytes D_800E1010 into the 10-byte save
+// record of the menu's settings set (D_800ABA74 row of the save slot x42; record D_80082F4C + set * 10): byte 0
+// cleared, 1..4 = settings 2, 3, 0x10, 0x11, the set-specific bytes 5 / 6 (set 0: 4; sets 1, 2: 0xD, 0xE; sets 5, 7:
+// 0x12; sets 8, 9: 7, 0x13; others none), 8 = 0x16, 9 = 6, then writes the save (func_150076A0).
+void func_151E2B9C(void) {
+    s32 set;
+    s8 *rec;
+
+    set = ((s8 *) &D_800ABA74)[((MenuState *) D_80090174)->x42 * 10];
+    rec = (s8 *) D_80082F4C + set * 10;
+    rec[0] = 0;
+    rec[1] = D_800E1010[2];
+    rec[2] = D_800E1010[3];
+    rec[3] = D_800E1010[0x10];
+    rec[4] = D_800E1010[0x11];
+    switch (set) {
+        case 0:
+            rec[5] = D_800E1010[4];
+            break;
+        case 1:
+        case 2:
+            rec[5] = D_800E1010[0xD];
+            rec[6] = D_800E1010[0xE];
+            break;
+        case 5:
+        case 7:
+            rec[5] = D_800E1010[0x12];
+            break;
+        case 8:
+        case 9:
+            rec[5] = D_800E1010[7];
+            rec[6] = D_800E1010[0x13];
+            break;
+    }
+    rec[8] = D_800E1010[0x16];
+    rec[9] = D_800E1010[6];
+    func_150076A0();
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2B9C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s8 D_800901E4;
@@ -1203,7 +1513,257 @@ block_41:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2C88.s")
 #endif
+#ifdef NON_MATCHING
+extern s8 D_800ABA70[][10];     /* menu modes (rows of 10, by MenuState x42) */
+extern u16 D_80090160;
+extern s16 D_8009015C;
+extern s8 D_800D27C8;
+extern s32 D_800ABB38[];
+extern u8 D_800E0FC9;
+extern s8 D_80090134;
+extern s8 D_800BEA38;
+extern u8 D_800D3260;
+extern s8 D_80090110;
+extern s8 D_800901E4;           /* first of the 16-byte player queue */
+extern s32 D_800BE804;
+s8 func_151E2C88(s32);
+void func_151E86A4(void);
+void func_1501C710(s32, s32, s32, s32, s32);
+extern s8 D_8009013C;            /* set: drop the first D_80090110 queue entries on the next start */
+extern s32 D_80090118;           /* time limit (settings byte 3 * 3000) or 0 */
+extern s8 D_800E1000;
+extern s8 D_800D2550;
+extern s8 D_80087608;
+extern s8 D_80090128;            /* player count (queue entries) */
+extern u8 D_800E0FBC;
+extern s8 D_800E0FC0[];
+extern u8 D_800AB95C[][8];
+extern u8 D_800E0ED8;
+extern u8 D_800E0FE8[];
+extern s8 D_800E0EDA;
+extern s8 D_800E0ED9;
+extern s8 D_800E0EE0[16];
+extern s8 D_800E0EF0[16];
+extern u8 D_800E0F00[];
+extern s16 D_800E1040[2];
+extern s32 D_800E1048[2];
+extern s16 D_800E0ED0[2];
+extern s8 D_800E1050;
+extern s8 D_8009011C;
+extern s8 D_800902E7[];          /* player count -> argument of func_1501C710 */
+extern s16 D_800ABB60[];         /* settings set -> D_80090160 flags */
+extern s16 D_800ABB74[];         /* settings set -> D_8009015C flags */
+
+// menu_game_start: P127: start callback of the main menu: applies the settings of the chosen mode (D_800ABA70 row
+// x42: +2 level, +4 settings set, +5 < 0 = fill free slots, +8 slot type): drops the first D_80090110 entries of the
+// player queue (D_800901E4 / D_800E1030) when D_8009013C asks for it, clears the menu / game state, sets the game
+// flags D_80090160 / D_8009015C from the set's tables and the settings bytes D_800E1010 (time limit D_80090118 =
+// byte 3 * 3000, D_800D27C8, D_800E1000, D_80087260 / D_80087608), counts the players (D_80090128, slot mask), fills
+// the 16 slot types D_80087270 (mode 8: func_151E2C88; else character records / per-mode rules), assigns free slot
+// numbers when +5 < 0, resets D_800E0EE0 / D_800E0EF0 / D_800E1040.. and starts the game: func_1501C710(6, level, 0,
+// D_800902E7[players], slot mask).
+void func_151E2FCC(void) {
+    s8 *rec;
+    s32 flags;
+    s32 level;
+    s32 mask;
+    s32 n;
+    s32 i;
+    s32 used;
+    s32 next;
+    s8 *slot;
+
+    rec = D_800ABA70[((MenuState *) D_80090174)->x42];
+    if (D_800E1010[3] < 3) {
+        D_800E1010[3] = 0;
+    }
+    if (D_8009013C != 0) {
+        n = D_80090110;
+        if (n != 0 && n < 16 - n) {
+            for (i = n; i < 16 - n; i++) {
+                (&D_800901E4)[i] = (&D_800901E4)[i + n];
+                D_800E1030[i] = D_800E1030[i + n];
+            }
+        }
+    }
+    D_8009013C = 0;
+    D_80090110 = 0;
+    func_15017790();
+    D_800BE804 = 0;
+    bzero(D_80090174 + 0x66, 0x30);
+    bzero(D_80090174 + 0x46, 0x20);
+    bzero(D_800E0F00, 0x20);
+    D_800BEAC1 = 0;
+    D_800BEAC0 = 0;
+    D_800E0B94 = 0;
+    D_8008FDA8 = -1;
+    D_800843F0[1] = 0xFF;
+    D_800843F0[2] = 0xFF;
+    D_800843F0[3] = 0xFF;
+
+    level = *(s16 *) (rec + 2);
+    D_80090168 = rec[5] < 0;
+    flags = D_800ABB38[rec[4]];
+    D_80090160 = D_800ABB60[rec[4]];
+    D_8009015C = D_800ABB74[rec[4]] | 1;
+    if (flags & 0x80000) {
+        D_800D27C8 = D_800E1010[0x13];
+    } else {
+        D_800D27C8 = 0;
+    }
+    if (flags & 8) {
+        D_80090118 = D_800E1010[3] * 3000;
+    } else {
+        D_80090118 = 0;
+    }
+    if (flags & 0x10000) {
+        D_800E1000 = D_800E1010[0x10];
+    } else {
+        D_800E1000 = 2;
+    }
+    if ((flags & 4) && D_80090118 == 0) {
+        D_80090160 |= 2;
+        D_8009015C &= 0xFFFE;
+    }
+    if (D_80090160 & 0x80) {
+        D_80090160 |= 0x1000;
+    }
+    if ((flags & 0x20000) && D_800E1010[0x11] != 0) {
+        D_80090160 |= 0x20;
+    }
+    if ((D_80090160 & 0x100) && D_80090118 != 0) {
+        D_80090160 = (D_80090160 & ~0x100) | 0x200;
+    }
+    D_80087260 = D_800E1010[2];
+    D_800D2550 = 3;
+    D_80087264 = 0;
+    D_800D2132 = 0;
+    D_80087608 = D_800E1010[4];
+    if (D_800E1010[3] >= 3) {
+        D_80087260 = 99;
+    }
+    if (rec[8] == 8) {
+        for (i = 0; i < 16; i++) {
+            D_80087270[i] = 8;
+        }
+        D_80090110 = func_151E2C88(0);
+    }
+
+    /* players: queue entries != -1 (entry 0 always counts) */
+    mask = 1;
+    D_80090128 = 1;
+    if ((&D_800901E4)[1] != -1) {
+        mask = 3;
+        D_800843F0[1] = (&D_800901E4)[1];
+        D_80090128++;
+    }
+    if ((&D_800901E4)[2] != -1) {
+        mask |= 4;
+        D_80090128++;
+        D_800843F0[2] = (&D_800901E4)[2];
+    }
+    if ((&D_800901E4)[3] != -1) {
+        mask |= 8;
+        D_800843F0[3] = (&D_800901E4)[3];
+        D_80090128++;
+    }
+    for (i = 4; i < 16; i++) {
+        if ((&D_800901E4)[i] != -1) {
+            mask |= 1 << i;
+            D_80090128++;
+        }
+    }
+
+    if (rec[8] != 8) {
+        i = 0;
+        if (D_800E0FBC != 0 && (&D_800901E4)[0] >= 0) {
+            do {
+                D_80087270[i] = D_800AB95C[D_800E0FC0[i]][6];
+                i++;
+            } while ((&D_800901E4)[i] >= 0 && i != 4);
+        }
+        for (; i < 16; i++) {
+            s32 mode;
+
+            slot = &D_80087270[i];
+            *slot = rec[8];
+            mode = ((MenuState *) D_80090174)->x42;
+            if (mode == 7) {
+                if ((&D_800901E4)[i] < -1) {
+                    *slot = 0xB;
+                }
+            } else if (mode == 2) {
+                if (D_800E1030[i] == 0) {
+                    *slot = 0xB;
+                }
+            } else if (mode == 8) {
+                if (D_800E1030[i] != 0) {
+                    *slot = 3;
+                } else {
+                    *slot = (func_150ADA20() & 0xF) + 0x11;
+                }
+            } else if (D_800E1030[i] != 0 && rec[8] == 4) {
+                *slot = 3;
+            } else if ((&D_800901E4)[i] < -1 && rec[8] == 0xB) {
+                *slot = (i & 3) + 0xC;
+            }
+        }
+    }
+
+    D_800E0FC9 = 2;
+    n = D_80090128;
+    D_80090130 = 0;
+    D_800E0ED8 = 0;
+    D_8008FD8C = n;
+    for (i = 0; i < n; i++) {
+        if ((&D_800901E4)[i] >= 0) {
+            D_80090130++;
+            D_800E0ED8 |= 1 << D_800E1030[i];
+        }
+    }
+    D_80090134 = D_80090130;
+    D_800BEA38 = D_8008FD8C;
+    bzero(D_800E0FE8, 0x10);
+    D_800E0EDA = -1;
+    D_800E0ED9 = 4;
+    for (i = 0; i < 16; i++) {
+        D_800E0EE0[i] = -1;
+        D_800E0EF0[i] = 0;
+    }
+    if (D_80090168 != 0) {
+        n = D_80090128;
+        D_800E0ED9 = D_8008FD8C;
+        used = 0;
+        next = 0;
+        for (i = 0; i < n; i++) {
+            if ((&D_800901E4)[i] >= 0) {
+                D_800E1030[i] = (&D_800901E4)[i];
+                used |= 1 << D_800E1030[i];
+            } else {
+                while ((1 << next) & used) {
+                    next++;
+                }
+                D_800E1030[i] = next;
+                used |= 1 << next;
+                next++;
+            }
+        }
+    }
+    D_800E1040[0] = -1;
+    D_800E1040[1] = -1;
+    D_800E1048[0] = -1;
+    D_800E1048[1] = -1;
+    D_800E0ED0[0] = 0;
+    D_800E0ED0[1] = 0;
+    func_151E86A4();
+    D_800E1050 = 0;
+    D_800D3260 = 0;
+    D_8009011C = D_80087270[0];
+    func_1501C710(6, level, 0, D_800902E7[D_80090128], mask);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E2FCC.s")
+#endif
 
 void func_151E86A4(void);
 extern s8 D_800E0FE1;
@@ -2609,6 +3169,14 @@ void func_151E8648(void) {
     func_10017870(4U);
 }
 
+#ifdef NON_MATCHING
+// menu_settings_apply_checked: P127 (port): applies the sound mode (func_151E8648). The N64 build then sums the code
+// words of func_151DE100..func_151DECB4 and, on a mismatch (anti-tamper), writes 0 over osSpTaskLoad; the port has
+// no MIPS code words there (the sum is 0) and the write lands in the null zone, so the NON_MATCHING build skips it.
+void func_151E86A4(void) {
+    func_151E8648();
+}
+#else
 extern s32 func_151DE100;
 void func_151E86A4(void) {
     void (*new_var)(OSTask *tp); // fakematch: permuter temp pinning osSpTaskLoad address
@@ -2626,6 +3194,7 @@ void func_151E86A4(void) {
         if (func_151DECB4) { } // fakematch
     }
 }
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E870C.s")
 

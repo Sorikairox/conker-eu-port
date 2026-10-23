@@ -2,6 +2,7 @@
 #include "functions.h"
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
+void func_15179008(s32);
 s32 func_151152A4(u8 *, s32, s32, s16, s16, s32);
 #endif
 
