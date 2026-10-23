@@ -169,3 +169,45 @@ void p88_watch_init(void) {
 
 /* P91: the P88 TEMPORARY guard __wrap_func_1501D348 (restore of object records moved from uninitialised
  * D_800C3958 blocks) was removed: the port-b branch converted the producer func_1501ECA4 (and func_15020F6C) in P87. */
+
+/* P97 TEMPORARY guard (producer: the asm stubs func_15020920 (segment cubic: SceneActor +0x08..+0x38 coefficients and
+ * the 101-sample length table) and func_15020090 (segment control points), both game_eu_4A070.c, still asm).
+ * P92 made func_1501FD34 (place) / func_1501FF10 (heading) / func_1501F7D4 C; with the stubbed producers they read
+ * never-written coefficients and stack points, and func_1501ECA4 copies the result into the player at the respawn
+ * scene start (node: pos -1.4e29 / 3.4e15 / -2.1e34 at frame 943, more deaths, then a call_indirect trap in
+ * func_1504A730). The guard returns without writing the outputs = the pre-P92 stub behaviour.
+ * ?p97path=1 runs the real C (drop the guard once func_15020920 / func_15020090 / func_15020430 are C). */
+static int fpath = -1, npath = 0;
+void __real_func_1501FD34(int actor, float t, float *x, float *y, float *z, int slot);
+void __real_func_1501FF10(int actor, float t, float *out, int slot);
+void __wrap_func_1501FD34(int actor, float t, float *x, float *y, float *z, int slot) {
+    if (flag(&fpath, "p97path")) { __real_func_1501FD34(actor, t, x, y, z, slot); return; }
+    if (npath++ < 2) port_log("[p97] TEMPORARY guard: func_1501FD34 actor %d slot %d skipped (stub producer func_15020920) frame %u\n", actor, slot, port_frame_count);
+}
+void __wrap_func_1501FF10(int actor, float t, float *out, int slot) {
+    if (flag(&fpath, "p97path")) { __real_func_1501FF10(actor, t, out, slot); return; }
+    if (npath++ < 2) port_log("[p97] TEMPORARY guard: func_1501FF10 actor %d slot %d skipped (stub producer func_15020920) frame %u\n", actor, slot, port_frame_count);
+}
+
+/* P97 DIAGNOSTIC ?p97camh=N: first N calls (every 20th frame) of func_15124C38 (camera target height, P92 C): the
+ * eased height +0x2C0 before / after, the holder's (+0x3D0) y +0x18, floor +0x180, height above floor +0x28, model
+ * height +0xCC, the target's (+0x3D4) +0x114, camera flags +0x2C / +0x84 / +0x5F0, states +0x23C / +0x23E.
+ * DIAGNOSTIC ?p97nocamh=1: func_15124C38 does nothing when out == NULL (the pre-P92 stub behaviour). */
+static int fcamh = -1, fnocamh = -1, ncamh = 0;
+static float F(const unsigned char *p) { return *(const float *)p; }
+static int H(const unsigned char *p) { return *(const short *)((uintptr_t)p ^ 2); }
+void __real_func_15124C38(unsigned char *cam, float *out);
+void __wrap_func_15124C38(unsigned char *cam, float *out) {
+    float before = F(cam + 0x2C0);
+    unsigned char *hold = *(unsigned char **)(cam + 0x3D0), *pl = *(unsigned char **)(cam + 0x3D4);
+    if (out == 0 && flag(&fnocamh, "p97nocamh")) return;
+    __real_func_15124C38(cam, out);
+    if (flag(&fcamh, "p97camh") && ncamh < fcamh && port_frame_count % 20 == 0) {
+        ncamh++;
+        port_log("[p97camh] frame %u out %d h %.1f -> %.1f | hold y %.1f floor %.1f above %.1f cc %d | pl %d 114 %d | 2C %08X 84 %08X 5F0 %08X 23C %u 23E %u 102 %u\n",
+                 port_frame_count, out != 0, before, out ? *out : F(cam + 0x2C0), hold ? F(hold + 0x18) : -1.f,
+                 hold ? F(hold + 0x180) : -1.f, hold ? F(hold + 0x28) : -1.f, hold ? H(hold + 0xCC) : -1, pl != 0,
+                 pl ? H(pl + 0x114) : -1, W(cam + 0x2C), W(cam + 0x84), W(cam + 0x5F0), B(cam + 0x23C), B(cam + 0x23E),
+                 hold ? B(hold + 0x102) : 0);
+    }
+}

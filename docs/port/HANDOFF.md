@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P97, 2026-10-23, port-web). Details: `docs/port/sessions/P97.md`
+
+- Merged port b3219c2 (P90 / P93 / P95) and port-b 99d4923 (P92). Both had only HANDOFF conflicts (merge_union).
+  - One semantic clash: func_151BF8F0 (game_eu_1EC610.c, port-b C) still declared func_15157580 arg2 `s32` and passed
+    0x3F800000; P95 made it `f32`. Fixed in its NM block. **port-b needs the same change.**
+  - verify_all OK, NM links, protocheck 984 / 0, float-int scan 0, clean port rebuild.
+- **P92 scene path + stub producer = corrupted player.** With the stub func_15020920, func_1501FD34 writes a garbage
+  player position (-1.4e29...) at the scene start. Then more deaths and a call_indirect trap in func_1504A730.
+  - TEMPORARY guard (`p84_checks.c`): func_1501FD34 / func_1501FF10 skip; `?p97path=1` runs the real C.
+  - With it: one death, scene, 0x2C warp, heap 0, null zone 0 (node + 3 Chrome runs).
+- The 30-36 s camera now looks straight down. Bisected to merge 1, not P92 and not func_150268BC: it is in the
+  P93 / P95 changes. Open.
+- func_15124C38 is never called; its per-frame caller func_15126378 is still asm.
+- Sound: 0 samples since P94 (before and after); open.
+- Sky t range = the game's own math (pitch x 81 / 32, base 237..612); not a port bug.
+- Arity 113 / 57 (unchanged).
+
+## Next steps (from P97)
+
+1. Convert func_15020920 / func_15020090 / func_15020430 (port-b), then drop the P97 guard and check the paths.
+2. Bisect the top-down camera inside P93 / P95: the float-int fix files vs func_15083E0C / func_150ADA68 /
+   func_15167010 / func_1517FCCC.
+3. func_15126378 (camera height caller), then the per-frame stub list in P97.md section 5.
+4. Audio silence since P94 (P91 had rms 0.024): bisect P91..P94.
+
 ## State (session P94, 2026-10-23). Details: `docs/port/sessions/P94.md`
 
 - **The green hoodie in the respawn cutscene was a renderer bug.** Two bugs in character lighting
@@ -2752,3 +2777,4 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     - Scene path: func_1501FD34 (320 calls, "place", feeds func_1501ECA4's records), then func_1501E0C8 (63) and func_1512DAD0 (57, camera event 7).
     - Then the per-frame stubs at about 668 calls: func_15129220, func_150ADA68, func_15097E9C, func_15044D18, func_15097BA8, game_14FF90 x2, ... (P91.md section 6).
     - Check the func_151143D4 callback arity.
+- **P97 (merge port b3219c2 + port-b 99d4923, checks).** Full notes: P97.md. func_151BF8F0 prototype fix; TEMPORARY guard on func_1501FD34 / func_1501FF10 (stub producer func_15020920, `?p97path=1`); top-down camera at 30-36 s from P93 / P95 (open); sound 0 since P94; sky t range = game math; arity 113 / 57.
