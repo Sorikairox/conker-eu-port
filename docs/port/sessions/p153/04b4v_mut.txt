@@ -1,0 +1,16 @@
+s/if (func_1514FC58((u8 \*) path) == 0) {/if (func_1514FC58((u8 *) path) != 0) {/
+s/(\*(s16 \*) (def + 0xE) + 1) + \*(s16 \*) (def + 0xC);/(*(s16 *) (def + 0xE) + 2) + *(s16 *) (def + 0xC);/
+s/(\*(s16 \*) (def + 0xE) + 1) + \*(s16 \*) (def + 0xC);/(*(s16 *) (def + 0xE) + 1) + *(s16 *) (def + 0xE);/
+s/func_150ADA68() \* \*(f32 \*) (def + 0x14) + \*(f32 \*) (def + 0x10), pos);/func_150ADA68() * *(f32 *) (def + 0x10) + *(f32 *) (def + 0x14), pos);/
+s/def\[0x31\], size/def[0x30], size/
+s/size \* \*(f32 \*) (def + 0x20) + \*(f32 \*) (def + 0x1C)/size * *(f32 *) (def + 0x20) + *(f32 *) (def + 0x18)/
+s/(\*(s16 \*) (def + 0x1A) + 1) + \*(s16 \*) (def + 0x18)/(*(s16 *) (def + 0x1A) + 1) + *(s16 *) (def + 0x1A)/
+s/(def\[0x25\] + 1) + def\[0x24\]/(def[0x25] + 1) + def[0x25]/
+s/speed \* \*(f32 \*) (def + 0x2C)/chance1 * *(f32 *) (def + 0x2C)/
+s/(chance1 < \*(f32 \*) (def + 0x34)) ? 1 : 0/(chance1 > *(f32 *) (def + 0x34)) ? 1 : 0/
+s/1.4f, 1.4f, 1, owner/1.4f, 1.5f, 1, owner/
+s/1, owner, def\[0x38\]/0, owner, def[0x38]/
+s/(chance2 < \*(f32 \*) (def + 0x3C)) ? 1 : 0/(chance2 < *(f32 *) (def + 0x34)) ? 1 : 0/
+s/arg3 \& 0xFF, arg4);/arg3 \& 0x7F, arg4);/
+s/        n--;/        n -= 2;/
+s/rLife = func_150ADA20();/rLife = func_150ADA20() + 1;/

@@ -1,0 +1,35 @@
+s/    if (obj == NULL) {/    if (obj == (u8 *) 1) {/
+s/func_150A3538(2, /func_150A3538(3, /
+s/func_150A3538(1, (s32) \*(f32 \*) (obj + 0x14), (s32) \*(f32 \*) (obj + 0x18)/func_150A3538(1, (s32) *(f32 *) (obj + 0x14), (s32) *(f32 *) (obj + 0x1C)/
+s/dx = -(\*(f32 \*) (obj + 0x14) - x);/dx = x - *(f32 *) (obj + 0x14);/
+s/dz = -(\*(f32 \*) (obj + 0x1C) - z);/dz = -(*(f32 *) (obj + 0x1C) - x);/
+s/(obj + 0x18) + 80.0f/(obj + 0x18) + 81.0f/
+s/dx, 0.0f, dz, 0,/dx, 0.0f, dz, 1,/
+s/(s32) \&f.pos\[1\], (s32) \&f.pos\[2\]/(s32) \&f.pos[2], (s32) \&f.pos[1]/
+s/    if (func_15145C90(f.surface) != 0) {/    if (func_15145C90(f.surface) == 0) {/
+s/f.drop.u6 = 6;/f.drop.u6 = 5;/
+s/f.drop.kindFlags = 0x9F01;/f.drop.kindFlags = 0x9F00;/
+s/% 51 + 100;/% 50 + 100;/
+s/% 101 + 155;/% 101 + 154;/
+s/f.drop.u10\[5\] = 0xFF;/f.drop.u10[5] = 0xFE;/
+s/f.drop.u18 = 0x3B0002;/f.drop.u18 = 0x3B0001;/
+s/f.drop.u10\[7\] = 7;/f.drop.u10[7] = 6;/
+s/f.drop.u22 = 0x19;/f.drop.u22 = 0x18;/
+s/size0 \* 20.0f + 40.0f/size0 * 20.0f + 41.0f/
+s/size1 \* 20.0f + 40.0f/size0 * 20.0f + 40.0f/
+s/alpha \& 0xFF, (func_150ADA20() \& 1) + (flip \& 1) \* 2/alpha \& 0xFF, (func_150ADA20() \& 1) * 2 + (flip \& 1)/
+s/, 3, 0xFF, 0, arg3,/, 3, 0xFE, 0, arg3,/
+s/f.ring.u0 = 0xF;/f.ring.u0 = 0xE;/
+s/f.ring.pos\[1\] = f.pos\[1\];/f.ring.pos[1] = f.pos[0];/
+s/f.ring.dir\[1\] = -0.0f;/f.ring.dir[1] = 0.0f;/
+s/f.ring.dir\[0\] = -dx;/f.ring.dir[0] = dx;/
+s/f.ring.hit\[8\] = f.hit\[8\];//
+s/f.ring.hit\[1\] = f.hit\[1\];/f.ring.hit[1] = f.hit[0];/
+s/f.ring.u30 = 675.0f;/f.ring.u30 = 676.0f;/
+s/f.ring.u4C\[0\] = -1.0220001f;/f.ring.u4C[0] = -1.022f;/
+s/f.ring.u49 = 155;/f.ring.u49 = 154;/
+s/f.ring.u44 = 0x5C0001;/f.ring.u44 = 0x5C0000;/
+s/f.ring.u6A = 0x19;/f.ring.u6A = 0x18;/
+s/f.ring.u6C\[1\] = 1.0840001f;/f.ring.u6C[1] = 1.084f;/
+s/func_1515176C((u8 \*) \&f.ring, arg3, arg4);/func_1515176C((u8 *) \&f.ring, arg4, arg3);/
+s/^    if (obj == NULL) {/    D_800843F0[0] = 0xFF;\n    if (obj == NULL) {/
