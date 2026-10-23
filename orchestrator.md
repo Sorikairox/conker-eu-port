@@ -100,7 +100,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 ### Lesson: test the harness itself (P71, P73)
 - Twice a difftest bug made results meaningless while looking fine: callee arity taken from call statements (P71), and the candidate silently dropped when one NM block holds two functions (P73) — every mutant "survived" because the old copy was tested. A surviving mutant that should obviously die is a harness bug until proven otherwise; add a selftest case for every harness fix.
 - Concurrent knob and mutant runs of the same function must not share a temp dir (use the p73 knobs.sh / mut.sh).
-- Use the newest mutant script (port-b `docs/port/sessions/p82/mut.sh`): it checks the unmutated draft before random trials (P77) and reports `SED ERROR` / `INVALID` instead of counting a mutant that never compiled as "survived" (P82).
+- Use port-b `docs/port/sessions/p96/mut.sh` (per-run files/temp dirs; older mut.sh versions race when two runs of one function overlap — P92 false survivors). Earlier: the p82 mut.sh: it checks the unmutated draft before random trials (P77) and reports `SED ERROR` / `INVALID` instead of counting a mutant that never compiled as "survived" (P82).
 - DIFFTEST_POKE can't change ROM rodata or `.game_data`; take the real value from the ELF instead.
 - RET/OUTW/ARGMEM keys: take the address from the decoded `jal` word, not from the symbol name (some EU names map elsewhere, e.g. func_151ACBD4 is jal 151AD184); a wrong key silently does nothing. `DIFFTEST_ARG` values are hex (`1=10` means 0x10).
 - Stub return pointers must be heap-like (0x804xxxxx): values in the harness stack range 0x80600000–0x8067FFFF all compare equal ("STK"), hiding wrong-pointer mutants (P86).
