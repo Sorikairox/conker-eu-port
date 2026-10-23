@@ -32,7 +32,26 @@ void func_151D43B4(s32 arg0, s32 arg1, void *arg2, u8 arg3, f32 arg4) {
     (*(f32 *)((u8 *)arg1 + 8)) = (f32) (*(f32 *)((u8 *)arg0 + 0x1C));
 }
 
+#ifdef NON_MATCHING
+/* P159 */
+// object_sound_between: plays sound `sound` (func_1505D1C4) at the midpoint of a and b for object obj (its index
+// in D_800CC2D0); the facing is obj's u16 at +0x76, minus the s16 at +0x12 of its parent (+0x31C) when it has one.
+void func_151D441C(struct127 *obj, f32 *a, f32 *b, s32 sound) {
+    u8 *parent;
+    u16 facing;
+
+    parent = *(u8 **)((u8 *)obj + 0x31C);
+    if (parent != NULL) {
+        facing = *(u16 *)((u8 *)obj + 0x76) - *(s16 *)(parent + 0x12);
+    } else {
+        facing = *(u16 *)((u8 *)obj + 0x76);
+    }
+    func_1505D1C4((a[0] + b[0]) * 0.5f, (a[1] + b[1]) * 0.5f, (a[2] + b[2]) * 0.5f, sound, obj - D_800CC2D0,
+                  facing, 0, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D441C.s")
+#endif
 
 void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2) {
     s8 sp48[8];
@@ -455,7 +474,7 @@ s32 func_151D5AC4(u8 *pos, u8 arg1, s32 arg2) {
 #endif
 
 #ifdef NON_MATCHING
-void func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
+s32 func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
 #else
 void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
 #endif
@@ -542,7 +561,63 @@ s32 func_151D5FC8(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *p
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5FC8.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P159 */
+extern s32 (*D_80087030[])(u8 *, s32, s32);
+// objects_hit_by_segment: tests the segment start / dir (func_151452C4) against every live object of D_800CC2D0
+// (not self, kind byte +4 not 0xFF unless level 0x23, state +5 not 3, flag 0x40 at +0xF8, passing filter
+// D_80087030[filter](obj, self, filterArg) unless filter is -1) as a sphere at its position raised by +0xD6 with
+// diameter 2 * max(+0xD2, +0xD4). Returns a mask with bit i cleared for each hit object i (all other bits set).
+s32 func_151D611C(u8 *start, s32 *dir, u8 *self, s8 filter, s32 filterArg) {
+    f32 center[3];
+    f32 out0[3];
+    f32 out1[3];
+    f32 dist0;
+    f32 dist1;
+    f32 radius;
+    s32 mask;
+    u8 i;
+    u8 *obj;
+
+    mask = -1;
+    for (i = 0; i < 25; i++) {
+        obj = (u8 *)&D_800CC2D0[i];
+        if (*(s32 *)(obj + 0) == 0) {
+            continue;
+        }
+        if (obj[5] == 3) {
+            continue;
+        }
+        if (D_800BE9F0 != 0x23 && obj[4] == 0xFF) {
+            continue;
+        }
+        if (obj == self) {
+            continue;
+        }
+        if ((*(s32 *)(obj + 0xF8) & 0x40) == 0) {
+            continue;
+        }
+        if (filter != -1 && D_80087030[filter](obj, (s32)self, filterArg) == 0) {
+            continue;
+        }
+        if (*(s16 *)(obj + 0xD2) < *(s16 *)(obj + 0xD4)) {
+            radius = *(s16 *)(obj + 0xD4);
+        } else {
+            radius = *(s16 *)(obj + 0xD2);
+        }
+        center[0] = *(f32 *)(obj + 0x14);
+        center[1] = *(f32 *)(obj + 0x18) + (f32)*(s16 *)(obj + 0xD6);
+        center[2] = *(f32 *)(obj + 0x1C);
+        if (func_151452C4((struct17 *)start, (struct17 *)dir, (struct17 *)center, radius + radius, (s32)out0,
+                          (s32)out1, &dist0, &dist1)) {
+            mask &= ~(1 << i);
+        }
+    }
+    return mask;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D611C.s")
+#endif
 
 s32 allocate_memory(s32, s32, s32, s32);
 

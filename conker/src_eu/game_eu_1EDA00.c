@@ -9,7 +9,7 @@ void func_151C0648(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
 #endif
 // hoisted forward declaration(s) for func_151C0AA8
 #ifdef NON_MATCHING
-void func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
+s32 func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
 #else
 void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
 #endif
@@ -90,7 +90,79 @@ void func_151C0350(u8 *arg0, f32 *arg1, u8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P159 */
+s32 func_15144E80(u8 *, f32 *, f32 *, f32 *);
+void func_1515016C(void *, u8, s32);
+// impact_effects_spawn: the effects of a hit at pos (func_151C09C8, func_151C0AA8, func_151C0B54, func_151C0BA0).
+// With `full` set: when hit (an 0x12-byte surface record) has a downward-facing third axis (func_15144E80) also
+// func_151C0BF4, a burst along it (func_151C0910), and a spray against dir (func_1515016C with the surface, else
+// func_15150108 without one), its parameters from func_151C01F0.
+void func_151C0434(u8 *hit, f32 *pos, f32 *dir, u8 full, u8 arg4, s32 arg5) {
+    typedef struct {
+        f32 u0;
+        s32 u4;
+        f32 pos[3];
+        u8 rest[0x40];
+    } SprayParams; /* filled by func_151C01F0 (0x54 bytes) */
+    struct {
+        f32 dir[3];
+        u8 hit[0x12];
+        u8 pad1E[2];
+        f32 range;
+        SprayParams p;
+    } a; /* func_1515016C */
+    struct {
+        f32 dir[3];
+        f32 range;
+        SprayParams p;
+    } b; /* func_15150108 */
+    f32 ax0[3];
+    f32 ax1[3];
+    f32 ax2[3];
+    s32 i;
+
+    func_151C09C8((u8 *)pos, arg4, arg5);
+    func_151C0AA8((u8 *)pos, arg4, arg5);
+    func_151C0B54((s32)pos, arg4, arg5);
+    func_151C0BA0((struct17 *)pos, arg4, arg5);
+    if (hit != NULL && full != 0) {
+        if (func_15144E80(hit, ax0, ax1, ax2) != 0 && ax2[1] < 0.0f) {
+            func_151C0BF4((s32)pos, arg4, arg5);
+        }
+    }
+    if (hit != NULL && full != 0) {
+        func_151C0910((s32)hit, (s32)pos, arg4, arg5);
+    }
+    if (full == 0) {
+        return;
+    }
+    if (hit != NULL) {
+        a.dir[0] = -dir[0];
+        a.dir[1] = -dir[1];
+        a.dir[2] = -dir[2];
+        for (i = 0; i < 0x12; i++) {
+            a.hit[i] = hit[i];
+        }
+        a.p.pos[0] = pos[0];
+        a.p.pos[1] = pos[1];
+        a.p.pos[2] = pos[2];
+        func_151C01F0((f32 *)&a.p, &a.range);
+        func_1515016C(&a, arg4, arg5);
+    } else {
+        b.dir[0] = -dir[0];
+        b.dir[1] = -dir[1];
+        b.dir[2] = -dir[2];
+        func_151C01F0((f32 *)&b.p, &b.range);
+        b.p.pos[0] = pos[0];
+        b.p.pos[1] = pos[1];
+        b.p.pos[2] = pos[2];
+        func_15150108((f32 *)&b, arg4, arg5);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C0434.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15046F70(s32 *, s32, f32, f32 *);
@@ -290,7 +362,7 @@ s32 func_151C16BC(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s
 void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_15081A90(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
 void func_151AC3F0(u8 *, u8 *, s32, u8, s32);
-s32 func_151C0434(f32 *, u8 *, u8 *, s32, s32, s32);
+void func_151C0434(u8 *, f32 *, f32 *, u8, u8, s32);
 
 s32 func_151C1730(u8 *arg0) {
     struct {
@@ -373,7 +445,7 @@ s32 func_151C1730(u8 *arg0) {
             sp54 = temp_v0;
             sp50 = temp_a0;
             func_151C1C04(temp_a0, (s32) (var_s0 + 0x38), (*(s32 *)((u8 *)var_s0 + 0x6C)), (*(u8 *)((u8 *)var_s0 + 0x92)), (s32) temp_v0);
-            func_151C0434(sp54, sp50, arg0 + 0x44, (((*(u8 *)((u8 *)var_s0 + 0xC8)) & 1) == 0) & 0xFF, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            func_151C0434((u8 *) sp54, (f32 *) sp50, (f32 *) (arg0 + 0x44), (((*(u8 *)((u8 *)var_s0 + 0xC8)) & 1) == 0) & 0xFF, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         }
         return 0;
     }
@@ -515,9 +587,18 @@ void func_151C1E10(u8 *arg0, u8 arg1, s32 arg2) {
 
 s32 func_151C0894();
 
+#ifdef NON_MATCHING
+/* P159 */
+// object_filter_not_listed: target filter 3 of D_80087030 (func_151D611C, func_15081A90): returns func_151C0894's
+// result (the N64 code leaves it in v0; the matching C is void, which breaks a call through the s32 table on wasm).
+s32 func_151C1EF0(s32 arg0, s32 arg1, s32 *arg2) {
+    return func_151C0894(arg0, arg1, *arg2, arg2 + 1);
+}
+#else
 void func_151C1EF0(s32 arg0, s32 arg1, s32 *arg2) {
     func_151C0894(arg0, arg1, *arg2, arg2 + 1);
 }
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15145128(u8 *, u8 *, u8 *, s32);

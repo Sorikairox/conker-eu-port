@@ -1,0 +1,2 @@
+s/func_151C01F0((f32 \*)\&a.p, \&a.range);/func_151C01F0((f32 *)\&a.p, \&a.dir[0]);/
+s/func_151C01F0((f32 \*)\&b.p, \&b.range);/func_151C01F0((f32 *)\&b.p, \&b.dir[0]);/
