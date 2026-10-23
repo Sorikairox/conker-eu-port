@@ -264,3 +264,4 @@ P185	web	port-web				merged port f9c552b + port-b 4c2d5a5; vbe.py 4-aligns stack
 P187	port	nm convert	7			stubs behind the object-effect handlers (shot impact, ground explosion, attached glow) + level 0x29 state events, dust effects, path sound pan/volume hand C; D_8008FF30 table OK; port 5296/5915 89.5% 73.1%
 P188	port-b	nm convert	4		~120	level 0x29 drips + sky box draw (651 words) + model light create + object gun fire hand C; combined 5296/5915 89.5% 73.9%; rise/control-loss stubs queued for next session
 P190	port	nm convert	8			object floor mesh builder func_150A4FE4 (Rare hand asm, whole-function harness 860 trials) + area drift emitter + mp3 bit reader + 5 small hand C; port 5303/5915 89.7% 73.3%
+P189	web	diagnostic			~113	level-0 rise and level-0x29 control loss both = swim update stub func_1504B0FC (buoyancy never clamped); splash stubs cosmetic; green decal = renderer bug with CI8 2-cycle trilinear + alpha cut-out; torches need prop handlers
