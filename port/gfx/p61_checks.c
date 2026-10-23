@@ -65,11 +65,12 @@ void __wrap_func_1505D6F0(void *rec, int idx) {
 }
 
 /* ---- func_1508000C's sound calls */
+extern int port_p110_inmus; /* P110: set during func_150000B0 (level music) */
 void __real_func_1000D96C(int a0, int a1, int a2);
 void __wrap_func_1000D96C(int a0, int a1, int a2) {
     static unsigned n;
     n++;
-    if (want(n) || (a0 >= 0x15 && a0 <= 0x17 && on()))
+    if (want(n) || port_p110_inmus || (a0 >= 0x15 && a0 <= 0x17 && on()))
         port_log("[p61] func_1000D96C (sound start) call %u frame %u: id %d (0x%X) %d %d | D_800D1CE4 %d\n", n,
                  port_frame_count, a0, a0, a1, a2, D_800D1CE4);
     __real_func_1000D96C(a0, a1, a2);
@@ -78,7 +79,7 @@ void __real_func_1000DE1C(int a0, int a1);
 void __wrap_func_1000DE1C(int a0, int a1) {
     static unsigned n;
     n++;
-    if (want(n) || (a0 >= 0x15 && a0 <= 0x17 && on()))
+    if (want(n) || port_p110_inmus || (a0 >= 0x15 && a0 <= 0x17 && on()))
         port_log("[p61] func_1000DE1C (sound stop) call %u frame %u: id %d (0x%X) %d | D_800D1CE4 %d\n", n,
                  port_frame_count, a0, a0, a1, D_800D1CE4);
     __real_func_1000DE1C(a0, a1);

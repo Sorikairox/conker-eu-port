@@ -14,6 +14,8 @@
 #include "../ultra/pc_mem.h"
 
 void port_log(const char *fmt, ...);
+int port_flag(const char *name);
+extern unsigned port_frame_count;
 
 #define RING (1u << 17) /* stereo frames, ~6 s at 22 kHz */
 static int16_t ring[RING][2];
@@ -75,6 +77,22 @@ int aud_out_open(int rate) {
 void aud_out_push_game(const void *buf, unsigned frames) {
     const uint8_t *p = (const uint8_t *)buf;
     pushed += frames;
+    { /* P110 DIAGNOSTIC ?p110aud=1 (node PORT_P110AUD=1): game output level per ~1 s window (left channel) */
+        static int f = -1; static double e; static int pk; static unsigned n, nz;
+        if (f < 0) f = port_flag("p110aud");
+        if (f) {
+            for (unsigned i = 0; i < frames; i++) {
+                int v = (int16_t)vbe_ld16(p + 4 * i); e += (double)v * v; nz += v != 0;
+                if ((v < 0 ? -v : v) > pk) pk = v < 0 ? -v : v;
+            }
+            n += frames;
+            if (n >= 22020) {
+                port_log("[p110aud] frame %u: %u samples rms %.0f peak %d nonzero %u%%\n", port_frame_count, n,
+                         __builtin_sqrt(e / n), pk, nz * 100 / n);
+                e = 0; pk = 0; n = 0; nz = 0;
+            }
+        }
+    }
     for (unsigned i = 0; i < frames; i++) {
         unsigned nx = (wr + 1) & (RING - 1);
         if (nx == rd) { dropped += frames - i; break; }

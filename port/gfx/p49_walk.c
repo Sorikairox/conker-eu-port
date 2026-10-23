@@ -402,6 +402,7 @@ void __wrap_func_1505A9AC(void *rec, float a1) {
  * func_1000D96C): the level D_800BE9F0, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
 extern unsigned char *D_800B0DF0;
 extern int D_800BE9F0, D_800B1248;
+int port_p110_inmus;
 void __real_func_150000B0(void);
 void __wrap_func_150000B0(void) {
     static int f = -1;
@@ -413,5 +414,7 @@ void __wrap_func_150000B0(void) {
         port_log("[p101] func_150000B0 (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
                  port_frame_count, D_800BE9F0, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
     }
+    port_p110_inmus = 1; /* P110: func_1000D96C / DE1C calls from inside are logged by p61_checks.c */
     __real_func_150000B0();
+    port_p110_inmus = 0;
 }
