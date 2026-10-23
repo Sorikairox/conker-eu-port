@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P136 (port-b) (session P136, 2026-10-23). Details: `docs/port/sessions/P136.md`
+
+Branch `port-b` (from P133 48f7258); the orchestrator merges it into `port`.
+
+- Hand C (NM), readable, with name comments, all difftest EQUIV + mutants: func_15111DD8 `star_field_generate` +
+  func_151148C8 `world_object_rotate_point` + func_151152A4 `object_sound_play` (13DC30), func_1518010C
+  `scope_lens_draw` (1ACBC0, P126 DL passthru: 4 mirrored scissored texrects), func_15169260 `node_lists_update_types`
+  (1944C0, new-game path), func_1514C860 `spawn_ring_emit` (1772D0), func_1514948C `trail_spawn_directed` (175B20),
+  func_15144CEC `world_to_screen` + func_1514654C `model_node_points_to_world` (170760), func_15159C2C
+  `orbit_object_step` (186A80), func_15053430 `object_death_resolve` (78230).
+- func_15111DD8 keeps Rare's float-upper-halfword star coordinates; its difftest needs DIFFTEST_STEP=1 + RETF
+  (`port_work/p136/dd8.sh`), prefix-only (8000 iterations exceed the call cap).
+- Stubs reached: guRotateF (libultra), func_150A7EE0 (D5650), func_1507D754, func_1000FA64; indirect handler tables
+  D_8008B848 +0x1C / D_8008ADA0 not checked.
+- P134's struct258 stride report (port line 774) = func_15022440, already fixed here in 4acf065 (port must merge it);
+  no other D_800D20FC scaling in port-b's game_eu_4A070.c.
+- Checks: verify_all rc 0, NM links, protocheck = known pairs (1088 bodies). progress_nm total 5082/5915 (85.9%),
+  C bytes 64.5%, 833 asm-only.
+
+## Next steps (from P136)
+
+1. Browser: scope lens (func_1518010C), star-field overlay, new-game frames past func_15169260.
+2. Owned asm with C callers next (`python3 port_work/p136/asmlist.py`): func_151277B0, func_1514C9E0, func_15095F18,
+   func_151BF490, func_1514CDC8, func_1517A550, func_15146078, func_151BF678 ...
+3. Remaining stubs from the new C: func_150A7EE0 (game_eu_D5650, not port-b), func_1507D754, func_1000FA64.
+
 ## P133 (port-b) (session P133, 2026-10-23). Details: `docs/port/sessions/P133.md`
 
 Branch `port-b` (from P130 54195bc); the orchestrator merges it into `port`.

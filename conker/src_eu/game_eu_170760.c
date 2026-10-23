@@ -983,7 +983,49 @@ f32 func_15144C8C(f32 arg0, f32 arg1) {
     return tmp;
 }
 
+#ifdef NON_MATCHING
+/* P136 */
+void func_150A7EE0(u8 *, f32, f32, f32, f32 *, f32 *, f32 *, f32 *);
+extern u8 D_800DA130[]; /* per view: 4x4 f32 projection matrix (0x40 bytes) */
+extern f32 D_800D9F40;
+
+/*
+ * world_to_screen: projects the world point pos (3 f32) with view `view`'s matrix (D_800DA130 + view * 0x40,
+ * func_150A7EE0) into scr[0..1], *oz and *ow (each out pointer may be NULL: a local is used). Fails (0) when
+ * w >= 6000, w <= D_800D9F40 or w == 0; else *oinv = 1 / w and scr becomes the viewport position: x = inv * x *
+ * (half width +0x0C + 5) + centre x +0x34, y = centre y +0x38 - inv * y * (half height +0x10 + 5) of
+ * D_800BE628 + view * 0x180. Returns 1.
+ */
+s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view) {
+    f32 z, w, inv;
+    u8 *vp;
+
+    if (oz == NULL) {
+        oz = &z;
+    }
+    if (ow == NULL) {
+        ow = &w;
+    }
+    if (oinv == NULL) {
+        oinv = &inv;
+    }
+    func_150A7EE0(D_800DA130 + (view << 6), pos[0], pos[1], pos[2], &scr[0], &scr[1], oz, ow);
+    if (*ow >= 6000.0f || *ow <= D_800D9F40) {
+        return 0;
+    }
+    if (*ow == 0.0f) {
+        return 0;
+    }
+    *oinv = 1.0f / *ow;
+    vp = (u8 *) D_800BE628 + view * 0x180;
+    scr[0] = *oinv * (scr[0] * (*(f32 *) (vp + 0x0C) + 5.0f)) + *(f32 *) (vp + 0x34);
+    vp = (u8 *) D_800BE628 + view * 0x180;
+    scr[1] = *(f32 *) (vp + 0x38) - *oinv * (scr[1] * (*(f32 *) (vp + 0x10) + 5.0f));
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_15144CEC.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_15144E80(u8 *arg0, struct17 *arg1, u8 *arg2, struct17 *arg3) {
     struct {
@@ -1576,7 +1618,66 @@ void func_15146508(struct127 *arg0, struct127 *arg1) {
     func_15169040(&tmp, 45, arg0, arg1);
 }
 
+#ifdef NON_MATCHING
+/* P136 */
+u8 *func_15031C4C(u8 *, u16, s32);
+s32 func_15031360(u8 *, u8 *, Mtx **, s32 *);
+
+/*
+ * model_node_points_to_world: transforms n local points (in[i] -> out[i], 3 f32 each) by the matrix of node `node`
+ * of a model instance obj (obj +0x1D4 = its matrix array, required). The matrix comes from, in order: the node's
+ * attached instance (+0x48: its frame matrix array +0x3E8[D_800BE9C0] + idx * 0x40, 0 when that instance is not
+ * ready (+0x3F6)); a sub-model (+0x1E id, func_15031C4C / func_15031360, entry +0x20 when that model is
+ * skinned (+0x48)); the node's own frame matrices (+0x34 + D_800BE9C0 * 0x40); else func_15145EA4 with obj's
+ * matrix + node byte +2 * 0x40. Mtx (s15.16) -> float with guMtxL2F, points with func_150A7E40.
+ * Returns 1, or 0 when something is missing.
+ */
+s32 func_1514654C(u8 *obj, u8 *node, s32 idx, f32 **in, f32 **out, s32 n) {
+    f32 mf[4][4];
+    Mtx *mtx;
+    s32 unused;
+    u8 *sub;
+    u8 *att;
+    s32 i;
+
+    if (obj == NULL || node == NULL || *(s32 *) (obj + 0x1D4) == 0) {
+        return 0;
+    }
+    att = *(u8 **) (node + 0x48);
+    if (att != NULL) {
+        if (att[0x3F6] == 0) {
+            return 0;
+        }
+        mtx = (Mtx *) (((u8 **) (att + 0x3E8))[D_800BE9C0] + (idx << 6));
+    } else if (*(u16 *) (node + 0x1E) != 0) {
+        sub = func_15031C4C(obj, *(u16 *) (node + 0x1E), 0);
+        if (sub == NULL) {
+            return 0;
+        }
+        if (func_15031360(sub, obj, &mtx, &unused) == 0) {
+            return 0;
+        }
+        if (*(s32 *) (sub + 0x48) != 0) {
+            mtx = (Mtx *) ((u8 *) mtx + (*(u16 *) (node + 0x20) << 6));
+        }
+    } else if (*(u8 **) (node + 0x34) != NULL) {
+        mtx = (Mtx *) (*(u8 **) (node + 0x34) + (D_800BE9C0 << 6));
+    } else {
+        func_15145EA4(in, out, (Mtx *) (*(u8 **) (obj + 0x1D4) + (node[2] << 6)), n);
+        return 1;
+    }
+    if (mtx == NULL) {
+        return 0;
+    }
+    guMtxL2F(mf, mtx);
+    for (i = 0; i < n; i++) {
+        func_150A7E40(mf, in[i][0], in[i][1], in[i][2], &out[i][0], &out[i][1], &out[i][2]);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_170760/func_1514654C.s")
+#endif
 
 s32 func_1514672C(u8 *arg0) {
     f32 temp_f0;

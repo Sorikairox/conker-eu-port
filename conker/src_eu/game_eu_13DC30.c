@@ -387,7 +387,60 @@ void func_15111CAC(s32 mode) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111CAC.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P136 */
+void *allocate_memory(s32, s32, s32, s32);
+s32 func_150ADA20(void); /* random */
+f32 func_150AD78C(f32);  /* sinf */
+f32 func_150AD780(f32);  /* cosf */
+extern f32 D_800A32F4; /* latitude spread scale */
+extern f32 D_800A32F8; /* longitude: centidegrees -> radians */
+extern f32 D_800A32FC; /* latitude: degrees -> radians */
+
+/*
+ * star_field_generate: allocates the overlay buffer D_800DC2B0 (8000 records of 8 bytes) and fills it with random
+ * stars on a sphere of radius 256: longitude (rand % 36000) * D_800A32F8, latitude 89 - sqrt(t) or sqrt(-t) - 89
+ * with t = ((rand % 1584400) - 792100) * D_800A32F4 (denser near the horizon). y = (s32) (sin(lat) * 256),
+ * r = sqrt(0x10000 - y * y), x = (s32) (sin(lon) * r), z = (s32) (cos(lon) * r); byte +7 = 64 + rand % 191
+ * (brightness), byte +6 = rand % 5.
+ * Rare quirk kept: each coordinate is converted to float and the record gets the float's upper halfword (the asm
+ * stores the value with swc1 and reads it back with lhu), not the integer; STAR_FLOAT_HI16 does that endian-neutrally.
+ */
+/* the upper halfword of (f32) v, endian-neutral (c: the function's float/word union) */
+#define STAR_FLOAT_HI16(c, v) ((c).f = (f32) (v), (u16) ((c).u >> 16))
+
+void func_15111DD8(void) {
+    u8 *star;
+    s32 i;
+    f32 lon, lat, t, r;
+    s32 y;
+    union {
+        f32 f;
+        u32 u;
+    } c;
+
+    star = allocate_memory(0xFA00, 1, 0, 0);
+    D_800DC2B0 = (s32) star;
+    for (i = 0; i < 8000; i++, star += 8) {
+        lon = (f32) ((u32) func_150ADA20() % 36000U) * D_800A32F8;
+        t = (f32) (s32) (((u32) func_150ADA20() % 1584400U) - 792100) * D_800A32F4;
+        if (t >= 0.0f) {
+            lat = 89.0f - sqrtf(t);
+        } else {
+            lat = sqrtf(-t) + -89.0f;
+        }
+        y = (s32) (func_150AD78C(lat * D_800A32FC) * 256.0f);
+        *(u16 *) (star + 2) = STAR_FLOAT_HI16(c, y);
+        r = sqrtf((f32) (s32) (0x10000 - (u32) (y * y)));
+        *(u16 *) (star + 0) = STAR_FLOAT_HI16(c, (s32) (func_150AD78C(lon) * r));
+        *(u16 *) (star + 4) = STAR_FLOAT_HI16(c, (s32) (func_150AD780(lon) * r));
+        star[7] = (u32) func_150ADA20() % 191U + 0x40;
+        star[6] = (u32) func_150ADA20() % 5U;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111DD8.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15112074.s")
 
@@ -1047,11 +1100,75 @@ void func_15114708(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15114708.s")
 #endif
+#ifdef NON_MATCHING
+/* P136 */
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+
+/*
+ * world_object_rotate_point: rotates the point (*px, *py, *pz) by world-object record idx (D_800DBEF4, 0xA0 bytes)
+ * around its pivot (s16 +0x10/+0x12/+0x14). The record's three base angles (f32 +0 about X, +8 about Z, +4 about Y,
+ * each skipped when 0) first turn the local axes X/Y/Z (guRotateF + func_150A7E40 on the two other axes); the
+ * matrix is then R(+0x60, X) * R(+0x68, Z) * R(+0x64, Y) about those axes (func_150A7A48 = matrix product).
+ * Rare's result kept: each coordinate gets s16 offset (+0x5A/+0x5C/+0x5E) + (rotated - unrotated) added, where
+ * the unrotated value is relative to the pivot.
+ */
+void func_151148C8(s32 idx, f32 *px, f32 *py, f32 *pz) {
+    f32 ax[3], ay[3], az[3];
+    f32 m2[4][4];
+    f32 m[4][4];
+    f32 ox, oy, oz;
+    f32 dx, dy, dz;
+    f32 rx, ry, rz;
+    u8 *rec;
+
+    ax[0] = 1.0f; ax[1] = 0.0f; ax[2] = 0.0f;
+    ay[0] = 0.0f; ay[1] = 1.0f; ay[2] = 0.0f;
+    az[0] = 0.0f; az[1] = 0.0f; az[2] = 1.0f;
+    rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    dx = *px - (f32) *(s16 *) (rec + 0x10);
+    dy = *py - (f32) *(s16 *) (rec + 0x12);
+    dz = *pz - (f32) *(s16 *) (rec + 0x14);
+    if (*(f32 *) (rec + 0) != 0.0f) {
+        guRotateF(m, *(f32 *) (rec + 0), 1.0f, 0.0f, 0.0f);
+        func_150A7E40(m, ay[0], ay[1], ay[2], &ay[0], &ay[1], &ay[2]);
+        func_150A7E40(m, az[0], az[1], az[2], &az[0], &az[1], &az[2]);
+        rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    }
+    if (*(f32 *) (rec + 8) != 0.0f) {
+        guRotateF(m, *(f32 *) (rec + 8), az[0], az[1], az[2]);
+        func_150A7E40(m, ay[0], ay[1], ay[2], &ay[0], &ay[1], &ay[2]);
+        func_150A7E40(m, ax[0], ax[1], ax[2], &ax[0], &ax[1], &ax[2]);
+        rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    }
+    if (*(f32 *) (rec + 4) != 0.0f) {
+        guRotateF(m, *(f32 *) (rec + 4), ay[0], ay[1], ay[2]);
+        func_150A7E40(m, ax[0], ax[1], ax[2], &ax[0], &ax[1], &ax[2]);
+        func_150A7E40(m, az[0], az[1], az[2], &az[0], &az[1], &az[2]);
+        rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    }
+    guRotateF(m, *(f32 *) (rec + 0x60), ax[0], ax[1], ax[2]);
+    rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    guRotateF(m2, *(f32 *) (rec + 0x68), az[0], az[1], az[2]);
+    func_150A7A48(m, m2, m);
+    rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    guRotateF(m2, *(f32 *) (rec + 0x64), ay[0], ay[1], ay[2]);
+    func_150A7A48(m, m2, m);
+    func_150A7E40(m, dx, dy, dz, &ox, &oy, &oz);
+    rec = (u8 *) D_800DBEF4 + idx * 0xA0;
+    rx = (f32) *(s16 *) (rec + 0x5A) + (ox - dx);
+    ry = (f32) *(s16 *) (rec + 0x5C) + (oy - dy);
+    rz = (f32) *(s16 *) (rec + 0x5E) + (oz - dz);
+    *px += rx;
+    *py += ry;
+    *pz += rz;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151148C8.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P133 */
-void func_151148C8(s32, s32 *, s32 *, s32 *);
+void func_151148C8(s32, f32 *, f32 *, f32 *);
 extern f32 D_800A3330;   /* world-object timer scale */
 extern u16 D_800CC1C0[]; /* per object: world-object index + 1 it follows */
 
@@ -1069,7 +1186,7 @@ void func_15114CBC(struct127 *arg0, s32 idx) {
     if (obj == NULL || idx >= D_800DC320) {
         return;
     }
-    func_151148C8(idx, (s32 *) (obj + 0x14), (s32 *) (obj + 0x18), (s32 *) (obj + 0x1C));
+    func_151148C8(idx, (f32 *) (obj + 0x14), (f32 *) (obj + 0x18), (f32 *) (obj + 0x1C));
     rec = (u8 *) D_800DBEF4 + idx * 0xA0;
     t = (f32) *(u16 *) (obj + 0x76) + *(f32 *) (rec + 0x64) * D_800A3330;
     *(u16 *) (obj + 0x76) = t;
@@ -1204,7 +1321,56 @@ s32 func_15115244(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* P136 */
+
+/*
+ * object_sound_play: plays / updates the positional sound of a world object (handle u16 at obj +0x74, position s16
+ * +0x10/+0x12/+0x14). flags 1: nothing to do when the handle still plays `sound` (func_1001147C). sound -1: stops
+ * the handle (func_100111C8) and clears it. flags 8: start a new voice instead of reusing the handle. flags 4:
+ * func_10010E78 (one-shot at the position, volume vol, ranges r0 / r1); the handle is cleared unless flags 8.
+ * flags 2: releases the old handle (func_1001123C) and stores func_10010E78's new one. Otherwise releases it and
+ * starts a tracked sound with func_1000FA64 (update callback func_15115244 with the object). Returns 0 (callers
+ * declare s32 and ignore it; the asm returns nothing).
+ */
+s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags) {
+    u16 *handle = (u16 *) (obj + 0x74);
+    s16 *pos = (s16 *) (obj + 0x10);
+    u16 h;
+
+    if ((flags & 1) && *handle != 0 && func_1001147C(*handle) == sound) {
+        return 0;
+    }
+    if (sound == -1) {
+        if (*handle != 0) {
+            func_100111C8(*handle);
+            *handle = 0;
+        }
+        return 0;
+    }
+    h = (flags & 8) ? 0 : *handle;
+    if (flags & 4) {
+        func_10010E78(h, sound, vol, 0, 0, -1, pos[0], pos[1], pos[2], r0, r1);
+        if (!(flags & 8)) {
+            *handle = 0;
+        }
+    } else if (flags & 2) {
+        if (h != 0) {
+            func_1001123C(h);
+            h = 0;
+        }
+        *handle = func_10010E78(h, sound, vol, 0, 0, -1, pos[0], pos[1], pos[2], r0, r1);
+    } else {
+        if (h != 0) {
+            func_1001123C(h);
+        }
+        *handle = func_1000FA64(sound, pos[0], pos[1], pos[2], vol, r1, r0, (s32) func_15115244, obj, 0, 0, 0);
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_151152A4.s")
+#endif
 
 void func_15115484(s32 arg0, s32 arg1, s32 arg2) {
     func_1001001C(func_15115244, arg0, 0, arg1, arg2);

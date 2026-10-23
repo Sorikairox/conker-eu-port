@@ -1,0 +1,12 @@
+s/ay\[0\] = 0.0f; ay\[1\] = 1.0f;/ay[0] = 0.0f; ay[1] = 0.0f;/
+s/dy = \*py - (f32) \*(s16 \*) (rec + 0x12);/dy = *py - (f32) *(s16 *) (rec + 0x14);/
+s/guRotateF(m, \*(f32 \*) (rec + 0), 1.0f, 0.0f, 0.0f);/guRotateF(m, *(f32 *) (rec + 0), 0.0f, 1.0f, 0.0f);/
+s/if (\*(f32 \*) (rec + 8) != 0.0f) {/if (*(f32 *) (rec + 8) == 0.0f) {/
+s/guRotateF(m, \*(f32 \*) (rec + 4), ay\[0\], ay\[1\], ay\[2\]);/guRotateF(m, *(f32 *) (rec + 4), az[0], az[1], az[2]);/
+s/guRotateF(m, \*(f32 \*) (rec + 0x60), ax\[0\]/guRotateF(m, *(f32 *) (rec + 0x64), ax[0]/
+s/func_150A7A48(m, m2, m);/func_150A7A48(m2, m, m);/
+s/func_150A7E40(m, dx, dy, dz, \&ox, \&oy, \&oz);/func_150A7E40(m, dx, dz, dy, \&ox, \&oy, \&oz);/
+s/ry = (f32) \*(s16 \*) (rec + 0x5C) + (oy - dy);/ry = (f32) *(s16 *) (rec + 0x5C) + (dy - oy);/
+s/rz = (f32) \*(s16 \*) (rec + 0x5E)/rz = (f32) *(u16 *) (rec + 0x5E)/
+s/\*pz += rz;/*pz = rz;/
+s/rec = (u8 \*) D_800DBEF4 + idx \* 0xA0;/rec = (u8 *) D_800DBEF4 + idx * 0x90;/
