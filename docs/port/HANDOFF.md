@@ -216,6 +216,27 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. Check character point lights (M >= 2) at runtime when a level sends them (new `[p94light]` lines under `?p78tex`).
 2. Sky: trace the game's sky quad t range (292..667) and find out what draws the black area above it in the
    table-view camera.
+## State (session P104, 2026-10-23). Details: `docs/port/sessions/P104.md`
+
+- func_150000B0 (game_2D4B0, level music) in hand C (NM): random + 33 knob setups EQUIV, mutants 33/34 (1 equivalent). Music
+  requests should now reach func_1000D96C in the browser.
+- NOT committed (drafts only): the level event unit (func_1509CBD4 / func_1509B950 / func_1509B5AC random-EQUIV,
+  func_150ADA20 not runnable in difftest, VM func_150ADFD0 + func_150AE760 mapped: hand-written asm with an
+  sp-restoring abort), and func_1517C11C (1286 insns, random-EQUIV draft).
+- Float re-check after P100's harness fix: 66 / 203 bodies run, 4 DIFFER + 2 UNSURE, not investigated.
+
+## Next steps (from P104)
+
+0. Level event system as one unit (browser P103 title-screen blocker): `docs/port/sessions/p104/event_vm_map.md`.
+   Drafts in `p104/ev/` need knob setups + mutants; func_1509B8FC (NM) must return func_1509B950(...); the VM
+   func_150ADFD0 needs a C interpreter design with a setjmp/longjmp (or flag) abort for func_150AE760's first 6
+   instructions; func_150AE780 (the rest of AE760's asm) is an ordinary function.
+1. func_1517C11C: `p104/draft_7c11c.c` + `p104/func_1517C11C_notes.md` (addresses, jal keys, setup plan). Commit with
+   setups + mutants; make its NM prototype in game_eu_1A9280.c void. Producer func_1517BE0C (sort) is still asm.
+2. Float re-check: finish the 137 bodies (`p104/hfrun.sh` on the unrun rows), investigate func_15075884
+   (game_A28B0) and func_150E7104 (game_eu_114640); func_15123A54 / func_151247C0 are port-b (game_14FF90).
+3. func_1512EE50 (camera eye, 1352 insns): not started.
+
 ## State (session P100, 2026-10-23). Details: `docs/port/sessions/P100.md`
 
 - Frame-path stubs in hand C (NM): func_15141C0C (object type -> interaction category), func_15146EE0 (D_8008A084
