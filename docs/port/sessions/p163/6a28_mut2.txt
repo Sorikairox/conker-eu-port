@@ -1,0 +1,2 @@
+s/D_800AAF18 + arg1 \* 12/D_800AAF18 + arg1 * 8/
+s/D_800AAF30 + arg1 \* 12/D_800AAEE8 + arg1 * 12/

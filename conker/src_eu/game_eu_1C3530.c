@@ -524,9 +524,18 @@ void func_151985C4(struct102 *arg0, s32 *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198EEC.s")
 
+#ifdef NON_MATCHING
+/* P163: D_8008FC30 is the one-entry start-sound table (FC34 / FC38 / FC3C are separate update / stop / extra tables,
+   each indexed by its own record byte, -1 = none); func_15196438 (asm) stores the entry's v0 as the record's u16 voice handle (`sh $v0, 0xB2($sp) = record + 0x66`), so this returns func_10010F30's handle. */
+// emitter_sound_start: starts sound 0x1AA at full volume and returns its voice handle
+u16 func_151991D0(void) {
+    return func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
+}
+#else
 void func_151991D0(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
+#endif
 
 void func_15199200(u8 *arg0) {
     u8 *temp_v0;
@@ -926,9 +935,18 @@ void func_1519C490(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P163: D_8008FC58 is the one-entry start-sound table (FC5C / FC64 are separate tables used by func_15199F80);
+   func_15199A28 (asm) stores the entry's v0 as the record's u16 voice handle (`sh $v0, 0x130($t5) = record + 0x130`), so this returns func_10010F30's handle. */
+// emitter2_sound_start: starts sound 0x1AA at full volume and returns its voice handle
+u16 func_1519C4FC(void) {
+    return func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
+}
+#else
 void func_1519C4FC(void) {
     func_10010F30(0x1AA, 0x7FFF, 0x40, 0, 0);
 }
+#endif
 
 void func_1519C52C(u8 *arg0) {
     u8 *temp_v0;

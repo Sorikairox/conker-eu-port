@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P163 (port-b) (session P163, 2026-10-24). Details: `docs/port/sessions/P163.md`
+
+Branch `port-b` (from P162 720e4c3). Took game_eu_1C3530.c.
+- Table signatures: D_8008FC30 / D_8008FC58 are one-entry start-sound tables (FC34.. / FC5C.. are separate update /
+  stop tables with their own index bytes); the asm dispatchers store v0 as the u16 voice handle. NM variants
+  `u16 func_151991D0` / `u16 func_1519C4FC` return func_10010F30's handle (EQUIV + mutants).
+- The 11 tablesig "maybe" rows: port-b ones (B730, FC10, 90070, 900D0, BA4) are false positives (next named address
+  is a separately indexed table). Possibly real, not port-b: D_80089E40 (func_151342BC, game_161520) looks like one
+  23-entry table whose default entries func_151346EC / func_1513470C are void wrappers; the dispatcher tests v0.
+- m2c_sanity (port-web tsv): 12 high/medium rows in port-b files, all checked, 0 real (reasons in P163.md).
+- func_151C6A28 `object_muzzle_fire` (1F4090) hand C (NM): 200 random + 9 setups + ARGMEM, mutants 18/20 + 2/2;
+  returns 0 for game_981E0's undeclared call. func_15142A5C is 1-argument under NM in 1F4090 (was 2: wasm mismatch).
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1202 bodies), selftest 62/62. progress_nm total 5196/5915 (87.8%), game 4665/5334, C bytes 69.0%, 719 asm-only. No difftest processes left.
+
+## Next steps (from P163)
+
+1. Owner of game_161520.c: D_80089E40 (func_151342BC) index obj+0x3C may reach func_151346EC / func_1513470C (void
+   C, v0 = func_15169804 / func_15169824's result, tested by `bnez v0`) and the void 1D7790 / F3AD0 / F4400 entries.
+2. func_150F79F0 (125200, asm, port-b): consumer of func_151C6A28 / func_150FF604; 20-argument prototype in P163.md.
+3. Next port-b asm with C callers (`p163/asmlist.py`): func_15152A90 (213, 17D3C0), func_150FD140 (215, 12A7C0),
+   func_15081120 (219, AE930), func_150511E8 (220, 78230), func_15152700 (228, 15 calls).
+4. Browser: P163.md / P162.md UNVERIFIED.
+
 ## P162 (port-b) (session P162, 2026-10-24). Details: `docs/port/sessions/P162.md`
 
 Branch `port-b` (from P160 9151c20). Took game_eu_F6060.c, game_eu_192500.c, game_eu_1BAF40.c, game_eu_1FB080.c.
