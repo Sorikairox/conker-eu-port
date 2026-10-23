@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P118, 2026-10-23, port-web, tooling). Details: `docs/port/sessions/P118.md`
+
+- New `port/tools/m2c_sanity.py` (host, ~10 s): compares every NON_MATCHING body's clang IR (sroa+instcombine) with
+  the EU asm for access width (lb/lh vs word), pointer stride (`p += 4` on `u8 **`), and the m2c byte idiom
+  `(x * K) + &SYM` on a non-byte symbol. Output `docs/port/m2c_sanity.tsv` (202 rows; high 48 rows / 40 functions).
+- Validation: flags func_1502457C (scaled + stride + a third bug: line 299 `*(&D_800C39E0 + arg1) = 1` on s32, asm `sb`)
+  and func_150337A8 (`lb` vs `*(s32 *)`), all high.
+- New real bugs confirmed by hand: func_150623F4 (frame path, `s32 *var_s1 += 0x40`, asm +64), func_15010110,
+  func_150C6960 / func_1509EDE0 (scaled), func_1506045C, func_15070300, func_1508A040, func_1509DFCC, func_151E2C88,
+  func_150DE9D8, func_16000B14. FP sample: 2/10 (pooled `O:` width rows are the weak tier).
+- No src_eu edits (fixes are for conversion slots).
+
+## Next steps (from P118)
+
+1. Conversion slot: fix the high rows (P118.md section 6 list), frame path first: func_1502457C (3 lines) +
+   func_150337A8, func_150623F4; then the scaled rows (7 functions share the `D_800AB7F4` x3 idiom).
+2. Re-run `python3 port/tools/m2c_sanity.py` after each conversion merge; hand-check pooled `O:` rows before fixing.
+
 ## State (session P116, 2026-10-23, port-web). Details: `docs/port/sessions/P116.md`
 
 - Merged port 28b8fa3 (P114) as 21cc7f0 (HANDOFF only). verify_all OK, NM link, protocheck 0 (1024), float-int BUG 0,
