@@ -1,0 +1,9 @@
+s/(void \*)sBreakTop, top/(void *)sBreakTop, side/
+s/fabsf(center\[1\] - top\[1\])/(center[1] - top[1])/
+s/(side\[2\] - top\[2\]) \* (side\[2\] - top\[2\])/(side[1] - top[1]) * (side[2] - top[2])/
+s/func_150B8AA0(center, \&height, \&radius, owner/func_150B8AA0(center, \&radius, \&height, owner/
+s/chunk.pos\[1\] = emit\[i\]\[1\]/chunk.pos[1] = emit[0][1]/
+155s/1.0f < sx/0.9f < sx/
+158s/sx < 0.5f/sx < 0.6f/
+162s/1.0f < sz/1.1f < sz/
+165s/sz < 0.5f/sz <= 0.4f/

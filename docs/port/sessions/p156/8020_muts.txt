@@ -1,0 +1,58 @@
+s/if (obj == NULL) {/if (obj == (u8 *)1) {/
+s/func_15142314(model, 4,/func_15142314(model, 3,/
+s/(obj + 0x1D4), 5,/(obj + 0x1D4), 6,/
+s/(obj + 0x1D4), 0, (struct17/(obj + 0x1D4), 1, (struct17/
+s/emit\[0\]\[0\] = base\[0\] + 20.0f;/emit[0][0] = base[0] + 21.0f;/
+s/emit\[0\]\[1\] = base\[1\] + 130.0f;/emit[0][1] = base[1] + 131.0f;/
+s/emit\[1\]\[0\] = base\[0\] - 20.0f;/emit[1][0] = base[0] + 20.0f;/
+s/emit\[1\]\[2\] = base\[2\];/emit[1][2] = base[1];/
+s/(obj + 0x76) >> 8) + 0x40)/(obj + 0x76) >> 8) + 0x41)/
+s/driftX \*= \*(f32 \*)(obj + 0x3C)/driftX *= 2.0f/
+s/driftZ \*= \*(f32 \*)(obj + 0x3C)/driftZ *= 2.0f/
+s/(void \*)sBreakTop, top/(void *)sBreakTop, side/
+s/fabsf(center\[1\] - top\[1\])/(center[1] - top[1])/
+s/(side\[2\] - top\[2\]) \* (side\[2\] - top\[2\])/(side[1] - top[1]) * (side[2] - top[2])/
+s/if (radius == 0.0f)/if (radius == 1.0f)/
+s/ratio = 1.0f;/ratio = 0.0f;/
+s/ratio = height \/ radius;/ratio = radius \/ height;/
+s/func_150B87B0(center, \&height, \&radius, \&ratio/func_150B87B0(center, \&height, \&ratio, \&radius/
+s/func_150B8AA0(center, \&height, \&radius, owner/func_150B8AA0(center, \&radius, \&height, owner/
+s/ground\[1\] = center\[1\] + 100.0f;/ground[1] = center[1] + 101.0f;/
+s/center\[1\] - 2000.0f, hit) != 0/center[1] - 2000.0f, hit) == 0/
+s/ground\[1\] = \*(f32 \*)hit;/;/
+s/ground\[1\] + 31.0f/ground[1] + 30.0f/
+s/0, 0xFF, r/0, 0xFE, r/
+s/11 + 30, 0x19/11 + 30, 0x18/
+s/0.0f, 0, owner);/0.0f, 1, owner);/
+0,/if (1.0f < sx)/s//if (0.9f < sx)/
+0,/if (sx < 0.5f)/s//if (sx < 0.6f)/
+0,/if (1.0f < sz)/s//if (1.1f < sz)/
+0,/if (sz < 0.5f)/s//if (sz <= 0.5f)/
+s/chunk.u04 = 0.6f/chunk.u04 = 0.5f/
+s/chunk.sizeX = 3.0f \* sx/chunk.sizeX = 3.0f * sz/
+s/chunk.rot\[1\] = \*(f32 \*)(obj + 0x40)/chunk.rot[1] = *(f32 *)(obj + 0x44)/
+s/chunk.one\[2\] = 1.0f/chunk.one[2] = 2.0f/
+s/chunk.gravity = -1.6f/chunk.gravity = -1.5f/
+s/chunk.flags = 0x197D/chunk.flags = 0x197C/
+s/chunk.life = 300/chunk.life = 301/
+s/chunk.u61 = 1/chunk.u61 = 2/
+s/chunk.u62\[3\] = 1/chunk.u62[3] = 0/
+s/i < 2; i++/i < 1; i++/
+s/\* 30.0f \* \*(f32 \*)(obj + 0x150) + 10.0f/* 30.0f * *(f32 *)(obj + 0x14C) + 10.0f/
+s/a = func_150ADA20() \& 0x7F/a = func_150ADA20() \& 0xFF/
+s/b = -0x20 - (func_150ADA20() \& 0x1F)/b = -0x21 - (func_150ADA20() \& 0x1F)/
+s/cosA = func_151423D8(a - 0x40)/cosA = func_151423D8(a + 0x40)/
+s/chunk.pos\[1\] = emit\[i\]\[1\]/chunk.pos[1] = emit[0][1]/
+s/speed \* sinB \* cosA + driftX/speed * sinB * cosA + driftZ/
+s/chunk.vel\[1\] = -speed \* cosB/chunk.vel[1] = speed * cosB/
+s/chunk.spinY = 30.0f - func_150ADA68() \* 60.0f/chunk.spinY = 30.0f - func_150ADA68() * 61.0f/
+s/func_15132FBC(\&chunk, 3, 2, 0, owner, 0)/func_15132FBC(\&chunk, 3, 2, 1, owner, 0)/
+s/0.5f \/ 0.96f/0.5f \/ 0.95f/
+s/smoke.sizeB = 3.0f \* scale/smoke.sizeB = 4.0f * scale/
+s/smoke.u18 = 0.231f/smoke.u18 = 0.23f/
+s/smoke.u1C = 15.0f \* scale/smoke.u1C = 16.0f * scale/
+s/smoke.u24\[4\] = -0x3F/smoke.u24[4] = -0x3E/
+s/smoke.u24\[9\] = 0x14/smoke.u24[9] = 0x15/
+s/smoke.u38\[2\] = 0x48/smoke.u38[2] = 0x49/
+s/smoke.u3C\[0\] = 1/smoke.u3C[0] = 2/
+s/func_15151FA8((u8 \*)\&smoke, owner, arg2)/func_15151FA8((u8 *)\&smoke, owner, 1)/

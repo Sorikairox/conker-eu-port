@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P156, 2026-10-23). Details: `docs/port/sessions/P156.md`
+
+- New hand C (NM): func_1507CD64 player_hit_reaction (func_1507D754 callee; 72 setups, mutants 55/55; returns s32 0
+  because every prototype, also port-b's, says s32 and no caller reads it), func_150B8020 object_break_effects
+  (func_1507D754 callee; 24 + 10 setups, mutants 57/58, 1 beyond the ARGMEM window, asm-checked), its callee
+  func_150B87B0 debris_burst_spawn (6 parameters, mutants 18/18), coordinator item func_1510A98C
+  vent_smoke_emitter_update (18 + 3 setups, mutants 40/42, 2 beyond the ARGMEM window, asm-checked).
+- D_8008A3CC (func_151416E8 handler table): entries 10..17 are all C (list in P156.md); entries >= 18 are another table.
+- difftest: opt-in `DIFFTEST_TUCMP_LEN=N` (bytes compared for a candidate TU-local object argument, default 32) and
+  `DIFFTEST_OUTA_PERCALL=1` (OUTA words + k * 0x10000 on call k: different out-arrays per call); both forwarded by
+  difftest.sh. New `docs/port/sessions/p156/isasm.py ROOT func...` (real C / ASM status; callees.py / romtab.py ASM
+  marks come from the stale p98 asmonly list).
+- Checks: verify_all OK (full ROM OK, after the last code edit), NM links, protocheck 0 (1151), selftest 62/62, progress_nm 5145/5915 (87.0%), C bytes 67.6%.
+
+## Next steps (from P156)
+
+1. func_1507D754 still blocked: this slot's func_151BAAC8 (715), func_150BC968 / func_150BC03C (461 / 587),
+   func_150C04E0 (127), func_151C9740 (224), func_151CFFFC (374); port-b's func_15150D7C (via func_15136C3C ->
+   func_1513A24C) and func_15154728 (via func_150E0DF0, func_151C9740); func_151D5AC4 / func_151D4684 (game_eu_201240).
+2. func_15132BBC (game_eu_15FF50, 256): asm worker behind the C wrapper func_15132FBC (particle spawn used by
+   func_150B8020 and many C callers).
+3. Browser: hit reactions (func_1507CD64), vent smoke (func_1510A98C).
+4. P138 / P141 leftovers (not started).
+
 ## State (session P154, 2026-10-23, port-web, runtime). Details: `docs/port/sessions/P154.md`
 
 - **A new game reaches player control**: the Gregg cutscene (level 0x22 scene 2, 12441) ends at retrace **18485**.
@@ -62,6 +86,30 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. Longer new-game run with `?padf` presses through the Gregg cutscene to first player control.
 3. Check m2c_sanity width-high rows on func_151018F8 / func_150EF90C (port-b) and med rows on func_1517B270 (port).
 
+## State (session P151, 2026-10-23). Details: `docs/port/sessions/P151.md`
+
+- New hand C (NM): func_1514CFF0 character_handler_indices (new-game scene start; 192 setups, mutants 24/24),
+  func_15058898 object_move_collide (49 setups, mutants 48/49 + 1 equivalent; calls port-b's func_150BA3B0 with its
+  C signature `(u8 *, f32, f32, u8, s32)`), its callee func_1505DADC player_find_visible_target (mutants 26/28 + 2
+  equivalent), func_1000A420 sound_pan_volume (492 setups, mutants 30/36 + 6 equivalent; init_A420 prototype now
+  has f32 arg 3 and pointer outs), func_100114D0 sound_source_mix (mutants 14/14), func_1507D754 callees
+  func_150AEB9C owner_spawn_children (anti-tamper checksum skipped under NM, as P127), func_1507515C
+  player_find_owned_object, func_150E7F14 spawn_random_curve_object (func_1507CD64's asm callee), and coordinator
+  P152 item func_151416E8 effect_message_dispatch. All EQUIV + mutants killed (equivalents listed in P151.md).
+- game_83300 NM prototype of func_150ACEA0: args 7 / 8 are `void *`.
+- Checks: verify_all OK (after the last code edit), NM links, protocheck 0 (1147), selftest 62/62, progress_nm
+  5141/5915 (86.9%), C bytes 67.4%.
+
+## Next steps (from P151)
+
+1. Coordinator P152: func_1510A98C (game_eu_1379B0, 281 insns); func_1501B640 is in port-b's game_34F20 /
+   game_eu_48B10 (port-b).
+2. func_1507D754: remaining asm callees func_1507CD64 (now only C callees), func_151BAAC8, func_15136C3C (blocked by
+   port-b's func_15150D7C via func_1513A24C), func_150B8020 (+ func_150B87B0), func_150BC968 / func_150BC03C,
+   func_150E0DF0 (+ func_151D5AC4 / func_151D4684, port-b's func_15154728), port-b's func_151A7240.
+3. Browser: check the null+0x14 = 0x400 write at the new-game scene start is gone (func_1514CFF0 now real).
+4. P138 / P141 leftovers.
+
 ## P150 (port-b) (session P150, 2026-10-23). Details: `docs/port/sessions/P150.md`
 
 Branch `port-b` (from P146 b8f1ce7); merged port 37085b5 (merge commit 1457344, only HANDOFF.md conflicted).
@@ -104,7 +152,6 @@ Branch `port-b` (from P146 b8f1ce7); merged port 37085b5 (merge commit 1457344, 
    func_150A7EE0 / func_15058898 (mode 0), func_1517B270, func_1514CFF0, then func_151928C8 / func_151A2F10.
 2. Use `?padf` for all new scripted runs (screenshot times are still wall clock: ~50 retraces/s after ~1.4 s boot).
 3. Lens warp func_151CB6C0 still unexercised at runtime: find a level with a 0x34-list effect.
-
 ## State (session P148, 2026-10-23). Details: `docs/port/sessions/P148.md`
 
 - New hand C (NM): func_151928C8 water_drop_splash_update (func_1513095C update handler 14; mutants 16/16),

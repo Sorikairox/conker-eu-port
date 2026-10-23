@@ -1,0 +1,8 @@
+s/if (D_8008A3CC\[rec\[0x168\]\] != NULL) {/if (1) {/% t3_h0_c22_m1
+s/(rec, msg, c);/(rec, msg, code);/% t7_h2_c122_m1
+s/c == 0x24 || c == 0x25)/c == 0x24 || c == 0x26)/% t3_h0_c25_m1 t3_h0_c26_m1
+s/(c == 0x22 ||/(c == 0x21 ||/% t3_h0_c22_m1
+s/msg\[0\] == rec\[0x110 + 0x58\]/msg[0] != rec[0x110 + 0x58]/% t3_h0_c22_m1
+s/rec\[0x110 + 0x59\] = -1;/rec[0x110 + 0x59] = 1;/% t3_h0_c24_m1
+s/rec\[0x110 + 0x59\] = 2;/rec[0x110 + 0x59] = 3;/% t3_h0_c25_m1
+s/u8 c = code;/s32 c = code;/% t3_h0_c122_m1 t5_h1_c122_m1

@@ -1060,7 +1060,43 @@ s32 func_1001147C(u16 arg0) {
     return -1;
 }
 
+#ifdef NON_MATCHING
+// sound_source_mix: volume / pan / distance of a sound at (x, y, z) for the nearest listener (P151). With more than
+// one listener (D_80082FA0 = last index) it picks the one whose ear position (ex, ey, ez) is closest; then
+// func_1000A420 with the source relative to the ear, the listener's heading and the source relative to the listener
+// (x, y, z) for the distance falloff between `outer` and `inner`. *outVol = that volume scaled by gain / 0x8000.
+// Returns the distance.
+s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist) {
+    SfxListener *best = D_80042308;
+    SfxListener *l;
+    u32 min;
+    u32 d;
+    s32 dx, dy, dz;
+    s32 i;
+    s32 vol;
+    s32 dist;
+
+    if (D_80082FA0 != 0) {
+        min = -1;
+        for (i = 0, l = D_80042308; i <= D_80082FA0; i++, l++) {
+            dx = x - l->ex;
+            dy = y - l->ey;
+            dz = z - l->ez;
+            d = dx * dx + dy * dy + dz * dz;
+            if (d < min) {
+                min = d;
+                best = l;
+            }
+        }
+    }
+    dist = func_1000A420(x - best->ex, y - best->ey, z - best->ez, best->f, x - best->x, y - best->y, z - best->z, outer,
+                         inner, (s32)outPan, &vol, (s32)outDist);
+    *outVol = (u32)(vol * gain) >> 15;
+    return dist;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_EB00/func_100114D0.s")
+#endif
 #ifdef NON_MATCHING
 /* SfxEnt.unk10 flags used by the update pass */
 #define SFX_PLAYING     0x0001 /* unk24 holds a live voice */

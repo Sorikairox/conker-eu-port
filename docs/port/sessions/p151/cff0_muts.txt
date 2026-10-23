@@ -1,0 +1,24 @@
+s/case 0x96: \*outType = 0;/case 0x97: *outType = 0;/% m99_s1_t96 m99_s1_t97
+s/case 0x0A: \*outType = 3;/case 0x0B: *outType = 3;/% m0_s0_ta m0_s1_tb mb_s1_t25 
+s/case 0x29: case 0x2A: \*outType = 4;/case 0x29: *outType = 4;/% m2a_s1_t64 m2a_s0_t65 m2a_s1_t2a
+s/case 0x5F: \*outType = 0x1B;/case 0x5F: *outType = 0x1A;/% m99_s1_t5f m27_s0_t5f
+s/case 0x89: case 0xBA:/case 0x89: case 0xBB:/% m99_s1_tba m99_s1_tbb
+s/case 0x7F: \*outType = 0x16; flags = 4;/case 0x7F: *outType = 0x16; flags = 5;/% m40_s0_t7f
+s/case 0x02:$/case 0x03:/% m2_s7_t4 m3_s1_tc
+s/case 9: \*outSub = 0; flags |= 1; break;/case 9: *outSub = 1; flags |= 1; break;/% m2_s9_t5
+s/case 0xE: case 0xF: case 0x17: case 0x19:/case 0xE: case 0xF: case 0x17: case 0x18:/% m2_s19_ta
+s/\*outSub = sub - 6;/*outSub = sub - 5;/% ma_s6_t1a ma_s9_t1d
+s/case 0xF: \*outSub = 8;/case 0x10: *outSub = 8;/% ma_sf_t23 ma_s10_t24
+s/\*outSub = 1; flags |= 1;$/*outSub = 2; flags |= 1;/% me_s1_t2b
+s/} else if (sub == 8) {/} else if (sub == 9) {/% me_s8_t2c
+s/case 0x10: \*outMode = 4; flags |= 2; if (sub == 6)/case 0x10: *outMode = 4; flags |= 2; if (sub == 7)/% m10_s6_t30
+s/case 0x1D: \*outMode = 0x14; flags |= 2; if (sub == 9)/case 0x1D: *outMode = 0x14; flags |= 2; if (sub == 1)/% m1d_s9_t4a m1d_s1_t4b
+s/case 0x35: \*outMode = 0x13;/case 0x36: *outMode = 0x13;/% m35_s1_t7a m36_s1_t7c
+s/obj\[4\] == 0x9D/obj[4] == 0x9E/% m2b_s0_t9d
+s/case 0x06: \*outMode = 2; flags |= 2;/case 0x06: *outMode = 2; flags |= 3;/% m6_s1_t12 m6_s0_t13
+s/case 0x0C: \*outMode = 3;/case 0x0C: *outMode = 4;/% mc_s1_t27
+s/switch ((u32)D_800BE9F0)/switch (D_800BE9F0 \& 0xFF)/% mffffffff_s1_t80
+s/case 0x2C: \*outMode = 0x11;/case 0x2D: *outMode = 0x11;/% m2c_s1_t68 m2d_s1_t6a
+s/case 0x0A: \*outType = 3;/case 0x0B: *outType = 3;/% m2_s19_ta
+s/case 0x29: case 0x2A: \*outType = 4;/case 0x29: *outType = 4;/% md_s0_t2a
+s/case 0x5F: \*outType = 0x1B;/case 0x5F: *outType = 0x1A;/% m27_s0_t5f

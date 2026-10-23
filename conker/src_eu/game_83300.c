@@ -1376,7 +1376,141 @@ void func_1505841C(struct127 *arg0, f32 arg1) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+s32 func_150A44A4(f32 x, f32 z, s32 tri, u8 *packed, f32 *out);
+void func_1510EE3C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, u16 argA, s32 argB, s32 argC, s32 argD, s32 argE);
+f32 func_1510FBC8(f32, f32, f32);
+s32 func_15044670(f32, f32, s32, u8 *, s32, s32);
+void func_150BA3B0(u8 *obj, f32 x, f32 z, u8, s32); /* port-b C signature (P150) */
+s32 func_1505DADC(u8 *, u16 *, s32, s32, s32);
+extern u8 D_800CC1F3;
+extern s32 D_800D1580;
+
+// object_move_collide: per-frame floor and wall step of a moving object (P151). Clears the floor height (+0x118) and
+// runs func_15021834; frozen (+0xF8 bit 0x8000: +0x28 = 0 for sub-type 7 else 1) and fixed-height objects (bit
+// 0x200000: floor +0x180 = (s16)+0x224) stop there. Otherwise finds the floor below (func_150A44A4 on the cached
+// triangle when walls are solid for it - bit 2 of its own or of player 0's flags when owned by player 0 - else
+// func_1510EE3C; func_1510FBC8 for the floor height with bit 8). With wall collision (bit 4 of its own flags, or
+// of its owner's for owner 100 + n unless the object is type 0x9A) the move from the old position is clipped by
+// func_15044670; if that moved it, it marks +0xF4 0x10000, ends a carry (+0x24E, type 0xC releases via
+// func_150BA3B0), and with bit 0x1000 bounces: the heading is mirrored about the wall direction, the speed +0x3C
+// scaled (0.9 for state 0x21 and for a state-4 object with +0x103, which also re-aims at the nearest visible
+// player via func_1505DADC, else 0.3), a bounce sound (+0x2CC via func_1506E5FC when faster than 5), and for state
+// 4 gravity 3. Then the floor is looked up again at the new position. Finally a fall deeper than +0x256 * 8 below
+// the last floor with +0x255 set (and not stunned) stops it and starts the +0x255 fall effect (func_1507BB28);
+// else +0x180 = the floor height.
+void func_15058898(struct127 *arg0, f32 arg1) {
+    u8 *p = (u8 *)arg0;
+    f32 floorY;
+    f32 x0, z0;
+    s32 flags;
+    s32 solid;
+    s32 wallFlags;
+    u16 ang;
+    u16 aim;
+    u8 owner;
+
+    arg0->unk118 = -10000.0f;
+    func_15021834(arg0, 0, -1);
+    flags = arg0->unkF8;
+    if (flags & 0x8000) {
+        arg0->unk28 = (arg0->unk5 == 7) ? 0.0f : 1.0f;
+        return;
+    }
+    if (flags & 0x200000) {
+        arg0->unk180 = (s16)arg0->unk224;
+        return;
+    }
+
+    solid = flags & 2;
+    if (arg0->unk13C >= 100 && arg0->unk13C - 100 == 0) {
+        solid = D_800CC2D0[arg0->unk13C - 100].unkF8 & 2;
+    }
+    if (solid != 0 && func_150A44A4(arg0->x_position, arg0->z_position, arg0->unk188, (u8 *)&arg0->unk18C, &floorY) != 0) {
+        if (arg0->unkF8 & 8) {
+            arg0->unk118 = func_1510FBC8(arg0->x_position, arg0->y_position, arg0->z_position);
+        }
+    } else {
+        flags = arg0->unkF8;
+        func_1510EE3C((s32)&arg0->unk188, (s32)&arg0->unk18C, (s32)&floorY, (flags & 8) ? (s32)&arg0->unk118 : 0,
+                      (s32)&arg0->unk184, (s32)arg0->pad1A2, arg0->x_position, arg0->y_position, arg0->z_position,
+                      arg1, 0, (s32)arg0, (s32)0xC61C4000 /* -10000.0f */, *(s32 *)&arg0->y_position, flags & 0x04000000);
+    }
+
+    wallFlags = arg0->unkF8;
+    owner = arg0->unk13C;
+    if (owner != 0 && arg0->id != 0x9A) {
+        wallFlags = D_800CC2D0[owner - 100].unkF8;
+    }
+    if ((wallFlags & 4) && arg0->unk13D == 0 &&
+        !(arg0->unk127 == 0xFF && arg0->old_x_position == arg0->x_position && floorY == arg0->old_y_position &&
+          arg0->unk28 == 0.0f && arg0->old_z_position == arg0->z_position)) {
+        x0 = arg0->x_position;
+        z0 = arg0->z_position;
+        if (arg0->id == 0x1B || arg0->id == 0x7E) {
+            D_800CC1F3 = 1;
+        }
+        func_15044670(arg0->old_x_position, arg0->old_y_position, *(s32 *)&arg0->old_z_position, p, 1, 0);
+        if (arg0->id == 0x1B || arg0->id == 0x7E) {
+            D_800CC1F3 = 0;
+        }
+        if (arg0->x_position != x0 || arg0->z_position != z0) {
+            arg0->unkF4 |= 0x10000;
+            if (arg0->unk24E != 0) {
+                if (arg0->id == 0xC) {
+                    func_150BA3B0(p, x0, z0, 0xFF, 0);
+                }
+                arg0->unk232 = arg0->unk24E;
+                arg0->unk24E = 0;
+                arg0->unk218 = NULL;
+                arg0->unk7A = arg0->unk76;
+                arg0->unk78 = arg0->unk76;
+            }
+            if (arg0->unkF8 & 0x1000) {
+                ang = func_1505A630(arg0->x_position - x0, z0 - arg0->z_position, 0);
+                arg0->unk76 = (ang - arg0->unk76) + ang + 0x8000;
+                if (arg0->interaction_state == 0x21) {
+                    arg0->xz_velocity *= 0.9f;
+                } else if (arg0->interaction_state == 0x26) {
+                    arg0->xz_velocity *= 0.3f;
+                } else if (arg0->interaction_state == 4 && arg0->unk103 != 0) {
+                    arg0->xz_velocity *= 0.9f;
+                    arg0->unk7A = arg0->unk76;
+                    if (func_1505DADC(p, &aim, 0, (u8)(arg0->unk124 - 1), 20) != 0xFF) {
+                        arg0->unk76 = aim;
+                    }
+                } else {
+                    arg0->xz_velocity *= 0.3f;
+                }
+                if (arg0->unk2CC != 0 && 5.0f < arg0->xz_velocity) {
+                    D_800D1580 = arg0->unk2CC;
+                    func_1506E5FC();
+                }
+                if (arg0->interaction_state == 4) {
+                    arg0->unk102 = 0;
+                    arg0->gravity = 3.0f;
+                }
+            }
+            func_1510EE3C((s32)&arg0->unk188, (s32)&arg0->unk18C, (s32)&floorY, (s32)&arg0->unk118,
+                          (s32)&arg0->unk184, (s32)arg0->pad1A2, arg0->x_position, arg0->y_position, arg0->z_position,
+                          arg1, 0, (s32)arg0, (s32)0xC61C4000 /* -10000.0f */, *(s32 *)&arg0->y_position, arg0->unkF8 & 0x04000000);
+        }
+    }
+
+    if (arg0->unk255 != 0 && arg0->stunned == 0 && floorY < arg0->unk180 - (f32)(arg0->unk256 * 8)) {
+        arg0->y_velocity = 0.0f;
+        arg0->gravity = 0.0f;
+        arg0->xz_velocity = 0.0f;
+        arg0->unk218 = func_1507BB28(0, arg0->unk255);
+        arg0->unk21C = 0;
+        arg0->unk255 = 0;
+        return;
+    }
+    arg0->unk180 = floorY;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_15058898.s")
+#endif
 
 void func_15058EA4(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6) {
     if (arg1 < arg0->y_position) {
@@ -2826,7 +2960,7 @@ extern f32 D_800998E4; /* pi / 180 */
 extern struct127 D_800B30F0[];
 s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
-s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32); /* P151: args 7 / 8 are out-pointers (func_1505DADC) */
 f32 func_15143E64(f32 *vec);
 
 /* P67: one attack descriptor (0x28 bytes) of the table func_1505C1A4 returns; rec->unkD0 - 1 is the active one. */
@@ -3328,7 +3462,63 @@ void func_1505D6F0(struct127 *rec, s32 idx) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505D6F0.s")
 #endif
+#ifdef NON_MATCHING
+u16 func_1505A630(f32 arg0, f32 arg1, s32 arg2);
+f32 func_1505DF10(u8 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+
+// player_find_visible_target: picks the player (0..24 of D_800CC2D0) that `rec` can see best (P151). Skips empty or
+// inactive slots (+0x1CA, +0x2FA, flag 0x40 of +0xF8 clear), rec itself and `skip`. A candidate must be closer than
+// the best so far (initially 1e7, 40000 when skip is 0xFE) - or, when the best one is stunned (+0x104) and this one
+// is not, at any distance - lie within the heading cone `cone` (in 1/256 turns, half width) and within 16/256 of the
+// pitch `pitch`, and have a clear ray (func_150ACEA0 from rec's position + 80 up) or a hit beyond it. Writes the
+// winner's direction to *outDir and returns its number, 0xFF for none. (Like func_1505DDA8, the asm passes a 6th
+// argument 0 to func_1505DF10.)
+s32 func_1505DADC(u8 *rec, u16 *outDir, s32 pitch, s32 skip, s32 cone) {
+    struct127 *self = (struct127 *)rec;
+    struct127 *o;
+    f32 best = (u8)skip == 0xFE ? 40000.0f : 10000000.0f;
+    u8 bestStunned = 0;
+    u8 bestIdx = 0xFF;
+    u8 i;
+    u16 dir;
+    f32 h2, dy, d2;
+    f32 tri, nx, ny, nz, hx, t;
+
+    for (i = 0; i < 25; i++) {
+        o = &D_800CC2D0[i];
+        if (o->interaction_state == 0 || ((u8 *)o)[0x1CA] == 0 || (u8)(self - D_800CC2D0) == i || !(o->unkF8 & 0x40) ||
+            (u8)skip == i || o->unk2FA == 0) {
+            continue;
+        }
+        d2 = func_1505DF10(rec, i, &dir, &h2, &dy);
+        if (!(d2 < best) && (o->stunned != 0 || bestStunned == 0)) {
+            continue;
+        }
+        if ((u8)(((s32)(dir - self->unk7A) >> 8) + (u8)cone) >= (u8)cone * 2) {
+            continue;
+        }
+        if ((u8)((u8)(func_1505A630(sqrtf(h2), -dy, 0) >> 8) - (u8)pitch + 0x10) >= 0x20) {
+            continue;
+        }
+        if (func_150ACEA0(self->x_position, self->y_position + 80.0f, self->z_position, o->x_position - self->x_position,
+                          o->y_position - self->y_position, o->z_position - self->z_position, &tri, &nx, &ny, &nz, &hx,
+                          &t, 0, 0, 0.0f) != 0) {
+            t = t * t;
+            if (t < d2) {
+                continue;
+            }
+        }
+        bestStunned = o->stunned;
+        bestIdx = i;
+        best = d2;
+        *outDir = dir;
+    }
+    return bestIdx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505DADC.s")
+#endif
 #ifdef NON_MATCHING
 f32 func_1505DF10(u8 *arg0, u8 arg1, u16 *arg2, f32 *arg3, f32 *arg4);
 
