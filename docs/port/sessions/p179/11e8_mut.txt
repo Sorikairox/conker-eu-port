@@ -1,0 +1,37 @@
+s/if (\*(f32 \*)(obj + 0x28) <= 0.0f)/if (*(f32 *)(obj + 0x28) < 0.0f)/
+s/        mul = 0.7f;/        mul = 0.75f;/
+s/        rate = 0.3f;/        rate = 0.35f;/
+s/        speed = 35.0f;/        speed = 36.0f;/
+s/        speedScale = 0.7f;/        speedScale = 0.75f;/
+s/obj\[4\] == 0x28 ||/obj[4] == 0x29 ||/
+s/|| obj\[4\] == 0x77) {/|| obj[4] == 0x78) {/
+s/            mul = 0.9f;/            mul = 0.95f;/
+s/            rate = 0.2f;/            rate = 0.25f;/
+s/            speed = 7.0f;/            speed = 8.0f;/
+s/            speedScale = 0.6f;/            speedScale = 0.65f;/
+s/(s32) (obj + 0x18C), &dummy64/(s32) (obj + 0x188), \&dummy64/
+s/& 0x100000) {/\& 0x200000) {/
+s/ang = func_1505210C(obj, fx, fz, &sp40, 50.0f);/ang = func_1505210C(obj, fz, fx, \&sp40, 50.0f);/
+s/&sp40, 50.0f/\&sp40, 51.0f/
+s/            sp40 \*= mul;/            sp40 *= rate;/
+s/(sp40 - \*(f32 \*)(obj + 0xB8)) \* rate/(sp40 - *(f32 *)(obj + 0xB8)) * mul/
+s/(ang \* mul - \*(f32 \*)(obj + 0xC4))/(ang - *(f32 *)(obj + 0xC4))/
+s/& 0x80000)) {/\& 0x40000)) {/
+s/            speed = obj\[0x226\];/            speed = obj[0x227];/
+s/fabsf(fx) < 0.09f \&\& /fabsf(fx) < 0.1f \&\& /
+s/\&\& fabsf(fz) < 0.09f/|| fabsf(fz) < 0.09f/
+s/            strength = 0.2f;/            strength = 0.25f;/
+s/if (1.0f < fabsf(fx)) {/if (1.0f <= fabsf(fx) + 0.25f) {/
+s/fx = (fx < 0.0f) ? -1.0f : 1.0f;/fx = (fx < 0.0f) ? -1.0f : 0.5f;/
+s/fz = (fz < 0.0f) ? -1.0f : 1.0f;/fz = (fz > 0.0f) ? -1.0f : 1.0f;/
+s/if (clamped \&\& obj\[4\] == 0x77) {/if (obj[4] == 0x77) {/
+s/if (15.0f < \*(f32 \*)(obj + 0x3C)) {/if (16.0f < *(f32 *)(obj + 0x3C)) {/
+s/(obj + 0x3C) \*= 0.8f;/(obj + 0x3C) *= 0.75f;/
+s/if (obj\[0x89\] < 8) {/if (obj[0x89] < 9) {/
+s/obj\[0x89\] = 6;/obj[0x89] = 7;/
+s/sqrtf(fx \* fx + fz \* fz)/sqrtf(fx * fx + fz * fx)/
+s/            fz \*= speed;/            fz *= speedScale;/
+s/strength = len \* speedScale + 0.05f;/strength = len * speedScale + 0.06f;/
+s/        strength = 0.1f;/        strength = 0.15f;/
+s/func_1505A250(-fx, -fz, strength/func_1505A250(fx, -fz, strength/
+s/(f32 \*) (obj + 0x164), (f32 \*) (obj + 0x168)/(f32 *) (obj + 0x168), (f32 *) (obj + 0x164)/

@@ -1,0 +1,615 @@
+void C functions scanned: 2504 Counter({'ok': 1890, 'RETPASS': 498, 'NEAR': 94, 'SUSPECT': 16, 'ASMPASS': 3, 'SUSPECT2': 3})
+ASMPASS	game_83300	func_150593C4	MATCH	v0=set f0=set	calls=2 tabrefs=0	func_15059444@15059828:ret func_150611E8@15061970:ret
+ASMPASS	game_83300	func_15059444	MATCH	v0=pass+set f0=none+pass	calls=2 tabrefs=0	func_1504B0FC@1504b5d0:ret
+ASMPASS	init_EB00	func_1000FD38	MATCH	v0=set f0=none+pass	calls=17 tabrefs=0	func_10010154@10010580:ret func_100109D0@10010d0c:ret func_10010A3C@10010d78:ret func_150D513C@150d5190:ret func_151A7068@151a7090:ret func_151C1B20@151c1b94:ret
+NEAR	game_122650	func_150F51E8	MATCH	v0=pass+set f0=none+pass near=150f5798:lui $2,0x800c	calls=0 tabrefs=0	
+NEAR	game_1765E0	func_15149264	MATCH	v0=pass+set f0=none+pass near=15149864:lh $2,14($4)	calls=0 tabrefs=0	
+NEAR	game_18D770	func_151604A0	MATCH	v0=pass+set f0=none+pass near=15160b48:lw $2,-19216($2)	calls=0 tabrefs=0	
+NEAR	game_18D770	func_15161F4C	MATCH	v0=pass+set f0=none+pass near=15162580:lw $2,-18696($2)	calls=0 tabrefs=0	
+NEAR	game_18D770	func_151621B8	MATCH	v0=set f0=pass near=15162950:lw $2,28($29)	calls=0 tabrefs=0	
+NEAR	game_18D770	func_15163FEC	MATCH	v0=pass+set f0=none+pass near=1516460c:lw $2,-18668($2)	calls=0 tabrefs=0	
+NEAR	game_18D770	func_15164134	MATCH	v0=pass+set f0=none+pass near=15164754:lw $2,-18660($2)	calls=0 tabrefs=0	
+NEAR	game_1FFF60	func_151D324C	MATCH	v0=pass+set f0=none+pass near=151d3894:lw $2,4($2)	calls=0 tabrefs=0	
+NEAR	game_1FFF60	func_151D3354	MATCH	v0=set f0=none near=151d3904:lw $2,48($4)	calls=1 tabrefs=0	func_151D2DAC@151d3364:ret
+NEAR	game_36680	func_1500A94C	MATCH	v0=none+pass+set f0=none+pass near=1500a91c:lw $2,12172($2)	calls=1 tabrefs=0	
+NEAR	game_36680	func_1500AB5C	MATCH	v0=none+pass+set f0=none+pass near=1500ab2c:lw $2,12528($2)	calls=1 tabrefs=0	
+NEAR	game_43820	func_15016370	MATCH	v0=set f0=none near=15016338:move $2,$0	calls=1 tabrefs=0	
+NEAR	game_6E240	func_1504129C	MATCH	v0=set f0=none near=1504159c:addiu $2,$2,4;15041594:addiu $2,$2,4	calls=0 tabrefs=0	
+NEAR	game_83300	func_15059140	MATCH	v0=set f0=pass near=15059708:lui $2,0x800c	calls=11 tabrefs=0	func_150C3994@150c4198:ret func_150F3A74@150f3b8c:ret
+NEAR	game_981E0	func_1506C32C	NM	v0=pass+set f0=none+pass near=1506c798:lw $2,36($2)	calls=0 tabrefs=1	
+NEAR	game_981E0	func_1506DE84	MATCH	v0=none+pass+set f0=none+pass near=1506e2e0:lui $2,0x800d	calls=0 tabrefs=0	
+NEAR	game_981E0	func_15071A64	MATCH	v0=pass+set f0=pass near=15071e68:addiu $2,$2,-14608	calls=0 tabrefs=0	
+NEAR	game_981E0	func_15071D38	MATCH	v0=pass+set f0=none+pass near=15072114:lw $2,25840($2)	calls=3 tabrefs=0	func_15071D78@15072164:ret
+NEAR	game_981E0	func_15071F80	MATCH	v0=set f0=none near=1507234c:lui $2,0x800d	calls=0 tabrefs=0	
+NEAR	game_981E0	func_15072A7C	MATCH	v0=pass+set f0=none+pass near=15072e4c:lw $2,796($14)	calls=0 tabrefs=0	
+NEAR	game_981E0	func_150746F0	MATCH	v0=pass+set f0=none+pass near=15074afc:lui $2,0x800d	calls=0 tabrefs=0	
+NEAR	game_DBA60	func_150AED4C	MATCH	v0=set f0=none near=150af26c:lh $2,52($4)	calls=0 tabrefs=0	
+NEAR	game_DBA60	func_150AEDF8	MATCH	v0=pass+set f0=none+pass near=150af348:addiu $2,$7,40	calls=0 tabrefs=0	
+NEAR	game_eu_103160	func_150D7370	MATCH	v0=pass+set f0=none+pass near=150d73e0:addiu $2,$7,168	calls=0 tabrefs=0	
+NEAR	game_eu_103160	func_150D7578	MATCH	v0=pass+set f0=none+pass near=150d75e8:addiu $2,$7,168	calls=0 tabrefs=0	
+NEAR	game_eu_105140	func_150D7B40	MATCH	v0=set f0=none near=150d7b44:lui $2,0x800e	calls=0 tabrefs=0	
+NEAR	game_eu_10D650	func_150E0B78	MATCH	v0=set f0=set near=150e0c44:mfc1 $2,$f8;150e0c10:move $2,$0;150e0bf4:li $2,255	calls=0 tabrefs=0	
+NEAR	game_eu_110DB0	func_150E4590	MATCH	v0=pass+set f0=none+pass near=150e459c:addiu $2,$4,272	calls=0 tabrefs=0	
+NEAR	game_eu_1231B0	func_150F6980	MATCH	v0=none+set f0=none near=150f6990:addiu $2,$2,40	calls=2 tabrefs=0	
+NEAR	game_eu_131F00	func_15104764	NM	v0=pass+set f0=none+pass+set near=15104814:li $2,1	calls=0 tabrefs=1	
+NEAR	game_eu_133A70	func_151074D0	MATCH	v0=pass+set f0=none+pass near=151074f4:lw $2,-28728($2)	calls=0 tabrefs=0	
+NEAR	game_eu_15E000	func_15131E58	MATCH	v0=set f0=none near=15131e60:lw $2,-4604($2)	calls=1 tabrefs=0	
+NEAR	game_eu_15E000	func_15131E88	MATCH	v0=set f0=none near=15131e90:lw $2,-4604($2)	calls=3 tabrefs=0	
+NEAR	game_eu_15E000	func_15131EC8	MATCH	v0=set f0=none near=15131ed0:lw $2,-4604($2)	calls=6 tabrefs=0	
+NEAR	game_eu_15E000	func_1513219C	MATCH	v0=none+pass+set f0=none+pass near=151321d0:lw $2,-25576($2)	calls=0 tabrefs=0	
+NEAR	game_eu_1754C0	func_1514828C	MATCH	v0=pass+set f0=none+pass near=151482b0:lw $2,-22736($2)	calls=0 tabrefs=0	
+NEAR	game_eu_182A10	func_15155AD4	MATCH	v0=pass+set f0=none+pass near=15155af8:lw $2,-20316($2)	calls=0 tabrefs=0	
+NEAR	game_eu_185E30	func_151590AC	MATCH	v0=set f0=none near=151590c0:move $2,$6	calls=0 tabrefs=0	
+NEAR	game_eu_18B1C0	func_1515DC0C	MATCH	v0=set f0=none near=1515dc24:lw $2,0($2);1515dc10:lw $2,-11864($2)	calls=1 tabrefs=0	
+NEAR	game_eu_18B1C0	func_1515EDF8	NM	v0=set f0=pass near=1515f0c4:li $2,255	calls=1 tabrefs=1	
+NEAR	game_eu_18B1C0	func_1515F170	MATCH	v0=set f0=none near=1515f70c:lw $2,0($2);1515f704:lw $2,0($2);1515f6f0:lw $2,-11864($2)	calls=20 tabrefs=0	func_1509DD0C@1509ddec:ret func_1509DD0C@1509de14:ret func_150F58C0@150f5970:ret
+NEAR	game_eu_1ABE00	func_1517E71C	MATCH	v0=set f0=none+set near=1517e7e8:lw $2,36($2);1517e7a8:lw $2,36($2);1517e788:lw $2,36($2)	calls=1 tabrefs=0	
+NEAR	game_eu_1B6590	func_1518900C	MATCH	v0=set f0=none near=1518902c:lw $2,12($2);15189024:lw $2,12($2);15189010:lw $2,-1032($2)	calls=1 tabrefs=0	func_1506EE60@1506f254:ret
+NEAR	game_eu_1B6590	func_151898C0	MATCH	v0=set f0=none near=15189e54:lw $2,12($2);15189e48:lw $2,12($2);15189e34:lw $2,-1032($2)	calls=1 tabrefs=0	func_1506EEAC@1506f280:ret
+NEAR	game_eu_1B9810	func_1518CDC0	MATCH	v0=pass+set f0=none+pass near=1518cddc:move $2,$6	calls=0 tabrefs=0	
+NEAR	game_eu_1C06A0	func_151937A4	MATCH	v0=pass+set f0=none+pass near=15193814:addiu $2,$7,40	calls=0 tabrefs=0	
+NEAR	game_eu_1C06A0	func_15193850	MATCH	v0=pass+set f0=none+pass near=151938c0:addiu $2,$7,40	calls=0 tabrefs=0	
+NEAR	game_eu_1C3530	func_1519C7C8	MATCH	v0=set f0=none near=1519c7cc:lw $2,152($14)	calls=2 tabrefs=0	
+NEAR	game_eu_1CC6F0	func_1519EF74	MATCH	v0=none+pass+set f0=none+pass near=1519efb0:li $2,1	calls=0 tabrefs=0	
+NEAR	game_eu_1CCD10	func_151A0E98	MATCH	v0=set f0=none near=151a0ea8:addiu $2,$2,88	calls=4 tabrefs=0	func_151A0DBC@151a0e68:ret
+NEAR	game_eu_1CCD10	func_151A0EC0	MATCH	v0=pass+set f0=none+pass near=151a0ee0:move $2,$6	calls=0 tabrefs=0	
+NEAR	game_eu_1CCD10	func_151A0F5C	MATCH	v0=pass+set f0=none+pass near=151a0f78:lw $2,24($15)	calls=0 tabrefs=0	
+NEAR	game_eu_1D1150	func_151A552C	MATCH	v0=pass+set f0=none+pass near=151a5544:addiu $2,$4,40	calls=0 tabrefs=0	
+NEAR	game_eu_1D2F30	func_151A5B84	MATCH	v0=pass+set f0=none+pass near=151a5ba8:lw $2,-860($2)	calls=0 tabrefs=0	
+NEAR	game_eu_1E0E70	func_151B3FE4	MATCH	v0=pass+set f0=none+pass near=151b4008:lw $2,-248($2)	calls=0 tabrefs=0	
+NEAR	game_eu_1E0E70	func_151B51CC	MATCH	v0=pass+set f0=pass near=151b51f8:lw $2,-240($2)	calls=2 tabrefs=0	
+NEAR	game_eu_1E3000	func_151B604C	MATCH	v0=pass+set f0=none+pass near=151b60f8:addiu $2,$4,40	calls=0 tabrefs=0	
+NEAR	game_eu_1E7CC0	func_151BEB08	MATCH	v0=pass+set f0=none+pass near=151beb78:addiu $2,$7,176	calls=0 tabrefs=0	
+NEAR	game_eu_1F7960	func_151CB07C	MATCH	v0=pass+set f0=none+pass near=151cb104:lw $2,-80($2)	calls=0 tabrefs=0	
+NEAR	game_eu_1F7960	func_151CBA4C	MATCH	v0=pass+set f0=none+pass near=151cba68:move $2,$6	calls=0 tabrefs=0	
+NEAR	game_eu_1F7960	func_151CC11C	MATCH	v0=pass+set f0=none+pass near=151cc138:move $2,$6	calls=0 tabrefs=0	
+NEAR	game_eu_200480	func_151D2CC8	MATCH	v0=set f0=none near=151d2cf8:lw $2,8($2);151d2cf0:lw $2,8($2)	calls=1 tabrefs=0	func_1509DB90@1509dcb4:ret
+NEAR	game_eu_203C50	func_151D6CA0	MATCH	v0=none+pass+set f0=none+pass near=151d6cf8:lui $2,0x800c	calls=4 tabrefs=0	func_15104764@151049b4:ret
+NEAR	game_eu_20B730	func_151E7110	NM	v0=pass+set f0=none+pass near=151e7158:lui $2,0x800e	calls=3 tabrefs=1	
+NEAR	game_eu_51190	func_15023EC4	NM	v0=set f0=none near=15024380:addiu $2,$2,8	calls=1 tabrefs=1	
+NEAR	game_eu_595D0	func_1502E228	NM	v0=pass+set f0=pass+set near=1502e42c:lw $2,-14140($2)	calls=2 tabrefs=1	func_1502C074@1502c09c:ret
+NEAR	game_eu_595D0	func_1502FED8	NM	v0=none+pass+set f0=none+pass near=1502ff20:move $2,$0	calls=1 tabrefs=1	
+NEAR	game_eu_5D910	func_150341B4	MATCH	v0=set f0=none near=150341f0:move $2,$3;150341bc:lw $2,17152($2)	calls=1 tabrefs=0	
+NEAR	game_eu_62360	func_150351A4	MATCH	v0=set f0=none+set near=150351ac:lh $2,17168($2)	calls=1 tabrefs=0	func_150348D4@150349e0:ret
+NEAR	game_eu_64770	func_15039CC8	NM	v0=set f0=none near=15039fb8:lw $2,804($4)	calls=1 tabrefs=1	func_150627D4@15062b8c:ret
+NEAR	game_eu_6AA20	func_1503D658	NM	v0=none+set f0=none+pass near=1503d69c:move $2,$18	calls=2 tabrefs=1	
+NEAR	game_eu_6AA20	func_1503D800	NM	v0=set f0=none near=1503d84c:move $2,$0	calls=2 tabrefs=1	
+NEAR	game_eu_6D4F0	func_1503FCE0	NM	v0=set f0=none near=1503fde8:li $2,1;1503fde0:move $2,$3	calls=1 tabrefs=1	
+NEAR	game_eu_90F50	func_15063F14	MATCH	v0=pass+set f0=pass near=15064000:lw $2,796($16)	calls=2 tabrefs=0	
+NEAR	game_eu_ABEA0	func_1507EB1C	NM	v0=none+pass+set f0=none+pass near=1507eb48:move $2,$3	calls=2 tabrefs=1	
+NEAR	game_eu_BC930	func_1508F21C	MATCH	v0=set f0=none near=1508f234:sll $2,$4,0x2	calls=1 tabrefs=0	func_1508F26C@1508f388:ret
+NEAR	game_eu_CA060	func_1509C850	NM	v0=none+pass+set f0=none+pass near=1509ca8c:move $2,$0;1509ca84:li $2,1;1509c9dc:move $2,$0	calls=0 tabrefs=1	
+NEAR	game_eu_CA060	func_1509CBD8	NM	v0=none+set f0=none near=1509cd00:li $2,1;1509ccd4:lbu $2,14994($2);1509ccc8:sltu $2,$0,$12	calls=0 tabrefs=1	
+NEAR	game_eu_CA630	func_1509D464	MATCH	v0=pass+set f0=none+pass near=1509d470:lw $2,13264($2)	calls=2 tabrefs=0	
+NEAR	game_eu_CA630	func_1509DB90	NM	v0=none+pass+set f0=none+pass near=1509dc90:move $2,$0	calls=0 tabrefs=1	
+NEAR	game_eu_CA630	func_1509DD0C	NM	v0=none+pass+set f0=none+pass near=1509def8:li $2,1	calls=0 tabrefs=1	
+NEAR	game_eu_DB7E0	func_150ADFD0	NM	v0=pass+set f0=pass near=150ae75c:move $2,$11;150ae754:move $2,$0;150ae740:li $2,1	calls=5 tabrefs=1	
+NEAR	game_eu_E9450	func_150BB760	NM	v0=none+pass+set f0=none+pass near=150bbc64:li $2,1	calls=1 tabrefs=1	func_1506EFC8@1506f3ac:ret
+NEAR	game_eu_EBBA0	func_150BE650	MATCH	v0=pass+set f0=none+pass near=150be66c:move $2,$6	calls=0 tabrefs=0	
+NEAR	game_eu_F3080	func_150C61C4	MATCH	v0=pass+set f0=none+pass near=150c61e8:lw $2,-29848($2)	calls=0 tabrefs=0	
+NEAR	game_eu_FABD0	func_150CE07C	MATCH	v0=none+set f0=none near=150ce088:lui $2,0x8009	calls=1 tabrefs=0	
+NEAR	game_eu_FBE70	func_150CEBA4	MATCH	v0=pass+set f0=none+pass near=150cec14:addiu $2,$7,24	calls=0 tabrefs=0	
+NEAR	game_eu_FCE60	func_150D05D0	MATCH	v0=none+pass+set f0=none+pass near=150d0620:lw $2,-29616($2)	calls=0 tabrefs=0	
+NEAR	init_8F90	func_1000A348	MATCH	v0=set f0=none near=1000a6f8:move $2,$3;1000a640:lw $2,4($7)	calls=1 tabrefs=0	func_1000A03C@1000a610:ret
+NEAR	init_B1B0	func_1000CBF0	MATCH	v0=set f0=none near=1000cf30:addiu $2,$2,1;1000cf14:addiu $2,$2,1	calls=6 tabrefs=0	
+NEAR	init_B1B0	func_1000CEAC	NM	v0=set f0=none+pass near=1000d5b4:addiu $2,$2,8	calls=1 tabrefs=1	
+NEAR	init_B1B0	func_1000E7A0	MATCH	v0=set f0=none near=1000eb98:lui $2,0x8004	calls=6 tabrefs=0	func_151C2600@151c26fc:ret func_151C2600@151c2834:ret func_151DEDD0@151df3f0:ret
+NEAR	init_B1B0	func_1000E8C4	MATCH	v0=set f0=none near=1000ebc0:lui $2,0x8004	calls=1 tabrefs=0	
+NEAR	init_EB00	func_100111C8	MATCH	v0=set f0=none+pass near=10011514:lw $2,28($29)	calls=44 tabrefs=0	func_100109D0@10010cec:ret func_10010A3C@10010d58:ret func_10010AA8@10010dd4:ret func_10010AA8@10010df8:ret func_10011624@10011e14:ret func_150BE710@150be7c8:ret
+RETPASS	D5E90_mtx	func_150A9B0C	NM	v0= f0=	calls=5 tabrefs=0	func_15043F6C@15044294:ret
+RETPASS	D5E90_mtx	func_150A9E64	NM	v0=none f0=none	calls=2 tabrefs=0	func_1502E764@1502e790:ret
+RETPASS	code_17AA0	func_10017AA0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_100084D8@10008814:ret
+RETPASS	code_17D80	func_10017D80	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008744@10008a68:ret
+RETPASS	code_18C60	func_10018C60	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_10008F24@10009230:ret
+RETPASS	debugger	func_16000590	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_16000314@1600036c:ret
+RETPASS	debugger	func_160006CC	MATCH	v0=set f0=pass	calls=1 tabrefs=0	func_16000314@1600035c:ret
+RETPASS	debugger	func_160012B0	MATCH	v0=none+pass f0=none+pass	calls=28 tabrefs=0	func_16000000@16000010:ret func_16000058@160001fc:ret func_16000424@16000574:ret func_16000F8C@16000ff0:ret func_16000F8C@1600102c:ret func_16001044@1600123c:ret
+RETPASS	debugger	func_16001338	MATCH	v0=none f0=none	calls=24 tabrefs=0	func_1600078C@160009d0:ret func_1600078C@16000a04:ret func_1600078C@16000a1c:ret
+RETPASS	debugger_257350	func_16002DE4	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_1600288C@16002cfc:ret
+RETPASS	debugger_257350	func_160033A8	MATCH	v0=pass+set f0=pass	calls=3 tabrefs=0	func_160021FC@16002418:ret func_160021FC@1600256c:ret func_160021FC@160027ec:ret
+RETPASS	game_130CB0	func_15103800	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_15011C70@15011c38:ret func_15011CA0@15011c58:ret func_15011D40@15011cf8:ret
+RETPASS	game_130CB0	func_15103828	MATCH	v0=none+set f0=none	calls=3 tabrefs=0	func_150FD530@150fd53c:ret func_150FE290@150fe2a8:ret func_15103C10@15103c1c:ret
+RETPASS	game_15B200	func_1512DD50	NM	v0=set f0=pass	calls=1 tabrefs=1	func_1512EE50@1512fb14:ret
+RETPASS	game_161520	func_151346EC	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150C6910@150c6920:ret func_150C7240@150c7250:ret func_151ABD38@151abd70:ret
+RETPASS	game_161520	func_1513470C	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150C6938@150c6948:ret func_150C7268@150c7278:ret func_151ABD88@151abdc0:ret
+RETPASS	game_161520	func_151352EC	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151AB100@151ab110:ret
+RETPASS	game_161520	func_1513530C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151AB128@151ab138:ret
+RETPASS	game_161520	func_1513555C	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_15135480@15135a7c:ret
+RETPASS	game_161520	func_151355B8	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_15135480@15135a6c:ret
+RETPASS	game_161520	func_15137610	MATCH	v0=pass+set f0=none+pass	calls=4 tabrefs=0	func_1506AEA0@1506af08:ret func_15195A98@15195ba4:ret func_151D535C@151d55d8:ret
+RETPASS	game_161520	func_1513A48C	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15136C3C@151374a8:ret
+RETPASS	game_16DC80	func_151411A4	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_150F08A8@150f08bc:ret func_150F6A04@150f6a18:ret func_15101858@15101868:ret func_151BEDA8@151bedbc:ret
+RETPASS	game_16DC80	func_151411C4	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_150F08D4@150f08e8:ret func_150F6A30@150f6a44:ret func_15101880@15101890:ret func_151BEDD4@151bede8:ret
+RETPASS	game_16DC80	func_151417C4	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150DF1A8@150df1ec:ret
+RETPASS	game_16EE20	func_15141970	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15141990@15141f08:ret func_151419B0@15141f28:ret
+RETPASS	game_16EE20	func_15141A7C	NM	v0=none+pass f0=none+pass	calls=1 tabrefs=1	func_15071DC8@1507219c:ret
+RETPASS	game_16EE20	func_15141DA4	MATCH	v0=none+pass+set f0=none+pass	calls=1 tabrefs=0	func_151ABDD8@151abdec:ret
+RETPASS	game_16EE20	func_15141E38	NM	v0=pass f0=pass	calls=2 tabrefs=1	func_15141DA4@15142390:ret
+RETPASS	game_16EE20	func_15141F78	MATCH	v0=pass f0=pass	calls=8 tabrefs=0	func_150BEFCC@150bf0e8:ret func_150BF24C@150bf368:ret func_150EB610@150eb71c:ret func_15147168@1514728c:ret func_151472D0@151473dc:ret func_15147888@151479d0:ret
+RETPASS	game_16EE20	func_15142180	MATCH	v0=pass f0=pass	calls=7 tabrefs=0	func_150BEFCC@150bf118:ret func_150BF24C@150bf398:ret func_15147168@151472b8:ret func_151479E8@15147b30:ret func_15147B48@15147c90:ret
+RETPASS	game_16EE20	func_15142314	MATCH	v0=set f0=none+set	calls=16 tabrefs=0	func_15143134@151437fc:ret func_15145EA4@151464f8:ret func_15145EA4@151465ac:ret
+RETPASS	game_1765E0	func_1514933C	MATCH	v0=pass f0=pass	calls=21 tabrefs=0	func_150B5CC8@150b5cdc:ret func_150C5008@150c501c:ret func_150D25EC@150d2600:ret func_150D278C@150d27a0:ret func_150D5F3C@150d5f44:ret func_150F0840@150f0854:ret
+RETPASS	game_1765E0	func_15149368	MATCH	v0=pass f0=pass	calls=21 tabrefs=0	func_150B5CF4@150b5d08:ret func_150C5034@150c5048:ret func_150D25C0@150d25d4:ret func_150D27B8@150d27cc:ret func_150D5F5C@150d5f64:ret func_150F086C@150f0880:ret
+RETPASS	game_1765E0	func_151494E0	MATCH	v0=pass f0=pass	calls=44 tabrefs=0	func_150717E0@15071bd8:ret func_1508039C@150803c8:ret func_1509DD0C@1509de68:ret func_1509DD0C@1509df08:ret func_150B42B0@150b4338:ret func_150B65F0@150b6654:ret
+RETPASS	game_1765E0	func_15149514	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_150BADD0@150badf8:ret func_150C5060@150c50d0:ret func_150E0840@150e0868:ret func_150F1B78@150f1bec:ret func_150F66B8@150f66e0:ret func_150F7890@150f7904:ret
+RETPASS	game_18D770	func_151616D0	MATCH	v0=pass f0=pass	calls=18 tabrefs=0	func_1509DB90@1509dbe8:ret func_1509DB90@1509dc28:ret func_1509DB90@1509dccc:ret func_1509DB90@1509dcf4:ret func_1509DD0C@1509df94:ret func_151008C0@15100988:ret
+RETPASS	game_18D770	func_151617C4	MATCH	v0=pass f0=pass	calls=6 tabrefs=0	func_150F0910@150f0924:ret func_151017B8@151017c8:ret func_15161714@15161c98:ret func_1516176C@15161cf0:ret func_151909D4@151909e8:ret func_1519C770@1519c784:ret
+RETPASS	game_18D770	func_151617E4	MATCH	v0=pass f0=pass	calls=6 tabrefs=0	func_150F093C@150f0950:ret func_151017E0@151017f0:ret func_15161740@15161cc4:ret func_15161798@15161d1c:ret func_15190A00@15190a14:ret func_1519C79C@1519c7b0:ret
+RETPASS	game_18D770	func_151618BC	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_151604A0@15160b04:ret func_15160954@15160fb0:ret
+RETPASS	game_18D770	func_1516381C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15009EC8@15009e8c:ret
+RETPASS	game_18D770	func_151645C4	MATCH	v0=pass+set f0=none+pass	calls=3 tabrefs=0	func_1500E470@1500e558:ret func_1509DD0C@1509ddbc:ret
+RETPASS	game_1CC420	func_1519EF70	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_1506F8C0@1506fc98:ret
+RETPASS	game_1FFF60	func_151D2B4C	MATCH	v0=pass+set f0=none+pass	calls=2 tabrefs=0	func_150B5CA4@150b5cb0:ret func_15190A2C@15190a70:ret
+RETPASS	game_21FC90	func_151F2960	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1001263C@100129c0:ret
+RETPASS	game_21FC90	func_151F2BA8	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_100125CC@10012914:ret func_151F39E4@151f433c:ret
+RETPASS	game_21FC90	func_151F2D6C	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_100125CC@100128fc:ret func_1501E220@1501e300:ret func_15080FE8@1508104c:ret func_151E49C8@151e4a38:ret
+RETPASS	game_21FC90	func_151F3C1C	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_10012588@100128a4:ret
+RETPASS	game_21FC90	func_151F3C34	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_15016170@15016238:ret
+RETPASS	game_2D4B0	func_15000090	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15007A70@15007ab8:ret
+RETPASS	game_32F10	func_15005A60	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_150054C4@150056f0:ret
+RETPASS	game_33990	func_150064E0	MATCH	v0=set f0=pass	calls=3 tabrefs=0	func_15006590@15006650:ret func_150076BC@1500767c:ret func_1501C55C@1501c604:ret
+RETPASS	game_33990	func_15007644	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_150061B0@150061cc:ret
+RETPASS	game_33990	func_1500764C	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_151DECFC@151ded24:ret
+RETPASS	game_33990	func_150076A0	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_151E2B9C@151e2c70:ret
+RETPASS	game_33990	func_150076BC	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_151E06D0@151e0a40:ret
+RETPASS	game_33990	func_15007718	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_1509C3A0@1509c804:ret func_151DE100@151de9f8:ret
+RETPASS	game_36040	func_15008BB0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15008B90@15008b48:ret
+RETPASS	game_36680	func_15009334	NM	v0= f0=	calls=1 tabrefs=1	func_150092DC@150092b4:ret
+RETPASS	game_3BFE0	func_1500EB30	MATCH	v0=pass f0=pass	calls=17 tabrefs=0	func_1500EBC4@1500ed14:ret
+RETPASS	game_3C230	func_1500EE18	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1514E1A8@1514e1b4:ret
+RETPASS	game_3E890	func_15011A78	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1514FB00@1514fb24:ret
+RETPASS	game_3F120	func_15011C70	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1500E70C@1500e6d0:ret
+RETPASS	game_3F670	func_150121C0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150097CC@150097b0:ret
+RETPASS	game_433F0	func_15015FBC	NM	v0=set f0=none	calls=1 tabrefs=1	func_100039C0@10003af8:ret
+RETPASS	game_43B20	func_15016680	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_1501C710@1501c800:ret
+RETPASS	game_447B0	func_1501748C	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_15017300@150173e4:ret
+RETPASS	game_447B0	func_150174C0	NM	v0=set f0=none	calls=1 tabrefs=1	func_15017578@15017574:ret
+RETPASS	game_476D0	func_1501B22C	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_1510BC10@1510bcdc:ret
+RETPASS	game_70200	func_15042D94	MATCH	v0=pass f0=pass	calls=93 tabrefs=0	func_150916B4@15091c8c:ret func_150916B4@15091ce0:ret func_151E1EDC@151e29f4:ret func_151E3AE4@151e492c:ret
+RETPASS	game_70200	func_15042E3C	MATCH	v0=pass f0=pass	calls=35 tabrefs=0	func_151D75B0@151d7664:ret func_151E0BBC@151e0fb8:ret func_151E1EDC@151e28f0:ret func_151E1EDC@151e2920:ret func_151E1EDC@151e2938:ret
+RETPASS	game_70200	func_15042ECC	NM	v0=none+pass+set f0=none+pass+set	calls=2 tabrefs=1	func_15042D94@15043114:ret func_15042E3C@150431a4:ret
+RETPASS	game_70200	func_1504332C	MATCH	v0=none f0=none	calls=50 tabrefs=0	func_151E1EDC@151e2820:ret
+RETPASS	game_71240	func_15043EC8	MATCH	v0=none f0=none	calls=3 tabrefs=0	func_1503CE88@1503d190:ret func_1503EB1C@1503ecf8:ret
+RETPASS	game_71240	func_15043FF0	MATCH	v0=none f0=set	calls=3 tabrefs=0	func_1505327C@15053720:ret
+RETPASS	game_71240	func_150440A0	MATCH	v0=pass f0=set	calls=3 tabrefs=0	func_15036600@1503677c:ret
+RETPASS	game_75BD0	func_15048758	MATCH	v0=none f0=set	calls=10 tabrefs=0	func_15049978@15049ab4:ret
+RETPASS	game_75FC0	func_1504917C	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_150491EC@1504952c:ret
+RETPASS	game_75FC0	func_150491EC	MATCH	v0=pass f0=pass	calls=6 tabrefs=0	func_151229B0@15122e0c:ret
+RETPASS	game_83300	func_15056A00	NM	v0=set f0=none	calls=2 tabrefs=1	func_15077F64@1507841c:ret
+RETPASS	game_83300	func_1505841C	NM	v0=pass+set f0=pass+set	calls=2 tabrefs=1	func_15056B08@15056fc0:ret func_15056B08@15058688:ret
+RETPASS	game_83300	func_15058EA4	MATCH	v0=none f0=set	calls=5 tabrefs=0	func_1504CA60@1504ce70:ret
+RETPASS	game_83300	func_1505959C	MATCH	v0=pass+set f0=pass	calls=5 tabrefs=0	func_150597FC@15059d30:ret func_150F3A74@150f3dac:ret
+RETPASS	game_83300	func_15059C84	NM	v0=none+pass+set f0=set	calls=6 tabrefs=1	func_150D18B0@150d1908:ret
+RETPASS	game_83300	func_1505A184	NM	v0=pass f0=pass	calls=29 tabrefs=1	func_15059C84@1505a240:ret func_15073FA0@15074960:ret func_15145740@15145db8:ret
+RETPASS	game_83300	func_1505A250	NM	v0=none f0=none+set	calls=9 tabrefs=1	func_150511E8@150518a8:ret func_15051558@15051f58:ret func_15051558@15052444:ret func_15064668@15064b0c:ret
+RETPASS	game_83300	func_1505A770	NM	v0=none+set f0=set	calls=7 tabrefs=1	func_15052260@15052718:ret
+RETPASS	game_83300	func_1505D408	NM	v0=set f0=set	calls=2 tabrefs=1	func_1505D5D0@1505da84:ret func_1505D6F0@1505dd6c:ret
+RETPASS	game_83300	func_1505D5D0	NM	v0=pass f0=pass+set	calls=2 tabrefs=1	func_1505D6F0@1505dddc:ret func_1505D6F0@1505de38:ret
+RETPASS	game_83300	func_1505DFDC	MATCH	v0=set f0=none+pass	calls=4 tabrefs=0	func_1502DB14@1502db6c:ret func_1505E0C4@1505e7ec:ret func_1505E650@1505eac4:ret func_1505E650@1505eb0c:ret
+RETPASS	game_83300	func_1505E650	NM	v0=none+pass+set f0=none+pass	calls=82 tabrefs=1	func_1504C0E8@1504cac0:ret func_1504C0E8@1504cb34:ret func_15052260@150526b8:ret func_15052EF0@150532ac:ret func_15054A94@150551a4:ret func_15055B0C@15055ea8:ret
+RETPASS	game_83300	func_1505F188	NM	v0=set f0=pass	calls=6 tabrefs=1	func_15060F28@15061578:ret
+RETPASS	game_83300	func_1506045C	NM	v0=none+pass+set f0=none+pass	calls=4 tabrefs=1	func_1505F298@1505faac:ret func_1506045C@15060a54:ret
+RETPASS	game_83300	func_15060778	NM	v0=pass f0=pass	calls=5 tabrefs=1	func_15060A30@15060e30:ret func_15060A9C@15060e98:ret func_15060B04@15060f04:ret func_15076250@15076658:ret
+RETPASS	game_83300	func_15060A30	MATCH	v0=pass f0=pass	calls=25 tabrefs=0	.L150544C4@150546c8:ret func_15064668@1506496c:ret func_15077B44@15077f28:ret func_150799B4@15079dd0:ret
+RETPASS	game_83300	func_15060A9C	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_1506DC10@1506e04c:ret func_1507BA48@1507be78:ret
+RETPASS	game_83300	func_15061B4C	NM	v0=pass+set f0=pass+set	calls=2 tabrefs=1	func_1502378C@150238ec:ret
+RETPASS	game_83300	func_150627D4	MATCH	v0=pass f0=pass	calls=7 tabrefs=0	func_1505E0C4@1505e9e0:ret func_15062800@15062e58:ret
+RETPASS	game_8FCB0	func_15062AC4	MATCH	v0=set f0=set	calls=3 tabrefs=0	func_15062B1C@15062ee8:ret func_15062B50@15062f1c:ret
+RETPASS	game_8FCB0	func_15062B1C	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15073CF4@150740dc:ret func_1507B178@1507b5dc:ret
+RETPASS	game_8FCB0	func_15062B50	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15073D34@1507411c:ret func_1507B178@1507b5b8:ret
+RETPASS	game_8FCB0	func_15062B84	MATCH	v0=set f0=set	calls=1 tabrefs=0	func_15062BDC@150630a8:ret
+RETPASS	game_8FCB0	func_15062BDC	MATCH	v0=none+pass f0=none+pass	calls=10 tabrefs=0	func_15053750@15053b04:ret func_15053750@15053b50:ret func_15053750@15053ba0:ret func_15053750@15053be8:ret func_15076D3C@1507719c:ret
+RETPASS	game_8FCB0	func_15062D10	NM	v0=set f0=none	calls=21 tabrefs=1	func_15061B4C@15062004:ret func_15061B4C@15062090:ret func_15061B4C@15062280:ret func_15061B4C@15062340:ret func_15061B4C@150625c8:ret func_15061B4C@1506271c:ret
+RETPASS	game_8FCB0	func_15062FC0	NM	v0=set f0=none	calls=3 tabrefs=1	func_15061B4C@1506261c:ret func_150EDBB8@150edca8:ret
+RETPASS	game_8FCB0	func_15063168	MATCH	v0=none+pass+set f0=none+pass	calls=2 tabrefs=0	func_150CEC50@150cf3f8:ret
+RETPASS	game_981E0	func_1506B100	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_1506B078@1506b4a8:ret func_1506B860@1506bc34:ret func_1506B88C@1506bc5c:ret func_1506B8F4@1506bcc4:ret func_1506B91C@1506bcec:ret func_1506B944@1506bd2c:ret
+RETPASS	game_981E0	func_1506B3B8	NM	v0=set f0=pass	calls=1 tabrefs=1	func_1506B4EC@1506b8b4:ret
+RETPASS	game_981E0	func_1506B634	MATCH	v0=pass+set f0=pass	calls=2 tabrefs=0	func_1506B740@1506bb9c:ret func_1506B7F4@1506bbd4:ret
+RETPASS	game_981E0	func_1506B82C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150729D0@15072dbc:ret
+RETPASS	game_981E0	func_1506BA4C	MATCH	v0=pass f0=pass	calls=13 tabrefs=0	func_1506DE84@1506e334:ret func_1506E5FC@1506e9e4:ret func_1506E63C@1506ea24:ret func_1506E67C@1506ea64:ret func_1506E6BC@1506eaa4:ret func_1506E6FC@1506eae4:ret
+RETPASS	game_981E0	func_1506BAD8	MATCH	v0=pass f0=pass	calls=12 tabrefs=0	func_1506E8D8@1506ecc0:ret func_1506E918@1506ed00:ret func_1506E958@1506ed40:ret func_1506E998@1506ed80:ret func_1506E9D8@1506edc0:ret func_1506EA18@1506ee00:ret
+RETPASS	game_981E0	func_1506BB64	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1506E898@1506ec80:ret
+RETPASS	game_981E0	func_1506BBA8	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1506E77C@1506eb64:ret func_1506E7BC@1506eba4:ret
+RETPASS	game_981E0	func_1506BC24	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1506EA58@1506ee40:ret
+RETPASS	game_981E0	func_1506BF5C	NM	v0=pass+set f0=none+pass	calls=2 tabrefs=1	func_1506BF1C@1506c304:ret func_1506C32C@1506c7c0:ret
+RETPASS	game_981E0	func_1506D538	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_15055D48@15056168:ret
+RETPASS	game_981E0	func_1506D584	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_1506D6B4@1506daf4:ret
+RETPASS	game_981E0	func_1506E0EC	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_1506DE84@1506e428:ret
+RETPASS	game_981E0	func_1506E2CC	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_1506DE84@1506e458:ret
+RETPASS	game_981E0	func_1506E8D8	MATCH	v0=pass f0=pass	calls=11 tabrefs=0	func_15051558@15052328:ret
+RETPASS	game_981E0	func_1506EBC0	MATCH	v0=set f0=none+set	calls=1 tabrefs=0	func_1504BAF0@1504be68:ret
+RETPASS	game_981E0	func_15070C40	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15070CDC@150710a8:ret func_15070D00@150710cc:ret
+RETPASS	game_981E0	func_15070F60	MATCH	v0=pass+set f0=none+pass	calls=2 tabrefs=0	func_15071230@150715fc:ret func_15071254@15071620:ret
+RETPASS	game_981E0	func_15072740	MATCH	v0=set f0=none	calls=3 tabrefs=0	func_15074E80@15075290:ret func_15074EE8@150752d8:ret
+RETPASS	game_981E0	func_15074664	MATCH	v0=set f0=none+pass	calls=2 tabrefs=0	func_15064668@15064790:ret func_15064668@15064834:ret
+RETPASS	game_A9D90	func_1507C8E0	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_15071F54@15072328:ret .L1507D3A4_game_data@1507d474:ret
+RETPASS	game_A9D90	func_1507C8FC	NM	v0=none+set f0=none+pass	calls=1 tabrefs=1	func_15018DFC@15018e20:ret
+RETPASS	game_A9D90	func_1507D4F8	NM	v0=pass+set f0=pass	calls=9 tabrefs=1	func_1506B370@1506b758:ret func_1506D538@1506d918:ret .L1507D3A4_game_data@1507d4a8:ret
+RETPASS	game_A9D90	func_1507DF10	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_1508220C@15082260:ret
+RETPASS	game_BC430	func_1508EF80	NM	v0=set f0=pass	calls=8 tabrefs=1	func_151256BC@15125db8:ret func_151256BC@15125e74:ret func_1512C77C@1512c964:ret func_1512D900@1512da38:ret func_1512D900@1512dab0:ret
+RETPASS	game_C8950	func_1509B4A0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15017868@150178b8:ret func_1509BBA0@1509c214:ret
+RETPASS	game_C8950	func_1509B764	MATCH	v0=set f0=pass	calls=2 tabrefs=0	func_1509BA04@1509bed8:ret func_1509BA04@1509bf38:ret
+RETPASS	game_C8950	func_1509BFB0	NM	v0=pass f0=pass	calls=71 tabrefs=1	func_15005B70@15005b54:ret func_1507D158@1507d5a0:ret func_1508EFEC@1508f03c:ret func_1508F054@1508f0a0:ret func_1508F0B8@1508f104:ret func_1509C228@1509c684:ret
+RETPASS	game_C8950	func_1509C228	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1509BA04@1509be68:ret
+RETPASS	game_C8950	func_1509C3A0	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	func_1509B4A0@1509b950:ret
+RETPASS	game_D5160	func_150A7CB0	NM	v0=none f0=none	calls=10 tabrefs=1	func_15017FA4@15018070:ret
+RETPASS	game_D5500	func_150A8050	NM	v0=pass f0=set	calls=71 tabrefs=1	func_150D2140@150d21ec:ret func_15142914@15142eac:ret func_15145CD0@15146278:ret func_15145DB4@15146364:ret func_151831CC@15183264:ret
+RETPASS	game_eu_103160	func_150D6898	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150D5F7C@150d6864:ret
+RETPASS	game_eu_103160	func_150D6C40	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_151D6F20@151d6f4c:ret
+RETPASS	game_eu_10C0B0	func_150DF1A8	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1509DD0C@1509dfb4:ret func_150DF160@150df178:ret
+RETPASS	game_eu_10D650	func_150E0324	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_150348D4@15034a00:ret
+RETPASS	game_eu_10D650	func_150E08C8	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1506AABC@1506aacc:ret
+RETPASS	game_eu_10F840	func_150E2EA4	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_1506F8F0@1506fd68:ret func_1506F9C0@1506fe38:ret func_1506FA90@1506ff08:ret func_1506FD30@15070198:ret
+RETPASS	game_eu_10F840	func_150E3334	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150B0344@150b0500:ret
+RETPASS	game_eu_110DB0	func_150E3A94	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_150E3CB8@150e3d64:ret func_150E3CB8@150e3eac:ret func_150E3CB8@150e3ec4:ret
+RETPASS	game_eu_110DB0	func_150E3B5C	MATCH	v0=none+set f0=none+pass	calls=1 tabrefs=0	func_1509DB90@1509dc54:ret
+RETPASS	game_eu_111F50	func_150E4878	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_150E4A94@150e4ab8:ret
+RETPASS	game_eu_111F50	func_150E4A94	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150E6060@150e6184:ret
+RETPASS	game_eu_1122E0	func_150E5AD8	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150E5384@150e5aa0:ret
+RETPASS	game_eu_113870	func_150E6060	NM	v0=none+pass f0=none+pass	calls=1 tabrefs=1	func_150EAE60@150eae6c:ret
+RETPASS	game_eu_114640	func_150E6E30	NM	v0=none+pass+set f0=none+pass+set	calls=1 tabrefs=1	func_150A2AB4@150a2b6c:ret
+RETPASS	game_eu_114640	func_150E7810	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150A2AB4@150a2b08:ret
+RETPASS	game_eu_114640	func_150E856C	NM	v0=pass f0=pass	calls=9 tabrefs=1	func_151BC56C@151bc60c:ret func_151C0910@151c09b0:ret
+RETPASS	game_eu_114640	func_150E8854	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150109D0@150109f0:ret func_15011330@150112e8:ret
+RETPASS	game_eu_114640	func_150E892C	MATCH	v0=pass f0=pass	calls=10 tabrefs=0	func_151C0BF4@151c0c30:ret
+RETPASS	game_eu_114640	func_150E8EB0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150E8E40@150e8e98:ret
+RETPASS	game_eu_11A2B0	func_150ECFE8	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150ED180@150ed1d8:ret
+RETPASS	game_eu_11AF60	func_150EDAF8	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_1504ADD0@1504b1a8:ret
+RETPASS	game_eu_11AF60	func_150EDBB8	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150FE290@150fe2e8:ret
+RETPASS	game_eu_11F790	func_150F1F80	NM	v0=set f0=pass	calls=1 tabrefs=1	func_150348D4@150349f0:ret
+RETPASS	game_eu_11F790	func_150F2230	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_15071D08@150720e0:ret
+RETPASS	game_eu_1207F0	func_150F3978	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_151101B4@15110284:ret
+RETPASS	game_eu_122300	func_150F4AF0	NM	v0=pass f0=pass	calls=2 tabrefs=1	func_150F536C@150f56ac:ret func_150FB06C@150fb200:ret
+RETPASS	game_eu_1231B0	func_150F5B48	NM	v0=set f0=none	calls=1 tabrefs=1	func_150F5B10@150f5b30:ret
+RETPASS	game_eu_124B40	func_150F7330	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1509DB90@1509dc10:ret
+RETPASS	game_eu_12C5F0	func_150FF1A8	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150FEDE0@150ff12c:ret
+RETPASS	game_eu_12CAC0	func_150FF9F4	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150F9ED0@150f9f7c:ret func_150FF2B0@150ff534:ret func_150FF604@150ff7ec:ret
+RETPASS	game_eu_1306B0	func_151037D4	NM	v0=pass f0=pass	calls=4 tabrefs=1	func_150E3CB8@150e4528:ret
+RETPASS	game_eu_131F00	func_151046F0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15194F64@15194fb0:ret
+RETPASS	game_eu_133A70	func_151080F8	MATCH	v0=none+pass f0=none+pass	calls=4 tabrefs=0	func_150B5988@150b5c3c:ret
+RETPASS	game_eu_1365E0	func_15108850	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_15009870@1500982c:ret
+RETPASS	game_eu_1365E0	func_151095E4	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_1513BA78@1513c01c:ret
+RETPASS	game_eu_13C400	func_1510ED24	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_1510E004@1510e17c:ret func_1512A1A0@1512a8b4:ret
+RETPASS	game_eu_13C400	func_1510EE3C	MATCH	v0=pass f0=pass	calls=7 tabrefs=0	func_1512A390@1512abac:ret
+RETPASS	game_eu_13C400	func_1510F800	MATCH	v0=pass f0=pass	calls=59 tabrefs=0	func_150026C4@150026d0:ret func_15002754@150027d8:ret func_15003668@15003848:ret func_150045C4@150047d0:ret func_1503EF90@1503efd0:ret func_15175514@15175568:ret
+RETPASS	game_eu_142E40	func_1511563C	MATCH	v0=none f0=set	calls=2 tabrefs=0	func_150C7DE0@150c7e18:ret func_150C7E30@150c7e50:ret
+RETPASS	game_eu_142E40	func_151156DC	MATCH	v0=none f0=set	calls=1 tabrefs=0	func_15116A8C@15116c14:ret
+RETPASS	game_eu_142E40	func_1511638C	MATCH	v0=set f0=pass	calls=1 tabrefs=0	func_1511645C@1511647c:ret
+RETPASS	game_eu_142E40	func_15117CF0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150EBB94@150ebdf4:ret
+RETPASS	game_eu_142E40	func_15117D18	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150CF5B0@150cf62c:ret
+RETPASS	game_eu_142E40	func_15119A54	NM	v0=set f0=none+pass	calls=2 tabrefs=1	func_15119C54@15119d0c:ret
+RETPASS	game_eu_14D9E0	func_151201D0	NM	v0=set f0=set	calls=1 tabrefs=1	func_1512317C@15123928:ret
+RETPASS	game_eu_14FE50	func_151220D0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_151283B8@151289dc:ret
+RETPASS	game_eu_1501C0	func_15122EF0	NM	v0=pass f0=pass	calls=6 tabrefs=1	func_151220D0@151226c8:ret func_151226E0@15122708:ret func_151226E0@1512274c:ret func_151226E0@15122798:ret func_151283B8@151289bc:ret func_151283B8@151289fc:ret
+RETPASS	game_eu_15B470	func_1512DC60	MATCH	v0=set f0=set	calls=3 tabrefs=0	func_1512DEF0@1512e264:ret
+RETPASS	game_eu_15BEC0	func_1512E6B0	NM	v0=none+pass+set f0=none+set	calls=7 tabrefs=1	func_151221F0@15122618:ret func_151226E0@1512295c:ret func_151226E0@15122988:ret
+RETPASS	game_eu_15E000	func_151318EC	MATCH	v0=none+set f0=none	calls=2 tabrefs=0	func_15131BBC@15131c04:ret
+RETPASS	game_eu_15E000	func_15131CAC	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_15101808@15101818:ret func_151018A8@151018b8:ret func_151D14B8@151d14cc:ret
+RETPASS	game_eu_15E000	func_15131CCC	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_15101830@15101840:ret func_151018D0@151018e0:ret func_151D14E4@151d14f8:ret
+RETPASS	game_eu_15FF50	func_15132AE0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150B07D0@150b07e4:ret func_151C1BAC@151c1bc0:ret
+RETPASS	game_eu_15FF50	func_15132B0C	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150B07FC@150b0810:ret func_151C1BD8@151c1bec:ret
+RETPASS	game_eu_15FF50	func_15132B38	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_151329B4@15132ac4:ret
+RETPASS	game_eu_15FF50	func_151343AC	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1513A24C@1513a9e4:ret
+RETPASS	game_eu_1754C0	func_15147E64	MATCH	v0=pass f0=pass	calls=12 tabrefs=0	func_150B4354@150b43b0:ret func_150D50E4@150d50f8:ret func_150DAA34@150daa48:ret func_15149674@1514967c:ret func_151968A0@1519690c:ret func_15199E98@15199eac:ret
+RETPASS	game_eu_1754C0	func_15147E98	MATCH	v0=pass f0=pass	calls=11 tabrefs=0	func_150B43C8@150b4424:ret func_150D5110@150d5124:ret func_150DAA60@150daa74:ret func_15196924@15196990:ret func_15199EC4@15199ed8:ret func_1519D570@1519d588:ret
+RETPASS	game_eu_1754C0	func_151482D4	MATCH	v0=pass f0=pass	calls=10 tabrefs=0	func_150DAB6C@150dab90:ret func_15197A7C@1519800c:ret func_15199834@15199dc4:ret func_1519D4E0@1519d4f8:ret func_1519E688@1519ec14:ret
+RETPASS	game_eu_17A800	func_1514E21C	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_1514E29C@1514e2a4:ret func_1514E2BC@1514e2c4:ret func_1514E2DC@1514e2e4:ret func_1514E2FC@1514e304:ret func_1514E31C@1514e324:ret func_1514E33C@1514e344:ret
+RETPASS	game_eu_17A800	func_1514EDF0	MATCH	v0=pass f0=pass	calls=18 tabrefs=0	func_150F791C@150f7970:ret func_15141970@15141ee8:ret func_1518EA10@1518ea24:ret func_151D3130@151d377c:ret
+RETPASS	game_eu_182A10	func_15155C9C	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_150D0148@150d0158:ret func_150FBE40@150fc8d0:ret func_1515BB64@1515bb84:ret func_151CC840@151cc854:ret
+RETPASS	game_eu_183F10	func_15156E68	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15157294@151574ec:ret
+RETPASS	game_eu_188D10	func_1515BB64	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1515BFF0@1515c004:ret func_1515C01C@1515c030:ret
+RETPASS	game_eu_188D10	func_1515BF80	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_151236D0@15123e8c:ret
+RETPASS	game_eu_188D10	func_1515BF8C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151236D0@15123e7c:ret
+RETPASS	game_eu_188D10	func_1515BFB8	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_151236D0@15123da8:ret func_151236D0@15123e40:ret
+RETPASS	game_eu_188D10	func_1515BFF0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_151236D0@15123d94:ret func_151236D0@15123df0:ret
+RETPASS	game_eu_188D10	func_1515C01C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151236D0@15123e00:ret
+RETPASS	game_eu_189860	func_1515C710	MATCH	v0=set f0=none+set	calls=3 tabrefs=0	func_151CEACC@151ceaf4:ret
+RETPASS	game_eu_18B1C0	func_1515D4D4	NM	v0=set f0=none	calls=12 tabrefs=1	func_150D19AC@150d1a24:ret func_150D2050@150d20c8:ret func_150D26DC@150d2768:ret func_150FA9E8@150faa28:ret func_150FA9E8@150faa88:ret func_1515F8A8@1515fb1c:ret
+RETPASS	game_eu_18B1C0	func_1515F10C	MATCH	v0=pass f0=pass	calls=7 tabrefs=0	func_1514EDEC@1514edf4:ret func_15155E0C@15155f60:ret func_15155E0C@1515614c:ret
+RETPASS	game_eu_18B1C0	func_1515F61C	MATCH	v0=none f0=set	calls=1 tabrefs=0	func_1515F4E4@1515f560:ret
+RETPASS	game_eu_18B1C0	func_1515F7E0	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_150A2AB4@150a2c3c:ret
+RETPASS	game_eu_193D00	func_151664F0	MATCH	v0=pass f0=pass	calls=7 tabrefs=0	func_150D8F44@150d9004:ret
+RETPASS	game_eu_193D00	func_15166688	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15074C80@15075190:ret
+RETPASS	game_eu_194720	func_15166F10	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150762D4@150766e8:ret
+RETPASS	game_eu_19B180	func_1516DA58	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_15170648@151709fc:ret func_15170A70@15170bec:ret func_15170F24@151710b0:ret func_15171E60@15172100:ret
+RETPASS	game_eu_19B180	func_1516DF0C	MATCH	v0=pass f0=pass	calls=15 tabrefs=0	func_150B0148@150b0278:ret func_150BF47C@150bf5c4:ret func_1516ECE8@1516ee24:ret func_1516F2D8@1516f42c:ret func_1516EED4@1516f57c:ret func_1516F730@1516f850:ret
+RETPASS	game_eu_19B180	func_1516EED4	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_1506DDC0@1506e1ac:ret
+RETPASS	game_eu_19B180	func_1516F730	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_1506DE84@1506e354:ret func_1506DE84@1506e374:ret func_1506DE84@1506e394:ret
+RETPASS	game_eu_19B180	func_1516F868	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_1506DE84@1506e3c0:ret func_1506DE84@1506e3ec:ret func_1506DE84@1506e418:ret func_1506DE84@1506e484:ret
+RETPASS	game_eu_19B180	func_1516FE8C	MATCH	v0=set f0=none	calls=3 tabrefs=0	func_1516FEBC@1516fedc:ret
+RETPASS	game_eu_19E910	func_15171D6C	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_15171B70@15171c10:ret func_15171B70@15171c78:ret func_15171B70@15171ce8:ret func_15171B70@15171d54:ret
+RETPASS	game_eu_1A09D0	func_15172D80	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_15018F80@15018fe8:ret
+RETPASS	game_eu_1A09D0	func_15173298	MATCH	v0=pass+set f0=pass	calls=3 tabrefs=0	func_15172D80@151733d0:ret func_151733EC@151734bc:ret
+RETPASS	game_eu_1A09D0	func_151733EC	MATCH	v0=none+pass+set f0=none+pass	calls=3 tabrefs=0	func_150A2C6C@150a2d00:ret
+RETPASS	game_eu_1A1730	func_151741D0	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_15118F2C@1511945c:ret func_151194A4@15119910:ret func_1511BAA4@1511bd44:ret func_1511CBC0@1511cc38:ret func_1511CBC0@1511d06c:ret
+RETPASS	game_eu_1A1730	func_15174200	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15118F2C@15119488:ret
+RETPASS	game_eu_1A2410	func_15174690	NM	v0=pass+set f0=none+pass	calls=5 tabrefs=1	func_1505A9AC@1505b32c:ret func_1505B5F8@1505bad8:ret func_1506DA94@1506ded8:ret func_1506DE04@1506e218:ret
+RETPASS	game_eu_1A2720	func_15174F10	MATCH	v0=set f0=none	calls=2 tabrefs=0	func_150CF470@150cf538:ret
+RETPASS	game_eu_1A8930	func_1517ABB0	MATCH	v0=none+set f0=none+pass	calls=1 tabrefs=0	func_15019414@150193e4:ret
+RETPASS	game_eu_1A9280	func_1517DAE8	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_1517DB6C@1517dbe8:ret
+RETPASS	game_eu_1A9280	func_1517E5CC	MATCH	v0=set f0=none	calls=3 tabrefs=0	func_151664F0@1516666c:ret func_15166688@1516675c:ret func_15166F10@15167084:ret
+RETPASS	game_eu_1B0550	func_15182D40	NM	v0=none+pass+set f0=none+pass+set	calls=2 tabrefs=1	func_150F5890@150f589c:ret
+RETPASS	game_eu_1B6590	func_15188D80	NM	v0=none+pass f0=none+pass	calls=5 tabrefs=1	func_1506EE60@1506f244:ret
+RETPASS	game_eu_1B6590	func_15188FC8	MATCH	v0=set f0=none	calls=2 tabrefs=0	func_15188D80@15188ea0:ret func_15188EBC@15188fac:ret
+RETPASS	game_eu_1B7680	func_15189E70	MATCH	v0=pass+set f0=pass+set	calls=11 tabrefs=0	func_1500F3BC@1500f958:ret
+RETPASS	game_eu_1B8AA0	func_1518B818	NM	v0=none+pass f0=none+pass+set	calls=2 tabrefs=1	func_1518B7D4@1518b800:ret
+RETPASS	game_eu_1B9430	func_1518BC20	NM	v0=pass f0=pass	calls=2 tabrefs=1	func_150BFF7C@150c0098:ret
+RETPASS	game_eu_1BA680	func_1518CF74	MATCH	v0=none+pass+set f0=none+pass	calls=10 tabrefs=0	func_15156468@15156494:ret
+RETPASS	game_eu_1BA800	func_1518CFF0	NM	v0=pass f0=pass	calls=4 tabrefs=1	func_1518BC20@1518bfb0:ret
+RETPASS	game_eu_1C0580	func_15192800	MATCH	v0=none+pass+set f0=none+pass	calls=1 tabrefs=0	func_15071DF4@150721c8:ret
+RETPASS	game_eu_1C13E0	func_15193660	NM	v0=none+pass+set f0=none+pass	calls=3 tabrefs=1	func_150700E4@150704bc:ret
+RETPASS	game_eu_1C13E0	func_151937F4	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	func_15070114@150704ec:ret
+RETPASS	game_eu_1C1A20	func_151942B0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15074FD4@150753f8:ret func_15195104@15195128:ret
+RETPASS	game_eu_1C1A20	func_15194794	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15074E80@1507525c:ret func_150750C4@150754c8:ret
+RETPASS	game_eu_1C1A20	func_15194978	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_15074F48@1507537c:ret func_15194AF8@15194b24:ret
+RETPASS	game_eu_1C1A20	func_15194F64	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_15194FD8@1519500c:ret func_15195104@15195148:ret
+RETPASS	game_eu_1C3530	func_15196888	MATCH	v0=none f0=none	calls=4 tabrefs=0	func_150F2FE0@150f31e4:ret
+RETPASS	game_eu_1C3530	func_15197A7C	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	func_1506F524@1506f8f4:ret func_15076768@15076b58:ret func_1509DD0C@1509dd60:ret
+RETPASS	game_eu_1C3530	func_15199834	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_15070C18@15070fe8:ret
+RETPASS	game_eu_1C3530	func_15199924	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_151985C4@15198618:ret
+RETPASS	game_eu_1CACF0	func_1519D4E0	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_1519EBCC@1519ebe0:ret
+RETPASS	game_eu_1CACF0	func_1519D510	MATCH	v0=set f0=none	calls=4 tabrefs=0	func_1519E764@1519e7a4:ret func_1519E764@1519e7d0:ret func_1519E764@1519e80c:ret
+RETPASS	game_eu_1CACF0	func_1519E688	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_1506FC50@1507001c:ret
+RETPASS	game_eu_1CACF0	func_1519E6BC	NM	v0=pass+set f0=pass	calls=1 tabrefs=1	func_1506FC74@15070044:ret
+RETPASS	game_eu_1CACF0	func_1519E92C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1519ECC4@1519ed48:ret
+RETPASS	game_eu_1CCD10	func_1519F928	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_151AA72C@151aa768:ret func_151AA7C0@151aa7fc:ret
+RETPASS	game_eu_1CCD10	func_1519F970	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	func_15159514@151595dc:ret func_151AA780@151aa788:ret func_151AA7A0@151aa7a8:ret
+RETPASS	game_eu_1CCD10	func_1519F9FC	NM	v0=set f0=none	calls=5 tabrefs=1	func_1519F970@1519f98c:ret func_1519F970@1519f9a8:ret func_151A0EC0@151a0f10:ret func_151A0EC0@151a0f44:ret
+RETPASS	game_eu_1D1150	func_151A544C	MATCH	v0=set f0=none	calls=2 tabrefs=0	func_151A5290@151a52d0:ret
+RETPASS	game_eu_1D7790	func_151AA814	NM	v0=none+pass f0=none+pass	calls=3 tabrefs=1	func_151AB774@151ab858:ret
+RETPASS	game_eu_1D7790	func_151AB920	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_1506FEF8@150702cc:ret func_1506FF24@150702f8:ret
+RETPASS	game_eu_1D7790	func_151AB930	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1506FF50@15070320:ret
+RETPASS	game_eu_1D7790	func_151AC3B0	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_151AA054@151aa134:ret func_151AA250@151aa354:ret func_151AA470@151aa55c:ret
+RETPASS	game_eu_1DC570	func_151AEF34	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151AEE40@151aef1c:ret
+RETPASS	game_eu_1DC570	func_151AF064	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151AEE40@151aeec8:ret
+RETPASS	game_eu_1DFE20	func_151B2610	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1514E0D4@1514e0f0:ret
+RETPASS	game_eu_1DFE20	func_151B27DC	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_151B27BC@151b27c4:ret
+RETPASS	game_eu_1E3960	func_151B6150	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1507266C@15072ae8:ret
+RETPASS	game_eu_1E40E0	func_151B68D0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1506ADC8@1506adf0:ret
+RETPASS	game_eu_1E7CC0	func_151BAA18	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_1513BA78@1513c02c:ret
+RETPASS	game_eu_1E7CC0	func_151BC04C	NM	v0=none+pass f0=none+pass	calls=1 tabrefs=1	func_1506AB20@1506ab44:ret
+RETPASS	game_eu_1E7CC0	func_151BC6B4	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_1506ABFC@1506ac0c:ret
+RETPASS	game_eu_1E7CC0	func_151BCB54	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_15134C98@1513522c:ret
+RETPASS	game_eu_1F3040	func_151C5D2C	NM	v0=pass f0=pass+set	calls=1 tabrefs=1	func_15137610@15137d2c:ret
+RETPASS	game_eu_1F3040	func_151C6750	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15136C3C@15137494:ret
+RETPASS	game_eu_1F7960	func_151CA398	NM	v0=pass f0=pass	calls=2 tabrefs=1	func_151CA150@151ca28c:ret
+RETPASS	game_eu_1F7960	func_151CA484	NM	v0=pass f0=pass	calls=6 tabrefs=1	func_15121E34@15121f1c:ret
+RETPASS	game_eu_1F7960	func_151CB128	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151CA150@151ca37c:ret
+RETPASS	game_eu_1F7960	func_151CD444	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_151CA150@151ca254:ret
+RETPASS	game_eu_204F70	func_151D7A60	MATCH	v0=pass f0=pass	calls=8 tabrefs=0	func_1514E57C@1514e6ec:ret func_1514E704@1514e874:ret func_1514FA18@1514fa30:ret func_1514FA48@1514fa60:ret func_1514FA78@1514fa90:ret func_1514FAA8@1514fac0:ret
+RETPASS	game_eu_204F70	func_151D7D78	MATCH	v0=set f0=none	calls=4 tabrefs=0	func_151D7814@151d7920:ret func_151D7814@151d7930:ret func_151D7814@151d7940:ret func_151D79B4@151d79bc:ret
+RETPASS	game_eu_204F70	func_151D7DE0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151D7814@151d7910:ret
+RETPASS	game_eu_2065A0	func_151D91B0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151D9190@151d9198:ret
+RETPASS	game_eu_2065A0	func_151D9364	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151D9398@151d93b0:ret
+RETPASS	game_eu_2065A0	func_151D9398	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_15007B3C@1500817c:ret
+RETPASS	game_eu_20B730	func_151DDF6C	NM	v0=set f0=none	calls=2 tabrefs=1	func_151E2A54@151e2b84:ret
+RETPASS	game_eu_20B730	func_151DED3C	MATCH	v0=set f0=pass	calls=1 tabrefs=0	func_151DECB4@151dece4:ret
+RETPASS	game_eu_20B730	func_151DF6A4	NM	v0=set f0=pass	calls=1 tabrefs=1	func_151DEDD0@151df540:ret
+RETPASS	game_eu_20B730	func_151DFD0C	NM	v0=pass+set f0=pass	calls=1 tabrefs=1	func_151DEDD0@151df550:ret
+RETPASS	game_eu_20B730	func_151E06D0	NM	v0=pass+set f0=pass	calls=1 tabrefs=1	func_151DEDD0@151df560:ret
+RETPASS	game_eu_20B730	func_151E0BBC	NM	v0=none+pass+set f0=none+pass+set	calls=1 tabrefs=1	func_151DEDD0@151df59c:ret
+RETPASS	game_eu_20B730	func_151E1174	NM	v0=pass+set f0=pass	calls=1 tabrefs=1	func_151DEDD0@151df5ac:ret
+RETPASS	game_eu_20B730	func_151E1308	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_151DEDD0@151df5cc:ret
+RETPASS	game_eu_20B730	func_151E19AC	NM	v0=set f0=none+pass	calls=1 tabrefs=1	func_151DEDD0@151df5ec:ret
+RETPASS	game_eu_20B730	func_151E1EDC	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_151DEDD0@151df5dc:ret
+RETPASS	game_eu_20B730	func_151E2A1C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151DEDD0@151df5bc:ret
+RETPASS	game_eu_20B730	func_151E2A54	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_151E0BBC@151e0c78:ret
+RETPASS	game_eu_20B730	func_151E2B9C	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_151E1174@151e1254:ret
+RETPASS	game_eu_20B730	func_151E2FCC	NM	v0=pass f0=pass	calls=1 tabrefs=5	func_151E4A78@151e4b28:ret
+RETPASS	game_eu_20B730	func_151E4B40	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_151E2A1C@151e2a34:ret
+RETPASS	game_eu_20B730	func_151E5AB8	MATCH	v0=none+set f0=none+set	calls=8 tabrefs=0	func_151E49C8@151e49ec:ret
+RETPASS	game_eu_20B730	func_151E5D28	MATCH	v0=set f0=none	calls=4 tabrefs=0	func_151E533C@151e54fc:ret
+RETPASS	game_eu_20B730	func_151E73C8	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_1512A8D0@1512a8dc:ret
+RETPASS	game_eu_20B730	func_151E86A4	NM	v0=set f0=pass	calls=4 tabrefs=0	func_15007440@150074e4:ret func_151E3A1C@151e3acc:ret
+RETPASS	game_eu_20B730	func_151E870C	NM	v0=pass f0=pass	calls=3 tabrefs=1	func_151E1308@151e18a4:ret
+RETPASS	game_eu_21D7D0	func_151F0114	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_15012370@150123d4:ret func_1510B5F0@1510b690:ret
+RETPASS	game_eu_21DCD0	func_151F05C0	MATCH	v0=set f0=set	calls=3 tabrefs=0	func_151882DC@1518836c:ret
+RETPASS	game_eu_2F180	func_15001B5C	MATCH	v0=set f0=none	calls=2 tabrefs=0	func_15002008@1500220c:ret
+RETPASS	game_eu_2F180	func_15002560	MATCH	v0=none+pass+set f0=none+pass	calls=2 tabrefs=0	func_15002560@150025c4:ret
+RETPASS	game_eu_2F180	func_150025FC	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150038A0@150038c0:ret
+RETPASS	game_eu_38360	func_1500BE40	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_1500BE68@1500be58:ret
+RETPASS	game_eu_49310	func_1501C0D0	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_1501BFF0@1501c0b8:ret
+RETPASS	game_eu_49310	func_1501C15C	MATCH	v0=set f0=none	calls=3 tabrefs=0	func_1501C51C@1501c52c:ret
+RETPASS	game_eu_49F20	func_1501C710	MATCH	v0=pass+set f0=pass	calls=18 tabrefs=0	func_1507D4F8@1507d9f0:ret func_1507D4F8@1507da10:ret func_15172D80@151733ac:ret func_151DEBB4@151dec90:ret func_151E2FCC@151e384c:ret func_151E3864@151e3a04:ret
+RETPASS	game_eu_51190	func_150243AC	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_15024438@15024474:ret
+RETPASS	game_eu_51190	func_150E3334	NM	v0=pass f0=pass	calls=2 tabrefs=0	func_150B0344@150b0500:ret
+RETPASS	game_eu_51190	func_1516DF0C	NM	v0=pass f0=pass	calls=15 tabrefs=0	func_150B0148@150b0278:ret func_150BF47C@150bf5c4:ret func_1516ECE8@1516ee24:ret func_1516F2D8@1516f42c:ret func_1516EED4@1516f57c:ret func_1516F730@1516f850:ret
+RETPASS	game_eu_595D0	func_1502C8F8	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1502C074@1502c0cc:ret
+RETPASS	game_eu_595D0	func_1502DE74	NM	v0=none+pass+set f0=none+pass+set	calls=1 tabrefs=1	func_1502E228@1502e748:ret
+RETPASS	game_eu_595D0	func_1502ED50	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_150771F0@15077628:ret
+RETPASS	game_eu_595D0	func_1502ED6C	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_150771F0@1507763c:ret
+RETPASS	game_eu_595D0	func_1502ED88	MATCH	v0=set f0=none	calls=6 tabrefs=0	func_150ED10C@150ed168:ret func_150F3294@150f33a8:ret func_150F75EC@150f7858:ret
+RETPASS	game_eu_595D0	func_1502EDEC	NM	v0=none+set f0=none	calls=1 tabrefs=1	func_1502C074@1502c184:ret
+RETPASS	game_eu_595D0	func_1502EF24	NM	v0=none+set f0=none+pass+set	calls=2 tabrefs=1	func_1502CF24@1502cfd4:ret
+RETPASS	game_eu_595D0	func_1502F554	NM	v0=set f0=none	calls=1 tabrefs=1	func_1502C074@1502c170:ret
+RETPASS	game_eu_595D0	func_1502F780	NM	v0=set f0=none+set	calls=1 tabrefs=1	func_1502F6B8@1502f72c:ret
+RETPASS	game_eu_5D910	func_15030448	NM	v0=pass f0=pass	calls=11 tabrefs=1	func_15030758@15030858:ret func_15030758@1503089c:ret func_15030758@150308f4:ret func_15030758@15030920:ret func_15030758@15030d2c:ret func_15030758@15030d78:ret
+RETPASS	game_eu_5D910	func_150305E0	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150836CC@15083b04:ret
+RETPASS	game_eu_5D910	func_15030758	NM	v0=none+pass+set f0=none+pass	calls=1 tabrefs=1	func_1502C1D4@1502c454:ret
+RETPASS	game_eu_5D910	func_15031C1C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1505528C@15055c98:ret
+RETPASS	game_eu_61AE0	func_15034A18	MATCH	v0=none+pass+set f0=none+pass+set	calls=2 tabrefs=0	func_15034AD8@15034b1c:ret func_15035220@15035964:ret
+RETPASS	game_eu_62360	func_15035220	NM	v0=pass f0=pass+set	calls=2 tabrefs=1	func_15035AF8@1503600c:ret
+RETPASS	game_eu_62360	func_15035AF8	NM	v0=pass+set f0=none+pass+set	calls=3 tabrefs=1	func_15036438@150365a4:ret
+RETPASS	game_eu_63E10	func_15036600	NM	v0=none+pass f0=none+set	calls=2 tabrefs=1	func_150348D4@150349cc:ret
+RETPASS	game_eu_64770	func_15036F60	MATCH	v0=set f0=set	calls=1 tabrefs=0	func_15083E20@15083f18:ret
+RETPASS	game_eu_64770	func_15038910	NM	v0=pass+set f0=none+pass	calls=2 tabrefs=1	.L1503707C@150371f8:ret
+RETPASS	game_eu_64770	func_15039D68	NM	v0=pass f0=set	calls=1 tabrefs=1	func_1503A1C0@1503a20c:ret
+RETPASS	game_eu_64770	func_1503A1C0	NM	v0=pass f0=pass+set	calls=3 tabrefs=1	func_15038910@15038fc0:ret
+RETPASS	game_eu_64770	func_1503A37C	NM	v0=pass+set f0=none+pass+set	calls=1 tabrefs=1	func_1502C074@1502c104:ret
+RETPASS	game_eu_64770	func_1503A968	NM	v0=none+set f0=none+pass	calls=1 tabrefs=1	func_1503AAE0@1503ab08:ret
+RETPASS	game_eu_64770	func_1503AB20	NM	v0= f0=	calls=1 tabrefs=1	func_1502C074@1502c12c:ret
+RETPASS	game_eu_692C0	func_1503BCAC	NM	v0=none+pass+set f0=none+pass	calls=1 tabrefs=1	func_1503482C@150348bc:ret
+RETPASS	game_eu_692C0	func_1503CE88	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_1503BCAC@1503ce60:ret
+RETPASS	game_eu_6AA20	func_1503D728	MATCH	v0=set f0=none	calls=5 tabrefs=0	func_1503D774@1503d7b4:ret
+RETPASS	game_eu_6B970	func_1503DE70	NM	v0=pass f0=pass	calls=5 tabrefs=1	func_150772E8@150776c0:ret func_1507A270@1507a64c:ret func_1507DB44@1507df2c:ret
+RETPASS	game_eu_6B970	func_1503E1FC	MATCH	v0=set f0=none	calls=2 tabrefs=0	func_1503DE70@1503e1bc:ret func_1503DE70@1503e1e4:ret
+RETPASS	game_eu_6B970	func_1503E238	NM	v0=none+pass+set f0=none+pass	calls=1 tabrefs=1	func_1502C074@1502c150:ret
+RETPASS	game_eu_6B970	func_1503E5F8	NM	v0=pass f0=set	calls=6 tabrefs=1	func_1503E6B4@1503e7f0:ret func_1503F6F4@1503f77c:ret
+RETPASS	game_eu_6B970	func_1503EB1C	NM	v0=none+pass+set f0=none+pass	calls=1 tabrefs=1	func_1503E238@1503e4b8:ret
+RETPASS	game_eu_6B970	func_1503EE68	NM	v0=pass f0=pass	calls=3 tabrefs=1	func_1503F368@1503f384:ret func_1503F39C@1503f3b0:ret func_1503F3C8@1503f3e0:ret
+RETPASS	game_eu_6CFB0	func_1503F7A0	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_15157840@15157914:ret
+RETPASS	game_eu_71E70	func_1504715C	MATCH	v0=set f0=none+pass	calls=53 tabrefs=0	func_150CF650@150cf740:ret func_15136404@15136a20:ret func_15136C3C@15137210:ret
+RETPASS	game_eu_770B0	func_150498A0	NM	v0=none f0=set	calls=67 tabrefs=1	func_1512317C@15123a3c:ret func_15124C38@1512542c:ret func_15124C38@15125790:ret func_15128D50@15128e04:ret func_15128D50@15129014:ret func_15128D50@15129198:ret
+RETPASS	game_eu_770B0	func_15049978	NM	v0=pass f0=pass	calls=23 tabrefs=1	func_150F6B00@150f72e4:ret func_15122170@151221a8:ret func_15123A54@151243b8:ret
+RETPASS	game_eu_90F50	func_15063A54	MATCH	v0=set f0=none	calls=2 tabrefs=0	func_150639D8@15063a3c:ret func_151D5DA8@151d5fac:ret
+RETPASS	game_eu_90F50	func_15064D5C	MATCH	v0=set f0=none+set	calls=3 tabrefs=0	func_15064DD0@15064f38:ret
+RETPASS	game_eu_90F50	func_15064DD0	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_1504C0E8@1504c494:ret
+RETPASS	game_eu_A9980	func_1507C170	NM	v0=none+pass+set f0=none+pass+set	calls=2 tabrefs=1	func_1503F7A0@1503f878:ret func_1507C608@1507c6c8:ret
+RETPASS	game_eu_A9980	func_1507C608	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1502C1D4@1502c46c:ret
+RETPASS	game_eu_A9980	func_1507C700	MATCH	v0=set f0=none+set	calls=2 tabrefs=0	func_15054A94@150551bc:ret func_150C3230@150c38d4:ret
+RETPASS	game_eu_ABEA0	func_1507E690	NM	v0=none+pass+set f0=none+pass	calls=1 tabrefs=1	func_1507EB1C@1507eb84:ret
+RETPASS	game_eu_ABEA0	func_1507E7A0	NM	v0=set f0=none	calls=1 tabrefs=1	func_1502F1E4@1502f2e0:ret
+RETPASS	game_eu_ABEA0	func_1507E7E4	NM	v0=none+pass+set f0=none+pass	calls=7 tabrefs=1	func_15022388@15022420:ret func_1506D584@1506da5c:ret func_15079928@15079d30:ret func_1507EE9C@1507eeb8:ret
+RETPASS	game_eu_ABEA0	func_1507E9A8	NM	v0=pass+set f0=pass	calls=2 tabrefs=1	func_1507E8E0@1507e960:ret func_1507E7E4@1507eccc:ret
+RETPASS	game_eu_ABEA0	func_1507EB4C	MATCH	v0=none+pass f0=none+pass	calls=8 tabrefs=0	func_15079988@15079d5c:ret func_1507EF0C@1507ef14:ret
+RETPASS	game_eu_ABEA0	func_1507EDC8	MATCH	v0=none f0=none	calls=2 tabrefs=0	func_15037CCC@15038318:ret func_15037CCC@1503835c:ret
+RETPASS	game_eu_ABEA0	func_1507EE9C	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_1502FED8@15030044:ret func_1507EB1C@1507ebac:ret func_1507EB4C@1507ef40:ret
+RETPASS	game_eu_AC770	func_1507F238	MATCH	v0=pass+set f0=pass	calls=1 tabrefs=0	func_1507F3B0@1507f81c:ret
+RETPASS	game_eu_AC770	func_1507F298	MATCH	v0=set f0=none	calls=3 tabrefs=0	func_1507F238@1507f264:ret func_1507F238@1507f280:ret
+RETPASS	game_eu_AC770	func_1507F640	NM	v0=none+pass+set f0=none+pass	calls=11 tabrefs=1	func_1506B82C@1506bc08:ret func_1506B8B4@1506bc9c:ret func_1506B9C0@1506bdf4:ret func_15072A14@15072de8:ret func_15072A40@15072e24:ret func_15073C28@15073ff0:ret
+RETPASS	game_eu_AC770	func_1507F92C	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1507F640@1507fd5c:ret func_1507F640@1507fe4c:ret
+RETPASS	game_eu_AC770	func_1508000C	NM	v0=pass+set f0=none+pass+set	calls=1 tabrefs=1	func_150802A8@15080384:ret
+RETPASS	game_eu_AE110	func_15080B84	MATCH	v0=set f0=none+pass	calls=1 tabrefs=0	func_15080BF4@15080c10:ret
+RETPASS	game_eu_AE110	func_15081064	MATCH	v0=none+set f0=none+pass	calls=1 tabrefs=0	func_1504A730@1504b074:ret
+RETPASS	game_eu_B2980	func_15085710	NM	v0=none+set f0=none	calls=25 tabrefs=1	func_1507D4F8@1507d92c:ret func_15085ABC@15085fa8:ret func_151E67A0@151e6a08:ret
+RETPASS	game_eu_B2980	func_150858A0	NM	v0=pass f0=pass	calls=3 tabrefs=1	func_15173298@151732a4:ret
+RETPASS	game_eu_B37F0	func_15088CA0	MATCH	v0=none f0=set	calls=2 tabrefs=0	func_15087540@1508772c:ret
+RETPASS	game_eu_B37F0	func_150891D4	MATCH	v0=pass+set f0=pass	calls=1 tabrefs=0	func_1507D1D8@1507d8bc:ret
+RETPASS	game_eu_B7840	func_1508B20C	MATCH	v0=set f0=none	calls=7 tabrefs=0	func_15054F74@15055548:ret func_150C3230@150c39ac:ret func_15105BC8@1510618c:ret
+RETPASS	game_eu_B7840	func_1508EFEC	MATCH	v0=pass f0=pass	calls=6 tabrefs=0	func_1508DCAC@1508ddf4:ret
+RETPASS	game_eu_BC930	func_1508F26C	NM	v0=none+pass+set f0=none+pass	calls=3 tabrefs=1	func_150BFF7C@150c0474:ret
+RETPASS	game_eu_CA060	func_1509CD0C	NM	v0=pass f0=pass	calls=2 tabrefs=1	func_1509C850@1509cb30:ret
+RETPASS	game_eu_CA630	func_1509D0C4	MATCH	v0=pass f0=pass	calls=2 tabrefs=1	func_1509D0A4@1509d0ac:ret
+RETPASS	game_eu_CC5F0	func_1509F9C8	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1509F4D0@1509f620:ret
+RETPASS	game_eu_CDDE0	func_150A067C	NM	v0=set f0=none	calls=1 tabrefs=1	func_15019F20@1501a1e4:ret
+RETPASS	game_eu_CE6C0	func_150A28C4	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_150A09D0@150a0fc8:ret
+RETPASS	game_eu_CE6C0	func_150A2D44	MATCH	v0=none+pass f0=none+pass	calls=6 tabrefs=0	func_150DE8AC@150de990:ret
+RETPASS	game_eu_D1760	func_150A4ED4	NM	v0=none f0=none	calls=1 tabrefs=0	func_1510F800@1510fd88:ret
+RETPASS	game_eu_D5650	func_150A7A48	NM	v0=none f0=set	calls=40 tabrefs=1	func_15017FA4@1501803c:ret func_15017FA4@15018120:ret func_15035220@15035310:ret func_1503EB1C@1503ecac:ret func_15048B10@15048f08:ret func_150952B0@15095338:ret
+RETPASS	game_eu_D5650	func_150A7E40	NM	v0=none f0=set	calls=86 tabrefs=1	func_15094CD0@15094d74:ret func_150E5384@150e5620:ret func_1511F8A4@1511f918:ret func_1514182C@15141e10:ret func_15143134@15143790:ret func_15143134@151437d8:ret
+RETPASS	game_eu_DCBA0	func_150AEEB0	NM	v0=none+pass f0=none+pass	calls=2 tabrefs=1	func_1506F17C@1506f550:ret
+RETPASS	game_eu_DCEF0	func_150AF6E0	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_150B051C@150b054c:ret func_150B051C@150b055c:ret
+RETPASS	game_eu_DCEF0	func_150B0148	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15052590@15052964:ret
+RETPASS	game_eu_DCEF0	func_150B0290	MATCH	v0=none+set f0=none+pass	calls=1 tabrefs=0	func_1506DE84@1506e494:ret
+RETPASS	game_eu_DE3A0	func_150B0B90	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_151953C4@15195400:ret
+RETPASS	game_eu_DE750	func_150B1138	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150B1114@150b1120:ret
+RETPASS	game_eu_E1AC0	func_150B42B0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1509DB90@1509dc64:ret
+RETPASS	game_eu_E1AC0	func_150B5540	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_150B586C@150b5890:ret
+RETPASS	game_eu_E35E0	func_150B5C38	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15071690@15071a94:ret
+RETPASS	game_eu_E35E0	func_150B64E0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150B5F1C@150b6100:ret func_150B5C38@150b62fc:ret
+RETPASS	game_eu_E48B0	func_150B7964	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150B70A0@150b7108:ret
+RETPASS	game_eu_E48B0	func_150B7A40	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150B70A0@150b7118:ret
+RETPASS	game_eu_E48B0	func_150B7B3C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150B70A0@150b7128:ret
+RETPASS	game_eu_E48B0	func_150B7B6C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150B70A0@150b7148:ret
+RETPASS	game_eu_E48B0	func_150B7C88	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150B70A0@150b7138:ret
+RETPASS	game_eu_E81B0	func_150BA4C0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1506F02C@1506f404:ret
+RETPASS	game_eu_E9450	func_150BCBBC	NM	v0=none+pass+set f0=none+pass+set	calls=1 tabrefs=1	func_1506F004@1506f3d4:ret
+RETPASS	game_eu_EB430	func_150BDC20	NM	v0=none+pass f0=none+pass	calls=1 tabrefs=1	func_15172164@151721e0:ret
+RETPASS	game_eu_ECC80	func_150C04C0	NM	v0=pass f0=pass	calls=1 tabrefs=1	func_15074C00@15075028:ret
+RETPASS	game_eu_EEF70	func_150C1260	NM	v0=none+pass+set f0=none+pass	calls=2 tabrefs=1	func_1506F0C4@1506f498:ret func_1506F0F0@1506f4c4:ret
+RETPASS	game_eu_F2A30	func_150C572C	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1509DB90@1509dca4:ret
+RETPASS	game_eu_F3080	func_150C5930	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150C5A10@150c5a24:ret
+RETPASS	game_eu_F3080	func_150C5950	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150C5A3C@150c5a50:ret
+RETPASS	game_eu_F3080	func_150C619C	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1509DB90@1509dc94:ret
+RETPASS	game_eu_FB8D0	func_150CE0C0	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_15172164@151721f0:ret
+RETPASS	game_eu_FCE60	func_150D034C	MATCH	v0=set f0=pass	calls=2 tabrefs=0	func_150D03A8@150d03f8:ret
+RETPASS	game_eu_FCE60	func_150D03A8	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_150D05D0@150d0600:ret
+RETPASS	game_eu_FE5E0	func_150D15F4	NM	v0=pass f0=pass	calls=2 tabrefs=1	func_15195750@15195a7c:ret
+RETPASS	init_11FA0	func_10012020	MATCH	v0=pass+set f0=pass+set	calls=1 tabrefs=0	func_1501905C@150190c8:ret
+RETPASS	init_12560	func_1001263C	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_1001A3FC@1001a72c:ret
+RETPASS	init_128D0	func_10012A28	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_10012934@10012cd8:ret
+RETPASS	init_128D0	func_10012B84	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_10012A28@10012d80:ret
+RETPASS	init_128D0	func_10012BD0	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_10012A28@10012df8:ret
+RETPASS	init_128D0	func_10012C5C	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	_n_handleEvent@10015f48:ret
+RETPASS	init_128D0	func_10012CFC	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_10012C5C@10012fcc:ret
+RETPASS	init_1420	func_10001AA8	MATCH	v0=pass+set f0=none+pass	calls=1 tabrefs=0	func_10001550@10001a50:ret
+RETPASS	init_15550	func_10016E90	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	_n_handleEvent@10015d74:ret _n_handleEvent@100161a4:ret _n_handleEvent@10016890:ret _n_handleEvent@100168a0:ret _n_handleEvent@1001705c:ret
+RETPASS	init_15550	func_10016F00	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	_n_handleEvent@100166cc:ret _n_handleEvent@100169dc:ret _n_handleEvent@1001704c:ret
+RETPASS	init_15550	func_10016F80	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_10016E90@100171d0:ret
+RETPASS	init_15550	func_10017594	MATCH	v0=none+pass f0=none+pass	calls=4 tabrefs=0	func_1001123C@1001158c:ret func_10011310@100116cc:ret
+RETPASS	init_15550	func_10017604	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_100176C4@100179bc:ret func_100176EC@100179e4:ret
+RETPASS	init_15550	func_10017714	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1000F85C@1000fbf4:ret
+RETPASS	init_15550	func_10017780	MATCH	v0=pass f0=pass	calls=7 tabrefs=0	func_1000F248@1000f6a4:ret func_10011BB8@100120dc:ret
+RETPASS	init_17870	func_10017870	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_151E8648@151e8664:ret func_151E8648@151e867c:ret func_151E8648@151e868c:ret
+RETPASS	init_17870	func_10017944	MATCH	v0=none f0=none	calls=4 tabrefs=0	func_10008180@10008794:ret func_10017870@10017bfc:ret func_150000B0@150006b8:ret
+RETPASS	init_17AF0	func_10017AF0	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_10008570@1000887c:ret
+RETPASS	init_17AF0	func_10017B04	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_100085B8@100088d0:ret
+RETPASS	init_17AF0	func_10017BB8	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_100085F8@10008904:ret
+RETPASS	init_17C00	func_10017C00	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1000862C@10008938:ret
+RETPASS	init_17C00	func_10017C68	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008660@100089d0:ret
+RETPASS	init_17C00	func_10017CE0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_100086FC@10008a1c:ret
+RETPASS	init_17C00	func_10017D30	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008824@10008b44:ret
+RETPASS	init_17DF0	func_10017DF0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008BC0@10008edc:ret
+RETPASS	init_17DF0	func_10017E4C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008A94@10008de4:ret
+RETPASS	init_17F10	func_10017F10	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008B60@10008e98:ret
+RETPASS	init_18D00	func_10018D00	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008EE0@100091fc:ret
+RETPASS	init_18D50	func_10018D50	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008F58@10009264:ret
+RETPASS	init_19B50	func_10019D98	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_10019ED8@1001a208:ret func_10019F38@1001a268:ret
+RETPASS	init_19B50	func_1001A224	MATCH	v0=none+pass f0=none+pass	calls=1 tabrefs=0	func_1001A2F8@1001a66c:ret
+RETPASS	init_19B50	func_1001A45C	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_1001A704@1001acac:ret func_1001AA08@1001ada8:ret
+RETPASS	init_19B50	func_1001A704	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1001A508@1001a9d4:ret
+RETPASS	init_1CBF0	func_1001CF38	MATCH	v0=none+pass f0=none+pass	calls=4 tabrefs=1	func_1001DAE4@1001de6c:ret
+RETPASS	init_1E2A0	func_1001E2A0	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	_n_handleEvent@10016974:ret func_10019C28@10019f90:ret
+RETPASS	init_1E350	func_1001E350	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	_n_handleEvent@100170f0:ret func_10019F98@1001a2f0:ret
+RETPASS	init_1E400	func_1001E400	MATCH	v0=pass f0=pass	calls=6 tabrefs=0	func_10017BB8@10017ed0:ret func_10017C00@10017f38:ret func_10017C68@10017fb0:ret func_10017CE0@10018000:ret func_10017D30@10018050:ret
+RETPASS	init_3C40	func_10004074	NM	v0=none+pass f0=none+pass	calls=132 tabrefs=3	func_15001CEC@15001dc8:ret func_150025FC@150026ac:ret func_15003570@15003614:ret func_150158D0@150159c0:ret func_1501C55C@1501c6e4:ret func_1501E5AC@1501e76c:ret
+RETPASS	init_3C40	func_100043B4	MATCH	v0=pass f0=pass	calls=47 tabrefs=0	func_15044D18@15044e14:ret func_15084814@150848a0:ret func_150849C0@15084d30:ret func_15132B38@15132ba0:ret func_1513C92C@1513cf04:ret func_1513CAD4@1513d0ac:ret
+RETPASS	init_4470	func_1000480C	NM	v0=pass+set f0=none+pass	calls=4 tabrefs=1	func_10004514@100047a8:ret func_1502DB14@1502dd20:ret func_1502DB14@1502dd88:ret
+RETPASS	init_49E0	func_10004F00	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_10004DB0@1000512c:ret func_10004DB0@1000517c:ret
+RETPASS	init_49E0	func_10004FE0	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	func_10004DB0@10005198:ret
+RETPASS	init_49E0	func_10005020	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10004FE0@100052b8:ret
+RETPASS	init_8180	func_100084D8	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_1000D2F8@1000d824:ret
+RETPASS	init_8180	func_100085F8	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_100088F0@10008c44:ret
+RETPASS	init_8180	func_1000862C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_100088F0@10008c34:ret
+RETPASS	init_8180	func_10008660	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_10008790@10008adc:ret func_1000D2F8@1000d868:ret
+RETPASS	init_8180	func_10008824	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_1000886C@10008bac:ret
+RETPASS	init_8180	func_100088F0	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	func_1000D2F8@1000d840:ret
+RETPASS	init_8180	func_10008B60	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_10012020@100127b8:ret func_10012020@100127f8:ret
+RETPASS	init_8180	func_10008BC0	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10012020@10012740:ret
+RETPASS	init_8180	func_10008EE0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1000CC54@1000d018:ret func_1000E2F4@1000e65c:ret
+RETPASS	init_8180	func_10008F24	MATCH	v0=pass f0=pass	calls=4 tabrefs=0	func_1000D2F8@1000d8dc:ret
+RETPASS	init_8180	func_10008F58	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_1000E054@1000e3c4:ret func_1000E2F4@1000e684:ret
+RETPASS	init_8F90	func_10009BE4	NM	v0=pass+set f0=none+pass	calls=1 tabrefs=1	func_10009B4C@10009e68:ret
+RETPASS	init_B1B0	func_1000B294	MATCH	v0=set f0=none	calls=3 tabrefs=0	func_1000B3D4@1000b7dc:ret func_1000D2F8@1000d8f8:ret
+RETPASS	init_B1B0	func_1000B3D4	MATCH	v0=none+pass+set f0=none+pass	calls=4 tabrefs=0	func_1000D2F8@1000d764:ret func_1000D96C@1000df64:ret func_1000D96C@1000e0f0:ret
+RETPASS	init_B1B0	func_1000CBA8	MATCH	v0=set f0=none	calls=1 tabrefs=0	func_150762B0@1507667c:ret
+RETPASS	init_B1B0	func_1000CC54	MATCH	v0=pass+set f0=none+pass	calls=6 tabrefs=0	func_1000D2F8@1000d9d8:ret func_1000DF68@1000e2a0:ret func_1000E054@1000e398:ret func_1000E2F4@1000e6b8:ret
+RETPASS	init_B1B0	func_1000D2F8	NM	v0=pass+set f0=pass	calls=1 tabrefs=1	func_1000D758@1000dc30:ret
+RETPASS	init_B1B0	func_1000D96C	NM	v0=none+pass+set f0=none+pass	calls=19 tabrefs=1	func_1000DE1C@1000e168:ret func_1000DE1C@1000e190:ret func_150C7EBC@150c7fe4:ret
+RETPASS	init_B1B0	func_1000DE1C	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_1000E17C@1000e5a8:ret func_150C7EBC@150c7f88:ret
+RETPASS	init_B1B0	func_1000DEC4	MATCH	v0=pass+set f0=none+pass	calls=4 tabrefs=0	func_15000090@15000098:ret
+RETPASS	init_B1B0	func_1000E17C	MATCH	v0=none+pass+set f0=none+pass	calls=2 tabrefs=0	func_1501DF70@1501e08c:ret
+RETPASS	init_B1B0	func_1000E75C	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_15118F2C@151193dc:ret
+RETPASS	init_B1B0	func_1000E934	MATCH	v0=set f0=pass	calls=2 tabrefs=0	func_15000000@1500006c:ret
+RETPASS	init_EB00	func_1000F85C	MATCH	v0=none+pass f0=none+pass	calls=19 tabrefs=0	func_1000F91C@1000fcac:ret func_1000F9D4@1000fd3c:ret func_1001091C@10010c58:ret func_10011624@10011cd4:ret func_10011624@10011dc4:ret func_15060778@15060cc8:ret
+RETPASS	init_EB00	func_1000F91C	MATCH	v0=pass f0=pass	calls=8 tabrefs=0	func_15060778@15060c88:ret func_1509FC5C@1509fcc8:ret func_15116A8C@15116dd8:ret func_15199200@15199298:ret func_1519C52C@1519c5c4:ret
+RETPASS	init_EB00	func_1000FC18	MATCH	v0=set f0=none+pass	calls=3 tabrefs=0	func_150A09D0@150a0f80:ret
+RETPASS	init_EB00	func_1001001C	MATCH	v0=set f0=none+pass	calls=1 tabrefs=0	func_15115484@151154ac:ret
+RETPASS	init_EB00	func_10010558	MATCH	v0=pass f0=pass	calls=8 tabrefs=0	func_1511E320@1511e470:ret func_151E67A0@151e6bc4:ret func_151E67A0@151e6e50:ret func_151E67A0@151e7034:ret func_151E67A0@151e70f8:ret
+RETPASS	init_EB00	func_10010630	NM	v0=none+pass f0=none+pass	calls=25 tabrefs=1	func_10010720@10010a58:ret func_15060A9C@15060e78:ret func_15060B04@15060ee4:ret func_1506BF5C@1506c640:ret func_1506BF5C@1506c6d4:ret func_15077190@15077598:ret
+RETPASS	init_EB00	func_1001091C	MATCH	v0=none+pass f0=none+pass	calls=2 tabrefs=0	func_150C3574@150c3e54:ret
+RETPASS	init_EB00	func_100109D0	MATCH	v0=none+pass f0=none+pass	calls=12 tabrefs=0	func_1506BA4C@1506be34:ret func_1506C43C@1506c808:ret func_1508000C@15080284:ret func_1509FB40@1509fb78:ret func_150C3574@150c3da4:ret func_150C3574@150c3e78:ret
+RETPASS	init_EB00	func_10010A3C	MATCH	v0=none+pass f0=none+pass	calls=8 tabrefs=0	func_1506BAD8@1506bec0:ret func_1506C418@1506c7e4:ret func_1509FB40@1509fb68:ret
+RETPASS	init_eu_5DA0	func_10007CC8	NM	v0=none f0=none	calls=9 tabrefs=2	__osLeoInterrupt@100276dc:ret
+RETPASS	n_csq	func_100186DC	MATCH	v0=none f0=none	calls=1 tabrefs=0	func_10008C6C@10008fc0:ret
+RETPASS	n_csq	func_10018790	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_10008C04@10008f44:ret
+RETPASS	n_synsetpitch2	func_1001CA90	MATCH	v0=none+pass f0=none+pass	calls=3 tabrefs=0	__n_CSPHandleMIDIMsg@100152ec:ret func_10019D98@1001a194:ret
+SUSPECT	game_18D770	func_1516387C	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_15009BD0@15009c00:read@15009c08/ret func_15009C7C@15009cac:read@15009cb4/ret func_15009F74@15009fac:read@15009fb4/ret
+SUSPECT	game_6D800	func_150408CC	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_150403C8@1504077c:read@150407c4
+SUSPECT	game_83300	func_1505D1C4	MATCH	v0=pass f0=pass	calls=11 tabrefs=0	func_150E1AF0@150e1d1c:read@150e1d28/ret func_150E4590@150e4684:ret func_151000EC@15100144:ret func_1519D320@1519d478:ret func_151D441C@151d44ac:ret func_151D4684@151d487c:ret
+SUSPECT	game_eu_11AF60	func_150ED7B4	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_150EDCC8@150ee7a8:read@150ee7b8 func_150EDCC8@150eeaf0:read@150eeafc
+SUSPECT	game_eu_12CAC0	func_150FF808	MATCH	v0=pass f0=pass	calls=3 tabrefs=0	func_150F9ED0@150f9ee4:read@150f9eec/ret func_150FF2B0@150ff2c8:read@150ff2d0/ret func_150FF604@150ff61c:read@150ff624/ret
+SUSPECT	game_eu_15E000	func_1513092C	MATCH	v0=pass f0=pass	calls=9 tabrefs=0	func_150C65D8@150c68c0:read@150c68c8/ret func_150C6F08@150c71f0:read@150c71f8/ret func_150EA69C@150ea9e4:read@150ea9ec/ret func_150EAB4C@150eae34:read@150eae3c/ret func_15159E00@1515a0e4:read@1515a0ec/ret func_1515A178@1515a608:read@1515a610/ret
+SUSPECT	game_eu_18B1C0	func_1515DB1C	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	.L15009340_game_data@1500944c:read@15009458
+SUSPECT	game_eu_1C3530	func_15195FB0	MATCH	v0=pass f0=pass	calls=5 tabrefs=0	func_150BFC60@150bfcd0:read@150bfce0 func_15116690@151166d8:read@151166e4/ret func_1511D0CC@1511d458:read@1511d460/ret
+SUSPECT	game_eu_1E61C0	func_151B8C18	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_151C0698@151c1404:read@151c1414/ret
+SUSPECT	game_eu_3CA50	func_1500F240	NM	v0=pass f0=pass	calls=4 tabrefs=1	func_1500F3BC@1500f408:read@1500f418 func_1500F3BC@1500f428:read@1500f430 func_1500F3BC@1500f440:read@1500f448 func_1500F3BC@1500f458:read@1500f470
+SUSPECT	game_eu_B37F0	func_150870E0	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15086508@15086580:read@1508658c func_150867D4@15086f0c:read@15086f1c/ret
+SUSPECT	game_eu_CC5F0	func_1509FA88	MATCH	v0=pass f0=pass	calls=1 tabrefs=0	func_1509F4D0@1509f640:read@1509f64c/ret
+SUSPECT	game_eu_CC5F0	func_1509FB90	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_1509F4D0@1509f500:read@1509f50c/ret func_1509F4D0@1509f55c:read@1509f568/ret
+SUSPECT	game_eu_CC5F0	func_1509FBC8	NM	v0=pass+set f0=pass near=1509fbf0:move $2,$0	calls=1 tabrefs=1	func_1509F4D0@1509f6c0:read@1509f6cc/ret
+SUSPECT	init_12560	func_100126E8	MATCH	v0=pass f0=pass	calls=2 tabrefs=0	func_15080628@15080650:read@15080658/ret func_15080628@15080714:read@1508071c/ret
+SUSPECT	init_EB00	func_10010F88	MATCH	v0=pass f0=pass	calls=45 tabrefs=0	func_15055A2C@15055e60:ret func_1509F9C8@1509fa70:ret func_1509FBC8@1509fc44:ret func_150B2C20@150b3360:ret func_150BC03C@150bc92c:ret func_150D0C40@150d0da8:ret
+SUSPECT2	game_83300	func_15060F28	NM	v0=pass f0=pass	calls=58 tabrefs=1	func_1503F1B0@1503f224:ret func_15052464@150527e4:ret func_15052F9C@150535cc:ret func_15053894@15053c20:ret .L150544C4@15054c18:ret func_15054A0C@15054db0:ret
+SUSPECT2	game_83300	func_1506160C	NM	v0=set f0=none	calls=20 tabrefs=1	func_15021834@15021de0:ret func_15052F9C@150535a4:ret func_15053694@15053a24:ret func_150721A4@15072590:ret func_150722F0@150726e4:ret func_15076C7C@1507705c:ret
+SUSPECT2	game_981E0	func_1506E5FC	MATCH	v0=pass f0=pass	calls=16 tabrefs=0	func_15052F9C@150533ec:ret func_1505B5F8@1505bc54:ret func_1506E7FC@1506ebf0:ret func_150C3574@150c3e04:ret
