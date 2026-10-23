@@ -26,6 +26,15 @@ Branch `port-b` (from P162 720e4c3). Took game_eu_1C3530.c.
 
 ## Next steps (from P163)
 
+0. **PRIORITY (coordinator, browser P161), not done in P163 (budget):** func_1501370C (game_40490.c:64, now port-b)
+   calls `D_80082EA0[arg0->unk17]()` without the record; the asm (EU 150136BC) keeps a0 = arg0 at the jalr, so every
+   level-start record handler gets NULL (the null+0x14 writer). Fix under NM like func_1501396C:
+   `void (*func)(struct16 *) = (void (*)(struct16 *)) D_80082EA0[idx]; if (func) func(arg0);` — **in the same commit
+   as func_151530A8** (game_eu_17D3C0, asm, 102 calls from frame 4773; 287 asm lines; callees func_150ADA20 x14,
+   func_150ADA68 x3, func_15143794 (jal 15143D04), func_1515C2F0 (jal 1515C860); its C prototypes disagree:
+   1897A0 `(s32 *, u8, u8)`, 11CB90 `(s32 *, s32, s32, u8 *)`, 126330 `(s32 *, s32, s32)` — check the asm's real
+   arity). D_80082EA0 = EU 0x80083230, entries 0..0x2F (see P163.md); still asm besides 151530A8's path:
+   func_151C7750 (idx 8, 1F4F60), func_1500C2F0 (idx 0x22) and func_1500D8C8 (idx 0x26) (game_39750).
 1. Owner of game_161520.c: D_80089E40 (func_151342BC) index obj+0x3C may reach func_151346EC / func_1513470C (void
    C, v0 = func_15169804 / func_15169824's result, tested by `bnez v0`) and the void 1D7790 / F3AD0 / F4400 entries.
 2. func_150F79F0 (125200, asm, port-b): consumer of func_151C6A28 / func_150FF604; 20-argument prototype in P163.md.
