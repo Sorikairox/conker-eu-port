@@ -1396,6 +1396,12 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                     hf = proto_fregs(all_hdr_protos(), pn)
                     if hf:
                         new[c['name']] = (new[c['name']][0], new[c['name']][1], hf)
+                        # P134: the arity and the a-register slots of the leading float parameters come from the same
+                        # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
+                        # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
+                        # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
+                        if new[c['name']][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
+                            new[c['name']] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
         why = compare(R, C, rk, arity)
         if verbose:

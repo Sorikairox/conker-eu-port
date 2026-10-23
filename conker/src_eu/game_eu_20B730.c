@@ -896,7 +896,331 @@ void func_151DF6A4(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DF6A4.s")
 #endif
 
+#ifdef NON_MATCHING
+extern s8 D_800ABC00[];         /* scenes per chapter (9 chapters) */
+extern u8 D_800ABC0C[];         /* "#": text id (chapter title) */
+extern u8 D_eu_800902B8[];      /* per-chapter text colour, 3 bytes (r, g, b) */
+extern s8 D_800902B0;           /* chapter (0..8) */
+extern u8 D_800902B4;           /* chosen route (scene) id, 0xFF = none */
+extern s8 D_800902D4;           /* list scroll offset (animates by 2 towards 0) */
+extern s8 D_800902D8;           /* previous list selection */
+extern s8 D_800902DC;           /* chapter step direction (-1 / 1) */
+extern u8 D_800902E0;           /* blink phase of the selected entry */
+extern s8 D_80090150;           /* list selection */
+extern s32 *D_800E0FB8;         /* text table (scene names) */
+extern s32 D_800E9D00;          /* cheat / unlock flags */
+extern u8 D_800BE7FE;
+extern u8 D_800E0B94;
+extern s8 D_80090114;
+extern s32 *D_800E0EB8;
+s32 func_1509D338(s32, s32 *);
+void func_1509D464(void);
+s32 func_1509D49C(s8, u8, s32 *, s32 *);
+void func_151E3864(void);
+
+// title_chapter_select_page: title page 2, the chapter / scene select. Left-right (D_800E0EC6 = 1 / 2) steps the
+// chapter D_800902B0 (0..8, wrapping) to the next one with an unlocked scene: the scene mask comes from the save route
+// table (func_1509D338 / func_1509D49C per scene, func_1509D464), cheat flags D_800E9D00 unlock a chapter's first scene
+// (0x8000 every scene), chapter 0's first scene is always open and chapter 8's fourth scene opens with D_800BE7FE.
+// If no other chapter has one the step is cancelled, else the page fades out (D_800E0EC6 = 3 / 4, alpha D_800E0EC5
+// - 32 per tick), moves and fades back in. Up-down scrolls the unlocked scenes (D_80090150, scroll animation
+// D_800902D4); the list (11 px rows, a wrapped copy above and below, faded at the edges, the selection blinking) is
+// drawn in the chapter's colour under the chapter title. Accept on a scene (D_800902B4) starts it: mode 7 (fade)
+// with the callback func_151E3864, D_80090114 = 3. Sound 0x4FF on a move, 0x500 on accept.
+void func_151DFD0C(void) {
+    u8 rows[32];    /* the asm keeps 0x54 bytes; at most 31 scenes */
+    s32 alpha;
+    s32 sfx;
+    s8 cursor;
+    s8 orig;
+    s32 again;
+    s32 first;      /* text index of the chapter's first scene */
+    s32 mask;       /* unlocked scenes */
+    s32 count;      /* number of unlocked scenes */
+    s32 i;
+    s32 k;
+    s32 bit;
+    s32 found;
+    s32 tmp;
+    s32 a;
+    s32 textAlpha;
+    s8 dir;
+    s8 scroll;
+    s32 rgb;
+    s32 lineAlpha;
+    s32 y;
+    s32 listEnd;
+    s8 pass;
+    u8 *col;
+    u16 in;
+
+    alpha = D_800E0EC4;
+    sfx = 0;
+    cursor = D_800902B0;
+    dir = D_800E0EC6;
+    do {
+        orig = cursor;
+        again = 0;
+        if (dir == 1) {
+            D_800902B0 = cursor - 1;
+            if (D_800902B0 < 0) {
+                D_800902B0 = 8;
+            }
+            D_800902DC = -1;
+        } else if (dir == 2) {
+            D_800902B0 = cursor + 1;
+            if (D_800902B0 >= 9) {
+                D_800902B0 = 0;
+            }
+            D_800902DC = 1;
+        }
+        cursor = D_800902B0;
+        do {
+            first = 1;
+            for (i = 0; i < cursor; i++) {
+                first += D_800ABC00[i];
+            }
+            mask = 0;
+            count = 0;
+            if (D_800E9D00 & 0x8000) {
+                mask = -1;
+            }
+            if (cursor == 8 && (D_800E9D00 & 2)) {
+                mask |= 1;
+            }
+            if (cursor == 7 && (D_800E9D00 & 4)) {
+                mask |= 1;
+            }
+            if (cursor == 6 && (D_800E9D00 & 0x1000)) {
+                mask |= 1;
+            }
+            if (cursor == 5 && (D_800E9D00 & 0x4000)) {
+                mask |= 1;
+            }
+            if (cursor == 4 && (D_800E9D00 & 0x1000000)) {
+                mask |= 1;
+            }
+            if (cursor == 3 && (D_800E9D00 & 0x2000000)) {
+                mask |= 1;
+            }
+            if (cursor == 2 && (D_800E9D00 & 0x4000000)) {
+                mask |= 1;
+            }
+            found = func_1509D338(cursor, &i);
+            if (D_800902B0 == 0) {
+                mask |= 1;
+            }
+            if (found != 0) {
+                for (i = 0; i < D_800ABC00[D_800902B0] - 1; i++) {
+                    if (func_1509D49C(D_800902B0, i, &tmp, NULL)) {
+                        mask |= 1 << i;
+                    }
+                    if (mask & (1 << i)) {
+                        count++;
+                    }
+                }
+                func_1509D464();
+                if (D_800902B0 == 8 && D_800BE7FE != 0 && !(mask & 8)) {
+                    mask |= 8;
+                    count++;
+                }
+            } else {
+                /* no route table: only the scene the count names */
+                mask |= 1 << i;
+                count = 1;
+            }
+            if (count == 0) {
+                /* nothing unlocked in this chapter: try the next one in the same direction */
+                D_800902B0 += D_800902DC;
+                if (D_800902B0 >= 9) {
+                    D_800902B0 = 0;
+                }
+                if (D_800902B0 < 0) {
+                    D_800902B0 = 8;
+                }
+            }
+            cursor = D_800902B0;
+        } while (count == 0);
+        dir = D_800E0EC6;
+        if (dir == 1 || dir == 2) {
+            if (orig == D_800902B0) {
+                D_800E0EC6 = -1;                /* no other chapter: cancel */
+            } else {
+                D_800E0EC6 = dir + 2;           /* fade out, then move (3 = left, 4 = right) */
+                D_800902B0 = orig;
+            }
+            again = 1;
+            dir = D_800E0EC6;
+        }
+        cursor = D_800902B0;
+    } while (again);
+
+    if (dir > 0) {
+        a = D_800E0EC5 - D_800BE9E4 * 32;
+        if (a <= 0) {
+            a = 0;
+            D_800E0EC6 = -1;
+            if (dir == 3) {
+                D_800902B0 = cursor - 1;
+                if (D_800902B0 < 0) {
+                    D_800902B0 = 8;
+                }
+                D_800902DC = -1;
+            } else {
+                D_800902B0 = cursor + 1;
+                if (D_800902B0 >= 9) {
+                    D_800902B0 = 0;
+                }
+                D_800902DC = 1;
+            }
+        }
+    } else {
+        a = D_800E0EC5 + D_800BE9E4 * 32;
+        if (a >= 0x100) {
+            a = 0xFF;
+        }
+    }
+    D_800E0EC5 = a;
+    textAlpha = (a * alpha) >> 8;
+    if (textAlpha >= 0xFE) {
+        textAlpha = 0xFF;
+    }
+
+    scroll = D_800902D4;
+    if (scroll > 0) {
+        scroll -= 2;
+    } else if (scroll < 0) {
+        scroll += 2;
+    }
+    D_800902D4 = scroll;
+    if (scroll == 0 && D_800E0EC5 == 0xFF) {
+        if (D_800BED38[0].stickY < -0x31) {
+            D_800902D8 = D_80090150;
+            D_80090150++;
+            D_800902D4 = -10;
+            sfx = 0x4FF;
+        } else if (D_800BED38[0].stickY >= 0x32) {
+            D_800902D8 = D_80090150;
+            D_80090150--;
+            D_800902D4 = 10;
+            sfx = 0x4FF;
+        }
+    }
+    if (D_80090150 < 0) {
+        D_80090150 = 0;
+        D_800902D4 = 0;
+        sfx = 0;
+    }
+    if (D_80090150 >= count) {
+        D_80090150 = count - 1;
+        D_800902D4 = 0;
+        sfx = 0;
+    }
+    func_1504332C(0xFF, 0xFF, 0xFF, textAlpha & 0xFF);
+    func_15042D94(0x94, 0x4D, 0x81, (s32) D_800ABC0C, D_800902B0 + 0x42);
+
+    /* the unlocked scenes' numbers, in order */
+    bit = 0;
+    for (k = 0; k < count; k++) {
+        while (!(mask & (1 << bit))) {
+            bit++;
+        }
+        rows[k] = bit;
+        bit++;
+    }
+
+    col = &D_eu_800902B8[D_800902B0 * 3];
+    func_1504332C(0xFF, 0, 0, textAlpha & 0xFF);
+    pass = -1;
+    if (count < 6) {
+        listEnd = count * 11;
+        y = 0x2F;
+    } else {
+        y = -(D_80090150 * 11) - D_800902D4 + 0x45;
+        listEnd = 0x37;
+        if (y >= 0x30) {
+            y = 0x2F;
+        }
+    }
+    k = count - 3;
+    for (i = -3; i < count + 3; i++) {
+        rgb = D_800902D4 * 12;
+        if (rgb < 0) {
+            rgb = -rgb;
+        }
+        if (k == D_80090150) {
+            rgb = 0xFF - rgb;
+            if (rgb == 0xFF) {
+                /* selected and settled: blink 0xC0 .. 0xFF */
+                tmp = (D_800902E0 * 2) & 0x7F;
+                if (tmp >= 0x40) {
+                    tmp = 0x7F - tmp;
+                }
+                rgb = tmp + 0xC0;
+                D_800902E0 += D_800BE9E4;
+            } else {
+                D_800902E0 = 0x1F;
+            }
+        } else if (D_800902D8 == k) {
+            rgb += 0x80;
+        } else {
+            rgb = 0x80;
+        }
+        if (k == D_80090150) {
+            D_800902B4 = rows[k];
+        }
+        /* fade the rows in at the top (y 70..80) and out at the bottom (listEnd + 70 .. 80) */
+        if (y < 0x50) {
+            lineAlpha = y * 25 - 1750;
+        } else if (listEnd + 0x46 < y && y < listEnd + 0x50) {
+            lineAlpha = (listEnd - y + 10) * 25 + 1750;
+        } else {
+            lineAlpha = 0xFF;
+        }
+        if (lineAlpha < 0) {
+            lineAlpha = 0;
+        }
+        if (lineAlpha >= 0xFA) {
+            lineAlpha = 0xFF;
+        }
+        if (textAlpha < lineAlpha) {
+            lineAlpha = textAlpha;
+        }
+        func_1504332C((col[0] * rgb) >> 8, (col[1] * rgb) >> 8, (col[2] * rgb) >> 8, lineAlpha & 0xFF);
+        if (y >= 0x46 && y < listEnd + 0x50 && pass == 0) {
+            func_15042D94(0x94, y + 0xF, 0x81, D_800E0FB8[rows[k] + first]);
+        }
+        y += 11;
+        k++;
+        if (k >= count) {
+            pass++;
+            k = 0;
+        }
+    }
+
+    if (D_800E0EC5 == 0xFF) {
+        in = ((MenuState *) D_80090174)->input;
+        if (in & 4) {
+            D_800E0EC6 = 1;
+            sfx = 0x4FF;
+        } else if (in & 8) {
+            D_800E0EC6 = 2;
+            sfx = 0x4FF;
+        }
+        if ((((MenuState *) D_80090174)->input & 0x10) && D_800902B4 != 0xFF) {
+            D_800E0B94 = 7;
+            D_800E0EB8 = (s32 *) func_151E3864;
+            D_80090114 = 3;
+            sfx = 0x500;
+        }
+    }
+    if (sfx != 0) {
+        func_10010F30(sfx, 0x4650, 0x40, 0, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151DFD0C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u8 D_800ABC10[]; /* "%d" */
