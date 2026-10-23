@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P148, 2026-10-23). Details: `docs/port/sessions/P148.md`
+
+- New hand C (NM): func_151928C8 water_drop_splash_update (func_1513095C update handler 14; mutants 16/16),
+  func_1513100C particle_draw_sprite (frame DL path, 37 setups, mutants 29/31 + 2 equivalent), func_1517B270
+  player_morph_blend (27 setups, mutants 28/29 + 1 equivalent; game_eu_595D0 prototype now s32), func_150A7EE0
+  matrix_transform_point_w (hand-asm trampoline; new whole harness `tools/port/difftest/nmasm_7ee0.py`, 2000 trials
+  0 diffs), func_1501A764 world_to_screen (mutants 10/10).
+- func_1513095C tables: only update handler 17 func_151A2F10 (port-b) is still asm; death table all C.
+- New helpers `docs/port/sessions/p148/romtab.py` (EU table dump with ASM marks), `callees.py` (jal targets with
+  decoded keys).
+- Checks: verify_all OK, NM links, protocheck 0 (1138), selftest 62/62, progress_nm 5132/5915 (86.8%), bytes 67.1%.
+
+## Next steps (from P148)
+
+1. Coordinator P149 census items still open: func_1514CFF0 (game_eu_17A800, 583 lines, pointer producer),
+   func_15058898 (game_83300; asm callees func_150BA3B0 port-b, func_1505DADC), func_100114D0 (init_EB00; asm callee
+   func_1000A420 first).
+2. func_1507D754 (game_A9D90): 10 asm callees listed in P148.md section 4 (func_151A7240 is port-b's).
+3. P138 / P141 leftovers (func_151E3AE4 ARGMEM 0:52 lists, func_151DFD0C f1 setups, func_151E19AC, func_151E4B40 gaps).
+
 ## State (session P145, 2026-10-23). Details: `docs/port/sessions/P145.md`
 
 - Scans on this tree: protoasm_check 0 real rows (RETNONE 14 info), floatint_scan BUG 0 / REVIEW 4 (known);

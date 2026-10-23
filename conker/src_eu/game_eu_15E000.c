@@ -182,7 +182,240 @@ void func_1513095C(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513095C.s")
 #endif
 
+#ifdef NON_MATCHING
+extern s32 (*D_80089BA4[])(u8 *, s32);
+extern f32 D_800A3BDC;
+extern u8 D_800A4EA8[];
+extern s32 D_800D30BC;
+s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
+void func_151318EC(s32 arg0_, s32 arg1_, s32 arg2_, s32 arg3_, s32 arg4_);
+void func_15131BBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8);
+void func_1515EDF8(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7);
+Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
+Gfx *func_15142CF0(s32, s32, s32, s16, s32, s32, s32, u8 *);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+s32 func_15142E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *arg9, s32 argA);
+u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
+
+/*
+ * particle_draw_sprite: draw handler of the sprite particles (draw tables at 0x8008C10C / 0x8008C6BC / 0x8008C8F8):
+ * one textured rectangle for particle `p` in view `view`. Skipped when flag 0x40000 hides it in this view (+0x76
+ * view mask), when the visibility handler D_80089BA4[+0x74] (0x8000) says no, or when flag 0x20000's owner +0x6C
+ * is not in this view. Projects the position (+0x40, plus +0x4C when 0x1000) with func_15144CEC, sizes the
+ * half-extents from +0x38 / +0x3C (clamped to at most +0x7C with 0x200000, at least +0x78 with 0x400000), culls
+ * against the view's screen box, then emits pipe sync (once), prim depth, combine / colour (func_151318EC +
+ * func_1515EDF8 lighting with 0x10000, else func_15131BBC), texture D_80090F10[+0x2D] and the rectangle with
+ * flipped S (0x40) / T (0x80) and clipped texture start at the left / top screen edge. Returns the new DL end.
+ */
+Gfx *func_1513100C(Gfx *gfx, u8 *p, s16 view) {
+    u8 sync;
+    u8 blend;
+    u8 combine;
+    s16 prim[4];  /* r, g, b, a: sp EA E8 E6 E4 */
+    s16 env[4];   /* sp E2 E0 DE DC */
+    u8 rgb[3];
+    f32 pos[3];
+    f32 scr[3];
+    f32 oz;
+    f32 ow;
+    f32 inv;
+    u8 *cam;
+    u8 *zv;
+    u8 *spr;
+    u32 flags;
+    f32 hw;
+    f32 hh;
+    f32 m;
+    f32 left;
+    f32 right;
+    f32 top;
+    f32 bottom;
+    f32 left4;
+    f32 top4;
+    f32 right4;
+    f32 bottom4;
+    f32 w;
+    f32 h;
+    s32 dsdx;
+    s32 dtdy;
+    s32 s0;
+    s32 t0;
+    s32 yi;
+    s32 ds;
+    s32 dt;
+    s32 v;
+    s16 x;
+    s16 y;
+    s16 d;
+    Gfx *g;
+
+    if ((*(u32 *)(p + 0x68) & 0x40000) && !(p[0x76] & (1 << view))) {
+        return gfx;
+    }
+    sync = 1;
+    blend = *(u16 *)(p + 0x18) >> 8;
+    combine = *(u16 *)(p + 0x18);
+    if ((*(u32 *)(p + 0x68) & 0x8000) && (s8)p[0x74] != -1) {
+        if (!D_80089BA4[(s8)p[0x74]](p, view)) {
+            return gfx;
+        }
+    }
+    flags = *(u32 *)(p + 0x68);
+    if ((flags & 0x20000) && *(u8 **)(p + 0x6C) != NULL && !(*(s16 *)(*(u8 **)(p + 0x6C) + 2) & (1 << view))) {
+        return gfx;
+    }
+    if (flags & 0x1000) {
+        pos[0] = *(f32 *)(p + 0x40) + *(f32 *)(p + 0x4C);
+        pos[1] = *(f32 *)(p + 0x44) + *(f32 *)(p + 0x50);
+        pos[2] = *(f32 *)(p + 0x48) + *(f32 *)(p + 0x54);
+    } else {
+        pos[0] = *(f32 *)(p + 0x40);
+        pos[1] = *(f32 *)(p + 0x44);
+        pos[2] = *(f32 *)(p + 0x48);
+    }
+    if (!func_15144CEC(pos, scr, &oz, &ow, &inv, view)) {
+        return gfx;
+    }
+    cam = (u8 *)D_800BE628 + view * 0x180;
+    hw = *(f32 *)(p + 0x38) * inv * *(f32 *)(cam + 0x1C) * D_800A3BDC;
+    hh = *(f32 *)(p + 0x3C) * inv * *(f32 *)(cam + 0x20) * D_800A3BDC;
+    flags = *(u32 *)(p + 0x68);
+    if (flags & 0x200000) {
+        m = *(f32 *)(p + 0x7C);
+        if (m < hw) {
+            hw = m;
+        }
+        if (m < hh) {
+            hh = m;
+        }
+    }
+    if (flags & 0x400000) {
+        m = *(s16 *)(p + 0x78);
+        if (hw < m) {
+            hw = m;
+        }
+        if (hh < m) {
+            hh = m;
+        }
+    }
+    right = scr[0] + hw;
+    if (!(*(f32 *)(cam + 0x2C) <= right)) {
+        return gfx;
+    }
+    left = scr[0] - hw;
+    if (!(left <= *(f32 *)(cam + 0x30))) {
+        return gfx;
+    }
+    bottom = scr[1] + hh;
+    if (!(*(f32 *)(cam + 0x24) <= bottom)) {
+        return gfx;
+    }
+    top = scr[1] - hh;
+    if (!(top <= *(f32 *)(cam + 0x28))) {
+        return gfx;
+    }
+    left4 = left * 4.0f;
+    top4 = top * 4.0f;
+    right4 = right * 4.0f;
+    bottom4 = bottom * 4.0f;
+
+    if (sync) {
+        gfx->words.w0 = 0xE7000000; /* pipe sync */
+        gfx->words.w1 = 0;
+        gfx++;
+        sync = 0;
+    }
+    /* prim depth from the view's z-buffer scale / offset (s16 at +0x44 / +0x4C of the D_800BE9C0 entry) */
+    zv = (u8 *)D_800BE628 + view * 0x180 + D_800BE9C0 * 16;
+    gfx->words.w0 = 0xEE000000;
+    gfx->words.w1 = (s32)((*(s16 *)(zv + 0x4C) + oz * inv * *(s16 *)(zv + 0x44)) * 32.0f) << 16;
+    gfx++;
+
+    spr = (u8 *)&D_80090F10[p[0x2D]];
+    w = D_80090F10[p[0x2D]].unk6;
+    h = D_80090F10[p[0x2D]].unk8;
+    if (left4 < right4) {
+        dsdx = (s32)(4096.0f * w / (right4 - left4));
+    } else {
+        dsdx = 0;
+    }
+    if (0.0f < bottom4 - top4) {
+        dtdy = (s32)(4096.0f * h / (bottom4 - top4));
+    } else {
+        dtdy = 0;
+    }
+    s0 = 0;
+    t0 = 0;
+    flags = *(u32 *)(p + 0x68);
+    if (flags & 0x40) { /* flip S */
+        s0 = (D_80090F10[p[0x2D]].unk6 - 1) << 5;
+        dsdx = -dsdx & 0xFFFF;
+    }
+    if (flags & 0x80) { /* flip T */
+        t0 = (D_80090F10[p[0x2D]].unk8 - 1) << 5;
+        dtdy = -dtdy & 0xFFFF;
+    }
+    if (flags & 0x10000) {
+        func_151318EC((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)p);
+        func_1515EDF8(view, (s32)pos[0], (s32)pos[1], (s32)pos[2], 0xFF, rgb, 0, 0);
+        env[0] = rgb[0];
+        env[1] = rgb[1];
+        env[2] = rgb[2];
+        env[3] = p[0x2B];
+    } else {
+        func_15131BBC((s32)&prim[0], (s32)&prim[1], (s32)&prim[2], (s32)&prim[3], (s32)&env[0], (s32)&env[1],
+                      (s32)&env[2], (s32)&env[3], (s32)p);
+    }
+    gfx = func_1513F4E4(gfx, blend, &sync);
+    gfx = func_15142B7C(gfx, *(s32 *)(p + 0x10), *(s32 *)(p + 0x14) | 0x10000 | 0x100000);
+    gfx = func_15142CF0((s32)gfx, 0, 0, prim[0], prim[1], prim[2], prim[3], &sync);
+    gfx = func_15142C10(gfx, env[0], env[1], env[2], env[3], &sync);
+    gfx = (Gfx *)func_15142E24((s32)gfx, (s32)spr, *(s32 *)(p + 0x1C), 2, 0, 0, p[0x2D], 0, 0, &sync,
+                               (*(u32 *)(p + 0x68) & 0x800000) ? 0x3E : 3);
+    g = (Gfx *)func_15142FBC(gfx, ((*(u32 *)(p + 0x68) & 0x100) ? 0x100000 : 0) | D_800D30BC | 0x2CA0,
+                             *(s32 *)(D_800A4EA8 + combine * 8 + 4) | *(s32 *)(D_800A4EA8 + combine * 8) | 4, &sync);
+
+    /* texture rectangle: lower right, upper left (10.2 screen coordinates clamped at 0) */
+    x = (s32)right4;
+    y = (s32)bottom4;
+    g[0].words.w0 = 0xE4000000 | ((y > 0 ? y : 0) & 0xFFF) | (((x > 0 ? x : 0) & 0xFFF) << 12);
+    x = (s32)left4;
+    yi = (s32)top4;
+    y = yi;
+    g[0].words.w1 = (((x > 0 ? x : 0) & 0xFFF) << 12) | ((y > 0 ? y : 0) & 0xFFF);
+    g[1].words.w0 = 0xE1000000;
+    /* rectangle starting left of / above the screen: advance the texture start by the clipped part */
+    if (x < 0) {
+        d = dsdx;
+        v = (x * d) >> 7;
+        if (d < 0) {
+            ds = v > 0 ? v : 0;
+        } else {
+            ds = v < 0 ? v : 0;
+        }
+    } else {
+        ds = 0;
+    }
+    if (yi < 0) {
+        d = dtdy;
+        v = (y * d) >> 7;
+        if (d < 0) {
+            dt = v > 0 ? v : 0;
+        } else {
+            dt = v < 0 ? v : 0;
+        }
+    } else {
+        dt = 0;
+    }
+    g[1].words.w1 = ((t0 - dt) & 0xFFFF) | ((s0 - ds) << 16);
+    g[2].words.w0 = 0xF1000000;
+    g[2].words.w1 = (dsdx << 16) | (dtdy & 0xFFFF);
+    return g + 3;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513100C.s")
+#endif
 
 typedef struct {
     u8 pad0[0x24];
