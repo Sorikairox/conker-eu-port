@@ -7,6 +7,19 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_151787D8.s")
 
+#ifdef NON_MATCHING
+s32 func_15168118(s32 gdl, u8 *obj, s16 player);
+
+/* P186: the asm leaves arg1 / arg2 in a1 / a2 at the jal and func_15168118 reads them (object, player view):
+ * pass them (dropped-arguments lesson). */
+s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
+    u8 *p = *(u8 **)(arg1 + 0x14);
+    if (p[0x36] & (1 << arg2)) {
+        return func_15168118(arg0, arg1, arg2);
+    }
+    return arg0;
+}
+#else
 s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
     u8 *p = *(u8 **)(arg1 + 0x14);
     if (p[0x36] & (1 << arg2)) {
@@ -14,6 +27,7 @@ s32 func_15178CC0(s32 arg0, u8 *arg1, s16 arg2) {
     }
     return arg0;
 }
+#endif
 
 void func_eu_15178D14(void) {}
 
