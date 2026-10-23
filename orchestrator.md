@@ -94,6 +94,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Lesson: converted C on top of asm stubs (P72)
 - A correct C function can still corrupt memory when its **inputs come from an asm stub** (NULL buffers, garbage out-params): it then writes into the null zone and other code reads that as objects. When a browser run shows heap corruption, bisect merges first (scratch worktree + bounded reproducer), then look for stubbed producers of the faulting function's pointers.
+- Rule since P97 (it happened again: P92 converted path readers before their producer func_15020920): in briefs, require **producers before consumers** — a function whose inputs are written by a still-asm function in the same subsystem is committed only together with that producer, or not at all.
 
 ### Lesson: test the harness itself (P71, P73)
 - Twice a difftest bug made results meaningless while looking fine: callee arity taken from call statements (P71), and the candidate silently dropped when one NM block holds two functions (P73) — every mutant "survived" because the old copy was tested. A surviving mutant that should obviously die is a harness bug until proven otherwise; add a selftest case for every harness fix.
