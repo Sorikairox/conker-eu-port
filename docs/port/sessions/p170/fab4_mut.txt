@@ -1,0 +1,25 @@
+s/(s32 \*) (fx + 0x100), slot, 0x40/(s32 *) (fx + 0x100), slot, 0x80/
+s/    if (fresh) {/    if (!fresh) {/
+s/memcpy(\*(u8 \*\*) (fx + 0x100 + slot \* 4) + 0x40, fx + 0xC0, 0x40);/memcpy(*(u8 **) (fx + 0x100 + slot * 4) + 0x40, fx + 0xC0, 0x20);/
+s/    cam = func_15144B34(slot);/    cam = func_15144B34(slot + 1);/
+s/(fx + 0x2C) \* scale\[0\];/(fx + 0x2C) * scale[1];/
+s/(fx + 0x30) \* scale\[1\];/(fx + 0x30) * scale[0];/
+s/dir\[1\] = \*(f32 \*) (fx + 0x44) - \*(f32 \*) (fx + 0x38);/dir[1] = *(f32 *) (fx + 0x44) - *(f32 *) (fx + 0x3C);/
+s/    dir\[2\] \*= len;/    dir[2] *= halfWidth;/
+s/end\[1\] = \*(f32 \*) (fx + 0x38) + dir\[1\];/end[1] = *(f32 *) (fx + 0x38) - dir[1];/
+s/dir\[0\] \* 0.5f - cam\[0\]/dir[0] * 0.25f - cam[0]/
+s/dir\[2\] \* 0.5f - cam\[2\]/dir[2] * 0.5f - cam[1]/
+s/func_150ADD90((u8 \*) dir, (u8 \*) toCam/func_150ADD90((u8 *) toCam, (u8 *) dir/
+s/side\[1\] \* side\[1\] + side\[2\] \* side\[2\]/side[1] * side[1] + side[1] * side[2]/
+s/    if (lenSq == 0.0f) {/    if (lenSq < 1.0f) {/
+s/        side\[0\] = side\[1\] = side\[2\] = 0.0f;/        side[0] = side[1] = 0.0f;/
+s/        s = halfWidth \/ sqrtf(lenSq);/        s = halfWidth \/ lenSq;/
+s/        side\[2\] \*= s;/        side[2] *= halfWidth;/
+s/    if (flip) {/    if (!flip) {/
+s/        \*(s16 \*) (vtx + 6) = 0;/        *(s16 *) (vtx + 6) = 1;/
+s/(s32) (end\[0\] - side\[0\]);/(s32) (end[0] + side[0]);/
+s/(s32) (end\[2\] + side\[2\]);/(s32) (end[2] + side[1]);/
+s/(s32) (\*(f32 \*) (fx + 0x38) - side\[1\]);/(s32) (*(f32 *) (fx + 0x38) + side[1]);/
+s/(s32) (\*(f32 \*) (fx + 0x3C) + side\[2\]);/(s32) (*(f32 *) (fx + 0x3C) + side[0]);/
+s/    return start;/    return vtx;/
+s/        vtx += 0x10;/        vtx += 0x8;/
