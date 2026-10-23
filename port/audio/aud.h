@@ -24,4 +24,5 @@ extern struct aud_stats aud_stats;
 int aud_out_open(int rate);
 void aud_out_push_game(const void *buf, unsigned frames);
 unsigned aud_out_queued(void);
+unsigned aud_out_ai_len(void); /* P147: AI_LEN model: queued frames minus the target latency */
 #endif

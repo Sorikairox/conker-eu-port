@@ -374,14 +374,48 @@ void port_post_event(int e) {
 /* ---------------- main loop ---------------- */
 
 extern int port_paused; /* P27: pc_os.c port_set_paused */
-static void frame(void) {
-    if (port_paused) return;
+/* one emulated VI retrace: post VI / timer messages and run the threads until they block */
+static void retrace(void) {
     port_frame_count++;
     if (port_frame_hook) port_frame_hook();
     port_vi_retrace();
     if (frame_mq_init) osSendMesg(&frame_mq, NULL, OS_MESG_NOBLOCK);
     port_sched_run();
-    port_video_frame();
+    { extern void port_pace_report(void) __attribute__((weak)); if (port_pace_report) port_pace_report(); } /* P147 ?p147pace */
+}
+
+/* P147: VI pacing. The EU ROM is PAL (osTvType 0): its VI retraces at 50 Hz, and game logic, cutscene timers
+ * and the audio task (one audio frame every 2 retraces, init_8F90.c) are counted in retraces. Before P147 one
+ * browser frame was one retrace, i.e. 60 Hz (or 120 / 144 Hz) and the game ran 20 % (or 2-3x) fast.
+ * Now, in the browser, retraces come from a fixed-timestep clock: every requestAnimationFrame adds the elapsed
+ * wall time to an accumulator and runs one retrace per 20 ms (16.683 ms NTSC / MPAL) in it; the canvas shows
+ * the last frame drawn (preserveDrawingBuffer), so a tick without a retrace (120 / 144 Hz monitors) presents
+ * the previous frame. Catch-up is capped: at most VI_MAX_STEPS retraces per tick, at most VI_TICK_MS of
+ * work per tick, the elapsed time per tick is clamped to 250 ms (background tabs are paused anyway, P27), and
+ * a backlog above 2 periods is dropped (slow machine: the game slows down instead of spiralling).
+ * Node (no window), ?det=1 and ?vi60=1 keep one retrace per main-loop callback (deterministic frame numbers;
+ * node runs as fast as its setTimeout shim allows; the ?det clock advances 1/50 s per retrace for PAL). */
+#define VI_MAX_STEPS 4
+#define VI_TICK_MS 33.0
+int port_tv_type = 1; /* P147: osTvType as set at boot (port/boot/game_main.c; the scheduler demo stays NTSC) */
+double port_vi_period_ms(void) { return port_tv_type == 0 ? 20.0 : 1000.0 / 59.94; }
+static void frame(void) {
+    static int mode = -1; static double last, acc;
+    if (mode < 0) mode = port_flag("det") || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
+    if (port_paused) { last = 0; return; }
+    if (!mode) { retrace(); port_video_frame(); return; }
+    double now = emscripten_get_now(), per = port_vi_period_ms();
+    if (!last) { last = now - per; acc = 0; }  /* first tick / after a pause: one retrace, no catch-up */
+    double dt = now - last; last = now;
+    if (dt > 250.0) dt = 250.0;
+    acc += dt;
+    int n = 0;
+    while (acc >= per && n < VI_MAX_STEPS) {
+        retrace(); n++; acc -= per;
+        if (emscripten_get_now() - now > VI_TICK_MS) break;
+    }
+    if (acc > 2 * per) acc = 2 * per;
+    if (n) port_video_frame();
 }
 
 void port_dump_stubs(int max);
@@ -409,8 +443,11 @@ void port_run(port_boot_fn boot) {
     boot();
     in_main_loop = 1;
     emscripten_set_main_loop(frame, 0, 0);
-    /* ?timer=1: drive frames from setTimeout (headless Chrome's virtual time throttles rAF) */
-    if (EM_ASM_INT({ return typeof location !== 'undefined' && /[?&]timer=1/.test(location.search); }))
-        emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 16);
+    /* ?timer=1: drive frames from setTimeout (headless Chrome's virtual time throttles rAF); P147: ?timer=N (N > 1) uses
+     * an N ms period, e.g. 7 to test the 50 Hz VI pacing against a ~144 Hz main loop */
+    if (EM_ASM_INT({ return typeof location !== 'undefined' ? 1 : 0; })) {
+        int tm = port_flag("timer");
+        if (tm > 0) emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, tm == 1 ? 16 : tm);
+    }
     /* main() returns; the runtime stays alive (EXIT_RUNTIME=0) and the main loop drives everything */
 }

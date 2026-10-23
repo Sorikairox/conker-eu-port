@@ -149,7 +149,17 @@ static unsigned off_addr, off_w, off_fbo_w, off_siz, off_rows;
  * The rows written back are off_rows: the image width (square, as before) unless the game sets a scissor while the
  * image is bound (the RDP cannot write below the scissor, so its lry bounds the image's height). */
 #define OFF_FBO_H 256
-#define CIMG_H ((float)(off_on ? OFF_FBO_H : cimg_width * 0.75f))
+/* P147: on screen, the rows shown are the VI's (pc_os.c port_vi_view: PAL rows 1 .. 214.7 of the 292 x 216 framebuffer),
+ * stretched over the canvas; N64 row y is canvas row (y - VI_Y0) * canvas_h / CIMG_H. Before P147 it was rows
+ * 0 .. 0.75 * width (219), which showed row 216 (below the scissor) as a stray line. */
+static float vi_y0, vi_h;
+static void vi_view_update(void) {
+    int port_vi_view(float *y0, float *h);
+    float y0, h;
+    if (port_vi_view(&y0, &h)) { vi_y0 = y0; vi_h = h; } else { vi_y0 = 0; vi_h = 0; }
+}
+#define VI_Y0 (off_on ? 0.0f : vi_y0)
+#define CIMG_H ((float)(off_on ? OFF_FBO_H : vi_h > 0 ? vi_h : cimg_width * 0.75f))
 typedef struct { unsigned fmt, siz, line, tmem, pal, cms, cmt, masks, maskt, shifts, shiftt, uls, ult, lrs, lrt; } Tile;
 static Tile tiles[8];
 static struct { unsigned fmt, siz, width, raw; unsigned char *p; } timg;
@@ -556,12 +566,12 @@ static void apply_state(void) {
     else {
         float w = 2 * vp_scale[0] / 4.0f, h = 2 * vp_scale[1] / 4.0f;
         float x0 = (vp_trans[0] - vp_scale[0]) / 4.0f, y0 = (vp_trans[1] - vp_scale[1]) / 4.0f;
-        glViewport((GLint)(x0 * sx), (GLint)(canvas_h - (y0 + h) * sy), (GLint)(w * sx), (GLint)(h * sy));
+        glViewport((GLint)(x0 * sx), (GLint)(canvas_h - (y0 + h - VI_Y0) * sy), (GLint)(w * sx), (GLint)(h * sy));
     }
     /* P35b: G_SETSCISSOR (the RDP clips every primitive to it; the level frames use x 2..290, y 0..216) */
     if (sc_on) {
         glEnable(GL_SCISSOR_TEST);
-        glScissor((GLint)(sc_box[0] * sx), (GLint)(canvas_h - sc_box[3] * sy), (GLint)((sc_box[2] - sc_box[0]) * sx + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
+        glScissor((GLint)(sc_box[0] * sx), (GLint)(canvas_h - (sc_box[3] - VI_Y0) * sy), (GLint)((sc_box[2] - sc_box[0]) * sx + 0.5f), (GLint)((sc_box[3] - sc_box[1]) * sy + 0.5f));
     } else glDisable(GL_SCISSOR_TEST);
 }
 
@@ -752,7 +762,7 @@ static void rect(float x0, float y0, float x1, float y1, float s0, float t0, flo
     V q[4];
     float xs[4] = {x0, x1, x0, x1}, ys[4] = {y0, y0, y1, y1}, ss[4] = {s0, s1, s0, s1}, ts[4] = {t0, t0, t1, t1};
     for (int i = 0; i < 4; i++) {
-        q[i].x = xs[i] / W * 2 - 1; q[i].y = 1 - ys[i] / H * 2; q[i].z = 0; q[i].w = 1;
+        q[i].x = xs[i] / W * 2 - 1; q[i].y = 1 - (ys[i] - VI_Y0) / H * 2; q[i].z = 0; q[i].w = 1;
         q[i].r = (col >> 24) / 255.0f; q[i].g = (col >> 16 & 255) / 255.0f; q[i].b = (col >> 8 & 255) / 255.0f;
         q[i].a = (col & 255) / 255.0f; q[i].s = ss[i]; q[i].t = ts[i]; q[i].fog = 0;
     }
@@ -1428,6 +1438,7 @@ void gfx_run_task(void *task) {
     const unsigned char *t = task;
     unsigned ucode = rd32(t + 16), data = rd32(t + 48), size = rd32(t + 52);
     gfx_stats.tasks++;
+    vi_view_update(); /* P147 */
     if (gfx_stats.tasks <= 4)
         port_log("[gfx] task %u: ucode %08X ucode_data %08X dl %08X (%u bytes)\n", gfx_stats.tasks, ucode, rd32(t + 24), data, size);
     const void *dl = gfx_addr(data);
@@ -1439,6 +1450,9 @@ void gfx_run_task(void *task) {
     if (dltrace < 0) { dltrace = port_flag("dltrace"); dlstat = port_flag("dlstat"); }
     /* P23: ?dltrace=N dumps every command of gfx task N too; ?dlstat=N logs the opcode histogram every N tasks */
     gfx_trace = gfx_stats.tasks <= 2 || (dltrace && gfx_stats.tasks == (unsigned)dltrace);
+    { /* P147 ?dltracef=F: trace the first gfx task at or after retrace F (task numbers differ from run to run) */
+        static int tf = -1, done; if (tf < 0) tf = port_flag("dltracef");
+        if (tf > 0 && !done && port_frame_count >= (unsigned)tf) { done = 1; gfx_trace = 1; port_log("[p147] dltracef: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); } }
     if (p78_task < 0) p78_task = port_flag("p78tex");
     p78_on = p78_task > 0 && gfx_stats.tasks == (unsigned)p78_task; p78_mat = 0;
     if (dlstat && gfx_stats.tasks % (unsigned)dlstat == 0) logf = 2;

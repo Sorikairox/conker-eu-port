@@ -103,6 +103,7 @@ static void port_boot(void) {
     /* libultra boot globals the IPL3 leaves in low RDRAM */
     D_80000300 = 1;          /* osTvType: NTSC=1 / PAL=0; EU ROM -> PAL */
     D_80000300 = 0;
+    { extern int port_tv_type; port_tv_type = 0; } /* P147: VI pacing 50 Hz (pc_sched.c) */
     D_80000308 = (s32)0xB0000000; /* osRomBase: the cart in KSEG1, as the IPL3 leaves it (P66: the C func_1000480C reads
                               * CART_WORD(devAddr | osRomBase); with 0 it read KSEG1 RDRAM 0xA0xxxxxx, not the ROM) */
     D_8000030C = 0;          /* osResetType: cold */

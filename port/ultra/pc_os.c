@@ -304,13 +304,15 @@ EMSCRIPTEN_KEEPALIVE void port_set_paused(int p) {
     port_paused = p != 0;
 }
 /* P21: ?det=1 / PORT_DET=1: deterministic clock for node-vs-browser comparisons. Time is
- * frame * 1/60 s plus 1000 ticks (~21 us) per read, so busy-waits still progress; it never depends
+ * frame * 1/50 s (PAL; 1/60 NTSC, P147) plus 1000 ticks (~21 us) per read, so busy-waits still progress; it never depends
  * on the host's speed or on wall time. */
 static int det_mode = -1;
 extern unsigned port_frame_count;
 static OSTime det_now(void) {
     static OSTime vt; static unsigned vf;
-    if (vf != port_frame_count) { OSTime f = (OSTime)port_frame_count * (OS_CPU_COUNTER / 60); if (f > vt) vt = f; vf = port_frame_count; }
+    if (vf != port_frame_count) { /* P147: one retrace = 1/50 s for PAL (osTvType 0), 1/60 s otherwise */
+        extern int port_tv_type; OSTime f = (OSTime)port_frame_count * (OS_CPU_COUNTER / (port_tv_type == 0 ? 50 : 60));
+        if (f > vt) vt = f; vf = port_frame_count; }
     return vt += 1000;
 }
 void port_spin_check(void); /* P19: busy-waits on the clock yield too (pc_sched.c) */
@@ -361,7 +363,7 @@ static u32 vi_count = 1, vi_tick;
 static void *vi_cur_fb, *vi_next_fb;
 
 void osCreateViManager(OSPri pri) { (void)pri; }
-void osViSetMode(OSViMode *m) { (void)m; }
+void osViSetMode(OSViMode *m) { extern OSViMode *port_vi_mode; port_vi_mode = m; }
 void osViBlack(u8 b) { (void)b; }
 void osViSetSpecialFeatures(u32 f) { (void)f; }
 void osViSetEvent(OSMesgQueue *mq, OSMesg msg, u32 retrace) {
@@ -371,8 +373,45 @@ void osViSwapBuffer(void *fb) { vi_next_fb = fb; }
 void *osViGetCurrentFramebuffer(void) { return vi_cur_fb; }
 void *osViGetNextFramebuffer(void) { return vi_next_fb; }
 
-/* one browser frame = one retrace */
+/* P147 DIAGNOSTIC ?p147vi=1 (node PORT_P147VI=1): log the game's active VI mode D_8002AF20 (EU 0x8002AF20; OSViMode,
+ * u32 fields are native words in the vbe memory) whenever it changes: width, hStart, xScale, field 0 origin / yScale /
+ * vStart, and what the VI would show from it (N64 pixels = screen span * scale / 1024; PAL screen lines per field
+ * = (vEnd - vStart) / 2). */
+OSViMode *port_vi_mode; /* P147: the mode last passed to osViSetMode (the game edits it in place: init_49E0.c, init_39C0.c) */
+static void p147_vi_log(void) {
+    static int f = -1; static u32 last[20]; static int n;
+    if (f < 0) f = port_flag("p147vi");
+    if (!f || n >= 40) return;
+    const u32 *m = (const u32 *)port_vi_mode;
+    if (!m || !memcmp(last, m, sizeof last)) return;
+    memcpy(last, m, sizeof last); n++;
+    u32 hs = m[7], xs = m[8], ys = m[11], vs = m[12];
+    int hspan = (int)(hs & 0x3FF) - (int)(hs >> 16 & 0x3FF), vspan = ((int)(vs & 0x3FF) - (int)(vs >> 16 & 0x3FF)) / 2;
+    port_log("[p147vi] frame %u: type %u ctrl %08X width %u hStart %08X xScale %08X | origin %08X yScale %08X vStart %08X | "
+             "vSync %u hSync %08X -> %d x %d screen, %.1f x %.1f fb pixels\n", port_frame_count, m[0] >> 24, m[1], m[2], hs, xs,
+             m[10], ys, vs, m[4], m[5], hspan, vspan, hspan * (xs & 0xFFF) / 1024.0, vspan * (ys & 0xFFF) / 1024.0);
+}
+
+/* P147: the part of the framebuffer the VI shows, from the active mode (the game's PAL mode D_8002AF20: width 292,
+ * origin 0x248 = one 16-bit row, yScale 0x350 over vStart 0x3F..0x244 = 258 lines -> rows 1 .. 214.7 of the 216-row
+ * framebuffer; xScale 0x200 over hStart 0x8C..0x2D5 = 585 dots -> 292.5 columns, the whole width). The renderer maps
+ * these rows onto the canvas (gfx_f3dex2.c), so row 0 and rows 215 / 216 are not shown, as on the N64.
+ * Returns 0 (caller keeps its default) when no usable mode is set; ?p147vifull=1 = the old 4:3 window from row 0. */
+int port_vi_view(float *y0, float *h) {
+    static int full = -1; if (full < 0) full = port_flag("p147vifull");
+    const u32 *m = (const u32 *)port_vi_mode;
+    if (full || !m) return 0;
+    u32 width = m[2] & 0xFFF, bpp = (m[1] & 3) == 3 ? 4 : 2, ys = m[11] & 0xFFF, vs = m[12];
+    int vspan = ((int)(vs & 0x3FF) - (int)(vs >> 16 & 0x3FF)) / 2;
+    if (!width || !ys || vspan <= 0 || (m[1] & 3) < 2) return 0;
+    *y0 = (float)(m[10] / (width * bpp));
+    *h = vspan * ys / 1024.0f;
+    return *h > 16;
+}
+
+/* one emulated retrace (P147: paced at 50 Hz for PAL by pc_sched.c frame()) */
 void port_vi_retrace(void) {
+    p147_vi_log();
     timers_poll();
     vi_cur_fb = vi_next_fb;
     if (vi_mq && ++vi_tick >= vi_count) {
@@ -408,7 +447,7 @@ u32 __port_io_read(u32 a) {
     }
     int i = io_slot(a, "read");
     switch (a) {
-    case 0xA4500004: return aud_out_queued() * 4;   /* AI_LEN_REG: bytes left in the current DMA */
+    case 0xA4500004: return aud_out_ai_len() * 4;   /* AI_LEN_REG: bytes left in the current DMA (P147: minus the target latency) */
     case 0xA450000C: return 0;                      /* AI_STATUS_REG: not full, not busy */
     case 0xA4600010: return 0;                      /* PI_STATUS_REG: idle */
     case 0xA4800018: return 0;                      /* SI_STATUS_REG: idle */
@@ -530,7 +569,7 @@ void osDpSetStatus(u32 s) { (void)s; }
 static int ai_rate = 22020;
 s32 osAiSetNextBuffer(void *p, u32 n) { aud_out_open(ai_rate); aud_out_push_game(p, n / 4); return 0; }
 u32 osAiGetStatus(void) { return 0; }
-u32 osAiGetLength(void) { return aud_out_queued() * 4; }
+u32 osAiGetLength(void) { return aud_out_ai_len() * 4; }
 s32 osAiSetFrequency(u32 f) { ai_rate = (int)f; return (s32)f; }
 
 /* ---------------- controllers: pc_pif.c (P27) ---------------- */

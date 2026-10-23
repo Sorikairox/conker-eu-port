@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P147, 2026-10-23, port-web). Details: `docs/port/sessions/P147.md`
+
+- **Browser VI pacing is now 50 Hz for PAL** (pc_sched.c fixed-timestep accumulator on performance.now; present on
+  rAF only after a retrace; caps: 250 ms per tick, 4 retraces / 33 ms per tick, backlog > 2 periods dropped; pause
+  resets). Node / `?det=1` / `?vi60=1` keep one retrace per callback; `?det` clock 1/50 s per retrace.
+- Audio: AI_LEN reports ring level minus 3072 frames (`?ailat`). 130 s Chrome run: **50.009 retraces per audio second**,
+  ring 2.1k..5.3k frames (stable), 0 underrun, 0 dropped (old 60 Hz pacing: ring filled to 6 s and dropped samples).
+  Diagnostic `?p147pace=1`.
+- Presented rows follow the VI mode (`?p147vi=1` logs it): PAL rows 1..214.7 of the 292 x 216 fb (no more row-216 line);
+  `?p147vifull=1` = old. Logo-end title image at y 226..278 is outside the scissor (0..216) on the N64 too.
+- New game: 1682 frames black = ~34 s to the fade-in (was 28 s). At 50 Hz the menu STARTs need E1=69500 E2=91000.
+- Regressions clean: node noev (death 925, 0x2C 1285, 0 1365), Chrome walk (1531 / 2303 / 2383), heap 0 / null 0 / traps 0.
+- New knobs: `?dltracef=F` (trace first gfx task at/after retrace F), `?timer=N` (N ms setTimeout loop).
+
+## Next steps (from P147)
+
+1. Conversion blockers as P144 (func_1513CFE4 + handlers, func_1514CFF0, frame-DL stubs, func_15153BA4).
+2. Logo-end title image: what sets its y 226 (scene event data D_80091BA8 or a stubbed producer).
+3. Scripts driven by wall time (walks, newgame presses) now land on different frames: retime them for 50 Hz.
+
 ## State (session P144, 2026-10-23, port-web). Details: `docs/port/sessions/P144.md`
 
 - Merged port-b a4cc21e (P136 / P139 / P142): only HANDOFF conflicted (merge_union); game_eu_11A2B0.c func_151432BC

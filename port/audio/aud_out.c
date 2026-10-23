@@ -20,14 +20,16 @@ extern unsigned port_frame_count;
 #define RING (1u << 17) /* stereo frames, ~6 s at 22 kHz */
 static int16_t ring[RING][2];
 static volatile unsigned rd, wr;
-static int opened;
+static int opened, out_rate = 22020;
 static unsigned pushed, dropped;
+static volatile unsigned underrun; /* P147: output frames the Web Audio callback found the ring empty (JS increments) */
+static unsigned ringin;            /* P147: frames written into the ring (consumed = ringin - queued) */
 
 /* Web Audio sink: ScriptProcessorNode(2048 frames, stereo) pulling from ring[rd..wr). The page's
  * first click / key resumes a context that the autoplay policy started suspended. Returns the
  * context's rate (Web Audio resamples from `rate` when it cannot run at it) or 0. */
 /* The __port_ prefix keeps port/tools/gen_stubs.py from stubbing this EM_JS import as "missing". */
-EM_JS(int, __port_web_audio_open, (int rate, int ring, int rdp, int wrp, int mask), {
+EM_JS(int, __port_web_audio_open, (int rate, int ring, int rdp, int wrp, int mask, int urp), {
   try {
     var G = globalThis, C = G.AudioContext || G.webkitAudioContext;
     if (!C) return 0;
@@ -35,12 +37,13 @@ EM_JS(int, __port_web_audio_open, (int rate, int ring, int rdp, int wrp, int mas
     try { ctx = new C({ sampleRate: rate }); } catch (e) { ctx = new C(); }
     var node = ctx.createScriptProcessor(2048, 0, 2);
     var src = ctx.sampleRate === rate ? 1 : rate / ctx.sampleRate;
-    var pos = 0;
+    var pos = 0, started = 0;
     node.onaudioprocess = function (e) {
         var L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1);
         var r = HEAPU32[rdp >> 2], w = HEAPU32[wrp >> 2], base = ring >> 1;
         for (var i = 0; i < L.length; i++) {
-            if (r === w) { L[i] = R[i] = 0; continue; }
+            if (r === w) { L[i] = R[i] = 0; if (started) HEAPU32[urp >> 2]++; continue; }
+            started = 1;
             L[i] = HEAP16[base + 2 * r] / 32768; R[i] = HEAP16[base + 2 * r + 1] / 32768;
             pos += src;
             while (pos >= 1 && r !== w) { pos -= 1; r = (r + 1) & mask; }
@@ -64,12 +67,12 @@ int aud_out_open(int rate) {
     if (opened) return 0;
     int has_ctx = EM_ASM_INT({ return (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') ? 1 : 0; });
     if (!has_ctx) { port_log("[aud] no AudioContext (node): output disabled, %d Hz\n", rate); opened = -1; return -1; }
-    int got = __port_web_audio_open(rate, (int)(uintptr_t)ring, (int)(uintptr_t)&rd, (int)(uintptr_t)&wr, (int)(RING - 1));
+    int got = __port_web_audio_open(rate, (int)(uintptr_t)ring, (int)(uintptr_t)&rd, (int)(uintptr_t)&wr, (int)(RING - 1), (int)(uintptr_t)&underrun);
     if (got <= 0) {
         port_log("[aud] Web Audio open failed (%d): %s\n", got, got < 0 ? "exception, see globalThis.portAudioErr" : "no AudioContext");
         opened = -1; return -1;
     }
-    opened = 1;
+    opened = 1; out_rate = rate;
     port_log("[aud] Web Audio open: ring at %d Hz, context %d Hz, stereo, ScriptProcessor 2048\n", rate, got);
     return 0;
 }
@@ -98,12 +101,48 @@ void aud_out_push_game(const void *buf, unsigned frames) {
         if (nx == rd) { dropped += frames - i; break; }
         ring[wr][0] = (int16_t)vbe_ld16(p + 4 * i);
         ring[wr][1] = (int16_t)vbe_ld16(p + 4 * i + 2);
-        wr = nx;
+        wr = nx; ringin++;
     }
     if (opened != 1) rd = wr; /* no device: discard */
 }
 
 unsigned aud_out_queued(void) { return (wr - rd) & (RING - 1); }
+
+/* P147: AI_LEN as the game sees it. The audio manager (init_8F90.c func_100095A0) makes a short audio frame
+ * (736 instead of 920 samples at 22020 Hz, 25 audio frames/s at PAL 50 Hz VI) when AI_LEN >= 249 samples, so it
+ * keeps AI_LEN near 249: on the N64 that is the rest of the DMA in flight. Here the ring is drained by a
+ * ScriptProcessor in 2048-frame bursts, so reporting the whole ring would hold it near empty and every burst would
+ * underrun. Report the queued frames minus a target latency instead (default 3072 frames, ~140 ms at 22020 Hz;
+ * ?ailat=N / PORT_AILAT=N): the ring then settles at ~latency and the burst always finds its 2048 frames. */
+unsigned aud_out_ai_len(void) {
+    static int lat = -1;
+    if (lat < 0) { lat = port_flag("ailat"); if (lat <= 0) lat = 3072; }
+    unsigned q = aud_out_queued();
+    return q > (unsigned)lat ? q - (unsigned)lat : 0;
+}
+
+/* P147 DIAGNOSTIC ?p147pace=N (node PORT_P147PACE=N): every N retraces (1 = 250) log the retrace rate against the
+ * wall clock and the audio clock (frames the Web Audio callback consumed), the ring level range in the window,
+ * underrun output frames and dropped input frames. Target: ~50.0 retraces per audio second (PAL), stable ring. */
+void port_pace_report(void) {
+    static int f = -1; static unsigned v0, c0, u0, d0, p0, qmin = ~0u, qmax, nwin; static double t0;
+    if (f < 0) { f = port_flag("p147pace"); if (f == 1) f = 250; }
+    if (f <= 0) return;
+    unsigned q = aud_out_queued();
+    if (q < qmin) qmin = q;
+    if (q > qmax) qmax = q;
+    if (port_frame_count % (unsigned)f) return;
+    double t = emscripten_get_now();
+    unsigned cons = ringin - q;
+    if (nwin++ && t > t0) {
+        double vs = (port_frame_count - v0) * 1000.0 / (t - t0), as = (cons - c0) / (double)out_rate;
+        static double tstart; if (!tstart) tstart = t0;
+        port_log("[p147] vi %u t %.1f s: %.2f vi/s wall, audio %u frames consumed = %.2f vi per audio s, pushed %u (%.1f/vi), ring %u (min %u max %u), "
+                 "underrun %u, dropped %u\n", port_frame_count, (t - tstart) / 1000.0, vs, cons - c0, as > 0 ? (port_frame_count - v0) / as : 0.0,
+                 pushed - p0, (double)(pushed - p0) / (port_frame_count - v0), q, qmin, qmax, underrun - u0, dropped - d0);
+    }
+    v0 = port_frame_count; c0 = cons; u0 = underrun; d0 = dropped; p0 = pushed; t0 = t; qmin = ~0u; qmax = 0;
+}
 
 /* ---------------- test capture (aud_test.c): accumulate, check, write a WAV / play ---------------- */
 #define CAP (22050 * 20)
