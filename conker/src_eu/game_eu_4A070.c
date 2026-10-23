@@ -2444,12 +2444,12 @@ s32 func_15022440(s32 arg0, s32 arg1) {
                     return var_v0;
                 }
                 if (sp38 < (s32) D_800D2520) {
-                    func_15082E44((sp38 * 0x30) + D_800D20FC, sp38, 0, arg1, 0);
+                    func_15082E44((u8 *) D_800D20FC + sp38 * 0x30, sp38, 0, arg1, 0);
                     var_v0 = func_1505EEF4(sp38);
                     if (var_v0 != 0) {
                         sp3C = (struct127 *) var_v0;
                         func_1505E650((struct127 *) var_v0, 0U, 0.0f, 0.0f, 0.0f, 0.0f, 1);
-                        var_v0 = func_15022304((s32) (sp3C - D_800CC2D0) / 812, arg1);
+                        var_v0 = func_15022304(((u8 *) sp3C - (u8 *) D_800CC2D0) / 812, arg1);
                     }
                 }
                 /* Duplicate return node #13. Try simplifying control flow for better match */
