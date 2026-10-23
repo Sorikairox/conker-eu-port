@@ -341,7 +341,9 @@ void func_1509DB90(s32 arg0, u8 *arg1) {
 #ifdef NON_MATCHING
 extern s32 D_800A0D30;
 
-void func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
+// P176: s32 like the D_80088874 handler table. The asm sets v0 only on the case 0x1C / 5 out-of-range path (1);
+// elsewhere v0 is a callee's result (undefined): 0 here.
+s32 func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
     struct {
         f32 u2C;
         s8 u30;
@@ -361,33 +363,33 @@ void func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
     case 0x34:
         if (arg1 == 3) {
             func_15197A7C(func_1505EEF4((*(s32 *)((u8 *)arg2 + 4)) & 0xFFF));
-            return;
+            return 0;
         }
     default:
-        return;
+        return 0;
     case 0x32:
         if (arg1 == 2) {
             func_151403A8(0, 0x53U);
-            return;
+            return 0;
         }
         if (arg1 == 3) {
             func_151403A8(0, 0x54U);
-            return;
+            return 0;
         }
         break;
     case 0x2D:
         func_151645C4((arg1 == 6) & 0xFF);
-        return;
+        return 0;
     case 0x28:
         if (arg1 == 2) {
             func_1515F170(4, 1);
             func_1515F170(5, 0);
-            return;
+            return 0;
         }
         if (arg1 == 3) {
             func_1515F170(4, 0);
             func_1515F170(5, 1);
-            return;
+            return 0;
         }
         break;
     case 0x1F:
@@ -400,7 +402,7 @@ void func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
         if (arg1 == 2) {
             sp.u34 = (s8) (*(s32 *)((u8 *)arg2 + 8));
             func_151494E0((s32) &sp.u34, 0x34U);
-            return;
+            return 0;
         }
         break;
     case 0x1D:
@@ -411,17 +413,17 @@ void func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
             sp.u32 = (s8) (*(s32 *)((u8 *)arg2 + 0x14));
             sp.u33 = (s8) (*(s32 *)((u8 *)arg2 + 0x18));
             func_1516944C(0x35, (s32) &sp.u2C, 0x33U);
-            return;
+            return 0;
         }
         break;
     case 0x1C:
         if (arg1 == 5) {
             temp_v0 = (*(s32 *)((u8 *)arg2 + 8));
             if ((temp_v0 < 0) || (temp_v0 >= 3)) {
-                return;
+                return 1;
             }
             func_151494E0((s32) ((u8 *) &D_800A0D30 + temp_v0 * 0x10), 0x32U);
-            return;
+            return 0;
         }
         break;
     case 0xB:
@@ -450,11 +452,12 @@ void func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
             }
         }
         func_151616D0(var_a0, var_a1, 0);
-        return;
+        return 0;
     case 0x11:
         func_150DF1A8((*(u8 *)((u8 *)arg2 + 0xB)), (arg1 == 3) & 0xFF);
         break;
     }
+    return 0;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509DD0C.s")
