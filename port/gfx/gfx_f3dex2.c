@@ -1540,6 +1540,9 @@ static int cw_snap(unsigned *v) {
     if (!p) return 0;
     o = *(const unsigned char *const *)(p + 0x3D4);
     r = *(const unsigned char *const *)(p + 0x3D0);
+    /* P99: the obj / rec pointers can be stale or garbage (a death); reading them trapped (memory access out of bounds) */
+    if ((unsigned)o < 0x1000 || (unsigned)o > 0x15FF0000) o = 0;
+    if ((unsigned)r < 0x1000 || (unsigned)r > 0x15FF0000) r = 0;
     for (i = 0; i < 10; i++) v[n++] = o ? *(const unsigned *)(o + 0x130 + i * 4) : 0;   /* 0..9 */
     for (i = 0; i < 3; i++) v[n++] = *(const unsigned *)(p + 0x2A4 + i * 4);            /* 10..12 */
     for (i = 0; i < 3; i++) v[n++] = *(const unsigned *)(p + 0x2BC + i * 4);            /* 13..15 */
@@ -1589,7 +1592,14 @@ void port_camwatch(const char *where) {
     cw_have = 1;
 }
 void __real_func_1512C490(void *arg0);
+void func_1000D96C(int, int, int);
 void __wrap_func_1512C490(void *arg0) {
+    { /* P99 DIAGNOSTIC ?p99snd=F: at frame >= F start sound 0x15 once through the game's own entry (the floor-material
+       * ambient loop func_1508000C starts), to tell "no sound requested" from "audio path broken" */
+        static int sf = -1, done = 0;
+        if (sf < 0) sf = port_flag("p99snd");
+        if (sf > 0 && !done && port_frame_count >= (unsigned)sf) { done = 1; func_1000D96C(0x15, 0, 0); }
+    }
     if (cw_flag < 0) cw_flag = port_flag("camwatch");
     if (cw_flag) {
         port_camwatch("func_1512C490 entry");

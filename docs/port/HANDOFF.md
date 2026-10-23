@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P99, 2026-10-23, port-web). Details: `docs/port/sessions/P99.md`
+
+- **Bisect lesson:** game .c changes are not rebuilt unless `port/build/vbe.stamp` is removed (the stamp does not
+  depend on the sources). P97's bisect builds were no-ops. `port_work/p99/bis.sh` removes the stamp.
+- Camera at 30-36 s ("straight down") and the higher 41 s scene camera: **func_15124C38** (P92 C, game_14FF90.c),
+  found with a real rebuild and a node camera metric.
+  - The old asm stub never moved the target height (+0x2C0): it stayed at y 1 / 0.
+  - The C eases it to player y + 67.5 and follows Conker down when he falls before the death. The eye height stays
+    at 400 (still stubbed), so the view tilts to -77 deg.
+  - Checked against the asm: correct. **No fix.** The real problems are the fall itself (it predates P93 / P95) and
+    the stubbed eye height.
+- Audio: no regression.
+  - The only sound any run ever starts is the floor-material ambient loop 0x15 (func_1508000C). P91 stood on that
+    floor by chance, and P91 walk3 was silent too.
+  - `?p99snd=F` forces that start: Chrome rms 0.026, peak 0.25, PASS at HEAD.
+  - No music is ever started (older gap).
+- Port: the `?camwatch` pointer guard (it trapped at the death) and the `?p99snd` diagnostic, in gfx_f3dex2.c.
+
+## Next steps (from P99)
+
+1. Why the player falls below the ground near (-179, 301) at about node frame 805 (collision / floor producers).
+2. The camera eye-height producer (cam +0x2FC fixed at 400): func_15126378 / func_1512EE50 (asm stubs).
+3. The music start path (no sequence ever starts); the init_EB00 asm stubs func_10010154 / func_1000F568.
+4. Then P97's list (func_15020920 & co., the per-frame stubs).
+
 ## State (session P97, 2026-10-23, port-web). Details: `docs/port/sessions/P97.md`
 
 - Merged port b3219c2 (P90 / P93 / P95) and port-b 99d4923 (P92). Both had only HANDOFF conflicts (merge_union).
