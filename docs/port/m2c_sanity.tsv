@@ -1,7 +1,8 @@
 function	file	kind	conf	path	detail
-func_15022440	conker/src_eu/game_eu_4A070.c	pscale	high	2	L2447 (x*48)+D_800D20FC on %struct.struct258 (size 16): byte scale 768; asm adds {x48} to that base
 func_15036BB4	conker/src_eu/game_eu_64070.c	pscale	high	2	L46/L75 (x*4)+&D_800CC2D0[i] on %struct.struct127 (size 812): byte scale 3248; asm adds {x4} to that base
 func_150A44A4	conker/src_eu/game_eu_D1760.c	width	high	2	A3:0 asm{h1L} IR{b2L}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E4 asm{h2LS} IR{w3LS}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E8 asm{h2LS} IR{w3LS}
 func_1509DD0C	conker/src_eu/game_eu_CA630.c	scaled	high	1	(x*16)+&D_800A0D30 on i32 (size 4): byte scale 64, m2c meant 16; asm has x16 
 func_1509EDE0	conker/src_eu/game_eu_CC5F0.c	scaled	high	1	(x*12)+&D_80089030 on i32 (size 4): byte scale 48, m2c meant 12; asm has x12 
 func_150C6960	conker/src_eu/game_eu_F3AD0.c	scaled	high	1	(x*3)+&D_800AB7F4 on i32 (size 4): byte scale 12, m2c meant 3; asm has x3 
@@ -42,9 +43,11 @@ func_1518C900	conker/src_eu/game_eu_1BA680.c	width	high	2	O:0 asm{b2LS,w3L} IR{w
 func_15051558	conker/src_eu/game_eu_78230.c	width	high	1	O:0 asm{b1L,w2L} IR{w2L}
 func_15149DA8	conker/src_eu/game_eu_1772D0.c	width	high	1	O:36 asm{h4LS,w3LS} IR{w2LS}
 func_151A5C10	conker/src_eu/game_eu_1D3420.c	width	high	1	O:64 asm{b3L} IR{w1L}
+func_150A6070	conker/src_eu/game_eu_D3880.c	width	high	0	O:0 asm{h1L,w5LS} IR{w1L}
 func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:16 asm{b2L} IR{w1L}
 func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:4 asm{b1L} IR{w2L}
 func_1518C628	conker/src_eu/game_eu_1B9810.c	width	high	0	O:4 asm{b5L,w9LS} IR{w5LS}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	pscale	med	2	L134/L135/L136 (x*8)+ptr on i16 (size 2): byte scale 16; asm adds {-} to that base, x8 elsewhere
 func_150A86B0	conker/src_eu/nm_asm/D5E90_anim.c	scaled	med	2	(x*2)+&D_8008891C on i32 (size 4): byte scale 8, m2c meant 2; asm has x2 x8
 func_150A6A48	conker/src_eu/game_eu_D3880.c	stride	med	2	IR ptr %.053 step 160, asm self-steps {1,2}
 func_15186D04	conker/src_eu/game_eu_1B1ED0.c	stride	med	2	IR ptr %.0274 step 812, asm self-steps {1,2,4,8,16,32,40,64}
@@ -75,6 +78,10 @@ func_150A44A4	conker/src_eu/game_eu_D1760.c	width	med	2	O:0 asm{h4L,w2LS} IR{b2L
 func_150A5858	conker/src_eu/game_eu_D2DB0.c	width	med	2	O:2 asm{h6LS} IR{b1L,h5LS}
 func_150A5858	conker/src_eu/game_eu_D2DB0.c	width	med	2	O:4 asm{h4L,w1L} IR{b1L,h4L,w15LS}
 func_150A6A48	conker/src_eu/game_eu_D3880.c	width	med	2	O:0 asm{w2S} IR{h2S,w2S}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	med	2	O:16 asm{w1S,d1S} IR{h1S,w1S}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	med	2	O:160 asm{b1L} IR{h1L}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	med	2	O:164 asm{b1L} IR{h1L}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	med	2	O:20 asm{w1S} IR{h1S,w1S}
 func_150A86B0	conker/src_eu/nm_asm/D5E90_anim.c	width	med	2	O:0 asm{h12LS,w3LS} IR{b2L,h15LS,w7LS}
 func_150A86B0	conker/src_eu/nm_asm/D5E90_anim.c	width	med	2	O:16 asm{w2S} IR{b1L,w2S}
 func_1510D3E0	conker/src_eu/game_eu_13A8A0.c	width	med	2	O:0 asm{b5LS,h2S,w1S} IR{h1S,w3LS}
@@ -101,9 +108,11 @@ func_150E89F0	conker/src_eu/game_eu_114640.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150E995C	conker/src_eu/game_eu_114640.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_150ECC30	conker/src_eu/game_eu_11A2B0.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150F16F0	conker/src_eu/game_eu_11CB90.c	width	med	1	O:12 asm{w2LS} IR{b1L}
+func_1510DD2C	conker/src_eu/game_eu_13A8A0.c	width	med	1	O:0 asm{b1S,w2LS} IR{w1L}
 func_1515B0F8	conker/src_eu/game_eu_186A80.c	width	med	1	O:52 asm{b1L} IR{w1L}
 func_151661F0	conker/src_eu/game_eu_193A00.c	width	med	1	O:2 asm{b2L,h10S} IR{h2S}
 func_1517A320	conker/src_eu/game_eu_1A7B30.c	width	med	1	O:0 asm{h7S,w6LS} IR{b1L,h1S,w6LS}
+func_15186494	conker/src_eu/game_eu_1B1ED0.c	width	med	1	O:16 asm{w1S} IR{h1L,w2LS}
 func_151A1F48	conker/src_eu/game_eu_1CE7D0.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_151A2564	conker/src_eu/game_eu_1CE7D0.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_151A5C10	conker/src_eu/game_eu_1D3420.c	width	med	1	O:12 asm{w6LS} IR{b1L}
@@ -111,6 +120,7 @@ func_151A9BE4	conker/src_eu/game_eu_1D5710.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_151ABF78	conker/src_eu/game_eu_1D7790.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_151BFDCC	conker/src_eu/game_eu_1EC610.c	width	med	1	O:20 asm{b4LS,w4S} IR{w4S}
 func_151CEC80	conker/src_eu/game_eu_1FB080.c	width	med	1	O:12 asm{w2L} IR{b1L}
+func_151E0BBC	conker/src_eu/game_eu_20B730.c	width	med	1	O:0 asm{b2LS,w8LS} IR{h1L}
 func_1503605C	conker/src_eu/game_eu_62360.c	width	med	0	O:4 asm{w8S} IR{b1L,w4S}
 func_150CE710	conker/src_eu/game_eu_FBE70.c	width	med	0	O:28 asm{w3LS} IR{b1L}
 func_150CE710	conker/src_eu/game_eu_FBE70.c	width	med	0	O:44 asm{w1L} IR{b6LS}
@@ -130,6 +140,10 @@ func_1508F0D4	conker/src_eu/game_BC510.c	stride	low	2	IR idx %.0107 step 96, asm
 func_1508FD38	conker/src_eu/game_BC510.c	stride	low	2	IR idx %.036 step 2, asm self-steps {4,8}
 func_1508FD38	conker/src_eu/game_BC510.c	stride	low	2	IR idx %.1 step 2, asm self-steps {4,8}
 func_150A09D0	conker/src_eu/game_eu_CE6C0.c	stride	low	2	IR idx %.0 step 6071296, asm self-steps {1,52,2464}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	stride	low	2	IR idx %.0186 step 12, asm self-steps {8,24}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	stride	low	2	IR idx %.1187 step 12, asm self-steps {8,24}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	stride	low	2	IR idx %.2188 step 12, asm self-steps {8,24}
+func_150A6D40	conker/src_eu/game_eu_D4550.c	stride	low	2	IR idx %.2188 step 16, asm self-steps {8,24}
 func_150A7A48	conker/src_eu/game_eu_D5650.c	stride	low	2	IR idx %.031 step 4, asm self-steps {1,16}
 func_150A7A48	conker/src_eu/game_eu_D5650.c	stride	low	2	IR idx %.132 step 4, asm self-steps {1,16}
 func_150A7B80	conker/src_eu/game_D5030.c	stride	low	2	IR idx %.0 step 2, asm self-steps {}
@@ -194,6 +208,7 @@ func_150A09D0	conker/src_eu/game_eu_CE6C0.c	width	low	2	O:0 asm{h2L} IR{b1L,h1L}
 func_150A16A4	conker/src_eu/game_eu_CE6C0.c	width	low	2	O:0 asm{w} IR{d} (8 vs 4: copy?)
 func_150A16A4	conker/src_eu/game_eu_CE6C0.c	width	low	2	O:8 asm{h} IR{h,d} (8 vs 4: copy?)
 func_150A5858	conker/src_eu/game_eu_D2DB0.c	width	low	2	O:0 asm{b,h,w,d} IR{b,h,w} (8 vs 4: copy?)
+func_150A6D40	conker/src_eu/game_eu_D4550.c	width	low	2	O:0 asm{w,d} IR{w} (8 vs 4: copy?)
 func_150A7B80	conker/src_eu/game_D5030.c	width	low	2	O:0 asm{h,d} IR{h} (8 vs 4: copy?)
 func_150A7D00	conker/src_eu/game_D51B0.c	width	low	2	O:0 asm{h,d} IR{h,w} (8 vs 4: copy?)
 func_150A7D00	conker/src_eu/game_D51B0.c	width	low	2	O:24 asm{h,d} IR{h} (8 vs 4: copy?)

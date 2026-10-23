@@ -270,39 +270,25 @@ P113W0(func_1502C494)
 P113W0(func_15114208)
 P113W1(func_15173E34)
 
-/* P113 TEMPORARY guard (remove when the scene end retargets the camera itself): after the LogoScreen scene on level
- * 0x21 ends (frame 2133) the object removal func_15060F28 (from func_1502298C) frees the removed object's +0x31C
- * record, but camera record D_800DBFF0[i] (struct108, 0x9A0 bytes) keeps it as its target unk3D4 (set by
- * func_1512868C from D_800CC2D0[unk23D].unk31C). func_15122AE0 -> func_15122C5C then writes floats into the freed
- * block (+0x138..) and the next heap walk / alloc traps (frame 2137). On N64 the scene VM func_15024910 (asm stub
- * here) ends LogoScreen with opcode 0x67 -> func_151DECB4 -> mode 3 before that; the stub never does, so the producer
- * that should retarget / drop the camera is in the stubbed scene path. Guard: a camera whose unk3D4 is the freed
- * record is pointed at a zeroed parking record instead. ?p113noguard=1 / PORT_P113NOGUARD=1 turns it off.
- * P121: since the P117 walker fix track 13 runs (3/0xD, 5/0x5C, 5/0x67 -> func_151DECB4 at frame 2133) and the
- * 2133 case is harmless without the guard (mode 3 at 2139, no trap); but the menu level's scene 1 (916 frames) ends
- * at 3053 with the same stale target (camera 0, object 105DF6F0) and without the guard node traps 4 frames later in
- * func_1508F0D4 (particle list). Guard KEPT for that case. */
+/* P113 guard REMOVED in P137: after the LogoScreen scene on level 0x21 (frame 2133) and the menu scene end (3053) the
+ * object removal func_15060F28 used to leave camera record D_800DBFF0[i] (struct108, 0x9A0 bytes) with the freed +0x31C
+ * record as its target unk3D4, and the guard re-pointed it at a zeroed parking record. Since the scene VM / walker
+ * fixes (P117) and the P127..P133 conversions the case no longer occurs: P137 runs (4 new-game Chrome runs incl.
+ * ?p113noguard=1, node new game, noev walks) had 0 guard / NO GUARD lines. Kept as a check only: a stale target is
+ * logged ("[p113] STALE camera target"), never patched. */
 extern int D_80082FA0;
-static unsigned p113_park[0x200] __attribute__((aligned(16)));
 void __real_func_15060F28(unsigned char *obj, int mode);
 void __wrap_func_15060F28(unsigned char *obj, int mode) {
-    static int fng = -1, n;
+    static int n;
     unsigned rec = *(unsigned *)(obj + 0x31C);
     int i;
     __real_func_15060F28(obj, mode);
     if (rec == 0) return;
     for (i = 0; i <= D_80082FA0 && i < 4; i++) {
         unsigned *t = (unsigned *)(D_800DBFF0 + i * 0x9A0 + 0x3D4);
-        if (*t == rec && flag(&fng, "p113noguard")) { /* P121: report the stale target with the guard off too */
-            if (n++ < 16)
-                port_log("[p113] NO GUARD: camera %d target %08X freed with object %08X (mode %d) frame %u\n", i, rec,
-                         (unsigned)(uintptr_t)obj, mode, port_frame_count);
-        } else if (*t == rec) {
-            if (n++ < 16)
-                port_log("[p113] guard: camera %d target %08X freed with object %08X (mode %d) frame %u -> parking record\n", i, rec,
-                         (unsigned)(uintptr_t)obj, mode, port_frame_count);
-            *t = (unsigned)(uintptr_t)p113_park;
-        }
+        if (*t == rec && n++ < 16)
+            port_log("[p113] STALE camera target: camera %d target %08X freed with object %08X (mode %d) frame %u\n", i, rec,
+                     (unsigned)(uintptr_t)obj, mode, port_frame_count);
     }
 }
 

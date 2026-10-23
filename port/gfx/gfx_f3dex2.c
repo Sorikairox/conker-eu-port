@@ -137,6 +137,15 @@ static int bany;
 static unsigned oth_h, oth_l, combine_w0, combine_w1;
 static unsigned prim_col, env_col, fog_col, blend_col, fill_col, prim_lod;
 static unsigned cimg_addr, zimg_addr, cimg_width = 320, prim_z;
+/* P137: offscreen colour image (render to texture, e.g. the P130 object shadow pass: SETCIMG RGBA16 64 wide).
+ * While on, draws go to an FBO of cimg_width x cimg_width N64 pixels (1:1) and the canvas is that size; the FBO is
+ * written back to RDRAM in the image's pixel size (8-bit: the red byte, as the RDP's 8-bit colour images; 16-bit:
+ * RGBA5551 big-endian; 32-bit: RGBA8888) when the game loads the target as a texture (SETTIMG) and when
+ * the colour image switches back / the task ends. Before P137 the renderer drew such passes onto the screen,
+ * scaled as a 64-wide frame (white screen + black shadow polygons). ?p137nooff=1 turns it off (old behaviour). */
+static int off_on, off_saved_w, off_saved_h;
+static unsigned off_addr, off_w, off_fbo_w, off_siz;
+#define CIMG_H ((float)(off_on ? cimg_width : cimg_width * 0.75f))
 typedef struct { unsigned fmt, siz, line, tmem, pal, cms, cmt, masks, maskt, shifts, shiftt, uls, ult, lrs, lrt; } Tile;
 static Tile tiles[8];
 static struct { unsigned fmt, siz, width, raw; unsigned char *p; } timg;
@@ -532,7 +541,7 @@ static void apply_state(void) {
     blend_state(cyc, mode);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);  /* the blend factor goes through alpha; keep the canvas opaque */
     /* viewport */
-    float sx = canvas_w / (float)cimg_width, sy = canvas_h / (cimg_width * 0.75f);
+    float sx = canvas_w / (float)cimg_width, sy = canvas_h / CIMG_H;
     if (rect_mode) glViewport(0, 0, canvas_w, canvas_h);
     else {
         float w = 2 * vp_scale[0] / 4.0f, h = 2 * vp_scale[1] / 4.0f;
@@ -610,7 +619,7 @@ static void p78_density(void) {
         const float *p[3] = {batch + i * VF, batch + (i + 1) * VF, batch + (i + 2) * VF};
         if (p[0][3] <= 0 || p[1][3] <= 0 || p[2][3] <= 0) continue;
         float X[3], Y[3];
-        for (int k = 0; k < 3; k++) { X[k] = (p[k][0] / p[k][3] * 0.5f + 0.5f) * cimg_width; Y[k] = (p[k][1] / p[k][3] * 0.5f + 0.5f) * cimg_width * 0.75f; }
+        for (int k = 0; k < 3; k++) { X[k] = (p[k][0] / p[k][3] * 0.5f + 0.5f) * cimg_width; Y[k] = (p[k][1] / p[k][3] * 0.5f + 0.5f) * CIMG_H; }
         float a = (X[1] - X[0]) * (Y[2] - Y[0]) - (X[2] - X[0]) * (Y[1] - Y[0]);
         if (a > -0.5f && a < 0.5f) continue;
         float ds1 = (p[1][8] - p[0][8]) * shs, ds2 = (p[2][8] - p[0][8]) * shs, dt1 = p[1][9] - p[0][9], dt2 = p[2][9] - p[0][9];
@@ -679,10 +688,56 @@ static void tri(unsigned i0, unsigned i1, unsigned i2) {
     put(a, 1, 1); put(b, 1, 1); put(c, 1, 1);   /* P35: the tile shift is applied per tile in the shader */
 }
 
+/* P137: offscreen colour image helpers (see off_on) */
+static GLuint off_fbo, off_tex;
+static void off_writeback(void) {
+    static unsigned char px[256 * 256 * 4];
+    unsigned char *dst = gfx_addr(off_addr);
+    unsigned w = off_w, x, y;
+    flush();
+    if (!dst || w > 256) return;
+    glReadPixels(0, 0, w, w, GL_RGBA, GL_UNSIGNED_BYTE, px);
+    for (y = 0; y < w; y++)                 /* GL row 0 is the bottom: N64 row y = GL row w - 1 - y */
+        for (x = 0; x < w; x++) {
+            const unsigned char *q = px + ((w - 1 - y) * w + x) * 4;
+            unsigned i = y * w + x;
+            if (off_siz == 1) *VBE8(dst + i) = q[0];       /* the shadow pass: CI/I 8-bit, 64 wide (4 KB) */
+            else if (off_siz == 2) {
+                unsigned v = (q[0] >> 3) << 11 | (q[1] >> 3) << 6 | (q[2] >> 3) << 1 | 1;
+                *VBE8(dst + 2 * i) = v >> 8; *VBE8(dst + 2 * i + 1) = v & 0xFF;
+            } else if (off_siz == 3) {
+                *VBE8(dst + 4 * i) = q[0]; *VBE8(dst + 4 * i + 1) = q[1]; *VBE8(dst + 4 * i + 2) = q[2]; *VBE8(dst + 4 * i + 3) = 0xFF;
+            }
+        }
+}
+static void off_begin(unsigned addr, unsigned w, unsigned siz) {
+    flush();
+    if (!off_fbo || off_fbo_w != w) {
+        if (!off_fbo) { glGenFramebuffers(1, &off_fbo); glGenTextures(1, &off_tex); }
+        glBindTexture(GL_TEXTURE_2D, off_tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, w, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, off_fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, off_tex, 0);
+        off_fbo_w = w;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, off_fbo);
+    off_saved_w = canvas_w; off_saved_h = canvas_h;
+    canvas_w = canvas_h = w;
+    off_on = 1; off_addr = addr; off_w = w; off_siz = siz; state_dirty = 1;
+    { static unsigned n; if (n++ < 4) port_log("[p137] offscreen colour image %08X %ux%u siz %u (frame %u)\n", addr, w, w, siz, port_frame_count); }
+}
+static void off_end(void) {
+    if (!off_on) return;
+    off_writeback();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    canvas_w = off_saved_w; canvas_h = off_saved_h;
+    off_on = 0; state_dirty = 1;
+}
+
 /* screen-space rectangle in N64 pixels (fill / texture rectangles) */
 static void rect(float x0, float y0, float x1, float y1, float s0, float t0, float s1, float t1, unsigned col, int rm) {
     need_state(rm);
-    float W = cimg_width, H = cimg_width * 0.75f;
+    float W = cimg_width, H = CIMG_H;
     V q[4];
     float xs[4] = {x0, x1, x0, x1}, ys[4] = {y0, y0, y1, y1}, ss[4] = {s0, s1, s0, s1}, ts[4] = {t0, t0, t1, t1};
     for (int i = 0; i < 4; i++) {
@@ -1293,9 +1348,18 @@ void gfx_run_dl(const void *dl) {
              * patched by the engine before submission; left raw they read a placeholder pattern. */
             timg.p = (w1 & ~0x00400000u) < 0x10000 || (w1 < 0x10000000u && (gfx_tex_unresolved_segs >> (w1 >> 24) & 1)) ? 0 : gfx_addr(w1);
             if (!timg.p) gfx_stats.tex_ids++;
+            if (off_on && timg.p && timg.p == gfx_addr(off_addr)) off_writeback();   /* P137: texture = render target */
             break;
         case 0xFE: zimg_addr = w1; break;
-        case 0xFF: cimg_addr = w1; cimg_width = (w0 & 0xFFF) + 1; if (cimg_width < 64) cimg_width = 320; break;
+        case 0xFF: {
+            static int nooff = -1; if (nooff < 0) nooff = port_flag("p137nooff");
+            unsigned w = (w0 & 0xFFF) + 1;
+            int off = gl_ok && !nooff && !gfx_measure_only && w >= 16 && w < 320 && w <= 256 && w1 != zimg_addr && gfx_addr(w1);
+            if (off_on && (!off || w1 != off_addr)) off_end();
+            cimg_addr = w1; cimg_width = w; if (cimg_width < 64) cimg_width = 320;
+            if (off && !off_on) off_begin(w1, w, w0 >> 19 & 3);
+            break;
+        }
         default: unknown(op, w0, w1); break;
         }
     }
@@ -1385,6 +1449,7 @@ void gfx_run_task(void *task) {
     p61_mtx = p61_dl = p61_tris = p61_verts = p61_imtx = p61_bad = p61_cmds = p61_vbad = 0; p61_depth = -1; p61_pend = 0;
     memset(p61_icls, 0, sizeof p61_icls); p61_mn[0] = p61_mn[1] = 1e30f; p61_mx[0] = p61_mx[1] = -1e30f;
     gfx_run_dl(dl);
+    if (off_on) off_end();   /* P137 */
     if (p61_flag && p61_mtx && (++p61_frames <= (unsigned)p61_flag || p61_frames % 256 == 0))
         port_log("[p61] task %u: model G_MTX %u, sub-DLs %u: %u commands, %u vertices, %u triangles, inner G_MTX %u "
                  "(K0 %u wasm %u seg %u phys %u), bad/unset addresses %u, NDC x %.2f..%.2f y %.2f..%.2f (%u verts w<=0/NaN)\n",
@@ -1662,6 +1727,9 @@ static int p38_on(void) { if (p38_flag < 0) p38_flag = port_flag("p38check"); re
 uint8_t *__real_func_15186D04(uint8_t *gdl, int arg1);
 uint8_t *__wrap_func_15186D04(uint8_t *gdl, int arg1) {
     static unsigned calls, tot_vtx, tot_t1, tot_t2, tot_t4, tot_cmd, tot_other;
+    static int p137 = -1;
+    if (p137 < 0) p137 = port_flag("p137noshadow");
+    if (p137 > 0) return gdl; /* P137 DIAGNOSTIC ?p137noshadow=1: skip the object shadow DL (render-to-texture pass) */
     uint8_t *r = __real_func_15186D04(gdl, arg1);
     if (p38_on()) {
         unsigned vtx = 0, t1 = 0, t2 = 0, t4 = 0, other = 0, n = 0, slots = 0, maxslots = 0;
