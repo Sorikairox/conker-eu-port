@@ -1,0 +1,20 @@
+s/if (kind >= 9)/if (kind > 9)/
+s/((flags \& 2) ? 8 : 0)/((flags \& 2) ? 4 : 0)/
+s/((owner != NULL) ? 2 : 0)/((owner != NULL) ? 0 : 2)/
+s/((flags \& 1) ? 4 : 0)/((flags \& 1) ? 8 : 0)/
+s/spawn.f8 = k->f0;/spawn.f8 = k->f4;/
+s/spawn.pos\[1\] = p\[1\];/spawn.pos[1] = p[2];/
+s/spawn.b25 = -1;/spawn.b25 = 1;/
+s/spawn.f1C = arg4;/spawn.f1C = arg5;/
+s/func_151A8B20(\&spawn, life, 0x2C, arg7, arg8)/func_151A8B20(\&spawn, life, 0x2C, arg7, 0)/
+s/memcpy(rec + 0x80, k->extra, 0x2C);/memcpy(rec + 0x80, k->extra, 0x28);/
+s/rec\[0x80 + 0x28\] |= 1;/rec[0x80 + 0x28] |= 4;/
+s/if (flags \& 0x10)/if (flags \& 0x20)/
+s/if (flags \& 4) {/if (flags \& 2) {/
+s/((life == -1) ? 0 : 1) | 2/((life == -1) ? 1 : 0) | 2/
+s/(life == -1) ? 300 : life/(life == -1) ? 200 : life/
+s/snd.b4 = k->bB;/snd.b4 = k->bC;/
+s/at\[0\] = p\[0\];/at[0] = p[0] + 0.5f;/
+s/at\[1\] = ((s16 \*)owner)\[1\];/at[1] = ((u16 *)owner)[1];/
+s/k->b9, k->bA, 0xFF/k->b9, k->bA, 0xFE/
+s/0, k->bC, 0xFF, 1)/0, k->bC, 0xFF, 0)/

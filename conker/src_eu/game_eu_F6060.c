@@ -2,8 +2,60 @@
 #include "functions.h"
 #include "variables.h"
 
+/* P162: E10 / D_eu_800BE900 moved up from below func_150C89F4 (used by func_150C8850's NM C) */
+typedef struct { u8 u0; u8 pad1[3]; s16 u4; u8 pad6[4]; } E10;
+extern E10 *D_eu_800BE900;
 
+#ifdef NON_MATCHING
+// wobblers_update: the 10 records at D_eu_800BE900 (s8 dir +2, s16 pos +4, s16 speed +6, s16 target speed +8):
+// speed moves toward the target (sign follows the current speed) by at most D_800BE9E4 * 16, then pos advances by
+// speed * dir * D_800BE9A0 and bounces inside 0 .. 0x4FF (dir flips)
+void func_150C8850(void) {
+    s32 i;
+    u8 *r;
+    s32 speed;
+    s32 target;
+    s32 diff;
+    s32 step;
+    s32 pos;
+
+    for (i = 0; i < 10; i++) {
+        r = (u8 *)&D_eu_800BE900[i];
+        speed = *(s16 *)(r + 6);
+        if (speed != *(s16 *)(r + 8)) {
+            target = *(s16 *)(r + 8);
+            if (speed < 0) {
+                target = -target;
+            }
+            diff = target - speed;
+            step = D_800BE9E4 * 16;
+            if ((diff < 0 ? -diff : diff) < step) {
+                *(s16 *)(r + 6) = target;
+            } else {
+                *(s16 *)(r + 6) = speed + step * (diff >= 0 ? 1 : -1);
+            }
+            speed = *(s16 *)(r + 6);
+        }
+        *(s16 *)(r + 4) += speed * *(s8 *)(r + 2) * D_800BE9A0;
+        pos = *(s16 *)(r + 4);
+        if (pos >= 0x500) {
+            *(s16 *)(r + 4) = 0x500 - (s16)(pos - 0x500);
+            *(s8 *)(r + 2) = -*(s8 *)(r + 2);
+            if (*(s16 *)(r + 4) >= 0x500) {
+                *(s16 *)(r + 4) = 0x4FF;
+            }
+        } else if (pos < 0) {
+            *(s16 *)(r + 4) = -pos;
+            *(s8 *)(r + 2) = -*(s8 *)(r + 2);
+            if (*(s16 *)(r + 4) < 0) {
+                *(s16 *)(r + 4) = 0;
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F6060/func_150C8850.s")
+#endif
 
 void func_150C89F4(s32 arg0) {
     if (arg0 == 0) {
@@ -11,8 +63,6 @@ void func_150C89F4(s32 arg0) {
     }
 }
 
-typedef struct { u8 u0; u8 pad1[3]; s16 u4; u8 pad6[4]; } E10;
-extern E10 *D_eu_800BE900;
 s32 func_150CE07C(s32);
 void func_150C851C(s32 arg0) {
     s32 i;

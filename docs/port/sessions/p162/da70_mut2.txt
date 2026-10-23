@@ -1,0 +1,4 @@
+s/rec.life = 300/rec.life = 301/
+s/rec.kind = 0x34/rec.kind = 0x35/
+s/rec.type = 11/rec.type = 12/
+s/rec.u18 = 0/rec.u18 = 1/

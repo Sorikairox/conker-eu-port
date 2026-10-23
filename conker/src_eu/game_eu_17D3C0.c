@@ -51,7 +51,7 @@ s32 func_1514FC58(u8 *arg0) {
     return 1;
 }
 
-s32 func_15143874(s16, f32, f32 *, f32 *);
+void func_15143874(s16, f32, f32 *, f32 *);
 
 f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2) {
     f32 s;
@@ -64,10 +64,78 @@ f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2) {
     return arg2;
 }
 
+#ifdef NON_MATCHING
+/* P159 */
+void func_15143874(s16, f32, f32 *, f32 *);
+void func_151A3084(s32, s32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32);
+// spray_particles_spawn: scales `normal` by 1000 (in place) and spawns base + rand % (extra + 1) particles
+// (func_151A3084) at p's point, each moving along normal plus a random offset in the plane of axisA / axisB
+// (func_15143874: random angle, radius rand * spread), times a random speed; size, life and the rest come from
+// the parameter block p (func_151C01F0 fills one).
+void func_1514FE68(u8 *p, u8 *normal, s32 *axisA, s32 *axisB, f32 spread, s32 arg5, s32 arg6) {
+    typedef struct {
+        s32 countBase;     /* 0x00 */
+        s32 countExtra;    /* 0x04 */
+        f32 pos[3];        /* 0x08 */
+        f32 speedBase;     /* 0x14 */
+        f32 speedRange;    /* 0x18 */
+        f32 sizeBase;      /* 0x1C */
+        f32 sizeRange;     /* 0x20 */
+        f32 size2Base;     /* 0x24 */
+        f32 size2Range;    /* 0x28 */
+        s32 lifeBase;      /* 0x2C */
+        s32 lifeExtra;     /* 0x30 */
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        s16 u44;
+        s16 u46;
+        s16 u48;
+        s16 u4A;
+        s16 u4C;
+        s16 u4E;
+        s8 u50;
+    } SprayParams;
+    SprayParams *sp = (SprayParams *)p;
+    f32 *n = (f32 *)normal;
+    f32 *a = (f32 *)axisA;
+    f32 *b = (f32 *)axisB;
+    f32 c;
+    f32 s;
+    f32 speed;
+    f32 r1;
+    f32 r2;
+    f32 vel[3];
+    u32 count;
+    u32 angle;
+    u32 life;
+
+    n[0] *= 1000.0f;
+    n[1] *= 1000.0f;
+    n[2] *= 1000.0f;
+    count = (u32)func_150ADA20() % (u32)(sp->countExtra + 1) + sp->countBase;
+    for (; count != 0; count--) {
+        speed = func_150ADA68() * sp->speedRange + sp->speedBase;
+        angle = func_150ADA20();
+        func_15143874(angle & 0xFF, func_150ADA68() * spread, &c, &s);
+        vel[0] = (a[0] * c + b[0] * s + n[0]) * speed;
+        vel[1] = (a[1] * c + b[1] * s + n[1]) * speed;
+        vel[2] = (a[2] * c + b[2] * s + n[2]) * speed;
+        r1 = func_150ADA68();
+        r2 = func_150ADA68();
+        life = (u32)func_150ADA20() % (u32)(sp->lifeExtra + 1) + sp->lifeBase;
+        func_151A3084((s32)sp->pos, (s32)vel, r1 * sp->sizeRange + sp->sizeBase, r2 * sp->size2Range + sp->size2Base,
+                      life, sp->u34, sp->u38, sp->u3C, sp->u40, sp->u44, sp->u46, sp->u48, sp->u4A, sp->u4C, sp->u4E,
+                      sp->u50, (u8)arg5, arg6);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_1514FE68.s")
+#endif
 
 s32 func_15146078(u8 *, s32 *, s32 *);
-s32 func_1514FE68(u8 *, u8 *, s32 *, s32 *, f32, s32, s32);
+void func_1514FE68(u8 *, u8 *, s32 *, s32 *, f32, s32, s32);
 void func_15150108(u8 *arg0, u8 arg1, s32 arg2) {
     s32 sp34[3];
     s32 sp28[3];
@@ -120,7 +188,11 @@ void func_15150258(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 void func_1514FBB0();
+#ifdef NON_MATCHING
+s32 func_151504B4();
+#else
 void func_151504B4();
+#endif
 
 void func_1515046C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     u8 sp24[0x2C];
@@ -128,13 +200,291 @@ void func_1515046C(s32 arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
     func_151504B4(sp24, arg1, arg2, arg3, arg4);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151504B4.s")
+#ifdef NON_MATCHING
+/* P153 */
+s32 func_1514FC58(u8 *arg0);
+f32 *func_1514FD78(f32 *arg0, f32 arg1, f32 *arg2);
 
+// path_particles_spawn: P153: when the path / curve `path` is usable (func_1514FC58) spawns def +0xC + random
+// [0, def +0xE] particles (func_151D9014) along it: each at a random point (func_1514FD78 at def +0x10 + random *
+// +0x14) with sprite def +0x31, size +0x1C + random * +0x20, life +0x18 + random [0, +0x1A], alpha +0x24 + random
+// [0, +0x25], speed +0x28 + random * +0x2C, flag 1 below chance +0x34, scale 1.4 x 1.4, owner / owner arg,
+// +0x38, flag 2 below chance +0x3C. The asm returns nothing; the callers' prototypes say s32 (game_eu_1FB080): 0.
+s32 func_151504B4(f32 *path, u8 *def, s32 owner, s32 arg3, s32 arg4) {
+    f32 pos[3];
+    f32 size;
+    f32 speed;
+    f32 chance1;
+    f32 chance2;
+    s32 rLife;
+    s32 rAlpha;
+    s32 n;
+
+    if (func_1514FC58((u8 *) path) == 0) {
+        return 0;
+    }
+    n = (u32) func_150ADA20() % (u32) (*(s16 *) (def + 0xE) + 1) + *(s16 *) (def + 0xC);
+    while (n != 0) {
+        func_1514FD78(path, func_150ADA68() * *(f32 *) (def + 0x14) + *(f32 *) (def + 0x10), pos);
+        size = func_150ADA68();
+        rLife = func_150ADA20();
+        rAlpha = func_150ADA20();
+        speed = func_150ADA68();
+        chance1 = func_150ADA68();
+        chance2 = func_150ADA68();
+        func_151D9014(def, pos, def[0x31], size * *(f32 *) (def + 0x20) + *(f32 *) (def + 0x1C),
+                      (u32) rLife % (u32) (*(s16 *) (def + 0x1A) + 1) + *(s16 *) (def + 0x18),
+                      (u32) rAlpha % (u32) (def[0x25] + 1) + def[0x24],
+                      speed * *(f32 *) (def + 0x2C) + *(f32 *) (def + 0x28),
+                      (chance1 < *(f32 *) (def + 0x34)) ? 1 : 0, 1.4f, 1.4f, 1, owner, def[0x38],
+                      (chance2 < *(f32 *) (def + 0x3C)) ? 1 : 0, arg3 & 0xFF, arg4);
+        n--;
+    }
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151504B4.s")
+#endif
+
+#ifdef NON_MATCHING
+/* P155 */
+void func_15143794(s16, s16, f32, void *);
+typedef struct {
+    u8 pad0[0xC];
+    s16 countMin;  /* +0x0C */
+    s16 countRange;
+    f32 speedMin;  /* +0x10 */
+    f32 speedRange;
+    s16 lifeMin;   /* +0x18 */
+    s16 lifeRange;
+    f32 sizeMin;   /* +0x1C */
+    f32 sizeRange;
+    u8 alphaMin;   /* +0x24 */
+    u8 alphaRange;
+    u8 pad26[2];
+    f32 spinMin;   /* +0x28 */
+    f32 spinRange;
+    u8 pad30;
+    u8 kind;       /* +0x31 */
+    u8 pad32[2];
+    f32 chance7;   /* +0x34 */
+    u8 b38;
+    u8 pad39[3];
+    f32 chanceD;   /* +0x3C */
+} Def06E8;
+// particle_spray_spawn: spawns countMin + rand(countRange + 1) particles of def (func_151D9014), each with a random
+// direction (yaw / pitch ranges `angles` = {yaw base, yaw range, pitch base, pitch range}) and speed turned into a
+// velocity by func_15143794, and random size, life, alpha, spin and two chance flags from def; scale 1.4.
+// Returns 0 (the asm leaves v0 unset; the callers ignore it).
+s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
+    s16 *a = angles;
+    Def06E8 *d = def;
+    f32 vel[3];
+    u32 n;
+    u32 r1, r2;
+    f32 f;
+    f32 size;
+    f32 spin;
+    f32 c7;
+    f32 cD;
+
+    n = func_150ADA20() % (u32)(d->countRange + 1) + d->countMin;
+    while (n != 0) {
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        f = func_150ADA68();
+        func_15143794(r1 % (u32)(a[1] + 1) + a[0], r2 % (u32)(a[3] + 1) + a[2], f * d->speedRange + d->speedMin, vel);
+        size = func_150ADA68();
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        spin = func_150ADA68();
+        c7 = func_150ADA68();
+        cD = func_150ADA68();
+        func_151D9014(d, vel, d->kind, size * d->sizeRange + d->sizeMin, r1 % (u32)(d->lifeRange + 1) + d->lifeMin,
+                      r2 % (u32)(d->alphaRange + 1) + d->alphaMin, spin * d->spinRange + d->spinMin, c7 < d->chance7,
+                      1.4f, 1.4f, 1, arg2, d->b38, cD < d->chanceD, arg3, arg4);
+        n--;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151506E8.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150970.s")
 
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+s32 allocate_memory(s32, s32, s32, s32);
+s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
+s32 memcpy(s32, f32 *, s32);
+
+// base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
+#define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
+
+// debris_burst_spawn: spawns base + rand % (extra + 1) pieces (at most n) of the n kinds ids[] / scales[]; each
+// piece takes a random kind not used yet in this burst (a temporary n-byte used map from allocate_memory), at the
+// spec's point plus a random offset (func_15143794 with length arg10) moving in a random direction, with random
+// spins, sway, life and size (scales[k] x random), solid (+0x50 bit 0, +0x61 = 0xD, +0x63 = spec +0x40) with
+// chance spec +0x3C; effect kind 3 via func_15132BBC (arg9, extra bytes arg5 copied from arg4 to +0x170, arg13 /
+// arg14). Option bits: arg7 -> 0x80, arg11 -> 0x4000, arg12 -> 0x100000. The result is unused by all callers.
+s32 func_15150D7C(s32 *arg0, s32 *ids, s32 *scales, s32 n, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8,
+                  s32 arg9, f32 arg10, s32 arg11, s32 arg12, s32 arg13, s32 arg14) {
+    typedef struct {
+        s32 countBase;      /* 0x00 */
+        s32 countExtra;     /* 0x04 */
+        f32 pos[3];         /* 0x08 */
+        s16 angXBase;       /* 0x14 */
+        s16 angXExtra;      /* 0x16 */
+        s16 angYBase;       /* 0x18 */
+        s16 angYExtra;      /* 0x1A */
+        f32 speedBase;      /* 0x1C */
+        f32 speedRange;     /* 0x20 */
+        f32 u24Base;        /* 0x24 */
+        f32 u24Range;       /* 0x28 */
+        s16 lifeBase;       /* 0x2C */
+        s16 lifeExtra;      /* 0x2E */
+        f32 sizeBase;       /* 0x30 */
+        f32 sizeRange;      /* 0x34 */
+        f32 sway;           /* 0x38 */
+        f32 solidChance;    /* 0x3C */
+        u8 solidKind;       /* 0x40 */
+    } DebrisSpec;
+    struct {
+        f32 u00;            /* 0x00 = 1 */
+        f32 u04;            /* 0x04 = 0.5610 */
+        f32 size[2];        /* 0x08 */
+        f32 spin[3];        /* 0x10 */
+        f32 u1C[3];         /* 0x1C = 1 */
+        f32 pos[3];         /* 0x28 */
+        f32 vel[3];         /* 0x34 */
+        f32 swayX;          /* 0x40 */
+        f32 u44;            /* 0x44 = 0 */
+        f32 swayZ;          /* 0x48 */
+        f32 u4C;            /* 0x4C */
+        u32 flags;          /* 0x50 */
+        s16 life;           /* 0x54 */
+        s16 id;             /* 0x56 */
+        u8 u58;             /* 0x58 = arg6 */
+        s32 u5C;            /* 0x5C = 0 */
+        u8 u60;             /* 0x60 = 0xFF */
+        u8 u61;             /* 0x61 = 8 / 0xD */
+        u8 u62;             /* 0x62 = 0 */
+        u8 u63;             /* 0x63 */
+        u8 u64[4];          /* 0x64 = 0 */
+        u8 u68;             /* 0x68 = 2 */
+        s8 u69;             /* 0x69 = arg8 */
+        u8 u6A;             /* 0x6A = 0 */
+        s32 u6C;            /* 0x6C = 0 */
+        u8 u70;             /* 0x70 = 0 */
+        s16 u72;            /* 0x72 = 0xC */
+        s16 u74;            /* 0x74 = 0x15 */
+    } fx;
+    DebrisSpec *sp = (DebrisSpec *) arg0;
+    u8 *used;
+    u8 *p;
+    s32 count;
+    s32 left;
+    s32 i;
+    u32 r;
+    s16 a;
+    s16 b;
+    u8 *e;
+
+    used = (u8 *) allocate_memory(n, 2, 2, 1);
+    if (used == NULL) {
+        return 0;
+    }
+    for (i = 0; i < n; i++) {
+        used[i] = 0;
+    }
+    left = n;
+    fx.u00 = 1.0f;
+    fx.u1C[0] = 1.0f;
+    fx.u1C[1] = 1.0f;
+    fx.u1C[2] = 1.0f;
+    fx.u04 = 0.561000049f;
+    fx.u44 = 0.0f;
+    fx.flags = 0x13968 | ((u8) arg12 ? 0x100000 : 0) | ((u8) arg7 ? 0x80 : 0) | ((u8) arg11 ? 0x4000 : 0);
+    count = RAND_SPREAD(sp->countBase, sp->countExtra);
+    if (n < count) {
+        count = n;
+    }
+    fx.u58 = arg6;
+    fx.u5C = 0;
+    fx.u60 = 0xFF;
+    fx.u62 = 0;
+    fx.u64[0] = 0;
+    fx.u64[1] = 0;
+    fx.u64[2] = 0;
+    fx.u64[3] = 0;
+    fx.u68 = 2;
+    fx.u6A = 0;
+    fx.u6C = 0;
+    fx.u70 = 0;
+    fx.u72 = 0xC;
+    fx.u74 = 0x15;
+    fx.u69 = arg8;
+    for (; count != 0; count--) {
+        a = RAND_SPREAD(sp->angXBase, sp->angXExtra);
+        b = RAND_SPREAD(sp->angYBase, sp->angYExtra);
+        func_15143794(a, b, func_150ADA68() * sp->speedRange + sp->speedBase, fx.vel);
+        func_15143794(a, b, arg10, fx.pos);
+        fx.pos[0] += sp->pos[0];
+        fx.pos[1] += sp->pos[1];
+        fx.pos[2] += sp->pos[2];
+        fx.spin[0] = func_150ADA68() * 360.0f;
+        fx.spin[1] = func_150ADA68() * 360.0f;
+        fx.spin[2] = func_150ADA68() * 360.0f;
+        fx.swayX = func_150ADA68() * (sp->sway + sp->sway) - sp->sway;
+        fx.swayZ = func_150ADA68() * (sp->sway + sp->sway) - sp->sway;
+        fx.u4C = func_150ADA68() * sp->u24Range + sp->u24Base;
+        fx.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);
+        /* the r-th unused kind, counting round from 0 */
+        r = (u32) func_150ADA20() % (u32) left;
+        i = 0;
+        p = used;
+        for (;;) {
+            while (*p != 0) {
+                i++;
+                p++;
+            }
+            if (r == 0) {
+                break;
+            }
+            i++;
+            r--;
+            p++;
+            if (i >= n) {
+                i = 0;
+                p = used;
+            }
+        }
+        fx.id = ids[i];
+        fx.size[1] = ((f32 *) scales)[i] * (sp->sizeBase + func_150ADA68() * sp->sizeRange);
+        left--;
+        fx.size[0] = fx.size[1];
+        *p = 1;
+        if (func_150ADA68() < sp->solidChance) {
+            fx.flags |= 1;
+            fx.u61 = 0xD;
+            fx.u63 = sp->solidKind;
+        } else {
+            fx.flags &= ~1;
+            fx.u63 = 0;
+            fx.u61 = 8;
+        }
+        e = (u8 *) func_15132BBC(&fx, 3, 0xFF, arg9, arg5, (u8) arg13, arg14);
+        if (arg4 != 0 && e != NULL) {
+            memcpy((s32) (e + 0x170), (f32 *) arg4, arg5);
+        }
+    }
+    return 0;
+}
+#undef RAND_SPREAD
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150D7C.s")
+#endif
 
 void func_15143794(s16, s16, f32, void *);
 #ifdef NON_MATCHING
@@ -527,7 +877,153 @@ void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152700.s")
 
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+s32 func_15157E08(s8 *, f32 *, s32, f32, s32, s32, s32, s32, s32);
+
+// base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
+#define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
+
+// particle_burst_from_spec_b: as particle_burst_from_spec (func_151530A8) for the second spec layout: base +
+// rand % (extra + 1) particles (func_15157E08, kind spec +0x3C, size base + rand x range) at the spec's point,
+// each with a random life, three random angles (0..360), a random scalar, a random direction (func_15143794),
+// three random colour scalars and one more random scalar; flags / colours / the rest are copied once.
+// arg1 / arg2 go to func_15157E08. The result is unused by its caller (game_eu_1C13E0).
+s32 func_15152A90(s32 *arg0, u8 arg1, s32 arg2) {
+    typedef struct {
+        s32 countBase;      /* 0x00 */
+        s32 countExtra;     /* 0x04 */
+        s32 pos[3];         /* 0x08 */
+        s16 angXBase;       /* 0x14 */
+        s16 angXExtra;      /* 0x16 */
+        s16 angYBase;       /* 0x18 */
+        s16 angYExtra;      /* 0x1A */
+        f32 lenBase;        /* 0x1C */
+        f32 lenRange;       /* 0x20 */
+        f32 u24;            /* 0x24 */
+        f32 u28Base;        /* 0x28 */
+        f32 u28Range;       /* 0x2C */
+        s16 lifeBase;       /* 0x30 */
+        s16 lifeExtra;      /* 0x32 */
+        s32 u34;            /* 0x34 */
+        s32 u38;            /* 0x38 */
+        s32 kind;           /* 0x3C */
+        f32 sizeBase;       /* 0x40 */
+        f32 sizeRange;      /* 0x44 */
+        f32 u48Base;        /* 0x48 */
+        f32 u48Range;       /* 0x4C */
+        f32 colBase[3];     /* 0x50 */
+        f32 colRange[3];    /* 0x5C */
+        u8 colA[4];         /* 0x68 */
+        u8 colB[4];         /* 0x6C */
+        u8 flags;           /* 0x70 */
+        u8 u71;             /* 0x71 */
+        s16 u72;            /* 0x72 */
+        s16 u74;            /* 0x74 */
+    } BurstSpecB;
+    struct {
+        f32 ang[3];         /* 0x00 */
+        f32 u0C;            /* 0x0C */
+        f32 dir[3];         /* 0x10, func_15143794 */
+        f32 col[3];         /* 0x1C */
+        f32 u28;            /* 0x28 */
+        f32 u2C;            /* 0x2C */
+        u8 u30;             /* 0x30 */
+    } part;
+    struct {
+        u8 flags;           /* 0x00 */
+        u8 u01;             /* 0x01 = 0 */
+        u8 u02;             /* 0x02 = 1 */
+        s8 u03;             /* 0x03 = -1 */
+        s8 u04;             /* 0x04 = -1 */
+        s16 life;           /* 0x06 */
+        s32 u08;            /* 0x08 */
+        s32 u0C;            /* 0x0C */
+        s32 u10;            /* 0x10 = 0 */
+        s32 u14;            /* 0x14 = 0x220405 */
+        s32 u18;            /* 0x18 = 0x40200 */
+        s32 u1C;            /* 0x1C = 1 */
+        s32 u20;            /* 0x20 = 0x38 */
+        s32 u24;            /* 0x24 = 0x80 */
+        s32 u28;            /* 0x28 = 0x20 */
+        u8 u2C;             /* 0x2C = 0 */
+        u8 u2D;             /* 0x2D = 8 */
+        u8 pad2E[2];
+        u8 colA[4];         /* 0x30 */
+        u8 colB[4];         /* 0x34 */
+        u8 u38;             /* 0x38 = 0 */
+        s32 u3C;            /* 0x3C = 0 */
+        u8 u40;             /* 0x40 = 0 */
+        u8 u41;             /* 0x41 = 2 */
+        s32 pos[3];         /* 0x44 */
+        u8 pad50[4];
+        s16 u54;            /* 0x54 */
+        s16 u56;            /* 0x56 */
+    } blk;
+    BurstSpecB *sp = (BurstSpecB *) arg0;
+    u32 count;
+    u32 ra;
+    u32 rb;
+    f32 len;
+    f32 size;
+    s32 i;
+
+    blk.u38 = 0;
+    blk.flags = sp->flags | 2;
+    blk.u01 = 0;
+    blk.u02 = 1;
+    blk.u03 = -1;
+    blk.u04 = -1;
+    blk.u08 = sp->u34;
+    blk.u0C = sp->u38;
+    blk.u10 = 0;
+    blk.u14 = 0x220405;
+    blk.u18 = 0x40200;
+    blk.u1C = 1;
+    blk.u20 = 0x38;
+    blk.u24 = 0x80;
+    blk.u28 = 0x20;
+    blk.u2C = 0;
+    blk.u2D = 8;
+    blk.u3C = 0;
+    blk.u40 = 0;
+    blk.u41 = 2;
+    blk.pos[0] = sp->pos[0];
+    blk.pos[1] = sp->pos[1];
+    blk.pos[2] = sp->pos[2];
+    part.u2C = sp->u24;
+    for (i = 0; i < 4; i++) {
+        blk.colA[i] = sp->colA[i];
+        blk.colB[i] = sp->colB[i];
+    }
+    blk.u54 = sp->u72;
+    blk.u56 = sp->u74;
+    part.u30 = sp->u71;
+    count = RAND_SPREAD(sp->countBase, sp->countExtra);
+    for (; count != 0; count--) {
+        blk.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);
+        part.ang[0] = func_150ADA68() * 360.0f;
+        part.ang[1] = func_150ADA68() * 360.0f;
+        part.ang[2] = func_150ADA68() * 360.0f;
+        part.u0C = func_150ADA68() * sp->u48Range + sp->u48Base;
+        ra = func_150ADA20();
+        rb = func_150ADA20();
+        len = func_150ADA68() * sp->lenRange + sp->lenBase;
+        func_15143794(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
+                      len, part.dir);
+        for (i = 0; i < 3; i++) {
+            part.col[i] = func_150ADA68() * sp->colRange[i] + sp->colBase[i];
+        }
+        part.u28 = func_150ADA68() * sp->u28Range + sp->u28Base;
+        size = func_150ADA68() * sp->sizeRange + sp->sizeBase;
+        func_15157E08((s8 *) &blk, (f32 *) &part, sp->kind, size, 0, 0, 0, arg1, arg2);
+    }
+    return 0;
+}
+#undef RAND_SPREAD
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152A90.s")
+#endif
 
 void func_15143794(s16, s16, f32, void *);
 void func_150CD3C0(void *, u8, u8);
@@ -590,7 +1086,134 @@ void func_1515302C(u8 *arg0) {
     arg0[2] = e[2];
 }
 
+#ifdef NON_MATCHING
+void func_15143794(s16, s16, f32, void *);
+void *func_1515C2F0(s32 *, s32, void *, s32, u8, s32);
+
+// base + rand % (extra + 1) (func_150ADA20, unsigned remainder)
+#define RAND_SPREAD(base, extra) ((u32) func_150ADA20() % (u32) ((extra) + 1) + (base))
+
+// particle_burst_from_spec: spawns base + rand % (extra + 1) particles (func_1515C2F0) at the spec's point; each
+// one gets random life / flag byte, two random scalars, a random direction (func_15143794: two s16 angles and a
+// length, each base + random) and two random 4-byte colours; the rest of the 0x3C-byte particle block is copied
+// from the spec once. arg1 / arg2 go to func_1515C2F0 (owner byte, extra word). The result is unused by all callers.
+s32 func_151530A8(s32 *arg0, u8 arg1, s32 arg2) {
+    typedef struct {
+        s32 countBase;      /* 0x00 */
+        s32 countExtra;     /* 0x04 */
+        s32 pos[3];         /* 0x08 */
+        f32 aBase;          /* 0x14 */
+        f32 aRange;         /* 0x18 */
+        f32 bBase;          /* 0x1C */
+        f32 bRange;         /* 0x20 */
+        f32 lenBase;        /* 0x24 */
+        f32 lenRange;       /* 0x28 */
+        s16 angXBase;       /* 0x2C */
+        s16 angXExtra;      /* 0x2E */
+        s16 angYBase;       /* 0x30 */
+        s16 angYExtra;      /* 0x32 */
+        s32 flagBase;       /* 0x34 */
+        s32 flagExtra;      /* 0x38 */
+        s16 lifeBase;       /* 0x3C */
+        s16 lifeExtra;      /* 0x3E */
+        u16 u40;            /* 0x40 */
+        u8 u42[3];          /* 0x42 */
+        u8 colABase[4];     /* 0x45 */
+        u8 colAExtra[4];    /* 0x49 */
+        u8 colBBase[4];     /* 0x4D */
+        u8 colBExtra[4];    /* 0x51 */
+        u8 u55Base;         /* 0x55 */
+        u8 u55Extra;        /* 0x56 */
+        u8 u57[2];          /* 0x57 */
+        s32 u5C;            /* 0x5C */
+        s32 u60;            /* 0x60 */
+        s16 u64;            /* 0x64 */
+        s16 u66;            /* 0x66 */
+        s16 u68;            /* 0x68 */
+        u8 u6A;             /* 0x6A */
+        f32 u6C;            /* 0x6C */
+        s8 u70;             /* 0x70 */
+        s8 u71;             /* 0x71 */
+    } BurstSpec;
+    struct {
+        f32 a;              /* 0x00 */
+        f32 dir[3];         /* 0x04, func_15143794 */
+        f32 b;              /* 0x10 */
+        u8 u14[3];          /* 0x14 */
+        u8 colA[4];         /* 0x17 */
+        u8 colB[4];         /* 0x1B */
+        u8 u1F;             /* 0x1F */
+        u8 u20[2];          /* 0x20 */
+        s32 u24;            /* 0x24 */
+        s32 u28;            /* 0x28 */
+        s16 u2C;            /* 0x2C */
+        s16 u2E;            /* 0x2E */
+        s16 u30;            /* 0x30 */
+        u8 u32;             /* 0x32 */
+        f32 u34;            /* 0x34 */
+        s8 u38;             /* 0x38 */
+        s8 u39;             /* 0x39 */
+    } part;                 /* 0x3C bytes, copied by func_1515C2F0 */
+    struct {
+        s32 pos[3];         /* 0x00 */
+        s16 life;           /* 0x0C */
+        u16 u0E;            /* 0x0E */
+        s32 u10;            /* 0x10, func_1515C2F0 also sets 10 */
+        u8 pad14;
+        u8 flag;            /* 0x15 */
+    } spawn;
+    BurstSpec *sp = (BurstSpec *) arg0;
+    u32 count;
+    u32 ra;
+    u32 rb;
+    f32 len;
+    s32 i;
+
+    count = RAND_SPREAD(sp->countBase, sp->countExtra);
+    spawn.pos[0] = sp->pos[0];
+    spawn.pos[1] = sp->pos[1];
+    spawn.pos[2] = sp->pos[2];
+    spawn.u10 = 10;
+    spawn.u0E = sp->u40;
+    part.u14[0] = sp->u42[0];
+    part.u14[1] = sp->u42[1];
+    part.u14[2] = sp->u42[2];
+    part.u20[0] = sp->u57[0];
+    part.u20[1] = sp->u57[1];
+    part.u24 = sp->u5C;
+    part.u28 = sp->u60;
+    part.u2C = sp->u64;
+    part.u2E = sp->u66;
+    part.u38 = sp->u70;
+    part.u39 = sp->u71;
+    part.u30 = sp->u68;
+    part.u32 = sp->u6A;
+    part.u34 = sp->u6C;
+    for (; count != 0; count--) {
+        spawn.flag = RAND_SPREAD(sp->flagBase, sp->flagExtra);
+        spawn.life = RAND_SPREAD(sp->lifeBase, sp->lifeExtra);
+        part.a = func_150ADA68() * sp->aRange + sp->aBase;
+        part.b = func_150ADA68() * sp->bRange + sp->bBase;
+        ra = func_150ADA20();
+        rb = func_150ADA20();
+        len = func_150ADA68() * sp->lenRange + sp->lenBase;
+        func_15143794(ra % (u32) (sp->angXExtra + 1) + sp->angXBase, rb % (u32) (sp->angYExtra + 1) + sp->angYBase,
+                      len, part.dir);
+        for (i = 0; i < 4; i++) {
+            part.colA[i] = RAND_SPREAD(sp->colABase[i], sp->colAExtra[i]);
+        }
+        for (i = 0; i < 4; i++) {
+            part.colB[i] = RAND_SPREAD(sp->colBBase[i], sp->colBExtra[i]);
+        }
+        part.u1F = RAND_SPREAD(sp->u55Base, sp->u55Extra);
+        func_1515C2F0(spawn.pos, 0, &part, 0, arg1, arg2);
+    }
+    return 0;
+}
+#undef RAND_SPREAD
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151530A8.s")
+#endif
 
 #ifdef NON_MATCHING
 u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
@@ -772,117 +1395,114 @@ void func_15153808(u8 *arg0, s32 arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15153808.s")
 #endif
 #ifdef NON_MATCHING
+/* P150 (hand C, replaces the batch m2c body) */
 s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
 s32 memcpy(s32, f32 *, s32);
 
-void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3) {
-    struct {
-        f32 u8C;
-        s32 u90;
-        s32 u94;
-        u16 u98;
-        s16 u9A;
-        s32 u9C;
-        s32 uA0;
-        u8 uA4;
-        u8 uA5;
-        u8 uA6;
-        u8 uA7;
-        u8 uA8;
-        u8 uA9;
-        u8 uAA;
-        s8 uAB;
-        u8 uAC;
-        u8 uAD;
-        s16 uAE;
-        s16 uB0;
-        s16 uB2;
-        f32 uB4;
-        f32 uB8;
-        f32 uBC;
-        s32 uC0;
-        u8 padC4[0x14];
-        f32 uD8;
-        f32 uDC;
-        f32 uE0;
-        f32 uE4;
-        s32 uE8;
-        u8 padEC[0x4];
-        u8 uF0;
-        u8 uF1;
-        s8 uF2;
-        s8 uF3;
-        u8 padF4[0x2];
-        s8 uF6;
-    } sp;
-    f32 temp_f20;
-    f32 temp_f22;
-    f32 temp_f24;
-    f32 temp_f26;
-    f32 temp_f28;
-    f32 temp_f2;
-    f32 temp_f8;
-    s16 temp_s1;
-    s16 temp_s2;
-    s32 temp_v0;
-    s32 var_s3;
-    u32 temp_hi;
+// particle template handed to func_151307F0 (0x67 bytes used)
+typedef struct {
+    /* 0x00 */ s32 u0;
+    /* 0x04 */ s32 u4;
+    /* 0x08 */ u16 u08;
+    /* 0x0A */ s16 life;
+    /* 0x0C */ s32 uC;
+    /* 0x10 */ s32 u10;
+    /* 0x14 */ u8 colour[7];
+    /* 0x1B */ s8 u1B;
+    /* 0x1C */ u8 u1C;
+    /* 0x1D */ u8 u1D;
+    /* 0x1E */ s16 u1E;
+    /* 0x20 */ s16 u20;
+    /* 0x22 */ s16 u22;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 size[2];
+    /* 0x30 */ f32 pos[3];
+    /* 0x3C */ u8 pad3C[0xC];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ s32 u58;
+    /* 0x5C */ u8 pad5C[4];
+    /* 0x60 */ u8 u60;
+    /* 0x61 */ u8 u61;
+    /* 0x62 */ s8 u62;
+    /* 0x63 */ s8 u63;
+    /* 0x64 */ u8 pad64[2];
+    /* 0x66 */ u8 u66;
+} BurstParticle;
 
-    temp_hi = func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 2)) + 1);
-    sp.u8C = (*(f32 *)((u8 *)arg0 + 0x68));
-    sp.uAD = (*(u8 *)((u8 *)arg0 + 4));
-    var_s3 = temp_hi + (*(s16 *)((u8 *)arg0 + 0));
-    sp.u98 = (*(u16 *)((u8 *)arg0 + 6));
-    sp.u94 = (*(s32 *)((u8 *)arg0 + 0xC));
-    sp.u9C = 0;
-    sp.u90 = (*(s32 *)((u8 *)arg0 + 8));
-    sp.uA4 = (*(u8 *)((u8 *)arg0 + 0x1C));
-    sp.uA5 = (*(u8 *)((u8 *)arg0 + 0x1D));
-    sp.uA6 = (*(u8 *)((u8 *)arg0 + 0x1E));
-    sp.uA7 = (*(u8 *)((u8 *)arg0 + 0x1F));
-    sp.uA8 = (*(u8 *)((u8 *)arg0 + 0x20));
-    sp.uA9 = (*(u8 *)((u8 *)arg0 + 0x21));
-    sp.uAA = (*(u8 *)((u8 *)arg0 + 0x22));
-    (*(s32 *)((u8 *)(&sp.uC0) + 0)) = (s32) (*(s32 *)((u8 *)arg0 + 0x38));
-    (*(s32 *)((u8 *)(&sp.uC0) + 4)) = (s32) (*(s32 *)((u8 *)arg0 + 0x3C));
-    (*(s32 *)((u8 *)(&sp.uC0) + 8)) = (s32) (*(s32 *)((u8 *)arg0 + 0x40));
-    sp.uE8 = (*(s32 *)((u8 *)arg0 + 0x5C));
-    sp.uAC = (*(u8 *)((u8 *)arg0 + 0x25));
-    sp.uF2 = (*(s8 *)((u8 *)arg0 + 0x60));
-    sp.uF3 = (*(s8 *)((u8 *)arg0 + 0x61));
-    sp.uAE = (*(s16 *)((u8 *)arg0 + 0x26));
-    sp.uB0 = (*(s16 *)((u8 *)arg0 + 0x28));
-    sp.uF0 = (*(u8 *)((u8 *)arg0 + 0x62));
-    sp.uF1 = (*(u8 *)((u8 *)arg0 + 0x63));
-    sp.uB2 = (*(s16 *)((u8 *)arg0 + 0x2A));
-    sp.uF6 = arg1 & 0xFF;
-    sp.uB4 = (*(f32 *)((u8 *)arg0 + 0x2C));
-    if (var_s3 != 0) {
-        do {
-            temp_s1 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x48)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x44));
-            temp_s2 = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x4A)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x46));
-            temp_f24 = func_151423D8(temp_s2 & 0xFF);
-            temp_f26 = func_151423D8((temp_s2 - 0x40) & 0xFF);
-            temp_f28 = func_151423D8(temp_s1 & 0xFF);
-            temp_f22 = func_151423D8((temp_s1 - 0x40) & 0xFF);
-            temp_f20 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x50))) + (*(f32 *)((u8 *)arg0 + 0x4C));
-            sp.u9A = (func_150ADA20() % (u32) ((*(s16 *)((u8 *)arg0 + 0x12)) + 1)) + (*(s16 *)((u8 *)arg0 + 0x10));
-            sp.uA0 = (func_150ADA20() % (u32) ((*(s32 *)((u8 *)arg0 + 0x18)) + 1)) + (*(s32 *)((u8 *)arg0 + 0x14));
-            temp_f2 = temp_f20 * temp_f24;
-            temp_f8 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x34))) + (*(f32 *)((u8 *)arg0 + 0x30));
-            sp.uBC = temp_f8;
-            sp.uB8 = temp_f8;
-            sp.uD8 = temp_f2 * temp_f22;
-            sp.uDC = -temp_f20 * temp_f26;
-            sp.uE0 = temp_f2 * temp_f28;
-            sp.uE4 = (func_150ADA68() * (*(f32 *)((u8 *)arg0 + 0x58))) + (*(f32 *)((u8 *)arg0 + 0x54));
-            sp.uAB = (func_150ADA20() % (u32) ((*(u8 *)((u8 *)arg0 + 0x24)) + 1)) + (*(u8 *)((u8 *)arg0 + 0x23));
-            temp_v0 = func_151307F0(&sp.u90, (*(u8 *)((u8 *)arg0 + 0x64)), 0, 4, arg2 & 0xFF, arg3);
-            if (temp_v0 != 0) {
-                memcpy(temp_v0 + 0xA8, &sp.u8C, 4);
-            }
-            var_s3 -= 1;
-        } while (var_s3 != 0);
+// particle_burst_spawn: spawns a burst of particles from a request (e.g. the pickup flash of func_151BF678):
+// count = +0 + random [0, +2]; each particle gets the request's fixed fields, a random life (+0x10 / +0x12),
+// value +0x14 / +0x18, size (+0x30 + random * +0x34), byte +0x23 / +0x24 and +0x54 + random * +0x58, and a
+// velocity of speed +0x4C + random * +0x50 along yaw +0x44 / +0x48 and pitch +0x46 / +0x4A (256 steps per
+// turn). It is created through func_151307F0(template, +0x64, 0, 4, owner, ownerArg) and its +0xA8 gets +0x68.
+// tag = template byte 0x66.
+void func_15153BA4(u8 *req, s32 tag, s32 owner, s32 ownerArg) {
+    BurstParticle p;
+    f32 spin;
+    f32 speed;
+    f32 sinPitch;
+    f32 cosPitch;
+    f32 sinYaw;
+    f32 cosYaw;
+    f32 size;
+    f32 horiz;
+    s16 yaw;
+    s16 pitch;
+    s32 part;
+    s32 count;
+
+    count = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x2) + 1) + *(s16 *)(req + 0x0);
+    spin = *(f32 *)(req + 0x68);
+    p.u0 = *(s32 *)(req + 0x8);
+    p.u4 = *(s32 *)(req + 0xC);
+    p.u08 = *(u16 *)(req + 0x6);
+    p.uC = 0;
+    p.colour[0] = req[0x1C];
+    p.colour[1] = req[0x1D];
+    p.colour[2] = req[0x1E];
+    p.colour[3] = req[0x1F];
+    p.colour[4] = req[0x20];
+    p.colour[5] = req[0x21];
+    p.colour[6] = req[0x22];
+    p.u1C = req[0x25];
+    p.u1D = req[0x4];
+    p.u1E = *(s16 *)(req + 0x26);
+    p.u20 = *(s16 *)(req + 0x28);
+    p.u22 = *(s16 *)(req + 0x2A);
+    p.u24 = *(f32 *)(req + 0x2C);
+    p.pos[0] = *(f32 *)(req + 0x38);
+    p.pos[1] = *(f32 *)(req + 0x3C);
+    p.pos[2] = *(f32 *)(req + 0x40);
+    p.u58 = *(s32 *)(req + 0x5C);
+    p.u60 = req[0x62];
+    p.u61 = req[0x63];
+    p.u62 = req[0x60];
+    p.u63 = req[0x61];
+    p.u66 = tag;
+
+    for (; count != 0; count--) {
+        yaw = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x48) + 1) + *(s16 *)(req + 0x44);
+        pitch = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x4A) + 1) + *(s16 *)(req + 0x46);
+        sinPitch = func_151423D8(pitch);
+        cosPitch = func_151423D8(pitch - 0x40);
+        sinYaw = func_151423D8(yaw);
+        cosYaw = func_151423D8(yaw - 0x40);
+        speed = func_150ADA68() * *(f32 *)(req + 0x50) + *(f32 *)(req + 0x4C);
+        p.life = (u32) func_150ADA20() % (u32) (*(s16 *)(req + 0x12) + 1) + *(s16 *)(req + 0x10);
+        p.u10 = (u32) func_150ADA20() % (u32) (*(s32 *)(req + 0x18) + 1) + *(s32 *)(req + 0x14);
+        size = func_150ADA68() * *(f32 *)(req + 0x34) + *(f32 *)(req + 0x30);
+        p.size[1] = size;
+        p.size[0] = size;
+        horiz = speed * sinPitch;
+        p.vel[0] = horiz * cosYaw;
+        p.vel[1] = -speed * cosPitch;
+        p.vel[2] = horiz * sinYaw;
+        p.u54 = func_150ADA68() * *(f32 *)(req + 0x58) + *(f32 *)(req + 0x54);
+        p.u1B = (u32) func_150ADA20() % (u32) (req[0x24] + 1) + req[0x23];
+        part = func_151307F0((s32) &p, req[0x64], 0, 4, owner, ownerArg);
+        if (part != 0) {
+            memcpy(part + 0xA8, &spin, 4);
+        }
     }
 }
 #else
@@ -1010,7 +1630,119 @@ void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, 
     }
 }
 
+#ifdef NON_MATCHING
+/* P159 */
+s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
+// spark_shower_spawn: spawns a spark particle (func_15132FBC, 0x18 extra bytes at +0x170) at pos lasting `time`
+// (> 0, else nothing) with brightness `bright` (also its life byte, IDO f32 -> u8 conversion); `flat` != 0 makes it
+// a flat spark turning around y (yaw / spin from it), else it gets random angles and a random x / z drift
+// (+-4.256). The extra bytes keep time / size / brightness, the fade rate bright / time^2 and the flat flag.
+// Returns the particle or 0.
+s32 func_15154728(f32 *pos, f32 time, f32 size, f32 bright, f32 flat, u8 arg5, s32 arg6) {
+    struct {
+        /* extra data copied to particle +0x170 (0x18 bytes) */
+        f32 age;
+        f32 time;
+        f32 size;
+        f32 bright;
+        f32 fade;
+        u8 isFlat;
+        u8 pad3D[3];
+        /* spawn block for func_15132FBC */
+        f32 scaleX;
+        f32 scaleY;
+        f32 u48;
+        f32 flat;
+        f32 rot[3];
+        f32 scale[3];
+        f32 pos[3];
+        f32 u74[3];
+        f32 vel[3];
+        f32 u8C;
+        s32 flags;
+        s16 u94;
+        s16 tex;
+        u8 u98;
+        u8 pad99[3];
+        s32 u9C;
+        u8 life;
+        u8 uA1;
+        u8 uA2;
+        u8 uA3;
+        u8 uA4;
+        u8 uA5;
+        u8 uA6;
+        u8 uA7;
+        u8 uA8;
+        u8 padA9;
+        u8 uAA;
+        u8 padAB;
+        s32 uAC;
+        u8 uB0;
+        u8 padB1;
+        s16 uB2;
+        s16 uB4;
+    } sp;
+    s32 p;
+
+    if (time <= 0.0f) {
+        return 0;
+    }
+    sp.age = 0.0f;
+    sp.time = time;
+    sp.bright = bright;
+    sp.size = size;
+    sp.fade = bright / (time * time);
+    sp.isFlat = (flat != 0.0f) ? 1 : 0;
+    sp.u48 = 0.0f;
+    sp.flat = flat;
+    sp.scaleX = 1.0f;
+    sp.scaleY = 1.0f;
+    sp.rot[0] = (flat != 0.0f) ? 0.0f : func_150ADA68() * 360.0f;
+    sp.rot[1] = func_150ADA68() * 360.0f;
+    sp.rot[2] = (flat != 0.0f) ? 0.0f : func_150ADA68() * 360.0f;
+    sp.scale[0] = 1.0f;
+    sp.scale[1] = 1.0f;
+    sp.scale[2] = 1.0f;
+    ((s32 *)sp.pos)[0] = ((s32 *)pos)[0];
+    ((s32 *)sp.pos)[1] = ((s32 *)pos)[1];
+    ((s32 *)sp.pos)[2] = ((s32 *)pos)[2];
+    sp.u74[0] = 0.0f;
+    sp.u74[1] = 0.0f;
+    sp.u74[2] = 0.0f;
+    sp.vel[0] = (flat != 0.0f) ? 0.0f : func_150ADA68() * 8.512f + -4.256f;
+    sp.vel[1] = (flat != 0.0f) ? func_150ADA68() * 8.512f + -4.256f : 0.0f;
+    sp.vel[2] = (flat != 0.0f) ? 0.0f : func_150ADA68() * 8.512f + -4.256f;
+    sp.u8C = 0.0f;
+    sp.flags = 0x100140;
+    sp.tex = 0x54;
+    sp.u98 = 0;
+    sp.u9C = 0;
+    /* IDO's f32 -> u32 conversion: below 0 gives 0xFFFFFFFF (undefined in C, wasm traps) */
+    sp.life = (bright <= -1.0f) ? 0xFF : (u8)(u32)bright;
+    sp.uA1 = 0xF;
+    sp.uA2 = 0;
+    sp.uA3 = 0;
+    sp.uA4 = 0;
+    sp.uA5 = 0;
+    sp.uA6 = 0;
+    sp.uA7 = 0;
+    sp.uA8 = 2;
+    sp.uAA = 0;
+    sp.uAC = 0;
+    sp.uB0 = 0;
+    sp.uB2 = 1;
+    sp.uB4 = 0xFF;
+    sp.u94 = 300;
+    p = func_15132FBC(&sp.scaleX, 0, 0, 0x18, arg5, arg6);
+    if (p != 0) {
+        memcpy((u8 *)p + 0x170, &sp, 0x18);
+    }
+    return p;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15154728.s")
+#endif
 
 s32 func_15154A9C(u8 *arg0) {
     f32 *p;

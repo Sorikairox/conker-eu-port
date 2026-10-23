@@ -1,0 +1,11 @@
+s/0x40, (s32 \*)&vtx/0x41, (s32 *)\&vtx/
+s/    if (fresh) {/    if (!fresh) {/
+s/        memcpy(\*(u8 \*\*)(fx + 0x100 + slot \* 4), fx + 0xC0, 0x40);/        memcpy(*(u8 **)(fx + 0x100 + slot * 4), fx + 0xC4, 0x40);/
+s/    corner\[1\]\[0\] = -\*(f32 \*)(fx + 0x2C);/    corner[1][0] = *(f32 *)(fx + 0x2C);/
+s/    corner\[3\]\[1\] = -\*(f32 \*)(fx + 0x30);/    corner[3][1] = *(f32 *)(fx + 0x30);/
+s/\*(f32 \*)(fx + 0x44), \*(f32 \*)(fx + 0x48)/*(f32 *)(fx + 0x48), *(f32 *)(fx + 0x44)/
+s/    mtx\[3\]\[0\] = \*(f32 \*)(fx + 0x34);/    mtx[3][0] = *(f32 *)(fx + 0x38);/
+s/(vtx + 0) = (s32)corner\[i\]\[0\]/(vtx + 0) = (s32)corner[i][1]/
+s/(vtx + 6) = 0;/(vtx + 6) = 1;/
+s/i < 4; i++/i < 2; i++/
+s/    return start;/    return NULL;/

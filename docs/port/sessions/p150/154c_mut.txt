@@ -1,0 +1,27 @@
+s/kind = ((u8 \*)&D_8009C100)\[kind \* 4 + 2\];/kind = ((u8 *)\&D_8009C100)[kind * 4 + 3];/
+s/count = D_8009CF9C\[kind\];/count = D_8009CF9C[kind] - 1;/
+s/\*dist = -1.0f;$/*dist = 0.0f;/
+s/sphere\[1\] = \*(s16 \*)(type + 0x10) \* \*(f32 \*)(obj + 0x150) + \*(f32 \*)(obj + 0x18);/sphere[1] = *(s16 *)(type + 0x10) * *(f32 *)(obj + 0x14C) + *(f32 *)(obj + 0x18);/
+s/\*(u16 \*)(type + 0xE) \* \*(f32 \*)(obj + 0x150)/*(u16 *)(type + 0x10) * *(f32 *)(obj + 0x150)/
+s/bestPriority = -1;/bestPriority = 0;/
+s/if ((1 << e\[0\]) & \*(s32 \*)(obj + 0x9C)) {/if ((1 << e[1]) \& *(s32 *)(obj + 0x9C)) {/
+s/local\[1\] = \*(s16 \*)(e + 6);/local[1] = *(s16 *)(e + 4);/
+s/local\[2\] = \*(s16 \*)(e + 8);/local[2] = *(s16 *)(e + 6);/
+s/\*(u8 \*\*)(obj + 0x1D4) + e\[0\] \* 64);/*(u8 **)(obj + 0x1D4) + e[0] * 48);/
+s/\*(u16 \*)(e + 2) \* \*(f32 \*)(obj + 0x14C)/*(u16 *)(e + 2) * *(f32 *)(obj + 0x150)/
+s/if (!(tIn < \*dist) || e\[1\] < bestPriority) {/if (!(tIn < *dist)) {/
+s/if (!(tIn < \*dist) || e\[1\] < bestPriority) {/if (!(tIn <= *dist) || e[1] < bestPriority) {/
+s/if (!(tIn < \*dist) || e\[1\] < bestPriority) {/if (!(tIn < *dist) || e[1] <= bestPriority) {/
+s/bestIn\[1\] = hitIn\[1\];/bestIn[1] = hitIn[0];/
+s/bestOut\[0\] = hitOut\[0\];/bestOut[0] = hitIn[0];/
+s/bestSphere\[2\] = sphere\[2\];/bestSphere[2] = sphere[1];/
+s/bestIndex = i;/bestIndex = i + 1;/
+s/bestPriority = e\[1\];/bestPriority = e[0];/
+s/^    \*dist = tIn;$/    ;/
+s/\*priority = e\[1\];/*priority = e[0];/
+s/\*bone = e\[0\];/*bone = e[1];/
+s/centre\[2\] = \*(s16 \*)(e + 8);/centre[2] = *(s16 *)(e + 6);/
+s/exitPoint\[2\] = bestOut\[2\];/exitPoint[2] = bestOut[1];/
+s/if (normal != NULL) {/if (normal == NULL) {/
+s/        return 0;\n    }\n\n    bestPriority/XX/
+s/    if (\*dist == -1.0f) {/    if (*dist == -2.0f) {/

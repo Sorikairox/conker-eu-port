@@ -562,7 +562,117 @@ u8 *func_151A6900(u8 *arg0, s16 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6900.s")
 #endif
+#ifdef NON_MATCHING
+/* P143 */
+f32 func_15144528(f32, f32, f32);
+void func_15143874(s16, f32, f32 *, f32 *);
+void func_15143794(s16, s16, f32, void *);
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+extern f32 D_800A9180;
+extern f32 D_800A9184;
+extern f32 D_800A9188;
+extern f32 D_800A918C;
+// bubble_emitter_update: update handler (D_8008A100 slot 40) of a particle emitter effect. Optional sound / light
+// probe (func_1508B20C, radius 500) when +0x127 is set; +0x114 angle advances by +0x118 * dt (wrapped by
+// func_15144528 to 2048); the pulse phase byte +0x124 advances by +0x125 per tick and sets the brightness +0x126
+// (192 + 63 * sin). Unless func_151464B8(+0x60) says the emitter is off, the spawn accumulator +0x128 grows by
+// (D_800A9180 + rand * D_800A9184) * dt and each whole unit spawns one particle (func_151307F0) at a random point of
+// the disc in the s16 {x, y, z, radius} at *(+0x110), with random size, life, velocity (func_15143794) and fade.
+// Always returns 1.
+s32 func_151A6BB0(u8 *fx) {
+    struct {
+        s32 render[2];  /* 0x200005, 0x1F0600 */
+        s16 u8;         /* 0x2203 */
+        s16 sprite;     /* 0x19 + rand & 0xF */
+        s32 uC;
+        s32 u10;
+        u8 color[6];    /* 0xFF */
+        u8 u1A;
+        u8 life;        /* 100..200 */
+        u8 u1C;
+        u8 u1D;         /* 0x28 */
+        s16 u1E;        /* 0xC */
+        s16 u20;        /* 0x15 */
+        s16 u22;        /* 1 */
+        f32 u24;        /* 1.0 */
+        f32 size[2];
+        f32 pos[3];
+        f32 u3C[3];
+        f32 vel[3];
+        f32 fade;
+        s32 u58;        /* 0xC207 */
+        s32 u5C;
+        s8 u60[6];      /* 6, 8, -1, -1, -1, 0 */
+    } req;
+    f32 *mv = (f32 *)(fx + 0x110);
+    s16 *src;
+    s32 r0, r1;
+    f32 rf;
+
+    if (fx[0x127] != 0) {
+        func_1508B20C(*(f32 *)(fx + 0x34), *(f32 *)(fx + 0x38), *(f32 *)(fx + 0x3C), 500.0f);
+    }
+    mv[1] += mv[2] * D_800BE9A4;
+    mv[1] = func_15144528(mv[1], 2048.0f, 0.0f);
+    fx[0x124] += fx[0x125] * D_800BE9E4;
+    fx[0x126] = (u32)(func_151423D8(fx[0x124] - 0x40) * 63.0f + 192.0f);
+    if (func_151464B8(*(s32 *)(fx + 0x60)) != 0) {
+        return 1;
+    }
+    mv[6] += (D_800A9180 + func_150ADA68() * D_800A9184) * D_800BE9A4;
+    if (mv[6] > 1.0f) {
+        req.u1D = 0x28;
+        req.u8 = 0x2203;
+        req.render[0] = 0x200005;
+        req.render[1] = 0x1F0600;
+        req.color[0] = 0xFF;
+        req.color[1] = 0xFF;
+        req.color[2] = 0xFF;
+        req.color[3] = 0xFF;
+        req.color[4] = 0xFF;
+        req.color[5] = 0xFF;
+        req.u3C[0] = 0.0f;
+        req.u3C[1] = 0.0f;
+        req.u3C[2] = 0.0f;
+        req.uC = 0;
+        req.u10 = 0;
+        req.u1A = 0xFF;
+        req.u1E = 0xC;
+        req.u20 = 0x15;
+        req.u22 = 1;
+        req.u24 = 1.0f;
+        req.u58 = 0xC207;
+        req.u60[0] = 6;
+        req.u60[1] = 8;
+        req.u60[2] = -1;
+        req.u60[3] = -1;
+        req.u60[4] = -1;
+        req.u60[5] = 0;
+        do {
+            r0 = func_150ADA20();
+            src = *(s16 **)(fx + 0x110);
+            func_15143874(r0 & 0xFF, func_150ADA68() * src[3], &req.pos[0], &req.pos[2]);
+            src = *(s16 **)(fx + 0x110);
+            req.pos[0] += src[0];
+            req.pos[1] = src[1];
+            req.pos[2] += src[2];
+            req.sprite = (func_150ADA20() & 0xF) + 0x19;
+            req.life = (func_150ADA20() % 101U) + 100;
+            req.size[0] = req.size[1] = func_150ADA68() * 205.0f + 98.0f;
+            r0 = func_150ADA20();
+            r1 = func_150ADA20();
+            rf = func_150ADA68();
+            func_15143794(r0 & 0xFF, ((u32)r1 % 35U) - 0x40, rf * 10.0f + 10.0f, req.vel);
+            req.fade = func_150ADA68() * D_800A918C + D_800A9188;
+            func_151307F0((s32)&req, 1, 0, 0, fx[0xC], fx[1]);
+            mv[6] -= 1.0f;
+        } while (mv[6] > 1.0f);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A6BB0.s")
+#endif
 
 void func_1000FD38(s32 (*)(struct57 *, struct57 *, s32 *, s32, s32, s32, u16 *), u8 *, s32, u8 *);
 
@@ -624,4 +734,87 @@ u8 *func_151A7188(s32 arg0) {
     return NULL;
 }
 
+#ifdef NON_MATCHING
+/* P153 */
+s32 func_151A74B0(void *spray, s32 arg1, u8 arg2, s32 arg3);
+void func_151D58E4(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, s32 arg6);
+void func_151D45A4(u8 *, u8, s32);
+s32 func_151D5AC4(u8 *, u8, s32);
+s32 func_15154728(u8 *, f32, f32, f32, f32, u8, s32);
+
+/* the stack blocks of func_151A7240 (sp40 spray block for func_151A74B0, then the position at sp9C) */
+typedef struct {
+    struct {
+        s16 count;        /* 0x00: 6..9 */
+        u8 pad2[2];
+        f32 pos[3];       /* 0x04 */
+        s16 u10;          /* 0x10 */
+        u8 pad12[2];
+        f32 u14;          /* 0x14 */
+        s16 u18[4];       /* 0x18 */
+        f32 u20[12];      /* 0x20 */
+        f32 u50;          /* 0x50 */
+        u8 u54;           /* 0x54 */
+        u8 u55;           /* 0x55 */
+        s16 u56;          /* 0x56 */
+        s16 u58;          /* 0x58 */
+        u8 pad5A[2];
+    } spray;
+    f32 pos[3];           /* sp9C */
+} Frame7240;
+
+// object_explosion_effects: P153: the effect set of an exploding object at obj's position (+0x14): a spray of 6..9
+// pieces (func_151A74B0), the flash / sparks / smoke spawners func_151D58E4 (506, 1013, 0.000987, 5),
+// func_151D45A4 and func_151D5AC4, a random-sized burst (func_15154728: size 12..16, 1.641, brightness 200..255)
+// and the screen shake func_151D5404 (1502, 3000, 1/3000, 12, 15). The original reads the position before its
+// NULL test.
+void func_151A7240(u8 *obj, u8 arg1, s32 arg2) {
+    Frame7240 f;
+    f32 r;
+    f32 size;
+
+    f.pos[0] = *(f32 *) (obj + 0x14);
+    f.pos[1] = *(f32 *) (obj + 0x18);
+    f.pos[2] = *(f32 *) (obj + 0x1C);
+    if (obj == NULL) {
+        return;
+    }
+    f.spray.count = (func_150ADA20() & 3) + 6;
+    f.spray.pos[0] = f.pos[0];
+    f.spray.pos[1] = f.pos[1];
+    f.spray.pos[2] = f.pos[2];
+    f.spray.u14 = 60.0f;
+    f.spray.u20[0] = 0.0f;
+    f.spray.u20[1] = 35.0f;
+    f.spray.u10 = 0x50;
+    f.spray.u18[0] = 0;
+    f.spray.u18[1] = 0xFF;
+    f.spray.u18[2] = -0x3F;
+    f.spray.u18[3] = 0x50;
+    f.spray.u54 = 0;
+    f.spray.u55 = 0;
+    f.spray.u56 = 0x32;
+    f.spray.u58 = 0x19;
+    f.spray.u20[9] = -1.0f;
+    f.spray.u20[10] = -1.0f;
+    f.spray.u20[4] = 0.0f;
+    f.spray.u20[5] = 0.0f;
+    f.spray.u20[6] = 0.0f;
+    f.spray.u20[2] = 10.0f;
+    f.spray.u20[3] = 40.0f;
+    f.spray.u20[7] = 0.2f;
+    f.spray.u20[8] = 0.5f;
+    f.spray.u20[11] = -2.0f;
+    f.spray.u50 = 4.0f;
+    func_151A74B0(&f.spray, 0, arg1, arg2);
+    func_151D58E4((u8 *) f.pos, 506.0f, 1013.0f, 0.0009871669f, 5, arg1, arg2);
+    func_151D45A4((u8 *) f.pos, arg1, arg2);
+    func_151D5AC4((u8 *) f.pos, arg1, arg2);
+    r = func_150ADA68();
+    size = r * 4.0f + 12.0f;
+    func_15154728((u8 *) f.pos, size, 1.6409999f, (f32) ((u32) func_150ADA20() % 56 + 200), 0.0f, arg1, arg2);
+    func_151D5404((struct17 *) f.pos, 1502.0f, 3000.0f, 0.00033333333f, 0xC, 0xF, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D3420/func_151A7240.s")
+#endif

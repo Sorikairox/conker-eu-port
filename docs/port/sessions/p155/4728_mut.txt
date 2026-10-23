@@ -1,0 +1,23 @@
+s/if (time <= 0.0f) {/if (time < 0.0f) {/
+s/sp.bright = bright;/sp.bright = size;/
+s/sp.fade = bright \/ (time \* time);/sp.fade = bright \/ time;/
+s/sp.isFlat = (flat != 0.0f) ? 1 : 0;/sp.isFlat = 1;/
+s/sp.flat = flat;/sp.flat = 0.0f;/
+s/sp.scaleY = 1.0f;/sp.scaleY = 2.0f;/
+s/sp.rot\[1\] = func_150ADA68() \* 360.0f;/sp.rot[1] = func_150ADA68() * 180.0f;/
+s/sp.rot\[2\] = (flat != 0.0f) ? 0.0f : func_150ADA68() \* 360.0f;/sp.rot[2] = 0.0f;/
+s/((s32 \*)sp.pos)\[2\] = ((s32 \*)pos)\[2\];/((s32 *)sp.pos)[2] = ((s32 *)pos)[1];/
+s/sp.vel\[1\] = (flat != 0.0f) ? func_150ADA68() \* 8.512f + -4.256f : 0.0f;/sp.vel[1] = 0.0f;/
+s/sp.vel\[2\] = (flat != 0.0f) ? 0.0f : func_150ADA68() \* 8.512f + -4.256f;/sp.vel[2] = (flat != 0.0f) ? 0.0f : func_150ADA68() * 8.512f + 4.256f;/
+s/sp.flags = 0x100140;/sp.flags = 0x140;/
+s/sp.tex = 0x54;/sp.tex = 0x55;/
+s/sp.life = (bright <= -1.0f) ? 0xFF : (u8)(u32)bright;/sp.life = (u8)(s32)bright;/
+s/sp.life = (bright <= -1.0f) ? 0xFF : (u8)(u32)bright;/sp.life = (bright < 0.0f) ? 0xFF : (u8)(u32)bright;/
+s/sp.uA1 = 0xF;/sp.uA1 = 0x12;/
+s/sp.uA8 = 2;/sp.uA8 = 0;/
+s/sp.uB2 = 1;/sp.uB2 = 0;/
+s/sp.uB4 = 0xFF;/sp.uB4 = 0xFE;/
+s/sp.u94 = 300;/sp.u94 = 200;/
+s/p = func_15132FBC(\&sp.scaleX, 0, 0, 0x18, arg5, arg6);/p = func_15132FBC(\&sp.scaleX, 0, 0, 0x14, arg5, arg6);/
+s/memcpy((u8 \*)p + 0x170, \&sp, 0x18);/memcpy((u8 *)p + 0x170, \&sp, 0x14);/
+s/    return p;/    return 0;/

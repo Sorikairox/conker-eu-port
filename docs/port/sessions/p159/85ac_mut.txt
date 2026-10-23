@@ -1,0 +1,18 @@
+s/sp.recPos\[1\] = rec\[1\];/sp.recPos[1] = rec[0];/
+s/sp.u10 = 0.0f;/sp.u10 = 1.0f;/
+s/sp.scale\[1\] = 1.0f;/sp.scale[1] = 0.5f;/
+s/sp.angle\[2\] = rec\[5\];/sp.angle[2] = rec[4];/
+s/sp.pos\[2\] = rec\[2\];/sp.pos[2] = rec[1];/
+s/sp.color\[2\] = ((s32 \*)D_800A5860)\[2\];/sp.color[2] = ((s32 *)D_800A5860)[1];/
+s/sp.flags50 = 0x980;/sp.flags50 = 0x900;/
+s/sp.type = 0x2F;/sp.type = 0x2E;/
+s/sp.u61 = 0x14;/sp.u61 = 0x15;/
+s/i < 7; i++/i < 6; i++/
+s/sp.u72 = 1;/sp.u72 = 0;/
+s/sp.u74 = 0xFF;/sp.u74 = 0xFE;/
+s/0, 0xB4, flag, arg3/0, 0xB0, flag, arg3/
+s/flag, arg3);/flag, 0);/
+s/(s32 \*)\&sp.rec, 0x14/(s32 *)\&sp.rec, 0x10/
+s/memcpy(p + 0x170/memcpy(p + 0x174/
+s/sp.life = life;/sp.life = 0;/
+s/sp.u6A = 0;/sp.u6A = 1;/

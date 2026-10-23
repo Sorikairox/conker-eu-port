@@ -1,0 +1,8 @@
+s/== 11/== 12/
+s/0x48)/0x44)/
+s/(node + 8)/(node + 4)/
+s/group < 2/group < 1/
+s/i < 2/i < 1/
+s/return NULL;/return node;/
+s/\[i\]\]/[1 - i]]/
+s/== id/!= id/

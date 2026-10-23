@@ -138,9 +138,6 @@ void func_1510B9D8(s32 player, f32 width, f32 height) {
 #ifdef NON_MATCHING
 // Apply the pending per-player requests queued in D_800D9F18 (x == -1.0f: none) through func_1510BB78,
 // with the player's camera record (D_800BE628, 0x180 bytes each).
-#ifndef NON_MATCHING
-struct PendingF2 { f32 x, y; };
-#endif
 extern struct PendingF2 D_800D9F18[];
 extern u8 D_800D9F38;
 void func_1510BB78(s32 arg0, u16 *arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);

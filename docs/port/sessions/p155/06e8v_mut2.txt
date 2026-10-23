@@ -1,0 +1,2 @@
+s/c7 < d->chance7/c7 <= d->chance7/
+s/        r1 = func_150ADA20();/        r1 = 0;/

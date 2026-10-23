@@ -1,0 +1,56 @@
+s/life = 300;/life = 299;/
+s/    if (life == -1) {/    if (life == -2) {/
+s/f.timed = 1;/f.timed = 2;/
+s|/ 812;|/ 808;|
+s/\[0x23D\];/[0x23C];/
+s/f.main.owner23D = 0xFF;/f.main.owner23D = 0xFE;/
+s/f.main.objType = obj\[0x3B\];/f.main.objType = obj[0x3A];/
+s/? 2 : 0;/? 1 : 0;/
+s/f.main.pos\[2\] = pos\[2\];/f.main.pos[2] = pos[1];/
+s/f.main.dir\[0\] = dir\[0\];/f.main.dir[0] = pos[0];/
+s/f.main.param\[1\] = arg8;/f.main.param[1] = arg9;/
+s/f.main.param\[7\] = argB;/f.main.param[7] = argA;/
+s/= -32768.0f;/= -32767.0f;/
+s/f.main.param\[21\] = 0.4f;/f.main.param[21] = 0.5f;/
+s/f.main.param\[3\] = 0.0f;//
+s/func_10010F30(0x4D0, 0x7D0, 0x40, 0, 0)/func_10010F30(0x4D0, 0x7D0, 0x41, 0, 0)/
+s/f.main.sound = 0;/f.main.sound = 1;/
+s/f.mainSpawn.kind = 0x59;/f.mainSpawn.kind = 0x58;/
+s/f.mainSpawn.flags = 0x3103;/f.mainSpawn.flags = 0x3101;/
+s/f.mainSpawn.scale\[1\] = 1.0f;/f.mainSpawn.scale[1] = 0.0f;/
+s/0x200000 | 0x400000 | 0x80000000;/0x200000 | 0x80000000;/
+s/f.mainSpawn.u44\[3\] = 6;/f.mainSpawn.u44[3] = 5;/
+s/0x15, 0x1F, 0, 0x12, 0, 0x94/0x15, 0x1F, 0, 0x12, 0, 0x93/
+s/memcpy((s32) state, (s32) \&f.main, 0x94);/memcpy((s32) state, (s32) \&f.main, 0x90);/
+s/f.rec2Pay.owner = rec;/f.rec2Pay.owner = obj;/
+s/f.rec2Spawn.sub = 2;/f.rec2Spawn.sub = 3;/
+s/f.rec2Spawn.mode = (f.timed ? 1 : 0) | 0x40000/f.rec2Spawn.mode = (f.timed ? 1 : 0) | 0x40001/
+s/0, 0, 0, 0x13, 0, 0x18/0, 0, 0, 0x12, 0, 0x18/
+s/(state + 0x28) + 0x110)/(state + 0x28) + 0x10C)/
+s/f.light.unk0 = (f.timed ? 1 : 0) | 2;/f.light.unk0 = (f.timed ? 1 : 0) | 3;/
+s/f.light.unk4 = 7;/f.light.unk4 = 6;/
+s/f.lightArg.unk4 = 0;/f.lightArg.unk4 = 1;/
+s/5, r, g, b, 0xFF, 0, 4/5, r, b, g, 0xFF, 0, 4/
+s/(state + 0x2C) + 0x18)/(state + 0x2C) + 0x1C)/
+s/f.sparkPay.size\[1\] = 10.250001f;/f.sparkPay.size[1] = 10.25f;/
+s/f.sparkPay.angle\[1\] = func_150ADA68() \* 6.2831855f;/f.sparkPay.angle[1] = func_150ADA68() * 6.283185f;/
+s/f.sparkPay.spin\[0\] = func_150ADA68() \* 0.59999996f/f.sparkPay.spin[0] = func_150ADA68() * 0.6f/
+s/f.spark.kind = 0x2B;/f.spark.kind = 0x2C;/
+s/f.spark.colour\[7\] = 0xFF;/f.spark.colour[7] = 0xFE;/
+s/f.spark.u60\[2\] = 0xB;/f.spark.u60[2] = 0xC;/
+s/f.spark.mode = bit80 | (f.timed ? 1 : 0) | bit40 | 0xC000;/f.spark.mode = bit40 | (f.timed ? 1 : 0) | bit40 | 0xC000;/
+s/(s32) \&f.spark, 1, 0x30, argD, argE/(s32) \&f.spark, 1, 0x2C, argD, argE/
+s/f.emitSpawn.pos1\[2\] = 500.0f;/f.emitSpawn.pos1[2] = 400.0f;/
+s/0x2012 | 0x20000/0x2010 | 0x20000/
+s/f.emit.u14\[3\] = 1e-06f;/f.emit.u14[3] = 0.0f;/
+s/f.emit.range\[1\] = 60.000004f;/f.emit.range[1] = 60.0f;/
+s/f.emit.u54\[4\] = 1;/f.emit.u54[4] = 2;/
+s/func_151407D0(\&f.emit, 0x68,/func_151407D0(\&f.emit, 0x5C,/
+s/0, 0, 0, 0, 0, argD, argE);/0, 0, 0, 0, 1, argD, argE);/
+s/(state + 0x30) + 0x170)/(state + 0x30) + 0x16C)/
+s/f.glow.size\[1\] = 125.0f;/f.glow.size[1] = 124.0f;/
+s/f.glow.u60\[5\] = 5;/f.glow.u60[5] = 4;/
+s/f.glowPay.owner = rec;/f.glowPay.owner = 0;/
+s/(s32) \&f.glow, 1, 8, argD, argE/(s32) \&f.glow, 1, 8, argE, argD/
+s/(state + 0x34) + 0xA8, (s32) \&f.glowPay, 8)/(state + 0x34) + 0xA8, (s32) \&f.glowPay, 4)/
+s/    return (s32) rec;/    return 1;/

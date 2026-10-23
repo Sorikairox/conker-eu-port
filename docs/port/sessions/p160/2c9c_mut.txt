@@ -1,0 +1,36 @@
+s/    period = (s16)period;//
+s/    fadePeriod = (s16)fadePeriod;//
+s/if (period <= 0)/if (period < 0)/
+s/if (fadePeriod <= 0)/if (fadePeriod < 0)/
+s/ex.u0 = arg3;/ex.u0 = arg4;/
+s/ex.fadeStep = 255 \/ fadePeriod/ex.fadeStep = 255 \/ period/
+s/ex.u8 = argA;/ex.u8 = argB;/
+s/ex.uA = argB;/ex.uA = argA;/
+s/s8 uA;/u8 uA;/
+s/blk.u00 = 0x200005/blk.u00 = 0x200004/
+s/blk.u04 = 0;/blk.u04 = 1;/
+s/blk.u08 = 0x5203/blk.u08 = 0x5303/
+s/blk.u0A = arg6/blk.u0A = arg7/
+s/blk.u0C = 0;/blk.u0C = 2;/
+s/blk.u10 = 0;/blk.u10 = 2;/
+s/blk.color\[0\] = r;/blk.color[0] = g;/
+s/blk.color\[2\] = b;/blk.color[2] = r;/
+s/blk.u17\[2\] = 0xFF/blk.u17[2] = 0xFE/
+s/blk.u1B = arg7/blk.u1B = arg6/
+s/blk.u1C = 0xFF/blk.u1C = 0xFE/
+s/blk.u1D = 0x27/blk.u1D = 0x28/
+s/blk.step = 255 \/ period/blk.step = 256 \/ period/
+s/blk.u22 = 1/blk.u22 = 2/
+s/blk.u24 = 1.0f/blk.u24 = 0.5f/
+s/blk.scale\[1\] = scale/blk.scale[1] = arg4/
+s/blk.vel = \*(V3_151A2C9C \*)vel/blk.vel = *(V3_151A2C9C *)acc/
+s/blk.acc = \*(V3_151A2C9C \*)acc/blk.acc = *(V3_151A2C9C *)vel/
+s/blk.u54 = arg4/blk.u54 = arg3/
+s/? 0x40 : 0/? 0x80 : 0/
+s/bit80 | 7 | bit40 | 0x80D200/bit80 | 7 | bit40 | 0x80D300/
+s/blk.u60\[2\] = 0x11/blk.u60[2] = 0x12/
+s/blk.u60\[5\] = 2/blk.u60[5] = 3/
+s/(\&blk, 1, 0x10, argF, arg10)/(\&blk, 1, 0x10, argF, 0)/
+s/(\&blk, 1, 0x10, argF/(\&blk, 0, 0x10, argF/
+s/memcpy(p + 0xB0/memcpy(p + 0xAC/
+s/(p + 0xA8, \&ex.u0, 8)/(p + 0xA8, \&ex.u0, 4)/

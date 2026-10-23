@@ -1,0 +1,12 @@
+s/i < 10/i < 9/
+s/speed < 0)/speed <= 0)/
+s/D_800BE9E4 \* 16/D_800BE9E4 * 8/
+s/) < step/) <= step/
+s/diff >= 0 ? 1/diff > 0 ? 1/
+s/pos >= 0x500/pos > 0x500/
+s/= 0x4FF/= 0x500/
+s/0x500 - (s16)(pos - 0x500)/0xA00 - pos/
+s/(r + 4) = -pos/(r + 4) = pos/
+s/(r + 4) = 0;/(r + 4) = 1;/
+s/\* D_800BE9A0/* 2/
+s/\*(s8 \*)(r + 2) \* /* /

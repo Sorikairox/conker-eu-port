@@ -5,7 +5,71 @@
 s32 func_151AD0E8(u8 *, u8 *);
 
 
+#ifdef NON_MATCHING
+/* P155 */
+u8 func_151D8E20(void);
+void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9,
+                   s32 argA, u8 argB);
+void func_151DBE80(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u8 arg6, u8 arg7, u8 arg8, s32 arg9);
+typedef struct {
+    f32 size;         /* 0x0 */
+    s16 count;        /* 0x4 */
+    u16 countRange;   /* 0x6 */
+} DebrisDefAC3F0;
+typedef struct {
+    f32 u0;           /* 0x0 */
+    s16 u4;           /* 0x4 */
+    f32 u8;           /* 0x8 */
+} FlashDefAC3F0;
+extern s8 D_800A9400[][5];          /* per kind: chunk def, dust def, flash def (-1 = none) */
+extern DebrisDefAC3F0 D_800A9420[]; /* chunks (type 0xB) */
+extern DebrisDefAC3F0 D_800A9538[]; /* dust (type 0xC) */
+extern FlashDefAC3F0 D_800A963C[];  /* flash */
+
+// debris_burst_spawn: P153: the debris of a broken object of `kind` at pos (src = the owner): per D_800A9400[kind]
+// a chunk burst (func_1514CBE8 type 0xB, def D_800A9420) and a dust burst (type 0xC, D_800A9538) with count
+// +4 + random [0, +6], each with the owner block {src, arg4, light} (light = func_151D8E20()), and when src +0x1C
+// bit 0 is set a flash (func_151DBE80, D_800A963C, 150) at pos, src + 4.
+void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
+    struct {
+        u8 *src;
+        s32 arg;
+        u8 light;
+    } chunkOwner, dustOwner;
+    s8 *def;
+    DebrisDefAC3F0 *d;
+    FlashDefAC3F0 *fl;
+    u8 light;
+
+    light = func_151D8E20();
+    if (src == NULL) {
+        return;
+    }
+    def = D_800A9400[kind];
+    if (def[0] != -1) {
+        chunkOwner.src = src;
+        chunkOwner.light = light;
+        chunkOwner.arg = arg4;
+        d = &D_800A9420[def[0]];
+        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) func_150ADA20() % (u32) (d->countRange + 1) + d->count,
+                      0xB, kind, 0.0f, (s32) &chunkOwner, arg3);
+    }
+    if (def[2] != -1) {
+        dustOwner.src = src;
+        dustOwner.arg = arg4;
+        dustOwner.light = light;
+        d = &D_800A9538[def[2]];
+        func_1514CBE8(pos[0], pos[1], pos[2], d->size, 0, 0xFF, (u32) func_150ADA20() % (u32) (d->countRange + 1) + d->count,
+                      0xC, kind, 0.0f, (s32) &dustOwner, arg3);
+    }
+    if (def[4] != -1 && (src[0x1C] & 1)) {
+        fl = &D_800A963C[def[4]];
+        func_151DBE80(light, fl->u0, fl->u8, fl->u4, (u8 *) pos, (s32) (src + 4), 0x96, 0, arg3, arg4);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC3F0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC628.s")
 
@@ -24,7 +88,7 @@ s32 func_151AC97C(u8 *arg0) {
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 u8 func_151D8E20(void);
-s32 func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
 s32 func_151AC9B8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     u8 *tbl;
     u8 *obj;
@@ -156,7 +220,11 @@ s32 func_151AD0E8(u8 *arg0, u8 *arg1) {
     return ret;
 }
 
+#ifdef NON_MATCHING
+void func_151AE958(u8 *arg0);
+#else
 s32 func_151AE958();
+#endif
 
 void func_151AD110(u8 *arg0) {
     s32 temp = *(s32 *)(*(u8 **)(*(u8 **)(arg0 + 0x1C) + 0x31C) + 0x9C);
@@ -177,7 +245,7 @@ void func_151AD144(u8 *arg0, s32 arg1, u8 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ADEDC.s")
 
 void func_151AE814(u8 *);
-s32 func_151AE694(u8 *, u8);
+void func_151AE694(u8 *, u8);
 void func_151AE61C(u8 *arg0, u8 *arg1) {
     u8 sp1F;
     u8 a;
@@ -194,7 +262,55 @@ void func_151AE61C(u8 *arg0, u8 *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P150 */
+struct_eu_node *func_151AEB40(s32);
+void func_151AE86C(f32 *, u8 *, s32, f32);
+// path_try_attach: attaches obj to path node `id` (func_151AEB40; the original hangs when there is none, the port returns) unless the
+// path is busy (+0x52), obj cannot ride (+0x1CA == 0) or is busy (+0x104). The rider record (+0x31C) gets its
+// progress along the path at +0xA0 (func_151AE86C from obj's height); when the path point at that progress
+// (points +0x38, 24 bytes each, count +0x42, spacing +0x3C, 140 units kept free at the end) is within 100 units
+// of obj, the record takes the path (+0x98 id, +0x9C path), obj state +0x8A = 0x12 and the path's rider +0x44 = obj.
+void func_151AE694(u8 *obj, u8 id) {
+    u8 *path;
+    u8 *rec;
+    f32 *point;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 spare;
+    s32 index;
+
+    path = (u8 *)func_151AEB40(id);
+    if (path == NULL) {
+        // Deliberate port divergence (coordinator decision, P155): the N64 code spins here forever (the console
+        // hangs) when no path object with this id is spawned. In the port that would freeze the browser tab, so
+        // the attach is simply skipped. The NM build has no port log hook to report it; the normal path is
+        // unchanged.
+        return;
+    }
+    if (*(s16 *)(path + 0x52) != 0 || obj[0x1CA] == 0 || obj[0x104] != 0) {
+        return;
+    }
+    func_151AE86C((f32 *)(*(u8 **)(obj + 0x31C) + 0xA0), path, *(s32 *)(obj + 0x14), *(f32 *)(obj + 0x18));
+    spare = 140.0f / *(f32 *)(path + 0x3C);
+    rec = *(u8 **)(obj + 0x31C);
+    index = (f32)(path[0x42] - spare - 1) * *(f32 *)(rec + 0xA0);
+    point = (f32 *)(*(u8 **)(path + 0x38) + index * 24);
+    dx = point[0] - *(f32 *)(obj + 0x14);
+    dy = point[1] - *(f32 *)(obj + 0x18);
+    dz = point[2] - *(f32 *)(obj + 0x1C);
+    if (dz * dz + (dx * dx + dy * dy) > 10000.0f) {
+        return;
+    }
+    (*(u8 **)(obj + 0x31C))[0x98] = id;
+    obj[0x8A] = 0x12;
+    *(u8 **)(*(u8 **)(obj + 0x31C) + 0x9C) = path;
+    *(u8 **)(path + 0x44) = obj;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AE694.s")
+#endif
 
 void func_151AE814(u8 *arg0) {
     u8 *temp_v0;
@@ -257,7 +373,58 @@ loop_2:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AE86C.s")
 #endif
+#ifdef NON_MATCHING
+/* P153 */
+s32 func_15143E08(struct127 *arg0);
+f32 func_151423D8(u8);
+// path_ride_place: P153: places the rider obj (arg0 + 0x1C) on its path (record +0x31C, path +0x9C): the rider's
+// progress (+0xA0) picks a segment of the path points (+0x38, 24 bytes each, count +0x42, 140 units kept free at
+// the end as in func_151AE694); the record's +0xAE gets the segment index, and obj's position becomes the point
+// between that segment's two ends, moved sideways by arg0 +0x28 along obj's yaw (func_15143E08) - 0x80.
+void func_151AE958(u8 *arg0) {
+    u8 *obj;
+    u8 *path;
+    u8 *rec;
+    f32 *p;
+    f32 oldX;
+    f32 oldY;
+    f32 oldZ;
+    f32 side;
+    f32 sinYaw;
+    f32 cosYaw;
+    f32 t;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 spare;
+    s32 index;
+    u8 yaw;
+
+    obj = *(u8 **) (arg0 + 0x1C);
+    path = *(u8 **) (*(u8 **) (obj + 0x31C) + 0x9C);
+    yaw = func_15143E08((struct127 *) obj) - 0x80;
+    sinYaw = func_151423D8((yaw - 0x40) & 0xFF);
+    cosYaw = func_151423D8(yaw);
+    rec = *(u8 **) (obj + 0x31C);
+    oldY = *(f32 *) (obj + 0x18);
+    oldX = *(f32 *) (obj + 0x14);
+    side = *(f32 *) (arg0 + 0x28);
+    oldZ = *(f32 *) (obj + 0x1C);
+    spare = 140.0f / *(f32 *) (path + 0x3C);
+    index = (f32) (path[0x42] - spare - 1) * *(f32 *) (rec + 0xA0);
+    rec[0xAE] = index;
+    t = (f32) (path[0x42] - spare - 1) * *(f32 *) (rec + 0xA0) - (f32) index;
+    p = (f32 *) (*(u8 **) (path + 0x38) + index * 24);
+    x = (p[6] - p[0]) * t + p[0] + side * sinYaw;
+    y = (p[7] - p[1]) * t + p[1];
+    z = (p[8] - p[2]) * t + p[2] + side * cosYaw;
+    *(f32 *) (obj + 0x14) = (x - oldX) + oldX;
+    *(f32 *) (obj + 0x18) = (y - oldY) + oldY;
+    *(f32 *) (obj + 0x1C) = (z - oldZ) + oldZ;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AE958.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_800A9650;

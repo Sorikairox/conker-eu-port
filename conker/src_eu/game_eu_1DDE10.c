@@ -23,14 +23,85 @@ s32 func_151B0600(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s3
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* P153 */
+void func_1504715C(void *, u8 *);
+s32 func_15134070(struct127 *);
+extern f32 D_800AA500[3]; /* (0, -12, 96): offset of the effect from the model node */
+
+// object_hit_flash_spawn: P153: spawns the hit flash (func_15154488 parameter block) on obj's model node
+// (obj +0x1D4, +0x180) for the target's class: 4 without a target or for target types 0x53 / 0xA5, else
+// func_15134070(target); nothing for class 0x63, a class mode (D_800A43B8[class] byte 0xE) of 2, obj without a
+// model, or obj +0x74 low nibble 0xF. Angle: (u8) ((+0x7A >> 8) + 0x40) - 0x68; +0x3C set for class mode 1.
+// The asm leaves v0 unset; the callers (func_15194794, game_981E0) declare an int result and ignore it: 0 here.
+s32 func_151B01B8(u8 *obj, u8 *target) {
+    struct_eu_15154488 p;
+    s32 basis[10];
+    u8 *cls;
+    s32 class;
+    u8 yaw;
+
+    if (obj == NULL || *(s32 *) (obj + 0x1D4) == 0 || (obj[0x74] & 0xF) == 0xF) {
+        return 0;
+    }
+    func_1504715C(basis, obj);
+    class = 4;
+    if (target != NULL) {
+        if (target[4] == 0x53 || target[4] == 0xA5) {
+            class = 4;
+        } else {
+            class = func_15134070((struct127 *) target);
+        }
+    }
+    if (class == 0x63) {
+        return 0;
+    }
+    cls = D_800A43B8[class];
+    if (cls[0xE] == 2) {
+        return 0;
+    }
+    yaw = (*(u16 *) (obj + 0x7A) >> 8) + 0x40;
+    func_15143134(D_800AA500, &p.unk8, *(u8 **) (obj + 0x1D4) + 0x180);
+    p.unk0 = yaw - 0x68;
+    p.unk14 = 7.22f;
+    p.unk2C = 0xA;
+    p.unk2E = 0x14;
+    p.unk2 = 0xD0;
+    p.unk4 = -0x1B;
+    p.unk6 = 0x36;
+    p.unk30 = 3;
+    p.unk32 = 2;
+    p.unk34 = 0x1E;
+    p.unk36 = 0x28;
+    p.unk38 = 0x9B;
+    p.unk3A = 0x64;
+    p.unk18 = 3.04f;
+    p.unk1C = 0.81000006f;
+    p.unk20 = 0.40500003f;
+    p.unk24 = 6.0f;
+    p.unk28 = 13.900001f;
+    p.unk40 = 0.5f;
+    if (cls[0xE] == 1) {
+        p.unk3C = 1;
+    } else {
+        p.unk3C = 0;
+    }
+    p.unk44 = 0x10;
+    p.unk46 = 0xF;
+    p.unk48 = 0;
+    func_15154488(&p, &p.unk8, (s32) basis, 0xFF, 1);
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B01B8.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15046C6C(f32 *, s32, f32, f32 *);
 s32 func_15046F70(f32 *, s32, f32, f32 *);
 void func_1504715C(void *, u8 *);
 s32 func_15136698(f32, f32, s32, s32, s32, s32 *, f32 *, s32, s32, s32, s32);
-s32 func_151DAB58(s32, f32, s32, f32 *, s32, s32, s32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
 
 void func_151B03B8(struct127 *arg0, s32 arg1, s32 arg2) {
     struct {
@@ -196,11 +267,148 @@ block_9:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B03B8.s")
 #endif
+#ifdef NON_MATCHING
+/* P150 */
+s32 memcpy(s32, f32 *, s32);
+s32 func_15134070(struct127 *);
+extern u8 D_800A43C6[];
+// object_link_effect_spawn: spawns a type 0x13 effect tied to obj (func_151491F4, 0x98-byte state copied to +0x28)
+// for the target's class: 4 without a target or for target types 0x53 / 0xA5, else func_15134070(target);
+// class 0x63 or a class mode (D_800A43C6[class * 16]) of 2 spawns nothing. The state is {obj, obj[0x3B], zeros,
+// 0.0f, mode == 1}. life = span, or 300 (not fixed) when span is -1. Returns the effect or 0. The type 0x13
+// effects of obj are first cleared through func_151494E0({obj, obj[0x3B]}, 0x13).
+s32 func_151B09BC(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
+    struct {
+        u8 *obj;
+        u8 id;
+    } key;
+    struct {
+        /* 0x00 */ u8 *obj;
+        /* 0x04 */ u8 id;
+        /* 0x08 */ s32 zero[0x22];
+        /* 0x90 */ f32 f90;
+        /* 0x94 */ u8 single;
+    } state;
+    u8 *part;
+    s32 class;
+    s32 mode;
+    s32 life;
+    s32 fixed;
+    s32 i;
+
+    if (obj == NULL) {
+        return 0;
+    }
+    if (target == NULL || target[4] == 0x53 || target[4] == 0xA5) {
+        class = 4;
+    } else {
+        class = func_15134070((struct127 *)target);
+    }
+    if (class == 0x63) {
+        return 0;
+    }
+    mode = D_800A43C6[class * 16];
+    if (mode == 2) {
+        return 0;
+    }
+    state.single = (mode == 1) ? 1 : 0;
+    key.obj = obj;
+    key.id = obj[0x3B];
+    func_151494E0((s32)&key, 0x13);
+    if (span == -1) {
+        fixed = 0;
+        life = 300;
+    } else {
+        life = span;
+        fixed = 1;
+    }
+    state.obj = obj;
+    state.id = obj[0x3B];
+    for (i = 0; i < 0x22; i++) {
+        state.zero[i] = 0;
+    }
+    state.f90 = 0.0f;
+    part = (u8 *)func_151491F4(life, -1, 0x13, fixed, 0xF, 0x98, arg3, arg4);
+    if (part != NULL) {
+        memcpy((s32)(part + 0x28), (f32 *)&state, 0x98);
+    }
+    return (s32)part;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B09BC.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1138.s")
 
+#ifdef NON_MATCHING
+/* P143 */
+extern f32 D_800AA6D0;
+extern f32 D_800AA6D4;
+extern f32 D_800AA6D8;
+// debris_fall_update: update handler (D_8008A058 slot 16) of a falling debris sprite. Motion block at +0x110:
+// velocity x/y/z, gravity +0x11C; x / z speeds are multiplied by 0.25 * dt each frame, y gains gravity * dt; the
+// position +0x34 moves by the mean speed, the trail point +0x40 moves with it and then eases back towards the
+// position (factor D_800AA6D0). With floor check (+0x134) a floor probe (func_15046F70, from the previous height
+// minus the half height +0x30) that hits ends the sprite (0) and spawns a splash at the floor + 5: either
+// func_151D9B8C (scale D_800AA6D4) or the ring func_151DAB58 (scale D_800AA6D8), of type +0x135, sized by the mean
+// of +0x124 + +0x12C / 2 and +0x128 + +0x130 / 2. Returns 1 while it keeps falling.
+s32 func_151B173C(u8 *fx) {
+    f32 *mv = (f32 *)(fx + 0x110);
+    f32 probe[3];
+    f32 hit[3];
+    f32 y0, vx0, vz0, vy, dvy;
+    f32 dx, dy, dz;
+    f32 x, y, z;
+    f32 size;
+    s8 ret;
+
+    y0 = *(f32 *)(fx + 0x38);
+    vx0 = mv[0];
+    vz0 = mv[2];
+    ret = 1;
+    mv[0] = vx0 * (0.25f * D_800BE9A4);
+    mv[2] = vz0 * (0.25f * D_800BE9A4);
+    dx = (mv[0] + vx0) * 0.5f * D_800BE9A4;
+    vy = mv[1];
+    dvy = mv[3] * D_800BE9A4;
+    dy = vy * D_800BE9A4 + dvy * D_800BE9A4 * 0.5f;
+    dz = (mv[2] + vz0) * 0.5f * D_800BE9A4;
+    mv[1] = vy + dvy;
+    *(f32 *)(fx + 0x38) = y0 + dy;
+    *(f32 *)(fx + 0x34) += dx;
+    *(f32 *)(fx + 0x3C) += dz;
+    *(f32 *)(fx + 0x40) += dx;
+    *(f32 *)(fx + 0x44) += dy;
+    *(f32 *)(fx + 0x48) += dz;
+    x = *(f32 *)(fx + 0x34);
+    y = *(f32 *)(fx + 0x38);
+    z = *(f32 *)(fx + 0x3C);
+    *(f32 *)(fx + 0x40) = x + (*(f32 *)(fx + 0x40) - x) * D_800AA6D0;
+    *(f32 *)(fx + 0x44) = y + (*(f32 *)(fx + 0x44) - y) * D_800AA6D0;
+    *(f32 *)(fx + 0x48) = z + (*(f32 *)(fx + 0x48) - z) * D_800AA6D0;
+    if (fx[0x134] != 0) {
+        probe[0] = x;
+        probe[1] = y0 - *(f32 *)(fx + 0x30);
+        probe[2] = *(f32 *)(fx + 0x3C);
+        if (func_15046F70(probe, 0, *(f32 *)(fx + 0x38) - *(f32 *)(fx + 0x30), (f32 *)(fx + 0x78)) != 0) {
+            hit[0] = probe[0];
+            hit[1] = *(f32 *)(fx + 0x78) + 5.0f;
+            hit[2] = probe[2];
+            size = ((mv[5] + mv[7] * 0.5f) + (mv[6] + mv[8] * 0.5f)) * 0.5f;
+            if (func_150ADA20() & 1) {
+                func_151D9B8C(fx[0x135], size * D_800AA6D4, fx[0x5C], (s32)(fx + 0x7C), (struct17 *)hit, 100, 0, 1, 0,
+                              fx[0xC], fx[1]);
+            } else {
+                func_151DAB58(fx[0x135], size * D_800AA6D8, fx[0x5C], hit, 1, fx[0xC], fx[1]);
+            }
+            ret = 0;
+        }
+    }
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B173C.s")
+#endif
 
 s32 func_151B1A28(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);

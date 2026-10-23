@@ -1,0 +1,20 @@
+s/rec.objId = obj\[0x3B\]/rec.objId = obj[0x3A]/
+s/rec.sound = -1;/rec.sound = 0;/
+s/rec.flags = 0;/rec.flags = 2;/
+s/rec.kind = kind;/rec.kind = 0;/
+s/rec.unkC = 0.0f;/rec.unkC = 1.0f;/
+s/kind == 6/kind == 5/
+s/rec.sound = 0x82/rec.sound = 0x83/
+s/!= NULL \&\& (obj/== NULL \&\& (obj/
+s/(obj\[0x74\] \& 0xF) != 0xF/(obj[0x74] \& 0xF) != 0xE/
+s/obj\[0x74\] \& 0xF)/obj[0x74] \& 0x7)/
+s/D_80090010\[kind\](obj, rec.sound, rec.point)/D_80090010[kind](obj, -1, rec.point)/
+s/rec.point);/\&rec.point[1]);/
+s/rec.flags |= 1;/rec.flags |= 3;/
+s/func_15149130(arg2, -1/func_15149130(arg3, -1/
+s/0x41, -1, 1, 0x35/0x41, -1, 1, 0x36/
+s/(struct37 \*)0x20, arg3, arg4/(struct37 *)0x20, arg3, 1/
+s/memcpy(p + 0x28/memcpy(p + 0x24/
+s/rec, 0x20)/rec, 0x1C)/
+s/u8 kind, s16 arg2/s32 kind, s16 arg2/
+s/s16 arg2, u8 arg3/s32 arg2, u8 arg3/

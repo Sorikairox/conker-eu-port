@@ -1,0 +1,22 @@
+s/(u32) ((extra) + 1)/(u32) ((extra) + 2)/
+s/count = RAND_SPREAD(sp->countBase, sp->countExtra);/count = RAND_SPREAD(sp->countBase, sp->countBase);/
+s/spawn.u10 = 10;/spawn.u10 = 11;/
+s/spawn.u0E = sp->u40;/spawn.u0E = sp->u64;/
+s/part.u14\[2\] = sp->u42\[2\];/part.u14[2] = sp->u42[1];/
+s/part.u28 = sp->u60;/part.u28 = sp->u5C;/
+s/part.u38 = sp->u70;/part.u38 = sp->u71;/
+s/part.u34 = sp->u6C;/part.u34 = sp->aBase;/
+s/spawn.flag = RAND_SPREAD(sp->flagBase, sp->flagExtra);/spawn.flag = RAND_SPREAD(sp->flagBase, sp->lifeExtra);/
+s/part.a = func_150ADA68() \* sp->aRange + sp->aBase;/part.a = func_150ADA68() * sp->aRange - sp->aBase;/
+s/part.b = func_150ADA68() \* sp->bRange + sp->bBase;/part.b = func_150ADA68() * sp->aRange + sp->bBase;/
+s/len = func_150ADA68() \* sp->lenRange + sp->lenBase;/len = func_150ADA68() * sp->lenRange;/
+s/        for (i = 0; i < 4; i++) {/        for (i = 0; i < 3; i++) {/
+s/part.colB\[i\] = RAND_SPREAD(sp->colBBase\[i\], sp->colBExtra\[i\]);/part.colB[i] = RAND_SPREAD(sp->colBBase[i], sp->colAExtra[i]);/
+s/part.u1F = RAND_SPREAD(sp->u55Base, sp->u55Extra);/part.u1F = RAND_SPREAD(sp->u55Extra, sp->u55Base);/
+s/func_1515C2F0(spawn.pos, 0, &part, 0, arg1, arg2);/func_1515C2F0(spawn.pos, 0, \&part, 0, arg1, 1);/
+s/void func_151530A8(s32 \*arg0, u8 arg1, s32 arg2)/void func_151530A8(s32 *arg0, s32 arg1, s32 arg2)/
+s/u8 u6A;             \/\* 0x6A \*\//s8 u6A;/
+s/    for (; count != 0; count--) {/    for (; count > 1; count--) {/
+s/+ sp->angYBase,/+ sp->angXBase,/
+s/spawn.pos\[2\] = sp->pos\[2\];/spawn.pos[2] = sp->pos[1];/
+s/ra = func_150ADA20();/ra = func_150ADA20() + 1;/

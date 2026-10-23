@@ -1,0 +1,3 @@
+s/        top += ys \/ depth;/        top += xs \/ depth;/
+s/    dtdy = ((s32) depth << 10) \/ ysi;/    dtdy = ((s32) depth << 10) \/ xsi;/
+s/                if (frame >= (tex\[0xA\] \& 0x7F) \* 8) {/                if (frame > (tex[0xA] \& 0x7F) * 8) {/

@@ -47,7 +47,11 @@ void func_151CD944(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_151CDA70(s32, u8, s32, u8, s32);
+#else
 s32 func_151CDA70(s32, u8, s32, u8, u8);
+#endif
 void func_151CEA2C(u8 *);
 void func_151CD97C(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *v = arg0 + 0x28;
@@ -71,7 +75,85 @@ void func_151CD97C(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+// splash_effect_spawn: spawns a 300-frame effect object (kind 0x34 / 11 / 7 / 0x23) at the s16 point src[0..2]
+// (y raised by src[4]) sized by src[3]; its 0x50-byte parameter block (sizes, rates, centre, owner arg2 / arg1)
+// is copied to the object's data (+0x98). Returns the object (0 if none).
+s32 func_151CDA70(s32 src_p, u8 arg1, s32 arg2, u8 arg3, s32 arg4) {
+    s16 *src = (s16 *)src_p;
+    struct {
+        f32 size_x;     /* 0x00 */
+        f32 size_y;     /* 0x04 */
+        f32 u08;
+        f32 u0C;
+        f32 rate0;      /* 0x10 */
+        f32 rate1;      /* 0x14 */
+        f32 x;          /* 0x18 */
+        f32 z;          /* 0x1C */
+        f32 u20;
+        f32 radius;     /* 0x24 */
+        f32 grow;       /* 0x28 */
+        f32 u2C;
+        f32 rate2;      /* 0x30 */
+        f32 radius2;    /* 0x34 */
+        f32 min0;       /* 0x38 */
+        f32 min1;       /* 0x3C */
+        f32 u40;
+        f32 y;          /* 0x44 */
+        s32 owner;      /* 0x48 */
+        u8 owner_id;    /* 0x4C */
+    } params;
+    struct {
+        f32 x, y, z;    /* 0x00 */
+        s16 life;       /* 0x0C */
+        s16 kind;       /* 0x0E */
+        s32 type;       /* 0x10 */
+        u8 u14;
+        u8 u15;
+        s32 u18;
+    } rec;
+    f32 size;
+    u8 *obj;
+
+    size = src[3];
+    rec.u15 = 0x23;
+    rec.x = src[0];
+    rec.y = src[1] + src[4];
+    rec.z = src[2];
+    rec.life = 300;
+    rec.kind = 0x34;
+    rec.type = 11;
+    params.radius = size * 0.875f;
+    params.size_x = size * 0.125f;
+    params.size_y = size * 0.125f;
+    params.rate0 = 0.0300000012f;
+    params.rate1 = 0.0400000028f;
+    params.u08 = 0.0f;
+    params.u0C = 0.0f;
+    params.y = src[1];
+    params.x = rec.x;
+    params.z = rec.z;
+    params.radius2 = params.radius;
+    params.grow = size * 0.0625f;
+    params.u2C = 0.0f;
+    params.rate2 = 0.0550000034f;
+    params.u40 = 0.0f;
+    params.owner = arg2;
+    params.min0 = -16384.0f;
+    params.min1 = -16384.0f;
+    params.u20 = 0.0f;
+    params.owner_id = arg1;
+    rec.u18 = 0;
+    rec.u14 = 7;
+    obj = func_15147FF0(&rec, 0x50, 0x1C, 9, 9, 9, 0, 0, 0, arg3, arg4);
+    if (obj != NULL) {
+        memcpy(*(void **)(obj + 0x98), &params, 0x50);
+    }
+    return (s32)obj;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CDA70.s")
+#endif
 
 typedef struct { f32 unk0; f32 unk4; f32 unk8; f32 unkC; u8 pad10[0xC]; } S1C;
 typedef struct { s32 x, y, z; } V3i;
@@ -518,7 +600,28 @@ void func_151CEACC(s32 arg0, u8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CEACC.s")
 #endif
+#ifdef NON_MATCHING
+// node_find_kind11_by_id: searches the node lists D_800DD280[0..1][list] for the two lists named in D_800A5B40
+// (s32 words 0x4D, 0x22) for a node of kind 11 (+0x20) whose sub-object (+0x98) has id (+0x48) == id; NULL if none
+u8 *func_151CEBE4(s32 id) {
+    u8 i;
+    s32 group;
+    u8 *node;
+
+    for (i = 0; i < 2; i++) {
+        for (group = 0; group < 2; group++) {
+            for (node = (u8 *)D_800DD280[group][((s32 *)D_800A5B40)[i]]; node != NULL; node = *(u8 **)(node + 8)) {
+                if (*(s32 *)(node + 0x20) == 11 && *(s32 *)(*(u8 **)(node + 0x98) + 0x48) == id) {
+                    return node;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CEBE4.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_150455FC(u8 *, f32, u8 *);
@@ -1420,6 +1523,35 @@ s32 func_151D1624(f32 *arg0, f32 *arg1) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_151D1694(u8 *obj, f32 *out, u8 which);
+
+/* P162: D_8008FFD0 entries 1 / 2. func_151D16E8 (asm) and func_151D1510 test the result ("point found"), so these
+   return func_151D1694's s32 like entry 0 (func_151D1624) instead of void. */
+// object_offset_point_0: entry 1 of D_8008FFD0: object's matrix applied to offset 0 (100, 8, -20)
+s32 func_151D1654(u8 *obj, f32 *out) {
+    return func_151D1694(obj, out, 0);
+}
+
+// object_offset_point_1: entry 2 of D_8008FFD0: object's matrix applied to offset 1 (-100, 8, -20)
+s32 func_151D1674(u8 *obj, f32 *out) {
+    return func_151D1694(obj, out, 1);
+}
+
+extern f32 D_800AB37C[2][3];
+
+// object_offset_point: transforms the fixed offset D_800AB37C[which] by the object's matrix (obj + 0x1D4) into
+// out; returns 0 (out untouched) when the object has no matrix, 1 otherwise
+s32 func_151D1694(u8 *obj, f32 *out, u8 which) {
+    void *mtx = *(void **)(obj + 0x1D4);
+
+    if (mtx == NULL) {
+        return 0;
+    }
+    func_15143134(D_800AB37C[which], out, mtx);
+    return 1;
+}
+#else
 void func_151D1654(s32 arg0, s32 arg1) {
     func_151D1694(arg0, arg1, 0);
 }
@@ -1429,6 +1561,7 @@ void func_151D1674(s32 arg0, s32 arg1) {
 }
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D1694.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D16E8.s")
 

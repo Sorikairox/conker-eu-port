@@ -1,0 +1,11 @@
+s/height < 0.0f/height <= 0.0f/
+s/(fx + 0x38) - \*(f32 \*)(fx + 0x124)/(fx + 0x34) - *(f32 *)(fx + 0x124)/
+s/byLife = \*(s16 \*)(fx + 0x1C) << 4;/byLife = *(s16 *)(fx + 0x1C) << 3;/
+s/    if (byLife >= 0x100) {/    if (byLife > 0x100) {/
+s/        byLife = 0xFF;/        byLife = 0xFE;/
+s/byHeight = (s32)height << 2;/byHeight = (s32)height << 3;/
+s/    if (byHeight >= 0x100) {/    if (byHeight >= 0xFF) {/
+s/(byHeight < byLife) ? byHeight : byLife/(byHeight > byLife) ? byHeight : byLife/
+s/fx\[0x5C\]/fx[0x5D]/
+s/    return 1;/    return 2;/
+s/        return 0;/        return 1;/

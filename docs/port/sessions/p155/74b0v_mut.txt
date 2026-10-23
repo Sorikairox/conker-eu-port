@@ -1,0 +1,34 @@
+s/while (n-- != 0) {/while (--n > 0) {/
+s/yaw = func_150ADA20() \/ (u32)(s->yawRange + 1)/yaw = 0/
+s/(u32)(s->yawRange + 1) + s->yawMin;/(u32)(s->yawRange + 1) + s->pitchMin;/
+s/(u32)(s->pitchRange + 1) + s->pitchMin;/(u32)(s->pitchRange) + s->pitchMin;/
+s/sy = func_151423D8(yaw - 0x40);/sy = func_151423D8(yaw + 0x40);/
+s/sp_ = func_151423D8(pitch - 0x40);/sp_ = func_151423D8(pitch);/
+s/r = func_150ADA68() \* s->radius;/r = s->radius;/
+s/sp.pos\[1\] = s->pos\[1\] - r \* sp_;/sp.pos[1] = s->pos[1] + r * sp_;/
+s/sp.pos\[2\] = s->pos\[2\] + h \* cy;/sp.pos[2] = s->pos[2] + h * sy;/
+s/sp.vel\[1\] = func_150ADA68() \* s->upRange + s->upMin;/sp.vel[1] = func_150ADA68() * s->upRange;/
+s/sp.vel\[0\] = v \* sy;/sp.vel[0] = v * cy;/
+s/sp.vel\[1\] = -v \* sp_;/sp.vel[1] = v * sp_;/
+s/((s32 \*)sp.vel)\[1\] = ((s32 \*)s->dir)\[1\];/((s32 *)sp.vel)[1] = ((s32 *)s->dir)[2];/
+s/sp.vel\[2\] = s->dir\[2\] \* v;/sp.vel[2] = s->dir[1] * v;/
+s/size = func_150ADA68() \* s->sizeRange + s->sizeMin;/size = func_150ADA68() * s->sizeMin + s->sizeRange;/
+s/sp.uF0 = size;/sp.uF0 = 1.0f;/
+s/sp.scale = size \* 30.0f;/sp.scale = size * 20.0f;/
+s/sp.u134 = func_150ADA68() \* s->spinRange + s->spinMin;/sp.u134 = func_150ADA68() * s->rotRange + s->spinMin;/
+s/sp.spin\[2\] = func_150ADA68() \* s->rotRange + s->rotMin;/sp.spin[2] = func_150ADA68() * s->rotRange;/
+s/sp.flags = 0x21E9;/sp.flags = 0x21E8;/
+s/sp.tex = 0x1B;/sp.tex = 0x1C;/
+s/sp.spin\[1\] = 0.0f;/sp.spin[1] = 1.0f;/
+s/sp.uEC = 0.2f;/sp.uEC = 0.25f;/
+s/sp.u14A = 5;/sp.u14A = 4;/
+s/sp.u15A = 0x20;/sp.u15A = 0x10;/
+s/sp.model = s->model;/sp.model = 0;/
+s/p = (u8 \*)func_15132FBC(\&sp, 0, 0, 0x10, arg2, arg3);/p = (u8 *)func_15132FBC(\&sp, 0, 0, 0x14, arg2, arg3);/
+s/trail.pos\[1\] = p + 0x3C;/trail.pos[1] = p + 0x40;/
+s/trail.size = 15.0f \* sp.uF4;/trail.size = 16.0f * sp.uF4;/
+s/trail.life = 300;/trail.life = 200;/
+s/trail.u9C = 0.358f;/trail.u9C = 0.35f;/
+s/t = (u8 \*)func_15134908((struct_eu_EF410 \*)\&trail, 4, arg2, arg3);/t = (u8 *)func_15134908((struct_eu_EF410 *)\&trail, 5, arg2, arg3);/
+s/memcpy(t + 0x40, \&size, 4);/memcpy(t + 0x44, \&size, 4);/
+s/            \*(u8 \*\*)(p + 0x170 + 4) = t;/            ;/

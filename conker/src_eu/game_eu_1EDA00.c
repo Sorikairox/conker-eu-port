@@ -9,7 +9,7 @@ void func_151C0648(u8 *arg0, s32 arg1, u8 arg2, s32 arg3, s32 arg4);
 #endif
 // hoisted forward declaration(s) for func_151C0AA8
 #ifdef NON_MATCHING
-void func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
+s32 func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */
 #else
 void func_15154728(u8 *, f32, s32, f32, f32, u8, s32);
 #endif
@@ -90,7 +90,79 @@ void func_151C0350(u8 *arg0, f32 *arg1, u8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P159 */
+s32 func_15144E80(u8 *, f32 *, f32 *, f32 *);
+void func_1515016C(void *, u8, s32);
+// impact_effects_spawn: the effects of a hit at pos (func_151C09C8, func_151C0AA8, func_151C0B54, func_151C0BA0).
+// With `full` set: when hit (an 0x12-byte surface record) has a downward-facing third axis (func_15144E80) also
+// func_151C0BF4, a burst along it (func_151C0910), and a spray against dir (func_1515016C with the surface, else
+// func_15150108 without one), its parameters from func_151C01F0.
+void func_151C0434(u8 *hit, f32 *pos, f32 *dir, u8 full, u8 arg4, s32 arg5) {
+    typedef struct {
+        f32 u0;
+        s32 u4;
+        f32 pos[3];
+        u8 rest[0x40];
+    } SprayParams; /* filled by func_151C01F0 (0x54 bytes) */
+    struct {
+        f32 dir[3];
+        u8 hit[0x12];
+        u8 pad1E[2];
+        f32 range;
+        SprayParams p;
+    } a; /* func_1515016C */
+    struct {
+        f32 dir[3];
+        f32 range;
+        SprayParams p;
+    } b; /* func_15150108 */
+    f32 ax0[3];
+    f32 ax1[3];
+    f32 ax2[3];
+    s32 i;
+
+    func_151C09C8((u8 *)pos, arg4, arg5);
+    func_151C0AA8((u8 *)pos, arg4, arg5);
+    func_151C0B54((s32)pos, arg4, arg5);
+    func_151C0BA0((struct17 *)pos, arg4, arg5);
+    if (hit != NULL && full != 0) {
+        if (func_15144E80(hit, ax0, ax1, ax2) != 0 && ax2[1] < 0.0f) {
+            func_151C0BF4((s32)pos, arg4, arg5);
+        }
+    }
+    if (hit != NULL && full != 0) {
+        func_151C0910((s32)hit, (s32)pos, arg4, arg5);
+    }
+    if (full == 0) {
+        return;
+    }
+    if (hit != NULL) {
+        a.dir[0] = -dir[0];
+        a.dir[1] = -dir[1];
+        a.dir[2] = -dir[2];
+        for (i = 0; i < 0x12; i++) {
+            a.hit[i] = hit[i];
+        }
+        a.p.pos[0] = pos[0];
+        a.p.pos[1] = pos[1];
+        a.p.pos[2] = pos[2];
+        func_151C01F0((f32 *)&a.p, &a.range);
+        func_1515016C(&a, arg4, arg5);
+    } else {
+        b.dir[0] = -dir[0];
+        b.dir[1] = -dir[1];
+        b.dir[2] = -dir[2];
+        func_151C01F0((f32 *)&b.p, &b.range);
+        b.p.pos[0] = pos[0];
+        b.p.pos[1] = pos[1];
+        b.p.pos[2] = pos[2];
+        func_15150108((f32 *)&b, arg4, arg5);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C0434.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15046F70(s32 *, s32, f32, f32 *);
@@ -289,8 +361,8 @@ s32 func_151C16BC(u8 *arg0, s32 arg1, s32 *arg2, s32 arg3, s32 arg4, s32 arg5, s
 #ifdef NON_MATCHING
 void func_15055A2C(s32, f32, f32, f32, s32);
 s32 func_15081A90(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
-s32 func_151AC3F0(u8 *, u8 *, s32, u8, s32);
-s32 func_151C0434(f32 *, u8 *, u8 *, s32, s32, s32);
+void func_151AC3F0(u8 *, u8 *, s32, u8, s32);
+void func_151C0434(u8 *, f32 *, f32 *, u8, u8, s32);
 
 s32 func_151C1730(u8 *arg0) {
     struct {
@@ -373,7 +445,7 @@ s32 func_151C1730(u8 *arg0) {
             sp54 = temp_v0;
             sp50 = temp_a0;
             func_151C1C04(temp_a0, (s32) (var_s0 + 0x38), (*(s32 *)((u8 *)var_s0 + 0x6C)), (*(u8 *)((u8 *)var_s0 + 0x92)), (s32) temp_v0);
-            func_151C0434(sp54, sp50, arg0 + 0x44, (((*(u8 *)((u8 *)var_s0 + 0xC8)) & 1) == 0) & 0xFF, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
+            func_151C0434((u8 *) sp54, (f32 *) sp50, (f32 *) (arg0 + 0x44), (((*(u8 *)((u8 *)var_s0 + 0xC8)) & 1) == 0) & 0xFF, (s32) (*(u8 *)((u8 *)arg0 + 0xC)), (s32) (*(u8 *)((u8 *)arg0 + 1)));
         }
         return 0;
     }
@@ -444,7 +516,7 @@ void func_151C1BD8(void *arg0) {
 }
 
 s32 func_151D4684(u8 *, s32, s32, s32, s32, s32, s32, s32);
-s32 func_151D4898(u8 *, s32, s32, s32, s32);
+void func_151D4898(u8 *, s32, s32, s32, s32);
 extern s32 (*D_800E0D64)(s32, s32, s32);
 
 void func_151C1C04(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {
@@ -515,13 +587,22 @@ void func_151C1E10(u8 *arg0, u8 arg1, s32 arg2) {
 
 s32 func_151C0894();
 
+#ifdef NON_MATCHING
+/* P159 */
+// object_filter_not_listed: target filter 3 of D_80087030 (func_151D611C, func_15081A90): returns func_151C0894's
+// result (the N64 code leaves it in v0; the matching C is void, which breaks a call through the s32 table on wasm).
+s32 func_151C1EF0(s32 arg0, s32 arg1, s32 *arg2) {
+    return func_151C0894(arg0, arg1, *arg2, arg2 + 1);
+}
+#else
 void func_151C1EF0(s32 arg0, s32 arg1, s32 *arg2) {
     func_151C0894(arg0, arg1, *arg2, arg2 + 1);
 }
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15145128(u8 *, u8 *, u8 *, s32);
-s32 func_151C230C(s32, u8 *, u8 *, u8 *, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_151C230C(s32, u8 *, f32 *, u8 *, f32, s32, s32, s32, s8, u8 *, f32 *, f32 *, u8 *, s32);
 
 s32 func_151C1F1C(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA) {
     u8 sp57;
@@ -545,7 +626,7 @@ s32 func_151C1F1C(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, s32 arg5, s3
         (*(s32 *)((u8 *)var_s3 + 4)) = (s32) (*(s32 *)((u8 *)arg4 + 4));
         (*(s32 *)((u8 *)var_s3 + 8)) = (s32) (*(s32 *)((u8 *)arg4 + 8));
         sp57 = 1;
-        func_151C230C(arg5, var_s2, var_s3, arg0, 0.0f, 0, 0, 1, 3, arg6, arg7, arg8, arg9, argA);
+        func_151C230C(arg5, var_s2, (f32 *)var_s3, arg0, 0.0f, 0, 0, 1, 3, (u8 *)arg6, (f32 *)arg7, (f32 *)arg8, (u8 *)arg9, argA);
         var_v1 = 1;
         if ((*(u8 *)((u8 *)arg0 + 0x59)) == 0) {
             if (((*(f32 *)((u8 *)arg0 + 0x2C)) != (*(f32 *)((u8 *)arg1 + 0))) || ((*(f32 *)((u8 *)arg0 + 0x30)) != (*(f32 *)((u8 *)arg1 + 4))) || ((*(f32 *)((u8 *)arg0 + 0x34)) != (*(f32 *)((u8 *)arg1 + 8)))) {
@@ -587,7 +668,7 @@ block_14:
     (*(s32 *)((u8 *)var_s3 + 8)) = var_at;
 block_15:
     if (var_v1 != 0) {
-        func_151C230C(arg5, var_s2, var_s3, arg0, 0.0f, 0, 1, 1, 3, arg6, arg7, arg8, arg9, argA);
+        func_151C230C(arg5, var_s2, (f32 *)var_s3, arg0, 0.0f, 0, 1, 1, 3, (u8 *)arg6, (f32 *)arg7, (f32 *)arg8, (u8 *)arg9, argA);
         if ((*(u8 *)((u8 *)arg0 + 0x59)) != 0) {
             sp56 = 1;
         }
@@ -627,7 +708,60 @@ block_15:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C1F1C.s")
 #endif
+#ifdef NON_MATCHING
+/* P160 */
+s32 func_15081A90(s32, f32, f32, f32, f32, f32, f32, s32 *, f32, s32, s32, s32, s32, u8 *, s32);
+extern f32 D_800AADA4;
+
+typedef struct { f32 x, y, z; } V3_151C230C;
+typedef struct { u16 h[9]; } Blk12_151C230C; /* 0x12 bytes, 2-byte aligned */
+
+// ray_cast_through_passable: casts the ray `dir` from `start` (func_15081A90, hit record `hit`) and, while the hit
+// object has (obj[0x4F] & 0x60) == 0x40 (a see-through object), records that object (its hit point in passPos,
+// the distance so far in passDist, and a 0x24-byte pass record) and casts again from just behind it
+// (D_800AADA4 along the hit normal). Finally restores the record's start (hit+0x2C) and stores the total distance
+// in hit+4. Always returns 0.
+s32 func_151C230C(s32 arg0, u8 *start, f32 *dir, u8 *hit, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s8 arg8,
+                  u8 *arg9, f32 *passPos, f32 *passDist, u8 *pass, s32 argD) {
+    V3_151C230C pos;
+    f32 dist;
+    f32 step;
+    u8 *obj;
+    s32 again;
+
+    dist = 0.0f;
+    *passDist = 0.0f;
+    pos = *(V3_151C230C *)start;
+    step = D_800AADA4;
+    do {
+        func_15081A90(arg0, pos.x, pos.y, pos.z, dir[0], dir[1], dir[2], (s32 *)hit, arg4, arg5, arg6, arg7, arg8,
+                      arg9, argD);
+        obj = *(u8 **)(hit + 0x5C);
+        dist += *(f32 *)(hit + 4);
+        again = 0;
+        if (obj != NULL && (obj[0x4F] & 0x60) == 0x40) {
+            pos.x = *(f32 *)(hit + 0x8) + *(f32 *)(hit + 0x38) * step;
+            pos.y = *(f32 *)(hit + 0xC) + *(f32 *)(hit + 0x3C) * step;
+            pos.z = *(f32 *)(hit + 0x10) + *(f32 *)(hit + 0x40) * step;
+            *(V3_151C230C *)passPos = *(V3_151C230C *)(hit + 8);
+            *passDist = dist;
+            dist += step;
+            *(f32 *)(pass + 0) = *(f32 *)(hit + 0xC);
+            *(Blk12_151C230C *)(pass + 4) = *(Blk12_151C230C *)(hit + 0x44);
+            *(s32 *)(pass + 0x18) = *(s32 *)(hit + 0x60);
+            pass[0x1C] = 7;
+            pass[0x1D] = 3;
+            *(u8 **)(pass + 0x20) = obj;
+            again = 1;
+        }
+    } while (again);
+    *(V3_151C230C *)(hit + 0x2C) = *(V3_151C230C *)start;
+    *(f32 *)(hit + 4) = dist;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EDA00/func_151C230C.s")
+#endif
 
 void func_151C1FB8(u8 *arg0) {
     s8 sp18[8];

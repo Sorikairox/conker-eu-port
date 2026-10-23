@@ -5,7 +5,7 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
 extern u8 D_800AB7C8[];
-s32 func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
 void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
 u8 func_151D9534(u8 *arg0, u8 *arg1);
 #endif
@@ -420,7 +420,124 @@ void func_151D9FC0(u8 arg0, f32 arg1, u8 arg2, s32 arg3, s32 arg4, u8 arg5, s32 
     }
 }
 
+#ifdef NON_MATCHING
+/* P160 */
+extern f32 D_800AB850;
+extern f32 D_800AB854;
+extern f32 D_800AB858;
+extern f32 D_800AB85C;
+
+typedef struct { f32 x, y, z; } V3_151DA08C;
+
+typedef struct {
+    u8 u0;
+    u8 u1;
+    u8 u2;            /* rand % 5 + 2 */
+    u8 u3;            /* rand % 5 + 2 */
+    f32 u4;           /* (randf * D_800AB850 + D_800AB854) * scale */
+    f32 u8;           /* (randf * D_800AB858 + D_800AB85C) * scale */
+    f32 uC;           /* 0 */
+    f32 scale;        /* 0x10 */
+    f32 u14;          /* 1.0f with the default life, else arg2 */
+    u8 kind;          /* 0x18 */
+} Rec1C_151DA08C;     /* 0x1C bytes, copied to the record at +0x128 */
+
+typedef struct {
+    u8 u00;           /* the kind's D_800900A4 handler result */
+    u8 u01;
+    s16 u02;          /* 3 */
+    s16 life;         /* 0x04: 300 or the caller's */
+    s32 u08;
+    s32 u0C;
+    u8 u10[4];        /* 0, 0, 0, 0xFF */
+    f32 u14[2];       /* scale */
+    V3_151DA08C pos;  /* 0x1C */
+    f32 u28[3];       /* 0 */
+    f32 u34[3];       /* 1.0f */
+    s32 u40;          /* 0x0CDC0008, | 1 with a caller's life */
+    u8 u44;           /* arg3 */
+    u8 u45;           /* 0xFF */
+    u8 u46;           /* 4 */
+    u8 u47;           /* 5 */
+    s32 u48;
+    u8 u4C;           /* 0xFF */
+    s32 u50;
+    s16 alpha;        /* 0x54: min(life, 255), 1 with the default life */
+    s16 fade;         /* 0x56: 255 / life (1 if life >= 256), 255 with the default life */
+} Blk58_151DA08C;
+
+// smoke_puff_spawn: spawns one effect record of kind `kind` (func_1513D668 class 0xE / 0x13) at *pos with size
+// `scale` and life `life` (-1: 300 frames, full alpha), then copies a 0x1C-byte parameter block (random speeds,
+// the kind) into the record at +0x128. arg7 / arg8 are unused. Returns the record (0 if none).
+s32 func_151DA08C(u8 kind, f32 scale, f32 arg2, u8 arg3, s16 life, s32 arg5, void *pos, s32 arg7, s32 arg8) {
+    u8 (**handlers)(void) = (u8 (**)(void))&D_800900A4;
+    Rec1C_151DA08C rec;
+    Blk58_151DA08C blk;
+    s32 ra;
+    s32 rb;
+    s32 rc;
+    u8 *p;
+
+    rec.scale = scale;
+    rec.u0 = 0;
+    rec.u1 = 0;
+    rec.u2 = (u32)func_150ADA20() % 5 + 2;
+    rec.u3 = (u32)func_150ADA20() % 5 + 2;
+    rec.u4 = (func_150ADA68() * D_800AB850 + D_800AB854) * rec.scale;
+    rec.u8 = (func_150ADA68() * D_800AB858 + D_800AB85C) * rec.scale;
+    rec.kind = kind;
+    rec.uC = 0.0f;
+    blk.u00 = handlers[kind]();
+    blk.u02 = 3;
+    blk.u08 = 0;
+    blk.u0C = 0;
+    blk.u10[0] = 0;
+    blk.u10[1] = 0;
+    blk.u10[2] = 0;
+    blk.u10[3] = 0xFF;
+    blk.u14[1] = scale;
+    blk.u14[0] = scale;
+    blk.pos = *(V3_151DA08C *)pos;
+    blk.u40 = 0x0CDC0008;
+    blk.u34[0] = 1.0f;
+    blk.u34[1] = 1.0f;
+    blk.u34[2] = 1.0f;
+    blk.u28[0] = 0.0f;
+    blk.u28[1] = 0.0f;
+    blk.u28[2] = 0.0f;
+    if (life == -1) {
+        blk.life = 300;
+        rec.u14 = 1.0f;
+        blk.alpha = 1;
+        blk.fade = 255;
+    } else {
+        blk.life = life;
+        blk.u40 = 0x0CDC0009;
+        rec.u14 = arg2;
+        blk.alpha = (life < 256) ? life : 255;
+        blk.fade = (life < 256) ? 255 / life : 1;
+    }
+    blk.u45 = 0xFF;
+    blk.u01 = 0;
+    blk.u46 = 4;
+    blk.u47 = 5;
+    blk.u48 = 0;
+    blk.u4C = 0xFF;
+    blk.u50 = 0;
+    blk.u44 = arg3;
+    ra = func_150ADA20();
+    rb = func_150ADA20();
+    rc = func_150ADA20();
+    p = (u8 *)func_1513D668((s32)&blk, 0, 0xE, 0x13, 0, (rb & 1) + (ra & 1), rc & 0xFF, 500.0f, 500.0f, 0, arg5, 0,
+                            0x1C, 0xFF, 0);
+    if (p != NULL) {
+        memcpy(p + 0x128, &rec, 0x1C);
+    }
+    return (s32)p;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DA08C.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_151DB5D0(u8 arg0, u8 *arg1, u8 *arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, s16 arg7, u8 arg8, s16 arg9, s16 argA, u8 argB, u8 argC, s32 argD);
 
@@ -606,7 +723,7 @@ u8 *func_151DA6F8(u8 *pos, u8 *vel, f32 scale, s16 sprite, u8 alpha, f32 speed, 
 #endif
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 extern f32 D_800AB87C;
-s32 func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
 s32 func_151DA938(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5)
 {
   u8 *tbl;
@@ -645,7 +762,96 @@ s32 func_151DAA88(struct_eu_2062D0_c *arg0, s32 arg1, s32 arg2, s32 arg3, f32 ar
     sub->unk20 = 4;
     return 1;
 }
+#ifdef NON_MATCHING
+/* P143 */
+extern u8 (*D_80090070[])(void);
+extern s32 D_800AB710;
+extern f32 D_800AB880;
+extern f32 D_800AB884;
+extern f32 D_800AB888;
+extern f32 D_800AB88C;
+// splash_ring_spawn: spawns a flat ring effect of kind `type` (texture from D_80090070[type](), life 100) at `pos`
+// with half size `size`, alpha `alpha`, through func_1513D2F0 (update handler 0x14, draw 0xE, fade from life 0x20
+// at rate 7; flag 0x40000000 when D_800AB710[type]). `lit` picks the light texture set (0x3B vs 0x22 in the high
+// byte of +0x1A) and lit vertex colours. On success the effect's +0x110 gets {0, 6..8 random, growth speeds
+// (random ranges from D_800AB880..D_800AB88C)}.
+void func_151DAB58(u8 type, f32 size, u8 alpha, f32 *pos, u8 lit, u8 room, s32 owner) {
+    struct {
+        u8 texture;     /* -> effect +0x18 */
+        u8 u1;
+        s16 u2;         /* (0x3B or 0x22) << 8 | 3 */
+        s16 life;       /* +0x1C */
+        s32 frame;      /* +0x20 */
+        s32 speed;      /* +0x24 */
+        u8 color[4];    /* +0x28 */
+        f32 halfW;      /* +0x2C */
+        f32 halfH;      /* +0x30 */
+        s32 pos[3];     /* +0x34 */
+        f32 angle[3];   /* +0x40 */
+        f32 scale[3];   /* +0x4C */
+        s32 flags;      /* +0x58 */
+        u8 alpha;       /* +0x5C */
+        u8 u45;
+        u8 u46;
+        u8 u47;
+        s32 u48;
+        u8 u4C;
+        s32 u50;
+        s16 fadeStart;  /* +0x6C */
+        s16 fadeRate;   /* +0x6E */
+    } req;
+    struct {
+        u8 u0;
+        u8 steps;
+        f32 growA;
+        f32 growB;
+    } extra;
+    u8 *fx;
+
+    req.texture = D_80090070[type]();
+    req.u2 = ((lit ? 0x3B : 0x22) << 8) + 3;
+    req.life = 100;
+    req.color[2] = 0;
+    req.color[1] = 0;
+    req.color[0] = 0;
+    req.color[3] = 0xFF;
+    req.u45 = 0xFF;
+    req.alpha = alpha;
+    req.pos[0] = ((s32 *)pos)[0];
+    req.pos[1] = ((s32 *)pos)[1];
+    req.pos[2] = ((s32 *)pos)[2];
+    req.flags = (((u8 *)&D_800AB710)[type] ? 0x40000000 : 0) | 0x0CDC0009;
+    req.angle[0] = 0.0f;
+    req.angle[1] = 0.0f;
+    req.angle[2] = 0.0f;
+    req.scale[0] = 1.0f;
+    req.scale[1] = 1.0f;
+    req.scale[2] = 1.0f;
+    req.frame = 0;
+    req.speed = 0;
+    req.halfH = size;
+    req.halfW = size;
+    req.u46 = 0;
+    req.u47 = 7;
+    extra.u0 = 0;
+    extra.steps = (func_150ADA20() % 3U) + 6;
+    extra.growA = func_150ADA68() * D_800AB880 + D_800AB884;
+    extra.growB = func_150ADA68() * D_800AB888 + D_800AB88C;
+    req.u1 = 0;
+    req.u48 = 0;
+    req.u4C = 0xFF;
+    req.u50 = 0;
+    req.fadeStart = 0x20;
+    req.fadeRate = 7;
+    fx = func_1513D2F0(&req, (s32)&D_800A4AA0, 0, 0x14, 0, 0xE, (func_150ADA20() & 1) | 2, lit ? 3 : 0,
+                       lit ? 0xFF : 0, 0xC, room, owner);
+    if (fx != NULL) {
+        memcpy(fx + 0x110, &extra, 0xC);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DAB58.s")
+#endif
 s32 func_151DADA0(struct_eu_2062D0_b *arg0) {
     struct_eu_2062D0_b_sub *sub = &arg0->unk110;
     f32 f0;
@@ -1245,7 +1451,101 @@ void func_151DBE80(s32 arg0, f32 arg1, f32 arg2, s16 arg3, u8 *arg4, s32 arg5, u
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DBE80.s")
 #endif
+#ifdef NON_MATCHING
+/* P153 */
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+extern u8 D_800AB700[]; /* sprite per glow type */
+
+// glow particle template of func_151307F0 (0x70 bytes, the func_15153BA4 layout)
+typedef struct {
+    s32 u0;           /* 0x00 */
+    s32 u4;           /* 0x04 */
+    u16 flags;        /* 0x08 */
+    s16 life;         /* 0x0A */
+    s32 uC;           /* 0x0C */
+    s32 u10;          /* 0x10 */
+    u8 colour[8];     /* 0x14: 7 bytes, alpha */
+    u8 u1C;           /* 0x1C */
+    u8 sprite;        /* 0x1D */
+    s16 u1E;          /* 0x1E */
+    s16 u20;          /* 0x20 */
+    s16 u22;          /* 0x22 */
+    f32 u24;          /* 0x24 */
+    f32 size[2];      /* 0x28 */
+    f32 pos[3];       /* 0x30 */
+    f32 u3C[3];       /* 0x3C */
+    f32 vel[3];       /* 0x48 */
+    f32 u54;          /* 0x54 */
+    s32 mode;         /* 0x58 */
+    s32 u5C;          /* 0x5C */
+    u8 u60[7];        /* 0x60 */
+    u8 pad67;
+    s16 u68;          /* 0x68 */
+    u8 pad6A[2];
+    f32 u6C;          /* 0x6C */
+} GlowTmplC034;
+
+// glow_particle_spawn: P153: spawns a glow particle (func_151307F0) at pos with size, alpha and life for glow
+// `type` (sprite D_800AB700[type], flag 0x800000 when D_800AB710[type]); random flip bits 0x80 / 0x40, still
+// (velocity D_800A5860). Returns func_151307F0's record.
+s32 func_151DC034(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, s32 arg6) {
+    GlowTmplC034 t;
+    s32 bit80;
+    s32 bit40;
+
+    t.flags = 0x4403;
+    t.u0 = 0x200005;
+    t.sprite = D_800AB700[type];
+    t.u4 = 0x9F0600;
+    t.life = life;
+    t.uC = 0;
+    t.u10 = 0;
+    t.colour[0] = 0xFF;
+    t.colour[1] = 0xFF;
+    t.colour[2] = 0xFF;
+    t.colour[3] = 0xFF;
+    t.colour[4] = 0xFF;
+    t.colour[5] = 0xFF;
+    t.colour[6] = 0xFF;
+    t.colour[7] = alpha;
+    t.u1C = 0xFF;
+    t.size[1] = size;
+    t.size[0] = size;
+    t.pos[0] = pos[0];
+    t.pos[1] = pos[1];
+    t.pos[2] = pos[2];
+    t.u3C[0] = ((f32 *) D_800A5860)[0];
+    t.u3C[1] = ((f32 *) D_800A5860)[1];
+    t.u3C[2] = ((f32 *) D_800A5860)[2];
+    t.vel[0] = ((f32 *) D_800A5860)[0];
+    t.vel[1] = ((f32 *) D_800A5860)[1];
+    t.vel[2] = ((f32 *) D_800A5860)[2];
+    t.u1E = 4;
+    t.u20 = 0x3F;
+    t.u22 = 1;
+    t.u54 = 0.0f;
+    t.u24 = 1.0f;
+    bit80 = 0;
+    if (func_150ADA20() & 1) {
+        bit80 = 0x80;
+    }
+    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    t.mode = (((u8 *) &D_800AB710)[type] != 0 ? 0x800000 : 0) | 1 | bit40 | bit80 | 0xC200 | 0x10000;
+    t.u60[0] = 6;
+    t.u60[1] = 8;
+    t.u60[2] = 0xFF;
+    t.u60[3] = 0xFF;
+    t.u60[4] = 0xFF;
+    t.u60[5] = 0;
+    t.u5C = 0;
+    t.u60[6] = 0xFF;
+    t.u68 = 1000;
+    t.u6C = 1000.0f;
+    return func_151307F0((s32) &t, 1, 0, 0, arg5, arg6);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_2062D0/func_151DC034.s")
+#endif
 extern f32 D_800AB8B0;
 extern f32 D_800AB8B4;
 extern f32 D_800AB8B8;

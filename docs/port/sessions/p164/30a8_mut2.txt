@@ -1,0 +1,3 @@
+s/+ sp->angYBase,/+ sp->angXBase,/
+s/spawn.pos\[2\] = sp->pos\[2\];/spawn.pos[2] = sp->pos[1];/
+s/ra = func_150ADA20();/ra = func_150ADA20() + 1;/

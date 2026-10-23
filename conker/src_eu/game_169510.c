@@ -1,14 +1,6 @@
 #include <ultra64.h>
 
-#ifdef NON_MATCHING
-/* P128: functions.h:772 declares func_1513D524 void; the NM definition below returns the record. Hide the old
- * prototype until the port slot's functions.h fix merges (harmless afterwards). */
-#define func_1513D524 func_1513D524_void_proto
-#endif
 #include "functions.h"
-#ifdef NON_MATCHING
-#undef func_1513D524
-#endif
 #include "variables.h"
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 u8 *func_15140410(u8 *arg0, u8 *arg1, u8 *arg2, s16 arg3);
@@ -461,7 +453,104 @@ void func_1513CF9C(s32 arg0, s32 arg1, u8 arg2) {
 void func_1513CFD0(s32 arg0, s32 arg1, s32 arg2) {
 }
 
+#ifdef NON_MATCHING
+/* P143 draft, inserted P146 */
+extern s32 (*D_8008A058[])(u8 *);
+extern s32 (*D_8008A100[])(u8 *);
+extern s32 (*D_8008A1B0[])(u8 *);
+// effect3d_update: per-frame update of a 3D sprite effect (sibling of func_1513C060): +0x10 bit 0 active;
+// +0x58 flags; +0x1C life (s16, counts down by D_800BE9E4 when flags & 1); +0x70 / +0x71 update handlers
+// (D_8008A058 / D_8008A100, 0 = none; returning 0 ends the effect); while alive, flags 0x08000000 / 0x10000000 fade
+// alpha +0x5C / +0x2B to life * rate +0x6E below life +0x6C (only ever lowering it, compared against +0x5C);
+// +0x20 frame position (16.16) advanced by speed +0x24 and wrapped at the frame count of texture +0x18
+// (D_80090F14): flags 0x800 / 0x1000 end at the top / bottom, 0x400 ping-pong, else wrap. When it ends, the end
+// handler +0x72 (D_8008A1B0, 2 slots) may veto the removal (nonzero), else func_1516972C frees it.
+void func_1513CFE4(u8 *fx) {
+    s8 done;
+    s32 flags;
+    s32 life;
+    s32 a;
+    s32 speed;
+    s32 pos;
+    s32 top;
+
+    if (!(*(s32 *)(fx + 0x10) & 1)) {
+        return;
+    }
+    done = 0;
+    if (*(s32 *)(fx + 0x58) & 1) {
+        *(s16 *)(fx + 0x1C) -= D_800BE9E4;
+        if (*(s16 *)(fx + 0x1C) < 0) {
+            done = 1;
+        }
+    }
+    if ((fx[0x70] != 0) && (D_8008A058[fx[0x70]](fx) == 0)) {
+        done = 1;
+    }
+    if ((fx[0x71] != 0) && (D_8008A100[fx[0x71]](fx) == 0)) {
+        done = 1;
+    }
+    flags = *(s32 *)(fx + 0x58);
+    if ((flags & 0x08000000) && !done) {
+        life = *(s16 *)(fx + 0x1C);
+        if (life < *(s16 *)(fx + 0x6C)) {
+            a = life * *(s16 *)(fx + 0x6E);
+            if (a < fx[0x5C]) {
+                fx[0x5C] = a;
+            }
+        }
+    }
+    flags = *(s32 *)(fx + 0x58);
+    if ((flags & 0x10000000) && !done) {
+        life = *(s16 *)(fx + 0x1C);
+        if (life < *(s16 *)(fx + 0x6C)) {
+            a = life * *(s16 *)(fx + 0x6E);
+            if (a < fx[0x5C]) {
+                fx[0x2B] = a;
+            }
+        }
+    }
+    if (!done && ((speed = *(s32 *)(fx + 0x24)) != 0)) {
+        pos = *(s32 *)(fx + 0x20) + speed * D_800BE9E4;
+        *(s32 *)(fx + 0x20) = pos;
+        top = (D_80090F14[fx[0x18]][0] << 16) - 1;
+        if (top < pos) {
+            flags = *(s32 *)(fx + 0x58);
+            if (flags & 0x800) {
+                done = 1;
+            } else if (flags & 0x400) {
+                *(s32 *)(fx + 0x20) = top - pos % top;
+                *(s32 *)(fx + 0x24) = -speed;
+            } else {
+                do {
+                    pos -= top;
+                    *(s32 *)(fx + 0x20) = pos;
+                } while (top < pos);
+            }
+        } else if (pos < 0) {
+            flags = *(s32 *)(fx + 0x58);
+            if (flags & 0x1000) {
+                done = 1;
+            } else if (flags & 0x400) {
+                *(s32 *)(fx + 0x20) = -pos % top;
+                *(s32 *)(fx + 0x24) = -speed;
+            } else {
+                do {
+                    pos += top;
+                    *(s32 *)(fx + 0x20) = pos;
+                } while (pos < 0);
+            }
+        }
+    }
+    if (done) {
+        if ((fx[0x72] == 0) || (D_8008A1B0[fx[0x72]](fx) == 0)) {
+            func_1516972C((struct102 *)fx);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513CFE4.s")
+#endif
 
 #ifdef NON_MATCHING
 void * func_1513D2F0(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9, u8 argA, s32 argB) {
@@ -539,9 +628,17 @@ void * func_1513D2F0(void * arg0_p, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513D2F0.s")
 #endif
+#ifdef NON_MATCHING
+// record_spawn: func_1513D2F0 without extra words; returns the new record (the asm leaves func_1513D2F0's v0 in
+// v0 and func_15100B80 uses it). P153.
+struct210 *func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
+    return func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
+}
+#else
 void func_1513D4B8(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9) {
     func_1513D2F0(arg0, arg1, arg2, arg3, arg4, arg5, arg6, 0, 0, arg7, arg8, arg9);
 }
+#endif
 
 #ifdef NON_MATCHING
 // record_spawn_default: func_1513D2F0 with the default parameter block D_800A4AA0 and no extra words; returns the
@@ -570,9 +667,16 @@ s32 func_1513D594(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 ar
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+/* P160: the N64 code leaves func_1513D594's record in v0 and func_151DA08C (game_2062D0) uses it */
+struct210 *func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
+    return (struct210 *)func_1513D594(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
+}
+#else
 void func_1513D668(s32 arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s16 arg6, f32 arg7, f32 arg8, s32 arg9, s32 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
     func_1513D594(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, 0, 0, argB, argC, argD, argE);
 }
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1510E908(s32, s32, f32 *, f32 *);
@@ -1268,7 +1372,65 @@ s32 func_1513E6E8(struct_eu_1513E6E8 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* P143 */
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+// sprite_quad_build_scaled: builds the 4 corner vertices (+-half width +0x2C, +-half height +0x30, z 0) of a
+// sprite effect's quad for display list slot `slot`: rotation from the angles +0x40/+0x44/+0x48, matrix rows scaled
+// by +0x4C/+0x50/+0x54, translated to +0x34/+0x38/+0x3C. func_151D6310 hands out the slot's vertex buffer (pointer
+// table at +0x100); when it is new, both halves (0x40 bytes each) are first filled from the template at +0xC0.
+// Returns the written vertices, or NULL when no buffer is available. (Draw-table D_8008A1BC entry.)
+u8 *func_1513E83C(u8 *fx, s16 slot) {
+    f32 corner[4][3];
+    f32 mtx[4][4];
+    u8 *vtx;
+    u8 *start;
+    u8 fresh;
+    s16 i;
+
+    func_151D6310((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
+    start = vtx;
+    if (vtx == NULL) {
+        return NULL;
+    }
+    if (fresh) {
+        memcpy(*(u8 **)(fx + 0x100 + slot * 4), fx + 0xC0, 0x40);
+        memcpy(*(u8 **)(fx + 0x100 + slot * 4) + 0x40, fx + 0xC0, 0x40);
+    }
+    corner[0][0] = *(f32 *)(fx + 0x2C);
+    corner[0][1] = *(f32 *)(fx + 0x30);
+    corner[1][0] = -*(f32 *)(fx + 0x2C);
+    corner[1][1] = *(f32 *)(fx + 0x30);
+    corner[2][0] = -*(f32 *)(fx + 0x2C);
+    corner[2][1] = -*(f32 *)(fx + 0x30);
+    corner[3][0] = *(f32 *)(fx + 0x2C);
+    corner[3][1] = -*(f32 *)(fx + 0x30);
+    func_150A8050(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
+    mtx[3][0] = *(f32 *)(fx + 0x34);
+    mtx[3][1] = *(f32 *)(fx + 0x38);
+    mtx[3][2] = *(f32 *)(fx + 0x3C);
+    mtx[0][0] *= *(f32 *)(fx + 0x4C);
+    mtx[0][1] *= *(f32 *)(fx + 0x4C);
+    mtx[0][2] *= *(f32 *)(fx + 0x4C);
+    mtx[1][0] *= *(f32 *)(fx + 0x50);
+    mtx[1][1] *= *(f32 *)(fx + 0x50);
+    mtx[1][2] *= *(f32 *)(fx + 0x50);
+    mtx[2][0] *= *(f32 *)(fx + 0x54);
+    mtx[2][1] *= *(f32 *)(fx + 0x54);
+    mtx[2][2] *= *(f32 *)(fx + 0x54);
+    for (i = 0; i < 4; i++) {
+        func_150A7E40(mtx, corner[i][0], corner[i][1], 0.0f, &corner[i][0], &corner[i][1], &corner[i][2]);
+        *(s16 *)(vtx + 0) = (s32)corner[i][0];
+        *(s16 *)(vtx + 2) = (s32)corner[i][1];
+        *(s16 *)(vtx + 4) = (s32)corner[i][2];
+        *(s16 *)(vtx + 6) = 0;
+        vtx += 0x10;
+    }
+    return start;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513E83C.s")
+#endif
 // ???
 #ifdef NON_MATCHING
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
@@ -1392,7 +1554,59 @@ s32 func_1513EDE4(s32 arg0, s16 arg1) {
     return func_1513EAD8(arg0, 1, arg1);
 }
 
+#ifdef NON_MATCHING
+/* P143 */
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+// sprite_quad_build: builds the 4 corner vertices (+-half width +0x2C, +-half height +0x30, z 0) of a sprite
+// effect's quad for display list slot `slot`, rotated by the angles +0x40/+0x44/+0x48 and translated to
+// +0x34/+0x38/+0x3C (no scale; func_1513E83C is the scaled variant). New vertex buffers from func_151D6310 are first
+// filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL when there is no buffer.
+// (Draw-table D_8008A1BC entry.)
+u8 *func_1513EE14(u8 *fx, s16 slot) {
+    f32 mtx[4][4];
+    f32 in[4][2];
+    f32 out[4][3];
+    u8 *vtx;
+    u8 *start;
+    u8 fresh;
+    s32 i;
+
+    func_151D6310((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
+    start = vtx;
+    if (vtx == NULL) {
+        return NULL;
+    }
+    if (fresh) {
+        memcpy(*(u8 **)(fx + 0x100 + slot * 4), fx + 0xC0, 0x40);
+        memcpy(*(u8 **)(fx + 0x100 + slot * 4) + 0x40, fx + 0xC0, 0x40);
+    }
+    func_150A8050(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
+    mtx[3][0] = *(f32 *)(fx + 0x34);
+    mtx[3][1] = *(f32 *)(fx + 0x38);
+    mtx[3][2] = *(f32 *)(fx + 0x3C);
+    in[0][0] = *(f32 *)(fx + 0x2C);
+    in[0][1] = *(f32 *)(fx + 0x30);
+    in[1][0] = -*(f32 *)(fx + 0x2C);
+    in[1][1] = *(f32 *)(fx + 0x30);
+    in[2][0] = -*(f32 *)(fx + 0x2C);
+    in[2][1] = -*(f32 *)(fx + 0x30);
+    in[3][0] = *(f32 *)(fx + 0x2C);
+    in[3][1] = -*(f32 *)(fx + 0x30);
+    for (i = 0; i < 4; i++) {
+        func_150A7E40(mtx, in[i][0], in[i][1], 0.0f, &out[i][0], &out[i][1], &out[i][2]);
+    }
+    for (i = 0; i < 4; i++) {
+        *(s16 *)(vtx + 0) = (s32)out[i][0];
+        *(s16 *)(vtx + 2) = (s32)out[i][1];
+        *(s16 *)(vtx + 4) = (s32)out[i][2];
+        *(s16 *)(vtx + 6) = 0;
+        vtx += 0x10;
+    }
+    return start;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513EE14.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_800DD608;
@@ -1695,7 +1909,59 @@ void func_151400D0(Vtx *arg0, struct_eu_vtxcol *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P143 */
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+// sprite_quad_build_flat: same result as func_1513EE14 (corner quad +-0x2C / +-0x30 rotated by +0x40/+0x44/+0x48,
+// translated to +0x34/+0x38/+0x3C, no scale), written as a loop over corners kept in place. New vertex buffers from
+// func_151D6310 are first filled (both 0x40-byte halves) from the template at +0xC0. Returns the vertices, or NULL
+// when there is no buffer. (Draw-table D_8008A1BC entry.)
+u8 *func_15140190(u8 *fx, s16 slot) {
+    f32 corner[4][3];
+    f32 mtx[4][4];
+    u8 *vtx;
+    u8 *start;
+    u8 fresh;
+    u8 i;
+
+    func_151D6310((s32 *)(fx + 0x100), slot, 0x40, (s32 *)&vtx, &fresh);
+    start = vtx;
+    if (vtx == NULL) {
+        return NULL;
+    }
+    if (fresh) {
+        memcpy(*(u8 **)(fx + 0x100 + slot * 4), fx + 0xC0, 0x40);
+        memcpy(*(u8 **)(fx + 0x100 + slot * 4) + 0x40, fx + 0xC0, 0x40);
+    }
+    corner[0][0] = *(f32 *)(fx + 0x2C);
+    corner[0][1] = *(f32 *)(fx + 0x30);
+    corner[0][2] = 0.0f;
+    corner[1][0] = -*(f32 *)(fx + 0x2C);
+    corner[1][1] = *(f32 *)(fx + 0x30);
+    corner[1][2] = 0.0f;
+    corner[2][0] = -*(f32 *)(fx + 0x2C);
+    corner[2][1] = -*(f32 *)(fx + 0x30);
+    corner[2][2] = 0.0f;
+    corner[3][0] = *(f32 *)(fx + 0x2C);
+    corner[3][1] = -*(f32 *)(fx + 0x30);
+    corner[3][2] = 0.0f;
+    func_150A8050(mtx, *(f32 *)(fx + 0x40), *(f32 *)(fx + 0x44), *(f32 *)(fx + 0x48));
+    mtx[3][0] = *(f32 *)(fx + 0x34);
+    mtx[3][1] = *(f32 *)(fx + 0x38);
+    mtx[3][2] = *(f32 *)(fx + 0x3C);
+    for (i = 0; i < 4; i++) {
+        func_150A7E40(mtx, corner[i][0], corner[i][1], 0.0f, &corner[i][0], &corner[i][1], &corner[i][2]);
+        *(s16 *)(vtx + 0) = (s32)corner[i][0];
+        *(s16 *)(vtx + 2) = (s32)corner[i][1];
+        *(s16 *)(vtx + 4) = (s32)corner[i][2];
+        *(s16 *)(vtx + 6) = 0;
+        vtx += 0x10;
+    }
+    return start;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_15140190.s")
+#endif
 
 void func_151403A8(s32 arg0, u8 arg1) {
     func_15169260(&D_800A5168, 4, arg0, arg1);

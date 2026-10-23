@@ -1,0 +1,37 @@
+s/    \*(f32 \*)(hit + 0x4) = -1.0f;/    *(f32 *)(hit + 0x4) = 1.0f;/
+s/    hit\[0x59\] = 0;/    hit[0x59] = 4;/
+s/(hit + 0x30) = start\[1\];/(hit + 0x30) = start[0];/
+s/(hit + 0x3C) = dir\[1\];/(hit + 0x3C) = dir[2];/
+s/(hit + 0x60) = 0;/(hit + 0x60) = 1;/
+s/maxDist = 9999999.0f;/maxDist = 9.0f;/
+s/own = ((u8 \*)caster)\[0x124\] - 1;/own = ((u8 *)caster)[0x124];/
+s/link\[obj\[0x65\] - 1\] = i + 1;/link[obj[0x65] - 1] = i;/
+s/obj\[0x65\] != 0) {/obj[0x65] != 1) {/
+s/dist < maxDist) {/dist <= maxDist) {/
+s/        hit\[0x59\] = 1;/        hit[0x59] = 5;/
+s/(hit + 0xC) = hy;/(hit + 0xC) = hx;/
+s/(hit + 0x24) = \*(f32 \*)(hit + 0xC);/(hit + 0x24) = *(f32 *)(hit + 0x8);/
+s/material \* 0xA0;/material * 0x90;/
+s/if (material != -1) {/if (material != 0) {/
+s/    if (noObjects != 0) {/    if (noObjects == 0) {/
+s/if ((1 << i) & skipMask) {/if ((2 << i) \& skipMask) {/
+s/        if (own == i) {/        if (own == i + 1) {/
+s/obj\[0x5\] == 3 ||/obj[0x5] == 2 ||/
+s/obj == (u8 \*)caster ||/obj == (u8 *)caster + 1 ||/
+s/(obj + 0xF8) & 0x40)/(obj + 0xF8) \& 0x80)/
+s/D_80087030\[(s8)filter\](obj, (s32)caster, filterArg) == 0/D_80087030[(s8)filter](obj, (s32)caster, filterArg) != 0/
+s/if ((s8)filter != -1 \&\&/if (filter != -1 \&\&/
+s/(obj, (s32)caster, filterArg)/(obj, (s32)caster, 0)/
+s/            if (res > 0 \&\& dist < maxDist/            if (res >= 0 \&\& dist < maxDist/
+s/last != link\[i\]) {$/last != link[i + 1]) {/
+s/                last = i + 1;/                last = i;/
+s/hit\[0x58\] = modelC;/hit[0x58] = modelB;/
+s/(s16 \*)(hit + 0x56) = modelB;/(s16 *)(hit + 0x56) = modelA;/
+s/(hit + 0x18) = normal\[1\];/(hit + 0x18) = normal[0];/
+s/hit\[0x5A\] = modelA;/hit[0x5A] = modelC;/
+s/                hit\[0x59\] = 3;/                hit[0x59] = 2;/
+s/            if (res != -1) {/            if (res != 0) {/
+s/            hit\[0x59\] = 2;/            hit[0x59] = 3;/
+s/(start, dir, obj, point, exitPoint, \&dist, \&dist2)/(start, dir, obj, point, exitPoint, \&dist2, \&dist)/
+s/(hit + 0x28) = exitPoint\[2\];$/(hit + 0x28) = exitPoint[1];/
+s/== -1.0f || dist < \*(f32 \*)(hit + 0x4))/== -1.0f || dist <= *(f32 *)(hit + 0x4))/

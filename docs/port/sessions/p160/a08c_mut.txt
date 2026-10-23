@@ -1,0 +1,35 @@
+s/rec.u0 = 0;/rec.u0 = 1;/
+s/rec.u2 = (u32)func_150ADA20() \% 5 + 2;/rec.u2 = (u32)func_150ADA20() \% 6 + 2;/
+s/rec.u3 = (u32)func_150ADA20() \% 5 + 2;/rec.u3 = func_150ADA20() \% 5 + 3;/
+s/rec.u3 = (u32)/rec.u3 = (s32)/
+s/D_800AB850 + D_800AB854) \* rec.scale/D_800AB850 + D_800AB854) * arg2/
+s/D_800AB858 + D_800AB85C/D_800AB858 + D_800AB854/
+s/rec.kind = kind;/rec.kind = arg3;/
+s/rec.uC = 0.0f;/rec.uC = 1.0f;/
+s/handlers\[kind\]()/handlers[kind + 1]()/
+s/blk.u02 = 3;/blk.u02 = 2;/
+s/blk.u08 = 0;/blk.u08 = 1;/
+s/blk.u10\[2\] = 0;/blk.u10[2] = 1;/
+s/blk.u10\[3\] = 0xFF;/blk.u10[3] = 0xFE;/
+s/blk.u14\[0\] = scale;/blk.u14[0] = arg2;/
+s/blk.u40 = 0x0CDC0008;/blk.u40 = 0x0CDC000A;/
+s/blk.u34\[1\] = 1.0f;/blk.u34[1] = 0.0f;/
+s/blk.u28\[2\] = 0.0f;/blk.u28[2] = 1.0f;/
+s/life == -1/life == 0xFFFF/
+s/blk.life = 300;/blk.life = 301;/
+s/rec.u14 = 1.0f;/rec.u14 = arg2;/
+s/blk.alpha = 1;/blk.alpha = 0;/
+s/blk.fade = 255;/blk.fade = 1;/
+s/blk.u40 = 0x0CDC0009;/blk.u40 = 0x0CDC0008;/
+s/(life < 256) ? life : 255/(life < 255) ? life : 255/
+s/(life < 256) ? 255 \/ life : 1/(life < 256) ? 256 \/ life : 1/
+s/blk.u46 = 4;/blk.u46 = 5;/
+s/blk.u4C = 0xFF;/blk.u4C = 0;/
+s/blk.u44 = arg3;/blk.u44 = kind;/
+s/(rb \& 1) + (ra \& 1)/(rb \& 1) + (rc \& 1)/
+s/rc \& 0xFF, 500.0f/rc \& 0x7F, 500.0f/
+s/0, arg5, 0,/0, arg7, 0,/
+s/0x1C, 0xFF, 0);/0x1C, 0xFF, 1);/
+s/0xE, 0x13/0xE, 0x12/
+s/memcpy(p + 0x128/memcpy(p + 0x124/
+s/return (s32)p;/return 0;/

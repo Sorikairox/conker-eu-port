@@ -618,8 +618,145 @@ void func_151A2B90(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A2B90.s")
 #endif
+#ifdef NON_MATCHING
+/* P160 */
+s32 func_151308E4(void *, s32, s32, u8, s32);
+s32 func_150ADA20(void);
+
+typedef struct { f32 x, y, z; } V3_151A2C9C;
+typedef struct {
+    s32 u00;          /* 0x00: 0x200005 */
+    s32 u04;
+    s16 u08;          /* 0x08: 0x5203 */
+    s16 u0A;
+    s32 u0C;
+    s32 u10;
+    u8 color[3];      /* 0x14 */
+    u8 u17[4];        /* 0x17: 0xFF */
+    u8 u1B;
+    u8 u1C;           /* 0xFF */
+    u8 u1D;           /* 0x27 */
+    s16 period;       /* 0x1E */
+    s16 step;         /* 0x20: 255 / period */
+    s16 u22;          /* 1 */
+    f32 u24;          /* 1.0f */
+    f32 scale[2];     /* 0x28 */
+    V3_151A2C9C pos;  /* 0x30 */
+    V3_151A2C9C vel;  /* 0x3C */
+    V3_151A2C9C acc;  /* 0x48 */
+    f32 u54;
+    s32 flags;        /* 0x58 */
+    s32 pad5C;
+    u8 u60[6];        /* 7, 2, 0x11, 0xFF, 0xFF, 2 */
+} Blk_151A2C9C;
+
+typedef struct {
+    f32 u0;
+    s16 fadePeriod;   /* 0x4 */
+    s16 fadeStep;     /* 0x6: 255 / fadePeriod */
+    s16 u8;
+    s8 uA;
+} Extra_151A2C9C;
+
+// particle_puff_spawn: spawns one particle (func_151308E4 class 1 / 0x10) at pos with velocity vel and
+// acceleration acc; the two fade periods are clamped to at least 1 and give 255 / period steps, the flags get
+// random 0x40 / 0x80 bits; ex bytes 0..7 go to the particle at +0xA8 and bytes 4..11 at +0xB0 (overlapping copies; byte 11 is padding). Returns 0.
+s32 func_151A2C9C(f32 *pos, f32 *vel, f32 *acc, f32 arg3, f32 arg4, f32 scale, s32 arg6, s32 arg7, s32 period,
+                  s32 fadePeriod, s32 argA, s32 argB, s32 r, s32 g, s32 b, s32 argF, s32 arg10) {
+    Blk_151A2C9C blk;
+    Extra_151A2C9C ex;
+    s32 bit40;
+    s32 bit80;
+    u8 *p;
+
+    period = (s16)period;
+    fadePeriod = (s16)fadePeriod;
+    if (period <= 0) {
+        period = 1;
+    }
+    if (fadePeriod <= 0) {
+        fadePeriod = 1;
+    }
+    ex.u0 = arg3;
+    ex.fadePeriod = fadePeriod;
+    ex.fadeStep = 255 / fadePeriod;
+    ex.u8 = argA;
+    ex.uA = argB;
+    blk.u00 = 0x200005;
+    blk.u04 = 0;
+    blk.u08 = 0x5203;
+    blk.u0A = arg6;
+    blk.u0C = 0;
+    blk.u10 = 0;
+    blk.color[0] = r;
+    blk.color[1] = g;
+    blk.color[2] = b;
+    blk.u17[0] = 0xFF;
+    blk.u17[1] = 0xFF;
+    blk.u17[2] = 0xFF;
+    blk.u17[3] = 0xFF;
+    blk.u1B = arg7;
+    blk.u1C = 0xFF;
+    blk.u1D = 0x27;
+    blk.period = period;
+    blk.step = 255 / period;
+    blk.u22 = 1;
+    blk.u24 = 1.0f;
+    blk.scale[0] = scale;
+    blk.scale[1] = scale;
+    blk.pos = *(V3_151A2C9C *)pos;
+    blk.vel = *(V3_151A2C9C *)vel;
+    blk.acc = *(V3_151A2C9C *)acc;
+    blk.u54 = arg4;
+    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    blk.flags = bit80 | 7 | bit40 | 0x80D200;
+    blk.u60[0] = 7;
+    blk.u60[1] = 2;
+    blk.u60[2] = 0x11;
+    blk.u60[3] = 0xFF;
+    blk.u60[4] = 0xFF;
+    blk.u60[5] = 2;
+    p = (u8 *)func_151308E4(&blk, 1, 0x10, argF, arg10);
+    if (p != NULL) {
+        memcpy(p + 0xA8, &ex.u0, 8);
+        memcpy(p + 0xB0, &ex.fadePeriod, 8);
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A2C9C.s")
+#endif
+#ifdef NON_MATCHING
+/* P146 */
+extern void (*D_8008FC80[])(u8 *, s32, s32, s32);
+s32 func_15131C7C(u8 *, s32);
+// particle_timed_event_update: particle update handler 17 (func_1513095C). While the age (+0x1A) is below +0xB0
+// the alpha +0x2C ramps as age * +0xB2. While the age (+0x1A, counting down) is <= the trigger time +0xB4 (-1 = none) the event
+// D_8008FC80[+0xB6] (-1 = none) is called once with (particle, trigger time, age, -1) and the trigger cleared;
+// events are suppressed while D_800BE616 is set. Then the common update func_15131C7C(particle, arg) runs and its
+// result is returned.
+s32 func_151A2F10(u8 *part, s32 arg) {
+    s16 age = *(s16 *)(part + 0x1A);
+    s16 when;
+    s8 event;
+
+    if (age < *(s16 *)(part + 0xB0)) {
+        part[0x2C] = age * *(s16 *)(part + 0xB2);
+    }
+    if (D_800BE616 == 0) {
+        when = *(s16 *)(part + 0xB4);
+        event = *(s8 *)(part + 0xB6);
+        if (when != -1 && event != -1 && when >= age) {
+            D_8008FC80[event](part, when, age, -1);
+            *(s16 *)(part + 0xB4) = -1;
+        }
+    }
+    return func_15131C7C(part, arg);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A2F10.s")
+#endif
 
 s32 func_151A31D4(s32, s32, s16, s16, f32, f32, f32, s32, f32, f32, f32, f32, s16, s16, s16, s16, s16, s16, s8, u8, s32, u8);
 
@@ -634,7 +771,13 @@ void func_151A3084(s32 arg0, s32 arg1, f32 arg2, f32 arg3, s32 arg4, f32 arg5, f
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3084.s")
 #endif
+#ifdef NON_MATCHING
+/* P160: same signature as func_151A3180 (func_151A31D4 calls either through one pointer; arg3 is the speed it ignores) */
+// accel_scaled_copy: out = base * (1 - t) (func_151A31D4's acceleration without a direction)
+void func_151A3134(f32 *arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, f32 *arg5) {
+#else
 void func_151A3134(f32 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, f32 *arg5) {
+#endif
     f32 temp_f0 = 1.0f - arg4;
 
     arg5[0] = arg0[0] * temp_f0;
@@ -647,10 +790,68 @@ void func_151A3180(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, s32 arg5) {
     func_15143794(arg1, arg2, (1.0f - arg4) * arg3, arg5);
 }
 
+#ifdef NON_MATCHING
+/* P160 */
+extern u8 D_8008FC88[]; /* 4 colours, 3 bytes each */
+typedef struct { u8 b[12]; } Blk12_151A31D4;
+s32 func_151A2C9C(f32 *, f32 *, f32 *, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_151A3134(f32 *arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, f32 *arg5);
+void func_151A3180(s32 arg0, s16 arg1, s16 arg2, f32 arg3, f32 arg4, s32 arg5);
+
+// particle_burst_spawn: spawns `count` particles (func_151A2C9C) at pos. For particle i (t = i / count) the
+// velocity is a random direction (func_15143794) of random speed up to speedMax, the acceleration comes from
+// `accel` (scaled by 1 - t) through func_151A3180 (useDir) or func_151A3134, the colour is one of the 4
+// D_8008FC88 colours, about 8% of the particles get 0x19 as extra value (else -1), and the lives / periods are
+// random within the given ranges. Returns 0 (the N64 code leaves func_151A2C9C's 0 in v0).
+s32 func_151A31D4(s32 pos, s32 accel, s16 dirA, s16 dirB, f32 accelSpeed, f32 scaleBase, f32 scaleSlope, s32 count,
+                  f32 speedMax, f32 arg9, f32 lifeBase, f32 lifeRange, s16 periodBase, s16 periodRange,
+                  s16 fadeBase, s16 fadeRange, s16 period2, s16 fade2, s8 arg12, u8 arg13, s32 arg14, u8 useDir) {
+    void (*accelFn)(f32 *, s16, s16, f32, f32, f32 *);
+    u8 colors[12];
+    f32 acc[3];
+    f32 vel[3];
+    s16 minPeriod;
+    s16 period;
+    f32 t;
+    f32 step;
+    f32 lifeRand;
+    s32 a;
+    s32 b;
+    s32 c;
+    s32 extra;
+
+    if (useDir != 0) {
+        accelFn = (void (*)(f32 *, s16, s16, f32, f32, f32 *))func_151A3180;
+    } else {
+        accelFn = func_151A3134;
+    }
+    minPeriod = (period2 < fade2) ? period2 : fade2;
+    t = 0.0f;
+    step = 1.0f / count;
+    for (; count != 0; count--) {
+        period = (u32)func_150ADA20() % (periodRange + 1) + periodBase;
+        a = func_150ADA20();
+        b = func_150ADA20();
+        func_15143794((u8)a, (u8)b, func_150ADA68() * speedMax, (s32)vel);
+        accelFn((f32 *)accel, dirA, dirB, accelSpeed, t, acc);
+        *(Blk12_151A31D4 *)colors = *(Blk12_151A31D4 *)D_8008FC88;
+        c = func_150ADA20() & 3;
+        lifeRand = func_150ADA68();
+        b = func_150ADA20();
+        extra = (func_150ADA68() < 0.0802f) ? 0x19 : -1;
+        func_151A2C9C((f32 *)pos, vel, acc, arg9, lifeRand * lifeRange + lifeBase, scaleSlope * t + scaleBase,
+                      period + minPeriod, (u32)b % (fadeRange + 1) + fadeBase, period2, fade2, extra, arg12,
+                      colors[c * 3 + 0], colors[c * 3 + 1], colors[c * 3 + 2], arg13, arg14);
+        t += step;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A31D4.s")
+#endif
 
 #ifdef NON_MATCHING
-s32 func_151530A8(s32 *, u8, u8, u8 *);
+s32 func_151530A8(s32 *, u8, s32);
 
 void func_151A34BC(u8 *arg0) {
     struct {
@@ -771,13 +972,13 @@ void func_151A34BC(u8 *arg0) {
     sp.u44 = 10.0f;
     sp.u3C = 0.0f;
     sp.u88 = 1.0f;
-    func_151530A8(&sp.u1C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)), arg0);
+    func_151530A8(&sp.u1C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A34BC.s")
 #endif
 #ifdef NON_MATCHING
-s32 func_151530A8(s32 *, u8, u8, u8 *);
+s32 func_151530A8(s32 *, u8, s32);
 
 void func_151A3700(u8 *arg0) {
     struct {
@@ -898,7 +1099,7 @@ void func_151A3700(u8 *arg0) {
     sp.u38 = -1.031f;
     sp.u3C = 0.0f;
     sp.u88 = 1.0f;
-    func_151530A8(&sp.u1C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)), arg0);
+    func_151530A8(&sp.u1C, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A3700.s")
