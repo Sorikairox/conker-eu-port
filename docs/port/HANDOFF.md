@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P123, 2026-10-23, port-web). Details: `docs/port/sessions/P123.md`
+
+- **Menu black = screen fade stuck at 0xFF.** The C menu handler (P117) now starts level 0x1D scene 1. Its scene start
+  func_1501DB18 sets black (t = 0 event `5/0x01 w6 1`). The fade-in is the same event in **handler C func_15029EA8**
+  (game_eu_51190.c, asm stub), so func_1517F51C(0) stays 1 and func_15019464 / func_150195A0 skip every world draw
+  (114-command DLs, 0 triangles). The renderer is fine.
+- TEST ONLY `?p123fadeev=1` (5/1 `b4 == 0` branch of func_15029EA8 from the asm): the menu room is drawn (3119
+  triangles, Chrome shot). Other new flags: `?p123tri=N`, `?p123fade=1`, `?p123noscene=1`.
+- Merged port 0c14e92 (P120, carousel func_151E73C8 C, func_151EE704 OR dropped) as b00bd2c on coordinator request:
+  verify_all OK, NM link, protocheck 0 (1033), census 0 FAIL (clean). The carousel alone does not fix the black menu.
+  `?p121spr` is now obsolete: don't pass it.
+- Camera retarget (3053): no scene event retargets +0x3D4 (type 3 only switches the scene camera track; 1D/1's final
+  3/0 is a no-op). +0x3D4 comes only from the camera init func_1512868C / func_150054C4 (slot D_800CC2D0[+0x23D]
+  +0x31C). The removed object is slot 0 itself. P113 guard stays.
+
+## Next steps (from P123)
+
+1. Conversion slot: **func_15029EA8 to C** (handler C; type 5 id 1 = screen fade, types 6 / 0xA = sounds). Then drop the
+   p123fadeev wrap. Also func_1510AEB0 (P121).
+2. port-web: log func_1512868C / func_150054C4 / func_15097188 after 2133 and 3053 (no guard) to find the camera
+   re-init that the port misses.
+
 ## State (session P121, 2026-10-23, port-web). Details: `docs/port/sessions/P121.md`
 
 - Merged port 4987bbc (P117) as 85aea50. NM build broke on a `func_1501D348` redeclaration in game_eu_20B730.c
