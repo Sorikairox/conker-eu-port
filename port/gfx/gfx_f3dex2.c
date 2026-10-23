@@ -506,6 +506,12 @@ static void apply_state(void) {
     unsigned ac = oth_l & 3;
     glUniform1i(u_acmp, ac == 1 ? 1 : ac == 3 ? 3 : 0);
     glUniform1i(u_cvg, (oth_l & 0x2000) ? ((oth_l & 0x4000) ? 2 : 1) : 0); /* ALPHA_CVG_SEL: coverage from alpha */
+    /* P144: CVG_X_ALPHA + CLR_ON_CVG without FORCE_BL (e.g. the logo-end iris, func_15180AF0 / func_1518010C: black
+     * combiner, I8 lens alpha): coverage = pixel coverage * alpha and the colour is written only on coverage
+     * overflow, so texels with low alpha leave the framebuffer alone (approximated as "discard below 0.5"). Before,
+     * the whole lens square was drawn opaque black. ?p144nocvgx=1 restores the old behaviour. */
+    { static int nx = -1; if (nx < 0) nx = port_flag("p144nocvgx");
+      if (!nx && !(oth_l & 0x2000) && (oth_l & 0x1080) == 0x1080 && !(oth_l & 0x4000)) glUniform1i(u_cvg, 1); }
     int mode = rect_mode == 1 || cyc == 3 ? 1 : cyc == 2 ? 3 : 0;
     glUniform1i(u_mode, mode);
     int texon = 0;

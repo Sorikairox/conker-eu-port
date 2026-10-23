@@ -90,6 +90,7 @@ func_1510EED0	conker/src_eu/game_eu_13C400.c	width	med	2	O:0 asm{b1L,h3LS,w33LS}
 func_1512BCA0	conker/src_eu/game_eu_158110.c	width	med	2	O:0 asm{b1S,w10LS} IR{w3LS}
 func_15173954	conker/src_eu/game_eu_1A1060.c	width	med	2	O:0 asm{h8LS} IR{b1S,h8LS,w4LS}
 func_15179008	conker/src_eu/game_eu_1A6C30.c	width	med	2	O:0 asm{b4S,w1S} IR{w1S}
+func_151BEE00	conker/src_eu/game_eu_1EC610.c	width	med	2	O:0 asm{w2L} IR{b1L,w3L}
 func_1507DB6C	conker/src_eu/game_A9D90.c	width	med	1	O:0 asm{b3LS,w12S} IR{w1S}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:0 asm{w20LS} IR{h1L,w6LS}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:4 asm{w19LS} IR{h1L,w4S}
@@ -161,6 +162,7 @@ func_150A9E64	conker/src_eu/nm_asm/D5E90_mtx.c	stride	low	2	IR idx %.133 step 12
 func_150A9E64	conker/src_eu/nm_asm/D5E90_mtx.c	stride	low	2	IR idx %.133 step 8, asm self-steps {1,64}
 func_150ADFD0	conker/src_eu/game_eu_DB7E0.c	pindex	low	2	arg0[i] on i16 (size 2) vs asm index scale {x1,x4} on that base
 func_1516865C	conker/src_eu/game_1944C0.c	stride	low	2	IR idx %.0 step 16, asm self-steps {1,64}
+func_15169260	conker/src_eu/game_1944C0.c	stride	low	2	IR idx %.0 step 416, asm self-steps {4}
 func_151EC300	conker/src_eu/game_eu_216470.c	stride	low	2	IR idx %.093 step 4, asm self-steps {8}
 func_15017B20	conker/src_eu/game_44C40.c	width	low	2	G:800D34C0 asm{w} IR{d} (8 vs 4: copy?)
 func_15017B20	conker/src_eu/game_44C40.c	width	low	2	G:800D34D8 asm{w} IR{d} (8 vs 4: copy?)
@@ -190,6 +192,7 @@ func_10010BE8	conker/src_eu/init_EB00.c	sign	low	1	G:80042984 h: asm u, IR s
 func_1505841C	conker/src_eu/game_83300.c	sign	low	1	A0:582 b: asm u, IR s
 func_15157580	conker/src_eu/game_eu_183F10.c	sign	low	1	A0:0 b: asm u, IR s
 func_16000B14	conker/src_eu/debugger/debugger.c	stride	low	0	IR idx %.050 step 64, asm self-steps {16}
+func_150B3668	conker/src_eu/game_eu_E0430.c	spaddr	low	0	asm passes sp+0x38 (call near 150B3B5C) with store-only slots {0x3C,0x40,0x44,0x48,0x4C,0x50,0x54,0x58,0x5C,0x60,0x64,0x68,0x6C,0x70,0x74}; IR passes &scalar to memcpy, 7 store-only locals
 func_10004074	conker/src_eu/init_3C40.c	width	low	2	O:8 asm{b1S,w8LS} IR{w7LS}
 func_15000AD0	conker/src_eu/game_2DF70.c	width	low	2	O:24 asm{h1S} IR{w3L}
 func_15017B20	conker/src_eu/game_44C40.c	width	low	2	O:0 asm{w} IR{d} (8 vs 4: copy?)

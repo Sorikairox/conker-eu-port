@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P144, 2026-10-23, port-web). Details: `docs/port/sessions/P144.md`
+
+- Merged port-b a4cc21e (P136 / P139 / P142): only HANDOFF conflicted (merge_union); game_eu_11A2B0.c func_151432BC
+  prototype -> s32. verify OK, NM links, protocheck 0 (1130), float-int BUG 0, census 722 ok / 0 FAIL (clean),
+  m2c_sanity 236 rows / 41 high (+3 low/med port-b rows).
+- **New-game title cards now draw** (P142 func_15169FB8 / func_150966AC): "Nintendo presents", "A Rareware game",
+  "Starring Conker & Berri", then the fade-in to the throne cutscene.
+- **Logo-end iris** (func_15180AF0 -> func_1518010C scope lens) was a black screen: renderer ignored CVG_X_ALPHA +
+  CLR_ON_CVG without FORCE_BL; now low-alpha texels are discarded (`?p144nocvgx=1` = old). Scope lens verified.
+- Browser runs ~60 VI frames/s; the EU ROM is PAL (50): game and cutscenes ~20 % fast. Not changed.
+- New knob `?p144hits=1` / PORT_P144HITS: call counts of 17 P136-P142 functions (cross-TU --wrap).
+- Regressions clean: node noev (death 953, 0x2C 1321, 0 1401), 2 Chrome walks, heap 0 / null 0 / traps 0.
+
+## Next steps (from P144)
+
+1. Runtime: pace VI retraces at 50 Hz for osTvType PAL (pc_sched / main loop) and check audio pacing with it.
+2. Conversion: func_1513CFE4 (+ its asm handlers, producers first), func_1514CFF0 (null+0x14 write at new-game
+   scene start); frame-DL stubs func_1513095C / func_1513100C, func_151408A4, func_1517B270, func_1515FDA0;
+   func_15153BA4.
+3. Check the logo-end title image (5/0x5C b5 0, drawn at y 226..278) and the y 216 row under the iris fills.
+
 ## State (session P140, 2026-10-23, port-web, diagnostic). Details: `docs/port/sessions/P140.md`
 
 - Node noev "stall" (P137) is a log artefact: without PORT_P61CHECK no frame-bearing lines after the padscript ends;
