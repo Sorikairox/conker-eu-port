@@ -1698,10 +1698,10 @@ s32 func_150337A8(u8 *arg0, u8 *arg1) {
         if (var_v1 != 0) {
             do {
                 var_v1 -= 1;
-                if (*(s32 *)((var_a0 * 8) + var_v0) != -0xE) {
+                if (*(s8 *)((var_a0 * 8) + var_v0) != -0xE /* P117: lb (G_SETTILESIZE opcode 0xF2), was a word */) {
                     do {
                         var_a0 += 1;
-                    } while (*(s32 *)((var_a0 * 8) + var_v0) != -0xE);
+                    } while (*(s8 *)((var_a0 * 8) + var_v0) != -0xE);
                 }
                 if (var_v1 != 0) {
                     var_a0 += 1;
