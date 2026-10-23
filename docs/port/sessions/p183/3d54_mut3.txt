@@ -1,0 +1,2 @@
+s/    if (alpha < 0xFF) {/    if (alpha < 0xFE) {/
+s/    if (D_800BEFC4 < (((u8 \*) gdl - (u8 \*) D_800BEDE8\[D_800BE9C0\]) >> 3)) {/    if (D_800BEFC4 <= (((u8 *) gdl - (u8 *) D_800BEDE8[D_800BE9C0]) >> 3)) {/

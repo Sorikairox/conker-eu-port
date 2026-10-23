@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P183 (port-b) (session P183, 2026-10-24). Details: `docs/port/sessions/P183.md`
+
+Branch `port-b` (from P181 4c2d5a5).
+- **Debug hooks** func_1511FC2C / func_1511FC44 (coordinator decision): NM-only real signatures
+  `Gfx *(Gfx *, f32, f32, f32, f32, s32)` / `Gfx *(Gfx *, f32, f32, f32, s32)` in `include/functions.h` and, because
+  that file includes functions.h, in their definitions in `src_eu/game/done/game_14D0D0.c` (outside the brief's file
+  list; NM-only, default build unchanged). The asm passes three f32 in a1..a3 by mfc1 (first argument is a pointer).
+- Hand C (NM), difftest EQUIV + setups + mutants: func_15113D54 `world_mesh_draw` (13DC30), func_1514B8D4
+  `lava_splash_effect` (1772D0; game_A28B0 prototype `void` -> `s32` under NM), func_151279A0 `player_aim_look`
+  (14FF90), func_151ACBD4 `light_column_create` (1D9C00), func_15078A60 `script_test_object_value` (A28B0).
+- Skipped func_15168118 (game_1944C0): its C caller func_15178CC0 (game_eu_1A5D10.c, not port-b's) drops a1 / a2.
+- Checks: verify_all rc 0 (default build byte-identical), NM build links, protocheck 0 (1295 bodies), selftest 65/65.
+  voidret_scan on the caller files: no SUSPECT. progress_nm total 5289/5915 (89.4%), game 4755/5334, C bytes 73.4%,
+  626 asm-only. No difftest / mut.sh processes left.
+
+## Next steps (from P183)
+
+1. Browser (port-web): P183.md UNVERIFIED list (world meshes, lava splash, aim look, light columns, script tests).
+2. Owner of game_eu_1A5D10.c: func_15178CC0 must pass (arg0, arg1, arg2) to func_15168118 under NM; then port-b can
+   convert func_15168118 (337, game_1944C0).
+3. port-b breadth (`python3 docs/port/sessions/p168/asmlist.py` after `progress_nm.py --list > port_work/p162/asmonly.txt`,
+   drop game_eu_1C3530 rows): func_15183800 (392, 1B1010), func_15177410 (417, 1A5190, 6 calls), func_151C62D0 (425,
+   1F4090), func_15082278 (466, AF2A0), func_150B2C20 (477, E0430).
+4. func_150A55A0 (game_eu_D2DB0, not port-b's) is still asm and is called by world_mesh_draw and game_eu_138E00.
+
 ## P181 (port-b) (session P181, 2026-10-24). Details: `docs/port/sessions/P181.md`
 
 Branch `port-b` (from P179 9ddc1a9).
