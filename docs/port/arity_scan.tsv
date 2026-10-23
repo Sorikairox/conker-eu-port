@@ -30,93 +30,98 @@ rank	tier	kind	caller	callee_or_table	TU	passed	declC	callee_asm_in(I:max_of_tab
 29	1	I	func_1513477C	D_80089AD4[func_1513470C,func_151ABD88,func_150C6938,func_150C7268,+6]	game_161520	0	-	1	1	exact	0	1	a0:E
 30	1	I	func_1513BA10	D_80089C44[func_1513B9A8,func_1513B9A8,func_1513B9A8,func_1513B9A8]	game_168A90	0	-	1	1	exact	0	1	a0:E
 31	1	I	func_1513BA44	D_80089C54[func_1513B9DC,func_1513B9DC,func_1513B9DC,func_1513B9DC]	game_168A90	0	-	1	1	exact	0	1	a0:E
-32	1	I	func_15147F50	D_8008A690[func_15147E64,func_15149674,func_150DAA34,func_151968A0,+16]	game_eu_1754C0	0	-	1	1	exact	0	1	a0:E
-33	1	I	func_15147FA0	D_8008A6E0[func_15147E98,func_15149674,func_150DAA60,func_15196924,+16]	game_eu_1754C0	0	-	1	1	exact	0	1	a0:E
-34	1	I	func_15158794	D_8008B1A0[func_15158BF4,func_1518AB64,func_1515906C]	game_eu_185E30	0	-	1	1	exact	0	1	a0:E
-35	1	I	func_151603FC	D_8008B0F0[func_15160600,func_1516065C,func_15160684,func_151606A8,+12]	game_18D770	0	-	1	1	exact	0	1	a0:E
-36	1	I	func_1516055C	D_8008B470[func_15160648,func_150CE710]	game_eu_18DB20	0	-	1	1	exact	0	1	a0:E
-37	1	I	func_15163504	D_8008B70C[func_151BD86C]	game_18D770	0	-	1	1	exact	0	1	a0:E
-38	1	I	func_15167B44	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
-39	1	I	func_15168BAC	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
-40	1	I	func_1518D218	D_8008D970[func_151927C0]	game_eu_1BA800	0	-	1	1	exact	0	1	a0:E
-41	1	I	func_151B3734	D_8008FE98[func_151B402C,func_151B42A0,func_151B458C,func_151B4854,+2]	game_eu_1E0E70	1	-	2	2	exact	2	1	a0:WE a1:W
-42	1	I	func_151C4B0C	D_800E0940	game_eu_1EFE10	2	-	-	3	exact	0	1	a0:W a1:W a2:W
-43	1	D3	func_15063DE8	func_15063D6C	game_eu_90F50	1	1	2	3	exact	0	1	a0:E a1:W a2:E
-44	1	D3	func_150E4A94	func_150E4740	game_eu_111F50	0	0	1	1	exact	0	1	a0:E
-45	1	D3	func_15179008	func_15179A38	game_eu_1A6C30	0	0	1	1	exact	0	1	a0:E
-46	0	I	func_16000B14	?	debugger__debugger	0	-	-	9	exact	0	9	a0:W a1:W a2:W a3:W stk:5
-47	0	I	func_16001BB4	?	debugger_257350	3	-	-	9	exact	0	6	a0:W a1:W a2:W a3:W stk:5
-48	0	I	func_151A929C	func_151A951C	game_eu_1D5710	4	-	-	8	exact	1	4	a0:W a1:W a2:W a3:W stk:4
-49	0	I	func_151E564C	D_800E0EB8	game_eu_20B730	0	-	-	4	exact	0	4	a1:W a2:W a3:W
-50	0	I	func_1001BD34	?	init_1AAE0	0	-	-	3	exact	0	3	a0:E a1:E a2:E
-51	0	I	func_151F3C4C	D_8002BA44	libultra__audio__game_21FC90	1	-	-	4	exact	0	3	a0:W a1:E a2:E a3:E
-52	0	I	func_1001BE1C	?	init_1AAE0	1	-	-	3	exact	0	2	a0:W a1:E a2:E
-53	0	I	func_1001BE1C	?	init_1AAE0	1	-	-	3	exact	1	2	a0:W a1:E a2:E
-54	0	I	func_1515C050	D_8008B41C	game_eu_189860	1	-	-	3	exact	1	2	a0:W a1:W a2:W
-55	0	I	__n_seqpStopOsc	?	init_1AAE0	1	-	-	2	exact	0	1	a0:W a1:E
-56	0	I	func_10021E4C	?	init_214F0	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
-57	0	I	func_15117D40	func_15104A80	game_eu_142E40	3	-	-	4	exact	0	1	a0:E a1:W a2:W a3:W
-58	0	I	func_15132740	D_80089C50	game_eu_15FF50	1	-	-	2	exact	1	1	a0:W a1:W
-59	0	I	func_151C1C04	D_800E0D64	game_eu_1EDA00	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
-60	0	D2	func_15178CC0	func_15168118	game_eu_1A5D10	1	-	3	3	exact	0	2	a0:E a1:E a2:W
-61	0	D2	func_150A3990	func_150A39E4	game_eu_CE6C0	0	-	4	1	exact	0	1	a0:E
-62	3	I	func_1509BE40	D_80088838[func_1509CBD8,func_1509A024,func_1509F254,func_150A09B8,+10]	game_C8950	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
-63	3	I	func_1509BFB0	D_80088874[func_1509C850,func_15097E9C,func_1509EDE0,func_150A0890,+10]	game_C8950	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
-64	3	I	func_1513C060	D_8008A010[func_1513416C,func_150B9AFC,func_150BA83C,func_150AEDD8,+9]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
-65	3	I	func_1513C060	D_8008A048[func_151AB730,func_150C63FC,func_150C6D2C]	game_169510	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
-66	3	I	func_1506AD30	D_8008679C[func_1506D950,func_1506BCA0,func_1506BCC8,func_1506BE2C,+154]	game_981E0	4	-	2	9	exact	0	-2	a0:W a1:W a2:W a3:W stk:5
-67	2	I	func_15005A60	D_80082B40[func_15005AB0,func_15005AF0,func_15005B00,func_15005B10,+22]	game__done__game_32F10	1	-	1	2	exact	0	0	a0:E a1:E
-68	2	I	func_15008930	D_80082F64[func_150089D0]	game_35D20	0	-	0	1	exact	0	0	a0:E
-69	2	I	func_1503E238	D_800847CC[func_1503F2B4,func_1503F3F8,func_1503F45C]	game_eu_6B970	1	-	1	3	exact	1	0	a0:W a1:W a2:W
-70	2	I	func_1504A730	D_800863A4[func_150D1920]	game_eu_78230	1	-	1	2	exact	0	0	a0:W a1:W
-71	2	I	func_1504A730	D_800863AC[func_150D197C]	game_eu_78230	1	-	1	2	exact	2	0	a0:W a1:W
-72	2	I	func_150E6E30	D_80088DC0[func_150E73B4,func_150E7458,func_150E7498]	game_eu_114640	1	-	1	3	exact	1	0	a0:W a1:W a2:W
-73	2	I	func_151307A0	D_80089A10[func_150C7C70,func_150AE5B0,func_150C4BF0,func_150EB740,+31]	game_eu_15DFB0	1	-	1	2	exact	0	0	a0:E a1:E
-74	2	I	func_1514F18C	D_8008AEF8[func_1514EDA0,func_1514EDC0,func_1514EDEC]	game_eu_17A800	1	-	1	4	exact	0	0	a0:W a3:W
-75	2	I	func_15186344	D_8008D860[func_15185AC4,func_15185BEC,func_15185D20,func_15185E44,+6]	game_eu_1B1ED0	1	-	1	7	exact	0	0	a0:W a1:E a2:E a3:E stk:3
-76	2	I	func_151D9B8C	D_800900A4[func_151D97A8,func_151D9878,func_151D98D0,func_151D9820,+2]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
-77	2	I	func_151DB5D0	D_800900D8[func_151DB004,func_151DB068,func_151DB0CC,func_151DB15C,+9]	game_2062D0	1	-	1	4	exact	0	0	a0:W a1:E a2:E a3:E
-78	2	I	func_151E8620	D_80090370[func_151EB81C,func_151ECB98,func_151EC0E0,func_151EC300]	game_eu_216470	1	-	1	3	exact	0	0	a0:E a1:W a2:W
-79	1	D1	func_15074C80	func_15194858	game_981E0	2	3	3	2	exact	0	0	a0:W a1:W
-80	1	I	func_150D0544	D_80088C40[func_150D06B0,func_150D083C,func_150D0A44,func_151D75B0]	game_eu_FCE60	1	-	1	3	exact	0	0	a0:W a1:E a2:W
-81	1	I	func_150E67B0	D_80088DB0[func_150E6D50]	game_eu_113D60	1	-	1	4	exact	0	0	a0:W a2:W a3:W
-82	1	I	func_151073F8	D_80088FB8[func_15107B84]	game_eu_133A70	1	-	1	2	exact	0	0	a0:W a1:W
-83	1	I	func_1513095C	D_80089B00[func_151A4DEC,func_151A4EB0,func_150BB740,func_15159B04,+36]	game_eu_15E000	2	-	2	4	exact	0	0	a0:E a1:W a2:W a3:W
-84	1	I	func_1513095C	D_80089BA0[func_150C1698]	game_eu_15E000	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
-85	1	I	func_15132740	D_80089D28[func_1513384C]	game_eu_15FF50	1	-	1	2	exact	0	0	a0:W a1:W
-86	1	I	func_15132740	D_80089CB4[func_150B9B1C,func_1518B290,func_1518B71C,func_1518B748,+3]	game_eu_15FF50	1	-	1	2	exact	2	0	a0:W a1:W
-87	1	I	func_15132740	D_80089D1C[func_151A7EB8,func_151B657C]	game_eu_15FF50	1	-	1	2	exact	3	0	a0:W a1:W
-88	1	I	func_1513532C	D_80089F10[func_151352EC,func_151AB100,func_151352EC,func_151352EC,+2]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
-89	1	I	func_151353A8	D_80089F28[func_1513530C]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
-90	1	I	func_151411E4	D_8008A33C[func_151411A4,func_15101858,func_151411A4,func_151411A4,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
-91	1	I	func_15141250	D_8008A384[func_151411C4,func_15101880,func_151411C4,func_151411C4,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
-92	1	I	func_15147888	D_800900A4[func_151D97A8,func_151D9878,func_151D98D0,func_151D9820,+2]	game_eu_174610	0	-	0	1	exact	0	0	a0:W
-93	1	I	func_15147CB0	D_8008A5A0[func_15148428,func_15196CB8,func_1519D7B0,func_150DCAD8,+10]	game_eu_1754C0	1	-	1	2	exact	0	0	a0:E a1:W
-94	1	I	func_15147CB0	D_8008A5DC[func_150D952C,func_151970BC,func_1519D9C4,func_150DD420,+13]	game_eu_1754C0	1	-	1	2	exact	1	0	a0:WE a1:W
-95	1	I	func_15147CB0	D_8008A624[func_1519AF14,func_150D44E4,func_151B7F48,func_151CF6D0,+4]	game_eu_1754C0	1	-	1	2	exact	2	0	a0:WE a1:W
-96	1	I	func_15148428	D_8008A780[func_15148E34,func_15149064,func_15149114,func_15149350,+1]	game_eu_175B20	1	-	1	3	exact	0	0	a0:E a2:W
-97	1	I	func_15148428	D_8008A798[func_1518CAB0,func_150AED9C,func_150AF6A0,func_150C251C,+1]	game_eu_175B20	1	-	1	3	exact	1	0	a0:WE a2:W
-98	1	I	func_15155200	D_8008B068[func_15134CEC,func_1515BF04,func_15135BF8,func_151CBAC0,+10]	game_eu_182A10	1	-	1	2	exact	0	0	a0:E a1:W
-99	1	I	func_15157840	D_8008B130[func_15158018,func_151BF268,func_151B9204,func_150FB81C]	game_eu_185050	1	-	1	3	exact	0	0	a0:W a1:W a2:W
-100	1	I	func_15157840	D_8008B140[func_15157DD0,func_15157E88]	game_eu_185050	1	-	1	3	exact	1	0	a0:W a1:W a2:W
-101	1	I	func_15158838	D_8008B1AC[func_15158AFC,func_1518AE84,func_15158E90]	game_eu_185E30	2	-	2	3	exact	0	0	a0:W a1:W a2:E
-102	1	I	func_1515C534	D_8008B424[func_1515CF9C,func_1515D030]	game_1897A0	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
-103	1	I	func_15160B74	D_8008B598[func_15163CD0,func_150B6BBC,func_150D8DBC,func_151CA0E0]	game_18D770	1	-	1	4	exact	0	0	a0:W a1:W a3:W
-104	1	I	func_15161804	D_8008B208[func_151617C4,func_151617C4,func_151617C4,func_151617C4,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
-105	1	I	func_15161860	D_8008B2B0[func_151617E4,func_151617E4,func_151617E4,func_151617E4,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
-106	1	I	func_15161F4C	D_8008B6F8[func_150F1C04]	game_18D770	3	-	3	4	exact	0	0	a0:W a1:WE a2:W a3:W
-107	1	I	func_15168870	D_8008CD68[func_151B9F14,func_15179D20,func_15168B44,func_15174E90,+15]	game_1944C0	1	-	1	3	exact	0	0	a0:E a1:W a2:W
-108	1	I	func_1518AF80	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	3	exact	0	0	a0:W a1:W a2:W
-109	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	0	0	a0:W a1:E a2:W a3:W
-110	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	1	0	a0:W a2:W a3:W
-111	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
-112	1	I	func_15196CB8	D_8008FC34[func_15199200]	game_eu_1C3530	1	-	1	4	exact	0	0	a0:W a1:W a2:W a3:W
-113	1	I	func_15196CB8	D_8008FC3C[func_151992EC]	game_eu_1C3530	1	-	1	4	exact	1	0	a0:W a1:W a2:W a3:W
-114	1	I	func_151B51CC	D_8008FF10[func_151B2F00]	game_eu_1E0E70	1	-	1	2	exact	0	0	a0:W a1:W
-115	1	I	func_151D1510	D_8008FFD0[func_151D1624,func_151D1654,func_151D1674]	game_eu_1FB080	2	-	2	4	exact	0	0	a0:E a1:W a2:E a3:E
-116	1	I	func_151D2F90	D_8008FFF8[func_1518FDC8]	game_1FFF60	1	-	1	2	exact	0	0	a0:E a1:W
-117	1	I	func_151D2F90	D_8008FFF0[func_1518FE0C]	game_1FFF60	1	-	1	2	exact	1	0	a0:E a1:W
-118	1	I	func_151D2F90	D_8008FFF4[func_151D33B8]	game_1FFF60	1	-	1	2	exact	2	0	a0:E a1:W
-119	1	I	func_151D2F90	D_8008FFEC[func_1518FD34]	game_1FFF60	1	-	1	2	exact	3	0	a0:WE a1:W
-120	1	I	func_151D7B74	D_80090048[func_151D7CD4,func_151D7D20,func_151D7D4C]	game_eu_204F70	1	-	1	4	exact	0	0	a0:W a3:W
-121	0	I	func_15196CB8	D_8008FC20[func_15198AE0,func_15198EEC,func_15198D3C]	game_eu_1C3530	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
+32	1	I	func_1513CFE4	D_8008A100[func_150B9ADC,func_150BA904,func_1514143C,func_1514A70C,+39]	game_169510	1	-	2	4	exact	1	1	a0:WE a3:W
+33	1	I	func_15147F50	D_8008A690[func_15147E64,func_15149674,func_150DAA34,func_151968A0,+16]	game_eu_1754C0	0	-	1	1	exact	0	1	a0:E
+34	1	I	func_15147FA0	D_8008A6E0[func_15147E98,func_15149674,func_150DAA60,func_15196924,+16]	game_eu_1754C0	0	-	1	1	exact	0	1	a0:E
+35	1	I	func_15158794	D_8008B1A0[func_15158BF4,func_1518AB64,func_1515906C]	game_eu_185E30	0	-	1	1	exact	0	1	a0:E
+36	1	I	func_151603FC	D_8008B0F0[func_15160600,func_1516065C,func_15160684,func_151606A8,+12]	game_18D770	0	-	1	1	exact	0	1	a0:E
+37	1	I	func_1516055C	D_8008B470[func_15160648,func_150CE710]	game_eu_18DB20	0	-	1	1	exact	0	1	a0:E
+38	1	I	func_15163504	D_8008B70C[func_151BD86C]	game_18D770	0	-	1	1	exact	0	1	a0:E
+39	1	I	func_15167B44	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
+40	1	I	func_15168BAC	D_8008CDC0[func_1516A1E0,func_1516AAA8,func_150B72DC,func_150B731C,+5]	game_1944C0	0	-	1	1	exact	0	1	a0:E
+41	1	I	func_1518D218	D_8008D970[func_151927C0]	game_eu_1BA800	0	-	1	1	exact	0	1	a0:E
+42	1	I	func_151B3734	D_8008FE98[func_151B402C,func_151B42A0,func_151B458C,func_151B4854,+2]	game_eu_1E0E70	1	-	2	2	exact	2	1	a0:WE a1:W
+43	1	I	func_151C4B0C	D_800E0940	game_eu_1EFE10	2	-	-	3	exact	0	1	a0:W a1:W a2:W
+44	1	D3	func_15063DE8	func_15063D6C	game_eu_90F50	1	1	2	3	exact	0	1	a0:E a1:W a2:E
+45	1	D3	func_150E4A94	func_150E4740	game_eu_111F50	0	0	1	1	exact	0	1	a0:E
+46	1	D3	func_15179008	func_15179A38	game_eu_1A6C30	0	0	1	1	exact	0	1	a0:E
+47	0	I	func_16000B14	?	debugger__debugger	0	-	-	9	exact	0	9	a0:W a1:W a2:W a3:W stk:5
+48	0	I	func_16001BB4	?	debugger_257350	3	-	-	9	exact	0	6	a0:W a1:W a2:W a3:W stk:5
+49	0	I	func_151A929C	func_151A951C	game_eu_1D5710	4	-	-	8	exact	1	4	a0:W a1:W a2:W a3:W stk:4
+50	0	I	func_151E564C	D_800E0EB8	game_eu_20B730	0	-	-	4	exact	0	4	a1:W a2:W a3:W
+51	0	I	func_1001BD34	?	init_1AAE0	0	-	-	3	exact	0	3	a0:E a1:E a2:E
+52	0	I	func_151F3C4C	D_8002BA44	libultra__audio__game_21FC90	1	-	-	4	exact	0	3	a0:W a1:E a2:E a3:E
+53	0	I	func_1001BE1C	?	init_1AAE0	1	-	-	3	exact	0	2	a0:W a1:E a2:E
+54	0	I	func_1001BE1C	?	init_1AAE0	1	-	-	3	exact	1	2	a0:W a1:E a2:E
+55	0	I	func_1515C050	D_8008B41C	game_eu_189860	1	-	-	3	exact	1	2	a0:W a1:W a2:W
+56	0	I	__n_seqpStopOsc	?	init_1AAE0	1	-	-	2	exact	0	1	a0:W a1:E
+57	0	I	func_10021E4C	?	init_214F0	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
+58	0	I	func_15117D40	func_15104A80	game_eu_142E40	3	-	-	4	exact	0	1	a0:E a1:W a2:W a3:W
+59	0	I	func_15132740	D_80089C50	game_eu_15FF50	1	-	-	2	exact	1	1	a0:W a1:W
+60	0	I	func_151C1C04	D_800E0D64	game_eu_1EDA00	3	-	-	4	exact	0	1	a0:W a1:W a2:W a3:E
+61	0	D2	func_15178CC0	func_15168118	game_eu_1A5D10	1	-	3	3	exact	0	2	a0:E a1:E a2:W
+62	0	D2	func_150A3990	func_150A39E4	game_eu_CE6C0	0	-	4	1	exact	0	1	a0:E
+63	3	I	func_1509BE40	D_80088838[func_1509CBD8,func_1509A024,func_1509F254,func_150A09B8,+10]	game_C8950	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
+64	3	I	func_1509BFB0	D_80088874[func_1509C850,func_15097E9C,func_1509EDE0,func_150A0890,+10]	game_C8950	3	-	3	4	exact	0	0	a0:W a1:W a2:W a3:W
+65	3	I	func_1513C060	D_8008A010[func_1513416C,func_150B9AFC,func_150BA83C,func_150AEDD8,+9]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
+66	3	I	func_1513C060	D_8008A048[func_151AB730,func_150C63FC,func_150C6D2C]	game_169510	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
+67	3	I	func_1506AD30	D_8008679C[func_1506D950,func_1506BCA0,func_1506BCC8,func_1506BE2C,+154]	game_981E0	4	-	2	9	exact	0	-2	a0:W a1:W a2:W a3:W stk:5
+68	2	I	func_15005A60	D_80082B40[func_15005AB0,func_15005AF0,func_15005B00,func_15005B10,+22]	game__done__game_32F10	1	-	1	2	exact	0	0	a0:E a1:E
+69	2	I	func_15008930	D_80082F64[func_150089D0]	game_35D20	0	-	0	1	exact	0	0	a0:E
+70	2	I	func_1503E238	D_800847CC[func_1503F2B4,func_1503F3F8,func_1503F45C]	game_eu_6B970	1	-	1	3	exact	1	0	a0:W a1:W a2:W
+71	2	I	func_1504A730	D_800863A4[func_150D1920]	game_eu_78230	1	-	1	2	exact	0	0	a0:W a1:W
+72	2	I	func_1504A730	D_800863AC[func_150D197C]	game_eu_78230	1	-	1	2	exact	2	0	a0:W a1:W
+73	2	I	func_15081A90	D_80087030[func_150FCEB0,func_150FFC34,func_151C6840,func_151C1EF0,+1]	game_eu_AF2A0	3	-	3	8	exact	0	0	a0:W a1:W a2:W a3:W stk:4
+74	2	I	func_150E6E30	D_80088DC0[func_150E73B4,func_150E7458,func_150E7498]	game_eu_114640	1	-	1	3	exact	1	0	a0:W a1:W a2:W
+75	2	I	func_151307A0	D_80089A10[func_150C7C70,func_150AE5B0,func_150C4BF0,func_150EB740,+31]	game_eu_15DFB0	1	-	1	2	exact	0	0	a0:E a1:E
+76	2	I	func_1514F18C	D_8008AEF8[func_1514EDA0,func_1514EDC0,func_1514EDEC]	game_eu_17A800	1	-	1	4	exact	0	0	a0:W a3:W
+77	2	I	func_15186344	D_8008D860[func_15185AC4,func_15185BEC,func_15185D20,func_15185E44,+6]	game_eu_1B1ED0	1	-	1	7	exact	0	0	a0:W a1:E a2:E a3:E stk:3
+78	2	I	func_151D9B8C	D_800900A4[func_151D97A8,func_151D9878,func_151D98D0,func_151D9820,+2]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
+79	2	I	func_151DB5D0	D_800900D8[func_151DB004,func_151DB068,func_151DB0CC,func_151DB15C,+9]	game_2062D0	1	-	1	4	exact	0	0	a0:W a1:E a2:E a3:E
+80	2	I	func_151E8620	D_80090370[func_151EB81C,func_151ECB98,func_151EC0E0,func_151EC300]	game_eu_216470	1	-	1	3	exact	0	0	a0:E a1:W a2:W
+81	1	D1	func_15074C80	func_15194858	game_981E0	2	3	3	2	exact	0	0	a0:W a1:W
+82	1	I	func_150D0544	D_80088C40[func_150D06B0,func_150D083C,func_150D0A44,func_151D75B0]	game_eu_FCE60	1	-	1	3	exact	0	0	a0:W a1:E a2:W
+83	1	I	func_150E67B0	D_80088DB0[func_150E6D50]	game_eu_113D60	1	-	1	4	exact	0	0	a0:W a2:W a3:W
+84	1	I	func_151073F8	D_80088FB8[func_15107B84]	game_eu_133A70	1	-	1	2	exact	0	0	a0:W a1:W
+85	1	I	func_1513095C	D_80089B00[func_151A4DEC,func_151A4EB0,func_150BB740,func_15159B04,+36]	game_eu_15E000	2	-	2	4	exact	0	0	a0:E a1:W a2:W a3:W
+86	1	I	func_1513095C	D_80089BA0[func_150C1698]	game_eu_15E000	1	-	1	4	exact	1	0	a0:WE a1:W a2:W a3:W
+87	1	I	func_15132740	D_80089D28[func_1513384C]	game_eu_15FF50	1	-	1	2	exact	0	0	a0:W a1:W
+88	1	I	func_15132740	D_80089CB4[func_150B9B1C,func_1518B290,func_1518B71C,func_1518B748,+3]	game_eu_15FF50	1	-	1	2	exact	2	0	a0:W a1:W
+89	1	I	func_15132740	D_80089D1C[func_151A7EB8,func_151B657C]	game_eu_15FF50	1	-	1	2	exact	3	0	a0:W a1:W
+90	1	I	func_1513532C	D_80089F10[func_151352EC,func_151AB100,func_151352EC,func_151352EC,+2]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
+91	1	I	func_151353A8	D_80089F28[func_1513530C]	game_161520	1	-	1	2	exact	0	0	a0:W a1:W
+92	1	I	func_1513CFE4	D_8008A058[func_1513E6E8,func_1518A604,func_150B9A40,func_150BA85C,+6]	game_169510	1	-	1	4	exact	0	0	a0:E a3:W
+93	1	I	func_1513CFE4	D_8008A1B0[func_1514A434,func_1514C828]	game_169510	1	-	1	4	exact	2	0	a0:WE a1:W a2:W a3:W
+94	1	I	func_151411E4	D_8008A33C[func_151411A4,func_15101858,func_151411A4,func_151411A4,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
+95	1	I	func_15141250	D_8008A384[func_151411C4,func_15101880,func_151411C4,func_151411C4,+14]	game_16DC80	1	-	1	2	exact	0	0	a0:W a1:W
+96	1	I	func_15147888	D_800900A4[func_151D97A8,func_151D9878,func_151D98D0,func_151D9820,+2]	game_eu_174610	0	-	0	1	exact	0	0	a0:W
+97	1	I	func_15147CB0	D_8008A5A0[func_15148428,func_15196CB8,func_1519D7B0,func_150DCAD8,+10]	game_eu_1754C0	1	-	1	2	exact	0	0	a0:E a1:W
+98	1	I	func_15147CB0	D_8008A5DC[func_150D952C,func_151970BC,func_1519D9C4,func_150DD420,+13]	game_eu_1754C0	1	-	1	2	exact	1	0	a0:WE a1:W
+99	1	I	func_15147CB0	D_8008A624[func_1519AF14,func_150D44E4,func_151B7F48,func_151CF6D0,+4]	game_eu_1754C0	1	-	1	2	exact	2	0	a0:WE a1:W
+100	1	I	func_15148428	D_8008A780[func_15148E34,func_15149064,func_15149114,func_15149350,+1]	game_eu_175B20	1	-	1	3	exact	0	0	a0:E a2:W
+101	1	I	func_15148428	D_8008A798[func_1518CAB0,func_150AED9C,func_150AF6A0,func_150C251C,+1]	game_eu_175B20	1	-	1	3	exact	1	0	a0:WE a2:W
+102	1	I	func_15155200	D_8008B068[func_15134CEC,func_1515BF04,func_15135BF8,func_151CBAC0,+10]	game_eu_182A10	1	-	1	2	exact	0	0	a0:E a1:W
+103	1	I	func_15157840	D_8008B130[func_15158018,func_151BF268,func_151B9204,func_150FB81C]	game_eu_185050	1	-	1	3	exact	0	0	a0:W a1:W a2:W
+104	1	I	func_15157840	D_8008B140[func_15157DD0,func_15157E88]	game_eu_185050	1	-	1	3	exact	1	0	a0:W a1:W a2:W
+105	1	I	func_15158838	D_8008B1AC[func_15158AFC,func_1518AE84,func_15158E90]	game_eu_185E30	2	-	2	3	exact	0	0	a0:W a1:W a2:E
+106	1	I	func_1515C534	D_8008B424[func_1515CF9C,func_1515D030]	game_1897A0	2	-	2	4	exact	0	0	a0:W a1:W a2:W a3:W
+107	1	I	func_15160B74	D_8008B598[func_15163CD0,func_150B6BBC,func_150D8DBC,func_151CA0E0]	game_18D770	1	-	1	4	exact	0	0	a0:W a1:W a3:W
+108	1	I	func_15161804	D_8008B208[func_151617C4,func_151617C4,func_151617C4,func_151617C4,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
+109	1	I	func_15161860	D_8008B2B0[func_151617E4,func_151617E4,func_151617E4,func_151617E4,+38]	game_18D770	1	-	1	2	exact	0	0	a0:W a1:W
+110	1	I	func_15161F4C	D_8008B6F8[func_150F1C04]	game_18D770	3	-	3	4	exact	0	0	a0:W a1:WE a2:W a3:W
+111	1	I	func_15168870	D_8008CD68[func_151B9F14,func_15179D20,func_15168B44,func_15174E90,+15]	game_1944C0	1	-	1	3	exact	0	0	a0:E a1:W a2:W
+112	1	I	func_1518AF80	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	3	exact	0	0	a0:W a1:W a2:W
+113	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	0	0	a0:W a1:E a2:W a3:W
+114	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	1	0	a0:W a2:W a3:W
+115	1	I	func_1518B140	D_8008D960[func_150BB8E8,func_150CC46C]	game_eu_1B8790	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W
+116	1	I	func_15196CB8	D_8008FC34[func_15199200]	game_eu_1C3530	1	-	1	4	exact	0	0	a0:W a1:W a2:W a3:W
+117	1	I	func_15196CB8	D_8008FC3C[func_151992EC]	game_eu_1C3530	1	-	1	4	exact	1	0	a0:W a1:W a2:W a3:W
+118	1	I	func_151B51CC	D_8008FF10[func_151B2F00]	game_eu_1E0E70	1	-	1	2	exact	0	0	a0:W a1:W
+119	1	I	func_151D1510	D_8008FFD0[func_151D1624,func_151D1654,func_151D1674]	game_eu_1FB080	2	-	2	4	exact	0	0	a0:E a1:W a2:E a3:E
+120	1	I	func_151D2F90	D_8008FFF8[func_1518FDC8]	game_1FFF60	1	-	1	2	exact	0	0	a0:E a1:W
+121	1	I	func_151D2F90	D_8008FFF0[func_1518FE0C]	game_1FFF60	1	-	1	2	exact	1	0	a0:E a1:W
+122	1	I	func_151D2F90	D_8008FFF4[func_151D33B8]	game_1FFF60	1	-	1	2	exact	2	0	a0:E a1:W
+123	1	I	func_151D2F90	D_8008FFEC[func_1518FD34]	game_1FFF60	1	-	1	2	exact	3	0	a0:WE a1:W
+124	1	I	func_151D7B74	D_80090048[func_151D7CD4,func_151D7D20,func_151D7D4C]	game_eu_204F70	1	-	1	4	exact	0	0	a0:W a3:W
+125	1	I	func_151DAB58	D_80090070[func_151D8E6C,func_151D8EB0,func_151D8EBC,func_151D8EC8,+8]	game_2062D0	0	-	0	4	exact	0	0	a0:E a1:E a2:E a3:E
+126	0	I	func_15196CB8	D_8008FC20[func_15198AE0,func_15198EEC,func_15198D3C]	game_eu_1C3530	1	-	1	4	exact	2	0	a0:W a1:W a2:W a3:W

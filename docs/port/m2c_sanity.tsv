@@ -12,10 +12,12 @@ func_15180AF0	conker/src_eu/game_eu_1ACBC0.c	width	high	2	O:0 asm{b3L,w43LS} IR{
 func_15181A6C	conker/src_eu/game_eu_1ACBC0.c	width	high	2	O:0 asm{b6LS,w1L} IR{w7L}
 func_1518C900	conker/src_eu/game_eu_1BA680.c	width	high	2	O:0 asm{b2LS,w3L} IR{w3L}
 func_15051558	conker/src_eu/game_eu_78230.c	width	high	1	O:0 asm{b1L,w2L} IR{w2L}
+func_151018F8	conker/src_eu/game_eu_12E390.c	width	high	1	O:0 asm{b4LS,w1L} IR{w1L}
 func_15149DA8	conker/src_eu/game_eu_1772D0.c	width	high	1	O:36 asm{h4LS,w3LS} IR{w2LS}
 func_151A5C10	conker/src_eu/game_eu_1D3420.c	width	high	1	O:64 asm{b3L} IR{w1L}
 func_151DFD0C	conker/src_eu/game_eu_20B730.c	width	high	1	O:0 asm{b2L,w1L} IR{w1L}
 func_150A6070	conker/src_eu/game_eu_D3880.c	width	high	0	O:0 asm{h1L,w5LS} IR{w1L}
+func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	high	0	O:24 asm{b6LS,w1L} IR{w1L}
 func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:4 asm{b1L} IR{w1L}
 func_1518C628	conker/src_eu/game_eu_1B9810.c	width	high	0	O:4 asm{b5L,w9LS} IR{w5LS}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	pscale	med	2	L134/L135/L136 (x*8)+ptr on i16 (size 2): byte scale 16; asm adds {-} to that base, x8 elsewhere
@@ -63,6 +65,7 @@ func_15173954	conker/src_eu/game_eu_1A1060.c	width	med	2	O:0 asm{h8LS} IR{b1S,h8
 func_15179008	conker/src_eu/game_eu_1A6C30.c	width	med	2	O:0 asm{b4S,w1S} IR{w1S}
 func_151BEE00	conker/src_eu/game_eu_1EC610.c	width	med	2	O:0 asm{w2L} IR{b1L,w3L}
 func_1507DB6C	conker/src_eu/game_A9D90.c	width	med	1	O:0 asm{b3LS,w12S} IR{w1S}
+func_15081A90	conker/src_eu/game_eu_AF2A0.c	width	med	1	O:0 asm{b4L,w3S} IR{w3S}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:0 asm{w20LS} IR{h1L,w6LS}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:4 asm{w19LS} IR{h1L,w4S}
 func_150954E4	conker/src_eu/game_eu_C2B60.c	width	med	1	O:0 asm{w13LS} IR{b5L,w3LS}
@@ -98,6 +101,7 @@ func_151E870C	conker/src_eu/game_eu_20B730.c	width	med	1	O:6 asm{b1L,h1S} IR{h1S
 func_1503605C	conker/src_eu/game_eu_62360.c	width	med	0	O:4 asm{w8S} IR{b1L,w4S}
 func_150CE710	conker/src_eu/game_eu_FBE70.c	width	med	0	O:28 asm{w3LS} IR{b1L}
 func_150CE710	conker/src_eu/game_eu_FBE70.c	width	med	0	O:44 asm{w1L} IR{b6LS}
+func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	med	0	O:16 asm{w4LS} IR{h1S}
 func_150F873C	conker/src_eu/game_eu_125200.c	width	med	0	O:12 asm{w3LS} IR{b1L,w1L}
 func_151050B0	conker/src_eu/game_131F30.c	width	med	0	O:12 asm{w2L} IR{b1L}
 func_15172634	conker/src_eu/game_eu_19FA20.c	width	med	0	O:0 asm{h1S,w17LS} IR{w14LS}
@@ -161,6 +165,10 @@ func_151DEDD0	conker/src_eu/game_eu_20B730.c	sign	low	2	G:800BED50 h: asm u, IR 
 func_1503E5F8	conker/src_eu/game_eu_6B970.c	stride	low	1	IR idx %.0 step 4, asm self-steps {16}
 func_15059C84	conker/src_eu/game_83300.c	stride	low	1	IR idx %.0 step 2, asm self-steps {6,12}
 func_15059C84	conker/src_eu/game_83300.c	stride	low	1	IR idx %.0 step 4, asm self-steps {6,12}
+func_1513EE14	conker/src_eu/game_169510.c	stride	low	1	IR idx %.0 step 12, asm self-steps {64}
+func_1513EE14	conker/src_eu/game_169510.c	stride	low	1	IR idx %.0 step 8, asm self-steps {64}
+func_1513EE14	conker/src_eu/game_169510.c	stride	low	1	IR idx %.1 step 12, asm self-steps {64}
+func_151B09BC	conker/src_eu/game_eu_1DDE10.c	stride	low	1	IR idx %.0 step 4, asm self-steps {48,768}
 func_10010BE8	conker/src_eu/init_EB00.c	sign	low	1	G:80042984 h: asm u, IR s
 func_1505841C	conker/src_eu/game_83300.c	sign	low	1	A0:582 b: asm u, IR s
 func_15157580	conker/src_eu/game_eu_183F10.c	sign	low	1	A0:0 b: asm u, IR s
@@ -199,6 +207,8 @@ func_1511CBC0	conker/src_eu/game_eu_142E40.c	width	low	1	O:0 asm{h2L} IR{w1S}
 func_1512BBA0	conker/src_eu/game_eu_158110.c	width	low	1	O:0 asm{b3S} IR{b3S,h1L}
 func_151ABF78	conker/src_eu/game_eu_1D7790.c	width	low	1	O:24 asm{b1L,w1L} IR{w1L}
 func_eu_15108850	conker/src_eu/game_eu_136060.c	width	low	1	O:8 asm{b1L,h1L} IR{h1L}
+func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	low	0	O:0 asm{h1S,w2L} IR{w2L}
+func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	low	0	O:4 asm{b1L,h1S} IR{b1L}
 func_15103438	conker/src_eu/game_eu_1306B0.c	width	low	0	O:32 asm{w4L} IR{h3S}
 func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:16 asm{w1L} IR{h1S}
 func_151408A4	conker/src_eu/game_16DC80.c	width	low	0	O:20 asm{w1L} IR{h1S}
