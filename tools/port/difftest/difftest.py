@@ -442,6 +442,21 @@ def hdr_protos():
         except OSError: _HDR = ''
     return _HDR
 
+_ALLHDR = None
+def all_hdr_protos():
+    """P100: every header under include/ (functions.h, libc/math.h, ...). Float-register and float-slot info for a
+    callee with no declaration in the TU comes from here: sinf / cosf are declared only in include/libc/math.h, so
+    their f12 argument was never compared and a `rad = ang` mutant survived (port-b P96)."""
+    global _ALLHDR
+    if _ALLHDR is None:
+        import glob as _g
+        parts = []
+        for f in sorted(_g.glob('include/**/*.h', recursive=True)):
+            try: parts.append(open(f, errors='replace').read())
+            except OSError: pass
+        _ALLHDR = '\n'.join(parts)
+    return _ALLHDR
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
@@ -498,8 +513,9 @@ def proto_fslots(tu, name):
 FREGS = {}
 def proto_fregs(tu, name):
     """P18: FP argument registers (f12-f15) the prototype of name passes (o32: only leading float/double params
-    travel in FPRs), None if unknown"""
-    for m in _decl_first(tu, name):
+    travel in FPRs), None if unknown. P100: declarations only; a call statement such as `s = sinf(temp->unk8);` was
+    parsed as a prototype with an int parameter and gave set(), so no FPR argument was compared at all."""
+    for m in [m for m in _decl_first(_nocomment(tu), name) if _is_decl(_nocomment(tu), m)]:
         ps = [p.strip() for p in m.group(1).split(',') if p.strip()]
         if ps == ['void'] or not ps: return set()
         out = set(); fr = 12
@@ -560,10 +576,15 @@ for _p in filter(None, os.environ.get('DIFFTEST_RETF', '').split(',')):
 # P34 (opt-in): DIFFTEST_OUTW="ADDR=N:V1;V2;...,..." (hex ADDR/V, decimal N): at each call to ADDR the stub
 # writes the word V (V1 on the first call, V2 on the second, ..., the last repeats) through aN, e.g. the
 # found / count out-params of func_1502B6BC. Several "N:V" for one ADDR are separated by '/'. P64: N >= 4 = stack argument.
+def _outn(s):
+    # P100: N may be '@ADDR' (hex): the stub writes at that absolute address instead of through an argument
+    # (results a callee leaves in globals, e.g. func_1517C11C's per-voice flags read by func_1517E3CC).
+    return ('abs', int(s[1:], 16)) if s.startswith('@') else int(s)
+
 OUTW = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
     _a, _v = _p.split('=')
-    OUTW[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
+    OUTW[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
 # P38 (opt-in): DIFFTEST_OUTA="ADDR=N:W0;W1;...,..." (hex ADDR/W, decimal N): at every call to ADDR the stub writes
@@ -572,7 +593,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
 OUTA = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
     _a, _v = _p.split('=')
-    OUTA[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
+    OUTA[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
 # P41 (opt-in): DIFFTEST_OUTB="ADDR=N:B0;B1;...,..." like DIFFTEST_OUTA but writes bytes (hex B), e.g. u8 out-params
@@ -580,7 +601,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
 OUTB = {}
 for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
     _a, _v = _p.split('=')
-    OUTB[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
+    OUTB[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
@@ -590,7 +611,10 @@ ARGMEM = {}
 for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     _a, _v = _p.split('=')
     _n, _l = _v.split(':')
-    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l)))
+    # P100: N may be 'N+OFF' (hex OFF): compare LEN bytes from aN + OFF (skips padding a struct argument leaves
+    # uninitialised, e.g. func_151DA6F8's spawn block: bytes 0x16-0x17 are stack garbage in both builds).
+    _n, _o = (_n.split('+') + ['0'])[:2]
+    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16)))
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -931,9 +955,9 @@ class Run:
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
-            for _n, _l in ARGMEM[addr & 0x1FFFFFFF]:
+            for _n, _l, _o in ARGMEM[addr & 0x1FFFFFFF]:
                 # P43: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
-                try: am.append(bytes(mu.mem_read(phys(regs[_n] if _n < 4 else stkw[_n - 4]), _l)).hex())
+                try: am.append(bytes(mu.mem_read(phys((regs[_n] if _n < 4 else stkw[_n - 4]) + _o), _l)).hex())
                 except Exception: am.append('unmapped')
             self.calls[-1]['argmem'] = am
         self.pending = len(self.calls) - 1
@@ -966,15 +990,15 @@ class Run:
         if (addr & 0x1FFFFFFF) in OUTW:
             for _n, _vs in OUTW[addr & 0x1FFFFFFF]:
                 # P64: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
-                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
         if (addr & 0x1FFFFFFF) in OUTA:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
-                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *_ws))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
-                _p = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 mu.mem_write(phys(_p), bytes(_ws))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
@@ -1292,6 +1316,10 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                     ha = proto_arity(hdr_protos(), pn)
                     if ha is not None and 16 < ha < 99:
                         new[c['name']] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
+                if new[c['name']][2] is None:   # P100: no declaration in the TU: FP argument registers from include/**.h
+                    hf = proto_fregs(all_hdr_protos(), pn)
+                    if hf:
+                        new[c['name']] = (new[c['name']][0], new[c['name']][1], hf)
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
         why = compare(R, C, rk, arity)
         if verbose:

@@ -70,7 +70,7 @@ void func_150FB8A4(u8 *arg0, u8 arg1, s32 arg2);
 void func_150E0C58(u8 *arg0, u8 arg1, u8 arg2, s32 arg3);
 void func_150F9D6C(u8 *arg0, u8 arg1, s32 arg2);
 void func_150F9ED0(u8 *arg0, u8 arg1, s32 arg2);
-s32 func_151BEE00(f32 *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6);
+s32 func_151BEE00(f32 *arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4, s32 arg5, s32 arg6); /* P98 */
 void func_150BAEF4(u8 *arg0, u8 arg1, s32 arg2);
 void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2);
 void func_15143134(void *arg0, void *arg1, void *arg2);
@@ -760,7 +760,7 @@ s32 func_150268BC(s32 arg0, u8 track, u16 value, s32 now, s32 player, struct127 
             p[0] = O_F32(r, 0);
             p[1] = O_F32(r, 4);
             p[2] = O_F32(r, 8);
-            func_151BEE00(p, O_S32(r, 0x10), 1, 0, 2, flag, 1);
+            func_151BEE00(p, O_F32(r, 0x10), 1, 0, 2, flag, 1);
             break;
         }
         case 4:

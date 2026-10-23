@@ -908,7 +908,7 @@ void func_150774B4(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15086508(f32, f32, u8, s8, f32, s8, s32, u8 *, u8 *);
+s32 func_15086508(f32, f32, f32, s8, s8, u8 *, u8 *); /* P98: from the asm (f12, f14, a2 = z bits, a3, 3 stack words) */
 s32 func_150867D4(u8, s8, s8, u8 *, u8 *);
 s32 func_1508712C(s32, f32 *, f32 *, f32 *);
 extern s32 D_800D277C;
@@ -981,7 +981,7 @@ block_5:
                 sp.u84 = (s32) D_800D154C->unk210;
             }
             if (sp.u84 == 0xFF) {
-                var_v0 = func_15086508(D_800D154C->x_position, D_800D154C->y_position, temp_v1_2, var_a1, D_800D154C->z_position, var_a1, (s32) sp76, &D_800D154C->unk211, &D_800D154C->pad212);
+                var_v0 = func_15086508(D_800D154C->x_position, D_800D154C->y_position, D_800D154C->z_position, var_a1, sp76, &D_800D154C->unk211, &D_800D154C->pad212);
                 goto block_28;
             }
         } else if (temp_v1_2 != 0xFF) {
