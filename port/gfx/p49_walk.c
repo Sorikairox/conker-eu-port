@@ -304,6 +304,47 @@ static void p55_synth(void) {
              "missed %d, extra %d, edge-ambiguous %d;%s %s\n", n, nin, maxd, nin ? sumd / nin : 0, bad, miss, extra, edge,
              ex, (bad || miss || extra) ? "FAIL" : "PASS");
 }
+/* P101 DIAGNOSTIC ?p101col=N: on the first N floor -> void changes of record 0's floor query: the 4 collision areas
+ * (enable D_800894C0, triangle count D_800DBE18, x / y / z extent of the table D_800DC208), the level DLs
+ * D_800B0E00[0..3], and the world objects (D_800DC320 records of 0xA0 at D_800DBEF4: DL +0x1C, flags +0x4F, first tri
+ * +0x58, count +0x56, +0x10..+0x14). */
+extern int D_800DC208[], D_800DBE18[], D_800DC320, D_800B0E00[];
+extern unsigned char *D_800DBEF4;
+extern unsigned char D_800E0B94;
+extern unsigned D_8009018C[];
+static void p101_col(float h, float x, float y, float z) {
+    static int f = -1, n, last = 2;
+    int isfloor = h != -10000.0f, a, i, was = last;
+    if (f < 0) f = port_flag("p101col");
+    last = isfloor;
+    if (!f || isfloor || was != 1 || n >= f) return;
+    n++;
+    port_log("[p101] game mode D_800E0B94 %u, handlers D_8009018C[0..9] %08X %08X %08X %08X %08X %08X %08X %08X %08X %08X\n",
+             vbe_ld8(&D_800E0B94), D_8009018C[0], D_8009018C[1], D_8009018C[2], D_8009018C[3], D_8009018C[4],
+             D_8009018C[5], D_8009018C[6], D_8009018C[7], D_8009018C[8], D_8009018C[9]);
+    port_log("[p101] void at frame %u: x %g y %g z %g; enable %u %u %u %u; level DLs %08X %08X %08X %08X; objects %d\n",
+             port_frame_count, x, y, z, vbe_ld8(&D_800894C0[0]), vbe_ld8(&D_800894C0[1]), vbe_ld8(&D_800894C0[2]),
+             vbe_ld8(&D_800894C0[3]), D_800B0E00[0], D_800B0E00[1], D_800B0E00[2], D_800B0E00[3], D_800DC320);
+    for (a = 0; a < 4; a++) {
+        const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
+        float mn[3] = {1e9f, 1e9f, 1e9f}, mx[3] = {-1e9f, -1e9f, -1e9f};
+        int k, cnt = D_800DBE18[a];
+        for (i = 0; vo && cnt > 0 && cnt < 40000 && i < cnt * 3; i++)
+            for (k = 0; k < 3; k++) {
+                float v = (short)vbe_ld16((const unsigned char *)(uintptr_t)vo[i] + 2 * k);
+                if (v < mn[k]) mn[k] = v;
+                if (v > mx[k]) mx[k] = v;
+            }
+        port_log("[p101]   area %d: table %08X, %d tris, x %g..%g y %g..%g z %g..%g\n", a, (unsigned)(uintptr_t)vo, cnt,
+                 mn[0], mx[0], mn[1], mx[1], mn[2], mx[2]);
+    }
+    for (i = 0; D_800DBEF4 && i < D_800DC320 && i < 64; i++) {
+        const unsigned char *o = D_800DBEF4 + i * 0xA0;
+        port_log("[p101]   obj %d: DL %08X +4F %02X tri %u +%u | +10 %d %d %d\n", i, *(const unsigned *)(o + 0x1C),
+                 vbe_ld8(o + 0x4F), vbe_ld16(o + 0x58), vbe_ld16(o + 0x56), (short)vbe_ld16(o + 0x10),
+                 (short)vbe_ld16(o + 0x12), (short)vbe_ld16(o + 0x14));
+    }
+}
 void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
 void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
@@ -336,6 +377,7 @@ void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float 
                      vbe_ld8(&D_800DBE62) == 0, best - h, isfloor != lastfloor ? " (floor/void change)" : "");
         lastfloor = isfloor;
     }
+    if (aB == (int)(uintptr_t)D_800CC2D0) p101_col(a2 ? *(float *)(uintptr_t)a2 : 0, a6, a7, a8);
 }
 
 /* P55 ?p49walk: landing func_1505A9AC (P54 C, called by the walk handler with +0x180): y / vy / +0x28 / +0x180 before and
@@ -353,4 +395,23 @@ void __wrap_func_1505A9AC(void *rec, float a1) {
     if (flag && (calls <= (unsigned)flag || calls % (unsigned)every == 0 || v0 != F(0x20) || s0 != *(const int *)r))
         port_log("[p55] landing call %u frame %u: arg1 %g | state %d -> %d y %g -> %g yv %g -> %g +28 %g -> %g +180 %g\n",
                  calls, port_frame_count, a1, s0, *(const int *)r, y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180));
+}
+
+/* P101 DIAGNOSTIC ?p101mus=1: at each call of the level-start music function func_150000B0 (game_2D4B0.c, still an
+ * asm stub = does nothing; its m2c draft starts the level songs from the level header D_800B0DF0 +0x2C..+0x39 through
+ * func_1000D96C): the level D_800BE9F0, the header bytes +0x2C..+0x39, and the level model count D_800B1248. */
+extern unsigned char *D_800B0DF0;
+extern int D_800BE9F0, D_800B1248;
+void __real_func_150000B0(void);
+void __wrap_func_150000B0(void) {
+    static int f = -1;
+    if (f < 0) f = port_flag("p101mus");
+    if (f) {
+        const unsigned char *h = D_800B0DF0;
+        char b[64]; int i, o = 0;
+        for (i = 0x2C; h && i < 0x3A; i++) o += snprintf(b + o, sizeof b - o, "%02X%s", vbe_ld8(h + i), (i & 3) == 3 ? " " : "");
+        port_log("[p101] func_150000B0 (level music start, asm stub) frame %u: level %X header %08X +2C: %s| models %d\n",
+                 port_frame_count, D_800BE9F0, (unsigned)(uintptr_t)h, h ? b : "-", D_800B1248);
+    }
+    __real_func_150000B0();
 }

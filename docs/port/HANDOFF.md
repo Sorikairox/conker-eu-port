@@ -10,6 +10,41 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P101, 2026-10-23, port-web). Details: `docs/port/sessions/P101.md`
+
+- **The fall near (-179, 301) is not a collision bug.**
+  - Level 0x21's only collision is model 0: 288 triangles in a flat 480 x 480 grid at y 0 (x / z -240..240).
+    Areas 1-3 are empty, D_800B0E00[1..3] are NULL, there are 0 world objects and no wall triangles.
+  - The pad script walks Conker past |z| = 240 (at about (-142..-154, 249..268); frame 773-917, depending on run
+    speed). The C floor query then correctly returns -10000, and an independent float reference over every
+    triangle agrees.
+  - The data reads cleanly (a perfect 40-unit grid), so endianness and relocation are fine. No port or game-C fix.
+  - Idle, he stands at (27, 0, 27).
+  - Open: whether the real game gives stick control on level 0x21 (mode 1, entered by the boot-screen timer
+    func_151DEBB4). That needs an N64 reference.
+- **Music: the blocker is func_150000B0** (game_2D4B0.c, still asm).
+  - It is the level-start music function, called by func_15007B3C at every level load. It reads song ids from the
+    level header D_800B0DF0 +0x2C / +0x32 and requests them through func_1000D96C.
+  - From func_1000D96C on, everything is C: func_1000B3D4 queues the song, then func_1000D758 -> func_1000D2F8 ->
+    func_10008CE8 (n_alCSeqNew / play).
+  - The header asks for song 0x35 on level 0x2C (volume 0x7FFF) and song 0x60 on the scene level 0. Level 0x21 has
+    song 0.
+  - func_10010154 / func_1000F568 are sound-effect emitters, not music.
+- Census at HEAD (node 50 s): 52 distinct stubs. One death, scene, 0x2C warp, heap 0, null zone 0. List in P101.md
+  section 3.
+- Port: DIAGNOSTICS `?p101col=N` (collision dump at floor -> void) and `?p101mus=1` (func_150000B0 wrap, level header
+  music fields), in p49_walk.c, plus a Makefile wrap.
+
+## Next steps (from P101)
+
+1. Convert func_150000B0 to readable C (asm/nonmatchings/game_2D4B0/func_150000B0.s, jump table jtbl_80091A30).
+   - Its inputs and callees are all C or data. Then check in Chrome that song 0x35 plays on level 0x2C.
+2. func_15020920 / func_15020090 / func_15020430 (scene producers; the P97 guard still fires).
+3. Camera eye height: func_15126378 / func_1512EE50.
+4. The per-frame stubs (P101.md section 3), then the player-state stubs hit from the spawn: func_1507E9A8,
+   func_15141C0C, func_15146EE0, func_151DA6F8.
+5. If an N64 reference becomes available: does level 0x21 (mode 1) really let the stick move Conker?
+
 ## State (session P99, 2026-10-23, port-web). Details: `docs/port/sessions/P99.md`
 
 - **Bisect lesson:** game .c changes are not rebuilt unless `port/build/vbe.stamp` is removed (the stamp does not
@@ -2803,3 +2838,4 @@ PORT_P49WALK=3 PORT_P49EVERY=16 PADSCRIPT="15000:0:0:80; 22000:0:0:0" port/web/b
     - Then the per-frame stubs at about 668 calls: func_15129220, func_150ADA68, func_15097E9C, func_15044D18, func_15097BA8, game_14FF90 x2, ... (P91.md section 6).
     - Check the func_151143D4 callback arity.
 - **P97 (merge port b3219c2 + port-b 99d4923, checks).** Full notes: P97.md. func_151BF8F0 prototype fix; TEMPORARY guard on func_1501FD34 / func_1501FF10 (stub producer func_15020920, `?p97path=1`); top-down camera at 30-36 s from P93 / P95 (open); sound 0 since P94; sky t range = game math; arity 113 / 57.
+- **P101 (investigation, no merge).** Full notes: P101.md. Fall = walking off level 0x21's 480 x 480 floor (its only collision, correct C query, no fix). Music blocker = asm stub func_150000B0 (level-start music: header song 0x35 on 0x2C, 0x60 on scene level 0). Census 52 stubs. Diagnostics ?p101col / ?p101mus.
