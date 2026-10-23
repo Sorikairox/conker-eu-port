@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P102 (port-b) (session P102, 2026-10-23). Details: `docs/port/sessions/P102.md`
+
+Branch `port-b` (from P96 66dffbc); the orchestrator merges it into `port`.
+
+- Default build byte-identical (verify_all). `NON_MATCHING=1` links. protocheck: 1 expected problem
+  (func_15157580, gone after merging port). **progress_nm**: total 4916/5915 (83.1%), game 4388/5334 (82.3%),
+  C bytes 56.8%, 999 asm-only.
+- P98 rows done: func_1506045C arg3 / func_15064668 arg2 / func_15065E18 arg3 are f32 (NM, all callers NM).
+- **func_15097E9C (object command handler, 142 cases): verified but NOT committed.** Draft
+  `sessions/p102/func_15097E9C.c`, map `func_15097E9C_map.md`, 1471 setups EQUIV, mutants 85/87 + 2 equivalent.
+  Blocked by its producer **func_1507BB28** (game_A28B0.c, asm, stub returns 0 -> object +0x218 script pointer
+  NULL for cmds 0x14 / 0x35 / 0x60). Verified draft `sessions/p102/func_1507BB28.c` (7/7). Commit both together.
+- New hand-written NM C: func_1512BAAC (producer for func_1512B2C4), func_1512BBA0, func_1505D5D0, func_151406AC,
+  func_1505DDA8, func_1501DF70 (all mutants killed).
+
+## Next steps (from P102)
+
+1. Whoever owns game_A28B0.c: `insert_nm.py func_1507BB28 docs/port/sessions/p102/func_1507BB28.c` and, in the
+   same commit, `insert_nm.py func_15097E9C docs/port/sessions/p102/func_15097E9C.c` (port-b file
+   game_eu_C5530.c); then browser check of script commands.
+2. Browser: P102.md UNVERIFIED list.
+3. Smallest asm-only left in port-b files: func_15144CEC (101), func_1505D024 (104, used by func_15097E9C),
+   func_1505327C (109), func_15053430 (113), func_15060D54 (117).
+
 ## P96 (port-b) (session P96, 2026-10-23). Details: `docs/port/sessions/P96.md`
 
 Branch `port-b` (from P92 99d4923); the orchestrator merges it into `port`.

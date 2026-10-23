@@ -1111,7 +1111,7 @@ void func_1505A9AC(struct127 *, f32);
 s32 func_1505D024(struct127 *, s32, u16, s32); 
 void func_1505D6F0(struct127 *, s32); /* P59: void in the NM definition */
 void func_1505F298(struct127 *, struct49 *); /* P64: void in the NM definition */
-void func_1506045C(struct127 *, s32, s32, s32, s32);
+void func_1506045C(struct127 *, s32, s32, f32, s32); /* P102: arg3 f32 */
 void func_15063168(struct127 *);                 
 void func_150802A8(struct127 *);                 
 s32 func_150882C4(u8, struct127 *);             
@@ -2155,7 +2155,7 @@ block_197:
             func_1504B0FC(arg0, sp1B0);
         }
         if (arg0->stunned != 0xFF) {
-            func_1506045C(arg0, (u16) ((struct49 *)D_800CC6A4)->unk0, D_800CC288, *(s32 *)&arg0->unk28, 0);
+            func_1506045C(arg0, (u16) ((struct49 *)D_800CC6A4)->unk0, D_800CC288, arg0->unk28, 0);
             temp_v0_23 = arg0->unk84.uh;
             arg0->unk54 = 0.0f;
             arg0->disable_run = 0;
