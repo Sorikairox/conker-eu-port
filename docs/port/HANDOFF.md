@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P155 (port-b) (session P155, 2026-10-23). Details: `docs/port/sessions/P155.md`
+
+Branch `port-b` (from P153 d394089). Coordinator decisions: func_151AC3F0 inserted (1EDA00:292 prototype `void`);
+func_151AE694 returns instead of spinning forever when no path exists (NM only, documented port divergence; no log
+hook in the NM build). Took game_eu_1D4CC0.c and game_eu_201240.c (not on the port slot's list).
+Hand C (NM), difftest EQUIV + setups + mutants: func_151A9940 `kind_effect_spawn` (1D5710), func_1516AD20
+`text_box_open` (1984F0), func_1505528C `thrown_object_update` (78230), func_151506E8 `particle_spray_spawn` (17D3C0),
+func_151D5AC4 `smoke_cloud_spawn`, func_151A74B0 `debris_spray_spawn` (1D4CC0), func_151D5714 `bone_beam_spawn`,
+func_151D4898 `object_sound_at`, func_151A7F00 `path_record_create` (1D5710), func_151D5FC8 `object_mouth_point`,
+func_151D4684 `object_sounds_at` (201240). func_15081974 (AE930) takes `f32` for its second parameter.
+- func_15154728 `spark_shower_spawn` verified (draft `p155/d_4728.c`) but NOT committed: game_eu_125200.c:36 (not
+  port-b) declares it `void`; 1191C0 needs `s32`. Fix that prototype (+ port-b NM prototypes 201240:398, 1EDA00:12,
+  1D3420:743 -> s32), then insert.
+- Checks: verify_all rc 0, NM build links, protocheck 0 (1182 bodies), selftest 62/62.
+  progress_nm total 5176/5915 (87.5%), game 4645/5334, C bytes 68.5%, 739 asm-only.
+
+## Next steps (from P155)
+
+1. func_15154728: after the 125200 prototype fix, insert `p155/d_4728.c`.
+2. func_151D441C: prototypes in 12C0B0 / 12BB30 (void) vs 12D5D0 (s32) must agree first.
+3. func_151D469C / func_151D611C (201240): check the D_80090010 / D_80087030 handler tables (C or stubs) first.
+4. Next port-b asm with C callers (`p155/asmlist.py`): func_151C0434 (133, 1EDA00), func_150F0BEC (151, 11CB90),
+   func_151C230C (151, 1EDA00), func_151A2C9C (157, 1CE7D0), func_1514FE68 (168, 17D3C0).
+5. Browser: P155.md UNVERIFIED (post-opening cutscene text boxes, level-0 thrown objects).
+
 ## P153 (port-b) (session P153, 2026-10-23). Details: `docs/port/sessions/P153.md`
 
 Branch `port-b` (from P150 53f4db6). Hand C (NM), difftest EQUIV + setups + mutants:

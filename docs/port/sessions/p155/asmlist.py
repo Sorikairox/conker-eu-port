@@ -11,7 +11,7 @@ game_eu_13A8A0 game_eu_15B2E0 game_D5030 game_eu_F5580 game_eu_D4C90 game_eu_13B
 game_eu_193A00 game_eu_1A7B30 game_eu_138E00 game_eu_1B5C40 game_BC510 game_eu_186A80 game_eu_D3880 game_eu_D4550
 game_eu_197680 game_eu_EF6D0 game_eu_EF410 game_eu_EF370 game_eu_1CE7D0 game_eu_E0170 game_eu_E17A0 game_eu_1D9C00
 game_eu_11CB90 game_eu_12A7C0 game_eu_12E390 game_eu_AF2A0 game_eu_E7BC0 game_eu_1B7D70 game_eu_1DDE10 game_eu_1BE5C0
-game_eu_1D3420 game_2062D0 game_eu_AE930 game_eu_17D3C0""".split())
+game_eu_1D3420 game_2062D0 game_eu_AE930 game_eu_17D3C0 game_eu_1EDA00 game_eu_1D5710 game_eu_1984F0 game_eu_1D4CC0 game_eu_201240""".split())
 cfe4 = 'E7BC0 FABD0 11CB90 12A7C0 12E390 169510 16DC80 1B7D70 1BAF40 1BE5C0 1C3530 1D3420 1DDE10'.split()
 def nm_select(t):
     out, st = [], []

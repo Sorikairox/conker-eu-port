@@ -444,7 +444,7 @@ void func_151C1BD8(void *arg0) {
 }
 
 s32 func_151D4684(u8 *, s32, s32, s32, s32, s32, s32, s32);
-s32 func_151D4898(u8 *, s32, s32, s32, s32);
+void func_151D4898(u8 *, s32, s32, s32, s32);
 extern s32 (*D_800E0D64)(s32, s32, s32);
 
 void func_151C1C04(u8 *arg0, s32 arg1, s32 arg2, u8 arg3, s32 arg4) {

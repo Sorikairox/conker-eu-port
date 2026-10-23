@@ -1,0 +1,12 @@
+s/a = func_150484A0(dir\[0\], dir\[2\]) \* 10430.378f;/a = func_150484A0(dir[2], dir[0]) * 10430.378f;/
+s/((angle - 0x4000) | 1) \& 0xFFFF/((angle - 0x4000)) \& 0xFFFF/
+s/at\[0\] = pos\[0\] + dir\[0\] \* -90.0f;/at[0] = pos[0] + dir[0] * 90.0f;/
+s/at\[1\] = pos\[1\] + dir\[1\] \* -90.0f;/at[1] = pos[1] + dir[2] * -90.0f;/
+s/((s32 \*)at)\[1\] = ((s32 \*)pos)\[1\];/((s32 *)at)[1] = ((s32 *)pos)[0];/
+s/if (model != NULL) {/if (model == NULL) {/
+s/at\[1\] += height >> 1;/at[1] += height;/
+s/at\[1\] += height >> 1;/at[1] += (u16)height >> 1;/
+s/        facing = 0;/        facing = 1;/
+s/index = obj - D_800CC2D0;/index = obj - D_800CC2D0 - 1;/
+s/sound1, index, facing, flags, (s32)at);/sound1, index, facing, 0, (s32)at);/
+s/sound2, index, facing, flags, (s32)at);/sound1, index, facing, flags, (s32)at);/

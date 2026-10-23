@@ -62,9 +62,69 @@ void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
     func_151602C0(sp48, sp3C, (func_150ADA20() % 24U) + 0x22, 0xFF, 0xA1, 0xA2, 0xFFU, 0U, 0, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4684.s")
+#ifdef NON_MATCHING
+/* P155 */
+void func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
+// object_sounds_at: plays the sounds `sound1` and `sound2` (func_1505D1C4) at pos for object obj (its index in
+// D_800CC2D0) with `flags` and a source point: with dir, pos - 90 * dir and dir's binary angle - 0x4000 (odd) as
+// facing; without, pos raised by half the height of `model` (func_1507C7C0, when given) and facing 0. arg4 is
+// unused. Returns 0 (the asm leaves v0 unset; the caller ignores it).
+s32 func_151D4684(f32 *pos, f32 *dir, struct127 *obj, struct127 *model, s32 arg4, s32 sound1, s32 sound2, s32 flags) {
+    f32 at[3];
+    s16 height;
+    f32 a;
+    u32 angle;
+    s32 facing;
+    s32 index;
 
+    if (dir != NULL) {
+        a = func_150484A0(dir[0], dir[2]) * 10430.378f;
+        /* IDO's f32 -> u32 conversion: below 0 gives 0xFFFFFFFF (undefined in C, wasm traps) */
+        angle = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
+        facing = ((angle - 0x4000) | 1) & 0xFFFF;
+        at[0] = pos[0] + dir[0] * -90.0f;
+        at[1] = pos[1] + dir[1] * -90.0f;
+        at[2] = pos[2] + dir[2] * -90.0f;
+    } else {
+        ((s32 *)at)[0] = ((s32 *)pos)[0];
+        ((s32 *)at)[1] = ((s32 *)pos)[1];
+        ((s32 *)at)[2] = ((s32 *)pos)[2];
+        if (model != NULL) {
+            func_1507C7C0(model, &height, NULL, NULL);
+            at[1] += height >> 1;
+        }
+        facing = 0;
+    }
+    index = obj - D_800CC2D0;
+    func_1505D1C4(pos[0], pos[1], pos[2], sound1, index, facing, flags, (s32)at);
+    func_1505D1C4(pos[0], pos[1], pos[2], sound2, index, facing, flags, (s32)at);
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4684.s")
+#endif
+
+#ifdef NON_MATCHING
+/* P155 */
+// object_sound_at: plays sound `sound` (func_1505D1C4) at pos for object obj (its index in D_800CC2D0), with the
+// direction of dir (x / z, binary angle - 0x4000, odd) or 0 without dir. arg3 is unused.
+void func_151D4898(f32 *pos, f32 *dir, struct127 *obj, s32 arg3, s32 sound) {
+    f32 a;
+    u32 angle;
+    s32 facing;
+
+    facing = 0;
+    if (dir != NULL) {
+        a = func_150484A0(dir[0], dir[2]) * 10430.378f;
+        /* IDO's f32 -> u32 conversion: below 0 gives 0xFFFFFFFF (undefined in C, wasm traps) */
+        angle = (a <= -1.0f) ? 0xFFFFFFFF : (u32)a;
+        facing = ((angle - 0x4000) | 1) & 0xFFFF;
+    }
+    func_1505D1C4(pos[0], pos[1], pos[2], sound, obj - D_800CC2D0, facing, 0, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D4898.s")
+#endif
 
 typedef struct { f32 x, y, z; } V3;
 
@@ -412,11 +472,75 @@ void func_151D5BF8(u8 *arg0, u8 arg1, s32 arg2) {
 #endif
 }
 
+#ifdef NON_MATCHING
+/* P155 */
+void func_15145EA4(f32 **, f32 **, void *, s32);
+void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+// bone_beam_spawn: unless obj has no bone matrices (+0x1D4) or is hidden (+0x74 low nibble 0xF), transforms the
+// points a and b by bone `bone` (func_15145EA4, two points) and starts the effect func_151D49B8 at a's world
+// position along b - a (with the bone matrix, obj, scale, alpha and flags).
+void func_151D5714(struct127 *obj, f32 *a, f32 *b, u8 bone, f32 scale, u8 alpha, s32 flags) {
+    f32 *outs[2];
+    f32 *ins[2];
+    u8 *mtx;
+    f32 dir[3];
+    f32 at[3];
+
+    if (obj->unk1D4 == NULL || (((u8 *)obj)[0x74] & 0xF) == 0xF) {
+        return;
+    }
+    outs[0] = at;
+    outs[1] = dir;
+    mtx = (u8 *)obj->unk1D4 + bone * 64;
+    ins[0] = a;
+    ins[1] = b;
+    func_15145EA4(ins, outs, mtx, 2);
+    dir[0] -= at[0];
+    dir[1] -= at[1];
+    dir[2] -= at[2];
+    func_151D49B8((u8 *)at, (u8 *)dir, (s32)mtx, (u8 *)obj, scale, alpha, flags);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5714.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5DA8.s")
 
+#ifdef NON_MATCHING
+/* P155 */
+void func_15145EA4(f32 **, f32 **, void *, s32);
+// object_mouth_point: P155: func_15145740 (obj, dir, arg3, arg4, 0.811), then out = `point` transformed by obj's
+// bone `bone` (func_15145EA4) or, without bone matrices, obj's position + 49 up + 34 to the side of dir (x / z
+// normalised, (0, 1) when both are below 0.0001). Returns 0 (the asm leaves v0 unset; the caller ignores it).
+s32 func_151D5FC8(struct127 *obj, f32 *out, f32 *dir, s32 arg3, s32 arg4, f32 *point, u8 bone) {
+    f32 *ins[1];
+    f32 *outs[1];
+    f32 n;
+    f32 sx, sz;
+
+    func_15145740(obj, (s32)dir, arg3, arg4, 0.81100005f);
+    if (obj->unk1D4 != NULL) {
+        outs[0] = out;
+        ins[0] = point;
+        func_15145EA4(ins, outs, (u8 *)obj->unk1D4 + bone * 64, 1);
+        return 0;
+    }
+    if (fabsf(dir[0]) > 0.0001f || fabsf(dir[2]) > 0.0001f) {
+        n = 1.0f / sqrtf(dir[0] * dir[0] + dir[2] * dir[2]);
+        sz = dir[2] * n;
+        sx = -dir[0] * n;
+    } else {
+        sz = 1.0f;
+        sx = 0.0f;
+    }
+    out[0] = obj->x_position + 34.0f * sx;
+    out[1] = obj->y_position + 49.0f;
+    out[2] = obj->z_position + 34.0f * sz;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D5FC8.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_201240/func_151D611C.s")
 
