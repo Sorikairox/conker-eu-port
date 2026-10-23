@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P137, 2026-10-23, port-web). Details: `docs/port/sessions/P137.md`
+
+- Merged port-b 48f7258 (P130/P133), port caf7013 (P132), port 40dc311 (P134). Only HANDOFF conflicts; game_16DC80.c
+  func_1513D524 hack removed; game_eu_20B730.c D_800E0FB8 unified to `u8 **` (P134's `s32 *` broke the NM build).
+  verify OK, NM links, protocheck 0 (1102), float-int BUG 0, arity 118, census 722 ok / 0 FAIL, m2c_sanity 234 / 41 high.
+- New game: no trap; level 0x18 opening is black (fade 255) for ~1680 frames, then the throne cutscene draws (5-8k tris).
+- Shadows: renderer now supports offscreen colour images (FBO + RDRAM write-back); before that the P130 shadow pass
+  painted the screen white. Conker has a shadow on level 0 / 0x2C. P113 guard removed (log-only STALE check).
+- Open: node noev stops advancing game frames at ~1730 after the 40dc311 merge (Chrome fine).
+
+## Next steps (from P137)
+
+1. Node noev stall after 40dc311 (rerun with P131 knobs, bisect).
+2. Check the opening's fade-in event time vs scene data; then mode-0 stubs func_151408A4, func_151432BC.
+3. Frame-DL stubs func_1513100C / func_1513095C / func_15169FB8 / func_1518010C; func_1513CFE4.
+
 ## State (session P135, 2026-10-23, port-web, tooling). Details: `docs/port/sessions/P135.md`
 
 - `port/tools/m2c_sanity.py` gains per-base kinds `pscale` / `pindex` (typed pointer LOADED from memory: pointer

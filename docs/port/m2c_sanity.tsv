@@ -1,5 +1,4 @@
 function	file	kind	conf	path	detail
-func_15036BB4	conker/src_eu/game_eu_64070.c	pscale	high	2	L46/L75 (x*4)+&D_800CC2D0[i] on %struct.struct127 (size 812): byte scale 3248; asm adds {x4} to that base
 func_150A44A4	conker/src_eu/game_eu_D1760.c	width	high	2	A3:0 asm{h1L} IR{b2L}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E4 asm{h2LS} IR{w3LS}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E8 asm{h2LS} IR{w3LS}
@@ -43,6 +42,7 @@ func_1518C900	conker/src_eu/game_eu_1BA680.c	width	high	2	O:0 asm{b2LS,w3L} IR{w
 func_15051558	conker/src_eu/game_eu_78230.c	width	high	1	O:0 asm{b1L,w2L} IR{w2L}
 func_15149DA8	conker/src_eu/game_eu_1772D0.c	width	high	1	O:36 asm{h4LS,w3LS} IR{w2LS}
 func_151A5C10	conker/src_eu/game_eu_1D3420.c	width	high	1	O:64 asm{b3L} IR{w1L}
+func_151DFD0C	conker/src_eu/game_eu_20B730.c	width	high	1	O:0 asm{b2L,w1L} IR{w1L}
 func_150A6070	conker/src_eu/game_eu_D3880.c	width	high	0	O:0 asm{h1L,w5LS} IR{w1L}
 func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:16 asm{b2L} IR{w1L}
 func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:4 asm{b1L} IR{w2L}
@@ -199,8 +199,6 @@ func_15020090	conker/src_eu/game_eu_4A070.c	width	low	2	O:8 asm{w1S} IR{h1L,w5S}
 func_15022A8C	conker/src_eu/game_eu_4A070.c	width	low	2	O:0 asm{h2L,w1L} IR{b1L,h2L,w1L}
 func_150268BC	conker/src_eu/game_eu_51190.c	width	low	2	O:2 asm{b1L,h10L} IR{h33L}
 func_1502CFEC	conker/src_eu/game_eu_595D0.c	width	low	2	O:0 asm{h1L,w32LS} IR{w12LS}
-func_15036BB4	conker/src_eu/game_eu_64070.c	width	low	2	O:28 asm{b1S,w1S} IR{w1S}
-func_15036BB4	conker/src_eu/game_eu_64070.c	width	low	2	O:44 asm{b1S,w1S} IR{w1S}
 func_1503DAF4	conker/src_eu/game_eu_6AA20.c	width	low	2	O:0 asm{w3LS} IR{h2S,w1L}
 func_1505E0C4	conker/src_eu/game_83300.c	width	low	2	O:6 asm{h2LS} IR{b1L,h2LS}
 func_1506AD30	conker/src_eu/game_981E0.c	width	low	2	O:0 asm{w2L} IR{b1L,w2L}

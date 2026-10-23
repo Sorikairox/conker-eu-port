@@ -907,7 +907,7 @@ extern s8 D_800902D8;           /* previous list selection */
 extern s8 D_800902DC;           /* chapter step direction (-1 / 1) */
 extern u8 D_800902E0;           /* blink phase of the selected entry */
 extern s8 D_80090150;           /* list selection */
-extern s32 *D_800E0FB8;         /* text table (scene names) */
+extern u8 **D_800E0FB8;          /* text table (scene names); P137: u8 ** as the loader below (P134 declared s32 *; NM build failed on the redeclaration) */
 extern s32 D_800E9D00;          /* cheat / unlock flags */
 extern u8 D_800BE7FE;
 extern u8 D_800E0B94;
