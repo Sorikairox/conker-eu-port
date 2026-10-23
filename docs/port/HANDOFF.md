@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P125 (port-b) (session P125, 2026-10-23). Details: `docs/port/sessions/P125.md`
+
+Branch `port-b` (from P122 422e5d3); the orchestrator merges it into `port`.
+
+- C (NM), all EQUIV + mutants: menu stubs func_1516865C `sprite_quad_init` (game_1944C0.c, now `s32 (u8 *, s32 x4)`
+  to match its callers), func_15054F74 `menu_object_update` (game_eu_78230.c, file prototype -> void),
+  func_1510E004 `blob_shadow_update` (game_eu_13B700.c), func_15179008 `rain_update` + its asm callee func_1517A084
+  `rain_spawn_splashes` (game_eu_1A6C30.c); func_15184298 `anim_meshes_update` (game_eu_1B1010.c) with its asm
+  callees func_151661F0 `mesh_swing_update` (game_eu_193A00.c) and func_1517A320 `flag_wave_update`
+  (game_eu_1A7B30.c).
+- Not done: func_15149AC0 (needs func_1513D524 to return its record: functions.h:772 + game_169510.c),
+  func_150A6C40 (caller game_eu_13C400.c:576 declares s32; asm is void), the rest of the per-frame group.
+- verify_all OK, NM links, protocheck = only the known game_A9D90.c func_1517FD84 lines. progress_nm total
+  5048/5915.
+
+## Next steps (from P125)
+
+1. func_15149AC0 (menu, 1451 hits): change `func_1513D524` to return `func_1513D2F0(...)` (game_169510.c, check
+   byte-identical) and functions.h:772 to `struct210 *` (or `u8 *`), then convert (stack struct sp44..spDC, one
+   struct: the record copy memcpy(rec + 0x110, &sp44, 0x50)).
+2. func_150A6C40: decide the caller prototype (game_eu_13C400.c:576 `s32` -> void), then convert (reading in P125.md).
+3. func_15179008 callers game_eu_1231B0.c:140 / game_eu_1387B0.c:10 have no prototype (implicit int): check the
+   wasm link for a signature-mismatch stub.
+4. Per-frame stubs still open: func_1510CE28, func_15188630, func_1508F9F4 + func_1509093C, func_1515929C,
+   func_1505528C (its callee func_15058898 is also a menu stub).
+5. Browser: menu sprites / shadows / rain / animated meshes (UNVERIFIED list in P125.md).
+
 ## P122 (port-b) (session P122, 2026-10-23). Details: `docs/port/sessions/P122.md`
 
 Branch `port-b` (from P119 3b9eea1); the orchestrator merges it into `port`.
