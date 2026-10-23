@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P143 (port-b) (session P143, 2026-10-23). Details: `docs/port/sessions/P143.md`
+
+Branch `port-b` (from P142 a4cc21e); the orchestrator merges it into `port`.
+
+- P142's func_1513CFE4 handler list was wrong: D_8008A1B0 has 3 slots, D_8008A1BC after it is the +0x73 draw
+  table. Real asm handlers were 8; P143 converted 5 (func_150BA904, func_1518A604, func_151B173C, func_15191A90,
+  func_151A6BB0) plus func_151DAB58 `splash_ring_spawn` (2062D0, asm callee of two of them) and the three draw-table
+  quad builders func_1513E83C / func_1513EE14 / func_15140190 (169510). All hand C (NM), difftest EQUIV + mutants.
+- func_1513CFE4: verified draft `docs/port/sessions/p143/d_cfe4.c` (EQUIV, mutants 28/28), not inserted: still
+  asm handlers func_150EF90C (11CB90, + asm callee func_15081A90 in AF2A0), func_150FDA94 (12A7C0),
+  func_151018F8 (12E390).
+- Files taken: game_eu_E7BC0, game_eu_1B7D70, game_eu_1DDE10, game_eu_1BE5C0, game_eu_1D3420, game_2062D0.
+- Checks: verify_all rc 0, NM build links rc 0, protocheck 5 lines = 4 known pairs + game_eu_11A2B0.c:9.
+  progress_nm total 5108/5915 (86.4%), game 4578/5334, C bytes 65.3%, 807 asm-only.
+
+## Next steps (from P143)
+
+1. func_150FDA94, func_151018F8, func_150EF90C (+ func_15081A90), then insert `p143/d_cfe4.c` (+ its setups for a
+   final re-run) into game_169510.c.
+2. Browser: sprite quads, splash rings, falling debris / drops, bubble emitters, bone-attached effects.
+3. func_15153BA4 (17D3C0) for func_151BF678's flash particle (not started).
+
 ## P142 (port-b) (session P142, 2026-10-23). Details: `docs/port/sessions/P142.md`
 
 Branch `port-b` (from P139 9c9369d); the orchestrator merges it into `port`.

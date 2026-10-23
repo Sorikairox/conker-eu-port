@@ -24,7 +24,7 @@ s32 func_151AC97C(u8 *arg0) {
 
 typedef struct { f32 x, y, z; s32 a, b; } Node14;
 u8 func_151D8E20(void);
-s32 func_151DAB58(u8, f32, u8, f32 *, s32, s32, s32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
 s32 func_151AC9B8(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     u8 *tbl;
     u8 *obj;
