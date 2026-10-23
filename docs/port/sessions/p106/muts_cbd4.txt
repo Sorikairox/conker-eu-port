@@ -1,0 +1,7 @@
+s/while (e != 0xFFFF)/while (e != 0xFFFE)/ %
+s/|| ok == 0) {/) {/ %
+s/(1 << (e \& 7))/(1 << (e \& 3))/ %
+s/\[e >> 3\]/[e >> 4]/ %
+s/    return 1;/    return 2;/ %
+s/        p++;/        p += 2;/ %
+s/ + id \* 0x14 + 0xC/ + id * 0x14 + 0x8/ %

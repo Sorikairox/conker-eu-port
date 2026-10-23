@@ -546,6 +546,10 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
     for _k in range(int(_n)):
         POKES[(int(_a, 16) + 4 * _k) & 0x1FFFFFFF] = int(_v, 16) & 0xFFFFFFFF
 
+# P106 (opt-in): DIFFTEST_MEMSTK="ADDR,..." (hex): memory words that hold a stack address (a function that saves
+# its sp in a global, e.g. func_150ADFD0 -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
+MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTEST_MEMSTK', '').split(','))]
+
 # P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
 # reach code behind a callee's result (e.g. an early return unless func_1517F51C() == 0).
 STUBRET = {}
@@ -892,9 +896,17 @@ class Run:
 
     def dirty(self):
         out = []
-        for p in sorted(self.writes):
+        w = self.writes
+        if MEMSTK:   # P106: words that hold a stack address (e.g. a saved sp) compare by class, like registers
+            w = dict(w)
+            for a in MEMSTK:
+                if all(a + i in w for i in range(4)):
+                    v = struct.unpack('>I', bytes(w[a + i] for i in range(4)))[0]
+                    if self.norm(v) == 'STK':
+                        for i in range(4): w[a + i] = 0x5A
+        for p in sorted(w):
             init = self.page_init(p & ~(PAGE - 1))[p & (PAGE - 1)]
-            if self.writes[p] != init: out.append((p, self.writes[p]))
+            if w[p] != init: out.append((p, w[p]))
         return out
 
     def norm(self, v):
@@ -1126,7 +1138,11 @@ def compare(R, C, rk, arity):
         k = min(set(sr) ^ set(sc) | {p for p in sr if p in sc and sr[p] != sc[p]})
         return 'memory differs at 0x%08X (ref=%s cand=%s)' % (k, '%02X' % sr[k] if k in sr else 'init', '%02X' % sc[k] if k in sc else 'init')
     o, p = R.out, C.out
-    if o['sp'] != p['sp'] or o['s'] != p['s'] or o['fs'][::2] != p['fs'][::2]:
+    # P106: DIFFTEST_SIGNORE="7,..." leaves s-registers out (hand asm that uses s7 as its ra save: the event VM's
+    # native helpers, whose caller saved s7 itself)
+    sig = {int(x) for x in filter(None, os.environ.get('DIFFTEST_SIGNORE', '').split(','))}
+    os_ = [v for k, v in enumerate(o['s']) if k not in sig]; ps_ = [v for k, v in enumerate(p['s']) if k not in sig]
+    if o['sp'] != p['sp'] or os_ != ps_ or o['fs'][::2] != p['fs'][::2]:
         return 'callee-saved registers not restored the same way'
     if rk == 'int' and not same_val(R, o['v0'], C, p['v0']):
         return 'return v0 ref=0x%X cand=0x%X' % (o['v0'], p['v0'])
@@ -1256,7 +1272,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         cwords = strip_pad(cwords)
         if not spath:   # C function: reference = ROM bytes, same length as the matched object
             rom = vram2rom(vram); raw = open('conker.eu.bin', 'rb').read()
-            n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN', '0')) // 4 or len(cwords)
+            n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN') or '0') // 4 or len(cwords)
             rwords = [struct.unpack_from('>I', raw, rom + 4 * k)[0] for k in range(n)]
     except CompileError as e:
         return dict(func=func, file=p, result='CERR', line='CERR %s: %s' % (func, str(e).replace('\n', ' | ')[:300]))
@@ -1281,7 +1297,7 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     def one(t):
         rng = random.Random(h32('trial', seed, t))
         inputs = make_inputs(rng, kinds)
-        romdata = t % 2 == 1
+        romdata = t % 2 == 1 or os.environ.get('DIFFTEST_ROMDATA') == '1'   # P106: always the ROM .data (jump / opcode tables)
         forced = {}; lrn = 0
         WLOG_ON[0] = 'R' if WLOG and str(t) == WLOG_T else None
         pw = t < 2

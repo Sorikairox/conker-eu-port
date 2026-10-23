@@ -1,0 +1,48 @@
+# P106 VM mutants (sed on ev/vm.c % setups). Run: NORAND=1 DIFFTEST_ROMDATA=1 DIFFTEST_MEMSTK=800D3C78 mut.sh
+s/case 0x01: \*addr\[0\] = (u32) val\[1\] + (u32) val\[2\]/case 0x01: *addr[0] = (u32) val[1] - (u32) val[2]/ % op01_imm op01_var op01_frm
+s/case 0x02: \*addr\[0\] = (u32) val\[1\] - (u32) val\[2\]/case 0x02: *addr[0] = (u32) val[2] - (u32) val[1]/ % op02_imm op02_var
+s/\*addr\[0\] = (u32) val\[1\] \* (u32) val\[2\]/*addr[0] = (u32) val[1] * (u32) val[1]/ % op03_imm op03_var
+s/\*addr\[0\] = val\[1\] \/ val\[2\]/*addr[0] = (u32) val[1] \/ val[2]/ % op04_neg op04_imm op04_var op04_frm
+s/\*addr\[0\] = -(u32) val\[1\];$/*addr[0] = val[1];/ % op04_m1 op04_m1b
+s/case 0x06: \*addr\[0\] = -(u32) val\[1\]/case 0x06: *addr[0] = ~val[1]/ % op06_imm op06_var
+s/\*addr\[0\] = (val\[1\] == 0); break/*addr[0] = (val[1] != 0); break/ % op07_imm op07_zero
+s/case 0x08: \*addr\[0\] = ~val\[1\]/case 0x08: *addr[0] = -val[1]/ % op08_imm op08_var
+s/val\[1\] & val\[2\]/val[1] \& ~val[2]/ % op09_imm op09_var
+s/val\[1\] | val\[2\]/val[1] ^ val[2]/ % op0A_imm op0A_var
+s/case 0x0B: \*addr\[0\] = val\[1\] ^ val\[2\]/case 0x0B: *addr[0] = val[1] | val[2]/ % op0B_imm op0B_var
+s/(val\[2\] & 31); break; *$/(val[2] \& 15); break;/ % op0C_big op0C_var op0C_imm op0C_frm
+s/case 0x0D: \*addr\[0\] = val\[1\] >> (val\[2\] & 31)/case 0x0D: *addr[0] = (u32) val[1] >> (val[2] \& 31)/ % op0D_neg op0D_imm op0D_var op0D_frm
+s/case 0x0E: \*addr\[0\] = val\[1\]/case 0x0E: *addr[0] = val[1] + 1/ % op0E_imm
+s/case 0x0F: pc = (u16 \*) (base + val\[0\])/case 0x0F: pc = (u16 *) (base + val[0] + 2)/ % jmp0F_c0
+s/case 0x10: if (val\[0\] == 0)/case 0x10: if (val[0] != 0)/ % jmp10_c0 jmp10_c1
+s/case 0x11: if (val\[0\] != 0)/case 0x11: if (val[0] > 0)/ % jmp11_c-1 loop_jnz
+s/(val\[1\] < val\[2\]); break; *$/(val[1] <= val[2]); break;/ % op12_imm op12_var op12_res op12_frm op12_dat op12_neg op12_big op12_eq
+s/case 0x13: \*addr\[0\] = (val\[2\] < val\[1\])/case 0x13: *addr[0] = (val[1] < val[2])/ % op13_imm op13_var
+s/case 0x14: \*addr\[0\] = !(val\[2\] < val\[1\])/case 0x14: *addr[0] = !(val[2] <= val[1])/ % op14_imm op14_var op14_frm op14_res op14_dat op14_neg op14_big op14_eq
+s/case 0x15: \*addr\[0\] = !(val\[1\] < val\[2\])/case 0x15: *addr[0] = !(val[2] < val[1])/ % op15_imm op15_var
+s/(val\[1\] == val\[2\])/(val[1] == val[2] + 1)/ % op16_imm op16_var op16_res op16_frm op16_dat op16_big op16_neg op16_eq
+s/(val\[1\] != val\[2\])/(val[1] > val[2])/ % op17_imm op17_var op17_neg op17_frm
+s/D_800D3C64++;/D_800D3C64 += 2;/ % call_ret_imm2 nat0_n1
+s/? (s32) addr\[0\] : val\[0\]/? val[0] : val[0]/ % call_ret_dat2 call_retv_dat2
+s/D_800D3C60 = D_800D3C64;/D_800D3C60 = 0;/ % nat0_n1 nat0_n3 nat1_n3
+s/(sp, EV_NATIVE, addr\[0\])/(sp + 1, EV_NATIVE, addr[0])/ % nat0_n1 nat0_n3 nat13_n3
+s/D_800D3C68 = result;/D_800D3C68 = result + 1;/ % nat0_n0 nat0_n1
+s/                    \*sp = (s32) pc;/                    *sp = (s32) (pc + 1);/ % call_ret_imm0 call_retv_imm2
+s/sp = (s32 \*) ((u8 \*) sp - val\[0\]);/sp = (s32 *) ((u8 *) sp - val[0] + 4);/ % call_ret_imm2 call_retv_var3
+s/                D_800D3C68 = val\[0\];/                D_800D3C68 = val[0] + 1;/ % call_retv_imm0 call_retimm_imm0
+s/if (sp >= top) {/if (sp > top) {/ % call_ret_imm0 romC9_e0 call_noenter
+s/case 0x1D: \*addr\[0\] = addr\[1\]\[val\[2\]\]/case 0x1D: *addr[0] = addr[1][val[2] + 1]/ % arr_k0 arr_k1 arr_k3
+s/case 0x1E: addr\[1\]\[val\[2\]\] = val\[0\]/case 0x1E: addr[1][val[2]] = val[0] + 1/ % arr_k0 arr_k1
+s/val\[n\] = ((u32) pc\[0\] << 16) | pc\[1\];/val[n] = ((u32) pc[1] << 16) | pc[0];/ % long_w1 long_w2 long_w3 long_w23
+s/                        wide = 0;/                        wide = 1;/ % long_w23 long_w2
+s/wide = (op >> 6) \& 1;/wide = 0;/ % long_w1 long_w2
+s/val\[n\] = (n == 0) ? 6 : D_800D3C68;/val[n] = D_800D3C68;/ % quirk_res_dat call_ret_res2
+s/val\[n\] = 5;/val[n] = 0x40;/ % quirk_res_dat
+s/addr\[n\] = (s32 \*) (vars + off);/addr[n] = (s32 *) (data + off);/ % op01_var op0E_var
+s/addr\[n\] = (s32 \*) ((u8 \*) frame + off);/addr[n] = (s32 *) ((u8 *) sp + off);/ % op01_frm call_ret_imm2 call_retv_frm2
+s/                        val\[n\] = off;/                        val[n] = *addr[n];/ % op01_dat op0E_dat
+s/pc = (u16 \*) (base + hdr\[6 + entry\]);/pc = (u16 *) (base + hdr[7 + entry]);/ % entry1 entry2
+s/pc = (u16 \*) (base + 0x20);/pc = (u16 *) (base + 0x24);/ % entry0
+s/u8 \*vars = base + hdr\[5\];/u8 *vars = base + hdr[4];/ % op01_var
+
+s/\*addr\[0\] = 0;/*addr[0] = 1;/ % op05_m1 op05_m1b

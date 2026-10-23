@@ -6,6 +6,9 @@
 struct249 *func_1509B704(s16 arg0);
 void func_1509C120(void);
 void func_1509C3A0(void);
+#ifdef NON_MATCHING
+struct249 *func_1509B5AC(s32 id, s32 arg1);
+#endif
 
 
 void func_1509B4A0(s32 arg0, s32 arg1) {
@@ -39,7 +42,52 @@ u16 *func_1509B570(s32 arg0) {
     return NULL;
 }
 
+#ifdef NON_MATCHING
+struct249 *func_1509B704(s16 arg0);
+struct249 *func_1509B8FC(s16 arg0);
+void func_1509B810(struct249 *arg0);
+void func_150ADFD0(struct249 *, s32);
+
+/* event_start: start event `id` (arg1 = 0: level start, skipped when the event's own save bit is set). An event not yet in the
+ * list is loaded (func_1509B8FC), linked (func_1509B810) and run once from entry 0 unless the save bit of its flags
+ * (flags & 0x3FF) is set; flag 0x4000 marks it started (always at level start, else only with flag 0x400). An event
+ * already in the list with flag 0x1000 and not 0x800 gets its variables cleared when arg1 != 0. */
+struct249 *func_1509B5AC(s32 id, s32 arg1) {
+    struct249 *e = func_1509B704(id);
+    u8 *save = (u8 *) D_800D2E4C;
+    u16 flags;
+    s32 bit;
+
+    if (arg1 == 0 && (save[id >> 3] & (1 << (id & 7)))) {
+        return NULL;
+    }
+    if (e == NULL) {
+        e = func_1509B8FC(id);
+        func_1509B810(e);
+        flags = e->unk0;
+        bit = flags & 0x3FF;
+        if (!(save[bit >> 3] & (1 << (bit & 7)))) {
+            D_8003C8E0 = 0x6000000;
+            func_150ADFD0(e, 0);
+            D_8003C8E0 = 0;
+            flags = e->unk0;
+        }
+        if (arg1 == 0 || (flags & 0x400)) {
+            e->unk0 = flags | 0x4000;
+        }
+        return e;
+    }
+    if (arg1 != 0) {
+        flags = e->unk0;
+        if ((flags & 0x1000) && !(flags & 0x800)) {
+            bzero((u8 *) e + ((struct_eu_C8950_blk *) e)->unkA, ((struct_eu_C8950_blk *) e)->unk6);
+        }
+    }
+    return e;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B5AC.s")
+#endif
 
 struct249 *func_1509B704(s16 arg0) {
     struct249 *tmp;
@@ -125,6 +173,19 @@ void func_1509B810(struct249 *arg0) {
     D_800D2F48.length += 1;
 }
 
+#ifdef NON_MATCHING
+/* event_load: load event block `arg0` (asset 20) and relocate it; the caller func_1509B5AC uses the result (the matching
+ * void version leaves it in v0). */
+struct249 *func_1509B8FC(s16 arg0) {
+    struct248 *temp_v0;
+    s16 sp18[2];
+
+    temp_v0 = func_1502B5C8(&sp18, 2, 20, arg0);
+    temp_v0->unk0 |= arg0;
+    temp_v0->unk2 = D_800BE9F0;
+    return (struct249 *) func_1509B950((struct_eu_C8950_blk *) temp_v0);
+}
+#else
 void func_1509B8FC(s16 arg0) {
     struct248 *temp_v0;
     s16 sp18[2];
@@ -134,8 +195,33 @@ void func_1509B8FC(s16 arg0) {
     temp_v0->unk2 = D_800BE9F0;
     func_1509B950(temp_v0);
 }
+#endif
 
+#ifdef NON_MATCHING
+/* event_block_relocate: relocate a loaded event block: the variable area (unk6 bytes) goes after the script at an 8-aligned offset
+ * (unkA), the block size is rounded up to 8, the block is copied to a new allocation with the variables cleared,
+ * and the old block is freed. */
+struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *blk) {
+    struct_eu_C8950_blk *new;
+    u16 pos;
+
+    pos = blk->unk4 + (8 - (((s32) blk + blk->unk4) & 7));
+    blk->unk4 = pos + blk->unk6;
+    blk->unkA = pos;
+    blk->unk4 = blk->unk4 - (((s32) blk + blk->unk4) & 7) + 8;
+    new = (struct_eu_C8950_blk *) allocate_memory(blk->unk4, 0xFF, 2, 0);
+    if (new == NULL) {
+        while (1) {
+        }
+    }
+    bcopy((void *) blk, (void *) new, blk->unk4);
+    bzero((u8 *) new + new->unkA, new->unk6);
+    func_10004074((s32) blk);
+    return new;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_C8950/func_1509B950.s")
+#endif
 // NON-MATCHING: register allocation of pad/pos swapped (v1/t0)
 // struct_eu_C8950_blk *func_1509B950(struct_eu_C8950_blk *arg0) {
 //     u16 pos;
@@ -159,7 +245,7 @@ void func_1509B8FC(s16 arg0) {
 // }
 
 #ifdef NON_MATCHING
-s32 func_150ADFD0(struct249 *, s32);
+void func_150ADFD0(struct249 *, s32);
 void func_1509B764(struct249 *);
 void func_1509C228(void);
 
@@ -209,7 +295,7 @@ void func_1509BA04(s32 arg0) {
 #endif
 #ifdef NON_MATCHING
 s32 func_1509BE40(s32, s32, ...);
-s32 func_150ADFD0(struct249 *, s32);
+void func_150ADFD0(struct249 *, s32);
 extern s16 D_800BEE12;
 extern s32 D_800D3268;
 extern s32 D_800D3378;
