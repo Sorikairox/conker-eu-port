@@ -1,0 +1,19 @@
+s/\[id >> 3\] \& (1 << (id \& 7))/[id >> 3] \& (1 << (id \& 3))/ %
+s/func_1509B704(id))\[1\]/func_1509B704(id))[0]/ %
+s/if (D_80087270\[i\] != 10) {/if (D_80087270[i] != 11) {/ %
+s/return mask \& ~D_800D18A0;/return mask;/ %
+s/for (i = 0; i < D_8008FD8C; i++) {/for (i = 0; i <= D_8008FD8C; i++) {/ %
+s/return (s8) D_800BE3DF;/return D_800BE3DF;/ %
+s/if (sum >= pick \&\& args\[3 + i\] != 0) {/if (sum > pick \&\& args[3 + i] != 0) {/ %
+s/ \&\& args\[3 + i\] != 0) {/) {/ %
+s/return args\[2\] - 1;/return args[2];/ %
+s/pick = func_150ADA68() \* (f32) sum;/pick = func_150ADA68() * (f32) sum + 0.5f;/ %
+s/return D_8009015C \& 0x10;/return D_8009015C \& 0x20;/ %
+s/return D_800BED50\[args\[2\]\];/return D_800BED50[args[3]];/ %
+s/return D_800BED38\[args\[2\]\]\[0\];/return D_800BED38[args[2]][1];/ %
+s/return D_800E0B94 == 2;/return D_800E0B94 == 3;/ %
+s/return (ev->unk0 \& 0x2000) == 0;/return (ev->unk0 \& 0x2000) != 0;/ %
+s/(D_800D3C60 == 3) ? args\[2\] : 0/(D_800D3C60 == 4) ? args[2] : 0/ %
+s/return D_800E0FE1;/return (u8) D_800E0FE1;/ %
+s/case 0x2D:/case 0x2E:/ %
+s/return func_151E6710(args\[2\]);/return func_151E6710(args[3]);/ %

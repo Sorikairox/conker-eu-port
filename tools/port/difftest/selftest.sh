@@ -120,4 +120,10 @@ chkce DIFFER func_151DA6F8 "$SDA6F8 DIFFTEST_ARGMEM=15148310=0+18:4" 's/sb.owner
 # P100: a callee declared only in a header (sinf: include/libc/math.h): the call statement `sinf(temp->unk8)` was
 # read as an int-parameter prototype, so f12 was never compared (port-b P96: a `rad = ang` mutant survived).
 chk DIFFER func_15141564 src_eu/game_16DC80.c 's/sinf(temp->unk8)/sinf(temp->unk4)/'
+# P112: an indirect call whose argument register is set in an earlier block (event native 6: lw a1 before the branch
+# to the shared jalr tail) - a1 was not compared, the P106 args[1] -> args[0] mutant survived. Now every arg register
+# the reference wrote since the previous call counts for a jalr of an unknown function.
+AE60C="DIFFTEST_ROMDATA=1 DIFFTEST_EXACT=* DIFFTEST_REFLEN=104 DIFFTEST_SIGNORE=7 DIFFTEST_ARG=0=80490000,1=6,2=80491000 DIFFTEST_POKE=80490000=1001,80490004=1234"
+chkce EQUIV  func_150AE60C "$AE60C"
+chkce DIFFER func_150AE60C "$AE60C" 's/args\[1\], args)/args[0], args)/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

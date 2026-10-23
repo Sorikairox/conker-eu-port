@@ -10,6 +10,43 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P112, 2026-10-23). Details: `docs/port/sessions/P112.md`
+
+- **game_eu_CD540.c fully hand C (NM)**: func_1509FD30 (event_action_game_state, D_80088874[4]: 23 actions incl.
+  the abort sites `func_150AE760(); return 0;`, attract idle check, mode 10) and func_150A02EC
+  (event_query_game_state, D_80088838[4]: 20 queries). Random EQUIV + 65 / 45 knob setups EQUIV, mutants
+  MUTFD30 / MUT02EC killed. Host whole-VM test (`p112/vmabort/`): stopping the running event ends the script after
+  the native call, D_800D3858 cleared, result not stored; other events / pause go on.
+- **difftest**: a `jalr` call of an unknown function now compares every arg register the reference wrote on its path
+  since the previous call (P106's surviving a1 mutant in func_150AE5F8 / 60C now DIFFERs). `DIFFTEST_JALR_DYN=0`
+  disables. Selftest 51/51 (new case func_150AE60C). DIFFTEST_REFLEN is in bytes.
+- **Object removal producers** (coordinator re-order, browser P110 heap corruption at the logo scene end):
+  func_150849C0 (object_release_models, game_eu_AF2A0) and func_15060D54 (object_forget_target, game_83300) in
+  hand C (NM); setups EQUIV, mutants 8/10 (1 equivalent, 1 loop-bound gap) and 3/3. Their caller func_15060F28 is
+  C on port-b / port-web only.
+- **The real LogoScreen path**: event 0xC9 only does func_1509C850(1, 1) -> **func_1501D348(0x21, 1, 0, 0, 0)**
+  (scene start; asm, 473 insns, game_eu_4A070 = port-b). None of the D_80088874 / D_800887C0 asm handlers is on it.
+  The exit to the menu is the scene VM func_15024910 (asm, 2027, game_eu_51190) opcode 0x67 -> func_151DECB4.
+- Checks: full verify_all OK (code build, check_files, full ROM byte-identical), NM links, protocheck 0 (951 bodies), selftest 51/51, progress_nm 4945/5915 (83.6%), bytes 58.5%.
+
+## Next steps (from P112)
+
+0. Web: merge, re-run the logo scene end (func_15060F28 -> the two new C functions); other still-asm callees of
+   func_15060F28 were not re-listed here (stubcalls needs a port build; in the asm: func_1514D880, func_151695F0,
+   func_150626EC, func_1504AF10, func_1503E550, func_10004074, func_1516972C, func_100043B4, func_10010AA8,
+   func_150306D4, func_15189040, func_1505F188 - check them with stubcalls.py on port-web).
+   Scene stubs in my files still asm: func_15083F30 (182, game_eu_AF2A0), func_15024910 / func_15029EA8
+   (game_eu_51190), func_151149AC (28, game_eu_13DC30), func_150A4FE4 (295, game_eu_D1760), func_1513095C /
+   func_1513100C (game_eu_15E000) - file owners to check.
+1. **func_1501D348** (scene start; port-b's game_eu_4A070; runs on port-web already). Then the scene VM
+   **func_15024910** (game_eu_51190, 2027 insns): check that level 0x21 scene 1 reaches opcode 0x67 (scene data
+   reader still to write; evdis.py is for event blocks only).
+2. Menu level 0x1D: event 0xC8 needs func_15097D20 (47) and func_15097E9C (2146), both in port-b's game_eu_C5530;
+   mode 3 needs func_151DEDD0 + 8 page handlers in game_eu_20B730 (~3300 insns, map in P112.md), func_15007778
+   (game_33990, 46), func_151EE704 (game_eu_216470, 142), and func_1501D348 again.
+3. func_150039E0 (world objects, 741 insns, all callees C; map in P112.md).
+4. Web: re-run level 0x21 after func_1501D348 is C; the event handlers 0x5xxx (func_1509FD30 / func_150A02EC) are C now.
+
 ## State (session P106, 2026-10-23). Details: `docs/port/sessions/P106.md`
 
 - **Level event system committed as one unit** (NM hand C): func_1509CBD4 (prereqs), func_1509B950 (relocate),

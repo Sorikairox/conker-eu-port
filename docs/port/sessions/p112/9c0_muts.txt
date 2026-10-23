@@ -1,0 +1,11 @@
+s/if (k == self) {/if (k == self + 1) {/ %
+s/other\[5\] == 2/other[5] == 3/ %
+s/                    lastUser = 0;/                    lastUser = 1;/ %
+s/ \&\& model != 0) {/) {/ %
+s/for (k = 0; k < 187; k++) {/for (k = 0; k < 186; k++) {/ %
+s/(s32 \*) (model - 0x10), 3/(s32 *) (model - 0x10), 4/ %
+s/D_800D1C90\[parts\[j\]\] = NULL;/D_800D1C90[parts[j]] = D_800D1C90[parts[j]];/ %
+s/D_800C6070\[kind\] = 0;/D_800C6070[kind] = 1;/ %
+s/        lastUser = 1;\n/X/ %
+s/(\&D_800D19A0)\[parts\[j\]\] != 0/(\&D_800D19A0)[kind] != 0/ %
+s/for (k = 0; k < 25; k++) {/for (k = 0; k < 24; k++) {/ %

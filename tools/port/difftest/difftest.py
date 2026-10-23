@@ -931,6 +931,10 @@ class Run:
         self.flush_fregs()
         if self.vram <= addr < self.end:
             self.icount += max(1, size // 4)
+            # P112: arg registers this run wrote since the last call (path-sensitive; see compare: indirect calls)
+            for k in range((addr - self.vram) // 4, min(len(self.words), (addr - self.vram + size) // 4)):
+                d = gpr_dest(self.words[k])
+                if d is not None and 4 <= d <= 7: self.awr.add(d - 4)
             # P89: the frame is set up in the entry block; the next blocks see the function's own sp
             if self.nblk < 4:
                 self.nblk += 1; self.minsp = min(self.minsp, mu.reg_read(UC_MIPS_REG_SP))
@@ -952,7 +956,9 @@ class Run:
         # compared. DIFFTEST_STKW_OLD=1 restores the old window.
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
-        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs,
+        ind = site is not None and (self.words[site] & 0xFC00003F) == 9   # P112: reached through jalr
+        awr = self.awr; self.awr = set()
+        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, awr=awr,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
@@ -1021,7 +1027,7 @@ class Run:
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
         self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
-        self.minsp = SP_ENTRY; self.nblk = 0
+        self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set()
         while True:
             self.resume = None
             try:
@@ -1093,6 +1099,12 @@ def compare(R, C, rk, arity):
         # one-argument call to func_15048A40, which made a2 look like an argument)
         if na is not None and na != 99 and os.environ.get('DIFFTEST_PROTO_ARGS', '1') == '1': cnt = min(cnt, na)
         if na is None or na == 99: cnt = max(cnt, max(a['a'], default=-1) + 1)
+        # P112: an indirect call (jalr) of an unknown function: the reference may set an argument register in an
+        # earlier block (event natives 5 / 6 load a1 before branching to their shared jalr tail), which the
+        # straight-line scan above misses -> a1 was never compared (P106 args[1] -> args[0] mutant survived). Count
+        # every arg register the reference wrote on its path since the previous call. DIFFTEST_JALR_DYN=0 disables.
+        if na is None and a.get('ind') and os.environ.get('DIFFTEST_JALR_DYN', '1') != '0':
+            cnt = max(cnt, max(a['awr'], default=-1) + 1)
         # libultra prototypes are exact: a call site that also reloads a spilled a3 is not a 4th argument
         if na not in (None, 99) and a['name'].startswith(LIBULTRA_PREFIXES): cnt = na
         # P30 (opt-in): DIFFTEST_EXACT="NAME,..." or "*": those known prototypes are exact too (a scratch a2 left
