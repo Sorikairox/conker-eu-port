@@ -583,7 +583,7 @@ void func_150E8728(s32 arg0, u8 arg1, s32 arg2) {
 
     temp_a3 = arg0 & 0xFF;
     if ((temp_a3 == 4) || (temp_a3 == 5) || (temp_a3 == 6) || (temp_a3 == 7)) {
-        temp_t8 = (temp_a3 * 0xC) + &D_800A1660;
+        temp_t8 = (u8 *) &D_800A1660 + temp_a3 * 0xC;
         (*(s32 *)((u8 *)(&sp.u84) + 0)) = (s32) (*(s32 *)((u8 *)temp_t8 + 0));
         (*(s32 *)((u8 *)(&sp.u84) + 4)) = (s32) (*(s32 *)((u8 *)temp_t8 + 4));
         (*(s32 *)((u8 *)(&sp.u84) + 8)) = (s32) (*(s32 *)((u8 *)temp_t8 + 8));

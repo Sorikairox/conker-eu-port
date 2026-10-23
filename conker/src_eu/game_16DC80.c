@@ -34,7 +34,181 @@ struct210 *func_151407D0(void *emit, s32 emitSize, u8 *spawn, u8 arg3, u8 arg4, 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151407D0.s")
 #endif
 
+#ifdef NON_MATCHING
+s32 func_15144CEC(f32 *pos, f32 *scr, f32 *oz, f32 *ow, f32 *oinv, u8 view);
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+extern s32 (*D_8008A330[])(u8 *, s16);
+extern s32 D_800899D0[8][2];   /* z-buffer decode per exponent (code >> 13): {shift, add} */
+// particle_glow_update: per-player update of a light-flare particle (record from func_151407D0, emitter block at
+// +0x110). Runs the kind check D_8008A330[+0x169] (-1 = none), clears the player's screen cell (+0x134 / +0x144),
+// needs flag 2 (+0x58), projects the source (+0x34) with func_15144CEC and drops it outside the player's viewport
+// (D_800BE628[player] +0x24..+0x30). Gets 4 vertices from func_151D6310 (copying the 0x40-byte template at +0xC0
+// into a fresh buffer), normalises the axis (+0x40 = source + 500 * dir, once, flag 4), takes the facing term
+// dot(axis, camera - source) (0 = drop unless flag 0x10000), fades with distance (1 - e[0x20] * dist), and with
+// flag 0x10 tests occlusion: the projected depth (viewport scale 0x44 / 0x4C, x32) against the z-buffer code at
+// e[0x4C + 2 * player] decoded through D_800899D0 (visible if depth - zbuf < 0x1F); the per-player intensity
+// e[0x54 + player] eases towards 0xFF or 0 by 1/8 per frame (0xFF without flag 0x10). The quad is centred between
+// the source and the camera (lerp e[0x14]..e[0x10]), sized lerp e[8]..e[0] / e[0xC]..e[4] times e[0x48], laid
+// out perpendicular to the view direction; alpha +0x5C = intensity * lerp(e[0x1C]..e[0x18]) * 255 >> 8, copied
+// (scaled by +0x2B) into the linked object's +0x30. Returns the vertex buffer or NULL.
+u8 *func_151408A4(u8 *obj, s16 player) {
+    u8 *e;
+    f32 *cam;
+    f32 *view;
+    u8 *verts;
+    u8 *link;
+    u8 reload;
+    f32 scr[2];
+    f32 oz;
+    f32 ow;
+    f32 oinv;
+    f32 dx, dy, dz, d2, s;
+    f32 r0, r1, r2;
+    f32 ax, ay, az;
+    f32 facing, dist, fade, inv, horiz, ih;
+    f32 t, px, py, pz, w, h, hh, wh;
+    f32 ux, uy, uz, vx, vz;
+    s32 vis;
+    s32 visible;
+    s16 depth = 0;
+    u32 code;
+    u32 zbuf;
+    s16 alpha;
+
+    if ((s8) obj[0x169] != -1) {
+        if (D_8008A330[(s8) obj[0x169]](obj, player) == 0) {
+            return NULL;
+        }
+    }
+    e = obj + 0x110;
+    *(s32 *) (e + player * 4 + 0x34) = -1;
+    *(s32 *) (e + player * 4 + 0x24) = -1;
+    if (!(*(s32 *) (obj + 0x58) & 2)) {
+        return NULL;
+    }
+    vis = func_15144CEC((f32 *) (obj + 0x34), scr, &oz, &ow, &oinv, player);
+    if (vis == 0) {
+        return NULL;
+    }
+    view = (f32 *) ((u8 *) D_800BE628 + player * 0x180);
+    if (scr[0] < view[0x2C / 4] || view[0x30 / 4] < scr[0] || scr[1] < view[0x24 / 4] || view[0x28 / 4] < scr[1]) {
+        return NULL;
+    }
+    cam = func_15144B34(player);
+    func_151D6310((s32 *) (obj + 0x100), player, 0x40, (s32 *) &verts, &reload);
+    if (verts == NULL) {
+        return NULL;
+    }
+    if (reload) {
+        memcpy(*(u8 **) (obj + player * 4 + 0x100), obj + 0xC0, 0x40);
+        memcpy(*(u8 **) (obj + player * 4 + 0x100) + 0x40, obj + 0xC0, 0x40);
+    }
+    if (!(*(s32 *) (obj + 0x58) & 4)) {
+        dy = *(f32 *) (obj + 0x44) - *(f32 *) (obj + 0x38);
+        dx = *(f32 *) (obj + 0x40) - *(f32 *) (obj + 0x34);
+        dz = *(f32 *) (obj + 0x48) - *(f32 *) (obj + 0x3C);
+        d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 == 0.0f) {
+            *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x3C) + 500.0f;
+        } else {
+            s = 500.0f / sqrtf(d2);
+            *(f32 *) (obj + 0x40) = *(f32 *) (obj + 0x34) + dx * s;
+            *(f32 *) (obj + 0x44) = *(f32 *) (obj + 0x38) + dy * s;
+            *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x3C) + dz * s;
+        }
+        *(s32 *) (obj + 0x58) |= 4;
+    }
+    r0 = cam[0] - *(f32 *) (obj + 0x34);
+    r1 = cam[1] - *(f32 *) (obj + 0x38);
+    r2 = cam[2] - *(f32 *) (obj + 0x3C);
+    ax = *(f32 *) (obj + 0x40) - *(f32 *) (obj + 0x34);
+    ay = *(f32 *) (obj + 0x44) - *(f32 *) (obj + 0x38);
+    az = *(f32 *) (obj + 0x48) - *(f32 *) (obj + 0x3C);
+    facing = ax * r0 + ay * r1 + az * r2;
+    if (facing < 0.0f) {
+        facing = 0.0f;
+    }
+    if (facing == 0.0f && !(*(s32 *) (obj + 0x58) & 0x10000)) {
+        return NULL;
+    }
+    if (!(fabsf(r0) > 0.0001f) && !(fabsf(r2) > 0.0001f)) {
+        return NULL;
+    }
+    dist = sqrtf(r0 * r0 + r1 * r1 + r2 * r2);
+    fade = 1.0f - *(f32 *) (e + 0x20) * dist;
+    if (!(fade > 0.0f)) {
+        return NULL;
+    }
+    code = *(u16 *) (e + player * 2 + 0x4C);
+    zbuf = (u32) (D_800899D0[code >> 13][1] + (((code >> 2) & 0x7FF) << D_800899D0[code >> 13][0])) >> 3;
+    if (*(s32 *) (obj + 0x58) & 0x10) {
+        visible = 1;
+        if (vis != 0) {
+            *(s32 *) (e + player * 4 + 0x24) = (s32) scr[0];
+            *(s32 *) (e + player * 4 + 0x34) = (s32) scr[1];
+            view = (f32 *) ((u8 *) D_800BE628 + player * 0x180 + D_800BE9C0 * 0x10);
+            depth = (s32) (((f32) *(s16 *) ((u8 *) view + 0x4C) + oz * oinv * (f32) *(s16 *) ((u8 *) view + 0x44)) *
+                           32.0f);
+        } else {
+            *(s32 *) (e + player * 4 + 0x24) = -1;
+            *(s32 *) (e + player * 4 + 0x34) = -1;
+            visible = 0;
+        }
+        if (depth - (s32) zbuf >= 0x1F) {
+            visible = 0;
+        }
+        if (visible) {
+            e[0x54 + player] += (0xFF - e[0x54 + player]) >> 3;
+        } else {
+            e[0x54 + player] -= e[0x54 + player] >> 3;
+        }
+    } else {
+        e[0x54 + player] = 0xFF;
+    }
+    inv = 1.0f / dist;
+    horiz = sqrtf(r0 * r0 + r2 * r2);
+    facing = facing * (fade * inv * 0.002f);
+    t = *(f32 *) (e + 0x14) + (*(f32 *) (e + 0x10) - *(f32 *) (e + 0x14)) * facing;
+    px = *(f32 *) (obj + 0x34) + t * r0;
+    py = *(f32 *) (obj + 0x38) + t * r1;
+    pz = *(f32 *) (obj + 0x3C) + t * r2;
+    w = (*(f32 *) (e + 8) + (*(f32 *) (e + 0) - *(f32 *) (e + 8)) * facing) * *(f32 *) (e + 0x48);
+    h = (*(f32 *) (e + 0xC) + (*(f32 *) (e + 4) - *(f32 *) (e + 0xC)) * facing) * *(f32 *) (e + 0x48);
+    ih = 1.0f / horiz;
+    wh = w * ih;
+    hh = h * (ih * inv);
+    ux = -r0 * r1 * hh;  /* up vector (perpendicular to the view, in the vertical plane) */
+    uy = h * horiz * inv;
+    uz = -r2 * r1 * hh;
+    vx = -r2 * wh;       /* side vector (horizontal) */
+    vz = -r0 * wh;
+    *(s16 *) (verts + 0) = (s32) (ux + vx + px);
+    *(s16 *) (verts + 2) = (s32) (uy + py);
+    *(s16 *) (verts + 4) = (s32) (uz - vz + pz);
+    *(s16 *) (verts + 6) = 0;
+    *(s16 *) (verts + 0x10) = (s32) (ux - vx + px);
+    *(s16 *) (verts + 0x12) = (s32) (uy + py);
+    *(s16 *) (verts + 0x14) = (s32) (uz + vz + pz);
+    *(s16 *) (verts + 0x16) = 0;
+    *(s16 *) (verts + 0x20) = (s32) (-ux - vx + px);
+    *(s16 *) (verts + 0x22) = (s32) (py - uy);
+    *(s16 *) (verts + 0x24) = (s32) (-uz + vz + pz);
+    *(s16 *) (verts + 0x26) = 0;
+    *(s16 *) (verts + 0x30) = (s32) (-ux + vx + px);
+    *(s16 *) (verts + 0x32) = (s32) (py - uy);
+    *(s16 *) (verts + 0x34) = (s32) (-uz - vz + pz);
+    *(s16 *) (verts + 0x36) = 0;
+    alpha = (s32) ((*(f32 *) (e + 0x1C) + (*(f32 *) (e + 0x18) - *(f32 *) (e + 0x1C)) * facing) * 255.0f);
+    obj[0x5C] = (e[0x54 + player] * alpha) >> 8;
+    link = *(u8 **) (e + 0x44);
+    if (link != NULL) {
+        link[0x30] = (obj[0x5C] * obj[0x2B]) >> 8;
+    }
+    return verts;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16DC80/func_151408A4.s")
+#endif
 
 void func_151411A4(struct210 *arg0) {
     func_1513CA6C(arg0);

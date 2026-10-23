@@ -4399,7 +4399,7 @@ void func_1506045C(struct127 *arg0, s32 arg1, s32 arg2, f32 arg3, s32 arg4) {
         }
         temp_a0 = arg0->unk65;
         if ((temp_a0 != 0) && (arg4 == 0)) {
-            temp_v0_3 = *(s32 *)((u8 *)&D_800CC3C8 + (temp_a0 * 0x32C));
+            temp_v0_3 = *((u8 *)&D_800CC3C8 + (temp_a0 * 0x32C));
             if (temp_v0_3 != 0xC) {
                 if (temp_v0_3 != 0x23) {
                     var_s0 = 0;

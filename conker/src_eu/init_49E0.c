@@ -322,6 +322,11 @@ void func_10004FE0(void) {
 }
 
 extern u8 D_eu_8002AFA8;
+#ifdef NON_MATCHING
+// func_1515FDA0 is the US name of EU func_15160310 (undefined_syms alias); the port has only the EU symbol
+void func_15160310(u16 *);
+#define func_1515FDA0 func_15160310
+#endif
 extern s8 D_eu_8002AE24;
 
 void func_10005020(void) {

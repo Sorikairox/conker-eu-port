@@ -63,13 +63,13 @@ void func_150DE9D8(u8 *arg0) {
     }
     if (((*(u16 *)((u8 *)arg0 + 0x54)) & 0xFFFF7FFF) == 0xC) {
         var_s2 = 4;
-        var_s1 = ((*(s32 *)((u8 *)arg0 + 0x7C)) * 8) + &D_800905B4;
+        var_s1 = (s32 *) ((u8 *) &D_800905B4 + (*(s32 *)((u8 *)arg0 + 0x7C)) * 8);
         var_s0 = 5;
         do {
             temp_v0_2 = func_1510D66C(*var_s1, &sp.u54, 3, 0);
             func_1510DDF4(arg0, temp_v0_2, (sp.u54 + temp_v0_2) - 0x200, var_s2, var_s0);
             var_s0 += 2;
-            var_s1 += 4;
+            var_s1++;
             var_s2 += 2;
         } while (var_s0 != 9);
     }

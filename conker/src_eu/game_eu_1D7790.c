@@ -679,7 +679,7 @@ void func_151AB3A8(u8 *arg0) {
         sp5C = temp_f6 + 50.0f;
         sp.u76 = 0xA;
         sp.u78 = 0xA;
-        temp_v0_2 = (sp5B * 3) + &D_800AB7F4;
+        temp_v0_2 = (u8 *) &D_800AB7F4 + sp5B * 3;
         sp.u86 = 0x38;
         sp.u84 = 0x12C;
         sp.u8C = (s32) ((32768.0f * 0.5f) + 26214.4f);

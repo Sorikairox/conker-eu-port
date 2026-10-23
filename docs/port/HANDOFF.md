@@ -183,6 +183,61 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    p123fadeev wrap. Also func_1510AEB0 (P121).
 2. port-web: log func_1512868C / func_150054C4 / func_15097188 after 2133 and 3053 (no guard) to find the camera
    re-init that the port misses.
+## State (session P145, 2026-10-23). Details: `docs/port/sessions/P145.md`
+
+- Scans on this tree: protoasm_check 0 real rows (RETNONE 14 info), floatint_scan BUG 0 / REVIEW 4 (known);
+  arity_scan / m2c_sanity need port-web's `port/build/ll` (run them there after the next merge).
+- New lister `docs/port/sessions/p145/asmlist.py` (asm-only functions in this slot's files with C callers).
+- New hand C (NM): func_15160310 framebuffer_effects_apply (= US func_1515FDA0; init_49E0 aliases the name under NM),
+  func_151CB6C0 fb_lens_warp_draw, func_1513095C particle_update (frame path), its handlers func_151A4DEC
+  spark_burst_update and func_150C1698 pool_slot_release. All EQUIV on setups + mutants killed (equivalents listed).
+- func_1513095C update handlers 14 func_151928C8 (game_eu_1BF960, this slot) and 17 func_151A2F10 (game_eu_1CE7D0,
+  port-b) are still asm: those particles die on their first tick in the port.
+- Checks: verify_all OK, NM links, protocheck 0 (1133), selftest 62/62, progress_nm 5127/5915 (86.7%), bytes 66.8%.
+
+## Next steps (from P145)
+
+1. func_151928C8 (water splash handler, 137 lines); ask port-b for func_151A2F10.
+2. func_1513100C (game_eu_15E000, frame DL, 568 lines), func_1517B270 (game_eu_1A8930, 512 lines).
+3. func_1507D754 (game_A9D90) after its 13 asm callees; P138 / P141 leftovers.
+
+## State (session P141, 2026-10-23). Details: `docs/port/sessions/P141.md`
+
+- Merged port-b 9c9369d (P115-P139) as 904c686: HANDOFF conflict only (merge_union); functions.h func_1513D524
+  `struct210 *` under NM (game_16DC80 hack removed), game_eu_11A2B0 func_151432BC s32, game_eu_20B730:460
+  func_1501D348 void.
+- New hand C (NM): func_151408A4 particle_glow_update (game_16DC80, 38 setups, mutants 62/62), func_151E4B40
+  menu_level_start_page (67 setups, mutants 52/54 + 1 equivalent), func_151E1EDC menu_team_select_page (74 setups,
+  mutants 51/59, 8 equivalent; random garbage layouts with > 4 teams diverge, unreachable).
+- Checks: verify_all OK, NM links, protocheck 0 (1128), selftest 62/62, progress_nm 5122/5915 (86.6%) combined, bytes 66.7%.
+
+## Next steps (from P141)
+
+1. func_151E4B40: 2 coverage-gap mutants (fade exactly 0x100; state-1 queue loop with D_800E1030[i] != i).
+2. P138 re-runs: func_151E3AE4 mutant lists, func_151DFD0C terminating f1 setups, func_151E19AC mutants.
+3. arity_scan / m2c_sanity after the merge; port-b to drop the func_1513D524_void_proto defines (game_169510, game_eu_1772D0).
+
+## State (session P138, 2026-10-23). Details: `docs/port/sessions/P138.md`
+
+- func_151E3AE4 real bug fixed: in the asm frame y[] (sp+0x90) has only 14 slots and x[] follows it, so with 13+ items
+  y[14..] overwrites x[0..]; now one `points[14 + 32]` buffer. 68 errored setups EQUIV with ARGMEM 15049AD0=0:52
+  (old 20 DIFFER); aliasing mutant killed. Use ARGMEM 0:52, not 0:128 (unwritten slots = false DIFFER).
+- m2c_sanity high rows (39 in this slot's files): 25 functions fixed NM-only; 11 with old DIFFER / new EQUIV, 14
+  asm-checked but unobserved by difftest (UNVERIFIED list in P138.md); 8 rows false positives (reasons in P138.md).
+- New hand C (NM): func_151E870C menu_spawn_character (mutants 23/23), func_151E1308 menu_player_join_page
+  (27 setups, mutants 41/41). func_15060F28 (their object free) is still asm on `port` (C on port-b P83).
+- game_eu_20B730.c D_800E0FB8 declared `u8 **` (coordinator item from browser P137).
+- Checks: verify_all OK, NM links, protocheck 0 (981), selftest 60/60, progress_nm 4975/5915 (84.1%), bytes 60.5%.
+
+## Next steps (from P138)
+
+1. func_151408A4 (game_16DC80, emitter update, 3148 calls on the new-game mode-0 path; coordinator request).
+2. func_151E1EDC, func_151E4B40 (menu pages).
+3. func_151E3AE4: re-run P120 mutant lists (no ARGMEM) and the remaining 135 setups.
+4. func_151DFD0C: ~12 surviving mutants need nav f1 setups with a terminating scene loop; func_151E19AC mutants
+   (DIFFTEST_VARARGS_REF=1).
+5. Targeted setups for the 14 unobserved scanner fixes (P138.md section 2), e.g. ARGMEM on the stack record callee.
+
 ## P142 (port-b) (session P142, 2026-10-23). Details: `docs/port/sessions/P142.md`
 
 Branch `port-b` (from P139 9c9369d); the orchestrator merges it into `port`.

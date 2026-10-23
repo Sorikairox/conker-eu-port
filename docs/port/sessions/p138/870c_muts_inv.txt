@@ -1,0 +1,4 @@
+s/== 7) {/== 6) {/
+s/pos = slot + 1;/pos = slot;/
+s/type == 0x53/type == 0x54/
+s/spawn\[0xD\] = 0x24/spawn[0xD] = 0x25/

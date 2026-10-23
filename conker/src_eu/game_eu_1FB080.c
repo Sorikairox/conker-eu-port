@@ -327,7 +327,7 @@ u8 *func_151CE3D0(u8 *arg0, u8 *arg1, s16 arg2) {
         if (sp.uBC != NULL) {
             temp_s6 = (*(s32 *)((u8 *)arg0 + 0x94));
             sp.uB3 = 1;
-            temp_v0 = *(&D_800AB2C0 + ((*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x98))) + 0x4C)) * 4));
+            temp_v0 = *(s32 *) ((u8 *) &D_800AB2C0 + (*(u8 *)((u8 *)((*(u8 **)((u8 *)arg0 + 0x98))) + 0x4C)) * 4);
             temp_v1 = ((u8 *)&D_800A4EA8);
             var_s3 = func_15142FBC(func_15142B7C(func_1513F4E4(func_15142E24(var_s3, &D_80090F10[temp_v0], 0, 0, 0, 0, temp_v0, 0, 0, &sp.uB3, 3), 0x4E, &sp.uB3), 0x200005, 0x1F0600), D_800D30BC | 0x80000 | 0x2CA0, (*(s32 *)((u8 *)temp_v1 + 0x1C)) | (*(s32 *)((u8 *)temp_v1 + 0x18)), &sp.uB3);
             if ((*(u16 *)((u8 *)arg0 + 0x1E)) & 2) {

@@ -387,7 +387,7 @@ s32 func_150C7290(u8 *arg0) {
         sp60 = temp_f10 + 200.0f;
         sp.u7A = 0xA;
         sp.u7C = 0xA;
-        temp_v0_2 = (sp5F * 3) + &D_800AB7F4;
+        temp_v0_2 = (u8 *) &D_800AB7F4 + sp5F * 3;
         sp.u8A = 0x38;
         sp.u88 = 0x12C;
         sp.u90 = (s32) ((32768.0f * 0.5f) + 26214.4f);

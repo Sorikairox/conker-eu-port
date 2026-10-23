@@ -59,7 +59,128 @@ void func_1513092C(s32 arg0, u8 arg1, s32 arg2) {
     func_151308E4(arg0, arg1, arg2, 0xFF, 0);
 }
 
+#ifdef NON_MATCHING
+extern s32 (*D_80089B00[])(u8 *, f32 *);
+extern void (*D_80089BA0[])(u8 *);
+
+/*
+ * particle_update: per-tick update of a 0x2B / 0x52 / 0x47 particle (record from func_151307F0). Flag word +0x68:
+ * 1 life timer +0x1A counts down by the frame ticks (D_800BE9E4), dead below 0; 2 vertical speed +0x5C gains
+ * gravity +0x64; 4 position +0x40 moves by the velocity +0x58 (scaled by D_800BE9A4); 0x200 alpha +0x2B fades
+ * as timer * +0x30 below timer +0x2E; 0x400 size +0x38 / +0x3C changes by +0x34 below timer +0x32 (0x800 =
+ * multiply once per tick, else add per tick; 0x80000 = only +0x38, 0x100000 = only +0x3C). Frame counter +0x1C
+ * advances by speed +0x20 over the animation length of D_80090F14[+0x2D] (x 0x10000): 0x10 / 0x20 = die at the
+ * end / start, 8 = bounce, else wrap. Then update handler D_80089B00[+0x72] (with the old position; 0 = die);
+ * a dead particle runs death handler D_80089BA0[+0x73] and is freed.
+ */
+void func_1513095C(u8 *arg0) {
+    s32 dead = FALSE;
+    u32 flags;
+    f32 old[3];
+    s32 n;
+    s32 spd, len, fr;
+    s8 h;
+
+    if (*(u32 *)(arg0 + 0x68) & 1) {
+        *(s16 *)(arg0 + 0x1A) -= D_800BE9E4;
+        if (*(s16 *)(arg0 + 0x1A) < 0) {
+            dead = TRUE;
+        }
+    }
+    if (*(u32 *)(arg0 + 0x68) & 2) {
+        *(f32 *)(arg0 + 0x5C) += *(f32 *)(arg0 + 0x64) * D_800BE9A4;
+    }
+    old[0] = *(f32 *)(arg0 + 0x40);
+    old[1] = *(f32 *)(arg0 + 0x44);
+    old[2] = *(f32 *)(arg0 + 0x48);
+    flags = *(u32 *)(arg0 + 0x68);
+    if (flags & 4) {
+        *(f32 *)(arg0 + 0x40) += *(f32 *)(arg0 + 0x58) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x44) += *(f32 *)(arg0 + 0x5C) * D_800BE9A4;
+        *(f32 *)(arg0 + 0x48) += *(f32 *)(arg0 + 0x60) * D_800BE9A4;
+        flags = *(u32 *)(arg0 + 0x68);
+    }
+    if ((flags & 0x200) && *(s16 *)(arg0 + 0x1A) < *(s16 *)(arg0 + 0x2E)) {
+        s16 a = *(s16 *)(arg0 + 0x1A) * *(s16 *)(arg0 + 0x30);
+        if (a < arg0[0x2B]) {
+            arg0[0x2B] = a;
+        }
+        flags = *(u32 *)(arg0 + 0x68);
+    }
+    if ((flags & 0x400) && *(s16 *)(arg0 + 0x1A) < *(s16 *)(arg0 + 0x32)) {
+        if (flags & 0x800) {
+            if (flags & 0x80000) {
+                for (n = D_800BE9E4; n != 0; n--) {
+                    *(f32 *)(arg0 + 0x38) *= *(f32 *)(arg0 + 0x34);
+                }
+            } else if (flags & 0x100000) {
+                for (n = D_800BE9E4; n != 0; n--) {
+                    *(f32 *)(arg0 + 0x3C) *= *(f32 *)(arg0 + 0x34);
+                }
+            } else {
+                for (n = D_800BE9E4; n != 0; n--) {
+                    *(f32 *)(arg0 + 0x38) *= *(f32 *)(arg0 + 0x34);
+                    *(f32 *)(arg0 + 0x3C) *= *(f32 *)(arg0 + 0x34);
+                }
+            }
+        } else {
+            if (!(flags & 0x80000)) {
+                *(f32 *)(arg0 + 0x3C) += *(f32 *)(arg0 + 0x34) * (f32)D_800BE9E4;
+            }
+            if (!(flags & 0x100000)) {
+                *(f32 *)(arg0 + 0x38) += *(f32 *)(arg0 + 0x34) * (f32)D_800BE9E4;
+            }
+        }
+    }
+    if (!dead && (spd = *(s32 *)(arg0 + 0x20)) != 0) {
+        len = (D_80090F14[arg0[0x2D]][0] << 16) - 1;
+        fr = *(s32 *)(arg0 + 0x1C) + spd * D_800BE9E4;
+        *(s32 *)(arg0 + 0x1C) = fr;
+        if (len < fr) {
+            flags = *(u32 *)(arg0 + 0x68);
+            if (flags & 0x10) {
+                dead = TRUE;
+            } else if (flags & 8) {
+                *(s32 *)(arg0 + 0x1C) = len - fr % len;
+                *(s32 *)(arg0 + 0x20) = -spd;
+            } else {
+                do {
+                    fr -= len;
+                    *(s32 *)(arg0 + 0x1C) = fr;
+                } while (len < fr);
+            }
+        } else if (fr < 0) {
+            flags = *(u32 *)(arg0 + 0x68);
+            if (flags & 0x20) {
+                dead = TRUE;
+            } else if (flags & 8) {
+                *(s32 *)(arg0 + 0x1C) = -fr % len;
+                *(s32 *)(arg0 + 0x20) = -spd;
+            } else {
+                do {
+                    fr += len;
+                    *(s32 *)(arg0 + 0x1C) = fr;
+                } while (fr < 0);
+            }
+        }
+    }
+    h = *(s8 *)(arg0 + 0x72);
+    if (h != -1 && !dead) {
+        if (D_80089B00[h](arg0, old) == 0) {
+            dead = TRUE;
+        }
+    }
+    if (dead) {
+        h = *(s8 *)(arg0 + 0x73);
+        if (h != -1) {
+            D_80089BA0[h](arg0);
+        }
+        func_1516972C((struct102 *)arg0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513095C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15E000/func_1513100C.s")
 

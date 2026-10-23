@@ -1,0 +1,9 @@
+s/if (\*(u8 \*\*)e == arg0) {/if (*(u8 **)e != arg0) {/%
+s/                prev = cur;//%
+s/} while (cur != -1 \&\& !found);/} while (cur != -1);/%
+s/if (cur == head) {/if (prev == -1 \&\& 0) {/%
+s/\*(s16 \*)(pool + 0x44) = \*(s16 \*)(e + 4);/*(s16 *)(pool + 0x44) = cur;/%
+s/+ prev \* 8 + 4) = /+ cur * 8 + 4) = /%
+s/\*(s16 \*)(e + 4) = \*(s16 \*)(pool + 0x46);/*(s16 *)(e + 4) = -1;/%
+s/\*(s16 \*)(pool + 0x46) = cur;/*(s16 *)(pool + 0x46) = prev;/%
+s/if (found) {/if (1) {/%

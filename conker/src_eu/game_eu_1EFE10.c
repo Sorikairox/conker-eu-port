@@ -358,7 +358,7 @@ s8 func_151C2CE4(u8 *arg0) {
             var_t0 = sp.uCC;
             var_v1 = 0;
             if (D_80082FA0 >= 0) {
-                temp_a3 = ((temp_v0 & 7) * 4) + &D_8008FF88;
+                temp_a3 = (u8 *) &D_8008FF88 + (temp_v0 & 7) * 4;
                 temp_a2 = (*(u16 *)((u8 *)temp_a3 + 2));
                 var_a0 = D_800DBFF0;
                 temp_f18 = (*(f32 *)((u8 *)(&arg0[0x110]) + 0x98));

@@ -292,7 +292,39 @@ void func_151A4BE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u
     }
 }
 
+#ifdef NON_MATCHING
+/*
+ * spark_burst_update: particle update handler 0 (D_80089B00, called by func_1513095C with the old position).
+ * The 12-byte parameter block at +0xA8 (copied by the spawner above) gives three thresholds on the life timer
+ * +0x1A: below +0xAC the alpha +0x2B follows timer * +0xAE; below +0xB0 both sizes +0x38 / +0x3C grow by
+ * +0xB2 per tick; below +0xA8 it switches to update handler 1 / draw modes 2, sets +0x18 = 0x5203 and the
+ * colour byte +0x2C = timer * +0xAA. Always keeps the particle (returns 1).
+ */
+s32 func_151A4DEC(u8 *arg0, f32 *oldPos) {
+    s16 t = *(s16 *)(arg0 + 0x1A);
+    f32 d;
+
+    if (t < *(s16 *)(arg0 + 0xAC)) {
+        arg0[0x2B] = t * *(s16 *)(arg0 + 0xAE);
+    }
+    if (t < *(s16 *)(arg0 + 0xB0)) {
+        d = (f32)(*(s16 *)(arg0 + 0xB2) * D_800BE9E4);
+        *(f32 *)(arg0 + 0x38) += d;
+        *(f32 *)(arg0 + 0x3C) += d;
+        t = *(s16 *)(arg0 + 0x1A);
+    }
+    if (t < *(s16 *)(arg0 + 0xA8)) {
+        arg0[0x72] = 1;
+        arg0[0x70] = 2;
+        arg0[0x71] = 2;
+        *(s16 *)(arg0 + 0x18) = 0x5203;
+        arg0[0x2C] = t * *(s16 *)(arg0 + 0xAA);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4DEC.s")
+#endif
 
 s32 func_151A4EB0(u8 *arg0, s32 arg1)
 {

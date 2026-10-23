@@ -420,7 +420,7 @@ void func_1509DD0C(s32 arg0, s32 arg1, u8 *arg2) {
             if ((temp_v0 < 0) || (temp_v0 >= 3)) {
                 return;
             }
-            func_151494E0((s32) ((temp_v0 * 0x10) + &D_800A0D30), 0x32U);
+            func_151494E0((s32) ((u8 *) &D_800A0D30 + temp_v0 * 0x10), 0x32U);
             return;
         }
         break;
@@ -487,7 +487,7 @@ s32 func_1509DFCC(s32 arg0, s32 arg1, s32 arg2) {
 loop_6:
                 var_a1 = 0;
 loop_7:
-                var_v0_2 = D_800DD280[var_t0][*(((u8 *)&D_800A6440) + (var_a1 * 4))];
+                var_v0_2 = D_800DD280[var_t0][*(s32 *)((u8 *)&D_800A6440 + var_a1 * 4)];
                 var_a1 += 1;
                 if (var_v0_2 != NULL) {
 loop_8:
