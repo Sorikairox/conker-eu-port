@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P142 (port-b) (session P142, 2026-10-23). Details: `docs/port/sessions/P142.md`
+
+Branch `port-b` (from P139 9c9369d); the orchestrator merges it into `port`.
+
+- Priority (P140): func_15169FB8 `image_effect_draw` (197680, the new-game title cards) + func_150966AC
+  `image_draw_tiled` (C2B60) converted together; browser check pending.
+- Also hand C (NM), difftest EQUIV + mutants: func_15096144 `sprite_draw_rect` (C2B60), func_15146078
+  `plane_axes_from_normal` (170760), func_151BF678 `pickup_burst_spawn` (1EC610, now void(f32 *)), func_151BEE00
+  `marker_sprite_spawn` (1EC610; LivesSprite typedef hoisted), func_15129EA4 `camera_follow_update` (156A30).
+- func_1513CFE4 (169510, hot) skipped: its three handler tables still hold 16 asm handlers (list in P142.md).
+- Checks: verify_all rc 0, NM build links rc 0, protocheck 5 lines = 4 known pairs + game_eu_11A2B0.c:9
+  func_151432BC. progress_nm total 5099/5915 (86.2%), game 4569/5334, C bytes 65.1%, 816 asm-only.
+
+## Next steps (from P142)
+
+1. Browser: new-game title cards (func_15169FB8), sprites (func_15096144), pickup bursts, camera mode 0x40.
+2. func_1513CFE4 after its handlers: port-b ones first (func_1513E83C, func_1513EE14, func_15140190 in 169510),
+   the others in their owners' slots.
+3. func_15153BA4 (17D3C0, not port-b) so func_151BF678's flash particle spawns.
+4. Owned asm with C callers next (`python3 port_work/p142/asmlist.py`): func_150511E8, func_1510CA2C,
+   func_15113D54, func_1514B8D4, func_1513FAB4, ...
+
 ## P139 (port-b) (session P139, 2026-10-23). Details: `docs/port/sessions/P139.md`
 
 Branch `port-b` (from P136 b894dda); the orchestrator merges it into `port`.
