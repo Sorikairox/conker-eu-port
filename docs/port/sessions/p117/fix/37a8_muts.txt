@@ -1,0 +1,5 @@
+s/(var_a0 \* 8) + var_v0) != -0xE \/\*/(var_a0 * 8) + var_v0) != -0xD \/*/
+s/(var_a0 \* 8) + var_v0) != -0xE)/(var_a0 * 8) + var_v0) != -0xD)/
+s/        var_v1 = 4;/        var_v1 = 3;/
+s/        var_a1 = -0x64;/        var_a1 = -0x63;/
+s/            var_t1 += temp_t0;/            var_t1 += 1;/
