@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P116, 2026-10-23, port-web). Details: `docs/port/sessions/P116.md`
+
+- Merged port 28b8fa3 (P114) as 21cc7f0 (HANDOFF only). verify_all OK, NM link, protocheck 0 (1024), float-int BUG 0,
+  census 722 ok / 0 FAIL.
+- **Title menu reached**: Chrome, events on: scene 722..2133, then **mode 3 / level 0x1D at frame 2139**, event 0xC8
+  starts, the menu room renders (GAME1 sign, Conker, sack character): `p116/P116_menu_60000ms.png`.
+- **Bug in game C func_1502457C** (scene walker, game_eu_51190.c, P15 m2c): `var_s6 += 4` on a `u8 **` (and the slot
+  offset `(arg1 * 0x78) + &D_800C3AA8` on an `s32 *`). Track i walks track 4i's events with track i's object, so
+  LogoScreen attached Conker to himself (+0x65 = 1) and func_1502C1D4 hung; track 13 (t = 1700 camera switch, 5/0x67)
+  is never walked. Fix = 2 lines (P116.md section 2); not applied (game C).
+- With a fixed port-side copy (`?p116walk=1`, TEST ONLY) the next P15 m2c bug traps: func_150337A8 (game_eu_5D910.c)
+  compares words where the asm uses `lb` (-0xE = 0xF2 opcode byte).
+- Hang guard (always on): the func_1502C1D4 wrap logs a +0x65 cycle and skips that frame's update (LogoScreen 1461..1628).
+- The P113 camera guard still fires at 2133 (track 13 unwalked) and stays.
+- `?p110noev=1` regression clean: node + 2 Chrome walks (death, 0x2C and back, heap 0, null 0).
+
+## Next steps (from P116)
+
+1. Conversion slot: fix func_1502457C (2 lines) and func_150337A8 (`*(s8 *)` compares) in one commit; scan other P15
+   m2c bodies for pointer-stride / load-width errors. Then port-web: boot without p116walk, check track 13 at t = 1700
+   and drop the P113 guard (`?p113noguard=1` first).
+2. Mode 3: func_151DEDD0 + 8 pages (game_eu_20B730), func_15149AC0, func_1000FA64, func_15058898, func_15054F74,
+   func_15179008, func_1000BF60.
+3. Node trap at frame 1985 in func_15169EF8 (table index), seen once; recheck after 1.
+
 ## State (session P113, 2026-10-23, port-web). Details: `docs/port/sessions/P113.md`
 
 - Merged port 8ed5688 (P112) as 8e79558.

@@ -166,7 +166,46 @@ P113W0(func_1510BC10)
 P113W1(func_1510F800)
 P113W0(func_15113700)
 P113W0(func_15044D18)
-P113W2(func_1502457C)
+/* P116: func_1502457C also logs, when slot 0's +0x65 (parent) changed during the call, the scene events it queued in
+ * D_800C4170 ({event ptr, time << 8, s8 track, s16 index}, 0xC bytes) this frame (first 8 entries). */
+void __real_func_1502457C(int, int);
+void __wrap_func_1502457C(int a, int b) {
+    extern unsigned char D_800CC2D0[];
+    extern unsigned char *D_800C4170;
+    static unsigned nlog;
+    unsigned before = vbe_ld8(D_800CC2D0 + 0x65), after;
+    static int fwalk = -1;
+    void p116_walk_fixed(int, int);
+    p113_watch("func_1502457C in");
+    if (flag(&fwalk, "p116walk")) p116_walk_fixed(a, b); /* TEST ONLY: fixed copy (port/boot/p69_pcold.c) */
+    else __real_func_1502457C(a, b);
+    p113_watch("func_1502457C out");
+    after = vbe_ld8(D_800CC2D0 + 0x65);
+    if (after != before && nlog++ < 8) {
+        int i;
+        port_log("[p116] slot 0 +0x65 %02X -> %02X in func_1502457C(%d, %d) frame %u; queue:\n", before, after, a, b,
+                 port_frame_count);
+        if (nlog == 1) { /* the slot-0 scene tables: event track i -> events pointer / count, and its ref entry */
+            extern int D_800C3AA8[][30]; extern unsigned short *D_800C39F8[]; extern unsigned char *D_800C3A10[];
+            extern unsigned char D_800C3A5A[];
+            int n = vbe_ld8(D_800C3A5A);
+            for (i = 0; i < n && i < 30; i++) {
+                const unsigned char *rf = D_800C3A10[0] + i * 8;
+                port_log("[p116]   track %d: events %08X n %d | ref kind %d id %d\n", i, (unsigned)D_800C3AA8[0][i],
+                         D_800C39F8[0] ? vbe_ld16(&D_800C39F8[0][i]) : -1, vbe_ld16(rf), vbe_ld8(rf + 2));
+            }
+        }
+        for (i = 0; i < 8 && D_800C4170; i++) {
+            const unsigned char *e = D_800C4170 + i * 0xC;
+            const unsigned char *ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
+            if (!memok(ev)) break;
+            port_log("[p116]   ev %08X time %d track %d idx %d: type %02X delta %02X id %04X b4 %d b5 %d w6 %d\n",
+                     (unsigned)(uintptr_t)ev, *(const int *)(e + 4) >> 8, (signed char)vbe_ld8(e + 8), (short)vbe_ld16(e + 0xA),
+                     vbe_ld8(ev), vbe_ld8(ev + 1), vbe_ld16(ev + 2), (signed char)vbe_ld8(ev + 4), (signed char)vbe_ld8(ev + 5),
+                     (short)vbe_ld16(ev + 6));
+        }
+    }
+}
 P113W1(func_1501ECA4)
 P113W1(func_15020F6C)
 P113W1(func_1501E364)
@@ -207,4 +246,44 @@ void __wrap_func_15060F28(unsigned char *obj, int mode) {
             *t = (unsigned)(uintptr_t)p113_park;
         }
     }
+}
+
+/* P116 (?p103boot): log every setup command list run (func_15083568, called from scene handler A func_15024910 for
+ * type 0xD b4 0 and from other TUs): owner slot, list n, result. */
+int __real_func_15083568(void *obj, int n, float f, int a3);
+int __wrap_func_15083568(void *obj, int n, float f, int a3) {
+    static unsigned cnt;
+    extern unsigned char D_800CC2D0[];
+    int r = __real_func_15083568(obj, n, f, a3);
+    if (flag(&fboot, "p103boot") && cnt++ < 60) {
+        long so = ((unsigned char *)obj - D_800CC2D0), sr = ((unsigned char *)(uintptr_t)(unsigned)r - D_800CC2D0);
+        port_log("[p116] func_15083568(obj %08X slot %ld, list %d, %g, %d) frame %u -> %08X slot %ld (+65 %02X)\n",
+                 (unsigned)(uintptr_t)obj, so / 0x32C, n, f, a3, port_frame_count, (unsigned)r, sr / 0x32C,
+                 r ? vbe_ld8((unsigned char *)(uintptr_t)(unsigned)r + 0x65) : 0);
+    }
+    return r;
+}
+
+/* P116 (?p116find=1): log the object lookups by setup id of the scene handlers (func_15083E90 / func_15083FB0, called
+ * from game_eu_51190.c): id -> slot, first 80 calls whose answer changes per id. */
+void *__real_func_15083E90(unsigned char id);
+int __real_func_15083FB0(unsigned char id);
+static int ffind = -1;
+static void p116_find_log(const char *fn, unsigned id, long slot) {
+    static long last[256]; static int init; static unsigned n;
+    if (!init) { int i; for (i = 0; i < 256; i++) last[i] = -1000; init = 1; }
+    if (!flag(&ffind, "p116find") || n >= 80 || last[id & 0xFF] == slot) return;
+    last[id & 0xFF] = slot; n++;
+    port_log("[p116] %s(%u) frame %u -> slot %ld\n", fn, id, port_frame_count, slot);
+}
+void *__wrap_func_15083E90(unsigned char id) {
+    extern unsigned char D_800CC2D0[];
+    void *r = __real_func_15083E90(id);
+    p116_find_log("func_15083E90", id, r ? ((unsigned char *)r - D_800CC2D0) / 0x32C : -1);
+    return r;
+}
+int __wrap_func_15083FB0(unsigned char id) {
+    int r = __real_func_15083FB0(id);
+    p116_find_log("func_15083FB0", id, r);
+    return r;
 }

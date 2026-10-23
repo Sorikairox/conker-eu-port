@@ -109,10 +109,39 @@ void __wrap_func_1505A770(void *rec) {
                  *(const unsigned *)D_800D1550, F(0x24), y0, F(0x18), v0, F(0x20), h0, F(0x28), F(0x180), F(0x118));
 }
 void __real_func_1502C1D4(void);
+/* P116: func_1502C1D4 follows each record's +0x65 parent chain (1-based slot) with no bound; a cycle hangs the game
+ * thread (seen after the scene-1 setup spawns of func_15083F30). If one is found, the 25 records are logged (first 4
+ * times) and the frame's object update is skipped instead of hanging. */
+static int p116_cycle(void) {
+    static unsigned logged;
+    int i, k, bad = -1;
+    for (i = 0; i < 25 && bad < 0; i++) {
+        const unsigned char *q = (const unsigned char *)D_800CC2D0 + i * 0x32C;
+        if (*(const int *)q == 0 || vbe_ld8(q + 0x65) == 0) continue;
+        for (k = 0; k < 26 && vbe_ld8(q + 0x65) != 0; k++) {
+            unsigned p = vbe_ld8(q + 0x65);
+            if (p > 25) { k = 26; break; }
+            q = (const unsigned char *)D_800CC2D0 + (p - 1) * 0x32C;
+        }
+        if (k >= 26) bad = i;
+    }
+    if (bad >= 0 && logged++ < 4) {
+        port_log("[p116] +0x65 parent cycle from slot %d, frame %u; records:\n", bad, port_frame_count);
+        for (i = 0; i < 25; i++) {
+            const unsigned char *q = (const unsigned char *)D_800CC2D0 + i * 0x32C;
+            if (*(const int *)q == 0 && vbe_ld8(q + 0x65) == 0) continue;
+            port_log("[p116]   slot %2d %08X state %d kind %02X +65 %02X +3B %02X +5C %d +123 %d +1D4 %08X\n", i,
+                     (unsigned)(uintptr_t)q, *(const int *)q, vbe_ld8(q + 4), vbe_ld8(q + 0x65), vbe_ld8(q + 0x3B),
+                     *(const int *)(q + 0x5C), vbe_ld8(q + 0x123), *(const unsigned *)(q + 0x1D4));
+        }
+    }
+    return bad >= 0;
+}
 void __wrap_func_1502C1D4(void) {
     static int flag = -1;
     static unsigned calls;
     const unsigned char *r = D_800CC2D0;
+    if (p116_cycle()) return;
     __real_func_1502C1D4();
     if (flag < 0) { flag = port_flag("p49walk"); }
     calls++;
