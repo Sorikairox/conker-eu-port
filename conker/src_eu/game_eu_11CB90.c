@@ -448,7 +448,44 @@ void func_150EFE90(struct102 *arg0, u8 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A19F0[][3];      /* bone-local points per kind (D_800A19C0 + 0x30) */
+
+/* rider_anchor_update: follows the mount ((+0x60)->+8): when its flag +0x128 bit 0 is set and its skeleton
+ * (+0x110)->+0x1D4 exists, copies its six words +0x34..+0x48 to +0x30..+0x44 and +0x14C / +0x150 to +0x54 / +0x58,
+ * transforms the point D_800A19F0[k] (k = mount +0x11D) by bone D_800A1A08[k] (func_15143134) into +0x48, makes it
+ * relative to +0x30 and sets flag 2 of +0x1C; otherwise clears flag 2. Always returns 1. */
+s32 func_150EFFCC(u8 *o) {
+    u8 *m = *(u8 **) (*(u8 **) (o + 0x60) + 8);
+    u8 *sk;
+    u8 k;
+
+    if (m[0x128] & 1) {
+        sk = *(u8 **) (m + 0x110);
+        if (*(u8 **) (sk + 0x1D4) != NULL) {
+            k = m[0x11D];
+            *(s32 *) (o + 0x30) = *(s32 *) (m + 0x34);
+            *(s32 *) (o + 0x34) = *(s32 *) (m + 0x38);
+            *(s32 *) (o + 0x38) = *(s32 *) (m + 0x3C);
+            *(s32 *) (o + 0x3C) = *(s32 *) (m + 0x40);
+            *(s32 *) (o + 0x40) = *(s32 *) (m + 0x44);
+            *(s32 *) (o + 0x44) = *(s32 *) (m + 0x48);
+            *(f32 *) (o + 0x54) = *(f32 *) (m + 0x14C);
+            *(f32 *) (o + 0x58) = *(f32 *) (m + 0x150);
+            func_15143134(D_800A19F0[k], o + 0x48, *(u8 **) (sk + 0x1D4) + (D_800A1A08[k] << 6));
+            *(f32 *) (o + 0x48) -= *(f32 *) (o + 0x30);
+            *(f32 *) (o + 0x4C) -= *(f32 *) (o + 0x34);
+            *(f32 *) (o + 0x50) -= *(f32 *) (o + 0x38);
+            o[0x1C] |= 2;
+            return 1;
+        }
+    }
+    o[0x1C] &= ~2;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150EFFCC.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);

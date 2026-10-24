@@ -123,7 +123,58 @@ void func_150D939C(u8 *arg0) {
     *(u16 *)(arg0 + 0x1C) = 0x28;
 }
 
+#ifdef NON_MATCHING
+// path_points_catch_up: P250. Handler (s32 (u8 *), function table at ELF file offset 0x24A5D8, next to
+// func_150D952C) of an object that walks a ring of 0x24-byte points (+0x94; +0x25 = point count, +0x2E = last
+// processed point, +0x2D = current point, +0x2C = state). Returns 0 at once when the state is < 2 and flag 8 of +0x1E
+// is set. Otherwise every point from the last processed one back to the current one (walking backwards around the
+// ring) gets func_150D9304(point, point + 0xC, D_800BE9A4); +0x54..0x5C becomes the current point's position (zero
+// in state <= 0). The timer +0x4D of the record at +0x98 advances by D_800BE9E4; past 50 it restarts and the
+// record's owner (+0) part +0x31C gets its counter +0x1AA bumped. Returns 1.
+s32 func_150D93CC(u8 *p) {
+    u8 *pts = *(u8 **) (p + 0x94);
+    u8 *rec = *(u8 **) (p + 0x98);
+    s32 i;
+
+    if (*(s8 *) (p + 0x2C) < 2 && (*(u16 *) (p + 0x1E) & 8)) {
+        return 0;
+    }
+    i = *(s8 *) (p + 0x2E);
+    if (i != *(s8 *) (p + 0x2D)) {
+        do {
+            i--;
+            if (i < 0) {
+                i = p[0x25] - 1;
+            }
+            func_150D9304((f32 *) (pts + i * 0x24), (f32 *) (pts + i * 0x24 + 0xC), D_800BE9A4);
+        } while (i != *(s8 *) (p + 0x2D));
+    }
+    if (*(s8 *) (p + 0x2C) > 0) {
+        s32 *pos = (s32 *) (pts + *(s8 *) (p + 0x2D) * 0x24);   /* copied as words, like the asm */
+
+        *(s32 *) (p + 0x54) = pos[0];
+        *(s32 *) (p + 0x58) = pos[1];
+        *(s32 *) (p + 0x5C) = pos[2];
+    } else {
+        *(f32 *) (p + 0x54) = 0.0f;
+        *(f32 *) (p + 0x58) = 0.0f;
+        *(f32 *) (p + 0x5C) = 0.0f;
+    }
+    *(s8 *) (rec + 0x4D) += D_800BE9E4;
+    if (*(s8 *) (rec + 0x4D) >= 0x33) {
+        u8 *owner = *(u8 **) rec;
+        u8 *part;
+
+        if (owner != NULL && (part = *(u8 **) (owner + 0x31C)) != NULL) {
+            *(s16 *) (part + 0x1AA) += 1;
+        }
+        *(s8 *) (rec + 0x4D) = 0;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D93CC.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A0F24;

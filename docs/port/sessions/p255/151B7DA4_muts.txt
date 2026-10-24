@@ -1,0 +1,23 @@
+# P255 func_151B7DA4 (obj_attached_glow_update) mutants: sed % setup names
+s/if (D_800BE9E4 > 0) {/if (D_800BE9E4 >= 0) {/ % step0
+s/obj + 0x10) == 0) {/obj + 0x10) != 0) {/ % ok fail
+s/            return 0;/            return 2;/ % fail
+s/if (data->glow != 0) {/if (data->glow == 0) {/ % ok noglow
+s/data->glow + 0x44) = \*(s32 \*) (obj + 0x14);/data->glow + 0x44) = *(s32 *) (obj + 0x18);/ % ok
+s/d\[1\] = \*(f32 \*) (obj + 0x14) - old\[1\];/d[1] = *(f32 *) (obj + 0x14) + old[1];/ % ok
+s/d\[2\] = \*(f32 \*) (obj + 0x18) - old\[2\];/d[2] = old[2];/ % ok
+s/old\[0\] = \*(f32 \*) (obj + 0x10);/old[0] = *(f32 *) (obj + 0x14);/ % ok
+s/e = ring + (s8) obj\[0x2E\] \* 20;/e = ring + obj[0x2E] * 20;/ % negidx
+s/e = ring + (s8) obj\[0x2E\] \* 20;/e = ring + (s8) obj[0x2E] * 16;/ % ok
+s/(e + 0xC) = len;/(e + 0xC) = 0.0f;/ % ok
+s/e\[0x10\] = 0xFF;/e[0x10] = 0xFE;/ % ok
+s/(e + 8) = \*(s32 \*) (obj + 0x18);/(e + 8) = *(s32 *) (obj + 0x14);/ % ok
+s/if (obj\[0x25\] == (s8) obj\[0x2E\]) {/if (obj[0x25] == obj[0x2E] + 1) {/ % ok wrap
+s/if (obj\[0x25\] == (s8) obj\[0x2E\]) {/if ((s8) obj[0x25] == (s8) obj[0x2E]) {/ % negidx
+s/obj\[0x2C\] = (s8) obj\[0x2C\] + 1;/obj[0x2C] = (s8) obj[0x2C] + 2;/ % ok
+s/if ((s8) obj\[0x2D\] == (s8) obj\[0x2E\]) {/if ((s8) obj[0x2D] != (s8) obj[0x2E]) {/ % ok catch
+s/obj\[0x2D\] = (s8) obj\[0x2D\] + 1;/obj[0x2D] = (s8) obj[0x2E] + 2;/ % catch
+s/if (obj\[0x25\] == (s8) obj\[0x2D\]) {/if (obj[0x25] < (s8) obj[0x2D]) {/ % catchwrap
+s/                obj\[0x2D\] = 0;/                obj[0x2D] = 1;/ % catchwrap
+s/obj\[0x2C\] = (s8) obj\[0x2C\] - 1;/obj[0x2C] = (s8) obj[0x2C] - 2;/ % catch
+s/            obj\[0x2E\] = 0;/            obj[0x2E] = 1;/ % wrap

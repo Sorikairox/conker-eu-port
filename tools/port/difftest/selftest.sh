@@ -84,6 +84,10 @@ chkce() { # expect func "ENV=.. ..." [sed-expr]
   case "$out" in $exp*) pass=$((pass+1)); echo "ok   [$exp] env case ${ex:-as is}  $out";; *) fail=$((fail+1)); echo "FAIL [want $exp] env case ${ex:-as is}  $out";; esac
 }
 chkce EQUIV  func_1502AB94 "$AB94"
+# P246: DIFFTEST_WLOG=1 (no LO-HI range) raised IndexError in every trial (WLOG[1] of a 1-tuple), so no trial ran; it
+# now means the whole range and the result is unchanged (WLOG_T=99: no trial logs, so the result line stays first; the
+# old IndexError came before the trial check, so this still catches it).
+chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_WLOG=1 DIFFTEST_WLOG_T=99"
 chkce DIFFER func_1502AB94 "$AB94" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_STK_OLD=1" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 # P90: stack arguments past sp+0x3C (args 16+) were never captured: func_150268BC's func_1516DF0C call has 49 arguments;
@@ -272,4 +276,13 @@ TRIALS=8 chkce EQUIV  func_15031C1C ""
 TRIALS=8 chkce DIFFER func_15031C1C "" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, arg2)/'
 TRIALS=8 chkce EQUIV  func_15031C1C "DIFFTEST_INCHDR_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
 TRIALS=8 chkce DIFFER func_15031C1C "DIFFTEST_INCHDR_OLD=1 DIFFTEST_ALIASPROTO_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
+# P250: at a jalr, f12-f15 are no longer compared when the target's prototype (or, without a declaration in the TU, its
+# C definitions in src_eu) starts with an integer / pointer parameter: a leftover f14 scratch gave a false DIFFER in
+# func_150C5A68 (handler func_150C6088 is s32 (u8 *); P246 / P247 needed DIFFTEST_JALRARG_OLD=1). DIFFTEST_JALRFPR_OLD=1
+# shows the old false DIFFER; a wrong a0 at the jalr still DIFFERs. Also: a stub knob address given twice is an error.
+S5A68="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80410000 DIFFTEST_POKE=80410010=00000001,80410018=41200000,8041001C=40A00000,80410020=C1200000,80410024=3F800000,80410028=40000000,8041002C=40400000,80410030=00000000,804100C0=12345678 DIFFTEST_RET=150C6088=1 DIFFTEST_RETF=151443D4=42C80000"
+chkce EQUIV  func_150C5A68 "$S5A68"
+chkce DIFFER func_150C5A68 "$S5A68 DIFFTEST_JALRFPR_OLD=1"
+chkce DIFFER func_150C5A68 "$S5A68" 's/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/'
+TRIALS=1 chkce KNOBERROR func_150C5A68 "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C6088=1:2"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

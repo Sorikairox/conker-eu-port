@@ -1,0 +1,33 @@
+# P246 func_151EF3A0 (save_screen_frame_draw) mutants: sed % setup names
+s/D_800E0EC4 | 0xFFFFFF00/D_800E0EC4 | 0xFFFF0000/ % load
+s/0x7FB, 0, 3, 0/0x7FC, 0, 3, 0/ % load
+s/0x887, 0, 3, 0/0x887, 0, 2, 0/ % load
+s/0xFD100000, tex/0xFD180000, tex/ % load
+s/0xF5100000, 0x07054260/0xF5100000, 0x07054250/ % load
+s/0x075FF000/0x075FF001/ % load
+s/0xF5101800, 0x00054260/0xF5101000, 0x00054260/ % load
+s/0x000BC07C/0x000BC078/ % load
+s/0x002C3F, 0x504244/0x002C3F, 0x504240/ % load
+s/0x190, 0x100, 0x250, 0x200/0x190, 0x100, 0x250, 0x1FC/ % load
+s/0, 0x5E0, 0, -0x400, 0x400/0, 0x5E0, 0, 0x400, 0x400/ % load
+s/0, 0x5E0, 0,/0, 0x5C0, 0,/ % load
+s/0x250, 0xBC, 0x290, 0xFC/0x250, 0xBC, 0x290, 0xF8/ % load
+s/0xFC, 0, 0x200, 0x200/0xFC, 0, 0x200, 0x0/ % load
+s/0x0007C07C/0x0007C078/ % load
+s/0xFD180000, tex/0xFD100000, tex/ % load
+s/entry + 1 != D_800E10B5/entry != D_800E10B5/ % load cache
+s/table = NULL;/table = (u16 *) 1;/ % load
+s/&table, 1, 0x1D)/\&table, 1, 0x1C)/ % load
+s/(u32) entry < (size >> 1)/(u32) entry <= (size >> 1)/ % past
+s/(u32) entry < (size >> 1)/(s32) entry < (s32) (size >> 1)/ % big
+s/(u32) entry < (size >> 1)/(u32) entry < size/ % past
+s/D_800904EC = 0;/D_800904EC = 1;/ % past
+s/= table\[entry\];/= ((s16 *) table)[entry];/ % last
+s/func_10004074(table);/func_10004074(0);/ % load
+s/D_800E10B5 = entry + 1;/D_800E10B5 = entry;/ % load
+s/if (D_800904EC != 0)/if (D_800904EC == 0)/ % load cache
+s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 2, 1, 1.0f, 0/ % cache
+s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 1, 2, 1.0f, 1/ % cache
+s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x61, 1, 2, 1.0f, 0/ % cache
+s/0x94, 0x60, 1, 2, 1.0f, 0/0x94, 0x60, 1, 2, 2.0f, 0/ % cache
+s/&D_800904EC, 0x94/\&D_80090410, 0x94/ % cache

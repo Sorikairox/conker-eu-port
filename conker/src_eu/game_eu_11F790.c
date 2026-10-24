@@ -244,7 +244,40 @@ void func_150F2290(u8 *arg0, s32 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F2290.s")
 #endif
+#ifdef NON_MATCHING
+/* P249: readable C for func_150F2670 (game_eu_11F790, 80 insns). */
+// ambient_far_sound_update: random ambient sound while object `slot` is far out. A cooldown D_800D9D10 (u8) counts
+// down by D_800BE9E4 per frame (to 0); when it is 0 and x^4 + z^4 of D_800CC2D0[slot] exceeds 6760000, plays sound
+// 0x6C..0x6E (func_150ADA20() % 3) at volume 0x5DC0 with the pan of func_100114D0(0, y, 0, 0x7FFF, 20000, 19000)
+// (+0x80, low byte) and restarts the cooldown at 0x80..0xFF frames.
+s32 func_100114D0(s32 x, s32 y, s32 z, s32 gain, s32 outer, s32 inner, s32 *outPan, s32 *outVol, s32 *outDist);
+s32 func_150ADA20(void);
+void func_150F2670(s32 slot) {
+    struct127 *obj = &D_800CC2D0[slot];
+    u8 *timer = (u8 *) D_800D9D10;
+    f32 x2, z2;
+    s32 pan, vol, dist;
+
+    x2 = obj->x_position * obj->x_position;
+    z2 = obj->z_position * obj->z_position;
+    if (*timer != 0) {
+        if (D_800BE9E4 < *timer) {
+            *timer -= D_800BE9E4;
+        } else {
+            *timer = 0;
+        }
+        return;
+    }
+    if (x2 * x2 + z2 * z2 > 6760000.0f) {
+        func_100114D0(0, (s32) obj->y_position, 0, 0x7FFF, 0x4E20, 0x4A38, &pan, &vol, &dist);
+        pan += 0x80;
+        *timer = (func_150ADA20() & 0x7F) + 0x80;
+        func_10010F30((u32) func_150ADA20() % 3 + 0x6C, 0x5DC0, (u8) pan, 0, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11F790/func_150F2670.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15143874(s16, f32, f32 *, f32 *); /* P95: f32 parameter */

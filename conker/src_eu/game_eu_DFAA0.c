@@ -174,4 +174,39 @@ void func_150B2470(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2470.s")
 #endif
+#ifdef NON_MATCHING
+/* P249: readable C for func_150B2820 (game_eu_DFAA0, 79 insns; compiled C, not hand asm: IDO prologue / delay slots). */
+// view_progress_setup: configures a view record (+0x84 flags, +0x190, +0x348 / +0x34C / +0x374, +0x5F0) from the game
+// progress queries func_1509BE40 (kind 0 = 3 arguments, kind 1 = 4). Query 0x5043 / 0x1A set: +0x84 |= 0x400000
+// (and 0x4000 when 0x5045 / 0x1A is set too), +0x190 = 0; else 0x4030 (kind 1): +0x190 = 235; else +0x348 / +0x34C =
+// 114, +0x374 = 384, +0x190 = 60. +0x5F0 bit 0x100 = (query (0x2007 / 0xB7 | 0x2000) / 0xBC != 0 and query
+// 0x2000 / 0xBB != -1).
+void func_150B2820(u8 *v) {
+    s32 a;
+    s32 b;
+
+    a = func_1509BE40(0, func_1509BE40(0, 0x2007, 0xB7) | 0x2000, 0xBC);
+    b = func_1509BE40(0, 0x2000, 0xBB);
+    if (func_1509BE40(0, 0x5043, 0x1A) != 0) {
+        if (func_1509BE40(0, 0x5045, 0x1A) != 0) {
+            *(s32 *) (v + 0x84) |= 0x4000;
+        }
+        *(s32 *) (v + 0x84) |= 0x400000;
+        *(f32 *) (v + 0x190) = 0.0f;
+    } else if (func_1509BE40(1, 0x4030, 6, 0x2000) != 0) {
+        *(f32 *) (v + 0x190) = 235.0f;
+    } else {
+        *(f32 *) (v + 0x348) = 114.0f;
+        *(f32 *) (v + 0x34C) = 114.0f;
+        *(f32 *) (v + 0x374) = 384.0f;
+        *(f32 *) (v + 0x190) = 60.0f;
+    }
+    if (a != 0 && b != -1) {
+        *(s32 *) (v + 0x5F0) |= 0x100;
+    } else {
+        *(s32 *) (v + 0x5F0) &= ~0x100;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2820.s")
+#endif

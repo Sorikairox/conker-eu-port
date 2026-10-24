@@ -237,9 +237,90 @@ Gfx *func_15189270(Gfx *gfx, s32 arg1, s16 arg2) {
     return gfx;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151893B8.s")
+#ifdef NON_MATCHING
+/* P249: readable C for func_151893B8 (game_eu_1B6590, 79 insns). */
+// trail_matrix_history_push: advances an object's motion-trail matrix history. The record holds rec[1] steps of
+// `per` matrices (func_1502DE10(object kind), 64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is
+// written, the other half read): step j of this half = step j + 1 of the other half, and the last step = the
+// object's current bone matrices (object +0x10, its +0x1D4); without matrices the filled count rec[2] is reset to 0
+// and nothing else happens. Otherwise rec[2] counts up to rec[1].
+s32 func_1502DE10(u8);
+void func_151893B8(u8 *rec) {
+    s32 n, per, total, cur, prev, i, j;
+    u8 *src;
 
+    n = rec[1];
+    per = func_1502DE10((*(u8 **) (rec + 0x10))[4]);
+    total = per * n;
+    cur = D_800BE9C0 * total;
+    prev = (D_800BE9C0 ^ 1) * total;
+    j = 0;
+    for (i = 1; i <= n; i++) {
+        if (i == n) {
+            src = *(u8 **) (*(u8 **) (rec + 0x10) + 0x1D4);
+            if (src == NULL) {
+                rec[2] = 0;
+                return;
+            }
+        } else {
+            src = *(u8 **) (rec + 8) + ((i * per + prev) << 6);
+        }
+        bcopy(src, *(u8 **) (rec + 8) + ((j * per + cur) << 6), per << 6);
+        j = i;
+    }
+    if (rec[1] != rec[2]) {
+        rec[2]++;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151893B8.s")
+#endif
+
+#ifdef NON_MATCHING
+extern u16 **D_800895E0[];   /* per group: -> the group's entry list (4-byte entries, u16 record id first) */
+extern Mtx **D_800895F0[2];  /* per DL buffer: -> the world-object matrix array (one Mtx per record id) */
+extern u16 D_800DC318[];     /* per group: entry count */
+// trail_matrix_history_push_world: P253. Like func_151893B8 (same handler table), for an object with one matrix: the
+// record holds rec[1] matrices (64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is written, the other
+// half read): matrix j of this half = matrix j + 1 of the other half, and the last one = the object's world matrix
+// (the object +0x10 is looked up in group 0's entry list by its record id, 0xA0-byte records at D_800DBEF4; matrix
+// array of the current DL buffer). When the object is not in the list, the filled count rec[2] is reset to 0 and
+// nothing else happens. Otherwise rec[2] counts up to rec[1].
+void func_151894F4(u8 *rec) {
+    s32 n = rec[1];
+    s32 cur = D_800BE9C0 * n;
+    s32 prev = (D_800BE9C0 ^ 1) * n;
+    s32 k, i, j;
+    Mtx *mtx;
+    u8 *src;
+
+    for (k = 0; k < D_800DC318[0]; k++) {
+        if (*(u8 **) (rec + 0x10) == (u8 *) D_800DBEF4 + (*D_800895E0[0])[k * 2] * 0xA0) {
+            break;
+        }
+    }
+    if (k == D_800DC318[0]) {
+        rec[2] = 0;
+        return;
+    }
+    mtx = *D_800895F0[D_800BE9C0] + (*D_800895E0[0])[k * 2];
+    j = 0;
+    for (i = 1; i <= n; i++) {
+        if (i == n) {
+            src = (u8 *) mtx;
+        } else {
+            src = *(u8 **) (rec + 8) + (i + prev) * 64;
+        }
+        bcopy(src, *(u8 **) (rec + 8) + (cur + j) * 64, 64);
+        j = i;
+    }
+    if (rec[1] != rec[2]) {
+        rec[2]++;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151894F4.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1502DE10(u8);
@@ -382,7 +463,55 @@ void func_15189B3C(u8 *arg0) {
     func_100043B4((*(s32 **)((u8 *)arg0 + 8)), 2U);
 }
 
+#ifdef NON_MATCHING
+u8 func_15084E34(struct127 *, s32 *);
+s32 func_1503DD8C(struct127 *, u8, s32, s32);
+u8 *func_1502CC64(u8 *, s32, s16, s32, s32);
+extern u8 *D_800DFBF0; /* matrix list func_1502CC64 draws the object with */
+extern u8 D_800DFBF4;  /* alpha func_1502CC64 draws the object with */
+// trail_draw: P253. Draw handler (u8 *(u8 *gfx, u8 *rec, s16 arg2), same table as func_151893B8) of an object's
+// motion trail: with filled steps (rec[2] != 0) it prepares the object +0x10 (func_15084E34 / func_1503DD8C), swaps
+// the object's +0x94 for the record's +0x14 and draws the object (func_1502CC64, D_800CC2D0 slot index, mode 4) once
+// per filled step, each time with that step's matrices from the history buffer +8 (this half, D_800BE9C0) and alpha
+// rec[3] * (3 + step) * 32 / 256, then restores +0x94. Objects outside the 25 first D_800CC2D0 slots are skipped.
+u8 *func_15189B64(u8 *gfx, u8 *rec, s16 arg2) {
+    struct127 *obj = *(struct127 **) (rec + 0x10);
+    s32 sp64;
+    s32 n, alpha0, per, slot, count, i, m, a;
+    s32 saved;
+    u8 k;
+
+    if (rec[2] == 0) {
+        return gfx;
+    }
+    k = func_15084E34(obj, &sp64);
+    func_1503DD8C(*(struct127 **) (rec + 0x10), k, sp64, 1);
+    n = rec[1];
+    alpha0 = rec[3];
+    per = func_1502DE10(((u8 *) *(struct127 **) (rec + 0x10))[4]);
+    obj = *(struct127 **) (rec + 0x10);
+    m = D_800BE9C0 * per * n;
+    count = rec[2];
+    slot = ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C;
+    if (slot < 0 || slot >= 25) {
+        return gfx;
+    }
+    saved = *(s32 *) ((u8 *) obj + 0x94);
+    *(s32 *) ((u8 *) obj + 0x94) = *(s32 *) (rec + 0x14);
+    a = alpha0 * 3 * 32;
+    for (i = 0; i < count; i++) {
+        D_800DFBF0 = *(u8 **) (rec + 8) + m * 64;
+        D_800DFBF4 = a >> 8;
+        gfx = func_1502CC64(gfx, slot, arg2, 4, 1);
+        a += alpha0 * 32;
+        m += per;
+    }
+    *(s32 *) (*(u8 **) (rec + 0x10) + 0x94) = saved;
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_15189B64.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15113D54(s32, u8 *, s32, s16, s32, s32);

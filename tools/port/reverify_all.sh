@@ -54,8 +54,9 @@ L = open(sys.argv[1]).read().split('\n'); f = L[0].split()[0] if L and L[0] else
 rnd = '-'; st = []; mu = []; bad = False
 for l in L:
     l = l.strip()
-    if l.startswith('random:'):
-        rnd = l.split()[1]; bad |= rnd != 'EQUIV'
+    if l.startswith('random:') or l.startswith('harness:'):  # P255: HARNESS= rows print `harness: VERDICT ...`
+        rnd = l.split()[1] if len(l.split()) > 1 else '?'; bad |= rnd != 'EQUIV'
+        if l.startswith('harness:'): rnd = 'harness ' + rnd
     elif l.startswith('setups '):
         m = re.search(r': (\d+) EQUIV / (\d+)(.*)', l)
         if m:

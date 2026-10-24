@@ -1,0 +1,17 @@
+# P253 func_150D083C (console_text_type) mutants: sed % setup names
+s/if (p\[0x30\] & 1)/if (p[0x30] \& 2)/ % restart
+s/st->n = 0;/st->n = 1;/ % restart
+s/st->t = 0.0f;/st->t = 0.5f;/ % restart
+s/< (f32) txt\[0x14\]/< (f32) txt[0x15]/ % done run
+s/0.437f \* D_800BE9A4/0.4375f * D_800BE9A4/ % run
+s/while (st->t > 1.0f)/while (st->t > 2.0f)/ % run big
+s/st->n = txt\[0x14\];/st->n = txt[0x14] - 1;/ % big
+s/st->t -= 1.0f;/st->t -= 0.5f;/ % run
+s/memcpy((s32) buf, prompt, 4);/memcpy((s32) buf, prompt, 3);/ % run
+s/txt\[0x15\] \* 4), st->n)/txt[0x15] * 4 + 4), st->n)/ % run
+s/buf\[st->n + 5\] = 0xBB;/buf[st->n + 5] = 0xBC;/ % run
+s/buf\[st->n + 6\] = 0;/buf[st->n + 7] = 0;/ % run
+s/func_1504332C(0, 0xFF, 0, 0x96)/func_1504332C(0, 0xFF, 0, 0x95)/ % run
+s/return 1;/return 0;/ % run
+s/st->n++;/st->n += 2;/ % run big
+s/char prompt\[\] = "C:> ";/char prompt[] = "C:>_";/ % run

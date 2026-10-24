@@ -397,7 +397,65 @@ void func_15045178(void) {
     }
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800990F0; // 99999.9f
+extern s32 D_800DC26C;
+s32 func_150A3F50(s32, s32);
+
+// ceiling_probe: mirror of func_150453BC (floor probe). Of the collision triangles func_150A3F50 lists under pos
+// (x, z), takes the lowest one at or above pos[1] (heights in D_800D3720 are 24.8 fixed point), copies its vertices
+// and surface type (D_800DBE5C, no NULL check here) into out and sets flags 1 | 4. Returns 1 (and sets out flag 2)
+// when that ceiling is at or below maxY; returns 0 with flag 2 cleared when pos is above maxY or nothing is found.
+s32 func_150451C0(f32 *pos, f32 maxY, Unk45674 *out) {
+    s32 best;
+    s32 n;
+    s32 i;
+    s32 j;
+    f32 d;
+    s32 *q;
+    s32 off;
+
+    if (maxY < pos[1]) {
+        out->unk1C &= ~2;
+        return 0;
+    }
+    out->unk0 = D_800990F0;
+    best = -1;
+    func_1510F800(0);
+    n = func_150A3F50((s32) pos[0], (s32) pos[2]);
+    for (i = 0; i < n; i++) {
+        d = D_800D3720[i].unk0 * 0.00390625f;
+        if (pos[1] <= d && d < out->unk0) {
+            best = i;
+            out->unk0 = d;
+        }
+    }
+    if (best == -1) {
+        out->unk1C &= ~2;
+        return 0;
+    }
+    q = D_800D3720[best].unk4;
+    off = D_800D3720[best].unk8 * 16;
+    for (j = 0; j < 3; j++) {
+        s16 *p = (s16 *) (q[j] + off);
+
+        out->unk4[j][0] = p[0];
+        out->unk4[j][1] = p[1];
+        out->unk4[j][2] = p[2];
+    }
+    out->unk18 = ((s32 *) D_800DBE5C)[((s32) D_800D3720[best].unk4 - D_800DC26C) / 12];
+    out->unk1D = 1;
+    out->unk1C |= 5;
+    out->unk20 = 0;
+    if (out->unk0 <= maxY) {
+        out->unk1C |= 2;
+        return 1;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_71E70/func_150451C0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800990F4;

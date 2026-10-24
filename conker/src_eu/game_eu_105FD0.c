@@ -48,7 +48,71 @@ s32 func_150D87CC(u8 *arg0, u8 *arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D87CC.s")
 #endif
+#ifdef NON_MATCHING
+extern s32 D_80090648;
+extern s32 D_800BE9E4;
+
+// tile_slide_by_anim_update: material handler (s32 (u8 *mat, u8 *actor) table, as func_150D87CC): a 4-state
+// open / close level 0..100 in mat +0x3C driven by the actor's animation (+0x84) and its frame (+0x2D0 -> +8):
+// state 0 waits for anim 0x18D past frame 46, state 1 opens by the frame step D_800BE9E4, state 2 waits for anim 0x18E
+// past frame 34, state 3 closes 4x as fast, state 4 stays shut. The level sets the ult field of the material display
+// list's G_SETTILESIZE (first 8-byte command whose opcode byte is 0xF2). mat +0x18 takes texture ids from D_80090648.
+s32 func_150D88E8(u8 *mat, u8 *actor) {
+    s32 *state = (s32 *) (mat + 0x38);
+    s32 *level = (s32 *) (mat + 0x3C);
+    s32 v;
+    f32 t;
+    s8 *cmd;
+    s32 i;
+
+    switch (*state) {
+        case 0:
+            *level = 50;
+            *(s16 *) (mat + 0x18) = *(s32 *) ((u8 *) &D_80090648 + 0x6C);
+            if (*(u16 *) (actor + 0x84) == 0x18D && *(f32 *) (*(u8 **) (actor + 0x2D0) + 8) >= 46.0f) {
+                *state = 1;
+                *(s16 *) (mat + 0x18) = *(s32 *) ((u8 *) &D_80090648 + 0x70);
+            }
+            v = *level;
+            break;
+        case 1:
+            v = *level + D_800BE9E4;
+            *level = v;
+            if (v >= 100) {
+                v = 100;
+                *level = 100;
+                *state = 2;
+            }
+            break;
+        case 2:
+            if (*(u16 *) (actor + 0x84) == 0x18E && *(f32 *) (*(u8 **) (actor + 0x2D0) + 8) >= 34.0f) {
+                *state = 3;
+            }
+            v = *level;
+            break;
+        case 3:
+            v = *level - D_800BE9E4 * 4;
+            *level = v;
+            if (v <= 0) {
+                *level = 0;
+                *state = 4;
+                v = 0;
+            }
+            break;
+        default:
+            v = *level;
+            break;
+    }
+    t = (f32) v * 0.01f;
+    cmd = **(s8 ***) (mat + 0x24);
+    for (i = 0; cmd[i * 8] != -0xE; i++) {
+    }
+    *(s32 *) (cmd + i * 8) = ((s32) (120.0f * t + 2.0f) & 0xFFF) | 0xF2002000;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_105FD0/func_150D88E8.s")
+#endif
 
 s16 *func_150D8AA0(s16 *arg0, s32 arg1) {
     arg0[0] = 0x42;

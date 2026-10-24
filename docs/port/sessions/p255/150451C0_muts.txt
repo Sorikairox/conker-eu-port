@@ -1,0 +1,21 @@
+# P255 func_150451C0 (ceiling_probe) mutants: sed % setup names
+s/if (maxY < pos\[1\]) {/if (maxY <= pos[1]) {/ % eqmax
+1,/out->unk1C \&= ~2;/s/out->unk1C \&= ~2;/out->unk1C \&= ~4;/ % above
+s/out->unk0 = D_800990F0;/out->unk0 = 1000.0f;/ % eqmax n0
+s/func_1510F800(0);/func_1510F800(1);/ % base
+s/n = func_150A3F50((s32) pos\[0\], (s32) pos\[2\]);/n = func_150A3F50((s32) pos[2], (s32) pos[0]);/ % base
+s/\* 0.00390625f;/* 0.0078125f;/ % base
+s/if (pos\[1\] <= d \&\&/if (pos[1] < d \&\&/ % eqd
+s/\&\& d < out->unk0) {/\&\& d <= out->unk0) {/ % tie
+s/            best = i;/            best = 0;/ % order
+s/if (best == -1) {/if (best == -2) {/ % n0 eqmax
+s/off = D_800D3720\[best\].unk8 \* 16;/off = D_800D3720[best].unk8 * 12;/ % base
+s/out->unk4\[j\]\[1\] = p\[1\];/out->unk4[j][1] = p[2];/ % base
+s/- D_800DC26C) \/ 12\];/- D_800DC26C) \/ 16];/ % second
+s/out->unk1D = 1;/out->unk1D = 2;/ % base
+s/out->unk1C |= 5;/out->unk1C |= 7;/ % toohigh
+s/out->unk20 = 0;/out->unk20 = 1;/ % base
+s/if (out->unk0 <= maxY) {/if (out->unk0 < maxY) {/ % eqret
+s/        out->unk1C |= 2;/        out->unk1C |= 10;/ % flags base
+s/        return 1;/        return 2;/ % base
+# P255: `|= 2` -> `|= 6` is equivalent (bit 4 was just set); replaced by `|= 10`

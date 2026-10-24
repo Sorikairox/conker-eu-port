@@ -26,11 +26,136 @@ void func_15103828(void) {
 }
 
 // need to figure out the structs
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103910.s")
-#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103AA0.s")
+/* positional sound slot (SfxEnt in init_EB00.c, 0x30 bytes); only the fields the callbacks use are named */
+typedef struct {
+    u16 sound;      /* 0x00 */
+    s16 x;          /* 0x02 */
+    s16 y;          /* 0x04 */
+    s16 z;          /* 0x06 */
+    u16 unk8;       /* 0x08 */
+    s16 unkA;       /* 0x0A */
+    s32 vol;        /* 0x0C */
+    s32 flags;      /* 0x10 */
+    void *callback; /* 0x14 */
+    s32 state;      /* 0x18: callback state (func_1000FA64's arg8: high half = queued sound, low half = timer) */
+    u8 *obj;        /* 0x1C: func_1000FA64's arg9, the object that makes the sound */
+    s16 unk20;
+    u8 unk22;
+    u8 unk23;
+    u16 voice;      /* 0x24 */
+    u16 unk26;
+    u16 unk28;
+    u16 pad2A;
+    f32 unk2C;
+} SfxEnt_130CB0;
 #ifdef NON_MATCHING
-extern s32 func_15103910;
-extern s32 func_15103AA0;
+// object_sound_follow_cam: P253. func_1000FA64 callback (s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch,
+// s32 *slot, u16 *sound), called from the sound update in init_EB00.c; non-zero = free the slot) of the sounds
+// func_15103C14 starts for an object with a camera. The slot follows the object's position. With a timer (low half of
+// state, signed): a sound the update is about to start is queued instead (high half) and sound 0x5B0 is started
+// (volume 25000, 100, 0x78); otherwise the timer counts down by D_800BE9E4 and at 0 the queued sound is handed back
+// (*sound, slot sound, *vol = slot volume, *pos = 1, state cleared). Without a timer: *vol = slot volume, *pos = 1;
+// with no voice yet the slot ends (sound 0x5B1 started, returns 1); else the object's voice (+0x8C) is replaced by
+// this slot's voice (the old one stopped with func_100111C8) and flag 0x80 is cleared.
+s32 func_15103910(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
+    u8 *obj = e->obj;
+    s32 state = e->state;
+    s16 timer = state;
+
+    e->x = (s32) *(f32 *) (obj + 0x14);
+    e->y = (s32) *(f32 *) (obj + 0x18);
+    e->z = (s32) *(f32 *) (obj + 0x1C);
+    if (timer != 0) {
+        if (*sound != 0) {
+            e->state = (*sound << 16) | (state & 0xFFFF);
+            e->sound = 0;
+            *sound = 0;
+            func_10010344(0x5B0, (struct127 *) obj, 25000, 100, 0x78);
+            return 0;
+        }
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            *sound = state >> 16;
+            e->sound = state >> 16;
+            *vol = e->vol;
+            *pos = 1;
+            e->state = 0;
+            return 0;
+        }
+    } else {
+        *vol = e->vol;
+        *pos = 1;
+        if (e->voice == 0) {
+            func_10010344(0x5B1, (struct127 *) obj, e->vol, e->unkA, e->unk8);
+            return 1;
+        }
+        if (e->voice != *(u16 *) (obj + 0x8C)) {
+            func_100111C8(*(u16 *) (obj + 0x8C));
+            *(u16 *) (obj + 0x8C) = e->voice;
+        }
+        e->flags &= ~0x80;
+        state = e->state;
+    }
+    e->state = (state & 0xFFFF0000) | timer;
+    return 0;
+}
+
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103910.s")
+#endif
+
+#ifdef NON_MATCHING
+// object_sound_delayed: P253. func_1000FA64 callback (same signature as func_15103910) of the sounds func_15103C14
+// starts for an object without a camera (state = flag 0x8000 from its arg4 | 0x10). The slot follows the object's
+// position. With a timer (state & 0x7FFF): a sound the update is about to start is queued (high half) and sound 0x5B0
+// is started (volume -25000); otherwise the timer counts down by D_800BE9E4 and once it would reach 0 the queued
+// sound is handed back (*sound, slot sound; the timer bits cleared). Without a timer: with no voice yet the slot ends
+// (sound 0x5B1, returns 1); else, unless flag 0x8000 is set, func_1000F85C(voice, -0x8000, 2) once, the state is
+// cleared and flag 0x80 of the slot is cleared.
+s32 func_15103AA0(SfxEnt_130CB0 *e, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound) {
+    u8 *obj = e->obj;
+    s32 state = e->state;
+    s32 timer = state & 0x7FFF;
+
+    e->x = (s32) *(f32 *) (obj + 0x14);
+    e->y = (s32) *(f32 *) (obj + 0x18);
+    e->z = (s32) *(f32 *) (obj + 0x1C);
+    if (timer != 0) {
+        if (*sound != 0) {
+            e->state = (*sound << 16) | (state & 0xFFFF);
+            e->sound = 0;
+            *sound = 0;
+            func_10010344(0x5B0, (struct127 *) obj, -25000, e->unkA, e->unk8);
+            return 0;
+        }
+        if ((u32) timer <= (u32) D_800BE9E4) {
+            *sound = state >> 16;
+            e->sound = state >> 16;
+            e->state &= ~0x7FFF;
+            return 0;
+        }
+        timer -= D_800BE9E4;
+    } else {
+        if (e->voice == 0) {
+            func_10010344(0x5B1, (struct127 *) obj, -25000, e->unkA, e->unk8);
+            return 1;
+        }
+        if (state != 0) {
+            if (!(state & 0x8000)) {
+                func_1000F85C(e->voice, -0x8000, 2);
+            }
+            e->state = 0;
+        }
+        e->flags &= ~0x80;
+        state = e->state;
+    }
+    e->state = (state & ~0x7FFF) | timer;
+    return 0;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_130CB0/func_15103AA0.s")
+#endif
+#ifdef NON_MATCHING
 
 void func_15103C14(s32 arg0, s32 arg1, u32 arg2, s32 arg3, s32 arg4) {
     s32 sp48;

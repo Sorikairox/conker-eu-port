@@ -1,0 +1,27 @@
+# P255 func_1517A75C (sprite_particle_update) mutants: sed % setup names
+s/(obj + 0x90) += \*(s16 \*) (obj + 0xA0);/(obj + 0x90) += *(s16 *) (obj + 0xA4);/ % live
+s/(obj + 0x92) -= vy;/(obj + 0x92) += vy;/ % live
+s/(obj + 0x94) += \*(s16 \*) (obj + 0xA4);/(obj + 0x94) -= *(s16 *) (obj + 0xA4);/ % live
+s/(obj + 0x96) += \*(s8 \*) (obj + 0x9C);/(obj + 0x96) += *(u8 *) (obj + 0x9C);/ % live
+s/(obj + 0x98) += \*(s8 \*) (obj + 0x9D);/(obj + 0x98) += *(s8 *) (obj + 0x9E);/ % live
+s/(obj + 0x9A) += \*(s8 \*) (obj + 0x9E);/(obj + 0x9A) += *(s8 *) (obj + 0x9F);/ % live
+s/if (mode == 5) {/if (mode == 4) {/ % grav
+s/(obj + 0xA2) = vy + 1;/(obj + 0xA2) = vy + 2;/ % grav
+s/if (life < (s32) mode) {/if (life <= (s32) mode) {/ % lifeeq
+1,/sign = -1;/s/sign = -1;/sign = 1;/ % dragneg
+1,/v + -sign \* r;/s/v + -sign \* r;/v - r;/ % dragneg
+s/(obj + 0xA4) = v + -sign \* r;/(obj + 0xA4) = v - sign;/ % drag
+1,/(obj + 0xAE);/s/(obj + 0xAE);/(obj + 0xAC);/ % drag
+1,/(u32) func_150ADA20()/s/(u32) func_150ADA20()/(s32) func_150ADA20()/ % dragbig
+s/        life = \*(u16 \*) (obj + 0xA6);/        life = 0;/ % drag
+s/v = life - D_800BE9E4;/v = life - 1;/ % fade
+s/if (v < 0) {/if (v <= 0) {/ % lifeedge
+s/D_800BE9E4 \* 4;/D_800BE9E4 * 2;/ % fade
+s/        v = 0;/        v = 1;/ % fade
+s/if (a < 0) {/if (a < -1) {/ % fadem1
+s/            a = 0;/            a = 1;/ % fadeout
+s/if (alpha == 0 ||/if (alpha == 1 ||/ % alpha0
+s/(obj\[0xB2\] != 0 \&\&/(obj[0xB2] != 1 \&\&/ % live
+s/\& 0xF) == (obj\[0xB2\] >> 4)/\& 0xF) != (obj[0xB2] >> 4)/ % nibeq nibne
+s/(obj\[0xB2\] >> 4)/(obj[0xB2] >> 3)/ % nibeq
+# P255: `a < 0` -> `a <= 0` is equivalent (a = 0 either way); replaced by `a < -1` (setup fadem1)

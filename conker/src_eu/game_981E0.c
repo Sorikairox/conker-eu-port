@@ -2625,7 +2625,94 @@ void func_15072AF8(void) {
     func_1505E650(D_800D154C, D_800D154C->unk84.uh + 1, 1.0f, 6.0f, 0.0f, 0.0f, 0);
 }
 
+#ifdef NON_MATCHING
+// player_anim_follow_up: when the player's (D_800D154C) animation +0x84 ends, start the one that follows it (blend 4):
+// fixed pairs (0x35 / 0x3F -> 0x3A, 0x1CD / 0x1CF -> 0x1CE, the 0x26F..0x274 cycle, ...); for 0x10C, 0x156 and 0x167
+// the follow-up depends on the player's flag +0x31C->+0x197, without it the idle animation (func_1507F640) starts;
+// 0xBE, and 0xC1 without flag 0x2000 in +0x31C->+0x38, go to 0xBF. Anything else starts nothing.
+void func_15072B44(void) {
+    s32 cur = D_800D154C->unk84.uh;
+    s32 next = -1;
+
+    switch (cur) {
+        case 0x35:
+        case 0x3F:
+            next = 0x3A;
+            break;
+        case 0xFD:
+            next = 0xFE;
+            break;
+        case 0x10A:
+            next = 0x10A;
+            break;
+        case 0x10C:
+            if (D_800D154C->unk31C->unk197 != 0) {
+                next = 0x10A;
+            } else {
+                func_1507F640();
+            }
+            break;
+        case 0x12C:
+        case 0x142:
+            next = 0x12D;
+            break;
+        case 0x138:
+            next = 0x3E;
+            break;
+        case 0x156:
+            if (D_800D154C->unk31C->unk197 != 0) {
+                next = 0x157;
+            } else {
+                func_1507F640();
+            }
+            break;
+        case 0x167:
+            if (D_800D154C->unk31C->unk197 != 0) {
+                next = 0x165;
+            } else {
+                func_1507F640();
+            }
+            break;
+        case 0x175:
+        case 0x176:
+            next = 0x177;
+            break;
+        case 0x1CD:
+        case 0x1CF:
+            next = 0x1CE;
+            break;
+        case 0x1D6:
+            next = 0x1D7;
+            break;
+        case 0x1D7:
+            next = 0x1D8;
+            break;
+        case 0x26F:
+        case 0x270:
+        case 0x271:
+        case 0x272:
+        case 0x273:
+            next = cur + 1;
+            break;
+        case 0x274:
+            next = 0x26F;
+            break;
+        case 0xBE:
+            next = 0xBF;
+            break;
+        case 0xC1:
+            if (!(D_800D154C->unk31C->unk38 & 0x2000)) {
+                next = 0xBF;
+            }
+            break;
+    }
+    if (next != -1) {
+        func_1505E650(D_800D154C, next, 1.0f, 4.0f, 0.0f, 0.0f, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15072B44.s")
+#endif
 void func_15072DA0(void) {
     D_800D154C->unk2F8 &= 0xFFF8;
     D_800D154C->unk2F8 |= D_800D1580;

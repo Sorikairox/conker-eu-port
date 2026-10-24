@@ -1,0 +1,22 @@
+# P255 func_151473F4 (object_splash_spawn) mutants: sed % setup names
+s/(obj + 0x1D4) != 0/(obj + 0x1D4) == 0/ % nomodel ring
+s/(s32) sp.rec, id) != 0/(s32) sp.rec, id) == 0/ % ring nofind
+s/sp.rec, id)/sp.rec, 1)/ % id2
+s/strength >= 0x47/strength > 0x47/ % ring
+s/sp.pt, sp.rec\[6\], 1.0f/sp.pt, sp.rec[5], 1.0f/ % ring
+s/1.0f, 1.0f);/1.0f, 2.0f);/ % ring
+s/pos\[0\] = sp.pt\[0\];/pos[0] = sp.pt[1];/ % ring burst
+s/pos\[1\] = \*(f32 \*) \&sp.rec\[0\];/pos[1] = sp.pt[1];/ % ring burst
+s/pos\[2\] = sp.pt\[2\];/pos[2] = sp.pt[0];/ % ring burst
+s/func_150ADA20() \& 1)/func_150ADA20() \& 2)/ % ring burst
+s/r \* 10.0f + 10.0f/r * 10.0f + 11.0f/ % ring
+s/(s32) \&sp.rec\[1\]/(s32) \&sp.rec[2]/ % ring
+s/r \* 8.0f + 5.0f/r * 8.0f + 6.0f/ % burst
+s/pos, 1, 0xFF, 1);/pos, 1, 0xFF, 0);/ % burst
+s/u32 a;/s32 a;/ % ringbig burstbig
+s/(slot, r \* 8.0f/(5, r * 8.0f/ % id2
+s/101 + 100, (s32)/100 + 100, (s32)/ % ring
+s/41 + 80/40 + 80/ % ring
+s/+ 80, 1, 1, 0, 0xFF, 1/+ 81, 1, 1, 0, 0xFF, 1/ % ring
+s/+ 80, 1, 1, 0, 0xFF, 1/+ 80, 1, 1, 0, 0xFE, 1/ % ring
+s/101 + 100, pos/101 + 101, pos/ % burst
