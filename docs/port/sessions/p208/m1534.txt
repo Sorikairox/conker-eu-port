@@ -1,0 +1,14 @@
+s/    \*ready = 0;/    ;/
+s/0xD18 + sheet/0xD18 - sheet/
+s/0xD18 + sheet/0xD17 + sheet/
+s/    if (tex == 0x80000000) {/    if (tex == 0) {/
+s/0xFD500000;/0xFD510000;/
+s/0x07098260;/0x07098261;/
+s/0xF5400800;/0xF5400801;/
+s/0x000FC0FC;/0x000FC0FD;/
+s/tex + 0x800;/tex + 0x400;/
+s/0x0603C000;/0x0603C001;/
+s/0xEF00AC3F;/0xEF002C3F;/
+s/    \*ready = 1;/    *ready = 2;/
+s/func_1510D66C(0xD18 + sheet, NULL, 3, 0)/func_1510D66C(0xD18 + sheet, NULL, 2, 0)/
+s/    gdl->words.w1 = tex;/    gdl->words.w1 = tex + 1;/

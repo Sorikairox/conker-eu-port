@@ -1,0 +1,128 @@
+s/        bars\[i\] = D_80087750\[i\];/        bars[i] = 1;/
+s/    width = ((struct_eu_BE628 \*)D_800BE628)->unk30 - /    width = ((struct_eu_BE628 *)D_800BE628)->unk28 - /
+s/    gSPDisplayList(gdl++, D_80087730);/    gSPDisplayList(gdl++, D_80087750);/
+s/    func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);/    func_1504332C(0xFF, 0xFF, 0xFF, 0x80);/
+s/    scale = 0x400;/    scale = 0x401;/
+s/            table\[i\] = i;/            table[i] = i + 1;/
+s/        scale = 1024.0f \/ f;/        scale = 1023.0f \/ f;/
+s/            table\[i\] = (f32)i \* f;/            table[i] = (f32)i * f + 1.0f;/
+s/    if (D_80090160 & 0xC02) {/    if (D_80090160 \& 0x802) {/
+s/            y = (f32)table\[6\] + view->unk24;/            y = (f32)table[7] + view->unk24;/
+s/            x = view->unk2C;/            x = view->unk30;/
+s/            if (D_80090160 & 2) {/            if (D_80090160 \& 1) {/
+s/                    tex = func_1510D66C(0xD16, NULL, 3, 0);/                    tex = func_1510D66C(0xD17, NULL, 3, 0);/
+s/                    if (tex != 0x80000000) {/                    if (tex != 0) {/
+s/                        gdl->words.w0 = 0xFD180000;/                        gdl->words.w0 = 0xFD100000;/
+s/                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0x80);/                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/
+s/                        ready = 1;/                        ready = 0;/
+s/                ix = table\[5\] + x;/                ix = table[6] + x;/
+s/                k = func_150859AC((s16)p, 3);/                k = func_150859AC((s16)p, 4);/
+s/                s = D_80087764\[k & 3\] << 5;/                s = D_80087764[k \& 3] << 4;/
+s/                t = D_80087768\[k >> 2\] << 5;/                t = D_80087768[k >> 1] << 5;/
+s/(table\[5\] + ix) \* 4, (table\[7\] + y) \* 4,/(table[5] + ix) * 4, (table[8] + y) * 4,/
+s/                ix = (width >> 1) + x - 8;/                ix = (width >> 1) + x - 9;/
+s/                    ix -= 8;/                    ix -= 7;/
+s/(s32)D_8009E0B8, \*(s16 \*)(D_80090174 + 0x46 + p \* 2));/(s32)D_8009E0B8, *(s16 *)(D_80090174 + 0x44 + p * 2));/
+s/                ix = (width >> 1) + x + 16;/                ix = (width >> 1) + x + 15;/
+s/                    ix += 16;/                    ix += 17;/
+s/(s32)D_8009E0BC, ((u8 \*\*)D_800E1008)\[8 + D_800E0EF0\[p\]\]);/(s32)D_8009E0BC, ((u8 **)D_800E1008)[9 + D_800E0EF0[p]]);/
+s/    if (D_80090160 & 0x14) {/    if (D_80090160 \& 0x04) {/
+s/            right = view->unk30 - f;/            right = view->unk30 + f;/
+s/            y = f + view->unk24;/            y = f + view->unk28;/
+s/                if (obj->interaction_state == 0x1F) {/                if (obj->interaction_state == 0x1E) {/
+s/                case 0x09: icon = 0; break;/                case 0x09: icon = 2; break;/
+s/                case 0x16: icon = 1; break;/                case 0x16: icon = 2; break;/
+s/                case 0x14: case 0x3F: icon = 3; break;/                case 0x14: icon = 3; break;/
+s/                case 0x20: icon = 5; break;/                case 0x20: icon = 8; break;/
+s/                case 0x18: case 0x41: icon = 6; break;/                case 0x18: icon = 6; break;/
+s/                case 0x15: icon = 7; break;/                case 0x15: icon = 8; break;/
+s/                case 0x22: icon = 9; break;/                case 0x22: icon = 10; break;/
+s/                case 0x32: case 0x33: count = (s8)st\[0x1AE\]; icon = 11; break;/                case 0x32: case 0x33: count = 1; icon = 11; break;/
+s/                case 0x21: icon = 12; break;/                case 0x21: icon = 13; break;/
+s/                case 0x25: icon = 14; break;/                case 0x25: icon = 11; break;/
+s/                case 0x40: icon = 4; toff = -3; break;/                case 0x40: icon = 4; toff = 3; break;/
+s/                    if (obj->health != 0) {/                    if (obj->health == 0) {/
+s/                    if (D_800BE9F0 == 0x1A) {/                    if (D_800BE9F0 == 0x1B) {/
+s/                        toff = 4;/                        toff = 5;/
+s/                if (obj->unk13C) {/                if (0) {/
+s/                    ix = (right - table\[25\]) \* 4;/                    ix = (right - table[24]) * 4;/
+s/                    h = table\[D_8008775C\[row\]\] \* 4;/                    h = table[D_8008775C[row] + 1] * 4;/
+s/                    t = D_80087754\[row\] << 5;/                    t = D_80087754[row + 1] << 5;/
+s/                        dy = 4;/                        dy = 0;/
+s/                        h -= 8;/                        h -= 4;/
+s/                        h -= 4;/                        h -= 0;/
+s/ 3) \* 800, t, scale, scale);/ 3) * 768, t, scale, scale);/
+s/                        ix -= 18 \* 4;/                        ix -= 18;/
+s/                    } while (--count > 0);/                    } while (--count >= 0);/
+s/            if (D_80090160 & 0x10) {/            if (D_80090160 \& 0x8) {/
+s/                    gdl = func_15091534(gdl, 0, \&ready);/                    gdl = func_15091534(gdl, 1, \&ready);/
+s/                ix = table\[22\] + x;/                ix = table[21] + x;/
+s/                len = ((k + 1) >> 1) \* 5;/                len = (k >> 1) * 5;/
+s/                len = (k >> 1) \* 5;/                len = ((k - 1) >> 1) * 5;/
+s/ix \* 4, (table\[4\] + y) \* 4,/ix * 4, (table[5] + y) * 4,/
+s/ix \* 4, (table\[9\] + y) \* 4,/ix * 4, (table[8] + y) * 4,/
+s/G_TX_RENDERTILE, 0x620, 0xA0, scale, scale);/G_TX_RENDERTILE, 0x620, 0xC0, scale, scale);/
+s/            right = view->unk30 - 5.0f;/            right = view->unk30 - 4.0f;/
+s/            y = view->unk24 + 5.0f;/            y = view->unk24 + 6.0f;/
+s/            if (obj->interaction_state == 0x1E) {/            if (obj->interaction_state == 0x1F) {/
+s/                    shift = 4;/                    shift = 3;/
+s/                } else if (k & 2) {/                } else if (k \& 4) {/
+s/                    shift = 6;/                    shift = 5;/
+s/                } else if (k & 0x10) {/                } else if (k \& 0x20) {/
+s/                    shift = -3;/                    shift = -2;/
+s/                if (icon >= 0 && icon != 3) {/                if (icon >= 0) {/
+s/                    bar_mode = 1;/                    bar_mode = 2;/
+s/                trow = 3;/                trow = 2;/
+s/                case 0x30: case 0x31: count = (s8)st\[0x1AE\]; icon = 6; break;/                case 0x30: count = (s8)st[0x1AE]; icon = 6; break;/
+s/                case 0x37: icon = 7; break;/                case 0x37: icon = 8; break;/
+s/                case 0x39: icon = 10; break;/                case 0x39: icon = 9; break;/
+s/                    bars\[p\] = \*(u16 \*)(st + 0x12C) >> 4;/                    bars[p] = *(u16 *)(st + 0x12C) >> 3;/
+s/                gdl = func_15091534(gdl, 1, \&ready);/                gdl = func_15091534(gdl, 0, \&ready);/
+s/            t = (D_80087754\[row\] + trow) << 5;/            t = (D_80087754[row] + trow) << 4;/
+s/                ix -= 18;/                ix -= 17;/
+s/        gdl->words.w1 = 0x0F0A4004;/        gdl->words.w1 = 0x0F0A4005;/
+s/        gDPSetPrimColor(gdl++, 0, 0, 0xFF, 0x00, 0x00, 0xFF);/        gDPSetPrimColor(gdl++, 0, 0, 0xFF, 0x00, 0x01, 0xFF);/
+s/        x = (bar_mode == 2) ? 15 : 30;/        x = (bar_mode == 2) ? 16 : 30;/
+s/            ix = (s32)view->unk30 - x;/            ix = (s32)view->unk30 - x - 1;/
+s/            iy = (s32)view->unk24 + 10;/            iy = (s32)view->unk24 + 11;/
+s/            gDPFillRectangle(gdl++, ix - bars\[p\], iy, ix, iy + 4);/            gDPFillRectangle(gdl++, ix - bars[p], iy, ix, iy + 5);/
+s/        tex = func_1510D66C(0xD15, NULL, 3, 0);/        tex = func_1510D66C(0xD14, NULL, 3, 0);/
+s/            if (k != 0x26 && k != 0x3A) {/            if (k != 0x26) {/
+s/            ix = ((s32)view->unk30 - 15) \* 4;/            ix = ((s32)view->unk30 - 14) * 4;/
+s/            iy = ((s32)view->unk24 + 5) \* 4;/            iy = ((s32)view->unk24 + 4) * 4;/
+s/            if (D_800BE9F0 == 0x1A || D_800BE9F0 == 0x3F) {/            if (D_800BE9F0 == 0x1A) {/
+s/            } else if (obj->id == 0x75 || obj->id == 0xB1) {/            } else if (obj->id == 0x75) {/
+s/                wi = 5, hi = 20, s = 0xC0, t = 0x100;/                wi = 5, hi = 21, s = 0xC0, t = 0x100;/
+s/            } else if (obj->id == 0x3B) {/            } else if (obj->id == 0x3C) {/
+s/                wi = 8, hi = 9, s = 0x240, t = 0x60;/                wi = 8, hi = 9, s = 0x240, t = 0x40;/
+s/            for (i = 0; i < ((u8 \*)obj->unk31C)\[0x19A\]; i++) {/            for (i = 0; i <= ((u8 *)obj->unk31C)[0x19A]; i++) {/
+s/                                        0x400, scale);/                                        scale, scale);/
+s/                ix -= 11 \* 4;/                ix -= 10 * 4;/
+s/    if ((D_80090160 & 0x80) && D_80087640 != NULL) {/    if (D_80090160 \& 0x80) {/
+s/            iy = (s32)view->unk24 + 5;/            iy = (s32)view->unk24 + 6;/
+s/            if (\*(s32 \*)((u8 \*)race + 0x20) > 0) {/            if (*(s32 *)((u8 *)race + 0x20) >= 0) {/
+s/                func_150916B4((s32)view->unk2C + 0x17, iy + 0x19,/                func_150916B4((s32)view->unk2C + 0x17, iy + 0x18,/
+s/            lap = race->unk27 + 1;/            lap = race->unk27;/
+s/            if (lap <= laps) {/            if (lap < laps) {/
+s/(s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)D_8009E0C8, lap, laps);/(s32)view->unk2C + 0x1D, iy + 0xE, 0xC1, (s32)D_8009E0C8, lap, lap);/
+s/(s32)view->unk28 - 0xC, \*(s32 \*)((u8 \*)\&D_80087640\[p\] + 0x1C), 0xC0);/(s32)view->unk28 - 0xC, *(s32 *)((u8 *)\&D_80087640[p] + 0x20), 0xC0);/
+s/    if (D_800BEAC1 == 0 && (D_80090160 & 0x1000)) {/    if (D_80090160 \& 0x1000) {/
+s/        mx = ((s32)((struct_eu_BE628 \*)D_800BE628)->unk30 - table\[32\]) \* 4;/        mx = ((s32)((struct_eu_BE628 *)D_800BE628)->unk30 - table[31]) * 4;/
+s/            zoom = D_8009E23C \* D_8009E240;/            zoom = D_8009E23C;/
+s/            size = 0x63;/            size = 0x64;/
+s/            dot = 6;/            dot = 5;/
+s/        tex = func_1510D66C((D_8009015C & 0x40) ? 0xCF4 : 0xCF3, NULL, 3, 0);/        tex = func_1510D66C((D_8009015C \& 0x20) ? 0xCF4 : 0xCF3, NULL, 3, 0);/
+s/        for (p = 0; p < D_80090130; p++) {/        for (p = 0; p <= D_80090130; p++) {/
+s/            my = (table\[24\] + (s32)view->unk24 + table\[21\]) \* 4;/            my = (table[24] + (s32)view->unk24 + table[20]) * 4;/
+s/            r = table\[32\] \* 4;/            r = table[31] * 4;/
+s/                if (i != p && !(i < D_8008FD8C && func_150859AC((s16)i, 3) > 0) && obj->unk328 == 0) {/                if (i != p \&\& obj->unk328 == 0) {/
+s/                if (i != p && !(i < D_8008FD8C && func_150859AC((s16)i, 3) > 0) && obj->unk328 == 0) {/                if (!(i < D_8008FD8C \&\& func_150859AC((s16)i, 3) > 0) \&\& obj->unk328 == 0) {/
+s/                fy = (f32)my + D_8009E244;/                fy = (f32)my + D_8009E248;/
+s/                fx = (f32)mx + D_8009E248;/                fx = (f32)mx + D_8009E244;/
+s/                    gDPSetEnvColor(gdl++, 0x00, 0xFF, 0x00, 0xFF);/                    gDPSetEnvColor(gdl++, 0x00, 0xFF, 0x01, 0xFF);/
+s/                } else if (i < D_8008FD8C) {/                } else if (i <= D_8008FD8C) {/
+s/                cx = fx + (f32)(s32)(obj->x_position \* zoom);/                cx = fx + (obj->x_position * zoom);/
+s/                cy = fy + (f32)(s32)(obj->z_position \* zoom);/                cy = fy + (f32)(s32)(obj->y_position * zoom);/
+s/            for (i = 0; i < 25; i++) {/            for (i = 0; i < 24; i++) {/
+s/    if (D_800BEAC1 == 0 && (D_80090160 & 0x20)) {/    if (D_80090160 \& 0x20) {/
+s/        gdl = func_15093B58(gdl, scale, table, 0x2C30, 0);/        gdl = func_15093B58(gdl, scale, table, 0x2C30, 1);/

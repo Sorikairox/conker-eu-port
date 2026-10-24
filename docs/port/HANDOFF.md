@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P208 (port-b) (session P208, 2026-10-24). Details: `docs/port/sessions/P208.md`
+
+Branch `port-b`. Merge of `port` (4c59938, checks green) + hand C (NM), difftest EQUIV + setups + mutants:
+- **Ownership**: port-b now also owns `game_16EE20.c`, `game_83300.c`, `game_A28B0.c`, `game_1944C0.c` (moved from
+  port in P208). `game_eu_78230.c` is port's (P207 edited func_150538CC); older notes calling it port-b's are stale.
+- func_150918EC `mp_hud_draw` (BC510, 1995): the multiplayer HUD overlay (placing digit, score / team text, state and
+  vehicle icons, lives and ammo bars, fire counter, race laps, overview map, radar). 64 setups EQUIV, mutants 126/128
+  + 2 equivalent. With it func_15091534 `hud_icon_sheet_load` (BC510, 96; producer of the `ready` byte and of the DL
+  pointer), 5 setups, mutants 14/14.
+- func_15142600 `mtx_look_along_scaled` (16EE20, 142): look-along matrix for func_150BA1F4 (E66D0); keeps the
+  caller's s32 prototype, returns 0 (unused). 7 setups, mutants 25/25.
+- port P207 follow-up (b): func_150611E8 m2c_sanity rows O:20 / O:28 are loop artefacts (unrolled by 4, pointer +0x20);
+  C is right.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1416 bodies), selftest 71/71. progress_nm total 5410 / 5915
+  (91.5%), game 4874 / 5334, C bytes 78.2%, 505 asm-only.
+
+## Next steps (from P208)
+
+1. func_151C0698 (1EDA00): unblocked, callee func_151B8EB8 is C on port (2672b13); merge port first.
+2. New files: func_1505C1E4 (381, 83300, result used by func_1505C7D8), func_1505B9C4 (490). func_150585F0 (callers in
+   port's 78230 / 10E600 declare `s32 (struct127 *, s32)`; the asm takes one argument, no result), func_150562FC (s32
+   in port's 78230) and func_1505E874 (functions.h `f32 (u8, struct127 *)`, the asm ignores a0 and has no result)
+   need void prototypes in the callers' files first (other owners / shared header).
+3. Other owner: func_151C384C (game_eu_1EFE10) asm-only, called by func_150F8EAC.
+4. Browser: multiplayer HUD (func_150918EC), radar, fire scene; E66D0 objects using func_15142600.
+
 ## P206 (port-b) (session P206, 2026-10-24). Details: `docs/port/sessions/P206.md`
 
 Branch `port-b` (from P203 4f8756f). Tooling commit + hand C (NM), difftest EQUIV + setups + mutants:

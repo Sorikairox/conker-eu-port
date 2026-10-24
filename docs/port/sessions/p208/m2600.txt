@@ -1,0 +1,25 @@
+s/    dx = x1 - x0;/    dx = x0 - x1;/
+s/    dy = y1 - y0;/    dy = y1 - z0;/
+s/    inv = 1.0f \/ sqrtf(dx \* dx + dy \* dy + dz \* dz);/    inv = 1.0f \/ sqrtf(dx * dx + dy * dy + dy * dz);/
+s/    fy = dy \* inv;/    fy = dy;/
+s/    inv = 1.0f \/ sqrtf(fz \* fz + -fx \* -fx);/    inv = 1.0f \/ sqrtf(fz * fz + fy * fy);/
+s/    rx = fz \* inv;/    rx = fz;/
+s/    rz = -fx \* inv;/    rz = fx * inv;/
+s/    ux = fy \* rz;/    ux = fy * rx;/
+s/    uy = fz \* rx - fx \* rz;/    uy = fz * rx + fx * rz;/
+s/    uz = -fy \* rx;/    uz = fy * rx;/
+s/    inv = 1.0f \/ sqrtf(ux \* ux + uy \* uy + uz \* uz);/    inv = 1.0f \/ sqrtf(ux * ux + uy * uy);/
+s/    mf\[0\]\[0\] = rx \* sx \* scale;/    mf[0][0] = rx * sy * scale;/
+s/    mf\[0\]\[1\] = 0.0f;/    mf[0][1] = 1.0f;/
+s/    mf\[0\]\[2\] = rz \* sz \* scale;/    mf[0][2] = rz * sz * up_scale;/
+s/    mf\[1\]\[0\] = ux \* inv \* sx \* up_scale;/    mf[1][0] = ux * inv * sx * scale;/
+s/    mf\[1\]\[1\] = uy \* inv \* sy \* up_scale;/    mf[1][1] = uy * sy * up_scale;/
+s/    mf\[1\]\[2\] = uz \* inv \* sz \* up_scale;/    mf[1][2] = uz * inv * sy * up_scale;/
+s/    mf\[2\]\[0\] = fx \* sx \* scale;/    mf[2][0] = fx * sx;/
+s/    mf\[2\]\[1\] = fy \* sy \* scale;/    mf[2][1] = fy * sz * scale;/
+s/    mf\[2\]\[2\] = fz \* sz \* scale;/    mf[2][2] = fz * sz * up_scale;/
+s/    mf\[2\]\[3\] = 0.0f;/    mf[2][3] = 1.0f;/
+s/    mf\[3\]\[0\] = x0;/    mf[3][0] = x1;/
+s/    mf\[3\]\[2\] = z0;/    mf[3][2] = y0;/
+s/    mf\[3\]\[3\] = 1.0f;/    mf[3][3] = 0.0f;/
+s/    guMtxF2L(mf, m);/    guMtxF2L(mf, m + 1);/
