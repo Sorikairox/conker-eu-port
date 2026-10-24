@@ -1,0 +1,34 @@
+# P249 func_150BE050 (rideable_vehicle_update) mutants: sed % setup names
+s/if (o\[4\] == 0x23) {/if (o[4] == 0x22) {/ % ride23 pick3
+s/state1 = 0xA;/state1 = 0xB;/ % pick3
+s/state2 = 0xB;/state2 = 0xA;/ % ride23
+s/state3 = 0xC;/state3 = 0xD;/ % ride23
+s/kind = 3;/kind = 1;/ % ridelo pick4
+s/v - (v >> 3)/v - (v >> 2)/ % ride23 ridelo
+s/o\[0x66\] \&= ~0x20;/o[0x66] \&= ~0x21;/ % ride23
+s/D_800CC2D0\[o\[0x13C\] - 100\]/D_800CC2D0[o[0x13C] - 99]/ % ride23 ridelo
+s/o\[0x2FC\] = 1 << view\[0x23D\];/o[0x2FC] = 2 << view[0x23D];/ % ride23 noaim
+s/part != NULL \&\& part\[0x197\] != 0/part != NULL/ % noaim
+s/\* 182.04445f/* 182.0f/ % ride23 ridelo
+s/\*(s16 \*) (o + 0x76) = v;/*(s16 *) (o + 0x74) = v;/ % ride23
+s/(part + 0x16C)/(part + 0x170)/ % ride23 ridelo
+s/if (pitch > 180.0f)/if (pitch >= 30.0f)/ % ridelo
+s/pitch -= 360.0f;/pitch -= 180.0f;/ % ride23
+s/o\[0x66\] |= 0x20;/o[0x66] |= 0x40;/ % ridelo
+s/(s32) (pitch \* 10.0f)/(s32) (pitch * 8.0f)/ % ride23 ridelo
+s/100.0f, kind, 4, 0, state3/100.0f, kind, 4, 1, state3/ % ride23 ridelo
+s/if (o\[0x232\] == state2)/if (o[0x232] == state3)/ % ride23 ridelo
+s/o\[0x232\] != state1 ||/o[0x232] == state1 ||/ % pick3 pick4
+s/(struct127 \*) o, 0) != NULL/(struct127 *) o, 0) == NULL/ % found pick3
+s/mask = ~D_800D18A0 \& D_800CC268;/mask = D_800CC268;/ % pick3
+s/i < 0x19; i++/i < 0x3; i++/ % pick3 pick4
+s/slot\[0x127\] != 0xFF \&\& //  % pick4b
+s/slot\[0x65\] == 0 \&\& // % pick4
+s/part\[0x19B\] == 0 \&\& part\[0x197\] == 0/part[0x197] == 0/ % pick19b
+s/ \&\& slot\[0x13C\] == 0$// % pick13c
+s/part\[0x1AC\] == 0 \&\& // % pick13c
+s/(part + 0x46) <= 0/(part + 0x46) < 0/ % pick3 picknone
+s/o\[0x124\] = i;/o[0x124] = i + 1;/ % pick3 pick4
+s/44.0f, 3.2f, state2, kind/44.0f, 3.0f, state2, kind/ % pick3 pick4
+s/+ 0x24) = 500;/+ 0x24) = 501;/ % pick3
+s/+ 0x19E) = 0;/+ 0x19C) = 0;/ % pick3 pick4

@@ -1,0 +1,18 @@
+# P249 func_151893B8 (trail_matrix_history_push) mutants: sed % setup names
+s/n = rec\[1\];/n = rec[2];/ % n3c0
+s/(rec + 0x10))\[4\]);/(rec + 0x10))[5]);/ % n3c0
+s/total = per \* n;/total = per * (n + 1);/ % n3c1
+s/cur = D_800BE9C0 \* total;/cur = D_800BE9C0 * per;/ % n3c1
+s/prev = (D_800BE9C0 ^ 1) \* total;/prev = D_800BE9C0 * total;/ % n3c0
+s/    j = 0;/    j = 1;/ % n3c0
+s/for (i = 1; i <= n; i++) {/for (i = 1; i < n; i++) {/ % n3c0
+s/if (i == n) {/if (i == n - 1) {/ % n3c0
+s/(rec + 0x10) + 0x1D4);/(rec + 0x10) + 0x1D0);/ % n3c0
+s/rec\[2\] = 0;/rec[2] = 1;/ % nomats
+s/return;$/;/ % nomats
+s/((i \* per + prev) << 6);/((j * per + prev) << 6);/ % n3c0
+s/((j \* per + cur) << 6), per << 6);/((j * per + cur) << 6), per << 5);/ % n3c0
+s/((j \* per + cur) << 6)/((i * per + cur) << 6)/ % n3c1
+s/        j = i;/        j = i + 1;/ % n3c0
+s/if (rec\[1\] != rec\[2\]) {/if (rec[1] > rec[2] + 1) {/ % n3c1
+s/rec\[2\]++;/rec[2] += 2;/ % n3c0 n0

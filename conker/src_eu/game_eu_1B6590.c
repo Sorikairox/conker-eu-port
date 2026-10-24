@@ -237,7 +237,44 @@ Gfx *func_15189270(Gfx *gfx, s32 arg1, s16 arg2) {
     return gfx;
 }
 
+#ifdef NON_MATCHING
+/* P249: readable C for func_151893B8 (game_eu_1B6590, 79 insns). */
+// trail_matrix_history_push: advances an object's motion-trail matrix history. The record holds rec[1] steps of
+// `per` matrices (func_1502DE10(object kind), 64 bytes each) in two halves of the buffer +8 (half D_800BE9C0 is
+// written, the other half read): step j of this half = step j + 1 of the other half, and the last step = the
+// object's current bone matrices (object +0x10, its +0x1D4); without matrices the filled count rec[2] is reset to 0
+// and nothing else happens. Otherwise rec[2] counts up to rec[1].
+s32 func_1502DE10(u8);
+void func_151893B8(u8 *rec) {
+    s32 n, per, total, cur, prev, i, j;
+    u8 *src;
+
+    n = rec[1];
+    per = func_1502DE10((*(u8 **) (rec + 0x10))[4]);
+    total = per * n;
+    cur = D_800BE9C0 * total;
+    prev = (D_800BE9C0 ^ 1) * total;
+    j = 0;
+    for (i = 1; i <= n; i++) {
+        if (i == n) {
+            src = *(u8 **) (*(u8 **) (rec + 0x10) + 0x1D4);
+            if (src == NULL) {
+                rec[2] = 0;
+                return;
+            }
+        } else {
+            src = *(u8 **) (rec + 8) + ((i * per + prev) << 6);
+        }
+        bcopy(src, *(u8 **) (rec + 8) + ((j * per + cur) << 6), per << 6);
+        j = i;
+    }
+    if (rec[1] != rec[2]) {
+        rec[2]++;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151893B8.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B6590/func_151894F4.s")
 

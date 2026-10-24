@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P249, 2026-10-25). Details: `docs/port/sessions/P249.md`
+- **MP stubs**: func_150EDCC8 (11AF60) `tank_update` **drives the tank** (pad stick / buttons -> throttle, steering,
+  boost, brake, turret); converted with its asm helper func_150ED818 `tank_shell_aim_error`. func_150BE050 (EB860)
+  `rideable_vehicle_update` (Colors) does not read a controller (heading from the rider's aim, physics, hit states).
+- Breadth: func_150B2820 `view_progress_setup` (compiled C, not hand asm), func_151893B8 `trail_matrix_history_push`,
+  func_150F2670 `ambient_far_sound_update`. Mutants: EDCC8 120/127 (7 explained in P249.md), ED818 30/30, BE050
+  33/33, B2820 18/18, 893B8 17/17, F2670 15/15. func_15052590 is now declared void in the NM blocks (protocheck).
+- Merged port-b 02e7fc19 (P244). Registry re-run: 3 of the 13 rows done (all green); func_15160E30 row has OUTP.
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1559 NON_MATCHING bodies checked, 0
+  problems`, implicit_scan 0 NM+float, selftest 119 / 119 (after the merge; no harness change), progress_nm
+  `total 5915 3994 1576 345 5570 94.2% 1922392/2253856 (85.3%)`.
+
+## Next steps (from P249)
+1. port-web: merge port; Tank (play.env) should drive now; Colors start. Remaining Tank stubs are port-b's.
+2. Finish the registry re-run: func_1508C600, 1508CF34, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874,
+   151D8280, 151EA4C8. func_150EDCC8: re-run mutants (new setups), check `dist = 10000` with mp_ray_nodist.
+3. Breadth: func_1508B704 (B7840) not started.
+
 ## State (session P246, 2026-10-25). Details: `docs/port/sessions/P246.md`
 - Hand C (NM): **func_151EF3A0 save_screen_frame_draw** (216470, the P240 save / load screen stub; returns the DL end;
   uses literals 0x7FB / 0x887 for the asm's D_7FB / D_887 link symbols, so no ROM_ABS entry is needed), func_150C1BC0
