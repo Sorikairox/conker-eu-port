@@ -4,6 +4,7 @@ func_150A44A4	conker/src_eu/game_eu_D1760.c	width	high	2	A3:0 asm{h1L} IR{b2L}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E4 asm{h2LS} IR{w3LS}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	width	high	2	G:800DD5E8 asm{h2LS} IR{w3LS}
 func_1500D8C8	conker/src_eu/game_39750.c	width	high	1	G:800964B4 asm{w1L} IR{h1L}
+func_150918EC	conker/src_eu/game_BC510.c	width	high	1	G:80087750 asm{w1L} IR{b1L}
 func_150DE8AC	conker/src_eu/game_eu_10C0B0.c	width	high	1	G:80088CF0 asm{w1L} IR{b2L}
 func_10003C6C	conker/src_eu/init_3C40.c	width	high	2	O:0 asm{h2L,w15LS} IR{w13LS}
 func_15043384	conker/src_eu/game_70200.c	width	high	2	O:0 asm{b1L,w11LS} IR{w7LS}
@@ -90,6 +91,7 @@ func_15081A90	conker/src_eu/game_eu_AF2A0.c	width	med	1	O:0 asm{b4L,w3S} IR{w3S}
 func_150867D4	conker/src_eu/game_eu_B37F0.c	width	med	1	O:2 asm{b10L,h4L} IR{h4L}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:0 asm{w20LS} IR{h1L,w6LS}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:4 asm{w19LS} IR{h1L,w4S}
+func_150918EC	conker/src_eu/game_BC510.c	width	med	1	O:0 asm{b3LS,h3L,w66S} IR{w15S}
 func_150954E4	conker/src_eu/game_eu_C2B60.c	width	med	1	O:0 asm{w13LS} IR{b5L,w3LS}
 func_1509F254	conker/src_eu/game_eu_CC5F0.c	width	med	1	O:128 asm{w2L} IR{b1L,w1L}
 func_150AF808	conker/src_eu/game_eu_DCEF0.c	width	med	1	O:12 asm{w6LS} IR{b1L}
