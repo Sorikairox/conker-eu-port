@@ -15,7 +15,7 @@
 82s/pos\[1\]/pos[0]/
 83s/scale/fadeA/2
 84s/scale/fadeA/2
-85s/\& 1/\\& 0/
+85s/\& 1/\& 0/
 86s/span/life/2
 87s/? 2 : 0/? 0 : 2/
 88s/0x3A/0x3B/
@@ -43,7 +43,7 @@
 110s/flag, owner/owner, flag/
 111s/==/!=/
 114s/0x70/0x74/
-114s/\&blk\.life/\\&blk.kinds/
+114s/\&blk\.life/\&blk.kinds/
 116s/0\.5f/0.25f/
 116s/sprite\.scaleB/sprite.scaleA/
 117s/300\.0f/200.0f/
@@ -83,7 +83,7 @@
 150s/d \* c/d * s/
 150s/pos\[1\]/pos[0]/
 151s/~6/~4/
-152s/\& 1/\\& 0/
+152s/\& 1/\& 0/
 154s/2/1/
 157s/4/8/
 159s/0, 0, 0, 0/1, 0, 0, 0/

@@ -1,0 +1,25 @@
+\#^    if (\*(s32 \*) obj == 0 || t->id != obj\[0x3B\]) {$#s/== 0/!= 0/
+\#^    if (\*(s32 \*) obj == 0 || t->id != obj\[0x3B\]) {$#s/!= obj/== obj/
+\#^    if (\*(s32 \*) obj == 0 || t->id != obj\[0x3B\]) {$#s/0x3B/0x3A/
+\#^        \*(s16 \*) (self + 0xE) = -1;$#s/-1/0/
+\#^        \*(s16 \*) (self + 0xE) = -1;$#s/0xE/0xC/
+\#^    t->prev = t->cur;$#s/t->prev = t->cur/(void)0/
+\#^    if (D_8008FFD0\[t->point\](obj, &t->cur) == 0) {$#s/== 0/!= 0/
+\#^    if (D_8008FFD0\[t->point\](obj, &t->cur) == 0) {$#s/&t->cur/\&t->prev/
+\#^        t->cur = t->prev;$#s/t->cur = t->prev/(void)0/
+\#^    t->delta\.x = t->cur\.x - t->prev\.x;$#s/- t->prev\.x/- t->prev.y/
+\#^    t->delta\.y = t->cur\.y - t->prev\.y;$#s/t->cur\.y/t->cur.x/
+\#^    t->delta\.z = t->cur\.z - t->prev\.z;$#s/- t->prev\.z/+ t->prev.z/
+\#^    t->dist = func_15143E64(&t->delta\.x);$#s/&t->delta\.x/\&t->cur.x/
+\#^    state = func_1510FE4C(\*(s32 \*) (obj + 0x184));$#s/0x184/0x180/
+\#^    if (t->dist > 300\.0f || t->dist <= 0\.0f || \*(f32 \*) (obj + 0x28) != 0\.0f || obj\[0xAD\] != 0$#s/> 300\.0f/>= 300.0f/
+\#^    if (t->dist > 300\.0f || t->dist <= 0\.0f || \*(f32 \*) (obj + 0x28) != 0\.0f || obj\[0xAD\] != 0$#s/<= 0\.0f/< 0.0f/
+\#^    if (t->dist > 300\.0f || t->dist <= 0\.0f || \*(f32 \*) (obj + 0x28) != 0\.0f || obj\[0xAD\] != 0$#s/!= 0\.0f/> 0.0f/
+\#^    if (t->dist > 300\.0f || t->dist <= 0\.0f || \*(f32 \*) (obj + 0x28) != 0\.0f || obj\[0xAD\] != 0$#s/0xAD/0xAC/
+\#^        || state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {$#s/== 5/== 4/
+\#^        || state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {$#s/== 9/== 8/
+\#^        || state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {$#s/== 14/== 15/
+\#^        || state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {$#s/== 13/== 12/
+\#^        || state == 5 || state == 6 || state == 9 || state == 13 || state == 14) {$#s/== 6/== 7/
+\#^    if (stop) {$#s/stop/!stop/
+\#^    } else if (t->effect == NULL) {$#s/== NULL/!= NULL/

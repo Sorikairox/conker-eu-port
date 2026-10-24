@@ -1,0 +1,2 @@
+/spec\.life = (u32)/s/(u32)/(s8)/ % seqr8
+/spec\.rgba1\[3\] = (u32)/s/(u32)/(s8)/ % seqr8
