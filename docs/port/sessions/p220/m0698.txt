@@ -1,0 +1,33 @@
+60s/65.0f/64.0f/ % mp0
+70s/-13.0f/-12.0f/ % hand
+73s/0x23D/0x23C/ % aim
+74s/25.0f/24.0f/ % aim
+76s/hand\[2\] - /hand[2] + / % aim
+88s/? target : obj/? obj : target/ % tgt tgt1d4
+99s/0.001f/0.002f/ % face
+105s/0x24/0x25/ % aimlvl face24
+108s/, 3,/, 4,/ % aim face
+111s/aiming ? NULL : (u8 \*)dir/NULL/ % face
+142s/0x500920/0x500921/ % mp0
+143s/0x12C/0x12D/ % mp0
+151s/0.005f/0.006f/ % mp0 face
+155s/? 0 : 1/? 1 : 1/ % mp0 mp1
+162s/200.0f/201.0f/ % mp0 face
+168s/0.005f/0.004f/ % mp0 face
+171s/0xA/0xB/ % mp0
+182s/= 1/= 2/ % mp0
+187s/= arg3/= arg4/ % mp0
+189s/0xD0, arg4/0xD0, arg3/ % mp0
+201s/0x12C/0x12D/ % mp0
+203s/0x28, 0xFF/0x29, 0xFF/ % mp0
+204s/W(p, 0x84)/W(p, 0x88)/ % mp0
+206s/0x2EE/0x2EF/ % mp0
+209s/D_80082FA0 < 2/D_80082FA0 < 3/ % fa2
+209s/D_8008FD8C < 4/D_8008FD8C < 5/ % fd4
+225s/== 0xF ||/== 0xE ||/ % flF fl0
+225s/== 0x77/== 0x76/ % fl76
+239s/10.0f/11.0f/ % mp1 tgt1d4
+250s/0xFF, 0, -1/0xFF, 0, 0/ % mp1 tgt1d4
+255s/arg4, arg5/arg4, 0/ % mp1 tgt1d4
+124s/= trace;/= 0;/ % mp0 aim face
+130s/0.047000002f/0.048f/ % mp0 face

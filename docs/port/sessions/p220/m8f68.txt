@@ -1,0 +1,26 @@
+21s/& 1/\& 2/ % dead live
+23s/< 0/<= 0/ % dead live
+24s/= 1/= 0/ % dead
+30s/0x20/0x24/ % live
+32s/0x2A) < t/0x2A) <= t/ % live notimer
+33s/0x4C/0x4E/ % live
+33s/0x2C/0x34/ % live
+35s/t < /t <= / % fadein live
+36s/0x34/0x2C/ % fadein
+39s/0x38/0x3C/ % spawn0 spawn1
+39s/D_800A08FC \*/1.0f */ % spawn0 spawn1
+40s/1.0f </0.5f </ % spawn0 spawn1 nospawn
+41s/0x380/0x384/ % spawn0 spawn1
+41s/D_800A0904/1.0f/ % spawn0 spawn1
+42s/% 81/% 80/ % spawn1
+42s/- 0x28/- 0x29/ % spawn0 spawn1
+43s/a - 0x40/a + 0x40/ % spawn0 spawn1
+46s/s \*/c */ % spawn0 spawn1
+47s/0x14/0x10/ % spawn0 spawn1
+48s/0x18/0x14/ % spawn0 spawn1
+49s/</>/ % spawn0 spawn1 spawnfar
+50s/(u8)a, s, c/(u8)a, c, s/ % spawn0 spawn1
+52s/1.0f/0.5f/ % spawn0 spawn1
+55s/!= -1/!= 0/ % h3d live
+60s/== 0/!= 0/ % h1d0 h1d1
+66s/node)/0)/ % dead h1d0

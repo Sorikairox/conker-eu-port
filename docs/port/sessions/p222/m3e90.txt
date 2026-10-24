@@ -1,0 +1,10 @@
+8s/id == 0/id != 0/ %
+9s/NULL/D_800CC2D0/ %
+11s/i < 26/i < 25/ %
+11s/i = 0,/i = 1,/ %
+12s/!= 0 \&\&/== 0 \&\&/ %
+12s/id == o->unique_id/id != o->unique_id/ %
+12s/o->interaction_state != 0 \&\& //  %
+13s/return o;/return o + 1;/ %
+16s/NULL/D_800CC2D0/ %
+11s/o++)/o += 2)/ %

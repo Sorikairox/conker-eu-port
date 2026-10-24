@@ -1274,51 +1274,22 @@ s32 func_15083E0C(u8 id) {
 #endif
 
 #ifdef NON_MATCHING
-extern u8 D_800CC72B;
-extern struct127 D_800CCA1C;
+/* P222: readable C for func_15083E90 (game_eu_AF2A0, 72 words); replaces the m2c-style NM body (goto loop). */
+// object_find_by_id: returns the live object (word +0 != 0) of D_800CC2D0 whose id byte +0x3B is `id`, scanning all
+// 26 slots (the asm peels slots 0 and 1 and unrolls the rest by 4); NULL for id 0 or when none matches.
+struct127 *func_15083E90(u8 id) {
+    struct127 *o;
+    s32 i;
 
-struct127 *func_15083E90(u8 arg0) {
-    s32 temp_t6;
-    s32 var_a0;
-    struct127 *temp_v1;
-    struct127 *temp_v1_2;
-    struct127 *temp_v1_3;
-    struct127 *var_v1;
-
-    temp_t6 = arg0 & 0xFF;
-    if (temp_t6 == 0) {
+    if (id == 0) {
         return NULL;
     }
-    if ((D_800CC2D0->interaction_state != 0) && (temp_t6 == D_800CC72B)) {
-        return D_800CC2D0;
+    for (i = 0, o = D_800CC2D0; i < 26; i++, o++) {
+        if (o->interaction_state != 0 && id == o->unique_id) {
+            return o;
+        }
     }
-    var_a0 = 2;
-    if ((D_800CCA1C.interaction_state != 0) && (temp_t6 == D_800CCA1C.unique_id)) {
-        return &D_800CCA1C;
-    }
-    var_v1 = ((struct127 *)((u8 *)&D_800CCA1C + 0x32C));
-loop_9:
-    if ((var_v1->interaction_state != 0) && (temp_t6 == var_v1->unique_id)) {
-        return var_v1;
-    }
-    temp_v1_3 = ((struct127 *)((u8 *)var_v1 + 0x32C));
-    if ((var_v1[1].interaction_state != 0) && (temp_t6 == temp_v1_3->unique_id)) {
-        return temp_v1_3;
-    }
-    temp_v1_2 = ((struct127 *)((u8 *)temp_v1_3 + 0x32C));
-    if ((temp_v1_3[1].interaction_state != 0) && (temp_t6 == temp_v1_2->unique_id)) {
-        return temp_v1_2;
-    }
-    temp_v1 = ((struct127 *)((u8 *)temp_v1_2 + 0x32C));
-    var_a0 += 4;
-    if ((temp_v1_2[1].interaction_state != 0) && (temp_t6 == temp_v1->unique_id)) {
-        return temp_v1;
-    }
-    var_v1 = ((struct127 *)((u8 *)temp_v1 + 0x32C));
-    if (var_a0 == 0x1A) {
-        return NULL;
-    }
-    goto loop_9;
+    return NULL;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AF2A0/func_15083E90.s")

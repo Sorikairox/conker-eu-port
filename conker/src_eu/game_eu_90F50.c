@@ -106,7 +106,103 @@ void func_15063A54(struct127 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P222: readable C for func_15063AA0 (game_eu_90F50, 179 words; jump table jtbl_80099A98 = EU 0x80099A98). */
+void func_1506435C(u8 *arg0, s32 arg1);
+void func_151D5DA8(struct127 *obj, u8 which);
+s32 func_15082278(u8 *obj, u8 *hit, s32 kind);
+s32 func_10010894(struct127 *arg0);
+void func_10010558(u16, struct127 *, s32, s32, s32, s32);
+void func_1512D854(s32, s32);
+void func_15100248(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+void func_15100304(f32 *pos, f32 *dir, u8 flag, s32 arg3);
+
+// object_pending_actions_run: once per frame (game_45B80) for every live object with a controller (+0x31C) whose
+// pending-action byte ctl +0x1B4 is set: makes it the current object (D_800C3E78 = slot, D_800D154C = obj) and runs
+// bit 0: func_150639D8(obj, 0), bit 2 / bit 3: func_151D5DA8(obj, 0 / 1), bit 1: the action of the controller's item
+// kind ctl +0x78 (bit 7 ignored): 0x14 / 0x3F / 0x18 / 0x41 hit reactions (func_1506435C 2 / 0x12 / 6, counter
+// ctl +0x1AA, pad rumble), 0x24 the hit record ctl +0xB0 as kind 7 (with a pain voice 0x53B..0x53D unless the
+// record says 2 or ctl +0xAF is clear), 0x3B kind 0x10 plus the muzzle sparks (func_15100248 / func_15100304),
+// 0x23 kind 8 (rumble off). Then clears ctl +0x1B4. D_800CC2B0 is cleared first.
+void func_15063AA0(void) {
+    struct127 *obj;
+    u8 *ctl;
+    u8 kind;
+    f32 pos[3];
+    f32 dir[3];
+    f32 v50[3];
+    f32 v44[3];
+    s32 i;
+
+    D_800CC2B0 = 0;
+    for (i = 0, obj = D_800CC2D0; i < 25; i++, obj++) {
+        if (obj->interaction_state == 0 || (ctl = *(u8 **) ((u8 *) obj + 0x31C)) == NULL || ctl[0x1B4] == 0) {
+            continue;
+        }
+        D_800C3E78 = i;
+        D_800D154C = obj;
+        if (ctl[0x1B4] & 1) {
+            func_150639D8((u8 *) obj, 0.0f);
+        }
+        if ((*(u8 **) ((u8 *) obj + 0x31C))[0x1B4] & 4) {
+            func_151D5DA8(obj, 0);
+        }
+        if ((*(u8 **) ((u8 *) obj + 0x31C))[0x1B4] & 8) {
+            func_151D5DA8(obj, 1);
+        }
+        ctl = *(u8 **) ((u8 *) obj + 0x31C);
+        if (ctl[0x1B4] & 2) {
+            kind = ctl[0x78] & ~0x80;
+            switch (kind) {
+            case 0x18:
+            case 0x41:
+                func_1506435C((u8 *) obj, 6);
+                (*(s16 *) ((*(u8 **) ((u8 *) obj + 0x31C)) + 0x1AA))++;
+                if (*(s32 *) ((u8 *) obj + 0x318) != 0) {
+                    func_1512D854(*(s32 *) ((u8 *) obj + 0x318), 1);
+                }
+                break;
+            case 0x14:
+            case 0x3F:
+                func_1506435C((u8 *) obj, kind == 0x14 ? 2 : 0x12);
+                (*(s16 *) ((*(u8 **) ((u8 *) obj + 0x31C)) + 0x1AA))++;
+                if (*(s32 *) ((u8 *) obj + 0x318) != 0) {
+                    func_1512D854(*(s32 *) ((u8 *) obj + 0x318), 1);
+                }
+                break;
+            case 0x24:
+                if (func_15082278((u8 *) obj, ctl + 0xB0, 7) != 2) {
+                    ctl = *(u8 **) ((u8 *) obj + 0x31C);
+                    if (ctl[0xAF] != 0) {
+                        ctl[0xAF] = 0;
+                        if (func_10010894(obj) == 0) {
+                            func_10010558((u32) func_150ADA20() % 3 + 0x53B, obj, 0x7D00, 0x320, 0xBB8, 0x19);
+                        }
+                    }
+                }
+                if (*(s32 *) ((u8 *) obj + 0x318) != 0) {
+                    func_1512D854(*(s32 *) ((u8 *) obj + 0x318), 1);
+                }
+                break;
+            case 0x3B:
+                func_15082278((u8 *) obj, ctl + 0xB0, 0x10);
+                func_15100248((s32) obj, (s32) pos, (s32) dir, (s32) v50, (s32) v44);
+                func_15100304(pos, dir, 0xFF, 1);
+                break;
+            case 0x23:
+                func_15082278((u8 *) obj, ctl + 0xB0, 8);
+                if (*(s32 *) ((u8 *) obj + 0x318) != 0) {
+                    func_1512D854(*(s32 *) ((u8 *) obj + 0x318), 0);
+                }
+                break;
+            }
+        }
+        (*(u8 **) ((u8 *) obj + 0x31C))[0x1B4] = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_15063AA0.s")
+#endif
 
 extern s16 D_800CC6D2;
 
@@ -198,7 +294,23 @@ void func_15063F14(struct127 *arg0, s32 arg1) {
     *(*(u8 **)((u8 *)arg0 + 0x31C) + 0x11A) = 0;
 }
 
+#ifdef NON_MATCHING
+// object_find_held: returns the first live object (word +0 != 0) of kind `kind` (+0x4) whose holder byte +0x65 is
+// owner's slot + 1, or NULL. Scans all 25 objects of D_800CC2D0 (the asm peels slot 0).
+struct127 *func_1506401C(struct127 *owner, s32 kind) {
+    struct127 *o;
+    s32 i;
+
+    for (i = 0, o = D_800CC2D0; i < 25; i++, o++) {
+        if (*(s32 *) o != 0 && kind == *((u8 *) o + 4) && (owner - D_800CC2D0) + 1 == *((u8 *) o + 0x65)) {
+            return o;
+        }
+    }
+    return NULL;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_90F50/func_1506401C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15064240(struct127 *arg0, s32 arg1, s32 arg2, s8 arg3, s32 arg4) {
@@ -949,7 +1061,7 @@ s32 func_15083568(struct127 *, s32, f32, s32);
 void func_1505E650(struct127 *, u16, f32, f32, f32, f32, s32);
 void func_15060A30(s32, struct127 *);
 void func_150D9098(struct127 *);
-void func_150DC2F0(s32);
+u8 *func_150DC2F0(u8 kind, s32 arg1); /* P222: as port's C (arg1 unused) */
 s32 func_1507BB28(s32, s32);
 void func_151D4668(struct127 *);
 void func_151D5308(struct127 *);
@@ -976,7 +1088,7 @@ extern s32 D_800864A0[2];
 extern u16 D_80099A90[];
 void func_1507EE9C(struct127 *);
 void func_1507E7E4(struct127 *, u8, u8, u16, s32);
-void func_150FC438(struct127 *, struct127 *, s32, u8);
+void func_150FC438(struct127 *arg0, struct127 *arg1, u8 arg2, u8 arg3); /* P222: as port's functions.h */
 s32 func_1000EC24();
 void func_15073FA0(void);
 struct127 *func_1506401C(struct127 *, s32);
@@ -1313,11 +1425,11 @@ s32 func_15065E18(struct127 *obj, s32 buttons, s32 held, f32 height, s32 recurse
         if (D_800BE9F0 == 0x31) {
             F(CTL, 0x28) = SH(D_800D34B8, 0x270);
             F(CTL, 0x2C) = SH(D_800D34B8, 0x274);
-            func_150DC2F0(5);
+            func_150DC2F0(5, 0);
         } else {
             F(CTL, 0x28) = SH(D_800D34B8, 0x68);
             F(CTL, 0x2C) = SH(D_800D34B8, 0x6C);
-            func_150DC2F0(0);
+            func_150DC2F0(0, 0);
         }
         H(obj, 0x76) = 0xC000;
         speed = 1.05f /* D_80099D5C */;
@@ -2527,7 +2639,8 @@ s32 func_15065E18(struct127 *obj, s32 buttons, s32 held, f32 height, s32 recurse
                 func_150FC438((struct127 *)other, obj, 0, carryAnim);
                 func_10010A3C((struct127 *)other);
                 if (B(obj, 4) == 0x80 && (func_150ADA20() & 3) == 0) {
-                    func_1000FA64(func_1000F568(0x57C, 6), POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)func_1000EFB4, obj,
+                    u16 v = func_1000F568(0x57C, 6); /* voice id: the asm masks it to u16 */
+                    func_1000FA64(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)func_1000EFB4, obj,
                                   (s32)D_80099A90, 0, 0);
                 }
             }

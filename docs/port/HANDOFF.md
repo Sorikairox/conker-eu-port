@@ -68,6 +68,27 @@ Branch `port` (P221 d5b5126a + P224 commit).
    then events 4 / 6 (enemy knock-back), event 1 (zone 9, item 0x28: carried object).
 3. Open: does item 4 survive scene 4 on N64 (port needs a second B press)? Needs an N64 reference.
 
+## P222 (port-b) (session P222, 2026-10-24). Details: `docs/port/sessions/P222.md`
+
+Branch `port-b`. Hand C (NM), difftest setups (ARGMEM / STKFILL / RET sequences) + mutants, exact commands per
+function in P222.md section 2: **func_1506401C object_find_held** (90F50, 145; mutants 14/14), **func_150C92B8
+ring_effect_draw** (F6060, 767; render layer 0x31 draw, `Gfx *(Gfx *, u8 *, s16)`; 1 boundary survivor),
+**func_1518F080 line_quad_build** (1BAF40, 273; 1 equivalent survivor), **func_151D4D44 object_trail_smoke_update**
+(201240, 297; 1 equivalent survivor), **func_15083E90 object_find_by_id** (AF2A0, 72; readable rewrite of the m2c
+goto body; port P221 follow-up (a)), **func_15063AA0 object_pending_actions_run** (90F50, 179; jump table, all cases;
+mutants 47/47). func_15065E18: func_150FC438 / func_150DC2F0 prototypes now match port's C (`(.., u8, u8)`,
+`u8 *(u8, s32)`, calls pass arg1 = 0; a3 at 0x15069F80 is carryAnim, already passed). 1BAF40: func_151901F4's
+nested `#ifdef PORT` moved into a macro (it broke difftest for the whole TU). Port-b's files have no asm-only
+functions left (D3880's are C since P130). Checks: verify_all rc 0, NM links, protocheck 0 (1461), selftest 91/91. progress_nm total 5455 / 5915 (92.2%),
+C bytes 80.9%, 460 asm-only.
+
+## Next steps (from P222)
+
+1. Browser: B-pad case 0x3C (func_15065E18 -> func_15083E90 / func_150FC438), shockwave rings (func_150C8F68 /
+   func_150C92B8), line effects (func_1518F080), trail smoke (func_151D4D44), pending actions (func_15063AA0).
+2. Readable rewrites of remaining m2c-style NM bodies in port-b's files.
+3. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098 (106830).
+
 ## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
 
 Branch `port` (P218 85e5d8c6 + P221 commit).
@@ -89,6 +110,26 @@ Branch `port` (P218 85e5d8c6 + P221 commit).
 2. port-b: func_15065E18's `jal func_150FC438` (15069F80): a3 not visibly set; func_150DC2F0 takes 2 args in NM C.
 3. Re-checks: use `tools/port/reverify.sh`; fill blank knobs in the registry as functions are re-checked.
 4. Breadth: `p218/asmlist.py`.
+## P220 (port-b) (session P220, 2026-10-24). Details: `docs/port/sessions/P220.md`
+
+Branch `port-b`. **func_15065E18 player_item_action** (90F50): 40 targeted setups (RET on func_15064240 /
+func_150810F4 / func_151F2CDC (key 151F349C) / func_1506401C / func_15083568, pad pokes via D_800CC6A4 / D_800CC6B0 /
+D_800CC6AC, ctl +0x8 for case 3, noAnim = 0 for the `done` cases 0x1A / 0x2A) all EQUIV; mutants 33/34 killed, the one
+survivor (`D_800D1940 & 7` -> `& 3` inside `== 0x42`) is equivalent. Fix: case 0x1B's voice id is u16 (the asm masks it).
+Hand C (NM): **func_151C0698 projectile_fire** (1EDA00, 669): ARGMEM setups found two draft bugs (inexact float
+literals 0.047 / 1.009, missing payload +0xCC = trace hit), fixed; 18/20 setups EQUIV (2 differ only on the asm's
+leftover v0), mutants 33/33. **func_150C8F68 ring_effect_update** (F6060, 212): 13/14 setups EQUIV (h3d: a1 the
+target never reads), mutants 26/26; handlers func_150C9EB4 / func_150CA2C4 now take (.., f32, f32) (wasm type).
+func_150A6070 / func_150A6324 were already C (P130). Checks: verify_all rc 0, NM links, protocheck 0 (1455), selftest
+91/91. progress_nm total 5449 / 5915 (92.1%), C bytes 80.6%, 466 asm-only.
+
+## Next steps (from P220)
+
+1. func_1506401C (90F50, func_15065E18 case 0x3A's item lookup).
+2. Breadth: func_150C92B8 (F6060, ring effect draw), func_1518F080 (1BAF40), func_151D4D44 (201240).
+3. Browser: level 0x29 B-pad (func_15065E18 case 0x3C), gun shots (func_151C0698), shockwave rings (func_150C8F68).
+4. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098
+   (106830), func_150DC2F0 (109770), func_150FC438 (129650).
 
 ## P219 (port-b) (session P219, 2026-10-24). Details: `docs/port/sessions/P219.md`
 
