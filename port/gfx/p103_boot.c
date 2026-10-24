@@ -34,7 +34,10 @@ static int flag(int *f, const char *n) { if (*f < 0) *f = port_flag(n); return *
  * the ?p103boot event log in __wrap_func_1502457C at the Gregg scene load, frame 12441) */
 static int memok(const void *p) {
     uintptr_t a = (uintptr_t)p;
-    return a >= 0x100 && a + 0x20 <= (uintptr_t)__builtin_wasm_memory_size(0) * 65536u;
+    /* P199: compare without the a + 0x20 overflow: an end-of-list / sentinel pointer such as 0xFFFFFFF0 wrapped to a
+     * small value, passed, and crashed the ?p103boot event log at frame 17820 (level 6 scene 20) */
+    uintptr_t top = (uintptr_t)__builtin_wasm_memory_size(0) * 65536u;
+    return a >= 0x100 && top >= 0x20 && a <= top - 0x20;
 }
 
 static int p103_prereq(int id, int depth) {
@@ -254,13 +257,17 @@ void __wrap_func_1502457C(int a, int b) {
             int n = vbe_ld8(D_800C3A5A);
             for (i = 0; i < n && i < 30; i++) {
                 const unsigned char *rf = D_800C3A10[0] + i * 8;
+                /* P199: bounds-safe (frame 17820, level 6 scene 20: a stale table pointer read out of bounds) */
+                int nev = memok(D_800C39F8[0] + i) ? vbe_ld16(&D_800C39F8[0][i]) : -1;
                 port_log("[p116]   track %d: events %08X n %d | ref kind %d id %d\n", i, (unsigned)D_800C3AA8[0][i],
-                         D_800C39F8[0] ? vbe_ld16(&D_800C39F8[0][i]) : -1, vbe_ld16(rf), vbe_ld8(rf + 2));
+                         nev, memok(rf) ? vbe_ld16(rf) : -1, memok(rf) ? vbe_ld8(rf + 2) : -1);
             }
         }
         for (i = 0; i < 8 && D_800C4170; i++) {
             const unsigned char *e = D_800C4170 + i * 0xC;
-            const unsigned char *ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
+            const unsigned char *ev;
+            if (!memok(e)) break; /* P199 */
+            ev = (const unsigned char *)(uintptr_t)*(const unsigned *)e;
             if (!memok(ev)) break;
             port_log("[p116]   ev %08X time %d track %d idx %d: type %02X delta %02X id %04X b4 %d b5 %d w6 %d\n",
                      (unsigned)(uintptr_t)ev, *(const int *)(e + 4) >> 8, (signed char)vbe_ld8(e + 8), (short)vbe_ld16(e + 0xA),

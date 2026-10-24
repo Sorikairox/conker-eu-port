@@ -4,7 +4,7 @@
  * hand-written asm in game_eu_226870 / game_eu_227BF0, which the port links as stubs. Without them a
  * voice stream decodes to nothing, so this file supplies C equivalents:
  *
- *   func_151F9150  get bits            translated from the asm
+ *   func_151F9150  get bits            (P199: now game C, game_eu_226870.c)
  *   func_151F9184  Huffman big_values  translated from the asm (fast byte table + tree walk)
  *   func_151F933C  Huffman count1      translated from the asm
  *   func_151F94E0  IMDCT, long blocks  written from the MPEG-1 Layer III description (ISO 11172-3)
@@ -38,9 +38,7 @@ static u32 getbits(u8 *buf, s32 *pos, s32 n) {
     return v;
 }
 
-s32 func_151F9150(u8 *buffer, s32 *offset, s32 numbits) {
-    return (s32)getbits(buffer, offset, numbits);
-}
+/* func_151F9150 (get bits): removed in P199, the game C (P190, game_eu_226870.c mp3util_get_bits) defines it now */
 
 /* func_151F9060: one Huffman symbol of table `tbl`. Returns the first value, *second gets the other. */
 static s32 huff(u8 *buf, s32 *pos, s32 tbl, s32 *second) {
