@@ -1,0 +1,16 @@
+s/if (D_800C6360\[type\] == 0) {/if (D_800C6360[type] != 0) {/ %
+s/i < 25; i++/i < 4; i++/ %
+s/\*(s32 \*) o == 0 || //  %
+s/type != \*((u8 \*) o + 4) || //  %
+s/ || o->unk2FA == 0) {/) {/ %
+s/tex \* 12;/tex * 8;/ %
+s/w = \*(u16 \*) (entry + 8);/w = *(u16 *) (entry + 0xA);/ %
+s/h \*= 2;/h *= 4;/ %
+s/if (twice) {/if (!twice) {/ %
+s/\[D_800BE9C0\];/[0];/ %
+s/if (list != NULL) {/if (1) {/ %
+s/list + dl \* 16/list + dl * 8/ %
+s/\&table\[cmd\]/\&table[arg2]/ %
+s/(f32) amount, h, w);/(f32) amount, w, h);/ %
+s/(f32) amount, h, w);/(f32) (u32) amount, h, w);/ %
+s/, arg2, (f32)/, cmd, (f32)/ %

@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
+
+Branch `port` (P207 2672b13 + merge of port-b 4c59938 = a447641).
+- Merged port-b 4c59938 (C5530 `s32 func_150867D4`, port-b P201-P206); HANDOFF via merge_union + hoorder 150.
+- Hand C (NM): func_150867D4 rail_route_next inserted (P207 draft; 6 of 9 survivors killed by gen_67d4b.py setups,
+  3 proven equivalent), func_151C384C fire_embers_spawn (embers for port-b's fire_burn_update; 151530A8 + 151307F0
+  + 151602C0 requests, ARGMEM on all), func_15087040 rail_node_distance, func_1508DE78 rail_state_reset,
+  func_15133E04 particle_fall_update, func_150FFC60 model_points_find, func_15062E24 type_texture_scroll_apply,
+  func_151009E4 sky_segments_set, func_151722BC sprite_spawn_at. All random + setups EQUIV, all mutants killed
+  (except listed equivalents).
+- **NM-only prototype changes for port-b**: func_150585F0 and func_150562FC are `void (struct127 *)` under NM
+  (game_eu_78230, game_eu_10E600; the matched func_15052590's call is wrapped in `#ifdef NON_MATCHING`);
+  functions.h `void func_1505E874(u8, struct127*)` under NM (asm ignores a0, no v0); func_15142600 void in
+  game_eu_E66D0's NM prototype. func_150FFC60 is `s32 (f32 *, f32 *, f32 *, f32 *, f32 *, u8 *, s32)` now
+  (game_eu_126330's prototype still says s32 * - port-b may align it).
+- Checks: verify_all OK (port_work/p209/verify.log), NM build links, protocheck 0 (1426), selftest 71 / 71,
+  progress_nm 5420 / 5915 (91.6%), C bytes 78.3%.
+
+## Next steps (from P209)
+1. func_1508DCAC (B7840, rail script command 9): decide what the script runner does with a command's v0 (its
+   `*cnt == 0` path returns func_150ADA68's leftover v0), then convert; the other B7840 commands have the same issue.
+2. Browser: P209.md section 6 (rail races, fire embers, sprites, landing particles, sky segments).
+3. Breadth: `p209/asmlist.py` (next: func_151F9184 is hand asm; func_15138120, func_1519D320, func_15117858,
+   func_150B0344, func_150FC438 ...).
+4. Harness: compare pass-through arguments of jalr calls (still open).
+
 ## State (session P207, 2026-10-24). Details: `docs/port/sessions/P207.md`
 
 Branch `port` (from P204 0226d7d).
