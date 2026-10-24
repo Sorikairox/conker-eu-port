@@ -1,0 +1,16 @@
+s/(f32) -D_8008D400\[\*type\]\[0\], 0.0f)/(f32) D_8008D400[*type][0], 0.0f)/
+s/D_8008D400\[\*type\]\[1\] \* 0xA0 + 0x16/D_8008D400[*type][1] * 0xA0 + 0x14/
+s/if (n1 >= 40) {/if (n1 >= 39) {/
+s/n1 = 39;/n1 = 40;/
+s/frac = pos - (f32) n;/frac = pos;/
+s/(1.0f - frac)/(1.0f + frac)/
+s/nodes + n1 \* 12 + 8/nodes + n * 12 + 8/
+s/(dy >> 4)/(dy >> 3)/
+s/pos = func_151834C8(src\[2\], w);/pos = func_151834C8(src[1], w);/
+s/(f32) \*(s16 \*) (rec + 0x12) + outY/(f32) *(s16 *) (rec + 0x12) + outZ/
+s/dst\[2\] = (s32) ((f32) \*(s16 \*) (rec + 0x14) + outZ);/dst[2] = (s32) ((f32) *(s16 *) (rec + 0x14) + outX);/
+s/(f32) src\[0\], (f32)/(f32) src[2], (f32)/
+s/i++, dst += 8)/i++, dst += 4)/
+s/D_800BE9C0 \* 4)/D_800BE9C0 * 8)/
+s/(u8 \*\*) \&D_800DE290)\[w\]/(u8 **) \&D_800DE290)[0]/
+s/u8 \*type = \&D_800DE284\[w\];/u8 *type = \&D_800DE284[0];/

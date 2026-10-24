@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P194 (port-b) (session P194, 2026-10-24). Details: `docs/port/sessions/P194.md`
+
+Branch `port-b` (from P191 5d6bdf7). Docs / drafts only, no src_eu change.
+- Torch flames: none of func_151184BC (per-level door mover), func_15116F34 / func_1511712C (linear movers with
+  sounds), func_151831CC (wave mesh vertices) draws or spawns flames. Those files are port's (P192 converted
+  func_15116F34 / func_151831CC); P194 drafts kept in `p194/` for reference only.
+- func_15082278 shot_hit_apply (AF2A0, 466 words): draft `p194/d_2278.c`, 312 setups EQUIV, mutants 38/42
+  (1 coverage survivor, 3 not re-run on the full set). Not inserted.
+
+## Next steps (from P194)
+
+1. func_1518DC50 (game_eu_1BAF40, 750 insns): torch-flame candidate from port P195 (P195.md); callees first.
+2. Finish func_15082278 (survivor run on all setups, insert, `s32` prototype in game_eu_12D5D0.c, full checks).
+3. Breadth: func_150B2C20, func_150CA150, func_151D3A30, func_1511127C, func_151C0698.
+
 ## P191 (port-b) (session P191, 2026-10-24). Details: `docs/port/sessions/P191.md`
 
 Branch `port-b` (from P188 a1667be). Hand C (NM), all difftest EQUIV + setups + mutants:
