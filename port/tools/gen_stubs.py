@@ -127,6 +127,8 @@ def main():
             k = next((i for i, x in enumerate(parms) if re.match(r'Gfx\s*\*', x)), None)
             if k: passthru_k[m.group(1)] = k
     npass = ndl = 0
+    # P199: name -> (index of the DL argument, argument count); checked against the asm (returns v0 = that argument)
+    DL_INDIRECT = {'func_151A03DC': (1, 3)}  # foot-trail / ripple particle draw (D_8008A5A0 table), v0 = a1
     for n in funcs:
         sigs = undef_f[n]
         (ps, rs), _ = sigs.most_common(1)[0]
@@ -136,6 +138,13 @@ def main():
         ret = CT.get(rs[0], 'int') if rs else 'void'
         args = ', '.join(f'{CT.get(t, "int")} a{i}' for i, t in enumerate(ps)) or 'void'
         body = f'port_stub_hit("{n}", "{what}");' + ('' if ret == 'void' else ' return 0;')
+        if n in DL_INDIRECT and what.startswith('asm'):
+            # P199: DL builders reached only through data tables (no C call shape to scan): explicit signature,
+            # the stub returns the DL argument instead of 0 (else the caller keeps building at address 0)
+            k, nargs = DL_INDIRECT[n]
+            ret = 'int'; args = ', '.join(f'int a{i}' for i in range(nargs))
+            body = f'port_stub_hit("{n}", "{what}:passthru{k}"); port_stub_dlret(a{k}); return a{k};'
+            npass += 1
         if n in passthru_k and n not in passthru and len(ps) > passthru_k[n] and ret != 'void' and what.startswith('asm'):
             k = passthru_k[n]
             body = f'port_stub_hit("{n}", "{what}:passthru{k}"); port_stub_dlret((int)a{k}); return ({ret})a{k};'

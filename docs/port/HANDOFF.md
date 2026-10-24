@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P199, 2026-10-24, port-web). Details: `docs/port/sessions/P199.md`
+
+- Merged port 4793d9c (P184-P196) and port-b a4dd67d (P183-P194, swim update func_1504B0FC): HANDOFF.md conflicts only.
+  After each: verify_all OK, NM link OK, protocheck 0 (1381 bodies), float-int 0 bugs, census 0 FAIL (clean rebuild).
+  arity +3 rows (func_1506B04C, func_1509D274, func_1514D3B0), m2c_sanity 260 -> 273 (func_150A55A0, func_150DE8AC, func_150611E8).
+- Port fixes: duplicate func_151F9150 (mp3_pc.c copy removed); p103_boot memok overflow (?p103boot crash at 17820);
+  **wraps for func_1513472C / func_1513477C** (pc_overrides.c: dropped object argument trapped func_15168A9C at noev 1501
+  once Conker swims; `?p199nowrap=1` = old); **gen_stubs DL_INDIRECT func_151A03DC** returns its a1 DL (stub returned 0:
+  frame DL built at address 0, black screen in water, 1338 null-zone words).
+- Level-0 rise gone (node + Chrome): Conker floats, swims to the bank, walks out; death / 0x2C / level 0 as before; heap 0.
+- New game, no flags: real route to 0x29 (22765); at 25889 Conker falls in the pond, floats, swims, leaves it by 27768
+  and walks on (control kept, to 34936). Torches still unlit (func_1518DC50 stub); text boxes / NPCs not reached.
+
+## Next steps (from P199)
+
+1. Convert func_151A03DC (ripple / foot-trail draw) and fix the func_1513472C / func_1513477C game C (pass arg0); drop the port workarounds.
+2. func_1518DC50 (torches), func_1518354C (1.1 M calls on 0x29), func_150F5FD4, func_151096A0, func_150B1200, func_151D7814.
+3. Walk further on 0x29 with A presses (text boxes, NPCs); backdrop quad draw 0 check; re-run ?p103boot past 17820.
+
 ## State (session P196, 2026-10-24). Details: `docs/port/sessions/P196.md`
 
 Branch `port` (from P195 7964ca6). Hand C (NM), difftest EQUIV + setups + mutants (table in P196.md):
