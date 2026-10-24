@@ -170,36 +170,6 @@ void port_cam_probe(unsigned task) {
 /* P88: the TEMPORARY PC func_151DDF6C (P84, settings clamp) was removed: the port branch converted it in P85
  * (game_eu_20B730.c, NON_MATCHING, void (void)). */
 
-/* P199: dropped argument (arity_scan rows func_1513472C / func_1513477C, "a0:E"). The matched C calls the
- * D_80089AAC / D_80089AD4 handlers with no argument, `D_80089AAC[idx]()`; on N64 a0 still holds the object, and the
- * handlers use it (func_151346EC -> func_15169804(obj) relinks the object's node; func_1513470C -> func_15169824(obj)
- * frees it). In the port the missing argument is 0: the relink worked on the null-zone record and trapped (out of
- * bounds in func_15168A9C) at frame 1501 of the noev walk, once the C swim update (port-b P191) kept Conker in the
- * water. The matched game C stays as is; these --wrap versions (port/Makefile) pass the object on.
- * ?p199nowrap=1 = the old calls (TEST). */
-extern void (*D_80089AAC[10])(void);
-extern void (*D_80089AD4[10])(void);
-int port_flag(const char *name);
-void __real_func_1513472C(u8 *arg0);
-void __real_func_1513477C(u8 *arg0);
-static int p199_nowrap(void) {
-    static int f = -1;
-    if (f < 0) f = port_flag("p199nowrap");
-    return f;
-}
-static s32 p199_idx(u8 *arg0) {
-    s32 idx = arg0[0x3D]; /* struct102.unk3D (u8) */
-    if (idx < 0) idx = 0;
-    if (idx >= 10) idx = 0;
-    return idx;
-}
-/* obj_list_state_dispatch: calls the object's D_80089AAC handler with the object */
-void __wrap_func_1513472C(u8 *arg0) {
-    if (p199_nowrap()) { __real_func_1513472C(arg0); return; }
-    ((void (*)(u8 *))D_80089AAC[p199_idx(arg0)])(arg0);
-}
-/* obj_list_free_dispatch: calls the object's D_80089AD4 handler with the object */
-void __wrap_func_1513477C(u8 *arg0) {
-    if (p199_nowrap()) { __real_func_1513477C(arg0); return; }
-    ((void (*)(u8 *))D_80089AD4[p199_idx(arg0)])(arg0);
-}
+/* P205: the P199 --wrap of func_1513472C / func_1513477C (dropped object argument of the D_80089AAC / D_80089AD4
+ * handlers) was removed: port P200 made the NON_MATCHING game C (game_161520.c) pass the object and return the
+ * handler's result. ?p199nowrap is gone with it. */

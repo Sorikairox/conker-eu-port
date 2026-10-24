@@ -201,6 +201,7 @@ func_1503E5F8	conker/src_eu/game_eu_6B970.c	stride	low	1	IR idx %.0 step 4, asm 
 func_15059C84	conker/src_eu/game_83300.c	stride	low	1	IR idx %.0 step 2, asm self-steps {6,12}
 func_15059C84	conker/src_eu/game_83300.c	stride	low	1	IR idx %.0 step 4, asm self-steps {6,12}
 func_150B7170	conker/src_eu/game_eu_E48B0.c	stride	low	1	IR idx %.0 step 4, asm self-steps {16}
+func_150CA150	conker/src_eu/game_eu_F6060.c	stride	low	1	IR idx %.0 step 10, asm self-steps {4,64}
 func_150FF840	conker/src_eu/game_eu_12D5D0.c	stride	low	1	IR idx %.0 step 12, asm self-steps {}
 func_1513EE14	conker/src_eu/game_169510.c	stride	low	1	IR idx %.0 step 12, asm self-steps {64}
 func_1513EE14	conker/src_eu/game_169510.c	stride	low	1	IR idx %.0 step 8, asm self-steps {64}

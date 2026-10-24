@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P205, 2026-10-24, port-web). Details: `docs/port/sessions/P205.md`
+
+- Merged port 47ca032 (P200) and port-b ce8da0d (P201): HANDOFF.md conflicts only. After each: verify_all OK, NM link OK,
+  protocheck 0 (1402 bodies), float-int 0 bugs, census 0 FAIL (clean rebuild), arity 136 -> 134 (func_1513472C / 477C
+  rows gone), m2c_sanity 278 -> 279 (+func_150CA150 stride low, review only).
+- **P199 wrap removed** (pc_overrides.c + Makefile): level 0 swim (node noev + Chrome chN) and the level 0x29 pond swim
+  run without a trap (no func_15168A9C trap), heap 0, null zone 0.
+- **Level 0x29: Birdy (the scarecrow) dialogue reached** with a new pad autopilot (`?p205goto`, port/gfx/p205_obj.c;
+  routes in `docs/port/sessions/p205/padwalk205.py`): route around the fence, dialogue at 26812 (16-line box, then a
+  4-line box to 29360), text boxes / camera cuts / Birdy's animation correct, gameplay resumes after. Only stub on the
+  route: func_1518354C. Node and Chrome are retrace-identical.
+- func_150CA150 (landing dust): 0 calls on all routes (event-script command func_15070014 only); UNVERIFIED.
+- New diagnostics: `?p205obj=F` (D_800CC2D0 record dump), `?p205dust=N` (func_150CA150 wrap).
+
+## Next steps (from P205)
+
+1. port: func_1518354C (only stub on the 0x29 route); P204's func_151A03DC -> then drop gen_stubs' DL_INDIRECT entry.
+2. port-web: after Birdy, find the next trigger (the disc in front of him: B taps did nothing; run `?p174ev` on
+   padwalk205 `bpad`), then the river crossing / door to the north; extend padwalk205.
+3. Check arity rows func_1513BA10 / func_1513BA44 (game_168A90, port): same dropped-argument shape as func_1513472C.
+
 ## State (session P202, 2026-10-24, port-web). Details: `docs/port/sessions/P202.md`
 
 - Merged port 6f2d2ca (P198) and port-b b693dac (P197): HANDOFF.md conflicts only. After each: verify_all OK, NM link OK,
