@@ -69,6 +69,7 @@ void p81_look_hook(int pre) {
                      vbe_ld8(q + 0xAD), W(q, 0x31C), F(q, 0x3C), F(q, 0x30));
         }
     }
+    if (!pre) { extern void p205_obj_hook(void); p205_obj_hook(); }
     if (!flag(&flook, "p81look") || id > 64) return;
     r = D_800CC2D0 + id * REC;
     if (pre) { slot0 = vbe_ld8(D_800C441A_); return; }

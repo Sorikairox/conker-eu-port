@@ -69,6 +69,7 @@ static void padf_apply(void) {
     if (k < 0) return;
     if (k != padf_cur) { padf_cur = k; port_log("[padf] retrace %u: buttons %X stick %d,%d\n", port_frame_count, padf[k].b, padf[k].x, padf[k].y); }
     port_pads[0][0] = 1; port_pads[0][1] = padf[k].b; port_pads[0][2] = padf[k].x; port_pads[0][3] = padf[k].y;
+    { extern void p205_goto_apply(int *, int *, int *); p205_goto_apply(&port_pads[0][1], &port_pads[0][2], &port_pads[0][3]); } /* P205 TEST ?p205goto */
 }
 
 /* ---- EEPROM */
