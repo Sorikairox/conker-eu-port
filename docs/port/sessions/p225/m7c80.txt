@@ -1,0 +1,48 @@
+43s/0x1D4/0x1D0/ %
+43s/== 0/!= 0/ %
+44s/return 0/return 1/ %
+46s/= obj;/= obj + 1;/ %
+47s/0x3B/0x3A/ %
+48s/= angle0/= angle1/ %
+49s/= angle1/= angle0/ %
+50s/300/301/ %
+50s/life == -1/life == 1/ %
+51s/0 : 1/1 : 1/ %
+51s/? 0/? 2/ %
+52s/= 0/= 1/ %
+53s/= segments/= segments + 1/ %
+54s/= jitter/= width/ %
+55s/= width/= jitter/ %
+56s/= lifeBase/= lifeRange/ %
+57s/= lifeRange/= lifeBase/ %
+58s/rgba\[0\];/rgba[1];/ %
+61s/rgba\[3\];/rgba[2];/ %
+62s/= 2/= 3/ %
+63s/angle0, angle1/angle1, angle0/ %
+63s/(u8 \*)origin/NULL/ %
+64s/spec.start\[0\], spec.start\[1\]/spec.start[1], spec.start[1]/ %
+64s/spec.start\[2\], spec.start\[0\]/spec.start[2], spec.start[1]/ %
+64s/- origin\[0\]/+ origin[0]/ %
+65s/spec.start\[1\] - origin\[1\]/spec.start[1] - origin[0]/ %
+65s/- origin\[2\]/- origin[1]/ %
+65s/0.0f, 0, 1/1.0f, 0, 1/ %
+65s/0.0f, 0, 1/0.0f, 1, 1/ %
+65s/0, 1, 1, -1/0, 0, 1, -1/ %
+65s/1, 1, -1/1, 0, -1/ %
+65s/-1, 0, 0)/0, 0, 0)/ %
+65s/-1, 0, 0)/-1, 1, 0)/ %
+65s/-1, 0, 0)/-1, 0, 1)/ %
+66s/0x59/0x58/ %
+66s/== 0/!= 0/ %
+69s/0x08/0x0C/ %
+70s/0x0C/0x08/ %
+71s/0x10/0x14/ %
+72s/spec.c1, spec.c2/spec.c2, spec.c1/ %
+72s/spec.start, spec.end/spec.end, spec.start/ %
+73s/0xC,/0x10,/ %
+73s/layer, arg11/arg11, arg11/ %
+73s/layer, arg11/layer, layer/ %
+74s/!= NULL/== NULL/ %
+75s/0xC)/0x8)/ %
+75s/arc + 0x60/arc + 0x5C/ %
+77s/return (s32)arc/return (s32)arc + 1/ %

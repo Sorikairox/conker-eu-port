@@ -1,0 +1,40 @@
+29s/\[variant\]/[variant + 1]/ %
+31s/edge < 4/edge < 3/ %
+31s/p += 3/p += 4/ %
+32s/edge == 3/edge == 2/ %
+32s/edge + 1;/edge;/ %
+33s/edge == 2/edge == 1/ %
+33s/countA : countB/countB : countA/ %
+34s/next \* 3/next * 3 + 1/ %
+35s/variant \* 3/variant * 2/ %
+36s/q\[0\] + p\[0\]/q[0] + p[1]/ %
+36s/0.5f - x/0.5f - z/ %
+37s/- z/- x/ %
+38s/mx + mx/mx + mz/ %
+39s/mz + mz/mz/ %
+40s/n <= 0/n <= 1/ %
+43s/731.0f/730.0f/ %
+44s/836.0f/837.0f/ %
+45s/143.0f/142.0f/ %
+46s/n - 1/n/ %
+48s/(f32)i/(f32)(i + 1)/ %
+49s/+ p\[0\]/+ q[0]/ %
+50s/q\[1\] - p\[1\]/q[1] - p[0]/ %
+51s/\* t + p\[2\]/* t + p[1]/ %
+52s/0x1F/0x0F/ %
+52s/+ 15/+ 16/ %
+53s/+ speedBase/+ spreadBase/ %
+54s/(s16)(s32)px, (s16)(s32)py/(s16)(s32)py, (s16)(s32)px/ %
+54s/0xD, 0, col/0xE, 0, col/ %
+54s/col\[0\], col\[1\]/col[1], col[0]/ %
+54s/col\[2\], 0/col[2], 1/ %
+54s/0, 0, 2,/0, 0, 3,/ %
+55s/(vx >> 8) \& 0xFF, vx/(vx >> 7) \& 0xFF, vx/ %
+55s/vx \& 0xFF, (vz/vz \& 0xFF, (vz/ %
+55s/vz \& 0xFF, 0/vx \& 0xFF, 0/ %
+55s/kind, 0/alpha, 0/ %
+55s/speed, speed,/speed, life,/ %
+56s/life, (u32)/speed, (u32)/ %
+56s/+ spreadBase/+ speedBase/ %
+56s/alpha, owner/owner, alpha/ %
+56s/0, 0, alpha/0, 1, alpha/ %

@@ -1,0 +1,2 @@
+24s/rot, mf, mf/mf, rot, mf/ % upb downb
+24s/rot, mf, mf/rot, rot, mf/ % upb downb

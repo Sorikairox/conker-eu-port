@@ -223,4 +223,18 @@ TRIALS=32 chkce EQUIV  func_151416E8 ""
 TRIALS=32 chkce DIFFER func_151416E8 "DIFFTEST_BADJALR_OLD=1"
 TRIALS=32 chkce DIFFER func_151416E8 "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
 TRIALS=32 chkce DIFFER func_151416E8 "" 's/(rec, msg, c);/(rec, msg, code);/'
+# P225: (1) nm_resolve passes #if blocks nested inside an NM block through (DIFFTEST_NMNEST_OLD=1 = old: the nested #else /
+# #endif closed the NM block -> CERR, P222 1BAF40). The case has `#ifdef PORT` (dropped: no PORT in difftest)
+# / `#else` (kept) inside its NM block. (2) DIFFTEST_STKFILL with a non-hex value is an ERROR line (was a traceback with
+# no result line, P222).
+TRIALS=8 chkce EQUIV  func_15103828 ""
+TRIALS=8 chkce CERR   func_15103828 "DIFFTEST_NMNEST_OLD=1"
+TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+TRIALS=8 chkce EQUIV  func_15103828 "" 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/'
+TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_STKFILL=WORD"
+TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_STKFILL=A5A5A5A5"
+# P229: a DIFFTEST_ARG item with a non-decimal index (`A=7`) is an ERROR line (was a traceback, empty result, P225);
+# a valid decimal index with a hex value still runs.
+TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_ARG=A=7"
+TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_ARG=0=7"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]
