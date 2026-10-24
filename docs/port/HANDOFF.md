@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P218, 2026-10-24). Details: `docs/port/sessions/P218.md`
+
+Branch `port` (P215 18edc1c6 + P218 commit). No harness change.
+- func_1514D3B0: event values a2 / a3 are s32 in the NM build (functions.h `#ifdef NON_MATCHING`; the default keeps u8
+  because the s32 prototype changes a C caller's default codegen). Setups wide / wideneg / wide32 EQUIV, 17 / 17 mutants.
+- Random DIFFERs are harness artefacts: func_1504A730 (D_800CC6A4 holds &sp5C: MEMSTK=800CC6A4 -> EQUIV x3 seeds),
+  func_151416E8 / func_151D9014 (random table entries -> unaligned jalr targets, no stub: ROMDATA / valid kind -> EQUIV).
+- UNSURE setups: 15169260 / 15160310 just need DIFFTEST_ROMDATA=1 (EQUIV); func_15013000's "setups" were func_15113000's
+  (p119/3000.txt): new `p218/15013000_setups.txt` EQUIV + mutants; func_1509D274 setups EQUIV TR=16 (random stays UNSURE).
+- Hand C (NM): func_1508E080 rail_weapons_update (cmd 11, B7840), func_15173090 sprite_place_on_floor (19FA20).
+- Checks: verify_all OK, NM build links, protocheck 0 (1434), selftest 91 / 91, progress_nm 5428 / 5915 (91.8%), C bytes 78.8%.
+
+## Next steps (from P218)
+1. B7840: func_1508CF34 (cmd 9; its result is used by func_1508AB7C: exact v0).
+2. Harness idea (needs a selftest case): a jalr to an unaligned target could end the trial as inconclusive on both
+   sides instead of running garbage (P218 section 2).
+3. Re-check runs must use each function's own setup file and knobs (P214 / P215 ran 9260 / 0310 without ROMDATA and
+   func_15013000 with another function's setups).
+4. port-b: re-run A28B0 mutants (DECLKW fix, P214) - and any port-b mutant run made on a merge of P214 (jalr compare off).
+
 ## State (session P215, 2026-10-24). Details: `docs/port/sessions/P215.md`
 
 Branch `port` (P214 2f944d3c + P215 commit).

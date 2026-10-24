@@ -1,0 +1,10 @@
+s/temp_a1(&D_800D34B8\[var_s0\], temp_a1)/temp_a1(\&D_800D34B8[var_s0], 0)/
+s/temp_a1(&D_800D34B8\[var_s0\], temp_a1)/temp_a1(D_800D34B8, temp_a1)/
+s/+ 0x15)) >> 2)/+ 0x14)) >> 2)/
+s/>> 2) \& 0xFF\]/>> 3) \& 0xFF]/
+s/var_s0 += 0x34;/var_s0 += 0x30;/
+s/var_s1 < (u32) D_800D3094/var_s1 <= (u32) D_800D3094/
+s/if (temp_a1 != NULL) {/if (1) {/
+s/D_800DCDC4 = 0;/D_800DCDC4 = 1;/
+s/D_800DCD90 = 0.0f;/D_800DCD90 = 1.0f;/
+s/if (D_800D3094 != 0) {/if (D_800D3094 > 1) {/

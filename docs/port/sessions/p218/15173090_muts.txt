@@ -1,0 +1,16 @@
+s/(angle - 90.0f) \* 0.017453292f/(angle - 90.0f) * 0.0175f/
+s/(angle - 90.0f)/(angle + 90.0f)/
+s/c = cosf(a);/c = sinf(a);/
+s/    x += (f32) dist \* s;/    x += (f32) dist * c;/
+s/    z += (f32) dist \* c;/    z -= (f32) dist * c;/
+s/0, x, y, z, y, 0, 0);/0, x, y, z, z, 0, 0);/
+s/0, x, y, z, y, 0, 0);/0, x, y, x, y, 0, 0);/
+s/(s32) \&tri, 0, x/0, 0, x/
+s/(s32) \&floorY, 0, (s32)/(s32) \&floorY, 1, (s32)/
+s/if (floor == 0) {/if (floor < 0) {/
+s/if (floorY == -10000.0f) {/if (floorY <= -10000.0f) {/
+s/floor, x, floorY, z, angle, arg6, (u8) arg7);/floor, x, floorY, z, angle, arg6, arg7);/
+s/floor, x, floorY, z, angle, arg6, (u8) arg7);/floor, x, y, z, angle, arg6, (u8) arg7);/
+s/floor, x, floorY, z, angle, arg6, (u8) arg7);/floor, x, floorY, z, a, arg6, (u8) arg7);/
+s/        return 0;\n    }\n    if (floorY/X/
+s/    return func_15172B6C(/    func_15172B6C(/
