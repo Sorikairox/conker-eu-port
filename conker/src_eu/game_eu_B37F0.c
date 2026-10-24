@@ -92,7 +92,97 @@ s32 func_15086218(f32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15086268.s")
 
+#ifdef NON_MATCHING
+s32 func_150870E0(s32);
+s32 func_15086268(f32, f32, f32, s32, s32);
+s32 func_150A3794(u8 *, s32, s32, s32);
+s32 func_150867D4(s32, s32, s32, u8 *, void *);
+
+// rail_point_pick: the track node for position (x, y, z): the nearest node of y's height band (func_15086268). With
+// `count` > 0 and a node found: when the node's zone (func_150870E0) contains the position, or its radius (+8) is
+// above 5000, the choice is func_150867D4's (node, count, first, list, sel); otherwise the link (+9..+0xD) whose
+// line from the node passes closest to the position (only links the position lies ahead on) is checked with
+// func_150867D4(node, count, first, list, sel) and taken when that returns the same link. Returns the chosen node, or
+// the nearest node when none was chosen (0xFF when there is none).
+s32 func_15086508(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *sel) {
+    struct_eu_800D2778 *node;
+    struct_eu_800D2778 *to;
+    u8 *zone;
+    s32 res;
+    s32 near;
+    s32 pick;
+    s32 got;
+    s32 k;
+    u8 link;
+    u32 radius;
+    f32 r2;
+    f32 ex;
+    f32 ez;
+    f32 inv;
+    f32 nx;
+    f32 nz;
+    f32 d;
+    f32 px;
+    f32 pz;
+    f32 dist;
+    f32 best;
+
+    res = 0xFF;
+    near = func_15086268(x, y, z, 0, func_15086218(y));
+    if ((s8) count > 0 && near != 0xFF) {
+        zone = (u8 *) func_150870E0(near);
+        if (zone != NULL && func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {
+            res = func_150867D4(near, (s8) count, (s8) first, list, sel);
+        } else {
+            node = &D_800D2778[near];
+            radius = ((u8 *) node)[8];
+            r2 = (f32) radius + (f32) radius;
+            if (1e8f < r2 * r2) {
+                res = func_150867D4(near, (s8) count, (s8) first, list, sel);
+            } else {
+                pick = 0xFF;
+                best = 1e8f;
+                for (k = 0; k < 5; k++) {
+                    link = ((u8 *) node)[9 + k];
+                    if (link == 0xFF) {
+                        continue;
+                    }
+                    to = &D_800D2778[link];
+                    ex = to->unk0 - node->unk0;
+                    ez = to->unk4 - node->unk4;
+                    inv = 1.0f / sqrtf(ex * ex + ez * ez);
+                    ex *= inv;
+                    ez *= inv;
+                    nx = node->unk0;
+                    nz = node->unk4;
+                    d = x * ex + z * ez + -(nx * ex + nz * ez);
+                    if (0.0f < d) {
+                        px = x - (nx + ex * d);
+                        pz = z - (nz + ez * d);
+                        dist = px * px + pz * pz;
+                        if (dist < best) {
+                            pick = link;
+                            best = dist;
+                        }
+                    }
+                }
+                if (pick != 0xFF) {
+                    got = func_150867D4(near, (s8) count, (s8) first, list, sel);
+                    if (got == pick) {
+                        res = got;
+                    }
+                }
+            }
+        }
+    }
+    if (res != 0xFF) {
+        near = res;
+    }
+    return near;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15086508.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150867D4.s")
 
@@ -125,7 +215,85 @@ s32 func_150871B8(s32 arg0) {
     return 0xFF;
 }
 
+#ifdef NON_MATCHING
+// rail_wall_hit: where the move from (x, z) by (dx, dz) first crosses a wall: the type-1 nodes of D_800D2778 in the
+// height band of `y` (node +6 = func_15086218(y)) and their links (+9..+0xD) to higher-numbered type-1 nodes form
+// segments; a segment counts when the move's start and end lie on different sides of its line and the crossing
+// point lies within the segment. Returns -1 when none is hit, else the move length times the crossing fraction of
+// the last segment whose line the move crossed (Rare uses that fraction, not the smallest one it keeps).
+f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz) {
+    struct_eu_800D2778 *a;
+    struct_eu_800D2778 *b;
+    s32 band;
+    s32 i;
+    s32 k;
+    u8 link;
+    f32 ex;
+    f32 ez;
+    f32 c;
+    f32 d0;
+    f32 d1;
+    f32 a0;
+    f32 a1;
+    f32 s;
+    f32 hit;
+    f32 best;
+
+    band = func_15086218(y);
+    best = 100.0f;
+    s = 0.0f; // only read after a crossing set it
+    for (i = 0; i < D_80087630; i++) {
+        a = &D_800D2778[i];
+        if (((u8 *) a)[0xE] != 1 || ((u8 *) a)[6] != band) {
+            continue;
+        }
+        for (k = 0; k < 5; k++) {
+            link = ((u8 *) a)[9 + k];
+            if (link == 0xFF || link <= i) {
+                continue;
+            }
+            b = &D_800D2778[link];
+            if (((u8 *) b)[0xE] != 1) {
+                continue;
+            }
+            // side of the segment's line (normal (ez, -ex)) for the start and the end of the move
+            ez = b->unk4 - a->unk4;
+            ex = -(f32) (b->unk0 - a->unk0);
+            c = -(a->unk0 * ez + ex * a->unk4);
+            d0 = x * ez + z * ex + c;
+            d1 = (x + dx) * ez + (z + dz) * ex + c;
+            if (!((d1 < 0.0f && 0.0f <= d0) || (d0 < 0.0f && 0.0f <= d1))) {
+                continue;
+            }
+            a1 = d1;
+            if (d1 < 0.0f) {
+                a1 = -d1;
+            }
+            a0 = d0;
+            if (d0 < 0.0f) {
+                a0 = -d0;
+            }
+            s = a0 / (a0 + a1);
+            // position of the crossing point and of b along the segment (a = 0)
+            ex = -ex;
+            c = -(a->unk0 * ex + ez * a->unk4);
+            hit = (s * dx + x) * ex + (s * dz + z) * ez + c;
+            d1 = b->unk0 * ex + ez * b->unk4 + c;
+            if ((0.0f < d1 && 0.0f < hit && hit <= d1) || (d1 < 0.0f && hit < 0.0f && d1 <= hit)) {
+                if (s < best) {
+                    best = s;
+                }
+            }
+        }
+    }
+    if (best <= 1.0f) {
+        return sqrtf(dx * dx + dz * dz) * s;
+    }
+    return -1.0f;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15087204.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s8 D_800D27C8;
@@ -715,7 +883,68 @@ s32 func_15088760(s32 player, s32 delta) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088760.s")
 #endif
 
+#ifdef NON_MATCHING
+// rail_find_ahead: the nearest other racer in front of player `player`'s object along its rail record's track
+// direction (+0xC / +0x10, reversed when `dir` >= 0): among the D_800D27B8 records whose player (+0x31) is not the
+// object's own (obj[0x124] - 1) and, when the record's alt +0x2F is set, with the same alt, the one with the smallest
+// positive distance (< 10000) from the plane through the player's position. Stores that record's +0 in `*t` and its
+// alt in `*alt` and returns its object (D_800CC2D0 + +0x31); NULL when there is none or no records.
+struct127 *func_1508882C(s32 player, s32 dir, f32 *t, s32 *alt) {
+    struct_eu_80087640 *rec;
+    struct_eu_80087640 *other;
+    struct127 *obj;
+    struct127 *found;
+    f32 sign;
+    f32 nx;
+    f32 nz;
+    f32 c;
+    f32 d;
+    f32 best;
+    s8 self;
+    s8 want;
+    s8 id;
+    s32 i;
+
+    if (D_80087640 == NULL) {
+        return NULL;
+    }
+    rec = &D_80087640[player];
+    if (dir >= 0) {
+        sign = -1.0f;
+    } else {
+        sign = 1.0f;
+    }
+    nx = *(f32 *) ((u8 *) rec + 0xC) * sign;
+    nz = *(f32 *) ((u8 *) rec + 0x10) * sign;
+    obj = &D_800CC2D0[(s8) rec->unk31];
+    want = ((u8 *) rec)[0x2F];
+    self = ((u8 *) obj)[0x124] - 1;
+    found = NULL;
+    best = 10000.0f;
+    c = -(nx * *(f32 *) ((u8 *) obj + 0x14) + nz * *(f32 *) ((u8 *) obj + 0x1C));
+    for (i = 0; i < D_800D27B8; i++) {
+        other = &D_80087640[i];
+        id = other->unk31;
+        if (self == id) {
+            continue;
+        }
+        if (want != 0 && want != (s8) ((u8 *) other)[0x2F]) {
+            continue;
+        }
+        obj = &D_800CC2D0[id];
+        d = nx * *(f32 *) ((u8 *) obj + 0x14) + nz * *(f32 *) ((u8 *) obj + 0x1C) + c;
+        if (0.0f < d && d < best) {
+            best = d;
+            *t = other->unk0;
+            *alt = (s8) ((u8 *) other)[0x2F];
+            found = &D_800CC2D0[(s8) other->unk31];
+        }
+    }
+    return found;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_1508882C.s")
+#endif
 
 // K&R: func_15088BFC calls this without the argument.
 s32 func_150889D8(arg0)
@@ -891,7 +1120,113 @@ s32 func_15088D24(u8 prev, u8 node, s32 alt) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088D24.s")
 #endif
 
+#ifdef NON_MATCHING
+extern s8 D_800D27B0;
+extern s8 D_800D27C8;
+s32 func_15088D24(u8, u8, s32);
+
+// rail_param_step: moves rail record `rec`'s spline parameter +8 by `dt`. Below 0 it wraps (+1) and the four control
+// nodes +0x2B..+0x2E shift one node back (new first node from func_15088D24, alt = +0x2F); from 1 on it wraps (-1) and
+// they shift forward (new last node), and the new second node's camera type (+0xF) picks the camera mode D_800D27B0
+// (5 -> 1, 6 -> 2; on the mirrored track D_800D27C8: 7 -> 1, 8 -> 2, 9 -> 3). On a shift the node counter +0x24 moves
+// by the direction and gives the lap +0x27 (/ lap length +0x26; capped at the lap count D_800E1010[7] + 1 when
+// D_800BE616 is set). A new highest lap +0x28 of a human player's (+0x31 < D_80090130) record that is not on the rail
+// (+0x30 = 0) with time +0x1C > 0 records the lap time (+0x1C - lap start +0x18, max 0x7D00) in +0x20 and as the
+// player's best lap (s16 at D_800E1010 + 0x30) when better, and on the last lap the total time (max 0x57E40) at
+// D_800E1010 + 0x38; the lap start becomes the time (-time after the last lap). Returns the direction (-1, 0, 1).
+s32 func_15088E84(struct_eu_80087640 *rec, f32 dt) {
+    u8 *r = (u8 *) rec;
+    u8 *node;
+    s32 dir = 0;
+    s8 laps;
+    s8 player;
+    s32 t;
+    s16 *best;
+
+    rec->unk8 += dt;
+    if (rec->unk8 < 0.0f) {
+        rec->unk8 += 1.0f;
+        r[0x2E] = r[0x2D];
+        r[0x2D] = r[0x2C];
+        r[0x2C] = r[0x2B];
+        dir = -1;
+        r[0x2B] = func_15088D24(r[0x2D], r[0x2C], (s8) r[0x2F]);
+    } else if (1.0f <= rec->unk8) {
+        rec->unk8 -= 1.0f;
+        r[0x2B] = r[0x2C];
+        r[0x2C] = r[0x2D];
+        r[0x2D] = r[0x2E];
+        r[0x2E] = func_15088D24(r[0x2C], r[0x2D], (s8) r[0x2F]);
+        dir = 1;
+        if (D_800D27C8 == 0) {
+            node = (u8 *) &D_800D2778[r[0x2C]];
+            if (node[0xF] == 5) {
+                D_800D27B0 = 1;
+            }
+            node = (u8 *) &D_800D2778[r[0x2C]];
+            if (node[0xF] == 6) {
+                D_800D27B0 = 2;
+            }
+        } else {
+            node = (u8 *) &D_800D2778[r[0x2C]];
+            if (node[0xF] == 7) {
+                D_800D27B0 = 1;
+            }
+            node = (u8 *) &D_800D2778[r[0x2C]];
+            if (node[0xF] == 8) {
+                D_800D27B0 = 2;
+            }
+            node = (u8 *) &D_800D2778[r[0x2C]];
+            if (node[0xF] == 9) {
+                D_800D27B0 = 3;
+            }
+        }
+    }
+    if (dir == 0) {
+        return dir;
+    }
+
+    laps = D_800E1010[7];
+    rec->unk24 += dir;
+    rec->unk27 = rec->unk24 / (s8) r[0x26];
+    player = (s8) r[0x31];
+    if (D_800BE616 != 0 && laps < rec->unk27) {
+        rec->unk27 = laps + 1;
+    }
+    if (rec->unk27 <= (s8) r[0x28]) {
+        return dir;
+    }
+    r[0x28] = rec->unk27;
+    if (player < D_80090130 && (s8) r[0x30] == 0 && *(s32 *) (r + 0x1C) > 0) {
+        if ((s8) r[0x28] <= laps) {
+            best = (s16 *) ((u8 *) D_800E1010 + 0x30);
+            t = *(s32 *) (r + 0x1C) - *(s32 *) (r + 0x18);
+            if (t > 0x7D00) {
+                t = 0x7D00;
+            }
+            if (best[player] <= 0 || t < best[player]) {
+                best[player] = t;
+            }
+            *(s32 *) (r + 0x20) = t;
+        }
+        if (laps == (s8) r[0x28]) {
+            t = *(s32 *) (r + 0x1C);
+            if (t > 0x57E40) {
+                t = 0x57E40;
+            }
+            ((s32 *) ((u8 *) D_800E1010 + 0x38))[player] = t;
+        }
+    }
+    if (laps == (s8) r[0x28]) {
+        *(s32 *) (r + 0x18) = -*(s32 *) (r + 0x1C);
+    } else if ((s8) r[0x28] < laps) {
+        *(s32 *) (r + 0x18) = *(s32 *) (r + 0x1C);
+    }
+    return dir;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088E84.s")
+#endif
 
 f32 func_15144BC8(f32);
 f32 func_15049AD0(s32 *, s32, f32);

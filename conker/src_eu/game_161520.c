@@ -373,6 +373,22 @@ void func_1513470C(struct102 *arg0) {
 }
 #endif
 
+#ifdef NON_MATCHING
+/* object_state_dispatch_a / _b: run the object's state handler (+0x3D, 0..9, else 0) from D_80089AAC / D_80089AD4 on
+ * the object. The asm leaves the object in a0 for the handler (all entries are s32 (*)(obj): func_151346EC,
+ * func_1513470C, func_150C6910 / 6938, func_150C7240 / 7268, func_151ABD38 / D88) and returns the handler's v0. */
+s32 func_1513472C(struct102 *arg0) {
+    s32 idx = arg0->unk3D;
+
+    if (idx < 0) {
+        idx = 0;
+    }
+    if (idx >= 10) {
+        idx = 0;
+    }
+    return ((s32 (*)(struct102 *)) D_80089AAC[idx])(arg0);
+}
+#else
 void func_1513472C(struct102 *arg0) {
     s32 idx = arg0->unk3D;
     if (idx < 0) {
@@ -383,7 +399,22 @@ void func_1513472C(struct102 *arg0) {
     }
     D_80089AAC[idx]();
 }
+#endif
 
+#ifdef NON_MATCHING
+// object_state_dispatch_b: as func_1513472C with the table D_80089AD4.
+s32 func_1513477C(struct102 *arg0) {
+    s32 idx = arg0->unk3D;
+
+    if (idx < 0) {
+        idx = 0;
+    }
+    if (idx >= 10) {
+        idx = 0;
+    }
+    return ((s32 (*)(struct102 *)) D_80089AD4[idx])(arg0);
+}
+#else
 void func_1513477C(struct102 *arg0) {
   s32 idx = arg0->unk3D;
   if (idx < 0) {
@@ -394,6 +425,7 @@ void func_1513477C(struct102 *arg0) {
   }
     D_80089AD4[idx]();
 }
+#endif
 
 void func_151347CC(struct161520 *arg0, struct161520_msg *arg1, u8 arg2) {
   s32 *key = &arg0->unk1C;

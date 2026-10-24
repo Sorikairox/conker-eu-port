@@ -1,0 +1,24 @@
+s/        return NULL;/        return (struct127 *) D_800CC2D0;/
+s/    if (dir >= 0) {/    if (dir > 0) {/
+s/        sign = -1.0f;/        sign = 1.0f;/
+s/        sign = 1.0f;/        sign = -1.0f;/
+s/    nx = \*(f32 \*) ((u8 \*) rec + 0xC) \* sign;/    nx = *(f32 *) ((u8 *) rec + 0xC);/
+s/    nz = \*(f32 \*) ((u8 \*) rec + 0x10) \* sign;/    nz = *(f32 *) ((u8 *) rec + 0xC) * sign;/
+s/    want = ((u8 \*) rec)\[0x2F\];/    want = ((u8 *) rec)[0x2E];/
+s/    self = ((u8 \*) obj)\[0x124\] - 1;/    self = ((u8 *) obj)[0x124];/
+s/    best = 10000.0f;/    best = 1000.0f;/
+s/    c = -(nx/    c = (nx/
+s/    for (i = 0; i < D_800D27B8; i++) {/    for (i = 1; i < D_800D27B8; i++) {/
+s/    for (i = 0; i < D_800D27B8; i++) {/    for (i = 0; i <= D_800D27B8; i++) {/
+s/        if (self == id) {/        if (0) {/
+s/        if (want != 0 \&\& want != (s8) ((u8 \*) other)\[0x2F\]) {/        if (want != (s8) ((u8 *) other)[0x2F]) {/
+s/        if (want != 0 \&\& want != (s8) ((u8 \*) other)\[0x2F\]) {/        if (want != 0 \&\& want == (s8) ((u8 *) other)[0x2F]) {/
+s/        if (0.0f < d \&\& d < best) {/        if (0.0f <= d \&\& d < best) {/
+s/        if (0.0f < d \&\& d < best) {/        if (0.0f < d \&\& d <= best) {/
+s/        if (0.0f < d \&\& d < best) {/        if (d < best) {/
+s/            best = d;//
+s/            \*t = other->unk0;/            *t = other->unk8;/
+s/            \*alt = (s8) ((u8 \*) other)\[0x2F\];/            *alt = ((u8 *) other)[0x2F];/
+s/            found = \&D_800CC2D0\[(s8) other->unk31\];/            found = \&D_800CC2D0[i];/
+s/        d = nx \* \*(f32 \*) ((u8 \*) obj + 0x14) + nz \* \*(f32 \*) ((u8 \*) obj + 0x1C) + c;/        d = nx * *(f32 *) ((u8 *) obj + 0x14) + nz * *(f32 *) ((u8 *) obj + 0x18) + c;/
+s/        id = other->unk31;/        id = i;/

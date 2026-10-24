@@ -1,0 +1,36 @@
+s/    res = 0xFF;/    res = 0xFE;/
+s/    near = func_15086268(x, y, z, 0, func_15086218(y));/    near = func_15086268(x, y, z, 1, func_15086218(y));/
+s/    near = func_15086268(x, y, z, 0, func_15086218(y));/    near = func_15086268(x, y, z, 0, func_15086218(z));/
+s/    if ((s8) count > 0 \&\& near != 0xFF) {/    if (count > 0 \&\& near != 0xFF) {/
+s/    if ((s8) count > 0 \&\& near != 0xFF) {/    if ((s8) count >= 0 \&\& near != 0xFF) {/
+s/    if ((s8) count > 0 \&\& near != 0xFF) {/    if ((s8) count > 0) {/
+s/        if (zone != NULL \&\& func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {/        if (func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {/
+s/        if (zone != NULL \&\& func_150A3794(zone, (s32) x, (s32) y, (s32) z) != 0) {/        if (zone != NULL) {/
+s/func_150A3794(zone, (s32) x, (s32) y, (s32) z)/func_150A3794(zone, (s32) x, (s32) z, (s32) y)/
+s/            res = func_150867D4(near, (s8) count, (s8) first, list, sel);/            res = func_150867D4(near, (s8) count, first, list, sel);/
+s/            res = func_150867D4(near, (s8) count, (s8) first, list, sel);/            res = func_150867D4(near, (s8) count, 0, list, sel);/
+s/            radius = ((u8 \*) node)\[8\];/            radius = ((u8 *) node)[9];/
+s/            r2 = (f32) radius + (f32) radius;/            r2 = (f32) radius;/
+s/            if (1e8f < r2 \* r2) {/            if (1e8f <= r2 * r2) {/
+s/            if (1e8f < r2 \* r2) {/            if (1e6f < r2 * r2) {/
+s/                res = func_150867D4(near, (s8) count, (s8) first, list, sel);/                res = func_150867D4(near, count, (s8) first, list, sel);/
+s/                for (k = 0; k < 5; k++) {/                for (k = 0; k < 4; k++) {/
+s/                    link = ((u8 \*) node)\[9 + k\];/                    link = ((u8 *) node)[8 + k];/
+s/                    ez = to->unk4 - node->unk4;/                    ez = to->unk2 - node->unk4;/
+s/                    inv = 1.0f \/ sqrtf(ex \* ex + ez \* ez);/                    inv = 1.0f;/
+s/                    ez \*= inv;//
+s/                    nx = node->unk0;/                    nx = 0;/
+s/                    d = x \* ex + z \* ez + -(nx \* ex + nz \* ez);/                    d = x * ex + z * ez;/
+s/                    if (0.0f < d) {/                    if (0.0f <= d) {/
+s/                    if (0.0f < d) {/                    if (1) {/
+s/                        px = x - (nx + ex \* d);/                        px = x - nx;/
+s/                        pz = z - (nz + ez \* d);/                        pz = z - (nz + ex * d);/
+s/                        if (dist < best) {/                        if (dist <= best) {/
+s/                            best = dist;//
+s/                            pick = link;/                            pick = k;/
+s/                if (pick != 0xFF) {/                if (1) {/
+s/                    if (got == pick) {/                    if (got != 0xFF) {/
+s/                        res = got;/                        res = pick + 1;/
+s/    if (res != 0xFF) {/    if (res != 0) {/
+s/        near = res;/        near = 0xFF;/
+s/                best = 1e8f;/                best = 100.0f;/

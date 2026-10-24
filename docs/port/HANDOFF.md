@@ -10,6 +10,37 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P200, 2026-10-24). Details: `docs/port/sessions/P200.md`
+
+Branch `port` (from P198 6f2d2ca).
+- Harness fix: `DIFFTEST_ARG` on a leading float parameter now also sets f12 / f14 (before, setups for
+  `f(f32 x, f32 y, ...)` ran on random x / y). `DIFFTEST_ARGF_OLD=1` = old. Selftest case func_15087204.
+  Known remaining hole: a pass-through argument of an indirect call (a0 never written before the jalr) is not compared.
+- Restore re-check (P198 stub-write fix): func_15006590's unexplained P176 survivor (`D_800BE7FC >= 0` -> `> 0`) is now
+  killed; committed body unchanged and EQUIV (no bug). Other old survivors near OUT knobs are logic / type equivalences.
+- Priority 1 from the coordinator (P199 blocker) done: func_1513472C / func_1513477C (game_161520.c) under NM call the
+  D_80089AAC / D_80089AD4 handler with the object and return its result (all 20 entries are s32 (*)(obj)).
+  **port-web can remove** the func_1513472C / 477C `--wrap` in port/boot/pc_overrides.c after merging this.
+- Hand C (NM): func_15088E84 rail_param_step, func_1508882C rail_find_ahead, func_15087204 rail_wall_hit,
+  func_15086508 rail_point_pick, func_1517F01C world_to_screen, func_15155B1C effect_overlap_find,
+  func_150CFB90 screen_bar_spawn, func_15195160 obj_hit_retire (void; NM prototype in 1C1A20 void).
+- Checks: verify_all OK (port_work/p200/verify.log), NM build links, protocheck 0 (1359), selftest 71 / 71,
+  progress_nm 5353 / 5915 (90.5%), C bytes 74.5%.
+
+## Next steps (from P200)
+1. Coordinator priorities not started (budget): func_151A03DC (game_eu_1CCD10.c, ripple / foot-trail DL draw, data
+   table; must return its DL argument) - then port-web's DL_INDIRECT entry in port/tools/gen_stubs.py can go;
+   func_1518354C (game_eu_1B0550.c, 1.1M stub calls per walk on level 0x29); then func_150F5FD4 (1231B0),
+   func_151096A0 (1365E0), func_150B1200 (DE750), func_151D7814 (204F70), func_1000BF60 (init_B1B0).
+2. func_150867D4 (539, rail choice): port-b must first make game_eu_C5530.c's prototype
+   `s32 func_150867D4(s32, s32, s32, u8 *, s8 *)` (now void; func_15086508 / game_A28B0 use the result).
+3. Harness: compare pass-through arguments of jalr calls (func_1513472C `handler(0)` mutant is EQUIV today).
+4. Browser: P200.md UNVERIFIED (rail race levels, swimming, effects).
+5. Coordinator low-priority item (budget): game_981E0.c needs prototypes `s32 func_150CA150(u8 *);` (port-b P201: s32
+   returning 0) and `s32 func_151AABC4(struct127 *, s32);` (both called without one today); keep byte identity.
+6. Breadth: `p200/asmlist.py` next: func_15103AA0 (93, refs only), func_15103910 (100), func_150D2C9C (102),
+   func_15062E24 (103), func_151009E4 (103).
+
 ## State (session P198, 2026-10-24). Details: `docs/port/sessions/P198.md`
 
 Branch `port` (from P196 4793d9c).
