@@ -900,9 +900,111 @@ void func_151985C4(struct102 *arg0, s32 *arg1, u8 arg2) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198680.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198AE0.s")
+#ifdef NON_MATCHING
+s32 func_1505D024(struct127 *obj, s32 flags, u16 val, s32 arg3);
+u8 *func_1518D1C0(u8 *obj, s16 type, s16 time, u8 clear, u8 view, s32 arg5, char *name);
+// path_flame_touch_player: path handler 0 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater).
+// Walks back from the path's head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x24 bytes at
+// +0x94); when player 0 (D_800CC2D0[0]: x +0x14, y +0x18 + s16 +0xE8, z +0x1C) is within its radius s16 +0xE4 of a
+// point (the height difference scaled by (1 + r / +0xE6) / 2), it is hurt (func_1505D024 flags 0x60006 with its u16
+// +0x7A, by the owner object **(arg0 + 0x98)), gets the flame-thrower effect (func_1518D1C0 type 0xB with the
+// emitter's +0x0C / +0x01), and the current point advances to that point (count +0x2C drops by one per step).
+// Always returns 1.
+s32 func_15198AE0(u8 *arg0) {
+    u8 *points = *(u8 **) (arg0 + 0x94);
+    u8 *owner = *(u8 **) (arg0 + 0x98);
+    u8 *player = (u8 *) D_800CC2D0;
+    f32 *pt;
+    f32 radius;
+    f32 height;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 i;
 
+    i = *(s8 *) (arg0 + 0x2E);
+    while (i != *(s8 *) (arg0 + 0x2D)) {
+        i--;
+        if (i < 0) {
+            i = arg0[0x25] - 1;
+        }
+        pt = (f32 *) (points + i * 0x24);
+        radius = *(s16 *) (player + 0xE4);
+        height = *(s16 *) (player + 0xE6);
+        dx = pt[0] - *(f32 *) (player + 0x14);
+        dz = pt[2] - *(f32 *) (player + 0x1C);
+        dy = (pt[1] - (*(f32 *) (player + 0x18) + *(s16 *) (player + 0xE8))) * ((1.0f + radius / height) * 0.5f);
+        if (dx * dx + dy * dy + dz * dz < radius * radius) {
+            func_1505D024(D_800CC2D0, 0x60006, *(u16 *) (player + 0x7A),
+                          (s32) (*(u8 **) owner - (u8 *) D_800CC2D0) / 0x32C);
+            func_1518D1C0(player, 0xB, 0, 1, arg0[0xC], arg0[1], "Characterflamethrower");
+            while (i != *(s8 *) (arg0 + 0x2D)) {
+                (*(s8 *) (arg0 + 0x2D))++;
+                if (arg0[0x25] == *(s8 *) (arg0 + 0x2D)) {
+                    *(s8 *) (arg0 + 0x2D) = 0;
+                }
+                (*(s8 *) (arg0 + 0x2C))--;
+            }
+        }
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198AE0.s")
+#endif
+
+#ifdef NON_MATCHING
+// path_pass_points_near_objects: path handler 2 of D_8008FC20 (`s32 (*)(u8 *)`, its result is tested by the path
+// updater). For every live object of D_800CC2D0 (+0x00 set, not held: +0x65 == 0) whose team byte +0x3B differs
+// from the path owner's (**(arg0 + 0x98))[0x3B], it walks back from the path's head point +0x2E to the current
+// point +0x2D (ring of +0x25 points of 0x24 bytes at +0x94). When the object (x +0x14, y +0x18 + s16 +0xE8,
+// z +0x1C) is within (radius +0xE4)^2 + 2500 of a point (the height difference scaled by (1 + r / +0xE6) / 2),
+// the current point advances to it (wrapping at +0x25), and the remaining count +0x2C drops by one per step.
+// Always returns 1.
+s32 func_15198D3C(u8 *arg0) {
+    u8 *owner = *(u8 **) (arg0 + 0x98);
+    u8 *points = *(u8 **) (arg0 + 0x94);
+    u8 *obj;
+    f32 *pt;
+    f32 radius;
+    f32 height;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 i;
+
+    for (obj = (u8 *) D_800CC2D0; obj != (u8 *) &D_800D121C; obj += 0x32C) {
+        if (*(s32 *) obj == 0 || obj[0x65] != 0 || obj[0x3B] == (*(u8 **) owner)[0x3B]) {
+            continue;
+        }
+        i = *(s8 *) (arg0 + 0x2E);
+        while (i != *(s8 *) (arg0 + 0x2D)) {
+            i--;
+            if (i < 0) {
+                i = arg0[0x25] - 1;
+            }
+            pt = (f32 *) (points + i * 0x24);
+            radius = *(s16 *) (obj + 0xE4);
+            height = *(s16 *) (obj + 0xE6);
+            dx = pt[0] - *(f32 *) (obj + 0x14);
+            dz = pt[2] - *(f32 *) (obj + 0x1C);
+            dy = (pt[1] - (*(f32 *) (obj + 0x18) + *(s16 *) (obj + 0xE8))) * ((1.0f + radius / height) * 0.5f);
+            if (dx * dx + dy * dy + dz * dz < radius * radius + 2500.0f) {
+                while (i != *(s8 *) (arg0 + 0x2D)) {
+                    (*(s8 *) (arg0 + 0x2D))++;
+                    if (arg0[0x25] == *(s8 *) (arg0 + 0x2D)) {
+                        *(s8 *) (arg0 + 0x2D) = 0;
+                    }
+                    (*(s8 *) (arg0 + 0x2C))--;
+                }
+            }
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198D3C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198EEC.s")
 
@@ -1258,7 +1360,69 @@ void func_15199EF0(void *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 (*D_8008FC64[])(u8 *); /* emitter2 check handlers (result 0 = stop) */
+extern void (*D_8008FC5C[])(u8 *); /* emitter2 sound update handlers */
+void func_1519C38C(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3);
+// emitter2_path_update: entry 12 of D_8008A5A0 (`s32 (u8 *)`). Updates a path emitter: clears flag 0x10 of the
+// owner's (+0x98) +0x150; returns 0 if a short path (+0x2C < 2) has flag 8 in +0x1E, or if the owner's check handler
+// D_8008FC64[owner +0x48] (-1 = none) returns 0. Else moves every point from the head +0x2E back to the current
+// point +0x2D (ring of +0x25 points of 0x28 bytes at +0x94: func_1519C38C with gravity owner +0x20 over
+// D_800BE9A4, and +0x18 grows by owner +0x30 per frame), puts the owner's model (+0x148 -> +0x14, s16 +0x0E..+0x12)
+// on the current point when the path has 2+ points, runs the sound handler D_8008FC5C[owner +0x38], clears flag 1 of
+// +0x150 and copies the current point (or zero when +0x2C <= 0) to +0x54..+0x5C. Returns 1.
+s32 func_15199F80(u8 *arg0) {
+    u8 *owner = *(u8 **) (arg0 + 0x98);
+    u8 *points = *(u8 **) (arg0 + 0x94);
+    u8 *pt;
+    s16 *model;
+    s32 i;
+
+    owner[0x150] &= ~0x10;
+    if (*(s8 *) (arg0 + 0x2C) < 2 && (*(u16 *) (arg0 + 0x1E) & 8)) {
+        return 0;
+    }
+    i = *(s8 *) (owner + 0x48);
+    if (i != -1 && D_8008FC64[i](arg0) == 0) {
+        return 0;
+    }
+    i = *(s8 *) (arg0 + 0x2E);
+    while (i != *(s8 *) (arg0 + 0x2D)) {
+        i--;
+        if (i < 0) {
+            i = arg0[0x25] - 1;
+        }
+        pt = points + i * 0x28;
+        func_1519C38C((f32 *) pt, (f32 *) (pt + 0xC), *(f32 *) (owner + 0x20), D_800BE9A4);
+        *(f32 *) (pt + 0x18) += *(f32 *) (owner + 0x30) * D_800BE9A4;
+    }
+    if (*(u8 **) (owner + 0x148) != NULL && *(s8 *) (arg0 + 0x2C) >= 2) {
+        pt = points + *(s8 *) (arg0 + 0x2D) * 0x28;
+        model = *(s16 **) (*(u8 **) (owner + 0x148) + 0x14);
+        model[7] = (s32) ((f32 *) pt)[0];
+        model[8] = (s32) ((f32 *) pt)[1];
+        model[9] = (s32) ((f32 *) pt)[2];
+    }
+    i = *(s8 *) (owner + 0x38);
+    if (i != -1) {
+        D_8008FC5C[i](arg0);
+    }
+    owner[0x150] &= ~1;
+    if (*(s8 *) (arg0 + 0x2C) > 0) {
+        pt = points + *(s8 *) (arg0 + 0x2D) * 0x28;
+        *(s32 *) (arg0 + 0x54) = ((s32 *) pt)[0];
+        *(s32 *) (arg0 + 0x58) = ((s32 *) pt)[1];
+        *(s32 *) (arg0 + 0x5C) = ((s32 *) pt)[2];
+    } else {
+        *(f32 *) (arg0 + 0x54) = 0.0f;
+        *(f32 *) (arg0 + 0x58) = 0.0f;
+        *(f32 *) (arg0 + 0x5C) = 0.0f;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199F80.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519A1A4.s")
 
@@ -1984,4 +2148,51 @@ void func_1519D2D4(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+// path_trail_spawn_effects: spawns effect `kind` (func_1505D1C4) at even spacing along the path of `arg0` (needs a
+// count +0x2C >= 2): walks back from the head point +0x2E to the current point +0x2D (ring of +0x25 points of 0x28
+// bytes at +0x94, +0x1C = segment length), starting from the position at +0x10; whenever the walked length reaches
+// the next mark (0, then every owner +0x14C * step), one effect is spawned on that segment, interpolated back towards
+// the previous point, for the owner's object (**(arg0 + 0x98): its D_800CC2D0 index and u16 +0x76).
+void func_1519D320(s32 arg0, f32 step, s32 kind) {
+    u8 *self = (u8 *) arg0;
+    u8 *owner = *(u8 **) (self + 0x98);
+    u8 *points = *(u8 **) (self + 0x94);
+    f32 *prev = (f32 *) (self + 0x10);
+    f32 *pt;
+    u8 *obj;
+    f32 spacing;
+    f32 walked;
+    f32 mark;
+    f32 len;
+    f32 t;
+    s32 i;
+
+    if (*(s8 *) (self + 0x2C) < 2) {
+        return;
+    }
+    walked = 0.0f;
+    mark = 0.0f;
+    spacing = *(f32 *) (owner + 0x14C) * step;
+    i = *(s8 *) (self + 0x2E);
+    do {
+        i--;
+        if (i < 0) {
+            i = self[0x25] - 1;
+        }
+        pt = (f32 *) (points + i * 0x28);
+        len = pt[7];
+        walked += len;
+        if (mark <= walked) {
+            obj = *(u8 **) owner;
+            t = (walked - mark) / len;
+            func_1505D1C4(pt[0] + (prev[0] - pt[0]) * t, pt[1] + (prev[1] - pt[1]) * t, pt[2] + (prev[2] - pt[2]) * t,
+                          kind, (s32) (obj - (u8 *) D_800CC2D0) / 0x32C, *(u16 *) (obj + 0x76), 0, 0);
+            mark += spacing;
+        }
+        prev = pt;
+    } while (i != *(s8 *) (self + 0x2D));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519D320.s")
+#endif

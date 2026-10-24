@@ -224,7 +224,56 @@ void func_1516EED4(s32 arg0, s32 arg1, u8 arg2, s32 arg3) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_1516FDD4(u8 *arg0);
+void func_1516FEBC(s32 arg0, s32 arg1);
+
+// sprite_fade_grow_kind_tick: particle tick (handler at 0x8008CF48, sibling of func_1516FF34) with per-kind
+// parameters (+0x2C = kind 0..10, tables copied from D_8008CF64 / CF70 / CF7C / CF88). While +0x24 (fading in) is
+// set, alpha +0x1F rises by 16 per frame (D_800BE9E4) up to the kind's maximum; otherwise it falls by the kind's
+// rate per frame down to 0. Returns 1 (done) once fading out reached 0. Else moves the particle
+// (func_1516FDD4), grows the size +0x14 / +0x16 by the kind's step per frame (kind 3 also sets +0x18 = 100),
+// scales its velocity by the kind's factor / 256 (func_1516FEBC) and returns 0.
+s32 func_1516F594(u8 *arg0) {
+    static const u8 scale[11] = { 0xFA, 0xFA, 0xEB, 0xEB, 0xFA, 0xFA, 0xDC, 0xD2, 0xD2, 0xDC, 0xD2 };
+    static const u8 grow[11] = { 0x10, 0x07, 0x07, 0x07, 0x14, 0x08, 0x28, 0x28, 0x28, 0x14, 0x14 };
+    static const u8 maxAlpha[11] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xBE, 0xAA, 0x78, 0xC8, 0x3C, 0x78, 0xC8 };
+    static const u8 fadeRate[11] = { 0x08, 0x02, 0x0A, 0x01, 0x08, 0x0A, 0xFF, 0x0A, 0x02, 0xFF, 0x0A };
+    s32 kind = arg0[0x2C];
+    s32 v = arg0[0x1F];
+    s32 size;
+
+    if (arg0[0x24] != 0) {
+        if (v != maxAlpha[kind]) {
+            v += D_800BE9E4 << 4;
+            if (v > maxAlpha[kind]) {
+                v = maxAlpha[kind];
+            }
+            arg0[0x1F] = v;
+        }
+    } else if (v != 0) {
+        v -= D_800BE9E4 * fadeRate[kind];
+        if (v < 0) {
+            v = 0;
+        }
+        arg0[0x1F] = v;
+    }
+    if (arg0[0x24] == 0 && v == 0) {
+        return 1;
+    }
+    func_1516FDD4(arg0);
+    size = *(s16 *) (arg0 + 0x14) + D_800BE9E4 * grow[kind];
+    *(s16 *) (arg0 + 0x16) = size;
+    *(s16 *) (arg0 + 0x14) = size;
+    if (kind == 3) {
+        *(s16 *) (arg0 + 0x18) = 100;
+    }
+    func_1516FEBC((s32) arg0, scale[kind]);
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516F594.s")
+#endif
 
 void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F, u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29, u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30);
 
@@ -357,7 +406,56 @@ void func_1516FFF8(s16 arg0, s16 arg1, s16 arg2, s32 arg3, u8 arg4, s32 arg5) {
     func_1516DF0C(arg0, arg1, arg2, 0x1B, 0, 0xFF, 0xFF, 0xFF, 0, 0xFF, 0xFF, 0xFF, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x400, 0x400, 0, 0, 2, 0, 0, 0xFF, 0xF, 0, 0, 9, 0, 0xFF, 0xA, 0x5A, 5, arg3, 0, 0, (s32) arg4, arg5);
 }
 
+#ifdef NON_MATCHING
+// sprite_fade_drift_tint_tick: particle tick (handler at 0x8008CF50, same scheme as func_1516FF34): while +0x24
+// (fading in) is set, alpha +0x1F rises by 16 per frame (D_800BE9E4) up to 255; otherwise it falls by
+// D_800BE9E4 << +0x2F down to 0. Returns 1 (done) once fading out reached 0. Else the size +0x14 / +0x16 grows by
+// the signed rates +0x2D / +0x2E per frame; when the width reaches 0 or below both are cleared and it returns 1.
+// Else the tint step +0x2C advances by D_800BE9E4 (up to 0x7F) and the colour +0x1C..+0x1E blends from
+// +0x26..+0x28 towards +0x29..+0x2B by 2 * step / 256; returns 0.
+s32 func_1517013C(u8 *arg0) {
+    s32 v = arg0[0x1F];
+    s32 t;
+
+    if (arg0[0x24] != 0) {
+        if (v != 0xFF) {
+            v += D_800BE9E4 << 4;
+            if (v >= 0x100) {
+                v = 0xFF;
+            }
+            arg0[0x1F] = v;
+        }
+    } else if (v != 0) {
+        v -= D_800BE9E4 << arg0[0x2F];
+        if (v < 0) {
+            v = 0;
+        }
+        arg0[0x1F] = v;
+    }
+    if (arg0[0x24] == 0 && v == 0) {
+        return 1;
+    }
+    *(s16 *) (arg0 + 0x14) += (s8) arg0[0x2D] * D_800BE9E4;
+    *(s16 *) (arg0 + 0x16) += (s8) arg0[0x2E] * D_800BE9E4;
+    if (*(s16 *) (arg0 + 0x14) <= 0) {
+        *(s16 *) (arg0 + 0x16) = 0;
+        *(s16 *) (arg0 + 0x14) = *(s16 *) (arg0 + 0x16);
+        return 1;
+    }
+    v = arg0[0x2C] + D_800BE9E4;
+    if (v >= 0x80) {
+        v = 0x7F;
+    }
+    arg0[0x2C] = v;
+    t = v * 2;
+    arg0[0x1C] = (((arg0[0x29] - arg0[0x26]) * t) >> 8) + arg0[0x26];
+    arg0[0x1D] = (((arg0[0x2A] - arg0[0x27]) * t) >> 8) + arg0[0x27];
+    arg0[0x1E] = (((arg0[0x2B] - arg0[0x28]) * t) >> 8) + arg0[0x28];
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1517013C.s")
+#endif
 
 void func_1516FDD4(u8 *arg0);
 
@@ -570,7 +668,57 @@ void func_15170A70(s32 x, s32 y, s32 z, s32 angle, s32 flare, s32 alpha, s32 arg
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_15170A70.s")
 #endif
 
+#ifdef NON_MATCHING
+s32 func_151EFDD0(void);
+// sprite_flicker_drift_tick: particle tick (handler at 0x8008CF58 of D_8008CF40, same scheme as func_1516FF34).
+// While +0x24 (life) is set, the alpha +0x1F rises by 64 per frame (D_800BE9E4) up to 254; a particle whose alpha is
+// still 0 first gets a life of 200..224 (func_150ADA20). Otherwise the alpha falls by 16 per frame down to 0, and
+// the particle is done (returns 1) once it reached 0. Else it moves (func_1516FDD4) and its velocity +0x26 / +0x28
+// is scaled by a random (230 + -31..31) / 256 when +0x2F is set, or by (220 + -31..31) / 256 when the 8.8
+// velocity +0x26 is above sqrt(1000); +0x18 is cleared and it returns 0.
+s32 func_15170D50(u8 *arg0) {
+    s32 alpha = arg0[0x1F];
+    s32 vel;
+
+    if (arg0[0x24] != 0) {
+        if (alpha == 0) {
+            arg0[0x24] = (u32) func_150ADA20() % 25 + 200;
+        }
+        if (alpha != 0xFE) {
+            alpha += D_800BE9E4 << 6;
+            if (alpha >= 0xFF) {
+                alpha = 0xFE;
+            }
+            arg0[0x1F] = alpha;
+        }
+    } else if (alpha != 0) {
+        alpha -= D_800BE9E4 << 4;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        arg0[0x1F] = alpha;
+    }
+    if (arg0[0x24] == 0 && alpha == 0) {
+        return 1;
+    }
+    func_1516FDD4(arg0);
+    if (arg0[0x2F] != 0) {
+        func_1516FE5C((s32) arg0, func_151EFDD0() % 32 + 0xE6);
+        func_1516FE8C((s32) arg0, func_151EFDD0() % 32 + 0xE6);
+    } else {
+        vel = (*(s8 *) (arg0 + 0x26) << 8) + arg0[0x27];
+        // the asm squares the +0x26 velocity twice (not +0x28); u32 keeps its wrap-around at vel = -0x8000
+        if ((s32) ((u32) vel * vel + (u32) vel * vel) > 2000) {
+            func_1516FE5C((s32) arg0, func_151EFDD0() % 32 + 0xDC);
+            func_1516FE8C((s32) arg0, func_151EFDD0() % 32 + 0xDC);
+        }
+    }
+    *(s16 *) (arg0 + 0x18) = 0;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_15170D50.s")
+#endif
 
 s32 func_151705A4(s32, f32 *, f32 *, f32 *);
 void func_15170F24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {

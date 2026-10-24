@@ -35,6 +35,27 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    (183F10), then `progress_nm --list`.
 4. Browser: UNVERIFIED list in P255.md section 5.
 
+## P254 (port-b) (session P254, 2026-10-25). Details: `docs/port/sessions/P254.md`
+
+Branch `port-b`. **Tank-mode black screen (coordinator priority)**: func_151D2248 trail_ribbon_draw is entry 18 of
+D_8008A644 (`s32 (u8 *, s32 dl, s16 slot)`) and returns the advanced display list; the stub returned 0, so
+func_151481BC's caller wrote the DL at NULL (D9FDFFFF at null+0x10). Converted with func_151D1B80 tank_track_record
+(D_8008A5DC[17], `s32 (u8 *)`); both difftest EQUIV + mutants (39 / 42 + 2 / 2, 40 / 43 + 2 / 2, survivors explained).
+Breadth (hand C, NM): func_15198D3C, func_1519D320, func_15170D50, func_15139578, func_150FB06C, then func_151389A8,
+func_15199F80, func_15198AE0 (the last one is outside the registry: its string literal pointer differs from ROM
+D_800A8E64; verified with a ROM-address draft). Two first drafts were caught by difftest with implicit float calls
+(func_150F4AF0, func_15144528) -> prototypes. Checks: verify_all rc 0, NM rc 0, protocheck 0 (1564), selftest 118 / 118,
+implicit NM+float 0. progress_nm total 5577 / 5915 (94.3%), C bytes 85.5%.
+Not done: task 2 (func_15134E48 without JALRARG_OLD: port-b lacks port's P250 commit), D5E90 hand asm.
+
+## Next steps (from P254)
+
+1. Browser: Tank mode (no more DL writes at NULL?), path emitters / flame thrower, bone splashes, arc bolts.
+2. Next asm-only in port-b files: func_1516DCA8 (153, 19B180), func_15106794 (168, 133A70), func_150FA738 (172,
+   127840), func_151349D0 (178, 161520); D5E90 sin / cos group.
+3. After merging port P250: re-run func_15134E48 without DIFFTEST_JALRARG_OLD.
+4. Harness: string-argument compare by content (func_15198AE0); reverify support for whole-function harness rows.
+
 ## State (session P253, 2026-10-25). Details: `docs/port/sessions/P253.md`
 - Registry re-run done: func_1508C600, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874, 151D8280, 151EA4C8
   all random EQUIV, all setups, all mutants killed. func_150C5A68 still needs DIFFTEST_JALRARG_OLD=1 (the random jalr
@@ -78,6 +99,25 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. port: func_15194210 (game_eu_1C1A20), func_15072B44 (981E0), func_151473F4 (174610), func_150D88E8 (105FD0),
    func_150451C0 (71E70).
 3. port-web: get past the Baddie (from the pit after the knock-back); Tank movement once it draws; use det=2 routes.
+## P251 (port-b) (session P251, 2026-10-25). Details: `docs/port/sessions/P251.md`
+
+Branch `port-b`. **MP3 (game_eu_226870) done as hand C (NM)**: func_151F94E0 mp3_imdct36_hybrid (958 words, bit-exact
+float order; random + 32 realistic-spectrum setups EQUIV, mutants 65 / 65 + 16 / 16 1-ulp constants); Huffman group
+func_151F9184 / 933C (C ABI) + 9060 / 911C as static helpers: whole-function harness `p251/nmasm_huff.py` (ROM code
+vs NM C in Unicorn, real tables from the ROM assets, 250k real MP3 granules from the ROM): 5000 granules + 5000 random
+EQUIV (23707 calls; 4948 / 5000 end exactly at part2_3_length), mutants 47 / 49 (2 equivalents). Small asm-only
+(19B180): func_1517013C sprite_fade_drift_tint_tick, func_1516F594 sprite_fade_grow_kind_tick. func_15190940 (1BAF40,
+D_8008B490[18]) now `s32` under NM returning func_15163F50's v0. Checks: verify_all rc 0, NM rc 0, protocheck 0 (1554),
+selftest 118 / 118. progress_nm total 5567 / 5915 (94.1%), C bytes 85.2%.
+
+## Next steps (from P251)
+
+1. Browser: MP3 playback (music / speech), particle kinds of D_8008CF40, light effect 18.
+2. Smallest asm-only in port-b files: func_15198D3C, func_1519D320, func_15170D50, func_15139578, func_150FB06C.
+3. port: reverify support for whole-function harness rows (nmasm_huff.py); NORAND knob for func_1516F594; the p214
+   tablesig.py container name.
+4. Still open from P247: port func_150EDCC8 (tank driving); game_168A90 D_80089FC8 4-arg call of 2-arg handlers.
+
 ## State (session P250, 2026-10-25). Details: `docs/port/sessions/P250.md`
 - Tank func_150EDCC8: `dist = 10000` survivor explained (eye fields poked 4 bytes early in every mp_ray setup, fixed;
   slot 0 near the eye also hid it) and killed with `mp_ray_10k`; new setups `sp_lock2` (kills `off * d`) and `sp_turn`
@@ -135,7 +175,6 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. port-web: cross the last gap (top ledge -> plateau) to fire event 6 (The Baddie), then `?p223hit` knock-back.
 2. port: func_15134004 (15FF50; may cut the hover height), func_15072B44, func_151473F4, func_150D88E8, func_151AB874.
 3. port-b: func_15134E48 (161520) and the P245 Tank stubs.
-
 ## P247 (port-b) (session P247, 2026-10-25). Details: `docs/port/sessions/P247.md`
 
 Branch `port-b`. **Tank-mode stubs (browser P245)**, hand C (NM) + setups + pattern-sed mutants + registry rows:

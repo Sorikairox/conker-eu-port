@@ -1,0 +1,27 @@
+\#^    static const u8 scale\[11\] = { 0xFA, 0xFA, 0xEB, 0xEB, 0xFA, 0xFA, 0xDC, 0xD2, 0xD2, 0xDC, 0xD2 };$#s/0xEB, 0xEB, 0xFA/0xEB, 0xEC, 0xFA/
+\#^    static const u8 grow\[11\] = { 0x10, 0x07, 0x07, 0x07, 0x14, 0x08, 0x28, 0x28, 0x28, 0x14, 0x14 };$#s/0x14, 0x08/0x14, 0x09/
+\#^    static const u8 maxAlpha\[11\] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xBE, 0xAA, 0x78, 0xC8, 0x3C, 0x78, 0xC8 };$#s/0x3C/0x3D/
+\#^    static const u8 fadeRate\[11\] = { 0x08, 0x02, 0x0A, 0x01, 0x08, 0x0A, 0xFF, 0x0A, 0x02, 0xFF, 0x0A };$#s/0x08, 0x02, 0x0A, 0x01/0x08, 0x02, 0x0A, 0x02/
+\#^    s32 kind = arg0\[0x2C\];$#s/0x2C/0x2D/
+\#^    s32 v = arg0\[0x1F\];$#s/0x1F/0x1E/
+\#^    if (arg0\[0x24\] != 0) {$#s/!=/==/
+\#^        if (v != maxAlpha\[kind\]) {$#s/!=/</
+\#^            v += D_800BE9E4 << 4;$#s/<< 4/<< 3/
+\#^            if (v > maxAlpha\[kind\]) {$#s/>/>=/
+\#^                v = maxAlpha\[kind\];$#s/maxAlpha/grow/
+\#^    } else if (v != 0) {$#s/v != 0/v > 1/
+\#^        v -= D_800BE9E4 \* fadeRate\[kind\];$#s/fadeRate/grow/
+\#^        if (v < 0) {$#s/v < 0/v < 1/
+\#^            v = 0;$#s/0/1/
+\#^    if (arg0\[0x24\] == 0 && v == 0) {$#s/&&/||/
+\#^    if (arg0\[0x24\] == 0 && v == 0) {$#s/0x24/0x25/
+\#^    func_1516FDD4(arg0);$#s/arg0/arg0 + 4/
+\#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/0x14/0x16/
+\#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/(s16 \*)/(u16 *)/
+\#^    size = \*(s16 \*) (arg0 + 0x14) + D_800BE9E4 \* grow\[kind\];$#s/grow\[kind\]/scale[kind]/
+\#^    \*(s16 \*) (arg0 + 0x16) = size;$#s/0x16/0x18/
+\#^    \*(s16 \*) (arg0 + 0x14) = size;$#s/size/size + 1/
+\#^    if (kind == 3) {$#s/3/2/
+\#^        \*(s16 \*) (arg0 + 0x18) = 100;$#s/100/101/
+\#^    func_1516FEBC((s32) arg0, scale\[kind\]);$#s/scale/grow/
+\#^    return 0;$#s/0/1/
