@@ -1,0 +1,35 @@
+s/    rail\[0x1704\]++;/    ;/
+s/== me) {/!= me) {/
+s/D_800D27D0\[0x1704\] = 0;/D_800D27D0[0x1704] = 1;/
+s/row = me \* 16;/row = me * 15;/
+s/if (!(mask \& (1 << me))) {/if (!(mask \& (2 << me))) {/
+s/if (active\[k\] <= 0 || team\[k\] == myTeam) {/if (active[k] < 0 || team[k] == myTeam) {/
+s/|| team\[k\] == myTeam) {/) {/
+s/dx = D_800CC2D0\[me\].x_position - obj->x_position;/dx = D_800CC2D0[me].x_position - obj->z_position;/
+s/dz = D_800CC2D0\[me\].z_position - obj->z_position;/dz = D_800CC2D0[me].y_position - obj->z_position;/
+s/            d = 0x7D00;/            d = 0x7D01;/
+s/            d += 500;/            d += 501;/
+s/if (node\[me\] != node\[k\]) {/if (node[me] == node[k]) {/
+s/if (flags \& (0x10000 << k)) {/if (flags \& (0x8000 << k)) {/
+s/if (d > 3000 \&\& obj->unk65 != 0) {/if (d >= 3000 \&\& obj->unk65 != 0) {/
+s/if (d > 3000 \&\& obj->unk65 != 0) {/if (d > 3000) {/
+1,/if (k >= D_80090130) {/s/if (k >= D_80090130) {/if (k > D_80090130) {/
+s/if (mode != 0xB8 \&\& (kind\[k\] == 2 || kind\[k\] == 3)) {/if (kind[k] == 2 || kind[k] == 3) {/
+s/kind\[k\] == 3)) {/kind[k] == 4)) {/
+s/if (mode == 0xB7) {/if (mode == 0xB8) {/
+s/                d = dist;/                d = d;/
+s/if (obj->unk13C != 0) {/if (obj->unk13C == 0) {/
+s/d \/= func_150859AC(k, 6) + 2;/d \/= func_150859AC(k, 6) + 1;/
+s/func_150859AC(k, 6)/func_150859AC(me, 6)/
+s/if (k < D_80090130 \&\& d != -1) {/if (k < D_80090130) {/
+s/if (k < D_80090130 \&\& d != -1) {/if (k <= D_80090130 \&\& d != -1) {/
+s/if (d >= 0) {/if (d > 0) {/
+s/j < count \&\& weights\[row + j\] < d; j++/j < count \&\& weights[row + j] <= d; j++/
+s/links\[row + m\] = links\[row + m - 1\];/;/
+s/weights\[row + m\] = weights\[row + m - 1\];/;/
+s/            links\[row + j\] = k;/            links[row + j] = me;/
+s/            weights\[row + j\] = d;/            weights[row + j] = dist;/
+s/if (dist < best) {/if (d < best) {/
+s/    for (j = count; j < 16; j++) {/    for (j = count; j < 15; j++) {/
+s/))\[me\] = best;/))[me] = count;/
+s/    s32 best = 0x7D00;/    s32 best = 0x7CFF;/

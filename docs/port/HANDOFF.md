@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P214, 2026-10-24). Details: `docs/port/sessions/P214.md`
+
+Branch `port` (P211 b635f45 + P214 commit).
+- difftest: `return func_X(...)` lines were taken as func_X's prototype (type `return`): FP args of such callees were
+  never compared (port-b P210 func_150768DC x-swap of func_1505A630). Fixed (DECLKW_OLD=1 = old); K&R `f();` = unknown.
+  Unknown-prototype jal: FPRs either side sets right before the call (JALARG_OLD=1 = old); the wide "since previous
+  call" compare is opt-in (JALARG_WIDE=1: false DIFFERs as default). Selftest hook DIFFTEST_NOPROTO. New selftest
+  case func_150768DC (6 checks).
+- func_15074C80 (981E0): NM-only 3-parameter signature (table D_80086A34 all void/3; default build keeps 2 params).
+- Hand C (NM, B7840): func_1508ECF8 rail_racer_take_over (cmd 15), func_1508A63C rail_rank_rivals (cmd 5).
+- Re-check table in P214.md section 2: func_1506B04C (981C0) p184 setups DIFFER with old and new compare (object in
+  a2 vs a3 at the jalr): likely real bug, not fixed.
+- Checks: verify_all OK, NM build links, protocheck 0 (1431), progress_nm 5425 / 5915 (91.7%), C bytes 78.5%.
+  **Selftest 82 / 83** (func_1513472C `arg0 = 0` case EQUIV, was 83 / 83 mid-session): open, see P214.md section 6.
+
+## Next steps (from P214)
+1. Selftest func_1513472C case (P214.md section 6), before trusting new difftest results.
+2. func_1506B04C jalr argument slot (P214.md section 2).
+3. port-b: re-run A28B0 mutants touching func_1505A630 / directly returned float-arg callees (DECLKW fix).
+4. Re-check left: natives func_150AE5D8 / 5E8 / 5F8 (p106 REFLEN / SIGNORE=7 candidates), func_150FD49C,
+   func_15196438, func_15199A28, func_151DA6F8, func_1509D274.
+5. B7840: func_1508AB7C (cmd 6, exact v0), func_1508E080, func_1508CF34. Breadth: `p214/asmlist.py`.
+
 ## State (session P211, 2026-10-24). Details: `docs/port/sessions/P211.md`
 
 Branch `port` (P209 d93bdcd + P211 commit).
