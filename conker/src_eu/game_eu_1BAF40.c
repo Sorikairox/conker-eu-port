@@ -1220,24 +1220,16 @@ s32 func_151901B4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *arg1) {
     return 1;
 }
 
-/* P222: the PORT choice of func_151901F4's target sits in this macro, outside the NON_MATCHING block: difftest's
- * nm_resolve does not handle a nested #ifdef / #endif inside an NM block (it broke the whole TU's difftest build). */
-#ifdef PORT
-#define EFFECT_LAUNCH_TARGET(target, node) ((target) = (struct_eu_vec3 *) ((node) + 0x34))
-#else
-#define EFFECT_LAUNCH_TARGET(target, node) ((void) 0)
-#endif
 #ifdef NON_MATCHING
-// effect_node_launch: P219. Entry 0 of the effect-node handler table D_8008FC48 (EU 0x8008FFE8), run by the asm
-// dispatcher func_1519AF14 (1C3530). node +0x2C = the particle, node +0x30 = its config (NULL: the particle is freed
+// effect_node_launch: P219. Entry 0 of the effect-node handler table D_8008FFE8, called by game_1FFF60's C
+// (node, &pos) and (child, &child->unk34). node +0x2C = the particle, node +0x30 = its config (NULL: the particle is freed
 // with func_1516972C). Otherwise the particle gets velocity (target - node pos +0x34) * cfg +0x60 (+0x148..+0x150),
 // +0x154 = random f32 * cfg +0x68 + cfg +0x64, +0x158 = cfg +0x6C, +0x6C / +0x6E = cfg s16 +0x70 / +0x72,
 // +0x1C = random % (cfg s16 +0x76 + 1) + cfg s16 +0x74, +0x70 = 0x21 when cfg +0x7C bit 0 else 0x20, +0x71 = 0x24,
 // +0x58 |= 0x08000001.
-// target (a1): the dispatcher never sets a1 at its jalr (stale register: a loop index on the early exits, memcpy /
-// func_1513D2F0 leftovers on the loop path - see P215.md), so on N64 the velocity comes from whatever a1 points at.
-// The N64 build keeps that read (byte-faithful behaviour, difftest-checked); the PORT build does not dereference the
-// bogus pointer and aims at the node's own position instead (velocity 0).
+// target (a1): P231: a real vec3. P215 / P219 took the table for D_8008FC48 (func_1519AF14's, whose three entries
+// func_1519CEB8 / CEE0 / CF08 take one argument) and added a PORT-only "aim at the node itself" fallback; the real
+// callers pass the position, so the fallback is gone and both builds use the target.
 // Returns s32 only for the table signature (the siblings func_15190174 / func_151901B4 return s32); the dispatcher
 // never reads v0. Path 2 returns the random int (the asm leaves it in v0), path 1 returns 0.
 s32 func_151901F4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
@@ -1250,7 +1242,6 @@ s32 func_151901F4(struct_eu_1BAAA0_d *arg0, struct_eu_vec3 *target) {
         func_1516972C((struct102 *)p);
         return 0;
     }
-    EFFECT_LAUNCH_TARGET(target, node);
     *(f32 *)(p + 0x148) = (target->x - *(f32 *)(node + 0x34)) * *(f32 *)(cfg + 0x60);
     *(f32 *)(p + 0x14C) = (target->y - *(f32 *)(node + 0x38)) * *(f32 *)(cfg + 0x60);
     *(f32 *)(p + 0x150) = (target->z - *(f32 *)(node + 0x3C)) * *(f32 *)(cfg + 0x60);

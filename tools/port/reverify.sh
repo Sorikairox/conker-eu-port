@@ -15,7 +15,10 @@ for F in "$@"; do
   row=$(awk -F'\t' -v f="$F" '$1==f {OFS="\037"; $1=$1; print}' $REG | tail -1)  # US-separated: read collapses empty tab fields
   [ -z "$row" ] && { echo "$F: not in registry"; continue; }
   IFS=$'\037' read -r fn file st kn mu ses <<< "$row"
-  C=$W/$F.c; python3 tools/port/nmblock.py $F $C > /dev/null || { echo "$F: no C definition"; continue; }
+  # P235: the candidate is the whole NM block (as the session drafts: mutant line numbers match; a matching-C function
+  # such as func_151D52B4 keeps its matching body in the #else arm). NMBLOCK_BODY=1 = old behaviour (body only).
+  wh=(NMBLOCK_WHOLE=1); [ -n "$NMBLOCK_BODY" ] && wh=(-u NMBLOCK_WHOLE)
+  C=$W/$F.c; env "${wh[@]}" python3 tools/port/nmblock.py $F $C > /dev/null || { echo "$F: no C definition"; continue; }
   envs=(); tr=${TR:-4}
   for k in $kn; do case $k in TR=*) [ -z "$TR" ] && tr=${k#TR=};; *) envs+=("$k");; esac; done
   T=build/difftest_rv_${F}_$$

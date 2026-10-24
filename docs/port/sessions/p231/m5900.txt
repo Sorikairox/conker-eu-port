@@ -1,0 +1,54 @@
+34s/yRange <= 0/yRange < 0/
+34s/0x40)/0x20)/
+37s/0x10000/0x20000/
+40s/0x2F8/0x2FC/
+42s/(f32)z/(f32)x/
+39s/player \*/(player + 1) */
+46s/off = 0;/off = 1;/
+50s/list + off/list/
+54s/ground & 1/ground \& 2/
+55s/0x20000/0x10000/
+57s/rMax - rMin/rMax - rMin + 1/
+59s/r - rMin/r + rMin/
+59s/r < 0/r <= 0/
+61s/+ z/+ x/
+62s/mode == 0 || onGround/mode == 0/
+63s/px, y, pz/px, py + 1, pz/
+66s/py = (s32)/py = 1 + (s32)/
+67s/yRange != 0/yRange > 1/
+68s/y + /x + /
+70s/slot/slot + 1/
+71s/= flags;/= flags + 1;/
+73s/= mode;/= mode + 1;/
+74s/(f32)py/(f32)px/
+76s/+ 10;/+ 11;/
+79s/- 15;/- 16;/
+80s/a < 0/a <= 0/
+82s/a >= 360/a > 360/
+83s/a -= 360;/a -= 359;/
+86s/360;/359;/
+89s/0x1F/0x0F/
+90s/-1.0f/1.0f/
+96s/(f32)a/(f32)(a + 1)/
+97s/0x80/0x7F/
+97s/0.01f/0.02f/
+99s/\* scale + base/* base + scale/
+99s/0xFFFF/0x7FFF/
+100s/== -1/== -2/
+103s/off = 0;/off = 1;/
+105s/& modelMask/\& (modelMask + 1)/
+107s/off += model;/off += model + 1;/
+108s/= off;/= off + 1;/
+110s/= x;/= z;/
+113s/= rMin;/= rMax;/
+114s/= rMax;/= rMin;/
+119s/= yRange;/= yRange + 1;/
+120s/i != 0/i > 1/
+122s/list == 0xA/list == 0xB/
+123s/0xA2, 0x7D00/0xA3, 0x7D00/
+123s/px, py, pz/px, y, pz/
+126s/0x80/0x40/
+128s/tri != 0/tri == 0/
+129s/\/ 12/\/ 4/
+132s/>> 5/>> 4/
+136s/p\[0xF0\] = 0;/p[0xF0] = 1;/
