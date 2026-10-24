@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P230, 2026-10-24). Details: `docs/port/sessions/P230.md`
+- **Standing check: `tools/port/implicit_scan.py`** (`[--all] [--tsv OUT]`, ~9 s): host clang pass over src_eu with
+  -DNON_MATCHING and only -Wimplicit-function-declaration (IDO is silent about implicit declarations). Lists
+  implicit call sites, NM-only vs both builds, FLOAT flag (libm, by-value f32 prototype elsewhere, or asm callee
+  reading $f12/$f14 / returning $f0). Run it after every conversion session; NM+float must stay 0.
+  Now: 852 sites, 159 in NM code, 1 float (port-b 201240:588 func_151D52B4 -> func_15131EC8(f32 *, f32)).
+- Fixed: func_150AFBC4 (DCEF0) NM variant passes the f32 to func_15131EC8 with a prototype; game_981E0 NM
+  prototype `u8 *func_15196438(u8 *, s32, u8, s32)` (port-b P229 item). port-b list: `docs/port/sessions/p230/implicit_portb.tsv`.
+- Hand C (NM, one block each), all in the registry: func_150130B4 `record_particle_emitter_start` (40490, 61/61),
+  func_1508C07C `rail_lane_shuffle` (B7840, 18/18; void (void): func_1508A040's NM prototype / call fixed),
+  func_1508CA14 `rail_pair_rivals` (B7840, 51/51; returns the +0x16C0 mask: func_1508BE18's NM prototype fixed),
+  func_1508B854 `rail_events_assign_nodes` (B7840, 44/44), func_1000C530 `channel_effect_update` (init_B1B0, 47/47).
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1454 NON_MATCHING bodies checked, 0
+  problems`, selftest 95 / 95, progress_nm `total 5915 3994 1454 467 5448 92.1% 1805128/2253856 (80.1%)`.
+
+## Next steps (from P230)
+1. port-web: MP / race rail AI (lanes, rival pairing, event nodes), record particle emitters, channel audio effects.
+2. func_15073FA0 (981E0): sketched in P230.md section 5, not written. Then func_1508CF34 (B7840 cmd 9, 862 insns).
+3. Pre-0x29 leftovers: func_151D7EDC (204F70), func_15109DC8 (1371A0), func_1510A538 (1379B0), func_151922C4
+   (1BF960), func_15006BEC (33990).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
 ## State (session P227, 2026-10-24). Details: `docs/port/sessions/P227.md`
 - Tooling: `tools/port/reverify.sh` no longer cuts the mutant line (knob `MUTCUT=N`; P226's rvw.sh is obsolete).
 - Hand C (NM, one block each), all in the registry: func_151E9150 `mp_hud_draw` (216470), func_151EA90C

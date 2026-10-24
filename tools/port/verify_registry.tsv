@@ -76,3 +76,8 @@ func_151E9150	game_eu_216470	docs/port/sessions/p227/151E9150_setups.txt	DIFFTES
 func_151EA90C	game_eu_216470	docs/port/sessions/p227/151EA90C_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=5A5A5A5A	docs/port/sessions/p227/151EA90C_muts.txt	P227
 func_1509D590	game_eu_CA630	docs/port/sessions/p227/1509D590_setups.txt	DIFFTEST_STKFILL=5A5A5A5A DIFFTEST_ARGMEM=15046F70=0:12,151C0434=0+14:12,151C0434=1:12,151C0434=2:12,151C0648=0:12,150DF240=0:12	docs/port/sessions/p227/1509D590_muts.txt	P227
 func_1511E4F4	game_eu_142E40	docs/port/sessions/p227/1511E4F4_setups.txt	DIFFTEST_STKFILL=5A5A5A5A	docs/port/sessions/p227/1511E4F4_muts.txt	P227
+func_150130B4	game_40490	docs/port/sessions/p230/150130B4_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4 DIFFTEST_ARGMEM=15140D40=0:89,15140D40=2:88,10023360=1:16,10023360=1+10:8	docs/port/sessions/p230/150130B4_muts.txt	P230
+func_1508C07C	game_eu_B7840	docs/port/sessions/p230/1508C07C_setups.txt	DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p230/1508C07C_muts.txt	P230
+func_1508CA14	game_eu_B7840	docs/port/sessions/p230/1508CA14_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p230/1508CA14_muts.txt	P230
+func_1508B854	game_eu_B7840	docs/port/sessions/p230/1508B854_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4 DIFFTEST_ARGMEM=1508B704=1:86	docs/port/sessions/p230/1508B854_muts.txt	P230
+func_1000C530	init_B1B0	docs/port/sessions/p230/1000C530_setups.txt	DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p230/1000C530_muts.txt	P230

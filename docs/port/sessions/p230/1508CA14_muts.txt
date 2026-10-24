@@ -1,0 +1,51 @@
+s/    s32 \*team = (s32 \*) ((u8 \*) D_800D27D0 + 0xE64);/    s32 *team = (s32 *) ((u8 *) D_800D27D0 + 0xE60);/ % base
+s/    u8 a = \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1700);/    u8 a = *(u8 *) ((u8 *) D_800D27D0 + 0x1701);/ % rr4
+s/    u8 b = \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1701);/    u8 b = *(u8 *) ((u8 *) D_800D27D0 + 0x1700);/ % rr4
+s/    if (refresh != 0 \&\& D_80090130 > 0) {/    if (refresh != 0 \&\& D_80090130 > 1) {/ % nh1_n8
+s/        for (i = 0, p = D_800CC2D0; i < D_80090130; i++, p++) {/        for (i = 0, p = D_800CC2D0; i <= D_80090130; i++, p++) {/ % base
+s/            for (k = 0; k < 3; k++) {/            for (k = 0; k < 2; k++) {/ % base
+s/                idx\[k\] = -1;/                idx[k] = 0;/ % one_ai two_ai
+s/                best\[k\] = D_8009DE38;/                best[k] = 1.0f;/ % base
+s/            for (k = D_80090130; k < n; k++) {/            for (k = D_80090130 + 1; k < n; k++) {/ % base
+s/            for (k = D_80090130; k < n; k++) {/            for (k = D_80090130; k <= n; k++) {/ % base nh1_n8
+s/                if (team\[i\] == team\[k\]) {/                if (team[i] != team[k]) {/ % base
+s/                if (((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[i\] \& (0x10001 << k)) {/                if (((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] \& (0x10000 << k)) {/ % masked_lo
+s/                if (((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[i\] \& (0x10001 << k)) {/                if (((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] \& (0x1 << k)) {/ % masked_hi masked
+s/                dx = p->x_position - p->x_position;/                dx = p->x_position - p->z_position;/ % far_xz far_tgt tgt
+s/                dz = p->x_position - p->z_position;/                dz = p->z_position - p->z_position;/ % tgt tgt_order xz_eq_tgt
+s/                if (i == ((s32 \*) ((u8 \*) D_800D27D0 + 0x11C))\[k\]) {/                if (i != ((s32 *) ((u8 *) D_800D27D0 + 0x11C))[k]) {/ % tgt tgt_order
+s/                    dz \*= 0.5f;/                    dz *= 0.25f;/ % far_tgt tgt_order
+s/                d = dx \* dx + dz \* dz;/                d = dx * dx - dz * dz;/ % tgt tgt_order
+s/                if (d < best\[2\]) {/                if (d <= best[2]) {/ % base tgt tgt_order xz_eq
+s/                        best\[m + 1\] = best\[m\];/                        best[m + 1] = d;/ % tgt_order
+s/                        idx\[m + 1\] = idx\[m\];/                        idx[m + 1] = -1;/ % tgt_one tgt_order
+s/                        idx\[m\] = k;/                        idx[m] = k - 1;/ % base
+s/                        if (m == 0 || !(d < best\[m - 1\])) {/                        if (m == 0 || !(d <= best[m - 1])) {/ % base tgt_order
+s/                        if (m == 0 || !(d < best\[m - 1\])) {/                        if (m == 1 || !(d < best[m - 1])) {/ % tgt_order
+s/            for (q = idx; q != \&idx\[3\]; q++) {/            for (q = idx; q != \&idx[2]; q++) {/ % tgt_order tgt_one kmask
+s/                if (\*q == -1) {/                if (*q == 0) {/ % one_ai
+s/                ((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[\*q\] \&= ~(0x10001 << i);/                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[*q] \&= ~(0x1 << i);/ % kmask
+s/                func_1508C600(i, \*q);/                func_1508C600(*q, i);/ % base
+s/    if (refresh != 0) {/    if (refresh != 1) {/ % base r0
+1,/steps = 0/s/        p = \&D_800CC2D0\[a\];/        p = \&D_800CC2D0[b];/ % rr_team_ab rr_team_mix
+1,/steps = 0/s/            aTeam = p->unk128;/            aTeam = 0;/ % rr_team rr_team_mix
+s/            steps = 0;/            steps = 0x3F;/ % rr_busy_all rr_team
+s/                b++;/                b += 2;/ % base
+s/                if (b >= D_8008FD8C) {/                if (b > D_8008FD8C) {/ % rr_wrap rr_n2
+s/                    a++;/                    a += 2;/ % rr_wrap
+s/                    if (a >= D_8008FD8C - 1) {/                    if (a >= D_8008FD8C) {/ % rr_wrap_a rr_n2
+s/                        a = 0;/                        a = 1;/ % rr_wrap_a rr_n2
+s/                    b = a + 1;/                    b = a;/ % rr_wrap_m rr_wrap
+s/                    p = \&D_800CC2D0\[a\];/                    p = \&D_800CC2D0[b];/ % rr_team_ab rr_team_mix
+s/                    aTeam = p->unk128;/                    aTeam = 7;/ % rr_team rr_wrap rr_wrap_a rr_team_mix
+s/                ((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[a\] \&= ~(0x10001 << b);/                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[a] \&= ~(0x10000 << b);/ % rr4_m rr_wrap_m
+s/                ((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[b\] \&= ~(0x10001 << a);/                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[b] \&= ~(0x1 << a);/ % who5 rr4
+s/                steps++;/                steps += 2;/ % rr_busy_all rr_team
+s/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0\[b\].unk128));/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (2 << b))) != 0) || aTeam == D_800CC2D0[b].unk128));/ % rr_busy rr_busy_all
+s/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0\[b\].unk128));/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) \&\& aTeam == D_800CC2D0[b].unk128));/ % rr_busy rr_team_mix
+s/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0\[b\].unk128));/            } while (steps < 0x40 \&\& (((D_800D18A0 \& ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0[a].unk128));/ % rr_team_mix
+s/            func_1508C600(a, b);/            func_1508C600(b, a);/ % rr4
+s/        } while (--refresh != 0);/        } while (--refresh > 1);/ % rr4
+s/    \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1700) = a;/    *(u8 *) ((u8 *) D_800D27D0 + 0x1700) = b;/ % rr4
+s/    \*(u8 \*) ((u8 \*) D_800D27D0 + 0x1701) = b;/    *(u8 *) ((u8 *) D_800D27D0 + 0x1701) = a;/ % rr4
+s/    return ((s32 \*) ((u8 \*) D_800D27D0 + 0x16C0))\[who\];/    return ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[0];/ % who5
