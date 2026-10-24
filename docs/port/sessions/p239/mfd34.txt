@@ -1,0 +1,11 @@
+17s/+=/=/
+17s/count\[1\] +/count[2] +/
+17s/\* count\[2\]/* count[1]/
+17s/) \* D_800BE9A4/)/
+17s/count\[1\] +/count[1] -/
+18s/self/self + 4/
+19s/0x88/0x89/
+20s/!= -1/> 0/
+21s/\[tick\]/[tick + 1]/
+21s/return D_8008DA1C/D_8008DA1C/
+23s/1/0/

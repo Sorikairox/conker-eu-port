@@ -1,0 +1,6 @@
+116s/20\.0f/2.0f/ % b d
+118s/1/0/ % b d
+120s/NULL/(u8 *) 1/ % b d
+122s/unique_id/id/ % b d
+128s/handle;/NULL;/ % b d
+121s/obj;/NULL;/ % b d

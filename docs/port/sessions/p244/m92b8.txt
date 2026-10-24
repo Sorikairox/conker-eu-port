@@ -1,0 +1,59 @@
+\#^    gdl = func_15142B7C(gdl, 0x200205, 0x70400);$#s/0x200205/0x200204/ %
+\#^    gdl = func_15142B7C(gdl, 0x200205, 0x70400);$#s/0x70400/0x70000/ %
+\#^    gdl = func_15142C10(gdl, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, \&flag/0xFE, \&flag/ %
+\#^    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xF2, 0,/0xF2, 1,/ %
+\#^    gdl = func_15142CF0(gdl, 0xF2, 0, 0xFF, 0xFF, 0xFF, 0xFF, &flag);$#s/0xFF, 0xFF, \&flag/0xFF, 0, \&flag/ %
+\#^    gdl = func_1513F4E4(gdl, 0x21, &flag);$#s/0x21/0x20/ %
+\#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/\[29\] | /[27] | / %
+\#^    gdl = func_15142FBC(gdl, 0x1DACA0, D_800A4EA8\[29\] | D_800A4EA8\[28\], &flag);$#s/0x1DACA0/0x1DACA1/ %
+\#^    tex = func_1510D66C(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 2, 0)/ %
+\#^    tex = func_1510D66C(\*D_80091234, &size, 3, 0);$#s/, 3, 0)/, 3, 1)/ %
+\#^    RING_DL(0xFD500000, tex);        /\* texture image: CI, 16-bit words (block load) \*/$#s/tex)/tex + 1)/ %
+\#^    RING_DL(0xF3000000, 0x073EF000); /\* load block 0x3EF+1 texels \*/$#s/0x073EF000/0x073EE000/ %
+\#^    RING_DL(0xF56004BC, 0x00017C5F); /\* tile 0 (mip 0) \*/$#s/0x00017C5F/0x00017C5E/ %
+\#^    RING_DL(0xFD100000, tex + size - 0x20); /\* TLUT image: the texture's last 16 colours \*/$#s/- 0x20/- 0x10/ %
+\#^    RING_DL(0xFD100000, tex + size - 0x20); /\* TLUT image: the texture's last 16 colours \*/$#s/tex + size/tex/ %
+\#^    RING_DL(0xF5600100, 0x06000000);         /\* tile 6: TLUT at tmem 0x100 \*/$#s/0x06000000/0x05000000/ %
+\#^    gDPLoadSync(gdl++);$#s/gDPLoadSync/gDPPipeSync/ %
+\#^    gDPLoadTLUTCmd(gdl++, 6, 15);$#s/6, 15/6, 16/ %
+\#^    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 4, G_TX_RENDERTILE, G_ON);$#s/, 4, G_TX/, 3, G_TX/ %
+\#^    gSPTexture(gdl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);$#s/, 0, G_TX/, 1, G_TX/ %
+\#^    buf = ((Vtx \*\*) (node + 0x54))\[D_800BE9C0\];$#s/D_800BE9C0\]/D_800BE9C0 ^ 1]/ %
+\#^    for (col = 0; col == 0 || col <= \*(s32 \*) (node + 0x24); col++) {$#s/col <= \*/col < */ %
+\#^    for (col = 0; col == 0 || col <= \*(s32 \*) (node + 0x24); col++) {$#s/col == 0 || // %
+\#^        dir = \*(f32 \*\*) (node + 0x360) + (col == \*(s32 \*) (node + 0x24) ? 0 : col) \* 2;$#s/? 0 : col/? col : col/ %
+\#^        dir = \*(f32 \*\*) (node + 0x360) + (col == \*(s32 \*) (node + 0x24) ? 0 : col) \* 2;$#s/\* 2;/* 3;/ %
+\#^        cx = \*(f32 \*) (node + 0x10) + \*(f32 \*) (node + 0x44) \* dir\[0\];$#s/dir\[0\]/dir[1]/ %
+\#^        cz = \*(f32 \*) (node + 0x18) + \*(f32 \*) (node + 0x44) \* dir\[1\];$#s/0x18)/0x1C)/ %
+\#^        cz = \*(f32 \*) (node + 0x18) + \*(f32 \*) (node + 0x44) \* dir\[1\];$#s/dir\[1\]/dir[0]/ %
+\#^        near = (cx \* cx + cz \* cz < 10894295\.0f);$#s/cx \* cx + cz \* cz/cx * cx/ %
+\#^        near = (cx \* cx + cz \* cz < 10894295\.0f);$#s/ < / <= / % eq
+\#^        near = (cx \* cx + cz \* cz < 10894295\.0f);$#s/10894295.0f/1089429.0f/ %
+\#^            px = D_80088BC0\.pt\[i\]\[0\] \* \*(f32 \*) (node + 0x40);$#s/\[0\]/[1]/ %
+\#^            py = D_80088BC0\.pt\[i\]\[1\] \* \*(f32 \*) (node + 0x40);$#s/0x40)/0x44)/ %
+\#^            x = cx + px \* dir\[0\];$#s/cx + /cz + / %
+\#^            z = cz + px \* dir\[1\];$#s/dir\[1\]/dir[0]/ %
+\#^            v->v\.ob\[0\] = x;$#s/= x;/= z;/ %
+\#^            v->v\.ob\[1\] = (near ? py : 0\.0f) + \*(f32 \*) (node + 0x14);$#s/near ? py : 0.0f/near ? 0.0f : py/ %
+\#^            v->v\.ob\[1\] = (near ? py : 0\.0f) + \*(f32 \*) (node + 0x14);$#s/0x14)/0x10)/ %
+\#^            v->v\.ob\[2\] = z;$#s/= z;/= x;/ %
+\#^            v->v\.tc\[0\] = -((x \* 0\.03988662f + z \* 0\.03713737f + 110\.230064f) \* 32\.0f);$#s/-((/((/ %
+\#^            v->v\.tc\[0\] = -((x \* 0\.03988662f + z \* 0\.03713737f + 110\.230064f) \* 32\.0f);$#s/32.0f/16.0f/ %
+\#^            v->v\.tc\[1\] = -((x \* 0\.054123953f + z \* -0\.058144543f + 50\.14429f) \* 32\.0f);$#s/-0.058144543f/0.058144543f/ %
+\#^            func_150CD2A0(z, &r, &g, &b);$#s/(z,/(x,/ %
+\#^            func_150CD2A0(z, &r, &g, &b);$#s/\&r, \&g/\&g, \&r/ %
+\#^            v->v\.cn\[0\] = (u32) r;$#s/(u32) r/(u32) g/ %
+\#^            v->v\.cn\[2\] = (u32) b;$#s/(u32) b/(u32) r/ %
+\#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/0xFF : 0/0xFF : 1/ %
+\#^            v->v\.cn\[3\] = near ? 0xFF : 0;$#s/near ?/!near ?/ %
+\#^        n = D_80088BC0\.n;$#s/= D_80088BC0.n/= D_80088BC0.n - 1/ %
+\#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[D_800BE9C0\] + (nv - n \* 2), n \* 2, 0);$#s/(nv - n \* 2)/(nv - n)/ %
+\#^        gSPVertex(gdl++, ((Vtx \*\*) (node + 0x54))\[D_800BE9C0\] + (nv - n \* 2), n \* 2, 0);$#s/n \* 2, 0)/n * 2, 1)/ %
+\#^        for (i = 0; i < D_80088BC0\.n - 1; i++) {$#s/n - 1;/n;/ %
+\#^        for (i = 0; i < D_80088BC0\.n - 1; i++) {$#s/i = 0;/i = 1;/ %
+\#^            gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0\.n + 1, 0);$#s/i + 1, i/i + 2, i/ %
+\#^            gSP1Triangle(gdl++, i, i + 1, i + D_80088BC0\.n + 1, 0);$#s/n + 1, 0)/n, 0)/ %
+\#^            gSP1Triangle(gdl++, i, i + D_80088BC0\.n + 1, i + D_80088BC0\.n, 0);$#s/n + 1, i/n + 2, i/ %
+\#^            gSP1Triangle(gdl++, i, i + D_80088BC0\.n + 1, i + D_80088BC0\.n, 0);$#s/i + D_80088BC0.n, 0)/i + D_80088BC0.n + 1, 0)/ %
+\#^    return gdl;$#s/return gdl;/return gdl - 1;/ %
+\#^            nv++;$#s/nv++;/nv += 2;/ %

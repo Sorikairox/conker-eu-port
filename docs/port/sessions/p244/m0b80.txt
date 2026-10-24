@@ -1,0 +1,10 @@
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/== 0x1B/== 0x1C/ % l1B
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/== 0x1E/== 0x1F/ % l1E
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/== 0x31 \&\&/== 0x32 \&\&/ % l31y
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/0x78) == 3/0x78) != 3/ % l31y l31n
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/+ 0x78)/+ 0x79)/ % l31y
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/gdl, 2, 0,/gdl, 0, 0,/ % l1B
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/D_800BE620 - 2/D_800BE620 - 1/ % l1B
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/D_800DC2D8\[1\], D_800DC2D8\[2\]/D_800DC2D8[2], D_800DC2D8[1]/ % l1B
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/    return gdl;/    return 0;/ % l1B
+/^Gfx \*func_15110B80(Gfx \*gdl,/,/^}/s/|| D_800BE9F0 == 0x1E/\&\& D_800BE9F0 == 0x1E/ % l1B
