@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P230, 2026-10-24). Details: `docs/port/sessions/P230.md`
+- **Standing check: `tools/port/implicit_scan.py`** (`[--all] [--tsv OUT]`, ~9 s): host clang pass over src_eu with
+  -DNON_MATCHING and only -Wimplicit-function-declaration (IDO is silent about implicit declarations). Lists
+  implicit call sites, NM-only vs both builds, FLOAT flag (libm, by-value f32 prototype elsewhere, or asm callee
+  reading $f12/$f14 / returning $f0). Run it after every conversion session; NM+float must stay 0.
+  Now: 852 sites, 159 in NM code, 1 float (port-b 201240:588 func_151D52B4 -> func_15131EC8(f32 *, f32)).
+- Fixed: func_150AFBC4 (DCEF0) NM variant passes the f32 to func_15131EC8 with a prototype; game_981E0 NM
+  prototype `u8 *func_15196438(u8 *, s32, u8, s32)` (port-b P229 item). port-b list: `docs/port/sessions/p230/implicit_portb.tsv`.
+- Hand C (NM, one block each), all in the registry: func_150130B4 `record_particle_emitter_start` (40490, 61/61),
+  func_1508C07C `rail_lane_shuffle` (B7840, 18/18; void (void): func_1508A040's NM prototype / call fixed),
+  func_1508CA14 `rail_pair_rivals` (B7840, 51/51; returns the +0x16C0 mask: func_1508BE18's NM prototype fixed),
+  func_1508B854 `rail_events_assign_nodes` (B7840, 44/44), func_1000C530 `channel_effect_update` (init_B1B0, 47/47).
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1454 NON_MATCHING bodies checked, 0
+  problems`, selftest 95 / 95, progress_nm `total 5915 3994 1454 467 5448 92.1% 1805128/2253856 (80.1%)`.
+
+## Next steps (from P230)
+1. port-web: MP / race rail AI (lanes, rival pairing, event nodes), record particle emitters, channel audio effects.
+2. func_15073FA0 (981E0): sketched in P230.md section 5, not written. Then func_1508CF34 (B7840 cmd 9, 862 insns).
+3. Pre-0x29 leftovers: func_151D7EDC (204F70), func_15109DC8 (1371A0), func_1510A538 (1379B0), func_151922C4
+   (1BF960), func_15006BEC (33990).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
 ## State (session P228, 2026-10-24, port-web). Details: `docs/port/sessions/P228.md`
 
 - Merged port 956b59ed (P214 .. P226), then port-b 5ac75d1c (P220 / P222). After the first merge alone the NM build
@@ -54,6 +76,26 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    then events 4 / 6 / 1 on level 0x29; Race A lap counting once a lap completes (needs a frame script that stays on
    the track: steer, don't hold the stick straight up).
 3. Check why difftest selftest fails in conkerdev-web (fault at pc 0 on the first callee).
+## State (session P227, 2026-10-24). Details: `docs/port/sessions/P227.md`
+- Tooling: `tools/port/reverify.sh` no longer cuts the mutant line (knob `MUTCUT=N`; P226's rvw.sh is obsolete).
+- Hand C (NM, one block each), all in the registry: func_151E9150 `mp_hud_draw` (216470), func_151EA90C
+  `mp_scoreboard_draw` (216470; barrel menu mode 3 bar / in-match score table), func_1509D590
+  `event_effect_command` (CA630, D_800887C0 entry 14, EvHandlerA), func_1511E4F4 `pickup_update` (142E40,
+  world-object type 0x28 callback D_80089030[0x28][0]; declares `f32 cosf(f32)` in its block: 142E40 had none).
+- Verification: setups + mutants all killed (69/69, 68/68, 57/57, 53/53); random 100 EQUIV for all four.
+- Total War null+0x24 = 7.58f (browser P223): func_1511E4F4 has no +0x24 store and returns nothing used, so its
+  stub is only where the check fired; the write happened earlier in that frame. Its conversion is NOT expected to fix
+  the write (pickups now scale in / animate / can be taken). Re-check in the browser after the merge; look at the
+  code that runs before the world-object callbacks in that frame.
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck
+  `1449 NON_MATCHING bodies checked, 0 problems`, selftest 95 / 95, progress_nm
+  `total 5915 3994 1449 472 5443 92.0% 1799532/2253856 (79.8%)`.
+
+## Next steps (from P227)
+1. port-web: Race A / Total War HUD and score table, pickups, null+0x24 re-check.
+2. func_150130B4 (40490): analysed in P227.md section 6 (spawn / emitter blocks, 19-case jump table), not written.
+3. Rail AI func_1508B854 / func_1508C07C / func_1508CA14 (B7840), func_1000C530 (init_B1B0), func_15073FA0 (981E0),
+   func_1508CF34 (B7840 cmd 9). m2c drafts: `port_work/p226/gen/`.
 
 ## State (session P226, 2026-10-24). Details: `docs/port/sessions/P226.md`
 - Hand C (NM, one block each), all in the registry: func_151E5E08 `mp_match_rules_update` (20B730; the match now

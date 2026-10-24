@@ -279,7 +279,219 @@ s32 func_1509D49C(s8 arg0, u8 arg1, s32 *outA, s32 *outB) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D49C.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u8 D_8009F4A0;            /* the one-entry effect table of command 0x18 */
+extern s8 D_800D9D40;
+void func_151616D0(u8, u8, s32);
+void func_1000E7A0(u32, s32);
+s32 func_15046F70(void *, u16, f32, void *);
+struct260 *func_150B58B0(u8 *, s16, u8, s32);
+void func_150BD550(u8, s32);
+void func_150BF47C(s32);
+void func_150D5F7C(struct127 *, s32, s32);
+void func_150DF240(f32 *, u8, s32);
+void func_150E0880(void);
+struct260 *func_150E15E0(u8, u8, s32);
+s32 func_150E3788(s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_150E3850(s32, s32, s32, s32, s32, f32);
+s32 func_150E3994(s32, s32, s32, s32, s32, s32, s32, s32, f32);
+void func_150E8728(s32, u8, s32);
+void func_150E8EB0(void);
+void func_150ED180(s32, u8, s32);
+void *func_150F7364(struct127 *);
+void func_150FAFC0(u8, s32);
+void func_150FB2A8(void);
+void func_150FB2F8(void);
+void func_150FCFB0(void);
+void func_150FD554(struct127 *, u8, s32);
+void func_151086A0(struct127 *, u8, s32);
+s32 func_15136C3C(u8 *, u8, u8, u8, u8, u8, u8, s32);
+void func_15155D6C(s32, s32, f32);
+struct225 *func_15163A60(u8, u8, s32);
+void func_1517946C(s32);
+s32 func_1518FA8C(s32, u8, s16, s8, s8, s8, u8, s32, u8, s32);
+void func_151C0434(u8 *, f32 *, f32 *, u8, u8, s32);
+void func_151C0648(u8 *, s32, u8, s32, s32);
+void func_151CD90C(s32);
+void func_151D2C70(s16);
+/* event_effect_command: handler 14 of the event VM's native table D_800887C0 (id = the command word without its
+ * nibble, args = the operands, args[1] mostly an object id resolved with func_1505EEF4 & 0xFFF). Starts effects /
+ * spawns: 0 func_150B58B0, 1 func_150BF47C (returns 1), 2 sets D_800D9D40, 3 func_1517946C, 4 / 5 / 6 spawn through
+ * func_150E3788 / func_150E3850 (at an object) / func_150E3994 (at the player) and return the handle as
+ * (h << 6) | 0xE004, 7 func_150DF240 at a point (args[1] == 999) or func_150E8728, 0x10 / 0x16 func_151616D0
+ * pairs, 0x18 func_1518FA8C on character args[1], 0x21 func_151C0648 50 above an object, 0x22 func_151C0434 at the
+ * ground below (args[1], args[2]) found by func_15046F70, 0x24 func_1514F18C (0x1B), others single calls. Returns 0
+ * unless noted. */
+s32 func_1509D590(s32 id, s32 *args, s32 *operand) {
+    struct {
+        u8 pad[0x14];
+        s32 u14;
+        s8 u18;
+        s8 u19;
+        s32 u1C;
+    } hit;
+    f32 pos[3];
+    f32 dir[3];
+    f32 ground;
+    u8 tbl[1];
+    struct127 *obj;
+    s32 ret = 0;
+
+    switch ((u32) id) {
+    case 0x00:
+        func_150B58B0((u8 *) func_1505EEF4(args[1] & 0xFFF), (s16) args[2], 0xFF, 1);
+        break;
+    case 0x01:
+        func_150BF47C(args[1]);
+        return 1;
+    case 0x02:
+        D_800D9D40 = 1;
+        break;
+    case 0x03:
+        func_1517946C(args[1]);
+        break;
+    case 0x04:
+        ret = func_150E3788(args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+        if (ret != 0) {
+            ret = (ret << 6) | 0xE004;
+        }
+        break;
+    case 0x05:
+        obj = func_1505EEF4(args[4] & 0xFFF);
+        if (obj != NULL) {
+            ret = func_150E3850(args[1], args[2], args[3], (s32) obj, args[5], (f32) args[7]);
+            if (ret != 0) {
+                ret = (ret << 6) | 0xE004;
+            }
+        }
+        break;
+    case 0x06:
+        ret = func_150E3994(args[1], args[2], args[3], args[4], args[5], args[6], (s32) D_800CC2D0, args[7],
+                            (f32) args[8]);
+        if (ret != 0) {
+            ret = (ret << 6) | 0xE004;
+        }
+        break;
+    case 0x07:
+        if (args[1] == 999) {
+            pos[0] = (f32) args[2];
+            pos[1] = (f32) args[3];
+            pos[2] = (f32) args[4];
+            func_150DF240(pos, 0xFF, 1);
+        } else {
+            func_150E8728(args[1] & 0xFF, 0xFF, 1);
+        }
+        break;
+    case 0x0F:
+        func_150E8EB0();
+        break;
+    case 0x10:
+        func_1000E7A0(0x10, 0);
+        func_151616D0(0x16, 0x1F, 0);
+        break;
+    case 0x12:
+        func_151CD90C(args[1]);
+        break;
+    case 0x13:
+        func_151D2C70((s16) args[1]);
+        break;
+    case 0x14:
+        func_150E15E0((u8) args[1], 0xFF, 1);
+        break;
+    case 0x16:
+        func_151616D0(0x23, 0x27, 0);
+        func_151616D0(0x24, 0x27, 0);
+        break;
+    case 0x17:
+        func_15163A60((u8) args[1], 0xFF, 1);
+        break;
+    case 0x18:
+        tbl[0] = D_8009F4A0;
+        func_1518FA8C((s32) func_15083E90((u8) args[1]), tbl[args[2]], (s16) args[3], -1, -1, -1, 0, 0, 0xFF, 1);
+        break;
+    case 0x1B:
+        func_150FCFB0();
+        break;
+    case 0x20:
+        func_150D5F7C(func_1505EEF4(args[1] & 0xFFF), 0xFF, 1);
+        break;
+    case 0x21:
+        obj = func_1505EEF4(args[1] & 0xFFF);
+        if (obj != NULL) {
+            pos[0] = obj->x_position;
+            pos[1] = obj->y_position + 50.0f;
+            pos[2] = obj->z_position;
+            func_151C0648((u8 *) pos, (s32) obj, 1, 0xFF, 1);
+        }
+        break;
+    case 0x22:
+        ground = -10000.0f;
+        hit.u14 = 0;
+        hit.u18 = 0;
+        hit.u19 = 0;
+        hit.u1C = 0;
+        pos[0] = (f32) args[1];
+        pos[1] = 20000.0f;
+        pos[2] = (f32) args[2];
+        if (func_15046F70(pos, 0, -10000.0f, &ground) != 0) {
+            pos[1] = ground;
+            dir[0] = 0.0f;
+            dir[1] = -1.0f;
+            dir[2] = 0.0f;
+            func_151C0434((u8 *) &hit, pos, dir, 1, 0xFF, 1);
+        }
+        break;
+    case 0x23:
+        func_15136C3C((u8 *) func_1505EEF4(args[1] & 0xFFF), 1, 1, 1, 1, 0, 0xFF, 1);
+        break;
+    case 0x24:
+        obj = func_1505EEF4(args[1] & 0xFFF);
+        if (obj != NULL) {
+            func_1514F18C(func_150F7364(obj), obj, 0x1B);
+        }
+        break;
+    case 0x25:
+        func_15155D6C(args[1] & 0xFFF, 0x78, (f32) args[2]);
+        break;
+    case 0x2A:
+        obj = func_1505EEF4(args[1] & 0xFFF);
+        if (obj != NULL) {
+            func_150FD554(obj, 0xFF, 1);
+        }
+        break;
+    case 0x2B:
+        func_150E0880();
+        break;
+    case 0x2C:
+        func_150FB2F8();
+        break;
+    case 0x2E:
+        obj = func_1505EEF4(args[1] & 0xFFF);
+        if (obj != NULL) {
+            func_150ED180((s32) obj, 0xFF, 1);
+        }
+        break;
+    case 0x2F:
+        obj = func_1505EEF4(args[1] & 0xFFF);
+        if (obj != NULL) {
+            func_151086A0(obj, 0xFF, 1);
+        }
+        break;
+    case 0x30:
+        func_150FAFC0(0xFF, 1);
+        break;
+    case 0x31:
+        func_150FB2A8();
+        break;
+    case 0x33:
+        func_150BD550(0xFF, 1);
+        break;
+    }
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CA630/func_1509D590.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_150B42B0(void);

@@ -2,7 +2,7 @@
 # P221: re-run a converted function's verification with its exact recorded command (tools/port/verify_registry.tsv).
 # usage: tools/port/reverify.sh FUNC...   (after eval "$(tools/eu_port/wt.sh env <name>)")
 # Env: TR (trials per setup, default 4), NR (random trials, default 100; 0 = skip), MUT=1 also runs the mutants,
-#      NOSETUP=1 random only. Candidate = the function's current NM block (tools/port/nmblock.py).
+#      NOSETUP=1 random only, MUTCUT=N cuts the mutant line at N characters (default: no cut; P227). Candidate = the function's current NM block (tools/port/nmblock.py).
 # Registry columns: func, file, setup_file (comma list), knobs (space-separated K=V env, e.g. DIFFTEST_ROMDATA=1; TR=N sets
 # the setup trials), mutant_file (comma list, `sed-expr % setup names` lines), session.
 # Output: one line per phase: `FUNC random: EQUIV|DIFFER...`, `FUNC setups FILE: n EQUIV / m (bad: name=RESULT ...)`,
@@ -52,7 +52,7 @@ for F in "$@"; do
       done <<< "$(STOP=1 runset $M $first $names)"
       case "$hit" in 1) k=$((k+1));; inv) inv="$inv [$e]($why)";; *) sv="$sv [$e]";; esac
     done < <(grep -vE '^\s*(#|$)' "$m"); rm -f $M
-    echo "  muts $(basename $m): $k killed / $tot${sv:+ (survived:$sv)}; not applied: $na${inv:+; invalid:$inv}" | cut -c1-600
+    echo "  muts $(basename $m): $k killed / $tot${sv:+ (survived:$sv)}; not applied: $na${inv:+; invalid:$inv}" | { [ -n "$MUTCUT" ] && cut -c1-$MUTCUT || cat; }
   done
   docker exec ${CONKERDEV:-conkerdev} rm -rf /conker/conker/$T 2>/dev/null
 done

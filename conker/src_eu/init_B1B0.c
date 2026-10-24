@@ -439,7 +439,86 @@ s32 func_1000C350(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
     }
     return arg0;
 }
+#ifdef NON_MATCHING
+/*
+ * channel_effect_update: P230. Per-frame update of a packed sound-channel effect state `state` for channel `ch`:
+ * bits 0-1 effect mode, 2-7 hold timer, 8-15 parameter A, 16-23 parameter B (bit 7 = flag, bits 0-6 = level),
+ * 24-31 fade level. A pending request D_80041F08 (mode; parameters in D_80041F0C: A = bits 0-7, B = bits 8..)
+ * replaces the state and restarts the timer at 30 frames, unless mode 2 is still holding and the request is not
+ * mode 2. The timer counts down by D_800BE9E4 and clears the mode at 0. On a mode change the old effect stops
+ * (func_100085F8(ch, old + 9)) and the new one is set up (func_10008824 A, func_100086FC flag, func_10008744
+ * level); a repeated request with new parameters updates only what changed. D_80041F04 bit 4 (cleared here)
+ * restarts the fade at 0xFF (with func_1000886C(ch, 0xC0, 0x80) when no fade was running); the fade drops by
+ * D_800BE9E4 << 23 per frame and calls func_10008790(ch, 0xC0, 0, 0x5A) when it runs out. The request is
+ * consumed; returns the new packed state. The float arguments are not used.
+ */
+s32 func_1000C530(s32 state, u8 ch, f32 arg2, f32 arg3, f32 arg4) {
+    s32 req = D_80041F08;
+    s32 oldMode = state & 3;
+    s32 mode = oldMode;
+    s32 timer = ((u32) state >> 2) & 0x3F;
+    s32 a = ((u32) state >> 8) & 0xFF;
+    s32 b = ((u32) state >> 16) & 0xFF;
+    s32 oldA = a;
+    s32 oldB = b;
+    u32 fade = state & 0xFF000000;
+    u32 d;
+
+    if (req != 0 && !(oldMode == 2 && timer != 0 && req != 2)) {
+        mode = req;
+        a = D_80041F0C & 0xFF;
+        b = D_80041F0C >> 8;
+        timer = 30;
+    }
+    if (timer != 0) {
+        timer -= D_800BE9E4;
+        if (timer <= 0) {
+            timer = 0;
+            mode = 0;
+        }
+    }
+    if (mode != oldMode) {
+        if (oldMode != 0) {
+            func_100085F8(ch, oldMode + 9);
+        }
+        if (mode != 0) {
+            func_10008824(ch, mode + 9, a);
+            func_100086FC(ch, mode + 9, b >> 7);
+            func_10008744(ch, mode + 9, b & 0x7F);
+        }
+    } else if (oldMode != 0 && req != 0 && ((u32) state >> 8) != (u32) D_80041F0C) {
+        if (a != oldA) {
+            func_10008824(ch, oldMode + 9, a);
+        }
+        if (b != oldB) {
+            if ((b ^ oldB) & 0x80) {
+                func_100086FC(ch, mode + 9, b >> 7);
+            }
+            func_10008744(ch, mode + 9, b & 0x7F);
+        }
+    }
+    if (D_80041F04 & 0x10) {
+        D_80041F04 &= ~0x10;
+        if (fade == 0) {
+            func_1000886C(ch, 0xC0, 0x80);
+        }
+        fade = 0xFF000000;
+    }
+    if (fade != 0) {
+        d = (D_800BE9E4 << 23) & 0xFF000000;
+        if (d < fade) {
+            fade -= d;
+        } else {
+            func_10008790(ch, 0xC0, 0, 0x5A);
+            fade = 0;
+        }
+    }
+    D_80041F08 = 0;
+    return (timer << 2) | mode | (a << 8) | (b << 16) | fade;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000C530.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_1000C7E8(s32 arg0, s32 arg1, f32 arg2, s32 arg3, f32 arg4) {
     f32 temp_f12;

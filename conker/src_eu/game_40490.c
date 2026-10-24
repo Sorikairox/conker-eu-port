@@ -59,7 +59,231 @@ void func_15013000(void) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+extern s32 D_80096930[3];
+extern s32 D_8009693C[];
+extern s32 D_80096950[];
+extern s32 D_80096960[];
+extern f32 D_80096984;
+extern f32 D_80096988;
+extern f32 D_8009698C;
+extern f32 D_80096990;
+extern f32 D_800969E0;
+extern f32 D_800969E4;
+extern f32 D_800969E8;
+extern u8 D_80083228[6];
+void func_1510F800(s32);
+u8 *func_151149AC(u8);
+u8 *func_151407D0(void *emit, s32 emitSize, void *spawn, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, u8 arg8,
+                  s32 arg9);
+
+/* the record func_150130B4 reads (D_80082EA0 start handlers get the level record) */
+typedef struct {
+    s16 x, y, z;        /* 0x00 */
+    s16 rangeX;         /* 0x06 */
+    s16 rangeY;         /* 0x08 */
+    u8 pad0A[2];
+    f32 angX;           /* 0x0C */
+    f32 angY;           /* 0x10 */
+    u8 pad14[2];
+    u8 flags16;         /* 0x16 */
+    u8 pad17;
+    u32 colour;         /* 0x18: r / g / b in bytes 0..2, kind index in the top byte */
+    s32 type;           /* 0x1C: 1..19 */
+    u32 opts;           /* 0x20: top byte: with sound, byte 2: flag 0x10, bytes 1 / 0: spread x / y (/ 255) */
+} Rec150130B4;
+
+/* spawn block (sp+0xDC, 0x58 bytes) and emitter block (sp+0x134): N64 layout as in game_3E890.c. The emitter
+ * size passed is 0x60 / 0x70 / 0x78; on N64 only 0x5C bytes lie in this frame (the rest is the caller's stack). */
+typedef struct {
+    struct {
+        u8 kind;            /* 0x00 */
+        u8 u1;              /* 0x01 */
+        u16 flags;          /* 0x02 */
+        u16 life;           /* 0x04 */
+        u8 pad6[2];
+        s32 u8_;            /* 0x08 */
+        s32 uC;             /* 0x0C */
+        u8 rgba[4];         /* 0x10 */
+        f32 size[2];        /* 0x14 */
+        f32 pos0[3];        /* 0x1C */
+        f32 pos1[3];        /* 0x28 */
+        f32 scale[3];       /* 0x34 */
+        s32 u40;            /* 0x40 */
+        u8 u44[4];          /* 0x44 */
+        s32 sound;          /* 0x48 */
+        u8 pad4C[0xC];
+    } spawn;
+    struct {
+        f32 range[4];       /* 0x00 */
+        f32 u10;            /* 0x10 */
+        f32 u14;            /* 0x14 */
+        f32 spreadX;        /* 0x18 */
+        f32 spreadY;        /* 0x1C */
+        f32 u20;            /* 0x20 */
+        u8 pad24[0x24];
+        f32 u48;            /* 0x48 */
+        u8 pad4C[8];
+        u8 u54[5];          /* 0x54 */
+        u8 pad59[0x1F];
+    } emit;
+} Blk150130B4;
+
+/*
+ * record_particle_emitter_start: P230: start handler of a particle-emitter record. Marks the record started
+ * (+0x16 |= 4) and fills a spawn block: position from the record, the "to" point = position + (0, 0, -500)
+ * rotated by the record's angles (func_150A8050 / func_150A7E40), kind D_8009693C[colour >> 24], flags
+ * D_80096950[colour >> 24] + 3, life 300, colour from +0x18, scale 1, and an optional sound
+ * (opts top byte: func_1510F800(0); func_1510FD20(x, z)). The emitter block gets the ranges +6 / +8, the spreads
+ * (opts bytes 1 / 0) / 255 and a per-type sub kind (+0x58); type 8 and 13..18 emitters also get a tail at +0x170
+ * (types 13..18: the target object func_151149AC(D_80083228[type - 13]) and its position; none -> no emitter).
+ */
+s32 func_150130B4(Rec150130B4 *rec) {
+    f32 m[4][4];
+    Blk150130B4 b;
+    union {                 /* copied to the new emitter's +0x170 */
+        f32 t8[4];          /* type 8 */
+        struct {            /* types 13..18 */
+            f32 a;
+            f32 b;
+            u8 *obj;
+            f32 pos[3];
+        } t13;
+    } tail;
+    u8 *e;
+    s32 type;
+    s32 flags;
+    u8 snd;
+    u32 idx;
+
+    rec->flags16 |= 4;
+    snd = rec->opts >> 24;
+    type = rec->type;
+    b.spawn.pos0[0] = rec->x;
+    b.spawn.pos0[1] = rec->y;
+    b.spawn.pos0[2] = rec->z;
+    func_150A8050(m, rec->angX, rec->angY, 0.0f);
+    func_150A7E40(m, 0.0f, 0.0f, -500.0f, &b.spawn.pos1[0], &b.spawn.pos1[1], &b.spawn.pos1[2]);
+    b.spawn.pos1[0] += b.spawn.pos0[0];
+    b.spawn.pos1[1] += b.spawn.pos0[1];
+    b.spawn.pos1[2] += b.spawn.pos0[2];
+
+    b.emit.range[1] = rec->rangeX;
+    b.emit.range[0] = b.emit.range[1];
+    b.emit.range[3] = rec->rangeY;
+    b.emit.range[2] = b.emit.range[3];
+    b.emit.spreadX = ((rec->opts >> 8) & 0xFF) * D_80096984;
+    b.emit.spreadY = (rec->opts & 0xFF) * D_80096984;
+    b.emit.u10 = D_80096988;
+    b.emit.u14 = D_8009698C;
+    b.emit.u20 = D_80096990;
+    b.emit.u48 = 1.0f;
+    b.emit.u54[0] = 0;
+    b.emit.u54[1] = 0;
+    b.emit.u54[2] = 0;
+    b.emit.u54[3] = 0;
+
+    idx = rec->colour >> 24;
+    b.spawn.kind = D_8009693C[idx];
+    b.spawn.u1 = 3;
+    b.spawn.flags = D_80096950[idx] + 3;
+    b.spawn.life = 300;
+    b.spawn.u8_ = 0;
+    b.spawn.uC = 0;
+    b.spawn.rgba[0] = rec->colour;
+    b.spawn.rgba[1] = rec->colour >> 8;
+    b.spawn.rgba[2] = rec->colour >> 16;
+    b.spawn.rgba[3] = 0xFF;
+    b.spawn.size[0] = 0.0f;
+    b.spawn.size[1] = 0.0f;
+    b.spawn.scale[0] = 1.0f;
+    b.spawn.scale[1] = 1.0f;
+    b.spawn.scale[2] = 1.0f;
+    b.spawn.u44[1] = 0xFF;
+    b.spawn.u44[0] = 0xFF;
+    b.spawn.u44[2] = 0;
+    b.spawn.u44[3] = 6;
+
+    if (snd != 0) {
+        func_1510F800(0);
+        b.spawn.sound = func_1510FD20((s32) b.spawn.pos0[0], (s32) b.spawn.pos0[2]);
+    } else {
+        b.spawn.sound = 0;
+    }
+    b.emit.u54[4] = 0;
+    flags = (snd != 0) ? 0x01002006 : 0x2006;
+    if ((rec->opts >> 16) & 0xFF) {
+        flags |= 0x10;
+    }
+    flags |= 0x40000 | 0x80000 | 0x10000 | 0x400000;
+    b.spawn.u40 = flags;
+
+    switch (type) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            b.emit.u54[4] = D_80096960[type];
+            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            break;
+        case 5:
+        case 6:
+        case 7:
+            b.emit.u54[4] = D_80096930[type - 5]; /* the asm indexes a stack copy of the table */
+            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            break;
+        case 8:
+            tail.t8[0] = D_800969E0;
+            tail.t8[1] = D_800969E4;
+            tail.t8[2] = 0.0f;
+            tail.t8[3] = D_800969E8;
+            e = func_151407D0(&b.emit, 0x70, &b.spawn, 0, 0x29, 0, 0, -1, 0xFF, 1);
+            if (e != NULL) {
+                memcpy(e + 0x170, tail.t8, 0x10);
+            }
+            break;
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+            b.emit.u54[4] = D_80096950[type];
+            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            break;
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+            tail.t13.obj = func_151149AC(D_80083228[type - 13]); /* the asm indexes a stack copy */
+            if (tail.t13.obj == NULL) {
+                break;
+            }
+            tail.t13.a = -80.0f;
+            tail.t13.b = 0.0125f;
+            tail.t13.pos[0] = *(s16 *) (tail.t13.obj + 0x10);
+            tail.t13.pos[1] = *(s16 *) (tail.t13.obj + 0x12);
+            tail.t13.pos[2] = *(s16 *) (tail.t13.obj + 0x14);
+            b.emit.u54[4] = 0;
+            e = func_151407D0(&b.emit, 0x78, &b.spawn, 0x25, 0, 0, 0, -1, 0xFF, 1);
+            if (e != NULL) {
+                memcpy(e + 0x170, &tail.t13, 0x18);
+            }
+            break;
+        case 19:
+            b.emit.u54[4] = 0x11;
+            b.spawn.u40 = flags & ~2;
+            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            break;
+        default:
+            func_151407D0(&b.emit, 0x60, &b.spawn, 0, 0, 0, 0, -1, 0xFF, 1);
+            break;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150130B4.s")
+#endif
 
 // record_start_dispatch: runs the record's start handler D_80082EA0[rec->unk17] (EU 0x80083230) on the record.
 s32 func_1501370C(struct16 *arg0) {
