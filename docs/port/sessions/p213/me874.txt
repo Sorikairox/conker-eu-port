@@ -1,0 +1,89 @@
+s/    blend = 6.0f;/    blend = 5.0f;/
+s/if (obj->id == 0xFF) {/if (obj->id == 0xFE) {/
+s/    row = obj->unk106;/    row = obj->unk105;/
+s/D_800D1588\[obj->id\] - 8)/D_800D1588[obj->id] - 4)/
+s/    if (rows == NULL) {/    if (rows == (u8 *)1) {/
+s/    if (obj->unk105 == 0) {/    if (obj->unk105 != 1) {/
+s/obj->disable_jump = 0;/;/
+s/obj->unk10F = r\[8\];/obj->unk10F = r[9];/
+s/((u8 \*)obj->unk31C)\[0x26\] = 0;/((u8 *)obj->unk31C)[0x27] = 0;/
+s/obj->id == 0x5E \&\& obj->unk13D != 0/obj->id == 0x5E/
+s/            blend = 0.0f;/            ;/
+s/sound = \*(s32 \*)(r + 4);/sound = *(s32 *)(r + 8);/
+s/func_1506E46C(obj, \&sound, 1)/func_1506E46C(obj, \&sound, 0)/
+s/if (sound == 0x33) {/if (sound == 0x32) {/
+s/func_15060B04(sound, obj, 0x5DC0);/func_15060B04(sound, obj, 0x5DC1);/
+s/func_15060A30(sound, obj);/func_15060A30(0x21, obj);/
+s/obj->unkF4 \&= ~0x000C014E;/obj->unkF4 \&= ~0x000C004E;/
+s/    if (phase < 3) {/    if (phase < 2) {/
+s/flags = cell\[0xD\] \& 0xFE;/flags = cell[0xD];/
+s/(obj->unk10B \& 0xFE) | (cell\[0xD\] \& 1)/(obj->unk10B \& 0xFE)/
+s/(obj->unk10B \& 0xFE) |/(obj->unk10B \& 0xFC) |/
+s/player != 0xFF \&\& phase == 0 \&\&/player != 0xFF \&\&/
+s/obj->unk31C != NULL \&\& obj->camera != NULL/obj->unk31C != NULL/
+s/((u8 \*)obj->unk31C)\[0x197\] != 0/((u8 *)obj->unk31C)[0x196] != 0/
+s/func_1517F9F8(0xFF, 0, 0, 0xB4, 0x14, /func_1517F9F8(0xFF, 0, 0, 0xB4, 0x15, /
+s/((u8 \*)obj->camera)\[0x23D\]);/((u8 *)obj->camera)[0x23C]);/
+s/            player = obj->unk127;/            ;/
+s/player != 0xFF \&\& obj->health == 0/obj->health == 0/
+s/player != 0xFF \&\& obj->health == 0/player != 0xFF/
+s/            last = phase;/            last = 0;/
+s/r + last \* 4 + 0xA) != 0/r + last * 4 + 0xC) != 0/
+s/            if (last < 2) {/            if (last < 1) {/
+s/                last = 2;/                last = 3;/
+s/if (last == phase + 1) {/if (last == phase) {/
+s/if (obj->id == 0x9A) {/if (obj->id == 0x9B) {/
+s/                    end = 14;/                    end = 15;/
+s/} else if (obj->id == 0x53) {/} else if (obj->id == 0x52) {/
+s/                    end = 10;/                    end = 9;/
+s/} else if (obj->in_water != 0) {/} else if (0) {/
+s/                    end = 4;/                    end = 5;/
+s/m = obj->unk184 \& 0x1F;/m = obj->unk184 \& 0xFF;/
+s/(m == 14 || m == 19)/(m == 14)/
+s/(m == 14 || m == 19)/(m == 19)/
+s/D_800BE9F0 != 0x34/D_800BE9F0 != 0x35/
+s/                        end = 13;/                        end = 12;/
+s/                            case 15:/                            case 18:/
+s/                                end = 16;/                                end = 17;/
+s/((u8 \*)obj->unk31C)\[0x1AC\] = 1;/((u8 *)obj->unk31C)[0x1AC] = 2;/
+s/D_800D1580 = (s32)0xFF010434;/D_800D1580 = (s32)0xFF010435;/
+s/D_800D1580 = (s32)0xFF070169;/;/
+s/                                func_1506E8D8();/                                ;/
+s/                                func_1506E5FC();/                                ;/
+s/                            case 33:/                            case 34:/
+s/                            case 37:/                            case 36:/
+s/                            case 38:/                            case 39:/
+s/                            case 51:/                            case 50:/
+s/                            case 52:/                            case 53:/
+s/                            case 72:/                            case 71:/
+s/                            case 44:/                            case 43:/
+s/                                end = 8;/                                end = 9;/
+s/                            case 45:/                            case 48:/
+s/                            case 47:/                            case 49:/
+s/                                end = 7;/                                end = 6;/
+s/                            case 66:/                            case 65:/
+s/                                end = 12;/                                end = 13;/
+s/                            case 67:/                            case 68:/
+s/                                end = 11;/                                end = 10;/
+s/                                end = 1;/                                end = 2;/
+s/func_1507CD64(obj, end);/func_1507CD64(obj, 1);/
+s/obj->unk105 = 3;/obj->unk105 = 2;/
+s/if (flags == 200) {/if (flags == 202) {/
+s/obj->unkF4 |= 8;/obj->unkF4 |= 4;/
+s/obj->unk10B |= 1;/obj->unk10B |= 2;/
+s/obj->unk10C = flags \* 100;/obj->unk10C = flags * 10;/
+s/cell = r + phase \* 4;/cell = r + phase * 2;/
+s/speed = cell\[0xC\] \/ 100.0f;/speed = cell[0xC] \/ 10.0f;/
+s/        if (anim != 0) {/        if (anim != 1) {/
+s/obj->unk105 = phase + 1;/obj->unk105 = phase + 2;/
+s/if (speed == 0.0f) {/if (speed == 0.5f) {/
+s/            speed = 1.0f;/            speed = 2.0f;/
+s/obj->unk10C = 20000;/obj->unk10C = 2000;/
+s/obj->unkF4 \&= ~8;/obj->unkF4 \&= ~4;/
+s/obj->stunned = 0;/;/
+s/        obj->unk10B = 0;/        ;/
+s/        obj->unk10F = 0;/        ;/
+s/if (obj->interaction_state == 1) {/if (obj->interaction_state == 2) {/
+s/((u8 \*)obj->unk31C)\[0x58\] = 0;/((u8 *)obj->unk31C)[0x59] = 0;/
+s/obj->unkF8 \&= ~0x01000200;/obj->unkF8 \&= ~0x01000000;/
+s/func_1505E650(obj, anim, speed, blend, 0.0f, 0.0f, 0);/func_1505E650(obj, anim, blend, speed, 0.0f, 0.0f, 0);/

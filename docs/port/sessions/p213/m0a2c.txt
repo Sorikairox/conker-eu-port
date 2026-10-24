@@ -1,0 +1,8 @@
+s/    if (\*(u8 \*\*)(node + 0x84) != NULL) {/    if (0) {/
+s/    if (\*(u8 \*\*)(node + 0x84) != NULL) {/    if (1) {/
+s/func_1516972C(\*(struct102 \*\*)(node + 0x84));/func_1516972C(*(struct102 **)(node + 0x80));/
+s/(s32)node, \*(s32 \*)(node + 0x10));/(s32)node, *(s32 *)(node + 0x14));/
+s/(s32)node, \*(s32 \*)(node + 0x10));/0, *(s32 *)(node + 0x10));/
+s/func_1000FD38((s32)func_1518E808,/func_1000FD38(0,/
+s/(node + 0x30 + 0x48));/(node + 0x30 + 0x44));/
+s/    func_151D2B4C(/    (/

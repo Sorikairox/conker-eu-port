@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P213 (port-b) (session P213, 2026-10-24). Details: `docs/port/sessions/P213.md`
+
+Branch `port-b`. Hand C (NM), difftest EQUIV + setups + mutants: func_150562FC object_carried_update, func_1505E874
+hit_reaction_advance (83300, void since P209), func_15190A2C effect_node_release (1BAF40, D_8008FC60 handler),
+func_150CA0DC shockwave_hit_objects (F6060, D_80088C00 handler, s32 leftover v0 kept). P210 setup gaps closed: 602c
+t == 12, 68dc self2, 7e0c boundaries + both `%` mutants (rewritten with `.` and groups), 85f0 unk28 0.2f - all killed;
+remaining: 68dc func_1505A630 x-swap (waiting for port P211's harness check), 7e0c life `<= 0` (equivalent).
+Blocked: func_151C0698 (needs port's func_151B8EB8 to return the func_151307F0 result; payload +0x84 is dereferenced
+by func_151C1730), func_151901F4 (dispatcher func_1519AF14 leaves a1). Checks: verify_all rc 0, NM links, protocheck 0 (1445), selftest 71/71. progress_nm total 5439 / 5915 (92.0%), 476 asm-only.
+
+## Next steps (from P213)
+
+1. port: func_151B8EB8 (1E61C0) -> `s32`, returning func_151307F0's result; then port-b converts func_151C0698
+   (analysis in P213.md section 3).
+2. func_151901F4 after the a1 of func_1519AF14's D_8008FC48 jalr is known (port's file).
+3. Breadth in port-b files: func_151D5DA8, func_150A6070, func_150A6324, func_150C8F68, func_1518F080,
+   func_151D4D44, func_150C92B8.
+4. Re-run the func_150768DC x-swap mutant after P211's harness answer.
+
 ## P210 (port-b) (session P210, 2026-10-24). Details: `docs/port/sessions/P210.md`
 
 Branch `port-b`. Merge of `port` d93bdcd (30e140a7; func_15142600 now void, 126330 func_150FFC60 declaration =
