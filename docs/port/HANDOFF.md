@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P251 (port-b) (session P251, 2026-10-25). Details: `docs/port/sessions/P251.md`
+
+Branch `port-b`. **MP3 (game_eu_226870) done as hand C (NM)**: func_151F94E0 mp3_imdct36_hybrid (958 words, bit-exact
+float order; random + 32 realistic-spectrum setups EQUIV, mutants 65 / 65 + 16 / 16 1-ulp constants); Huffman group
+func_151F9184 / 933C (C ABI) + 9060 / 911C as static helpers: whole-function harness `p251/nmasm_huff.py` (ROM code
+vs NM C in Unicorn, real tables from the ROM assets, 250k real MP3 granules from the ROM): 5000 granules + 5000 random
+EQUIV (23707 calls; 4948 / 5000 end exactly at part2_3_length), mutants 47 / 49 (2 equivalents). Small asm-only
+(19B180): func_1517013C sprite_fade_drift_tint_tick, func_1516F594 sprite_fade_grow_kind_tick. func_15190940 (1BAF40,
+D_8008B490[18]) now `s32` under NM returning func_15163F50's v0. Checks: verify_all rc 0, NM rc 0, protocheck 0 (1554),
+selftest 118 / 118. progress_nm total 5567 / 5915 (94.1%), C bytes 85.2%.
+
+## Next steps (from P251)
+
+1. Browser: MP3 playback (music / speech), particle kinds of D_8008CF40, light effect 18.
+2. Smallest asm-only in port-b files: func_15198D3C, func_1519D320, func_15170D50, func_15139578, func_150FB06C.
+3. port: reverify support for whole-function harness rows (nmasm_huff.py); NORAND knob for func_1516F594; the p214
+   tablesig.py container name.
+4. Still open from P247: port func_150EDCC8 (tank driving); game_168A90 D_80089FC8 4-arg call of 2-arg handlers.
+
 ## P247 (port-b) (session P247, 2026-10-25). Details: `docs/port/sessions/P247.md`
 
 Branch `port-b`. **Tank-mode stubs (browser P245)**, hand C (NM) + setups + pattern-sed mutants + registry rows:
