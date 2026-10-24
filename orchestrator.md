@@ -54,7 +54,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 3. Breadth: ~600 asm-only; describe pass + scripted rename at a quiet merge point; Phase 2B (symbolic data); native 64-bit build.
 
 ### Open items needing care
-- File ownership (2026-10-24, P208): port-b owns game_eu_1BAF40, AF2A0, 12D5D0, E0430, F6060, D3880, C5530, 13DC30, 201240, BC510, 126330, 1EDA00 + its HANDOFF list, and since P208 also game_16EE20.c, game_83300.c, game_A28B0.c, game_1944C0.c (moved from port), and since P216 game_eu_90F50.c. port owns everything else.
+- File ownership (2026-10-24, P208): port-b owns game_eu_1BAF40, AF2A0, 12D5D0, E0430, F6060, D3880, C5530, 13DC30, 201240, BC510, 126330, 1EDA00 + its HANDOFF list, and since P208 also game_16EE20.c, game_83300.c, game_A28B0.c, game_1944C0.c (moved from port), and since P216 game_eu_90F50.c, and since P225 game_161520 (src + src_eu), game_eu_1C3530, game_eu_19B180, game_eu_1FB080, game_eu_127840, game_eu_226870, game_eu_1E7CC0, game_eu_1A2970, game_eu_133A70, game_eu_101080 and D5E90 (hand asm). port owns everything else.
 - Two conversion slots own disjoint file lists (see latest briefs); port-web merges both and never edits game C.
 - Backups: tools/eu_port/backup_push.sh to the private origin after each session; never push upstream.
 - Licensing: SDK-derived libultra C — fine privately, matters if distributed.
