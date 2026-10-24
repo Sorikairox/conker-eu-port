@@ -1,0 +1,23 @@
+s/func_150ADA20() & 3\]/func_150ADA20() \& 2]/ % r0 r1 r3
+s/0x1303/0x1203/ %
+s/req.life = 300/req.life = 301/ %
+s/req.color\[1\] = 0xFF/req.color[1] = 0/ %
+s/req.u18\[2\] = 0xFF/req.u18[2] = 0/ %
+s/\* 500.0f + 900.0f/* 500.0f + 800.0f/ %
+s/req.halfH = s/req.halfH = 0.0f/ %
+s/(obj + 0x3C)/(obj + 0x40)/ %
+s/req.angle\[1\] = ((s32 \*) D_800A5860)\[1\]/req.angle[1] = 1/ %
+s/req.vel\[2\] = ((s32 \*) D_800A5860)\[2\]/req.vel[2] = 2/ %
+s/req.fadeStart = 1/req.fadeStart = 2/ %
+s/req.fadeRate = 0xFF/req.fadeRate = 0xFE/ %
+s/req.u22 = 1/req.u22 = 0/ %
+s/req.value = 0.0f/req.value = 1.0f/ %
+s/req.u24 = 1.0f/req.u24 = 0.5f/ %
+s/? 0x40 : 0/? 0x80 : 0/ % r1 r2 r3
+s/| 0x40000/| 0x4000/ %
+s/req.update = 5/req.update = 6/ %
+s/req.u64 = -1/req.u64 = 0/ %
+s/req.u66 = 0xFF/req.u66 = 0/ %
+s/req.u5C = 0/req.u5C = 1/ %
+s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/ %
+s/1, 0, 0, obj/1, 0, 0x1C, obj/ %

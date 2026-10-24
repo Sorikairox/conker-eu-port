@@ -1,0 +1,33 @@
+s/\*(s32 \*) obj == 0 ||/*(s32 *) obj == 1 ||/ % dead boost
+s/fx\[0x2C\] != obj\[0x3B\]/fx[0x2D] != obj[0x3B]/ % reused boost
+s/(s16 \*) (fx + 0xE) = -1/(s16 *) (fx + 0xE) = 0/ % dead
+s/\[0x4F\] == 2/[0x4F] != 1/ % mode1
+s/\* 1.35f;/* 1.3f;/ % boost boost_eq
+s/if (speed < boost)/if (speed > boost)/ % boost
+s/speed > 26.0f/speed >= 26.0f/ % eq26 boost_eq
+s/(obj + 0x3C)/(obj + 0x40)/ % boost
+s/1.2590001f + r \* 1.079f/1.259f + r * 1.079f/ % exact1 one
+s/1.2590001f + r \* 1.079f/1.2590001f + r * 1.0f/ % one multi
+s/\* D_800BE9A4;/* 2.0f;/ % one
+s/(fx + 0x30) > 1.0f)) {/(fx + 0x30) >= 1.0f)) {/ % exact1
+s/ground = D_800A5860;/ground = (u8 *) D_800CC2D0;/ % noground
+s/\* 0.017453292f, 1.0f/* 0.017453292f, 2.0f/ % one
+s/(obj + 0x40) \* 0.017453292f/(obj + 0x3C) * 0.017453292f/ % one
+s/fwd\[1\] = -side\[0\];/fwd[1] = side[0];/ % one
+s/fwd\[0\] = side\[1\];/fwd[0] = side[0];/ % one
+s/func_150B0F40(obj, owner,/func_150B0F40(owner, obj,/ % one
+s/n1 % 26 - 0x29/n1 % 26 - 0x28/ % one multi
+s/r + 4.06f/r + 4.0f/ % one
+s/func_150ADA68() \* 3.77f/func_150ADA68() * 3.7f/ % one
+s/((f32 \*) ground)\[0\] \* 0.9250001f/((f32 *) ground)[0] * 0.925f/ % one multi
+s/vel\[2\] -= ((f32 \*) ground)\[2\]/vel[2] -= ((f32 *) ground)[1]/ % one
+s/r \* 0.178f + -0.44200003f/r * 0.178f + -0.442f/ % one multi
+s/n1 % 21 + 0x14/n1 % 20 + 0x14/ % multi r3low
+s/n2 % 101 + 0x9B/n2 % 100 + 0x9B/ % multi r3eq
+s/r2 \* 50.0f + 80.0f/r2 * 50.0f + 81.0f/ % one
+s/r3 < 0.044000003f/r3 <= 0.044000003f/ % r3eq
+s/1.4f, 1.4f, 1, 0, 1, 0/1.4f, 1.5f, 1, 0, 1, 0/ % one
+s/1, 0, 1, 0, fx\[0xC\], fx\[1\]/1, 0, 0, 0, fx[0xC], fx[1]/ % one
+s/fx\[0xC\], fx\[1\]);/fx[1], fx[0xC]);/ % one
+s/-= 1.0f;/-= 0.5f;/ % one
+s/pos, vel, 5,/pos, vel, 6,/ % one

@@ -1,0 +1,28 @@
+s/func_15182388(0)/func_15182388(1)/ % c0
+s/(a\[2\] + 59) \/ 60/(a[2] + 60) \/ 60/ % c1 c1_neg c1_exact
+s/D_8009015C |= 0x80/D_8009015C |= 0x40/ % c1
+s/0x96, 0x56/0x96, 0x57/ % c1
+s/(s32) D_8009F6D0/(s32) D_800D2870/ % c1
+s/D_800D2870 = a\[2\]/D_800D2870 = a[3]/ % c2
+s/return func_1508A63C();/return func_1508AB7C();/ % c5
+s/return func_1508C5F0(a\[2\])/return func_1508C5F0(a[3])/ % c8
+s/a\[5\], 0, 0)/a[5], 0, 1)/ % c9
+s/return func_1508DF48(a\[2\], a\[3\]);/func_1508DF48(a[2], a[3]); return 0;/ % c12
+s/return func_1508ECF8(a\[2\], a\[3\])/return func_1508ECF8(a[2], a[2])/ % c15
+s/point != 0xFF/point != 0xFE/ % c16_ff
+s/(f32) a\[3\])/(f32) a[2])/ % c16 c16_pt
+s/z, (f32)/x, (f32)/ % c16 c16_pt
+s/func_15087540(a\[2\], a\[3\], a\[4\])/func_15087540(a[2], a[3], a[3])/ % c17
+s/a\[3\], 0.1f/a[3], 0.2f/ % c18
+s/func_1508845C(a\[2\], a\[3\])/func_1508845C(a[3], a[2])/ % c20
+s/func_15088434(a\[2\], a\[3\])/func_1508823C(a[2], a[3])/ % c21
+s/return func_15088568(a\[2\], a\[3\]);/func_15088568(a[2], a[3]); return 0;/ % c22
+s/func_1508B630(a\[2\])/func_1508B630(a[3])/ % c23
+s/args\[0xB\]/args[0xA]/ % c24_obj
+s/func_15060F28(obj, 0)/func_15060F28(obj, 1)/ % c24_obj
+s/obj != NULL/obj == NULL/ % c24_obj c24_none
+1,/case 26/s/a\[5\] \*/a[4] */ % c25 c25_i2
+1,/case 26/s/D_800D33F8\[a\[2\]\] \* 65536.0f/D_800D33E0[a[2]] * 65536.0f/ % c25 c25_i2
+/case 26/,$s/0x7B4/0x7B0/ % c26 c26_i3
+/case 26/,$s/&D_800D33E0\[a\[2\]\]/\&D_800D33F8[a[2]]/ % c26 c26_i3
+s/return 0;$/return 1;/ % c27 cbig c3

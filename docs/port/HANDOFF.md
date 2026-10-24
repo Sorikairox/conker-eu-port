@@ -10,6 +10,34 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P207, 2026-10-24). Details: `docs/port/sessions/P207.md`
+
+Branch `port` (from P204 0226d7d).
+- Hand C (NM): rail callers func_1509E3D4 rail_script_command (CBB40) and func_150538CC thrown_object_fly_update
+  (78230, 1027 insns; D_800863B4 handler) - func_150877C0 rail_track_update now has C callers; func_151B8EB8
+  smoke_puff_spawn (1E61C0; **port-b can convert func_151C0698** now); func_150B1200 wake_spray_update (DE750).
+  All difftest EQUIV (random + setups) and every mutant killed.
+- func_150867D4 rail_route_next (B37F0, 539): **draft only** in `docs/port/sessions/p207/150867D4_cand.c` (s32;
+  40 setups EQUIV, 29 / 38 mutants, 9 survivors listed in P207.md 3.). Inserting it makes protocheck fail (2) until
+  port-b 4f8756f's game_eu_C5530.c prototype (`s32 func_150867D4`) is merged into `port`; then insert with
+  `p207/insert.py` and strengthen the setups (near-tie graph with a penalised short cut, first hop > 32767).
+- Ownership change (coordinator, mid-session): game_16EE20.c, game_83300.c, game_A28B0.c, game_1944C0.c are port-b's
+  now; no edits there in P207. func_150611E8 (83300) m2c_sanity O:20 / O:28 rows handed to port-b unresolved.
+- Merge note: game_eu_78230.c was edited here (func_150538CC NM block); port-b has older edits in it - expect a
+  clean merge (different function).
+- Harness notes: declare no-arg callees (`s32 func_150ADA20(void);`) in the NM block or difftest compares their a0;
+  mut.sh cuts a mutant line at the first `%` (use `.` + `\(..\)` groups); a stub's pointer arguments are only
+  compared with DIFFTEST_ARGMEM.
+- Checks: verify_all OK (port_work/p207/verify.log), NM build links, protocheck 0 (1369), selftest 71 / 71,
+  progress_nm 5363 / 5915 (90.7%), C bytes 75.1%.
+
+## Next steps (from P207)
+1. After merging port-b 4f8756f: insert func_150867D4 (above), strengthen its setups, re-run the survivors.
+2. func_151C384C (game_eu_1EFE10, ~300 insns, two func_151307F0 requests + func_151530A8): called by port-b's new
+   fire_burn_update for embers (coordinator item, not started).
+3. Browser: P207.md UNVERIFIED (rail races / camera, thrown objects, wake spray, smoke puffs).
+4. Harness: compare pass-through arguments of jalr calls (still open).
+
 ## State (session P204, 2026-10-24). Details: `docs/port/sessions/P204.md`
 
 Branch `port` (from P200 47ca032).
