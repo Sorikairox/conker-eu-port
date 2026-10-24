@@ -1,0 +1,30 @@
+s/action = rule->action \& 0x7F;/action = rule->action \& 0x3F;/
+s/if ((desc->damage \& mask) < obj->health) {/if ((desc->damage) < obj->health) {/
+s/                        self->unk218 = NULL;/                        ;/
+s/if (8.0f < obj->unk28) {/if (8.0f <= obj->unk28) {/
+s/if (obj->unk28 == 0.0f) {/if (obj->unk28 != 0.0f) {/
+s/self->unk2EC = 100;/self->unk2EC = 101;/
+s/                        self->unkD0 = 0;$/                        self->unkD0 = 1;/
+s/D_80086A34\[handler\](self, obj, scratch);/D_80086A34[handler](obj, obj, scratch);/
+s/u8 handler = desc->handler;/u8 handler = desc->handler + 1;/
+s/if (obj->unkFC != 0) {/if (obj->unkFC == 0) {/
+s/if (func_1506E46C(self, \&effect, 1) != 0) {/if (func_1506E46C(self, \&effect, 0) != 0) {/
+s/func_15060B04(effect, obj, 0x5DC0);/func_15060B04(effect, self, 0x5DC0);/
+s/D_800D1580 = desc->sound;/D_800D1580 = desc->sound + 1;/
+s/                    if (desc->sound != 0) {/                    if (desc->sound == 0) {/
+s/hits |= 1 << ((slot - 1) \& 0x1F);/hits |= 1 << (slot \& 0x1F);/
+s/                    continue; \/\* failed/                    break; \/* failed/
+s/        return hits;/        return 0;/
+s/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/func_1505B9C4(self, obj, (s32)tbl, (s32)tbl, idx, slot, mask);/
+s/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, 7);/
+s/return hits | (1 << ((slot - 1) \& 0x1F));/return hits | (1 << (slot \& 0x1F));/
+s/                case 9:/                case 99:/
+s/                case 2:/                case 22:/
+s/                case 3:/                case 33:/
+s/                case 1: {/                case 11111: {/
+/case 6:/,/break/s/mask = 0;/;/
+/case 4:/,/break/s/mask = 0;/;/
+/case 2:/,/break/s/idx = rule->param;/idx = rule->kind;/
+/case 13:/,/break/s/handled = TRUE;/;/
+/case 12:/,/break/s/handled = TRUE;/;/
+/case 3:/,/break/s/handled = TRUE;/;/

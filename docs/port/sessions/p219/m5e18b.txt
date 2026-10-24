@@ -1,0 +1,30 @@
+1318s/|= 8/|= 1/ % k12_f k12_r k12_s k12_u k12_uk k12_x k12_zf k12_zr k12_zu k12_zu0 k12_zx
+1327s/0xC6/0xC5/ % k12_f k12_r k12_s k12_u k12_uk k12_x k12_zf k12_zr k12_zu k12_zu0 k12_zx
+1335s/0xC7/0xC8/ % k12_f k12_r k12_s k12_u k12_uk k12_x k12_zf k12_zr k12_zu k12_zu0 k12_zx
+1346s/0x10A/0x10B/ % k12_f k12_r k12_s k12_u k12_uk k12_x k12_zf k12_zr k12_zu k12_zu0 k12_zx
+1378s/>= 6/>= 7/ % k23_f k23_r k23_s k23_u k23_uk k23_x k23_zf k23_zr k23_zu k23_zu0 k23_zx
+1395s/++/--/ % k23_f k23_r k23_s k23_u k23_uk k23_x k23_zf k23_zr k23_zu k23_zu0 k23_zx
+1401s/0x165/0x164/ % k23_f k23_r k23_s k23_u k23_uk k23_x k23_zf k23_zr k23_zu k23_zu0 k23_zx
+1422s/0x166/0x167/ % k23_f k23_r k23_s k23_u k23_uk k23_x k23_zf k23_zr k23_zu k23_zu0 k23_zx
+1428s/B(CTL, 0x199) = 0;/;/ % k23_f k23_r k23_s k23_u k23_uk k23_x k23_zf k23_zr k23_zu k23_zu0 k23_zx
+1450s/0x8E/0x8F/ % k17_f k17_r k17_s k17_u k17_uk k17_x k17_zf k17_zr k17_zu k17_zu0 k17_zx
+1455s/0x4000/0x3FFF/ % k17_f k17_r k17_s k17_u k17_uk k17_x k17_zf k17_zr k17_zu k17_zu0 k17_zx
+1484s/0x358/0x357/ % k1A_f k1A_r k1A_s k1A_u k1A_uk k1A_x k1A_zf k1A_zr k1A_zu k1A_zu0 k1A_zx
+1485s/D_800D1940 & 7/D_800D1940 \& 3/ % k1A_f k1A_r k1A_s k1A_u k1A_uk k1A_x k1A_zf k1A_zr k1A_zu k1A_zu0 k1A_zx
+1487s/0x12E/0x12F/ % k1A_f k1A_r k1A_s k1A_u k1A_uk k1A_x k1A_zf k1A_zr k1A_zu k1A_zu0 k1A_zx
+1499s/0x142/0x141/ % k1A_f k1A_r k1A_s k1A_u k1A_uk k1A_x k1A_zf k1A_zr k1A_zu k1A_zu0 k1A_zx
+1537s/D_800864A0\[1\]/D_800864A0[0]/ % k2A_f k2A_r k2A_s k2A_u k2A_uk k2A_x k2A_zf k2A_zr k2A_zu k2A_zu0 k2A_zx
+1514s/0x26F/0x270/ % k2A_f k2A_r k2A_s k2A_u k2A_uk k2A_x k2A_zf k2A_zr k2A_zu k2A_zu0 k2A_zx
+1597s/grabAnim/hold/ % k1B_f k1B_r k1B_s k1B_u k1B_uk k1B_x k1B_zf k1B_zr k1B_zu k1B_zu0 k1B_zx
+1617s/0x7D/0x7E/ % k1B_f k1B_r k1B_s k1B_u k1B_uk k1B_x k1B_zf k1B_zr k1B_zu k1B_zu0 k1B_zx
+1604s/B(CTL, 0x199) = 0;/;/ % k1B_f k1B_r k1B_s k1B_u k1B_uk k1B_x k1B_zf k1B_zr k1B_zu k1B_zu0 k1B_zx
+1639s/0x10000/0x20000/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
+1640s/func_15073FA0();/;/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
+1674s/obj, 1)/obj, 0)/ % k26_f k26_r k26_s k26_st1a k26_st1b k26_st1c k26_st2a k26_st2b k26_st2c k26_st3a k26_st3b k26_st3c k26_st4a k26_st4b k26_st4c k26_u k26_uk k26_x k26_zf k26_zr k26_zu k26_zu0 k26_zx
+1733s/0x401807/0x401806/ % k3A_f k3A_r k3A_s k3A_st5a k3A_st5b k3A_st5c k3A_st6a k3A_st6b k3A_st6c k3A_st7a k3A_st7b k3A_st7c k3A_u k3A_uk k3A_x k3A_zf k3A_zr k3A_zu k3A_zu0 k3A_zx
+1735s/func_1514FAD8((s32)o);/;/ % k3A_f k3A_r k3A_s k3A_st5a k3A_st5b k3A_st5c k3A_st6a k3A_st6b k3A_st6c k3A_st7a k3A_st7b k3A_st7c k3A_u k3A_uk k3A_x k3A_zf k3A_zr k3A_zu k3A_zu0 k3A_zx
+1761s/30.0f/31.0f/ % k3A_f k3A_r k3A_s k3A_st5a k3A_st5b k3A_st5c k3A_st6a k3A_st6b k3A_st6c k3A_st7a k3A_st7b k3A_st7c k3A_u k3A_uk k3A_x k3A_zf k3A_zr k3A_zu k3A_zu0 k3A_zx
+1764s/-y/y/ % k3A_f k3A_r k3A_s k3A_st5a k3A_st5b k3A_st5c k3A_st6a k3A_st6b k3A_st6c k3A_st7a k3A_st7b k3A_st7c k3A_u k3A_uk k3A_x k3A_zf k3A_zr k3A_zu k3A_zu0 k3A_zx
+1770s/= yaw;/= yaw + 1;/ % k3A_f k3A_r k3A_s k3A_st5a k3A_st5b k3A_st5c k3A_st6a k3A_st6b k3A_st6c k3A_st7a k3A_st7b k3A_st7c k3A_u k3A_uk k3A_x k3A_zf k3A_zr k3A_zu k3A_zu0 k3A_zx
+1785s/0x4B/0x4C/ % k3E_f k3E_r k3E_s k3E_u k3E_uk k3E_x k3E_zf k3E_zr k3E_zu k3E_zu0 k3E_zx
+1789s/0x96/0x95/ % k3E_f k3E_r k3E_s k3E_u k3E_uk k3E_x k3E_zf k3E_zr k3E_zu k3E_zu0 k3E_zx

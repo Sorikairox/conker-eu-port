@@ -1,0 +1,10 @@
+s/(target->x - \*(f32 \*)(node + 0x34))/(target->y - *(f32 *)(node + 0x34))/
+s/(target->z - \*(f32 \*)(node + 0x3C))/(target->z - *(f32 *)(node + 0x38))/
+s/\* \*(f32 \*)(cfg + 0x68) + \*(f32 \*)(cfg + 0x64)/* *(f32 *)(cfg + 0x64) + *(f32 *)(cfg + 0x68)/
+s/(cfg + 0x6C);/(cfg + 0x68);/
+s/(p + 0x6E) = \*(s16 \*)(cfg + 0x72)/(p + 0x6E) = *(s16 *)(cfg + 0x70)/
+s/(cfg + 0x76) + 1)/(cfg + 0x76) + 2)/
+s/? 0x21 : 0x20/? 0x20 : 0x21/
+s/p\[0x71\] = 0x24/p[0x71] = 0x25/
+s/0x08000001/0x08000000/
+s/if (cfg == NULL) {/if (cfg == (u8 *)1) {/

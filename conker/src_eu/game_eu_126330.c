@@ -558,7 +558,7 @@ void func_150F9D6C(u8 *arg0, u8 arg1, s32 arg2)
 
 u8 *func_150FF808(u8 *);
 s32 func_150FF9F4(s32 *, s32 *, u8, s32);
-s32 func_150FFC60(s32 *, s32 *, s32 *, s32 *, s32 *, u8 *, u8 *);
+s32 func_150FFC60(f32 *, f32 *, f32 *, f32 *, f32 *, u8 *, s32); /* P210: port P209's prototype (game_eu_12CAC0) */
 s32 func_151D44C4(s32 *, u8, s32);
 s32 func_151D49B8(s32 *, s32 *, s32, u8 *, f32, s32, s32);
 
@@ -575,7 +575,7 @@ void func_150F9ED0(u8 *arg0, u8 arg1, s32 arg2) {
     temp_v0 = func_150FF808(arg0);
     if (temp_v0 != NULL) {
         sp2C = temp_v0;
-        if (func_150FFC60(sp60, sp54, sp48, sp3C, sp30, arg0, temp_v0) != 0) {
+        if (func_150FFC60((f32 *)sp60, (f32 *)sp54, (f32 *)sp48, (f32 *)sp3C, (f32 *)sp30, arg0, (s32)temp_v0) != 0) {
             func_151D44C4(sp54, arg1, arg2);
             func_151D49B8(sp48, sp3C, (*(u8 *)(sp2C + 2) << 6) + *(s32 *)(arg0 + 0x1D4), arg0, 1.0f, arg1, arg2);
             func_150FF9F4(sp54, sp60, arg1, arg2);

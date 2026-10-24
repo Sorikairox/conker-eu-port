@@ -1,0 +1,11 @@
+68s/> 5.0f/>= 6.0f/ % far55 eq5
+68s/> 5.0f/>= 5.0f/ % far55 eq5
+128s/> 1.0f/>= 1.0f/ % exact2
+119s/~0xC0/~0x80/ % seqr
+119s/~0xC0/~0x40/ % seqr
+117s/0x80 : 0/0 : 0x80/ % seqr
+112s/+ 4;/+ 3;/ % seqr
+120s/+ 0x3C/+ 0x3D/ % seqr
+121s/+ 0x46/+ 0x47/ % seqr
+111s/data.b1 = func_150ADA20();/data.b1 = data.b0;/ % seqr
+121s/(u32)/(s8)/ % seqr

@@ -1,0 +1,68 @@
+s/slot = obj->unk13D - 100;/slot = obj->unk13D - 99;/
+s/anim_offset = 5.0f;/anim_offset = 6.0f;/
+s/obj->immune = 30;/obj->immune = 31;/
+s/obj->unk180 = holder->unk180;/;/
+s/obj->unk1CC = obj->y_position;/obj->unk1CC = obj->x_position;/
+s/obj->gravity = 4.5f;/obj->gravity = 4.0f;/
+s/obj->y_velocity = 0.0f;/;/
+s/if (obj->unk21C < 30) {/if (obj->unk21C <= 30) {/
+s/obj->unk21C += D_800BE9A0;/obj->unk21C += 1;/
+s/    row = 13;/    row = 12;/
+s/obj->unk5C = 9;\(\n\)*/obj->unk5C = 8;/
+s/        if (obj->unk21C < 10) {/        if (obj->unk21C <= 10) {/
+s/            row = 0x24;/            row = 0x25;/
+s/if (anim == 0x116) {/if (anim == 0x115) {/
+s/if (anim == 0x117) {/if (anim == 0x118) {/
+s/        func_15064D5C(slot, D_800C3E78);/        func_15064D5C(D_800C3E78, slot);/
+s/obj->unk5C = 4;/obj->unk5C = 5;/
+s/if (anim == 0x1A6) {/if (anim == 0x1A5) {/
+s/if (anim == 0x1A7) {/if (anim == 0x1A8) {/
+s/id == 0xA8 || id == 0xA9/id == 0xA8/
+s/if (anim == 0x1B0) {/if (anim == 0x1AF) {/
+s/if (anim == 0x1B1) {/if (anim == 0x1B2) {/
+s/} else if (id == 0x5E) {/} else if (id == 0x5F) {/
+s/anim_offset = 16.0f;/anim_offset = 15.0f;/
+s/if (anim == 0x286) {/if (anim == 0x285) {/
+s/if (anim == 0x27E) {/if (anim == 0x27F) {/
+s/row = func_1505E7CC(row, obj);/row = func_1505E7CC(13, obj);/
+s/D_800D1588\[obj->id\] - 8)/D_800D1588[obj->id] - 4)/
+s/holder->interaction_state == 1 \&\& holder->in_water != 0/holder->interaction_state == 1/
+s/rows + row \* 0x18 + 0xE)/rows + row * 0x18 + 0xA)/
+s/    if (t < 20) {/    if (t <= 20) {/
+s/weight = (f32)t \/ 50.0f;/weight = (f32)t \/ 40.0f;/
+s/            weight = 1.0f;/            weight = 0.9f;/
+s/        weight = 0.8f;/        weight = 0.75f;/
+s/offset = obj->unk10F;/offset = obj->unk13E;/
+s/func_150599C8(obj, 0x10, /func_150599C8(obj, 0x11, /
+s/holder->unk7A + (obj->unk13E << 8));/holder->unk7A + (obj->unk13E << 7));/
+s/if (holder->unk1D4 != NULL) {/if (holder->unk1D4 == NULL) {/
+s/lift = obj->unk10C \/ 100;/lift = obj->unk10C \/ 10;/
+s/if (holder->interaction_state != 0x15) {/if (holder->interaction_state != 0x14) {/
+s/if (t >= 7) {/if (t > 7) {/
+s/0x240 + 0x1A);/0x240 + 0x18);/
+s/if (t < 14) {/if (t <= 14) {/
+s/lift = (t \/ 14.0f) \* lift;/lift = (t \/ 13.0f) * lift;/
+s/obj->y_position = obj->y_position + lift;/obj->y_position = obj->y_position - lift;/
+s/if (obj->id == 0xE) {/if (obj->id == 0xF) {/
+s/} else if (obj->id == 0x13) {/} else if (obj->id == 0x12) {/
+s/offset = 204.0f;/offset = 200.0f;/
+s/row = func_1505E7CC(0x39, obj);/row = func_1505E7CC(0x38, obj);/
+s/obj->unk7A = holder->unk7A;/;/
+s/holder->y_position - 10.0f;/holder->y_position - 11.0f;/
+s/obj->unk28 > 100.0f \&\& /obj->unk28 >= 100.0f \&\& /
+s/obj->unk21C >= 21) {/obj->unk21C > 21) {/
+s/            anim_offset = 0.0f;/            ;/
+s/        offset = 0.0f;/        ;/
+s/obj->xz_velocity = 0.0f;/;/
+s/\* 0.12f;/* 0.125f;/
+s/func_1505A184(holder->unk7A, offset, 0.0f, /func_1505A184(obj->unk7A, offset, 0.0f, /
+s/\&offset, \&dz, \&dy);/\&dy, \&dz, \&offset);/
+s/((holder->x_position + offset) - obj->x_position) \* weight;/((holder->x_position + offset) - obj->x_position) * 0.5f;/
+s/((holder->z_position + dz) - obj->z_position)/((holder->z_position + dy) - obj->z_position)/
+s/cell = rows + row \* 0x18 + col \* 4;/cell = rows + row * 0x18 + col * 2;/
+s/\*(u16 \*)(cell + 0xA), cell\[0xC\] \/ 100.0f/*(u16 *)(cell + 0xA), cell[0xD] \/ 100.0f/
+s/anim_offset, 0.0f, 0.0f, 0);/anim_offset, 0.0f, 0.0f, 1);/
+s/obj->unk65 = slot + 1;/obj->unk65 = slot;/
+s/obj->unk101 |= 4;/obj->unk101 |= 2;/
+s/        obj->unk65 = 0;/        ;/
+s/        typed = 1;/        typed = 0;/

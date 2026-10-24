@@ -222,7 +222,174 @@ void func_15056258(struct127 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+// object_carried_update: P213: per-frame update of object `obj` while it is held by the object in slot unk13D - 100
+/* (port P209: void, one argument). Sets 30 frames of immunity, copies the carrier's unk180, keeps the height in
+ * unk1CC, gravity 4.5, no fall speed; the hold timer unk21C counts up by D_800BE9A0 to 30. Per type (0x57, 0x8C
+ * after 10 frames - else nothing more; 0xA8 / 0xA9; 0x5E with offset 16) the carrier's animation unk84 picks the
+ * column (0..2) of the reaction row and the carrier's grab is synced (func_15064D5C); other types use row 13
+ * column 0. The reaction row comes from func_1505E7CC (0x24 for 0x57 with carrier anim 0x114, else 13); a
+ * swimming player carrier (state 1, in_water) uses column 1 when the row has one. The object is moved towards
+ * the point `offset` (unk10F, 204 for type 0x13) in front of the carrier along its facing unk7A + unk13E << 8,
+ * by unk21C / 50 per frame (1 with D_800BE9B4) until 20 frames, then 0.8; a carrier with a model (unk1D4) lifts
+ * it to the model's height + unk10C / 100 (ramped over 14 frames) after 7 frames. Carrier state 0x15: row 0x39,
+ * same facing, 10 below the carrier, no forward speed, turn speed unkC4 eases to the carrier's; column 1 when
+ * unk28 > 100 after 21 frames, else no animation offset. Starts the row's animation (func_1505E650) and marks
+ * the holder in unk65 (slot + 1, unk101 bit 2) for the typed cases, else clears unk65. */
+void func_15064D5C(s32, s32);
+void func_150562FC(struct127 *obj) {
+    u8 slot;
+    s32 typed;
+    f32 anim_offset;
+    struct127 *holder;
+    u16 anim;
+    u32 col;
+    u32 row;
+    u8 *rows;
+    u8 *cell;
+    f32 weight;
+    f32 offset;
+    f32 dz;
+    f32 dy;
+    f32 lift;
+    u16 t;
+    u8 id;
+
+    slot = obj->unk13D - 100;
+    typed = 0;
+    anim_offset = 5.0f;
+    obj->immune = 30;
+    holder = &D_800CC2D0[slot];
+    obj->unk180 = holder->unk180;
+    obj->unk1CC = obj->y_position;
+    obj->gravity = 4.5f;
+    obj->y_velocity = 0.0f;
+    if (obj->unk21C < 30) {
+        obj->unk21C += D_800BE9A0;
+    }
+    col = 0;
+    row = 13;
+    id = obj->id;
+    if (id == 0x57) {
+        obj->unk5C = 9;
+        if (obj->unk21C < 10) {
+            return;
+        }
+        anim = holder->unk84.uh;
+        typed = 1;
+        if (anim == 0x114) {
+            row = 0x24;
+        }
+        if (anim == 0x116) {
+            col = 1;
+        }
+        if (anim == 0x117) {
+            col = 2;
+        }
+        func_15064D5C(slot, D_800C3E78);
+    } else if (id == 0x8C) {
+        obj->unk5C = 4;
+        if (obj->unk21C < 10) {
+            return;
+        }
+        anim = holder->unk84.uh;
+        typed = 1;
+        if (anim == 0x1A6) {
+            col = 1;
+        }
+        if (anim == 0x1A7) {
+            col = 2;
+        }
+        func_15064D5C(slot, D_800C3E78);
+    } else if (id == 0xA8 || id == 0xA9) {
+        obj->unk5C = 9;
+        anim = holder->unk84.uh;
+        typed = 1;
+        if (anim == 0x1B0) {
+            col = 1;
+        }
+        if (anim == 0x1B1) {
+            col = 2;
+        }
+    } else if (id == 0x5E) {
+        obj->unk5C = 9;
+        anim_offset = 16.0f;
+        anim = holder->unk84.uh;
+        typed = 1;
+        if (anim == 0x286) {
+            col = 2;
+        }
+        if (anim == 0x27E) {
+            col = 1;
+        }
+    }
+    row = func_1505E7CC(row, obj);
+    rows = *(u8 **)((u8 *)D_800D1588[obj->id] - 8);
+    if (holder->interaction_state == 1 && holder->in_water != 0) {
+        obj->unk5C = 4;
+        typed = 1;
+        if (*(u16 *)(rows + row * 0x18 + 0xE) != 0) {
+            col = 1;
+        }
+    }
+    t = obj->unk21C;
+    if (t < 20) {
+        weight = (f32)t / 50.0f;
+        if (D_800BE9B4 != 0) {
+            weight = 1.0f;
+        }
+    } else {
+        weight = 0.8f;
+    }
+    offset = obj->unk10F;
+    func_150599C8(obj, 0x10, holder->unk7A + (obj->unk13E << 8));
+    if (holder->unk1D4 != NULL) {
+        lift = obj->unk10C / 100;
+        if (holder->interaction_state != 0x15) {
+            t = obj->unk21C;
+            if (t >= 7) {
+                obj->y_position = *(s16 *)((u8 *)holder->unk1D4 + 0x240 + 0x1A);
+                if (t < 14) {
+                    lift = (t / 14.0f) * lift;
+                }
+                obj->y_position = obj->y_position + lift;
+            }
+            if (obj->id == 0xE) {
+                obj->unkC4 = 0.0f;
+            } else if (obj->id == 0x13) {
+                offset = 204.0f;
+                obj->unkC4 = 0.0f;
+            }
+        }
+    }
+    if (holder->interaction_state == 0x15) {
+        row = func_1505E7CC(0x39, obj);
+        obj->unk7A = holder->unk7A;
+        obj->y_position = holder->y_position - 10.0f;
+        if (obj->unk28 > 100.0f && obj->unk21C >= 21) {
+            col = 1;
+        } else {
+            anim_offset = 0.0f;
+        }
+        offset = 0.0f;
+        obj->xz_velocity = 0.0f;
+        obj->unkC4 = obj->unkC4 + (holder->unkC4 - obj->unkC4) * 0.12f;
+    }
+    func_1505A184(holder->unk7A, offset, 0.0f, &offset, &dz, &dy);
+    obj->x_position = obj->x_position + ((holder->x_position + offset) - obj->x_position) * weight;
+    obj->z_position = obj->z_position + ((holder->z_position + dz) - obj->z_position) * weight;
+    cell = rows + row * 0x18 + col * 4;
+    func_1505E650(obj, *(u16 *)(cell + 0xA), cell[0xC] / 100.0f, anim_offset, 0.0f, 0.0f, 0);
+    if (typed) {
+        obj->unk65 = slot + 1;
+        obj->unk101 |= 4;
+    } else {
+        obj->unk65 = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150562FC.s")
+#endif
 // NON-MATCHING: 10% of the way there...
 // void func_150562FC(struct127 *arg0) {
 //     f32 sp70;
@@ -1305,7 +1472,94 @@ void func_1505841C(struct127 *arg0, f32 arg1) {
 //     }
 // }
 
+#ifdef NON_MATCHING
+// object_stun_update: P210: per-frame stun / hit-recovery update of object `obj` (port P209: void, one argument).
+/* Hover physics func_1505A3A8 (speed unk109 / 10); remembers the height in unk1CC while it is unset (>= 100000);
+ * while lifted (+0xAD 1..9) no gravity, the upward speed fades (x0.9 below 60) and above unk118 - 20 the lift
+ * ends (gravity 4). unk21C is cleared unless a player in multiplayer. Unless stunned 0xFF: the stun counter
+ * counts down (0xFE stays; a dead player keeps it), the hit timer unk10C by D_800CC264 (cleared when unk28 < 0.2
+ * with flag 0x100; at 0 the controller's byte 0x7D is cleared and func_1505E874 runs). Stun over: speeds and
+ * turning stop (players: func_1506B078 when lifted, else gravity 4 and flag 0x8000 cleared), unk23A = unk238 when
+ * set. Still stunned: the hit reaction func_150599C8(obj, 12, heading (turned round with unk10B bit 4)) unless
+ * unk10B bit 2, with unk80 = 10. */
+void func_150585F0(struct127 *obj) {
+    u8 *b = (u8 *)obj;
+    u8 lift;
+    u8 stun;
+    u8 hit;
+    u16 heading;
+
+    func_1505A3A8(0.0f, obj, 1.0f, obj->unk109 * 0.1f, 0);
+    if (obj->unk1CC < 100000.0f) {
+        obj->unk1CC = obj->y_position;
+    }
+    lift = b[0xAD];
+    if (lift != 0 && lift < 10) {
+        obj->gravity = 0.0f;
+        if (obj->y_velocity < 60.0f) {
+            obj->y_velocity *= 0.9f;
+        }
+        if (obj->unk118 - 60.0f + 40.0f < obj->y_position) {
+            obj->unk81 = 0;
+            obj->unk83 = 0;
+            b[0xAD] = 0;
+            obj->unkB8 = 0.0f;
+            obj->gravity = 4.0f;
+        }
+    }
+    if (D_800BE616 == 0 || obj->interaction_state != 1) {
+        obj->unk21C = 0;
+    }
+    stun = obj->stunned;
+    if (stun == 0xFF) {
+        return;
+    }
+    if (stun != 0xFE && (obj->health != 0 || obj->interaction_state != 1)) {
+        obj->stunned = stun - 1;
+    }
+    obj->unk10C -= D_800CC264;
+    if (obj->unk28 < 0.2f && (obj->unkF4 & 0x100)) {
+        obj->unk10C = 0;
+    }
+    if (obj->unk10C <= 0) {
+        if (obj->unk31C != NULL) {
+            ((u8 *)obj->unk31C)[0x7D] = 0;
+        }
+        obj->unk10C = 0;
+        func_1505E874(D_800C3E78, obj);
+    }
+    if (obj->stunned == 0) {
+        obj->xz_velocity = 0.0f;
+        obj->unk81 = 0;
+        obj->unk78 = obj->unk7A;
+        obj->unk76 = obj->unk7A;
+        if (b[0xAD] != 0) {
+            obj->y_velocity = 0.0f;
+            if (obj->interaction_state == 1) {
+                func_1506B078();
+            }
+        } else if (obj->interaction_state == 1) {
+            obj->unkF8 &= ~0x8000;
+            obj->gravity = 4.0f;
+        }
+        if (obj->unk238 != 0) {
+            obj->unk23A = obj->unk238;
+        }
+    } else {
+        hit = obj->unk10B;
+        if (!(hit & 2)) {
+            heading = obj->unk76;
+            if (hit & 4) {
+                heading ^= 0x8000;
+            }
+            obj->unk80 = 10;
+            func_150599C8(obj, 12, heading);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_150585F0.s")
+#endif
 // NON-MATCHING: 80% there
 // void func_150585F0(struct127 *arg0) {
 //     f32 temp_f0;
@@ -2930,7 +3184,226 @@ block_35:
 //     }
 // }
 
+#ifdef NON_MATCHING
+void func_151E67A0(struct127 *, struct127 *, u8);
+void func_151AE814(u8 *);
+s32 func_1506E46C(struct127 *, s32 *, s32);
+f32 func_1506AD30(struct127 *, f32, s32);
+extern void (*D_80086A34[])(struct127 *, struct127 *, u8 *); /* hit handlers (void/3, tablesig) */
+extern f32 D_800CC690;
+extern f32 D_800CC694;
+extern f32 D_800CC698;
+
+/* P210: one hit descriptor (0x28 bytes): the attack tables of func_1505C1A4 (indexed by the attack number) and
+ * D_8009A6D8. Fields 0x09..0x0E are the attack's hit volume (func_1505C7D8's AttackBox). */
+typedef struct {
+    /* 0x00 */ u8  kind;      /* & 0x7F: hit kind; 0x80: the entry's own kind wins over the base entry's */
+    /* 0x01 */ u8  pad1[3];
+    /* 0x04 */ s32 sound;     /* effect / sound id (func_1506E46C), 0 = none */
+    /* 0x08 */ u8  handler;   /* index into D_80086A34; 0 = use the base entry's */
+    /* 0x09 */ u8  pad9[6];
+    /* 0x0F */ u8  damage;    /* low bits (masked by the caller): health taken; 0x20 flag, 0x40 keep the angle */
+    /* 0x10 */ u8  push;      /* high byte added to the attacker's moving angle */
+    /* 0x11 */ u8  pad11[3];
+    /* 0x14 */ f32 xz_speed;
+    /* 0x18 */ f32 y_speed;
+    /* 0x1C */ f32 gravity;
+    /* 0x20 */ u8  unk20;     /* -> obj->unk109 */
+    /* 0x21 */ u8  pad21;
+    /* 0x22 */ u8  immune;    /* 0x80: obj->immune = & 0x3F */
+    /* 0x23 */ u8  pad23;
+    /* 0x24 */ u16 flags;
+    /* 0x26 */ u8  pad26[2];
+} HitDesc;
+
+// object_apply_hit: applies hit descriptor `idx` from attacker `self` to object `obj` (number `slot` - 1).
+/* `base_tbl` is the attacker's own table, `cur_tbl` the one in effect (func_1505C1E4 may redirect it into
+ * D_8009A6D8). Sets the knock-back (angle from the attacker, speeds, gravity), takes `damage & mask` health,
+ * makes a ridden player drop off (and the carrier let go of it), runs the descriptor's handler (not for kind
+ * 0x27), reports the hit (func_151E67A0 in multiplayer, two func_15169070 events), plays the sound and sets the
+ * hit state of `obj` (stun 0xFE, func_1505E7CC / func_1505E874 reaction, flags in unk10B). Returns the base
+ * entry's byte 0x22 (unused by the callers). */
+u8 func_1505B9C4(struct127 *self, struct127 *obj, s32 base_tbl, s32 cur_tbl, u8 idx, s32 slot, u8 mask) {
+    HitDesc *base = &((HitDesc *)base_tbl)[idx];
+    HitDesc *cur = &((HitDesc *)cur_tbl)[idx];
+    struct {
+        struct127 *obj;
+        u8 uid;
+    } ev;
+    u8 kind;
+    u8 dmg;
+    u8 handler;
+
+    if (cur->kind & 0x80) {
+        kind = cur->kind & 0x7F;
+    } else {
+        kind = base->kind & 0x7F;
+    }
+    obj->unk10B = 0;
+    if ((base->flags & 1) && obj->stunned != 0) {
+        mask = 0;
+    }
+    if (!(cur->damage & 0x40)) {
+        obj->unk76 = (cur->push << 8) + self->unk76;
+        if (base->flags & 0x10) {
+            obj->unk76 = func_1505A630(obj->x_position - self->x_position, self->z_position - obj->z_position, 0);
+        }
+        if (self->id == 0x44) {
+            obj->unk76 = 0;
+        }
+    }
+    if ((cur->damage | base->damage) & 0x20) {
+        obj->unk10B |= 2;
+    }
+    obj->unk3A = 0;
+    obj->unk109 = cur->unk20;
+    obj->y_velocity = cur->y_speed;
+    obj->xz_velocity = cur->xz_speed;
+    obj->unk100 &= 0xD6;
+    obj->gravity = cur->gravity;
+    dmg = cur->damage & mask;
+    if (dmg < obj->health) {
+        obj->health -= dmg;
+    } else {
+        obj->health = 0;
+    }
+
+    if (obj->interaction_state == 1) {
+        /* a player: run its drop-off with obj as the current object, then clear its riding state */
+        struct127 *saved = D_800D154C;
+        u8 savedNum = D_800C3E78;
+        s32 num = ((s32)obj - (s32)D_800CC2D0) / 0x32C;
+        struct126 *ctl;
+
+        D_800D154C = obj;
+        D_800C3E78 = num;
+        ctl = D_800CC2D0[(u8)num].unk31C;
+        if (ctl->unk4E != 2) {
+            ctl->unk4E = 0;
+        }
+        func_1506AD30(obj, 800.0f, 1);
+        D_800D154C = saved;
+        D_800C3E78 = savedNum;
+        obj->unkF8 &= ~0x01008000;
+        obj->unk31C->unk95 = 0;
+        obj->unk31C->unk6B = 0;
+        if (obj->unk31C->pad98[0] != 0) {
+            func_151AE814((u8 *)obj);
+        }
+        obj->unk31C->unk54 = 0;
+        obj->unk137 = 0;
+        if (obj->unk65 != 0) {
+            /* carried by object unk65 - 1: ids 0x8A / 0x23 only let go when the hit is hard enough */
+            struct127 *carrier = &D_800CC2D0[(u8)(obj->unk65 - 1)];
+            u8 id = carrier->id;
+
+            if ((id != 0x8A && id != 0x23) || obj->health == 0 || (base->flags & 2)
+                || (D_800BE616 != 0 && (30.0f < obj->y_velocity || 110.0f < obj->xz_velocity))) {
+                s32 state = (id == 0x8A) ? 1 : 0;
+
+                if (id == 0x23) {
+                    state = 10;
+                }
+                if (id == 0xC) {
+                    state = 15;
+                }
+                if (state != 0) {
+                    carrier->unk232 = state;
+                    carrier->unk218 = NULL;
+                }
+                carrier->unk2FC = 0;
+                carrier->unk13C = 0;
+                obj->unk239 = 0;
+                obj->unk65 = 0;
+            }
+        }
+    }
+
+    handler = cur->handler;
+    if (handler == 0) {
+        handler = base->handler;
+    }
+    if (kind != 0x27) {
+        D_80086A34[handler](self, obj, &kind);
+    }
+    if (D_800BE616 != 0) {
+        func_151E67A0((self->unk124 != 0) ? &D_800CC2D0[self->unk124 - 1] : self, obj, kind);
+    }
+    ev.obj = self;
+    ev.uid = self->unique_id;
+    func_15169070(0, 0x68, (s32)&ev, 2);
+    ev.obj = obj;
+    ev.uid = obj->unique_id;
+    func_15169070(0, 0x68, (s32)&ev, 2);
+
+    if (base->sound != 0) {
+        D_800D1580 = base->sound;
+        if (func_1506E46C(obj, &D_800D1580, 0) != 0) {
+            func_10010630(D_800D1582, obj, 0x6D60, 0x12C, 0x708);
+        }
+    } else if (cur->sound != 0) {
+        D_800D1580 = cur->sound;
+        if (func_1506E46C(obj, &D_800D1580, 0) != 0) {
+            func_10010630(D_800D1582, obj, 0x6D60, 0x12C, 0x708);
+        }
+    }
+
+    self->unk107 = 0x3C;
+    if (D_800BE616 == 0 || obj->interaction_state != 1) {
+        obj->unk21C = 0;
+        if (base->flags & 0x100) {
+            obj->unk218 = NULL;
+        }
+    }
+    obj->unkD0 = 0;
+    if (self->unk124 != 0) {
+        obj->unk10A = self->unk124 + 0x7F;
+    } else {
+        obj->unk10A = D_800C3E78 | 0x80;
+    }
+    self->unk108 = (slot - 1) | 0x80;
+
+    if (kind != 0x27) {
+        if ((base->flags & 0x40) && obj->interaction_state == 1) {
+            /* player hit by a player: halfword 0x46 of the attacker's controller */
+            *(s16 *)((u8 *)D_800CC2D0[slot - 1].unk31C + 0x46) = 8000;
+        } else {
+            if (obj->unk23B != 0) {
+                kind = obj->unk23B;
+            }
+            obj->stunned = 0xFE;
+            obj->unk105 = 0;
+            obj->unk106 = func_1505E7CC(kind, obj);
+            obj->unk84.uh = 0xFFFF;
+            func_1505E874(slot - 1, obj);
+            if (base->flags & 0x200) {
+                obj->unk10B |= 0x20;
+            }
+            if (0.0f < obj->y_velocity) {
+                obj->unk28 += 0.1f;
+            }
+            if (base->flags & 8) {
+                obj->unk10B |= 0x40;
+                D_800CC690 = self->x_position;
+                D_800CC694 = self->z_position;
+                D_800CC698 = self->y_position;
+            }
+        }
+        if (base->flags & 2) {
+            obj->unk10B |= 0x80;
+        }
+    }
+    if ((base->flags & 0x400) || (cur->flags & 0x400)) {
+        obj->unk10B |= 4;
+    }
+    if (base->immune & 0x80) {
+        obj->immune = base->immune & 0x3F;
+    }
+    return base->immune;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505B9C4.s")
+#endif
 
 s16 func_1505C140(struct127 *arg0, struct127 *arg1) {
     s16 ret = func_1505A630(arg0->x_position - arg1->x_position, arg1->z_position - arg0->z_position, 0);
@@ -2955,7 +3428,193 @@ struct252 *func_1505C1A4(struct127 *arg0) {
     return ret;
 }
 
+#ifdef NON_MATCHING
+s32 func_1506E46C(struct127 *, s32 *, s32);
+void func_15060B04(s32 arg0, struct127 *arg1, s32 arg2);
+s16 func_1505C140(struct127 *arg0, struct127 *arg1);
+u8 func_1505B9C4(struct127 *arg0, struct127 *arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5, u8 arg6);
+extern void (*D_80086A34[])(struct127 *, struct127 *, u8 *); /* hit handlers (void/3, tablesig) */
+
+/* HitDesc: see func_1505B9C4 */
+/* P210: one hit reaction rule (4 bytes) of the per-type lists D_80086E40[type] (D_8009AA60[type] rules each). */
+typedef struct {
+    u8 cond;    /* 1: obj faces the attacker (func_1505C140 <= 0x4000), 2: turned away (>= 0x4000), 3: obj stunned,
+                 * 4: obj not stunned; other values: always */
+    u8 kind;    /* the hit kind the rule is for */
+    u8 action;  /* & 0x7F: reaction; 0x80: the rule is for every kind except `kind` */
+    u8 param;
+} HitRule;
+
+extern u8 D_8009AA60[];
+extern HitRule *D_80086E40[];
+
+// object_receive_hit: hit descriptor `idx` of table `descs` from `self` hits object `obj` (number `slot` - 1).
+/* The first matching rule of obj's reaction list (type obj->unk239 & 0x7F) may change the hit: actions 0 / 1
+ * (attacker on the front / back side) and 2 / 4 pick another descriptor, 5 / 6 / 7 take descriptor `param` of
+ * D_8009A6D8 (7 only when the damage reaches obj's health, then obj's health is cleared), 4 / 6 make it harmless
+ * (mask 0); 3, 8 (obj catches the attacker), 10, 11, 12, 13 (handler only) handle it here. Rules whose action or
+ * condition fails are skipped. Unless handled, func_1505B9C4 applies the hit. Returns `hits` with obj's bit set
+ * when the hit landed (or when 8 / 13 handled it). */
+s32 func_1505C1E4(struct127 *self, struct127 *obj, void *descs, s32 idx, s32 slot, s32 hits, s32 mask) {
+    HitDesc *desc = &((HitDesc *)descs)[idx];
+    HitDesc *tbl = descs;   /* tbl[idx] is the descriptor func_1505B9C4 applies */
+    u8 kind = desc->kind & 0x7F;
+    u8 type = obj->unk239 & 0x7F;
+    s32 handled = FALSE;
+    HitRule *rule;
+    s32 count;
+    s32 n;
+    u8 action;
+    u8 scratch[4]; /* the handler's kind byte; the asm passes an unset stack word and ignores it */
+
+    if (type != 0 && (count = D_8009AA60[type]) > 0) {
+        rule = D_80086E40[type];
+        for (n = 0; n < count; n++, rule++) {
+            if (rule->action & 0x80) {
+                if (rule->kind == kind) {
+                    continue;
+                }
+            } else if (rule->kind != kind) {
+                continue;
+            }
+            action = rule->action & 0x7F;
+            if (rule->cond == 1 && func_1505C140(self, obj) > 0x4000) {
+                action = 0xFF;
+            }
+            if (rule->cond == 2 && func_1505C140(self, obj) < 0x4000) {
+                action = 0xFF;
+            }
+            if (rule->cond == 3 && obj->stunned == 0) {
+                action = 0xFF;
+            }
+            if (rule->cond == 4 && obj->stunned != 0) {
+                action = 0xFF;
+            }
+            switch (action) {
+                case 0:
+                case 1: {
+                    /* 0: the attacker is in front of obj, 1: behind it */
+                    u16 ang = func_1505A630(self->x_position - obj->x_position, obj->z_position - self->z_position, 0);
+
+                    if (action == ((((s32)ang - obj->unk7A + 0x4000) >> 15) & 0xFFFF)) {
+                        idx = rule->param;
+                    }
+                    break;
+                }
+                case 2:
+                    idx = rule->param;
+                    break;
+                case 3:
+                    handled = TRUE;
+                    break;
+                case 4:
+                    if (rule->param != 0xFF) {
+                        idx = rule->param;
+                    }
+                    mask = 0;
+                    break;
+                case 5:
+                    tbl = (HitDesc *)D_8009A6D8 + rule->param - idx;
+                    break;
+                case 6:
+                    tbl = (HitDesc *)D_8009A6D8 + rule->param - idx;
+                    mask = 0;
+                    break;
+                case 7:
+                    if ((desc->damage & mask) < obj->health) {
+                        continue;
+                    }
+                    tbl = (HitDesc *)D_8009A6D8 + rule->param - idx;
+                    obj->health = 0;
+                    break;
+                case 8:
+                    /* obj catches the attacker */
+                    handled = TRUE;
+                    obj->unkF4 &= ~0x00040040;
+                    hits |= 1 << ((slot - 1) & 0x1F);
+                    self->unk108 = slot + 0x7F;
+                    self->unk107 = 0x3C;
+                    obj->unk1C4 = 0;
+                    obj->unk218 = NULL;
+                    obj->disable_run = 1;
+                    obj->unkD0 = 0;
+                    obj->unk232 = rule->param;
+                    D_800D1580 = desc->sound;
+                    if (desc->sound != 0) {
+                        func_1506E5FC();
+                    }
+                    if (obj->interaction_state == 1) {
+                        struct126 *ctl = obj->unk31C;
+
+                        if (ctl->unk4E == 2 && ctl->unk84 == 0) {
+                            ctl->pad4F[1] = 30; /* byte 0x50 */
+                            obj->unk81 = 0;
+                            obj->y_velocity = 50.0f;
+                            obj->gravity = 2.0f;
+                        }
+                    }
+                    break;
+                case 9:
+                    break;
+                case 10:
+                    if (obj->unk84.uh == 0x283) {
+                        obj->unk76 = self->unk7A;
+                        obj->xz_velocity = 25.0f;
+                        D_800D1580 = 0xFF0102E2;
+                        func_1506E5FC();
+                        self->unkD0 = 0;
+                        self->unk232 = 0xD;
+                        self->unk218 = NULL;
+                        handled = TRUE;
+                    }
+                    break;
+                case 11:
+                    if (8.0f < obj->unk28) {
+                        handled = TRUE;
+                    }
+                    break;
+                case 12:
+                    if (obj->unk28 == 0.0f) {
+                        self->unk2EC = 100;
+                        self->unkD0 = 0;
+                    }
+                    handled = TRUE;
+                    break;
+                case 13: {
+                    /* only the descriptor's handler (and obj's effect unkFC) */
+                    u8 handler = desc->handler;
+                    s32 effect;
+
+                    D_800D1580 = desc->sound;
+                    if (desc->sound != 0) {
+                        func_1506E5FC();
+                    }
+                    D_80086A34[handler](self, obj, scratch);
+                    if (obj->unkFC != 0) {
+                        effect = obj->unkFC;
+                        if (func_1506E46C(self, &effect, 1) != 0) {
+                            func_15060B04(effect, obj, 0x5DC0);
+                        }
+                    }
+                    hits |= 1 << ((slot - 1) & 0x1F);
+                    handled = TRUE;
+                    break;
+                }
+                default:
+                    continue; /* failed condition (0xFF) or no reaction */
+            }
+            break;
+        }
+    }
+    if (handled) {
+        return hits;
+    }
+    func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);
+    return hits | (1 << ((slot - 1) & 0x1F));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505C1E4.s")
+#endif
 #ifdef NON_MATCHING
 extern f32 D_800998E4; /* pi / 180 */
 extern struct127 D_800B30F0[];
@@ -3883,7 +4542,182 @@ u32 func_1505E7CC(s32 arg0, struct127 *arg1)
   }
   return 0U;
 }
+#ifdef NON_MATCHING
+// hit_reaction_advance: P213: plays the next phase of object `obj`'s current hit reaction (port P209: void; the
+/* first argument is not read). Reaction row unk106 of the type's row table (D_800D1588[id] - 8, 0x18-byte rows:
+ * +0 kind, +4 sound, +8 unk10F value, +0xA three phases {u16 anim, u8 speed %, u8 flags}). Phase 0 (unk105)
+ * first: unk10F from the row, jump flag and the controller's byte 0x26 cleared, the row's sound (0x33 through
+ * func_15060B04, others func_15060A30) when func_1506E46C allows it; type 0x5E held by a carrier blends with 0.
+ * Move flags 0x000C014E cleared. Phases 0..2: hit bit unk10B bit 0 = the phase flag's bit 0; phase 0 of a living
+ * player-like object (unk127 != 0xFF, controller byte 0x197) shakes the camera (func_1517F9F8). A living object
+ * past its last phase gets an end action (func_1507CD64: type 0x9A 14, 0x53 10, swimming 4, ground kinds 14 / 19
+ * outside level 0x34 13, else by the row kind) and phase 3. Otherwise the hit timer unk10C = flags x 100 (flags
+ * 200: move flag 8 and hit bit 0) and the phase's animation starts (func_1505E650, speed % / 100, 1 when 0,
+ * blend 6); no animation (or phase 3+, timer 20000) ends the reaction: stun, hit bits and unk10F cleared, a
+ * player's controller byte 0x58 and flags 0x01000200 of unkF8 cleared. */
+void func_1517F9F8(s32, s32, s32, s32, s32, s32);
+void func_15060A30(s32, struct127 *);
+void func_1505E874(u8 arg0, struct127 *obj) {
+    f32 blend;
+    u16 row;
+    u8 *rows;
+    u8 *r;
+    u8 *cell;
+    u8 phase;
+    u8 flags;
+    u8 player;
+    s32 sound;
+    s32 last;
+    s32 end;
+    f32 speed;
+    u16 anim;
+    s32 m;
+
+    blend = 6.0f;
+    if (obj->id == 0xFF) {
+        return;
+    }
+    row = obj->unk106;
+    rows = *(u8 **)((u8 *)D_800D1588[obj->id] - 8);
+    if (rows == NULL) {
+        return;
+    }
+    if (obj->unk105 == 0) {
+        r = rows + row * 0x18;
+        obj->disable_jump = 0;
+        obj->unk10F = r[8];
+        if (obj->unk31C != NULL) {
+            ((u8 *)obj->unk31C)[0x26] = 0;
+        }
+        if (obj->id == 0x5E && obj->unk13D != 0) {
+            blend = 0.0f;
+        }
+        sound = *(s32 *)(r + 4);
+        if (sound != 0 && func_1506E46C(obj, &sound, 1) != 0) {
+            if (sound == 0x33) {
+                func_15060B04(sound, obj, 0x5DC0);
+            } else {
+                func_15060A30(sound, obj);
+            }
+        }
+    }
+    obj->unkF4 &= ~0x000C014E;
+    phase = obj->unk105;
+    if (phase < 3) {
+        r = rows + row * 0x18;
+        cell = r + phase * 4;
+        flags = cell[0xD] & 0xFE;
+        obj->unk10B = (obj->unk10B & 0xFE) | (cell[0xD] & 1);
+        player = obj->unk127;
+        if (player != 0xFF && phase == 0 && obj->unk31C != NULL && obj->camera != NULL
+            && ((u8 *)obj->unk31C)[0x197] != 0) {
+            func_1517F9F8(0xFF, 0, 0, 0xB4, 0x14, ((u8 *)obj->camera)[0x23D]);
+            player = obj->unk127;
+        }
+        if (player != 0xFF && obj->health == 0) {
+            phase = obj->unk105;
+            last = phase;
+            while (*(u16 *)(r + last * 4 + 0xA) != 0) {
+                last++;
+            }
+            if (last < 2) {
+                last = 2;
+            }
+            if (last == phase + 1) {
+                if (obj->id == 0x9A) {
+                    end = 14;
+                } else if (obj->id == 0x53) {
+                    end = 10;
+                } else if (obj->in_water != 0) {
+                    end = 4;
+                } else {
+                    m = obj->unk184 & 0x1F;
+                    if ((m == 14 || m == 19) && D_800BE9F0 != 0x34) {
+                        end = 13;
+                    } else {
+                        switch (r[0]) {
+                            case 14:
+                            case 15:
+                                end = 16;
+                                break;
+                            case 16:
+                                ((u8 *)obj->unk31C)[0x1AC] = 1;
+                                D_800D1580 = (s32)0xFF010434;
+                                func_1506E5FC();
+                                D_800D1580 = (s32)0xFF070169;
+                                func_1506E8D8();
+                                end = 0;
+                                break;
+                            case 32:
+                            case 33:
+                            case 37:
+                            case 38:
+                            case 51:
+                            case 52:
+                            case 72:
+                                end = 0;
+                                break;
+                            case 44:
+                                end = 8;
+                                break;
+                            case 45:
+                            case 46:
+                            case 47:
+                                end = 7;
+                                break;
+                            case 66:
+                                end = 12;
+                                break;
+                            case 67:
+                                end = 11;
+                                break;
+                            default:
+                                end = 1;
+                                break;
+                        }
+                    }
+                }
+                func_1507CD64(obj, end);
+                obj->unk105 = 3;
+                return;
+            }
+        }
+        if (flags == 200) {
+            obj->unkF4 |= 8;
+            obj->unk10B |= 1;
+        }
+        obj->unk10C = flags * 100;
+        phase = obj->unk105;
+        cell = r + phase * 4;
+        speed = cell[0xC] / 100.0f;
+        anim = *(u16 *)(cell + 0xA);
+        if (anim != 0) {
+            obj->unk105 = phase + 1;
+        }
+        if (speed == 0.0f) {
+            speed = 1.0f;
+        }
+    } else {
+        obj->unk10C = 20000;
+        speed = 1.0f;
+        anim = 0;
+    }
+    if (anim == 0) {
+        obj->unkF4 &= ~8;
+        obj->stunned = 0;
+        obj->unk10B = 0;
+        obj->unk10F = 0;
+        if (obj->interaction_state == 1) {
+            ((u8 *)obj->unk31C)[0x58] = 0;
+            obj->unkF8 &= ~0x01000200;
+        }
+    } else {
+        func_1505E650(obj, anim, speed, blend, 0.0f, 0.0f, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/func_1505E874.s")
+#endif
 #ifdef NON_MATCHING
 extern s32 D_800CC8C4;
 

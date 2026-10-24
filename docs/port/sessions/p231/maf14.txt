@@ -1,0 +1,77 @@
+116s/48.0f/40.0f/
+125s/newest\[1\] - sy/newest[1] - sx/
+127s/hit < maxLen/hit <= maxLen + 1.0f/
+128s/maxLen = hit;/maxLen = hit + 1.0f;/
+120s/& 2/\& 4/
+123s/(s8)obj\[0x2E\]/(s8)obj[0x2D]/
+135s/0.0f/1.0f/
+136s/& 2/\& 1/
+139s/i = TRAIL_PREV(i, obj);/;/
+145s/pt->x - newest\[0\]/newest[0] - pt->x/
+147s/pt->z - newest\[2\]/pt->z - newest[1]/
+150s/maxLen < /maxLen <= /
+152s/seglen != 0.0f/seglen > 1.0f/
+153s/- maxLen/- maxLen - 1.0f/
+155s/d.unk4 \* cut/d.unk8 * cut/
+157s/1.0f - cut/1.0f + cut/
+161s/== obj\[0x25\]/>= obj[0x25] - 1/
+162s/obj\[0x2D\] = 0;/obj[0x2D] = 1;/
+164s/- 1;/- 2;/
+166s/= maxLen;/= maxLen + 1.0f;/
+168s/newest = &pt->x;/;/
+174s/0x3C/0x40/
+176s/1.0f \//2.0f \//
+183s/fadeLen < acc/fadeLen <= acc - 1.0f/
+184s/(acc - fadeLen)/(acc + fadeLen)/
+186s/0x3A/0x3B/
+193s/0x40/0x44/
+194s/-16384.0f/-16383.0f/
+201s/0x44/0x40/
+201s/acc \*/(acc + 1.0f) */
+206s/>= 3/>= 2/
+206s/&& (st\[0x150\] & 0x10)/|| (st[0x150] \& 0x10)/
+206s/maxLen <= /maxLen < /
+207s/0x50/0x4C/
+208s/0x2D/0x2E/
+209s/1.0f < /2.0f < /
+212s/next == obj\[0x25\]/next >= obj[0x25] - 1/
+217s/0.0f/1.0f/
+221s/0x84/0x88/
+228s/where <= acc/where < acc/
+230s/prev != NULL && //
+231s/(acc - where)/(where - acc)/
+232s/(prev->x - pt->x)/(prev->y - pt->x)/
+235s/prev->width - pt->width/prev->width + pt->width/
+237s/pt->y - prev->y/prev->y - pt->y/
+243s/width = pt->width;/width = 0.0f;/
+246s/0.0f/1.0f/
+250s/ && !found//
+254s/0x78/0x7C/
+257s/0x80/0x82/
+259s/0x2203/0x2202/
+268s/6.3757176f/6.375f/
+271s/7;/6;/
+273s/tail/next/
+276s/0x58/0x5C/
+278s/0x6C/0x68/
+279s/24.222889f/24.0f/
+282s/dir\[1\]/dir[0]/
+285s/pOld/pNew/
+287s/0x74/0x70/
+288s/0x13 : 0x14/0x14 : 0x13/
+289s/+ 1)/+ 2)/
+290s/r1 = func_150ADA20();/r1 = func_150ADA20() + 1;/
+291s/0x3F, width/0x40, width/
+293s/jit.unk4/jit.unk8/
+296s/seg.unk4/seg.unk0/
+298s/st\[0x88\]/st[0x89]/
+299s/0x1F, 0x22/0x1F, 0x23/
+299s/| 2/| 3/
+300s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+302s/0x110/0x10C/
+304s/1.0f/0.5f/
+311s/h != -1/h > 0/
+316s/& 2)/\& 4)/
+322s/0x2D/0x2E/
+324s/newest\[1\]/newest[2]/
+326s/0.5f);/0.25f);/

@@ -1,0 +1,2 @@
+s/ || i == self) {/) {/
+s/o->x_position - D_800D154C->x_position, D_800D154C->z_position - o->z_position/D_800D154C->x_position - o->x_position, D_800D154C->z_position - o->z_position/

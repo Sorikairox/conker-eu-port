@@ -1,0 +1,47 @@
+22s/0x1D4/0x1D0/ %
+22s/== 0/!= 0/ %
+23s/return 0/return 1/ %
+25s/= obj;/= obj + 1;/ %
+26s/0x3B/0x3A/ %
+27s/pos\[0\];/pos[1];/ %
+29s/pos\[2\];/pos[1];/ %
+30s/= kind/= kind + 1/ %
+31s/300/301/ %
+31s/life == -1/life == 1/ %
+32s/? 0/? 2/ %
+33s/= 1/= 0/ %
+34s/= segments/= segments + 1/ %
+35s/= jitter/= width/ %
+36s/= width/= jitter/ %
+37s/= lifeBase/= lifeRange/ %
+38s/= lifeRange/= lifeBase/ %
+39s/rgba\[0\];/rgba[1];/ %
+42s/rgba\[3\];/rgba[2];/ %
+43s/= 3/= 2/ %
+44s/obj, kind/obj, 0/ %
+44s/pos, spec.start/spec.start, spec.start/ %
+45s/angle0, angle1/angle1, angle0/ %
+45s/1.0f/2.0f/ %
+46s/spec.start\[0\], spec.start\[1\]/spec.start[1], spec.start[1]/ %
+46s/dir\[0\], dir\[1\]/dir[1], dir[1]/ %
+46s/dir\[2\], hit/dir[1], hit/ %
+47s/300.0f/301.0f/ %
+47s/0, 1, 1, -1/1, 1, 1, -1/ %
+47s/-1, 0, 0)/-1, 0, 1)/ %
+48s/0x59/0x58/ %
+48s/== 0/!= 0/ %
+49s/dir\[0\] \* 300.0f/dir[0] * 301.0f/ %
+49s/spec.start\[0\] +/spec.start[1] +/ %
+50s/dir\[1\]/dir[0]/ %
+51s/spec.start\[2\]/spec.start[1]/ %
+53s/0x08/0x0C/ %
+55s/0x10/0x0C/ %
+57s/spec.start, spec.end/spec.end, spec.start/ %
+57s/spec.c1, spec.c2/spec.c2, spec.c1/ %
+58s/0x18,/0xC,/ %
+58s/layer, arg13/arg13, arg13/ %
+58s/layer, arg13/layer, layer/ %
+59s/!= NULL/== NULL/ %
+60s/0x18)/0xC)/ %
+60s/arc + 0x60/arc + 0x5C/ %
+62s/return (s32)arc/return (s32)arc + 1/ %

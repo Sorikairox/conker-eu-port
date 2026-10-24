@@ -1,0 +1,47 @@
+21s/0x40, \&vtx/0x30, \&vtx/ %
+21s/0x100)/0x104)/ %
+23s/== NULL/!= NULL/ %
+26s/if (fresh)/if (!fresh)/ %
+27s/fx + 0xC0/fx + 0xC4/ %
+28s/+ 0x40, (u8/+ 0x20, (u8/ %
+28s/0x40);/0x20);/ %
+30s/\* \*(f32 \*) (fx + 0x30)/* *(f32 *) (fx + 0x2C)/ %
+31s/(fx + 0x44)/(fx + 0x40)/ %
+32s/0x3C) + /0x38) + /  %
+33s/0x9A0/0x9A4/ %
+33s/0x2F8/0x2FC/ %
+36s/px - /py - / %
+40s/cam\[1\]/cam[0]/ %
+41s/cam\[2\]/cam[1]/ %
+42s/dy \* ez - ey \* dz/dy * ez + ey * dz/ %
+43s/dz \* ex/dz * ey/ %
+44s/ex \* dy/ex * dz/ %
+45s/+ nz \* nz/ / %
+46s/== 0.0f/!= 0.0f/ %
+47s/nx = ny = nz = 0.0f/nx = ny = 0.0f/ %
+49s/(fx + 0x2C)/(fx + 0x30)/ %
+49s/sqrtf(len2)/len2/ %
+51s/ny \*= k/ny *= 2.0f/ %
+54s/+ nx;/- nx;/ %
+55s/+ ny;/+ nx;/ %
+56s/+ nz;/+ ny;/ %
+57s/= 0;/= 1;/ %
+60s/- ny;/+ ny;/ %
+61s/- nz;/+ nz;/ %
+66s/dx = -dx;/dx = dx;/ %
+67s/dy = -dy;/dy = dy;/ %
+68s/dz = -dz;/dz = 2 * dz;/ %
+69s/px - cam\[0\]/*(f32 *) (fx + 0x34) - cam[0]/ %
+71s/pz - /pz + / %
+72s/dy \* ez/dz * ez/ %
+76s/== 0.0f/< 0.0f/ %
+79s/(fx + 0x2C)/(fx + 0x28)/ %
+81s/ny \*= k/ny *= -k/ %
+82s/nz \*= k/nz *= k * 2/ %
+84s/px + nx/px - nx/ %
+86s/pz + nz/pz/ %
+87s/= 0;/= 2;/ %
+88s/vtx += 0x10;/vtx += 0x8;/ %
+89s/px - nx/px + nx/ %
+91s/pz - nz/pz/ %
+93s/return start;/return vtx;/ %

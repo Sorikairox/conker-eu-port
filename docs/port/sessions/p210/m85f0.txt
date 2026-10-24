@@ -1,0 +1,41 @@
+s/func_1505A3A8(0.0f, obj, 1.0f, obj->unk109 \* 0.1f, 0);/func_1505A3A8(0.0f, obj, 1.0f, obj->unk109 * 0.2f, 0);/
+s/func_1505A3A8(0.0f, obj, 1.0f,/func_1505A3A8(0.0f, obj, 2.0f,/
+s/if (obj->unk1CC < 100000.0f) {/if (obj->unk1CC <= 50.0f) {/
+s/obj->unk1CC = obj->y_position;/obj->unk1CC = obj->x_position;/
+s/if (lift != 0 \&\& lift < 10) {/if (lift != 0 \&\& lift < 9) {/
+s/if (lift != 0 \&\& lift < 10) {/if (lift < 10) {/
+s/        obj->gravity = 0.0f;/        ;/
+s/if (obj->y_velocity < 60.0f) {/if (obj->y_velocity <= 70.0f) {/
+s/obj->y_velocity \*= 0.9f;/obj->y_velocity *= 0.8f;/
+s/obj->unk118 - 60.0f + 40.0f < obj->y_position/obj->unk118 - 60.0f + 41.0f < obj->y_position/
+s/            obj->unk81 = 0;/            ;/
+s/            obj->unk83 = 0;/            ;/
+s/            b\[0xAD\] = 0;/            ;/
+s/            obj->unkB8 = 0.0f;/            ;/
+s/if (D_800BE616 == 0 || obj->interaction_state != 1) {/if (D_800BE616 == 0 \&\& obj->interaction_state != 1) {/
+s/        obj->unk21C = 0;/        ;/
+s/    if (stun == 0xFF) {/    if (stun == 0xFE) {/
+s/if (stun != 0xFE \&\& (obj->health != 0 || obj->interaction_state != 1)) {/if (stun != 0xFE \&\& (obj->health != 0)) {/
+s/if (stun != 0xFE \&\& /if (/
+s/obj->stunned = stun - 1;/obj->stunned = stun - 2;/
+s/obj->unk10C -= D_800CC264;/obj->unk10C -= 1;/
+s/if (obj->unk28 < 0.2f \&\& (obj->unkF4 \& 0x100)) {/if (obj->unk28 < 0.2f) {/
+s/if (obj->unk28 < 0.2f \&\& /if (obj->unk28 < 0.25f \&\& /
+s/    if (obj->unk10C <= 0) {/    if (obj->unk10C < 0) {/
+s/((u8 \*)obj->unk31C)\[0x7D\] = 0;/((u8 *)obj->unk31C)[0x7C] = 0;/
+s/        obj->unk10C = 0;$/        ;/
+s/func_1505E874(D_800C3E78, obj);/func_1505E874(D_800C3E78, NULL);/
+s/    if (obj->stunned == 0) {/    if (stun == 1) {/
+s/obj->xz_velocity = 0.0f;/;/
+s/        obj->unk81 = 0;/        ;/
+s/obj->unk78 = obj->unk7A;/obj->unk78 = obj->unk76;/
+s/obj->unk76 = obj->unk7A;/;/
+s/            obj->y_velocity = 0.0f;/            ;/
+s/                func_1506B078();/                ;/
+s/obj->unkF8 \&= ~0x8000;/obj->unkF8 \&= ~0x80000;/
+s/            obj->gravity = 4.0f;$/            obj->gravity = 3.0f;/
+s/obj->unk23A = obj->unk238;/obj->unk23A = 0;/
+s/if (!(hit \& 2)) {/if (!(hit \& 1)) {/
+s/heading ^= 0x8000;/heading ^= 0x4000;/
+s/obj->unk80 = 10;/obj->unk80 = 11;/
+s/func_150599C8(obj, 12, heading);/func_150599C8(obj, 13, heading);/

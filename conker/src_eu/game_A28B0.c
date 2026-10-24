@@ -464,7 +464,35 @@ void func_15075F6C(void) {
     D_800D154C->unk3A = D_800D1893;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_8009A500; /* 1 / 12 */
+
+// path_jump_to_point: P210: script command: jump (ballistic) to point D_800D1891 of the object's path
+// (D_800D2104[unk13F]); unk21E = that point. Flight time t = 2 * distance / speed (unk44); below 12 the speed is
+// scaled by t / 12 and t = 12. unk21C = t * 100, upward velocity = gravity * t / 2, unk223 = 4.
+void func_1507602C(void) {
+    s16 *pt;
+    f32 dx, dz;
+    f32 t;
+
+    func_15075548();
+    D_800D154C->unk21E = D_800D1891;
+    pt = (s16 *)(D_800D2104[D_800D154C->unk13F] + D_800D1891 * 8 + 8);
+    dx = pt[0] - D_800D154C->x_position;
+    dz = pt[2] - D_800D154C->z_position;
+    t = sqrtf(dx * dx + dz * dz) / D_800D154C->unk44;
+    t = t + t;
+    if (t < 12.0f) {
+        D_800D154C->unk44 = D_800D154C->unk44 * (t * D_8009A500);
+        t = 12.0f;
+    }
+    D_800D154C->unk21C = t * 100.0f;
+    D_800D154C->y_velocity = D_800D154C->gravity * t * 0.5f;
+    D_800D154C->unk223 = 4;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507602C.s")
+#endif
 // NON-MATCHING: indexing is wrong
 // void func_1507602C(void) {
 //     f32 temp_f12;
@@ -651,7 +679,61 @@ void func_150767F4(void) {
     }
 }
 
+#ifdef NON_MATCHING
+int func_1507BB28(s32, s32);
+
+// find_visible_target: P210: script command: looks for the nearest object the current one can see: live (state,
+// health), targetable (unkF8 bit 0x20), not itself, of another id unless D_800D1891 is set, within 50 in height,
+// closer than D_800D1890 * 8 (func_1505A72C), and inside its view cone (width byte 0x17 of its type record
+// D_800D1C90[id], in 1/256 turns around heading unk76 >> 8 + unk2CA). The nearest one is stored as unkA8 =
+// 0x80 + its number; then the object's script jumps to D_800D1893 and, when D_800D1892 is set, the target's
+// script to D_800D1892 with unk222 = the current object's number.
+void func_150768DC(void) {
+    s32 self = ((s32)D_800D154C - (s32)D_800CC2D0) / 0x32C;
+    f32 best = D_800D1890 * 8;
+    struct127 *o = D_800CC2D0;
+    struct127 *t;
+    s32 i;
+    f32 d;
+    s32 fov;
+    u16 ang;
+
+    D_800D154C->unkA8 = 0;
+    for (i = 0; i < 25; i++, o++) {
+        if (o->interaction_state == 0 || o->health == 0 || !(o->unkF8 & 0x20) || i == self) {
+            continue;
+        }
+        if (D_800D1891 == 0 && D_800D154C->id == o->id) {
+            continue;
+        }
+        if (50.0f < fabsf(D_800D154C->y_position - o->y_position)) {
+            continue;
+        }
+        d = func_1505A72C(D_800D154C, o);
+        if (!(d < best)) {
+            continue;
+        }
+        fov = D_800D1C90[D_800D154C->id]->unk17;
+        ang = func_1505A630(o->x_position - D_800D154C->x_position, D_800D154C->z_position - o->z_position, 0);
+        if (((((D_800D154C->unk76 >> 8) + D_800D154C->unk2CA) - (ang >> 8) + fov / 2) & 0xFF) < fov) {
+            D_800D154C->unkA8 = i + 0x80;
+            best = d;
+        }
+    }
+    if (D_800D154C->unkA8 != 0) {
+        D_800D154C->unk218 = (struct216 *)func_1507BB28(0, D_800D1893);
+        D_800D154C->unk218--;
+        if (D_800D1892 != 0) {
+            t = &D_800CC2D0[D_800D154C->unkA8 & 0x7F];
+            t->unk218 = NULL;
+            t->unk232 = D_800D1892;
+            t->unk222 = self;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_150768DC.s")
+#endif
 // NON-MATCHING: almost JUSTREG
 // void func_150768DC(void) {
 //     u8 temp_s2;
@@ -746,7 +828,23 @@ void func_15076D04(void) {
     D_800D154C->xz_velocity = D_800D1890;
 }
 
+#ifdef NON_MATCHING
+// object_set_scale: P210: script command: sets the current object's scale from the command bytes (two s16 in
+// hundredths: D_800D1890 / D_800D1891 = xz, D_800D1892 / D_800D1893 = y, low byte first; D_8009A504 = 0.01),
+// copies it to unk154 / unk158 and applies it with func_15062BDC.
+void func_15076D3C(void) {
+    s16 xz = D_800D1890 | (D_800D1891 << 8);
+    s16 y = D_800D1892 | (D_800D1893 << 8);
+
+    D_800D154C->xz_scale = xz * D_8009A504;
+    D_800D154C->y_scale = y * D_8009A504;
+    D_800D154C->unk154 = D_800D154C->xz_scale;
+    D_800D154C->unk158 = D_800D154C->y_scale;
+    func_15062BDC(D_800D154C, D_800D154C->xz_scale, D_800D154C->y_scale);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15076D3C.s")
+#endif
 // ???
 // void func_15076D3C(void) {
 //     s32 temp_a3;
@@ -1366,7 +1464,57 @@ void func_15078520(void) {
     func_15075400(D_800D1890);
 }
 
+#ifdef NON_MATCHING
+f32 func_150489B0(u8);
+
+// path_point_from_object: P210: script command: sets point D_800D1890 & 0x3F of the current object's path
+// (D_800D2104[unk13F], s16 x / y / z after an 8-byte header) to an offset from object unk222 (D_800CC2D0). The
+// offset is x = 8 * (s8 D_800D1891 << 4 | D_800D1893 >> 4), z = 8 * (s8 D_800D1892 << 4 | D_800D1893 & 0xF),
+// rotated by the object's heading (D_800D1890 bits 6-7 = 0), not rotated (1), or by the direction from the
+// object to the current one (2, 3); y is the object's height. D_800D1890 keeps the masked point number.
+void func_15078544(void) {
+    u8 cmd = D_800D1890;
+    struct127 *o;
+    s32 mode;
+    f32 ox, oz;
+    f32 x, y, z;
+    f32 s, c;
+    s16 *pt;
+
+    D_800D1890 = cmd & 0x3F;
+    o = &D_800CC2D0[D_800D154C->unk222];
+    ox = (((s8)D_800D1891 << 4) | (D_800D1893 >> 4)) << 3;
+    oz = (((s8)D_800D1892 << 4) | (D_800D1893 & 0xF)) << 3;
+    mode = cmd >> 6;
+    y = o->y_position;
+    x = o->x_position;
+    z = o->z_position;
+    if (mode == 0) {
+        u8 a = (o->unk7A >> 8) - 0x40;
+
+        s = func_15048A40(a);
+        c = func_150489B0(a);
+    } else if (mode == 1) {
+        s = 0.0f;
+        c = 1.0f;
+    } else {
+        f32 ang = func_150484A0(D_800D154C->x_position - x, D_800D154C->z_position - z);
+
+        s = sinf(ang);
+        c = cosf(ang);
+    }
+    x += ox * c + oz * s;
+    z += oz * c - ox * s;
+    pt = (s16 *)(D_800D2104[D_800D154C->unk13F] + D_800D1890 * 8 + 8);
+    pt[0] = x;
+    pt = (s16 *)(D_800D2104[D_800D154C->unk13F] + D_800D1890 * 8 + 8);
+    pt[1] = y;
+    pt = (s16 *)(D_800D2104[D_800D154C->unk13F] + D_800D1890 * 8 + 8);
+    pt[2] = z;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15078544.s")
+#endif
 void func_1507879C(void) {
     struct197 *temp_v0 = D_800CC2D0[D_800D154C->unk222].unk2D0;
     f32 temp_f0 = temp_v0->unk8;
@@ -1774,7 +1922,108 @@ u16 func_15079A98(s32 arg0) {
 }
 
 // requires jump table
+#ifdef NON_MATCHING
+/* func_15083FB0 (s32 (u8), game_eu_AF2A0) is used undeclared in this file, like its other callers here */
+int func_1507BB28(s32, s32);
+u16 func_15079A98(s32 arg0);
+
+// object_var_cmd: P210: script command on object `idx` (D_800D1891 0 / 1: the current one D_800C3E78, else
+// func_15083FB0(D_800D1891 - 2); -1 = none). D_800D1892 selects: 1..3 counter unk2E4 / unk2E8 / unk2EC, updated by
+// D_800D1893 (0 = D_800D1890, 1 -1, 2 + frame time D_800BE9E4, 3 +1, 4 - frame time, 5 - D_800CC264,
+// 6 + D_800CC264); 4 / 5 start script D_800D1890 on the object (when it is not running it already); 6 unkC8 =
+// D_800D1890; 7 unkB8 = 0; for the current object: 8 unk221 = D_800D1890 when the path point angle
+// (func_15079A98) from object D_800C3E78 minus the one from object unk222 has bit 15 set, 9 unk244 = D_800D1893 << 8 | D_800D1890, 10 unk236 = unk23D + (s8)D_800D1890, 11 unk22A = D_800D1890.
+// Other D_800D1892 values: the asm then updates a counter through an unset stack pointer; here nothing happens.
+void func_15079B30(void) {
+    s32 idx;
+    s32 *var;
+    struct127 *saved;
+    u8 savedNum;
+    u16 a;
+
+    if (D_800D1891 == 0 || D_800D1891 == 1) {
+        idx = D_800C3E78;
+    } else {
+        idx = func_15083FB0(D_800D1891 - 2);
+        if (idx == -1) {
+            return;
+        }
+    }
+    switch (D_800D1892) {
+        case 1:
+            var = &D_800CC2D0[idx].unk2E4;
+            break;
+        case 2:
+            var = &D_800CC2D0[idx].unk2E8;
+            break;
+        case 3:
+            var = &D_800CC2D0[idx].unk2EC;
+            break;
+        case 4:
+        case 5:
+            saved = D_800D154C;
+            savedNum = D_800C3E78;
+            D_800D154C = &D_800CC2D0[idx];
+            D_800C3E78 = idx;
+            if (D_800D1890 != D_800D154C->unk232) {
+                D_800D154C->unk232 = D_800D1890;
+                D_800D154C->unk218 = (struct216 *)func_1507BB28(0, D_800D154C->unk232);
+                D_800D154C->unk21C = 0;
+            }
+            D_800C3E78 = savedNum;
+            D_800D154C = saved;
+            return;
+        case 6:
+            D_800CC2D0[idx].unkC8 = D_800D1890;
+            return;
+        case 7:
+            D_800CC2D0[idx].unkB8 = 0.0f;
+            return;
+        case 8:
+            a = func_15079A98(D_800D154C->unk222);
+            if ((func_15079A98(D_800C3E78) - a) & 0x8000) {
+                D_800D154C->unk221 = D_800D1890;
+            }
+            return;
+        case 9:
+            D_800D154C->unk244 = (D_800D1893 << 8) | D_800D1890;
+            return;
+        case 10:
+            D_800D154C->unk236 = D_800D154C->unk23D + (s8)D_800D1890;
+            return;
+        case 11:
+            D_800D154C->unk22A = D_800D1890;
+            return;
+        default:
+            return;
+    }
+    switch (D_800D1893) {
+        case 0:
+            *var = D_800D1890;
+            break;
+        case 1:
+            *var -= 1;
+            break;
+        case 2:
+            *var += D_800BE9E4;
+            break;
+        case 3:
+            *var += 1;
+            break;
+        case 4:
+            *var -= D_800BE9E4;
+            break;
+        case 5:
+            *var -= D_800CC264;
+            break;
+        case 6:
+            *var += D_800CC264;
+            break;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15079B30.s")
+#endif
 
 void func_15079F24(void) {
     D_800D154C->unk48 = D_800D1898[D_800D1890];
@@ -1792,7 +2041,42 @@ void func_15079F6C(void) {
     D_800D154C->unk226 = D_800D1893;
 }
 
+#ifdef NON_MATCHING
+int func_1507BB28(s32, s32);
+extern f32 D_8009A5A4; /* 0.7 */
+
+// follow_player_speed: P210: script command: when player 1 (D_800CC2D0[0]) rides nothing (unk65 0) or is slower
+// than 5, jumps the current object's script to D_800D1891 (unk232, script pointer func_1507BB28 - one entry);
+// otherwise copies the player's controller heading (unk31C +0x4C) into unk78 and starts func_15075F40 with speed
+// parameter D_800D1892 = player speed (times 0.7 unless the player is chased), D_800D1893 + 1 and D_800D1890 = 8
+// below 17; sets flag 0x40 in unkF4.
+void func_15079FBC(void) {
+    struct127 *player = &D_800CC2D0[0];
+    s16 speed;
+
+    if (player->unk65 == 0 || player->unk44 < 5.0f) {
+        D_800D154C->unk232 = D_800D1891;
+        D_800D154C->unk218 = (struct216 *)func_1507BB28(0, D_800D154C->unk232);
+        D_800D154C->unk218--;
+        return;
+    }
+    D_800D154C->unk78 = player->unk31C->unk4C;
+    if (player->unk31C->chased != 0) {
+        speed = player->unk44;
+    } else {
+        speed = player->unk44 * D_8009A5A4;
+    }
+    if (speed < 17) {
+        D_800D1893++;
+        D_800D1890 = 8;
+    }
+    D_800D1892 = speed;
+    func_15075F40();
+    D_800D154C->unkF4 |= 0x40;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_15079FBC.s")
+#endif
 // NON-MATCHING: JUSTREG
 // void func_15079FBC(void) {
 //     s16 phi_v1;
@@ -2031,7 +2315,59 @@ void func_1507A984(void) {
 }
 
 // requires jump table
+#ifdef NON_MATCHING
+extern f32 D_8009A5CC; /* 65536 / (2 pi) */
+/* IDO's f32 -> u32 conversion (cvt.w.s, then 2^31 offset): -1 for NaN, values <= -1 and >= 2^32 */
+#define P210_F2U(v) (((v) > -1.0f && (v) < 4294967296.0f) ? (u32)(v) : 0xFFFFFFFF)
+
+// set_heading_cmd: P210: script command: sets the current object's target heading unk78 (or its heading unk76)
+// from the 16-bit value D_800D1890 << 8 | D_800D1891 by mode D_800D1892: 0 heading + value, 1 heading - value,
+// 2 value, 3 turn now (unk76 = unk7A = unk78), 4 direction from path point D_800D1890 to point D_800D1891
+// (D_800D2104[unk13F]) + D_800D1893 << 8 + 0x4000, 5 random (func_150ADA20), 6 keep the heading, 7 unk76 = object
+// unk222's facing + value, 8 unk76 = own facing unk7A.
+void func_1507AA48(void) {
+    u16 v = (D_800D1890 << 8) | D_800D1891;
+
+    switch (D_800D1892) {
+        case 0:
+            D_800D154C->unk78 = D_800D154C->unk76 + v;
+            break;
+        case 1:
+            D_800D154C->unk78 = D_800D154C->unk76 - v;
+            break;
+        case 2:
+            D_800D154C->unk78 = v;
+            break;
+        case 3:
+            D_800D154C->unk76 = D_800D154C->unk78;
+            D_800D154C->unk7A = D_800D154C->unk78;
+            break;
+        case 4: {
+            u8 *path = (u8 *)D_800D2104[D_800D154C->unk13F];
+            s16 *from = (s16 *)(path + D_800D1890 * 8 + 8);
+            s16 *to = (s16 *)(path + D_800D1891 * 8 + 8);
+            f32 ang = func_150484A0(to[0] - from[0], to[2] - from[2]);
+
+            D_800D154C->unk78 = P210_F2U(ang * D_8009A5CC) + (D_800D1893 << 8) + 0x4000;
+            break;
+        }
+        case 5:
+            D_800D154C->unk78 = func_150ADA20();
+            break;
+        case 6:
+            D_800D154C->unk78 = D_800D154C->unk76;
+            break;
+        case 7:
+            D_800D154C->unk76 = D_800CC2D0[D_800D154C->unk222].unk7A + v;
+            break;
+        case 8:
+            D_800D154C->unk76 = D_800D154C->unk7A;
+            break;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A28B0/func_1507AA48.s")
+#endif
 
 void func_1507ACB0(void) {
     D_800D154C->unk220 = D_800D1890;

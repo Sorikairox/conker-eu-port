@@ -8,7 +8,123 @@ void func_151084D4(u8 *arg0, u8 arg1, void *arg2, void *arg3);
 #endif
 
 
+#ifdef NON_MATCHING
+s32 func_15106794(struct102 *);
+void func_15106B90(struct102 *);
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+s32 func_150ADA20(void);
+void *memcpy(void *, const void *, unsigned int);
+
+/* The 0x70-byte particle spec func_151307F0 gets for each arc end. */
+typedef struct {
+    s32 w00;            /* 0x00 0x200005 */
+    s32 w04;            /* 0x04 0 */
+    s16 h08;            /* 0x08 0x4404 */
+    s16 life;           /* 0x0A 300 */
+    s32 w0C, w10;       /* 0x0C 0 */
+    u8 rgba0[4];        /* 0x14 FF FF FF FF */
+    u8 rgba1[4];        /* 0x18 the arc's colour (spec +0x48..+0x4B) */
+    u8 b1C, b1D;        /* 0x1C 0xFF 0x2B */
+    s16 h1E, h20, h22;  /* 0x1E 1, 0xFF, 1 */
+    f32 f24;            /* 0x24 1.0 */
+    f32 size[2];        /* 0x28 width * (1 / 13) * 200 (both) */
+    f32 pos[3];         /* 0x30 the arc end */
+    f32 f3C[3];         /* 0x3C D_800A5860 */
+    f32 f48[3];         /* 0x48 D_800A5860 */
+    f32 f54;            /* 0x54 0 */
+    s32 flags;          /* 0x58 bits 0x40 / 0x80 random */
+    s32 w5C;            /* 0x5C 0 */
+    u8 b60, b61;        /* 0x60 6 6 */
+    s8 b62, b63, b64;   /* 0x62 -1 -1 -1 */
+    u8 b65, b66;        /* 0x65 0 0xFF */
+    s16 h68;            /* 0x68 0 */
+    f32 f6C;            /* 0x6C 1000000.0 */
+} ArcEndSpec;
+
+// bolt_arc_spawn: creates a lightning arc object (type 0x40, func_15167A68 layer `layer` / `arg3`) from the 0x50-byte
+// arc spec `spec` (copied to +0x10; +0x38 = segment count n, +0x40 width, +0x44 / +0x46 life base / random range,
+// +0x48 colour). The object's data area (+0x60) follows its 0x88-byte header, n * 0x34 + (n + 2) * 0xC bytes in and
+// `extra` more bytes are reserved for the caller. Sets the step 1 / (n + 1) (+0x64) and the life (+0x68), builds the
+// points (func_15106794, func_15106B90), clears +0x6C..+0x83, sets +0x84 = n * 0x30 + 0x60 and spawns one glow
+// particle at each arc end (func_151307F0, handles at +0x6C / +0x70). Returns the object (NULL when none is free).
+u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3) {
+    ArcEndSpec ps;
+    u8 *p = (u8 *)spec;
+    u8 *obj;
+    s32 n = *(s32 *)(p + 0x38);
+    s32 flags;
+    u8 i;
+
+    obj = func_15167A68(0x40, arg3, n * 0x34 + (n + 2) * 0xC + extra + 0x88, 1, layer, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    memcpy(obj + 0x10, p, 0x50);
+    *(u8 **)(obj + 0x60) = obj + n * 0x34 + (n + 2) * 0xC + 0x88;
+    *(f32 *)(obj + 0x64) = 1.0f / (f32)(*(s32 *)(p + 0x38) + 1);
+    *(s16 *)(obj + 0x68) = (u32)func_150ADA20() % (u32)(*(s16 *)(p + 0x46) + 1) + *(s16 *)(p + 0x44);
+    func_15106794((struct102 *)obj);
+    func_15106B90((struct102 *)obj);
+    *(s32 *)(obj + 0x6C) = 0;
+    *(s32 *)(obj + 0x70) = 0;
+    bzero(obj + 0x74, 0x10);
+    *(s32 *)(obj + 0x84) = *(s32 *)(obj + 0x48) * 0x30 + 0x60;
+
+    ps.w00 = 0x200005;
+    ps.w04 = 0;
+    ps.h08 = 0x4404;
+    ps.life = 300;
+    ps.w0C = 0;
+    ps.w10 = 0;
+    ps.rgba0[0] = 0xFF;
+    ps.rgba0[1] = 0xFF;
+    ps.rgba0[2] = 0xFF;
+    ps.rgba0[3] = 0xFF;
+    ps.rgba1[0] = p[0x48];
+    ps.rgba1[1] = p[0x49];
+    ps.rgba1[2] = p[0x4A];
+    ps.rgba1[3] = p[0x4B];
+    ps.b1C = 0xFF;
+    ps.b1D = 0x2B;
+    ps.h1E = 1;
+    ps.h20 = 0xFF;
+    ps.h22 = 1;
+    ps.f24 = 1.0f;
+    ps.f3C[0] = ((f32 *) D_800A5860)[0];
+    ps.f3C[1] = ((f32 *) D_800A5860)[1];
+    ps.f3C[2] = ((f32 *) D_800A5860)[2];
+    ps.f48[0] = ((f32 *) D_800A5860)[0];
+    ps.f48[1] = ((f32 *) D_800A5860)[1];
+    ps.f48[2] = ((f32 *) D_800A5860)[2];
+    ps.f54 = 0.0f;
+    ps.w5C = 0;
+    ps.b60 = 6;
+    ps.b61 = 6;
+    ps.b62 = -1;
+    ps.b63 = -1;
+    ps.b64 = -1;
+    ps.b65 = 0;
+    ps.b66 = 0xFF;
+    ps.h68 = 0;
+    ps.f6C = 1000000.0f;
+    ps.size[1] = *(f32 *)(p + 0x40) * 0.07692308f * 200.0f;
+    ps.size[0] = ps.size[1];
+
+    for (i = 0; i < 2; i++) {
+        f32 *end = (f32 *)(p + (i == 0 ? 0x04 : 0x28));   /* the arc start, then its end */
+
+        ps.pos[0] = end[0];
+        ps.pos[1] = end[1];
+        ps.pos[2] = end[2];
+        flags = func_150ADA20() ? 0x40 : 0;
+        ps.flags = (func_150ADA20() ? 0x80 : 0) | flags;
+        *(s32 *)(obj + 0x6C + i * 4) = func_151307F0((s32)&ps, 0, 0, 0, layer, arg3);
+    }
+    return obj;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15106260.s")
+#endif
 
 typedef struct { f32 x, y, z; } V3_133A70;
 s32 func_15106794(struct102 *);
@@ -288,7 +404,7 @@ typedef struct {
     u8 u4F;       // 0x4F
     u8 u50;       // 0x50
 } BoltArcSpawn;
-s32 func_15106260(s16 *, s32, u8, u8);
+u8 *func_15106260(s16 *spec, s32 extra, u8 layer, s32 arg3);
 s32 func_150ADA20(void);
 f32 func_150ADA68(void);
 void func_15143794(s16, s16, f32, u8 *);
@@ -402,7 +518,87 @@ void func_15107C24(u8 *arg0, s32 arg1, u8 arg2)
   }
 }
 
+#ifdef NON_MATCHING
+s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+
+/* The 0x50-byte arc spec func_15106260 copies into the arc object (+0x10). */
+typedef struct {
+    /* 0x00 */ s16 life;        /* 300 when the caller passes -1 */
+    /* 0x02 */ u8 u02;          /* 0 when the caller passes -1, else 1 */
+    /* 0x04 */ f32 start[3];
+    /* 0x10 */ f32 c1[3];       /* control points (func_15108060: 1/3 and 2/3 of the way) */
+    /* 0x1C */ f32 c2[3];
+    /* 0x28 */ f32 end[3];
+    /* 0x34 */ u8 u34;
+    /* 0x38 */ s32 segments;
+    /* 0x3C */ f32 jitter;
+    /* 0x40 */ f32 width;
+    /* 0x44 */ s16 lifeBase;
+    /* 0x46 */ s16 lifeRange;
+    /* 0x48 */ u8 rgba[4];
+    /* 0x4C */ u8 u4C;          /* 2 */
+} ArcSpec;
+
+/* The 0xC-byte record the arc's data area (+0x60) gets: the object it hangs on and the attachment angles. */
+typedef struct {
+    u8 *obj;
+    u8 id;                      /* obj[0x3B] */
+    s16 angle0;
+    s16 angle1;
+} ArcLink;
+
+// object_arc_to_surface_spawn: casts a ray (func_15081A90) from the object's attachment point at angles
+// (angle0, angle1) (func_15107FA0) outwards from the object's centre and, when it hits something, spawns a lightning arc
+// (func_15106260, 0xC extra bytes for an ArcLink back to the object) from the point to the hit, with control points at
+// 1/3 and 2/3 (func_15108060). life -1 = 300 and spec +0x02 = 0. Returns the arc, 0 when the object has no +0x1D4, the
+// ray hits nothing or no arc could be spawned.
+s32 func_15107C80(u8 *obj, s16 angle0, s16 angle1, s16 life, s32 segments, f32 jitter, f32 width, s32 lifeBase,
+                  s32 lifeRange, s8 *rgba, s32 layer, s32 arg11) {
+    u8 hit[0x64];
+    f32 origin[3];
+    ArcSpec spec;
+    ArcLink link;
+    u8 *arc;
+
+    if (*(s32 *)(obj + 0x1D4) == 0) {
+        return 0;
+    }
+    link.obj = obj;
+    link.id = obj[0x3B];
+    link.angle0 = angle0;
+    link.angle1 = angle1;
+    spec.life = (life == -1) ? 300 : life;
+    spec.u02 = (life == -1) ? 0 : 1;
+    spec.u34 = 0;
+    spec.segments = segments;
+    spec.jitter = jitter;
+    spec.width = width;
+    spec.lifeBase = lifeBase;
+    spec.lifeRange = lifeRange;
+    spec.rgba[0] = rgba[0];
+    spec.rgba[1] = rgba[1];
+    spec.rgba[2] = rgba[2];
+    spec.rgba[3] = rgba[3];
+    spec.u4C = 2;
+    func_15107FA0(obj, angle0, angle1, (u8 *)spec.start, (u8 *)origin);
+    func_15081A90((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], spec.start[0] - origin[0],
+                  spec.start[1] - origin[1], spec.start[2] - origin[2], hit, 0.0f, 0, 1, 1, -1, 0, 0);
+    if (hit[0x59] == 0) {
+        return 0;
+    }
+    spec.end[0] = *(f32 *)(hit + 0x08);
+    spec.end[1] = *(f32 *)(hit + 0x0C);
+    spec.end[2] = *(f32 *)(hit + 0x10);
+    func_15108060(spec.start, spec.end, spec.c1, spec.c2);
+    arc = func_15106260(&spec.life, 0xC, layer, arg11);
+    if (arc != NULL) {
+        memcpy(*(u8 **)(arc + 0x60), &link, 0xC);
+    }
+    return (s32)arc;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15107C80.s")
+#endif
 
 void func_15107E64(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_a2 = *(s32 *)(arg0 + 0x60);
@@ -505,7 +701,72 @@ void func_151080F8(u8 *arg0, s16 arg1, s16 arg2, u8 arg3, s32 arg4) {
     }
 }
 
+#ifdef NON_MATCHING
+/* The 0x18-byte record the arc's data area (+0x60) gets: the object, a point and a kind byte. */
+typedef struct {
+    u8 *obj;
+    u8 id;                      /* obj[0x3B] */
+    f32 pos[3];                 /* 0x08 */
+    u8 kind;                    /* 0x14 */
+} ArcPointLink;
+
+// object_arc_from_point_spawn: like func_15107C80 but from the object's point `pos` / `kind` (func_151084D4) in the
+// direction of angles (angle0, angle1) (func_15143794, unit length): the ray (func_15081A90, length 300) ends the
+// arc at the hit, or 300 units out when it hits nothing. Spec +0x34 = 1, +0x4C = 3, 0x18 extra bytes for an
+// ArcPointLink. Returns the arc, 0 when the object has no +0x1D4 or no arc could be spawned.
+s32 func_1510819C(u8 *obj, u8 kind, f32 *pos, s16 angle0, s16 angle1, s16 life, s32 segments, f32 jitter,
+                  f32 width, s32 lifeBase, s32 lifeRange, s8 *rgba, s32 layer, s32 arg13) {
+    u8 hit[0x64];
+    f32 dir[3];
+    ArcSpec spec;
+    ArcPointLink link;
+    u8 *arc;
+
+    if (*(s32 *)(obj + 0x1D4) == 0) {
+        return 0;
+    }
+    link.obj = obj;
+    link.id = obj[0x3B];
+    link.pos[0] = pos[0];
+    link.pos[1] = pos[1];
+    link.pos[2] = pos[2];
+    link.kind = kind;
+    spec.life = (life == -1) ? 300 : life;
+    spec.u02 = (life == -1) ? 0 : 1;
+    spec.u34 = 1;
+    spec.segments = segments;
+    spec.jitter = jitter;
+    spec.width = width;
+    spec.lifeBase = lifeBase;
+    spec.lifeRange = lifeRange;
+    spec.rgba[0] = rgba[0];
+    spec.rgba[1] = rgba[1];
+    spec.rgba[2] = rgba[2];
+    spec.rgba[3] = rgba[3];
+    spec.u4C = 3;
+    func_151084D4(obj, kind, pos, spec.start);
+    func_15143794(angle0, angle1, 1.0f, (u8 *)dir);
+    func_15081A90((struct127 *)obj, spec.start[0], spec.start[1], spec.start[2], dir[0], dir[1], dir[2], hit,
+                  300.0f, 0, 1, 1, -1, 0, 0);
+    if (hit[0x59] == 0) {
+        spec.end[0] = spec.start[0] + dir[0] * 300.0f;
+        spec.end[1] = spec.start[1] + dir[1] * 300.0f;
+        spec.end[2] = spec.start[2] + dir[2] * 300.0f;
+    } else {
+        spec.end[0] = *(f32 *)(hit + 0x08);
+        spec.end[1] = *(f32 *)(hit + 0x0C);
+        spec.end[2] = *(f32 *)(hit + 0x10);
+    }
+    func_15108060(spec.start, spec.end, spec.c1, spec.c2);
+    arc = func_15106260(&spec.life, 0x18, layer, arg13);
+    if (arc != NULL) {
+        memcpy(*(u8 **)(arc + 0x60), &link, 0x18);
+    }
+    return (s32)arc;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_1510819C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_151083C8(u8 *arg0, s8 *arg1) {

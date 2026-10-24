@@ -269,13 +269,25 @@ def build_tu(func, p, src, code):
     return PRAG.sub('', tu)
 
 def nm_resolve(text, on=True):
-    """evaluate the (non-nested) #ifdef/#ifndef NON_MATCHING ... [#else ...] #endif blocks"""
+    """evaluate the #ifdef/#ifndef NON_MATCHING ... [#else ...] #endif blocks. P225: other #if blocks nested inside
+    one are passed through (kept or dropped with their side); before, their #else / #endif were taken as the NM
+    block's own (P222 1BAF40: CERR for the whole TU; DIFFTEST_NMNEST_OLD=1 = old)."""
     out = []; state = None   # None | ('if'|'else', keep)
+    depth = 0                # P225: depth of #if blocks nested inside the current NM block
     for l in text.split('\n'):
         t = l.strip()
         if state is None and re.match(r'#\s*if(n?)def\s+NON_MATCHING\b', t):
             neg = t.startswith('#ifndef') or t.startswith('# ifndef')
-            state = ['if', on != neg]; continue
+            state = ['if', on != neg]; depth = 0; continue
+        if state is not None and not NMNEST_OLD:
+            if re.match(r'#\s*if', t): depth += 1
+            elif depth and re.match(r'#\s*endif\b', t):
+                depth -= 1
+                if state[1]: out.append(l)
+                continue
+            if depth:   # inside a nested block: an ordinary line for the NM resolver
+                if state[1]: out.append(l)
+                continue
         if state is not None and re.match(r'#\s*else\b', t):
             state = ['else', not state[1]]; continue
         if state is not None and re.match(r'#\s*endif\b', t):
@@ -766,11 +778,30 @@ JALRSKIP = {int(x) for x in filter(None, os.environ.get('DIFFTEST_JALRSKIP', '')
 NOPROTO = set(filter(None, os.environ.get('DIFFTEST_NOPROTO', '').split(',')))   # P214: selftest hook
 JALARG_OLD = os.environ.get('DIFFTEST_JALARG_OLD') == '1'
 JALARG_WIDE = os.environ.get('DIFFTEST_JALARG_WIDE') == '1'   # P214: opt-in wide jal argument compare (see compare)   # P214: old argument compare at direct calls of unknown prototype
-STKFILL = int(os.environ['DIFFTEST_STKFILL'], 16) if os.environ.get('DIFFTEST_STKFILL') else None   # P211: stack fill word
+NMNEST_OLD = bool(os.environ.get('DIFFTEST_NMNEST_OLD'))   # P225: old nm_resolve (nested #if inside an NM block breaks it)
+def _stkfill():
+    v = os.environ.get('DIFFTEST_STKFILL')
+    if not v: return None
+    try:
+        w = int(v, 16)
+        if not 0 <= w <= 0xFFFFFFFF: raise ValueError
+        return w
+    except ValueError:
+        print('ERROR DIFFTEST_STKFILL: %r is not a 32-bit hex word (e.g. A5A5A5A5)' % v); sys.exit(2)
+STKFILL = _stkfill()   # P211: stack fill word
+# P225: a value that is not a 32-bit hex word (e.g. the placeholder `WORD`) used to raise a traceback before any result
+# line, so wrappers that grep EQUIV / DIFFER / ERROR printed empty result lines (P222). Now it is an ERROR line.
 ARG_FOLD = os.environ.get('DIFFTEST_ARGF_OLD') == '1'   # P200: old behaviour (ARG on a float parameter sets only aN)
 for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
-    _a, _v = _p.split('=')
-    ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
+    # P229: a malformed item (non-decimal index such as `A=7`, missing `=`, non-hex value) used to raise a traceback
+    # before any result line, so wrappers printed empty result lines (P225). Now it is an ERROR line, like STKFILL.
+    try:
+        _a, _v = _p.split('=')
+        _n = int(_a, 10)
+        if _n < 0: raise ValueError
+        ARGFIX[_n] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
+    except ValueError:
+        print('ERROR DIFFTEST_ARG: %r is not INDEX=HEX[|HEX...] with a decimal index (e.g. 1=10)' % _p); sys.exit(2)
 
 STK_IN_MAX = 60   # P95: stack argument words sp+0x10 .. sp+0xFC (SP_ENTRY = STK_TOP - 0x100)
 
