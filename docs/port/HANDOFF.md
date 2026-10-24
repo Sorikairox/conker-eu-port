@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P195, 2026-10-24). Details: `docs/port/sessions/P195.md`
+
+Branch `port` (from P192 cc3d667). Hand C (NM), difftest EQUIV + setups + mutants (table in P195.md):
+- Level 0x29 world-mesh handlers (D_80089140 table, func_151143D4): func_151184BC `gate_swing_update` (652; mutants
+  partial, see P195.md), func_15118F2C `mover_swing_step` (350), func_1511ED08 `mover_slide_step` (308),
+  func_15119974 `mover_bob_y_update` (port-b P194 draft), func_1511A540 `pickup_spin_update` (278).
+- Other level 0x29 stubs: func_1513B5E0 `mesh_effect_spawn` (game_168A90), func_151630F4 `lightning_flash_update`
+  (game_18D770). Breadth: func_15080900 `context_action_set` (AE110), func_150DBA98 `anim_event_effect_spawn` (108C00).
+- Torch flames: not in game_eu_142E40. Best candidate is port-b's func_1518DC50 (game_eu_1BAF40, 750 insns): object-type
+  handler at D_8008BEFC that spawns particle records (func_1513D524 + 0x58-byte emitter block at rec + 0x110).
+- Checks: verify_all OK, NM links, protocheck 0 (1333), selftest 65/65, progress_nm 5327/5915 (90.1%), C bytes 73.9%.
+
+## Next steps (from P195)
+1. port-b: convert func_1518DC50 (torch-flame candidate), then browser-check the level 0x29 torches.
+2. Finish func_151184BC mutants: `TR=4 docs/port/sessions/p195/mut.sh func_151184BC docs/port/sessions/p195/151184BC_cand.c
+   docs/port/sessions/p195/151184BC_setups.txt docs/port/sessions/p195/151184BC_muts.txt` (68 setups now).
+3. Breadth (`p195/asmlist.py` after `progress_nm.py --list > port_work/p195/asmonly.txt`): func_15088130 needs
+   func_15089664 (321) / func_15089B68 (306) first (all game_eu_B37F0).
+4. Browser: level 0x29 gate / doors / scenery / pickups / lightning (P195.md section 4).
+5. Setup tip: sinf / cosf are harness stubs (random returns); pin them with RETF (cosf jal 15047EF0, sinf jal 15048050).
+
 ## State (session P192, 2026-10-24). Details: `docs/port/sessions/P192.md`
 
 - Level 0x29 stubs (browser P185 census) now hand C (NM), difftest EQUIV + setups + mutants: **func_15080628**

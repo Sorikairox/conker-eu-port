@@ -1,0 +1,33 @@
+s/if (cmd == 1) {/if (cmd != 0) {/
+s/if (state == 0 || state == 1) {/if (state == 0) {/
+s/if (state == 3 || state == 2) {/if (state == 3) {/
+s/            sfx = 1;/            sfx = 0;/
+s/dir = 1.0f;/dir = 2.0f;/
+s/dir = -1.0f;/dir = 1.0f;/
+s/dir = 90.0f;/dir = 0.0f;/
+s/if (sfx != -1) {/if (sfx > 0) {/
+s/\& 0xFFFF\])\[sfx\]/\& 0xFF])[sfx]/
+s/if (sound > 0) {/if (sound >= 0) {/
+s/0x5DC0, 0xC8, 0x9C4, 0)/0x5DC0, 0xC8, 0x9C4, 1)/
+s/range = 70.0f;/range = 72.0f;/
+s/speed = 6.0f;/speed = 5.0f;/
+s/if (type == 2 || type == 4) {/if (type == 2) {/
+s/speed = 3.0f;/speed = 6.0f;/
+s/range = 82.0f;/range = 80.0f;/
+s/if (\*y < -110.0f) {/if (*y < -100.0f) {/
+s/\*x -= dir \* 3.0f;/*x -= dir * speed;/
+s/if (\*x < 260.0f) {/if (*x <= 250.0f) {/
+s/lim = \*rest + range;/lim = *rest + speed;/
+s/lim = \*rest - range;/lim = *rest + range;/
+s/        case 8:/        case 9:/
+s/        case 7:/        case 5:/
+s/\*rest += 0.01f;/*rest += 0.02f;/
+s/\*rest += 0.04f \* dt;/*rest += 0.04f;/
+s/\*y = sinf(\*rest) \* 10.0f;/*y = sinf(*rest) * 12.0f;/
+s/if (\*rest > 12.566371f) {/if (*rest > 6.2831855f) {/
+s/((func_150ADA20() \& 4) + 1)/((func_150ADA20() \& 4) + 2)/
+s/0x503, 0x1F40, 0x96, 0x258, 0)/0x503, 0x1F40, 0x96, 0x200, 0)/
+s/\*y = 180.0 - sinf/*y = 160.0 - sinf/
+s/\*(s32 \*) (rec + 0x7C) = 1;/*(s32 *) (rec + 0x7C) = 2;/
+s/(rec\[0x73\] \& ~3) | state/(rec[0x73] \& ~1) | state/
+s/            \*y = \*rest;/            *y = -*rest;/
