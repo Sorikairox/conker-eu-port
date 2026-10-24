@@ -30,6 +30,27 @@ asm-only.
 2. func_151C0698 (1EDA00, 669; RET on the func_151B8EB8 stub; analysis P213.md section 3).
 3. Breadth: func_150A6070, func_150A6324 (D3880), func_150C8F68, func_1518F080, func_151D4D44, func_150C92B8.
 
+## State (session P217, 2026-10-24, port-web). Details: `docs/port/sessions/P217.md`
+
+- Merged port-b 427c2d4a (P210 + P213) and, on coordinator request, port-b bcdca37c (P219 func_15065E18, contains port
+  18edc1c6): HANDOFF conflicts only. After each: verify_all OK, NM link OK, protocheck 0 (1445 / 1453), float-int 0,
+  census 0 FAIL (722, clean rebuild), arity 139 / 137 lines (tool changed in bcdca37c), m2c 285 / 287.
+- **B pad works**: B on the pad -> q 0x2000 cmd 0xAA = 4 (item held), scene 4 31803 .. 33263, then ev 1074 waits on
+  q 0x4036 / 0x4008. Level-0x29 stub census 0 (scarecrow, hit, bpad routes; Chrome first-hit lists).
+- B attack on Birdy: C hit path, no trap / stub / null-zone write; no visible knock-back (Birdy is a scripted NPC).
+- **Multiplayer reached** (menu path in P217.md 4): Race A (level 0x33) and Total War (0x2D) start; HUD (lap, place,
+  map, timer; radar with dot, ammo squares, countdown) draws. Conker cannot move; in Race the first death goes black
+  for good: stub func_1507D1D8 (MP respawn, A9D90).
+- Node census runs fail when other slots use the Docker VM (rc 137 / swapping at 5.3 GiB): run them only when the VM is idle.
+
+## Next steps (from P217)
+1. port: func_1507D1D8 (A9D90, MP respawn); then the MP control / start stubs (B7840 func_1508C07C / B854 / CA14 /
+   E080, B37F0 func_15086268, 40490 func_150130B4, 142E40 func_1511E4F4, 78230 func_150528C8, 20B730 func_151E5E08,
+   CC5F0 func_1509F4D0, 14FA00 func_151221F0, init_B1B0 func_1000C530, 216470 func_151E9150, CA630 func_1509D590),
+   func_15164E0C (192500), func_151ECE00 (216470 menu DL).
+2. port-web: level 0x29 after scene 4 (zone 0x36 / river); MP rails / laps once Conker can move.
+3. port-b reviews: arity D_80086A34 rows (func_1505B9C4 / func_1505C1E4, a3), func_15167E0C; m2c func_15167C58.
+
 ## P216 (port-b) (session P216, 2026-10-24). Details: `docs/port/sessions/P216.md`
 
 Branch `port-b`. Hand C (NM), difftest EQUIV + 10 setups + mutants 20/20: func_151D5DA8 mouth_aim_ray (201240, void;
