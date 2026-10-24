@@ -153,7 +153,10 @@ case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread
 # P134: a callee declared only in a header (cosf in gu.h) takes its arity / float slots from there: a0 (written at the
 # call site, &D_800CC298) is not an argument of cosf(float). DIFFTEST_HDRSLOT_OLD=1 = pre-P134 (false DIFFER on a0).
 chkce EQUIV  func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1"
-chkce DIFFER func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1"
+# P234: the included-header prototypes (gu.h `cosf`) now come first, so HDRSLOT_OLD alone has no effect: the P134
+# false DIFFER needs DIFFTEST_INCHDR_OLD=1 too
+chkce DIFFER func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1 DIFFTEST_INCHDR_OLD=1"
+chkce EQUIV  func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1"
 chkce DIFFER func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1" 's/0.35000002f/0.35f/'
 # P176: a stub on the last word of a page (func_151CFFFC at 0x151CFFFC): its delay slot runs as a separate Unicorn
 # block that was taken for a second call (both sides faulted at 0 -> UNSURE). Type-0x25 object with +0x2EC set.
@@ -242,4 +245,12 @@ TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_STKFILL=A5A5A5A5"
 # a valid decimal index with a hex value still runs.
 TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_ARG=A=7"
 TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_ARG=0=7"
+# P234: a callee declared only in a header the TU includes (func_150ADA20 / func_150ADA68 in functions.h) has a known
+# prototype: IDO's scratch f12 left right before `jal func_150ADA20` is not an argument (P232 func_15109DC8 first run
+# was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
+S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151308E4=0:92,151308E4=0+60:6,151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8 DIFFTEST_RET=150ADF00=0;0;0 DIFFTEST_RETF=150ADF48=3F000000;3E800000"
+TRIALS=4 chkce EQUIV  func_15109DC8 "$S9DC8"
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8 DIFFTEST_INCHDR_OLD=1"
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/t.life = (func_150ADA20() \& 0xF) + 10;/t.life = (func_150ADA20() \& 0xF) + 11;/'
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/scale = (func_150ADA68() \* D_800A2A04/scale = (func_150ADA68() * D_800A2A08/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

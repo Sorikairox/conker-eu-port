@@ -1,0 +1,2 @@
+# P234 func_151603FC mutant
+s/D_8008B0F0\[arg0->unkF\](arg0)/D_8008B0F0[arg0->unkF](NULL)/ % 

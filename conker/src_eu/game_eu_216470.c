@@ -401,7 +401,111 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9E1C.s")
 
+#ifdef NON_MATCHING
+extern s16 D_800E0ED0[];         /* team score */
+extern char D_800ABEB0[], D_800ABEB4[];
+s32 func_1510D66C(s32, s32, s32, s32);
+u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#define TW_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
+/* mp_team_score_draw: P237. The two-team score panel (Total War and the other team modes; func_151E9150 /
+ * func_151EA90C call it with D_80090160 0x6340) at screen row `y` - 16; returns the new DL end (`buf` unchanged
+ * when the texture is not loaded). Texture: 0xD12 (32 x 32) normally, 16 x 16 0xD13 with D_80090160 0x4000 or 0xD14
+ * in barrel mode 8 (D_80090174 + 0x42); loaded as RGBA32 with an env colour of white. With `update` the scores are
+ * recomputed and stored in D_800E0ED0[0] / [1]: with 0x6040 the team totals func_150859AC(team, 6); with 0x100 the
+ * sum of func_150859AC(player, 3) (negative = 0) per team (+0x128 of D_800CC2D0[player]); else the barrel rows'
+ * s16 +0x46 (negative = 0) by D_800E1030 team, and the icons use the lower half of the sheet (t + 0x200). Without
+ * `update` the stored scores are drawn. Two icons (x 0x108 and 0x318, 0x40 high; 32 x 32: the right half of the sheet
+ * then the left; 16 x 16: the upper then the lower), then the scores in grey (D_800ABEB0 team 1 at x 0x4F,
+ * D_800ABEB4 team 0 at x 0xD3, text row y / 4 - 3). */
+u8 *func_151EA4C8(u8 *buf, s32 y, s32 update) {
+    Gfx *gdl = (Gfx *) buf;
+    s32 top, size, tex, ls, lt, score0, score1, i, n, v, lrs, row;
+
+    top = y - 0x10;
+    if (!(D_80090160 & 0x4000) && *(s8 *) (D_80090174 + 0x42) != 8) {
+        tex = 0xD12;
+        size = 0x20;
+        ls = 0x200;
+        lt = 0;
+    } else {
+        tex = 0xD13;
+        size = 0x10;
+        if (*(s8 *) (D_80090174 + 0x42) == 8) {
+            tex = 0xD14;
+        }
+        ls = 0;
+        lt = 0x200;
+    }
+    tex = func_1510D66C(tex, 0, 3, 0);
+    if (tex == (s32) 0x80000000) {
+        return buf;
+    }
+    gDPPipeSync(gdl++);
+    TW_W(gdl, 0xFD180000, tex);                                     /* SetTImg RGBA32 */
+    TW_W(gdl, 0xF5180000, 0x07094250);                              /* SetTile (load) */
+    gDPLoadSync(gdl++);
+    lrs = size * 32 - 1;
+    if (lrs >= 0x7FF) {
+        lrs = 0x7FF;
+    }
+    TW_W(gdl, 0xF3000000, 0x07000000 | ((lrs & 0xFFF) << 12));      /* LoadBlock */
+    gDPPipeSync(gdl++);
+    TW_W(gdl, 0xF5180000 | ((((size * 2 + 7) >> 3) & 0x1FF) << 9), 0x00094250); /* SetTile (render) */
+    TW_W(gdl, 0xF2000000, ((((size - 1) * 4) & 0xFFF) << 12) | 0x7C);  /* SetTileSize */
+    TW_W(gdl, 0xEF000C3F, 0x00504244);                              /* SetOtherMode */
+    TW_W(gdl, 0xFB000000, 0xFFFFFFFF);                              /* SetEnvColor white */
+
+    row = 0;
+    score0 = 0;
+    score1 = 0;
+    if (update) {
+        if (D_80090160 & 0x6040) {
+            score0 = func_150859AC(0, 6);
+            score1 = func_150859AC(1, 6);
+        } else if (D_80090160 & 0x100) {
+            for (i = 0; i < D_8008FD8C; i++) {
+                v = func_150859AC((s16) i, 3);
+                if (v < 0) {
+                    v = 0;
+                }
+                if (D_800CC2D0[i].unk128 != 0) {
+                    score1 += v;
+                } else {
+                    score0 += v;
+                }
+            }
+        } else {
+            row = 0x200;
+            n = D_8008FD8C;
+            for (i = 0; i < n; i++) {
+                v = *(s16 *) (D_80090174 + 0x46 + i * 2);
+                if (v < 0) {
+                    v = 0;
+                }
+                if (D_800E1030[i] != 0) {
+                    score1 += v;
+                } else {
+                    score0 += v;
+                }
+            }
+        }
+        D_800E0ED0[0] = score0;
+        D_800E0ED0[1] = score1;
+    } else {
+        score0 = D_800E0ED0[0];
+        score1 = D_800E0ED0[1];
+    }
+    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x108, top, 0x148, top + 0x40, 0, ls, row, 0x400, 0x400);
+    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x318, top, 0x358, top + 0x40, 0, 0, row + lt, 0x400, 0x400);
+    func_1504332C(0xC0, 0xC0, 0xC0, 0xFF);
+    func_15042D94(0x4F, (top >> 2) + 1, 0x80, D_800ABEB0, score1);
+    func_15042D94(0xD3, (top >> 2) + 1, 0x80, D_800ABEB4, score0);
+    return (u8 *) gdl;
+}
+#undef TW_W
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EA4C8.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s8 D_800901E4[4];         /* player queue (controller numbers, -1 empty) */

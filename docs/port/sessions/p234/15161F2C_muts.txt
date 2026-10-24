@@ -1,0 +1,2 @@
+# P234 func_15161F2C mutant
+s/    return func_15163F50(arg0, \&arg0->unk18);/    func_15163F50(arg0, \&arg0->unk18); return 0;/ % 

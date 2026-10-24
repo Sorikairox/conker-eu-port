@@ -1386,7 +1386,25 @@ void func_150F16F0(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F16F0.s")
 #endif
+#ifdef NON_MATCHING
+void func_15149514(s32, u8, s32, s32, s32);
+// fx_hit_handler: P237. Hit handler of an effect (sibling of func_150F1C04; record at +0x28 = target id, +0x2C =
+// target slot byte). Event 0x43: when the hitter `other` is the target (same id, or same byte +4 as +0x2C) the effect
+// ends (func_1516972C). Any other event is passed on to func_15149514(other, event, &id, &slot, obj).
+void func_150F1B78(u8 *obj, s32 *other, u8 event) {
+    u8 *p = obj + 0x28;
+
+    if (event == 0x43) {
+        if (other[0] == *(s32 *) p || p[4] == ((u8 *) other)[4]) {
+            func_1516972C((struct102 *) obj);
+        }
+        return;
+    }
+    func_15149514((s32) other, event, (s32) p, (s32) (p + 4), (s32) obj);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11CB90/func_150F1B78.s")
+#endif
 
 void func_150F1C04(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *p = arg0 + 0x18;

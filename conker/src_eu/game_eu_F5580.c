@@ -35,7 +35,25 @@ void func_150C7E30(u8 *arg0) {
     func_1511563C(arg0);
 }
 
+#ifdef NON_MATCHING
+void func_15116690(u8 *obj);
+// obj_shade_from_level: P237. Object callback (same family as func_150C7DE0 / func_150C7E30): runs func_15116690(obj),
+// then, unless the object's +0x73 bit 2 is set, gives its model record (+0x7C, when there is one) the shade byte
+// +0x13 = the level block's (D_800DBEF4) s16 +0x21C / 16.
+void func_150C7E68(u8 *obj) {
+    u8 *rec;
+
+    func_15116690(obj);
+    if (!(obj[0x73] & 4)) {
+        rec = *(u8 **) (obj + 0x7C);
+        if (rec != NULL) {
+            rec[0x13] = *(s16 *) ((u8 *) D_800DBEF4 + 0x21C) >> 4;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F5580/func_150C7E68.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1000D96C(s32, s32, s32);
