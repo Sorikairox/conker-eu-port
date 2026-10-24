@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P258, 2026-10-25, port-web). Details: `docs/port/sessions/P258.md`
+- Merged port aad230e1 and port-b 21b85bac; checks after each: verify_all OK, NM OK, protocheck 0, floatint 0,
+  implicit NM+float 0, romabs 0 FAIL, census (clean) 722 / 0 FAIL, selftest 123 / 0. Registry 248 rows (new
+  `p258/reg3way.py`: 3-way merge by func, replaces regmerge). Link fix: port/audio/mp3_pc.c Huffman / IMDCT36 now under
+  `#ifdef P258_MP3_PC_OLD` (game C defines them since port-b P251).
+- **Tank draws and drives** (det=2): black screen gone, tank moves, turret turns; new port stubs func_1506CE6C
+  (game_981E0) at 7565, func_151030B8 (game_eu_1306B0) at 10693.
+- **MP3 game C plays**: `?p258pcm=N` PCM hashes, pre vs post merge on the same det=2 frames: 33 MP3 windows
+  bit-identical, the rest LSB-level or gameplay divergence; Web Audio pulls non-zero audio.
+- Save screen: slot draw (icons, chapter picture) OK, no stub.
+- Level 0x29: no route stubs left (P255). Route re-tuned (`p258/r5g.goto`: plateau 12254, rim 12422).
+  Script: event 7 (after 6) keeps the Baddie unbeatable (prop 0x13 = 0xFF) until event 5 "Frying Pan" is done, and
+  event 5 only runs in level 0x2E. **Lever** (user hint) found at about (2190, 1734, -2840) on the rim before the bridge
+  (world obj 10 = its handle?); B / jumps from its west side did nothing; the door is probably world objs 8 / 9
+  (swinging doors at gap 2, (-337 / -62, 733, -5514 / -5789)).
+
+## Next steps (from P258)
+1. port-web: pull the lever from its handle (east / north) side, jump + hang on the handle; then doors 8 / 9 at gap 2
+   (`p258/lever.goto` is the start; base route r5g).
+2. port: func_1506CE6C (game_981E0), func_151030B8 (game_eu_1306B0) (Tank); func_15194210 (1C1A20, P256).
+3. Find how level 0x2E (event 5 Frying Pan) is entered.
+
 ## State (session P255, 2026-10-25). Details: `docs/port/sessions/P255.md`
 - Level 0x29 route stubs (browser P248 / P252), hand C (NM), all random EQUIV + setups + mutants 100%: func_150D88E8
   tile_slide_by_anim_update (scene 7), func_15072B44 player_anim_follow_up (event-4 bubbles), func_151473F4
