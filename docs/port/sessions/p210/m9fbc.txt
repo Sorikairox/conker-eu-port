@@ -1,0 +1,15 @@
+s/struct127 \*player = \&D_800CC2D0\[0\];/struct127 *player = \&D_800CC2D0[1];/
+s/if (player->unk65 == 0 || player->unk44 < 5.0f) {/if (player->unk65 == 0 \&\& player->unk44 < 5.0f) {/
+s/player->unk44 < 5.0f) {/player->unk44 <= 5.0f) {/
+s/D_800D154C->unk232 = D_800D1891;/D_800D154C->unk232 = D_800D1890;/
+s/func_1507BB28(0, D_800D154C->unk232)/func_1507BB28(1, D_800D154C->unk232)/
+s/        D_800D154C->unk218--;/        ;/
+s/        return;/        ;/
+s/D_800D154C->unk78 = player->unk31C->unk4C;/D_800D154C->unk78 = player->unk7A;/
+s/if (player->unk31C->chased != 0) {/if (player->unk31C->chased == 0) {/
+s/speed = player->unk44 \* D_8009A5A4;/speed = player->unk44 * 0.75f;/
+s/if (speed < 17) {/if (speed <= 17) {/
+s/        D_800D1893++;/        ;/
+s/D_800D1890 = 8;/D_800D1890 = 9;/
+s/D_800D1892 = speed;/D_800D1892 = speed + 1;/
+s/D_800D154C->unkF4 |= 0x40;/D_800D154C->unkF4 |= 0x80;/

@@ -1,0 +1,70 @@
+s/u8 kind = desc->kind \& 0x7F;/u8 kind = desc->kind;/
+s/u8 type = obj->unk239 \& 0x7F;/u8 type = obj->unk239;/
+s/if (type != 0 \&\& (count = D_8009AA60\[type\]) > 0) {/if (type != 0 \&\& (count = D_8009AA60[type]) > 1) {/
+s/for (n = 0; n < count; n++, rule++) {/for (n = 1; n < count; n++, rule++) {/
+s/            if (rule->action \& 0x80) {/            if (rule->action \& 0x40) {/
+s/                if (rule->kind == kind) {/                if (rule->kind != kind) {/
+s/} else if (rule->kind != kind) {/} else if (rule->kind == kind) {/
+s/action = rule->action \& 0x7F;/action = rule->action \& 0x3F;/
+s/func_1505C140(self, obj) > 0x4000/func_1505C140(self, obj) >= 0x4000/
+s/func_1505C140(self, obj) < 0x4000/func_1505C140(self, obj) <= 0x4000/
+s/rule->cond == 3 \&\& obj->stunned == 0/rule->cond == 3 \&\& obj->stunned != 0/
+s/rule->cond == 4 \&\& obj->stunned != 0/rule->cond == 4 \&\& obj->stunned == 0/
+s/self->x_position - obj->x_position, obj->z_position - self->z_position, 0/obj->x_position - self->x_position, obj->z_position - self->z_position, 0/
+s/(((s32)ang - obj->unk7A + 0x4000) >> 15)/(((s32)ang - obj->unk7A + 0x4000) >> 14)/
+s/(((s32)ang - obj->unk7A + 0x4000) >> 15)/(((s32)ang - self->unk7A + 0x4000) >> 15)/
+s/(((s32)ang - obj->unk7A + 0x4000) >> 15) \& 0xFFFF/(((s32)ang - obj->unk7A + 0x4000) >> 15) \& 1/
+s/(((s32)ang - obj->unk7A + 0x4000) >> 15)/(((s32)ang - obj->unk7A) >> 15)/
+s/                    if (rule->param != 0xFF) {/                    if (rule->param != 0xFE) {/
+s/tbl = (HitDesc \*)D_8009A6D8 + rule->param - idx;/tbl = (HitDesc *)D_8009A6D8 + rule->param;/
+s/if ((desc->damage \& mask) < obj->health) {/if ((desc->damage \& mask) <= obj->health) {/
+s/if ((desc->damage \& mask) < obj->health) {/if ((desc->damage) < obj->health) {/
+s/                    obj->health = 0;/                    ;/
+s/obj->unkF4 \&= ~0x00040040;/obj->unkF4 \&= ~0x00040000;/
+s/self->unk108 = slot + 0x7F;/self->unk108 = slot + 0x80;/
+s/self->unk107 = 0x3C;/self->unk107 = 0x3D;/
+s/obj->unk1C4 = 0;/;/
+s/                    obj->unk218 = NULL;/                    ;/
+s/obj->disable_run = 1;/obj->disable_run = 2;/
+s/                    obj->unkD0 = 0;/                    ;/
+s/obj->unk232 = rule->param;/obj->unk232 = rule->kind;/
+s/if (obj->interaction_state == 1) {/if (obj->interaction_state == 0) {/
+s/if (ctl->unk4E == 2 \&\& ctl->unk84 == 0) {/if (ctl->unk4E == 2 || ctl->unk84 == 0) {/
+s/ctl->pad4F\[1\] = 30;/ctl->pad4F[1] = 31;/
+s/obj->unk81 = 0;/;/
+s/obj->y_velocity = 50.0f;/obj->y_velocity = 40.0f;/
+s/obj->gravity = 2.0f;/obj->gravity = 1.0f;/
+s/if (obj->unk84.uh == 0x283) {/if (obj->unk84.uh != 0x283) {/
+s/obj->unk76 = self->unk7A;/obj->unk76 = obj->unk7A;/
+s/obj->xz_velocity = 25.0f;/obj->xz_velocity = 24.0f;/
+s/D_800D1580 = 0xFF0102E2;/D_800D1580 = 0xFF0102E3;/
+s/                        self->unkD0 = 0;/                        ;/
+s/self->unk232 = 0xD;/self->unk232 = 0xC;/
+s/                        self->unk218 = NULL;/                        ;/
+s/if (8.0f < obj->unk28) {/if (8.0f <= obj->unk28) {/
+s/if (obj->unk28 == 0.0f) {/if (obj->unk28 != 0.0f) {/
+s/self->unk2EC = 100;/self->unk2EC = 101;/
+s/                        self->unkD0 = 0;$/                        self->unkD0 = 1;/
+s/D_80086A34\[handler\](self, obj, scratch);/D_80086A34[handler](obj, obj, scratch);/
+s/u8 handler = desc->handler;/u8 handler = desc->handler + 1;/
+s/if (obj->unkFC != 0) {/if (obj->unkFC == 0) {/
+s/if (func_1506E46C(self, \&effect, 1) != 0) {/if (func_1506E46C(self, \&effect, 0) != 0) {/
+s/func_15060B04(effect, obj, 0x5DC0);/func_15060B04(effect, self, 0x5DC0);/
+s/D_800D1580 = desc->sound;/D_800D1580 = desc->sound + 1;/
+s/                    if (desc->sound != 0) {/                    if (desc->sound == 0) {/
+s/hits |= 1 << ((slot - 1) \& 0x1F);/hits |= 1 << (slot \& 0x1F);/
+s/                    continue; \/\* failed/                    break; \/* failed/
+s/        return hits;/        return 0;/
+s/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/func_1505B9C4(self, obj, (s32)tbl, (s32)tbl, idx, slot, mask);/
+s/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, mask);/func_1505B9C4(self, obj, (s32)descs, (s32)tbl, idx, slot, 7);/
+s/return hits | (1 << ((slot - 1) \& 0x1F));/return hits | (1 << (slot \& 0x1F));/
+s/                case 9:/                case 99:/
+s/                case 2:/                case 22:/
+s/                case 3:/                case 33:/
+s/                case 1: {/                case 11111: {/
+/case 6:/,/break/s/mask = 0;/;/
+/case 4:/,/break/s/mask = 0;/;/
+/case 2:/,/break/s/idx = rule->param;/idx = rule->kind;/
+/case 13:/,/break/s/handled = TRUE;/;/
+/case 12:/,/break/s/handled = TRUE;/;/
+/case 3:/,/break/s/handled = TRUE;/;/

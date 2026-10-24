@@ -1,0 +1,6 @@
+s/        if (\*(s16 \*)(n + 0x38) < 0) {/        if (*(s16 *)(n + 0x38) <= 0) {/
+s/    if (fade > 0) {/    if (fade >= 0) {/
+s/            if (last < frame) {/            if (last <= frame) {/
+s/= last - \(\*(s16 \*)(n + 0x1C) . last;\)/= \1/
+s/            } else if (frame < 0) {/            } else if (frame <= 0) {/
+s/= -\(frame . last;\)/= \1/

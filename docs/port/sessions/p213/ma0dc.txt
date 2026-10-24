@@ -1,0 +1,26 @@
+s/    s32 ret = 0;/    s32 ret = 1;/
+s/o != \&D_800CC2D0\[25\]/o != \&D_800CC2D0[24]/
+s/        ret = o->interaction_state;/        ret = 0;/
+s/if (ret == 0 || /if (/
+s/!(o->unk28 < 20.0f)/!(o->unk28 <= 20.0f)/
+s/ || o->immune != 0) {/) {/
+s/if (o->id != 0x53 \&\& ret != 1) {/if (o->id != 0x53 \&\& ret != 2) {/
+s/if (o->id != 0x53 \&\& ret != 1) {/if (ret != 1) {/
+s/dx = o->x_position - \*(f32 \*)(node + 0x10);/dx = o->x_position - *(f32 *)(node + 0x14);/
+s/dz = o->z_position - \*(f32 \*)(node + 0x18);/dz = o->y_position - *(f32 *)(node + 0x18);/
+s/sqrtf(dx \* dx + dz \* dz) - 100.0f;/sqrtf(dx * dx + dz * dz) - 101.0f;/
+s/if (o->id == 0x53 \&\& o->unk13C == 0) {/if (o->id == 0x53) {/
+s/            dist -= 150.0f;/            dist -= 151.0f;/
+s/reach = \*(f32 \*)(node + 0x44) - dist;/reach = *(f32 *)(node + 0x40) - dist;/
+s/if (!(0.0f <= reach) || /if (!(0.0f < reach) || /
+s/!(reach < 250.0f)) {/!(reach <= 250.0f)) {/
+s/        if (o->id == 0x53) {/        if (o->id == 0x54) {/
+s/o->disable_run = 10;/o->disable_run = 11;/
+s/o->unk218 = NULL;/;/
+s/o->unk232 = 0x13;/o->unk232 = 0x12;/
+s/D_800CC2D0\[o->unk124\].unk65 != 0/o->unk65 != 0/
+s/o->unk232 = 0x14;/o->unk232 = 0x15;/
+s/ret = func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000E, o->unk7A, -1);/
+s/func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000F, o->unk7A, -1);/
+s/func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000E, o->unk76, -1);/
+s/func_1505D024(o, 0x6000E, o->unk7A, -1);/func_1505D024(o, 0x6000E, o->unk7A, 0);/

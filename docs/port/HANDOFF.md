@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P213 (port-b) (session P213, 2026-10-24). Details: `docs/port/sessions/P213.md`
+
+Branch `port-b`. Hand C (NM), difftest EQUIV + setups + mutants: func_150562FC object_carried_update, func_1505E874
+hit_reaction_advance (83300, void since P209), func_15190A2C effect_node_release (1BAF40, D_8008FC60 handler),
+func_150CA0DC shockwave_hit_objects (F6060, D_80088C00 handler, s32 leftover v0 kept). P210 setup gaps closed: 602c
+t == 12, 68dc self2, 7e0c boundaries + both `%` mutants (rewritten with `.` and groups), 85f0 unk28 0.2f - all killed;
+remaining: 68dc func_1505A630 x-swap (waiting for port P211's harness check), 7e0c life `<= 0` (equivalent).
+Blocked: func_151C0698 (needs port's func_151B8EB8 to return the func_151307F0 result; payload +0x84 is dereferenced
+by func_151C1730), func_151901F4 (dispatcher func_1519AF14 leaves a1). Checks: verify_all rc 0, NM links, protocheck 0 (1445), selftest 71/71. progress_nm total 5439 / 5915 (92.0%), 476 asm-only.
+
+## Next steps (from P213)
+
+1. port: func_151B8EB8 (1E61C0) -> `s32`, returning func_151307F0's result; then port-b converts func_151C0698
+   (analysis in P213.md section 3).
+2. func_151901F4 after the a1 of func_1519AF14's D_8008FC48 jalr is known (port's file).
+3. Breadth in port-b files: func_151D5DA8, func_150A6070, func_150A6324, func_150C8F68, func_1518F080,
+   func_151D4D44, func_150C92B8.
+4. Re-run the func_150768DC x-swap mutant after P211's harness answer.
+
 ## State (session P212, 2026-10-24, port-web). Details: `docs/port/sessions/P212.md`
 
 - Merged port d93bdcd (P204 / P207 / P209 + port-b P203 / P206) and port-b 33387f8 (P208): HANDOFF.md conflicts only
@@ -30,6 +49,24 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. port-web: after the merge, padwalk212 `bpad2` (P212 route) -> B on the pad -> follow q 0x2000 cmd 0xAA, then the
    river crossing / door north (fence at z ~548).
 4. Reviews: m2c func_150F5FD4 width high (port), func_150867D4 (port), func_150F8EAC (port-b); arity func_151D7814 (port).
+
+## P210 (port-b) (session P210, 2026-10-24). Details: `docs/port/sessions/P210.md`
+
+Branch `port-b`. Merge of `port` d93bdcd (30e140a7; func_15142600 now void, 126330 func_150FFC60 declaration =
+P209's) + hand C (NM), difftest EQUIV + setups + mutants: func_1505B9C4 object_apply_hit, func_1505C1E4
+object_receive_hit, func_150585F0 object_stun_update (83300); func_15076D3C object_set_scale, func_15079FBC
+follow_player_speed, func_1507602C path_jump_to_point, func_150768DC find_visible_target, func_15078544
+path_point_from_object, func_1507AA48 set_heading_cmd, func_15079B30 object_var_cmd (A28B0, script command handlers
+of D_80086730); func_15167C58 sprite_quad_draw, func_15167E0C sprite_node_update (1944C0, render layer callbacks of
+D_8008B848). Checks: verify_all rc 0, NM links, protocheck 0 (1441), selftest 71/71. progress_nm total 5435 / 5915
+(91.9%), 480 asm-only.
+
+## Next steps (from P210)
+
+1. func_150562FC (400), func_1505E874 (304) in 83300 (void prototypes since P209).
+2. func_151C0698 (1EDA00, 669 words), callee func_151B8EB8 is C now.
+3. Setup gaps listed in P210.md section 1 notes (602c, 68dc, 7e0c, 85f0).
+4. Other owner: func_15074C80 (981E0) has 2 parameters in the void/3 hit handler table D_80086A34.
 
 ## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
 

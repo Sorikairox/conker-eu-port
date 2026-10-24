@@ -1,0 +1,2 @@
+s/if (ret == 0 || /if (/
+s/            dist -= 150.0f;/            dist -= 151.0f;/

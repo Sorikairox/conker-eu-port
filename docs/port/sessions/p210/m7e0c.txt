@@ -1,0 +1,35 @@
+s/if (t != 0x7FFF) {/if (t != 0x7FFE) {/
+s/\*(s16 \*)(n + 0x38) = t - D_800BE9E4;/*(s16 *)(n + 0x38) = t - 1;/
+s/        if (\*(s16 \*)(n + 0x38) < 0) {/        if (*(s16 *)(n + 0x38) <= 0) {/
+s/    if (fade > 0) {/    if (fade >= 0) {/
+s/if (fade < n\[0x3F\]) {/if (fade <= n[0x3F]) {/
+s/n\[0x3F\] -= fade;/n[0x3F] -= fade + 1;/
+s/if ((s8)n\[0x2F\] != -1 \&\& /if (/
+s/D_8008CD68\[(s8)n\[0x2F\]\](n);/D_8008CD68[(s8)n[0x2F] + 1](n);/
+s/\*(s16 \*)(n + 0x30) += \*(s16 \*)(n + 0x32);/;/
+s/((\*(s16 \*)(n + 0x22) << 8) | n\[0x2E\]) + \*(s16 \*)(n + 0x30)/((*(s16 *)(n + 0x22) << 8) | n[0x2E]) + *(s16 *)(n + 0x32)/
+s/\*(s16 \*)(n + 0x22) = v >> 8;/*(s16 *)(n + 0x22) = v >> 9;/
+s/n\[0x2E\] = v;/n[0x2E] = v >> 1;/
+s/((\*(s16 \*)(n + 0x20) << 8) | n\[0x2C\])/((*(s16 *)(n + 0x20) << 8) | n[0x2D])/
+s/\*(s16 \*)(n + 0x26) \* D_800BE9E4/*(s16 *)(n + 0x28) * D_800BE9E4/
+s/n\[0x2C\] = v;/;/
+s/((\*(s16 \*)(n + 0x24) << 8) | n\[0x2D\])/((*(s16 *)(n + 0x24) << 8))/
+s/\*(s16 \*)(n + 0x24) = v >> 8;/*(s16 *)(n + 0x24) = v;/
+s/        if (speed != 0) {/        if (speed > 0) {/
+s/last = ((\*(u8 \*\*)(n + 0x10))\[4\] << 8) - 1;/last = ((*(u8 **)(n + 0x10))[4] << 8);/
+s/\*(s16 \*)(n + 0x1C) += speed \* D_800BE9E4;/*(s16 *)(n + 0x1C) += speed;/
+s/            if (last < frame) {/            if (last <= frame) {/
+s/                if (flags \& 0x20) {/                if (flags \& 0x40) {/
+s/\*(u16 \*)(n + 0x44) = flags | 0x80;/;/
+s/                    if (flags \& 2) {/                    if (flags \& 1) {/
+s/= last - \*(s16 \*)(n + 0x1C) % last;/= \*(s16 *)(n + 0x1C) % last;/
+s/\*(s16 \*)(n + 0x1E) = -\*(s16 \*)(n + 0x1E);/;/
+s/                        } while (last < \*(s16 \*)(n + 0x1C));/                        } while (0);/
+s/            } else if (frame < 0) {/            } else if (frame <= 0) {/
+s/                if (flags \& 0x40) {/                if (flags \& 0x20) {/
+s/= -frame % last;/= frame % last;/
+s/\*(s16 \*)(n + 0x1E) = -speed;/;/
+s/                    } while (\*(s16 \*)(n + 0x1C) < 0);/                    } while (0);/
+s/    if (done) {/    if (!done) {/
+s/        if ((s8)n\[0x48\] != -1) {/        if ((s8)n[0x48] == -1) {/
+s/        func_1516972C((struct102 \*)n);/        ;/

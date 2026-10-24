@@ -499,8 +499,8 @@ void func_151424F4(Mtx *m, f32 s1, f32 s2, f32 rx, f32 ry, f32 rz, f32 sx, f32 s
 // mtx_look_along_scaled: P208: builds in `m` (guMtxF2L) the matrix that puts a model at (x0, y0, z0) facing
 // (x1, y1, z1): row 2 is the unit direction, row 0 the horizontal side vector (dir.z, 0, -dir.x) normalised, row 1
 // the up vector dir x side normalised; every row is scaled per column by (sx, sy, sz), rows 0 / 2 also by `scale`
-// and row 1 by `up_scale`. game_eu_E66D0's prototype gives it an s32 result: the callers ignore it, returns 0.
-s32 func_15142600(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 sz, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
+// and row 1 by `up_scale`. No result (P210: void, as game_eu_E66D0's prototype since port P209).
+void func_15142600(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 sz, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1,
                   f32 z1) {
     f32 mf[4][4];
     f32 dx, dy, dz, inv, fx, fy, fz, rx, rz, ux, uy, uz;
@@ -537,7 +537,6 @@ s32 func_15142600(Mtx *m, f32 scale, f32 up_scale, f32 sx, f32 sy, f32 sz, f32 x
     mf[3][2] = z0;
     mf[3][3] = 1.0f;
     guMtxF2L(mf, m);
-    return 0;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_16EE20/func_15142600.s")
