@@ -2527,7 +2527,8 @@ s32 func_15065E18(struct127 *obj, s32 buttons, s32 held, f32 height, s32 recurse
                 func_150FC438((struct127 *)other, obj, 0, carryAnim);
                 func_10010A3C((struct127 *)other);
                 if (B(obj, 4) == 0x80 && (func_150ADA20() & 3) == 0) {
-                    func_1000FA64(func_1000F568(0x57C, 6), POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)func_1000EFB4, obj,
+                    u16 v = func_1000F568(0x57C, 6); /* voice id: the asm masks it to u16 */
+                    func_1000FA64(v, POSARGS(obj), 0x7FFF, 1000, 0x1F4, (s32)func_1000EFB4, obj,
                                   (s32)D_80099A90, 0, 0);
                 }
             }

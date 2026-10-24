@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P220 (port-b) (session P220, 2026-10-24). Details: `docs/port/sessions/P220.md`
+
+Branch `port-b`. **func_15065E18 player_item_action** (90F50): 40 targeted setups (RET on func_15064240 /
+func_150810F4 / func_151F2CDC (key 151F349C) / func_1506401C / func_15083568, pad pokes via D_800CC6A4 / D_800CC6B0 /
+D_800CC6AC, ctl +0x8 for case 3, noAnim = 0 for the `done` cases 0x1A / 0x2A) all EQUIV; mutants 33/34 killed, the one
+survivor (`D_800D1940 & 7` -> `& 3` inside `== 0x42`) is equivalent. Fix: case 0x1B's voice id is u16 (the asm masks it).
+Hand C (NM): **func_151C0698 projectile_fire** (1EDA00, 669): ARGMEM setups found two draft bugs (inexact float
+literals 0.047 / 1.009, missing payload +0xCC = trace hit), fixed; 18/20 setups EQUIV (2 differ only on the asm's
+leftover v0), mutants 33/33. **func_150C8F68 ring_effect_update** (F6060, 212): 13/14 setups EQUIV (h3d: a1 the
+target never reads), mutants 26/26; handlers func_150C9EB4 / func_150CA2C4 now take (.., f32, f32) (wasm type).
+func_150A6070 / func_150A6324 were already C (P130). Checks: verify_all rc 0, NM links, protocheck 0 (1455), selftest
+91/91. progress_nm total 5449 / 5915 (92.1%), C bytes 80.6%, 466 asm-only.
+
+## Next steps (from P220)
+
+1. func_1506401C (90F50, func_15065E18 case 0x3A's item lookup).
+2. Breadth: func_150C92B8 (F6060, ring effect draw), func_1518F080 (1BAF40), func_151D4D44 (201240).
+3. Browser: level 0x29 B-pad (func_15065E18 case 0x3C), gun shots (func_151C0698), shockwave rings (func_150C8F68).
+4. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098
+   (106830), func_150DC2F0 (109770), func_150FC438 (129650).
+
 ## P219 (port-b) (session P219, 2026-10-24). Details: `docs/port/sessions/P219.md`
 
 Branch `port-b`. Merged port 18edc1c6 (difftest P211/P214/P215 fixes, func_151B8EB8 s32); after the merge verify_all
