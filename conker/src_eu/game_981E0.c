@@ -3249,7 +3249,14 @@ s32 func_150335C8(u8 *, u8 *, s32, s32, s32, s32);
 s32 func_15166688(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_15194858(u8 *, u8 *);
 
+// P214: entry of hit-handler table D_80086A34, whose other 36 entries are void (a, b, s32): the NM build takes the
+// third (unused) argument too, so the port's indirect call type matches. The extra parameter changes IDO's frame
+// (0x10 bytes), so the default build keeps the 2-parameter definition.
+#ifdef NON_MATCHING
+void func_15074C80(u8 *arg0, u8 *arg1, s32 arg2) {
+#else
 void func_15074C80(u8 *arg0, u8 *arg1) {
+#endif
     s32 var_a2;
 
     if ((*(u16 *)((u8 *)arg0 + 0x278)) == 0x11) {

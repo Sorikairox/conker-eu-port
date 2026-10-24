@@ -1,0 +1,20 @@
+s/(n < 9) ? 1 : 4/(n < 8) ? 1 : 4/ %
+s/func_1508CA14(0,/func_1508CA14(1,/ %
+s/bias = rail + me \* 16 + 0x15B4;/bias = rail + me * 16 + 0x15B5;/ %
+s/    rail = (u8 \*) D_800D27D0;/    ;/ %
+s/active\[k\] <= 0/active[k] < 0/ %
+s/ || k == me) {/) {/ %
+s/j < k \* 16 + 16 \&\&/j < k * 16 + 15 \&\&/ %
+s/links\[j\] != -1;/links[j] != 0;/ %
+s/                break;//ic %
+s/if (w == -1) {/if (w == 0) {/ %
+s/f = bias\[k\] \* D_8009DE34;/f = (s8) bias[k] * D_8009DE34;/ %
+s/if (current\[me\] == k) {/if (current[k] == me) {/ %
+s/f \*= D_8009DE30;/f *= D_8009DE34;/ %
+s/if (cost < bestCost) {/if (cost <= bestCost) {/ %
+s/s32 bestCost = 10000000;/s32 bestCost = 1000000;/ %
+s/s32 best = -1;/s32 best = 0;/ %
+s/D_800CC2D0\[me\].z_position - D_800CC2D0\[best\].z_position/D_800CC2D0[me].z_position - D_800CC2D0[me].z_position/ %
+s/((s32 \*) ((u8 \*) D_800D27D0 + 0x45C))\[me\] = bestCost;/((s32 *) ((u8 *) D_800D27D0 + 0x45C))[me] = best;/ %
+s/((s32 \*) (rail + 0x49C))\[me\] = best;/((s32 *) (rail + 0x49C))[me] = bestCost;/ %
+s/    return 0;/    return 1;/ %

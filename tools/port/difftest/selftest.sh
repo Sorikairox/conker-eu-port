@@ -170,4 +170,50 @@ S87204="DIFFTEST_EXACT=* DIFFTEST_ARG=0=42700000,1=40A00000,2=41A00000,3=C220000
 chkce EQUIV  func_15087204 "$S87204"
 chkce DIFFER func_15087204 "$S87204" 's/            ex = -ex;//'
 TRIALS=4 chkce EQUIV  func_15087204 "$S87204 DIFFTEST_ARGF_OLD=1" 's/            ex = -ex;//'
+# P211: an indirect call (jalr) compared only the arg registers the reference wrote since the previous call, and only
+# for targets of unknown arity: a candidate setting the pass-through a0 to 0 in an earlier block (`arg0 = 0` in the
+# `idx >= 10` branch, a branch before the jalr block) compared equal. Now every arg register / f12-f15 either side wrote
+# since entry is compared at a jalr. Table entry 0 poked to an unknown target (0x80450000). DIFFTEST_JALRARG_OLD=1 = old.
+S472C="DIFFTEST_ARG=0=80490000 DIFFTEST_POKE=8049003C=000F0000,80089E4C=80450000"
+chkce EQUIV  func_1513472C "$S472C"
+chkce DIFFER func_1513472C "$S472C" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
+chkce EQUIV  func_1513472C "$S472C DIFFTEST_JALRARG_OLD=1" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
+# P211: DIFFTEST_STKFILL=WORD fills the harness stack (zeros before): func_151C384C builds an emitter request on its
+# stack; dropping `req.angle[1] = 0.0f` compared equal because the unwritten slot read 0 anyway. With the fill the
+# request bytes (ARGMEM on func_151530A8) differ. No fill = old behaviour.
+S384C="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_ARGMEM=151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8,151307F0=0:92,151307F0=0+60:6,15160830=0:5,15160830=1:12 DIFFTEST_ARG=0=80450000,1=7,2=1 DIFFTEST_POKE=80450000=44610000,80450004=C2C80000,80450008=3F800000 DIFFTEST_RET=150ADF00=0;0;0;0;0 DIFFTEST_RETF=150ADF48=00000000"
+TRIALS=4 chkce EQUIV  func_151C384C "$S384C DIFFTEST_STKFILL=5A5A5A5A"
+TRIALS=4 chkce DIFFER func_151C384C "$S384C DIFFTEST_STKFILL=5A5A5A5A" 's/    req.angle\[1\] = 0.0f;//'
+TRIALS=4 chkce EQUIV  func_151C384C "$S384C" 's/    req.angle\[1\] = 0.0f;//'
+# P214: arguments of direct calls. (1) `return func_X(...)` was parsed as a declaration of func_X (type `return`):
+# game_A28B0's `return func_1505A630(temp_v0[0] - ...)` gave func_1505A630 an empty FP-argument set, so f12 / f14 were
+# never compared (port-b P210 func_150768DC x-swap survived); DIFFTEST_DECLKW_OLD=1 = old. (2) a callee of unknown
+# prototype (DIFFTEST_NOPROTO forces it): every f12-f15 / a0-a3 either side wrote since the previous call is
+# compared, not only FPRs both sides set right before the jal (the case writes f12 before a branch); JALARG_OLD=1 = old.
+S68DC="DIFFTEST_EXACT=* DIFFTEST_POKE=800CC6F0=00000000,800CCA1C=00000000,800CCD48=00000000,800CD074=00000001,800CD078=10000000,800CD088=00000000,800CD08C=40A00000,800CD090=00000000,800CD0E8=00000000,800CD11C=33000000,800CD33C=00000000,800CD3A0=00000000,800CD6CC=00000001,800CD6D0=11000000,800CD6E0=42480000,800CD6E4=40A00000,800CD6E8=40A00000,800CD7C4=00000020,800CD894=00000500,800CD8E4=80470000,800CD8EC=00005500,800CD8FC=00004400,800CD9F8=00000000,800CDD24=00000000,800CE050=00000000,800CE37C=00000000,800CE6A8=00000000,800CE9D4=00000000,800CED00=00000000,800CF02C=00000000,800CF358=00000000,800CF684=00000000,800CF9B0=00000000,800CFCDC=00000000,800D0008=00000000,800D0334=00000000,800D0660=00000000,800D098C=00000000,800D0CB8=00000000,800D0FE4=00000000,800D1310=00000000,800D196C=800CD074,800D1CB0=20001527,800D20F0=80450000,80450014=00000040 DIFFTEST_RET=1507BEE8=80470010,1505A9B0=00001000 DIFFTEST_RETF=1505AAAC=42000000"
+M68DC='s/dx = o->x_position - D_800D154C->x_position;/dx = D_800D154C->x_position - o->x_position;/'
+TRIALS=4 chkce EQUIV  func_150768DC "$S68DC"
+TRIALS=4 chkce DIFFER func_150768DC "$S68DC" "$M68DC"
+TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_DECLKW_OLD=1" "$M68DC"
+TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630"
+TRIALS=4 chkce DIFFER func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630" "$M68DC"
+TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630 DIFFTEST_JALARG_OLD=1" "$M68DC"
+# P215: (1) P214 lost the `cnt = max(cnt, ...indw...)` line of the P211 jalr compare (indw computed, never used): the
+# func_1513472C `arg0 = 0` case above gave EQUIV (82 / 83 at the end of P214). (2) at a jalr the target register is not
+# an argument: func_1506B04C does `lw a2, D_800864B0(a2); jalr a2` (a2 = the handler address in the reference, `arg`
+# in the candidate) and keeps a scratch copy of `arg` in a3 (`or a3, a2, zero`; it passes it in a1). The target
+# register is skipped (DIFFTEST_JALRTGT_OLD=1 = old); DIFFTEST_JALRSKIP=3 drops the scratch a3 (all 15 handlers take 2 args).
+SB04C="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=80450000,1=A,2=80460010 DIFFTEST_POKE=8045002C=3F800000"
+TRIALS=4 chkce EQUIV  func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3"
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3" 's/handler(obj, arg);/handler(obj, obj);/'
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3" 's/handler(obj, arg);/handler(arg, arg);/'
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3 DIFFTEST_JALRTGT_OLD=1"
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C"
+# P215: (3) a TU-literal argument (candidate "%d" at TU_BASE vs the reference's rodata_inject D_8009DDF0) compared
+# "different" when the reference never touched that page (unmapped: mem_read failed). Now the page's initial content
+# is read (DIFFTEST_TUPEEK_OLD=1 = old). func_1508AB7C draws the counters with func_15042D94(x, y, 1, "%d", n / 50).
+SAB7C="DIFFTEST_ROMDATA=1 DIFFTEST_TUCMP_LEN=4 DIFFTEST_EXACT=* DIFFTEST_POKE=800D27D0=80450000,80450010=3,800BEE04=2,800CCA0C=80460000,800CCD38=80460000,800CD064=80460000,80460198=00000000,804601AC=00000000,800E1000=00000000,80450E64=0,80450E68=1,80450E6C=2,804516BC=00B90000,800CC91C=0,800CCC48=0,800CCF74=0,80450014=00000000,80450018=00000000,8045035C=00000000,80450360=00000000,80450364=00000000,8045031C=00000000,80450320=00000000,80450324=00000000,800E0FE8=02000000,800BEA48=80470000,80470024=41200000,8047002C=42000000,80470030=43000000,800CC818=0,80083330=1,80451574=00000123,80451578=00000123,8045157C=00000123 DIFFTEST_RET=15085E1C=0 DIFFTEST_RETF=150ADF48=3F400000"
+TRIALS=4 chkce EQUIV  func_1508AB7C "$SAB7C"
+TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C" 's/(s32) "%d"/(s32) "%x"/'
+TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C DIFFTEST_TUPEEK_OLD=1"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

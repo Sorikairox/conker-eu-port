@@ -30,6 +30,56 @@ v0 used by func_1506045C. Checks: verify_all rc 0, NM links, protocheck 0 (1446)
 3. Breadth: func_150A6070, func_150A6324 (D3880; compiled or hand asm?), func_150C8F68, func_1518F080,
    func_151D4D44, func_150C92B8.
 
+## State (session P215, 2026-10-24). Details: `docs/port/sessions/P215.md`
+
+Branch `port` (P214 2f944d3c + P215 commit).
+- Selftest regression root cause: P214's compare() edit deleted the P211 line `cnt = max(cnt, max(indw)+1)` (jalr GPR
+  compare silently off; JALRARG_OLD a no-op). Restored. All difftest runs after that P214 edit with a jalr are suspect;
+  P214's dispatcher re-check redone (P215.md section 4).
+- difftest: jalr target register not compared (JALRTGT_OLD=1 = old); `DIFFTEST_JALRSKIP=N,..` drops scratch arg GPRs at
+  jalrs (check every table entry first); TU-literal compare reads unmapped reference pages' initial content
+  (TUPEEK_OLD=1 = old). Selftest cases func_1506B04C (5), func_1508AB7C (3): 91 / 91.
+- func_1506B04C: C was right (handler(obj, arg)); the DIFFER was a2 = jump target + a3 scratch copy. Verified.
+- Natives func_150AE5D8 / 5E8 / 5F8 / 60C: EQUIV, all mutants killed (new setup idhi8).
+- func_151B8EB8 (1E61C0): NM C now `s32`, returns func_151307F0's particle (port-b func_151C0698 stores it at +0x84).
+- port-b question: func_1519AF14 does NOT set a1 at the D_8008FC48 jalr: a1 is stale (loop index on the early exits
+  after func_15144528, memcpy / func_1513D2F0 leftovers on the loop path), never a vec3 pointer (P215.md section 5).
+- Hand C (NM, B7840): func_1508AB7C rail_racers_update (cmd 6, returns the started-racer mask).
+- Checks: verify_all OK, NM build links, protocheck 0 (1432), selftest 91 / 91, progress_nm 5426 / 5915 (91.7%), C bytes 78.6%.
+
+## Next steps (from P215)
+1. func_1514D3B0 (17A800): a2 / a3 are u8 in functions.h but the asm passes them unmasked (random DIFFER a2 0x141A vs
+   0x1A). Change to s32 (prototype + NM def) and check the default build of the C callers (A28B0 is port-b's).
+2. Random DIFFERs still open (not new-compare artefacts): func_1504A730, func_151416E8, func_151D9014; check with WLOG
+   whether lazily filled pages / random tables explain them.
+3. Setup files of func_15169260 / func_15160310 / func_15013000 / func_151D9014 / func_1514D3B0 give UNSURE at TR=4
+   (faults): rerun with more trials or fix the setups.
+4. B7840: func_1508E080, func_1508CF34. Breadth: `p215/asmlist.py`.
+5. port-b: re-run A28B0 mutants (DECLKW fix, P214) - and any port-b mutant run made on a merge of P214 (jalr compare off).
+
+## State (session P214, 2026-10-24). Details: `docs/port/sessions/P214.md`
+
+Branch `port` (P211 b635f45 + P214 commit).
+- difftest: `return func_X(...)` lines were taken as func_X's prototype (type `return`): FP args of such callees were
+  never compared (port-b P210 func_150768DC x-swap of func_1505A630). Fixed (DECLKW_OLD=1 = old); K&R `f();` = unknown.
+  Unknown-prototype jal: FPRs either side sets right before the call (JALARG_OLD=1 = old); the wide "since previous
+  call" compare is opt-in (JALARG_WIDE=1: false DIFFERs as default). Selftest hook DIFFTEST_NOPROTO. New selftest
+  case func_150768DC (6 checks).
+- func_15074C80 (981E0): NM-only 3-parameter signature (table D_80086A34 all void/3; default build keeps 2 params).
+- Hand C (NM, B7840): func_1508ECF8 rail_racer_take_over (cmd 15), func_1508A63C rail_rank_rivals (cmd 5).
+- Re-check table in P214.md section 2: func_1506B04C (981C0) p184 setups DIFFER with old and new compare (object in
+  a2 vs a3 at the jalr): likely real bug, not fixed.
+- Checks: verify_all OK, NM build links, protocheck 0 (1431), progress_nm 5425 / 5915 (91.7%), C bytes 78.5%.
+  **Selftest 82 / 83** (func_1513472C `arg0 = 0` case EQUIV, was 83 / 83 mid-session): open, see P214.md section 6.
+
+## Next steps (from P214)
+1. Selftest func_1513472C case (P214.md section 6), before trusting new difftest results.
+2. func_1506B04C jalr argument slot (P214.md section 2).
+3. port-b: re-run A28B0 mutants touching func_1505A630 / directly returned float-arg callees (DECLKW fix).
+4. Re-check left: natives func_150AE5D8 / 5E8 / 5F8 (p106 REFLEN / SIGNORE=7 candidates), func_150FD49C,
+   func_15196438, func_15199A28, func_151DA6F8, func_1509D274.
+5. B7840: func_1508AB7C (cmd 6, exact v0), func_1508E080, func_1508CF34. Breadth: `p214/asmlist.py`.
+
 ## P213 (port-b) (session P213, 2026-10-24). Details: `docs/port/sessions/P213.md`
 
 Branch `port-b`. Hand C (NM), difftest EQUIV + setups + mutants: func_150562FC object_carried_update, func_1505E874
@@ -49,6 +99,36 @@ by func_151C1730), func_151901F4 (dispatcher func_1519AF14 leaves a1). Checks: v
    func_151D4D44, func_150C92B8.
 4. Re-run the func_150768DC x-swap mutant after P211's harness answer.
 
+## State (session P211, 2026-10-24). Details: `docs/port/sessions/P211.md`
+
+Branch `port` (P209 d93bdcd + P211 commit).
+- difftest: at a jalr every arg register a0-a3 / f12-f15 that EITHER side wrote since entry is compared, whatever the
+  target's prototype (before: only the reference's writes since the previous call, unknown targets only).
+  `DIFFTEST_JALRARG_OLD=1` = old. New knob `DIFFTEST_STKFILL=WORD` (stack starts filled with WORD instead of zeros).
+  Both forwarded by difftest.sh; selftest cases func_1513472C (jalr) and func_151C384C (stack fill); selftest 77 / 77.
+  P200's "handler(0) survives" was a mutant file identical to the draft (sed did not apply).
+- func_151C384C's `req.angle[1]` survivor killed with STKFILL=5A5A5A5A (setup r0).
+- func_1513BA10 / BA44 (game_168A90): NM blocks pass the object to the D_80089C44 / C54 handlers (asm keeps a0).
+- **Rail command result rule** (P211.md section 3): func_1509E3D4's return goes to the event VM result register
+  (or back to func_1509BFB0's C caller, none of which uses a 0xFxxx word). ROM script scan: only commands 3, 6, 22,
+  25 have their result read. Those must return the asm's exact value; the others return the asm's value where
+  defined and 0 where the asm leaves a callee's scratch v0 (pin that callee with DIFFTEST_RET).
+- Hand C (NM): func_1508DCAC rail_rival_pace (cmd 14), func_1508BE18 rail_pick_chase_target (cmd 13),
+  func_1508C370 rail_assign_targets (cmd 7); all random + setups EQUIV, mutants all killed.
+- Checks: verify_all OK (port_work/p211/verify.log), NM build links, protocheck 0 (1429), selftest 77 / 77,
+  progress_nm 5423 / 5915 (91.7%), C bytes 78.4%.
+
+## Next steps (from P211)
+1. Re-run the setups of the dispatchers in the P211.md section 1 re-check list with the new jalr compare.
+2. B7840 commands: func_1508ECF8 (cmd 15), func_1508A63C, func_1508AB7C (cmd 6: result read by scripts, exact v0),
+   func_1508E080, func_1508CF34, func_1508C5F0.
+3. Coordinator items not reached: (a) port-b func_150768DC mutant swapping the f12 / f14 x arguments of jal stub
+   func_1505A630 survived - check that jal-stub FPR args are compared (unknown prototype: only FPRs BOTH sides
+   write right before the call count; a known prototype uses FREGS) and float stack args; (b) game_981E0
+   func_15074C80 is declared with 2 params but sits in hit handler table D_80086A34 (others void, 3 args): check
+   the asm and align the NM prototype.
+4. Browser: P211.md section 8. Breadth: `p211/asmlist.py`.
+
 ## P210 (port-b) (session P210, 2026-10-24). Details: `docs/port/sessions/P210.md`
 
 Branch `port-b`. Merge of `port` d93bdcd (30e140a7; func_15142600 now void, 126330 func_150FFC60 declaration =
@@ -66,7 +146,6 @@ D_8008B848). Checks: verify_all rc 0, NM links, protocheck 0 (1441), selftest 71
 2. func_151C0698 (1EDA00, 669 words), callee func_151B8EB8 is C now.
 3. Setup gaps listed in P210.md section 1 notes (602c, 68dc, 7e0c, 85f0).
 4. Other owner: func_15074C80 (981E0) has 2 parameters in the void/3 hit handler table D_80086A34.
-
 ## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
 
 Branch `port` (P207 2672b13 + merge of port-b 4c59938 = a447641).

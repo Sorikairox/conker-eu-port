@@ -1,0 +1,26 @@
+s/func_1508DF48(i, 1);/func_1508DF48(i, 0);/ % newrace
+s/if (!(seen \& bit)) {/if (!(mask \& bit)) {/ % gone newrace
+s/        cooldown\[i\] -= D_800BE9E4;/        cooldown[i] -= 1;/ %
+s/        if (counter\[i\] < 0) {/        if (counter[i] <= 0) {/ %
+s/(cooldown\[i\] \& 0x1F) >= 0x1D/(cooldown[i] \& 0x1F) >= 0x1C/ % st3
+s/        D_800E0FE8\[i\] \&= 0x7F;// % flags newrace
+s/!isNew \&\& obj\[0x2FD\] == 0/obj[0x2FD] == 0/ % newrace
+s/                teamCount\[team\[k\]\]++;/                teamCount[k]++;/ % newrace
+s/            result |= bit;/            result |= 1;/ % newrace
+s/obj\[0x222\] = target\[i\] - 2;/obj[0x222] = target[i];/ % tgt5 tgt4 tgt0
+s/                    boost\[i\] = 0x1E;/                    boost[i] = 0x1F;/ % tgt5
+s/\* 0.5f;/* 0.25f;/ % tgt5
+s/if (target\[i\] - 2 >= 2) {/if (target[i] - 2 >= 1) {/ % tgt5 tgt0
+s/            if (aiTimer\[i\] >= 0 \&\& prevAi < 0) {/            if (aiTimer[i] > 0 \&\& prevAi < 0) {/ % tgt4 tgt0 tgt5
+s/limit, replan, (s8)/replan, limit, (s8)/ % tgt4 tgt0 tgt5
+s/                \&\& state\[i\] != 1) {/                \&\& state[i] != 2) {/ % tgt4
+s/                        ((s8 \*) D_800D27D0)\[0x1705 + i\] = -50;/                        ((s8 *) D_800D27D0)[0x1705 + i] = 50;/ % tgt0 tgt4 tgt5
+s/rail\[0x1735 + i\] += (s8) (((s8) rail\[0x1715 + i\] - (s8) rail\[0x1735 + i\]) >> 2);/rail[0x1735 + i] += (s8) (((s8) rail[0x1715 + i] - (s8) rail[0x1735 + i]) >> 1);/ % tgt0 tgt4 tgt5
+s/        if (wrapped \&\& \*(s16/        if (*(s16/ % tgt0 tgt4 tgt5
+s/flags \& ~0x200;/flags;/ % flags
+s/            cooldown\[i\] = 20;/            cooldown[i] = 21;/ % flags
+s/        \*(f32 \*) ((u8 \*) D_800D27D0 + 0x16B4) = 1.0f;/        *(f32 *) ((u8 *) D_800D27D0 + 0x16B4) = 0.0f;/ % st3
+s/ + 6.0f), 1,/ + 6.0f), 2,/ % newB9
+s/counter\[i\] \/ 50);/counter[i] \/ 25);/ % newB9
+s/>> 1;/>> 2;/ % newB9
+s/            obj\[0x1E4\] = 1;/            obj[0x1E4] = 2;/ % newB9
