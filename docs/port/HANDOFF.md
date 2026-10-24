@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P225 (port-b) (session P225, 2026-10-24). Details: `docs/port/sessions/P225.md`
+
+Branch `port-b`. **Ownership (new from P225): port-b also owns game_161520 (src and src_eu), game_eu_1C3530,
+game_eu_19B180, game_eu_1FB080, game_eu_127840, game_eu_226870, game_eu_1E7CC0, game_eu_1A2970, game_eu_133A70,
+game_eu_101080 and D5E90 (Rare hand asm).** Merged port d5b5126a (verify registry, BADJALR fix); 35 registry rows
+added for port-b's P197-P222 conversions (DIFFTEST_ROMDATA=1 + the recorded ARGMEM / STKFILL; rows whose ARGMEM list
+was never written down have ROMDATA only, listed in P225.md section 1). Port-b uses the registry from now on.
+Harness: `nm_resolve` handles `#if` nested inside an NM block (DIFFTEST_NMNEST_OLD=1 = old; selftest case
+func_15103828); a non-hex DIFFTEST_STKFILL is an ERROR line instead of empty output. Hand C (NM) + setups + mutants:
+**func_15138120 object_hit_kind_effect_spawn** (161520; now s32 = the asm's leftover v0, as 1C1A20 declares it),
+**func_15106260 bolt_arc_spawn**, **func_15107C80 object_arc_to_surface_spawn**, **func_1510819C
+object_arc_from_point_spawn** (133A70), **func_15177360 prop_model_draw** (1A2970). Checks: verify_all rc 0, NM links,
+protocheck 0 (1471), selftest 101/101. progress_nm total 5465 / 5915 (92.4%), C bytes 81.3%, 450 asm-only.
+
+## Next steps (from P225)
+
+1. Browser: hit effects (func_15138120), lightning arcs (func_15106260 / func_15107C80 / func_1510819C), prop models
+   with fade (func_15177360).
+2. New files: 68 compiled asm-only functions left (C-caller candidates listed in P225.md section 6), 4 Rare hand-asm
+   functions in game_eu_226870 (func_151F9060 / 911C / 9184 / 933C: nmasm harness) and 29 in D5E90.
+3. Fill in the missing ARGMEM knobs of the older registry rows when re-checking them (P225.md section 1).
+4. difftest: a non-decimal DIFFTEST_ARG index (e.g. `A=7`) also gives empty result lines (seen in P225); make it an
+   ERROR like STKFILL.
+
 ## P222 (port-b) (session P222, 2026-10-24). Details: `docs/port/sessions/P222.md`
 
 Branch `port-b`. Hand C (NM), difftest setups (ARGMEM / STKFILL / RET sequences) + mutants, exact commands per
