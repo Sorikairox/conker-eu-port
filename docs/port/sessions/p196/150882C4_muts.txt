@@ -1,0 +1,9 @@
+s/if (D_80087640 == NULL) {/if (D_80087640 == (void *) 1) {/
+s/rec = \&D_80087640\[player\];/rec = \&D_80087640[0];/
+s/dir = r + 0x4000;/dir = r + 0x4400;/
+s/(\*(f32 \*) ((u8 \*) rec + 0x10), \*(f32 \*) ((u8 \*) rec + 0xC), 0)/(*(f32 *) ((u8 *) rec + 0xC), *(f32 *) ((u8 *) rec + 0x10), 0)/
+s/if (diff \& 0x8000) {/if (diff \& 0x4000) {/
+s/if (diff < 0xDBFF) {/if (diff <= 0xDBFF) {/
+s/= dir + 0x2400;/= dir + 0x2000;/
+s/} else if (diff > 0x2400) {/} else if (diff >= 0x2400) {/
+s/= dir - 0x2400;/= dir - 0x2000;/

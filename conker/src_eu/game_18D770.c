@@ -48,7 +48,7 @@ struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg
 struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32  func_15163704(struct225 *arg0);
 void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3);
-void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+struct225 *func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
 s32  func_151639D0(struct225 *arg0, s32 arg1, u8 arg2);
 void func_15163A18(struct225 *arg0, s32 arg1, u8 arg2);
 struct225 *func_15163A60(u8 arg0, u8 arg1, s32 arg2);
@@ -1136,7 +1136,52 @@ struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5,
 }
 
 // big one
+#ifdef NON_MATCHING
+// lightning_flash_update: weather record handler (table entry at ROM 0x230744; returns 1 = keep). Drives the sky flash
+// of the area object +0x14 (skipped when its +0x9 is 1): its +0x2F gets the flash level +0x18, which decays by the
+// factor +0x1C once per tick (D_800BE9E4). While a burst is running (+0x2C flashes left) +0x38 counts down by
+// D_800BE9A4; at zero a new flash of level rand * +0x48 + +0x44 starts, the next one is due after rand * +0x40 + +0x3C,
+// and a flash counter is used up (func_1000E770 is called with two NULL pointers; the asm also computes a thunder
+// delay from func_151EFDD0 that EU's two-pointer func_1000E770 never reads). Between bursts +0x20 counts down; at zero
+// a burst of rand % (+0x34 + 1) + +0x30 flashes is queued and the next pause is rand * +0x28 + +0x24.
+s32 func_1000E770(s32 *arg0, s32 *arg1);
+f32 func_150ADA68(void);
+int func_151EFDD0(void);
+
+s32 func_151630F4(u8 *rec) {
+    u8 *obj = *(u8 **) (rec + 0x14);
+    f32 *level = (f32 *) (rec + 0x18);
+    u32 n;
+
+    if (obj[9] == 1) {
+        return 1;
+    }
+    obj[0x2F] = (u32) *level;
+    for (n = D_800BE9E4; n != 0; n--) {
+        *level -= *level * *(f32 *) (rec + 0x1C);
+    }
+    if (*(s32 *) (rec + 0x2C) > 0) {
+        *(f32 *) (rec + 0x38) -= D_800BE9A4;
+        if (*(f32 *) (rec + 0x38) < 0.0f) {
+            *level = func_150ADA68() * *(f32 *) (rec + 0x48) + *(f32 *) (rec + 0x44);
+            *(f32 *) (rec + 0x38) = func_150ADA68() * *(f32 *) (rec + 0x40) + *(f32 *) (rec + 0x3C);
+            func_151EFDD0();
+            func_1000E770(NULL, NULL);
+            *(s32 *) (rec + 0x2C) -= 1;
+        }
+    } else {
+        *(f32 *) (rec + 0x20) -= D_800BE9A4;
+        if (*(f32 *) (rec + 0x20) < 0.0f) {
+            *(s32 *) (rec + 0x2C) = (u32) func_150ADA20() % (u32) (*(s32 *) (rec + 0x34) + 1) + *(s32 *) (rec + 0x30);
+            *(f32 *) (rec + 0x38) = 0.0f;
+            *(f32 *) (rec + 0x20) = func_150ADA68() * *(f32 *) (rec + 0x28) + *(f32 *) (rec + 0x24);
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_151630F4.s")
+#endif
 
 struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE) {
     struct225 *temp_v0;
@@ -1255,14 +1300,14 @@ void func_1516381C(s32 arg0, u8 arg1, u8 arg2, s32 arg3) {
     func_1516037C(&tmp, arg0, 0, arg2, arg3);
 }
 
-void func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
+struct225 *func_1516387C(s32 arg0, u8 arg1, s8 arg2, s16 arg3, u8 arg4, s32 offset, u8 arg6, s32 arg7) {
     Header tmp;
     tmp.unk0 = arg1;
     tmp.unk1 = arg2;
     tmp.unk2 = arg3;
     tmp.unk4 = arg4;
 
-    func_1516037C(&tmp, arg0, offset, arg6, arg7);
+    return func_1516037C(&tmp, arg0, offset, arg6, arg7);
 }
 
 typedef struct {

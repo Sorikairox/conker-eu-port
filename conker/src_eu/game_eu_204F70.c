@@ -36,7 +36,46 @@ struct260 *func_151D7760(s16 arg0, u8 arg1, u8 arg2, f32 arg3, u8 *arg4, u8 arg5
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+/* P204 (from the s163 draft 7814_b.c) */
+extern s32 (*D_80090040[])(u8 *);
+f32 func_15143E64(struct17 *);
+void func_151D7DE0(u8 *);
+// effect_follow_update: per-frame handler (D_8008A980 table, void (u8 *)) of an effect-carrier object: remembers its
+// position (+0x30) and flag +0x2D bit 0, then runs the kind's update D_80090040[+0x2C]; when that returns 0 the object
+// is retired (+0xE = -1, +0xD bit 0). Otherwise, when bit 0 of +0x2D was set before and is still set and the object
+// moved less than +0x3C this frame, an effect is attached by func_151D7DE0 if there is none yet (+0x28 == NULL);
+// in every other case func_151D7D78 releases the attached effect.
+void func_151D7814(u8 *obj) {
+    f32 pos[3];
+    u8 active;
+    f32 d[3];
+
+    pos[0] = *(f32 *) (obj + 0x30);
+    pos[1] = *(f32 *) (obj + 0x34);
+    pos[2] = *(f32 *) (obj + 0x38);
+    active = obj[0x2D] & 1;
+    if (D_80090040[obj[0x2C]](obj) == 0) {
+        *(s16 *) (obj + 0xE) = -1;
+        obj[0xD] |= 1;
+        return;
+    }
+    if ((obj[0x2D] & 1) && active) {
+        d[0] = *(f32 *) (obj + 0x30) - pos[0];
+        d[1] = *(f32 *) (obj + 0x34) - pos[1];
+        d[2] = *(f32 *) (obj + 0x38) - pos[2];
+        if (func_15143E64((struct17 *) d) < *(f32 *) (obj + 0x3C)) {
+            if (*(u8 **) (obj + 0x28) == NULL) {
+                func_151D7DE0(obj);
+            }
+            return;
+        }
+    }
+    func_151D7D78(obj);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7814.s")
+#endif
 
 extern void (*D_80090044[])(u8 *, s32, u8);
 void func_151D7958(u8 *arg0, s32 arg1, u8 arg2)
@@ -96,7 +135,24 @@ void func_151D7A60(u8 *arg0, u8 arg1, s8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
+#ifdef NON_MATCHING
+// linked_obj_event_3d: event handler of an object whose link record sits at +0x40 ({ s32 id, u8 key }): event 0x3D removes the
+// object (func_1516972C) when the event's record matches by id or by key; any other event goes to the common
+// handler func_15149514.
+void func_151D7AE8(struct102 *obj, u8 *ev, u8 type) {
+    u8 *link = (u8 *) obj + 0x40;
+
+    if (type == 0x3D) {
+        if (*(s32 *) link == *(s32 *) ev || link[4] == ev[4]) {
+            func_1516972C(obj);
+        }
+    } else {
+        func_15149514((s32) ev, type, (s32) link, (s32) (link + 4), (s32) obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7AE8.s")
+#endif
 
 extern u8 D_800AB660[];
 extern u8 D_800AB6B4[];

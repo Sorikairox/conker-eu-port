@@ -1,0 +1,15 @@
+s/    extra.u0 = 0;/    extra.u0 = 1;/
+s/    extra.u8 = -300.0f;/    extra.u8 = 300.0f;/
+s/    extra.uC = 0.0f;/    extra.uC = 1.0f;/
+s/    spec.x = -300.0f;/    spec.x = 300.0f;/
+s/    spec.scaleB = 7.5f;/    spec.scaleB = 7.0f;/
+s/    spec.span = span;/    spec.span = 0;/
+s/    spec.u16 = 1;/    spec.u16 = 0;/
+s/    for (i = 0; i < 9; i++) {/    for (i = 0; i < 8; i++) {/
+s/    spec.u2C = 0x9F0601;/    spec.u2C = 0x9F0600;/
+s/    spec.u41 = 0xA;/    spec.u41 = 0xB;/
+s/    spec.player = D_80082FA0;/    spec.player = 0;/
+s/    spec.u54 = 0.0f;/    spec.u54 = 1.0f;/
+s/0xC, 0, 0, 0x10, flag, arg2);/0xC, 0, 0, 0x10, arg2, flag);/
+s/    if (rec != 0) {/    if (1) {/
+s/        memcpy(rec + 0x70, \&extra, 0x10);/        memcpy(rec + 0x6C, \&extra, 0x10);/

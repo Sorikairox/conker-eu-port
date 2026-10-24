@@ -1,0 +1,20 @@
+s/, 0, \&count, 2,/, 0, \&count, 3,/
+s/(u8 \*) p + 0x34))/(u8 *) p + 0x30))/
+s/- (s32) hdr - 0x28;/- (s32) hdr - 0x20;/
+s/total = size \* 2 \* (D_80082FA0 + 1);/total = size * 2 * D_80082FA0;/
+s/arg1 ? 0x54 : 0x38/arg1 ? 0x38 : 0x54/
+s/rec = func_15167A68((arg1/rec = func_15167A68((arg1/;s/, arg4, arg2 + total/, arg3, arg2 + total/
+s/arg2 + total + 0xF8, 2,/arg2 + total + 0xF0, 2,/
+s/0xF8, 2, arg3, 1);/0xF8, 2, arg3, 0);/
+s/memcpy(rec + 0x10, p, 0x3C);/memcpy(rec + 0x10, p, 0x38);/
+s/\*(u8 \*\*) (rec + 0x4C) = hdr;/*(u8 **) (rec + 0x48) = hdr;/
+s/dst = rec + 0xF8;/dst = rec + 0xF0;/
+s/for (i = 0; i <= D_80082FA0; i++) {/for (i = 0; i < D_80082FA0; i++) {/
+s/= dst + size;/= dst + size * 2;/
+s/memcpy(dst, hdr + 0x28, size);/memcpy(dst, hdr + 0x20, size);/
+s/memcpy(((u8 \*\*) (rec + 0x68))\[i\], hdr + 0x28, size);/memcpy(((u8 **) (rec + 0x58))[i], hdr + 0x28, size);/
+s/dst += size \* 2;/dst += size;/
+s/\*(s32 \*) (rec + 0x54) = \*(s32 \*) hdr;/*(s32 *) (rec + 0x54) = (s32) hdr;/
+s/\*(s32 \*) (rec + 0x50) = total;/*(s32 *) (rec + 0x50) = size;/
+s/0, 1, 0x3E, NULL);/0, 1, 0x3F, NULL);/
+s/return (struct102 \*) rec;/return (struct102 *) dst;/

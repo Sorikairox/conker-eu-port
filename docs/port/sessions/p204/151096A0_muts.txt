@@ -1,0 +1,23 @@
+s/+ 0xF8);/+ 0xF4);/
+s/func_150A8050(mtx, p\[0\], 0.0f, p\[1\]);/func_150A8050(mtx, p[1], 0.0f, p[0]);/
+s/mtx\[3\]\[1\] = p\[4\];/mtx[3][1] = p[3];/
+s/mtx\[0\]\[1\] \*= 0.157f;/;/
+s/mtx\[1\]\[2\] \*= 0.157f;/;/
+s/mtx\[2\]\[2\] \*= 0.157f;/mtx[2][3] *= 0.157f;/
+s/(rec + 0x78 + D_800BE9C0 \* 0x40)/(rec + 0x78)/
+s/func_15144B34((s16) slot)/func_15144B34(0)/
+s/fabsf(cam\[1\]) > 0.0001f/fabsf(cam[2]) > 0.0001f/
+s/fabsf(cam\[0\]) > 0.0001f ||/fabsf(cam[0]) >= 0.0001f ||/
+s/cam\[0\] \* cam\[0\] + cam\[2\] \* cam\[2\]/cam[0] * cam[0] + cam[1] * cam[1]/
+s/cx = cam\[2\] \* inv;/cx = cam[2];/
+s/cz = -cam\[0\] \* inv;/cz = cam[0] * inv;/
+s/cx = 1.0f;/cx = 0.0f;/
+s/cz = 0.0f;/cz = 1.0f;/
+s/i < 16;/i < 15;/
+s/(rec + D_800BE9C0 \* 0x10 + (s16) slot \* 4 + 0x58)/(rec + (s16) slot * 4 + 0x58)/
+s/v->v.ob\[1\], v->v.ob\[2\]/v->v.ob[2], v->v.ob[1]/
+s/(ox \* cx + oz \* cz)/(ox * cz + oz * cx)/
+s/\* 0.21300001f + 26.0f/* 0.213f + 26.0f/
+s/(oy \* 0.358f + 81.0f) \* 32.0f/(oy * 0.358f + 80.0f) * 32.0f/
+s/v->v.tc\[1\] = /v->v.tc[0] = /
+s/return 1;/return 0;/

@@ -1,0 +1,69 @@
+s/< 2) {/< 3) {/
+s/0x30 + 0x120/0x30 + 0x100/
+s/(s32 \*) \&vtx, NULL/(s32 *) \&vtx, (u8 *) \&flag/
+s/if (vtx == NULL) {/if (0) {/
+s/flag = 1;/flag = 0;/
+s/if (rec\[4\] \& 2) {/if (rec[4] \& 1) {/
+s/n = (s16) rec\[0x40\];/n = (s16) rec[0x41];/
+s/i = \*(s8 \*) (t + 0x2D);/i = *(s8 *) (t + 0x2D) + 1;/
+s/pts\[i\].fade = step;/pts[i].fade = step + 1;/
+s/step += rec\[0x41\];/step += rec[0x40];/
+s/if (i == t\[0x25\]) {/if (i > t[0x25]) {/
+1,/if (n == 0) {/s/if (n == 0) {/if (n == 1) {/
+1,/} while (i != \*(s8 \*) (t + 0x2E));/s/} while (i != \*(s8 \*) (t + 0x2E));/} while (0);/
+s/if (rec\[4\] \& 4) {/if (rec[4] \& 8) {/
+s/n = (s16) rec\[0x42\];/n = (s16) rec[0x43];/
+s/p->fade = (p->fade \* step) >> 8;/p->fade = (p->fade * step) >> 7;/
+s/step += rec\[0x43\];/step += rec[0x42];/
+1,/i = \*(s8 \*) (t + 0x2E) - 1;/s/i = \*(s8 \*) (t + 0x2E) - 1;/i = *(s8 *) (t + 0x2E);/
+s/(s32) D_800911BC, 0, 0, 0, 0, 0x39/(s32) D_800911BC, 0, 0, 0, 0, 0x38/
+s/\&flag, 0x3E);/\&flag, 0x3F);/
+s/func_15142B7C(gfx, 1, 0x160600)/func_15142B7C(gfx, 1, 0x160601)/
+s/rec\[0x2A\], rec\[0x2B\], rec\[0x2C\]/rec[0x2B], rec[0x2A], rec[0x2C]/
+s/0, 0, 0xFF, 0xFF, 0xFF, 0, \&flag/0, 0, 0xFF, 0xFF, 0xFE, 0, \&flag/
+s/func_1513F4E4(gfx, 7,/func_1513F4E4(gfx, 6,/
+s/0x80000 | 0x2CA0/0x80000 | 0x2C00/
+s/0x5049D8/0x5049D9/
+s/if (\*(u16 \*) (t + 0x1E) \& 2) {/if (*(u16 *) (t + 0x1E) \& 4) {/
+s/cur\[1\] = \*(f32 \*) (t + 0x14);/cur[1] = *(f32 *) (t + 0x18);/
+s/width = \*(f32 \*) (rec + 0x38);/width = q->width;/
+s/u = q->texU;/u = qU;/
+s/prev = i - 1;/prev = i - 2;/
+s/alpha = (p->alpha \* p->fade) >> 8;/alpha = (q->alpha * p->fade) >> 8;/
+s/width = p->width;/width = q->width;/
+s/cur\[1\] = p->y;/cur[1] = p->z;/
+s/u = p->texU;/u = q->texU;/
+1,/dz = nxt\[2\] - cur\[2\];/s/dz = nxt\[2\] - cur\[2\];/dz = nxt[1] - cur[2];/
+s/fabsf(dx) > 0.0001f ||/fabsf(dx) > 0.001f ||/
+s/|| fabsf(dz) > 0.0001f/\&\& fabsf(dz) > 0.0001f/
+1,/inv = 1.0f;/s/inv = 1.0f;/inv = 2.0f;/
+s/if (tv\[2\] < tv\[0\]) {/if (tv[2] <= tv[0]) {/
+s/tv\[0\] = tv\[0\] . 1024;/tv[0] = tv[0] \& 1023;/
+s/\*(s16 \*) (rec + 0x46) = tv\[0\];/;/
+s/tv\[1\] = (tv\[2\] + tv\[0\]) >> 1;/tv[1] = (tv[2] + tv[0]) >> 2;/
+s/== 6) {/== 7) {/
+1,/ox = -dz \* inv \* width;/s/ox = -dz \* inv \* width;/ox = dz * inv * width;/
+1,/oz = dx \* inv \* width;/s/oz = dx \* inv \* width;/oz = dx * inv * qWidth;/
+1,/vtx->v.ob\[2\] = (s32) (cur\[2\] + oz);/s/vtx->v.ob\[2\] = (s32) (cur\[2\] + oz);/vtx->v.ob[2] = (s32) (cur[2] - oz);/
+1,/vtx->v.tc\[1\] = tv\[l\];/s/vtx->v.tc\[1\] = tv\[l\];/vtx->v.tc[1] = tv[r];/
+1,/vtx->v.cn\[3\] = 0;/s/vtx->v.cn\[3\] = 0;/vtx->v.cn[3] = 1;/
+1,/vtx->v.cn\[3\] = alpha;/s/vtx->v.cn\[3\] = alpha;/vtx->v.cn[3] = qAlpha;/
+1,/vtx->v.flag = 0;/s/vtx->v.flag = 0;/vtx->v.flag = 1;/
+1,/vtx->v.ob\[1\] = (s32) cur\[1\];/s/vtx->v.ob\[1\] = (s32) cur\[1\];/vtx->v.ob[1] = (s32) cur[2];/
+s/vtx->v.ob\[0\] = (s32) (cur\[0\] - ox);/vtx->v.ob[0] = (s32) (cur[0] + ox);/
+s/ox = -dz \* inv \* qWidth;/ox = -dz * inv * width;/
+s/vtx->v.ob\[2\] = (s32) (nxt\[2\] + oz);/vtx->v.ob[2] = (s32) (nxt[2]);/
+s/vtx->v.cn\[3\] = qAlpha;/vtx->v.cn[3] = alpha;/
+s/vtx->v.ob\[2\] = (s32) (nxt\[2\] - oz);/vtx->v.ob[2] = (s32) (nxt[2] - ox);/
+s/gSPVertex(gfx++, vtx - 6, 6, 0);/gSPVertex(gfx++, vtx - 3, 6, 0);/
+s/gSP1Triangle(gfx++, 0, 4, 1, 0);/gSP1Triangle(gfx++, 0, 4, 2, 0);/
+s/gSP1Triangle(gfx++, 1, 5, 2, 0);//
+s/if (i == \*(s8 \*) (t + 0x2D)) {/if (prev == *(s8 *) (t + 0x2D)) {/
+s/cur\[2\] = nxt\[2\];/cur[2] = nxt[1];/
+s/if (nxt\[0\] == cur\[0\] \&\& dz == 0.0f) {/if (dx == 0.0f || dz == 0.0f) {/
+s/^    return (s32) gfx;/    return gfxArg;/
+s/^        qWidth = q->width;/        ;/
+s/^        qU = q->texU;/        ;/
+s/^        qAlpha = (q->alpha \* q->fade) >> 8;/        ;/
+s/^        prev--;/        prev -= 2;/
+s/^            prev = t\[0x25\] - 1;/            prev = t[0x25] - 2;/

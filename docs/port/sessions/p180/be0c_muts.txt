@@ -1,0 +1,9 @@
+s/if (!(lo < hi))/if (!(lo <= hi))/
+s/? 2 : 0;/? 1 : 0;/
+s/pivot = D_800DE148\[hi\]/pivot = D_800DE148[lo]/
+s/\.pos\[k\] < pivot \&\& i < hi/.pos[k] <= pivot \&\& i < hi/
+s/pivot < D_800DE148\[j\]\.pos\[k\] \&\& lo < j/pivot <= D_800DE148[j].pos[k] \&\& lo < j/
+s/if (!(i < j))/if (!(i <= j))/
+s/func_1517BE0C(lo, i - 1)/func_1517BE0C(lo, i - 2)/
+s/func_1517BE0C(i + 1, hi)/func_1517BE0C(i, hi)/
+s/D_800DE148\[hi\] = tmp;/D_800DE148[hi - 1] = tmp;/

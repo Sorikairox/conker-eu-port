@@ -575,7 +575,171 @@ void func_150A4ED4(s32 area) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A49D0.s")
 #endif
 
+#ifdef NON_MATCHING
+/*
+ * obj_floor_mesh_update: P190 readable C for the hand-written func_150A4FE4.s (saves $gp and every FPR, keeps
+ * values in odd FPRs; inner labels func_150A53D4 / func_150A543C are its exit and release paths). Builds the
+ * world-space floor mesh of an object record (D_800CC2D0, 0x32C bytes each) that func_150A5480 tests (area 3):
+ * - only while the record is live (+0, +0x1D4 matrices, +0xF8 & 0x4000), its model m = byte +4 has a group list
+ *   D_800C5C08[m] and another live record is within the radius +0x270 on x / z; otherwise the three buffers
+ *   +0x264 / +0x268 / +0x26C are freed and cleared.
+ * - +0x264: D_800C5BC0[m] vertices (s16 x / y / z, 0x10 bytes each). The D_800C6318[m] groups (12 bytes: +0 source
+ *   s16 vertices, stride 0x10, +4 count, +8 matrix index) are transformed by the 4x4 f32 matrices at +0x1D4
+ *   (0x40 bytes each), rounded with cvt.w.s.
+ * - +0x268: per triangle (D_800C5D38[m] triangles, vertex byte offsets D_800C6070[m], 3 words each) the x / z
+ *   bounds (min x, min z, max x, max z); +0x26C: the y bounds (min y, max y).
+ * Buffers are allocated (allocate_memory(size, 1, 1, 2)) when missing; a failed allocation releases all three.
+ * Counts of 0 (groups or triangles) loop "forever" in the asm (do-while); the C keeps that shape.
+ */
+extern u16 D_800C5BC0[];        /* model vertex counts */
+extern u16 D_800C6318[];        /* model transform group counts */
+
+#define OBJMESH_F(p, off) (*(f32 *)((u8 *)(p) + (off)))
+#define OBJMESH_W(p, off) (*(s32 *)((u8 *)(p) + (off)))
+
+static void objmesh_minmax(s32 v, s32 *lo, s32 *hi) {
+    if (v < *lo) {
+        *lo = v;
+    } else if (*hi < v) {
+        *hi = v;
+    }
+}
+
+static s32 objmesh_rint(f32 f) {
+    return BLOB49D0_RINT(f);
+}
+
+void func_150A4FE4(struct127 *arg0) {
+    u8 *obj = (u8 *)arg0;
+    u8 *rec;
+    u8 *recEnd = (u8 *)D_800CC2D0 + 25 * 0x32C;
+    s32 m, p;
+    s32 *group;
+    u32 groups, n;
+    s16 *verts, *out, *src, *a, *b, *c;
+    s16 *bounds, *yRange;
+    s32 *tri, *triEnd;
+    f32 *mtx;
+    f32 r2, dx, dz, x, y, z;
+    s32 minX, maxX, minY, maxY, minZ, maxZ;
+
+    if (OBJMESH_W(obj, 0) == 0 || OBJMESH_W(obj, 0x1D4) == 0 || !(OBJMESH_W(obj, 0xF8) & 0x4000)) {
+        goto release;
+    }
+    m = obj[4];
+    group = (s32 *)D_800C5C08[m];
+    if (group == NULL) {
+        goto release;
+    }
+    /* another live record within the radius (x / z) */
+    r2 = OBJMESH_F(obj, 0x270) * OBJMESH_F(obj, 0x270);
+    for (rec = (u8 *)D_800CC2D0; rec != recEnd; rec += 0x32C) {
+        if (rec == obj || OBJMESH_W(rec, 0) == 0) {
+            continue;
+        }
+        dx = OBJMESH_F(rec, 0x14) - OBJMESH_F(obj, 0x14);
+        dz = OBJMESH_F(rec, 0x1C) - OBJMESH_F(obj, 0x1C);
+        if (dx * dx + dz * dz <= r2) {
+            break;
+        }
+    }
+    if (rec == recEnd) {
+        goto release;
+    }
+
+    groups = D_800C6318[m] - 1;
+    verts = (s16 *)OBJMESH_W(obj, 0x264);
+    if (verts == NULL) {
+        verts = (s16 *)allocate_memory(D_800C5BC0[m] << 4, 1, 1, 2);
+        if (verts == NULL) {
+            goto release;
+        }
+        OBJMESH_W(obj, 0x264) = (s32)verts;
+    }
+    bounds = (s16 *)OBJMESH_W(obj, 0x268);
+    if (bounds == NULL) {
+        bounds = (s16 *)allocate_memory(D_800C5D38[m] << 3, 1, 1, 2);
+        if (bounds == NULL) {
+            goto release;
+        }
+        OBJMESH_W(obj, 0x268) = (s32)bounds;
+    }
+    yRange = (s16 *)OBJMESH_W(obj, 0x26C);
+    if (yRange == NULL) {
+        yRange = (s16 *)allocate_memory(D_800C5D38[m] << 2, 1, 1, 2);
+        if (yRange == NULL) {
+            goto release;
+        }
+        OBJMESH_W(obj, 0x26C) = (s32)yRange;
+    }
+
+    /* transform the groups' vertices */
+    out = verts;
+    do {
+        src = (s16 *)group[0];
+        n = group[1];
+        mtx = (f32 *)(OBJMESH_W(obj, 0x1D4) + (group[2] << 6));
+        group += 3;
+        for (; n != 0; n--) {
+            x = src[0];
+            y = src[1];
+            z = src[2];
+            out[0] = objmesh_rint((mtx[0] * x + mtx[4] * y) + (mtx[8] * z + mtx[12]));
+            out[1] = objmesh_rint((mtx[1] * x + mtx[5] * y) + (mtx[9] * z + mtx[13]));
+            out[2] = objmesh_rint((mtx[2] * x + mtx[6] * y) + (mtx[10] * z + mtx[14]));
+            src += 8;
+            out += 8;
+        }
+    } while (groups-- != 0);
+
+    /* per-triangle bounds */
+    tri = (s32 *)D_800C6070[m];
+    triEnd = tri + D_800C5D38[m] * 3;
+    do {
+        a = (s16 *)((u8 *)verts + tri[0]);
+        b = (s16 *)((u8 *)verts + tri[1]);
+        c = (s16 *)((u8 *)verts + tri[2]);
+        minX = maxX = a[0];
+        minY = maxY = a[1];
+        minZ = maxZ = a[2];
+        objmesh_minmax(b[0], &minX, &maxX);
+        objmesh_minmax(b[1], &minY, &maxY);
+        objmesh_minmax(b[2], &minZ, &maxZ);
+        objmesh_minmax(c[0], &minX, &maxX);
+        objmesh_minmax(c[1], &minY, &maxY);
+        objmesh_minmax(c[2], &minZ, &maxZ);
+        bounds[0] = minX;
+        bounds[1] = minZ;
+        bounds[2] = maxX;
+        bounds[3] = maxZ;
+        yRange[0] = minY;
+        yRange[1] = maxY;
+        tri += 3;
+        bounds += 4;
+        yRange += 2;
+    } while (tri != triEnd);
+    return;
+
+release:
+    p = OBJMESH_W(obj, 0x264);
+    OBJMESH_W(obj, 0x264) = 0;
+    if (p != 0) {
+        func_10004074(p);
+    }
+    p = OBJMESH_W(obj, 0x268);
+    OBJMESH_W(obj, 0x268) = 0;
+    if (p != 0) {
+        func_10004074(p);
+    }
+    p = OBJMESH_W(obj, 0x26C);
+    OBJMESH_W(obj, 0x26C) = 0;
+    if (p != 0) {
+        func_10004074(p);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A4FE4.s")
+#endif
 
 #ifndef NON_MATCHING /* P54: C above */
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D1760/func_150A5480.s")

@@ -1,0 +1,18 @@
+s/if (\*timer != 0) {/if (*timer > 1) {/
+s/if (D_800BE9E4 < \*timer) {/if (D_800BE9E4 <= *timer) {/
+s/\*timer -= D_800BE9E4;/*timer -= D_800BE9E4 + 1;/
+s/            \*timer = 0;/            *timer = 1;/
+s/(0, 0x15) == 0) {/(0, 0x15) != 0) {/
+s/id = 0x1A;/id = 0x1B;/
+s/(0, 0x1C) == 0/(0, 0x1D) == 0/
+s/id = 0x1D;/id = 0x1C;/
+s/(0, 0x20) == 0) {/(0, 0x20) == 1) {/
+s/    if (id == 0) {/    if (id == 0x15) {/
+s/0x7F) + 0x80;/0x7F) + 0x81;/
+s/0x7F) + 0x80;/0xFF) + 0x80;/
+s/id \* 0x34)/id * 0x30)/
+s/(u32) func_150ADA20() . 3 + 0x6C/(u32) func_150ADA20() \& 3 + 0x6C/
+s/(u32) func_150ADA20()/(s32) func_150ADA20()/
+s/0x5DC0, 0, 0, 0, pos\[0\], pos\[1\], pos\[2\]/0x5DC0, 0, 0, 0, pos[0], pos[2], pos[1]/
+s/pos\[2\], 0x320, 0x5DC/pos[2], 0x320, 0x5DD/
+s/    func_15182D40();/    func_15182D40(); if (D_800BE9E4 == 0x10) return;/

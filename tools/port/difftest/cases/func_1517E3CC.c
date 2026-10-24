@@ -1,5 +1,5 @@
 #ifdef NON_MATCHING
-s32 func_1517C11C(s32, s32, s32, s32, f32, s32, s32, s32);
+void func_1517C11C(s32, s32, s32, s32, f32, s32, s32, s32);
 
 /* Per-frame refresh of the 15 positional sound slots (records of 0x68 bytes at D_800DD478, word 0 = active) and
  * their voices (16-byte records at D_800DDA90: +8 voice handle, +0xC "heard this frame"). With D_800DDD20 set,

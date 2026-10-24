@@ -1,0 +1,34 @@
+s/    D_80087640 = NULL;/    ;/
+s/start = func_150871B8(tag);/start = func_150871B8(0);/
+s/    if (start == 0xFF) {/    if (start == 0xFE) {/
+s/    best = D_800D27C8 \* 0xFF;/    best = 0;/
+s/    best = D_800D27C8 \* 0xFF;/    best = D_800D27C8;/
+s/        if (link == 0xFF) {/        if (link == 0xFE) {/
+s/        if (q\[0xE\] != 0) {/        if (q[0xE] == 1) {/
+s/        if (D_800D27C8 == 0) {/        if (D_800D27C8 <= 0) {/
+s/            if (q\[0xF\] >= best) {/            if (q[0xF] > best) {/
+s/        } else if (q\[0xF\] <= best) {/        } else if (q[0xF] < best) {/
+s/link = p\[9 + i\];/link = p[8 + i];/
+s/after = func_15088D24(start, next, 0);/after = func_15088D24(next, start, 0);/
+s/back = func_15088D24(next, start, 0);/back = func_15088D24(start, next, 0);/
+s/    if (next == 0xFF || back == 0xFF || after == 0xFF) {/    if (next == 0xFF || back == 0xFF) {/
+s/    if (next == 0xFF || back == 0xFF || after == 0xFF) {/    if (next == 0xFF || after == 0xFF) {/
+s/    cur = after;/    cur = next;/
+s/nx = func_15088D24(prev, cur, 0);/nx = func_15088D24(cur, prev, 0);/
+s/        if (prev == start) {/        if (cur == start) {/
+s/    D_800D27B9 = cpus;/    D_800D27B9 = humans;/
+s/    D_800D27B8 = humans;/    D_800D27B8 = cpus;/
+s/    total = humans + cpus;/    total = humans;/
+s/    D_800D27B4 = 0;/    ;/
+s/allocate_memory(total \* 0x84, 1, 0, 0);/allocate_memory(total * 0x84, 0, 0, 0);/
+s/        rec->pad28\[3\] = back;/        rec->pad28[3] = after;/
+s/        rec->pad28\[5\] = next;/        rec->pad28[5] = start;/
+s/        rec->pad28\[6\] = after;/        rec->pad28[6] = next;/
+s/        rec->pad28\[4\] = start;/        rec->pad28[4] = back;/
+s/        if (i < D_800D27B8) {/        if (i <= D_800D27B8) {/
+s/            rec->unk31 = i;/            rec->unk31 = 0;/
+s/((u8 \*) rec)\[0x26\] = laps;/((u8 *) rec)[0x26] = laps + 1;/
+s/= !(i < D_80090130);/= !(i <= D_80090130);/
+s/= !(i < D_80090130);/= (i < D_80090130);/
+s/    D_800D27BA = 1;/    D_800D27BA = 0;/
+s/        func_15088CA0((u8 \*) rec);/        func_15088CA0((u8 *) D_80087640);/

@@ -7,7 +7,7 @@
 #ifdef NON_MATCHING
 s32 func_15004FE0(s32);
 void func_1500AC14(void);
-s32 func_1500BEC0();
+void func_1500BEC0(void);
 void func_1500E5C0(void);
 void func_15012370(void);
 void func_15012760(void);

@@ -1,0 +1,3 @@
+s/if (e->level != -1) {/if (e->level >= 0) {/
+s/tick = (\*state \& 0xFFFF) + dir;/tick = (*state \& 0x7FFF) + dir;/
+s/tick -= found->count \* found->ticks;/tick = 0;/

@@ -1,0 +1,17 @@
+s/if (ref == NULL) {/if (0) {/
+s/(pl + 0x2D0);/(pl + 0x2D4);/
+s/\*(s32 \*) (n + 0x38) = 1;/;/
+s/\*(s32 \*) (n + 0x38) = 2;/;/
+s/                fade = 1.0f;/                fade = 0.5f;/
+s/                reset = TRUE;/                ;/
+s/            fade = 0.0f;/            fade = 0.5f;/
+s/if (y < 69.0f) {/if (y <= 69.0f) {/
+s/} else if (y > 84.0f) {/} else if (y >= 84.0f) {/
+s/(y - 69.0f) \/ 15.0f/(y - 69.0f) \/ 16.0f/
+s/fade = 1.0f - /fade = /
+s/!= (s8) G_SETTILESIZE/!= (s8) G_SETTILE/
+s/t = 2;/t = 1;/
+s/58.0f \* fade + 44.0f/58.0f * fade + 43.0f/
+s/(2 << 12)/(1 << 12)/
+s/(t \& 0xFFF)/(t \& 0x7FF)/
+s/(\*(u16 \*) (pl + 0x84) == 5) {$/(*(u16 *) (pl + 0x84) == 6) {/

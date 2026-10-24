@@ -1,0 +1,1 @@
+s/if (!(D_800D27B4 \& bit)) {/if (!(D_800D27B4 \& bit \& 0xFFFF)) {/

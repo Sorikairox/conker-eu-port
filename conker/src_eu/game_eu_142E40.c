@@ -583,15 +583,137 @@ void func_15116EB0(struct_15116EB0 *arg0, struct_15116EB0_1 *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15116F34(u8 *obj);
+#endif
 void func_15116F04(u8 *arg0) {
     if (arg0[0x73] & 2) {
         func_15116F34(arg0);
     }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116F34.s")
+#ifdef NON_MATCHING
+// mover_step: moves the object's s16 position +0x10 towards its s32 target +0x7C (+0x3C: sound entry index >> 10,
+// speed in the other bits; +0x5A gets the per-axis delta). At the target the deltas are cleared and the entry's
+// stop sound plays if the move sound was on (+0x74); entries with a near-arrival sound go to func_1511712C;
+// otherwise the move sound starts (unless +0x74) and each axis steps by (speed * D_800BE9E4) / 2, clamped.
+typedef struct {
+    /* 0x0 */ s16 move_sfx;
+    /* 0x2 */ s16 unk2;
+    /* 0x4 */ s16 stop_sfx;
+    /* 0x6 */ s16 unk6;
+    /* 0x8 */ s16 near_sfx;
+    /* 0xA */ s16 near_lead;
+} MoverSfx; // 0xC
+extern MoverSfx D_80089600[];
+s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
 
+void func_1511712C(u8 *obj);
+
+void func_15116F34(u8 *obj) {
+    s32 bits = *(s32 *)(obj + 0x3C);
+    s32 kind = bits >> 10;
+    s16 *pos = (s16 *)(obj + 0x10);
+    s32 *target = (s32 *)(obj + 0x7C);
+    s16 *delta = (s16 *)(obj + 0x5A);
+    s32 step;
+    s32 i;
+
+    if (target[0] == pos[0] && target[1] == pos[1] && target[2] == pos[2]) {
+        delta[2] = 0;
+        delta[1] = delta[2];
+        delta[0] = delta[2];
+        if (*(u16 *)(obj + 0x74) != 0) {
+            if (kind != 0 && D_80089600[kind].stop_sfx != 0) {
+                func_151152A4(obj, D_80089600[kind].stop_sfx, 0x5DC0, 0x7D0, 0xFA0, 4);
+            }
+            *(u16 *)(obj + 0x74) = 0;
+        }
+        return;
+    }
+    if (kind != 0 && D_80089600[kind].near_sfx != 0) {
+        func_1511712C(obj);
+        return;
+    }
+    if (kind != 0 && *(u16 *)(obj + 0x74) == 0 && D_80089600[kind].move_sfx != 0) {
+        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+    }
+    step = ((bits & 0xFFFF03FF) * D_800BE9E4) >> 1;
+    for (i = 0; i < 3; i++) {
+        delta[i] = pos[i];
+        if (pos[i] != target[i]) {
+            if (target[i] < pos[i]) {
+                pos[i] -= step;
+                if (pos[i] < target[i]) {
+                    pos[i] = target[i];
+                }
+            } else {
+                pos[i] += step;
+                if (target[i] < pos[i]) {
+                    pos[i] = target[i];
+                }
+            }
+        }
+        delta[i] = pos[i] - delta[i];
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116F34.s")
+#endif
+
+#ifdef NON_MATCHING
+// mover_step_sfx: func_15116F34's path for movers whose sound entry has a near-arrival sound: starts the move sound
+// (entry +0, unless +0x74 says it already plays), steps the s16 position +0x10 towards the s32 target +0x7C by
+// ((+0x3C & 0xFFFF03FF) * D_800BE9E4) / 2 per axis (clamped; +0x5A gets the per-axis delta) and plays the entry's
+// +8 sound once the largest remaining distance minus +0xA * speed / 2 drops to 0 (on the frame it crosses, or
+// when the move sound started this frame).
+void func_1511712C(u8 *obj) {
+    s32 bits = *(s32 *)(obj + 0x3C);
+    s32 kind = bits >> 10;
+    s32 speed = bits & 0xFFFF03FF;
+    s16 *pos = (s16 *)(obj + 0x10);
+    s32 *target = (s32 *)(obj + 0x7C);
+    s16 *delta = (s16 *)(obj + 0x5A);
+    s32 started = FALSE;
+    s32 farthest = 0;
+    s32 step;
+    s32 dist;
+    s32 i;
+
+    if (kind != 0 && *(u16 *)(obj + 0x74) == 0 && D_80089600[kind].move_sfx != 0) {
+        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+        started = TRUE;
+    }
+    step = (speed * D_800BE9E4) >> 1;
+    for (i = 0; i < 3; i++) {
+        delta[i] = pos[i];
+        if (pos[i] != target[i]) {
+            if (target[i] < pos[i]) {
+                pos[i] -= step;
+                dist = pos[i] - target[i];
+            } else {
+                pos[i] += step;
+                dist = target[i] - pos[i];
+            }
+            if (dist < 0) {
+                pos[i] = target[i];
+            }
+            if (farthest < dist) {
+                farthest = dist;
+            }
+        }
+        delta[i] = pos[i] - delta[i];
+    }
+    if (kind != 0 && D_80089600[kind].near_sfx != 0) {
+        farthest -= (D_80089600[kind].near_lead * speed) >> 1;
+        if (farthest <= 0 && (-step < farthest || started)) {
+            func_151152A4(obj, D_80089600[kind].near_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511712C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151172FC.s")
 
@@ -890,8 +1012,266 @@ void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118324.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151184BC.s")
+#ifdef NON_MATCHING
+// gate_swing_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler at D_800893D8 for the per-level push gate / door
+// (levels 1 / 0x29, 0xB, 0x17, 0x28, 0x2F, 0x35, 0x3C, 0x40, 0x41; other levels do nothing). The level case gives the
+// open angle, the handle point (scaled by +0x2C..+0x34), the squared reach (scaled by +0x34 squared) and the creak
+// sound; bit 3 of +0x73 marks gates that only close when told to (state 1). A player (D_800CC2D0, D_8008FD8C of them)
+// near the handle and not busy (+0x31C byte +0x6B < 4) pushes it: state 2 (opening) waits 50 ticks (+0x7C bits 8..15)
+// then swings +0x0 up to the open angle with speed +0x84 / acceleration +0x80, plays sound 0x14 and sets state 3
+// (open). With bit 2 of +0x73 the gate is pushed from the other side and only drives the player's +0x6B state (3 -> 4).
+// The player's +0x6C..+0x70 get the handle position. Without a player it swings shut (state 1 -> 0). +0x4F bit 5 is set
+// while it is opening or waiting.
+void func_15060A30(s32, void *);
+void func_15118324(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, u8 *arg4);
 
+void func_151184BC(u8 *rec) {
+    f32 pos[3];
+    f32 open = 40.0f;
+    f32 reach = 40000.0f;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 acc;
+    f32 spd;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s32 sound = 0x4B8;
+    s32 state = rec[0x73] & 3;
+    s32 back = rec[0x73] & 4;
+    s32 closeOnly = rec[0x73] & 8;
+    s32 timer;
+    s32 started;
+    s32 n;
+    s32 i;
+    u8 *player;
+    u8 *p;
+    u8 *q;
+
+    switch (D_800BE9F0) {
+        case 0x1:
+        case 0x29:
+            x = -13.0f;
+            y = 76.0f;
+            z = 354.0f;
+            reach = 10000.0f;
+            break;
+        case 0xB:
+            x = 70.0f;
+            y = 120.0f;
+            z = 329.0f;
+            sound = 0x4BA;
+            closeOnly = 8;
+            break;
+        case 0x17:
+            x = 0.0f;
+            y = 125.0f;
+            z = 322.0f;
+            break;
+        case 0x28:
+            open = 55.0f;
+            x = 0.0f;
+            y = 99.0f;
+            z = 168.0f;
+            closeOnly = 8;
+            break;
+        case 0x35:
+            open = 20.0f;
+            x = 0.0f;
+            y = -328.0f;
+            z = 549.0f;
+            break;
+        case 0x2F:
+            open = 90.0f;
+            reach = 5625.0f;
+            x = 0.0f;
+            y = 61.0f;
+            z = 104.0f;
+            closeOnly = 8;
+            break;
+        case 0x3C:
+            open = 30.0f;
+            reach = 10000.0f;
+            x = 22.0f;
+            y = 13.0f;
+            z = 419.0f;
+            closeOnly = 8;
+            break;
+        case 0x41:
+            open = 45.0f;
+            if (back == 4) {
+                reach = -1.0f;
+            }
+            x = 0.0f;
+            y = 25.0f;
+            z = 336.0f;
+            closeOnly = 8;
+            break;
+        case 0x40:
+            open = 45.0f;
+            x = 0.0f;
+            y = 47.0f;
+            z = 72.0f;
+            closeOnly = 8;
+            reach = 10000.0f;
+            break;
+        default:
+            return;
+    }
+    x *= *(f32 *) (rec + 0x2C);
+    y *= *(f32 *) (rec + 0x30);
+    z *= *(f32 *) (rec + 0x34);
+    reach *= *(f32 *) (rec + 0x34) * *(f32 *) (rec + 0x34);
+    if (*(s32 *) (rec + 0x7C) == 0) {
+        *(s32 *) (rec + 0x7C) = 2;
+        if (state == 3) {
+            *(f32 *) rec = open;
+        }
+    }
+    acc = *(f32 *) (rec + 0x80);
+    timer = (*(s32 *) (rec + 0x7C) >> 8) & 0xFF;
+    started = *(s32 *) (rec + 0x7C) & 1;
+    spd = *(f32 *) (rec + 0x84);
+    func_15118324(rec, x, y, z, (u8 *) pos);
+
+    player = NULL;
+    if (state != 3 && state != 1) {
+        n = D_8008FD8C;
+        for (p = (u8 *) D_800CC2D0; p < (u8 *) D_800CC2D0 + n * 0x32C; p += 0x32C) {
+            if (p[0x65] != 0 || p[0x104] != 0) {
+                continue;
+            }
+            q = *(u8 **) (p + 0x31C);
+            if (q[0x17] != 0 || q[0x27] != 0 || q[0x6B] >= 4) {
+                continue;
+            }
+            if (*(f32 *) (p + 0x18) + 40.0f < pos[1]) {
+                dy = (*(f32 *) (p + 0x18) + *(s16 *) (p + 0xE6)) - pos[1];
+                dz = *(f32 *) (p + 0x1C) - pos[2];
+                dx = *(f32 *) (p + 0x14) - pos[0];
+                if (dz * dz + (dx * dx + dy * dy) < reach) {
+                    player = p;
+                    break;
+                }
+            }
+        }
+    }
+    if (player == NULL && state == 2) {
+        n = D_8008FD8C;
+        p = (u8 *) D_800CC2D0;
+        for (i = 0; i < n; i++, p += 0x32C) {
+            if ((*(u8 **) (p + 0x31C))[0x6B] != 0) {
+                player = p;
+                break;
+            }
+        }
+    }
+
+    if (player != NULL || state == 2) {
+        if (player != NULL && !started) {
+            func_15060A30(0x16B, player);
+        }
+        if (!back) {
+            if (!started) {
+                timer = 50;
+                started++;
+                acc = 0.0f;
+            }
+            state = 2;
+            if (player != NULL) {
+                (*(u8 **) (player + 0x31C))[0x6B] = (timer != 0) ? 1 : 2;
+            }
+            if (timer != 0) {
+                timer = (D_800BE9E4 < timer) ? timer - D_800BE9E4 : 0;
+            } else {
+                spd += acc;
+                if (spd > 30.0f) {
+                    spd = 30.0f;
+                }
+                acc += 0.03f;
+                if (acc > 0.2f && *(u16 *) (rec + 0x74) == 0) {
+                    func_151152A4(rec, sound, 0x7D00, 0x5DC, 0xDAC, 0);
+                }
+                *(f32 *) rec += spd;
+                if (open <= *(f32 *) rec) {
+                    *(f32 *) rec = open;
+                    state = 3;
+                    started = 0;
+                    spd = 0.0f;
+                    acc = 0.0f;
+                    func_151152A4(rec, 0x14, 0x7D00, 0x5DC, 0xDAC, 4);
+                    if (player != NULL) {
+                        (*(u8 **) (player + 0x31C))[0x6B] = 0;
+                    }
+                }
+            }
+            if (player != NULL) {
+                func_15118324(rec, x, y, z, (u8 *) pos);
+                q = *(u8 **) (player + 0x31C);
+                *(s16 *) (q + 0x6C) = (s32) pos[0];
+                *(s16 *) (q + 0x6E) = (s32) pos[1];
+                *(s16 *) (q + 0x70) = (s32) pos[2];
+            }
+        } else if (player != NULL && (q = *(u8 **) (player + 0x31C)) != NULL) {
+            if (!started && q[0x6B] == 0) {
+                timer = 50;
+                started++;
+            }
+            if (timer != 0) {
+                q[0x6B] = 3;
+            } else if (q[0x6B] == 3) {
+                q[0x6B] = 4;
+                started = 0;
+            }
+            if (timer != 0) {
+                timer = (D_800BE9E4 < timer) ? timer - D_800BE9E4 : 0;
+            }
+        }
+        if (player != NULL && *(u8 **) (player + 0x31C) != NULL) {
+            func_15118324(rec, x, y, z, (u8 *) pos);
+            q = *(u8 **) (player + 0x31C);
+            *(s16 *) (q + 0x6C) = (s32) pos[0];
+            *(s16 *) (q + 0x6E) = (s32) pos[1];
+            *(s16 *) (q + 0x70) = (s32) pos[2];
+        }
+    } else if ((!closeOnly || state == 1) && *(f32 *) rec > 0.0f) {
+        if (!started) {
+            acc = 0.1f;
+            started++;
+        }
+        spd += 0.1f;
+        state = 1;
+        if (spd > 30.0f) {
+            spd = 30.0f;
+        }
+        acc += 0.05f;
+        *(f32 *) rec -= spd;
+        if (*(f32 *) rec <= 0.0f) {
+            *(f32 *) rec = 0.0f;
+            started = 0;
+            state = 0;
+            acc = 0.0f;
+            spd = 0.0f;
+        }
+    }
+
+    rec[0x73] = (rec[0x73] & ~3) | state;
+    *(s32 *) (rec + 0x7C) = (*(s32 *) (rec + 0x7C) & 0xFE) | (timer << 8) | started;
+    *(f32 *) (rec + 0x80) = acc;
+    *(f32 *) (rec + 0x84) = spd;
+    rec[0x4F] &= ~0x60;
+    if (state == 2 || (state == 0 && timer != 0)) {
+        rec[0x4F] |= 0x20;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151184BC.s")
+#endif
+
+#ifdef NON_MATCHING
+void func_15118F2C(s32 arg0, s32 arg1);
+#endif
 void func_15118EEC(s32 arg0) {
     func_15118F2C(arg0, 0);
 }
@@ -900,7 +1280,143 @@ void func_15118F0C(s32 arg0) {
     func_15118F2C(arg0, 3);
 }
 
+#ifdef NON_MATCHING
+// mover_swing_step: swings a world mesh record (D_800DBEF4, 0xA0 bytes) about its yaw +0x4 like a door. +0x3C: low 10 bits
+// = signed open angle, bits 10..15 = D_80089600 sound row, top byte = light slot + 1 (0 = none). +0x73 bits 0..1 = state
+// (0 closed, 1 closing, 2 opening, 3 open; bit 2 picks the other default constants, which hold the same values), +0x7C = acceleration (0 -> 0.3), +0x80 = top speed
+// (0 -> 0.075), +0x84 = angular velocity. Starting from rest plays the row's open / close sound; arriving bounces back
+// (velocity * -accel) until it is below 1, then snaps, sets state 3 / 0 and plays the open / close stop sound. The new
+// yaw is stored unless the netplay owner check says otherwise; on level 2 it sets func_1000E75C's level from the open
+// fraction, elsewhere a light slot is dimmed by it (func_151885BC / func_151741D0, plus func_15174200 for slot 0 on level 1).
+// func_15118EEC / func_15118F0C pass arg1 (0 / 3) through to func_1511FF00. Reached through the D_800893D8 table.
+void func_1511FF00(u8 *arg0, s32 arg1);
+f32 func_15048A70(f32 arg0, f32 arg1);
+s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
+s32 func_15022BB0(s32 arg0, s32 arg1);
+void func_1000E75C(s32 arg0);
+void func_151885BC(s32 arg0, f32 arg1);
+void func_151741D0(s32 arg0, s32 arg1);
+void func_15174200(s32 arg0, s32 arg1, s32 arg2);
+
+void func_15118F2C(s32 arg0, s32 arg1) {
+    u8 *rec = (u8 *) arg0;
+    MoverSfx *row;
+    s32 bits;
+    s32 angle;
+    s32 kind;
+    s32 state;
+    s32 sound = 0;
+    s32 slot;
+    s32 level;
+    f32 open;
+    f32 target;
+    f32 yaw;
+    f32 vel;
+    f32 accel;
+    f32 top;
+    f32 diff;
+    f32 frac;
+
+    func_1511FF00(rec, arg1);
+    bits = *(s32 *) (rec + 0x3C);
+    angle = (bits << 22) >> 22;
+    kind = (bits & 0xFC00) >> 10;
+    row = &D_80089600[kind];
+    open = angle;
+    target = open;
+    state = rec[0x73] & 3;
+    yaw = *(f32 *) (rec + 4);
+    vel = *(f32 *) (rec + 0x84);
+    if (state == 0 || state == 1) {
+        target = 0.0f;
+    }
+    if (state == 0 || state == 3) {
+        vel = 0.0f;
+        yaw = target;
+    }
+    if (yaw == target && vel == 0.0f) {
+        *(f32 *) (rec + 0x84) = vel;
+    } else {
+        if (*(f32 *) (rec + 0x7C) == 0.0f) {
+            *(f32 *) (rec + 0x7C) = 0.3f;
+        }
+        accel = *(f32 *) (rec + 0x7C);
+        if (*(f32 *) (rec + 0x80) == 0.0f) {
+            *(f32 *) (rec + 0x80) = 0.075f;
+        }
+        top = *(f32 *) (rec + 0x80);
+        if (vel == 0.0f) {
+            sound = (target == 0.0f) ? row->unk2 : row->move_sfx;
+        }
+        yaw += vel;
+        diff = func_15048A70(yaw, target);
+        if (fabsf(diff) < fabsf(vel)) {
+            vel = -vel * accel;
+            if (fabsf(vel) < 1.0f) {
+                vel = 0.0f;
+                if (target == 0.0f) {
+                    sound = row->unk6;
+                    state = 0;
+                } else {
+                    sound = row->stop_sfx;
+                    state = 3;
+                }
+                yaw = target;
+            } else {
+                *(f32 *) (rec + 0x80) = top * 0.5f;
+            }
+        } else if (diff > 0.0f) {
+            vel += top;
+            if (vel > 5.0f) {
+                vel = 5.0f;
+            }
+        } else {
+            vel -= top;
+            if (vel < -5.0f) {
+                vel = -5.0f;
+            }
+        }
+        if (fabsf(diff) > 30.0f && diff * vel < 0.0f) {
+            vel = 0.0f;
+        }
+        if (yaw < -180.0f) {
+            yaw += 360.0f;
+        } else if (yaw >= 180.0f) {
+            yaw -= 360.0f;
+        }
+        rec[0x73] = (rec[0x73] & ~3) | state;
+        if (sound != 0) {
+            func_151152A4(rec, sound, 0x5DC0, 0x9C4, 0x1194, 0);
+        }
+        *(f32 *) (rec + 0x84) = vel;
+    }
+    if (D_800BE9B4 == 0 && yaw == *(f32 *) (rec + 4)) {
+        return;
+    }
+    if (D_800C35EA == 1 && func_15022BB0((rec - (u8 *) D_800DBEF4) / 0xA0, 0) != 0) {
+        yaw = *(f32 *) (rec + 4);
+    } else {
+        *(f32 *) (rec + 4) = yaw;
+    }
+    slot = (u8) (*(s32 *) (rec + 0x3C) >> 24);
+    if (D_800BE9F0 == 2) {
+        func_1000E75C((s32) (255.0f - fabsf((yaw - open) * 255.0f / open)));
+        return;
+    }
+    if (slot == 0) {
+        return;
+    }
+    frac = 1.0f - fabsf((fabsf(yaw) - (f32) (angle < 0 ? -angle : angle)) / open);
+    func_151885BC(slot - 1, frac);
+    level = (s32) (frac * 255.0f);
+    func_151741D0(level, slot - 1);
+    if (D_800BE9F0 == 1 && slot - 1 == 0) {
+        func_15174200(level, 0, 0xF8);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118F2C.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151194A4.s")
 
@@ -911,7 +1427,47 @@ void func_1511992C(u8 *arg0, s32 *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+// mover_bob_y_update: (port-b P194 draft, verified and inserted P195). World mesh record (D_800DBEF4, 0xA0 bytes) handler: moves the record's y (+0x12) towards
+// base + (phase * amplitude) / 256, where phase = the upper half of +0x3C (unsigned), amplitude = +0x80 and the base y
+// is latched once into +0x84 (low half = the starting y, bit 31 marks it as set). It moves at most +0x7C (speed) per
+// call; +0x7C == 0 does nothing. The "arrived" bits 0 / 1 of +0x73 are cleared while it moves and both set when y is
+// already at the target.
+void func_15119974(u8 *rec) {
+    s16 *y = (s16 *) (rec + 0x12);
+    s32 speed;
+    s32 target;
+    s32 diff;
+
+    if (*(s32 *) (rec + 0x84) == 0) {
+        *(s32 *) (rec + 0x84) = *y | 0x80000000;
+    }
+    speed = *(s32 *) (rec + 0x7C);
+    if (speed == 0) {
+        return;
+    }
+    rec[0x73] &= ~3;
+    target = (s32) ((u16) (*(s32 *) (rec + 0x3C) >> 16) * *(s32 *) (rec + 0x80)) / 256 + (s16) *(s32 *) (rec + 0x84);
+    if (target == *y) {
+        rec[0x73] |= 3;
+        return;
+    }
+    diff = *y - target;
+    if (diff < 0) {
+        if (-diff < speed) {
+            *y = target;
+        } else {
+            *y += speed;
+        }
+    } else if (diff < speed) {
+        *y = target;
+    } else {
+        *y -= speed;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119974.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
@@ -989,7 +1545,100 @@ void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119EB8.s")
 
+#ifdef NON_MATCHING
+// pickup_spin_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler for a spinning, bobbing pickup (P195). The phase
+// +0x7C advances by 5 degrees * D_800BE9A4 (wrapping at 6 pi) and drives the tilt +0x0 / +0x8 (15 * sin / cos), the
+// spin +0x4 (phase * 60 / pi) and the bob of y +0x12 around the base +0x80 (latched from y). While +0x84 (respawn
+// timer, in ticks) is 0, the first live player (D_800CC2D0, D_8008FD8C of them; +0x3C >= 0) within 80 units on the
+// ground plane and in its height band fades it in by distance; touching it with +0x1CA set gives the item
+// (func_15060BA4): respawning pickups (+0x3C high half = respawn time / 50) start their timer and set +0x70 bit 2,
+// others are marked taken (+0x6E) and saved through func_1508F26C(2, index); then sound 0x1CF and the effect
+// func_151D6F64. +0x8A is the alpha, +0x4F the draw flags (0x21 idle, 0x31 fading, 0x20 taken).
+s32 func_1507C7C0(struct127 *, s16 *, s16 *, s16 *);
+s32 func_15060BA4(struct127 *arg0, s32 arg1);
+void func_1508F26C(s32 arg0, s32 arg1);
+u16 func_10010344(u16 sfx, struct127 *obj, s32 vol, s16 arg3, u16 arg4);
+void func_151D6F64(s16 *arg0, struct127 *arg1);
+
+void func_1511A540(u8 *rec) {
+    u8 *p;
+    f32 phase;
+    f32 d2;
+    f32 dx;
+    f32 dz;
+    f32 y;
+    s16 height;
+    s16 unk4C;
+    s16 unk4A;
+    s32 v;
+
+    if (*(s32 *) (rec + 0x84) < 0x20) {
+        if (*(s32 *) (rec + 0x80) == 0) {
+            *(s32 *) (rec + 0x80) = *(s16 *) (rec + 0x12);
+        }
+        *(f32 *) (rec + 0) = sinf(*(f32 *) (rec + 0x7C)) * 15.0f;
+        *(f32 *) (rec + 4) = *(f32 *) (rec + 0x7C) * 19.098593f;
+        *(f32 *) (rec + 8) = cosf(*(f32 *) (rec + 0x7C)) * 15.0f;
+        *(f32 *) (rec + 0x7C) += 0.08726647f * D_800BE9A4;
+        phase = *(f32 *) (rec + 0x7C);
+        if (18.849556f <= phase) {
+            *(f32 *) (rec + 0x7C) = phase - 18.849556f;
+            phase = *(f32 *) (rec + 0x7C);
+        }
+        *(s16 *) (rec + 0x12) = (s32) (cosf(phase + phase) * 10.0f) + *(s32 *) (rec + 0x80) + 10;
+        if (*(s32 *) (rec + 0x84) != 0) {
+            rec[0x4F] = 0x31;
+            rec[0x8A] = (0x20 - *(s32 *) (rec + 0x84)) << 3;
+        } else {
+            for (p = (u8 *) D_800CC2D0; p < (u8 *) D_800CC2D0 + D_8008FD8C * 0x32C; p += 0x32C) {
+                if (*(s32 *) p == 0 || p[0x127] == 0xFF || *(s32 *) (rec + 0x3C) < 0) {
+                    continue;
+                }
+                dz = *(s16 *) (rec + 0x14) - *(f32 *) (p + 0x1C);
+                dx = *(s16 *) (rec + 0x10) - *(f32 *) (p + 0x14);
+                d2 = dz * dz + dx * dx;
+                if (!(d2 < 6400.0f)) {
+                    rec[0x8A] = 0xFF;
+                    rec[0x4F] = 0x21;
+                    continue;
+                }
+                func_1507C7C0((struct127 *) p, &height, &unk4C, &unk4A);
+                rec[0x4F] = 0x31;
+                y = *(s16 *) (rec + 0x12);
+                if (*(f32 *) (p + 0x18) < y + 80.0f && y - 80.0f < *(f32 *) (p + 0x18) + height && p[0x1CA] != 0) {
+                    if (func_15060BA4((struct127 *) p, 1) != 0) {
+                        v = *(s32 *) (rec + 0x3C);
+                        if (v != 0) {
+                            *(s32 *) (rec + 0x84) = ((v >> 16) & 0xFFFF) * 50;
+                            rec[0x70] |= 4;
+                        } else {
+                            rec[0x6E] = 1;
+                            func_1508F26C(2, ((rec - (u8 *) D_800DBEF4) / 0xA0) & 0xFFFF);
+                        }
+                        rec[0x4F] = 0x20;
+                        func_10010344(0x1CF, (struct127 *) p, 0x7D00, 0xC8, 0x9C4);
+                        func_151D6F64((s16 *) rec, (struct127 *) p);
+                    } else {
+                        rec[0x4F] = 0x31;
+                        rec[0x8A] = (u32) ((0.25f + d2 * 0.0001171875f) * 255.0f);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    if (*(s32 *) (rec + 0x84) > 0) {
+        *(s32 *) (rec + 0x84) -= D_800BE9E4;
+        if (*(s32 *) (rec + 0x84) <= 0) {
+            *(s32 *) (rec + 0x84) = 0;
+            rec[0x8A] = 0xFF;
+            rec[0x4F] = 0x21;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511A540.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1511A998(s8 *arg0, s32 *arg1) {
@@ -1025,7 +1674,90 @@ loop_2:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511A998.s")
 #endif
+#ifdef NON_MATCHING
+// obj_texture_anim_step: steps the animated texture of a scenery object. The first D_800896C4 entry that applies
+// (level filter -1 or the current level D_800BE9F0; id 0xFF = any, else the object's +0x54 type, with 0x8000 set for
+// level-filtered entries) gives the frame table, frame count, ticks per frame and ping-pong flag. *slots holds the
+// object's texture slot (looked up once from its +0x1C texture list by func_1511A998: index << 16 | slot) and
+// *state the playing direction (high half) and the tick counter (low half). The frame texture is loaded
+// (func_1510D66C, age 3 on levels 6 / 0x3B else 0x3E) and patched into the display list (func_1510DDF4).
+typedef struct {
+    /* 0x0 */ s32 *frames;
+    /* 0x4 */ u8 count;
+    /* 0x5 */ u8 id;
+    /* 0x6 */ s8 level;
+    /* 0x7 */ u8 ticks;
+    /* 0x8 */ u8 pingpong;
+} TexAnim; // 0xC
+extern TexAnim D_800896C4[24];
+s32 func_1511A998(s8 *arg0, s32 *arg1);
+s32 func_1510D66C(s32 id, s32 *outSize, s32 age, s32 addRef);
+void func_1510DDF4(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
+
+void func_1511AA1C(u8 *obj, s32 *slots, s32 *state) {
+    TexAnim *e;
+    TexAnim *found = NULL;
+    s32 id;
+    s32 second;
+    s32 dir;
+    s32 tick;
+    s32 tex;
+    s32 size;
+    s32 end;
+
+    for (e = D_800896C4; e != D_800896C4 + 24; e++) {
+        id = e->id;
+        if (e->level != -1) {
+            if (D_800BE9F0 != e->level) {
+                continue;
+            }
+            if (id != 0xFF) {
+                id |= 0x8000;
+            }
+        }
+        if (id == 0xFF || id == *(u16 *)(obj + 0x54)) {
+            found = e;
+            break;
+        }
+    }
+    if (found == NULL) {
+        return;
+    }
+    if (*slots == 0) {
+        *slots = func_1511A998(*(s8 **)(obj + 0x1C), &second);
+        *slots |= second << 16;
+    } else {
+        second = (*slots >> 16) & 0xFFFF;
+    }
+    dir = (s16)(*state >> 16);
+    if (dir == 0) {
+        dir = 1;
+    }
+    tick = (*state & 0xFFFF) + dir;
+    if (found->pingpong) {
+        if (tick < 0) {
+            dir = 1;
+            tick = found->ticks;
+        } else if (tick >= found->count * found->ticks) {
+            dir = -1;
+            tick = (found->count - 1) * found->ticks;
+        }
+    } else if (tick >= found->count * found->ticks) {
+        tick -= found->count * found->ticks;
+        dir = 1;
+    }
+    tex = func_1510D66C(found->frames[tick / found->ticks], &size,
+                        (D_800BE9F0 == 6 || D_800BE9F0 == 0x3B) ? 3 : 0x3E, 0);
+    end = 0;
+    if (second != 0) {
+        end = size + tex - 0x20;
+    }
+    func_1510DDF4((s32)obj, tex, end, 4, 5);
+    *state = (dir << 16) | tick;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511AA1C.s")
+#endif
 
 void func_1511AC84(u8 *arg0) {
     if (*(s32 *)(arg0 + 0x3C) != 0) {
@@ -1830,7 +2562,150 @@ void func_1511E320(u8 *arg0, struct127 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511E4F4.s")
 
+#ifdef NON_MATCHING
+// mover_slide_step: world mesh record (D_800DBEF4, 0xA0 bytes) handler at D_8008936C for sliding / bobbing scenery.
+// +0x80 is the command (1 = open, 0 = close, anything else keeps going with a 90x step); starting an open / close from
+// the other end plays the D_80089600 row (+0x3C low half) move / start sound. +0x3C high half picks the motion; +0x84
+// latches the rest position on the first call (+0x7C, set to 1 at the end) and +0x73 bits 0..1 hold the state
+// (0 closed, 1 closing, 2 opening, 3 open). Types 0 / 3: move y +0x8 / x +0x4 down to -110 / 260; 2, 8: x up by at most
+// 70 (80 for type 2); 4, 6, 7: x down by at most 70 (80 / 82, type 6 at half speed); 10, 11: y bobs as sin(phase) * 10
+// with a splash sound when the phase wraps after 4 pi; 12, 13: y = 180 - sin(phase) * 10 (10 / 12 add a fixed step first).
+void func_1511ED08(u8 *rec) {
+    f32 *x = (f32 *) (rec + 4);
+    f32 *y = (f32 *) (rec + 8);
+    f32 *rest = (f32 *) (rec + 0x84);
+    s32 cmd = *(s32 *) (rec + 0x80);
+    s32 state = rec[0x73] & 3;
+    s32 sfx = -1;
+    s32 type;
+    s16 sound;
+    f32 dir;
+    f32 dt;
+    f32 range;
+    f32 speed;
+    f32 lim;
+
+    if (cmd == 1) {
+        if (state == 0 || state == 1) {
+            state = 2;
+            sfx = 0;
+        }
+        dir = 1.0f;
+    } else if (cmd == 0) {
+        if (state == 3 || state == 2) {
+            state = 1;
+            sfx = 1;
+        }
+        dir = -1.0f;
+    } else {
+        dir = 90.0f;
+    }
+    if (sfx != -1) {
+        sound = ((s16 *) &D_80089600[*(s32 *) (rec + 0x3C) & 0xFFFF])[sfx];
+        if (sound > 0) {
+            func_151152A4(rec, sound, 0x5DC0, 0xC8, 0x9C4, 0);
+        }
+    }
+    dt = D_800BE9E4;
+    type = *(s32 *) (rec + 0x3C) >> 16;
+    range = 70.0f;
+    speed = 6.0f;
+    dir *= dt;
+    if (type == 2 || type == 4) {
+        range = 80.0f;
+    } else if (type == 6) {
+        speed = 3.0f;
+        range = 82.0f;
+    }
+    switch (type) {
+        case 0:
+            if (*(s32 *) (rec + 0x7C) == 0) {
+                *rest = *y;
+            }
+            *y -= dir * speed;
+            if (*y > *rest) {
+                *y = *rest;
+                state = 0;
+            }
+            if (*y < -110.0f) {
+                *y = -110.0f;
+                state = 3;
+            }
+            break;
+        case 3:
+            if (*(s32 *) (rec + 0x7C) == 0) {
+                *rest = *x;
+            }
+            *x -= dir * 3.0f;
+            if (*x < 260.0f) {
+                *x = 260.0f;
+                state = 3;
+            }
+            if (*x > *rest) {
+                *x = *rest;
+                state = 0;
+            }
+            break;
+        case 2:
+        case 8:
+            if (*(s32 *) (rec + 0x7C) == 0) {
+                *rest = *x;
+            }
+            *x += dir * speed;
+            lim = *rest + range;
+            if (*x > lim) {
+                *x = lim;
+                state = 3;
+            }
+            if (*x < *rest) {
+                *x = *rest;
+                state = 0;
+            }
+            break;
+        case 4:
+        case 6:
+        case 7:
+            if (*(s32 *) (rec + 0x7C) == 0) {
+                *rest = *x;
+            }
+            *x -= dir * speed;
+            lim = *rest - range;
+            if (*x > *rest) {
+                *x = *rest;
+                state = 0;
+            }
+            if (*x < lim) {
+                *x = lim;
+                state = 3;
+            }
+            break;
+        case 10:
+            *rest += 0.01f;
+            dt = D_800BE9E4;
+            /* fallthrough */
+        case 11:
+            *rest += 0.04f * dt;
+            *y = sinf(*rest) * 10.0f;
+            if (*rest > 12.566371f) {
+                *rest -= 12.566371f * ((func_150ADA20() & 4) + 1);
+                func_151152A4(rec, 0x503, 0x1F40, 0x96, 0x258, 0);
+            }
+            break;
+        case 12:
+            *rest += 0.01f;
+            dt = D_800BE9E4;
+            /* fallthrough */
+        case 13:
+            *rest += 0.04f * dt;
+            *y = 180.0 - sinf(*rest) * 10.0f;
+            break;
+    }
+    *(s32 *) (rec + 0x7C) = 1;
+    rec[0x73] = (rec[0x73] & ~3) | state;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ED08.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1511F1D8(u8 *arg0) {

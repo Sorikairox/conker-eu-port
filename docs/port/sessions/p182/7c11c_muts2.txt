@@ -1,0 +1,5 @@
+s/axis = byZ ? 2 : 0;/axis = byZ ? 1 : 0;/ % none exact big neg nonem fade
+s/if (dist2 < 0xF0) {/if (dist2 <= 0xF0) {/ % fade fadex near
+s|) / 100;|) / 99;| % fade fadex
+s/} else if (dist < 0x30/} else if (dist < 0x2F/ % near
+s/(u32) r < (u32) D_800DE188/(u32) r <= (u32) D_800DE188/ % spark3

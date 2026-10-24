@@ -1,0 +1,26 @@
+s/d.type = type;/d.type = 0;/
+s/a.u89 = 0x14;/a.u89 = 0x15;/
+s/a.u82 = 0x14;/a.u82 = 0x13;/
+s/a.u84 = 0x10;/a.u84 = 0x11;/
+s/a.u88 = 2;/a.u88 = 3;/
+s/size + 0x10, 0x14, 0, 0xE, 0xE/size + 0x10, 0x14, 0, 0xE, 0xD/
+s/alpha, arg4);$/alpha, 0);/
+s/data->data = (u8 \*) data + 0x10;/data->data = (u8 *) data + 0xC;/
+s/memcpy(data->data, src, size);/memcpy(data->data, src, size + 1);/
+s/(obj, obj + 0x10) == 0/(obj, obj + 0x14) == 0/
+s/return NULL;/return obj;/
+s/func_150ADA20() \& 3\]/func_150ADA20() \& 1]/
+s/p.unk8 = 0x1303;/p.unk8 = 0x1302;/
+s/p.life = 300;/p.life = 301;/
+s/p.color\[5\] = 0xFF;/p.color[5] = 0xFE;/
+s/\* 800.0f/* 801.0f/
+s/p.size\[1\] = glowSize;/p.size[1] = 0.0f;/
+s/p.pos\[1\] = a.pos\[1\];/p.pos[1] = a.pos[2];/
+s/p.unk22 = 1;/p.unk22 = 2;/
+s/p.unk24 = 1.0f;/p.unk24 = 0.0f;/
+s/? 0x80 : 0;/? 0x40 : 0;/
+s/| 0xC000 | 0x40000;/| 0xC000;/
+s/p.unk60\[1\] = 5;/p.unk60[1] = 6;/
+s/p.unk60\[6\] = -1;/p.unk60[6] = 0;/
+s/func_151307F0(\&p, 1, 0, 0,/func_151307F0(\&p, 2, 0, 0,/
+s/data->glow = func_151307F0/func_151307F0/

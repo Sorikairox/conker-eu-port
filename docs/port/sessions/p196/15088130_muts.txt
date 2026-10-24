@@ -1,0 +1,13 @@
+s/D_800D27C9 = 0;/D_800D27C9 = 1;/
+s/if (D_80087640 == NULL) {/if (D_80087640 == (void *) 1) {/
+s/i < D_800D27B8;/i <= D_800D27B8;/
+s/rec = (u8 \*) D_80087640 + i \* 0x84;/rec = (u8 *) D_80087640;/
+s/\[(s8) rec\[0x31\]\]/[(s8) rec[0x30]]/
+s/if (\*(s32 \*) (player + 0x318) == 0) {/if (*(s32 *) (player + 0x31C) == 0) {/
+s/if ((s8) rec\[0x30\] >= 2) {/if ((s8) rec[0x30] >= 3) {/
+s/if ((s8) rec\[0x30\] >= 2) {/if (rec[0x30] >= 2) {/
+s/} else if (rec\[0x48\] == 0) {/} else if (rec[0x49] == 0) {/
+s/func_15089B68(rec, player, 0);/func_15089B68(rec, player, 1);/
+s/} else if ((s8) rec\[0x49\] != 0) {/} else {/
+s/func_15089B68(rec, player, 1);/func_15089B68(rec, player, 0);/
+s/func_15089664(rec, player);/func_15089664(player, rec);/

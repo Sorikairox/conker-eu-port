@@ -1,0 +1,6 @@
+s/i <= 16; i++/i < 16; i++/
+s/ids\[i\] \* 0x34/ids[i] * 0x30/
+s/func_151C9CBC(1,/func_151C9CBC(2,/
+s/func_1515F170(9, 1);/func_1515F170(9, 0);/
+s/21, 22 }/21, 23 }/
+s/static const s32 ids\[17\] = { 6,/static const s32 ids[17] = { 5,/

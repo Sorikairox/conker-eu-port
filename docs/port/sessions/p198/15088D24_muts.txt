@@ -1,0 +1,15 @@
+s/    if ((s8) alt != 0) {/    if (alt != 0) {/
+s/        want = 1;/        want = 0;/
+s/        want = 2;/        want = 3;/
+s/        if (link == 0xFF || link == prev) {/        if (link == 0xFF) {/
+s/        if (link == 0xFF || link == prev) {/        if (link == prev) {/
+s/        if (q\[0xE\] != 0) {/        if (q[0xE] == 4) {/
+s/        if (q\[0xF\] == want) {/        if (q[0xF] != want) {/
+s/            match = link;/            ;/
+s/        } else if (other == 0xFF || q\[0xF\] != 0) {/        } else {/
+s/        } else if (other == 0xFF || q\[0xF\] != 0) {/        } else if (other == 0xFF) {/
+s/        } else if (other == 0xFF || q\[0xF\] != 0) {/        } else if (q[0xF] != 0) {/
+s/        other = match;/        other = 0;/
+s/    if (other == 0xFF) {/    if (match != 0xFF) {/
+s/    for (k = 0; k < 5; k++) {/    for (k = 0; k < 4; k++) {/
+s/        link = p\[9 + k\];/        link = p[8 + k];/

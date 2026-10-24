@@ -1,0 +1,12 @@
+s/i < 40; i++/i < 39; i++/
+s/allocate_memory(0x1E0, 1, 0, 0)/allocate_memory(0x1E0, 0, 0, 0)/
+s/allocate_memory(0x1E0, 1, 0, 0)/allocate_memory(0x1D0, 1, 0, 0)/
+s/D_800DE284\[D_800DDE50\] = area;/D_800DE284[D_800DDE50 + 1] = area;/
+s/\[i\]\[2\] = D_800DE290\[D_800DDE50\]\[i\]\[1\];/[i][2] = 1.0f;/
+s/\[i\]\[0\] = 0.0f;/[i][0] = -1.0f;/
+s/\[39\]\[2\] = \*(s16 \*) (rec + 0x14)/[39][1] = *(s16 *) (rec + 0x14)/
+s/\*(s16 \*) (rec + 0x14)/*(u16 *) (rec + 0x14)/
+s/\*(s16 \*) (rec + 0x14)/*(s16 *) (rec + 0x16)/
+s/area \* 0x18;/area * 0x14;/
+s/rec\[0x17\] = 0;/rec[0x16] = 0;/
+s/    D_800DDE50++;/    D_800DDE50 += 2;/

@@ -1,0 +1,16 @@
+s/pos\[1\] = \*(f32 \*) (obj + 0x34);/pos[1] = *(f32 *) (obj + 0x38);/
+s/active = obj\[0x2D\] \& 1;/active = 1;/
+s/D_80090040\[obj\[0x2C\]\](obj)/D_80090040[obj[0x2C]](NULL)/
+s/D_80090040\[obj\[0x2C\]\](obj) == 0/D_80090040[obj[0x2C]](obj) != 0/
+s/D_80090040\[obj\[0x2C\]\]/D_80090040[obj[0x2D]]/
+s/(obj + 0xE) = -1;/(obj + 0xE) = 0;/
+s/obj\[0xD\] |= 1;/obj[0xD] |= 2;/
+s/^        return;/        ;/
+s/if ((obj\[0x2D\] \& 1) \&\& active) {/if (active) {/
+s/if ((obj\[0x2D\] \& 1) \&\& active) {/if (obj[0x2D] \& 1) {/
+s/d\[1\] = \*(f32 \*) (obj + 0x34) - pos\[1\];/d[1] = 0.0f;/
+s/d\[2\] = \*(f32 \*) (obj + 0x38) - pos\[2\];/d[2] = *(f32 *) (obj + 0x38) - pos[1];/
+s/< \*(f32 \*) (obj + 0x3C)/<= *(f32 *) (obj + 0x3C)/
+s/if (\*(u8 \*\*) (obj + 0x28) == NULL) {/if (1) {/
+s/            return;/            ;/
+s/func_151D7DE0(obj);/func_151D7D78(obj);/

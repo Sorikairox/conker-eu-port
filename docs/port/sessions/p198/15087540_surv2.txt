@@ -1,0 +1,1 @@
+s/    best = D_800D27C8 \* 0xFF;/    best = D_800D27C8;/

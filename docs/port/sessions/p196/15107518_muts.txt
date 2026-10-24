@@ -1,0 +1,14 @@
+s/spec.count = (1 << depth) + 1;/spec.count = (1 << depth);/
+s/    spec.u8 = 0;/    spec.u8 = 1;/
+s/for (i = 0; i < 12; i++) {/for (i = 0; i < 11; i++) {/
+s/    spec.kind = kind;/    spec.kind = 0;/
+s/0x3E, -1, 0, 0x30,/0x3E, -1, 0, 0x20,/
+s/(spec.count \* 12 + 0x48)/(spec.count * 12 + 0x40)/
+s/, arg6, arg7);/, arg7, arg6);/
+s/memcpy(rec + 0x28, \&spec, sizeof(BoltSpec));/memcpy(rec + 0x28, \&spec, 0x40);/
+s/pts = (f32 \*) (rec + 0x28 + 0x48);/pts = (f32 *) (rec + 0x28 + 0x44);/
+s/        pts\[1\] = start\[1\];/        pts[1] = end[1];/
+s/+ (spec.count - 1) \* 3;/+ spec.count * 3;/
+s/        pts\[2\] = end\[2\];/        ;/
+s/func_15107678(rec, 0, spec.count - 1, jitter);/func_15107678(rec, 0, spec.count, jitter);/
+s/    return (s32) rec;/    return 0;/

@@ -46,7 +46,7 @@ void func_150B7B6C(void);
 void func_150B7B3C(void);
 void func_150B7A40(void);
 void func_150B7964(void);
-s32 func_150B7170(void);
+void func_150B7170(void);   /* P182: no result (asm v0 = a stale address) */
 s32 func_150B7214(void);
 s32 func_150B7258(void);
 s32 func_150B7DFC(void);
@@ -85,7 +85,29 @@ void func_150B70A0(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800BEE08;
+void *func_151A5580(s32, s32, s32, s32, s32, s32, u8, s32);
+#endif
+
+#ifdef NON_MATCHING
+// hud_box_reset: removes the old box object D_800D9CB4 (func_1516972C), creates a new one (func_151A5580(0, 0, 0xFF,
+// 0, 0, D_800BEE08, 0, 0)), sets state D_800D9CB0 = 3 and clears the 10 words D_800D9CB8.
+void func_150B7170(void) {
+    s32 i;
+
+    if (D_800D9CB4 != 0) {
+        func_1516972C((struct102 *) D_800D9CB4);
+    }
+    D_800D9CB4 = (s32) func_151A5580(0, 0, 0xFF, 0, 0, D_800BEE08, 0, 0);
+    D_800D9CB0 = 3;
+    for (i = 0; i < 10; i++) {
+        D_800D9CB8[i] = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7170.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_800D9CC4;
@@ -468,7 +490,47 @@ void func_150B7B6C(void) {
     D_800D9CB0 = 3;
 }
 
+#ifdef NON_MATCHING
+extern s32 D_80091C98;
+
+// hud_counter_box_open: replaces HUD box slot `slot` of D_800D9CB8 (the old one is removed with func_1516972C) by a
+// new type-6 box effect (func_15169ED8) using the D_80091C98 graphics, `width` wide and 170 high (0x51 / 0x51
+// offsets, 0x58 / 0x40 size, colour 0xFF / 0 / 0 / 0xFF, flags 7 / 0x15 / 1).
+void func_150B7B9C(s32 width, s32 slot) {
+    EffectTemplateE48B0 sp;
+    s32 *box;
+
+    sp.u30 = 6;
+    sp.u2E = 0x40;
+    box = &D_800D9CB8[slot];
+    sp.u31 = 1;
+    sp.u2C = 0x58;
+    sp.u1C = width;
+    sp.u14 = 0;
+    sp.u16 = 0;
+    sp.u18 = 0;
+    sp.u0 = &D_80091C98;
+    sp.u32 = 0xFF;
+    sp.u33 = 0;
+    sp.u34 = 0;
+    sp.u35 = 0xFF;
+    sp.u24 = 0;
+    sp.u26 = 0;
+    sp.u39 = 0;
+    sp.u36 = 7;
+    sp.u37 = 0x15;
+    sp.u38 = 1;
+    sp.u28 = 0x51;
+    sp.u2A = 0x51;
+    sp.u20 = 170.0f;
+    if (*box != 0) {
+        func_1516972C((struct102 *)*box);
+    }
+    *box = (s32)func_15169ED8(&sp);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E48B0/func_150B7B9C.s")
+#endif
 
 extern s32 D_80091C98;
 extern s32 D_80091CA4;

@@ -1,0 +1,6 @@
+s/if (i == 0 \&\& obj/if (i == 1 \&\& obj/
+s/obj\[0x1B\] != 0) {/obj[0x1B] != 1) {/
+s/(obj\[0x1B\] \* 63) >> 8/(obj[0x1B] * 64) >> 8/
+s/, 0, 0, 0, i);/, 0, 0, 1, i);/
+s/    return gfx;/    return gfx + 1;/
+s/(obj\[0x1B\] \* 63) >> 8, 0/(obj[0x1A] * 63) >> 8, 0/

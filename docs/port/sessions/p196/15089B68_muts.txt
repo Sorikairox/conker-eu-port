@@ -1,0 +1,46 @@
+s/    if (release) {/    if (!release) {/
+s/\*(s32 \*) (rec + 0x5C) = 120;/*(s32 *) (rec + 0x5C) = 121;/
+s/\*(f32 \*) (rec + 0x58) = 999.0f;/*(f32 *) (rec + 0x58) = 1000.0f;/
+s/10, rec + 0x4C);/10, rec + 0x58);/
+s/6, (void \*) (s32) cam\[0x23D\]);/6, (void *) (s32) cam[0x23C]);/
+s/        rec\[0x49\] = 0;/        rec[0x49] = 2;/
+s/if ((s8) rec\[0x49\] == 0) {/if (rec[0x49] == 0) {/
+s/want = D_800D27C8 + 1;/want = D_800D27C8;/
+s/\[0xE\] == 6 \&\& /[0xE] == 4 \&\& /
+s/\[0xF\] == want) {/[0xF] >= want) {/
+s/                break;/                ;/
+s/rec\[0x45\] = func_150894F8(rec\[0x44\], 6, 0xFF, 0);/rec[0x45] = func_150894F8(rec[0x44], 4, 0xFF, 0);/
+s/rec\[0x46\] = func_150894F8(rec\[0x45\], 6, rec\[0x44\], 0);/rec[0x46] = func_150894F8(rec[0x45], 6, 0xFF, 0);/
+s/rec\[0x47\] = func_150894F8(rec\[0x46\], 6, rec\[0x45\], 0);/rec[0x47] = func_150894F8(rec[0x46], 6, rec[0x44], 0);/
+s/\*(f32 \*) (rec + 0x3C) = \*(f32 \*) (player + 0x18);/*(f32 *) (rec + 0x3C) = *(f32 *) (player + 0x1C);/
+s/        \*(f32 \*) (rec + 0x34) = 0.0f;/        ;/
+s/5, (void \*) (s32) cam\[0x23D\]);/5, NULL);/
+s/        rec\[0x49\] = 1;/        rec[0x49] = 0;/
+s/+= 0.017f \* (f32) D_800BE9E4;/+= 0.017f;/
+s/if (1.0f <= t) {/if (1.0f < t) {/
+s/if (node == 0xFF) {/if (node == 0) {/
+s/(rec + 0x34) = 1.0f;/(rec + 0x34) = t;/
+s/            rec\[0x45\] = node;/            ;/
+s/(rec + 0x34) = t - 1.0f;/(rec + 0x34) = 0.0f;/
+s/            rec\[0x46\] = rec\[0x47\];/            ;/
+s/            rec\[0x44\] = old;/            ;/
+s/rec\[0x47\] = func_150894F8(rec\[0x46\], 6, node, 0);/rec[0x47] = func_150894F8(rec[0x46], 6, 0xFF, 0);/
+s/if (rec\[0x44 + k\] != 0xFF) {/if (rec[0x44 + k] != 0) {/
+s/            had = 1;/            had = 2;/
+s/func_150894F8(rec\[0x44 + k\], 4, 0xFF, 0)/func_150894F8(rec[0x44 + k], 6, 0xFF, 0)/
+s/\&pt\[3\]\[k\], \&pt\[4\]\[k\], \&pt\[5\]\[k\]/\&pt[4][k], \&pt[3][k], \&pt[5][k]/
+s/        } else if (had == 1) {/        } else if (had) {/
+s/            had = 0;/            ;/
+s/\* 0.01745;/* 0.017453292;/
+s/- sinf(ang) \* 500.0f;/- cosf(ang) * 500.0f;/
+s/(rec + 0x3C) + 180.0f;/(rec + 0x3C) + 120.0f;/
+s/- cosf(ang) \* 500.0f;/+ cosf(ang) * 500.0f;/
+s/            pt\[3\]\[k\] = \*(f32 \*) (rec + 0x38);/            pt[3][k] = *(f32 *) (rec + 0x40);/
+s/(rec + 0x3C) + 120.0f;/(rec + 0x3C) + 180.0f;/
+s/pt\[j\]\[k\] = (pt\[j\]\[k - 1\] - pt\[j\]\[k - 2\]) + pt\[j\]\[k - 1\];/pt[j][k] = pt[j][k - 1];/
+s/pt\[j\]\[k\] = (pt\[j\]\[k - 1\] - pt\[j\]\[k - 2\]) + pt\[j\]\[k - 1\];/pt[j][k] = (pt[j][k - 1] - pt[j][k - 2]) * 2.0f;/
+s/func_15049AD0((s32 \*) pt\[1\], 0, t);/func_15049AD0((s32 *) pt[2], 0, t);/
+s/func_15049AD0((s32 \*) pt\[5\], 0, t);/func_15049AD0((s32 *) pt[5], 1, t);/
+s/    \*(f32 \*) (rec + 0x7C) = 30.0f;/    ;/
+s/    \*(s32 \*) (rec + 0x4C) = 0;/    ;/
+s/7, rec + 0x4C);/7, rec);/

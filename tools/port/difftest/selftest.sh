@@ -156,4 +156,18 @@ D754="DIFFTEST_ARG=0=80480000 DIFFTEST_POKE=80480004=25000000,80480014=42C80000,
 chkce EQUIV  func_1507D754 "$D754"
 chkce DIFFER func_1507D754 "$D754" 's/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFE, 1);/'
 chkce UNSURE func_1507D754 "$D754 DIFFTEST_PAGESTUB_OLD=1"
+# P198: words a stub writes (DIFFTEST_OUTW '@ADDR') are part of the compared memory: func_15063254 saves +0xB8 / +0xC4
+# of its object, func_15060F28 (jal 150612D4) clobbers them, the function restores them. Before P198 the final compare
+# used the function's own store log only, so dropping a restore compared equal. DIFFTEST_STUBW_OLD=1 = old behaviour.
+S63254="DIFFTEST_EXACT=* DIFFTEST_ARG=0=800CC6F0,1=3,2=7,3=3FC00000 DIFFTEST_POKE=800CC704=41280000,800CC708=C1A20000,800CC70C=43960000,800CC7A8=3F400000,800CC730=3FA00000,800CC7B4=C0900000,800CC764=5555BEEF,800CC82C=11111102,800CC834=80410000,800CCA08=80420000,800CCA0C=CAFE0000 DIFFTEST_OUTW=150612D4=@800CC7A8:DEADBEEF/@800CC7B4:DEADBEEF/@800CCA08:DEADBEEF"
+chkce EQUIV  func_15063254 "$S63254"
+chkce DIFFER func_15063254 "$S63254" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
+chkce EQUIV  func_15063254 "$S63254 DIFFTEST_STUBW_OLD=1" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
+# P200: DIFFTEST_ARG on a leading float parameter (f12 / f14) set only a0 / a1, so f(f32 x, f32 y, ...) ran on random
+# x / y: func_15087204's wall setups never met the wall and dropping `ex = -ex` survived. DIFFTEST_ARGF_OLD=1 = old.
+# (old mode: 4 trials, the random x / y of trial 5 happen to cross the wall)
+S87204="DIFFTEST_EXACT=* DIFFTEST_ARG=0=42700000,1=40A00000,2=41A00000,3=C2200000,4=42200000 DIFFTEST_POKE=800D2778=80470000,80087630=00020000,80470000=00000007,80470004=00000200,80470008=0001FFFF,8047000C=FFFF0100,80470010=00640007,80470014=00640200,80470018=00FFFFFF,8047001C=FFFF0100 DIFFTEST_RET=15086218=2"
+chkce EQUIV  func_15087204 "$S87204"
+chkce DIFFER func_15087204 "$S87204" 's/            ex = -ex;//'
+TRIALS=4 chkce EQUIV  func_15087204 "$S87204 DIFFTEST_ARGF_OLD=1" 's/            ex = -ex;//'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

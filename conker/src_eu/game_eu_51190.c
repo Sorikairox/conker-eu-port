@@ -1450,7 +1450,7 @@ struct260 *func_15109990(u8 *obj, s16 span, s8, s8, f32, s32, u8 flag, s32);
 void func_150F85AC(u8 *rec, s16 span, u8 flag, s32);
 void func_150C4620(u8 *obj, s16 span, u8 flag, s32);
 void func_150CFB90(s16 span, u8 flag, s32);
-void func_151925C4(u8 *obj, s16 span, u8 flag, s32);
+struct260 *func_151925C4(u8 *obj, s16 span, u8 flag, s32);
 void func_150FB398(s16 span, u8 flag, s32);
 s32 func_151B09BC(u8 *obj, s32, s16 span, u8 flag, s32);
 u8 *func_1518D1C0(u8 *obj, s16 kind, s16 span, s32, s32 flag, s32, char *name);

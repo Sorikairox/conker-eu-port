@@ -1,0 +1,7 @@
+s/f32 reach = 40000.0f;/f32 reach = 40001.0f;/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
+s/< reach) {/<= reach * 0.99f) {/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
+s/if (open <= \*(f32 \*) rec) {/if (open < *(f32 *) rec) {/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
+s/if (!started \&\& q\[0x6B\] == 0) {/if (!started) {/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
+s/} else if (q\[0x6B\] == 3) {/} else if (q[0x6B] != 0) {/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
+s/if (\*(f32 \*) rec <= 0.0f) {/if (*(f32 *) rec < 0.0f) {/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
+s/(state == 0 \&\& timer != 0)/(timer != 0)/ % lv17_edge lv17_in99 snap_exact back_6b3_unstarted back_6b1_done closing_exact open_timer
