@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P232, 2026-10-24). Details: `docs/port/sessions/P232.md`
+- Hand C (NM, one block each), all in the registry: func_151E533C `mp_match_end_continue` (20B730; coordinator
+  priority: the D_800E0EB8 fade callback after a multiplayer match: next level / replay / back to the menu; 32/32),
+  func_15073FA0 `event_spawn_helper_object` (981E0; last asm callee of the B-pad function; 74/74),
+  func_151D7EDC `trail_points_update` (204F70, level 6; 22/22), func_15109DC8 `spark_burst_spawn` (1371A0, D_80089004
+  handler 0; 58/58), func_1510A538 `segment_effect_update` (1379B0, effect 0x1B; 21/21), func_151922C4
+  `obj_dust_effect_update` (1BF960, effect 0x1D; 34/34), func_15006BEC `save_slot_pack` (33990, EEPROM save writer;
+  now `void (s32)`; 46/46).
+- No `D_<small hex>` link symbols in the new C (nothing for port-web's ROM_ABS table).
+- difftest tip: a callee declared only in a header has no TU prototype, so IDO's scratch f12 before a `void`-arg call
+  (func_150ADA20) is compared as an argument: declare such callees in the NM block.
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1461 NON_MATCHING bodies checked, 0
+  problems`, selftest 95 / 95, implicit_scan 852 sites / 159 NM / 1 float / 0 NM+float, progress_nm
+  `total 5915 3994 1461 460 5455 92.2% 1811392/2253856 (80.4%)`.
+
+## Next steps (from P232)
+1. port-web: Race A end of match (func_151E533C: black screen after the wipe should be gone), save writing
+   (func_15006BEC vs func_15006590), level 6 trail (func_151D7EDC), object dust / segment sparks.
+2. func_1508CF34 (B7840 rail cmd 9, 862 insns, exact v0 for func_1508AB7C): not started.
+3. Breadth from `progress_nm.py --list` (func_150E394C is listed as asm-only although game_eu_110DB0 has its NM body:
+   check the block detection).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
 ## State (session P230, 2026-10-24). Details: `docs/port/sessions/P230.md`
 - **Standing check: `tools/port/implicit_scan.py`** (`[--all] [--tsv OUT]`, ~9 s): host clang pass over src_eu with
   -DNON_MATCHING and only -Wimplicit-function-declaration (IDO is silent about implicit declarations). Lists

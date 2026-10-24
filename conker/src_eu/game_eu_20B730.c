@@ -3485,7 +3485,72 @@ void func_151E4B40(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E4B40.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u8 D_800E0EB6;           /* set by func_151E5B94: nonzero = the match was quit, not finished */
+// mp_match_end_continue: P232. Menu fade callback (D_800E0EB8, set by func_151E5B94) run when a multiplayer match
+// has ended: closes the pause / menu state, keeps only some of the D_80090160 flags and picks what comes next from
+// the menu mode row D_800ABA70[x42]: byte 7 = the level to go on with (an index into D_800ABBA0, -1 none, -2 back
+// to the menu), byte 5 >= 0 = a multi-round mode, where two or more players placed first (D_800E0EF0[0..3] == 1)
+// replays it (main page 3 state 4). Otherwise the next level D_800ABBA0[byte 7] is started (state 1); a finished
+// match of mode -2 goes back to the menu (state 2) without restarting; anything else restarts level 0x1D. A
+// restart sets main page 6 (3 when nothing is left), calls func_1501C710(6, level, 0, 0, 1), resets the player
+// order (func_151E5D28) and sets D_8008FD8C / D_80090130 to 1.
+void func_151E533C(void) {
+    s8 *mode;
+    s32 next;
+    s8 tie = 0;
+    s8 n;
+    s32 level;
+
+    D_800901CC = 0;
+    D_800BEAC1 = 0;
+    D_80090144 = 0;
+    D_800E0EC0 = 0;
+    mode = D_800ABA70[(s8) D_80090174[0x42]];
+    next = mode[7];
+    D_80090160 &= 0xF369;
+    if (D_800ABA70[(s8) D_80090174[0x42]][5] >= 0) {
+        n = 0;
+        if (D_800E0EF0[0] == 1) {
+            n = 1;
+        }
+        if (D_800E0EF0[1] == 1) {
+            n++;
+        }
+        if (D_800E0EF0[2] == 1) {
+            n++;
+        }
+        if (D_800E0EF0[3] == 1) {
+            n++;
+        }
+        tie = (n >= 2);
+    }
+    if (next >= 0 && !tie) {
+        D_800E0B94 = 6;
+        level = D_800ABBA0[next].level;
+        D_80090120 = 1;
+    } else if (next == -2 && (s8) D_800E0EB6 == 0) {
+        D_800E0B94 = 6;
+        D_80090120 = 2;
+        D_80090160 = 0;
+        return;
+    } else if (!tie) {
+        level = 0x1D;
+        D_800E0B94 = 3;
+    } else {
+        level = 0x1D;
+        D_800E0B94 = 6;
+        D_80090120 = 4;
+    }
+    D_800D3260 = 0;
+    func_1501C710(6, level, 0, 0, 1);
+    func_151E5D28();
+    D_8008FD8C = 1;
+    D_80090130 = 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E533C.s")
+#endif
 
 void func_151E5528(void) {
     D_800E0B94 = 10;

@@ -132,7 +132,86 @@ struct260 *func_1510A454(u8 *volatile arg0, s16 arg1, s8 arg2, s8 arg3, f32 arg4
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A28EC;          /* emission rate scale */
+extern f32 D_800A28D4[];        /* segment weights; [6] = total */
+extern f32 D_800A2938[];        /* segment start / end points (12-byte points, read as start = [i], end = [i + 1]) */
+extern f32 D_800A298C[];        /* per-segment target points */
+extern void *D_80089000[];      /* end handlers (s8 +0x34) */
+extern void *D_80089004[];      /* point handlers (s8 +0x35) */
+f32 func_150ADA68(void);
+void func_15114E8C(f32 (*)[4], u8 *);
+void func_150A7E40(f32 (*)[4], f32, f32, f32, f32 *, f32 *, f32 *);
+s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+
+// segment_effect_update: P232. Update callback of effect type 0x1B (func_1510A454 fills its +0x28 data: owner object,
+// accumulator, rate, end handler +0x34, point handler +0x35). The accumulator grows by rate * D_800A28EC * frame step;
+// for every whole unit, when there is a point handler: picks a segment of the owner's model by the weights
+// D_800A28D4, a random point on it, and transforms it, the segment ends and the segment's target point by the
+// owner's matrix (func_15114E8C); the direction from the start to a random point between the end and the target is
+// normalised (func_15145128), then D_80089004[handler](fx, point, start, end, target, dir) runs. Without a point
+// handler the units are dropped. Finally the end handler D_80089000[+0x34](fx) runs unless it is -1. Sibling of
+// func_15109A7C (game_eu_1371A0, effect 0x1A).
+void func_1510A538(u8 *fx) {
+    u8 *rec = fx + 0x28;
+    f32 mtx[4][4];
+    f32 pt[3];
+    f32 start[3];
+    f32 end[3];
+    f32 target[3];
+    f32 dir[3];
+    f32 *seg;
+    f32 *w;
+    f32 r;
+    f32 sel;
+    f32 wt;
+    s32 i;
+
+    *(f32 *) (rec + 4) += *(f32 *) (rec + 8) * D_800A28EC * D_800BE9A4;
+    if ((s8) rec[0xD] != -1) {
+        while (*(f32 *) (rec + 4) > 1.0f) {
+            func_15114E8C(mtx, *(u8 **) rec);
+            i = 0;
+            sel = D_800A28D4[6] * func_150ADA68();
+            w = D_800A28D4;
+            if (D_800A28D4[0] < sel) {
+                wt = D_800A28D4[0];
+                do {
+                    sel -= wt;
+                    wt = w[1];
+                    i++;
+                    w++;
+                } while (wt < sel);
+            }
+            r = func_150ADA68();
+            seg = &D_800A2938[i * 3];
+            func_150A7E40(mtx, (seg[3] - seg[0]) * r + seg[0], (seg[4] - seg[1]) * r + seg[1],
+                          (seg[5] - seg[2]) * r + seg[2], &pt[0], &pt[1], &pt[2]);
+            func_150A7E40(mtx, seg[0], seg[1], seg[2], &start[0], &start[1], &start[2]);
+            func_150A7E40(mtx, seg[3], seg[4], seg[5], &end[0], &end[1], &end[2]);
+            func_150A7E40(mtx, D_800A298C[i * 3], D_800A298C[i * 3 + 1], D_800A298C[i * 3 + 2], &target[0],
+                          &target[1], &target[2]);
+            r = func_150ADA68();
+            dir[0] = ((target[0] - end[0]) * r + end[0]) - start[0];
+            dir[1] = ((target[1] - end[1]) * r + end[1]) - start[1];
+            dir[2] = ((target[2] - end[2]) * r + end[2]) - start[2];
+            func_15145128(dir, dir, NULL, NULL);
+            ((void (*)(u8 *, f32 *, f32 *, f32 *, f32 *, f32 *)) D_80089004[(s8) rec[0xD]])(fx, pt, start, end,
+                                                                                          target, dir);
+            *(f32 *) (rec + 4) -= 1.0f;
+        }
+    } else {
+        while (*(f32 *) (rec + 4) > 1.0f) {
+            *(f32 *) (rec + 4) -= 1.0f;
+        }
+    }
+    if ((s8) rec[0xC] != -1) {
+        ((void (*)(u8 *)) D_80089000[(s8) rec[0xC]])(fx);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1379B0/func_1510A538.s")
+#endif
 
 struct260 *func_1510A8C4(u8 *arg0, s16 arg1, u8 arg2, s32 arg3) {
     struct260 *temp_v0;
