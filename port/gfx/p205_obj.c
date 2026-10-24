@@ -156,7 +156,104 @@ static void go_parse(void) {
  * D_800DD600. Fitted on the P205 goB log: sgn = -1, base ~ pi (start value); base is refined slowly from the motion
  * (the game polls the pad only on some retraces, so no frame-exact calibration). Stuck (< 8 units in 100 retraces):
  * jump (A) and turn the stick +90 degrees for 50 retraces. */
+/* P240 TEST ?p240steer=F[:LOOK[:PCT]] (node: PORT_P240STEER): hoverboard steering controller for Race A. From retrace F on
+ * the stick of pad 0 steers player record p205_player (?p205rec) towards a rail node ahead in the player's rail
+ * record (D_80087640 entry whose +0x31 is 0): node list +0x2B..+0x2E, from slot LOOK (1 default .. 3), skipping nodes
+ * already reached (within 900 units) or passed (the board is within the node's distance + 400 of the next slot's
+ * node; nodes reached / passed are remembered, last 6); target = node + PCT% (default 50) of the way to its
+ * type-4 edge node (link +0xB), from D_800D2778. Stick angle th = wrap(cam + pi - bearing)
+ * (the P205 camera mapping, sgn -1, base pi; the board camera sits behind the board), limited to +-100 degrees,
+ * magnitude 80. Stuck (< 30 units in 120 retraces): stick at +90 degrees with A for 40 retraces. Once the record's
+ * highest lap (+0x28) reaches the lap count D_800E1017 the stick is released and A tapped every 60 retraces.
+ * Logs [p240steer] every 40 retraces and on each node / lap change. Wins over ?p205goto. */
+EM_JS(int, __port_p240_steer, (void), {
+    var v = null;
+    if (typeof location !== 'undefined') { var m = /[?&]p240steer=([^&]*)/.exec(location.search); if (m) v = decodeURIComponent(m[1]); }
+    else if (typeof process !== 'undefined' && process.env && process.env.PORT_P240STEER !== undefined) v = process.env.PORT_P240STEER;
+    if (v === null) return -1;
+    var a = v.split(':'); return ((parseInt(a[0], 10) || 0) * 4 + ((parseInt(a[1] || '1', 10) || 1) & 3)) * 128 + Math.min(127, parseInt(a[2] || '50', 10));
+});
+static float p240_frac = 0.5f;   /* ?p240steer=F:LOOK:PCT: target = node + PCT% of the way to its edge node */
+static void node_centre(int ni, float *tx, float *tz) {   /* P240: rail node + its type-4 edge node (link +0xB), halved */
+    extern unsigned char *D_800D2778;
+    const unsigned char *nd = D_800D2778 + ni * 0x10, *ed;
+    int e = vbe_ld8(nd + 0xB);
+    *tx = (short)vbe_ld16(nd); *tz = (short)vbe_ld16(nd + 4);
+    if (e < 100) { ed = D_800D2778 + e * 0x10; if (vbe_ld8(ed + 0xE) == 4) { *tx += ((short)vbe_ld16(ed) - *tx) * p240_frac; *tz += ((short)vbe_ld16(ed + 4) - *tz) * p240_frac; } }
+}
+static int p240_steer(int *btn, int *sx, int *sy) {
+    static int cfg = -2, look, last_node = -1, last_lap = -1, unstick, done;
+    static unsigned f0, st_f, done_f, log_f; static float st_x, st_z; static int reached[6], nreached;
+    extern unsigned char *D_80087640, *D_800D2778; extern signed char D_800D27B8, D_800D27B9, D_800E1017;
+    const unsigned char *r, *q = 0;
+    float x, z, tx, tz, cam, b, th; int k, n, ni, lap, laps, passed, allseen;
+    if (cfg == -2) { cfg = __port_p240_steer(); if (cfg >= 0) { p240_frac = (cfg & 127) / 100.f; cfg >>= 7; f0 = (unsigned)cfg >> 2; look = cfg & 3; if (look < 1) look = 1;
+        port_log("[p240steer] from retrace %u, look slot %d, edge fraction %.2f\n", f0, look, p240_frac); } }
+    if (cfg < 0 || port_frame_count < f0 || !D_80087640 || !D_800D2778) return cfg >= 0 && port_frame_count >= f0;
+    n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
+    for (k = 0; k < n && k < 8; k++) if ((signed char)vbe_ld8(D_80087640 + k * 0x84 + 0x31) == 0) { q = D_80087640 + k * 0x84; break; }
+    if (!q) return 1;
+    r = D_800CC2D0 + (p205_player < 26 ? p205_player : 0) * REC;
+    x = F(r, 0x14); z = F(r, 0x1C);
+    lap = (signed char)vbe_ld8(q + 0x28); laps = (signed char)vbe_ld8(&D_800E1017);
+    if (lap != last_lap) { port_log("[p240steer] retrace %u: lap %d (max) of %d, cnt %d, pos %.0f %.0f\n", port_frame_count, lap, laps,
+                                    (short)vbe_ld16(q + 0x24), x, z); last_lap = lap; }
+    if (laps > 0 && lap >= laps) {   /* finished: release, tap A */
+        if (!done) { done = 1; done_f = port_frame_count; port_log("[p240steer] retrace %u: finished (%d laps)\n", port_frame_count, lap); }
+        *sx = *sy = 0; if ((port_frame_count - done_f) % 60 < 8) *btn |= 0x8000;
+        return 1;
+    }
+    /* P240 r3: the first node in slots LOOK..3 not yet reached (within 900 units of its centre; the last 6 reached
+     * nodes are remembered), else straight on. The record can lag behind the board (it advanced only at respawns in r2),
+     * so a reached node must never become the target again (r2 turned back to node 22 and stuck on a wall). */
+    allseen = 0;
+    for (k = look; k <= 3; k++) {
+        int j, seen = 0;
+        ni = vbe_ld8(q + 0x2B + k);
+        if (ni == 0xFF || ni >= 100) { if (k == look) return 1; ni = vbe_ld8(q + 0x2B + k - 1); break; }
+        for (j = 0; j < 6; j++) if (reached[j] == ni + 1) seen = 1;
+        if (seen && k < 3) continue;
+        node_centre(ni, &tx, &tz);
+        passed = 0;
+        if (!seen && k < 3) {   /* passed: the board is nearer (+400) the next slot's node than this node is (r4: the slack lets a start-grid
+                                     * place beside node 21 count as past it; race7 turned back there) */
+            int nn = vbe_ld8(q + 0x2B + k + 1); float ux, uz;
+            if (nn != 0xFF && nn < 100) {
+                node_centre(nn, &ux, &uz);
+                passed = sqrtf((ux - x) * (ux - x) + (uz - z) * (uz - z)) < sqrtf((ux - tx) * (ux - tx) + (uz - tz) * (uz - tz)) + 400.f;
+            }
+        }
+        if (seen && k == 3) { allseen = 1; break; }
+        if (!seen && (passed || (tx - x) * (tx - x) + (tz - z) * (tz - z) < 900.f * 900.f)) {
+            reached[nreached++ % 6] = ni + 1;
+            port_log("[p240steer] retrace %u: %s node %d at %.0f %.0f\n", port_frame_count, passed ? "passed" : "reached", ni, x, z);
+            if (k < 3) continue;
+        }
+        break;
+    }
+    node_centre(ni, &tx, &tz);
+    cam = atan2f(D_800DD600[0], D_800DD600[1]);
+    b = atan2f(tx - x, tz - z);
+    th = allseen ? 0.f : wrapa(cam + 3.14159265f - b);   /* every slot reached (record lags): straight on */
+    if (th > 1.745f) th = 1.745f; else if (th < -1.745f) th = -1.745f;
+    if (!st_f) { st_f = port_frame_count; st_x = x; st_z = z; }
+    if (port_frame_count - st_f >= 120) {
+        float d = sqrtf((x - st_x) * (x - st_x) + (z - st_z) * (z - st_z));
+        if (d < 30.f) { unstick = 40; port_log("[p240steer] retrace %u: stuck at %.0f %.0f (moved %.0f), turn + A\n", port_frame_count, x, z, d); }
+        st_f = port_frame_count; st_x = x; st_z = z;
+    }
+    if (unstick > 0) { unstick--; th = 1.5708f; *btn |= 0x8000; }
+    *sx = (int)lrintf(80.f * sinf(th)); *sy = (int)lrintf(80.f * cosf(th));
+    if (ni != last_node || port_frame_count - log_f >= 40) {
+        log_f = port_frame_count;
+        port_log("[p240steer] retrace %u: node %d (%.0f %.0f) pos %.0f %.1f %.0f cnt %d lap %d cam %.2f brg %.2f th %.2f stick %d,%d\n",
+                 port_frame_count, ni, tx, tz, x, F(r, 0x18), z, (short)vbe_ld16(q + 0x24), (signed char)vbe_ld8(q + 0x27), cam, b, th, *sx, *sy);
+        last_node = ni;
+    }
+    return 1;
+}
 void p205_goto_apply(int *btn, int *sx, int *sy) {
+    if (p240_steer(btn, sx, sy)) return;
     const unsigned char *r;
     float x, z, dx, dz, d, cam, th;
     unsigned t;
@@ -254,4 +351,21 @@ void __wrap_func_150877C0(int player, int mode, float speed) {
                  vbe_ld8(q + 0x2B), vbe_ld8(q + 0x2C), vbe_ld8(q + 0x2D), vbe_ld8(q + 0x2E), (signed char)vbe_ld8(q + 0x2F),
                  F(q, 0), F(q, 0xC), F(q, 0x10));
     }
+}
+
+/* P240 DIAGNOSTIC: count func_151B61A0 ripple_spawn_flat calls (P234 C; only caller func_1513783C in game_161520.c,
+ * so the --wrap sees every call). ?p240rip=N logs the first N calls and then every 64th: frame, position, life,
+ * result. Calls through unchanged. */
+int __real_func_151B61A0(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,
+                         unsigned char alpha, int a8, float a9, unsigned char aA, unsigned char aB, unsigned char aC, int aD);
+int __wrap_func_151B61A0(float *pos, float *vel, float scale, float *dir, float *acc, float speed, short life,
+                         unsigned char alpha, int a8, float a9, unsigned char aA, unsigned char aB, unsigned char aC, int aD) {
+    static int f = -1; static unsigned n;
+    int r = __real_func_151B61A0(pos, vel, scale, dir, acc, speed, life, alpha, a8, a9, aA, aB, aC, aD);
+    if (f < 0) f = port_flag("p240rip");
+    n++;
+    if (f > 0 && (n <= (unsigned)f || n % 64 == 0))
+        port_log("[p240rip] call %u frame %u: pos %.1f %.1f %.1f scale %.2f speed %.2f life %d alpha %u -> %d\n", n,
+                 port_frame_count, pos ? pos[0] : 0.f, pos ? pos[1] : 0.f, pos ? pos[2] : 0.f, scale, speed, life, alpha, r);
+    return r;
 }

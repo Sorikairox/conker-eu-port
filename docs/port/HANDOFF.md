@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P240, 2026-10-24, port-web). Details: `docs/port/sessions/P240.md`
+
+- Merged port a64ed49e and port-b b798adaf. Checks after each: verify_all OK, NM build OK, protocheck 0 (1517),
+  floatint 0, implicit NM+float 0, romabs 0 FAIL, arity / m2c ran; clean rebuild census 722 TUs 0 FAIL; selftest
+  108 / 0. HANDOFF: 59 exact duplicate blocks from older merge_union runs removed (`docs/port/sessions/p240/hodedup.py`).
+- Total War: null zone clean, store watch on [0x24, 0x28) silent for 7269 frames (func_151603FC fix holds); stubs:
+  2 boot only.
+- Story route chR3: level 0x29 scene 5 at 33659 as P236; func_15175900 gone; stubs 2 boot + func_151D8280 (204F70).
+- Save / load: route EEPROM (`?eepdump=1`) booted with `?eephex=`: save select shows GAME1 0:09:52, PLAY loads level
+  0x29 (func_15006BEC pack and func_15006590 unpack agree). New stub func_151EF3A0 (216470) on that screen.
+- Race A: `?p240steer=8100[:LOOK[:PCT]]` (with `&p205rec=1`) drives 3 full laps (HUD LAP 2/3, 3/3 shots); the CPU
+  (C func_1508CF34) still finishes first, so STATS shows the player's total as --:--:--. Ripples (func_151B61A0) not
+  reached in any route (`?p240rip` counter).
+
+## Next steps (from P240)
+1. port: stub func_151EF3A0 (game_eu_216470, save-select slot draw); stub func_151D8280 (204F70, level 6 entry).
+2. port-b: func_15196438 D_8008FC30 arity row.
+3. port-web: Race A win (avoid the node 14 / 15 lava; tune PCT), then STATS with a total time; ripple route
+   (object break over water); river crossing on level 0x29.
+
 ## State (session P237, 2026-10-24). Details: `docs/port/sessions/P237.md`
 - Hand C (NM, one block each, all in the registry with setups + mutants): Total War stubs func_1508C600
   `rail_pair_sight` (B7840; racer line-of-sight masks rail +0x16C0, 18 setups, 32 / 32) and func_151EA4C8

@@ -267,12 +267,19 @@ async function persistEeprom() {
   eepTimer = null;
   if (!M || !romSha1 || saveBlocked) return;
   const b = eepBytes();
+  if (Q.get('eepdump')) log(`[eepdump] ${eepWrites} ${Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('')}`);  // P240 TEST: hex image per save (feed back with ?eephex=)
   try { await idb('saves', 'readwrite', (s) => s.put(b, saveKey())); log(`[eep] saved ${b.length} bytes to IndexedDB (${saveKey()}), ${eepWrites} block writes`); eepStatus(`Saved ${new Date().toLocaleTimeString()} (slot ${slot}).`); }
   catch (e) { log('[eep] save failed: ' + e, 'fail'); eepStatus('Save failed: ' + e); }
 }
 let saveBlocked = false;  // set when the save could not be read: never overwrite it with a blank EEPROM
 async function loadEeprom(Mod) {
   try {
+    const hx = Q.get('eephex');   // P240 TEST ?eephex=HEX (4096 hex digits, e.g. from an [eepdump] line): boot with this EEPROM
+    if (hx) {
+      const n = Mod._port_eeprom_size(), p = Mod._port_eeprom_ptr(), m = Math.min(n, hx.length >> 1);
+      for (let i = 0; i < m; i++) Mod.HEAPU8[p + i] = parseInt(hx.substr(i * 2, 2), 16);
+      log(`[eep] loaded ${m} bytes from ?eephex`); return;
+    }
     // IndexedDB can stall (headless --virtual-time-budget, blocked storage): do not hold the boot on it
     const b = await Promise.race([idb('saves', 'readonly', (s) => s.get(saveKey())),
       new Promise((_, rej) => setTimeout(() => rej(new Error('IndexedDB did not answer in 3 s')), 3000))]);
