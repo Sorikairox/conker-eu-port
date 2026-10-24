@@ -13,6 +13,11 @@ while True:
 print(src[m.start():i])
 PY
 }
+# P233: difftest needs the pinned Unicorn 2.0.1 in $R/port_work/pyuc201 (gitignored, one per worktree). Without it the
+# container's 2.1.x is used silently and every call with an FPU delay slot faults at pc 0 (P228 web: 44 / 95 failed).
+if [ ! -d "$R/port_work/pyuc201/unicorn" ] && [ -z "$DIFFTEST_UNICORN" ]; then
+  echo "ERROR: no pinned unicorn in $R/port_work/pyuc201: docker exec \$CONKERDEV pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1"; exit 2
+fi
 pass=0; fail=0
 C=$R/tools/port/difftest/cases
 chkc() { # expect func case-file [sed-expr]: a draft kept in tools/port/difftest/cases

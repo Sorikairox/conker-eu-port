@@ -77,6 +77,8 @@ STUB_OBJS := $(B)/stubs/asm_stubs.o $(B)/stubs/data_stubs.o $(B)/stubs/n64mem_ta
 
 $(B)/vbe.stamp: $(B)/census/files.tsv exclude.txt tools/vbe.py tools/vbe_build.py tools/sigs.py tools/icall.py $(BOOT_SRC) ultra/pc_mem.h $(GEN)/memtest_expect.h $(GEN)/gutest_expect.h
 	cd .. && python3 port/tools/vbe_build.py $(addprefix port/,$(BOOT_SRC))
+	# P233: D_<small hex> link symbols in NM C must be in vbe.py ROM_ABS / RAM_ALIAS (else zero data stubs)
+	cd .. && CONKER_ROOT=$$(pwd) python3 port/tools/romabs_check.py --quiet
 	@touch $@
 
 $(GEN)/memtest_expect.h: tools/n64mem.py

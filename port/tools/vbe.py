@@ -424,6 +424,11 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
            # (port P226): as data stubs they were wasm addresses (0x10A377xx) -> func_1510D66C range -> fatal
            # func_150ADC50 + trap in func_1510D984 in the multiplayer barrel menu (frame 4442).
            'D_88C': 0x88C, 'D_87B': 0x87B}
+# P233: link symbols whose value is the PHYSICAL / segment address of real RAM data (KSEG0 | value = that symbol).
+# The C hands them to the RSP as pointers (gSPMatrix(&D_89810) = the identity matrix D_80089810 in the shadow pass of
+# game_eu_1B1ED0.c); as zero data stubs the port drew with an all-zero view matrix. Every reference is renamed to the
+# RAM symbol (n64mem.py mirrors it like any other D_800xxxxx). port/tools/romabs_check.py checks both tables.
+RAM_ALIAS = {'D_89810': 'D_80089810'}
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. (func_151DE100 used to be a data stub, read as code bytes by func_151E86A4's
@@ -435,6 +440,7 @@ FUNC_AS_DATA = ['func_15033ECC', 'func_150D5634', 'func_150E394C', 'func_151BB69
                 # func_1000EC24 (P26) dropped in P29: port P28 declares it as a function under NON_MATCHING.
                 'func_15103AA0', 'func_15103910', 'func_150DE8AC', 'func_160036F0']
 ABS_REF = re.compile(r'@(' + '|'.join(ROM_ABS) + r')\b(?![.\w])')
+ALIAS_REF = re.compile(r'@(' + '|'.join(RAM_ALIAS) + r')\b(?![.\w])')
 EXT_DECL = re.compile(r'^@([\w.$-]+) = external (?:dso_local )?global [^\n]*$', re.M)
 
 
@@ -443,6 +449,13 @@ def abs_syms(text, st):
         if m[1] in ROM_ABS:
             st['romabs_decl'] += 1
             return ''
+        if m[1] in RAM_ALIAS:
+            st['ramalias_decl'] += 1
+            t = RAM_ALIAS[m[1]]
+            # drop it when the module already declares / defines the target, else declare the target instead
+            if re.search(r'^@' + t + r' = ', text, re.M):
+                return ''
+            return m[0].replace('@' + m[1] + ' ', '@' + t + ' ', 1)
         if m[1] in FUNC_AS_DATA:
             st['func_as_data'] += 1
             return f'declare void @{m[1]}()'
@@ -452,7 +465,12 @@ def abs_syms(text, st):
     def ref(m):
         st['romabs_ref'] += 1
         return f'inttoptr (i32 {ROM_ABS[m[1]]} to ptr)'
-    return ABS_REF.sub(ref, text)
+    text = ABS_REF.sub(ref, text)
+
+    def aref(m):
+        st['ramalias_ref'] += 1
+        return '@' + RAM_ALIAS[m[1]]
+    return ALIAS_REF.sub(aref, text)
 
 
 # KSEG0 pointer tests in Rare's audio code (session P9). The N64 code tells a resident pointer from an

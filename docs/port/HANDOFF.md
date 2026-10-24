@@ -24,6 +24,13 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   func_1508B854 `rail_events_assign_nodes` (B7840, 44/44), func_1000C530 `channel_effect_update` (init_B1B0, 47/47).
 - Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1454 NON_MATCHING bodies checked, 0
   problems`, selftest 95 / 95, progress_nm `total 5915 3994 1454 467 5448 92.1% 1805128/2253856 (80.1%)`.
+## Next steps (from P230)
+1. port-web: MP / race rail AI (lanes, rival pairing, event nodes), record particle emitters, channel audio effects.
+2. func_15073FA0 (981E0): sketched in P230.md section 5, not written. Then func_1508CF34 (B7840 cmd 9, 862 insns).
+3. Pre-0x29 leftovers: func_151D7EDC (204F70), func_15109DC8 (1371A0), func_1510A538 (1379B0), func_151922C4
+   (1BF960), func_15006BEC (33990).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
 ## P229 (port-b) (session P229, 2026-10-24). Details: `docs/port/sessions/P229.md`
 
 Branch `port-b`. Harness: a malformed `DIFFTEST_ARG` item (e.g. `A=7`) is an ERROR line instead of a traceback with
@@ -211,36 +218,6 @@ C bytes 80.9%, 460 asm-only.
    func_150C92B8), line effects (func_1518F080), trail smoke (func_151D4D44), pending actions (func_15063AA0).
 2. Readable rewrites of remaining m2c-style NM bodies in port-b's files.
 3. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098 (106830).
-
-## P222 (port-b) (session P222, 2026-10-24). Details: `docs/port/sessions/P222.md`
-
-Branch `port-b`. Hand C (NM), difftest setups (ARGMEM / STKFILL / RET sequences) + mutants, exact commands per
-function in P222.md section 2: **func_1506401C object_find_held** (90F50, 145; mutants 14/14), **func_150C92B8
-ring_effect_draw** (F6060, 767; render layer 0x31 draw, `Gfx *(Gfx *, u8 *, s16)`; 1 boundary survivor),
-**func_1518F080 line_quad_build** (1BAF40, 273; 1 equivalent survivor), **func_151D4D44 object_trail_smoke_update**
-(201240, 297; 1 equivalent survivor), **func_15083E90 object_find_by_id** (AF2A0, 72; readable rewrite of the m2c
-goto body; port P221 follow-up (a)), **func_15063AA0 object_pending_actions_run** (90F50, 179; jump table, all cases;
-mutants 47/47). func_15065E18: func_150FC438 / func_150DC2F0 prototypes now match port's C (`(.., u8, u8)`,
-`u8 *(u8, s32)`, calls pass arg1 = 0; a3 at 0x15069F80 is carryAnim, already passed). 1BAF40: func_151901F4's
-nested `#ifdef PORT` moved into a macro (it broke difftest for the whole TU). Port-b's files have no asm-only
-functions left (D3880's are C since P130). Checks: verify_all rc 0, NM links, protocheck 0 (1461), selftest 91/91. progress_nm total 5455 / 5915 (92.2%),
-C bytes 80.9%, 460 asm-only.
-
-## Next steps (from P222)
-
-1. Browser: B-pad case 0x3C (func_15065E18 -> func_15083E90 / func_150FC438), shockwave rings (func_150C8F68 /
-   func_150C92B8), line effects (func_1518F080), trail smoke (func_151D4D44), pending actions (func_15063AA0).
-2. Readable rewrites of remaining m2c-style NM bodies in port-b's files.
-3. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098 (106830).
-
-## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
-
-## Next steps (from P230)
-1. port-web: MP / race rail AI (lanes, rival pairing, event nodes), record particle emitters, channel audio effects.
-2. func_15073FA0 (981E0): sketched in P230.md section 5, not written. Then func_1508CF34 (B7840 cmd 9, 862 insns).
-3. Pre-0x29 leftovers: func_151D7EDC (204F70), func_15109DC8 (1371A0), func_1510A538 (1379B0), func_151922C4
-   (1BF960), func_15006BEC (33990).
-4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
 
 ## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
 
