@@ -40,4 +40,4 @@ docker rm -f "$NAME" >/dev/null 2>&1 || true
 docker run -d --name "$NAME" -p 127.0.0.1:"$PORT":8000 -v "$DEST":/www:ro -w /www "$IMG" \
   python3 -m http.server 8000 >/dev/null
 echo "playing at http://localhost:$PORT/   (stop: tools/eu_port/play.sh stop)"
-open "http://localhost:$PORT/" 2>/dev/null || true
+[ -n "${NOOPEN:-}" ] || open "http://localhost:$PORT/" 2>/dev/null || true
