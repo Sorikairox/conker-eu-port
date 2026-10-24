@@ -113,6 +113,7 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Functions reached through function-pointer tables must have the signature the dispatcher uses (return type too): a `void` C function called through an `s32` table pointer whose result is tested is wrong on N64 semantics and traps on wasm (P159 func_151C1EF0).
 - Batch m2c bodies sometimes declared a function `void` and dropped every `return` even though callers (often through s32 handler tables) use the result (P174: func_1509CBD8 made every event scene query answer 0 and sent the new game off-route). When a C function sits in a handler table, check its asm for v0.
 - Port layout: N64 code assumes 4-byte alignment of small stack arrays passed as wider pointers (P178: `s16 sp18[2]` passed as `s32*` clobbered a neighbour in wasm). vbe.py must align stack variables like IDO does.
+- Since P198 the memory compare includes words written by stub knobs (OUTW/OUTA/OUTB); before that, mutants that dropped a restore after a clobbering stub could survive — re-check "equivalent" restore survivors from older sessions.
 - Watch for float bit patterns passed as ints (`0xC61C4000` to an `f32` parameter) — an m2c artefact that is wrong on wasm.
 
 ### Lesson: dropped arguments (P75, P78)
