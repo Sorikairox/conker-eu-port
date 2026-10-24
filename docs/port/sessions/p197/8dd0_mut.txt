@@ -1,0 +1,13 @@
+s/func_15167A68(0x31, arg3,/func_15167A68(0x30, arg3,/
+s/\* 0xA8 + 0x408, 1,/* 0xA8 + 0x400, 1,/
+s/view \& 0xFF, 1);/view \& 0xFF, 0);/
+s/memcpy(rec + 0x10, spec, 0x30);/memcpy(rec + 0x10, spec, 0x2C);/
+s/rec + 0x368 + \*(s32 \*) (spec + 0x14) \* 8;/rec + 0x368 + *(s32 *) (spec + 0x14) * 4;/
+s/rec + 0x3B8 + \*(s32 \*) (spec + 0x14) \* 0x58;/rec + 0x3B8 + *(s32 *) (spec + 0x14) * 0x50;/
+s/(rec + 0x44) = 0.0f;/(rec + 0x44) = 1.0f;/
+s/rec + 0x408 + \*(s32 \*) (spec + 0x14) \* 0xA8;/rec + 0x408 + *(s32 *) (spec + 0x14) * 0xA0;/
+s/\*(s16 \*) (rec + 0x4C) = \*(s16 \*) (rec + 0x28);/*(s16 *) (rec + 0x4C) = *(s16 *) (rec + 0x2A);/
+s/6.2831855f/3.1415927f/
+s/\[i \* 2 + 1\] = cosf(a);/[i * 2 + 1] = sinf(a);/
+s/i++, a += /i++, a -= /
+s/        return NULL;/        return rec + 1;/

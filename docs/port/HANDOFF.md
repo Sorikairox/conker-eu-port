@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P197 (port-b) (session P197, 2026-10-24). Details: `docs/port/sessions/P197.md`
+
+Branch `port-b` (from P194 a4dd67d). Hand C (NM):
+- func_1518DC50 `character_effect_update` (1BAF40, 750): the handler of every func_1518D1C0 character effect
+  (burning / smoke / impacts; endless point flames = types 5..9, effects 2..6, attach 2) - the torch-flame candidate:
+  as asm stub no character effect ever spawned. 207 setups EQUIV, mutants partial (18/20 run, 52 not run).
+- func_15082278 `shot_hit_apply` (AF2A0) inserted (41/42 + 1 equivalent); game_eu_12D5D0 prototype s32.
+- func_150B2C20 `pipe_explode_effects` (E0430; s32 for port's caller), mutants 41/41.
+- func_150C8DD0 `ring_effect_create` (F6060), mutants 13/13. func_150A66F0 `view_sphere_depth` (D3880, hand asm):
+  whole-function harness `p197/nmasm_66f0.py` 10000 trials EQUIV.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1312). progress_nm 5306/5915 (89.7%), C bytes 74.5%.
+
+## Next steps (from P197)
+
+1. Browser: level 0x29 torches / character effects with func_1518DC50 in C.
+2. Finish func_1518DC50 mutants (P197.md 4.); func_150CA150, func_1511127C (their asm callees are C now).
+3. Breadth (`p168/asmlist.py`), smallest first.
+
 ## P194 (port-b) (session P194, 2026-10-24). Details: `docs/port/sessions/P194.md`
 
 Branch `port-b` (from P191 5d6bdf7). Docs / drafts only, no src_eu change.

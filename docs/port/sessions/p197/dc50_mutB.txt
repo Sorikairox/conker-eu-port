@@ -1,0 +1,33 @@
+s/if (e->timed \& 1) {/if (e->timed \& 2) {/
+s/if (e->onEnd == -1) {/if (e->onEnd == 0) {/
+s/if (vis \& (1 << D_80082FA4)) {/if (vis \& (2 << D_80082FA4)) {/
+s/(vis \& 0xF) != 0xF/(vis \& 0x7) != 0x7/
+s/                cfg = row\[n\];/                cfg = row[0];/
+s/                            cfg = row\[i\];/                            cfg = row[i + 1];/
+s/if (\*(u16 \*) (owner + 0x84) == set->lists\[i\].ids\[j\]) {/if (*(u8 *) (owner + 0x85) == set->lists[i].ids[j]) {/
+s/if (!(e->mode \& 8) \&\& (mode != e->mode/if (!(e->mode \& 4) \&\& (mode != e->mode/
+s/e->accum = (f32) cfg->max;/e->accum = (f32) cfg->count;/
+s/            } else if (cfg->attach == 2) {/            } else if (cfg->attach == 1) {/
+s/if (cfg->attach == 2 || mode == 2) {/if (cfg->attach == 2) {/
+s/\*(s16 \*) (pt + 0xC) \* 0x40);/*(u8 *) (pt + 0xC) * 0x40);/
+s/if (slot->timer < 0) {/if (slot->timer <= 0) {/
+s/} else if (m->vel\[2\] < -10.0f) {/} else if (m->vel[2] < -9.0f) {/
+s/m->tpl->end\[0\], m->tpl->end\[1\]/m->tpl->end[1], m->tpl->end[1]/
+s/\*(s32 \*) (slot->obj + 0x58) |= 1;/*(s32 *) (slot->obj + 0x58) |= 2;/
+s/                    if (tail == NULL) {/                    if (tail != NULL) {/
+s/spawn.wC = (s32) ((tpl->f14 + tpl->f18) \* 0.5f);/spawn.wC = (s32) (tpl->f14 + tpl->f18);/
+s/blk.s4A = tpl->s2A;/blk.s4A = tpl->s28;/
+s/                    if (fresh) {/                    if (!fresh) {/
+s/spawn.scale\[1\] = 0.0f;/spawn.scale[1] = 1.0f;/
+s/spawn.b45 = 255;/spawn.b45 = 0;/
+s/(u32) (nfree + 1);/(u32) (nfree + 2);/
+s/tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58/tpl->kind, tpl->b3A, 0, tpl->b3A, b, 0x58/
+s/|= 0x40000000;/|= 0x20000000;/
+s/cb = func_151423D8((u8) (c - 0x40));/cb = func_151423D8((u8) (c + 0x40));/
+s/head->off\[1\] = -r \* cb;/head->off[1] = r * cb;/
+s/head->off\[2\] = -func_151423D8((u8) (a - 0x40)) \* r;/head->off[2] = func_151423D8((u8) (a - 0x40)) * r;/
+s/idx = head - e->slots;/idx = head - e->slots + 1;/
+s/(u32) (cfg->range + 1) + cfg->base;/(u32) (cfg->range + 1) + cfg->range;/
+s/                                e->live++;/                                e->live += 2;/
+s/} while (ok \&\& nfree != 0/} while (nfree != 0/
+s/            e->attach = cfg->attach;/            e->attach = cfg->shape;/

@@ -10,7 +10,7 @@ s32 func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32,
 void func_15100304(f32 *pos, f32 *dir, u8 flag, s32 arg3);
 void func_151000EC(u8 *arg0, s32 arg1, struct127 *arg2, s32 arg3);
 s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
-void func_15082278(u8 *obj, u8 *hit, s32 arg2);
+s32 func_15082278(u8 *obj, u8 *hit, s32 arg2); /* P197: s32 like its C (0 / 1 / 2; nobody reads it) */
 void func_151001BC(u8 *arg0);
 extern s32 D_800A2500;      /* f32[3] spray point (rodata; s32 as in func_1510015C below) */
 extern f32 D_800A250C[9];
