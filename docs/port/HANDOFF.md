@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P206 (port-b) (session P206, 2026-10-24). Details: `docs/port/sessions/P206.md`
+
+Branch `port-b` (from P203 4f8756f). Tooling commit + hand C (NM), difftest EQUIV + setups + mutants:
+- Tooling: `docs/port/sessions/p179/voidret_scan.py --files` silently matched nothing for paths / `.c` names ("0
+  void C functions scanned"); now accepts base names, `.c` names and paths, errors on unknown names, refuses a missing
+  `port_work/p179/dis.txt` and warns when it is older than the ELF; `#pragma GLOBAL_ASM` lines no longer count as
+  table references. Re-run on the P197..P203 files: 88 void functions, no suspect. `tools/port/v0use.py` copied from
+  port (p204).
+- func_15093B58 `radar_draw` (BC510, 857): multiplayer radar (disc + team dots + height marks); callers
+  func_1508FD38 (C) and func_150918EC (asm), both read v0. 35 setups EQUIV, mutants 65/67 + 2 equivalent.
+- func_150F8EAC `fire_burn_update` (126330, 893): burning-object update (stages, crackle, embers / flames / smoke /
+  sparks); caller func_150F8DFC (matched C, void). 21 setups EQUIV, mutants 89/91 + 1 equivalent + 1 1-ulp literal.
+  Callee func_151C384C (game_eu_1EFE10, not port-b's) is asm-only: embers missing until converted.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1318 bodies), selftest 65/65. progress_nm 5312 / 5915 (89.8%),
+  game 4778 / 5334, C bytes 75.2%, 603 asm-only (P203's "5353 / 562" in its notes did not match progress_nm; the
+  P162 list from 11:37 had 5307 before P203).
+
+## Next steps (from P206)
+
+1. func_150918EC (1995, BC510): last owned asm-only function with a C caller; split into readable parts, verify by
+   branch setups.
+2. Other owner: func_151C384C (game_eu_1EFE10) asm-only, called by func_150F8EAC.
+3. Browser: radar (multiplayer), the fire scene (message 0x3F to func_150F8DFC).
+
 ## P203 (port-b) (session P203, 2026-10-24). Details: `docs/port/sessions/P203.md`
 
 Branch `port-b` (from P201 ce8da0d). Hand C (NM), difftest EQUIV + setups + mutants:

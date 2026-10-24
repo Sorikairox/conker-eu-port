@@ -1,0 +1,2 @@
+s/    range = 3136.0f;/    range = 3137.0f;/ % edge2p edge1p
+s/        range = 7744.0f;/        range = 7745.0f;/ % edge2p edge1p
