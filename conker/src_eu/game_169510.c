@@ -1546,9 +1546,17 @@ u8 *func_1513EAD8(u8 *arg0, u8 arg1, s16 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513EAD8.s")
 #endif
+#ifdef NON_MATCHING
+/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+   matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
+s32 func_1513EDB4(s32 arg0, s16 arg1) {
+    return func_1513EAD8(arg0, 0, arg1);
+}
+#else
 void func_1513EDB4(s32 arg0, s16 arg1) {
     func_1513EAD8(arg0, 0, arg1);
 }
+#endif
 
 s32 func_1513EDE4(s32 arg0, s16 arg1) {
     return func_1513EAD8(arg0, 1, arg1);
@@ -1725,9 +1733,17 @@ u8 *func_1513F114(u8 *arg0, s16 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_169510/func_1513F114.s")
 #endif
+#ifdef NON_MATCHING
+/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+   matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
+u8 * func_1513F4B0(struct210 *arg0, s16 arg1) {
+    return func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
+}
+#else
 void func_1513F4B0(struct210 *arg0, s16 arg1) {
     func_15140410(arg0, &arg0->unk110, &arg0->unk11C, arg1);
 }
+#endif
 
 // emits gDPSetCombineLERP for combine mode arg1 (table D_800A4F88), preceded by a pipe sync if *arg2 == 1
 Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2) {
@@ -1862,6 +1878,17 @@ block_5:
 #endif
 u8 *func_1513FAB4(u8 *fx, u8 flip, f32 *scale, s16 slot);
 
+#ifdef NON_MATCHING
+/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+   matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
+u8 * func_1513FA2C(s32 arg0, s16 arg1) {
+    f32 sp18[2];
+
+    sp18[0] = 1.0f;
+    sp18[1] = 1.0f;
+    return func_1513FAB4((u8 *) arg0, 0, sp18, arg1);
+}
+#else
 void func_1513FA2C(s32 arg0, s16 arg1) {
     f32 sp18[2];
 
@@ -1869,7 +1896,19 @@ void func_1513FA2C(s32 arg0, s16 arg1) {
     sp18[1] = 1.0f;
     func_1513FAB4((u8 *) arg0, 0, sp18, arg1);
 }
+#endif
 
+#ifdef NON_MATCHING
+/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+   matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
+u8 * func_1513FA70(s32 arg0, s16 arg1) {
+    f32 sp18[2];
+
+    sp18[0] = 1.0f;
+    sp18[1] = 1.0f;
+    return func_1513FAB4((u8 *) arg0, 1, sp18, arg1);
+}
+#else
 void func_1513FA70(s32 arg0, s16 arg1) {
     f32 sp18[2];
 
@@ -1877,6 +1916,7 @@ void func_1513FA70(s32 arg0, s16 arg1) {
     sp18[1] = 1.0f;
     func_1513FAB4((u8 *) arg0, 1, sp18, arg1);
 }
+#endif
 
 #ifdef NON_MATCHING
 /* P170 */

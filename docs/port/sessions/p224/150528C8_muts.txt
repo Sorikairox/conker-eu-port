@@ -1,0 +1,46 @@
+s/f32 radius = (f32) (s8) o\[0x22B\];/f32 radius = (f32) (s8) o[0x22A];/
+s/D_800D2104)\[o\[0x13F\]\] + 2);/D_800D2104)[o[0x13F]] + 4);/
+s/if (kind == 0x4F \&\& o\[0x65\] != 0/if (kind == 0x4E \&\& o[0x65] != 0/
+s/OBJ_F32(PLAYER(o\[0x65\]), -0x1DC) \* 284.0f/OBJ_F32(PLAYER(o[0x65]), -0x1D8) * 284.0f/
+s/\* 284.0f + OBJ_F32(PLAYER(o\[0x65\]), 0x18);/* 284.0f + OBJ_F32(PLAYER(o[0x65]), 0x1C);/
+s/\*(s32 \*) (o + 0xF8) |= 0x10000;/*(s32 *) (o + 0xF8) |= 0x20000;/
+s/o\[0x80\] = 10;/o[0x80] = 11;/
+s/0x18) + 80.0f;/0x18) + 81.0f;/
+s/o\[0x21E\] \* 8 + 0xA);/o[0x21E] * 8 + 0x8);/
+s/if (o\[0x223\] == 0xE || o\[0x223\] == 3) {/if (o[0x223] == 0xE) {/
+s/if (kind == 0x4F || kind == 0x83) {/if (kind == 0x4F) {/
+s/if (o\[0x251\] == 1) {/if (o[0x251] == 0) {/
+s/settle = 0;/settle = 1;/
+s/OBJ_F32(o, 0x20), 0) \* -0.0054931640625f;/OBJ_F32(o, 0x20), 0) * 0.0054931640625f;/
+s/if (PLAYER(o\[0x124\])\[-0x205\] == 0xFF) {/if (PLAYER(o[0x124])[-0x204] == 0xFF) {/
+s/OBJ_F32(o, 0xB8) \* D_80099708;/OBJ_F32(o, 0xB8) * D_8009970C;/
+s/if (kind == 8) {/if (kind == 9) {/
+s/if (floor < OBJ_F32(o, 0x18) \&\& OBJ_F32(o, 0x20) > 0.0f) {/if (floor < OBJ_F32(o, 0x18)) {/
+s/if (o\[0x223\] != 3) {/if (o[0x223] == 3) {/
+s/if (floor < target) {/if (floor > target) {/
+s/band = radius \* D_800BE9A4;/band = radius;/
+s/if (d < band \&\& -band < d) {/if (d < band) {/
+s/OBJ_F32(o, 0x24) = 0.0f;/OBJ_F32(o, 0x28) = 0.0f;/
+s/y + d \* D_80099710;/y + d * D_80099714;/
+s/if (bob == 0xFF) {/if (bob == 0xFE) {/
+s/if (D_800BE9E4 < timer) {/if (D_800BE9E4 <= timer) {/
+s/= timer - D_800BE9E4;/= timer - 1;/
+s/OBJ_F32(o, 0x3C) = 254.0f;/OBJ_F32(o, 0x3C) = 255.0f;/
+s/(ctl + 0x8C) \& 0x2000)/(ctl + 0x8C) \& 0x4000)/
+s/func_150D7CA0(arg0, ctl\[0x75\] \& 0x7F);/func_150D7CA0(arg0, ctl[0x75]);/
+s/if (30.0f < v) {/if (31.0f < v) {/
+s/(v - OBJ_F32(o, 0xB8)) \* D_80099714;/(v - OBJ_F32(o, 0xB8)) * D_8009971C;/
+s/if (snap != 2 \&\& bob != 0) {/if (bob != 0) {/
+s/amp = (f32) bob \* D_80099718;/amp = (f32) bob * D_80099714;/
+s/func_15058EA4(arg0, target, amp, target, -amp, radius, -radius);/func_15058EA4(arg0, target, amp, target, amp, radius, -radius);/
+s/o\[4\] != 0x49 \&\&/o[4] != 0x48 \&\&/
+s/(o + 0x22C) \& 8)) {/(o + 0x22C) \& 4)) {/
+s/OBJ_F32(o, 0x20) \* -2.5f/OBJ_F32(o, 0x20) * -2.0f/
+s/if (o\[0x104\] != 0) {/if (o[0x105] != 0) {/
+s/(o + 0x7A) + 0x4000) \* 0.0054931640625f;/(o + 0x7A) + 0x2000) * 0.0054931640625f;/
+s/func_15052760(arg0, yaw);/func_15052760(arg0, 0);/
+s/if (o\[4\] == 0x9E) {/if (o[4] == 0x9F) {/
+s/(o + 0x2E4) = 0;/(o + 0x2E0) = 0;/
+s/D_800C3E78 < D_80090130)/D_800C3E78 <= D_80090130)/
+s/|| func_150535F4(arg0) == 0) {/|| func_150535F4(arg0) != 0) {/
+s/func_15021834(arg0, 0, -1);/func_15021834(arg0, 0, 1);/

@@ -185,9 +185,17 @@ s32 func_150F83A0(u8 *arg0)
   return 1;
 }
 
+#ifdef NON_MATCHING
+/* P224: entry of draw table D_8008A1BC, whose dispatcher (func_1513DB70 area, game_169510) uses the result: the
+   matching C is void, but its compiled code returns the callee's v0, so the NM variant returns it. */
+u8 * func_150F84D8(u8 *arg0, s16 arg1) {
+    return (u8 *) func_15140410(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
+}
+#else
 void func_150F84D8(u8 *arg0, s16 arg1) {
     func_15140410(arg0, arg0 + 0x110, arg0 + 0x11C, arg1);
 }
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15154728(u8 *, f32, f32, f32, f32, u8, s32); /* P95: f32 parameter */

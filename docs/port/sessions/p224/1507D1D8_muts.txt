@@ -1,0 +1,39 @@
+s/team = ctl\[0x11B\];/team = ctl[0x11A];/
+s/team = -1;/team = 0;/
+s/if (D_800BE9F0 == 0x2B) {/if (D_800BE9F0 == 0x2C) {/
+s/n = func_150859AC((s16) idx, 1);/n = func_150859AC((s16) idx, 3);/
+s/if (n >= 0x11 \&\& n < 0x21) {/if (n >= 0x11 \&\& n < 0x20) {/
+s/if (n >= 0x11 \&\& n < 0x21) {/if (n > 0x11 \&\& n < 0x21) {/
+s/n = (func_150ADA20() \& 0xF) + 0x11;/n = (func_150ADA20() \& 0x7) + 0x11;/
+s/func_15085710((s16) idx, 0, n);/func_15085710((s16) idx, 1, n);/
+s/if (n < 0x1D) {/if (n < 0x1C) {/
+s/idx \* 0x30 + 4\] = 0x9C;/idx * 0x30 + 5] = 0x9C;/
+s/\] = 0x9D;/] = 0x9E;/
+s/func_15060F28(rec, 0);/func_15060F28(rec, 1);/
+s/D_800D18A8 = 1;/D_800D18A8 = 2;/
+s/func_15082E44((u8 \*) D_800D20FC + idx \* 0x30, idx, 0, 0, 0);/func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 1);/
+s/\[0x1B0\] = keep1B0;/[0x1B0] = keep1AF;/
+s/obj\[0x328\] = keep328;/obj[0x329] = keep328;/
+s/if (idx <= D_80082FA0) {/if (idx < D_80082FA0) {/
+s/idx \* 0x9A0), idx, D_800BEE12, team);/idx * 0x9A0), idx, D_800BEE12, 0);/
+s/func_15182338(idx);/func_15182338(0);/
+s/func_1517F3B0(0, 0, 0, 0, 1, idx);/func_1517F3B0(0, 0, 0, 0, 0, idx);/
+s/func_1517F3B0(0, 0, 0, 0x1E, 0, idx);/func_1517F3B0(0, 0, 0, 0x1F, 0, idx);/
+s/func_150858A0(obj, team, 0);/func_150858A0(obj, 0, 0);/
+s/D_800D18A8 = 0;/D_800D18A8 = 1;/
+s/\[0x122\] = 0;/[0x123] = 0;/
+s/+ 0x124) = 0;/+ 0x126) = 0;/
+s/+ 0x1AA) = keep1AA;/+ 0x1AA) = 0;/
+s/|= 0x100;/|= 0x200;/
+s/obj\[0x1CA\] = D_8008726C;/obj[0x1CB] = D_8008726C;/
+s/\[0x75\] = 0;/[0x76] = 0;/
+s/obj\[0x210\] = 0xFF;/obj[0x210] = 0xFE;/
+s/obj\[0x232\] = 1;/obj[0x232] = 0;/
+s/(obj + 0x218) = 0;/(obj + 0x21C) = 0;/
+s/\[0x11B\] = team;/[0x11B] = 0;/
+s/obj\[0x125\] = 0x96;/obj[0x125] = 0x95;/
+s/\[0x1B1\] = 0x96;/[0x1B0] = 0x96;/
+s/if (D_800BE9F0 == 0x33) {/if (D_800BE9F0 == 0x34) {/
+s/func_1507D158(idx, 0x78, 0, 0, 0);/func_1507D158(idx, 0x77, 0, 0, 0);/
+s/func_150891D4(obj);/func_150891D4(0);/
+s/s8 keep1B0 = ctl\[0x1B0\];/s8 keep1B0 = ctl[0x1B1];/

@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P224, 2026-10-24). Details: `docs/port/sessions/P224.md`
+
+Branch `port` (P221 d5b5126a + P224 commit).
+- Hand C (NM), multiplayer: func_1507D1D8 mp_player_respawn (A9D90; the respawn after a lost life), func_150528C8
+  obj_hover_height_update (78230; board height / movement handler, state table D_800863B8: the likely cause of
+  "Conker can't move in Race A"), func_151221F0 camera_follow_update (14FA00; the stub skipped the camera follow steps),
+  func_15164E0C object_wobble_update (192500). Random + setups EQUIV, mutants 39/39, 46/46, 37/37, 30/30 (func_150528C8
+  random DIFFERs only on an lh-vs-u16 argument the callee masks: artefact, see the session doc).
+- D_8008A1BC draw-table entries (port-b P222 item) return their callee's v0 in NM (7 wrappers; NM-only prototypes
+  in functions.h for func_1513EDB4 / func_1513F4B0).
+- Triage of the MP start stubs in P224.md section 1. Ownership move to port-b (game_161520, 1C3530, 19B180, 1FB080,
+  127840, 226870, 1E7CC0, 1A2970, 133A70, 101080, D5E90): no edits there in P224.
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck `1441 NON_MATCHING bodies checked, 0 problems`, selftest 95 / 95, progress_nm `total 5915 3994 1441 480 5435 91.9% 1783192/2253856 (79.1%)`.
+
+## Next steps (from P224)
+1. port-web: browser re-run of Race A / Total War (movement, camera, first death / respawn).
+2. func_151E5E08 (match rules, D_800E1050), func_151ECE00 (216470 DL passthru, 661 insns), func_151E9150,
+   func_1509D590; then func_15073FA0, func_1508CF34.
+
 ## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
 
 Branch `port` (P218 85e5d8c6 + P221 commit).

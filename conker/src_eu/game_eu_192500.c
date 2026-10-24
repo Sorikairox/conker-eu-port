@@ -37,7 +37,67 @@ void func_15164DF8(u8 *arg0) {
     arg0[0x10] |= 2;
 }
 
+#ifdef NON_MATCHING
+extern s32 (*D_8008B730[])(u8 *);
+extern f32 (*D_8008B734[])(u8 *);
+extern f32 D_800A6F00; // 6 consecutive limits (all pi)
+
+// object_wobble_update: per-frame update of a 6-channel wobble / fade record (D_8008B4D4 handler). Optional life
+// timer (+0x10 & 1: +0x14 -= frames) and end check (+0x11: D_8008B730 callback, 0 = done) end it via func_15164DF8.
+// The amplitude scale is 1 or the +0x12 callback of D_8008B734 (+0x10 & 4). Each channel i with a speed (+0x30 + 4i)
+// advances its phase (+0x48 + 4i, wrapped by func_15144B68), records the half-cycle in +0x60 + i (phase < pi), stops
+// itself at a half-cycle change when +0x10 & 2, and adds sin(phase) * amplitude (+0x18 + 4i) * scale to float i of
+// target record +0x16 of D_800DD210 (0x18 bytes each). When every speed is 0 the record is freed (func_1516972C).
+void func_15164E0C(u8 *arg0) {
+    u8 prev[6];
+    f32 scale;
+    f32 phase;
+    f32 *dst;
+    s32 done = 0;
+    s32 i;
+
+    if (arg0[0x10] & 1) {
+        *(s16 *) (arg0 + 0x14) -= D_800BE9E4;
+        if (*(s16 *) (arg0 + 0x14) < 0) {
+            done = 1;
+        }
+    }
+    if (!done && (s8) arg0[0x11] != -1) {
+        if (D_8008B730[(s8) arg0[0x11]](arg0) == 0) {
+            done = 1;
+        }
+    }
+    if (done) {
+        func_15164DF8(arg0);
+    }
+    for (i = 0; i < 6; i++) {
+        prev[i] = arg0[0x60 + i];
+    }
+    scale = 1.0f;
+    if ((arg0[0x10] & 4) && (s8) arg0[0x12] != -1) {
+        scale = D_8008B734[(s8) arg0[0x12]](arg0);
+    }
+    for (i = 0; i < 6; i++) {
+        if (*(f32 *) (arg0 + 0x30 + i * 4) != 0.0f) {
+            phase = func_15144B68(*(f32 *) (arg0 + 0x48 + i * 4) + *(f32 *) (arg0 + 0x30 + i * 4) * D_800BE9A4);
+            *(f32 *) (arg0 + 0x48 + i * 4) = phase;
+            arg0[0x60 + i] = (phase < (&D_800A6F00)[i]);
+            if ((arg0[0x10] & 2) && prev[i] != arg0[0x60 + i]) {
+                *(f32 *) (arg0 + 0x30 + i * 4) = 0.0f;
+                *(f32 *) (arg0 + 0x48 + i * 4) = 0.0f;
+            }
+            dst = (f32 *) (D_800DD210 + arg0[0x16] * 0x18) + i;
+            *dst += sinf(*(f32 *) (arg0 + 0x48 + i * 4)) * *(f32 *) (arg0 + 0x18 + i * 4) * scale;
+        }
+    }
+    if (*(f32 *) (arg0 + 0x30) == 0.0f && *(f32 *) (arg0 + 0x34) == 0.0f && *(f32 *) (arg0 + 0x38) == 0.0f
+        && *(f32 *) (arg0 + 0x3C) == 0.0f && *(f32 *) (arg0 + 0x40) == 0.0f && *(f32 *) (arg0 + 0x44) == 0.0f) {
+        func_1516972C((struct102 *) arg0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_192500/func_15164E0C.s")
+#endif
 
 void func_15165454(void) {
     bzero(D_800DD210, 0x60);
