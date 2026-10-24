@@ -268,3 +268,4 @@ P189	web	diagnostic			~113	level-0 rise and level-0x29 control loss both = swim 
 P191	port-b	nm convert	5			swim update func_1504B0FC (591 words; fixes level-0 rise + level-0x29 control loss) + splash debris chunk/dust + foot trail + footstep splash hand C; combined 5301/5915 89.6% 74.2%
 P192	port	nm convert	15			level 0x29 stubs (text-queue tempo events, mover step + sfx, texture anim, water waves) + 10 smaller hand C; port 5318/5915 89.9% 73.5%
 P195	port	nm convert	9			level 0x29 scenery movers (gate swing, swing/slide/bob, spinning pickup), lightning flash, mesh effect spawn, context action set hand C; torch flames traced to port-b func_1518DC50; COMBINED 5327/5915 90.1% 73.9%
+P194	port-b	investigation	0			torch candidates are scenery movers (wasted partly on port-owned files after a routing slip); func_15082278 shot-hit draft verified (not inserted); no src change
