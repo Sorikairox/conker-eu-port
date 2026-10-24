@@ -1,0 +1,8 @@
+# P237 func_150C7E68 (obj_shade_from_level) mutants: sed % setup names
+# dropped (equivalent): s16 -> u16 load (only bits 4..11 reach the byte)
+s/    func_15116690(obj);/    func_15116690(0);/ % rec
+s/    if (!(obj\[0x73\] \& 4)) {/    if (!(obj[0x73] \& 2)) {/ % flag4 rec_neg
+s/        rec = \*(u8 \*\*) (obj + 0x7C);/        rec = *(u8 **) (obj + 0x78);/ % rec
+s/        if (rec != NULL) {/        if (1) {/ % norec
+s/            rec\[0x13\] = \*(s16 \*) ((u8 \*) D_800DBEF4 + 0x21C) >> 4;/            rec[0x13] = *(s16 *) ((u8 *) D_800DBEF4 + 0x21C) >> 3;/ % rec
+s/            rec\[0x13\] = \*(s16 \*) ((u8 \*) D_800DBEF4 + 0x21C) >> 4;/            rec[0x12] = *(s16 *) ((u8 *) D_800DBEF4 + 0x21C) >> 4;/ % rec

@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P237, 2026-10-24). Details: `docs/port/sessions/P237.md`
+- Hand C (NM, one block each, all in the registry with setups + mutants): Total War stubs func_1508C600
+  `rail_pair_sight` (B7840; racer line-of-sight masks rail +0x16C0, 18 setups, 32 / 32) and func_151EA4C8
+  `mp_team_score_draw` (216470; two-team score panel, returns the DL end, 13 setups, 30 / 30); D_8008B0F0 light
+  handlers func_15160E30 `light_beam_update` (18D770, 16 setups, 29 / 29) and func_151B99B8 `searchlight_light_update`
+  (1E6B70, 5 setups, 17 / 17; the beam pointer is re-read per store as in the asm); func_15109390 was already C.
+  Breadth: func_150C7E68 `obj_shade_from_level` (F5580), func_151600E0 `effect_noop_check` (18D5D0),
+  func_150F1B78 `fx_hit_handler` (11CB90).
+- Checks: NM build rc 0, protocheck `1470 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 852
+  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1488 433 5482
+  92.7% 1827484/2253856 (81.1%)`, verify_all rc 0 (3994 / 5915 matched), selftest 100 / 100.
+
+## Next steps (from P237)
+1. port-web: Total War (func_1508C600 / func_151EA4C8), beam lights and the searchlight (func_15160E30 /
+   func_151B99B8); frame-19116 freeze review of the P232 functions is still not done here (no message received).
+2. Breadth in port's files (P237.md section 6): func_150C1B60 (asm caller only), func_150A7BD0, func_150FD49C,
+   func_151016C8 / func_15101610.
+3. D_8008FFE8 one-argument table (P234 item 2, port-b's entries) still open.
+
 ## State (session P234, 2026-10-24). Details: `docs/port/sessions/P234.md`
 - Harness: difftest now takes callee prototypes from the headers the TU includes (recursive, Makefile include dirs)
   when the TU text has no declaration: a callee declared only in functions.h (func_150ADA20) no longer has IDO's

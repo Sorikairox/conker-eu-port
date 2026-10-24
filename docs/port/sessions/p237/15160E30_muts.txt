@@ -1,0 +1,32 @@
+# P237 func_15160E30 (light_beam_update) mutants: sed % setup names
+s/    if (\*(s32 \*) obj == 0) {/    if (*(s32 *) obj == 1) {/ % dead
+s/    if (s\[4\] != obj\[0x3B\]) {/    if (s[5] != obj[0x3B]) {/ % uid_pt
+s/    if (\*(u8 \*\*) (obj + 0x1D4) != NULL \&\& (s\[0x24\] \& 1) \&\& (obj\[0x74\] \& 0xF) != 0xF) {/    if (*(u8 **) (obj + 0x1D4) != NULL \&\& (obj[0x74] \& 0xF) != 0xF) {/ % noflag
+s/    if (\*(u8 \*\*) (obj + 0x1D4) != NULL \&\& (s\[0x24\] \& 1) \&\& (obj\[0x74\] \& 0xF) != 0xF) {/    if (*(u8 **) (obj + 0x1D4) != NULL \&\& (s[0x24] \& 1)) {/ % hidden
+s/        src\[0\] = (f32 \*) (s + 8);/        src[0] = (f32 *) (s + 0xC);/ % world
+s/        src\[1\] = (f32 \*) (s + 0x14);/        src[1] = (f32 *) (s + 8);/ % world
+s/        func_15145EA4(src, dst, \*(u8 \*\*) (obj + 0x1D4) + (s\[5\] << 6), 2);/        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 4), 2);/ % world
+s/        func_15145EA4(src, dst, \*(u8 \*\*) (obj + 0x1D4) + (s\[5\] << 6), 2);/        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 6), 1);/ % world
+# harness limit: func_15145EA4's outputs (through a pointer array) stay stack fill, so start == dir and a swapped
+# subtraction is equivalent here; '+' instead of '-' is visible (fill + fill != 0)
+s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = dir[0] + start[0];/ % world
+s/        dir\[2\] = dir\[2\] - start\[2\];/        dir[2] = dir[2] + start[2];/ % world
+s/        if (func_15145128(dir, dir, \&tmp0, \&tmp1) != 0) {/        if (func_15145128(dir, dir, \&tmp0, \&tmp1) == 0) {/ % world
+s/            func_15081A90((struct127 \*) obj, start\[0\], start\[1\], start\[2\], dir\[0\], dir\[1\], dir\[2\], (u8 \*) \&ray, 0.0f,/            func_15081A90((struct127 *) obj, start[0], start[1], start[2], dir[0], dir[1], dir[2], (u8 *) \&ray, 1.0f,/ % world
+s/                          0, 0, 1, -1, 0, 0);/                          0, 0, 0, -1, 0, 0);/ % world
+s/            if (ray.hit != 0) {/            if (ray.hit > 1) {/ % world
+s/                if ((s\[0x24\] \& 2) \&\& ray.hit >= 2 \&\& ((u8 \*) ray.obj)\[4\] == 0x9E) {/                if ((s[0x24] \& 2) \&\& ((u8 *) ray.obj)[4] == 0x9E) {/ % world
+s/                if ((s\[0x24\] \& 2) \&\& ray.hit >= 2 \&\& ((u8 \*) ray.obj)\[4\] == 0x9E) {/                if (ray.hit >= 2 \&\& ((u8 *) ray.obj)[4] == 0x9E) {/ % obj9E_noflag2
+s/                if ((s\[0x24\] \& 2) \&\& ray.hit >= 2 \&\& ((u8 \*) ray.obj)\[4\] == 0x9E) {/                if ((s[0x24] \& 2) \&\& ray.hit >= 2) {/ % obj_other
+s/                    \*(s32 \*) ((u8 \*) ray.obj + 0x2E4) = 1;/                    *(s32 *) ((u8 *) ray.obj + 0x2E0) = 1;/ % obj9E
+s/                arg0->unk14->unkE = ray.x;/                arg0->unk14->unkE = ray.y;/ % world
+s/                arg0->unk14->unk12 = ray.z;/                arg0->unk14->unk12 = ray.x;/ % world
+s/                f = \*(f32 \*) (s + 0x20) \* ray.t;/                f = *(f32 *) (s + 0x20);/ % bright_mid
+s/                    f = 255.0f;/                    f = 254.0f;/ % bright_hi
+s/                if (f < 0.0f) {/                if (f < -2.0f) {/ % bright_neg15
+s/                arg0->unk14->unk2F = (u32) f;/                arg0->unk14->unk2F = (u32) f + 1;/ % bright_mid
+s/                arg0->unk14->unk9 = 0;/                arg0->unk14->unk9 = 1;/ % world
+s/                return 1;/                return 0;/ % world
+s/    arg0->unk14->unk10 = \*(f32 \*) (obj + 0x18);/    arg0->unk14->unk10 = *(f32 *) (obj + 0x1C);/ % nomtx
+s/    arg0->unk14->unk2F = 0;/    arg0->unk14->unk2F = 1;/ % nohit
+s/    arg0->unk14->unk9 = 1;/    arg0->unk14->unk9 = 0;/ % nonorm

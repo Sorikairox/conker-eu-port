@@ -834,7 +834,92 @@ s32 func_1508C5F0(s32 arg0) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+extern s16 D_80087664[];
+
+// rail_pair_sight: P237. Line-of-sight test between rail racers a and b (func_1508CA14 pairs them). Each racer's
+// record (func_1505EEF4(id & 0xFFFF0FFF)) gives an eye point: a racer whose state block (+0x31C) has +0x84 set
+// looks from y + 0.75 * height (+0x114, s16), 50 lower for state kind 9 (+0x75 & 0x7F); a record of kind 0x1F from
+// y + 80; when only the OTHER racer has +0x84 set and the difficulty's D_80087664 entry is not -1, from the s16
+// point +0x1A4 / +0x1A6 / +0x1A8; else from y + 40. The ray a -> b is cast with func_150ACEA0: no hit, or a hit
+// farther than the distance, means "seen", then func_15087204 (the wall test from a along x / z) > 0 clears it.
+// Rail block +0x16C0 masks: bit b of a's word and bit a of b's word when the pair is clear; bits 16 + b / 16 + a
+// when the ray reached the other racer (whatever the wall test said). Nothing when a record is missing.
+void func_1508C600(s32 a, s32 b) {
+    u8 *ra, *rb, *sa, *sb;
+    s32 flagA, flagB, seen, clear;
+    f32 xa, ya, za, xb, yb, zb, dx, dy, dz, dist, hit, h0, h1, h2;
+
+    clear = 0;
+    seen = 0;
+    ra = (u8 *) func_1505EEF4(a & 0xFFFF0FFF);
+    rb = (u8 *) func_1505EEF4(b & 0xFFFF0FFF);
+    if (ra != NULL && rb != NULL) {
+        sa = *(u8 **) (ra + 0x31C);
+        sb = *(u8 **) (rb + 0x31C);
+        flagA = sa[0x84];
+        flagB = sb[0x84];
+
+        xa = *(f32 *) (ra + 0x14);
+        za = *(f32 *) (ra + 0x1C);
+        if (flagA != 0) {
+            ya = *(f32 *) (ra + 0x18) + (f32) *(s16 *) (sa + 0x114) * 0.75f;
+            if ((sa[0x75] & 0x7F) == 9) {
+                ya -= 50.0f;
+            }
+        } else if (*(s32 *) ra == 0x1F) {
+            ya = *(f32 *) (ra + 0x18) + 80.0f;
+        } else if (flagB != 0 && D_80087664[D_800E1000] != -1) {
+            xa = (f32) *(s16 *) (ra + 0x1A4);
+            ya = (f32) *(s16 *) (ra + 0x1A6);
+            za = (f32) *(s16 *) (ra + 0x1A8);
+        } else {
+            ya = *(f32 *) (ra + 0x18) + 40.0f;
+        }
+
+        xb = *(f32 *) (rb + 0x14);
+        zb = *(f32 *) (rb + 0x1C);
+        if (flagB != 0) {
+            yb = *(f32 *) (rb + 0x18) + (f32) *(s16 *) (sb + 0x114) * 0.75f;
+            if ((sb[0x75] & 0x7F) == 9) {
+                yb -= 50.0f;
+            }
+        } else if (*(s32 *) rb == 0x1F) {
+            yb = *(f32 *) (rb + 0x18) + 80.0f;
+        } else if (flagA != 0 && D_80087664[D_800E1000] != -1) {
+            xb = (f32) *(s16 *) (rb + 0x1A4);
+            yb = (f32) *(s16 *) (rb + 0x1A6);
+            zb = (f32) *(s16 *) (rb + 0x1A8);
+        } else {
+            yb = *(f32 *) (rb + 0x18) + 40.0f;
+        }
+
+        dy = yb - ya;
+        dz = zb - za;
+        dx = xb - xa;
+        dist = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, &h0, &h1, &h2, &hit, 0, 0, 0.0f) == 0 || dist < hit) {
+            seen = 1;
+            clear = 1;
+            if (0.0f < func_15087204(xa, ya, za, dx, dz)) {
+                clear = 0;
+            }
+        }
+    }
+    if (clear) {
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + a * 4) |= 1 << b;
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + b * 4) |= 1 << a;
+    }
+    if (seen) {
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + a * 4) |= 0x10000 << b;
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + b * 4) |= 0x10000 << a;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C600.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009DE38;
