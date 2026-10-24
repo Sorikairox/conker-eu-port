@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P219 (port-b) (session P219, 2026-10-24). Details: `docs/port/sessions/P219.md`
+
+Branch `port-b`. Merged port 18edc1c6 (difftest P211/P214/P215 fixes, func_151B8EB8 s32); after the merge verify_all
+rc 0, NM links, protocheck 0, selftest 91/91. Hand C (NM): **func_15065E18 player_item_action** (90F50, 4838 words,
+the level 0x29 B-pad blocker): every case written (P216 draft fixed: cases 3 / 9 / 0x15 / 0x37 / 0x38 / 0x39 / 0x3C
+had dropped calls; new 0x24 0x3B 0x12 0x23 0x17 0x1A 0x2A 0x1B 0x26 0x3A 0x3E), 617 setups EQUIV, mutants 29/61
+killed, 27 survivors = setup gaps (list in P219.md section 2), 5 invalid (0x3A k3A_s faults at TR=4).
+**func_151901F4 effect_node_launch** (1BAF40): setups EQUIV, mutants 11/11; a1 is the dispatcher's stale register:
+N64 build reads it, `#ifdef PORT` aims at the node itself (velocity 0). func_150768DC x-swap mutant now KILLED
+(random) with the merged harness. Checks: verify_all rc 0, NM links, protocheck 0 (1453), selftest 91/91. progress_nm total 5447 / 5915 (92.1%), 468
+asm-only.
+
+## Next steps (from P219)
+
+1. func_15065E18 survivors (RET knobs on func_150810F4 / func_151F2CDC / func_15064240, pad pokes via D_800CC6A4 /
+   D_800CC6B0 / D_800CC6AC, ctl +0x8 for case 3, a non-faulting 0x3A stunned setup); browser-check level 0x29 B-pad
+   (case 0x3C).
+2. func_151C0698 (1EDA00, 669; RET on the func_151B8EB8 stub; analysis P213.md section 3).
+3. Breadth: func_150A6070, func_150A6324 (D3880), func_150C8F68, func_1518F080, func_151D4D44, func_150C92B8.
+
 ## P216 (port-b) (session P216, 2026-10-24). Details: `docs/port/sessions/P216.md`
 
 Branch `port-b`. Hand C (NM), difftest EQUIV + 10 setups + mutants 20/20: func_151D5DA8 mouth_aim_ray (201240, void;
