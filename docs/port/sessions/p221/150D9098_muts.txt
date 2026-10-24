@@ -1,0 +1,27 @@
+s/if (D_800BE9F0 == 10) {/if (D_800BE9F0 == 11) {/
+s/func_1000D96C(10, 0x37, 0);/func_1000D96C(10, 0x38, 0);/
+s/data.flags = 1;/data.flags = 3;/
+s/data.u4D = 0;/data.u4D = 1;/
+s/data.id = obj\[0x3B\];/data.id = obj[0x3A];/
+s/data.pos0\[1\] = spec.pos\[1\];/data.pos0[1] = spec.pos[0];/
+s/data.pos1\[2\] = spec.pos\[2\];/data.pos1[2] = spec.pos[1];/
+s/func_150D904C((s32) obj, (s32) data.aim);/func_150D904C((s32) obj, (s32) data.pos1);/
+s/data.u3C = D_800A0F18;/data.u3C = 0.0f;/
+s/if (D_800BE9F0 == 0x34) {/if (D_800BE9F0 != 0x34) {/
+s/func_151EFDD0() . 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/(func_151EFDD0() \& 1), 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/
+s/0, 0, 500, 5000)/0, 0, 500, 5001)/
+s/0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500)/0x7FFF, 0, 0, 0, 0, 0, 0, 501, 1500)/
+s/data.u2C = 0.0f;/data.u2C = 1.0f;/
+s/data.u48 = 0.0f;/data.u48 = 1.0f;/
+s/data.u38 = -16384.0f;/data.u38 = -16383.0f;/
+s/data.flags \&= ~1;/data.flags \&= ~2;/
+s/(\*(u8 \*\*) (obj + 0x31C))\[0x84\] != 0/(*(u8 **) (obj + 0x31C))[0x85] != 0/
+s/spec.u15 = 0x32;/spec.u15 = 0x33;/
+s/spec.u0E = 0x36;/spec.u0E = 0x37;/
+s/spec.u10 = 2;/spec.u10 = 3;/
+s/spec.u14 = 5;/spec.u14 = 6;/
+s/spec.u18 = 0;/spec.u18 = 1;/
+s/spec.time = 0x12C;/spec.time = 0x12D;/
+s/0x50, 0x24, 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1)/0x50, 0x24, 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 0)/
+s/memcpy(\*(u8 \*\*) (rec + 0x98), \&data, 0x50);/memcpy(*(u8 **) (rec + 0x94), \&data, 0x50);/
+s/if (\*(u8 \*\*) (obj + 0x31C) == NULL) {/if (0) {/

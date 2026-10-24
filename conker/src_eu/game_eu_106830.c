@@ -16,7 +16,92 @@ void func_150D904C(s32 arg0, s32 arg1) {
     func_15145740(arg0, (s32)sp34, (s32)sp28, arg1, D_800BE616 ? D_800A0F10 : D_800A0F14);
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A0F18;
+int func_151EFDD0(void);
+void func_1000D96C(s32 arg0, s32 arg1, s32 arg2);
+
+// obj_spawn_effect50_with_sound: for an object with a character record (+0x31C), starts a sound 0x1B6 / 0x1B7
+// (random, func_10010F88; 1500 or, outside level 0x34, 5000 frames) and an effect record of kind 0x50
+// (func_15147FF0, 300 frames) at the object's position + 20 in y (func_150D9020); its 0x50-byte data (rec + 0x98)
+// holds the object, its id, the position (twice), the aim of func_150D904C, the sound handle and a flag byte (bit 0
+// cleared when the character record's +0x84 is set). In level 10 a func_1000D96C(10, 0x37, 0) cue comes first.
+void func_150D9098(u8 *obj) {
+    struct {
+        u8 *obj;        // 0x00 (sp58)
+        u8 id;          // 0x04
+        f32 pos0[3];    // 0x08
+        f32 pos1[3];    // 0x14
+        f32 aim[3];     // 0x20
+        f32 u2C;        // 0x2C
+        s16 sound;      // 0x30
+        f32 u34;        // 0x34
+        f32 u38;        // 0x38
+        f32 u3C;        // 0x3C
+        f32 u40;        // 0x40
+        f32 u44;        // 0x44
+        f32 u48;        // 0x48
+        u8 flags;       // 0x4C
+        u8 u4D;         // 0x4D
+    } data;
+    struct {
+        f32 pos[3];     // 0x00 (spAC)
+        s16 time;       // 0x0C
+        s16 u0E;        // 0x0E
+        s32 u10;        // 0x10
+        u8 u14;         // 0x14
+        u8 u15;         // 0x15
+        s32 u18;        // 0x18
+    } spec;
+    u8 *rec;
+
+    if (*(u8 **) (obj + 0x31C) == NULL) {
+        return;
+    }
+    if (D_800BE9F0 == 10) {
+        func_1000D96C(10, 0x37, 0);
+    }
+    func_150D9020((f32 *) obj, spec.pos);
+    data.flags = 1;
+    data.u4D = 0;
+    data.obj = obj;
+    data.id = obj[0x3B];
+    data.pos0[0] = spec.pos[0];
+    data.pos0[1] = spec.pos[1];
+    data.pos0[2] = spec.pos[2];
+    data.pos1[0] = spec.pos[0];
+    data.pos1[1] = spec.pos[1];
+    data.pos1[2] = spec.pos[2];
+    func_150D904C((s32) obj, (s32) data.aim);
+    data.u3C = D_800A0F18;
+    if (D_800BE9F0 == 0x34) {
+        data.sound = func_10010F88(0x1B6 + func_151EFDD0() % 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 1500);
+    } else {
+        data.sound = func_10010F88(0x1B6 + func_151EFDD0() % 2, 0x7FFF, 0, 0, 0, 0, 0, 0, 500, 5000);
+    }
+    data.u34 = 0.0f;
+    data.u2C = 0.0f;
+    data.u40 = 0.0f;
+    data.u44 = 0.0f;
+    data.u48 = 0.0f;
+    data.u38 = -16384.0f;
+    if (*(u8 **) (obj + 0x31C) != NULL && (*(u8 **) (obj + 0x31C))[0x84] != 0) {
+        data.flags &= ~1;
+    }
+    spec.u15 = 0x32;
+    spec.time = 0x12C;
+    spec.u0E = 0x36;
+    spec.u10 = 2;
+    spec.u14 = 5;
+    spec.u18 = 0;
+    rec = func_15147FF0(&spec, 0x50, 0x24, 0xE, 1, 0x11, 3, 0xFF, 0, 0xFF, 1);
+    if (rec != NULL) {
+        memcpy(*(u8 **) (rec + 0x98), &data, 0x50);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_106830/func_150D9098.s")
+#endif
 
 extern f32 D_800A0F1C;
 extern f32 D_800A0F20;

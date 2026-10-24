@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
+
+Branch `port` (P218 85e5d8c6 + P221 commit).
+- **Verification registry**: `tools/port/verify_registry.tsv` (func, file, setup_file, knobs, mutant_file, session;
+  57 rows: P198-P218 conversions seeded by `tools/port/seed_registry.py`, P218 re-check rows, P221). Re-run with
+  `tools/port/reverify.sh FUNC...` (TR=4, NR=100 random, MUT=1 mutants, NOSETUP=1); candidate = current NM block
+  (`tools/port/nmblock.py`). Add a row for every new conversion; blank knobs = not recorded (check the session doc).
+- difftest: a jalr / jr to an unaligned or unstubbable target ends the run as a fault `jalr to bad target` (same
+  target both sides = inconclusive; `DIFFTEST_BADJALR_OLD=1` = old). Selftest case func_151416E8: 95 / 95.
+- Hand C (NM), B-pad callees of port-b's func_15065E18: func_150FC438 effect27_spawn_with_screen_effect (129650; NM-only
+  prototype in functions.h), func_150D9098 obj_spawn_effect50_with_sound (106830), func_150DC2F0 item_effect_spawn
+  (109770; `(u8 kind, s32 arg1)`). Random + setups EQUIV, mutants 22/22, 27/27, 37/37.
+- Lesson: random trials compare stack records passed to stubs (memcpy sources, spec structs) only by pointer class:
+  func_150D9098's first draft swapped two record floats and was random-EQUIV. Use ARGMEM (+ STKFILL) setups.
+- Checks: verify_all OK, NM build links, protocheck 0 (1437), selftest 95 / 95, progress_nm 5431 / 5915 (91.8%), C bytes 78.9%.
+
+## Next steps (from P221)
+1. func_15073FA0 (game_981E0, 458 lines; last port-file callee of func_15065E18), func_1508CF34 (B7840 cmd 9, exact v0).
+2. port-b: func_15065E18's `jal func_150FC438` (15069F80): a3 not visibly set; func_150DC2F0 takes 2 args in NM C.
+3. Re-checks: use `tools/port/reverify.sh`; fill blank knobs in the registry as functions are re-checked.
+4. Breadth: `p218/asmlist.py`.
+
 ## State (session P218, 2026-10-24). Details: `docs/port/sessions/P218.md`
 
 Branch `port` (P215 18edc1c6 + P218 commit). No harness change.

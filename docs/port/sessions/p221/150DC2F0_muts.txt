@@ -1,0 +1,37 @@
+s/    d.u20 = 0.0f;/    d.u20 = 1.0f;/
+s/    d.u40 = 0;/    d.u40 = 1;/
+s/    spec.flags = 0;//
+s/    d.u34 = 0;/    d.u34 = 2;/
+s/            spec.y = 115.0f;/            spec.y = 116.0f;/
+s/            d.u24 = D_800A102C;/            d.u24 = D_800A1028;/
+s/            spec.z = D_800A1038;/            spec.z = D_800A1034;/
+s/        d.pos\[1\] = spec.z;/        d.pos[1] = spec.y;/
+s/        d.u80 = -185.0f;/        d.u80 = 185.0f;/
+s/        d.uF0 = 173.0f;/        d.uF0 = 172.0f;/
+s/        d.u88 = 0x181;/        d.u88 = 0x180;/
+s/        d.uEE = 0x135;/        d.uEE = 0x136;/
+s/        d.anim2 = D_80090778;/        d.anim2 = D_800907C4;/
+s/        d.uFC = -1;/        d.uFC = 1;/
+s/        d.u00 = 6.0f;/        d.u00 = 7.0f;/
+s/        d.u10C = 100.0f;/        d.u10C = 101.0f;/
+s/        obj = func_15083E90(6);/        obj = func_15083E90(5);/
+s/== 6) ? 498.0f : -37.0f;/== 7) ? 498.0f : -37.0f;/
+s/        spec.y = 736.0f;/        spec.y = 737.0f;/
+s/            spec.z = D_800A1070;/            spec.z = D_800A106C;/
+s/        } else if (kind == 3) {/        } else if (kind == 4) {/
+s/            spec.x = D_800A107C;/            spec.x = D_800A1078;/
+s/        d.u38 = D_800A108C;/        d.u38 = D_800A1088;/
+s/        d.uBC = 2.75f;/        d.uBC = 2.5f;/
+s/        spec.u15 = 0x1E;/        spec.u15 = 0x1F;/
+s/        spec.flags |= 1;/        spec.flags = 3;/
+s/        d.u104 = D_800A10BC;/        d.u104 = D_800A10B8;/
+s/        d.uF8 = 0xAB;/        d.uF8 = 0xAC;/
+s/        d.uFC = 0xC;/        d.uFC = 0xD;/
+s/        d.u8C = 500.0f;/        d.u8C = 501.0f;/
+s/        d.uB0 = 25.0f;/        d.uB0 = 26.0f;/
+s/    spec.u10 = 5;/    spec.u10 = 4;/
+s/    d.u116 = 0x1B8;/    d.u116 = 0x1B9;/
+s/(\&spec, 0x120, 0x18, 4, 4, 4, 0, 0, 0, 0xFF, 1)/(\&spec, 0x120, 0x18, 4, 4, 4, 0, 0, 0, 0xFF, 2)/
+s/memcpy(\*(u8 \*\*) (rec + 0x98), \&d, 0x11C);/memcpy(*(u8 **) (rec + 0x98), \&d, 0x118);/
+s/    return rec;/    return NULL;/
+s/    case 5:/    case 6:/
