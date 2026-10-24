@@ -706,6 +706,7 @@ def param_kinds(tu, func):
 # P20 (opt-in): DIFFTEST_ARG="N=V1|V2|...,..." (hex) gives integer argument slot N (0-3 = a0-a3, 4+ = stack) one of the
 # listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
 ARGFIX = {}
+ARG_FOLD = os.environ.get('DIFFTEST_ARGF_OLD') == '1'   # P200: old behaviour (ARG on a float parameter sets only aN)
 for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
     _a, _v = _p.split('=')
     ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
@@ -727,14 +728,17 @@ def make_inputs(rng, kinds):
         v = vs[rng.randrange(len(vs))]
         if n < 4: r['a'][n] = v
         elif n - 4 < len(r['stk']): r['stk'][n - 4] = v
+        # P200: a leading float parameter is read from f12 / f14, not from its integer slot: set that register too
+        # (before, ARG 0 / 1 of f(f32 x, f32 y, ...) changed only a0 / a1 and the function ran on random x / y).
         else: print('NOTE: DIFFTEST_ARG %d is beyond the %d stack words that can be set' % (n, STK_IN_MAX))
+        if n in r.get('fslot', {}) and not ARG_FOLD: r['f'][r['fslot'][n]] = v
     return r
 
 def _make_inputs(rng, kinds):
     a = [rand_arg(rng) for _ in range(4)]; f = [rand_float_bits(rng), 0, rand_float_bits(rng), 0]
     stk = [rand_arg(rng) for _ in range(12)]
     if kinds is None: return dict(a=a, f=f, stk=stk)
-    slot = 0; fpok = True; fi = 0
+    slot = 0; fpok = True; fi = 0; fslot = {}
     for k in kinds:
         if k == 'double':
             slot = (slot + 1) & ~1
@@ -746,13 +750,13 @@ def _make_inputs(rng, kinds):
                 elif j - 4 < 12: stk[j - 4] = w
             slot += 2; continue
         v = rand_arg(rng, k)
-        if k == 'float' and fpok and fi < 2: f[2 * fi] = v; fi += 1
+        if k == 'float' and fpok and fi < 2: f[2 * fi] = v; fslot[slot] = 2 * fi; fi += 1
         else: fpok = False
         if k != 'float': fpok = False
         if slot < 4: a[slot] = v
         elif slot - 4 < 12: stk[slot - 4] = v
         slot += 1
-    return dict(a=a, f=f, stk=stk)
+    return dict(a=a, f=f, stk=stk, fslot=fslot)
 
 def rand_float_bits(rng):
     return struct.unpack('>I', struct.pack('>f', rng.uniform(-200, 200)))[0]

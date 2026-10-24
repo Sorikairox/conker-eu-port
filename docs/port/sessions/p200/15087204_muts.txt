@@ -1,0 +1,33 @@
+s/    best = 100.0f;/    best = 1.0f;/
+s/    for (i = 0; i < D_80087630; i++) {/    for (i = 0; i < D_80087630 - 1; i++) {/
+s/        if (((u8 \*) a)\[0xE\] != 1 || ((u8 \*) a)\[6\] != band) {/        if (((u8 *) a)[0xE] != 1) {/
+s/        if (((u8 \*) a)\[0xE\] != 1 || ((u8 \*) a)\[6\] != band) {/        if (((u8 *) a)[6] != band) {/
+s/        for (k = 0; k < 5; k++) {/        for (k = 0; k < 4; k++) {/
+s/            if (link == 0xFF || link <= i) {/            if (link == 0xFF || link < i) {/
+s/            if (link == 0xFF || link <= i) {/            if (link == 0xFF) {/
+s/            if (((u8 \*) b)\[0xE\] != 1) {/            if (0) {/
+s/            ez = b->unk4 - a->unk4;/            ez = b->unk4 - a->unk2;/
+s/            ex = -(f32) (b->unk0 - a->unk0);/            ex = (f32) (b->unk0 - a->unk0);/
+s/            c = -(a->unk0 \* ez + ex \* a->unk4);/            c = (a->unk0 * ez + ex * a->unk4);/
+s/            d0 = x \* ez + z \* ex + c;/            d0 = x * ez + y * ex + c;/
+s/            d1 = (x + dx) \* ez + (z + dz) \* ex + c;/            d1 = (x + dx) * ez + (z + dx) * ex + c;/
+s/(d1 < 0.0f \&\& 0.0f <= d0) || (d0 < 0.0f \&\& 0.0f <= d1)/(d1 < 0.0f \&\& 0.0f < d0) || (d0 < 0.0f \&\& 0.0f <= d1)/
+s/(d1 < 0.0f \&\& 0.0f <= d0) || (d0 < 0.0f \&\& 0.0f <= d1)/(d1 < 0.0f \&\& 0.0f <= d0) || (d0 < 0.0f \&\& 0.0f < d1)/
+s/(d1 < 0.0f \&\& 0.0f <= d0) || (d0 < 0.0f \&\& 0.0f <= d1)/(d1 < 0.0f \&\& 0.0f <= d0)/
+s/                a1 = -d1;//
+s/                a0 = -d0;//
+s/            s = a0 \/ (a0 + a1);/            s = a1 \/ (a0 + a1);/
+s/            ex = -ex;//
+s/            hit = (s \* dx + x) \* ex + (s \* dz + z) \* ez + c;/            hit = (dx + x) * ex + (s * dz + z) * ez + c;/
+s/            d1 = b->unk0 \* ex + ez \* b->unk4 + c;/            d1 = b->unk0 * ex + ez * b->unk2 + c;/
+s/(0.0f < d1 \&\& 0.0f < hit \&\& hit <= d1)/(0.0f < d1 \&\& 0.0f <= hit \&\& hit <= d1)/
+s/(0.0f < d1 \&\& 0.0f < hit \&\& hit <= d1)/(0.0f < d1 \&\& 0.0f < hit \&\& hit < d1)/
+s/(d1 < 0.0f \&\& hit < 0.0f \&\& d1 <= hit)/(d1 < 0.0f \&\& hit < 0.0f \&\& d1 < hit)/
+s/(d1 < 0.0f \&\& hit < 0.0f \&\& d1 <= hit)/(d1 < 0.0f \&\& hit <= 0.0f \&\& d1 <= hit)/
+s/ || (d1 < 0.0f \&\& hit < 0.0f \&\& d1 <= hit))/)/
+s/                if (s < best) {/                if (s <= best) {/
+s/                    best = s;/                    best = 0.5f;/
+s/    if (best <= 1.0f) {/    if (best < 1.0f) {/
+s/        return sqrtf(dx \* dx + dz \* dz) \* s;/        return sqrtf(dx * dx + dz * dz) * best;/
+s/        return sqrtf(dx \* dx + dz \* dz) \* s;/        return sqrtf(dx * dx + dz * dz);/
+s/    return -1.0f;/    return -2.0f;/

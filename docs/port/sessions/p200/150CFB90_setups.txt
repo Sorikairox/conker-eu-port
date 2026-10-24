@@ -1,0 +1,4 @@
+# P200 func_150CFB90: RET func_151559FC (jal 151559FC) = record 80460000 or 0; run with DIFFTEST_ARGMEM (spec / extra, pads skipped)
+rec ! 0=1234,1=7F,2=55 ! 80083330=00000002 ! 151559FC=80460000 ! ! ! ! 
+rec_neg ! 0=FFFF8001,1=FF,2=FFFFFFFF ! 80083330=000001FE ! 151559FC=80460000 ! ! ! ! 
+none ! 0=10,1=1,2=2 ! 80083330=00000003 ! 151559FC=0 ! ! ! ! 

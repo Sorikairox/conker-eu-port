@@ -1,0 +1,17 @@
+s/    cam = (u8 \*) D_800DBFF0 + D_80082FA4 \* 0x9A0;/    cam = (u8 *) D_800DBFF0;/
+s/    func_151108E0(D_80082FA4, mtx,/    func_151108E0(0, mtx,/
+s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/-*(f32 *) (cam + 0x380), -*(f32 *) (cam + 0x388)/
+s/-\*(f32 \*) (cam + 0x388), -\*(f32 \*) (cam + 0x380)/*(f32 *) (cam + 0x388), -*(f32 *) (cam + 0x380)/
+s/, \*(f32 \*) (cam + 0x5EC));/, 0.0f);/
+s/    vp = (u8 \*) D_800BE628 + D_80082FA4 \* 0x180;/    vp = (u8 *) D_800BE628;/
+s/    hw = \*(f32 \*) (vp + 0xC);/    hw = *(f32 *) (vp + 0x10);/
+s/    func_150A7EE0(mtx, x, y, z, \&sx, \&sy, \&sz, \&w);/    func_150A7EE0(mtx, x, z, y, \&sx, \&sy, \&sz, \&w);/
+s/    if (10.0f < w) {/    if (10.0f <= w) {/
+s/    if (10.0f < w) {/    if (0.0f < w) {/
+s/        sx = sx \* hw \* inv;/        sx = sx * hw;/
+s/        sy = sy \* hh \* inv;/        sy = sy * hw * inv;/
+s/        \*outX = hw + sx;/        *outX = hw - sx;/
+s/        \*outY = hh - sy;/        *outY = hh + sy;/
+s/        return 1;/        return 2;/
+s/    \*outY = 0.0f;//
+s/    return 0;/    return -1;/

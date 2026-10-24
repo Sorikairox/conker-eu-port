@@ -163,4 +163,11 @@ S63254="DIFFTEST_EXACT=* DIFFTEST_ARG=0=800CC6F0,1=3,2=7,3=3FC00000 DIFFTEST_POK
 chkce EQUIV  func_15063254 "$S63254"
 chkce DIFFER func_15063254 "$S63254" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
 chkce EQUIV  func_15063254 "$S63254 DIFFTEST_STUBW_OLD=1" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
+# P200: DIFFTEST_ARG on a leading float parameter (f12 / f14) set only a0 / a1, so f(f32 x, f32 y, ...) ran on random
+# x / y: func_15087204's wall setups never met the wall and dropping `ex = -ex` survived. DIFFTEST_ARGF_OLD=1 = old.
+# (old mode: 4 trials, the random x / y of trial 5 happen to cross the wall)
+S87204="DIFFTEST_EXACT=* DIFFTEST_ARG=0=42700000,1=40A00000,2=41A00000,3=C2200000,4=42200000 DIFFTEST_POKE=800D2778=80470000,80087630=00020000,80470000=00000007,80470004=00000200,80470008=0001FFFF,8047000C=FFFF0100,80470010=00640007,80470014=00640200,80470018=00FFFFFF,8047001C=FFFF0100 DIFFTEST_RET=15086218=2"
+chkce EQUIV  func_15087204 "$S87204"
+chkce DIFFER func_15087204 "$S87204" 's/            ex = -ex;//'
+TRIALS=4 chkce EQUIV  func_15087204 "$S87204 DIFFTEST_ARGF_OLD=1" 's/            ex = -ex;//'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]
