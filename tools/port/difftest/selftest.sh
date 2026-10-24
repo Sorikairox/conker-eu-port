@@ -84,6 +84,10 @@ chkce() { # expect func "ENV=.. ..." [sed-expr]
   case "$out" in $exp*) pass=$((pass+1)); echo "ok   [$exp] env case ${ex:-as is}  $out";; *) fail=$((fail+1)); echo "FAIL [want $exp] env case ${ex:-as is}  $out";; esac
 }
 chkce EQUIV  func_1502AB94 "$AB94"
+# P246: DIFFTEST_WLOG=1 (no LO-HI range) raised IndexError in every trial (WLOG[1] of a 1-tuple), so no trial ran; it
+# now means the whole range and the result is unchanged (WLOG_T=99: no trial logs, so the result line stays first; the
+# old IndexError came before the trial check, so this still catches it).
+chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_WLOG=1 DIFFTEST_WLOG_T=99"
 chkce DIFFER func_1502AB94 "$AB94" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_STK_OLD=1" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 # P90: stack arguments past sp+0x3C (args 16+) were never captured: func_150268BC's func_1516DF0C call has 49 arguments;

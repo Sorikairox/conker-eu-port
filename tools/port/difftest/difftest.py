@@ -93,8 +93,17 @@ STUBW_OLD = os.environ.get('DIFFTEST_STUBW_OLD') == '1'   # P176: pre-P176 page-
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 # P47 (debug, opt-in): DIFFTEST_WLOG="LO-HI" (physical hex) + DIFFTEST_WLOG_T=trial prints every non-stack write
 # into [LO, HI) of that trial with the writing pc (R = reference, C = candidate). Debug aid for long functions.
-WLOG = tuple(int(x, 16) for x in os.environ['DIFFTEST_WLOG'].split('-')) if os.environ.get('DIFFTEST_WLOG') else None
-WLOG_T = os.environ.get('DIFFTEST_WLOG_T', '0'); WLOG_ON = [None]
+# P246: a value without '-' (e.g. DIFFTEST_WLOG=1) made a 1-tuple and every write raised IndexError (WLOG[1]) inside the
+# trial, so the trial died instead of logging; such a value now means the whole physical range. LO-HI as before.
+def _wlog(v):
+    if not v: return None
+    if '-' not in v: return (0, 0x20000000)
+    _lo, _hi = v.split('-', 1)
+    return (int(_lo, 16), int(_hi, 16))
+WLOG = _wlog(os.environ.get('DIFFTEST_WLOG', ''))
+# P246: difftest.sh always passes DIFFTEST_WLOG_T (empty when unset), so the default trial 0 never matched and WLOG
+# printed nothing; an empty value now means trial 0.
+WLOG_T = os.environ.get('DIFFTEST_WLOG_T') or '0'; WLOG_ON = [None]
 OUTPARAMS = os.environ.get('DIFFTEST_OUTPARAMS') == '1' or '--outparams' in sys.argv
 NOFORK = os.environ.get('DIFFTEST_NOFORK') == '1'   # P16: run trials in-process (old behaviour)
 
@@ -1134,7 +1143,8 @@ class Run:
         if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return
         v = value & ((1 << (8 * size)) - 1)
         if WLOG and WLOG[0] <= p < WLOG[1] and WLOG_ON[0]:
-            print('WLOG %s pc=%08X addr=%08X size=%d val=%X' % (WLOG_ON[0], mu.reg_read(UC_MIPS_REG_PC), p, size, v))
+            # P246: flush: trials run in forked children that leave through os._exit, so buffered lines were lost
+            print('WLOG %s pc=%08X addr=%08X size=%d val=%X' % (WLOG_ON[0], mu.reg_read(UC_MIPS_REG_PC), p, size, v), flush=True)
         for i in range(size):
             self.writes[p + i] = (v >> (8 * (size - 1 - i))) & 0xFF
 
@@ -1284,7 +1294,7 @@ class Run:
             mu.reg_write(UC_MIPS_REG_PC, ra)
 
     def run(self, inputs):
-        if WLOG_ON[0]: print('WLOG %s --- run' % WLOG_ON[0])
+        if WLOG_ON[0]: print('WLOG %s --- run' % WLOG_ON[0], flush=True)
         mu = self.mu
         self.done = False
         for r, v in zip(A_REGS, inputs['a']): mu.reg_write(r, v)

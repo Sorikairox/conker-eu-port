@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P246, 2026-10-25). Details: `docs/port/sessions/P246.md`
+- Hand C (NM): **func_151EF3A0 save_screen_frame_draw** (216470, the P240 save / load screen stub; returns the DL end;
+  uses literals 0x7FB / 0x887 for the asm's D_7FB / D_887 link symbols, so no ROM_ABS entry is needed), func_150C1BC0
+  emit_point_debris (EF370) and func_151A11BC emit_point_blob (1CE7D0) (the last D_8008ADA0 asm handlers), func_150BF5F4
+  fade_slide_update, func_151172FC spin_angles_update, func_150EB3A4 drifting_sprite_update, func_150EFFCC
+  rider_anchor_update, func_150C5A68 object_motion_step. All EQUIV, every mutant killed; registry rows added.
+- Registry re-run (P243 random-kill fix): 10 of 23 port rows with old survivors re-run, all now killed (table in P246.md
+  section 3); 13 rows left. Unaffected by port-b P244's reverify.sh bugs (no ARG / RET / POKE / OUT* knobs, no
+  multi-file setups).
+- difftest: `DIFFTEST_WLOG=1` IndexError fixed (no range = whole range), WLOG_T empty = trial 0 (WLOG printed nothing
+  before), flushed prints; selftest 119 / 119 (new case).
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1546 NON_MATCHING bodies checked, 0
+  problems`, implicit_scan 0 NM+float, selftest 119 / 119, progress_nm
+  `total 5915 3994 1564 357 5558 94.0% 1908756/2253856 (84.7%)`.
+
+## Next steps (from P246)
+1. **Priority (browser P245)**: func_150EDCC8 (game_eu_11AF60, Tank start) and func_150BE050 (game_eu_EB860, Colors).
+2. Merge port-b 02e7fc19 (reverify.sh fixes), then re-run the 13 rows listed in P246.md section 3.
+3. port-web: browser-check func_151EF3A0 (save screen with a save present) and the P246 handlers; func_150EB3A4's table
+   (0x8008B4AC) dispatcher is not identified (kept `s32 (u8 *)`).
+
 ## State (session P243, 2026-10-24). Details: `docs/port/sessions/P243.md`
 - difftest: a matched-C reference is its ELF symbol size (was len(candidate): a longer candidate jal-ing the next
   function hung; DIFFTEST_REFSZ_OLD=1); callee prototypes are looked up under every symbol at the call address

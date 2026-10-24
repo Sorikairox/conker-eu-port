@@ -2090,4 +2090,72 @@ void func_151EE704(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE93C.s")
 
+#ifdef NON_MATCHING
+/* save_screen_frame_draw: draws the save / load screen frame (D_80090174 mode of func_151ECB98, padC[0] = selected
+ * entry): environment alpha D_800E0EC4, two halves of texture 0x7FB (RGBA16, second half mirrored in S), two pieces of
+ * texture 0x887 (RGBA32), then the caption string. The caption id comes from asset table 0x1D (u16 per entry), reloaded
+ * only when the entry changes (D_800E10B5 = entry + 1) and cached in D_800904EC (0 = no caption). Returns the DL end. */
+extern u8 D_800E0EC4;
+extern u8 D_800E10B5;
+extern s32 D_800904EC;
+s32 func_1502B7F0(s32 *, s32, ...);
+void func_10004074(void *);
+s32 func_1510D66C(s32, s32, s32, s32);
+u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_151EDBE8(Gfx *, void *, s32, s32, s32, s32, f32, s32);
+#define SAVE_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
+
+Gfx *func_151EF3A0(Gfx *gdl, s32 entry) {
+    s32 tex;
+    u16 *table;
+    u32 size;
+
+    gDPPipeSync(gdl++);
+    SAVE_W(gdl, 0xFB000000, D_800E0EC4 | 0xFFFFFF00); /* SetEnvColor 255, 255, 255, alpha */
+    tex = func_1510D66C(0x7FB, 0, 3, 0);
+    if (tex != (s32) 0x80000000) {
+        SAVE_W(gdl, 0xFD100000, tex);        /* SetTImg RGBA16 */
+        SAVE_W(gdl, 0xF5100000, 0x07054260); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        SAVE_W(gdl, 0xF3000000, 0x075FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        SAVE_W(gdl, 0xF5101800, 0x00054260); /* SetTile (render) */
+        SAVE_W(gdl, 0xF2000000, 0x000BC07C); /* SetTileSize 48x32 */
+        gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
+        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x190, 0x100, 0x250, 0x200, 0, 0, 0, 0x400, 0x400);
+        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x250, 0x100, 0x310, 0x200, 0, 0x5E0, 0, -0x400, 0x400);
+    }
+    gDPPipeSync(gdl++);
+    tex = func_1510D66C(0x887, 0, 3, 0);
+    if (tex != (s32) 0x80000000) {
+        SAVE_W(gdl, 0xFD180000, tex);        /* SetTImg RGBA32 */
+        SAVE_W(gdl, 0xF5180000, 0x07094250); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        SAVE_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        SAVE_W(gdl, 0xF5181000, 0x00094250); /* SetTile (render) */
+        SAVE_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
+        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x250, 0xBC, 0x290, 0xFC, 0, 0, 0, 0x400, 0x400);
+        gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x180, 0xBC, 0x1D0, 0xFC, 0, 0x200, 0x200, 0x400, 0x400);
+    }
+    if (entry + 1 != D_800E10B5) {
+        table = NULL;
+        size = func_1502B7F0((s32 *) &table, 1, 0x1D);
+        if ((u32) entry < (size >> 1)) {
+            D_800904EC = table[entry];
+        } else {
+            D_800904EC = 0;
+        }
+        func_10004074(table);
+        D_800E10B5 = entry + 1;
+    }
+    if (D_800904EC != 0) {
+        gDPPipeSync(gdl++);
+        gdl = func_151EDBE8(gdl, &D_800904EC, 0x94, 0x60, 1, 2, 1.0f, 0);
+    }
+    return gdl;
+}
+#undef SAVE_W
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EF3A0.s")
+#endif
