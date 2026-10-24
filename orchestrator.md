@@ -33,24 +33,29 @@ Mac mini worker `sorikairo@192.168.0.71` (container `conkerdev`) runs `remote_pe
 Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 
 ### Browser build — what works (port-web)
-- Boot → logo screen → title menu → NEW GAME → opening (title cards, throne cutscene) → Conker wakes → Gregg cutscene → **player control in the first room** (P154, retrace ~18485): walk, camera, collision, jump/hover, tail pickup, idle, pause.
+- Boot → logo → title menu → NEW GAME → full real route, no test flags (P185): opening, intro cutscenes, level 0 → level 0x29 gameplay (reached ~frame 22765).
+- Walking, slopes, collision, camera, jump/hover, sound effects, music, shadows, particles, pause (frozen-frame background).
+- Swimming works (P191 player_swim_update + P199 fixes): level-0 rise gone, level 0x29 control kept after the pond.
 - PAL 50 Hz fixed-timestep pacing, audio in sync (P147); VI-row framing; frame-based test input `?padf` (P149).
-- Shadows (render-to-texture), particles, title cards, iris transition, music.
-- No TEMPORARY guards left (P113 removed in P137).
-- Next blocker: B / context action func_15064668 (asm) to leave the first room; sound-effect emitters; pause menu text gfx.
+- Port-side workarounds still in place (P199): func_1513472C/477C --wrap (handler arity), DL_INDIRECT stub func_151A03DC.
+- Open: unlit torches (func_1518DC50 converted in P197, merge pending in P202), backdrop quad colour, text boxes/NPCs not reached yet, ~17 stubs still hit on level 0x29 (func_1518354C 1.1M calls/walk).
+
+### Coverage (2026-10-24)
+- port 5345/5915 (90.4%), C bytes 74.3% (P198); port-b 5306/5915 (P197). Combined >90%.
 
 ### Running now
-- P131 (port-web): merge P127 + port-b P125–P129, drop mode-0 data stub, start a new game.
-- P132 (port): difftest poke fix, new-game stubs, menu pages.
-- P130 (port-b): shadow drawing, menu DL stubs.
+- P200 (port): func_1513472C/477C arity + func_151A03DC + func_1518354C (P199 blockers), then rail family, breadth.
+- P201 (port-b): finish func_1518DC50 mutants, find char-effect 5..9 attach sites, func_150CA150, func_1511127C, breadth.
+- P202 (port-web): merge port 6f2d2ca + port-b b693dac; torches, rail cameras, backdrop quad, text boxes, p103boot.
 
 ### Next milestones
-1. New game playable from the menu (level 0x18 opening, then gameplay).
-2. Frame-path stubs to zero; m2c_sanity high rows to zero.
-3. Breadth: ~855 asm-only; describe pass + scripted rename at a quiet merge point; Phase 2B (symbolic data); native 64-bit build.
+1. Level 0x29 fully correct (torches, NPCs/text boxes, zero frame-path stubs); remove the port-side workarounds.
+2. m2c_sanity high rows and arity rows to zero.
+3. Breadth: ~600 asm-only; describe pass + scripted rename at a quiet merge point; Phase 2B (symbolic data); native 64-bit build.
 
 ### Open items needing care
-- Two conversion slots own disjoint file lists (see latest briefs); port-b merges port periodically (P119), port-web merges both.
+- Two conversion slots own disjoint file lists (see latest briefs); port-web merges both and never edits game C.
+- Backups: tools/eu_port/backup_push.sh to the private origin after each session; never push upstream.
 - Licensing: SDK-derived libultra C — fine privately, matters if distributed.
 
 ---
