@@ -161,11 +161,157 @@ void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B854.s")
 
+#ifdef NON_MATCHING
+extern f32 D_8009DE30;
+extern f32 D_8009DE34;
+void func_1508CA14(s32, s32);
+s32 func_1508A63C(void);
+
+// rail_pick_chase_target: script command 13 (func_1509E3D4). Refreshes the rail state (func_1508CA14 with 1 or, for
+// more than 8 racers, 4; func_1508A63C), then picks the racer the current one (+0x4) should chase: among the active
+// racers k (+0x39C[k] > 0, not itself) whose link list +0x5DC[k * 16..] (ended by -1) holds the current racer, the
+// cost (link weight +0x9DC) * (byte +0x15B4[me * 16 + k] * D_8009DE34), times D_8009DE30 for the racer already in
+// slot +0x11C[me], is lowest (start 10000000). Stores the pick in +0x49C[me] and in +0x45C[me] the distance to it
+// (or the start cost when there is none). The link tables and the current racer are the ones read before the calls;
+// the result slots go to the block D_800D27D0 points to afterwards. Returns 0.
+s32 func_1508BE18(void) {
+    u8 *rail = (u8 *) D_800D27D0;
+    s32 n = *(s32 *) (rail + 0x10);
+    s32 me = *(s32 *) (rail + 0x4);
+    s32 *active = (s32 *) (rail + 0x39C);
+    s32 *links = (s32 *) (rail + 0x5DC);
+    s32 *weights = (s32 *) (rail + 0x9DC);
+    s32 *current = (s32 *) (rail + 0x11C);
+    u8 *bias;
+    s32 best = -1;
+    s32 bestCost = 10000000;
+    s32 k;
+    s32 j;
+    s32 w;
+    s32 cost;
+    f32 f;
+    f32 dx;
+    f32 dz;
+
+    func_1508CA14(0, (n < 9) ? 1 : 4);
+    func_1508A63C();
+    rail = (u8 *) D_800D27D0;
+    bias = rail + me * 16 + 0x15B4;
+    for (k = 0; k < n; k++) {
+        if (active[k] <= 0 || k == me) {
+            continue;
+        }
+        w = -1;
+        for (j = k * 16; j < k * 16 + 16 && links[j] != -1; j++) {
+            if (links[j] == me) {
+                w = weights[j];
+                break;
+            }
+        }
+        if (w == -1) {
+            continue;
+        }
+        f = bias[k] * D_8009DE34;
+        if (current[me] == k) {
+            f *= D_8009DE30;
+        }
+        cost = (s32) (w * f);
+        if (cost < bestCost) {
+            bestCost = cost;
+            best = k;
+        }
+    }
+    ((s32 *) (rail + 0x49C))[me] = best;
+    if (best != -1) {
+        dx = D_800CC2D0[me].x_position - D_800CC2D0[best].x_position;
+        dz = D_800CC2D0[me].z_position - D_800CC2D0[best].z_position;
+        ((s32 *) ((u8 *) D_800D27D0 + 0x45C))[me] = (s32) sqrtf(dx * dx + dz * dz);
+    } else {
+        ((s32 *) ((u8 *) D_800D27D0 + 0x45C))[me] = bestCost;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508BE18.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C07C.s")
 
+#ifdef NON_MATCHING
+// rail_assign_targets: script command 7 (func_1509E3D4). For every racer i on the current racer's team (+0xE64), the
+// ones of kind 2 / 3 (+0x15C) first, then the others: picks the active (+0x39C > 0) racer k of another team whose
+// link list +0x5DC[k * 16..] (ended by -1) holds i, with the lowest link weight (+0x9DC) shifted left by the number
+// of racers already assigned to k (start 10000000). Stores the cost in +0x45C[i] and k in +0x49C[i] (-1: none) and
+// counts the assignment for k. Returns 0.
+s32 func_1508C370(void) {
+    u8 *rail = (u8 *) D_800D27D0;
+    s32 me = *(s32 *) (rail + 0x4);
+    s32 n = *(s32 *) (rail + 0x10);
+    s32 *kind = (s32 *) (rail + 0x15C);
+    s32 *active = (s32 *) (rail + 0x39C);
+    s32 *team = (s32 *) (rail + 0xE64);
+    s32 *cost = (s32 *) (rail + 0x45C);
+    s32 *pick = (s32 *) (rail + 0x49C);
+    s32 *links = (s32 *) (rail + 0x5DC);
+    s32 *weights = (s32 *) (rail + 0x9DC);
+    s32 myTeam = team[me];
+    s8 assigned[40];
+    s32 pass;
+    s32 special;
+    s32 best;
+    s32 bestK;
+    s32 i;
+    s32 k;
+    s32 j;
+    s32 w;
+
+    for (i = 0; i < n; i++) {
+        assigned[i] = 0;
+    }
+    for (pass = 0; pass != 2; pass++) {
+        for (i = 0; i < n; i++) {
+            special = (kind[i] == 2 || kind[i] == 3);
+            if (special ? pass != 0 : pass == 0) {
+                continue;
+            }
+            if (team[i] != myTeam) {
+                continue;
+            }
+            best = 10000000;
+            bestK = -1;
+            for (k = 0; k < n; k++) {
+                if (active[k] <= 0 || team[k] == myTeam) {
+                    continue;
+                }
+                w = -1;
+                for (j = k * 16; j < k * 16 + 16 && links[j] != -1; j++) {
+                    if (links[j] == i) {
+                        w = weights[j];
+                        break;
+                    }
+                }
+                if (w == -1) {
+                    continue;
+                }
+                w <<= assigned[k];
+                if (w < best) {
+                    best = w;
+                    bestK = k;
+                }
+            }
+            // with no pick the asm increments the unused stack byte before the array
+            if (bestK != -1) {
+                assigned[bestK]++;
+            }
+            cost[i] = best;
+            pick[i] = bestK;
+        }
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C370.s")
+#endif
 
 s32 func_1508C5F0(s32 arg0) {
     return 0;
@@ -225,7 +371,65 @@ s32 func_1508CEE4(void) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508CF34.s")
 
+#ifdef NON_MATCHING
+extern s16 D_800876C0[];
+extern s8 D_80087688[];
+extern f32 D_8009DE5C;
+extern s8 D_800E1000;
+void func_1508EFEC(s32, s32, s32);
+f32 func_150ADA68(void);
+
+// rail_rival_pace: script command 14 (func_1509E3D4). Object `i` of D_800CC2D0 races towards the object in its rail
+// slot +0x11C (copied to its record's +0x129). The distance band to it (0 far = beyond D_8009DE5C, 1 beyond 2000,
+// 2 close) and the difficulty D_800E1000 pick a step limit from D_800876C0; once the slot's counter +0x29C passes it,
+// the counter restarts (and when the target's bit 16 + target is set in the slot's mask +0x16C0, func_1508EFEC
+// sends message 0x61). On a zero counter the record's boost flag +0x12A is set when 100 * random beats D_80087688.
+// Returns the band while the counter runs, 0 otherwise: no event script reads command 14's result (P211 scan), the
+// asm leaves the random helper's v0 there.
+s32 func_1508DCAC(s32 i) {
+    struct127 *obj = &D_800CC2D0[i];
+    u8 *rail = (u8 *) D_800D27D0;
+    s32 *target = (s32 *) (rail + 0x11C) + i;
+    s32 *count = (s32 *) (rail + 0x29C) + i;
+    struct127 *other;
+    f32 dx;
+    f32 dz;
+    f32 d;
+    s32 band;
+
+    *((u8 *) obj->unk31C + 0x129) = *target;
+    if (*target < 0) {
+        return 0;
+    }
+    other = &D_800CC2D0[*target];
+    dx = other->x_position - obj->x_position;
+    dz = other->z_position - obj->z_position;
+    d = sqrtf(dx * dx + dz * dz);
+    if (D_8009DE5C < d) {
+        band = 0;
+    } else if (2000.0f < d) {
+        band = 1;
+    } else {
+        band = 2;
+    }
+    if (D_800876C0[D_800E1000 * 3 + band] < *count) {
+        *count = 0;
+        if ((0x10000 << *target) & *(s32 *) ((u8 *) D_800D27D0 + i * 4 + 0x16C0)) {
+            func_1508EFEC(i, 0x61, 0x2000);
+        }
+    }
+    if (*count != 0) {
+        return band;
+    }
+    *((u8 *) obj->unk31C + 0x12A) = 0;
+    if (D_80087688[D_800E1000] < (s32) (func_150ADA68() * 100.0f)) {
+        *((u8 *) obj->unk31C + 0x12A) = 1;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DCAC.s")
+#endif
 
 #ifdef NON_MATCHING
 // rail_state_reset: script command 10 (func_1509E3D4): marks the D_800D27D0 slots +0xEB0 free (-1, +0x10 of them)

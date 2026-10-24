@@ -704,6 +704,8 @@ def param_kinds(tu, func):
 # P20 (opt-in): DIFFTEST_ARG="N=V1|V2|...,..." (hex) gives integer argument slot N (0-3 = a0-a3, 4+ = stack) one of the
 # listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
 ARGFIX = {}
+JALRARG_OLD = os.environ.get('DIFFTEST_JALRARG_OLD') == '1'   # P211: old jalr argument compare (see compare)
+STKFILL = int(os.environ['DIFFTEST_STKFILL'], 16) if os.environ.get('DIFFTEST_STKFILL') else None   # P211: stack fill word
 ARG_FOLD = os.environ.get('DIFFTEST_ARGF_OLD') == '1'   # P200: old behaviour (ARG on a float parameter sets only aN)
 for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
     _a, _v = _p.split('=')
@@ -783,7 +785,11 @@ class Run:
                 self.d64[vram + 4 * k] = w; mwords[k] = 0
         code = b''.join(struct.pack('>I', w) for w in mwords)
         self.premap(vram, code, overlay=True)
-        self.premap(STK_LO, bytes(STK_TOP - STK_LO + 0x1000))
+        # P211: DIFFTEST_STKFILL=WORD fills the harness stack with that word (both sides alike) instead of zeros, so a
+        # local the candidate forgets to write reads non-zero (func_151C384C: dropping `req.angle[1] = 0.0f` survived
+        # because the unwritten slot read 0 anyway). Default: zeros as before.
+        self.premap(STK_LO, struct.pack('>I', STKFILL) * ((STK_TOP - STK_LO + 0x1000) // 4) if STKFILL is not None
+                    else bytes(STK_TOP - STK_LO + 0x1000))
         self.premap(RET_MAGIC, words2b(EPILOGUE_CODE) + bytes(PAGE - 4 * len(EPILOGUE_CODE)))
         self.premap(SCR, bytes(0x400) + words2b(PROLOGUE_CODE) + bytes(PAGE - 0x400 - 4 * len(PROLOGUE_CODE)))
         self.helpers = set(); self.pending = None
@@ -1022,7 +1028,9 @@ class Run:
             # P112: arg registers this run wrote since the last call (path-sensitive; see compare: indirect calls)
             for k in range((addr - self.vram) // 4, min(len(self.words), (addr - self.vram + size) // 4)):
                 d = gpr_dest(self.words[k])
-                if d is not None and 4 <= d <= 7: self.awr.add(d - 4)
+                if d is not None and 4 <= d <= 7: self.awr.add(d - 4); self.awr_all.add(d - 4)
+                fd = fpr_dest(self.words[k])
+                if fd in (12, 13, 14, 15): self.awf_all.add(fd)
             # P89: the frame is set up in the entry block; the next blocks see the function's own sp
             if self.nblk < 4:
                 self.nblk += 1; self.minsp = min(self.minsp, mu.reg_read(UC_MIPS_REG_SP))
@@ -1046,7 +1054,8 @@ class Run:
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         ind = site is not None and (self.words[site] & 0xFC00003F) == 9   # P112: reached through jalr
         awr = self.awr; self.awr = set()
-        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, awr=awr,
+        awr_all, awf_all = set(self.awr_all), set(self.awf_all)   # P211: arg GPRs / FPRs written since entry
+        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, awr=awr, awr_all=awr_all, awf_all=awf_all,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
@@ -1118,7 +1127,7 @@ class Run:
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
         self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
-        self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set()
+        self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set(); self.awr_all = set(); self.awf_all = set()
         while True:
             self.resume = None
             try:
@@ -1207,6 +1216,16 @@ def compare(R, C, rk, arity):
         # P30 (opt-in): DIFFTEST_EXACT="NAME,..." or "*": those known prototypes are exact too (a scratch a2 left
         # by the reference right before a 1-arg call is not an argument)
         if na not in (None, 99) and (a['name'] in EXACT or '*' in EXACT): cnt = na
+        # P211: an indirect call (jalr) also compares every arg register that EITHER side wrote since entry, whatever
+        # the target's prototype says (table targets' prototypes are often wrong: `void (*)(void)` handlers that
+        # read a0). Before P211 only the reference's writes since the previous call counted, and only for unknown
+        # targets: a candidate that set the pass-through a0 to 0 in an earlier block (func_1513472C `arg0 = 0` in
+        # the `idx >= 10` branch) compared equal. Registers neither side wrote hold the same entry value on both
+        # sides. DIFFTEST_JALRARG_OLD=1 = old behaviour.
+        indw = set()
+        if a.get('ind') and not JALRARG_OLD:
+            indw = a.get('awr_all', set()) | b.get('awr_all', set())
+            cnt = max(cnt, max(indw, default=-1) + 1)
         for k in range(min(cnt, 4)):
             if k in FSKIP.get(a['name'], ()): continue
             if not same_val(R, a['regs'][k], C, b['regs'][k]):
@@ -1226,7 +1245,9 @@ def compare(R, C, rk, arity):
                 return 'call #%d %s: stack arg sp+0x%X ref=0x%X cand=0x%X' % (i, a['name'], o, a['stkw'][j], b['stkw'][j])
         pf = FREGS.get(a['name'])
         # unknown prototype: only FPRs both sides set right before the call (a lone scratch f12 is not an argument)
-        for fr in sorted(a['f'] & b['f'] if pf is None else pf):
+        frs = set(a['f'] & b['f'] if pf is None else pf)
+        if a.get('ind') and not JALRARG_OLD: frs |= a.get('awf_all', set()) | b.get('awf_all', set())   # P211
+        for fr in sorted(frs):
             if a['fregs'][fr] != b['fregs'][fr]:
                 return 'call #%d %s: f%d ref=0x%X cand=0x%X' % (i, a['name'], fr, a['fregs'][fr], b['fregs'][fr])
         if a['mem'] != b['mem']:

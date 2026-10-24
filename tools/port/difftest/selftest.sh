@@ -170,4 +170,19 @@ S87204="DIFFTEST_EXACT=* DIFFTEST_ARG=0=42700000,1=40A00000,2=41A00000,3=C220000
 chkce EQUIV  func_15087204 "$S87204"
 chkce DIFFER func_15087204 "$S87204" 's/            ex = -ex;//'
 TRIALS=4 chkce EQUIV  func_15087204 "$S87204 DIFFTEST_ARGF_OLD=1" 's/            ex = -ex;//'
+# P211: an indirect call (jalr) compared only the arg registers the reference wrote since the previous call, and only
+# for targets of unknown arity: a candidate setting the pass-through a0 to 0 in an earlier block (`arg0 = 0` in the
+# `idx >= 10` branch, a branch before the jalr block) compared equal. Now every arg register / f12-f15 either side wrote
+# since entry is compared at a jalr. Table entry 0 poked to an unknown target (0x80450000). DIFFTEST_JALRARG_OLD=1 = old.
+S472C="DIFFTEST_ARG=0=80490000 DIFFTEST_POKE=8049003C=000F0000,80089E4C=80450000"
+chkce EQUIV  func_1513472C "$S472C"
+chkce DIFFER func_1513472C "$S472C" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
+chkce EQUIV  func_1513472C "$S472C DIFFTEST_JALRARG_OLD=1" 's|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|'
+# P211: DIFFTEST_STKFILL=WORD fills the harness stack (zeros before): func_151C384C builds an emitter request on its
+# stack; dropping `req.angle[1] = 0.0f` compared equal because the unwritten slot read 0 anyway. With the fill the
+# request bytes (ARGMEM on func_151530A8) differ. No fill = old behaviour.
+S384C="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_ARGMEM=151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8,151307F0=0:92,151307F0=0+60:6,15160830=0:5,15160830=1:12 DIFFTEST_ARG=0=80450000,1=7,2=1 DIFFTEST_POKE=80450000=44610000,80450004=C2C80000,80450008=3F800000 DIFFTEST_RET=150ADF00=0;0;0;0;0 DIFFTEST_RETF=150ADF48=00000000"
+TRIALS=4 chkce EQUIV  func_151C384C "$S384C DIFFTEST_STKFILL=5A5A5A5A"
+TRIALS=4 chkce DIFFER func_151C384C "$S384C DIFFTEST_STKFILL=5A5A5A5A" 's/    req.angle\[1\] = 0.0f;//'
+TRIALS=4 chkce EQUIV  func_151C384C "$S384C" 's/    req.angle\[1\] = 0.0f;//'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

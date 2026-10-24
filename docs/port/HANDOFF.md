@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P211, 2026-10-24). Details: `docs/port/sessions/P211.md`
+
+Branch `port` (P209 d93bdcd + P211 commit).
+- difftest: at a jalr every arg register a0-a3 / f12-f15 that EITHER side wrote since entry is compared, whatever the
+  target's prototype (before: only the reference's writes since the previous call, unknown targets only).
+  `DIFFTEST_JALRARG_OLD=1` = old. New knob `DIFFTEST_STKFILL=WORD` (stack starts filled with WORD instead of zeros).
+  Both forwarded by difftest.sh; selftest cases func_1513472C (jalr) and func_151C384C (stack fill); selftest 77 / 77.
+  P200's "handler(0) survives" was a mutant file identical to the draft (sed did not apply).
+- func_151C384C's `req.angle[1]` survivor killed with STKFILL=5A5A5A5A (setup r0).
+- func_1513BA10 / BA44 (game_168A90): NM blocks pass the object to the D_80089C44 / C54 handlers (asm keeps a0).
+- **Rail command result rule** (P211.md section 3): func_1509E3D4's return goes to the event VM result register
+  (or back to func_1509BFB0's C caller, none of which uses a 0xFxxx word). ROM script scan: only commands 3, 6, 22,
+  25 have their result read. Those must return the asm's exact value; the others return the asm's value where
+  defined and 0 where the asm leaves a callee's scratch v0 (pin that callee with DIFFTEST_RET).
+- Hand C (NM): func_1508DCAC rail_rival_pace (cmd 14), func_1508BE18 rail_pick_chase_target (cmd 13),
+  func_1508C370 rail_assign_targets (cmd 7); all random + setups EQUIV, mutants all killed.
+- Checks: verify_all OK (port_work/p211/verify.log), NM build links, protocheck 0 (1429), selftest 77 / 77,
+  progress_nm 5423 / 5915 (91.7%), C bytes 78.4%.
+
+## Next steps (from P211)
+1. Re-run the setups of the dispatchers in the P211.md section 1 re-check list with the new jalr compare.
+2. B7840 commands: func_1508ECF8 (cmd 15), func_1508A63C, func_1508AB7C (cmd 6: result read by scripts, exact v0),
+   func_1508E080, func_1508CF34, func_1508C5F0.
+3. Coordinator items not reached: (a) port-b func_150768DC mutant swapping the f12 / f14 x arguments of jal stub
+   func_1505A630 survived - check that jal-stub FPR args are compared (unknown prototype: only FPRs BOTH sides
+   write right before the call count; a known prototype uses FREGS) and float stack args; (b) game_981E0
+   func_15074C80 is declared with 2 params but sits in hit handler table D_80086A34 (others void, 3 args): check
+   the asm and align the NM prototype.
+4. Browser: P211.md section 8. Breadth: `p211/asmlist.py`.
+
 ## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
 
 Branch `port` (P207 2672b13 + merge of port-b 4c59938 = a447641).
