@@ -10,7 +10,9 @@ command -v "$DOCKER" >/dev/null || DOCKER=/Applications/Docker.app/Contents/Reso
 cp tools/eu_port/baseline/{conker.eu.yaml,symbol_addrs.eu.txt,undefined_syms.eu.txt} conker/
 rm -rf conker/src_eu conker/build_port/us
 
-"$DOCKER" run --rm --platform linux/amd64 -v "$(pwd)":/conker conker bash -c '
+# P245: named so a running one is identifiable in `docker ps` (was an anonymous name such as youthful_bhaskara)
+CTNAME="euport-run-$(basename "$(pwd)")-$$"
+"$DOCKER" run --rm --name "$CTNAME" --platform linux/amd64 -v "$(pwd)":/conker conker bash -c '
 set -euo pipefail
 cd conker
 mkdir -p build_port && cp symbol_addrs.eu.txt build_port/symbol_addrs.eu.base.txt

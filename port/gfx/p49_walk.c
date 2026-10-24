@@ -374,6 +374,31 @@ static void p101_col(float h, float x, float y, float z) {
                  (short)vbe_ld16(o + 0x12), (short)vbe_ld16(o + 0x14));
     }
 }
+/* P245 DIAGNOSTIC ?p245col=F: once, on the first p205_obj_hook call (needs ?p205obj) at retrace >= F (the floor-query wrap is not reached for Conker on 0x29), dump every triangle of collision areas
+ * 0 and 1 (D_800DC208 vertex-pointer table, 3 pointers to s16 x y z per triangle, count D_800DBE18) as
+ * "[p245tri] area idx x0 y0 z0 x1 y1 z1 x2 y2 z2 flags" (flags = D_800DBE5C entry when the area is the current one,
+ * D_800DC26C, else -1), plus the caller's position. For offline path planning (level 0x29 river). */
+void p245_coldump(float x, float y, float z) {
+    static int f = -2, done;
+    int a, i, k, cnt;
+    if (f == -2) f = port_flag("p245col");
+    if (f <= 0 || done || port_frame_count < (unsigned)f) return;
+    done = 1;
+    port_log("[p245col] frame %u pos %g %g %g; area counts %d %d %d %d, current table %08X\n", port_frame_count, x, y, z,
+             D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3], (unsigned)D_800DC26C);
+    for (a = 0; a < 2; a++) {
+        const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
+        cnt = D_800DBE18[a];
+        if (!vo || cnt <= 0 || cnt > 40000) continue;
+        for (i = 0; i < cnt; i++) {
+            short v[9]; long fl = -1;
+            for (k = 0; k < 9; k++) v[k] = (short)vbe_ld16((const unsigned char *)(uintptr_t)vo[i * 3 + k / 3] + 2 * (k % 3));
+            if ((uintptr_t)D_800DC26C == (uintptr_t)vo && D_800DBE5C) fl = (long)((const unsigned *)(uintptr_t)D_800DBE5C)[i];
+            port_log("[p245tri] %d %d %d %d %d %d %d %d %d %d %d %lX\n", a, i, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8], fl);
+        }
+    }
+    port_log("[p245col] done\n");
+}
 void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
 void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,

@@ -10,7 +10,9 @@ DOCKER=${DOCKER:-docker}
 command -v "$DOCKER" >/dev/null || DOCKER=/Applications/Docker.app/Contents/Resources/bin/docker
 QUICK=${1:-}
 
-"$DOCKER" run --rm --platform linux/amd64 -v "$(pwd)":/conker conker bash -c '
+# P245: named so a running one is identifiable in `docker ps` (was an anonymous name such as youthful_bhaskara)
+CTNAME="verify-$(basename "$(pwd)")-$$"
+"$DOCKER" run --rm --name "$CTNAME" --platform linux/amd64 -v "$(pwd)":/conker conker bash -c '
 set -uo pipefail
 fail=0
 make VERSION=eu extract >/dev/null 2>&1 || { echo "FAIL root extract"; exit 1; }

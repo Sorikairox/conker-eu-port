@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P245, 2026-10-24, port-web). Details: `docs/port/sessions/P245.md`
+- Unnamed `conker` containers = `tools/eu_port/verify_all.sh` (seen: youthful_bhaskara, mount ~/conker-wt/port, the
+  port slot's verify run; already `--rm`). verify_all.sh and run.sh now pass `--name verify-|euport-run-<wt>-<pid>`
+  (port-web only; other worktrees get it by merge).
+- **Race A won**: the race starts at ~7774, not 8100; `STICK=0 p245/mp.sh race ... p240steer=7770:2:5:150` (new 4th
+  field = start phase) -> player 1st, STATS "P1: 1st 1:07:52 (0:20:16)". Post-finish A taps delayed 1500 retraces.
+- Multiplayer: Race B (0x33) starts, moves; Colors (0x30) starts, moves, stub func_150BE050; Tank (PLAY barrel, 0x24)
+  starts but the tank does not move (port-b stubs func_151BB690 / func_151BA634 / func_15134E48 / func_151D16E8, port
+  func_150EDCC8); Total War played to the end (match end 36618, STATS DRAW, back to the menu), no new stubs.
+- Level 0x29: `?p245col=F` collision dump + colmap.py / colgrid.py; `p245/r29load.sh` boots the P240 EEPROM straight
+  into 0x29. Route `p245/river_east.goto` (round the field fence's east end) gets Conker **swimming in the river**,
+  stuck at (855, -1056).
+- **User hint (river):** the river is reached by going back out through the door Conker opens with B to get to Birdy
+  (not across the field fence). Find that door in the object / zone dumps, steer back out through it after scene 5,
+  then on to events 4 (Jumping) and 6 (The Baddie); record it as a named padwalk route.
+
+## Next steps (from P245)
+1. port-b: Tank stubs func_151BB690, func_151BA634 (1E7CC0), func_15134E48 (161520), func_151D16E8 (1FB080).
+2. port: func_150EDCC8 (11AF60, Tank), func_150BE050 (EB860, Colors), func_151EF3A0 (216470), func_151D8280 (204F70).
+3. port-web: river via the user's door route; else find the blocker at (855, -1056) (dump collision area 2).
+
 ## State (session P240, 2026-10-24, port-web). Details: `docs/port/sessions/P240.md`
 
 - Merged port a64ed49e and port-b b798adaf. Checks after each: verify_all OK, NM build OK, protocheck 0 (1517),

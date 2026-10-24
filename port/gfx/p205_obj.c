@@ -27,6 +27,7 @@ void p205_obj_hook(void) {
         if (fp < 0) fp = port_flag("p205rec");
         if (fp > 0) p205_player = fp - 1;
     }
+    { extern void p245_coldump(float, float, float); p245_coldump(0, 0, 0); }   /* P245 ?p245col=F triangle dump */
     { extern void p223_hit_tick(void); p223_hit_tick(); }   /* P223 ?p223hit: follow a hit target */
     if (f < 0) f = port_flag("p205obj");
     if (f <= 0 || port_frame_count < (unsigned)f) return;
@@ -164,7 +165,7 @@ static void go_parse(void) {
  * type-4 edge node (link +0xB), from D_800D2778. Stick angle th = wrap(cam + pi - bearing)
  * (the P205 camera mapping, sgn -1, base pi; the board camera sits behind the board), limited to +-100 degrees,
  * magnitude 80. Stuck (< 30 units in 120 retraces): stick at +90 degrees with A for 40 retraces. Once the record's
- * highest lap (+0x28) reaches the lap count D_800E1017 the stick is released and A tapped every 60 retraces.
+ * highest lap (+0x28) reaches the lap count D_800E1017 the stick is released (P245: A taps every 60 retraces only from 1500 retraces later).
  * Logs [p240steer] every 40 retraces and on each node / lap change. Wins over ?p205goto. */
 EM_JS(int, __port_p240_steer, (void), {
     var v = null;
@@ -173,6 +174,16 @@ EM_JS(int, __port_p240_steer, (void), {
     if (v === null) return -1;
     var a = v.split(':'); return ((parseInt(a[0], 10) || 0) * 4 + ((parseInt(a[1] || '1', 10) || 1) & 3)) * 128 + Math.min(127, parseInt(a[2] || '50', 10));
 });
+/* P245: 4th field START: for START retraces from F the stick is held straight up (no target), as the CPU leaves the grid
+ * (race7/8 stalled 120+ retraces on the grid steering sideways towards node 21, then respawned twice). */
+EM_JS(int, __port_p240_start, (void), {
+    var v = null;
+    if (typeof location !== 'undefined') { var m = /[?&]p240steer=([^&]*)/.exec(location.search); if (m) v = decodeURIComponent(m[1]); }
+    else if (typeof process !== 'undefined' && process.env && process.env.PORT_P240STEER !== undefined) v = process.env.PORT_P240STEER;
+    if (v === null) return 0;
+    return parseInt(v.split(':')[3] || '0', 10) || 0;
+});
+static int p240_start;
 static float p240_frac = 0.5f;   /* ?p240steer=F:LOOK:PCT: target = node + PCT% of the way to its edge node */
 static void node_centre(int ni, float *tx, float *tz) {   /* P240: rail node + its type-4 edge node (link +0xB), halved */
     extern unsigned char *D_800D2778;
@@ -188,7 +199,8 @@ static int p240_steer(int *btn, int *sx, int *sy) {
     const unsigned char *r, *q = 0;
     float x, z, tx, tz, cam, b, th; int k, n, ni, lap, laps, passed, allseen;
     if (cfg == -2) { cfg = __port_p240_steer(); if (cfg >= 0) { p240_frac = (cfg & 127) / 100.f; cfg >>= 7; f0 = (unsigned)cfg >> 2; look = cfg & 3; if (look < 1) look = 1;
-        port_log("[p240steer] from retrace %u, look slot %d, edge fraction %.2f\n", f0, look, p240_frac); } }
+        p240_start = __port_p240_start();
+        port_log("[p240steer] from retrace %u, look slot %d, edge fraction %.2f, start phase %d\n", f0, look, p240_frac, p240_start); } }
     if (cfg < 0 || port_frame_count < f0 || !D_80087640 || !D_800D2778) return cfg >= 0 && port_frame_count >= f0;
     n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
     for (k = 0; k < n && k < 8; k++) if ((signed char)vbe_ld8(D_80087640 + k * 0x84 + 0x31) == 0) { q = D_80087640 + k * 0x84; break; }
@@ -200,7 +212,13 @@ static int p240_steer(int *btn, int *sx, int *sy) {
                                     (short)vbe_ld16(q + 0x24), x, z); last_lap = lap; }
     if (laps > 0 && lap >= laps) {   /* finished: release, tap A */
         if (!done) { done = 1; done_f = port_frame_count; port_log("[p240steer] retrace %u: finished (%d laps)\n", port_frame_count, lap); }
-        *sx = *sy = 0; if ((port_frame_count - done_f) % 60 < 8) *btn |= 0x8000;
+        *sx = *sy = 0;   /* P245: no A for 1500 retraces (A on the STATS overlay picks RESTART: raceA2 lost the STATS view in 52 retraces) */
+        if (port_frame_count - done_f >= 1500 && (port_frame_count - done_f) % 60 < 8) *btn |= 0x8000;
+        return 1;
+    }
+    if (port_frame_count < f0 + (unsigned)p240_start) {   /* P245 start phase: stick up, no target */
+        *sx = 0; *sy = 80; st_f = 0;
+        if ((port_frame_count - f0) % 40 == 0) port_log("[p240steer] retrace %u: start phase pos %.0f %.0f\n", port_frame_count, x, z);
         return 1;
     }
     /* P240 r3: the first node in slots LOOK..3 not yet reached (within 900 units of its centre; the last 6 reached
