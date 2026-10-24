@@ -1,0 +1,3 @@
+# P241 func_1514DAD4 (object_fixed_beam_spawn): obj 80450000 (+0x14..+0x1C f32 position, +0x3B id); func_150C5870 RET = effect 80460000 or 0; memcpy = jal 10023360; func_1514F18C jal its own name. ARGMEM knobs in the registry (spawn block 36 bytes, record 20 bytes)
+made ! 0=80450000 ! 80450014=42C80000,80450018=C1200000,8045001C=44BB8000,80450038=00000007 ! 150C5870=80460000 ! ! ! ! !
+none ! 0=80450000 ! 80450014=42C80000,80450018=C1200000,8045001C=44BB8000,80450038=00000007 ! 150C5870=0 ! ! ! ! !

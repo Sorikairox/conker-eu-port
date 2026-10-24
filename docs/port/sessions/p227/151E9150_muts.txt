@@ -1,0 +1,69 @@
+s/D_8009015C \&= ~0x10;/D_8009015C \&= ~0x20;/ % base
+s/gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F9);/gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F8);/ % base
+s/? 0x320 : 0x198/? 0x320 : 0x199/ % fa0
+s/pitch = 0x124 \/ D_800E0FE0;/pitch = 0x120 \/ D_800E0FE0;/ % nt3
+s/if (p->unk13C != 0 ||/if (p->unk13C == 0 ||/ % act_team1
+s/+ 0x128) \& 0x20))/+ 0x128) \& 0x40))/ % ctlflag
+s/sel = p->unk128;/sel = p->unk128 + 1;/ % f1sel f1only
+s/if (sel != -1 \&\& (D_80090160 \& 0x8000))/if (sel != -1 \&\& (D_80090160 \& 0x4000))/ % arrow_t0
+s/flags |= 2;/flags |= 1;/ % arrow_t0
+s/^            sel = -1;$/            sel = sel;/ % arrow_t1
+s/if (p->unk128 == 1 \&\& p->unk2E4/if (p->unk128 == 0 \&\& p->unk2E4/ % bonus
+s/p->unk2E4 != 0 \&\&/p->unk2E4 == 0 \&\&/ % bonus_t0
+s/flags |= 4;/flags |= 5;/ % bonus
+s/+ 0x75) \& 0x7F) == 0x25/+ 0x75) \& 0xFF) == 0x25/ % near_far
+s/func_150871B8(0x49)/func_150871B8(0x48)/ % near
+s/ddz = pz - p->z_position;/ddz = py - p->z_position;/ % near
+s/< 6250000.0f/< 6000000.0f/ % near_edge
+s/                D_8009015C |= 0x10;/                D_8009015C |= 0x18;/ % near
+1,/D_800E0FFC |= 1 << i;/s/D_800E0FFC |= 1 << i;/D_800E0FFC |= 2 << i;/ % act_team1
+/0x25) {/,/D_800E0FFC/s/D_800E0FFC |= 1 << i;/D_800E0FFC |= 1;/ % near
+s/(D_800BEDCC \& 0x1F) < 11/(D_800BEDCC \& 0x1F) < 10/ % blink
+s/^        flags = 0;$/        flags = flags;/ % blink
+s/if (D_80090160 \& 9) {/if (D_80090160 \& 1) {/ % f8only
+s/tex = func_1510D66C(0xD16, 0, 3, 0);/tex = func_1510D66C(0xD17, 0, 3, 0);/ % base
+s/HUD_W(gdl, 0xF5181000, 0x00094250);/HUD_W(gdl, 0xF5181000, 0x00094251);/ % base
+s/gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);/gDPSetOtherMode(gdl++, 0x002C3F, 0x504245);/ % base
+s/^            tex = 0;$/            tex = 1;/ % notex
+s/if ((D_80090160 \& 8) \&\& tex != 0)/if ((D_80090160 \& 8) || tex != 0)/ % f1only
+s/x = pitch >> 1;/x = pitch >> 2;/ % base
+s/score = func_150859AC((s16) team, 6);/score = func_150859AC((s16) team, 5);/ % base
+s/D_800ABEA0\[team\]\[1\]/D_800ABEA0[team][2]/ % base
+1,/alpha \& 0xFF)/s/alpha \& 0xFF)/alpha \& 0x7F)/ % base
+s/(x + 3) \* 4, y, dx, y + 0x1C, 0, 0x1C0/(x + 3) * 4, y, dx, y + 0x1D, 0, 0x1C0/ % base
+s/if (q != 0 || started || div == 1)/if (q != 0 || div == 1)/ % nt3
+s/D_8009041C\[q \& 3\] << 5/D_8009041C[q \& 3] << 4/ % base
+s/D_80090420\[q >> 2\] << 5/D_80090420[q >> 1] << 5/ % nt4big
+s/dx += 0x18;/dx += 0x14;/ % nt3
+s/score -= q \* div;/score -= div;/ % nt4big
+s/div = 10000;/div = 1000;/ % nt4big
+s/x += pitch;/x += pitch + 1;/ % nt3
+s/func_151E9E1C((u8 \*) gdl, y, sel, 0, 1)/func_151E9E1C((u8 *) gdl, y, sel, 1, 1)/ % f1only
+s/if (near || sel != -1) {/if (near \&\& sel != -1) {/ % near
+s/? 0xD19 : 0xD18/? 0xD18 : 0xD18/ % sel4000
+s/HUD_W(gdl, 0xFD100000, tex + 0x800);/HUD_W(gdl, 0xFD100000, tex + 0x400);/ % f1only
+s/gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);/gDPSetOtherMode(gdl++, 0x00AC3F, 0x504204);/ % f1only
+s/0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660/0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x620/ % near
+s/0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540/0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x500/ % sel4000
+s/row = 0x1A;/row = 0x1B;/ % f1sel
+s/off = 0xB;/off = 0xA;/ % sel_no1
+s/row = 0x26;/row = 0x27;/ % sel_no1
+s/(off + 0xE) \* 4/(off + 0xD) * 4/ % f1sel
+s/size = 0x10;/size = 0x8;/ % bonus
+s/id = 0xD13;/id = 0xD12;/ % bonus
+s/w = size \* 32 - 1;/w = size * 32;/ % arrow_t0
+s/((((size \* 2 + 7) >> 3) \& 0x1FF) << 9)/((((size * 2 + 7) >> 2) \& 0x1FF) << 9)/ % arrow_t0
+s/((((size - 1) \* 4) \& 0xFFF) << 12) | 0x7C/((((size - 1) * 4) \& 0xFFF) << 12) | 0x7E/ % arrow_t0
+s/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);/gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFE);/ % arrow_t0
+s/0xA0, y - 0x10, 0xE0, y + 0x30/0xA0, y - 0x10, 0xE0, y + 0x20/ % arrow_t1
+s/0x3B0, y - 0x10, 0x3F0/0x3B0, y - 0x8, 0x3F0/ % arrow_t0
+s/0x250, 0xC, 0x280, 0x48, 0, 0, 0x200/0x250, 0xC, 0x280, 0x48, 0, 0, 0x240/ % bonus
+s/if (D_80090160 \& 0x6340)/if (D_80090160 \& 0x6300)/ % timer
+s/func_151EA4C8((u8 \*) gdl, y, 1)/func_151EA4C8((u8 *) gdl, y, 0)/ % timer
+1,/if (flags \& 4) {/s/if (flags \& 4) {/if (flags \& 2) {/ % bonus
+s/if (sel != -1) {$/if (sel == -1) {/ % near_sel
+s/if (near) {$/if (!near) {/ % near
+1,/if (D_80090160 \& 1) {/s/if (D_80090160 \& 1) {/if (D_80090160 \& 2) {/ % f1only
+s/p = \&D_800CC2D0\[i\];/p = \&D_800CC2D0[i + 1];/ % act_team1
+s/for (i = 0; i < D_8008FD8C; i++)/for (i = 1; i < D_8008FD8C; i++)/ % arrow_t0
+s/for (team = 0; team < D_800E0FE0; team++)/for (team = 1; team < D_800E0FE0; team++)/ % base

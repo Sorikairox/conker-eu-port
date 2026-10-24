@@ -73,8 +73,9 @@ s32 func_150F3794(u8 *arg0) {
 #endif
 s32 func_15140410();
 
-void func_150F38FC(u8 *arg0, s16 arg1) {
-    func_15140410(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);
+/* P224: draw table D_8008A1BC entry; the asm returns func_15140410's v0 and the dispatcher uses it. */
+u8 *func_150F38FC(u8 *arg0, s16 arg1) {
+    return (u8 *) func_15140410(arg0, arg0 + 0x12C, arg0 + 0x138, arg1);
 }
 
 typedef struct {

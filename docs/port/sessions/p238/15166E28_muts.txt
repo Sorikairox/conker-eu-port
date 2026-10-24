@@ -1,0 +1,15 @@
+# P238 func_15166E28 (layer_pre_scroll_texture) mutants: sed % setup names
+s/    D_800DD270 = prev + 0x80;/    D_800DD270 = prev + 0x40;/ % mid
+s/    if (D_800DD270 >= 0x500) {/    if (D_800DD270 > 0x500) {/ % wrap
+s/    if (D_800DD270 >= 0x500) {/    if ((u16) D_800DD270 >= 0x500) {/ % neg
+s/        D_800DD270 = 0;/        D_800DD270 = 1;/ % wrap
+s/    D_800DD650 = prev;/    D_800DD650 = D_800DD270;/ % mid
+s/    D_800DD650 = prev;/    D_800DD650 = (u16) prev;/ % neg2
+s/    D_800DD654 = 1;/    D_800DD654 = 0;/ % mid
+s/    D_800DD658 = (s32) D_800907A4;/    D_800DD658 = (s32) D_800DD660;/ % mid
+s/(s32 \*) D_800DD660, 0, 0, 0, 1, 3)/(s32 *) D_800DD660, 0, 0, 0, 1, 2)/ % mid
+s/(s32 \*) D_800DD660, 0, 0, 0, 1, 3)/(s32 *) D_800907A4, 0, 0, 0, 1, 3)/ % mid
+s/    gdl = (Gfx \*) func_15095380(/    (void) func_15095380(/ % mid
+s/D_800D30BC | 0x82CA0/D_800D30BC | 0x82CA1/ % mid
+s/D_800A4EA8\[7\] | D_800A4EA8\[6\]/D_800A4EA8[5] | D_800A4EA8[4]/ % mid
+s/    u8 one = 1;/    u8 one = 2;/ % mid

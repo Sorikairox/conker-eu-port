@@ -248,7 +248,57 @@ s16 arg1;
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* P241: readable C for func_1514DAD4 (game_eu_17A800, 58 insns). */
+// object_fixed_beam_spawn: entry 16 of D_8008AE10 (`void (struct127 *)`): spawns a beam effect (func_150C5870,
+// kind 0x46) from the fixed point (-477, -2015, 2244) to the object's position +0x14, width 0.32, gives it the
+// record {object, its id byte +0x3B, 6, 0, -180, 77} at +0xC8 and attaches it to the object (func_1514F18C, slot
+// 0x15). Constants: the ELF's D_800A61C4..D_800A61D0 (0xC3EE8000, 0xC4FBE000, 0x450C4000, 0x3EA3D70A).
+typedef struct {
+    f32 start[3];
+    f32 end[3];
+    u8 flag18;
+    f32 width;
+    u8 flag20;
+} BeamSpawn_1514DAD4; /* func_150C5870 copies 0x24 bytes */
+typedef struct {
+    struct127 *owner;
+    u8 ownerId;
+    u8 kind;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+} BeamRec_1514DAD4; /* 0x14 bytes at effect +0xC8 */
+u8 *func_150C5870(s32, s32);
+void func_1514DAD4(struct127 *obj) {
+    BeamRec_1514DAD4 rec;
+    BeamSpawn_1514DAD4 blk;
+    u8 *fx;
+
+    rec.owner = obj;
+    rec.ownerId = ((u8 *) obj)[0x3B];
+    rec.kind = 6;
+    rec.f8 = 0.0f;
+    rec.fC = -180.0f;
+    rec.f10 = 77.0f;
+    blk.start[0] = -477.0f;
+    blk.start[1] = -2015.0f;
+    blk.start[2] = 2244.0f;
+    blk.end[0] = *(f32 *) ((u8 *) obj + 0x14);
+    blk.end[1] = *(f32 *) ((u8 *) obj + 0x18);
+    blk.end[2] = *(f32 *) ((u8 *) obj + 0x1C);
+    blk.flag18 = 1;
+    blk.width = 0.32f;
+    blk.flag20 = 1;
+    fx = func_150C5870((s32) &blk, 0x14);
+    if (fx != NULL) {
+        memcpy(fx + 0xC8, &rec, sizeof(rec));
+        func_1514F18C(fx, obj, 0x15);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514DAD4.s")
+#endif
 
 void func_1514DBBC(struct127 *arg0) {
     s32 pad; // fakematch: unused slot at the top of the frame

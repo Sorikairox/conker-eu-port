@@ -1,0 +1,31 @@
+s/    if (D_800D3C60 == 1) {/    if (D_800D3C60 == 2) {/ % mode1 mode2_c0
+s/        h = func_1509FB90(id, 0x7FFF, 0, 0x40);/        h = func_1509FB90(id, 0x7FFF, 0, 0x41);/ % mode1
+s/                switch (kind \& 0xF000) {/                switch (kind \& 0x7000) {/ % c0_a000
+s/return func_1509F834(id, args\[2\] \& 0xFFF, args\[3\], args\[4\], kind \& 0xFFF, args\[6\], args\[7\]);/return func_1509F834(id, args[2] \& 0xFFF, args[3], args[4], kind \& 0xFFF, args[6], args[6]);/ % c0_2000
+s/return func_1509F834(id, args\[2\] \& 0xFFF, args\[3\], args\[4\], kind \& 0xFFF, args\[6\], args\[7\]);/return func_1509F834(id, args[2], args[3], args[4], kind \& 0xFFF, args[6], args[7]);/ % c0_2000
+s/func_1509F95C(id, args\[2\] \& 0xFFF, args\[4\], kind \& 0xFFF, args\[6\], args\[7\]);/func_1509F95C(id, args[2] \& 0xFFF, args[3], kind \& 0xFFF, args[6], args[7]);/ % c0_3000
+s/func_1509F95C(id, args\[2\] \& 0xFFF, args\[4\], kind \& 0xFFF, args\[6\], args\[7\]);/func_1509F95C(id, args[2] \& 0xFFF, args[4], kind, args[6], args[7]);/ % c0_3000
+s/                        return 0;/                        return 1;/ % c0_3000
+s/return func_1509F9C8(id, args\[2\] \& 0xFFF, args\[4\], kind \& 0xFFF, args\[6\]);/return func_1509F9C8(id, args[2] \& 0xFFF, args[4], kind \& 0xFFF, args[7]);/ % c0_4000
+s/return func_1509F9C8(id, args\[2\] \& 0xFFF, args\[4\], kind \& 0xFFF, args\[6\]);/return (func_1509F9C8(id, args[2] \& 0xFFF, args[4], kind \& 0xFFF, args[6]) << 16) | 0x7000;/ % c0_4000
+s/h = func_1509FA88(id, args\[2\] \& 0xFFF, args\[4\]);/h = func_1509FA88(id, args[2] \& 0xFFF, args[3]);/ % c0_1000
+s/                pan = 0x40;/                pan = 0x41;/ % c1_m3
+s/                if (D_800D3C60 < 4) {/                if (D_800D3C60 < 5) {/ % c1_m4
+s/                    vol = 0;/                    vol = 1;/ % c1_m3
+s/                    vol = args\[3\];/                    vol = args[4];/ % c1_m4
+s/                    if (D_800D3C60 == 5) {/                    if (D_800D3C60 >= 5) {/ % c1_m6
+s/                        pan = args\[4\];/                        pan = args[3];/ % c1_m5
+s/                h = func_1509FB90(id, args\[2\], vol, pan);/                h = func_1509FB90(id, args[2] \& 0xFFF, vol, pan);/ % c1_m3
+s/                if (D_800D3C60 >= 7 \&\& args\[6\] != 0) {/                if (D_800D3C60 >= 6 \&\& args[6] != 0) {/ % c2_m6
+s/                if (D_800D3C60 >= 7 \&\& args\[6\] != 0) {/                if (D_800D3C60 >= 7) {/ % c2_m7z
+s/func_1509FAD4(id \& 0xFFF, args\[2\], args\[3\] \& 0xFFF, args\[4\], args\[5\], force);/func_1509FAD4(id \& 0xFFF, args[2], args[3], args[4], args[5], force);/ % c2_m7
+s/func_1509FAD4(id \& 0xFFF, args\[2\], args\[3\] \& 0xFFF, args\[4\], args\[5\], force);/func_1509FAD4(id \& 0xFFF, args[2], args[3] \& 0xFFF, args[4], args[6], force);/ % c2_m7
+s/                h = 0;/                h = 1;/ % c2_m7
+s/h = func_1509FBC8(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/h = func_1509FBC8(id, args[3] \& 0xFFF, args[2], args[5], args[5]);/ % c3
+s/h = func_1509FBC8(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/h = func_1509FBC8(id, args[2] \& 0xFFF, args[2], args[4], args[5]);/ % c3
+s/func_15103C14(id, args\[3\] \& 0xFFF, args\[2\], args\[4\], args\[5\]);/func_15103C14(id, args[3], args[2], args[4], args[5]);/ % c4
+s/                return 0x7000;/                return 0x7001;/ % c4
+s/^                return 0;/                return 7;/ % c5 cneg
+s/        switch ((u32) args\[1\]) {/        switch (args[1] \& 7) {/ % c9
+s/    if (h != 0) {/    if (h >= 0) {/ % c3_zero mode1_zero
+s/        h = (h << 16) | 0x7000;/        h = (h << 16) | 0x6000;/ % c3

@@ -795,9 +795,17 @@ void func_1513E070(s32 arg0, s32 arg1, s32 arg2);
 void func_1513E084(struct210 *arg0, struct212 *arg1, u8 arg2);
 void func_1513E134(void);
 void func_1513E2A4(void);
+#ifdef NON_MATCHING /* P224: D_8008A1BC entries return the callee's v0 */
+s32 func_1513EDB4(s32 arg0, s16 arg1);
+#else
 void func_1513EDB4(s32 arg0, s16 arg1);
+#endif
 s32 func_1513EDE4(s32 arg0, s16 arg1);
+#ifdef NON_MATCHING
+u8 *func_1513F4B0(struct210 *arg0, s16 arg1);
+#else
 void func_1513F4B0(struct210 *arg0, s16 arg1);
+#endif
 void func_151403A8(s32 arg0, u8 arg1);
 void func_151403DC(s32 arg0, u8 arg1);
 void func_151411A4(struct210 *arg0);

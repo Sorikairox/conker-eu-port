@@ -8,7 +8,7 @@ void func_15089BB0(void) {
 }
 
 #ifdef NON_MATCHING
-s32 func_1508C07C(s32);
+void func_1508C07C(void);
 s8 *func_1509B570(s32);
 extern s32 D_80087650;
 extern s32 D_80087690;
@@ -33,7 +33,7 @@ s32 func_1508A040(void) {
         D_800D27D0 = temp_v0;
 block_12:
         sp1C = temp_a0;
-        func_1508C07C(temp_a0);
+        func_1508C07C(); /* P230: takes no argument, returns nothing */
         (*(s8 *)((u8 *)D_800D27D0 + 0x1700)) = 0;
         (*(s8 *)((u8 *)D_800D27D0 + 0x1701)) = 0;
         var_v0 = 0;
@@ -518,12 +518,110 @@ void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B704.s")
 
+#ifdef NON_MATCHING
+extern f32 D_8009DE2C;
+s32 func_15086268(f32, f32, f32, s32, s32);
+
+/* the zone block func_1508B704 fills (sp+0xAC in func_1508B854) */
+typedef struct {
+    f32 x;              /* 0x00 */
+    f32 z;              /* 0x04 */
+    f32 radius;         /* 0x08: the event's radius (func_1508B704 may change it) */
+    f32 lim[8];         /* 0x0C: per-node squared-distance limits */
+    s16 count;          /* 0x2C */
+    u8 node[8];         /* 0x2E */
+    u8 rest[0x20];      /* 0x36: cleared before func_1508B704 */
+} RailZone1508B854;
+void func_1508B704(s32 node, RailZone1508B854 *zone);
+
+/*
+ * rail_events_assign_nodes: P230. Racer rail slots (+0x55C[k]) that are set (!= -1) become -2. Then for each of the
+ * +0x1745 pending rail events (records of 0xC bytes at +0x1748: f32 radius, s16 x / y / z) every computer racer k
+ * (D_80090130 .. D_8008FD8C) within -100 < dy < 200 of the event and with dx^2 + dz^2 < radius + 100 gets the
+ * nearest node of the event's zone: the zone is built once per event at the first racer in range (the rail node
+ * near the event: func_15086268(x, y, z, 0, func_15086218(y)); if there is one, func_1508B704 fills the zone).
+ * The node is the zone's node with the smallest squared distance that is below both its limit and 1e8; the racer's
+ * slot gets that node's +7 byte (+0x5C[k] = 1 when the slot was not -2). Slots still < 0 become -1, and the event
+ * count is cleared.
+ */
+void func_1508B854(void) {
+    RailZone1508B854 zone;
+    s32 *slot = (s32 *) ((u8 *) D_800D27D0 + 0x55C);
+    u8 *ev = (u8 *) D_800D27D0 + 0x1748;
+    struct127 *p;
+    s32 i, e, k, found, near;
+    u8 best;
+    f32 ex, ey, ez, dx, dy, dz, d, bestD, px, pz;
+
+    for (i = 0; i < D_8008FD8C; i++) {
+        if (slot[i] != -1) {
+            slot[i] = -2;
+        }
+    }
+    for (e = 0; e < *(s8 *) ((u8 *) D_800D27D0 + 0x1745); e++, ev += 0xC) {
+        found = FALSE;
+        zone.radius = *(f32 *) ev;
+        ex = *(s16 *) (ev + 4);
+        ey = *(s16 *) (ev + 6);
+        ez = *(s16 *) (ev + 8);
+        for (k = D_80090130, p = &D_800CC2D0[k]; k < D_8008FD8C; k++, p++) {
+            dy = p->y_position - ey;
+            if (!(dy < 200.0f) || !(-100.0f < dy)) {
+                continue;
+            }
+            dx = p->x_position - ex;
+            dz = p->z_position - ez;
+            if (!(dx * dx + dz * dz < zone.radius + 100.0f)) {
+                continue;
+            }
+            bestD = D_8009DE2C;
+            best = 0xFF;
+            if (!found) {
+                zone.count = 0;
+                found = TRUE;
+                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));
+                if (near != -1) {
+                    zone.x = ex;
+                    zone.z = ez;
+                    zone.count = 0;
+                    bzero(zone.rest, sizeof(zone.rest));
+                    func_1508B704(near & 0xFF, &zone);
+                }
+            }
+            px = p->x_position;
+            pz = p->z_position;
+            for (i = 0; i < zone.count; i++) {
+                dx = D_800D2778[zone.node[i]].unk0 - px;
+                dz = D_800D2778[zone.node[i]].unk4 - pz;
+                d = dx * dx + dz * dz;
+                if (d < zone.lim[i] && d < bestD) {
+                    best = zone.node[i];
+                    bestD = d;
+                }
+            }
+            if (best != 0xFF) {
+                if (slot[k] != -2) {
+                    ((s32 *) ((u8 *) D_800D27D0 + 0x5C))[k] = 1;
+                }
+                slot[k] = D_800D2778[best].unk7;
+            }
+        }
+    }
+    for (i = 0; i < D_8008FD8C; i++) {
+        if (slot[i] < 0) {
+            slot[i] = -1;
+        }
+    }
+    *(s8 *) ((u8 *) D_800D27D0 + 0x1745) = 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B854.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009DE30;
 extern f32 D_8009DE34;
-void func_1508CA14(s32, s32);
+s32 func_1508CA14(s32, s32); /* P230: returns the +0x16C0 mask of arg0 (asm v0) */
 s32 func_1508A63C(void);
 
 // rail_pick_chase_target: script command 13 (func_1509E3D4). Refreshes the rail state (func_1508CA14 with 1 or, for
@@ -594,7 +692,67 @@ s32 func_1508BE18(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508BE18.s")
 #endif
 
+#ifdef NON_MATCHING
+/*
+ * rail_lane_shuffle: P230: for each of the D_8008FD8C racers (row i = D_800D27D0 + 0x15B4 + i * 0x10), picks a
+ * random free start column (func_150ADA68 * n, then steps in a random direction past the columns already taken
+ * this row) and writes a triangle wave into the row from there: 0x55, + step, ... (step = 0xAA / max(n / 2, 2),
+ * negated each time the value reaches 0x100; values >= 0x100 are stored as 0xFF), wrapping at column n.
+ */
+void func_1508C07C(void) {
+    s8 used[16];
+    s32 n = D_8008FD8C;
+    s32 half = n >> 1;
+    s32 step0;
+    u8 *row = (u8 *) D_800D27D0 + 0x15B4;
+    f32 nf;
+    s32 i, k, j, dir, v, step;
+
+    if (half < 2) {
+        half = 2;
+    }
+    step0 = 0xAA / half;
+    if (n <= 0) {
+        return;
+    }
+    nf = n;
+    for (i = 0; i < n; i++, row += 0x10) {
+        dir = -1;
+        v = 0x55;
+        step = step0;
+        for (k = 0; k < 16; k++) {
+            used[k] = 0;
+        }
+        j = (s32) (func_150ADA68() * nf);
+        if (func_150ADA68() > 0.5f) {
+            dir = 1;
+        }
+        while (used[j] != 0) {
+            j += dir;
+            if (j < 0) {
+                j = n - 1;
+            }
+            if (j >= n) {
+                j = 0;
+            }
+        }
+        used[j] = 1;
+        for (k = 0; k < n; k++) {
+            row[j] = (v < 0x100) ? v : 0xFF;
+            j++;
+            if (j >= n) {
+                j = 0;
+            }
+            v += step;
+            if (v >= 0x100) {
+                step = -step;
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C07C.s")
+#endif
 
 #ifdef NON_MATCHING
 // rail_assign_targets: script command 7 (func_1509E3D4). For every racer i on the current racer's team (+0xE64), the
@@ -676,9 +834,196 @@ s32 func_1508C5F0(s32 arg0) {
     return 0;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C600.s")
+#ifdef NON_MATCHING
+f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, s32, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+extern s16 D_80087664[];
 
+// rail_pair_sight: P237. Line-of-sight test between rail racers a and b (func_1508CA14 pairs them). Each racer's
+// record (func_1505EEF4(id & 0xFFFF0FFF)) gives an eye point: a racer whose state block (+0x31C) has +0x84 set
+// looks from y + 0.75 * height (+0x114, s16), 50 lower for state kind 9 (+0x75 & 0x7F); a record of kind 0x1F from
+// y + 80; when only the OTHER racer has +0x84 set and the difficulty's D_80087664 entry is not -1, from the s16
+// point +0x1A4 / +0x1A6 / +0x1A8; else from y + 40. The ray a -> b is cast with func_150ACEA0: no hit, or a hit
+// farther than the distance, means "seen", then func_15087204 (the wall test from a along x / z) > 0 clears it.
+// Rail block +0x16C0 masks: bit b of a's word and bit a of b's word when the pair is clear; bits 16 + b / 16 + a
+// when the ray reached the other racer (whatever the wall test said). Nothing when a record is missing.
+void func_1508C600(s32 a, s32 b) {
+    u8 *ra, *rb, *sa, *sb;
+    s32 flagA, flagB, seen, clear;
+    f32 xa, ya, za, xb, yb, zb, dx, dy, dz, dist, hit, h0, h1, h2;
+
+    clear = 0;
+    seen = 0;
+    ra = (u8 *) func_1505EEF4(a & 0xFFFF0FFF);
+    rb = (u8 *) func_1505EEF4(b & 0xFFFF0FFF);
+    if (ra != NULL && rb != NULL) {
+        sa = *(u8 **) (ra + 0x31C);
+        sb = *(u8 **) (rb + 0x31C);
+        flagA = sa[0x84];
+        flagB = sb[0x84];
+
+        xa = *(f32 *) (ra + 0x14);
+        za = *(f32 *) (ra + 0x1C);
+        if (flagA != 0) {
+            ya = *(f32 *) (ra + 0x18) + (f32) *(s16 *) (sa + 0x114) * 0.75f;
+            if ((sa[0x75] & 0x7F) == 9) {
+                ya -= 50.0f;
+            }
+        } else if (*(s32 *) ra == 0x1F) {
+            ya = *(f32 *) (ra + 0x18) + 80.0f;
+        } else if (flagB != 0 && D_80087664[D_800E1000] != -1) {
+            xa = (f32) *(s16 *) (ra + 0x1A4);
+            ya = (f32) *(s16 *) (ra + 0x1A6);
+            za = (f32) *(s16 *) (ra + 0x1A8);
+        } else {
+            ya = *(f32 *) (ra + 0x18) + 40.0f;
+        }
+
+        xb = *(f32 *) (rb + 0x14);
+        zb = *(f32 *) (rb + 0x1C);
+        if (flagB != 0) {
+            yb = *(f32 *) (rb + 0x18) + (f32) *(s16 *) (sb + 0x114) * 0.75f;
+            if ((sb[0x75] & 0x7F) == 9) {
+                yb -= 50.0f;
+            }
+        } else if (*(s32 *) rb == 0x1F) {
+            yb = *(f32 *) (rb + 0x18) + 80.0f;
+        } else if (flagA != 0 && D_80087664[D_800E1000] != -1) {
+            xb = (f32) *(s16 *) (rb + 0x1A4);
+            yb = (f32) *(s16 *) (rb + 0x1A6);
+            zb = (f32) *(s16 *) (rb + 0x1A8);
+        } else {
+            yb = *(f32 *) (rb + 0x18) + 40.0f;
+        }
+
+        dy = yb - ya;
+        dz = zb - za;
+        dx = xb - xa;
+        dist = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (func_150ACEA0(xa, ya, za, dx, dy, dz, 0, 0, &h0, &h1, &h2, &hit, 0, 0, 0.0f) == 0 || dist < hit) {
+            seen = 1;
+            clear = 1;
+            if (0.0f < func_15087204(xa, ya, za, dx, dz)) {
+                clear = 0;
+            }
+        }
+    }
+    if (clear) {
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + a * 4) |= 1 << b;
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + b * 4) |= 1 << a;
+    }
+    if (seen) {
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + a * 4) |= 0x10000 << b;
+        *(s32 *) ((u8 *) D_800D27D0 + 0x16C0 + b * 4) |= 0x10000 << a;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508C600.s")
+#endif
+
+#ifdef NON_MATCHING
+extern f32 D_8009DE38;
+void func_1508C600(s32, s32);
+
+/*
+ * rail_pair_rivals: P230. The rail block's +0x16C0 words are per-racer masks (bit k and k + 16 = "not yet paired
+ * with racer k"). With refresh != 0:
+ * 1. each human racer i (< D_80090130) is paired (func_1508C600(i, k), both mask bits cleared) with up to three of
+ *    the computer racers k (D_80090130.. D_8008FD8C) that are on another team (+0xE64) and whose bit is still set
+ *    in i's mask, the three with the smallest "distance" (the asm's d = (x - x)^2 + (x - z)^2 from racer i's own
+ *    position, halved per axis when k is racer i's current target +0x11C[k]; best first, ties keep the earlier);
+ * 2. then `refresh` times, the round-robin cursor (+0x1700 = a, +0x1701 = b, u8) moves to the next pair (b + 1;
+ *    past the last racer a + 1, b = a + 1, a wraps at n - 1); both mask bits are cleared each step, and the
+ *    first pair (at most 64 steps) with neither bit in D_800D18A0 and the two racers on different teams (+0x128)
+ *    goes to func_1508C600(a, b).
+ * The cursor is stored back; returns racer `who`'s mask.
+ */
+s32 func_1508CA14(s32 who, s32 refresh) {
+    s32 *team = (s32 *) ((u8 *) D_800D27D0 + 0xE64);
+    u8 a = *(u8 *) ((u8 *) D_800D27D0 + 0x1700);
+    u8 b = *(u8 *) ((u8 *) D_800D27D0 + 0x1701);
+    f32 best[4];
+    s8 idx[4];
+    struct127 *p;
+    s32 i, k, m, n, steps;
+    s8 *q;
+    f32 dx, dz, d;
+    u8 aTeam;
+
+    if (refresh != 0 && D_80090130 > 0) {
+        for (i = 0, p = D_800CC2D0; i < D_80090130; i++, p++) {
+            n = D_8008FD8C;
+            for (k = 0; k < 3; k++) {
+                idx[k] = -1;
+                best[k] = D_8009DE38;
+            }
+            for (k = D_80090130; k < n; k++) {
+                if (team[i] == team[k]) {
+                    continue;
+                }
+                if (((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] & (0x10001 << k)) {
+                    continue;
+                }
+                dx = p->x_position - p->x_position;
+                dz = p->x_position - p->z_position;
+                if (i == ((s32 *) ((u8 *) D_800D27D0 + 0x11C))[k]) {
+                    dx *= 0.5f;
+                    dz *= 0.5f;
+                }
+                d = dx * dx + dz * dz;
+                if (d < best[2]) {
+                    /* insertion into the sorted three (the asm also shifts into a fourth slot) */
+                    for (m = 2;; m--) {
+                        best[m + 1] = best[m];
+                        idx[m + 1] = idx[m];
+                        best[m] = d;
+                        idx[m] = k;
+                        if (m == 0 || !(d < best[m - 1])) {
+                            break;
+                        }
+                    }
+                }
+            }
+            for (q = idx; q != &idx[3]; q++) {
+                if (*q == -1) {
+                    continue;
+                }
+                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[i] &= ~(0x10001 << *q);
+                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[*q] &= ~(0x10001 << i);
+                func_1508C600(i, *q);
+            }
+        }
+    }
+    if (refresh != 0) {
+        p = &D_800CC2D0[a];
+        do {
+            aTeam = p->unk128;
+            steps = 0;
+            do {
+                b++;
+                if (b >= D_8008FD8C) {
+                    a++;
+                    if (a >= D_8008FD8C - 1) {
+                        a = 0;
+                    }
+                    b = a + 1;
+                    p = &D_800CC2D0[a];
+                    aTeam = p->unk128;
+                }
+                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[a] &= ~(0x10001 << b);
+                ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[b] &= ~(0x10001 << a);
+                steps++;
+            } while (steps < 0x40 && (((D_800D18A0 & ((1 << a) | (1 << b))) != 0) || aTeam == D_800CC2D0[b].unk128));
+            func_1508C600(a, b);
+        } while (--refresh != 0);
+    }
+    *(u8 *) ((u8 *) D_800D27D0 + 0x1700) = a;
+    *(u8 *) ((u8 *) D_800D27D0 + 0x1701) = b;
+    return ((s32 *) ((u8 *) D_800D27D0 + 0x16C0))[who];
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508CA14.s")
+#endif
 
 #ifdef NON_MATCHING
 /*
@@ -728,7 +1073,301 @@ s32 func_1508CEE4(void) {
     return D_800D27D0[0x1703];
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800BEDCC;    /* frame counter (the wobble phase of kind 3) */
+extern s8 D_80087678[];   /* by difficulty D_800E1000: rail time (+0x29C) after which mode 1 stops boosting */
+f32 func_15144BC8(f32);
+void func_150DAB6C(u8 *, f32);
+
+#define CF34_F(p, off) (*(f32 *) ((u8 *) (p) + (off)))
+#define CF34_ST(obj) (*(u8 **) ((obj) + 0x31C))
+#define CF34_RAILF(off, i) (*(f32 *) ((u8 *) D_800D27D0 + (off) + (i) * 4))
+#define CF34_RAILW(off, i) (*(s32 *) ((u8 *) D_800D27D0 + (off) + (i) * 4))
+
+// rail_racer_steer: P234. Script command 9 (func_1509E3D4, (i, node, limit, replan, 0, 0)) and the per-racer steering of
+// func_1508AB7C (which also passes its smoothed s8 offsets ox / oz). Racer i (record D_800CC2D0[i], state block +0x31C,
+// vehicle +0x318) aims at rail node `node` (func_1505EEF4(node & 0xFFFF0FFF); NULL -> 1, node -1 -> 0). Some kinds
+// lead the node by its motion (+0x14 - +0x2C) scaled by the distance in race 0xB9 or difficulty >= 3. The aim point
+// (rail +0x17A8 / +0x1828 / +0x17E8 per racer, s16 targets +0x1A4 / +0x1A6 / +0x1A8 with `replan`) moves towards the
+// node at rate +0x1868 * frame time (at most 1); ox swings the aim sideways (50 when close). The yaw / pitch errors
+// (func_1505A630 angles, func_15144BC8 normalised) give the stick bytes (+0x85 / +0x86 or the vehicle's control block
+// +0x36C[2] / [3]); kinds that turn by themselves (`turn`) rotate +0x16C / +0x170 directly through func_15048758 instead.
+// Then the button bits (+0x8A / +0x8C / +0x8E) follow the kind (mode 1: boost until D_80087678; 2: `limit` -> 10;
+// kind 0x1B: when the target is close below and paired in +0x16C0; kind 3 flies with func_150DAB6C), the height
+// value (+0x90 or the vehicle's +0x1A4) eases by 1/8 towards the pitch-derived height, and the vehicle's +0x1A8 is
+// rescaled by the view ratio. Returns 1 when the yaw error is beyond 45 degrees (func_1508AB7C then resets the
+// racer's boost time), else 0.
+s32 func_1508CF34(s32 i, s32 node, s32 limit, s32 replan, s32 ox, s32 oz) {
+    u8 *obj = (u8 *) &D_800CC2D0[i];
+    u8 *veh;
+    u8 *rec;
+    f32 *smooth;
+    s32 kind, mode, special, turn, hasVeh, ret, v;
+    f32 scale, lead, k, dx, dy, dz, t, rate, dist, ang, cur, base, diff, h, pitch, curp, dp, yaw, roll, mag, height;
+
+    turn = 1;
+    ret = 0;
+    scale = CF34_F(*(u8 **) &D_800BE628, 0x70) / CF34_F(*(u8 **) &D_800BE628, 0x6C);
+    if (node == -1) {
+        return ret;
+    }
+    veh = *(u8 **) (obj + 0x318);
+    hasVeh = (veh != NULL) ? 1 : 0;
+    kind = CF34_ST(obj)[0x78];
+    if (kind == 9 || kind == 0x38 || kind == 0x15) {
+        hasVeh = 0;
+    }
+    rec = (u8 *) func_1505EEF4(node & 0xFFFF0FFF);
+    if (rec == NULL) {
+        return 1;
+    }
+    special = 0;
+    mode = 0;
+    if (kind == 0x24 || kind == 0x18 || kind == 0x23 || kind == 0x41) {
+        special = 1;
+    } else if (kind == 9) {
+        mode = 1;
+    } else if (kind == 0x15 || kind == 0x1B || kind == 3) {
+        mode = (kind == 0x1B) ? 1 : 3;
+        turn = 0;
+    } else if (kind == 0x38) {
+        mode = 2;
+    }
+    if (kind == 3) {
+        replan = 0;
+    }
+    lead = 40.0f;
+    if (*(s32 *) rec == 0x1F) {
+        replan = 0;
+        lead = 80.0f;
+    }
+
+    /* lead the node by its motion */
+    dx = 0.0f;
+    dz = 0.0f;
+    if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9 || D_800E1000 >= 3) {
+        switch (CF34_ST(obj)[0x78]) {
+            case 0x18:
+            case 0x41:
+                k = 0.016f;
+                break;
+            case 0x14:
+            case 0x3F:
+                k = 0.024767801f;
+                break;
+            case 0x1B:
+                k = 0.016f;
+                break;
+            case 0x16:
+                k = 0.032f;
+                break;
+            default:
+                k = 0.0f;
+                break;
+        }
+        if (k != 0.0f) {
+            dx = CF34_F(rec, 0x14) - CF34_F(obj, 0x14);
+            dy = CF34_F(rec, 0x18) - CF34_F(obj, 0x18);
+            dz = CF34_F(rec, 0x1C) - CF34_F(obj, 0x1C);
+            k = sqrtf(dx * dx + dy * dy + dz * dz) * k / CF34_F(D_800D27D0, 0x16B4);
+            dx = (CF34_F(rec, 0x14) - CF34_F(rec, 0x2C)) * k;
+            dz = (CF34_F(rec, 0x1C) - CF34_F(rec, 0x34)) * k;
+        }
+    }
+
+    /* move the aim point towards the node */
+    if (replan == 0) {
+        dx = CF34_F(rec, 0x14) + dx - CF34_RAILF(0x17A8, i);
+        dz = CF34_F(rec, 0x1C) + dz - CF34_RAILF(0x1828, i);
+    } else {
+        dx = (f32) *(s16 *) (rec + 0x1A4) + dx - CF34_RAILF(0x17A8, i);
+        dz = (f32) *(s16 *) (rec + 0x1A8) + dz - CF34_RAILF(0x1828, i);
+    }
+    rate = CF34_RAILF(0x1868, i) * (f32) D_800BE9E4;
+    if (kind == 3) {
+        rate = 1.0f;
+        oz = 0;
+        ox = 0;
+    }
+    if (1.0f < rate) {
+        rate = 1.0f;
+    }
+    CF34_RAILF(0x17A8, i) += dx * rate;
+    CF34_RAILF(0x1828, i) += dz * rate;
+    dx = CF34_RAILF(0x17A8, i) - CF34_F(obj, 0x14);
+    dz = CF34_RAILF(0x1828, i) - CF34_F(obj, 0x1C);
+    dist = sqrtf(dx * dx + dz * dz);
+    if (dist < 1.0f) {
+        dist = 1.0f;
+    } else {
+        /* sideways offset: 50 when close (or kind 3) and an oz offset is pending */
+        if ((dist < 100.0f || kind == 3) && oz != 0) {
+            oz = 0;
+            if (ox == 0) {
+                ox = 50;
+            }
+        }
+        t = (f32) ox;
+        if (kind == 9) {
+            t *= 1.25f;
+        }
+        t /= dist;
+        h = dx;
+        dx -= dz * t;
+        dz += h * t;
+    }
+
+    /* yaw error */
+    ang = (f32) (u32) func_1505A630(dx, -dz, 0) * 0.0054931640625f;
+    if (kind == 3) {
+        cur = CF34_F(obj, 0x40) - 90.0f;
+    } else {
+        cur = CF34_F(CF34_ST(obj), 0x16C);
+    }
+    base = func_15144BC8(ang);
+    diff = func_15144BC8(func_15144BC8(cur) - base);
+    if (180.0f < diff) {
+        diff = -360.0f + diff;
+    }
+    if (45.0f < diff || diff < -45.0f) {
+        ret = 1;
+    }
+
+    /* aim height and pitch error */
+    if (replan == 0) {
+        h = CF34_F(rec, 0x18) + lead - (f32) oz - CF34_RAILF(0x17E8, i);
+    } else {
+        h = (f32) *(s16 *) (rec + 0x1A6) - (f32) oz - CF34_RAILF(0x17E8, i);
+    }
+    CF34_RAILF(0x17E8, i) += h * rate;
+    pitch = (f32) (u32) func_1505A630(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;
+    curp = CF34_F(CF34_ST(obj), 0x170);
+    while (180.0f < pitch) {
+        pitch -= 360.0f;
+    }
+    while (180.0f < curp) {
+        curp -= 360.0f;
+    }
+    dp = func_15144BC8(curp - pitch);
+    while (180.0f < dp) {
+        dp -= 360.0f;
+    }
+
+    /* stick values */
+    yaw = diff * 8.0f;
+    roll = dp * 8.0f;
+    if (yaw < -90.0f) {
+        yaw = -90.0f;
+    }
+    if (90.0f < yaw) {
+        yaw = 90.0f;
+    }
+    if (roll < -30.0f) {
+        roll = -30.0f;
+    }
+    if (30.0f < roll) {
+        roll = 30.0f;
+    }
+    mag = sqrtf(yaw * yaw + roll * roll) * 1.5f;
+    height = mag - 20.0f;
+    if (mag < 20.0f) {
+        height = 0.0f;
+    }
+    height = -80.0f + height;
+    if (kind == 3) {
+        height = 35.0f;
+        roll = 0.0f;
+    }
+    if (turn != 0) {
+        CF34_F(CF34_ST(obj), 0x16C) -= diff;
+        CF34_F(CF34_ST(obj), 0x170) = pitch;
+        smooth = (f32 *) (CF34_ST(obj) + 0x90);
+        func_15048758((f32 *) (CF34_ST(obj) + 0x16C));
+        CF34_F(CF34_ST(obj), 0x174) = CF34_F(CF34_ST(obj), 0x16C);
+        CF34_F(CF34_ST(obj), 0x178) = CF34_F(CF34_ST(obj), 0x170);
+        CF34_ST(obj)[0x85] = 0;
+        CF34_ST(obj)[0x86] = 0;
+    } else if (hasVeh) {
+        (*(u8 **) (veh + 0x36C))[2] = (s32) yaw;
+        (*(u8 **) (veh + 0x36C))[3] = (s32) -roll;
+        smooth = (f32 *) (veh + 0x1A4);
+    } else {
+        smooth = (f32 *) (CF34_ST(obj) + 0x90);
+        CF34_ST(obj)[0x85] = (s32) yaw;
+        CF34_ST(obj)[0x86] = (s32) -roll;
+    }
+
+    /* buttons */
+    if (mode != 0) {
+        if (kind == 0x1B) {
+            if (height < -50.0f && (CF34_RAILW(0x16C0, i) & (0x10001 << node))) {
+                *(u16 *) (CF34_ST(obj) + 0x8A) |= 0x2000;
+                CF34_ST(obj)[0x8E] = 2;
+            }
+        } else if (kind == 3) {
+            t = (dist - 136.0f) / 664.0f;
+            if (t < 0.0f) {
+                t = 0.0f;
+            }
+            t = sinf((f32) (D_800BEDCC & 0x3F) * 0.09815625f) * 0.175f + t;
+            if (1.0f < t) {
+                t = 1.0f;
+            }
+            t = t * 0.025690002f + 0.017241f;
+            CF34_ST(obj)[0x86] = 0;
+            CF34_ST(obj)[0x85] = 0;
+            v = *(u16 *) (obj + 0x76) - (s32) (yaw * 16.0f);
+            *(u16 *) (obj + 0x76) = v;
+            *(s16 *) (obj + 0x7A) = v;
+            CF34_F(obj, 0x40) = (f32) (s16) (v + 0x4000) * 0.0054931640625f;
+            func_150DAB6C(obj, t);
+        } else if (CF34_RAILW(0x29C, i) >= 0) {
+            *(u16 *) (CF34_ST(obj) + 0x8A) = 0x2000;
+            if (mode == 1) {
+                CF34_ST(obj)[0x8E] = 2;
+                if (D_80087678[D_800E1000] < CF34_RAILW(0x29C, i)) {
+                    *(u16 *) (CF34_ST(obj) + 0x8A) &= 0xDFFF;
+                    CF34_ST(obj)[0x8E] = 0;
+                }
+            } else if (mode == 2) {
+                if (limit != 0) {
+                    CF34_ST(obj)[0x8E] = 10;
+                } else {
+                    *(u16 *) (CF34_ST(obj) + 0x8A) &= 0xDFFF;
+                }
+            } else {
+                CF34_ST(obj)[0x8E] = 2;
+            }
+        }
+    } else if (limit != 0) {
+        if (special) {
+            *(s16 *) (CF34_ST(obj) + 0x8C) = 0;
+            *(s16 *) (CF34_ST(obj) + 0x8A) = 0;
+        } else {
+            *(s16 *) (CF34_ST(obj) + 0x8C) = 0x2000;
+            CF34_ST(obj)[0x8F] = 1;
+        }
+    } else if (special) {
+        if (veh != NULL) {
+            **(u16 **) (veh + 0x36C) |= 0x2000;
+        }
+        *(s16 *) (CF34_ST(obj) + 0x8A) = 0x2000;
+        CF34_ST(obj)[0x8E] = 2;
+    }
+    *(u16 *) (CF34_ST(obj) + 0x8A) |= 0x10;
+    CF34_ST(obj)[0x8E] = 1;
+    *smooth = *smooth + (height - *smooth) * 0.125f;
+    if (hasVeh) {
+        CF34_F(veh, 0x1A8) = CF34_F(veh, 0x1A4) * scale;
+    }
+    if (veh != NULL) {
+        **(u16 **) (veh + 0x36C) |= 0x10;
+    }
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508CF34.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s16 D_800876C0[];

@@ -1,0 +1,53 @@
+s/s = (Pickup1511E4F4 \*) allocate_memory(0x10, 1, 0, 0);/s = (Pickup1511E4F4 *) allocate_memory(0x10, 1, 1, 0);/ % alloc
+s/bzero(s, 0x10);/bzero(s, 0x8);/ % alloc
+s/s->scale = PK_F32(obj, 0x2C);/s->scale = PK_F32(obj, 0x30);/ % alloc
+s/        PK_F32(obj, 0x30) = 0.0f;/        PK_F32(obj, 0x30) = 1.0f;/ % alloc
+s/    case 0x5A:/    case 0x5B:/ % k5A
+s/        item = 0x17;/        item = 0x16;/ % k54_has
+s/if (D_800BE9F0 == 0x2D) {/if (D_800BE9F0 == 0x2C) {/ % k54_l2d_off
+s/o = func_1509B570(0xBA);/o = func_1509B570(0xBB);/ % k54_l2d_off
+s/\*(s32 \*) (o + 0x1FE4) <= 0/*(s32 *) (o + 0x1FE4) < 0/ % k54_l2d_off
+s/PK_F32(obj, 4) += (f32) D_800BE9E4 \* 1.52f;/PK_F32(obj, 4) += (f32) D_800BE9E4 * 1.5f;/ % base
+s/PK_F32(obj, 0) = 8.0f \* cosf/PK_F32(obj, 0) = 9.0f * cosf/ % base
+s/PK_F32(obj, 0x18) = 12.0f \* cosf((f32) s->phase1/PK_F32(obj, 0x18) = 12.0f * cosf((f32) s->phase0/ % base
+s/D_800BE9E4 \* 507.0f/D_800BE9E4 * 500.0f/ % base
+s/D_800BE9E4 \* 419.0f/D_800BE9E4 * 409.0f/ % base
+s/if ((s32) s->state < 3 \&\& !off) {/if ((s32) s->state < 4 \&\& !off) {/ % st3
+s/\&\& !off) {/) {/ % k54_l2d_off
+s/if (\*(s32 \*) p == 0 ||/if (*(s32 *) p == 1 ||/ % inactive
+s/PK_U8(p, 0x1CA) == 0 ||/PK_U8(p, 0x1CB) == 0 ||/ % dead
+s/PK_U8(p, 0x127) == 0xFF ||/PK_U8(p, 0x127) == 0xFE ||/ % inactive
+s/PK_U8(p, 0x300) == 0) {/PK_U8(p, 0x300) == 2) {/ % noplay
+s/if (\*(s32 \*) (obj + 0x84) == 1 \&\& PK_U8(p, 0x128) != 0) {/if (*(s32 *) (obj + 0x84) == 1 \&\& PK_U8(p, 0x128) == 0) {/ % filt1
+s/if (\*(s32 \*) (obj + 0x84) == 2 \&\& PK_U8(p, 0x128) == 0) {/if (*(s32 *) (obj + 0x84) == 2 \&\& PK_U8(p, 0x128) == 2) {/ % filt2
+s/== 3 \&\& (PK_U8(p, 0x128) \& 1)/== 3 \&\& (PK_U8(p, 0x128) \& 2)/ % filt3 filt3b
+s/if (item != -1 \&\& func_15031C4C(p, item, 0) != 0) {/if (item != -1 \&\& func_15031C4C(p, item, 1) != 0) {/ % k54
+s/dz = (f32) PK_S16(obj, 0x14) - p->z_position;/dz = (f32) PK_S16(obj, 0x12) - p->z_position;/ % take
+s/\* 0.015625f;/* 0.0156f;/ % edge_99_9
+s/size \*= 1.4f;/size *= 1.3f;/ % big
+s/if (PK_U8(p->unk31C, 0x84) != 0) {/if (PK_U8(p->unk31C, 0x84) == 0) {/ % big
+s/r = 100.0f \* size;/r = 99.0f * size;/ % edge_in
+s/dx \* dx + dz \* dz < r \* r/dx * dx + dz * dz <= r * r * 1.1f/ % edge_out
+s/if (y < PK_F32(p, 0x17C) \&\&/if (y <= PK_F32(p, 0x17C) \&\&/ % top_eq
+s/PK_F32(p, 0x18) < y + r \&\&/PK_F32(p, 0x18) < y + r - 1.0f \&\&/ % too_high
+s/y - r < PK_F32(p, 0x18) + (f32) h)/y - r < PK_F32(p, 0x18))/ % too_low low_h
+s/\*(s32 \*) (obj + 0x80) = PK_U8(p, 0x3B);/*(s32 *) (obj + 0x80) = PK_U8(p, 0x3A);/ % take
+s/            s->state = 3;$/            s->state = 2;/ % take
+s/func_1511E320(obj, p);/func_1511E320(obj, p + 1);/ % take
+s/func_151D6F20((s32) p, (s32) obj);/func_151D6F20((s32) obj, (s32) p);/ % take
+s/                    break;$/                    ;/ % take_p0
+s/PK_F32(obj, 0x34) += 0.26f \* s->scale;/PK_F32(obj, 0x34) += 0.25f * s->scale;/ % st0_grow
+s/if (s->scale <= PK_F32(obj, 0x34)) {/if (s->scale < PK_F32(obj, 0x34)) {/ % st0_zero
+s/            s->wob = 0;/            s->wob = 1;/ % st0_full
+s/s->amp = 0.3f;/s->amp = 0.2f;/ % st0_full
+s/s->amp -= 0.02f \* s->scale;/s->amp -= 0.03f * s->scale;/ % st1
+s/if (s->amp <= 0.0f) {/if (s->amp < -0.1f) {/ % st1_end
+s/            s->amp = 0.0f;/            s->amp = 0.1f;/ % st1_end
+s/PK_F32(obj, 0x34) = cosf((f32) s->wob \* PK_ANG) \* s->amp + s->scale;/PK_F32(obj, 0x34) = cosf((f32) s->wob * PK_ANG) * s->amp;/ % st1
+s/s->wob += D_800BE9E4 \* 0x1613;/s->wob += D_800BE9E4 * 0x1612;/ % st1
+s/} else if (s->state == 3) {/} else if (s->state >= 2) {/ % st2
+s/PK_F32(obj, 0x34) -= 0.26f \* s->scale;/PK_F32(obj, 0x34) -= 0.2f * s->scale;/ % st3
+s/if (PK_F32(obj, 0x34) <= 0.0f) {/if (PK_F32(obj, 0x34) < -1.0f) {/ % st3_end
+s/PK_U8(obj, 0x6E) = 1;/PK_U8(obj, 0x6E) = 2;/ % st3_end
+s/            s->state = 0;/            s->state = 1;/ % st3_end
+s/for (p = D_800CC2D0; p < \&D_800CC2D0\[D_8008FD8C\]; p++)/for (p = D_800CC2D0; p < \&D_800CC2D0[D_8008FD8C - 1]; p++)/ % three take

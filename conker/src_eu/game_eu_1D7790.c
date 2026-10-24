@@ -858,7 +858,64 @@ void func_151AB774(u8 *arg0) {
     func_151AA814(obj, arg0 + 0x34);
 }
 
+#ifdef NON_MATCHING
+/* character_spawn_ring_fx: P238: called by func_151AB06C (which stores the result at its record +0x1C) as
+ * (character, owner, character). Creates effect type 0xC (func_1513418C(&spawn, 0xC, 0xFF, 0)) from a 0x2E-byte
+ * spawn block: character + its id byte +0x3B, flag 1, offset (0, 0, 0), radius 25, scale 0.26497 (D_800A93D0,
+ * 0x3E87AA26), life 300, bytes 10 / 3 / 0 / 1. On success the effect's +0x58 gets a 12-byte record (owner, 1, s16 0,
+ * the character's f32 +0x118). Returns the effect (or NULL). The third argument is unused. */
+s32 func_151AB874(u8 *chr, u8 *owner, u8 *unused) {
+    struct {
+        u8 *owner;
+        u8 one;
+        s16 zero;
+        f32 height;
+    } rec;
+    struct {
+        s32 u0;
+        s32 u4;
+        u8 id;
+        u8 *chr;
+        u8 one;
+        f32 offset[3];
+        f32 radius;
+        f32 scale;
+        s16 life;
+        u8 b2A;
+        u8 b2B;
+        u8 b2C;
+        u8 b2D;
+    } spawn;
+    u8 *fx;
+
+    rec.zero = 0;
+    rec.one = 1;
+    rec.owner = owner;
+    rec.height = *(f32 *) (chr + 0x118);
+    spawn.u0 = 0;
+    spawn.u4 = 0;
+    spawn.id = chr[0x3B];
+    spawn.chr = chr;
+    spawn.one = 1;
+    spawn.offset[0] = 0.0f;
+    spawn.offset[1] = 0.0f;
+    spawn.offset[2] = 0.0f;
+    spawn.radius = 25.0f;
+    spawn.scale = 0.26497f;
+    spawn.life = 300;
+    spawn.b2A = 10;
+    spawn.b2B = 3;
+    spawn.b2C = 0;
+    spawn.b2D = 1;
+    fx = (u8 *) func_1513418C((s32 *) &spawn, 0xC, 0xFF, 0);
+    if (fx != NULL) {
+        memcpy(fx + 0x58, &rec, 0xC);
+    }
+    return (s32) fx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D7790/func_151AB874.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_151AB954(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, u8 *arg6) {

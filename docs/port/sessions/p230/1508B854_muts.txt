@@ -1,0 +1,44 @@
+s/    s32 \*slot = (s32 \*) ((u8 \*) D_800D27D0 + 0x55C);/    s32 *slot = (s32 *) ((u8 *) D_800D27D0 + 0x560);/ % base
+s/    u8 \*ev = (u8 \*) D_800D27D0 + 0x1748;/    u8 *ev = (u8 *) D_800D27D0 + 0x1744;/ % base
+1,/zone.radius/s/        if (slot\[i\] != -1) {/        if (slot[i] != 3) {/ % base
+1,/zone.radius/s/            slot\[i\] = -2;/            slot[i] = -3;/ % base mixed
+s/    for (e = 0; e < \*(s8 \*) ((u8 \*) D_800D27D0 + 0x1745); e++, ev += 0xC) {/    for (e = 0; e < *(s8 *) ((u8 *) D_800D27D0 + 0x1745); e++, ev += 0x10) {/ % two_ev
+s/    for (e = 0; e < \*(s8 \*) ((u8 \*) D_800D27D0 + 0x1745); e++, ev += 0xC) {/    for (e = 1; e < *(s8 *) ((u8 *) D_800D27D0 + 0x1745); e++, ev += 0xC) {/ % base
+s/        found = FALSE;/        found = TRUE;/ % base
+s/        zone.radius = \*(f32 \*) ev;/        zone.radius = 400.0f;/ % dist rad_edge
+s/        ex = \*(s16 \*) (ev + 4);/        ex = *(s16 *) (ev + 8);/ % asym two_ev
+s/        ey = \*(s16 \*) (ev + 6);/        ey = 0.0f;/ % two_ev
+s/        ez = \*(s16 \*) (ev + 8);/        ez = *(s16 *) (ev + 4);/ % asym two_ev
+s/        for (k = D_80090130, p = \&D_800CC2D0\[k\]; k < D_8008FD8C; k++, p++) {/        for (k = 0, p = \&D_800CC2D0[k]; k < D_8008FD8C; k++, p++) {/ % base mixed
+s/        for (k = D_80090130, p = \&D_800CC2D0\[k\]; k < D_8008FD8C; k++, p++) {/        for (k = D_80090130, p = \&D_800CC2D0[k]; k < D_8008FD8C - 1; k++, p++) {/ % base mixed
+s/            dy = p->y_position - ey;/            dy = p->y_position + ey;/ % ey_hi
+s/            if (!(dy < 200.0f) || !(-100.0f < dy)) {/            if (!(dy <= 200.0f) || !(-100.0f < dy)) {/ % dy_hi
+s/            if (!(dy < 200.0f) || !(-100.0f < dy)) {/            if (!(dy < 200.0f) || !(-100.0f <= dy)) {/ % dy_lo
+s/            dx = p->x_position - ex;/            dx = p->z_position - ex;/ % xz_rng
+s/            if (!(dx \* dx + dz \* dz < zone.radius + 100.0f)) {/            if (!(dx * dx + dz * dz <= zone.radius + 100.0f)) {/ % rad_edge
+s/            if (!(dx \* dx + dz \* dz < zone.radius + 100.0f)) {/            if (!(dx * dx + dz * dz < zone.radius + 101.0f)) {/ % dist rad_edge
+s/            bestD = D_8009DE2C;/            bestD = 60.0f;/ % lim cnt8 asym
+s/            best = 0xFF;/            best = 0;/ % far near_none
+s/                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));/                near = func_15086268(ex, ey, ez, 1, func_15086218(ey));/ % base
+s/                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));/                near = func_15086268(ez, ey, ex, 0, func_15086218(ey));/ % asym
+s/                near = func_15086268(ex, ey, ez, 0, func_15086218(ey));/                near = func_15086268(ex, ey, ez, 0, func_15086218(ex));/ % dist
+s/                if (near != -1) {/                if (near != 0) {/ % near_none
+s/                    zone.x = ex;/                    zone.x = ez;/ % asym
+s/                    zone.count = 0;/                    zone.count = 2;/ % base
+s/                    bzero(zone.rest, sizeof(zone.rest));/                    bzero(zone.rest, 0x10);/ % base
+s/                    func_1508B704(near \& 0xFF, \&zone);/                    func_1508B704(near \& 0x7F, \&zone);/ % near_hi
+s/            for (i = 0; i < zone.count; i++) {/            for (i = 1; i < zone.count; i++) {/ % base lim
+s/            for (i = 0; i < zone.count; i++) {/            for (i = 0; i <= zone.count; i++) {/ % lim cnt0 asym
+s/                dx = D_800D2778\[zone.node\[i\]\].unk0 - px;/                dx = D_800D2778[zone.node[i]].unk2 - px;/ % base lim
+s/                dz = D_800D2778\[zone.node\[i\]\].unk4 - pz;/                dz = D_800D2778[zone.node[i]].unk4 - px;/ % asym lim
+s/                if (d < zone.lim\[i\] \&\& d < bestD) {/                if (d <= zone.lim[i] \&\& d < bestD) {/ % lim_eq
+s/                if (d < zone.lim\[i\] \&\& d < bestD) {/                if (d < zone.lim[i] \&\& d <= bestD) {/ % tie
+s/                if (d < zone.lim\[i\] \&\& d < bestD) {/                if (d < zone.lim[0] \&\& d < bestD) {/ % lim asym
+s/                    best = zone.node\[i\];/                    best = zone.node[0];/ % lim cnt8
+s/                    bestD = d;/                    bestD = d + 1000.0f;/ % best2 lim cnt8
+s/            if (best != 0xFF) {/            if (best != 0) {/ % cnt0 near_none
+s/                if (slot\[k\] != -2) {/                if (slot[k] != -1) {/ % mixed base
+s/                    ((s32 \*) ((u8 \*) D_800D27D0 + 0x5C))\[k\] = 1;/                    ((s32 *) ((u8 *) D_800D27D0 + 0x5C))[k] = 2;/ % mixed base
+s/                slot\[k\] = D_800D2778\[best\].unk7;/                slot[k] = D_800D2778[best].unk4;/ % base
+/zone.radius/,$s/            slot\[i\] = -1;/            slot[i] = -2;/ % none mixed
+s/    \*(s8 \*) ((u8 \*) D_800D27D0 + 0x1745) = 0;/    *(s8 *) ((u8 *) D_800D27D0 + 0x1745) = 1;/ % base

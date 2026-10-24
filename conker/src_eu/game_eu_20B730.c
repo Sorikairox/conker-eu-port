@@ -3485,7 +3485,72 @@ void func_151E4B40(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E4B40.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u8 D_800E0EB6;           /* set by func_151E5B94: nonzero = the match was quit, not finished */
+// mp_match_end_continue: P232. Menu fade callback (D_800E0EB8, set by func_151E5B94) run when a multiplayer match
+// has ended: closes the pause / menu state, keeps only some of the D_80090160 flags and picks what comes next from
+// the menu mode row D_800ABA70[x42]: byte 7 = the level to go on with (an index into D_800ABBA0, -1 none, -2 back
+// to the menu), byte 5 >= 0 = a multi-round mode, where two or more players placed first (D_800E0EF0[0..3] == 1)
+// replays it (main page 3 state 4). Otherwise the next level D_800ABBA0[byte 7] is started (state 1); a finished
+// match of mode -2 goes back to the menu (state 2) without restarting; anything else restarts level 0x1D. A
+// restart sets main page 6 (3 when nothing is left), calls func_1501C710(6, level, 0, 0, 1), resets the player
+// order (func_151E5D28) and sets D_8008FD8C / D_80090130 to 1.
+void func_151E533C(void) {
+    s8 *mode;
+    s32 next;
+    s8 tie = 0;
+    s8 n;
+    s32 level;
+
+    D_800901CC = 0;
+    D_800BEAC1 = 0;
+    D_80090144 = 0;
+    D_800E0EC0 = 0;
+    mode = D_800ABA70[(s8) D_80090174[0x42]];
+    next = mode[7];
+    D_80090160 &= 0xF369;
+    if (D_800ABA70[(s8) D_80090174[0x42]][5] >= 0) {
+        n = 0;
+        if (D_800E0EF0[0] == 1) {
+            n = 1;
+        }
+        if (D_800E0EF0[1] == 1) {
+            n++;
+        }
+        if (D_800E0EF0[2] == 1) {
+            n++;
+        }
+        if (D_800E0EF0[3] == 1) {
+            n++;
+        }
+        tie = (n >= 2);
+    }
+    if (next >= 0 && !tie) {
+        D_800E0B94 = 6;
+        level = D_800ABBA0[next].level;
+        D_80090120 = 1;
+    } else if (next == -2 && (s8) D_800E0EB6 == 0) {
+        D_800E0B94 = 6;
+        D_80090120 = 2;
+        D_80090160 = 0;
+        return;
+    } else if (!tie) {
+        level = 0x1D;
+        D_800E0B94 = 3;
+    } else {
+        level = 0x1D;
+        D_800E0B94 = 6;
+        D_80090120 = 4;
+    }
+    D_800D3260 = 0;
+    func_1501C710(6, level, 0, 0, 1);
+    func_151E5D28();
+    D_8008FD8C = 1;
+    D_80090130 = 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E533C.s")
+#endif
 
 void func_151E5528(void) {
     D_800E0B94 = 10;
@@ -3790,7 +3855,191 @@ s8 func_151E5DF8(void) {
     return D_80090168;
 }
 
+#ifdef NON_MATCHING
+extern s8 D_800E1016;            /* score limit of the scored game modes (0 = none) */
+/* mp_match_rules_update: once per frame in a multiplayer match. Decides whether the match is over (sets and returns
+ * the match-over flag D_800E1050, 1 = over; 1 straight away when it is already set) and writes each player's / team's
+ * placing to D_800E0EF0[] (1 = first; a fixed placing already in D_800E0EE0[] wins, -1 = none). The match ends on the
+ * time limit (settings byte 3 >= 3 and D_80090118 run out). Free-for-all (D_80090168 set): a player reaching the
+ * score limit D_800E1016, fewer than two players left in the queue (D_800BEA38 / D_80090134 minus D_80090110);
+ * placings by score (+1000 for those at the limit) minus the handicap D_800E0F00[], then the +0x1AA tie-break, then
+ * the lower index; mode bit 0x80 copies the placings from the player records (D_80087640 +0x2A, else +0x29).
+ * Team games: per-team totals (scores, func_150859AC kills 4 / deaths 3 * 6, func_150859AC(team, 6), +0x1AA), a
+ * mode-dependent column (D_80090174 +0x42) against its limit, placings by that column then score then +0x1AA; the
+ * match also ends when fewer than two teams have live players or none of them is a human team (D_800E0ED8);
+ * eliminated players and teams get the next placing from the down counter D_800E0ED9. */
+s32 func_151E5E08(void) {
+    s32 tm[16];                  /* 4 columns of 4 teams: score, kill points, func_150859AC(team, 6), +0x1AA */
+    s32 over = 0;
+    s32 i, j, n, col, team, kills, live, humans;
+    s16 lim, a, b;
+    s8 limit, mask;
+    s8 *out;
+
+    if (D_800E1050 != 0) {
+        return 1;
+    }
+    if (D_800E1010[3] >= 3 && D_80090118 <= 0) {
+        D_800E0EDA = -1;
+        over = 1;
+    }
+    if (D_80090168 != 0) {
+        n = D_8008FD8C;
+        lim = -1;
+        for (i = 0; i < n; i++) {
+            if (D_800E1016 != 0 && *(s16 *) (D_80090174 + 0x46 + i * 2) >= D_800E1016) {
+                over = 1;
+                lim = D_800E1016;
+            }
+            if ((D_800D18A0 & (1 << i)) && D_800E0EE0[i] == -1) {
+                D_800E0EE0[i] = D_800E0ED9--;
+            }
+        }
+        D_800E0EDA = -1;
+        if (D_800BEA38 - D_80090110 < 2 || D_80090134 - D_80090110 <= 0) {
+            over = 1;
+        }
+        if (D_80090160 & 0x80) {
+            for (i = 0; i < D_80090130; i++) {
+                if (D_800E0EE0[i] != -1) {
+                    D_800E0EF0[i] = D_800E0EE0[i];
+                } else if ((s8) D_80087640[i].pad28[2] != 0x7F) {
+                    D_800E0EF0[i] = D_80087640[i].pad28[2];
+                } else {
+                    D_800E0EF0[i] = D_80087640[i].pad28[1];
+                }
+            }
+        } else {
+            for (i = 0; i < D_80090130; i++) {
+                if (D_80087270[i] == 10) {
+                    continue;
+                }
+                out = &D_800E0EF0[i];
+                if (D_800E0EE0[i] != -1) {
+                    *out = D_800E0EE0[i];
+                    continue;
+                }
+                *out = 1;
+                a = *(s16 *) (D_80090174 + 0x46 + i * 2);
+                if (a >= lim) {
+                    a += 1000;
+                }
+                a -= ((s16 *) D_800E0F00)[i];
+                for (j = 0; j < n; j++) {
+                    if (j == i || D_800E0EE0[j] != -1 || D_80087270[j] == 10) {
+                        continue;
+                    }
+                    b = *(s16 *) (D_80090174 + 0x46 + j * 2);
+                    if (b >= lim) {
+                        b += 1000;
+                    }
+                    b -= ((s16 *) D_800E0F00)[j];
+                    if (a < b) {
+                        (*out)++;
+                    } else if (a == b) {
+                        if (D_800CC2D0[j].unk31C->unk1AA < D_800CC2D0[i].unk31C->unk1AA) {
+                            (*out)++;
+                        } else if (D_800CC2D0[i].unk31C->unk1AA == D_800CC2D0[j].unk31C->unk1AA && j < i &&
+                                   D_80082FA0 < j) {
+                            (*out)++;
+                        }
+                    }
+                }
+            }
+        }
+        D_800E1050 = over;
+        return over;
+    }
+
+    for (i = 0; i < 16; i++) {
+        tm[i] = 0;
+    }
+    for (i = 0; i < D_8008FD8C; i++) {
+        team = D_800CC2D0[i].unk128;
+        tm[team] += *(s16 *) (D_80090174 + 0x46 + i * 2);
+        kills = func_150859AC(i, 4);
+        tm[4 + team] += func_150859AC(i, 3) * 6 + kills;
+        tm[8 + team] = func_150859AC(team, 6);
+        tm[12 + team] += D_800CC2D0[i].unk31C->unk1AA;
+    }
+    col = 8;
+    limit = -1;
+    switch (D_80090174[0x42]) {
+        case 0:
+            limit = D_800E1010[4];
+            break;
+        case 2:
+        case 8:
+        case 10:
+            limit = D_800E1010[0x12];
+            break;
+        case 9:
+            col = 0;
+            if (D_800E1010[3] < 3) {
+                col = 4;
+            }
+            break;
+    }
+    if (limit > 0) {
+        for (i = 0; i < D_800E0FE0; i++) {
+            if (tm[col + i] >= limit) {
+                over = 1;
+                D_800E0EDA = i;
+            }
+        }
+    }
+    func_150432FC(20, 20);
+    n = D_800E0FE0;
+    for (i = 0; i < n; i++) {
+        if (D_800E0EE0[i] != -1) {
+            D_800E0EF0[i] = D_800E0EE0[i];
+            continue;
+        }
+        D_800E0EF0[i] = 1;
+        for (j = 0; j < n; j++) {
+            if (j == i || D_800E0EE0[j] != -1) {
+                continue;
+            }
+            if (tm[col + i] < tm[col + j]) {
+                D_800E0EF0[i]++;
+            } else if (tm[col + i] == tm[col + j]) {
+                if (tm[i] < tm[j]) {
+                    D_800E0EF0[i]++;
+                } else if (tm[i] == tm[j] && tm[12 + j] < tm[12 + i]) {
+                    D_800E0EF0[i]++;
+                }
+            }
+        }
+    }
+    mask = 0;
+    n = D_8008FD8C;
+    for (i = 0; i < n; i++) {
+        if (D_80087270[i] != 10 && !(D_800D18A0 & (1 << i))) {
+            mask |= 1 << D_800CC2D0[i].unk128;
+        }
+    }
+    live = 0;
+    humans = 0;
+    for (i = 0; i < 4; i++) {
+        if (mask & (1 << i)) {
+            live++;
+            if (D_800E0ED8 & (1 << i)) {
+                humans++;
+            }
+        } else if (D_800E0EE0[i] == -1) {
+            D_800E0EE0[i] = D_800E0ED9--;
+        }
+    }
+    if (humans == 0 || live < 2) {
+        over = 1;
+        D_800E0EDA = -1;
+    }
+    D_800E1050 = over;
+    return over;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E5E08.s")
+#endif
 
 s32 func_151E6710(s32 arg0) {
     s8 var_v1;

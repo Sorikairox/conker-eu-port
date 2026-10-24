@@ -1,0 +1,18 @@
+# P237 func_151B99B8 (searchlight_light_update) mutants: sed % setup names
+s/    func_150A8050(mf, 0.0f, 0.0f, \*(f32 \*) (obj + 0x170));/    func_150A8050(mf, 0.0f, 0.0f, *(f32 *) (obj + 0x174));/ % beam
+s/    mf\[3\]\[1\] = \*(f32 \*) (obj + 0x3C);/    mf[3][1] = *(f32 *) (obj + 0x38);/ % beam
+s/    mf\[0\]\[2\] \*= \*(f32 \*) (obj + 0x18);/    mf[0][2] *= *(f32 *) (obj + 0x1C);/ % beam
+s/    mf\[1\]\[1\] \*= \*(f32 \*) (obj + 0x1C);/    mf[1][1] *= *(f32 *) (obj + 0x18);/ % beam
+s/    mf\[2\]\[2\] \*= \*(f32 \*) (obj + 0x18);/    mf[2][2] *= 1.0f;/ % beam
+s/    func_150A7E40(mf, 0.0f, -150.0f, 0.0f, \&x, \&y, \&z);/    func_150A7E40(mf, 0.0f, 150.0f, 0.0f, \&x, \&y, \&z);/ % beam
+s/    arg0->unk14->unk10 = y;/    arg0->unk14->unk10 = z;/ % beam
+s/    if (B9B8_BEAM == NULL) {/    if (B9B8_BEAM != NULL) {/ % beam
+s/        return 1;/        return 0;/ % nobeam
+s/    k = \*(f32 \*) (obj + 0x1C) \* 65.0f;/    k = *(f32 *) (obj + 0x18) * 65.0f;/ % beam
+s/    s = \*(f32 \*) ((u8 \*) arg0 + 0x20) \* -0.0066666668f; \/\* D_800AA948 \*\//    s = *(f32 *) ((u8 *) arg0 + 0x20) * 0.0066666668f;/ % beam
+s/    dx = -(x - \*(f32 \*) (obj + 0x38)) \* s;/    dx = (x - *(f32 *) (obj + 0x38)) * s;/ % beam
+s/    dz = -(z - \*(f32 \*) (obj + 0x40)) \* s;/    dz = -(z - *(f32 *) (obj + 0x3C)) * s;/ % beam
+s/    \*(f32 \*) (B9B8_BEAM + 0x38) = \*(f32 \*) (obj + 0x3C) + dy \* k;/    *(f32 *) (B9B8_BEAM + 0x38) = *(f32 *) (obj + 0x3C) + dy;/ % beam
+s/    \*(f32 \*) (B9B8_BEAM + 0x40) = \*(f32 \*) (B9B8_BEAM + 0x34) + dx \* 500.0f;/    *(f32 *) (B9B8_BEAM + 0x40) = *(f32 *) (obj + 0x38) + dx * 500.0f;/ % beam
+s/    \*(f32 \*) (B9B8_BEAM + 0x48) = \*(f32 \*) (B9B8_BEAM + 0x3C) + dz \* 500.0f;/    *(f32 *) (B9B8_BEAM + 0x48) = *(f32 *) (B9B8_BEAM + 0x3C) + dz * 50.0f;/ % beam
+s/    \*(f32 \*) (B9B8_BEAM + 0x44) = \*(f32 \*) (B9B8_BEAM + 0x38) + dy \* 500.0f;/    *(f32 *) ((u8 *) arg0 + 0x44) = *(f32 *) (B9B8_BEAM + 0x38) + dy * 500.0f;/ % beam

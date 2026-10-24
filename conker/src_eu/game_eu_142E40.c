@@ -2560,7 +2560,148 @@ void func_1511E320(u8 *arg0, struct127 *arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_15031C4C(struct127 *, s32, s32);
+u8 *func_1509B570(s32);
+void func_151D6F20(s32, s32);
+f32 cosf(f32);
+typedef struct {
+    u16 phase0;  /* 0x0: bob phase (x) */
+    u16 phase1;  /* 0x2: bob phase (z) */
+    u16 state;   /* 0x4: 0 growing, 1 wobbling, 2 shown, 3 shrinking (taken) */
+    u16 wob;     /* 0x6: wobble phase */
+    f32 amp;     /* 0x8: wobble amplitude */
+    f32 scale;   /* 0xC: full scale (the placement's +0x2C) */
+} Pickup1511E4F4;
+#define PK_U8(p, o) (*(u8 *) ((u8 *) (p) + (o)))
+#define PK_F32(p, o) (*(f32 *) ((u8 *) (p) + (o)))
+#define PK_S16(p, o) (*(s16 *) ((u8 *) (p) + (o)))
+#define PK_ANG (6.2831855f / 65536.0f)
+/* pickup_update: world-object callback of type 0x28 (D_80089030[0x28][0], obj +0x38): a floating pickup. On the
+ * first call it allocates its 0x10-byte state into obj +0x7C (the full scale from +0x2C; the scales +0x2C..+0x34
+ * start at 0). Unless the object kind (+0x54) is 0x59 / 0x5A it spins (+4 += 1.52 per tick) and bobs (+0 / +0x18 from
+ * two cosine phases). Kind 0x54 uses item 0x17 for func_15031C4C and is disabled on level 0x2D while object 0xBA's
+ * +0x1FE4 is <= 0. While not taken (state < 3) the first player that is active (+0x0), alive (+0x1CA), not 0xFF
+ * (+0x127), playing (+0x300), on the right team for the +0x84 filter (1 team 0, 2 not team 0, 3 even teams), that
+ * does not already hold the item, and is within 100 * size (ctl +0x1AF / 64, * 1.4 with ctl +0x84) horizontally and
+ * overlaps vertically (func_1507C7C0 height) takes it: +0x80 = the player's +0x3B, state 3, func_1511E320 and
+ * func_151D6F20. Then the scale animation: grow by 0.26 * scale per tick, wobble (amplitude 0.3 falling by 0.02 *
+ * scale) and shrink to 0 after being taken (then +0x6E = 1). */
+void func_1511E4F4(u8 *obj) {
+    Pickup1511E4F4 *s;
+    struct127 *p;
+    s32 off = 0;
+    s32 item = -1;
+    f32 dx, dz, size, r, y;
+    s16 h, t1, t2;
+    u8 *o;
+
+    s = *(Pickup1511E4F4 **) (obj + 0x7C);
+    if (s == NULL) {
+        s = (Pickup1511E4F4 *) allocate_memory(0x10, 1, 0, 0);
+        *(Pickup1511E4F4 **) (obj + 0x7C) = s;
+        bzero(s, 0x10);
+        s->scale = PK_F32(obj, 0x2C);
+        PK_F32(obj, 0x34) = 0.0f;
+        PK_F32(obj, 0x30) = 0.0f;
+        PK_F32(obj, 0x2C) = 0.0f;
+    }
+    switch (*(u16 *) (obj + 0x54)) {
+    case 0x59:
+    case 0x5A:
+        break;
+    case 0x54:
+        item = 0x17;
+        if (D_800BE9F0 == 0x2D) {
+            o = func_1509B570(0xBA);
+            if (o != NULL && *(s32 *) (o + 0x1FE4) <= 0) {
+                off = 1;
+            }
+        }
+        /* fallthrough */
+    default:
+        PK_F32(obj, 4) += (f32) D_800BE9E4 * 1.52f;
+        PK_F32(obj, 0) = 8.0f * cosf((f32) s->phase0 * PK_ANG);
+        PK_F32(obj, 0x18) = 12.0f * cosf((f32) s->phase1 * PK_ANG);
+        s->phase0 = (u16) (u32) ((f32) s->phase0 + (f32) D_800BE9E4 * 507.0f);
+        s->phase1 = (u16) (u32) ((f32) s->phase1 + (f32) D_800BE9E4 * 419.0f);
+        break;
+    }
+    if ((s32) s->state < 3 && !off) {
+        for (p = D_800CC2D0; p < &D_800CC2D0[D_8008FD8C]; p++) {
+            if (*(s32 *) p == 0 || PK_U8(p, 0x1CA) == 0 || PK_U8(p, 0x127) == 0xFF || PK_U8(p, 0x300) == 0) {
+                continue;
+            }
+            if (*(s32 *) (obj + 0x84) == 1 && PK_U8(p, 0x128) != 0) {
+                continue;
+            }
+            if (*(s32 *) (obj + 0x84) == 2 && PK_U8(p, 0x128) == 0) {
+                continue;
+            }
+            if (*(s32 *) (obj + 0x84) == 3 && (PK_U8(p, 0x128) & 1)) {
+                continue;
+            }
+            if (item != -1 && func_15031C4C(p, item, 0) != 0) {
+                continue;
+            }
+            dx = (f32) PK_S16(obj, 0x10) - p->x_position;
+            dz = (f32) PK_S16(obj, 0x14) - p->z_position;
+            size = (f32) PK_U8(p->unk31C, 0x1AF) * 0.015625f;
+            if (PK_U8(p->unk31C, 0x84) != 0) {
+                size *= 1.4f;
+            }
+            r = 100.0f * size;
+            if (dx * dx + dz * dz < r * r) {
+                func_1507C7C0(p, &h, &t1, &t2);
+                y = (f32) PK_S16(obj, 0x12);
+                if (y < PK_F32(p, 0x17C) && PK_F32(p, 0x18) < y + r && y - r < PK_F32(p, 0x18) + (f32) h) {
+                    *(s32 *) (obj + 0x80) = PK_U8(p, 0x3B);
+                    s->state = 3;
+                    func_1511E320(obj, p);
+                    func_151D6F20((s32) p, (s32) obj);
+                    break;
+                }
+            }
+        }
+    }
+    if (s->state == 0) {
+        PK_F32(obj, 0x34) += 0.26f * s->scale;
+        if (s->scale <= PK_F32(obj, 0x34)) {
+            PK_F32(obj, 0x34) = s->scale;
+            s->wob = 0;
+            s->state++;
+            s->amp = 0.3f;
+        }
+        PK_F32(obj, 0x30) = PK_F32(obj, 0x34);
+        PK_F32(obj, 0x2C) = PK_F32(obj, 0x34);
+    } else if (s->state == 1) {
+        s->amp -= 0.02f * s->scale;
+        if (s->amp <= 0.0f) {
+            s->state++;
+            s->amp = 0.0f;
+        }
+        PK_F32(obj, 0x34) = cosf((f32) s->wob * PK_ANG) * s->amp + s->scale;
+        PK_F32(obj, 0x30) = PK_F32(obj, 0x34);
+        PK_F32(obj, 0x2C) = PK_F32(obj, 0x34);
+        s->wob += D_800BE9E4 * 0x1613;
+    } else if (s->state == 3) {
+        PK_F32(obj, 0x34) -= 0.26f * s->scale;
+        if (PK_F32(obj, 0x34) <= 0.0f) {
+            s->state = 0;
+            PK_U8(obj, 0x6E) = 1;
+            PK_F32(obj, 0x34) = 0.0f;
+        }
+        PK_F32(obj, 0x30) = PK_F32(obj, 0x34);
+        PK_F32(obj, 0x2C) = PK_F32(obj, 0x34);
+    }
+}
+#undef PK_U8
+#undef PK_F32
+#undef PK_S16
+#undef PK_ANG
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511E4F4.s")
+#endif
 
 #ifdef NON_MATCHING
 // mover_slide_step: world mesh record (D_800DBEF4, 0xA0 bytes) handler at D_8008936C for sliding / bobbing scenery.

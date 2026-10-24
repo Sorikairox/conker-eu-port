@@ -1,0 +1,20 @@
+# P241 func_151D75B0 (money_popup_draw) mutants: sed % setup names
+s/    if (\*(s32 \*) owner == 0 || data\[4\] != owner\[0x3B\]) {/    if (data[4] != owner[0x3B]) {/ % gone
+s/    if (\*(s32 \*) owner == 0 || data\[4\] != owner\[0x3B\]) {/    if (*(s32 *) owner == 0) {/ % otherid
+s/data\[4\] != owner\[0x3B\]/data[5] != owner[0x3B]/ % fade
+s/data\[4\] != owner\[0x3B\]/data[4] != owner[0x3A]/ % fade
+s/        return 0;/        return 1;/ % gone
+s/    return 1;/    return 0;/ % fade
+s/    alpha = 0xFF;/    alpha = 0xFE;/ % full
+s/    if (timer < \*(s16 \*) (data + 0xC)) {/    if (timer <= *(s16 *) (data + 0xC)) {/ % full
+s/        alpha = timer \* \*(s16 \*) (data + 0xE);/        alpha = timer * *(u8 *) (data + 0xF);/ % neg
+s/        alpha = timer \* \*(s16 \*) (data + 0xE);/        alpha = timer + *(s16 *) (data + 0xE);/ % fade
+s/        if (alpha < 0) {/        if (alpha < -1) {/ % neg
+s/    s16 alpha;/    s32 alpha;/ % wrap
+s/    timer = \*(s16 \*) (rec + 0xE);/    timer = *(s16 *) (rec + 0xC);/ % fade
+s/    func_150432CC((s32) owner, 0x109);/    func_150432CC((s32) owner, 0x108);/ % fade
+s/    func_150432CC((s32) owner, 0x109);/    func_150432CC((s32) data, 0x109);/ % fade
+s/    func_1504332C(0x32, 0x7D, 0x1C, alpha);/    func_1504332C(0x32, 0x7C, 0x1C, alpha);/ % fade
+s/    func_15042D78(0x81);/    func_15042D78(0x80);/ % fade
+s/    func_15042E3C((s32) D_800AB634, \*(s32 \*) (data + 8));/    func_15042E3C((s32) D_800AB634, *(s16 *) (data + 0xA));/ % full
+s/    func_15042E3C((s32) D_800AB634, \*(s32 \*) (data + 8));/    func_15042E3C((s32) D_800AB634 + 1, *(s32 *) (data + 8));/ % fade

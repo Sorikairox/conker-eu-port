@@ -42,6 +42,21 @@ Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1491), selftest 103 / 103 
    0x5B3 / 0x5B4 / 0x5BC), func_150FA030 (camera callback 1), func_1516FF34 (particle tick).
 5. implicit_scan (port's tool) not run here; run it after the merge.
 
+## State (session P241, 2026-10-24). Details: `docs/port/sessions/P241.md`
+- Merged port-b b798adaf (limiter, NMBLOCK_WHOLE, P225-P235). reverify.sh now picks the mutant layout per file (body-only
+  P222-era drafts vs whole-block P225+); new tools/port/reverify_all.sh. Re-run partial: changed rows (all port-b) in P241.md section 2.
+- Hand C (NM): func_151D75B0 money_popup_draw, func_150CF470 level_light2_orbit, func_1514DAD4 object_fixed_beam_spawn,
+  func_151A9670 object_effect_kind2_start, func_eu_151D8FD4 rumble_effect_update, func_15134004 attached_bone_matrix,
+  func_150EF204 rider_dismount_enter, func_151008C0 sky_segments_flicker (all mutants killed).
+- Fix: func_15132FF8 passes the object to the D_80089D2C handlers. variables.h: NM s32 declarations of D_8008FFE8 / D_8008DA20.
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1533), implicit_scan 0 NM+float, selftest 111 / 111, progress_nm
+  `total 5915 3994 1551 370 5545 93.7% 1903008/2253856 (84.4%)`.
+
+## Next steps (from P241)
+1. Finish the registry re-run (FROM= commands in P241.md section 6); port-b reviews its rows.
+2. difftest gap: longer candidate calling the next function (coordinator item b), not done.
+3. port-web: browser-check the P241 functions and the D_80089D2C argument fix.
+
 ## P239 (port-b) (session P239, 2026-10-24). Details: `docs/port/sessions/P239.md`
 
 Branch `port-b`. **D_8008FFE8 (game_1FFF60)**: the ROM table is one 7-entry table at 0x8008FFE0 (D_8008FFE0 = index
@@ -71,6 +86,46 @@ progress_nm: game 4943 / 5334, total 5479 / 5915 (92.6%), C bytes 82.1%, 436 asm
 4. difftest.py: a candidate longer than the reference that calls the next function (jal target inside the candidate
    range) hangs (stub_at refuses in-range addresses); stub such targets when they are past the reference length.
 5. implicit_scan was not run (port's tool); run it after the merge.
+## State (session P238, 2026-10-24). Details: `docs/port/sessions/P238.md`
+- Hand C (NM, one block each, all in the registry with setups + mutants): func_150C1B60 `spawn_ring_kind2_small`
+  (EF370, 11 / 11), func_150FD49C `view_spot_distance_fade` (12A7C0, D_8008B734 entry 0, f32, 12 / 12),
+  func_15101610 `obj_fx_kill_all` / func_151016C8 `obj_fx_stop_all` (12E390, kind tables 0x8008A29C / 0x8008A2D0,
+  15 / 15, 12 / 12), func_15191E2C `owner_effect_watch` (1BE5C0, 14 / 14), func_15166E28 `layer_pre_scroll_texture`
+  (193D00, render layer 4 `pre`, 14 / 14), func_151AB874 `character_spawn_ring_fx` (1D7790, 19 / 19); priority func_151D8280 `trail_ring_constrain`
+  (204F70, the route stub at frame 17824, 6 setups, 18 / 18).
+- Harness: new knob `DIFFTEST_OUTP="ADDR=N.I:W0;W1;..."` writes words through the pointer aN[I] (outputs written
+  through an array of pointers, func_15145EA4); selftest 100 / 100 before, 103 / 103 after (3 func_15160E30 cases).
+- func_150A7BD0 is hand asm (private convention, already covered by VTX_WAVE_COS); hand-asm list in P238.md section 6.
+- Checks: NM build rc 0, protocheck `1478 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
+  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1496 425 5490
+  92.8% 1829736/2253856 (81.2%)`, verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), selftest 103 / 103.
+
+## Next steps (from P238)
+1. port-web: re-run the story route past frame 17824 (func_151D8280 is C now); the P238 functions (P238.md section 5) plus the P237 list; the frame-19116 freeze review of the P232
+   functions is still not done here (no message received).
+2. Breadth in port's files (P238.md section 7): func_151D75B0 (needs the dispatcher's v0 use first), func_150CF470,
+   func_1514DAD4, func_151A9670, func_eu_151D8FD4, func_15134004.
+3. Use DIFFTEST_OUTP to re-check P237's func_15160E30 with the real `-` mutants.
+4. D_8008FFE8 one-argument table (P234 item 2, port-b's entries) still open.
+
+## State (session P237, 2026-10-24). Details: `docs/port/sessions/P237.md`
+- Hand C (NM, one block each, all in the registry with setups + mutants): Total War stubs func_1508C600
+  `rail_pair_sight` (B7840; racer line-of-sight masks rail +0x16C0, 18 setups, 32 / 32) and func_151EA4C8
+  `mp_team_score_draw` (216470; two-team score panel, returns the DL end, 13 setups, 30 / 30); D_8008B0F0 light
+  handlers func_15160E30 `light_beam_update` (18D770, 16 setups, 29 / 29) and func_151B99B8 `searchlight_light_update`
+  (1E6B70, 5 setups, 17 / 17; the beam pointer is re-read per store as in the asm); func_15109390 was already C.
+  Breadth: func_150C7E68 `obj_shade_from_level` (F5580), func_151600E0 `effect_noop_check` (18D5D0),
+  func_150F1B78 `fx_hit_handler` (11CB90).
+- Checks: NM build rc 0, protocheck `1470 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
+  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1488 433 5482
+  92.7% 1827484/2253856 (81.1%)`, verify_all rc 0 (3994 / 5915 matched), selftest 100 / 100.
+
+## Next steps (from P237)
+1. port-web: Total War (func_1508C600 / func_151EA4C8), beam lights and the searchlight (func_15160E30 /
+   func_151B99B8); frame-19116 freeze review of the P232 functions is still not done here (no message received).
+2. Breadth in port's files (P237.md section 6): func_150C1B60 (asm caller only), func_150A7BD0, func_150FD49C,
+   func_151016C8 / func_15101610.
+3. D_8008FFE8 one-argument table (P234 item 2, port-b's entries) still open.
 
 ## P235 (port-b) (session P235, 2026-10-24). Details: `docs/port/sessions/P235.md`
 
@@ -105,6 +160,60 @@ total 5478 / 5915 (92.6%), C bytes 82.1%, 437 asm-only.
 5. difftest (port's difftest.py): ARGMEM has one length per callee, so memcpy blocks of different sizes in one function
    can't all be compared; a per-call length (or `N+OFF:LEN@callindex`) would help.
 
+## State (session P234, 2026-10-24). Details: `docs/port/sessions/P234.md`
+- Harness: difftest now takes callee prototypes from the headers the TU includes (recursive, Makefile include dirs)
+  when the TU text has no declaration: a callee declared only in functions.h (func_150ADA20) no longer has IDO's
+  scratch f12 compared as an argument. `DIFFTEST_INCHDR_OLD=1` = old (forwarded by difftest.sh). Selftest 95 / 95
+  before, 100 / 100 after (new func_15109DC8 cases; the P134 func_150F1F80 case now needs HDRSLOT_OLD + INCHDR_OLD).
+- progress_nm: conditional-stack block detection (`--old` = old regex). 18 functions with C in the NM build were
+  counted asm-only (func_150E394C, D2DB0 / D3880 / D1760 / AC770 / 45B90 / 48B10 / init_EB00 / 1FB080 pieces; list in
+  P234.md). Corrected before this session's conversions: `total 5915 3994 1479 442 5473 92.5% 1819332/2253856 (80.7%)`.
+- Hand C (NM, one block each), in the registry: func_1508CF34 `rail_racer_steer` (B7840 rail cmd 9 / AI steering,
+  862 insns; exact v0 = yaw error beyond 45 degrees; 60 setups, 90 / 90), func_151B61A0 `ripple_spawn_flat` (1E39B0,
+  coordinator item: the ripple model func_1513783C picks half the time; anti-tamper code sum skipped in NM; 39 / 39).
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck
+  `1463 NON_MATCHING bodies checked, 0 problems`, selftest 100 / 100, implicit_scan `663 TUs, 852 implicit call sites
+  (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1481 440 5475 92.6% 1823456/2253856 (80.9%)`.
+- Urgent port fix (coordinator, Total War null+0x24): D_8008B0F0 (EU D_8008B490) handlers now get the effect: NM
+  table type `s32 (*[])(struct225 *)` in variables.h, NM block of func_151603FC passes arg0, NM func_15161F2C returns
+  func_15163F50's s32 (the dispatcher tests it). Both difftest EQUIV, NULL / return-0 mutants DIFFER (P234.md section 8).
+- zsh note: `env $K cmd` does not split $K in the agent shell; use `${=K}` (or bash) for hand-run knob strings.
+
+## Next steps (from P234)
+1. port-web: Total War null+0x24 should be gone (D_8008B0F0 handlers get the effect); AI racers on rail levels
+   (func_1508CF34), water ripples (func_151B61A0).
+1b. Not done: NM C for Total War stubs func_1508C600 (B7840), func_151EA4C8 (216470); review P232 functions
+   (func_15006BEC, func_151D7EDC -> stub func_151D8280, func_15109DC8, func_1510A538) for the frame-19116 freeze.
+2. D_8008FFE8 (game_1FFF60) table: all 5 EU entries take one argument ([0] func_151901F4 asm, [1] func_1518FD34
+   `s32 (s32)`, [2] func_1518FE0C, [3] func_151D33B8, [4] func_1518FDC8), the declaration and the two matched C
+   dispatchers pass two. Entries 0/1/2/4 are port-b's (1BAF40): coordinate an NM one-argument table type + NM copies of
+   func_151D2C40 / func_151D3130, and func_1518FD34's return type (v0use first).
+3. Breadth from `progress_nm.py --list` (not started in P234).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
+## State (session P232, 2026-10-24). Details: `docs/port/sessions/P232.md`
+- Hand C (NM, one block each), all in the registry: func_151E533C `mp_match_end_continue` (20B730; coordinator
+  priority: the D_800E0EB8 fade callback after a multiplayer match: next level / replay / back to the menu; 32/32),
+  func_15073FA0 `event_spawn_helper_object` (981E0; last asm callee of the B-pad function; 74/74),
+  func_151D7EDC `trail_points_update` (204F70, level 6; 22/22), func_15109DC8 `spark_burst_spawn` (1371A0, D_80089004
+  handler 0; 58/58), func_1510A538 `segment_effect_update` (1379B0, effect 0x1B; 21/21), func_151922C4
+  `obj_dust_effect_update` (1BF960, effect 0x1D; 34/34), func_15006BEC `save_slot_pack` (33990, EEPROM save writer;
+  now `void (s32)`; 46/46).
+- No `D_<small hex>` link symbols in the new C (nothing for port-web's ROM_ABS table).
+- difftest tip: a callee declared only in a header has no TU prototype, so IDO's scratch f12 before a `void`-arg call
+  (func_150ADA20) is compared as an argument: declare such callees in the NM block.
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1461 NON_MATCHING bodies checked, 0
+  problems`, selftest 95 / 95, implicit_scan 852 sites / 159 NM / 1 float / 0 NM+float, progress_nm
+  `total 5915 3994 1461 460 5455 92.2% 1811392/2253856 (80.4%)`.
+
+## Next steps (from P232)
+1. port-web: Race A end of match (func_151E533C: black screen after the wipe should be gone), save writing
+   (func_15006BEC vs func_15006590), level 6 trail (func_151D7EDC), object dust / segment sparks.
+2. func_1508CF34 (B7840 rail cmd 9, 862 insns, exact v0 for func_1508AB7C): not started.
+3. Breadth from `progress_nm.py --list` (func_150E394C is listed as asm-only although game_eu_110DB0 has its NM body:
+   check the block detection).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
 ## P231 (port-b) (session P231, 2026-10-24). Details: `docs/port/sessions/P231.md`
 
 Branch `port-b`. Hand C (NM) + setups + mutants, registry rows with full knobs: **func_1519AF14 trail_update**
@@ -123,6 +232,28 @@ site). func_151901F4 (1BAF40): P219's PORT-only "aim at the node" fallback remov
    func_15139768, func_150D3870, func_151F94E0; the 4 Rare hand-asm functions of game_eu_226870 (not started).
 3. port: game_1FFF60's D_8008FFE8 declared `void (*)(child *, void *)` but holds s32-returning / one-argument
    handlers (wasm call_indirect signature); func_151B61A0 (1E39B0) is an asm ripple handler behind func_1513783C.
+
+## State (session P230, 2026-10-24). Details: `docs/port/sessions/P230.md`
+- **Standing check: `tools/port/implicit_scan.py`** (`[--all] [--tsv OUT]`, ~9 s): host clang pass over src_eu with
+  -DNON_MATCHING and only -Wimplicit-function-declaration (IDO is silent about implicit declarations). Lists
+  implicit call sites, NM-only vs both builds, FLOAT flag (libm, by-value f32 prototype elsewhere, or asm callee
+  reading $f12/$f14 / returning $f0). Run it after every conversion session; NM+float must stay 0.
+  Now: 852 sites, 159 in NM code, 1 float (port-b 201240:588 func_151D52B4 -> func_15131EC8(f32 *, f32)).
+- Fixed: func_150AFBC4 (DCEF0) NM variant passes the f32 to func_15131EC8 with a prototype; game_981E0 NM
+  prototype `u8 *func_15196438(u8 *, s32, u8, s32)` (port-b P229 item). port-b list: `docs/port/sessions/p230/implicit_portb.tsv`.
+- Hand C (NM, one block each), all in the registry: func_150130B4 `record_particle_emitter_start` (40490, 61/61),
+  func_1508C07C `rail_lane_shuffle` (B7840, 18/18; void (void): func_1508A040's NM prototype / call fixed),
+  func_1508CA14 `rail_pair_rivals` (B7840, 51/51; returns the +0x16C0 mask: func_1508BE18's NM prototype fixed),
+  func_1508B854 `rail_events_assign_nodes` (B7840, 44/44), func_1000C530 `channel_effect_update` (init_B1B0, 47/47).
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1454 NON_MATCHING bodies checked, 0
+  problems`, selftest 95 / 95, progress_nm `total 5915 3994 1454 467 5448 92.1% 1805128/2253856 (80.1%)`.
+
+## Next steps (from P230)
+1. port-web: MP / race rail AI (lanes, rival pairing, event nodes), record particle emitters, channel audio effects.
+2. func_15073FA0 (981E0): sketched in P230.md section 5, not written. Then func_1508CF34 (B7840 cmd 9, 862 insns).
+3. Pre-0x29 leftovers: func_151D7EDC (204F70), func_15109DC8 (1371A0), func_1510A538 (1379B0), func_151922C4
+   (1BF960), func_15006BEC (33990).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
 
 ## P229 (port-b) (session P229, 2026-10-24). Details: `docs/port/sessions/P229.md`
 
@@ -143,6 +274,45 @@ rc 0, NM links, protocheck 0 (1477), selftest 103/103. progress_nm total 5471 / 
    func_151BDDD8, func_150F9BB0, func_15135DD0, func_15139768, func_150D3870, func_1519AF14 (D_8008FC48 dispatcher),
    func_151F94E0; the 4 Rare hand-asm functions of game_eu_226870 (nmasm harness) are not started.
 3. port: game_981E0 calls func_15196438 without a prototype (implicit int); `u8 *func_15196438(u8 *, s32, u8, s32)`.
+
+## State (session P227, 2026-10-24). Details: `docs/port/sessions/P227.md`
+- Tooling: `tools/port/reverify.sh` no longer cuts the mutant line (knob `MUTCUT=N`; P226's rvw.sh is obsolete).
+- Hand C (NM, one block each), all in the registry: func_151E9150 `mp_hud_draw` (216470), func_151EA90C
+  `mp_scoreboard_draw` (216470; barrel menu mode 3 bar / in-match score table), func_1509D590
+  `event_effect_command` (CA630, D_800887C0 entry 14, EvHandlerA), func_1511E4F4 `pickup_update` (142E40,
+  world-object type 0x28 callback D_80089030[0x28][0]; declares `f32 cosf(f32)` in its block: 142E40 had none).
+- Verification: setups + mutants all killed (69/69, 68/68, 57/57, 53/53); random 100 EQUIV for all four.
+- Total War null+0x24 = 7.58f (browser P223): func_1511E4F4 has no +0x24 store and returns nothing used, so its
+  stub is only where the check fired; the write happened earlier in that frame. Its conversion is NOT expected to fix
+  the write (pickups now scale in / animate / can be taken). Re-check in the browser after the merge; look at the
+  code that runs before the world-object callbacks in that frame.
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck
+  `1449 NON_MATCHING bodies checked, 0 problems`, selftest 95 / 95, progress_nm
+  `total 5915 3994 1449 472 5443 92.0% 1799532/2253856 (79.8%)`.
+
+## Next steps (from P227)
+1. port-web: Race A / Total War HUD and score table, pickups, null+0x24 re-check.
+2. func_150130B4 (40490): analysed in P227.md section 6 (spawn / emitter blocks, 19-case jump table), not written.
+3. Rail AI func_1508B854 / func_1508C07C / func_1508CA14 (B7840), func_1000C530 (init_B1B0), func_15073FA0 (981E0),
+   func_1508CF34 (B7840 cmd 9). m2c drafts: `port_work/p226/gen/`.
+
+## State (session P226, 2026-10-24). Details: `docs/port/sessions/P226.md`
+- Hand C (NM, one block each), all in the registry: func_151E5E08 `mp_match_rules_update` (20B730; the match now
+  ends: D_800E1050, placings D_800E0EF0), func_151ECE00 `barrel_menu_draw` (216470; returns the DL end),
+  func_1509F4D0 `event_sound_command` (CC5F0, D_800887C0 entry 7), func_15086268 `rail_node_nearest` (B37F0).
+  func_1509F9C8 (CC5F0, matching C `void`) has an NM variant returning func_10010F88's handle (func_1509F4D0
+  kind 0x4000 returns it to the VM).
+- Verification: setups + mutants all killed (50/50, 76/76, 31/31, 25/25); func_1509F4D0 random DIFFERs only at the
+  u16-truncated argument of func_1509FBC8 (callee reads `lhu`, harness artefact).
+- `port_work/p226/rvw.sh` = reverify.sh printing all survivors (reverify cuts at 600 characters); consider making
+  the cut an env knob in tools/port/reverify.sh.
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1445 bodies), selftest 95/95, progress_nm total 5439/5915 C (92.0%), C bytes 79.4%.
+
+## Next steps (from P226)
+1. func_151E9150 (216470 MP HUD, 819 insns), func_1509D590 (CA630), func_150130B4 (40490), func_1511E4F4 (142E40).
+2. Rail AI group func_1508B854 / func_1508C07C / func_1508CA14 (B7840) - func_15086268 is done; func_1000C530
+   (init_B1B0); then func_15073FA0 (981E0) and func_1508CF34 (B7840 cmd 9). m2c reading drafts: `port_work/p226/gen/`.
+3. func_151EA90C (216470, barrel menu mode 3) is still asm.
 
 ## P225 (port-b) (session P225, 2026-10-24). Details: `docs/port/sessions/P225.md`
 
@@ -168,6 +338,24 @@ protocheck 0 (1471), selftest 101/101. progress_nm total 5465 / 5915 (92.4%), C 
 4. difftest: a non-decimal DIFFTEST_ARG index (e.g. `A=7`) also gives empty result lines (seen in P225); make it an
    ERROR like STKFILL.
 
+## State (session P224, 2026-10-24). Details: `docs/port/sessions/P224.md`
+
+Branch `port` (P221 d5b5126a + P224 commit).
+- Hand C (NM), multiplayer: func_1507D1D8 mp_player_respawn (A9D90; the respawn after a lost life), func_150528C8
+  obj_hover_height_update (78230; board height / movement handler, state table D_800863B8: the likely cause of
+  "Conker can't move in Race A"), func_151221F0 camera_follow_update (14FA00; the stub skipped the camera follow steps),
+  func_15164E0C object_wobble_update (192500). Random + setups EQUIV, mutants 39/39, 46/46, 37/37, 30/30 (func_150528C8
+  random DIFFERs only on an lh-vs-u16 argument the callee masks: artefact, see the session doc).
+- D_8008A1BC draw-table entries (port-b P222 item) return their callee's v0 in NM (7 wrappers; NM-only prototypes
+  in functions.h for func_1513EDB4 / func_1513F4B0).
+- Triage of the MP start stubs in P224.md section 1. Ownership move to port-b (game_161520, 1C3530, 19B180, 1FB080,
+  127840, 226870, 1E7CC0, 1A2970, 133A70, 101080, D5E90): no edits there in P224.
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck `1441 NON_MATCHING bodies checked, 0 problems`, selftest 95 / 95, progress_nm `total 5915 3994 1441 480 5435 91.9% 1783192/2253856 (79.1%)`.
+
+## Next steps (from P224)
+1. port-web: browser re-run of Race A / Total War (movement, camera, first death / respawn).
+2. func_151E5E08 (match rules, D_800E1050), func_151ECE00 (216470 DL passthru, 661 insns), func_151E9150,
+   func_1509D590; then func_15073FA0, func_1508CF34.
 ## P222 (port-b) (session P222, 2026-10-24). Details: `docs/port/sessions/P222.md`
 
 Branch `port-b`. Hand C (NM), difftest setups (ARGMEM / STKFILL / RET sequences) + mutants, exact commands per

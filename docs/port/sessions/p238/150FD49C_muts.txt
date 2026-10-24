@@ -1,0 +1,13 @@
+# P238 func_150FD49C (view_spot_distance_fade) mutants: sed % setup names
+s/        return 1\.0f;/        return 0.0f;/ % nospot
+s/    pos\[0\] = spot\[0\];/    pos[0] = spot[1];/ % spot
+s/    pos\[2\] = spot\[2\];/    pos[2] = spot[1];/ % spot
+s/    pos\[1\] = spot\[1\];/    pos[1] = (u16) spot[1];/ % spotneg
+s/f32 nearDist = 2007\.0f;/f32 nearDist = 2008.0f;/ % spot
+s/f32 range = 9005\.0f;/f32 range = 9000.0f;/ % spot
+s/&range, 0\.00011104942f)/\&range, 0.0001f)/ % spot
+s/return func_15166120(obj, pos,/return func_15166120(pos, pos,/ % spot
+s/\*(s32 \*) &nearDist, \*(s32 \*) &range,/*(s32 *) \&range, *(s32 *) \&nearDist,/ % spot
+s/(s16 \*) D_800D9AA0\[0\];/(s16 *) D_800D9AA0[1];/ % spot
+s/    if (spot == NULL) {/    if (spot != NULL) {/ % spot
+s/return func_15166120(obj, pos, \*(s32 \*) &nearDist/return func_15166120(obj, pos, (s32) nearDist/ % spot

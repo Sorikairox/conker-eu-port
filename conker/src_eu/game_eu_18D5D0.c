@@ -40,7 +40,14 @@ void func_1515FDC0(s32 arg0, s32 arg1) {
     func_1515D4D4(c[0], c[1], c[2], 0U);
 }
 
+#ifdef NON_MATCHING
+// effect_noop_check: P237. Does nothing: the asm only loads obj +0x3B and arg1 +0x1C and tests them (an empty if,
+// probably a stripped debug check). No caller reads v0 (no jal callers; v0 is a load or garbage).
+void func_151600E0(u8 *obj, u8 *arg1) {
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_18D5D0/func_151600E0.s")
+#endif
 
 void func_15160104(u8 *arg0, s32 arg1) {
     func_1505D024(arg0, 0x6002D, *(u16 *)(arg0 + 0x7A), -1);

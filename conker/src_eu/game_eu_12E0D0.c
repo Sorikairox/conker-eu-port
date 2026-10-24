@@ -3,7 +3,44 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+/* P241: readable C for func_151008C0 (game_eu_12E0D0, 73 insns). */
+// sky_segments_flicker: level update handler (D_8008D0A4 entry 10, `void (s32)`; does nothing for a non-zero
+// argument): advances the sky animation frame D_800DD835 and toggles each of the 5 sky segment variants
+// D_800BE500[i] with chance 35 / 1000 (70 / 1000 while it is on). A segment that turns on gets command 0x18 for
+// its id (D_80088F60 = 9..13, func_151616D0), one that turns off gets 0x1C then 0x17. func_150ADA20 is the random
+// number generator.
+typedef struct {
+    u8 id[5];
+} SkyIds_151008C0;
+extern SkyIds_151008C0 D_80088F60;
+extern u8 D_800DD835;
+void func_151616D0(u8, u8, s32);
+void func_151008C0(s32 arg0) {
+    SkyIds_151008C0 ids = D_80088F60;
+    s32 i;
+    u32 chance;
+
+    if (arg0 != 0) {
+        return;
+    }
+    D_800DD835++;
+    for (i = 0; i < 5; i++) {
+        chance = (D_800BE500[i] != 0) ? 70 : 35;
+        if ((u32) func_150ADA20() % 1000 < chance) {
+            D_800BE500[i] ^= 1;
+            if (D_800BE500[i] != 0) {
+                func_151616D0(ids.id[i], 0x18, 0);
+            } else {
+                func_151616D0(ids.id[i], 0x1C, 0);
+                func_151616D0(ids.id[i], 0x17, 0);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E0D0/func_151008C0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_800906D4[]; /* asset ids: 3 animated frames, then the 5 segment textures' variants */

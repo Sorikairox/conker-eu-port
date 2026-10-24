@@ -324,7 +324,100 @@ void func_1507D158(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 tmp = D_800CC82F[arg0 * 812];
     func_1509BFB0(3, tmp | 0x2000, arg1, arg2, arg3, arg4);
 }
+#ifdef NON_MATCHING
+void func_15085710(s16, s16, s32);
+s32 func_150859AC(s16 arg0, s32 arg1);
+s32 func_15082E44(u8 *e, s32 idx, s32 arg2, s32 arg3, s32 reuse);
+void func_150054C4(struct108 *arg0, s32 arg1, s16 arg2, s32 arg3);
+void func_150858A0(void *arg0, s32 arg1, s32 arg2);
+void func_15182338(s32);
+void func_150891D4(u8 *arg0);
+extern u8 D_800BE616;
+extern s32 D_800BE9F0;
+extern s8 D_8008726C;
+extern u8 D_800D18A8;
+extern s16 D_800BEE12;
+extern struct127 D_800CC2D0[];
+
+// mp_player_respawn: multiplayer respawn of a player object (D_800CC2D0[idx], 0x32C bytes) after a lost life.
+// Keeps the character record's (+0x31C) +0x1AA / +0x1AF / +0x1B0 and the object's +0x328 across the reset; the team /
+// colour byte is ctl +0x11B in multiplayer (D_800BE616), else -1. In level 0x2B a player whose stat 1 is 17..32 gets a
+// random 17..32 back (func_15085710(idx, 0, n)) and its D_800D20FC entry +4 becomes 0x9C (n < 29) or 0x9D. Then the
+// object is reset (func_15060F28), its D_800D20FC entry re-placed at a start point (func_15082E44, under the
+// D_800D18A8 flag), and human players (idx <= D_80082FA0) get their camera / HUD reset (func_150054C4, func_15182338,
+// two func_1517F3B0 fades), others func_150858A0. Finally the control state is cleared, flags +0x22C |= 0x100,
+// health D_8008726C, and in multiplayer a 150-frame invulnerability (+0x125, ctl +0x1B1); in level 0x33 (race) also
+// a 120-frame event (func_1507D158) and a rail re-sync (func_150891D4). void: the callers ignore v0.
+void func_1507D1D8(struct127 *rec) {
+    u8 *obj = (u8 *) rec;
+    u8 *ctl = *(u8 **) (obj + 0x31C);
+    s32 keep1AA = *(s16 *) (ctl + 0x1AA);
+    s8 keep1B0 = ctl[0x1B0];
+    s8 keep328 = obj[0x328];
+    s8 keep1AF = ctl[0x1AF];
+    s8 team;
+    s32 idx;
+    s32 n;
+
+    if (D_800BE616 != 0) {
+        team = ctl[0x11B];
+    } else {
+        team = -1;
+    }
+    if (D_800BE9F0 == 0x2B) {
+        idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
+        n = func_150859AC((s16) idx, 1);
+        if (n >= 0x11 && n < 0x21) {
+            n = (func_150ADA20() & 0xF) + 0x11;
+            func_15085710((s16) idx, 0, n);
+            if (n < 0x1D) {
+                ((u8 *) D_800D20FC)[idx * 0x30 + 4] = 0x9C;
+            } else {
+                ((u8 *) D_800D20FC)[idx * 0x30 + 4] = 0x9D;
+            }
+        }
+    }
+    idx = (s32) (obj - (u8 *) D_800CC2D0) / 0x32C;
+    func_15060F28(rec, 0);
+    D_800D18A8 = 1;
+    func_15082E44((u8 *) D_800D20FC + idx * 0x30, idx, 0, 0, 0);
+    (*(u8 **) (obj + 0x31C))[0x1B0] = keep1B0;
+    (*(u8 **) (obj + 0x31C))[0x1AF] = keep1AF;
+    obj[0x328] = keep328;
+    if (idx <= D_80082FA0) {
+        func_150054C4((struct108 *) ((u8 *) D_800DBFF0 + idx * 0x9A0), idx, D_800BEE12, team);
+        func_15182338(idx);
+        func_1517F3B0(0, 0, 0, 0, 1, idx);
+        func_1517F3B0(0, 0, 0, 0x1E, 0, idx);
+    } else {
+        func_150858A0(obj, team, 0);
+    }
+    D_800D18A8 = 0;
+    (*(u8 **) (obj + 0x31C))[0x120] = 0;
+    (*(u8 **) (obj + 0x31C))[0x122] = 0;
+    *(s16 *) (*(u8 **) (obj + 0x31C) + 0x124) = 0;
+    *(s16 *) (*(u8 **) (obj + 0x31C) + 0x1AA) = keep1AA;
+    *(u16 *) (obj + 0x22C) |= 0x100;
+    obj[0x1CA] = D_8008726C;
+    (*(u8 **) (obj + 0x31C))[0x75] = 0;
+    obj[0x20F] = 0xFF;
+    obj[0x210] = 0xFF;
+    obj[0x211] = 0xFF;
+    obj[0x232] = 1;
+    *(s32 *) (obj + 0x218) = 0;
+    (*(u8 **) (obj + 0x31C))[0x11B] = team;
+    if (D_800BE616 != 0) {
+        obj[0x125] = 0x96;
+        (*(u8 **) (obj + 0x31C))[0x1B1] = 0x96;
+        if (D_800BE9F0 == 0x33) {
+            func_1507D158(idx, 0x78, 0, 0, 0);
+            func_150891D4(obj);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_A9D90/func_1507D1D8.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15085710(s16, s16, s32);

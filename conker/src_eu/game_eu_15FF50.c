@@ -288,7 +288,6 @@ void func_15132FBC(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
 }
 #endif
 
-extern s32 (*D_80089D2C[])(Mtx *);
 u8 func_151464B8(s16 *arg0);
 typedef struct {
     u8 pad0[0x60];
@@ -300,6 +299,10 @@ typedef struct {
     u8 pad79[0x17];
     Mtx mtx[2];
 } Unk15132FF8;
+/* P241: every entry (func_15133A80, func_150BA1F4, func_15133CD0, func_150C7C3C, func_151B98C0, func_15134004) takes
+ * the object as its second argument: the asm leaves it in a1 at the jalr (`move a1, a0` on entry). The table was
+ * declared with one parameter, so the port passed nothing there (wasm: signature mismatch). */
+extern s32 (*D_80089D2C[])(Mtx *, Unk15132FF8 *);
 
 void func_15132FF8(Unk15132FF8 *arg0) {
     s32 r;
@@ -315,7 +318,7 @@ void func_15132FF8(Unk15132FF8 *arg0) {
         arg0->flags |= 0x200000;
         return;
     }
-    r = D_80089D2C[arg0->unk78](&arg0->mtx[D_800BE9C0]);
+    r = D_80089D2C[arg0->unk78](&arg0->mtx[D_800BE9C0], arg0);
     if (r == -1) {
         func_1516972C((struct102 *)arg0);
         return;
@@ -632,7 +635,43 @@ s32 func_15133FC0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* P241: readable C for func_15134004 (game_eu_15FF50, 65 insns). */
+// attached_bone_matrix: entry 5 of D_80089D2C (dispatcher func_15132FF8: -1 ends the object, 0 hides it, 1 shows
+// it): copies bone obj[0x170] of the target object (+0x7C) into mtx. -1 when the target is gone (NULL, word +0 is 0,
+// byte +4 is 0xFF or its id +0x3B no longer matches obj +0x80); 0 when the target has no bone matrices (+0x1D4) or
+// its +0x74 low nibble is 0xF. The bone list holds Mtx (D_800C42B0 set: copied as is) or float matrices (made affine:
+// column 3 = 0, 0, 0, 1, then guMtxF2L).
+s32 func_15134004(Mtx *mtx, u8 *obj) {
+    u8 *target = *(u8 **) (obj + 0x7C);
+    u8 *bones;
+    f32 mf[4][4];
+
+    if (target == NULL || *(s32 *) target == 0 || target[4] == 0xFF || obj[0x80] != target[0x3B]) {
+        return -1;
+    }
+    bones = *(u8 **) (target + 0x1D4);
+    if (bones == NULL) {
+        return 0;
+    }
+    if ((target[0x74] & 0xF) == 0xF) {
+        return 0;
+    }
+    if (D_800C42B0 != 0) {
+        memcpy(mtx, bones + obj[0x170] * 0x40, 0x40);
+        return 1;
+    }
+    memcpy(mf, bones + obj[0x170] * 0x40, 0x40);
+    mf[0][3] = 0.0f;
+    mf[1][3] = 0.0f;
+    mf[2][3] = 0.0f;
+    mf[3][3] = 1.0f;
+    guMtxF2L(mf, mtx);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15134004.s")
+#endif
 
 s32 func_15134108(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5)
 {

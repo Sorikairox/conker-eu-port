@@ -155,7 +155,114 @@ void func_15006590(s8 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006590.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_150859AC(s16, s32);
+
+/* save_slot_pack: P232. Writes save slot `slot` (record D_800BE818[slot]): bumps the slot's time stamp (+8, 31 bits)
+ * and moves it to the highest EEPROM slot area (0..3) that no live record (+8 >= 0) uses (+0xE). Unless the EEPROM
+ * is disabled (D_8002AC5C), the area's last block (area * 16 + 0x13) is first overwritten with 0xFE bytes. The
+ * 0x80-byte block D_800BE778 is the inverse of func_15006590's layout: u16 checksum, slot, stamp (big-endian), 27
+ * bytes of *D_800D2E4C, 9 bytes of D_800D2E60, D_800BE3DF, D_800BE800, D_800BE804 = func_150859AC(0, 6) (u16),
+ * D_800BE3E8 (u32), then the 69 values of D_800C3A60 packed MSB first with the widths D_800BE810 (a last partial
+ * byte is not stored; the 0x45 bytes after D_800BE3E8 are cleared first). Checksum = 0xCC + bytes 2..0x7F shifted
+ * left by index & 3 (16 bits). Written with func_151DD4A0 (osEepromLongWrite) to block area * 16 + 4. */
+void func_15006BEC(s32 slot) { /* the asm uses the whole a0 (callers pass an s8) */
+    u8 *rec = (u8 *) &D_800BE818[slot];
+    s32 stamp;
+    s32 used;
+    s32 area;
+    u8 *e;
+    u8 *p;
+    s32 i;
+    s32 j;
+    u64 bit;
+    u8 cur;
+    u8 mask;
+    u16 sum;
+
+    stamp = (*(s32 *) (rec + 8) + 1) & 0x7FFFFFFF;
+    used = -1;
+    for (e = (u8 *) D_800BE818; e < (u8 *) &D_800BE818[3]; e += 0x10) {
+        if (*(s32 *) (e + 8) >= 0) {
+            used &= ~(1 << (s8) e[0xE]);
+        }
+    }
+    area = 0;
+    for (i = 0; i < 4; i++) {
+        if ((1 << i) & used) {
+            area = i;
+        }
+    }
+    rec[0xE] = area;
+    *(s32 *) (rec + 8) = stamp;
+    if (D_8002AC5C == 0) {
+        for (i = 0; i < 8; i++) {
+            D_800BE778[i] = 0xFE;
+        }
+        osWritebackDCacheAll();
+        func_151DDA90(&D_800BE900, area * 16 + 0x13, D_800BE778);
+    }
+    if (D_800BE810 == NULL) {
+        D_800BE810 = (u8 *) func_1502B5C8(NULL, 1, 7) + 8;
+    }
+    p = &D_800BE778[2];
+    p[0] = slot;
+    p[1] = stamp >> 24;
+    p[2] = stamp >> 16;
+    p[3] = stamp >> 8;
+    p[4] = stamp;
+    p += 5;
+    for (i = 0; i < 27; i++) {
+        *p++ = ((u8 *) D_800D2E4C)[i];
+    }
+    for (i = 0; i < 9; i++) {   /* the asm copies up to D_800D3289 (EU), 9 bytes */
+        *p++ = D_800D2E60[i];
+    }
+    p[0] = D_800BE3DF;
+    p[1] = D_800BE800;
+    p += 2;
+    D_800BE804 = func_150859AC(0, 6);
+    p[0] = (u32) D_800BE804 >> 8;
+    p[1] = D_800BE804;
+    p[2] = (u32) D_800BE3E8 >> 24;
+    p[3] = (u32) D_800BE3E8 >> 16;
+    p[4] = (u32) D_800BE3E8 >> 8;
+    p[5] = D_800BE3E8;
+    p += 6;
+    for (i = 0; i < 69; i++) {
+        p[i] = 0;
+    }
+    cur = 0;
+    mask = 0x80;
+    for (i = 0; i < 69; i++) {
+        bit = 1LL << (D_800BE810[i] - 1);
+        for (j = 0; j < D_800BE810[i]; j++) {
+            if (D_800C3A60[i] & bit) {
+                cur |= mask;
+            }
+            if (mask == 1) {
+                *p++ = cur;
+                cur = 0;
+                mask = 0x80;
+            } else {
+                mask >>= 1;
+            }
+            bit >>= 1;
+        }
+    }
+    sum = 0xCC;
+    for (i = 2; i < 0x80; i++) {
+        sum += D_800BE778[i] << (i & 3);
+    }
+    *(u16 *) D_800BE778 = sum;
+    osWritebackDCacheAll();
+    if (D_8002AC5C == 0) {
+        func_151DD4A0(&D_800BE900, area * 16 + 4, D_800BE778, 0x80);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_33990/func_15006BEC.s")
+#endif
 #ifdef NON_MATCHING
 void func_1500707C(s32 arg0) {
     s32 temp_v0;

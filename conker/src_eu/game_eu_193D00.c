@@ -317,4 +317,37 @@ u8 *func_151667D8(u8 *arg0, u8 *arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/func_151667D8.s")
 #endif
+#ifdef NON_MATCHING
+extern s16 D_800DD270;
+extern s32 D_800DD650;
+extern s32 D_800DD654;
+extern s32 D_800DD658;
+extern u8 D_800DD660[];
+extern u8 D_800907A4[];
+extern s32 D_800D30BC;
+extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+u8 *func_15095380(u8 *, s32 *, s32, s32 *, s32, s32, s32, s32, s32);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+
+/* layer_pre_scroll_texture: P238: `pre` callback of render layer 4 (D_8008B848 + 0xE4, RenderLayer +0x14; called as
+ * pre(gdl, layer, list, arg2) by func_151674F8, the other arguments are unused). Advances the s16 scroll D_800DD270 by
+ * 0x80 (back to 0 once it reaches 0x500), records texture D_800907A4 / the old scroll / 1 in D_800DD658 / 650 / 654,
+ * emits the texture through func_15095380(gdl, D_800DD658, D_800DD650, D_800DD660, 0, 0, 0, 1, 3) and returns the
+ * render mode set by func_15142FBC(gdl, D_800D30BC | 0x82CA0, render modes 3 (D_800A4EA8 words 7 | 6), &1). */
+Gfx *func_15166E28(Gfx *gdl, s32 layer, s32 list, s16 arg3) {
+    u8 one = 1;
+    s16 prev = D_800DD270;
+
+    D_800DD270 = prev + 0x80;
+    D_800DD658 = (s32) D_800907A4;
+    D_800DD650 = prev;
+    if (D_800DD270 >= 0x500) {
+        D_800DD270 = 0;
+    }
+    D_800DD654 = 1;
+    gdl = (Gfx *) func_15095380((u8 *) gdl, (s32 *) D_800DD658, D_800DD650, (s32 *) D_800DD660, 0, 0, 0, 1, 3);
+    return func_15142FBC(gdl, D_800D30BC | 0x82CA0, D_800A4EA8[7] | D_800A4EA8[6], &one);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_193D00/func_15166E28.s")
+#endif

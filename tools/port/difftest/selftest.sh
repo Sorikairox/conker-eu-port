@@ -148,7 +148,10 @@ case "$out" in *POKE\ unread*) fail=$((fail+1)); echo "FAIL [want no POKE unread
 # P134: a callee declared only in a header (cosf in gu.h) takes its arity / float slots from there: a0 (written at the
 # call site, &D_800CC298) is not an argument of cosf(float). DIFFTEST_HDRSLOT_OLD=1 = pre-P134 (false DIFFER on a0).
 chkce EQUIV  func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1"
-chkce DIFFER func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1"
+# P234: the included-header prototypes (gu.h `cosf`) now come first, so HDRSLOT_OLD alone has no effect: the P134
+# false DIFFER needs DIFFTEST_INCHDR_OLD=1 too
+chkce DIFFER func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1 DIFFTEST_INCHDR_OLD=1"
+chkce EQUIV  func_150F1F80 "DIFFTEST_HDRSLOT_OLD=1"
 chkce DIFFER func_150F1F80 "DIFFTEST_TRIALS_UNUSED=1" 's/0.35000002f/0.35f/'
 # P176: a stub on the last word of a page (func_151CFFFC at 0x151CFFFC): its delay slot runs as a separate Unicorn
 # block that was taken for a second call (both sides faulted at 0 -> UNSURE). Type-0x25 object with +0x2EC set.
@@ -223,6 +226,22 @@ TRIALS=32 chkce EQUIV  func_151416E8 ""
 TRIALS=32 chkce DIFFER func_151416E8 "DIFFTEST_BADJALR_OLD=1"
 TRIALS=32 chkce DIFFER func_151416E8 "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
 TRIALS=32 chkce DIFFER func_151416E8 "" 's/(rec, msg, c);/(rec, msg, code);/'
+# P234: a callee declared only in a header the TU includes (func_150ADA20 / func_150ADA68 in functions.h) has a known
+# prototype: IDO's scratch f12 left right before `jal func_150ADA20` is not an argument (P232 func_15109DC8 first run
+# was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
+S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151308E4=0:92,151308E4=0+60:6,151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8 DIFFTEST_RET=150ADF00=0;0;0 DIFFTEST_RETF=150ADF48=3F000000;3E800000"
+TRIALS=4 chkce EQUIV  func_15109DC8 "$S9DC8"
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8 DIFFTEST_INCHDR_OLD=1"
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/t.life = (func_150ADA20() \& 0xF) + 10;/t.life = (func_150ADA20() \& 0xF) + 11;/'
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/scale = (func_150ADA68() \* D_800A2A04/scale = (func_150ADA68() * D_800A2A08/'
+# P238: DIFFTEST_OUTP writes through a pointer read from an argument array (func_15145EA4's dst[i] points). Without
+# it the transformed start / end points stay stack fill (start == dir) and a swapped subtraction is EQUIV (the hole).
+S60E30="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15146414=0:8,15145698=0:12 DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450014=80460000,80450018=80470000,8045001C=07030000,80450038=42C80000,8045003C=03000000,80470000=00000001,80470014=42F73333,80470038=00000007,80470074=03000000,804701D4=80480000 DIFFTEST_RET=15145698=1 DIFFTEST_OUTA=15081A90=7:80490000;3F000000;C29B6666;4284CCCD;44BB8666;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;10000"
+P60E30="DIFFTEST_OUTP=15146414=1.0:41200000;41A00000;41F00000/1.1:42200000;C1200000;42480000"
+M60E30='s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = start[0] - dir[0];/'
+TRIALS=4 chkce EQUIV  func_15160E30 "$S60E30 $P60E30"
+TRIALS=4 chkce DIFFER func_15160E30 "$S60E30 $P60E30" "$M60E30"
+TRIALS=4 chkce EQUIV  func_15160E30 "$S60E30" "$M60E30"
 # P225: (1) nm_resolve passes #if blocks nested inside an NM block through (DIFFTEST_NMNEST_OLD=1 = old: the nested #else /
 # #endif closed the NM block -> CERR, P222 1BAF40). The case has `#ifdef PORT` (dropped: no PORT in difftest)
 # / `#else` (kept) inside its NM block. (2) DIFFTEST_STKFILL with a non-hex value is an ERROR line (was a traceback with

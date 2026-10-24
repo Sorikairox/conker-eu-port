@@ -36,7 +36,11 @@ void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s
 struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 s32  func_15161A68(struct225 *arg0);
 struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
+#ifdef NON_MATCHING
+s32 func_15161F2C(struct225 *arg0);
+#else
 void func_15161F2C(struct225 *arg0);
+#endif
 struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
@@ -93,6 +97,28 @@ struct225 *func_1516037C(Header *header, struct226 *arg1, s32 offset, u8 arg3, s
     return ret;
 }
 
+#ifdef NON_MATCHING
+// light_effect_update: P234 (port fix). Counts the effect's life down (+0x10, flag 1 of +0xE) and runs its handler
+// D_8008B0F0[+0xF] with the effect (the asm keeps a0 = the effect at the jalr; the matched C passed nothing, so the
+// port handlers got NULL: Total War null+0x24 writes); a 0 result or an expired life frees it (func_1516972C).
+void func_151603FC(struct225 *arg0) {
+    s32 pad;
+    u8 ret = 0;
+
+    if ((arg0->unkE & 1) != 0) {
+        arg0->unk10 -= D_800BE9E4;
+        if (arg0->unk10 < 0) {
+            ret = 1;
+        }
+    }
+    if ((ret == 0) && (arg0->unkF != -1) && (D_8008B0F0[arg0->unkF](arg0) == 0)) {
+        ret = 1;
+    }
+    if (ret) {
+        func_1516972C(arg0);
+    }
+}
+#else
 void func_151603FC(struct225 *arg0) {
     s32 pad;
     u8 ret = 0;
@@ -110,6 +136,7 @@ void func_151603FC(struct225 *arg0) {
         func_1516972C(arg0);
     }
 }
+#endif
 
 // requires jump table
 extern s32 (*D_8008B4F0[])(struct225 *);
@@ -361,7 +388,87 @@ struct225 *func_15160CDC(struct127 *arg0, u8 arg1, struct17 *arg2, struct17 *arg
 }
 
 // similar to func_15160B74
+#ifdef NON_MATCHING
+void func_15145EA4(f32 **, f32 **, void *, s32);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+typedef struct {
+    struct127 *obj; /* first object hit */
+    f32 t;          /* hit distance along the ray (fraction of dir) */
+    f32 x, y, z;    /* hit point */
+    u8 pad14[0x45];
+    u8 hit;         /* +0x59: what was hit (0 = nothing, 1 = world, >= 2 = an object) */
+    u8 pad5A[2];
+} Ray_60E30;
+/* data at +0x18 (func_15160CDC): object, its unique id, attach point, offset (+8), ray end (+0x14), scale (+0x20),
+ * flags (+0x24: 1 = cast, 2 = poke kind 0x9E). */
+
+/* light_beam_update: P237. D_8008B0F0 handler for the beam lights of func_15160CDC. Ends the light (0) when its
+ * object is gone or was reused (unique id). Without attach matrices (+0x1D4), without flag 1, or for a hidden
+ * object (+0x74 & 0xF == 0xF), the light sits at the object position (light +0xE / +0x10 / +0x12) with brightness
+ * +0x2F = 0 and +9 = 1. Else the offset and end points go through attach matrix `point` (func_15145EA4), and when
+ * the direction between them is not degenerate (func_15145128) a ray is cast from the start along it
+ * (func_15081A90): no hit = as above; a hit moves the light to the hit point with brightness
+ * clamp(scale * t, 0, 255) and +9 = 0, and with flag 2 a hit object of kind 0x9E gets +0x2E4 = 1. Returns 1. */
+s32 func_15160E30(struct225 *arg0) {
+    u8 *obj = *(u8 **) ((u8 *) arg0 + 0x18);
+    u8 *s = (u8 *) arg0 + 0x18;
+    f32 *src[2];
+    f32 *dst[2];
+    f32 start[3];
+    f32 dir[3];
+    f32 tmp0, tmp1;
+    Ray_60E30 ray;
+    f32 f;
+
+    if (*(s32 *) obj == 0) {
+        return 0;
+    }
+    if (s[4] != obj[0x3B]) {
+        return 0;
+    }
+    if (*(u8 **) (obj + 0x1D4) != NULL && (s[0x24] & 1) && (obj[0x74] & 0xF) != 0xF) {
+        src[0] = (f32 *) (s + 8);
+        src[1] = (f32 *) (s + 0x14);
+        dst[0] = start;
+        dst[1] = dir;
+        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + (s[5] << 6), 2);
+        dir[0] = dir[0] - start[0];
+        dir[1] = dir[1] - start[1];
+        dir[2] = dir[2] - start[2];
+        if (func_15145128(dir, dir, &tmp0, &tmp1) != 0) {
+            func_15081A90((struct127 *) obj, start[0], start[1], start[2], dir[0], dir[1], dir[2], (u8 *) &ray, 0.0f,
+                          0, 0, 1, -1, 0, 0);
+            if (ray.hit != 0) {
+                if ((s[0x24] & 2) && ray.hit >= 2 && ((u8 *) ray.obj)[4] == 0x9E) {
+                    *(s32 *) ((u8 *) ray.obj + 0x2E4) = 1;
+                }
+                arg0->unk14->unkE = ray.x;
+                arg0->unk14->unk10 = ray.y;
+                arg0->unk14->unk12 = ray.z;
+                f = *(f32 *) (s + 0x20) * ray.t;
+                if (255.0f < f) {
+                    f = 255.0f;
+                }
+                if (f < 0.0f) {
+                    f = 0.0f;
+                }
+                arg0->unk14->unk2F = (u32) f;
+                arg0->unk14->unk9 = 0;
+                return 1;
+            }
+        }
+    }
+    arg0->unk14->unkE = *(f32 *) (obj + 0x14);
+    arg0->unk14->unk10 = *(f32 *) (obj + 0x18);
+    arg0->unk14->unk12 = *(f32 *) (obj + 0x1C);
+    arg0->unk14->unk2F = 0;
+    arg0->unk14->unk9 = 1;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15160E30.s")
+#endif
 
 s32 func_15161238(struct127 *arg0, struct127 *arg1) {
     if (arg0->interaction_state == 0) {
@@ -706,9 +813,17 @@ struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, 
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+// handler 10 of D_8008B0F0 (P234): the dispatcher func_151603FC tests the result, which is func_15163F50's v0 left in
+// place by the matched void C; s32 here, one signature for wasm
+s32 func_15161F2C(struct225 *arg0) {
+    return func_15163F50(arg0, &arg0->unk18);
+}
+#else
 void func_15161F2C(struct225 *arg0) {
     func_15163F50(arg0, &arg0->unk18);
 }
+#endif
 
 extern void (*D_8008B6F8[])(u8 *, u8 *, u8);
 void func_15161F4C(u8 *arg0, u8 *arg1, u8 arg2)

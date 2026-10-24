@@ -1,0 +1,4 @@
+# P241 func_151A9670 (object_effect_kind2_start): obj 80450000, a1 = table index; func_151A8B20 = jal 151A90D0 (RET record 80460000 or 0); memcpy = jal 10023360. ARGMEM in the registry (spawn block 39 bytes: the asm leaves byte 0x27 and the 3 padding bytes uninitialised; the fill makes them equal; the 1-byte extra)
+odd ! 0=80450000,1=3 ! ! 151A90D0=80460000 ! ! ! ! !
+even ! 0=80450000,1=4 ! ! 151A90D0=80460000 ! ! ! ! !
+none ! 0=80450000,1=1 ! ! 151A90D0=0 ! ! ! ! !

@@ -499,6 +499,38 @@ def all_hdr_protos():
         _ALLHDR = '\n'.join(parts)
     return _ALLHDR
 
+# P234: the headers the TU includes (#include "x" / <x>, recursively, resolved like the Makefile's INCLUDE_CFLAGS plus
+# the TU's own directory). The candidate is compiled with those prototypes, so a callee declared only there (e.g.
+# `s32 func_150ADA20(void);` in functions.h) has a known prototype: before P234 its FP-argument set was unknown and the
+# P214 rule compared IDO's scratch f12 left right before `jal func_150ADA20` as an argument (false DIFFER, P232
+# func_15109DC8). DIFFTEST_INCHDR_OLD=1 = old behaviour (TU text, then the P93 / P100 header fallbacks only).
+INCHDR_OLD = os.environ.get('DIFFTEST_INCHDR_OLD') == '1'
+INC_DIRS = ['.', 'include', 'include/2.0L', 'include/2.0L/PR', 'include/libc', 'src/libultra/os', 'src/libultra/audio',
+            'src/libultra/io']
+_INCH = {}
+def inc_hdr_text(path, tu):
+    """concatenated text of every header the TU includes (recursively; .h files only)"""
+    k = (path, hash(tu))
+    if k in _INCH: return _INCH[k]
+    seen, parts = set(), []
+    def walk(text, here, depth):
+        if depth > 12: return
+        for m in re.finditer(r'^\s*#\s*include\s*[<"]([^">]+)[">]', text, re.M):
+            n = m.group(1)
+            if not n.endswith('.h'): continue
+            for d in [here] + INC_DIRS:
+                f = os.path.normpath(os.path.join(d, n))
+                if os.path.isfile(f):
+                    if f not in seen:
+                        seen.add(f)
+                        try: t = open(f, errors='replace').read()
+                        except OSError: t = ''
+                        parts.append(t); walk(t, os.path.dirname(f), depth + 1)
+                    break
+    walk(tu, os.path.dirname(path or '.') or '.', 0)
+    _INCH[k] = '\n'.join(parts)
+    return _INCH[k]
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
@@ -660,6 +692,16 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
     _a, _v = _p.split('=')
     OUTB[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
+
+# P238 (opt-in): DIFFTEST_OUTP="ADDR=N.I:W0;W1;...,..." (hex ADDR/W, decimal N/I): at every call to ADDR the stub
+# reads the pointer at word I of the array that argument N points to (aN[I]; N >= 4 = stack argument) and writes the
+# words W0, W1, ... there: outputs a callee writes through an array of pointers (func_15145EA4's dst[i] points).
+# Several "N.I:W..." for one ADDR are separated by '/'.
+OUTP = {}
+for _p in filter(None, os.environ.get('DIFFTEST_OUTP', '').split(',')):
+    _a, _v = _p.split('=')
+    OUTP[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0].split('.')[0]), int(_x.split(':')[0].split('.')[1]),
+                                      [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')]) for _x in _v.split('/')]
 
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
@@ -1161,6 +1203,12 @@ class Run:
                 # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
                 self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
+        if (addr & 0x1FFFFFFF) in OUTP:
+            for _n, _i, _ws in OUTP[addr & 0x1FFFFFFF]:
+                _arr = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                try: _p = struct.unpack('>I', bytes(mu.mem_read(phys(_arr + 4 * _i), 4)))[0]
+                except Exception: continue
+                self.stub_write(_p, struct.pack('>%dI' % len(_ws), *_ws))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
@@ -1552,6 +1600,10 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
                 new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
+                if new[c['name']][2] is None and not INCHDR_OLD:   # P234: no declaration in the TU text: included headers
+                    ih = inc_hdr_text(p, tu)
+                    if proto_fregs(ih, pn) is not None:
+                        new[c['name']] = (proto_arity(ih, pn), proto_fslots(ih, pn), proto_fregs(ih, pn))
                 if new[c['name']][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
                     ha = proto_arity(hdr_protos(), pn)
                     if ha is not None and 16 < ha < 99:
@@ -1644,7 +1696,7 @@ def knob_notes(called, ntrials):
     address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
     if not ntrials: return ''
     un = []
-    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('ARGMEM', ARGMEM)):
+    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
         un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called]
     return ' [knob callee never called: %s]' % ', '.join(un) if un else ''
 

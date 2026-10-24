@@ -1,0 +1,20 @@
+# P238 func_151AB874 (character_spawn_ring_fx) mutants: sed % setup names
+s/    rec.zero = 0;/    rec.zero = 2;/ % made
+s/    rec.one = 1;/    rec.one = 2;/ % made
+s/    rec.owner = owner;/    rec.owner = chr;/ % made
+s/    rec.height = \*(f32 \*) (chr + 0x118);/    rec.height = *(f32 *) (chr + 0x114);/ % made
+s/    spawn.u0 = 0;/    spawn.u0 = 1;/ % made
+s/    spawn.u4 = 0;/    spawn.u4 = 1;/ % made
+s/    spawn.id = chr\[0x3B\];/    spawn.id = chr[0x3A];/ % made
+s/    spawn.chr = chr;/    spawn.chr = owner;/ % made
+s/    spawn.one = 1;/    spawn.one = 0;/ % made
+s/    spawn.offset\[1\] = 0\.0f;/    spawn.offset[1] = 1.0f;/ % made
+s/    spawn.radius = 25\.0f;/    spawn.radius = 26.0f;/ % made
+s/    spawn.scale = 0\.26497f;/    spawn.scale = 0.265f;/ % made
+s/    spawn.life = 300;/    spawn.life = 301;/ % made
+s/    spawn.b2B = 3;/    spawn.b2B = 4;/ % made
+s/    spawn.b2D = 1;/    spawn.b2D = 0;/ % made
+s/(s32 \*) \&spawn, 0xC, 0xFF, 0);/(s32 *) \&spawn, 0xB, 0xFF, 0);/ % made
+s/    if (fx != NULL) {/    if (fx == NULL) {/ % made
+s/        memcpy(fx + 0x58, \&rec, 0xC);/        memcpy(fx + 0x54, \&rec, 0xC);/ % made
+s/    return (s32) fx;/    return 1;/ % fail

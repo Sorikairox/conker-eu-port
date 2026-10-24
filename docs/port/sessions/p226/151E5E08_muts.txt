@@ -1,0 +1,50 @@
+s/    if (D_800E1050 != 0) {/    if (D_800E1050 == 5) {/ % over
+s/D_800E1010\[3\] >= 3 \&\& D_80090118 <= 0/D_800E1010[3] >= 4 \&\& D_80090118 <= 0/ % ffa_time
+s/D_800E1010\[3\] >= 3 \&\& D_80090118 <= 0/D_800E1010[3] >= 3 \&\& D_80090118 < 0/ % ffa_time
+s/D_800E1010\[3\] >= 3 \&\& D_80090118 <= 0/D_800E1010[3] >= 3 || D_80090118 <= 0/ % ffa_time_left ffa_time_neg
+s/\*(s16 \*) (D_80090174 + 0x46 + i \* 2) >= D_800E1016/*(s16 *) (D_80090174 + 0x46 + i * 2) > D_800E1016/ % ffa_limit_eq
+s/                lim = D_800E1016;/                lim = 5000;/ % ffa_limit
+s/if ((D_800D18A0 \& (1 << i)) \&\& D_800E0EE0\[i\] == -1) {/if ((D_800D18A0 \& (2 << i)) \&\& D_800E0EE0[i] == -1) {/ % ffa_elim
+s/                D_800E0EE0\[i\] = D_800E0ED9--;/                D_800E0EE0[i] = --D_800E0ED9;/ % ffa_elim
+s/D_800BEA38 - D_80090110 < 2 ||/D_800BEA38 - D_80090110 < 1 ||/ % ffa_queue
+s/|| D_80090134 - D_80090110 <= 0)/|| D_80090134 - D_80090110 < 0)/ % ffa_queue2
+s/if (D_80090160 \& 0x80) {/if (D_80090160 \& 0x81) {/ % ffa_f01
+s/        } else if ((s8) D_80087640\[i\].pad28\[2\] != 0x7F) {/        } else if ((s8) D_80087640[i].pad28[2] != 0x7E) {/ % ffa_f80
+s/                    D_800E0EF0\[i\] = D_80087640\[i\].pad28\[1\];/                    D_800E0EF0[i] = D_80087640[i].pad28[0];/ % ffa_f80
+s/                if (D_80087270\[i\] == 10) {/                if (D_80087270[i] == 11) {/ % ffa_spect
+s/                    \*out = D_800E0EE0\[i\];/                    *out = 0;/ % ffa_elim_fixed
+s/                \*out = 1;/                *out = 0;/ % ffa_rank
+s/                if (a >= lim) {/                if (a > lim) {/ % ffa_limit
+s/                a -= ((s16 \*) D_800E0F00)\[i\];/                a += ((s16 *) D_800E0F00)[i];/ % ffa_hcap
+s/if (j == i || D_800E0EE0\[j\] != -1 || D_80087270\[j\] == 10) {/if (j == i || D_80087270[j] == 10) {/ % ffa_elim_fixed
+s/if (j == i || D_800E0EE0\[j\] != -1 || D_80087270\[j\] == 10) {/if (j == i || D_800E0EE0[j] != -1) {/ % ffa_spect
+s/                    b -= ((s16 \*) D_800E0F00)\[j\];/                    b -= 0;/ % ffa_hcap
+s/                    if (b >= lim) {/                    if (b > lim) {/ % ffa_limit
+s/                        if (D_800CC2D0\[j\].unk31C->unk1AA < D_800CC2D0\[i\].unk31C->unk1AA) {/                        if (D_800CC2D0[j].unk31C->unk1AA > D_800CC2D0[i].unk31C->unk1AA) {/ % ffa_tb
+s/\&\& j < i \&\&/\&\& j > i \&\&/ % ffa_tieidx ffa_tieidx0
+s/                                   D_80082FA0 < j) {/                                   D_80082FA0 <= j) {/ % ffa_tieidx ffa_tieidx0
+s/        tm\[team\] += \*(s16 \*) (D_80090174 + 0x46 + i \* 2);/        tm[team] = *(s16 *) (D_80090174 + 0x46 + i * 2);/ % team_sum
+s/        kills = func_150859AC(i, 4);/        kills = func_150859AC(i, 5);/ % team_m9a
+s/        tm\[4 + team\] += func_150859AC(i, 3) \* 6 + kills;/        tm[4 + team] += func_150859AC(i, 3) * 5 + kills;/ % team_kd
+s/        tm\[8 + team\] = func_150859AC(team, 6);/        tm[8 + team] = func_150859AC(i, 6);/ % team_m0
+s/        tm\[12 + team\] += D_800CC2D0\[i\].unk31C->unk1AA;/        tm[12 + team] = D_800CC2D0[i].unk31C->unk1AA;/ % team_tie team_tie2 team_tie3
+s/            limit = D_800E1010\[4\];/            limit = D_800E1010[5];/ % team_m0_hit
+s/            limit = D_800E1010\[0x12\];/            limit = D_800E1010[0x13];/ % team_m2 team_m8 team_m10
+s/        case 8:/        case 7:/ % team_m8
+s/        case 10:/        case 11:/ % team_m10 team_m11
+s/            if (D_800E1010\[3\] < 3) {/            if (D_800E1010[3] < 4) {/ % team_m9b
+s/    if (limit > 0) {/    if (limit >= 0) {/ % team_m0_zero
+s/            if (tm\[col + i\] >= limit) {/            if (tm[col + i] > limit) {/ % team_m0_hit team_m8
+s/                D_800E0EDA = i;/                D_800E0EDA = i + 1;/ % team_m0_hit team_m8
+s/    func_150432FC(20, 20);/    func_150432FC(20, 21);/ % team_m0
+s/            if (j == i || D_800E0EE0\[j\] != -1) {/            if (j == i) {/ % team_fixed2
+s/            if (tm\[col + i\] < tm\[col + j\]) {/            if (tm[col + i] <= tm[col + j]) {/ % team_m9a team_4
+s/                if (tm\[i\] < tm\[j\]) {/                if (tm[i] > tm[j]) {/ % team_tie4
+s/                } else if (tm\[i\] == tm\[j\] \&\& tm\[12 + j\] < tm\[12 + i\]) {/                } else if (tm[i] == tm[j] \&\& tm[12 + j] > tm[12 + i]) {/ % team_tie team_tie2 team_tie3
+s/        if (D_80087270\[i\] != 10 \&\& !(D_800D18A0 \& (1 << i))) {/        if (!(D_800D18A0 \& (1 << i))) {/ % team_spect
+s/        if (D_80087270\[i\] != 10 \&\& !(D_800D18A0 \& (1 << i))) {/        if (D_80087270[i] != 10) {/ % team_elim team_elim2
+s/            if (D_800E0ED8 \& (1 << i)) {/            if (D_800E0ED8 \& (2 << i)) {/ % team_cpu1 team_cpu
+s/    if (humans == 0 || live < 2) {/    if (humans == 0 || live < 1) {/ % team_elim
+s/    if (humans == 0 || live < 2) {/    if (live < 2) {/ % team_cpu
+/humans == 0/,/}/s/D_800E0EDA = -1;/D_800E0EDA = 0;/ % team_cpu team_elim
+/D_80090118 <= 0) {/,/}/s/D_800E0EDA = -1;/D_800E0EDA = 0;/ % team_time

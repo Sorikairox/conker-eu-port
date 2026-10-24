@@ -7,6 +7,7 @@ void func_1507D4F8(s32); /* P59: was implicitly int */
 void func_1507F640(void); /* P60: idle animation, was implicitly int */
 s32 func_151AABC4(struct127 *, s32); /* P192: C on port-b (returns 0), was implicit */
 s32 func_150CA150(u8 *); /* P204: C on port-b (P201, returns 0), was implicit */
+u8 *func_15196438(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitter, was implicit */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_151C0698();   /* still asm; called by func_15070300 */
@@ -15,6 +16,8 @@ void func_1506BF5C(void);  /* P68 hand C; called by func_1506BF1C */
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];
+void func_150F9BB0(u8 *, u8, s32);        /* P238: port-b hand C (void); called by func_15071830 */
+void func_150FA520(u8 *, u8, u8, s32);    /* P238: port-b hand C (void); called by func_15071998 / func_150719CC / func_15071A00 */
 #endif
 
 
@@ -1654,11 +1657,11 @@ void func_1506FC9C(s32 arg0) {
 }
 
 void func_1506FCC8(s32 arg0) {
-    func_15196438(D_800D154C, 6, 0xFF, 0);
+    func_15196438((u8 *) D_800D154C, 6, 0xFF, 0);
 }
 
 void func_1506FCFC(s32 arg0) {
-    func_15196438(D_800D154C, 5, 0xFF, 0);
+    func_15196438((u8 *) D_800D154C, 5, 0xFF, 0);
 }
 
 void func_1506FD30(s32 arg0) {
@@ -3028,7 +3031,179 @@ void func_15073F78(void) {
     D_800D154C->unk10B &= ~D_800D1580;
 }
 
+#ifdef NON_MATCHING
+extern u8 *D_800D252C;
+extern f32 D_800CC704;
+extern f32 D_800CC70C;
+u8 *func_15031C4C(u8 *, s32, s32);
+s32 func_15082E44(u8 *, s32, s32, s32, s32);
+void func_100100E0(s32, s32, s32, s32, s32, s32);
+void func_1506B04C(u8 *, s32, void *);
+void func_150F1C5C(u8 *, u8, u8, u8, s32);
+s32 func_15033ECC();
+
+/* struct126 (the owner's control block, me->unk31C) fields past the declared ones */
+#define CTL_F32(c, off) (*(f32 *) ((u8 *) (c) + (off)))
+#define CTL_U16(c, off) (*(u16 *) ((u8 *) (c) + (off)))
+/* D_800D2104[obj->unk13F]: the object's model / anim block (s16 x/y/z offsets at +8/+A/+C) */
+#define OBJ_MODEL_S16(o, off) (*(s16 *) ((u8 *) (D_800D2104[(o)->unk13F]) + (off)))
+
+// event_spawn_helper_object: event-script command: spawns the helper object of record (arg & 0xFF) next to the
+// current object D_800D154C (on its marker point 0x13 / 4 / arg byte 2 or 100 units above it), gives it the owner's
+// heading, a throw speed (from the owner's charge +0x19C when D_800BE616 is set, with a launch sound), then applies
+// the per-kind setup (0x4A, 0x7B, 0x9A), marks it active (+0x1CA bit 0x80) and stores its state in +0x232.
+void func_15073FA0(void) {
+    s32 arg = D_800D1580 & 0xFFFF;
+    s32 rec;
+    s32 n;
+    s32 state;
+    s32 sel;
+    s32 usePos;
+    struct127 *me;
+    struct127 *obj;
+    struct126 *ctl;
+    u8 *snd;
+    f32 speed;
+    s16 angle;
+    f32 dx, dy, dz;
+    s32 r1, r2, turn;
+
+    rec = func_15083E0C(arg & 0xFF);
+    if (rec == -1) {
+        return;
+    }
+    state = 1;
+    D_800D252C[rec] = 0;
+    n = func_15082E44((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    if (n == 0) {
+        return;
+    }
+    obj = &D_800CC2D0[n - 1];
+    obj->unk124 = D_800C3E78 + 1;
+    obj->unique_id = D_800C3E78 + 0x96;
+    me = D_800D154C;
+    speed = 40.0f;
+    usePos = TRUE;
+    if (me->unk1D4 != NULL) {
+        usePos = FALSE;
+        switch (me->id) {
+        case 0x5A:
+            sel = 0x13;
+            break;
+        case 0x75:
+        case 0x80:
+            sel = 4;
+            break;
+        case 0x7B:
+            if (arg == 0x10) {
+                sel = (D_800D1580 >> 16) & 0xFF;
+            } else {
+                usePos = TRUE;
+            }
+            break;
+        default:
+            usePos = TRUE;
+            break;
+        }
+        if (!usePos) {
+            func_15143134(NULL, &obj->x_position, (u8 *) me->unk1D4 + sel * 64);
+            me = D_800D154C;
+        }
+    }
+    if (usePos) {
+        obj->x_position = me->x_position;
+        obj->y_position = me->y_position + 100.0f;
+        obj->z_position = me->z_position;
+    }
+    if (D_800BE616 != 0) {
+        state = 5;
+        obj->unk2E4 = CTL_U16(me->unk31C, 0x19C);
+        me->unk31C->unk19B = 0;
+        D_800D154C->unk31C->unk78 = 0;
+        obj->gravity = 4.0f;
+        me = D_800D154C;
+        ctl = me->unk31C;
+        speed = (f32) (200 - CTL_U16(ctl, 0x19C)) * 60.0f / 200.0f + 40.0f;
+        if ((D_800D1580 >> 16) & 1) {
+            speed = 0.0f;
+        }
+        if (ctl->unk198 != 0) {
+            func_1505A184((u16) (s32) ((45.0f - CTL_F32(ctl, 0x170)) * 182.04445f), speed * 4.0f, 0.0f, &dx, &dy, &dz);
+            obj->y_velocity = -dy;
+        } else {
+            obj->y_velocity = 50.0f;
+        }
+        snd = func_15031C4C((u8 *) me, (me->id == 0x75) ? 0x64 : 0x2C, 0);
+        if (snd != NULL) {
+            obj->unk8E = *(s32 *) (snd + 0x3C);
+            func_100100E0((s32) func_15033ECC, (s32) snd, (s32) D_800D154C, (s32) func_1000EE70, (s32) obj,
+                          obj->unique_id);
+        }
+        me = D_800D154C;
+    }
+
+    angle = me->unk7A;
+    if (me->unk31C != NULL) {
+        angle -= me->unk31C->unk12;
+    }
+    obj->unk7A = angle;
+    obj->unk76 = angle;
+    obj->xz_velocity = speed;
+    obj->unk1CC = obj->y_position;
+
+    switch (me->id) {
+    case 0x4A:
+        state = 5;
+        obj->xz_velocity = 0.0f;
+        func_151A3940((u8 *) obj, 0xFF);
+        OBJ_MODEL_S16(obj, 8) = (s16) (s32) D_800CC704;
+        OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) D_800CC70C;
+        break;
+    case 0x7B:
+        if (arg == 0x10) {
+            state = 7;
+            OBJ_MODEL_S16(obj, 8) = (s16) (s32) D_800CC704;
+            OBJ_MODEL_S16(obj, 0xA) = 0x3D4;
+            OBJ_MODEL_S16(obj, 0xC) = (s16) (s32) D_800CC70C;
+            obj->unique_id = 0xFF - (n - 1);
+            func_1506B04C((u8 *) obj, 0xC, NULL);
+            r1 = func_150ADA20();
+            r2 = func_150ADA20();
+            func_150F1C5C((u8 *) D_800D154C, r1 & 1, r2 & 3, 0xFF, 1);
+        } else if (arg == 0xA) {
+            state = 0xE;
+            obj->y_position = me->y_position;
+        } else {
+            state = 4;
+            obj->unique_id = 0x12;
+            obj->y_position = 1040.0f;
+            obj->xz_velocity = 0.0f;
+        }
+        break;
+    case 0x9A:
+        turn = (func_150ADA20() & 0xFFF) - 0x800;
+        r2 = (s16) ((u32) func_150ADA20() % 800);
+        state = 7;
+        func_1505A184((u16) (D_800D154C->unk76 + turn), 30.0f - (f32) r2 * 0.01f, 0.0f, &dx, &dy, &dz);
+        obj->x_position -= dx;
+        obj->z_position -= dy;
+        me = D_800D154C;
+        obj->xz_velocity = me->xz_velocity * 1.35f + 6.0f;
+        obj->immune = 0xFF;
+        obj->y_velocity = me->y_velocity;
+        obj->y_position = me->y_position - 40.0f;
+        obj->unk222 = me->unk222;
+        break;
+    }
+    obj->health |= 0x80;
+    obj->unk232 = state;
+}
+#undef CTL_F32
+#undef CTL_U16
+#undef OBJ_MODEL_S16
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15073FA0.s")
+#endif
 
 void func_15074644(void) {
     D_800D154C->unk31C->unk11A = (s8) D_800D1580;
