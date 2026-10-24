@@ -1,0 +1,2 @@
+# P243 func_150B8020: plain random inputs with the registry ARGMEM (smoke request 0x88 bytes at jal 15151FA8)
+r ! ! ! ! ! ! !

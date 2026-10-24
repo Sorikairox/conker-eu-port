@@ -1,0 +1,23 @@
+# P243 func_150B40EC (emit_point_spark_ring) mutants: sed % setup names
+s/func_151423D8((angle0 - 0x40) \& 0xFF)/func_151423D8((angle0 - 0x3F) \& 0xFF)/ % base
+s/sh = func_151423D8(angle0 \& 0xFF)/sh = func_151423D8(a \& 0xFF)/ % base
+s/ct = func_151423D8((a - 0x40) \& 0xFF)/ct = func_151423D8((angle0 - 0x40) \& 0xFF)/ % base
+s/spd = 10.0f \*/spd = 11.0f */ % base
+s/sp.vel\[0\] = spd \* ch;/sp.vel[0] = spd * sh;/ % base
+s/sp.vel\[1\] = -10.0f \* ct;/sp.vel[1] = -10.0f * ch;/ % base
+s/sp.pos\[1\] = y;/sp.pos[1] = x;/ % base
+s/\* 1.9530001f + 3.736f/* 1.953f + 3.736f/ % base
+s/\* 0.94000006f + 2.223f/* 0.94000006f + 2.2f/ % base
+s/\* 2.6599998f + 1.8499999f/* 2.66f + 1.8499999f/ % base
+s/func_151429E0(8, \&sp.c\[0\]/func_151429E0(9, \&sp.c[0]/ % base
+s/\&sp.c\[0\], \&sp.c\[1\]/\&sp.c[1], \&sp.c[0]/ % base
+s/sp.c\[3\] = 0xFF;/sp.c[3] = 0xFE;/ % base
+s/sp.c\[8\] = 9;/sp.c[8] = 10;/ % base
+s/\& 0xF) + 0xF;/\& 0x7) + 0xF;/ % base
+s/sp.e = 0x1601;/sp.e = 0x1602;/ % base
+s/sp.h = 0xA;/sp.h = 0xB;/ % base
+s/sp.i = 0x19;/sp.i = 0x18;/ % base
+s/argB \& 0xFF, 1);/argB \& 0xFF, 0);/ % base
+s/func_151568F8(\&sp, 1, 0);/func_151568F8(\&sp, 0, 0);/ % base
+s/    func_151568F8(\&sp, 1, 0);// % base
+s/    return 1;/    return 0;/ % base

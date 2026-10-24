@@ -223,7 +223,90 @@ s32 func_150C251C(struct_eu_sprite *arg0) {
     }
     return 1;
 }
+#ifdef NON_MATCHING
+/* P243: readable C for func_150C2558 (game_EF410, 106 insns). */
+// emit_point_smoke: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
+// s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`): queues one func_15151FA8 smoke puff (owner byte argB,
+// arg 1) at (x, y, z + 15 - rand * 30), sizes 22 / 44, 200 / 150, the byte angle (s32) (pz * 0.07012195f) - 0x40 and
+// the fixed puff constants of the asm (the 0x84-byte request of func_150B8020; the last word stays unwritten, as in
+// the asm). Always returns 1 (go on).
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 sizeA;
+    /* 0x10 */ f32 sizeB;
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ s16 u24[10];
+    /* 0x38 */ u8 u38[3];
+    /* 0x3C */ s32 u3C[6];
+    /* 0x54 */ u8 u54[3];
+    /* 0x58 */ s32 u58[9];
+    /* 0x7C */ u8 u7C[2];
+    /* 0x7E */ u8 pad7E[2];
+    /* 0x80 */ s16 u80;
+    /* 0x82 */ s16 u82;
+    /* 0x84 */ s32 u84;
+} Smoke2558;
+f32 func_150ADA68(void);
+
+s32 func_150C2558(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+                  f32 arg9, s32 argA, s32 argB) {
+    Smoke2558 sm;
+    f32 pz;
+
+    sm.pos[0] = x;
+    sm.pos[1] = y;
+    pz = (z + 15.0f) - func_150ADA68() * 30.0f;
+    sm.pos[2] = pz;
+    sm.sizeA = 22.0f;
+    sm.sizeB = 44.0f;
+    sm.u14 = 0.0f;
+    sm.u18 = 0.0f;
+    sm.u1C = 200.0f;
+    sm.u20 = 150.0f;
+    sm.u24[0] = 1;
+    sm.u24[1] = 0;
+    sm.u24[2] = (s32) (pz * 0.07012195f) - 0x40;
+    sm.u24[3] = 9;
+    sm.u24[4] = 0;
+    sm.u24[5] = 0;
+    sm.u24[6] = 3;
+    sm.u24[7] = 3;
+    sm.u24[8] = 0x28;
+    sm.u24[9] = 0x15;
+    sm.u38[0] = 0xB;
+    sm.u38[1] = 1;
+    sm.u38[2] = 0x28;
+    sm.u3C[0] = 1;
+    sm.u3C[1] = 4;
+    sm.u3C[2] = 0;
+    sm.u3C[3] = 0;
+    sm.u3C[4] = 0;
+    sm.u3C[5] = 0;
+    sm.u54[0] = 0xFF;
+    sm.u54[1] = 0xFF;
+    sm.u54[2] = 0;
+    sm.u58[0] = 3;
+    sm.u58[1] = 0xFF;
+    sm.u58[2] = 0;
+    sm.u58[3] = 0x220005;
+    sm.u58[4] = 0x1D0600;
+    sm.u58[5] = 1;
+    sm.u58[6] = 0x3B;
+    sm.u58[7] = 0x80;
+    sm.u58[8] = 0x20;
+    sm.u7C[0] = 0;
+    sm.u7C[1] = 7;
+    sm.u80 = 0xC;
+    sm.u82 = 0x15;
+    func_15151FA8((u8 *) &sm, argB & 0xFF, 1);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2558.s")
+#endif
 typedef struct {
     s16 u0[4];
     f32 u8;

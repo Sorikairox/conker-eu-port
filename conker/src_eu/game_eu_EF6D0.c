@@ -167,4 +167,53 @@ void func_150C1F40(u8 *arg0, s32 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/func_150C1F40.s")
 #endif
+#ifdef NON_MATCHING
+/* P243: readable C for func_150C2334 (game_eu_EF6D0, 75 insns). */
+// emit_point_puff: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a,
+// s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, emitters func_1514C860 / func_1514C9E0 / func_1514CBE8):
+// queues one func_1518CFF0 particle at (x, y, z): drift (x - x0, z - z0) * 10, size (s32) arg9 and (s32) (arg9 *
+// 0.1757) (double, the ROM's D_800A05F8), constants 150 / 20 / 600, two func_151429E0 colour triples of palette 0,
+// alpha bytes 0xFF / 0xFF, a random 12..27 byte and 1 (the record layout of func_1514A434). Always returns 1 (go on).
+typedef struct {
+    f32 pos[3];
+    u8 unkC[0xA];
+    s16 h16, h18, h1A, h1C, h1E, h20, h22, h24, h26;
+    u8 c0[3];
+    u8 c1[3];
+    u8 b2E, b2F, b30, b31;
+} Puff2334;
+void func_151429E0(u8, u8 *, u8 *, u8 *);
+void func_1518CFF0(Puff2334 *, s32);
+
+s32 func_150C2334(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+                  f32 arg9, s32 argA, s32 argB) {
+    Puff2334 s;
+    s16 size;
+    s16 sizeB;
+
+    s.pos[0] = x;
+    s.pos[1] = y;
+    s.pos[2] = z;
+    size = (s32) arg9;
+    sizeB = (s32) (arg9 * 0.1757);
+    s.h1E = (s32) ((x - x0) * 10.0f);
+    s.h20 = (s32) ((z - z0) * 10.0f);
+    s.h22 = 150;
+    s.h26 = 600;
+    s.h24 = 20;
+    s.h16 = size;
+    s.h18 = size;
+    s.h1A = sizeB;
+    s.h1C = sizeB;
+    func_151429E0(0, &s.c0[0], &s.c0[1], &s.c0[2]);
+    func_151429E0(0, &s.c1[0], &s.c1[1], &s.c1[2]);
+    s.b2E = 0xFF;
+    s.b2F = 0xFF;
+    s.b30 = (func_150ADA20() & 0xF) + 12;
+    s.b31 = 1;
+    func_1518CFF0(&s, 1);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF6D0/func_150C2334.s")
+#endif

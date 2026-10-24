@@ -67,6 +67,7 @@ typedef struct {
     /* 0x54 */ u8  u54[3];
     /* 0x58 */ s32 u58[9];
     /* 0x7C */ u8  u7C[2];
+    /* 0x7E */ u8  pad7E[2];   /* P243: was missing, so u80 / u82 landed at 0x7E / 0x80 */
     /* 0x80 */ s16 u80;
     /* 0x82 */ s16 u82;
     /* 0x84 */ s32 u84;

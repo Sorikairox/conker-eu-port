@@ -256,4 +256,20 @@ TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_STKFILL=A5A5A5A5"
 # a valid decimal index with a hex value still runs.
 TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_ARG=A=7"
 TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_ARG=0=7"
+# P243: a matched-C reference is its own ELF symbol size, not len(candidate): a longer candidate that jals the next
+# function (func_150305E0 -> func_15030600) used to make the reference span the callee, leave `jal func_15030600`
+# unstubbed and run into the real callee (hang until DIFFTEST_TIMEOUT). Now the candidate moves to CAND_ALT and the
+# callee is a stub on both sides. DIFFTEST_REFSZ_OLD=1 = old (hangs; not a case here). D_800C3EE0 is EU 800C4300.
+TRIALS=8 chkce EQUIV  func_150305E0 "DIFFTEST_TIMEOUT=120"
+TRIALS=8 chkce DIFFER func_150305E0 "DIFFTEST_TIMEOUT=120 DIFFTEST_POKE=800C4300=5A5A1234" '1,/0xFF/s/0xFF/0xFE/'
+TRIALS=8 chkce EQUIV  func_150305E0 "DIFFTEST_TIMEOUT=120" '1,/0xFF/s/0xFF/0xFE/'
+# P243 (port-b P242): 0x15031C4C carries two symbols (func_15031C4C, and func_1503195C in undefined_syms.eu.txt); calls
+# are named func_1503195C. Since P234 its functions.h declaration is found through the TU's includes; without that
+# (DIFFTEST_INCHDR_OLD=1, or an alias no header declares) the callee had no prototype. Now every name at the address
+# is tried (first declared one wins; DIFFTEST_ALIASPROTO_OLD=1 = old). Case: the candidate leaves a scratch value in a3
+# (not an argument of the 3-argument callee): with the prototype EQUIV, without it a false DIFFER on a3.
+TRIALS=8 chkce EQUIV  func_15031C1C ""
+TRIALS=8 chkce DIFFER func_15031C1C "" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, arg2)/'
+TRIALS=8 chkce EQUIV  func_15031C1C "DIFFTEST_INCHDR_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
+TRIALS=8 chkce DIFFER func_15031C1C "DIFFTEST_INCHDR_OLD=1 DIFFTEST_ALIASPROTO_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

@@ -1,0 +1,21 @@
+# P243 func_150C2558 (emit_point_smoke) mutants: sed % setup names
+s/(z + 15.0f) - func_150ADA68() \* 30.0f/(z + 15.0f) - func_150ADA68() * 20.0f/ % base far
+s/(z + 15.0f)/(z + 16.0f)/ % base far
+s/sm.pos\[1\] = y;/sm.pos[1] = x;/ % base
+s/sm.sizeA = 22.0f;/sm.sizeA = 23.0f;/ % base
+s/sm.u1C = 200.0f;/sm.u1C = 201.0f;/ % base
+s/pz \* 0.07012195f) - 0x40/pz * 0.07012195f) - 0x41/ % base far
+s/pz \* 0.07012195f/pz * 0.0701f/ % far
+s/sm.u24\[3\] = 9;/sm.u24[3] = 8;/ % base
+s/sm.u24\[9\] = 0x15;/sm.u24[9] = 0x16;/ % base
+s/sm.u38\[1\] = 1;/sm.u38[1] = 0;/ % base
+s/sm.u3C\[1\] = 4;/sm.u3C[1] = 5;/ % base
+s/sm.u3C\[5\] = 0;/sm.u3C[5] = 1;/ % base
+s/sm.u54\[2\] = 0;/sm.u54[2] = 1;/ % base
+s/sm.u58\[3\] = 0x220005;/sm.u58[3] = 0x220006;/ % base
+s/sm.u58\[8\] = 0x20;/sm.u58[8] = 0x21;/ % base
+s/sm.u7C\[1\] = 7;/sm.u7C[1] = 6;/ % base
+s/sm.u82 = 0x15;/sm.u82 = 0x14;/ % base
+s/argB \& 0xFF, 1)/argB \& 0x7F, 1)/ % base
+s/argB \& 0xFF, 1)/argB \& 0xFF, 0)/ % base
+s/    return 1;/    return 0;/ % base
