@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P244 (port-b) (session P244, 2026-10-24). Details: `docs/port/sessions/P244.md`
+
+Branch `port-b`. Merged port 8c12ab83 (P241) and 8e1a8bdb (P243). **Triage of P241's re-run of port-b registry rows**:
+no C bug; every DIFFER was an incomplete registry row or a harness / reverify artefact (table in P244.md section 3).
+func_15065E18: func_150DC2F0's unused a1 (2-arg prototype since P222, asm leaves a1 stale) -> `CANDSED` test sed; P220's
+setups / mutants added to the row: setups 680 / 680, mutants all killed but P220's documented equivalent. func_151C0698:
+leftover v0 -> tested as void (CANDSED): all EQUIV, 35 / 35. func_150C8F68: missing ARGMEM + JALRSKIP=1: all EQUIV.
+func_15170648: reverify bug (registry knob overrode setup fields): 4 / 4. func_150C92B8: new exact-boundary setup,
+59 / 59 + 6 / 6. func_15196438 / func_15065E18 / func_150C92B8 mutants rewritten as pattern seds (port_work/p244/mutfix.py).
+**reverify.sh**: setup fields win over registry knobs; named mutant setups searched in every setup file; knobs `CANDSED=`
+and `NR=`. **func_15110B80** (13DC30, D_80089578[3]) view_border_clear: NM block with the dispatcher's 8-argument
+signature; random / 5 setups EQUIV, mutants 10 / 10. Checks: verify_all rc 0, NM rc 0, protocheck 0 (1545), selftest
+118 / 118, implicit_scan 0 NM+float. progress_nm total 5556 / 5915 (93.9%), C bytes 84.8%.
+
+## Next steps (from P244)
+
+1. Re-run the P241 rows nobody re-ran: func_1518F080, func_151D4D44, func_15063AA0, func_15175900, func_1513783C, the P235
+   rows (reverify MUT=1); func_15083E90 needs the body layout.
+2. Harness (port): per-call ARGMEM lengths (func_150D3870's m3870vb needs memcpy 28 in setups b / d, 8 elsewhere);
+   reverify splits mutant lines at `%`.
+3. port: re-run func_151D75B0 (its registry RET knob overrode the setups' RET fields before the reverify fix).
+4. Browser: func_15110B80 border clear (levels 0x1B / 0x1E / 0x31).
+5. Older items still open: game_eu_226870 hand asm (func_151F911C / 9060 / 9184 / 933C) + func_151F94E0; P242 browser list.
+
 ## State (session P243, 2026-10-24). Details: `docs/port/sessions/P243.md`
 - difftest: a matched-C reference is its ELF symbol size (was len(candidate): a longer candidate jal-ing the next
   function hung; DIFFTEST_REFSZ_OLD=1); callee prototypes are looked up under every symbol at the call address

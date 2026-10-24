@@ -170,12 +170,26 @@ Gfx *func_15110AC4(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 r, u8 g,
 }
 
 extern u8 D_800DC2D8[];
+#ifdef NON_MATCHING
+// view_border_clear: camera callback D_80089578[3] (dispatcher func_15110420 passes 8 arguments; only gdl is used).
+// On levels 0x1B / 0x1E, and on 0x31 while D_800DBFF0's record +0x3D4 has byte +0x78 == 3, fills the rectangle
+// (2, 0)..(D_800BE620 - 2, D_800BE624) with the level colour D_800DC2D8 (func_15110AC4); otherwise draws nothing.
+// P244: NM signature = the dispatcher's type (it took 4 parameters: a wasm call_indirect signature mismatch).
+Gfx *func_15110B80(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 handle) {
+    if (D_800BE9F0 == 0x1B || D_800BE9F0 == 0x1E
+        || (D_800BE9F0 == 0x31 && *(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3)) {
+        gdl = func_15110AC4(gdl, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
+    }
+    return gdl;
+}
+#else
 Gfx *func_15110B80(Gfx *arg0, s32 arg1, s32 arg2, s32 arg3) {
     if ((D_800BE9F0 == 0x1B) || (D_800BE9F0 == 0x1E) || ((D_800BE9F0 == 0x31) && (*(u8 *)((u8 *)D_800DBFF0->unk3D4 + 0x78) == 3))) {
         arg0 = func_15110AC4(arg0, 2, 0, D_800BE620 - 2, D_800BE624, D_800DC2D8[0], D_800DC2D8[1], D_800DC2D8[2]);
     }
     return arg0;
 }
+#endif
 
 #ifdef NON_MATCHING
 extern u8 D_800BEEE2;
