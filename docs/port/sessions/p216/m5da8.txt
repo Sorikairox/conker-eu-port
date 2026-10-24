@@ -1,0 +1,20 @@
+s/D_8009002C\[which\], \*D_80090034\[which\]/D_8009002C[0], *D_80090034[which]/
+s/D_8009002C\[which\], \*D_80090034\[which\]/D_8009002C[which], *D_80090034[0]/
+s/(s32)sp94, (s32)sp88, D_8009/(s32)sp88, (s32)sp94, D_8009/
+s/(u8 \*)sp7C,$/(u8 *)sp70,/
+s/(u8 \*\*)&hitB, NULL);/(u8 **)\&hitA, NULL);/
+s/\[0x109\] = 1;/[0x109] = 2;/
+s/        hitA = mouth;/        hitA = dir;/
+s/        hitB = dir;/        hitB = mouth;/
+s/hitA\[1\] + hitB\[1\] \* 9999.0f/hitA[1] + hitB[1] * 9998.0f/
+s/hitA\[2\] + hitB\[2\]/hitA[2] + hitB[1]/
+s/0xC0) = hitA/0xBC) = hitA/
+s/    if (ctl\[0x109\] != 0) {/    if (ctl[0x109] == 0) {/
+s/seg\[1\] = \*(f32 \*)((u8 \*)obj->unk31C + 0xBC) - mouth\[1\]/seg[1] = *(f32 *)((u8 *)obj->unk31C + 0xBC) - mouth[0]/
+s/if (func_15145128(seg, seg, &len, NULL) != 0)/if (func_15145128(seg, seg, \&len, NULL) == 0)/
+s/(u8 \*)obj->unk31C + 0xB0,/(u8 *)obj->unk31C + 0xB4,/
+s/len \* 1.01f, 0, 0, 0, -1, 0, 0/len * 1.02f, 0, 0, 0, -1, 0, 0/
+s/len \* 1.01f, 0, 0, 0, -1, 0, 0/len * 1.01f, 0, 0, 0, 0, 0, 0/
+s/len \* 1.01f, 0, 0, 0, -1, 0, 0/len * 1.01f, 0, 1, 0, -1, 0, 0/
+s/mouth\[0\], mouth\[1\], mouth\[2\], seg\[0\]/mouth[0], mouth[1], mouth[1], seg[0]/
+s/    func_15063A54(obj);/    ;/

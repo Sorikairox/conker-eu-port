@@ -1,0 +1,19 @@
+s/kind\[i\] == 2 || kind\[i\] == 3/kind[i] == 2 || kind[i] == 4/ %
+s/kind\[i\] == 2 ||/kind[i] == 1 ||/ %
+s/special ? pass != 0 : pass == 0/special ? pass == 0 : pass != 0/ %
+s/pass != 2; pass++/pass != 1; pass++/ %
+s/if (team\[i\] != myTeam) {/if (team[i] == myTeam) {/ %
+s/active\[k\] <= 0 ||/active[k] < 0 ||/ %
+s/ || team\[k\] == myTeam) {/) {/ %
+s/j < k \* 16 + 16 \&\&/j < k * 16 + 15 \&\&/ %
+s/if (links\[j\] == i) {/if (links[j] == k) {/ %
+s/                        break;// %
+s/w <<= assigned\[k\];/w <<= assigned[i];/ %
+s/if (w < best) {/if (w <= best) {/ %
+s/assigned\[bestK\]++;/assigned[bestK] += 2;/ %
+s/best = 10000000;/best = 1000;/ %
+s/cost\[i\] = best;/cost[i] = bestK;/ %
+s/pick\[i\] = bestK;/pick[i] = best;/ %
+s/s32 myTeam = team\[me\];/s32 myTeam = team[0];/ %
+s/        assigned\[i\] = 0;/        assigned[i] = 1;/ %
+s/    return 0;/    return 1;/ %

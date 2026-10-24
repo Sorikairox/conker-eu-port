@@ -1,0 +1,1 @@
+s/kind\[i\] == 2 || kind\[i\] == 3/kind[i] == 2 || kind[i] == 4/ %

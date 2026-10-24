@@ -143,6 +143,18 @@ void func_1513B9DC(struct132 *arg0) {
     func_15169824(arg0);
 }
 
+#ifdef NON_MATCHING
+// object_mode_dispatch_a: runs the D_80089C44 handler picked by the object's +0x48 byte on the object. The asm leaves
+// the object in a0 at the jalr; every entry (func_1513B9A8 x4) is void (struct132 *), so no result is passed on.
+void func_1513BA10(struct132 *arg0) {
+    ((void (*)(struct132 *)) D_80089C44[arg0->unk48])(arg0);
+}
+
+// object_mode_dispatch_b: as func_1513BA10 with the table D_80089C54 (func_1513B9DC x4).
+void func_1513BA44(struct132 *arg0) {
+    ((void (*)(struct132 *)) D_80089C54[arg0->unk48])(arg0);
+}
+#else
 void func_1513BA10(struct132 *arg0) {
     D_80089C44[arg0->unk48]();
 }
@@ -150,6 +162,7 @@ void func_1513BA10(struct132 *arg0) {
 void func_1513BA44(struct132 *arg0) {
     D_80089C54[arg0->unk48]();
 }
+#endif
 
 void func_1513BA78(u8 *arg0, s32 arg1, u8 arg2) {
     switch (arg0[0x48]) {

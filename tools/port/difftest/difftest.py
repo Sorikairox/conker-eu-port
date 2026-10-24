@@ -516,7 +516,12 @@ def _split_top(ps):
         d += {'(': 1, ')': -1}.get(ch, 0); cur += ch
     return out + [cur]
 
-_DECL_PRE = re.compile(r'^\s*(?:(?:extern|static|inline)\s+)*[A-Za-z_]\w*[\s*]+$')
+# P214: `return func_X(...);` is a statement, not a declaration with type `return` (port-b P210: a `return
+# func_1505A630(temp_v0[0] - ..., ...)` line in game_A28B0 was read as func_1505A630's prototype, whose `[` made
+# its FP argument set empty, so f12 / f14 were never compared at any func_1505A630 call in that TU and the swapped
+# x arguments of func_150768DC survived). DIFFTEST_DECLKW_OLD=1 = old behaviour.
+_DECL_PRE = re.compile(r'^\s*(?:(?:extern|static|inline)\s+)*' + ('' if os.environ.get('DIFFTEST_DECLKW_OLD') == '1' else
+                       r'(?!(?:return|else|case|goto|do|sizeof)\b)') + r'[A-Za-z_]\w*[\s*]+$')
 def _is_decl(tu, m):
     """P47: the match is a declaration / definition (a type before the name on its line), not a call statement
     such as `    func_X(temp_f12);` that would hide the real prototype's float slots"""
@@ -549,6 +554,9 @@ def proto_fregs(tu, name):
     parsed as a prototype with an int parameter and gave set(), so no FPR argument was compared at all."""
     for m in [m for m in _decl_first(_nocomment(tu), name) if _is_decl(_nocomment(tu), m)]:
         ps = [p.strip() for p in m.group(1).split(',') if p.strip()]
+        # P214: a K&R declaration `T f();` says nothing about the parameters: unknown (look further / headers), not
+        # "no FP arguments" (DIFFTEST_DECLKW_OLD=1 = old)
+        if not ps and os.environ.get('DIFFTEST_DECLKW_OLD') != '1': continue
         if ps == ['void'] or not ps: return set()
         out = set(); fr = 12
         for p in ps[:2]:
@@ -706,6 +714,13 @@ def param_kinds(tu, func):
 # P20 (opt-in): DIFFTEST_ARG="N=V1|V2|...,..." (hex) gives integer argument slot N (0-3 = a0-a3, 4+ = stack) one of the
 # listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
 ARGFIX = {}
+JALRARG_OLD = os.environ.get('DIFFTEST_JALRARG_OLD') == '1'   # P211: old jalr argument compare (see compare)
+JALRTGT_OLD = os.environ.get('DIFFTEST_JALRTGT_OLD') == '1'   # P215: old jalr target-register handling (see compare)
+JALRSKIP = {int(x) for x in filter(None, os.environ.get('DIFFTEST_JALRSKIP', '').split(','))}   # P215: scratch arg GPRs at jalrs (see compare)
+NOPROTO = set(filter(None, os.environ.get('DIFFTEST_NOPROTO', '').split(',')))   # P214: selftest hook
+JALARG_OLD = os.environ.get('DIFFTEST_JALARG_OLD') == '1'
+JALARG_WIDE = os.environ.get('DIFFTEST_JALARG_WIDE') == '1'   # P214: opt-in wide jal argument compare (see compare)   # P214: old argument compare at direct calls of unknown prototype
+STKFILL = int(os.environ['DIFFTEST_STKFILL'], 16) if os.environ.get('DIFFTEST_STKFILL') else None   # P211: stack fill word
 ARG_FOLD = os.environ.get('DIFFTEST_ARGF_OLD') == '1'   # P200: old behaviour (ARG on a float parameter sets only aN)
 for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
     _a, _v = _p.split('=')
@@ -785,7 +800,11 @@ class Run:
                 self.d64[vram + 4 * k] = w; mwords[k] = 0
         code = b''.join(struct.pack('>I', w) for w in mwords)
         self.premap(vram, code, overlay=True)
-        self.premap(STK_LO, bytes(STK_TOP - STK_LO + 0x1000))
+        # P211: DIFFTEST_STKFILL=WORD fills the harness stack with that word (both sides alike) instead of zeros, so a
+        # local the candidate forgets to write reads non-zero (func_151C384C: dropping `req.angle[1] = 0.0f` survived
+        # because the unwritten slot read 0 anyway). Default: zeros as before.
+        self.premap(STK_LO, struct.pack('>I', STKFILL) * ((STK_TOP - STK_LO + 0x1000) // 4) if STKFILL is not None
+                    else bytes(STK_TOP - STK_LO + 0x1000))
         self.premap(RET_MAGIC, words2b(EPILOGUE_CODE) + bytes(PAGE - 4 * len(EPILOGUE_CODE)))
         self.premap(SCR, bytes(0x400) + words2b(PROLOGUE_CODE) + bytes(PAGE - 0x400 - 4 * len(PROLOGUE_CODE)))
         self.helpers = set(); self.pending = None
@@ -1024,7 +1043,9 @@ class Run:
             # P112: arg registers this run wrote since the last call (path-sensitive; see compare: indirect calls)
             for k in range((addr - self.vram) // 4, min(len(self.words), (addr - self.vram + size) // 4)):
                 d = gpr_dest(self.words[k])
-                if d is not None and 4 <= d <= 7: self.awr.add(d - 4)
+                if d is not None and 4 <= d <= 7: self.awr.add(d - 4); self.awr_all.add(d - 4)
+                fd = fpr_dest(self.words[k])
+                if fd in (12, 13, 14, 15): self.awf_all.add(fd); self.awf.add(fd)
             # P89: the frame is set up in the entry block; the next blocks see the function's own sp
             if self.nblk < 4:
                 self.nblk += 1; self.minsp = min(self.minsp, mu.reg_read(UC_MIPS_REG_SP))
@@ -1047,8 +1068,11 @@ class Run:
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         ind = site is not None and (self.words[site] & 0xFC00003F) == 9   # P112: reached through jalr
+        jrs = (self.words[site] >> 21) & 31 if ind else None   # P215: the jalr's target register
         awr = self.awr; self.awr = set()
-        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, awr=awr,
+        awf = self.awf; self.awf = set()   # P214: arg FPRs written since the previous call
+        awr_all, awf_all = set(self.awr_all), set(self.awf_all)   # P211: arg GPRs / FPRs written since entry
+        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, jrs=jrs, awr=awr, awf=awf, awr_all=awr_all, awf_all=awf_all,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
@@ -1120,7 +1144,7 @@ class Run:
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
         self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
-        self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set()
+        self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set(); self.awf = set(); self.awr_all = set(); self.awf_all = set()
         while True:
             self.resume = None
             try:
@@ -1158,10 +1182,24 @@ def same_val(R, a, C, b):
         # candidate table is followed by other data than the reference's rodata vector, e.g. func_1510A98C)
         n = int(os.environ.get('DIFFTEST_TUCMP_LEN') or '32')
         try:
-            return bytes(R.mu.mem_read(phys(a), n)) == bytes(C.mu.mem_read(phys(b), n))
+            if os.environ.get('DIFFTEST_TUPEEK_OLD') == '1':
+                return bytes(R.mu.mem_read(phys(a), n)) == bytes(C.mu.mem_read(phys(b), n))
+            return _peek(R, a, n) == _peek(C, b, n)
         except Exception:
             return False
     return False
+
+
+def _peek(run, a, n):
+    """P215: n bytes at a; a page the run never touched gives its initial content (ROM image / pokes / random)
+    instead of failing (the reference's own string D_8009DDF0, passed by func_1508AB7C to func_15042D94 but never
+    read by it, sat on an unmapped page, so the TU-literal compare was always 'different'). DIFFTEST_TUPEEK_OLD=1 = old."""
+    out = b''; p = phys(a)
+    while len(out) < n:
+        pp = p & ~(PAGE - 1); k = min(n - len(out), pp + PAGE - p)
+        out += bytes(run.mu.mem_read(p, k)) if pp in run.mapped else run.page_init(pp)[p - pp:p - pp + k]
+        p += k
+    return out
 
 
 LIBULTRA_PREFIXES = ('os', '__os', 'gu', 'bzero', 'bcopy')
@@ -1209,8 +1247,39 @@ def compare(R, C, rk, arity):
         # P30 (opt-in): DIFFTEST_EXACT="NAME,..." or "*": those known prototypes are exact too (a scratch a2 left
         # by the reference right before a 1-arg call is not an argument)
         if na not in (None, 99) and (a['name'] in EXACT or '*' in EXACT): cnt = na
-        for k in range(min(cnt, 4)):
-            if k in FSKIP.get(a['name'], ()): continue
+        # P211: an indirect call (jalr) also compares every arg register that EITHER side wrote since entry, whatever
+        # the target's prototype says (table targets' prototypes are often wrong: `void (*)(void)` handlers that
+        # read a0). Before P211 only the reference's writes since the previous call counted, and only for unknown
+        # targets: a candidate that set the pass-through a0 to 0 in an earlier block (func_1513472C `arg0 = 0` in
+        # the `idx >= 10` branch) compared equal. Registers neither side wrote hold the same entry value on both
+        # sides. DIFFTEST_JALRARG_OLD=1 = old behaviour.
+        indw = set()
+        if a.get('ind') and not JALRARG_OLD:
+            indw = a.get('awr_all', set()) | b.get('awr_all', set())
+            # P211 jalr GPR compare. P215: this line was lost in the P214 edit below (indw computed, never used), so
+            # jalr a0-a3 were compared only up to the target's arity: selftest func_1513472C `arg0 = 0` gave EQUIV.
+            cnt = max(cnt, max(indw, default=-1) + 1)
+        # P214: DIFFTEST_JALARG_WIDE=1 (opt-in): a direct call (jal) of a function with no known prototype also compares
+        # every arg GPR / FPR either side wrote since the previous call. Not the default: IDO keeps locals and
+        # temporaries in a0-a3 / f12-f15 between calls (func_151DE100 keeps a byte local in a0 across its call of the
+        # no-argument func_1517F54C; func_1508A63C has the race mode in a3 and dz in f12 at its func_150859AC call),
+        # so the wide compare gives false DIFFERs. The default P214 change is below (FPRs: union of the straight-line
+        # writes). A known prototype keeps the path above.
+        jw = set()
+        if not a.get('ind') and na is None and not JALARG_OLD and JALARG_WIDE:
+            jw = (a.get('awr', set()) | b.get('awr', set())) - set(range(cnt))
+        # P215: at a jalr, an arg register that holds the jump target on either side is not an argument (func_1506B04C
+        # does `lw a2, table(a2); jalr a2`: a2 = the handler's address in the reference, `arg` in the candidate, a false
+        # DIFFER since P211). Skipped unless the target's known arity covers it. DIFFTEST_JALRTGT_OLD=1 = old.
+        tgt = set()
+        if a.get('ind') and not JALRTGT_OLD:
+            tgt = {c['jrs'] - 4 for c in (a, b) if c.get('jrs') is not None and 4 <= c['jrs'] <= 7}
+            # DIFFTEST_JALRSKIP=N,...: arg GPRs aN the caller only uses as scratch before a jalr (func_1506B04C copies
+            # `arg` to a3 and passes it in a1; all 15 D_800864B0 handlers take 2 args). Check every table entry first.
+            tgt |= JALRSKIP
+            tgt = {k for k in tgt if na is None or na == 99 or k >= na}
+        for k in sorted(set(range(min(cnt, 4))) | jw):
+            if k in FSKIP.get(a['name'], ()) or k in tgt: continue
             if not same_val(R, a['regs'][k], C, b['regs'][k]):
                 return 'call #%d %s: a%d ref=0x%X cand=0x%X' % (i, a['name'], k, a['regs'][k], b['regs'][k])
         # outgoing stack args: the contiguous run of slots from sp+0x10 written right before the call
@@ -1228,7 +1297,16 @@ def compare(R, C, rk, arity):
                 return 'call #%d %s: stack arg sp+0x%X ref=0x%X cand=0x%X' % (i, a['name'], o, a['stkw'][j], b['stkw'][j])
         pf = FREGS.get(a['name'])
         # unknown prototype: only FPRs both sides set right before the call (a lone scratch f12 is not an argument)
-        for fr in sorted(a['f'] & b['f'] if pf is None else pf):
+        frs = set(a['f'] & b['f'] if pf is None else pf)
+        if a.get('ind') and not JALRARG_OLD: frs |= a.get('awf_all', set()) | b.get('awf_all', set())   # P211
+        # P214: a direct call of unknown prototype compares the FPRs EITHER side set in the straight-line run right before
+        # the call (before P214: only those BOTH sides set there, so a candidate that computes f12 before a branch and
+        # the jal block compared nothing; selftest func_150768DC with DIFFTEST_NOPROTO). DIFFTEST_JALARG_OLD=1 = old;
+        # DIFFTEST_JALARG_WIDE=1 adds every f12-f15 either side wrote since the previous call.
+        if not a.get('ind') and pf is None and not JALARG_OLD:
+            frs |= a['f'] | b['f']
+            if JALARG_WIDE: frs |= a.get('awf', set()) | b.get('awf', set())
+        for fr in sorted(frs):
             if a['fregs'][fr] != b['fregs'][fr]:
                 return 'call #%d %s: f%d ref=0x%X cand=0x%X' % (i, a['name'], fr, a['fregs'][fr], b['fregs'][fr])
         if a['mem'] != b['mem']:
@@ -1442,6 +1520,8 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
                         # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
                         if new[c['name']][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
                             new[c['name']] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
+                # P214 (selftest hook): DIFFTEST_NOPROTO="NAME,..." treats those callees as having no prototype at all
+                if c['name'] in NOPROTO: new[c['name']] = (None, set(), None)
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
         why = compare(R, C, rk, arity)
         if verbose:
