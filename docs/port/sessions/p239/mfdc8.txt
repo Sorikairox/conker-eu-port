@@ -1,0 +1,4 @@
+6s/0x89/0x88/ % r0
+8s/!= -1/> 0/ % r0
+9s/release + 1/release/ % r0
+9s/(self)/(self + 4)/ % r0

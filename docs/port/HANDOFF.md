@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P239 (port-b) (session P239, 2026-10-24). Details: `docs/port/sessions/P239.md`
+
+Branch `port-b`. **D_8008FFE8 (game_1FFF60)**: the ROM table is one 7-entry table at 0x8008FFE0 (D_8008FFE0 = index
++0x29, result tested; D_8008FFE8 = +2 entries, index +0x2A, result ignored). All entries now have the NM signature
+`s32 (ptr, void *pos)` (= D_8008FFE0's declared type): func_1518FD34 **bone_sparks_tick** (readable rewrite, returns
+1 / the tick handler's v0), func_1518FE0C **bone_sparks_burst**, func_151D33B8 (EU 151D3968)
+**effect_node_children_free**, func_1518FDC8 **bone_sparks_release** take and ignore the position (NM blocks, matched
+C kept in `#else`); the dispatchers func_151D2C40 **effect_child_update** / func_151D3130 **effect_node_release** have
+NM copies that call D_8008FFE8 through a cast to that type. Same for the tick table D_8008DA1C (D_8008DA20 = +1):
+func_15190C34 **bone_sparks_owner_release** is `s32 (u8 *)` under NM. No asm callers of any entry (v0use). Verified:
+difftest random + setups + mutants for all 7 (jalr arg compare in the dispatchers: 19 / 19 and 12 / 12 mutants);
+func_1518FE0C / func_151D33B8 / func_1518FDC8's no-handler path through void test variants (registry knob `DRAFT=`,
+new in reverify.sh). Hand C (NM): **func_15135DD0 beam_impact_effects** (161520, 397 words; mutants 38 / 38). Checks:
+verify_all rc 0 (byte-identical), NM build rc 0, protocheck 0 (1485), selftest 103 / 103, voidret_scan no SUSPECT.
+progress_nm: game 4943 / 5334, total 5479 / 5915 (92.6%), C bytes 82.1%, 436 asm-only.
+
+## Next steps (from P239)
+
+1. port (variables.h): declare `extern s32 (*D_8008FFE8[])(struct_eu_1FFF60_child *, void *);` (the NM dispatcher
+   copies in game_1FFF60 cast until then) and `extern s32 (*D_8008DA20[])(u8 *);` (only the matching func_1518FDC8
+   uses it).
+2. Browser: func_15135DD0 (func_151AFA80 beam / impact effects); effect-child handlers (entries 3..6 are not reached
+   by func_1518FE50's children; watch for other spawners writing child +0x29 / +0x2A).
+3. Candidates left: func_15139768 (387, 161520; asm caller func_15138C80 returns its v0, NM caller passes f32 0.6 /
+   1.0), func_150D3870 (450, 101080), func_151F94E0 (960, 226870); the 4 Rare hand-asm functions of game_eu_226870
+   (func_151F9060 / 911C / 9184 / 933C, nmasm harness). 61 asm-only functions in port-b's files (P239.md section 3).
+4. difftest.py: a candidate longer than the reference that calls the next function (jal target inside the candidate
+   range) hangs (stub_at refuses in-range addresses); stub such targets when they are past the reference length.
+5. implicit_scan was not run (port's tool); run it after the merge.
+
 ## P235 (port-b) (session P235, 2026-10-24). Details: `docs/port/sessions/P235.md`
 
 Branch `port-b`. **difftest job limiter** in `tools/port/difftest.sh` (port and web get it via merges): at most 2

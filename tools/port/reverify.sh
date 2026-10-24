@@ -20,7 +20,10 @@ for F in "$@"; do
   wh=(NMBLOCK_WHOLE=1); [ -n "$NMBLOCK_BODY" ] && wh=(-u NMBLOCK_WHOLE)
   C=$W/$F.c; env "${wh[@]}" python3 tools/port/nmblock.py $F $C > /dev/null || { echo "$F: no C definition"; continue; }
   envs=(); tr=${TR:-4}
-  for k in $kn; do case $k in TR=*) [ -z "$TR" ] && tr=${k#TR=};; *) envs+=("$k");; esac; done
+  # P239: knob DRAFT=path tests a recorded test variant instead of the NM block (e.g. func_1518FE0C: the shipped
+  # s32 (u8 *, void *) table-signature body is one word longer and its jal to the adjacent func_1518FE50 falls inside
+  # the candidate range, so difftest cannot stub it; the void one-argument variant has the same body)
+  for k in $kn; do case $k in TR=*) [ -z "$TR" ] && tr=${k#TR=};; DRAFT=*) C=${k#DRAFT=};; *) envs+=("$k");; esac; done
   T=build/difftest_rv_${F}_$$
   dt() { local u=(); [ -n "$NOARGMEM" ] && u=(-u DIFFTEST_ARGMEM)  # mut.sh P73: the random phase runs without ARGMEM
     env "${envs[@]}" "${u[@]}" DIFFTEST_TMP=$T "$@" 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | cut -c1-${CUT:-160}; }

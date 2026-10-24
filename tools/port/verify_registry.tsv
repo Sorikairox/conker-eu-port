@@ -110,3 +110,11 @@ func_150FA520	game_eu_127840	docs/port/sessions/p235/sa520.txt	DIFFTEST_ROMDATA=
 func_150F9BB0	game_eu_127840	docs/port/sessions/p235/s9bb0.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=1513D860=0:88,1513D860=0+58:92,15140D40=0:120,15140D40=2:88,10023360=1:24,151D8E18=0:7,15160FC8=2:12 TR=4	docs/port/sessions/p235/m9bb0.txt	P235
 func_151356D4	game_161520	docs/port/sessions/p235/s56d4.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151559FC=0:68,151559FC=2:32,10023360=1:24 TR=4	docs/port/sessions/p235/m56d4.txt,docs/port/sessions/p235/m56d4b.txt,docs/port/sessions/p235/m56d4c.txt	P235
 func_151BDDD8	game_eu_1E7CC0	docs/port/sessions/p235/sddd8.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=1513D860=0:88,1513D860=0+58:92,15140D40=0:120,15140D40=2:88,10023360=1:24 TR=4	docs/port/sessions/p235/mddd8.txt	P235
+func_151D2C40	game_1FFF60	docs/port/sessions/p239/s2c40.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p239/m2c40.txt	P239
+func_151D3130	game_1FFF60	docs/port/sessions/p239/s3130.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p239/m3130.txt	P239
+func_1518FD34	game_eu_1BAF40	docs/port/sessions/p239/sfd34.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p239/mfd34.txt	P239
+func_1518FDC8	game_eu_1BAF40	docs/port/sessions/p239/sfdc8.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p239/mfdc8.txt	P239
+func_1518FE0C	game_eu_1BAF40	docs/port/sessions/p239/sfe0cv.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4 DRAFT=docs/port/sessions/p239/d_fe0cv.c	docs/port/sessions/p239/mfe0cv.txt,docs/port/sessions/p239/mfe0cvb.txt	P239
+func_151D33B8	game_1FFF60	docs/port/sessions/p239/s33b8v.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4 DRAFT=docs/port/sessions/p239/d_33b8v.c	docs/port/sessions/p239/m33b8v.txt,docs/port/sessions/p239/m33b8vb.txt	P239
+func_15190C34	game_eu_1BAF40	docs/port/sessions/p239/s0c34.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p239/m0c34.txt	P239
+func_15135DD0	game_161520	docs/port/sessions/p239/s5dd0.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15046750=0:12,15046750=3:36,151DBB80=2:12,151DACA8=1:12,151D95C4=1:12 TR=4	docs/port/sessions/p239/m5dd0.txt,docs/port/sessions/p239/m5dd0b.txt	P239

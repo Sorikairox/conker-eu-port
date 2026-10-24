@@ -1,0 +1,5 @@
+10s/count\[3\] +/count[4] +/
+10s/count\[4\] \*/count[3] */
+10s/count\[0\] =/count[1] =/
+10s/+ count\[4\]/- count[4]/
+11s/(s32)self/(s32)count/
