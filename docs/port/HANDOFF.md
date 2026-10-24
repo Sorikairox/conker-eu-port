@@ -47,6 +47,28 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. port: func_15134004 (15FF50; may cut the hover height), func_15072B44, func_151473F4, func_150D88E8, func_151AB874.
 3. port-b: func_15134E48 (161520) and the P245 Tank stubs.
 
+## P247 (port-b) (session P247, 2026-10-25). Details: `docs/port/sessions/P247.md`
+
+Branch `port-b`. **Tank-mode stubs (browser P245)**, hand C (NM) + setups + pattern-sed mutants + registry rows:
+func_151D16E8 object_point_trail_update (1FB080, D_8008A980[0x21]; 25 / 25), func_151BA634 object_screen_uv_project
+(1E7CC0, D_80089FC8[3]; 44 / 44), func_15134E48 bone_emitter_update (161520, pointer 0x8008C09C; 48 / 48, knob
+JALRARG_OLD=1: leftover f12 at the handler jalr), func_151BB690 tank_engine_sound_update (1E7CC0, voice callback;
+72 / 75, 3 equivalents). None of them reads input or moves the tank: the likely driver is port's **func_150EDCC8**
+(11AF60, 1359 words, P245 frame 7147). **Re-run** of the P241 / P235 rows: no C bug; func_151D4D44 new setup + 2
+mutants (s4d44b / m4d44d) kill the `(u32) -> (s8)` survivor; p235/m56d4.txt `\\&` lines fixed (90 / 90).
+**MP3 group**: draft only (`p247/d_huff_draft.c`): 9184 / 933C have the C ABI (called from game_221290), only 9060 /
+911C use registers; func_151F94E0 is separate compiled float code. Checks: verify_all rc 0 (byte-identical), NM build rc 0, protocheck 0 (1549 NM bodies), selftest 118 / 118.
+progress_nm total 5560 / 5915 (94.0%), C bytes 84.9%.
+
+## Next steps (from P247)
+
+1. port: func_150EDCC8 (tank driving, 11AF60) - the Tank blocker after these four.
+2. MP3 group: whole-function harness for func_151F9184 / func_151F933C (+ 9060 / 911C as static helpers), from the
+   P247 draft; func_151F94E0 (IMDCT, 960 words) separately with difftest.
+3. Smallest remaining asm-only in port-b files (progress_nm --list); not started in P247.
+4. Browser: Tank mode (trail / screen-UV effect / bone emitters / engine sound 0x4A7-0x4A9).
+5. port (game_168A90): D_80089FC8 C dispatcher passes 4 args to 2-argument handlers (wasm signature).
+
 ## State (session P246, 2026-10-25). Details: `docs/port/sessions/P246.md`
 - Hand C (NM): **func_151EF3A0 save_screen_frame_draw** (216470, the P240 save / load screen stub; returns the DL end;
   uses literals 0x7FB / 0x887 for the asm's D_7FB / D_887 link symbols, so no ROM_ABS entry is needed), func_150C1BC0
@@ -87,7 +109,6 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. port-b: Tank stubs func_151BB690, func_151BA634 (1E7CC0), func_15134E48 (161520), func_151D16E8 (1FB080).
 2. port: func_150EDCC8 (11AF60, Tank), func_150BE050 (EB860, Colors), func_151EF3A0 (216470), func_151D8280 (204F70).
 3. port-web: river via the user's door route; else find the blocker at (855, -1056) (dump collision area 2).
-
 ## P244 (port-b) (session P244, 2026-10-24). Details: `docs/port/sessions/P244.md`
 
 Branch `port-b`. Merged port 8c12ab83 (P241) and 8e1a8bdb (P243). **Triage of P241's re-run of port-b registry rows**:
