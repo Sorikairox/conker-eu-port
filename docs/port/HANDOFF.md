@@ -10,6 +10,30 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P196, 2026-10-24). Details: `docs/port/sessions/P196.md`
+
+Branch `port` (from P195 7964ca6). Hand C (NM), difftest EQUIV + setups + mutants (table in P196.md):
+- func_151184BC `gate_swing_update` mutants done: 66 run, 64 killed, 2 equivalent (new setups for the 4 P195 gaps).
+- Rail cameras (game_eu_B37F0): func_150894F8 `rail_node_next`, func_15089664 `rail_camera_follow`, func_15089B68
+  `rail_camera_spline`, func_15088130 `rail_cameras_update`, func_150882C4 `obj_yaw_clamp_to_track`. Dormant in the
+  port until the producer func_150877C0 (604, asm) sets D_800D27C9.
+- Breadth: func_150D7B6C `anim_segments_set` (105140), func_150E7B20 `particle_spawn_simple` (114640), func_15131F34
+  `surface_hit_dispatch` (15E000, passes cfg as the handler's arg3), func_15063254 `obj_model_swap_keep_pose` (8FCB0),
+  func_150DE8AC `trigger_zones_check` (10C0B0; game_3DC30 now declares it as a function), func_15107678
+  `bolt_subdivide` (133A70). func_15107518 `bolt_spawn` verified but not committed (handler func_1510783C is asm).
+- Checks: verify_all OK, NM links, protocheck 0 (1344), selftest ok, progress_nm 5338/5915 (90.2%), C bytes 74.1%.
+
+## Next steps (from P196)
+1. port-b: func_1518DC50 (torch-flame candidate, P195), then browser-check level 0x29.
+2. Harness: func_15063254 mutants dropping restores of stub-clobbered words (OUTW `@ADDR` on func_15060F28) survive;
+   check whether difftest compares memory written by stubs (P196.md section 2 notes); add a selftest case if fixed.
+3. Rail producers (B37F0): func_150877C0 (604), func_15087540 (160), func_1508882C (107), func_150867D4 (539), then
+   func_150893AC (83) / func_15088D24 (88) / func_15088E84 (212). Bolt: func_1510783C (210), then commit
+   `p196/15107518_cand.c` (verified).
+4. func_15133E04: fix the D_80089CD4 handler signatures (func_151A79EC has `f32 arg1`) before converting.
+5. Breadth (`p196/asmlist.py` after `progress_nm.py --list > port_work/p196/asmonly.txt`): next game entries
+   func_1518C000 (89), func_1517F01C (92), func_15103AA0 (93), func_15155B1C (96).
+
 ## State (session P195, 2026-10-24). Details: `docs/port/sessions/P195.md`
 
 Branch `port` (from P192 cc3d667). Hand C (NM), difftest EQUIV + setups + mutants (table in P195.md):

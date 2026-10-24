@@ -1,0 +1,2 @@
+s/\[0xF\] == want) {/[0xF] >= want) {/ % init_order
+s/                break;/                ;/ % init_order

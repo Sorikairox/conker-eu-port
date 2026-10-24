@@ -131,7 +131,42 @@ s32 func_150871B8(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150877C0.s")
 
+#ifdef NON_MATCHING
+extern s8 D_800D27C9;
+void func_15089664(u8 *rec, u8 *player);
+void func_15089B68(u8 *rec, u8 *player, s32 release);
+
+// rail_cameras_update: clears D_800D27C9 and runs the rail camera of each of the D_800D27B8 player records
+// (D_80087640, 0x84 bytes) whose player (D_800CC2D0 + rec[0x31]) has a camera (+0x318): records in state 2 or more
+// (rec[0x30]) follow the rail (func_15089664), the others with rec[0x48] == 0 run the spline camera
+// (func_15089B68), and the rest release the spline camera once while rec[0x49] is set.
+void func_15088130(void) {
+    u8 *rec;
+    u8 *player;
+    s32 i;
+
+    D_800D27C9 = 0;
+    if (D_80087640 == NULL) {
+        return;
+    }
+    for (i = 0; i < D_800D27B8; i++) {
+        rec = (u8 *) D_80087640 + i * 0x84;
+        player = (u8 *) &D_800CC2D0[(s8) rec[0x31]];
+        if (*(s32 *) (player + 0x318) == 0) {
+            continue;
+        }
+        if ((s8) rec[0x30] >= 2) {
+            func_15089664(rec, player);
+        } else if (rec[0x48] == 0) {
+            func_15089B68(rec, player, 0);
+        } else if ((s8) rec[0x49] != 0) {
+            func_15089B68(rec, player, 1);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088130.s")
+#endif
 
 s32 func_15088D24(u8, u8, s32);
 void func_1508823C(s32 arg0, s32 arg1) {
@@ -150,7 +185,36 @@ void func_1508823C(s32 arg0, s32 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+// obj_yaw_clamp_to_track: keeps the object's yaw (+0x76) within 0x2400 of a quarter turn (+0x4000) past player
+// `player`'s track direction (record D_80087640 + player * 0x84, vector +0x10 / +0xC, func_1505A630). Nothing without
+// player records. Returns func_1505A630's raw result (the asm leaves v0 unset without records; the one caller
+// ignores it).
+s32 func_150882C4(u8 player, struct127 *obj) {
+    struct_eu_80087640 *rec;
+    s32 r;
+    u16 dir;
+    u16 diff;
+
+    if (D_80087640 == NULL) {
+        return 0;
+    }
+    rec = &D_80087640[player];
+    r = func_1505A630(*(f32 *) ((u8 *) rec + 0x10), *(f32 *) ((u8 *) rec + 0xC), 0);
+    dir = r + 0x4000;
+    diff = dir - *(u16 *) ((u8 *) obj + 0x76);
+    if (diff & 0x8000) {
+        if (diff < 0xDBFF) {
+            *(u16 *) ((u8 *) obj + 0x76) = dir + 0x2400;
+        }
+    } else if (diff > 0x2400) {
+        *(u16 *) ((u8 *) obj + 0x76) = dir - 0x2400;
+    }
+    return r;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150882C4.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s8 D_800D27C8;
@@ -542,8 +606,280 @@ void func_150891D4(u8 *arg0)
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150893AC.s")
 
+#ifdef NON_MATCHING
+// rail_node_next: the rail node after `node` coming from `prev` (D_800D2778, D_80087630 nodes of 16 bytes: s16 x / y / z,
+// links +9..+0xD (0xFF = none), type +0xE, band +0xF). Takes the links in order, skipping 0xFF and `prev`; a link of
+// type `type` (any type when `type` is 0xFF) and band `band` is returned at once, otherwise the last link of the right
+// type. 0xFF when `node` is out of range or no link fits.
+u8 func_150894F8(u8 node, u8 type, u8 prev, u8 band) {
+    u8 *p;
+    u8 *q;
+    u8 last = 0xFF;
+    u8 link;
+    s32 k;
+
+    if (node >= D_80087630) {
+        return 0xFF;
+    }
+    p = (u8 *) &D_800D2778[node];
+    for (k = 0; k < 5; k++) {
+        link = p[9 + k];
+        if (link == 0xFF || link == prev) {
+            continue;
+        }
+        q = (u8 *) &D_800D2778[link];
+        if (q[0xE] == type || type == 0xFF) {
+            last = link;
+            if (q[0xF] == band) {
+                return link;
+            }
+        }
+    }
+    return last;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150894F8.s")
+#endif
 
+#ifdef NON_MATCHING
+extern u16 D_8009015C;
+void func_1512DAD0(u8 *, s32, void *);
+u8 func_150894F8(u8 node, u8 type, u8 prev, u8 band);
+
+// rail_camera_follow: rail camera of one player record (D_80087640 + i * 0x84, player = D_800CC2D0 + rec[0x31],
+// camera = player + 0x318) on the rail nodes of D_800D2778 (band 1 when D_8009015C bit 6 is set, else 0). State 2
+// (rec[0x30]) sets it up: the first type-5 band-2 node starts the segment rec[0x4A] -> rec[0x4B] (rec[0x4B] = its
+// band-3 link, or its non-band-3 link when D_800D27C8 is set), then the whole rail loop is walked from there and the
+// segment whose end node is nearest the player (x / z) is kept; camera mode 5, state 3. Every call: the segment moves
+// on when the player is nearer its end node than its start; the camera (mode 7, parameters at rec + 0x4C) looks at the
+// player from that node's direction, at most 1000 units back. Camera +0x19C..+0x1A8 = 30.
+void func_15089664(u8 *rec, u8 *player) {
+    u8 *cam = *(u8 **) (player + 0x318);
+    u8 band;
+    u8 *node;
+    u8 *a;
+    u8 *b;
+    u8 link;
+    u8 start;
+    u8 cur;
+    u8 prev;
+    u8 next;
+    s32 i;
+    s32 k;
+    f32 best;
+    f32 d;
+    f32 dB;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 dist;
+
+    if (cam == NULL) {
+        return;
+    }
+    band = (D_8009015C & 0x40) ? 1 : 0;
+    if ((s8) rec[0x30] == 2) {
+        for (i = 0; i < D_80087630; i++) {
+            node = (u8 *) &D_800D2778[i];
+            if (node[0xE] != 5 || node[0xF] != 2) {
+                continue;
+            }
+            rec[0x4A] = i;
+            rec[0x4B] = i;
+            for (k = 0; k < 5; k++) {
+                link = node[9 + k];
+                if (link == 0xFF) {
+                    continue;
+                }
+                if (D_800D27C8 == 0) {
+                    if (((u8 *) &D_800D2778[link])[0xF] == 3) {
+                        rec[0x4B] = link;
+                    }
+                } else if (((u8 *) &D_800D2778[link])[0xF] != 3) {
+                    rec[0x4B] = link;
+                }
+            }
+            break;
+        }
+        start = rec[0x4B];
+        cur = start;
+        prev = rec[0x4A];
+        best = 1.0e9f;
+        do {
+            node = (u8 *) &D_800D2778[cur];
+            next = func_150894F8(cur, 0xFF, prev, band);
+            dx = *(f32 *) (player + 0x14) - *(s16 *) node;
+            dz = *(f32 *) (player + 0x1C) - *(s16 *) (node + 4);
+            prev = cur;
+            cur = next;
+            d = dx * dx + dz * dz;
+            if (d < best) {
+                best = d;
+                rec[0x4A] = prev;
+                rec[0x4B] = next;
+            }
+        } while (cur != start);
+        func_1512DAD0(*(u8 **) (player + 0x318), 5, NULL);
+        rec[0x30] = 3;
+    }
+
+    b = (u8 *) &D_800D2778[rec[0x4B]];
+    dx = *(f32 *) (player + 0x14) - *(s16 *) b;
+    dz = *(f32 *) (player + 0x1C) - *(s16 *) (b + 4);
+    dB = dx * dx + dz * dz;
+    a = (u8 *) &D_800D2778[rec[0x4A]];
+    node = a;
+    dx = *(f32 *) (player + 0x14) - *(s16 *) a;
+    dz = *(f32 *) (player + 0x1C) - *(s16 *) (a + 4);
+    d = dx * dx + dz * dz;
+    if (dB < d) {
+        prev = rec[0x4A];
+        rec[0x4A] = rec[0x4B];
+        rec[0x4B] = func_150894F8(rec[0x4A], 0xFF, prev, band);
+        node = b;
+        dx = *(f32 *) (player + 0x14) - *(s16 *) b;
+        dz = *(f32 *) (player + 0x1C) - *(s16 *) (b + 4);
+        d = dB;
+    }
+    dy = *(f32 *) (player + 0x18) - *(s16 *) (node + 2);
+    dist = sqrtf(dy * dy + d);
+    dx /= dist;
+    dy /= dist;
+    dz /= dist;
+    if (1000.0f < dist) {
+        dist = 1000.0f;
+    }
+    *(s32 *) (rec + 0x4C) = 0;
+    *(f32 *) (rec + 0x6C) = *(f32 *) (player + 0x14);
+    *(f32 *) (rec + 0x70) = *(f32 *) (player + 0x18);
+    *(f32 *) (rec + 0x74) = *(f32 *) (player + 0x1C);
+    *(f32 *) (rec + 0x60) = *(f32 *) (player + 0x14) - dx * dist;
+    *(f32 *) (rec + 0x64) = *(f32 *) (player + 0x18) - dy * dist;
+    *(f32 *) (rec + 0x68) = *(f32 *) (player + 0x1C) - dz * dist;
+    *(s32 *) (rec + 0x50) = 0;
+    *(f32 *) (rec + 0x7C) = 30.0f;
+    *(f32 *) (rec + 0x80) = 30.0f;
+    *(f32 *) (rec + 0x78) = 0.0f;
+    func_1512DAD0(*(u8 **) (player + 0x318), 7, rec + 0x4C);
+    *(f32 *) (cam + 0x19C) = 30.0f;
+    *(f32 *) (cam + 0x1A4) = 30.0f;
+    *(f32 *) (cam + 0x1A0) = 30.0f;
+    *(f32 *) (cam + 0x1A8) = 30.0f;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15089664.s")
+#endif
 
+#ifdef NON_MATCHING
+void func_1512DAD0(u8 *, s32, void *);
+u8 func_150894F8(u8 node, u8 type, u8 prev, u8 band);
+
+// rail_camera_spline: spline camera of one player record (D_80087640 + i * 0x84, camera = player + 0x318).
+// `release` != 0: camera mode 10 (rec + 0x4C params: +0x58 = 999, +0x5C = 120), then mode 6 with the camera's +0x23D,
+// rec[0x49] = 0. Else, on the first call (rec[0x49] == 0): the first type-6 node of band D_800D27C8 + 1 and the next
+// three type-6 nodes after it fill rec[0x44..0x47], the player position is kept at rec + 0x38, t (rec + 0x34) = 0,
+// camera mode 5, rec[0x49] = 1. Each call t += 0.017 * D_800BE9E4; past 1 the four nodes shift on by one (t stays at
+// 1 at the rail end). The eye points are the nodes rec[0x44 + k] (from rec + 0x38 behind the player's yaw +0x40 for
+// the first missing one, then extrapolated), the targets their type-4 links; func_15049AD0 interpolates both at t
+// into rec + 0x60 / + 0x6C and camera mode 7 takes rec + 0x4C.
+void func_15089B68(u8 *rec, u8 *player, s32 release) {
+    u8 *cam = *(u8 **) (player + 0x318);
+    f32 pt[6][4]; // eye x / y / z, target x / y / z for the four nodes
+    f32 t;
+    f32 ang;
+    u8 want;
+    u8 old;
+    u8 node;
+    s32 had;
+    s32 i;
+    s32 k;
+    s32 j;
+
+    if (cam == NULL) {
+        return;
+    }
+    if (release) {
+        *(s32 *) (rec + 0x5C) = 120;
+        *(f32 *) (rec + 0x58) = 999.0f;
+        func_1512DAD0(*(u8 **) (player + 0x318), 10, rec + 0x4C);
+        func_1512DAD0(*(u8 **) (player + 0x318), 6, (void *) (s32) cam[0x23D]);
+        rec[0x49] = 0;
+        return;
+    }
+    if ((s8) rec[0x49] == 0) {
+        want = D_800D27C8 + 1;
+        for (i = 0; i < D_80087630; i++) {
+            if (((u8 *) &D_800D2778[i])[0xE] == 6 && ((u8 *) &D_800D2778[i])[0xF] == want) {
+                rec[0x44] = i;
+                break;
+            }
+        }
+        rec[0x45] = func_150894F8(rec[0x44], 6, 0xFF, 0);
+        rec[0x46] = func_150894F8(rec[0x45], 6, rec[0x44], 0);
+        rec[0x47] = func_150894F8(rec[0x46], 6, rec[0x45], 0);
+        *(f32 *) (rec + 0x38) = *(f32 *) (player + 0x14);
+        *(f32 *) (rec + 0x3C) = *(f32 *) (player + 0x18);
+        *(f32 *) (rec + 0x34) = 0.0f;
+        *(f32 *) (rec + 0x40) = *(f32 *) (player + 0x1C);
+        func_1512DAD0(*(u8 **) (player + 0x318), 5, (void *) (s32) cam[0x23D]);
+        rec[0x49] = 1;
+    }
+    *(f32 *) (rec + 0x34) += 0.017f * (f32) D_800BE9E4;
+    t = *(f32 *) (rec + 0x34);
+    if (1.0f <= t) {
+        node = rec[0x46];
+        if (node == 0xFF) {
+            *(f32 *) (rec + 0x34) = 1.0f;
+        } else {
+            old = rec[0x45];
+            rec[0x45] = node;
+            *(f32 *) (rec + 0x34) = t - 1.0f;
+            rec[0x46] = rec[0x47];
+            rec[0x44] = old;
+            rec[0x47] = func_150894F8(rec[0x46], 6, node, 0);
+        }
+    }
+
+    had = 0;
+    for (k = 0; k < 4; k++) {
+        if (rec[0x44 + k] != 0xFF) {
+            had = 1;
+            func_1508712C(rec[0x44 + k], &pt[0][k], &pt[1][k], &pt[2][k]);
+            func_1508712C(func_150894F8(rec[0x44 + k], 4, 0xFF, 0), &pt[3][k], &pt[4][k], &pt[5][k]);
+        } else if (had == 1) {
+            had = 0;
+            ang = *(f32 *) (player + 0x40) * 0.01745;
+            pt[0][k] = *(f32 *) (rec + 0x38) - sinf(ang) * 500.0f;
+            pt[1][k] = *(f32 *) (rec + 0x3C) + 180.0f;
+            pt[2][k] = *(f32 *) (rec + 0x40) - cosf(ang) * 500.0f;
+            pt[3][k] = *(f32 *) (rec + 0x38);
+            pt[4][k] = *(f32 *) (rec + 0x3C) + 120.0f;
+            pt[5][k] = *(f32 *) (rec + 0x40);
+        } else if (k >= 2) {
+            // the asm also extrapolates at k = 0 / 1 (rec[0x44] == 0xFF) from stack garbage; left 0 here
+            for (j = 0; j < 6; j++) {
+                pt[j][k] = (pt[j][k - 1] - pt[j][k - 2]) + pt[j][k - 1];
+            }
+        } else {
+            for (j = 0; j < 6; j++) {
+                pt[j][k] = 0.0f;
+            }
+        }
+    }
+    t = *(f32 *) (rec + 0x34);
+    *(f32 *) (rec + 0x60) = func_15049AD0((s32 *) pt[0], 0, t);
+    *(f32 *) (rec + 0x64) = func_15049AD0((s32 *) pt[1], 0, t);
+    *(f32 *) (rec + 0x68) = func_15049AD0((s32 *) pt[2], 0, t);
+    *(f32 *) (rec + 0x6C) = func_15049AD0((s32 *) pt[3], 0, t);
+    *(f32 *) (rec + 0x70) = func_15049AD0((s32 *) pt[4], 0, t);
+    *(f32 *) (rec + 0x74) = func_15049AD0((s32 *) pt[5], 0, t);
+    *(s32 *) (rec + 0x4C) = 0;
+    *(s32 *) (rec + 0x50) = 0;
+    *(f32 *) (rec + 0x7C) = 30.0f;
+    *(f32 *) (rec + 0x80) = 30.0f;
+    *(f32 *) (rec + 0x78) = 0.0f;
+    func_1512DAD0(*(u8 **) (player + 0x318), 7, rec + 0x4C);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15089B68.s")
+#endif
