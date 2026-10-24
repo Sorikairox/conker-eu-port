@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P193, 2026-10-24, port-web). Details: `docs/port/sessions/P193.md`
+
+- **Level 0x29 green patch fixed (renderer)**: the texture cache was direct-mapped and mip tiles 1 and 3 of a standard
+  chain always shared a slot, so binding tile 3 re-uploaded the GL texture bound to unit 1; LOD level 1 sampled out of
+  range (alpha 0) and the ALPHA_CVG_SEL CI4 ground (draw 48, cc 26A004/151092FF) was cut away, showing the backdrop quad.
+  Fix in `tex_for`: mixed hash, 8-way probing, entries bound for the pending draw never evicted (`?p193oldtc=1` = old).
+- The CI8 leaf cut-out (cc 15FC92F8) blamed by P189 is fine: the `[draw]` log printed the NEXT draw's state. Fixed
+  (apply_state saves the drawn state; lines carry `#index`).
+- New DIAGNOSTIC flags: `?p193dbg`, `?p193idx`, `?p193bucket`, `?p193pick` (+`p193d`), per-unit binding log in p158 dumps.
+- Before/after: no regressions (logo, menu, throne room, intro scenes, level 0x29); level 0 not re-shot.
+
+## Next steps (from P193)
+
+1. Convert func_1504B0FC (P189 #1). 2. Torches on level 0x29. 3. Backdrop quad (draw 0) texture / colour check.
+
 ## State (session P189, 2026-10-24, port-web). Details: `docs/port/sessions/P189.md`
 
 - Diagnostic only (no merges, no src_eu edits). New flags: `?p189y=F` (Conker y / vy / gravity / water log),

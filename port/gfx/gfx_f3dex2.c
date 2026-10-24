@@ -171,6 +171,7 @@ typedef struct { unsigned fmt, siz, line, tmem, pal, cms, cmt, masks, maskt, shi
 static Tile tiles[8];
 static struct { unsigned fmt, siz, width, raw; unsigned char *p; } timg;
 static unsigned char tmem[4096];
+static int p193_idx;   /* P193: draws (non-empty flushes) in this gfx task */
 static unsigned tmem_gen;          /* bumped on every TMEM write (texture cache key) */
 
 #define G_ZBUFFER 0x00000001
@@ -206,7 +207,7 @@ static void mtx_ident(float m[4][4]) {
 /* ------------------------------------------------------------------ GL backend */
 static GLuint prog, vbo, vao;
 static GLint u_tex[6], u_tp[6], u_tm[6], u_ts[6], u_lodviz, u_splitx, u_c0, u_c1, u_a0, u_a1, u_2cyc, u_prim, u_env, u_fogc, u_blendc,
-    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg;
+    u_primlod, u_acmp, u_mode, u_texon, u_filt, u_lod, u_pixscale, u_bl1, u_bl2, u_blfin, u_k45, u_primz, u_cvg, u_dbg, u_idx;
 static int gl_ok, canvas_w = 640, canvas_h = 480;
 #define VF 11
 #define BATCH_TRIS 4096
@@ -245,7 +246,7 @@ static const char *FS =
     "precision highp float; precision highp int;\n"
     "in vec4 vCol; in vec2 vST; in float vFog;\n"
     "uniform highp sampler2D uT0, uT1, uT2, uT3, uT4, uT5; uniform vec4 uTP[6]; uniform ivec4 uTM[6], uTS[6]; uniform int uLodViz; uniform float uSplitX;\n"
-    "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg;\n"
+    "uniform ivec4 uC0, uC1, uA0, uA1, uBl1, uBl2, uLod; uniform int u2cyc, uAcmp, uMode, uTexOn, uFilt, uBlFin, uCvg, uDbg, uIdx;\n"
     "uniform vec4 uPrim, uEnv, uFogC, uBlendC; uniform vec2 uK45; uniform float uPrimLod, uPixScale, uPrimZ;\n"
     "out vec4 frag;\n"
     "vec4 T0, T1, SH; float LF;\n"
@@ -293,7 +294,9 @@ static const char *FS =
     "void main() {\n"
     "  SH = vCol; LF = 0.0;\n"
     "  gl_FragDepth = uPrimZ >= 0.0 ? uPrimZ : gl_FragCoord.z;\n"
-    "  if (uMode == 1) { frag = vCol; return; }\n"
+    /* P193 DIAGNOSTIC ?p193idx=F: draw index as colour (r = idx & 7, g = idx >> 3 & 7, b = idx >> 6 & 7, 32 per step + 16) */
+    "  vec4 IC = vec4(vec3(float(uIdx & 7), float((uIdx >> 3) & 7), float((uIdx >> 6) & 7)) * 32.0 + 16.0, 255.0) / 255.0;\n"
+    "  if (uMode == 1) { frag = uIdx >= 0 ? IC : vCol; return; }\n"
     "  int lt = 0; bool distant = false;\n"
     "  if (uTexOn != 0) {\n"
     /* P78: the RDP's LOD is the largest of |ds|, |dt| over one N64 pixel step in x and in y (tile 0 texels,
@@ -318,6 +321,10 @@ static const char *FS =
     "    c1 = (cA(uC1.x, c) - cB(uC1.y, c)) * cC(uC1.z, c, a) + cD(uC1.w, c);\n"
     "    a1 = (aX(uA1.x, a) - aX(uA1.y, a)) * aC(uA1.z, a) + aX(uA1.w, a); }\n"
     "  c1 = clamp(c1, 0.0, 1.0); a1 = clamp(a1, 0.0, 1.0);\n"
+    /* P193 DIAGNOSTIC ?p193dbg=F: views of one material (see apply_state) */
+    "  if (uDbg == 8) discard;\n"
+    "  if (uDbg != 0) { frag = vec4(uDbg == 1 ? T0.rgb : uDbg == 2 ? SH.rgb : uDbg == 3 ? vec3(1.0, 0.0, 1.0) : uDbg == 4 ? vec3(LF) :"
+    "    uDbg == 5 ? vec3(float(lt) / 4.0, float(uTexOn) / 63.0, distant ? 1.0 : 0.0) : uDbg == 6 ? vec3(a1) : vec3(T0.a, T1.a, 0.0), 1.0); return; }\n"
     "  if (uAcmp == 1 && a1 < uBlendC.a) discard;\n"
     "  if (uAcmp == 3 && a1 < fract(sin(dot(gl_FragCoord.xy, vec2(41.31, 17.77))) * 1531.7)) discard;\n"
     "  if (uCvg > 0 && a1 < (uCvg == 1 ? 0.5 : 0.125)) discard;\n"
@@ -328,6 +335,7 @@ static const char *FS =
     "  else if (uBlFin == 1) frag = vec4(clamp(bP(uBl2.x, c1) * A + bP(uBl2.z, c1) * bB(uBl2.w, A), 0.0, 1.0), 1.0);\n"
     "  else frag = vec4(bP(uBl2.x == 1 ? uBl2.z : uBl2.x, c1), A);\n"
     /* P78 DIAGNOSTIC ?p78lodviz=1: tint by the LOD tile (0 none, 1 red, 2 green, 3 blue, 4 magenta; LOD materials) */
+    "  if (uIdx >= 0) frag = IC;\n"
     "  if (uLodViz != 0 && uLod.x != 0 && lt > 0) frag.rgb = mix(frag.rgb, lt == 1 ? vec3(1,0,0) : lt == 2 ? vec3(0,1,0) : lt == 3 ? vec3(0,0,1) : vec3(1,0,1), 0.5);\n"
     "}\n";
 
@@ -371,7 +379,7 @@ int gfx_init(void) {
     U(u_c0, "uC0"); U(u_c1, "uC1"); U(u_a0, "uA0"); U(u_a1, "uA1"); U(u_2cyc, "u2cyc"); U(u_prim, "uPrim");
     U(u_env, "uEnv"); U(u_fogc, "uFogC"); U(u_blendc, "uBlendC"); U(u_primlod, "uPrimLod"); U(u_acmp, "uAcmp");
     U(u_mode, "uMode"); U(u_texon, "uTexOn"); U(u_filt, "uFilt"); U(u_lod, "uLod"); U(u_pixscale, "uPixScale"); U(u_lodviz, "uLodViz"); U(u_splitx, "uSplitX");
-    U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg");
+    U(u_bl1, "uBl1"); U(u_bl2, "uBl2"); U(u_blfin, "uBlFin"); U(u_k45, "uK45"); U(u_primz, "uPrimZ"); U(u_cvg, "uCvg"); U(u_dbg, "uDbg"); U(u_idx, "uIdx");
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -389,8 +397,16 @@ int gfx_init(void) {
 }
 
 /* ---- textures: decode a tile out of TMEM into RGBA8, cached by (TMEM generation, tile params) */
-typedef struct { unsigned key[6]; GLuint tex; } TexEnt;
+/* P193: the texture cache. Before P193 it was direct-mapped on (k0 * 2654435761 ^ k1 * 40503 ^ k2 * 97 ^ k3) & 255, and in a
+ * standard mip chain tile 1 (tmem 080 line 2, 32x16) and tile 3 (tmem 0A8 line 1, 8x4) always land in the same slot (the
+ * low 8 bits of k2 * 97 ^ k3 are A0 for both, whatever the TMEM generation): binding tile 3 re-uploaded the GL texture
+ * already bound to unit 1, so LOD level 1 sampled an 8x4 image with 32x16 addressing, texelFetch outside it returned
+ * 0 (alpha 0) and the ALPHA_CVG_SEL ground of level 0x29 (CI4 64x32 mips, cc 26A004/151092FF) was cut away where it
+ * used level 1: the sky quad (first draw) showed through as a green patch. Now: a better mixed hash, 8-way probing,
+ * and an entry bound by the current apply_state (stamp) is never evicted. ?p193oldtc=1 = the old direct-mapped cache. */
+typedef struct { unsigned key[6]; GLuint tex; unsigned stamp; } TexEnt;
 static TexEnt tcache[256];
+static unsigned tc_stamp = 1;   /* bumped by apply_state: entries bound for the pending draw carry it */
 static unsigned char texbuf[1024 * 1024 * 4 / 4];
 
 static inline unsigned tmem8(unsigned a) { return tmem[a & 0xFFF]; }
@@ -449,15 +465,34 @@ static void tile_dims(const Tile *t, unsigned *w, unsigned *h) {
     *w = tw; *h = th;
 }
 
+static unsigned p193_bind[6][6];   /* P193 DIAGNOSTIC: per unit of the last apply_state: tile, GL tex, hash, hit, first texel, w | h << 16 */
+static int p193_k = -1;
 static GLuint tex_for(int ti, unsigned *w, unsigned *h) {
     const Tile *t = &tiles[ti & 7];
     tile_dims(t, w, h);
     if ((size_t)*w * *h * 4 > sizeof texbuf) *h = sizeof texbuf / 4 / *w;
     unsigned key[6] = {tmem_gen, t->fmt | t->siz << 4 | t->pal << 8 | (oth_h >> 14 & 3) << 20,
                        t->tmem | t->line << 12, *w | *h << 16, 0, 2};
-    unsigned hsh = (key[0] * 2654435761u ^ key[1] * 40503u ^ key[2] * 97u ^ key[3]) & 255;
-    TexEnt *e = &tcache[hsh];
-    if (e->tex && !memcmp(e->key, key, sizeof key)) return e->tex;
+    static int oldtc = -1; if (oldtc < 0) oldtc = port_flag("p193oldtc");
+    unsigned hsh;
+    TexEnt *e;
+    if (oldtc) { hsh = (key[0] * 2654435761u ^ key[1] * 40503u ^ key[2] * 97u ^ key[3]) & 255; e = &tcache[hsh]; }
+    else {
+        unsigned m = key[0];
+        for (int i = 1; i < 4; i++) m = (m ^ key[i]) * 2654435761u, m ^= m >> 15;
+        hsh = m >> 24;
+        TexEnt *victim = 0;
+        e = 0;
+        for (unsigned i = 0; i < 8; i++) {
+            TexEnt *c = &tcache[(hsh + i) & 255];
+            if (c->tex && !memcmp(c->key, key, sizeof key)) { e = c; break; }
+            if (!victim && c->stamp != tc_stamp) victim = c;   /* first free / not used by the pending draw */
+        }
+        if (!e) e = victim ? victim : &tcache[hsh];
+        e->stamp = tc_stamp;
+    }
+    if (p193_k >= 0 && p193_k < 6) { p193_bind[p193_k][0] = ti; p193_bind[p193_k][2] = hsh; p193_bind[p193_k][5] = *w | *h << 16; }
+    if (e->tex && !memcmp(e->key, key, sizeof key)) { if (p193_k >= 0 && p193_k < 6) { p193_bind[p193_k][1] = e->tex; p193_bind[p193_k][3] = 1; } return e->tex; }
     if (!e->tex) glGenTextures(1, &e->tex);
     memcpy(e->key, key, sizeof key);
     for (unsigned y = 0; y < *h; y++)
@@ -469,6 +504,8 @@ static GLuint tex_for(int ti, unsigned *w, unsigned *h) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gfx_stats.tex_uploads++;
+    if (p193_k >= 0 && p193_k < 6) { p193_bind[p193_k][1] = e->tex; p193_bind[p193_k][3] = 0;
+        p193_bind[p193_k][4] = (unsigned)texbuf[0] << 24 | texbuf[1] << 16 | texbuf[2] << 8 | texbuf[3]; }
     return e->tex;
 }
 
@@ -510,6 +547,7 @@ static void blend_state(unsigned cyc, int mode) {
     bl_last_gl = gl;
 }
 
+static unsigned dl_st[10];   /* P193: see draw_log_line */
 static void apply_state(void) {
     unsigned cyc = oth_h >> 20 & 3; /* 0 1CYC, 1 2CYC, 2 COPY, 3 FILL */
     unsigned w0 = combine_w0, w1 = combine_w1;
@@ -535,6 +573,8 @@ static void apply_state(void) {
     int mode = rect_mode == 1 || cyc == 3 ? 1 : cyc == 2 ? 3 : 0;
     glUniform1i(u_mode, mode);
     int texon = 0;
+    { unsigned st[10] = {geom, oth_h, oth_l, combine_w0, combine_w1, tex_on, tex_tile, prim_col, env_col, fog_col}; memcpy(dl_st, st, sizeof st); }
+    tc_stamp++;   /* P193: a new set of bound textures */
     if (mode != 1 && (tex_on || rect_mode == 2)) {
         /* tiles base .. base+3: TEXEL1 of 2-cycle mode and the LOD levels (G_TL_LOD, tex_level) */
         int ntile = cyc == 1 ? 2 : 1, lod = (oth_h & 0x10000) && cyc == 1 && rect_mode == 0;
@@ -543,7 +583,7 @@ static void apply_state(void) {
             unsigned w, h;
             int ti = (tex_tile + k) & 7;
             glActiveTexture(GL_TEXTURE0 + k);
-            glBindTexture(GL_TEXTURE_2D, tex_for(ti, &w, &h));
+            p193_k = k; glBindTexture(GL_TEXTURE_2D, tex_for(ti, &w, &h)); p193_k = -1;
             const Tile *t = &tiles[ti];
             glUniform4f(u_tp[k], t->uls / 4.0f, t->ult / 4.0f, shiftscale(t->shifts), shiftscale(t->shiftt));
             int cls = (t->cms & 2) || !t->masks, clt = (t->cmt & 2) || !t->maskt;
@@ -561,6 +601,17 @@ static void apply_state(void) {
     { static int ol = -1; if (ol < 0) ol = port_flag("p78oldlod");   /* DIAGNOSTIC ?p78oldlod=1: the pre-P78 (inverted) scale */
       glUniform1f(u_pixscale, ol ? (float)cimg_width / canvas_w : (float)canvas_w / cimg_width); }   /* P78: canvas px per N64 px */
     { static int lv = -1; if (lv < 0) lv = port_flag("p78lodviz"); glUniform1i(u_lodviz, lv); }
+    { /* P193 DIAGNOSTIC ?p193dbg=F[&p193cc=W1hex]: from retrace F, draws with combiner 26A004/<W1> (default 15FC92F8) cycle
+       * through views every 100 retraces: 0 normal, 1 T0, 2 shade, 3 magenta, 4 LOD_FRACTION, 5 (lt/4, texon/63, distant),
+       * 6 final alpha, 7 (T0.a, T1.a, 0); P193b: 3 = magenta, 8 = hidden (discard); ?p193cc0 / ?p193cc = the combiner words
+       * (decimal: the flags are integers) */
+      static int df = -1; static unsigned dcc, dcc0, lastk = ~0u; if (df < 0) { df = port_flag("p193dbg"); dcc = (unsigned)port_flag("p193cc"); if (!dcc) dcc = 0x15FC92F8;
+                                                                       dcc0 = (unsigned)port_flag("p193cc0"); if (!dcc0) dcc0 = 0x26A004; }
+      int k = 0;
+      if (df > 0 && port_frame_count >= (unsigned)df && combine_w0 == dcc0 && combine_w1 == dcc) {
+          k = (int)((port_frame_count - df) / 100 % 9);
+          if ((unsigned)k != lastk) { lastk = k; port_log("[p193] view %d at frame %u\n", k, port_frame_count); } }
+      glUniform1i(u_dbg, k); }
     { static int sp = -1; if (sp < 0) sp = port_flag("p78split"); glUniform1f(u_splitx, sp ? canvas_w / 2.0f : -1.0f); }
     /* depth: Z_CMP / Z_UPD; ZMODE (bits 10-11) DEC -> polygon offset (the RDP's z-delta compare) */
     int zcmp = (geom & G_ZBUFFER) && (oth_l & 0x10) && rect_mode == 0, zupd = (oth_l & 0x20) && rect_mode == 0;
@@ -589,6 +640,9 @@ static void apply_state(void) {
     } else glDisable(GL_SCISSOR_TEST);
 }
 
+/* P193: the state the pending batch was drawn with (saved by apply_state). Before P193 the [draw] line printed the
+ * globals at flush time, i.e. the NEXT draw's state (flush runs after the new state commands): P189 took the ground
+ * draw for the CI8 leaf cut-out because of that. */
 static int draw_log; /* P33: ?drawlog=N: one line per draw call of gfx task N (state + NDC box) */
 static void draw_log_line(void) {
     float x0 = 1e9f, x1 = -1e9f, y0 = 1e9f, y1 = -1e9f, z0 = 1e9f, z1 = -1e9f; int behind = 0;
@@ -606,9 +660,9 @@ static void draw_log_line(void) {
              (short)(lbuf[0x80] << 8 | lbuf[0x81]), (short)(lbuf[0x82] << 8 | lbuf[0x83]), (short)(lbuf[0x84] << 8 | lbuf[0x85]),
              rare_s(0), rare_s(1), rare_s(2), rare_t(0), rare_t(1), rare_t(2), -1, bl_last_gl, filt_mode);
     port_log("[draw] vp scale %d %d %d trans %d %d %d cimg %u canvas %dx%d\n", vp_scale[0], vp_scale[1], vp_scale[2], vp_trans[0], vp_trans[1], vp_trans[2], cimg_width, canvas_w, canvas_h);
-    port_log("[draw] %d verts (%d w<=0) rm %d ndc x %.2f..%.2f y %.2f..%.2f z %.3f..%.3f | geom %06X oth %06X/%08X cc %06X/%08X tex %d tile %d prim %08X env %08X fog %08X v0 rgba %.2f %.2f %.2f %.2f st %.1f %.1f fog %.2f\n",
-             nbatch, behind, rect_mode, x0, x1, y0, y1, z0, z1, geom, oth_h, oth_l, combine_w0, combine_w1, tex_on, tex_tile,
-             prim_col, env_col, fog_col, o[4], o[5], o[6], o[7], o[8], o[9], o[10]);
+    port_log("[draw] #%d %d verts (%d w<=0) rm %d ndc x %.2f..%.2f y %.2f..%.2f z %.3f..%.3f | geom %06X oth %06X/%08X cc %06X/%08X tex %d tile %d prim %08X env %08X fog %08X v0 rgba %.2f %.2f %.2f %.2f st %.1f %.1f fog %.2f\n",
+             p193_idx, nbatch, behind, rect_mode, x0, x1, y0, y1, z0, z1, dl_st[0], dl_st[1], dl_st[2], dl_st[3], dl_st[4], dl_st[5], dl_st[6],
+             dl_st[7], dl_st[8], dl_st[9], o[4], o[5], o[6], o[7], o[8], o[9], o[10]);
 }
 /* P78: ?p78tex=N: per-material dump of gfx task N (node too: no GL needed). At each state change before
  * triangles: othermode, combiner, G_TEXTURE, the tiles base..base+4 (fmt siz line tmem pal cm mask shift, tile
@@ -623,6 +677,9 @@ static void p78_material(void) {
     port_log("[p78] mat %d: oth %06X/%08X cc %06X/%08X tex lvl %u tile %u on %u sc %.4f %.4f prim %08X env %08X lodfrac %02X\n",
              p78_mat, oth_h, oth_l, combine_w0, combine_w1, tex_level, tex_tile, tex_on, tex_sc_s, tex_sc_t, prim_col, env_col, prim_lod);
     unsigned nt = tex_level + 2; if (nt > 6) nt = 6;
+    for (unsigned k = 0; k < nt; k++)   /* P193 DIAGNOSTIC: what apply_state bound */
+        port_log("[p193] mat %d unit %u: tile %u gl %u hash %u %s texel0 %08X %ux%u\n", p78_mat, k, p193_bind[k][0], p193_bind[k][1], p193_bind[k][2],
+                 p193_bind[k][3] ? "hit" : "miss", p193_bind[k][4], p193_bind[k][5] & 0xFFFF, p193_bind[k][5] >> 16);
     for (unsigned k = 0; k < nt; k++) {
         const Tile *t = &tiles[(tex_tile + k) & 7];
         port_log("[p78]   tile %u: fmt %u siz %u line %u tmem %03X pal %u cms %u cmt %u mask %u/%u shift %u/%u ul %.2f %.2f lr %.2f %.2f\n",
@@ -681,7 +738,25 @@ static void p78_density(void) {
 static void flush(void) {
     if (draw_log && nbatch) draw_log_line();
     if (nbatch) p78_density();
+    if (nbatch) p193_idx++;
     if (!nbatch || !gl_ok) { nbatch = 0; return; }
+    { static int f = -1; if (f < 0) f = port_flag("p193idx");   /* P193 DIAGNOSTIC: draw index colours for 100 retraces from F */
+      int ix = f > 0 && port_frame_count >= (unsigned)f && port_frame_count < (unsigned)f + 100 ? p193_idx - 1 : -1;
+      /* ?p193bucket=F: from retrace F, window k (100 retraces each, 10 windows) shows draws k*16 .. k*16+15 in their index colour */
+      static int bf = -1; if (bf < 0) bf = port_flag("p193bucket");
+      if (bf > 0 && port_frame_count >= (unsigned)bf && port_frame_count < (unsigned)bf + 1000) {
+          int k = (int)((port_frame_count - bf) / 100);
+          static int lastk = -1; if (k != lastk) { lastk = k; port_log("[p193] bucket %d (draws %d..%d) at frame %u task %u\n", k, k * 16, k * 16 + 15, port_frame_count, gfx_stats.tasks); }
+          if (p193_idx - 1 >= k * 16 && p193_idx - 1 < k * 16 + 16) ix = p193_idx - 1; }
+      glUniform1i(u_idx, ix);
+      /* ?p193pick=F[&p193d=D]: from retrace F, 100-retrace windows: 0 normal, 1 draw 0 hidden, 2 draw 0 magenta (no discard),
+       * 3 draw 0 shade, 4 draw D (default 48) hidden, 5 draw D T0, 6 draw D shade, 7 draw D final alpha */
+      static int pf = -1, pd; if (pf < 0) { pf = port_flag("p193pick"); pd = port_flag("p193d"); if (!pd) pd = 48; }
+      if (pf > 0 && port_frame_count >= (unsigned)pf && port_frame_count < (unsigned)pf + 800) {
+          static const int vw[8] = {0, 8, 3, 2, 8, 1, 2, 6};
+          int k = (int)((port_frame_count - pf) / 100), tgt = k == 0 ? -1 : k <= 3 ? 0 : pd;
+          static int lastk = -1; if (k != lastk) { lastk = k; port_log("[p193] pick window %d at frame %u\n", k, port_frame_count); }
+          glUniform1i(u_dbg, p193_idx - 1 == tgt ? vw[k] : 0); } }
     if (off_on) off_drawn = 1;   /* P161 */
     glBufferData(GL_ARRAY_BUFFER, nbatch * VF * 4, batch, GL_STREAM_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, nbatch);
@@ -1030,7 +1105,7 @@ static void load_vtx(unsigned w0, unsigned w1) {
     unsigned n = w0 >> 12 & 0xFF, end = w0 >> 1 & 0x7F, v0 = end - n;
     const unsigned char *p = gfx_addr(w1);
     if (!p || v0 + n > 64) { gfx_stats.bad_addr++; return; }
-    if (p78_on && tex_on) {   /* P78: raw Vtx records (x y z flag s t rgba) of the dumped task */
+    if (p78_on && (tex_on || p158_on)) {   /* P78: raw Vtx records (x y z flag s t rgba) of the dumped task (P193: p158 dumps also untextured) */
         port_log("[p78vtx] G_VTX %08X %08X: %u at slot %u, ucode %08X geom %06X\n", w0, w1, n, v0, cur_ucode, geom);
         for (unsigned i = 0; i < n; i++)
             port_log("[p78vtx]   %2u: %6d %6d %6d  flag %04X  st %6d %6d (%.2f %.2f)  rgba %08X\n", v0 + i, (short)vbe_ld16(p + 16 * i),
@@ -1608,7 +1683,7 @@ void gfx_run_task(void *task) {
         static int tf = -1, done; if (tf < 0) tf = port_flag("dltracef");
         if (tf > 0 && !done && port_frame_count >= (unsigned)tf) { done = 1; gfx_trace = 1; port_log("[p147] dltracef: task %u at frame %u\n", gfx_stats.tasks, port_frame_count); } }
     if (p78_task < 0) p78_task = port_flag("p78tex");
-    p78_on = p78_task > 0 && gfx_stats.tasks == (unsigned)p78_task; p78_mat = 0;
+    p78_on = p78_task > 0 && gfx_stats.tasks == (unsigned)p78_task; p78_mat = 0; p193_idx = 0;
     { /* P158 DIAGNOSTIC ?p158f=F[,?p158f2=F2]: the p78 material / texel dump plus the draw log (and texture-load lines) of the
        * first gfx task at or after retrace F (and F2): task numbers differ from run to run */
         static int f1 = -1, f2, d1, d2; if (f1 < 0) { f1 = port_flag("p158f"); f2 = port_flag("p158f2"); }
