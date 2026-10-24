@@ -267,3 +267,4 @@ P190	port	nm convert	8			object floor mesh builder func_150A4FE4 (Rare hand asm,
 P189	web	diagnostic			~113	level-0 rise and level-0x29 control loss both = swim update stub func_1504B0FC (buoyancy never clamped); splash stubs cosmetic; green decal = renderer bug with CI8 2-cycle trilinear + alpha cut-out; torches need prop handlers
 P191	port-b	nm convert	5			swim update func_1504B0FC (591 words; fixes level-0 rise + level-0x29 control loss) + splash debris chunk/dust + foot trail + footstep splash hand C; combined 5301/5915 89.6% 74.2%
 P192	port	nm convert	15			level 0x29 stubs (text-queue tempo events, mover step + sfx, texture anim, water waves) + 10 smaller hand C; port 5318/5915 89.9% 73.5%
+P195	port	nm convert	9			level 0x29 scenery movers (gate swing, swing/slide/bob, spinning pickup), lightning flash, mesh effect spawn, context action set hand C; torch flames traced to port-b func_1518DC50; COMBINED 5327/5915 90.1% 73.9%
