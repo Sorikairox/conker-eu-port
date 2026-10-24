@@ -1140,7 +1140,11 @@ f32  func_151423D8(u8);
 f32  func_15144598(struct_eu_15144598 *arg0);
 f32  func_1514462C(struct_eu_15144598 *arg0);
 f32  func_15144B68(f32 arg0);
-s32 func_1514D3B0(s32, s16, u8, u8);
+#ifdef NON_MATCHING
+s32 func_1514D3B0(s32, s16, s32, s32); /* P218: the asm passes the event values (a2 / a3) through unmasked */
+#else
+s32 func_1514D3B0(s32, s16, u8, u8);   /* the s32 version changes the C callers' default codegen */
+#endif
 s32  func_1515D6D0(s32 arg0, s32 arg1);
 void func_1515D4D4(s32, s32, s32, u8);
 void func_15169260(void *, s32, s32, u8);
@@ -1251,5 +1255,9 @@ void func_1518B818(s32 arg0, f32 arg1, f32 arg2, s32 arg3, u16 arg4, s32 arg5, u
 void func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
 void func_151C40BC(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 arg5, u8 arg6, u8 arg7);
 void func_1507F298(u8 arg0, u8 *arg1);
+#ifdef NON_MATCHING
+/* P221: NM only (game_981E0's func_15071278 called it undeclared: implicit int, a wasm signature mismatch) */
+void func_150FC438(struct127 *arg0, struct127 *arg1, u8 arg2, u8 arg3);
+#endif
 /* EU: end new */
 #endif

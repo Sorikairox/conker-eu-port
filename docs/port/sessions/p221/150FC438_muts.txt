@@ -1,0 +1,22 @@
+s/data.objId = ((u8 \*) obj)\[0x3B\];/data.objId = ((u8 *) obj)[0x3A];/
+s/data.f8 = 0.0f;/data.f8 = 1.0f;/
+s/data.uC = 0;/data.uC = 1;/
+s/data.a = a;/data.a = b;/
+s/data.screen = 0;//
+s/data.u14 = 0;/data.u14 = 1;/
+s/data.b = b;/data.b = a;/
+s/data.player = pl\[0x23D\];/data.player = pl[0x23C];/
+s/data.player = -1;/data.player = 0;/
+s/data.otherId = (other != NULL) ? ((u8 \*) other)\[0x3B\] : 0xFF;/data.otherId = (other != NULL) ? ((u8 *) other)[0x3B] : 0;/
+s/0x12C, -1, 0x27, -1, 0, 0x25/0x12C, -1, 0x28, -1, 0, 0x25/
+s/(struct37 \*) 0x20, 0xFF, 1)/(struct37 *) 0x20, 0xFF, 0)/
+s/memcpy(rec + 0x28, \&data, 0x20);/memcpy(rec + 0x24, \&data, 0x20);/
+s/fx.kind = 4;/fx.kind = 5;/
+s/fx.u2 = -1;/fx.u2 = 0;/
+s/fx.time = 0x12C;/fx.time = 0x12D;/
+s/fx.f\[2\] = 19.0f;/fx.f[2] = 20.0f;/
+s/fx.f\[11\] = D_800A22A0;/fx.f[11] = D_800A229C;/
+s/func_15164CF0((u8 \*) \&fx, 0, 0xFF, 1)/func_15164CF0((u8 *) \&fx, 1, 0xFF, 1)/
+s/\*(u8 \*\*) (rec + 0x28 + 0x10) = func_15164CF0/(void) func_15164CF0/
+s/if (other == NULL || \*(u8 \*\*) ((u8 \*) other + 0x318) == NULL) {/if (other == NULL) {/
+s/fx.player = (\*(u8 \*\*) ((u8 \*) other + 0x318))\[0x23D\];/fx.player = 0;/

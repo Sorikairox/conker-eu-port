@@ -23,7 +23,86 @@ void func_150FC8E8(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC8E8.s")
 #endif
+#ifdef NON_MATCHING
+extern f32 D_800A2280, D_800A2284, D_800A2288, D_800A228C, D_800A2290, D_800A2294, D_800A2298, D_800A229C, D_800A22A0;
+u8 *func_15164CF0(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
+
+// effect27_spawn_with_screen_effect: starts an effect record of kind 0x27 (300 frames, func_15149130) whose 32-byte
+// data (rec + 0x28) holds `obj` and its id (+0x3B), the flag `a`, `other`, its id (0xFF without one) and its player
+// (+0x318 -> +0x23D, -1 without one) and the value `b`. When `other` has a player record, a kind-4 screen effect of
+// 300 frames for that player is started too (func_15164CF0, scales 12 / 20 / 19 and the D_800A2280.. table); its record
+// goes to data + 0x10. Called by the B-pad item action func_15065E18 and by func_15071278 (game_981E0).
+void func_150FC438(struct127 *obj, struct127 *other, u8 a, u8 b) {
+    struct {
+        u8 kind;    // 0x00
+        s8 u1;      // 0x01
+        s8 u2;      // 0x02
+        s16 time;   // 0x04
+        u8 player;  // 0x06
+        f32 f[12];  // 0x08
+    } fx;
+    struct {
+        struct127 *obj;   // 0x00
+        u8 objId;         // 0x04
+        f32 f8;           // 0x08
+        u8 uC;            // 0x0C
+        u8 a;             // 0x0D
+        s32 screen;       // 0x10: the screen effect record
+        s16 u14;          // 0x14
+        s8 player;        // 0x16
+        struct127 *other; // 0x18
+        u8 otherId;       // 0x1C
+        u8 b;             // 0x1D
+    } data;
+    u8 *rec;
+    u8 *pl;
+
+    data.obj = obj;
+    data.objId = ((u8 *) obj)[0x3B];
+    data.f8 = 0.0f;
+    data.uC = 0;
+    data.a = a;
+    data.screen = 0;
+    data.u14 = 0;
+    data.b = b;
+    if (other != NULL && (pl = *(u8 **) ((u8 *) other + 0x318)) != NULL) {
+        data.player = pl[0x23D];
+    } else {
+        data.player = -1;
+    }
+    data.other = other;
+    data.otherId = (other != NULL) ? ((u8 *) other)[0x3B] : 0xFF;
+
+    rec = (u8 *) func_15149130(0x12C, -1, 0x27, -1, 0, 0x25, (struct37 *) 0x20, 0xFF, 1);
+    if (rec == NULL) {
+        return;
+    }
+    memcpy(rec + 0x28, &data, 0x20);
+    if (other == NULL || *(u8 **) ((u8 *) other + 0x318) == NULL) {
+        return;
+    }
+    fx.kind = 4;
+    fx.u1 = -1;
+    fx.u2 = -1;
+    fx.time = 0x12C;
+    fx.player = (*(u8 **) ((u8 *) other + 0x318))[0x23D];
+    fx.f[0] = 12.0f;
+    fx.f[1] = 20.0f;
+    fx.f[2] = 19.0f;
+    fx.f[3] = D_800A2280;
+    fx.f[4] = D_800A2284;
+    fx.f[5] = D_800A2288;
+    fx.f[6] = D_800A228C;
+    fx.f[7] = D_800A2290;
+    fx.f[8] = D_800A2294;
+    fx.f[9] = D_800A2298;
+    fx.f[10] = D_800A229C;
+    fx.f[11] = D_800A22A0;
+    *(u8 **) (rec + 0x28 + 0x10) = func_15164CF0((u8 *) &fx, 0, 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FC438.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_150FBE40(u8 *, u8, f32, u8, s32, s32);

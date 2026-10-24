@@ -31,6 +31,28 @@ C bytes 80.9%, 460 asm-only.
 2. Readable rewrites of remaining m2c-style NM bodies in port-b's files.
 3. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098 (106830).
 
+## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
+
+Branch `port` (P218 85e5d8c6 + P221 commit).
+- **Verification registry**: `tools/port/verify_registry.tsv` (func, file, setup_file, knobs, mutant_file, session;
+  57 rows: P198-P218 conversions seeded by `tools/port/seed_registry.py`, P218 re-check rows, P221). Re-run with
+  `tools/port/reverify.sh FUNC...` (TR=4, NR=100 random, MUT=1 mutants, NOSETUP=1); candidate = current NM block
+  (`tools/port/nmblock.py`). Add a row for every new conversion; blank knobs = not recorded (check the session doc).
+- difftest: a jalr / jr to an unaligned or unstubbable target ends the run as a fault `jalr to bad target` (same
+  target both sides = inconclusive; `DIFFTEST_BADJALR_OLD=1` = old). Selftest case func_151416E8: 95 / 95.
+- Hand C (NM), B-pad callees of port-b's func_15065E18: func_150FC438 effect27_spawn_with_screen_effect (129650; NM-only
+  prototype in functions.h), func_150D9098 obj_spawn_effect50_with_sound (106830), func_150DC2F0 item_effect_spawn
+  (109770; `(u8 kind, s32 arg1)`). Random + setups EQUIV, mutants 22/22, 27/27, 37/37.
+- Lesson: random trials compare stack records passed to stubs (memcpy sources, spec structs) only by pointer class:
+  func_150D9098's first draft swapped two record floats and was random-EQUIV. Use ARGMEM (+ STKFILL) setups.
+- Checks: verify_all OK, NM build links, protocheck 0 (1437), selftest 95 / 95, progress_nm 5431 / 5915 (91.8%), C bytes 78.9%.
+
+## Next steps (from P221)
+1. func_15073FA0 (game_981E0, 458 lines; last port-file callee of func_15065E18), func_1508CF34 (B7840 cmd 9, exact v0).
+2. port-b: func_15065E18's `jal func_150FC438` (15069F80): a3 not visibly set; func_150DC2F0 takes 2 args in NM C.
+3. Re-checks: use `tools/port/reverify.sh`; fill blank knobs in the registry as functions are re-checked.
+4. Breadth: `p218/asmlist.py`.
+
 ## P220 (port-b) (session P220, 2026-10-24). Details: `docs/port/sessions/P220.md`
 
 Branch `port-b`. **func_15065E18 player_item_action** (90F50): 40 targeted setups (RET on func_15064240 /
@@ -72,6 +94,26 @@ asm-only.
 2. func_151C0698 (1EDA00, 669; RET on the func_151B8EB8 stub; analysis P213.md section 3).
 3. Breadth: func_150A6070, func_150A6324 (D3880), func_150C8F68, func_1518F080, func_151D4D44, func_150C92B8.
 
+## State (session P218, 2026-10-24). Details: `docs/port/sessions/P218.md`
+
+Branch `port` (P215 18edc1c6 + P218 commit). No harness change.
+- func_1514D3B0: event values a2 / a3 are s32 in the NM build (functions.h `#ifdef NON_MATCHING`; the default keeps u8
+  because the s32 prototype changes a C caller's default codegen). Setups wide / wideneg / wide32 EQUIV, 17 / 17 mutants.
+- Random DIFFERs are harness artefacts: func_1504A730 (D_800CC6A4 holds &sp5C: MEMSTK=800CC6A4 -> EQUIV x3 seeds),
+  func_151416E8 / func_151D9014 (random table entries -> unaligned jalr targets, no stub: ROMDATA / valid kind -> EQUIV).
+- UNSURE setups: 15169260 / 15160310 just need DIFFTEST_ROMDATA=1 (EQUIV); func_15013000's "setups" were func_15113000's
+  (p119/3000.txt): new `p218/15013000_setups.txt` EQUIV + mutants; func_1509D274 setups EQUIV TR=16 (random stays UNSURE).
+- Hand C (NM): func_1508E080 rail_weapons_update (cmd 11, B7840), func_15173090 sprite_place_on_floor (19FA20).
+- Checks: verify_all OK, NM build links, protocheck 0 (1434), selftest 91 / 91, progress_nm 5428 / 5915 (91.8%), C bytes 78.8%.
+
+## Next steps (from P218)
+1. B7840: func_1508CF34 (cmd 9; its result is used by func_1508AB7C: exact v0).
+2. Harness idea (needs a selftest case): a jalr to an unaligned target could end the trial as inconclusive on both
+   sides instead of running garbage (P218 section 2).
+3. Re-check runs must use each function's own setup file and knobs (P214 / P215 ran 9260 / 0310 without ROMDATA and
+   func_15013000 with another function's setups).
+4. port-b: re-run A28B0 mutants (DECLKW fix, P214) - and any port-b mutant run made on a merge of P214 (jalr compare off).
+
 ## P216 (port-b) (session P216, 2026-10-24). Details: `docs/port/sessions/P216.md`
 
 Branch `port-b`. Hand C (NM), difftest EQUIV + 10 setups + mutants 20/20: func_151D5DA8 mouth_aim_ray (201240, void;
@@ -91,7 +133,6 @@ v0 used by func_1506045C. Checks: verify_all rc 0, NM links, protocheck 0 (1446)
    jalr: convert faithfully, port-safe C must not dereference it; document).
 3. Breadth: func_150A6070, func_150A6324 (D3880; compiled or hand asm?), func_150C8F68, func_1518F080,
    func_151D4D44, func_150C92B8.
-
 ## State (session P215, 2026-10-24). Details: `docs/port/sessions/P215.md`
 
 Branch `port` (P214 2f944d3c + P215 commit).

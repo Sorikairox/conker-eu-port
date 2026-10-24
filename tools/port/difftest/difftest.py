@@ -714,6 +714,12 @@ def param_kinds(tu, func):
 ARGFIX = {}
 JALRARG_OLD = os.environ.get('DIFFTEST_JALRARG_OLD') == '1'   # P211: old jalr argument compare (see compare)
 JALRTGT_OLD = os.environ.get('DIFFTEST_JALRTGT_OLD') == '1'   # P215: old jalr target-register handling (see compare)
+# P221: a jalr / jr to an unaligned target, or one no stub can be written at (outside kseg0/kseg1 RAM), ends the run
+# as a fault 'jalr to bad target 0x...' (an address error on N64 too): when both sides do it at the same target the
+# trial is inconclusive, as for any common fault. Before P221 stub_at refused such targets and both sides ran on into
+# garbage, then into their own code at different addresses (P218: func_151416E8 / func_151D9014 random DIFFERs from
+# random handler tables). DIFFTEST_BADJALR_OLD=1 = old behaviour.
+BADJALR_OLD = os.environ.get('DIFFTEST_BADJALR_OLD') == '1'
 JALRSKIP = {int(x) for x in filter(None, os.environ.get('DIFFTEST_JALRSKIP', '').split(','))}   # P215: scratch arg GPRs at jalrs (see compare)
 NOPROTO = set(filter(None, os.environ.get('DIFFTEST_NOPROTO', '').split(',')))   # P214: selftest hook
 JALARG_OLD = os.environ.get('DIFFTEST_JALARG_OLD') == '1'
@@ -844,7 +850,9 @@ class Run:
         self.last_pc = addr
 
     def stub_at(self, a):
-        if a in self.stubs or self.vram <= a < self.end or a == RET_MAGIC or a & 3: return
+        """-> False when no stub could be written (P221), else True"""
+        if a in self.stubs or self.vram <= a < self.end or a == RET_MAGIC: return True
+        if a & 3: return False   # (BADJALR_OLD: ignored by on_jalr, the old silent refusal)
         try:
             p = phys(a)
             for pp in {p & ~(PAGE - 1), (p + 7) & ~(PAGE - 1)}: self.ensure(pp)
@@ -857,14 +865,18 @@ class Run:
                 self.mu.mem_write(p, b'\x03\xe0\x00\x08\x00\x00\x00\x00')
             self.mu.ctl_remove_cache(a, a + 8)
         except Exception:
-            pass
-        self.stubs.add(a)
+            if BADJALR_OLD: self.stubs.add(a)
+            return False
+        self.stubs.add(a); return True
 
     def on_jalr(self, mu, addr, size, ud):
         if len(self.stubs) > 400:   # random function pointers: every new target costs a fresh page; give up (timeout)
             mu.emu_stop(); return
         w = self.words[(addr - self.vram) // 4]
-        self.stub_at(mu.reg_read(UC_MIPS_REG_0 + ((w >> 21) & 31)) & 0xFFFFFFFF)
+        tg = mu.reg_read(UC_MIPS_REG_0 + ((w >> 21) & 31)) & 0xFFFFFFFF
+        ok = self.stub_at(tg)
+        if not ok and not BADJALR_OLD:
+            self.badjalr = (tg, addr); mu.emu_stop()
 
     def on_d64(self, mu, addr, size, ud):
         w = self.d64.get(addr)
@@ -1141,7 +1153,7 @@ class Run:
         for i, r in enumerate(S_REGS): mu.reg_write(r, 0x5EED0000 + i)
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
-        self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None
+        self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None; self.badjalr = None
         self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set(); self.awf = set(); self.awr_all = set(); self.awf_all = set()
         while True:
             self.resume = None
@@ -1150,6 +1162,11 @@ class Run:
             except UcError as e:
                 self.fault = '%s at 0x%08X' % (e, mu.reg_read(UC_MIPS_REG_PC))
                 self.fault_pc = self.last_pc if self.last_pc is not None else mu.reg_read(UC_MIPS_REG_PC)
+                self.fault_regs = [mu.reg_read(UC_MIPS_REG_0 + i) for i in range(32)]
+                break
+            if self.badjalr is not None:   # P221 (BADJALR_OLD): the target is part of the fault kind, compared below
+                self.fault = 'jalr to bad target 0x%08X at 0x%08X' % self.badjalr
+                self.fault_pc = self.badjalr[1]
                 self.fault_regs = [mu.reg_read(UC_MIPS_REG_0 + i) for i in range(32)]
                 break
             if self.d64fault is not None:
