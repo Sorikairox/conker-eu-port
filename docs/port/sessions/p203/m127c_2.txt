@@ -1,0 +1,7 @@
+s/    if (face < 4) {/    if (face < 3) {/
+s/            dist = 320;/            dist = 300;/
+s/        dist = (s32) (dist \* (h \/ step_t) + 319) \/ 320;/        dist = (dist * (s32) (h \/ step_t) + 319) \/ 321;/
+s/            cols = w \/ step_s;/            cols = h \/ step_s;/
+s/0x07000000 | ((lrs \& 0xFFF) << 12)/0x07000000 | ((lrs \& 0x7FF) << 12)/
+s/(f32) ((q\[0\]\[2\] + q\[2\]\[2\]) >> 1)/(f32) (q[0][2] + q[2][2])/
+s/        dist = (s32) (dist \* (h \/ step_t)/        dist = (s32) (dist * (w \/ step_s)/

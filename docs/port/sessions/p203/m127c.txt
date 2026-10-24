@@ -1,0 +1,84 @@
+s/    x \*= 8.0f;/    x *= 4.0f;/
+s/    y \*= 8.0f;/    y *= 9.0f;/
+s/    z \*= 8.0f;/    z *= 8.5f;/
+s/    n = \*count;/    n = 0;/
+s/    cur_first = \*first;/    cur_first = 0;/
+s/    fmt_last = \*last_fmt;/    fmt_last = -1;/
+s/        u_start = (s32) z;/        u_start = (s32) y;/
+s/        v_start = (s32) z;/        v_start = (s32) x;/
+s/    } else if (ax == 'z') {/    } else if (ax == 'Z') {/
+s/    if (face < 4) {/    if (face < 3) {/
+s/        if (dist > 320) {/        if (dist > 321) {/
+s/            dist = 320;/            dist = 300;/
+s/        dist = (s32) (dist \* (h \/ step_t) + 319) \/ 320;/        dist = (s32) (dist * (h \/ step_t) + 320) \/ 320;/
+s/        dist = (s32) (dist \* (h \/ step_t) + 319) \/ 320;/        dist = (dist * (s32) (h \/ step_t) + 319) \/ 321;/
+s/        dist = 0x7FFF;/        dist = 7;/
+s/    v = v_start - dv;/    v = v_start;/
+s/tpos += step_t, row++, v -= dv)/tpos += step_t, row++, v -= dv + 1)/
+s/tpos += step_t, row++, v -= dv)/tpos += step_t, v -= dv)/
+s/spos += step_s, col++, u = u2)/spos += step_s, col++, u += 8)/
+s/spos += step_s, col++, u = u2)/spos += step_s, u = u2)/
+s/            v2 = v + dv;/            v2 = v + du;/
+s/                    q\[0\]\[0\] = fx, q\[0\]\[1\] = v, q\[0\]\[2\] = u;/                    q[0][0] = fx, q[0][1] = v, q[0][2] = u2;/
+s/                    q\[2\]\[0\] = fx, q\[2\]\[1\] = v2, q\[2\]\[2\] = u2;/                    q[2][0] = fx, q[2][1] = v2, q[2][2] = u;/
+s/                    q\[3\]\[0\] = u, q\[3\]\[1\] = fy, q\[3\]\[2\] = v2;/                    q[3][0] = u, q[3][1] = fy, q[3][2] = v;/
+s/                    q\[1\]\[0\] = u2, q\[1\]\[1\] = fy, q\[1\]\[2\] = v;/                    q[1][0] = u, q[1][1] = fy, q[1][2] = v;/
+s/                    q\[2\]\[0\] = u2, q\[2\]\[1\] = v2, q\[2\]\[2\] = fz;/                    q[2][0] = u2, q[2][1] = v, q[2][2] = fz;/
+s/                    fz = (s32) z;/                    fz = (s32) y;/
+s/                case 'X':/                case 'W':/
+s/(f32) ((q\[0\]\[1\] + q\[2\]\[1\]) >> 1)/(f32) ((q[0][1] + q[3][1]) >> 1)/
+s/(f32) (q\[0\]\[2\] + q\[2\]\[2\]) >> 1)/(f32) (q[0][2] + q[2][2]))/
+s/(f32) du, (f32) dv, D_800A32F0)/(f32) dv, (f32) du, D_800A32F0)/
+s/(f32) du, (f32) dv, D_800A32F0) == 0)/(f32) du, (f32) dv, 1000.0f) == 0)/
+s/            if (D_800DC2DB == 0 \&\& row >= dist) {/            if (D_800DC2DB == 0 \&\& row > dist) {/
+s/            if (D_800DC2DB != 0 \&\& row >= dist) {/            if (row > dist) {/
+s/            if (D_800DC2DB != 0 \&\& row >= dist) {/            if (0) {/
+s/            id = tex + col \* rows + row;/            id = tex + row * rows + col;/
+s/((u8 \*) D_800B0DF0)\[9\] == 1/((u8 *) D_800B0DF0)[8] == 1/
+s/face == 2 \&\& row >= 4/face == 1 \&\& row >= 4/
+s/row >= 4 \&\& row < 7/row >= 3 \&\& row < 7/
+s/row >= 4 \&\& row < 7/row >= 4 \&\& row < 6/
+s/col >= 2 \&\&/col >= 1 \&\&/
+s/                col < 4) {/                col < 3) {/
+s/                id = 0x1675 + (col \* 3 + row - 10);/                id = 0x1675 + (col * 3 + row - 9);/
+s/addr = func_1510D66C(id, NULL, 3, 0);/addr = func_1510D66C(id, NULL, 2, 0);/
+s/t_hi = (s32) (((f32) step_t + 0.5f) \* 32.0f);/t_hi = (s32) (((f32) step_t + 0.5f) * 31.0f);/
+s/s_hi = (s32) (((f32) step_s + 0.5f) \* 32.0f);/s_hi = (s32) (((f32) step_t + 0.5f) * 32.0f);/
+s/vp = (s16 \*) (vbuf + (cur_first + n) \* 16);/vp = (s16 *) (vbuf + (cur_first + n) * 8);/
+s/            cols = w \/ step_s;/            cols = h \/ step_s;/
+s/if (ax == 'y' \&\& (spos == 0 || spos == w - step_s))/if (ax == 'y' \&\& (spos == 0))/
+s/if (ax == 'y' \&\& (spos == 0 || spos == w - step_s))/if (ax == 'y' \&\& (spos == w - step_s))/
+s/if (ax == 'y' \&\& (spos == 0 || spos == w - step_s))/if (ax == 'x' \&\& (spos == 0 || spos == w - step_s))/
+s/                q\[3\]\[0\] -= 3;/                q[3][0] += 3;/
+s/                q\[1\]\[2\] -= 3;/                q[1][2] += 3;/
+s/                q\[3\]\[2\] += 3;/                q[3][2] += 2;/
+s/vp\[3\] = 0, vp\[4\] = 16, vp\[5\] = 16;/vp[3] = 0, vp[4] = 16, vp[5] = 32;/
+s/vp\[11\] = 0, vp\[12\] = s_hi, vp\[13\] = 16;/vp[11] = 0, vp[12] = t_hi, vp[13] = 16;/
+s/vp\[19\] = 0, vp\[20\] = s_hi, vp\[21\] = t_hi;/vp[19] = 1, vp[20] = s_hi, vp[21] = t_hi;/
+s/vp\[24\] = q\[3\]\[0\], vp\[25\] = q\[3\]\[1\]/vp[24] = q[3][1], vp[25] = q[3][0]/
+s/vp\[27\] = 0, vp\[28\] = 16, vp\[29\] = t_hi;/vp[27] = 0, vp[28] = 16, vp[29] = s_hi;/
+s/            loads\[n >> 2\].addr = addr;/            loads[n >> 2].addr = id;/
+s/\[col \* rows + row + face \* cols \* rows\]/[col * rows + row + face * cols]/
+s/\[col \* rows + row + face \* cols \* rows\]/[row * cols + col + face * cols * rows]/
+s/            n += 4;/            n += 2;/
+s/            if (n != 16) {/            if (n < 12) {/
+s/            gdl->words.w0 = 0x01010020;/            gdl->words.w0 = 0x01010010;/
+s/            gdl->words.w1 = vbuf + cur_first \* 16;/            gdl->words.w1 = vbuf;/
+s/                lrs = ((arg19\[fmt\] + 0x800) >> arg20\[fmt\]) - 1;/                lrs = ((arg19[fmt] + 0x800) >> arg20[fmt]);/
+s/                lrs = ((arg19\[fmt\] + 0x800) >> arg20\[fmt\]) - 1;/                lrs = ((arg20[fmt] + 0x800) >> arg19[fmt]) - 1;/
+s/                if (lrs >= 0x7FF) {/                if (lrs > 0x7FF) {/
+s/                    lrs = 0x7FF;/                    lrs = 0x7FE;/
+s/0x07000000 | ((lrs \& 0xFFF) << 12)/0x07000000 | ((lrs \& 0x7FF) << 12)/
+s/gdl->words.w1 = tlut_offset\[fmt\] + loads\[k >> 2\].addr;/gdl->words.w1 = tlut_offset[fmt ^ 1] + loads[k >> 2].addr;/
+s/0x06000000 | (tlut_count\[fmt\] << 14)/0x06000000 | (tlut_count[fmt] << 12)/
+s/                if (fmt != fmt_last) {/                if (fmt > fmt_last) {/
+s/                    fmt_last = fmt;/                    ;/
+s/0xD7000002 | ((tile\[fmt\] \& 7) << 8)/0xD7000002 | ((tile[fmt] \& 0xF) << 8)/
+s/(((k \* 2 + 4) \& 0xFF) << 16) | (((k \* 2) \& 0xFF) << 8) | ((k \* 2 + 2) \& 0xFF)/(((k * 2 + 2) \& 0xFF) << 16) | (((k * 2) \& 0xFF) << 8) | ((k * 2 + 4) \& 0xFF)/
+s/(((k \* 2 + 6) \& 0xFF) << 16) | (((k \* 2) \& 0xFF) << 8) | ((k \* 2 + 4) \& 0xFF)/(((k * 2 + 6) \& 0xFF) << 16) | (((k * 2 + 2) \& 0xFF) << 8) | ((k * 2 + 4) \& 0xFF)/
+s/            n = 0;/            n = 1;/
+s/            cur_first += 16;/            cur_first += 8;/
+s/    \*count = n;/    *count = 0;/
+s/    \*first = cur_first;/    *first = 0;/
+s/    \*vtx = vbuf;/    *vtx = vbuf + 4;/
+s/            dist = (s32) (dist \* (h \/ step_t)/            dist = (s32) (dist * (w \/ step_s)/

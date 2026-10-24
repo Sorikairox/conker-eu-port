@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P203 (port-b) (session P203, 2026-10-24). Details: `docs/port/sessions/P203.md`
+
+Branch `port-b` (from P201 ce8da0d). Hand C (NM), difftest EQUIV + setups + mutants:
+- func_1518ECAC `particle_quad_velocity_build` (1BAF40, 245; coordinator priority from browser P202): entry 5 of
+  the particle draw table D_8008A1BC, `u8 *(u8 *, s16)` like func_1514A540; returns the view's vertex block (the stub
+  returned 0: no character-effect particle drawn). 14 setups, mutants 32/33 + 1 equivalent.
+- func_1511127C `sky_box_face_build` (13DC30, 652, level-0x29 stub): returns the DL (C caller func_15112074 uses
+  it); w / h / steps u32; SkyFace / SkyLoad typedefs moved above it. 39 setups, mutants 80/84 (3 equivalent, 1
+  untestable upper-case axis = port decision, start at 0).
+- func_151D3A30 `impact_effect_spawn` (201240, 564): s32 returning 0 (981C0 prototype, nobody reads v0). 32 setups,
+  mutants 88/88. IDO reads `5.86f` as 0x40BB851F: the C writes 5.85999966f (rodata 0x40BB851E).
+- Coordinator: game_eu_C5530.c NM prototype of func_150867D4 is now s32 (asm returns s5; func_15086508 and game_A28B0
+  read it): port can convert func_150867D4.
+- P199 stub census: no other listed stub is in a port-b file.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1359), selftest 65/65. progress_nm 5353/5915 (90.5%), C bytes
+  74.5%, 562 asm-only.
+
+## Next steps (from P203)
+
+1. Browser: func_1518ECAC (frontend 0x1D fire imp flames), func_1511127C (level 0x29 sky), func_151D3A30 impacts.
+2. func_151C0698 (1EDA00) waits for func_151B8EB8 (game_eu_1E61C0, other owner, asm-only).
+3. Owned breadth: func_15093B58 (857, BC510), func_150F8EAC (893, 126330), func_150918EC (1995, BC510).
+
 ## P201 (port-b) (session P201, 2026-10-24). Details: `docs/port/sessions/P201.md`
 
 Branch `port-b` (from P197 b693dac). Hand C (NM) + tests:
