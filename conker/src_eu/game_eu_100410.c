@@ -22,7 +22,55 @@ void func_150D2C00(u8 *arg0)
   }
 }
 
+#ifdef NON_MATCHING
+/* 0x60-byte particle state, copied to the particle's +0x28 */
+typedef struct {
+    s32 kind;
+    f32 angle;      /* 0 .. 2 pi */
+    f32 scale;      /* 0.3 .. 0.7 */
+    f32 invScale;
+    f32 spin;       /* +-(0.3 .. 0.43) */
+    f32 unk14;
+    f32 unk18;
+    u8 mtx[0x40];
+    u8 colour[3];
+    u8 pad5F;
+} Flake_150D2C9C;
+// flake_particle_spawn: P253. Spawns one particle (func_15149130: lifetime 100..200, 0x60 bytes of state; arg2 /
+// arg3 are the owner's +0xC / +1) whose state is: kind, a random angle, scale 0.3..0.7 and its inverse, a spin of
+// 0.3..0.43 with a random sign, the 64-byte matrix mtx and a random colour (white, red or green). Callers:
+// func_150D2C00 (timer) and func_150D380C (message 0x34); both ignore the result (the asm leaves memcpy's result, or
+// 0 when no particle was free; s32 as in this file's prototype).
+s32 func_150D2C9C(s32 kind, u8 *mtx, u8 arg2, u8 arg3) {
+    Flake_150D2C9C f;
+    static const u8 colours[3][3] = { { 0xFF, 0xFF, 0xFF }, { 0xFF, 0, 0 }, { 0, 0xFF, 0 } };
+    u8 c;
+    struct260 *part;
+
+    f.kind = kind;
+    f.angle = func_150ADA68() * 2.0f * 3.1415927f;
+    f.scale = func_150ADA68() * 0.4f + 0.3f;
+    f.invScale = 1.0f / f.scale;
+    f.spin = func_150ADA68() * 0.13000001f + 0.3f;
+    if (func_150ADA20() & 1) {
+        f.spin = -f.spin;
+    }
+    f.unk14 = 0.0f;
+    f.unk18 = 0.0f;
+    memcpy((s32) f.mtx, (s32) mtx, 0x40);
+    c = func_150ADA20() % 3U;
+    f.colour[0] = colours[c][0];
+    f.colour[1] = colours[c][1];
+    f.colour[2] = colours[c][2];
+    part = func_15149130((func_150ADA20() % 101U) + 100, -1, 0x32, -1, 1, 0, (struct37 *) 0x60, arg2, arg3);
+    if (part == NULL) {
+        return 0;
+    }
+    return memcpy((s32) ((u8 *) part + 0x28), (s32) &f, 0x60);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_100410/func_150D2C9C.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1514373C(f32, f32, f32 *, f32 *);

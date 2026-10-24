@@ -1,0 +1,18 @@
+# P253 func_15189B64 (trail_draw) mutants: sed % setup names
+s/if (rec\[2\] == 0)/if (rec[2] == 1)/ % h0 none
+s/sp64, 1);/sp64, 0);/ % h
+s/n = rec\[1\];/n = rec[3];/ % h
+s/m = D_800BE9C0 \* per \* n;/m = D_800BE9C0 * per;/ % h
+s/\/ 0x32C;/\/ 0x330;/ % h
+s/slot >= 25/slot >= 26/ % s25
+s/slot < 0 || // % neg
+s/= \*(s32 \*) (rec + 0x14);/= *(s32 *) (rec + 0x18);/ % h
+s/a = alpha0 \* 3 \* 32;/a = alpha0 * 2 * 32;/ % h
+s/D_800DFBF4 = a >> 8;/D_800DFBF4 = a >> 7;/ % h
+s/(gfx, slot, arg2, 4, 1)/(gfx, slot, arg2, 3, 1)/ % h
+s/a += alpha0 \* 32;/a += alpha0 * 16;/ % h
+s/m += per;/m += 1;/ % h
+s/\*(s32 \*) (\*(u8 \*\*) (rec + 0x10) + 0x94) = saved;/;/ % h
+s/m \* 64;/m * 32;/ % h
+s/for (i = 0; i < count; i++)/for (i = 1; i < count; i++)/ % h
+s/return gfx;$/return gfx + 8;/ % none

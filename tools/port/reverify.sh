@@ -1,7 +1,7 @@
 #!/bin/bash
 # P221: re-run a converted function's verification with its exact recorded command (tools/port/verify_registry.tsv).
 # usage: tools/port/reverify.sh FUNC...   (after eval "$(tools/eu_port/wt.sh env <name>)")
-# Env: TR (trials per setup, default 4), NR (random trials, default 100; 0 = skip), MUT=1 also runs the mutants,
+# Env: TR (trials per setup, default 4), NR (random trials, default 100; 0 = skip; NORAND=1 = NR=0), MUT=1 also runs the mutants,
 #      NOSETUP=1 random only, MUTCUT=N cuts the mutant line at N characters (default: no cut; P227). Candidate = the function's current NM block (tools/port/nmblock.py).
 # Registry columns: func, file, setup_file (comma list), knobs (space-separated K=V env, e.g. DIFFTEST_ROMDATA=1; TR=N sets
 # the setup trials), mutant_file (comma list, `sed-expr % setup names` lines), session.
@@ -12,6 +12,8 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 R=${CONKER_ROOT:-$HOME/conker}; cd "$R" || exit 2
 REG=tools/port/verify_registry.tsv; W=port_work/reverify; mkdir -p $W
 NR0=$NR  # P244: registry knob NR=N sets the random trial count for that row (env NR still wins)
+# P253: NORAND=1 skips the random phase (same as NR=0; it was silently ignored before). It wins over a registry NR= knob.
+[ -n "$NORAND" ] && NR0=0
 for F in "$@"; do NR=$NR0
   row=$(awk -F'\t' -v f="$F" '$1==f {OFS="\037"; $1=$1; print}' $REG | tail -1)  # US-separated: read collapses empty tab fields
   [ -z "$row" ] && { echo "$F: not in registry"; continue; }

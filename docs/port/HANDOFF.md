@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P253, 2026-10-25). Details: `docs/port/sessions/P253.md`
+- Registry re-run done: func_1508C600, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874, 151D8280, 151EA4C8
+  all random EQUIV, all setups, all mutants killed. func_150C5A68 still needs DIFFTEST_JALRARG_OLD=1 (the random jalr
+  target is a null pointer, so no prototype; the f14 leftover is compared); knob kept.
+- port_work/p249/gen_edcc8.py eye offsets fixed (+0x2F8 / +0x2FC / +0x300).
+- Hand C (NM), all random EQUIV + setups + mutants 100%: func_150DF8B4 ground_burst_effect, func_150D779C
+  bullet_impact_effect, func_151894F4 trail_matrix_history_push_world, func_150D083C console_text_type, func_150D2C9C
+  flake_particle_spawn, func_15103910 object_sound_follow_cam / func_15103AA0 object_sound_delayed (func_1000FA64
+  callbacks: `s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound)`), func_15189B64 trail_draw.
+- Harness: tools/port/tablesig.py (moved from p214, container from $CONKERDEV); reverify.sh NORAND=1 (= NR=0).
+- Lesson: an initialised non-const local array goes to .data, which the NM link discards -> use `static const`.
+
+## Next steps (from P253)
+1. Registry/reverify: add a `HARNESS=cmd` knob (or column) so reverify.sh / reverify_all.sh re-run whole-function
+   harnesses (port-b nmasm_huff.py + mutant script); coordinator request from port-b P251.
+2. port-b: func_15082278 (AF2A0) passes hit +0x44 as func_150D779C's first parameter, a 0x12-byte collision triangle
+   (s16[9]) or NULL; its C calls it `h->normal`, worth a look. func_15190940 (P250 follow-up 2) still open.
+3. Breadth (compiled, owned): func_15115B40 (142E40), func_150F6EDC (1231B0), func_151B7DA4 / func_151B69D0 (1E40E0),
+   func_1517A75C (1A7B30), func_150D88E8 (105FD0), func_151473F4 (174610), func_15011D60 (3F1F0), func_15104A80
+   (131F30), func_15117858 (142E40), func_15194B3C (1C1A20), func_151570C4 (183F10). The asm-only functions under 60
+   instructions are all handwritten or port-b's.
+4. Browser: UNVERIFIED list in P253.md section 6.
+
 ## State (session P250, 2026-10-25). Details: `docs/port/sessions/P250.md`
 - Tank func_150EDCC8: `dist = 10000` survivor explained (eye fields poked 4 bytes early in every mp_ray setup, fixed;
   slot 0 near the eye also hid it) and killed with `mp_ray_10k`; new setups `sp_lock2` (kills `off * d`) and `sp_turn`

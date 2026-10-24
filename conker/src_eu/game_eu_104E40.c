@@ -6,7 +6,7 @@
 #ifdef NON_MATCHING
 void func_15150258(u8 *, u8, s32);
 void func_151C0AA8(u8 *, u8, s32);
-void func_151C0B54(s32, u8, s32);
+void func_151C0B54(void *, u8, s32); /* P253: was s32 (a pointer in both callers) */
 void func_151C0BA0(void *, u8, s32);
 
 void func_150D7630(u8 *arg0, u8 arg1, s32 arg2) {
@@ -76,4 +76,64 @@ void func_150D7630(u8 *arg0, u8 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/func_150D7630.s")
 #endif
+#ifdef NON_MATCHING
+void func_151C01F0(f32 *, f32 *);
+void func_1515016C(u8 *, u8, s32);
+void func_15150108(u8 *, u8, s32);
+/* 0x54-byte effect description: func_151C01F0 fills everything except the position (+0x08) */
+typedef struct {
+    f32 unk0;
+    s32 unk4;
+    f32 pos[3];
+    u8 unk14[0x40];
+} ImpactInfo_150D779C;
+/* 0x12-byte collision triangle (copied as a whole) */
+typedef struct {
+    s16 v[9];
+} ImpactTri_150D779C;
+// bullet_impact_effect: P253. Effect at a hit point: pos = hit position, dir = shot direction, kind (0xFF from both
+// callers) and arg4 are passed to every spawner. Always spawns func_151C0AA8 / func_151C0B54 / func_151C0BA0 at pos.
+// With a triangle (tri != NULL: the surface that was hit) builds { -dir, the triangle, size, info } and calls
+// func_1515016C (a mark on the triangle); without one builds { -dir, size, info } and calls func_15150108. info / size
+// come from func_151C01F0; info's position is the hit position.
+void func_150D779C(ImpactTri_150D779C *tri, f32 *pos, f32 *dir, u8 kind, s32 arg4) {
+    func_151C0AA8((u8 *) pos, kind, arg4);
+    func_151C0B54(pos, kind, arg4);
+    func_151C0BA0(pos, kind, arg4);
+    if (tri != NULL) {
+        struct {
+            f32 normal[3];
+            ImpactTri_150D779C tri;
+            f32 size;
+            ImpactInfo_150D779C info;
+        } rec;
+
+        rec.normal[0] = -dir[0];
+        rec.normal[1] = -dir[1];
+        rec.normal[2] = -dir[2];
+        rec.tri = *tri;
+        *(s32 *) &rec.info.pos[0] = *(s32 *) &pos[0];   /* copied as words, like the asm */
+        *(s32 *) &rec.info.pos[1] = *(s32 *) &pos[1];
+        *(s32 *) &rec.info.pos[2] = *(s32 *) &pos[2];
+        func_151C01F0((f32 *) &rec.info, &rec.size);
+        func_1515016C((u8 *) &rec, kind, arg4);
+    } else {
+        struct {
+            f32 normal[3];
+            f32 size;
+            ImpactInfo_150D779C info;
+        } rec;
+
+        rec.normal[0] = -dir[0];
+        rec.normal[1] = -dir[1];
+        rec.normal[2] = -dir[2];
+        func_151C01F0((f32 *) &rec.info, &rec.size);
+        *(s32 *) &rec.info.pos[0] = *(s32 *) &pos[0];
+        *(s32 *) &rec.info.pos[1] = *(s32 *) &pos[1];
+        *(s32 *) &rec.info.pos[2] = *(s32 *) &pos[2];
+        func_15150108((u8 *) &rec, kind, arg4);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_104E40/func_150D779C.s")
+#endif
