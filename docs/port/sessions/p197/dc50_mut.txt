@@ -1,0 +1,73 @@
+# P197 mutants of func_1518DC50 (sed expression % setup names; empty = all)
+s/if (!(e->flags \& 1)) {/if (!(e->flags \& 2)) {/
+s/            e->mode = 1;/            e->mode = 3;/
+s/        if (e->live != 0) {/        if (e->live > 1) {/
+s/|| e->id != owner\[0x3B\])/|| e->id != owner[0x3A])/
+s/\*(s32 \*) owner == 0 ||/*(s32 *) owner == 1 ||/
+s/\* 0.01f;/* 0.02f;/
+s/if (e->timed \& 1) {/if (e->timed \& 2) {/
+s/if (e->time < 0) {/if (e->time <= 0) {/
+s/if (e->onEnd == -1) {/if (e->onEnd == 0) {/
+s/kill = D_8008D9C8\[e->onEnd\](arg0);/kill = D_8008D9C8[e->onEnd](arg0) != 0;/
+s/if (vis \& (1 << D_80082FA4)) {/if (vis \& (2 << D_80082FA4)) {/
+s/                e->mode |= 1;/                e->mode |= 2;/
+s/(vis \& 0xF) != 0xF/(vis \& 0x7) != 0x7/
+s/row = set->rows + owner\[0x1C8\] \* (n + 2);/row = set->rows + owner[0x1C8] * (n + 1);/
+s/                cfg = row\[n\];/                cfg = row[0];/
+s/                cfg = row\[n + 1\];/                cfg = row[n];/
+s/                            cfg = row\[i\];/                            cfg = row[i + 1];/
+s/for (j = 0; j < set->lists\[i\].len; j++) {/for (j = 1; j < set->lists[i].len; j++) {/
+s/if (\*(u16 \*) (owner + 0x84) == set->lists\[i\].ids\[j\]) {/if (*(u8 *) (owner + 0x85) == set->lists[i].ids[j]) {/
+s/                mode = 4;/                mode = 5;/
+s/if (!(e->mode \& 8) \&\& (mode != e->mode/if (!(e->mode \& 4) \&\& (mode != e->mode/
+s/|| e->attach != cfg->attach)) {/)) {/
+s/e->accum = (f32) cfg->max;/e->accum = (f32) cfg->count;/
+s/e->pos\[1\] = \*(f32 \*) (owner + 0x18) + cfg->yoff;/e->pos[1] = *(f32 *) (owner + 0x18);/
+s/            } else if (cfg->attach == 2) {/            } else if (cfg->attach == 1) {/
+s/cfg->local\[0\],/cfg->local[1],/
+s/if (cfg->attach == 2 || mode == 2) {/if (cfg->attach == 2) {/
+s/e->pos\[1\] + slot->off\[1\];/e->pos[1] + slot->off[2];/
+s/\*(s16 \*) (pt + 0xC) \* 0x40);/*(u8 *) (pt + 0xC) * 0x40);/
+s/slot->timer -= D_800BE9E4;/slot->timer -= 1;/
+s/if (slot->timer < 0) {/if (slot->timer <= 0) {/
+s/if (10.0f < m->vel\[0\]) {/if (11.0f < m->vel[0]) {/
+s/} else if (m->vel\[2\] < -10.0f) {/} else if (m->vel[2] < -9.0f) {/
+s/m->vel\[1\] = 0.0f;/m->vel[1] = 1.0f;/
+s/m->tpl->end\[0\], m->tpl->end\[1\]/m->tpl->end[1], m->tpl->end[1]/
+s/(u32) (m->tpl->range + 1) + m->tpl->life;/(u32) (m->tpl->range + 2) + m->tpl->life;/
+s/\*(s32 \*) (slot->obj + 0x58) |= 1;/*(s32 *) (slot->obj + 0x58) |= 2;/
+s/                        e->live--;/                        e->live -= 2;/
+s/                    if (tail == NULL) {/                    if (tail != NULL) {/
+s/                e->accum += cfg->rate;/                e->accum += cfg->rate * 0.5f;/
+s/spawn.wC = (s32) ((tpl->f14 + tpl->f18) \* 0.5f);/spawn.wC = (s32) (tpl->f14 + tpl->f18);/
+s/blk.f50 = tpl->f30;/blk.f50 = tpl->f2C;/
+s/blk.s4A = tpl->s2A;/blk.s4A = tpl->s28;/
+s/blk.size\[1\] = tpl->size\[1\] \* e->scale;/blk.size[1] = tpl->size[1];/
+s/                    if (fresh) {/                    if (!fresh) {/
+s/blk.size2\[2\] = tpl->size\[4\] \* e->scale;/blk.size2[2] = tpl->size[3] * e->scale;/
+s/spawn.scale\[1\] = 0.0f;/spawn.scale[1] = 1.0f;/
+s/spawn.f40 = 2.0f;/spawn.f40 = 1.0f;/
+s/spawn.b45 = 255;/spawn.b45 = 0;/
+s/\&\& e->live < cfg->max) {/\&\& e->live <= cfg->max) {/
+s/(u32) (nfree + 1);/(u32) (nfree + 2);/
+s/D_8008D9C0\[tpl->init\]/D_8008D9C0[tpl->kind]/
+s/tpl->kind, tpl->b39, 0, tpl->b3A, b, 0x58/tpl->kind, tpl->b3A, 0, tpl->b3A, b, 0x58/
+s/memcpy(rec + 0x110, (u8 \*\*) \&blk, 0x58);/memcpy(rec + 0x110, (u8 **) \&blk, 0x54);/
+s/|= 0x40000000;/|= 0x20000000;/
+s/                                    case 1: \/\* sphere \*\//                                    case 3:/
+s/cb = func_151423D8((u8) (c - 0x40));/cb = func_151423D8((u8) (c + 0x40));/
+s/head->off\[0\] = r \* sb \* ca;/head->off[0] = r * sb * sa;/
+s/head->off\[1\] = -r \* cb;/head->off[1] = r * cb;/
+s/head->off\[1\] = func_150ADA68() \* cfg->height;/head->off[1] = func_150ADA68() * cfg->radius;/
+s/head->off\[2\] = -func_151423D8((u8) (a - 0x40)) \* r;/head->off[2] = func_151423D8((u8) (a - 0x40)) * r;/
+s/e->pos\[2\] + head->off\[2\];/e->pos[2] + head->off[1];/
+s/idx = head - e->slots;/idx = head - e->slots + 1;/
+s/                                obj = head->obj;/                                obj = rec + 4;/
+s/(u32) (cfg->range + 1) + cfg->base;/(u32) (cfg->range + 1) + cfg->range;/
+s/                                tail->next = head;/                                tail->next = tail;/
+s/                                e->live++;/                                e->live += 2;/
+s/                            e->accum -= 1.0f;/                            e->accum -= 0.5f;/
+s/} while (ok \&\& nfree != 0/} while (nfree != 0/
+s/                    while (1.0f < e->accum) {/                    while (2.0f < e->accum) {/
+s/            e->attach = cfg->attach;/            e->attach = cfg->shape;/
+s/            e->mode = mode;/            e->mode = mode | 8;/

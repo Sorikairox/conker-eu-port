@@ -53,6 +53,24 @@ Branch `port` (from P196 4793d9c).
 5. Breadth (`p198/asmlist.py` after `progress_nm.py --list > port_work/p198/asmonly.txt`): next game entries
    func_1517F01C (92), func_15103AA0 (93, refs only), func_15155B1C (96), func_150CFB90 (96), func_15103910 (100).
 
+## P197 (port-b) (session P197, 2026-10-24). Details: `docs/port/sessions/P197.md`
+
+Branch `port-b` (from P194 a4dd67d). Hand C (NM):
+- func_1518DC50 `character_effect_update` (1BAF40, 750): the handler of every func_1518D1C0 character effect
+  (burning / smoke / impacts; endless point flames = types 5..9, effects 2..6, attach 2) - the torch-flame candidate:
+  as asm stub no character effect ever spawned. 207 setups EQUIV, mutants partial (18/20 run, 52 not run).
+- func_15082278 `shot_hit_apply` (AF2A0) inserted (41/42 + 1 equivalent); game_eu_12D5D0 prototype s32.
+- func_150B2C20 `pipe_explode_effects` (E0430; s32 for port's caller), mutants 41/41.
+- func_150C8DD0 `ring_effect_create` (F6060), mutants 13/13. func_150A66F0 `view_sphere_depth` (D3880, hand asm):
+  whole-function harness `p197/nmasm_66f0.py` 10000 trials EQUIV.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1312). progress_nm 5306/5915 (89.7%), C bytes 74.5%.
+
+## Next steps (from P197)
+
+1. Browser: level 0x29 torches / character effects with func_1518DC50 in C.
+2. Finish func_1518DC50 mutants (P197.md 4.); func_150CA150, func_1511127C (their asm callees are C now).
+3. Breadth (`p168/asmlist.py`), smallest first.
+
 ## State (session P196, 2026-10-24). Details: `docs/port/sessions/P196.md`
 
 Branch `port` (from P195 7964ca6). Hand C (NM), difftest EQUIV + setups + mutants (table in P196.md):
@@ -97,7 +115,6 @@ Branch `port` (from P192 cc3d667). Hand C (NM), difftest EQUIV + setups + mutant
    func_15089664 (321) / func_15089B68 (306) first (all game_eu_B37F0).
 4. Browser: level 0x29 gate / doors / scenery / pickups / lightning (P195.md section 4).
 5. Setup tip: sinf / cosf are harness stubs (random returns); pin them with RETF (cosf jal 15047EF0, sinf jal 15048050).
-
 ## P194 (port-b) (session P194, 2026-10-24). Details: `docs/port/sessions/P194.md`
 
 Branch `port-b` (from P191 5d6bdf7). Docs / drafts only, no src_eu change.
