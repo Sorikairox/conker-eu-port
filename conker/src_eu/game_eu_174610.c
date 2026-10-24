@@ -188,7 +188,53 @@ void func_151472D0(u8 *obj, u8 id, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151472D0.s")
 #endif
 
+#ifdef NON_MATCHING
+u8 func_151D8E20(void);
+void func_15142180(u8, f32 *, s32, f32, f32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
+
+// object_splash_spawn: effect handler of the same table as func_151472D0 (entry {0x50, fn}, `void (u8 *obj, u8 id,
+// s32 strength)`). For an object with a model (+0x1D4), func_15146E00 finds point `id` and probes the surface below
+// it (rec[0] = surface height, f32). Takes an effect slot (func_151D8E20); strength >= 0x47 also spawns the
+// func_15142180 effect at the point (rec[6]). Then, at (pt x, surface, pt z), one of two random effects: a ring
+// func_151D9B8C (size 10..20, alpha 100..200, life 80..120) or a burst func_151DAB58 (size 5..13, alpha 100..200).
+void func_151473F4(u8 *obj, u8 id, s32 strength) {
+    struct {
+        s32 rec[9];
+        f32 pt[3];
+    } sp;
+    f32 pos[3];
+    u8 slot;
+    f32 r;
+    u32 a;
+    u32 b;
+
+    if (*(s32 *) (obj + 0x1D4) != 0) {
+        if (func_15146E00(sp.pt, obj, (s32) sp.rec, id) != 0) {
+            slot = func_151D8E20();
+            if (strength >= 0x47) {
+                func_15142180(slot, sp.pt, sp.rec[6], 1.0f, 1.0f);
+            }
+            pos[0] = sp.pt[0];
+            pos[1] = *(f32 *) &sp.rec[0];
+            pos[2] = sp.pt[2];
+            if (func_150ADA20() & 1) {
+                r = func_150ADA68();
+                a = func_150ADA20();
+                b = func_150ADA20();
+                func_151D9B8C(slot, r * 10.0f + 10.0f, a % 101 + 100, (s32) &sp.rec[1], (struct17 *) pos,
+                              b % 41 + 80, 1, 1, 0, 0xFF, 1);
+            } else {
+                r = func_150ADA68();
+                a = func_150ADA20();
+                func_151DAB58(slot, r * 8.0f + 5.0f, a % 101 + 100, pos, 1, 0xFF, 1);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151473F4.s")
+#endif
 
 s32 func_15146E00(f32 *, u8 *, s32, u8);
 #ifdef NON_MATCHING

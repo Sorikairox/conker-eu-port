@@ -37,7 +37,81 @@ void func_151B68D0(u8 *arg0, u8 arg1, s32 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+// trail_ring_age_update: update handler (s32 (u8 *obj), the func_151B6B84 table) of the trail objects: the ring +0x94
+// holds 28-byte points {pos, life +0xC, alpha +0x10, distance +0x18}; write index +0x2E, read index +0x2D, count
+// +0x2C, capacity +0x25. Returns 0 (done) when fewer than 2 points are left and flag 8 of +0x1E is set. Walking back
+// from the newest point, each life runs down by the frame time D_800BE9A4; at a dead point all older points are
+// dropped (read index moves up to it). Then each point's alpha is its distance from the oldest point * 0.494
+// (at most 0x9B), and +0x54 gets the oldest point (0, 0, 0 when empty). Returns 1.
+s32 func_151B69D0(u8 *obj) {
+    s32 count = (s8) obj[0x2C];
+    u8 *ring = *(u8 **) (obj + 0x94);
+    s32 i;
+    s32 rd;
+    s32 a;
+    f32 base;
+
+    if (count < 2 && (*(u16 *) (obj + 0x1E) & 8)) {
+        return 0;
+    }
+    rd = (s8) obj[0x2D];
+    i = (s8) obj[0x2E];
+    if (i != rd) {
+        do {
+            i--;
+            if (i < 0) {
+                i = obj[0x25] - 1;
+            }
+            *(f32 *) (ring + i * 0x1C + 0xC) -= D_800BE9A4;
+            if (*(f32 *) (ring + i * 0x1C + 0xC) < 0.0f) {
+                rd = (s8) obj[0x2D];
+                while (i != rd) {
+                    obj[0x2D] = rd + 1;
+                    rd = (s8) obj[0x2D];
+                    if (obj[0x25] == rd) {
+                        obj[0x2D] = 0;
+                        rd = (s8) obj[0x2D];
+                    }
+                    obj[0x2C] = (s8) obj[0x2C] - 1;
+                }
+            }
+            rd = (s8) obj[0x2D];
+        } while (i != rd);
+        count = (s8) obj[0x2C];
+    }
+    if (count > 0) {
+        i = rd;
+        base = *(f32 *) (ring + rd * 0x1C + 0x18);
+        do {
+            a = (*(f32 *) (ring + i * 0x1C + 0x18) - base) * 0.49400002f;
+            if (a < 0x9C) {
+                ring[i * 0x1C + 0x10] = a;
+            } else {
+                ring[i * 0x1C + 0x10] = 0x9B;
+            }
+            i++;
+            if (i >= obj[0x25]) {
+                i = 0;
+            }
+        } while (i != (s8) obj[0x2E]);
+        count = (s8) obj[0x2C];
+    }
+    if (count > 0) {
+        i = (s8) obj[0x2D];
+        *(s32 *) (obj + 0x54) = *(s32 *) (ring + i * 0x1C + 0);
+        *(s32 *) (obj + 0x58) = *(s32 *) (ring + i * 0x1C + 4);
+        *(s32 *) (obj + 0x5C) = *(s32 *) (ring + i * 0x1C + 8);
+    } else {
+        *(f32 *) (obj + 0x54) = 0.0f;
+        *(f32 *) (obj + 0x58) = 0.0f;
+        *(f32 *) (obj + 0x5C) = 0.0f;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B69D0.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 func_15143E64(void *);
@@ -443,7 +517,60 @@ s32 func_151B7C7C(u8 *arg0, f32 *arg1) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+// obj_attached_glow_update: update handler of the func_151B78D8 helper objects. Each frame with a time step
+// (D_800BE9E4 > 0): the attach type's handler (D_8008FF30) moves the object (pos +0x10) - on failure returns 0 (the
+// caller frees it); the glow particle (data->glow, pos +0x40) follows. The move is logged in the trail ring +0x94
+// (20-byte entries {pos, step length (func_15143E64), alpha 0xFF}; write index +0x2E, read index +0x2D, count +0x2C,
+// capacity +0x25): when the write index catches the read index, the oldest entry is dropped. Returns 1.
+s32 func_151B7DA4(u8 *obj) {
+    u8 *ring = *(u8 **) (obj + 0x94);
+    AttachData *data = *(AttachData **) (obj + 0x98);
+    f32 old[3];
+    f32 d[3];
+    f32 len;
+    u8 *e;
+
+    if (D_800BE9E4 > 0) {
+        old[0] = *(f32 *) (obj + 0x10);
+        old[1] = *(f32 *) (obj + 0x14);
+        old[2] = *(f32 *) (obj + 0x18);
+        if (D_8008FF30[data->type](obj, obj + 0x10) == 0) {
+            return 0;
+        }
+        if (data->glow != 0) {
+            *(s32 *) ((u8 *) data->glow + 0x40) = *(s32 *) (obj + 0x10);
+            *(s32 *) ((u8 *) data->glow + 0x44) = *(s32 *) (obj + 0x14);
+            *(s32 *) ((u8 *) data->glow + 0x48) = *(s32 *) (obj + 0x18);
+        }
+        d[0] = *(f32 *) (obj + 0x10) - old[0];
+        d[1] = *(f32 *) (obj + 0x14) - old[1];
+        d[2] = *(f32 *) (obj + 0x18) - old[2];
+        len = func_15143E64(d);
+        e = ring + (s8) obj[0x2E] * 20;
+        *(s32 *) (e + 0) = *(s32 *) (obj + 0x10);
+        *(s32 *) (e + 4) = *(s32 *) (obj + 0x14);
+        *(s32 *) (e + 8) = *(s32 *) (obj + 0x18);
+        *(f32 *) (e + 0xC) = len;
+        e[0x10] = 0xFF;
+        obj[0x2E] = (s8) obj[0x2E] + 1;
+        if (obj[0x25] == (s8) obj[0x2E]) {
+            obj[0x2E] = 0;
+        }
+        obj[0x2C] = (s8) obj[0x2C] + 1;
+        if ((s8) obj[0x2D] == (s8) obj[0x2E]) {
+            obj[0x2D] = (s8) obj[0x2D] + 1;
+            if (obj[0x25] == (s8) obj[0x2D]) {
+                obj[0x2D] = 0;
+            }
+            obj[0x2C] = (s8) obj[0x2C] - 1;
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7DA4.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7F48.s")
 

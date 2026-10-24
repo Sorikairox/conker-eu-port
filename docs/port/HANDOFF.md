@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P255, 2026-10-25). Details: `docs/port/sessions/P255.md`
+- Level 0x29 route stubs (browser P248 / P252), hand C (NM), all random EQUIV + setups + mutants 100%: func_150D88E8
+  tile_slide_by_anim_update (scene 7), func_15072B44 player_anim_follow_up (event-4 bubbles), func_151473F4
+  object_splash_spawn (river exit), func_150451C0 ceiling_probe (after a respawn). func_15134004 was already C.
+  NOT done: func_15194210 (game_eu_1C1A20, 388 instructions, tail of the Baddie hit handler func_15074FD4).
+- Breadth, same verification: func_15115B40 lift_y_update, func_150F6EDC spark_burst_spawn, func_151B7DA4
+  obj_attached_glow_update, func_1517A75C sprite_particle_update, func_151B69D0 trail_ring_age_update, func_15117858
+  swing_angle_step.
+- Harness: registry knobs `HARNESS=cmd` / `HMUT=cmd` (commas = spaces) in reverify.sh / reverify_all.sh for
+  whole-function harnesses; new `tools/port/nmharness.sh` (NM build + nmasm harness in the container, verdict line)
+  and `tools/port/nmharness_mut.sh` (sed mutants on a source file, rebuild, harness, restore). Test row
+  func_150A44A4 (nmasm_floor.py): harness EQUIV, mutants 2 / 3 (1 coverage-gap survivor, see P255.md section 2).
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1582), implicit_scan 0 NM+float, selftest 123 / 123,
+  progress_nm `total 5915 3994 1599 322 5593 94.6% 1931932/2253856 (85.7%)`.
+- Lesson: a mutant runner that restores the source with `cp -p` leaves build_nm on the last mutant (make sees no
+  newer source); restore with cp + touch.
+
+## Next steps (from P255)
+1. func_15194210 (game_eu_1C1A20, 388 insns): the Baddie hit handler tail on level 0x29 (browser P252 blocker).
+2. port-b: add `HARNESS=` / `HMUT=` rows for the MP3 Huffman group (example command in P255.md section 2); mhuff.sh
+   has hard-coded portb paths and restores with cp (check the mtime issue above).
+3. Breadth (compiled, owned): func_15011D60 (3F1F0), func_15104A80 (131F30), func_15194B3C (1C1A20), func_151570C4
+   (183F10), then `progress_nm --list`.
+4. Browser: UNVERIFIED list in P255.md section 5.
+
 ## State (session P253, 2026-10-25). Details: `docs/port/sessions/P253.md`
 - Registry re-run done: func_1508C600, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874, 151D8280, 151EA4C8
   all random EQUIV, all setups, all mutants killed. func_150C5A68 still needs DIFFTEST_JALRARG_OLD=1 (the random jalr

@@ -1,0 +1,22 @@
+# P255 func_150F6EDC (spark_burst_spawn) mutants: sed % setup names
+s/size \*= 1.0f + (r + r);/size *= 1.0f + r;/ % hitbounce
+s/size \*= 1.0f + (r + r);/size *= 2.0f + (r + r);/ % hitbounce
+s/< 0.6f) ? 1 : 0;/<= 0.6f) ? 1 : 0;/ % miss
+s/< 0.6f) ? 1 : 0;/< 0.5f) ? 1 : 0;/ % hitbounce edge
+s/(arg5 + 0x1C));/(arg5 + 0x18));/ % hitbounce
+s/floor.unk18 = 0;/floor.unk18 = 1;/ % miss
+s/floor.unk1C = 0;/floor.unk1C = 1;/ % miss
+s/floor.unk1D = 0;/floor.unk1D = 1;/ % miss
+s/floor.unk20 = 0;/floor.unk20 = 1;/ % miss
+s/floor.floor_y = -10000.0f;/floor.floor_y = -1000.0f;/ % miss
+s/if (func_150ADA68() < 0.5f) {/if (func_150ADA68() <= 0.5f) {/ % hitnob
+s/            bounce = 1;/            bounce = 2;/ % hitbounce
+s/(pos, dir, 1, speed/(pos, unused, 1, speed/ % hitbounce
+s/(pos, dir, 1, speed/(pos, dir, 0, speed/ % hitbounce
+s/angle, alpha, size, hit/angle, alpha, speed, hit/ % hitbounce
+s/size, hit, 1.8f, 1.8f/size, 1, 1.8f, 1.8f/ % miss
+s/1.8f, 1.8f, 1,/1.8f, 1.5f, 1,/ % hitbounce
+s/(s32) \&floor, 1, bounce/(s32) \&floor, 0, bounce/ % hitbounce
+s/arg5\[0xC\],/arg5[0xD],/ % hitbounce
+s/                  arg5\[1\]);/                  arg5[0]);/ % hitbounce
+s/arg4, arg5, pos/arg4 * 2.0f, arg5, pos/ % hitbounce

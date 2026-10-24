@@ -170,7 +170,87 @@ void func_151158E8(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151158E8.s")
 #endif
+#ifdef NON_MATCHING
+// lift_y_update: world-object mover (update table next to func_15115CDC): moves the object's y (+0x12, s16) between
+// its rest height (+0x7C, taken from y on the first call) and the target in the params word +0x3C (low half), in
+// `steps` (byte 1) equal steps, with a pause of byte 0 + 1 frames. Timer +0x80: > 0 = going up (counts down at
+// the target), < 0 = waiting to return (counts up), 0 = at rest (starts again by itself when flag 4 of +0x4F is set)
+// or going back down. +0x5C gets this frame's y change.
+void func_15115B40(u8 *obj) {
+    s32 params = *(s32 *) (obj + 0x3C);
+    s32 steps = (params >> 16) & 0xFF;
+    s32 pause = ((params >> 24) & 0xFF) + 1;
+    s32 target = (s16) params;
+    s32 old_y = *(s16 *) (obj + 0x12);
+    s32 loop = 0;
+    s32 moving = 0;
+    s32 rest;
+    s32 step;
+    s32 timer;
+    s32 y;
+
+    if ((obj[0x4F] & 4) == 4) {
+        loop = 1;
+    }
+    rest = *(s32 *) (obj + 0x7C);
+    if (rest == 0) {
+        *(s32 *) (obj + 0x7C) = old_y;
+        rest = old_y;
+    }
+    step = (target - rest) / steps;
+    timer = *(s32 *) (obj + 0x80);
+    if (timer == 0) {
+        if (rest == old_y) {
+            if (loop) {
+                *(s32 *) (obj + 0x80) = pause;
+                timer = pause;
+            }
+        } else {
+            y = (s16) (old_y - step);
+            if (rest < target) {
+                if (rest < y) {
+                    moving = 1;
+                }
+            } else if (y < rest) {
+                moving = 1;
+            }
+            if (moving) {
+                *(s16 *) (obj + 0x12) = y;
+                timer = *(s32 *) (obj + 0x80);
+            } else {
+                timer = -pause;
+                *(s16 *) (obj + 0x12) = rest;
+                *(s32 *) (obj + 0x80) = timer;
+            }
+        }
+    }
+    if (timer > 0) {
+        y = (s16) (*(s16 *) (obj + 0x12) + step);
+        if (*(s32 *) (obj + 0x7C) < target) {
+            if (y < target) {
+                moving = 1;
+            }
+        } else if (target < y) {
+            moving = 1;
+        }
+        if (moving) {
+            *(s16 *) (obj + 0x12) = y;
+            *(s32 *) (obj + 0x80) = pause;
+            timer = pause;
+        } else {
+            *(s16 *) (obj + 0x12) = target;
+            *(s32 *) (obj + 0x80) = timer - 1;
+            timer--;
+        }
+    }
+    if (timer < 0) {
+        *(s32 *) (obj + 0x80) = timer + 1;
+    }
+    *(s16 *) (obj + 0x5C) = *(s16 *) (obj + 0x12) - old_y;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15115B40.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15115CDC(u8 *arg0) {
@@ -755,7 +835,52 @@ void func_151172FC(u8 *o) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117424.s")
 
+#ifdef NON_MATCHING
+// swing_angle_step: spring-damped swing of one angle (degrees) of a swinging object towards its rest angle (the signed
+// low 10 bits of +0x3C); returns the new angle (callers func_15117A20 / 15117A48 / 15117A70 pick the axis). Speed
+// +0x84, spring +0x80, damping +0x7C. At rest at the target nothing happens; a swing that starts from rest plays the
+// move sound of the D_80089600 entry (+0x3C >> 10). The speed gains spring * |offset| towards the target
+// (func_15048A70 = signed angle difference) and is damped; when both are below 0.01 the angle snaps to the target.
+// The angle stays in [0, 360).
+f32 func_15117858(f32 *arg0, f32 angle) {
+    u8 *obj = (u8 *) arg0;
+    f32 damp = *(f32 *) (obj + 0x7C);
+    s32 params = *(s32 *) (obj + 0x3C);
+    f32 spring = *(f32 *) (obj + 0x80);
+    f32 speed = *(f32 *) (obj + 0x84);
+    f32 rest = (f32) ((params << 22) >> 22);
+    s32 kind;
+    f32 diff;
+
+    if (angle == rest && speed == 0.0f) {
+        return angle;
+    }
+    kind = params >> 10;
+    if (speed == 0.0f && kind != 0 && D_80089600[kind].move_sfx != 0) {
+        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);
+    }
+    angle += speed * (f32) D_800BE9E4;
+    diff = func_15048A70(angle, rest);
+    if (0.0f < diff) {
+        speed += fabsf(diff) * spring;
+    } else {
+        speed -= fabsf(diff) * spring;
+    }
+    speed *= damp;
+    if (fabsf(diff) < 0.01f && fabsf(speed) < 0.01f) {
+        angle = rest;
+        speed = 0.0f;
+    } else if (angle < 0.0f) {
+        angle += 360.0f;
+    } else if (360.0f <= angle) {
+        angle -= 360.0f;
+    }
+    *(f32 *) (obj + 0x84) = speed;
+    return angle;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117858.s")
+#endif
 
 void func_15117A20(f32 *arg0) {
     arg0[2] = func_15117858(arg0, arg0[2]);

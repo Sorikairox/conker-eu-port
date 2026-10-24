@@ -218,3 +218,14 @@ func_150D2C9C	game_eu_100410	docs/port/sessions/p253/150D2C9C_setups.txt	DIFFTES
 func_15103910	game_130CB0	docs/port/sessions/p253/15103910_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p253/15103910_muts.txt	P253
 func_15103AA0	game_130CB0	docs/port/sessions/p253/15103AA0_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p253/15103AA0_muts.txt	P253
 func_15189B64	game_eu_1B6590	docs/port/sessions/p253/15189B64_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_RET=15084E34=000000C5 TR=4	docs/port/sessions/p253/15189B64_muts.txt	P253
+func_150D88E8	game_eu_105FD0	docs/port/sessions/p255/150D88E8_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/150D88E8_muts.txt	P255
+func_15072B44	game_981E0	docs/port/sessions/p255/15072B44_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/15072B44_muts.txt	P255
+func_151473F4	game_eu_174610	docs/port/sessions/p255/151473F4_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151DA13C=4:12,151DA13C=3:32,151DB108=3:12,151426F0=1:12 TR=4	docs/port/sessions/p255/151473F4_muts.txt	P255
+func_150A44A4	game_eu_D1760		HARNESS=tools/port/nmharness.sh,tools/port/difftest/nmasm_floor.py,400,1 HMUT=tools/port/nmharness_mut.sh,conker/src_eu/game_eu_D1760.c,docs/port/sessions/p255/150A44A4_hmuts.txt,tools/port/difftest/nmasm_floor.py,200,1	docs/port/sessions/p255/150A44A4_hmuts.txt	P255
+func_15115B40	game_eu_142E40	docs/port/sessions/p255/15115B40_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/15115B40_muts.txt	P255
+func_150F6EDC	game_eu_1231B0	docs/port/sessions/p255/150F6EDC_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151D95C4=0:12,151D95C4=1:12,151D95C4=11:36 TR=4	docs/port/sessions/p255/150F6EDC_muts.txt	P255
+func_151B7DA4	game_eu_1E40E0	docs/port/sessions/p255/151B7DA4_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151443D4=0:12 TR=4	docs/port/sessions/p255/151B7DA4_muts.txt	P255
+func_1517A75C	game_eu_1A7B30	docs/port/sessions/p255/1517A75C_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/1517A75C_muts.txt	P255
+func_151B69D0	game_eu_1E40E0	docs/port/sessions/p255/151B69D0_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/151B69D0_muts.txt	P255
+func_15117858	game_eu_142E40	docs/port/sessions/p255/15117858_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/15117858_muts.txt	P255
+func_150451C0	game_eu_71E70	docs/port/sessions/p255/150451C0_setups.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p255/150451C0_muts.txt	P255

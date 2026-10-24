@@ -1,0 +1,28 @@
+# P255 func_15115B40 (lift_y_update) mutants: sed % setup names
+s/(params >> 16) \& 0xFF;/(params >> 16) \& 0x7F;/ % bytes
+s/((params >> 24) \& 0xFF) + 1;/((params >> 24) \& 0xFF) + 2;/ % downend upover
+s/((params >> 24) \& 0xFF) + 1;/(params >> 24) + 1;/ % bytes
+s/s32 target = (s16) params;/s32 target = (u16) params;/ % negtgt restneg
+s/if ((obj\[0x4F\] \& 4) == 4)/if (obj[0x4F] \& 5)/ % first
+s/if (rest == 0) {/if (rest != 0) {/ % first up
+s/(obj + 0x7C) = old_y;/(obj + 0x7C) = 0;/ % first
+s/if (rest == old_y) {/if (rest != old_y) {/ % first down
+s/\*(s32 \*) (obj + 0x80) = pause;$/*(s32 *) (obj + 0x80) = steps;/ % firstloop
+1,/y = (s16) (old_y - step);/s/old_y - step/old_y + step/ % down revdown
+s/if (rest < y) {/if (rest <= y) {/ % downend
+s/} else if (y < rest) {/} else if (y <= rest) {/ % revend revexact
+s/timer = -pause;/timer = 1 - pause;/ % downend
+1,/\*(s16 \*) (obj + 0x12) = rest;/s/= rest;/= old_y;/ % downend
+s/if (timer > 0) {/if (timer >= 0) {/ % first down
+s/(obj + 0x12) + step);/(obj + 0x12) + step + 1);/ % up
+s/if (\*(s32 \*) (obj + 0x7C) < target) {/if (*(s32 *) (obj + 0x7C) <= target) {/ % flat
+s/if (y < target) {/if (y <= target) {/ % upend
+s/} else if (target < y) {/} else if (target <= y) {/ % revupend
+s/\*(s16 \*) (obj + 0x12) = target;/*(s16 *) (obj + 0x12) = y;/ % upover
+s/(obj + 0x80) = timer - 1;/(obj + 0x80) = timer;/ % upwait
+s/if (timer < 0) {/if (timer <= 0) {/ % first
+s/(obj + 0x80) = timer + 1;/(obj + 0x80) = timer + 2;/ % waitneg
+s/(obj + 0x12) - old_y;/(obj + 0x12) + old_y;/ % up
+s/step = (target - rest) \/ steps;/step = (target - rest) >> 1;/ % trunc
+s/y = (s16) (\*(s16/y = (s32) (*(s16/ % wrap
+# P255: the mutant `*(obj + 0x7C)` -> `rest` (equivalent: rest is that word) replaced by `<=` (setup flat)

@@ -18,6 +18,31 @@ for F in "$@"; do NR=$NR0
   row=$(awk -F'\t' -v f="$F" '$1==f {OFS="\037"; $1=$1; print}' $REG | tail -1)  # US-separated: read collapses empty tab fields
   [ -z "$row" ] && { echo "$F: not in registry"; continue; }
   IFS=$'\037' read -r fn file st kn mu ses <<< "$row"
+  # P255 (port-b P251 request): knob HARNESS=cmd runs a whole-function harness instead of the difftest phases, knob
+  # HMUT=cmd its mutant runner (MUT=1 only). Commas in cmd become spaces (the knob column is space-separated); the
+  # command runs from the worktree root with this shell's env (CONKER_ROOT, CONKERDEV). HARNESS must print a verdict
+  # line starting with EQUIV / DIFFER / UNSURE / ERROR (or `RESULT X`), HMUT a last line `done: killed K survived S
+  # other O` (tools/port/nmharness.sh / nmharness_mut.sh do both). Output: `  harness: VERDICT ...` and
+  # `  muts harness: K killed / N (survived: [..])`. Rows with HARNESS skip random / setups / difftest mutants.
+  hc=""; hm=""; for k in $kn; do case $k in HARNESS=*) hc=${k#HARNESS=};; HMUT=*) hm=${k#HMUT=};; esac; done
+  if [ -n "$hc" ]; then
+    echo "$F ($ses, $file) knobs: $kn"
+    r=$(bash -c "${hc//,/ }" 2>&1 | grep -E '^(RESULT )?(EQUIV|DIFFER|UNSURE|ERROR)' | tail -1 | cut -c1-${CUT:-160})
+    [ -z "$r" ] && r="ERROR (no verdict line from: ${hc//,/ })"; echo "  harness: ${r#RESULT }"
+    if [ -n "$MUT" ]; then
+      if [ -z "$hm" ]; then echo "  muts harness: 0 killed / 0; not applied: 0 (no HMUT knob)"
+      else ho_out=$(bash -c "${hm//,/ }" 2>&1); d=$(echo "$ho_out" | grep -E '^done: killed' | tail -1)
+        if [ -z "$d" ]; then echo "  muts harness: ? (no 'done: killed' line from: ${hm//,/ })"
+        else read -r hk hs ho <<< "$(echo "$d" | sed -E 's/done: killed ([0-9]+) survived ([0-9]+) other ([0-9]+).*/\1 \2 \3/')"
+          # survivors / others listed as [expr] when the runner prints `SURVIVED k: expr` lines (nmharness_mut.sh does)
+          sv=$(echo "$ho_out" | sed -n 's/^SURVIVED [0-9]*: \(.*\)/ [\1]/p' | tr -d '\n'); [ -z "$sv" ] && for ((q = 0; q < hs; q++)); do sv="$sv [?]"; done
+          iv=$(echo "$ho_out" | sed -nE 's/^(NOAPPLY|INVALID|ERROR) [0-9]+: (.*)/ [\2]/p' | tr -d '\n'); [ -z "$iv" ] && for ((q = 0; q < ho; q++)); do iv="$iv [?]"; done
+          echo "  muts harness: $hk killed / $((hk + hs + ho))${sv:+ (survived:$sv)}; not applied: 0${iv:+; invalid:$iv}"
+        fi
+      fi
+    fi
+    continue
+  fi
   # P235: the candidate is the whole NM block (as the session drafts: mutant line numbers match; a matching-C function
   # such as func_151D52B4 keeps its matching body in the #else arm). NMBLOCK_BODY=1 = old behaviour (body only).
   wh=(NMBLOCK_WHOLE=1); [ -n "$NMBLOCK_BODY" ] && wh=(-u NMBLOCK_WHOLE)
