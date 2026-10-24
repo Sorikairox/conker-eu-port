@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P248, 2026-10-25, port-web). Details: `docs/port/sessions/P248.md`
+- User's door route on level 0x29 works up to the top of the pit spiral. B on **zone 9 (the B pad by the river at
+  (1746, 1309), next to the field gate)** -> event 1, scene 7 (4995 .. 6907); Conker gets through the field gate
+  (world obj 18 at (1567, 110, 1175), no update fn) into Birdy's field and walks back out; north across the river at
+  x ~1200 (no stop) to the grass platform: **event 4 "Jumping" fires at 8683** (thought bubbles: jump + helicopter
+  "across that gap"); event 6 armed (q 0x4029 for object 0x2007, zone (1056, 1584, -2941)), never true.
+- North of the platform: a deep water pit with a spiral of ledges; new autopilot `hX:Z` (jump + hover) crosses its
+  gaps: bdoor8 reaches the top ledge (2651, 1672, -4595) at 12345. The last gap to the plateau (y 1750, z -4050) not
+  crossed. Baddie / knock-back not reached.
+- New: `?p248mesh=F` (world objects, gate watch, zones on the loaded level), `p248/wasmnames.py` (port function
+  pointer -> name), routes `p248/bdoor*.goto`.
+- New stubs on the route: func_150D88E8 (105FD0), func_151473F4 (174610), func_15072B44 (981E0), func_15134004
+  (15FF50, first hover), func_151AB874 (1D7790); port-b func_15134E48 (161520). Traps 0.
+
+## Next steps (from P248)
+1. port-web: cross the last gap (top ledge -> plateau) to fire event 6 (The Baddie), then `?p223hit` knock-back.
+2. port: func_15134004 (15FF50; may cut the hover height), func_15072B44, func_151473F4, func_150D88E8, func_151AB874.
+3. port-b: func_15134E48 (161520) and the P245 Tank stubs.
+
 ## State (session P245, 2026-10-24, port-web). Details: `docs/port/sessions/P245.md`
 - Unnamed `conker` containers = `tools/eu_port/verify_all.sh` (seen: youthful_bhaskara, mount ~/conker-wt/port, the
   port slot's verify run; already `--rm`). verify_all.sh and run.sh now pass `--name verify-|euport-run-<wt>-<pid>`

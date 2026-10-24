@@ -399,6 +399,72 @@ void p245_coldump(float x, float y, float z) {
     }
     port_log("[p245col] done\n");
 }
+/* P248 DIAGNOSTIC ?p248mesh=F (needs ?p205obj; called from p205_obj_hook): once at retrace >= F, dump the world objects
+ * (D_800DC320 records of 0xA0 at D_800DBEF4): angle +0x0, yaw +0x4, pos +0x10..+0x14, scale +0x2C..+0x34, update
+ * +0x38 (compared with gate_swing_update func_151184BC), +0x4F, tri +0x58 / count +0x56, +0x5A pos, +0x6E busy,
+ * +0x6F flags, +0x73 state; and every triangle of collision areas 2 and 3 ("[p248tri] area idx x0 .. z2").
+ * Then every retrace: a "[p248gate]" line whenever a world object's +0x0 angle (rounded) or +0x73 changes, with
+ * player 0's position and ctx +0x6B (gate push state) and the pad buttons. */
+extern void func_151184BC(unsigned char *);
+void p248_mesh(void) {
+    static int f = -2, done, n0;
+    static int lastang[256], last73[256], last6b = -1;
+    int i, k, a, n = D_800DC320;
+    const unsigned char *pl = D_800CC2D0, *q;
+    if (f == -2) f = port_flag("p248mesh");
+    if (f <= 0 || port_frame_count < (unsigned)f || !D_800DBEF4) return;
+    if (n > 256) n = 256;
+    if (!done) {
+        done = 1; n0 = n;
+        port_log("[p248mesh] frame %u: %d world objects, gate fn %08X, area counts %d %d %d %d\n", port_frame_count, n,
+                 (unsigned)(uintptr_t)func_151184BC, D_800DBE18[0], D_800DBE18[1], D_800DBE18[2], D_800DBE18[3]);
+        for (i = 0; i < n; i++) {
+            const unsigned char *o = D_800DBEF4 + i * 0xA0;
+            port_log("[p248mesh] %d ang %.1f yaw %.1f pos %d %d %d scale %.2f %.2f %.2f upd %08X%s 4F %02X tri %u +%u pos5A %d %d %d busy %u fl %02X 73 %02X DL %08X\n",
+                     i, *(const float *)o, *(const float *)(o + 4), (short)vbe_ld16(o + 0x10), (short)vbe_ld16(o + 0x12),
+                     (short)vbe_ld16(o + 0x14), *(const float *)(o + 0x2C), *(const float *)(o + 0x30),
+                     *(const float *)(o + 0x34), *(const unsigned *)(o + 0x38),
+                     *(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)func_151184BC ? " GATE" : "",
+                     vbe_ld8(o + 0x4F), vbe_ld16(o + 0x58), vbe_ld16(o + 0x56), (short)vbe_ld16(o + 0x5A),
+                     (short)vbe_ld16(o + 0x5C), (short)vbe_ld16(o + 0x5E), vbe_ld8(o + 0x6E), vbe_ld8(o + 0x6F),
+                     vbe_ld8(o + 0x73), *(const unsigned *)(o + 0x1C));
+            lastang[i] = (int)*(const float *)o; last73[i] = vbe_ld8(o + 0x73);
+        }
+        for (a = 2; a < 4; a++) {
+            const unsigned *vo = (const unsigned *)(uintptr_t)D_800DC208[a];
+            int cnt = D_800DBE18[a];
+            if (!vo || cnt <= 0 || cnt > 40000) continue;
+            for (i = 0; i < cnt; i++) {
+                short v[9];
+                for (k = 0; k < 9; k++) v[k] = (short)vbe_ld16((const unsigned char *)(uintptr_t)vo[i * 3 + k / 3] + 2 * (k % 3));
+                port_log("[p248tri] %d %d %d %d %d %d %d %d %d %d %d\n", a, i, v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], v[8]);
+            }
+        }
+        {   /* the level's event zones (as P212's [p212zone], which fires before the level loads in EEPROM boots) */
+            extern unsigned char *D_800D34B8; extern unsigned D_800D3094;
+            unsigned kz;
+            for (kz = 0; kz < D_800D3094 && kz < 256 && D_800D34B8; kz++) {
+                const unsigned char *z = D_800D34B8 + kz * 0x34;
+                port_log("[p248zone] %02X pos %d %d %d u6 %d f10 %.1f b14 %02X %02X %02X %02X\n", kz, (short)vbe_ld16(z),
+                         (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4), (short)vbe_ld16(z + 6), *(const float *)(z + 0x10),
+                         vbe_ld8(z + 0x14), vbe_ld8(z + 0x15), vbe_ld8(z + 0x16), vbe_ld8(z + 0x17));
+            }
+        }
+        port_log("[p248mesh] done\n");
+    }
+    q = *(const unsigned char *const *)(pl + 0x31C);
+    for (i = 0; i < n && i < n0; i++) {
+        const unsigned char *o = D_800DBEF4 + i * 0xA0;
+        int ang = (int)*(const float *)o, s = vbe_ld8(o + 0x73), b6 = q ? vbe_ld8(q + 0x6B) : -1;
+        if (ang != lastang[i] || s != last73[i] || (*(const unsigned *)(o + 0x38) == (unsigned)(uintptr_t)func_151184BC && b6 != last6b)) {
+            port_log("[p248gate] frame %u obj %d ang %d (was %d) 73 %02X (was %02X) 7C %08X | player %.1f %.1f %.1f ctx6B %d\n",
+                     port_frame_count, i, ang, lastang[i], s, last73[i], *(const unsigned *)(o + 0x7C),
+                     *(const float *)(pl + 0x14), *(const float *)(pl + 0x18), *(const float *)(pl + 0x1C), b6);
+            lastang[i] = ang; last73[i] = s;
+        }
+    }
+    if (q) last6b = vbe_ld8(q + 0x6B);
+}
 void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
 void __wrap_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,

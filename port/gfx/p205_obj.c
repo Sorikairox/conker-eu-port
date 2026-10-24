@@ -28,6 +28,7 @@ void p205_obj_hook(void) {
         if (fp > 0) p205_player = fp - 1;
     }
     { extern void p245_coldump(float, float, float); p245_coldump(0, 0, 0); }   /* P245 ?p245col=F triangle dump */
+    { extern void p248_mesh(void); p248_mesh(); }   /* P248 ?p248mesh=F world objects, areas 2/3, gate watch */
     { extern void p223_hit_tick(void); p223_hit_tick(); }   /* P223 ?p223hit: follow a hit target */
     if (f < 0) f = port_flag("p205obj");
     if (f <= 0 || port_frame_count < (unsigned)f) return;
@@ -123,7 +124,7 @@ static unsigned go_f, go_arrive, go_stuck_f;
 static float go_r, go_x[GO_MAX], go_z[GO_MAX];
 static int go_tap[GO_MAX], go_ntap[GO_MAX];   /* step k is "tap go_tap[k] go_ntap[k] times" when go_ntap[k] > 0 */
 static float go_rr[GO_MAX];                    /* per-waypoint radius (X:Z:R), else go_r */
-static int go_jmp[GO_MAX];                     /* P223: jX:Z = jump (A, 8 of every 40 retraces) on the way there */
+static int go_jmp[GO_MAX];                     /* P223: jX:Z = jump (A, 8 of every 40 retraces) on the way there; P248: hX:Z = 2 (jump, then A held = helicopter hover; 200-retrace cycle) */
 static unsigned go_tap_f;
 static float go_px, go_pz, go_base, go_th, go_sx0, go_sz0;
 static int go_sgn = -1, go_have, go_have_init;
@@ -143,7 +144,7 @@ static void go_parse(void) {
             go_ntap[go_n] = (int)strtol(p, &e, 10); go_n++; p = e;
             if (*p == '_') { p++; continue; } else break;
         }
-        go_jmp[go_n] = 0; if (*p == 'j') { go_jmp[go_n] = 1; p++; }
+        go_jmp[go_n] = 0; if (*p == 'j') { go_jmp[go_n] = 1; p++; } else if (*p == 'h') { go_jmp[go_n] = 2; p++; }
         go_x[go_n] = strtof(p, &e); if (*e != ':') break; p = e + 1;
         go_z[go_n] = strtof(p, &e); p = e;
         go_rr[go_n] = go_r;
@@ -319,7 +320,15 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
         go_sx0 = x; go_sz0 = z; go_stuck_f = port_frame_count;
     }
     if (go_have > 0) { go_have--; th = wrapa(th + 1.5708f); if (go_have > 40) *btn |= 0x8000; }
-    else if (go_jmp[go_i] && port_frame_count % 40 < 8) *btn |= 0x8000;
+    else if (go_jmp[go_i] == 1 && port_frame_count % 40 < 8) *btn |= 0x8000;
+    else if (go_jmp[go_i] == 2) {   /* P248 hX:Z: jump + helicopter: A 0-5, 10-15 (a second chance to jump when the
+                                     * first press came during a landing), then held from 20; cycle 200 retraces */
+        static int hi = -1; static unsigned hf;
+        unsigned ht;
+        if (hi != go_i) { hi = go_i; hf = port_frame_count; }
+        ht = (port_frame_count - hf) % 200;
+        if (ht < 6 || (ht >= 10 && ht < 16) || ht >= 20) *btn |= 0x8000;
+    }
     go_th = th;
     *sx = (int)lrintf(80.f * sinf(th)); *sy = (int)lrintf(80.f * cosf(th));
     if (port_frame_count % 50 == 0)
