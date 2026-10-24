@@ -1,0 +1,10 @@
+127s/hit < maxLen/hit <= maxLen + 1.0f/
+120s/& 2/\& 4/
+150s/maxLen < /maxLen <= /
+152s/seglen != 0.0f/seglen > 1.0f/
+162s/obj\[0x2D\] = 0;/obj[0x2D] = 1;/
+206s/>= 3/>= 2/
+209s/1.0f < /2.0f < /
+212s/next == obj\[0x25\]/next >= obj[0x25] - 1/
+228s/where <= acc/where < acc/
+285s/pOld/pNew/

@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P231 (port-b) (session P231, 2026-10-24). Details: `docs/port/sessions/P231.md`
+
+Branch `port-b`. Hand C (NM) + setups + mutants, registry rows with full knobs: **func_1519AF14 trail_update**
+(1C3530; the "stale a1" quirk was a table mix-up: its D_8008FC48 is at 0x8008FC48 with three one-argument handlers
+func_1519CEB8 / CEE0 / CF08; JALRSKIP=1,2,3), **func_15175900 leaf_field_spawn** (1A2970), **func_1513783C
+object_break_effects** (161520; ripple via asm func_151B61A0 or C func_151B65C0 at random). Coordinator request:
+**func_151D52B4** (201240) NM variant with the real `func_15131EC8(f32 *, f32)` prototype (P230 implicit_scan float
+site). func_151901F4 (1BAF40): P219's PORT-only "aim at the node" fallback removed - D_8008FFE8's real callers
+(game_1FFF60 C) pass the position. Checks: verify_all rc 0 (byte-identical), NM build rc 0, protocheck 0 (1480), selftest 103 / 103. progress_nm: game 4938 / 5334, total 5474 / 5915 (92.5%), C bytes 81.8%, 441 asm-only.
+
+## Next steps (from P231)
+
+1. Browser: trails (func_1519AF14), leaf fields (func_15175900), break debris / splash (func_1513783C), effect node
+   launch target (func_151901F4 PORT change).
+2. port-b C-caller candidates left: func_150FA520, func_151356D4, func_151BDDD8, func_150F9BB0, func_15135DD0,
+   func_15139768, func_150D3870, func_151F94E0; the 4 Rare hand-asm functions of game_eu_226870 (not started).
+3. port: game_1FFF60's D_8008FFE8 declared `void (*)(child *, void *)` but holds s32-returning / one-argument
+   handlers (wasm call_indirect signature); func_151B61A0 (1E39B0) is an asm ripple handler behind func_1513783C.
+
 ## P229 (port-b) (session P229, 2026-10-24). Details: `docs/port/sessions/P229.md`
 
 Branch `port-b`. Harness: a malformed `DIFFTEST_ARG` item (e.g. `A=7`) is an ERROR line instead of a traceback with
