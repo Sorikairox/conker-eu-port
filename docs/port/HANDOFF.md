@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P226, 2026-10-24). Details: `docs/port/sessions/P226.md`
+- Hand C (NM, one block each), all in the registry: func_151E5E08 `mp_match_rules_update` (20B730; the match now
+  ends: D_800E1050, placings D_800E0EF0), func_151ECE00 `barrel_menu_draw` (216470; returns the DL end),
+  func_1509F4D0 `event_sound_command` (CC5F0, D_800887C0 entry 7), func_15086268 `rail_node_nearest` (B37F0).
+  func_1509F9C8 (CC5F0, matching C `void`) has an NM variant returning func_10010F88's handle (func_1509F4D0
+  kind 0x4000 returns it to the VM).
+- Verification: setups + mutants all killed (50/50, 76/76, 31/31, 25/25); func_1509F4D0 random DIFFERs only at the
+  u16-truncated argument of func_1509FBC8 (callee reads `lhu`, harness artefact).
+- `port_work/p226/rvw.sh` = reverify.sh printing all survivors (reverify cuts at 600 characters); consider making
+  the cut an env knob in tools/port/reverify.sh.
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1445 bodies), selftest 95/95, progress_nm total 5439/5915 C (92.0%), C bytes 79.4%.
+
+## Next steps (from P226)
+1. func_151E9150 (216470 MP HUD, 819 insns), func_1509D590 (CA630), func_150130B4 (40490), func_1511E4F4 (142E40).
+2. Rail AI group func_1508B854 / func_1508C07C / func_1508CA14 (B7840) - func_15086268 is done; func_1000C530
+   (init_B1B0); then func_15073FA0 (981E0) and func_1508CF34 (B7840 cmd 9). m2c reading drafts: `port_work/p226/gen/`.
+3. func_151EA90C (216470, barrel menu mode 3) is still asm.
+
 ## State (session P224, 2026-10-24). Details: `docs/port/sessions/P224.md`
 
 Branch `port` (P221 d5b5126a + P224 commit).

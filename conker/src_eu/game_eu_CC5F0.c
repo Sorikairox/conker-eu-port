@@ -298,7 +298,88 @@ block_42:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F254.s")
 #endif
+#ifdef NON_MATCHING
+u16 func_1509FB90(s32, s32, s32, s32);
+u32 func_1509F834(s32, s32, u32, u32, s32, s16, s32);
+void func_1509F95C(s32, s32, s32, s32, s16, s32);
+u16 func_1509F9C8(s32, s32, u16, s32, u32);
+u16 func_1509FA88(s32, s32, s32);
+void func_1509FAD4(u16, s32, s32, s16, s32, s32);
+u16 func_1509FBC8(s32, s32, u16, s32, s32);
+void func_15103C14(s32, s32, u32, s32, s32);
+extern s32 D_800D3C60;           /* sound mode */
+/* event_sound_command: handler 7 of the event VM's native table D_800887C0 (id = the command word without its
+ * table nibble, args = the VM stack). In sound mode 1 (D_800D3C60) every command just plays sound id (volume
+ * 0x7FFF, func_1509FB90). Otherwise by args[1]: 0 = random / positional sound by the kind nibble of args[5]
+ * (0x2000 random pick from the range id..args[2] on object args[4], returns the remaining mask; 0x3000 / 0x4000
+ * positional variants func_1509F95C / func_1509F9C8, the latter returns its handle unpacked; other kinds
+ * func_1509FA88), 1 = plain sound with the volume / pan arguments by mode (args[3] from mode 4, args[4] from mode
+ * 5), 2 = object sound func_1509FAD4 (forced with args[6] from mode 7), 3 = func_1509FBC8, 4 = func_15103C14
+ * (returns 0x7000). A sound handle h is returned as (h << 16) | 0x7000, 0 stays 0. */
+s32 func_1509F4D0(s32 id, s32 *args, s32 *operand) {
+    s32 h;
+    s32 kind;
+    s32 vol;
+    s32 pan;
+    s32 force;
+
+    if (D_800D3C60 == 1) {
+        h = func_1509FB90(id, 0x7FFF, 0, 0x40);
+    } else {
+        switch ((u32) args[1]) {
+            case 0:
+                kind = args[5];
+                switch (kind & 0xF000) {
+                    case 0x2000:
+                        return func_1509F834(id, args[2] & 0xFFF, args[3], args[4], kind & 0xFFF, args[6], args[7]);
+                    case 0x3000:
+                        func_1509F95C(id, args[2] & 0xFFF, args[4], kind & 0xFFF, args[6], args[7]);
+                        return 0;
+                    case 0x4000:
+                        return func_1509F9C8(id, args[2] & 0xFFF, args[4], kind & 0xFFF, args[6]);
+                    default:
+                        h = func_1509FA88(id, args[2] & 0xFFF, args[4]);
+                        break;
+                }
+                break;
+            case 1:
+                pan = 0x40;
+                if (D_800D3C60 < 4) {
+                    vol = 0;
+                } else {
+                    vol = args[3];
+                    if (D_800D3C60 == 5) {
+                        pan = args[4];
+                    }
+                }
+                h = func_1509FB90(id, args[2], vol, pan);
+                break;
+            case 2:
+                force = 0;
+                if (D_800D3C60 >= 7 && args[6] != 0) {
+                    force = 1;
+                }
+                func_1509FAD4(id & 0xFFF, args[2], args[3] & 0xFFF, args[4], args[5], force);
+                h = 0;
+                break;
+            case 3:
+                h = func_1509FBC8(id, args[3] & 0xFFF, args[2], args[4], args[5]);
+                break;
+            case 4:
+                func_15103C14(id, args[3] & 0xFFF, args[2], args[4], args[5]);
+                return 0x7000;
+            default:
+                return 0;
+        }
+    }
+    if (h != 0) {
+        h = (h << 16) | 0x7000;
+    }
+    return h;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CC5F0/func_1509F4D0.s")
+#endif
 
 s32 func_1509F728(s32 arg0, s32 *arg1) {
     if (arg0 != 0) {
@@ -368,6 +449,22 @@ void func_1509F95C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s16 arg4, s32 arg5) {
     func_151152A4(sp24, func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, arg4, arg5, 0);
 }
 
+#ifdef NON_MATCHING
+/* P226: the asm leaves func_10010F88's handle in v0 and func_1509F4D0 returns it: NM returns it. */
+u16 func_1509F9C8(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg4) {
+    u8 *temp_v1;
+    s32 temp_t0;
+    u8 *sp34;
+
+    temp_v1 = (arg3 * 0x34) + D_800D34B8;
+    temp_t0 = (*(s16 *)((u8 *)temp_v1 + 6));
+    if (arg4 >= (u32) temp_t0) {
+        arg4 = temp_t0 - 1;
+    }
+    sp34 = temp_v1;
+    return func_10010F88(func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, 0, 0U, 0, (s16) (s32) (*(s16 *)temp_v1), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 2)), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 4)), (s16) arg4, (s16) (s32) temp_t0);
+}
+#else
 void func_1509F9C8(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg4) {
     u8 *temp_v1;
     s32 temp_t0;
@@ -381,6 +478,7 @@ void func_1509F9C8(s32 arg0, s32 arg1, u16 arg2, s32 arg3, u32 arg4) {
     sp34 = temp_v1;
     func_10010F88(func_1000F568(arg0, ((arg1 - arg0) + 1) & 0xFF), arg2, 0, 0U, 0, (s16) (s32) (*(s16 *)temp_v1), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 2)), (s16) (s32) (*(s16 *)((u8 *)temp_v1 + 4)), (s16) arg4, (s16) (s32) temp_t0);
 }
+#endif
 
 u16 func_1509FA88(s32 arg0, s32 arg1, s32 arg2) {
     return func_10010F30(func_1000F568(arg0, (u8)(arg1 - arg0 + 1)), arg2, 0x40, 0, 0);

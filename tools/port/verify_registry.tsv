@@ -67,3 +67,8 @@ func_1513FA70	game_169510				P224
 func_151B8BEC	game_eu_1E61C0				P224
 func_150F84D8	game_eu_125200				P224
 func_150F38FC	game_eu_1207F0				P224
+func_151E5E08	game_eu_20B730	docs/port/sessions/p226/151E5E08_setups.txt	DIFFTEST_STKFILL=5A5A5A5A	docs/port/sessions/p226/151E5E08_muts.txt	P226
+func_151ECE00	game_eu_216470	docs/port/sessions/p226/151ECE00_setups.txt	DIFFTEST_STKFILL=5A5A5A5A DIFFTEST_ARGMEM=151EDBE8=1:4	docs/port/sessions/p226/151ECE00_muts.txt	P226
+func_1509F4D0	game_eu_CC5F0	docs/port/sessions/p226/1509F4D0_setups.txt	DIFFTEST_STKFILL=5A5A5A5A	docs/port/sessions/p226/1509F4D0_muts.txt	P226
+func_1509F9C8	game_eu_CC5F0				P226
+func_15086268	game_eu_B37F0	docs/port/sessions/p226/15086268_setups.txt	DIFFTEST_STKFILL=5A5A5A5A	docs/port/sessions/p226/15086268_muts.txt	P226
