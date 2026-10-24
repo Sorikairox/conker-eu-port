@@ -700,7 +700,7 @@ static void p78_material(void) {
         if (dup || nseen >= 256 || p78_ntex >= 60) continue;
         seen[nseen][0] = key0; seen[nseen][1] = key1; seen[nseen][2] = key2; nseen++;
         unsigned w, h; tile_dims(t, &w, &h);
-        if (p158_on ? w > 256 || h > 128 : w > 64 || h > (w <= 8 ? 256u : 64u)) continue;   /* P94: narrow gradient strips (sky 4x256) too; P158: up to 256x128 */
+        if (p158_on ? w > 256 || h > (w <= 8 ? 256u : 128u) : w > 64 || h > (w <= 8 ? 256u : 64u)) continue;   /* P202: p158 narrow strips up to 256 rows (backdrop 4x256) */   /* P94: narrow gradient strips (sky 4x256) too; P158: up to 256x128 */
         p78_ntex++;
         port_log("[p78hex] T%d mat %d tile %u %ux%u\n", p78_ntex, p78_mat, (tex_tile + k) & 7, w, h);
         for (unsigned y = 0; y < h; y++) {

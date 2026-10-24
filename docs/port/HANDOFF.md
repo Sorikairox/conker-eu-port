@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P202, 2026-10-24, port-web). Details: `docs/port/sessions/P202.md`
+
+- Merged port 6f2d2ca (P198) and port-b b693dac (P197): HANDOFF.md conflicts only. After each: verify_all OK, NM link OK,
+  protocheck 0 (1393 bodies), float-int 0 bugs, census 0 FAIL (clean rebuild), arity 136 rows (no change),
+  m2c_sanity 273 -> 278 (func_150877C0 width high, func_1510783C width med x3, func_1518DC50 width low).
+- func_1518DC50: 0 stub calls now. `?p202fx=N` (port/gfx/p202_fx.c): only 2 character-effect attaches in a 57 k-frame
+  walk, both the frontend 0x1D fire imp (type 5); none on level 0x29, and no continuous particle spawns there.
+  `?p202stubfrom=F` (stub census counts from frame F): on 0x29 only func_1518354C / func_151A03DC / func_151473F4 are hit
+  -> the 0x29 torches are not blocked by a stub on the current path (agrees with port-b P201).
+- **New blocker func_1518ECAC** (game_eu_1BAF40): particle draw table D_8008A1BC[5], stub returns 0 -> the fire imp's
+  flames (all character-effect particles) are spawned but not drawn.
+- Backdrop quad (draw 0) 00C700 is correct: the 4x256 texture is a sky gradient whose last rows are 00C700 (ground
+  below the horizon); t clamps there.
+- Regressions none: level 0 swim (node + Chrome), level 0x29 pond swim, ?p103boot runs past 17820 (to 39488).
+  Rail func_150877C0 unreachable (callers func_150538CC / func_1509E3D4 still asm, never hit).
+
+## Next steps (from P202)
+
+1. port-b: convert func_1518ECAC (then re-shoot the fire imp, chB shots 50-65 s); func_1518354C.
+2. Level 0x29: route to the scarecrow / B pads (text boxes); check on an emulator whether the torch posts are lit there.
+3. Drop the P199 port workarounds once port P200's game C lands.
+
 ## State (session P199, 2026-10-24, port-web). Details: `docs/port/sessions/P199.md`
 
 - Merged port 4793d9c (P184-P196) and port-b a4dd67d (P183-P194, swim update func_1504B0FC): HANDOFF.md conflicts only.

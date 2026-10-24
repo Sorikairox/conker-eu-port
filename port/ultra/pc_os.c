@@ -83,7 +83,8 @@ const char *port_gstr(const char *g) {
 
 /* per-stub call counters (names are string literals: pointer identity), for the priority list */
 #define STUB_SLOTS 4096
-static struct { const char *name, *what; unsigned n, first_frame, order, dl, win; } stub_tab[STUB_SLOTS];
+static struct { const char *name, *what; unsigned n, first_frame, order, dl, win, late; } stub_tab[STUB_SLOTS];
+static int stub_from = -1;  /* P202 DIAGNOSTIC ?p202stubfrom=F: also count the calls at frames >= F (one level) */
 static unsigned stub_last = STUB_SLOTS;  /* P23: slot of the latest stub hit */
 static unsigned stub_distinct;
 
@@ -95,6 +96,8 @@ static int stub_count(const char *name, const char *what) {
         stub_tab[h].first_frame = port_frame_count; stub_tab[h].order = ++stub_distinct;
     }
     stub_last = h;
+    if (stub_from < 0) stub_from = port_flag("p202stubfrom");
+    if (stub_from > 0 && port_frame_count >= (unsigned)stub_from) stub_tab[h].late++;
     return ++stub_tab[h].n == 1;
 }
 
@@ -114,9 +117,9 @@ EMSCRIPTEN_KEEPALIVE void port_dump_stubs(int max) {
     port_log("[stubs] %u distinct asm stubs hit, %d calls; ranked by calls (first-hit order, frame):\n",
              n, port_stub_hits);
     for (unsigned i = 0; i < n && (int)i < max; i++)
-        port_log("  %3u. %-14s %8u  #%-3u f%-4u %s%s\n", i + 1, stub_tab[idx[i]].name, stub_tab[idx[i]].n,
+        port_log("  %3u. %-14s %8u  #%-3u f%-4u %s%s late %u\n", i + 1, stub_tab[idx[i]].name, stub_tab[idx[i]].n,
                  stub_tab[idx[i]].order, stub_tab[idx[i]].first_frame, stub_tab[idx[i]].what,
-                 stub_tab[idx[i]].dl ? " [DL]" : "");
+                 stub_tab[idx[i]].dl ? " [DL]" : "", stub_tab[idx[i]].late);
     /* P23: the stubs on the frame display-list path: they were handed a pointer into the frame DL buffers
      * and returned it unchanged (pass-through), so their drawing is what is missing from the frame */
     unsigned k = 0;
