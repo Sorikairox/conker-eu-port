@@ -45,6 +45,7 @@ func_1517C11C	conker/src_eu/game_eu_1A9280.c	scaled	med	1	(x*26)+&D_800DD478 on 
 func_1509F254	conker/src_eu/game_eu_CC5F0.c	stride	med	1	IR ptr %.0 step 659344, asm self-steps {1,812}
 func_151C2CE4	conker/src_eu/game_eu_1EFE10.c	stride	med	1	IR ptr %.074 step 6071296, asm self-steps {1,2464}
 func_15007558	conker/src_eu/game_33990.c	width	med	1	G:800BE778 asm{h1S} IR{b1L,h1S}
+func_1508B854	conker/src_eu/game_eu_B7840.c	stride	med	0	IR ptr %.0 step 12, asm self-steps {1,4,16,64,812}
 func_150A55A0	conker/src_eu/game_eu_D2DB0.c	stride	med	0	IR ptr %.0 step 8, asm self-steps {}
 func_150A55A0	conker/src_eu/game_eu_D2DB0.c	stride	med	0	IR ptr %.072 step 16, asm self-steps {}
 func_150A55A0	conker/src_eu/game_eu_D2DB0.c	stride	med	0	IR ptr %.073 step 4, asm self-steps {}
@@ -109,6 +110,7 @@ func_150E995C	conker/src_eu/game_eu_114640.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_150ECC30	conker/src_eu/game_eu_11A2B0.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150F16F0	conker/src_eu/game_eu_11CB90.c	width	med	1	O:12 asm{w2LS} IR{b1L}
 func_150F8EAC	conker/src_eu/game_eu_126330.c	width	med	1	O:48 asm{w6LS} IR{b6LS}
+func_15106260	conker/src_eu/game_eu_133A70.c	width	med	1	O:72 asm{w1L} IR{b1L,w1L}
 func_1510783C	conker/src_eu/game_eu_133A70.c	width	med	1	O:20 asm{h2L} IR{w1L}
 func_1510783C	conker/src_eu/game_eu_133A70.c	width	med	1	O:44 asm{b1L} IR{w5LS}
 func_1510783C	conker/src_eu/game_eu_133A70.c	width	med	1	O:96 asm{w1L} IR{b1L,w1L}
@@ -226,6 +228,7 @@ func_151C7B1C	conker/src_eu/game_eu_1F4F60.c	stride	low	1	IR idx %.2 step 4, asm
 func_151C7B1C	conker/src_eu/game_eu_1F4F60.c	stride	low	1	IR idx %.3 step 4, asm self-steps {}
 func_151C7B1C	conker/src_eu/game_eu_1F4F60.c	stride	low	1	IR idx %.4 step 4, asm self-steps {}
 func_15006590	conker/src_eu/game_33990.c	width	low	1	G:800C3E80 asm{w} IR{d} (8 vs 4: copy?)
+func_1509D590	conker/src_eu/game_eu_CA630.c	spaddr	low	1	asm passes sp+0x44 (call near 1509DAD8) with store-only slots {0x48,0x4C,0x5C,0x68,0x6C,0x7C,0x80} (+4 more); IR passes &scalar to func_15046F70, 1 store-only locals
 func_151D4684	conker/src_eu/game_eu_201240.c	spaddr	low	1	asm passes sp+0x40 (call near 151D482C) with store-only slots {0x48} (+1 more); IR passes &scalar to func_1507C7C0, 1 store-only locals
 func_10010BE8	conker/src_eu/init_EB00.c	sign	low	1	G:80042984 h: asm u, IR s
 func_1500AD84	conker/src_eu/game_eu_38360.c	sign	low	1	G:80096090 b: asm u, IR s
@@ -233,6 +236,7 @@ func_1505841C	conker/src_eu/game_83300.c	sign	low	1	A0:582 b: asm u, IR s
 func_15065E18	conker/src_eu/game_eu_90F50.c	sign	low	1	G:800BEB30 h: asm u, IR s
 func_15157580	conker/src_eu/game_eu_183F10.c	sign	low	1	A0:0 b: asm u, IR s
 func_1516AFE0	conker/src_eu/game_eu_1984F0.c	sign	low	1	G:800BEB30 h: asm u, IR s
+func_151E9150	conker/src_eu/game_eu_216470.c	sign	low	1	G:80090160 h: asm u, IR s
 func_15008E10	conker/src_eu/game_362B0.c	stride	low	0	IR idx %.0 step 12, asm self-steps {48}
 func_1500B3B0	conker/src_eu/game_eu_38360.c	stride	low	0	IR idx %.042 step 8, asm self-steps {2,4,12,16}
 func_151C9748	conker/src_eu/game_eu_1F4F60.c	stride	low	0	IR idx %.0 step 4, asm self-steps {64,144,368}
@@ -275,6 +279,7 @@ func_1518DC50	conker/src_eu/game_eu_1BAF40.c	width	low	1	O:40 asm{w8LS} IR{h1L,w
 func_151901F4	conker/src_eu/game_eu_1BAF40.c	width	low	1	O:112 asm{b2S} IR{b1S,h1L}
 func_15190E08	conker/src_eu/game_eu_1BE5C0.c	width	low	1	O:32 asm{b1L,w5LS} IR{w5LS}
 func_151ABF78	conker/src_eu/game_eu_1D7790.c	width	low	1	O:24 asm{b1L,w1L} IR{w1L}
+func_151EA90C	conker/src_eu/game_eu_216470.c	width	low	1	O:0 asm{b1L,h1L,w41S} IR{h1L,w7LS}
 func_eu_15108850	conker/src_eu/game_eu_136060.c	width	low	1	O:8 asm{b1L,h1L} IR{h1L}
 func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	low	0	O:0 asm{h1S,w2L} IR{w2L}
 func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	low	0	O:4 asm{b1L,h1S} IR{b1L}

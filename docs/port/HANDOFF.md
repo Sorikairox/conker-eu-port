@@ -10,6 +10,36 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P233, 2026-10-24, port-web). Details: `docs/port/sessions/P233.md`
+
+- Merged port 690c3153 (P227 / P230), port-b 2428c7cb (P225 / P229), port 05b91168 (P232). After each: verify_all OK,
+  NM link OK, protocheck 0 (1501 at the end), float-int 0, implicit_scan NM+float 0, romabs_check 0 FAIL; census 722 ok /
+  0 FAIL (clean rebuilds); arity_scan 142 rows (+3 port-b func_15196438), m2c_sanity 299. Selftest 103 / 103.
+- **`port/tools/romabs_check.py`** (standing check; run by port/Makefile after vbe_build.py and by checks.sh): every
+  `D_<hex>` link symbol < 0x10000000 used by NM C must be in vbe.py `ROM_ABS` (a number) or the new **`RAM_ALIAS`**
+  (physical address of RAM data). Found D_89810 -> fixed: `RAM_ALIAS = {'D_89810': 'D_80089810'}` (shadow pass
+  identity view matrix in game_eu_1B1ED0.c, was a zero data stub). D_2D810 is a reviewed ROM offset (REVIEWED_ABS).
+- **Difftest in a new worktree needs `port_work/pyuc201`** (pinned Unicorn 2.0.1, gitignored): without it the
+  container's 2.1.4 runs silently and calls next to FPU delay slots fault at pc 0 (that was the web 44 / 95). Installed
+  for web; selftest.sh now refuses to run without it.
+  `docker exec $CONKERDEV pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1`.
+- **Race A**: CPU racer drives (rail AI C), HUD complete; match end -> STATS (RESTART / QUIT) -> back to the RACE barrel
+  menu; only the 2 boot stubs. Laps still UNVERIFIED (frame script dies in the lava, LAP 1/3).
+- **Total War null+0x24 writer**: store watch (p233/watch.sh) -> func_15163DEC / func_15160954 called through
+  `D_8008B0F0[arg0->unkF]()` in **game_18D770.c:106 func_151603FC with arg0 dropped** (asm keeps a0 = arg0; variables.h:444
+  declares the table `(void)`). Game-C fix for port. Total War stubs: func_1508C600 (B7840), func_151EA4C8 (216470).
+- **Level 0x29 route REGRESSION**: chR3 run freezes at frame 19116 (`func_1501D348(level 18, scene 2)`, no more
+  retraces, no trap) after the 05b91168 merge; P228 went on from the same point. Suspects: P232's func_15006BEC
+  save_slot_pack (new EEPROM save at level 6 entry), func_151D7EDC (+ stub func_151D8280), func_15109DC8 / func_1510A538.
+
+## Next steps (from P233)
+0. port / port-web: bisect the frame-19116 freeze (build 690c3153+2428c7cb vs 05b91168; chR3 frame script to ~19300).
+1. port: game_18D770.c func_151603FC pass arg0 to D_8008B0F0 handlers (+ variables.h:444 prototype); then Total War
+   stubs func_1508C600, func_151EA4C8.
+2. port-b: func_15196438's D_8008FC30 call (arity row, a0..a3 live in the asm).
+3. port-web: re-run the store watch after fix 1 (`SW_EXCL= p233/watch.sh inst; p233/watch.sh run war 200 LOG`);
+   Race A laps with a steering frame script; river crossing from a human recording (P228 record.sh).
+
 ## State (session P232, 2026-10-24). Details: `docs/port/sessions/P232.md`
 - Hand C (NM, one block each), all in the registry: func_151E533C `mp_match_end_continue` (20B730; coordinator
   priority: the D_800E0EB8 fade callback after a multiplayer match: next level / replay / back to the menu; 32/32),
