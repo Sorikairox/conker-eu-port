@@ -2,6 +2,8 @@
 
 > **Private repository. Do not make public.** It contains material derived from the game (screenshots, data dumps in session notes). No ROM is stored here — you need your own EU ROM.
 
+**To play it yourself, see [PLAYING.md](PLAYING.md)** (one command: `tools/eu_port/play.sh`).
+
 This is a private fork of [mkst/conker](https://github.com/mkst/conker) (the US decompilation). The goal is a **native source port of the EU version that runs in a web browser**: the game's own code rewritten as readable C, compiled to WebAssembly with Emscripten (TypeScript only for the page), with native Mac/Windows builds later from the same C. It is **not** a static recompilation.
 
 ## Branches
@@ -12,7 +14,7 @@ This is a private fork of [mkst/conker](https://github.com/mkst/conker) (the US 
 | **`eu-wt-a`** | Second working branch used for the matching decomp when two sessions ran in parallel. Fully merged into `eu`. | Idle; kept for history. |
 | **`port`** | **Conversion branch 1.** Every remaining assembly function gets hand-written, readable C under `#ifdef NON_MATCHING` (the original assembly stays under `#else`, so the default build is still byte-identical). Each conversion is checked against the original with the `tools/port/difftest` equivalence tester plus deliberately broken variants ("mutants"). Owns the test harness (`tools/port/difftest`). | Active. |
 | **`port-b`** | **Conversion branch 2.** Same work as `port`, in parallel, on a separate list of source files so the two never edit the same file. Merges `port` periodically and vice versa. | Active. |
-| **`port-web`** | **The browser build.** Merges `port` and `port-b`, and adds the platform layer in `port/`: WebAssembly build, N64 OS/scheduler emulation, WebGL2 renderer for the N64 graphics microcode, audio, controller/keyboard input, saves, and the web page. Runtime checks happen here (node + Chrome), and they feed the list of what to convert next. | Active. A new game plays from the title menu through the opening cutscenes to player control in the first room. |
+| **`port-web`** | **The browser build.** Merges `port` and `port-b`, and adds the platform layer in `port/`: WebAssembly build, N64 OS/scheduler emulation, WebGL2 renderer for the N64 graphics microcode, audio, controller/keyboard input, saves, and the web page. Runtime checks happen here (node + Chrome), and they feed the list of what to convert next. | Active. Single player plays from the title through the intro into level 0x29 (Birdy, the river, the pit, the gargoyle scene); all multiplayer modes start and play; music, saves and loading work. |
 
 How they flow:
 
