@@ -36,7 +36,11 @@ void func_151618BC(u16 arg0, s16 arg1, u8 arg2, s32 arg3, f32 *arg4, s16 arg5, s
 struct225 *func_151619A0(s32 arg0, s16 arg1, u8 arg2, s32 arg3);
 s32  func_15161A68(struct225 *arg0);
 struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u8 arg8, s32 arg9);
+#ifdef NON_MATCHING
+s32 func_15161F2C(struct225 *arg0);
+#else
 void func_15161F2C(struct225 *arg0);
+#endif
 struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
@@ -93,6 +97,28 @@ struct225 *func_1516037C(Header *header, struct226 *arg1, s32 offset, u8 arg3, s
     return ret;
 }
 
+#ifdef NON_MATCHING
+// light_effect_update: P234 (port fix). Counts the effect's life down (+0x10, flag 1 of +0xE) and runs its handler
+// D_8008B0F0[+0xF] with the effect (the asm keeps a0 = the effect at the jalr; the matched C passed nothing, so the
+// port handlers got NULL: Total War null+0x24 writes); a 0 result or an expired life frees it (func_1516972C).
+void func_151603FC(struct225 *arg0) {
+    s32 pad;
+    u8 ret = 0;
+
+    if ((arg0->unkE & 1) != 0) {
+        arg0->unk10 -= D_800BE9E4;
+        if (arg0->unk10 < 0) {
+            ret = 1;
+        }
+    }
+    if ((ret == 0) && (arg0->unkF != -1) && (D_8008B0F0[arg0->unkF](arg0) == 0)) {
+        ret = 1;
+    }
+    if (ret) {
+        func_1516972C(arg0);
+    }
+}
+#else
 void func_151603FC(struct225 *arg0) {
     s32 pad;
     u8 ret = 0;
@@ -110,6 +136,7 @@ void func_151603FC(struct225 *arg0) {
         func_1516972C(arg0);
     }
 }
+#endif
 
 // requires jump table
 extern s32 (*D_8008B4F0[])(struct225 *);
@@ -706,9 +733,17 @@ struct225 *func_15161E24(struct127 *arg0, u8 arg1, u8 arg2, s16 arg3, s32 arg4, 
     return temp_v0;
 }
 
+#ifdef NON_MATCHING
+// handler 10 of D_8008B0F0 (P234): the dispatcher func_151603FC tests the result, which is func_15163F50's v0 left in
+// place by the matched void C; s32 here, one signature for wasm
+s32 func_15161F2C(struct225 *arg0) {
+    return func_15163F50(arg0, &arg0->unk18);
+}
+#else
 void func_15161F2C(struct225 *arg0) {
     func_15163F50(arg0, &arg0->unk18);
 }
+#endif
 
 extern void (*D_8008B6F8[])(u8 *, u8 *, u8);
 void func_15161F4C(u8 *arg0, u8 *arg1, u8 arg2)

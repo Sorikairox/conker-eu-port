@@ -24,10 +24,16 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 - Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck
   `1463 NON_MATCHING bodies checked, 0 problems`, selftest 100 / 100, implicit_scan `663 TUs, 852 implicit call sites
   (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1481 440 5475 92.6% 1823456/2253856 (80.9%)`.
+- Urgent port fix (coordinator, Total War null+0x24): D_8008B0F0 (EU D_8008B490) handlers now get the effect: NM
+  table type `s32 (*[])(struct225 *)` in variables.h, NM block of func_151603FC passes arg0, NM func_15161F2C returns
+  func_15163F50's s32 (the dispatcher tests it). Both difftest EQUIV, NULL / return-0 mutants DIFFER (P234.md section 8).
 - zsh note: `env $K cmd` does not split $K in the agent shell; use `${=K}` (or bash) for hand-run knob strings.
 
 ## Next steps (from P234)
-1. port-web: AI racers on rail levels (func_1508CF34), water ripples (func_151B61A0).
+1. port-web: Total War null+0x24 should be gone (D_8008B0F0 handlers get the effect); AI racers on rail levels
+   (func_1508CF34), water ripples (func_151B61A0).
+1b. Not done: NM C for Total War stubs func_1508C600 (B7840), func_151EA4C8 (216470); review P232 functions
+   (func_15006BEC, func_151D7EDC -> stub func_151D8280, func_15109DC8, func_1510A538) for the frame-19116 freeze.
 2. D_8008FFE8 (game_1FFF60) table: all 5 EU entries take one argument ([0] func_151901F4 asm, [1] func_1518FD34
    `s32 (s32)`, [2] func_1518FE0C, [3] func_151D33B8, [4] func_1518FDC8), the declaration and the two matched C
    dispatchers pass two. Entries 0/1/2/4 are port-b's (1BAF40): coordinate an NM one-argument table type + NM copies of
