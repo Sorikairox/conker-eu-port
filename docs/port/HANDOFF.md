@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P201 (port-b) (session P201, 2026-10-24). Details: `docs/port/sessions/P201.md`
+
+Branch `port-b` (from P197 b693dac). Hand C (NM) + tests:
+- func_1518DC50 `character_effect_update` mutants complete: 72 = 71 killed + 1 equivalent on ROM data (hidden-row
+  yoff is 0 in every D_8008D980 row); 19 new setups (vis 7, model id >= 0x100, release velocities at the clamps,
+  live == max, effects 8 / 9). Seed-1 trial-57 random DIFFER proved a harness artefact (kuseg pointer 0x02000000,
+  lazily mapped page reads 0; WLOG + POKE evidence in P201.md 1).
+- **Character effect types 5..9 (func_1518D1C0)**: attached by the D_8008AE10 character handlers 4..8 / 0x2C
+  (game_eu_17A800 func_1514EA78 / EB28 / EBD8 / EC88 type 5, func_1514ED38 type 7, func_1514F9BC type 5 "frontend
+  fire imp"), run from func_1514D6CC; func_1514CFF0 picks them only on levels 0x02 (sub 0xD -> type 7), 0x0A (subs
+  8..0xF -> type 5) and 0x1D (sub 9 -> fire imp). **Level 0x29 is not in that switch**: no static path gives a
+  level-0x29 character a type 5..9 effect (only a cutscene script event 0x4C with b5 5..9 could). Types 6 / 8 / 9
+  have no static caller. So the level-0x29 torches are probably not character effects. Table in P201.md 2.
+- func_150CA150 `landing_dust_burst` (F6060, 504): 22 setups EQUIV, mutants 55/56 + 1 equivalent; s32 returning 0
+  (implicit-int caller in game_981E0); anti-tamper code checksum skipped in NM.
+- func_150CA2C4 (F6060) fixed: called func_150CD2A0 without a prototype with a pointer as its f32 argument (wrong
+  wasm signature; N64 used a leftover f12). Now passes the position's z. Port decision, UNVERIFIED.
+- Checks: verify_all rc 0, NM links, protocheck 0 (1313), selftest 65/65; voidret no suspect. progress_nm 5307/5915
+  (89.7%), C bytes 74.6%, 608 asm-only.
+
+## Next steps (from P201)
+
+1. Browser: func_1518D1C0 calls on level 0x29 (torches need another source than character effects); character
+   fire on level 0x0A / frontend 0x1D; func_150CA150 on player landing.
+2. func_1511127C (13DC30, 652; asm read halfway, not started), func_151D3A30, func_151C0698 (asm callees first).
+3. game_981E0 owner: add `s32 func_150CA150(u8 *);` (called without a prototype).
+
 ## P197 (port-b) (session P197, 2026-10-24). Details: `docs/port/sessions/P197.md`
 
 Branch `port-b` (from P194 a4dd67d). Hand C (NM):
