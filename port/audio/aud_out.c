@@ -63,7 +63,9 @@ EM_JS(int, __port_web_audio_open, (int rate, int ring, int rdp, int wrp, int mas
   } catch (e) { globalThis.portAudioErr = String(e && e.stack || e); return -1; }
 });
 
+static int game_rate = 22020; /* P252: the game's AI rate (for the ?det virtual AI clock) */
 int aud_out_open(int rate) {
+    if (rate > 0) game_rate = rate;
     if (opened) return 0;
     int has_ctx = EM_ASM_INT({ return (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') ? 1 : 0; });
     if (!has_ctx) { port_log("[aud] no AudioContext (node): output disabled, %d Hz\n", rate); opened = -1; return -1; }
@@ -80,6 +82,7 @@ int aud_out_open(int rate) {
 void aud_out_push_game(const void *buf, unsigned frames) {
     const uint8_t *p = (const uint8_t *)buf;
     pushed += frames;
+    { extern unsigned det_vq_push(unsigned); det_vq_push(frames); }
     { /* P110 DIAGNOSTIC ?p110aud=1 (node PORT_P110AUD=1): game output level per ~1 s window (left channel) */
         static int f = -1; static double e; static int pk; static unsigned n, nz;
         if (f < 0) f = port_flag("p110aud");
@@ -114,10 +117,30 @@ unsigned aud_out_queued(void) { return (wr - rd) & (RING - 1); }
  * ScriptProcessor in 2048-frame bursts, so reporting the whole ring would hold it near empty and every burst would
  * underrun. Report the queued frames minus a target latency instead (default 3072 frames, ~140 ms at 22020 Hz;
  * ?ailat=N / PORT_AILAT=N): the ring then settles at ~latency and the burst always finds its 2048 frames. */
+/* P252: under ?det (any value) AI_LEN comes from a virtual queue instead of the Web Audio ring: game pushes add to it and
+ * it drains at the AI rate per VI retrace (1/50 s PAL, 1/60 otherwise), so the audio manager's frame sizes (and anything
+ * timed by them) depend only on the retrace count, not on when the browser's ScriptProcessor ran. */
+static int det_on = -1; static double det_vq; static unsigned det_vf;
+static void det_vq_drain(void) {
+    extern int port_tv_type;
+    if (port_frame_count != det_vf) {
+        det_vq -= (double)(port_frame_count - det_vf) * game_rate / (port_tv_type == 0 ? 50.0 : 60.0);
+        if (det_vq < 0) det_vq = 0;
+        det_vf = port_frame_count;
+    }
+}
+unsigned det_vq_push(unsigned frames) {
+    if (det_on < 0) det_on = port_flag("det");
+    if (!det_on) return 0;
+    det_vq_drain(); det_vq += frames;
+    if (det_vq > RING - 1) det_vq = RING - 1; /* the real ring drops beyond this too */
+    return (unsigned)det_vq;
+}
 unsigned aud_out_ai_len(void) {
     static int lat = -1;
     if (lat < 0) { lat = port_flag("ailat"); if (lat <= 0) lat = 3072; }
-    unsigned q = aud_out_queued();
+    if (det_on < 0) det_on = port_flag("det");
+    unsigned q = det_on ? (det_vq_drain(), (unsigned)det_vq) : aud_out_queued();
     return q > (unsigned)lat ? q - (unsigned)lat : 0;
 }
 

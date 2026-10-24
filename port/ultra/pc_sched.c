@@ -401,7 +401,9 @@ int port_tv_type = 1; /* P147: osTvType as set at boot (port/boot/game_main.c; t
 double port_vi_period_ms(void) { return port_tv_type == 0 ? 20.0 : 1000.0 / 59.94; }
 static void frame(void) {
     static int mode = -1; static double last, acc;
-    if (mode < 0) mode = port_flag("det") || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
+    /* P252: ?det=2 = deterministic clock and no wall budget (pc_os.c, port_sched_run) but keep this wall-paced 50 Hz VI,
+     * so Chrome route runs keep their real-time screenshot timing and still replay identically (?det=1 = one retrace per tick) */
+    if (mode < 0) mode = port_flag("det") == 1 || port_flag("vi60") || EM_ASM_INT({ return typeof window === 'undefined' ? 1 : 0; }) ? 0 : 1;
     if (port_paused) { last = 0; return; }
     if (!mode) { retrace(); port_video_frame(); return; }
     double now = emscripten_get_now(), per = port_vi_period_ms();
