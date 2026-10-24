@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P250, 2026-10-25). Details: `docs/port/sessions/P250.md`
+- Tank func_150EDCC8: `dist = 10000` survivor explained (eye fields poked 4 bytes early in every mp_ray setup, fixed;
+  slot 0 near the eye also hid it) and killed with `mp_ray_10k`; new setups `sp_lock2` (kills `off * d`) and `sp_turn`
+  (OUTW into the stubbed physics: kills `/ 64`, `speed + turn`). 124 / 127, 3 equivalent left.
+- Conversions: func_1508B704 `rail_zone_flood` (own NM block now), func_150D93CC `path_points_catch_up`, func_150BEFCC /
+  func_150BF24C / func_15147B48 `impact_effect_a/b/c`; all random EQUIV + mutants all killed.
+- Table "0x8008B4AC" is D_8008B490 (US D_8008B0F0), dispatcher func_151603FC `s32 (struct225 *)`, result tested;
+  func_150EB3A4 (entry 19) s32 is right; port-b's func_15190940 (entry 18) is void but must return s32.
+- port-b P247 follow-ups: func_1513B83C handler call now 2 args; difftest errors on a repeated stub-knob address
+  (KNOBERROR); jalr FPR compare skipped for int-first targets (prototype or src_eu definition). Selftest 123 / 123.
+- Registry re-run: func_1508CF34 green (60/60, 90/90); 9 rows still to do.
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1564), implicit_scan 0 NM+float, progress_nm
+  `total 5915 3994 1581 340 5575 94.3% 1924152/2253856 (85.4%)`.
+- Host: /usr/local/bin/docker is a dangling OrbStack link; prefix PATH with /Applications/Docker.app/Contents/Resources/bin.
+
+## Next steps (from P250)
+1. Registry re-run: func_1508C600, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874, 151D8280, 151EA4C8.
+2. port-b: func_15190940 -> s32 under NM. Rows with JALRARG_OLD only for f12 / f14 leftovers can drop it (re-run).
+3. Breadth: func_150DF8B4, func_150D779C, func_151894F4, func_150D083C, func_150D2C9C; 130CB0 sound callbacks need
+   the func_1000FA64 callback signature first.
+
 ## State (session P249, 2026-10-25). Details: `docs/port/sessions/P249.md`
 - **MP stubs**: func_150EDCC8 (11AF60) `tank_update` **drives the tank** (pad stick / buttons -> throttle, steering,
   boost, brake, turret); converted with its asm helper func_150ED818 `tank_shell_aim_error`. func_150BE050 (EB860)

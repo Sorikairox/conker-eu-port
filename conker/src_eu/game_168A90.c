@@ -108,7 +108,8 @@ u8 *func_1513B83C(u8 *arg0, u8 *arg1, s16 arg2) {
     temp_v0 = (*(s8 *)((u8 *)arg1 + 0x12));
     if (temp_v0 != -1) {
         arg2 = var_a2;
-        temp_v0_2 = (*(s32 (**)())((u8 *)&D_80089FC8 + (temp_v0 * 4)))(arg1, var_a2, var_a2, arg0);
+        // P250: the handlers (func_151096A0, func_151BA634) are s32 (u8 *, s32); a2 / a3 are only leftovers in the asm
+        temp_v0_2 = ((s32 (**)(u8 *, s32)) &D_80089FC8)[temp_v0](arg1, var_a2);
         var_a2 = arg2;
         if (temp_v0_2 == 0) {
             return arg0;

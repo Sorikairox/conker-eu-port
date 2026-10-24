@@ -343,4 +343,27 @@ void func_151479E8(u8 *arg0, int arg1, s32 arg2)
   }
 }
 
+#ifdef NON_MATCHING
+extern u8 (*D_800900D0)(void);
+extern f32 D_800A5B2C;
+extern f32 D_800A5B30;
+// impact_effect_c: P250. Effect table handler (u8 *obj, kind, level) like its table neighbour func_151479E8 (records
+// {handler, 0x82} at ELF file offset 0x24A4D4): when the object has a model (+0x1D4) and func_15146E00 finds the
+// effect point (pos + hit record), spawns the effect whose id D_800900D0() returns (func_15141F78: strength level *
+// D_800A5B2C, size +0x40 * D_800A5B30 as a byte) and, for level >= 0x73, effect 0xB (func_15142180) with the hit
+// record's word 6.
+void func_15147B48(u8 *obj, s32 kind, s32 level) {
+    f32 pos[3];
+    s32 hit[9];
+
+    if (*(s32 *) (obj + 0x1D4) != 0 && func_15146E00(pos, obj, (s32) hit, (u8) kind) != 0) {
+        func_15141F78(D_800900D0(), hit, (f32) level * D_800A5B2C, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A5B30),
+                      pos, (u8) kind);
+        if (level >= 0x73) {
+            func_15142180(0xB, pos, hit[6], 1.0f, 1.0f);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147B48.s")
+#endif

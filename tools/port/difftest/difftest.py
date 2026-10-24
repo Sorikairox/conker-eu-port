@@ -663,6 +663,10 @@ def proto_fslots(tu, name):
     return set()
 
 FREGS = {}
+class IntFirst(set):
+    """P250: proto_fregs result for a prototype whose first parameter is an integer / pointer (o32: then no argument
+    travels in an FPR). A plain empty set is a `(void)` prototype, which table handlers often get wrong."""
+    pass
 def proto_fregs(tu, name):
     """P18: FP argument registers (f12-f15) the prototype of name passes (o32: only leading float/double params
     travel in FPRs), None if unknown. P100: declarations only; a call statement such as `s = sinf(temp->unk8);` was
@@ -673,6 +677,9 @@ def proto_fregs(tu, name):
         # "no FP arguments" (DIFFTEST_DECLKW_OLD=1 = old)
         if not ps and os.environ.get('DIFFTEST_DECLKW_OLD') != '1': continue
         if ps == ['void'] or not ps: return set()
+        p0 = ps[0]
+        if '*' in p0 or '[' in p0 or not re.search(r'\b(f32|float|f64|double)\b', p0):
+            if p0 != '...': return IntFirst()
         out = set(); fr = 12
         for p in ps[:2]:
             if '*' in p or '[' in p: break   # P50: array parameters are pointers
@@ -681,6 +688,25 @@ def proto_fregs(tu, name):
             else: break
         return out
     return None
+
+
+_DEFIF = {}
+def def_intfirst(name):
+    """P250: True when every C definition of name in src_eu/*.c starts with an integer / pointer parameter (o32: no FPR
+    argument). For jalr targets whose prototype the candidate TU does not declare (table handlers defined elsewhere)."""
+    if not _DEFIF:
+        _DEFIF['#'] = {}
+        rx = re.compile(r'^[A-Za-z_][^\n;#/(){}=]*?\b(func_[0-9A-F]{8})\s*\(([^;{)]*)\)\s*\{', re.M)
+        for f in glob.glob('src_eu/*.c'):
+            try: t = open(f, errors='replace').read()
+            except OSError: continue
+            for m in rx.finditer(t):
+                ps = [x.strip() for x in m.group(2).split(',') if x.strip()]
+                p0 = ps[0] if ps else 'void'
+                ok = p0 not in ('void', '...') and ('*' in p0 or '[' in p0 or not re.search(r'\b(f32|float|f64|double)\b', p0))
+                d = _DEFIF['#']; d[m.group(1)] = d.get(m.group(1), True) and ok
+    n = name if not name.startswith('0x') else 'func_%08X' % int(name, 16)
+    return _DEFIF['#'].get(n, False)
 
 
 def ret_kind(tu, func):
@@ -720,8 +746,24 @@ MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTE
 
 # P13 (opt-in): DIFFTEST_RET="ADDR=VAL,..." (hex) makes the stub at ADDR return VAL in v0, for both sides, to
 # reach code behind a callee's result (e.g. an early return unless func_1517F51C() == 0).
+# P250 (port-b P247 request): several "N:..." for one stub address must be joined with '/'. With commas only, the
+# later key silently replaced the earlier one (8 false survivors in P247). A repeated ADDR in one of the stub knobs
+# below is now an error. DIFFTEST_DUPKEY_OLD=1 = old behaviour (the last key wins).
+def _knob_items(name):
+    items = list(filter(None, os.environ.get(name, '').split(',')))
+    if os.environ.get('DIFFTEST_DUPKEY_OLD') != '1':
+        seen = {}
+        for _p in items:
+            _k = int(_p.split('=')[0], 16) & 0x1FFFFFFF
+            if _k in seen:
+                print('KNOBERROR %s: address %s given twice (%s / %s); join several outputs for one stub with \'/\''
+                      % (name, _p.split('=')[0], seen[_k], _p), flush=True)
+                sys.exit(2)
+            seen[_k] = _p
+    return items
+
 STUBRET = {}
-for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
+for _p in _knob_items('DIFFTEST_RET'):
     _a, _v = _p.split('=')
     # P24: "ADDR=V1;V2;..." returns V1 on the first call, V2 on the second, ... (the last value repeats),
     # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
@@ -730,7 +772,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_RET', '').split(',')):
 # P50 (opt-in): DIFFTEST_RETF="ADDR=V1;V2;...,..." (hex float bits) makes the stub at ADDR return V in f0 (V1 on the
 # first call, ...; the last repeats), e.g. func_1504B0FC's speed in func_1504CB98 (a random f0 is often 0 / NaN).
 STUBRETF = {}
-for _p in filter(None, os.environ.get('DIFFTEST_RETF', '').split(',')):
+for _p in _knob_items('DIFFTEST_RETF'):
     _a, _v = _p.split('=')
     STUBRETF[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
@@ -743,7 +785,7 @@ def _outn(s):
     return ('abs', int(s[1:], 16)) if s.startswith('@') else int(s)
 
 OUTW = {}
-for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
+for _p in _knob_items('DIFFTEST_OUTW'):
     _a, _v = _p.split('=')
     OUTW[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
@@ -753,7 +795,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTW', '').split(',')):
 # e.g. func_15186494's 5-word strip table. Several "N:W..." for one ADDR are separated by '/'.
 OUTA = {}
 OUTA_PERCALL = os.environ.get('DIFFTEST_OUTA_PERCALL') == '1'
-for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
+for _p in _knob_items('DIFFTEST_OUTA'):
     _a, _v = _p.split('=')
     OUTA[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
@@ -761,7 +803,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTA', '').split(',')):
 # P41 (opt-in): DIFFTEST_OUTB="ADDR=N:B0;B1;...,..." like DIFFTEST_OUTA but writes bytes (hex B), e.g. u8 out-params
 # that sit next to each other in the caller's frame (func_150851E0's angle / flag bytes).
 OUTB = {}
-for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
+for _p in _knob_items('DIFFTEST_OUTB'):
     _a, _v = _p.split('=')
     OUTB[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
@@ -771,7 +813,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
 # words W0, W1, ... there: outputs a callee writes through an array of pointers (func_15145EA4's dst[i] points).
 # Several "N.I:W..." for one ADDR are separated by '/'.
 OUTP = {}
-for _p in filter(None, os.environ.get('DIFFTEST_OUTP', '').split(',')):
+for _p in _knob_items('DIFFTEST_OUTP'):
     _a, _v = _p.split('=')
     OUTP[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0].split('.')[0]), int(_x.split(':')[0].split('.')[1]),
                                       [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')]) for _x in _v.split('/')]
@@ -839,6 +881,7 @@ def param_kinds(tu, func):
 # P20 (opt-in): DIFFTEST_ARG="N=V1|V2|...,..." (hex) gives integer argument slot N (0-3 = a0-a3, 4+ = stack) one of the
 # listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
 ARGFIX = {}
+JALRFPR_OLD = os.environ.get('DIFFTEST_JALRFPR_OLD') == '1'   # P250: see the jalr FPR compare
 JALRARG_OLD = os.environ.get('DIFFTEST_JALRARG_OLD') == '1'   # P211: old jalr argument compare (see compare)
 JALRTGT_OLD = os.environ.get('DIFFTEST_JALRTGT_OLD') == '1'   # P215: old jalr target-register handling (see compare)
 # P221: a jalr / jr to an unaligned target, or one no stub can be written at (outside kseg0/kseg1 RAM), ends the run
@@ -1466,7 +1509,14 @@ def compare(R, C, rk, arity):
         pf = FREGS.get(a['name'])
         # unknown prototype: only FPRs both sides set right before the call (a lone scratch f12 is not an argument)
         frs = set(a['f'] & b['f'] if pf is None else pf)
-        if a.get('ind') and not JALRARG_OLD: frs |= a.get('awf_all', set()) | b.get('awf_all', set())   # P211
+        # P211: at a jalr, every f12-f15 either side wrote since entry. P250 (port-b P247 request): not when the target's
+        # known prototype starts with an integer / pointer parameter (IntFirst): o32 then passes nothing in FPRs, and a
+        # leftover f12 / f14 scratch gave false DIFFERs (P246 func_150C5A68, P247 needed DIFFTEST_JALRARG_OLD=1).
+        # Without a declaration in the TU, the target's C definitions in src_eu decide (def_intfirst). A `(void)` or
+        # unknown prototype keeps the P211 compare. DIFFTEST_JALRFPR_OLD=1 = old behaviour.
+        intfirst = not JALRFPR_OLD and a.get('ind') and (isinstance(pf, IntFirst) or (pf is None and def_intfirst(a['name'])))
+        if a.get('ind') and not JALRARG_OLD and not intfirst:
+            frs |= a.get('awf_all', set()) | b.get('awf_all', set())
         # P214: a direct call of unknown prototype compares the FPRs EITHER side set in the straight-line run right before
         # the call (before P214: only those BOTH sides set there, so a candidate that computes f12 before a branch and
         # the jal block compared nothing; selftest func_150768DC with DIFFTEST_NOPROTO). DIFFTEST_JALARG_OLD=1 = old;
