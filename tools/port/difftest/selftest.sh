@@ -216,4 +216,11 @@ SAB7C="DIFFTEST_ROMDATA=1 DIFFTEST_TUCMP_LEN=4 DIFFTEST_EXACT=* DIFFTEST_POKE=80
 TRIALS=4 chkce EQUIV  func_1508AB7C "$SAB7C"
 TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C" 's/(s32) "%d"/(s32) "%x"/'
 TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C DIFFTEST_TUPEEK_OLD=1"
+# P221: a jalr to an unaligned / unstubbable target ends the trial as a common fault (inconclusive) on both sides
+# (DIFFTEST_BADJALR_OLD=1 = old: stub_at refused it silently and both sides ran into garbage, then into their own code:
+# func_151416E8 trial 24 handler 0x1167216A from a random D_8008A3CC). Different / one-sided bad targets still DIFFER.
+TRIALS=32 chkce EQUIV  func_151416E8 ""
+TRIALS=32 chkce DIFFER func_151416E8 "DIFFTEST_BADJALR_OLD=1"
+TRIALS=32 chkce DIFFER func_151416E8 "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
+TRIALS=32 chkce DIFFER func_151416E8 "" 's/(rec, msg, c);/(rec, msg, code);/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

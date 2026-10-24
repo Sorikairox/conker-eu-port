@@ -3710,7 +3710,163 @@ void func_15052760(struct127 *arg0, u16 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15052760.s")
 #endif
+#ifdef NON_MATCHING
+u16 func_1505A630(f32, f32, s32);
+void func_15058EA4(struct127 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+void func_15059140(struct127 *arg0);
+void func_150D7CA0(struct127 *, s32);
+void func_1504CA60(struct127 *arg0);
+extern f32 D_80099708; // 0.2f
+extern f32 D_8009970C; // 0.8f
+extern f32 D_80099710; // 0.15f
+extern f32 D_80099714; // 0.4f
+extern f32 D_80099718; // 0.1f
+extern f32 D_8009971C; // 0.18f
+extern struct127 D_800CC2D0[];
+
+#define OBJ_F32(o, off) (*(f32 *) ((u8 *) (o) + (off)))
+#define PLAYER(i) ((u8 *) D_800CC2D0 + (i) * 0x32C)
+
+// obj_hover_height_update: per-frame height / tilt update of an object riding at a target height (board / hover
+// states; state +0x80 set to 10, flag +0xF8 |= 0x10000). Target height: the y of player +0x222 + 80 (kind 10) or the
+// track point +0x21E of track D_800D2104[+0x13F] (+0xA), overridden by +0x224, by player +0x222's y - 40 (mode +0x223
+// 14 / 3, or kind 8), and capped by the track's floor (+2). Kinds 0x4F / 0x83: +0x251 == 1 takes the tilt +0xB8 from
+// the heading to (+0x3C, +0x20) (func_1505A630) and skips the settle; otherwise the object snaps to the target when
+// within radius (+0x22B) * D_800BE9A4 (y += d * 0.15, velocity 0). +0x226 == 0xFF: the character record's +0x12C
+// timer runs down (keeping +0x3C at 254 while alive), an effect (func_150D7CA0) when ctl +0x8C & 0x2000, then
+// func_1504CA60 and tilt toward -vy; else a bob (func_15058EA4, amplitude +0x226 * 0.1) and tilt toward -2.5 vy.
+// Then the movement step (func_150585F0 with +0x104, else func_15056B08), the facing +0x40 from +0x7A,
+// func_15059140, the settle (func_15052760 with +0x76), and func_15021834(obj, 0, -1) when the object leaves the
+// play area (func_150535F4) or, in multiplayer, D_800C3E78 < D_80090130.
+void func_150528C8(struct127 *arg0) {
+    u8 *o = (u8 *) arg0;
+    u16 yaw = *(u16 *) (o + 0x76);
+    s32 snap = 0;
+    f32 radius = (f32) (s8) o[0x22B];
+    s32 settle = 1;
+    u8 kind = o[4];
+    f32 floor = (f32) *(s16 *) (((u8 **) D_800D2104)[o[0x13F]] + 2);
+    f32 target;
+    f32 band;
+    f32 d;
+    f32 y;
+    f32 v;
+    f32 amp;
+    u8 bob;
+    u8 *ctl;
+    u16 timer;
+
+    if (kind == 0x4F && o[0x65] != 0 && *(s32 *) (o + 0x1D4) != 0) {
+        OBJ_F32(o, 0x18) = OBJ_F32(PLAYER(o[0x65]), -0x1DC) * 284.0f + OBJ_F32(PLAYER(o[0x65]), 0x18);
+        kind = o[4];
+    }
+    *(s32 *) (o + 0xF8) |= 0x10000;
+    o[0x80] = 10;
+    if (kind == 10) {
+        target = OBJ_F32(PLAYER(o[0x222]), 0x18) + 80.0f;
+    } else {
+        target = (f32) *(s16 *) (((u8 **) D_800D2104)[o[0x13F]] + o[0x21E] * 8 + 0xA);
+    }
+    if (*(s16 *) (o + 0x224) != 0) {
+        target = (f32) *(s16 *) (o + 0x224);
+    }
+    if (o[0x223] == 0xE || o[0x223] == 3) {
+        target = OBJ_F32(PLAYER(o[0x222]), 0x18) - 40.0f;
+    }
+    if (kind == 0x4F || kind == 0x83) {
+        if (o[0x251] == 1) {
+            settle = 0;
+            OBJ_F32(o, 0xB8) = (f32) func_1505A630(OBJ_F32(o, 0x3C), OBJ_F32(o, 0x20), 0) * -0.0054931640625f;
+            kind = o[4];
+        } else {
+            snap = 1;
+            if (PLAYER(o[0x124])[-0x205] == 0xFF) {
+                OBJ_F32(o, 0xB8) = OBJ_F32(o, 0xB8) * D_80099708;
+                kind = o[4];
+            }
+        }
+    }
+    if (kind == 8) {
+        target = OBJ_F32(PLAYER(o[0x222]), 0x18) - 40.0f;
+        if (*(s16 *) (o + 0x224) != 0) {
+            target = (f32) *(s16 *) (o + 0x224);
+        }
+        if (floor < OBJ_F32(o, 0x18) && OBJ_F32(o, 0x20) > 0.0f) {
+            OBJ_F32(o, 0x20) = OBJ_F32(o, 0x20) * D_8009970C;
+        }
+        if (o[0x223] != 3) {
+            snap = 1;
+        }
+    }
+    if (floor < target) {
+        target = floor;
+    }
+    if (snap != 0) {
+        band = radius * D_800BE9A4;
+        y = OBJ_F32(o, 0x18);
+        d = target - y;
+        if (d < band && -band < d) {
+            snap = 2;
+            OBJ_F32(o, 0x20) = 0.0f;
+            OBJ_F32(o, 0x24) = 0.0f;
+            OBJ_F32(o, 0x18) = y + d * D_80099710;
+        }
+    }
+    bob = o[0x226];
+    if (bob == 0xFF) {
+        ctl = *(u8 **) (o + 0x31C);
+        if (ctl != NULL) {
+            timer = *(u16 *) (ctl + 0x12C);
+            if (D_800BE9E4 < timer) {
+                *(u16 *) (ctl + 0x12C) = timer - D_800BE9E4;
+                if (o[0x1CA] != 0) {
+                    OBJ_F32(o, 0x3C) = 254.0f;
+                }
+            } else {
+                *(u16 *) (ctl + 0x12C) = 0;
+            }
+            ctl = *(u8 **) (o + 0x31C);
+            if ((*(u16 *) (ctl + 0x8C) & 0x2000) && o[0x1CA] != 0) {
+                func_150D7CA0(arg0, ctl[0x75] & 0x7F);
+            }
+        }
+        func_1504CA60(arg0);
+        v = -OBJ_F32(o, 0x20);
+        if (30.0f < v) {
+            v = 30.0f;
+        }
+        OBJ_F32(o, 0xB8) = OBJ_F32(o, 0xB8) + (v - OBJ_F32(o, 0xB8)) * D_80099714;
+    } else {
+        if (snap != 2 && bob != 0) {
+            amp = (f32) bob * D_80099718;
+            func_15058EA4(arg0, target, amp, target, -amp, radius, -radius);
+        }
+        if (settle != 0 && o[4] != 0x49 && !(*(u16 *) (o + 0x22C) & 8)) {
+            OBJ_F32(o, 0xB8) = OBJ_F32(o, 0xB8) + (OBJ_F32(o, 0x20) * -2.5f - OBJ_F32(o, 0xB8)) * D_8009971C;
+        }
+    }
+    if (o[0x104] != 0) {
+        func_150585F0(arg0);
+    } else {
+        func_15056B08(arg0);
+    }
+    OBJ_F32(o, 0x40) = (f32) (s16) (*(u16 *) (o + 0x7A) + 0x4000) * 0.0054931640625f;
+    func_15059140(arg0);
+    if (settle != 0) {
+        func_15052760(arg0, yaw);
+    }
+    if (o[4] == 0x9E) {
+        *(s32 *) (o + 0x2E4) = 0;
+    }
+    if ((D_800BE616 != 0 && D_800C3E78 < D_80090130) || func_150535F4(arg0) == 0) {
+        func_15021834(arg0, 0, -1);
+    }
+}
+#undef OBJ_F32
+#undef PLAYER
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_150528C8.s")
+#endif
 
 void func_15052EF0(struct127 *arg0) {
     arg0->immune = 100;

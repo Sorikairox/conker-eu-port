@@ -90,7 +90,61 @@ s32 func_15086218(f32 arg0) {
     return D_800D2770[i];
 }
 
+#ifdef NON_MATCHING
+extern u8 D_8008763C;            /* node remembered by the last caller (0xFF none), tried first */
+extern s32 D_800D277C;
+f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz);
+/* rail_node_nearest: the track node of D_800D2778 nearest to (x, y, z) among those of band `band` (+6) and kind
+ * `kind` (+0xE; -1 = any). With kind 0 a node counts only when the straight move to it is free of walls
+ * (func_15087204 < 0). The remembered node D_8008763C is tried first (its distance + 10 sets the bar) and then
+ * cleared. Returns the node (0xFF none, also when nothing is nearer than 10000) and leaves its distance in
+ * D_800D277C. */
+s32 func_15086268(f32 x, f32 y, f32 z, s32 kind, s32 band) {
+    struct_eu_800D2778 *p;
+    f32 best = 1e8f;
+    f32 dx, dy, dz, d;
+    s32 walls = 0;
+    s32 res = 0xFF;
+    s32 i;
+
+    kind = (s8) kind;
+    band = (s8) band;
+    if (kind == 0) {
+        walls = 1;
+    }
+    if (D_8008763C != 0xFF) {
+        p = &D_800D2778[D_8008763C];
+        dx = p->unk0 - x;
+        dy = p->unk2 - y;
+        dz = p->unk4 - z;
+        if (!walls || func_15087204(x, y, z, dx, dz) < 0.0f) {
+            best = dx * dx + dy * dy + dz * dz + 10.0f;
+        }
+        D_8008763C = 0xFF;
+    }
+    for (i = 0; i < D_80087630; i++) {
+        p = &D_800D2778[i];
+        if (band != p->pad6 && band != -1) {
+            continue;
+        }
+        if (kind != p->pad8[6] && kind != -1) {
+            continue;
+        }
+        dx = p->unk0 - x;
+        dy = p->unk2 - y;
+        dz = p->unk4 - z;
+        d = dx * dx + dy * dy + dz * dz;
+        if (d < best && (!walls || func_15087204(x, y, z, dx, dz) < 0.0f)) {
+            best = d;
+            res = i;
+        }
+    }
+    D_800D277C = sqrtf(best);
+    return res;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15086268.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_150870E0(s32);

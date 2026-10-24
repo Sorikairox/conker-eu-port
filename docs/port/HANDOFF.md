@@ -10,6 +10,43 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P226, 2026-10-24). Details: `docs/port/sessions/P226.md`
+- Hand C (NM, one block each), all in the registry: func_151E5E08 `mp_match_rules_update` (20B730; the match now
+  ends: D_800E1050, placings D_800E0EF0), func_151ECE00 `barrel_menu_draw` (216470; returns the DL end),
+  func_1509F4D0 `event_sound_command` (CC5F0, D_800887C0 entry 7), func_15086268 `rail_node_nearest` (B37F0).
+  func_1509F9C8 (CC5F0, matching C `void`) has an NM variant returning func_10010F88's handle (func_1509F4D0
+  kind 0x4000 returns it to the VM).
+- Verification: setups + mutants all killed (50/50, 76/76, 31/31, 25/25); func_1509F4D0 random DIFFERs only at the
+  u16-truncated argument of func_1509FBC8 (callee reads `lhu`, harness artefact).
+- `port_work/p226/rvw.sh` = reverify.sh printing all survivors (reverify cuts at 600 characters); consider making
+  the cut an env knob in tools/port/reverify.sh.
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1445 bodies), selftest 95/95, progress_nm total 5439/5915 C (92.0%), C bytes 79.4%.
+
+## Next steps (from P226)
+1. func_151E9150 (216470 MP HUD, 819 insns), func_1509D590 (CA630), func_150130B4 (40490), func_1511E4F4 (142E40).
+2. Rail AI group func_1508B854 / func_1508C07C / func_1508CA14 (B7840) - func_15086268 is done; func_1000C530
+   (init_B1B0); then func_15073FA0 (981E0) and func_1508CF34 (B7840 cmd 9). m2c reading drafts: `port_work/p226/gen/`.
+3. func_151EA90C (216470, barrel menu mode 3) is still asm.
+
+## State (session P224, 2026-10-24). Details: `docs/port/sessions/P224.md`
+
+Branch `port` (P221 d5b5126a + P224 commit).
+- Hand C (NM), multiplayer: func_1507D1D8 mp_player_respawn (A9D90; the respawn after a lost life), func_150528C8
+  obj_hover_height_update (78230; board height / movement handler, state table D_800863B8: the likely cause of
+  "Conker can't move in Race A"), func_151221F0 camera_follow_update (14FA00; the stub skipped the camera follow steps),
+  func_15164E0C object_wobble_update (192500). Random + setups EQUIV, mutants 39/39, 46/46, 37/37, 30/30 (func_150528C8
+  random DIFFERs only on an lh-vs-u16 argument the callee masks: artefact, see the session doc).
+- D_8008A1BC draw-table entries (port-b P222 item) return their callee's v0 in NM (7 wrappers; NM-only prototypes
+  in functions.h for func_1513EDB4 / func_1513F4B0).
+- Triage of the MP start stubs in P224.md section 1. Ownership move to port-b (game_161520, 1C3530, 19B180, 1FB080,
+  127840, 226870, 1E7CC0, 1A2970, 133A70, 101080, D5E90): no edits there in P224.
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck `1441 NON_MATCHING bodies checked, 0 problems`, selftest 95 / 95, progress_nm `total 5915 3994 1441 480 5435 91.9% 1783192/2253856 (79.1%)`.
+
+## Next steps (from P224)
+1. port-web: browser re-run of Race A / Total War (movement, camera, first death / respawn).
+2. func_151E5E08 (match rules, D_800E1050), func_151ECE00 (216470 DL passthru, 661 insns), func_151E9150,
+   func_1509D590; then func_15073FA0, func_1508CF34.
+
 ## State (session P223, 2026-10-24, port-web). Details: `docs/port/sessions/P223.md`
 
 - No merges, no game C. Level 0x29 script mapped from ROM (evdis / evtab): event 0 Scarecrow (ev 1128), 1 (ev 1090:
@@ -31,6 +68,28 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    then events 4 / 6 (enemy knock-back), event 1 (zone 9, item 0x28: carried object).
 3. Open: does item 4 survive scene 4 on N64 (port needs a second B press)? Needs an N64 reference.
 
+## State (session P221, 2026-10-24). Details: `docs/port/sessions/P221.md`
+
+Branch `port` (P218 85e5d8c6 + P221 commit).
+- **Verification registry**: `tools/port/verify_registry.tsv` (func, file, setup_file, knobs, mutant_file, session;
+  57 rows: P198-P218 conversions seeded by `tools/port/seed_registry.py`, P218 re-check rows, P221). Re-run with
+  `tools/port/reverify.sh FUNC...` (TR=4, NR=100 random, MUT=1 mutants, NOSETUP=1); candidate = current NM block
+  (`tools/port/nmblock.py`). Add a row for every new conversion; blank knobs = not recorded (check the session doc).
+- difftest: a jalr / jr to an unaligned or unstubbable target ends the run as a fault `jalr to bad target` (same
+  target both sides = inconclusive; `DIFFTEST_BADJALR_OLD=1` = old). Selftest case func_151416E8: 95 / 95.
+- Hand C (NM), B-pad callees of port-b's func_15065E18: func_150FC438 effect27_spawn_with_screen_effect (129650; NM-only
+  prototype in functions.h), func_150D9098 obj_spawn_effect50_with_sound (106830), func_150DC2F0 item_effect_spawn
+  (109770; `(u8 kind, s32 arg1)`). Random + setups EQUIV, mutants 22/22, 27/27, 37/37.
+- Lesson: random trials compare stack records passed to stubs (memcpy sources, spec structs) only by pointer class:
+  func_150D9098's first draft swapped two record floats and was random-EQUIV. Use ARGMEM (+ STKFILL) setups.
+- Checks: verify_all OK, NM build links, protocheck 0 (1437), selftest 95 / 95, progress_nm 5431 / 5915 (91.8%), C bytes 78.9%.
+
+## Next steps (from P221)
+1. func_15073FA0 (game_981E0, 458 lines; last port-file callee of func_15065E18), func_1508CF34 (B7840 cmd 9, exact v0).
+2. port-b: func_15065E18's `jal func_150FC438` (15069F80): a3 not visibly set; func_150DC2F0 takes 2 args in NM C.
+3. Re-checks: use `tools/port/reverify.sh`; fill blank knobs in the registry as functions are re-checked.
+4. Breadth: `p218/asmlist.py`.
+
 ## P219 (port-b) (session P219, 2026-10-24). Details: `docs/port/sessions/P219.md`
 
 Branch `port-b`. Merged port 18edc1c6 (difftest P211/P214/P215 fixes, func_151B8EB8 s32); after the merge verify_all
@@ -50,6 +109,26 @@ asm-only.
    (case 0x3C).
 2. func_151C0698 (1EDA00, 669; RET on the func_151B8EB8 stub; analysis P213.md section 3).
 3. Breadth: func_150A6070, func_150A6324 (D3880), func_150C8F68, func_1518F080, func_151D4D44, func_150C92B8.
+
+## State (session P218, 2026-10-24). Details: `docs/port/sessions/P218.md`
+
+Branch `port` (P215 18edc1c6 + P218 commit). No harness change.
+- func_1514D3B0: event values a2 / a3 are s32 in the NM build (functions.h `#ifdef NON_MATCHING`; the default keeps u8
+  because the s32 prototype changes a C caller's default codegen). Setups wide / wideneg / wide32 EQUIV, 17 / 17 mutants.
+- Random DIFFERs are harness artefacts: func_1504A730 (D_800CC6A4 holds &sp5C: MEMSTK=800CC6A4 -> EQUIV x3 seeds),
+  func_151416E8 / func_151D9014 (random table entries -> unaligned jalr targets, no stub: ROMDATA / valid kind -> EQUIV).
+- UNSURE setups: 15169260 / 15160310 just need DIFFTEST_ROMDATA=1 (EQUIV); func_15013000's "setups" were func_15113000's
+  (p119/3000.txt): new `p218/15013000_setups.txt` EQUIV + mutants; func_1509D274 setups EQUIV TR=16 (random stays UNSURE).
+- Hand C (NM): func_1508E080 rail_weapons_update (cmd 11, B7840), func_15173090 sprite_place_on_floor (19FA20).
+- Checks: verify_all OK, NM build links, protocheck 0 (1434), selftest 91 / 91, progress_nm 5428 / 5915 (91.8%), C bytes 78.8%.
+
+## Next steps (from P218)
+1. B7840: func_1508CF34 (cmd 9; its result is used by func_1508AB7C: exact v0).
+2. Harness idea (needs a selftest case): a jalr to an unaligned target could end the trial as inconclusive on both
+   sides instead of running garbage (P218 section 2).
+3. Re-check runs must use each function's own setup file and knobs (P214 / P215 ran 9260 / 0310 without ROMDATA and
+   func_15013000 with another function's setups).
+4. port-b: re-run A28B0 mutants (DECLKW fix, P214) - and any port-b mutant run made on a merge of P214 (jalr compare off).
 
 ## State (session P217, 2026-10-24, port-web). Details: `docs/port/sessions/P217.md`
 
@@ -91,7 +170,6 @@ v0 used by func_1506045C. Checks: verify_all rc 0, NM links, protocheck 0 (1446)
    jalr: convert faithfully, port-safe C must not dereference it; document).
 3. Breadth: func_150A6070, func_150A6324 (D3880; compiled or hand asm?), func_150C8F68, func_1518F080,
    func_151D4D44, func_150C92B8.
-
 ## State (session P215, 2026-10-24). Details: `docs/port/sessions/P215.md`
 
 Branch `port` (P214 2f944d3c + P215 commit).

@@ -76,7 +76,273 @@ void func_150DC1E0(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DC1E0.s")
 #endif
+#ifdef NON_MATCHING
+extern f32 D_800A1028, D_800A102C, D_800A1030, D_800A1034, D_800A1038, D_800A103C, D_800A1040, D_800A1044, D_800A1048,
+    D_800A104C, D_800A1050, D_800A1054, D_800A1058, D_800A105C, D_800A1060, D_800A1064, D_800A1068, D_800A106C,
+    D_800A1070, D_800A1074, D_800A1078, D_800A107C, D_800A1080, D_800A1084, D_800A1088, D_800A108C, D_800A1090,
+    D_800A1094, D_800A1098, D_800A109C, D_800A10A0, D_800A10A4, D_800A10A8, D_800A10AC, D_800A10B0, D_800A10B4,
+    D_800A10B8, D_800A10BC;
+extern u8 D_80090778[], D_800907C4[];
+struct127 *func_15083E90(u8 arg0);
+
+// item_effect_spawn: starts the effect record of preset `kind` (func_15147FF0: kind 0x120, 300 frames... spec below)
+// and fills its 0x11C-byte data (rec + 0x98). Presets 0 / 5 use the D_80090778 animation and positions of their own;
+// presets 1..4 the D_800907C4 one, placed by the object func_15083E90(6) (y 736; z depends on kind, the x / z pair
+// and +0x24 on whether that object's +0x84 is 6). Returns the record, NULL for an unknown preset, a missing
+// object or a full pool. arg1 is unused (func_150DE508 passes its record).
+u8 *func_150DC2F0(u8 kind, s32 arg1) {
+    struct {
+        f32 u00; u8 u04; s16 u06; f32 u08; u8 u0C; s16 u0E;
+        f32 pos[2];             // 0x10: x / z of the spec
+        f32 u18; f32 u1C; f32 u20; f32 u24;
+        u8 u28; u8 u29; f32 u2C; f32 u30; u8 u34; s16 u36; f32 u38; u8 u3C; s16 u3E;
+        u8 u40; u8 u41; u8 u42; s32 u44; s32 u48; s32 u4C; s32 u50; s32 u54; s32 u58; s32 u5C;
+        u8 u60; f32 u64; f32 u68; f32 u6C; s16 u70; s16 u72; f32 u74; f32 u78; s16 u7C; s16 u7E; f32 u80;
+        s16 u84; s16 u86; s16 u88; f32 u8C; u8 *anim; s32 u94; s8 u98; f32 u9C; f32 uA0; f32 uA4; s16 uA8; s16 uAA;
+        f32 uAC; f32 uB0; f32 uB4; f32 uB8; f32 uBC; f32 uC0; s16 uC4; s16 uC6; s16 uC8; u8 uCA; f32 uCC; f32 uD0;
+        f32 uD4; s16 uD8; s16 uDA; f32 uDC; f32 uE0; s16 uE4; s16 uE6; s16 uE8; s16 uEA; s16 uEC; s16 uEE; f32 uF0;
+        u8 *anim2; s32 uF8; s8 uFC; f32 u100; f32 u104; f32 u108; f32 u10C; f32 u110; s16 u114; s16 u116; s16 u118;
+    } d;                        // sp48
+    struct {
+        f32 x, y, z;            // 0x00
+        s16 u0C;                // 0x0C
+        u16 flags;              // 0x0E
+        s32 u10;                // 0x10
+        u8 pad14;
+        u8 u15;                 // 0x15
+    } spec;                     // sp164
+    struct127 *obj;
+    u8 *rec;
+
+    d.u20 = 0.0f;
+    d.u40 = 0;
+    spec.flags = 0;
+    d.u34 = 0;
+    switch (kind) {
+    case 0:
+    case 5:
+        if (kind == 0) {
+            spec.x = 5.0f;
+            spec.y = 115.0f;
+            spec.z = D_800A1028;
+            d.u24 = D_800A102C;
+        } else {
+            spec.x = D_800A1030;
+            spec.y = D_800A1034;
+            spec.z = D_800A1038;
+            d.u24 = 90.0f;
+        }
+        d.pos[0] = spec.x;
+        d.pos[1] = spec.z;
+        d.u18 = D_800A103C;
+        d.u1C = D_800A1040;
+        d.u2C = 14.0f;
+        d.u30 = 4.0f;
+        d.u08 = D_800A1044;
+        d.u6C = D_800A1048;
+        d.u74 = 40.0f;
+        d.u80 = -185.0f;
+        d.u8C = D_800A104C;
+        d.u9C = D_800A1050;
+        d.uAC = D_800A1054;
+        d.uB0 = D_800A1058;
+        d.uB4 = 5.0f;
+        d.uBC = D_800A105C;
+        d.uC0 = D_800A1060;
+        d.uCC = D_800A1064;
+        d.uD4 = D_800A1068;
+        d.uDC = 270.0f;
+        d.uE0 = 154.0f;
+        d.uF0 = 173.0f;
+        d.u100 = 60.0f;
+        spec.u15 = 0x19;
+        spec.u0C = 0x85;
+        d.u118 = 0x78;
+        d.u28 = 0xFF;
+        d.u29 = 0xFF;
+        d.u36 = 0xC;
+        d.u3C = 2;
+        d.u3E = 2;
+        d.u06 = 0xA;
+        d.u0E = 5;
+        spec.flags = 1;
+        d.u41 = 0x18;
+        d.u42 = 0x51;
+        d.u44 = 8;
+        d.u58 = 5;
+        d.u60 = 1;
+        d.u70 = 0x3F;
+        d.u7C = 0x38;
+        d.u7E = -0x80;
+        d.u84 = 8;
+        d.u86 = 0xA;
+        d.u88 = 0x181;
+        d.u98 = -1;
+        d.uA8 = -0x3F;
+        d.uAA = 0x2B;
+        d.uC4 = 0x56;
+        d.uC6 = 3;
+        d.uC8 = 3;
+        d.uCA = 0xC;
+        d.uD8 = -0x3E;
+        d.uDA = 7;
+        d.uE4 = 0x38;
+        d.uE6 = -0x39;
+        d.uE8 = 0x15;
+        d.uEA = 7;
+        d.uEC = 3;
+        d.uEE = 0x135;
+        d.u38 = 0.0f;
+        d.u04 = 0;
+        d.u0C = 0;
+        d.u48 = 0;
+        d.u4C = 0;
+        d.u50 = 0;
+        d.u54 = 0;
+        d.u5C = 0;
+        d.u64 = 0.0f;
+        d.u68 = 0.0f;
+        d.u72 = 0;
+        d.anim = D_80090778;
+        d.u94 = 0;
+        d.uA0 = 0.0f;
+        d.uD0 = 0.0f;
+        d.anim2 = D_80090778;
+        d.uF8 = 0;
+        d.uFC = -1;
+        d.u104 = 0.0f;
+        d.u108 = 0.0f;
+        d.u00 = 6.0f;
+        d.uB8 = 6.0f;
+        d.u10C = 100.0f;
+        d.u110 = 100.0f;
+        d.u78 = 25.0f;
+        d.uA4 = 25.0f;
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+        obj = func_15083E90(6);
+        if (obj == NULL) {
+            return NULL;
+        }
+        d.u24 = (*(u16 *) ((u8 *) obj + 0x84) == 6) ? 498.0f : -37.0f;
+        spec.y = 736.0f;
+        if (kind == 1) {
+            spec.x = D_800A106C;
+            spec.z = D_800A1070;
+        } else if (kind == 2) {
+            spec.x = D_800A1074;
+            spec.z = D_800A1074;
+        } else if (kind == 3) {
+            spec.z = D_800A1078;
+            spec.x = D_800A107C;
+        } else {
+            spec.x = D_800A1080;
+            spec.z = D_800A1080;
+        }
+        d.pos[0] = spec.x;
+        d.pos[1] = spec.z;
+        d.u18 = -2.0f;
+        d.u1C = D_800A1084;
+        d.u2C = 132.0f;
+        d.u30 = D_800A1088;
+        d.u38 = D_800A108C;
+        d.u64 = D_800A1090;
+        d.u6C = D_800A1094;
+        d.u74 = D_800A1098;
+        d.u78 = D_800A109C;
+        d.u80 = -51.0f;
+        d.u9C = D_800A10A0;
+        d.uA4 = D_800A10A4;
+        d.uAC = D_800A10A8;
+        d.uB4 = 15.0f;
+        d.uB8 = 12.0f;
+        d.uBC = 2.75f;
+        spec.u15 = 0x1E;
+        d.uC0 = D_800A10AC;
+        spec.u0C = 0xA0;
+        d.uCC = D_800A10B0;
+        d.uD4 = 131.0f;
+        d.uDC = D_800A10B4;
+        d.uE0 = D_800A10B8;
+        d.u118 = 0x6E;
+        d.u28 = 0xFF;
+        d.u29 = 0xFF;
+        d.u36 = 0xC;
+        d.u3C = 1;
+        d.u3E = 3;
+        d.u06 = 6;
+        d.u0E = 6;
+        spec.flags |= 1;
+        d.u100 = 3.0f;
+        d.u41 = 0x19;
+        d.u42 = 0x51;
+        d.u44 = 8;
+        d.u4C = 6;
+        d.u60 = 2;
+        d.u70 = 0x24;
+        d.u72 = 0x1A;
+        d.u7C = 0x258;
+        d.u7E = -0x48;
+        d.u84 = 6;
+        d.u104 = D_800A10BC;
+        d.u86 = 3;
+        d.u88 = 0x514;
+        d.u94 = 0xAB;
+        d.u98 = 0xC;
+        d.uA8 = -0x3A;
+        d.uAA = 0xB;
+        d.uC4 = 0x46;
+        d.uC6 = 4;
+        d.uC8 = 2;
+        d.uCA = 9;
+        d.u04 = 0;
+        d.u0C = 0;
+        d.u48 = 0;
+        d.u50 = 0;
+        d.u54 = 0;
+        d.u58 = 0;
+        d.u5C = 0;
+        d.u68 = 0.0f;
+        d.anim = D_800907C4;
+        d.uA0 = 0.0f;
+        d.uD0 = 0.0f;
+        d.uD8 = -0x38;
+        d.uDA = 0xA;
+        d.uE4 = 0x258;
+        d.uE6 = -0xDF;
+        d.uE8 = 0x40;
+        d.uEA = 6;
+        d.uEC = 4;
+        d.uEE = 0x514;
+        d.anim2 = D_800907C4;
+        d.uF8 = 0xAB;
+        d.uFC = 0xC;
+        d.u108 = 0.0f;
+        d.u00 = 22.0f;
+        d.u08 = 22.0f;
+        d.u10C = 100.0f;
+        d.u110 = 100.0f;
+        d.u8C = 500.0f;
+        d.uF0 = 500.0f;
+        d.uB0 = 25.0f;
+        break;
+    default:
+        return NULL;
+    }
+    spec.u10 = 5;
+    d.u116 = 0x1B8;
+    rec = func_15147FF0(&spec, 0x120, 0x18, 4, 4, 4, 0, 0, 0, 0xFF, 1);
+    if (rec != NULL) {
+        memcpy(*(u8 **) (rec + 0x98), &d, 0x11C);
+    }
+    return rec;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DC2F0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DCAD8.s")
 

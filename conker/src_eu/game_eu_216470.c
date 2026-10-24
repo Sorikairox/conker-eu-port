@@ -883,7 +883,229 @@ Gfx *func_151ECB98(Gfx *gdl) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ECB98.s")
 #endif
+#ifdef NON_MATCHING
+typedef struct {
+    /* 0x00 */ f32 slide;        /* menu slide position (0.5 = centre) */
+    /* 0x04 */ f32 x4;
+    /* 0x08 */ f32 fade;         /* 0 = fully shown */
+    /* 0x0C */ f32 vel;          /* slide velocity */
+    /* 0x10 */ u8 pad10[0x1C];
+    /* 0x2C */ s8 page;
+    /* 0x2D */ u8 pad2D[0x13];
+    /* 0x40 */ s8 mode;          /* 0 barrel, 3 single bar, 4 player slots */
+    /* 0x41 */ s8 sel;           /* selected barrel */
+} BarrelMenu174;
+extern s8 D_800904A8;            /* page whose banner is shown */
+extern s32 D_80090488[];         /* banner sprite per page */
+extern s32 D_800904AC[];         /* barrel sprite per item (5) */
+extern u8 D_800E10B8[4];         /* player slot fill (0..255) */
+extern u8 D_800E0EC4;
+extern f32 D_80090188;           /* barrel rotation phase */
+extern s8 D_800901CC;
+extern s32 D_800BEDCC;           /* frame counter */
+extern s8 D_800901E0;            /* joined players */
+extern s8 D_800901E4[];          /* player queue (controller numbers) */
+extern s8 D_800E0FC0[];          /* character per joined player */
+extern struct127 *D_800E0FD0[4]; /* character object per controller */
+extern u8 D_87B[];
+extern u8 D_88C[];
+extern char D_800ABED8[];         /* "#" */
+extern char D_800ABEDC[];         /* "#" */
+extern char D_800ABEE0[];         /* "%d" */
+s8 func_151E2C88(s32);
+void func_151E870C(s32 slot, s32 character);
+/* barrel_menu_draw: draws the multiplayer barrel menu (D_80090174 mode 1 of func_151ECB98) into gdl and returns
+ * the new end. A pipe sync, then (unless mode 3) the page banner D_80090488[D_800904A8] faded by the slide offset
+ * and the title D_88C faded by +0x08. Mode 0: once faded in on page 4, the ring of five item barrels (D_800904AC,
+ * cos ring from the selection +0x41 and the rotation D_80090188), the front one pulsing when at rest; mode 3: the
+ * single bar func_151EA90C; mode 4: two or four player slots (page 7: two) that fill while the controller is
+ * joined (spawning its character with func_151E870C) and empty otherwise (removing the object), each with its
+ * frame D_89C, a pulsing highlight, the fill bar D_87B, the slot number and the player's score from
+ * func_151E2C88. */
+Gfx *func_151ECE00(Gfx *gdl) {
+    BarrelMenu174 *m;
+    s32 scores[8];
+    s32 alpha, a, x, k, mul, prev, cur, mid, v, i, j, slot, dir, nslots, nscores, si, pulse, step, y;
+    f32 ang, sc, sizef;
+    u8 *fill;
+
+    alpha = (s32) ((((BarrelMenu174 *) D_80090174)->slide - 0.5f) * 512.0f);
+    if (alpha < 0) {
+        alpha = -alpha;
+    }
+    if (alpha >= 0x100) {
+        alpha = 0xFF;
+    }
+    gDPPipeSync(gdl++);
+    m = (BarrelMenu174 *) D_80090174;
+    if (m->fade == 0.0f && m->vel == 0.0f) {
+        D_800904A8 = m->page;
+    } else if (m->page == 0 && m->vel < 0.0f) {
+        D_800904A8 = 4;
+    }
+    if (m->page == 0) {
+        y = 0x6A;
+        a = 0xFF - (s32) (m->fade * 300.0f);
+    } else {
+        a = alpha;
+        y = 0x6A - (s32) (m->fade * (D_800904A8 == 4 ? 68.0f : 76.0f));
+    }
+    if (m->mode != 3) {
+        if (a > 0 && D_80090488[D_800904A8] != 0) {
+            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, a);
+            if (D_800904A8 == 4) {
+                sc = 0.8f;
+                k = 2;
+                mul = 2;
+            } else {
+                sc = 1.0f;
+                k = 2;
+                mul = 1;
+                if (D_800904A8 != 0) {
+                    k = 3;
+                }
+            }
+            D_80090410 = D_80090488[D_800904A8];
+            gdl = func_151EDBE8(gdl, &D_80090410, 0x94, y, k, mul, sc, 0);
+            m = (BarrelMenu174 *) D_80090174;
+        }
+        a = 0xFF - (s32) (m->fade * 300.0f);
+        if (a > 0) {
+            gDPPipeSync(gdl++);
+            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, a);
+            D_80090410 = (s32) D_88C;
+            gdl = func_151EDBE8(gdl, &D_80090410, 0x94, 0x1E, 3, 1, 1.0f, 0);
+            m = (BarrelMenu174 *) D_80090174;
+        }
+    }
+    switch (m->mode) {
+        case 0:
+            D_800E10B8[0] = 0;
+            D_800E10B8[1] = 0xFF;
+            D_800E10B8[2] = 0xFF;
+            D_800E10B8[3] = 0xFF;
+            if (!(m->fade >= 0.5f) || m->page != 4) {
+                break;
+            }
+            alpha = (D_800E0EC4 * D_800E0EC5) >> 8;
+            if (alpha >= 0xFE) {
+                alpha = 0xFF;
+            }
+            ang = 0.62831855f + (0.62831855f + 0.62831855f * D_80090188);
+            prev = 0x7E - (s32) (cosf(ang) * 52.0f);
+            i = ((BarrelMenu174 *) D_80090174)->sel - 4;
+            if (i < 0) {
+                i += 5;
+            }
+            for (j = 1; j != 8; j++) {
+                ang -= 0.62831855f;
+                cur = 0x7E - (s32) (cosf(ang) * 52.0f);
+                if (prev < cur) {
+                    gDPPipeSync(gdl++);
+                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, alpha);
+                    mid = ((cur - prev) >> 1) + prev;
+                    sizef = (f32) (cur - prev) * 0.03125f;
+                    D_80090410 = D_800904AC[i];
+                    gdl = func_151EDBE8(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
+                    if (D_80090188 == 0.0f && j == 5 && D_800901CC == 0) {
+                        v = (D_800BEDCC * 2) & 0x7F;
+                        if (v >= 0x40) {
+                            v = 0x7F - v;
+                        }
+                        v = (alpha * (v * 3 + 0x3F)) >> 8;
+                        if (v >= 0x100) {
+                            v = 0xFF;
+                        }
+                        gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, v);
+                        D_80090410 = D_800904AC[i] + 2;
+                        gdl = func_151EDBE8(gdl, &D_80090410, 0x53, mid, 2, 1, sizef, -1);
+                    }
+                }
+                i++;
+                if (i >= 5) {
+                    i -= 5;
+                }
+                prev = cur;
+            }
+            break;
+        case 4:
+            x = 0x28;
+            pulse = (s32) (D_800E0EC5 * (s32) ((sinf((f32) (D_800BEDCC & 0x3F) * 0.09817469f + 0.7853975f) + 1.0f) * 127.0f)) >> 8;
+            if (((BarrelMenu174 *) D_80090174)->page == 7) {
+                x = 0x70;
+                nslots = 2;
+            } else {
+                nslots = 4;
+            }
+            nscores = func_151E2C88((s32) scores);
+            if (nscores != 0) {
+                si = 0;
+            }
+            fill = D_800E10B8;
+            for (slot = 0; slot != nslots; slot++, fill++, x += 0x48) {
+                j = -1;
+                dir = 1;
+                for (i = 0; i < D_800901E0; i++) {
+                    if (slot == D_800901E4[i]) {
+                        j = i;
+                        dir = -1;
+                        break;
+                    }
+                }
+                if (slot != 0 && D_800E0FD0[0] != NULL) {
+                    if (*fill != 0xFF) {
+                        if (D_800E0FD0[slot] == NULL && j != -1) {
+                            func_151E870C(slot, D_800E0FC0[j]);
+                        }
+                    } else if (D_800E0FD0[slot] != NULL) {
+                        func_15060F28(D_800E0FD0[slot], 1);
+                        D_800E0FD0[slot] = NULL;
+                    }
+                }
+                v = *fill + dir * (D_800BE9E4 * 8);
+                if (v >= 0x100) {
+                    v = 0xFF;
+                } else if (v < 0) {
+                    v = 0;
+                }
+                *fill = v;
+                gDPPipeSync(gdl++);
+                gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);
+                D_80090410 = (s32) (D_89C + 2);
+                y = 0x8C - (s32) ((f32) v * 0.14285715f);
+                gdl = func_151EDBE8(gdl, &D_80090410, x, y, 1, 1, 1.0f, 0);
+                if (v > 0) {
+                    gDPPipeSync(gdl++);
+                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, pulse);
+                    gdl = func_151EDBE8(gdl, &D_80090410, x, y, 1, 1, 1.0f, 1);
+                    gDPPipeSync(gdl++);
+                    step = (D_800E0EC5 * v) >> 8;
+                    if (step >= 0xFE) {
+                        step = 0xFF;
+                    }
+                    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, step);
+                    D_80090410 = (s32) D_87B;
+                    gdl = func_151EDBE8(gdl, &D_80090410, x, 0x82, 1, 1, 1.0f, 0);
+                }
+                func_1504332C(0xFF, 0xFF, 0xFF, D_800E0EC5);
+                func_15042D94(x, 0x41, 0x80, D_800ABED8, slot + 1);
+                if (nscores != 0 && j >= 0 && D_800901E4[j] >= 0) {
+                    nscores--;
+                    func_15042D94(x, 0xA8, 0, D_800ABEDC, 0x38);
+                    func_15042D94(x, 0xA2, 0x81, D_800ABEE0, scores[si] + 1);
+                    si++;
+                }
+            }
+            break;
+        case 3:
+            gdl = (Gfx *) func_151EA90C(gdl, 0x6A, 0xFF, 0);
+            break;
+    }
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151ECE00.s")
+#endif
 
 #ifndef NON_MATCHING
 void func_15096D44(Gfx *);

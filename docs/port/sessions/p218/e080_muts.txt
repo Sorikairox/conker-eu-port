@@ -1,0 +1,66 @@
+s/== 0xB9 \&\& \*((u8 \*) obj + 0x128) != 0/== 0xB9 \&\& *((u8 *) obj + 0x128) == 0/
+s/have = ext\[0x75\] \& 0x7F;/have = ext[0x75];/
+s/if (ext\[0x19B\] >= 5) {/if (ext[0x19B] > 5) {/
+s/} else if (ext\[0x19B\] > 0) {/} else if (ext[0x19B] > 1) {/
+s/cur = weapon\[slotOf\[i\]\];/cur = weapon[i];/
+s/} else if (cur == 0x457) {/} else if (cur == 0x456) {/
+s/have = ext\[0x128\] \& ~0x20;/have = ext[0x128];/
+s/func_1508EFEC(i, 0x4C, item);/func_1508EFEC(i, 0x4B, item);/
+s/func_1508EFEC(i, 0x4C, 0x1E);/func_1508EFEC(i, 0x4C, 0x1D);/
+s/((u8 \*) obj->unk31C)\[0x11A\] = 0;\n            }/X/
+s/if (item > 0x1000) {/if (item >= 0x1000) {/
+s/func_1508EFEC(i, 0x4B, item \& ~0x1000);/func_1508EFEC(i, 0x4B, item);/
+s/\*((u8 \*) obj + 0x125) = 0;/*((u8 *) obj + 0x124) = 0;/
+s/((u8 \*) obj->unk31C)\[0x128\] = cur;/((u8 *) obj->unk31C)[0x128] = have;/
+s/+ 0x12C) = 1500;/+ 0x12C) = 1501;/
+s/func_1502ECFC(obj, 0, 0, 0xFF, 0xBF, 4);/func_1502ECFC(obj, 0, 0, 0xFF, 0xBF, 3);/
+s/func_15080A20(i, 1, cur, 0);/func_15080A20(i, 1, have, 0);/
+s/if (cur == 0 \&\& have != 3) {/if (cur == 0) {/
+s/func_1508EFEC(i, 0x45, 4);/func_1508EFEC(i, 0x45, 3);/
+s/if (D_800876E0 != i ||/if (D_800876E0 != 0 ||/
+s/if (n == 0 \&\& ((u8 \*) obj->unk31C)\[0x11A\] == 2/if (n == 0 \&\& ((u8 *) obj->unk31C)[0x11A] != 0/
+s/item != 0x55 \&\& item != 0x2E) {/item != 0x55) {/
+s/if (n != 0 \&\& cur != 0x20) {/if (n != 0) {/
+s/if ((kind == 0x1E \&\& item == 0x1D) || /if (/
+s/|| kind == 0x2A || kind == 0x22 || kind == 0x2D/|| kind == 0x2A || kind == 0x2D/
+s/|| kind == 0x78 || kind == 7) {/|| kind == 0x78) {/
+s/                            found = 1;/                            found = 0;/
+s/if (!found \&\& /if (/
+s/\&\& kind != 0x2C \&\& kind != 0x64/\&\& kind != 0x64/
+s/\&\& kind != 0x2C \&\& kind != 0x64/\&\& kind != 0x2C/
+s/if (item != 0x55 \&\& \*(s32/if (*(s32/
+s/== i + 1 \&\& \*((u8 \*) p + 4) == 0x6E/== i \&\& *((u8 *) p + 4) == 0x6E/
+s/                    break;/                    ;/
+s/if (\*(s32 \*) p != 0 \&\& /if (/
+s/    D_800876E0++;/    ;/
+s/if (D_800876E0 >= \*(s32/if (D_800876E0 > *(s32/
+s/pick = func_151149AC((u8) slotObj\[i\]);/pick = func_151149AC(slotObj[i]);/
+s/respawn\[i\] = 4;/respawn[i] = 3;/
+s/if (hide\[i\] <= 0) {/if (hide[i] < 0) {/
+s/if (respawn\[i\] > 0) {\n            continue/X/
+s/            pick\[0x6E\] = 0;/            ;/
+s/\*(s16 \*) (pick + 0x12) = homeY\[i\];/*(s16 *) (pick + 0x12) = homeX[i];/
+s/if (flags\[i\] \& 4) {/if (flags[i] \& 8) {/
+s/pt = func_150ADA68() \* 0.99999f \* scale;/pt = func_150ADA68() * scale;/
+s/                            k = 1000;/                            ;/
+s/pt = fixedPoint\[i\];/pt = point[i];/
+s/            point\[i\] = pt;/            ;/
+s/0x14F4))\[pt\]);/0x14F4))[i]);/
+s/(s32) y + 0x3C;/(s32) y + 0x3B;/
+s/\*(s16 \*) (pick + 0x14) = (s32) z;/*(s16 *) (pick + 0x14) = (s32) x;/
+s/} else if (respawn\[i\] == 0) {/} else {/
+s/r = \*(s32 \*) (pick + 0x80) - 1;/r = *(s32 *) (pick + 0x80);/
+s/\*(s32 \*) (pick + 0x80) = 0;/;/
+s/if (weapon\[i\] == 0x8AE) {/if (weapon[i] == 0x8AD) {/
+s/ext\[0x19A\] += 3;/ext[0x19A] += 2;/
+s/\[0x19A\] >= 7) {/[0x19A] >= 6) {/
+s/func_1508DF48(r, 0);/func_1508DF48(r, 1);/
+s/if (flags\[i\] \& 2) {/if (flags[i] \& 1) {/
+s/hidden\[i\] = r | 0x2000;/hidden[i] = r;/
+s/                point\[i\] = -1;/                ;/
+s/                hide\[i\] = 0;/                ;/
+s/slotOf\[r\] = i;/slotOf[i] = r;/
+s/0x5C))\[r\] = 1;/0x5C))[i] = 1;/
+s/+ 0x12C) = 600;/+ 0x12C) = 601;/
+s/if (weapon\[i\] == ext\[0x128\]) {/if (1) {/
+s/    return (s32) D_800D27D0;/    return 0;/

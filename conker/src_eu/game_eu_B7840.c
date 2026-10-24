@@ -868,7 +868,296 @@ s32 func_1508DF48(s32 arg0, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508DF48.s")
 #endif
+#ifdef NON_MATCHING
+extern s8 D_800876E0;      /* racer whose items are checked this frame (cycles over the racers) */
+s32 func_1508EBDC(s32);
+void func_1508EFEC(s32, s32, s32);
+s32 func_1508DF48(s32, s32);
+void func_15080A20(s32, s32, s32, s32);
+void func_1502ED40(struct127 *);
+void func_1502ECFC(struct127 *, s32, s32, s32, s32, s32);
+s32 func_15034118(u8 *, s32 *);
+void func_15030448(struct127 *, s32);
+void func_151027E8(u8 *);
+u8 *func_151149AC(s32);
+s32 func_150871B8(s32);
+s32 func_1508712C(s32, f32 *, f32 *, f32 *);
+f32 func_150ADA68(void);
+// rail_weapons_update: script command 11 (func_1509E3D4; its result is never read: returns the rail state pointer like
+// the asm). Pass 1, every racer i (count +0x10; skipped in race mode 0xB9 while the object's +0x128 is set): the weapon
+// it should hold (+0xFF0[i]; 0x3A / 0x26 when its +0x19B ammo level is >= 5 / > 0; when none, the weapon of its pickup
+// slot +0xEB0[i] (+0x1174[slot]) or the default +0x1170; 0x457 = none) is compared with the one it holds (+0x75 & 0x7F,
+// or +0x128 without bit 5 in mode 0xB8). On a change the old weapon's sound / item (func_1508EBDC, 0x1000 = no item
+// change) and the new one's are switched through func_1508EFEC, and the object is armed (mode 0xB8: +0x128, counter
+// +0x12C; otherwise func_15080A20). For the racer D_800876E0 (not in mode 0xB8) the carried items (func_15034118) that
+// do not belong to the weapon are dropped (func_15030448), the weapon item is given back when missing
+// (func_15083568), and an object of kind 0x6E owned by the racer (+0x65 = i + 1) beyond the racers is removed.
+// D_800876E0 then moves to the next racer. Pass 2, every pickup slot i (+0xEA4): its object (func_151149AC of +0xEF0[i])
+// counts down its hide timer +0x12F4 (then the respawn timer +0x1070 = 4) and its respawn timer; on respawn it goes
+// back to its home position (+0x1374 / +0x13F4 / +0x1474) or, unless flag 4 of +0x11F4, to a rail point: a random
+// one not used by another slot (flag 1; +0x10F0) or the fixed +0x1274, placed with func_150871B8 / func_1508712C
+// (y + 0x3C). A slot whose object was picked up (+0x80 = racer + 1) is taken: weapon 0x8AE adds 3 ammo (max 6) to the
+// racer and restarts the timer (+0xEAC); others reset the racer's route (func_1508DF48(r, 0)), either restart the
+// timer (flag 2) or hide the slot (-1, +0xF70 = racer | 0x2000, point -1), and link the racer to the slot (+0xEB0[r],
+// +0x5C[r] = 1). Mode 0xB9 sets the racer's counter +0x12C to 600, mode 0xB8 the weapon's counter (see pass 1).
+s32 func_1508E080(void) {
+    u8 *rail = (u8 *) D_800D27D0;
+    s32 *slotOf = (s32 *) (rail + 0xEB0);
+    s32 *slotObj = (s32 *) (rail + 0xEF0);
+    s32 *hidden = (s32 *) (rail + 0xF70);
+    s32 *want = (s32 *) (rail + 0xFF0);
+    s32 *respawn = (s32 *) (rail + 0x1070);
+    s32 *point = (s32 *) (rail + 0x10F0);
+    s32 *weapon = (s32 *) (rail + 0x1174);
+    s32 *flags = (s32 *) (rail + 0x11F4);
+    s32 *fixedPoint = (s32 *) (rail + 0x1274);
+    s32 *hide = (s32 *) (rail + 0x12F4);
+    s32 *homeX = (s32 *) (rail + 0x1374);
+    s32 *homeY = (s32 *) (rail + 0x13F4);
+    s32 *homeZ = (s32 *) (rail + 0x1474);
+    u8 *items[10];
+    struct127 *obj;
+    struct127 *p;
+    u8 *ext;
+    u8 *pick;
+    s32 i;
+    s32 k;
+    s32 n;
+    s32 cur;
+    s32 have;
+    s32 item;
+    s32 kind;
+    s32 found;
+    s32 r;
+    s32 pt;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 scale;
+
+    obj = D_800CC2D0;
+    for (i = 0; i < *(s32 *) ((u8 *) D_800D27D0 + 0x10); i++, obj++) {
+        if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9 && *((u8 *) obj + 0x128) != 0) {
+            continue;
+        }
+        ext = (u8 *) obj->unk31C;
+        have = ext[0x75] & 0x7F;
+        cur = want[i];
+        if (ext[0x19B] >= 5) {
+            cur = 0x3A;
+        } else if (ext[0x19B] > 0) {
+            cur = 0x26;
+        }
+        if (cur == 0) {
+            if (slotOf[i] != -1) {
+                cur = weapon[slotOf[i]];
+            } else {
+                cur = *(s32 *) ((u8 *) D_800D27D0 + 0x1170);
+            }
+        } else if (cur == 0x457) {
+            cur = 0;
+        }
+        if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB8) {
+            have = ext[0x128] & ~0x20;
+        }
+        if (cur != have) {
+            item = func_1508EBDC(have);
+            if (item != -1) {
+                item &= ~0x1000;
+                func_1508EFEC(i, 0x4C, item);
+                if (item == 0x1D) {
+                    func_1508EFEC(i, 0x4C, 0x1E);
+                }
+                ((u8 *) obj->unk31C)[0x11A] = 0;
+            }
+            item = func_1508EBDC(cur);
+            if (item > 0x1000) {
+                func_1508EFEC(i, 0x4B, item & ~0x1000);
+            }
+            if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB8) {
+                if (have == 0x80) {
+                    func_1502ED40(obj);
+                    *((u8 *) obj + 0x125) = 0;
+                }
+                ((u8 *) obj->unk31C)[0x128] = cur;
+                if (cur == 1) {
+                    *(s16 *) ((u8 *) obj->unk31C + 0x12C) = 500;
+                } else if (cur == 0x80) {
+                    *(s16 *) ((u8 *) obj->unk31C + 0x12C) = 1500;
+                    func_1502ECFC(obj, 0, 0, 0xFF, 0xBF, 4);
+                } else if (cur == 0x10) {
+                    *(s16 *) ((u8 *) obj->unk31C + 0x12C) = 3;
+                }
+            } else {
+                func_15080A20(i, 1, cur, 0);
+                if (cur == 0 && have != 3) {
+                    ((u8 *) obj->unk31C)[0x78] = 0;
+                }
+                if (have == 0x20) {
+                    func_1508EFEC(i, 0x45, 4);
+                }
+                if (cur == 0x20) {
+                    func_1508EFEC(i, 0x45, 3);
+                }
+            }
+        }
+        if (D_800876E0 != i || *(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB8) {
+            continue;
+        }
+        found = 0;
+        item = func_1508EBDC(cur);
+        n = func_15034118((u8 *) obj, (s32 *) items);
+        if (n == 0 && ((u8 *) obj->unk31C)[0x11A] == 2 && item != 0x55 && item != 0x2E) {
+            func_15083568(obj, item, 1.0f, 0);
+            if (item == 0x1D) {
+                func_15083568(obj, 0x1E, 1.0f, 0);
+            }
+        }
+        if (n != 0 && cur != 0x20) {
+            if (item != -1) {
+                item &= ~0x1000;
+                for (k = 0; k < n; k++) {
+                    kind = items[k][6];
+                    if ((kind == 0x1E && item == 0x1D) || kind == item || kind == 0x2A || kind == 0x22 || kind == 0x2D
+                        || kind == 0x72 || kind == 0x73 || kind == 0x76 || kind == 0x77 || kind == 0x78 || kind == 7) {
+                        if (kind == item) {
+                            found = 1;
+                        }
+                    } else {
+                        func_15030448((struct127 *) items[k], 0);
+                        ((u8 *) obj->unk31C)[0x11A] = 0;
+                    }
+                }
+                if (!found && ((u8 *) obj->unk31C)[0x11A] == 2 && item != 0x55 && item != 0x2E) {
+                    func_15083568(obj, item, 1.0f, 0);
+                    if (item == 0x1D) {
+                        func_15083568(obj, 0x1E, 1.0f, 0);
+                    }
+                }
+            } else {
+                for (k = 0; k < n; k++) {
+                    kind = items[k][6];
+                    if (kind != 0x2A && kind != 0x22 && kind != 0x2C && kind != 0x64 && kind != 0x2D && kind != 0x72
+                        && kind != 0x73 && kind != 0x76 && kind != 0x77 && kind != 0x78 && kind != 7) {
+                        func_15030448((struct127 *) items[k], 0);
+                        ((u8 *) obj->unk31C)[0x11A] = 0;
+                    }
+                }
+            }
+        }
+        if (item != 0x55 && *(s32 *) ((u8 *) D_800D27D0 + 0x10) < 25) {
+            for (p = &D_800CC2D0[*(s32 *) ((u8 *) D_800D27D0 + 0x10)]; p < &D_800CC2D0[25]; p++) {
+                if (*(s32 *) p != 0 && *((u8 *) p + 0x65) == i + 1 && *((u8 *) p + 4) == 0x6E) {
+                    func_151027E8((u8 *) p);
+                    func_15060F28(p, 0);
+                    break;
+                }
+            }
+        }
+    }
+    D_800876E0++;
+    if (D_800876E0 >= *(s32 *) ((u8 *) D_800D27D0 + 0x10)) {
+        D_800876E0 = 0;
+    }
+
+    for (i = 0; i < *(s32 *) ((u8 *) D_800D27D0 + 0xEA4); i++) {
+        pick = func_151149AC((u8) slotObj[i]);
+        if (pick == NULL) {
+            continue;
+        }
+        if (hide[i] != 0) {
+            hide[i] -= D_800BE9E4;
+            if (hide[i] <= 0) {
+                respawn[i] = 4;
+                hide[i] = 0;
+            }
+        }
+        if (respawn[i] > 0) {
+            respawn[i] -= D_800BE9E4;
+            if (respawn[i] > 0) {
+                continue;
+            }
+            respawn[i] = 0;
+            pick[0x6E] = 0;
+            if (hide[i] != 0) {
+                *(s16 *) (pick + 0x10) = homeX[i];
+                *(s16 *) (pick + 0x12) = homeY[i];
+                *(s16 *) (pick + 0x14) = homeZ[i];
+                continue;
+            }
+            if (flags[i] & 4) {
+                continue;
+            }
+            if (flags[i] & 1) {
+                scale = *(s32 *) ((u8 *) D_800D27D0 + 0xEA8);
+                do {
+                    pt = func_150ADA68() * 0.99999f * scale;
+                    for (k = 0; k < *(s32 *) ((u8 *) D_800D27D0 + 0xEA8); k++) {
+                        if (pt == point[k]) {
+                            pt = -1;
+                            k = 1000;
+                        }
+                    }
+                } while (pt == -1);
+            } else {
+                pt = fixedPoint[i];
+            }
+            point[i] = pt;
+            r = func_150871B8(((s32 *) ((u8 *) D_800D27D0 + 0x14F4))[pt]);
+            if (r != -1) {
+                func_1508712C(r, &x, &y, &z);
+                *(s16 *) (pick + 0x10) = (s32) x;
+                *(s16 *) (pick + 0x12) = (s32) y + 0x3C;
+                *(s16 *) (pick + 0x14) = (s32) z;
+            }
+        } else if (respawn[i] == 0) {
+            r = *(s32 *) (pick + 0x80) - 1;
+            if (r == -1) {
+                continue;
+            }
+            *(s32 *) (pick + 0x80) = 0;
+            if (weapon[i] == 0x8AE) {
+                ext = (u8 *) D_800CC2D0[r].unk31C;
+                ext[0x19A] += 3;
+                if (((u8 *) D_800CC2D0[r].unk31C)[0x19A] >= 7) {
+                    ((u8 *) D_800CC2D0[r].unk31C)[0x19A] = 6;
+                }
+                respawn[i] = *(s32 *) ((u8 *) D_800D27D0 + 0xEAC);
+            } else {
+                func_1508DF48(r, 0);
+                if (flags[i] & 2) {
+                    respawn[i] = *(s32 *) ((u8 *) D_800D27D0 + 0xEAC);
+                } else {
+                    respawn[i] = -1;
+                    hidden[i] = r | 0x2000;
+                    point[i] = -1;
+                }
+                hide[i] = 0;
+                slotOf[r] = i;
+                ((s32 *) ((u8 *) D_800D27D0 + 0x5C))[r] = 1;
+            }
+            if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9) {
+                *(s16 *) ((u8 *) D_800CC2D0[r].unk31C + 0x12C) = 600;
+            }
+            if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB8) {
+                ext = (u8 *) D_800CC2D0[r].unk31C;
+                if (weapon[i] == ext[0x128]) {
+                    if (weapon[i] == 1) {
+                        *(s16 *) (ext + 0x12C) = 500;
+                    } else if (weapon[i] == 0x80) {
+                        *(s16 *) (ext + 0x12C) = 1500;
+                    } else if (weapon[i] == 0x10) {
+                        *(s16 *) (ext + 0x12C) = 3;
+                    }
+                }
+            }
+        }
+    }
+    return (s32) D_800D27D0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508E080.s")
+#endif
 
 void func_1508EB24(void) {
 }
