@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P216 (port-b) (session P216, 2026-10-24). Details: `docs/port/sessions/P216.md`
+
+Branch `port-b`. Hand C (NM), difftest EQUIV + 10 setups + mutants 20/20: func_151D5DA8 mouth_aim_ray (201240, void;
+caller func_15063AA0 ignores v0). **Ownership: game_eu_90F50.c moved to port-b** (coordinator, mid-session).
+func_15065E18 (90F50, the level 0x29 B-pad item-action blocker) is **4838 words** (0x42-case switch), not ~1280:
+WIP draft `docs/port/sessions/p216/d_5e18.c` (compiles in difftest, not verified, not in the source) covers the
+prologue, the tail and all cases except the rest of 0x24 and 0x3B 0x12 0x23 0x17 0x1A 0x2A 0x1B 0x26 0x3A 0x3E
+(asm 15068ED0..1506A898). Signature s32 (obj, buttons, held, f32 height, recurse, kind, stunned, timeout, noAnim),
+v0 used by func_1506045C. Checks: verify_all rc 0, NM links, protocheck 0 (1446), selftest 71/71. progress_nm total
+5440 / 5915 (92.0%), 475 asm-only.
+
+## Next steps (from P216)
+
+1. Finish func_15065E18 from the P216 draft (P217), then setups for every branch + mutants (P218 if needed).
+2. Merge port (P215 18edc1c6+: func_151B8EB8 s32, difftest jalr fix) into port-b; re-run the func_150768DC x-swap
+   mutant; convert func_151C0698 (RET on the func_151B8EB8 stub) and func_151901F4 (a1 is stale at the dispatcher
+   jalr: convert faithfully, port-safe C must not dereference it; document).
+3. Breadth: func_150A6070, func_150A6324 (D3880; compiled or hand asm?), func_150C8F68, func_1518F080,
+   func_151D4D44, func_150C92B8.
+
 ## P213 (port-b) (session P213, 2026-10-24). Details: `docs/port/sessions/P213.md`
 
 Branch `port-b`. Hand C (NM), difftest EQUIV + setups + mutants: func_150562FC object_carried_update, func_1505E874
