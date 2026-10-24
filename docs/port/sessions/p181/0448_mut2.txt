@@ -1,0 +1,13 @@
+s/    pay.index = obj\[0x3B\];/    pay.index = obj[0x3A];/
+s/    spawn.color\[3\] = 0xFF;/    spawn.color[3] = 0xFE;/
+s/    spawn.emitFlags = 0xCD2002;/    spawn.emitFlags = 0xCD2003;/
+s/    spawn.kind = 3;/    spawn.kind = 2;/
+s/    spawn.flags = 0x2203;/    spawn.flags = 0x2202;/
+s/    spawn.life = 300;/    spawn.life = 301;/
+s/    spawn.color\[0\] = arg2;/    spawn.color[0] = arg3;/
+s/    spawn.color\[2\] = arg4;/    spawn.color[2] = arg2;/
+s/    spawn.u44\[3\] = 6;/    spawn.u44[3] = 7;/
+s/    spawn.u48 = 0;/    spawn.u48 = 1;/
+s/    spawn.u34\[1\] = 1.0f;/    spawn.u34[1] = 2.0f;/
+s/    spawn.sizeY = 100.0f;/    spawn.sizeY = 10.0f;/
+s/    spawn.u1C\[4\] = 0.0f;/    spawn.u1C[4] = 1.0f;/

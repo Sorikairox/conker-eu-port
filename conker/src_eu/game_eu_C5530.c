@@ -908,7 +908,7 @@ s32 func_15084000(s32);
 s32 func_15085890(struct127 *);
 s32 func_15086218(f32 y);
 s32 func_15086508(f32 x, f32 y, f32 z, s32 count, s32 first, u8 *list, void *sel);
-void func_150867D4(s32 point, s32 count, s32 first, u8 *list, s8 *sel);
+s32 func_150867D4(s32 point, s32 count, s32 first, u8 *list, s8 *sel); /* P203: s32 (asm returns s5; func_15086508 and game_A28B0 read it) */
 s32 func_1508712C(s32 point, f32 *x, f32 *y, f32 *z);
 s32 func_150871B8(s32 id);
 f32 func_15087204(f32 x, f32 y, f32 z, f32 dx, f32 dz);

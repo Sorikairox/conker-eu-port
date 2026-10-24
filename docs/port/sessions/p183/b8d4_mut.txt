@@ -1,0 +1,54 @@
+s/    probe\[1\] = pos\[1\] + 200.0f;/    probe[1] = pos[1] + 100.0f;/
+s/pos\[1\] - 200.0f, owner) == 0) {/pos[1] + 200.0f, owner) == 0) {/
+s/    probe\[2\] = pos\[2\];/    probe[2] = pos[0];/
+s/    specA.countBase = 10;/    specA.countBase = 11;/
+s/    specA.aBase = 9.900001f;/    specA.aBase = 9.9f;/
+s/    specA.bBase = -3.0000002f;/    specA.bBase = -3.0f;/
+s/    specA.lenRange = 30.4f;/    specA.lenRange = 30.0f;/
+s/    specA.angYBase = -0x3F;/    specA.angYBase = -0x40;/
+s/    specA.flagExtra = 5;/    specA.flagExtra = 4;/
+s/    specA.lifeExtra = 30;/    specA.lifeExtra = 31;/
+s/    specA.u42\[1\] = 2;/    specA.u42[1] = 3;/
+s/    specA.colABase\[3\] = 0x9B;/    specA.colABase[3] = 0x9C;/
+s/    specA.colAExtra\[1\] = 0x64;/    specA.colAExtra[1] = 0x65;/
+s/    specA.colBBase\[2\] = 0xFF;/    specA.colBBase[2] = 0xFE;/
+s/    specA.u57\[1\] = 0x24;/    specA.u57[1] = 0x25;/
+s/    specA.u5C = 0x200005;/    specA.u5C = 0x200004;/
+s/    specA.u66 = 12;/    specA.u66 = 13;/
+s/    specA.u6C = 1.0f;/    specA.u6C = 2.0f;/
+s/    specA.u72\[1\] = -1;/    specA.u72[1] = 0;/
+s/    specA.pos\[2\] = at\[2\];/    specA.pos[2] = at[1];/
+s/    func_151530A8((s32 \*) &specA, arg2, arg3);/    func_151530A8((s32 *) \&specA, arg2, 0);/
+s/    specB.pos\[1\] = at\[1\];/    specB.pos[1] = at[0];/
+s/    specB.f0C\[2\] = 0.60200006f;/    specB.f0C[2] = 0.602f;/
+s/    specB.f0C\[5\] = 10.2699995f;/    specB.f0C[5] = 10.27f;/
+s/    specB.h24\[4\] = -0x40;/    specB.h24[4] = -0x3F;/
+s/    specB.h24\[9\] = 30;/    specB.h24[9] = 31;/
+s/    specB.b38\[1\] = 0x21;/    specB.b38[1] = 0x20;/
+s/    specB.w3C\[1\] = 12;/    specB.w3C[1] = 13;/
+s/    specB.w3C\[5\] = 0;/    specB.w3C[5] = 1;/
+s/    specB.b54\[0\] = 0xFF;/    specB.b54[0] = 0xFE;/
+s/    specB.b54\[1\] = (u32) func_150ADA20() . 101 + 0x9B;/    specB.b54[1] = (u32) func_150ADA20() \/ 101 + 0x9B;/
+s/    func_151534E0((u8 \*) &specB, 0xFF);/    func_151534E0((u8 *) \&specB, 0xFE);/
+s/    func_1514B5A4((u8 \*) at, arg2, arg3);/    func_1514B5A4((u8 *) at, arg3, arg2);/
+s/    part.type = 0x38;/    part.type = 0x39;/
+s/    part.u04 = 50;/    part.u04 = 51;/
+s/    part.u0C = 0x6666;/    part.u0C = 0x6667;/
+s/    part.col\[3\] = 0xFF;/    part.col[3] = 0xFE;/
+s/    part.pos\[1\] = \*(f32 \*) &at\[1\] + 10.0f;/    part.pos[1] = *(f32 *) \&at[1] + 11.0f;/
+s/    part.u28\[1\] = 0.0f;/    part.u28[1] = 1.0f;/
+s/    part.u34 = 0.2f;/    part.u34 = 0.25f;/
+s/    part.u38\[1\] = 1.0f;/    part.u38[1] = 0.0f;/
+s/    part.flags = 0x400C0001;/    part.flags = 0x400C0000;/
+s/    part.u44\[0\] = (u32) func_150ADA20() . 101 + 100;/    part.u44[0] = (u32) func_150ADA20() \/ 101 + 100;/
+s/    part.u44\[3\] = 6;/    part.u44[3] = 7;/
+s/    part.col\[0\] = (u32) func_150ADA20() . 51 + 0xB4;/    part.col[0] = (u32) func_150ADA20() \/ 51 + 0xB4;/
+s/    part.col\[1\] = (u32) func_150ADA20() . 101;/    part.col[1] = (u32) func_150ADA20() \/ 101;/
+s/^    func_150ADA20();$//
+s/    part.col\[2\] = 0;/    part.col[2] = 1;/
+s/(r7 & 1) + (r6 & 1), r8 & 0xFF,/(r7 \& 1) + (r6 \& 1), r8 \& 0x7F,/
+s/(r7 & 1) + (r6 & 1), r8 & 0xFF,/(r7 \& 1) + (r7 \& 1), r8 \& 0xFF,/
+s/100.0f, 100.0f, 0, (s32) (owner + 4),/100.0f, 50.0f, 0, (s32) (owner + 4),/
+s/100.0f, 100.0f, 0, (s32) (owner + 4),/100.0f, 100.0f, 0, (s32) (owner + 8),/
+s/                  0, 0, arg2, arg3);/                  0, 0, arg2, arg2);/
+s/func_1513D668((s32) &part, 0, 0x12, 0x1D,/func_1513D668((s32) \&part, 0, 0x12, 0x1E,/

@@ -1,0 +1,25 @@
+s/if (c == -0x21) {\n                return 0;/X/
+s/                return 0;/                return 1;/
+s/if (skip-- < 1)/if (skip-- < 0)/
+s/dl->words.w1 == (u32)D_800B1268\[key\]/dl->words.w1 != (u32)D_800B1268[key]/
+s/if (c != 5 \&\& c != 6 \&\& (c >> 4) != 1) {/if (c != 5 \&\& (c >> 4) != 1) {/
+s/                        found = 1;/                        found = 0;/
+s/                        nest--;/                        nest++;/
+s/            dl--;\n        } else {/X/
+s/                if (++nest > 0) {/                if (++nest > 1) {/
+s/                max = 0;/                max = 1;/
+s/vbase < (u32)\*out/vbase > (u32)*out/
+s/idx\[1\] = (w0 >> 8) \& 0xFF;/idx[1] = (w0 >> 9) \& 0xFF;/
+s/idx\[5\] = w1 \& 0xFF;/idx[5] = w1 \& 0x7F;/
+s/idx\[0\] = (w1 >> 25) \& 0x1F;/idx[0] = (w1 >> 24) \& 0x1F;/
+s/idx\[11\] = ((w1 >> 30) \& 3) + (((w0 >> 15) \& 7) << 2);/idx[11] = ((w1 >> 30) \& 3) + (((w0 >> 15) \& 7) << 1);/
+s/idx\[9\] = (w0 >> 23) \& 0x1F;/idx[9] = (w0 >> 22) \& 0x1F;/
+s/idx\[7\] = (w0 >> 5) \& 0x1F;/idx[7] = (w0 >> 5) \& 0xF;/
+s/                        idx\[k\] >>= 1;/                        idx[k] >>= 2;/
+s/if (max < idx\[k\])/if (max > idx[k])/
+s/if (nest == 0 \&\& first) {/if (first) {/
+s/if (idx\[k\] < lo) {/if (idx[k] > lo) {/
+s/                    first = 0;/                    first = 1;/
+s/((lo \& 0xFF) << 4)/((lo \& 0xFF) << 3)/
+s/(max + 1) \* 16/(max + 2) * 16/
+s/                first = 1;/                first = 0;/

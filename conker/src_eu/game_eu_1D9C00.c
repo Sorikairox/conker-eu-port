@@ -71,7 +71,124 @@ void func_151AC3F0(f32 *pos, u8 *src, s32 kind, u8 arg3, s32 arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC3F0.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P191 */
+u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+extern s8 D_800A9400[][5];
+extern u8 D_800AB7D4[];
+extern u8 D_800AB7E4[];
+/* owner block the debris spawner func_151AC3F0 passes through the burst emitter (argA of the D_8008ADA0 handlers) */
+typedef struct {
+    s32 src;   /* 0x0 */
+    s32 arg;   /* 0x4 */
+    u8 light;  /* 0x8 */
+} SpawnOwnerAC628;
+/* chunk particle definition (D_800A9448, 0x30 bytes, index D_800A9400[kind][1]) */
+typedef struct {
+    u8 colBase;        /* 0x00: colour byte 2 = colBase + random [0, colRange] */
+    u8 colRange;       /* 0x01 */
+    s16 pitchBase;     /* 0x02: byte angle from vertical */
+    u16 pitchRange;    /* 0x04 */
+    f32 speedBase;     /* 0x08 */
+    f32 speedRange;    /* 0x0C */
+    s32 b15Base;       /* 0x10 */
+    s32 b15Range;      /* 0x14 */
+    s16 lifeBase;      /* 0x18 */
+    u16 lifeRange;     /* 0x1A */
+    f32 widthBase;     /* 0x1C */
+    f32 widthRange;    /* 0x20 */
+    f32 v10Base;       /* 0x24 */
+    f32 v10Range;      /* 0x28 */
+    f32 trailChance;   /* 0x2C */
+} ChunkDefAC628;
+extern ChunkDefAC628 D_800A9448[];
+
+// debris_chunk_emit: P191: D_8008ADA0 handler 0xB (the chunk bursts of debris_burst_spawn func_151AC3F0, emitted by
+// func_1514CBE8 / the ring, line and arc emitters): spawns one chunk particle (func_15148310, update kind 8) at
+// (x, y, z) with the definition D_800A9448[D_800A9400[kind][1]]: speed (random in the def range) along the byte angle
+// a (x / z) tilted by a random pitch (y = -speed * cos(pitch)); colour bytes D_800AB7D4[light], 0xFF, random; flag
+// 0x20 when D_800AB7E4[light]; with probability trailChance flags 3 and the trail args (6, 2). y is also stored in
+// the shape (+0x14). The owner block argA gives the owner (src, arg) and the light. Returns 1 (keep emitting).
+s32 func_151AC628(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 kind,
+                  f32 arg9, s32 argA, s32 argB) {
+    SpawnOwnerAC628 *owner = (SpawnOwnerAC628 *) argA;
+    ChunkDefAC628 *def = &D_800A9448[D_800A9400[kind][1]];
+    struct {
+        s32 w[7];   /* 0x00 */
+        u8 b1C;
+        u8 b1D;
+    } style;
+    struct {
+        f32 width;  /* 0x00 */
+        f32 vel[3]; /* 0x04 */
+        f32 v10;    /* 0x10 */
+        f32 y;      /* 0x14 */
+        u8 flags;   /* 0x18 */
+        u8 col[3];  /* 0x19 */
+    } shape;
+    struct {
+        f32 x;      /* 0x00 */
+        f32 y;
+        f32 z;
+        s16 life;   /* 0x0C */
+        s16 sE;
+        s32 s10;
+        u8 b14;
+        u8 b15;
+    } at;
+    f32 sinA, cosA, sinP, cosP, speed, hv;
+    s32 trailA, trailB;
+    s16 pitch;
+
+    sinA = func_151423D8(a & 0xFF);
+    cosA = func_151423D8((a - 0x40) & 0xFF);
+    style.w[0] = 0;
+    style.w[1] = 1;
+    style.w[2] = 0x160600;
+    style.w[3] = 1;
+    style.w[4] = 0x10;
+    style.w[5] = 0x80;
+    style.w[6] = 0x20;
+    style.b1C = 0;
+    style.b1D = 9;
+    at.s10 = 1;
+    at.sE = 1;
+    at.y = y;
+    shape.y = y;
+    at.x = x;
+    at.z = z;
+    shape.col[0] = D_800AB7D4[owner->light];
+    shape.col[1] = 0xFF;
+    shape.flags = (D_800AB7E4[owner->light] ? 0x20 : 0) | 8;
+    if (func_150ADA68() < def->trailChance) {
+        shape.flags |= 3;
+        trailA = 6;
+        trailB = 2;
+    } else {
+        trailA = 0;
+        trailB = 0;
+        shape.flags &= ~3;
+    }
+    shape.col[2] = (u32) func_150ADA20() % (u32) (def->colRange + 1) + def->colBase;
+    pitch = (u32) func_150ADA20() % (u32) (def->pitchRange + 1) + def->pitchBase;
+    sinP = func_151423D8(pitch & 0xFF);
+    cosP = func_151423D8((pitch - 0x40) & 0xFF);
+    speed = func_150ADA68() * def->speedRange + def->speedBase;
+    hv = speed * sinP;
+    shape.vel[0] = hv * cosA;
+    shape.vel[1] = -speed * cosP;
+    shape.vel[2] = hv * sinA;
+    at.b15 = (u32) func_150ADA20() % (u32) (def->b15Range + 1) + def->b15Base;
+    at.life = (u32) func_150ADA20() % (u32) (def->lifeRange + 1) + def->lifeBase;
+    shape.width = func_150ADA68() * def->widthRange + def->widthBase;
+    shape.v10 = func_150ADA68() * def->v10Range + def->v10Base;
+    func_15148310((u8 *) &at, (s32) &shape, 0, 1, 8, 0, trailA, trailB, 0, 0, 0, (u8 *) &style, owner->src, argB & 0xFF,
+                  owner->arg);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AC628.s")
+#endif
 
 s32 func_151AC97C(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);
@@ -124,7 +241,71 @@ s32 func_151ACB00(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* P191 */
+void func_15143794(s16, s16, f32, void *);
+extern s8 D_800A9400[][5];
+/* owner block the debris spawner func_151AC3F0 passes through the burst emitter (argA of the D_8008ADA0 handlers) */
+typedef struct {
+    s32 src;   /* 0x0 */
+    s32 arg;   /* 0x4 */
+    u8 light;  /* 0x8 */
+} SpawnOwnerACBCC;
+/* dust particle definition (D_800A9560, 0x2C bytes, index D_800A9400[kind][3]) */
+typedef struct {
+    s16 u0;              /* 0x00: not read here */
+    s16 u2;              /* 0x02 */
+    s16 pitchBase;       /* 0x04 */
+    u16 pitchRange;      /* 0x06 */
+    f32 speedBase;       /* 0x08 */
+    f32 speedRange;      /* 0x0C */
+    s16 lifeBase;        /* 0x10 */
+    u16 lifeRange;       /* 0x12 */
+    u8 alphaBase;        /* 0x14 */
+    u8 alphaRange;       /* 0x15 */
+    f32 sizeBase;        /* 0x18 */
+    f32 sizeRange;       /* 0x1C */
+    f32 valBase;         /* 0x20 */
+    f32 valRange;        /* 0x24 */
+    f32 additiveChance;  /* 0x28 */
+} DustDefACBCC;
+extern DustDefACBCC D_800A9560[];
+
+// debris_dust_emit: P191: D_8008ADA0 handler 0xC (the dust bursts of debris_burst_spawn func_151AC3F0): spawns one
+// dust particle (particle_spawn func_151D9014, kind = the owner's light) at (x, y, z) with the definition
+// D_800A9560[D_800A9400[kind][3]]: velocity from func_15143794(yaw = a, random pitch, random speed); random value,
+// life, alpha and size from the def ranges; additive with probability additiveChance; grow 1.0 / 1.0, lit, group =
+// the owner's src word, no fade, room argB, owner = the owner's arg. Returns 1 (keep emitting).
+s32 func_151ACBCC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 kind,
+                  f32 arg9, s32 argA, s32 argB) {
+    SpawnOwnerACBCC *owner = (SpawnOwnerACBCC *) argA;
+    DustDefACBCC *def = &D_800A9560[D_800A9400[kind][3]];
+    f32 pos[3];
+    f32 vel[3];
+    f32 speed;
+    f32 fVal, fSize, fAdd;
+    s32 rPitch, rLife, rAlpha;
+
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+    rPitch = func_150ADA20();
+    speed = func_150ADA68() * def->speedRange + def->speedBase;
+    func_15143794(a, (u32) rPitch % (u32) (def->pitchRange + 1) + def->pitchBase, speed, vel);
+    fVal = func_150ADA68();
+    rLife = func_150ADA20();
+    rAlpha = func_150ADA20();
+    fSize = func_150ADA68();
+    fAdd = func_150ADA68();
+    func_151D9014(pos, vel, owner->light, fVal * def->valRange + def->valBase,
+                  (u32) rLife % (u32) (def->lifeRange + 1) + def->lifeBase,
+                  (u32) rAlpha % (u32) (def->alphaRange + 1) + def->alphaBase, fSize * def->sizeRange + def->sizeBase,
+                  fAdd < def->additiveChance, 1.0f, 1.0f, 1, owner->src, 1, 0, argB & 0xFF, owner->arg);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ACBCC.s")
+#endif
 
 s32 func_151D6310(s32, s16, s32, u8 **, u8 *);
 extern f32 D_800DD608[];
@@ -238,7 +419,121 @@ void func_151AD144(u8 *arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, (s32)(arg0 + 0x1C), (s32)(arg0 + 0x20), (s32)arg0);
 }
 
+#ifdef NON_MATCHING
+/* P183 */
+void *allocate_memory(s32, s32, s32, s32);
+
+// light_column_create: P183: creates the light-column effect (func_15167A68 kind 0x4E in level 0x2C, else 0x2F;
+// layer arg1 + 0x58) from the 0x24-byte zone record arg0 (copied to +0x10: point +0x14..+0x1C, bottom y +0x24,
+// +0x2C scale -> +0x34 = 1 / scale). +0x38 = 20 points (0x18 bytes) up the column from y = bottom to the top
+// (+0x18) in 19 steps at the point's x / z, +0x3C = step height, +0x48 = 2 x 20 quads of 4 Vtx (texture 0x37 in
+// level 0xB, else 0x36: s = 0 / w/4 / w/2 / 3w/4 (+0x100, << 5), t = (0x100 + i * (h - 1)) << 5 (<< 4 for 0x37),
+// flag 0, colour (0x58, 0x4B, 0x2C) in level 0x39 else white, alpha 0xFF). Returns the effect (0 without one).
+s32 func_151ACBD4(s8 *arg0, s32 arg1) {
+    u8 *e;
+    f32 *pt;
+    Vtx *v;
+    s32 x, top, bottom, z, dy;
+    s32 i, k;
+    s32 shift;
+    s32 tw, th;
+    s32 t;
+    s32 s1, s2, s3;
+    u8 r, g, b;
+    struct_eu_80090F10 *tex;
+
+    e = func_15167A68((D_800BE9F0 == 0x2C) ? 0x4E : 0x2F, 0, arg1 + 0x58, 1, 0xFF, 1);
+    if (e == NULL) {
+        return 0;
+    }
+    memcpy(e + 0x10, arg0, 0x24);
+    *(s32 *) (e + 0x44) = 0;
+    *(s16 *) (e + 0x52) = 0;
+    *(f32 *) (e + 0x34) = 1.0f / *(f32 *) (e + 0x2C);
+    *(f32 **) (e + 0x38) = allocate_memory(0x1E0, 1, 0, 0);
+    x = *(f32 *) (e + 0x14);
+    top = *(f32 *) (e + 0x18);
+    z = *(f32 *) (e + 0x1C);
+    bottom = *(f32 *) (e + 0x24);
+    e[0x42] = 20;
+    dy = top - bottom;
+    for (i = 0; i < 20; i++) {
+        pt = *(f32 **) (e + 0x38) + i * 6;
+        pt[0] = x;
+        pt[1] = (dy * i) / 19 + bottom;
+        pt[2] = z;
+        pt[3] = 0.0f;
+        pt[4] = 0.0f;
+        pt[5] = 0.0f;
+    }
+    *(f32 *) (e + 0x3C) = (f32) (top - bottom) / 19.0f;
+    *(Vtx **) (e + 0x48) = allocate_memory(0xA00, 1, 2, 0);
+
+    if (D_800BE9F0 == 0xB) {
+        *(u16 *) (e + 0x40) = 0x37;
+        shift = 4;
+    } else {
+        *(u16 *) (e + 0x40) = 0x36;
+        shift = 5;
+    }
+    if (D_800BE9F0 == 0x39) {
+        r = 0x58;
+        g = 0x4B;
+        b = 0x2C;
+    } else {
+        r = 0xFF;
+        g = 0xFF;
+        b = 0xFF;
+    }
+    tex = &D_80090F10[*(u16 *) (e + 0x40)];
+    tw = tex->unk6 >> 2;
+    th = tex->unk8 - 1;
+    s1 = (tw + 0x100) << 5;
+    s2 = (tw * 2 + 0x100) << 5;
+    s3 = (tw * 3 + 0x100) << 5;
+    for (k = 0; k < 2; k++) {
+        v = *(Vtx **) (e + 0x48) + k * 80;
+        t = 0x100;
+        for (i = 0; i < 20; i++, v += 4) {
+            s32 tt = t << shift;
+
+            t += th;
+            v[0].v.flag = 0;
+            v[0].v.tc[0] = 0x2000;
+            v[0].v.tc[1] = tt;
+            v[0].v.cn[0] = r;
+            v[0].v.cn[1] = g;
+            v[0].v.cn[2] = b;
+            v[0].v.cn[3] = 0xFF;
+            v[1].v.flag = 0;
+            v[1].v.tc[0] = s1;
+            v[1].v.tc[1] = tt;
+            v[1].v.cn[0] = r;
+            v[1].v.cn[1] = g;
+            v[1].v.cn[2] = b;
+            v[1].v.cn[3] = 0xFF;
+            v[2].v.flag = 0;
+            v[2].v.tc[0] = s2;
+            v[2].v.tc[1] = tt;
+            v[2].v.cn[0] = r;
+            v[2].v.cn[1] = g;
+            v[2].v.cn[2] = b;
+            v[2].v.cn[3] = 0xFF;
+            v[3].v.flag = 0;
+            v[3].v.tc[0] = s3;
+            v[3].v.tc[1] = tt;
+            v[3].v.cn[0] = r;
+            v[3].v.cn[1] = g;
+            v[3].v.cn[2] = b;
+            v[3].v.cn[3] = 0xFF;
+        }
+    }
+    *(f32 *) (e + 0x4C) = 0.0f;
+    return (s32) e;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ACBD4.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AD724.s")
 

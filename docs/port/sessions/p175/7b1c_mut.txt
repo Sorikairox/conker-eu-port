@@ -1,0 +1,50 @@
+s/(s32) hitA\[0\], (s32) hitA\[2\]/(s32) hitA[0], (s32) hitA[1]/
+s/if (e.groundA == 0 || e.groundB == 0) {/if (e.groundA == 0) {/
+s/(repeat ? 0x10 : 0) | (opt0 ? 1 : 0)/(repeat ? 0x20 : 0) | (opt0 ? 1 : 0)/
+s/(opt1 ? 0 : 2)/(opt1 ? 2 : 0)/
+s/(noshadow ? 4 : 0) | (opt3 ? 8 : 0)/(noshadow ? 4 : 0) | (glow ? 8 : 0)/
+s/        owner\[0x14\] = 1;/        owner[0x14] = 2;/
+s/    e.u98 = arg19;/    e.u98 = arg20;/
+s/    e.u94 = arg17;/    e.u94 = opt3;/
+s/        e.triB\[i\] = triB\[i\];/        e.triB[i] = triA[i];/
+s/for (i = 0; i < 0x12; i++) {/for (i = 0; i < 0x10; i++) {/
+s/e.len01 = len0 + len1;/e.len01 = len0 + len2;/
+s/    e.len\[2\] = len2;/    e.len[2] = len1;/
+s/1024.0f + -2560.0f + 2048.0f/1024.0f + -2560.0f + 2047.0f/
+s/1024.0f + 1536.0f/1024.0f + 1530.0f/
+s/    e.u10\[1\] = func_150ADA68() \* 768.0f + 768.0f;/    e.u10[1] = func_150ADA68() * 768.0f + 767.0f;/
+s/    e.phase\[1\] = func_150ADA68() \* 6.2831855f;/    e.phase[1] = func_150ADA68() * 6.283185f;/
+s/    e.rate\[1\] = (func_150ADA68() \* 80.0f + 50.0f) \* 0.001f;/    e.rate[1] = (func_150ADA68() * 80.0f + 51.0f) * 0.001f;/
+s/spawn.d\[1\] = hitB\[1\] - hitA\[1\];/spawn.d[1] = hitB[1] - hitA[0];/
+s/alt = r < b;/alt = r < g;/
+s/neg\[2\] = -spawn.d\[2\];/neg[2] = spawn.d[2];/
+s/(e.pieceA, hitA, triA, neg, e.groundA, alt, noshadow, arg22, 0)/(e.pieceA, hitA, triA, neg, e.groundA, alt, noshadow, arg22, 1)/
+s/(e.pieceB, hitB, triB, spawn.d, e.groundB/(e.pieceB, hitB, triB, spawn.d, e.groundA/
+s/e.pieceB\[1\] == NULL || e.pieceB\[2\] == NULL) {/e.pieceB[1] == NULL) {/
+s/                func_1516972C((struct102 \*) e.pieceB\[i\]);/                func_1516972C((struct102 *) e.pieceA[i]);/
+s/    e.owner2 = arg5;/    e.owner2 = owner;/
+s/mid\[1\] = (s32) (hitA\[1\] + spawn.d\[1\] \* 0.5f);/mid[1] = (s32) (hitA[1] + spawn.d[1] * 0.25f);/
+s/        snd.life = 300;/        snd.life = 301;/
+s/(\&snd, mid, r, g, b, 0xFF, 0, 0, 0x10, arg22, arg23)/(\&snd, mid, r, g, b, 0xFF, 0, 0, 0x11, arg22, arg23)/
+s/        e.sound = 0;/        e.sound = 1;/
+s/    spawn.flags = 0x5A03;/    spawn.flags = 0x5A02;/
+s/    spawn.rgba\[2\] = b;/    spawn.rgba[2] = g;/
+s/    spawn.size\[1\] = 20.0f;/    spawn.size[1] = 21.0f;/
+s/    spawn.to\[2\] = hitB\[2\];/    spawn.to[2] = hitA[2];/
+s/(D_800BE9F0 == 0x36) ? 0 : 0x2000000/(D_800BE9F0 == 0x35) ? 0 : 0x2000000/
+s/    spawn.u44\[3\] = 6;/    spawn.u44[3] = 7;/
+s/0x1A, 0, 0, 0x18, 0, 0xA0, arg22, arg23)/0x1A, 0, 0, 0x18, 0, 0xA1, arg22, arg23)/
+s/(u8 \*) \&e, 0xA0);/(u8 *) \&e, 0x9C);/
+s/!= 0 \&\& glow) {/!= 0 || glow) {/
+s/        uy = u\[1\] \* 20.0f;/        uy = u[1] * 21.0f;/
+s/        vz = u\[2\] \* 500.0f;/        vz = u[2] * 501.0f;/
+s/        q\[1\] = vy + p\[1\];/        q[1] = vy + p[0];/
+s/        rp\[2\] = hitB\[2\] - uz;/        rp[2] = hitB[2] + uz;/
+s/        rq\[0\] = rp\[0\] - vx;/        rq[0] = rp[0] + vx;/
+s/(rec, rp, rq, r, g, b, e.groundB, noshadow/(rec, rp, rq, r, g, b, e.groundA, noshadow/
+s/(rec, p, q, r, g, b, e.groundA, noshadow, arg22, arg23)/(rec, p, q, r, g, b, e.groundA, noshadow, arg22, 0)/
+s/        ((BeamEmit \*) (rec + 0x110))->glowB = NULL;/        ((BeamEmit *) (rec + 0x110))->glowB = rec;/
+s/0x1F40, 0xFA, 0x64,/0x1F40, 0xFA, 0x65,/
+s/(s32) func_151C8D5C, rec + 0x110, 0, 8,/(s32) func_151C8D5C, rec + 0x100, 0, 8,/
+s/func_150ADA20() \& 0xFF);/func_150ADA20() \& 0x7F);/
+s/    return rec;/    return arg5;/

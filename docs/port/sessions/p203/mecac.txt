@@ -1,0 +1,33 @@
+s/func_151D6310((s32) (p + 0x100), view, 0x40/func_151D6310((s32) (p + 0x104), view, 0x40/
+s/    if (blk == NULL) {/    if (blk != NULL) {/
+s/    if (fresh) {/    if (!fresh) {/
+s/memcpy(\*(u8 \*\*) (p + 0x100 + view \* 4) + 0x40/memcpy(*(u8 **) (p + 0x100 + view * 4) + 0x20/
+s/    s = D_800DD608\[view\];/    s = D_800DD618[view];/
+s/    c = D_800DD618\[view\];/    c = D_800DD618[0];/
+s/(\*(f32 \*) (p + 0x40) - \*(f32 \*) (p + 0x34)) \* c/(*(f32 *) (p + 0x40) - *(f32 *) (p + 0x38)) * c/
+s/- s \* (\*(f32 \*) (p + 0x48)/+ s * (*(f32 *) (p + 0x48)/
+s/    if (t < 0.0f) {/    if (t <= 0.0f) {/
+s/        neg = FALSE;/        neg = TRUE;/
+s/sqrtf(t) \* \*(f32 \*) (p + 0x160)/sqrtf(t) * *(f32 *) (p + 0x164)/
+s/    if (1.5707964f < lean) {/    if (1.5f < lean) {/
+s/        lean = 1.5707964f;/        lean = 1.5f;/
+s/    if (neg) {/    if (!neg) {/
+s/lean \* 40.7436638f/lean * 40.0f/
+s/ang = (n < 0) ? 0xFF : n;/ang = n;/
+s/    sn = func_15048A40(ang);/    sn = func_150489B0(ang);/
+s/    a = \*(f32 \*) (p + 0x2C) \* cs;/    a = *(f32 *) (p + 0x2C) * sn;/
+s/    hs = \*(f32 \*) (p + 0x30) \* sn;/    hs = *(f32 *) (p + 0x2C) * sn;/
+s/    hc = \*(f32 \*) (p + 0x30) \* cs;/    hc = *(f32 *) (p + 0x30) * sn;/
+s/    v\[1\] = \*(f32 \*) (p + 0x38) + b;/    v[1] = *(f32 *) (p + 0x38) - b;/
+s/    v\[2\] = \*(f32 \*) (p + 0x3C) - a \* s;/    v[2] = *(f32 *) (p + 0x3C) + a * s;/
+s/    v\[8\] = \*(f32 \*) (p + 0x34) + -a \* c;/    v[8] = *(f32 *) (p + 0x34) + a * c;/
+s/    v\[10\] = \*(f32 \*) (p + 0x3C) - -a \* s;/    v[11] = *(f32 *) (p + 0x3C) - -a * s;/
+s/    e = -(a + hs);/    e = -(a - hs);/
+s/    v\[17\] = (\*(f32 \*) (p + 0x38) + hc) - b;/    v[17] = (*(f32 *) (p + 0x38) - hc) - b;/
+s/    v\[18\] = \*(f32 \*) (p + 0x3C) - e \* s;/    v[18] = *(f32 *) (p + 0x3C) - e * c;/
+s/    e = a - hs;/    e = hs - a;/
+s/    v\[24\] = \*(f32 \*) (p + 0x34) + e \* c;/    v[25] = *(f32 *) (p + 0x34) + e * c;/
+s/    v\[25\] = (\*(f32 \*) (p + 0x38) + hc) + b;/    v[25] = (*(f32 *) (p + 0x38) + hc) + hs;/
+s/    v\[26\] = \*(f32 \*) (p + 0x3C) - e \* s;/    v[26] = *(f32 *) (p + 0x3C) - e;/
+s/    return blk;/    return (u8 *) v + 2;/
+s/        D_800BEDC8;/        1.0f;/

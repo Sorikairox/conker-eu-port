@@ -1,0 +1,22 @@
+s/kind < 0xBB \&\&/kind < 0xBA \&\&/
+s/kind != 0xFF/kind != 0xFE/
+s/radius = 50.0f;/radius = 40.0f;/
+s/+ 0x1A) \* \*(f32 \*)(obj + 0x14C)/+ 0x18) * *(f32 *)(obj + 0x14C)/
+s/(obj + 0x14C);/(obj + 0x150);/
+s/if ((f32)height == 0.0f)/if ((f32)height < 0.0f)/
+s/half = (f32)height \* 0.5f;/half = (f32)height * 0.25f;/
+s/centre\[1\] = \*(f32 \*)(obj + 0x18) + half;/centre[1] = *(f32 *)(obj + 0x18);/
+s/centre\[2\] = \*(f32 \*)(obj + 0x1C);/centre[2] = *(f32 *)(obj + 0x18);/
+s/scale = radius \/ half;/scale = half \/ radius;/
+s/start\[0\] = \*(f32 \*)(rec + 0x34);/start[0] = *(f32 *)(rec + 0x40);/
+s/start\[1\] = (\*(f32 \*)(rec + 0x38) - centre\[1\]) \* scale + centre\[1\];/start[1] = *(f32 *)(rec + 0x38);/
+s/endY = (\*(f32 \*)(rec + 0x44) - centre\[1\]) \* scale + centre\[1\];/endY = *(f32 *)(rec + 0x44);/
+s/dir\[0\] = \*(f32 \*)(rec + 0x40) - start\[0\];/dir[0] = *(f32 *)(rec + 0x40);/
+s/dir\[1\] = endY - start\[1\];/dir[1] = endY - centre[1];/
+s/dir\[2\] = \*(f32 \*)(rec + 0x48) - start\[2\];/dir[2] = *(f32 *)(rec + 0x3C) - start[2];/
+s/(s32 \*)\&len, (s32 \*)\&inv/(s32 *)\&inv, (s32 *)\&len/
+s/radius, len, (s32)hitA/len, radius, (s32)hitA/
+s/(s32)hitA, (s32)hitB, \&tA, \&tB/(s32)hitB, (s32)hitA, \&tA, \&tB/
+s/start, dir, centre, radius/centre, dir, start, radius/
+s/    return 1;/    return 2;/
+s/if (!func_15145128(dir, dir,/if (func_15145128(dir, dir,/

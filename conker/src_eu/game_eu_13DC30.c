@@ -344,7 +344,220 @@ block_46:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15110E44.s")
 #endif
+#ifdef NON_MATCHING
+/* P188: one face of the sky box (D_800A3170, 16 bytes): texture size in texels and two opposite corners; the axis
+ * the face is perpendicular to is the one whose coordinate the corners share */
+typedef struct {
+    u16 w, h;
+    s16 a[3];
+    s16 b[3];
+} SkyFace;
+/* P188: a texture load the vertex builder func_1511127C queued (filled through its pointer argument) */
+typedef struct {
+    s32 addr; /* texture (palette at addr + tlut_offset[fmt]) */
+    s32 fmt;  /* 0 = 8-bit CI (256 colours), 1 = 4-bit CI (16 colours) */
+} SkyLoad;
+extern SkyFace D_800A3170[];
+extern s32 D_800DC2B8[];
+extern s32 D_800DC2E0;
+/* (one line: tools/port/protocheck.py reads single-line prototypes) */
+Gfx *func_1511127C(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face);
+#endif
+#ifdef NON_MATCHING
+/* P203 */
+s32 func_150A66F0(f32 *m, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
+s32 func_1510D66C(s32, s32 *, s32, s32);
+extern f32 D_800A32F0; /* sky tile view-test far distance */
+extern u8 D_800DC2DB;  /* 1 on level 0x3C: load every visible tile's texture, even beyond the distance limit */
+extern u8 D_800DC2DC;  /* bit 0 of D_800D2E4C->unk14: sky 1 face 2 shows the replacement tiles 0x1675.. */
+extern s32 D_800DC2B0; /* sky asset: one format byte per tile (0 = CI8, 1 = CI4) */
+
+// sky_box_face_build: P203: builds one face of the sky box (func_15112074) as a grid of textured quads in the
+// frame's vertex buffer and queues their texture loads. The face lies in the plane `axis` ('x' / 'y' / 'z') through
+// the corner (x, y, z) * 8 and spans w x h texels in tiles of step_s x step_t texels (8 world units per texel); rows
+// run down from the corner's second coordinate, columns along its first. Per tile: the view test func_150A66F0
+// (centre of the quad, half sizes step * 8, far D_800A32F0) drops tiles outside the view; for the side faces
+// (face < 4) only the first `dist` rows are kept with dist scaled from 0..320 to 0..rows (rounded up); the texture
+// (tex + col * rows + row, or on sky 1 face 2 with D_800DC2DC the replacement 0x1675 + col * 3 + row - 10 for
+// rows 4..6 / columns 2..3) is fetched with func_1510D66C(id, NULL, 3, 0) and queued in loads[] with the tile's
+// format byte from the sky asset D_800DC2B0. On the 'y' faces the first and last columns grow by 3 units on each
+// side (hides the seams). Every 16 vertices (4 quads) it emits one G_VTX and per quad the block / palette loads,
+// a tile switch when the format changes (*last_fmt) and two triangles; *count / *first keep the partial batch for
+// the caller, which flushes the rest. arg3 / arg4 are unused. Returns the advanced display list.
+// Port: for an upper-case axis the asm leaves the start coordinates unset (garbage); the C starts them at 0.
+Gfx *func_1511127C(Gfx *gdl, s32 *vtx, s32 tex, s32 arg3, s32 arg4, u32 w, u32 h, u32 step_s, u32 step_t, f32 x, f32 y, f32 z, s32 axis, f32 (*view)[4], s32 dist, s32 *count, s32 *first, SkyLoad *loads, s32 *last_fmt, u8 *arg19, u8 *arg20, s16 *tlut_offset, u8 *tlut_count, u8 *tile, s32 face) {
+    s32 q[4][3]; /* the quad's corners in vertex order */
+    s32 vbuf, cur_first, n, fmt_last;
+    s32 fx, fy, fz;
+    s32 u_start, v_start, u, u2, v, v2;
+    s32 du, dv, row, col, rows, cols, id, addr, k, lrs, fmt;
+    u32 spos, tpos;
+    u16 s_hi, t_hi;
+    s16 *vp;
+    u8 ax;
+
+    x *= 8.0f;
+    y *= 8.0f;
+    z *= 8.0f;
+    vbuf = *vtx;
+    cur_first = *first;
+    n = *count;
+    fmt_last = *last_fmt;
+    ax = axis;
+    if (ax == 'x') {
+        u_start = (s32) z;
+        v_start = (s32) y;
+    } else if (ax == 'y') {
+        u_start = (s32) x;
+        v_start = (s32) z;
+    } else if (ax == 'z') {
+        u_start = (s32) x;
+        v_start = (s32) y;
+    } else {
+        u_start = 0;
+        v_start = 0;
+    }
+    row = 0;
+    if (face < 4) {
+        if (dist > 320) {
+            dist = 320;
+        }
+        dist = (s32) (dist * (h / step_t) + 319) / 320;
+    } else {
+        dist = 0x7FFF;
+    }
+    dv = step_t * 8;
+    v = v_start - dv;
+    for (tpos = 0; tpos < h; tpos += step_t, row++, v -= dv) {
+        col = 0;
+        u = u_start;
+        du = step_s * 8;
+        for (spos = 0; spos < w; spos += step_s, col++, u = u2) {
+            u2 = u + du;
+            v2 = v + dv;
+            switch (ax) {
+                case 'X':
+                case 'x':
+                    fx = (s32) x;
+                    q[0][0] = fx, q[0][1] = v, q[0][2] = u;
+                    q[1][0] = fx, q[1][1] = v, q[1][2] = u2;
+                    q[2][0] = fx, q[2][1] = v2, q[2][2] = u2;
+                    q[3][0] = fx, q[3][1] = v2, q[3][2] = u;
+                    break;
+                case 'Y':
+                case 'y':
+                    fy = (s32) y;
+                    q[0][0] = u, q[0][1] = fy, q[0][2] = v;
+                    q[1][0] = u2, q[1][1] = fy, q[1][2] = v;
+                    q[2][0] = u2, q[2][1] = fy, q[2][2] = v2;
+                    q[3][0] = u, q[3][1] = fy, q[3][2] = v2;
+                    break;
+                case 'Z':
+                case 'z':
+                    fz = (s32) z;
+                    q[0][0] = u, q[0][1] = v, q[0][2] = fz;
+                    q[1][0] = u2, q[1][1] = v, q[1][2] = fz;
+                    q[2][0] = u2, q[2][1] = v2, q[2][2] = fz;
+                    q[3][0] = u, q[3][1] = v2, q[3][2] = fz;
+                    break;
+            }
+            /* view test of the quad's centre (corners 0 and 2 are opposite) */
+            if (func_150A66F0((f32 *) view, (f32) ((q[0][0] + q[2][0]) >> 1), (f32) ((q[0][1] + q[2][1]) >> 1),
+                              (f32) ((q[0][2] + q[2][2]) >> 1), (f32) du, (f32) dv, D_800A32F0) == 0) {
+                continue;
+            }
+            if (D_800DC2DB == 0 && row >= dist) {
+                continue;
+            }
+            rows = h / step_t;
+            id = tex + col * rows + row;
+            if (D_800DC2DC != 0 && ((u8 *) D_800B0DF0)[9] == 1 && face == 2 && row >= 4 && row < 7 && col >= 2 &&
+                col < 4) {
+                id = 0x1675 + (col * 3 + row - 10);
+            }
+            addr = func_1510D66C(id, NULL, 3, 0);
+            if (D_800DC2DB != 0 && row >= dist) {
+                continue;
+            }
+            t_hi = (s32) (((f32) step_t + 0.5f) * 32.0f);
+            s_hi = (s32) (((f32) step_s + 0.5f) * 32.0f);
+            vp = (s16 *) (vbuf + (cur_first + n) * 16);
+            cols = w / step_s;
+            if (ax == 'y' && (spos == 0 || spos == w - step_s)) {
+                q[0][0] -= 3;
+                q[3][0] -= 3;
+                q[2][0] += 3;
+                q[1][0] += 3;
+                q[0][2] -= 3;
+                q[2][2] += 3;
+                q[1][2] -= 3;
+                q[3][2] += 3;
+            }
+            /* x, y, z, flag 0, s, t (10.5 fixed); the colour words stay */
+            vp[0] = q[0][0], vp[1] = q[0][1], vp[2] = q[0][2], vp[3] = 0, vp[4] = 16, vp[5] = 16;
+            vp[8] = q[1][0], vp[9] = q[1][1], vp[10] = q[1][2], vp[11] = 0, vp[12] = s_hi, vp[13] = 16;
+            vp[16] = q[2][0], vp[17] = q[2][1], vp[18] = q[2][2], vp[19] = 0, vp[20] = s_hi, vp[21] = t_hi;
+            vp[24] = q[3][0], vp[25] = q[3][1], vp[26] = q[3][2], vp[27] = 0, vp[28] = 16, vp[29] = t_hi;
+            loads[n >> 2].addr = addr;
+            loads[n >> 2].fmt = ((u8 *) D_800DC2B0)[col * rows + row + face * cols * rows];
+            n += 4;
+            if (n != 16) {
+                continue;
+            }
+            /* a full batch: one G_VTX for the 16 vertices, then per quad its texture and two triangles */
+            gdl->words.w0 = 0x01010020;
+            gdl->words.w1 = vbuf + cur_first * 16;
+            gdl++;
+            for (k = 0; k < 16; k += 4) {
+                fmt = loads[k >> 2].fmt;
+                gdl->words.w0 = 0xE7000000;
+                gdl->words.w1 = 0;
+                gdl++;
+                gdl->words.w0 = 0xFD100000;
+                gdl->words.w1 = loads[k >> 2].addr;
+                gdl++;
+                lrs = ((arg19[fmt] + 0x800) >> arg20[fmt]) - 1;
+                if (lrs >= 0x7FF) {
+                    lrs = 0x7FF;
+                }
+                gdl->words.w0 = 0xF3000000;
+                gdl->words.w1 = 0x07000000 | ((lrs & 0xFFF) << 12);
+                gdl++;
+                gdl->words.w0 = 0xFD100000;
+                gdl->words.w1 = tlut_offset[fmt] + loads[k >> 2].addr;
+                gdl++;
+                gdl->words.w0 = 0xE6000000;
+                gdl->words.w1 = 0;
+                gdl++;
+                gdl->words.w0 = 0xF0000000;
+                gdl->words.w1 = 0x06000000 | (tlut_count[fmt] << 14);
+                gdl++;
+                if (fmt != fmt_last) {
+                    fmt_last = fmt;
+                    gdl->words.w0 = 0xD7000002 | ((tile[fmt] & 7) << 8);
+                    gdl->words.w1 = 0xFFFFFFFF;
+                    gdl++;
+                }
+                /* (k + 2, k, k + 1) and (k + 3, k, k + 2); G_TRI1 indices are vertex * 2 */
+                gdl->words.w0 = 0x05000000 | (((k * 2 + 4) & 0xFF) << 16) | (((k * 2) & 0xFF) << 8) | ((k * 2 + 2) & 0xFF);
+                gdl->words.w1 = 0;
+                gdl++;
+                gdl->words.w0 = 0x05000000 | (((k * 2 + 6) & 0xFF) << 16) | (((k * 2) & 0xFF) << 8) | ((k * 2 + 4) & 0xFF);
+                gdl->words.w1 = 0;
+                gdl++;
+            }
+            n = 0;
+            cur_first += 16;
+        }
+    }
+    *count = n;
+    *first = cur_first;
+    *vtx = vbuf;
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_1511127C.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P133 */
@@ -442,7 +655,236 @@ void func_15111DD8(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15111DD8.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P188 */
+
+/*
+ * sky_box_draw: camera callback (D_80089578[], same signature as func_15110948) that draws the textured sky box of
+ * the current player D_80082FA4. The position arguments are unused. Steps:
+ *  - texture on, func_1501A490 (D_80083336) / func_1501A680; on level 60 (and on level 19 in mode D_800C35EA == 1
+ *    with D_800C3A08 == 1 or 2) the viewport is first cleared to black through func_15110AC4 (the camera record
+ *    D_800BE628[p] +0x24..0x30, as func_15110948);
+ *  - on level 65 the pitch is turned by -119 degrees (wrapped into [0, 360));
+ *  - pipe sync, combiner: plain texture when the sky colour (D_800B0DF0 +5..7) is white, else texture * env colour;
+ *    other modes, the 4-bit / 8-bit tile descriptors;
+ *  - view matrix: func_1511084C(yaw, pitch, roll) times the camera matrix (+0xBC) into the frame's Mtx
+ *    D_800DC2E0[p * 2 + D_800BE9C0], D_80089810 as the projection, perspective normalisation (+0xB8);
+ *  - faces `first`..`last - 1` (0..4; 4..4 on level 25; 0..5 on level 12): faces 0..3 (the sides, every 90 degrees
+ *    of pitch) only when the pitch is within the field of view (95 degrees in mode D_80082FA0 == 1, else 80) of the
+ *    face, faces 4 / 5 (down / up) by the yaw, face 5 only from distance `dist` >= 300. func_1511127C builds each
+ *    face's quads into the frame's vertex buffer D_800DC2B8[p * 2 + D_800BE9C0] and queues the texture loads (the
+ *    face's textures D_8008955C[sky +9][face, 0 for face 5]);
+ *  - one G_VTX for all `count` vertices, then per quad (4 vertices): load its texture block and palette (tile
+ *    changes only when the format does) and two triangles.
+ */
+Gfx *func_15112074(Gfx *gdl, f32 x, f32 y, f32 z, f32 yaw, f32 pitch, f32 roll, s32 dist) {
+    u8 tile[2];        /* {0, 1} */
+    u8 tlut_count[2];  /* {0xFF, 0x0F} */
+    s16 tlut_offset[2]; /* {0x800, 0x400} */
+    u8 arg20[2];       /* {1, 2} */
+    u8 arg19[2];       /* {1, 4} */
+    f32 fov;
+    u8 col[3];
+    s32 last_fmt;
+    SkyLoad loads[4];
+    s32 first_vtx;
+    s32 count;
+    s32 vtx;
+    f32 view[4][4];
+    f32 m[4][4];
+    s32 *texs;
+    s32 i, last, axis, face, k, fmt;
+    SkyFace *f;
+    u8 *cam;
+    u8 *sky;
+
+    /* P188: the asm copies these from .data initialisers (D_8008958C..9C); set element-wise here because an
+     * aggregate initialiser would put a .data section in the NM object, which the linker script discards */
+    tile[0] = 0;
+    tile[1] = 1;
+    tlut_count[0] = 0xFF;
+    tlut_count[1] = 0x0F;
+    tlut_offset[0] = 0x800;
+    tlut_offset[1] = 0x400;
+    arg20[0] = 1;
+    arg20[1] = 2;
+    arg19[0] = 1;
+    arg19[1] = 4;
+    gdl->words.w0 = 0xD7000002;
+    gdl->words.w1 = 0xFFFFFFFF;
+    gdl = (Gfx *) func_1501A490((s32) (gdl + 1), D_80083336, 0, 0, 0, 0);
+    gdl = (Gfx *) func_1501A680(gdl);
+    if (D_80082FA0 == 1) {
+        fov = 95.0f;
+    } else {
+        fov = 80.0f;
+    }
+    if (D_800BE9F0 == 65) {
+        pitch -= 119.0f;
+        if (pitch < 0.0f) {
+            pitch += 360.0f;
+        }
+    } else if (D_800BE9F0 == 60 ||
+               (D_800BE9F0 == 19 && D_800C35EA == 1 && (D_800C3A08 == 2 || D_800C3A08 == 1))) {
+        cam = (u8 *) D_800BE628 + D_80082FA4 * 0x180;
+        gdl = func_15110AC4(gdl, (s32) *(f32 *) (cam + 0x2C), (s32) *(f32 *) (cam + 0x24),
+                            (s32) (*(f32 *) (cam + 0x30) - 1.0f), (s32) *(f32 *) (cam + 0x28), 0, 0, 0);
+    }
+    sky = (u8 *) D_800B0DF0;
+    col[0] = sky[5];
+    col[1] = sky[6];
+    col[2] = sky[7];
+    gdl->words.w0 = 0xE7000000;
+    gdl->words.w1 = 0;
+    gdl++;
+    if (col[2] + col[0] + col[1] == 765) {
+        gdl->words.w0 = 0xFCFFFFFF;
+        gdl->words.w1 = 0xFFFCF279;
+        gdl++;
+    } else {
+        gdl->words.w0 = 0xFB000000;
+        gdl->words.w1 = (col[0] << 24) | (col[1] << 16) | (col[2] << 8) | 0xFF;
+        gdl++;
+        gdl->words.w0 = 0xFC129A25;
+        gdl->words.w1 = 0xFF37FFFF;
+        gdl++;
+    }
+    gdl->words.w0 = 0xEF08AC0F;
+    gdl->words.w1 = 0x0F0A4004;
+    gdl++;
+    gdl->words.w0 = 0xF5500000;
+    gdl->words.w1 = 0x07000000;
+    gdl++;
+    gdl->words.w0 = 0xF5481000;
+    gdl->words.w1 = 0x00080200;
+    gdl++;
+    gdl->words.w0 = 0xF2000000;
+    gdl->words.w1 = 0x000F407C;
+    gdl++;
+    gdl->words.w0 = 0xF5400800;
+    gdl->words.w1 = 0x01080200;
+    gdl++;
+    gdl->words.w0 = 0xF2000000;
+    gdl->words.w1 = 0x010F407C;
+    gdl++;
+    gdl->words.w0 = 0xF5000100;
+    gdl->words.w1 = 0x06000000;
+    gdl++;
+    func_1511084C(view, yaw, pitch, roll);
+    func_150A7A48(view, (f32 (*)[4]) ((u8 *) D_800BE628 + D_80082FA4 * 0x180 + 0xBC), m);
+    guMtxF2L(m, (Mtx *) D_800DC2E0 + (D_80082FA4 * 2 + D_800BE9C0));
+    gdl->words.w0 = 0xDA380007;
+    gdl->words.w1 = (u32) ((Mtx *) D_800DC2E0 + (D_80082FA4 * 2 + D_800BE9C0));
+    gdl++;
+    gdl->words.w0 = 0xDA380003;
+    gdl->words.w1 = (u32) D_80089810;
+    gdl++;
+    gdl->words.w0 = 0xDB0E0000;
+    gdl->words.w1 = *(u16 *) ((u8 *) D_800BE628 + D_80082FA4 * 0x180 + 0xB8);
+    gdl++;
+    texs = D_8008955C[sky[9]];
+    count = 0;
+    first_vtx = 0;
+    last_fmt = -1;
+    vtx = D_800DC2B8[D_80082FA4 * 2 + D_800BE9C0];
+    if (dist < 0) {
+        dist = 0;
+    }
+    last = (D_800BE9F0 == 12) ? 6 : 5;
+    i = (D_800BE9F0 == 25) ? 4 : 0;
+    for (; i < last; i++) {
+        switch (i) {
+            case 0:
+                if (pitch <= 180.0f) {
+                    if (fov < pitch) {
+                        continue;
+                    }
+                } else if (pitch < 360.0f - fov) {
+                    continue;
+                }
+                break;
+            case 1:
+                if (270.0f + fov < pitch || pitch < 270.0f - fov) {
+                    continue;
+                }
+                break;
+            case 2:
+                if (180.0f + fov < pitch || pitch < 180.0f - fov) {
+                    continue;
+                }
+                break;
+            case 3:
+                if (90.0f + fov < pitch || pitch < 90.0f - fov) {
+                    continue;
+                }
+                break;
+            case 4:
+                if (-90.0f + fov < yaw || yaw < -90.0f - fov) {
+                    continue;
+                }
+                break;
+            case 5:
+                if (90.0f + fov < yaw || yaw < 90.0f - fov || dist < 300) {
+                    continue;
+                }
+                break;
+        }
+        f = &D_800A3170[i];
+        if (f->a[0] == f->b[0]) {
+            axis = 'x';
+        } else if (f->a[1] == f->b[1]) {
+            axis = 'y';
+        } else {
+            axis = 'z';
+        }
+        face = (i == 5) ? 0 : i;
+        gdl = func_1511127C(gdl, &vtx, texs[face], 0, 2, f->w, f->h, 60, 30, f->a[0], f->a[1], f->a[2], axis, view, dist,
+                            &count, &first_vtx, loads, &last_fmt, arg19, arg20, tlut_offset, tlut_count, tile, face);
+    }
+    if (count != 0) {
+        gdl->words.w0 = 0x01000000 | ((count & 0xFF) << 12) | ((count & 0x7F) << 1);
+        gdl->words.w1 = vtx + first_vtx * 0x10;
+        gdl++;
+        for (k = 0; k < count; k += 4) {
+            fmt = loads[k >> 2].fmt;
+            gdl->words.w0 = 0xE7000000;
+            gdl->words.w1 = 0;
+            gdl++;
+            gdl->words.w0 = 0xFD100000;
+            gdl->words.w1 = loads[k >> 2].addr;
+            gdl++;
+            gdl->words.w0 = 0xF3000000;
+            gdl->words.w1 = 0x077FF000;
+            gdl++;
+            gdl->words.w0 = 0xFD100000;
+            gdl->words.w1 = loads[k >> 2].addr + tlut_offset[fmt];
+            gdl++;
+            gdl->words.w0 = 0xE6000000;
+            gdl->words.w1 = 0;
+            gdl++;
+            gdl->words.w0 = 0xF0000000;
+            gdl->words.w1 = 0x06000000 | (tlut_count[fmt] << 14);
+            gdl++;
+            if (fmt != last_fmt) {
+                last_fmt = fmt;
+                gdl->words.w0 = 0xD7000002 | ((tile[fmt] & 7) << 8);
+                gdl->words.w1 = 0xFFFFFFFF;
+                gdl++;
+            }
+            /* two triangles (k + 2, k, k + 1) and (k + 3, k, k + 2); G_TRI1 indices are vertex * 2 */
+            gdl->words.w0 = 0x05000000 | (((k * 2 + 4) & 0xFF) << 16) | (((k * 2) & 0xFF) << 8) | ((k * 2 + 2) & 0xFF);
+            gdl->words.w1 = 0;
+            gdl++;
+            gdl->words.w0 = 0x05000000 | (((k * 2 + 6) & 0xFF) << 16) | (((k * 2) & 0xFF) << 8) | ((k * 2 + 4) & 0xFF);
+            gdl->words.w1 = 0;
+            gdl++;
+        }
+    }
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15112074.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s16 D_800895D4;
@@ -899,7 +1341,127 @@ Gfx *func_15113B44(Gfx *arg0, s32 arg1, s16 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113B44.s")
 #endif
+#ifdef NON_MATCHING
+/* P183 */
+Gfx *func_1510D338(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3);
+u8 *func_1510DE40(u8 *arg0, s32 arg1);
+Gfx *func_150CFAF8(Gfx *gdl);
+Gfx *func_150A55A0(s32, Gfx *, u8 *, s32, s32, s32);
+extern u8 D_800840D0[];   /* combiner/othermode block for translucent meshes (segment 6 + 0x20) */
+extern u8 D_80084250[];   /* the same block for opaque meshes */
+extern u8 D_800DA030[];   /* per player: 0x40-byte view matrix (float) */
+extern s32 D_800BEFC4;    /* display list capacity (commands) */
+
+// world_mesh_draw: P183: draws one world mesh record `obj` (0xA0 bytes) for `player`: alpha =
+// obj[0x8B + player] * obj[0x8A] / 255 (0xFF when both are 0xFF), nothing when 0 or when the opaque/translucent
+// pass flag `pass` (0 or 0x10) does not match (opaque meshes draw only when obj[0x4F] & 0x10 differs from pass,
+// translucent ones only in pass 0). Flags obj+0x6C bits 0/4/5 call the debug position hooks. Then pipe sync,
+// render-mode block (D_800840D0 translucent / D_80084250 opaque), cull mode (obj[0x4F] & 2), func_1510D338 colour
+// (0xFF, alpha), func_1510DE40, segment 1 = obj+0x20[frame], matrix `mtx`, optional func_150CFAF8 (flag 0x200),
+// the mesh (func_150A55A0 when obj[0x70] & 2, else a G_DL to obj+0x1C). Returns the new gdl, or the start when
+// the frame display list overflows. `unused` is never read.
+s32 func_15113D54(s32 arg0, u8 *obj, s32 mtx, s16 player, s32 unused, s32 pass) {
+    Gfx *gdl = (Gfx *) arg0;
+    Gfx *start = gdl;
+    s32 a = obj[0x8B + player];
+    s32 alpha;
+    u16 flags;
+
+    if (a == 0xFF && obj[0x8A] == 0xFF) {
+        alpha = 0xFF;
+    } else {
+        alpha = (s32) (a * obj[0x8A]) / 0xFF;
+        if (alpha == 0) {
+            return (s32) gdl;
+        }
+    }
+    if (alpha == 0xFF) {
+        if (pass == (obj[0x4F] & 0x10)) {
+            return (s32) gdl;
+        }
+    } else if (pass != 0) {
+        return (s32) gdl;
+    }
+
+    flags = *(u16 *) (obj + 0x6C);
+    if (flags != 0) {
+        if (flags & 1) {
+            gdl = func_1511FC2C(gdl, (f32) *(s16 *) (obj + 0x10),
+                                (f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18),
+                                (f32) *(s16 *) (obj + 0x14), *(f32 *) (obj + 0x4), player);
+        } else if (flags & 0x10) {
+            gdl = func_1511FC2C(gdl, (f32) *(s16 *) (obj + 0x10),
+                                (f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18),
+                                (f32) *(s16 *) (obj + 0x14), (f32) *(s32 *) (obj + 0x7C), player);
+        } else if (flags & 0x20) {
+            gdl = func_1511FC44(gdl, (f32) *(s16 *) (obj + 0x10),
+                                (f32) *(s16 *) (obj + 0x12) + *(f32 *) (obj + 0x18),
+                                (f32) *(s16 *) (obj + 0x14), player);
+        }
+    }
+
+    gdl->words.w0 = 0xE7000000;
+    gdl->words.w1 = 0;
+    gdl++;
+    gdl->words.w0 = 0xDB060020;
+    if (alpha < 0xFF) {
+        gdl->words.w1 = (u32) D_800840D0;
+    } else {
+        gdl->words.w1 = (u32) D_80084250;
+    }
+    gdl++;
+    if ((obj[0x4F] & 2) == 2) {
+        gdl->words.w0 = 0xD9FFFFFF;
+        gdl->words.w1 = 0x400000;
+    } else {
+        gdl->words.w0 = 0xD9BFFFFF;
+        gdl->words.w1 = 0;
+    }
+    gdl++;
+    gdl->words.w0 = 0xD9FFFFFF;
+    gdl->words.w1 = 0x20000;
+    gdl++;
+    gdl = func_1510D338(gdl, 0xFF, alpha, player);
+    gdl = (Gfx *) func_1510DE40((u8 *) gdl, (s32) obj);
+    if (pass == 0) {
+        gdl->words.w0 = 0xD9FFFFFF;
+        gdl->words.w1 = 0x110000;
+        gdl++;
+    }
+    gdl->words.w0 = 0xDB060004;
+    gdl->words.w1 = *(u32 *) (obj + 0x20 + D_800BE9C0 * 4);
+    gdl++;
+    gdl->words.w0 = 0xDA380003;
+    gdl->words.w1 = mtx;
+    gdl++;
+    gdl->words.w0 = 0xD9F7FFFF;
+    gdl->words.w1 = 0;
+    gdl++;
+    if (*(u16 *) (obj + 0x6C) & 0x200) {
+        gdl = func_150CFAF8(gdl);
+    }
+    if ((obj[0x70] & 2) == 2) {
+        gdl = func_150A55A0(*(s32 *) (obj + 0x1C), gdl, D_800DA030 + player * 0x40, 0, 0,
+                            *(s32 *) (obj + 0x20 + D_800BE9C0 * 4) + 0xFF000000);
+    } else {
+        gdl->words.w0 = 0xDE000000;
+        gdl->words.w1 = *(u32 *) (obj + 0x1C);
+        gdl++;
+    }
+    gdl->words.w0 = 0xD9EEFFFF;
+    gdl->words.w1 = 0;
+    gdl++;
+    gdl->words.w0 = 0xE7000000;
+    gdl->words.w1 = 0;
+    gdl++;
+    if (D_800BEFC4 < (((u8 *) gdl - (u8 *) D_800BEDE8[D_800BE9C0]) >> 3)) {
+        return (s32) start;
+    }
+    return (s32) gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_13DC30/func_15113D54.s")
+#endif
 
 extern u8 D_800C3A7C;
 s32 func_15022BB0(s32, s32);

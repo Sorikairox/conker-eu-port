@@ -311,7 +311,123 @@ s32 func_151506E8(void *angles, void *def, s32 arg2, u8 arg3, s32 arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151506E8.s")
 #endif
 
+#ifdef NON_MATCHING
+/* P181 */
+void func_15143794(s16, s16, f32, void *);
+s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
+s32 memcpy(s32, f32 *, s32);
+
+// spark_burst_spawn: P181: spawns def +0 + rand % (def +4 + 1) particles (0 = none) from the burst definition
+// `arg0`: each at a random direction (angles ang[0] + rand % (ang[1] + 1), ang[2] + rand % (ang[3] + 1)) at
+// distance def +0x54 from the centre def +8, moving that way at def +0x14 + random x +0x18, random rotation 0..360
+// on all axes, spin +-def +0x30 about x / z, fade def +0x1C + random x +0x20, life def +0x24 + rand % (+0x26 + 1),
+// texture ((s32 *)def +0x48)[k] for a random k < def +0x50 with size ((f32 *)def +0x4C)[k] x (def +0x28 + random x
+// +0x2C) (+0 = def +0x44 x size), +4 = def +0x3C + random x +0x40. With chance def +0x38 the particle is solid
+// (+0x61 = 13, +0x63 = def +0x59), else +0x61 = 8. Flags 0x121E9, plus 0x800 and effect kind 3 (else 0) when
+// def +0x58 bit 0 is set. Effect via func_15132BBC (def +0x34, extra bytes def +0x5C copied from def +0x60 to
+// +0x170, owner arg2 / arg3). The asm leaves a stale v0; the callers ignore it (s32 matches their prototype).
+s32 func_15150970(s32 *arg0, s16 *ang, u8 arg2, s32 arg3) {
+    u8 *def = (u8 *)arg0;
+    struct {
+        f32 u00;       /* +0x00 */
+        f32 u04;       /* +0x04 */
+        f32 sizeX;     /* +0x08 */
+        f32 sizeY;     /* +0x0C */
+        f32 rot[3];    /* +0x10 */
+        f32 u1C[3];    /* +0x1C */
+        f32 pos[3];    /* +0x28 */
+        f32 vel[3];    /* +0x34 */
+        f32 spinX;     /* +0x40 */
+        f32 spinY;     /* +0x44 */
+        f32 spinZ;     /* +0x48 */
+        f32 fade;      /* +0x4C */
+        s32 flags;     /* +0x50 */
+        s16 life;      /* +0x54 */
+        s16 texture;   /* +0x56 */
+        u8 u58;
+        s32 u5C;
+        u8 u60;
+        u8 u61;        /* +0x61 */
+        u8 u62;
+        u8 u63;        /* +0x63 */
+        u8 u64[4];
+        u8 u68;
+        s8 u69;
+        u8 u6A;
+        s32 u6C;
+        u8 u70;
+        s16 u72;
+        s16 u74;
+        s32 u78;
+    } p;
+    s32 n;
+    s16 angA;
+    s16 angB;
+    u32 k;
+    u8 *e;
+
+    p.u1C[0] = 1.0f;
+    p.u1C[1] = 1.0f;
+    p.u1C[2] = 1.0f;
+    p.spinY = 0.0f;
+    p.flags = ((def[0x58] & 1) ? 0x800 : 0) | 0x21E9 | 0x10000;
+    p.u58 = 0;
+    p.u5C = 0;
+    p.u60 = 0xFF;
+    p.u62 = 0;
+    p.u64[0] = 0;
+    p.u64[1] = 0;
+    p.u64[2] = 0;
+    p.u64[3] = 0;
+    p.u68 = 2;
+    p.u69 = -1;
+    p.u6A = 0;
+    p.u6C = 0;
+    p.u70 = 0;
+    p.u72 = 0xC;
+    p.u74 = 0x15;
+    p.u78 = 0;
+    n = (u32) func_150ADA20() % (u32) (*(s32 *)(def + 4) + 1) + *(s32 *)(def + 0);
+    while (n != 0) {
+        angA = (u32) func_150ADA20() % (u32) (ang[1] + 1) + ang[0];
+        angB = (u32) func_150ADA20() % (u32) (ang[3] + 1) + ang[2];
+        if (func_150ADA68() < *(f32 *)(def + 0x38)) {
+            p.u61 = 13;
+            p.u63 = def[0x59];
+        } else {
+            p.u61 = 8;
+            p.u63 = 0;
+        }
+        p.u04 = func_150ADA68() * *(f32 *)(def + 0x40) + *(f32 *)(def + 0x3C);
+        p.rot[0] = func_150ADA68() * 360.0f;
+        p.rot[1] = func_150ADA68() * 360.0f;
+        p.rot[2] = func_150ADA68() * 360.0f;
+        func_15143794(angA, angB, func_150ADA68() * *(f32 *)(def + 0x18) + *(f32 *)(def + 0x14), p.vel);
+        p.spinX = func_150ADA68() * (*(f32 *)(def + 0x30) + *(f32 *)(def + 0x30)) - *(f32 *)(def + 0x30);
+        p.spinZ = func_150ADA68() * (*(f32 *)(def + 0x30) + *(f32 *)(def + 0x30)) - *(f32 *)(def + 0x30);
+        p.fade = func_150ADA68() * *(f32 *)(def + 0x20) + *(f32 *)(def + 0x1C);
+        p.life = (u32) func_150ADA20() % (u32) (*(s16 *)(def + 0x26) + 1) + *(s16 *)(def + 0x24);
+        func_15143794(angA, angB, *(f32 *)(def + 0x54), p.pos);
+        p.pos[0] += *(f32 *)(def + 0x8);
+        p.pos[1] += *(f32 *)(def + 0xC);
+        p.pos[2] += *(f32 *)(def + 0x10);
+        k = (u32) func_150ADA20() % *(u32 *)(def + 0x50);
+        p.texture = (*(s32 **)(def + 0x48))[k];
+        p.sizeY = (*(f32 **)(def + 0x4C))[k] * (*(f32 *)(def + 0x28) + func_150ADA68() * *(f32 *)(def + 0x2C));
+        p.sizeX = p.sizeY;
+        p.u00 = *(f32 *)(def + 0x44) * p.sizeX;
+        e = (u8 *)func_15132BBC(&p, (def[0x58] & 1) ? 3 : 0, 0xFF, *(s32 *)(def + 0x34), *(s32 *)(def + 0x5C), arg2,
+                                arg3);
+        if (*(s32 *)(def + 0x5C) > 0 && e != NULL) {
+            memcpy((s32)(e + 0x170), *(f32 **)(def + 0x60), *(s32 *)(def + 0x5C));
+        }
+        n--;
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15150970.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);
@@ -875,7 +991,103 @@ void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151522DC.s")
 
+#ifdef NON_MATCHING
+/* P179 */
+s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
+void func_15143794(s16, s16, f32, void *);
+
+// particle_burst_spawn: P179: spawns def +0 + random [0, def +4] kind-3 particles (func_15132FBC record block,
+/* 0x76 bytes) from the burst definition `arg0`: each at a random direction (angles def +0x14 + random [0, +0x16],
+ * +0x18 + random [0, +0x1A]) `dist` from the centre def +8, moving that way at def +0x1C + random x +0x20, spin
+ * +-def +0x38 about x / z, random rotation 0..360 on all axes, life def +0x2C + random [0, +0x2E], fade
+ * def +0x24 + random x +0x28, texture tex[k] for a random k < ntex with size scale[k] x (def +0x30 + random x
+ * +0x34). Flags 0x29E8, plus 0x100000 when `flag`; owner / owner arg arg6 / arg7. */
+void func_15152700(void *arg0, void *arg1, void *arg2, s32 arg3, f32 arg4, u8 arg5, u8 arg6, s32 arg7) {
+    u8 *def = arg0;
+    s32 *tex = arg1;
+    f32 *scale = arg2;
+    struct {
+        f32 u00[2];
+        f32 sizeX;     /* +0x08 */
+        f32 sizeY;     /* +0x0C */
+        f32 rot[3];    /* +0x10 */
+        f32 u1C[3];
+        f32 pos[3];    /* +0x28 */
+        f32 vel[3];    /* +0x34 */
+        f32 spinX;     /* +0x40 */
+        f32 spinY;     /* +0x44 */
+        f32 spinZ;     /* +0x48 */
+        f32 fade;      /* +0x4C */
+        s32 flags;     /* +0x50 */
+        s16 life;      /* +0x54 */
+        s16 texture;   /* +0x56 */
+        u8 u58;
+        s32 u5C;
+        u8 u60;
+        u8 u61;
+        u8 u62[6];
+        u8 u68;
+        u8 u6A;        /* +0x6A */
+        s32 u6C;
+        u8 u70;
+        s16 u72;
+        s16 u74;
+    } p;
+    s32 n;
+    s16 angA;
+    s16 angB;
+    u32 k;
+
+    p.u00[0] = 1.0f;
+    p.u00[1] = 1.0f;
+    p.u1C[0] = 1.0f;
+    p.u1C[1] = 1.0f;
+    p.u1C[2] = 1.0f;
+    p.spinY = 0.0f;
+    p.flags = (arg5 ? 0x100000 : 0) | 0x29E8;
+    p.u58 = 0;
+    p.u5C = 0;
+    p.u60 = 0xFF;
+    p.u61 = 8;
+    p.u62[0] = 0;
+    p.u62[1] = 0;
+    p.u62[2] = 0;
+    p.u62[3] = 0;
+    p.u62[4] = 0;
+    p.u62[5] = 0;
+    p.u68 = 2;
+    p.u6A = 0;
+    p.u6C = 0;
+    p.u70 = 0;
+    p.u72 = 0xC;
+    p.u74 = 0x15;
+    n = (u32) func_150ADA20() % (u32) (*(s32 *)(def + 4) + 1) + *(s32 *)(def + 0);
+    while (n != 0) {
+        angA = (u32) func_150ADA20() % (u32) (*(s16 *)(def + 0x16) + 1) + *(s16 *)(def + 0x14);
+        angB = (u32) func_150ADA20() % (u32) (*(s16 *)(def + 0x1A) + 1) + *(s16 *)(def + 0x18);
+        p.rot[0] = func_150ADA68() * 360.0f;
+        p.rot[1] = func_150ADA68() * 360.0f;
+        p.rot[2] = func_150ADA68() * 360.0f;
+        func_15143794(angA, angB, func_150ADA68() * *(f32 *)(def + 0x20) + *(f32 *)(def + 0x1C), p.vel);
+        p.spinX = func_150ADA68() * (*(f32 *)(def + 0x38) + *(f32 *)(def + 0x38)) - *(f32 *)(def + 0x38);
+        p.spinZ = func_150ADA68() * (*(f32 *)(def + 0x38) + *(f32 *)(def + 0x38)) - *(f32 *)(def + 0x38);
+        p.fade = func_150ADA68() * *(f32 *)(def + 0x28) + *(f32 *)(def + 0x24);
+        p.life = (u32) func_150ADA20() % (u32) (*(s16 *)(def + 0x2E) + 1) + *(s16 *)(def + 0x2C);
+        func_15143794(angA, angB, arg4, p.pos);
+        p.pos[0] += *(f32 *)(def + 0x8);
+        p.pos[1] += *(f32 *)(def + 0xC);
+        p.pos[2] += *(f32 *)(def + 0x10);
+        k = (u32) func_150ADA20() % (u32) arg3;
+        p.texture = tex[k];
+        p.sizeY = scale[k] * (*(f32 *)(def + 0x30) + func_150ADA68() * *(f32 *)(def + 0x34));
+        p.sizeX = p.sizeY;
+        func_15132FBC(&p, 3, 0xFF, 0, arg6, arg7);
+        n--;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15152700.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15143794(s16, s16, f32, void *);

@@ -1,0 +1,2 @@
+s/key\[0\] = (u8) pipe \* 2;/key[0] = (u8) pipe * 2 + 1;/
+s/(u8) pipe \* 2 + 1;/(u8) pipe * 2 + 2;/

@@ -1,0 +1,36 @@
+s/    if (obj == NULL) {/    if (obj != NULL) {/
+s/    if (clear) {/    if (!clear) {/
+s/for (i = 0; i < 2; i++) {/for (i = 0; i < 1; i++) {/
+s/            D_800DD5C0++;/            D_800DD5C0 += 2;/
+s/node = D_800DD280\[i\]\[0x21\];/node = D_800DD280[i][0x20];/
+s/D_800DD5C8\[D_800DD5C0\] = node->next;/D_800DD5C8[D_800DD5C0] = node->prev;/
+s/(u8 \*)node + 0x18) == obj/(u8 *)node + 0x14) == obj/
+s/obj\[0x3B\] == ((u8 \*)node)\[0x1C\]/obj[0x3B] == ((u8 *)node)[0x1D]/
+s/ == obj || obj/ == obj \&\& obj/
+s/            D_800DD5C0--;/            D_800DD5C0 = 0;/
+s/    e.id = obj\[0x3B\];/    e.id = obj[0x3A];/
+s/    case 1: e.time = 500;/    case 1: e.time = 501;/
+s/e.dir = 0; e.effect = 1; break;/e.dir = 1; e.effect = 1; break;/
+s/case 2: e.time = 3000; e.flag = 1; e.dir = 1; e.effect = 7;/case 2: e.time = 3000; e.flag = 1; e.dir = 1; e.effect = 6;/
+s/case 3: e.time = 200;/case 3: e.time = 300;/
+s/e.dir = -1; e.effect = 9; break;/e.dir = -1; e.effect = 8; break;/
+s/case 5: e.time = 3000; e.flag = 0;/case 5: e.time = 3000; e.flag = 1;/
+s/e.effect = 3; break;/e.effect = 4; break;/
+s/case 7: e.time = 3000;/case 7: e.time = 2000;/
+s/e.dir = -1; e.effect = 5; break;/e.dir = 0; e.effect = 5; break;/
+s/e.dir = -1; e.effect = 6; break;/e.dir = -1; e.effect = 7; break;/
+s/case 10: e.time = 75; e.flag = obj\[0x1CA\] ? 1 : 0;/case 10: e.time = 75; e.flag = obj[0x1CB] ? 1 : 0;/
+s/case 11: e.time = 75; e.flag = obj\[0x1CA\] ? 1 : 0;/case 11: e.time = 75; e.flag = obj[0x1CA] ? 0 : 1;/
+/case 11/s/e.dir = 0; e.effect = 1; break;/e.dir = 0; e.effect = 2; break;/
+s/case 12: e.time = 75;/case 12: e.time = 76;/
+s/case 13: e.time = time; e.flag = (time == 999) ? 0 : 1;/case 13: e.time = time; e.flag = (time == 998) ? 0 : 1;/
+s/e.effect = 10; break;/e.effect = 11; break;/
+s/case 14: e.time = time; e.flag = 1;/case 14: e.time = 100; e.flag = 1;/
+s/case 15: e.time = time; e.flag = (time == 999) ? 0 : 1;/case 15: e.time = time; e.flag = 1;/
+s/case 16: e.time = time; e.flag = (time == 999) ? 0 : 1; e.dir = -1;/case 16: e.time = time; e.flag = (time == 999) ? 0 : 1; e.dir = 1;/
+s/case 17: e.time = 300;/case 17: e.time = 200;/
+s/case 18: e.time = time; e.flag = 1;/case 18: e.time = time; e.flag = 0;/
+s/e.effect = 15; break;/e.effect = 15; break; case 19: e.effect = 3; break;/
+s/    case 1: e.time/    case 0: case 1: e.time/
+s/return func_1518E934((u8 \*\*)\&e, view);/return func_1518E934((u8 **)\&e, clear);/
+s/    default: return NULL;/    default: return (u8 *)obj;/

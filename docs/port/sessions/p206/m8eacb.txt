@@ -1,0 +1,4 @@
+s/    st->emberAcc += (0.020000001f + func_150ADA68() \* 0.025f)/    st->emberAcc += (0.02f + func_150ADA68() * 0.025f)/ % acc_zero rand_long
+s/    st->flameAcc += (0.020000001f + func_150ADA68() \* 0.060000002f)/    st->flameAcc += (0.020000001f + func_150ADA68() * 0.06f)/ % acc_zero rand_long
+s/                smoke.flags \&= ~0xC0;/                smoke.flags \&= ~0x80;/ % acc_zero rand_long
+s/                flipB = (func_150ADA20() \& 1) ? 0x80 : 0;/                flipB = (func_150ADA20() \& 1) ? 0x40 : 0;/ % acc_zero rand_long

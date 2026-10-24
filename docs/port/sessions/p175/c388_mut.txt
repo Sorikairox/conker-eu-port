@@ -1,0 +1,16 @@
+s/p\[0\] += \*(f32 \*) (rec + 4)/p[0] += *(f32 *) (rec + 8)/
+s/D_800BE9A4 \* D_800BE9A4 \* 0.5f/D_800BE9A4 * 0.5f/
+s/p\[2\] += \*(f32 \*) (rec + 0xC)/p[2] -= *(f32 *) (rec + 0xC)/
+s/p\[3\] = vy + /p[3] = vy - /
+s/if (i == obj\[0x25\]) {/if (i >= obj[0x25] - 1) {/
+s/(obj, rec) == 0;/(rec, rec) == 0;/
+s/(obj, rec) == 0;/(obj, obj) == 0;/
+s/!= -1) {/!= 0) {/
+s/if (\*(s8 \*) (obj + 0x2C) > 0) {/if (*(s8 *) (obj + 0x2C) > 1) {/
+s/(obj + 0x2D) \* 0x10);/(obj + 0x2E) * 0x10);/
+s/(obj + 0x5C) = ((s32 \*) p)\[2\]/(obj + 0x5C) = ((s32 *) p)[1]/
+s/        return 0;/        return 2;/
+s/if (\*(s8 \*) (obj + 0x2C) != 0) {/if (*(s8 *) (obj + 0x2C) > 0) {/
+s/vy \* D_800BE9A4 + /vy * D_800BE9A4 - /
+s/(obj + 0x58) = 0.0f;/(obj + 0x58) = 1.0f;/
+s/i != \*(s8 \*) (obj + 0x2E);)/i != *(s8 *) (obj + 0x2E) - 1;)/
