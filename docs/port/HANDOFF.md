@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P227, 2026-10-24). Details: `docs/port/sessions/P227.md`
+- Tooling: `tools/port/reverify.sh` no longer cuts the mutant line (knob `MUTCUT=N`; P226's rvw.sh is obsolete).
+- Hand C (NM, one block each), all in the registry: func_151E9150 `mp_hud_draw` (216470), func_151EA90C
+  `mp_scoreboard_draw` (216470; barrel menu mode 3 bar / in-match score table), func_1509D590
+  `event_effect_command` (CA630, D_800887C0 entry 14, EvHandlerA), func_1511E4F4 `pickup_update` (142E40,
+  world-object type 0x28 callback D_80089030[0x28][0]; declares `f32 cosf(f32)` in its block: 142E40 had none).
+- Verification: setups + mutants all killed (69/69, 68/68, 57/57, 53/53); random 100 EQUIV for all four.
+- Total War null+0x24 = 7.58f (browser P223): func_1511E4F4 has no +0x24 store and returns nothing used, so its
+  stub is only where the check fired; the write happened earlier in that frame. Its conversion is NOT expected to fix
+  the write (pickups now scale in / animate / can be taken). Re-check in the browser after the merge; look at the
+  code that runs before the world-object callbacks in that frame.
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck
+  `1449 NON_MATCHING bodies checked, 0 problems`, selftest 95 / 95, progress_nm
+  `total 5915 3994 1449 472 5443 92.0% 1799532/2253856 (79.8%)`.
+
+## Next steps (from P227)
+1. port-web: Race A / Total War HUD and score table, pickups, null+0x24 re-check.
+2. func_150130B4 (40490): analysed in P227.md section 6 (spawn / emitter blocks, 19-case jump table), not written.
+3. Rail AI func_1508B854 / func_1508C07C / func_1508CA14 (B7840), func_1000C530 (init_B1B0), func_15073FA0 (981E0),
+   func_1508CF34 (B7840 cmd 9). m2c drafts: `port_work/p226/gen/`.
+
 ## State (session P226, 2026-10-24). Details: `docs/port/sessions/P226.md`
 - Hand C (NM, one block each), all in the registry: func_151E5E08 `mp_match_rules_update` (20B730; the match now
   ends: D_800E1050, placings D_800E0EF0), func_151ECE00 `barrel_menu_draw` (216470; returns the DL end),

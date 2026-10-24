@@ -195,13 +195,418 @@ u8 *func_151E8E94(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s3
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E8E94.s")
 #endif
+#ifdef NON_MATCHING
+extern u16 D_8009015C;           /* HUD state: 0x10 = a player is near the target point */
+extern u16 D_80090160;           /* HUD elements: 1 / 8 team scores, 0x4000 / 0x8000 carried item, 0x6340 timer */
+extern s8 D_800E0FE0;            /* team count */
+extern u16 D_800E0FFC;           /* players marked on the HUD (bit per player) */
+extern u8 D_800ABEA0[][4];       /* team colours (r, g, b) */
+extern u8 D_8009041C[4];         /* digit -> sheet column */
+extern u8 D_80090420[];          /* digit -> sheet row */
+extern s32 D_800BEDCC;           /* frame counter */
+s32 func_1508712C(s32, f32 *, f32 *, f32 *);
+s32 func_150871B8(s32);
+s32 func_1510D66C(s32, s32, s32, s32);
+u8 *func_151E9E1C(u8 *, s32, s32, s32, s32);
+u8 *func_151EA4C8(u8 *, s32, s32);
+#define HUD_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
+/* mp_hud_draw: the multiplayer HUD overlay; returns the new DL end. `alpha` is the overlay alpha (low byte), the
+ * second argument is unused. Marks the players to show in D_800E0FFC (active or flagged players, players of kind
+ * 0x25 near rail point 0x49: within 2500 units also sets D_8009015C 0x10 and the "near" icon), remembers the last
+ * flagged player's team (+0x128) as the carrier (with D_80090160 0x8000 it becomes the left / right arrow flag
+ * instead), and the bonus flag 4 for team 1 with +0x2E4. Every 32 frames the first 11 clear all of that (blink).
+ * Then: the team score row (D_80090160 8; texture 0xD16, per team its colour bar and the score in digits from the
+ * D_8009041C / D_80090420 sheet), the team panel func_151E9E1C (1), the carried-item / near icons (texture 0xD18,
+ * 0xD19 with 0x4000), the side arrows / bonus icon (texture 0xD12, 0xD13 with flag 4) and the timer func_151EA4C8
+ * (0x6340). */
+u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
+    Gfx *gdl = (Gfx *) buf;
+    struct127 *p;
+    s32 y, pitch, x, team, score, q, div, dx, started, done, tex, id, size, w, off, row, i, sel;
+    u8 near, flags;
+    f32 px, py, pz, ddx, ddz;
+
+    flags = 0;
+    D_8009015C &= ~0x10;
+    gSPDisplayList(gdl++, D_800903D8);
+    gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F9);
+    y = (D_80082FA0 == 0) ? 0x320 : 0x198;
+    pitch = 0x124;
+    if (D_800E0FE0 > 0) {
+        pitch = 0x124 / D_800E0FE0;
+    }
+    D_800E0FFC = 0;
+    near = 0;
+    sel = -1;
+    for (i = 0; i < D_8008FD8C; i++) {
+        p = &D_800CC2D0[i];
+        if (p->unk13C != 0 || (*(u8 *) ((u8 *) p->unk31C + 0x128) & 0x20)) {
+            D_800E0FFC |= 1 << i;
+            sel = p->unk128;
+        }
+        if (sel != -1 && (D_80090160 & 0x8000)) {
+            if (sel == 0) {
+                flags |= 2;
+            } else {
+                flags |= 1;
+            }
+            sel = -1;
+        }
+        if (p->unk128 == 1 && p->unk2E4 != 0 && (D_80090160 & 0x4000)) {
+            flags |= 4;
+        }
+        if ((*(u8 *) ((u8 *) p->unk31C + 0x75) & 0x7F) == 0x25) {
+            func_1508712C(func_150871B8(0x49), &px, &py, &pz);
+            ddx = px - p->x_position;
+            ddz = pz - p->z_position;
+            if (ddx * ddx + ddz * ddz < 6250000.0f) {
+                near = 1;
+                D_8009015C |= 0x10;
+            }
+            D_800E0FFC |= 1 << i;
+        }
+    }
+    if ((D_800BEDCC & 0x1F) < 11) {
+        D_800E0FFC = 0;
+        near = 0;
+        sel = -1;
+        flags = 0;
+    }
+    tex = 0;
+    if (D_80090160 & 9) {
+        tex = func_1510D66C(0xD16, 0, 3, 0);
+        if (tex != (s32) 0x80000000) {
+            HUD_W(gdl, 0xFD180000, tex);        /* SetTImg RGBA32 */
+            HUD_W(gdl, 0xF5180000, 0x07094250); /* SetTile (load) */
+            gDPLoadSync(gdl++);
+            HUD_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+            gDPPipeSync(gdl++);
+            HUD_W(gdl, 0xF5181000, 0x00094250); /* SetTile (render) */
+            HUD_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
+            gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
+        } else {
+            tex = 0;
+        }
+    }
+    if ((D_80090160 & 8) && tex != 0) {
+        x = pitch >> 1;
+        for (team = 0; team < D_800E0FE0; team++) {
+            started = 0;
+            done = 0;
+            score = func_150859AC((s16) team, 6);
+            gDPPipeSync(gdl++);
+            gDPSetEnvColor(gdl++, D_800ABEA0[team][0], D_800ABEA0[team][1], D_800ABEA0[team][2], alpha & 0xFF);
+            dx = (x + 10) * 4;
+            gdl = (Gfx *) func_151E8E94((u8 *) gdl, (x + 3) * 4, y, dx, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+            div = 10000;
+            do {
+                q = score / div;
+                if (q != 0 || started || div == 1) {
+                    started = 1;
+                    gdl = (Gfx *) func_151E8E94((u8 *) gdl, dx, y, dx + 0x14, y + 0x1C, 0, D_8009041C[q & 3] << 5,
+                                                D_80090420[q >> 2] << 5, 0x400, 0x400);
+                    dx += 0x18;
+                }
+                score -= q * div;
+                if (div == 1) {
+                    done = 1;
+                }
+                div /= 10;
+            } while (!done);
+            x += pitch;
+        }
+    }
+    if (D_80090160 & 1) {
+        gdl = (Gfx *) func_151E9E1C((u8 *) gdl, y, sel, 0, 1);
+    }
+    if (near || sel != -1) {
+        id = (D_80090160 & 0x4000) ? 0xD19 : 0xD18;
+        tex = func_1510D66C(id, 0, 3, 0);
+        if (tex != (s32) 0x80000000) {
+            HUD_W(gdl, 0xFD500000, tex);        /* SetTImg CI 8-bit */
+            HUD_W(gdl, 0xF5500000, 0x07098260); /* SetTile (load) */
+            gDPLoadSync(gdl++);
+            HUD_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+            gDPPipeSync(gdl++);
+            HUD_W(gdl, 0xF5400800, 0x00098260); /* SetTile (render) */
+            HUD_W(gdl, 0xF2000000, 0x000FC0FC); /* SetTileSize 64x64 */
+            HUD_W(gdl, 0xFD100000, tex + 0x800); /* SetTImg: the palette after the texels */
+            gDPLoadSync(gdl++);
+            HUD_W(gdl, 0xF0000000, 0x0603C000); /* LoadTLUT */
+            gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);
+            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, alpha & 0xFF);
+            if (near) {
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x238, 0xC, 0x268, 0x48, 0, 0x640, 0x660, 0x400, 0x400);
+            }
+            if (sel != -1) {
+                if (D_80090160 & 0x4000) {
+                    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x220, 0xC, 0x250, 0x48, 0, 0x600, 0x540, 0x400, 0x400);
+                } else {
+                    if (D_80090160 & 1) {
+                        row = 0x1A;
+                        off = 0;
+                    } else {
+                        row = 0x26;
+                        off = 0xB;
+                    }
+                    gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x238, (off + 3) * 4, 0x268, (off + 0xE) * 4, 0, 0x640,
+                                                row << 5, 0x400, 0x400);
+                }
+            }
+        }
+    }
+    size = 0x20;
+    if (flags != 0) {
+        id = 0xD12;
+        if (flags & 4) {
+            id = 0xD13;
+            size = 0x10;
+        }
+        tex = func_1510D66C(id, 0, 3, 0);
+        if (tex != (s32) 0x80000000) {
+            gDPPipeSync(gdl++);
+            HUD_W(gdl, 0xFD180000, tex);        /* SetTImg RGBA32 */
+            HUD_W(gdl, 0xF5180000, 0x07094250); /* SetTile (load) */
+            gDPLoadSync(gdl++);
+            w = size * 32 - 1;
+            if (w >= 0x7FF) {
+                w = 0x7FF;
+            }
+            HUD_W(gdl, 0xF3000000, 0x07000000 | ((w & 0xFFF) << 12)); /* LoadBlock */
+            gDPPipeSync(gdl++);
+            HUD_W(gdl, 0xF5180000 | ((((size * 2 + 7) >> 3) & 0x1FF) << 9), 0x00094250); /* SetTile (render) */
+            HUD_W(gdl, 0xF2000000, ((((size - 1) * 4) & 0xFFF) << 12) | 0x7C);       /* SetTileSize */
+            gDPSetOtherMode(gdl++, 0x000C3F, 0x504244);
+            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, 0xFF);
+            if (flags & 1) {
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0xA0, y - 0x10, 0xE0, y + 0x30, 0, 0, 0x200, 0x400, 0x400);
+            }
+            if (flags & 2) {
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x3B0, y - 0x10, 0x3F0, y + 0x30, 0, 0x200, 0x200, 0x400, 0x400);
+            }
+            if (flags & 4) {
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x250, 0xC, 0x280, 0x48, 0, 0, 0x200, 0x400, 0x400);
+            }
+        }
+    }
+    if (D_80090160 & 0x6340) {
+        gdl = (Gfx *) func_151EA4C8((u8 *) gdl, y, 1);
+    }
+    return (u8 *) gdl;
+}
+#undef HUD_W
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9150.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9E1C.s")
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EA4C8.s")
 
+#ifdef NON_MATCHING
+extern s8 D_800901E4[4];         /* player queue (controller numbers, -1 empty) */
+extern s8 D_800E0EF0[];          /* placing per team / player (1 = first) */
+extern s16 D_800E0ED0[];         /* team score */
+extern s16 D_800E0F00[];         /* per player value (last column) */
+extern s8 D_8009011C;
+extern char D_800ABEB8[], D_800ABEBC[], D_800ABEC0[], D_800ABEC8[], D_800ABECC[], D_800ABED0[], D_800ABED4[];
+s32 func_1510D66C(s32, s32, s32, s32);
+u8 *func_151E9E1C(u8 *, s32, s32, s32, s32);
+u8 *func_151EA4C8(u8 *, s32, s32);
+#define BAR_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
+#define BAR_MODE() (*(s8 *) (D_80090174 + 0x42))
+#define BAR_ROW(i, off) (*(s16 *) (D_80090174 + (i) * 12 + (off)))
+/* mp_scoreboard_draw: the multiplayer score table (barrel menu mode 3 bar of func_151ECE00, and the in-match HUD
+ * with `hud` set); returns the new DL end. Menu modes 11 / 12: only the controller icons of the player queue
+ * D_800901E4 (texture 0x843; nothing in the HUD). Otherwise one row per queued player that is not a spectator
+ * (D_80087270 != 10) and has a team (D_800E1030; team 0 too in mode 8): the header (textures 0x887 / 0x888:
+ * columns, team column with D_80090160 1, no kills column in mode 1) before the first row, then the controller icon
+ * in the team colour D_800ABEA0, the placing name (D_800E1008 strings from D_800E0EF0, the second table with
+ * D_800E1003 == 2), the team score D_800E0ED0, the hit percentage (+0x66 * 100 / shots, shots from the player's
+ * +0x1AA in the HUD, else +0x6C; at most 9999), the score +0x46, the lives +0x6A (or the D_800ABECC mark for
+ * player state 9) unless mode 1, and D_800E0F00. Rows start at `y` (40 higher with D_800E0B94 and D_80090168) and
+ * are 15 apart. Ends with the timer func_151EA4C8 (D_80090160 0x6340) and, in the HUD, the team panel. */
+u8 *func_151EA90C(Gfx *gdl, s32 y, s16 alpha, s32 hud) {
+    s8 *q;
+    s32 tex, yy, k, i, team, base, fmt, x, hy, v, pct, r;
+    s8 wide, hdr, all;
+
+    if (BAR_MODE() == 11 || BAR_MODE() == 12) {
+        if (hud) {
+            return (u8 *) gdl;
+        }
+        gDPPipeSync(gdl++);
+        gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, alpha & 0xFF);
+        gDPSetCombine(gdl++, 0x12D225, 0xFFA7FFFF);
+        tex = func_1510D66C(0x843, 0, 3, 0);
+        if (tex == (s32) 0x80000000) {
+            return (u8 *) gdl;
+        }
+        BAR_W(gdl, 0xFD180000, tex);        /* SetTImg RGBA32 */
+        BAR_W(gdl, 0xF5180000, 0x07094250); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        BAR_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        BAR_W(gdl, 0xF5181000, 0x00094250); /* SetTile (render) */
+        BAR_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
+        gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
+        yy = 0x48;
+        for (q = D_800901E4; q != D_800901E4 + 4; q++) {
+            if (*q >= 0) {
+                k = *q & 3;
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, 0x120, (yy - 2) * 4, 0x160, (yy + 0xE) * 4, 0, (k & 1) << 9,
+                                            (k >> 1) << 9, 0x400, 0x400);
+                yy += 0x12;
+            }
+        }
+        return (u8 *) gdl;
+    }
+    base = (D_80090160 & 1) ? 0x1A : 0x34;
+    if (D_800E0B94 != 0 && D_80090168 != 0) {
+        y -= 0x28;
+    }
+    func_1504332C(0xFF, 0xFF, 0xFF, alpha & 0xFF);
+    if (D_800E1003 == 2) {
+        fmt = 9;
+        wide = 1;
+    } else {
+        fmt = 0x5E;
+        wide = 0;
+    }
+    all = (BAR_MODE() == 8) ? 0 : 1;
+    gDPPipeSync(gdl++);
+    gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, alpha & 0xFF);
+    gDPSetCombine(gdl++, 0x12D225, 0xFFA7FFFF);
+    hdr = 0;
+    for (i = 0; i < 4; i++) {
+        if (D_800901E4[i] < 0 || D_80087270[i] == 10) {
+            continue;
+        }
+        team = D_800E1030[i];
+        if (team == 0 && !all) {
+            continue;
+        }
+        if (!hdr) {
+            tex = func_1510D66C(0x887, 0, 3, 0);
+            if (tex == (s32) 0x80000000) {
+                return (u8 *) gdl;
+            }
+            BAR_W(gdl, 0xFD180000, tex);
+            BAR_W(gdl, 0xF5180000, 0x07094250);
+            gDPLoadSync(gdl++);
+            BAR_W(gdl, 0xF3000000, 0x073FF000);
+            gDPPipeSync(gdl++);
+            BAR_W(gdl, 0xF5181000, 0x00094250);
+            BAR_W(gdl, 0xF2000000, 0x0007C07C);
+            gDPSetOtherMode(gdl++, 0x000C3F, 0x504244);
+            x = (base - 0x28) * 4;
+            hy = (y - 0x11) * 4;
+            if (D_80090160 & 1) {
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, x + 0x1D4, hy, x + 0x214, hy + 0x40, 0, 0x200, 0, 0x400, 0x400);
+                x += 0x78;
+            }
+            x += 0x1D4;
+            if (BAR_MODE() == 1) {
+                x -= 0x78;
+            }
+            gdl = (Gfx *) func_151E8E94((u8 *) gdl, x + 0x164, hy, x + 0x1A4, hy + 0x3C, 0, 0, 0x200, 0x400, 0x400);
+            if (BAR_MODE() == 1) {
+                x += 0x78;
+            }
+            gDPPipeSync(gdl++);
+            tex = func_1510D66C(0x888, 0, 3, 0);
+            if (tex == (s32) 0x80000000) {
+                return (u8 *) gdl;
+            }
+            BAR_W(gdl, 0xFD180000, tex);
+            BAR_W(gdl, 0xF5180000, 0x07094250);
+            gDPLoadSync(gdl++);
+            BAR_W(gdl, 0xF3000000, 0x073FF000);
+            gDPPipeSync(gdl++);
+            BAR_W(gdl, 0xF5181000, 0x00094250);
+            BAR_W(gdl, 0xF2000000, 0x0007C07C);
+            gdl = (Gfx *) func_151E8E94((u8 *) gdl, x, hy, x + 0x40, hy + 0x40, 0, 0x200, 0, 0x400, 0x400);
+            x += 0x74;
+            gdl = (Gfx *) func_151E8E94((u8 *) gdl, x, hy, x + 0x40, hy + 0x40, 0, 0, 0, 0x400, 0x400);
+            if (BAR_MODE() != 1) {
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, x + 0x4C, hy, x + 0xCC, hy + 0x40, 0, 0, 0x200, 0x400, 0x400);
+            }
+            gDPPipeSync(gdl++);
+            tex = func_1510D66C(0x843, 0, 3, 0);
+            if (tex == (s32) 0x80000000) {
+                return (u8 *) gdl;
+            }
+            BAR_W(gdl, 0xFD180000, tex);
+            BAR_W(gdl, 0xF5180000, 0x07094250);
+            gDPLoadSync(gdl++);
+            BAR_W(gdl, 0xF3000000, 0x073FF000);
+            gDPPipeSync(gdl++);
+            hdr = 1;
+            BAR_W(gdl, 0xF5181000, 0x00094250);
+            BAR_W(gdl, 0xF2000000, 0x0007C07C);
+            gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
+        }
+        func_1504332C(D_800ABEA0[team][0], D_800ABEA0[team][1], D_800ABEA0[team][2], alpha & 0xFF);
+        k = D_800901E4[i] & 3;
+        gdl = (Gfx *) func_151E8E94((u8 *) gdl, (base + 8) * 4, (y - 2) * 4, (base + 0x18) * 4, (y + 0xE) * 4, 0,
+                                    (k & 1) << 9, (k >> 1) << 9, 0x400, 0x400);
+        pct = 0;
+        if (hud) {
+            v = D_800CC2D0[i].unk31C->unk1AA;
+        } else {
+            v = BAR_ROW(i, 0x6C);
+        }
+        if (v > 0) {
+            pct = (BAR_ROW(i, 0x66) * 100) / v;
+        }
+        if (pct >= 10000) {
+            pct = 9999;
+        }
+        if (D_80090168 != 0) {
+            team = i;
+        }
+        r = (s8) (D_800E0EF0[team] - 1);
+        if (r < 0) {
+            r = 0;
+        }
+        func_15042D94(base + 0x3C, y, 0x81, D_800ABEB8, ((s32 *) D_800E1008)[r + fmt]);
+        x = base;
+        if (D_80090160 & 1) {
+            func_15042D94(base + 0x54, y, 0x81, D_800ABEBC, D_800E0ED0[team]);
+            x = base + 0x1E;
+        }
+        x += 0x58;
+        func_15042D94(x, y, 0x81, D_800ABEC0, pct);
+        x += 0x1A;
+        func_15042D94(x, y, 0x81, D_800ABEC8, *(s16 *) (D_80090174 + i * 2 + 0x46));
+        x += 0x1E;
+        if (BAR_MODE() != 1) {
+            if (D_80087270[i] == 9 || (i == 0 && D_8009011C == 9)) {
+                func_15042D94(x, y, 0x81, D_800ABECC);
+            } else {
+                func_15042D94(x, y, 0x81, D_800ABED0, BAR_ROW(i, 0x6A));
+            }
+            x += 0x1E;
+        }
+        func_15042D94(x, y, 0x81, D_800ABED4, D_800E0F00[i]);
+        y += 0xF;
+    }
+    if (D_80090160 & 0x6340) {
+        gSPDisplayList(gdl++, D_800903D8);
+        gDPSetCombine(gdl++, 0x12FE25, 0xFFFFF3F9);
+        gdl = (Gfx *) func_151EA4C8((u8 *) gdl, 0x320, wide);
+    }
+    if (hud && (D_80090160 & 1)) {
+        gdl = (Gfx *) func_151E9E1C((u8 *) gdl, 0x320, -1, 1, wide);
+    }
+    return (u8 *) gdl;
+}
+#undef BAR_W
+#undef BAR_MODE
+#undef BAR_ROW
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EA90C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1510D66C(s32, s32, s32, s32);
