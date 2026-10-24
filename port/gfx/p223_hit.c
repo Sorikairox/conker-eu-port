@@ -40,6 +40,13 @@ int __wrap_func_1505C1E4(void *self, void *obj, void *descs, int idx, int slot, 
                  o ? vbe_ld8(o + 0x3B) : 0, o ? vbe_ld8(o + 0x239) : 0, idx, d ? vbe_ld8(d) : 0, d ? vbe_ld8(d + 8) : 0,
                  d ? vbe_ld8(d + 0xF) : 0, d ? vbe_ld8(d + 0x10) : 0, d ? F(d, 0x14) : 0.f, d ? F(d, 0x18) : 0.f,
                  d ? vbe_ld16(d + 0x24) : 0, slot, (unsigned)hits, (unsigned)mask);
+        if (d) { /* P252: the raw descriptor (0x28 bytes, N64 byte order) to find it in the ROM data, and the attacker's angle */
+            char hx[0x28 * 2 + 1]; static const char H[] = "0123456789ABCDEF";
+            for (int k = 0; k < 0x28; k++) { unsigned v = vbe_ld8(d + k); hx[2 * k] = H[v >> 4]; hx[2 * k + 1] = H[v & 15]; }
+            hx[0x50] = 0;
+            port_log("[p223hit]   desc bytes %s | self ang %04X pos %.1f %.1f %.1f\n", hx, s ? vbe_ld16(s + 0x76) : 0,
+                     s ? F(s, 0x14) : 0.f, s ? F(s, 0x18) : 0.f, s ? F(s, 0x1C) : 0.f);
+        }
         if (o) st("before", o);
     }
     r = __real_func_1505C1E4(self, obj, descs, idx, slot, hits, mask);
@@ -54,7 +61,10 @@ int __wrap_func_1505C1E4(void *self, void *obj, void *descs, int idx, int slot, 
 /* called once per frame from p205_obj_hook */
 void p223_hit_tick(void) {
     unsigned t;
+    static unsigned lastf = ~0u;
     if (!fol || on() <= 0) return;
+    if (lastf == port_frame_count) return; /* P252: the hook runs twice in some frames; one line per frame */
+    lastf = port_frame_count;
     t = port_frame_count - fol_f;
     if (t > 60) { fol = 0; return; }
     if (t % 6 == 0) {
