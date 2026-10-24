@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P252, 2026-10-25, port-web). Details: `docs/port/sessions/P252.md`
+- Merged port 4c2baf47 and port-b 1cd754c3; checks after each: verify_all OK, NM OK, protocheck 0, floatint 0,
+  implicit NM+float 0, romabs 0 FAIL, census (clean) 722 / 0 FAIL, selftest 119 / 0. Registry 211 rows, no dups.
+- **Deterministic Chrome runs: `?det=2`** (det clock, virtual AI_LEN queue, no 40 ms wall budget, wall-paced 50 Hz VI).
+  Non-det runs took osGetCount (game randomness, timers), AI_LEN (Web Audio drain) and the frame budget from wall
+  time. Same route twice = identical logs; det=1&timer=2 = same frames at ~2.9x speed (tune fast, shoot with det=2).
+  `p252/route.sh` (DET=2 default).
+- Level 0x29: route `p252/bdoor_ev6.goto` crosses gap 2 (lower step), the last gap (run-up north edge -> plateau at
+  12262), walks the rim: **event 6 at 12429, scene 12433 .. 14513 (the gargoyle "The Baddie", rec 4 id 0x8E)**.
+  **Knock-back:** the Baddie hits Conker at 14773; angle / speeds / health / stun / +0x109 match its descriptor
+  (xz 0, y 0, gravity 4, dmg 0, handler 0x0F); handler func_15074FD4 throws Conker into the pit; its tail
+  func_15194210 (game_eu_1C1A20) is a stub.
+- Colors plays (no stubs). Tank: new port-b stubs func_151D2248 / func_151D1B80 (1FB080) + null+0x10 DL write, canvas
+  black. Field gate obj 18 does not block before event 1 (walks straight through).
+
+## Next steps (from P252)
+1. port-b: func_151D2248, func_151D1B80 (game_eu_1FB080): Tank black screen / null DL write.
+2. port: func_15194210 (game_eu_1C1A20), func_15072B44 (981E0), func_151473F4 (174610), func_150D88E8 (105FD0),
+   func_150451C0 (71E70).
+3. port-web: get past the Baddie (from the pit after the knock-back); Tank movement once it draws; use det=2 routes.
+
 ## State (session P249, 2026-10-25). Details: `docs/port/sessions/P249.md`
 - **MP stubs**: func_150EDCC8 (11AF60) `tank_update` **drives the tank** (pad stick / buttons -> throttle, steering,
   boost, brake, turret); converted with its asm helper func_150ED818 `tank_shell_aim_error`. func_150BE050 (EB860)
