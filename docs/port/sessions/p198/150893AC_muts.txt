@@ -1,0 +1,17 @@
+s/id = ((u8 \*) rec)\[0x2B + i\];/id = ((u8 *) rec)[0x2A + i];/
+s/        if (id == 0xFF) {/        if (id == 0xFE) {/
+s/((f32 \*) xs)\[i\] = i << 6;/((f32 *) xs)[i] = i << 5;/
+s/            ((f32 \*) ys)\[i\] = 0.0f;/            ;/
+s/            ((f32 \*) zs)\[i\] = 0.0f;/            ;/
+s/        for (k = 0; k < 5; k++) {/        for (k = 0; k < 4; k++) {/
+s/            link = p\[9 + k\];/            link = p[8 + k];/
+s/if (link != 0xFF && ((u8 \*) &D_800D2778\[link\])\[0xE\] == 4) {/if (((u8 *) \&D_800D2778[link])[0xE] == 4) {/
+s/\[0xE\] == 4) {/[0xE] == 3) {/
+s/\[0xE\] == 4) {/[0xF] == 4) {/
+s/                break;/                ;/
+s/node->unk0 + (f32) (to->unk0 - node->unk0) \* rec->unk0;/node->unk0 + (f32) (to->unk0 - node->unk0);/
+s/node->unk0 + (f32) (to->unk0 - node->unk0) \* rec->unk0;/to->unk0 + (f32) (to->unk0 - node->unk0) * rec->unk0;/
+s/((f32 \*) ys)\[i\] = node->unk2;/((f32 *) ys)[i] = to->unk2;/
+s/node->unk4 + (f32) (to->unk4 - node->unk4) \* rec->unk0;/node->unk4 + (f32) (to->unk4 - node->unk2) * rec->unk0;/
+s/node->unk4 + (f32) (to->unk4 - node->unk4) \* rec->unk0;/node->unk4 + (f32) (node->unk4 - to->unk4) * rec->unk0;/
+s/    return i;/    return 0;/

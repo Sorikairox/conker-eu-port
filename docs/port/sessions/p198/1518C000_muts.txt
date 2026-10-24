@@ -1,0 +1,20 @@
+s/    if (obj == NULL) {/    if (obj == (struct127 *) 1) {/
+s/    for (i = 0; i < 2; i++) {/    for (i = 0; i < 1; i++) {/
+s/D_800DD280\[i\]\[0x1F\]/D_800DD280[i][0x1E]/
+s/(u8 \*) node + 0x24) == obj ||/(u8 *) node + 0x20) == obj ||/
+s/((u8 \*) obj)\[0x3B\] == \*((u8 \*) node + 0x28)) {/((u8 *) obj)[0x3B] == *((u8 *) node + 0x29)) {/
+s/((u8 \*) obj)\[0x3B\] == \*((u8 \*) node + 0x28)) {/((u8 *) obj)[0x3A] == *((u8 *) node + 0x28)) {/
+s/    switch (((u8 \*) obj)\[4\]) {/    switch (((u8 *) obj)[5]) {/
+s/        case 4:/        case 5:/
+s/            spec.u12 = 0;/            spec.u12 = 1;/
+s/            spec.u10 = 5;/            spec.u10 = 4;/
+s/            spec.f\[3\] = 10.0f;/            spec.f[3] = 5.0f;/
+s/        case 7:/        case 6:/
+s/            spec.u12 = 0x37;/            spec.u12 = 0x36;/
+s/            spec.u10 = 4;/            spec.u10 = 5;/
+s/            spec.f\[0\] = 2.76f;/            spec.f[0] = 5.96f;/
+s/            spec.f\[2\] = 3.21f;/            spec.f[2] = 3.2f;/
+s/            spec.f\[3\] = 5.0f;/            spec.f[3] = 10.0f;/
+s/    spec.obj = obj;/    spec.obj = NULL;/
+s/    spec.id = ((u8 \*) obj)\[0x3B\];/    spec.id = 0;/
+s/func_1518C240((s32) &spec, arg1, arg2);/func_1518C240((s32) \&spec, arg2, arg1);/

@@ -127,9 +127,331 @@ s32 func_150871B8(s32 arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15087204.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15087540.s")
+#ifdef NON_MATCHING
+extern s8 D_800D27C8;
+extern s8 D_800D27B9;
+extern s8 D_800D27BA;
+void *allocate_memory(s32, s32, s32, s32);
+s32 func_150871B8(s32);
+s32 func_15088D24(u8, u8, s32);
 
+// rail_records_init: sets up the rail (track) records. From the node tagged `tag` (func_150871B8) it takes the type-0
+// link with the highest band (the lowest when D_800D27C8 mirrors the track), the nodes after it and before the start
+// (func_15088D24), and counts the nodes of one lap. Then D_800D27B8 = `humans`, D_800D27B9 = `cpus`, D_800D27B4 = 0,
+// and D_80087640 gets humans + cpus records (0x84 bytes, func_15088CA0) with nodes +0x2B..+0x2E = back, start, next,
+// after next, +0x26 = lap length, +0x31 = player index (human records), +0x30 = 1 from D_80090130 on; D_800D27BA = 1.
+// Nothing (D_80087640 stays NULL) when the start node or one of its neighbours is missing.
+void func_15087540(s32 tag, s32 humans, s32 cpus) {
+    struct_eu_80087640 *rec;
+    u8 *p;
+    u8 *q;
+    u8 start;
+    u8 next;
+    u8 after;
+    u8 back;
+    u8 best;
+    u8 link;
+    u8 prev;
+    u8 cur;
+    u8 nx;
+    s32 laps;
+    s32 total;
+    s32 i;
+
+    D_80087640 = NULL;
+    start = func_150871B8(tag);
+    if (start == 0xFF) {
+        return;
+    }
+    best = D_800D27C8 * 0xFF;
+    next = 0xFF;
+    p = (u8 *) &D_800D2778[start];
+    for (i = 0; i < 5; i++) {
+        link = p[9 + i];
+        if (link == 0xFF) {
+            continue;
+        }
+        q = (u8 *) &D_800D2778[link];
+        if (q[0xE] != 0) {
+            continue;
+        }
+        if (D_800D27C8 == 0) {
+            if (q[0xF] >= best) {
+                best = q[0xF];
+                next = link;
+            }
+        } else if (q[0xF] <= best) {
+            best = q[0xF];
+            next = link;
+        }
+    }
+    if (next != 0xFF) {
+        after = func_15088D24(start, next, 0);
+        back = func_15088D24(next, start, 0);
+    }
+    if (next == 0xFF || back == 0xFF || after == 0xFF) {
+        return;
+    }
+    // walk one lap: from (next, after) until the step that leaves the start node
+    laps = 0;
+    prev = next;
+    cur = after;
+    for (;;) {
+        nx = func_15088D24(prev, cur, 0);
+        laps++;
+        if (prev == start) {
+            break;
+        }
+        prev = cur;
+        cur = nx;
+    }
+    D_800D27B9 = cpus;
+    D_800D27B8 = humans;
+    total = humans + cpus;
+    D_800D27B4 = 0;
+    D_80087640 = allocate_memory(total * 0x84, 1, 0, 0);
+    for (i = 0; i < total; i++) {
+        rec = &D_80087640[i];
+        func_15088CA0((u8 *) rec);
+        rec->pad28[3] = back;
+        rec->pad28[5] = next;
+        rec->pad28[6] = after;
+        rec->pad28[4] = start;
+        if (i < D_800D27B8) {
+            rec->unk31 = i;
+        }
+        ((u8 *) rec)[0x26] = laps;
+        ((u8 *) rec)[0x30] = !(i < D_80090130);
+    }
+    D_800D27BA = 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15087540.s")
+#endif
+
+#ifdef NON_MATCHING
+extern s8 D_800D27B0;
+extern f32 D_800D27BC;
+extern f32 D_800D27C0;
+extern f32 D_800D27C4;
+extern s8 D_800D27C9;
+f32 func_15049AD0(s32 *, s32, f32);
+f32 func_15049B94(s32 *, s32, f32, s32 *);
+s32 func_15088E84(struct_eu_80087640 *, f32);
+s32 func_150893AC(struct_eu_80087640 *, s32 *, s32 *, s32 *);
+s32 func_1508849C(struct_eu_80087640 *, struct127 *, s32);
+void func_15042D78(u8);
+
+// rail_track_update: moves `player`'s rail record (D_80087640 + player * 0x84) along its spline to the point nearest
+// the player object (D_800CC2D0 + rec[0x31]): the step +0 (start 0.5 when +0x30 is 0, else eased toward +4 by 1/8,
+// clamped to +-0.06) is used, then up to 11 times the player's distance from the plane through the spline point
+// (normal = the tangent, stored at +0xC / +0x10) is turned into a parameter step for func_15088E84 (halved when it
+// grows). +0x14 gets the speed along the track ((previous - current distance) * 4 / frames). With +0x30 set it
+// computes the camera point D_800D27BC / C0 / C4 on a copy moved 2 * `speed` ahead (human players: or 300 units
+// behind player 0's yaw when `mode` is 0, written to the player's camera D_800D2104[obj[0x13F]] +8 / +A / +C, mode
+// to obj +0x44, fov +0x20 by D_800D27B0); otherwise +0 becomes the step to the next point. Sets D_800D27C9 (rail
+// cameras on), counts frames off-track in +0x1C, records state 2+ via func_1508849C (0xD) and, for player 0, ranks
+// all D_800D27B8 records (score = t + segment, + 30000 - 1000 * place while +0x2A != 0x7F, - 10000 for the D_800D18A0
+// players) and stores each record's place in +0x29.
+void func_150877C0(s32 player, s32 mode, f32 speed) {
+    struct_eu_80087640 *rec;
+    u8 *r;
+    u8 *obj;
+    f32 px;
+    f32 pz;
+    f32 xs[4];
+    f32 ys[4];
+    f32 zs[4];
+    f32 dx;
+    f32 dz;
+    f32 len;
+    f32 seg;
+    f32 sx;
+    f32 sz;
+    f32 c;
+    f32 d;
+    f32 prev;
+    f32 ad;
+    f32 gain;
+    f32 step;
+    f32 inv;
+    s8 ok;
+    s8 tries;
+    s32 again;
+    u8 copy[0x84];
+    f32 score[16];
+    s8 order[16];
+    s32 n;
+    s32 i;
+    s32 sorted;
+    f32 tf;
+    s8 tb;
+
+    tries = 0;
+    if (D_80087640 == NULL) {
+        return;
+    }
+    rec = &D_80087640[player];
+    r = (u8 *) rec;
+    obj = (u8 *) &D_800CC2D0[(s8) r[0x31]];
+    px = *(f32 *) (obj + 0x14);
+    pz = *(f32 *) (obj + 0x1C);
+    D_800D27B0 = 0;
+    if ((s8) r[0x30] == 0) {
+        rec->unk0 = 0.5f;
+    } else {
+        step = (rec->unk4 - rec->unk0) * 0.125f;
+        if (0.06f < step) {
+            step = 0.06f;
+        }
+        if (step < -0.06f) {
+            step = -0.06f;
+        }
+        rec->unk0 = rec->unk0 + step;
+    }
+    gain = 0.75f;
+    ok = 1;
+    prev = 10000.0f;
+    do {
+        again = 0;
+        if (ok) {
+            func_150893AC(rec, (s32 *) xs, (s32 *) ys, (s32 *) zs);
+            dx = xs[2] - xs[1];
+            dz = zs[2] - zs[1];
+            seg = sqrtf(dx * dx + dz * dz);
+        }
+        sx = func_15049B94((s32 *) xs, 0, rec->unk8, (s32 *) &dx);
+        sz = func_15049B94((s32 *) zs, 0, rec->unk8, (s32 *) &dz);
+        inv = -1.0f / sqrtf(dx * dx + dz * dz);
+        dx *= inv;
+        dz *= inv;
+        *(f32 *) (r + 0xC) = dx;
+        *(f32 *) (r + 0x10) = dz;
+        c = -(sx * dx + sz * dz);
+        d = dx * px + dz * pz + c;
+        if (d < -50.0f || 50.0f < d) {
+            ad = d;
+            if (d < 0.0f) {
+                ad = -d;
+            }
+            if (prev < ad) {
+                gain *= 0.5f;
+            }
+            prev = ad;
+            again = 1;
+            step = d * gain / seg;
+            if (step < -0.5f) {
+                step = -0.5f;
+            }
+            if (0.5f < step) {
+                step = 0.5f;
+            }
+            ok = func_15088E84(rec, -step);
+        }
+        tries++;
+        if (tries >= 11) {
+            again = 0;
+        }
+    } while (again);
+
+    func_15042D78(0x80);
+    r[0x32] = r[0x33];
+    r[0x33] = D_800BE9E4;
+    rec->unk14 = ((*(f32 *) (obj + 0x2C) * dx + *(f32 *) (obj + 0x34) * dz + c) - d) * 4.0f / (s8) r[0x32];
+    if ((s8) r[0x30] != 0) {
+        bcopy(rec, copy, 0x84);
+        func_15088E84((struct_eu_80087640 *) copy, speed + speed);
+        func_150893AC((struct_eu_80087640 *) copy, (s32 *) xs, (s32 *) ys, (s32 *) zs);
+        D_800D27BC = func_15049AD0((s32 *) xs, 0, ((struct_eu_80087640 *) copy)->unk8);
+        D_800D27C0 = func_15049AD0((s32 *) ys, 0, ((struct_eu_80087640 *) copy)->unk8);
+        D_800D27C4 = func_15049AD0((s32 *) zs, 0, ((struct_eu_80087640 *) copy)->unk8);
+        if (player < D_800D27B8) {
+            if (mode == 0) {
+                // player 0's yaw (D_800CC2D0[0] +0x40) in degrees (Rare's 0.01745 for pi / 180)
+                f32 ang = *(f32 *) ((u8 *) D_800CC2D0 + 0x40) * 0.01745;
+
+                D_800D27BC = sinf(ang) * 300.0f + *(f32 *) (obj + 0x14);
+                D_800D27C0 = *(f32 *) (obj + 0x18);
+                D_800D27C4 = cosf(ang) * 300.0f + *(f32 *) (obj + 0x1C);
+            }
+            *(s16 *) ((u8 *) D_800D2104[obj[0x13F]] + 8) = D_800D27BC;
+            *(s16 *) ((u8 *) D_800D2104[obj[0x13F]] + 0xA) = D_800D27C0;
+            *(s16 *) ((u8 *) D_800D2104[obj[0x13F]] + 0xC) = D_800D27C4;
+            *(f32 *) (obj + 0x44) = mode;
+            if (D_800D27B0 == 1) {
+                *(f32 *) (obj + 0x20) = 75.0f;
+            } else if (D_800D27B0 == 2) {
+                *(f32 *) (obj + 0x20) = 55.0f;
+            } else if (D_800D27B0 == 3) {
+                *(f32 *) (obj + 0x20) = 65.0f;
+            }
+            obj[0x21E] = 0;
+        }
+    } else {
+        rec->unk0 = 0.0f;
+        func_150893AC(rec, (s32 *) xs, (s32 *) ys, (s32 *) zs);
+        sx = func_15049AD0((s32 *) xs, 0, rec->unk8);
+        sz = func_15049AD0((s32 *) zs, 0, rec->unk8);
+        rec->unk0 = 1.0f;
+        func_150893AC(rec, (s32 *) xs, (s32 *) ys, (s32 *) zs);
+        dx = func_15049AD0((s32 *) xs, 0, rec->unk8) - sx;
+        dz = func_15049AD0((s32 *) zs, 0, rec->unk8) - sz;
+        len = sqrtf(dx * dx + dz * dz);
+        if (1.0f < len) {
+            inv = 1.0f / len;
+            dx *= inv;
+            dz *= inv;
+            rec->unk0 = ((dx * px + dz * pz) - (dx * sx + dz * sz)) * inv;
+        } else {
+            rec->unk0 = 0.0f;
+        }
+    }
+    r[0x48] = mode;
+    D_800D27C9 = 1;
+    if ((s8) r[0x30] == 0 && r[0x48] != 0 && !(D_800D18A0 & (1 << (s8) r[0x31]))) {
+        *(s32 *) (r + 0x1C) += D_800BE9E4;
+    }
+    if ((s8) r[0x30] >= 2 && (*(u8 **) (obj + 0x31C))[0x84] == 0) {
+        func_1508849C(rec, (struct127 *) obj, 0xD);
+    }
+    if (player != 0) {
+        return;
+    }
+
+    n = D_800D27B8;
+    for (i = 0; i < n; i++) {
+        order[i] = i;
+        score[i] = D_80087640[i].unk8 + D_80087640[i].unk24;
+        if ((s8) D_80087640[i].pad28[2] != 0x7F) {
+            score[i] += 30000.0f - (s8) D_80087640[i].pad28[2] * 1000.0f;
+        }
+        if (D_800D18A0 & (1 << (s8) D_80087640[i].unk31)) {
+            score[i] -= 10000.0f;
+        }
+    }
+    do {
+        sorted = 1;
+        for (i = 0; i < n - 1; i++) {
+            if (score[i] < score[i + 1]) {
+                tb = order[i];
+                order[i] = order[i + 1];
+                order[i + 1] = tb;
+                tf = score[i];
+                score[i] = score[i + 1];
+                score[i + 1] = tf;
+                sorted = 0;
+            }
+        }
+    } while (!sorted);
+    if (n > 0) {
+        for (i = 0; i < D_800D27B8; i++) {
+            D_80087640[order[i]].pad28[1] = i + 1;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150877C0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s8 D_800D27C9;
@@ -527,7 +849,47 @@ void func_15088CA0(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x10)) = 1.0f;
 }
 
+#ifdef NON_MATCHING
+// rail_link_pick: the next track node after `node` coming from `prev`, among its type-0 links (+9..+0xD of the
+// D_800D2778 node, 0xFF / `prev` skipped): the last link whose band (+0xF) is not the wanted one (1 when `alt` is set,
+// else 2; a band-0 link only when none was found yet), otherwise the last link in the wanted band; 0xFF when none.
+s32 func_15088D24(u8 prev, u8 node, s32 alt) {
+    u8 *p = (u8 *) &D_800D2778[node];
+    u8 *q;
+    u8 want;
+    u8 match = 0xFF;
+    u8 other = 0xFF;
+    u8 link;
+    s32 k;
+
+    if ((s8) alt != 0) {
+        want = 1;
+    } else {
+        want = 2;
+    }
+    for (k = 0; k < 5; k++) {
+        link = p[9 + k];
+        if (link == 0xFF || link == prev) {
+            continue;
+        }
+        q = (u8 *) &D_800D2778[link];
+        if (q[0xE] != 0) {
+            continue;
+        }
+        if (q[0xF] == want) {
+            match = link;
+        } else if (other == 0xFF || q[0xF] != 0) {
+            other = link;
+        }
+    }
+    if (other == 0xFF) {
+        other = match;
+    }
+    return other;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088D24.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_15088E84.s")
 
@@ -604,7 +966,47 @@ void func_150891D4(u8 *arg0)
   }
 }
 
+#ifdef NON_MATCHING
+// rail_spline_points: the four spline control points of a rail record (nodes rec[0x2B..0x2E] of D_800D2778) as
+// separate x / y / z float arrays: each node's position moved by rec->unk0 toward its first type-4 link (x and z only;
+// the node itself when it has none); a missing node (0xFF) gives (i * 64, 0, 0). Returns 4 (the point count; the
+// callers ignore it).
+s32 func_150893AC(struct_eu_80087640 *rec, s32 *xs, s32 *ys, s32 *zs) {
+    struct_eu_800D2778 *node;
+    struct_eu_800D2778 *to;
+    u8 *p;
+    u8 id;
+    u8 link;
+    s32 i;
+    s32 k;
+
+    for (i = 0; i < 4; i++) {
+        id = ((u8 *) rec)[0x2B + i];
+        if (id == 0xFF) {
+            ((f32 *) xs)[i] = i << 6;
+            ((f32 *) ys)[i] = 0.0f;
+            ((f32 *) zs)[i] = 0.0f;
+            continue;
+        }
+        node = &D_800D2778[id];
+        to = node;
+        p = (u8 *) node;
+        for (k = 0; k < 5; k++) {
+            link = p[9 + k];
+            if (link != 0xFF && ((u8 *) &D_800D2778[link])[0xE] == 4) {
+                to = &D_800D2778[link];
+                break;
+            }
+        }
+        ((f32 *) xs)[i] = node->unk0 + (f32) (to->unk0 - node->unk0) * rec->unk0;
+        ((f32 *) ys)[i] = node->unk2;
+        ((f32 *) zs)[i] = node->unk4 + (f32) (to->unk4 - node->unk4) * rec->unk0;
+    }
+    return i;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B37F0/func_150893AC.s")
+#endif
 
 #ifdef NON_MATCHING
 // rail_node_next: the rail node after `node` coming from `prev` (D_800D2778, D_80087630 nodes of 16 bytes: s16 x / y / z,
