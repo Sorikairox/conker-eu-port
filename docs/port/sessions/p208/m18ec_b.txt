@@ -1,0 +1,55 @@
+s/                s = D_80087764\[k & 3\] << 5;/                s = D_80087764[k \& 3] << 4;/
+s/                t = D_80087768\[k >> 2\] << 5;/                t = D_80087768[k >> 1] << 5;/
+s/(table\[5\] + ix) \* 4, (table\[7\] + y) \* 4,/(table[5] + ix) * 4, (table[8] + y) * 4,/
+s/                ix = (width >> 1) + x - 8;/                ix = (width >> 1) + x - 9;/
+s/                    ix -= 8;/                    ix -= 7;/
+s/(s32)D_8009E0B8, \*(s16 \*)(D_80090174 + 0x46 + p \* 2));/(s32)D_8009E0B8, *(s16 *)(D_80090174 + 0x44 + p * 2));/
+s/                ix = (width >> 1) + x + 16;/                ix = (width >> 1) + x + 15;/
+s/                    ix += 16;/                    ix += 17;/
+s/(s32)D_8009E0BC, ((u8 \*\*)D_800E1008)\[8 + D_800E0EF0\[p\]\]);/(s32)D_8009E0BC, ((u8 **)D_800E1008)[9 + D_800E0EF0[p]]);/
+s/    if (D_80090160 & 0x14) {/    if (D_80090160 \& 0x04) {/
+s/            right = view->unk30 - f;/            right = view->unk30 + f;/
+s/            y = f + view->unk24;/            y = f + view->unk28;/
+s/                if (obj->interaction_state == 0x1F) {/                if (obj->interaction_state == 0x1E) {/
+s/                case 0x09: icon = 0; break;/                case 0x09: icon = 2; break;/
+s/                case 0x16: icon = 1; break;/                case 0x16: icon = 2; break;/
+s/                case 0x14: case 0x3F: icon = 3; break;/                case 0x14: icon = 3; break;/
+s/                case 0x20: icon = 5; break;/                case 0x20: icon = 8; break;/
+s/                case 0x18: case 0x41: icon = 6; break;/                case 0x18: icon = 6; break;/
+s/                case 0x15: icon = 7; break;/                case 0x15: icon = 8; break;/
+s/                case 0x22: icon = 9; break;/                case 0x22: icon = 10; break;/
+s/                case 0x32: case 0x33: count = (s8)st\[0x1AE\]; icon = 11; break;/                case 0x32: case 0x33: count = 1; icon = 11; break;/
+s/                case 0x21: icon = 12; break;/                case 0x21: icon = 13; break;/
+s/                case 0x25: icon = 14; break;/                case 0x25: icon = 11; break;/
+s/                case 0x40: icon = 4; toff = -3; break;/                case 0x40: icon = 4; toff = 3; break;/
+s/                    if (obj->health != 0) {/                    if (obj->health == 0) {/
+s/                    if (D_800BE9F0 == 0x1A) {/                    if (D_800BE9F0 == 0x1B) {/
+s/                        toff = 4;/                        toff = 5;/
+s/                if (obj->unk13C) {/                if (0) {/
+s/                    ix = (right - table\[25\]) \* 4;/                    ix = (right - table[24]) * 4;/
+s/                    h = table\[D_8008775C\[row\]\] \* 4;/                    h = table[D_8008775C[row] + 1] * 4;/
+s/                    t = D_80087754\[row\] << 5;/                    t = D_80087754[row + 1] << 5;/
+s/                        dy = 4;/                        dy = 0;/
+s/                        h -= 8;/                        h -= 4;/
+s/                        h -= 4;/                        h -= 0;/
+s/ 3) \* 800, t, scale, scale);/ 3) * 768, t, scale, scale);/
+s/                        ix -= 18 \* 4;/                        ix -= 18;/
+s/                    } while (--count > 0);/                    } while (--count >= 0);/
+s/            if (D_80090160 & 0x10) {/            if (D_80090160 \& 0x8) {/
+s/                    gdl = func_15091534(gdl, 0, \&ready);/                    gdl = func_15091534(gdl, 1, \&ready);/
+s/                ix = table\[22\] + x;/                ix = table[21] + x;/
+s/                len = ((k + 1) >> 1) \* 5;/                len = (k >> 1) * 5;/
+s/                len = (k >> 1) \* 5;/                len = ((k - 1) >> 1) * 5;/
+s/ix \* 4, (table\[4\] + y) \* 4,/ix * 4, (table[5] + y) * 4,/
+s/ix \* 4, (table\[9\] + y) \* 4,/ix * 4, (table[8] + y) * 4,/
+s/G_TX_RENDERTILE, 0x620, 0xA0, scale, scale);/G_TX_RENDERTILE, 0x620, 0xC0, scale, scale);/
+s/            right = view->unk30 - 5.0f;/            right = view->unk30 - 4.0f;/
+s/            y = view->unk24 + 5.0f;/            y = view->unk24 + 6.0f;/
+s/            if (obj->interaction_state == 0x1E) {/            if (obj->interaction_state == 0x1F) {/
+s/                    shift = 4;/                    shift = 3;/
+s/                } else if (k & 2) {/                } else if (k \& 4) {/
+s/                    shift = 6;/                    shift = 5;/
+s/                } else if (k & 0x10) {/                } else if (k \& 0x20) {/
+s/                    shift = -3;/                    shift = -2;/
+s/                if (icon >= 0 && icon != 3) {/                if (icon >= 0) {/
+s/                    bar_mode = 1;/                    bar_mode = 2;/
