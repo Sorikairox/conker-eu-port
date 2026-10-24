@@ -1,0 +1,96 @@
+# P191 mutants of func_1504B0FC (sed % setups)
+s/SWIM_S16(SWIM_ST(p), 0x68) = 0;/SWIM_S16(SWIM_ST(p), 0x68) = 1;/ % deep
+s/SWIM_U8(p, 0x110) = 0;/SWIM_U8(p, 0x110) = 1;/ % deep
+s/turn = ((s8 \*) D_800CC6A4)\[2\]/turn = ((s8 *) D_800CC6A4)[1]/ % dive turnneg
+s/dive = ((s8 \*) D_800CC6A4)\[3\]/dive = ((s8 *) D_800CC6A4)[2]/ % dive
+s/SWIM_ST(p)\[0x198\] == 0/SWIM_ST(p)[0x198] != 0/ % dive
+s/>= 0x65)/>= 0x64)/ % st22 deep
+s/dive = 0x50;/dive = 0x51;/ % st22
+s/- 60.0f) - 170.0f)/- 60.0f) - 171.0f)/ % float floatcap
+s/depth2 = depth2 + depth2;/depth2 = depth2 + 1.0f;/ % deep float
+s/SWIM_ST(p)\[0x20\] \& 1) || SWIM_ST(p)\[0x21\]/SWIM_ST(p)[0x20] \& 2) || SWIM_ST(p)[0x21]/ % float surf20
+s/if (depth2 < 400.0f)/if (depth2 < 300.0f)/ % float floatcap
+s/step = 8.0f \* D_800D1550\[0\]/step = 7.0f * D_800D1550[0]/ % float
+s/if (dive >= 0xB)/if (dive >= 0xC)/ % float
+s/dive = 0xA;/dive = 0xB;/ % float
+s/step = 400.0f - depth2/step = 401.0f - depth2/ % floatcap
+s/SWIM_F32(p, 0x1CC) = p->y_position/SWIM_F32(p, 0x1CC) = p->old_y_position/ % deep
+s/if (SWIM_SURFACE(p) == -10000.0f) {/if (SWIM_SURFACE(p) == -1000.0f) {/ % nosurf
+s/targetPitch = dive \* 2.25f/targetPitch = dive * 2.5f/ % dive
+s/- 60.0f) - 175.0f < p->y_position) {$/- 60.0f) - 176.0f < p->y_position) {/ % deep dive
+s/targetPitch = SWIM_PITCH(p);/targetPitch = 0.0f;/ % pitchfast pitchslow notbottom
+s/(p->health != 0 || 60.0f <= p->y_velocity)/(p->health != 0 || 60.0f < p->y_velocity)/ % stun0h stun0hv
+s/(p->health != 0 || 60.0f <= p->y_velocity)/(p->health != 0)/ % stun0h stun0hv
+s/SWIM_ANIM(p) == 0x262/SWIM_ANIM(p) == 0x263/ % a262
+s/0.0f < depth2 \&\& SWIM_ANIM(p) != 0x22/0.0f <= depth2 \&\& SWIM_ANIM(p) != 0x22/ % deep anim22
+s/0.0f < depth2 \&\& SWIM_ANIM(p) != 0x22/0.0f < depth2/ % anim22 anim22b
+s/depth2 = 300.0f;/depth2 = 301.0f;/ % notbottom deep
+s/depth2 \* dt \* 0.002997f/depth2 * 0.002997f/ % dt2
+s/0.002997f/0.003f/ % deep dt2
+s/} else if (p->gravity < 0.0f) {/} else if (p->gravity <= 0.0f) {/ % notwater notwater2 notwater3
+s/if (p->y_velocity < 0.0f) {/if (p->y_velocity > 0.0f) {/ % notwater2 notwater3
+s/SWIM_F32(p, 0x28) < 10.0f \&\&/SWIM_F32(p, 0x28) < 6.0f \&\&/ % bottom bottom2
+s/- 60.0f) + 20.0f)) {/- 60.0f) + 30.0f)) {/ % bottom bottom2 notbottom
+s/p->xz_velocity = 16.0f;/p->xz_velocity = 15.0f;/ % bottom
+s/if (16.0f < p->xz_velocity)/if (6.0f < p->xz_velocity)/ % bottom2
+s/ret = p->xz_velocity;/ret = p->target_speed;/ % bottom bottom2
+s/> SWIM_SURFACE(p) - 50.0f/> SWIM_SURFACE(p) - 150.0f/ % deep surfgasp
+s/(SWIM_ST(p)\[0x20\] \& 1)) \&\& p->health/(SWIM_ST(p)[0x20] \& 2)) \&\& p->health/ % surf20
+s/\&\& p->health != 0) {/\&\& p->health != 1) {/ % surfh0 surfgasp
+s/if (air >= 0x1F) {/if (air >= 0x20) {/ % surfgasp3
+s/if (air >= 0x5D3) {/if (air >= 0x5D4) {/ % surfgasp
+s/func_15060A30(0x1A7, p);/func_15060A30(0x1A8, p);/ % surfgasp
+s/} else if (air >= 0x2D1) {/} else if (air >= 0x2D2) {/ % surfgasp2
+s/func_15060A30(0x168, p);/func_15060A30(0x169, p);/ % surfgasp2
+s/air = SWIM_AIR(p) + D_800BE9E4;/air = SWIM_AIR(p) + 1;/ % airout airwarn
+s/if (air >= 0x605 ||/if (air >= 0x606 ||/ % airout
+s/(p->health == 0 \&\& SWIM_ST(p)\[0x120\] == 0)/(p->health == 0)/ % air0h120
+s/SWIM_AIR(p) = air - 0x32;/SWIM_AIR(p) = air - 0x33;/ % airout
+s/if (p->health >= 2) {/if (p->health >= 1) {/ % airout1
+s/if (p->health == 4) {/if (p->health == 3) {/ % airout4 airout
+s/func_15060A30(0x499, p);$/func_15060A30(0x498, p);/ % airout4 airwarn
+s/p->health = p->health - 1;/p->health = p->health - 2;/ % airout
+s/p->health = 0;/p->health = 1;/ % airout1
+s/func_1507CD64(p, 4);/func_1507CD64(p, 5);/ % airout1s
+s/func_1507CD64(p, 3);/func_1507CD64(p, 2);/ % airout1
+s/} else if (air >= 0x5A1 \&\& air < 0x5D2) {/} else if (air >= 0x5A2 \&\& air < 0x5D2) {/ % airwarn
+s/SWIM_AIR(p) = air + 100;/SWIM_AIR(p) = air + 101;/ % airwarn
+s/if (p->health < 4) {/if (p->health < 5) {/ % airwarn5
+s/if (p->gravity < 0.0f \&\& 0.0f < p->y_velocity) {/if (p->gravity < 0.0f) {/ % gravneg deep
+s/\&\& SWIM_ANIM(p) != 0x28) {/\&\& SWIM_ANIM(p) != 0x29) {/ % anim28
+s/SWIM_F32(SWIM_ST(p), 0x1C) < 2.5f/SWIM_F32(SWIM_ST(p), 0x1C) < 2.6f/ % bobmax bob
+s/SWIM_F32(SWIM_ST(p), 0x1C) + 0.05f;/SWIM_F32(SWIM_ST(p), 0x1C) + 0.5f;/ % bob
+s/SWIM_F32(SWIM_ST(p), 0x1C) \* D_800D1550\[0\];/SWIM_F32(SWIM_ST(p), 0x1C);/ % bob near
+s/- 60.0f) + 14.0f)/- 60.0f) + 15.0f)/ % over
+s/over \* 0.65f/over * 0.6f/ % over
+s/- 60.0f) - 75.0f < p->y_position/- 60.0f) - 76.0f < p->y_position/ % near
+s/targetPitch = targetPitch - 30.0f/targetPitch = targetPitch - 3.0f/ % near
+s/SWIM_ANIM(p) == 0x22 \&\& targetPitch < -20.0f/SWIM_ANIM(p) == 0x22 \&\& targetPitch < -21.0f/ % anim22b
+s/targetPitch = -20.0f;/targetPitch = -21.0f;/ % anim22b
+s/SWIM_F32(p, 0x28) < 40.0f/SWIM_F32(p, 0x28) < 21.0f/ % floor floor2
+s/(s32) \&slide,/(s32) \&dummy54,/ % floor
+s/fx = func_1505210C((u8 \*) p, fx, fz, \&fz, 180.0f)/fx = func_1505210C((u8 *) p, fx, fz, \&fz, 181.0f)/ % floor
+s/fx = func_1505210C((u8 \*) p, fx, fz, \&fz/fx = func_1505210C((u8 *) p, fz, fx, \&fz/ % floor
+s/if (fz < SWIM_PITCH(p)) {/if (fz > SWIM_PITCH(p)) {/ % floor floor2
+s/(fz - SWIM_PITCH(p)) \* 0.2f/(fz - SWIM_PITCH(p)) * 0.25f/ % floor
+s/SWIM_PITCHVEL(p) = delta;/SWIM_PITCHVEL(p) = -delta;/ % pitchslow pitchfast
+s/if (mag < 2.7f \* D_800D1550\[0\])/if (mag < 2.7f)/ % pitchfast pitchslow
+s/if (2.7f < SWIM_PITCHVEL(p)) {/if (2.6f < SWIM_PITCHVEL(p)) {/ % dive pitchclamp
+s/SWIM_PITCHVEL(p) = 2.7f;/SWIM_PITCHVEL(p) = 2.6f;/ % dive
+s/SWIM_PITCHVEL(p) = -2.7f;/SWIM_PITCHVEL(p) = -2.6f;/ % pitchfast
+s/SWIM_PITCHVEL(p) \* D_800D1550\[0\];/SWIM_PITCHVEL(p);/ % pitchfast dive
+s/if (SWIM_PITCH(p) < -90.0f) {/if (SWIM_PITCH(p) < -91.0f) {/ % pitchclamp
+s/if (90.0f < SWIM_PITCH(p)) {/if (91.0f < SWIM_PITCH(p)) {/ % pitchhi
+s/q = (turn + 8) \/ 18;/q = (turn + 9) \/ 18;/ % dive turnneg
+s/q = (turn + 8) \/ 18;/q = turn \/ 18;/ % dive turnneg
+s/SWIM_U8(p, 0x7E) = 0x17;/SWIM_U8(p, 0x7E) = 0x16;/ % dive
+s/<< 8) \/ 100;/<< 8) \/ 101;/ % dive turnneg
+s/((q \* D_800CC264) << 8)/((q * D_800CC264) << 7)/ % dive
+s/ret = p->target_speed;/ret = p->xz_velocity;/ % deep
+s/if (SWIM_ST(p)\[0x21\] == 0) {/if (SWIM_ST(p)[0x21] == 1) {/ % deep st21
+s/SWIM_U8(p, 0x80) = 1;/SWIM_U8(p, 0x80) = 2;/ % deep
+s/if (SWIM_ST(p)\[0x95\] != 0) {/if (SWIM_ST(p)[0x95] == 0) {/ % st95 deep
+s/p->y_position = p->old_y_position;/p->y_position = p->y_position;/ % st95
+s/!(p->y_position < SWIM_SURFACE(p) - 60.0f)/!(p->y_position < SWIM_SURFACE(p) - 40.0f)/ % st95 st95b
+s/p->in_water = 0;/p->in_water = 2;/ % st95b
+s/if (SWIM_ST(p)\[0x21\] != 0) {/if (SWIM_ST(p)[0x21] == 0) {/ % deep

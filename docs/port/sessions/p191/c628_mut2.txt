@@ -1,0 +1,1 @@
+s/< def->trailChance/<= def->trailChance/ % kEq

@@ -1,0 +1,47 @@
+s/    zoom = (f32) D_800BE9E4 \* 0.02f;/    zoom = (f32) D_800BE9E4 * 0.025f;/
+s/    if (type == 0xC || type == 0x1B) {/    if (type == 0xC) {/
+s/    if (type == 0xC || type == 0x1B) {/    if (type == 0x1B) {/
+s/        \*(u16 \*) in |= 0x10;/        *(u16 *) in |= 0x20;/
+s/        case 0x23: case 0x24: case 0x16: case 0x12:/        case 0x23: case 0x24: case 0x16: case 0x13:/
+s/ case 0x41: case 0xC:/ case 0x42: case 0xC:/
+s/            if ((\*(u16 \*) in & 0x10) && pl\[0x197\] == 0) {/            if ((*(u16 *) in \& 0x10) || pl[0x197] == 0) {/
+s/                pl\[0x197\] = 2;/                pl[0x197] = 3;/
+s/                \*(f32 \*) (pl + 0x178) = 0.0f;/                *(f32 *) (pl + 0x178) = 1.0f;/
+s/                \*(f32 \*) (pl + 0x180) = 0.0f;/                *(f32 *) (pl + 0x180) = 1.0f;/
+s/                \*(f32 \*) (pl + 0x174) = \*(f32 \*) (obj + 0x40) - 90.0f;/                *(f32 *) (pl + 0x174) = *(f32 *) (obj + 0x40) + 90.0f;/
+s/                \*(f32 \*) (pl + 0x16C) = \*(f32 \*) (pl + 0x174);/                *(f32 *) (pl + 0x16C) = *(f32 *) (obj + 0x40);/
+s/^                func_150627D4(arg0);$//
+s/        return type;/        return 2;/
+s/    target\[0\] = \*(f32 \*) (obj + 0x14);/    target[0] = *(f32 *) (obj + 0x10);/
+s/    yaw = (\*(f32 \*) (obj + 0x40) - 90.0f) \* 0.017453292f;/    yaw = (*(f32 *) (obj + 0x40) - 90.0f) * 0.0174f;/
+s/(f32) \*(s16 \*) (pl + 0x114) \* 0.75f;/(f32) *(s16 *) (pl + 0x116) * 0.75f;/
+s/(f32) \*(s16 \*) (pl + 0x114) \* 0.75f;/(f32) *(s16 *) (pl + 0x114) * 0.5f;/
+s/    target\[2\] = \*(f32 \*) (obj + 0x1C);/    target[2] = *(f32 *) (obj + 0x18);/
+s/    target\[0\] = sinf(yaw) \* 100.0f + eye\[0\];/    target[0] = sinf(yaw + 1.0f) * 100.0f + eye[0];/
+s/    target\[2\] = cosf(yaw) \* 100.0f + eye\[2\];/    target[2] = cosf(yaw + 1.0f) * 100.0f + eye[2];/
+s/(\*(f32 \*) (obj + 0x18) - \*(f32 \*) (obj + 0x30));/(*(f32 *) (obj + 0x18) - *(f32 *) (obj + 0x34));/
+s/    if (!(buttons & 0x10) || type == 0) {/    if (!(buttons \& 0x10)) {/
+s/        pl\[0x197\] = 0;/        pl[0x197] = 1;/
+s/        return 0;\n    }\n\n    \*(f32/X/
+s/- (f32) (s8) in\[2\] \* 0.025f;/- (f32) (u8) in[2] * 0.025f;/
+s/+ (f32) (s8) in\[3\] \* 0.025f;/+ (f32) (s8) in[2] * 0.025f;/
+s/+ (f32) (s8) in\[3\] \* 0.025f;/- (f32) (s8) in[3] * 0.025f;/
+s/    func_15048758((f32 \*) (pl + 0x174));/    func_15048758((f32 *) (pl + 0x178));/
+s/    if (type == 0x1F || type == 0x29) {/    if (type == 0x1F) {/
+s/    if (type == 0x1F || type == 0x29) {/    if (type == 0x29) {/
+s/        lo = -20.0f;/        lo = -25.0f;/
+s/        lo = -80.0f;/        lo = -70.0f;/
+s/    if (v < lo) {/    if (v <= lo + 1.0f) {/
+s/(80.0f < v) ? 80.0f : v;/(70.0f < v) ? 70.0f : v;/
+s/(f32 \*) (pl + 0x17C), 6.0f, 8.0f, zoom);/(f32 *) (pl + 0x17C), 6.0f, 8.0f, 1.0f);/
+s/(f32 \*) (pl + 0x180), 6.0f, 8.0f, zoom);/(f32 *) (pl + 0x180), 8.0f, 6.0f, zoom);/
+s/func_15049978((f32 \*) (pl + 0x16C), \*(f32 \*) (pl + 0x174),/func_15049978((f32 *) (pl + 0x16C), *(f32 *) (pl + 0x178),/
+s/    c = cosf(\*(f32 \*) (pl + 0x170) \* -0.017453292f) \* 1.0f;/    c = cosf(*(f32 *) (pl + 0x16C) * -0.017453292f) * 1.0f;/
+s/    dir\[1\] = sinf(\*(f32 \*) (pl + 0x170) \* -0.017453292f) \* 1.0f;/    dir[1] = sinf(*(f32 *) (pl + 0x170) * 0.017453292f) * 1.0f;/
+s/    dir\[0\] = cosf(\*(f32 \*) (pl + 0x16C) \* -0.017453292f) \* c;/    dir[0] = cosf(*(f32 *) (pl + 0x16C) * -0.017453292f);/
+s/    dir\[2\] = sinf(\*(f32 \*) (pl + 0x16C) \* -0.017453292f) \* c;/    dir[2] = sinf(*(f32 *) (pl + 0x16C) * -0.017453292f) * dir[0];/
+s/    target\[1\] = eye\[1\] + dir\[1\];/    target[1] = eye[1] - dir[1];/
+s/    \*(f32 \*) (pl + 0x150) = target\[2\];/    *(f32 *) (pl + 0x150) = target[1];/
+s/    \*(f32 \*) (pl + 0x140) = eye\[1\];/    *(f32 *) (pl + 0x140) = target[1];/
+s/    \*(f32 \*) (pl + 0x138) = dir\[2\];/    *(f32 *) (pl + 0x138) = dir[1];/
+s/    return 1;/    return 0;/

@@ -1,0 +1,15 @@
+s/started = TRUE;/started = FALSE;/
+s/\*(u16 \*) (rec + 0x74) == 0 \&\&/1 \&\&/
+s/step = (s32) (speed \* D_800BE9E4) >> 1;/step = (s32) (speed * D_800BE9E4) >> 2;/
+s/left = pos\[i\] - target\[i\];/left = target[i] - pos[i];/
+s/if (left < 0) {/if (left <= 0) {/
+s/if (remain < left) {/if (remain <= left - 1) {/
+s/remain = left;$/remain += left;/
+s/remain -= (s32) (D_80089600\[snd\].lead \* speed) >> 1;/remain -= (s32) (D_80089600[snd].lead * speed) >> 2;/
+s/if (remain <= 0 \&\& (-step < remain || started))/if (remain <= 0 \&\& (-step <= remain || started))/
+s/if (remain <= 0 \&\& (-step < remain || started))/if (remain < 0 \&\& (-step < remain || started))/
+s/if (remain <= 0 \&\& (-step < remain || started))/if (remain <= 0 \&\& (-step < remain))/
+s/D_80089600\[snd\].arrive, 0x5DC0/D_80089600[snd].start, 0x5DC0/
+s/s32 remain = 0;/s32 remain = 1;/
+s/pos\[i\] += step;/pos[i] += step + 1;/
+s/moved\[i\] = pos\[i\] - moved\[i\];/moved[i] = pos[i];/

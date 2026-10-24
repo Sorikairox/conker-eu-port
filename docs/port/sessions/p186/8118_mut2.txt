@@ -1,0 +1,15 @@
+s/    flag = 1;/    flag = 0;/
+s/(u32) img >= 0x10000000/(u32) img > 0x10000000/
+s/(view + 0x380) + (f32) obj\[0x1B\] \* 1.40625f/(view + 0x380) - (f32) obj[0x1B] * 1.40625f/
+s/ang = fabsf(\*(f32 \*) (view + 0x380)/ang = (*(f32 *) (view + 0x380)/
+s/while (ang >= 360.0f)/if (ang >= 360.0f)/
+s/if (ang >= 180.0f) {/if (ang > 200.0f) {/
+s/if (w < 0x400) {/if (w < 0x300) {/
+s/            w = 0;/            w = 1;/
+s/        b = 255;/        b = 254;/
+s/        r = 128;/        r = 127;/
+s/== D_800908EC) {/== D_80090BAC + 4) {/
+s/        r = g = b = 0;/        r = g = b = 1;/
+s/gfx = func_15142C10(gfx, r, g, b, 0, &flag);/gfx = func_15142C10(gfx, r, g, b, 1, \&flag);/
+s/u8 \*view = (u8 \*) D_800DBFF0 + player \* 0x9A0;/u8 *view = (u8 *) D_800DBFF0 + player * 0x9A8;/
+s/        u8 combine = obj\[0x15\];/        u8 combine = obj[0x15] + 1;/

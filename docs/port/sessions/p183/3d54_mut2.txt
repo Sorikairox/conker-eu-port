@@ -1,0 +1,21 @@
+s/    if (a == 0xFF && obj\[0x8A\] == 0xFF) {/    if (a == 0xFF) {/
+s/        alpha = (s32) (a \* obj\[0x8A\]) \/ 0xFF;/        alpha = (s32) (a * obj[0x8A]) \/ 0x100;/
+s/        if (alpha == 0) {/        if (alpha == 1) {/
+s/    if (alpha == 0xFF) {/    if (alpha >= 0x80) {/
+s/    } else if (pass != 0) {/    } else if (pass == 0) {/
+s/        } else if (flags & 0x10) {/        } else if (flags \& 0x40) {/
+s/        } else if (flags & 0x20) {/        } else if (flags \& 0x8) {/
+s/(f32) \*(s32 \*) (obj + 0x7C), player);/(f32) *(s32 *) (obj + 0x78), player);/
+s/(f32) \*(s32 \*) (obj + 0x7C), player);/*(f32 *) (obj + 0x7C), player);/
+s/                                (f32) \*(s16 \*) (obj + 0x14), player);/                                (f32) *(s16 *) (obj + 0x14), 0);/
+s/    if (alpha < 0xFF) {/    if (alpha < 0xFE) {/
+s/        gdl->words.w1 = (u32) D_800840D0;/        gdl->words.w1 = (u32) D_80084250;/
+s/        gdl->words.w0 = 0xD9BFFFFF;/        gdl->words.w0 = 0xD9FFFFFF;/
+s/    gdl = func_1510D338(gdl, 0xFF, alpha, player);/    gdl = func_1510D338(gdl, alpha, 0xFF, player);/
+s/    if (\*(u16 \*) (obj + 0x6C) & 0x200) {/    if (*(u16 *) (obj + 0x6C) \& 0x100) {/
+s/        gdl->words.w1 = \*(u32 \*) (obj + 0x1C);/        gdl->words.w1 = *(u32 *) (obj + 0x18);/
+s/    if (D_800BEFC4 < (((u8 \*) gdl - (u8 \*) D_800BEDE8\[D_800BE9C0\]) >> 3)) {/    if (D_800BEFC4 <= (((u8 *) gdl - (u8 *) D_800BEDE8[D_800BE9C0]) >> 3)) {/
+s/        return (s32) start;/        return (s32) gdl;/
+s/(f32) \*(s16 \*) (obj + 0x12) + \*(f32 \*) (obj + 0x18),/(f32) *(s16 *) (obj + 0x12),/
+s/gdl = func_1511FC44(gdl, (f32) \*(s16 \*) (obj + 0x10),/gdl = func_1511FC44(gdl, (f32) *(s16 *) (obj + 0x12),/
+s/    gdl->words.w1 = \*(u32 \*) (obj + 0x20 + D_800BE9C0 \* 4);/    gdl->words.w1 = *(u32 *) (obj + 0x20);/

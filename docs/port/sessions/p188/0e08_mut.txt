@@ -1,0 +1,51 @@
+# P188 mutants of func_15190E08 (sed % setups)
+s/-= D_800BE9E4;$/-= D_800BE9E4 + 1;/ % ktimer timerok
+s/(e + 0x16) < 0) {/(e + 0x16) < 1) {/ % ktimer timerok
+s/e\[0x14\] != owner\[0x3B\]/e[0x15] != owner[0x3B]/ % kid spawn
+s/(s32 \*) owner == 0/(s32 *) owner == 1/ % kown0 spawn
+s/func_151491F4(300, -1/func_151491F4(301, -1/ % nomtx0
+s/13, 1, 8, 12, 255, 0)/13, 0, 8, 12, 255, 0)/ % nomtx1
+s/(f32 \*) (e + 0x10), 12)/(f32 *) (e + 0x10), 16)/ % nomtx0 nomtx1
+s/if (drop != NULL) {$/if (drop == NULL) {/ % nomtx0 nomtxn spawn spawn0
+s/(obj + 0x40) = \*(f32 \*) (obj + 0x34)/(obj + 0x40) = *(f32 *) (obj + 0x38)/ % hang expire
+s/(obj + 0x48) = \*(f32 \*) (obj + 0x3C)/(obj + 0x48) = *(f32 *) (obj + 0x38)/ % hang expire
+s/cfg->points\[i \* 0x10 + 0xC\] \* 0x40/cfg->points[i * 0x10 + 0xD] * 0x40/ % hang expire
+s/slot->timer -= D_800BE9E4/slot->timer -= 1/ % hang expire
+s/if (slot->timer < 0)/if (slot->timer <= 0)/ % hang expire expire3
+s/(obj + 0x114) = 0.0f/(obj + 0x114) = 1.0f/ % expire
+s/(obj + 0x40)) \* D_800BEDC8/(obj + 0x44)) * D_800BEDC8/ % expire
+s/r = &D_800AA120\[obj\[0x130\]\]/r = \&D_800AA120[obj[0x131]]/ % expire expire3
+s/func_1513F680(obj, 13, 18, 0, 13)/func_1513F680(obj, 13, 18, 1, 13)/ % expire
+s/(u32) (r->range + 1) + r->base/(u32) (r->range + 1) + r->range/ % expire expire3
+s/(obj + 0x58) |= 1/(obj + 0x58) |= 2/ % expire
+s/(e + 0x20) -= 1/(e + 0x20) -= 2/ % expire expire3
+s/n++;/n += 2;/ % spawn hang
+s/if (tail == NULL) {/if (tail != NULL) {/ % spawn hang
+s/cfg->rate \* D_800BE9A4/cfg->rate * D_800BEDC8/ % spawn noacc
+s/if (1.0f < \*(f32 \*) (e + 0x1C)) {/if (0.5f < *(f32 *) (e + 0x1C)) {/ % noacc spawn
+s/blk.f10 = D_800A83F4/blk.f10 = 0.0f/ % spawn
+s/blk.s16 = 17/blk.s16 = 16/ % spawn
+s/blk.gravity = -1.0f/blk.gravity = 1.0f/ % spawn
+s/blk.b5C = e\[0x2C\]/blk.b5C = e[0x2D]/ % spawn
+s/spawn.type = D_800AB6F0\[e\[0x2C\]\]/spawn.type = D_800AB6F0[e[0x2C] + 1]/ % spawn
+s/spawn.flags = 0x1001/spawn.flags = 0x1000/ % spawn
+s/spawn.life = 300/spawn.life = 30/ % spawn
+s/spawn.b13 = 255/spawn.b13 = 0/ % spawn
+s/spawn.scale\[1\] = 1.0f/spawn.scale[1] = 2.0f/ % spawn
+s/spawn.b45 = 255/spawn.b45 = 0/ % spawn
+s/src = (s32 \*) ((u8 \*) r + 4)/src = (s32 *) ((u8 *) r + 8)/ % spawn
+s/while (k-- != 0) {/while (k-- > 1) {/ % spawn spawnc0
+s/101 + 100/101 + 101/ % spawn
+s/5 + 4;$/5 + 3;/ % spawn
+s/spawn.pos2\[1\] = spawn.pos\[1\]/spawn.pos2[1] = spawn.pos[0]/ % spawn
+s/(e + 0x10) + 0x118) </(e + 0x10) + 0x118) >/ % spawn high
+s/- \*(f32 \*) &blk.rng\[3\]/- *(f32 *) \&blk.rng[2]/ % high spawn
+s/D_800AB7E4\[e\[0x2C\]\] ? 0 : 2/D_800AB7E4[e[0x2C]] ? 2 : 0/ % spawn spawnc3
+s/0, 0, 13, D_800AB7E4/0, 1, 13, D_800AB7E4/ % spawn
+s/(f32 \*) &blk, 0x60)/(f32 *) \&blk, 0x5C)/ % spawn
+s/(cfg->range + 1) + cfg->base/(cfg->range + 1) + cfg->range/ % spawn
+s/n--;/n -= 0;/ % spawn spawnc0 spawnc3
+s/(e + 0x20) += 1/(e + 0x20) += 2/ % spawn
+s/(e + 0x1C) -= 1.0f/(e + 0x1C) -= 0.5f/ % spawn
+s/(e + 0x20) < cfg->max)/(e + 0x20) <= cfg->max)/ % maxed spawn
+s/tail->next = head; \/\* circular/tail->next = NULL; \/* circular/ % spawn spawnc0

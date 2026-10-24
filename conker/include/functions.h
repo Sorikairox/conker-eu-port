@@ -730,8 +730,15 @@ void func_1510550C(struct102 *arg0, s32 arg1, u8 arg2);
 void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2);
 void func_15105848(struct207 *arg0, s32 arg1, u8 arg2);
 void func_1511FC20(s32 arg0);
+#ifdef NON_MATCHING
+/* P183: debug position hooks, the arguments their only caller (func_15113D54) passes: gdl in a0, three f32 in
+ * a1..a3 (mfc1), then an f32 / s32 on the stack; both return gdl. Same o32 registers as the 4 x s32 form. */
+Gfx *func_1511FC2C(Gfx *gdl, f32 x, f32 y, f32 z, f32 w, s32 player);
+Gfx *func_1511FC44(Gfx *gdl, f32 x, f32 y, f32 z, s32 player);
+#else
 s32  func_1511FC2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
 s32  func_1511FC44(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+#endif
 void func_15122AE0(void);
 void func_15124B18(struct108 *arg0);
 void func_15123508(struct108 *arg0);
