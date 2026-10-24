@@ -237,7 +237,25 @@ void func_1516F868(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5) {
     func_1516DF0C(3, 0, 0, 0x2B, 0, 0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0x50, 0x50, 0, 0, 7, 4, 4, arg0, arg2, 0, 0, 0x81, 5, 0, 1, 0, 0, 0, 1, arg3, arg4, arg5);
 }
 
+#ifdef NON_MATCHING
+
+// spray_pair_spawn: spawns two particle sprays at (x, y, z) through func_1516DF0C (same parameters except the second
+// one's +0x13 byte (rate11 instead of rate10) and +0x27 = 6), then plays sound 7 there with `span` as the sound's user
+// value. Speeds speedA / speedB go through a 20.12 fixed-point round trip ((v << 12) / 4096) as in the asm.
+void func_1516FAB8(s32 x, s32 y, s32 z, s32 span, s32 dx, s32 spread, s32 dz, s32 speedA, s32 speedB, s32 size,
+                   s32 rate10, s32 rate11, s32 unused12, s32 unused13, s32 unused14, s32 flag, s32 owner) {
+    s16 a = (s16)((speedA << 12) / 4096);
+    s16 b = (s16)((speedB << 12) / 4096);
+
+    func_1516DF0C(x, y, z, 0xD, 0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0, 2, dx, 0, dz, 0, 0, 0, rate10, 0, 0, 0, 0, 0, 0, 0,
+                  a, a, b, b, span, size, 0x14, 0xFF, 0x10, spread, 0xC8, 1, 0, 0, 1, 0, 0, 0, 0, 0, flag, owner);
+    func_1516DF0C(x, y, z, 0xD, 0, 0x67, 0x17, 0xD, 0, 0, 0x12, 0, 2, dx, 0, dz, 0, 0, 0, rate11, 0, 0, 0, 0, 0, 0, 0,
+                  a, a, b, b, span, size, 0x14, 0xFF, 0x10, spread, 0xC8, 1, 6, 0, 1, 0, 0, 0, 0, 0, flag, owner);
+    func_1000FA64(7, x, y, z, 0x36B0, 0x3E8, 0x64, (s32)&func_1000EBC4, (void *)span, 0, 0, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516FAB8.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1516FDD4(u8 *arg0) {
@@ -401,7 +419,68 @@ s32 func_151705A4(s32 arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     *arg3 = c * s;
 }
 
+#ifdef NON_MATCHING
+s32 func_150ADA20(void);
+extern f32 D_8008CFA0[3]; /* spread per variant: 571, 130, 130 */
+extern u8 D_8008CFAC[9];  /* colour per variant (3 bytes) */
+
+// quad_edge_sparks_spawn: walks the 4 edges of `quad` (4 points of 3 floats) and spawns `countA` (edges 0 / 2) or
+// `countB` (edges 1 / 3) sparks evenly along each edge (func_1516DA58 type 0xD, variant `variant`'s colour): the
+// spark's push is the edge midpoint relative to (x, z) (doubled, as hi / lo bytes), its speed 731 * size + rand
+// modulo 836 * size, life 15..46, spread 143 * size + rand modulo D_8008CFA0[variant] * size. The caller's D_8008CF94 copy is unused.
+void func_15170648(f32 *quad, f32 x, f32 z, s32 kind, f32 size, s32 variant, s32 countA, s32 countB, s32 alpha,
+                   s32 owner) {
+    f32 *p;
+    f32 *q;
+    u8 *col;
+    s32 edge;
+    s32 next;
+    s32 n;
+    s32 i;
+    s32 range;
+    s32 vx, vz;
+    s32 speedBase, speedRange, spreadBase;
+    s32 life;
+    s32 speed;
+    f32 mx, mz;
+    f32 step;
+    f32 t;
+    f32 px, py, pz;
+
+    range = (s32)(D_8008CFA0[variant] * size);
+    p = quad;
+    for (edge = 0; edge < 4; edge++, p += 3) {
+        next = (edge == 3) ? 0 : edge + 1;
+        n = (edge == 0 || edge == 2) ? countA : countB;
+        q = &quad[next * 3];
+        col = &D_8008CFAC[variant * 3];
+        mx = (q[0] + p[0]) * 0.5f - x;
+        mz = (q[2] + p[2]) * 0.5f - z;
+        vx = (s32)(mx + mx);
+        vz = (s32)(mz + mz);
+        if (n <= 0) {
+            continue;
+        }
+        speedBase = (s32)(731.0f * size);
+        speedRange = (s32)(836.0f * size);
+        spreadBase = (s32)(143.0f * size);
+        step = 1.0f / (f32)(n - 1);
+        for (i = 0; i < n; i++) {
+            t = (f32)i * step;
+            px = (q[0] - p[0]) * t + p[0];
+            py = (q[1] - p[1]) * t + p[1];
+            pz = (q[2] - p[2]) * t + p[2];
+            life = (func_150ADA20() & 0x1F) + 15;
+            speed = (u32)func_150ADA20() % (u32)speedRange + speedBase;
+            func_1516DA58((s16)(s32)px, (s16)(s32)py, (s16)(s32)pz, 0xD, 0, col[0], col[1], col[2], 0, 0, 0, 0, 2,
+                          (vx >> 8) & 0xFF, vx & 0xFF, (vz >> 8) & 0xFF, vz & 0xFF, 0, 0, kind, 0, 0, 0, speed, speed,
+                          life, (u32)func_150ADA20() % (u32)range + spreadBase, 0, 0, alpha, owner);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_15170648.s")
+#endif
 
 #ifdef NON_MATCHING
 extern u16 D_800CC76A;

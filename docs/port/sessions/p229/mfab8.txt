@@ -1,0 +1,26 @@
+8s/<< 12/<< 11/ %
+8s/4096/4095/ %
+9s/speedB/speedA/ %
+11s/x, y, z/y, x, z/ %
+11s/0x67, 0x17/0x67, 0x16/ %
+11s/0x12, 0, 2/0x12, 0, 3/ %
+11s/2, dx, 0, dz/2, dz, 0, dx/ %
+11s/rate10/rate11/ %
+11s/0, 0, 0, rate10/0, 0, 1, rate10/ %
+12s/a, a, b, b/a, b, b, b/ %
+12s/span, size/size, span/ %
+12s/0x14, 0xFF, 0x10/0x14, 0xFE, 0x10/ %
+12s/spread, 0xC8/dx, 0xC8/ %
+12s/1, 0, 0, 1, 0/1, 0, 0, 0, 0/ %
+12s/flag, owner/owner, flag/ %
+13s/rate11/rate10/ %
+13s/x, y, z/x, y, x/ %
+14s/1, 6, 0, 1/1, 0, 0, 1/ %
+14s/a, a, b, b/a, a, a, b/ %
+14s/0, flag/1, flag/ %
+15s/(7,/(8,/ %
+15s/x, y, z/x, z, y/ %
+15s/0x36B0/0x36B1/ %
+15s/0x3E8, 0x64/0x3E8, 0x65/ %
+15s/(void \*)span/(void *)size/ %
+15s/0, 0, 0)/0, 1, 0)/ %

@@ -751,8 +751,15 @@ STKFILL = _stkfill()   # P211: stack fill word
 # line, so wrappers that grep EQUIV / DIFFER / ERROR printed empty result lines (P222). Now it is an ERROR line.
 ARG_FOLD = os.environ.get('DIFFTEST_ARGF_OLD') == '1'   # P200: old behaviour (ARG on a float parameter sets only aN)
 for _p in filter(None, os.environ.get('DIFFTEST_ARG', '').split(',')):
-    _a, _v = _p.split('=')
-    ARGFIX[int(_a)] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
+    # P229: a malformed item (non-decimal index such as `A=7`, missing `=`, non-hex value) used to raise a traceback
+    # before any result line, so wrappers printed empty result lines (P225). Now it is an ERROR line, like STKFILL.
+    try:
+        _a, _v = _p.split('=')
+        _n = int(_a, 10)
+        if _n < 0: raise ValueError
+        ARGFIX[_n] = [int(x, 16) & 0xFFFFFFFF for x in _v.split('|')]
+    except ValueError:
+        print('ERROR DIFFTEST_ARG: %r is not INDEX=HEX[|HEX...] with a decimal index (e.g. 1=10)' % _p); sys.exit(2)
 
 STK_IN_MAX = 60   # P95: stack argument words sp+0x10 .. sp+0xFC (SP_ENTRY = STK_TOP - 0x100)
 

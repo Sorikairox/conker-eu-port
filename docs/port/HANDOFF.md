@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P229 (port-b) (session P229, 2026-10-24). Details: `docs/port/sessions/P229.md`
+
+Branch `port-b`. Harness: a malformed `DIFFTEST_ARG` item (e.g. `A=7`) is an ERROR line instead of a traceback with
+empty result lines (selftest cases `A=7` ERROR / `0=7` EQUIV, 103 / 103). `tools/eu_port/hoorder.py` added (copy of
+p208's). Hand C (NM) + setups + mutants, registry rows with full knobs: **func_15196438 object_emitter_spawn**
+(1C3530; returns the emitter; JALRSKIP=1,2,3 for the one-argument handler tables), **func_1516FAB8 spray_pair_spawn**
+(19B180), **func_15170648 quad_edge_sparks_spawn** (19B180; constant 836.0), **func_150FB398 score_banner_spawn**
+(127840; ARGMEM found two spec layout bugs that random trials missed), **func_15175160 leaf_burst_spawn** and
+**func_15175514 leaf_drop_spawn** (1A2970; Row20 / D_800DE2B8 declarations moved to the file top). Checks: verify_all
+rc 0, NM links, protocheck 0 (1477), selftest 103/103. progress_nm total 5471 / 5915 (92.5%), C bytes 81.6%, 444 asm-only.
+
+## Next steps (from P229)
+
+1. Browser: emitters (func_15196438, flame thrower kinds 5 / 6), scene-event sprays (func_1516FAB8), banner
+   (func_150FB398), leaves (func_15175160 / func_15175514), quad edge sparks (func_15170648).
+2. port-b's new files: C-caller candidates left: func_15175900 (370), func_1513783C, func_150FA520, func_151356D4,
+   func_151BDDD8, func_150F9BB0, func_15135DD0, func_15139768, func_150D3870, func_1519AF14 (D_8008FC48 dispatcher),
+   func_151F94E0; the 4 Rare hand-asm functions of game_eu_226870 (nmasm harness) are not started.
+3. port: game_981E0 calls func_15196438 without a prototype (implicit int); `u8 *func_15196438(u8 *, s32, u8, s32)`.
+
 ## P225 (port-b) (session P225, 2026-10-24). Details: `docs/port/sessions/P225.md`
 
 Branch `port-b`. **Ownership (new from P225): port-b also owns game_161520 (src and src_eu), game_eu_1C3530,

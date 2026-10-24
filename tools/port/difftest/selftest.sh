@@ -233,4 +233,8 @@ TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9
 TRIALS=8 chkce EQUIV  func_15103828 "" 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/'
 TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_STKFILL=WORD"
 TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_STKFILL=A5A5A5A5"
+# P229: a DIFFTEST_ARG item with a non-decimal index (`A=7`) is an ERROR line (was a traceback, empty result, P225);
+# a valid decimal index with a hex value still runs.
+TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_ARG=A=7"
+TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_ARG=0=7"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]
