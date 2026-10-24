@@ -1,0 +1,20 @@
+# P238 func_151D8280 (trail_ring_constrain) mutants: sed % setup names
+s/            if (80\.0f < total) {/            if (81.0f < total) {/ % edge
+s/k = (total - 80\.0f)/k = (total - 81.0f)/ % pull
+s/obj\[0x2C\] = (s8) obj\[0x2C\] - 1;/obj[0x2C] = (s8) obj[0x2C] - 2;/ % pull
+s/obj\[0x2D\] = (s8) obj\[0x2D\] + 1;/obj[0x2D] = (s8) obj[0x2D] + 2;/ % pull
+s/            prev = (f32 \*) (obj + 0x10);/            prev = (f32 *) (obj + 0x14);/ % flag2
+s/cur\[4\] = len \* (1\.0f - k);/cur[4] = len * k;/ % pull
+s/cur\[1\] -= d\[1\] \* k;/cur[1] += d[1] * k;/ % pull
+s/-41\.0f \* D_800BE9A4/-40.0f * D_800BE9A4/ % short
+s/acc \* 46\.87999725341797f,/acc * 46.0f,/ % short
+s/\[0x14\] = 60;/[0x14] = 61;/ % short
+s/total \* 0\.2990000247955322f;/total * 0.2f;/ % short
+s/\* inv \* 60\.0f)/* inv * 50.0f)/ % short
+s/if (fadeLen < t) {/if (fadeLen > t) {/ % short
+s/d\[2\] = cur\[2\] - prev\[2\];/d[2] = cur[2] - prev[1];/ % short
+1,/                acc += cur\[4\];/s/                acc += cur\[4\];/                acc += cur[5];/ % short
+s/    if ((s8) obj\[0x2C\] >= 2) {/    if ((s8) obj[0x2C] >= 1) {/ % one
+s/                i = obj\[0x25\] - 1;/                i = obj[0x25] - 2;/ % wrap
+s/16383\.0f, -16384\.0f);/16383.0f, -16383.0f);/ % short
+# dropped (near-equivalent): 0.299 -> 0.3 (the alpha bytes truncate to the same values)

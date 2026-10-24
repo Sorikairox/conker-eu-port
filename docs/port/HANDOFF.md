@@ -15,16 +15,17 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   (EF370, 11 / 11), func_150FD49C `view_spot_distance_fade` (12A7C0, D_8008B734 entry 0, f32, 12 / 12),
   func_15101610 `obj_fx_kill_all` / func_151016C8 `obj_fx_stop_all` (12E390, kind tables 0x8008A29C / 0x8008A2D0,
   15 / 15, 12 / 12), func_15191E2C `owner_effect_watch` (1BE5C0, 14 / 14), func_15166E28 `layer_pre_scroll_texture`
-  (193D00, render layer 4 `pre`, 14 / 14), func_151AB874 `character_spawn_ring_fx` (1D7790, 19 / 19).
+  (193D00, render layer 4 `pre`, 14 / 14), func_151AB874 `character_spawn_ring_fx` (1D7790, 19 / 19); priority func_151D8280 `trail_ring_constrain`
+  (204F70, the route stub at frame 17824, 6 setups, 18 / 18).
 - Harness: new knob `DIFFTEST_OUTP="ADDR=N.I:W0;W1;..."` writes words through the pointer aN[I] (outputs written
   through an array of pointers, func_15145EA4); selftest 100 / 100 before, 103 / 103 after (3 func_15160E30 cases).
 - func_150A7BD0 is hand asm (private convention, already covered by VTX_WAVE_COS); hand-asm list in P238.md section 6.
-- Checks: NM build rc 0, protocheck `1477 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
-  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1495 426 5489
-  92.8% 1828724/2253856 (81.1%)`, verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), selftest 103 / 103.
+- Checks: NM build rc 0, protocheck `1478 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
+  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1496 425 5490
+  92.8% 1829736/2253856 (81.2%)`, verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), selftest 103 / 103.
 
 ## Next steps (from P238)
-1. port-web: the P238 functions (P238.md section 5) plus the P237 list; the frame-19116 freeze review of the P232
+1. port-web: re-run the story route past frame 17824 (func_151D8280 is C now); the P238 functions (P238.md section 5) plus the P237 list; the frame-19116 freeze review of the P232
    functions is still not done here (no message received).
 2. Breadth in port's files (P238.md section 7): func_151D75B0 (needs the dispatcher's v0 use first), func_150CF470,
    func_1514DAD4, func_151A9670, func_eu_151D8FD4, func_15134004.
