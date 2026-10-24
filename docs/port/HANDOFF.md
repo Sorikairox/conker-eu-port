@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P257 (port-b) (session P257, 2026-10-25). Details: `docs/port/sessions/P257.md`
+
+Branch `port-b`. Merged port aad230e1 (ae929f60; 123 / 123 selftest at the merge). DUPKEY fallout fixed: p247/s4e48.txt
+repeated an OUTA key (all setups NOOUTPUT since P250), joined with '/' (`port_work/p257/dupkey.py` scans every registry
+setup file: it was the only one). func_15134E48 re-run without DIFFTEST_JALRARG_OLD: EQUIV, 32 / 32 setups, 48 / 48 +
+1 / 1 mutants (knob dropped). Huffman rows func_151F9184 (HARNESS + HMUT, p257/huff_hmuts.txt = mhuff.txt as scoped
+seds, each checked identical to mhuff_apply.py) and func_151F933C (HARNESS): harness EQUIV, mutants 47 / 49 (the two
+P251 equivalents); mhuff.sh had no `cp -p` bug. mut.sh random guard on func_151D1B80: correct (seed 1 trial 99 DIFFERs
+because a random owner pointer lands in the harness stack window; artefact). Hand C (NM): func_1516DCA8
+tinted_sprite_draw (35 / 35), func_15106794 bolt_arc_sample_curve (void now; 26 / 26), func_150FA738
+twin_emitters_follow_owner (25 / 25). Checks: verify_all rc 0, NM rc 0, protocheck 0 (1604), implicit NM+float 0,
+**selftest 118 / 123** (5 chkce sed-mutant cases CERR after the Docker restart, none in P257 files; see P257.md 5).
+progress_nm total 5617 / 5915 (95.0%), C bytes 86.5%.
+
+## Next steps (from P257)
+
+1. Selftest: the 5 CERR chkce cases (func_151416E8, func_15103828, func_15031C1C) after the container restart.
+2. func_151349D0 (178, game_161520), then progress_nm --list in port-b files; D5E90 sin / cos hand-asm group.
+3. Browser: func_1516DCA8 sprites (other-mode word when the combine mode is unchanged: the asm used a stale stack word),
+   lightning arcs (func_15106794), twin emitters (func_150FA738).
+
 ## State (session P255, 2026-10-25). Details: `docs/port/sessions/P255.md`
 - Level 0x29 route stubs (browser P248 / P252), hand C (NM), all random EQUIV + setups + mutants 100%: func_150D88E8
   tile_slide_by_anim_update (scene 7), func_15072B44 player_anim_follow_up (event-4 bubbles), func_151473F4
