@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P238, 2026-10-24). Details: `docs/port/sessions/P238.md`
+- Hand C (NM, one block each, all in the registry with setups + mutants): func_150C1B60 `spawn_ring_kind2_small`
+  (EF370, 11 / 11), func_150FD49C `view_spot_distance_fade` (12A7C0, D_8008B734 entry 0, f32, 12 / 12),
+  func_15101610 `obj_fx_kill_all` / func_151016C8 `obj_fx_stop_all` (12E390, kind tables 0x8008A29C / 0x8008A2D0,
+  15 / 15, 12 / 12), func_15191E2C `owner_effect_watch` (1BE5C0, 14 / 14), func_15166E28 `layer_pre_scroll_texture`
+  (193D00, render layer 4 `pre`, 14 / 14), func_151AB874 `character_spawn_ring_fx` (1D7790, 19 / 19).
+- Harness: new knob `DIFFTEST_OUTP="ADDR=N.I:W0;W1;..."` writes words through the pointer aN[I] (outputs written
+  through an array of pointers, func_15145EA4); selftest 100 / 100 before, 103 / 103 after (3 func_15160E30 cases).
+- func_150A7BD0 is hand asm (private convention, already covered by VTX_WAVE_COS); hand-asm list in P238.md section 6.
+- Checks: NM build rc 0, protocheck `1477 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
+  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1495 426 5489
+  92.8% 1828724/2253856 (81.1%)`, verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), selftest 103 / 103.
+
+## Next steps (from P238)
+1. port-web: the P238 functions (P238.md section 5) plus the P237 list; the frame-19116 freeze review of the P232
+   functions is still not done here (no message received).
+2. Breadth in port's files (P238.md section 7): func_151D75B0 (needs the dispatcher's v0 use first), func_150CF470,
+   func_1514DAD4, func_151A9670, func_eu_151D8FD4, func_15134004.
+3. Use DIFFTEST_OUTP to re-check P237's func_15160E30 with the real `-` mutants.
+4. D_8008FFE8 one-argument table (P234 item 2, port-b's entries) still open.
+
 ## State (session P237, 2026-10-24). Details: `docs/port/sessions/P237.md`
 - Hand C (NM, one block each, all in the registry with setups + mutants): Total War stubs func_1508C600
   `rail_pair_sight` (B7840; racer line-of-sight masks rail +0x16C0, 18 setups, 32 / 32) and func_151EA4C8
@@ -18,7 +39,7 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   (1E6B70, 5 setups, 17 / 17; the beam pointer is re-read per store as in the asm); func_15109390 was already C.
   Breadth: func_150C7E68 `obj_shade_from_level` (F5580), func_151600E0 `effect_noop_check` (18D5D0),
   func_150F1B78 `fx_hit_handler` (11CB90).
-- Checks: NM build rc 0, protocheck `1470 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 852
+- Checks: NM build rc 0, protocheck `1470 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
   implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1488 433 5482
   92.7% 1827484/2253856 (81.1%)`, verify_all rc 0 (3994 / 5915 matched), selftest 100 / 100.
 

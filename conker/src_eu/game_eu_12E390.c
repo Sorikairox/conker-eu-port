@@ -434,9 +434,66 @@ s32 func_15100B80(u8 *obj, f32 *pos, f32 *dir, u8 kind, s16 life, u8 r, u8 g, u8
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_15100B80.s")
 #endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_15101610.s")
+#ifdef NON_MATCHING
+/* obj_fx_kill_all: P238: handler in the kind table at D_8008A29C (default func_1513CA6C): stops the object's sound
+ * (u16 +0x1A0, func_100111C8) when set, ends each of its effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that
+ * order; func_1516972C) that is set, then runs the default func_1513CA6C. The pointers are not cleared. */
+void func_15101610(struct210 *arg0) {
+    u8 *obj = (u8 *) arg0;
+    u8 *fx = obj + 0x110;
 
+    if (*(u16 *) (obj + 0x1A0) != 0) {
+        func_100111C8(*(u16 *) (obj + 0x1A0));
+    }
+    if (*(struct102 **) (obj + 0x138) != NULL) {
+        func_1516972C(*(struct102 **) (obj + 0x138));
+    }
+    if (*(struct102 **) (fx + 0x2C) != NULL) {
+        func_1516972C(*(struct102 **) (fx + 0x2C));
+    }
+    if (*(struct102 **) (fx + 0x24) != NULL) {
+        func_1516972C(*(struct102 **) (fx + 0x24));
+    }
+    if (*(struct102 **) (fx + 0x30) != NULL) {
+        func_1516972C(*(struct102 **) (fx + 0x30));
+    }
+    if (*(struct102 **) (fx + 0x34) != NULL) {
+        func_1516972C(*(struct102 **) (fx + 0x34));
+    }
+    func_1513CA6C(arg0);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_15101610.s")
+#endif
+
+#ifdef NON_MATCHING
+/* obj_fx_stop_all: P238: handler in the kind table at D_8008A2D0 (default func_1513CAA0): func_1516979C on each of
+ * the object's effects (+0x138, +0x13C, +0x134, +0x140, +0x144, in that order) that is set, then the default
+ * func_1513CAA0. No sound stop here (unlike obj_fx_kill_all). */
+void func_151016C8(struct210 *arg0) {
+    u8 *obj = (u8 *) arg0;
+    u8 *fx = obj + 0x110;
+
+    if (*(struct102 **) (obj + 0x138) != NULL) {
+        func_1516979C(*(struct102 **) (obj + 0x138));
+    }
+    if (*(struct102 **) (fx + 0x2C) != NULL) {
+        func_1516979C(*(struct102 **) (fx + 0x2C));
+    }
+    if (*(struct102 **) (fx + 0x24) != NULL) {
+        func_1516979C(*(struct102 **) (fx + 0x24));
+    }
+    if (*(struct102 **) (fx + 0x30) != NULL) {
+        func_1516979C(*(struct102 **) (fx + 0x30));
+    }
+    if (*(struct102 **) (fx + 0x34) != NULL) {
+        func_1516979C(*(struct102 **) (fx + 0x34));
+    }
+    func_1513CAA0(arg0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12E390/func_151016C8.s")
+#endif
 
 void func_15101768(struct210 *arg0) {
     u8 *p = *(u8 **)((u8 *)arg0 + 0x124) + 0x110;

@@ -681,6 +681,16 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
     OUTB[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
 
+# P238 (opt-in): DIFFTEST_OUTP="ADDR=N.I:W0;W1;...,..." (hex ADDR/W, decimal N/I): at every call to ADDR the stub
+# reads the pointer at word I of the array that argument N points to (aN[I]; N >= 4 = stack argument) and writes the
+# words W0, W1, ... there: outputs a callee writes through an array of pointers (func_15145EA4's dst[i] points).
+# Several "N.I:W..." for one ADDR are separated by '/'.
+OUTP = {}
+for _p in filter(None, os.environ.get('DIFFTEST_OUTP', '').split(',')):
+    _a, _v = _p.split('=')
+    OUTP[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0].split('.')[0]), int(_x.split(':')[0].split('.')[1]),
+                                      [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')]) for _x in _v.split('/')]
+
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
 # N >= 4 (P43): the stack argument at sp+0x10+4*(N-4).
@@ -1162,6 +1172,12 @@ class Run:
                 # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
                 self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
+        if (addr & 0x1FFFFFFF) in OUTP:
+            for _n, _i, _ws in OUTP[addr & 0x1FFFFFFF]:
+                _arr = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                try: _p = struct.unpack('>I', bytes(mu.mem_read(phys(_arr + 4 * _i), 4)))[0]
+                except Exception: continue
+                self.stub_write(_p, struct.pack('>%dI' % len(_ws), *_ws))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
@@ -1649,7 +1665,7 @@ def knob_notes(called, ntrials):
     address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
     if not ntrials: return ''
     un = []
-    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('ARGMEM', ARGMEM)):
+    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
         un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called]
     return ' [knob callee never called: %s]' % ', '.join(un) if un else ''
 

@@ -526,7 +526,39 @@ s32 func_15191DEC(struct_eu_1BAAA0_e *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+u8 *func_15190770(u8 **, s32, u8, s32);
+
+/* owner_effect_watch: P238: entry 13 of D_8008A4E8 (EU 0x8008A888, `void (u8 *)` handlers) for an effect e whose
+ * 12-byte spawn record (owner pointer, id byte +4, s16 life +6, flags +8) sits at e +0x28. It kills itself
+ * (func_1516972C) when the owner is gone (owner word 0 is 0) or has another id (e[0x2C] vs owner[0x3B]). When the
+ * owner's +0x1D4 is set it first re-spawns the record through func_15190770(e + 0x28, 0, e[0xC], e[1]) (life = s16
+ * e +0xE with flag bit 0 when e[0xD] bit 0 is set, else 300) and then kills itself. Otherwise nothing happens. */
+void func_15191E2C(u8 *e) {
+    u8 *owner = *(u8 **) (e + 0x28);
+    u8 *rec;
+    s32 done = 0;
+
+    if (*(s32 *) owner == 0 || e[0x2C] != owner[0x3B]) {
+        done = 1;
+    } else if (*(s32 *) (owner + 0x1D4) != 0) {
+        rec = e + 0x28;
+        done = 1;
+        if (e[0xD] & 1) {
+            rec[8] |= 1;
+            *(s16 *) (rec + 6) = *(s16 *) (e + 0xE);
+        } else {
+            *(s16 *) (rec + 6) = 300;
+        }
+        func_15190770((u8 **) rec, 0, e[0xC], e[1]);
+    }
+    if (done) {
+        func_1516972C((struct102 *) e);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BE5C0/func_15191E2C.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15191EF0(struct102 *arg0, u8 *arg1, u8 arg2) {
