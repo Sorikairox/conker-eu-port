@@ -1,0 +1,14 @@
+s/set = func_150ADA20() & 1;/set = func_150ADA20() \& 2;/ %
+s/q.names\[1\] = D_800A2438;/q.names[1] = D_800A2444;/ %
+s/q.names\[3\] = D_800A242C;/q.names[3] = (char *) \&D_800A2420;/ %
+s/D_800A2450\[set\]\[i\];/D_800A2450[0][i];/ %
+s/q.outs\[4 + i\] = points + i \* 3;/q.outs[4 + i] = points + i * 4;/ %
+s/i < 6; i++/i < 5; i++/ %
+s/q.outs\[0\] = a;/q.outs[0] = b;/ %
+s/q.outs\[2\] = out;/q.outs[2] = ref;/ %
+s/model, arg6, 0, q.names, q.outs, 10/model, 0, 0, q.names, q.outs, 10/ %
+s/model, arg6, 0, q.names, q.outs, 10/model, arg6, 0, q.names, q.outs, 9/ %
+s/out\[1\] -= ref\[1\];/;/ %
+s/out\[2\] -= ref\[2\];/out[2] -= ref[1];/ %
+s/return 1;/return 2;/ %
+s/) != 0) {$/) > 0) {/ %

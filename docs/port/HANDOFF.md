@@ -10,6 +10,32 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
+
+Branch `port` (P207 2672b13 + merge of port-b 4c59938 = a447641).
+- Merged port-b 4c59938 (C5530 `s32 func_150867D4`, port-b P201-P206); HANDOFF via merge_union + hoorder 150.
+- Hand C (NM): func_150867D4 rail_route_next inserted (P207 draft; 6 of 9 survivors killed by gen_67d4b.py setups,
+  3 proven equivalent), func_151C384C fire_embers_spawn (embers for port-b's fire_burn_update; 151530A8 + 151307F0
+  + 151602C0 requests, ARGMEM on all), func_15087040 rail_node_distance, func_1508DE78 rail_state_reset,
+  func_15133E04 particle_fall_update, func_150FFC60 model_points_find, func_15062E24 type_texture_scroll_apply,
+  func_151009E4 sky_segments_set, func_151722BC sprite_spawn_at. All random + setups EQUIV, all mutants killed
+  (except listed equivalents).
+- **NM-only prototype changes for port-b**: func_150585F0 and func_150562FC are `void (struct127 *)` under NM
+  (game_eu_78230, game_eu_10E600; the matched func_15052590's call is wrapped in `#ifdef NON_MATCHING`);
+  functions.h `void func_1505E874(u8, struct127*)` under NM (asm ignores a0, no v0); func_15142600 void in
+  game_eu_E66D0's NM prototype. func_150FFC60 is `s32 (f32 *, f32 *, f32 *, f32 *, f32 *, u8 *, s32)` now
+  (game_eu_126330's prototype still says s32 * - port-b may align it).
+- Checks: verify_all OK (port_work/p209/verify.log), NM build links, protocheck 0 (1426), selftest 71 / 71,
+  progress_nm 5420 / 5915 (91.6%), C bytes 78.3%.
+
+## Next steps (from P209)
+1. func_1508DCAC (B7840, rail script command 9): decide what the script runner does with a command's v0 (its
+   `*cnt == 0` path returns func_150ADA68's leftover v0), then convert; the other B7840 commands have the same issue.
+2. Browser: P209.md section 6 (rail races, fire embers, sprites, landing particles, sky segments).
+3. Breadth: `p209/asmlist.py` (next: func_151F9184 is hand asm; func_15138120, func_1519D320, func_15117858,
+   func_150B0344, func_150FC438 ...).
+4. Harness: compare pass-through arguments of jalr calls (still open).
+
 ## P208 (port-b) (session P208, 2026-10-24). Details: `docs/port/sessions/P208.md`
 
 Branch `port-b`. Merge of `port` (4c59938, checks green) + hand C (NM), difftest EQUIV + setups + mutants:
@@ -36,6 +62,33 @@ Branch `port-b`. Merge of `port` (4c59938, checks green) + hand C (NM), difftest
 3. Other owner: func_151C384C (game_eu_1EFE10) asm-only, called by func_150F8EAC.
 4. Browser: multiplayer HUD (func_150918EC), radar, fire scene; E66D0 objects using func_15142600.
 
+## State (session P207, 2026-10-24). Details: `docs/port/sessions/P207.md`
+
+Branch `port` (from P204 0226d7d).
+- Hand C (NM): rail callers func_1509E3D4 rail_script_command (CBB40) and func_150538CC thrown_object_fly_update
+  (78230, 1027 insns; D_800863B4 handler) - func_150877C0 rail_track_update now has C callers; func_151B8EB8
+  smoke_puff_spawn (1E61C0; **port-b can convert func_151C0698** now); func_150B1200 wake_spray_update (DE750).
+  All difftest EQUIV (random + setups) and every mutant killed.
+- func_150867D4 rail_route_next (B37F0, 539): **draft only** in `docs/port/sessions/p207/150867D4_cand.c` (s32;
+  40 setups EQUIV, 29 / 38 mutants, 9 survivors listed in P207.md 3.). Inserting it makes protocheck fail (2) until
+  port-b 4f8756f's game_eu_C5530.c prototype (`s32 func_150867D4`) is merged into `port`; then insert with
+  `p207/insert.py` and strengthen the setups (near-tie graph with a penalised short cut, first hop > 32767).
+- Ownership change (coordinator, mid-session): game_16EE20.c, game_83300.c, game_A28B0.c, game_1944C0.c are port-b's
+  now; no edits there in P207. func_150611E8 (83300) m2c_sanity O:20 / O:28 rows handed to port-b unresolved.
+- Merge note: game_eu_78230.c was edited here (func_150538CC NM block); port-b has older edits in it - expect a
+  clean merge (different function).
+- Harness notes: declare no-arg callees (`s32 func_150ADA20(void);`) in the NM block or difftest compares their a0;
+  mut.sh cuts a mutant line at the first `%` (use `.` + `\(..\)` groups); a stub's pointer arguments are only
+  compared with DIFFTEST_ARGMEM.
+- Checks: verify_all OK (port_work/p207/verify.log), NM build links, protocheck 0 (1369), selftest 71 / 71,
+  progress_nm 5363 / 5915 (90.7%), C bytes 75.1%.
+
+## Next steps (from P207)
+1. After merging port-b 4f8756f: insert func_150867D4 (above), strengthen its setups, re-run the survivors.
+2. func_151C384C (game_eu_1EFE10, ~300 insns, two func_151307F0 requests + func_151530A8): called by port-b's new
+   fire_burn_update for embers (coordinator item, not started).
+3. Browser: P207.md UNVERIFIED (rail races / camera, thrown objects, wake spray, smoke puffs).
+4. Harness: compare pass-through arguments of jalr calls (still open).
 ## P206 (port-b) (session P206, 2026-10-24). Details: `docs/port/sessions/P206.md`
 
 Branch `port-b` (from P203 4f8756f). Tooling commit + hand C (NM), difftest EQUIV + setups + mutants:

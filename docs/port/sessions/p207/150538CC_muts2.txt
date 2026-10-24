@@ -1,0 +1,16 @@
+s/owner != 0 \&\&/owner != 1 \&\&/ % r13_own1
+s/dist = dx \* dx + dz \* dz;/dist = dx * dx + dy * dy;/ % r13_farz
+s/P38_F32(0x18) + 50.0f, \&floorY) > 0/P38_F32(0x18) + 50.0f, \&floorY) >= 0/ % r13_floor_zero
+s/range < P38_F32(0x3C) \* 16.0f/range < P38_F32(0x3C) * 8.0f/ % h_mid_range
+s/P38_F32(0x3C) > 0.0f) {/P38_F32(0x3C) >= 0.0f) {/ % b_zero3c_616
+s/flags |= 8;/flags |= 4;/ % d_k13_flag8
+s/if (n < 25) {/if (n <= 25) {/ % d_k5_far
+s/(D_800CC268 >> 1) != 0/(D_800CC268 >> 2) != 0/ % m_k15_two
+s/func_150D7630(p + 0x14, 0xFF, 1)/func_150D7630(p + 0x14, 0xFF, 0)/ % d_k13_flag8
+s/vec\[2\] = D_800CC674\[2\] - P38_F32(0x34)/vec[2] = D_800CC674[2] - P38_F32(0x1C)/ % ht_k13 d_k13_vec0
+s/func_151EFDD0() \(.\) 2/(u32) func_151EFDD0() \1 2/ % k2_spin_neg
+s/\(func_150ADA20() . 3 + 0x2E\)E/\1F/ % k9_a8
+s/(u32) \(func_150ADA20() . 3 + 0x2EE\)/(s32) \1/ % k13_a8
+s/\(. 3 + 0x53\)B/\1C/ % ht_1
+s/        case 13:$/        case 16:/ % k13_a8
+s/\(func_150ADA20() . \)9/\18/ % b_f4 b_f4_r5

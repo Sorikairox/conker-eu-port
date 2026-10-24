@@ -47,8 +47,8 @@ s32 func_150B9AFC(struct102 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9B1C.s")
 
-#ifdef NON_MATCHING
-s32 func_15142600(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
+#ifdef NON_MATCHING /* P209: void, the caller ignores v0 */
+void func_15142600(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);
 #else
 s32 func_15142600(s32, s32, s32, s32, f32, f32, f32, f32, f32, f32, f32, f32);
 #endif

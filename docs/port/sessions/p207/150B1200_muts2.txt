@@ -1,0 +1,12 @@
+s/\[0x4F\] == 2/[0x4F] != 1/ % mode3 boost
+s/(obj + 0x3C)/(obj + 0x40)/ % objfast boost
+s/((f32 \*) ground)\[0\] \* 0.9250001f/((f32 *) ground)[0] * 0.925f/ % one multi boost
+s/\(n1 . 26 - 0x2\)9/\18/ % one multi
+s/\(n1 . 2\)1 + 0x14/\10 + 0x14/ % multi r3low
+s/\(n2 . 10\)1 + 0x9B/\10 + 0x9B/ % multi r3eq
+s/r3 < 0.044000003f/r3 <= 0.044000003f/ % r3eq
+s/1.4f, 1.4f, 1, 0, 1, 0/1.4f, 1.5f, 1, 0, 1, 0/ % one
+s/1, 0, 1, 0, fx\[0xC\], fx\[1\]/1, 0, 0, 0, fx[0xC], fx[1]/ % one
+s/fx\[0xC\], fx\[1\]);/fx[1], fx[0xC]);/ % one
+s/-= 1.0f;/-= 0.5f;/ % one
+s/pos, vel, 5,/pos, vel, 6,/ % one
