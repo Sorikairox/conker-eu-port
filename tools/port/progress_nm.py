@@ -14,8 +14,47 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 C = os.path.join(ROOT, 'conker')
 
 
+_DIR = re.compile(r'^\s*#\s*(ifdef|ifndef|if|elif|else|endif)\b(.*)$')
+_PRAGMA = re.compile(r'^\s*#pragma GLOBAL_ASM\("[^"]*/(\w+)\.s"\)')
+
+
+def nm_funcs_scan(text):
+    """P234: every GLOBAL_ASM pragma that the NON_MATCHING build leaves out (its code is C there: an NM body, or a
+    private entry folded into another function's NM C, e.g. func_1000661C.. in func_1000654C's inflate, the
+    func_150A5480 loop pieces in D2DB0, func_150A661C in D3880). A conditional stack: each level says whether its current branch is live
+    with NON_MATCHING defined (None = unrelated condition, inherits). Before P234 one regex required `#endif` right
+    after the pragma: func_150E394C (game_eu_110DB0) keeps `extern s32 func_150E394C;` in the #else part and was
+    counted asm-only although its NM body exists (P190). --old = the old regex."""
+    lines = text.split('\n')
+    stack = []   # (nm_live_in_branch: True / False / None)
+    excluded = []
+    for ln in lines:
+        m = _DIR.match(ln)
+        if m:
+            k, rest = m.group(1), re.sub(r'/\*.*?\*/|//.*', '', m.group(2)).strip()
+            if k == 'ifdef': stack.append(True if rest == 'NON_MATCHING' else None)
+            elif k == 'ifndef': stack.append(False if rest == 'NON_MATCHING' else None)
+            elif k == 'if':
+                stack.append(True if re.fullmatch(r'defined\s*\(?\s*NON_MATCHING\s*\)?', rest) else
+                             False if re.fullmatch(r'!\s*defined\s*\(?\s*NON_MATCHING\s*\)?', rest) else None)
+            elif k == 'elif':
+                if stack: stack[-1] = None
+            elif k == 'else':
+                if stack and stack[-1] is not None: stack[-1] = not stack[-1]
+            elif k == 'endif':
+                if stack: stack.pop()
+            continue
+        p = _PRAGMA.match(ln)
+        if p and any(s is False for s in stack): excluded.append(p.group(1))
+    return excluded
+
+
 def nm_funcs():
     out = {}
+    if '--old' not in sys.argv:
+        for p in glob.glob(os.path.join(C, 'src_eu/**/*.c'), recursive=True):
+            for f in nm_funcs_scan(open(p).read()): out[f] = os.path.relpath(p, C)
+        return out
     pat = re.compile(r'^#ifdef NON_MATCHING\n(?:(?!^#endif).*\n)*?#else\n#pragma GLOBAL_ASM\("[^"]*/(\w+)\.s"\)\n#endif', re.M)
     for p in glob.glob(os.path.join(C, 'src_eu/**/*.c'), recursive=True):
         for m in pat.finditer(open(p).read()):

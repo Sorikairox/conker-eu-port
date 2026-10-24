@@ -487,6 +487,38 @@ def all_hdr_protos():
         _ALLHDR = '\n'.join(parts)
     return _ALLHDR
 
+# P234: the headers the TU includes (#include "x" / <x>, recursively, resolved like the Makefile's INCLUDE_CFLAGS plus
+# the TU's own directory). The candidate is compiled with those prototypes, so a callee declared only there (e.g.
+# `s32 func_150ADA20(void);` in functions.h) has a known prototype: before P234 its FP-argument set was unknown and the
+# P214 rule compared IDO's scratch f12 left right before `jal func_150ADA20` as an argument (false DIFFER, P232
+# func_15109DC8). DIFFTEST_INCHDR_OLD=1 = old behaviour (TU text, then the P93 / P100 header fallbacks only).
+INCHDR_OLD = os.environ.get('DIFFTEST_INCHDR_OLD') == '1'
+INC_DIRS = ['.', 'include', 'include/2.0L', 'include/2.0L/PR', 'include/libc', 'src/libultra/os', 'src/libultra/audio',
+            'src/libultra/io']
+_INCH = {}
+def inc_hdr_text(path, tu):
+    """concatenated text of every header the TU includes (recursively; .h files only)"""
+    k = (path, hash(tu))
+    if k in _INCH: return _INCH[k]
+    seen, parts = set(), []
+    def walk(text, here, depth):
+        if depth > 12: return
+        for m in re.finditer(r'^\s*#\s*include\s*[<"]([^">]+)[">]', text, re.M):
+            n = m.group(1)
+            if not n.endswith('.h'): continue
+            for d in [here] + INC_DIRS:
+                f = os.path.normpath(os.path.join(d, n))
+                if os.path.isfile(f):
+                    if f not in seen:
+                        seen.add(f)
+                        try: t = open(f, errors='replace').read()
+                        except OSError: t = ''
+                        parts.append(t); walk(t, os.path.dirname(f), depth + 1)
+                    break
+    walk(tu, os.path.dirname(path or '.') or '.', 0)
+    _INCH[k] = '\n'.join(parts)
+    return _INCH[k]
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
@@ -1521,6 +1553,10 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
                 new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
+                if new[c['name']][2] is None and not INCHDR_OLD:   # P234: no declaration in the TU text: included headers
+                    ih = inc_hdr_text(p, tu)
+                    if proto_fregs(ih, pn) is not None:
+                        new[c['name']] = (proto_arity(ih, pn), proto_fslots(ih, pn), proto_fregs(ih, pn))
                 if new[c['name']][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
                     ha = proto_arity(hdr_protos(), pn)
                     if ha is not None and 16 < ha < 99:

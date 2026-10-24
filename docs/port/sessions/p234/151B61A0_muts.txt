@@ -1,0 +1,40 @@
+# P234 func_151B61A0 (ripple_spawn_flat) mutants: sed % setup names
+s/    req.u0 = 0.0f;/    req.u0 = 1.0f;/ % base
+s/    req.size = 24.7f \* scale;/    req.size = 24.0f * scale;/ % base
+s/    req.grow = grow;/    req.grow = scale;/ % base
+s/    req.u10 = scale;/    req.u10 = grow;/ % base
+s/    req.u14 = scale;/    req.u14 = 0.0f;/ % base
+s/    req.dir = \*dir;/    req.dir = *pos;/ % base
+s/    req.one\[1\] = 1.0f;/    req.one[1] = 0.5f;/ % base
+s/    req.pos = \*pos;/    req.pos = *dir;/ % base
+s/    req.speed = speed;/    req.speed = grow;/ % base
+s/    req.flags = 0xB908;/    req.flags = 0xB900;/ % base
+s/    if (life == -1) {/    if (life == 0) {/ % base life_0
+s/        req.life = 0x12C;/        req.life = 0x12D;/ % base
+s/        req.flags = 0xB988;/        req.flags = 0xB908;/ % life
+s/        req.life = life + n;/        req.life = life;/ % life
+s/        n = 0x100 >> shift;/        n = 0x80 >> shift;/ % base life
+s/        req.flags |= 0x20;/        req.flags |= 0x10;/ % base
+s/        req.vel.y = 0.0f;/        req.vel.y = 1.0f;/ % novel
+s/        req.flags |= 0x40;/        req.flags |= 0x20;/ % base
+s/        req.acc.z = 0.0f;/        req.acc.z = 1.0f;/ % noacc
+s/    if (additive != 0) {/    if (additive == 0) {/ % base add
+s/        req.flags |= 1;/        req.flags |= 2;/ % add
+s/    req.u5E = 2;/    req.u5E = 3;/ % base
+s/    req.u60 = 0;/    req.u60 = 1;/ % base
+s/    req.u64 = 0;/    req.u64 = 1;/ % base
+s/    req.alpha = alpha;/    req.alpha = 0xFF;/ % base
+s/    req.u69 = 5;/    req.u69 = 6;/ % base
+s/    req.u6B = 6;/    req.u6B = 5;/ % base
+s/    req.u6E = 2;/    req.u6E = 0;/ % base
+s/    req.u70 = 2;/    req.u70 = 0;/ % base
+s/    req.u72 = 0;/    req.u72 = 1;/ % base
+s/    req.u74 = 0;/    req.u74 = 1;/ % base
+s/    req.u78 = 0;/    req.u78 = 1;/ % base
+s/    req.step = n;/    req.step = n + 1;/ % base
+s/    req.fade = 0xFF \/ n;/    req.fade = 0x100 \/ n;/ % shift3
+s/    obj = func_15132FBC(&req.size, 3, 0xFF, 8, layer, owner);/    obj = func_15132FBC(\&req.grow, 3, 0xFF, 8, layer, owner);/ % base
+s/    obj = func_15132FBC(&req.size, 3, 0xFF, 8, layer, owner);/    obj = func_15132FBC(\&req.size, 3, 0xFF, 8, alpha, owner);/ % base
+s/    if (obj != 0) {/    if (obj == 0) {/ % base noobj
+s/        memcpy((void \*) (obj + 0x170), &req, 8);/        memcpy((void *) (obj + 0x170), \&req, 4);/ % base
+s/    return obj;/    return 0;/ % base

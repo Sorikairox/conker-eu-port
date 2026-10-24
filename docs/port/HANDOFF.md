@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P234, 2026-10-24). Details: `docs/port/sessions/P234.md`
+- Harness: difftest now takes callee prototypes from the headers the TU includes (recursive, Makefile include dirs)
+  when the TU text has no declaration: a callee declared only in functions.h (func_150ADA20) no longer has IDO's
+  scratch f12 compared as an argument. `DIFFTEST_INCHDR_OLD=1` = old (forwarded by difftest.sh). Selftest 95 / 95
+  before, 100 / 100 after (new func_15109DC8 cases; the P134 func_150F1F80 case now needs HDRSLOT_OLD + INCHDR_OLD).
+- progress_nm: conditional-stack block detection (`--old` = old regex). 18 functions with C in the NM build were
+  counted asm-only (func_150E394C, D2DB0 / D3880 / D1760 / AC770 / 45B90 / 48B10 / init_EB00 / 1FB080 pieces; list in
+  P234.md). Corrected before this session's conversions: `total 5915 3994 1479 442 5473 92.5% 1819332/2253856 (80.7%)`.
+- Hand C (NM, one block each), in the registry: func_1508CF34 `rail_racer_steer` (B7840 rail cmd 9 / AI steering,
+  862 insns; exact v0 = yaw error beyond 45 degrees; 60 setups, 90 / 90), func_151B61A0 `ripple_spawn_flat` (1E39B0,
+  coordinator item: the ripple model func_1513783C picks half the time; anti-tamper code sum skipped in NM; 39 / 39).
+- Checks: verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), NM build rc 0, protocheck
+  `1463 NON_MATCHING bodies checked, 0 problems`, selftest 100 / 100, implicit_scan `663 TUs, 852 implicit call sites
+  (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1481 440 5475 92.6% 1823456/2253856 (80.9%)`.
+- zsh note: `env $K cmd` does not split $K in the agent shell; use `${=K}` (or bash) for hand-run knob strings.
+
+## Next steps (from P234)
+1. port-web: AI racers on rail levels (func_1508CF34), water ripples (func_151B61A0).
+2. D_8008FFE8 (game_1FFF60) table: all 5 EU entries take one argument ([0] func_151901F4 asm, [1] func_1518FD34
+   `s32 (s32)`, [2] func_1518FE0C, [3] func_151D33B8, [4] func_1518FDC8), the declaration and the two matched C
+   dispatchers pass two. Entries 0/1/2/4 are port-b's (1BAF40): coordinate an NM one-argument table type + NM copies of
+   func_151D2C40 / func_151D3130, and func_1518FD34's return type (v0use first).
+3. Breadth from `progress_nm.py --list` (not started in P234).
+4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+
 ## State (session P232, 2026-10-24). Details: `docs/port/sessions/P232.md`
 - Hand C (NM, one block each), all in the registry: func_151E533C `mp_match_end_continue` (20B730; coordinator
   priority: the D_800E0EB8 fade callback after a multiplayer match: next level / replay / back to the menu; 32/32),

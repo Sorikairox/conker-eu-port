@@ -1,0 +1,95 @@
+# P234 func_1508CF34 (rail_racer_steer) mutants: sed % setup names (first setup file)
+# dropped as equivalent: mode 1 -> 2 for kind 0x1B (only mode != 0 matters there); the 0x8E stores 0 / 10 / 2 before the final
+# 0x8E = 1; 0x8A &= 0xDFEF (the final |= 0x10); `kind == 3` in the oz test (kind 3 clears oz); veh != NULL -> hasVeh in the
+# special / no-limit branch (special kinds never clear hasVeh)
+s/        return ret;$/        return 1;/ % node_neg
+s/    if (rec == NULL) {/    if (rec != NULL) {/ % rec_null plain
+s/    hasVeh = (veh != NULL) ? 1 : 0;/    hasVeh = 1;/ % plain special_nolimit
+s/    if (kind == 9 || kind == 0x38 || kind == 0x15) {/    if (kind == 9 || kind == 0x38) {/ % k15
+s/    if (kind == 0x24 || kind == 0x18 || kind == 0x23 || kind == 0x41) {/    if (kind == 0x24 || kind == 0x18 || kind == 0x41) {/ % special_nolimit
+s/        turn = 0;/        turn = 1;/ % k15 k3 k1B_bit
+s/        mode = 2;/        mode = 3;/ % k38_limit k38_nolimit
+s/        mode = 1;$/        mode = 2;/ % k9_neg k9_0 k9_big
+s/        replan = 0;$/        replan = 1;/ % k3 k3_nov k3_near rec1F
+s/        lead = 80.0f;/        lead = 40.0f;/ % rec1F
+s/    lead = 40.0f;/    lead = 41.0f;/ % plain
+s/    if (\*(s16 \*) ((u8 \*) D_800D27D0 + 0x16BC) == 0xB9 || D_800E1000 >= 3) {/    if (*(s16 *) ((u8 *) D_800D27D0 + 0x16BC) == 0xB9 || D_800E1000 >= 4) {/ % special_41_dif3
+s/                k = 0.024767801f;/                k = 0.016f;/ % k14_race k3F_dif3
+s/                k = 0.032f;/                k = 0.016f;/ % k16_race
+s/            k = sqrtf(dx \* dx + dy \* dy + dz \* dz) \* k \/ CF34_F(D_800D27D0, 0x16B4);/            k = sqrtf(dx * dx + dz * dz) * k \/ CF34_F(D_800D27D0, 0x16B4);/ % k14_race k16_race special_18_race
+s/            dx = (CF34_F(rec, 0x14) - CF34_F(rec, 0x2C)) \* k;/            dx = (CF34_F(rec, 0x14) - CF34_F(rec, 0x30)) * k;/ % k14_race k16_race special_18_race
+s/            dz = (CF34_F(rec, 0x1C) - CF34_F(rec, 0x34)) \* k;/            dz = (CF34_F(rec, 0x18) - CF34_F(rec, 0x34)) * k;/ % k14_race k16_race special_18_race
+s/        dx = (f32) \*(s16 \*) (rec + 0x1A4) + dx - CF34_RAILF(0x17A8, i);/        dx = (f32) *(s16 *) (rec + 0x1A6) + dx - CF34_RAILF(0x17A8, i);/ % replan replan_veh
+s/        dz = (f32) \*(s16 \*) (rec + 0x1A8) + dz - CF34_RAILF(0x1828, i);/        dz = (f32) *(u16 *) (rec + 0x1A8) + dz - CF34_RAILF(0x1828, i);/ % replan replan_veh
+s/    rate = CF34_RAILF(0x1868, i) \* (f32) D_800BE9E4;/    rate = CF34_RAILF(0x1868, i);/ % ft3
+s/        oz = 0;$/        oz = 1;/ % k3_nov k3
+s/    if (1.0f < rate) {/    if (2.0f < rate) {/ % rate2
+s/    CF34_RAILF(0x1828, i) += dz \* rate;/    CF34_RAILF(0x1828, i) = dz * rate;/ % plain
+s/    if (dist < 1.0f) {/    if (dist < 0.5f) {/ % near07
+s/        if ((dist < 100.0f || kind == 3) \&\& oz != 0) {/        if ((dist < 10.0f || kind == 3) \&\& oz != 0) {/ % oz_close oz_ox
+s/            t \*= 1.25f;/            t *= 1.5f;/ % k9_ox racer2_k9
+s/        dz += h \* t;/        dz -= h * t;/ % ox_only oz_ox
+s/    ang = (f32) (u32) func_1505A630(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (u32) func_1505A630(dx, dz, 0) * 0.0054931640625f;/ % plain
+s/    ang = (f32) (u32) func_1505A630(dx, -dz, 0) \* 0.0054931640625f;/    ang = (f32) (s16) func_1505A630(dx, -dz, 0) * 0.0054931640625f;/ % ang_hi
+s/        cur = CF34_F(obj, 0x40) - 90.0f;/        cur = CF34_F(obj, 0x40) + 90.0f;/ % k3
+s/    diff = func_15144BC8(func_15144BC8(cur) - base);/    diff = func_15144BC8(func_15144BC8(cur) + base);/ % plain
+s/        diff = -360.0f + diff;/        diff = 360.0f - diff;/ % plain_yaw200
+s/    if (45.0f < diff || diff < -45.0f) {/    if (45.0f <= diff || diff < -45.0f) {/ % plain_yaw45
+s/    if (45.0f < diff || diff < -45.0f) {/    if (45.0f < diff) {/ % plain_yawneg
+s/        h = CF34_F(rec, 0x18) + lead - (f32) oz - CF34_RAILF(0x17E8, i);/        h = CF34_F(rec, 0x18) + lead + (f32) oz - CF34_RAILF(0x17E8, i);/ % oz_far
+s/        h = (f32) \*(s16 \*) (rec + 0x1A6) - (f32) oz - CF34_RAILF(0x17E8, i);/        h = (f32) *(s16 *) (rec + 0x1A4) - (f32) oz - CF34_RAILF(0x17E8, i);/ % replan
+s/    CF34_RAILF(0x17E8, i) += h \* rate;/    CF34_RAILF(0x17E8, i) += h;/ % plain
+s/    pitch = (f32) (u32) func_1505A630(dist, CF34_F(CF34_ST(obj), 0x140) - CF34_RAILF(0x17E8, i), 0) \* 0.0054931640625f;/    pitch = (f32) (u32) func_1505A630(dist, CF34_F(CF34_ST(obj), 0x144) - CF34_RAILF(0x17E8, i), 0) * 0.0054931640625f;/ % plain
+s/    while (180.0f < curp) {/    if (180.0f < curp) {/ % plain_dp450
+s/    while (180.0f < dp) {/    if (180.0f < dp) {/ % k15_dp600
+s/    dp = func_15144BC8(curp - pitch);/    dp = func_15144BC8(pitch - curp);/ % plain
+s/    yaw = diff \* 8.0f;/    yaw = diff * 4.0f;/ % plain_small
+s/        yaw = -90.0f;/        yaw = -80.0f;/ % plain_yawneg
+s/        yaw = 90.0f;/        yaw = 80.0f;/ % plain_yaw200 plain_yaw45
+s/        roll = 30.0f;/        roll = 20.0f;/ % plain_dp450 k1B_high
+s/        roll = -30.0f;/        roll = -20.0f;/ % plain_big
+s/    mag = sqrtf(yaw \* yaw + roll \* roll) \* 1.5f;/    mag = sqrtf(yaw * yaw + roll * roll) * 1.25f;/ % plain plain_big
+s/        height = 0.0f;/        height = 1.0f;/ % plain_tiny
+s/    height = -80.0f + height;/    height = -70.0f + height;/ % plain
+s/        height = 35.0f;/        height = 30.0f;/ % k3
+s/        roll = 0.0f;/        roll = 1.0f;/ % k3_nov
+s/        CF34_F(CF34_ST(obj), 0x16C) -= diff;/        CF34_F(CF34_ST(obj), 0x16C) += diff;/ % plain
+s/        CF34_F(CF34_ST(obj), 0x170) = pitch;/        CF34_F(CF34_ST(obj), 0x170) = curp;/ % plain plain_dp450
+s/        func_15048758((f32 \*) (CF34_ST(obj) + 0x16C));/        func_15048758((f32 *) (CF34_ST(obj) + 0x170));/ % plain
+s/        CF34_F(CF34_ST(obj), 0x178) = CF34_F(CF34_ST(obj), 0x170);/        CF34_F(CF34_ST(obj), 0x178) = CF34_F(CF34_ST(obj), 0x16C);/ % plain
+s/        CF34_ST(obj)\[0x85\] = 0;/        CF34_ST(obj)[0x84] = 0;/ % plain
+s/        (\*(u8 \*\*) (veh + 0x36C))\[2\] = (s32) yaw;/        (*(u8 **) (veh + 0x36C))[1] = (s32) yaw;/ % k15 k1B_bit k3 replan_veh
+s/        (\*(u8 \*\*) (veh + 0x36C))\[3\] = (s32) -roll;/        (*(u8 **) (veh + 0x36C))[3] = (s32) roll;/ % k1B_bit replan_veh
+s/        smooth = (f32 \*) (veh + 0x1A4);/        smooth = (f32 *) (veh + 0x1A8);/ % k1B_bit k3
+s/        CF34_ST(obj)\[0x86\] = (s32) -roll;/        CF34_ST(obj)[0x86] = (s32) roll;/ % k15_nov k1B_nobit
+s/            if (height < -50.0f \&\& (CF34_RAILW(0x16C0, i) \& (0x10001 << node))) {/            if (height < -50.0f \&\& (CF34_RAILW(0x16C0, i) \& (0x10001 << (node + 1)))) {/ % k1B_bit_small k1B_nobit_small
+s/            if (height < -50.0f \&\& (CF34_RAILW(0x16C0, i) \& (0x10001 << node))) {/            if (height < -60.0f \&\& (CF34_RAILW(0x16C0, i) \& (0x10001 << node))) {/ % k1B_mid
+s/                \*(u16 \*) (CF34_ST(obj) + 0x8A) |= 0x2000;/                *(u16 *) (CF34_ST(obj) + 0x8A) = 0x2000;/ % k1B_bit_small
+s/            t = (dist - 136.0f) \/ 664.0f;/            t = (dist - 136.0f) \/ 600.0f;/ % k3 k3_nov
+s/                t = 0.0f;/                t = 0.1f;/ % k3_near
+s/            t = sinf((f32) (D_800BEDCC \& 0x3F) \* 0.09815625f) \* 0.175f + t;/            t = sinf((f32) (D_800BEDCC \& 0x1F) * 0.09815625f) * 0.175f + t;/ % k3
+s/            t = sinf((f32) (D_800BEDCC \& 0x3F) \* 0.09815625f) \* 0.175f + t;/            t = sinf((f32) (D_800BEDCC \& 0x3F) * 0.09815625f) * 0.2f + t;/ % k3
+s/                t = 1.0f;$/                t = 0.9f;/ % k3_far
+s/            t = t \* 0.025690002f + 0.017241f;/            t = t * 0.025690002f + 0.02f;/ % k3
+s/            CF34_ST(obj)\[0x86\] = 0;/            CF34_ST(obj)[0x87] = 0;/ % k3
+s/            v = \*(u16 \*) (obj + 0x76) - (s32) (yaw \* 16.0f);/            v = *(u16 *) (obj + 0x76) + (s32) (yaw * 16.0f);/ % k3
+s/            \*(s16 \*) (obj + 0x7A) = v;/            *(s16 *) (obj + 0x78) = v;/ % k3
+s/            CF34_F(obj, 0x40) = (f32) (s16) (v + 0x4000) \* 0.0054931640625f;/            CF34_F(obj, 0x40) = (f32) (u16) (v + 0x4000) * 0.0054931640625f;/ % k3_neg
+s/            func_150DAB6C(obj, t);/            func_150DAB6C(obj, dist);/ % k3
+s/        } else if (CF34_RAILW(0x29C, i) >= 0) {/        } else if (CF34_RAILW(0x29C, i) > 0) {/ % k9_0
+s/        } else if (CF34_RAILW(0x29C, i) >= 0) {/        } else if (CF34_RAILW(0x29C, i) >= -1) {/ % k9_neg
+s/            \*(u16 \*) (CF34_ST(obj) + 0x8A) = 0x2000;/            *(u16 *) (CF34_ST(obj) + 0x8A) |= 0x2000;/ % k9_0 k38_limit k15
+s/                if (D_80087678\[D_800E1000\] < CF34_RAILW(0x29C, i)) {/                if (D_80087678[D_800E1000] <= CF34_RAILW(0x29C, i)) {/ % k9_eq
+s/                    CF34_ST(obj)\[0x8E\] = 0;/                    CF34_ST(obj)[0x8F] = 0;/ % k9_big
+s/            \*(s16 \*) (CF34_ST(obj) + 0x8C) = 0;/            *(s16 *) (CF34_ST(obj) + 0x8C) = 1;/ % special_limit
+s/            \*(s16 \*) (CF34_ST(obj) + 0x8C) = 0x2000;/            *(s16 *) (CF34_ST(obj) + 0x8C) = 0x2001;/ % plain_limit
+s/            CF34_ST(obj)\[0x8F\] = 1;/            CF34_ST(obj)[0x8F] = 2;/ % plain_limit
+s/            \*\*(u16 \*\*) (veh + 0x36C) |= 0x2000;/            **(u16 **) (veh + 0x36C) |= 0x4000;/ % special_veh
+s/    \*(u16 \*) (CF34_ST(obj) + 0x8A) |= 0x10;/    *(u16 *) (CF34_ST(obj) + 0x8A) |= 0x20;/ % plain
+s/    CF34_ST(obj)\[0x8E\] = 1;/    CF34_ST(obj)[0x8E] = 3;/ % plain
+s/    \*smooth = \*smooth + (height - \*smooth) \* 0.125f;/    *smooth = *smooth + (height - *smooth) * 0.25f;/ % plain
+s/        CF34_F(veh, 0x1A8) = CF34_F(veh, 0x1A4) \* scale;/        CF34_F(veh, 0x1A8) = CF34_F(veh, 0x1A4);/ % k1B_bit k3
+s/        \*\*(u16 \*\*) (veh + 0x36C) |= 0x10;/        **(u16 **) (veh + 0x36C) |= 0x20;/ % plain_veh k15
+s/    if (veh != NULL) {$/    if (hasVeh) {/ % k15 k9_0
+
+s/                ox = 50;/                ox = 40;/ % oz_close
