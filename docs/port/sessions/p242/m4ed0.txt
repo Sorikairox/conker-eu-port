@@ -1,0 +1,19 @@
+11s/0x98/0x94/
+14s/0x2E/0x2F/
+14s/== 3/== 4/
+14s/event == 0 ||/event == 1 ||/
+15s/data\[4\] == msg\[4\]/data[4] == msg[5]/
+15s/||/\&\&/
+16s/obj/data/
+18s/0x2D/0x2C/
+19s/==/!=/
+20s/msg + 4/msg + 8/
+22s/9/8/
+23s/msg + 4/msg + 0/
+26s/8/9/
+24s/msg;/data;/
+28s/return;/;/
+30s/0x48/0x47/
+30s/0x7A : 0x79/0x79 : 0x7A/
+30s/(data + 8)/(data + 0xC)/
+30s/0x79, 0)/0x79, 1)/

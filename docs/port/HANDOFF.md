@@ -10,6 +10,38 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P242 (port-b) (session P242, 2026-10-24). Details: `docs/port/sessions/P242.md`
+
+Branch `port-b`. Hand-written C (NM, one block each) + setups + mutants + registry rows: **func_15139768
+object_hit_sparks** (161520, 387; now `void (struct127 *, s32 *, f32, s32 *, u8, s32)`, the NM prototype in
+func_15138C80's block changed with it; v0use: no reader of func_15138C80's v0), **func_150D3870 object_fire_spawn**
+(101080, 450; ships `s32` returning 0 to match game_eu_5D910's declaration; difftest on void variant `d_3870v.c`,
+registry `DRAFT=`), **func_150D4ED0 object_fire_message** (101080, handler table D_8008A760), **func_150FA030
+camera_view_clear_draw** (127840, D_80089578[1], dispatcher signature), **func_1516FF34 sprite_fade_scale_tick**
+(19B180, D_8008CF40), **func_151D1694 object_offset_point** (1FB080: already C, split into its own NM block so
+progress_nm counts it). Harness finding: callee func_15031C4C shares its address with symbol func_1503195C, so
+difftest found no prototype and did not compare its a1 / a2 (workarounds in P242.md section 2).
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1491), selftest 103 / 103 (P242.md section 4).
+
+## Next steps (from P242)
+
+0. **First (coordinator, after P242)**: triage port P241's re-run of port-b registry rows with port's harness (port
+   commit 8c12ab83, logs ~/conker-wt/port/port_work/reverify_all/): DIFFERs in func_15065E18 (6 / 640 setups: k5_u,
+   k5_uk, k5_x, k5_zu, k5_zu0, k5_zx), func_151C0698 (random + 18 / 20), func_150C8F68 (random + 13 / 14, 6 survivors),
+   func_15170648 (0 / 4); then survivors / not-applied lines in func_150C92B8, func_15177360, func_15196438,
+   func_1519AF14, func_150FB398, func_15106260, func_1516FAB8, func_15175160, func_15175514. For each: re-run the
+   recorded command in port-b's tree; if EQUIV here, find the harness / knob difference and fix the registry row,
+   else fix the C. Not started in P242 (arrived at the budget limit).
+1. difftest (port's difftest.py): look up the prototype under every ELF symbol at a callee's address (0x15031C4C =
+   func_15031C4C / func_1503195C); re-check other functions that call aliased addresses.
+2. D_80089578 camera callbacks: func_15110B80 (13DC30, 4 params) and func_150D1D20 (FF530, 7) disagree with the
+   dispatcher's 8-argument type (wasm signature mismatch); give them the common signature under NM.
+3. game_eu_226870 hand asm (func_151F911C / 9060 / 9184 / 933C) + func_151F94E0: private register ABI, convert as one
+   unit with a decoder-state struct (nmasm harness); not started.
+4. Browser: func_15139768 (object hit sparks / smoke), func_150D3870 / func_150D4ED0 (burning effect object, sounds
+   0x5B3 / 0x5B4 / 0x5BC), func_150FA030 (camera callback 1), func_1516FF34 (particle tick).
+5. implicit_scan (port's tool) not run here; run it after the merge.
+
 ## P239 (port-b) (session P239, 2026-10-24). Details: `docs/port/sessions/P239.md`
 
 Branch `port-b`. **D_8008FFE8 (game_1FFF60)**: the ROM table is one 7-entry table at 0x8008FFE0 (D_8008FFE0 = index
