@@ -198,4 +198,22 @@ TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_DECLKW_OLD=1" "$M68DC"
 TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630"
 TRIALS=4 chkce DIFFER func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630" "$M68DC"
 TRIALS=4 chkce EQUIV  func_150768DC "$S68DC DIFFTEST_NOPROTO=func_1505A630 DIFFTEST_JALARG_OLD=1" "$M68DC"
+# P215: (1) P214 lost the `cnt = max(cnt, ...indw...)` line of the P211 jalr compare (indw computed, never used): the
+# func_1513472C `arg0 = 0` case above gave EQUIV (82 / 83 at the end of P214). (2) at a jalr the target register is not
+# an argument: func_1506B04C does `lw a2, D_800864B0(a2); jalr a2` (a2 = the handler address in the reference, `arg`
+# in the candidate) and keeps a scratch copy of `arg` in a3 (`or a3, a2, zero`; it passes it in a1). The target
+# register is skipped (DIFFTEST_JALRTGT_OLD=1 = old); DIFFTEST_JALRSKIP=3 drops the scratch a3 (all 15 handlers take 2 args).
+SB04C="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=80450000,1=A,2=80460010 DIFFTEST_POKE=8045002C=3F800000"
+TRIALS=4 chkce EQUIV  func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3"
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3" 's/handler(obj, arg);/handler(obj, obj);/'
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3" 's/handler(obj, arg);/handler(arg, arg);/'
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C DIFFTEST_JALRSKIP=3 DIFFTEST_JALRTGT_OLD=1"
+TRIALS=4 chkce DIFFER func_1506B04C "$SB04C"
+# P215: (3) a TU-literal argument (candidate "%d" at TU_BASE vs the reference's rodata_inject D_8009DDF0) compared
+# "different" when the reference never touched that page (unmapped: mem_read failed). Now the page's initial content
+# is read (DIFFTEST_TUPEEK_OLD=1 = old). func_1508AB7C draws the counters with func_15042D94(x, y, 1, "%d", n / 50).
+SAB7C="DIFFTEST_ROMDATA=1 DIFFTEST_TUCMP_LEN=4 DIFFTEST_EXACT=* DIFFTEST_POKE=800D27D0=80450000,80450010=3,800BEE04=2,800CCA0C=80460000,800CCD38=80460000,800CD064=80460000,80460198=00000000,804601AC=00000000,800E1000=00000000,80450E64=0,80450E68=1,80450E6C=2,804516BC=00B90000,800CC91C=0,800CCC48=0,800CCF74=0,80450014=00000000,80450018=00000000,8045035C=00000000,80450360=00000000,80450364=00000000,8045031C=00000000,80450320=00000000,80450324=00000000,800E0FE8=02000000,800BEA48=80470000,80470024=41200000,8047002C=42000000,80470030=43000000,800CC818=0,80083330=1,80451574=00000123,80451578=00000123,8045157C=00000123 DIFFTEST_RET=15085E1C=0 DIFFTEST_RETF=150ADF48=3F400000"
+TRIALS=4 chkce EQUIV  func_1508AB7C "$SAB7C"
+TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C" 's/(s32) "%d"/(s32) "%x"/'
+TRIALS=4 chkce DIFFER func_1508AB7C "$SAB7C DIFFTEST_TUPEEK_OLD=1"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

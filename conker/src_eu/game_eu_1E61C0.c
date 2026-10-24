@@ -153,7 +153,9 @@ f32 func_150ADA68(void);
 // smoke_puff_spawn: spawns one big smoke puff particle (random texture of the 4 in D_800AA898, half size
 // 900..1400, white, alpha 0xFF, 300 frames, fade from 1 at rate 0xFF, draw 6 / update 5, random flip flags 0x40 /
 // 0x80) at the object's position +0x38, in its room (+0xC) for its owner (+0x1) through func_151307F0.
-void func_151B8EB8(u8 *obj) {
+// Returns func_151307F0's result (the new particle): P215, the asm returns it and port-b's asm caller func_151C0698
+// stores it at its particle payload +0x84 (func_151C1730 dereferences it every frame).
+s32 func_151B8EB8(u8 *obj) {
     s32 textures[4];
     struct {
         s32 handlers;   /* +0x00: 0x200005 */
@@ -239,7 +241,7 @@ void func_151B8EB8(u8 *obj) {
     req.u65 = 0;
     req.u5C = 0;
     req.u66 = 0xFF;
-    func_151307F0((s32) &req, 1, 0, 0, obj[0xC], obj[1]);
+    return func_151307F0((s32) &req, 1, 0, 0, obj[0xC], obj[1]);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E61C0/func_151B8EB8.s")

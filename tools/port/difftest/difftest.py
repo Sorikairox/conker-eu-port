@@ -713,6 +713,8 @@ def param_kinds(tu, func):
 # listed values per trial, to reach paths behind rare argument bits (func_1502B350's packed-record flag).
 ARGFIX = {}
 JALRARG_OLD = os.environ.get('DIFFTEST_JALRARG_OLD') == '1'   # P211: old jalr argument compare (see compare)
+JALRTGT_OLD = os.environ.get('DIFFTEST_JALRTGT_OLD') == '1'   # P215: old jalr target-register handling (see compare)
+JALRSKIP = {int(x) for x in filter(None, os.environ.get('DIFFTEST_JALRSKIP', '').split(','))}   # P215: scratch arg GPRs at jalrs (see compare)
 NOPROTO = set(filter(None, os.environ.get('DIFFTEST_NOPROTO', '').split(',')))   # P214: selftest hook
 JALARG_OLD = os.environ.get('DIFFTEST_JALARG_OLD') == '1'
 JALARG_WIDE = os.environ.get('DIFFTEST_JALARG_WIDE') == '1'   # P214: opt-in wide jal argument compare (see compare)   # P214: old argument compare at direct calls of unknown prototype
@@ -1064,10 +1066,11 @@ class Run:
         stkw = [struct.unpack('>I', mu.mem_read(phys(sp) + o, 4))[0] for o in range(16, 0x40 if STKW_OLD else 0x100, 4)]
         fregs = {n: 0 for n in (12, 13, 14, 15)}   # filled by flush_fregs once the helper ran
         ind = site is not None and (self.words[site] & 0xFC00003F) == 9   # P112: reached through jalr
+        jrs = (self.words[site] >> 21) & 31 if ind else None   # P215: the jalr's target register
         awr = self.awr; self.awr = set()
         awf = self.awf; self.awf = set()   # P214: arg FPRs written since the previous call
         awr_all, awf_all = set(self.awr_all), set(self.awf_all)   # P211: arg GPRs / FPRs written since entry
-        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, awr=awr, awf=awf, awr_all=awr_all, awf_all=awf_all,
+        self.calls.append(dict(addr=addr, name=name, regs=regs, a=a, f=f, stk=stk, stkw=stkw, fregs=fregs, ind=ind, jrs=jrs, awr=awr, awf=awf, awr_all=awr_all, awf_all=awf_all,
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
@@ -1177,10 +1180,24 @@ def same_val(R, a, C, b):
         # candidate table is followed by other data than the reference's rodata vector, e.g. func_1510A98C)
         n = int(os.environ.get('DIFFTEST_TUCMP_LEN') or '32')
         try:
-            return bytes(R.mu.mem_read(phys(a), n)) == bytes(C.mu.mem_read(phys(b), n))
+            if os.environ.get('DIFFTEST_TUPEEK_OLD') == '1':
+                return bytes(R.mu.mem_read(phys(a), n)) == bytes(C.mu.mem_read(phys(b), n))
+            return _peek(R, a, n) == _peek(C, b, n)
         except Exception:
             return False
     return False
+
+
+def _peek(run, a, n):
+    """P215: n bytes at a; a page the run never touched gives its initial content (ROM image / pokes / random)
+    instead of failing (the reference's own string D_8009DDF0, passed by func_1508AB7C to func_15042D94 but never
+    read by it, sat on an unmapped page, so the TU-literal compare was always 'different'). DIFFTEST_TUPEEK_OLD=1 = old."""
+    out = b''; p = phys(a)
+    while len(out) < n:
+        pp = p & ~(PAGE - 1); k = min(n - len(out), pp + PAGE - p)
+        out += bytes(run.mu.mem_read(p, k)) if pp in run.mapped else run.page_init(pp)[p - pp:p - pp + k]
+        p += k
+    return out
 
 
 LIBULTRA_PREFIXES = ('os', '__os', 'gu', 'bzero', 'bcopy')
@@ -1237,6 +1254,9 @@ def compare(R, C, rk, arity):
         indw = set()
         if a.get('ind') and not JALRARG_OLD:
             indw = a.get('awr_all', set()) | b.get('awr_all', set())
+            # P211 jalr GPR compare. P215: this line was lost in the P214 edit below (indw computed, never used), so
+            # jalr a0-a3 were compared only up to the target's arity: selftest func_1513472C `arg0 = 0` gave EQUIV.
+            cnt = max(cnt, max(indw, default=-1) + 1)
         # P214: DIFFTEST_JALARG_WIDE=1 (opt-in): a direct call (jal) of a function with no known prototype also compares
         # every arg GPR / FPR either side wrote since the previous call. Not the default: IDO keeps locals and
         # temporaries in a0-a3 / f12-f15 between calls (func_151DE100 keeps a byte local in a0 across its call of the
@@ -1246,8 +1266,18 @@ def compare(R, C, rk, arity):
         jw = set()
         if not a.get('ind') and na is None and not JALARG_OLD and JALARG_WIDE:
             jw = (a.get('awr', set()) | b.get('awr', set())) - set(range(cnt))
+        # P215: at a jalr, an arg register that holds the jump target on either side is not an argument (func_1506B04C
+        # does `lw a2, table(a2); jalr a2`: a2 = the handler's address in the reference, `arg` in the candidate, a false
+        # DIFFER since P211). Skipped unless the target's known arity covers it. DIFFTEST_JALRTGT_OLD=1 = old.
+        tgt = set()
+        if a.get('ind') and not JALRTGT_OLD:
+            tgt = {c['jrs'] - 4 for c in (a, b) if c.get('jrs') is not None and 4 <= c['jrs'] <= 7}
+            # DIFFTEST_JALRSKIP=N,...: arg GPRs aN the caller only uses as scratch before a jalr (func_1506B04C copies
+            # `arg` to a3 and passes it in a1; all 15 D_800864B0 handlers take 2 args). Check every table entry first.
+            tgt |= JALRSKIP
+            tgt = {k for k in tgt if na is None or na == 99 or k >= na}
         for k in sorted(set(range(min(cnt, 4))) | jw):
-            if k in FSKIP.get(a['name'], ()): continue
+            if k in FSKIP.get(a['name'], ()) or k in tgt: continue
             if not same_val(R, a['regs'][k], C, b['regs'][k]):
                 return 'call #%d %s: a%d ref=0x%X cand=0x%X' % (i, a['name'], k, a['regs'][k], b['regs'][k])
         # outgoing stack args: the contiguous run of slots from sp+0x10 written right before the call

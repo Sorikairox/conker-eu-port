@@ -10,6 +10,33 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P215, 2026-10-24). Details: `docs/port/sessions/P215.md`
+
+Branch `port` (P214 2f944d3c + P215 commit).
+- Selftest regression root cause: P214's compare() edit deleted the P211 line `cnt = max(cnt, max(indw)+1)` (jalr GPR
+  compare silently off; JALRARG_OLD a no-op). Restored. All difftest runs after that P214 edit with a jalr are suspect;
+  P214's dispatcher re-check redone (P215.md section 4).
+- difftest: jalr target register not compared (JALRTGT_OLD=1 = old); `DIFFTEST_JALRSKIP=N,..` drops scratch arg GPRs at
+  jalrs (check every table entry first); TU-literal compare reads unmapped reference pages' initial content
+  (TUPEEK_OLD=1 = old). Selftest cases func_1506B04C (5), func_1508AB7C (3): 91 / 91.
+- func_1506B04C: C was right (handler(obj, arg)); the DIFFER was a2 = jump target + a3 scratch copy. Verified.
+- Natives func_150AE5D8 / 5E8 / 5F8 / 60C: EQUIV, all mutants killed (new setup idhi8).
+- func_151B8EB8 (1E61C0): NM C now `s32`, returns func_151307F0's particle (port-b func_151C0698 stores it at +0x84).
+- port-b question: func_1519AF14 does NOT set a1 at the D_8008FC48 jalr: a1 is stale (loop index on the early exits
+  after func_15144528, memcpy / func_1513D2F0 leftovers on the loop path), never a vec3 pointer (P215.md section 5).
+- Hand C (NM, B7840): func_1508AB7C rail_racers_update (cmd 6, returns the started-racer mask).
+- Checks: verify_all OK, NM build links, protocheck 0 (1432), selftest 91 / 91, progress_nm 5426 / 5915 (91.7%), C bytes 78.6%.
+
+## Next steps (from P215)
+1. func_1514D3B0 (17A800): a2 / a3 are u8 in functions.h but the asm passes them unmasked (random DIFFER a2 0x141A vs
+   0x1A). Change to s32 (prototype + NM def) and check the default build of the C callers (A28B0 is port-b's).
+2. Random DIFFERs still open (not new-compare artefacts): func_1504A730, func_151416E8, func_151D9014; check with WLOG
+   whether lazily filled pages / random tables explain them.
+3. Setup files of func_15169260 / func_15160310 / func_15013000 / func_151D9014 / func_1514D3B0 give UNSURE at TR=4
+   (faults): rerun with more trials or fix the setups.
+4. B7840: func_1508E080, func_1508CF34. Breadth: `p215/asmlist.py`.
+5. port-b: re-run A28B0 mutants (DECLKW fix, P214) - and any port-b mutant run made on a merge of P214 (jalr compare off).
+
 ## State (session P214, 2026-10-24). Details: `docs/port/sessions/P214.md`
 
 Branch `port` (P211 b635f45 + P214 commit).

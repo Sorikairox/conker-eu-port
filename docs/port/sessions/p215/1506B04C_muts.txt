@@ -1,0 +1,13 @@
+s/if (type < 0 || type >= 15)/if (type < 0 || type >= 14)/
+s/if (type < 0 || type >= 15)/if (type < 1 || type >= 15)/
+s/if (type < 0 || type >= 15)/if (type >= 15)/
+s/point\[1\] = \*(f32 \*) (obj + 0x30)/point[1] = *(f32 *) (obj + 0x34)/
+s/point\[0\] = \*(f32 \*) (obj + 0x2C)/point[0] = *(f32 *) (obj + 0x14)/
+s/vec\[2\] = D_800CC674\[2\]/vec[2] = D_800CC674[1]/
+s/vec\[0\] = D_800CC674\[0\];/vec[0] = point[0];/
+s/handler(obj, arg);/handler(obj, NULL);/
+s/handler(obj, arg);/handler(arg, arg);/
+s/handler = D_800864B0\[type\];/handler = D_800864B0[type + 1];/
+s/if (handler != NULL) {/if (1) {/
+s/handler(obj, arg);/handler(obj, obj);/
+s/vec\[1\] = D_800CC674\[1\];/vec[1] = D_800CC674[0];/
