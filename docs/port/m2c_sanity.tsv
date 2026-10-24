@@ -30,6 +30,7 @@ func_150611E8	conker/src_eu/game_83300.c	width	high	0	O:20 asm{h1L,w1L} IR{w1L}
 func_150611E8	conker/src_eu/game_83300.c	width	high	0	O:28 asm{h1L,w1L} IR{w1L}
 func_150A6070	conker/src_eu/game_eu_D3880.c	width	high	0	O:0 asm{h1L,w5LS} IR{w1L}
 func_150EF90C	conker/src_eu/game_eu_11CB90.c	width	high	0	O:24 asm{b6LS,w1L} IR{w1L}
+func_150F5FD4	conker/src_eu/game_eu_1231B0.c	width	high	0	O:0 asm{b2L,w2LS} IR{w3LS}
 func_15109A7C	conker/src_eu/game_eu_1371A0.c	width	high	0	O:4 asm{b1L} IR{w1L}
 func_1518C628	conker/src_eu/game_eu_1B9810.c	width	high	0	O:4 asm{b5L,w9LS} IR{w5LS}
 func_150A6D40	conker/src_eu/game_eu_D4550.c	pscale	med	2	L134/L135/L136 (x*8)+ptr on i16 (size 2): byte scale 16; asm adds {-} to that base, x8 elsewhere
@@ -86,6 +87,7 @@ func_151BEE00	conker/src_eu/game_eu_1EC610.c	width	med	2	O:0 asm{w2L} IR{b1L,w3L
 func_1507CD64	conker/src_eu/game_A9D90.c	width	med	1	O:0 asm{b3S,w1L} IR{w2L}
 func_1507DB6C	conker/src_eu/game_A9D90.c	width	med	1	O:0 asm{b3LS,w12S} IR{w1S}
 func_15081A90	conker/src_eu/game_eu_AF2A0.c	width	med	1	O:0 asm{b4L,w3S} IR{w3S}
+func_150867D4	conker/src_eu/game_eu_B37F0.c	width	med	1	O:2 asm{b10L,h4L} IR{h4L}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:0 asm{w20LS} IR{h1L,w6LS}
 func_150900F0	conker/src_eu/game_BC510.c	width	med	1	O:4 asm{w19LS} IR{h1L,w4S}
 func_150954E4	conker/src_eu/game_eu_C2B60.c	width	med	1	O:0 asm{w13LS} IR{b5L,w3LS}
@@ -103,6 +105,7 @@ func_150E89F0	conker/src_eu/game_eu_114640.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150E995C	conker/src_eu/game_eu_114640.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_150ECC30	conker/src_eu/game_eu_11A2B0.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150F16F0	conker/src_eu/game_eu_11CB90.c	width	med	1	O:12 asm{w2LS} IR{b1L}
+func_150F8EAC	conker/src_eu/game_eu_126330.c	width	med	1	O:48 asm{w6LS} IR{b6LS}
 func_1510783C	conker/src_eu/game_eu_133A70.c	width	med	1	O:20 asm{h2L} IR{w1L}
 func_1510783C	conker/src_eu/game_eu_133A70.c	width	med	1	O:44 asm{b1L} IR{w5LS}
 func_1510783C	conker/src_eu/game_eu_133A70.c	width	med	1	O:96 asm{w1L} IR{b1L,w1L}

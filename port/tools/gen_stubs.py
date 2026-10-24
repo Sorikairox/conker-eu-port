@@ -128,7 +128,8 @@ def main():
             if k: passthru_k[m.group(1)] = k
     npass = ndl = 0
     # P199: name -> (index of the DL argument, argument count); checked against the asm (returns v0 = that argument)
-    DL_INDIRECT = {'func_151A03DC': (1, 3)}  # foot-trail / ripple particle draw (D_8008A5A0 table), v0 = a1
+    # P212: func_151A03DC (foot-trail / ripple draw, D_8008A5A0 table, v0 = a1) removed: C since port P204
+    DL_INDIRECT = {}
     for n in funcs:
         sigs = undef_f[n]
         (ps, rs), _ = sigs.most_common(1)[0]
