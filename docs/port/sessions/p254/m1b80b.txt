@@ -1,0 +1,2 @@
+\#^    \*(f32 \*) (owner + 4) = \*(f32 \*) (owner + 4) + rec\[3\] \* 21\.85f;$#s/21\.85f/21.8500023f/ % t0
+\#^        mid\[8\] = 0\.0f;$#s/0\.0f/1.0f/ % degenerate degenerate2

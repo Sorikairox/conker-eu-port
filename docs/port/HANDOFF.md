@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P254 (port-b) (session P254, 2026-10-25). Details: `docs/port/sessions/P254.md`
+
+Branch `port-b`. **Tank-mode black screen (coordinator priority)**: func_151D2248 trail_ribbon_draw is entry 18 of
+D_8008A644 (`s32 (u8 *, s32 dl, s16 slot)`) and returns the advanced display list; the stub returned 0, so
+func_151481BC's caller wrote the DL at NULL (D9FDFFFF at null+0x10). Converted with func_151D1B80 tank_track_record
+(D_8008A5DC[17], `s32 (u8 *)`); both difftest EQUIV + mutants (39 / 42 + 2 / 2, 40 / 43 + 2 / 2, survivors explained).
+Breadth (hand C, NM): func_15198D3C, func_1519D320, func_15170D50, func_15139578, func_150FB06C, then func_151389A8,
+func_15199F80, func_15198AE0 (the last one is outside the registry: its string literal pointer differs from ROM
+D_800A8E64; verified with a ROM-address draft). Two first drafts were caught by difftest with implicit float calls
+(func_150F4AF0, func_15144528) -> prototypes. Checks: verify_all rc 0, NM rc 0, protocheck 0 (1564), selftest 118 / 118,
+implicit NM+float 0. progress_nm total 5577 / 5915 (94.3%), C bytes 85.5%.
+Not done: task 2 (func_15134E48 without JALRARG_OLD: port-b lacks port's P250 commit), D5E90 hand asm.
+
+## Next steps (from P254)
+
+1. Browser: Tank mode (no more DL writes at NULL?), path emitters / flame thrower, bone splashes, arc bolts.
+2. Next asm-only in port-b files: func_1516DCA8 (153, 19B180), func_15106794 (168, 133A70), func_150FA738 (172,
+   127840), func_151349D0 (178, 161520); D5E90 sin / cos group.
+3. After merging port P250: re-run func_15134E48 without DIFFTEST_JALRARG_OLD.
+4. Harness: string-argument compare by content (func_15198AE0); reverify support for whole-function harness rows.
+
 ## P251 (port-b) (session P251, 2026-10-25). Details: `docs/port/sessions/P251.md`
 
 Branch `port-b`. **MP3 (game_eu_226870) done as hand C (NM)**: func_151F94E0 mp3_imdct36_hybrid (958 words, bit-exact
