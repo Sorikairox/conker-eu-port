@@ -44,9 +44,19 @@ for F in "$@"; do
   done; fi
   [ -n "$MUT" ] && for m in ${mu//,/ }; do
     M=$W/${F}_mut_$$.c; k=0; sv=""; na=0; inv=""; tot=0
+    # P241: line-numbered mutant files were written against one of two draft layouts: the whole NM block (P235 on) or
+    # the body without the `#ifdef NON_MATCHING` line (e.g. P222 drafts). Per mutant file, the layout under which more
+    # mutants apply is used (ties: whole block; NMBLOCK_BODY=1 / NMBLOCK_FIXED=1 = no choice, as before).
+    lay=""; if [ -z "$NMBLOCK_BODY$NMBLOCK_FIXED" ]; then CB=$W/${F}_body_$$.c
+      env -u NMBLOCK_WHOLE python3 tools/port/nmblock.py $F $CB > /dev/null
+      aw=0; ab=0; while IFS='%' read -r e names; do e=$(echo "$e" | sed 's/ *$//')
+        sed "$e" $C 2>/dev/null | cmp -s $C - || aw=$((aw+1)); sed "$e" $CB 2>/dev/null | cmp -s $CB - || ab=$((ab+1))
+      done < <(grep -vE '^\s*(#|$)' "$m")
+      if [ $ab -gt $aw ]; then lay=" [layout body: $ab vs whole $aw applied]"; Cm=$CB; else Cm=$C; [ $ab != $aw ] && lay=" [layout whole: $aw vs body $ab applied]"; fi
+    else Cm=$C; fi
     while IFS='%' read -r e names; do
       e=$(echo "$e" | sed 's/ *$//'); tot=$((tot+1))
-      sed "$e" $C > $M 2>/dev/null || { inv="$inv sed:[$e]"; continue; }; cmp -s $C $M && { na=$((na+1)); continue; }
+      sed "$e" $Cm > $M 2>/dev/null || { inv="$inv sed:[$e]"; continue; }; cmp -s $Cm $M && { na=$((na+1)); continue; }
       if [ "${NR:-100}" != 0 ] && [ -n "$randok" ] && [ "$(NOARGMEM=1 CUT=6 dt tools/port/difftest.sh $F $M --trials ${NR:-100} --seed 1)" = DIFFER ]; then k=$((k+1)); continue; fi
       hit=""; first=${st%%,*}
       # synchronous (STOP ends the runner at the first non-EQUIV setup): a `< <(runset)` loop left the runner going
@@ -54,8 +64,8 @@ for F in "$@"; do
       [ -n "$first" ] && while read -r nm r; do case "$r" in DIFFER*) hit=1; break;; EQUIV*) ;; *) hit="inv"; why="$nm=$(echo $r | cut -c1-120)"; break;; esac
       done <<< "$(STOP=1 runset $M $first $names)"
       case "$hit" in 1) k=$((k+1));; inv) inv="$inv [$e]($why)";; *) sv="$sv [$e]";; esac
-    done < <(grep -vE '^\s*(#|$)' "$m"); rm -f $M
-    echo "  muts $(basename $m): $k killed / $tot${sv:+ (survived:$sv)}; not applied: $na${inv:+; invalid:$inv}" | { [ -n "$MUTCUT" ] && cut -c1-$MUTCUT || cat; }
+    done < <(grep -vE '^\s*(#|$)' "$m"); rm -f $M ${CB:-}
+    echo "  muts $(basename $m): $k killed / $tot${sv:+ (survived:$sv)}; not applied: $na${inv:+; invalid:$inv}$lay" | { [ -n "$MUTCUT" ] && cut -c1-$MUTCUT || cat; }
   done
   docker exec ${CONKERDEV:-conkerdev} rm -rf /conker/conker/$T 2>/dev/null
 done

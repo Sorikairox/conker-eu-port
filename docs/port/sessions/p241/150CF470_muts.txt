@@ -1,0 +1,15 @@
+# P241 func_150CF470 (level_light2_orbit) mutants: sed % setup names
+s/(func_151149AC(4) + 8)/(func_151149AC(4) + 4)/ % a30
+s/func_151149AC(4)/func_151149AC(3)/ % a30
+s/ \* 0.017453292f;/ * 0.0175f;/ % a30
+s/    f32 s = func_150AD78C(angle);/    f32 s = func_150AD780(angle);/ % a30
+s/    f32 dx = 76.0f - -1.0f;/    f32 dx = 76.0f - 1.0f;/ % a30
+s/    f32 dy = 241.0f - 44.0f;/    f32 dy = 241.0f - 45.0f;/ % a30
+s/(s16) (dx \* c - dy \* s + -1.0f)/(s16) (dx * c + dy * s + -1.0f)/ % a30
+s/(s16) (dx \* c - dy \* s + -1.0f)/(s16) (dx * c - dy * s)/ % a30
+s/(s16) (dx \* s + dy \* c + 44.0f)/(s16) (dx * s - dy * c + 44.0f)/ % a30
+s/(s16) (dx \* s + dy \* c + 44.0f)/(s16) (dx * c + dy * s + 44.0f)/ % neg
+s/(s16) -1805.0f)/(s16) -1804.0f)/ % a30
+s/    func_150A3924(2,/    func_150A3924(1,/ % a30
+s/    func_15174F10(5, 3);/    func_15174F10(5, 4);/ % a30
+s/    func_15174F10(5, 3);/    func_15174F10(4, 3);/ % a30

@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P241, 2026-10-24). Details: `docs/port/sessions/P241.md`
+- Merged port-b b798adaf (limiter, NMBLOCK_WHOLE, P225-P235). reverify.sh now picks the mutant layout per file (body-only
+  P222-era drafts vs whole-block P225+); new tools/port/reverify_all.sh. Re-run partial: changed rows (all port-b) in P241.md section 2.
+- Hand C (NM): func_151D75B0 money_popup_draw, func_150CF470 level_light2_orbit, func_1514DAD4 object_fixed_beam_spawn,
+  func_151A9670 object_effect_kind2_start, func_eu_151D8FD4 rumble_effect_update, func_15134004 attached_bone_matrix,
+  func_150EF204 rider_dismount_enter, func_151008C0 sky_segments_flicker (all mutants killed).
+- Fix: func_15132FF8 passes the object to the D_80089D2C handlers. variables.h: NM s32 declarations of D_8008FFE8 / D_8008DA20.
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1533), implicit_scan 0 NM+float, selftest 111 / 111, progress_nm
+  `total 5915 3994 1551 370 5545 93.7% 1903008/2253856 (84.4%)`.
+
+## Next steps (from P241)
+1. Finish the registry re-run (FROM= commands in P241.md section 6); port-b reviews its rows.
+2. difftest gap: longer candidate calling the next function (coordinator item b), not done.
+3. port-web: browser-check the P241 functions and the D_80089D2C argument fix.
+
 ## State (session P238, 2026-10-24). Details: `docs/port/sessions/P238.md`
 - Hand C (NM, one block each, all in the registry with setups + mutants): func_150C1B60 `spawn_ring_kind2_small`
   (EF370, 11 / 11), func_150FD49C `view_spot_distance_fade` (12A7C0, D_8008B734 entry 0, f32, 12 / 12),

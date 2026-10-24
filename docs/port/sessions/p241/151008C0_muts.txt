@@ -1,0 +1,16 @@
+# P241 func_151008C0 (sky_segments_flicker) mutants: sed % setup names
+s/    if (arg0 != 0) {/    if (arg0 == 0) {/ % edges
+s/    D_800DD835++;/    D_800DD835 += 2;/ % edges
+s/    for (i = 0; i < 5; i++) {/    for (i = 0; i < 4; i++) {/ % edges
+s/        chance = (D_800BE500\[i\] != 0) ? 70 : 35;/        chance = (D_800BE500[i] != 0) ? 69 : 35;/ % edges
+s/        chance = (D_800BE500\[i\] != 0) ? 70 : 35;/        chance = (D_800BE500[i] != 0) ? 70 : 36;/ % edges
+s/        chance = (D_800BE500\[i\] != 0) ? 70 : 35;/        chance = (D_800BE500[i] == 0) ? 70 : 35;/ % edges
+s/            D_800BE500\[i\] ^= 1;/            D_800BE500[i] = 1;/ % edges
+s/                func_151616D0(ids.id\[i\], 0x18, 0);/                func_151616D0(ids.id[i], 0x19, 0);/ % edges
+s/                func_151616D0(ids.id\[i\], 0x18, 0);/                func_151616D0(ids.id[0], 0x18, 0);/ % edges
+s/                func_151616D0(ids.id\[i\], 0x1C, 0);/                func_151616D0(ids.id[i], 0x1C, 1);/ % edges
+s/                func_151616D0(ids.id\[i\], 0x17, 0);/                func_151616D0(ids.id[i], 0x16, 0);/ % edges
+s/                func_151616D0(ids.id\[i\], 0x17, 0);/                func_151616D0(i, 0x17, 0);/ % edges
+s/ 1000 < chance/ 1000 <= chance/ % edges
+s/(u32) func_150ADA20() \(.\) 1000 < chance/func_150ADA20() \1 1000 < (s32) chance/ % mod
+s/ 1000 < chance/ 100 < chance/ % mod
