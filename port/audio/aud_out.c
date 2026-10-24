@@ -99,6 +99,25 @@ void aud_out_push_game(const void *buf, unsigned frames) {
             }
         }
     }
+    { /* P258 DIAGNOSTIC ?p258pcm=N: from retrace N, one line per 25 pushes (~1 s): FNV-1a hash of the PCM, rms, peak,
+       * nonzero %, RSP mp3 commands so far. With ?det=2 two builds can be compared on the same frames. */
+        static int f = -1; static unsigned h = 2166136261u, n, pushes, nz, pk, first; static double e;
+        if (f < 0) f = port_flag("p258pcm");
+        if (f > 0 && port_frame_count >= (unsigned)f) {
+            if (!pushes) first = port_frame_count;
+            for (unsigned i = 0; i < 2 * frames; i++) {
+                int v = (int16_t)vbe_ld16(p + 2 * i);
+                h = (h ^ (unsigned)(v & 0xFFFF)) * 16777619u; e += (double)v * v; nz += v != 0;
+                if ((unsigned)(v < 0 ? -v : v) > pk) pk = v < 0 ? -v : v;
+            }
+            n += frames;
+            if (++pushes == 25) {
+                port_log("[p258pcm] frames %u-%u: %u samples hash %08x rms %.1f peak %u nonzero %u%% mp3 %u\n", first,
+                         port_frame_count, n, h, __builtin_sqrt(e / (2.0 * n)), pk, nz * 50 / n, aud_stats.mp3);
+                h = 2166136261u; n = 0; pushes = 0; nz = 0; pk = 0; e = 0;
+            }
+        }
+    }
     for (unsigned i = 0; i < frames; i++) {
         unsigned nx = (wr + 1) & (RING - 1);
         if (nx == rd) { dropped += frames - i; break; }
