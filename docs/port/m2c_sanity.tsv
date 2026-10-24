@@ -100,6 +100,7 @@ func_150AF808	conker/src_eu/game_eu_DCEF0.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150B2470	conker/src_eu/game_eu_DFAA0.c	width	med	1	O:12 asm{w6LS} IR{b1L}
 func_150B3CA8	conker/src_eu/game_eu_E0430.c	width	med	1	O:12 asm{w1L} IR{b2L,w1L}
 func_150CFD10	conker/src_eu/game_eu_FCE60.c	width	med	1	O:12 asm{w2L} IR{b1L}
+func_150D083C	conker/src_eu/game_eu_FDEC0.c	width	med	1	O:4 asm{b1S,h10LS} IR{h8LS}
 func_150D247C	conker/src_eu/game_eu_FF950.c	width	med	1	O:68 asm{b5LS,w1S} IR{w1S}
 func_150D2E34	conker/src_eu/game_eu_100410.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_150E6D50	conker/src_eu/game_eu_113D60.c	width	med	1	O:12 asm{w1L} IR{b1L}
@@ -129,6 +130,7 @@ func_151A9940	conker/src_eu/game_eu_1D5710.c	width	med	1	O:0 asm{w1L} IR{h1L,w2L
 func_151A9940	conker/src_eu/game_eu_1D5710.c	width	med	1	O:4 asm{w1L} IR{h1L,w2L}
 func_151A9BE4	conker/src_eu/game_eu_1D5710.c	width	med	1	O:12 asm{w1L} IR{b1L}
 func_151ABF78	conker/src_eu/game_eu_1D7790.c	width	med	1	O:12 asm{w6LS} IR{b1L}
+func_151BA634	conker/src_eu/game_eu_1E7CC0.c	width	med	1	O:4 asm{b1L,h1L} IR{h1L}
 func_151BFDCC	conker/src_eu/game_eu_1EC610.c	width	med	1	O:20 asm{b4LS,w4S} IR{w4S}
 func_151C7B1C	conker/src_eu/game_eu_1F4F60.c	width	med	1	O:0 asm{w7L} IR{b2L,w9L}
 func_151CEC80	conker/src_eu/game_eu_1FB080.c	width	med	1	O:12 asm{w2L} IR{b1L}
@@ -150,6 +152,7 @@ func_1510CA2C	conker/src_eu/game_eu_138E00.c	width	med	0	O:4 asm{h2S,w12LS} IR{w
 func_15172634	conker/src_eu/game_eu_19FA20.c	width	med	0	O:0 asm{h1S,w17LS} IR{w14LS}
 func_151A2A58	conker/src_eu/game_eu_1CE7D0.c	width	med	0	O:20 asm{h2L,w1S} IR{w1S}
 func_151C0434	conker/src_eu/game_eu_1EDA00.c	width	med	0	O:0 asm{w2L} IR{b1L,w4L}
+func_151D16E8	conker/src_eu/game_eu_1FB080.c	width	med	0	O:52 asm{b1L} IR{w1L}
 func_151F9150	conker/src_eu/game_eu_226870.c	width	med	0	O:0 asm{w2LS} IR{b1L,w2LS}
 func_160014F0	conker/src_eu/debugger/debugger.c	width	med	0	O:0 asm{h4S} IR{b1L,h1S}
 func_150A86B0	conker/src_eu/nm_asm/D5E90_anim.c	pscale	low	2	(x*12)+ptr on i16 (size 2): byte scale 24; asm adds {-} to that base, x12 elsewhere
@@ -298,5 +301,6 @@ func_151A831C	conker/src_eu/game_eu_1D5710.c	width	low	0	O:20 asm{w2L} IR{h3S,w7
 func_151B2F24	conker/src_eu/game_eu_1DFE20.c	width	low	0	O:32 asm{w1L} IR{h3S}
 func_151B2F24	conker/src_eu/game_eu_1DFE20.c	width	low	0	O:4 asm{b1L,h4S,w4LS} IR{h4S,w2LS}
 func_151B81E8	conker/src_eu/game_eu_1E40E0.c	width	low	0	O:16 asm{b3L} IR{b3L,h2S}
+func_151D16E8	conker/src_eu/game_eu_1FB080.c	width	low	0	O:44 asm{w1S} IR{b1L}
 func_151D8674	conker/src_eu/game_eu_204F70.c	width	low	0	O:16 asm{w1L} IR{h2S,w2LS}
 func_151D8674	conker/src_eu/game_eu_204F70.c	width	low	0	O:28 asm{h1L} IR{b2S,h1L}

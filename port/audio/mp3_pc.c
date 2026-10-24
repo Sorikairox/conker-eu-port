@@ -40,6 +40,10 @@ static u32 getbits(u8 *buf, s32 *pos, s32 n) {
 
 /* func_151F9150 (get bits): removed in P199, the game C (P190, game_eu_226870.c mp3util_get_bits) defines it now */
 
+/* P258: port-b P251 made func_151F9184 / func_151F933C (Huffman, with the static helpers 9060 / 911C) and func_151F94E0
+ * (IMDCT 36) game C (game_eu_226870.c, bit-exact with the asm). These P14 PC versions are kept for A/B runs only:
+ * build with -DP258_MP3_PC_OLD and without the game C ones. */
+#ifdef P258_MP3_PC_OLD
 /* func_151F9060: one Huffman symbol of table `tbl`. Returns the first value, *second gets the other. */
 static s32 huff(u8 *buf, s32 *pos, s32 tbl, s32 *second) {
     u8 *p = buf + ((u32)*pos >> 3);
@@ -126,6 +130,8 @@ s32 func_151F933C(u8 *buf, s32 *bitpos, s32 tbl, s32 idx, s32 endbit, s16 **out,
     return idx;
 }
 
+#endif /* P258_MP3_PC_OLD */
+
 /* ---- IMDCT + windowing + overlap-add + frequency inversion ---- */
 static f32 cos36[36][18], cos12[12][6], win12[12];
 static s32 tabs_ok;
@@ -150,6 +156,7 @@ static void overlap_out(const f32 *z, s32 sb, f32 *out, f32 *prev) {
     }
 }
 
+#ifdef P258_MP3_PC_OLD
 void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
     f32 z[36];
     s32 i, k;
@@ -161,6 +168,8 @@ void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
     }
     overlap_out(z, sb, out, prev);
 }
+
+#endif /* P258_MP3_PC_OLD */
 
 /* three 12-point IMDCTs over the interleaved short-block values in[w + 3k], each windowed and
  * placed at 6 + 6w in the 36-sample block */
