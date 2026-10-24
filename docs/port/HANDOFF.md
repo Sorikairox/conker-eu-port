@@ -10,6 +10,51 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P228, 2026-10-24, port-web). Details: `docs/port/sessions/P228.md`
+
+- Merged port 956b59ed (P214 .. P226), then port-b 5ac75d1c (P220 / P222). After the first merge alone the NM build
+  failed (game_eu_90F50.c local prototypes of func_150FC438 / func_150DC2F0 vs port's new C); port-b's P222 alignment
+  fixes it. After both: verify_all OK, NM link OK, protocheck 0 (1474), float-int 0 bugs, census 0 FAIL (722 TUs, clean
+  rebuild), arity_scan 137 rows unchanged, m2c_sanity 286 rows.
+- **Barrel-menu trap fixed** (port/tools/vbe.py ROM_ABS += D_88C 0x88C, D_87B 0x87B): the new C barrel_menu_draw
+  func_151ECE00 passes these link-symbol texture ids; as zero data stubs they were wasm addresses -> func_1510D66C range
+  -> fatal func_150ADC50 + OOB trap in func_1510D984 at frame 4442. Rule: new C using `D_<small hex>` link symbols needs
+  a ROM_ABS entry. Still open: `D_89810` (shadow view matrix in game_eu_1B1ED0.c) is a zero data stub; it should alias
+  D_80089810 (identity matrix).
+- **Race A**: Conker drives (about one lap), camera follows, deaths respawn with a fade (9 respawns, no black screen),
+  lives 6 -> 4 -> out; match end at 12524 -> stub **func_151E533C** (20B730, port) -> black for good. Laps / rail camera
+  still UNVERIFIED (LAP 1/3 only).
+- **Total War**: player model visible, camera follows, player moves; null+0x24 write still at 6514 .. 6518 before stub
+  func_1511E4F4 (142E40, port).
+- **Level 0x29 regression OK**: chR3 route scenes 2 / 3 / 4 / 5 at the P223 retraces, 5002 at 33914, 0 stubs on 0x29.
+- **?padrec=1 / ?padf F:P** (port/ultra/pc_pif.c): records a human route as a frame script; `p228/record.sh`.
+- Difftest selftest in conkerdev-web: 51 ok / 44 failed (unicorn 2.1.4 installed this session; failing cases fault at
+  pc 0 on the first callee, e.g. func_151B97C4): an environment problem of this container, not investigated; run
+  selftests in the port / port-b containers.
+
+### How to record the river crossing (for the user)
+1. Make sure `conker-web-serve` runs (it serves `~/conker-wt/web/port/build/web` on http://localhost:8064). Use a
+   fresh profile / private window (no saves: the script assumes a new game), keep the tab in front (a hidden tab pauses).
+2. `docs/port/sessions/p228/record.sh url` prints the URL (add `&romurl=...` or load the ROM as usual). The autopilot
+   plays the new game to scene 5 on level 0x29 (~11 minutes, retrace ~34000). At retrace 34200 (~685 s after boot)
+   the pad is yours: keyboard WASD stick, Space A, F B, Q Z, Ctrl half tilt (or a gamepad).
+3. Walk to the river and cross it (event 4 "Training - Jumping", zone 0x0F near (622, -142, -2674); P223 found the
+   fence at z ~548 solid; the crossing is somewhere else: a gap, a log, a platform?). Go on as far as you like (the
+   Baddie, event 6, is past the jumping area).
+4. Open DevTools (Cmd-Opt-J) and run `copy(__padrec.join(','))`; paste into a file, e.g.
+   `docs/port/sessions/p228/river_human.txt`.
+5. Replay headless: `docs/port/sessions/p228/record.sh replay docs/port/sessions/p228/river_human.txt 1200`.
+   Format: `F:BTN:X:Y` comma-separated, F = VI retrace, BTN = N64 button bits in hex (A 8000, B 4000, Z 2000,
+   START 1000), X / Y stick -80..80 (y up). Only entries after 34200 are kept; the prefix is replayed by the autopilot.
+
+## Next steps (from P228)
+1. port: func_151E533C (MP match end / results), func_1511E4F4 (null+0x24 in Total War), func_151E9150,
+   func_1509D590, func_150130B4, rail AI func_1508B854 / func_1508C07C / func_1508CA14, func_1000C530.
+2. port-web: D_89810 alias (shadow view matrix); the river crossing from a human recording (above) or nav data;
+   then events 4 / 6 / 1 on level 0x29; Race A lap counting once a lap completes (needs a frame script that stays on
+   the track: steer, don't hold the stick straight up).
+3. Check why difftest selftest fails in conkerdev-web (fault at pc 0 on the first callee).
+
 ## State (session P226, 2026-10-24). Details: `docs/port/sessions/P226.md`
 - Hand C (NM, one block each), all in the registry: func_151E5E08 `mp_match_rules_update` (20B730; the match now
   ends: D_800E1050, placings D_800E0EF0), func_151ECE00 `barrel_menu_draw` (216470; returns the DL end),

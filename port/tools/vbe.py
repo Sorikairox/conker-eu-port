@@ -419,7 +419,11 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
            'D_D11': 0xD11, 'D_A4A': 0xA4A, 'D_2C1': 0x2C1, 'D_1C0': 0x1C0,
            # P37: texture ids stored as D_89C / D_85D (boot screen func_151EC300, game_eu_216470.c), and the ROM range of
            # the fixed player-slot setup table that func_15016950 (game_eu_44010.c) DMAs: D_1A3750..D_1A3840..D_1A3B40.
-           'D_89C': 0x89C, 'D_85D': 0x85D, 'D_1A3750': 0x1A3750, 'D_1A3840': 0x1A3840}
+           'D_89C': 0x89C, 'D_85D': 0x85D, 'D_1A3750': 0x1A3750, 'D_1A3840': 0x1A3840,
+           # P228: texture ids D_88C (barrel menu title) / D_87B (fill bar) of the C barrel_menu_draw func_151ECE00
+           # (port P226): as data stubs they were wasm addresses (0x10A377xx) -> func_1510D66C range -> fatal
+           # func_150ADC50 + trap in func_1510D984 in the multiplayer barrel menu (frame 4442).
+           'D_88C': 0x88C, 'D_87B': 0x87B}
 # Functions declared `extern s32 func_X;` and passed as callbacks (&func_X). Declaring them as
 # functions makes &func_X a function-table index (registered by icall.py, stubbed by gen_stubs.py)
 # instead of a zero-filled data stub. (func_151DE100 used to be a data stub, read as code bytes by func_151E86A4's

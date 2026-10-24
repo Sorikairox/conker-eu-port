@@ -43,18 +43,19 @@ EM_JS(int, __port_padf_char, (int i), {
     else if (typeof process !== 'undefined' && process.env && process.env.PORT_PADF !== undefined) v = process.env.PORT_PADF;
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
-#define PADF_MAX 2048 /* P154: 128 -> 2048 (long new-game scripts) */
+#define PADF_MAX 16384 /* P154: 128 -> 2048 (long new-game scripts); P228: 16384 (human recordings, ?padrec) */
 static struct { unsigned f; int b, x, y; } padf[PADF_MAX];
 static int padf_n = -1, padf_cur = -1;
 static void padf_apply(void) {
     if (padf_n < 0) {
-        static char s[65536]; int n = 0, c;
+        static char s[524288]; int n = 0, c;   /* P228: 64K -> 512K */
         while (n < (int)sizeof s - 1 && (c = __port_padf_char(n)) != 0) s[n++] = (char)c;
         s[n] = 0; padf_n = 0;
         for (char *p = s; *p && padf_n < PADF_MAX;) {
             unsigned f = 0; int b = 0, x = 0, y = 0, neg;
             while (*p >= '0' && *p <= '9') f = f * 10 + (unsigned)(*p++ - '0');
-            if (*p == ':') { p++; while ((c = *p) && c != ':' && c != ',') { b = b * 16 + (c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10); p++; } }
+            if (*p == ':' && (p[1] == 'P' || p[1] == 'p')) { b = -1; p += 2; }   /* P228: F:P = hand back to the page */
+            else if (*p == ':') { p++; while ((c = *p) && c != ':' && c != ',') { b = b * 16 + (c <= '9' ? c - '0' : (c | 0x20) - 'a' + 10); p++; } }
             if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') x = x * 10 + (*p++ - '0'); if (neg) x = -x; }
             if (*p == ':') { p++; neg = *p == '-'; if (neg) p++; while (*p >= '0' && *p <= '9') y = y * 10 + (*p++ - '0'); if (neg) y = -y; }
             padf[padf_n].f = f; padf[padf_n].b = b; padf[padf_n].x = x; padf[padf_n].y = y; padf_n++;
@@ -68,8 +69,32 @@ static void padf_apply(void) {
     while (k + 1 < padf_n && padf[k + 1].f <= port_frame_count) k++;
     if (k < 0) return;
     if (k != padf_cur) { padf_cur = k; port_log("[padf] retrace %u: buttons %X stick %d,%d\n", port_frame_count, padf[k].b, padf[k].x, padf[k].y); }
+    /* P228 F:P entry: keyboard / gamepad from here on (record with ?padrec=1). Once a P entry has been reached the
+     * ?p205goto autopilot is off for good, so a replay (prefix, F:P, then the recorded entries) is not disturbed by
+     * the autopilot's after-arrival taps. */
+    static int handed;
+    if (padf[k].b == -1) { handed = 1; return; }
     port_pads[0][0] = 1; port_pads[0][1] = padf[k].b; port_pads[0][2] = padf[k].x; port_pads[0][3] = padf[k].y;
-    { extern void p205_goto_apply(int *, int *, int *); p205_goto_apply(&port_pads[0][1], &port_pads[0][2], &port_pads[0][3]); } /* P205 TEST ?p205goto */
+    if (!handed) { extern void p205_goto_apply(int *, int *, int *); p205_goto_apply(&port_pads[0][1], &port_pads[0][2], &port_pads[0][3]); } /* P205 TEST ?p205goto */
+}
+
+/* ---- P228: ?padrec=1 logs every change of pad 0 (after ?padf, i.e. what the game reads) as
+ * "[padrec] F:BTN:X:Y" in ?padf syntax. A human route played in Chrome (keyboard / gamepad) becomes a frame
+ * script: join the [padrec] fields with commas. Use with a ?padf prefix that ends in an F:P entry (page input from
+ * retrace F on) to record only the part after a scripted start. The page also collects them in window.__padrec
+ * (DevTools console: copy(__padrec.join(',')) puts the whole script on the clipboard). */
+EM_JS(void, __port_padrec_push, (unsigned f, unsigned b, int x, int y), {
+    var g = typeof window !== 'undefined' ? window : globalThis;   /* DevTools: copy(__padrec.join(',')) */
+    (g.__padrec = g.__padrec || []).push(f + ':' + b.toString(16).toUpperCase() + ':' + x + ':' + y);
+});
+static void padrec_log(void) {
+    static int on = -1; static int32_t lb = 0, lx = 0, ly = 0;
+    if (on < 0) on = port_flag("padrec") > 0;
+    if (!on) return;
+    if (port_pads[0][1] == lb && port_pads[0][2] == lx && port_pads[0][3] == ly) return;
+    lb = port_pads[0][1]; lx = port_pads[0][2]; ly = port_pads[0][3];
+    port_log("[padrec] %u:%X:%d:%d\n", port_frame_count, (unsigned)lb & 0xFFFF, (int)lx, (int)ly);
+    __port_padrec_push(port_frame_count, (unsigned)lb & 0xFFFF, (int)lx, (int)ly);
 }
 
 /* ---- EEPROM */
@@ -158,6 +183,7 @@ s32 osContStartReadData(OSMesgQueue *mq) {
     pif_ram[i] = 0xFE;
     pif_ram[63] = 1;
     padf_apply();                                      /* P149 ?padf frame script */
+    padrec_log();                                      /* P228 ?padrec=1 */
     pif_run();
     memcpy(cont_ram, pif_ram, sizeof cont_ram);         /* the RD64B DMA into libultra's __osContPifRam */
     s32 r = mq ? osSendMesg(mq, NULL, OS_MESG_NOBLOCK) : -1; /* SI transfer done at once */
