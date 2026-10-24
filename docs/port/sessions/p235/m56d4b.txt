@@ -1,0 +1,6 @@
+85s/& 1/\& 0/ % k3a k3b nb outa flip
+114s/&blk\.life/\&blk.kinds/ % k3a k3b nb outa flip
+116s/sprite\.scaleB/sprite.scaleA/ % outa
+117s/100\.0f/101.0f/ % nb outa
+117s/\* scale/* mid/ % outa nb
+151s/~6/~4/ % flip k3a k3b

@@ -10,6 +10,39 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P235 (port-b) (session P235, 2026-10-24). Details: `docs/port/sessions/P235.md`
+
+Branch `port-b`. **difftest job limiter** in `tools/port/difftest.sh` (port and web get it via merges): at most 2
+difftest jobs per container (`DIFFTEST_SLOTS`, default 2, 0 = off); slots are lock dirs in the container's
+`/tmp/difftest_slots` with the job's in-container PID, taken under flock; dead-PID slots are cleaned inside the
+container; a third job waits (stderr notice; `DIFFTEST_SLOT_MAXWAIT=S` gives up with ERROR). Test
+`tools/port/difftest/slots_test.sh` 5 / 5; difftest.py untouched. Hand C (NM) + setups + mutants + registry rows:
+**func_150FA520 object_point_burst_spawn**, **func_150F9BB0 object_aura_spawn** (127840), **func_151356D4
+sprite_splash_spawn** (161520), **func_151BDDD8 object_aura_burst_spawn** (1E7CC0). **reverify fix**: line-numbered
+mutants were applied one line off (nmblock dropped the `#ifdef NON_MATCHING` line); nmblock `NMBLOCK_WHOLE=1`, used by
+reverify by default; matching-C functions without .s (func_151D52B4) re-check fine. Coordinator item: D_8008FC30's only
+entry func_151991D0 sets a0..a3 itself - the 0-argument call in func_15196438 is right (comment added). Checks:
+verify_all rc 0 (byte-identical), NM build rc 0, protocheck 0 (1484), selftest 103 / 103. progress_nm: game 4942 / 5334,
+total 5478 / 5915 (92.6%), C bytes 82.1%, 437 asm-only.
+
+## Next steps (from P235)
+
+1. **D_8008FFE8 (game_1FFF60, now port-b's; coordinator / port P234)**: entries [0] func_151901F4, [1] func_1518FD34
+   s32(s32), [2] func_1518FE0C void(s32), [3] func_151D33B8 (EU 151D3968) void(struct224 *), [4] func_1518FDC8 void(u8 *);
+   dispatchers func_151D2C40 / func_151D3130 (matched C) pass two arguments through `void (*)(child *, void *)`.
+   func_151901F4 does read its second argument (the target position, P231: its NM body aims at it), so the table
+   can't be one-argument for all entries: give it the wasm-safe common signature under NON_MATCHING (e.g.
+   `s32 (*)(void *, void *)`), NM wrappers / adjusted prototypes for the one-argument entries, and decide
+   func_1518FD34's return with v0use over the dispatchers first. Not started (budget).
+2. Browser: func_150FA520 / func_150F9BB0 (game_981E0 menu effect handlers), func_151356D4 (51190 event sprite
+   splash), func_151BDDD8 (5D910 aura burst).
+3. port (game_981E0, functions.h): func_150FA520 / func_150F9BB0 are called with no prototype (implicit int) but are
+   now `void (u8 *, u8, u8, s32)` / `void (u8 *, u8, s32)`: a wasm signature mismatch unless declared; add prototypes.
+4. C-caller candidates left: func_15135DD0 (397, 161520), func_15139768 (387, 161520), func_150D3870 (450, 101080),
+   func_151F94E0 (960, 226870); the 4 Rare hand-asm functions of game_eu_226870 (not started).
+5. difftest (port's difftest.py): ARGMEM has one length per callee, so memcpy blocks of different sizes in one function
+   can't all be compared; a per-call length (or `N+OFF:LEN@callindex`) would help.
+
 ## P231 (port-b) (session P231, 2026-10-24). Details: `docs/port/sessions/P231.md`
 
 Branch `port-b`. Hand C (NM) + setups + mutants, registry rows with full knobs: **func_1519AF14 trail_update**

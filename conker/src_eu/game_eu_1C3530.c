@@ -622,6 +622,8 @@ u8 *func_15196438(u8 *obj, s32 kind, u8 arg2, s32 arg3) {
     req.u0E = k->u44;
     req.u15 = k->u10;
 
+    /* P235 (browser P233 arity_scan): no arguments is right. tablesig: D_8008FC30 has one entry, func_151991D0
+       (matching C `void (void)`, NM `u16 (void)`), which sets a0..a3 itself; the asm only leaves them live. */
     if (rec.soundFn != -1) {
         rec.voice = D_8008FC30[rec.soundFn]();
     } else {
