@@ -1,0 +1,16 @@
+s/u16 v = (D_800D1890 << 8) | D_800D1891;/u16 v = (D_800D1891 << 8) | D_800D1890;/
+s/D_800D154C->unk78 = D_800D154C->unk76 + v;/D_800D154C->unk78 = D_800D154C->unk7A + v;/
+s/D_800D154C->unk78 = D_800D154C->unk76 - v;/D_800D154C->unk78 = v - D_800D154C->unk76;/
+s/            D_800D154C->unk78 = v;/            D_800D154C->unk76 = v;/
+s/            D_800D154C->unk76 = D_800D154C->unk78;/            ;/
+s/D_800D154C->unk7A = D_800D154C->unk78;/D_800D154C->unk7A = D_800D154C->unk76;/
+s/s16 \*from = (s16 \*)(path + D_800D1890 \* 8 + 8);/s16 *from = (s16 *)(path + D_800D1890 * 8);/
+s/func_150484A0(to\[0\] - from\[0\], to\[2\] - from\[2\])/func_150484A0(to[0] - from[0], to[1] - from[2])/
+s/func_150484A0(to\[0\] - from\[0\], to\[2\] - from\[2\])/func_150484A0(to[2] - from[2], to[0] - from[0])/
+s/P210_F2U(ang \* D_8009A5CC) + (D_800D1893 << 8) + 0x4000/(s32)(ang * D_8009A5CC) + (D_800D1893 << 8) + 0x4000/
+s/+ (D_800D1893 << 8) + 0x4000;/+ (D_800D1893 << 8) + 0x8000;/
+s/D_800D154C->unk78 = func_150ADA20();/D_800D154C->unk76 = func_150ADA20();/
+s/            D_800D154C->unk78 = D_800D154C->unk76;/            D_800D154C->unk78 = D_800D154C->unk7A;/
+s/D_800CC2D0\[D_800D154C->unk222\].unk7A + v;/D_800CC2D0[D_800D154C->unk222].unk76 + v;/
+s/            D_800D154C->unk76 = D_800D154C->unk7A;/            D_800D154C->unk78 = D_800D154C->unk7A;/
+s/        case 5:/        case 15:/

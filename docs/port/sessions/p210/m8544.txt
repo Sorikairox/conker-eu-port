@@ -1,0 +1,18 @@
+s/D_800D1890 = cmd \& 0x3F;/D_800D1890 = cmd \& 0x7F;/
+s/o = \&D_800CC2D0\[D_800D154C->unk222\];/o = \&D_800CC2D0[D_800D154C->unk222 + 1];/
+s/((s8)D_800D1891 << 4) | (D_800D1893 >> 4)/(D_800D1891 << 4) | (D_800D1893 >> 4)/
+s/(D_800D1893 >> 4)) << 3;/(D_800D1893 >> 4)) << 2;/
+s/((s8)D_800D1892 << 4) | (D_800D1893 \& 0xF)/((s8)D_800D1892 << 4) | (D_800D1893 \& 0x7)/
+s/mode = cmd >> 6;/mode = cmd >> 7;/
+s/y = o->y_position;/y = o->z_position;/
+s/u8 a = (o->unk7A >> 8) - 0x40;/u8 a = (o->unk7A >> 8);/
+s/s = func_15048A40(a);/s = func_150489B0(a);/
+s/        s = 0.0f;/        s = 1.0f;/
+s/        c = 1.0f;/        c = 0.0f;/
+s/} else if (mode == 1) {/} else if (mode == 2) {/
+s/D_800D154C->x_position - x, D_800D154C->z_position - z/x - D_800D154C->x_position, D_800D154C->z_position - z/
+s/        s = sinf(ang);/        s = cosf(ang);/
+s/x += ox \* c + oz \* s;/x += ox * c - oz * s;/
+s/z += oz \* c - ox \* s;/z += oz * c + ox * s;/
+s/    pt\[1\] = y;/    pt[1] = x;/
+s/    pt\[2\] = z;/    pt[3] = z;/

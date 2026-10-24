@@ -361,7 +361,48 @@ void func_15167B44(struct_eu_15167B44 *arg0) {
         func_1516972C((struct102 *)arg0);
     }
 }
+#ifdef NON_MATCHING
+Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+Gfx *func_15095B70(Gfx *gfx, u8 *quad);
+extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+
+// sprite_quad_draw: P210: render-layer draw callback (D_8008B848 layer 3): draws the textured quad of node `obj`.
+/* Texture obj +0x10 (word 0 = its frame table, indexed by frame s16 obj +0x14 >> 8), quad position / size s16
+ * obj +0x18..+0x20, byte obj +0x23 copied into the quad; render mode D_800A4EA8 entry 3. Returns the display list end. */
+s32 func_15167C58(s32 gdl, u8 *obj, s16 player) {
+    struct {
+        s16 x, y, z;
+        s16 w, h;
+        u8 bA;
+        u8 padB[2];
+        u8 bD;
+    } quad;
+    u8 flag;
+    u8 *tex = *(u8 **)(obj + 0x10);
+    s16 frame = *(s16 *)(obj + 0x14);
+    s32 *mode;
+    Gfx *gfx;
+
+    /* the asm stores the word 1 at the flag's address; the byte the callees read (big-endian) is 0 */
+    flag = 0;
+    gfx = func_15142E24((Gfx *)gdl, (s32)tex, frame << 8, 2, 0x100, 0x100, (*(s32 **)tex)[frame >> 8], 5, (s32)&quad,
+                        &flag, 3);
+    quad.x = *(s16 *)(obj + 0x18);
+    quad.y = *(s16 *)(obj + 0x1A);
+    quad.z = *(s16 *)(obj + 0x1C);
+    quad.w = *(s16 *)(obj + 0x1E);
+    quad.h = *(s16 *)(obj + 0x20);
+    quad.bA = obj[0x23];
+    quad.bD = 0;
+    /* the asm compares the s8 at obj +0x22 with 0xFF (entry 9), which never matches: always entry 3 */
+    mode = &D_800A4EA8[3 * 2];
+    gfx = func_15142FBC(gfx, 0x2C00, (mode[1] | mode[0]) | 4, &flag);
+    return (s32)func_15095B70(gfx, (u8 *)&quad);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167C58.s")
+#endif
 void *func_15167D84(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 arg5) {
     u8 *temp_v0;
     s32 type;
@@ -379,7 +420,108 @@ void *func_15167D84(void *arg0, s32 arg1, s32 arg2, s8 arg3, u8 arg4, s32 arg5) 
     temp_v0[0x48] = arg3;
     return temp_v0;
 }
+#ifdef NON_MATCHING
+extern void (*D_8008CD68[])(u8 *);  /* node behaviours, by s8 node +0x2F */
+/* D_8008CDC0 (variables.h: void (*[])(void)): node end handlers void (u8 *), by s8 node +0x48 */
+
+// sprite_node_update: P210: per-node update of render layers 5 / 59 / 66 (field 0 of their D_8008B848 records):
+/* counts down the lifetime s16 +0x38 by the frame time D_800BE9E4 (0x7FFF = forever) and fades the alpha +0x3F
+ * by s8 +0x3A per frame; runs the behaviour D_8008CD68[+0x2F]; while alive moves the 8.8 fixed-point position
+ * (s16 +0x20 / +0x22 / +0x24 with fraction bytes +0x2C / +0x2E / +0x2D) by the velocity +0x26 / +0x30 / +0x28 (+0x30
+ * accelerated by +0x32), and advances the animation frame +0x1C by speed +0x1E over the texture's (+0x10) byte 4
+ * frames: past the end flag 0x20 ends the node, else 0x80 is set and flag 2 bounces (speed negated) or the frame
+ * wraps; below 0 flag 0x40 ends it, flag 2 bounces, else it wraps. An ended node runs D_8008CDC0[+0x48] and is
+ * freed (func_1516972C). */
+void func_15167E0C(u8 *n) {
+    s32 done = FALSE;
+    s16 t = *(s16 *)(n + 0x38);
+    s32 fade;
+    s32 v;
+    s32 speed;
+    s32 last;
+    s32 frame;
+    u16 flags;
+
+    if (t != 0x7FFF) {
+        *(s16 *)(n + 0x38) = t - D_800BE9E4;
+        if (*(s16 *)(n + 0x38) < 0) {
+            *(s16 *)(n + 0x38) = 0;
+            done = TRUE;
+        }
+    }
+    fade = (s8)n[0x3A];
+    if (fade > 0) {
+        if (fade < n[0x3F]) {
+            n[0x3F] -= fade;
+        } else {
+            *(s16 *)(n + 0x38) = 0;
+            done = TRUE;
+        }
+    }
+    if ((s8)n[0x2F] != -1 && D_8008CD68[(s8)n[0x2F]] != NULL) {
+        D_8008CD68[(s8)n[0x2F]](n);
+    }
+
+    if (*(s16 *)(n + 0x38) == 0) {
+        done = TRUE;
+    } else {
+        *(s16 *)(n + 0x30) += *(s16 *)(n + 0x32);
+        speed = *(s16 *)(n + 0x1E);
+        v = ((*(s16 *)(n + 0x22) << 8) | n[0x2E]) + *(s16 *)(n + 0x30) * D_800BE9E4;
+        *(s16 *)(n + 0x22) = v >> 8;
+        n[0x2E] = v;
+        v = ((*(s16 *)(n + 0x20) << 8) | n[0x2C]) + *(s16 *)(n + 0x26) * D_800BE9E4;
+        *(s16 *)(n + 0x20) = v >> 8;
+        n[0x2C] = v;
+        v = ((*(s16 *)(n + 0x24) << 8) | n[0x2D]) + *(s16 *)(n + 0x28) * D_800BE9E4;
+        *(s16 *)(n + 0x24) = v >> 8;
+        n[0x2D] = v;
+        if (speed != 0) {
+            last = ((*(u8 **)(n + 0x10))[4] << 8) - 1;
+            *(s16 *)(n + 0x1C) += speed * D_800BE9E4;
+            frame = *(s16 *)(n + 0x1C);
+            if (last < frame) {
+                flags = *(u16 *)(n + 0x44);
+                if (flags & 0x20) {
+                    *(s16 *)(n + 0x38) = 0;
+                    done = TRUE;
+                } else {
+                    *(u16 *)(n + 0x44) = flags | 0x80;
+                    if (flags & 2) {
+                        *(s16 *)(n + 0x1C) = last - *(s16 *)(n + 0x1C) % last;
+                        *(s16 *)(n + 0x1E) = -*(s16 *)(n + 0x1E);
+                    } else {
+                        do {
+                            *(s16 *)(n + 0x1C) -= last;
+                        } while (last < *(s16 *)(n + 0x1C));
+                    }
+                }
+            } else if (frame < 0) {
+                flags = *(u16 *)(n + 0x44);
+                if (flags & 0x40) {
+                    *(s16 *)(n + 0x38) = 0;
+                    done = TRUE;
+                } else if (flags & 2) {
+                    *(s16 *)(n + 0x1C) = -frame % last;
+                    *(s16 *)(n + 0x1E) = -speed;
+                } else {
+                    do {
+                        *(s16 *)(n + 0x1C) += last;
+                    } while (*(s16 *)(n + 0x1C) < 0);
+                }
+            }
+        }
+    }
+    if (done) {
+        if ((s8)n[0x48] != -1) {
+            ((void (*)(u8 *))D_8008CDC0[(s8)n[0x48]])(n);
+        }
+        func_1516972C((struct102 *)n);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_1944C0/func_15167E0C.s")
+#endif
 #ifdef NON_MATCHING
 /* P186 */
 Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);

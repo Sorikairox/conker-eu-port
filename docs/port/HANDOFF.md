@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P210 (port-b) (session P210, 2026-10-24). Details: `docs/port/sessions/P210.md`
+
+Branch `port-b`. Merge of `port` d93bdcd (30e140a7; func_15142600 now void, 126330 func_150FFC60 declaration =
+P209's) + hand C (NM), difftest EQUIV + setups + mutants: func_1505B9C4 object_apply_hit, func_1505C1E4
+object_receive_hit, func_150585F0 object_stun_update (83300); func_15076D3C object_set_scale, func_15079FBC
+follow_player_speed, func_1507602C path_jump_to_point, func_150768DC find_visible_target, func_15078544
+path_point_from_object, func_1507AA48 set_heading_cmd, func_15079B30 object_var_cmd (A28B0, script command handlers
+of D_80086730); func_15167C58 sprite_quad_draw, func_15167E0C sprite_node_update (1944C0, render layer callbacks of
+D_8008B848). Checks: verify_all rc 0, NM links, protocheck 0 (1441), selftest 71/71. progress_nm total 5435 / 5915
+(91.9%), 480 asm-only.
+
+## Next steps (from P210)
+
+1. func_150562FC (400), func_1505E874 (304) in 83300 (void prototypes since P209).
+2. func_151C0698 (1EDA00, 669 words), callee func_151B8EB8 is C now.
+3. Setup gaps listed in P210.md section 1 notes (602c, 68dc, 7e0c, 85f0).
+4. Other owner: func_15074C80 (981E0) has 2 parameters in the void/3 hit handler table D_80086A34.
+
 ## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
 
 Branch `port` (P207 2672b13 + merge of port-b 4c59938 = a447641).

@@ -1,0 +1,93 @@
+s/kind = cur->kind \& 0x7F;/kind = base->kind \& 0x7F;/
+s/kind = base->kind \& 0x7F;/kind = cur->kind \& 0x7F;/
+s/if (cur->kind \& 0x80) {/if (base->kind \& 0x80) {/
+s/    obj->unk10B = 0;/    ;/
+s/if ((base->flags \& 1) \&\& obj->stunned != 0) {/if ((base->flags \& 1) || obj->stunned != 0) {/
+s/        mask = 0;/        mask = 1;/
+s/if (!(cur->damage \& 0x40)) {/if (!(base->damage \& 0x40)) {/
+s/(cur->push << 8) + self->unk76/(cur->push << 8) + obj->unk76/
+s/(cur->push << 8)/(cur->push << 4)/
+s/if (base->flags \& 0x10) {/if (base->flags \& 0x20) {/
+s/obj->x_position - self->x_position, self->z_position - obj->z_position/self->x_position - obj->x_position, self->z_position - obj->z_position/
+s/self->z_position - obj->z_position, 0)/obj->z_position - self->z_position, 0)/
+s/if (self->id == 0x44) {/if (self->id == 0x45) {/
+s/(cur->damage | base->damage) \& 0x20/(cur->damage) \& 0x20/
+s/obj->unk10B |= 2;/obj->unk10B |= 1;/
+s/    obj->unk3A = 0;/    ;/
+s/obj->unk109 = cur->unk20;/obj->unk109 = base->unk20;/
+s/obj->y_velocity = cur->y_speed;/obj->y_velocity = cur->xz_speed;/
+s/obj->xz_velocity = cur->xz_speed;/obj->xz_velocity = cur->y_speed;/
+s/obj->unk100 \&= 0xD6;/obj->unk100 \&= 0xD7;/
+s/obj->gravity = cur->gravity;/obj->gravity = base->gravity;/
+s/if (dmg < obj->health) {/if (dmg <= obj->health) {/
+s/obj->health -= dmg;/obj->health -= dmg + 1;/
+s/if (obj->interaction_state == 1) {/if (obj->interaction_state == 2) {/
+s/        D_800D154C = obj;/        ;/
+s/        D_800C3E78 = num;/        D_800C3E78 = num + 1;/
+s/if (ctl->unk4E != 2) {/if (ctl->unk4E == 2) {/
+s/func_1506AD30(obj, 800.0f, 1);/func_1506AD30(obj, 400.0f, 1);/
+s/        D_800D154C = saved;/        ;/
+s/        D_800C3E78 = savedNum;/        ;/
+s/obj->unkF8 \&= ~0x01008000;/obj->unkF8 \&= ~0x01000000;/
+s/obj->unk31C->unk95 = 0;/;/
+s/obj->unk31C->unk6B = 0;/;/
+s/if (obj->unk31C->pad98\[0\] != 0) {/if (obj->unk31C->pad98[0] == 0) {/
+s/obj->unk31C->unk54 = 0;/;/
+s/        obj->unk137 = 0;/        ;/
+s/\&D_800CC2D0\[(u8)(obj->unk65 - 1)\]/\&D_800CC2D0[(u8)(obj->unk65)]/
+s/(id != 0x8A \&\& id != 0x23)/(id != 0x8A)/
+s/|| obj->health == 0 ||/||/
+s/|| (base->flags \& 2)$/|| (base->flags \& 4)/
+s/30.0f < obj->y_velocity/40.0f < obj->y_velocity/
+s/110.0f < obj->xz_velocity/120.0f < obj->xz_velocity/
+s/(D_800BE616 != 0 \&\& (/(D_800BE616 == 0 \&\& (/
+s/s32 state = (id == 0x8A) ? 1 : 0;/s32 state = (id == 0x8A) ? 2 : 0;/
+s/                    state = 10;/                    state = 11;/
+s/                    state = 15;/                    state = 14;/
+s/carrier->unk218 = NULL;/;/
+s/carrier->unk2FC = 0;/;/
+s/carrier->unk13C = 0;/;/
+s/obj->unk239 = 0;/;/
+s/                obj->unk65 = 0;/                ;/
+s/    if (handler == 0) {/    if (handler == 1) {/
+s/handler = base->handler;/handler = cur->handler + 1;/
+s/D_80086A34\[handler\](self, obj, \&kind);/D_80086A34[handler](obj, self, \&kind);/
+s/    if (kind != 0x27) {$/    if (kind != 0x26) {/
+s/\&D_800CC2D0\[self->unk124 - 1\] : self, obj, kind/\&D_800CC2D0[self->unk124] : self, obj, kind/
+s/: self, obj, kind);/: obj, obj, kind);/
+s/ev.uid = self->unique_id;/ev.uid = obj->unique_id;/
+s/func_15169070(0, 0x68, (s32)\&ev, 2);/func_15169070(0, 0x69, (s32)\&ev, 2);/
+s/    if (base->sound != 0) {/    if (cur->sound != 0) {/
+s/D_800D1580 = base->sound;/D_800D1580 = cur->sound;/
+s/func_10010630(D_800D1582, obj, 0x6D60, 0x12C, 0x708);/func_10010630(D_800D1582, obj, 0x6D60, 0x12C, 0x700);/
+s/    } else if (cur->sound != 0) {/    } else if (base->sound != 0) {/
+s/self->unk107 = 0x3C;/self->unk107 = 0x3D;/
+s/if (D_800BE616 == 0 || obj->interaction_state != 1) {/if (D_800BE616 == 0 \&\& obj->interaction_state != 1) {/
+s/obj->unk21C = 0;/;/
+s/if (base->flags \& 0x100) {/if (cur->flags \& 0x100) {/
+s/            obj->unk218 = NULL;/            ;/
+s/    obj->unkD0 = 0;/    ;/
+s/obj->unk10A = self->unk124 + 0x7F;/obj->unk10A = self->unk124 + 0x80;/
+s/obj->unk10A = D_800C3E78 | 0x80;/obj->unk10A = D_800C3E78;/
+s/self->unk108 = (slot - 1) | 0x80;/self->unk108 = slot | 0x80;/
+s/if ((base->flags \& 0x40) \&\& obj->interaction_state == 1) {/if ((base->flags \& 0x40) || obj->interaction_state == 1) {/
+s/D_800CC2D0\[slot - 1\].unk31C + 0x46) = 8000;/D_800CC2D0[slot - 1].unk31C + 0x44) = 8000;/
+s/if (obj->unk23B != 0) {/if (obj->unk23B == 0) {/
+s/obj->stunned = 0xFE;/obj->stunned = 0xFF;/
+s/obj->unk105 = 0;/;/
+s/obj->unk106 = func_1505E7CC(kind, obj);/obj->unk106 = func_1505E7CC(kind + 1, obj);/
+s/obj->unk84.uh = 0xFFFF;/obj->unk84.uh = 0xFFFE;/
+s/func_1505E874(slot - 1, obj);/func_1505E874(slot - 1, self);/
+s/if (base->flags \& 0x200) {/if (base->flags \& 0x100) {/
+s/obj->unk10B |= 0x20;/obj->unk10B |= 0x10;/
+s/if (0.0f < obj->y_velocity) {/if (0.0f <= obj->y_velocity) {/
+s/obj->unk28 += 0.1f;/obj->unk28 += 0.2f;/
+s/if (base->flags \& 8) {/if (base->flags \& 4) {/
+s/D_800CC690 = self->x_position;/D_800CC690 = obj->x_position;/
+s/D_800CC694 = self->z_position;/D_800CC694 = self->y_position;/
+s/D_800CC698 = self->y_position;/D_800CC698 = self->z_position;/
+s/obj->unk10B |= 0x80;/obj->unk10B |= 0x8;/
+s/(base->flags \& 0x400) || (cur->flags \& 0x400)/(base->flags \& 0x400)/
+s/if (base->immune \& 0x80) {/if (base->immune \& 0x40) {/
+s/obj->immune = base->immune \& 0x3F;/obj->immune = base->immune \& 0x7F;/
+s/    return base->immune;/    return base->immune + 1;/
