@@ -93,5 +93,25 @@ add('opos_far_neg', effect=4, slots=SL, live=4, opos=(500.0, 0.0, -900.0))
 add('rng0', ret='1513DA94=80460000,150ADF00=0', slots=SL, live=4, effect=1, model=50, accum=2.0)
 add('rngff', ret='1513DA94=80460000,150ADF00=FFFFFFFF', slots=SL, live=4, effect=1, model=50, accum=2.0)
 add('rng7f', ret='1513DA94=80460000,150ADF00=7F', slots=SL, live=4, effect=4, accum=2.0)
+# P201: visibility 0x7 (not 0xF, view bit 3 clear): the matrix rows must be used
+add('vis7_e1', vis=7, view=3, effect=1, model=50, slots=SL, live=4, retf=F)
+add('vis7_e10', vis=7, view=3, effect=10, slots=SL, live=4, retf=F)
+add('vis7_e4', vis=7, view=3, effect=4, slots=SL, live=4, retf=F, mode=8, attach=0)
+# P201: model ids >= 0x100 whose low byte is in a list (u16 compare at owner +0x84)
+add('e1_m10F', effect=1, model=0x10F, tpl=0x8008ED60, slots=SL, live=4, retf=F)
+add('e1_m102', effect=1, model=0x102, tpl=0x8008ED60, slots=SL, live=4, retf=F)
+# P201: release velocities just inside the clamps: hidden model (mode 2) -> slot 2 (timer -5) moves to owner
+# (5, 60, -7) + (3, 6, -9); prev = opos + 2 -> vel x = 0.42 * 25 = 10.5, vel z = -0.38 * 25 = -9.5
+for eff in (10, 4, 1):
+    add('vel_edge_e%d' % eff, effect=eff, mtx=0, slots=SL, live=4, retf=F, opos=(5.58, 0.0, -17.62))
+    add('vel_edge2_e%d' % eff, effect=eff, mtx=0, slots=SL, live=4, retf=F, opos=(5.62, 0.0, -17.58))
+# P201: live slots == max (effect 4 rows: max 7) with the accumulator full; effects 8 / 9 (template 8008F020 is the
+# only one with initialiser 1, D_8008D9C0[1])
+add('live_eq_max_e4', effect=4, slots={i: 50 for i in range(7)}, live=7, accum=3.0, retf=F)
+add('live_eq_max_e4h', effect=4, mtx=0, slots={i: 50 for i in range(7)}, live=7, accum=3.0, retf=F)
+add('live_max1_e4', effect=4, slots={i: 50 for i in range(6)}, live=6, accum=3.0, retf=F)
+for eff in (8, 9):
+    add('e%d_spawn' % eff, effect=eff, tpl=0x8008F020, slots=SL, live=4, accum=3.0, retf=F)
+    add('e%d_spawn_h' % eff, effect=eff, tpl=0x8008F020, mtx=0, slots=SL, live=4, accum=3.0, retf=F)
 R = R[15:] + R[:15]  # P197: rich setups first (mut.sh stops at the first DIFFER)
 open(sys.argv[1], 'w').write('\n'.join(R) + '\n'); print(len(R))
