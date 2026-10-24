@@ -1,0 +1,4 @@
+s/s32 mode = state \& 3;/s32 mode = state \& 7;/
+s/u32 last = (u32) state >> 8;/u32 last = state >> 8;/
+s/if (pan != (last \& 0xFF)) {/if (pan != (last \& 0x7F)) {/
+s/func_1000E46C(0x22, 0x64, 0xFE0, 0);/func_1000E46C(0x22, 0x64, 0xFE0, started);/

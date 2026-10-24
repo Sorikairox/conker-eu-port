@@ -10,6 +10,38 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P204, 2026-10-24). Details: `docs/port/sessions/P204.md`
+
+Branch `port` (from P200 47ca032).
+- Coordinator priorities done (hand C, NM): func_151A03DC foot_trail_draw (game_eu_1CCD10; D_8008A644 draw handler,
+  returns its DL argument), func_1518354C water_wave_push (game_eu_1B0550; the 1.1 M-call level-0x29 stub), and the
+  level-0x29 frame-path stubs func_151D7814 effect_follow_update (204F70), func_150F5FD4 model_tile_fade_cb (1231B0),
+  func_151096A0 sky_dome_project_uv (1365E0), func_1000BF60 ambient_voice_update_3d (init_B1B0).
+  func_150B1200 (DE750, 244, particle spawner with many stub callees) NOT done (budget).
+- game_981E0.c: `s32 func_150CA150(u8 *);` added to the NM prototype block (call cast, default build identical);
+  func_151AABC4's prototype was already there (P192).
+- **port-web can remove** the `DL_INDIRECT` entry for func_151A03DC in port/tools/gen_stubs.py after merging this.
+- Merge note: game_eu_1CCD10.c is also edited on port-b (P191 func_1519FD60 NM block, one line above
+  func_151A03DC's GLOBAL_ASM line, a blank line between): expect a clean merge, check it.
+- Harness lesson: a plain-C callee is a stub in difftest too (func_15143E64 returned random f0): give such callees
+  RET / RETF and ARGMEM, or their branches are random.
+- Task 5: arity rows func_1509D274 / func_1506B04C / func_1514D3B0 and m2c_sanity func_150DE8AC are false positives
+  (P204.md section 2); func_150A55A0 is port-b's; func_150611E8 O:20 / O:28 not resolved.
+- Checks: verify_all OK (port_work/p204/verify.log), NM build links, protocheck 0 (1365), selftest 71 / 71,
+  progress_nm 5359 / 5915 (90.6%), C bytes 74.8%.
+
+## Next steps (from P204)
+1. Coordinator extras (arrived late, not started): (a) func_150867D4 (game_eu_B37F0, 539 insns, rail choice) with an
+   s32 return (asm ends `or v0, s5, zero`) - after merging port-b 4f8756f (its C5530 prototype becomes s32);
+   (b) rail camera callers func_150538CC (game_eu_78230) and func_1509E3D4 (game_eu_CBB40) are still asm (browser
+   P202: that is why func_150877C0 never runs on the route); (c) func_151B8EB8 (game_eu_1E61C0.c) blocks port-b's
+   func_151C0698.
+2. func_150B1200 (game_eu_DE750, 244): level-0x29 frame-path stub; list its stub callees first (func_150B0F40,
+   func_15143794, func_151D9014, func_1515C668).
+3. Browser: P204.md UNVERIFIED (pond ripples / trails, wave push, sky dome UVs, level 0x1D ambient voice).
+4. func_150611E8 m2c_sanity rows (O:20 / O:28) still to explain.
+5. Harness: compare pass-through arguments of jalr calls (P200 item, still open).
+
 ## State (session P200, 2026-10-24). Details: `docs/port/sessions/P200.md`
 
 Branch `port` (from P198 6f2d2ca).
