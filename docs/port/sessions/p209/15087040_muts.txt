@@ -1,0 +1,9 @@
+s/if (a == 0xFF || b == 0xFF) {/if (a == 0xFF) {/ %
+s/if (a == 0xFF || b == 0xFF) {/if (b == 0xFF) {/ %
+s/if (a == 0xFF || b == 0xFF) {/if ((u8) a == 0xFF || b == 0xFF) {/ %
+s/return 0.0f;/return 1.0f;/ %
+s/dx = pa\[0\] - pb\[0\];/dx = pa[0] - pb[1];/ %
+s/dy = pa\[1\] - pb\[1\];/dy = pa[1];/ %
+s/dz = pa\[2\] - pb\[2\];/dz = (s16) (pa[2] - pb[2]);/ %
+s/dx \* dx + dy \* dy + dz \* dz/dx * dx + dy * dy/ %
+s/s16 \*pa;/u16 *pa;/ %

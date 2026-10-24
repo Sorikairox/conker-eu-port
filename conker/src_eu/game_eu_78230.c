@@ -1333,7 +1333,7 @@ void func_1504CA60(struct127 *arg0) {
 #ifdef NON_MATCHING
 u16 func_1505A630(f32, f32, s32);
 f32 func_150AD78C(f32);
-s32 func_150585F0(struct127 *, s32);
+void func_150585F0(struct127 *); /* P209: the asm reads only a0 and returns nothing */
 void func_15056B08(struct127 *);
 void func_15021834(struct127 *, s32, s32);
 void func_1505250C(struct127 *arg0, s32 arg1);
@@ -1692,7 +1692,7 @@ void func_1504CB98(struct127 *arg0) {
     if ((arg0->stunned != 0) && (arg0->health != 0) && (((temp_v0 = (u8) arg0->unk31C->unk26, ((temp_v0 & 1) != 0)) && (D_800CC288 & 0x8000)) || ((temp_v0 & 2) && (func_1505A5CC(D_800CC6A4) > 15.0f)))) {
         arg0->unk10C = 0;
         arg0->unk105 = 3;
-        func_150585F0(arg0, 0x3D4CCCCD);
+        func_150585F0(arg0);
     }
     temp_t0_2 = arg0->unk31C;
     if (D_800BE616 != 0) {
@@ -2417,7 +2417,7 @@ block_197:
                 arg0->unk10C = 1;
                 arg0->unk105 = 3;
             }
-            func_150585F0(arg0, 0x3DCCCCCD);
+            func_150585F0(arg0);
             temp_v0_24 = arg0->unk10B;
             if (temp_v0_24 & 0x40) {
                 var_f0_6 = arg0->y_position - D_800CC698;
@@ -3617,9 +3617,14 @@ s32 func_150535F4(struct127 *arg0);
 void func_15021834(struct127 *, s32, s32);
 s32 func_15022A8C(struct127 *);
 void func_15054F74(struct127 *);
+#ifdef NON_MATCHING /* P209: both read only a0 and return nothing */
+void func_150562FC(struct127 *);
+void func_150585F0(struct127 *);
+#else
 s32 func_150562FC(struct127 *);
 void func_15056B08(struct127 *);
 s32 func_150585F0(struct127 *, s32);
+#endif
 s32 func_150597FC(struct127 *);
 s32 func_150B0148(u8, s32, s32, s32, s32, s32);
 extern u8 D_800C3A78;
@@ -3641,7 +3646,11 @@ void func_15052590(struct127 *arg0) {
         if (arg0->stunned == 0) {
             func_15056B08(arg0);
         } else if (arg0->unk13D == 0) {
+#ifdef NON_MATCHING
+            func_150585F0(arg0);
+#else
             func_150585F0(arg0, 0x3D4CCCCD);
+#endif
         }
         arg0->unk40 = (f32) (s16) (arg0->unk7A + 0x4000) * 0.005493164f;
         func_15059140(arg0);
