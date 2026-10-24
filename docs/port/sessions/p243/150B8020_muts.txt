@@ -1,0 +1,4 @@
+# P243 func_150B8020 (BreakSmoke layout fix: pad at 0x7E) mutants: sed % setup names (random + ARGMEM 136 on func_15151FA8)
+/u8  pad7E\[2\];/d % r
+s/smoke.u80 = 10;/smoke.u80 = 11;/ % r
+s/smoke.u82 = 0x19;/smoke.u82 = 0x18;/ % r

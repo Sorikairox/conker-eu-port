@@ -28,7 +28,10 @@ typedef struct {
  * D_80089810 as the projection, perspective normalisation D_800BE628[p] +0xB8 and the 4 vertices
  * D_800DC2B8[p][D_800BE9C0] whose t coordinates are scrolled by `scroll` * 81 (top / bottom rows depend on the
  * level D_800BE9F0: 0x32 / 0x33 / 0x3F use -0x62 / 0x27, else -0x13 / 0x65), drawn as two triangles. */
-Gfx *func_150D1D20(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, f32 scroll, s32 arg5, f32 angle) {
+/* P243: D_80089578 camera callback: takes the dispatcher's 8 arguments (func_15110420 passes gdl, x, y, z, yaw, pitch,
+ * roll, handle); only yaw (= scroll) and roll (= angle) are used. Was 7 arguments with s32 x / y / z / pitch: same o32
+ * slots, but a wasm signature mismatch through the table. */
+Gfx *func_150D1D20(Gfx *gdl, f32 x, f32 y, f32 z, f32 scroll, f32 pitch, f32 angle, s32 handle) {
     TexDesc_D1D20 tex;
     f32 view[4][4];
     f32 rot[4][4];

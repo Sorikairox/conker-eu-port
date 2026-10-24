@@ -23,7 +23,10 @@ for F in "$@"; do
   for k in $kn; do case $k in TR=*) [ -z "$TR" ] && tr=${k#TR=};; *) envs+=("$k");; esac; done
   T=build/difftest_rv_${F}_$$
   dt() { local u=(); [ -n "$NOARGMEM" ] && u=(-u DIFFTEST_ARGMEM)  # mut.sh P73: the random phase runs without ARGMEM
-    env "${envs[@]}" "${u[@]}" DIFFTEST_TMP=$T "$@" 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | cut -c1-${CUT:-160}; }
+    # P243: `env -u` must come before the K=V assignments: after them env took `-u` as the command, so with any
+    # registry knob the no-ARGMEM random run printed nothing, randok stayed empty and random kills never counted
+    # (mutants were killed only by setups; func_150D1D20's 3 random-only mutants all "survived"). RVENV_OLD=1 = old order.
+    if [ -n "$RVENV_OLD" ]; then env "${envs[@]}" "${u[@]}" DIFFTEST_TMP=$T "$@"; else env "${u[@]}" "${envs[@]}" DIFFTEST_TMP=$T "$@"; fi 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | cut -c1-${CUT:-160}; }
   echo "$F ($ses, $file) knobs: ${kn:-none}"
   randok=""; if [ "${NR:-100}" != 0 ]; then r=$(dt tools/port/difftest.sh $F $C --trials ${NR:-100} --seed 1); echo "  random: $r"
     # mut.sh P77: random kills only count when the unmutated draft is EQUIV on random (without ARGMEM)

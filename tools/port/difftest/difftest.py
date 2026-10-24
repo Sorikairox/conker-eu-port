@@ -150,6 +150,27 @@ def addr2name(a):
                 _ADDR2NAME.setdefault(v, n)
     return _ADDR2NAME.get(a)
 
+ALIASPROTO_OLD = os.environ.get('DIFFTEST_ALIASPROTO_OLD') == '1'
+_ADDRNAMES = None
+def addr_names(a):
+    """P243: every function name at address a (symbol files + build/conker.eu.elf), plus func_<ADDR>"""
+    global _ADDRNAMES
+    if _ADDRNAMES is None:
+        _ADDRNAMES = {}
+        for n, v in symtab().items():
+            if not n.startswith(('D_', 'jtbl_')): _ADDRNAMES.setdefault(v & 0xFFFFFFFF, []).append(n)
+        try:
+            with open('build/conker.eu.elf', 'rb') as fh:
+                for sy in ELFFile(fh).get_section_by_name('.symtab').iter_symbols():
+                    if sy['st_info']['type'] == 'STT_FUNC' and sy.name:
+                        l = _ADDRNAMES.setdefault(sy['st_value'], [])
+                        if sy.name not in l: l.append(sy.name)
+        except Exception:
+            pass
+    out = list(_ADDRNAMES.get(a & 0xFFFFFFFF, []))
+    if 'func_%08X' % a not in out: out.append('func_%08X' % a)
+    return out
+
 def segments():
     sys.path.insert(0, os.path.join(os.getcwd(), '../tools/eu_port'))
     import datarefs
@@ -180,6 +201,26 @@ def vram2rom(v):
 
 
 # ---------------------------------------------------------------- reference
+REFSZ_OLD = os.environ.get('DIFFTEST_REFSZ_OLD') == '1'
+_MSIZE = None
+def matched_size(vram, func):
+    """P243: size in bytes of the matched C function at vram (build/conker.eu.elf STT_FUNC st_size; else the distance to
+    the next known function symbol), or None"""
+    global _MSIZE
+    if _MSIZE is None:
+        _MSIZE = {}
+        try:
+            with open('build/conker.eu.elf', 'rb') as fh:
+                st = ELFFile(fh).get_section_by_name('.symtab')
+                for s in st.iter_symbols():
+                    if s['st_info']['type'] == 'STT_FUNC' and s['st_size']:
+                        _MSIZE.setdefault(s['st_value'], s['st_size'])
+        except Exception:
+            pass
+    if vram in _MSIZE: return _MSIZE[vram]
+    nx = [a for n, a in symtab().items() if n.startswith('func_') and a > vram]
+    return (min(nx) - vram) if nx else None
+
 def find_file(func):
     for p in glob.glob('src_eu/**/*.c', recursive=True):
         src = open(p).read()
@@ -530,6 +571,29 @@ def inc_hdr_text(path, tu):
     walk(tu, os.path.dirname(path or '.') or '.', 0)
     _INCH[k] = '\n'.join(parts)
     return _INCH[k]
+
+def lookup_proto(p, tu, pn):
+    """(arity, fslots, fregs) of callee pn from the TU, its included headers, functions.h, include/**.h"""
+    new = {pn: (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))}
+    if new[pn][2] is None and not INCHDR_OLD:   # P234: no declaration in the TU text: included headers
+        ih = inc_hdr_text(p, tu)
+        if proto_fregs(ih, pn) is not None:
+            new[pn] = (proto_arity(ih, pn), proto_fslots(ih, pn), proto_fregs(ih, pn))
+    if new[pn][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
+        ha = proto_arity(hdr_protos(), pn)
+        if ha is not None and 16 < ha < 99:
+            new[pn] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
+    if new[pn][2] is None:   # P100: no declaration in the TU: FP argument registers from include/**.h
+        hf = proto_fregs(all_hdr_protos(), pn)
+        if hf:
+            new[pn] = (new[pn][0], new[pn][1], hf)
+            # P134: the arity and the a-register slots of the leading float parameters come from the same
+            # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
+            # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
+            # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
+            if new[pn][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
+                new[pn] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
+    return new[pn]
 
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
@@ -1556,6 +1620,12 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         if not spath:   # C function: reference = ROM bytes, same length as the matched object
             rom = vram2rom(vram); raw = open('conker.eu.bin', 'rb').read()
             n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN') or '0') // 4 or len(cwords)
+            if not self_mode and not os.environ.get('DIFFTEST_REFLEN') and not REFSZ_OLD:
+                # P243: the reference is the matched function's own bytes (ELF symbol size), not len(cwords) words:
+                # a longer candidate made the reference span the next function, so its `jal next` was never stubbed
+                # (target inside [vram, end)) and the reference ran into the real callee (hang). DIFFTEST_REFSZ_OLD=1 = old.
+                z = matched_size(vram, func)
+                if z: n = z // 4
             rwords = [struct.unpack_from('>I', raw, rom + 4 * k)[0] for k in range(n)]
     except CompileError as e:
         return dict(func=func, file=p, result='CERR', line='CERR %s: %s' % (func, str(e).replace('\n', ' | ')[:300]))
@@ -1599,25 +1669,16 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         for c in R.calls + C.calls:
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
-                new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
-                if new[c['name']][2] is None and not INCHDR_OLD:   # P234: no declaration in the TU text: included headers
-                    ih = inc_hdr_text(p, tu)
-                    if proto_fregs(ih, pn) is not None:
-                        new[c['name']] = (proto_arity(ih, pn), proto_fslots(ih, pn), proto_fregs(ih, pn))
-                if new[c['name']][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
-                    ha = proto_arity(hdr_protos(), pn)
-                    if ha is not None and 16 < ha < 99:
-                        new[c['name']] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
-                if new[c['name']][2] is None:   # P100: no declaration in the TU: FP argument registers from include/**.h
-                    hf = proto_fregs(all_hdr_protos(), pn)
-                    if hf:
-                        new[c['name']] = (new[c['name']][0], new[c['name']][1], hf)
-                        # P134: the arity and the a-register slots of the leading float parameters come from the same
-                        # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
-                        # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
-                        # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
-                        if new[c['name']][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
-                            new[c['name']] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
+                new[c['name']] = lookup_proto(p, tu, pn)
+                if not ALIASPROTO_OLD and new[c['name']][2] is None:
+                    # P243: an address can carry several symbols (EU ELF: 0x15031C4C = func_15031C4C and func_1503195C);
+                    # the call was named after one of them, the TU may declare another -> its args were never compared.
+                    # Try every name at the address; the first one with a declaration wins. DIFFTEST_ALIASPROTO_OLD=1 = old.
+                    for an in addr_names(c['addr']):
+                        if an == pn: continue
+                        r = lookup_proto(p, tu, an)
+                        if r[2] is not None:
+                            new[c['name']] = r; break
                 # P214 (selftest hook): DIFFTEST_NOPROTO="NAME,..." treats those callees as having no prototype at all
                 if c['name'] in NOPROTO: new[c['name']] = (None, set(), None)
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]

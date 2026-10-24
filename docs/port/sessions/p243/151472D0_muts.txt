@@ -1,0 +1,12 @@
+# P243 func_151472D0 (object_effect10_spawn) mutants: sed % setup names
+s/if (\*(s32 \*)(obj + 0x1D4) != 0)/if (*(s32 *)(obj + 0x1D4) == 0)/ % hit nomodel
+s/(obj + 0x1D4)/(obj + 0x1D0)/ % hit nomodel
+s/(sp.pt, obj, (s32) sp.rec, id) != 0/(sp.pt, obj, (s32) sp.rec, id) == 0/ % hit miss
+s/func_15146E00(sp.pt, obj, (s32) sp.rec, id)/func_15146E00(sp.pt, obj, (s32) sp.rec, 1)/ % hit
+s/func_15141F78(10,/func_15141F78(11,/ % hit
+s/0.011764706f/0.0117f/ % hit big
+s/0.7111111f/0.71f/ % big
+s/(u8) (u32) (\*(f32 \*)(obj + 0x40)/(u8) (u32) (*(f32 *)(obj + 0x44)/ % hit
+s/, sp.pt,$/, (f32 *) sp.rec,/ % hit
+s/^                          id);/                          0);/ % hit
+s/(f32) arg2 \*/(f32) id */ % hit

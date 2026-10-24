@@ -27,4 +27,65 @@ void func_150B3AB0(struct127 *arg0, u8 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+/* P243: readable C for func_150B40EC (game_eu_E17A0, 113 insns). */
+// emit_point_spark_ring: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
+// s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`), the sibling of func_150B2A50 (game_eu_E0170):
+// one func_15156700 particle (S_3f24 record) at (x, y, z) heading along the byte angle angle0 and tilted by the point
+// angle a: velocity (10 sin(a) sin(angle0 - 0x40), -10 sin(a - 0x40), 10 sin(a) sin(angle0)) (func_151423D8 =
+// byte-angle sine), random sizes 1.953 * r + 3.736 / 0.94 * r + 2.223 / 2.66 * r + 1.85 (rodata D_8009FF9C..B0), two
+// palette-8 colour triples with alpha 0xFF, 9, life 15..30 ((rand & 0xF) + 15), 0x1601, -1, 0xA, 0x19; owner byte
+// argB; then func_151568F8(&rec, 1, 0) on the same record. Always returns 1 (go on).
+typedef struct {
+    f32 pos[3];
+    f32 vel[3];
+    f32 a;
+    f32 b;
+    u8 c[9];
+    s16 d;
+    u16 e;
+    f32 f;
+    s8 g;
+    s16 h;
+    s16 i;
+} Spark40EC;
+f32 func_151423D8(u8);
+void func_151429E0(u8, u8 *, u8 *, u8 *);
+s32 func_15156700(Spark40EC *, u8, s32, u8, s32);
+void func_151568F8(Spark40EC *, u8, s32);
+
+s32 func_150B40EC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+                  f32 arg9, s32 argA, s32 argB) {
+    Spark40EC sp;
+    f32 ch, sh, ct, spd;
+
+    ch = func_151423D8((angle0 - 0x40) & 0xFF);
+    sh = func_151423D8(angle0 & 0xFF);
+    ct = func_151423D8((a - 0x40) & 0xFF);
+    spd = 10.0f * func_151423D8(a & 0xFF);
+    sp.pos[0] = x;
+    sp.pos[1] = y;
+    sp.pos[2] = z;
+    sp.vel[0] = spd * ch;
+    sp.vel[1] = -10.0f * ct;
+    sp.vel[2] = spd * sh;
+    sp.a = func_150ADA68() * 1.9530001f + 3.736f;
+    sp.b = func_150ADA68() * 0.94000006f + 2.223f;
+    func_151429E0(8, &sp.c[0], &sp.c[1], &sp.c[2]);
+    func_151429E0(8, &sp.c[4], &sp.c[5], &sp.c[6]);
+    sp.c[3] = 0xFF;
+    sp.c[7] = 0xFF;
+    sp.c[8] = 9;
+    sp.d = (func_150ADA20() & 0xF) + 0xF;
+    sp.f = func_150ADA68() * 2.6599998f + 1.8499999f;
+    sp.e = 0x1601;
+    sp.g = -1;
+    sp.h = 0xA;
+    sp.i = 0x19;
+    func_15156700(&sp, 1, 0, argB & 0xFF, 1);
+    func_151568F8(&sp, 1, 0);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E17A0/func_150B40EC.s")
+#endif

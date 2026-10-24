@@ -10,6 +10,23 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P243, 2026-10-24). Details: `docs/port/sessions/P243.md`
+- difftest: a matched-C reference is its ELF symbol size (was len(candidate): a longer candidate jal-ing the next
+  function hung; DIFFTEST_REFSZ_OLD=1); callee prototypes are looked up under every symbol at the call address
+  (DIFFTEST_ALIASPROTO_OLD=1). Selftest 118 / 118 (cases func_150305E0, func_15031C1C).
+- reverify.sh: `env -u` order fixed: random kills never counted for registry rows with knobs before (RVENV_OLD=1).
+- func_150D1D20 takes D_80089578's 8 args; func_150B8020 smoke request padding fix (u80 / u82 were 2 bytes early).
+- Hand C (NM): func_150C2334 emit_point_puff, func_150C2558 emit_point_smoke, func_150B2A50 emit_point_spark,
+  func_150B40EC emit_point_spark_ring (D_8008ADA0 handlers), func_151472D0 object_effect10_spawn (all mutants killed).
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1538), implicit_scan 0 NM+float, selftest 118 / 118, progress_nm
+  `total 5915 3994 1556 365 5550 93.8% 1904940/2253856 (84.5%)`.
+
+## Next steps (from P243)
+1. **Priority**: func_151EF3A0 (216470, ~255 insns; save/load screen stub, browser P240), see P243.md section 11.
+2. Re-run registry mutants with survivors (reverify random-kill fix); port-b: func_15110B80 (D_80089578, 4 of 8 args),
+   func_150D4ED0 r0 / r0b setups never reach func_15031C4C.
+3. port-web: browser-check the P243 handlers, func_150D1D20 and the func_150B8020 smoke fix.
+
 ## State (session P241, 2026-10-24). Details: `docs/port/sessions/P241.md`
 - Merged port-b b798adaf (limiter, NMBLOCK_WHOLE, P225-P235). reverify.sh now picks the mutant layout per file (body-only
   P222-era drafts vs whole-block P225+); new tools/port/reverify_all.sh. Re-run partial: changed rows (all port-b) in P241.md section 2.

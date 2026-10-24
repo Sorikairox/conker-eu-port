@@ -1,0 +1,4 @@
+# P243 func_150D1D20 (D_80089578 camera callback, signature aligned to the dispatcher's 8 args) mutants: sed % setup names (random only)
+s/(s32)(scroll \* 81.0f)/(s32)(pitch * 81.0f)/ %
+s/0.0f, 0.0f, angle)/0.0f, 0.0f, z)/ %
+s/0.0f, 0.0f, angle)/0.0f, 0.0f, scroll)/ %
