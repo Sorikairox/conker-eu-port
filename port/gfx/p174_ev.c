@@ -119,11 +119,12 @@ s32 __wrap_func_150AE60C(s32 *args) {
     s32 r = __real_func_150AE60C(args);
     if (fin) p178fin("after ", args[0] & 0xFFF);
     if (on()) {
-        static unsigned nlog; static s32 lid[64], la1[64]; static int nl;
+        static unsigned nlog; static s32 lid[1024], la1[1024]; static int nl;
         /* one line per (id, arg1) pair seen first (the menu's 0x2000 action runs every 4 retraces) */
-        int j; for (j = 0; j < nl; j++) if (lid[j] == args[0] && la1[j] == args[1]) break;
-        if (j == nl && nl < 64) { lid[nl] = args[0]; la1[nl] = args[1]; nl++; } else if (j < nl && (args[0] & 0xF000) == 0x2000) j = -1;
-        if (j >= 0 && nlog++ < 400)
+        int j; for (j = 0; j < nl; j++) if (lid[j] == (args[0] & 0xFFFF) && la1[j] == args[1]) break;
+        /* P212: repeats of a seen pair are no longer logged (level 0x29's A06F every 4 retraces used up the cap by 23413) */
+        if (j == nl && nl < 1024) { lid[nl] = args[0] & 0xFFFF; la1[nl] = args[1]; nl++; } else j = -1;   /* table full: no more lines */
+        if (j >= 0 && nlog++ < 1000)
             port_log("[p174ev] frame %u ev %X act6 id %04X args %d %d %d -> %d\n", port_frame_count, cur_ev, args[0] & 0xFFFF, args[1],
                      args[2], args[3], r);
     }

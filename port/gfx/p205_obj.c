@@ -24,6 +24,21 @@ void p205_obj_hook(void) {
     if (f < 0) f = port_flag("p205obj");
     if (f <= 0 || port_frame_count < (unsigned)f) return;
     if (last != ~0u && port_frame_count - last < 250) return;
+    if (last == ~0u) {
+        /* P212: once, the event zones D_800D34B8[D_800D3094] (0x34 bytes; event query 0x4nnn cmd 6 = "object not in
+         * zone nnn"): s16 x y z +6, f32 +0x10, bytes +0x14..+0x17, words +0x18..+0x20, f32 +0x24..+0x30 */
+        extern unsigned char *D_800D34B8; extern unsigned D_800D3094;
+        unsigned k, nz = D_800D3094;
+        port_log("[p212zone] frame %u %u zones\n", port_frame_count, nz);
+        for (k = 0; k < nz && k < 256 && D_800D34B8; k++) {
+            const unsigned char *z = D_800D34B8 + k * 0x34;
+            port_log("[p212zone] %02X pos %d %d %d u6 %d f10 %.1f b14 %02X %02X %02X %02X w18 %X %X %X f24 %.1f %.1f %.1f %.1f\n",
+                     k, (short)vbe_ld16(z), (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4), (short)vbe_ld16(z + 6),
+                     F(z, 0x10), vbe_ld8(z + 0x14), vbe_ld8(z + 0x15), vbe_ld8(z + 0x16), vbe_ld8(z + 0x17),
+                     *(const unsigned *)(z + 0x18), *(const unsigned *)(z + 0x1C), *(const unsigned *)(z + 0x20),
+                     F(z, 0x24), F(z, 0x28), F(z, 0x2C), F(z, 0x30));
+        }
+    }
     last = port_frame_count;
     port_log("[p205obj] frame %u player %d\n", port_frame_count, vbe_ld8(D_800C3E78_p205));
     for (i = 0; i < 26; i++) {

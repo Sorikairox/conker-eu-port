@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P212, 2026-10-24, port-web). Details: `docs/port/sessions/P212.md`
+
+- Merged port d93bdcd (P204 / P207 / P209 + port-b P203 / P206) and port-b 33387f8 (P208): HANDOFF.md conflicts only
+  (merge_union + hoorder 150). After each: verify_all OK, NM link OK, protocheck 0 (1426 / 1429 bodies), float-int 0
+  bugs, census 0 FAIL (722 TUs, clean rebuild), arity 134 -> 135 (+func_151D7814), m2c_sanity 279 -> 284 (P212.md 1).
+- `tools/eu_port/hoorder.py` (copy of p185/hoorder.py): `python3 tools/eu_port/hoorder.py docs/port/HANDOFF.md 150`.
+- gen_stubs `DL_INDIRECT` emptied (func_151A03DC is C). Pond / level-0 water: wake trails drawn, null zone 0 everywhere.
+- **Level 0x29 stub census ~0**: only func_15065E18 (port) on the B pad and func_1505C1E4 (port-b) when B hits an NPC.
+- Fire imp flames visible on frontend 0x1D; level 6 night sky and the logo spotlight (sky dome UVs) fine.
+- **After Birdy**: the B pad is zone 0x24 at (894, 970) (the board north of Birdy, not the disc). Stepping on it starts
+  scene 3 ("OKAY, I'LL PRESS B", 29921 .. 31469); then the script waits for q 0x2000 cmd 0xAA (player held object +0x78)
+  but B on the pad does nothing while the stub func_15065E18 (game_eu_90F50, ~1280 insns) runs every frame.
+- New diagnostics: `[p212zone]` event-zone dump with ?p205obj; ?p174ev logs each action pair once (no cap overflow).
+
+## Next steps (from P212)
+1. port: **func_15065E18** (game_eu_90F50; caller port-b's C func_1506045C, 9 args) - blocks the B-pad action on 0x29.
+2. port-b: func_1505C1E4 (game_83300, attack hit apply; 8 calls on 0x29).
+3. port-web: after the merge, padwalk212 `bpad2` (P212 route) -> B on the pad -> follow q 0x2000 cmd 0xAA, then the
+   river crossing / door north (fence at z ~548).
+4. Reviews: m2c func_150F5FD4 width high (port), func_150867D4 (port), func_150F8EAC (port-b); arity func_151D7814 (port).
+
 ## State (session P209, 2026-10-24). Details: `docs/port/sessions/P209.md`
 
 Branch `port` (P207 2672b13 + merge of port-b 4c59938 = a447641).
