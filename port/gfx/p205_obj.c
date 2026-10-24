@@ -21,6 +21,7 @@ void p205_obj_hook(void) {
     static unsigned last = ~0u;
     int i;
     p205_player = vbe_ld8(D_800C3E78_p205);
+    { extern void p223_hit_tick(void); p223_hit_tick(); }   /* P223 ?p223hit: follow a hit target */
     if (f < 0) f = port_flag("p205obj");
     if (f <= 0 || port_frame_count < (unsigned)f) return;
     if (last != ~0u && port_frame_count - last < 250) return;
@@ -59,7 +60,7 @@ void p205_obj_hook(void) {
  * is learned from the motion: offset = heading moved - stick angle, smoothed. After the last waypoint the stick is
  * released and BTN (hex, e.g. 8000 = A, 4000 = B) is tapped every 60 retraces (8 retraces down) for 30 taps;
  * BTN 0 = no taps. A step written tBTN:N (e.g. t8000:40) instead of X:Z taps BTN N times there, then goes on;
- * X:Z:R gives one waypoint its own radius.
+ * X:Z:R gives one waypoint its own radius. P223: jX:Z jumps (A) every 40 retraces on the way to that waypoint.
  * Logs [p205go] every 50 retraces and on each waypoint. */
 #include <math.h>
 #include <emscripten.h>
@@ -76,6 +77,7 @@ static unsigned go_f, go_arrive, go_stuck_f;
 static float go_r, go_x[GO_MAX], go_z[GO_MAX];
 static int go_tap[GO_MAX], go_ntap[GO_MAX];   /* step k is "tap go_tap[k] go_ntap[k] times" when go_ntap[k] > 0 */
 static float go_rr[GO_MAX];                    /* per-waypoint radius (X:Z:R), else go_r */
+static int go_jmp[GO_MAX];                     /* P223: jX:Z = jump (A, 8 of every 40 retraces) on the way there */
 static unsigned go_tap_f;
 static float go_px, go_pz, go_base, go_th, go_sx0, go_sz0;
 static int go_sgn = -1, go_have, go_have_init;
@@ -95,6 +97,7 @@ static void go_parse(void) {
             go_ntap[go_n] = (int)strtol(p, &e, 10); go_n++; p = e;
             if (*p == '_') { p++; continue; } else break;
         }
+        go_jmp[go_n] = 0; if (*p == 'j') { go_jmp[go_n] = 1; p++; }
         go_x[go_n] = strtof(p, &e); if (*e != ':') break; p = e + 1;
         go_z[go_n] = strtof(p, &e); p = e;
         go_rr[go_n] = go_r;
@@ -156,6 +159,7 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
         go_sx0 = x; go_sz0 = z; go_stuck_f = port_frame_count;
     }
     if (go_have > 0) { go_have--; th = wrapa(th + 1.5708f); if (go_have > 40) *btn |= 0x8000; }
+    else if (go_jmp[go_i] && port_frame_count % 40 < 8) *btn |= 0x8000;
     go_th = th;
     *sx = (int)lrintf(80.f * sinf(th)); *sy = (int)lrintf(80.f * cosf(th));
     if (port_frame_count % 50 == 0)

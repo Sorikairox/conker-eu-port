@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P223, 2026-10-24, port-web). Details: `docs/port/sessions/P223.md`
+
+- No merges, no game C. Level 0x29 script mapped from ROM (evdis / evtab): event 0 Scarecrow (ev 1128), 1 (ev 1090:
+  zone 9 pad + item 0x28), 2 / 3 (ev 1074: held item 4 off zone 8 -> scene 5 / 14), 4 Jumping (zone 0x0F, across the
+  river), 6 The Baddie (the only enemy, across the river).
+- **Scene 5 reached**: after scene 4, B again on the pad -> item 4 -> event 2 fires: scene 5 33362 .. 33911, 5002 (event done),
+  item consumed (hangover cure). No stub / trap / null-zone write on level 0x29 to 56000.
+- Then stuck on the map: the river fence (z ~548) is solid even when jumping, and the autopilot gets stuck on the field
+  fence going back west. The river crossing (platform, door on the hill) was not found.
+- `?p223hit` (wrap of func_1505C1E4): B on Birdy lands every swing; rule `00 FF 86 08` -> D_8009A6D8[8] (xz 0, y 0,
+  mask 0): no knock-back is what the ROM data asks for. Knock-back with speed still UNVERIFIED (enemy across the river).
+- `docs/port/sessions/p223/mp.sh race|war`: one command into Race A (0x33 at 7447) / Total War (0x2D at 6546). Total
+  War writes null+0x24 (7.58f) at 6526 .. 6530, before stub func_1511E4F4 (142E40).
+- Never run two Chrome runs at once (the hidden tab pauses).
+
+## Next steps (from P223)
+1. port: func_1507D1D8 (MP respawn), MP start stubs (func_1511E4F4 first: null+0x24 write), func_15164E0C, func_151ECE00.
+2. port-web: level 0x29 river crossing: better autopilot (steer by collision / nav data, or a recorded human frame script),
+   then events 4 / 6 (enemy knock-back), event 1 (zone 9, item 0x28: carried object).
+3. Open: does item 4 survive scene 4 on N64 (port needs a second B press)? Needs an N64 reference.
+
 ## P219 (port-b) (session P219, 2026-10-24). Details: `docs/port/sessions/P219.md`
 
 Branch `port-b`. Merged port 18edc1c6 (difftest P211/P214/P215 fixes, func_151B8EB8 s32); after the merge verify_all
