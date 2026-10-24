@@ -154,9 +154,20 @@ void port_pif_dma(int write, void *d) {
 
 /* ---------------- controllers ---------------- */
 
+/* P236: libultra's osContInit (init_eu_256E0.c) ends with osCreateMesgQueue(&__osEepromTimerQ, &__osEepromTimerMsg, 1)
+ * (EU D_80042E08 / D_80042E20). This replacement skipped it, so the queue stayed zeroed (msgCount 0): the EEPROM
+ * long write's timer message (osEepromLongWrite func_151DD4A0 -> osSetTimer) was dropped by osSendMesg, the per-frame
+ * pump func_151DD588(0) never advanced, and the NEXT save blocked for good in func_151DD4A0's
+ * `while (func_151DD588(1))` (osRecvMesg OS_MESG_BLOCK on a queue nobody can fill). Seen after P232 made
+ * func_15006BEC save_slot_pack C: first save at the level 6 entry (frame 17824), the game thread froze at the next one
+ * (level 0x18 scene 2 request, frame 19116). Created once, as libultra does (guarded by __osContinitialized). */
+extern OSMesgQueue D_80042E08; /* __osEepromTimerQ */
+extern OSMesg D_80042E20;      /* __osEepromTimerMsg */
 s32 osContInit(OSMesgQueue *mq, u8 *bits, OSContStatus *st) {
     (void)mq;
     u8 present = 0;
+    static int eep_q_done;
+    if (!eep_q_done) { osCreateMesgQueue(&D_80042E08, &D_80042E20, 1); eep_q_done = 1; }
     for (int i = 0; i < MAXCONTROLLERS; i++) {
         int on = port_pads[i][0] != 0;
         present |= on << i;

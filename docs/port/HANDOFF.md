@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P236, 2026-10-24, port-web). Details: `docs/port/sessions/P236.md`
+
+- **Frame-19116 freeze fixed (port-side, not game C):** the port's own `osContInit` (port/ultra/pc_pif.c) skipped
+  libultra's `osCreateMesgQueue(&__osEepromTimerQ = D_80042E08, &D_80042E20, 1)`. The zeroed queue dropped the
+  osEepromLongWrite timer messages, so the first long write (P232's C func_15006BEC save_slot_pack at the level-6 entry)
+  never progressed, and the next save blocked for good in func_151DD4A0's `while (func_151DD588(1))` (OS_MESG_BLOCK
+  on the empty queue). osContInit now creates the queue once. Not a workaround; func_15006BEC is fine.
+- chR3 route (Chrome 730 s): saves progress (2 .. 30 block writes), level 0x29 scene 5 at 33659, 5002 started; item 4
+  pickup -> q 0xAA = 4 (32091 / 33659) -> 0 after scene 5. Traps 0, heap 0, null zone 0. Stubs: 2 boot +
+  func_151D8280 (204F70, port) + func_15175900 (1A2970, port-b).
+- Race A: `?p205goto` followed the CPU's record (D_800C3E78 = 1 in the look callback); new `?p205rec=N` picks record
+  N - 1. Lap counter works at record level (`?p236race=1`: player record node count 36 / 68 -> lap 1 / 2 of 33-node
+  laps), HUD LAP 2/3 not yet in a shot; the walking autopilot can't steer the board well (stuck near the start).
+- Diagnostics: `?p236race=1` (rail records + nodes), `?p236rw=F` (player rail tracking per update),
+  `--wrap=func_150877C0` (call counter, calls through).
+
+## Next steps (from P236)
+1. port: game_18D770.c func_151603FC arg0 (P233); stub func_151D8280 (204F70, now reached from C func_151D7EDC);
+   Total War stubs func_1508C600, func_151EA4C8.
+2. port-b: stub func_15175900 (1A2970, story route 19112); func_15196438 arity row.
+3. port-web: hoverboard steering controller (stick x from heading error) for a full Race A with LAP 2/3 / 3/3 on the
+   HUD; save / load check of the route's EEPROM (continue game); river crossing (P228 recorder).
+
 ## State (session P233, 2026-10-24, port-web). Details: `docs/port/sessions/P233.md`
 
 - Merged port 690c3153 (P227 / P230), port-b 2428c7cb (P225 / P229), port 05b91168 (P232). After each: verify_all OK,

@@ -21,6 +21,12 @@ void p205_obj_hook(void) {
     static unsigned last = ~0u;
     int i;
     p205_player = vbe_ld8(D_800C3E78_p205);
+    {   /* P236 TEST ?p205rec=N: the ?p205goto autopilot follows record N - 1 instead of D_800C3E78 (in Race A
+         * D_800C3E78 names the CPU racer's record 1 in the look callback, so the autopilot steered by the CPU's position) */
+        static int fp = -1;
+        if (fp < 0) fp = port_flag("p205rec");
+        if (fp > 0) p205_player = fp - 1;
+    }
     { extern void p223_hit_tick(void); p223_hit_tick(); }   /* P223 ?p223hit: follow a hit target */
     if (f < 0) f = port_flag("p205obj");
     if (f <= 0 || port_frame_count < (unsigned)f) return;
@@ -51,6 +57,45 @@ void p205_obj_hook(void) {
         port_log("[p205obj]   rec %2d st %08X id %02X uid %02X pos %.1f %.1f %.1f water %d\n", i, st, id, uid, x, y, z,
                  vbe_ld8(r + 0xAD));
     }
+    {   /* P236 DIAGNOSTIC ?p236race=1 (with ?p205obj): the race / rail records D_80087640[humans + cpus] (0x84 bytes,
+         * func_15088E84 rail_param_step): f32 param +8, s32 lap start +0x18 / time +0x1C / lap time +0x20, s16 node
+         * counter +0x24, s8 lap length +0x26, lap +0x27, highest lap +0x28, nodes +0x2B..+0x2E, on rail +0x30, player
+         * +0x31; laps D_800E1017, D_800BE616, humans D_80090130. */
+        static int fr = -1;
+        extern unsigned char *D_80087640; extern signed char D_800D27B8, D_800D27B9, D_800E1017, D_80090130;
+        extern unsigned char D_800BE616;
+        int k, n;
+        if (fr < 0) fr = port_flag("p236race");
+        if (fr > 0 && D_80087640) {
+            extern unsigned p236_rail_calls[8], p236_rail_mode[8];
+            port_log("[p236race] rail_track_update calls per record: %u %u %u %u %u %u (mode of last: %u %u)\n",
+                     p236_rail_calls[0], p236_rail_calls[1], p236_rail_calls[2], p236_rail_calls[3], p236_rail_calls[4],
+                     p236_rail_calls[5], p236_rail_mode[0], p236_rail_mode[1]);
+            {   /* once: the rail nodes D_800D2778 (0x10 bytes: s16 x y z, links +9..+0xD, type +0xE, camera +0xF) */
+                static int nd; extern unsigned char *D_800D2778; int j;
+                if (!nd && D_800D2778) {
+                    nd = 1;
+                    for (j = 0; j < 100; j++) {
+                        const unsigned char *q = D_800D2778 + j * 0x10;
+                        port_log("[p236node] %d %d %d %d links %d %d %d %d %d type %d cam %d\n", j, (short)vbe_ld16(q),
+                                 (short)vbe_ld16(q + 2), (short)vbe_ld16(q + 4), vbe_ld8(q + 9), vbe_ld8(q + 10),
+                                 vbe_ld8(q + 11), vbe_ld8(q + 12), vbe_ld8(q + 13), vbe_ld8(q + 14), vbe_ld8(q + 15));
+                    }
+                }
+            }
+            n = vbe_ld8(&D_800D27B8) + vbe_ld8(&D_800D27B9);
+            port_log("[p236race] frame %u: %d records, laps %d, BE616 %d, humans %d\n", port_frame_count, n,
+                     (signed char)vbe_ld8(&D_800E1017), vbe_ld8(&D_800BE616), (signed char)vbe_ld8(&D_80090130));
+            for (k = 0; k < n && k < 8; k++) {
+                const unsigned char *q = D_80087640 + k * 0x84;
+                port_log("[p236race]   %d: t %.3f start %d time %d lapt %d cnt %d len %d lap %d max %d nodes %d %d %d %d rail %d pl %d\n",
+                         k, F(q, 8), *(const int *)(q + 0x18), *(const int *)(q + 0x1C), *(const int *)(q + 0x20),
+                         (short)vbe_ld16(q + 0x24), (signed char)vbe_ld8(q + 0x26), (signed char)vbe_ld8(q + 0x27),
+                         (signed char)vbe_ld8(q + 0x28), vbe_ld8(q + 0x2B), vbe_ld8(q + 0x2C), vbe_ld8(q + 0x2D),
+                         vbe_ld8(q + 0x2E), (signed char)vbe_ld8(q + 0x30), (signed char)vbe_ld8(q + 0x31));
+            }
+        }
+    }
 }
 
 /* P205 TEST ?p205goto=F:R:BTN:X1:Z1_X2:Z2_... (node: PORT_P205GOTO): pad autopilot for test routes. From retrace F
@@ -70,7 +115,7 @@ EM_JS(int, __port_p205_goto_char, (int i), {
     else if (typeof process !== 'undefined' && process.env && process.env.PORT_P205GOTO !== undefined) v = process.env.PORT_P205GOTO;
     return v === null || i >= v.length ? 0 : v.charCodeAt(i);
 });
-#define GO_MAX 32
+#define GO_MAX 100   /* P236: 32 -> 100 (3 race laps) */
 extern float D_800DD600[2];   /* camera yaw of view 0: sin, cos (func_15167310) */
 static int go_n = -1, go_i, go_btn;
 static unsigned go_f, go_arrive, go_stuck_f;
@@ -83,7 +128,7 @@ static float go_px, go_pz, go_base, go_th, go_sx0, go_sz0;
 static int go_sgn = -1, go_have, go_have_init;
 static float wrapa(float a) { while (a > 3.14159265f) a -= 6.2831853f; while (a < -3.14159265f) a += 6.2831853f; return a; }
 static void go_parse(void) {
-    char s[1024]; int n = 0, c; char *p, *e;
+    char s[4096]; int n = 0, c; char *p, *e;
     while (n < (int)sizeof s - 1 && (c = __port_p205_goto_char(n)) != 0) s[n++] = (char)c;
     s[n] = 0; go_n = 0;
     if (!n) return;
@@ -185,4 +230,28 @@ int __wrap_func_150CA150(unsigned char *obj) {
     r = __real_func_150CA150(obj);
     if (f > 0 && n <= (unsigned)f) port_log("[p205dust] call %u done\n", n);
     return r;
+}
+
+/* P236 DIAGNOSTIC: count func_150877C0 rail_track_update calls per rail record (callers: script cmd 18 in
+ * game_eu_CBB40.c func_1509E3D4, thrown objects in game_eu_78230.c func_150538CC); printed by ?p236race. */
+unsigned p236_rail_calls[8], p236_rail_mode[8];
+void __real_func_150877C0(int player, int mode, float speed);
+void __wrap_func_150877C0(int player, int mode, float speed) {
+    static int rw = -1;
+    extern unsigned char *D_80087640;
+    const unsigned char *q = D_80087640 ? D_80087640 + (player & 7) * 0x84 : 0;
+    int lg;
+    float t0 = 0.f; int c0 = 0, n0 = 0;
+    if ((unsigned)player < 8) { p236_rail_calls[player]++; p236_rail_mode[player] = (unsigned)mode; }
+    if (rw < 0) rw = port_flag("p236rw");   /* ?p236rw=F: log player 0's tracking for retraces F .. F+600 */
+    lg = rw > 0 && player == 0 && q && port_frame_count >= (unsigned)rw && port_frame_count < (unsigned)rw + 600;
+    if (lg) { t0 = F(q, 8); c0 = (short)vbe_ld16(q + 0x24); n0 = vbe_ld8(q + 0x2C); }
+    __real_func_150877C0(player, mode, speed);
+    if (lg) {
+        const unsigned char *o = D_800CC2D0 + (signed char)vbe_ld8(q + 0x31) * REC;
+        port_log("[p236rw] %u pos %.0f %.0f %.0f | t %.3f cnt %d n %d -> t %.3f cnt %d nodes %d %d %d %d alt %d off %.2f n(%.2f %.2f)\n",
+                 port_frame_count, F(o, 0x14), F(o, 0x18), F(o, 0x1C), t0, c0, n0, F(q, 8), (short)vbe_ld16(q + 0x24),
+                 vbe_ld8(q + 0x2B), vbe_ld8(q + 0x2C), vbe_ld8(q + 0x2D), vbe_ld8(q + 0x2E), (signed char)vbe_ld8(q + 0x2F),
+                 F(q, 0), F(q, 0xC), F(q, 0x10));
+    }
 }
