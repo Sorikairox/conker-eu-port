@@ -1,0 +1,2 @@
+45s/+ nz \* nz/ /
+47s/nx = ny = nz = 0.0f/nx = ny = 0.0f/

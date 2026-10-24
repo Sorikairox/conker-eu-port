@@ -10,6 +10,27 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P222 (port-b) (session P222, 2026-10-24). Details: `docs/port/sessions/P222.md`
+
+Branch `port-b`. Hand C (NM), difftest setups (ARGMEM / STKFILL / RET sequences) + mutants, exact commands per
+function in P222.md section 2: **func_1506401C object_find_held** (90F50, 145; mutants 14/14), **func_150C92B8
+ring_effect_draw** (F6060, 767; render layer 0x31 draw, `Gfx *(Gfx *, u8 *, s16)`; 1 boundary survivor),
+**func_1518F080 line_quad_build** (1BAF40, 273; 1 equivalent survivor), **func_151D4D44 object_trail_smoke_update**
+(201240, 297; 1 equivalent survivor), **func_15083E90 object_find_by_id** (AF2A0, 72; readable rewrite of the m2c
+goto body; port P221 follow-up (a)), **func_15063AA0 object_pending_actions_run** (90F50, 179; jump table, all cases;
+mutants 47/47). func_15065E18: func_150FC438 / func_150DC2F0 prototypes now match port's C (`(.., u8, u8)`,
+`u8 *(u8, s32)`, calls pass arg1 = 0; a3 at 0x15069F80 is carryAnim, already passed). 1BAF40: func_151901F4's
+nested `#ifdef PORT` moved into a macro (it broke difftest for the whole TU). Port-b's files have no asm-only
+functions left (D3880's are C since P130). Checks: verify_all rc 0, NM links, protocheck 0 (1461), selftest 91/91. progress_nm total 5455 / 5915 (92.2%),
+C bytes 80.9%, 460 asm-only.
+
+## Next steps (from P222)
+
+1. Browser: B-pad case 0x3C (func_15065E18 -> func_15083E90 / func_150FC438), shockwave rings (func_150C8F68 /
+   func_150C92B8), line effects (func_1518F080), trail smoke (func_151D4D44), pending actions (func_15063AA0).
+2. Readable rewrites of remaining m2c-style NM bodies in port-b's files.
+3. Port's files (func_15065E18 still-asm callees): func_15073FA0 (981E0), func_1507EE9C (ABEA0), func_150D9098 (106830).
+
 ## P220 (port-b) (session P220, 2026-10-24). Details: `docs/port/sessions/P220.md`
 
 Branch `port-b`. **func_15065E18 player_item_action** (90F50): 40 targeted setups (RET on func_15064240 /
