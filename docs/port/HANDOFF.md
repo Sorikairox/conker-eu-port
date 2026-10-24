@@ -28,6 +28,30 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 1. Convert func_151A03DC (ripple / foot-trail draw) and fix the func_1513472C / func_1513477C game C (pass arg0); drop the port workarounds.
 2. func_1518DC50 (torches), func_1518354C (1.1 M calls on 0x29), func_150F5FD4, func_151096A0, func_150B1200, func_151D7814.
 3. Walk further on 0x29 with A presses (text boxes, NPCs); backdrop quad draw 0 check; re-run ?p103boot past 17820.
+## State (session P198, 2026-10-24). Details: `docs/port/sessions/P198.md`
+
+Branch `port` (from P196 4793d9c).
+- Harness fix (tools/port/difftest/difftest.py): memory written by stub knobs (DIFFTEST_OUTW / OUTA / OUTB, incl.
+  `@ADDR`) is now part of the compared memory (`Run.stub_write`); before, only the function's own stores were logged,
+  so dropping the restore of a stub-clobbered word compared equal. `DIFFTEST_STUBW_OLD=1` = old behaviour (forwarded by
+  difftest.sh). Selftest case func_15063254 (68 / 68 ok). func_15063254's 3 P196 survivors are now killed (16 / 16).
+- Hand C (NM), difftest EQUIV + setups + mutants (table in P198.md): func_1510783C `bolt_record_update` (43 / 43),
+  func_15107518 `bolt_spawn` (P196 candidate, re-run 14 / 14), func_150877C0 `rail_track_update` (604; 76 / 77 + 1
+  equivalent; sets D_800D27C9), func_150893AC `rail_spline_points`, func_15088D24 `rail_link_pick`, func_15087540
+  `rail_records_init` (34 / 34), func_1518C000 `obj_effect1F_attach` (void: the only caller's prototype is void).
+- game_eu_133A70: NM prototypes of func_15143794 are void (its definition is void; protocheck).
+- Checks: verify_all OK, NM links, protocheck 0 (1351), selftest 68 / 68, progress_nm 5345 / 5915 (90.4%), C bytes 74.3%.
+
+## Next steps (from P198)
+1. Browser: race level with the rail family (func_15087540 / func_150877C0 + P196 cameras): rank +0x29, camera point,
+   D_800D27C9 gating func_15088130; bolts (func_15107518 / func_1510783C).
+2. Rail still asm: func_15088E84 (212, parameter step used by func_150877C0), func_1508882C (107), func_150867D4 (539),
+   func_15087204, func_15086508; callers of func_150877C0 are asm (func_150538CC in port-b's 78230, func_1509E3D4).
+3. Re-check older functions verified with OUTW / OUTA / OUTB clobbers on words the function restores: their
+   "survived as equivalent" restore mutants may now die (harness fix above).
+4. func_15133E04: fix the D_80089CD4 handler signatures first (P196).
+5. Breadth (`p198/asmlist.py` after `progress_nm.py --list > port_work/p198/asmonly.txt`): next game entries
+   func_1517F01C (92), func_15103AA0 (93, refs only), func_15155B1C (96), func_150CFB90 (96), func_15103910 (100).
 
 ## State (session P196, 2026-10-24). Details: `docs/port/sessions/P196.md`
 

@@ -156,4 +156,11 @@ D754="DIFFTEST_ARG=0=80480000 DIFFTEST_POKE=80480004=25000000,80480014=42C80000,
 chkce EQUIV  func_1507D754 "$D754"
 chkce DIFFER func_1507D754 "$D754" 's/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFE, 1);/'
 chkce UNSURE func_1507D754 "$D754 DIFFTEST_PAGESTUB_OLD=1"
+# P198: words a stub writes (DIFFTEST_OUTW '@ADDR') are part of the compared memory: func_15063254 saves +0xB8 / +0xC4
+# of its object, func_15060F28 (jal 150612D4) clobbers them, the function restores them. Before P198 the final compare
+# used the function's own store log only, so dropping a restore compared equal. DIFFTEST_STUBW_OLD=1 = old behaviour.
+S63254="DIFFTEST_EXACT=* DIFFTEST_ARG=0=800CC6F0,1=3,2=7,3=3FC00000 DIFFTEST_POKE=800CC704=41280000,800CC708=C1A20000,800CC70C=43960000,800CC7A8=3F400000,800CC730=3FA00000,800CC7B4=C0900000,800CC764=5555BEEF,800CC82C=11111102,800CC834=80410000,800CCA08=80420000,800CCA0C=CAFE0000 DIFFTEST_OUTW=150612D4=@800CC7A8:DEADBEEF/@800CC7B4:DEADBEEF/@800CCA08:DEADBEEF"
+chkce EQUIV  func_15063254 "$S63254"
+chkce DIFFER func_15063254 "$S63254" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
+chkce EQUIV  func_15063254 "$S63254 DIFFTEST_STUBW_OLD=1" 's/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

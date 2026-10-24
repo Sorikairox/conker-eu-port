@@ -84,7 +84,12 @@ PROLOGUE_CODE = [_lwc1(12 + i, 0x40 + 4 * i) for i in range(4)] + [_lwc1(20 + i,
 EPILOGUE_CODE = [_swc1(0, 0x100), _swc1(1, 0x104)] + [_swc1(20 + i, 0x108 + 4 * i) for i in range(12)] + \
     [(43 << 26) | (_K0 << 21) | 0x13C, 0, 0]   # sw zero, 0x13C(k0): the epilogue completed
 RET_END = RET_MAGIC + 4 * len(EPILOGUE_CODE)
-PAGESTUB_OLD = os.environ.get('DIFFTEST_PAGESTUB_OLD') == '1'   # P176: pre-P176 page-end stub behaviour (selftest)
+PAGESTUB_OLD = os.environ.get('DIFFTEST_PAGESTUB_OLD') == '1'
+# P198: memory the stubs write (DIFFTEST_OUTW / OUTA / OUTB) now updates the compared write log: the final memory
+# compare used the function's own store values only, so a word a stub clobbered (OUTW '@ADDR') and the function
+# should restore compared equal when the restore was dropped (func_15063254 +0xB8 / +0xC4 / +0x318 mutants survived).
+# DIFFTEST_STUBW_OLD=1 = pre-P198 behaviour (selftest).
+STUBW_OLD = os.environ.get('DIFFTEST_STUBW_OLD') == '1'   # P176: pre-P176 page-end stub behaviour (selftest)
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 # P47 (debug, opt-in): DIFFTEST_WLOG="LO-HI" (physical hex) + DIFFTEST_WLOG_T=trial prints every non-stack write
 # into [LO, HI) of that trial with the writing pc (R = reference, C = candidate). Debug aid for long functions.
@@ -963,6 +968,14 @@ class Run:
         for i in range(size):
             self.writes[p + i] = (v >> (8 * (size - 1 - i))) & 0xFF
 
+    def stub_write(self, p, data):
+        """P198: a stub's write (no Unicorn write hook fires for mem_write): store it and log it like on_write"""
+        p = phys(p)
+        self.mu.mem_write(p, data)
+        if STUBW_OLD: return
+        if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return
+        for i, b in enumerate(data): self.writes[p + i] = b
+
     def dirty(self):
         out = []
         w = self.writes
@@ -1071,18 +1084,18 @@ class Run:
             for _n, _vs in OUTW[addr & 0x1FFFFFFF]:
                 # P64: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
-                mu.mem_write(phys(_p), struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
+                self.stub_write(_p, struct.pack('>I', _vs[min(k, len(_vs) - 1)]))
         if (addr & 0x1FFFFFFF) in OUTA:
             for _n, _ws in OUTA[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
                 # P156 (opt-in): DIFFTEST_OUTA_PERCALL=1 adds k * 0x10000 to every word on call k (a different vector
                 # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
-                mu.mem_write(phys(_p), struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
+                self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
-                mu.mem_write(phys(_p), bytes(_ws))
+                self.stub_write(_p, bytes(_ws))
         # callee clobbers caller-saved registers
         for reg in SCRATCH[3:] + A_REGS:
             mu.reg_write(reg, r.getrandbits(32))
