@@ -516,23 +516,58 @@ void func_1508B20C(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
   }
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B704.s")
-
-#ifdef NON_MATCHING
-extern f32 D_8009DE2C;
-s32 func_15086268(f32, f32, f32, s32, s32);
 
 /* the zone block func_1508B704 fills (sp+0xAC in func_1508B854) */
 typedef struct {
     f32 x;              /* 0x00 */
     f32 z;              /* 0x04 */
-    f32 radius;         /* 0x08: the event's radius (func_1508B704 may change it) */
+    f32 radius;         /* 0x08: the event's squared radius */
     f32 lim[8];         /* 0x0C: per-node squared-distance limits */
     s16 count;          /* 0x2C */
     u8 node[8];         /* 0x2E */
-    u8 rest[0x20];      /* 0x36: cleared before func_1508B704 */
+    u8 rest[0x20];      /* 0x36: visited-node bits, cleared before func_1508B704 */
 } RailZone1508B854;
-void func_1508B704(s32 node, RailZone1508B854 *zone);
+
+#ifdef NON_MATCHING
+// rail_zone_flood: P250. Flood fill over the rail node graph D_800D2778 (0x10-byte nodes: s16 x +0, s16 z +4, five
+// neighbour indices at +9..+0xD, 0xFF = none) from `node`. The node is marked visited (rest[node >> 3] |= 1 << (node &
+// 3): the game masks with 3, not 7, so bytes share bits; kept as is). A node whose squared xz distance to the zone
+// centre is above the zone radius ends the walk there and is added to the zone's list (up to 8 nodes, with that squared
+// distance as its limit); a node inside the radius recurses into its unvisited neighbours.
+void func_1508B704(u8 node, RailZone1508B854 *zone) {
+    u8 *n;
+    f32 dx, dz, d;
+    s32 i;
+
+    zone->rest[node >> 3] |= 1 << (node & 3);
+    n = (u8 *) &D_800D2778[node];
+    dx = (f32) *(s16 *) (n + 0) - zone->x;
+    dz = (f32) *(s16 *) (n + 4) - zone->z;
+    d = dx * dx + dz * dz;
+    if (zone->radius < d) {
+        if (zone->count < 8) {
+            zone->node[zone->count] = node;
+            zone->lim[zone->count] = d;
+            zone->count++;
+        }
+        return;
+    }
+    for (i = 0; i < 5; i++) {
+        u8 next = n[9 + i];
+
+        if (next != 0xFF && !(zone->rest[next >> 3] & (1 << (next & 3)))) {
+            func_1508B704(next, zone);
+        }
+    }
+}
+
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508B704.s")
+#endif
+
+#ifdef NON_MATCHING
+extern f32 D_8009DE2C;
+s32 func_15086268(f32, f32, f32, s32, s32);
 
 /*
  * rail_events_assign_nodes: P230. Racer rail slots (+0x55C[k]) that are set (!= -1) become -2. Then for each of the

@@ -5,7 +5,45 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/func_150DF240.s")
 
+#ifdef NON_MATCHING
+s32 func_15046C6C(f32 *, s32, f32, f32 *);
+void func_150E892C(f32 *, s16, u8, s32);
+void func_151A9DE4(f32 *, f32, f32, void *, s32, u8, s32, u8, s32);
+// ground_burst_effect: P253. Handler (void (u8 *), function table at ELF file offset 0x24A880, next to func_150C29F0 /
+// func_150DF160) of an effect object at p (+0x28 position, +0xC / +1 passed on to the spawners). Probes the ground
+// from 500 above the position down to 500 below (func_15046C6C; the hit record's first word is the ground height):
+// on a hit the effect sits on the ground (x, ground, z), else at the object's own position. Spawns
+// func_150E892C(pos, 120..181) there, then func_151A9DE4 from 500 above pos down to 500 below it (radius 250,
+// 3..5 pieces).
+void func_150DF8B4(u8 *p) {
+    f32 hit[10];
+    f32 top[3];
+    f32 probe[3];
+    f32 ground[3];
+    u8 found = 0;
+    f32 *pos;
+
+    probe[0] = *(f32 *) (p + 0x28);
+    probe[1] = *(f32 *) (p + 0x2C) + 500.0f;
+    probe[2] = *(f32 *) (p + 0x30);
+    if (func_15046C6C(probe, 0, probe[1] - 1000.0f, hit) != 0) {
+        ground[0] = *(f32 *) (p + 0x28);
+        ground[1] = hit[0];
+        ground[2] = *(f32 *) (p + 0x30);
+        found = 1;
+    }
+    pos = found ? ground : (f32 *) (p + 0x28);
+    func_150E892C(pos, (s16) ((func_150ADA20() % 62U) + 120), p[0xC], p[1]);
+    pos = found ? ground : (f32 *) (p + 0x28);
+    *(s32 *) &top[0] = *(s32 *) &pos[0];   /* copied as words, like the asm */
+    *(s32 *) &top[1] = *(s32 *) &pos[1];
+    *(s32 *) &top[2] = *(s32 *) &pos[2];
+    top[1] += 500.0f;
+    func_151A9DE4(top, top[1] - 1000.0f, 250.0f, hit, (func_150ADA20() % 3U) + 3, 1, 0, p[0xC], p[1]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10CA50/func_150DF8B4.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15149AC0(f32 *, s32, s32, s32, s32, s32);

@@ -98,7 +98,70 @@ void func_1517A550(u8 colour, s16 x, s16 y, s16 z, s8 tilt, u16 arg5, u16 mode, 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A550.s")
 #endif
 
+#ifdef NON_MATCHING
+// sprite_particle_update: update handler of the func_1517A550 sprite particles (tables next to func_1517A910).
+// Moves the screen position +0x90 / +0x92 / +0x94 by the velocity +0xA0 / -+0xA2 / +0xA4 and the rotation
+// +0x96..+0x9A by the s8 spins +0x9C..+0x9E; mode 5 (+0xAC) adds gravity (+0xA2 += 1). While the life +0xA6 is
+// below the mode value, the x / z velocities lose a random part (rand % +0xAE) towards zero. The life runs down by the
+// frame step D_800BE9E4; once out, alpha +0xB3 fades by 4 per step. Freed (func_1516972C) at alpha 0, or when the
+// frame counter +0xB2 is non-zero and its low and high nibbles are equal.
+void func_1517A75C(u8 *obj) {
+    s32 vy = *(s16 *) (obj + 0xA2);
+    u32 mode;
+    s32 life;
+    s32 v;
+    s32 sign;
+    u32 r;
+    s32 a;
+    u8 alpha;
+
+    *(s16 *) (obj + 0x90) += *(s16 *) (obj + 0xA0);
+    *(s16 *) (obj + 0x92) -= vy;
+    *(s16 *) (obj + 0x94) += *(s16 *) (obj + 0xA4);
+    *(s16 *) (obj + 0x96) += *(s8 *) (obj + 0x9C);
+    *(s16 *) (obj + 0x98) += *(s8 *) (obj + 0x9D);
+    *(s16 *) (obj + 0x9A) += *(s8 *) (obj + 0x9E);
+    mode = *(u16 *) (obj + 0xAC);
+    if (mode == 5) {
+        *(s16 *) (obj + 0xA2) = vy + 1;
+        mode = *(u16 *) (obj + 0xAC);
+    }
+    life = *(u16 *) (obj + 0xA6);
+    if (life < (s32) mode) {
+        r = (u32) func_150ADA20() % *(u16 *) (obj + 0xAE);
+        v = *(s16 *) (obj + 0xA0);
+        sign = 1;
+        if (v < 0) {
+            sign = -1;
+        }
+        *(s16 *) (obj + 0xA0) = v + -sign * r;
+        r = (u32) func_150ADA20() % *(u16 *) (obj + 0xAE);
+        v = *(s16 *) (obj + 0xA4);
+        sign = 1;
+        if (v < 0) {
+            sign = -1;
+        }
+        *(s16 *) (obj + 0xA4) = v + -sign * r;
+        life = *(u16 *) (obj + 0xA6);
+    }
+    v = life - D_800BE9E4;
+    if (v < 0) {
+        a = obj[0xB3] - D_800BE9E4 * 4;
+        v = 0;
+        if (a < 0) {
+            a = 0;
+        }
+        obj[0xB3] = a;
+    }
+    alpha = obj[0xB3];
+    *(u16 *) (obj + 0xA6) = v;
+    if (alpha == 0 || (obj[0xB2] != 0 && (obj[0xB2] & 0xF) == (obj[0xB2] >> 4))) {
+        func_1516972C((struct102 *) obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A75C.s")
+#endif
 
 s32 func_1517A904(s32 arg0) {
     return arg0;

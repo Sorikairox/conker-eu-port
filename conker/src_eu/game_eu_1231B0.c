@@ -689,4 +689,58 @@ void func_150F6E10(u8 *arg0, s16 arg1, u8 arg2, u8 arg3) {
     func_15134DAC(&sp, 0, arg0, arg1);
 }
 
+#ifdef NON_MATCHING
+void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5, f32 *arg6, f32 *arg7, f32 *arg8,
+                   f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
+void func_1504715C(void *, u8 *);
+
+// spark_burst_spawn: effect handler of the func_151C6424 table (`void (f32 *, f32 *, f32 *, f32 *, f32, u8 *)`):
+// func_15137F30 turns the inputs into a position / direction / size / angle / alpha; the size is scaled by
+// 1..3 (random). With chance 0.6 the particle gets a floor record from func_1504715C for the object (+0x1C) and
+// then bounces with chance 0.5; otherwise the record says "no floor" (height -10000). Spawned by func_151D9014
+// with gravity 1.8, the effect's colour (+0xC) and layer (+1) bytes.
+void func_150F6EDC(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg5) {
+    struct {
+        f32 floor_y;
+        s32 unk4[5];
+        s32 unk18;
+        u8 unk1C;
+        u8 unk1D;
+        s32 unk20;
+    } floor;
+    f32 pos[3];
+    f32 unused[3];
+    f32 dir[3];
+    f32 speed;
+    s16 angle;
+    u8 alpha;
+    f32 size;
+    u8 hit;
+    u8 bounce;
+    f32 r;
+
+    func_15137F30(arg0, arg1, arg2, arg3, arg4, arg5, pos, unused, dir, &speed, &angle, &alpha, &size);
+    r = func_150ADA68();
+    size *= 1.0f + (r + r);
+    hit = (func_150ADA68() < 0.6f) ? 1 : 0;
+    if (hit) {
+        func_1504715C(&floor, *(u8 **) (arg5 + 0x1C));
+    } else {
+        floor.unk18 = 0;
+        floor.unk1C = 0;
+        floor.unk1D = 0;
+        floor.unk20 = 0;
+        floor.floor_y = -10000.0f;
+    }
+    bounce = 0;
+    if (hit) {
+        if (func_150ADA68() < 0.5f) {
+            bounce = 1;
+        }
+    }
+    func_151D9014(pos, dir, 1, speed, angle, alpha, size, hit, 1.8f, 1.8f, 1, (s32) &floor, 1, bounce, arg5[0xC],
+                  arg5[1]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1231B0/func_150F6EDC.s")
+#endif

@@ -1,0 +1,17 @@
+# P250 func_1508B704 (rail_zone_flood) mutants: sed % setup names
+s/zone->rest\[node >> 3\] |= 1 << (node & 3);/zone->rest[node >> 2] |= 1 << (node \& 3);/ % out in masked
+s/zone->rest\[node >> 3\] |= 1 << (node & 3);/zone->rest[node >> 3] |= 1 << (node \& 7);/ % in out
+s/if (zone->radius < d) {/if (zone->radius <= d) {/ % edge
+s/if (zone->count < 8) {/if (zone->count <= 8) {/ % full
+s/zone->lim\[zone->count\] = d;/zone->lim[zone->count] = dx;/ % out outz
+s/zone->count++;/zone->count += 2;/ % out
+s/zone->node\[zone->count\] = node;/zone->node[zone->count] = 0;/ % out masked
+s/^        return;$/        ;/ % out
+s/if (next != 0xFF \&\& /if (next != 0xFE \&\& / % in
+s/\& (1 << (next \& 3))/\& (1 << (next \& 7))/ % in
+s/for (i = 0; i < 5; i++) {/for (i = 0; i < 4; i++) {/ % in edge
+s/u8 next = n\[9 + i\];/u8 next = n[8 + i];/ % in
+s/dz = (f32) \*(s16 \*) (n + 4) - zone->z;/dz = (f32) *(s16 *) (n + 2) - zone->z;/ % outz
+s/d = dx \* dx + dz \* dz;/d = dx * dx + dz;/ % outz
+s/dx = (f32) \*(s16 \*) (n + 0) - zone->x;/dx = (f32) *(s16 *) (n + 0) - zone->z;/ % edge
+s/func_1508B704(next, zone);/func_1508B704(node, zone);/ % in

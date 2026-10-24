@@ -281,4 +281,13 @@ TRIALS=8 chkce EQUIV  func_15031C1C ""
 TRIALS=8 chkce DIFFER func_15031C1C "" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, arg2)/'
 TRIALS=8 chkce EQUIV  func_15031C1C "DIFFTEST_INCHDR_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
 TRIALS=8 chkce DIFFER func_15031C1C "DIFFTEST_INCHDR_OLD=1 DIFFTEST_ALIASPROTO_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
+# P250: at a jalr, f12-f15 are no longer compared when the target's prototype (or, without a declaration in the TU, its
+# C definitions in src_eu) starts with an integer / pointer parameter: a leftover f14 scratch gave a false DIFFER in
+# func_150C5A68 (handler func_150C6088 is s32 (u8 *); P246 / P247 needed DIFFTEST_JALRARG_OLD=1). DIFFTEST_JALRFPR_OLD=1
+# shows the old false DIFFER; a wrong a0 at the jalr still DIFFERs. Also: a stub knob address given twice is an error.
+S5A68="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80410000 DIFFTEST_POKE=80410010=00000001,80410018=41200000,8041001C=40A00000,80410020=C1200000,80410024=3F800000,80410028=40000000,8041002C=40400000,80410030=00000000,804100C0=12345678 DIFFTEST_RET=150C6088=1 DIFFTEST_RETF=151443D4=42C80000"
+chkce EQUIV  func_150C5A68 "$S5A68"
+chkce DIFFER func_150C5A68 "$S5A68 DIFFTEST_JALRFPR_OLD=1"
+chkce DIFFER func_150C5A68 "$S5A68" 's/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/'
+TRIALS=1 chkce KNOBERROR func_150C5A68 "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C6088=1:2"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

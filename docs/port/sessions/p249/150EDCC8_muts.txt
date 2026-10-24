@@ -59,11 +59,11 @@ s/func_1505327C(o, 68.0f, 4.0f, 0xD, 5);/func_1505327C(o, 68.0f, 4.0f, 0xD, 6);/
 s/(u8 \*) tgt + 0x28) > 70.0f/(u8 *) tgt + 0x28) > 90.0f/ % bounce
 s/func_1505A6F8(tgt, o) < 100.0f/func_1505A6F8(tgt, o) < 300.0f/ % bounce_far
 s/0x10, 0xFF, 0, 1, 0);/0x10, 0xFF, 0, 0, 0);/ % bounce
-s/turn = (s16) (\*(u16 \*) (ob + 0x7A) - heading0) \/ 70;/turn = (s16) (*(u16 *) (ob + 0x7A) - heading0) \/ 64;/ % sp_steer
+s/turn = (s16) (\*(u16 \*) (ob + 0x7A) - heading0) \/ 70;/turn = (s16) (*(u16 *) (ob + 0x7A) - heading0) \/ 64;/ % sp_turn sp_steer
 s/if (fabsf(\*(f32 \*) (ob + 0x44)) > 4.0f) {/if (fabsf(*(f32 *) (ob + 0x44)) > 7.0f) {/ % sp_boost dead
 s/speed \* 0.6f + /speed * 0.5f + / % blend
 s/(ob + 0x44) \* 0.4f;/(ob + 0x44) * 0.5f;/ % sp_boost
-s/right = (s32) speed - turn;/right = (s32) speed + turn;/ % sp_steer
+s/right = (s32) speed - turn;/right = (s32) speed + turn;/ % sp_turn sp_steer
 s/if (o->health != 0) {/if (o->health == 0) {/ % dead sp_boost
 s/if (ob\[4\] == 0x77 || ob\[4\] == 0x28) {/if (ob[4] == 0x77) {/ % against
 s/o->xz_velocity > 5.0f \&\& \*(f32 \*) (ob + 0x44) <= 0.0f/o->xz_velocity > 5.0f \&\& *(f32 *) (ob + 0x44) < 0.0f/ % against
@@ -97,7 +97,7 @@ s/if (i == aimer) {/if (i == 1) {/ % sp_boost
 s/(u8 \*) tgt + 0xF8) \& 0x40)) {/(u8 *) tgt + 0xF8) \& 0x80)) {/ % sp_boost
 s/off = 35.0f - off;/off = 30.0f - off;/ % sp_cone
 s/if (d < 7000.0f) {/if (d < 100.0f) {/ % sp_boost sp_slot24
-s/score = off \/ d;/score = off * d;/ % sp_boost
+s/score = off \/ d;/score = off * d;/ % sp_lock2 sp_boost
 s/ty = (f32) \*(s16 \*) ((u8 \*) tgt + 0x1AA);/ty = (f32) *(s16 *) ((u8 *) tgt + 0x1A8);/ % sp_boost
 s/lim = 4.0f \* D_800BE9A4;/lim = 5.0f * D_800BE9A4;/ % sp_boost sp_boost_end
 s/if (adj < -lim) {/if (adj < -2.0f) {/ % sp_boost_end
@@ -109,7 +109,7 @@ s/while (p < -180.0f) {/while (p < -190.0f) {/ % mp_view_edge
 s/while (y > 180.0f) {/while (y > 190.0f) {/ % mp_view_edge
 s/TURRET_YAW(o) = y;/TURRET_YAW(o) = p;/ % mp_view
 s/(vw + 0x2C0) - \*(f32 \*) (vw + 0x2FC);/(vw + 0x2C0) - *(f32 *) (vw + 0x2F8);/ % mp_ray_hit
-s/dist = 100000.0f;/dist = 10000.0f;/ % mp_ray_nodist
+s/dist = 100000.0f;/dist = 10000.0f;/ % mp_ray_10k
 s/dir\[2\], 0, NULL, \&hit\[0\]/dir[2], 1, NULL, \&hit[0]/ % mp_ray_hit
 s/                    res = 1;/                    res = 3;/ % mp_ray_hit
 s/if (ob\[0x128\] != ((u8 \*) obj)\[0x128\]) {/if (ob[0x128] == ((u8 *) obj)[0x128]) {/ % mp_ray_obj

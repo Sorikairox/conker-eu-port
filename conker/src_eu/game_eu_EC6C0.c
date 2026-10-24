@@ -44,7 +44,33 @@ s32 func_150BEFA8(s32 arg0, s32 arg1) {
     return -1;
 }
 
+#ifdef NON_MATCHING
+void func_15141F78(u8, s32 *, f32, s32, f32 *, u8);
+void func_15142180(u8, f32 *, s32, f32, f32);
+extern f32 D_800A0490;
+extern f32 D_800A0494;
+extern f32 D_800A0498;
+extern f32 D_800A049C;
+// impact_effect_a: P250. Handler (u8 *obj, kind, level) of the effect table at ELF file offset 0x24A4DC (records
+// {handler, 0x55}; neighbours func_15147B48 / func_150BF24C, `(u8 *, int, s32)` like func_151479E8). When the
+// object has a model (+0x1D4) and func_150BEEB0 finds the effect point for `kind` (pos + hit record), it spawns effect
+// 0xB there (func_15141F78: strength level * D_800A0490 * D_800A0494, size +0x40 * D_800A0498 as a byte) and, for
+// level >= 0x4C, also effect 2 (func_15142180) with the hit record's word 6.
+void func_150BEFCC(u8 *obj, s32 kind, s32 level) {
+    f32 pos[3];
+    s32 hit[9]; /* filled by func_150BEEB0 (a hit record: word 6 is passed on to func_15142180) */
+
+    if (*(s32 *) (obj + 0x1D4) != 0 && func_150BEEB0(pos, obj, (s32) hit, (u8) kind) != 0) {
+        func_15141F78(0xB, hit, (f32) level * D_800A0490 * D_800A0494, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A0498), pos,
+                      (u8) kind);
+        if (level >= 0x4C) {
+            func_15142180(2, pos, hit[6], 3.232f, D_800A049C);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC6C0/func_150BEFCC.s")
+#endif
 
 
 s32 func_150BF130(f32 *arg0, u8 *arg1, s32 arg2, u8 arg3) {
@@ -84,7 +110,27 @@ s32 func_150BF228(s32 arg0, s32 arg1) {
     return -1;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A04A0;
+extern f32 D_800A04A4;
+extern f32 D_800A04A8;
+// impact_effect_b: P250. Same as func_150BEFCC (impact_effect_a) with the func_150BF130 effect points, strength
+// level * D_800A04A0 * 2, size +0x40 * D_800A04A4 and D_800A04A8 for the second effect.
+void func_150BF24C(u8 *obj, s32 kind, s32 level) {
+    f32 pos[3];
+    s32 hit[9]; /* filled by func_150BF130 (a hit record: word 6 is passed on to func_15142180) */
+
+    if (*(s32 *) (obj + 0x1D4) != 0 && func_150BF130(pos, obj, (s32) hit, (u8) kind) != 0) {
+        func_15141F78(0xB, hit, (f32) level * D_800A04A0 * 2.0f, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A04A4), pos,
+                      (u8) kind);
+        if (level >= 0x4C) {
+            func_15142180(2, pos, hit[6], 3.232f, D_800A04A8);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EC6C0/func_150BF24C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1509BE40(s32, s32, ...);

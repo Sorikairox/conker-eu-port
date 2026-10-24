@@ -1,0 +1,15 @@
+# P253 func_151894F4 (trail_matrix_history_push_world) mutants: sed % setup names
+s/s32 cur = D_800BE9C0 \* n;/s32 cur = D_800BE9C0;/ % h1
+s/(D_800BE9C0 ^ 1) \* n/(D_800BE9C0 ^ 1)/ % h0
+s/k < D_800DC318\[0\]; k++/k < D_800DC318[0] - 1; k++/ % last
+s/\* 0xA0) {/* 0x90) {/ % h1
+s/rec\[2\] = 0;/rec[2] = 1;/ % notfound
+s/\[D_800BE9C0\] + (\*D_800895E0\[0\])/[0] + (*D_800895E0[0])/ % h1
+s/\[k \* 2\];$/[k * 2 + 1];/ % h1
+s/if (i == n) {/if (i == n - 1) {/ % h1
+s/(i + prev) \* 64/(i + prev - 1) * 64/ % h1
+s/(cur + j) \* 64, 64/(cur + i) * 64, 64/ % h1
+s/if (rec\[1\] != rec\[2\])/if (rec[1] == rec[2])/ % h1 h0
+s/i <= n; i++/i < n; i++/ % h1
+s/if (k == D_800DC318\[0\])/if (k > D_800DC318[0])/ % notfound
+s/src = (u8 \*) mtx;/src = (u8 *) mtx + 64;/ % h1 n1

@@ -9,8 +9,13 @@
 #          (b) void C entries in tables whose asm dispatcher reads v0 after the jalr (P159 func_151C1EF0 case).
 # P162: D_ names resolved to EU addresses via undefined_syms.eu.txt (US names like D_80082FA4 live elsewhere in EU);
 #       each jalr is tied to the table it loads from (register trace), only those jalrs are checked for v0 / f0 use.
-# Run from the worktree root: python3 docs/port/sessions/p162/tablesig.py  (needs docker container conkerdev-portb)
+# Run from the worktree root: python3 tools/port/tablesig.py (P253: moved from docs/port/sessions/p214; the container
+# comes from $CONKERDEV, i.e. eval "$(tools/eu_port/wt.sh env <name>)" first; it was hard-coded to conkerdev-port)
 import re, glob, struct, subprocess, sys, os
+import os as _os
+CTR = _os.environ.get('CONKERDEV')
+if not CTR:
+    raise SystemExit('tablesig: set CONKERDEV (eval "$(tools/eu_port/wt.sh env <name>)")')
 sys.path.insert(0, os.path.dirname(__file__))
 ELF = 'conker/build/conker.eu.elf'
 MAP = 'conker/build/conker.eu.map'
@@ -33,7 +38,7 @@ for l in open(MAP, errors='replace'):
     m = re.match(r'\s+0x([0-9a-f]{8})\s+(func_[0-9A-Fa-f]{8}\w*)\s*$', l)
     if m: addr2fn[int(m.group(1), 16)] = m.group(2)
 data = open(ELF, 'rb').read()
-sh = subprocess.run(['docker', 'exec', '-w', '/conker/conker', 'conkerdev-port', 'mips-linux-gnu-readelf', '-SW',
+sh = subprocess.run(['docker', 'exec', '-w', '/conker/conker', CTR, 'mips-linux-gnu-readelf', '-SW',
                      'build/conker.eu.elf'], capture_output=True, text=True).stdout
 # P160: split runs at addresses that some code names (D_xxxxxxxx referenced in asm or C): adjacent tables otherwise merge
 eu_of = {}   # P162: source name -> EU address

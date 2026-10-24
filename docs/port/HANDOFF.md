@@ -10,6 +10,54 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P255, 2026-10-25). Details: `docs/port/sessions/P255.md`
+- Level 0x29 route stubs (browser P248 / P252), hand C (NM), all random EQUIV + setups + mutants 100%: func_150D88E8
+  tile_slide_by_anim_update (scene 7), func_15072B44 player_anim_follow_up (event-4 bubbles), func_151473F4
+  object_splash_spawn (river exit), func_150451C0 ceiling_probe (after a respawn). func_15134004 was already C.
+  NOT done: func_15194210 (game_eu_1C1A20, 388 instructions, tail of the Baddie hit handler func_15074FD4).
+- Breadth, same verification: func_15115B40 lift_y_update, func_150F6EDC spark_burst_spawn, func_151B7DA4
+  obj_attached_glow_update, func_1517A75C sprite_particle_update, func_151B69D0 trail_ring_age_update, func_15117858
+  swing_angle_step.
+- Harness: registry knobs `HARNESS=cmd` / `HMUT=cmd` (commas = spaces) in reverify.sh / reverify_all.sh for
+  whole-function harnesses; new `tools/port/nmharness.sh` (NM build + nmasm harness in the container, verdict line)
+  and `tools/port/nmharness_mut.sh` (sed mutants on a source file, rebuild, harness, restore). Test row
+  func_150A44A4 (nmasm_floor.py): harness EQUIV, mutants 2 / 3 (1 coverage-gap survivor, see P255.md section 2).
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1582), implicit_scan 0 NM+float, selftest 123 / 123,
+  progress_nm `total 5915 3994 1599 322 5593 94.6% 1931932/2253856 (85.7%)`.
+- Lesson: a mutant runner that restores the source with `cp -p` leaves build_nm on the last mutant (make sees no
+  newer source); restore with cp + touch.
+
+## Next steps (from P255)
+1. func_15194210 (game_eu_1C1A20, 388 insns): the Baddie hit handler tail on level 0x29 (browser P252 blocker).
+2. port-b: add `HARNESS=` / `HMUT=` rows for the MP3 Huffman group (example command in P255.md section 2); mhuff.sh
+   has hard-coded portb paths and restores with cp (check the mtime issue above).
+3. Breadth (compiled, owned): func_15011D60 (3F1F0), func_15104A80 (131F30), func_15194B3C (1C1A20), func_151570C4
+   (183F10), then `progress_nm --list`.
+4. Browser: UNVERIFIED list in P255.md section 5.
+
+## State (session P253, 2026-10-25). Details: `docs/port/sessions/P253.md`
+- Registry re-run done: func_1508C600, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874, 151D8280, 151EA4C8
+  all random EQUIV, all setups, all mutants killed. func_150C5A68 still needs DIFFTEST_JALRARG_OLD=1 (the random jalr
+  target is a null pointer, so no prototype; the f14 leftover is compared); knob kept.
+- port_work/p249/gen_edcc8.py eye offsets fixed (+0x2F8 / +0x2FC / +0x300).
+- Hand C (NM), all random EQUIV + setups + mutants 100%: func_150DF8B4 ground_burst_effect, func_150D779C
+  bullet_impact_effect, func_151894F4 trail_matrix_history_push_world, func_150D083C console_text_type, func_150D2C9C
+  flake_particle_spawn, func_15103910 object_sound_follow_cam / func_15103AA0 object_sound_delayed (func_1000FA64
+  callbacks: `s32 (SfxEnt *, s32 *pos, u32 *vol, s32 *pan, s32 *pitch, s32 *slot, u16 *sound)`), func_15189B64 trail_draw.
+- Harness: tools/port/tablesig.py (moved from p214, container from $CONKERDEV); reverify.sh NORAND=1 (= NR=0).
+- Lesson: an initialised non-const local array goes to .data, which the NM link discards -> use `static const`.
+
+## Next steps (from P253)
+1. Registry/reverify: add a `HARNESS=cmd` knob (or column) so reverify.sh / reverify_all.sh re-run whole-function
+   harnesses (port-b nmasm_huff.py + mutant script); coordinator request from port-b P251.
+2. port-b: func_15082278 (AF2A0) passes hit +0x44 as func_150D779C's first parameter, a 0x12-byte collision triangle
+   (s16[9]) or NULL; its C calls it `h->normal`, worth a look. func_15190940 (P250 follow-up 2) still open.
+3. Breadth (compiled, owned): func_15115B40 (142E40), func_150F6EDC (1231B0), func_151B7DA4 / func_151B69D0 (1E40E0),
+   func_1517A75C (1A7B30), func_150D88E8 (105FD0), func_151473F4 (174610), func_15011D60 (3F1F0), func_15104A80
+   (131F30), func_15117858 (142E40), func_15194B3C (1C1A20), func_151570C4 (183F10). The asm-only functions under 60
+   instructions are all handwritten or port-b's.
+4. Browser: UNVERIFIED list in P253.md section 6.
+
 ## State (session P252, 2026-10-25, port-web). Details: `docs/port/sessions/P252.md`
 - Merged port 4c2baf47 and port-b 1cd754c3; checks after each: verify_all OK, NM OK, protocheck 0, floatint 0,
   implicit NM+float 0, romabs 0 FAIL, census (clean) 722 / 0 FAIL, selftest 119 / 0. Registry 211 rows, no dups.
@@ -30,6 +78,26 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. port: func_15194210 (game_eu_1C1A20), func_15072B44 (981E0), func_151473F4 (174610), func_150D88E8 (105FD0),
    func_150451C0 (71E70).
 3. port-web: get past the Baddie (from the pit after the knock-back); Tank movement once it draws; use det=2 routes.
+## State (session P250, 2026-10-25). Details: `docs/port/sessions/P250.md`
+- Tank func_150EDCC8: `dist = 10000` survivor explained (eye fields poked 4 bytes early in every mp_ray setup, fixed;
+  slot 0 near the eye also hid it) and killed with `mp_ray_10k`; new setups `sp_lock2` (kills `off * d`) and `sp_turn`
+  (OUTW into the stubbed physics: kills `/ 64`, `speed + turn`). 124 / 127, 3 equivalent left.
+- Conversions: func_1508B704 `rail_zone_flood` (own NM block now), func_150D93CC `path_points_catch_up`, func_150BEFCC /
+  func_150BF24C / func_15147B48 `impact_effect_a/b/c`; all random EQUIV + mutants all killed.
+- Table "0x8008B4AC" is D_8008B490 (US D_8008B0F0), dispatcher func_151603FC `s32 (struct225 *)`, result tested;
+  func_150EB3A4 (entry 19) s32 is right; port-b's func_15190940 (entry 18) is void but must return s32.
+- port-b P247 follow-ups: func_1513B83C handler call now 2 args; difftest errors on a repeated stub-knob address
+  (KNOBERROR); jalr FPR compare skipped for int-first targets (prototype or src_eu definition). Selftest 123 / 123.
+- Registry re-run: func_1508CF34 green (60/60, 90/90); 9 rows still to do.
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1564), implicit_scan 0 NM+float, progress_nm
+  `total 5915 3994 1581 340 5575 94.3% 1924152/2253856 (85.4%)`.
+- Host: /usr/local/bin/docker is a dangling OrbStack link; prefix PATH with /Applications/Docker.app/Contents/Resources/bin.
+
+## Next steps (from P250)
+1. Registry re-run: func_1508C600, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874, 151D8280, 151EA4C8.
+2. port-b: func_15190940 -> s32 under NM. Rows with JALRARG_OLD only for f12 / f14 leftovers can drop it (re-run).
+3. Breadth: func_150DF8B4, func_150D779C, func_151894F4, func_150D083C, func_150D2C9C; 130CB0 sound callbacks need
+   the func_1000FA64 callback signature first.
 
 ## State (session P249, 2026-10-25). Details: `docs/port/sessions/P249.md`
 - **MP stubs**: func_150EDCC8 (11AF60) `tank_update` **drives the tank** (pad stick / buttons -> throttle, steering,

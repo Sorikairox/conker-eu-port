@@ -188,7 +188,53 @@ void func_151472D0(u8 *obj, u8 id, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151472D0.s")
 #endif
 
+#ifdef NON_MATCHING
+u8 func_151D8E20(void);
+void func_15142180(u8, f32 *, s32, f32, f32);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
+
+// object_splash_spawn: effect handler of the same table as func_151472D0 (entry {0x50, fn}, `void (u8 *obj, u8 id,
+// s32 strength)`). For an object with a model (+0x1D4), func_15146E00 finds point `id` and probes the surface below
+// it (rec[0] = surface height, f32). Takes an effect slot (func_151D8E20); strength >= 0x47 also spawns the
+// func_15142180 effect at the point (rec[6]). Then, at (pt x, surface, pt z), one of two random effects: a ring
+// func_151D9B8C (size 10..20, alpha 100..200, life 80..120) or a burst func_151DAB58 (size 5..13, alpha 100..200).
+void func_151473F4(u8 *obj, u8 id, s32 strength) {
+    struct {
+        s32 rec[9];
+        f32 pt[3];
+    } sp;
+    f32 pos[3];
+    u8 slot;
+    f32 r;
+    u32 a;
+    u32 b;
+
+    if (*(s32 *) (obj + 0x1D4) != 0) {
+        if (func_15146E00(sp.pt, obj, (s32) sp.rec, id) != 0) {
+            slot = func_151D8E20();
+            if (strength >= 0x47) {
+                func_15142180(slot, sp.pt, sp.rec[6], 1.0f, 1.0f);
+            }
+            pos[0] = sp.pt[0];
+            pos[1] = *(f32 *) &sp.rec[0];
+            pos[2] = sp.pt[2];
+            if (func_150ADA20() & 1) {
+                r = func_150ADA68();
+                a = func_150ADA20();
+                b = func_150ADA20();
+                func_151D9B8C(slot, r * 10.0f + 10.0f, a % 101 + 100, (s32) &sp.rec[1], (struct17 *) pos,
+                              b % 41 + 80, 1, 1, 0, 0xFF, 1);
+            } else {
+                r = func_150ADA68();
+                a = func_150ADA20();
+                func_151DAB58(slot, r * 8.0f + 5.0f, a % 101 + 100, pos, 1, 0xFF, 1);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151473F4.s")
+#endif
 
 s32 func_15146E00(f32 *, u8 *, s32, u8);
 #ifdef NON_MATCHING
@@ -343,4 +389,27 @@ void func_151479E8(u8 *arg0, int arg1, s32 arg2)
   }
 }
 
+#ifdef NON_MATCHING
+extern u8 (*D_800900D0)(void);
+extern f32 D_800A5B2C;
+extern f32 D_800A5B30;
+// impact_effect_c: P250. Effect table handler (u8 *obj, kind, level) like its table neighbour func_151479E8 (records
+// {handler, 0x82} at ELF file offset 0x24A4D4): when the object has a model (+0x1D4) and func_15146E00 finds the
+// effect point (pos + hit record), spawns the effect whose id D_800900D0() returns (func_15141F78: strength level *
+// D_800A5B2C, size +0x40 * D_800A5B30 as a byte) and, for level >= 0x73, effect 0xB (func_15142180) with the hit
+// record's word 6.
+void func_15147B48(u8 *obj, s32 kind, s32 level) {
+    f32 pos[3];
+    s32 hit[9];
+
+    if (*(s32 *) (obj + 0x1D4) != 0 && func_15146E00(pos, obj, (s32) hit, (u8) kind) != 0) {
+        func_15141F78(D_800900D0(), hit, (f32) level * D_800A5B2C, (u8) (u32) (*(f32 *) (obj + 0x40) * D_800A5B30),
+                      pos, (u8) kind);
+        if (level >= 0x73) {
+            func_15142180(0xB, pos, hit[6], 1.0f, 1.0f);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_15147B48.s")
+#endif
