@@ -1,0 +1,19 @@
+# P256 func_150803E0 (obj_near_reachable_node) mutants: sed % setup names
+s/func_150A3674(4, 5,/func_150A3674(4, 6,/ % zone5
+s/func_150A3674(4, 0xB,/func_150A3674(3, 0xB,/ % zoneB
+s/obj->z_position) == 0 \&\&/obj->z_position) != 0 \&\&/ % zone5 nozone
+s/lists.id\[k\]\]/lists.id[k \& 1]]/ % list17
+s/lists.id\[k\]\]/lists.id[k] - 1]/ % zone5
+s/for (k = 0; k < 3; k++)/for (k = 0; k < 2; k++)/ % list17
+s/node = node->next/node = node->prev/ % zone5
+s/(u8 \*) node + 0x98/(u8 *) node + 0x94/ % zone5
+s/dy = pos\[1\] - obj->y_position;/dy = pos[1] - obj->x_position;/ % zone5 faronly
+s/dz = pos\[2\] - obj->z_position;/dz = pos[2] + obj->z_position;/ % zsign
+s/< 1000000.0f/<= 1000000.0f/ % edgeexact
+s/< 1000000.0f/< 999000.0f/ % justin
+s/func_15037988(obj - D_800CC2D0, 0, 0,/func_15037988(obj - D_800CC2D0, 0, 1,/ % zone5
+s/func_15037988(obj - D_800CC2D0,/func_15037988(obj - D_800CC2D0 + 1,/ % zone5
+s/pos\[1\], pos\[2\], out, 90.0f/pos[2], pos[1], out, 90.0f/ % zone5
+s/out, 90.0f, 0, 0)/out, 9.0f, 0, 0)/ % zone5
+s/out, 90.0f, 0, 0) != 0/out, 90.0f, 0, 0) == 0/ % reject rejectall
+s/                return 1;/                return 2;/ % zone5

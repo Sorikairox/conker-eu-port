@@ -3,16 +3,81 @@
 #include "variables.h"
 
 s32 func_1518D1C0(u8 *, s16, s32, u8, u8, s32, char *);
+s32 func_1504715C(s32 *, struct127 *);
+void func_15194210(u8 *obj, u8 alt, u8 view, s32 group);
 
 
+#ifdef NON_MATCHING
+// hit_impact_effect: P256: the impact effect at the last hit point D_800CC2C0/C4/C8 (written by the hit tests in
+// game_83300) for the struck object `obj`, chosen by its kind byte obj +0x04 (the material of the thing that was
+// hit). func_1504715C gives the object's matrix (9 words) on the stack first. Fire-like kinds spawn embers
+// (func_151C384C(pos, view, group)); the others pick a spark style (0 / 1 / 2 / 5 / 6) and spawn it with
+// func_151DC484 (`alt` != 0) or func_151DC260 (pos, matrix, style, view, group); unknown kinds spawn nothing.
+// Callers func_151942B0 (alt 0, reached from the Baddie hit handler func_15074FD4) / func_15194858 (alt 1).
+// The N64 code also XORs the code words func_150A16A4..func_150A2280 and on a mismatch (anti-tamper) scribbles
+// osGetCount() & 0x3FFFF7 into a random 0x20-byte record of D_80043ED0; the port has no MIPS code there, so the
+// NON_MATCHING build skips the check (as func_15046F70, func_150AEB9C).
+void func_151DC260(void *pos, void *mtx, u8 style, u8 view, s32 group);
+void func_15194210(u8 *obj, u8 alt, u8 view, s32 group) {
+    s32 mtx[9];
+    f32 pos[3];
+    u8 style;
+
+    func_1504715C(mtx, (struct127 *) obj);
+    pos[0] = D_800CC2C0;
+    pos[1] = D_800CC2C4;
+    pos[2] = D_800CC2C8;
+    switch (obj[4]) {
+    case 0x06: case 0x09: case 0x0C: case 0x0F: case 0x10: case 0x12: case 0x17: case 0x1B: case 0x1E: case 0x28:
+    case 0x29: case 0x2A: case 0x2B: case 0x2C: case 0x2D: case 0x2E: case 0x30: case 0x34: case 0x38: case 0x3A:
+    case 0x41: case 0x42: case 0x46: case 0x47: case 0x49: case 0x4A: case 0x4B: case 0x4C: case 0x4D: case 0x4E:
+    case 0x4F: case 0x51: case 0x52: case 0x55: case 0x56: case 0x5D: case 0x60: case 0x61: case 0x62: case 0x63:
+    case 0x66: case 0x67: case 0x6F: case 0x70: case 0x73: case 0x77: case 0x7B: case 0x7D: case 0x7E: case 0x7F:
+    case 0x82: case 0x83: case 0x84: case 0x89: case 0x8C: case 0x8E: case 0x8F: case 0x91: case 0x94: case 0x9E:
+    case 0xA1: case 0xA6: case 0xAB: case 0xAC: case 0xB2: case 0xB4: case 0xB7: case 0xB8: case 0xB9:
+        func_151C384C(pos, view, group);
+        return;
+    case 0x05: case 0x07: case 0x13: case 0x20: case 0x23: case 0x44: case 0x5A: case 0x5C: case 0x5E: case 0x5F:
+    case 0x6D: case 0x74: case 0x75: case 0x78: case 0x7A: case 0x8A: case 0x8D: case 0xAD: case 0xAE: case 0xAF:
+    case 0xB1:
+        style = 1;
+        break;
+    case 0x00: case 0x01: case 0x02: case 0x03: case 0x04: case 0x08: case 0x0A: case 0x11: case 0x14: case 0x16:
+    case 0x1A: case 0x21: case 0x22: case 0x26: case 0x27: case 0x31: case 0x36: case 0x3B: case 0x3E: case 0x50:
+    case 0x53: case 0x54: case 0x58: case 0x5B: case 0x64: case 0x69: case 0x6B: case 0x71: case 0x72: case 0x76:
+    case 0x79: case 0x80: case 0x86: case 0x87: case 0x88: case 0x90: case 0x96: case 0x97: case 0x98: case 0x9A:
+    case 0x9B: case 0x9C: case 0x9D: case 0x9F: case 0xA0: case 0xA2: case 0xA4: case 0xA5: case 0xA7: case 0xB0:
+    case 0xB3: case 0xB5: case 0xB6:
+        style = 0;
+        break;
+    case 0x25: case 0x92: case 0x95:
+        style = 2;
+        break;
+    case 0x3F:
+        style = 6;
+        break;
+    case 0x93:
+        style = 5;
+        break;
+    default:
+        return;
+    }
+    if (alt) {
+        func_151DC484(pos, mtx, style, view, group);
+    } else {
+        func_151DC260(pos, mtx, style, view, group);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194210.s")
+#endif
 
 void func_151942B0(s32 arg0, s32 arg1, s32 arg2) {
-    func_15194210(arg1, 0, 0xFF, 1);
+    func_15194210((u8 *) arg1, 0, 0xFF, 1);
 }
 
 void func_15194858(s32 arg0, s32 arg1, s32 arg2) {
-    func_15194210(arg1, 1, 0xFF, 1);
+    func_15194210((u8 *) arg1, 1, 0xFF, 1);
 }
 
 
@@ -93,7 +158,65 @@ void func_15194AF8(struct127 *arg0, struct127 *arg1, s32 arg2) {
     func_15194978(arg0, arg1);
 }
 
+#ifdef NON_MATCHING
+// hit_debris_burst: P256: the debris burst when `obj` is hit by `attacker`: unless obj's class (func_15134070) is
+// 0x63 or its class mode D_800A43C6[class * 16] is 2, one func_15154488 burst 270 above obj's position (heading
+// (attacker yaw +0x7A >> 8) - 0x80, single = mode == 1, obj's matrix from func_1504715C), then func_151B5280(obj,
+// 0xFF, 1). The y offset is added in double as in the asm (D_800A8680 = 270.0).
+s32 func_15134070(s32);
+u8 *func_151B5280(u8 *, u8, s32);
+extern u8 D_800A43C6[];
+void func_15194B3C(u8 *attacker, u8 *obj, s32 arg2) {
+    s32 mtx[9];
+    struct_eu_15154488 s;
+    s16 yaw;
+    struct17 pos;
+    s32 class;
+    u8 mode;
+
+    yaw = (*(u16 *)(attacker + 0x7A) >> 8) - 0x40;
+    pos.unk0 = *(f32 *)(obj + 0x14);
+    pos.unk4 = *(f32 *)(obj + 0x18) + 270.0;
+    pos.unk8 = *(f32 *)(obj + 0x1C);
+    func_1504715C(mtx, (struct127 *) obj);
+    class = func_15134070((s32) obj);
+    if (class == 0x63) {
+        return;
+    }
+    mode = D_800A43C6[class * 16];
+    if (mode == 2) {
+        return;
+    }
+    s.unk8 = pos;
+    s.unk14 = 6.7f;
+    s.unk18 = 2.33f;
+    s.unk1C = 0.68f;
+    s.unk20 = 0.0f;
+    s.unk24 = 4.4f;
+    s.unk28 = 5.3f;
+    s.unk2C = 0xF;
+    s.unk2E = 0xC;
+    s.unk0 = yaw - 0x40;
+    s.unk2 = 0x80;
+    s.unk4 = -0xA0;
+    s.unk6 = 0x20;
+    s.unk30 = 3;
+    s.unk32 = 1;
+    s.unk34 = 0x1F;
+    s.unk36 = 0x13;
+    s.unk38 = 0x9B;
+    s.unk3A = 0x64;
+    s.unk44 = 0x10;
+    s.unk46 = 0xF;
+    s.unk48 = 0;
+    s.unk40 = 0.5f;
+    s.unk3C = (mode == 1) ? 1 : 0;
+    func_15154488(&s, &s.unk8, (s32) mtx, 0xFF, 1);
+    func_151B5280(obj, 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C1A20/func_15194B3C.s")
+#endif
 
 s32 func_151AF820(u8 *, u8, s32);
 s32 func_151B01B8(s32, u8 *);

@@ -2523,7 +2523,66 @@ void func_150723E0(void) {
     }
 }
 
+#ifdef NON_MATCHING
+// event_respawn_record_object: P256: event-script command (request word D_800D1580): byte 0 = record id (looked up
+// with func_15083E0C, -1 = none), bits 8..14 = the new object's +0x5C, bit 15 = no +0x101 mode (else 4), bits
+// 16..23 = state (+0x232 gets the low 7 bits; bit 7 keeps the record's current object, otherwise that object is
+// released first: func_15060F28(obj, 0) + func_1505F188). Clears the record's flag bytes (D_800D252C[rec], record
+// +2), spawns it again (func_15082E44, 1-based object number) and places the object on the current object
+// D_800D154C, owned by it (+0x65 = its index + 1, +0x124 = D_800C3E78 + 1). With D_800BE616 set and the current
+// object of kind 0x53 that one remembers the new index (+0x222); kind 0x16 objects on level 0x3F get +0x94 bit 2.
+extern u8 *D_800D252C;
+s32 func_15082E44(u8 *, s32, s32, s32, s32);
+void func_1505F188(struct127 *);
+void func_15072420(void) {
+    s32 req = D_800D1580;
+    s32 word5C = (req >> 8) & 0x7F;
+    s32 noMode = (req >> 15) & 1;
+    s32 state = (req >> 16) & 0xFF;
+    s32 rec;
+    s32 n;
+    struct127 *old;
+    struct127 *obj;
+
+    rec = func_15083E0C(req & 0xFF);
+    if (rec == -1) {
+        return;
+    }
+    D_800D252C[rec] = 0;
+    if (!(state & 0x80)) {
+        old = func_1505EEF4(rec);
+        if (old != NULL) {
+            func_15060F28(old, 0);
+            func_1505F188(old);
+        }
+    }
+    ((u8 *) D_800D20FC + rec * 0x30)[2] = 0;
+    n = func_15082E44((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    if (n == 0) {
+        return;
+    }
+    obj = &D_800CC2D0[n - 1];
+    if (obj == NULL) {
+        return;
+    }
+    obj->unk65 = (D_800D154C - D_800CC2D0) + 1;
+    obj->unk5C = word5C;
+    obj->unk101 = noMode ? 0 : 4;
+    obj->unk232 = state & 0x7F;
+    obj->unk124 = D_800C3E78 + 1;
+    obj->x_position = D_800D154C->x_position;
+    obj->y_position = D_800D154C->y_position;
+    obj->z_position = D_800D154C->z_position;
+    if (D_800BE616 != 0 && D_800D154C->id == 0x53) {
+        D_800D154C->unk222 = obj - D_800CC2D0;
+    }
+    if (D_800BE9F0 == 0x3F && obj->id == 0x16) {
+        obj->unk94 |= 2;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15072420.s")
+#endif
 void func_1507266C(void)
 {
   u8 new_var;

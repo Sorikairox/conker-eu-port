@@ -285,4 +285,9 @@ chkce EQUIV  func_150C5A68 "$S5A68"
 chkce DIFFER func_150C5A68 "$S5A68 DIFFTEST_JALRFPR_OLD=1"
 chkce DIFFER func_150C5A68 "$S5A68" 's/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/'
 TRIALS=1 chkce KNOBERROR func_150C5A68 "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C6088=1:2"
+# P256: DIFFTEST_ARGMEM "N*OFF:LEN" compares LEN bytes at the pointer stored at aN + OFF (func_15104A80's key holds a
+# stack copy of a 9-byte part list; the pointer itself differs between the builds, so only the deref sees a swapped list).
+S4A80="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=804100A0 DIFFTEST_POKE=800DC324=80410000,800DC3C4=80420000,80420004=0000000C,80410110=0000F800,800CCD48=00000000,800CD074=00000001 DIFFTEST_ARGMEM=15149A50=0:4,15149A50=0+8:4,15149A50=0*4:9"
+chkce EQUIV  func_15104A80 "$S4A80"
+chkce DIFFER func_15104A80 "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

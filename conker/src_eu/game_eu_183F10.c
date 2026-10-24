@@ -389,7 +389,44 @@ void func_15156E68(u8 *arg0, u8 arg1) {
     func_151308E4(&sp, arg0[0x88], 0, arg1, 0);
 }
 
+#ifdef NON_MATCHING
+// spark_point_flash_update: P256: counts the emitter `obj`'s timer (s16 +0x2C) down by the frame step D_800BE9E4;
+// when it runs out, picks a random point of the table D_800DCE60 (3 groups x 10 points of x, y, z, w); a point with
+// a zero coordinate spawns nothing, else func_15157294(point, room obj[0xC]) and a light flash (func_151602C0:
+// type 3, 5..15 frames, at the truncated point, radius 100..255, white, room obj[0xC], owner obj[1]). The timer then
+// restarts at min +0x28 + rand % (range +0x2A + 1) (unsigned).
+extern f32 D_800DCE60[][10][4];
+void func_15157294(u8 *, u8);
+void func_151570C4(u8 *obj) {
+    Header flash;
+    Header2 at;
+    s16 *timer;
+    f32 *pt;
+    s32 group;
+
+    *(s16 *)(obj + 0x2C) -= D_800BE9E4;
+    if (*(s16 *)(obj + 0x2C) >= 0) {
+        return;
+    }
+    group = func_150ADA20() % 3U;
+    pt = D_800DCE60[group][func_150ADA20() % 10U];
+    if (pt[0] != 0.0f && pt[1] != 0.0f && pt[2] != 0.0f) {
+        func_15157294((u8 *) pt, obj[0xC]);
+        flash.unk0 = 3;
+        flash.unk1 = -1;
+        flash.unk2 = func_150ADA20() % 11U + 5;
+        flash.unk4 = 0;
+        at.unk0 = pt[0];
+        at.unk4 = pt[1];
+        at.unk8 = pt[2];
+        func_151602C0(&flash, &at, func_150ADA20() % 156U + 100, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, obj[0xC], obj[1]);
+    }
+    timer = (s16 *)(obj + 0x28);
+    timer[2] = func_150ADA20() % (u32) (timer[1] + 1) + timer[0];
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_183F10/func_151570C4.s")
+#endif
 
 void func_15157294(u8 *arg0, u8 arg1)
 {

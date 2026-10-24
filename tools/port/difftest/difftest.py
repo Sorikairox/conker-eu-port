@@ -827,8 +827,11 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     _n, _l = _v.split(':')
     # P100: N may be 'N+OFF' (hex OFF): compare LEN bytes from aN + OFF (skips padding a struct argument leaves
     # uninitialised, e.g. func_151DA6F8's spawn block: bytes 0x16-0x17 are stack garbage in both builds).
-    _n, _o = (_n.split('+') + ['0'])[:2]
-    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16)))
+    # P256: 'N*OFF' (hex OFF) dereferences: compare LEN bytes at the pointer stored at aN + OFF (e.g. a list that a
+    # stack key struct points to; the pointer itself is a stack address that differs between the builds).
+    _d = '*' in _n
+    _n, _o = (_n.split('*' if _d else '+') + ['0'])[:2]
+    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16), _d))
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -1276,9 +1279,12 @@ class Run:
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
-            for _n, _l, _o in ARGMEM[addr & 0x1FFFFFFF]:
+            for _n, _l, _o, _d in ARGMEM[addr & 0x1FFFFFFF]:
                 # P43: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
-                try: am.append(bytes(mu.mem_read(phys((regs[_n] if _n < 4 else stkw[_n - 4]) + _o), _l)).hex())
+                try:
+                    _pa = (regs[_n] if _n < 4 else stkw[_n - 4]) + _o
+                    if _d: _pa = int.from_bytes(bytes(mu.mem_read(phys(_pa), 4)), 'big')
+                    am.append(bytes(mu.mem_read(phys(_pa), _l)).hex())
                 except Exception: am.append('unmapped')
             self.calls[-1]['argmem'] = am
         self.pending = len(self.calls) - 1

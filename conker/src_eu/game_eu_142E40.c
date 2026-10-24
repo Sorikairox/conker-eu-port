@@ -905,11 +905,11 @@ void func_15117D18(f32 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15104A80(s32, s32, s32);
+void func_15104A80(u8 *);
 
 void func_15117D40(u8 *arg0) {
     s32 sp1C;
-    s32 (*var_t0)(s32, s32, s32);
+    void (*var_t0)(u8 *); // P256: only func_15104A80 (prop_owner_effects_clear), called with the object in a0
     s16 temp_v0_2;
     s16 temp_v0_3;
     s32 var_a1;
@@ -969,7 +969,7 @@ void func_15117D40(u8 *arg0) {
             var_a3 = 3;
             if (var_t0 != NULL) {
                 sp1C = 3;
-                var_t0(var_a1, var_a2, 3);
+                var_t0(arg0); // P256: the asm jalr passes a0 = arg0 (a1-a3 = step, flag, 3 are not read)
                 var_a3 = 3;
             }
         }

@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P256, 2026-10-25). Details: `docs/port/sessions/P256.md`
+- func_15194210 (game_eu_1C1A20, 388 insns) hand C (NM) `hit_impact_effect`: the impact effect at the last hit
+  point D_800CC2C0 by the struck object's kind (embers / spark styles 0,1,2,5,6), anti-tamper code checksum skipped
+  in NM. `void (u8 *obj, u8 alt, u8 view, s32 group)`; callers func_151942B0 / func_15194858 (4 args) now cast to
+  `u8 *` with a file-top prototype. Random EQUIV, 40 setups, mutants 23 / 23. It only spawns effects (the pit throw
+  is func_15074FD4's own D_800D1580 + func_15072740).
+- Breadth, all random EQUIV + setups + mutants 100%: func_15194B3C hit_debris_burst, func_15011D60
+  marker_effect_spawn, func_15104A80 prop_owner_effects_clear, func_151570C4 spark_point_flash_update,
+  func_15072420 event_respawn_record_object, func_150803E0 obj_near_reachable_node.
+- Harness: DIFFTEST_ARGMEM `N*OFF:LEN` dereferences the pointer at aN + OFF (stack-copied lists inside key
+  structs); 2 selftest cases.
+- Caller fix: func_15117D40 (game_eu_142E40) called its func_15104A80 pointer as (step, flag, 3); the asm passes
+  the object in a0 -> now `void (*)(u8 *)`, `var_t0(arg0)` (EQUIV with DIFFTEST_JALRARG_OLD=1; no registry row yet).
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1589), implicit_scan 0 NM+float, selftest
+  125 / 125, progress_nm `total 5915 3994 1606 315 5600 94.7% 1936436/2253856 (85.9%)`.
+- Docker Desktop stopped mid-session; only conkerdev-port was restarted (conkerdev-portb / -web / conker-web-serve
+  are still stopped).
+
+## Next steps (from P256)
+1. Browser: UNVERIFIED list in P256.md section 5 (level 0x29 Baddie hit effects first).
+2. Breadth (compiled, owned; `progress_nm --list`): func_1508A41C (B7840, 136), func_15040A78 (6D800, 148),
+   func_15062800 (8FCB0, 177), func_150124A0 (3F820, 160), func_150144B8 (40490, 165), then larger ones.
+3. func_15117D40: add a registry row + setups/mutants (level 0x34, JALRARG_OLD=1).
+4. When keying ARGMEM / RET / OUT* knobs, decode the jal word: func_151494E0's EU target is 15149A50.
+
 ## State (session P255, 2026-10-25). Details: `docs/port/sessions/P255.md`
 - Level 0x29 route stubs (browser P248 / P252), hand C (NM), all random EQUIV + setups + mutants 100%: func_150D88E8
   tile_slide_by_anim_update (scene 7), func_15072B44 player_anim_follow_up (event-4 bubbles), func_151473F4
