@@ -1090,7 +1090,11 @@ f32  func_1505A72C(struct127 *arg0, struct127 *arg1);
 void func_1505B5F8(struct127 *arg0, f32 arg1);
 void func_1505E650(struct127 *arg0, u16 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 u32  func_1505E7CC(s32, struct127*);
+#ifdef NON_MATCHING
+void func_1505E874(u8, struct127*); /* P209: the asm ignores a0 (home slot only) and returns nothing */
+#else
 f32 func_1505E874(u8, struct127*);
+#endif
 struct127* func_1505F0AC(s32);
 void func_15060778(s32 arg0, struct127 *arg1, u16 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6);
 void func_15060F28(struct127 *arg0, s32 arg1);

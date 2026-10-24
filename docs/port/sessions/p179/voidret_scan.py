@@ -10,10 +10,17 @@
 # A suspect = a void function whose callers read v0/f0 (or that is table-referenced and whose asm sets v0/f0).
 # Usage (worktree root): docker exec ... mips-linux-gnu-objdump -d --no-show-raw-insn -M reg-names=numeric
 #        conker/build/conker.eu.elf > port_work/p179/dis.txt ; python3 docs/port/sessions/p179/voidret_scan.py [--files a b ..] [--all]
+#        (--files takes base names game_eu_X, file names game_eu_X.c or paths; P206)
 import re, glob, sys, os
 from collections import defaultdict
 
 DIS = 'port_work/p179/dis.txt'
+# P206: a missing / stale disassembly silently scans the wrong code; refuse instead.
+ELF = 'conker/build/conker.eu.elf'
+if not os.path.exists(DIS):
+    sys.exit('voidret_scan: %s missing; regenerate it from %s (see Usage)' % (DIS, ELF))
+if os.path.exists(ELF) and os.path.getmtime(DIS) < os.path.getmtime(ELF):
+    print('voidret_scan: WARNING %s is older than %s; regenerate it (see Usage)' % (DIS, ELF), file=sys.stderr)
 PORTB = set("""game_eu_170760 game_169510 game_eu_4A070 game_eu_78230 game_eu_C2B60 game_eu_C5530 game_eu_CE0A0 game_14FF90
 game_eu_48B10 game_eu_158110 game_eu_15A210 game_34F20 game_eu_1EC610 game_A28B0 game_eu_175B20 game_eu_15C660 game_eu_E0430
 game_eu_156560 game_eu_156A30 game_eu_15C370 game_eu_13DC30 game_eu_1A5190 game_eu_1ACBC0 game_eu_1B1010 game_eu_1B1ED0
@@ -170,10 +177,18 @@ for f in order:
 
 # ---- sources
 files = sys.argv[sys.argv.index('--files') + 1:] if '--files' in sys.argv else None
+# P206: `--files conker/src_eu/game_eu_X.c` used to match nothing ("0 void C functions scanned"): only bare base names
+# (game_eu_X) matched. Accept paths and .c names; fail on a name that is not a source file.
+if files is not None:
+    files = [os.path.basename(f)[:-2] if f.endswith('.c') else os.path.basename(f) for f in files if not f.startswith('--')]
 srcs = sorted(glob.glob('conker/src_eu/**/*.c', recursive=True))
 alltext = ''
 alltext_nm = ''
 voids = []  # (file, func, branch)
+if files is not None:
+    known = {os.path.basename(p)[:-2] for p in srcs}
+    bad = [f for f in files if f not in known]
+    if bad: sys.exit('voidret_scan: no such source file under conker/src_eu: %s' % ' '.join(bad))
 for p in srcs:
     base = os.path.basename(p)[:-2]
     t = re.sub(r'/\*.*?\*/', lambda m: '\n' * m.group(0).count('\n'), open(p, errors='replace').read(), flags=re.S)
@@ -197,7 +212,8 @@ for p in glob.glob('conker/asm/data/**/*.s', recursive=True):
     for m in re.finditer(r'\.word\s+(func_[0-9A-F]{8})\b', open(p, errors='replace').read()):
         datarefs[m.group(1)] += 1
 crefs = defaultdict(int)
-for m in re.finditer(r'(?<![\w])&?(func_[0-9A-F]{8})\b(?!\s*\()', alltext):
+# P206: skip `#pragma GLOBAL_ASM(".../func_X.s")` lines (they counted as a table reference)
+for m in re.finditer(r'(?<![\w/])&?(func_[0-9A-F]{8})\b(?![\s.]*\()(?!\.s\b)', alltext):
     crefs[m.group(1)] += 1
 
 memo = {}
