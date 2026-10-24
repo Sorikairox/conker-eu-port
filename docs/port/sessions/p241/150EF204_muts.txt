@@ -1,0 +1,19 @@
+# P241 func_150EF204 (rider_dismount_enter) mutants: sed % setup names
+s/    obj\[5\] = 3;/    obj[5] = 2;/ % norider
+s/    \*(s16 \*) (obj + 0xE4) = 0;/    *(s16 *) (obj + 0xE4) = 1;/ % norider
+s/    obj\[0x125\] = 0xFF;/    obj[0x125] = 0xFE;/ % norider
+s/    obj\[0x328\] = 0;/    obj[0x328] = 1;/ % norider
+s/    if (rider == NULL) {/    if (rider != NULL) {/ % p0
+s/    k = (rider\[0x23D\] == 3) ? 1 : 0;/    k = (rider[0x23D] == 2) ? 1 : 0;/ % p3
+s/    k = (rider\[0x23D\] == 3) ? 1 : 0;/    k = 0;/ % p3
+s/    func_151254F4((struct108 \*) rider, k);/    func_151254F4((struct108 *) rider, 0);/ % p3
+s/    (\*(u8 \*\*) (obj + 0x31C))\[0x78\] = 0x29;/    (*(u8 **) (obj + 0x31C))[0x78] = 0x28;/ % p0
+s/    D_800BE748\[k \* 3\] \&= ~0x10;/    D_800BE748[k * 2] \&= ~0x10;/ % p3
+s/    D_800BE748\[k \* 3\] \&= ~0x10;/    D_800BE748[k * 3] \&= ~0x20;/ % p0
+s/    slot\[0x2FC\] |= 1 << rider\[0x23D\];/    slot[0x2FC] = 1 << rider[0x23D];/ % p0
+s/    slot\[0x2FC\] |= 1 << rider\[0x23D\];/    slot[0x2FC] |= 2 << rider[0x23D];/ % p2
+s/    if (slot\[0x10A\] != 0) {/    if (slot[0x10A] == 0) {/ % p0
+s/        func_1517F9F8(0xFF, 0, 0, 180, 20, rider\[0x23D\]);/        func_1517F9F8(0xFF, 0, 0, 180, 20, k);/ % p2
+s/        func_1517F9F8(0xFF, 0, 0, 180, 20, rider\[0x23D\]);/        func_1517F9F8(0xFF, 0, 0, 181, 20, rider[0x23D]);/ % p0
+s/        slot\[0x10A\] = 0;/        slot[0x10B] = 0;/ % p0
+s/    slot = (u8 \*) \&D_800CC2D0\[k\];/    slot = (u8 *) \&D_800CC2D0[0];/ % p3flag

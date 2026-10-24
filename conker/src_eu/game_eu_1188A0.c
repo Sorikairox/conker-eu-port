@@ -110,4 +110,35 @@ void func_150EB090(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_15046F70(f32 *, s32, f32, s32 *);
+
+/* drifting_sprite_update: moves an effect over the ground: x +0x18 / z +0x1C advance by the velocities +0x20 / +0x24
+ * times the frame time D_800BE9A4 and go to the sprite (+0x14) s16 x / z (+0xE / +0x12); the sprite's s16 y (+0x10)
+ * is the ground height func_15046F70 finds at (x, +0x28, z) (range +0x2C, result in +0x34), or +0x28 when there is
+ * none. The lifetime +0x30 counts down by the frame time; returns 0 once it is <= 0 (done), else 1. Table word
+ * 0x8008B4AC (dispatcher not identified; neighbours func_15190940 / func_150F2B20 take one u8 *). */
+s32 func_150EB3A4(u8 *o) {
+    f32 pt[3];
+
+    *(f32 *) (o + 0x18) += *(f32 *) (o + 0x20) * D_800BE9A4;
+    *(f32 *) (o + 0x1C) += *(f32 *) (o + 0x24) * D_800BE9A4;
+    pt[0] = *(f32 *) (o + 0x18);
+    pt[1] = *(f32 *) (o + 0x28);
+    pt[2] = *(f32 *) (o + 0x1C);
+    *(s16 *) (*(u8 **) (o + 0x14) + 0xE) = (s32) *(f32 *) (o + 0x18);
+    *(s16 *) (*(u8 **) (o + 0x14) + 0x12) = (s32) *(f32 *) (o + 0x1C);
+    if (func_15046F70(pt, 0, *(f32 *) (o + 0x2C), (s32 *) (o + 0x34)) != 0) {
+        *(s16 *) (*(u8 **) (o + 0x14) + 0x10) = (s32) *(f32 *) (o + 0x34);
+    } else {
+        *(s16 *) (*(u8 **) (o + 0x14) + 0x10) = (s32) *(f32 *) (o + 0x28);
+    }
+    *(f32 *) (o + 0x30) -= D_800BE9A4;
+    if (*(f32 *) (o + 0x30) <= 0.0f) {
+        return 0;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1188A0/func_150EB3A4.s")
+#endif

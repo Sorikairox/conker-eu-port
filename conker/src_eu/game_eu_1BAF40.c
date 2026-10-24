@@ -1076,28 +1076,46 @@ s32 func_1518FB40(s32 arg0, u8 *arg1, s16 arg2, s8 arg3, s8 arg4, s8 arg5, u8 ar
 }
 
 #ifdef NON_MATCHING
-extern s32 D_8008DA1C;
+void func_1518FE50(s32);
+// D_8008DA1C: the bone-spark emitter's tick handler table (0x8008DA1C: func_15190B2C, func_15190C34). func_1518FD34
+// indexes it with self +0x88 and returns the handler's result; func_1518FDC8 indexes D_8008DA20 (= D_8008DA1C + 1)
+// with self +0x89. One signature for both views (wasm call_indirect): s32 (u8 *).
+extern s32 (*D_8008DA1C[])(u8 *);
 
-s32 func_1518FD34(s32 arg0) {
-    u8 *sp1C;
-    s32 var_v0;
-    s8 temp_v1;
-    u8 *temp_v0;
+// bone_sparks_tick: effect-child handler (D_8008FFE0 [3] / D_8008FFE8 [1]). Advances the emitter's spark counter
+// (self +0x30) by (rate +0x34 + random f32 * spread +0x38) * D_800BE9A4 (frame time), emits the sparks
+// (func_1518FE50), then runs the tick handler D_8008DA1C[self +0x88] (none: -1) and returns its result (1 without).
+// The second argument (the position the effect-node dispatchers pass) is not used; it is there for the table's
+// common signature s32 (node, pos).
+s32 func_1518FD34(u8 *self, void *pos) {
+    f32 *count = (f32 *)(self + 0x30);
+    s8 tick;
 
-    temp_v0 = arg0 + 0x30;
-    (*(f32 *)((u8 *)temp_v0 + 0)) = (f32) ((*(f32 *)((u8 *)temp_v0 + 0)) + (((*(f32 *)((u8 *)temp_v0 + 4)) + (func_150ADA68() * (*(f32 *)((u8 *)temp_v0 + 8)))) * D_800BE9A4));
-    sp1C = temp_v0;
-    func_1518FE50(arg0);
-    temp_v1 = (*(s8 *)((u8 *)temp_v0 + 0x58));
-    var_v0 = 1;
-    if (temp_v1 != -1) {
-        var_v0 = (*(s32 (**)())((u8 *)&D_8008DA1C + (temp_v1 * 4)))(arg0);
+    count[0] += (count[1] + func_150ADA68() * count[2]) * D_800BE9A4;
+    func_1518FE50((s32)self);
+    tick = (s8)self[0x88];
+    if (tick != -1) {
+        return D_8008DA1C[tick](self);
     }
-    return var_v0;
+    return 1;
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BAF40/func_1518FD34.s")
 #endif
+
+#ifdef NON_MATCHING
+// bone_sparks_release: effect-child handler (D_8008FFE0 [6] / D_8008FFE8 [4]): runs the release handler
+// D_8008DA20[self +0x89] (= D_8008DA1C[self +0x89 + 1]; none: -1). The second argument is unused (table signature
+// s32 (node, pos)); returns the handler's result (0 without; the dispatchers that reach it ignore v0).
+s32 func_1518FDC8(u8 *self, void *pos) {
+    s8 release = (s8)self[0x89];
+
+    if (release != -1) {
+        return D_8008DA1C[release + 1](self);
+    }
+    return 0;
+}
+#else
 void func_1518FDC8(u8 *arg0)
 {
   u8 *new_var;
@@ -1107,13 +1125,24 @@ void func_1518FDC8(u8 *arg0)
     D_8008DA20[*((s8 *) new_var)](arg0);
   }
 }
+#endif
 
-#ifdef NON_MATCHING
-void func_1518FE50(s32);
-#else
+#ifndef NON_MATCHING
 s32 func_1518FE50(s32);
 #endif
 
+#ifdef NON_MATCHING
+// bone_sparks_burst: effect-child handler (D_8008FFE0 [4] / D_8008FFE8 [2]): sets the spark counter (self +0x30) to
+// base +0x3C + random f32 * spread +0x40 and emits them at once (func_1518FE50). The second argument is unused (table
+// signature s32 (node, pos)); returns 0 (the asm leaves func_1518FE50's v0; the dispatchers that reach it ignore it).
+s32 func_1518FE0C(u8 *self, void *pos) {
+    f32 *count = (f32 *)(self + 0x30);
+
+    count[0] = count[3] + count[4] * func_150ADA68();
+    func_1518FE50((s32)self);
+    return 0;
+}
+#else
 void func_1518FE0C(s32 arg0)
 {
   u8 *new_var;
@@ -1125,6 +1154,7 @@ void func_1518FE0C(s32 arg0)
   *new_var2 = (f32) ((*((f32 *) (((u8 *) new_var) + 0xC))) + ((*((f32 *) (((u8 *) temp_v0) + 0x10))) * func_150ADA68()));
   func_1518FE50(arg0);
 }
+#endif
 
 #ifdef NON_MATCHING
 u8 *func_1514BE54(u8 *arg0, u8 *arg1, s16 arg2, u8 arg3, u8 *arg4, f32 arg5, f32 arg6, f32 arg7, u8 arg8, u8 arg9,
@@ -1669,6 +1699,19 @@ s32 func_15190B2C(Obj0B2C *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+// bone_sparks_owner_release: D_8008DA1C [1] (func_1518FDC8's release handler, also reachable as a tick handler from
+// func_1518FD34): clears byte +0x1AC of the owner's (+0x10) attachment +0x31C, if any. Returns that pointer (the asm
+// leaves it in v0, and func_1518FD34 returns a tick handler's v0), so the table has one signature s32 (u8 *).
+s32 func_15190C34(u8 *self) {
+    u8 *att = *(u8 **)(*(u8 **)(self + 0x10) + 0x31C);
+
+    if (att != NULL) {
+        att[0x1AC] = 0;
+    }
+    return (s32)att;
+}
+#else
 void func_15190C34(u8 *arg0) {
     u8 *temp_v0;
 
@@ -1677,6 +1720,7 @@ void func_15190C34(u8 *arg0) {
         (*(s8 *)((u8 *)temp_v0 + 0x1AC)) = 0;
     }
 }
+#endif
 
 void func_15190C50(u8 *arg0, s32 *arg1, u8 arg2) {
     s32 *p = (s32 *)(arg0 + 0x90);

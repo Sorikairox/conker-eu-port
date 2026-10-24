@@ -1,0 +1,60 @@
+\#^    if (obj == NULL) {$#s/obj == NULL/obj != NULL/ %
+\#^    if (\*(u8 \*\*)(obj + 0x1D4) == NULL) {$#s/== NULL/!= NULL/ %
+\#^    k = &D_800A8B80\[kind\];$#s/\[kind\]/[kind + 1]/ %
+\#^    rec\.objId = obj\[0x3B\];$#s/0x3B/0x3A/ %
+\#^    rec\.node = k->node;$#s/k->node/k->u0C/ %
+\#^    rec\.flags = 2;$#s/= 2;/= 3;/ %
+\#^    rec\.speedFn = k->speedFn;$#s/k->speedFn/k->u31/ %
+\#^    rec\.at = k->at;$#s/k->at;/k->at2;/ %
+\#^    rec\.at2 = k->at2;$#s/k->at2;/k->at;/ %
+\#^    rec\.u40 = k->u04;$#s/k->u04/k->u08/ %
+\#^    rec\.u48 = k->u08;$#s/k->u08/k->u04/ %
+\#^    rec\.u4C = 0\.0f;$#s/0.0f/1.0f/ %
+\#^    rec\.u50 = 0;$#s/= 0;/= 1;/ %
+\#^    rec\.u51 = k->u0C;$#s/k->u0C/k->u31/ %
+\#^    rec\.u52 = k->u31;$#s/k->u31/k->u32/ %
+\#^    rec\.u53 = k->u32;$#s/k->u32/k->u33/ %
+\#^    rec\.u54 = k->u33;$#s/k->u33/k->u31/ %
+\#^    rec\.u58 = k->u34;$#s/k->u34/k->u38/ %
+\#^    rec\.u5C = k->u38;$#s/k->u38/k->u34/ %
+\#^    rec\.initFn = k->initFn;$#s/k->initFn/k->u3D/ %
+\#^    rec\.u61 = k->u3D;$#s/k->u3D/k->u3E/ %
+\#^    rec\.u62 = k->u3E;$#s/k->u3E/k->u3D/ %
+\#^    rec\.soundFn = k->soundFn;$#s/k->soundFn/k->u40/ %
+\#^    rec\.u64 = k->u40;$#s/k->u40/k->u41/ %
+\#^    rec\.u65 = k->u41;$#s/k->u41/k->u42/ %
+\#^    rec\.u68 = k->u42;$#s/k->u42/k->u40/ %
+\#^    rec\.u69 = k->u46;$#s/k->u46/k->u47/ %
+\#^    rec\.u6A = k->u47;$#s/k->u47/k->u46/ %
+\#^    rec\.u6C = k->u48;$#s/k->u48/k->u50/ %
+\#^    rec\.u70 = 0\.0f;$#s/0.0f/1.0f/ %
+\#^    rec\.u74 = k->u4C;$#s/k->u4C/k->u54/ %
+\#^    rec\.u78 = k->u50;$#s/k->u50/k->u58/ %
+\#^    rec\.u7C = 0\.0f;$#s/0.0f/1.0f/ %
+\#^    rec\.u80 = k->u54;$#s/k->u54/k->u4C/ %
+\#^    rec\.u84 = k->u58;$#s/k->u58/k->u48/ %
+\#^    rec\.u88 = 0\.0f;$#s/0.0f/1.0f/ %
+\#^    rec\.u8C\[0\] = k->u5C\[0\];$#s/u5C\[0\]/u5C[1]/ %
+\#^    rec\.u8C\[3\] = k->u5C\[3\];$#s/u5C\[3\]/u5C[2]/ %
+\#^    req\.kind = k->kind;$#s/k->kind/k->u44/ %
+\#^    req\.u0E = k->u44;$#s/k->u44/k->kind/ %
+\#^    req\.u15 = k->u10;$#s/k->u10/k->u0C/ %
+\#^    if (rec\.soundFn != -1) {$#s/!= -1/!= 0/ %
+\#^        rec\.voice = 0;$#s/= 0;/= 1;/ %
+\#^    mtx = \*(u8 \*\*)(rec\.obj + 0x1D4) + (rec\.node << 6);$#s/<< 6/<< 5/ %
+\#^    func_15143134(&rec\.at, &rec\.pos, mtx);$#s/&rec.pos,/\&rec.pos2,/ %
+\#^    func_15143134(&rec\.at2, &rec\.pos2, mtx);$#s/&rec.at2/\&rec.at/ %
+\#^    req\.pos\.x = rec\.pos\.x;$#s/rec.pos.x/rec.pos.y/ %
+\#^    req\.pos\.z = rec\.pos\.z;$#s/rec.pos.z/rec.pos2.z/ %
+\#^    rec\.u3C = 0\.0f;$#s/0.0f/1.0f/ %
+\#^    req\.u10 = 3;$#s/= 3;/= 2;/ %
+\#^    e = func_15147FF0(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/0x90, 0x24/0x90, 0x20/ %
+\#^    e = func_15147FF0(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/0, 0, 0, arg2/0, 0, 1, arg2/ %
+\#^    e = func_15147FF0(&req, 0x90, 0x24, 2, 2, 2, 0, 0, 0, arg2, arg3);$#s/arg2, arg3/arg3, arg2/ %
+\#^    if (e != NULL) {$#s/!= NULL/== NULL/ %
+\#^        dst = \*(EmitterRecord \*\*)(e + 0x98);$#s/0x98/0x94/ %
+\#^        if (dst->speedFn != -1) {$#s/!= -1/!= 0/ %
+\#^            dst->speed = D_8008FC10\[dst->speedFn\](e);$#s/(e)/(dst)/ %
+\#^            dst->speed = 0\.0f;$#s/0.0f/1.0f/ %
+\#^        if (rec\.initFn != -1) {$#s/!= -1/!= 0/ %
+\#^            D_8008FC1C\[rec\.initFn\](e);$#s/(e)/(obj)/ %

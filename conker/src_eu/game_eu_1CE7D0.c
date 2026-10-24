@@ -66,7 +66,98 @@ void func_151A10A8(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+f32 func_151423D8(u8);
+s32 func_15167D84(s32 **, s32, s32, s32, s32, s32);
+extern u8 D_8008FC70[];          /* grey level per colour index (arg8) */
+extern u8 D_80091C2C[];          /* sprite set of colour index 1 */
+extern u8 D_80091C50[];          /* sprite set of colour index 0 */
+
+/* emit_point_blob: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
+ * s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, as the game_eu_EF6D0 emitters): queues one
+ * func_15167D84 sprite particle at (x, y, z) (s16) flying out along the byte angle a with a random pitch of -63..-49
+ * (rand % 15 - 63) and speed 801..1304 (503 * rand + 801): s16 velocity (v sin(p) sin(a - 0x40), -v sin(p - 0x40),
+ * v sin(p) sin(a)) (func_151423D8 = byte-angle sine); -130..-90 (rand % 41 - 130), two sizes 250..700 (rand % 451 +
+ * 250), 200, 6..8 (rand % 3 + 6), grey D_8008FC70[arg8] with alpha 0xFF, sprite set D_80091C50 / D_80091C2C for
+ * arg8 0 / 1 (other values leave the word unset, as the asm), owner byte argB. The three bytes at +0x1C take the
+ * low byte of (s32) (x * 256) as in the asm. Words the asm never writes stay unset. Always returns 1 (go on). */
+s32 func_151A11BC(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+                  f32 arg9, s32 argA, s32 argB) {
+    struct {
+        u8 *sprites;        /* sp48 */
+        s32 pad04[2];       /* not set */
+        s16 h0C;
+        s16 h0E;
+        s16 pos[3];
+        s16 vx;
+        s16 vz;
+        s16 pad1A;          /* not set */
+        u8 b1C[3];
+        s8 minus1;
+        s16 vy;
+        s16 h22;
+        s16 size0;
+        s16 size1;
+        s16 h28;
+        u8 b2A;
+        u8 pad2B;           /* not set */
+        u8 grey[3];
+        u8 alpha;
+        u8 b30[3];
+        u8 pad33;           /* not set */
+        s16 h34;
+    } rec;
+    s16 pitch;
+    f32 sp, cp, sa, ca, v, h;
+    s16 size;
+    u8 g, xb;
+
+    pitch = (u32) func_150ADA20() % 15U - 0x3F;
+    sp = func_151423D8(pitch & 0xFF);
+    cp = func_151423D8((pitch - 0x40) & 0xFF);
+    sa = func_151423D8(a & 0xFF);
+    ca = func_151423D8((a - 0x40) & 0xFF);
+    v = func_150ADA68() * 503.0f + 801.0f;
+    h = v * sp;
+    rec.vx = (s32) (h * ca);
+    rec.vy = (s32) (-v * cp);
+    rec.vz = (s32) (h * sa);
+    rec.h22 = (u32) func_150ADA20() % 41U - 0x82;
+    rec.b2A = (u32) func_150ADA20() % 3U + 6;
+    size = (u32) func_150ADA20() % 451U + 0xFA;
+    g = D_8008FC70[arg8];
+    xb = (s32) (x * 256.0f);
+    rec.size0 = size;
+    rec.b30[0] = 0;
+    rec.b30[1] = 0;
+    rec.b30[2] = 0;
+    rec.alpha = 0xFF;
+    rec.minus1 = -1;
+    rec.h34 = 0;
+    rec.h0C = 0;
+    rec.h0E = 0;
+    rec.size1 = size;
+    rec.pos[0] = (s32) x;
+    rec.grey[0] = g;
+    rec.grey[1] = g;
+    rec.grey[2] = g;
+    rec.pos[1] = (s32) y;
+    rec.pos[2] = (s32) z;
+    rec.b1C[0] = xb;
+    rec.b1C[1] = xb;
+    rec.b1C[2] = xb;
+    if (arg8 == 0) {
+        rec.sprites = D_80091C50;
+    } else if (arg8 == 1) {
+        rec.sprites = D_80091C2C;
+    }
+    rec.h28 = 0xC8;
+    func_15167D84((s32 **) &rec, 0, 0, -1, argB & 0xFF, 1);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A11BC.s")
+#endif
 
 void func_151A13F0(f32 arg0, f32 arg1, f32 arg2, u8 arg3, s32 arg4) {
     func_151A177C(arg0, arg1, arg2, 163.0f, 2.019f, 0xA0, 0x4B, 0x41F, 0x4F6, 1, 2.019f, 0x87, 0x44, 0x41F, 0x4F6, 2, 1, 2.019f, 0x46, 0x42, 0x41F, 0x4F6, 7, 0x41, 4, 1, arg3, arg4);

@@ -27,7 +27,54 @@ void func_150BF47C(s32 arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF47C.s")
 #endif
+#ifdef NON_MATCHING
+/* fade_slide_update: per-frame update of a fading, sliding element (no direct caller; reached through a table, returns
+ * a done flag). The level +0x1F rises by +0x27 per tick (D_800BE9E4) up to +0x26 while +0x24 is set, else falls by
+ * +0x2F per tick down to 0; when it is 0 and +0x24 clear the element is done (1). Otherwise the s16 position +0x14 /
+ * +0x16 moves by the s8 speeds +0x2D / +0x2E per tick: once +0x14 is <= 0 both are zeroed and it is done (1), else
+ * the counter +0x2C advances by the ticks (capped at 0x7F) and it goes on (0). */
+s32 func_150BF5F4(u8 *e) {
+    s32 on = e[0x24];
+    s32 level = e[0x1F];
+    s32 max = e[0x26];
+
+    if (on != 0) {
+        if (level != max) {
+            level += D_800BE9E4 * e[0x27];
+            if (max < level) {
+                level = max;
+            }
+            e[0x1F] = level;
+        }
+        on = e[0x24];
+    } else if (level != 0) {
+        level -= D_800BE9E4 * e[0x2F];
+        if (level < 0) {
+            level = 0;
+        }
+        e[0x1F] = level;
+        on = e[0x24];
+    }
+    if (on == 0 && level == 0) {
+        return 1;
+    }
+    *(s16 *) (e + 0x14) += (s8) e[0x2D] * D_800BE9E4;
+    *(s16 *) (e + 0x16) += (s8) e[0x2E] * D_800BE9E4;
+    if (*(s16 *) (e + 0x14) <= 0) {
+        *(s16 *) (e + 0x16) = 0;
+        *(s16 *) (e + 0x14) = *(s16 *) (e + 0x16);
+        return 1;
+    }
+    level = e[0x2C] + D_800BE9E4;
+    if (level >= 0x80) {
+        level = 0x7F;
+    }
+    e[0x2C] = level;
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF5F4.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF71C.s")
 

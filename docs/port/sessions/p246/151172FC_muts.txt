@@ -1,0 +1,14 @@
+# P246 func_151172FC (spin_angles_update) mutants: sed % setup names
+s/0.00390625f/0.0078125f/ % base
+s/if (rate\[i\] != target\[i\])/if (rate[i] == target[i])/ % base
+1,/rate\[i\] -= step;/s/if (target\[i\] < rate\[i\]) {/if (target[i] > rate[i]) {/ % base
+s/rate\[i\] -= step;/rate[i] -= step * 2;/ % base clamp
+s/if (rate\[i\] < target\[i\])/if (rate[i] > target[i])/ % clamp
+s/rate\[i\] += step;/rate[i] += step * 2;/ % base
+/rate\[i\] += step;/,$s/if (target\[i\] < rate\[i\]) {/if (target[i] < rate[i] - 0.25f) {/ % clamp2
+s/angle\[i\] += rate\[i\] \* ticks;/angle[i] += rate[i];/ % base
+s/if (angle\[i\] < 0.0f)/if (angle[i] <= 0.0f)/ % clamp
+s/angle\[i\] += 360.0f;/angle[i] += 359.0f;/ % base
+s/} else if (360.0f <= angle\[i\])/} else if (360.0f < angle[i])/ % base
+s/angle\[i\] -= 360.0f;/angle[i] -= 359.0f;/ % clamp
+s/for (i = 0; i < 3; i++)/for (i = 0; i < 2; i++)/ % base

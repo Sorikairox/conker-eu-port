@@ -1546,7 +1546,11 @@ extern u8   D_800C3A08;
 extern f32  D_80096A00;
 extern u8   D_800BE800;
 extern void (*D_8008FFFC[])(struct_eu_1FFF60 *);
+#ifdef NON_MATCHING /* P241 (port-b P239): the NM dispatchers use the s32 results */
+extern s32 (*D_8008FFE8[])(struct_eu_1FFF60_child *, void *);
+#else
 extern void (*D_8008FFE8[])(struct_eu_1FFF60_child *, void *);
+#endif
 extern struct_eu_80090F10 D_80090F10[];
 extern f32  D_8009A4C8;
 extern f32  D_8009A4CC;
@@ -1689,7 +1693,11 @@ extern u8   D_800DE1BA;
 extern u8   D_800DE1BB;
 extern u8   D_800DE1BC;
 extern f32  D_800A0C08;
+#ifdef NON_MATCHING /* P241 (port-b P239): the NM dispatchers use the s32 results */
+extern s32 (*D_8008DA20[])(u8 *);
+#else
 extern void (*D_8008DA20[])(void *);
+#endif
 extern u8  *D_80088C10;
 extern f32  D_800A0B74;
 extern s32  (*D_8008B148)(s32);

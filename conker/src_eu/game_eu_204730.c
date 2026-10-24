@@ -247,7 +247,42 @@ s32 func_151D7410(u8 *arg0) {
 }
 #undef MTX_7410
 
+#ifdef NON_MATCHING
+/* P241: readable C for func_151D75B0 (game_eu_204730, 51 insns). */
+// money_popup_draw: entry 3 of the record table D_80088C40 (dispatcher func_150D0544 ends the record, timer +0xE = -1,
+// when the result is 0). Returns 0 once the owner object (data +0) is gone or its id byte +0x3B no longer matches
+// data +4; otherwise prints "$ %d" (D_800AB634, the amount at data +8) above the owner in colour (0x32, 0x7D, 0x1C)
+// with alpha fading in over the first data +0xC frames (timer * step data +0xE, clamped at 0; 0xFF after) and keeps
+// the record. The asm returns func_15042E3C's leftover v0 there (the last text node, non-zero unless the text pool
+// is full), like its siblings' explicit 1.
+extern u8 D_800AB634[];
+void func_15042E3C(s32, ...); /* varargs, as its definition (game_70200) */
+s32 func_151D75B0(u8 *rec) {
+    u8 *data = *(u8 **) (rec + 0x48);
+    u8 *owner = *(u8 **) data;
+    s16 timer;
+    s16 alpha;
+
+    if (*(s32 *) owner == 0 || data[4] != owner[0x3B]) {
+        return 0;
+    }
+    timer = *(s16 *) (rec + 0xE);
+    alpha = 0xFF;
+    if (timer < *(s16 *) (data + 0xC)) {
+        alpha = timer * *(s16 *) (data + 0xE);
+        if (alpha < 0) {
+            alpha = 0;
+        }
+    }
+    func_150432CC((s32) owner, 0x109);
+    func_1504332C(0x32, 0x7D, 0x1C, alpha);
+    func_15042D78(0x81);
+    func_15042E3C((s32) D_800AB634, *(s32 *) (data + 8));
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204730/func_151D75B0.s")
+#endif
 
 void func_151D767C(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *temp = *(u8 **)(arg0 + 0x48);

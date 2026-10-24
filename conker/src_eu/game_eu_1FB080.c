@@ -1737,7 +1737,17 @@ s32 func_151D1654(u8 *obj, f32 *out) {
 s32 func_151D1674(u8 *obj, f32 *out) {
     return func_151D1694(obj, out, 1);
 }
+#else
+void func_151D1654(s32 arg0, s32 arg1) {
+    func_151D1694(arg0, arg1, 0);
+}
 
+void func_151D1674(s32 arg0, s32 arg1) {
+    func_151D1694(arg0, arg1, 1);
+}
+#endif
+
+#ifdef NON_MATCHING
 extern f32 D_800AB37C[2][3];
 
 // object_offset_point: transforms the fixed offset D_800AB37C[which] by the object's matrix (obj + 0x1D4) into
@@ -1752,14 +1762,6 @@ s32 func_151D1694(u8 *obj, f32 *out, u8 which) {
     return 1;
 }
 #else
-void func_151D1654(s32 arg0, s32 arg1) {
-    func_151D1694(arg0, arg1, 0);
-}
-
-void func_151D1674(s32 arg0, s32 arg1) {
-    func_151D1694(arg0, arg1, 1);
-}
-
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D1694.s")
 #endif
 

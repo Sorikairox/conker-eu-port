@@ -89,6 +89,10 @@ chkce() { # expect func "ENV=.. ..." [sed-expr]
   case "$out" in $exp*) pass=$((pass+1)); echo "ok   [$exp] env case ${ex:-as is}  $out";; *) fail=$((fail+1)); echo "FAIL [want $exp] env case ${ex:-as is}  $out";; esac
 }
 chkce EQUIV  func_1502AB94 "$AB94"
+# P246: DIFFTEST_WLOG=1 (no LO-HI range) raised IndexError in every trial (WLOG[1] of a 1-tuple), so no trial ran; it
+# now means the whole range and the result is unchanged (WLOG_T=99: no trial logs, so the result line stays first; the
+# old IndexError came before the trial check, so this still catches it).
+chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_WLOG=1 DIFFTEST_WLOG_T=99"
 chkce DIFFER func_1502AB94 "$AB94" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 chkce EQUIV  func_1502AB94 "$AB94 DIFFTEST_STK_OLD=1" 's/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/'
 # P90: stack arguments past sp+0x3C (args 16+) were never captured: func_150268BC's func_1516DF0C call has 49 arguments;
@@ -231,6 +235,22 @@ TRIALS=32 chkce EQUIV  func_151416E8 ""
 TRIALS=32 chkce DIFFER func_151416E8 "DIFFTEST_BADJALR_OLD=1"
 TRIALS=32 chkce DIFFER func_151416E8 "" 's/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/'
 TRIALS=32 chkce DIFFER func_151416E8 "" 's/(rec, msg, c);/(rec, msg, code);/'
+# P234: a callee declared only in a header the TU includes (func_150ADA20 / func_150ADA68 in functions.h) has a known
+# prototype: IDO's scratch f12 left right before `jal func_150ADA20` is not an argument (P232 func_15109DC8 first run
+# was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
+S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151308E4=0:92,151308E4=0+60:6,151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8 DIFFTEST_RET=150ADF00=0;0;0 DIFFTEST_RETF=150ADF48=3F000000;3E800000"
+TRIALS=4 chkce EQUIV  func_15109DC8 "$S9DC8"
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8 DIFFTEST_INCHDR_OLD=1"
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/t.life = (func_150ADA20() \& 0xF) + 10;/t.life = (func_150ADA20() \& 0xF) + 11;/'
+TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/scale = (func_150ADA68() \* D_800A2A04/scale = (func_150ADA68() * D_800A2A08/'
+# P238: DIFFTEST_OUTP writes through a pointer read from an argument array (func_15145EA4's dst[i] points). Without
+# it the transformed start / end points stay stack fill (start == dir) and a swapped subtraction is EQUIV (the hole).
+S60E30="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15146414=0:8,15145698=0:12 DIFFTEST_ARG=0=80450000 DIFFTEST_POKE=80450014=80460000,80450018=80470000,8045001C=07030000,80450038=42C80000,8045003C=03000000,80470000=00000001,80470014=42F73333,80470038=00000007,80470074=03000000,804701D4=80480000 DIFFTEST_RET=15145698=1 DIFFTEST_OUTA=15081A90=7:80490000;3F000000;C29B6666;4284CCCD;44BB8666;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;10000"
+P60E30="DIFFTEST_OUTP=15146414=1.0:41200000;41A00000;41F00000/1.1:42200000;C1200000;42480000"
+M60E30='s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = start[0] - dir[0];/'
+TRIALS=4 chkce EQUIV  func_15160E30 "$S60E30 $P60E30"
+TRIALS=4 chkce DIFFER func_15160E30 "$S60E30 $P60E30" "$M60E30"
+TRIALS=4 chkce EQUIV  func_15160E30 "$S60E30" "$M60E30"
 # P225: (1) nm_resolve passes #if blocks nested inside an NM block through (DIFFTEST_NMNEST_OLD=1 = old: the nested #else /
 # #endif closed the NM block -> CERR, P222 1BAF40). The case has `#ifdef PORT` (dropped: no PORT in difftest)
 # / `#else` (kept) inside its NM block. (2) DIFFTEST_STKFILL with a non-hex value is an ERROR line (was a traceback with
@@ -245,12 +265,20 @@ TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_STKFILL=A5A5A5A5"
 # a valid decimal index with a hex value still runs.
 TRIALS=8 chkce ERROR  func_15103828 "DIFFTEST_ARG=A=7"
 TRIALS=8 chkce EQUIV  func_15103828 "DIFFTEST_ARG=0=7"
-# P234: a callee declared only in a header the TU includes (func_150ADA20 / func_150ADA68 in functions.h) has a known
-# prototype: IDO's scratch f12 left right before `jal func_150ADA20` is not an argument (P232 func_15109DC8 first run
-# was a false DIFFER; the case is the P232 block without its local declarations). DIFFTEST_INCHDR_OLD=1 = old.
-S9DC8="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151308E4=0:92,151308E4=0+60:6,151530A8=0:89,151530A8=0+5C:15,151530A8=0+6C:8 DIFFTEST_RET=150ADF00=0;0;0 DIFFTEST_RETF=150ADF48=3F000000;3E800000"
-TRIALS=4 chkce EQUIV  func_15109DC8 "$S9DC8"
-TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8 DIFFTEST_INCHDR_OLD=1"
-TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/t.life = (func_150ADA20() \& 0xF) + 10;/t.life = (func_150ADA20() \& 0xF) + 11;/'
-TRIALS=4 chkce DIFFER func_15109DC8 "$S9DC8" 's/scale = (func_150ADA68() \* D_800A2A04/scale = (func_150ADA68() * D_800A2A08/'
+# P243: a matched-C reference is its own ELF symbol size, not len(candidate): a longer candidate that jals the next
+# function (func_150305E0 -> func_15030600) used to make the reference span the callee, leave `jal func_15030600`
+# unstubbed and run into the real callee (hang until DIFFTEST_TIMEOUT). Now the candidate moves to CAND_ALT and the
+# callee is a stub on both sides. DIFFTEST_REFSZ_OLD=1 = old (hangs; not a case here). D_800C3EE0 is EU 800C4300.
+TRIALS=8 chkce EQUIV  func_150305E0 "DIFFTEST_TIMEOUT=120"
+TRIALS=8 chkce DIFFER func_150305E0 "DIFFTEST_TIMEOUT=120 DIFFTEST_POKE=800C4300=5A5A1234" '1,/0xFF/s/0xFF/0xFE/'
+TRIALS=8 chkce EQUIV  func_150305E0 "DIFFTEST_TIMEOUT=120" '1,/0xFF/s/0xFF/0xFE/'
+# P243 (port-b P242): 0x15031C4C carries two symbols (func_15031C4C, and func_1503195C in undefined_syms.eu.txt); calls
+# are named func_1503195C. Since P234 its functions.h declaration is found through the TU's includes; without that
+# (DIFFTEST_INCHDR_OLD=1, or an alias no header declares) the callee had no prototype. Now every name at the address
+# is tried (first declared one wins; DIFFTEST_ALIASPROTO_OLD=1 = old). Case: the candidate leaves a scratch value in a3
+# (not an argument of the 3-argument callee): with the prototype EQUIV, without it a false DIFFER on a3.
+TRIALS=8 chkce EQUIV  func_15031C1C ""
+TRIALS=8 chkce DIFFER func_15031C1C "" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, arg2)/'
+TRIALS=8 chkce EQUIV  func_15031C1C "DIFFTEST_INCHDR_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
+TRIALS=8 chkce DIFFER func_15031C1C "DIFFTEST_INCHDR_OLD=1 DIFFTEST_ALIASPROTO_OLD=1" 's/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

@@ -668,7 +668,41 @@ s32 func_151A9610(u8 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+/* P241: readable C for func_151A9670 (game_eu_1D5710, 59 insns). */
+// object_effect_kind2_start: handler of D_8008FD24 entries 0..5 (`(u8 *, s32)`, dispatcher func_151A9610 ignores the
+// result): spawns a kind-2 effect owned by obj through func_151A8B20 (1 byte of extra data) with the two values
+// 1.4e-6 / 8e-7 for an odd table index or 4e-7 / 6e-7 for an even one (the ELF's D_800A9338 / D_800A9340 and
+// D_800A933C / D_800A9344), and stores the index byte in the new record at +0x80. The asm leaves the spawn block's
+// padding bytes uninitialised, as here.
+void func_151A9670(u8 *obj, s32 idx) {
+    struct {
+        u8 kind;
+        u8 *owner;
+        f32 a, b;
+        f32 zero[5];
+        s8 b24, b25, b26;
+    } spawn;
+    u8 extra;
+    struct260 *p;
+
+    spawn.kind = 2;
+    spawn.owner = obj;
+    spawn.a = (idx & 1) ? 1.4e-6f : 4e-7f;
+    spawn.b = (idx & 1) ? 8e-7f : 6e-7f;
+    spawn.zero[0] = spawn.zero[1] = spawn.zero[2] = spawn.zero[3] = spawn.zero[4] = 0.0f;
+    spawn.b24 = 1;
+    spawn.b25 = -1;
+    spawn.b26 = 0;
+    extra = idx;
+    p = func_151A8B20(&spawn, -1, 1, 0xFF, 0);
+    if (p != NULL) {
+        memcpy((u8 *) p + 0x80, &extra, 1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A9670.s")
+#endif
 
 typedef struct {
     s32 u0;

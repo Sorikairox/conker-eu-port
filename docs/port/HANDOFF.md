@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P249, 2026-10-25). Details: `docs/port/sessions/P249.md`
+- **MP stubs**: func_150EDCC8 (11AF60) `tank_update` **drives the tank** (pad stick / buttons -> throttle, steering,
+  boost, brake, turret); converted with its asm helper func_150ED818 `tank_shell_aim_error`. func_150BE050 (EB860)
+  `rideable_vehicle_update` (Colors) does not read a controller (heading from the rider's aim, physics, hit states).
+- Breadth: func_150B2820 `view_progress_setup` (compiled C, not hand asm), func_151893B8 `trail_matrix_history_push`,
+  func_150F2670 `ambient_far_sound_update`. Mutants: EDCC8 120/127 (7 explained in P249.md), ED818 30/30, BE050
+  33/33, B2820 18/18, 893B8 17/17, F2670 15/15. func_15052590 is now declared void in the NM blocks (protocheck).
+- Merged port-b 02e7fc19 (P244). Registry re-run: 3 of the 13 rows done (all green); func_15160E30 row has OUTP.
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1559 NON_MATCHING bodies checked, 0
+  problems`, implicit_scan 0 NM+float, selftest 119 / 119 (after the merge; no harness change), progress_nm
+  `total 5915 3994 1576 345 5570 94.2% 1922392/2253856 (85.3%)`.
+
+## Next steps (from P249)
+1. port-web: merge port; Tank (play.env) should drive now; Colors start. Remaining Tank stubs are port-b's.
+2. Finish the registry re-run: func_1508C600, 1508CF34, 150C2334, 150D1D20, 150FD49C, 15160E30, 15166E28, 151AB874,
+   151D8280, 151EA4C8. func_150EDCC8: re-run mutants (new setups), check `dist = 10000` with mp_ray_nodist.
+3. Breadth: func_1508B704 (B7840) not started.
+
 ## State (session P248, 2026-10-25, port-web). Details: `docs/port/sessions/P248.md`
 - User's door route on level 0x29 works up to the top of the pit spiral. B on **zone 9 (the B pad by the river at
   (1746, 1309), next to the field gate)** -> event 1, scene 7 (4995 .. 6907); Conker gets through the field gate
@@ -29,6 +47,26 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. port: func_15134004 (15FF50; may cut the hover height), func_15072B44, func_151473F4, func_150D88E8, func_151AB874.
 3. port-b: func_15134E48 (161520) and the P245 Tank stubs.
 
+## State (session P246, 2026-10-25). Details: `docs/port/sessions/P246.md`
+- Hand C (NM): **func_151EF3A0 save_screen_frame_draw** (216470, the P240 save / load screen stub; returns the DL end;
+  uses literals 0x7FB / 0x887 for the asm's D_7FB / D_887 link symbols, so no ROM_ABS entry is needed), func_150C1BC0
+  emit_point_debris (EF370) and func_151A11BC emit_point_blob (1CE7D0) (the last D_8008ADA0 asm handlers), func_150BF5F4
+  fade_slide_update, func_151172FC spin_angles_update, func_150EB3A4 drifting_sprite_update, func_150EFFCC
+  rider_anchor_update, func_150C5A68 object_motion_step. All EQUIV, every mutant killed; registry rows added.
+- Registry re-run (P243 random-kill fix): 10 of 23 port rows with old survivors re-run, all now killed (table in P246.md
+  section 3); 13 rows left. Unaffected by port-b P244's reverify.sh bugs (no ARG / RET / POKE / OUT* knobs, no
+  multi-file setups).
+- difftest: `DIFFTEST_WLOG=1` IndexError fixed (no range = whole range), WLOG_T empty = trial 0 (WLOG printed nothing
+  before), flushed prints; selftest 119 / 119 (new case).
+- Checks: verify_all rc 0 (3994 / 5915 matched), NM build rc 0, protocheck `1546 NON_MATCHING bodies checked, 0
+  problems`, implicit_scan 0 NM+float, selftest 119 / 119, progress_nm
+  `total 5915 3994 1564 357 5558 94.0% 1908756/2253856 (84.7%)`.
+
+## Next steps (from P246)
+1. **Priority (browser P245)**: func_150EDCC8 (game_eu_11AF60, Tank start) and func_150BE050 (game_eu_EB860, Colors).
+2. Merge port-b 02e7fc19 (reverify.sh fixes), then re-run the 13 rows listed in P246.md section 3.
+3. port-web: browser-check func_151EF3A0 (save screen with a save present) and the P246 handlers; func_150EB3A4's table
+   (0x8008B4AC) dispatcher is not identified (kept `s32 (u8 *)`).
 ## State (session P245, 2026-10-24, port-web). Details: `docs/port/sessions/P245.md`
 - Unnamed `conker` containers = `tools/eu_port/verify_all.sh` (seen: youthful_bhaskara, mount ~/conker-wt/port, the
   port slot's verify run; already `--rm`). verify_all.sh and run.sh now pass `--name verify-|euport-run-<wt>-<pid>`
@@ -50,6 +88,93 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. port: func_150EDCC8 (11AF60, Tank), func_150BE050 (EB860, Colors), func_151EF3A0 (216470), func_151D8280 (204F70).
 3. port-web: river via the user's door route; else find the blocker at (855, -1056) (dump collision area 2).
 
+## P244 (port-b) (session P244, 2026-10-24). Details: `docs/port/sessions/P244.md`
+
+Branch `port-b`. Merged port 8c12ab83 (P241) and 8e1a8bdb (P243). **Triage of P241's re-run of port-b registry rows**:
+no C bug; every DIFFER was an incomplete registry row or a harness / reverify artefact (table in P244.md section 3).
+func_15065E18: func_150DC2F0's unused a1 (2-arg prototype since P222, asm leaves a1 stale) -> `CANDSED` test sed; P220's
+setups / mutants added to the row: setups 680 / 680, mutants all killed but P220's documented equivalent. func_151C0698:
+leftover v0 -> tested as void (CANDSED): all EQUIV, 35 / 35. func_150C8F68: missing ARGMEM + JALRSKIP=1: all EQUIV.
+func_15170648: reverify bug (registry knob overrode setup fields): 4 / 4. func_150C92B8: new exact-boundary setup,
+59 / 59 + 6 / 6. func_15196438 / func_15065E18 / func_150C92B8 mutants rewritten as pattern seds (port_work/p244/mutfix.py).
+**reverify.sh**: setup fields win over registry knobs; named mutant setups searched in every setup file; knobs `CANDSED=`
+and `NR=`. **func_15110B80** (13DC30, D_80089578[3]) view_border_clear: NM block with the dispatcher's 8-argument
+signature; random / 5 setups EQUIV, mutants 10 / 10. Checks: verify_all rc 0, NM rc 0, protocheck 0 (1545), selftest
+118 / 118, implicit_scan 0 NM+float. progress_nm total 5556 / 5915 (93.9%), C bytes 84.8%.
+
+## Next steps (from P244)
+
+1. Re-run the P241 rows nobody re-ran: func_1518F080, func_151D4D44, func_15063AA0, func_15175900, func_1513783C, the P235
+   rows (reverify MUT=1); func_15083E90 needs the body layout.
+2. Harness (port): per-call ARGMEM lengths (func_150D3870's m3870vb needs memcpy 28 in setups b / d, 8 elsewhere);
+   reverify splits mutant lines at `%`.
+3. port: re-run func_151D75B0 (its registry RET knob overrode the setups' RET fields before the reverify fix).
+4. Browser: func_15110B80 border clear (levels 0x1B / 0x1E / 0x31).
+5. Older items still open: game_eu_226870 hand asm (func_151F911C / 9060 / 9184 / 933C) + func_151F94E0; P242 browser list.
+
+## State (session P243, 2026-10-24). Details: `docs/port/sessions/P243.md`
+- difftest: a matched-C reference is its ELF symbol size (was len(candidate): a longer candidate jal-ing the next
+  function hung; DIFFTEST_REFSZ_OLD=1); callee prototypes are looked up under every symbol at the call address
+  (DIFFTEST_ALIASPROTO_OLD=1). Selftest 118 / 118 (cases func_150305E0, func_15031C1C).
+- reverify.sh: `env -u` order fixed: random kills never counted for registry rows with knobs before (RVENV_OLD=1).
+- func_150D1D20 takes D_80089578's 8 args; func_150B8020 smoke request padding fix (u80 / u82 were 2 bytes early).
+- Hand C (NM): func_150C2334 emit_point_puff, func_150C2558 emit_point_smoke, func_150B2A50 emit_point_spark,
+  func_150B40EC emit_point_spark_ring (D_8008ADA0 handlers), func_151472D0 object_effect10_spawn (all mutants killed).
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1538), implicit_scan 0 NM+float, selftest 118 / 118, progress_nm
+  `total 5915 3994 1556 365 5550 93.8% 1904940/2253856 (84.5%)`.
+
+## Next steps (from P243)
+1. **Priority**: func_151EF3A0 (216470, ~255 insns; save/load screen stub, browser P240), see P243.md section 11.
+2. Re-run registry mutants with survivors (reverify random-kill fix); port-b: func_15110B80 (D_80089578, 4 of 8 args),
+   func_150D4ED0 r0 / r0b setups never reach func_15031C4C.
+3. port-web: browser-check the P243 handlers, func_150D1D20 and the func_150B8020 smoke fix.
+
+## P242 (port-b) (session P242, 2026-10-24). Details: `docs/port/sessions/P242.md`
+
+Branch `port-b`. Hand-written C (NM, one block each) + setups + mutants + registry rows: **func_15139768
+object_hit_sparks** (161520, 387; now `void (struct127 *, s32 *, f32, s32 *, u8, s32)`, the NM prototype in
+func_15138C80's block changed with it; v0use: no reader of func_15138C80's v0), **func_150D3870 object_fire_spawn**
+(101080, 450; ships `s32` returning 0 to match game_eu_5D910's declaration; difftest on void variant `d_3870v.c`,
+registry `DRAFT=`), **func_150D4ED0 object_fire_message** (101080, handler table D_8008A760), **func_150FA030
+camera_view_clear_draw** (127840, D_80089578[1], dispatcher signature), **func_1516FF34 sprite_fade_scale_tick**
+(19B180, D_8008CF40), **func_151D1694 object_offset_point** (1FB080: already C, split into its own NM block so
+progress_nm counts it). Harness finding: callee func_15031C4C shares its address with symbol func_1503195C, so
+difftest found no prototype and did not compare its a1 / a2 (workarounds in P242.md section 2).
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1491), selftest 103 / 103 (P242.md section 4).
+
+## Next steps (from P242)
+
+0. **First (coordinator, after P242)**: triage port P241's re-run of port-b registry rows with port's harness (port
+   commit 8c12ab83, logs ~/conker-wt/port/port_work/reverify_all/): DIFFERs in func_15065E18 (6 / 640 setups: k5_u,
+   k5_uk, k5_x, k5_zu, k5_zu0, k5_zx), func_151C0698 (random + 18 / 20), func_150C8F68 (random + 13 / 14, 6 survivors),
+   func_15170648 (0 / 4); then survivors / not-applied lines in func_150C92B8, func_15177360, func_15196438,
+   func_1519AF14, func_150FB398, func_15106260, func_1516FAB8, func_15175160, func_15175514. For each: re-run the
+   recorded command in port-b's tree; if EQUIV here, find the harness / knob difference and fix the registry row,
+   else fix the C. Not started in P242 (arrived at the budget limit).
+1. difftest (port's difftest.py): look up the prototype under every ELF symbol at a callee's address (0x15031C4C =
+   func_15031C4C / func_1503195C); re-check other functions that call aliased addresses.
+2. D_80089578 camera callbacks: func_15110B80 (13DC30, 4 params) and func_150D1D20 (FF530, 7) disagree with the
+   dispatcher's 8-argument type (wasm signature mismatch); give them the common signature under NM.
+3. game_eu_226870 hand asm (func_151F911C / 9060 / 9184 / 933C) + func_151F94E0: private register ABI, convert as one
+   unit with a decoder-state struct (nmasm harness); not started.
+4. Browser: func_15139768 (object hit sparks / smoke), func_150D3870 / func_150D4ED0 (burning effect object, sounds
+   0x5B3 / 0x5B4 / 0x5BC), func_150FA030 (camera callback 1), func_1516FF34 (particle tick).
+5. implicit_scan (port's tool) not run here; run it after the merge.
+## State (session P241, 2026-10-24). Details: `docs/port/sessions/P241.md`
+- Merged port-b b798adaf (limiter, NMBLOCK_WHOLE, P225-P235). reverify.sh now picks the mutant layout per file (body-only
+  P222-era drafts vs whole-block P225+); new tools/port/reverify_all.sh. Re-run partial: changed rows (all port-b) in P241.md section 2.
+- Hand C (NM): func_151D75B0 money_popup_draw, func_150CF470 level_light2_orbit, func_1514DAD4 object_fixed_beam_spawn,
+  func_151A9670 object_effect_kind2_start, func_eu_151D8FD4 rumble_effect_update, func_15134004 attached_bone_matrix,
+  func_150EF204 rider_dismount_enter, func_151008C0 sky_segments_flicker (all mutants killed).
+- Fix: func_15132FF8 passes the object to the D_80089D2C handlers. variables.h: NM s32 declarations of D_8008FFE8 / D_8008DA20.
+- Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1533), implicit_scan 0 NM+float, selftest 111 / 111, progress_nm
+  `total 5915 3994 1551 370 5545 93.7% 1903008/2253856 (84.4%)`.
+
+## Next steps (from P241)
+1. Finish the registry re-run (FROM= commands in P241.md section 6); port-b reviews its rows.
+2. difftest gap: longer candidate calling the next function (coordinator item b), not done.
+3. port-web: browser-check the P241 functions and the D_80089D2C argument fix.
+
 ## State (session P240, 2026-10-24, port-web). Details: `docs/port/sessions/P240.md`
 
 - Merged port a64ed49e and port-b b798adaf. Checks after each: verify_all OK, NM build OK, protocheck 0 (1517),
@@ -69,6 +194,56 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 2. port-b: func_15196438 D_8008FC30 arity row.
 3. port-web: Race A win (avoid the node 14 / 15 lava; tune PCT), then STATS with a total time; ripple route
    (object break over water); river crossing on level 0x29.
+## P239 (port-b) (session P239, 2026-10-24). Details: `docs/port/sessions/P239.md`
+
+Branch `port-b`. **D_8008FFE8 (game_1FFF60)**: the ROM table is one 7-entry table at 0x8008FFE0 (D_8008FFE0 = index
++0x29, result tested; D_8008FFE8 = +2 entries, index +0x2A, result ignored). All entries now have the NM signature
+`s32 (ptr, void *pos)` (= D_8008FFE0's declared type): func_1518FD34 **bone_sparks_tick** (readable rewrite, returns
+1 / the tick handler's v0), func_1518FE0C **bone_sparks_burst**, func_151D33B8 (EU 151D3968)
+**effect_node_children_free**, func_1518FDC8 **bone_sparks_release** take and ignore the position (NM blocks, matched
+C kept in `#else`); the dispatchers func_151D2C40 **effect_child_update** / func_151D3130 **effect_node_release** have
+NM copies that call D_8008FFE8 through a cast to that type. Same for the tick table D_8008DA1C (D_8008DA20 = +1):
+func_15190C34 **bone_sparks_owner_release** is `s32 (u8 *)` under NM. No asm callers of any entry (v0use). Verified:
+difftest random + setups + mutants for all 7 (jalr arg compare in the dispatchers: 19 / 19 and 12 / 12 mutants);
+func_1518FE0C / func_151D33B8 / func_1518FDC8's no-handler path through void test variants (registry knob `DRAFT=`,
+new in reverify.sh). Hand C (NM): **func_15135DD0 beam_impact_effects** (161520, 397 words; mutants 38 / 38). Checks:
+verify_all rc 0 (byte-identical), NM build rc 0, protocheck 0 (1485), selftest 103 / 103, voidret_scan no SUSPECT.
+progress_nm: game 4943 / 5334, total 5479 / 5915 (92.6%), C bytes 82.1%, 436 asm-only.
+
+## Next steps (from P239)
+
+1. port (variables.h): declare `extern s32 (*D_8008FFE8[])(struct_eu_1FFF60_child *, void *);` (the NM dispatcher
+   copies in game_1FFF60 cast until then) and `extern s32 (*D_8008DA20[])(u8 *);` (only the matching func_1518FDC8
+   uses it).
+2. Browser: func_15135DD0 (func_151AFA80 beam / impact effects); effect-child handlers (entries 3..6 are not reached
+   by func_1518FE50's children; watch for other spawners writing child +0x29 / +0x2A).
+3. Candidates left: func_15139768 (387, 161520; asm caller func_15138C80 returns its v0, NM caller passes f32 0.6 /
+   1.0), func_150D3870 (450, 101080), func_151F94E0 (960, 226870); the 4 Rare hand-asm functions of game_eu_226870
+   (func_151F9060 / 911C / 9184 / 933C, nmasm harness). 61 asm-only functions in port-b's files (P239.md section 3).
+4. difftest.py: a candidate longer than the reference that calls the next function (jal target inside the candidate
+   range) hangs (stub_at refuses in-range addresses); stub such targets when they are past the reference length.
+5. implicit_scan was not run (port's tool); run it after the merge.
+## State (session P238, 2026-10-24). Details: `docs/port/sessions/P238.md`
+- Hand C (NM, one block each, all in the registry with setups + mutants): func_150C1B60 `spawn_ring_kind2_small`
+  (EF370, 11 / 11), func_150FD49C `view_spot_distance_fade` (12A7C0, D_8008B734 entry 0, f32, 12 / 12),
+  func_15101610 `obj_fx_kill_all` / func_151016C8 `obj_fx_stop_all` (12E390, kind tables 0x8008A29C / 0x8008A2D0,
+  15 / 15, 12 / 12), func_15191E2C `owner_effect_watch` (1BE5C0, 14 / 14), func_15166E28 `layer_pre_scroll_texture`
+  (193D00, render layer 4 `pre`, 14 / 14), func_151AB874 `character_spawn_ring_fx` (1D7790, 19 / 19); priority func_151D8280 `trail_ring_constrain`
+  (204F70, the route stub at frame 17824, 6 setups, 18 / 18).
+- Harness: new knob `DIFFTEST_OUTP="ADDR=N.I:W0;W1;..."` writes words through the pointer aN[I] (outputs written
+  through an array of pointers, func_15145EA4); selftest 100 / 100 before, 103 / 103 after (3 func_15160E30 cases).
+- func_150A7BD0 is hand asm (private convention, already covered by VTX_WAVE_COS); hand-asm list in P238.md section 6.
+- Checks: NM build rc 0, protocheck `1478 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
+  implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1496 425 5490
+  92.8% 1829736/2253856 (81.2%)`, verify_all rc 0 (code build / check_files / full ROM OK, 3994 / 5915 matched), selftest 103 / 103.
+
+## Next steps (from P238)
+1. port-web: re-run the story route past frame 17824 (func_151D8280 is C now); the P238 functions (P238.md section 5) plus the P237 list; the frame-19116 freeze review of the P232
+   functions is still not done here (no message received).
+2. Breadth in port's files (P238.md section 7): func_151D75B0 (needs the dispatcher's v0 use first), func_150CF470,
+   func_1514DAD4, func_151A9670, func_eu_151D8FD4, func_15134004.
+3. Use DIFFTEST_OUTP to re-check P237's func_15160E30 with the real `-` mutants.
+4. D_8008FFE8 one-argument table (P234 item 2, port-b's entries) still open.
 
 ## State (session P237, 2026-10-24). Details: `docs/port/sessions/P237.md`
 - Hand C (NM, one block each, all in the registry with setups + mutants): Total War stubs func_1508C600
@@ -78,7 +253,7 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
   (1E6B70, 5 setups, 17 / 17; the beam pointer is re-read per store as in the asm); func_15109390 was already C.
   Breadth: func_150C7E68 `obj_shade_from_level` (F5580), func_151600E0 `effect_noop_check` (18D5D0),
   func_150F1B78 `fx_hit_handler` (11CB90).
-- Checks: NM build rc 0, protocheck `1470 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 852
+- Checks: NM build rc 0, protocheck `1470 NON_MATCHING bodies checked, 0 problems`, implicit_scan `663 TUs, 848
   implicit call sites (159 in NM code, 1 float-related, 0 NM+float)`, progress_nm `total 5915 3994 1488 433 5482
   92.7% 1827484/2253856 (81.1%)`, verify_all rc 0 (3994 / 5915 matched), selftest 100 / 100.
 
@@ -267,6 +442,8 @@ site). func_151901F4 (1BAF40): P219's PORT-only "aim at the node" fallback remov
 3. Pre-0x29 leftovers: func_151D7EDC (204F70), func_15109DC8 (1371A0), func_1510A538 (1379B0), func_151922C4
    (1BF960), func_15006BEC (33990).
 4. port-b: func_151D52B4 float argument (same fix as func_150AFBC4).
+## P229 (port-b) (session P229, 2026-10-24). Details: `docs/port/sessions/P229.md`
+
 ## P229 (port-b) (session P229, 2026-10-24). Details: `docs/port/sessions/P229.md`
 
 Branch `port-b`. Harness: a malformed `DIFFTEST_ARG` item (e.g. `A=7`) is an ERROR line instead of a traceback with

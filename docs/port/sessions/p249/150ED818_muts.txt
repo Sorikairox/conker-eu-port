@@ -1,0 +1,31 @@
+# P249 func_150ED818 (tank_shell_aim_error) mutants: sed % setup names
+s/skel = \*(u8 \*\*) (obj + 0x1D4);/skel = *(u8 **) (obj + 0x1D0);/ % skel low
+s/(skel + 0xC0)/(skel + 0xB0)/ % skel
+s/0.0f, 0.0f, 1.0f, \&ox/0.0f, 1.0f, 0.0f, \&ox/ % skel
+s/ox -= mf\[3\]\[0\];/ox -= mf[3][1];/ % skel
+s/oz -= mf\[3\]\[2\];/oz -= mf[2][2];/ % skel
+s/oy -= mf\[3\]\[1\];/oy += mf[3][1];/ % skel
+s/(oy, sqrtf(ox \* ox + oz \* oz))/(oy, sqrtf(ox * ox + oy * oy))/ % skel
+s/if (a > 180.0f) {/if (a > 200.0f) {/ % skelwrap
+s/a -= 360.0f;/a -= 180.0f;/ % skelwrap
+s/pitch = a;/pitch = 0.0f;/ % skel
+s/ox = mf\[3\]\[0\];/ox = mf[3][2];/ % skel
+s/oy = mf\[3\]\[1\];/oy = mf[3][0];/ % skel
+s/oz = \*(f32 \*) (obj + 0x1C);/oz = *(f32 *) (obj + 0x18);/ % low near
+s/oy = \*(f32 \*) (obj + 0x18);/oy = *(f32 *) (obj + 0x14);/ % low high
+s/dist = sqrtf(dx \* dx + dz \* dz) - radius;/dist = sqrtf(dx * dx + dz * dz) + radius;/ % low
+s/if (dist < 100.0f) {/if (dist < 10.0f) {/ % near
+s/dist = 100.0f;/dist = 90.0f;/ % near
+s/result = 5000.0f;/result = 4000.0f;/ % never
+s/rad = pitch \* 0.017453292f;/rad = pitch * 0.0174533f;/ % low
+s/vx = cosf(rad) \* 148.25f;/vx = sinf(rad) * 148.25f;/ % low
+s/vy = sinf(rad) \* 148.25f;/vy = sinf(rad) * 148.0f;/ % low
+s/2.0f \* (dy \* -2.5f)/2.0f * (dy * 2.5f)/ % low high
+s/if (disc > 0.0f) {/if (disc >= 0.0f) {/ % zero
+s/t = (-vy - root) \/ -2.5f;/t = (-vy + root) \/ -2.5f;/ % low neg
+s/if (t > 0.0f) {$/if (t < 0.0f) {/ % low
+s/result = dist - t \* vx;/result = dist + t * vx;/ % low neg
+s/-2.0f \* dy \* -2.5f/2.0f * dy * -2.5f/ % high
+s/\* 0.0067453627f)/* 0.0067f)/ % high
+s/\* 57.295776f - pitch)/* 57.295776f + pitch)/ % high
+s/- pitch) \* 1000.0f;/- pitch) * 100.0f;/ % high

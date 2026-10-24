@@ -93,8 +93,17 @@ STUBW_OLD = os.environ.get('DIFFTEST_STUBW_OLD') == '1'   # P176: pre-P176 page-
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 # P47 (debug, opt-in): DIFFTEST_WLOG="LO-HI" (physical hex) + DIFFTEST_WLOG_T=trial prints every non-stack write
 # into [LO, HI) of that trial with the writing pc (R = reference, C = candidate). Debug aid for long functions.
-WLOG = tuple(int(x, 16) for x in os.environ['DIFFTEST_WLOG'].split('-')) if os.environ.get('DIFFTEST_WLOG') else None
-WLOG_T = os.environ.get('DIFFTEST_WLOG_T', '0'); WLOG_ON = [None]
+# P246: a value without '-' (e.g. DIFFTEST_WLOG=1) made a 1-tuple and every write raised IndexError (WLOG[1]) inside the
+# trial, so the trial died instead of logging; such a value now means the whole physical range. LO-HI as before.
+def _wlog(v):
+    if not v: return None
+    if '-' not in v: return (0, 0x20000000)
+    _lo, _hi = v.split('-', 1)
+    return (int(_lo, 16), int(_hi, 16))
+WLOG = _wlog(os.environ.get('DIFFTEST_WLOG', ''))
+# P246: difftest.sh always passes DIFFTEST_WLOG_T (empty when unset), so the default trial 0 never matched and WLOG
+# printed nothing; an empty value now means trial 0.
+WLOG_T = os.environ.get('DIFFTEST_WLOG_T') or '0'; WLOG_ON = [None]
 OUTPARAMS = os.environ.get('DIFFTEST_OUTPARAMS') == '1' or '--outparams' in sys.argv
 NOFORK = os.environ.get('DIFFTEST_NOFORK') == '1'   # P16: run trials in-process (old behaviour)
 
@@ -150,6 +159,27 @@ def addr2name(a):
                 _ADDR2NAME.setdefault(v, n)
     return _ADDR2NAME.get(a)
 
+ALIASPROTO_OLD = os.environ.get('DIFFTEST_ALIASPROTO_OLD') == '1'
+_ADDRNAMES = None
+def addr_names(a):
+    """P243: every function name at address a (symbol files + build/conker.eu.elf), plus func_<ADDR>"""
+    global _ADDRNAMES
+    if _ADDRNAMES is None:
+        _ADDRNAMES = {}
+        for n, v in symtab().items():
+            if not n.startswith(('D_', 'jtbl_')): _ADDRNAMES.setdefault(v & 0xFFFFFFFF, []).append(n)
+        try:
+            with open('build/conker.eu.elf', 'rb') as fh:
+                for sy in ELFFile(fh).get_section_by_name('.symtab').iter_symbols():
+                    if sy['st_info']['type'] == 'STT_FUNC' and sy.name:
+                        l = _ADDRNAMES.setdefault(sy['st_value'], [])
+                        if sy.name not in l: l.append(sy.name)
+        except Exception:
+            pass
+    out = list(_ADDRNAMES.get(a & 0xFFFFFFFF, []))
+    if 'func_%08X' % a not in out: out.append('func_%08X' % a)
+    return out
+
 def segments():
     sys.path.insert(0, os.path.join(os.getcwd(), '../tools/eu_port'))
     import datarefs
@@ -180,6 +210,26 @@ def vram2rom(v):
 
 
 # ---------------------------------------------------------------- reference
+REFSZ_OLD = os.environ.get('DIFFTEST_REFSZ_OLD') == '1'
+_MSIZE = None
+def matched_size(vram, func):
+    """P243: size in bytes of the matched C function at vram (build/conker.eu.elf STT_FUNC st_size; else the distance to
+    the next known function symbol), or None"""
+    global _MSIZE
+    if _MSIZE is None:
+        _MSIZE = {}
+        try:
+            with open('build/conker.eu.elf', 'rb') as fh:
+                st = ELFFile(fh).get_section_by_name('.symtab')
+                for s in st.iter_symbols():
+                    if s['st_info']['type'] == 'STT_FUNC' and s['st_size']:
+                        _MSIZE.setdefault(s['st_value'], s['st_size'])
+        except Exception:
+            pass
+    if vram in _MSIZE: return _MSIZE[vram]
+    nx = [a for n, a in symtab().items() if n.startswith('func_') and a > vram]
+    return (min(nx) - vram) if nx else None
+
 def find_file(func):
     for p in glob.glob('src_eu/**/*.c', recursive=True):
         src = open(p).read()
@@ -533,6 +583,29 @@ def inc_hdr_text(path, tu):
     _INCH[k] = '\n'.join(parts)
     return _INCH[k]
 
+def lookup_proto(p, tu, pn):
+    """(arity, fslots, fregs) of callee pn from the TU, its included headers, functions.h, include/**.h"""
+    new = {pn: (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))}
+    if new[pn][2] is None and not INCHDR_OLD:   # P234: no declaration in the TU text: included headers
+        ih = inc_hdr_text(p, tu)
+        if proto_fregs(ih, pn) is not None:
+            new[pn] = (proto_arity(ih, pn), proto_fslots(ih, pn), proto_fregs(ih, pn))
+    if new[pn][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
+        ha = proto_arity(hdr_protos(), pn)
+        if ha is not None and 16 < ha < 99:
+            new[pn] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
+    if new[pn][2] is None:   # P100: no declaration in the TU: FP argument registers from include/**.h
+        hf = proto_fregs(all_hdr_protos(), pn)
+        if hf:
+            new[pn] = (new[pn][0], new[pn][1], hf)
+            # P134: the arity and the a-register slots of the leading float parameters come from the same
+            # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
+            # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
+            # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
+            if new[pn][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
+                new[pn] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
+    return new[pn]
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
@@ -694,6 +767,16 @@ for _p in filter(None, os.environ.get('DIFFTEST_OUTB', '').split(',')):
     _a, _v = _p.split('=')
     OUTB[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFF for _y in _x.split(':')[1].split(';')])
                                      for _x in _v.split('/')]
+
+# P238 (opt-in): DIFFTEST_OUTP="ADDR=N.I:W0;W1;...,..." (hex ADDR/W, decimal N/I): at every call to ADDR the stub
+# reads the pointer at word I of the array that argument N points to (aN[I]; N >= 4 = stack argument) and writes the
+# words W0, W1, ... there: outputs a callee writes through an array of pointers (func_15145EA4's dst[i] points).
+# Several "N.I:W..." for one ADDR are separated by '/'.
+OUTP = {}
+for _p in filter(None, os.environ.get('DIFFTEST_OUTP', '').split(',')):
+    _a, _v = _p.split('=')
+    OUTP[int(_a, 16) & 0x1FFFFFFF] = [(int(_x.split(':')[0].split('.')[0]), int(_x.split(':')[0].split('.')[1]),
+                                      [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')]) for _x in _v.split('/')]
 
 # P28 (opt-in): DIFFTEST_ARGMEM="ADDR=N:LEN,..." (hex ADDR, decimal N/LEN): at each call to ADDR, the LEN bytes
 # that aN points to are logged and compared (e.g. a stack table passed by address, which stubs never read).
@@ -1062,7 +1145,8 @@ class Run:
         if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return
         v = value & ((1 << (8 * size)) - 1)
         if WLOG and WLOG[0] <= p < WLOG[1] and WLOG_ON[0]:
-            print('WLOG %s pc=%08X addr=%08X size=%d val=%X' % (WLOG_ON[0], mu.reg_read(UC_MIPS_REG_PC), p, size, v))
+            # P246: flush: trials run in forked children that leave through os._exit, so buffered lines were lost
+            print('WLOG %s pc=%08X addr=%08X size=%d val=%X' % (WLOG_ON[0], mu.reg_read(UC_MIPS_REG_PC), p, size, v), flush=True)
         for i in range(size):
             self.writes[p + i] = (v >> (8 * (size - 1 - i))) & 0xFF
 
@@ -1195,6 +1279,12 @@ class Run:
                 # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
                 self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
+        if (addr & 0x1FFFFFFF) in OUTP:
+            for _n, _i, _ws in OUTP[addr & 0x1FFFFFFF]:
+                _arr = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
+                try: _p = struct.unpack('>I', bytes(mu.mem_read(phys(_arr + 4 * _i), 4)))[0]
+                except Exception: continue
+                self.stub_write(_p, struct.pack('>%dI' % len(_ws), *_ws))
         if (addr & 0x1FFFFFFF) in OUTB:
             for _n, _ws in OUTB[addr & 0x1FFFFFFF]:
                 _p = _n[1] if isinstance(_n, tuple) else regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]
@@ -1206,7 +1296,7 @@ class Run:
             mu.reg_write(UC_MIPS_REG_PC, ra)
 
     def run(self, inputs):
-        if WLOG_ON[0]: print('WLOG %s --- run' % WLOG_ON[0])
+        if WLOG_ON[0]: print('WLOG %s --- run' % WLOG_ON[0], flush=True)
         mu = self.mu
         self.done = False
         for r, v in zip(A_REGS, inputs['a']): mu.reg_write(r, v)
@@ -1542,6 +1632,12 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         if not spath:   # C function: reference = ROM bytes, same length as the matched object
             rom = vram2rom(vram); raw = open('conker.eu.bin', 'rb').read()
             n = len(cwords) if self_mode else int(os.environ.get('DIFFTEST_REFLEN') or '0') // 4 or len(cwords)
+            if not self_mode and not os.environ.get('DIFFTEST_REFLEN') and not REFSZ_OLD:
+                # P243: the reference is the matched function's own bytes (ELF symbol size), not len(cwords) words:
+                # a longer candidate made the reference span the next function, so its `jal next` was never stubbed
+                # (target inside [vram, end)) and the reference ran into the real callee (hang). DIFFTEST_REFSZ_OLD=1 = old.
+                z = matched_size(vram, func)
+                if z: n = z // 4
             rwords = [struct.unpack_from('>I', raw, rom + 4 * k)[0] for k in range(n)]
     except CompileError as e:
         return dict(func=func, file=p, result='CERR', line='CERR %s: %s' % (func, str(e).replace('\n', ' | ')[:300]))
@@ -1585,25 +1681,16 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
         for c in R.calls + C.calls:
             if c['name'] not in arity and c['name'] not in new:
                 pn = 'func_' + c['name'][2:] if c['name'].startswith('0x') else c['name']  # P13: unnamed EU address
-                new[c['name']] = (proto_arity(tu, pn), proto_fslots(tu, pn), proto_fregs(tu, pn))
-                if new[c['name']][2] is None and not INCHDR_OLD:   # P234: no declaration in the TU text: included headers
-                    ih = inc_hdr_text(p, tu)
-                    if proto_fregs(ih, pn) is not None:
-                        new[c['name']] = (proto_arity(ih, pn), proto_fslots(ih, pn), proto_fregs(ih, pn))
-                if new[c['name']][0] is None:   # P93: no declaration in the TU: a >16-argument prototype in functions.h
-                    ha = proto_arity(hdr_protos(), pn)
-                    if ha is not None and 16 < ha < 99:
-                        new[c['name']] = (ha, proto_fslots(hdr_protos(), pn), proto_fregs(hdr_protos(), pn))
-                if new[c['name']][2] is None:   # P100: no declaration in the TU: FP argument registers from include/**.h
-                    hf = proto_fregs(all_hdr_protos(), pn)
-                    if hf:
-                        new[c['name']] = (new[c['name']][0], new[c['name']][1], hf)
-                        # P134: the arity and the a-register slots of the leading float parameters come from the same
-                        # header declaration: before P134 a TU without its own `cosf` declaration (declared only in
-                        # gu.h / math.h) had an unknown arity, so a0 was compared whenever the call site wrote it
-                        # (func_150F1F80: a0 = &D_800CC298 before `jal cosf` -> false DIFFER). DIFFTEST_HDRSLOT_OLD=1 = old.
-                        if new[c['name']][0] is None and os.environ.get('DIFFTEST_HDRSLOT_OLD') != '1':
-                            new[c['name']] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
+                new[c['name']] = lookup_proto(p, tu, pn)
+                if not ALIASPROTO_OLD and new[c['name']][2] is None:
+                    # P243: an address can carry several symbols (EU ELF: 0x15031C4C = func_15031C4C and func_1503195C);
+                    # the call was named after one of them, the TU may declare another -> its args were never compared.
+                    # Try every name at the address; the first one with a declaration wins. DIFFTEST_ALIASPROTO_OLD=1 = old.
+                    for an in addr_names(c['addr']):
+                        if an == pn: continue
+                        r = lookup_proto(p, tu, an)
+                        if r[2] is not None:
+                            new[c['name']] = r; break
                 # P214 (selftest hook): DIFFTEST_NOPROTO="NAME,..." treats those callees as having no prototype at all
                 if c['name'] in NOPROTO: new[c['name']] = (None, set(), None)
                 arity[c['name']] = new[c['name']][0]; FSKIP[c['name']] = new[c['name']][1]; FREGS[c['name']] = new[c['name']][2]
@@ -1682,7 +1769,7 @@ def knob_notes(called, ntrials):
     address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
     if not ntrials: return ''
     un = []
-    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('ARGMEM', ARGMEM)):
+    for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
         un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called]
     return ' [knob callee never called: %s]' % ', '.join(un) if un else ''
 

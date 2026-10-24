@@ -1,0 +1,15 @@
+15s/yaw, pitch/pitch, yaw/
+15s/roll)/z)/
+16s/0x180/0x170/
+17s/0x2C/0x28/
+17s/(cam + 0x24)/(cam + 0x28)/
+18s/- 1\.0f/- 2.0f/
+18s/0, 0, 0)/0, 0, 1)/
+18s/(cam + 0x28)/(cam + 0x24)/
+19s/0xE7000000/0xE6000000/
+20s/0;/1;/
+21s/0xEF002C0F/0xEF002C0E/
+22s/0x0F0A4004/0x0F0A4005/
+23s/\[2\]/[1]/
+24s/0xFFFFFFFF/0xFFFFFFFE/
+25s/gdl + 3/gdl + 2/

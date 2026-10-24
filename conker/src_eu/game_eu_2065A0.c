@@ -81,7 +81,44 @@ block_15:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_151D8E18.s")
 #endif
+#ifdef NON_MATCHING
+/* P241: readable C for func_eu_151D8FD4 (game_eu_2065A0, 64 insns). */
+// rumble_effect_update: update of the kind-0x3F effect made by func_151D8E18 (rumble for the players in the mask
+// +0x13, strength +0x12 0..8). With flag +0xE bit 0 the s16 life +0x10 counts down by D_800BE9E4 and the effect ends
+// (func_1516972C, after the rest) once it is negative. Runs the D_80090060 handler of index +0x14 (-1 = none); when
+// the strength changed since the last frame (+0x16), restarts the rumble of every player in the mask
+// (func_1501C15C, func_1501BFF0) and remembers the new strength. func_1501BFF0 is declared in the func_151D8E18 block above.
+extern void (*D_80090060[])(u8 *);
+void func_1501C15C(u8);
+void func_eu_151D8FD4(u8 *fx) {
+    u8 done = FALSE;
+    u8 i;
+
+    if (fx[0xE] & 1) {
+        *(s16 *) (fx + 0x10) -= D_800BE9E4;
+        if (*(s16 *) (fx + 0x10) < 0) {
+            done = TRUE;
+        }
+    }
+    if ((s8) fx[0x14] != -1) {
+        D_80090060[(s8) fx[0x14]](fx);
+    }
+    if (fx[0x12] != fx[0x16]) {
+        for (i = 0; i < 4; i++) {
+            if (fx[0x13] & (1 << i)) {
+                func_1501C15C(i);
+                func_1501BFF0(i, fx[0x12]);
+            }
+        }
+        fx[0x16] = fx[0x12];
+    }
+    if (done) {
+        func_1516972C((struct102 *) fx);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_2065A0/func_eu_151D8FD4.s")
+#endif
 
 void func_1501C15C(u8);
 void func_151D90D4(u8 *arg0) {

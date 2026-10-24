@@ -1,0 +1,19 @@
+25s/(arg0, \&pos)/(arg0, \&arg0->unk34)/
+25s/(arg0, \&pos)/(arg0, arg0)/
+25s/(arg0, \&pos)/(arg0->unk10, \&pos)/
+25s/D_8008FFE8\[arg0->unk2A\]/D_8008FFE0[arg0->unk2A]/
+25s/D_8008FFE8\[arg0->unk2A\]/D_8008FFE8[arg0->unk29]/
+24s/!= -1/> 0/
+27s/= 0/= 1/
+22s/-=/+=/
+23s/< 0/<= 0/
+21s/\& 1/\& 2/
+33s/== 0/!= 0/
+33s/(arg0, \&pos)/(arg0, \&arg0->unk34)/
+32s/unk29/unk2A/
+38s/pos/arg0->unk18/
+15s/!=/==/
+20s/<< 6/<< 5/
+16s/0xF)/0x7)/
+15s/0xFF/0xFE/
+20s/\&arg0->unk18/\&arg0->unk34/

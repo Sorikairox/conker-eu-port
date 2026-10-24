@@ -163,7 +163,30 @@ int func_15147168(arg0, arg1, arg2, arg3)
     }
 }
 
+#ifdef NON_MATCHING
+/* P243: readable C for func_151472D0 (game_eu_174610, 73 insns). */
+// object_effect10_spawn: for an object with a model (+0x1D4), func_15146E00 finds the point `id` of obj (position into
+// pt, a record into rec); when found, spawns effect kind 10 through func_15141F78 with size arg2 * (1 / 85) and the
+// byte (u32) (obj+0x40 scale * 0.7111111) (late rodata D_800A5B08 / D_800A5B0C), the point and the id. Twin of
+// func_150EB610 (game_eu_118CE0, which uses func_150EB4D0). No caller in the decomp (no jal, no data word): void, as
+// the twin; the asm returns no defined value. (func_15141F78: the declaration above func_15147168's caller block.)
+
+void func_151472D0(u8 *obj, u8 id, s32 arg2) {
+    struct {
+        s32 rec[9];
+        f32 pt[3];
+    } sp;
+
+    if (*(s32 *)(obj + 0x1D4) != 0) {
+        if (func_15146E00(sp.pt, obj, (s32) sp.rec, id) != 0) {
+            func_15141F78(10, sp.rec, (f32) arg2 * 0.011764706f, (u8) (u32) (*(f32 *)(obj + 0x40) * 0.7111111f), sp.pt,
+                          id);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151472D0.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_174610/func_151473F4.s")
 

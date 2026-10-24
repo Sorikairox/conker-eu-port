@@ -146,7 +146,30 @@ void func_150FD140(u8 view) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FD140.s")
 #endif
 
+#ifdef NON_MATCHING
+f32 func_15166120(void *, void *, s32, s32, f32);
+
+/* view_spot_distance_fade: P238: entry 0 of D_8008B734 (func_15164E0C, asm, passes the object in a0 and stores f0).
+ * Fade factor of `obj` against view 0's spot (D_800D9AA0[0], s16 x / y / z as floats): func_15166120 with near
+ * distance 2007, range 9005 and scale 1 / 9005 (D_800A22FC, 0x38E8E334). 1.0 when there is no spot. The near /
+ * range parameters are f32 bit patterns in func_15166120's s32 slots (it reads them as floats). */
+f32 func_150FD49C(u8 *obj) {
+    f32 pos[3];
+    f32 nearDist = 2007.0f;
+    f32 range = 9005.0f;
+    s16 *spot = (s16 *) D_800D9AA0[0];
+
+    if (spot == NULL) {
+        return 1.0f;
+    }
+    pos[0] = spot[0];
+    pos[1] = spot[1];
+    pos[2] = spot[2];
+    return func_15166120(obj, pos, *(s32 *) &nearDist, *(s32 *) &range, 0.00011104942f);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12A7C0/func_150FD49C.s")
+#endif
 
 void func_150FD530(s32 arg0) {
     func_15103828();

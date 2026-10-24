@@ -16,6 +16,8 @@ void func_1506BF5C(void);  /* P68 hand C; called by func_1506BF1C */
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
 extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];
+void func_150F9BB0(u8 *, u8, s32);        /* P238: port-b hand C (void); called by func_15071830 */
+void func_150FA520(u8 *, u8, u8, s32);    /* P238: port-b hand C (void); called by func_15071998 / func_150719CC / func_15071A00 */
 #endif
 
 

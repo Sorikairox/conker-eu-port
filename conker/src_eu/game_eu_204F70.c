@@ -398,7 +398,138 @@ s32 func_151D7FE8(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7FE8.s")
 #endif
+#ifdef NON_MATCHING
+f32 func_15144528(f32, f32, f32);
+
+/* trail_ring_constrain: P238: handler of the trail object of func_151D7EDC (ring of +0x25 entries of 0x1C bytes at
+ * +0x94, write cursor s8 +0x2E, oldest s8 +0x2D, count s8 +0x2C). With 2 or more points:
+ * 1. walk from the newest entry (the one before the cursor; flag 2 of u16 +0x1E: start at the object's own point
+ *    +0x10 instead and skip one more) back to the oldest, store each segment length at entry +0x10 and sum them;
+ *    once the sum passes 80 the entry is pulled back along its segment so the trail is exactly 80 long (+0x10
+ *    shortened to match) and every older entry is dropped (oldest moves up to it, count decreases).
+ * 2. state (+0x98) f32 +0x18 += -41 * frame step D_800BE9A4, wrapped by func_15144528(x, 16383, -16384); each
+ *    entry's +0x18 = func_15144528(that + sum of lengths so far * 46.88, 16383, -16384).
+ * 3. entry byte +0x14 (alpha): 60 while the running length is <= 0.299 * total, then fading linearly to 0 at the
+ *    end ((u32) conversion as in the asm).
+ * Returns 1. Float constants from the ELF: D_800AB6BC / C4 = 16383, D_800AB6C0 = 46.88 (0x423B851E),
+ * D_800AB6C8 = 0.299 (0x3E991688). */
+s32 func_151D8280(u8 *obj) {
+    u8 *ring = *(u8 **) (obj + 0x94);
+    u8 *state = *(u8 **) (obj + 0x98);
+    f32 *prev;
+    f32 *cur;
+    f32 d[3];
+    f32 total;
+    f32 len;
+    f32 k;
+    f32 acc;
+    f32 fadeStart;
+    f32 fadeLen;
+    f32 inv;
+    f32 t;
+    s32 i;
+
+    if ((s8) obj[0x2C] >= 2) {
+        total = 0.0f;
+        i = (s8) obj[0x2E];
+        if (*(u16 *) (obj + 0x1E) & 2) {
+            prev = (f32 *) (obj + 0x10);
+        } else {
+            i--;
+            if (i < 0) {
+                i = obj[0x25] - 1;
+            }
+            prev = (f32 *) (ring + i * 0x1C);
+        }
+        i--;
+        while (1) {
+            if (i < 0) {
+                i = obj[0x25] - 1;
+            }
+            cur = (f32 *) (ring + i * 0x1C);
+            d[0] = cur[0] - prev[0];
+            d[1] = cur[1] - prev[1];
+            d[2] = cur[2] - prev[2];
+            len = func_15143E64((struct17 *) d);
+            total += len;
+            cur[4] = len;
+            if (80.0f < total) {
+                if (cur[4] != 0.0f) {
+                    len = cur[4];
+                    k = (total - 80.0f) * (1.0f / len);
+                    cur[0] -= d[0] * k;
+                    cur[1] -= d[1] * k;
+                    cur[2] -= d[2] * k;
+                    cur[4] = len * (1.0f - k);
+                }
+                total = 80.0f;
+                while (i != (s8) obj[0x2D]) {
+                    obj[0x2D] = (s8) obj[0x2D] + 1;
+                    if (obj[0x25] == (s8) obj[0x2D]) {
+                        obj[0x2D] = 0;
+                    }
+                    obj[0x2C] = (s8) obj[0x2C] - 1;
+                }
+            }
+            prev = cur;
+            if (i == (s8) obj[0x2D]) {
+                break;
+            }
+            i--;
+        }
+
+        if ((s8) obj[0x2C] >= 2) {
+            *(f32 *) (state + 0x18) += -41.0f * D_800BE9A4;
+            *(f32 *) (state + 0x18) = func_15144528(*(f32 *) (state + 0x18), 16383.0f, -16384.0f);
+            acc = 0.0f;
+            i = (s8) obj[0x2E] - 1;
+            while (1) {
+                if (i < 0) {
+                    i = obj[0x25] - 1;
+                }
+                cur = (f32 *) (ring + i * 0x1C);
+                acc += cur[4];
+                cur[6] = func_15144528(*(f32 *) (state + 0x18) + acc * 46.87999725341797f, 16383.0f, -16384.0f);
+                if (i == (s8) obj[0x2D]) {
+                    break;
+                }
+                i--;
+            }
+        }
+
+        if ((s8) obj[0x2C] >= 2) {
+            fadeStart = total * 0.2990000247955322f;
+            fadeLen = total - fadeStart;
+            inv = 1.0f / fadeLen;
+            acc = 0.0f;
+            i = (s8) obj[0x2E] - 1;
+            while (1) {
+                if (i < 0) {
+                    i = obj[0x25] - 1;
+                }
+                cur = (f32 *) (ring + i * 0x1C);
+                if (fadeStart < acc) {
+                    t = acc - fadeStart;
+                    if (fadeLen < t) {
+                        t = fadeLen;
+                    }
+                    ((u8 *) cur)[0x14] = (u32) ((fadeLen - t) * inv * 60.0f);
+                } else {
+                    ((u8 *) cur)[0x14] = 60;
+                }
+                acc += cur[4];
+                if (i == (s8) obj[0x2D]) {
+                    break;
+                }
+                i--;
+            }
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D8280.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1513F4E4(s32, s32, s8 *);

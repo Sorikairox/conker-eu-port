@@ -3,9 +3,108 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF370/func_150C1B60.s")
+#ifdef NON_MATCHING
+/* s32 slots as in game_eu_EF6D0: the caller masks the tag itself (andi), IDO would skip the mask for a u8 parameter */
+s32 func_1514C860(f32, f32, f32, f32, s32, s32, s32, s32, s32, f32, s32, s32);
 
+/* spawn_ring_kind2_small: P238: emits 25 points of spawn handler kind 2 (D_8008ADA0) on a radius-80 ring around
+ * (x, y, z), starting at byte angle 0 and stepping by 3, with arg8 / arg9 / argA 0 and the byte `tag` as argB
+ * (func_1514C860, spawn_ring_emit). Its only caller (func_150C3994, asm) passes 0xFF and ignores v0; the asm leaves
+ * func_1514C860's v0 in place, so it is returned. */
+s32 func_150C1B60(f32 x, f32 y, f32 z, s32 tag) {
+    return func_1514C860(x, y, z, 80.0f, 0, 3, 0x19, 2, 0, 0.0f, 0, tag & 0xFF);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF370/func_150C1B60.s")
+#endif
+
+#ifdef NON_MATCHING
+f32 func_151423D8(u8);
+u8 *func_15148310(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                  s32 argA, u8 *argB, s32 argC, u8 argD, s32 argE);
+
+/* emit_point_debris: D_8008ADA0 spawn handler (`s32 (s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0,
+ * s32 a, s32 angle0, f32 r, s32 arg8, f32 arg9, s32 argA, s32 argB)`, as the game_eu_EF6D0 emitters): spawns one
+ * kind-5 particle (func_15148310) at (x, y, z) flying out along the byte angle a with a random pitch of -63..-51
+ * (rand % 13 - 63) and speed 25.5..42.9 (17.4 * rand + 25.5): velocity (v sin(p) sin(a - 0x40), -v sin(p - 0x40),
+ * v sin(p) sin(a)) (func_151423D8 = byte-angle sine); sprite 0x5A..0x99, tint 5..13, motion speed 24.7..44.9, scale
+ * 0.4..0.6, flags 0x28, kind 0xA; owner byte argB. The asm leaves the spawn block's -1 / owner words and the motion
+ * block's floor / timers unset (stack garbage), and so does this C. Always returns 1 (go on). */
+s32 func_150C1BC0(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, s32 a, s32 angle0, f32 r, s32 arg8,
+                  f32 arg9, s32 argA, s32 argB) {
+    struct {
+        s32 render[3];      /* spC8: words 0, 1, 0x160600 */
+        s32 mode[4];        /* 3, 0x10, 0x80, 0x20 */
+        u8 b0;              /* 0 */
+        u8 b1;              /* 9 */
+    } rb;
+    struct {
+        f32 speed;          /* spE8 */
+        f32 vel[3];
+        f32 scale;
+        f32 floor;          /* not set */
+        u8 flags;
+        u8 kind;
+        u8 full;
+        u8 alpha;
+        s16 t0;             /* not set */
+        s16 t1;             /* not set */
+    } mb;
+    struct {
+        f32 pos[3];         /* sp108 */
+        s16 sprite;
+        s16 model;
+        s32 count;
+        s8 minus1;          /* not set */
+        u8 tint;
+        s32 owner;          /* not set */
+    } sb;
+    s32 n;
+    s16 pitch;
+    f32 sp, cp, sa, ca, v, h;
+
+    rb.render[0] = 0;
+    rb.render[1] = 1;
+    rb.render[2] = 0x160600;
+    rb.mode[0] = 3;
+    rb.mode[1] = 0x10;
+    rb.mode[2] = 0x80;
+    rb.mode[3] = 0x20;
+    rb.b0 = 0;
+    rb.b1 = 9;
+    sb.count = 1;
+    sb.model = 1;
+    mb.kind = 0xA;
+    mb.full = 0xFF;
+    mb.flags = 0x28;
+    mb.alpha = 0xFF;
+    sb.pos[0] = x;
+    sb.pos[1] = y;
+    sb.pos[2] = z;
+    n = 1;
+    do {
+        pitch = (u32) func_150ADA20() % 13U - 0x3F;
+        sp = func_151423D8(pitch & 0xFF);
+        cp = func_151423D8((pitch - 0x40) & 0xFF);
+        sa = func_151423D8(a & 0xFF);
+        ca = func_151423D8((a - 0x40) & 0xFF);
+        v = func_150ADA68() * 17.4f + 25.5f;
+        sb.tint = (u32) func_150ADA20() % 9U + 5;
+        sb.sprite = (func_150ADA20() & 0x3F) + 0x5A;
+        mb.speed = func_150ADA68() * 20.2f + 24.7f;
+        mb.scale = func_150ADA68() * 0.2f + 0.4f;
+        h = v * sp;
+        mb.vel[0] = h * ca;
+        mb.vel[1] = -v * cp;
+        mb.vel[2] = h * sa;
+        func_15148310((u8 *) &sb, (s32) &mb, 0, 1, 5, 0, 0, 0, 0, 0, 0, (u8 *) &rb, 0, argB & 0xFF, 0);
+        n--;
+    } while (n != 0);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EF370/func_150C1BC0.s")
+#endif
 
 s32 func_150C1E78(u8 *arg0)
 {

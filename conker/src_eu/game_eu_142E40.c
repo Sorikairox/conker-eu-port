@@ -715,7 +715,43 @@ void func_1511712C(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511712C.s")
 #endif
 
+#ifdef NON_MATCHING
+/* spin_angles_update: three angles in degrees at +0x00 (f32[3]) turn by their rates +0x60 (f32[3]) times the ticks
+ * D_800BE9E4 and stay in [0, 360); each rate first moves toward its target +0x7C (f32[3]) by +0x3C / 256 (s32) without
+ * overshooting. No direct caller (reached through a table); the asm's v0 is the loop bound 0xC, not a result. */
+void func_151172FC(u8 *o) {
+    f32 *angle = (f32 *) o;
+    f32 *rate = (f32 *) (o + 0x60);
+    f32 *target = (f32 *) (o + 0x7C);
+    f32 step = *(s32 *) (o + 0x3C) * 0.00390625f;
+    f32 ticks = D_800BE9E4;
+    s32 i;
+
+    for (i = 0; i < 3; i++) {
+        if (rate[i] != target[i]) {
+            if (target[i] < rate[i]) {
+                rate[i] -= step;
+                if (rate[i] < target[i]) {
+                    rate[i] = target[i];
+                }
+            } else {
+                rate[i] += step;
+                if (target[i] < rate[i]) {
+                    rate[i] = target[i];
+                }
+            }
+        }
+        angle[i] += rate[i] * ticks;
+        if (angle[i] < 0.0f) {
+            angle[i] += 360.0f;
+        } else if (360.0f <= angle[i]) {
+            angle[i] -= 360.0f;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151172FC.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117424.s")
 
