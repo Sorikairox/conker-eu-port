@@ -68,14 +68,94 @@ struct260 *func_15192150(u8 *obj, f32 *offset, u8 kind, f32 a3, f32 arg4, s16 li
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/func_15192150.s")
 #endif
 
+typedef struct { f32 x, y, z; } V3_25AC;      /* P232: moved up for func_151922C4 (used by func_151925AC) */
+typedef struct { s16 h[9]; } H12_25AC;
+#ifdef NON_MATCHING
+extern f32 D_800A84C8;          /* height used when the point is outside the level (func_1514672C == 0) */
+extern f32 D_800A84CC;          /* floor search depth / default height */
+extern f32 D_800A84D0;          /* height used without a ground chance (+0x60 <= 0) */
+s32 func_1514672C(f32 *);
+s32 func_15047274(f32 *, s32, f32, s32 *);
+f32 func_150ADA68(void);
+s32 func_150ADA20(void);
+u8 *func_151925AC(V3_25AC *arg0, V3_25AC *arg1, f32 arg2, s16 arg3, u8 arg4, u8 arg5, f32 arg6, s32 arg7, f32 arg8,
+                  H12_25AC *arg9, u8 argA, u8 argB, s32 argC);
+
+// obj_dust_effect_update: P232. Update callback of effect type 0x1D (func_15192150 fills ObjDustData at +0x28). Ends
+// the effect (+0xE = -1) when its object is gone or was replaced (+0x3B). The accumulator +0x18 grows by
+// (u1C + rand * u20) * frame step; for every whole unit, when the object has a model (+0x1D4), one dust particle
+// is spawned (func_151925AC) at the object's `offset` point (func_15143134): size u48 + rand * u4C, life
+// u50 + rand % (u52 + 1), frames u54 + rand % (u55 + 1), scale u58 + rand * u5C, landing on the ground with
+// chance u60 (height from the floor query func_15047274 into ground[], D_800A84CC if none, D_800A84C8 outside the
+// level, D_800A84D0 when u60 <= 0). Without a model the units are dropped.
+void func_151922C4(u8 *fx) {
+    ObjDustData *d = (ObjDustData *) (fx + 0x28);
+    u8 *obj = d->obj;
+    V3_25AC pos;
+    V3_25AC vel;
+    f32 height;
+    f32 depth;
+    f32 size;
+    s32 onGround;
+    s32 r1;
+    s32 r2;
+    s32 life;
+    s32 frames;
+    f32 scale;
+
+    if (*(s32 *) obj == 0 || d->objId != obj[0x3B]) {
+        *(s16 *) (fx + 0xE) = -1;
+        return;
+    }
+    d->u18 += (d->u1C + func_150ADA68() * d->u20) * D_800BE9A4;
+    if (!(d->u18 > 1.0f)) {
+        return;
+    }
+    if (*(u8 **) (obj + 0x1D4) == NULL) {
+        while (d->u18 > 1.0f) {
+            d->u18 -= 1.0f;
+        }
+        return;
+    }
+    func_15143134(d->offset, &pos, *(u8 **) (obj + 0x1D4) + d->kind);
+    if (0.0f < d->u60) {
+        if (func_1514672C(&pos.x) == 0) {
+            height = D_800A84C8;
+        } else {
+            depth = D_800A84CC;
+            if (func_15047274(&pos.x, 0, depth, d->ground) != 0) {
+                height = *(f32 *) &d->ground[0];
+            } else {
+                height = depth;
+            }
+        }
+    } else {
+        height = D_800A84D0;
+    }
+    do {
+        onGround = (func_150ADA68() < d->u60) ? 1 : 0;
+        vel.x = 0.0f;
+        vel.y = 0.0f;
+        vel.z = 0.0f;
+        size = func_150ADA68();
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        life = (u32) r1 % (u32) (d->u52 + 1) + d->u50;
+        frames = (u32) r2 % (u32) (d->u55 + 1) + d->u54;
+        scale = func_150ADA68() * d->u5C + d->u58;
+        func_151925AC(&pos, &vel, size * d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,
+                      (H12_25AC *) &d->ground[1], d->u64, fx[0xC], fx[1]);
+        d->u18 -= 1.0f;
+    } while (d->u18 > 1.0f);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1BF960/func_151922C4.s")
+#endif
 
 u8 *func_151308E4(void *, s32, s32, u8, s32);
 extern u8 (*D_80090070[])(void);
 extern f32 D_800A84D4;
 extern f32 D_800A84D8;
-typedef struct { f32 x, y, z; } V3_25AC;
-typedef struct { s16 h[9]; } H12_25AC;
 typedef struct {
     s32 u0;
     s32 u4;

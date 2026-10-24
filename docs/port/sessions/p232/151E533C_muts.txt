@@ -1,0 +1,32 @@
+s/    D_800901CC = 0;/    D_800901CC = 1;/ % r2_none
+s/    D_800BEAC1 = 0;/    D_800BEAC1 = 1;/ % r2_none
+s/    D_80090144 = 0;/    D_80090144 = 1;/ % r2_none
+s/    D_800E0EC0 = 0;/    D_800E0EC0 = 1;/ % r2_none
+s/    next = mode\[7\];/    next = mode[6];/ % r2_none r11_none r11_quit
+s/    D_80090160 \&= 0xF369;/    D_80090160 \&= 0xF36B;/ % r2_none
+s/    if (D_800ABA70\[(s8) D_80090174\[0x42\]\]\[5\] >= 0) {/    if (D_800ABA70[(s8) D_80090174[0x42]][5] > 0) {/ % r0_two
+s/    if (D_800ABA70\[(s8) D_80090174\[0x42\]\]\[5\] >= 0) {/    if (D_800ABA70[(s8) D_80090174[0x42]][4] >= 0) {/ % r1_two
+s/        if (D_800E0EF0\[0\] == 1) {/        if (D_800E0EF0[0] != 1) {/ % r2_two
+s/            n = 1;/            n = 2;/ % p0_only
+s/        if (D_800E0EF0\[1\] == 1) {/        if (D_800E0EF0[1] == 2) {/ % r2_two
+s/        if (D_800E0EF0\[2\] == 1) {/        if (D_800E0EF0[2] == 0) {/ % p23
+s/        if (D_800E0EF0\[3\] == 1) {/        if (D_800E0EF0[3] == 2) {/ % p23
+s/        tie = (n >= 2);/        tie = (n >= 1);/ % r2_one
+s/        tie = (n >= 2);/        tie = (n >= 3);/ % r2_two
+s/    if (next >= 0 \&\& !tie) {/    if (next > 0 \&\& !tie) {/ % r0_none
+s/    if (next >= 0 \&\& !tie) {/    if (next >= 0) {/ % r2_two
+s/        level = D_800ABBA0\[next\].level;/        level = D_800ABBA0[next + 1].level;/ % r2_none
+s/        D_80090120 = 1;/        D_80090120 = 3;/ % r2_none
+s/    } else if (next == -2 \&\& (s8) D_800E0EB6 == 0) {/    } else if (next == -1 \&\& (s8) D_800E0EB6 == 0) {/ % r11_none r3_none
+s/    } else if (next == -2 \&\& (s8) D_800E0EB6 == 0) {/    } else if (next == -2) {/ % r11_quit
+s/        D_80090120 = 2;/        D_80090120 = 5;/ % r11_none
+s/        D_80090160 = 0;/        D_80090160 = 1;/ % r11_none
+s/        return;/        ;/ % r11_none
+s/        level = 0x1D;/        level = 0x1C;/ % r3_none
+s/        D_800E0B94 = 3;/        D_800E0B94 = 4;/ % r3_none
+s/        D_80090120 = 4;/        D_80090120 = 0;/ % r2_two
+s/    D_800D3260 = 0;/    D_800D3260 = 1;/ % r2_none
+s/    func_1501C710(6, level, 0, 0, 1);/    func_1501C710(6, level, 0, 0, 0);/ % r2_none
+s/    func_151E5D28();/    ;/ % r2_none
+s/    D_8008FD8C = 1;/    D_8008FD8C = 2;/ % r2_none
+s/    D_80090130 = 1;/    D_80090130 = 2;/ % r2_none

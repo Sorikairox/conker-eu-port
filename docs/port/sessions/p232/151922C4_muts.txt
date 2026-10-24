@@ -1,0 +1,34 @@
+s/    if (\*(s32 \*) obj == 0 || d->objId != obj\[0x3B\]) {/    if (*(s32 *) obj == 0) {/ % other_id
+s/    if (\*(s32 \*) obj == 0 || d->objId != obj\[0x3B\]) {/    if (d->objId != obj[0x3B]) {/ % dead
+s/        \*(s16 \*) (fx + 0xE) = -1;/        *(s16 *) (fx + 0xE) = 0;/ % dead
+s/    d->u18 += (d->u1C + func_150ADA68() \* d->u20) \* D_800BE9A4;/    d->u18 += (d->u1C + func_150ADA68() * d->u20);/ % accum
+s/    d->u18 += (d->u1C + func_150ADA68() \* d->u20) \* D_800BE9A4;/    d->u18 += (d->u20 + func_150ADA68() * d->u1C) * D_800BE9A4;/ % accum below1
+s/    if (!(d->u18 > 1.0f)) {/    if (!(d->u18 >= 1.0f)) {/ % exact1
+s/    if (\*(u8 \*\*) (obj + 0x1D4) == NULL) {/    if (*(u8 **) (obj + 0x1D4) != NULL) {/ % one nomodel
+s/            d->u18 -= 1.0f;/            d->u18 -= 2.0f;/ % nomodel
+s/    func_15143134(d->offset, \&pos, \*(u8 \*\*) (obj + 0x1D4) + d->kind);/    func_15143134(d->offset, \&pos, *(u8 **) (obj + 0x1D4));/ % one
+s/    if (0.0f < d->u60) {/    if (0.0f <= d->u60) {/ % u60_0
+s/        if (func_1514672C(\&pos.x) == 0) {/        if (func_1514672C(\&pos.x) != 0) {/ % one outside
+s/            height = D_800A84C8;/            height = D_800A84D0;/ % outside
+s/            depth = D_800A84CC;/            depth = D_800A84C8;/ % one nofloor
+s/            if (func_15047274(\&pos.x, 0, depth, d->ground) != 0) {/            if (func_15047274(\&pos.x, 0, depth, d->ground) == 0) {/ % one nofloor
+s/                height = \*(f32 \*) \&d->ground\[0\];/                height = *(f32 *) \&d->ground[1];/ % one
+s/                height = depth;/                height = 0.0f;/ % nofloor
+s/        height = D_800A84D0;/        height = D_800A84CC;/ % u60_0
+s/        onGround = (func_150ADA68() < d->u60) ? 1 : 0;/        onGround = (func_150ADA68() <= d->u60) ? 1 : 0;/ % ground_eq
+s/        onGround = (func_150ADA68() < d->u60) ? 1 : 0;/        onGround = (func_150ADA68() < d->u60) ? 0 : 1;/ % one
+s/        vel.y = 0.0f;/        vel.y = 1.0f;/ % one
+s/^        d->u18 -= 1.0f;/        d->u18 -= 0.5f;/ % three two_exact
+s/    } while (d->u18 > 1.0f);/    } while (d->u18 >= 1.0f);/ % two_exact three
+s/(u32) (d->u52 + 1) + d->u50;/(u32) (d->u52) + d->u50;/ % one mods3
+s/        life = (u32) r1 /        life = (u32) r2 / % one
+s/(u32) (d->u52 + 1) + d->u50;/(u32) (d->u52 + 1) + d->u54;/ % one
+s/        life = (u32) r1 \(.\) (u32)/        life = (s32) r1 \1 (s32)/ % mods
+s/(u32) (d->u55 + 1) + d->u54;/(u32) (d->u54 + 1) + d->u55;/ % one mods3
+s/(u32) (d->u55 + 1) + d->u54;/(u32) (d->u55) + d->u54;/ % one mods3
+s/        scale = func_150ADA68() \* d->u5C + d->u58;/        scale = func_150ADA68() * d->u58 + d->u5C;/ % one
+s/    func_151925AC(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/    func_151925AC(\&pos, \&vel, size * d->u48 + d->u4C, life, frames, 0xFF, scale, onGround, height,/ % one
+s/        func_151925AC(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/        func_151925AC(\&pos, \&vel, size * d->u4C + d->u48, life, frames, 0xFE, scale, onGround, height,/ % one
+s/        func_151925AC(\&pos, \&vel, size \* d->u4C + d->u48, life, frames, 0xFF, scale, onGround, height,/        func_151925AC(\&pos, \&vel, size * d->u4C + d->u48, frames, life, 0xFF, scale, onGround, height,/ % one
+s/                      (H12_25AC \*) \&d->ground\[1\], d->u64, fx\[0xC\], fx\[1\]);/                      (H12_25AC *) \&d->ground[0], d->u64, fx[0xC], fx[1]);/ % one
+s/                      (H12_25AC \*) \&d->ground\[1\], d->u64, fx\[0xC\], fx\[1\]);/                      (H12_25AC *) \&d->ground[1], d->u64, fx[1], fx[0xC]);/ % one

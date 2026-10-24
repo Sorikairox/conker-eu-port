@@ -1,0 +1,58 @@
+s/    scale = (func_150ADA68() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (func_150ADA68() * D_800A2A04 + D_800A2A08);/ % r00 r01
+s/    scale = (func_150ADA68() \* D_800A2A04 + D_800A2A08) \* D_800A2A0C;/    scale = (func_150ADA68() * D_800A2A08 + D_800A2A04) * D_800A2A0C;/ % r00 r01
+s/    t.kind = 0x2B;/    t.kind = 0x2A;/ % r00
+s/    t.flags = 0x4401;/    t.flags = 0x4400;/ % r00
+s/    t.u0 = 0x200005;/    t.u0 = 0x200004;/ % r00
+s/    t.u4 = 0x20000;/    t.u4 = 0x30000;/ % r00
+s/    t.life = (func_150ADA20() \& 0xF) + 10;/    t.life = (func_150ADA20() \& 0x7) + 10;/ % r10
+s/    t.life = (func_150ADA20() \& 0xF) + 10;/    t.life = (func_150ADA20() \& 0xF) + 11;/ % r00
+s/    t.uC = 0;/    t.uC = 1;/ % r00
+s/    t.u10 = 0;/    t.u10 = 1;/ % r00
+s/    for (i = 0; i < 9; i++) {/    for (i = 0; i < 8; i++) {/ % r00
+s/    size = func_150ADA68() \* 25.0f + 35.0f;/    size = func_150ADA68() * 25.0f + 30.0f;/ % r00
+s/    t.size\[1\] = size;/    t.size[1] = 1.0f;/ % r00
+s/    t.pos\[0\] = pos\[0\];/    t.pos[0] = pos[1];/ % r00
+s/    t.pos\[2\] = pos\[2\];/    t.pos[2] = pos[1];/ % r00
+s/    t.vel\[1\] = 0.0f;/    t.vel[1] = 1.0f;/ % r00
+s/    t.dir\[0\] = dir\[0\] \* scale;/    t.dir[0] = dir[0];/ % r00
+s/    t.dir\[1\] = dir\[1\] \* scale;/    t.dir[1] = dir[2] * scale;/ % r00
+s/    t.dir\[2\] = dir\[2\] \* scale;/    t.dir[2] = dir[2] * size;/ % r00
+s/    t.u1E = 5;/    t.u1E = 4;/ % r00
+s/    t.u20 = 0x33;/    t.u20 = 0x32;/ % r00
+s/    t.u22 = 1;/    t.u22 = 0;/ % r00
+s/    t.u54 = 0.0f;/    t.u54 = 1.0f;/ % r00
+s/    t.u24 = 1.0f;/    t.u24 = 2.0f;/ % r00
+s/    flipX = (func_150ADA20() \& 1) ? 0x40 : 0;/    flipX = (func_150ADA20() \& 2) ? 0x40 : 0;/ % r01 r_even
+s/    flipY = (func_150ADA20() \& 1) ? 0x80 : 0;/    flipY = (func_150ADA20() \& 1) ? 0x40 : 0;/ % r10
+s/    t.mode = flipY | 5 | flipX | 0xC200;/    t.mode = flipY | 5 | flipX | 0xC000;/ % r00
+s/    t.u60\[2\] = 0xFF;/    t.u60[2] = 0;/ % r00
+s/    t.u60\[5\] = 4;/    t.u60[5] = 5;/ % r00
+s/    func_151308E4(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    func_151308E4(\&t, 1, 0, obj[1], obj[0xC]);/ % r00
+s/    func_151308E4(\&t, 1, 0, obj\[0xC\], obj\[1\]);/    func_151308E4(\&t, 0, 0, obj[0xC], obj[1]);/ % r00
+s/    e.u0 = 1;/    e.u0 = 2;/ % r00
+s/    e.u4 = 4;/    e.u4 = 3;/ % r00
+s/    e.pos\[1\] = pos\[1\];/    e.pos[1] = pos[0];/ % r00
+s/    e.u14\[1\] = D_800A2A14;/    e.u14[1] = D_800A2A18;/ % r00
+s/    e.u14\[3\] = D_800A2A1C;/    e.u14[3] = D_800A2A10;/ % r00
+s/    e.u24 = 2.0f;/    e.u24 = 3.0f;/ % r00
+s/    e.u28 = 6.0f;/    e.u28 = 2.0f;/ % r00
+s/    e.u2E = 0xFF;/    e.u2E = 0xFE;/ % r00
+s/    e.u30 = -0x40;/    e.u30 = 0x40;/ % r00
+s/    e.u32 = 0x2E;/    e.u32 = 0x2F;/ % r00
+s/    e.u38 = 3;/    e.u38 = 4;/ % r00
+s/    e.u3C = 0x14;/    e.u3C = 0x15;/ % r00
+s/    e.u40 = 1;/    e.u40 = 0;/ % r00
+s/    e.u42\[1\] = 2;/    e.u42[1] = 3;/ % r00
+s/    for (i = 3; i < 7; i++) {/    for (i = 3; i < 6; i++) {/ % r00
+s/    for (i = 7; i < 0xB; i++) {/    for (i = 8; i < 0xB; i++) {/ % r00
+s/    for (i = 0xF; i < 0x13; i++) {/    for (i = 0xF; i < 0x12; i++) {/ % r00
+s/    e.u42\[0x13\] = 0xFF;/    e.u42[0x13] = 0;/ % r00
+s/    e.u42\[0x16\] = 0x24;/    e.u42[0x16] = 0x25;/ % r00
+s/    e.u5C = 0x200005;/    e.u5C = 0x200004;/ % r00
+s/    e.u60 = 0x60600;/    e.u60 = 0x60601;/ % r00
+s/    e.u66 = 0x19;/    e.u66 = 0x18;/ % r00
+s/    e.u6A = 0;/    e.u6A = 1;/ % r00
+s/    e.u6C = 1.0f;/    e.u6C = 2.0f;/ % r00
+s/    e.u70\[1\] = 0;/    e.u70[1] = 1;/ % r00
+s/    e.u70\[3\] = -1;/    e.u70[3] = 0;/ % r00
+s/    func_151530A8(\&e, obj\[0xC\], obj\[1\]);/    func_151530A8(\&e, obj[0xC], obj[0]);/ % r00

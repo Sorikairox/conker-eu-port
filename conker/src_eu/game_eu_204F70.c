@@ -265,7 +265,45 @@ void func_151D7DE0(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+// trail_points_update: P232. Particle-object callback (s32 handler, returns 1 = keep / 0 = done) for a ring of
+// points: the ring holds +0x25 entries of 0x1C bytes at +0x94 (position at +0, velocity at +0xC), +0x2E is the
+// write cursor and +0x2D the oldest entry. Each frame every entry from the one before the cursor back to the oldest
+// (wrapping) is advanced by func_151D8CC8 with the frame step D_800BE9A4. While there are points (+0x2C > 0) the
+// head position +0x54 is the oldest entry's position, else it is zeroed. With fewer than 2 points and flag 8 of
+// +0x1E the object ends (returns 0).
+s32 func_151D7EDC(u8 *arg0) {
+    u8 *ring = *(u8 **) (arg0 + 0x94);
+    s32 i;
+    u8 *e;
+
+    if ((s8) arg0[0x2C] < 2 && (*(u16 *) (arg0 + 0x1E) & 8)) {
+        return 0;
+    }
+    i = (s8) arg0[0x2E];
+    while (i != (s8) arg0[0x2D]) {
+        i--;
+        if (i < 0) {
+            i = arg0[0x25] - 1;
+        }
+        e = ring + i * 0x1C;
+        func_151D8CC8((f32 *) e, (f32 *) (e + 0xC), D_800BE9A4);
+    }
+    if ((s8) arg0[0x2C] > 0) {
+        e = ring + (s8) arg0[0x2D] * 0x1C;
+        *(s32 *) (arg0 + 0x54) = *(s32 *) (e + 0);
+        *(s32 *) (arg0 + 0x58) = *(s32 *) (e + 4);
+        *(s32 *) (arg0 + 0x5C) = *(s32 *) (e + 8);
+    } else {
+        *(f32 *) (arg0 + 0x54) = 0.0f;
+        *(f32 *) (arg0 + 0x58) = 0.0f;
+        *(f32 *) (arg0 + 0x5C) = 0.0f;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_204F70/func_151D7EDC.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_151D7FE8(u8 *arg0) {

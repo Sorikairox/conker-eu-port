@@ -1,0 +1,6 @@
+# P232 func_15109DC8 (spark_burst_spawn): func_150ADA20 (jal 150ADF00) = life / flip bits, func_150ADA68 (150ADF48) = scale / size. Arguments random (learned pointers).
+r00 ! ! ! 150ADF00=0;0;0 ! 150ADF48=3F000000;3E800000 ! ! ! !
+r01 ! ! ! 150ADF00=5;1;0 ! 150ADF48=3F800000;00000000 ! ! ! !
+r10 ! ! ! 150ADF00=F;0;1 ! 150ADF48=00000000;3F800000 ! ! ! !
+r11 ! ! ! 150ADF00=FFFFFFF3;FFFFFFFF;3 ! 150ADF48=3F400000;3F400000 ! ! ! !
+r_even ! ! ! 150ADF00=12345670;2;2 ! 150ADF48=3DCCCCCD;3F666666 ! ! ! !
