@@ -1,0 +1,32 @@
+s/if (\*(s32 \*)(p + 0x6C) != 0 \&\& func_151464B8/if (*(s32 *)(p + 0x6C) == 0 \&\& func_151464B8/
+s/\*(s16 \*)(p + 0x60) += 50;/*(s16 *)(p + 0x60) += 49;/
+s/for (i = 0; i <= last \&\& !found; i++) {/for (i = 0; i < last \&\& !found; i++) {/
+s/D_800BEA50\[i\] \* 0x9A0 + 0x2F8;/D_800BEA50[i] * 0x9A0 + 0x2F4;/
+s/dy = \*(f32 \*)(pl + 4) - \*(f32 \*)(p + 0x1C);/dy = 0.0f;/
+s/< 2500000.0f) {/<= 2500000.0f) {/
+s/        if (!found) {/        if (found) {/
+s/\* D_800BE9A4;/* 1.0f;/
+s/(\*(f32 \*)(p + 0x38) + f \* \*(f32 \*)(p + 0x3C))/(*(f32 *)(p + 0x38) + f)/
+s/    if (!(1.0f < \*(f32 \*)(p + 0x64))) {/    if (!(0.5f < *(f32 *)(p + 0x64))) {/
+s/spec.w08 = 0x160600;/spec.w08 = 0x160601;/
+s/spec.b1D = 7;/spec.b1D = 6;/
+s/spec.floorY = \*(f32 \*)(p + 0x68);/spec.floorY = *(f32 *)(p + 0x64);/
+s/spec.f38 = -10000.0f;/spec.f38 = 10000.0f;/
+s/spec.h42 = 0xF;/spec.h42 = 0xE;/
+s/spec.w54 = 1;/spec.w54 = 2;/
+s/% (u32)(\*(s32 \*)(p + 0x5C) + 1) + \*(s32 \*)(p + 0x58);/% (u32)(*(s32 *)(p + 0x5C) + 2) + *(s32 *)(p + 0x58);/
+s/spec.pos\[1\] = \*(f32 \*)(p + 0x1C) + f \* \*(f32 \*)(p + 0x28);/spec.pos[1] = *(f32 *)(p + 0x1C) + f * *(f32 *)(p + 0x2C);/
+s/spec.speed = func_150ADA68() \* \*(f32 \*)(p + 0x44) + \*(f32 \*)(p + 0x40);/spec.speed = func_150ADA68() * *(f32 *)(p + 0x40) + *(f32 *)(p + 0x44);/
+s/(u32)(\*(s16 \*)(p + 0x12) \* 2 + 1) + \*(s16 \*)(p + 0x12);/(u32)(*(s16 *)(p + 0x12) * 2 + 1) - *(s16 *)(p + 0x12);/
+s/(u32)(\*(s16 \*)(p + 0x16) + 1) + \*(s16 \*)(p + 0x14);/(u32)(*(s16 *)(p + 0x16) + 1) + *(s16 *)(p + 0x10);/
+s/cosYaw = func_151423D8(yaw - 0x40);/cosYaw = func_151423D8(yaw + 0x40);/
+s/horiz = speed \* sinPitch;/horiz = speed * cosPitch;/
+s/spec.dir\[1\] = -speed \* cosPitch;/spec.dir[1] = speed * cosPitch;/
+s/spec.dir\[2\] = horiz \* sinYaw;/spec.dir[2] = horiz * cosYaw;/
+s/spec.f34 = func_150ADA68() \* \*(f32 \*)(p + 0x50)/spec.f34 = func_150ADA68() * *(f32 *)(p + 0x4C)/
+s/% (u32)(\*(s16 \*)(p + 0x4A) + 1) + \*(s16 \*)(p + 0x48);/% (u32)(*(u16 *)(p + 0x4A) + 1) + *(s16 *)(p + 0x48);/
+s/% (u32)(\*(s16 \*)(p + 0x56) + 1) + \*(s16 \*)(p + 0x54);/% (u32)(*(s16 *)(p + 0x56) + 1) + *(u8 *)(p + 0x54);/
+s/(p\[0x70\] \& 1) ? 10 : 0/(p[0x70] \& 2) ? 10 : 0/
+s/(u8 \*)\&spec, 0, p\[0xC\], p\[1\]);/(u8 *)\&spec, 0, p[0xC], p[2]);/
+s/memcpy(\*(u8 \*\*)(part + 0x98) + 0x48, \&spec.floorY, 4);/memcpy(*(u8 **)(part + 0x98) + 0x44, \&spec.floorY, 4);/
+s/        \*(f32 \*)(p + 0x64) -= 1.0f;/        *(f32 *)(p + 0x64) -= 2.0f;/

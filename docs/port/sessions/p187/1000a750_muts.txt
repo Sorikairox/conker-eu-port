@@ -1,0 +1,29 @@
+s/if (count == 0) {/if (count == 1) {/
+s/best = 0x7FFFFFFF;/best = 0x7FFFFFFE;/
+s/lastD = 0x7FFFFFFF;/lastD = 0;/
+s/dy = y - pts\[i\].y;/dy = y - pts[i].z;/
+s/(u32) dz \* dz;/(u32) dz * dy;/
+s/if (d < best) {/if (d <= best) {/
+s/            prevD = lastD;/            prevD = d;/
+s/} else if (i == nearest + 1) {/} else if (i == nearest + 2) {/
+s/            nextD = d;/            nextD = lastD;/
+s/py = pts\[nearest\].y;/py = pts[nearest].z;/
+s/count >= 2 \&\& best >= 0x6D61/count >= 1 \&\& best >= 0x6D61/
+s/best >= 0x6D61/best >= 0x6D62/
+s/nearest >= count - 1 || prevD < nextD/nearest >= count - 1 \&\& prevD < nextD/
+s/nearest >= count - 1 || prevD < nextD/nearest >= count - 1 || prevD <= nextD/
+s/            seg = nearest - 1;/            seg = nearest;/
+s/rel\[2\] = z - pts\[seg\].z;/rel[2] = z - pts[seg].y;/
+s/if (t < 0.0f) {/if (t <= 0.0f) {/
+s/            len2 = len \* len;/            len2 = len;/
+s/if (len2 < t) {/if (len2 <= t) {/
+s/                seg++;/                seg += 2;/
+s/                seg--;/                seg++;/
+s/if (len2 != 0.0f) {/if (len2 != 1.0f) {/
+s/if (t < len2) {/if (t <= len2) {/
+s/t \/ len2, (struct17/len2 \/ t, (struct17/
+s/px = pts\[seg\].x + dir\[0\];/px = pts[seg + 1].x + dir[0];/
+s/pz = pts\[seg\].z + dir\[2\];/pz = pts[seg].z;/
+s/px - ex, py - ey, pz - ez, yaw/px - ex, py - ey, pz - ey, yaw/
+s/px - x, py - y, pz - z, near, far/px - x, py - y, pz - z, far, near/
+s/outPan, (s32 \*) outVol/outPan, (s32 *) outDist/

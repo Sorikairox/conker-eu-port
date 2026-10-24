@@ -1,0 +1,11 @@
+s/        return 16;/        return 15;/
+s/    return 16;/    return 0;/
+s/+ 0x29) + delta;/+ 0x29) - delta;/
+s/i < D_800D27B8; i++/i <= D_800D27B8; i++/
+s/\&\& i != player) {/) {/
+s/me->unk24 \* 16 + (s32)(me->unk8 \* 16.0f)/me->unk24 * 16 + (s32)(me->unk8 * 8.0f)/
+s/- other->unk24 \* 16/- other->unk24 * 8/
+s/- (s32)(other->unk8 \* 16.0f)/+ (s32)(other->unk8 * 16.0f)/
+s/if (gap < 0) {/if (gap < -1) {/
+s/return (gap << 8) | i;/return (gap << 4) | i;/
+s/return (gap << 8) | i;/return (gap << 8) | player;/

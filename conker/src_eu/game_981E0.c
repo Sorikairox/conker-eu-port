@@ -5,6 +5,7 @@
 #ifdef NON_MATCHING
 void func_1507D4F8(s32); /* P59: was implicitly int */
 void func_1507F640(void); /* P60: idle animation, was implicitly int */
+s32 func_151AABC4(struct127 *, s32); /* P192: C on port-b (returns 0), was implicit */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_151C0698();   /* still asm; called by func_15070300 */

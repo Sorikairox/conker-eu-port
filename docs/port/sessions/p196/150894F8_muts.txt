@@ -1,0 +1,13 @@
+s/u8 last = 0xFF;/u8 last = 0;/
+s/if (node >= D_80087630) {/if (node > D_80087630) {/
+s/        return 0xFF;/        return 0;/
+s/for (k = 0; k < 5; k++)/for (k = 0; k < 4; k++)/
+s/link = p\[9 + k\];/link = p[8 + k];/
+s/if (link == 0xFF || link == prev) {/if (link == 0xFF) {/
+s/if (link == 0xFF || link == prev) {/if (link == prev) {/
+s/if (q\[0xE\] == type || type == 0xFF) {/if (q[0xE] == type) {/
+s/if (q\[0xE\] == type || type == 0xFF) {/if (q[0xF] == type || type == 0xFF) {/
+s/            last = link;/            ;/
+s/if (q\[0xF\] == band) {/if (q[0xF] != band) {/
+s/                return link;/                return last + 1;/
+s/    return last;/    return 0xFF;/

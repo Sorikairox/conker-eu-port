@@ -1,0 +1,16 @@
+s/a0 == NULL || //
+s/ || a4 == NULL//
+s/ || span == 0) {/) {/
+s/spec.type = 0x17;/spec.type = 0x18;/
+s/spec.wC = 0x243A;/spec.wC = 0x243B;/
+s/spec.w40 = 0x401;/spec.w40 = 0x400;/
+s/spec.b44 = 0xFF;/spec.b44 = 0xFE;/
+s/spec.w8 = 0;/spec.w8 = 1;/
+s/spec.span = span;/spec.span = 0;/
+s/spec.b45 = 0xFF;/spec.b45 = 0;/
+s/spec.rgba\[2\] = 0xC8;/spec.rgba[2] = 0xC0;/
+s/spec.flags = 0x401;/spec.flags = 0x400;/
+s/0, 0xA, 0, 8, 0, 0x14, arg6, arg7);/0, 0xA, 0, 8, 0, 0x14, arg7, arg6);/
+s/(rec + 0x11C) = a4;/(rec + 0x11C) = a3;/
+s/(rec + 0x120) = a3;/(rec + 0x120) = a4;/
+s/(rec + 0x110) = a0;/(rec + 0x110) = a1;/

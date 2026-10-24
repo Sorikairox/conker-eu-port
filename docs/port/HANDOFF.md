@@ -10,6 +10,51 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P196, 2026-10-24). Details: `docs/port/sessions/P196.md`
+
+Branch `port` (from P195 7964ca6). Hand C (NM), difftest EQUIV + setups + mutants (table in P196.md):
+- func_151184BC `gate_swing_update` mutants done: 66 run, 64 killed, 2 equivalent (new setups for the 4 P195 gaps).
+- Rail cameras (game_eu_B37F0): func_150894F8 `rail_node_next`, func_15089664 `rail_camera_follow`, func_15089B68
+  `rail_camera_spline`, func_15088130 `rail_cameras_update`, func_150882C4 `obj_yaw_clamp_to_track`. Dormant in the
+  port until the producer func_150877C0 (604, asm) sets D_800D27C9.
+- Breadth: func_150D7B6C `anim_segments_set` (105140), func_150E7B20 `particle_spawn_simple` (114640), func_15131F34
+  `surface_hit_dispatch` (15E000, passes cfg as the handler's arg3), func_15063254 `obj_model_swap_keep_pose` (8FCB0),
+  func_150DE8AC `trigger_zones_check` (10C0B0; game_3DC30 now declares it as a function), func_15107678
+  `bolt_subdivide` (133A70). func_15107518 `bolt_spawn` verified but not committed (handler func_1510783C is asm).
+- Checks: verify_all OK, NM links, protocheck 0 (1344), selftest ok, progress_nm 5338/5915 (90.2%), C bytes 74.1%.
+
+## Next steps (from P196)
+1. port-b: func_1518DC50 (torch-flame candidate, P195), then browser-check level 0x29.
+2. Harness: func_15063254 mutants dropping restores of stub-clobbered words (OUTW `@ADDR` on func_15060F28) survive;
+   check whether difftest compares memory written by stubs (P196.md section 2 notes); add a selftest case if fixed.
+3. Rail producers (B37F0): func_150877C0 (604), func_15087540 (160), func_1508882C (107), func_150867D4 (539), then
+   func_150893AC (83) / func_15088D24 (88) / func_15088E84 (212). Bolt: func_1510783C (210), then commit
+   `p196/15107518_cand.c` (verified).
+4. func_15133E04: fix the D_80089CD4 handler signatures (func_151A79EC has `f32 arg1`) before converting.
+5. Breadth (`p196/asmlist.py` after `progress_nm.py --list > port_work/p196/asmonly.txt`): next game entries
+   func_1518C000 (89), func_1517F01C (92), func_15103AA0 (93), func_15155B1C (96).
+
+## State (session P195, 2026-10-24). Details: `docs/port/sessions/P195.md`
+
+Branch `port` (from P192 cc3d667). Hand C (NM), difftest EQUIV + setups + mutants (table in P195.md):
+- Level 0x29 world-mesh handlers (D_80089140 table, func_151143D4): func_151184BC `gate_swing_update` (652; mutants
+  partial, see P195.md), func_15118F2C `mover_swing_step` (350), func_1511ED08 `mover_slide_step` (308),
+  func_15119974 `mover_bob_y_update` (port-b P194 draft), func_1511A540 `pickup_spin_update` (278).
+- Other level 0x29 stubs: func_1513B5E0 `mesh_effect_spawn` (game_168A90), func_151630F4 `lightning_flash_update`
+  (game_18D770). Breadth: func_15080900 `context_action_set` (AE110), func_150DBA98 `anim_event_effect_spawn` (108C00).
+- Torch flames: not in game_eu_142E40. Best candidate is port-b's func_1518DC50 (game_eu_1BAF40, 750 insns): object-type
+  handler at D_8008BEFC that spawns particle records (func_1513D524 + 0x58-byte emitter block at rec + 0x110).
+- Checks: verify_all OK, NM links, protocheck 0 (1333), selftest 65/65, progress_nm 5327/5915 (90.1%), C bytes 73.9%.
+
+## Next steps (from P195)
+1. port-b: convert func_1518DC50 (torch-flame candidate), then browser-check the level 0x29 torches.
+2. Finish func_151184BC mutants: `TR=4 docs/port/sessions/p195/mut.sh func_151184BC docs/port/sessions/p195/151184BC_cand.c
+   docs/port/sessions/p195/151184BC_setups.txt docs/port/sessions/p195/151184BC_muts.txt` (68 setups now).
+3. Breadth (`p195/asmlist.py` after `progress_nm.py --list > port_work/p195/asmonly.txt`): func_15088130 needs
+   func_15089664 (321) / func_15089B68 (306) first (all game_eu_B37F0).
+4. Browser: level 0x29 gate / doors / scenery / pickups / lightning (P195.md section 4).
+5. Setup tip: sinf / cosf are harness stubs (random returns); pin them with RETF (cosf jal 15047EF0, sinf jal 15048050).
+
 ## State (session P193, 2026-10-24, port-web). Details: `docs/port/sessions/P193.md`
 
 - **Level 0x29 green patch fixed (renderer)**: the texture cache was direct-mapped and mip tiles 1 and 3 of a standard
@@ -24,6 +69,48 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 ## Next steps (from P193)
 
 1. Convert func_1504B0FC (P189 #1). 2. Torches on level 0x29. 3. Backdrop quad (draw 0) texture / colour check.
+
+## State (session P192, 2026-10-24). Details: `docs/port/sessions/P192.md`
+
+- Level 0x29 stubs (browser P185 census) now hand C (NM), difftest EQUIV + setups + mutants: **func_15080628**
+  text_queue_tempo_events (3083 stub hits), **func_15116F34** mover_step + its callee **func_1511712C** mover_step_sfx,
+  **func_1511AA1C** obj_texture_anim_step (real D_800896C4 table via DIFFTEST_ROMDATA), **func_151831CC**
+  water_mesh_wave_update.
+- Breadth (hand C, NM): func_1509D274, func_151AF820, func_1507E8E0 (void under NM, ADE10 prototype), func_15088760,
+  func_15088360, func_150F58C0, func_150637B4, func_15007558, func_150B7B9C, func_15088B08 (table in P192.md).
+- game_981E0.c: `s32 func_151AABC4(struct127 *, s32);` under NON_MATCHING (coordinator request).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1324 NM bodies), selftest 65/65, progress_nm 5318/5915 (89.9%), C bytes 73.5%. No difftest processes left.
+
+## Next steps (from P192)
+
+1. Browser: P192.md section 3 (level 0x29 moving scenery / animated textures / water, text queue 'L' records).
+2. Remaining level 0x29 stubs in port files: func_1511ED08 (308), func_15118F2C (350), func_151184BC (652) (game_eu_142E40).
+3. Breadth: p192/asmlist.py smallest first (next: func_15088130 67, func_150DBA98 70, func_15080900 72, func_150DE8AC 75,
+   func_150E7B20 76, func_150D7B6C 77); P138 / P141 leftovers.
+4. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged).
+
+## State (session P190, 2026-10-24). Details: `docs/port/sessions/P190.md`
+
+- **func_150A4FE4** obj_floor_mesh_update (game_eu_D1760, 295, Rare hand asm): readable hand C (NM) verified with the
+  new whole-function harness `tools/port/difftest/nmasm_objmesh4FE4.py` (VR4300 ref vs NM ELF, allocate_memory / free
+  as a shared MIPS stub with a log in RDRAM): 860 trials EQUIV, NM mutants 24 killed + 1 crash + 1 equivalent
+  (`docs/port/sessions/p190/mutnm.sh` runs mutants through a harness).
+- **func_15189F70** area_drift_emitter_update (game_eu_1B7680, 303; D_8008B848 type 0x1A update): EQUIV random + 17
+  setups, mutants 32 / 32.
+- Breadth (hand C, NM, EQUIV + setups + mutants): func_151F9150 mp3util_get_bits (hand asm), func_150E394C,
+  func_151A4B40 (prototype now void), func_15063920, func_151CC784, func_1508CE28 (table in P190.md).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1309 NM bodies), selftest 65/65, progress_nm 5303/5915 (89.7%), C bytes 73.3%. No difftest processes left.
+- game_eu_1CCD10.c / game_eu_1D7790.c moved to port-b (not touched; added to p190/asmlist.py's forbid list).
+
+## Next steps (from P190)
+
+1. Browser: P190.md section 4 (area 3 floors on moving objects, drifting particles, mp3 music / speech).
+2. Breadth: p190/asmlist.py smallest first (next: func_1509D274 49, func_151AF820 50, func_1507E8E0 50, func_15088760 /
+   func_15088360 (B37F0), func_150F58C0, func_150637B4, func_15007558, func_150B7B9C); P138 / P141 leftovers.
+3. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged from P182).
+4. Other hand-asm functions with C callers can follow the nmasm_objmesh4FE4.py + mutnm.sh pattern.
 
 ## State (session P189, 2026-10-24, port-web). Details: `docs/port/sessions/P189.md`
 
@@ -50,6 +137,27 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. Bisect why the noev respawn after the death at 925 now lands in water (merged P169-P182).
 4. Torch flames on level 0x29: log emitter creations (func_151407D0 / func_151DA6F8) on level 0x29.
 
+## State (session P187, 2026-10-24). Details: `docs/port/sessions/P187.md`
+
+- Hand C (NM), difftest EQUIV + setups + mutants (table in P187.md): the three port stubs behind func_1506B04C's
+  handlers **func_151B78D8** obj_attached_glow_spawn (game_eu_1E40E0; D_8008FF30 = 2 C handlers with matching
+  `s32 (u8 *, void *)`), **func_151BBBCC** shot_impact_effects (game_eu_1E7CC0; keyframe tables as `static const`),
+  **func_151043C0** ground_explosion (game_eu_131BD0); level 0x29 breadth **func_1514D3B0** obj_state_event_dispatch
+  (game_eu_17A800), **func_15192150** obj_dust_effect_spawn + **func_151925C4** obj_dust_effect (game_eu_1BF960,
+  producer with its caller), **func_1000A750** path_sound_pan_volume (init_A420).
+- Stubs still reached through func_1506B04C: func_151D3A30 (port-b), func_151522DC (port-b, from func_151BBBCC).
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0), protocheck 0
+  (1302 NM bodies), selftest 65/65, progress_nm 5296/5915 (89.5%), C bytes 73.1%. No difftest processes left.
+
+## Next steps (from P187)
+
+1. Browser: P187.md section 5 (effect handlers 2 / 11 / 12 / 14, level 0x29 state events, dust, path sounds).
+2. func_15189F70 (game_eu_1B7680, 303; level 0x29 list, no C caller so asmlist.py skips it).
+3. func_150A4FE4 (game_eu_D1760, 295) is hand-written asm: needs an nmasm whole-function harness (or the asm2c
+   stopgap by user decision), not hand C.
+4. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged from P182).
+5. Breadth: p187/asmlist.py (smallest first); P138 / P141 leftovers.
+
 ## State (session P185, 2026-10-24, port-web). Details: `docs/port/sessions/P185.md`
 
 - Merged port f9c552b (P169-P182) and port-b 4c2d5a5 (P170-P181): HANDOFF.md conflicts only. After each: verify_all OK,
@@ -73,6 +181,27 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
    func_151ACBCC (1D9C00), func_1519FD60, func_151AABC4 (level 0x29 at 25889).
 3. func_15078A60 (path follow), func_15116F34, func_151184BC, func_150D0C40, func_15008E10, func_151831CC.
 4. Green ground decal / unlit torches on level 0x29; DL stubs func_15113D54 / func_15112074.
+## State (session P184, 2026-10-24). Details: `docs/port/sessions/P184.md`
+
+- Hand C (NM), difftest EQUIV + setups + mutants (table in P184.md): **func_15170A70** spark_particle_spawn
+  (game_eu_19B180; the only stub the P182 ambient emitters reached), **func_1506B04C** obj_effect_dispatch
+  (game_eu_981C0; table D_800864B0 = 15 C handlers; func_1506AEA0 now takes the dispatch arguments `(u8 *, void *)`),
+  **func_150D0C40** level_ambient_cue_update (game_eu_FE450, level table D_8008D0A4[14]), **func_15008E10**
+  area_points_alloc (game_362B0), **func_150611E8** path_face_nearest_segment (game_83300; browser P178 level 0x29 path
+  reader; NM hoisted prototype added), **func_151B76F4** obj_smoke_puff_spawn (game_eu_1E40E0, effect handler 8).
+- Stubs still reached through func_1506B04C's C handlers: func_151BBBCC, func_151D3A30 (port-b), func_151B78D8,
+  func_151043C0.
+- Checks: verify_all OK (code build, check_files, full ROM OK) after the last code edit, NM links (rc 0),
+  protocheck 0 (1295 NM bodies), selftest 65/65, progress_nm 5289/5915 (89.4%), C bytes 72.9%. No difftest processes left.
+
+## Next steps (from P184)
+
+1. Browser: P184.md section 5 (sparks / flare-ups, object effects, level 0x29 cue sounds and path turning).
+2. func_151B78D8 (game_eu_1E40E0, 212): check its D_8008FF30 handler table first, then convert; func_151BBBCC
+   (1E7CC0, 288), func_151043C0 (131BD0, 204): the other stubs behind func_1506B04C (func_151D3A30 is port-b's).
+3. func_1505D1C4 (game_83300) return: coordinate with port-b (unchanged from P182).
+4. Breadth: p184/asmlist.py (skipped: func_150882C4 port-b caller prototype; libultra / hand-written asm).
+5. P138 / P141 leftovers.
 
 ## State (session P182, 2026-10-24). Details: `docs/port/sessions/P182.md`
 

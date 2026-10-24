@@ -105,9 +105,24 @@ void func_150E38C0(u8 *arg0, u8 *arg1, s32 arg2, s16 arg3) {
     func_150E35A0(temp_a0, temp_a1, temp_a2, temp_a0, temp_a1, temp_a2, 0x1A, 10.0f, 0, (*(f32 *)arg0), (*(f32 *)((u8 *)arg0 + 4)), (*(f32 *)((u8 *)arg0 + 8)), arg2, (s32) arg3);
 }
 
+#ifdef NON_MATCHING
+void func_1000E7A0(u32, s32);
+/*
+ * sound_handle_release_cb: P190. Callback that func_150E3994 passes to func_1000FA64: 1 while the handle *handle is
+ * 0, else releases it (func_1000E7A0(2, handle)) and returns 0.
+ */
+s32 func_150E394C(s32 arg0, s32 arg1, s32 *handle, s32 arg3) {
+    if (*handle == 0) {
+        return 1;
+    }
+    func_1000E7A0(2, *handle);
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E394C.s")
 
 extern s32 func_150E394C;
+#endif
 
 s32 func_150E3994(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, f32 arg8) {
     s32 temp_v0;

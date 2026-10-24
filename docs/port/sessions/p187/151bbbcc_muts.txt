@@ -1,0 +1,37 @@
+s/if (obj == 0) {/if (obj != 0) {/
+s/func_15055A2C(0, pos\[0\]/func_15055A2C(1, pos[0]/
+s/pos\[2\], 0);/pos[2], 1);/
+s/dir\[1\] = target\[1\] - pos\[1\];/dir[1] = target[1] - pos[2];/
+s/func_151C0BA0(pos, arg3, arg4);/func_151C0BA0(pos, arg3, 0);/
+s/func_151BC494((u8 \*) pos, arg3/func_151BC494((u8 *) target, arg3/
+s/dir\[1\], dir\[2\], 0, \&hit/dir[2], dir[1], 0, \&hit/
+s/NULL, \&hitObj, 0, 0.0f) == 0/NULL, \&hitObj, 0, 1.0f) == 0/
+s/if (func_15145C90(hitObj) != 0)/if (func_15145C90(hitObj) == 0)/
+s/(s32) hitPos, arg3, arg4);/(s32) hitPos, 0, arg4);/
+s/ax2\[1\] < 0.0f/ax2[1] <= 0.0f/
+s/ax2\[1\] < 0.0f/ax2[0] < 0.0f/
+s/ny = -dir\[1\];/ny = dir[1];/
+s/spray.dir\[2\] = nz;/spray.dir[2] = ny;/
+s/spray.hit = hit;/spray.range = 0.0f;/
+s/spray.range = 494.0f;/spray.range = 495.0f;/
+s/spray.p.u4 = 4;/spray.p.u4 = 5;/
+s/spray.p.pos\[1\] = hitPos\[1\];/spray.p.pos[1] = hitPos[0];/
+s/spray.p.f\[1\] = 0.0252f;/spray.p.f[1] = 0.0251f;/
+s/spray.p.f\[5\] = 414.0f;/spray.p.f[5] = 413.0f;/
+s/spray.p.u28 = 3;/spray.p.u28 = 2;/
+s/spray.p.u30\[2\] = 0.39100003f;/spray.p.u30[2] = 0.39f;/
+s/spray.p.s\[4\] = 0xC;/spray.p.s[4] = 0xD;/
+s/spray.p.u48 = 0;/spray.p.u48 = 1;/
+s/func_1515016C(\&spray, arg3, arg4);/func_1515016C(\&spray, arg3, 0);/
+s/flash.u4 = 6;/flash.u4 = 7;/
+s/flash.pos\[2\] = hitPos\[2\];/flash.pos[2] = hitPos[1];/
+s/flash.dir\[0\] = nx;/flash.dir[0] = ny;/
+s/flash.hit = hit;/flash.u0 = 6;/
+s/flash.u34 = 456.0f;/flash.u34 = 455.0f;/
+s/flash.u3C = 0.020000001f;/flash.u3C = 0.02f + 1.0f;/
+s/flash.u4A = 0x14;/flash.u4A = 0x15;/
+s/flash.u54 = 21.502f;/flash.u54 = 21.5f;/
+s/0x1D, 0x1E, 0x20 }/0x1D, 0x1F, 0x20 }/
+s/0.097f, 1.0f, 0.2f }/0.097f, 1.0f, 0.25f }/
+s/scales, 9, arg3, arg4);/scales, 8, arg3, arg4);/
+s/i < 9; i++/i < 8; i++/

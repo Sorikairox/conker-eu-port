@@ -1,0 +1,14 @@
+s/if (obj != NULL) {/if (obj == NULL) {/
+s/s.u4 = 0;/s.u4 = 1;/
+s/s.objId = obj\[0x3B\];/s.objId = obj[0x3A];/
+s/s.obj = obj;/s.obj = 0;/
+s/s.u10 = 1;/s.u10 = 2;/
+s/s.offset\[1\] = 0.0f;/s.offset[1] = 1.0f;/
+s/s.u20 = 14.7f;/s.u20 = 14.0f;/
+s/s.u24 = 3.0f;/s.u24 = 2.0f;/
+s/s.u28 = 100;/s.u28 = 101;/
+s/s.u2A = 10;/s.u2A = 11;/
+s/s.u2C = -1;/s.u2C = 1;/
+s/s.u2D = 0;/s.u2D = 1;/
+s/func_1513418C((u8 \*)\&s, 0, arg1, 0);/func_1513418C((u8 *)\&s, 0, arg1, 1);/
+s/func_1513418C((u8 \*)\&s, 0, arg1, 0);/func_1513418C((u8 *)\&s, 0, 0, 0);/

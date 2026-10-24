@@ -1,0 +1,13 @@
+s/handled = 0;/handled = 1;/
+s/(u8 \*) obj + 0x2F4)/(u8 *) obj + 0x2F0)/
+s/node = \*(u8 \*\*) (node + 0x14))/node = *(u8 **) (node + 0x10))/
+s/if (state != \*(s16/if (state == *(s16/
+s/\&\& func_1514DA28/|| func_1514DA28/
+s/(D_8008AF88\[state\] + 4)/(D_8008AF88[state] + 6)/
+s/+ 4), \*(s16 \*) (node + 0x1C)) == 0/+ 4), state) == 0/
+s/) == 0) {/) != 0) {/
+s/idx = \*(s16 \*) D_8008AF88\[\*(s16 \*) (node + 0x1C)\];/idx = *(s16 *) D_8008AF88[state];/
+s/(\*(u8 \*\*) (node + 0x10), arg2, arg3)/(*(u8 **) (node + 0x10), arg3, arg2)/
+s/(node + 0x10), arg2, arg3) != 0;/(node + 0x10), arg2, arg3);/
+s/(node + 0x10), arg2, arg3) != 0;/(node + 0x10), arg2, arg3) == 0;/
+s/handled = D_8008AF04/handled |= D_8008AF04/

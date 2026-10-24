@@ -1,0 +1,42 @@
+s/if (cam == NULL) {/if (cam == (u8 *) 1) {/
+s/band = (D_8009015C \& 0x40) ? 1 : 0;/band = (D_8009015C \& 0x80) ? 1 : 0;/
+s/band = (D_8009015C \& 0x40) ? 1 : 0;/band = 0;/
+s/if ((s8) rec\[0x30\] == 2) {/if ((s8) rec[0x30] >= 2) {/
+s/if (node\[0xE\] != 5 || node\[0xF\] != 2) {/if (node[0xE] != 5) {/
+s/if (node\[0xE\] != 5 || node\[0xF\] != 2) {/if (node[0xF] != 2) {/
+s/            rec\[0x4A\] = i;/            rec[0x4A] = 0;/
+s/            rec\[0x4B\] = i;/            rec[0x4B] = 0;/
+s/for (k = 0; k < 5; k++) {/for (k = 0; k < 4; k++) {/
+s/link = node\[9 + k\];/link = node[10 + k];/
+s/if (link == 0xFF) {/if (link == 0) {/
+s/if (D_800D27C8 == 0) {/if (D_800D27C8 <= 0) {/
+s/\[0xF\] == 3) {/[0xF] == 2) {/
+s/\[0xF\] != 3) {/[0xF] != 2) {/
+s/            break;/            ;/
+s/start = rec\[0x4B\];/start = rec[0x4A];/
+s/prev = rec\[0x4A\];$/prev = 0xFF;/
+s/best = 1.0e9f;/best = 1000.0f;/
+s/next = func_150894F8(cur, 0xFF, prev, band);/next = func_150894F8(cur, 0xFF, prev, 0);/
+s/dz = \*(f32 \*) (player + 0x1C) - \*(s16 \*) (node + 4);/dz = *(f32 *) (player + 0x1C) - *(s16 *) (node + 2);/
+s/            prev = cur;/            prev = next;/
+s/if (d < best) {/if (d <= best) {/
+s/                rec\[0x4A\] = prev;/                rec[0x4A] = next;/
+s/                rec\[0x4B\] = next;/                rec[0x4B] = prev;/
+s/func_1512DAD0(\*(u8 \*\*) (player + 0x318), 5, NULL);/func_1512DAD0(*(u8 **) (player + 0x318), 6, NULL);/
+s/        rec\[0x30\] = 3;/        rec[0x30] = 2;/
+s/dB = dx \* dx + dz \* dz;/dB = dx * dx;/
+s/if (dB < d) {/if (dB <= d) {/
+s/rec\[0x4B\] = func_150894F8(rec\[0x4A\], 0xFF, prev, band);/rec[0x4B] = func_150894F8(rec[0x4A], 0xFF, 0xFF, band);/
+s/        node = b;/        ;/
+s/        d = dB;/        ;/
+s/dy = \*(f32 \*) (player + 0x18) - \*(s16 \*) (node + 2);/dy = *(f32 *) (player + 0x18) - *(s16 *) (node + 4);/
+s/dist = sqrtf(dy \* dy + d);/dist = sqrtf(d);/
+s/    dy \/= dist;/    ;/
+s/if (1000.0f < dist) {/if (900.0f < dist) {/
+s/\*(f32 \*) (rec + 0x64) = \*(f32 \*) (player + 0x18) - dy \* dist;/*(f32 *) (rec + 0x64) = *(f32 *) (player + 0x18) + dy * dist;/
+s/\*(f32 \*) (rec + 0x68) = \*(f32 \*) (player + 0x1C) - dz \* dist;/*(f32 *) (rec + 0x68) = *(f32 *) (player + 0x1C) - dx * dist;/
+s/    \*(f32 \*) (rec + 0x80) = 30.0f;/    *(f32 *) (rec + 0x80) = 20.0f;/
+s/    \*(s32 \*) (rec + 0x50) = 0;/    ;/
+s/7, rec + 0x4C);/7, rec + 0x50);/
+s/    \*(f32 \*) (cam + 0x1A8) = 30.0f;/    ;/
+s/    \*(f32 \*) (rec + 0x74) = \*(f32 \*) (player + 0x1C);/    ;/

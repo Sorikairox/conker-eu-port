@@ -12,7 +12,7 @@ void func_15010780(void) {
 #ifdef NON_MATCHING
 s32 memcpy(s32, s16 *, s32);
 extern s32 *D_800E0D64;
-extern s32 func_150DE8AC;
+s32 func_150DE8AC(s32, s32, s32); // hit callback (C since P196; was declared as data)
 
 void func_15010880(void) {
     struct {
@@ -24,7 +24,7 @@ void func_15010880(void) {
     struct260 *temp_v0;
 
     func_15177410(0x10U, 0xE9U, -0x1B5, 0x463, -0xCBF, 90.0f, 0x3A98U, 36.0f, 0x4D, 0xF, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU, 0x7FU);
-    D_800E0D64 = &func_150DE8AC;
+    D_800E0D64 = (s32 *) func_150DE8AC;
     sp.u54 = 0;
     sp.u58 = D_800D34B8 + 0xEA0;
     sp.u5C = D_800D34B8 + 0xED4;

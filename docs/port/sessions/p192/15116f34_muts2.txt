@@ -1,0 +1,3 @@
+s/if (pos\[i\] < target\[i\]) {/if (pos[i] < target[i] - 20) {/
+s/^                if (target\[i\] < pos\[i\]) {/                if (target[i] < pos[i] - 40) {/
+s/^            if (target\[i\] < pos\[i\]) {/            if (target[i] < pos[i] - 1) {/

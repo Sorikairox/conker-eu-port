@@ -1,0 +1,1 @@
+s/if (link == 0xFF || link == prev) {/if (link == 0xFF) {/ % skip_prev_band

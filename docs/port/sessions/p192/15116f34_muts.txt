@@ -1,0 +1,17 @@
+s/s32 kind = bits >> 10;/s32 kind = bits >> 11;/
+s/target\[2\] == pos\[2\]) {/target[1] == pos[2]) {/
+s/        delta\[2\] = 0;/        delta[2] = 1;/
+s/        delta\[0\] = delta\[2\];//
+s/stop_sfx, 0x5DC0, 0x7D0, 0xFA0, 4);/stop_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);/
+s/D_80089600\[kind\].stop_sfx != 0/D_80089600[kind].stop_sfx > 0/
+s/            \*(u16 \*)(obj + 0x74) = 0;/            *(u16 *)(obj + 0x74) = 1;/
+s/if (kind != 0 \&\& D_80089600\[kind\].near_sfx != 0) {/if (kind != 0 \&\& D_80089600[kind].near_sfx == 1) {/
+s/\*(u16 \*)(obj + 0x74) == 0 \&\& D_80089600/*(u16 *)(obj + 0x74) != 1 \&\& D_80089600/
+s/move_sfx, 0x5DC0, 0x7D0, 0xFA0, 0);/move_sfx, 0x5DC0, 0x7D0, 0xFA1, 0);/
+s/(bits \& 0xFFFF03FF)/(bits \& 0x3FF)/
+s/D_800BE9E4) >> 1;/D_800BE9E4) >> 2;/
+s/if (target\[i\] < pos\[i\]) {/if (target[i] <= pos[i]) {/
+s/if (pos\[i\] < target\[i\]) {/if (pos[i] <= target[i] - 1) {/
+s/if (target\[i\] < pos\[i\]) {$/if (target[i] < pos[i] - 1) {/
+s/delta\[i\] = pos\[i\] - delta\[i\];/delta[i] = delta[i] - pos[i];/
+s/for (i = 0; i < 3; i++) {/for (i = 0; i < 2; i++) {/
