@@ -327,7 +327,101 @@ s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CDAAC.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_1514373C(f32, f32, f32 *, f32 *);
+void func_15152DE4(u8 *arg0, u8 arg1, s32 arg2);
+extern f32 D_80088C14[5];   /* base angles (radians) of the five shooting-star lanes */
+extern f32 D_800A0B24, D_800A0B28, D_800A0B2C;
+extern f64 D_800A0B30, D_800A0B38;
+extern f32 D_800A0B40, D_800A0B44, D_800A0B48, D_800A0B4C, D_800A0B50, D_800A0B54, D_800A0B58, D_800A0B5C;
+extern f32 D_800A0B60, D_800A0B64, D_800A0B68, D_800A0B6C, D_800A0B70;
+
+// shooting_star_sky_update: sky effect object. Its accumulator (+0x28) grows by D_800A0B24 * frame time * rate
+// (+0x2C); every whole unit picks one of the five lane angles D_80088C14 (+ random * D_800A0B40) and, when that
+// direction is within D_800A0B48 of the current camera heading (camera +0x380 - 180, wrapped to 0..360, times
+// D_800A0B44 = degrees to radians), spawns a streak (func_15152DE4) placed by func_1514373C at a random distance
+// (D_800A0B30 + random * D_800A0B38) and height (500 + D_800A0B50 + random * D_800A0B4C).
+void func_150CDD08(u8 *obj) {
+    struct {
+        s32 type;
+        s32 life;
+        f32 x;
+        f32 y;
+        f32 z;
+        s16 rot;
+        s16 unk16;
+        s16 unk18;
+        s16 unk1A;
+        f32 unk1C;
+        f32 unk20;
+        f32 unk24;
+        f32 unk28;
+        f32 unk2C;
+        u8 unk30;
+        u8 pad31;
+        s16 unk32;
+        s16 unk34;
+        u8 pad36[2];
+        f32 unk38;
+        f32 unk3C;
+        f32 unk40;
+        f32 unk44;
+        f32 unk48;
+    } spr;
+    f32 lanes[5];
+    f32 ang, h, r;
+    u8 k;
+
+    *(f32 *) (obj + 0x28) += D_800A0B24 * D_800BE9A4 * *(f32 *) (obj + 0x2C);
+    if (!(1.0f < *(f32 *) (obj + 0x28))) {
+        return;
+    }
+    spr.unk18 = -0x17;
+    spr.unk1A = 6;
+    spr.unk30 = 0;
+    spr.unk24 = D_800A0B28;
+    spr.unk48 = D_800A0B2C;
+    do {
+        lanes[0] = D_80088C14[0];
+        lanes[1] = D_80088C14[1];
+        lanes[2] = D_80088C14[2];
+        lanes[3] = D_80088C14[3];
+        lanes[4] = D_80088C14[4];
+        k = (u32) func_150ADA20() % 5;
+        ang = func_150ADA68() * D_800A0B40 + lanes[k];
+        h = *(f32 *) ((u8 *) D_800DBFF0 + D_80082FA4 * 0x9A0 + 0x380) - 180.0f;
+        while (360.0f < h) {
+            h -= 360.0f;
+        }
+        while (h < 0.0f) {
+            h += 360.0f;
+        }
+        if (fabsf(ang - h * D_800A0B44) < D_800A0B48) {
+            r = func_150ADA68();
+            spr.y = r * D_800A0B4C + D_800A0B50 + 500.0f;
+            func_1514373C(ang, (f32) (r * D_800A0B38 + D_800A0B30), &spr.x, &spr.z);
+            spr.type = 0xF;
+            spr.life = 0x14;
+            spr.unk16 = 0xC;
+            spr.unk32 = 0x226;
+            spr.unk34 = 0;
+            spr.unk3C = 15.0f;
+            spr.unk38 = 15.0f;
+            spr.unk44 = D_800A0B54;
+            spr.unk40 = D_800A0B54;
+            spr.unk1C = D_800A0B64;
+            spr.unk20 = D_800A0B68;
+            spr.unk28 = D_800A0B6C;
+            spr.unk2C = D_800A0B70;
+            spr.rot = (s32) (((ang + D_800A0B58) - D_800A0B5C) * D_800A0B60);
+            func_15152DE4((u8 *) &spr, obj[0xC], obj[1]);
+        }
+        *(f32 *) (obj + 0x28) -= 1.0f;
+    } while (1.0f < *(f32 *) (obj + 0x28));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CDD08.s")
+#endif
 
 void func_150CE07C(s32 arg0) {
     u8 *temp_v1;

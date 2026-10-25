@@ -1,0 +1,39 @@
+\#^    while (end == 0 #s/(s8) 0xDF/(s8) 0xDE/
+\#^    while (end == 0 #s/(u32) dl < end/(u32) dl <= end/
+\#^                bad = func_150408CC#s/bad = //
+\#^                addr = #s/0xFFFFFF/0x7FFFFF/
+\#^                addr = #s/0xF\]/0x7]/
+\#^                addr = #s/| 0x80000000/| 0xA0000000/
+\#^                if (++D_800C68A1 == 20) {#s/20/21/
+\#^                    DL_TRAP();$#s/DL_TRAP();/;/
+\#^                if (addr >= 0x80000001 #s/0x80000001/0x80000000/
+\#^                if (addr >= 0x80000001 #s/addr < 0xA0000000/addr <= 0xA0000000/
+\#^                if (addr >= 0x80000001 #s/addr \& 7/addr \& 3/
+\#^                    func_150403C8((void \*) addr, 0, #s/(s32) dl/0/
+\#^                    D_800C68A1--;#s/--/++/
+\#^                if (D_800C68A1 != 0) {#s/!= 0/> 1/
+\#^                D_800C68A0 = 0;#s/0;/1;/
+\#^            case 0xF6:#s/case 0xF6://
+\#^            case 7:#s/case 7://
+\#^            case 16: case 17#s/case 16: //
+\#^            case 24: case 25#s/case 31://
+\#^                bad = func_1504082C(dl);#s/bad = //
+\#^                bad = func_15040754#s/bad = //
+\#^                D_800848B0 = dl\[1\];#s/dl\[1\]/dl[0]/
+\#^            case 0xFF:#s/case 0xFF://
+\#^            case 0xEB:#s/case 0xEB://
+\#^            case 0xF9:#s/case 0xF9://
+\#^                if (((dl\[0\] >> 16) #s/== 6/== 5/
+\#^                    D_800C6860\[(s32) #s/\/ 4/\/ 8/
+\#^                    D_800C6860\[(s32) #s/= dl\[1\]/= dl[0]/
+\#^            case 0: case 2: case 3: case 4: case 8:#s/case 4: //
+\#^            case 0xD3: case#s/case 0xD3: //
+\#^            case 0xE6: case 0xE8#s/case 0xE8: //
+\#^                DL_TRAP();$#s/DL_TRAP();/;/
+\#^        if (needSync \&\& D_800C68A0) {#s/needSync \&\& //
+\#^            D_800C68A0 = 0;#s/0;/2;/
+\#^        if (bad) {#s/bad/!bad/
+\#^        dl += 2;#s/2/1/
+\@^#define DL_TRAP() @s/0x0C00005B/0x0C00005A/
+\@^#define DL_STOP(c) @s/func_15040CC8((u8 \*) (c)), //
+\#^                    D_800BE9C0 = 1 - D_800BE9C0)#s/1 - D_800BE9C0/D_800BE9C0/

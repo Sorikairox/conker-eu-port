@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P283 (port-d, group D) (session P283, 2026-10-26). Details: `docs/port/sessions/P283.md`
+
+Hand C (NM), registry rows `P283`, setups / mutants in docs/port/sessions/p283: func_15036860 vertex_anchor_follow,
+func_150403C8 dl_validate, func_150BABE0 foot_splash_effect, func_151C5280 gun_muzzle_smoke_spawn (+ NM `static
+const` copies of its rodata in game_eu_1F3040 and game_eu_51190), func_151A3D70 trail_emitter_update, func_15104BB4
+floor_height_below, func_150F3294 drip_emitter_update, func_150CDD08 shooting_star_sky_update. Survivors are
+equivalent ones (see P283.md); 2 func_150403C8 segment-mask mutants UNSURE. Lesson: IDO puts scalar `static const
+f32` in .data (discarded by the NM link): use 1-element arrays for float rodata copies.
+
+## Next steps (from P283, group D left)
+1. Next smallest group-D asm: func_150E4EA8 / func_150E4AD0 (1122E0, own late_rodata), func_150EBEC0, func_1515A178,
+   func_151229B0, func_150BF71C, func_150C8300, func_150BFF7C, then the 370+ rows.
+2. func_150FBA40 (129250) is "Handwritten function" (sd / dsll32 / $gp): group E, with func_150A80F0 (D5900).
+3. Table D_80089CD4 mixed arities [5, 6] (from P278) still open.
+
 ## P278 (port-d, group D) (session P278, 2026-10-25). Details: `docs/port/sessions/P278.md`
 
 Hand C (NM), registry rows `P278`, setups / mutants in docs/port/sessions/p278 (all mutants killed): func_150DBF60

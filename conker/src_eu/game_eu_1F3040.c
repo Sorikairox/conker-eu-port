@@ -3,11 +3,92 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C5280.s")
+#ifdef NON_MATCHING
+/* func_151C5280's .s owned this rodata (bone-space muzzle points); the NM link drops it, so NM gets copies.
+   D_800AAE7C is the second point of D_800AAE70 (read by func_151C5B38); game_eu_51190 has its own copy. */
+static const f32 D_800AAE70[6] = { -113.828796f, -14.0823936f, 14.5422001f, -124.648605f, -14.0823936f, 14.5422001f };
+static const f32 D_800AAE7C[3] = { -124.648605f, -14.0823936f, 14.5422001f };
+static const f32 D_800AAE88[3] = { 7.31999874f, -14.0823936f, 4.54220057f };
+static const f32 D_800AAE94[1] = { 0.00100000005f }; /* 0x3A83126F (arrays: IDO puts scalar float statics in .data) */
+static const f32 D_800AAE98[1] = { 0.00333333341f }; /* 0x3B5A740E */
 
-s32 func_151030B8(s32, s32, f32 *, f32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
+u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
+s32 func_1514654C(u8 *, u8 *, s32, f32 **, f32 **, s32);
+void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4);
+void func_151C5C54(u8 *arg0, u8 arg1, s32 arg2);
+u8 *func_151C284C(u8 *arg0, u8 *arg1, u8 *arg2, u8 *arg3, u8 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
+                  f32 argA, u8 argB, u8 *argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, s8 arg13,
+                  s32 arg14, f32 arg15, u8 arg16, s8 arg17, s32 arg18, u8 arg19, s32 arg1A);
+#else
 extern f32 D_800AAE70[];
 extern f32 D_800AAE7C[];
+#endif
+
+#ifdef NON_MATCHING
+// gun_muzzle_smoke_spawn: smoke trail from object `obj`'s gun. Direction = the object's facing vector
+// (func_15145740) * 0.001. With a model (+0x1D4) the two muzzle points D_800AAE70 / D_800AAE88 are taken through
+// attachment 0x46 (func_15031C4C / func_1514654C; bail out when either fails), then sparks (func_151C5C54) and, on a
+// random odd value, a flash (func_151C5B38); without a model the start is the object position (+0x14) raised by 106
+// and pushed 120 along the direction, the end 82 back. Then the smoke stream func_151C284C (alpha 0xFF with a model,
+// else 0x80; mode -1 when D_800BE616 is set, else 2). `flag` / `arg2` are passed on.
+void func_151C5280(u8 *obj, u8 flag, s32 arg2) {
+    f32 *in[2];
+    f32 *out[2];
+    f32 a, b;
+    u32 r;
+    f32 start[3];
+    f32 end[3];
+    f32 dir[3];
+    f32 side[3];
+    u8 *att;
+
+    if (obj == NULL) {
+        return;
+    }
+    func_15145740((struct127 *) obj, (s32) dir, (s32) side, 0, 0.0f);
+    dir[0] *= D_800AAE94[0];
+    dir[1] *= D_800AAE94[0];
+    dir[2] *= D_800AAE94[0];
+    if (*(u8 **) (obj + 0x1D4) != NULL) {
+        in[0] = (f32 *) D_800AAE70;
+        in[1] = (f32 *) D_800AAE88;
+        out[0] = start;
+        out[1] = end;
+        att = func_15031C4C(obj, 0x46, 0);
+        if (att == NULL) {
+            return;
+        }
+        if (func_1514654C(obj, att, 0, in, out, 2) == 0) {
+            return;
+        }
+        func_151C5C54((u8 *) start, flag, arg2);
+        if (func_150ADA20() & 1) {
+            func_151C5B38((s32) obj, (s32) start, 0x46, flag, arg2);
+        }
+    } else {
+        start[0] = *(f32 *) (obj + 0x14);
+        start[1] = *(f32 *) (obj + 0x18) + 106.0f;
+        start[2] = *(f32 *) (obj + 0x1C);
+        end[0] = dir[0] * -82.0f + start[0];
+        end[1] = dir[1] * -82.0f + start[1];
+        end[2] = dir[2] * -82.0f + start[2];
+        start[0] -= dir[0] * -120.0f;
+        start[1] -= dir[1] * -120.0f;
+        start[2] -= dir[2] * -120.0f;
+    }
+    a = func_150ADA68();
+    b = func_150ADA68();
+    r = func_150ADA20();
+    func_151C284C((u8 *) start, NULL, (u8 *) end, (u8 *) dir, 1, 0, 300.0f, D_800AAE98[0], a * 10.0f + 25.0f,
+                  b * 150.0f + 400.0f, 80.0f, r % 56 + 200, obj, 1, 1, 0, *(u8 **) (obj + 0x1D4) != NULL ? 0xFF : 0x80,
+                  0, 1, 0, 0x1A, 0.0f, 0xFF, D_800BE616 ? -1 : 2, 0, flag, arg2);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C5280.s")
+#endif
+
+s32 func_151030B8(s32, s32, f32 *, f32 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
 
 void func_151C5B38(s32 arg0, s32 arg1, s16 arg2, u8 arg3, s32 arg4) {
     f32 s[2];

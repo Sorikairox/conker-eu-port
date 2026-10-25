@@ -18,7 +18,131 @@ void func_15040350(void *arg0, u32 arg1) {
 }
 
 // contains jump relative
+#ifdef NON_MATCHING
+void func_150ADC50(void);
+void func_10008090(void);
+void func_15040CC8(u8 *arg0);
+s32 func_15040754(struct148 *arg0);
+
+/* debug trap: error code 0x0C00005B in D_8003C8E0, then the break handler */
+#define DL_TRAP() (D_8003C8E0 = 0x0C00005B, func_150ADC50())
+/* trap, dump the command (func_15040CC8) and stop in func_10008090 with the frame index D_800BE9C0 flipped */
+#define DL_STOP(c) (func_15040CC8((u8 *) (c)), DL_TRAP(), D_800BE9C0 = 1 - D_800BE9C0, func_10008090(), \
+                    D_800BE9C0 = 1 - D_800BE9C0)
+
+// dl_validate: debug walk over a display list of 8-byte commands until `end` (or, with end 0, until G_ENDDL 0xDF),
+// following G_DL (0xDE) branches through the segment table D_800C6860 (at most 20 deep, target must be a cached
+// 8-aligned KSEG0 address) and tracking G_MOVEWORD segment writes (index 6) and G_SETTIMG (D_800848B0). Primitives
+// (0xE4 / 0xE5 / 0xF6, 1, 5, 6, 7, 0x10-0x1F) mark D_800C68A0 "drawn since pipe sync", G_RDPPIPESYNC clears it; an
+// RDP state command (0xE2 / 0xE3 / 0xEA-0xEE / 0xF7-0xF9 / 0xFB-0xFF) while it is set, a failed command check
+// (func_150408CC / func_1504082C / func_15040754) or a bad branch stops in the debugger; unknown opcodes trap.
+void func_150403C8(void *list, u32 end, s32 parent) {
+    u32 *dl = list;
+    s32 bad = 0;
+    s32 needSync;
+    u32 w1;
+    u32 addr;
+
+    while (end == 0 ? *(s8 *) dl != (s8) 0xDF : (u32) dl < end) {
+        needSync = 0;
+        switch (*(u8 *) dl) {
+            case 0xDE:
+                w1 = dl[1];
+                bad = func_150408CC((struct148 *) dl);
+                addr = ((w1 & 0xFFFFFF) + D_800C6860[(w1 >> 24) & 0xF]) | 0x80000000;
+                if (++D_800C68A1 == 20) {
+                    func_15040CC8((u8 *) dl);
+                    DL_TRAP();
+                }
+                if (addr >= 0x80000001 && addr < 0xA0000000 && !(addr & 7)) {
+                    func_150403C8((void *) addr, 0, (s32) dl);
+                } else {
+                    DL_STOP(dl);
+                }
+                if (D_800C68A1 != 0) {
+                    D_800C68A1--;
+                } else {
+                    DL_TRAP();
+                    D_800BE9C0 = 1 - D_800BE9C0;
+                    func_10008090();
+                    D_800BE9C0 = 1 - D_800BE9C0;
+                }
+                break;
+            case 0xE7:
+                D_800C68A0 = 0;
+                break;
+            case 0xE4:
+            case 0xE5:
+            case 0xF6:
+            case 6:
+            case 7:
+            case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
+            case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31:
+                D_800C68A0 = 1;
+                break;
+            case 5:
+                bad = func_1504082C(dl);
+                D_800C68A0 = 1;
+                break;
+            case 1:
+                bad = func_15040754((struct148 *) dl);
+                break;
+            case 0xFD:
+                D_800848B0 = dl[1];
+                break;
+            case 0xFF:
+            case 0xE2:
+            case 0xE3:
+            case 0xEC:
+            case 0xED:
+            case 0xEE:
+            case 0xF7:
+            case 0xF8:
+            case 0xF9:
+            case 0xFB:
+            case 0xFC:
+            case 0xFE:
+            case 0xEA:
+            case 0xEB:
+                needSync = 1;
+                break;
+            case 0xDB:
+                if (((dl[0] >> 16) & 0xFF) == 6) {
+                    D_800C6860[(s32) (dl[0] & 0xFFFF) / 4] = dl[1];
+                }
+                break;
+            case 0xD3: case 0xD4: case 0xD5: case 0xD6:
+            case 0xD7: case 0xD8: case 0xD9: case 0xDA:
+            case 0xDC: case 0xDD: case 0xDF: case 0xE0: case 0xE1:
+            case 0xE6: case 0xE8: case 0xE9:
+            case 0xEF: case 0xF0: case 0xF1: case 0xF2: case 0xF3:
+            case 0xF4: case 0xF5: case 0xFA:
+            case 0: case 2: case 3: case 4: case 8:
+                break;
+            default:
+                DL_TRAP();
+                break;
+        }
+        if (needSync && D_800C68A0) {
+            func_15040CC8((u8 *) dl);
+            D_800C68A0 = 0;
+            DL_TRAP();
+            D_800BE9C0 = 1 - D_800BE9C0;
+            func_10008090();
+            D_800BE9C0 = 1 - D_800BE9C0;
+        }
+        if (bad) {
+            bad = 0;
+            DL_STOP(dl);
+        }
+        dl += 2;
+    }
+}
+#undef DL_STOP
+#undef DL_TRAP
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_150403C8.s")
+#endif
 
 s32 func_1504072C(s32 arg0) {
     if ((arg0 & 7) != 0) {

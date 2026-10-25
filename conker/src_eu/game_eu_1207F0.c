@@ -75,7 +75,159 @@ void func_150F320C(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_1502ED88(u8 *, s32, s32, s32, s32, s32, s32);
+void func_15145EA4(f32 **, f32 **, void *, s32);
+s32 func_15146078(f32 *, s32 *, s32 *);
+void *func_1513D2F0(void *arg0, s32 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7, s32 arg8, s32 arg9,
+                    u8 argA, s32 argB);
+extern u8 D_800A1D2C[];  /* second bone-space point (after D_800A1D20) */
+extern f32 D_800A1D38;   /* drops per frame unit */
+extern f32 D_800A1D3C;
+
+// drip_emitter_update: object update of a drip emitter (record at +0x28: owner, +4 owner id, +5 last owner
+// state, +8 f32 accumulator, +0xC s8 drops left). Stops when the cutscene flag D_800C35EA is 1; ends the object
+// (+0xE = -1) when the owner is gone or its id changed. A new non-zero owner state (+0x222) refills 3 drops; while
+// the state is set, func_1502ED88 runs on object D_800CC2D0[state]. With a model, the accumulator grows by
+// D_800A1D38 * frame time and every whole unit drops one: the line between the bone points D_800A1D20 / D_800A1D2C
+// (bone matrix +0x3C0) is probed (func_15146078) and a drop sprite (func_1513D2F0, template D_800A4AA0, size
+// 60..100, alpha 0x34-byte trail record copied to +0x110) is spawned at the first point.
+void func_150F3294(u8 *obj) {
+    struct {
+        u8 *owner;
+        u8 id;
+        u8 pad5[3];
+        f32 t;
+        f32 size;
+        f32 unk10;
+        f32 speed;
+        f32 accel;
+        s32 hit[3];
+        s32 normal[3];
+    } trail;
+    struct {
+        u8 type;
+        u8 unk1;
+        s16 tex;
+        s16 life;
+        u8 pad6[2];
+        s32 unk8;
+        s32 unkC;
+        u8 col[4];
+        f32 unk14;
+        f32 unk18;
+        f32 pos[3];
+        s32 unk28[3];
+        f32 scale[3];
+        s32 unk40;
+        u8 alpha;
+        u8 unk45;
+        u8 unk46;
+        u8 unk47;
+        s32 unk48;
+        u8 unk4C;
+        u8 pad4D[3];
+        s32 unk50;
+        s16 unk54;
+        s16 unk56;
+    } spr;
+    f32 *in[2];
+    f32 *out[2];
+    f32 dir[3];
+    u8 *st = obj + 0x28;
+    u8 *owner;
+    u8 state;
+    void *p;
+
+    if (D_800C35EA == 1) {
+        return;
+    }
+    owner = *(u8 **) st;
+    if (*(s32 *) owner == 0 || st[4] != owner[0x3B]) {
+        *(s16 *) (obj + 0xE) = -1;
+        return;
+    }
+    state = owner[0x222];
+    if (state != st[5] && state != 0) {
+        st[0xC] = 3;
+        *(f32 *) (st + 8) = 0.0f;
+    }
+    st[5] = owner[0x222];
+    state = owner[0x222];
+    if (state != 0) {
+        func_1502ED88((u8 *) D_800CC2D0 + state * 0x32C, 0xFF, 0, 0, 0x50, 0, 0xF);
+    }
+    if (*(u8 **) (owner + 0x1D4) == NULL) {
+        return;
+    }
+    if (*(s8 *) (st + 0xC) <= 0) {
+        return;
+    }
+    *(f32 *) (st + 8) += D_800A1D38 * D_800BE9A4;
+    if (!(1.0f < *(f32 *) (st + 8))) {
+        return;
+    }
+    do {
+        trail.owner = owner;
+        trail.id = owner[0x3B];
+        trail.t = 0.0f;
+        trail.size = func_150ADA68() * 6.0f + 13.0f;
+        trail.unk10 = D_800A1D3C;
+        trail.speed = func_150ADA68() * 40.0f + 60.0f;
+        trail.accel = trail.speed / (trail.size * trail.size);
+        in[0] = (f32 *) D_800A1D20;
+        in[1] = (f32 *) D_800A1D2C;
+        out[0] = spr.pos;
+        out[1] = dir;
+        func_15145EA4(in, out, *(u8 **) (owner + 0x1D4) + 0x3C0, 2);
+        dir[0] -= spr.pos[0];
+        dir[1] -= spr.pos[1];
+        dir[2] -= spr.pos[2];
+        if (func_15146078(dir, trail.hit, trail.normal) == 0) {
+            return;
+        }
+        spr.alpha = (u32) trail.speed;
+        spr.type = 0x79;
+        spr.unk1 = 0xC;
+        spr.tex = 0x4405;
+        spr.life = 300;
+        spr.unk8 = 0;
+        spr.unkC = 0;
+        spr.col[0] = 0xD5;
+        spr.col[1] = 0xDB;
+        spr.col[2] = 0xFF;
+        spr.col[3] = 0xFF;
+        spr.unk18 = 0.0f;
+        spr.unk14 = 0.0f;
+        spr.unk28[0] = ((s32 *) D_800A5860)[0];
+        spr.unk28[1] = ((s32 *) D_800A5860)[1];
+        spr.unk28[2] = ((s32 *) D_800A5860)[2];
+        spr.scale[0] = 1.0f;
+        spr.scale[1] = 1.0f;
+        spr.scale[2] = 1.0f;
+        spr.unk40 = 0x04EC0000;
+        spr.unk45 = 0xFF;
+        spr.unk46 = 0;
+        spr.unk47 = 6;
+        spr.unk48 = 0;
+        spr.unk4C = 0xFF;
+        spr.unk50 = 0;
+        spr.unk54 = 1;
+        spr.unk56 = 0xFF;
+        p = func_1513D2F0(&spr, (s32) &D_800A4AA0, 0x26, 0, 0, 0x25, 0, 0, 0, 0x34, obj[0xC], obj[1]);
+        if (p != NULL) {
+            memcpy((u8 *) p + 0x110, &trail, 0x34);
+        }
+        *(f32 *) (st + 8) -= 1.0f;
+        (*(s8 *) (st + 0xC))--;
+        if (!(1.0f < *(f32 *) (st + 8))) {
+            return;
+        }
+    } while (*(s8 *) (st + 0xC) > 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3294.s")
+#endif
 
 void func_150F3714(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x28, arg0 + 0x2C, arg0);

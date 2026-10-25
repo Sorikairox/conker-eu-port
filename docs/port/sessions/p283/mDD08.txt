@@ -1,0 +1,32 @@
+\#^    \*(f32 \*) (obj + 0x28) += #s/0x2C/0x30/
+\#^    \*(f32 \*) (obj + 0x28) += #s/D_800A0B24 \* //
+\#^    if (!(1\.0f < \*(f32 \*) (obj + 0x28))) {#s/1\.0f </1.0f <=/
+\#^    spr\.unk18 = -0x17;#s/-0x17/-0x16/
+\#^    spr\.unk24 = D_800A0B28;#s/D_800A0B28/D_800A0B2C/
+\#^    spr\.unk48 = D_800A0B2C;#s/D_800A0B2C/D_800A0B28/
+\#^        lanes\[3\] = D_80088C14\[3\];#s/\[3\];/[2];/
+\#^        k = (u32) func_150ADA20() #s/(u32) //
+\#^        ang = func_150ADA68() \* D_800A0B40 + lanes\[k\];#s/D_800A0B40/D_800A0B44/
+\#^        h = \*(f32 \*) ((u8 \*) D_800DBFF0 #s/0x9A0/0x9A4/
+\#^        h = \*(f32 \*) ((u8 \*) D_800DBFF0 #s/- 180\.0f/- 90.0f/
+\#^        while (360\.0f < h) {#s/360\.0f < h/360.0f <= h/
+\#^            h -= 360\.0f;#s/360/180/
+\#^        while (h < 0\.0f) {#s/h < 0\.0f/h <= 0.0f/
+\#^            h += 360\.0f;#s/360/180/
+\#^        if (fabsf(ang - h \* D_800A0B44) < D_800A0B48) {#s/fabsf(ang - h \* D_800A0B44)/(ang - h * D_800A0B44)/
+\#^        if (fabsf(ang - h \* D_800A0B44) < D_800A0B48) {#s/D_800A0B48/D_800A0B40/
+\#^            spr\.y = r \* D_800A0B4C + D_800A0B50 + 500\.0f;#s/500/400/
+\#^            func_1514373C(ang, #s/D_800A0B38 + D_800A0B30/D_800A0B30 + D_800A0B38/
+\#^            func_1514373C(ang, #s/\&spr\.x, \&spr\.z/\&spr.z, \&spr.x/
+\#^            spr\.type = 0xF;#s/0xF/0xE/
+\#^            spr\.unk16 = 0xC;#s/0xC/0xD/
+\#^            spr\.unk32 = 0x226;#s/0x226/0x225/
+\#^            spr\.unk3C = 15\.0f;#s/15/16/
+\#^            spr\.unk44 = D_800A0B54;#s/D_800A0B54/D_800A0B58/
+\#^            spr\.unk20 = D_800A0B68;#s/D_800A0B68/D_800A0B64/
+\#^            spr\.unk2C = D_800A0B70;#s/D_800A0B70/D_800A0B6C/
+\#^            spr\.rot = #s/- D_800A0B5C/+ D_800A0B5C/
+\#^            spr\.rot = #s/\* D_800A0B60/* D_800A0B5C/
+\#^            func_15152DE4((u8 \*) \&spr, obj\[0xC\], obj\[1\]);#s/obj\[1\]/obj[0xC]/
+\#^        \*(f32 \*) (obj + 0x28) -= 1\.0f;#s/1\.0f/0.5f/
+\#^    } while (1\.0f < \*(f32 \*) (obj + 0x28));#s/1\.0f </0.0f </

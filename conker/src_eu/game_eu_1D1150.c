@@ -189,7 +189,115 @@ s32 func_151A3BCC(TrailObj18 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+void func_151A544C(u8 *);
+struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+/* the .s's late_rodata D_800A9138 is dropped in the NM link */
+static const f32 D_800A9138[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO puts scalar float statics in .data) */
+#endif
+
+#ifdef NON_MATCHING
+// trail_emitter_update: object update of a trail emitter made by func_151A3AB4 (state SB3AB4 at +0x98, ring of 0x18
+// byte trail points at +0x94, position +0x10). Ends (returns 0) when the owner record is gone or its id (+0x3B)
+// changed. The first time (flag 4 in +0x1E) it fetches the start position (func_151A53E4). When the source can no
+// longer be read, the emitter is released (func_151A544C) and a fade record (func_151491F4 type 0x12C, the 0x30
+// spec copied to +0x28) takes over. Otherwise the travelled distance * rate (+0x14) is added to +0x40 and one point
+// is dropped per unit of it, interpolated from the last point to the new position, with the width going from
+// +0x20 + +0x24 * t to +0x20, colour +0x18 / +0x1A and a random-walk shade +0x44; the ring head / count / tail
+// (+0x2E / +0x2C / +0x2D, size +0x25) advance as in func_15147FF0's trail objects.
+s32 func_151A3D70(u8 *obj) {
+    SB3AB4 *st = *(SB3AB4 **) (obj + 0x98);
+    u8 *ring = *(u8 **) (obj + 0x94);
+    u8 *owner = *(u8 **) st;
+    u8 *pt;
+    u8 spec[0x30];
+    struct260 *fade;
+    f32 dx, dy, dz;
+    f32 dist, inv;
+    f32 t, dt;
+    f32 width, dwidth;
+    f32 sx, sy, sz;
+    V33AB4 pos;
+    s32 started = 0;
+
+    if (*(s32 *) owner == 0) {
+        return 0;
+    }
+    if (st->raw[4] != owner[0x3B]) {
+        return 0;
+    }
+    if (!(*(u16 *) (obj + 0x1E) & 4)) {
+        if (func_151A53E4((u8 *) st, obj + 0x10) == 0) {
+            return 1;
+        }
+        started = 1;
+        st->u34 = *(V33AB4 *) (obj + 0x10);
+        *(u16 *) (obj + 0x1E) |= 4;
+    }
+    if (!started && func_151A53E4((u8 *) st, obj + 0x10) == 0) {
+        func_151A544C(obj);
+        memcpy(spec, st, 0x30);
+        fade = func_151491F4(0x12C, -1, 0xA, 0, 5, 0x30, obj[0xC], 0);
+        if (fade != NULL) {
+            memcpy((u8 *) fade + 0x28, spec, 0x30);
+        }
+        return 1;
+    }
+    dx = *(f32 *) (obj + 0x10) - st->u34.x;
+    dy = *(f32 *) (obj + 0x14) - st->u34.y;
+    dz = *(f32 *) (obj + 0x18) - st->u34.z;
+    if (fabsf(dx) > D_800A9138[0] || fabsf(dy) > D_800A9138[0] || fabsf(dz) > D_800A9138[0]) {
+        st->u40 += sqrtf(dx * dx + dy * dy + dz * dz) * *(f32 *) (st->raw + 0x14);
+    }
+    dist = st->u40;
+    if (1.0f < dist) {
+        inv = 1.0f / dist;
+        pos = st->u34;
+        t = st->u48 + D_800BE9A4;
+        dt = t * inv;
+        width = *(f32 *) (st->raw + 0x20) + *(f32 *) (st->raw + 0x24) * t;
+        sx = dx * inv;
+        sy = dy * inv;
+        sz = dz * inv;
+        dwidth = (*(f32 *) (st->raw + 0x20) - width) * inv;
+        do {
+            pt = ring + *(s8 *) (obj + 0x2E) * 0x18;
+            *(V33AB4 *) pt = pos;
+            *(f32 *) (pt + 0xC) = width;
+            *(s16 *) (pt + 0x10) = *(s16 *) (st->raw + 0x18);
+            *(s16 *) (pt + 0x12) = *(s16 *) (st->raw + 0x1A);
+            pt[0x15] = st->u44;
+            st->u44 = st->u44 + st->raw[0x28] + (u32) func_150ADA20() % (st->raw[0x29] + 1);
+            pt[0x14] = 0xFF;
+            (*(s8 *) (obj + 0x2E))++;
+            if (obj[0x25] == *(s8 *) (obj + 0x2E)) {
+                *(s8 *) (obj + 0x2E) = 0;
+            }
+            (*(s8 *) (obj + 0x2C))++;
+            if (*(s8 *) (obj + 0x2D) == *(s8 *) (obj + 0x2E)) {
+                (*(s8 *) (obj + 0x2D))++;
+                if (obj[0x25] == *(s8 *) (obj + 0x2D)) {
+                    *(s8 *) (obj + 0x2D) = 0;
+                }
+                (*(s8 *) (obj + 0x2C))--;
+            }
+            width += dwidth;
+            pos.x += sx;
+            pos.y += sy;
+            pos.z += sz;
+            t -= dt;
+            st->u40 -= 1.0f;
+        } while (1.0f < st->u40);
+        st->u34 = pos;
+        st->u48 = t;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3D70.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4194.s")
 
