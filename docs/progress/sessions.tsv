@@ -356,3 +356,4 @@ P278	port-d	nm convert	9			group D: 9 conversions (288/288 mutants); func_150E0C
 P277	port-c	nm convert	10			group C: 10 conversions; func_150B1964 drafted (mode-14 setups DIFFER); 34 left; port-c 5679/5916 96.0% 88.4%
 P281	port-e	nm convert+harness	4			group E: prenmi_thread, _Ldtob, IMDCT func_151FA3E0, 1st readable wall helper; difftest STOPCALL/RETV1 knobs (selftest 140); progress_nm counts platform-replaced by default (97.1%, --strict 96.5%); 6 drafts parked (main loops etc.); walls need helper-level harness
 P282	port	nm convert	10			group B: 10 conversions (game_161520 hit handlers etc.); SpriteSpec356D4 padding fixed; NM LINK BROKEN at commit (12C5F0 static copies -> .data); 2 mutant runs unfinished
+P280	port-b	nm convert+harness	9			group A: 9 conversions (290/295 mutants); ARGMEM @K per-call knob (selftest 134); protocheck 2 problems in EBF20/F5580 (func_15116A8C proto s32->void); 26 left; portb 5690/5916 96.2% 88.8%
