@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P291 (port-e, group E: star field, ray coverage, readable ray cast) (2026-10-26). Details: `docs/port/sessions/P291.md`
+
+Committed (registry rows `P291`, HARNESS= / HMUT=): func_150FBA40 star_field_draw (game_eu_129250, hand asm from group D):
+readable NM C, new harness tools/port/difftest/nmasm_stars.py (300 x seeds 1-3 EQUIV, mutants 17/18, survivor
+equivalent). nmasm_vis5858 Ref gained mult/mflo/mfhi/add/daddu/dsubu/div.s; its Cand loads .init (IDO __ll helpers).
+nmasm_walls.py ray mode: rays aimed at vertices / edges / interiors / along edges, collidable objects, grid BSP trees,
+per-trial coverage counts (yz / zx / xy projections, obj hit, next leaf). func_150AD844's projection mutant now dies
+on seed 1 (8/12, rest P288-justified). func_150ACEA0 ray_cast readable in D5E90.c (D5E90_ray.inc removed): 300 x seeds
+1-5 EQUIV, mutants 15/25 (7 equivalent / tie / rounding; 3 next-leaf exit mutants survive = coverage gap).
+Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, selftest 143/143. progress_nm: `total       5916     3995   1722     33      166  5750 97.2%   2025072/2253856 (89.8%)`.
+
+### Next steps (group E, from P291)
+1. D5E90 wall engine bodies func_150AB708 (entry AB6D0) / func_150AC8C4 in D5E90_walls.inc (~1000 asm2c lines, frame
+   code pointers at sp+464/468): still asm2c (13 asm2c folded entries). Split per label region, harness after each;
+   `touch` D5E90.c after editing the .inc.
+2. Ray harness: scenes where the only hit lies in a later leaf reached through a -z exit / the dx == 0 exit (P291.md
+   lists the 3 surviving mutants in ray_body_hmuts.txt: 2, 3, 4).
+3. Port (port-web): vbe.py ROM_ABS for D_427B0 / D_19EDE8 (func_10001194, from P288).
+
 ## P288 (port-e, group E: stub_write fix, 1194 / 288C landed, D5E90 AAF00 + AD844 readable) (2026-10-26). Details: `docs/port/sessions/P288.md`
 
 Committed NM C (registry rows `P288`): func_10001194 boot_thread_main (setups 2/2, mutants 26/28, 2 equivalent),
