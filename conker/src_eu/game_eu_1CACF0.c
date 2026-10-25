@@ -406,7 +406,208 @@ s32 func_1519D9C4(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D9C4.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+Gfx *func_15142E24(Gfx *gfx, s32 tex, s32 frame, s32 arg3, s32 arg4, s32 arg5, s32 arg6, u8 arg7, s32 arg8, u8 *flag, s32 argA);
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+Gfx *func_1513F4E4(Gfx *arg0, u8 arg1, u8 *arg2);
+Gfx *func_15142B7C(Gfx *gfx, s32 set, s32 clear);
+u8 *func_15142FBC(Gfx *, s32, s32, u8 *);
+extern s32 D_800D30BC;
+extern u8 D_80091084[];
+extern f32 D_800DD608[];  /* per view slot: z step of the flat strip's width */
+extern f32 D_800DD618[];  /* per view slot: x step */
+
+/* one strip vertex: texture s = index << 6, t 0 / 0x7C0, white with the point's alpha */
+#define SPRAY_VTX(v, x, y, z, s, t, a) \
+    do { \
+        (v)->ob[0] = (s32) (x); \
+        (v)->ob[1] = (s32) (y); \
+        (v)->ob[2] = (s32) (z); \
+        (v)->tc[0] = (s); \
+        (v)->tc[1] = (t); \
+        (v)->cn[0] = 0xFF; \
+        (v)->cn[1] = 0xFF; \
+        (v)->cn[2] = 0xFF; \
+        (v)->cn[3] = (a); \
+        (v)->flag = 0; \
+    } while (0)
+
+// spray_trail_draw: D_8008A644 draw handler (kind 3) of the spray trail func_1519D9C4 records: a flat strip through
+// the point ring obj +0x94 (0x24 bytes: x, y, z, width f32 +0x18, s16 alpha +0x1C, u8 fade +0x20, u8 texture index
+// +0x21; ring of obj[0x25], newest obj +0x2E - 1, oldest +0x2D, count +0x2C). Spec obj +0x98: flag +6 bit 2 ramps
+// the fade up from the tail (+0x5C points, step +0x5D), bit 4 scales it down from the head (+0x5E points, step
+// +0x5F); grey +0x40. Each point gives two vertices width * (D_800DD618, D_800DD608)[slot] either side (x / z, no
+// y), alpha = alpha * fade >> 8; each segment loads 4 vertices and draws two triangles. When the texture index of
+// the older point is above the newer one's (wrapped), the older pair is copied for the next segment and the drawn
+// pair's s is moved back by 0x4000. With obj +0x1E bit 2 the strip starts at the object's position. Vertices from
+// func_151D6310 (obj[0x25] * 32 + 0xA0 bytes); returns the display list end (nothing below 2 points).
+s32 func_1519DF64(u8 *obj, s32 gfx, s16 slot) {
+    Vtx_t *vtx;
+    u8 *rec;
+    u8 *pts;
+    u8 *p;
+    Gfx *g;
+    f32 *sx;
+    f32 *sz;
+    f32 a[3];
+    f32 b[3];
+    f32 ax, az;
+    f32 bx, bz;
+    s32 i;
+    s32 j;
+    s32 aS;
+    s32 bS;
+    s16 aA;
+    s16 bA;
+    s16 n;
+    u8 fade;
+    u8 flag;
+
+    if (*(s8 *) (obj + 0x2C) < 2) {
+        return gfx;
+    }
+    func_151D6310((s32 *) (obj + 0x84), slot, obj[0x25] * 32 + 0xA0, (s32 *) &vtx, NULL);
+    if (vtx == NULL) {
+        return gfx;
+    }
+    rec = *(u8 **) (obj + 0x98);
+    pts = *(u8 **) (obj + 0x94);
+    flag = 1;
+
+    if (rec[6] & 2) {
+        /* fade in over the oldest rec[0x5C] points */
+        n = rec[0x5C];
+        i = *(s8 *) (obj + 0x2D);
+        fade = 0;
+        do {
+            pts[i * 0x24 + 0x20] = fade;
+            i++;
+            n--;
+            fade += rec[0x5D];
+            if (i == obj[0x25]) {
+                i = 0;
+            }
+        } while (n != 0 && i != *(s8 *) (obj + 0x2E));
+    }
+    if (rec[6] & 4) {
+        /* fade out over the newest rec[0x5E] points */
+        i = *(s8 *) (obj + 0x2E) - 1;
+        fade = 0;
+        n = rec[0x5E];
+        if (i < 0) {
+            i = obj[0x25] - 1;
+        }
+        do {
+            p = pts + i * 0x24;
+            n--;
+            i--;
+            p[0x20] = (p[0x20] * fade) >> 8;
+            fade += rec[0x5F];
+            if (i < 0) {
+                i = obj[0x25] - 1;
+            }
+        } while (n != 0 && i != *(s8 *) (obj + 0x2E));
+    }
+
+    g = func_15142E24((Gfx *) gfx, (s32) D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+    g = func_15142C10(g, rec[0x40], rec[0x40], rec[0x40], 0xFF, &flag);
+    g = func_1513F4E4(g, 6, &flag);
+    g = func_15142B7C(g, 1, 0x160600);
+    g = (Gfx *) func_15142FBC(g, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+
+    sx = &D_800DD618[slot];
+    sz = &D_800DD608[slot];
+    if (*(u16 *) (obj + 0x1E) & 2) {
+        j = *(s8 *) (obj + 0x2E) - 1;
+        if (j < 0) {
+            j = obj[0x25] - 1;
+        }
+        a[0] = *(f32 *) (obj + 0x10);
+        a[1] = *(f32 *) (obj + 0x14);
+        a[2] = *(f32 *) (obj + 0x18);
+        p = pts + j * 0x24;
+    } else {
+        i = *(s8 *) (obj + 0x2E) - 1;
+        if (i < 0) {
+            i = obj[0x25] - 1;
+        }
+        j = i - 1;
+        if (j < 0) {
+            j = obj[0x25] - 1;
+        }
+        p = pts + i * 0x24;
+        a[0] = *(f32 *) (p + 0);
+        a[1] = *(f32 *) (p + 4);
+        a[2] = *(f32 *) (p + 8);
+    }
+    /* the start pair takes width, texture and alpha from p (the newest point; with bit 2 the one after the object) */
+    ax = *sx * *(f32 *) (p + 0x18);
+    az = *sz * *(f32 *) (p + 0x18);
+    aS = p[0x21];
+    aA = (s16) ((p[0x20] * *(s16 *) (p + 0x1C)) >> 8);
+    p = pts + j * 0x24;
+    b[0] = *(f32 *) (p + 0);
+    b[1] = *(f32 *) (p + 4);
+    b[2] = *(f32 *) (p + 8);
+    bA = (s16) ((p[0x20] * *(s16 *) (p + 0x1C)) >> 8);
+    bS = p[0x21];
+    bx = *sx * *(f32 *) (p + 0x18);
+    bz = *sz * *(f32 *) (p + 0x18);
+    SPRAY_VTX(vtx, a[0] + ax, a[1], a[2] - az, aS << 6, 0x7C0, aA);
+    vtx++;
+    SPRAY_VTX(vtx, a[0] - ax, a[1], a[2] + az, aS << 6, 0, aA);
+    vtx++;
+
+    do {
+        SPRAY_VTX(vtx, b[0] + bx, b[1], b[2] - bz, bS << 6, 0x7C0, bA);
+        vtx++;
+        SPRAY_VTX(vtx, b[0] - bx, b[1], b[2] + bz, bS << 6, 0, bA);
+        vtx++;
+        ((s32 *) g)[0] = 0x01004008;           /* gSPVertex(vtx - 4, 4, 0) */
+        ((s32 *) g)[1] = (s32) (vtx - 4);
+        g++;
+        ((s32 *) g)[0] = 0x05000204;           /* gSP1Triangle(0, 1, 2) */
+        ((s32 *) g)[1] = 0;
+        g++;
+        ((s32 *) g)[0] = 0x05020604;           /* gSP1Triangle(1, 3, 2) */
+        ((s32 *) g)[1] = 0;
+        g++;
+        if (aS < bS) {
+            /* texture wrapped: the next segment starts from a copy, this one ends 0x4000 back */
+            memcpy((s32) vtx, (u8 **) (vtx - 2), 0x20);
+            vtx[-2].tc[0] -= 0x4000;
+            vtx++;
+            vtx[-2].tc[0] -= 0x4000;
+            vtx++;
+        }
+        i = j;
+        j--;
+        if (j < 0) {
+            j = obj[0x25] - 1;
+        }
+        if (i != *(s8 *) (obj + 0x2D)) {
+            aS = bS;
+            p = pts + i * 0x24;
+            a[0] = *(f32 *) (p + 0);  /* (copied, unused) */
+            a[1] = *(f32 *) (p + 4);
+            a[2] = *(f32 *) (p + 8);
+            p = pts + j * 0x24;
+            b[0] = *(f32 *) (p + 0);
+            b[1] = *(f32 *) (p + 4);
+            b[2] = *(f32 *) (p + 8);
+            bA = (s16) ((p[0x20] * *(s16 *) (p + 0x1C)) >> 8);
+            bx = *sx * *(f32 *) (p + 0x18);
+            bz = *sz * *(f32 *) (p + 0x18);
+            bS = p[0x21];
+        }
+    } while (i != *(s8 *) (obj + 0x2D));
+    return (s32) g;
+}
+#undef SPRAY_VTX
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519DF64.s")
+#endif
 
 void func_1519E764(u8 *arg0, u8 *arg1, u8 arg2)
 {

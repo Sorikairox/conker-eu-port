@@ -1,0 +1,38 @@
+s#    if (\*(s8 \*) (obj + 0x2C) < 2) {#    if (*(s8 *) (obj + 0x2C) < 3) {# % two
+s#obj\[0x25\] \* 32 + 0xA0,#obj[0x25] * 32 + 0x80,# % base
+s#    if (vtx == NULL) {#    if (vtx == (Vtx_t *) 4) {# % novtx
+s#    if (rec\[6\] \& 2) {#    if (rec[6] \& 1) {# % fin
+s#        n = rec\[0x5C\];#        n = rec[0x5D];# % fin
+s#        i = \*(s8 \*) (obj + 0x2D);#        i = *(s8 *) (obj + 0x2E);# % fin
+s#            pts\[i \* 0x24 + 0x20\] = fade;#            pts[i * 0x24 + 0x21] = fade;# % fin
+s#            fade += rec\[0x5D\];#            fade += rec[0x5C];# % fin
+s#            if (i == obj\[0x25\]) {#            if (i == 5) {# % finwrap
+s#    if (rec\[6\] \& 4) {#    if (rec[6] \& 8) {# % fout
+s#        n = rec\[0x5E\];#        n = rec[0x5F];# % fout
+s#            p\[0x20\] = (p\[0x20\] \* fade) >> 8;#            p[0x20] = (p[0x20] * fade) >> 7;# % fout
+s#            fade += rec\[0x5F\];#            fade += rec[0x5E];# % fout
+s#    g = func_15142C10(g, rec\[0x40\], rec\[0x40\], rec\[0x40\], 0xFF, \&flag);#    g = func_15142C10(g, rec[0x40], rec[0x41], rec[0x40], 0xFF, \&flag);# % base
+s#    g = func_1513F4E4(g, 6, \&flag);#    g = func_1513F4E4(g, 7, \&flag);# % base
+s#    g = func_15142B7C(g, 1, 0x160600);#    g = func_15142B7C(g, 1, 0x160601);# % base
+s#D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, \&flag);#D_800D30BC | 0x80000 | 0x2CA0, 0x5049D9, \&flag);# % base
+s#    sx = \&D_800DD618\[slot\];#    sx = \&D_800DD618[2];# % base
+s#    if (\*(u16 \*) (obj + 0x1E) \& 2) {#    if (*(u16 *) (obj + 0x1E) \& 1) {# % base flag2
+s#        a\[1\] = \*(f32 \*) (obj + 0x14);#        a[1] = *(f32 *) (obj + 0x18);# % flag2
+s#    ax = \*sx \* \*(f32 \*) (p + 0x18);#    ax = *sz * *(f32 *) (p + 0x18);# % base
+s#    aS = p\[0x21\];#    aS = p[0x20];# % base
+s#    aA = (s16) ((p\[0x20\] \* \*(s16 \*) (p + 0x1C)) >> 8);#    aA = (s16) ((p[0x20] * *(s16 *) (p + 0x1C)) >> 7);# % base
+s#    SPRAY_VTX(vtx, a\[0\] + ax, a\[1\], a\[2\] - az, aS << 6, 0x7C0, aA);#    SPRAY_VTX(vtx, a[0] + ax, a[1], a[2] + az, aS << 6, 0x7C0, aA);# % base
+s#    SPRAY_VTX(vtx, a\[0\] - ax, a\[1\], a\[2\] + az, aS << 6, 0, aA);#    SPRAY_VTX(vtx, a[0] - ax, a[1], a[2] + az, aS << 5, 0, aA);# % base
+s#        SPRAY_VTX(vtx, b\[0\] + bx, b\[1\], b\[2\] - bz, bS << 6, 0x7C0, bA);#        SPRAY_VTX(vtx, b[0] + bx, b[1], b[2] - bz, bS << 6, 0x7C0, aA);# % base
+s#        SPRAY_VTX(vtx, b\[0\] - bx, b\[1\], b\[2\] + bz, bS << 6, 0, bA);#        SPRAY_VTX(vtx, b[0] - bx, b[1] + bx, b[2] + bz, bS << 6, 0, bA);# % base
+s#        ((s32 \*) g)\[1\] = (s32) (vtx - 4);#        ((s32 *) g)[1] = (s32) (vtx - 2);# % base
+s#        ((s32 \*) g)\[0\] = 0x05020604;#        ((s32 *) g)[0] = 0x05020606;# % base
+s#        if (aS < bS) {#        if (aS <= bS) {# % base nowrap eq
+s#            memcpy((s32) vtx, (u8 \*\*) (vtx - 2), 0x20);#            memcpy((s32) vtx, (u8 **) (vtx - 2), 0x10);# % base step1
+s#        if (i != \*(s8 \*) (obj + 0x2D)) {#        if (i != *(s8 *) (obj + 0x2E)) {# % base head1 flagwrap full
+s#            aS = bS;#            aS = bS + 1;# % base step1
+s#            b\[1\] = \*(f32 \*) (p + 4);#            b[1] = *(f32 *) (p + 8);# % base
+s#            bA = (s16) ((p\[0x20\] \* \*(s16 \*) (p + 0x1C)) >> 8);#            bA = (s16) ((p[0x20] * *(s16 *) (p + 0x1E)) >> 8);# % base
+s#            bx = \*sx \* \*(f32 \*) (p + 0x18);#            bx = *sx * *(f32 *) (p + 0x1C);# % base
+s#            bS = p\[0x21\];#            bS = p[0x20];# % base
+s#    } while (i != \*(s8 \*) (obj + 0x2D));#    } while (i != *(s8 *) (obj + 0x2D) + 1);# % base

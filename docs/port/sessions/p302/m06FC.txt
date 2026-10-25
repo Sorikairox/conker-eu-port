@@ -1,0 +1,37 @@
+s#    if (\*(s32 \*) owner == 0 || obj\[0x2C\] != owner\[0x3B\]) {#    if (*(s32 *) owner == 0 || obj[0x2C] != owner[0x3A]) {# % idmis base
+s#        \*(s16 \*) (obj + 0xE) = -1;#        *(s16 *) (obj + 0xE) = -2;# % gone idmis
+s#    if (\*(u8 \*\*) (owner + 0x1D4) == NULL) {#    if (*(u8 **) (owner + 0x1D4) == (u8 *) 4) {# % nomtx
+s#    func_151D6310((s32 \*) (obj + 0x14), slot, 0x1C0, (s32 \*) \&vtx, NULL);#    func_151D6310((s32 *) (obj + 0x14), slot, 0x1B0, (s32 *) \&vtx, NULL);# % base
+s#    func_15143134(D_800AB33C\[obj\[0x35\]\], a, \*(u8 \*\*) (owner + 0x1D4) + 0x80);#    func_15143134(D_800AB33C[0], a, *(u8 **) (owner + 0x1D4) + 0x80);# % side1
+s#    func_15143134(D_800AB354, b, \*(u8 \*\*) (owner + 0x1D4) + (D_800AB360\[obj\[0x35\]\] << 6));#    func_15143134(D_800AB354, b, *(u8 **) (owner + 0x1D4) + (D_800AB360[obj[0x35]] << 5));# % base
+s#0x7F, 0, 0, (s8 \*) \&flag, 3);#0x7E, 0, 0, (s8 *) \&flag, 3);# % base
+s#    gfx = (Gfx \*) func_1513F4E4((s32) gfx, 0x3B, (s8 \*) \&flag);#    gfx = (Gfx *) func_1513F4E4((s32) gfx, 0x3C, (s8 *) \&flag);# % base
+s#    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, obj\[0x34\], \&flag);#    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, obj[0x35], \&flag);# % base
+s#0x200005, 0x60600);#0x200004, 0x60600);# % base
+s#    dir\[1\] = b\[1\] - a\[1\];#    dir[1] = b[1] - a[0];# % base
+s#    vx = dir\[0\] \* 0\.5f + a\[0\] - cam\[0\];#    vx = dir[0] * 0.25f + a[0] - cam[0];# % base near
+s#    vz = dir\[2\] \* 0\.5f + a\[2\] - cam\[2\];#    vz = dir[2] * 0.5f + a[2] - cam[1];# % base
+s#    ny = dir\[2\] \* vx - vz \* dir\[0\];#    ny = dir[2] * vx + vz * dir[0];# % base
+s#    if (len2 == 0\.0f) {#    if (len2 < 1.0f) {# % degen base near
+s#        side\[1\] = 0\.0f;#        side[1] = 1.0f;# % degen
+s#        k = 35\.0f \* \*(f32 \*) (obj + 0x30) \/ sqrtf(len2);#        k = 35.0f * *(f32 *) (obj + 0x2C) \/ sqrtf(len2);# % base
+s#    step\[1\] = dir\[1\] \* D_800AB430_c\[0\];#    step[1] = dir[1] * D_800AB434_c[0];# % base
+s#    if (len < 20\.0f) {#    if (len <= 20.0f) {# % len20
+s#    } else if (len < 70\.0f) {#    } else if (len <= 70.0f) {# % len70
+s#        amp = (len - 20\.0f) \* D_800AB434_c\[0\] \* D_800AB438_c\[0\];#        amp = (len - 21.0f) * D_800AB434_c[0] * D_800AB438_c[0];# % base
+s#        amp = D_800AB438_c\[0\];#        amp = D_800AB434_c[0];# % len100
+s#        amp = 0\.0f;#        amp = 0.5f;# % len10
+s#    pos\[1\] = a\[1\];#    pos[1] = a[2];# % base
+s#    for (i = 0; i != 6; i++) {#    for (i = 0; i != 5; i++) {# % base
+s#        w = 1\.0f - sinf(phase) \* amp;#        w = 1.0f + sinf(phase) * amp;# % base
+s#        BAND_VTX(vtx, pos\[0\] - ox, pos\[1\] - side\[1\] \* w, pos\[2\] - side\[2\] \* w, 0x7C0, (s32) t);#        BAND_VTX(vtx, pos[0] - ox, pos[1] - side[1] * w, pos[2] - side[2] * w, 0x7C1, (s32) t);# % base
+s#        nextPhase = phase + D_800AB440_c\[0\];#        nextPhase = phase + D_800AB444_c[0];# % base
+s#        oy = side\[1\] \* w;#        oy = side[0] * w;# % base
+s#        nextT = t + D_800AB444_c\[0\];#        nextT = t + D_800AB440_c[0];# % base
+s#pos\[2\] + step\[2\] - oz, 0x7C0, (s32) nextT);#pos[2] + step[2] + oz, 0x7C0, (s32) nextT);# % base
+s#pos\[2\] + step\[2\] + oz, 0, (s32) nextT);#pos[2] + step[2] + oz, 0, (s32) t);# % base
+s#        ((s32 \*) gfx)\[1\] = (s32) (vtx - 4);#        ((s32 *) gfx)[1] = (s32) (vtx - 3);# % base
+s#        ((s32 \*) gfx)\[0\] = 0x05000406;#        ((s32 *) gfx)[0] = 0x05000604;# % base
+s#        pos\[2\] += step\[2\];#        pos[2] += step[1];# % base
+s#        t = nextT;#        t = nextPhase;# % base
+s#        (v)->cn\[3\] = 0xFF; \\#        (v)->cn[3] = 0xFE; \\# % base

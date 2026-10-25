@@ -10,6 +10,19 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P302 (port-b, group A) (session P302, 2026-10-26). Details: `docs/port/sessions/P302.md`
+
+Hand C (NM), registry rows `P302`, setups / mutants in docs/port/sessions/p302: func_1500F3BC level_mist_setup
+(3CA50), func_151BD040 ribbon_strip_draw (1E7CC0), func_151D06FC limb_band_draw (1FB080), func_150CEC50
+rider_ai_control (FC460), func_1519DF64 spray_trail_draw (1CACF0). All random EQUIV + setups; mutants all killed
+except 2 equivalent (06FC len 20 / 70 boundaries). P298's func_1511D0CC boundary survivors killed (setups l4z12k,
+l4z12ki, l13rot360 added to p298/sD0CC.txt). Group A has no function left (progress_nm asm-only list).
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1701), implicit_scan 0 NM+float (830 sites), selftest 134/134,
+progress_nm `total 5916 3995 1721 200 5716 96.6% 2039304/2253856 (90.5%)`.
+
+## Next steps (from P302)
+1. Group A is done; the orchestrator can reassign this slot.
+
 ## P298 (port-b, group A) (session P298, 2026-10-26). Details: `docs/port/sessions/P298.md`
 
 Hand C (NM), registry rows `P298`, setups / mutants in docs/port/sessions/p298: func_150C49A4 damage_smoke_update
