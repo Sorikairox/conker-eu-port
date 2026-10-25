@@ -329,6 +329,13 @@ S1550="DIFFTEST_ARG=0=80480000,1=65 DIFFTEST_POKE=80480000=40934A45,80480004=6D5
 chkce EQUIV  func_10001550 "$S1550"
 chkce DIFFER func_10001550 "$S1550" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
 chkce EQUIV  func_10001550 "$S1550 DIFFTEST_SRET_OLD=1 DIFFTEST_LDIV_OLD=1" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
+# P288: a stub's OUTW / OUTA into a page the function never touched (func_10001194's func_10004514 reads into
+# D_80082EB0) faulted in stub_write (mem_write without ensure()) -> UNSURE; stub_write now maps the pages first
+# (DIFFTEST_STUBMAP_OLD=1 = old). The xor-key mutant is only seen through the OUTW-read offset table.
+S1194="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=0 DIFFTEST_POKE=8000030C=0 DIFFTEST_RET=10003E90=80480000,10003EBC=80400000;80420000 DIFFTEST_OUTW=10004764=1:00001234;0;8039CCCB"
+chkce EQUIV  func_10001194 "$S1194"
+chkce UNSURE func_10001194 "$S1194 DIFFTEST_STUBMAP_OLD=1"
+chkce DIFFER func_10001194 "$S1194" 's/(D_8003585C\[i\] ^ 0x8039CCCA)/(D_8003585C[i] ^ 0x8039CCCB)/'
 # P260: a candidate path the container already read, rewritten on the host with a different size (what every
 # chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares

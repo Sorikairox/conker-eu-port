@@ -90,6 +90,7 @@ PAGESTUB_OLD = os.environ.get('DIFFTEST_PAGESTUB_OLD') == '1'
 # should restore compared equal when the restore was dropped (func_15063254 +0xB8 / +0xC4 / +0x318 mutants survived).
 # DIFFTEST_STUBW_OLD=1 = pre-P198 behaviour (selftest).
 STUBW_OLD = os.environ.get('DIFFTEST_STUBW_OLD') == '1'   # P176: pre-P176 page-end stub behaviour (selftest)
+STUBMAP_OLD = os.environ.get('DIFFTEST_STUBMAP_OLD') == '1'   # P288: pre-P288 stub_write without ensure() (selftest)
 STEP = os.environ.get('DIFFTEST_STEP') == '1' or '--step' in sys.argv
 # P47 (debug, opt-in): DIFFTEST_WLOG="LO-HI" (physical hex) + DIFFTEST_WLOG_T=trial prints every non-stack write
 # into [LO, HI) of that trial with the writing pc (R = reference, C = candidate). Debug aid for long functions.
@@ -1224,6 +1225,8 @@ class Run:
     def stub_write(self, p, data):
         """P198: a stub's write (no Unicorn write hook fires for mem_write): store it and log it like on_write"""
         p = phys(p)
+        if not STUBMAP_OLD:   # P288: map the pages first (an OUTW / OUTA into a page the function never touched faulted)
+            for pp in range(p & ~(PAGE - 1), p + len(data), PAGE): self.ensure(pp)
         self.mu.mem_write(p, data)
         if STUBW_OLD: return
         if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return
