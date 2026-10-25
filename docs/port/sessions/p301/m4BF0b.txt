@@ -1,0 +1,5 @@
+# P301: func_150B4BF0 survivors of m4BF0 on the later setups (wide = large widths, sstep1 = s steps of 1)
+/^        len2 = nx \* nx + ny \* ny + nz \* nz;/s/+ nz \* nz// % wide wideown sstep1w
+/prevS = (u8) curS;/s/(u8) curS/curS + 1/ % sstep1 sstep1w
+/^        v->v.ob\[0\] = (s32) (b\[0\] + nx);/s/(b\[0\] + nx)/(a[0] + nx)/ % base wide
+/^    len2 = nx \* nx + ny \* ny + nz \* nz;/s/+ nz \* nz// % wide wideown sstep1w

@@ -186,7 +186,234 @@ void func_150E3C3C(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3) {
     }
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800A1404;
+extern f32 D_800A1408;
+extern f32 D_800A140C;
+extern f32 D_800A1410;
+extern f32 D_800A1414;
+extern f32 D_800A1418;
+extern f32 D_800A141C;
+void func_15143874(s16, f32, f32 *, f32 *);
+s32 func_15046F70(f32 *, s32, f32, f32 *);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 func_151C284C(f32 *, s32, s32, s32, u8, void *, f32, f32, f32, f32, f32, u8, s32, u8, u8, u8, u8, u8, u8, s8, s32,
+                  f32, u8, s8, s32, u8, s32);
+void func_151037D4(s16, u8, f32, u8 *, u8, u8, s32);
+
+typedef struct {
+    u8 b[0x12];
+} ZapStyle; /* 0x12 bytes copied from the bolt object (+0x58) into the beam request */
+
+// zap_bolt_update: per-frame update of a type-0x27 lightning bolt object `obj` (made by func_150E35A0). Counts down
+// its life (+0x7C, -0x63 = forever; func_150E3A94 frees it at < 0 but the update goes on), aims at the followed object
+// (+0x3C, its +0x14 position; freed when that object's first word is 0) or the path point (+0x78), and moves its head
+// (+0x10) by speed (+0x34) * D_800BE9E4 frames toward the target (+0x1C). When it arrives (no path), a followed
+// target makes it shoot 500 lengths further for 25 frames (+0x44); otherwise it is freed. The +0x4C accumulator then
+// spawns beam segments from the anchor (+0x28) to a random point near the head (func_151C284C, ground snapped with
+// func_15046F70 and shortened by a random amount), and without a path the +0x50 accumulator spawns sparks
+// (func_151037D4) at the anchor.
+void func_150E3CB8(u8 *obj) {
+    f32 *pos = (f32 *) (obj + 0x10);
+    f32 *target = (f32 *) (obj + 0x1C);
+    f32 *anchor = (f32 *) (obj + 0x28);
+    struct {
+        s32 u00;
+        f32 len;        /* +0x04 */
+        f32 end[3];     /* +0x08 */
+        f32 end2[3];    /* +0x14 */
+        f32 end3[3];    /* +0x20 */
+        f32 start[3];   /* +0x2C */
+        f32 dir[3];     /* +0x38 */
+        ZapStyle style; /* +0x44 */
+        s16 u56;
+        u8 u58;
+        u8 u59;
+        u8 u5A;
+        s32 owner;      /* +0x5C: +0x74 for kinds 2 / 3 */
+        s32 u60;        /* +0x60: +0x6C */
+    } seg;
+    f32 old[3];
+    f32 newPos[3];
+    f32 delta[3];
+    f32 vel[3];
+    f32 start[3];
+    f32 end[3];
+    f32 tip[3];
+    f32 dir[3];
+    f32 len;
+    f32 unused;
+    f32 ox;
+    f32 oz;
+    f32 dist;
+    f32 step;
+    f32 k;
+    f32 t;
+    f32 a;
+    f32 b;
+    u32 r;
+    u8 *follow;
+    f32 *path;
+    s32 hit = 0;
+    s32 mode;
+
+    if (*(s16 *) (obj + 0x7C) != -0x63) {
+        *(s16 *) (obj + 0x7C) -= D_800BE9E4;
+        if (*(s16 *) (obj + 0x7C) < 0) {
+            func_150E3A94((struct102 *) obj);
+        }
+    }
+    old[0] = pos[0];
+    old[1] = pos[1];
+    old[2] = pos[2];
+
+    follow = *(u8 **) (obj + 0x3C);
+    if (follow != NULL) {
+        if (*(s32 *) follow == 0) {
+            func_150E3A94((struct102 *) obj);
+            return;
+        }
+        target[0] = *(f32 *) (follow + 0x14);
+        target[1] = *(f32 *) (follow + 0x18);
+        target[2] = *(f32 *) (follow + 0x1C);
+    } else {
+        path = *(f32 **) (obj + 0x78);
+        if (path != NULL) {
+            target[0] = path[0];
+            target[1] = path[1];
+            target[2] = path[2];
+        }
+    }
+    delta[0] = target[0] - pos[0];
+    delta[1] = target[1] - pos[1];
+    delta[2] = target[2] - pos[2];
+    dist = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]);
+    step = *(f32 *) (obj + 0x34) * (f32) D_800BE9E4;
+
+    if (*(s32 *) (obj + 0x78) == 0) {
+        if (*(s32 *) (obj + 0x44) == 0) {
+            if (dist <= step) {
+                if (*(s32 *) (obj + 0x3C) == 0) {
+                    func_150E3A94((struct102 *) obj);
+                    return;
+                }
+                *(s32 *) (obj + 0x44) = 25;
+                *(s32 *) (obj + 0x3C) = 0;
+                target[0] += delta[0] * 500.0f;
+                target[1] += delta[1] * 500.0f;
+                target[2] += delta[2] * 500.0f;
+            }
+        } else {
+            *(s32 *) (obj + 0x44) -= D_800BE9E4;
+            if (*(s32 *) (obj + 0x44) <= 0) {
+                func_150E3A94((struct102 *) obj);
+                return;
+            }
+        }
+    }
+
+    if (dist == 0.0f) {
+        newPos[0] = target[0];
+        newPos[1] = target[1];
+        newPos[2] = target[2];
+        vel[0] = delta[0];
+        vel[1] = delta[1];
+        vel[2] = delta[2];
+    } else {
+        k = step / dist;
+        vel[0] = k * delta[0];
+        vel[1] = k * delta[1];
+        vel[2] = k * delta[2];
+        newPos[0] = old[0] + vel[0];
+        newPos[1] = old[1] + vel[1];
+        newPos[2] = old[2] + vel[2];
+    }
+    pos[0] = newPos[0];
+    pos[1] = newPos[1];
+    pos[2] = newPos[2];
+
+    *(f32 *) (obj + 0x4C) += (D_800A1404 + func_150ADA68() * D_800A1408) * D_800A140C * D_800BE9A4;
+    while (1.0f < *(f32 *) (obj + 0x4C)) {
+        start[0] = anchor[0];
+        start[1] = anchor[1];
+        start[2] = anchor[2];
+        t = func_150ADA68();
+        r = func_150ADA20();
+        func_15143874((u8) r, func_150ADA68() * 129.0f, &ox, &oz);
+        tip[0] = t * vel[0] + old[0] + ox;
+        tip[1] = t * vel[1] + old[1] + 200.0f;
+        tip[2] = t * vel[2] + old[2] + oz;
+        end[0] = tip[0];
+        end[1] = tip[1];
+        end[2] = tip[2];
+        if (func_15046F70(tip, 0, tip[1] - 1000.0f, (f32 *) (obj + 0x54))) {
+            end[1] = *(f32 *) (obj + 0x54);
+        }
+        dir[0] = end[0] - start[0];
+        dir[1] = end[1] - start[1];
+        dir[2] = end[2] - start[2];
+        if (func_15145128(dir, dir, &len, &unused)) {
+            k = 190.0f * (func_150ADA68() * D_800BE9A4);
+            start[0] += dir[0] * k;
+            start[1] += dir[1] * k;
+            start[2] += dir[2] * k;
+            len -= k;
+        }
+        seg.u00 = 0;
+        seg.len = len;
+        seg.end[0] = end[0];
+        seg.end[1] = end[1];
+        seg.end[2] = end[2];
+        seg.end2[0] = end[0];
+        seg.end2[1] = end[1];
+        seg.end2[2] = end[2];
+        seg.end3[0] = end[0];
+        seg.end3[1] = end[1];
+        seg.end3[2] = end[2];
+        seg.start[0] = start[0];
+        seg.start[1] = start[1];
+        seg.start[2] = start[2];
+        seg.dir[0] = dir[0];
+        seg.dir[1] = dir[1];
+        seg.dir[2] = dir[2];
+        seg.style = *(ZapStyle *) (obj + 0x58);
+        seg.u56 = 0;
+        seg.u58 = 0;
+        seg.u59 = 1;
+        seg.u5A = 0;
+        if (obj[0x71] == 2 || obj[0x71] == 3) {
+            seg.owner = *(s32 *) (obj + 0x74);
+        } else {
+            seg.owner = 0;
+        }
+        seg.u60 = *(s32 *) (obj + 0x6C);
+        a = func_150ADA68();
+        b = func_150ADA68();
+        r = func_150ADA20();
+        mode = (hit != 0 || *(s32 *) (obj + 0x78) != 0) ? 2 : 1;
+        if (func_151C284C(start, 0, 0, 0, 0, &seg, 190.0f, D_800A1410, a * 50.0f + 10.0f, b * 191.0f + 160.0f, 80.0f,
+                          r % 176U + 80, 0, 0, 0, 0, 0, 0, 1, mode, *(s32 *) (obj + 0x40), 0.0f, 0xFF, -1, 0, obj[0xC],
+                          obj[1]) != 0) {
+            hit = 1;
+        }
+        *(f32 *) (obj + 0x4C) -= 1.0f;
+    }
+
+    if (*(s32 *) (obj + 0x78) != 0) {
+        return;
+    }
+    *(f32 *) (obj + 0x50) += (56.0f + func_150ADA68() * 235.0f) * D_800A1414 * D_800BE9A4;
+    while (1.0f < *(f32 *) (obj + 0x50)) {
+        u32 count = func_150ADA20();
+        u32 alpha = func_150ADA20();
+        func_151037D4((count & 3) + 6, alpha % 156U + 100, func_150ADA68() * D_800A141C + D_800A1418, anchor, 0xFF,
+                      obj[0xC], obj[1]);
+        *(f32 *) (obj + 0x50) -= 1.0f;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_110DB0/func_150E3CB8.s")
+#endif
 
 extern f32 D_800A1420;
 

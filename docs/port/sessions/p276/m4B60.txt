@@ -1,0 +1,26 @@
+\#^    rec->flags16 |= 4;$#s/4/8/
+\#^    blk.u44 = 1;$#s/1/2/
+\#^    blk.pos\[1\] = rec->y;$#s/rec->y/rec->z/
+\#^    blk.ang\[0\] = (u16) (func_150ADA20() \* t) \* D_80096A48 \* 360.0f;$#s/360.0f/361.0f/
+\#^    blk.ang\[1\] = (u16) (func_150ADA20() \* t) \* D_80096A4C#s/(u16)/(s16)/
+\#^    blk.ang\[2\] = (u16) (func_150ADA20() \* t) \* D_80096A58#s/D_80096A58/D_80096A4C/
+\#^    blk.size\[0\] = (rec->sizeXY & 0xFFFF) \* D_80096A50 \* D_80096A54;$#s/\* D_80096A54//
+\#^    blk.size\[1\] = ((rec->sizeXY >> 16) & 0xFFFF)#s/>> 16/>> 15/
+\#^    blk.size\[2\] = (rec->sizeZW & 0xFFFF)#s/0xFFFF/0xFFF/
+\#^    blk.u3C = ((rec->sizeZW >> 16) & 0xFFFF) \* D_80096A5C \* D_80096A60;$#s/D_80096A60/D_80096A54/
+\#^    ipos\[1\] = rec->y;$#s/rec->y/rec->x/
+\#^        req.u0 = 2;$#s/2/3/
+\#^        req.u1 = -1;$#s/-1/1/
+\#^        req.life = 300;$#s/300/301/
+\#^        req.u4 = 0;$#s/0/1/
+\#^        if (D_800BE9F0 == 0x40) {$#s/0x40/0x41/
+\#^            r = 0xFF;$#s/0xFF/0xFE/
+\#^            g = 0;$#s/0/1/
+\#^            g = D_800A0D08\[i \* 3 + 1\];$#s/+ 1/+ 2/
+\#^            b = D_800A0D08\[i \* 3 + 2\];$#s/+ 2/+ 1/
+\#^        blk.light\[i\] = func_151602C0((Header \*) &req, (Header2 \*) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);$#s/ipos, 5/ipos, 4/
+\#^        blk.light\[i\] = func_151602C0((Header \*) &req, (Header2 \*) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);$#s/0xFF, 0, 0, 0xFF, 0)/0xFF, 0, 0, 0xFE, 0)/
+\#^    for (i = 0; i < 6; i++) {$#s/< 6/< 5/
+\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x2E, -1, 0, 0x29#s/0x29/0x28/
+\#^        memcpy(e + 0x28, &blk, 0x48);$#s/0x28/0x2C/
+\#^        if (blk.light\[i\] != NULL) {$#s/!=/==/

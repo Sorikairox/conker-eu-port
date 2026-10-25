@@ -853,8 +853,197 @@ s32 func_150144B8(u8 *rec) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150144B8.s")
 #endif
+#ifdef NON_MATCHING
+/* the level record func_1501474C reads */
+typedef struct {
+    s16 x, y, z;        /* 0x00 */
+    s16 halfX;          /* 0x06 */
+    s16 height;         /* 0x08 */
+    s16 halfZ;          /* 0x0A */
+    f32 angX;           /* 0x0C */
+    f32 angY;           /* 0x10 */
+    u8 pad14[2];
+    u8 flags16;         /* 0x16 */
+    u8 pad17;
+    u32 colour;         /* 0x18: bytes 0..3 copied little end first */
+    u32 params;         /* 0x1C: four 0..255 parameters, low byte first */
+} Rec1501474C;
+extern f32 D_80096A40;
+extern f32 D_80096A44;
+f32 sinf(f32);
+f32 cosf(f32);
+#endif
+
+#ifdef NON_MATCHING
+// record_zone_box_start: start handler (s32, returns 1) of a box-zone level record: marks it started (+0x16 |= 4),
+// rotates the rectangle (+-halfX, +-halfZ) by the record's yaw (sinf(angY * D_80096A40), cosf(angY * D_80096A44))
+// around (x, z) and hands a 0x40-byte block to a new func_15149130 object (type 0x12C, 0x2C; +0x28): two opposite
+// corners, the two edge vectors from them, the top (y + height) and bottom y, parameters 0 / 1 as (p / 256) * 0.5,
+// 0, parameters 2 / 3 as (p / 256) * 250, and the colour bytes in reverse order.
+s32 func_1501474C(Rec1501474C *rec) {
+    struct {
+        f32 c1[2];          /* 0x00 */
+        f32 c2[2];          /* 0x08 */
+        f32 e0[2];          /* 0x10: c0 - c1 */
+        f32 e1[2];          /* 0x18: c3 - c2 */
+        f32 top;            /* 0x20 */
+        f32 bottom;         /* 0x24 */
+        f32 p0;             /* 0x28 */
+        f32 p1;             /* 0x2C */
+        f32 zero;           /* 0x30 */
+        f32 p2;             /* 0x34 */
+        f32 p3;             /* 0x38 */
+        u8 colour[4];       /* 0x3C */
+    } blk;
+    f32 c[4][2];
+    f32 cx;
+    f32 cz;
+    f32 sn;
+    f32 cs;
+    u8 *e;
+
+    rec->flags16 |= 4;
+    cx = rec->x;
+    cz = rec->z;
+    sn = sinf(rec->angY * D_80096A40);
+    cs = cosf(rec->angY * D_80096A44);
+    c[0][0] = rec->halfX * cs + cx + rec->halfZ * sn;
+    c[0][1] = rec->halfZ * cs + cz - rec->halfX * sn;
+    c[1][0] = rec->halfX * cs + cx + (f32) -rec->halfZ * sn;
+    c[1][1] = (f32) -rec->halfZ * cs + cz - rec->halfX * sn;
+    c[2][0] = (f32) -rec->halfX * cs + cx + (f32) -rec->halfZ * sn;
+    c[2][1] = (f32) -rec->halfZ * cs + cz - (f32) -rec->halfX * sn;
+    c[3][0] = (f32) -rec->halfX * cs + cx + rec->halfZ * sn;
+    c[3][1] = rec->halfZ * cs + cz - (f32) -rec->halfX * sn;
+    blk.c1[0] = c[1][0];
+    blk.c1[1] = c[1][1];
+    blk.c2[0] = c[2][0];
+    blk.c2[1] = c[2][1];
+    blk.e0[0] = c[0][0] - c[1][0];
+    blk.e0[1] = c[0][1] - c[1][1];
+    blk.e1[0] = c[3][0] - c[2][0];
+    blk.e1[1] = c[3][1] - c[2][1];
+    blk.top = rec->y + rec->height;
+    blk.bottom = rec->y;
+    blk.p0 = (rec->params & 0xFF) * 0.00390625f * 0.5f;
+    blk.p1 = ((rec->params >> 8) & 0xFF) * 0.00390625f * 0.5f;
+    blk.zero = 0.0f;
+    blk.p2 = ((rec->params >> 16) & 0xFF) * 0.00390625f * 250.0f;
+    blk.p3 = ((rec->params >> 24) & 0xFF) * 0.00390625f * 250.0f;
+    blk.colour[0] = rec->colour;
+    blk.colour[1] = rec->colour >> 8;
+    blk.colour[2] = rec->colour >> 16;
+    blk.colour[3] = rec->colour >> 24;
+    e = (u8 *) func_15149130(0x12C, -1, 0x2C, -1, 0, 0, (struct37 *) 0x40, 0xFF, 0);
+    if (e != NULL) {
+        memcpy(e + 0x28, &blk, 0x40);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_1501474C.s")
+#endif
+#ifdef NON_MATCHING
+/* the level record func_15014B60 reads */
+typedef struct {
+    s16 x, y, z;        /* 0x00 */
+    u8 pad06[0x10];
+    u8 flags16;         /* 0x16 */
+    u8 pad17;
+    u32 sizeXY;         /* 0x18: two u16 sizes, low half first */
+    u32 sizeZW;         /* 0x1C: two more u16 values */
+} Rec15014B60;
+extern f32 D_80096A48;
+extern f32 D_80096A4C;
+extern f32 D_80096A50;
+extern f32 D_80096A54;
+extern f32 D_80096A58;
+extern f32 D_80096A5C;
+extern f32 D_80096A60;
+extern u8 D_800A0D08[]; /* 6 rgb triples */
+#endif
+
+#ifdef NON_MATCHING
+// record_light_ring_start: start handler (s32, returns 1) of a level record: marks it started (+0x16 |= 4) and
+// builds a 0x48-byte block for a new func_15149130 object (type 0x12C, 0x2E, kind 0x29; +0x28): the position, three
+// random angles ((u16) (func_150ADA20() * osGetCount()) scaled by D_80096A48 / 4C / 58 and 360), three sizes from the
+// record's u16 halves (* D_80096A50 * D_80096A54), six lights (func_151602C0 at the record position, colour
+// D_800A0D08[i], red in level 0x40), a fourth value (* D_80096A5C * D_80096A60), the record and a 1 byte. When
+// no object is free the lights are freed again (func_1516972C).
+s32 func_15014B60(Rec15014B60 *rec) {
+    struct {
+        f32 pos[3];         /* 0x00 */
+        f32 ang[3];         /* 0x0C */
+        f32 size[3];        /* 0x18 */
+        void *light[6];     /* 0x24 */
+        f32 u3C;            /* 0x3C */
+        Rec15014B60 *rec;   /* 0x40 */
+        u8 u44;             /* 0x44 */
+    } blk;
+    struct {
+        u8 u0;
+        s8 u1;
+        s16 life;
+        u8 u4;
+    } req;
+    s32 ipos[3];
+    u32 t;
+    s32 i;
+    s32 r;
+    s32 g;
+    s32 b;
+    u8 *e;
+
+    rec->flags16 |= 4;
+    blk.u44 = 1;
+    blk.rec = rec;
+    blk.pos[0] = rec->x;
+    blk.pos[1] = rec->y;
+    blk.pos[2] = rec->z;
+    t = osGetCount();
+    blk.ang[0] = (u16) (func_150ADA20() * t) * D_80096A48 * 360.0f;
+    t = osGetCount();
+    blk.ang[1] = (u16) (func_150ADA20() * t) * D_80096A4C * 360.0f;
+    t = osGetCount();
+    blk.ang[2] = (u16) (func_150ADA20() * t) * D_80096A58 * 360.0f;
+    blk.size[0] = (rec->sizeXY & 0xFFFF) * D_80096A50 * D_80096A54;
+    blk.size[1] = ((rec->sizeXY >> 16) & 0xFFFF) * D_80096A50 * D_80096A54;
+    blk.size[2] = (rec->sizeZW & 0xFFFF) * D_80096A50 * D_80096A54;
+    blk.u3C = ((rec->sizeZW >> 16) & 0xFFFF) * D_80096A5C * D_80096A60;
+    ipos[0] = rec->x;
+    ipos[1] = rec->y;
+    ipos[2] = rec->z;
+    for (i = 0; i < 6; i++) {
+        req.u0 = 2;
+        req.u1 = -1;
+        req.life = 300;
+        req.u4 = 0;
+        if (D_800BE9F0 == 0x40) {
+            r = 0xFF;
+            g = 0;
+            b = 0;
+        } else {
+            r = D_800A0D08[i * 3];
+            g = D_800A0D08[i * 3 + 1];
+            b = D_800A0D08[i * 3 + 2];
+        }
+        blk.light[i] = func_151602C0((Header *) &req, (Header2 *) ipos, 5, r, g, b, 0xFF, 0, 0, 0xFF, 0);
+    }
+    e = (u8 *) func_15149130(0x12C, -1, 0x2E, -1, 0, 0x29, (struct37 *) 0x48, 0xFF, 0);
+    if (e != NULL) {
+        memcpy(e + 0x28, &blk, 0x48);
+        return 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if (blk.light[i] != NULL) {
+            func_1516972C((struct102 *) blk.light[i]);
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15014B60.s")
+#endif
 s32 func_15014F6C(struct134 *arg0) {
     struct {
         struct134 *unk0;
@@ -990,7 +1179,83 @@ s32 func_15015300(struct134 *arg0) {
 }
 
 
+#ifdef NON_MATCHING
+/* the level record func_15015354 reads (D_80082EA0 entry 0x34) */
+typedef struct {
+    s16 x, y, z;        /* 0x00 */
+    s16 halfX;          /* 0x06 */
+    s16 pad08;
+    s16 halfZ;          /* 0x0A */
+    f32 angX;           /* 0x0C */
+    f32 angY;           /* 0x10 */
+    u8 started;         /* 0x14 */
+} Rec15015354;
+
+// record_quad_zone_start: start handler (void, D_80082EA0 entry 0x34) of a rectangular zone record: marks it started
+// (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (func_150A8050 /
+// func_150A7E40) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
+// (func_1510F800(0); func_1510FD20(x, z)), and hands that 0x74-byte block to a new func_15149130 object (+0x28).
+void func_15015354(Rec15015354 *src) {
+    struct {
+        Rec15015354 *src;   /* 0x00 */
+        s16 u4;             /* 0x04 */
+        f32 u8;             /* 0x08 */
+        f32 corner[4][3];   /* 0x0C */
+        f32 edge[4][3];     /* 0x3C */
+        s32 sound;          /* 0x6C */
+        s32 u70;            /* 0x70 */
+    } blk;
+    f32 m[4][4];
+    f32 local[4][3];
+    f32 pos[3];
+    u8 *e;
+    u8 i;
+    u8 j;
+
+    blk.src = src;
+    blk.u4 = -1;
+    blk.u8 = 0.0f;
+    src->started = 1;
+    pos[0] = src->x;
+    pos[1] = src->y;
+    pos[2] = src->z;
+    local[0][0] = src->halfX;
+    local[0][1] = 0.0f;
+    local[0][2] = src->halfZ;
+    local[1][0] = src->halfX;
+    local[1][1] = 0.0f;
+    local[1][2] = -src->halfZ;
+    local[2][0] = -src->halfX;
+    local[2][1] = 0.0f;
+    local[2][2] = -src->halfZ;
+    local[3][0] = -src->halfX;
+    local[3][1] = 0.0f;
+    local[3][2] = src->halfZ;
+    func_150A8050(m, src->angX, src->angY, 0.0f);
+    m[3][0] = pos[0];
+    m[3][1] = pos[1];
+    m[3][2] = pos[2];
+    for (i = 0; i < 4; i++) {
+        func_150A7E40(m, local[i][0], local[i][1], local[i][2], &blk.corner[i][0], &blk.corner[i][1],
+                      &blk.corner[i][2]);
+    }
+    for (i = 0; i < 4; i++) {
+        j = (i + 1) & 3;
+        blk.edge[i][0] = blk.corner[j][0] - blk.corner[i][0];
+        blk.edge[i][1] = blk.corner[j][1] - blk.corner[i][1];
+        blk.edge[i][2] = blk.corner[j][2] - blk.corner[i][2];
+    }
+    func_1510F800(0);
+    blk.sound = func_1510FD20(src->x, src->z);
+    blk.u70 = 0;
+    e = (u8 *) func_15149130(0x12C, -1, 0x3D, -1, 0, 0x2E, (struct37 *) 0x74, 0xFF, 0);
+    if (e != NULL) {
+        memcpy(e + 0x28, &blk, 0x74);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15015354.s")
+#endif
 s32 func_15015644(struct134 *arg0) {
     struct {
         struct134 *unk0;

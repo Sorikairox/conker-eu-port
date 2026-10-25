@@ -1,0 +1,40 @@
+/if (anim == NULL || obj->unk65 == 0) {/s/obj->unk65 == 0/obj->unk65 == 1/
+/partner = &D_800CC2D0\[obj->unk65 - 1\];/s/- 1/- 0/
+/if (obj->id == 0x41) {/s/0x41/0x42/
+/if (partner->unk84.uh != 0x48 && partner->unk84.uh != 0x4B) {/s/!= 0x4B/!= 0x4C/
+/if (cur == 0 && anim->unk8 == 0.0f) {/s/0.0f/1.0f/
+/func_15188D80(obj, 100, 0);/s/100/101/
+/if (cur == 0 && partner->unk84.uh == 0x4B) {/s/cur == 0/cur == 1/
+/func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);/s/3.0f/2.0f/
+/if (cur == 1 && anim->unk18 - 1.0f <= anim->unk8) {/s/<=/</
+/if (cur == 1 && anim->unk18 - 1.0f <= anim->unk8) {/s/- 1.0f/- 2.0f/
+/if (obj->id != 0x1D && obj->id != 0x6E && obj->id != 0x2F) {/s/!= 0x2F)/!= 0x30)/
+/if (partner->unk65 != 0 || partner->health == 0) {/s/partner->health == 0/partner->health == 1/
+/if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {/s/!= 0x41/!= 0x40/
+/if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {/s/unk11A != 3/unk11A != 2/
+/if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {/s/!= 0x18/!= 0x19/
+/^        anim2 = 0xC7;/s/0xC7/0xC8/
+/^        anim1 = 0xFB;/s/0xFB/0xFA/
+/^        anim2 = 0x2C9;/s/0x2C9/0x2C8/
+/^        move = 0x39;/s/0x39/0x38/
+/if (partner->unk13C != 0 || (obj->id == 0x1D && partner->stunned != 0)) {/s/obj->id == 0x1D \&\& //
+/if (6.0f <= panim->unk8 && panim->unk8 < 11.0f) {/s/6.0f <=/6.0f </
+/if (6.0f <= panim->unk8 && panim->unk8 < 11.0f) {/s/< 11.0f/<= 11.0f/
+/func_15083568(obj, move, 1.0f, 0);/s/1.0f/2.0f/
+/} else if (11.0f <= panim->unk8) {/s/11.0f/10.5f/
+/^            cur = partner->unk84.uh;/d
+/} else if (cur == 0xC6) {/s/0xC6/0xC5/
+/^            place = FALSE;/s/FALSE/TRUE/
+/func_1505E650(obj, cur, 1.0f, 0.0f, 0.0f, 0.0f, 0);/s/1.0f, 0.0f/1.0f, 1.0f/
+/^    if (place) {/s/place/!place/
+/^        ok = TRUE;/s/TRUE/FALSE/
+/^        ok = ctl->unk197;/s/unk197/unk11A/
+/if (ctl->unk84 == 0) {/s/== 0/!= 0/
+/if (n < 4 && !(\*(u16 \*) ((s32 \*) D_800BE728\[0\])\[n\] & 0x10)) {/s/n < 4/n < 5/
+/if (n < 4 && !(\*(u16 \*) ((s32 \*) D_800BE728\[0\])\[n\] & 0x10)) {/s/0x10)/0x20)/
+/if (partner->unk84.uh == 0x10A && \*(s16 \*) ((u8 \*) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {/s/<= 0/< 0/
+/if (partner->unk84.uh == 0x10A && \*(s16 \*) ((u8 \*) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {/s/ \&\& ok//
+/if (partner->unk84.uh == 0x10A && \*(s16 \*) ((u8 \*) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {/s/0x2000/0x1000/
+/func_15102C3C((u8 \*) partner, -1, 3, 1, 0xFF, 1);/s/0xFF, 1/0xFF, 0/
+/^            obj->unk2E8 = 1;/s/1;/2;/
+/} else if (obj->unk2E8 == 1) {/s/== 1/!= 0/

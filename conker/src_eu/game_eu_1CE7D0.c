@@ -193,7 +193,183 @@ void func_151A15C0(f32 arg0, f32 arg1, f32 arg2, s16 arg3, f32 arg4, f32 arg5, u
 void func_151A177C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, s32 argB, s32 argC, s32 argD, s32 argE, s32 argF, s32 arg10, f32 arg11, s32 arg12, s32 arg13, s32 arg14, s32 arg15, s32 arg16, s32 arg17, s32 arg18, s32 arg19, u8 arg1A, s32 arg1B) {
 }
 
+#ifdef NON_MATCHING
+s32 func_15167D84(s32 **, s32, s32, s32, s32, s32);
+extern s32 D_800910E4;
+
+/* spark emitter parameters at +0x28 of the object */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 spread;    /* radius of the target sphere */
+    /* 0x10 */ f32 accum;
+    /* 0x14 */ f32 rate;      /* sparks per frame unit */
+    /* 0x18 */ s16 lifeMin;
+    /* 0x1A */ s16 lifeRange;
+    /* 0x1C */ s16 fadeMin;
+    /* 0x1E */ s16 fadeRange;
+} Emit1794;
+
+/* func_15167D84's sprite template (as func_151A1F48's) */
+typedef struct {
+    /* 0x00 */ s32 *sprites;
+    /* 0x04 */ s32 mode;
+    /* 0x08 */ u8 pad8[4];
+    /* 0x0C */ s16 uC;
+    /* 0x0E */ s16 life;
+    /* 0x10 */ s16 pos[3];
+    /* 0x16 */ s16 u16;
+    /* 0x18 */ s16 u18;
+    /* 0x1A */ u8 pad1A[2];
+    /* 0x1C */ u8 frac[3];    /* x, z, y fractions (1/256) */
+    /* 0x1F */ u8 u1F;
+    /* 0x20 */ s16 u20;
+    /* 0x22 */ s16 u22;
+    /* 0x24 */ s16 u24;
+    /* 0x26 */ s16 u26;
+    /* 0x28 */ s16 total;     /* frames of the fade program */
+    /* 0x2A */ u8 u2A;
+    /* 0x2B */ u8 pad2B;
+    /* 0x2C */ u8 colour[4];
+    /* 0x30 */ u8 u30[3];
+    /* 0x33 */ u8 pad33;
+    /* 0x34 */ u16 flags;
+} Spr1794;
+
+/* the record's fade / motion program at +0x50 (0x22 bytes) */
+typedef struct {
+    /* 0x00 */ s16 inStep;    /* 255 / (total - rest) */
+    /* 0x02 */ s16 total;
+    /* 0x04 */ s16 rest;      /* total - total / 4 */
+    /* 0x06 */ s16 midStep;   /* fade / (total - half) */
+    /* 0x08 */ s16 total2;
+    /* 0x0A */ s16 half;
+    /* 0x0C */ s16 half2;
+    /* 0x0E */ s16 vel[3];    /* (target - pos) / half */
+    /* 0x14 */ s16 velFrac[3];
+    /* 0x1A */ s16 quarter;
+    /* 0x1C */ s16 outStep;   /* 255 / quarter */
+    /* 0x1E */ s16 half3;
+    /* 0x20 */ s16 endStep;   /* fade / half */
+} Fade1794;
+
+// spark_burst_emitter_update: adds rate * D_800BE9A4 to the emitter's accum and spawns one spark sprite
+// (func_15167D84, sprites D_800910E4, room / owner from +0xC / +0x1) per whole unit. Each spark starts at the
+// emitter position and flies in half its fade time to a random point of the sphere of radius spread (two random
+// angles through func_151423D8); life lifeMin + 0..lifeRange, fade value fadeMin + 0..fadeRange, random flags 4 / 8
+// (they accumulate over the batch). The fade program (Fade1794) is copied to the record's +0x50.
+void func_151A1794(u8 *obj) {
+    Emit1794 *e = (Emit1794 *) (obj + 0x28);
+    Spr1794 t;
+    Fade1794 f;
+    u8 r1;
+    u8 r2;
+    f32 sin1;
+    f32 cos1;
+    f32 sin2;
+    f32 cos2;
+    f32 dist;
+    f32 horiz;
+    f32 tx;
+    f32 ty;
+    f32 tz;
+    f32 inv;
+    f32 v;
+    s16 fade;
+    s16 n;
+    s16 q;
+    s16 h;
+    s16 rest;
+    u8 *rec;
+
+    e->accum = e->accum + e->rate * D_800BE9A4;
+    if (!(1.0f < e->accum)) {
+        return;
+    }
+    t.colour[0] = 0xFF;
+    t.colour[1] = 0xFF;
+    t.colour[2] = 0xFF;
+    t.u30[0] = 0;
+    t.u30[1] = 0;
+    t.u30[2] = 0;
+    t.u1F = 0x10;
+    t.flags = 0x120;
+    t.mode = 0x000C0001;
+    t.uC = 0;
+    t.sprites = &D_800910E4;
+    t.u16 = 0;
+    t.u20 = 0;
+    t.u18 = 0;
+    t.u22 = 0;
+    t.u2A = 0;
+    t.colour[3] = 0;
+    t.u26 = 0x7D0;
+    t.u24 = 0x7D0;
+    do {
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        sin1 = func_151423D8(r1 - 0x40);
+        cos1 = func_151423D8(r1);
+        sin2 = func_151423D8(r2 - 0x40);
+        cos2 = func_151423D8(r2);
+        dist = func_150ADA68() * e->spread;
+        horiz = dist * cos2;
+        tx = e->pos[0] + horiz * sin1;
+        ty = e->pos[1] - dist * sin2;
+        tz = e->pos[2] + horiz * cos1;
+        if (func_150ADA20() & 1) {
+            t.flags |= 4;
+        }
+        if (func_150ADA20() & 1) {
+            t.flags |= 8;
+        }
+        t.life = (u32) func_150ADA20() % (u32) (e->lifeRange + 1) + e->lifeMin;
+        fade = (u32) func_150ADA20() % (u32) (e->fadeRange + 1) + e->fadeMin;
+        t.total = ((u8 *) D_80090F10)[0x1D8] * (0x100 / t.life);
+
+        n = t.total;
+        q = n >> 2;
+        h = n >> 1;
+        rest = n - q;
+        f.inStep = 0xFF / (n - rest);
+        f.total = n;
+        f.rest = rest;
+        f.midStep = fade / (n - h);
+        f.total2 = n;
+        f.half = h;
+        f.half2 = h;
+        f.quarter = q;
+        f.outStep = 0xFF / q;
+        f.half3 = h;
+        f.endStep = fade / h;
+
+        t.pos[0] = (s32) e->pos[0];
+        t.pos[1] = (s32) e->pos[1];
+        t.pos[2] = (s32) e->pos[2];
+        t.frac[0] = (s32) (e->pos[0] * 256.0f);
+        t.frac[2] = (s32) (e->pos[1] * 256.0f);
+        t.frac[1] = (s32) (e->pos[2] * 256.0f);
+
+        inv = 1.0f / h;
+        v = (tx - e->pos[0]) * inv;
+        f.vel[0] = (s32) v;
+        f.velFrac[0] = (s32) (v * 256.0f) & 0xFF;
+        v = (ty - e->pos[1]) * inv;
+        f.vel[1] = (s32) v;
+        f.velFrac[1] = (s32) (v * 256.0f) & 0xFF;
+        v = (tz - e->pos[2]) * inv;
+        f.vel[2] = (s32) v;
+        f.velFrac[2] = (s32) (v * 256.0f) & 0xFF;
+
+        rec = (u8 *) func_15167D84((s32 **) &t, 0, 0x22, -1, obj[0xC], obj[1]);
+        if (rec != NULL) {
+            memcpy(rec + 0x50, &f, 0x22);
+        }
+        e->accum -= 1.0f;
+    } while (1.0f < e->accum);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CE7D0/func_151A1794.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_151A1D0C(u8 *arg0) {

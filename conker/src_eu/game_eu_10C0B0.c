@@ -119,7 +119,125 @@ void func_150DEC58(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DEC58.s")
 #endif
+#ifdef NON_MATCHING
+void func_1514470C(u8 *, f32 *);
+s32 func_15145128(f32 *, f32 *, f32 *, f32 *);
+s32 memcpy(u8 *, void *, s32);
+
+// beam_link_fire: timer handler of a link effect p (timer s16 at p+0x28, two objects at p+0x2C / p+0x30). When the
+// timer runs out (minus D_800BE9E4) it fires a bolt (func_1513D2F0 template, kind 0xBE or 0xBF at random, size 706,
+// at the first object's position) towards the second object at speed 25..55 (x0.18 for kind 0xBF); the bolt's +0x110
+// gets {velocity, travel time = distance / speed, the flat side vector (-z, 0, x) and flat direction (x, 0, z) of the
+// normalised horizontal offset}. The timer restarts at 200..400.
+void func_150DED40(u8 *p) {
+    struct {
+        u8 kind;            /* 0x00 */
+        u8 u1;              /* 0x01 */
+        s16 u2;             /* 0x02 */
+        s16 u4;             /* 0x04 */
+        u8 pad6[2];
+        s32 u8;             /* 0x08 */
+        s32 uC;             /* 0x0C */
+        u8 colour[4];       /* 0x10 */
+        f32 size[2];        /* 0x14 */
+        f32 pos[3];         /* 0x1C */
+        f32 u28[3];         /* 0x28 */
+        f32 scale[3];       /* 0x34 */
+        s32 mode;           /* 0x40 */
+        u8 u44[4];          /* 0x44 */
+        s32 u48;            /* 0x48 */
+        u8 u4C;             /* 0x4C */
+        u8 pad4D[3];
+        s32 u50;            /* 0x50 */
+        s16 u54;            /* 0x54 */
+        s16 u56;            /* 0x56 */
+    } t;
+    struct {
+        f32 vel[3];         /* 0x00 */
+        f32 time;           /* 0x0C */
+        f32 side[3];        /* 0x10 */
+        f32 flat[3];        /* 0x1C */
+    } rec;
+    s32 kinds[2];
+    f32 to[3];
+    f32 d[3];
+    f32 len;
+    f32 unused;
+    f32 speed;
+    f32 spd;
+    s16 *timer;
+    u8 *e;
+
+    *(s16 *) (p + 0x28) -= D_800BE9E4;
+    if (*(s16 *) (p + 0x28) >= 0) {
+        return;
+    }
+    kinds[0] = 0xBE;
+    kinds[1] = 0xBF;
+    t.kind = kinds[func_150ADA20() & 1];
+    timer = (s16 *) (p + 0x28);
+    func_1514470C(*(u8 **) (p + 0x2C), t.pos);
+    func_1514470C(*(u8 **) (p + 0x30), to);
+    d[0] = to[0] - t.pos[0];
+    d[1] = to[1] - t.pos[1];
+    d[2] = to[2] - t.pos[2];
+    func_15145128(d, rec.vel, &len, &unused);
+    speed = func_150ADA68() * 30.0f + 25.0f;
+    spd = speed;
+    if (t.kind == 0xBF) {
+        spd = speed * 0.18f;
+    }
+    rec.vel[0] *= spd;
+    rec.vel[1] *= spd;
+    rec.vel[2] *= spd;
+    rec.time = len / spd;
+    rec.flat[0] = d[0];
+    rec.flat[1] = 0.0f;
+    rec.flat[2] = d[2];
+    func_15145128(rec.flat, rec.flat, NULL, NULL);
+    rec.side[0] = -rec.flat[2];
+    rec.side[1] = 0.0f;
+    rec.side[2] = rec.flat[0];
+    t.u28[0] = ((f32 *) D_800A5860)[0];
+    t.u28[1] = ((f32 *) D_800A5860)[1];
+    t.u28[2] = ((f32 *) D_800A5860)[2];
+    t.u1 = 0;
+    t.u2 = 0x3B03;
+    t.u4 = 300;
+    t.u8 = 0;
+    t.uC = 0;
+    t.colour[0] = 0xFF;
+    t.colour[1] = 0xFF;
+    t.colour[2] = 0xFF;
+    t.colour[3] = 0xFF;
+    func_150ADA68(); /* result unused */
+    t.size[1] = 706.0f;
+    t.size[0] = 706.0f;
+    t.u28[0] = ((f32 *) D_800A5860)[0];
+    t.u28[1] = ((f32 *) D_800A5860)[1];
+    t.u28[2] = ((f32 *) D_800A5860)[2];
+    t.mode = 0x65C0000;
+    t.u44[0] = 0xFF;
+    t.u44[1] = 0xFF;
+    t.u44[2] = 0;
+    t.u44[3] = 7;
+    t.u48 = 0;
+    t.u4C = 0xFF;
+    t.u50 = 0;
+    t.u54 = 1;
+    t.u56 = 0xFF;
+    t.scale[0] = 1.0f;
+    t.scale[1] = 1.0f;
+    t.scale[2] = 1.0f;
+    e = func_1513D2F0(&t, (s32) &D_800A4AA0, 0x28, 0, 0, 0x26, 0, 3, 0xFF, 0x28, p[0xC], p[1]);
+    if (e != NULL) {
+        memcpy(e + 0x110, &rec, 0x28);
+    }
+    *timer = (u32) func_150ADA20() % 201 + 200;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10C0B0/func_150DED40.s")
+#endif
 
 s32 func_150DF04C(u8 *arg0) {
     (*(f32 *)((u8 *)arg0 + 0x34)) += ((*(f32 *)((u8 *)arg0 + 0x110)) * D_800BE9A4);

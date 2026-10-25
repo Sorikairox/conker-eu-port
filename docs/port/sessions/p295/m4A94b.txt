@@ -1,0 +1,7 @@
+# P295: the 6 P286 survivors of m4A94.txt against the boundary setups of s4A94b.txt (named)
+/if (anim == NULL || obj->unk65 == 0) {/s/obj->unk65 == 0/obj->unk65 == 1/ % i1 i1t
+/if (cur == 1 && anim->unk18 - 1.0f <= anim->unk8) {/s/<=/</ % a_eq
+/if (6.0f <= panim->unk8 && panim->unk8 < 11.0f) {/s/6.0f <=/6.0f </ % s1D_six
+/} else if (11.0f <= panim->unk8) {/s/11.0f/10.5f/ % s1D_105 s1D_105b
+/^            cur = partner->unk84.uh;/d % reload
+/} else if (obj->unk2E8 == 1) {/s/== 1/!= 0/ % x2

@@ -1,0 +1,109 @@
+# P310 mutants for func_150E2294 (beam_effect_update)
+/    tex = 0x23;/s/0x23/0x24/ % base aim_pass
+/\*(s16 \*) (obj + 0x90) -= D_800BE9E4;/s/-= D_800BE9E4/-= 1/ % lifeout life0
+/if (\*(s16 \*) (obj + 0x90) < 0 || (target != NULL && \*(s16 \*) (obj + 0xE0) != -1 &&/s/< 0/<= 0/ % life0
+/if (\*(s16 \*) (obj + 0x90) < 0 || (target != NULL && \*(s16 \*) (obj + 0xE0) != -1 &&/s/!= -1/!= 0/ % ser_m1
+/if (\*(s16 \*) (obj + 0x90) < 0 || (target != NULL && \*(s16 \*) (obj + 0xE0) != -1 &&/s/target != NULL/target == NULL/ % base nofollow
+/\*(s16 \*) (obj + 0xE0) != \*(u16 \*) (target + 0x84)))/s/0x84/0x86/ % base sermis
+/if (\*(s8 \*) (obj + 0xD0) != 0) {/s/(s8 \*)/(u8 *)/ % mneg
+/if (\*(s8 \*) (obj + 0xD0) != 0) {/s/!= 0/== 0/ % base m0
+/if (obj\[0xE3\] != 0) {/s/!= 0/!= 1/ % delay2 att
+/            obj\[0xE3\]--;/d % delay2
+/if (target != NULL && \*(u8 \*\*) (target + 0x1D4) != NULL && obj\[0xDA\] == target\[0x3B\] &&/s/obj\[0xDA\]/obj[0xDB]/ % att att_slot
+/if (target != NULL && \*(u8 \*\*) (target + 0x1D4) != NULL && obj\[0xDA\] == target\[0x3B\] &&/s/target != NULL \&\& //  % att_nof
+/                target\[0x127\] != 0xFF) {/s/!= 0xFF/!= 0xFE/ % att_ff
+/                obj\[0xE3\] = 3;/s/3/2/ % att
+/\*(s16 \*) (obj + 0xD6) -= D_800BE9E4;/s/D_800BE9E4/1/ % base teq tlt
+/if (\*(s16 \*) (obj + 0xD6) < -\*(s16 \*) (obj + 0xD4)) {/s/</<=/ % teq
+/if (\*(s16 \*) (obj + 0xD6) < -\*(s16 \*) (obj + 0xD4)) {/s/0xD4/0xD2/ % tlt base
+/\*(s16 \*) (obj + 0xD6) = \*(s16 \*) (obj + 0xD2);/s/0xD2)/0xD4)/ % base
+/if (target == NULL || \*(u8 \*\*) (target + 0x1D4) == NULL || obj\[0xDA\] != target\[0x3B\]) {/s/obj\[0xDA\] != target\[0x3B\]/0/ % t_slot
+/if (target == NULL || \*(u8 \*\*) (target + 0x1D4) == NULL || obj\[0xDA\] != target\[0x3B\]) {/s/ || \*(u8 \*\*) (target + 0x1D4) == NULL// % t_nomtx
+/^            mtx = \*(u8 \*\*) (target + 0x1D4) + obj\[0xE2\] \* 0x40;/s/0x40;/0x30;/ % base
+/            aim = (\*(u8 \*\*) (obj + 0xDC))\[0x127\];/s/0x127/0x126/ % base ff
+/            alpha = 0.0f;/s/0.0f/1.0f/ % aimmis_h aimmis_t
+/if (obj\[0xFD\]-- == 0) {/s/== 0/== 1/ % fd0 fd2 base
+/                obj\[0xFD\] = 2;/s/2/3/ % fd0
+/if (\*(f32 \*) (obj + 0xA8) == 0.0f) {/s/== 0.0f/!= 0.0f/ % w0 base
+/width = (f32) (func_151EFDD0() .* 70) + 40.0f;/s/40.0f/41.0f/ % w0 w0r
+/width = (f32) (func_151EFDD0() .* 70) + 40.0f;/s/70)/71)/ % w0r
+/            hitobj = 0;/d % ff_ray
+/aimrec = D_800D9D80 + aim \* 0x1C;/s/0x1C/0x18/ % base aim_pass
+/heading = \*(u16 \*) (target + 0x76) - \*(s16 \*) (\*(u8 \*\*) (target + 0x31C) + 0x12);/s/\*(s16 \*) (\*(u8/*(u16 *) (*(u8/ % aim_negh aimmis_t2
+/heading = \*(u16 \*) (target + 0x76) - \*(s16 \*) (\*(u8 \*\*) (target + 0x31C) + 0x12);/s/\*(u16 \*) (target/*(s16 *) (target/ % aimmis_t2
+/if (heading == \*(s16 \*) aimrec && \*(s8 \*) (target + 0x1D1) == \*(s8 \*) (aimrec + 2)) {/s/\*(s16 \*) aimrec/*(u16 *) aimrec/ % aim_negh
+/if (heading == \*(s16 \*) aimrec && \*(s8 \*) (target + 0x1D1) == \*(s8 \*) (aimrec + 2)) {/s/(aimrec + 2)/(aimrec + 3)/ % base aimmis_t
+/\*(f32 \*) (obj + 0xB4) = \*(f32 \*) (aimrec + 8);/s/+ 8)/+ 4)/ % base
+/if (D_800BE616 == 0 && func_151EFDD0() .* 100 < aimrec\[3\]) {/s/D_800BE616 == 0/D_800BE616 != 0/ % aim_on aim_pass
+/if (D_800BE616 == 0 && func_151EFDD0() .* 100 < aimrec\[3\]) {/s/< aimrec/<= aimrec/ % aim_fail aim_eq2
+/vec\[1\] = \*(f32 \*) (obj + 0xB4) - \*(f32 \*) (obj + 0x98);/s/0x98/0x94/ % aim_pass aim_big
+/dir = (f32 \*) (aimrec + 0x10);/s/0x10/0x14/ % aim_pass
+/func_15049148((struct17 \*) dir, d + d, (struct17 \*) out);/s/d + d/d * d/ % aim_pass aim_big
+/func_15048F58((struct17 \*) vec, (struct17 \*) out, (struct17 \*) out);/s/(struct17 \*) vec/(struct17 *) out/ % aim_pass
+/out\[1\] += \*(f32 \*) (obj + 0xB4);/s/0xB4/0xB8/ % aim_pass
+/out\[1\], out\[2\], (f32) (func_151EFDD0() .* 35) + 20.0f, 0.0f, 8.0f, 320.0f, 0x1E,/s/20.0f, 0.0f/20.0f, 1.0f/ % aim_pass
+/out\[1\], out\[2\], (f32) (func_151EFDD0() .* 35) + 20.0f, 0.0f, 8.0f, 320.0f, 0x1E,/s/0x1E/0x1F/ % aim_pass
+/func_10010F88(func_151EFDD0() .* 6 + 0x2B, 0x2710, 0, 0, aim, (s32) \* (f32 \*) (obj + 0xB0),/s/aim,/0xFF,/ % aim_pass
+/func_10010F88(func_151EFDD0() .* 6 + 0x2B, 0x2710, 0, 0, aim, (s32) \* (f32 \*) (obj + 0xB0),/s/0x2B/0x2C/ % aim_pass aim_passw
+/(s32) \* (f32 \*) (obj + 0xB4), (s32) \* (f32 \*) (obj + 0xB8), 0x1F4, 0x7D0);/s/(obj + 0xB8), 0x1F4/(obj + 0xB4), 0x1F4/ % aim_pass aim_big
+/^                    alpha = 1.0f;/d % base aim_on
+/func_1505A184(heading, 2000.0f, (f32) (s16) (\*(s8 \*) (target + 0x1D1) \* 200) \* 0.0054931640625f,/s/\* 200)/* 201)/ % aimmis_h aimmis_t2
+/func_1505A184(heading, 2000.0f, (f32) (s16) (\*(s8 \*) (target + 0x1D1) \* 200) \* 0.0054931640625f,/s/(f32) (s16)/(f32) (s32)/ % aimmis_t2 aimmis_neg
+/                                  (f32 \*) (obj + 0xB0), (f32 \*) (obj + 0xB8), (f32 \*) (obj + 0xB4));/s/(obj + 0xB8), (f32 \*) (obj + 0xB4)/(obj + 0xB4), (f32 *) (obj + 0xB8)/ % aimmis_h
+/                    \*(f32 \*) (obj + 0xB4) += \*(f32 \*) (obj + 0x98);/s/0x98/0x9C/ % aimmis_h
+/\*(f32 \*) (obj + 0xC0) = (f32) (func_151EFDD0() .* 3) \* 80.0f + 80.0f;/s/+ 80.0f/+ 81.0f/ % base
+/\*(f32 \*) (obj + 0xC0) = (f32) (func_151EFDD0() .* 3) \* 80.0f + 80.0f;/s/3)/4)/ % base aim_pass
+/                if (ray) {/s/ray/!ray/ % ff ff_ray
+/hit\[2\] = \*(f32 \*) (obj + 0xB8) - \*(f32 \*) (obj + 0x9C);/s/0x9C/0x98/ % ff_ray
+/step = (75.0f \* width) \/ sqrtf(hit\[0\] \* hit\[0\] + hit\[1\] \* hit\[1\] + hit\[2\] \* hit\[2\]);/s/75.0f/70.0f/ % ff_ray ff_rayw
+/step = (75.0f \* width) \/ sqrtf(hit\[0\] \* hit\[0\] + hit\[1\] \* hit\[1\] + hit\[2\] \* hit\[2\]);/s/+ hit\[2\] \* hit\[2\]// % ff_ray
+/if (func_150ACEA0(\*(f32 \*) (obj + 0x94), \*(f32 \*) (obj + 0x98), \*(f32 \*) (obj + 0x9C), hit\[0\] \* step,/s/hit\[0\] \* step/hit[1] * step/ % ff_ray
+/hit\[1\] \* step, hit\[2\] \* step, &rayhit, NULL, &hit\[0\], &hit\[1\], &hit\[2\], NULL, 0, 0,/s/&hit\[0\], &hit\[1\]/\&hit[1], \&hit[0]/ % ff_ray
+/                        \*(f32 \*) (obj + 0xB4) = hit\[1\];/s/hit\[1\]/hit[2]/ % ff_ray
+/                        alpha = 1.0f;/d % ff_ray
+/idx = (u32) (rayhit - D_800DC26C) \/ 12;/s/(u32) //  % ff_idxneg
+/idx = (u32) (rayhit - D_800DC26C) \/ 12;/s/12;/8;/ % ff_ray ff_idx4
+/if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {/s/idx < D_800DBE4C/idx <= D_800DBE4C/ % ff_idx5
+/if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {/s/ \&\& D_800DBE5C != 0// % ff_notab
+/hitobj = func_1510FE4C(((s32 \*) D_800DBE5C)\[idx\]);/s/\[idx\]/[idx + 1]/ % ff_ray ff_idx0
+/                tex = 0x43;/s/0x43/0x42/ % ff ff_ray
+/\*(f32 \*) (obj + 0xA4) = func_150484A0(-(\*(f32 \*) (obj + 0xB0) - \*(f32 \*) (obj + 0x94)),/s/-(\*(f32/(*(f32/ % base
+/-(\*(f32 \*) (obj + 0xB8) - \*(f32 \*) (obj + 0x9C)));/s/0x9C/0x98/ % base
+/\*(f32 \*) (obj + 0xA0) = func_150484A0(\*(f32 \*) (obj + 0xB4) - \*(f32 \*) (obj + 0x98), sqrtf(dx \* dx + dz \* dz));/s/dz \* dz/dz * dx/ % base
+/            \*(f32 \*) (obj + 0xC8) = 0.0f;/d % m0 base
+/^            if (ray) {/s/ray/!ray/ % base fd0
+/\*(f32 \*) (obj + 0xB0), \*(f32 \*) (obj + 0xB4), \*(f32 \*) (obj + 0xB8), width, alpha, 15.0f,/s/15.0f/16.0f/ % fd0 ff_ray
+/\*(f32 \*) (obj + 0xB0), \*(f32 \*) (obj + 0xB4), \*(f32 \*) (obj + 0xB8), width, alpha, 15.0f,/s/width, alpha/alpha, width/ % fd0 ff_ray
+/820.0f, 0x4B, tex, 0, 0, 0, \*(struct127 \*\*) (obj + 0xDC), 0, 0, 0, hitobj, obj\[0xFE\],/s/hitobj, obj\[0xFE\]/0, obj[0xFE]/ % ff_ray ff_idx0
+/820.0f, 0x4B, tex, 0, 0, 0, \*(struct127 \*\*) (obj + 0xDC), 0, 0, 0, hitobj, obj\[0xFE\],/s/obj\[0xFE\],/obj[0xFD],/ % ff_fe fd0
+/    if (\*(s16 \*) (obj + 0xD6) <= 0) {/s/<= 0/< 0/ % m0t0
+/    c = func_150AD78C(\*(f32 \*) (obj + 0xA0));/s/0xA0/0xA4/ % m0 mv_dir
+/    n\[1\] = n\[2\] - c \* -1.0f;/s/n\[2\] - c/n[2] + c/ % m0 mv_dir
+/    n\[0\] = n\[2\] + s \* -1.0f;/s/-1.0f/1.0f/ % m0
+/    vx = s \* n\[2\] + c \* n\[0\];/s/c \* n\[0\]/s * n[0]/ % m0 mv_dir2
+/    vz = -c \* n\[2\] + s \* n\[0\];/s/-c \* n\[2\] + // % mv_dir mv_vz0
+/    vz = -c \* n\[2\] + s \* n\[0\];/s/s \* n\[0\]/c * n[0]/ % m0 mv_dir2
+/    if (\*(f32 \*) (obj + 0xAC) != 0.0f) {/s/!= 0.0f/== 0.0f/ % mv_lim mv_near
+/        dist0 = sqrtf(dx \* dx + dy \* dy + dz \* dz);/s/dy \* dy + //  % mv_lim mv_far
+/    if (obj\[0xDB\] == 0) {/s/== 0/!= 0/ % mv_db0 m0
+/        vy = n\[1\] \* 0.5f;/s/0.5f/0.25f/ % mv_db0 mv_lim_db0
+/        vz \*= 0.5f;/d % mv_db0
+/    \*(f32 \*) (obj + 0xCC) = vz;/s/vz/vy/ % m0
+/    step = \*(f32 \*) (obj + 0xA8) \* (f32) D_800BE9E4;/s/(f32) D_800BE9E4/2.0f/ % mv_frames
+/    if (dist0 < step && \*(f32 \*) (obj + 0xAC) != 0.0f) {/s/dist0 < step/dist0 <= step/ % mv_lim_c0 mv_step mv_near
+/    if (dist0 < step && \*(f32 \*) (obj + 0xAC) != 0.0f) {/s/ \&\& \*(f32 \*) (obj + 0xAC) != 0.0f// % m0 mv_db0 mv_step
+/        \*(f32 \*) (obj + 0xC0) = dist0;/d % mv_near mv_step
+/        vy \*= dist0;/s/dist0/step/ % mv_near mv_step
+/    if (obj\[0xFE\] == 1) {/s/== 1/!= 0/ % m0 ff_fe
+/                      target != NULL ? (target - (u8 \*) D_800CC2D0) \/ 0x32C : 0, 0);/s/: 0, 0)/: 1, 0)/ % mv_fe1n
+/                      target != NULL ? (target - (u8 \*) D_800CC2D0) \/ 0x32C : 0, 0);/s/0x32C :/0x328 :/ % mv_fe1 mv_fe1_2
+/                      \*(f32 \*) (obj + 0x94) + vx, \*(f32 \*) (obj + 0x98) + vy, \*(f32 \*) (obj + 0x9C) + vz,/s/+ vy,/+ vx,/ % mv_fe1
+/    \*(f32 \*) (obj + 0x98) += vy;/s/vy/vz/ % m0
+/    if (limit == 0.0f) {/s/== 0.0f/!= 0.0f/ % m0 mv_lim
+/^    dy = \*(f32 \*) (obj + 0xB4) - \*(f32 \*) (obj + 0x98);/s/0x98/0x94/ % mv_lim mv_far mv_lim_c0
+/    if (d < limit || dist0 < d) {/s/d < limit ||/d <= limit ||/ % mv_lim mv_near
+/    if (d < limit || dist0 < d) {/s/ || dist0 < d// % mv_far mv_lim_c0
+/        if (obj\[0xFC\] != 0) {/s/!= 0/== 0/ % mv_near mv_near_fc mv_step
+/func_150E4AD0(endX, \*(f32 \*) (obj + 0xB4), \*(f32 \*) (obj + 0xB8), 1, obj\[0xFC\], 0, 0xFF);/s/0, 0xFF)/0, 0xFE)/ % mv_near_fc mv_step
+/func_150E4AD0(endX, \*(f32 \*) (obj + 0xB4), \*(f32 \*) (obj + 0xB8), 1, obj\[0xFC\], 0, 0xFF);/s/endX/*(f32 *) (obj + 0x94)/ % mv_near_fc mv_step
+/    if (d < \*(f32 \*) (obj + 0xC0)) {/s/</>/ % mv_lim mv_lim_c0 mv_lim_db0

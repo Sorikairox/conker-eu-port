@@ -102,9 +102,345 @@ s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2030.s")
 #endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2294.s")
+#ifdef NON_MATCHING
+float sqrtf(float);
+f32 func_150484A0(f32, f32);
+extern s32 D_800DC26C;
+extern u8 D_800D9D80[];
+int func_151EFDD0(void);
+f32 func_150ADDE0(u8 *, u8 *);
+s32 func_1510FE4C(s32);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, void *, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+s32 func_150E1AF0(struct127 *, f32, f32, f32, f32, f32, f32, s32, s32);
+s32 func_150E4AD0(f32, f32, f32, s32, s32, s32, s32);
 
+// beam_effect_update: P310: update handler of the beam objects of func_150E2030 (object type 0xB descriptor at
+// ROM 0x230D00, same layout as func_150E3CB8's; void (u8 *obj)). The life +0x90 counts down by D_800BE9E4 frames;
+// the beam is freed when it runs out or its followed object +0xDC changed (+0xE0 vs the object's +0x84 serial).
+// Mode beams (+0xD0 != 0) re-attach both ends to the followed character's matrix +0xE2 (offsets +0xE4 / +0xF0,
+// every 4th frame by the +0xE3 delay) and, each time the +0xD6 timer passes -(+0xD4), restart it (+0xD2) and pick a
+// new target end: the character's aim record D_800D9D80[+0x127] when it still matches (with a chance +3 of a spark
+// beam + sound when D_800BE616 is off), else a point 2000 ahead along its facing; with no aim record (0xFF) every
+// 3rd frame (+0xFD) a ray (func_150ACEA0) 75 * width ahead decides the end. Then (+0xD6 > 0) the head +0x94 moves
+// toward the end along the yaw / pitch +0xA4 / +0xA0 at speed +0xA8 (clamped to the distance when +0xAC != 0);
+// +0xFE == 1 leaves a trail (func_150E1AF0). With +0xAC != 0 the beam is freed (after a func_150E4AD0 impact when
+// +0xFC != 0) once the head is within +0xAC of the end or past the start distance, otherwise +0xC0 shrinks to it.
+void func_150E2294(u8 *obj) {
+    u8 *target;
+    u8 *mtx;
+    u8 *aimrec;
+    f32 *dir;
+    f32 vec[3];
+    f32 out[3];
+    f32 hit[3];
+    f32 len;
+    f32 width;
+    f32 alpha;
+    f32 dist0;
+    f32 limit;
+    f32 c;
+    f32 s;
+    volatile f32 n[3];
+    f32 vx;
+    f32 vy;
+    f32 vz;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 d;
+    f32 step;
+    f32 endX;
+    s32 tex;
+    s32 aim;
+    s32 rayhit;
+    s32 ray;
+    s32 hitobj;
+    s32 idx;
+    s32 heading;
+
+    tex = 0x23;
+    dist0 = 0.0f;
+    *(s16 *) (obj + 0x90) -= D_800BE9E4;
+    target = *(u8 **) (obj + 0xDC);
+    if (*(s16 *) (obj + 0x90) < 0 || (target != NULL && *(s16 *) (obj + 0xE0) != -1 &&
+                                      *(s16 *) (obj + 0xE0) != *(u16 *) (target + 0x84))) {
+        func_1516972C((struct102 *) obj);
+        return;
+    }
+    if (*(s8 *) (obj + 0xD0) != 0) {
+        if (obj[0xE3] != 0) {
+            obj[0xE3]--;
+        } else {
+            target = *(u8 **) (obj + 0xDC);
+            if (target != NULL && *(u8 **) (target + 0x1D4) != NULL && obj[0xDA] == target[0x3B] &&
+                target[0x127] != 0xFF) {
+                mtx = *(u8 **) (target + 0x1D4) + obj[0xE2] * 0x40;
+                func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xE4), *(f32 *) (obj + 0xE8), *(f32 *) (obj + 0xEC),
+                              (f32 *) (obj + 0x94), (f32 *) (obj + 0x98), (f32 *) (obj + 0x9C));
+                func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xF0), *(f32 *) (obj + 0xF4), *(f32 *) (obj + 0xF8),
+                              (f32 *) (obj + 0xB0), (f32 *) (obj + 0xB4), (f32 *) (obj + 0xB8));
+                obj[0xE3] = 3;
+            }
+        }
+        *(s16 *) (obj + 0xD6) -= D_800BE9E4;
+        if (*(s16 *) (obj + 0xD6) < -*(s16 *) (obj + 0xD4)) {
+            target = *(u8 **) (obj + 0xDC);
+            *(s16 *) (obj + 0xD6) = *(s16 *) (obj + 0xD2);
+            if (target == NULL || *(u8 **) (target + 0x1D4) == NULL || obj[0xDA] != target[0x3B]) {
+                func_1516972C((struct102 *) obj);
+                return;
+            }
+            mtx = *(u8 **) (target + 0x1D4) + obj[0xE2] * 0x40;
+            func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xE4), *(f32 *) (obj + 0xE8), *(f32 *) (obj + 0xEC),
+                          (f32 *) (obj + 0x94), (f32 *) (obj + 0x98), (f32 *) (obj + 0x9C));
+            aim = (*(u8 **) (obj + 0xDC))[0x127];
+            func_150A7E40((f32 (*)[4]) mtx, *(f32 *) (obj + 0xF0), *(f32 *) (obj + 0xF4), *(f32 *) (obj + 0xF8),
+                          (f32 *) (obj + 0xB0), (f32 *) (obj + 0xB4), (f32 *) (obj + 0xB8));
+            alpha = 0.0f;
+            if (obj[0xFD]-- == 0) {
+                obj[0xFD] = 2;
+                ray = TRUE;
+            } else {
+                ray = FALSE;
+            }
+            if (*(f32 *) (obj + 0xA8) == 0.0f) {
+                width = (f32) (func_151EFDD0() % 70) + 40.0f;
+            } else {
+                width = *(f32 *) (obj + 0xA8);
+            }
+            hitobj = 0;
+            if (aim != 0xFF) {
+                target = *(u8 **) (obj + 0xDC);
+                aimrec = D_800D9D80 + aim * 0x1C;
+                heading = *(u16 *) (target + 0x76) - *(s16 *) (*(u8 **) (target + 0x31C) + 0x12);
+                if (heading == *(s16 *) aimrec && *(s8 *) (target + 0x1D1) == *(s8 *) (aimrec + 2)) {
+                    *(f32 *) (obj + 0xB0) = *(f32 *) (aimrec + 4);
+                    *(f32 *) (obj + 0xB4) = *(f32 *) (aimrec + 8);
+                    *(f32 *) (obj + 0xB8) = *(f32 *) (aimrec + 0xC);
+                    if (D_800BE616 == 0 && func_151EFDD0() % 100 < aimrec[3]) {
+                        vec[0] = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
+                        vec[1] = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
+                        vec[2] = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
+                        dir = (f32 *) (aimrec + 0x10);
+                        d = func_150ADDE0((u8 *) dir, (u8 *) vec);
+                        func_15049148((struct17 *) dir, d + d, (struct17 *) out);
+                        func_15048F58((struct17 *) vec, (struct17 *) out, (struct17 *) out);
+                        out[0] += *(f32 *) (obj + 0xB0);
+                        out[1] += *(f32 *) (obj + 0xB4);
+                        out[2] += *(f32 *) (obj + 0xB8);
+                        func_150E2030(0, *(f32 *) (obj + 0xB0), *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), out[0],
+                                      out[1], out[2], (f32) (func_151EFDD0() % 35) + 20.0f, 0.0f, 8.0f, 320.0f, 0x1E,
+                                      0x23, 0, 0, 0, NULL, 0, 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+                        func_10010F88(func_151EFDD0() % 6 + 0x2B, 0x2710, 0, 0, aim, (s32) * (f32 *) (obj + 0xB0),
+                                      (s32) * (f32 *) (obj + 0xB4), (s32) * (f32 *) (obj + 0xB8), 0x1F4, 0x7D0);
+                    }
+                    alpha = 1.0f;
+                } else {
+                    func_1505A184(heading, 2000.0f, (f32) (s16) (*(s8 *) (target + 0x1D1) * 200) * 0.0054931640625f,
+                                  (f32 *) (obj + 0xB0), (f32 *) (obj + 0xB8), (f32 *) (obj + 0xB4));
+                    *(f32 *) (obj + 0xB0) += *(f32 *) (obj + 0x94);
+                    *(f32 *) (obj + 0xB4) += *(f32 *) (obj + 0x98);
+                    *(f32 *) (obj + 0xB8) += *(f32 *) (obj + 0x9C);
+                }
+                *(f32 *) (obj + 0xC0) = (f32) (func_151EFDD0() % 3) * 80.0f + 80.0f;
+            } else {
+                if (ray) {
+                    hit[0] = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
+                    hit[1] = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
+                    hit[2] = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
+                    step = (75.0f * width) / sqrtf(hit[0] * hit[0] + hit[1] * hit[1] + hit[2] * hit[2]);
+                    if (func_150ACEA0(*(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C), hit[0] * step,
+                                      hit[1] * step, hit[2] * step, &rayhit, NULL, &hit[0], &hit[1], &hit[2], NULL, 0, 0,
+                                      0.0f) != 0) {
+                        *(f32 *) (obj + 0xB0) = hit[0];
+                        *(f32 *) (obj + 0xB4) = hit[1];
+                        *(f32 *) (obj + 0xB8) = hit[2];
+                        alpha = 1.0f;
+                        idx = (u32) (rayhit - D_800DC26C) / 12;
+                        if (idx >= 0 && idx < D_800DBE4C && D_800DBE5C != 0) {
+                            hitobj = func_1510FE4C(((s32 *) D_800DBE5C)[idx]);
+                        }
+                    }
+                }
+                tex = 0x43;
+            }
+            *(f32 *) (obj + 0xA4) = func_150484A0(-(*(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94)),
+                                                  -(*(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C)));
+            dx = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
+            dz = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
+            *(f32 *) (obj + 0xA0) = func_150484A0(*(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98), sqrtf(dx * dx + dz * dz));
+            *(f32 *) (obj + 0xC4) = 0.0f;
+            *(f32 *) (obj + 0xC8) = 0.0f;
+            *(f32 *) (obj + 0xCC) = 0.0f;
+            if (ray) {
+                func_150E2030(0, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
+                              *(f32 *) (obj + 0xB0), *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), width, alpha, 15.0f,
+                              820.0f, 0x4B, tex, 0, 0, 0, *(struct127 **) (obj + 0xDC), 0, 0, 0, hitobj, obj[0xFE],
+                              0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            }
+        }
+    }
+    if (*(s16 *) (obj + 0xD6) <= 0) {
+        return;
+    }
+    c = func_150AD78C(*(f32 *) (obj + 0xA0));
+    s = func_150AD780(*(f32 *) (obj + 0xA0));
+    // the direction: a vector turned by the pitch, then by the yaw. The asm really adds / multiplies its 0.0 terms
+    // (0.0 + -0.0 = +0.0, s * 0.0 = -0.0 for s < 0); IDO folds `0.0f + x` to x, so the zero is read from the
+    // volatile n[2] (setup mv_vz0: velocity -0.0 vs +0.0)
+    n[2] = 0.0f;
+    n[1] = n[2] - c * -1.0f;
+    n[0] = n[2] + s * -1.0f;
+    c = func_150AD78C(*(f32 *) (obj + 0xA4));
+    s = func_150AD780(*(f32 *) (obj + 0xA4));
+    vx = s * n[2] + c * n[0];
+    vy = n[1];
+    vz = -c * n[2] + s * n[0];
+    if (*(f32 *) (obj + 0xAC) != 0.0f) {
+        dx = *(f32 *) (obj + 0xB0) - *(f32 *) (obj + 0x94);
+        dy = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
+        dz = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
+        dist0 = sqrtf(dx * dx + dy * dy + dz * dz);
+    }
+    if (obj[0xDB] == 0) {
+        vx *= 0.5f;
+        vy = n[1] * 0.5f;
+        vz *= 0.5f;
+    }
+    *(f32 *) (obj + 0xC4) = vx;
+    *(f32 *) (obj + 0xCC) = vz;
+    *(f32 *) (obj + 0xC8) = vy;
+    step = *(f32 *) (obj + 0xA8) * (f32) D_800BE9E4;
+    if (dist0 < step && *(f32 *) (obj + 0xAC) != 0.0f) {
+        vx *= dist0;
+        *(f32 *) (obj + 0xC0) = dist0;
+        vy *= dist0;
+        vz *= dist0;
+    } else {
+        vx *= step;
+        vy *= step;
+        vz *= step;
+    }
+    if (obj[0xFE] == 1) {
+        target = *(u8 **) (obj + 0xDC);
+        func_150E1AF0((struct127 *) target, *(f32 *) (obj + 0x94), *(f32 *) (obj + 0x98), *(f32 *) (obj + 0x9C),
+                      *(f32 *) (obj + 0x94) + vx, *(f32 *) (obj + 0x98) + vy, *(f32 *) (obj + 0x9C) + vz,
+                      target != NULL ? (target - (u8 *) D_800CC2D0) / 0x32C : 0, 0);
+    }
+    *(f32 *) (obj + 0x94) += vx;
+    *(f32 *) (obj + 0x98) += vy;
+    *(f32 *) (obj + 0x9C) += vz;
+    limit = *(f32 *) (obj + 0xAC);
+    if (limit == 0.0f) {
+        return;
+    }
+    endX = *(f32 *) (obj + 0xB0);
+    dx = endX - *(f32 *) (obj + 0x94);
+    dy = *(f32 *) (obj + 0xB4) - *(f32 *) (obj + 0x98);
+    dz = *(f32 *) (obj + 0xB8) - *(f32 *) (obj + 0x9C);
+    d = sqrtf(dx * dx + dy * dy + dz * dz);
+    if (d < limit || dist0 < d) {
+        if (obj[0xFC] != 0) {
+            func_150E4AD0(endX, *(f32 *) (obj + 0xB4), *(f32 *) (obj + 0xB8), 1, obj[0xFC], 0, 0xFF);
+        }
+        func_1516972C((struct102 *) obj);
+        return;
+    }
+    if (d < *(f32 *) (obj + 0xC0)) {
+        *(f32 *) (obj + 0xC0) = d;
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2294.s")
+#endif
+
+#ifdef NON_MATCHING
+extern s32 D_800D30BC;
+Gfx *func_15095380(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+
+// beam_effect_draw: draw handler of the beam objects of func_150E2030 (Gfx *(Gfx *, u8 *obj, s16 viewer)). With a
+// texture (+0xD6 > 0) the beam from +0x94 along the direction +0xC4 times the length +0xC0 is drawn as one quad
+// facing character `viewer` (D_800DBFF0 entry, position +0x2F8): at each end the offset cross(end - eye, dir) scaled
+// to the half width +0xBC gives the two corners end +- offset (far end first). The corners go to this frame's 4
+// vertices (obj + 0x10 + D_800BE9C0 * 0x40, s16 x / y / z), then texture D_8008CDEC[+0xD8] is loaded
+// (func_15095380; its sprite-parameter pointer is an unset local, as in the asm), the render mode is set
+// (func_15142FBC) and gSPVertex + 2 triangles are emitted; +0xDB = 1. Returns gfx unchanged without setting +0xDB
+// when an end lies on the eye line (zero offset). The asm also computes the squared eye distances of both ends and
+// an unused first offset; neither is read.
+Gfx *func_150E2E5C(Gfx *gfx, u8 *obj, s16 viewer) {
+    f32 ends[2][3];
+    f32 verts[4][3];
+    u8 spr[0x10];
+    u8 flag;
+    f32 *eye;
+    f32 *dir;
+    f32 *p;
+    f32 e[3];
+    f32 n[3];
+    f32 len;
+    f32 s;
+    s32 i;
+    s32 j;
+    u32 *cmd;
+
+    if (*(s16 *) (obj + 0xD6) <= 0) {
+        obj[0xDB] = 1;
+        return gfx;
+    }
+    dir = (f32 *) (obj + 0xC4);
+    /* far end first */
+    ends[0][0] = *(f32 *) (obj + 0x94) + *(f32 *) (obj + 0xC0) * dir[0];
+    ends[0][1] = *(f32 *) (obj + 0x98) + *(f32 *) (obj + 0xC0) * dir[1];
+    ends[0][2] = *(f32 *) (obj + 0x9C) + *(f32 *) (obj + 0xC0) * dir[2];
+    ends[1][0] = *(f32 *) (obj + 0x94);
+    ends[1][1] = *(f32 *) (obj + 0x98);
+    ends[1][2] = *(f32 *) (obj + 0x9C);
+    eye = (f32 *) ((u8 *) D_800DBFF0 + viewer * 0x9A0 + 0x2F8);
+    for (i = 0; i < 2; i++) {
+        p = ends[i];
+        e[0] = p[0] - eye[0];
+        e[1] = p[1] - eye[1];
+        e[2] = p[2] - eye[2];
+        n[0] = e[1] * dir[2] - e[2] * dir[1];
+        n[1] = e[2] * dir[0] - e[0] * dir[2];
+        n[2] = e[0] * dir[1] - e[1] * dir[0];
+        len = sqrtf(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        if (len == 0.0f) {
+            return gfx;
+        }
+        s = *(f32 *) (obj + 0xBC) / len;
+        n[0] *= s;
+        n[1] *= s;
+        n[2] *= s;
+        verts[i * 2][0] = n[0] + p[0];
+        verts[i * 2][1] = n[1] + p[1];
+        verts[i * 2][2] = n[2] + p[2];
+        verts[i * 2 + 1][0] = p[0] - n[0];
+        verts[i * 2 + 1][1] = p[1] - n[1];
+        verts[i * 2 + 1][2] = p[2] - n[2];
+    }
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            *(s16 *) (obj + D_800BE9C0 * 0x40 + i * 0x10 + 0x10 + j * 2) = (s32) verts[i][j];
+        }
+    }
+    gfx = func_15095380(gfx, D_8008CDEC[*(s16 *) (obj + 0xD8)], 0, spr, 0, 0, 0, 2, 3);
+    flag = 0;
+    gfx = func_15142FBC(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);
+    cmd = (u32 *) gfx;
+    cmd[0] = 0x01004008; /* gSPVertex(this frame's 4 vertices) */
+    cmd[1] = (u32) (obj + D_800BE9C0 * 0x40 + 0x10);
+    cmd[2] = 0x05000206; /* triangle 0 1 3 */
+    cmd[3] = 0;
+    cmd[4] = 0x05000604; /* triangle 0 3 2 */
+    cmd[5] = 0;
+    obj[0xDB] = 1;
+    return gfx + 3;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2E5C.s")
+#endif
 
 s32 func_150E3324(s32 arg0, s32 arg1) {
     return arg0;
