@@ -427,7 +427,152 @@ u8 *func_151330F0(u8 *arg0, u8 *arg1, s16 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_151330F0.s")
 #endif
+#ifdef NON_MATCHING
+typedef struct {
+    s16 v[9];
+} Surf334C; /* floor / wall surface record (+0x114 of a particle) */
+/* func_15044670 wall-probe request (0x1A0 bytes on the stack; only the fields set here are named) */
+typedef struct {
+    /* 0x000 */ s32 kind;
+    /* 0x004 */ u8 pad4[0x10];
+    /* 0x014 */ f32 pos[3];
+    /* 0x020 */ u8 pad20[8];
+    /* 0x028 */ f32 u28;
+    /* 0x02C */ u8 pad2C[0xB8];
+    /* 0x0E4 */ s16 uE4;
+    /* 0x0E6 */ s16 uE6;
+    /* 0x0E8 */ u8 padE8[0x10];
+    /* 0x0F8 */ s32 uF8;
+    /* 0x0FC */ u8 padFC[0x50];
+    /* 0x14C */ f32 u14C;
+    /* 0x150 */ f32 u150;
+    /* 0x154 */ u8 pad154[0x2C];
+    /* 0x180 */ f32 floor;
+    /* 0x184 */ u8 pad184[4];
+    /* 0x188 */ s32 u188;
+    /* 0x18C */ Surf334C surf;
+    /* 0x19E */ u8 pad19E[2];
+} WallProbe334C;
+s32 func_15046F70(f32 *, s32, f32, u8 *);
+s32 func_15044670(f32, f32, s32, u8 *, s32, s32);
+extern s32 (*D_80089CD4[])(u8 *, f32, f32, f32, f32, u8 *); /* landing handlers by +0x73 */
+/* floor-hit handlers by +0x74 and wall-hit handlers by +0x75 (entry 0 unused) */
+extern s32 (*D_80089D10[])(u8 *, f32, f32, f32, f32);
+extern s32 (*D_80089D14[])(u8 *, WallProbe334C *, f32, f32, f32);
+
+// particle_collide_update: integrates the particle's motion by D_800BE9A4 (+0x60 flags: 8 = gravity +0x5C on the y
+// velocity, 0x20 = position +0x38 += velocity +0x44, 0x40 = rotation +0x20 += spin +0x50) and, when any of the
+// collision bits 7 is set, checks the move from the old position: a floor probe (func_15046F70 from the old height
+// down to the new one less the +0x10 offset; floor height +0x110, info +0x114). On a floor of type (+0x12D) 1, or 2
+// with +0x12C bit 0: flag 1 of +0x148, the speed (+0x140) / its inverse (+0x144, flag 8) when +0x60 bit 0x10 and
+// faster than 1, the landing handler D_80089CD4[+0x73] and, with bit 0x10, the position saved at +0x134; type 3:
+// flag 2 and the D_80089D10[+0x74] handler. With bit 4 a wall probe (func_15044670, request kind 4 from the old to
+// the new position): flag 4, speed and yaw (+0x14A, func_150484A0 of the probe's hit point, 256 steps) with 0x10,
+// the D_80089D14[+0x75] handler and the saved position. A handler returning 0 ends the particle: returns 0, else 1.
+s32 func_1513334C(u8 *p) {
+    WallProbe334C req;
+    f32 probe[3];
+    f32 old[3];
+    f32 len;
+    u8 type;
+
+    if (*(s32 *) (p + 0x60) & 7) {
+        memcpy((u8 *) old, p + 0x38, 12);
+    }
+    if (*(s32 *) (p + 0x60) & 8) {
+        *(f32 *) (p + 0x48) += *(f32 *) (p + 0x5C) * D_800BE9A4;
+    }
+    if (*(s32 *) (p + 0x60) & 0x20) {
+        *(f32 *) (p + 0x38) += *(f32 *) (p + 0x44) * D_800BE9A4;
+        *(f32 *) (p + 0x3C) += *(f32 *) (p + 0x48) * D_800BE9A4;
+        *(f32 *) (p + 0x40) += *(f32 *) (p + 0x4C) * D_800BE9A4;
+    }
+    if (*(s32 *) (p + 0x60) & 0x40) {
+        *(f32 *) (p + 0x20) += *(f32 *) (p + 0x50) * D_800BE9A4;
+        *(f32 *) (p + 0x24) += *(f32 *) (p + 0x54) * D_800BE9A4;
+        *(f32 *) (p + 0x28) += *(f32 *) (p + 0x58) * D_800BE9A4;
+    }
+    if (!(*(s32 *) (p + 0x60) & 7)) {
+        return 1;
+    }
+
+    probe[0] = *(f32 *) (p + 0x38);
+    probe[1] = old[1];
+    probe[2] = *(f32 *) (p + 0x40);
+    if (func_15046F70(probe, 0, *(f32 *) (p + 0x3C) - *(f32 *) (p + 0x10), p + 0x110) != 0) {
+        type = p[0x12D];
+        if (type == 1 || (type == 2 && (p[0x12C] & 1))) {
+            p[0x148] |= 1;
+            if (*(s32 *) (p + 0x60) & 0x10) {
+                len = sqrtf(*(f32 *) (p + 0x44) * *(f32 *) (p + 0x44) + *(f32 *) (p + 0x48) * *(f32 *) (p + 0x48)
+                            + *(f32 *) (p + 0x4C) * *(f32 *) (p + 0x4C));
+                if (1.0f < len) {
+                    p[0x148] |= 8;
+                    *(f32 *) (p + 0x140) = len;
+                    *(f32 *) (p + 0x144) = 1.0f / len;
+                }
+            }
+            if (p[0x73] != 0
+                && !D_80089CD4[p[0x73]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110), p + 0x114)) {
+                return 0;
+            }
+            if (*(s32 *) (p + 0x60) & 0x10) {
+                memcpy(p + 0x134, p + 0x38, 12);
+            }
+        }
+        if (p[0x12D] == 3) {
+            p[0x148] |= 2;
+            if (p[0x74] != 0 && !D_80089D10[p[0x74]](p, old[0], old[1], old[2], *(f32 *) (p + 0x110))) {
+                return 0;
+            }
+        }
+    }
+
+    if (!(*(s32 *) (p + 0x60) & 4)) {
+        return 1;
+    }
+    req.kind = 4;
+    req.pos[0] = *(f32 *) (p + 0x38);
+    req.pos[1] = *(f32 *) (p + 0x3C);
+    req.pos[2] = *(f32 *) (p + 0x40);
+    req.u188 = 0;
+    req.surf = *(Surf334C *) (p + 0x114);
+    req.u28 = 1.0f;
+    req.u14C = 1.0f;
+    req.u150 = 1.0f;
+    req.uE4 = (s32) *(f32 *) (p + 0x10);
+    req.uE6 = (s32) *(f32 *) (p + 0x10);
+    if (p[0x12C] & 2) {
+        req.floor = *(f32 *) (p + 0x110);
+    } else {
+        req.floor = -10000.0f;
+    }
+    req.uF8 = 0;
+    if (func_15044670(old[0], old[1], *(s32 *) &old[2], (u8 *) &req, 0, 0) == 0) {
+        return 1;
+    }
+    p[0x148] |= 4;
+    if (*(s32 *) (p + 0x60) & 0x10) {
+        len = sqrtf(*(f32 *) (p + 0x44) * *(f32 *) (p + 0x44) + *(f32 *) (p + 0x48) * *(f32 *) (p + 0x48)
+                    + *(f32 *) (p + 0x4C) * *(f32 *) (p + 0x4C));
+        if (1.0f < len) {
+            p[0x148] |= 0x10;
+            *(f32 *) (p + 0x140) = len;
+            *(f32 *) (p + 0x144) = 1.0f / len;
+            p[0x14A] = (s32) (func_150484A0(req.pos[0] - *(f32 *) (p + 0x38), req.pos[2] - *(f32 *) (p + 0x40)) * 40.743664f);
+        }
+    }
+    if (p[0x75] != 0 && !D_80089D14[p[0x75]](p, &req, old[0], old[1], old[2])) {
+        return 0;
+    }
+    if (*(s32 *) (p + 0x60) & 0x10) {
+        memcpy(p + 0x134, p + 0x38, 12);
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_1513334C.s")
+#endif
 
 s32 func_1513384C(u8 *arg0)
 {

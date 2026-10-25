@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P282 (port, group B) (session P282, 2026-10-25). Details: `docs/port/sessions/P282.md`
+
+10 group B functions to hand C (NM), registry rows `P282`, setups / mutants in docs/port/sessions/p282: func_15139D74,
+func_1513A6E0, func_1513ABB8, func_1513B0F8, func_15138E98, func_15138424, func_15136F50 (game_161520), func_15054A94
+(78230), func_15008340 (357F0, CANDSED void test: callers in game_39750 declare s32), func_1513334C (15FF50).
+SpriteSpec356D4 pad fixed (player at 0x44). verify_all rc 0, protocheck 0, selftest 130/130, implicit NM+float 0.
+**NM build rc 2**: game_eu_12C5F0.c.o `.data` discarded (P276 static copies) - fix first.
+
+## Next steps (from P282)
+1. Fix the NM link (game_eu_12C5F0 statics), then finish `MUT=1 tools/port/reverify.sh func_15054A94 func_1513334C func_15136F50 func_151356D4`.
+2. Group B left (14): func_1517D5E4, func_150C1138, func_151A1794, func_151B1138, func_150CBF80, func_151C50BC,
+   func_151C40BC, func_151B6ED8, func_150E3CB8, func_150B4BF0, func_1506C460, func_150E2294, func_1516E100, func_151206C8.
+3. func_15008340: switch to void together with game_39750's prototypes.
+
 ## P276 (port, group B) (session P276, 2026-10-25). Details: `docs/port/sessions/P276.md`
 
 Merged port-b P274 (a1c4c47a). Group B of the P276 split: 16 compiled functions to hand C (NM), registry rows `P276`,

@@ -91,7 +91,7 @@ s32 func_15134070(struct127 *arg0);
 void func_1513A5E0(s32 arg0, u8 arg1, s32 arg2);
 s32 func_15138120(struct127 *arg0, s32 arg1, u8 arg2);
 void func_151382E0(void *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4);
-s32 func_15138424(struct127 *arg0, void *arg1, s32 arg2, void *arg3, u8 arg4, s32 arg5);
+void func_15138424(struct127 *arg0, f32 *arg1, s32 arg2, void *arg3, u8 arg4, s32 arg5); /* P282: void */
 void func_15137F30(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, struct161520 *arg5, f32 *arg6, f32 *arg7, f32 *arg8, f32 *arg9, s16 *argA, u8 *argB, f32 *argC);
 
 // requires jump table
@@ -894,6 +894,7 @@ typedef struct {
     /* 0x3C */ s32 u3C;
     /* 0x40 */ u8 u40;
     /* 0x41 */ u8 u41;
+    /* 0x42 */ u8 pad42[2]; /* P282: player is at 0x44 (it sat at 0x42 without this pad) */
     /* 0x44 */ u8 player;
     /* 0x48 */ f32 u48;
     /* 0x4C */ f32 u4C;
@@ -1540,7 +1541,117 @@ s32 func_15136C3C(u8 *obj, u8 smoke, u8 splats, u8 debris, u8 finish, u8 fewer, 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136C3C.s")
 #endif
 
+typedef struct {
+    f32 x;
+    f32 y;
+    f32 z;
+} Vec37C64;
+s32 func_15137C64(Vec37C64 *a, Vec37C64 *b, Vec37C64 *dir, s32 arg3, s32 arg4, Vec37C64 *p, Vec37C64 *q, Vec37C64 *d);
+
+#ifdef NON_MATCHING
+s32 func_151DC034(f32 *pos, f32 size, u8 alpha, s16 life, u8 type, u8 arg5, s32 arg6);
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32 *, s32, f32);
+u8 func_15145C90(s32);
+
+// impact_burst_effects: hit effect between the points p / q along d (func_15137C64 sets from = a, to = b, the unit
+// direction dir and two side axes; result 0 = nothing, 2 = no sparks / splashes). A func_151DC034 flash at a (size
+// 192..384, alpha 155..255, life 15..22), 4..7 func_151DB5D0 debris pieces from b (velocity (dir * 100 + a random
+// side offset of up to 50) * (0.093 r + 0.064)), then, unless the result was 2: 4..7 func_151DA6F8 sparks at a
+// (random side direction, speed 6..8), and, when D_800BE616 is set, 3..6 rays (func_150ACEA0) from b along dir * 100
+// plus a side offset of up to 140: each that hits an object accepted by func_15145C90 closer than 1999 leaves a
+// func_151D9B8C splash on the hit surface. `type` goes to every spawn as its first / type byte; kind / owner too.
+void func_15136F50(Vec37C64 *p, Vec37C64 *q, Vec37C64 *d, u8 type, u8 kind, s32 owner) {
+    Vec37C64 a;
+    Vec37C64 b;
+    Vec37C64 dir;
+    Vec37C64 side;
+    u8 sparks;
+    u8 splash;
+    Vec37C64 up;
+    f32 sc[2];
+    f32 vel[3];
+    f32 sc2[2];
+    f32 v[3];
+    f32 sc3[2];
+    s16 surf[9];
+    struct17 hit;
+    f32 dist;
+    s32 obj;
+    s32 res;
+    s32 n;
+    s16 m;
+    s32 x;
+    s32 y;
+    f32 r;
+    f32 r2;
+
+    splash = 1;
+    sparks = 1;
+    res = func_15137C64(&a, &b, &dir, (s32) &side, (s32) &up, p, q, d);
+    if (res == 0) {
+        return;
+    }
+    if (res == 2) {
+        sparks = 0;
+        splash = 0;
+    }
+    r = func_150ADA68();
+    x = func_150ADA20();
+    y = func_150ADA20();
+    func_151DC034(&a.x, r * 192.0f + 192.0f, (u32) x % 101 + 155, (y & 7) + 15, type, kind, owner);
+
+    for (n = (func_150ADA20() & 3) + 4; n > 0; n--) {
+        r = func_150ADA68() * 0.0929f + 0.0643f;
+        x = func_150ADA20();
+        func_15143874(x & 0xFF, func_150ADA68() * 50.0f, &sc[0], &sc[1]);
+        vel[0] = (dir.x * 100.0f + side.x * sc[0] + up.x * sc[1]) * r;
+        vel[1] = (dir.y * 100.0f + side.y * sc[0] + up.y * sc[1]) * r;
+        vel[2] = (dir.z * 100.0f + side.z * sc[0] + up.z * sc[1]) * r;
+        r2 = func_150ADA68();
+        r = func_150ADA68();
+        x = func_150ADA20();
+        y = func_150ADA20();
+        func_151DB5D0(type, (struct17 *) &b, vel, r2 * 80.0f + 120.0f, 1.033618f, 0.959544f, r * 0.0f,
+                      (u32) x % 31 + 30, (u32) y % 156 + 100, 0x2E, 5, 0, kind, owner);
+    }
+
+    if (sparks) {
+        for (m = (func_150ADA20() & 3) + 4; m != 0; m--) {
+            x = func_150ADA20();
+            func_15143874(x & 0xFF, func_150ADA68() * 2.0f + 6.0f, &sc2[0], &sc2[1]);
+            v[0] = side.x * sc2[0] + up.x * sc2[1];
+            v[1] = side.y * sc2[0] + up.y * sc2[1];
+            v[2] = side.z * sc2[0] + up.z * sc2[1];
+            x = func_150ADA20();
+            r = func_150ADA68();
+            y = func_150ADA20();
+            func_151DA6F8((struct17 *) &a, v, 0.0f, (u32) x % 6 + 8, 0xFF, r * 1.3000001f + 1.9f,
+                          (u32) y % 3 + 4, 0, 1.0f, 1.0f, 1, type, 0, 0x10, 0xF, 0, kind, owner);
+        }
+    }
+
+    if (!splash || !D_800BE616) {
+        return;
+    }
+    for (n = (func_150ADA20() & 3) + 3; n != 0; n--) {
+        x = func_150ADA20();
+        func_15143874(x & 0xFF, func_150ADA68() * 140.0f, &sc3[0], &sc3[1]);
+        if (func_150ACEA0(b.x, b.y, b.z, dir.x * 100.0f + side.x * sc3[0] + up.x * sc3[1],
+                          dir.y * 100.0f + side.y * sc3[0] + up.y * sc3[1],
+                          dir.z * 100.0f + side.z * sc3[0] + up.z * sc3[1], 0, surf, &hit.unk0, &hit.unk4, &hit.unk8,
+                          &dist, &obj, 0, 0.0f) != 0
+            && func_15145C90(obj) != 0 && dist < 1999.0f) {
+            r = func_150ADA68();
+            x = func_150ADA20();
+            y = func_150ADA20();
+            func_151D9B8C(type, r * 16.0f + 25.0f, (u32) x % 156 + 100, (s32) surf, &hit, (u32) y % 101 + 100, 1, 1, 1,
+                          kind, owner);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15136F50.s")
+#endif
 
 typedef struct {
     /* 0x000 */ u8 pad0[4];
@@ -1557,7 +1668,7 @@ typedef struct {
     /* 0x1D4 */ s32 unk1D4;
 } Obj7610;
 
-void func_15136F50(s32 arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void func_15136F50(Vec37C64 *arg0, Vec37C64 *arg1, Vec37C64 *arg2, u8 arg3, u8 arg4, s32 arg5); /* P282: as the definition */
 void func_151C5D2C(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, u8 arg6, s32 arg7);
 void func_15103C34(s32 arg0, u8 arg1, s32 arg2);
 
@@ -1647,11 +1758,11 @@ void func_15137610(Obj7610 *arg0, s32 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg
         func_151C384C((void *)arg1, arg4, arg5);
         break;
     case 3:
-        func_15136F50(arg1, arg2, arg3, 1, arg4, arg5);
+        func_15136F50((Vec37C64 *) arg1, (Vec37C64 *) arg2, (Vec37C64 *) arg3, 1, arg4, arg5);
         break;
     case 0:
     default:
-        func_15136F50(arg1, arg2, arg3, 0, arg4, arg5);
+        func_15136F50((Vec37C64 *) arg1, (Vec37C64 *) arg2, (Vec37C64 *) arg3, 0, arg4, arg5);
         break;
     }
 }
@@ -1762,11 +1873,6 @@ void func_1513783C(struct127 *obj, s32 arg1, s32 arg2) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513783C.s")
 #endif
 
-typedef struct {
-    f32 x;
-    f32 y;
-    f32 z;
-} Vec37C64;
 s32 func_15145128(Vec37C64 *, Vec37C64 *, s32 *, s32 *);
 s32 func_15146078(Vec37C64 *, s32, s32);
 
@@ -1958,7 +2064,151 @@ void func_151382E0(void *arg0, s32 arg1, void *arg2, u8 arg3, s32 arg4) {
     func_15154488(&sp24, &sp24.unk8, (s32) arg2, arg3, arg4);
 }
 
+#ifdef NON_MATCHING
+/* func_15132FBC / func_15132BBC particle request (0x7C bytes on the stack; layout as in game_eu_E9450) */
+typedef struct {
+    /* 0x00 */ f32 u00;
+    /* 0x04 */ f32 u04;
+    /* 0x08 */ f32 u08;
+    /* 0x0C */ f32 u0C;
+    /* 0x10 */ f32 pos[3];
+    /* 0x1C */ f32 scl[3];
+    /* 0x28 */ f32 at[3];
+    /* 0x34 */ f32 vel[3];
+    /* 0x40 */ f32 u40;
+    /* 0x44 */ f32 u44;
+    /* 0x48 */ f32 u48;
+    /* 0x4C */ f32 u4C;
+    /* 0x50 */ s32 u50;
+    /* 0x54 */ s16 life;
+    /* 0x56 */ s16 u56;
+    /* 0x58 */ u8 u58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8 u60[8];
+    /* 0x68 */ u8 u68;
+    /* 0x69 */ u8 pad69;
+    /* 0x6A */ u8 u6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ struct127 *obj;
+    /* 0x70 */ u8 uid;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 u72;
+    /* 0x74 */ s16 u74;
+    /* 0x76 */ u8 pad76[6];
+} Spark9768;
+s32 func_15132FBC(Spark9768 *, s32, s32, s32, u8, s32);
+s32 func_15132BBC(Spark9768 *, s32, s32, s32, s32, u8, s32);
+void func_1503F6F4(void *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *, f32 *);
+void func_15143794(s16, s16, f32, f32 *);
+u8 *func_15031C4C(struct127 *, s32, s32);
+extern s32 D_800A44F8[3];       /* hit kind 4: sounds tried in order (func_15031C4C) */
+extern s32 D_800A4504[3];       /* hit kind 4: spark sprite per sound found */
+extern s32 D_800A4510[4];       /* hit kind 5: +0x94 flag bits, a spark for each clear one */
+extern s32 D_800A4520[4];       /* hit kind 5: spark sprites */
+extern s32 D_800A4530[2];       /* hit kind 6: +0x94 flag bits */
+extern s32 D_800A4538[2];       /* hit kind 6: spark sprites */
+
+// object_hit_smoke_puff: generic hit effect of func_15138BC0. A func_15132BBC smoke puff (sprite = hit kind row
+// D_800A43B8[hit] +0xC, life 250..300, size (xz_scale + y_scale) / 2, x 0.6 for hit kind 15) from the model's
+// translation (model matrix +0x300, func_1503F6F4) aimed at `pos`; y scale 1.0 for row type (+0xE) 1, 2.0 for type 2,
+// else 0. Then, reusing the request, func_15132FBC sparks: hit kind 4: the sprite D_800A4504[i] of the first
+// D_800A44F8[i] sound the object has (func_15031C4C); kind 5 / 6: one per clear +0x94 flag bit (D_800A4510 /
+// D_800A4530) with sprite D_800A4520 / D_800A4538. kind (a byte) and owner go to every spawn. The asm returns a
+// leftover v0 that its only caller (func_15138BC0, void) ignores.
+void func_15138424(struct127 *obj, f32 *pos, s32 hit, void *arg3, u8 kind, s32 owner) {
+    f32 trans[3];
+    f32 scl[3];
+    f32 rot[3];
+    Spark9768 req;
+    u8 *info;
+    s32 a;
+    s32 b;
+    u8 i;
+    u8 found;
+
+    func_1503F6F4((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
+                  &rot[1], &rot[2]);
+    info = D_800A43B8[hit];
+    req.scl[0] = 1.0f;
+    req.u00 = 20.0f;
+    req.u04 = 0.56100005f;
+    if (info[0xE] == 1) {
+        req.scl[1] = 1.0f;
+    } else {
+        req.scl[1] = 0.0f;
+    }
+    if (info[0xE] == 2) {
+        req.scl[1] = 2.0f;
+    }
+    req.scl[2] = 1.0f;
+    req.u50 = 0x39E9;
+    req.u44 = 0.0f;
+    req.life = (u32) func_150ADA20() % 51 + 250;
+    req.u56 = *(u16 *) (info + 0xC);
+    req.u0C = ((info == D_800A43B8[15]) ? 0.6f : 1.0f) * ((obj->xz_scale + obj->y_scale) * 0.5f);
+    req.u08 = req.u0C;
+    req.u4C = (func_150ADA68() * 292.0f + -1099.0f) * 0.001f;
+    req.at[0] = pos[0];
+    req.at[1] = pos[1];
+    req.at[2] = pos[2];
+    a = func_150ADA20();
+    b = func_150ADA20();
+    func_15143794(a & 0xFF, (u32) b % 21 - 83, func_150ADA68() * 8.0f + 9.0f, req.vel);
+    req.pos[0] = trans[0];
+    req.pos[1] = trans[1];
+    req.pos[2] = trans[2];
+    req.u40 = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001f;
+    req.u48 = (func_150ADA68() * 24496.0f + -12248.0f) * 0.001f;
+    req.u58 = 0;
+    req.u5C = 0;
+    req.u60[0] = 0xFF;
+    req.u60[1] = 13;
+    req.u60[2] = 0;
+    req.u60[3] = 8;
+    req.u60[4] = 0;
+    req.u60[5] = 0;
+    req.u60[6] = 0;
+    req.u60[7] = 0;
+    req.u68 = 2;
+    req.u6A = 1;
+    req.obj = obj;
+    req.uid = obj->unique_id;
+    req.u72 = 12;
+    req.u74 = 21;
+    func_15132BBC(&req, 3, 0xFF, (s32) arg3, 0, kind, owner);
+
+    if (info == D_800A43B8[4]) {
+        found = FALSE;
+        for (i = 0; i < 3; i++) {
+            if (func_15031C4C(obj, D_800A44F8[i], 0) != NULL) {
+                found = TRUE;
+                break;
+            }
+        }
+        if (found) {
+            req.u56 = D_800A4504[i];
+            func_15132FBC(&req, 3, 0xFF, 0, kind, owner);
+        }
+    } else if (info == D_800A43B8[5]) {
+        for (i = 0; i < 4; i++) {
+            if (!(D_800A4510[i] & obj->unk94)) {
+                req.u56 = D_800A4520[i];
+                func_15132FBC(&req, 3, 0xFF, 0, kind, owner);
+            }
+        }
+    } else if (info == D_800A43B8[6]) {
+        for (i = 0; i < 2; i++) {
+            if (!(D_800A4530[i] & obj->unk94)) {
+                req.u56 = D_800A4538[i];
+                func_15132FBC(&req, 3, 0xFF, 0, kind, owner);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138424.s")
+#endif
 
 #ifdef NON_MATCHING
 // bone_bounce_splash_b: handler 8 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`), twin of func_15139578:
@@ -2029,12 +2279,12 @@ void func_15138BC0(struct127 *arg0, u8 arg1, s32 arg2) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15138E98(struct127 *, s32 *, s32, s32 *, s32, s32);
+void func_15138E98(struct127 *, s32 *, u8, s32 *, u8, s32); /* P282: void, flag / kind read as bytes */
 void func_15139768(struct127 *, s32 *, f32, s32 *, u8, s32); /* P95: f32 (was the bit pattern as an int); P242: void (v0 is a leftover, no caller reads it) */
-s32 func_15139D74(struct127 *, s32 *, s32 *, s32, s32);
-s32 func_1513A6E0(struct127 *, s32 *, s32 *, s32, s32);
-s32 func_1513ABB8(struct127 *, s32 *, s32, s32 *, s32, s32);
-s32 func_1513B0F8(struct127 *, s32 *, s32 *, s32, s32);
+void func_15139D74(struct127 *, s32 *, s32 *, s32, s32); /* P282: void (leftover v0, func_15138C80 is void) */
+void func_1513A6E0(struct127 *, s32 *, s32 *, s32, s32); /* P282: void */
+void func_1513ABB8(struct127 *, s32 *, s32, s32 *, u8, s32); /* P282: void, kind read as a byte */
+void func_1513B0F8(struct127 *, s32 *, s32 *, s32, s32); /* P282: void */
 
 void func_15138C80(struct127 *arg0, s32 arg1, s32 arg2) {
     struct {
@@ -2093,7 +2343,179 @@ void func_15138C80(struct127 *arg0, s32 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138C80.s")
 #endif
+#ifdef NON_MATCHING
+extern u8 D_800A4540[6];        /* 6 bit masks (one picked at random) */
+extern s32 D_800A4548[4];       /* spark sprite ids */
+extern s32 D_800A4558[4];       /* smoke sprite ids */
+extern f32 D_800A4568[4][3];    /* smoke start points in model space */
+extern f32 D_800A4598[3];       /* flash start point in model space */
+
+// object_hit_sparks_flash: hit types 3 (big = 1) / 5 / 6 (big = 0) of func_15138C80. As func_15139D74 with four
+// sparks / puffs (one of six masks D_800A4540, spark life 100); when `big` is set and the object has a model, one
+// more func_15132BBC puff (sprite 0x48, life 100..160) from the model point D_800A4598, speed 10.9..18.0.
+void func_15138E98(struct127 *obj, s32 *pos, u8 big, s32 *arg3, u8 kind, s32 owner) {
+    Spark9768 flash;
+    Spark9768 smoke;
+    f32 rot[3];
+    f32 scl[3];
+    Spark9768 spark;
+    u8 extra;
+    f32 trans[3];
+    u8 *mask;
+    u8 bit;
+    s32 i;
+    s32 a;
+    s32 b;
+    f32 size;
+    u8 *p;
+
+    mask = &D_800A4540[(u32) func_150ADA20() % 6 & 0xFF];
+    extra = 12;
+    spark.u00 = 1.0f;
+    spark.u04 = 1.0f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    spark.pos[0] = 0.0f;
+    spark.pos[1] = 0.0f;
+    spark.pos[2] = 0.0f;
+    spark.scl[0] = 1.0f;
+    spark.u0C = size;
+    spark.u08 = size;
+    spark.scl[1] = 1.0f;
+    spark.scl[2] = 1.0f;
+    spark.at[0] = 0.0f;
+    spark.at[1] = 0.0f;
+    spark.at[2] = 0.0f;
+    spark.vel[0] = 0.0f;
+    spark.vel[1] = 0.0f;
+    spark.vel[2] = 0.0f;
+    spark.u40 = 0.0f;
+    spark.u44 = 0.0f;
+    spark.u48 = 0.0f;
+    spark.u4C = 0.0f;
+    spark.u50 = 0x101900;
+    spark.life = 100;
+    spark.u58 = 5;
+    spark.u5C = 0;
+    spark.u60[0] = 0xFF;
+    spark.u60[1] = 0;
+    spark.u60[2] = 0;
+    spark.u60[3] = 0;
+    spark.u60[4] = 0;
+    spark.u60[5] = 0;
+    spark.u60[6] = 0;
+    spark.u60[7] = 0;
+    spark.u68 = 5;
+    spark.u6A = 1;
+    spark.obj = obj;
+    spark.u72 = 12;
+    spark.u74 = 21;
+    spark.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
+        if (*mask & bit) {
+            spark.u56 = D_800A4548[i];
+            p = (u8 *) func_15132FBC(&spark, 3, 0xFF, 1, kind, owner);
+            if (p != NULL) {
+                memcpy(p + 0x170, &extra, 1);
+            }
+        }
+    }
+
+    if (obj->unk1D4 == NULL || (obj->unk74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32) pos, kind, owner);
+    func_1503F6F4((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
+                  &rot[1], &rot[2]);
+    smoke.u00 = 1.0f;
+    smoke.u04 = 0.64900005f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    smoke.u0C = size;
+    smoke.u08 = size;
+    smoke.pos[0] = trans[0];
+    smoke.pos[1] = trans[1];
+    smoke.pos[2] = trans[2];
+    smoke.scl[0] = 1.0f;
+    smoke.scl[1] = 0.0f;
+    smoke.scl[2] = 1.0f;
+    smoke.u44 = 0.0f;
+    smoke.u58 = 0;
+    smoke.u5C = 0;
+    smoke.u60[0] = 0xFF;
+    smoke.u60[2] = 0;
+    smoke.u60[4] = 0;
+    smoke.u60[5] = 0;
+    smoke.u60[6] = 0;
+    smoke.u60[7] = 0;
+    smoke.u6A = 1;
+    smoke.obj = obj;
+    smoke.u72 = 12;
+    smoke.u74 = 21;
+    smoke.u50 = 0x1039E9;
+    smoke.u60[1] = 13;
+    smoke.u68 = 2;
+    smoke.u60[3] = 9;
+    smoke.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
+        if (!(*mask & bit)) {
+            smoke.u56 = D_800A4558[i];
+            func_15143134(D_800A4568[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            a = func_150ADA20();
+            b = func_150ADA20();
+            func_15143794(a & 0xFF, (u32) b % 35 - 84, func_150ADA68() * 6.12f + 3.0f, smoke.vel);
+            smoke.u40 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u48 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u4C = func_150ADA68() * 0.208f + -0.708f;
+            smoke.life = (u32) func_150ADA20() % 101 + 60;
+            func_15132BBC(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner);
+        }
+    }
+
+    if (!big) {
+        return;
+    }
+    flash.u00 = 1.0f;
+    flash.u04 = 0.64900005f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    flash.u0C = size;
+    flash.u08 = size;
+    flash.pos[0] = trans[0];
+    flash.pos[1] = trans[1];
+    flash.pos[2] = trans[2];
+    flash.scl[0] = 1.0f;
+    flash.scl[1] = 1.0f;
+    flash.scl[2] = 1.0f;
+    flash.u44 = 0.0f;
+    flash.u58 = 0;
+    flash.u5C = 0;
+    flash.u60[0] = 0xFF;
+    flash.u60[2] = 0;
+    flash.u60[4] = 0;
+    flash.u60[5] = 0;
+    flash.u60[6] = 0;
+    flash.u60[7] = 0;
+    flash.u6A = 1;
+    flash.obj = obj;
+    flash.u72 = 12;
+    flash.u74 = 21;
+    flash.u50 = 0x1039E9;
+    flash.u60[1] = 13;
+    flash.u68 = 2;
+    flash.u60[3] = 11;
+    flash.u56 = 0x48;
+    flash.uid = obj->unique_id;
+    func_15143134(D_800A4598, flash.at, (u8 *) obj->unk1D4 + 0x300);
+    a = func_150ADA20();
+    b = func_150ADA20();
+    func_15143794(a & 0xFF, (b & 0xF) - 60, func_150ADA68() * 7.1499996f + 10.889999f, flash.vel);
+    flash.u40 = func_150ADA68() * 48.158f + -24.079f;
+    flash.u48 = func_150ADA68() * 48.158f + -24.079f;
+    flash.u4C = func_150ADA68() * 0.323f + -1.4210001f;
+    flash.life = (u32) func_150ADA20() % 61 + 100;
+    func_15132BBC(&flash, 3, 0xFF, (s32) arg3, 0, kind, owner);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15138E98.s")
+#endif
 
 #ifdef NON_MATCHING
 // bone_bounce_splash: handler 9 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, func_15132BBC's dispatcher;
@@ -2146,38 +2568,6 @@ s32 func_15139578(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 ground, u8 *bone) 
 #endif
 
 #ifdef NON_MATCHING
-/* func_15132FBC / func_15132BBC particle request (0x7C bytes on the stack; layout as in game_eu_E9450) */
-typedef struct {
-    /* 0x00 */ f32 u00;
-    /* 0x04 */ f32 u04;
-    /* 0x08 */ f32 u08;
-    /* 0x0C */ f32 u0C;
-    /* 0x10 */ f32 pos[3];
-    /* 0x1C */ f32 scl[3];
-    /* 0x28 */ f32 at[3];
-    /* 0x34 */ f32 vel[3];
-    /* 0x40 */ f32 u40;
-    /* 0x44 */ f32 u44;
-    /* 0x48 */ f32 u48;
-    /* 0x4C */ f32 u4C;
-    /* 0x50 */ s32 u50;
-    /* 0x54 */ s16 life;
-    /* 0x56 */ s16 u56;
-    /* 0x58 */ u8 u58;
-    /* 0x59 */ u8 pad59[3];
-    /* 0x5C */ s32 u5C;
-    /* 0x60 */ u8 u60[8];
-    /* 0x68 */ u8 u68;
-    /* 0x69 */ u8 pad69;
-    /* 0x6A */ u8 u6A;
-    /* 0x6B */ u8 pad6B;
-    /* 0x6C */ struct127 *obj;
-    /* 0x70 */ u8 uid;
-    /* 0x71 */ u8 pad71;
-    /* 0x72 */ s16 u72;
-    /* 0x74 */ s16 u74;
-    /* 0x76 */ u8 pad76[6];
-} Spark9768;
 extern u8 D_800A45A4[4];        /* 4 bit masks (one picked at random): which of the 4 corner sparks / smoke puffs */
 extern s32 D_800A45A8[4];       /* spark sprite ids (0x61..0x64) */
 extern s32 D_800A45B8[4];       /* smoke sprite ids (0x5D..0x60) */
@@ -2330,7 +2720,138 @@ void func_15139768(struct127 *obj, s32 *pos, f32 scale, s32 *arg3, u8 kind, s32 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139768.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u8 D_800A45F8[3];        /* 3 bit masks (one picked at random): which of the 3 sparks / smoke puffs */
+extern s32 D_800A45FC[3];       /* spark sprite ids */
+extern s32 D_800A4608[3];       /* smoke sprite ids */
+extern f32 D_800A4614[3][3];    /* smoke start points in model space */
+
+// object_hit_sparks_small: default hit effect of func_15138C80 (3-way variant of func_15139768 without the debris
+// pieces). One of three bit masks (D_800A45F8) is picked at random. For each set bit, a func_15132FBC spark (kind 3,
+// sprite D_800A45FC[i], size (xz_scale + y_scale) / 2, life 400) whose new particle gets the extra byte 12 at +0x170.
+// If the object has a model (+0x1D4) and (+0x74 & 0xF) != 0xF: a func_1513A5E0 burst at `pos`, then for each clear
+// bit a func_15132BBC smoke puff from the model point D_800A4614[i] (model matrix +0x300, func_15143134), sprite
+// D_800A4608[i], life 60..160. The asm returns a leftover v0 that no caller reads (func_15138C80 is void).
+void func_15139D74(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 owner) {
+    Spark9768 smoke;
+    f32 rot[3];
+    f32 scl[3];
+    Spark9768 spark;
+    u8 extra;
+    f32 trans[3];
+    u8 *mask;
+    u8 bit;
+    s32 i;
+    s32 a;
+    s32 b;
+    f32 size;
+    u8 *p;
+
+    kind &= 0xFF;
+    mask = &D_800A45F8[(u32) func_150ADA20() % 3 & 0xFF];
+    extra = 12;
+    spark.u00 = 1.0f;
+    spark.u04 = 1.0f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    spark.pos[0] = 0.0f;
+    spark.pos[1] = 0.0f;
+    spark.pos[2] = 0.0f;
+    spark.scl[0] = 1.0f;
+    spark.u0C = size;
+    spark.u08 = size;
+    spark.scl[1] = 1.0f;
+    spark.scl[2] = 1.0f;
+    spark.at[0] = 0.0f;
+    spark.at[1] = 0.0f;
+    spark.at[2] = 0.0f;
+    spark.vel[0] = 0.0f;
+    spark.vel[1] = 0.0f;
+    spark.vel[2] = 0.0f;
+    spark.u40 = 0.0f;
+    spark.u44 = 0.0f;
+    spark.u48 = 0.0f;
+    spark.u4C = 0.0f;
+    spark.u50 = 0x101900;
+    spark.life = 400;
+    spark.u58 = 5;
+    spark.u5C = 0;
+    spark.u60[0] = 0xFF;
+    spark.u60[1] = 0;
+    spark.u60[2] = 0;
+    spark.u60[3] = 0;
+    spark.u60[4] = 0;
+    spark.u60[5] = 0;
+    spark.u60[6] = 0;
+    spark.u60[7] = 0;
+    spark.u68 = 5;
+    spark.u6A = 1;
+    spark.obj = obj;
+    spark.u72 = 12;
+    spark.u74 = 21;
+    spark.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 3; i++, bit <<= 1) {
+        if (*mask & bit) {
+            spark.u56 = D_800A45FC[i];
+            p = (u8 *) func_15132FBC(&spark, 3, 0xFF, 1, kind, owner);
+            if (p != NULL) {
+                memcpy(p + 0x170, &extra, 1);
+            }
+        }
+    }
+
+    if (obj->unk1D4 == NULL || (obj->unk74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32) pos, kind, owner);
+    func_1503F6F4((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
+                  &rot[1], &rot[2]);
+    smoke.u00 = 1.0f;
+    smoke.u04 = 0.64900005f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    smoke.u0C = size;
+    smoke.u08 = size;
+    smoke.pos[0] = trans[0];
+    smoke.pos[1] = trans[1];
+    smoke.pos[2] = trans[2];
+    smoke.scl[0] = 1.0f;
+    smoke.scl[1] = 0.0f;
+    smoke.scl[2] = 1.0f;
+    smoke.u44 = 0.0f;
+    smoke.u58 = 0;
+    smoke.u5C = 0;
+    smoke.u60[0] = 0xFF;
+    smoke.u60[2] = 0;
+    smoke.u60[4] = 0;
+    smoke.u60[5] = 0;
+    smoke.u60[6] = 0;
+    smoke.u60[7] = 0;
+    smoke.u6A = 1;
+    smoke.obj = obj;
+    smoke.u72 = 12;
+    smoke.u74 = 21;
+    smoke.u50 = 0x1039E9;
+    smoke.u60[1] = 13;
+    smoke.u68 = 2;
+    smoke.u60[3] = 9;
+    smoke.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 3; i++, bit <<= 1) {
+        if (!(*mask & bit)) {
+            smoke.u56 = D_800A4608[i];
+            func_15143134(D_800A4614[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            a = func_150ADA20();
+            b = func_150ADA20();
+            func_15143794(a & 0xFF, (u32) b % 35 - 84, func_150ADA68() * 6.12f + 3.0f, smoke.vel);
+            smoke.u40 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u48 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u4C = func_150ADA68() * 0.208f + -0.708f;
+            smoke.life = (u32) func_150ADA20() % 101 + 60;
+            func_15132BBC(&smoke, 3, 0xFF, (s32) arg2, 0, kind, owner);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_15139D74.s")
+#endif
 
 #ifdef NON_MATCHING
 /* func_15150D7C debris burst spec (0x44 bytes) and the 0xC extra bytes copied to each piece (+0x170) */
@@ -2501,9 +3022,263 @@ void func_1513A5E0(s32 arg0, u8 arg1, s32 arg2) {
     func_15152700(&s, D_800A4648, D_800A4650, 2, 0.0f, 1, arg1, arg2);
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A6E0.s")
+#ifdef NON_MATCHING
+extern u8 D_800A4658[6];        /* 6 bit masks (one picked at random) */
+extern s32 D_800A4660[4];       /* spark sprite ids */
+extern s32 D_800A4670[4];       /* smoke sprite ids */
+extern f32 D_800A4680[4][3];    /* smoke start points in model space */
 
+// object_hit_sparks_four: hit types 0 / 7 of func_15138C80; as func_15139D74 with four sparks / puffs, one of six
+// masks (D_800A4658) and spark life 100.
+void func_1513A6E0(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 owner) {
+    Spark9768 smoke;
+    f32 rot[3];
+    f32 scl[3];
+    Spark9768 spark;
+    u8 extra;
+    f32 trans[3];
+    u8 *mask;
+    u8 bit;
+    s32 i;
+    s32 a;
+    s32 b;
+    f32 size;
+    u8 *p;
+
+    kind &= 0xFF;
+    mask = &D_800A4658[(u32) func_150ADA20() % 6 & 0xFF];
+    extra = 12;
+    spark.u00 = 1.0f;
+    spark.u04 = 1.0f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    spark.pos[0] = 0.0f;
+    spark.pos[1] = 0.0f;
+    spark.pos[2] = 0.0f;
+    spark.scl[0] = 1.0f;
+    spark.u0C = size;
+    spark.u08 = size;
+    spark.scl[1] = 1.0f;
+    spark.scl[2] = 1.0f;
+    spark.at[0] = 0.0f;
+    spark.at[1] = 0.0f;
+    spark.at[2] = 0.0f;
+    spark.vel[0] = 0.0f;
+    spark.vel[1] = 0.0f;
+    spark.vel[2] = 0.0f;
+    spark.u40 = 0.0f;
+    spark.u44 = 0.0f;
+    spark.u48 = 0.0f;
+    spark.u4C = 0.0f;
+    spark.u50 = 0x101900;
+    spark.life = 100;
+    spark.u58 = 5;
+    spark.u5C = 0;
+    spark.u60[0] = 0xFF;
+    spark.u60[1] = 0;
+    spark.u60[2] = 0;
+    spark.u60[3] = 0;
+    spark.u60[4] = 0;
+    spark.u60[5] = 0;
+    spark.u60[6] = 0;
+    spark.u60[7] = 0;
+    spark.u68 = 5;
+    spark.u6A = 1;
+    spark.obj = obj;
+    spark.u72 = 12;
+    spark.u74 = 21;
+    spark.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
+        if (*mask & bit) {
+            spark.u56 = D_800A4660[i];
+            p = (u8 *) func_15132FBC(&spark, 3, 0xFF, 1, kind, owner);
+            if (p != NULL) {
+                memcpy(p + 0x170, &extra, 1);
+            }
+        }
+    }
+
+    if (obj->unk1D4 == NULL || (obj->unk74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32) pos, kind, owner);
+    func_1503F6F4((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
+                  &rot[1], &rot[2]);
+    smoke.u00 = 1.0f;
+    smoke.u04 = 0.64900005f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    smoke.u0C = size;
+    smoke.u08 = size;
+    smoke.pos[0] = trans[0];
+    smoke.pos[1] = trans[1];
+    smoke.pos[2] = trans[2];
+    smoke.scl[0] = 1.0f;
+    smoke.scl[1] = 0.0f;
+    smoke.scl[2] = 1.0f;
+    smoke.u44 = 0.0f;
+    smoke.u58 = 0;
+    smoke.u5C = 0;
+    smoke.u60[0] = 0xFF;
+    smoke.u60[2] = 0;
+    smoke.u60[4] = 0;
+    smoke.u60[5] = 0;
+    smoke.u60[6] = 0;
+    smoke.u60[7] = 0;
+    smoke.u6A = 1;
+    smoke.obj = obj;
+    smoke.u72 = 12;
+    smoke.u74 = 21;
+    smoke.u50 = 0x1039E9;
+    smoke.u60[1] = 13;
+    smoke.u68 = 2;
+    smoke.u60[3] = 9;
+    smoke.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 4; i++, bit <<= 1) {
+        if (!(*mask & bit)) {
+            smoke.u56 = D_800A4670[i];
+            func_15143134(D_800A4680[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            a = func_150ADA20();
+            b = func_150ADA20();
+            func_15143794(a & 0xFF, (u32) b % 35 - 84, func_150ADA68() * 6.12f + 3.0f, smoke.vel);
+            smoke.u40 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u48 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u4C = func_150ADA68() * 0.208f + -0.708f;
+            smoke.life = (u32) func_150ADA20() % 101 + 60;
+            func_15132BBC(&smoke, 3, 0xFF, (s32) arg2, 0, kind, owner);
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513A6E0.s")
+#endif
+
+#ifdef NON_MATCHING
+extern u8 D_800A46B0[3];        /* 3 bit masks (one picked at random) */
+extern s32 D_800A46B4[2][2];    /* spark sprite ids per variant */
+extern s32 D_800A46C4[2][2];    /* smoke sprite ids per variant */
+extern f32 D_800A46D4[2][2][3]; /* smoke start points in model space per variant */
+
+// object_hit_sparks_pair: hit types 8 / 9 of func_15138C80 (variant = type == 9); as func_15139D74 with two sparks /
+// puffs whose sprites and smoke points come from the variant's row, spark life 100. kind is a byte stack argument.
+void func_1513ABB8(struct127 *obj, s32 *pos, s32 variant, s32 *arg3, u8 kind, s32 owner) {
+    Spark9768 smoke;
+    f32 rot[3];
+    f32 scl[3];
+    Spark9768 spark;
+    u8 extra;
+    f32 trans[3];
+    u8 *mask;
+    u8 bit;
+    s32 i;
+    s32 a;
+    s32 b;
+    f32 size;
+    u8 *p;
+
+    variant &= 0xFF;
+    mask = &D_800A46B0[(u32) func_150ADA20() % 3 & 0xFF];
+    extra = 12;
+    spark.u00 = 1.0f;
+    spark.u04 = 1.0f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    spark.pos[0] = 0.0f;
+    spark.pos[1] = 0.0f;
+    spark.pos[2] = 0.0f;
+    spark.scl[0] = 1.0f;
+    spark.u0C = size;
+    spark.u08 = size;
+    spark.scl[1] = 1.0f;
+    spark.scl[2] = 1.0f;
+    spark.at[0] = 0.0f;
+    spark.at[1] = 0.0f;
+    spark.at[2] = 0.0f;
+    spark.vel[0] = 0.0f;
+    spark.vel[1] = 0.0f;
+    spark.vel[2] = 0.0f;
+    spark.u40 = 0.0f;
+    spark.u44 = 0.0f;
+    spark.u48 = 0.0f;
+    spark.u4C = 0.0f;
+    spark.u50 = 0x101900;
+    spark.life = 100;
+    spark.u58 = 5;
+    spark.u5C = 0;
+    spark.u60[0] = 0xFF;
+    spark.u60[1] = 0;
+    spark.u60[2] = 0;
+    spark.u60[3] = 0;
+    spark.u60[4] = 0;
+    spark.u60[5] = 0;
+    spark.u60[6] = 0;
+    spark.u60[7] = 0;
+    spark.u68 = 5;
+    spark.u6A = 1;
+    spark.obj = obj;
+    spark.u72 = 12;
+    spark.u74 = 21;
+    spark.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
+        if (*mask & bit) {
+            spark.u56 = D_800A46B4[variant][i];
+            p = (u8 *) func_15132FBC(&spark, 3, 0xFF, 1, kind, owner);
+            if (p != NULL) {
+                memcpy(p + 0x170, &extra, 1);
+            }
+        }
+    }
+
+    if (obj->unk1D4 == NULL || (obj->unk74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1513A5E0((s32) pos, kind, owner);
+    func_1503F6F4((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
+                  &rot[1], &rot[2]);
+    smoke.u00 = 1.0f;
+    smoke.u04 = 0.64900005f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    smoke.u0C = size;
+    smoke.u08 = size;
+    smoke.pos[0] = trans[0];
+    smoke.pos[1] = trans[1];
+    smoke.pos[2] = trans[2];
+    smoke.scl[0] = 1.0f;
+    smoke.scl[1] = 0.0f;
+    smoke.scl[2] = 1.0f;
+    smoke.u44 = 0.0f;
+    smoke.u58 = 0;
+    smoke.u5C = 0;
+    smoke.u60[0] = 0xFF;
+    smoke.u60[2] = 0;
+    smoke.u60[4] = 0;
+    smoke.u60[5] = 0;
+    smoke.u60[6] = 0;
+    smoke.u60[7] = 0;
+    smoke.u6A = 1;
+    smoke.obj = obj;
+    smoke.u72 = 12;
+    smoke.u74 = 21;
+    smoke.u50 = 0x1039E9;
+    smoke.u60[1] = 13;
+    smoke.u68 = 2;
+    smoke.u60[3] = 9;
+    smoke.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
+        if (!(*mask & bit)) {
+            smoke.u56 = D_800A46C4[variant][i];
+            func_15143134(D_800A46D4[variant][i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            a = func_150ADA20();
+            b = func_150ADA20();
+            func_15143794(a & 0xFF, (u32) b % 35 - 84, func_150ADA68() * 6.12f + 3.0f, smoke.vel);
+            smoke.u40 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u48 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u4C = func_150ADA68() * 0.208f + -0.708f;
+            smoke.life = (u32) func_150ADA20() % 101 + 60;
+            func_15132BBC(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513ABB8.s")
+#endif
 
 void func_1513B0B8(struct161520 *arg0, s32 arg1, u8 arg2) {
     s32 *temp_v0 = &arg0->unk170;
@@ -2515,4 +3290,131 @@ void func_1513B0B8(struct161520 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+extern u8 D_800A4704[3];        /* 3 bit masks (one picked at random) */
+extern s32 D_800A4708[2];       /* spark sprite ids */
+extern s32 D_800A4710[2];       /* smoke sprite ids */
+extern f32 D_800A4718[2][3];    /* smoke start points in model space */
+
+// object_hit_sparks_burst: hit type 16 of func_15138C80; first a func_15103C34 burst at `pos`, then as
+// func_15139D74 with two sparks / puffs (spark life 100, smoke y scale 2.0, no func_1513A5E0 burst).
+void func_1513B0F8(struct127 *obj, s32 *pos, s32 *arg2, s32 kind, s32 owner) {
+    Spark9768 smoke;
+    f32 rot[3];
+    f32 scl[3];
+    Spark9768 spark;
+    u8 extra;
+    f32 trans[3];
+    u8 *mask;
+    u8 bit;
+    s32 i;
+    s32 a;
+    s32 b;
+    f32 size;
+    u8 *p;
+
+    kind &= 0xFF;
+    func_15103C34((s32) pos, kind, owner);
+    mask = &D_800A4704[(u32) func_150ADA20() % 3 & 0xFF];
+    extra = 12;
+    spark.u00 = 1.0f;
+    spark.u04 = 1.0f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    spark.pos[0] = 0.0f;
+    spark.pos[1] = 0.0f;
+    spark.pos[2] = 0.0f;
+    spark.scl[0] = 1.0f;
+    spark.u0C = size;
+    spark.u08 = size;
+    spark.scl[1] = 1.0f;
+    spark.scl[2] = 1.0f;
+    spark.at[0] = 0.0f;
+    spark.at[1] = 0.0f;
+    spark.at[2] = 0.0f;
+    spark.vel[0] = 0.0f;
+    spark.vel[1] = 0.0f;
+    spark.vel[2] = 0.0f;
+    spark.u40 = 0.0f;
+    spark.u44 = 0.0f;
+    spark.u48 = 0.0f;
+    spark.u4C = 0.0f;
+    spark.u50 = 0x101900;
+    spark.life = 100;
+    spark.u58 = 5;
+    spark.u5C = 0;
+    spark.u60[0] = 0xFF;
+    spark.u60[1] = 0;
+    spark.u60[2] = 0;
+    spark.u60[3] = 0;
+    spark.u60[4] = 0;
+    spark.u60[5] = 0;
+    spark.u60[6] = 0;
+    spark.u60[7] = 0;
+    spark.u68 = 5;
+    spark.u6A = 1;
+    spark.obj = obj;
+    spark.u72 = 12;
+    spark.u74 = 21;
+    spark.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
+        if (*mask & bit) {
+            spark.u56 = D_800A4708[i];
+            p = (u8 *) func_15132FBC(&spark, 3, 0xFF, 1, kind, owner);
+            if (p != NULL) {
+                memcpy(p + 0x170, &extra, 1);
+            }
+        }
+    }
+
+    if (obj->unk1D4 == NULL || (obj->unk74 & 0xF) == 0xF) {
+        return;
+    }
+    func_1503F6F4((u8 *) obj->unk1D4 + 0x300, &scl[0], &scl[1], &scl[2], &trans[0], &trans[1], &trans[2], &rot[0],
+                  &rot[1], &rot[2]);
+    smoke.u00 = 1.0f;
+    smoke.u04 = 0.64900005f;
+    size = (obj->xz_scale + obj->y_scale) * 0.5f;
+    smoke.u0C = size;
+    smoke.u08 = size;
+    smoke.pos[0] = trans[0];
+    smoke.pos[1] = trans[1];
+    smoke.pos[2] = trans[2];
+    smoke.scl[0] = 1.0f;
+    smoke.scl[1] = 2.0f;
+    smoke.scl[2] = 1.0f;
+    smoke.u44 = 0.0f;
+    smoke.u58 = 0;
+    smoke.u5C = 0;
+    smoke.u60[0] = 0xFF;
+    smoke.u60[2] = 0;
+    smoke.u60[4] = 0;
+    smoke.u60[5] = 0;
+    smoke.u60[6] = 0;
+    smoke.u60[7] = 0;
+    smoke.u6A = 1;
+    smoke.obj = obj;
+    smoke.u72 = 12;
+    smoke.u74 = 21;
+    smoke.u50 = 0x1039E9;
+    smoke.u60[1] = 13;
+    smoke.u68 = 2;
+    smoke.u60[3] = 9;
+    smoke.uid = obj->unique_id;
+    for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {
+        if (!(*mask & bit)) {
+            smoke.u56 = D_800A4710[i];
+            func_15143134(D_800A4718[i], smoke.at, (u8 *) obj->unk1D4 + 0x300);
+            a = func_150ADA20();
+            b = func_150ADA20();
+            func_15143794(a & 0xFF, (u32) b % 35 - 84, func_150ADA68() * 6.12f + 3.0f, smoke.vel);
+            smoke.u40 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u48 = func_150ADA68() * 30.746002f + -15.373001f;
+            smoke.u4C = func_150ADA68() * 0.208f + -0.708f;
+            smoke.life = (u32) func_150ADA20() % 101 + 60;
+            func_15132BBC(&smoke, 3, 0xFF, (s32) arg2, 0, kind, owner);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_161520/func_1513B0F8.s")
+#endif

@@ -1,0 +1,32 @@
+/mask = &D_800A46B0/s/ 3 / 2 /
+/^    extra = 12;/s/12/13/
+/spark.u04 = 1.0f/s/1.0f/0.5f/
+/size = (obj->xz_scale + obj->y_scale) \* 0.5f;/s/y_scale/xz_scale/
+/spark.scl\[1\] = 1.0f/s/1.0f/0.0f/
+/spark.life = 100/s/100/400/
+/spark.u50 = 0x101900/s/0x101900/0x101901/
+/spark.u60\[3\] = 0/s/0;/1;/
+/spark.uid = obj->unique_id/s/unique_id/unk74/
+/for (i = 0, bit = 1; i < 2; i++, bit <<= 1) {/s/i < 2/i < 1/
+/if (\*mask & bit) {/s/\*mask & bit/*mask \& (bit << 1)/
+/spark.u56 = D_800A46B4/s/\[variant\]\[i\]/[variant][1 - i]/
+/func_15132FBC(&spark, 3, 0xFF, 1, kind, owner)/s/0xFF, 1/0xFF, 2/
+/memcpy(p + 0x170/s/0x170/0x171/
+/(obj->unk74 & 0xF) == 0xF/s/== 0xF)/== 0xE)/
+/func_1513A5E0((s32) pos, kind, owner)/s/kind, owner/kind, 0/
+/smoke.u04 = 0.64900005f/s/0.64900005f/0.649f/
+/smoke.pos\[1\] = trans\[1\]/s/trans\[1\]/trans[2]/
+/smoke.scl\[1\] = 0.0f/s/0.0f/1.0f/
+/smoke.u60\[1\] = 13/s/13/12/
+/smoke.u50 = 0x1039E9/s/E9/E8/
+/smoke.u56 = D_800A46C4/s/\[variant\]/[1 - variant]/
+/func_15143134(D_800A46D4\[variant\]\[i\]/s/0x300/0x304/
+/(u32) b . 35 - 84/s/84/83/
+/func_150ADA68() \* 6.12f + 3.0f/s/3.0f/3.5f/
+/smoke.u40 = /s/-15.373001f/-15.0f/
+/smoke.u48 = /s/30.746002f/30.0f/
+/smoke.u4C = /s/0.208f/0.2f/
+/smoke.life = /s/60;/61;/
+/func_15132BBC(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3, 0/(s32) arg3, 1/
+/func_15132BBC(&smoke, 3, 0xFF, (s32) arg3, 0, kind, owner)/s/(s32) arg3/(s32) pos/
+/^    variant &= 0xFF;/s/0xFF/0x1FF/

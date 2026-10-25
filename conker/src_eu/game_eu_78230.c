@@ -4749,7 +4749,151 @@ void func_15054A5C(struct127 *arg0, struct127 *arg1) {
     func_15060F28(arg0, 0);
 }
 
+#ifdef NON_MATCHING
+void func_15188D80(struct127 *, s32, s32);
+s32 func_150836CC(struct127 *, s32);
+void func_1507C700(u8 *, u8 *);
+s32 func_15102C3C(u8 *, s32, s32, s32, s32, s32);
+
+// carried_by_partner_update: obj's animation while it is held by its partner (+0x65 = 1-based D_800CC2D0 index).
+// Nothing without an animation (+0x2D0) or partner. Id 0x41: the partner must play anim 0x48 / 0x4B (else
+// func_15060F28 drops obj); obj starts anim 100 (func_15188D80) at frame 0, follows into anim 1 when the partner plays
+// 0x4B and is dropped at the end of anim 1. Ids 0x1D / 0x6E / 0x2F: the partner must be a free (+0x65 = 0) living
+// (health) holder whose controller (+0x31C) is of type 0x12 / 0x18 / 0x41 or in state 3 (+0x11A), not grabbing
+// (+0x13C) and, for 0x1D, not stunned (+0x104), else the hold ends (func_15054A5C). obj then mirrors the partner's
+// anims (anim2 -> 2 with the extra move func_15083568 / func_150836CC (0x39 for 0x1D, else 0x51) between frames
+// 6 and 11, anim1 -> 0, 0xC6 -> 3, else 1) and, except for the last case, func_1507C700 places it. When the partner
+// plays 0x10A on its first frame and its controller (type 0x12, or +0x197 with, for the first four players
+// without +0x84, the pad flag 0x10) has flag 0x2000 of +0x8A, func_15102C3C (-1, 3, 1, 0xFF, 1) starts once
+// (+0x2E8); otherwise a started one is stopped (func_151027E8).
+void func_15054A94(struct127 *obj) {
+    struct197 *anim;
+    struct127 *partner;
+    struct197 *panim;
+    struct126 *ctl;
+    u16 cur;
+    u16 anim1;
+    u16 anim2;
+    s32 move;
+    s32 place;
+    s32 n;
+    u8 ok;
+
+    anim = obj->unk2D0;
+    if (anim == NULL || obj->unk65 == 0) {
+        return;
+    }
+    partner = &D_800CC2D0[obj->unk65 - 1];
+    panim = partner->unk2D0;
+    if (panim == NULL) {
+        return;
+    }
+    if (obj->id == 0x41) {
+        if (partner->unk84.uh != 0x48 && partner->unk84.uh != 0x4B) {
+            func_15060F28(obj, 0);
+            return;
+        }
+        cur = obj->unk84.uh;
+        if (cur == 0 && anim->unk8 == 0.0f) {
+            func_15188D80(obj, 100, 0);
+            cur = obj->unk84.uh;
+        }
+        if (cur == 0 && partner->unk84.uh == 0x4B) {
+            func_1505E650(obj, 1, 1.0f, 3.0f, 0.0f, 0.0f, 0);
+            cur = obj->unk84.uh;
+        }
+        if (cur == 1 && anim->unk18 - 1.0f <= anim->unk8) {
+            func_15060F28(obj, 0);
+        }
+        return;
+    }
+    if (obj->id != 0x1D && obj->id != 0x6E && obj->id != 0x2F) {
+        return;
+    }
+    if (partner->unk65 != 0 || partner->health == 0) {
+        func_15054A5C(obj, partner);
+        return;
+    }
+    ctl = partner->unk31C;
+    if (ctl->unk78 != 0x12 && ctl->unk78 != 0x18 && ctl->unk78 != 0x41 && ctl->unk11A != 3) {
+        func_15054A5C(obj, partner);
+        return;
+    }
+    if (obj->id == 0x1D) {
+        anim1 = 0xC4;
+        anim2 = 0xC7;
+        move = 0x39;
+    } else if (obj->id == 0x6E) {
+        anim1 = 0xFB;
+        anim2 = 0xFC;
+        move = 0x51;
+    } else {
+        anim1 = 0x2C8;
+        anim2 = 0x2C9;
+        move = 0x51;
+    }
+    if (partner->unk13C != 0 || (obj->id == 0x1D && partner->stunned != 0)) {
+        func_15054A5C(obj, partner);
+        return;
+    }
+    place = TRUE;
+    cur = partner->unk84.uh;
+    if (cur == anim2) {
+        cur = 2;
+        if (obj->unk2E4 == 0) {
+            if (6.0f <= panim->unk8 && panim->unk8 < 11.0f) {
+                obj->unk2E4 = 1;
+                func_15083568(obj, move, 1.0f, 0);
+            }
+        } else if (11.0f <= panim->unk8) {
+            obj->unk2E4 = 0;
+            func_150836CC(obj, move);
+        }
+    } else {
+        if (obj->unk2E4 == 1) {
+            obj->unk2E4 = 0;
+            func_150836CC(obj, move);
+            cur = partner->unk84.uh;
+        }
+        if (cur == anim1) {
+            cur = 0;
+        } else if (cur == 0xC6) {
+            cur = 3;
+        } else {
+            cur = 1;
+            place = FALSE;
+        }
+    }
+    func_1505E650(obj, cur, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    if (place) {
+        func_1507C700((u8 *) obj, (u8 *) partner);
+    }
+
+    ctl = partner->unk31C;
+    if (ctl->unk78 == 0x12) {
+        ok = TRUE;
+    } else {
+        ok = ctl->unk197;
+        if (ctl->unk84 == 0) {
+            n = ((u8 *) partner - (u8 *) D_800CC2D0) / (s32) sizeof(struct127);
+            if (n < 4 && !(*(u16 *) ((s32 *) D_800BE728[0])[n] & 0x10)) {
+                ok = FALSE;
+            }
+        }
+    }
+    if (partner->unk84.uh == 0x10A && *(s16 *) ((u8 *) panim + 0x3C) <= 0 && ok && (ctl->unk8A & 0x2000)) {
+        if (obj->unk2E8 == 0) {
+            func_15102C3C((u8 *) partner, -1, 3, 1, 0xFF, 1);
+            obj->unk2E8 = 1;
+        }
+    } else if (obj->unk2E8 == 1) {
+        obj->unk2E8 = 0;
+        func_151027E8((u8 *) partner);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_78230/func_15054A94.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P125 */
