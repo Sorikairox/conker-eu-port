@@ -86,7 +86,89 @@ block_3:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B17DC.s")
 #endif
+
+#ifdef NON_MATCHING
+void func_150585F0(struct127 *);
+void func_15052760(struct127 *, s16);
+
+// held_object_update: update of an object that may be held, thrown or resting: unk80 = 10; stunned objects only run
+// func_150585F0. Otherwise its resting height is 210 above the floor entry D_800D20FC[unk13F] (+8), the vertical
+// bounce speed unkB8 is -vy / 2 (0 in mode 3) unless unk22C bit 3; in mode 14 (unk223) it is pulled towards object
+// unk222 (no gravity, vy = (its height + unk224 - y) / (distance func_1505A6F8 / speed)); otherwise (mode 1: 210 above
+// the player) the height comes from unk224 (10000: the D_800D2104 path point unk21E, else 8 x unk224, + unk180 for
+// all but kinds 5 / 0x50 / 0xAD..0xAF) and, unless unk100 bit 6, the collision box (func_15058EA4, 3 x 12 for kind
+// 0x44 at its path point height, else 5 x 35). Then the move (func_15056B08), the facing unk40 from unk7A, the
+// animation (func_15059140), kinds 5 / 0xAD..0xAF / 0x44 turn from the old heading (func_15052760), and the object
+// is released (func_15021834) when func_150535F4 says so.
+void func_150B1964(struct127 *obj) {
+    s16 heading;
+    f32 height;
+    f32 half;
+    f32 depth;
+    struct127 *target;
+    f32 dist;
+    s16 level;
+
+    heading = obj->unk76;
+    obj->unk80 = 10;
+    if (obj->stunned == 0) {
+        height = *(s16 *) ((u8 *) D_800D20FC + obj->unk13F * 0x30 + 8) + 210.0f;
+        if (!(obj->unk22C & 8)) {
+            if (obj->unk223 == 3) {
+                obj->unkB8 = 0.0f;
+            } else {
+                obj->unkB8 = obj->y_velocity * -0.5f;
+            }
+        }
+        if (obj->unk223 == 14) {
+            target = &D_800CC2D0[obj->unk222];
+            dist = func_1505A6F8(target, obj);
+            obj->gravity = 0.0f;
+            obj->y_velocity = (D_800CC2D0[obj->unk222].y_position + (s16) obj->unk224 - obj->y_position) /
+                              (dist / obj->xz_velocity);
+        } else {
+            if (obj->unk223 == 1) {
+                height = D_800CC2D0[0].y_position + 210.0f;
+            }
+            level = obj->unk224;
+            if (level != 0) {
+                if (level == 10000) {
+                    height = *(s16 *) ((u8 *) D_800D2104[obj->unk13F] + obj->unk21E * 8 + 0xA);
+                } else if (obj->id == 0x50 || obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE ||
+                           obj->id == 0xAF) {
+                    height = level * 8;
+                } else {
+                    height = level * 8 + obj->unk180;
+                }
+            }
+            if (!(obj->unk100 & 0x40)) {
+                if (obj->id == 0x44) {
+                    height = *(s16 *) ((u8 *) D_800D2104[obj->unk13F] + obj->unk21E * 8 + 0xA);
+                    half = 3.0f;
+                    depth = 12.0f;
+                } else {
+                    half = 5.0f;
+                    depth = 35.0f;
+                }
+                func_15058EA4(obj, height, half, height, -half, depth, -depth);
+            }
+        }
+        func_15056B08(obj);
+    } else {
+        func_150585F0(obj);
+    }
+    obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(obj);
+    if (obj->id == 5 || obj->id == 0xAD || obj->id == 0xAE || obj->id == 0xAF || obj->id == 0x44) {
+        func_15052760(obj, heading);
+    }
+    if (func_150535F4(obj) == 0) {
+        func_15021834(obj, 0, -1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1964.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15056B08(struct127 *);
@@ -142,4 +224,123 @@ void func_150B1CBC(struct127 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1CBC.s")
 #endif
+#ifdef NON_MATCHING
+extern u8 D_800B8AC4[];
+extern s32 D_800CC670;
+extern s32 D_8008CE80;
+void func_150562FC(struct127 *);
+void func_150597FC(struct127 *);
+f32 func_150489B0(u8);
+void func_1510F800(s32);
+s32 func_1510FE58(s32, s32, s32, s32 *);
+void *func_15167D84(void *, s32, s32, s8, u8, s32);
+
+// sinking_object_update: per-frame update of an object sinking / floating in water: flags (0x80, 0x4 while moving
+// faster than 1), unkB0 25, stunned 10, unk239 3, unkFC 0xA7, unk80 1; a pending reset (unk25C bit 6) puts its old
+// position on the player's. In a water region (unk13D) it calls func_150562FC and sinks (unkB8 eases towards -20 with
+// factor 0.2, else towards 0) once unk21C reaches 9, unless the region's D_800B8AC4 entry is set and D_800CC670 bit 2
+// is clear. Facing / animation / func_150597FC / func_1505E650 / release as usual. In water, 40 in 256 frames spawn
+// a ripple record (func_15167D84) at a random point up to 40 x xz_scale around it, drifting with the player's speed.
+void func_150B1EC0(struct127 *obj) {
+    struct {
+        s32 u00;
+        s32 u04;
+        s32 u08;
+        s16 u0C;
+        s16 u0E;
+        s16 pos[3];
+        s16 u16;
+        s16 u18;
+        s16 u1A;
+        u8 pad1C[3];
+        u8 u1F;
+        s16 u20;
+        s16 u22;
+        s16 u24;
+        s16 u26;
+        s16 u28;
+        u8 u2A;
+        u8 u2B;
+        u8 u2C;
+        u8 u2D;
+        u8 u2E;
+        u8 u2F;
+        u8 pad30[4];
+        s16 u34;
+    } rec;
+    f32 target;
+    f32 dist;
+    f32 s;
+    f32 c;
+    f32 speed;
+    u8 a;
+    u8 r;
+
+    obj->unkF8 &= ~4;
+    obj->unkB0 = 25;
+    obj->unk13C = 0;
+    obj->unkF8 |= 0x80;
+    if (1.0f < obj->xz_velocity) {
+        obj->unkF8 |= 4;
+    }
+    obj->stunned = 10;
+    obj->unk239 = 3;
+    obj->unkFC = 0xA7;
+    obj->unk80 = 1;
+    if (obj->unk25C & 0x40) {
+        obj->unk25C &= ~0x40;
+        obj->old_x_position = D_800CC2D0[0].x_position;
+        obj->old_z_position = D_800CC2D0[0].z_position;
+    }
+    target = 0.0f;
+    if (obj->unk13D != 0) {
+        func_150562FC(obj);
+        if ((D_800B8AC4[obj->unk13D * 0x32C] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {
+            target = -20.0f;
+        }
+    }
+    obj->unkB8 = obj->unkB8 + (target - obj->unkB8) * 0.2f;
+    obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(obj);
+    func_150597FC(obj);
+    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);
+    func_15021834(obj, 0, -1);
+    if (obj->unk13D == 0 || (u8) func_150ADA20() >= 40) {
+        return;
+    }
+    dist = obj->xz_scale * (f32) ((u32) func_150ADA20() % 40);
+    a = func_150ADA20();
+    s = func_150489B0(a);
+    c = func_15048A40(a);
+    rec.u00 = D_8008CE80;
+    rec.u0C = 0;
+    rec.u0E = 0;
+    rec.pos[0] = (s32) (obj->x_position + s * dist);
+    rec.pos[1] = (s32) obj->y_position;
+    rec.pos[2] = (s32) (obj->z_position + c * dist);
+    func_1510F800(0);
+    rec.u04 = func_1510FE58(rec.pos[0], rec.pos[1], rec.pos[2], NULL);
+    speed = D_800CC2D0[0].xz_velocity * 64.0f;
+    a = D_800CC2D0[0].unk76 >> 8;
+    rec.u16 = (s32) (func_150489B0(a) * speed);
+    rec.u18 = (s32) (func_15048A40(a) * -speed);
+    rec.u1A = -30;
+    rec.u1F = 7;
+    rec.u20 = 0;
+    rec.u22 = -80;
+    r = func_150ADA20();
+    rec.u24 = (r << 12) / 5100 + 204;
+    rec.u26 = (r << 12) / 12750 + 81;
+    rec.u28 = 400;
+    rec.u2A = 0;
+    rec.u2B = r;
+    rec.u2C = 0xFF;
+    rec.u2D = 0xFF;
+    rec.u2E = 0;
+    rec.u2F = 0xFF;
+    rec.u34 = 0;
+    func_15167D84(&rec, 0, 0, -1, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DEDE0/func_150B1EC0.s")
+#endif

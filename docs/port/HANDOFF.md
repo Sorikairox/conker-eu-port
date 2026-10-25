@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P284 (port-c, group C) (session P284, 2026-10-26). Details: `docs/port/sessions/P284.md`
+
+Hand C (NM), registry rows `P284`, setups / mutants in docs/port/sessions/p284: func_150B1964 (P277 draft fixed: the
+mode-14 divisor is func_1505A6F8's float result), func_150C3994, func_150F536C, func_150B1EC0, func_15162B28,
+func_150C3574, func_15198680. Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1672), implicit_scan 0 NM+float
+(833), selftest 130/130, progress_nm `total 5916 3995 1691 230 5686 96.1% 1999100/2253856 (88.7%)`.
+
+## Next steps (from P284, group C)
+1. func_1505D1C4 -> s32 is blocked by `void` declarations in game_eu_201240.c:355 and game_eu_C5530.c:90 (not
+   group C): change those two lines with game_83300 + functions.h in one merge, then write func_150E1AF0.
+2. Re-run mutants of func_150F536C / func_150B1EC0 / func_15162B28 (lines fixed after the run); boundary setups for
+   func_150C3574 (5 survivors listed in P284.md).
+3. D_8008B704 (func_15162B28's phase handlers) has mixed signatures: wasm call_indirect hazard, check with tablesig.
+4. Group C left (smallest first): func_151B8DB0 (asm read, 4 stack records), func_1518D290, func_151AFC84,
+   func_151B4854, func_150ED1F0, func_150A39E4, func_150CB6F4, func_151970BC, ... (+ func_150E1AF0 after step 1).
+
 ## P277 (port-c, group C) (session P277, 2026-10-25). Details: `docs/port/sessions/P277.md`
 
 Hand C (NM), registry rows `P277`, setups / mutants in docs/port/sessions/p277: func_150DB3F0, func_1517A910,

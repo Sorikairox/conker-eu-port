@@ -662,7 +662,7 @@ u8 *func_15196438(u8 *obj, s32 kind, u8 arg2, s32 arg3) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15198680(u8 *, s8, f32 *, u8 *);
+void func_15198680(u8 *, s32, f32 *, u8 *);
 extern s32 D_8008FC20;
 extern s32 D_8008FC34;
 extern s32 D_8008FC3C;
@@ -1001,7 +1001,177 @@ void func_151985C4(struct102 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    f32 size0;  // 0x00
+    f32 size1;
+    f32 size;  // 0x08 (size0 + size1) / 2
+    f32 grow0; // 0x0C
+    f32 grow1;
+    f32 grow2;
+    f32 grow;  // 0x18 (grow0 + grow1) / 2
+    s16 u1C;
+    s16 u1E;
+    f32 u20;
+    f32 u24;
+    u8 pad28[4]; // not written
+    s16 u2C;
+    u8 pad2E[2];
+    f32 vel0[3]; // 0x30
+    f32 vel1[3]; // 0x3C
+    f32 u48;
+    f32 u4C;
+    f32 u50;
+    f32 u54;
+    s16 u58;
+    s16 u5A;
+} SmokeRec8680; // 0x5C bytes, copied to the effect's +0x110
+typedef struct {
+    u8 type;
+    u8 pad01;
+    s16 u02;
+    s16 life;
+    u8 pad06[2];
+    s32 u08;
+    s32 u0C;
+    u8 u10;
+    u8 u11;
+    u8 u12;
+    u8 u13;
+    f32 size;
+    f32 grow;
+    f32 p0[3];
+    f32 p1[3];
+    f32 u34;
+    f32 u38;
+    f32 u3C;
+    s32 u40;
+    u8 u44;
+    u8 u45;
+} SmokeHdr8680;
+typedef struct {
+    f32 size;
+    f32 grow;
+    s16 life_min;
+    s16 life_range;
+} SmokeKind8680; // D_800A8AF0, 12 bytes per kind
+extern SmokeKind8680 D_800A8AF0[];
+
+// trail_smoke_spawn: spawns smoke puffs along a trail segment. obj +0x94 = ring of +0x25 points (0x24 bytes:
+// position, velocity +0xC, scale +0x18, done flag +0x21), +0x98 = the owner (accumulator +0x70, rate +0x6C, kind
+// +0x69 into D_800A8AF0). Marks point idx done, adds the rate to the accumulator and, unless the next point is the
+// head (+0x2E), spawns one puff per whole unit (func_1513D524 type 0x13 / 0x14 at random, 0x5C-byte record) between
+// point idx and the next one, both moved by a random direction (func_151423D8 sin / cos) of length 0.8 x the next
+// point's scale, with a random life from the kind. The last two parameters are unused.
+void func_15198680(u8 *obj, s32 idx, f32 *unused2, u8 *unused3) {
+    SmokeRec8680 rec;
+    SmokeHdr8680 hdr;
+    u8 *owner;
+    u8 *points;
+    u8 *cur;
+    u8 *next;
+    SmokeKind8680 *kind;
+    s32 n;
+    u8 a;
+    u8 b;
+    f32 sa;
+    f32 ca;
+    f32 sb;
+    f32 cb;
+    f32 r;
+    f32 h;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    u8 *fx;
+
+    owner = *(u8 **) (obj + 0x98);
+    points = *(u8 **) (obj + 0x94);
+    *(f32 *) (owner + 0x70) += *(f32 *) (owner + 0x6C);
+    cur = points + idx * 0x24;
+    cur[0x21] = 1;
+    kind = &D_800A8AF0[owner[0x69]];
+    n = idx + 1;
+    if (n == obj[0x25]) {
+        n = 0;
+    }
+    if (!(1.0f < *(f32 *) (owner + 0x70)) || n == (s8) obj[0x2E]) {
+        return;
+    }
+    hdr.u08 = 0;
+    rec.u20 = 25137.0f;
+    rec.u24 = 6733.0f;
+    rec.u2C = 0;
+    hdr.u0C = (s32) ((25137.0f + 6733.0f) * 0.5f);
+    rec.u48 = *(f32 *) (owner + 0x40);
+    rec.u58 = 8;
+    rec.u5A = 0x20;
+    rec.u4C = 0.828f;
+    rec.u50 = 0.753f;
+    rec.u54 = -0.012f;
+    rec.size0 = kind->size * 30.090544f;
+    rec.u1C = 0;
+    rec.size1 = kind->size * 18.355232f;
+    hdr.size = (rec.size0 + rec.size1) * 0.5f;
+    rec.size = hdr.size;
+    rec.grow0 = kind->grow * 3.96174f;
+    rec.grow1 = kind->grow * 2.919177f;
+    rec.u1E = 0;
+    rec.grow2 = kind->grow * 8.116549f;
+    hdr.u34 = 1.0f;
+    hdr.u3C = 1.0f;
+    hdr.u40 = 0x40000001;
+    hdr.u44 = 0xFF;
+    hdr.u45 = 0xFF;
+    hdr.grow = (rec.grow0 + rec.grow1) * 0.5f;
+    hdr.u38 = 0.0f;
+    rec.grow = hdr.grow;
+    if (func_150ADA20() & 1) {
+        hdr.type = 0x13;
+    } else {
+        hdr.type = 0x14;
+    }
+    hdr.u10 = 0;
+    hdr.u11 = 0;
+    hdr.u12 = 0;
+    hdr.u13 = 0x68;
+    hdr.u02 = 0x301;
+    next = points + n * 0x24;
+    rec.vel0[0] = *(f32 *) (next + 0xC);
+    rec.vel0[1] = *(f32 *) (next + 0x10);
+    rec.vel0[2] = *(f32 *) (next + 0x14);
+    rec.vel1[0] = *(f32 *) (cur + 0xC);
+    rec.vel1[1] = *(f32 *) (cur + 0x10);
+    rec.vel1[2] = *(f32 *) (cur + 0x14);
+    do {
+        a = func_150ADA20();
+        b = func_150ADA20();
+        sa = func_151423D8(a - 0x40);
+        ca = func_151423D8(a);
+        sb = func_151423D8(b - 0x40);
+        cb = func_151423D8(b);
+        r = *(f32 *) (next + 0x18) * 0.8f;
+        hdr.life = (u32) func_150ADA20() % (u32) (kind->life_range + 1) + kind->life_min;
+        h = r * cb;
+        dx = h * sa;
+        dy = -r * sb;
+        dz = h * ca;
+        hdr.p0[0] = *(f32 *) (next + 0) + dx;
+        hdr.p0[1] = *(f32 *) (next + 4) + dy;
+        hdr.p0[2] = *(f32 *) (next + 8) + dz;
+        hdr.p1[0] = *(f32 *) (cur + 0) + dx;
+        hdr.p1[1] = *(f32 *) (cur + 4) + dy;
+        hdr.p1[2] = *(f32 *) (cur + 8) + dz;
+        fx = (u8 *) func_1513D524((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);
+        if (fx != NULL) {
+            memcpy(fx + 0x110, &rec, 0x5C);
+        }
+        *(f32 *) (owner + 0x70) -= 1.0f;
+    } while (1.0f < *(f32 *) (owner + 0x70));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198680.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1505D024(struct127 *obj, s32 flags, u16 val, s32 arg3);

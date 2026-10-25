@@ -889,8 +889,182 @@ void func_150C3230(struct127 *obj) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3230.s")
 #endif
+#ifdef NON_MATCHING
+void func_1505A250(f32, f32, f32, f32 *, f32 *);
+f32 func_1505A3A8(f32, struct127 *, f32, f32, u8);
+u8 func_150599C8(struct127 *, u8, u16);
+void func_1001091C(u8 *, s32);
+
+// rolling_object_update: per-frame update of a rolling object (barrel / ball; kinds 0x25, 0x10, 0xAC): unk80 = 10;
+// kind 0x25 first damps its push vector (func_1505A250, 0.15) and, when unk87 bit 0, keeps its height in unk224;
+// friction (func_1505A3A8, 2 / 0.1 or 0.25), gravity 3, the move (func_15056B08, water func_150562FC) and animation.
+// Its frame velocity (unkBC / unk148 = position delta x D_800BEDC8) gives the speed d; xz_velocity is capped at 2d
+// when it exceeds 2(d + 4). unk87 == 4 (a hit) fires event 0xFF020133 as the player (func_1506E8D8) and stores the
+// velocity as the push vector. unk87 shifts left each frame. Moving faster than 0.5 on land turns the heading unk78
+// towards the motion (func_1505A630) and the facing towards it or its opposite (func_150599C8). The roll speed unk44
+// decays by 0.9 in the air (unk28 > 30), else is 2d (0 in water) and spins the model (func_15052490, scale
+// (2 - xz_scale) x 0.375 / 0.28125 / 1.125 by kind). Below 0.2 the rolling sound stops (func_100109D0); otherwise it
+// is started (func_1506E5FC with sound 0x630 / 0x67A / 0x62A by kind) or its pitch set to unk44 x 2500 (max 28000,
+// halved for kind 0x25, func_1001091C).
+void func_150C3574(struct127 *obj) {
+    f32 scale;
+    f32 friction;
+    f32 d;
+    u16 heading;
+    s32 pitch;
+    u8 flags;
+
+    scale = 0.5f;
+    obj->unk80 = 10;
+    if (obj->id == 0x25) {
+        func_1505A250(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);
+        friction = 0.1f;
+        if (obj->unk87 & 1) {
+            obj->unk224 = (s32) obj->y_position;
+        }
+        obj->unk160 = 0;
+    } else {
+        friction = 0.25f;
+    }
+    func_1505A3A8(0.0f, obj, 2.0f, friction, 0);
+    obj->gravity = 3.0f;
+    if (obj->id == 0x10) {
+        scale = 0.375f;
+    }
+    if (obj->id == 0xAC) {
+        scale = 1.5f;
+    }
+    scale *= 0.75f;
+    func_15056B08(obj);
+    if (obj->unk13D != 0) {
+        func_150562FC(obj);
+    }
+    func_15059140(obj);
+    obj->unkBC = (obj->x_position - obj->old_x_position) * D_800BEDC8;
+    obj->unk148 = (obj->z_position - obj->old_z_position) * D_800BEDC8;
+    d = sqrtf(obj->unkBC * obj->unkBC + obj->unk148 * obj->unk148);
+    if ((d + 4.0f) + (d + 4.0f) < obj->xz_velocity) {
+        obj->xz_velocity = d + d;
+    }
+    flags = obj->unk87;
+    if (flags == 4) {
+        D_800D1580 = 0xFF020133;
+        D_800D154C = D_800CC2D0;
+        func_1506E8D8();
+        D_800D154C = obj;
+        obj->unk164 = obj->unkBC;
+        obj->unk168 = obj->unk148;
+        obj->xz_velocity = 0.0f;
+        flags = obj->unk87;
+    }
+    obj->unk87 = flags << 1;
+    if (0.5f < d && obj->unk13D == 0) {
+        obj->unk78 = func_1505A630(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);
+    }
+    heading = obj->unk78;
+    if ((obj->unk7A - heading - 0x4000) & 0x8000) {
+        func_150599C8(obj, 2, heading);
+    } else {
+        func_150599C8(obj, 2, heading ^ 0x8000);
+    }
+    if (30.0f < obj->unk28) {
+        obj->unk44 *= 0.9f;
+    } else {
+        obj->unk44 = d + d;
+    }
+    if (obj->unk13D != 0) {
+        obj->unk44 = 0.0f;
+    }
+    func_15052490(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) * scale);
+    if (obj->unk44 < 0.2f) {
+        func_100109D0(obj);
+    } else if (func_100107F8(obj) == 0) {
+        if (obj->id == 0xAC) {
+            D_800D1580 = 0x630;
+        } else if (obj->id == 0x25) {
+            D_800D1580 = 0x67A;
+        } else {
+            D_800D1580 = 0x62A;
+        }
+        func_1506E5FC();
+    } else {
+        pitch = (s32) (obj->unk44 * 2500.0f);
+        if (pitch > 28000) {
+            pitch = 28000;
+        }
+        if (obj->id == 0x25) {
+            pitch >>= 1;
+        }
+        func_1001091C((u8 *) obj, pitch);
+    }
+    if (obj->unk44 < 0.2f) {
+        func_100109D0(obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3574.s")
+#endif
+#ifdef NON_MATCHING
+void func_15188D80(struct127 *, s32, s32);
+s32 func_150C1B60(f32, f32, f32, s32);
+void func_150C3D5C(struct127 *);
+void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+// bouncing_bomb_update: per-frame update of a falling / bouncing object. In state 20 it spawns a small dust puff
+// (func_151BA1A0 effect 0x2F) at its position, or with a timer (unk2E4) shows it (func_15188D80). On a fast enough
+// landing (falling, unk28 > 20 and unk28 < -20 x vy) it plays sound 0x92 once (unk136). On the first frame (unk83 0)
+// it sets the spin speed unk148 = 70, spawns a big puff plus a light (func_150C1B60) and sends event 6, or with a
+// timer shows it, plays sound 0x1A9, sets unkD0, flags 0x1008000 and unk114 = 500. Each frame: unk83 counts up,
+// immune 0xFF, flag 0x8000 cleared from frame 11; facing unk40 from unk7A, animation, spin unkB8 += unk148 with
+// unk148 x 0.96. It ends (func_150C3D5C, sound 0x93, state 1) once it rests (unk28 0) after frame 20 with unkCC 0,
+// or when unk107 is set or its health is 0.
+void func_150C3994(struct127 *obj) {
+    if (obj->interaction_state == 20) {
+        if (obj->unk2E4 == 0) {
+            func_151BA1A0(0x2F, 1, (s16) (s32) obj->x_position, (s16) (s32) (obj->y_position + 30.0f),
+                          (s32) obj->z_position, 2000, 1000, 400, 200, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
+        } else {
+            func_15188D80(obj, 100, 0);
+        }
+    }
+    if (obj->y_velocity < 0.0f && 20.0f < obj->unk28 && obj->unk136 == 0 &&
+        obj->unk28 < -20.0f * obj->y_velocity) {
+        func_10010630(0x92, obj, 0x7D00, 200, 2500);
+        obj->unk136 = 1;
+    }
+    if (obj->unk83 == 0) {
+        obj->unk148 = 70.0f;
+        if (obj->unk2E4 == 0) {
+            func_151BA1A0(0x2F, 1, (s16) (s32) obj->x_position, (s16) (s32) (obj->y_position + 30.0f),
+                          (s32) obj->z_position, 2200, 1280, 800, 700, 0xC00, 0xC00, 20, 1, 0, 0xFF, 0);
+            func_150C1B60(obj->x_position, obj->y_position + 30.0f, obj->z_position, 0xFF);
+            func_1506B04C(obj, 6, NULL);
+        } else {
+            func_15188D80(obj, 100, 0);
+        }
+        func_10010344(0x1A9, obj, 0x7FFF, 1000, 2000);
+        obj->unkD0 = 1;
+        obj->unkF8 |= 0x1008000;
+        obj->unk114 = 500.0f;
+    }
+    obj->immune = 0xFF;
+    obj->unk83++;
+    if (obj->unk83 >= 11) {
+        obj->unkF8 &= ~0x8000;
+    }
+    obj->unk40 = (f32) (obj->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(obj);
+    obj->unkB8 += obj->unk148;
+    obj->unk148 *= 0.96f;
+    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {
+        func_150C3D5C(obj);
+        func_10010630(0x93, obj, 0x7D00, 200, 2500);
+        func_15060F28(obj, 1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3994.s")
+#endif
 
 s32 func_150C3D48(s32 arg0) {
     return arg0 + 0xEDCBA988;
@@ -899,7 +1073,11 @@ s32 func_150C3D48(s32 arg0) {
 s32 func_1516DF0C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_15170F24(s32, s32, s32, s32, f32, s32, s32);
 s32 func_15171770(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
+#ifdef NON_MATCHING // the definition is void (P284)
+void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#else
 s32 func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#endif
 s32 func_150C3D48(s32 arg0);
 s32 func_151EF800(u32, u32 *);
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm
