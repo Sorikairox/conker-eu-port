@@ -79,3 +79,4 @@ P73	port-b	port NM C (151BF8F0, 1501D348, 1509A024)	3	0	130	difftest build_tu fi
 P269	port-web	user crash level 6 (type-77 trail)	0	0	~110	culprit func_151D7FE8 (204F70) f32* + 0xC vel pointer; fix difftest EQUIV + browser 0 traps past 18969 (temp edit, not committed); det repro; 4 stride leads
 P267	port-b	port NM C (150D5268, 15198180)	2	0	45	P264 leftovers in hand C; 5268 needs ARGMEM on the func_151307F0 template (5 survivors without it)
 P270	port	intro crash fix + stride bug class (151D7FE8 + 10 NM funcs)	11	0	100	func_151D7FE8 vel pointer fix (user crash); stride_scan.py 151->119 NM hits; verify_all OK
+P271	port-web	milk glass intro + mute runs	0	0	103	func_15031C4C m2c off-by-one (sub-attachments never drawn), fix diff to port; runs muted

@@ -10,6 +10,18 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P271 (port-web) (session P271, 2026-10-25). Details: `docs/port/sessions/P271.md`
+- **All test Chrome runs are muted now** (user request): `--mute-audio` in audprobe.js / shot.sh, `?mute=1` from
+  audprobe.sh (main.js volume 0). `PROBE_UNMUTE=1` to hear. Other worktrees' copies need the same change at merge.
+- Milk glass (throne-room intro): cause found, fix not browser-tested. **func_15031C4C** (game_eu_5D910, owner
+  **port**) m2c off-by-one: the asm returns the first match when a2 == 0, the C never does (decrements first). So
+  sub-model attachments (Conker's glass, list 0x4C, sub 65) get no matrix and are never drawn. Diff in P271.md.
+- Also func_15031D40 (same file): cases 0x37/0x3D/0x49/0x5A/0x5D/0x5E are dead in the C (second jump table lost).
+
+## Next steps (from P271)
+1. port: fix func_15031C4C (+ difftest, registry), confirm with docs/port/sessions/p271/run.sh (shots 130 s, 160 s).
+2. port: rewrite func_15031D40 as the asm's two switches.
+
 ## P269 (port-web) (session P269, 2026-10-25). Details: `docs/port/sessions/P269.md`
 - User crash ("Em, this way I suppose") SOLVED: **func_151D7FE8** (game_eu_204F70, owner **port**, P17 m2c body) passes
   `temp_a0 + 0xC` with `f32 *temp_a0` as the velocity pointer to func_151D8CC8 = entry + 0x30 bytes (asm: +0xC). For

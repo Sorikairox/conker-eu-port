@@ -1,0 +1,22 @@
+diff --git a/port/gfx/p81_checks.c b/port/gfx/p81_checks.c
+index 536d546c..a4d77188 100644
+--- a/port/gfx/p81_checks.c
++++ b/port/gfx/p81_checks.c
+@@ -107,14 +107,14 @@ static void att_log(const char *fn, unsigned n, unsigned in, unsigned out, int a
+     unsigned mtx = 0, first_dl = 0;
+     for (; g < (const unsigned char *)(uintptr_t)out; g += 8) {
+         unsigned w0 = W(g, 0), w1 = W(g, 4);
+-        if (w0 == 0xDE000000u) { if (!dls++) first_dl = w1; }
++        if (w0 == 0xDE000000u) { if (!dls++) first_dl = w1; if (fn[0] == '1' && fn[1] == '0') port_log("[p271] %s frame %u DL %08X\n", fn, port_frame_count, w1); }   /* P271: every part DL */
+         if (w0 == 0xDB06000Cu) mtx = w1;
+     }
+     port_log("[p81] att %s %u frame %u t %.0f ms args %d %d: %d cmds, %d part DLs (first %08X), seg3 mtx %08X\n", fn, n,
+              port_frame_count, emscripten_get_now(), a1, a2, cmds, dls, first_dl, mtx);
+     for (a = (const unsigned char *)(uintptr_t)W(D_800C3EE0_, 0); a && k < 8; a = (const unsigned char *)(uintptr_t)W(a, 0x54), k++)
+-        port_log("[p81]   att#%d %p model %d joint %d cb %d timer %04X sub %d | alpha %d vis %d mask %02X parts %d dl0 %08X seg1 %08X tex %04X %04X\n", k,
+-                 (void *)a, vbe_ld8(a), vbe_ld8(a + 2), vbe_ld8(a + 7), vbe_ld16(a + 0x1C), vbe_ld16(a + 0x1E), vbe_ld8(a + 3), vbe_ld8(a + 5), vbe_ld8(a + 0x13), vbe_ld8(a + 0x14),
++        port_log("[p81]   att#%d %p kind %02X f4 %02X s17 %d model %d joint %d cb %d timer %04X sub %d | alpha %d vis %d mask %02X parts %d dl0 %08X seg1 %08X tex %04X %04X\n", k,
++                 (void *)a, vbe_ld8(a + 1), vbe_ld8(a + 4), (signed char)vbe_ld8(a + 0x17), vbe_ld8(a), vbe_ld8(a + 2), vbe_ld8(a + 7), vbe_ld16(a + 0x1C), vbe_ld16(a + 0x1E), vbe_ld8(a + 3), vbe_ld8(a + 5), vbe_ld8(a + 0x13), vbe_ld8(a + 0x14),
+                  W(a, 0x24) ? W((const unsigned char *)(uintptr_t)W(a, 0x24), 0) : 0, W(a, 0x28), vbe_ld16(a + 0x18),
+                  vbe_ld16(a + 0x1A));
+ }
