@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P276 (port, group B) (session P276, 2026-10-25). Details: `docs/port/sessions/P276.md`
+
+Merged port-b P274 (a1c4c47a). Group B of the P276 split: 16 compiled functions to hand C (NM), registry rows `P276`,
+setups / mutants in docs/port/sessions/p276: func_150F7364, func_1515B500, func_151C4DD0, func_151B7F48,
+func_1510558C, func_151B9C40, func_15015354, func_150DED40, func_1515BBE4, func_150FEDE0, func_1506F1A8,
+func_1506F54C, func_15070898, func_150E2E5C, func_1501474C, func_15014B60. New `docs/port/sessions/p276/specgen.py` turns constant Emitter2Spec fillers into C. Checks: verify_all rc 0, NM build rc 0,
+protocheck 0 (1670), implicit_scan 0 NM+float, progress_nm `total 5916 3995 1690 231 5685 96.1% 1997912/2253856 (88.6%)`.
+
+## Next steps (from P276)
+1. Group B left (24 compiled): smallest first func_151B1138, func_150C1138, func_151A1794, func_15054A94,
+   func_15008340, func_1513334C, func_1517D5E4, then game_161520's seven, func_150CBF80, func_151C50BC ... (list in P276.md).
+2. Hand asm found in group B files (for group E): func_150A7770, func_150A7BD0, func_151FA3E0.
+3. reverify mutant lines must not contain `%` (it separates setup names).
+
 ## P274 (port-b) (session P274, 2026-10-25). Details: `docs/port/sessions/P274.md`
 
 Hand C (NM), registry rows `P274`, setups / mutants in docs/port/sessions/p274: func_1511BD5C part_vertices_follow_refs,
