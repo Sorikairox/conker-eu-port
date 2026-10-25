@@ -1,0 +1,4 @@
+s|if (var_a2 == 0) {|var_a2 -= 1; if (var_a2 == 0) {|
+s|if (var_a2 == 0) {|if (var_a2 == 1) {|
+s|var_a2 -= 1;|var_a2 -= 2;|
+s|if (var_a2 == 0) {|if ((var_a2 -= 1) == 0) {|;s|^            var_a2 -= 1;$||
