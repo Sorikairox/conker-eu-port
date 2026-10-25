@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P310 (port, group B1) (session P310, 2026-10-26). Details: `docs/port/sessions/P310.md`
+
+Hand C (NM), registry rows `P310`, setups / mutants in docs/port/sessions/p310: func_1506C460 camera_object_spawn
+(96 setups, mutants 92/92; injected D_8009A050 / D_8009A054 -> `static const` 1-element copies, jump tables -> switch),
+func_150E2294 beam_effect_update (type 0xB update handler, void (u8 *); 75 setups, mutants 105/117, the 4 survivors
+are equivalent). The P295 "7th argument left over" note was wrong: the 0xFF store sits in the jal delay slot.
+Lesson: IDO folds `0.0f + x` to x (and a known 0.0 operand), so C that copies asm `0.0 + s * -1.0` terms loses -0.0
+results; func_150E2294 reads the zero from a `volatile f32 n[3]` (setup mv_vz0 catches it).
+Checks: verify_all rc 0, NM rc 0, protocheck 0 (1692), selftest 130/130, implicit NM+float 0, progress_nm
+`total 5916 3995 1712 209 5707 96.5% 2035176/2253856 (90.3%)`.
+
+## Next steps (from P310)
+1. Group B: func_1516E100 / func_151206C8 (P311). func_150A7770 / func_150A7BD0 / func_151FA3E0 are done on other branches.
+2. Grep older NM code for `0.0f + ` / `0.0f - ` terms copied from asm (possible -0.0 sign losses, see P310 lesson).
+3. func_15008340: switch to void together with game_39750's prototypes (from P282).
+
 ## P301 (port, group B) (session P301, 2026-10-26). Details: `docs/port/sessions/P301.md`
 
 Hand C (NM), registry rows `P301`, setups / mutants in docs/port/sessions/p301: func_151C40BC impact_effects_spawn
