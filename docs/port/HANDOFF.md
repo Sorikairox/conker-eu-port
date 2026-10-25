@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P268 (port-web) (session P268, 2026-10-25). Details: `docs/port/sessions/P268.md`
+- User crash ("Em, this way I suppose") reproduced at retrace 18970 (level 6) with button taps, no det. Cause: list corruption
+  in D_800DD280 — the update of a **type 77 node** (func_15147CB0 -> one of its behaviours D_8008A5A0 / A5DC / A624) writes an
+  f32 at node + 0x390, past its ~0x378-byte block, into the next node's header. The user's `func_151670C0` frame is the
+  US-named update loop, not P263's func_eu_151670C0 (that one checks out).
+- New diagnostic `?p268nodes=1` (port/gfx/p268_nodes.c, wraps func_151670C0 / func_151674F8): names the handler that breaks a list.
+- Milk glass / Berri glove: not investigated.
+
+## Next steps (from P268)
+1. port-web: rerun `port_work/p268/run.sh DIR 400 8000,4000 100 "&p268nodes=1"` until it reaches level 6 (a1/a4 did; a3/a6
+   diverged), read the `handler of type 77 ... +24 +2F +30` line, then check that behaviour's C for a write at +0x390
+   (owner from the slot list; recent suspects in P268.md section 2).
+2. Milk glass (throne-room intro) and Berri's half-transparent hand: p158f draw/texture dump at those frames.
+
 ## P265 (merge) (session P265, 2026-10-25). Details: `docs/port/sessions/P265.md`
 - port merged port-b P264 (ada9d73e), port-b fast-forwarded to it, port-web merged port (38a091c9). All checks green (selftest 130, census 0 FAIL, link OK, no dup symbols).
 - Smoke (det=2): new game to level 6 same frames as before; Total War plays; pan8 / r5g identical to 11926 then fall at the last gap (route needs re-tuning on this build). Traps 0, only the 2 boot stubs.
