@@ -3,7 +3,7 @@
 #include "variables.h"
 
 
-s32 func_15116A8C(s32, s32, s32, f32);
+void func_15116A8C(s32, s32, s32, f32);
 void func_150C7D70(s32 arg0) {
     if (!((*(u8 *)((u8 *)D_800D2E4C + 0xA)) & 8)) {
         if (!(D_800DBEF4->pad70[3] & 4)) {
