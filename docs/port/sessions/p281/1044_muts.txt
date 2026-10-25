@@ -13,7 +13,7 @@ s/value = -value;/value = value;/
 s/if (value < 0) {/if (value <= 0) {/
 s/p >= D_16003B50; p--/p > D_16003B50; p--/
 s/p = \&D_16003B50\[9\]/p = \&D_16003B50[8]/
-s/value = value % \*p;/value = value - *p;/
+s/value = value . \*p;/value = value - *p;/
 s/if (digit > 0 || started || p == D_16003B50) {/if (digit > 0 || p == D_16003B50) {/
 s/if (digit > 0 || started || p == D_16003B50) {/if (digit > 0 || started) {/
 s/(u8) (digit + '0')/(u8) (digit + 'a')/
