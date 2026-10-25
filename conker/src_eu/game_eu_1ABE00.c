@@ -159,7 +159,132 @@ Gfx *func_1517E7FC(Gfx *gdl, s32 arg1) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517E7FC.s")
 #endif
+#ifdef NON_MATCHING
+Gfx *func_1517EFBC(Gfx *arg0);
+Gfx *func_150954E4(Gfx *, void *, s32, s32, s32, s32, s32, s32, s32, s32);
+Gfx *func_15095E58(Gfx *gfx, void *spr, f32 x, f32 y);
+extern u8 D_800D31C8; /* sprite primitive colour r, g, b, a */
+extern u8 D_800D31C9;
+extern u8 D_800D31CA;
+extern u8 D_8009075C[]; /* flare sprite */
+extern u8 D_800A7630[]; /* flare ring sizes, 7 per row */
+extern f32 D_80038400;
+extern f32 D_80038404;
+extern u8 D_800DE190; /* flare sprite mode set this frame */
+
+/* func_15095E58 sprite request */
+typedef struct {
+    /* 0x00 */ u8 pad00[6];
+    /* 0x06 */ s16 scaleX;
+    /* 0x08 */ s16 scaleY;
+    /* 0x0A */ u8 alpha;
+    /* 0x0B */ u8 u0B;
+    /* 0x0C */ u8 u0C;
+    /* 0x0D */ u8 u0D;
+    /* 0x0E */ u8 pad0E[2];
+    /* 0x10 */ void *tex;
+} SprEA18;
+
+// lens_flare_draw: draws the lens flare of a sun node (screen position +0xC / +0x10). With fade (D_800DD2D0) it moves
+// *fade (by 5 * D_800BE9E4) towards (120 - d) * 176 / 120 for distances d = (dx^2 + dy^2) * falloff / 10 from the
+// screen centre under 120 (0 when hidden: brightness -1). The flare strength +0x28 moves (by 10 * D_800BE9E4)
+// towards 0x1ADB00 / (d + 10000) * brightness / 256 (0 off screen or hidden). If d < 200000, +0x28 > 0 and the node
+// is within 2000 of the screen, draws `count` rings (sprite D_8009075C, mode set once a frame) along the line from
+// the node through the centre (k * 2 / 5 of the offset), alpha +0x28 * +0x30 / 256, sizes D_800A7630[row * 7 + k].
+Gfx *func_1517EA18(Gfx *gdl, u8 *node, s32 row, s32 count, s32 falloff, s32 bright, u8 *fade) {
+    SprEA18 spr;
+    f32 dx, dy;
+    f32 f;
+    f32 size;
+    s32 ix, iy;
+    s32 d;
+    s32 target;
+    s32 cur;
+    s32 step;
+    s32 alpha;
+    s32 i;
+    s32 j;
+    u8 *sizes;
+
+    dx = *(f32 *) (node + 0xC) - D_800BE620 * 0.5f;
+    dy = *(f32 *) (node + 0x10) - D_800BE624 * 0.5f;
+    if (fade != NULL) {
+        if (bright == -1) {
+            target = 0;
+        } else {
+            ix = dx;
+            iy = dy;
+            d = (ix * ix + iy * iy) * falloff / 10;
+            if (d < 120) {
+                target = (120 - d) * 176 / 120;
+            } else {
+                target = 0;
+            }
+        }
+        cur = *fade;
+        step = D_800BE9E4 * 5;
+        if (((target - cur) < 0 ? -(target - cur) : (target - cur)) < step) {
+            cur = target;
+        } else if (cur < target) {
+            cur += step;
+        } else {
+            cur -= step;
+        }
+        *fade = cur;
+    }
+    ix = dx;
+    iy = dy;
+    d = (ix * ix + iy * iy) * falloff / 10;
+    if (*(f32 *) (node + 0xC) < 2.0f || (f32) (D_800BE620 - 2) <= *(f32 *) (node + 0xC) ||
+        *(f32 *) (node + 0x10) < 0.0f || (f32) D_800BE624 <= *(f32 *) (node + 0x10)) {
+        target = 0;
+    } else if (bright == -1) {
+        target = 0;
+    } else {
+        target = 0x1ADB00 / (d + 10000) * bright / 256;
+    }
+    step = D_800BE9E4 * 10;
+    cur = *(s16 *) (node + 0x28);
+    if (((target - cur) < 0 ? -(target - cur) : (target - cur)) < step) {
+        *(s16 *) (node + 0x28) = target;
+    } else if (target < cur) {
+        *(s16 *) (node + 0x28) = cur - step;
+    } else {
+        *(s16 *) (node + 0x28) = cur + step;
+    }
+    if (d >= 200000 || *(s16 *) (node + 0x28) <= 0 || !(fabsf(*(f32 *) (node + 0xC)) < 2000.0f) ||
+        !(fabsf(*(f32 *) (node + 0x10)) < 2000.0f)) {
+        return gdl;
+    }
+    D_800D31C8 = 0xFF;
+    D_800D31C9 = 0xFF;
+    D_800D31CA = 0xFF;
+    spr.tex = D_8009075C;
+    spr.u0B = 0;
+    spr.u0C = 0;
+    spr.u0D = 0;
+    if (D_800DE190 == 0) {
+        gdl = func_150954E4(func_1517EFBC(gdl), D_8009075C, 0, 0, 0, 0, 2, 0x100, 0x100, 3);
+        D_800DE190 = 1;
+    }
+    alpha = (*(s16 *) (node + 0x28) * node[0x30]) >> 8;
+    sizes = &D_800A7630[row * 7];
+    for (i = 0, j = 2; i < count; i++, j += 2) {
+        f = j;
+        spr.alpha = alpha;
+        size = sizes[i] << 12;
+        D_800D31CB = 0;
+        spr.scaleX = size * D_80038400 / 255.0f;
+        spr.scaleY = size * D_80038404 / 255.0f;
+        gdl = func_15095E58(gdl, &spr, *(f32 *) (node + 0xC) - dx * f / 5.0f,
+                            *(f32 *) (node + 0x10) - dy * f / 5.0f + sizes[i] * 0.015625f);
+        gDPPipeSync(gdl++);
+    }
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1ABE00/func_1517EA18.s")
+#endif
 
 Gfx *func_1517EFBC(Gfx *arg0) {
     gDPPipeSync(arg0++);

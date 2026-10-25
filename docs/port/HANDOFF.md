@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P293 (port-b, group A) (session P293, 2026-10-26). Details: `docs/port/sessions/P293.md`
+
+game_EF410.c: func_15171770 prototype `s32` -> `void` (one-line exception; callers ignore v0). Hand C (NM), registry
+rows `P293`, setups / mutants in docs/port/sessions/p293: func_15171770 debris_cloud_spawn (19E910), func_150B8EC0
+projectile_bounce_update, func_150B9424 projectile_wall_hit (E66D0), func_150D3F78 track_follow_record (101080),
+func_150F7E34 rocket_update (125200), func_1519D9C4 spray_trail_record (1CACF0), func_1517EA18 lens_flare_draw
+(1ABE00). All random EQUIV + setups; mutants all killed except 4 equivalent ones (P293.md). memcpy's EU jal key is
+10023360 (00023360 silently does nothing).
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1690), implicit_scan 0 NM+float (830 sites), selftest 134/134,
+progress_nm `total 5916 3995 1710 211 5705 96.4% 2019316/2253856 (89.6%)`.
+
+## Next steps (from P293)
+1. Group A remaining (10), smallest first: func_150C49A4 (F1E30), func_150DF240 (10CA50), func_15119EB8,
+   func_1511ADC0, func_1511D0CC (142E40), func_150B9B1C (E66D0), func_151BD040 (1E7CC0), func_151D06FC (1FB080),
+   func_150CEC50 (FC460), func_1519DF64 (1CACF0).
+
 ## P287 (port-b, group A) (session P287, 2026-10-26). Details: `docs/port/sessions/P287.md`
 
 Prototype fixes (commit 2ca81f37): func_15116A8C `void` in game_eu_EBF20 / game_eu_F5580, func_1501175C prototype in

@@ -233,7 +233,178 @@ s32 func_1519D7B0(TrailObj *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_1514F2AC(struct_eu_link *, u8 *, s32);
+s32 func_1514F18C(void *arg0, struct127 *arg1, s16 arg2);
+void func_1519D510(u8 *arg0);
+
+/* +0x94 ring of trail points (0x24 bytes each) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];
+    /* 0x18 */ f32 height;
+    /* 0x1C */ s16 u1C;
+    /* 0x1E */ s16 u1E;
+    /* 0x20 */ u8 alpha;
+    /* 0x21 */ u8 frame;
+    /* 0x22 */ u8 pad22[2];
+} PointD9C4;
+
+/* 12-byte payload of the lost-track marker (func_151491F4) */
+typedef struct {
+    /* 0x00 */ s32 owner;
+    /* 0x04 */ u8 id;
+    /* 0x05 */ u8 pad05[3];
+    /* 0x08 */ s32 u08;
+} MarkD9C4;
+
+// spray_trail_record: entry 3 of D_8008A5DC (`s32 (*)(u8 *)`, 0 = drop). State = +0x98 {target, byte 4 = the
+// target's +0x3B, frame byte 7, last point +0x14, time +0x20, gravity +0x24, rate +0x28, pending +0x2C, rise +0x34 /
+// base +0x38, +0x3C, s16 +0x42 / +0x44 / +0x48 / +0x4A, target position +0x50}. Returns 0 when the target has gone or
+// changed. First call (flag 4 clear) waits for func_1519E874 to place the position (+0x10), then starts there. Later
+// calls follow with func_1519E874 (none: func_1519D510 and a func_151491F4 type-8 marker {target, id, +0x4C} hooked
+// to the target's link, return 1). Each frame adds rate * frame time to the pending count and emits one point per
+// whole unit, interpolated from the last point to the position: position, velocity (move * D_800BEDC8, y 0),
+// height base + rise * t, frame st[7] (advanced by +0x48 + random % (+0x4A + 1)), then moved by its velocity
+// (+ gravity) * t, t stepping down; ring write index +0x2E / count +0x2C / read index +0x2D (size +0x25). Finally
+// shifts all live points by the target's move since last frame (+0x50).
+s32 func_1519D9C4(u8 *obj) {
+    u8 *st = *(u8 **) (obj + 0x98);
+    PointD9C4 *ring = *(PointD9C4 **) (obj + 0x94);
+    u8 *tgt = *(u8 **) st;
+    PointD9C4 *e;
+    MarkD9C4 mark;
+    struct260 *marker;
+    s32 placed;
+    f32 cur[3];
+    f32 move[3];
+    f32 vel[3];
+    f32 step[3];
+    f32 x, z;
+    f32 inv, t, dt0, h, dh;
+    f32 dx, dy, dz;
+    s32 i;
+
+    if (*(s32 *) tgt == 0) {
+        return 0;
+    }
+    if (st[4] != tgt[0x3B]) {
+        return 0;
+    }
+    placed = 0;
+    if (!(*(u16 *) (obj + 0x1E) & 4)) {
+        if (func_1519E874(st, (f32 *) (obj + 0x10), 0.0f, 0.0f, 0.0f, 1.0f) == 0) {
+            return 1;
+        }
+        *(f32 *) (st + 0x14) = *(f32 *) (obj + 0x10);
+        *(f32 *) (st + 0x18) = *(f32 *) (obj + 0x14);
+        *(f32 *) (st + 0x1C) = *(f32 *) (obj + 0x18);
+        *(u16 *) (obj + 0x1E) |= 4;
+        placed = 1;
+    }
+    x = *(f32 *) (obj + 0x10);
+    z = *(f32 *) (obj + 0x18);
+    if (!placed && func_1519E874(st, (f32 *) (obj + 0x10), x, *(f32 *) (obj + 0x14), z, *(f32 *) (st + 0x3C)) == 0) {
+        func_1519D510(obj);
+        mark.owner = *(s32 *) st;
+        mark.id = (*(u8 **) st)[0x3B];
+        mark.u08 = st[0x4C];
+        marker = func_151491F4(*(s16 *) (obj + 0x1C), -1, 8, (*(u16 *) (obj + 0x1E) & 1) ? 1 : 0, 2, 0xC, 0xFF, 0);
+        if (marker != NULL) {
+            memcpy((s32) ((u8 *) marker + 0x28), (u8 **) &mark, 0xC);
+            if (func_1514F2AC(*(struct_eu_link **) (*(u8 **) st + 0x2F4), obj, 0) != 0) {
+                func_1514F18C(marker, *(struct127 **) st, 0x11);
+            }
+        }
+        return 1;
+    }
+    *(f32 *) (st + 0x2C) += *(f32 *) (st + 0x28) * D_800BE9A4;
+    if (1.0f < *(f32 *) (st + 0x2C)) {
+        inv = 1.0f / *(f32 *) (st + 0x2C);
+        cur[0] = *(f32 *) (st + 0x14);
+        cur[1] = *(f32 *) (st + 0x18);
+        cur[2] = *(f32 *) (st + 0x1C);
+        t = *(f32 *) (st + 0x20) + D_800BE9A4;
+        move[0] = *(f32 *) (obj + 0x10) - *(f32 *) (st + 0x14);
+        h = *(f32 *) (st + 0x38) + *(f32 *) (st + 0x34) * t;
+        move[1] = *(f32 *) (obj + 0x14) - *(f32 *) (st + 0x18);
+        move[2] = *(f32 *) (obj + 0x18) - *(f32 *) (st + 0x1C);
+        dh = *(f32 *) (st + 0x38) - h;
+        vel[1] = 0.0f;
+        vel[0] = (*(f32 *) (obj + 0x10) - x) * D_800BEDC8;
+        vel[2] = (*(f32 *) (obj + 0x18) - z) * D_800BEDC8;
+        dt0 = t * inv;
+        step[0] = move[0] * inv;
+        step[1] = move[1] * inv;
+        step[2] = move[2] * inv;
+        dh *= inv;
+        do {
+            e = &ring[(s8) obj[0x2E]];
+            e->pos[0] = cur[0];
+            e->pos[1] = cur[1];
+            e->pos[2] = cur[2];
+            e->vel[0] = vel[0];
+            e->vel[1] = vel[1];
+            e->vel[2] = vel[2];
+            e->height = h;
+            e->frame = st[7];
+            e->u1C = *(s16 *) (st + 0x42);
+            e->u1E = *(s16 *) (st + 0x44);
+            st[7] += *(s16 *) (st + 0x48) + (u32) func_150ADA20() % (*(s16 *) (st + 0x4A) + 1);
+            e->alpha = 0xFF;
+            e->vel[1] += *(f32 *) (st + 0x24) * t;
+            e->pos[0] += e->vel[0] * t;
+            e->pos[1] += e->vel[1] * t;
+            e->pos[2] += e->vel[2] * t;
+            t -= dt0;
+            obj[0x2E]++;
+            if (obj[0x25] == (s8) obj[0x2E]) {
+                obj[0x2E] = 0;
+            }
+            obj[0x2C]++;
+            if ((s8) obj[0x2D] == (s8) obj[0x2E]) {
+                obj[0x2D]++;
+                if (obj[0x25] == (s8) obj[0x2D]) {
+                    obj[0x2D] = 0;
+                }
+                obj[0x2C]--;
+            }
+            cur[0] += step[0];
+            cur[1] += step[1];
+            cur[2] += step[2];
+            h += dh;
+            *(f32 *) (st + 0x2C) -= 1.0f;
+        } while (1.0f < *(f32 *) (st + 0x2C));
+        *(f32 *) (st + 0x14) = cur[0];
+        *(f32 *) (st + 0x18) = cur[1];
+        *(f32 *) (st + 0x1C) = cur[2];
+        *(f32 *) (st + 0x20) = t;
+    }
+    tgt = *(u8 **) st;
+    dx = *(f32 *) (tgt + 0x14) - *(f32 *) (st + 0x50);
+    dy = *(f32 *) (tgt + 0x18) - *(f32 *) (st + 0x54);
+    dz = *(f32 *) (tgt + 0x1C) - *(f32 *) (st + 0x58);
+    i = (s8) obj[0x2E];
+    if (i != (s8) obj[0x2D]) {
+        do {
+            i--;
+            if (i < 0) {
+                i = obj[0x25] - 1;
+            }
+            ring[i].pos[0] += dx;
+            ring[i].pos[1] += dy;
+            ring[i].pos[2] += dz;
+        } while (i != (s8) obj[0x2D]);
+        tgt = *(u8 **) st;
+    }
+    *(f32 *) (st + 0x50) = *(f32 *) (tgt + 0x14);
+    *(f32 *) (st + 0x54) = *(f32 *) (tgt + 0x18);
+    *(f32 *) (st + 0x58) = *(f32 *) (tgt + 0x1C);
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519D9C4.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1CACF0/func_1519DF64.s")
 

@@ -290,7 +290,191 @@ s32 func_150D3870(struct127 *obj, u8 kind, s32 owner) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D3870.s")
 #endif
 
+#ifdef NON_MATCHING
+f32 func_15143E64(s32);
+s32 func_1515C668(s32, s32 *, u8 *);
+void func_150D5268(f32 *pos, f32 *vel, f32 scale, u8 room, s32 owner);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A0DD4_c[1] = { 2.1f };  /* 0x40066666 */
+static const f32 D_800A0DD8_c[1] = { 0.2f };  /* 0x3E4CCCCD */
+static const f32 D_800A0DDC_c[1] = { 0.35000002f }; /* 0x3EB33334 */
+
+/* +0x94 ring of recorded points (0x14 bytes each) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 dist;
+    /* 0x10 */ f32 u10;
+} Point3F78;
+
+// track_follow_record: entry 13 of D_8008A5DC (`s32 (*)(u8 *)`, 0 = drop). State = +0x98 {target, byte 4 = the
+// target's +0x3B, byte 5 = speed class, word 8, links +0xC / +0x10, f32 +0x14 eased towards +0x18}. Returns 0 when
+// the target has gone (no word 0) or changed (+0x3B). With D_800BE9E4 > 0: moves the position (+0x10) with
+// func_150D4FF0 (result 0: clears link flag 2 and own flag 4, returns 1; 1: on first contact (flag 4) restarts the
+// step from here, copies the position and func_150D4FF0's direction to both links (+0x34 / +0x40) and sets their flag
+// 2, clears 4; 2: first contact as 1, links lose flag 2), records position + step length + 100 in the +0x94 ring
+// (write index +0x2E, count +0x2C, read index +0x2D, size +0x25), then picks the speed class from the target's
+// +0x31C (record byte 0x84: target speed +0x44 > 6 / > 3; else the player slot's lean (*D_800BE728)[i] byte 3 > 20 /
+// < -20) and sets the goal +0x18 (50 / 10 / 20) and link +0x10's +0x174 (2.1 / 0.2 / 1); class 0 newly reached
+// spawns func_150D5268 dust (surface from func_1515C668 or D_800A5860). Always eases +0x14 by 0.35.
+s32 func_150D3F78(u8 *obj) {
+    Point3F78 *ring = *(Point3F78 **) (obj + 0x94);
+    u8 *st = *(u8 **) (obj + 0x98);
+    u8 *tgt = *(u8 **) st;
+    u8 *rec;
+    f32 *pos;
+    f32 *glow;
+    f32 old[3];
+    f32 dir[3];
+    f32 step[3];
+    f32 spd;
+    f32 *surface;
+    u8 prev;
+    u8 slot;
+    s8 lean;
+    s32 r;
+
+    if (*(s32 *) tgt == 0 || st[4] != tgt[0x3B]) {
+        return 0;
+    }
+    if (D_800BE9E4 > 0) {
+        pos = (f32 *) (obj + 0x10);
+        old[0] = pos[0];
+        old[1] = pos[1];
+        old[2] = pos[2];
+        r = func_150D4FF0((u8 *) pos, (u8 *) dir, (struct127 *) tgt, *(s32 *) (st + 8));
+        if (r == 0) {
+            if (*(u8 **) (st + 0xC) != NULL) {
+                *(s32 *) (*(u8 **) (st + 0xC) + 0x58) &= ~2;
+            }
+            if (*(u8 **) (st + 0x10) != NULL) {
+                *(s32 *) (*(u8 **) (st + 0x10) + 0x58) &= ~2;
+            }
+            *(u16 *) (obj + 0x1E) &= ~4;
+            return 1;
+        }
+        if (r == 1) {
+            if (!(*(u16 *) (obj + 0x1E) & 4)) {
+                old[0] = pos[0];
+                old[1] = pos[1];
+                old[2] = pos[2];
+            }
+            *(u16 *) (obj + 0x1E) |= 4;
+            if (*(u8 **) (st + 0xC) != NULL) {
+                *(f32 *) (*(u8 **) (st + 0xC) + 0x34) = pos[0];
+                *(f32 *) (*(u8 **) (st + 0xC) + 0x38) = pos[1];
+                *(f32 *) (*(u8 **) (st + 0xC) + 0x3C) = pos[2];
+                *(f32 *) (*(u8 **) (st + 0xC) + 0x40) = dir[0];
+                *(f32 *) (*(u8 **) (st + 0xC) + 0x44) = dir[1];
+                *(f32 *) (*(u8 **) (st + 0xC) + 0x48) = dir[2];
+                *(s32 *) (*(u8 **) (st + 0xC) + 0x58) &= ~4;
+                *(s32 *) (*(u8 **) (st + 0xC) + 0x58) |= 2;
+            }
+            if (*(u8 **) (st + 0x10) != NULL) {
+                *(f32 *) (*(u8 **) (st + 0x10) + 0x34) = pos[0];
+                *(f32 *) (*(u8 **) (st + 0x10) + 0x38) = pos[1];
+                *(f32 *) (*(u8 **) (st + 0x10) + 0x3C) = pos[2];
+                *(f32 *) (*(u8 **) (st + 0x10) + 0x40) = dir[0];
+                *(f32 *) (*(u8 **) (st + 0x10) + 0x44) = dir[1];
+                *(f32 *) (*(u8 **) (st + 0x10) + 0x48) = dir[2];
+                *(s32 *) (*(u8 **) (st + 0x10) + 0x58) &= ~4;
+                *(s32 *) (*(u8 **) (st + 0x10) + 0x58) |= 2;
+            }
+        } else if (r == 2) {
+            if (!(*(u16 *) (obj + 0x1E) & 4)) {
+                old[0] = pos[0];
+                old[1] = pos[1];
+                old[2] = pos[2];
+            }
+            *(u16 *) (obj + 0x1E) |= 4;
+            if (*(u8 **) (st + 0xC) != NULL) {
+                *(s32 *) (*(u8 **) (st + 0xC) + 0x58) &= ~2;
+            }
+            if (*(u8 **) (st + 0x10) != NULL) {
+                *(s32 *) (*(u8 **) (st + 0x10) + 0x58) &= ~2;
+            }
+        }
+        step[0] = pos[0] - old[0];
+        step[1] = pos[1] - old[1];
+        step[2] = pos[2] - old[2];
+        spd = func_15143E64((s32) step);
+        ring[(s8) obj[0x2E]].pos[0] = pos[0];
+        ring[(s8) obj[0x2E]].pos[1] = pos[1];
+        ring[(s8) obj[0x2E]].pos[2] = pos[2];
+        ring[(s8) obj[0x2E]].dist = spd;
+        ring[(s8) obj[0x2E]].u10 = 100.0f;
+        obj[0x2E]++;
+        if (obj[0x25] == (s8) obj[0x2E]) {
+            obj[0x2E] = 0;
+        }
+        obj[0x2C]++;
+        if ((s8) obj[0x2D] == (s8) obj[0x2E]) {
+            obj[0x2D]++;
+            if (obj[0x25] == (s8) obj[0x2D]) {
+                obj[0x2D] = 0;
+            }
+            obj[0x2C]--;
+        }
+        rec = *(u8 **) (tgt + 0x31C);
+        if (rec != NULL) {
+            glow = NULL;
+            if (*(u8 **) (st + 0x10) != NULL) {
+                glow = (f32 *) (*(u8 **) (st + 0x10) + 0x170);
+            }
+            prev = st[5];
+            if (rec[0x84] != 0) {
+                if (6.0f < *(f32 *) (tgt + 0x44)) {
+                    st[5] = 0;
+                } else if (3.0f < *(f32 *) (tgt + 0x44)) {
+                    st[5] = 1;
+                } else {
+                    st[5] = 2;
+                }
+            } else {
+                slot = (tgt - (u8 *) D_800CC2D0) / 0x32C;
+                if (slot >= 4) {
+                    st[5] = 1;
+                } else {
+                    lean = *(s8 *) (((u8 **) D_800BE728[0])[slot] + 3);
+                    if (lean > 20) {
+                        st[5] = 0;
+                    } else if (lean < -20) {
+                        st[5] = 2;
+                    } else {
+                        st[5] = 1;
+                    }
+                }
+            }
+            if (st[5] == 0) {
+                if (glow != NULL) {
+                    glow[1] = D_800A0DD4_c[0];
+                }
+                *(f32 *) (st + 0x18) = 50.0f;
+                if (st[5] != prev) {
+                    if (func_1515C668((s32) tgt, (s32 *) &surface, tgt) == 0) {
+                        surface = (f32 *) D_800A5860;
+                    }
+                    func_150D5268(pos, surface, *(f32 *) (tgt + 0x40), obj[0xC], obj[1]);
+                }
+            } else if (st[5] == 2) {
+                if (glow != NULL) {
+                    glow[1] = D_800A0DD8_c[0];
+                }
+                *(f32 *) (st + 0x18) = 10.0f;
+            } else {
+                *(f32 *) (st + 0x18) = 20.0f;
+                if (glow != NULL) {
+                    glow[1] = 1.0f;
+                }
+            }
+        }
+    }
+    *(f32 *) (st + 0x14) += (*(f32 *) (st + 0x18) - *(f32 *) (st + 0x14)) * D_800A0DDC_c[0];
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_101080/func_150D3F78.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 func_15143E64(s32);

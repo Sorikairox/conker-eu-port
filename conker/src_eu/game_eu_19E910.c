@@ -203,7 +203,92 @@ void func_15171734(u8 *arg0) {
     func_15060F28(arg0, 1);
 }
 
+#ifdef NON_MATCHING
+s32 func_1518C900(s32);
+void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A7390_c[1] = { -0.2f };        /* 0xBE4CCCCD */
+static const f32 D_800A7394_c[1] = { 6.1035157e-06f }; /* 0x36CCCCCD */
+static const f32 D_800A7398_c[1] = { 0.8f };         /* 0x3F4CCCCD */
+static const f32 D_800A739C_c[1] = { 6.666667f };    /* 0x40D55556 */
+
+/* func_15168BE4's debris template (the same layout as Debris714BC above) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];
+    /* 0x18 */ f32 spin[3];
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 u28;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 scale[3];
+    /* 0x3C */ s32 life;
+    /* 0x40 */ s32 model;
+    /* 0x44 */ s32 u44; /* not set */
+    /* 0x48 */ f32 u48[3];
+    /* 0x54 */ u8 u54[6];
+    /* 0x5A */ u8 id;
+    /* 0x5B */ u8 u5B;
+    /* 0x5C */ u8 u5C;
+    /* 0x5D */ u8 u5D;
+} Debris71770;
+
+// debris_cloud_spawn: spawns count func_15168BE4 debris pieces of model func_1518C900(id) scattered around
+// (x, y, z) by +-spread/2 (random (rand >> 16) * spread / 65536 per axis), no velocity, random spin
+// (x / z: (rand >> 16) * 15 / 65536, y: (rand & 0xFFFF) * spinY * 6.1e-6 + spinY * 0.8), random u24 / u28 / u2C
+// ((rand >> 16) * 10 / 65536) and a random scale per axis between scaleMin and scaleMax; u54[5] = scale sum * 6.67
+// + 20. u48 = {drift * -0.75, drift, -0.2}; life / u5B / kind / owner pass through.
+void func_15171770(s32 count, s32 id, f32 x, f32 y, f32 z, f32 spinY, f32 scaleMin, f32 scaleMax, f32 spread,
+                   s32 u5B, s32 life, f32 drift, s32 kind, s32 owner) {
+    Debris71770 t;
+    f32 spinYRange;
+    f32 spinYMin;
+    f32 scaleRange;
+    f32 scale2;
+    s32 i;
+
+    scaleRange = scaleMax - scaleMin;
+    spread *= 1.5258789e-05f; /* 1 / 65536 */
+    spinYRange = spinY * D_800A7394_c[0];
+    spinYMin = spinY * D_800A7398_c[0];
+    t.vel[0] = 0.0f;
+    t.vel[1] = 0.0f;
+    t.vel[2] = 0.0f;
+    t.u48[0] = drift * -0.75f;
+    t.u48[1] = drift;
+    t.u48[2] = D_800A7390_c[0];
+    t.u54[0] = 2;
+    t.u54[1] = 0xFF;
+    t.u54[2] = 0;
+    t.u54[3] = 0;
+    t.u54[4] = 0;
+    t.id = id;
+    t.u5B = u5B;
+    t.u5C = 1;
+    t.u5D = 1;
+    t.life = life;
+    for (i = 0; i < count; i++) {
+        t.pos[0] = (func_150ADA20() >> 16) * spread + x;
+        t.pos[1] = (func_150ADA20() >> 16) * spread + y;
+        t.pos[2] = (func_150ADA20() >> 16) * spread + z;
+        t.model = func_1518C900(id);
+        t.spin[0] = (func_150ADA20() >> 16) * 0.00022888184f;
+        t.spin[1] = (u32) (func_150ADA20() & 0xFFFF) * spinYRange + spinYMin;
+        t.spin[2] = (func_150ADA20() >> 16) * 0.00022888184f;
+        t.u24 = (func_150ADA20() >> 16) * 0.00015258789f;
+        t.u28 = (func_150ADA20() >> 16) * 0.00015258789f;
+        t.u2C = (func_150ADA20() >> 16) * 0.00015258789f;
+        t.scale[0] = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
+        t.scale[1] = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
+        scale2 = (u32) (func_150ADA20() & 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMin;
+        t.u54[5] = (u32) ((t.scale[0] + t.scale[1] + scale2) * D_800A739C_c[0] + 20.0f);
+        t.scale[2] = scale2;
+        func_15168BE4((u8 *) &t, kind, owner);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171770.s")
+#endif
 
 void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, f32 argA, u8 argB, s32 argC);
 extern f32 D_800A73A0;

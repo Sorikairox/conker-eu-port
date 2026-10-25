@@ -1,0 +1,33 @@
+s#    scaleRange = scaleMax - scaleMin;#    scaleRange = scaleMax + scaleMin;#
+s#    spread \*= 1\.5258789e-05f; \/\* 1 \/ 65536 \*\/#    spread *= 3.0517578e-05f;#
+s#    spinYRange = spinY \* D_800A7394_c\[0\];#    spinYRange = spinY * D_800A7398_c[0];#
+s#    spinYMin = spinY \* D_800A7398_c\[0\];#    spinYMin = spinY * D_800A7394_c[0];#
+s#    t\.vel\[1\] = 0\.0f;#    t.vel[1] = 1.0f;#
+s#    t\.u48\[0\] = drift \* -0\.75f;#    t.u48[0] = drift * 0.75f;#
+s#    t\.u48\[1\] = drift;#    t.u48[1] = -drift;#
+s#    t\.u48\[2\] = D_800A7390_c\[0\];#    t.u48[2] = D_800A7398_c[0];#
+s#    t\.u54\[1\] = 0xFF;#    t.u54[1] = 0xFE;#
+s#    t\.u54\[4\] = 0;#    t.u54[4] = 1;#
+s#    t\.id = id;#    t.id = id + 1;#
+s#    t\.u5B = u5B;#    t.u5B = life;#
+s#    t\.u5C = 1;#    t.u5C = 2;#
+s#    t\.u5D = 1;#    t.u5D = 0;#
+s#    t\.life = life;#    t.life = u5B;#
+s#    for (i = 0; i < count; i++) {#    for (i = 0; i <= count; i++) {#
+s#        t\.pos\[0\] = (func_150ADA20() >> 16) \* spread + x;#        t.pos[0] = (func_150ADA20() >> 15) * spread + x;#
+s#        t\.pos\[1\] = (func_150ADA20() >> 16) \* spread + y;#        t.pos[1] = (func_150ADA20() >> 16) * spread + x;#
+s#        t\.pos\[2\] = (func_150ADA20() >> 16) \* spread + z;#        t.pos[2] = (func_150ADA20() >> 16) * spread - z;#
+s#        t\.model = func_1518C900(id);#        t.model = func_1518C900(id + 1);#
+s#        t\.spin\[0\] = (func_150ADA20() >> 16) \* 0\.00022888184f;#        t.spin[0] = (func_150ADA20() >> 16) * 0.00015258789f;#
+s#        t\.spin\[1\] = (u32) (func_150ADA20() \& 0xFFFF) \* spinYRange + spinYMin;#        t.spin[1] = (u32) (func_150ADA20() \& 0xFFFF) * spinYRange - spinYMin;#
+s#        t\.spin\[2\] = (func_150ADA20() >> 16) \* 0\.00022888184f;#        t.spin[2] = (func_150ADA20() \& 0xFFFF) * 0.00022888184f;#
+s#        t\.u24 = (func_150ADA20() >> 16) \* 0\.00015258789f;#        t.u24 = (func_150ADA20() >> 16) * 0.00022888184f;#
+s#        t\.u28 = (func_150ADA20() >> 16) \* 0\.00015258789f;#        t.u28 = (func_150ADA20() >> 17) * 0.00015258789f;#
+s#        t\.u2C = (func_150ADA20() >> 16) \* 0\.00015258789f;#        t.u2C = -(func_150ADA20() >> 16) * 0.00015258789f;#
+s#        t\.scale\[0\] = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        t.scale[0] = (u32) (func_150ADA20() \& 0xFFFF) * 1.5258789e-05f * scaleRange + scaleMax;#
+s#        t\.scale\[1\] = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        t.scale[1] = (u32) (func_150ADA20() \& 0x7FFF) * 1.5258789e-05f * scaleRange + scaleMin;#
+s#        scale2 = (u32) (func_150ADA20() \& 0xFFFF) \* 1\.5258789e-05f \* scaleRange + scaleMin;#        scale2 = (u32) (func_150ADA20() \& 0xFFFF) * 1.5258789e-05f + scaleMin;#
+s#        t\.u54\[5\] = (u32) ((t\.scale\[0\] + t\.scale\[1\] + scale2) \* D_800A739C_c\[0\] + 20\.0f);#        t.u54[5] = (u32) ((t.scale[0] + t.scale[1] + scale2) * D_800A739C_c[0] + 21.0f);#
+s#        t\.scale\[2\] = scale2;#        t.scale[2] = t.scale[1];#
+s#        func_15168BE4((u8 \*) \&t, kind, owner);#        func_15168BE4((u8 *) \&t, kind, id);#
+s#        t\.u54\[5\] = (u32) ((t\.scale\[0\] + t\.scale\[1\] + scale2) \* D_800A739C_c\[0\] + 20\.0f);#        t.u54[5] = (s32) ((t.scale[0] + scale2) * D_800A739C_c[0] + 20.0f);#

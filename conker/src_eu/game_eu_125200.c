@@ -165,7 +165,178 @@ void func_150F79F0(f32 *a0, void *a1, void *a2, void *a3, u8 arg4, u8 *arg5, f32
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F79F0.s")
 #endif
 
+#ifdef NON_MATCHING
+s32 func_15081A90(struct127 *, f32, f32, f32, f32, f32, f32, u8 *, f32, s32, s32, s32, s32, s32, s32);
+void func_151D535C(u8 *obj, u8 *attacker, u8 *pos, f32 *pos2, u8 *rec, s32 flags, f32 *dir, u8 arg7, s32 arg8);
+void func_150F850C(u8 *arg0, u8 arg1, s32 arg2);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A1F94_c[1] = { 0.014285714f }; /* 0x3C6A0EA1, 1 / 70 */
+static const f32 D_800A1F98_c[1] = { 8.318001f };    /* 0x41051688 */
+static const f32 D_800A1F9C_c[1] = { 0.467f };       /* 0x3EEF1AA0 */
+static const f32 D_800A1FA0_c[1] = { 6.4814816f };   /* 0x40CF684C */
+static const f32 D_800A1FA4_c[1] = { 4.712389f };    /* 0x4096CBE4, 3 pi / 2 */
+
+/* func_15081A90 hit result */
+typedef struct {
+    /* 0x00 */ u8 *obj;
+    /* 0x04 */ u8 pad04[4];
+    /* 0x08 */ u8 pos[0x18];
+    /* 0x20 */ f32 pos2[3];
+    /* 0x2C */ u8 pad2C[0x2D];
+    /* 0x59 */ u8 count;
+    /* 0x5A */ u8 pad5A[2];
+} Hit7E34;
+
+/* func_1513D2F0 trail puff record (0x58 bytes) */
+typedef struct {
+    /* 0x00 */ u8 u00;
+    /* 0x01 */ u8 u01;
+    /* 0x02 */ s16 u02;
+    /* 0x04 */ s16 u04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 u08;
+    /* 0x0C */ s32 u0C;
+    /* 0x10 */ u8 colour[4];
+    /* 0x14 */ f32 u14[2];
+    /* 0x1C */ f32 pos[3];
+    /* 0x28 */ f32 u28[3];
+    /* 0x34 */ f32 scale[3];
+    /* 0x40 */ s32 u40;
+    /* 0x44 */ u8 u44[4];
+    /* 0x48 */ s32 u48;
+    /* 0x4C */ u8 u4C;
+    /* 0x4D */ u8 pad4D[3];
+    /* 0x50 */ s32 u50;
+    /* 0x54 */ u8 pad54[4];
+} Puff7E34;
+
+/* 0x2C bytes copied to +0x110 of each puff */
+typedef struct {
+    /* 0x00 */ f32 u00[3];
+    /* 0x0C */ f32 u0C[3];
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 u28;
+} PuffExtra7E34;
+
+// rocket_update: handler of the D_80089C80 table (`s32 (*)(u8 *)`, returns 1 while alive). Block d = +0x170. Step
+// dt = frame time D_800BE9A4, capped at the remaining life d +0x68. Moves its sound (+0x88) to the position; with d
+// +0x70 & 2 ray casts the move (func_15081A90 from the position along d +0x38 for d +0x6C * dt, filter
+// !(d +0x70 & 4), d +0xB0): on 2+ hits applies func_151D535C (flags 0x1A, d +0x38) and, with d +0x70 & 1, explodes
+// (func_150F850C) and dies. Then moves by the velocity +0x44 * dt; when not dead counts the life down (at 0 dies,
+// exploding with d +0x70 & 1 at the position). Trail: d +0x8C += distance, d +0x90 += dt; every 70 units of d +0x8C
+// one func_1513D2F0 smoke puff at d +0x98 (stepped by d +0xA4, d +0x90 by d +0x94), its +0x110 extra from d
+// +0x74..+0x88 and (27 - d +0x90) * 6.48 alpha.
+s32 func_150F7E34(u8 *obj) {
+    Puff7E34 rec;
+    PuffExtra7E34 extra;
+    Hit7E34 hit;
+    s8 alive = 1;
+    u8 *d = obj + 0x170;
+    struct127 *owner = *(struct127 **) (obj + 0x7C);
+    f32 dt;
+    f32 dist;
+    f32 n;
+    u8 *puff;
+
+    dt = D_800BE9A4;
+    if (*(f32 *) (d + 0x68) < dt) {
+        dt = *(f32 *) (d + 0x68);
+    }
+    if (*(s32 *) (obj + 0x88) != 0) {
+        func_1000F9D4(*(s32 *) (obj + 0x88), *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C), *(f32 *) (obj + 0x40));
+    }
+    dist = *(f32 *) (d + 0x6C) * dt;
+    if (d[0x70] & 2) {
+        func_15081A90(owner, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C), *(f32 *) (obj + 0x40), *(f32 *) (d + 0x38),
+                      *(f32 *) (d + 0x3C), *(f32 *) (d + 0x40), (u8 *) &hit, dist, 1, 0, !(d[0x70] & 4),
+                      (s8) d[0xB0], 0, 0);
+        if (hit.count >= 2) {
+            func_151D535C(hit.obj, (u8 *) owner, hit.pos, hit.pos2, (u8 *) &hit, 0x1A, (f32 *) (d + 0x38), obj[0xC],
+                          obj[1]);
+            if (d[0x70] & 1) {
+                func_150F850C(hit.pos, obj[0xC], obj[1]);
+            }
+            alive = 0;
+        }
+    }
+    *(f32 *) (obj + 0x38) += *(f32 *) (obj + 0x44) * dt;
+    *(f32 *) (obj + 0x3C) += *(f32 *) (obj + 0x48) * dt;
+    *(f32 *) (obj + 0x40) += *(f32 *) (obj + 0x4C) * dt;
+    if (alive == 1) {
+        *(f32 *) (d + 0x68) -= D_800BE9A4;
+        if (*(f32 *) (d + 0x68) <= 0.0f) {
+            alive = 0;
+            if (d[0x70] & 1) {
+                func_150F850C(obj + 0x38, obj[0xC], obj[1]);
+            }
+        }
+    }
+    *(f32 *) (d + 0x8C) += dist;
+    *(f32 *) (d + 0x90) += dt;
+    n = *(f32 *) (d + 0x8C) * D_800A1F94_c[0];
+    if (1.0f < n) {
+        extra.u00[0] = *(f32 *) (d + 0x74);
+        extra.u00[1] = *(f32 *) (d + 0x78);
+        extra.u00[2] = *(f32 *) (d + 0x7C);
+        extra.u0C[0] = *(f32 *) (d + 0x80);
+        extra.u0C[1] = *(f32 *) (d + 0x84);
+        extra.u0C[2] = *(f32 *) (d + 0x88);
+        extra.u24 = D_800A1F98_c[0];
+        extra.u28 = D_800A1F98_c[0];
+        rec.u00 = 0x7A;
+        rec.u01 = 0;
+        rec.u02 = 0x4404;
+        rec.u04 = 0xA;
+        rec.u08 = 0;
+        rec.u0C = 0;
+        rec.colour[0] = 0xFF;
+        rec.colour[1] = 0xFF;
+        rec.colour[2] = 0xFF;
+        rec.colour[3] = 0xFF;
+        rec.u14[0] = 0.0f;
+        rec.u14[1] = 0.0f;
+        extra.u20 = D_800A1F9C_c[0];
+        rec.u28[0] = ((f32 *) D_800A5860)[0];
+        rec.u28[1] = ((f32 *) D_800A5860)[1];
+        rec.u28[2] = ((f32 *) D_800A5860)[2];
+        rec.scale[0] = 1.0f;
+        rec.scale[1] = 1.0f;
+        rec.scale[2] = 1.0f;
+        rec.u40 = 0xCC0008;
+        rec.u44[1] = 0xFF;
+        rec.u44[2] = 0;
+        rec.u44[3] = 6;
+        rec.u48 = 0;
+        rec.u4C = 0xFF;
+        rec.u50 = 0;
+        do {
+            extra.u1C = D_800A1FA4_c[0];
+            extra.u18 = 27.0f - *(f32 *) (d + 0x90);
+            rec.pos[0] = *(f32 *) (d + 0x98);
+            rec.pos[1] = *(f32 *) (d + 0x9C);
+            rec.pos[2] = *(f32 *) (d + 0xA0);
+            rec.u44[0] = (u32) (extra.u18 * D_800A1FA0_c[0]);
+            puff = func_1513D2F0(&rec, (s32) &D_800A4AA0, 0x24, 0, 0, 0x21, 0, 0, 0, 0x2C, obj[0xC], obj[1]);
+            if (puff != NULL) {
+                memcpy((s32) (puff + 0x110), (s32 *) &extra, 0x2C);
+            }
+            *(f32 *) (d + 0x8C) -= 70.0f;
+            *(f32 *) (d + 0x90) -= *(f32 *) (d + 0x94);
+            *(f32 *) (d + 0x98) += *(f32 *) (d + 0xA4);
+            *(f32 *) (d + 0x9C) += *(f32 *) (d + 0xA8);
+            *(f32 *) (d + 0xA0) += *(f32 *) (d + 0xAC);
+            n -= 1.0f;
+        } while (1.0f < n);
+    }
+    return alive;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_125200/func_150F7E34.s")
+#endif
 
 extern f32 D_800A1FA8;
 s32 func_150F83A0(u8 *arg0)
