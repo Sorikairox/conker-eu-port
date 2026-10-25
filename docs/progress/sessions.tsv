@@ -368,3 +368,4 @@ P286	port	nm convert	4			group B: NM link fixed (static const copies 12C5F0); 4 
 P292	port-c	nm convert+harness	3			group C: 3 conversions (difftest caught 200.0f vs 202.0f); stub_write page map (dup of port-e fix); D_8008A0B4 call_indirect hazard noted; ~20 left
 P290	port-d	nm convert	5			group D: rechecks done; impact_effect_spawn, object_impact_effect, gun_barrel_fire, dust_emitter_update, camera_orbit_update; lesson: asm listings must keep nop delay slots
 P293	port-b	nm convert	7			group A: EF410 func_15171770 proto void + 7 conversions; memcpy EU key 10023360; 10 left; portb 5705/5916 96.4% 89.6%
+P294	port-e	nm convert+harness	2			group E: wall engine readable (nmw_engine + 8 helpers, NmwState), D5E90_walls.inc deleted, 0 asm2c left; ray later-leaf scenes kill P291 survivors
