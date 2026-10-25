@@ -390,3 +390,4 @@ P313	port-d	nm convert	1			cheat_entry_draw func_151EE93C (cheat-code entry scre
 P311	port-c	nm convert	2			GROUP B2 DONE: particle_emitter_update, player_camera_update; func_151CA150 decl/call arity fixed
 P316	port-b	integration	0			merged port-d (D1 rest) + port-c (B2) into port-b (e1d12f87); selftest 150/150; combined 99.4% (97.6% bytes), 38 asm-only (mostly B on port, unmerged)
 P314	port-e	nm convert	1			GROUP D DONE: ambient_flyer_update func_15175EC8 (119 setups, mutants 175/175)
+P310	port	nm convert	2			GROUP B DONE (last conversions): camera_object_spawn, beam_effect_update; lesson: IDO folds 0.0f + x (loses -0.0)
