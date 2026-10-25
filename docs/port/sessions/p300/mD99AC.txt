@@ -1,0 +1,53 @@
+1,/if (\*(s8 \*)(obj + 0x2C) >= 2) {/s/if (\*(s8 \*)(obj + 0x2C) >= 2) {/if (*(s8 *)(obj + 0x2C) >= 3) {/
+s/        if (\*(u16 \*)(obj + 0x1E) & 2) {/        if (*(u16 *)(obj + 0x1E) \& 1) {/
+s/            cur = obj + 0x10;/            cur = obj + 0x14;/
+s/            inv = trail_no_inv\[0\];/            inv = 1.0f;/
+s/            dir\[1\] = \*(f32 \*)(nxt + 4) - \*(f32 \*)(cur + 4);/            dir[1] = *(f32 *)(nxt + 4) - *(f32 *)(cur + 8);/
+s/            \*(f32 \*)(nxt + 0x18) = len;/            *(f32 *)(nxt + 0x1C) = len;/
+s/            if (trail_max_len\[0\] < total) {/            if (trail_max_len[0] <= total + 100.0f) {/
+s/                    cut = (total - trail_max_len\[0\]) \* inv;/                    cut = (total - trail_max_len[0]) * 0.5f;/
+s/                    \*(f32 \*)(nxt + 4) -= dir\[1\] \* cut;/                    *(f32 *)(nxt + 4) -= dir[0] * cut;/
+s/                    \*(f32 \*)(nxt + 0x18) \*= 1.0f - cut;/                    *(f32 *)(nxt + 0x18) *= 1.0f + cut;/
+s/                total = trail_max_len\[0\];/                total = 0.0f;/
+1,/(\*(s8 \*)(obj + 0x2C))--;/s/(\*(s8 \*)(obj + 0x2C))--;/(*(s8 *)(obj + 0x2C)) -= 2;/
+1,/\*(s8 \*)(obj + 0x2D) = 0;/s/\*(s8 \*)(obj + 0x2D) = 0;/*(s8 *)(obj + 0x2D) = 1;/
+s/                if (inv == trail_no_inv\[0\]) {/                if (inv != trail_no_inv[0]) {/
+s/unit\[2\], &hit, len, 0, 0, 1, -1, 0, 0);/unit[2], \&hit, len, 0, 0, 1, 1, 0, 0);/
+s/                if (hit.count != 0) {/                if (hit.count > 1) {/
+s/                    func_150DABFC(obj, &hit, unit);/                    func_150DABFC(obj, \&hit, dir);/
+s/                    if (hit.count >= 2) {/                    if (hit.count >= 3) {/
+s/                        \*(s32 \*)(hobj + 0x2EC) = 1;/                        *(s32 *)(hobj + 0x2EC) = 2;/
+s/                            \*(u8 \*)(hobj + 0x232) = 10;/                            *(u8 *)(hobj + 0x232) = 11;/
+s/\*(u8 \*)(hobj + 4) == 0x10 && \*(u8 \*)(hobj + 0x251) == 1) {/*(u8 *)(hobj + 4) == 0x10 \&\& *(u8 *)(hobj + 0x251) != 0) {/
+s/                            func_1505A250(\*(f32 \*)(hobj + 0x14) - hit.pos\[0\]/                            func_1505A250(*(f32 *)(hobj + 0x14) - hit.pos[1]/
+s/(1.0f - (total - 50.0f) \* trail_push_k\[0\])/(1.0f - (total - 40.0f) * trail_push_k[0])/
+s/trail_push_a\[0\] + trail_push_b\[0\],/trail_push_a[0] - trail_push_b[0],/
+s/                            if (\*(u8 \*)(hobj + 0x232) == 0xF) {/                            if (*(u8 *)(hobj + 0x232) != 0xF) {/
+s/                            dz = \*(f32 \*)(nxt + 8) - \*(f32 \*)(owner + 0x1C);/                            dz = *(f32 *)(nxt + 8) - *(f32 *)(owner + 0x18);/
+s/                            if (\*(u8 \*)(hobj + 0x232) == 0x10) {/                            if (*(u8 *)(hobj + 0x232) == 0x11) {/
+s/                                \*(f32 \*)(hobj + 0x3C) \*= trail_slow\[0\];/                                *(f32 *)(hobj + 0x3C) *= trail_dir_k[0];/
+s/                                s = 1.0f \/ (sqrtf(dx \* dx + dz \* dz) \* trail_dir_k\[0\]);/                                s = 1.0f \/ (sqrtf(dx * dx + dz * dx) * trail_dir_k[0]);/
+s/func_1505A250(dx \* s, dz \* s, 0.7f,/func_1505A250(dx * s, dz * s, 0.75f,/
+s/                            if (\*(u8 \*)(hobj + 0x125) == 0) {/                            if (*(u8 *)(hobj + 0x125) != 0) {/
+s/                            \*(u8 \*)(hobj + 0x232) = 3;/                            *(u8 *)(hobj + 0x232) = 4;/
+s/                            \*(u8 \*)(hobj + 0x232) = 0x2C;/                            *(u8 *)(hobj + 0x232) = 0x2D;/
+s/                            s32 slot = (owner - (u8 \*)D_800CC2D0) \/ 0x32C;/                            s32 slot = (owner - (u8 *)D_800CC2D0) \/ 0x330;/
+s/u32 ang = func_150484A0(unit\[0\], unit\[2\])/u32 ang = func_150484A0(unit[2], unit[0])/
+s/(u16)((ang - 0x4000) | 1), slot);/(u16)((ang + 0x4000) | 1), slot);/
+s/                    \*(f32 \*)(nxt + 8) = hit.pos\[2\];/                    *(f32 *)(nxt + 8) = hit.pos[1];/
+s/                    \*(f32 \*)(nxt + 0x18) = hit.dist;/                    *(f32 *)(nxt + 0x18) = hit.pos[0];/
+s/                    total += \*(f32 \*)(nxt + 0x18);/                    total += 1.0f;/
+s/                    if (\*(u16 \*)(data + 0x30) != 0) {/                    if (*(u16 *)(data + 0x32) != 0) {/
+s/(s16)(s32)\*(f32 \*)(nxt + 4), (s16)(s32)\*(f32 \*)(nxt + 8), 500, 5000);/(s16)(s32)*(f32 *)(nxt + 4), (s16)(s32)*(f32 *)(nxt + 8), 500, 5001);/
+s/            cur = nxt;/            cur = cur;/
+s/        \*(f32 \*)(data + 0x38) += trail_s_speed\[0\] \* D_800BE9A4;/        *(f32 *)(data + 0x38) += trail_s_speed[0];/
+s/trail_s_range\[0\], -16384.0f);$/trail_s_range[0], -16383.0f);/
+s/sum \* trail_s_k\[0\], trail_s_range\[0\]/sum * trail_s_range[0], trail_s_range[0]/
+1,/sum += \*(f32 \*)(nxt + 0x18);/s/sum += \*(f32 \*)(nxt + 0x18);/sum += *(f32 *)(nxt + 0x20);/
+s/        fade = total \* trail_fade\[0\];/        fade = total * 0.8f;/
+s/        rinv = 1.0f \/ rest;/        rinv = 1.0f \/ total;/
+s/            if (fade < sum) {/            if (fade <= sum - 1.0f) {/
+s/\* rinv \* 155.0f);/* rinv * 154.0f);/
+s/                \*(u8 \*)(nxt + 0x1C) = 155;/                *(u8 *)(nxt + 0x1C) = 154;/
+s/static const f32 trail_max_len\[1\] = { 1195.0f };/static const f32 trail_max_len[1] = { 1196.0f };/
+s/static const f32 trail_push_b\[1\] = { 0.201f };/static const f32 trail_push_b[1] = { 0.2f };/

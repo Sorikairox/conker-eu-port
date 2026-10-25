@@ -85,3 +85,11 @@ P287	port-b	group A	8	-	~130	prototype fixes (protocheck 0) + 8 compiled functio
 P293	port-b	group A	7	-	~130	func_15171770 (EF410 prototype void) + 6 compiled functions to hand C (NM); memcpy EU key 10023360
 P298	port-b	group A	6	15448	~130	6 hand C (NM), 3 unkilled mutants explained; 5 left in group A
 P302	port-b	group A	5	-	~125	5 hand C (NM) + P298 D0CC survivors killed; group A at 0
+P279	port-e	group E hand asm + init/debugger (150A7770 150A80F0 150B2290 bzero bcopy guMtxF2L cosf 1000BCBC; folded 150A7EF4 150A7BD0)	10	0	135	8 NM C + 2 folded pragmas, all EQUIV with mutants killed; progress_nm counts D5E90 NM_ASM/folded entries (+28) and --platform (40-row platform_replaced.tsv)
+P281	port-e	group E leftovers + endless-loop difftest (100052A0 10001550 151FA3E0 150AA950)	4	0	150	STOPCALL/RETV1/sret/ldiv harness; 4 NM C committed, 6 drafts pending mutants; progress_nm plat default (97.1%)
+P285	port-e	P281 drafts landed (36E8 5B04 7830 1044) + D5E90 wall helper unit mode, 6 helpers readable	10	0	130	nmasm_walls --unit; 288C setups DIFFER, 1194 blocked by stub_write page bug (97.2%)
+P288	port-e	stub_write page fix; 10001194 + 1600288C landed; D5E90 AAF00 + AD844 readable	4	0	135	288C DIFFER = unpoked 1e8 late_rodata; engine/ray bodies still asm2c (97.2%)
+P291	port-e	star field 150FBA40 (new nmasm_stars harness); ray inputs kill AD844 projection mutant; ray cast ACEA0 readable	2	0	118	stars 17/18; ray body 15/25 (3 next-leaf coverage gaps); walls engine bodies still asm2c (97.2%)
+P294	port-e	D5E90 wall engine AB708 (AB6D0 / AC8C4) readable, walls.inc deleted, ray far-leaf scenes	2	0	115	walls 33/41, ledge 20/32, P291 ray next-leaf survivors killed; 0 asm2c left (97.2%)
+P300	port-e	group C part C2 (trail update/draw/hit effects 106830, freecam 1579B0)	4	0	130	D99AC 53/53, DA1FC 34/34, DABFC 57/57, 2A1A0 47/50; 151E67A0 + 150FBE40 left (97.3%)
+P307	port-b	integration start: merge port-e (74c6f08a) into port-b; 1 game-C conflict (func_150A7EF4 fold, kept port-b)	0	0	30	verify_all OK, NM links, protocheck 0, implicit NM+float 0, selftest 147/147, 98.1% (92.7% bytes)

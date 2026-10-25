@@ -1,0 +1,5 @@
+KILLED 1: s/(hx - b\[0\]) \* inv, hx, hy, hz, 0x3E)/(hx - b[0]) * inv, hx, hy, hz, 0x3F)/
+SURVIVED 2: s/-(hy + b\[1\]) \* inv, hx, hy, hz, 0x37)/-(hy + b[1]) * inv, hx, hy, hz, 0x3B)/
+KILLED 3: s/    if (diff \& 0x30) {/    if (diff \& 0x10) {/
+SURVIVED 4: s/    if (NM_FABS(cy) < 1.0f) \*mask \&= 5;/    if (NM_FABS(cy) <= 1.0f) *mask \&= 5;/
+done: killed 2 survived 2 other 0

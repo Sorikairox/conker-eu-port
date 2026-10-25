@@ -1,0 +1,85 @@
+s/player = attacker->unk124 - 1;/player = attacker->unk124;/ % own own4
+s/if (player >= 0) {/if (player > 0) {/ % s80m2d
+s/src = &D_800CC2D0\[player\];/src = \&D_800CC2D0[player + 1];/ % own s80m2d
+s/if (player < 0 || player >= D_8008FD8C) {/if (player < 0 || player > D_8008FD8C) {/ % own5
+s/if (player < 0 || player/if (player < -1 || player/ % own0
+s/D_800E0FE8\[vi\] = player | 0x80;/D_800E0FE8[vi] = player;/ % hit
+s/if (player < D_80090130) {/if (player <= D_80090130) {/ % ah2
+s/MP_ROW(player, 0x66)++;/MP_ROW(player, 0x68)++;/ % hit
+s/^            if (kind == 0x2E) {$/            if (kind == 0x2F) {/ % hit hitk2f
+s/MP_ROW(player, 0x6A)++;/MP_ROW(player, 0x66)++;/ % hit
+s/\&\& kind != 0x2D) {/\&\& kind != 0x2C) {/ % teamkill teamkill2d
+s/MP_ROW(player, 0x70)++;/MP_ROW(player, 0x6E)++;/ % teamkill
+s/if (victim->health == 0 \&\& D_800E1030/if (victim->health != 0 \&\& D_800E1030/ % teamkill same
+s/MP_KILLS(player) < 9999/MP_KILLS(player) < 9998/ % kill9998
+s/MP_KILLS(player)++;/MP_KILLS(vi)++;/ % kill
+s/\& 0x200) {/\& 0x400) {/ % kill killnoflag
+s/func_15085710(D_800E1030\[player\] != 0, 10, 1);/func_15085710(D_800E1030[vi] != 0, 10, 1);/ % killt0
+s/func_15085710(D_800E1030\[player\] != 0, 10, 1);/func_15085710(D_800E1030[player], 10, 1);/ % killt0
+s/if (vi < D_80090130) {/if (vi <= D_80090130) {/ % s80v80bot
+s/MP_ROW(vi, 0x6E)++;/MP_ROW(vi, 0x70)++;/ % hit
+s/if (src == victim || /if (/ % selfhit
+s/|| victim->unk31C == NULL ||/||/ % nochar
+s/|| src->health == 0) {/|| src->health == 1) {/ % srcdead hit
+s/\*((u8 \*)src->unk31C + 0xAF) = 0;/*((u8 *)src->unk31C + 0xAE) = 0;/ % hit
+s/if (r == 0x21 || r == 0x22) {/if (r == 0x21) {/ % k33b
+s/func_10010630(0x510, victim,/func_10010630(0x510, src,/ % k33a
+s/if (src->id == 0x75 \&\& victim->health == 0) {/if (src->id == 0x75) {/ % s75alive
+s/if (victim->id == 0x75) {/if (victim->id == 0x76) {/ % s75v75
+1,/MP_ROW(vi, 0x70) >= 4/s/MP_ROW(vi, 0x70) >= 4/MP_ROW(vi, 0x70) > 4/ % s75v75
+s/sound = 0x665;/sound = 0x666;/ % s75v75
+1,/n = 4;/s/n = 4;/n = 3;/ % s75v75
+1,/sound = 0x52A/s/(func_150ADA20() \& 3) == 3/(func_150ADA20() \& 3) == 2/ % s75k34 s75k34n
+s/sound = 0x4D1;/sound = 0x4D2;/ % s75
+1,/0x6D60, 0x320, 0xBB8, 0)/s/0x6D60, 0x320, 0xBB8, 0)/0x6D60, 0x320, 0xBB8, 1)/ % s75
+1,/sound = 0x4D1/s/} else if (kind == 0x34) {/} else if (kind == 0x33) {/ % s75k34
+1,/mode = (u16)attacker->unk278;/s/attacker->interaction_state == 4/attacker->interaction_state == 3/ % s80m2d s80m2s
+1,/mode = (u16)/s/if (attacker != src \&\&/if (/ % s80self4
+1,/n = 8;/s/if (victim->id == 0x80) {/if (victim->id == 0x81) {/ % s80v80
+s/n = 8;/n = 7;/ % s80v80
+s/sound = 0x65A;/sound = 0x65B;/ % s80v80
+1,/sound = 0x571/s/} else if (mode == 2) {/} else if (mode == 3) {/ % s80m2d s80m3
+1,/sound = 0x571/s/(func_150ADA20() \& 7) == 0/(func_150ADA20() \& 7) == 1/ % s80m2a s80m2n
+s/} else if (\*((u8 \*)victim->unk31C + 0x1AC) != 0) {/} else if (*((u8 *)victim->unk31C + 0x1AB) != 0) {/ % s80c1d
+s/if (kind != 0x21 \&\& (victim->health == 0/if (kind != 0x20 \&\& (victim->health == 0/ % s80c1k21
+s/sound = 0x582;/sound = 0x583;/ % s80c1d
+/sound = 0x582/,/arg5/s/arg5 = 25;/arg5 = 26;/ % s80c1d
+s/if (\*((u8 \*)src->unk31C + 0x78) == 0x23/if (*((u8 *)src->unk31C + 0x78) == 0x24/ % s80k2e23
+s/sound = 0x587;/sound = 0x588;/ % s80k2e23
+s/sound = 0x579;/sound = 0x57A;/ % hit
+s/if (func_150ADA20() \& 1) {/if (func_150ADA20() \& 2) {/ % hitk2f
+s/sound = 0x56D;/sound = 0x56E;/ % s80k2c
+s/n = 7;/n = 6;/ % s80k2c
+/sound = 0x56D/,/arg5/s/arg5 = 50;/arg5 = 51;/ % s80k2c
+s/} else if (kind == 0x21 || kind == 0x20 || kind == 0x31) {/} else if (kind == 0x21 || kind == 0x20) {/ % s80k31d
+1,/0x7D00, 0x258, 0x7D0, arg5)/s/0x7D00, 0x258, 0x7D0, arg5)/0x7D00, 0x258, 0x7D0, 0)/ % hit
+1,/0x7D00/s/(u16)sound, src, 0x7D00/(u16)sound, victim, 0x7D00/ % hit
+s/} else if (src->id == 0x3B) {/} else if (src->id == 0x3C) {/ % s3Bk2e
+s/(func_150ADA20() \& 7) == 7/(func_150ADA20() \& 7) == 6/ % s3Bm2a s3Bm2n
+s/sound = 0x52F;/sound = 0x530;/ % s3Bk2e
+s/} else if (kind == 0x2C || kind == 0x2F) {/} else if (kind == 0x2C) {/ % s3Bk2f
+s/n = 2;/n = 1;/ % s3Bk2c
+s/} else if (kind == 0x25 || kind == 0x26) {/} else if (kind == 0x25) {/ % s3Bk26e
+s/if (player \& 1) {/if (player \& 2) {/ % s3Bk25o s3Bk25e
+s/if (victim->health >= 2) {/if (victim->health >= 3) {/ % s3Bk26o2
+s/sound = 0x55F - victim->health;/sound = 0x55F + victim->health;/ % s3Bk25o
+s/sound = 0x565 - victim->health;/sound = 0x564 - victim->health;/ % s3Bk25e
+s/sound = 0x52C;/sound = 0x52D;/ % s3Bk21
+s/r = func_150ADA20() \& 0xF;/r = func_150ADA20() \& 0x7;/ % s3Bk20rA
+s/if (r != 0) {/if (r != 1) {/ % s3Bk20r21
+s/if (r < 4) {/if (r < 3) {/ % s3Bk20r22
+s/sound = r + 0x52B;/sound = r + 0x52C;/ % s3Bk20r10
+s/} else if (src->id == 0x88) {/} else if (src->id == 0x89) {/ % s88
+s/if (victim->health != 0) {/if (victim->health != 5) {/ % s88alive
+s/sound = 0x41A;/sound = 0x41B;/ % s88k21
+s/sound = 0x415;/sound = 0x416;/ % s88
+s/n = 5;/n = 4;/ % s88
+s/0x6D60, 0x320, 0xBB8, arg5)/0x6D60, 0x320, 0xBB8, 0)/ % s88
+s/sound = func_1000F568(sound, n);/sound = n;/ % s75 hit s3Bk2e s88
+s/if (n != 0) {/if (n != 1) {/ % s3Bk21
+s/if (sound == 0) {/if (sound == 1) {/ % s80k40
+s/\&\& D_800E1030\[player\] != D_800E1030\[vi\]) {/\&\& 1) {/ % teamkill
+s/^        if (D_800E1030\[player\] != D_800E1030\[vi\]) {$/        if (1) {/ % same
+s/vi = (s32)((u8 \*)victim - (u8 \*)D_800CC2D0) \/ 0x32C;/vi = (s32)((u8 *)victim - (u8 *)D_800CC2D0) \/ 0x32C + 1;/ % hit
+s/mode = -1;/mode = 2;/ % s80k2c s3Bk2e
+s/mode = (u16)attacker->unk278;/mode = 2;/ % s80m3

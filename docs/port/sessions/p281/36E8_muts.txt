@@ -1,0 +1,14 @@
+s/    if (D_80038190 == 0) {/    if (D_80038190 != 0) {/
+s/        D_80038190 = 1;/        D_80038190 = 2;/
+s/osRecvMesg(dm->evtQueue, \&mesg, OS_MESG_BLOCK);/osRecvMesg(dm->cmdQueue, \&mesg, OS_MESG_BLOCK);/
+s/            case OS_MESG_TYPE_VRETRACE:/            case OS_MESG_TYPE_VRETRACE: case 5:/
+s/                D_80038190--;/                D_80038190 -= 2;/
+s/                if (D_80038190 == 0) {/                if (D_80038190 == 1) {/
+s/if (vc->msgq != NULL) {/if (vc->msgq == NULL) {/
+s/osSendMesg(vc->msgq, vc->msg, OS_MESG_NOBLOCK);/osSendMesg(vc->msgq, vc->msg, OS_MESG_BLOCK);/
+s/                    D_80038190 = vc->retraceCount;/                    D_80038190 = vc->state;/
+s/                D_80042D4C++;/                D_80042D4C--;/
+s/D_80042D40 += count - D_80042D48;/D_80042D40 += count + D_80042D48;/
+s/                D_80042D48 = count;/                D_80042D48 = count + 1;/
+s/                __osTimerInterrupt();/                __osViSwapContext();/
+s/vc = __osGetActiveQueue();$/vc = (OSViContext_s86 *) ((u8 *) __osGetActiveQueue() + 4);/

@@ -1,0 +1,32 @@
+s/        px->prec = 6;/        px->prec = 5;/
+s/(code == 'g' || code == 'G')/(code == 'g' || code == 'E')/
+s/        px->prec = 1;/        px->prec = 2;/
+s/(err == 2) ? D_16004870 : D_16004874/(err == 1) ? D_16004870 : D_16004874/
+s/        px->n1 = 3;/        px->n1 = 4;/
+s/    if (err == 0) {/    if (err == 1) {/
+s/            val = -val;/            val = val;/
+s/xexp \* 30103 \/ 100000 - 4/xexp * 30103 \/ 100000 - 3/
+s/n = (3 - xexp) \& ~3;/n = (4 - xexp) \& ~3;/
+s/val \*= D_16004828\[i\];/val *= D_16004828[i + 1];/
+s/factor = 1.0f;/factor = 2.0f;/
+s/            xexp \&= ~3;/            xexp \&= ~1;/
+s/factor \*= D_16004828\[i\];/factor *= D_16004828[0];/
+s/xexp + 10 : 6/xexp + 11 : 6/
+s/if (gen > 19) {/if (gen > 18) {/
+s/while (gen > 0 \&\& 0.0 < val) {/while (gen > 0 \&\& 0.0 <= val) {/
+s/(gen -= 8) > 0/(gen -= 7) > 0/
+s/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/
+s/\*--p = qr.rem + '0';/*--p = qr.quot + '0';/
+s/lo = qr.quot;/lo = qr.rem;/
+s/xexp += 7;/xexp += 6;/
+s/xexp + 1 : ((code == 'e' || code == 'E') ? 1 : 0)/xexp + 2 : ((code == 'e' || code == 'E') ? 1 : 0)/
+s/((code == 'e' || code == 'E') ? 1 : 0)/((code == 'e' || code == 'g') ? 1 : 0)/
+s/        if (gen < nsig) {/        if (gen <= nsig) {/
+s/p\[nsig\] > '4'/p[nsig] > '5'/
+s/                nsig--;/                n2--;/
+s/                p\[n2\]++;/                p[n2]--;/
+s/            if (n2 < 0) {/            if (n2 <= 0) {/
+s/                ++xexp;/                --xexp;/
+s/func_16002DE4(px, code, p, nsig, xexp);/func_10001AA8(px, code, p, xexp, nsig);/
+s/            gen = 19;/            gen = 20;/
+s/val = (val - lo) \* 1.0e8;/val = (val - lo) * 1.0e7;/

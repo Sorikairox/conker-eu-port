@@ -1,0 +1,19 @@
+KILLED 1: s/        if (w <= 203.0f) {/        if (w < 203.0f) {/
+KILLED 2: s/        if (w <= 203.0f) {/        if (w <= 200.0f) {/
+KILLED 3: s/        if (sx < 0.0f || sx >= width) {/        if (sx <= 0.0f || sx >= width) {/
+KILLED 4: s/        if (sx < 0.0f || sx >= width) {/        if (sx < 0.0f || sx > width) {/
+KILLED 5: s/        if (sy < 0.0f || sy >= height) {/        if (sy <= 0.0f || sy >= height) {/
+KILLED 6: s/        if (sy < 0.0f || sy >= height) {/        if (sy < 0.0f || sy > height) {/
+KILLED 7: s/    left = STAR_CAM_F(cam, STAR_CAM_LEFT) + scaleX;/    left = STAR_CAM_F(cam, STAR_CAM_LEFT) + scaleY;/
+KILLED 8: s/ \* scaleY \* inv;/ * scaleX * inv;/
+KILLED 9: s/     : ((f) >= 0.0f) ? (s32) (((f) + 8388608.0f) - 8388608.0f)/     : ((f) >= 0.0f) ? (s32) ((f) + 0.5f)/
+KILLED 10: s/STAR_RINT(rowA \* fx), ix + 1, iy);/STAR_RINT(rowA * gx), ix + 1, iy);/
+KILLED 11: s/                tint = 0xCDD3FF00;/                tint = 0xDAFBDC00;/
+KILLED 12: s/    if ((u32) gdl & 8) {/    if ((u32) gdl \& 4) {/
+SURVIVED 13: s/    if ((u32) g & 8) {/    if (0) {/
+KILLED 14: s/z \* mtx\[2\]\[3\];/z * mtx[3][3];/
+KILLED 15: s/((y + 1) << 2);/(y << 2);/
+KILLED 16: s/        rowA = alpha \* fy;/        rowA = alpha * gy;/
+KILLED 17: s/#define STAR_CACHED(p) ((Gfx \*) ((u32) (p) ^ 0x20000000))/#define STAR_CACHED(p) ((Gfx *) ((u32) (p)))/
+KILLED 18: s/        gx = 1.0f - fx;/        gx = 1.0f - fy;/
+done: killed 17 survived 1 other 0

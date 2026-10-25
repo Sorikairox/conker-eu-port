@@ -1,0 +1,4 @@
+func_16001044 (P285, debugger) knobs: none
+  random: EQUIV func_16001044 (99 trials ok, 1 inconclusive, 37 calls, ret=void, ref 155 words, cand 145 words)
+  setups 1044_setups.txt: 19 EQUIV / 19
+  muts 1044_muts.txt: 26 killed / 28 (survived: [s/(value << 9) != 0/(value << 8) != 0/]); not applied: 0; invalid: sed:[s/value = value]

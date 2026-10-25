@@ -4,7 +4,7 @@
 # difftest runs where --self fails (externs declared inside the NM block, or C in another file than the asm).
 import sys, re, glob, os
 fn, out = sys.argv[1:3]
-for p in sorted(glob.glob('conker/src_eu/*.c')):
+for p in sorted(glob.glob('conker/src_eu/**/*.c', recursive=True)):
     t = open(p).read()
     m = re.search(r'^[A-Za-z_][^\n;#/=]*\b%s\s*\([^;{]*\)\s*\{' % fn, t, re.M)
     if not m: continue
