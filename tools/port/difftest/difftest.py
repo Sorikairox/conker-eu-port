@@ -823,6 +823,7 @@ for _p in _knob_items('DIFFTEST_OUTW'):
 # e.g. func_15186494's 5-word strip table. Several "N:W..." for one ADDR are separated by '/'.
 OUTA = {}
 OUTA_PERCALL = os.environ.get('DIFFTEST_OUTA_PERCALL') == '1'
+MEMCPY_REAL = os.environ.get('DIFFTEST_MEMCPY') == '1'  # P317, see the stub
 for _p in _knob_items('DIFFTEST_OUTA'):
     _a, _v = _p.split('=')
     OUTA[int(_a, 16) & 0x1FFFFFFF] = [(_outn(_x.split(':')[0]), [int(_y, 16) & 0xFFFFFFFF for _y in _x.split(':')[1].split(';')])
@@ -1377,6 +1378,13 @@ class Run:
                 # per call: func_1510A98C's four bone points, func_150B8020's top / side points)
                 _dk = (k * 0x10000) if OUTA_PERCALL else 0
                 self.stub_write(_p, struct.pack('>%dI' % len(_ws), *[(_w + _dk) & 0xFFFFFFFF for _w in _ws]))
+        # P317 (opt-in): DIFFTEST_MEMCPY=1 makes the memcpy stub (EU 10023360) copy for real: a2 bytes from a1 to a0
+        # (up to 64 KiB; unreadable source = no copy). P301: the plain stub copies nothing, so a function that edits or
+        # reads memcpy'd data sees the fill value on both sides and swaps / dropped stores there went unseen.
+        if MEMCPY_REAL and (addr & 0x1FFFFFFF) == 0x10023360 and 0 < regs[2] <= 0x10000:
+            try: _src = bytes(mu.mem_read(phys(regs[1]), regs[2]))
+            except Exception: _src = None
+            if _src is not None: self.stub_write(regs[0], _src)
         if (addr & 0x1FFFFFFF) in OUTP:
             for _n, _i, _ws in OUTP[addr & 0x1FFFFFFF]:
                 _arr = regs[_n] if _n < 4 else struct.unpack('>I', bytes(mu.mem_read(phys(sp + 0x10 + 4 * (_n - 4)), 4)))[0]

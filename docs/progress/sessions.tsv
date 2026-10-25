@@ -118,3 +118,4 @@ P286	port	group B: NM link fix + 4 compiled funcs to hand C	4	0	130	NM link fixe
 P301	port	group B: 3 compiled funcs to hand C + 1513334C survivors	3	0	125	151C40BC 150E3CB8 150B4BF0 hand C; 1513334C 37/37 (memcpy OUTA fills old[]); verify_all OK
 P310	port	group B1: 2 compiled funcs to hand C	2	0	118	1506C460 150E2294 hand C (static const rodata copies; volatile zero keeps -0.0, IDO folds 0.0f + x); verify_all OK
 P314	port-e	group D1 leftover func_15175EC8 (ambient flyer update, 1A2970)	1	0	100	5EC8 175/175, 119 setups; 1A2970 identical to port-d (97.3%)
+P317	port-b	final integration: merge port + port-e, final-merge notes	1	0	140	conversion complete: 0 asm-only (5916/5916, strict 99.4%); D_8008A0B4 / D_80089CD4 signatures, 5 volatile-zero folds, DIFFTEST_MEMCPY; verify_all OK

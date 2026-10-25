@@ -756,7 +756,8 @@ s32 func_15133E04(u8 *p) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_15FF50/func_15133E04.s")
 #endif
 
-s32 func_15133F44(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+s32 func_15133F44(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     f32 temp_f0;
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) + arg4;
     temp_f0 = *(f32 *)(arg0 + 0x14);
@@ -769,7 +770,8 @@ s32 func_15133F44(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
-s32 func_15133FC0(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+s32 func_15133FC0(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) + arg4;
     *(f32 *)(arg0 + 0x44) = 0.0f;
     *(f32 *)(arg0 + 0x48) = 0.0f;

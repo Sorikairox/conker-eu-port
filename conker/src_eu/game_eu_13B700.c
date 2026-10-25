@@ -182,7 +182,10 @@ void func_1510E004(u8 *rec) {
     b[0] = -100.0f;
     b[2] = 0.0f;
     if (angle != 0) {
-        b[0] = -100.0f * c + 0.0f;
+        { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds, -0.0 -> +0.0; P310) */
+            volatile f32 p317z = 0.0f;
+            b[0] = -100.0f * c + p317z;
+        }
         b[2] = 0.0f - -100.0f * s;
     }
     b[1] = b[2] * slope_z + slope_x * b[0];

@@ -360,4 +360,9 @@ chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:92"
 chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1"
 chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1" 's/0.396174014f/0.396175f/'
 chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0" 's/0.396174014f/0.396175f/'
+# P317: DIFFTEST_MEMCPY=1 makes the memcpy stub copy for real. func_1501175C's 0x5C tail record is memcpy'd to the
+# heap: with the stub copying nothing, a tail-constant change was invisible without an ARGMEM compare (EQUIV above);
+# with the real copy the destination writes are compared and it DIFFERs, while the unmutated function stays EQUIV.
+chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1"
+chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1" 's/0.396174014f/0.396175f/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

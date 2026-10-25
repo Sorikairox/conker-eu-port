@@ -10,6 +10,45 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## Conversion complete (P317, port-b, 2026-10-26). Details: `docs/port/sessions/P317.md`
+
+All branches are merged into port-b: `port` (73675f39) and `port-e` (7535677f, func_15175EC8), on top of the P307..P316 merges.
+- progress_nm: `total 5916 3995 1888 33 0 5916 100.0% 2253856/2253856 (100.0%)`, **0 asm-only functions**.
+  `--strict`: `5883 99.4% 2246728/2253856 (99.7%)`.
+- "Platform-replaced" (33 functions, `tools/port/platform_replaced.tsv`, counted as done by user decision
+  2026-10-25): privileged / OS low-level code (COP0, TLB, cache ops, exception vectors, thread switch, boot), padding
+  and debug traps. The port's platform layer (port-web port/ultra, port/boot) replaces them, or the PC build never
+  runs them. They get no game C.
+- Final-merge fixes: D_8008A0B4 dispatcher func_15141A7C now calls its entries as `void (obj, s32, s32)`. The
+  D_80089CD4 entries (func_150BD498, func_15133F44, func_15133FC0, func_150B3B8C, func_150C06DC, func_151A79EC,
+  func_150C0B48) now use the dispatcher's `s32 (u8 *, f32, f32, f32, f32, u8 *)`. Five IDO `0.0f + x` folds now use a
+  volatile zero. New difftest knob `DIFFTEST_MEMCPY=1` (the memcpy stub copies for real) with 2 selftest cases.
+  The default build stays byte-identical. Checks: verify_all 0, NM 0, protocheck 0, implicit NM+float 0, selftest 152/152; stride_scan NM BOTH 125 / BYTE 3 (intended) / ELEM 37.
+
+Documented deviations from the original (collected from session docs; the behaviour is the same wherever the N64 is
+well-defined):
+- Uninitialised reads replaced with 0 / NULL: func_1517FAD4 colour lerp factor (P24), func_15196344 return on a failed
+  search (P172), func_150039E0 passes NULL to func_15004CE0 (P176), foot trail direction (P191), func_1511127C start
+  values (P203), func_150900F0 level-variant scale (P227 notes), stack garbage args set to 0 (P227).
+- Garbage v0 tails: functions whose asm leaves a callee's v0 behind are `void`, or return 0 when a table needs s32
+  (P162 func_1518FE50, P164, P168, P196 func_150882C4 / func_150DE8AC, P208 func_1505E874, P242).
+- Kept as in the original (also uninitialised on N64): func_1512C490's stack Mtx (P183/P210), unset handler byte (P210),
+  value kinds > 18 (P183), rec+0x275 "mark" path (P2xx).
+- Table signatures normalised for wasm (P159, P209, P317): entries take the dispatcher's type. Unused registers the asm
+  left in a3 (the D_8008A0B4 index) are not passed.
+- func_150B2290 compares unsigned (`px < end`) where the asm uses `slt` (the same for KSEG0 / wasm pointers, P289).
+- -0.0: `0.0f + x` is kept as a real add (volatile zero in the NM build, P310 / P317).
+
+Next steps:
+1. port-web: run `tools/port/arity_scan.py` (it needs port/build/ll, so it cannot run in port-b). Add the vbe.py
+   ROM_ABS entries D_427B0 / D_19EDE8 (P281/P288). The verify_all/run.sh container naming (P245) is still in port-web
+   only. Clear the census and vbe.stamp and rebuild.
+2. Finish the memcpy re-run: the 19 rows of `docs/port/sessions/p317/memcpy_rerun.list` after func_150F9BB0
+   (`DIFFTEST_MEMCPY=1 JOBS=2 tools/port/reverify_all.sh ...`). Consider adding MEMCPY=1 to registry knobs.
+3. Check the other 44 v0use candidates (`p317/v0real.txt`, likely heuristic false positives) and the 45 arityscan_eu rows.
+4. Look into the existing random DIFFERs of func_1510E004 (call count at func_1510E908) and func_15141A7C (random jalr
+   target). Write setups for both.
+
 ## Integration status (P316, port-b, 2026-10-26)
 
 Merged into port-b so far: A, B2, C1, C2, D (all but func_15175EC8), E. Group A (port-b, P274..P302, finished) + port-e at

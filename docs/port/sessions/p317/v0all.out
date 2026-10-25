@@ -1,0 +1,159 @@
+game_eu_B7840.c func_1508C07C <- game_eu_B7840/func_1508A040.s: v0 written (or) | f0 READ by mtc1 $zero, $f0
+init_3C40.c func_10004074 <- game_eu_1B1ED0/func_15186D04.s: v0 branch: READ by beql $v0, $zero, .L151877E8 | f0 branch: RETURNED (jr)
+game_eu_D5650.c func_150A7E40 <- game_eu_1B1ED0/func_151848D8.s: v0 unknown | f0 branch: READ by div.s $f0, $f0, $f12
+game_14FF90.c func_15124B18 <- game_14FF90/func_15123568.s: v0 RETURNED (jr) | f0 READ by mtc1 $zero, $f0
+game_eu_770B0.c func_150498A0 <- game_14FF90/func_151247C0.s: v0 branch: READ by lwc1 $f8, 0x14($v0) | f0 branch: READ by mtc1 $zero, $f0
+game_eu_1F7960.c func_151CA484 <- game_14FF90/func_15127EB8.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_70200.c func_1504332C <- game_eu_216470/func_151EA90C.s: v0 branch: READ by sw $t4, 0x0($v0) | f0 unknown
+game_71240.c func_15043E68 <- game_eu_216470/func_151EE93C.s: v0 next call | f0 READ by mtc1 $zero, $f0
+init_EB00.c func_1000F91C <- game_eu_106830/func_150D99AC.s: v0 written (lb) | f0 branch: READ by mtc1 $zero, $f0
+game_eu_106830.c func_150D9304 <- game_eu_106830/func_150D93CC.s: v0 written (lb) | f0 branch: READ by mtc1 $zero, $f0
+game_eu_774A0.c func_15049C90 <- game_eu_6B970/func_1503E6B4.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_6B970.c func_1503F6F4 <- game_eu_1E7CC0/func_151BAAC8.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15145EA4 <- game_eu_1E7CC0/func_151BE33C.s: v0 unknown | f0 branch: READ by mtc1 $at, $f0
+game_eu_170760.c func_151441A4 <- game_169510/func_1513DB00.s: v0 branch: READ by sw $v0, 0x34($sp) | f0 next call
+game_eu_170760.c func_151441A4 <- game_169510/func_1513CBF0.s: v0 branch: READ by sw $v0, 0x34($sp) | f0 next call
+game_83300.c func_1505E650 <- game_eu_78230/func_1504CB98.s: v0 written (lw) | f0 branch: READ by mtc1 $at, $f0
+game_eu_78230.c func_15051558 <- game_eu_78230/func_1504CB98.s: v0 unknown | f0 branch: READ by mtc1 $at, $f0
+game_83300.c func_1505E650 <- game_eu_78230/func_1504CB98.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_78230.c func_15052408 <- game_eu_78230/func_1504B0FC.s: v0 RETURNED (jr) | f0 READ by mtc1 $zero, $f0
+game_83300.c func_15059444 <- game_eu_78230/func_1504B0FC.s: v0 branch: RETURNED (jr) | f0 branch: READ by mtc1 $at, $f0
+game_eu_78230.c func_1504CA60 <- game_eu_78230/func_150528C8.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_981E0.c func_1506E5FC <- game_eu_78230/func_15052F9C.s: v0 branch: READ by addiu $t4, $v0, 0x4000 | f0 READ by mtc1 $zero, $f0
+game_eu_1B6590.c func_15188D80 <- game_eu_78230/func_15054A94.s: v0 written (lhu) | f0 READ by mtc1 $zero, $f0
+game_1944C0.c func_1516962C <- game_eu_F4D30/func_150C7520.s: v0 written (lh) | f0 READ by mtc1 $zero, $f0
+game_D5500.c func_150A8050 <- game_eu_62360/func_15035220.s: v0 branch: READ by swc1 $f20, 0xC($v0) | f0 next call
+game_D5500.c func_150A8050 <- game_40490/func_150130B4.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_D5650.c func_150A7E40 <- game_40490/func_150130B4.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_D5500.c func_150A8050 <- game_40490/func_150156F4.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_D5500.c func_150A8050 <- game_40490/func_150144B8.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_170760.c func_15143794 <- game_eu_133A70/func_1510819C.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15143134 <- game_eu_1D1150/func_151A4FE8.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_eu_193D00.c func_151664F0 <- game_eu_EF6D0/func_150C1F40.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_D5500.c func_150A8050 <- game_BC510/func_150900F0.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_D5500.c func_150A8050 <- game_BC510/func_150900F0.s: v0 next call | f0 READ by mtc1 $at, $f0
+init_3C40.c func_10004074 <- game_eu_13A8A0/func_1510D984.s: v0 branch: READ by slti $at, $v0, 0x4 | f0 branch: RETURNED (jr)
+game_eu_142E40.c func_1511FF00 <- game_eu_142E40/func_151194A4.s: v0 written (lbu) | f0 branch: READ by c.eq.s $f10, $f0
+game_eu_194720.c func_15166F10 <- game_eu_142E40/func_151194A4.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_eu_142E40.c func_1511F8A4 <- game_eu_142E40/func_15118324.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_142E40.c func_1511AD48 <- game_eu_142E40/func_1511ADC0.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_142E40.c func_1511FF00 <- game_eu_142E40/func_15118F2C.s: v0 written (lw) | f0 branch: READ by c.eq.s $f6, $f0
+game_eu_1A1730.c func_151741D0 <- game_eu_142E40/func_1511CBC0.s: v0 branch: READ by sb $zero, 0x6E($v0) | f0 branch: RETURNED (jr)
+game_eu_64770.c func_15037CCC <- game_eu_64770/func_1503AB20.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_64770.c func_15038758 <- game_eu_64770/func_15038910.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_64770.c func_15038758 <- game_eu_64770/func_15038910.s: v0 written (lui) | f0 branch: READ by mtc1 $at, $f0
+game_eu_64770.c func_1503A1C0 <- game_eu_64770/func_15038910.s: v0 written (addu) | f0 READ by mtc1 $at, $f0
+game_eu_193D00.c func_151664F0 <- game_eu_EEF70/func_150C1260.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_AC770.c func_1507EF98 <- game_eu_AC770/func_1507F3B0.s: v0 branch: READ by addiu $v0, $v0, 0x7 | f0 next call
+game_eu_AC770.c func_1507F3B0 <- game_eu_AC770/func_1507F640.s: v0 written (lbu) | f0 branch: READ by mtc1 $zero, $f0
+game_14FF90.c func_15123070 <- game_eu_135D70/func_15108560.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_1B7680.c func_15189E70 <- game_eu_3CA50/func_1500F3BC.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_83300.c func_15060B04 <- game_83300/func_1505E874.s: v0 written (lbu) | f0 branch: READ by mtc1 $at, $f0
+game_A28B0.c func_1507BC14 <- game_83300/func_15056B08.s: v0 branch: RETURNED (jr) | f0 branch: READ by mtc1 $zero, $f0
+game_83300.c func_1505A184 <- game_83300/func_15056B08.s: v0 branch: READ by beq $v0, $at, .L150573D4 | f0 written (add.s)
+game_eu_71E70.c func_15047680 <- game_83300/func_15056B08.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_83300.c func_1505E874 <- game_83300/func_150585F0.s: v0 branch: READ by andi $t4, $v0, 0x2 | f0 branch: RETURNED (jr)
+game_83300.c func_1505E874 <- game_83300/func_1505B9C4.s: v0 branch: READ by andi $t6, $v0, 0x8 | f0 branch: RETURNED (jr)
+game_83300.c func_15060B70 <- game_83300/func_1505A9AC.s: v0 written (lbu) | f0 READ by mtc1 $at, $f0
+game_83300.c func_15060B70 <- game_83300/func_1505A9AC.s: v0 written (lbu) | f0 READ by mtc1 $at, $f0
+game_83300.c func_15060B70 <- game_83300/func_1505A9AC.s: v0 branch: READ by andi $t7, $v0, 0x80 | f0 READ by mtc1 $at, $f0
+game_83300.c func_1505E650 <- game_83300/func_1505A9AC.s: v0 written (lbu) | f0 branch: READ by c.lt.s $f14, $f0
+game_eu_1A2410.c func_15174690 <- game_83300/func_1505B5F8.s: v0 branch: RETURNED (jr) | f0 branch: READ by mtc1 $at, $f0
+game_83300.c func_1505E650 <- game_83300/func_1505F298.s: v0 branch: READ by andi $t9, $v0, 0x7 | f0 branch: RETURNED (jr)
+init_3C40.c func_10004074 <- game_83300/func_15060F28.s: v0 branch: READ by lw $a0, 0x11C($v0) | f0 next call
+game_D5500.c func_150A8050 <- game_eu_1E6B70/func_151B99B8.s: v0 written (lw) | f0 READ by mtc1 $zero, $f0
+init_B1B0.c func_1000CC54 <- init_B1B0/func_1000D2F8.s: v0 branch: READ by beql $v0, $zero, .L1000D8F0 | f0 next call
+init_B1B0.c func_1000B3D4 <- init_B1B0/func_1000D96C.s: v0 branch: READ by lw $t3, 0x4($v0) | f0 branch: RETURNED (jr)
+game_eu_1984F0.c func_1516D1C8 <- game_eu_1984F0/func_1516AFE0.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_6EDC0.c func_15042BC4 <- game_eu_1984F0/func_1516AFE0.s: v0 branch: READ by beql $v0, $zero, .L1516B2E4 | f0 branch: READ by mtc1 $at, $f0
+game_eu_6EDC0.c func_15042BC4 <- game_eu_1984F0/func_1516AFE0.s: v0 written (lh) | f0 READ by mtc1 $at, $f0
+game_83300.c func_15059140 <- game_eu_1207F0/func_150F3A74.s: v0 written (lbu) | f0 READ by mtc1 $at, $f0
+game_14FF90.c func_15124B18 <- game_eu_1207F0/func_150F4970.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15145EA4 <- game_eu_1C3530/func_15199A28.s: v0 unknown | f0 READ by mtc1 $zero, $f0
+game_eu_1C3530.c func_1519C38C <- game_eu_1C3530/func_15199F80.s: v0 written (lb) | f0 branch: READ by mtc1 $zero, $f0
+game_eu_71E70.c func_1504715C <- game_eu_1C1A20/func_15194210.s: v0 branch: READ by beql $v0, $at, .L151942D4 | f0 next call
+game_eu_1BA680.c func_1518CF74 <- game_eu_5D910/func_15030448.s: v0 branch: READ by beql $v0, $zero, .L15030524 | f0 next call
+game_eu_204F70.c func_151D7A2C <- game_eu_5D910/func_15031F04.s: v0 READ by lw $t0, 0x9C($v0) | f0 branch: RETURNED (jr)
+game_14FF90.c func_151236D0 <- game_eu_156A30/func_15129EA4.s: v0 RETURNED (jr) | f0 READ by mtc1 $at, $f0
+game_14FF90.c func_15123070 <- game_eu_F5B10/func_150C8300.s: v0 RETURNED (jr) | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15145EA4 <- game_eu_127840/func_150FA738.s: v0 unknown | f0 branch: READ by mtc1 $zero, $f0
+game_16EE20.c func_15142314 <- game_eu_1C13E0/func_15193660.s: v0 unknown | f0 READ by mtc1 $zero, $f0
+game_D5500.c func_150A8050 <- game_eu_1F4F60/func_151C7750.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_1F4F60.c func_151C9748 <- game_eu_1F4F60/func_151C7B1C.s: v0 next call | f0 branch: READ by mtc1 $at, $f0
+game_eu_170760.c func_15145974 <- game_eu_1F4F60/func_151C9748.s: v0 written (delay) | f0 READ by mtc1 $zero, $f0
+game_eu_204F70.c func_151D8CC8 <- game_eu_204F70/func_151D7EDC.s: v0 written (lb) | f0 branch: READ by swc1 $f0, 0x54($s1)
+game_eu_FAAB0.c func_150CD2A0 <- game_eu_F6060/func_150CA2C4.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_114640.c func_150E892C <- game_eu_105FD0/func_150D8ABC.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15145974 <- game_eu_201240/func_151D3A30.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_1944C0.c func_1516972C <- game_eu_E48B0/func_150B7DFC.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_114640.c func_150E8854 <- game_3DF10/func_15010A60.s: v0 unknown | f0 READ by mtc1 $zero, $f0
+game_eu_192500.c func_15164DF8 <- game_eu_192500/func_15164E0C.s: v0 written (lb) | f0 READ by swc1 $f0, 0x34($sp)
+game_14FF90.c func_151254F4 <- game_eu_E44D0/func_150B6CC0.s: v0 branch: RETURNED (jr) | f0 READ by mtc1 $at, $f0
+init_3C40.c func_100043B4 <- game_eu_AF2A0/func_150849C0.s: v0 branch: READ by addiu $v0, $v0, %lo(D_800D19B4) | f0 unknown
+game_83300.c func_150615DC <- game_eu_AF2A0/func_15083F30.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_eu_19B180.c func_1516DF0C <- game_eu_19B180/func_1516FE1C.s: v0 branch: READ by bne $s0, $v0, .L15170464 | f0 RETURNED (jr)
+game_eu_6B970.c func_1503F6F4 <- game_eu_1FB080/func_151CFFFC.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_83300.c func_150597FC <- game_eu_DEDE0/func_150B1EC0.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_83300.c func_15056B08 <- game_eu_DEDE0/func_150B1CBC.s: v0 written (lui) | f0 READ by mtc1 $zero, $f0
+game_83300.c func_1505A770 <- game_eu_DEDE0/func_150B1CBC.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_83300.c func_1505A184 <- game_eu_DEDE0/func_150B1CBC.s: v0 written (lui) | f0 READ by mtc1 $zero, $f0
+game_1944C0.c func_15169040 <- game_A9D90/func_1507CD64.s: v0 written (addiu) | f0 branch: READ by mtc1 $zero, $f0
+game_161520.c func_15135424 <- game_161520/func_15134E48.s: v0 written (lb) | f0 branch: READ by swc1 $f0, 0x74($s0)
+game_eu_71E70.c func_1504715C <- game_eu_E88D0/func_150BABE0.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_D5650.c func_150A7E40 <- game_eu_DCEF0/func_150B0344.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15145974 <- game_eu_DCEF0/func_150B0574.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_4A070.c func_15020090 <- game_eu_4A070/func_15020920.s: v0 written (addiu) | f0 branch: READ by mtc1 $at, $f0
+game_eu_1ACBC0.c func_1517F3B0 <- game_eu_4A070/func_1501DB18.s: v0 branch: READ by addiu $s0, $v0, 0x18 | f0 RETURNED (jr)
+game_eu_4A070.c func_1501E5AC <- game_eu_4A070/func_1501E888.s: v0 written (lw) | f0 READ by mtc1 $zero, $f0
+game_eu_78230.c func_1504C854 <- game_eu_FC460/func_150CEC50.s: v0 written (lui) | f0 READ by mtc1 $zero, $f0
+game_eu_189860.c func_1515C710 <- game_eu_170760/func_15145AD8.s: v0 written (lw) | f0 READ by mtc1 $zero, $f0
+game_eu_1BAAA0.c func_1518D290 <- game_eu_ECC80/func_150BFF7C.s: v0 written (addiu) | f0 READ by mtc1 $zero, $f0
+game_eu_D5650.c func_150A7EE0 <- game_eu_1ABE00/func_1517F01C.s: v0 written (addiu) | f0 branch: READ by swc1 $f0, 0x0($t7)
+game_eu_13A8A0.c func_1510DBB0 <- game_eu_1B1010/func_15184198.s: v0 branch: READ by or $a0, $v0, $zero | f0 RETURNED (jr)
+game_eu_1772D0.c func_1514B5A4 <- game_eu_1772D0/func_1514B8D4.s: v0 next call | f0 READ by mtc1 $at, $f0
+debugger_256F80.c func_16001830 <- debugger/debugger/func_16000B14.s: v0 branch: READ by slti $at, $v0, 0x33 | f0 branch: RETURNED (jr)
+init_3C40.c func_100043B4 <- init_8F90/func_10009CBC.s: v0 branch: READ by beql $v0, $zero, .L1000A0D0 | f0 next call
+init_3C40.c func_10004074 <- init_8F90/func_1000A03C.s: v0 branch: READ by beql $v0, $zero, .L1000A59C | f0 next call
+game_14FF90.c func_15124B18 <- game_eu_120060/func_150F2C20.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_156A30.c func_15129E30 <- game_32740/func_150054C4.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_14FF90.c func_15124B18 <- game_eu_10EB20/func_150E1310.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_eu_1EFE10.c func_151C384C <- game_eu_126330/func_150F8EAC.s: v0 next call | f0 READ by mtc1 $at, $f0
+game_75FC0.c func_150491EC <- game_eu_15A210/func_1512C490.s: v0 written (lui) | f0 READ by mtc1 $zero, $f0
+game_eu_71E70.c func_15047E70 <- game_eu_15A210/func_1512C490.s: v0 written (lw) | f0 branch: READ by mtc1 $zero, $f0
+game_eu_AF2A0.c func_15083C3C <- game_eu_595D0/func_1502FED8.s: v0 written (lw) | f0 branch: READ by mtc1 $zero, $f0
+game_eu_595D0.c func_1502C074 <- game_eu_595D0/func_1502C1D4.s: v0 branch: READ by addiu $t5, $v0, 0x1 | f0 unknown
+game_eu_595D0.c func_1502C074 <- game_eu_595D0/func_1502C1D4.s: v0 branch: READ by sll $t5, $v0, 2 | f0 next call
+game_476D0.c func_1501AF44 <- game_476D0/func_1501A490.s: v0 written (or) | f0 READ by mtc1 $at, $f0
+game_476D0.c func_1501AF44 <- game_476D0/func_1501A8C0.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_D5650.c func_150A7EE0 <- game_476D0/func_1501A764.s: v0 written (addu) | f0 READ by mtc1 $at, $f0
+game_75FC0.c func_1504917C <- game_eu_C4590/func_15097BA8.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_eu_AF2A0.c func_15083784 <- game_eu_20B730/func_151E870C.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_70200.c func_150432FC <- game_eu_20B730/func_151DE100.s: v0 branch: READ by xor $a1, $v0, $v1 | f0 next call
+game_70200.c func_1504332C <- game_eu_20B730/func_151E1EDC.s: v0 branch: READ by lb $v1, 0x0($v0) | f0 next call
+game_70200.c func_15042E3C <- game_eu_20B730/func_151E19AC.s: v0 branch: READ by lw $v0, %lo(D_80090174)($v0) | f0 branch: RETURNED (jr)
+game_eu_770B0.c func_150498A0 <- game_eu_158110/func_1512C080.s: v0 written (lw) | f0 READ by mtc1 $zero, $f0
+game_eu_13C400.c func_1510EE3C <- game_eu_158110/func_1512A390.s: v0 next call | f0 branch: READ by c.eq.s $f14, $f0
+game_eu_170760.c func_15143134 <- game_eu_12E390/func_151018F8.s: v0 written (lw) | f0 branch: READ by swc1 $f0, 0x44($t0)
+game_83300.c func_15059140 <- game_eu_105140/func_150D7E38.s: v0 written (lui) | f0 branch: READ by mtc1 $at, $f0
+game_981E0.c func_1506B100 <- game_eu_105140/func_150D7E38.s: v0 branch: READ by slti $at, $v0, 0xA | f0 unknown
+game_eu_170760.c func_15143134 <- game_eu_1379B0/func_1510A98C.s: v0 unknown | f0 READ by mtc1 $zero, $f0
+game_eu_71E70.c func_1504715C <- game_eu_200070/func_151D2860.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_981E0.c func_1506E5FC <- game_eu_90F50/func_15064F50.s: v0 written (addiu) | f0 READ by mtc1 $zero, $f0
+game_eu_17D3C0.c func_15152DE4 <- game_eu_FABD0/func_150CDD08.s: v0 RETURNED (jr) | f0 READ by mtc1 $at, $f0
+game_83300.c func_1505B5F8 <- game_EF410/func_150C3230.s: v0 branch: READ by sll $t3, $v0, 2 | f0 READ by mtc1 $zero, $f0
+game_eu_17D3C0.c func_15151FA8 <- game_EF410/func_150C1F60.s: v0 unknown | f0 READ by mtc1 $zero, $f0
+game_eu_1B6590.c func_15188D80 <- game_EF410/func_150C3994.s: v0 branch: READ by bnel $v0, $zero, .L150C414C | f0 written (lwc1)
+game_eu_71E70.c func_1504715C <- game_eu_51190/func_150268BC.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_eu_AC770.c func_1507F640 <- game_981E0/func_15072B44.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_AC770.c func_1507F640 <- game_981E0/func_15072B44.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_AC770.c func_1507F640 <- game_981E0/func_15072B44.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_170760.c func_15145974 <- game_981E0/func_1506CE6C.s: v0 written (lui) | f0 READ by mtc1 $zero, $f0
+game_83300.c func_1505A184 <- game_981E0/func_1506C460.s: v0 unknown | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_15143134 <- game_981E0/func_15073FA0.s: v0 branch: READ by beql $v0, $zero, .L150746F8 | f0 written (lwc1)
+game_1944C0.c func_1516962C <- game_eu_1DC570/func_151AF820.s: v0 written (lw) | f0 READ by mtc1 $zero, $f0
+game_eu_15B2E0.c func_1512DAD0 <- game_eu_B37F0/func_15089664.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_eu_170760.c func_1514373C <- game_eu_103160/func_150D59D8.s: v0 unknown | f0 READ by mtc1 $zero, $f0
+game_eu_103160.c func_150D71A8 <- game_eu_103160/func_150D6C40.s: v0 next call | f0 READ by mtc1 $zero, $f0
+game_eu_170760.c func_15145974 <- game_eu_125200/func_150F79F0.s: v0 written (lw) | f0 READ by mtc1 $at, $f0
+game_14FF90.c func_151254F4 <- game_eu_118F50/func_150EB740.s: v0 next call | f0 READ by mtc1 $at, $f0
+void C funcs 3470 asm call sites 3877 reading v0/f0 158

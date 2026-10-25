@@ -810,7 +810,10 @@ void func_15019F20(void) {
     } else {
         {
             f32 *fp = (f32 *)&D_800BEA10;
-            var_f0 = 0.0f + D_eu_800BEA08 + (&D_eu_800BEA08)[1];
+            { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds, -0.0 -> +0.0; P310) */
+                volatile f32 p317z = 0.0f;
+                var_f0 = p317z + D_eu_800BEA08 + (&D_eu_800BEA08)[1];
+            }
             do {
                 var_f0 = var_f0 + fp[0] + fp[1] + fp[2] + fp[3];
                 fp += 4;

@@ -765,7 +765,8 @@ loop_6:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BCBBC.s")
 #endif
-s32 func_150BD498(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+s32 func_150BD498(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) * 1.1f + arg4;
     if (*(f32 *)(arg0 + 0x48) > -2.0f) {
         *(f32 *)(arg0 + 0x44) = 0.0f;

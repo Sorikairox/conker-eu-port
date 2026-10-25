@@ -99,7 +99,8 @@ void func_15141A7C(struct127 *arg0, s32 arg1) {
                     if (temp_v1->unk4 > 0) {
                         func_15141E38(arg0, temp_v0_2);
                     } else {
-                        ((s32 (*)(struct127 *, s32, s32, s32)) D_8008A0B4[temp_v0_2].unk0)(arg0, arg1, 0, temp_v0_2);
+                        /* P317: the entries are `void (obj, s32, s32)`; the asm leaves the index in a3, no entry reads it */
+                        ((void (*)(struct127 *, s32, s32)) D_8008A0B4[temp_v0_2].unk0)(arg0, arg1, 0);
                     }
                 }
             }
@@ -110,7 +111,7 @@ void func_15141A7C(struct127 *arg0, s32 arg1) {
             do {
                 temp_v0_3 = sp3C->unk10;
                 if (D_8008A0B4[temp_v0_3->unk28].unk0 != 0) {
-                    ((s32 (*)(struct127 *, s32, s16)) D_8008A0B4[temp_v0_3->unk28].unk0)(arg0, arg1, temp_v0_3->unkE);
+                    ((void (*)(struct127 *, s32, s32)) D_8008A0B4[temp_v0_3->unk28].unk0)(arg0, arg1, temp_v0_3->unkE);
                 }
                 temp_t8 = sp3C->unk14;
                 sp3C = temp_t8;

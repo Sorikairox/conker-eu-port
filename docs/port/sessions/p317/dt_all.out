@@ -1,0 +1,21 @@
+func_15141A7C: DIFFER func_15141A7C: trial 12: call #7: ref calls 0x00010000, cand calls 0x00040000 
+func_150BD498: ERROR func_150BD498: no definition or pragma of func_150BD498 in src_eu/game_eu_E9450.c 
+func_151A79EC: func_151A79EC: no C 
+func_150B3B8C: EQUIV func_150B3B8C (100 trials ok, 0 inconclusive, 0 calls, ret=int, ref 56 words, cand 56 words) 
+func_15133F44: ERROR func_15133F44: no definition or pragma of func_15133F44 in src_eu/game_eu_15FF50.c 
+func_15133FC0: ERROR func_15133FC0: no definition or pragma of func_15133FC0 in src_eu/game_eu_15FF50.c 
+func_150C06DC: EQUIV func_150C06DC (100 trials ok, 0 inconclusive, 200 calls, ret=int, ref 185 words, cand 180 words) 
+func_150C0B48: EQUIV func_150C0B48 (100 trials ok, 0 inconclusive, 259 calls, ret=int, ref 215 words, cand 214 words) 
+func_15019F20: EQUIV func_15019F20 (100 trials ok, 0 inconclusive, 100 calls, ret=void, ref 203 words, cand 240 words) 
+func_1510E004: DIFFER func_1510E004: trial 2: call count ref=1 cand=0 (0x1510E908) 
+func_15051558: EQUIV func_15051558 (100 trials ok, 0 inconclusive, 178 calls, ret=void, ref 749 words, cand 748 words, 8 trials via learned pointer inputs) 
+func_1512A1A0 (P300, game_eu_1579B0) knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80480000 TR=4
+  random: EQUIV func_1512A1A0 (100 trials ok, 0 inconclusive, 410 calls, ret=void, ref 460 words, cand 456 words, 23 trials via learned pointer inputs)
+  setups s2A1A0.txt: 24 EQUIV / 24
+func_15133E04 (P209, game_eu_15FF50) knobs: DIFFTEST_ARGMEM=15046F70=0:12 DIFFTEST_ROMDATA=1
+  random: EQUIV func_15133E04 (100 trials ok, 0 inconclusive, 100 calls, ret=int, ref 80 words, cand 78 words) [knob callee never called: ARGMEM 15046F70]
+  setups 15133E04_setups.txt: 15 EQUIV / 15 [knob not a jal target of the reference (EU address? jalr-only callee?): RET 150B8EC0, RET 150E5D90, RET 15133F44]
+func_1513334C (P301, game_eu_15FF50) knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4 DIFFTEST_ARGMEM=15044670=3:416,15046F70=0:12,150B9424=0:4,151A7EB8=1:416
+  random: EQUIV func_1513334C (100 trials ok, 0 inconclusive, 151 calls, ret=int, ref 320 words, cand 326 words) [knob not a jal target of the reference (EU address? jalr-only callee?): ARGMEM 150B9424, ARGMEM 151A7EB8]
+  setups s334C.txt: 58 EQUIV / 58 [knob not a jal target of the reference (EU address? jalr-only callee?): RET 150B8EC0, RET 150B9424, RET 15133F44, RET 151A7EB8, ARGMEM 150B9424, ARGMEM 151A7EB8]
+  setups s334Cb.txt: 63 EQUIV / 63 [knob not a jal target of the reference (EU address? jalr-only callee?): RET 150B8EC0, RET 150B9424, RET 15133F44, RET 151A7EB8, ARGMEM 150B9424, ARGMEM 151A7EB8]

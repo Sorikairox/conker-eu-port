@@ -1,0 +1,169 @@
+kind	file	func	line	type	size	expr	const	asm	code
+NM	game_169510	func_1513E2AC	1322	s16*	2	v += 8	dec	ELEM	v += 8;
+NM	game_1897A0	func_1515C6F4	255	Vtx*	16	v - 4	dec	BOTH	((s32 *) gfx)[1] = (s32) (v - 4);
+NM	game_1897A0	func_1515C6F4	263	f32*	4	p1 -= 4	dec	BOTH	p1 -= 4;
+NM	game_2DF70	func_15000AD0	151	Vtx*	16	buf + 4	dec	BOTH	D_800DC2B8[p][1] = buf + 4;
+NM	game_305D0	func_150031EC	99	s32*	4	ent += 2	dec	BOTH	for (i = 0; i < (u32)count; i++, ent += 2) {
+NM	game_3D5C0	func_15010110	45	s32*	4	var_s1 += 6	dec	BOTH	var_s1 += 6;
+NM	game_40490	func_15013778	347	s16*	2	rec + 6	dec	BOTH	blk.angX = *(f32 *) (rec + 6);
+NM	game_40490	func_15013778	348	s16*	2	rec + 8	dec	BOTH	blk.angY = *(f32 *) (rec + 8);
+NM	game_40490	func_15013778	355	s16*	2	rec + 6	dec	BOTH	func_150A8050(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
+NM	game_40490	func_15013778	355	s16*	2	rec + 8	dec	BOTH	func_150A8050(m, *(f32 *) (rec + 6), *(f32 *) (rec + 8), 0.0f);
+NM	game_45B80	func_15019130	438	s32*	4	p += 8	dec	ELEM	p += 8;
+NM	game_45B80	func_150195A0	545	Gfx*	8	gdl + 1	dec	BOTH	gdl = (Gfx *)func_1501A490((s32)(gdl + 1), player, 0, 0, 0, 0);
+NM	game_45B80	func_15019CC8	698	Gfx*	8	arg0 + 1	dec	BOTH	gdl = (Gfx *)func_1501A490((s32)(arg0 + 1), player, 0, 0, 0, 0);
+NM	game_45B80	func_15019CC8	703	Gfx*	8	gdl += 2	dec	ELEM	gdl += 2;
+NM	game_45B80	func_15019CC8	713	Gfx*	8	gdl + 2	dec	ELEM	return gdl + 2;
+NM	game_45B80	func_15019F20	819	f32*	4	fp += 4	dec	BOTH	fp += 4;
+NM	game_57FA0	func_1502AB04	39	s32*	4	arg1 += 2	dec	ELEM	arg1 += 2;
+NM	game_6D800	func_150403C8	138	u32*	4	dl += 2	dec	ELEM	dl += 2;
+NM	game_BC510	func_150900F0	587	s16*	2	pos += 3	dec	ELEM	pos += 3;
+NM	game_eu_106830	func_150DA1FC	739	Vtx*	16	vtx - 4	dec	BOTH	gfx->words.w0 = 0x01004008; gfx->words.w1 = (u32)(vtx - 4); gfx++;
+NM	game_eu_106830	func_150DA1FC	743	Vtx*	16	vtx - 2	dec	BOTH	memcpy(vtx, vtx - 2, 2 * sizeof(Vtx));
+NM	game_eu_106830	func_150DA1FC	746	Vtx*	16	vtx += 2	dec	BOTH	vtx += 2;
+NM	game_eu_10F840	func_150E2E5C	439	Gfx*	8	gfx + 3	dec	BOTH	return gfx + 3;
+NM	game_eu_11F790	func_150F20C8	106	s16*	2	p + 12	dec	BOTH	return p + 12;
+NM	game_eu_127840	func_150FA030	30	Gfx*	8	gdl + 3	dec	ELEM	return func_150FBA40(gdl + 3, mtx);
+NM	game_eu_133A70	func_15106794	241	f32*	4	rec + 4	dec	BOTH	if (func_15146078(rec + 4, rec + 7, rec + 10) == 0) {
+NM	game_eu_133A70	func_15106794	241	f32*	4	rec + 7	dec	ELEM	if (func_15146078(rec + 4, rec + 7, rec + 10) == 0) {
+NM	game_eu_133A70	func_15106794	241	f32*	4	rec + 10	dec	ELEM	if (func_15146078(rec + 4, rec + 7, rec + 10) == 0) {
+NM	game_eu_133A70	func_15106794	249	f32*	4	rec += 13	dec	ELEM	rec += 13;
+NM	game_eu_133A70	func_15106D38	433	Vtx*	16	vtx - 6	dec	ELEM	((s32 *) gfx)[1] = (s32) (vtx - 6);
+NM	game_eu_138E00	func_1510BF50	316	Gfx*	8	gdl += 2	dec	ELEM	gdl += 2;
+NM	game_eu_13DC30	func_15110420	59	Gfx*	8	gdl + 1	dec	BOTH	gdl = (Gfx *)func_15110C28((u8 *)(gdl + 1));
+NM	game_eu_13DC30	func_15110420	109	Gfx*	8	gdl + 1	dec	BOTH	return gdl + 1;
+NM	game_eu_13DC30	func_15110948	150	Gfx*	8	gdl + 1	dec	BOTH	gdl = (Gfx *)func_1501A490((s32)(gdl + 1), 0xFF, 0, 0, 0, 0);
+NM	game_eu_13DC30	func_15110948	154	Gfx*	8	gdl + 1	dec	BOTH	gdl = func_1501A6CC(gdl + 1, 0, h - 6, D_800BE620, h + 6);
+NM	game_eu_13DC30	func_15112074	729	Gfx*	8	gdl + 1	dec	BOTH	gdl = (Gfx *) func_1501A490((s32) (gdl + 1), D_80083336, 0, 0, 0, 0);
+NM	game_eu_142E40	func_15117424	989	s16*	2	a += 3	dec	ELEM	for (i = 0; i < count; i++, a += 3, b += 3) {
+NM	game_eu_142E40	func_15117424	989	s16*	2	b += 3	dec	ELEM	for (i = 0; i < count; i++, a += 3, b += 3) {
+NM	game_eu_142E40	func_15119C54	2071	s16*	2	v += 8	dec	ELEM	for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+NM	game_eu_142E40	func_15119C54	2082	s16*	2	v += 8	dec	ELEM	for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+NM	game_eu_142E40	func_15119C54	2098	s16*	2	v += 8	dec	ELEM	for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+NM	game_eu_142E40	func_15119EB8	2215	s16*	2	src += 8	dec	BOTH	for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+NM	game_eu_142E40	func_15119EB8	2215	s16*	2	dst += 8	dec	BOTH	for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+NM	game_eu_142E40	func_1511ADC0	2583	s16*	2	v += 8	dec	BOTH	for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+NM	game_eu_142E40	func_1511ADC0	2595	s16*	2	w += 8	dec	BOTH	for (j = 0, w = verts; j < *(u16 *) (obj + 0x16); j++, w += 8) {
+NM	game_eu_142E40	func_1511ADC0	2643	s16*	2	v += 8	dec	BOTH	for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8, dst += 8) {
+NM	game_eu_142E40	func_1511ADC0	2643	s16*	2	dst += 8	dec	BOTH	for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8, dst += 8) {
+NM	game_eu_142E40	func_1511D0CC	3674	s16*	2	src += 8	dec	BOTH	for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+NM	game_eu_142E40	func_1511D0CC	3674	s16*	2	dst += 8	dec	BOTH	for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+NM	game_eu_142E40	func_1511D0CC	3693	s16*	2	src += 8	dec	BOTH	for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+NM	game_eu_142E40	func_1511D0CC	3693	s16*	2	dst += 8	dec	BOTH	for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+NM	game_eu_142E40	func_1511DD44	3874	s16*	2	dst += 2	dec	BOTH	dst += 2;
+NM	game_eu_142E40	func_1511DD44	3897	s32*	4	st + 1	dec	BOTH	func_1511AA1C(obj, st + 1, st + 2);
+NM	game_eu_142E40	func_1511DD44	3897	s32*	4	st + 2	dec	BOTH	func_1511AA1C(obj, st + 1, st + 2);
+NM	game_eu_142E40	func_1511DF6C	3923	s16*	2	dst += 2	dec	BOTH	dst += 2;
+NM	game_eu_15B2E0	func_1512DAD0	23	s32*	4	slot + 1	dec	BOTH	*(void **) (slot + 1) = data;
+NM	game_eu_15E000	func_1513100C	414	Gfx*	8	g + 3	dec	BOTH	return g + 3;
+NM	game_eu_185050	func_15157990	176	s32*	4	var_s1 += 2	dec	BOTH	var_s1 += 2;
+NM	game_eu_1A9280	func_1517D5E4	539	u32*	4	g += 8	dec	BOTH	g += 8;
+NM	game_eu_1A9280	func_1517D5E4	597	u32*	4	g + 26	dec	NONE	return (s32) (g + 26);
+NM	game_eu_1B0550	func_151831CC	182	s16*	2	out += 8	dec	BOTH	for (i = 0, off = 0; i < *(u16 *)((u8 *)&D_800DBEF4[D_8008D400[*kind][1]] + 0x16); i++, off += 0x10, out += 8)
+NM	game_eu_1B1ED0	func_15186D04	1034	s32*	4	var_t4 += 1	dec	BOTH	var_t4 += 1;
+NM	game_eu_1C3530	func_151976B8	1121	Vtx*	16	vtx - 4	dec	BOTH	gfx->words.w1 = (u32) (vtx - 4);
+NM	game_eu_1C3530	func_151976B8	1131	Vtx*	16	vtx - 2	dec	BOTH	memcpy(vtx, vtx - 2, 0x20);
+NM	game_eu_1C3530	func_151976B8	1134	Vtx*	16	vtx += 2	dec	BOTH	vtx += 2;
+NM	game_eu_1C3530	func_15198180	1281	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1C3530	func_15198180	1286	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1C3530	func_15198180	1311	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1C3530	func_1519BA28	3146	Vtx*	16	vtx - 4	dec	BOTH	gfx->words.w1 = (u32) (vtx - 4);
+NM	game_eu_1C3530	func_1519BA28	3156	Vtx*	16	vtx - 2	dec	BOTH	memcpy(vtx, vtx - 2, 0x20);
+NM	game_eu_1C3530	func_1519BA28	3159	Vtx*	16	vtx += 2	dec	BOTH	vtx += 2;
+NM	game_eu_1CCD10	func_151A03DC	824	Vtx*	16	vtx - 6	dec	BOTH	gSPVertex(gfx++, vtx - 6, 6, 0);
+NM	game_eu_1D5710	func_151A8040	102	f32*	4	pt += 6	dec	ELEM	pt += 6;
+NM	game_eu_1D9C00	func_151ACBD4	497	Vtx*	16	v += 4	dec	BOTH	for (i = 0; i < 20; i++, v += 4) {
+NM	game_eu_1E0E70	func_151B3878	196	Vtx*	16	v - 4	dec	BOTH	((s32 *) gfx)[1] = (s32) (v - 4);
+NM	game_eu_1E0E70	func_151B4854	624	f32*	4	seg += 6	dec	ELEM	seg += 6;
+NM	game_eu_1E40E0	func_151B6ED8	416	Vtx*	16	v - 4	dec	BOTH	g[1] = (s32) (v - 4);
+NM	game_eu_1EDA00	func_151C1EF0	862	s32*	4	arg2 + 1	dec	NOASM	return func_151C0894(arg0, arg1, *arg2, arg2 + 1);
+NM	game_eu_1EFE10	func_151C4DD0	1618	f32*	4	s + 11	dec	ELEM	func_151C284C((u8 *) (s + 11), (u8 *) vec, NULL, NULL, 0, 0, s[14], s[15], r1 * 40.0f + 55.0f,
+NM	game_eu_1FB080	func_151CF930	1168	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151CF930	1173	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151CF930	1180	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151CF930	1185	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151CF930	1188	s16*	2	vtx - 0x20	hex	BOTH	g[1] = (u32) (vtx - 0x20);
+NM	game_eu_1FB080	func_151D2248	2501	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151D2248	2509	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+# summary: NM/BOTH=125, NM/BYTE=3, NM/ELEM=37, NM/NOASM=1, NM/NONE=1, matched/NOASM=16 | NM funcs: 80
+NM	game_eu_1FB080	func_151D2248	2519	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151D2248	2527	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151D2248	2529	s16*	2	vtx - 0x20	hex	BOTH	gfx[1] = (u32) (vtx - 0x20);
+NM	game_eu_1FB080	func_151D2248	2530	u32*	4	gfx += 2	dec	BOTH	gfx += 2;
+NM	game_eu_1FB080	func_151D2248	2533	u32*	4	gfx += 2	dec	BOTH	gfx += 2;
+NM	game_eu_1FB080	func_151D2248	2535	s16*	2	vtx - 0x10	hex	BOTH	memcpy(vtx, vtx - 0x10, 0x20);
+NM	game_eu_1FB080	func_151D2248	2536	s16*	2	vtx - 0x10	hex	BOTH	(vtx - 0x10)[5] -= 0x2000;
+NM	game_eu_1FB080	func_151D2248	2537	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_1FB080	func_151D2248	2538	s16*	2	vtx - 0x10	hex	BOTH	(vtx - 0x10)[5] -= 0x2000;
+NM	game_eu_1FB080	func_151D2248	2539	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	game_eu_216470	func_151EB81C	1090	Gfx*	8	temp_s0_3 + 1	dec	BOTH	temp_s0_4 = temp_s0_3 + 1;
+NM	game_eu_216470	func_151EB81C	1095	Gfx*	8	temp_s0_4 + 1	dec	BOTH	var_s0_2 = func_150900F0(temp_s0_4 + 1, 1);
+NM	game_eu_216470	func_151EDA54	1813	u32*	4	g + 8	dec	BYTE	return (Gfx *)(g + 8);
+NM	game_eu_216470	func_151EE704	2186	u32*	4	dl += 2	dec	BOTH	dl += 2;
+NM	game_eu_216470	func_151EE93C	2456	Mtx*	64	mtx + 1	dec	BOTH	func_150A7D00(mtx + 1, 0.0f, 0.0f, -(f32) D_800E10B2);
+NM	game_eu_216470	func_151EE93C	2467	Mtx*	64	mtx + 1	dec	BOTH	gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+NM	game_eu_226870	func_151F9184	112	s16*	2	o += 2	dec	BOTH	o += 2;
+NM	game_eu_226870	func_151F933C	159	s16*	2	o += 4	dec	BOTH	o += 4;
+NM	game_eu_227BF0	func_151FA3E0	89	f32*	4	x += 6	dec	ELEM	x += 6;
+NM	game_eu_227BF0	func_151FA3E0	90	f32*	4	a += 6	dec	ELEM	a += 6;
+NM	game_eu_38360	func_1500AC14	36	u16*	2	ids += 2	dec	BOTH	for (slot = 0; slot < 15; slot++, voice += 0x10, ids += 2) {
+NM	game_eu_3FF70	func_15012E88	136	u32*	4	dl += 2	dec	BOTH	for (i = 0; (s8) (dl[0] >> 24) != -0x21 ; i++, dl += 2) {
+NM	game_eu_44010	func_15016800	55	u16*	2	var_v1_2 += 2	dec	BOTH	var_v1_2 += 2;
+NM	game_eu_45B90	func_150183D0	38	s16*	2	ix += 2	dec	BOTH	ix += 2;
+NM	game_eu_45B90	func_150184B0	84	s16*	2	nodes + 3	dec	ELEM	next = nodes + 3;
+NM	game_eu_45B90	func_150184B0	102	s16*	2	next += 3	dec	ELEM	next += 3;
+NM	game_eu_45B90	func_150184B0	132	s16*	2	next += 3	dec	ELEM	next += 3;
+NM	game_eu_45B90	func_150184B0	147	s16*	2	next += 3	dec	ELEM	next += 3;
+NM	game_eu_45B90	func_150184B0	152	s16*	2	next += 3	dec	ELEM	next += 3;
+NM	game_eu_45B90	func_150184B0	167	u32*	4	e += 2	dec	BOTH	e += 2;
+NM	game_eu_51190	func_1502457C	460	u8**	4	var_s6 += 1	dec	BOTH	var_s6 += 1;
+NM	game_eu_595D0	func_1502CFEC	637	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	643	u32*	4	g += 4	dec	BOTH	g += 4;
+NM	game_eu_595D0	func_1502CFEC	650	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	653	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	656	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	665	u32*	4	g += 4	dec	BOTH	g += 4;
+NM	game_eu_595D0	func_1502CFEC	669	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	673	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	679	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	700	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	709	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	712	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	715	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	726	u32*	4	g += 8	dec	BOTH	g += 8;
+NM	game_eu_595D0	func_1502CFEC	733	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	741	u32*	4	g += 4	dec	BOTH	g += 4;
+NM	game_eu_595D0	func_1502CFEC	753	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_595D0	func_1502CFEC	758	u32*	4	g += 2	dec	BOTH	g += 2;
+NM	game_eu_5D910	func_15030100	67	s32*	4	hdr + 6	dec	ELEM	*data = (s32) (hdr + 6);
+NM	game_eu_62360	func_15034B50	27	s16*	2	buf += 2	dec	BOTH	if (!noeye) { buf[0] = a2 * 6 + off1; buf[1] = v; buf += 2; }
+NM	game_eu_62360	func_15034B50	31	s16*	2	buf += 2	dec	BOTH	if (!noeye) { buf[0] = a2 * 6 + off2; buf[1] = v; buf += 2; }
+NM	game_eu_62360	func_15034B50	68	s16*	2	buf += 2	dec	BOTH	buf += 2;
+NM	game_eu_6AA20	func_1503DC74	468	u32*	4	c += 2	dec	BOTH	c += 2;
+NM	game_eu_6D4F0	func_1503FE30	130	Gfx*	8	g + 1	dec	BOTH	*gfxp = g + 1;
+NM	game_eu_C2B60	func_15096144	432	u32*	4	gfx += 2	dec	ELEM	gfx += 2;
+NM	game_eu_C2B60	func_15096144	480	u32*	4	gfx += 6	dec	BYTE	gfx += 6;
+NM	game_eu_C2B60	func_150966AC	670	u32*	4	gfx += 6	dec	BOTH	gfx += 6;
+NM	game_eu_C5530	func_1509A024	1376	s16*	2	list += 4	dec	BOTH	for (n = 0; n < i; n++, list += 4) {
+NM	game_eu_CA630	func_1509D338	210	u32*	4	p += 2	dec	ELEM	p += 2;
+NM	game_eu_D1760	func_150A49D0	505	s16*	2	dst += 8	dec	BOTH	dst += 8;
+NM	game_eu_D1760	func_150A49D0	506	s16*	2	src += 8	dec	BOTH	src += 8;
+NM	game_eu_D1760	func_150A49D0	545	s16*	2	xz += 4	dec	BOTH	xz += 4;
+NM	game_eu_D1760	func_150A49D0	548	s16*	2	ylim += 2	dec	BOTH	ylim += 2;
+NM	game_eu_D1760	func_150A49D0	549	s32*	4	tri += 3	dec	BOTH	tri += 3;
+NM	game_eu_D1760	func_150A4FE4	682	s32*	4	group += 3	dec	ELEM	group += 3;
+NM	game_eu_D1760	func_150A4FE4	717	s32*	4	tri += 3	dec	ELEM	tri += 3;
+NM	game_eu_D1760	func_150A4FE4	718	s16*	2	bounds += 4	dec	BOTH	bounds += 4;
+NM	game_eu_D2DB0	func_150A55A0	50	u32*	4	src += 2	dec	ELEM	src += 2;
+NM	game_eu_D2DB0	func_150A55A0	56	u32*	4	out -= 2	dec	ELEM	out -= 2;
+NM	game_eu_D2DB0	func_150A55A0	84	u32*	4	out += 2	dec	ELEM	out += 2;
+NM	game_eu_D2DB0	func_150A55A0	85	u32*	4	src += 2	dec	ELEM	src += 2;
+NM	game_eu_D2DB0	func_150A5858	347	u32*	4	in += 2	dec	BOTH	in += 2;
+NM	game_eu_D2DB0	func_150A5858	424	u32*	4	out += 2	dec	BOTH	out += 2;
+NM	game_eu_D2DB0	func_150A5858	464	u32*	4	out += 2	dec	BOTH	out += 2;
+NM	game_eu_DB7E0	func_150ADFD0	117	u16*	2	pc += 2	dec	BOTH	pc += 2;
+NM	game_eu_DFAA0	func_150B2290	21	u16*	2	px += 8	dec	BYTE	px += 8;
+NM	game_eu_E1AC0	func_150B4BF0	486	Vtx*	16	v - 4	dec	BOTH	g[1] = (s32) (v - 4);
+NM	game_eu_E1AC0	func_150B4BF0	494	Vtx*	16	v - 2	dec	BOTH	memcpy((s32 *) v, (s32 *) (v - 2), 0x20);
+NM	game_eu_FABD0	func_150CDAAC	322	s16*	2	vtx += 8	dec	BOTH	vtx += 8;
+NM	init_39C0	func_10003ACC	50	s16*	2	var_v1_2 += 2	dec	BOTH	var_v1_2 += 2;

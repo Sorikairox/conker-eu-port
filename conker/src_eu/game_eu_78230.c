@@ -3461,7 +3461,10 @@ void func_15051558(struct127 *rec, f32 x, f32 z, u16 angle) {
         m = ((rec->unk118 - 30.0f) - rec->y_position) + rec->xz_velocity * 6.0f;
         m = (250.0f < m) ? 2.5f : m * 0.01f;
         if (fabsf(rec->unkB8) < 35.0f && 0.0f < m) {
-            dx = 0.0f + rec->unk54 * m;
+            { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds, -0.0 -> +0.0; P310) */
+                volatile f32 p317z = 0.0f;
+                dx = p317z + rec->unk54 * m;
+            }
         }
         func_1505A250(0.0f, 0.0f, 0.3f, &rec->unk164, &rec->unk168);
     }

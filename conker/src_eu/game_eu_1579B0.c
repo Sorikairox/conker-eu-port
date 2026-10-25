@@ -113,7 +113,10 @@ void func_1512A1A0(u8 *cam) {
             strafe = 0.0f - *roll;
         } else if (buttons & 1) {
             *roll += freecam_strafe_acc[0];
-            strafe = 0.0f + *roll;
+            { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds, -0.0 -> +0.0; P310) */
+                volatile f32 p317z = 0.0f;
+                strafe = p317z + *roll;
+            }
         } else {
             *roll = 0.0f;
         }

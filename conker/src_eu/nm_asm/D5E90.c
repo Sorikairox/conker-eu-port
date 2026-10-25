@@ -1182,7 +1182,10 @@ static s32 nmw_engine(u8 *rec, f32 x, f32 y, u32 zbits, s32 mark, s32 ledge) {
         w.ledgeHi = 65.0f;
         w.ledgeBest = 65536.0f; /* func_150AC8C4 sets it before joining the engine */
         w.yoff = NMW_F32(D_800CC1FC);
-        func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + 0.0f, (f32) w.radius * 2.0f);
+        { /* P317: volatile zero: IDO folds `0.0f + x` (the asm adds $f3, taken as 0.0; P310) */
+            volatile f32 p317z = 0.0f;
+            func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8) + p317z, (f32) w.radius * 2.0f);
+        }
     } else {
         w.radiusF = rd;
         w.radius = rd;

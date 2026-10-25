@@ -520,7 +520,8 @@ void func_150C04E0(u8 *obj) {
 void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04D4;
 
-s32 func_150C06DC(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
+s32 func_150C06DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     struct {
         s16 u34;
         s16 u36;
@@ -757,7 +758,8 @@ s32 func_15134108(u8 *, f32, f32, f32, f32, s32); /* P95: f32 (float bits were p
 void func_15153BA4(u8 *arg0, s32 arg1, s32 arg2, s32 arg3);
 extern s32 D_800A04DC;
 
-s32 func_150C0B48(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
+/* P317: args 1..3 f32 = D_80089CD4's dispatcher type (wasm call_indirect) */
+s32 func_150C0B48(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     struct {
         s16 u34;
         s16 u36;
@@ -933,7 +935,7 @@ s32 func_150C0B48(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4, s32 arg5) {
         func_15153BA4(&sp.u34, 0xFF, (*(u8 *)((u8 *)arg0 + 0xC)), (*(u8 *)((u8 *)arg0 + 1)));
         return 0;
     }
-    return func_15134108(arg0, *(f32 *)&arg1, *(f32 *)&arg2, *(f32 *)&arg3, arg4, arg5); /* P95: f32 (float bits were passed as an int) */
+    return func_15134108(arg0, arg1, arg2, arg3, arg4, arg5);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150C0B48.s")
