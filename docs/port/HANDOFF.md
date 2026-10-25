@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P287 (port-b, group A) (session P287, 2026-10-26). Details: `docs/port/sessions/P287.md`
+
+Prototype fixes (commit 2ca81f37): func_15116A8C `void` in game_eu_EBF20 / game_eu_F5580, func_1501175C prototype in
+game_eu_17A800 -> protocheck 0. Hand C (NM), registry rows `P287`, setups / mutants in docs/port/sessions/p287:
+func_151522DC impact_flash_spray (17D3C0), func_1511D91C water_surface_wave_update, func_15117424 mesh_morph_update,
+func_151194A4 bell_swing_update, func_1511B604 sliding_door_update (142E40), func_151CF930 ribbon_trail_draw
+(1FB080), func_150C5BA4 beam_quad_draw (F3080), func_151787D8 bird_follow_update (1A5D10). All setups EQUIV, all
+mutants killed except 2 equivalent ones (P287.md).
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1683), implicit_scan 0 NM+float (830 sites), selftest 134/134,
+progress_nm `total 5916 3995 1703 218 5698 96.3% 2009688/2253856 (89.2%)`.
+
+## Next steps (from P287)
+1. func_15171770 (19E910) is blocked on game_EF410.c's `s32 func_15171770(...)` prototype (should be `void`; the
+   function leaves no result). Whoever owns game_EF410 changes it, then the C can go in.
+2. Group A remaining (17), smallest first: func_150B8EC0 (E66D0), func_150D3F78 (101080), func_150F7E34 (125200),
+   func_1519D9C4 (1CACF0), func_1517EA18 (1ABE00), func_150B9424 (E66D0), func_150C49A4 (F1E30), func_150DF240
+   (10CA50), func_15119EB8, func_1511ADC0, func_1511D0CC (142E40), func_150B9B1C (E66D0), func_151BD040 (1E7CC0),
+   func_151D06FC (1FB080), func_150CEC50 (FC460), func_1519DF64 (1CACF0).
+
 ## P280 (port-b, group A) (session P280, 2026-10-25). Details: `docs/port/sessions/P280.md`
 
 Hand C (NM), registry rows `P280`, setups / mutants in docs/port/sessions/p280: func_15177F90 debris_burst_spawn,

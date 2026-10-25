@@ -1,0 +1,29 @@
+s#    if ((s8) rope\[0x2C\] < 2) {#    if ((s8) rope[0x2C] < 1) {# % few
+s#    if (owner != NULL \&\& \*(s32 \*) (owner + 0x1D4) == 0) {#    if (*(s32 *) (owner + 0x1D4) == 0) {# % noown
+s#    func_151D6310((s32 \*) (rope + 0x84), slot, (rope\[0x25\] << 5) + 0xA0, (s32 \*) \&vtx, NULL);#    func_151D6310((s32 *) (rope + 0x84), slot, (rope[0x25] << 4) + 0xA0, (s32 *) \&vtx, NULL);#
+s#    gdl = (u8 \*) func_15142C10((Gfx \*) gdl, 0xED, 0xD2, 0x85, 200, \&flag);#    gdl = (u8 *) func_15142C10((Gfx *) gdl, 0xED, 0xD2, 0x85, 201, \&flag);#
+s#    gdl = (u8 \*) func_15142B7C((s32) gdl, 0x200005, 0x1F0600);#    gdl = (u8 *) func_15142B7C((s32) gdl, 0x200005, 0x1F0601);#
+s#    gdl = (u8 \*) func_1513F4E4((s32) gdl, 0x54, (s8 \*) \&flag);#    gdl = (u8 *) func_1513F4E4((s32) gdl, 0x55, (s8 *) \&flag);#
+s#    gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,#    gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x2CA0,#
+s#                        \*(s32 \*) (D_800A4EA8 + 0xC) | \*(s32 \*) (D_800A4EA8 + 0x8), (s8 \*) \&flag);#                        *(s32 *) (D_800A4EA8 + 0xC), (s8 *) \&flag);#
+s#    cur = (s8) rope\[0x2E\] - 1;#    cur = (s8) rope[0x2E] - 2;#
+s#    next = cur - 1;#    next = cur - 2;#
+s#    aSide\[1\] = \*(f32 \*) (p + 0x1C);#    aSide[1] = *(f32 *) (p + 0x18);#
+s#    aOffX = \*(f32 \*) (p + 0x20) \* \*(f32 \*) (p + 0x14);#    aOffX = *(f32 *) (p + 0x20);#
+s#    aOffZ = \*(f32 \*) (p + 0x24) \* \*(f32 \*) (p + 0x14);#    aOffZ = *(f32 *) (p + 0x24) * *(f32 *) (p + 0x10);#
+s#    vtx\[0\] = (s32) (a\[0\] + aSide\[0\] + aOffX);#    vtx[0] = (s32) (a[0] + aSide[0] - aOffX);#
+s#    vtx\[2\] = (s32) (a\[2\] + aSide\[1\] + aOffZ);#    vtx[2] = (s32) (a[2] + aSide[1]);#
+s#    vtx\[0\] = (s32) (a\[0\] - aSide\[0\] + aOffX);#    vtx[0] = (s32) (a[0] + aSide[0] + aOffX);#
+s#    vtx\[2\] = (s32) (a\[2\] - aSide\[1\] + aOffZ);#    vtx[2] = (s32) (a[2] - aSide[0] + aOffZ);#
+s#        vtx\[0\] = (s32) (b\[0\] + bSide\[0\] + bOffX);#        vtx[0] = (s32) (b[0] + bSide[1] + bOffX);#
+s#        vtx\[2\] = (s32) (b\[2\] - bSide\[1\] + bOffZ);#        vtx[2] = (s32) (b[2] - bSide[1] - bOffZ);#
+s#        g\[1\] = (u32) (vtx - 0x20);#        g[1] = (u32) (vtx - 0x10);#
+s#        g\[2\] = 0x06000204; \/\* gSP2Triangles \*\/#        g[2] = 0x06000205;#
+s#        g\[3\] = 0x00020604;#        g[3] = 0x00020605;#
+s#        gdl += 0x10;#        gdl += 0x18;#
+s#            bOffZ = \*(f32 \*) (q + 0x24) \* \*(f32 \*) (q + 0x14);#            bOffZ = *(f32 *) (q + 0x20) * *(f32 *) (q + 0x14);# % normal long
+s#            bSide\[0\] = \*(f32 \*) (q + 0x18);#            bSide[0] = *(f32 *) (q + 0x1C);# % normal long
+s#    } while (cur != (s8) rope\[0x2D\]);#    } while (cur != (s8) rope[0x2D] + 1);# % normal long
+1,/        cur = rope\[0x25\] - 1;/s/        cur = rope\[0x25\] - 1;/        cur = rope[0x25] - 2;/ % headwrap
+\#^            next = rope\[0x25\] - 1;#s#- 1;#- 2;# % nextwrap long
+\#^    vtx\[1\] = (s32) a\[1\];#s#a\[1\]#a[0]# % normal

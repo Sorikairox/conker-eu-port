@@ -1093,7 +1093,122 @@ s32 func_151CF6D0(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF6D0.s")
 #endif
+#ifdef NON_MATCHING
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+
+// ribbon_trail_draw: draws a trail ribbon (same draw-handler shape as func_151CE3D0). Needs at least 2 points
+// (+0x2C) and, when the owner record (*+0x98) exists, its +0x1D4 drawable. Vertices come from func_151D6310 (slot
+// `slot`, 0x20 bytes per point + 0xA0). The render state is flat colour (0xED, 0xD2, 0x85, 200) with
+// D_800A4EA8 combine words. The points (+0x94, 0x28 bytes: position at +0, side offset x / z at +0x18 / +0x1C,
+// scale +0x14, centre offset x / z at +0x20 / +0x24) form a ring buffer of +0x25 entries walked backwards from the
+// head (+0x2E - 1) to the tail (+0x2D); each point gives two vertices (position +- side offset + scaled centre
+// offset) and each segment one quad (gSPVertex of the last 4 vertices + two triangles).
+u8 *func_151CF930(u8 *rope, u8 *gdl, s16 slot) {
+    u8 *pts;
+    u8 *owner;
+    u8 *p;
+    u8 *q;
+    s16 *vtx;
+    u8 flag;
+    s32 cur;
+    s32 next;
+    f32 a[3];
+    f32 aSide[2];
+    f32 b[3];
+    f32 bSide[2];
+    f32 bOffX;
+    f32 bOffZ;
+    f32 aOffX;
+    f32 aOffZ;
+    u32 *g;
+
+    if ((s8) rope[0x2C] < 2) {
+        return gdl;
+    }
+    owner = **(u8 ***) (rope + 0x98);
+    pts = *(u8 **) (rope + 0x94);
+    if (owner != NULL && *(s32 *) (owner + 0x1D4) == 0) {
+        return gdl;
+    }
+    func_151D6310((s32 *) (rope + 0x84), slot, (rope[0x25] << 5) + 0xA0, (s32 *) &vtx, NULL);
+    flag = 1;
+    gdl = (u8 *) func_15142C10((Gfx *) gdl, 0xED, 0xD2, 0x85, 200, &flag);
+    gdl = (u8 *) func_15142B7C((s32) gdl, 0x200005, 0x1F0600);
+    gdl = (u8 *) func_1513F4E4((s32) gdl, 0x54, (s8 *) &flag);
+    gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
+                        *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 0x8), (s8 *) &flag);
+    cur = (s8) rope[0x2E] - 1;
+    if (cur < 0) {
+        cur = rope[0x25] - 1;
+    }
+    next = cur - 1;
+    if (next < 0) {
+        next = rope[0x25] - 1;
+    }
+    p = pts + cur * 0x28;
+    q = pts + next * 0x28;
+    a[0] = *(f32 *) (p + 0x0);
+    a[1] = *(f32 *) (p + 0x4);
+    a[2] = *(f32 *) (p + 0x8);
+    aSide[0] = *(f32 *) (p + 0x18);
+    aSide[1] = *(f32 *) (p + 0x1C);
+    aOffX = *(f32 *) (p + 0x20) * *(f32 *) (p + 0x14);
+    aOffZ = *(f32 *) (p + 0x24) * *(f32 *) (p + 0x14);
+    b[0] = *(f32 *) (q + 0x0);
+    b[1] = *(f32 *) (q + 0x4);
+    b[2] = *(f32 *) (q + 0x8);
+    bSide[0] = *(f32 *) (q + 0x18);
+    bSide[1] = *(f32 *) (q + 0x1C);
+    bOffX = *(f32 *) (q + 0x20) * *(f32 *) (q + 0x14);
+    bOffZ = *(f32 *) (q + 0x24) * *(f32 *) (q + 0x14);
+    vtx[0] = (s32) (a[0] + aSide[0] + aOffX);
+    vtx[1] = (s32) a[1];
+    vtx[2] = (s32) (a[2] + aSide[1] + aOffZ);
+    vtx[3] = 0;
+    vtx += 8;
+    vtx[0] = (s32) (a[0] - aSide[0] + aOffX);
+    vtx[1] = (s32) a[1];
+    vtx[2] = (s32) (a[2] - aSide[1] + aOffZ);
+    vtx[3] = 0;
+    vtx += 8;
+    do {
+        cur = next;
+        vtx[0] = (s32) (b[0] + bSide[0] + bOffX);
+        vtx[1] = (s32) b[1];
+        vtx[2] = (s32) (b[2] + bSide[1] + bOffZ);
+        vtx[3] = 0;
+        vtx += 8;
+        vtx[0] = (s32) (b[0] - bSide[0] + bOffX);
+        vtx[1] = (s32) b[1];
+        vtx[2] = (s32) (b[2] - bSide[1] + bOffZ);
+        vtx[3] = 0;
+        vtx += 8;
+        g = (u32 *) gdl;
+        g[0] = 0x01004008; /* gSPVertex: 4 vertices */
+        g[1] = (u32) (vtx - 0x20);
+        g[2] = 0x06000204; /* gSP2Triangles */
+        g[3] = 0x00020604;
+        gdl += 0x10;
+        next--;
+        if (next < 0) {
+            next = rope[0x25] - 1;
+        }
+        if (cur != (s8) rope[0x2D]) {
+            q = pts + next * 0x28;
+            b[0] = *(f32 *) (q + 0x0);
+            b[1] = *(f32 *) (q + 0x4);
+            b[2] = *(f32 *) (q + 0x8);
+            bSide[0] = *(f32 *) (q + 0x18);
+            bSide[1] = *(f32 *) (q + 0x1C);
+            bOffX = *(f32 *) (q + 0x20) * *(f32 *) (q + 0x14);
+            bOffZ = *(f32 *) (q + 0x24) * *(f32 *) (q + 0x14);
+        }
+    } while (cur != (s8) rope[0x2D]);
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF930.s")
+#endif
 
 void func_151CFDF4(u8 *arg0, s32 arg1, u8 arg2) {
     s32 *temp_t7;

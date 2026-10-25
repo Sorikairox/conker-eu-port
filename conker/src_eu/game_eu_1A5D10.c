@@ -115,7 +115,133 @@ void func_15177F90(u8 count, u8 *pos, s32 arg2, s32 x, s32 y, s32 z, s32 arg6, s
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_15177F90.s")
 #endif
 
+#ifdef NON_MATCHING
+s32 func_150490A8(struct17 *arg0);
+float sqrtf(float);
+extern u8 *D_8008CDEC[];
+
+// bird_follow_update: steering of a flying follower sprite (leader *+0x14: position s32 +0x18 / +0x1C / +0x20, height
+// offset s16 +0x30, speed s16 +0x32; fast when the speed is above 0x3C0). Every 10 frames (2 when fast; counter in
+// the low nibble of +0x18, heading target in bits 4..11) it re-aims at the leader (func_150490A8 of leader - own
+// x / z position +0x20 / +0x24, plus a random -15..16). The heading +0x2A (0..0xFF) turns towards the target by
+// +0x3B (doubled when fast) the short way round; the velocity +0x26 / +0x28 = (cos, -sin)(heading) * leader speed.
+// The climb +0x32 is 100..227, negated when the leader is lower than own +0x22 - 50 - random 0..63; +0x30 is
+// clamped to +-0x400. The sprite frame +0x10 (D_8008CDEC[6..9]) and mirror flag +0x44 come from the velocity seen
+// from the camera angle (D_800DBFF0 +0x380 in degrees); +0x1C bit 8 toggles every frame.
+void func_151787D8(u8 *obj) {
+    u8 *lead = *(u8 **) (obj + 0x14);
+    s32 heading = *(s16 *) (obj + 0x2A);
+    struct17 rel;
+    f32 px;
+    f32 py;
+    f32 pz;
+    f32 tx;
+    f32 tz;
+    f32 dx;
+    f32 dz;
+    f32 dist;
+    f32 inv;
+    f32 speed;
+    f32 s;
+    f32 c;
+    s32 fast;
+    s32 count;
+    s32 target;
+    s32 step;
+    s32 diff;
+    s32 climb;
+    s32 v;
+    s32 frame;
+    u8 view;
+
+    tx = *(s32 *) (lead + 0x18);
+    px = tx;
+    py = *(s32 *) (lead + 0x1C);
+    tz = *(s32 *) (lead + 0x20);
+    pz = tz;
+    fast = *(s16 *) (lead + 0x32) >= 0x3C1;
+    py += *(s16 *) (lead + 0x30);
+    /* distance from the leader to the aim point (always 0 here: the aim point is the leader) */
+    dx = px - tx;
+    dz = pz - tz;
+    dist = sqrtf(dx * dx + dz * dz);
+    if (100.0f < dist) {
+        inv = 100.0f / dist;
+        px = dx * inv + tx;
+        pz = dz * inv + tz;
+    }
+    rel.unk0 = px - *(s16 *) (obj + 0x20);
+    rel.unk8 = pz - *(s16 *) (obj + 0x24);
+    count = *(s32 *) (obj + 0x18) & 0xF;
+    if (count == 0) {
+        target = func_150490A8(&rel);
+        target = target + (func_150ADA20() & 0x1F) - 0xF;
+        count = fast ? 2 : 10;
+    } else {
+        target = (*(s32 *) (obj + 0x18) >> 4) & 0xFF;
+        count--;
+    }
+    *(s32 *) (obj + 0x18) = ((target & 0xFF) << 4) | count;
+    step = obj[0x3B];
+    if (fast) {
+        step *= 2;
+    }
+    step = (heading < target) ? step : -step;
+    diff = target - heading;
+    if (diff < 0) {
+        diff = -diff;
+    }
+    if (diff >= 0x80) {
+        step = -step;
+    }
+    heading += step;
+    if (heading < 0) {
+        heading += 0x100;
+    } else if (heading >= 0x100) {
+        heading -= 0x100;
+    }
+    speed = *(s16 *) (lead + 0x32);
+    v = (s32) (func_15048A40(heading & 0xFF) * speed);
+    s = func_150489B0(heading & 0xFF);
+    *(s16 *) (obj + 0x26) = v;
+    *(s16 *) (obj + 0x2A) = heading;
+    *(s16 *) (obj + 0x28) = (s32) (-s * speed);
+    climb = (func_150ADA20() & 0x7F) + 100;
+    if ((f32) (u32) (func_150ADA20() & 0x3F) + (py + 50.0f) < (f32) *(s16 *) (obj + 0x22)) {
+        *(s16 *) (obj + 0x32) = -climb;
+    } else {
+        *(s16 *) (obj + 0x32) = climb;
+    }
+    if (*(s16 *) (obj + 0x30) > 0x400) {
+        *(s16 *) (obj + 0x30) = 0x400;
+    } else if (*(s16 *) (obj + 0x30) < -0x400) {
+        *(s16 *) (obj + 0x30) = -0x400;
+    }
+    view = (u32) (*(f32 *) ((u8 *) D_800DBFF0 + 0x380) * 0.7111111f); /* D_800A75C0 = 256 / 360 */
+    c = func_15048A40(view);
+    s = func_150489B0(view);
+    v = (s32) ((f32) *(s16 *) (obj + 0x26) * s - (f32) *(s16 *) (obj + 0x28) * c);
+    if (v >= 0) {
+        *(s16 *) (obj + 0x44) = 0;
+    } else {
+        *(s16 *) (obj + 0x44) = 4;
+        v = -v;
+    }
+    if (v > 0x200) {
+        frame = 6;
+    } else if (v > 0x100) {
+        frame = 7;
+    } else if ((s32) ((f32) *(s16 *) (obj + 0x26) * c + (f32) *(s16 *) (obj + 0x28) * s) >= 0) {
+        frame = 8;
+    } else {
+        frame = 9;
+    }
+    *(s16 *) (obj + 0x1C) ^= 0x100;
+    *(u8 **) (obj + 0x10) = D_8008CDEC[frame];
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A5D10/func_151787D8.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15168118(s32 gdl, u8 *obj, s16 player);

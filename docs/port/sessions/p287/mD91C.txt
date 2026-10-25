@@ -1,0 +1,31 @@
+s#    src = func_151149AC(\*(s32 \*) (obj + 0x3C) \& 0xFF);#    src = func_151149AC(*(s32 *) (obj + 0x3C) \& 0x7F);# % up
+s#    if (src == NULL) {#    if (src != NULL) {#
+s#    if (rec == NULL) {#    if (rec != NULL) {#
+s#    w = \&D_800897E4\[(\*(s32 \*) (obj + 0x3C) >> 8) \& 0xFF\];#    w = \&D_800897E4[(*(s32 *) (obj + 0x3C) >> 9) \& 0xFF];# % idx1
+s#    if (rest == NULL) {#    if (rest != NULL) {#
+s#        rest = allocate_memory(\*(u16 \*) (obj + 0x16) \* 2, 1, 0, 0);#        rest = allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);# % first
+s#        \*(s16 \*\*) (obj + 0x7C) = rest;#        ;# % first
+s#            rest\[i\] = \*(s16 \*) (\*(u8 \*\*) (obj + 0x28) + i \* 0x10 + 8);#            rest[i] = *(s16 *) (*(u8 **) (obj + 0x28) + i * 0x10 + 10);# % first
+s#        w->glowTimer = 0;#        ;# % first7
+s#        first = 1;#        first = 0;# % first
+s#    phase = (\*(u16 \*) (rec + 4) >> 8) + w->phaseAdd;#    phase = (*(u16 *) (rec + 4) >> 8) - w->phaseAdd;#
+s#    target = (func_150489B0(phase) + 1\.0f) \* 0\.5f;#    target = (func_150489B0(phase) + 1.0f) * 0.4f;#
+s#    swing = (func_15048A40(phase) + 0\.5f) \* 0\.5f;#    swing = (func_15048A40(phase) + 1.0f) * 0.5f;#
+s#        \*(f32 \*) (obj + 0x84) = target;#        *(f32 *) (obj + 0x84) = swing;# % first
+s#        \*(f32 \*) (obj + 0x80) = 0\.0f;#        ;# % first
+s#        d = (target - \*(f32 \*) (obj + 0x84)) \* w->gain;#        d = (target - *(f32 *) (obj + 0x84)) * w->accel;#
+s#        if (0\.0f < d) {#        if (0.0f > d) {#
+s#            \*(f32 \*) (obj + 0x80) += w->accel;#            *(f32 *) (obj + 0x80) += w->gain;# % up
+s#            if (d < \*(f32 \*) (obj + 0x80)) {#            if (d > *(f32 *) (obj + 0x80)) {# % up upcap
+s#            \*(f32 \*) (obj + 0x80) -= w->accel;#            *(f32 *) (obj + 0x80) -= w->gain;# % down
+s#            if (\*(f32 \*) (obj + 0x80) < d) {#            if (*(f32 *) (obj + 0x80) > d) {# % down downcap
+s#        \*(f32 \*) (obj + 0x84) += \*(f32 \*) (obj + 0x80);#        *(f32 *) (obj + 0x84) -= *(f32 *) (obj + 0x80);#
+s#    drop = (s32) (\*(f32 \*) (obj + 0x84) \* (f32) (s32) w->depth) + w->offset;#    drop = (s32) (*(f32 *) (obj + 0x84) * (f32) (s32) w->depth) - w->offset;#
+s#    sway = (s32) ((f32) (s32) w->sway \* swing);#    sway = (s32) ((f32) (s32) w->sway * swing * 2.0f);#
+s#    if (\*(s16 \*) (\*(u8 \*\*) (obj + 0x20 + D_800BE9C0 \* 4) + 0xA) >= 0x801) {#    if (*(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + 0xA) >= 0x800) {# % hi800
+s#        sway -= 0x800;#        sway -= 0x400;# % hi
+s#        \*(s16 \*) (verts + i \* 0x10 + 8) = rest\[i\] - drop;#        *(s16 *) (verts + i * 0x10 + 8) = rest[i] + drop;#
+s#            \*(s16 \*) (\*(u8 \*\*) (obj + 0x20 + (D_800BE9C0 == 0) \* 4) + i \* 0x10 + 0xA) + sway;#            *(s16 *) (*(u8 **) (obj + 0x20 + (D_800BE9C0 != 0) * 4) + i * 0x10 + 0xA) + sway;#
+s#    w->glowTimer += D_800BE9E4 \* 2;#    w->glowTimer += D_800BE9E4;#
+s#    \*(u8 \*) (obj + 0x8A) = (u32) ((func_150489B0(w->glowTimer + w->glowPhase) + 1\.0f) \* 0\.5f \* 205\.0f + 50\.0f);#    *(u8 *) (obj + 0x8A) = (u32) ((func_150489B0(w->glowTimer - w->glowPhase) + 1.0f) * 0.5f * 205.0f + 50.0f);# % idx1
+s#    \*(u8 \*) (obj + 0x8A) = (u32) ((func_150489B0(w->glowTimer + w->glowPhase) + 1\.0f) \* 0\.5f \* 205\.0f + 50\.0f);#    *(u8 *) (obj + 0x8A) = (u32) ((func_150489B0(w->glowTimer + w->glowPhase) + 1.0f) * 0.5f * 205.0f + 51.0f);#
