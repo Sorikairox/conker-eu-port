@@ -387,3 +387,4 @@ P312	port-b	integration	0			merged port-e (C2) into port-b (a271d55a); selftest 
 P309	port-f	nm convert	2			GROUP D2 DONE: carried_object_update (models leftover v0 of func_15052F9C), player_swim_update (177/178)
 P315	port-b	integration	0			merged port-f (D2 + D to c0c91c4d) into port-b (75ecb397); selftest 150/150; combined 99.2% (96.8% bytes), 45 asm-only left
 P313	port-d	nm convert	1			cheat_entry_draw func_151EE93C (cheat-code entry screen), 68 setups, mutants 190/190
+P311	port-c	nm convert	2			GROUP B2 DONE: particle_emitter_update, player_camera_update; func_151CA150 decl/call arity fixed
