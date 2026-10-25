@@ -366,3 +366,4 @@ P287	port-b	nm convert	8			group A: protocheck fixed (func_15116A8C void protos)
 P291	port-e	nm convert+harness	2			group E: star_field_draw func_150FBA40 (nmasm_stars.py), ray cast func_150ACEA0 readable (D5E90_ray.inc deleted), ray harness coverage; wall engine bodies left (func_150AB708/150AC8C4); port-e 97.2%
 P286	port	nm convert	4			group B: NM link fixed (static const copies 12C5F0); 4 conversions; P282 rechecks partly done (func_1513334C mutants pending); 10 left; port 96.3% 89.5%
 P292	port-c	nm convert+harness	3			group C: 3 conversions (difftest caught 200.0f vs 202.0f); stub_write page map (dup of port-e fix); D_8008A0B4 call_indirect hazard noted; ~20 left
+P290	port-d	nm convert	5			group D: rechecks done; impact_effect_spawn, object_impact_effect, gun_barrel_fire, dust_emitter_update, camera_orbit_update; lesson: asm listings must keep nop delay slots
