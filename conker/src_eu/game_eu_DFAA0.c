@@ -3,7 +3,27 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+// framebuffer_green_to_gray: turns the RGBA5551 pixels in [start, end) gray by copying each pixel's green field
+// into its red and blue fields (alpha kept). Rare's asm (hand-written) does 8 pixels per step with 64-bit masks
+// D_8009FCA0 = 0x07C0 (green) / D_8009FCA8 = 0x07C1 (green + alpha) in every halfword; it always does at least one
+// step and stops when start reaches end (signed compare). The port does the same per 16-bit pixel.
+void func_150B2290(u16 *start, u16 *end) {
+    u16 *px = start;
+    s32 i;
+
+    do {
+        for (i = 0; i < 8; i++) {
+            u16 green = px[i] & 0x07C0;
+
+            px[i] = (px[i] & 0x07C1) | (green << 5) | (green >> 5);
+        }
+        px += 8;
+    } while (px < end);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2290.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1509BE40(s32, s32, ...);

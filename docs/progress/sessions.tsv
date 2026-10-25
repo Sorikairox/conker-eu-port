@@ -81,3 +81,4 @@ P270	port	intro crash fix + stride bug class (151D7FE8 + 10 NM funcs)	11	0	100	f
 P274	port-b	port NM C (1511BD5C 15119C54 151C64F4 150E2030 150CDAAC 151CC86C 150EB740 151B402C 151714BC)	9	0	135	9 compiled funcs to hand C + 3 caller/type fixes (1511CBC0 sound table, 151B458C float args, 151B3550 return); verify_all OK
 P277	port-c	group C	10		~170	10 compiled funcs to NM C; B1964 drafted (mode-14 DIFFER), E1AF0 blocked on func_1505D1C4 void
 P284	port-c	group C	7		~140	B1964 fixed (mode-14 divisor = func_1505A6F8 result) + 6 compiled funcs to NM C; func_1505D1C4->s32 blocked by void decls in 201240/C5530
+P289	port-c	group C	3		~120	P284 mutants re-run clean; func_1505D1C4->s32 + E1AF0; D_8008B704 = 2 entries, NM phase param; B2290 (ld/sd hand asm) via Python-model harness; B8DB0

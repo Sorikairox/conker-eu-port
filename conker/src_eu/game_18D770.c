@@ -45,8 +45,16 @@ struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
 struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 size, u8 arg8, u8 arg9, s32 argA);
+#ifdef NON_MATCHING
+void func_15162EF8(struct239 *arg0, s32 phase);
+#else
 void func_15162EF8(struct239 *arg0);
+#endif
+#ifdef NON_MATCHING
+void func_15162F50(struct239 *arg0, s32 phase);
+#else
 void func_15162F50(struct239 *arg0);
+#endif
 struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
 struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
@@ -1190,7 +1198,7 @@ struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, 
 
 // a biggun'
 #ifdef NON_MATCHING
-extern void (*D_8008B704[])(u8 *, s32); // mixed-signature list (P284: see HANDOFF); a1 = the new phase
+extern void (*D_8008B704[])(u8 *, s32); // {func_15162EF8, func_15162F50} (P289: 2 entries, D_8008B70C is the next table); a1 = the new phase
 
 // envelope_update: drives a byte (+0x14 -> +0x2F, e.g. an alpha) through a looping 4-phase envelope on the timer
 // +0x24: before +0x28 the base +0x1C (phase 0); rising to base + range (+0x20) until +0x2C (phase 1, slope +0x38);
@@ -1255,7 +1263,13 @@ s32 func_15162B28(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162B28.s")
 #endif
 
+// P289: NM `phase` (unused) = the a1 the D_8008B704 dispatcher (func_15162B28) passes; it keeps the wasm call_indirect
+// signature void (u8 *, s32) of the table (the default build keeps the one-parameter text: IDO frames it differently).
+#ifdef NON_MATCHING
+void func_15162EF8(struct239 *arg0, s32 phase) {
+#else
 void func_15162EF8(struct239 *arg0) {
+#endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 
@@ -1267,7 +1281,11 @@ void func_15162EF8(struct239 *arg0) {
     func_151403A8(&sp1C, 36);
 }
 
+#ifdef NON_MATCHING
+void func_15162F50(struct239 *arg0, s32 phase) {
+#else
 void func_15162F50(struct239 *arg0) {
+#endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 

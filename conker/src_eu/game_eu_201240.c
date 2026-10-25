@@ -352,7 +352,7 @@ void func_151D45A4(u8 *arg0, u8 arg1, s32 arg2) {
 
 #ifdef NON_MATCHING
 /* P155 */
-void func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
+s32 func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7);
 // object_sounds_at: plays the sounds `sound1` and `sound2` (func_1505D1C4) at pos for object obj (its index in
 // D_800CC2D0) with `flags` and a source point: with dir, pos - 90 * dir and dir's binary angle - 0x4000 (odd) as
 // facing; without, pos raised by half the height of `model` (func_1507C7C0, when given) and facing 0. arg4 is

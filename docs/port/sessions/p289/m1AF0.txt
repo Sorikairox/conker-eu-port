@@ -1,0 +1,34 @@
+\#^    s32 ret = 0;$#s/0;/1;/
+\#^    s32 best = -1;$#s/-1;/0;/
+\#^    func_15047680(view, x0#s/0.0f, 1.0f, 0.0f/0.0f, 0.0f, 1.0f/
+\#^    func_15047680(view, x0#s/x1, y1, z1/x1, z1, y1/
+\#^    dy = y0 - y1;$#s/y0 - y1/y1 - y0/
+\#^    dz = z0 - z1;$#s/z0 - z1/z0 - x1/
+\#^    dist = sqrtf#s/ + dz \* dz//
+\#^        own = self->unk124 - 1;$#s/ - 1;/;/
+\#^    own = -1;$#s/-1/0/
+\#^    for (i = 0, obj#s/i < 25/i < 24/
+\#^        if (obj->interaction_state == 0#s/obj->interaction_state == 0 || //
+\#^        if (obj->interaction_state == 0#s/i == skip || //
+\#^        if (obj->interaction_state == 0#s/obj->health == 0 || //
+\#^        if (obj->interaction_state == 0#s/obj->immune != 0 || //
+\#^        if (obj->interaction_state == 0#s/ || i == own//
+\#^        score = func_15049440(view#s/ + (f32)obj->unkD6//
+\#^        score = func_15049440(view#s/obj->unkD6, obj->z_position/obj->unkD2, obj->z_position/
+\#^                              (f32)obj->unkD2#s/(f32)obj->unkD2, (f32)obj->unkD4/(f32)obj->unkD4, (f32)obj->unkD2/
+\#^                              (f32)obj->unkD2#s/dist, 10.0f, 10.0f/dist, 10.0f, 1.0f/
+\#^                              (f32)obj->unkD2#s/0.0f, dist/dist, dist/
+\#^        if (score == 0) {$#s/== 0/< 0/
+\#^        if (best == -1 || score < bestScore#s/score < bestScore/score <= bestScore/
+\#^        if (best == -1 || score < bestScore#s/score < bestScore/(u32)score < (u32)bestScore/
+\#^        if (best == -1 || score < bestScore#s/best == -1 || //
+\#^            bestScore = score;$#s/score;/i;/
+\#^    if (best != -1) {$#s/-1/0/
+\#^        ret = func_1505D1C4(obj->x_position#s/ + (f32)obj->unkD6//
+\#^        ret = func_1505D1C4(obj->x_position#s/kind, D_800C3E78, 0,/kind, best, 0,/
+\#^        ret = func_1505D1C4(obj->x_position#s/D_800C3E78, 0,/D_800C3E78, 1,/
+\#^        ret = func_1505D1C4(obj->x_position#s/ret = //
+\#^        obj->unk76 = self->unk76;$#s/self->unk76/obj->unk76 + 1/
+\#^        obj->unk76 = self->unk76;$#s/^.*$//
+\#^        obj = &D_800CC2D0\[best\];$#s/best/best + 1/
+\#^    return ret;$#s/ret;/best;/

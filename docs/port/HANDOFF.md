@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P289 (port-c, group C) (session P289, 2026-10-26). Details: `docs/port/sessions/P289.md`
+
+P284 re-runs: func_150F536C mutants 35/35, func_150B1EC0 49/49, func_15162B28 25/25. func_1505D1C4 is now `s32`
+(returns func_1505C7D8's v0; byte-identical) in game_83300 + functions.h + game_eu_201240.c:355 + game_eu_C5530.c:90.
+Hand C (NM; progress_nm total 5689 96.2%, 227 asm-only), registry rows `P289`, files in docs/port/sessions/p289: func_150E1AF0 (line_of_sight_hit_object),
+func_151B8DB0 (level_drip_spawn), func_150B2290 (framebuffer_green_to_gray, hand asm with ld/sd: whole-function
+harness p289/nmasm_fb2290.py, registry HARNESS/HMUT). D_8008B704 has only 2 entries (func_15162EF8 / F50); they now
+take `(struct239 *, s32 phase)` in the NM build to match the dispatcher (wasm call_indirect); tablesig does not compare
+entries with the dispatcher's call signature (gap). Checks: see P289.md.
+
+## Next steps (from P289, group C)
+1. Other groups: asm/NM functions that return func_1505D1C4's v0 (func_1519D320, func_151D441C, func_151D4684,
+   func_151D4898; v0use) may need `s32` too; game_eu_DCEF0's func_150AFC70 calls func_150B2290 undeclared (implicit
+   `int` vs `void` in wasm): add `void func_150B2290(u16 *, u16 *);` there (not group C).
+2. Group C left (smallest first): func_1518D290 (296 insns: random spawner, func_150ADA20/ADA68 x9, func_151307F0 +
+   memcpy, D_800A7830..3C), func_151AFC84, func_151B4854, func_150ED1F0, func_150A39E4, func_150CB6F4, func_151970BC, ...
+3. func_150C3574 boundary setups (P284 survivors) still open.
+
 ## P284 (port-c, group C) (session P284, 2026-10-26). Details: `docs/port/sessions/P284.md`
 
 Hand C (NM), registry rows `P284`, setups / mutants in docs/port/sessions/p284: func_150B1964 (P277 draft fixed: the

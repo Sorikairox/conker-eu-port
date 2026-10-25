@@ -3889,8 +3889,10 @@ s32 func_1505D024(struct127 *obj, s32 flags, u16 val, s32 arg3) {
 //     return ret;
 // }
 
-void func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7) {
-    s32 pad;
+// effect_spawn_at: spawns effect / sound `arg3` at (arg0, arg1, arg2) for object index arg4 through the shared
+// spawn record D_800D121C; returns func_1505C7D8's result (P289: was void, the asm leaves it in v0).
+s32 func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s32 arg6, s32 arg7) {
+    s32 ret;
     s32 tmp;
 
     tmp = D_800C3E78;
@@ -3907,8 +3909,9 @@ void func_1505D1C4(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, u16 arg5, s
     D_800D12EC = (arg3 & 0xFFFF) + 1;
     D_800D1368 = 0.5f;
     D_800D136C = 0.5f;
-    func_1505C7D8(&D_800D121C, 25);
+    ret = func_1505C7D8(&D_800D121C, 25);
     D_800C3E78 = tmp;
+    return ret;
 }
 
 void func_1505D2B8(struct127 *arg0, u8 arg1) {

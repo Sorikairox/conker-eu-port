@@ -332,3 +332,6 @@ func_150B1EC0	game_eu_DEDE0	docs/port/sessions/p284/s1EC0.txt	DIFFTEST_ROMDATA=1
 func_15162B28	game_18D770	docs/port/sessions/p284/s2B28.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p284/m2B28.txt	P284
 func_150C3574	game_EF410	docs/port/sessions/p284/s3574.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p284/m3574.txt	P284
 func_15198680	game_eu_1C3530	docs/port/sessions/p284/s8680.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=1513DA94=0:70,10023360=1:92 TR=4	docs/port/sessions/p284/m8680.txt	P284
+func_150E1AF0	game_eu_10F300	docs/port/sessions/p289/s1AF0.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p289/m1AF0.txt	P289
+func_150B2290	game_eu_DFAA0		HARNESS=tools/port/nmharness.sh,docs/port/sessions/p289/nmasm_fb2290.py,300,1 HMUT=tools/port/nmharness_mut.sh,conker/src_eu/game_eu_DFAA0.c,docs/port/sessions/p289/m2290.txt,docs/port/sessions/p289/nmasm_fb2290.py,60,2	docs/port/sessions/p289/m2290.txt	P289
+func_151B8DB0	game_eu_1E6B70	docs/port/sessions/p289/s8DB0.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=1=0|1|2|3|4|5,3=0|1|7|FF DIFFTEST_RET=15132FBC=80460000,151608EC=80470000 DIFFTEST_ARGMEM=15132FBC=0:118,10023360=1:12,151608EC=0:6,15140D40=0:90,15140D40=2:77 TR=4	docs/port/sessions/p289/m8DB0.txt	P289

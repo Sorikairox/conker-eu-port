@@ -1,0 +1,9 @@
+s/u16 green = px\[i\] & 0x07C0;/u16 green = px[i] \& 0x07E0;/
+s/px\[i\] = (px\[i\] & 0x07C1)/px[i] = (px[i] \& 0x07C0)/
+s/| (green << 5) | (green >> 5);/| (green << 5);/
+s/| (green << 5) | (green >> 5);/| (green << 6) | (green >> 5);/
+s/| (green << 5) | (green >> 5);/| (green << 5) | (green >> 6);/
+s/for (i = 0; i < 8; i++) {/for (i = 0; i < 7; i++) {/
+s/        px += 8;/        px += 4;/
+s/    } while (px < end);/    } while (px + 8 < end);/
+s/    } while (px < end);/    } while (px <= end);/
