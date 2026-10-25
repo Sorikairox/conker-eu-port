@@ -122,7 +122,7 @@ extern float D_800DD600[2];   /* camera yaw of view 0: sin, cos (func_15167310) 
 static int go_n = -1, go_i, go_btn;
 static unsigned go_f, go_arrive, go_stuck_f;
 static float go_r, go_x[GO_MAX], go_z[GO_MAX];
-static int go_tap[GO_MAX], go_ntap[GO_MAX];   /* step k is "tap go_tap[k] go_ntap[k] times" when go_ntap[k] > 0 */
+static int go_tap[GO_MAX], go_ntap[GO_MAX], go_vhold[GO_MAX], go_chase[GO_MAX];   /* P261 cREC:N: chase record REC (D_800CC2D0[REC]) for N x 60 retraces, B every 30 within 150 */   /* P261: vBTN:N = jump + hover in place (h pattern, stick released) */   /* step k is "tap go_tap[k] go_ntap[k] times" when go_ntap[k] > 0 */
 static float go_rr[GO_MAX];                    /* per-waypoint radius (X:Z:R), else go_r */
 static int go_jmp[GO_MAX];                     /* P223: jX:Z = jump (A, 8 of every 40 retraces) on the way there; P248: hX:Z = 2 (jump, then A held = helicopter hover; 200-retrace cycle) */
 static unsigned go_tap_f;
@@ -139,7 +139,13 @@ static void go_parse(void) {
     go_r = strtof(p, &e); if (*e != ':') return; p = e + 1;
     go_btn = (int)strtol(p, &e, 16); if (*e != ':') return; p = e + 1;
     while (*p && go_n < GO_MAX) {
-        if (*p == 't') {   /* tap step tBTN:N */
+        if (*p == 'c') {   /* P261 chase step cREC:N */
+            go_chase[go_n] = (int)strtol(p + 1, &e, 10) + 1; if (*e != ':') break; p = e + 1;
+            go_ntap[go_n] = (int)strtol(p, &e, 10); go_tap[go_n] = 0x4000; go_n++; p = e;
+            if (*p == '_') { p++; continue; } else break;
+        }
+        if (*p == 't' || *p == 'v') {   /* tap step tBTN:N; P261 vBTN:N: BTN on retraces 0-5, 10-15 and from 20 of each 200 (jump + hover), N cycles of 60 */
+            go_vhold[go_n] = *p == 'v';
             go_tap[go_n] = (int)strtol(p + 1, &e, 16); if (*e != ':') break; p = e + 1;
             go_ntap[go_n] = (int)strtol(p, &e, 10); go_n++; p = e;
             if (*p == '_') { p++; continue; } else break;
@@ -294,11 +300,30 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
             go_base = wrapa(go_base + 0.03f * wrapa(atan2f(mx, mz) - cam - go_sgn * go_th - go_base));
         go_px = x; go_pz = z;
     }
+    if (go_chase[go_i]) {   /* P261 chase step: steer to the record, B every 30 retraces (8 down) when within 150 */
+        const unsigned char *cr = D_800CC2D0 + (go_chase[go_i] - 1) * REC;
+        float cd;
+        if (!go_tap_f) { go_tap_f = port_frame_count; port_log("[p205go] retrace %u: chase step %d: rec %d x %d at %.1f %.1f %.1f\n", port_frame_count, go_i, go_chase[go_i] - 1, go_ntap[go_i], x, F(r, 0x18), z); }
+        t = port_frame_count - go_tap_f;
+        dx = F(cr, 0x14) - x; dz = F(cr, 0x1C) - z; cd = sqrtf(dx * dx + dz * dz);
+        th = wrapa(go_sgn * (atan2f(dx, dz) - cam - go_base));
+        go_th = th;
+        if (cd > 60.f) { *sx = (int)lrintf(80.f * sinf(th)); *sy = (int)lrintf(80.f * cosf(th)); } else { *sx = (int)lrintf(30.f * sinf(th)); *sy = (int)lrintf(30.f * cosf(th)); }
+        if (cd < 150.f && (t % 30) < 8) *btn |= go_tap[go_i];
+        if (t % 50 == 0) port_log("[p205go] retrace %u: chase rec %d at %.1f %.1f %.1f dist %.0f\n", port_frame_count, go_chase[go_i] - 1, F(cr, 0x14), F(cr, 0x18), F(cr, 0x1C), cd);
+        if (t >= 60u * go_ntap[go_i]) {
+            go_tap_f = 0;
+            if (++go_i >= go_n) go_arrive = port_frame_count;
+            go_sx0 = x; go_sz0 = z; go_stuck_f = port_frame_count;
+        }
+        return;
+    }
     if (go_ntap[go_i] > 0) {   /* tap step: stick released, BTN every 60 retraces (8 down) */
         if (!go_tap_f) { go_tap_f = port_frame_count; port_log("[p205go] retrace %u: tap step %d: %X x %d at %.1f %.1f %.1f\n", port_frame_count, go_i, go_tap[go_i], go_ntap[go_i], x, F(r, 0x18), z); }
         t = port_frame_count - go_tap_f;
         *sx = *sy = 0; go_th = 100.f;   /* no stick: no refinement from this motion */
-        if ((t % 60) < 8) *btn |= go_tap[go_i];
+        if (go_vhold[go_i]) { unsigned ht = t % 200; if (ht < 6 || (ht >= 10 && ht < 16) || ht >= 20) *btn |= go_tap[go_i]; }
+        else if ((t % 60) < 8) *btn |= go_tap[go_i];
         if (t >= 60u * go_ntap[go_i]) {
             go_tap_f = 0;
             if (++go_i >= go_n) go_arrive = port_frame_count;

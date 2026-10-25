@@ -4,6 +4,7 @@
  * word D_800CC6DC, and which asm stubs the handler reached (port_stub_trace_hook), with call counts. */
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include <stdio.h>
 #include "../ultra/pc_mem.h"
 
@@ -464,6 +465,51 @@ void p248_mesh(void) {
         }
     }
     if (q) last6b = vbe_ld8(q + 0x6B);
+    {   /* P261 DIAGNOSTIC ?p261lever=1: every 10 retraces while player 0 is within 600 (x/z) of a gate's handle point,
+         * log the handle point as gate_swing_update (func_151184BC) computes it on levels 1 / 0x29 (offset -13 76 354
+         * scaled, rotated by +0x0 then yaw +0x4, plus pos +0x10), the player's feet y, head y (+0x18 + s16 +0xE6), the
+         * squared distance (head) vs reach 10000*sz^2, feet+40 < handle y, and the busy bytes the gate skips on
+         * (+0x65, +0x104, ctx +0x17, +0x27, +0x6B >= 4). */
+        static int lf = -2, zlev = -1;
+        if (lf == -2) lf = port_flag("p261lever");
+        {   /* P261: the event zones again whenever the level (D_800BE9F0) changes, 60 retraces after */
+            extern unsigned char *D_800D34B8; extern unsigned D_800D3094; extern int D_800BE9F0;
+            static unsigned zf;
+            if (lf > 0 && D_800BE9F0 != zlev) { zlev = D_800BE9F0; zf = port_frame_count + 60; }
+            if (lf > 0 && zf && port_frame_count >= zf) {
+                unsigned kz;
+                zf = 0;
+                for (kz = 0; kz < D_800D3094 && kz < 256 && D_800D34B8; kz++) {
+                    const unsigned char *z = D_800D34B8 + kz * 0x34;
+                    port_log("[p261zone] level %02X %02X pos %d %d %d u6 %d f10 %.1f b14 %02X %02X %02X %02X\n", zlev, kz,
+                             (short)vbe_ld16(z), (short)vbe_ld16(z + 2), (short)vbe_ld16(z + 4), (short)vbe_ld16(z + 6),
+                             *(const float *)(z + 0x10), vbe_ld8(z + 0x14), vbe_ld8(z + 0x15), vbe_ld8(z + 0x16), vbe_ld8(z + 0x17));
+                }
+            }
+        }
+        static unsigned lc; if (lf > 0 && (lc++ % 4) == 0 && q) {
+            for (i = 0; i < n && i < n0; i++) {
+                const unsigned char *o = D_800DBEF4 + i * 0xA0;
+                float a, b, sx, sy, sz, hx, hy, hz, t0, t1, t2, px, py, pz, hd, dx, dy, dz;
+                if (*(const unsigned *)(o + 0x38) != (unsigned)(uintptr_t)func_151184BC) continue;
+                sx = *(const float *)(o + 0x2C); sy = *(const float *)(o + 0x30); sz = *(const float *)(o + 0x34);
+                a = *(const float *)o * 0.017453292f; b = *(const float *)(o + 4) * 0.017453292f;
+                t0 = -13.f * sx; t1 = 76.f * sy * cosf(a) - 354.f * sz * sinf(a); t2 = 76.f * sy * sinf(a) + 354.f * sz * cosf(a);
+                hx = t2 * sinf(b) + t0 * cosf(b) + (short)vbe_ld16(o + 0x10);
+                hy = t1 + (short)vbe_ld16(o + 0x12);
+                hz = t2 * cosf(b) - t0 * sinf(b) + (short)vbe_ld16(o + 0x14);
+                px = *(const float *)(pl + 0x14); py = *(const float *)(pl + 0x18); pz = *(const float *)(pl + 0x1C);
+                if ((px - hx) * (px - hx) + (pz - hz) * (pz - hz) > 600.f * 600.f) continue;
+                hd = py + (short)vbe_ld16(pl + 0xE6);
+                dx = px - hx; dy = hd - hy; dz = pz - hz;
+                port_log("[p261lever] frame %u obj %d handle %.0f %.0f %.0f | player %.1f %.1f %.1f head %.1f d2 %.0f (< %.0f) "
+                         "feet+40<hy %d | 65 %u 104 %u c17 %u c27 %u c6B %u 73 %02X ang %.1f\n",
+                         port_frame_count, i, hx, hy, hz, px, py, pz, hd, dx * dx + dy * dy + dz * dz, 10000.f * sz * sz,
+                         py + 40.f < hy, vbe_ld8(pl + 0x65), vbe_ld8(pl + 0x104), vbe_ld8(q + 0x17), vbe_ld8(q + 0x27),
+                         vbe_ld8(q + 0x6B), vbe_ld8(o + 0x73), *(const float *)o);
+            }
+        }
+    }
 }
 void __real_func_1510EE3C(int a0, int a1, int a2, int a3, int a4, int a5, float a6, float a7, float a8, float a9,
                           unsigned short aA, int aB, int aC, int aD, int aE);
@@ -538,3 +584,37 @@ void __wrap_func_150000B0(void) {
     __real_func_150000B0();
     port_p110_inmus = 0;
 }
+/* P261 DIAGNOSTIC (always on, logs only on a bad key): --wrap of func_1506AD30 (game_981E0, anim event keys). Before
+ * the real call, walks the keys the real code would dispatch (time <= arg1, < 900) and logs any key byte (+7) whose
+ * D_8008679C handler word is not a small table index, with the record and the key list. The real function runs. */
+extern float __real_func_1506AD30(unsigned char *a0, float a1, int a2);
+extern unsigned char D_8008679C[];
+float __wrap_func_1506AD30(unsigned char *a0, float a1, int a2) {
+    static int nlog;
+    const unsigned char *keys = (const unsigned char *)(uintptr_t)*(const unsigned *)(a0 + 0x1C4);
+    if (keys && vbe_ld8(a0 + 5) != 4 && nlog < 20) {
+        unsigned idx = vbe_ld8(a0 + 0x138), k;
+        if (a1 < *(const float *)(a0 + 0xB4)) idx = 0;
+        for (k = idx; k < idx + 16; k++) {
+            const unsigned char *e = keys + k * 0xC;
+            float t = *(const float *)e;
+            unsigned key = vbe_ld8(e + 7), fn;
+            if (!(t <= a1)) break;
+            if (t >= 900.f) continue;
+            fn = *(const unsigned *)(D_8008679C + key * 4);
+            if (key && (fn == 0 || fn > 0x10000)) {
+                nlog++;
+                port_log("[p261key] frame %u rec %p id %02X key %u (#%u t %.1f now %.1f) handler word %08X | keys %p idx %u b4 %.1f 2D0 %08X\n",
+                         port_frame_count, (void *)a0, vbe_ld8(a0 + 4), key, k, t, a1, fn, (const void *)keys, idx,
+                         *(const float *)(a0 + 0xB4), *(const unsigned *)(a0 + 0x2D0));
+            }
+        }
+    }
+    return __real_func_1506AD30(a0, a1, a2);
+}
+/* P261 (port-side, not a diagnostic): EU 0x1506D8AC is a separate 2-instruction function (jr ra; nop) that the split
+ * glued to the end of func_1506D2E8's asm (game_981E0). It is entry 16 of the anim-key handler table D_8008679C
+ * (dispatched by func_1506AD30). Without a definition the table word stayed the N64 address and call_indirect trapped
+ * ("table index is out of bounds") when the level-0x2E mushroom played its hit animation. port/tools/n64mem.py lists it
+ * in VM_NATIVES so the relocation maps the word here. Proper fix: split it in game_981E0 (port). */
+void func_1506D8AC(void) {}

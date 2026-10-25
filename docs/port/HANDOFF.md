@@ -10,6 +10,23 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P261, 2026-10-25, port-web). Details: `docs/port/sessions/P261.md`
+- **Lever (level 0x29) pulled**: gate_swing_update (obj 10) handle at (2015, 2037, -2692); grab = player's head
+  (y + rec+0xE6, 48) within 100 of the handle with feet 40+ below, not busy -> ctx+0x6B 1/2, Conker hangs, arm 0 -> 40.
+  Route `p261/lever6.goto`: running jump from (2066, -2732). Doors 8 / 9 open (state 2 at 12589, 3 at 13005).
+- **Through the door = level 0x2E** (13535): event 5 "Frying Pan": bubble, answer A (yes), hit the walking mushroom
+  (rec 1, id 8C) with B, enter zone 0x4002 (697, 714) -> 5005 + 5008 done, scene, back to 0x29 at the doors.
+  `p261/pan8.goto` (det=2) does lever + door + Frying Pan.
+- Trap fixed port-side: D_8008679C[16] = 0x1506D8AC (empty fn glued to func_1506D2E8's asm) was not relocated ->
+  "table index is out of bounds" on the first pan hit; now defined in p49_walk.c + n64mem.py VM_NATIVES.
+- New stubs on the route: func_15097188 (C4590, door camera), func_15194210 (1C1A20, each pan hit). Traps 0.
+- Routes are build-dependent (same route, two builds differing only in port code, diverge); tune on a frozen build.
+
+## Next steps (from P261)
+1. port-web: from `p261/back3.goto`: climb back to the gargoyle after 0x2E and hit the Baddie (event 7).
+2. port: func_15194210 (1C1A20), func_15097188 (C4590); split func_1506D8AC out of func_1506D2E8 (game_981E0).
+3. Find the build-dependent divergence (uninitialised read?); task 5 regression run (not done).
+
 ## State (session P258, 2026-10-25, port-web). Details: `docs/port/sessions/P258.md`
 - Merged port aad230e1 and port-b 21b85bac; checks after each: verify_all OK, NM OK, protocheck 0, floatint 0,
   implicit NM+float 0, romabs 0 FAIL, census (clean) 722 / 0 FAIL, selftest 123 / 0. Registry 248 rows (new
