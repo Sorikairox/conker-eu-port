@@ -355,3 +355,4 @@ P276	port	nm convert	16			group B: 16 conversions; merged port-b a1c4c47a; specg
 P278	port-d	nm convert	9			group D: 9 conversions (288/288 mutants); func_150E0C58 rodata static copies; 33 left in group D; port-d 5678/5916 96.0% 88.3%
 P277	port-c	nm convert	10			group C: 10 conversions; func_150B1964 drafted (mode-14 setups DIFFER); 34 left; port-c 5679/5916 96.0% 88.4%
 P281	port-e	nm convert+harness	4			group E: prenmi_thread, _Ldtob, IMDCT func_151FA3E0, 1st readable wall helper; difftest STOPCALL/RETV1 knobs (selftest 140); progress_nm counts platform-replaced by default (97.1%, --strict 96.5%); 6 drafts parked (main loops etc.); walls need helper-level harness
+P282	port	nm convert	10			group B: 10 conversions (game_161520 hit handlers etc.); SpriteSpec356D4 padding fixed; NM LINK BROKEN at commit (12C5F0 static copies -> .data); 2 mutant runs unfinished
