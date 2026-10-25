@@ -381,3 +381,4 @@ P307	port-b	integration	0			merged port-e into port-b (38377a3b); harness featur
 P308	port-b	integration	0			merged port-c (C1) into port-b (e9a35783); kept P289 func_150B2290; unified STUBMAP; selftest 150/150; combined 98.6% (94.7% bytes)
 P304	port-f	nm convert	4			group D2: impact_dust_spawn + fountain emit/step/draw (fountain_draw: original reads uninit stack slot, C uses newest point); 2 left (func_150D7E38, func_150F3A74)
 P301	port	nm convert	3			group B: impact_effects_spawn, zap_bolt_update, beam_ribbon_draw; func_1513334C 37/37 (memcpy stub copies nothing: use OUTA on 10023360); 4 left (split B1 port / B2 pc)
+P306	port-e	nm convert	2			GROUP C2 DONE: mp_report_hit, gun_fire_effects; lesson: some US-named symbols sit at other EU addresses, poke from EU nm
