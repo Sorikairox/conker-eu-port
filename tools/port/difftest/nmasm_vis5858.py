@@ -96,6 +96,8 @@ class Ref:
                 elif fn == 0x2A: setr(rdr, int(s64(r[rs]) < s64(r[rt])))
                 elif fn == 0x2B: setr(rdr, int(r[rs] < r[rt]))
                 elif fn == 0x3C: setr(rdr, r[rt] << (sa + 32))
+                elif fn == 0x38: setr(rdr, r[rt] << sa)                               # dsll (P279)
+                elif fn == 0x3A: setr(rdr, (r[rt] & M64) >> sa)                       # dsrl (P279)
                 else: raise RuntimeError('special %x at %08X' % (fn, pc))
             elif op == 1:
                 if rt in (0, 2, 1, 3):
@@ -111,7 +113,7 @@ class Ref:
                 c = {4: a == b, 5: a != b, 6: a <= 0, 7: a > 0, 0x14: a == b, 0x15: a != b}[op]
                 if c: tgt = (pc + 4 + (simm << 2)) & 0xFFFFFFFF
                 elif op >= 0x14: likely_skip = True
-            elif op == 9: setr(rt, sx32(r[rs] + simm))
+            elif op in (8, 9): setr(rt, sx32(r[rs] + simm))                      # addi (P279: no overflow case) / addiu
             elif op == 0xA: setr(rt, int(s64(r[rs]) < simm))
             elif op == 0xB: setr(rt, int(r[rs] < (simm & M64)))
             elif op == 0xC: setr(rt, r[rs] & imm)
@@ -142,6 +144,9 @@ class Ref:
                     elif fn == 0x34: cc = a < b; res = None                          # c.olt (P38)
                     elif fn == 0x35: cc = not (a >= b); res = None                   # c.ult
                     elif fn == 0x37: cc = not (a > b); res = None                    # c.ule
+                    elif fn == 0x0D:                                                 # trunc.w.s (P279)
+                        if a != a or abs(a) >= 2147483648.0: raise RuntimeError('cvt.w.s range at %08X' % pc)
+                        res = int(a) & 0xFFFFFFFF
                     elif fn == 0x24:                                                 # cvt.w.s (round to nearest even)
                         if a != a or abs(a) >= 2147483648.0: raise RuntimeError('cvt.w.s range at %08X' % pc)
                         res = round(a) & 0xFFFFFFFF

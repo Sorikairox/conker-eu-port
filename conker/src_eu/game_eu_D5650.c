@@ -24,7 +24,10 @@ void func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7EE0.s")
 #endif
 
+/* P279: private entry of func_150A7EE0 (w row with private registers f0/f2/f4, returns via t9): folded into func_150A7EE0's NM C above */
+#ifndef NON_MATCHING
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7EF4.s")
+#endif
 
 #ifdef NON_MATCHING
 /* 4x4 f32 matrix product c = a * b (row-major, hand-written asm in the original). b is read completely

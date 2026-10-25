@@ -79,3 +79,4 @@ P73	port-b	port NM C (151BF8F0, 1501D348, 1509A024)	3	0	130	difftest build_tu fi
 P267	port-b	port NM C (150D5268, 15198180)	2	0	45	P264 leftovers in hand C; 5268 needs ARGMEM on the func_151307F0 template (5 survivors without it)
 P270	port	intro crash fix + stride bug class (151D7FE8 + 10 NM funcs)	11	0	100	func_151D7FE8 vel pointer fix (user crash); stride_scan.py 151->119 NM hits; verify_all OK
 P274	port-b	port NM C (1511BD5C 15119C54 151C64F4 150E2030 150CDAAC 151CC86C 150EB740 151B402C 151714BC)	9	0	135	9 compiled funcs to hand C + 3 caller/type fixes (1511CBC0 sound table, 151B458C float args, 151B3550 return); verify_all OK
+P279	port-e	group E hand asm + init/debugger (150A7770 150A80F0 150B2290 bzero bcopy guMtxF2L cosf 1000BCBC; folded 150A7EF4 150A7BD0)	10	0	135	8 NM C + 2 folded pragmas, all EQUIV with mutants killed; progress_nm counts D5E90 NM_ASM/folded entries (+28) and --platform (40-row platform_replaced.tsv)

@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P279 (port-e, group E: hand asm + init / debugger leftovers) (2026-10-25). Details: `docs/port/sessions/P279.md`
+
+NM C + verification (registry rows `P279`): func_150A7770 (memset), func_150A80F0 + func_150B2290 (64-bit hand asm,
+whole-function harness docs/port/sessions/p279/nmasm_leaf.py, HARNESS/HMUT rows), bzero, bcopy, guMtxF2L (hand asm,
+cvt.w.s rounding), cosf (ROM constants), func_1000BCBC; func_150A7EF4 / func_150A7BD0 pragmas `#ifndef NON_MATCHING`
+(folded private entries). progress_nm.py now counts NM_ASM_C_FUNCS_* (Makefile) + tools/port/nm_folded.tsv (D5E90
+private entries; 17 still asm2c) and, with `--platform`, tools/port/platform_replaced.tsv (40 privileged / OS /
+padding functions the port replaces). Open question for the orchestrator: count platform-replaced as done by default.
+
+### Next steps (group E, from P279)
+1. Readable rewrite of the D5E90 wall engine / ray cast (asm2c today; nmasm_walls.py harness exists).
+2. Compiled C left: func_100052A0, func_10001550, func_16001044, func_1600288C; main loops func_100036E8,
+   func_15007830, func_10001194 need a loop-breaking stub in difftest.
+
 ## P274 (port-b) (session P274, 2026-10-25). Details: `docs/port/sessions/P274.md`
 
 Hand C (NM), registry rows `P274`, setups / mutants in docs/port/sessions/p274: func_1511BD5C part_vertices_follow_refs,

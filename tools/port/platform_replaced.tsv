@@ -1,0 +1,46 @@
+# P279: asm-only functions the native port does not need as game C: privileged / OS low-level code (COP0, TLB, cache
+# ops, exception vectors, thread switch, boot), padding and debug traps. The port's platform layer (port-web
+# port/ultra/*.c, port/boot/*.c) replaces each at runtime, or the PC build never reaches it. No fake C is written for
+# privileged instructions. progress_nm.py --platform counts these as done (column `plat`); the default output does not.
+# kind: cop0 / tlb / cache / exception / boot / libc / pad / trap / debugger / libultra-c (compiled C: NM C still worth writing)
+# nm_c: none = no meaningful C (privileged or not code); todo = compiled C, NM C possible later; done = has NM C too
+func	file	insns	kind	port_replacement	nm_c	note
+__osGetSR	init_eu_22D50	4	cop0	port/ultra/pc_os.c __osGetSR (pc_sr model)	none	mfc0 Status
+__osSetSR	init_eu_22D50	4	cop0	port/ultra/pc_os.c __osSetSR	none	mtc0 Status
+__osSetFpcCsr	init_eu_22D70	4	cop0	port/ultra/pc_os.c __osSetFpcCsr (pc_fpcsr model)	none	cfc1/ctc1 FCSR
+osGetCount	init_eu_24BE0	4	cop0	port/ultra/pc_os.c osGetCount (osGetTime; det=2 deterministic)	none	mfc0 Count
+__osSetCompare	init_eu_277C0	4	cop0	port/ultra/pc_os.c __osSetCompare (no-op: timers from the PC clock)	none	mtc0 Compare
+__osDisableInt	init_eu_23260	8	cop0	port/ultra/pc_os.c __osDisableInt	none	clears Status.IE
+__osRestoreInt	init_eu_23260	8	cop0	port/ultra/pc_os.c __osRestoreInt	none	restores Status.IE
+osSetIntMask	init_eu_24BF0	40	cop0	port/ultra/pc_os.c osSetIntMask	none	Status IM bits + MI_INTR_MASK
+osWritebackDCacheAll	init_eu_251D0	12	cache	port/ultra/pc_os.c osWritebackDCacheAll (no-op)	none	cache 0x1 loop
+osInvalICache	init_eu_23130	32	cache	port/ultra/pc_os.c osInvalICache (no-op)	none	cache 0x10 loop
+osInvalDCache	init_eu_231B0	44	cache	port/ultra/pc_os.c osInvalDCache (no-op)	none	cache 0x11/0x15
+func_10024190	init_eu_23CC0	32	cache	port/ultra/pc_os.c func_10024190 (no-op; unnamed osWritebackDCache)	none	cache 0x19 loop
+osMapTLB	init_eu_26640	48	tlb	port/ultra/pc_os.c osMapTLB (no-op: no TLB on PC)	none	tlbwi
+osUnmapTLB	init_eu_26600	16	tlb	port/ultra/pc_os.c osUnmapTLB (no-op)	none	tlbwi
+__osProbeTLB	init_eu_27700	48	tlb	port/ultra/pc_os.c __osProbeTLB (identity)	none	tlbp/tlbr
+func_10008410	init_eu_8410	24	tlb	not reached: port/boot/game_main.c replaces the boot path	none	maps TLB entry 0 (0x80000000 page pair)
+func_100061F8	init_eu_5DA0	18	tlb	port/boot/game_main.c calls it; the port's asm stub is a no-op (no TLB)	none	clears all TLB entries (Wired / EntryLo)
+func_16003650	debugger_258ED0	40	debugger	not reached on PC (debugger TLB dump)	none	tlbr of 32 entries into 4 tables
+func_10001000	init_eu_1000	20	boot	port/boot/game_main.c (PC boot: entrypoint -> func_10001050 path)	none	N64 entrypoint: clears BSS, sets sp, jumps to func_10005DA0
+func_10005DA0	init_eu_5DA0	21	boot	port/boot/game_main.c	none	boot COP0 init (Context, EntryHi) then main
+func_10005B04	init_eu_5DA0	55	boot	port/boot/game_main.c calls it (0xEB); asm stub on PC	todo	mtc0 Context + allocate_memory + func_10003C6C: the allocation part is game logic, check the stub hit
+func_10005F1C	init_eu_5DA0	371	tlb	not reached on PC (segments are loaded by port_mem_load, no TLB)	none	TLB-miss refill / rzip decompress of game segments (cop0 heavy)
+__osExceptionPreamble	init_eu_5DA0	378	exception	port/ultra/pc_sched.c (fibers; interrupts are delivered as messages)	none	libultra exceptasm: __osException
+func_10007AA8	init_eu_5DA0	136	exception	port/ultra/pc_sched.c	none	exceptasm: __osEnqueueAndYield (context save)
+func_10007D28	init_eu_5DA0	112	exception	port/ultra/pc_sched.c	none	exceptasm: __osDispatchThread (context restore, eret)
+__osCleanupThread	init_eu_5DA0	31	exception	port/ultra/pc_os.c __osCleanupThread	none	thread return address -> osDestroyThread
+func_10007F64	init_eu_5DA0	20	exception	not reached on PC	none	private-register save helper (jalr t3 into __osCleanupThread+0xC)
+func_10007FB4	init_eu_5DA0	25	exception	not reached on PC	none	private-register helper (as above)
+func_10008018	init_eu_5DA0	30	exception	not reached on PC	none	private-register helper (8-step loop)
+func_10008090	init_eu_5DA0	3	trap	not reached on PC	none	syscall 0; jr ra (debugger trap)
+func_1000809C	init_eu_5DA0	221	debugger	not reached on PC	none	crash / debugger entry: saves sp/ra, remaps TLB, DMA via osPiRawStartDma, calls func_16000B14
+func_150ADC50	D5E90	4	trap	not reached on PC (vbe.py FUNC_AS_DATA: only its address is compared)	none	syscall 0 (debugger break), no jr
+func_100229D0	229D0	16	pad	not code: 16 nops without jr (alignment padding in a raw asm segment)	none	-
+func_160036F0	debugger_eu_259B40	4	pad	not code: 4 nops (vbe.py FUNC_AS_DATA: only its address is used)	none	-
+bzero	init_eu_22A10	40	libc	port/ultra/pc_libc.c vbe.bzero	todo	hand asm libultra bzero
+bcopy	init_eu_23CC0	196	libc	port/ultra/pc_libc.c vbe.bcopy (memmove)	todo	hand asm libultra bcopy
+func_100036E8	init_eu_3570	102	libultra-c	port/ultra/pc_os.c osCreateViManager (no-op: the VI manager thread never runs)	todo	libultra viMgrMain (compiled C)
+func_15007830	entrypoint	124	boot	port/boot/game_entry.c (PC translation of the main loop)	todo	game entrypoint / main loop (compiled C)
+func_10001194	init_1050	203	boot	port/boot/game_main.c func_10001194 (PC main thread)	todo	main thread (compiled C)

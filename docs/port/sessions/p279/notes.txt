@@ -1,0 +1,5 @@
+# P279: equivalent (speed-path only) mutants dropped: n >= 13 for the word path, n > 4 in the word loop
+# P279: guMtxF2L mutant (f) > 2^23 dropped: equivalent (both branches give 2^23 at the boundary)
+# P279: equivalent mutants dropped: bcopy d > s + n (d == s + n: no overlap, both directions copy the same);
+#   func_150A80F0 loop from 1 (h[0] is rewritten afterwards); func_1000BCBC D_8002C584 <= d2 (at d2 == 6000^2 both give 4)
+#   and 224.0f <= f (f in [223, 224) gives 223 + 0x20 = 0xFF too). func_1000BCBC setup x25 added (kills dx = x - 25).

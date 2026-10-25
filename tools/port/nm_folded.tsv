@@ -1,0 +1,26 @@
+# P279: private entries of raw-asm segments (splat `asm`, no pragma) whose code is part of another function's NON_MATCHING C.
+# progress_nm.py counts them as nm (pragma files use #ifndef NON_MATCHING around the pragma instead).
+# kind: readable = hand C; asm2c = register-level translation (tools/port/asm2c_hand.py, still to be rewritten readably); data = not code
+func	file	host	nm_source	kind	note
+func_150A8680	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	no-animation path: copy the root matrix
+func_150A8EF8	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	key-frame decoder
+func_150A8DF8	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	half-angle sine/cosine (Euler to quaternion)
+func_150A99BC	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	joint matrix times parent
+D_150AA11C	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	data	sine table (513 floats) in .text: read as data by the NM C, nothing to convert
+func_150AA950	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	outcode helper
+func_150AA9B0	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	bevel helper
+func_150AAA88	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	corner helper
+func_150AAB24	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	edge lerp + outcode
+func_150AAB58	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	edge vs box faces
+func_150AAC58	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	unreferenced helper
+func_150AACF4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	plane test
+func_150AAE80	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	outcode merge
+func_150AAF00	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	triangle/box test (private regs)
+func_150AC200	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
+func_150AC6A4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
+func_150AC824	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
+func_150ACE90	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	tail jump to func_150AC7B8
+func_150AD844	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	asm2c	ray cast inner part
+func_150AB6D0	D5E90	func_150AB6D0	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine entry (NM_ASM_C_FUNCS)
+func_150AC8C4	D5E90	func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine entry (NM_ASM_C_FUNCS)
+func_150ACEA0	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	asm2c	ray cast entry (NM_ASM_C_FUNCS)
