@@ -82,3 +82,4 @@ P274	port-b	port NM C (1511BD5C 15119C54 151C64F4 150E2030 150CDAAC 151CC86C 150
 P279	port-e	group E hand asm + init/debugger (150A7770 150A80F0 150B2290 bzero bcopy guMtxF2L cosf 1000BCBC; folded 150A7EF4 150A7BD0)	10	0	135	8 NM C + 2 folded pragmas, all EQUIV with mutants killed; progress_nm counts D5E90 NM_ASM/folded entries (+28) and --platform (40-row platform_replaced.tsv)
 P281	port-e	group E leftovers + endless-loop difftest (100052A0 10001550 151FA3E0 150AA950)	4	0	150	STOPCALL/RETV1/sret/ldiv harness; 4 NM C committed, 6 drafts pending mutants; progress_nm plat default (97.1%)
 P285	port-e	P281 drafts landed (36E8 5B04 7830 1044) + D5E90 wall helper unit mode, 6 helpers readable	10	0	130	nmasm_walls --unit; 288C setups DIFFER, 1194 blocked by stub_write page bug (97.2%)
+P288	port-e	stub_write page fix; 10001194 + 1600288C landed; D5E90 AAF00 + AD844 readable	4	0	135	288C DIFFER = unpoked 1e8 late_rodata; engine/ray bodies still asm2c (97.2%)

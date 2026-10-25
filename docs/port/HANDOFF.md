@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P288 (port-e, group E: stub_write fix, 1194 / 288C landed, D5E90 AAF00 + AD844 readable) (2026-10-26). Details: `docs/port/sessions/P288.md`
+
+Committed NM C (registry rows `P288`): func_10001194 boot_thread_main (setups 2/2, mutants 26/28, 2 equivalent),
+func_1600288C debugger _Ldtob (setups 20/20 after poking the 1e8 late_rodata D_16004950 in docs/port/sessions/p288/
+288C_setups.txt; mutants 27/32, P281 equivalents). difftest: `stub_write` ensure()s its pages (DIFFTEST_STUBMAP_OLD=1
+= old), selftest 143/143. D5E90: readable nmw_tri_misses_box (func_150AAF00, unit + engine EQUIV, mutants 14/18) and
+nmr_ray_hits_triangle (func_150AD844, ray 300 x 5 seeds EQUIV, mutants 7/12 + 1, survivors justified); nmasm_walls.py
+aaf00 inputs now reach the box diagonals; NMW_DEBUG=1 dumps differing words.
+Checks: verify_all rc 0, NM build rc 0, protocheck rc 0. progress_nm: `total       5916     3995   1721     33      167  5749 97.2%   2024048/2253856 (89.8%)`.
+
+### Next steps (group E, from P288)
+1. D5E90 engine bodies func_150AB708 / func_150AC8C4 (walls.inc ~1150 lines) and func_150ACEA0's body (ray.inc):
+   still asm2c. Split them into readable pieces the same way (one label region per C helper, harness after each);
+   remember to `touch` D5E90.c after editing an .inc (not a make dependency).
+2. Port (port-web): vbe.py ROM_ABS for D_427B0 / D_19EDE8 (func_10001194's NM C).
+
 ## P285 (port-e, group E: P281 drafts, D5E90 wall helper unit mode) (2026-10-26). Details: `docs/port/sessions/P285.md`
 
 Committed NM C (registry rows `P285`): func_100036E8 vi_manager_main, func_10005B04 tlb_area_init, func_15007830
