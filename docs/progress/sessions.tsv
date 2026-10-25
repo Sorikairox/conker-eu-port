@@ -370,3 +370,4 @@ P290	port-d	nm convert	5			group D: rechecks done; impact_effect_spawn, object_i
 P293	port-b	nm convert	7			group A: EF410 func_15171770 proto void + 7 conversions; memcpy EU key 10023360; 10 left; portb 5705/5916 96.4% 89.6%
 P294	port-e	nm convert+harness	2			group E: wall engine readable (nmw_engine + 8 helpers, NmwState), D5E90_walls.inc deleted, 0 asm2c left; ray later-leaf scenes kill P291 survivors
 P296	port-c	nm convert	6			group C: 6 conversions + func_150C3574 boundary setups; 13 left (split C1 pc / C2 pe)
+P295	port	nm convert	3			group B: 3 conversions + rechecks (func_15054A94 40/40); lesson: mutant lines without % names only run the first setup file; 7 left; port 96.4% 89.7%
