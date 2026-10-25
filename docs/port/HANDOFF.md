@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P285 (port-e, group E: P281 drafts, D5E90 wall helper unit mode) (2026-10-26). Details: `docs/port/sessions/P285.md`
+
+Committed NM C (registry rows `P285`): func_100036E8 vi_manager_main, func_10005B04 tlb_area_init, func_15007830
+game_main, func_16001044 debug_print_value (all mutants killed or equivalent). func_10001550 re-run with r125: 20/20,
+26/32. D5E90: nmasm_walls.py `--unit` mode (new NM-only `nmw_unit` entry calls one private helper with registers +
+frame); readable C for func_150AA9B0 / AAA88 (edge / corner outcodes), AAB58 (+AAB24), AACF4 (+AAC58), AAE80,
+AC824; unit + engine harness EQUIV, survivors justified in P285.md.
+Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, selftest 140/140. progress_nm: `total       5916     3995   1719     34      168  5748 97.2%   2022864/2253856 (89.8%)`.
+
+### Next steps (group E, from P285)
+1. difftest `stub_write` must `ensure()` the pages it writes (OUTW/OUTA to an untouched page faults -> UNSURE);
+   then land func_10001194 (draft p281/drafts/init_1050.c.patch; setups p281/1194_setups.txt) + a selftest case.
+2. func_1600288C: 8/20 setups DIFFER (the digit-producing ones) - find out why (debugger ldiv copy? STKFILL).
+3. D5E90: func_150AAF00 (outputs f20/f21 from the caller's a0/a1 on some paths), the engine and D5E90_ray.inc.
+
 ## P281 (port-e, group E: compiled leftovers, endless loops, D5E90 helper) (2026-10-25). Details: `docs/port/sessions/P281.md`
 
 Committed NM C (registry rows `P281`): func_100052A0 prenmi_thread (endless; STOPCALL), func_10001550 libc _Ldtob,
