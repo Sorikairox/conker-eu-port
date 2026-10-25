@@ -2119,7 +2119,89 @@ void func_1511B4B8(u8 *arg0) {
 #endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511B604.s")
 
+#ifdef NON_MATCHING
+void func_151741D0(s32, s32);
+void func_151885BC(s32 arg0, f32 arg1);
+
+// door_swing_update: swings the door angle obj +0x8 (velocity +0x84) by the state in the low 2 bits of +0x73:
+// 0 closed / 3 open (angle pinned to 0 / the open angle s16 +0x3E), 1 closing (target 0), 2 opening (target
+// +0x3E). The angle moves by the velocity; on overshoot (|func_15048A70(angle, target)| < |velocity|) the
+// velocity bounces back scaled by +0x7C (0.45 when 0) and the door settles (state 0 / 3) once it is below 0.05 *
+// +0x80 (0.5 when 0); else the velocity accelerates towards +-(+0x80) by 1%. The angle wraps into [0, 360). When it
+// changes (or D_800BE9B4 is set) it is stored and, for a door with a light slot (byte +0x3C), the slot's light
+// (func_151885BC) and vertex colours (func_151741D0) follow the open fraction.
+void func_1511BAA4(u8 *obj) {
+    s16 open = *(s16 *) (obj + 0x3E);
+    s32 state = obj[0x73] & 3;
+    f32 openAngle = open;
+    f32 target = openAngle;
+    f32 angle = *(f32 *) (obj + 0x8);
+    f32 vel = *(f32 *) (obj + 0x84);
+    f32 bounce;
+    f32 speed;
+    f32 diff;
+    f32 frac;
+    s32 slot;
+
+    if (state == 0 || state == 1) {
+        target = 0.0f;
+    }
+    if (state == 0 || state == 3) {
+        angle = target;
+        vel = 0.0f;
+    }
+    if (angle == target && vel == 0.0f) {
+        *(f32 *) (obj + 0x84) = vel;
+    } else {
+        bounce = *(f32 *) (obj + 0x7C);
+        if (bounce == 0.0f) {
+            bounce = 0.45f; /* D_800A358C */
+        }
+        speed = *(f32 *) (obj + 0x80);
+        if (speed == 0.0f) {
+            speed = 0.5f;
+        }
+        angle += vel;
+        diff = func_15048A70(angle, target);
+        if (fabsf(diff) < fabsf(vel)) {
+            vel = -vel * bounce;
+            if (fabsf(vel) < speed * 0.05f /* D_800A3590 */) {
+                vel = 0.0f;
+                angle = target;
+                if (target == 0.0f) {
+                    state = 0;
+                } else {
+                    state = 3;
+                }
+            }
+        } else if (0.0f < diff) {
+            vel += (speed - vel) * 0.01f; /* D_800A3594 */
+        } else {
+            vel -= (speed + vel) * 0.01f; /* D_800A3598 */
+        }
+        if (angle < 0.0f) {
+            angle += 360.0f;
+        } else if (360.0f <= angle) {
+            angle -= 360.0f;
+        }
+        obj[0x73] = (obj[0x73] & ~3) | state;
+        *(f32 *) (obj + 0x84) = vel;
+    }
+    if (D_800BE9B4 == 0 && angle == *(f32 *) (obj + 0x8)) {
+        return;
+    }
+    *(f32 *) (obj + 0x8) = angle;
+    slot = obj[0x3C];
+    if (slot == 0 || open == 0) {
+        return;
+    }
+    frac = fabsf((angle - openAngle) / openAngle);
+    func_151885BC(slot - 1, frac);
+    func_151741D0((s32) ((1.0f - frac) * 255.0f), slot - 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BAA4.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 sinf(f32);

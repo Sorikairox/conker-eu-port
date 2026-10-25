@@ -104,4 +104,66 @@ void func_1512DD50(u8 *arg0) {
 //     temp_v0->unk0 = (s8) temp_v1->unk1C;
 // }
 
+#ifdef NON_MATCHING
+void func_150498A0(f32 *cur, f32 target, f32 *vel, f32 arg3, f32 arg4, f32 arg5);
+float sqrtf(float);
+
+// camera_orbit_point_update: camera block at +0x870 (mode byte +0x870, unit direction +0x880..+0x888, side speed
+// +0x890, vertical speed +0x894). Sets the point +0x8A8..+0x8B0 to +0x874 plus the direction times the distance
+// from +0x2BC to +0x874, then moves it by (vx, +0x894, vz): (vx, vz) = speed times (dz, -dx) / (-dz, dx) / (dx, dz)
+// / (-dx, -dz) for modes 0..3 (the asm leaves them unset for other modes). With +0x23C set the camera position
+// +0x2F8 jumps to the point and the rates +0x898 / +0x89C become 40; else the rates ease to 10 (func_150498A0,
+// 0.6, 1.4, frame step +0x7B4) and the position eases towards the point (velocity +0x3C0).
+void func_1512DEA4(struct108 *arg0) {
+    u8 *p = (u8 *) arg0;
+    f32 *c = (f32 *) (p + 0x870); /* c[4] = +0x880 ... */
+    f32 dx, dy, dz;
+    f32 dist;
+    f32 vx, vy, vz; /* the asm leaves vx / vz unset for a mode above 3 */
+
+    dx = *(f32 *) (p + 0x874) - *(f32 *) (p + 0x2BC);
+    dy = *(f32 *) (p + 0x878) - *(f32 *) (p + 0x2C0);
+    dz = *(f32 *) (p + 0x87C) - *(f32 *) (p + 0x2C4);
+    dist = sqrtf(dx * dx + dy * dy + dz * dz);
+    *(f32 *) (p + 0x8A8) = *(f32 *) (p + 0x874) + *(f32 *) (p + 0x880) * dist;
+    *(f32 *) (p + 0x8AC) = *(f32 *) (p + 0x878) + *(f32 *) (p + 0x884) * dist;
+    *(f32 *) (p + 0x8B0) = *(f32 *) (p + 0x87C) + *(f32 *) (p + 0x888) * dist;
+    vy = c[9]; /* +0x894 */
+    switch (p[0x870]) {
+    case 0:
+        vx = c[8] * c[6];
+        vz = c[8] * -c[4];
+        break;
+    case 1:
+        vx = c[8] * -c[6];
+        vz = c[8] * c[4];
+        break;
+    case 2:
+        vx = c[8] * c[4];
+        vz = c[8] * c[6];
+        break;
+    case 3:
+        vx = c[8] * -c[4];
+        vz = c[8] * -c[6];
+        break;
+    }
+    c[14] += vx; /* +0x8A8 */
+    c[15] += vy;
+    c[16] += vz;
+    if (p[0x23C] != 0) {
+        *(f32 *) (p + 0x2F8) = c[14];
+        *(f32 *) (p + 0x2FC) = c[15];
+        *(f32 *) (p + 0x300) = c[16];
+        c[10] = 40.0f;
+        c[11] = 40.0f;
+    } else {
+        func_150498A0(&c[10], 10.0f, &c[12], 0.6f, 1.4f /* D_800A3AF0 */, *(f32 *) (p + 0x7B4));
+        func_150498A0(&c[11], 10.0f, &c[13], 0.6f, 1.4f /* D_800A3AF4 */, *(f32 *) (p + 0x7B4));
+        func_150498A0((f32 *) (p + 0x2F8), c[14], (f32 *) (p + 0x3C0), c[10], c[11], *(f32 *) (p + 0x7B4));
+        func_150498A0((f32 *) (p + 0x2FC), c[15], (f32 *) (p + 0x3C4), c[10], c[11], *(f32 *) (p + 0x7B4));
+        func_150498A0((f32 *) (p + 0x300), c[16], (f32 *) (p + 0x3C8), c[10], c[11], *(f32 *) (p + 0x7B4));
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_15B200/func_1512DEA4.s")
+#endif

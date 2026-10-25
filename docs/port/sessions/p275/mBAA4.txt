@@ -1,0 +1,28 @@
+\#^    if (state == 0 || state == 1) {$#s/state == 1/state == 2/
+\#^        target = 0\.0f;$#s/0\.0f/1.0f/
+\#^    if (state == 0 || state == 3) {$#s/state == 3/state == 2/
+\#^        vel = 0\.0f;$#s/0\.0f/1.0f/
+\#^    if (angle == target && vel == 0\.0f) {$#s/&&/||/
+\#^            bounce = 0\.45f;#s/0\.45f/0.4f/ % defbounce
+\#^            speed = 0\.5f;$#s/0\.5f/0.6f/ % defaults
+\#^        angle += vel;$#s/+=/-=/
+\#^        diff = func_15048A70(angle, target);$#s/angle, target/target, angle/
+\#^        if (fabsf(diff) < fabsf(vel)) {$#s/fabsf(vel)/vel/
+\#^            vel = -vel \* bounce;$#s/-vel/vel/
+\#^            if (fabsf(vel) < speed \* 0\.05f#s/0\.05f/0.06f/ % thresh
+\#^                angle = target;$#s/target/0.0f/ % settle
+\#^                if (target == 0\.0f) {$#s/==/!=/
+\#^                    state = 3;$#s/3/2/ % settle
+\#^        } else if (0\.0f < diff) {$#s/0\.0f < diff/diff < 0.0f/
+\#^            vel += (speed - vel) \* 0\.01f;#s/speed - vel/speed + vel/
+\#^            vel -= (speed + vel) \* 0\.01f;#s/0\.01f/0.02f/
+\#^            angle += 360\.0f;$#s/360/361/ % wrapneg
+\#^        } else if (360\.0f <= angle) {$#s/<=/>=/
+\#^        obj\[0x73\] = (obj\[0x73\] & ~3) | state;$#s/~3/~1/
+\#^    if (D_800BE9B4 == 0 && angle == \*(f32 \*) (obj + 0x8)) {$#s/== 0 &&/!= 0 \&\&/
+\#^    slot = obj\[0x3C\];$#s/0x3C/0x3D/
+\#^    if (slot == 0 || open == 0) {$#s/|| open == 0//
+\#^    frac = fabsf((angle - openAngle) / openAngle);$#s/fabsf//
+\#^    frac = fabsf((angle - openAngle) / openAngle);$#s/\/ openAngle/\/ target/
+\#^    func_151885BC(slot - 1, frac);$#s/slot - 1/slot/
+\#^    func_151741D0((s32) ((1\.0f - frac) \* 255\.0f), slot - 1);$#s/255/256/

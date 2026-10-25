@@ -3,15 +3,107 @@
 #include "variables.h"
 
 
+void func_15171E60(f32 x, f32 y, f32 z, f32 r, s32 base, f32 scale, s32 colour, s32 n, u8 kind, s32 owner);
+
+#ifdef NON_MATCHING
+s32 func_1518C900(s32);
+void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2);
+
+/* func_15168BE4's debris template (the same layout as Debris714BC below) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];
+    /* 0x18 */ f32 spin[3];
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 u28;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 scale[3];
+    /* 0x3C */ s32 life;
+    /* 0x40 */ s32 model;
+    /* 0x44 */ s32 u44; /* not set */
+    /* 0x48 */ f32 u48[3];
+    /* 0x54 */ u8 u54[6];
+    /* 0x5A */ u8 id;
+    /* 0x5B */ u8 u5B;
+    /* 0x5C */ u8 u5C;
+    /* 0x5D */ u8 u5D;
+} Debris71100;
+
+extern f32 D_800A7270[6][3]; /* piece offsets */
+extern u8 D_800A7360[6];     /* piece ids when flags & 2 */
+
+// crate_break_pieces: breaks the object into 6 func_15168BE4 debris pieces at the object position (+0x10 / +0x12 /
+// +0x14) plus the D_800A7270 offsets. Piece id: D_800A7360[i] if flags & 2, else id + i if flags & 1, else id;
+// model func_1518C900(id). Spin = offset * 0.08 (+7 on |y|) plus random (rand >> 16) / 16384, u24 / u28 / u2C random
+// (rand >> 16) * 1.25 / 16384, scale 1, life 60. Then a ring of 10 sparks (func_15171E60) 80 below the object, and
+// +0x6E = 1. kind / owner go to every spawn; arg2 is the template's +0x5B byte.
+void func_15171100(u8 *obj, s32 id, s32 arg2, s32 flags, s32 kind, s32 owner) {
+    Debris71100 t;
+    f32 (*off)[3] = D_800A7270;
+    f32 x, y, z;
+    s32 piece;
+    s32 i;
+
+    x = *(s16 *) (obj + 0x10);
+    y = *(s16 *) (obj + 0x12);
+    z = *(s16 *) (obj + 0x14);
+    t.vel[0] = 0.0f;
+    t.vel[1] = 0.0f;
+    t.vel[2] = 0.0f;
+    t.scale[0] = 1.0f;
+    t.scale[1] = 1.0f;
+    t.scale[2] = 1.0f;
+    t.life = 0x3C;
+    t.u48[0] = 0.3f;  /* D_800A7368 */
+    t.u48[1] = -0.7f; /* D_800A736C */
+    t.u48[2] = -0.2f; /* D_800A7370 */
+    t.u54[0] = 2;
+    t.u54[1] = 0xFF;
+    t.u54[2] = 0;
+    t.u54[3] = 0;
+    t.u54[4] = 0;
+    t.u54[5] = 0x3C;
+    t.u5B = arg2;
+    t.u5C = 0;
+    t.u5D = 0;
+    for (i = 0; i < 6; i++, off++) {
+        if (flags & 2) {
+            piece = D_800A7360[i];
+        } else if (flags & 1) {
+            piece = id + i;
+        } else {
+            piece = id;
+        }
+        t.model = func_1518C900(piece);
+        t.pos[0] = (*off)[0] + x;
+        t.pos[1] = (*off)[1] + y;
+        t.pos[2] = (*off)[2] + z;
+        t.id = piece;
+        t.spin[0] = (*off)[0] * 0.08f;               /* D_800A7374 */
+        t.spin[1] = fabsf((*off)[1]) * 0.08f + 7.0f;
+        t.spin[2] = (*off)[2] * 0.08f;
+        t.spin[0] += (func_150ADA20() >> 16) * 0.00006103515625f;
+        t.spin[1] += (func_150ADA20() >> 16) * 0.00006103515625f;
+        t.spin[2] += (func_150ADA20() >> 16) * 0.00006103515625f;
+        t.u24 = (func_150ADA20() >> 16) * 0.0000762939453125f;
+        t.u28 = (func_150ADA20() >> 16) * 0.0000762939453125f;
+        t.u2C = (func_150ADA20() >> 16) * 0.0000762939453125f;
+        func_15168BE4((u8 *) &t, kind, owner);
+    }
+    func_15171E60(x, y - 80.0f, z, 70.0f, 500, 0.00457763671875f, 0, 10, kind, owner);
+    obj[0x6E] = 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171100.s")
+#endif
 
 void func_15171434(s32 arg0, u8 arg1, s32 arg2) {
     switch (D_800BE9F0) {
     case 2:
-        func_15171100(arg0, 1, 1, 1, arg1, arg2);
+        func_15171100((u8 *) arg0, 1, 1, 1, arg1, arg2);
         break;
     case 16:
-        func_15171100(arg0, 0xA9, 8, 0, arg1, arg2);
+        func_15171100((u8 *) arg0, 0xA9, 8, 0, arg1, arg2);
         break;
     }
 }
@@ -159,7 +251,61 @@ void func_15171D6C(s16 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, 
     func_15170648(pts[0], x, z, arg7, argA, arg6, arg8, arg9, argB, argC);
 }
 
+#ifdef NON_MATCHING
+f32 func_150489B0(u8);
+void func_1516DA58(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA,
+                   u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14,
+                   u8 arg15, u8 arg16, s16 arg17, s16 arg18, u8 arg19, s16 arg1A, s32 arg1B, s32 arg1C, u8 arg1D,
+                   s32 arg1E);
+
+typedef struct {
+    u8 rgb[3];
+} Colour71E60;
+extern Colour71E60 D_8008CFC0; /* {0x45, 0x53, 0x68} */
+
+// spark_ring_spawn: spawns count type-0xD particles (func_1516DA58) evenly around a circle of the given radius
+// around (x, z) at height y; each moves outwards (200 * sin / cos of its angle), colour D_8008CFC0 (the asm copies
+// it into a one-entry stack table indexed by colour; every caller passes 0), speed rand16 * speedScale + speedBase,
+// life 10..25, spread 100 + rand16 / 65536.
+void func_15171E60(f32 x, f32 y, f32 z, f32 radius, s32 speedBase, f32 speedScale, s32 colour, s32 count, u8 kind,
+                   s32 owner) {
+    Colour71E60 colours[1];
+    u8 *col;
+    s32 angle;
+    s32 step;
+    s32 i;
+    s16 py;
+    f32 s, c;
+    f32 pz;
+    f32 spread;
+    s32 speed;
+    s32 vx, vz;
+    s32 life;
+
+    colours[0] = D_8008CFC0;
+    if (count <= 0) {
+        return;
+    }
+    step = 0xFFFF / count;
+    py = (s32) y;
+    col = colours[colour].rgb;
+    for (i = 0, angle = 0; i != count; i++, angle += step) {
+        s = func_15048A40((angle >> 8) & 0xFF);
+        c = func_150489B0((angle >> 8) & 0xFF);
+        pz = radius * c + z;
+        vz = (s32) (200.0f * c);
+        spread = (func_150ADA20() & 0xFFFF) * 0.0000152587890625f + 100.0f;
+        speed = (s32) ((func_150ADA20() & 0xFFFF) * speedScale + (f32) speedBase);
+        life = (func_150ADA20() & 0xF) + 10;
+        vx = (s32) (200.0f * s);
+        func_1516DA58((s32) (radius * s + x), py, (s32) pz, 0xD, 0, col[0], col[1], col[2], 0, 0, 0, 0, 2,
+                      (vx >> 8) & 0xFF, vx & 0xFF, (vz >> 8) & 0xFF, vz & 0xFF, 0, 0, 5, 0, 0, 0, speed, speed,
+                      life, (s32) spread, 0, 0, kind, owner);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_15171E60.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_150AEEB0(struct127 *, u8);

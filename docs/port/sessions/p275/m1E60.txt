@@ -1,0 +1,22 @@
+\#^    if (count <= 0) {$#s/<= 0/< 0/ % c0
+\#^    step = 0xFFFF / count;$#s/0xFFFF/0x10000/
+\#^    py = (s32) y;$#s/y;/z;/
+\#^    col = colours\[colour\]\.rgb;$#s/colour\]/0]/ % c3
+\#^        s = func_15048A40((angle >> 8) & 0xFF);$#s/angle >> 8/angle >> 7/
+\#^        c = func_150489B0((angle >> 8) & 0xFF);$#s/0xFF/0x7F/
+\#^        pz = radius \* c + z;$#s/radius \* c/radius * s/
+\#^        vz = (s32) (200.0f \* c);$#s/200.0f/100.0f/
+\#^        spread = (func_150ADA20() & 0xFFFF) \* 0.0000152587890625f + 100.0f;$#s/+ 100.0f/+ 101.0f/
+\#^        spread = (func_150ADA20() & 0xFFFF)#s/0xFFFF/0x7FFF/
+\#^        speed = (s32) ((func_150ADA20() & 0xFFFF) \* speedScale + (f32) speedBase);$#s/speedScale +/speedScale -/
+\#^        life = (func_150ADA20() & 0xF) + 10;$#s/+ 10/+ 11/
+\#^        life = (func_150ADA20() & 0xF)#s/0xF)/0x1F)/
+\#^        vx = (s32) (200.0f \* s);$#s/\* s/* c/
+\#^        func_1516DA58((s32) (radius \* s + x), py, (s32) pz, 0xD, 0, col\[0\], col\[1\], col\[2\]#s/col\[1\], col\[2\]/col[2], col[1]/
+\#^        func_1516DA58((s32) (radius \* s + x)#s/0xD, 0,/0xD, 1,/
+\#^                      (vx >> 8) & 0xFF, vx & 0xFF#s/(vx >> 8) \& 0xFF, vx \& 0xFF/vx \& 0xFF, (vx >> 8) \& 0xFF/
+\#^                      (vx >> 8) & 0xFF, vx & 0xFF#s/vz \& 0xFF, 0, 0, 5/vz \& 0xFF, 0, 0, 6/
+\#^                      (vx >> 8) & 0xFF, vx & 0xFF#s/speed, speed,/speed, speed + 1,/
+\#^                      life, (s32) spread, 0, 0, kind, owner);$#s/kind, owner/kind, 0/
+\#^                      life, (s32) spread, 0, 0, kind, owner);$#s/0, 0, kind/0, 1, kind/
+\#^    for (i = 0, angle = 0; i != count; i++, angle += step) {$#s/angle += step/angle += step + 1/

@@ -3,7 +3,110 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, s32 *, f32 *, f32 *, f32 *, s32, s32 *, s32, f32);
+s32 func_15145C90(s32);
+f32 func_15144A74(void *, void *);
+s32 memcpy(s32, s32, s32);
+
+/* func_1513D524's request (type 0x41) */
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x02 */ s16 flags;
+    /* 0x04 */ s16 u4;
+    /* 0x08 */ s32 u8;
+    /* 0x0C */ s32 uC;
+    /* 0x10 */ u8 u10[4];
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 from[3];
+    /* 0x28 */ f32 to[3];
+    /* 0x34 */ f32 u34;
+    /* 0x38 */ f32 u38;
+    /* 0x3C */ f32 u3C;
+    /* 0x40 */ s32 u40;
+    /* 0x44 */ u8 u44;
+    /* 0x45 */ u8 u45;
+} Req6550;
+
+/* the 0x30-byte record copied to the new object's +0x110 */
+typedef struct {
+    /* 0x00 */ u8 hit;       /* bit 0: the ray hit an accepted surface */
+    /* 0x04 */ f32 pos[3];   /* hit point */
+    /* 0x10 */ s32 u10;      /* func_150ACEA0 outputs */
+    /* 0x14 */ s32 u14;
+    /* 0x18 */ u8 pad18[0x10];
+    /* 0x28 */ f32 side;     /* -1 / 1: sign of func_15144A74(hit - from, hit point) */
+    /* 0x2C */ s8 u2C;
+} Rec6550;
+#endif
+
+#ifdef NON_MATCHING
+// beam_ray_spawn: builds a type-0x41 func_1513D524 request (from, to, a2 / a3 / arg4 floats, arg8 / arg9 bytes) and,
+// when `cast` is set, ray casts from -> to (func_150ACEA0): on a hit whose object passes func_15145C90 the record
+// gets hit bit 0, the hit point and side = sign of func_15144A74(hit - from, hit). Spawns the object (func_1513D524
+// 0xF / 0x15, flags random bits 2 | 1, size 0x30, room arg5, owner arg6) and copies the record to its +0x110.
+// Returns the object (0 when the spawn fails).
+s32 func_150E6550(u8 *from, f32 *to, f32 a2, f32 a3, f32 arg4, u8 room, s32 owner, u8 cast, u8 arg8, s16 arg9,
+                  s8 arg10) {
+    Rec6550 r;
+    s32 hitObj;
+    f32 d[3];
+    Req6550 q;
+    struct210 *o;
+    s32 bit2;
+    s32 bit1;
+
+    q.type = 0x41;
+    q.flags = 0x2301;
+    q.u8 = 0;
+    q.uC = 0;
+    q.u10[0] = 0;
+    q.u10[1] = 0;
+    q.u10[2] = 0;
+    q.u10[3] = 0xFF;
+    q.u45 = 0xFF;
+    q.u14 = a3;
+    q.u4 = arg9;
+    q.u44 = arg8;
+    q.u18 = arg4;
+    q.from[0] = ((f32 *) from)[0];
+    q.from[1] = ((f32 *) from)[1];
+    q.from[2] = ((f32 *) from)[2];
+    q.to[0] = to[0];
+    q.to[1] = to[1];
+    q.to[2] = to[2];
+    q.u34 = 0.0f;
+    q.u38 = a2;
+    q.u3C = 0.0f;
+    q.u40 = 1;
+    r.hit = 0;
+    r.u2C = arg10;
+    if (cast != 0
+        && func_150ACEA0(((f32 *) from)[0], ((f32 *) from)[1], ((f32 *) from)[2], to[0], to[1], to[2], &r.u10, &r.u14,
+                         &r.pos[0], &r.pos[1], &r.pos[2], 0, &hitObj, 0, 0.0f) != 0
+        && func_15145C90(hitObj) != 0) {
+        d[0] = r.pos[0] - q.from[0];
+        d[1] = r.pos[1] - q.from[1];
+        d[2] = r.pos[2] - q.from[2];
+        r.hit |= 1;
+        if (func_15144A74(d, r.pos) < 0.0f) {
+            r.side = -1.0f;
+        } else {
+            r.side = 1.0f;
+        }
+    }
+    bit2 = (func_150ADA20() & 1) ? 2 : 0;
+    bit1 = (func_150ADA20() & 1) ? 1 : 0;
+    o = func_1513D524((s32) &q, 0xF, 0x15, 0, 0xF, bit1 | bit2, 0x30, room, owner);
+    if (o != NULL) {
+        memcpy((s32) o + 0x110, (s32) &r, 0x30);
+    }
+    return (s32) o;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_113D60/func_150E6550.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 func_15144A74(void *, void *);

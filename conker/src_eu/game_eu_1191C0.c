@@ -54,7 +54,89 @@ s32 func_150EBA04(u8 *arg0, f32 *arg1, s32 arg2) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+void func_15117CF0(f32 *arg0);
+float sqrtf(float);
+
+// tilt_spring_update: spring-driven angle at obj +0x0 (velocity +0x84, damping +0x7C, stiffness +0x80; state in the
+// low 2 bits of +0x73). State 3: idle. State 2: func_15117CF0 steps the angle; once it stops changing the state
+// becomes 3 and the angle 0. States 0 / 1: the target is -40, or, for objects with +0x4F bit 2, -40 plus 0.0108 *
+// the distance to the player (D_800CC2D0[0] position +0x14..+0x1C, at most 740); when the player's +0x31C
+// record has +0x57 set, the state becomes 2 with damping 0.5, stiffness 0.3, velocity 0 and +0x3C = 0. The angle
+// moves by velocity * D_800BE9E4, the velocity by +-|diff| * stiffness (diff = func_15048A70(angle, target)) and is
+// damped; it snaps to the target when both |diff| and |velocity| are below 0.01, else wraps into [0, 360).
+void func_150EBB94(u8 *obj) {
+    u8 *player = (u8 *) D_800CC2D0;
+    f32 target;
+    f32 dx, dy, dz;
+    f32 dist;
+    f32 angle;
+    f32 vel;
+    f32 damping;
+    f32 stiffness;
+    f32 diff;
+    u8 state = obj[0x73];
+
+    if ((state & 3) == 3) {
+        return;
+    }
+    if ((state & 3) == 2) {
+        angle = *(f32 *) obj;
+        func_15117CF0((f32 *) obj);
+        if (angle == *(f32 *) obj) {
+            obj[0x73] = (obj[0x73] & ~3) | 3;
+            *(f32 *) obj = 0.0f;
+        }
+        return;
+    }
+    if (obj[0x4F] & 4) {
+        if ((*(u8 **) (player + 0x31C))[0x57] != 0) {
+            obj[0x73] = (state & ~3) | 2;
+            *(s32 *) (obj + 0x3C) = 0;
+            *(f32 *) (obj + 0x7C) = 0.5f;
+            *(f32 *) (obj + 0x80) = 0.3f; /* D_800A18AC */
+            *(f32 *) (obj + 0x84) = 0.0f;
+        }
+        dz = *(s16 *) (obj + 0x14) - *(f32 *) (player + 0x1C);
+        dx = *(s16 *) (obj + 0x10) - *(f32 *) (player + 0x14);
+        dy = *(s16 *) (obj + 0x12) - *(f32 *) (player + 0x18);
+        dist = sqrtf(dz * dz + (dx * dx + dy * dy));
+        if (740.0f < dist) {
+            dist = 740.0f;
+        }
+        target = dist * 0.010810811f /* D_800A18B0 */ + -40.0f;
+    } else {
+        target = -40.0f;
+    }
+    angle = *(f32 *) obj;
+    damping = *(f32 *) (obj + 0x7C);
+    stiffness = *(f32 *) (obj + 0x80);
+    vel = *(f32 *) (obj + 0x84);
+    if (angle == target && vel == 0.0f) {
+        return;
+    }
+    angle += vel * D_800BE9E4;
+    diff = func_15048A70(angle, target);
+    if (0.0f < diff) {
+        vel += fabsf(diff) * stiffness;
+    } else {
+        vel -= fabsf(diff) * stiffness;
+    }
+    vel *= damping;
+    if (fabsf(diff) < 0.01f /* D_800A18B4 */ && fabsf(vel) < 0.01f) {
+        vel = 0.0f;
+        angle = target;
+    } else if (angle < 0.0f) {
+        angle += 360.0f;
+    } else if (360.0f <= angle) {
+        angle -= 360.0f;
+    }
+    *(f32 *) (obj + 0x84) = vel;
+    *(f32 *) obj = angle;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EBB94.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EBE44.s")
 

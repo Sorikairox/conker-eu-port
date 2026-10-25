@@ -14,7 +14,129 @@ void func_150F7330(u8 *arg0) {
     func_151494E0((s32)&tmp, 0x3E);
 }
 
+#ifdef NON_MATCHING
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+void *memcpy(void *, const void *, s32);
+
+/* func_151307F0's particle template (the GlowTmplC034 layout of game_2062D0) */
+typedef struct {
+    s32 u0;           /* 0x00 */
+    s32 u4;           /* 0x04 */
+    u16 flags;        /* 0x08 */
+    s16 life;         /* 0x0A */
+    s32 uC;           /* 0x0C */
+    s32 u10;          /* 0x10 */
+    u8 colour[8];     /* 0x14 */
+    u8 u1C;           /* 0x1C */
+    u8 sprite;        /* 0x1D */
+    s16 u1E;          /* 0x1E */
+    s16 u20;          /* 0x20 */
+    s16 u22;          /* 0x22 */
+    f32 u24;          /* 0x24 */
+    f32 size[2];      /* 0x28 */
+    f32 pos[3];       /* 0x30 */
+    f32 u3C[3];       /* 0x3C */
+    f32 vel[3];       /* 0x48 */
+    f32 u54;          /* 0x54 */
+    s32 mode;         /* 0x58 */
+    s32 u5C;          /* 0x5C */
+    u8 u60[7];        /* 0x60 */
+    u8 pad67;
+    s16 u68;          /* 0x68 */
+    u8 pad6A[2];
+    f32 u6C;          /* 0x6C */
+} Tmpl7364;
+
+/* the 0x78-byte record copied to the new object's +0x28 (only these fields are set) */
+typedef struct {
+    struct127 *owner; /* 0x00 */
+    u8 u4;            /* 0x04: owner +0x3B */
+    s32 fx[2];        /* 0x08: the two particles */
+    u8 pad10[0x64];
+    u8 u74;           /* 0x74 */
+    u8 pad75[3];
+} Rec7364;
+#endif
+
+#ifdef NON_MATCHING
+// object_twin_glow_spawn: creates a type-0x43 object (func_15149130) for obj and copies a record {obj, obj +0x3B,
+// 0, 0, ..., +0x74 = 0} to its +0x28, then spawns two func_151307F0 glow particles (flags 0x4417, life 300, size
+// 1511, sprite 100, mode 0x64C000, the second one red instead of blue in colour[4..7]) and stores them at the
+// record's fx[0] / fx[1]. Returns the new object (NULL when the alloc fails).
+void *func_150F7364(struct127 *obj) {
+    Rec7364 rec;
+    Tmpl7364 t;
+    struct260 *o;
+    Rec7364 *r;
+    f32 *still = (f32 *) D_800A5860; /* zero vector */
+    u8 i;
+
+    rec.owner = obj;
+    rec.u4 = ((u8 *) obj)[0x3B];
+    for (i = 0; i < 2; i++) {
+        rec.fx[i] = 0;
+    }
+    rec.u74 = 0;
+    o = func_15149130(0x12C, -1, 0x43, -1, 0, 0x37, (struct37 *) 0x78, 0xFF, 1);
+    if (o == NULL) {
+        return NULL;
+    }
+    r = (Rec7364 *) ((u8 *) o + 0x28);
+    memcpy(r, &rec, sizeof(Rec7364));
+    t.u0 = 0x200004;
+    t.u4 = 0;
+    t.flags = 0x4417;
+    t.life = 0x12C;
+    t.uC = 0;
+    t.u10 = 0;
+    t.colour[0] = 0xFF;
+    t.colour[1] = 0xFF;
+    t.colour[2] = 0xFF;
+    t.colour[3] = 0xFF;
+    t.u1C = 0xFF;
+    t.size[1] = 1511.0f; /* D_800A1F80 */
+    t.size[0] = 1511.0f;
+    t.pos[0] = still[0];
+    t.pos[1] = still[1];
+    t.pos[2] = still[2];
+    t.u3C[0] = still[0];
+    t.u3C[1] = still[1];
+    t.u3C[2] = still[2];
+    t.vel[0] = still[0];
+    t.vel[1] = still[1];
+    t.vel[2] = still[2];
+    t.u1E = 1;
+    t.u20 = 0xFF;
+    t.u22 = 1;
+    t.mode = 0x64C000;
+    t.u60[0] = 8;
+    t.u60[1] = 6;
+    t.u60[2] = 0xFF;
+    t.u60[3] = 0xFF;
+    t.u60[4] = 3;
+    t.u60[5] = 0;
+    t.u5C = 0;
+    t.u60[6] = 0xFF;
+    t.u68 = 10;
+    t.sprite = 0x64;
+    t.colour[4] = 0;
+    t.colour[5] = 0;
+    t.colour[6] = 0xFF;
+    t.colour[7] = 0xFF;
+    t.u54 = 0.0f;
+    t.u24 = 1.0f;
+    t.u6C = 20.0f;
+    r->fx[0] = func_151307F0((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
+    t.colour[4] = 0xFF;
+    t.colour[5] = 0;
+    t.colour[6] = 0;
+    t.colour[7] = 0xFF;
+    r->fx[1] = func_151307F0((s32) &t, 1, 0, 0, ((u8 *) o)[0xC], ((u8 *) o)[1]);
+    return o;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/func_150F7364.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A1F84;

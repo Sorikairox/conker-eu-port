@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P275 (port-b) (session P275, 2026-10-25). Details: `docs/port/sessions/P275.md`
+
+Merged port e6300743 (P272). func_150E2030 mutants 38/38. Hand C (NM), registry rows `P275`, setups / mutants in
+docs/port/sessions/p275: func_15171100 crate_break_pieces, func_15171E60 spark_ring_spawn (19E910), func_15173F20
+vertex_colours_blend (1A1730), func_150F7364 object_twin_glow_spawn (124B40), func_150E6550 beam_ray_spawn (113D60),
+func_1512DEA4 camera_orbit_point_update (15B200), func_150FF2B0 object_bolt_fire (12CAC0), func_150EBB94
+tilt_spring_update (1191C0), func_1511BAA4 door_swing_update (142E40), func_151B2C40 twin_lights_spawn (1DFE20),
+func_151226E0 camera_follow_target_update (14FE50); func_150A7EF4 (D5650) is the tail entry of the func_150A7EE0
+trampoline, absorbed by its NM C. All random EQUIV + setups; surviving mutants are equivalent or listed in P275.md.
+Tablesig D_8008906C / D_80089234 / D_800892B8: no dispatcher reads them (unreferenced), nothing to fix.
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1666), implicit_scan 0 NM+float (831 sites), selftest 130/130 (start of session; no harness change), progress_nm `total       5916     3995   1686      235  5681 96.0%   1992416/2253856 (88.4%)`.
+
+## Next steps (from P275)
+1. Group A (split-P276) remaining, smallest first: func_15177F90 (1A5D10), func_151A8040 (1D5710), func_1501175C
+   (3E890), func_150EBE44 (1191C0), func_150C4620 (F1E30), func_15116A8C (142E40), func_150B6CC0 (E44D0), ...
+2. Harness: a candidate that executes `break 7` (divide by zero) is not reported (func_15171E60 `count < 0` mutant).
+3. func_1515B500 (group B, game_eu_188D10) analysed in P275.md, not written.
+
 ## P274 (port-b) (session P274, 2026-10-25). Details: `docs/port/sessions/P274.md`
 
 Hand C (NM), registry rows `P274`, setups / mutants in docs/port/sessions/p274: func_1511BD5C part_vertices_follow_refs,
