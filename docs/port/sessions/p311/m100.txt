@@ -1,0 +1,81 @@
+s/notKind11 = (e->kind == 0x11) ? 0 : 1;/notKind11 = (e->kind == 0x12) ? 0 : 1;/ % kind11
+s/n = e->countdown - D_800BE9E4;/n = e->countdown - D_800BE9E4 - 1;/ % idle base
+s/n += e->period;/n += e->period + 1;/ % multi
+s/^            n = 0;/            n = 1;/ % base
+s/for (i = 0; i < e->count; i++)/for (i = 1; i < e->count; i++)/ % multi
+s/if (e->flags & 4) {/if (e->flags \& 2) {/ % chance4
+s#(s32) (e->timer \* e->chance) / e->lifeTotal#(s32) (e->timer * e->chance) / (e->lifeTotal + 1)# % chance4
+s#roll >= chance#roll > chance# % chance chance4
+s#roll = func_150ADA20();#roll = func_150ADA20() >> 1;# % chance
+s#chance = e->chance;#chance = e->chance + 1;# % chance
+s#if (e->obj == 0xFF) {#if (e->obj == 0xFE) {# % base obj
+s#pt = (s16 \*) ((e->posX << 16) | (u16) e->posY);#pt = (s16 *) ((e->posX << 16) | (u16) e->posY) + 1;# % ptr16
+s#y = pt\[1\] + e->posZ;#y = pt[1] - e->posZ;# % ptr16
+s#z = pt\[2\];#z = pt[1];# % ptr16
+s#x = pt\[0\];#x = pt[2];# % ptr16
+s#y = (s32) (pf\[1\] + (f32) e->posZ);#y = (s32) (pf[1]);# % ptrf
+s#z = (s32) pf\[2\];#z = (s32) pf[0];# % ptrf
+s#} else if (e->flags & 0x20) {#} else if (e->flags \& 0x40) {# % ptrf
+s#y = e->posY;#y = e->posZ;# % base
+s#x = e->posX;#x = e->posY;# % base
+s#z = e->posZ;#z = e->posX;# % base
+s#if (\*(u8 \*\*) (obj + 0x1D4) == NULL) {#if (*(u8 **) (obj + 0x1D8) == NULL) {# % objnull obj
+s#bz = D_800A7210\[e->posX\]\[5\];#bz = D_800A7210[e->posX][4];# % obj
+s#ay = D_800A7210\[e->posX\]\[1\];#ay = D_800A7210[e->posX][2];# % obj
+s#if (D_800A7210\[e->posX\]\[6\] != 0) {#if (D_800A7210[e->posX][5] != 0) {# % objmask obj
+s#bz += (f32) (u32) (func_150ADA20() & D_800A7210\[e->posX\]\[6\]);#bz += (f32) (u32) (func_150ADA20() \& 0x7F);# % objmask
+s#e->mtx \* 64), ax#e->mtx * 16), ax# % obj
+s#e->mtx \* 64), bx#e->mtx * 64 + 4), bx# % obj
+s#vx = (bx - ax) \* 8.0f;#vx = (bx - ax) * 4.0f;# % obj
+s#vy = (by - ay) \* 8.0f;#vy = (by - az) * 8.0f;# % obj
+s#vz = (bz - az) \* 8.0f;#vz = (bz - ax) * 8.0f;# % obj
+s#ang = (0x40 - \*(u16 \*) (obj + 0x76)) & 0xFF;#ang = (0x80 - *(u16 *) (obj + 0x76)) \& 0xFF;# % obj
+s#func_15048A40(ang) \* 64.0f;#func_15048A40(ang) * 32.0f;# % obj
+s#vz -= \*(f32 \*) (obj + 0x3C)#vz -= *(f32 *) (obj + 0x40)# % obj
+1,/a0D = (vi >> 8) & 0xFF;/s/a0D = (vi >> 8) & 0xFF;/a0D = (vi >> 16) \& 0xFF;/ % obj80
+1,/a10 = vi & 0xFF;/s/a10 = vi & 0xFF;/a10 = vi \& 0x7F;/ % obj80
+s#x = (s32) ax;#x = (s32) bx;# % obj
+s#y = (s32) ay;#y = (s32) az;# % obj
+s#if (e->flags & 8) {#if (e->flags \& 0x10) {# % vel8
+s#func_151705A4(e->flags, &vx#func_151705A4(0, \&vx# % vel8
+s#speed = (s32) (e->speedScale \* 16);#speed = (s32) (e->speedScale * 8);# % vel8
+s#offset = e->offsetScale;#offset = e->speedScale;# % vel8
+s#y = (s32) ((f32) y + offset \* vy);#y = (s32) ((f32) y + speed * vy);# % vel8
+s#rise = (s32) vy;#rise = (s32) vx;# % obj vel8
+s#^                func_150ADA20();$#                ;# % vel8
+s#x = (s32) ((f32) x + vx \* offset);#x = (s32) ((f32) x + vx * speed);# % vel8
+s#vz = vz \* speed;#vz = vz * offset;# % vel8
+/func_151705A4(e->flags/,/a10 = vi/s/a0E = vi & 0xFF;/a0E = (vi >> 1) \& 0xFF;/ % vel8
+/func_151705A4(e->flags/,/a10 = vi/s/a0F = (vi >> 8) & 0xFF;/a0F = (vi >> 9) \& 0xFF;/ % vel8 vel8clamp
+s#dirB = func_150489B0(r & 0xFF);#dirB = func_15048A40(r \& 0xFF);# % scatter
+s#\* e->scatterXZ) \* 1.52587890625e-05f;#* e->scatterXZ) * 3.0517578125e-05f;# % scatter
+s#z = (s32) ((f32) z + dist \* dirB);#z = (s32) ((f32) z + dist * dirA);# % scatter
+s#if (e->scatterY != 0) {#if (e->scatterXZ != 0) {# % scatter
+s#y += (s32) (dist \* dirA);#y += (s32) (dist * dirA * 2.0f);# % scatter
+s#(func_150ADA20() & 0xFFFF) \* e->scatterY#(func_150ADA20() \& 0x7FFF) * e->scatterY# % scatter scatter2
+s#(f32) (u32) ((func_150ADA20() & 0xFFFF) \* e->scatterXZ)#(f32) (s16) ((func_150ADA20() \& 0xFFFF) * e->scatterXZ)# % scatter2
+s#(u32) e->parmRandAB;#(u16) e->parmRandAB;# % rand1
+s#if (e->flags & 1) {#if (e->flags \& 2) {# % rand1
+s#parmB += r;#parmB += r + 1;# % rand1
+s#parmB += (u32) func_150ADA20()#parmB -= (u32) func_150ADA20()# % rand randb
+s#if (e->parmRandB != 0) {#if (e->parmRandAB != 0) {# % rand
+s#(u32) e->parmRandB;#(u16) e->parmRandB;# % randb
+s#if (!(e->flags & 8) && !(e->flags & 0x80)) {#if (!(e->flags \& 8)) {# % obj80
+s#rise = e->riseBase;#rise = e->riseBase + 1;# % base
+s#rise += (u32) func_150ADA20()#rise -= (u32) func_150ADA20()# % rand
+s#a0D = e->col\[0\];#a0D = e->col[1];# % base
+s#if (a0D >= 0x100) {#if (a0D > 0x100) {# % rand
+s#a0F = 0xFF;#a0F = 0xFE;# % rand
+s#a10 += (u32) func_150ADA20()#a10 += 1 + (u32) func_150ADA20()# % rand
+s#if (e->colRand\[1\] != 0) {#if (e->colRand[2] != 0) {# % rand1
+s#if (e->colRand\[3\] != 0) {#if (e->colRand[0] != 0) {# % rand1
+s#e->parm\[9\], a0D, a0E#e->parm[8], a0D, a0E# % base
+s#a0D, a0E, a0F, a10, e->parm2\[0\]#a0D, a0F, a0E, a10, e->parm2[0]# % base
+s#parmA, parmB, e->parm40#parmB, parmA, e->parm40# % base
+s#rise, notKind11, e->parm48, e->unk0C, e->owner#rise, notKind11, e->parm48, e->owner, e->unk0C# % base
+s#e->parm2\[5\], parmA#e->parm2[4], parmA# % base
+s#e->countdown = n;#e->countdown = n + 1;# % base
+s#if (e->timer != 0xFFFF) {#if (e->timer != 0xFFFE) {# % timerinf
+s#if (left > 0) {#if (left >= 0) {# % timer0
+s#func_1516972C((struct102 \*) e);#func_1516972C(NULL);# % timerneg
+s#e->timer = left;#e->timer = left - 1;# % base

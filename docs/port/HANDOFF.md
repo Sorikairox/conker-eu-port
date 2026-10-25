@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P311 (port-c slot, group B2) (session P311, 2026-10-26). Details: `docs/port/sessions/P311.md`
+- func_1516E100 particle_emitter_update (game_eu_19B180, emitter table entry 0) and func_151206C8
+  player_camera_update (game_eu_14D9E0, called from func_151283B8) to hand C (NM). Registry rows P311.
+- func_1516E100: random EQUIV, 25 setups, mutants 81/81. func_151206C8: random EQUIV, 57 setups, mutants 116/121
+  (5 equivalent, listed in m6c8.txt).
+- Also in game_eu_14D9E0: func_151CA150 declaration fixed to its definition `void (u8 *, s32)` (func_151201D0's
+  call now 2 args), func_151CA484 declared before use.
+- Checks: verify_all rc 0 (3995/5916), NM build rc 0, protocheck 0 (1693 bodies), implicit_scan 0 NM+float
+  (829 sites), selftest 133/133.
+
+## Next steps (from P311, group B2)
+1. Merge port-c into port (files disjoint from P310's game_981E0 / game_eu_10F840).
+2. Optional: one full `MUT=1 reverify.sh` of both functions after the merge (the fixed survivors were re-checked
+   one by one with p311/mut1.sh, not in a full registry run).
+
 ## P305 (port-c, group C1) (session P305, 2026-10-26). Details: `docs/port/sessions/P305.md`
 
 Hand C (NM), registry rows `P305`, files in docs/port/sessions/p305 (setup generators gen*.py): func_151976B8

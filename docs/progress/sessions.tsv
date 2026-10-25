@@ -86,3 +86,4 @@ P292	port-c	group C	3		~125	DCEF0 B2290 proto; 1505D1C4 v0 callers need no chang
 P296	port-c	group C	6		~130	ED1F0 + A39E4 (caller A3990 4 args) + CB6F4 + 970BC + 06D38 + BD550 to NM C; func_150C3574 boundary setups kill the 5 P284 survivors
 P299	port-c	group C1	4		~120	CA4E8 (rodata copied, shared D_800AB164.. exported const) + B3878 rope_draw + A1E0 debris_update + FE30 menu list to NM C; 1C3530 trio left
 P305	port-c	group C1	3		~115	976B8 emitter_ribbon_draw + A1A4 emitter2_flame_update + BA28 emitter2_flame_draw (1C3530) to NM C, mutants 74/76 + 106/106 + 85/85; group C1 done
+P311	port-c	group B2	2		~120	1516E100 particle_emitter_update + 151206C8 player_camera_update (1300-insn camera) to NM C, mutants 81/81 + 116/121 (5 equivalent); func_151CA150 prototype fixed
