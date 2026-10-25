@@ -245,6 +245,15 @@ func_15008E10	conker/src_eu/game_362B0.c	stride	low	0	IR idx %.0 step 12, asm se
 func_1500B3B0	conker/src_eu/game_eu_38360.c	stride	low	0	IR idx %.042 step 8, asm self-steps {2,4,12,16}
 func_151C9748	conker/src_eu/game_eu_1F4F60.c	stride	low	0	IR idx %.0 step 4, asm self-steps {64,144,368}
 func_151C9748	conker/src_eu/game_eu_1F4F60.c	stride	low	0	IR idx %.043 step 4, asm self-steps {64,144,368}
+func_151F933C	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.033 step 2, asm self-steps {1,4,8}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.0 step -4, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.1 step -8, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.2 step 4, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.3 step 4, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.4 step 4, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.5 step 4, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.6 step 4, asm self-steps {}
+func_151F94E0	conker/src_eu/game_eu_226870.c	stride	low	0	IR idx %.7 step 4, asm self-steps {}
 func_150B3668	conker/src_eu/game_eu_E0430.c	spaddr	low	0	asm passes sp+0x38 (call near 150B3B5C) with store-only slots {0x3C,0x40,0x44,0x48,0x4C,0x50,0x54,0x58,0x5C,0x60,0x64,0x68,0x6C,0x70,0x74}; IR passes &scalar to memcpy, 7 store-only locals
 func_15167C58	conker/src_eu/game_1944C0.c	spaddr	low	0	asm passes sp+0x5C (call near 151682D8) with store-only slots {0x5E,0x60,0x62,0x64,0x66,0x69}; IR passes &scalar to func_15142E24,func_15142FBC, 1 store-only locals
 func_10004074	conker/src_eu/init_3C40.c	width	low	2	O:8 asm{b1S,w8LS} IR{w7LS}

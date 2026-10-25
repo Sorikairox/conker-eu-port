@@ -10,6 +10,14 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P265 (merge) (session P265, 2026-10-25). Details: `docs/port/sessions/P265.md`
+- port merged port-b P264 (ada9d73e), port-b fast-forwarded to it, port-web merged port (38a091c9). All checks green (selftest 130, census 0 FAIL, link OK, no dup symbols).
+- Smoke (det=2): new game to level 6 same frames as before; Total War plays; pan8 / r5g identical to 11926 then fall at the last gap (route needs re-tuning on this build). Traps 0, only the 2 boot stubs.
+
+## Next steps (from P265)
+- port-web: re-tune the r5g gap-2/last-gap jump on this build, then replay pan8 (lever, doors, 0x2E Frying Pan).
+- port-web (cleanup): drop the dead port-side func_1506D8AC (p49_walk.c + n64mem VM_NATIVES); game C func_1506D4EC is at that address now.
+
 ## P264 (port-b) (session P264, 2026-10-25). Details: `docs/port/sessions/P264.md`
 
 Branch `port-b`. Merged port 34922b88 (selftest 130/130). Hand C (NM): func_150D5634 rocket_sound_update, func_151BE33C
