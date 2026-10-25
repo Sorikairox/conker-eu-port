@@ -219,8 +219,78 @@ void func_15040A60(s32 arg0) {
 void func_15040A6C(s32 arg0) {
 }
 
-// contains delay slot
+#ifdef NON_MATCHING
+extern void (*D_80084840[])(u8 *);
+// dl_walk_call_handlers: P259: walks the display list from `dl` (8-byte F3DEX2 commands) while the command pointer
+// is <= `end` or a G_DL call is open, and passes every command from `from` up to `end` to its opcode handler
+// D_80084840[op]. It resets the segment table D_800C6860 (all -1, segment 0 = 0), records G_MOVEWORD segment
+// writes (G_MW_SEGMENT), follows G_DL (0xDE) calls into known segments (unknown segment: skipped) and returns on
+// G_ENDDL (0xDF) to the saved command; G_VTX (1) only steps (the asm counts its vertices in an empty loop).
+// No callers in the ROM (only the symbol table names it).
+void func_15040A78(u8 *dl, u8 *from, u8 *end) {
+    u8 *stack[21];
+    u8 *cmd;
+    u32 w0;
+    u32 w1;
+    s32 seg;
+    s32 depth;
+    s32 active;
+    s32 i;
+    u8 op;
+
+    for (i = 0; i < 16; i++) {
+        D_800C6860[i] = -1;
+    }
+    D_800C6860[0] = 0;
+    depth = 0;
+    active = FALSE;
+    cmd = dl;
+    if (end < cmd) {
+        return;
+    }
+    do {
+        if (cmd == from) {
+            active = TRUE;
+        }
+        op = cmd[0];
+        if (active) {
+            D_80084840[op](cmd);
+        }
+        if (cmd == end) {
+            active = FALSE;
+        }
+        switch (op) {
+        case 0xDE: // G_DL
+            stack[depth++] = cmd + 8;
+            w1 = ((u32 *) cmd)[1];
+            seg = (w1 >> 24) & 0xF;
+            cmd += 8;
+            if (D_800C6860[seg] == -1) {
+                depth--;
+            } else {
+                cmd = (u8 *) (((w1 & 0xFFFFFF) + D_800C6860[seg]) | 0x80000000);
+            }
+            break;
+        case 0xDF: // G_ENDDL
+            cmd = stack[--depth];
+            break;
+        case 0xDB: // G_MOVEWORD
+            w0 = ((u32 *) cmd)[0];
+            w1 = ((u32 *) cmd)[1];
+            if (((w0 >> 16) & 0xFF) == 6) { // G_MW_SEGMENT
+                D_800C6860[(s32) (w0 & 0xFFFF) >> 2] = w1;
+            }
+            cmd += 8;
+            break;
+        default:
+            cmd += 8;
+            break;
+        }
+    } while (cmd <= end || depth > 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_6D800/func_15040A78.s")
+#endif
 
 extern void (*D_80084840[])(u8 *);
 

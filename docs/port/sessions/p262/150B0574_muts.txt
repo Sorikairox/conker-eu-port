@@ -1,0 +1,34 @@
+# P262 func_150B0574 (beam_trail_spawn) mutants: sed % setup names
+s/zero = 0;/zero = 1;/ % base
+s/dir\[1\] = to\[1\] - from\[1\];/dir[1] = to[1] + from[1];/ % base
+s/dir\[2\] = to\[2\] - from\[2\];/dir[2] = from[2] - to[2];/ % base
+s/if (func_15145128(dir, dir, \&o44, \&o40) == 0) {/if (func_15145128(dir, dir, \&o44, \&o40) != 0) {/ % base zero
+s/if (func_15145128(dir, dir, \&o44, \&o40) == 0) {/if (func_15145128(dir, dir, \&o44, \&o40) <= 0) {/ % wide
+s/req.u04 = 1.0f;/req.u04 = 0.7f;/ % base
+s/req.u08 = 0.7f;/req.u08 = 0.70000005f;/ % base
+s/req.pos\[2\] = from\[2\];/req.pos[2] = to[2];/ % base
+s/req.vel\[0\] = dir\[0\] \* 80.0f;/req.vel[0] = dir[0] * 8.0f;/ % base
+s/req.vel\[1\] = dir\[1\] \* 80.0f;/req.vel[1] = dir[1];/ % base
+s/func_15145974(req.vel, \&req.yaw, \&req.pitch);/func_15145974(req.vel, \&req.pitch, \&req.yaw);/ % base
+s/req.u20 = 1.0f;/req.u20 = 0.0f;/ % base
+s/req.u18 = 0.0f;/req.u18 = 1.0f;/ % base
+s/req.u40\[1\] = ((f32 \*)D_800A5860)\[1\];/req.u40[1] = 1.0f;/ % base
+s/req.u50 = 0x19A0;/req.u50 = 0x1990;/ % base
+s/req.u54 = 0x12C;/req.u54 = 0xD2;/ % base
+s/req.u56 = 0xD2;/req.u56 = 0x12C;/ % base
+s/req.u58 = 7;/req.u58 = 8;/ % base
+s/req.u61 = 8;/req.u61 = 7;/ % base
+s/req.u65 = 0;/;/ % base
+s/req.u68 = 2;/req.u68 = 3;/ % base
+s/req.u72 = 1;/req.u72 = 0;/ % base
+s/req.u74 = 0xFF;/req.u74 = 0x7F;/ % base
+s/req.u4C = 0.0f;/req.u4C = 1.0f;/ % base
+s/trail = func_15132BBC((u8 \*)\&req, 3, 0xFF, NULL, 4, alpha, arg3);/trail = func_15132BBC((u8 *)\&req, 2, 0xFF, NULL, 4, alpha, arg3);/ % base
+s/3, 0xFF, NULL, 4, alpha, arg3);/3, 0xFF, NULL, 8, alpha, arg3);/ % base
+s/3, 0xFF, NULL, 4, alpha, arg3);/3, 0xFF, NULL, 4, alpha, 0);/ % wide
+s/if (trail == NULL) {/if (trail != NULL) {/ % base notrail
+s/memcpy((s32)(trail + 0x170), (s8 \*)\&zero, 4);/;/ % wide
+s/src = trail;/src = NULL;/ % base
+s/func_151B78D8(\&src, 1, 8, alpha, arg3);/func_151B78D8(\&src, 0, 8, alpha, arg3);/ % base
+s/func_151B78D8(\&src, 1, 8, alpha, arg3);/func_151B78D8(\&src, 1, 4, alpha, arg3);/ % base
+s/\*(u8 \*\*)(trail + 0x170) = func_151B78D8/*(u8 **)(trail + 0x174) = func_151B78D8/ % base

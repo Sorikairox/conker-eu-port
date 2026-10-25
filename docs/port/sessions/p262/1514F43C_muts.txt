@@ -1,0 +1,32 @@
+# P262 func_1514F43C (character_fire_effect_start) mutants: sed % setup names
+s/func_15160A58(obj, 1, (s32 \*)sLightPos, 2,/func_15160A58(obj, 2, (s32 *)sLightPos, 2,/ % base
+s/0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3,/0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 2,/ % base
+s/0x12C, 2, 0xFF, 0, 0,/0x12C, 3, 0xFF, 0, 0,/ % base
+s/^                  0x19);/                  0x18);/ % base
+s/a.u00 = 0x69;/a.u00 = 0x68;/ % base
+s/a.u40 = 0x4ED200A;/a.u40 = 0x4ED2000;/ % base
+s/a.u04 = 0x12C;/a.u04 = 0x12D;/ % base
+s/a.u45 = 0xFF;/;/ % base
+s/a.u11 = 0;/a.u11 = 0xE6;/ % base
+s/a.u02 = 0x4403;/a.u02 = 0x401;/ % base
+s/a.u30 = 0.0f;/a.u30 = 1.0f;/ % base
+s/a.u01 = 3;/;/ % base
+s/a.u18 = 100.0f;/a.u18 = 10.0f;/ % base
+s/a.u38 = 1.0f;/a.u38 = 0.0f;/ % base
+s/a.u47 = 6;/a.u47 = 5;/ % base
+s/a.u4C = 0xFF;/a.u4C = 0;/ % base
+s/a.u54 = 1;/a.u54 = 0;/ % base
+s/a.u56 = 0xFF;/a.u56 = 0xFE;/ % base
+s/b.u04 = 95.0f;/b.u04 = 65.0f;/ % base
+s/b.u08 = 65.0f;/b.u08 = 95.0f;/ % base
+s/b.u14 = 0.15f;/b.u14 = 0.15000002f;/ % base
+s/b.u1C = 0.4f;/b.u1C = 0.7f;/ % base
+s/b.u20 = 1e-06f;/b.u20 = 0.0f;/ % base
+s/c.id = obj->unique_id;/c.id = 0;/ % base
+s/c.from\[1\] = sFrom\[1\];/c.from[1] = sTo[1];/ % base
+s/c.to\[1\] = sTo\[1\];/c.to[1] = sFrom[1];/ % base
+s/c.joint = 1;/c.joint = 0;/ % base
+s/b.u56 = 0;/;/ % base
+s/b.u48 = 1.0f;/b.u48 = 2.0f;/ % base
+s/c.mode = 3;/c.mode = 2;/ % base
+s/func_1518A560(\&a, \&b, \&c, 2, 0, 0, 0);/func_1518A560(\&a, \&b, \&c, 2, 3, 0, 0);/ % base

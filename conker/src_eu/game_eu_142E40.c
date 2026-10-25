@@ -905,11 +905,11 @@ void func_15117D18(f32 *arg0) {
 }
 
 #ifdef NON_MATCHING
-s32 func_15104A80(s32, s32, s32);
+void func_15104A80(u8 *);
 
 void func_15117D40(u8 *arg0) {
     s32 sp1C;
-    s32 (*var_t0)(s32, s32, s32);
+    void (*var_t0)(u8 *); // P256: only func_15104A80 (prop_owner_effects_clear), called with the object in a0
     s16 temp_v0_2;
     s16 temp_v0_3;
     s32 var_a1;
@@ -969,7 +969,7 @@ void func_15117D40(u8 *arg0) {
             var_a3 = 3;
             if (var_t0 != NULL) {
                 sp1C = 3;
-                var_t0(var_a1, var_a2, 3);
+                var_t0(arg0); // P256: the asm jalr passes a0 = arg0 (a1-a3 = step, flag, 3 are not read)
                 var_a3 = 3;
             }
         }
@@ -2556,9 +2556,110 @@ void func_1511D0B4(s32 arg0, f32 *arg1) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D91C.s")
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511DD44.s")
+#ifdef NON_MATCHING
+f32 func_150489B0(u8);
 
+// mesh_tex_wave_update: handler (table EU 8008912C) for a mesh object: on first use allocates its 12-byte state
+// (+0x7C: cached texture coordinates, two texture-animation words) and caches each source vertex's texture
+// coordinates; every frame offsets the current vertex buffer's coordinates by (amp_s * cos-like(phase),
+// amp_t * sin-like(phase)) (func_150489B0 / func_15048A40 of (+0x80 >> 4) & 0xFF; amplitudes = the low 12 bits and
+// the next 12 bits of +0x3C), advances the phase +0x80 by the top byte of +0x3C * D_800BE9E4, then runs the texture
+// animation (func_1511AA1C).
+void func_1511DD44(u8 *obj) {
+    s32 *st = *(s32 **)(obj + 0x7C);
+    s16 *uv;
+    s16 *dst;
+    s32 i;
+    s32 off;
+    s32 packed;
+    s32 amp_s;
+    s32 amp_t;
+    u32 speed;
+    u8 phase;
+    f32 a;
+    f32 b;
+    s16 ds;
+    s16 dt;
+
+    if (st == NULL) {
+        st = (s32 *)allocate_memory(0xC, 1, 0, 0);
+        *(s32 **)(obj + 0x7C) = st;
+        st[1] = 0;
+        st[2] = 0;
+        uv = allocate_memory(*(u16 *)(obj + 0x16) * 4, 1, 0, 0);
+        st[0] = (s32)uv;
+        dst = uv;
+        for (i = 0, off = 0; i < *(u16 *)(obj + 0x16); i++, off += 0x10) {
+            dst += 2;
+            dst[-2] = *(s16 *)(*(u8 **)(obj + 0x28) + off + 8);
+            dst[-1] = *(s16 *)(*(u8 **)(obj + 0x28) + off + 0xA);
+        }
+    } else {
+        uv = (s16 *)st[0];
+    }
+    packed = *(s32 *)(obj + 0x3C);
+    amp_s = packed & 0xFFF;
+    amp_t = (packed >> 12) & 0xFFF;
+    speed = (packed >> 24) & 0xFF;
+    phase = (*(s32 *)(obj + 0x80) >> 4) & 0xFF;
+    a = func_15048A40(phase);
+    b = func_150489B0(phase);
+    *(s32 *)(obj + 0x80) += speed * D_800BE9E4;
+    if (*(u16 *)(obj + 0x16) > 0) {
+        ds = (s32)((f32)amp_s * b);
+        dt = (s32)((f32)amp_t * a);
+        for (i = 0, off = 0; i < *(u16 *)(obj + 0x16); i++, off += 0x10) {
+            *(s16 *)(*(u8 **)(obj + 0x20 + D_800BE9C0 * 4) + off + 8) = uv[i * 2] + ds;
+            *(s16 *)(*(u8 **)(obj + 0x20 + D_800BE9C0 * 4) + off + 0xA) = uv[i * 2 + 1] + dt;
+        }
+    }
+    func_1511AA1C(obj, st + 1, st + 2);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511DD44.s")
+#endif
+
+#ifdef NON_MATCHING
+void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
+
+// mesh_tex_scroll_update: handler (table EU 80089318) for a mesh object: on first use caches each source vertex's
+// texture coordinates minus 0x2000 (+0x7C, allocated) and writes the source positions plus the offset (+0x10..+0x14)
+// into both vertex buffers (+0x24, +0x20); every frame advances the scroll (+0x80) by speed * 0.01 * D_800BE9E4
+// (speed = low half of +0x3C) and rebuilds the current buffer's texture coordinates (func_15094EC8) with the two
+// packed bytes of +0x3C (top byte signed).
+void func_1511DF6C(u8 *obj) {
+    s16 *uv = *(s16 **)(obj + 0x7C);
+    s16 *dst;
+    s32 i;
+    s32 off;
+    s32 packed;
+
+    if (uv == NULL) {
+        uv = allocate_memory(*(u16 *)(obj + 0x16) * 4, 1, 0, 0);
+        *(s16 **)(obj + 0x7C) = uv;
+        dst = uv;
+        for (i = 0, off = 0; i < *(u16 *)(obj + 0x16); i++, off += 0x10) {
+            dst += 2;
+            dst[-2] = *(s16 *)(*(u8 **)(obj + 0x28) + off + 8) - 0x2000;
+            dst[-1] = *(s16 *)(*(u8 **)(obj + 0x28) + off + 0xA) - 0x2000;
+        }
+        for (i = 0, off = 0; i < *(u16 *)(obj + 0x16); i++, off += 0x10) {
+            *(s16 *)(*(u8 **)(obj + 0x20) + off + 0) = *(s16 *)(*(u8 **)(obj + 0x24) + off + 0) =
+                *(s16 *)(*(u8 **)(obj + 0x28) + off + 0) + *(s16 *)(obj + 0x10);
+            *(s16 *)(*(u8 **)(obj + 0x20) + off + 2) = *(s16 *)(*(u8 **)(obj + 0x24) + off + 2) =
+                *(s16 *)(*(u8 **)(obj + 0x28) + off + 2) + *(s16 *)(obj + 0x12);
+            *(s16 *)(*(u8 **)(obj + 0x20) + off + 4) = *(s16 *)(*(u8 **)(obj + 0x24) + off + 4) =
+                *(s16 *)(*(u8 **)(obj + 0x28) + off + 4) + *(s16 *)(obj + 0x14);
+        }
+    }
+    packed = *(s32 *)(obj + 0x3C);
+    *(f32 *)(obj + 0x80) += (f32)((f32)(s16)packed * 0.01) * (f32)D_800BE9E4;
+    func_15094EC8(*(u8 **)(obj + 0x20 + D_800BE9C0 * 4), (s32 *)uv, *(u16 *)(obj + 0x16), *(f32 *)(obj + 0x80),
+                  packed >> 24, (packed >> 16) & 0xFF);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511DF6C.s")
+#endif
 
 struct B73 { u8 hi : 6; u8 lo : 2; };
 void func_1511E14C(u8 *arg0)

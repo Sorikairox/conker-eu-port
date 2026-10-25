@@ -736,4 +736,43 @@ void func_1508039C(u8 *arg0)
   func_151494E0(0xFFFFFFFFFFFFFFFF & sp1C, 0xD);
 }
 
+#ifdef NON_MATCHING
+// obj_near_reachable_node: P256: 1 when `obj` stands in a zone of kind 5 or 0xB (func_150A3674(4, kind, truncated
+// x, y, z)) and one of the nodes of the lists D_800DD280[0][0x15 / 0x16 / 0x17] (position at node +0x98) lies within
+// 1000 units (squared distance < D_8009C0DC = 1e6) and passes func_15037988(obj index, joints 0 / 0, node position,
+// out, 90.0f, 0, 0); else 0. The list ids come from D_80086FF0 {0x15, 0x16, 0x17} (struct copy to the stack).
+s32 func_150A3674(s32, s32, s32 x, s32 y, s32 z);
+s32 func_15037988(s32, s32, s32, f32, f32, f32, f32 *, f32, s32, s32);
+typedef struct {
+    s32 id[3];
+} ListIds3;
+extern ListIds3 D_80086FF0;
+s32 func_150803E0(struct127 *obj) {
+    ListIds3 lists = D_80086FF0;
+    f32 out[7];
+    struct_eu_node *node;
+    f32 *pos;
+    f32 dx, dy, dz;
+    s32 k;
+
+    if (func_150A3674(4, 5, obj->x_position, obj->y_position, obj->z_position) == 0 &&
+        func_150A3674(4, 0xB, obj->x_position, obj->y_position, obj->z_position) == 0) {
+        return 0;
+    }
+    for (k = 0; k < 3; k++) {
+        for (node = D_800DD280[0][lists.id[k]]; node != NULL; node = node->next) {
+            pos = (f32 *) ((u8 *) node + 0x98);
+            dx = pos[0] - obj->x_position;
+            dy = pos[1] - obj->y_position;
+            dz = pos[2] - obj->z_position;
+            if (dx * dx + dy * dy + dz * dz < 1000000.0f &&
+                func_15037988(obj - D_800CC2D0, 0, 0, pos[0], pos[1], pos[2], out, 90.0f, 0, 0) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_AC770/func_150803E0.s")
+#endif

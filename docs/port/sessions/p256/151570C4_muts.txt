@@ -1,0 +1,21 @@
+# P256 func_151570C4 (spark_point_flash_update) mutants: sed % setup names
+s/(obj + 0x2C) >= 0)/(obj + 0x2C) > 0)/ % zero
+s/-= D_800BE9E4/-= 1/ % fire0 zero
+s/group = func_150ADA20() . 3U;/group = func_150ADA20() \& 1;/ % fire2
+s/\[func_150ADA20() . 10U\]/[func_150ADA20() \& 7]/ % fire0 fire2
+s/pt\[0\] != 0.0f \&\& //  % x0
+s/ \&\& pt\[1\] != 0.0f//  % y0
+s/ \&\& pt\[2\] != 0.0f//  % z0
+s/func_15157294((u8 \*) pt, obj\[0xC\])/func_15157294((u8 *) pt, obj[1])/ % fire
+s/flash.unk0 = 3;/flash.unk0 = 2;/ % fire
+s/flash.unk1 = -1;/flash.unk1 = 0;/ % fire
+s/11U + 5;/11U + 6;/ % fire
+s/flash.unk4 = 0;/flash.unk4 = 1;/ % fire
+s/at.unk4 = pt\[1\];/at.unk4 = pt[0];/ % fire
+s/156U + 100/155U + 100/ % fire fire2
+s/0, 0, obj\[0xC\], obj\[1\])/0, 0, obj[0xC], obj[0])/ % fire
+s/(u32) (timer\[1\] + 1)/(timer[1] + 1)/ % fire2 restart
+s/(u32) (timer\[1\] + 1)/(u32) (timer[1] + 2)/ % fire
+s/+ timer\[0\];/+ timer[1];/ % fire
+s/timer\[2\] = /timer[1] = / % fire
+

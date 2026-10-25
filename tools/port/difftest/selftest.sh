@@ -297,4 +297,23 @@ TRIALS=1 chkce KNOBERROR func_150C5A68 "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C60
 F28=$T/func_15103828.mut.c
 sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/func_15103828.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
 TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+# P256: DIFFTEST_ARGMEM "N*OFF:LEN" compares LEN bytes at the pointer stored at aN + OFF (func_15104A80's key holds a
+# stack copy of a 9-byte part list; the pointer itself differs between the builds, so only the deref sees a swapped list).
+S4A80="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=804100A0 DIFFTEST_POKE=800DC324=80410000,800DC3C4=80420000,80420004=0000000C,80410110=0000F800,800CCD48=00000000,800CD074=00000001 DIFFTEST_ARGMEM=15149A50=0:4,15149A50=0+8:4,15149A50=0*4:9"
+chkce EQUIV  func_15104A80 "$S4A80"
+chkce DIFFER func_15104A80 "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
+# P259: knob keys that are no jal / j target of the reference are flagged statically ("[knob not a jal target of the
+# reference ...]"), also when no trial reaches the call (P256 keyed ARGMEM on func_151494E0's US address 151494E0; its
+# EU jal target is 15149A50, and the compare silently did nothing). chkcn: want yes|no, func, env, substring.
+chkcn() {
+  local want=$1 f=$2 ev=$3 pat=$4 cf=$C/$2.c out has=no
+  out=$(set -f; env $ev $R/tools/port/difftest.sh $f $cf --trials ${TRIALS:-8})
+  case "$out" in *"$pat"*) has=yes;; esac
+  if [ $has = $want ]; then pass=$((pass+1)); echo "ok   [$want: $pat] env case  $(echo "$out" | cut -c1-200)"
+  else fail=$((fail+1)); echo "FAIL [want $want: $pat] env case  $out"; fi
+}
+chkcn yes func_15104A80 "$S4A80 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target of the reference (EU address? jalr-only callee?): ARGMEM 151494E0"
+chkcn yes func_15104A80 "$S4A80 DIFFTEST_RET=151494E0=1" "RET 151494E0"
+chkcn no  func_15104A80 "$S4A80" "not a jal target"
+chkcn no  func_15104A80 "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target"
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

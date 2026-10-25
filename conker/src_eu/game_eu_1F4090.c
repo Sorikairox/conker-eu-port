@@ -298,7 +298,11 @@ s32 func_151C6A28(u8 *obj, u8 arg1, u8 arg2, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F4090/func_151C6A28.s")
 #endif
 
+#ifdef NON_MATCHING /* P262: the C definition's exact types (game_eu_1306B0) */
+void *func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32);
+#else
 s32 func_151030B8(s32, u8, u8 *, u8 *, f32 *, s32, s32, f32, s32, s32, s32, s32, s32, s32);
+#endif
 extern u32 D_800AAEE0[];
 extern u8 D_800AAEE8[];
 extern u8 D_800AAF00[];
@@ -318,7 +322,7 @@ void func_151C7320(s32 arg0, u8 arg1, s32 arg2, s16 arg3, u8 arg4, s32 arg5)
   r[0] = func_150ADA20();
   r[1] = func_150ADA20();
   t = func_150ADA68();
-  func_151030B8(arg0, D_800AAEE0[arg1] >> 6, D_800AAEE8 + (arg1 * 12), D_800AAF00 + (arg1 * 12), v, (r[0] & 3) + 6, 0xFF, (t * 270.0f) + D_800AB000, arg2, 0xFF, 0, arg3, arg4, arg5);
+  func_151030B8((u8 *)arg0, D_800AAEE0[arg1] >> 6, (f32 *)(D_800AAEE8 + (arg1 * 12)), (f32 *)(D_800AAF00 + (arg1 * 12)), v, (r[0] & 3) + 6, 0xFF, (t * 270.0f) + D_800AB000, (u8 *)arg2, 0xFF, 0, arg3, arg4, arg5);
 }
 
 void *memcpy(void *, const void *, s32);
