@@ -563,7 +563,13 @@ static void apply_state(void) {
     glUniform1f(u_primz, (oth_l & 4) && rect_mode == 0 ? (prim_z & 0x7FFF) / 32767.0f : -1.0f);
     unsigned ac = oth_l & 3;
     glUniform1i(u_acmp, ac == 1 ? 1 : ac == 3 ? 3 : 0);
-    glUniform1i(u_cvg, (oth_l & 0x2000) ? ((oth_l & 0x4000) ? 2 : 1) : 0); /* ALPHA_CVG_SEL: coverage from alpha */
+    /* ALPHA_CVG_SEL + CVG_X_ALPHA (TEX_EDGE etc.): coverage = coverage * alpha, low-alpha texels are cut out.
+     * P273: ALPHA_CVG_SEL alone (RM_AA_ZB_OPA_SURF, 0x2078) only puts the coverage into the blender's alpha; the
+     * combiner alpha never touches coverage, so nothing is cut. Before P273 every ALPHA_CVG_SEL draw discarded
+     * alpha < 0.5: Berri's I8 hand texture (alpha = intensity) lost its dark texels and looked transparent.
+     * ?p273oldcvg=1 restores the old behaviour. */
+    { static int oc = -1; if (oc < 0) oc = port_flag("p273oldcvg");
+      glUniform1i(u_cvg, (oth_l & 0x2000) && (oc || (oth_l & 0x1000)) ? ((oth_l & 0x4000) ? 2 : 1) : 0); }
     /* P144: CVG_X_ALPHA + CLR_ON_CVG without FORCE_BL (e.g. the logo-end iris, func_15180AF0 / func_1518010C: black
      * combiner, I8 lens alpha): coverage = pixel coverage * alpha and the colour is written only on coverage
      * overflow, so texels with low alpha leave the framebuffer alone (approximated as "discard below 0.5"). Before,
