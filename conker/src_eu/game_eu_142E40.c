@@ -1751,7 +1751,69 @@ void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119A54.s")
 #endif
+#ifdef NON_MATCHING
+f32 func_150484A0(f32, f32);
+f32 func_150489B0(u8);
+f32 func_15048A40(u8);
+
+// mesh_cluster_spin: splits the vertices (obj + 0x28, 16-byte records, count +0x16) into clusters with
+// func_15119A54 (seed = each unassigned vertex outside the radius, 100 or 400 for kinds 0x21 / 0x22; cluster tag at
+// +6). Then, last cluster first, rotates each cluster whose centre angle a (func_150484A0(sum x, sum z) in 256ths)
+// exceeds its tag by -a (sin func_15048A40 / cos func_150489B0) in the x/z plane and re-tags its vertices
+// ((tag - 1) & 3) << 8 | a. Sets the done flag +0x84.
+void func_15119C54(u8 *obj) {
+    s16 *v = *(s16 **) (obj + 0x28);
+    s32 radius = 100;
+    s32 tag = 0;
+    s32 i;
+    s32 sx, sz, a;
+    f32 s, c, x, z;
+
+    if (*(u16 *) (obj + 0x54) == 0x21 || *(u16 *) (obj + 0x54) == 0x22) {
+        radius = 400;
+    }
+    *(s32 *) (obj + 0x84) = 1;
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+        if (*(u16 *) &v[3] == 0 && radius < v[2] * v[2] + v[0] * v[0]) {
+            tag++;
+            v[3] = tag;
+            func_15119A54(obj, (u8 *) v, radius, tag);
+        }
+    }
+    for (; tag != 0; tag--) {
+        sx = 0;
+        sz = 0;
+        v = *(s16 **) (obj + 0x28);
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+            if (*(u16 *) &v[3] == tag) {
+                sx += v[0];
+                sz += v[2];
+            }
+        }
+        if (sx == 0 && sz == 0) {
+            continue;
+        }
+        a = (s32) (func_150484A0((f32) sx, (f32) sz) * 40.743664f) & 0xFF;
+        if (tag >= a) {
+            continue;
+        }
+        s = func_15048A40(-a & 0xFF);
+        c = func_150489B0(-a & 0xFF);
+        v = *(s16 **) (obj + 0x28);
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+            if (*(u16 *) &v[3] == tag) {
+                z = (f32) v[2];
+                x = (f32) v[0];
+                v[3] = (((tag - 1) & 3) << 8) | a;
+                v[0] = (s32) (z * s + x * c);
+                v[2] = (s32) (z * c - x * s);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119C54.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119EB8.s")
 
@@ -2059,7 +2121,70 @@ void func_1511B4B8(u8 *arg0) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BAA4.s")
 
+#ifdef NON_MATCHING
+f32 sinf(f32);
+f32 cosf(f32);
+
+/* D_800A3340: vertex count, then (vertex index, reference object 0 / 1) pairs */
+static const u8 D_800A3340_pairs[17] = {
+    8, 0, 0, 1, 1, 2, 0, 3, 1, 4, 0, 5, 1, 6, 1, 7, 0,
+};
+
+// part_vertices_follow_refs: rotates this part's 8 template vertices (obj + 0x28) around two reference objects
+// (obj - 0xA0 and obj - 0x140) by each reference's yaw (+0x8, degrees) and writes them into the current vertex
+// buffer (obj + 0x20 + D_800BE9C0 * 4), offset by the part position (+0x10/+0x12/+0x14). Runs while the redraw
+// counter +0x7C is non-zero; a change of either reference yaw (cached at +0x80 / +0x84) restarts it at 2.
+// Only for obj + 0x3C == 0: otherwise the asm reads uninitialised locals (the reference pointers and the table
+// are set only in that branch) and draws nothing; the C does nothing in that case.
+void func_1511BD5C(u8 *obj) {
+    u8 *ref[2];
+    const u8 *pair;
+    s32 n;
+    u8 *r;
+    s16 *src;
+    s32 dx, dy, sx, sy, sz;
+    f32 ang, s, c, fx, fy;
+
+    if (*(s32 *) (obj + 0x3C) != 0) {
+        return;
+    }
+    n = D_800A3340_pairs[0];
+    ref[0] = obj - 0xA0;
+    ref[1] = obj - 0x140;
+    pair = &D_800A3340_pairs[1];
+
+    if (*(f32 *) (obj + 0x80) != *(f32 *) (ref[0] + 8) || *(f32 *) (obj + 0x84) != *(f32 *) (ref[1] + 8)) {
+        *(f32 *) (obj + 0x80) = *(f32 *) (ref[0] + 8);
+        *(s32 *) (obj + 0x7C) = 2;
+        *(f32 *) (obj + 0x84) = *(f32 *) (ref[1] + 8);
+    }
+    if (*(s32 *) (obj + 0x7C) == 0) {
+        return;
+    }
+    *(s32 *) (obj + 0x7C) -= 1;
+
+    while (n-- != 0) {
+        r = ref[pair[1]];
+        dx = *(s16 *) (r + 0x10) - *(s16 *) (obj + 0x10);
+        dy = *(s16 *) (r + 0x12) - *(s16 *) (obj + 0x12);
+        ang = -*(f32 *) (r + 8) * 0.0174532924f;
+        s = sinf(ang);
+        c = cosf(ang);
+        src = (s16 *) (*(u8 **) (obj + 0x28) + pair[0] * 16);
+        fy = (f32) (src[1] - dy);
+        fx = (f32) (src[0] - dx);
+        sz = src[2] + *(s16 *) (obj + 0x14);
+        sy = (s32) (fy * c - fx * s) + dy + *(s16 *) (obj + 0x12);
+        sx = (s32) (fy * s + fx * c) + dx + *(s16 *) (obj + 0x10);
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + pair[0] * 16 + 0) = sx;
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + pair[0] * 16 + 2) = sy;
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + pair[0] * 16 + 4) = sz;
+        pair += 2;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BD5C.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15188580(s32, f32 *);
@@ -2459,15 +2584,16 @@ void func_1511CAD0(u8 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_150B2C20(s32, s32);
-s32 func_151714BC(u8 *, s32, s32, s32);
+void func_151714BC(u8 *, u8, s32); /* P274: 3 arguments, void (the asm caller also sets a3 = 1, unused) */
 void func_151741D0(s32, s32);
-extern s32 D_800A3354;
+/* D_800A3354 (rodata in func_1511BD5C's GLOBAL_ASM): the three hit sound ids, copied to the stack table */
+static const u16 D_800A3354_ids[3] = { 0x2B6, 0x2BD, 0x2BE };
 s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
 
 void func_1511CBC0(u8 *arg0) {
     struct {
-        u8 * u50;
-        u8 pad54[0x4];
+        u16 u50[3]; /* P274: was u8 * (indexing read bytes through an uninitialised pointer) */
+        u8 pad56[0x2];
         u16 u58;
         u16 u5A;
         u8 * u5C;
@@ -2538,13 +2664,14 @@ void func_1511CBC0(u8 *arg0) {
                 case 2:
                     break;
                 case 1:
-                    func_151714BC(sp48, 0xFF, 0, 1);
+                    func_151714BC(sp48, 0xFF, 0);
                     func_10010F30(0x2BE, 0x7FFFU, 0x40U, 0, 0U);
                     break;
                 case 0:
                     temp_t9 = func_150ADA20() % 3U;
-                    (*(s32 *)((u8 *)(&sp.u50[0]) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800A3354) + 0));
-                    (*(u16 *)((u8 *)(&sp.u50[0]) + 4)) = (u16) (*(u16 *)((u8 *)(&D_800A3354) + 4));
+                    sp.u50[0] = D_800A3354_ids[0];
+                    sp.u50[1] = D_800A3354_ids[1];
+                    sp.u50[2] = D_800A3354_ids[2];
                     sp.u5A = (u16) temp_t9;
                     temp_t1 = (&sp.u50[0])[((u32) ((func_150ADA20() & 1) + sp.u5A + 1) % 3U) & 0xFFFF];
                     sp.u5A = (&sp.u50[0])[sp.u5A];

@@ -1,0 +1,45 @@
+\#^    f\.t\.sprite = 0x6C;$#s/0x6C/0x6D/
+\#^    f\.t\.flags = 0x5103;$#s/0x5103/0x5102/
+\#^    f\.t\.u0 = 0x200005;$#s/0x200005/0x200004/
+\#^    f\.t\.u4 = 0;$#s/= 0/= 1/
+\#^    f\.t\.uC = 0;$#s/= 0/= 1/
+\#^    f\.t\.u10 = 0;$#s/= 0/= 1/
+\#^    f\.t\.u1E = 0x14;$#s/0x14/0x15/
+\#^    f\.t\.u20 = 0xC;$#s/0xC/0xD/
+\#^    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;$#s/0x40 : 0/0 : 0x40/
+\#^    bit1 = ((s16) life == -1) ? 0 : 1;$#s/(s16) life/life/
+\#^    bit1 = ((s16) life == -1) ? 0 : 1;$#s/? 0 : 1/? 1 : 0/
+\#^    bit80 = (func_150ADA20() & 1) ? 0x80 : 0;$#s/& 1/\& 2/
+\#^    f\.t\.mode = bit80 | bit1 | 6#s/| 6 |/| 4 |/
+\#^    f\.t\.mode = bit80 | bit1 | 6#s/0x800000/0x400000/
+\#^    f\.t\.mode = bit80 | bit1 | 6#s/0xC200/0xC000/
+\#^    f\.t\.u60\[0\] = 8;$#s/8/9/
+\#^    f\.t\.u60\[1\] = 6;$#s/= 6;/= 7;/
+\#^    f\.t\.u60\[2\] = (u8) bright ? 0x1D : 0xA;$#s/(u8) bright/bright/
+\#^    f\.t\.u60\[2\] = (u8) bright ? 0x1D : 0xA;$#s/0x1D : 0xA/0xA : 0x1D/
+\#^    f\.t\.u22 = 1;$#s/1/2/
+\#^    f\.t\.u60\[3\] = 0xFF;$#s/0xFF/0xFE/
+\#^    f\.t\.u60\[4\] = 0xFF;$#s/0xFF/0xFE/
+\#^    f\.t\.u60\[5\] = 0;$#s/0;/1;/
+\#^    f\.extra\.u0 = 1;$#s/1/2/
+\#^    f\.extra\.u1 = 0;$#s/0/1/
+\#^    f\.t\.colour\[0\] = 0xE2;$#s/0xE2/0xE3/
+\#^    f\.t\.colour\[2\] = 0x60;$#s/0x60/0x61/
+\#^    f\.t\.colour\[5\] = 0x0F;$#s/0x0F/0x0E/
+\#^    f\.t\.colour\[6\] = 0;$#s/0;/1;/
+\#^    f\.t\.u1C = 0xFF;$#s/0xFF/0xFE/
+\#^    f\.t\.u24 = 1\.0f;$#s/1\.0f/2.0f/
+\#^    f\.extra\.u4 = 0\.703f;$#s/0\.703f/0.704f/
+\#^    f\.t\.pos\[1\] = ((f32 \*) pos)\[1\];$#s/)\[1\]/)[2]/
+\#^    f\.t\.u3C\[1\] = 0\.0f;$#s/0\.0f/1.0f/
+\#^    f\.t\.vel\[2\] = vel\[2\];$#s/vel\[2\]/vel[1]/
+\#^    f\.t\.u54 = arg2;$#s/arg2/spin/
+\#^    f\.t\.colour\[7\] = (u8) alpha;$#s/alpha/life/
+\#^        f\.t\.life = 300;$#s/300/299/
+\#^    f\.t\.size\[1\] = size;$#s/size;/arg2;/
+\#^    p = func_151307F0((s32 \*) &f\.t, 1, room, 0x10, kind, owner);$#s/1, room/0, room/
+\#^    p = func_151307F0((s32 \*) &f\.t, 1, room, 0x10, kind, owner);$#s/0x10/0x11/
+\#^    p = func_151307F0((s32 \*) &f\.t, 1, room, 0x10, kind, owner);$#s/kind, owner/owner, kind/
+\#^    if (p != 0) {$#s/!=/==/
+\#^        memcpy(p + 0xA8, &f\.spin, 4);$#s/0xA8/0xAC/
+\#^        memcpy(p + 0xB0, (f32 \*) &f\.extra, 8);$#s/8)/4)/

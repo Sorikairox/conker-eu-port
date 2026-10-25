@@ -163,7 +163,61 @@ block_14:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CD68C.s")
 #endif
+#ifdef NON_MATCHING
+void func_151D6310(void *, s16, s32, void *, u8 *);
+void *memcpy(void *, const void *, s32);
+
+// sprite_quad_build: entry of the D_8008A1E0 draw table (`s16 *(u8 *, s16 slot)`, same family as func_15198180).
+// Gets 0x40 bytes of vertices for the view slot from the record's buffers at +0x100 (func_151D6310; on a fresh
+// buffer the matrix at +0xC0 is copied into both halves of it) and returns them (NULL when none). The four corners
+// (+/- half width +0x2C, +/- half height +0x30, z 0) are rotated by the angles +0x40 / +0x44 / +0x48
+// (func_150A8050 / func_150A7E40) and stored as s16 x, y, z with flag 0. (The asm also sums the position +0x34 and,
+// when +0x114 < 0, the offset +0x4C into a stack vector it never reads; that dead code is left out.)
+s16 *func_150CDAAC(u8 *arg0, s16 arg1) {
+    s16 *vtx;
+    s16 *ret;
+    u8 fresh;
+    u8 *buf;
+    f32 mtx[4][4];
+    f32 p[4][3];
+    s32 i;
+
+    func_151D6310(arg0 + 0x100, arg1, 0x40, &vtx, &fresh);
+    ret = vtx;
+    if (vtx == NULL) {
+        return NULL;
+    }
+    if (fresh) {
+        buf = *(u8 **) (arg0 + 0x100 + arg1 * 4);
+        memcpy(buf, arg0 + 0xC0, 0x40);
+        memcpy(*(u8 **) (arg0 + 0x100 + arg1 * 4) + 0x40, arg0 + 0xC0, 0x40);
+    }
+    p[0][0] = *(f32 *) (arg0 + 0x2C);
+    p[0][1] = *(f32 *) (arg0 + 0x30);
+    p[0][2] = 0.0f;
+    p[1][0] = -*(f32 *) (arg0 + 0x2C);
+    p[1][1] = *(f32 *) (arg0 + 0x30);
+    p[1][2] = 0.0f;
+    p[2][0] = -*(f32 *) (arg0 + 0x2C);
+    p[2][1] = -*(f32 *) (arg0 + 0x30);
+    p[2][2] = 0.0f;
+    p[3][0] = *(f32 *) (arg0 + 0x2C);
+    p[3][1] = -*(f32 *) (arg0 + 0x30);
+    p[3][2] = 0.0f;
+    func_150A8050(mtx, *(f32 *) (arg0 + 0x40), *(f32 *) (arg0 + 0x44), *(f32 *) (arg0 + 0x48));
+    for (i = 0; i < 4; i++) {
+        func_150A7E40(mtx, p[i][0], p[i][1], 0.0f, &p[i][0], &p[i][1], &p[i][2]);
+        vtx[0] = (s32) p[i][0];
+        vtx[1] = (s32) p[i][1];
+        vtx[2] = (s32) p[i][2];
+        vtx[3] = 0;
+        vtx += 8;
+    }
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CDAAC.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CDD08.s")
 

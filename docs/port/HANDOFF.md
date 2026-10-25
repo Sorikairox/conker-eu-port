@@ -10,6 +10,23 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P274 (port-b) (session P274, 2026-10-25). Details: `docs/port/sessions/P274.md`
+
+Hand C (NM), registry rows `P274`, setups / mutants in docs/port/sessions/p274: func_1511BD5C part_vertices_follow_refs,
+func_15119C54 mesh_cluster_spin, func_151C64F4 debris_sprite_spawn, func_150E2030 beam_effect_spawn, func_150CDAAC
+sprite_quad_build, func_151CC86C glow_colour_on_message, func_150EB740 player_mode_flags_update, func_151B402C
+rope_nodes_reset, func_151714BC barrel_break_pieces. Fixed old NM callers: func_1511CBC0 (stack sound-id table typed
+`u8 *` -> read through a garbage pointer; now u16[3]) and func_151B458C (called func_151B402C with two floats instead
+of its object). Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1655), implicit_scan 0 NM+float (832 sites), selftest 130/130, progress_nm `total 5916 3995 1674 247 5669 95.8% 1984680/2253856 (88.1%)`.
+
+## Next steps (from P274)
+1. Continue compiled breadth, smallest first: func_151714BC's neighbours in 19E910 (func_15171E60 / func_15171100),
+   func_15173F20, func_150F7364, func_1515B500, func_150E1AF0, func_151C4DD0, func_150E6550 (ray cast + template).
+2. D5E90 hand asm (sin/cos family) with a whole-function harness (nmharness.sh, HARNESS= / HMUT= rows).
+3. Pre-existing tablesig flags: D_8008906C / D_80089234 / D_800892B8 mixed arities (check the asm dispatchers).
+   D_8008FE90 (func_151B3550 void in a table whose C dispatchers test the result) fixed in P274: it now returns
+   func_151B4D88's value (matching C, verify_all byte-identical).
+
 ## P270 (port) (session P270, 2026-10-25). Details: `docs/port/sessions/P270.md`
 - Merged port-b (P267). Fixed the user's intro crash (func_151D7FE8 `f32 * + 0xC` velocity pointer, P269) and the same
   class in 10 more NM functions (vertex `s16 * + 0x10` stride in the func_151D6310 quad family, float spills cast to
