@@ -1,0 +1,42 @@
+SURVIVED 1: s|    w->y = nmD5E90_rint(py);|    w->y = (s32) py;|
+KILLED 2: s|        w->co = -dz / l;|        w->co = dz / l;|
+SURVIVED 3: s|    if (w->tgt\[0\] >= px) {|    if (w->tgt[0] > px) {|
+KILLED 4: s|    w->zmax = (s32) z1 + w->margin;|    w->zmax = (s32) z1;|
+KILLED 5: s|        if (r == w->rec \|\| |        if (|
+KILLED 6: s|!(\*(u32 \*) (r + 0xF8) \& 0x4000)|!(*(u32 *) (r + 0xF8) \& 0x400)|
+KILLED 7: s|    w->recNo = no;|    w->recNo = no + 1;|
+KILLED 8: s|        if (w->xmax < node->cx - node->half \|\| |        if (|
+SURVIVED 9: s|            w->zmax < node->cz - node->half \|\| node->cz + node->half < w->zmin) {|            w->zmax < node->cz - node->half) {|
+SURVIVED 10: s|        w->prev = w->curFirst - 1;|        w->prev = w->curFirst;|
+KILLED 11: s|                t += w->prev;|                t += w->prev + 1;|
+KILLED 12: s|                if (t >= n + first) {|                if (t > n + first) {|
+KILLED 13: s|                    w->cursor += t - first - n;|                    w->cursor += t - first;|
+SURVIVED 14: s|                    flags = \*(u32 \*) (obj + NMR_OBJ_FLAGS);|                    flags = 0;|
+KILLED 15: s|            w->noSlope = flags \& 0x1000000;|            w->noSlope = flags \& 0x2000000;|
+SURVIVED 16: s|        if (!(yr\[t \* 2\] < w->y + 200) |        if (!(yr[t * 2] < w->y + 100) |
+KILLED 17: s|            if (w->nVisited != 100) {|            if (w->nVisited != 2) {|
+KILLED 18: s|        k = NM_FABS(cr\[0\]\[2\]) > NM_FABS(cr\[0\]\[1\]) ? 2 : 1;|        k = 1;|
+KILLED 19: s|    if (cr\[2\]\[k\] < 0.0f) bits \|= 4;|    if (cr[2][k] < 0.0f) bits \|= 2;|
+KILLED 20: s|    \*side = cr\[1\]\[k\];|    *side = cr[0][k];|
+KILLED 21: s|        if (t < 0.0f) {|        if (t < -1.0f) {|
+SURVIVED 22: s|        if (!(dist >= best)) {|        if (!(dist > best)) {|
+KILLED 23: s|    if (best >= w->radiusF) {|    if (best > w->radiusF + 1.0f) {|
+KILLED 24: s|    w->pos\[2\] = w->pos\[2\] + (u\[2\] \* w->co + u\[0\] \* w->si);|    w->pos[2] = w->pos[2] + (u[2] * w->co - u[0] * w->si);|
+KILLED 25: s|    nmw_tri_to_local(tri, w->vbase, w->mid\[0\], w->mid\[1\] + w->yoff, |    nmw_tri_to_local(tri, w->vbase, w->mid[0], w->mid[1], |
+KILLED 26: s|        obj\[0x4F\] \|= 0x80;|        obj[0x4F] \|= 0x40;|
+KILLED 27: s|        w->rec\[0x275\] = w->recNo;|        w->rec[0x275] = w->recNo - 1;|
+SURVIVED 28: s|        len2 = 1.0f;|        len2 = 2.0f;|
+KILLED 29: s|            n\[2\] \* (w->tv\[0\].z - a \* w->si + c \* w->co) >= 0.0f) {|            n[2] * (w->tv[0].z - a * w->si + c * w->co) > 0.0f) {|
+KILLED 30: s|    if (w->noSlope == 0 \&\& \*D_800CC1F2 == 0 \&\& n\[1\] / len >= 0.5f) {|    if (w->noSlope == 0 \&\& n[1] / len >= 0.5f) {|
+KILLED 31: s|        if (dist != 0.0f \&\& !(dist <= 60.0f)) {|        if (dist != 0.0f \&\& !(dist <= 50.0f)) {|
+KILLED 32: s|        oz = w->mid\[2\]; /\* the asm|        oz = w->pos[2]; /* the asm|
+KILLED 33: s|    if (!(\*D_800CC1F3 != 0 \&\& side <= 0.8f) \&\& |    if (|
+KILLED 34: s|    h = n\[3\] + w->radiusF \* len - |    h = n[3] + w->radiusF - |
+KILLED 35: s|    if (!(n\[1\] / len >= -0.2f) \&\& !(w->dy.f <= 0.0f)) {|    if (!(n[1] / len >= -0.2f)) {|
+KILLED 36: s|    h = h / len2;|    h = h / len;|
+KILLED 37: s|    w->pos\[1\] = h \* n\[1\] + w->pos\[1\];|    w->pos[1] = w->pos[1];|
+KILLED 38: s|        func_150492CC((f32) w.margin \* 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius \* 2.0f + sqrtf|        func_150492CC((f32) w.margin * 2.0f, NMW_F32(D_800CC1F8), (f32) w.radius * 2.0f + 0.0f * sqrtf|
+KILLED 39: s|    w.keepFall = w.dy.u = \*(u32 \*) (rec + 0x20);|    w.keepFall = w.dy.u = 0;|
+KILLED 40: s|            w.moved = 1;|            w.moved = 0;|
+KILLED 41: s|        if (w.keepFall == 0) {|        if (w.keepFall != 0) {|
+done: killed 33 survived 8 other 0

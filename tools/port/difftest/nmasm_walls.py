@@ -207,6 +207,29 @@ def ray_call(ref, cand, m, rng, pos, vs=None):
     fa = {12: b32(p0[0]), 14: b32(p0[1])}
     return run(ref, cand, m, (0x150ACEA0, 'func_150ACEA0'), (0, 0, b32(p0[2]), b32(d[0])), fa=fa, stack=stack)
 
+# P294: engine paths counted per trial (executed reference PCs), walls / ledges
+WALL_PCS = {0x150ABC28: 'rec next', 0x150ABD34: 'obj next', 0x150ABE58: 'visited add', 0x150ABF28: 'obj mark',
+            0x150ABF84: 'rec mark', 0x150AC0CC: 'clamp test', 0x150AC104: 'clamp', 0x150AC3CC: 'edge push test',
+            0x150AC508: 'edge best', 0x150AC5D8: 'face push test', 0x150AC63C: 'keepfall clear', 0x150AC698: 'pushed',
+            0x150AC960: 'ledge tri', 0x150ACC38: 'ledge edge', 0x150ACE20: 'ledge -', 0x150ACE38: 'ledge +'}
+OBJMARK, VOFS2 = 0x80677000, 0x80618000
+
+def rec_models(rng, m, recs, nt):
+    """P294: area kind 3: some of the 25 records (D_800CC2D0, 0x32C bytes) get the level triangles as their model:
+    word 0 != 0, +0xF8 & 0x4000, kind byte +4 -> D_800C6070[kind] = offsets (relative to the vertex base +0x264),
+    D_800C5D38[kind] = count; xz / y bounds tables +0x268 / +0x26C. Some records are off (no flag / no base)."""
+    vb = rng.choice([VP - 0x2000, VP])
+    for t in range(nt):
+        for kk in range(3): W(m, VOFS2 + 12 * t + 4 * kk, 'I', (R(m, VOFS + 12 * t + 4 * kk, 'I')[0] - vb) & M32)
+    k = rng.randrange(187)
+    W(m, SY['D_800C6070'] + 4 * k, 'I', VOFS2); W(m, SY['D_800C5D38'] + 2 * k, 'H', nt)
+    for i in range(25):
+        r = recs + 0x32C * i
+        W(m, r, 'I', rng.choice([0, 1, 1, 1, 0x2C]))
+        m[phys(r) + 4] = k
+        W(m, r + 0xF8, 'I', rng.choice([0x4000, 0x4000, 0x4000, 0, 0xFFFFBFFF]))
+        W(m, r + 0x264, '3I', rng.choice([vb, vb, vb, 0]), BND, YB)
+
 def common_globals(rng, m):
     for a in ('D_800CC1F2', 'D_800CC1F3', 'D_800CC1F4'):
         m[phys(SY[a])] = rng.choice([0, 0, 1])
@@ -239,6 +262,22 @@ def synth(ref, cand, base, rng, n, only):
         W(m, DC280, 'i', rng.choice([0, 1]))
         onetree(rng, m, nt, pos[0], pos[2])
         common_globals(rng, m)
+        area = rng.choice([0, 0, 2, 3]) if kind != 'ray' else 0
+        if area == 2:                                          # P294: world objects (func_150A69A8 lists them)
+            nobj, _ = ray_objects(rng, m, nt, pos); W(m, DC320, 'i', nobj); W(m, DC280, 'i', 2)
+            W(m, SY['D_800DC3C4'], 'I', OBJMARK)
+            vb0 = VP - 0x1000                                  # the engine adds the object's vertex base to the
+            for i in range(nobj):                              # level triangles too: one base for all
+                W(m, OBJVB + 4 * i, 'I', vb0)
+                if rng.random() < 0.6:                         # listed (D_800D3C00): collidable, box around pos
+                    o = OBJS + 0xA0 * i; m[phys(o) + 0x6E] = 0; m[phys(o) + 0x4F] = rng.choice([0, 0x80, 0x1F])
+                    W(m, o + 0x10, '3h', pos[0] + rng.randint(-20, 20), pos[1], pos[2] + rng.randint(-20, 20))
+                    W(m, o + 0x50, '2H', rng.choice([300, 2000]), rng.choice([300, 2000]))
+                    W(m, o + 0x56, 'H', rng.choice([1, 3, nt, nt + 20]))
+            for t2 in range(nt + 80):
+                for kk in range(3): W(m, VOFS + 12 * t2 + 4 * kk, 'I', VP + 0x18 * t2 + 8 * kk - vb0)
+        elif area == 3:                                        # P294: the other records' own models
+            rec_models(rng, m, recs, nt); W(m, DC280, 'i', 3)
         rec, ri = setup_rec(rng, m, recs, pos)
         if kind == 'ray':
             if rng.random() < 0.5: ray_grid_tree(rng, m, vs, pos)
@@ -254,13 +293,22 @@ def synth(ref, cand, base, rng, n, only):
             for q in sorted(set(RAY_PCS[x] for x in ref.trace if x in RAY_PCS)): hist['ray ' + q] = hist.get('ray ' + q, 0) + 1
             ref.trace = None
             STUBS[:] = [None, None]
-        else: ok, v0, info, m1 = wall_call(ref, cand, m, rng, rec, pos, kind)
+        else:
+            ref.trace = []
+            try:
+                ok, v0, info, m1 = wall_call(ref, cand, m, rng, rec, pos, kind)
+            except RuntimeError as e:   # P294: area 2 list entries past the listed triangles can read garbage offsets
+                if not str(e).startswith('ref'): raise
+                hist['wall ref fault'] = hist.get('wall ref fault', 0) + 1; ref.trace = None; continue
+            for q in sorted(set(WALL_PCS[x] for x in ref.trace if x in WALL_PCS)): hist['  ' + q] = hist.get('  ' + q, 0) + 1
+            ref.trace = None
         key = '%s:%s' % (kind, v0 if v0 in (0, 1) else 'other')
         if kind == 'ac8c4': key += ' hit%d' % R(m1, SY['D_800CC1C0'] + 2 * ri, 'h')[0]
+        if kind != 'ray': key += ' area%d' % area
         hist[key] = hist.get(key, 0) + 1
         if not ok:
             bad += 1
-            if bad <= 6: print('DIFF', t, kind, info)
+            if bad <= 6: print('DIFF', t, kind, 'area', area, info)
     return bad, hist
 
 def level_mode(ref, cand, rng, n, levelno, rom, only):
