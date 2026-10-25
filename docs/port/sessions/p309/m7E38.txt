@@ -1,0 +1,112 @@
+s/            partner = other\[6\];/            partner = other[5];/ % h48
+s/    self->unkB0 = 0x19;/    self->unkB0 = 0x18;/ % hS1
+s/    if (self->unkE4 != 0) {/    if (self->unkE4 == 0) {/ % h48 h48k
+s/        self->unk90 = self->unkE4;/        self->unk90 = 0x333;/ % h48
+s/    if (self->unk13C != 0 \&\& ((u8 \*) D_800CC2D0\[slot\].unk31C)\[0x4E\] != 0) {/    if (self->unk13C != 0 \&\& ((u8 *) D_800CC2D0[slot].unk31C)[0x4F] != 0) {/ % h48 rel
+s/        for (i = 0; i < 9; i++) {/        for (i = 0; i < 8; i++) {/ % h48
+s/        self->gravity = 6.0f;/        self->gravity = 5.0f;/ % h48
+s/        turn = pl->unk54 \* 0.45f;/        turn = pl->unk54 * 0.5f;/ % hS1
+s/        self->unk44 = pl->unkC4;/        self->unk44 = pl->unk44;/ % hS1
+s/            pl->unk184 \&= ~0x1F;/            pl->unk184 \&= ~0xF;/ % h7Fb
+s/            pl->immune = 0x14;/            pl->immune = 0x15;/ % h7Fb
+s/            self->x_position += (pl->x_position - self->x_position) \* 0.5f;/            self->x_position += (pl->x_position - self->x_position) * 0.25f;/ % h7Fb
+s/            self->z_position += (pl->z_position/            self->z_position += (pl->x_position/ % h7Fb
+s/            self->y_position = pl->y_position;/            self->y_position = pl->z_position;/ % h7Fb
+s/            pl->disable_jump = 10;/            pl->disable_jump = 11;/ % h7Fn
+s/                if (speed < boost) {/                if (speed > boost) {/ % h7Fb h7Fn
+s/                boost = pl->unk44 \* 1.35f;/                boost = pl->unk44 * 1.25f;/ % h7Fb
+s/                pl->unkAA = 0x46;/                pl->unkAA = 0x47;/ % h7Fn
+s/            if (((u8 \*) pl->unk31C)\[0x4F\] == 2) {/            if (((u8 *) pl->unk31C)[0x4F] == 1) {/ % h7Fb h7Ff
+s/            self->y_velocity = 0.0f;/            self->y_velocity = 1.0f;/ % hS1
+s/        self->unk21C = old + (s16) (angle - old) \/ 3;/        self->unk21C = old + (u16) (angle - old) \/ 3;/ % hS1 hWrap
+s/        self->unk21C = old + (s16) (angle - old) \/ 3;/        self->unk21C = old + (s16) (angle - old) \/ 2;/ % h48
+s/        self->unk7A = old;/        self->unk7A = angle;/ % hS1
+s/        self->unk76 = old;/        self->unk76 = angle;/ % hS1
+s/        self->xz_velocity = pl->xz_velocity;/        self->xz_velocity = pl->unk44;/ % hS1
+s/            func_1505C7D8(self, D_800C3E78);/            func_1505C7D8(self, 0);/ % hS1
+s/        if (self->unkD0 != 0) {/        if (self->unkD0 == 0) {/ % h48 h48k
+s/        self->unk21C = self->unk7A;/        self->unk21C = self->unk76;/ % rel
+s/            if (D_800CC2D0\[slot\].stunned != 0) {/            if (D_800CC2D0[slot].stunned == 0) {/ % rel rel0
+s/                self->target_speed = 15.0f;/                self->target_speed = 16.0f;/ % rel
+s/                self->y_velocity = 80.0f;/                self->y_velocity = 81.0f;/ % rel
+s/            self->unk13C = 0;/            self->unk13C = 1;/ % rel
+s/        slot = D_800C3E78;/        slot = self->unk124;/ % rel0
+s/        self->unk65 = 0;/        self->unk65 = 1;/ % loopX
+s/        self->unkE4 = self->unk90;/        self->unkE4 = 0;/ % loopX
+s/        func_1505A3A8(0.0f, self, 0.0f, 0.5f, 1);/        func_1505A3A8(0.0f, self, 0.0f, 0.25f, 1);/ % loopX
+s/        self->stunned = 0x1E;/        self->stunned = 0x1F;/ % loopX
+/        self->stunned = 0x1E;/d;s/        func_15059140(self);/        func_15059140(self); self->stunned = 0x1E;/ % loopX
+/        self->xz_velocity = vel;/d % loopX
+s/        turn = (self->unkC4 - self->unk44) \* 0.8f;/        turn = (self->unkC4 - self->unk44) * 0.7f;/ % loopX
+s/        if (self->unk232 == 4) {/        if (self->unk232 == 5) {/ % land loopX
+s/                D_800CC2D0\[0\].unk1E4 = 1;/                D_800CC2D0[1].unk1E4 = 1;/ % land
+s/            func_15052F9C(self, 50.0f, 0x17, 4, 0, 5, 0, 0, 0, 0);/            func_15052F9C(self, 50.0f, 0x16, 4, 0, 5, 0, 0, 0, 0);/ % land
+s/ ? self->unk7A != 0 : / ? self->unk7A == 0 : / % landC landC0
+s/ : self->unk124 != 0) {/ : self->unk124 == 0) {/ % land land1
+s/self->interaction_state == 0x20) ?/self->interaction_state != 0x20) ?/ % landC landS
+s/            for (i = 0; i < 2; i++) {/            for (i = 0; i < 1; i++) {/ % loopSt
+s/                if (pl->interaction_state == 1 \&\&/                if (pl->interaction_state == 2 \&\&/ % loop48 loopSt
+s/\[0x78\] == 0 \&\&/[0x79] == 0 \&\&/ % loop78
+s/\[0x11A\] == 0 \&\& (D_800CC268/[0x11B] == 0 \&\& (D_800CC268/ % loop78
+s/(D_800CC268 \& (1 << i))/(D_800CC268 \& (2 << i))/ % loopX loop48
+s/pl->y_velocity < 0.0f) {/pl->y_velocity <= 0.0f) {/ % loopX
+s/                    self->unk124 = i;/                    self->unk124 = 1 - i;/ % loop48
+s/                    dist = 39.0f;/                    dist = 38.0f;/ % loopSt
+s/                        pl->stunned = 0;/                        pl->stunned = 1;/ % loop48
+s/                        dist = 0.0f;/                        dist = 1.0f;/ % loop48
+s/                    func_1505327C(self, dist, 3.0f, 4, -1);/                    func_1505327C(self, dist, 3.5f, 4, -1);/ % loop48
+s/    self->immune = 0xFF;/    self->immune = 0xFE;/ % h48
+s/    self->unk28 = self->y_position - self->unk180;/    self->unk28 = self->y_position;/ % h48 hi
+s/        if (partner == 0x7A) {/        if (partner != 0x7A) {/ % h48 h48k
+s/            self->unkF8 |= 0x10000;/            self->unkF8 |= 0x20000;/ % h48
+s/            top = self->unk180 + 180.0f;/            top = self->unk180 + 170.0f;/ % h48
+s/top + 10.0f, 1.2f, top, -1.1f, 4.0f, -4.0f);/top + 10.0f, 1.2f, top, -1.2f, 4.0f, -4.0f);/ % h48
+s/                D_800CC2D0\[self->unk124\].unkCC = 0x1E;/                D_800CC2D0[self->unk124].unkCC = 0x1F;/ % h48
+s/            self->unkC4 = -self->y_velocity;/            self->unkC4 = self->y_velocity;/ % h48
+s/            self->unk40 = (f32) self->unk7A \* 0.0054931640625f;/            self->unk40 = (f32) self->unk7A * 0.0055f;/ % h48
+s/        func_1506B100(0, 2.0f, 4.0f);/        func_1506B100(0, 2.0f, 3.0f);/ % hi
+s/        if (self->unk28 > 75.0f) {/        if (self->unk28 > 85.0f) {/ % hi
+s/            if (self->unk102 < 30) {/            if (self->unk102 < 31) {/ % hi30
+s/                self->unk102++;/                self->unk102 += 2;/ % hi
+s/        } else if (self->unk102 < 10) {/        } else if (self->unk102 < 11) {/ % lo10
+s/            self->unk102 = 0;/            self->unk102 = 1;/ % lo
+s/        if (self->unk102 > 10) {/        if (self->unk102 > 11) {/ % hDrop
+s/            if (pl->unk28 == 0.0f || self->in_water != 0 ||/            if (pl->unk28 == 1.0f || self->in_water != 0 ||/ % hDrop
+s/ || self->in_water != 0 ||/ || self->in_water == 0 ||/ % hDropW hNoDrop
+s/(self->unk124 != 0 \&\& ((u8 \*) pl->unk31C)\[0x4F\] == 2)) {/(self->unk124 != 0 \&\& ((u8 *) pl->unk31C)[0x4F] == 1)) {/ % hDropF hNoDrop
+s/                    D_800CC2D0\[self->unk124\].unkCC = 0;/                    D_800CC2D0[self->unk124].unkCC = 1;/ % hDrop
+s/\[self->unk124\].unk31C)\[0x4E\] = 0;/[self->unk124].unk31C)[0x4E] = 2;/ % hDrop
+s/                    D_800CC2D0\[self->unk124\].in_water = 0;/                    D_800CC2D0[self->unk124].in_water = 2;/ % hDrop
+s/                    D_800CC2D0\[self->unk124\].gravity = 4.0f;/                    D_800CC2D0[self->unk124].gravity = 3.0f;/ % hDrop
+s/                func_10010FFC(0, 0x51, 0x6D60, 0, 0, (u8 \*) self);/                func_10010FFC(0, 0x51, 0x6D61, 0, 0, (u8 *) self);/ % hDrop
+s/                self->health = 0;/                self->health = 1;/ % hDrop
+s/        if (self->y_scale < 1.0f) {/        if (self->y_scale <= 1.0f) {/ % lo
+s/            self->y_scale += 0.05f;/            self->y_scale += 0.06f;/ % hi
+s/        if (self->unk28 == 0.0f) {/        if (self->unk28 != 0.0f) {/ % flat hi
+s/            self->target_speed = 0.0f;/            self->target_speed = 1.0f;/ % flat
+s/            self->unkBC \*= 0.5f;/            self->unkBC *= 0.25f;/ % flat
+s/        if (self->target_speed == 0.0f) {/        if (self->target_speed != 0.0f) {/ % hi spin
+s/            self->unkC4 = self->unk44 + turn;/            self->unkC4 = self->unk44 - turn;/ % hi
+s/            self->unkC4 += self->target_speed;/            self->unkC4 -= self->target_speed;/ % spin2 hNeg
+s/            if (self->unkC4 < 0.0f) {/            if (self->unkC4 < -6.0f) {/ % spin
+s/                self->unkC4 += 360.0f;/                self->unkC4 += 350.0f;/ % spin
+s/            } else if (self->unkC4 > 360.0f) {/            } else if (self->unkC4 > 366.0f) {/ % spin2
+s/                self->unkC4 -= 360.0f;/                self->unkC4 -= 350.0f;/ % spin2
+s/            h = fabsf(self->unkC4 \* 0.7f) + 44.0f;/            h = (self->unkC4 * 0.7f) + 44.0f;/ % hNeg
+s/            h = fabsf(self->unkC4 \* 0.7f) + 44.0f;/            h = fabsf(self->unkC4 * 0.75f) + 44.0f;/ % h7Fb
+s/            self->unkC8 = h;/            self->unkC8 = h + 1;/ % h7Fb
+s/            h2 = h + 44.0f;/            h2 = h + 45.0f;/ % h7Fb
+s/            D_800CC2D0\[self->unk124\].unkCC = h2 \* self->y_scale;/            D_800CC2D0[self->unk124].unkCC = h2;/ % h7Fb
+s/            self->unkC8 = 44.0f;/            self->unkC8 = 45.0f;/ % hi
+s/        if (speed > 0.2f \&\& self->unk28 < 10.0f/        if (speed > 0.05f \&\& self->unk28 < 10.0f/ % sndLo
+s/ \&\& self->unk28 < 10.0f \&\& / \&\& self->unk28 < 4.0f \&\& / % lo
+s/ \&\& self->health != 0 \&\& / \&\& self->health == 0 \&\& / % lo sndH0
+s/D_800C35EA != 1) {/D_800C35EA != 2) {/ % snd35
+s/            vol = 1000.0f \* speed;/            vol = 900.0f * speed;/ % lo
+s/            if (vol > 0x4650) {/            if (vol > 0x4750) {/ % snd1
+s/                vol = 0x4650;/                vol = 0x4651;/ % snd1
+s/            if (func_100107F8(self) == 0) {/            if (func_100107F8(self) != 0) {/ % lo snd1
+s/                func_10010154(0x678, self, vol, 0x3E8, 0x7D0);/                func_10010154(0x678, self, vol, 0x3E8, 0x7D1);/ % lo
+s/                func_1001091C((u8 \*) self, vol);/                func_1001091C((u8 *) self, vol + 1);/ % snd1
+s/        func_15052490(self, self->unk76, speed, 0.55f);/        func_15052490(self, self->unk76, speed, 0.5f);/ % lo
+s/    func_150535F4(self);/    ;/ % lo
