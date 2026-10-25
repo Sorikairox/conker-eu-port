@@ -384,3 +384,4 @@ P301	port	nm convert	3			group B: impact_effects_spawn, zap_bolt_update, beam_ri
 P306	port-e	nm convert	2			GROUP C2 DONE: mp_report_hit, gun_fire_effects; lesson: some US-named symbols sit at other EU addresses, poke from EU nm
 P303	port-d	nm convert	4			group D1: rope_draw, rope_update, trail_ribbon_draw, electric_bolt_draw; 2 left (func_151EE93C, func_15175EC8)
 P312	port-b	integration	0			merged port-e (C2) into port-b (a271d55a); selftest 150/150; combined 98.7% (94.9% bytes)
+P309	port-f	nm convert	2			GROUP D2 DONE: carried_object_update (models leftover v0 of func_15052F9C), player_swim_update (177/178)
