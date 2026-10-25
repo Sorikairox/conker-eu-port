@@ -947,7 +947,210 @@ s32 func_151970BC(u8 *e) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151970BC.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_151D6310(void *, s16, s32, void *, u8 *);
+s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *func_15142B7C(Gfx *, s32, s32);
+Gfx *func_15142C10(Gfx *, s32, s32, s32, s32, u8 *);
+Gfx *func_1513F4E4(Gfx *, u8, u8 *);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+f32 sqrtf(f32);
+extern s32 D_800D30BC;
+/* texture definition D_80091960 (id 0x918, 32 x 32) and the descriptor func_15142E24 takes (like D_800911BC) */
+typedef struct {
+    /* 0x0 */ s32 texId;
+    /* 0x4 */ u16 w;
+    /* 0x6 */ u16 h;
+    /* 0x8 */ u8 u8_;
+    /* 0x9 */ u8 u9;
+    /* 0xA */ u8 fmt;
+} EmitterTexDef;
+typedef struct {
+    /* 0x0 */ s32 *texId;
+    /* 0x4 */ u8 fmt;
+    /* 0x6 */ u16 w;
+    /* 0x8 */ u16 h;
+    /* 0xA */ u8 u8_;
+    /* 0xB */ u8 u9;
+} EmitterTex;
+extern EmitterTexDef D_80091960;
+
+/* n = (a - b) x (p - cam), scaled to length `width` (0 when degenerate) */
+#define RIBBON_NORMAL(px, py, pz, width)                     \
+    do {                                                     \
+        dx = a.x - b.x;                                      \
+        dy = a.y - b.y;                                      \
+        dz = a.z - b.z;                                      \
+        cx = (px) - cam[0];                                  \
+        cy = (py) - cam[1];                                  \
+        cz = (pz) - cam[2];                                  \
+        nx = dy * cz - cy * dz;                              \
+        ny = dz * cx - cz * dx;                              \
+        nz = dx * cy - cx * dy;                              \
+        len = sqrtf(nx * nx + ny * ny + nz * nz);            \
+        if (len == 0.0f) {                                   \
+            nx = ny = nz = 0.0f;                             \
+        } else {                                             \
+            k = (width) / len;                               \
+            nx *= k;                                         \
+            ny *= k;                                         \
+            nz *= k;                                         \
+        }                                                    \
+    } while (0)
+/* the two vertices p + n (t 0x47C0) and p - n (t 0x4000), white, s = (seed + 256) * 64 */
+#define RIBBON_PAIR(p, seed)                                 \
+    do {                                                     \
+        vtx->v.ob[0] = (s32) ((p).x + nx);                   \
+        vtx->v.ob[1] = (s32) ((p).y + ny);                   \
+        vtx->v.ob[2] = (s32) ((p).z + nz);                   \
+        vtx->v.tc[0] = ((seed) + 0x100) << 6;                \
+        vtx->v.tc[1] = 0x47C0;                               \
+        vtx->v.cn[0] = 0xFF;                                 \
+        vtx->v.cn[1] = 0xFF;                                 \
+        vtx->v.cn[2] = 0xFF;                                 \
+        vtx->v.cn[3] = alpha;                                \
+        vtx->v.flag = 0;                                     \
+        vtx++;                                               \
+        vtx->v.ob[0] = (s32) ((p).x - nx);                   \
+        vtx->v.ob[1] = (s32) ((p).y - ny);                   \
+        vtx->v.ob[2] = (s32) ((p).z - nz);                   \
+        vtx->v.tc[0] = ((seed) + 0x100) << 6;                \
+        vtx->v.tc[1] = 0x4000;                               \
+        vtx->v.cn[0] = 0xFF;                                 \
+        vtx->v.cn[1] = 0xFF;                                 \
+        vtx->v.cn[2] = 0xFF;                                 \
+        vtx->v.cn[3] = alpha;                                \
+        vtx->v.flag = 0;                                     \
+        vtx++;                                               \
+    } while (0)
+
+// emitter_ribbon_draw: D_8008A644 draw handler (entry 2) of the model-attached emitter e (func_151970BC's ring of
+// 0x24-byte points at e +0x94, e[0x25] entries, tail +0x2D, head +0x2E, count +0x2C; record e +0x98). Returns gfx
+// unchanged with fewer than 2 points or no vertex buffer (func_151D6310 slot `slot` at e +0x84, 0x20 bytes per point
+// + 0xA0). Sets texture D_80091960, grey level rec +0x51, combine 0xB and render mode D_800D30BC | 0x80000 | 0x2CA0 /
+// 0x5049D8, then draws a camera-facing ribbon from the newest point (or, with e +0x1E bit 2, from the live position
+// e +0x10) back to the tail: two vertices per point at +-n (n = segment x (point - camera of view `slot`), length =
+// the older point's size; rec +0x5C for the live position), alpha = point alpha * point +0x1C / 256, texture s from
+// the point's seed byte. When the seed wraps (newer seed < older seed) the segment's older pair is re-emitted with
+// s - 0x4000 and a fresh copy starts the next segment. One 4-vertex load and two triangles per segment.
+s32 func_151976B8(u8 *e, s32 gfxArg, s16 slot) {
+    Gfx *gfx = (Gfx *) gfxArg;
+    EmitterRecord *rec;
+    EmitterPoint *pts;
+    EmitterPoint *q;   /* the older point of the segment */
+    Vtx *vtx;
+    f32 *cam;
+    EmitterTex tex;
+    s32 texId;
+    u8 flag;
+    EmitterVec a;      /* newer end of the segment */
+    EmitterVec b;      /* older end */
+    f32 width;
+    s32 i;
+    s32 j;
+    s32 seedA;
+    s32 seedB;
+    s32 alpha;
+    f32 dx, dy, dz;
+    f32 cx, cy, cz;
+    f32 nx, ny, nz;
+    f32 len;
+    f32 k;
+
+    if (*(s8 *) (e + 0x2C) < 2) {
+        return (s32) gfx;
+    }
+    func_151D6310(e + 0x84, slot, e[0x25] * 0x20 + 0xA0, &vtx, NULL);
+    if (vtx == NULL) {
+        return (s32) gfx;
+    }
+    cam = (f32 *) ((u8 *) D_800DBFF0 + slot * 0x9A0 + 0x2F8);
+    rec = *(EmitterRecord **) (e + 0x98);
+    pts = *(EmitterPoint **) (e + 0x94);
+    flag = 1;
+    texId = D_80091960.texId;
+    tex.texId = &texId;
+    tex.fmt = D_80091960.fmt;
+    tex.w = D_80091960.w;
+    tex.h = D_80091960.h;
+    tex.u8_ = D_80091960.u8_;
+    tex.u9 = D_80091960.u9;
+    gfx = (Gfx *) func_15142E24((s32) gfx, (s32) &tex, 0, 0, 0x100, 0x100, 0, 4, 0, &flag, 3);
+    gfx = func_15142C10(gfx, rec->u51, rec->u51, rec->u51, 0xFF, &flag);
+    gfx = func_15142B7C(gfx, 1, 0x160600);
+    gfx = func_1513F4E4(gfx, 0xB, &flag);
+    gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+
+    if (*(u16 *) (e + 0x1E) & 2) {
+        /* from the live position to the newest point */
+        j = *(s8 *) (e + 0x2E) - 1;
+        if (j < 0) {
+            j = e[0x25] - 1;
+        }
+        a = *(EmitterVec *) (e + 0x10);
+        q = &pts[j];
+        b = q->pos;
+        seedB = q->seed;
+        seedA = seedB;
+        width = rec->u5C;
+    } else {
+        i = *(s8 *) (e + 0x2E) - 1;
+        if (i < 0) {
+            i = e[0x25] - 1;
+        }
+        j = i - 1;
+        if (j < 0) {
+            j = e[0x25] - 1;
+        }
+        a = pts[i].pos;
+        q = &pts[j];
+        b = q->pos;
+        width = q->size;
+        seedA = pts[i].seed;
+        seedB = q->seed;
+    }
+    alpha = (q->alpha * (s16) q->u1C) >> 8;
+    RIBBON_NORMAL(a.x, a.y, a.z, width);
+    RIBBON_PAIR(a, seedA);
+
+    do {
+        RIBBON_NORMAL(b.x, b.y, b.z, q->size);
+        alpha = (q->alpha * (s16) q->u1C) >> 8;
+        RIBBON_PAIR(b, seedB);
+        gfx->words.w0 = 0x01004008; /* gSPVertex(vtx - 4, 4, 0) */
+        gfx->words.w1 = (u32) (vtx - 4);
+        gfx++;
+        gfx->words.w0 = 0x05000204; /* gSP1Triangle(0, 1, 2) */
+        gfx->words.w1 = 0;
+        gfx++;
+        gfx->words.w0 = 0x05020604; /* gSP1Triangle(1, 3, 2) */
+        gfx->words.w1 = 0;
+        gfx++;
+        if (seedA < seedB) {
+            /* the seed wrapped: this segment ends at s - 0x4000, the next one starts from a copy */
+            memcpy(vtx, vtx - 2, 0x20);
+            vtx[-2].v.tc[0] -= 0x4000;
+            vtx[-1].v.tc[0] -= 0x4000;
+            vtx += 2;
+        }
+        seedA = seedB;
+        i = j;
+        j--;
+        if (j < 0) {
+            j = e[0x25] - 1;
+        }
+        a = pts[i].pos;
+        q = &pts[j];
+        b = q->pos;
+        seedB = q->seed;
+    } while (i != *(s8 *) (e + 0x2D));
+    return (s32) gfx;
+}
+#undef RIBBON_NORMAL
+#undef RIBBON_PAIR
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151976B8.s")
+#endif
 
 f32 func_15197F68(s32 arg0) {
     return 1.32f;
@@ -2040,7 +2243,397 @@ s32 func_15199F80(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199F80.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_15145740(struct127 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4);
+s32 func_15146078(f32 *n, f32 *a, f32 *b);
+void func_15143874(s16, f32, f32 *, f32 *);
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+static const f32 sEmit2TipStep[1] = { 0.032f };     /* D_800A8EC0 */
+static const f32 sEmit2SparkFloor[1] = { -10000.0f }; /* D_800A8EC4 */
+/* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
+#define EMIT2_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
+#define E2F(o) (*(f32 *) ((u8 *) rec + (o)))
+
+/* one point of an emitter2 ring (0x28 bytes) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];   /* second point - first point */
+    /* 0x18 */ f32 size;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ u8 alpha;
+    /* 0x24 */ f32 texS;
+} Emitter2Point;
+
+/* the two spray emitters' parameters in the record (+0x90..+0x10F, part of the spec copy) */
+typedef struct {
+    /* 0x90 */ f32 at3[3];      /* first spray target (node space) */
+    /* 0x9C */ f32 rate;        /* particles per second: rate + rnd * rateRnd */
+    /* 0xA0 */ f32 rateRnd;
+    /* 0xA4 */ s32 shade;       /* particle byte +0x15: shade + rnd % (shadeRnd + 1) */
+    /* 0xA8 */ s32 shadeRnd;
+    /* 0xAC */ s16 life;
+    /* 0xAE */ s16 lifeRnd;
+    /* 0xB0 */ f32 size;
+    /* 0xB4 */ f32 sizeRnd;
+    /* 0xB8 */ f32 speed;
+    /* 0xBC */ f32 speedRnd;
+    /* 0xC0 */ f32 spreadRnd;
+    /* 0xC4 */ f32 u10;
+    /* 0xC8 */ f32 u10Rnd;
+    /* 0xCC */ s16 alpha;
+    /* 0xCE */ s16 alphaRnd;
+    /* 0xD0 */ s16 u18;
+    /* 0xD2 */ s16 u1A;
+    /* 0xD4 */ f32 at4[3];      /* second spray target */
+    /* 0xE0 */ f32 rate2;
+    /* 0xE4 */ f32 rate2Rnd;
+    /* 0xE8 */ s16 life2;
+    /* 0xEA */ s16 life2Rnd;
+    /* 0xEC */ s16 shade2;
+    /* 0xEE */ s16 shade2Rnd;
+    /* 0xF0 */ f32 size2;
+    /* 0xF4 */ f32 size2Rnd;
+    /* 0xF8 */ f32 speed2;
+    /* 0xFC */ f32 speed2Rnd;
+    /* 0x100 */ f32 spread2Rnd;
+    /* 0x104 */ f32 u54;
+    /* 0x108 */ f32 u54Rnd;
+    /* 0x10C */ s16 u1E;
+    /* 0x10E */ s16 u20;
+} Emitter2Spray;
+
+// emitter2_flame_update: entry 12 of D_8008A5DC (`s32 (u8 *)`) for the model-attached emitter2 e (record rec = e
+// +0x98, Emitter2Record). Returns 0 when the attach object is gone (its first word 0) or was replaced (rec +4 !=
+// obj +0x3B). Flag 0x10 of rec +0x150 mirrors (obj +0x74 & 0xF) == 0xF. The four node points (rec +8 / +0x14 / +0x90
+// / +0xD4) are transformed by the node matrix (func_15145EA4) into the position (also e +0x10), the tip and the two
+// spray targets; without model matrices the position is obj +0x14 (+33 up) and the tip 0.032 along func_15145740's
+// direction (flag 1 set). The emit counter rec +0x12C (rate rec +0x24 per second) appends one point per whole step
+// to the ring (0x28-byte points at e +0x94), interpolating both ends between last frame (rec +0x110 / +0x11C) and
+// now and pre-moving each point by the time left (func_1519C38C, size + rec +0x30 * time). With matrices and a
+// visible object, two spray counters (rec +0x138, +0x13C) spawn particles towards the spray targets in a random
+// cone (func_15146078 basis, func_15143874 angle / radius): func_15148310 sparks and func_151307F0 sprites. Every
+// 0x33 ticks the object's +0x31C +0x1AA counter steps; with rec flag 8 and obj +0x318 a timer rec +0x152 fires
+// func_151D8E18 every 120..140 ticks. Returns 1.
+s32 func_1519A1A4(u8 *e) {
+    Emitter2Point *pts = *(Emitter2Point **) (e + 0x94);
+    Emitter2Record *rec = *(Emitter2Record **) (e + 0x98);
+    Emitter2Spray *spr = (Emitter2Spray *) ((u8 *) rec + 0x90);
+    u8 *obj = rec->obj;
+    Emitter2Point *pt;
+    f32 *src[4];
+    f32 *dst[4];
+    f32 pos[3];         /* the four transformed points */
+    f32 tip[3];
+    f32 tgt[3];
+    f32 tgt2[3];
+    f32 dir[3];
+    f32 dir2[3];        /* func_15145740 output (unused) */
+    f32 a[3];           /* interpolated ends of the new point */
+    f32 b[3];
+    f32 stepA[3];
+    f32 stepB[3];
+    f32 inv;
+    f32 time;
+    f32 timeStep;
+    f32 speed;
+    f32 r;
+    f32 cs;
+    f32 sn;
+    f32 off[3];         /* spray direction and its cone basis */
+    f32 u[3];
+    f32 v[3];
+    s32 angle;
+    u8 *o;
+    struct {
+        /* 0x00 */ s32 u00;
+        /* 0x04 */ s32 u04;
+        /* 0x08 */ s32 u08;
+        /* 0x0C */ s32 u0C;
+        /* 0x10 */ s32 u10;
+        /* 0x14 */ s32 u14;
+        /* 0x18 */ s32 u18;
+        /* 0x1C */ u8 u1C;
+        /* 0x1D */ u8 u1D;
+    } sparkDraw;
+    struct {
+        /* 0x00 */ f32 size;
+        /* 0x04 */ f32 vel[3];
+        /* 0x10 */ f32 u10;
+        /* 0x14 */ f32 floorY;
+        /* 0x18 */ u8 rgba[4];
+        /* 0x1C */ s16 u1C;
+        /* 0x1E */ s16 u1E;
+    } sparkMove;
+    struct {
+        /* 0x00 */ f32 pos[3];
+        /* 0x0C */ s16 life;
+        /* 0x0E */ s16 u0E;
+        /* 0x10 */ s32 u10;
+        /* 0x14 */ s8 u14;
+        /* 0x15 */ u8 shade;
+    } spark;
+    struct {
+        /* 0x00 */ s32 u00;
+        /* 0x04 */ s32 u04;
+        /* 0x08 */ s16 u08;
+        /* 0x0A */ s16 life;
+        /* 0x0C */ s32 u0C;
+        /* 0x10 */ s32 u10;
+        /* 0x14 */ u8 rgb[7];
+        /* 0x1B */ u8 shade;
+        /* 0x1C */ u8 pad1C;
+        /* 0x1D */ u8 u1D;
+        /* 0x1E */ s16 u1E;
+        /* 0x20 */ s16 u20;
+        /* 0x22 */ s16 u22;
+        /* 0x24 */ f32 u24;
+        /* 0x28 */ f32 size;
+        /* 0x2C */ f32 size2;
+        /* 0x30 */ f32 pos[3];
+        /* 0x3C */ f32 u3C[3];
+        /* 0x48 */ f32 vel[3];
+        /* 0x54 */ f32 u54;
+        /* 0x58 */ s32 u58;
+        /* 0x5C */ u8 pad5C[4];
+        /* 0x60 */ u8 u60;
+        /* 0x61 */ u8 u61;
+        /* 0x62 */ s8 u62[3];
+        /* 0x65 */ u8 u65;
+    } sprite;
+    structEU_151D8E18 burst;
+
+    if (*(s32 *) obj == 0 || rec->u04 != obj[0x3B]) {
+        return 0;
+    }
+    if ((obj[0x74] & 0xF) == 0xF) {
+        rec->flags |= 0x10;
+    } else {
+        rec->flags &= ~0x10;
+    }
+    if (*(u8 **) (obj + 0x1D4) != NULL) {
+        src[0] = rec->at;
+        src[1] = rec->at2;
+        src[2] = spr->at3;
+        src[3] = spr->at4;
+        dst[0] = pos;
+        dst[1] = tip;
+        dst[2] = tgt;
+        dst[3] = tgt2;
+        func_15145EA4(src, dst, *(u8 **) (obj + 0x1D4) + rec->node * 0x40, 4);
+        rec->flags &= ~1;
+    } else {
+        func_15145740((struct127 *) obj, (s32) dir, (s32) dir2, 0, 0.0f);
+        pos[0] = *(f32 *) (obj + 0x14);
+        pos[1] = *(f32 *) (obj + 0x18) + 33.0f;
+        pos[2] = *(f32 *) (obj + 0x1C);
+        tip[0] = dir[0] * sEmit2TipStep[0] + pos[0];
+        tip[1] = dir[1] * sEmit2TipStep[0] + pos[1];
+        tip[2] = dir[2] * sEmit2TipStep[0] + pos[2];
+        rec->flags |= 1;
+    }
+    *(f32 *) (e + 0x10) = pos[0];
+    *(f32 *) (e + 0x14) = pos[1];
+    *(f32 *) (e + 0x18) = pos[2];
+
+    /* new ring points */
+    rec->u12C += E2F(0x24) * D_800BE9A4;
+    if (1.0f < rec->u12C) {
+        inv = 1.0f / rec->u12C;
+        time = rec->u128 + D_800BE9A4;
+        timeStep = time * inv;
+        a[0] = rec->pos[0];
+        a[1] = rec->pos[1];
+        a[2] = rec->pos[2];
+        b[0] = rec->pos2[0];
+        b[1] = rec->pos2[1];
+        b[2] = rec->pos2[2];
+        stepA[0] = (pos[0] - rec->pos[0]) * inv;
+        stepA[1] = (pos[1] - rec->pos[1]) * inv;
+        stepA[2] = (pos[2] - rec->pos[2]) * inv;
+        stepB[0] = (tip[0] - rec->pos2[0]) * inv;
+        stepB[1] = (tip[1] - rec->pos2[1]) * inv;
+        stepB[2] = (tip[2] - rec->pos2[2]) * inv;
+        do {
+            pt = &pts[*(s8 *) (e + 0x2E)];
+            pt->pos[0] = a[0];
+            pt->pos[1] = a[1];
+            pt->pos[2] = a[2];
+            pt->vel[0] = b[0] - a[0];
+            pt->vel[1] = b[1] - a[1];
+            pt->vel[2] = b[2] - a[2];
+            pt->size = E2F(0x2C);
+            pt->u1C = 0.0f;
+            pt->alpha = rec->u3A;
+            pt->texS = rec->u144;
+            func_1519C38C(pt->pos, pt->vel, E2F(0x20), time);
+            pt->size += E2F(0x30) * time;
+            /* advance the ring head; when it reaches the tail, drop the oldest point */
+            e[0x2E]++;
+            if (e[0x25] == *(s8 *) (e + 0x2E)) {
+                e[0x2E] = 0;
+            }
+            e[0x2C]++;
+            if (*(s8 *) (e + 0x2D) == *(s8 *) (e + 0x2E)) {
+                e[0x2D]++;
+                if (e[0x25] == *(s8 *) (e + 0x2D)) {
+                    e[0x2D] = 0;
+                }
+                e[0x2C]--;
+            }
+            a[0] += stepA[0];
+            a[1] += stepA[1];
+            a[2] += stepA[2];
+            b[0] += stepB[0];
+            b[1] += stepB[1];
+            b[2] += stepB[2];
+            time -= timeStep;
+            rec->u12C -= 1.0f;
+        } while (1.0f < rec->u12C);
+        rec->pos[0] = a[0];
+        rec->pos[1] = a[1];
+        rec->pos[2] = a[2];
+        rec->pos2[0] = b[0];
+        rec->pos2[1] = b[1];
+        rec->pos2[2] = b[2];
+        rec->u128 = time;
+    }
+
+    /* first spray: func_15148310 sparks towards tgt */
+    if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
+        r = func_150ADA68();
+        rec->u138 += (spr->rate + r * spr->rateRnd) * D_800BE9A4;
+        if (1.0f < rec->u138) {
+            sparkDraw.u00 = 0;
+            sparkDraw.u04 = 0x200005;
+            sparkDraw.u08 = 0x1F0600;
+            sparkDraw.u0C = 3;
+            sparkDraw.u10 = 0x22;
+            sparkDraw.u14 = 0x80;
+            sparkDraw.u18 = 0x20;
+            sparkDraw.u1C = 0;
+            sparkDraw.u1D = 7;
+            spark.u0E = 0x15;
+            spark.u10 = 1;
+            spark.u14 = -1;
+            sparkMove.rgba[0] = 0x68;
+            sparkMove.rgba[1] = 0xA;
+            sparkMove.rgba[2] = 0xFF;
+            sparkMove.floorY = sEmit2SparkFloor[0];
+            sparkMove.u1C = spr->u18;
+            sparkMove.u1E = spr->u1A;
+            do {
+                spark.shade = (u32) func_150ADA20() % (u32) (spr->shadeRnd + 1) + spr->shade;
+                spark.life = (u32) func_150ADA20() % (u32) (spr->lifeRnd + 1) + spr->life;
+                sparkMove.size = func_150ADA68() * spr->sizeRnd + spr->size;
+                spark.pos[0] = pos[0];
+                spark.pos[1] = pos[1];
+                spark.pos[2] = pos[2];
+                off[0] = tgt[0] - spark.pos[0];
+                off[1] = tgt[1] - spark.pos[1];
+                off[2] = tgt[2] - spark.pos[2];
+                if (func_15146078(off, u, v)) {
+                    speed = func_150ADA68() * spr->speedRnd + spr->speed;
+                    angle = func_150ADA20();
+                    func_15143874(angle & 0xFF, func_150ADA68() * spr->spreadRnd, &cs, &sn);
+                    sparkMove.vel[0] = (u[0] * cs + v[0] * sn + off[0]) * speed;
+                    sparkMove.vel[1] = (u[1] * cs + v[1] * sn + off[1]) * speed;
+                    sparkMove.vel[2] = (u[2] * cs + v[2] * sn + off[2]) * speed;
+                    sparkMove.u10 = func_150ADA68() * spr->u10Rnd + spr->u10;
+                    r = func_150ADA68();
+                    sparkMove.rgba[3] = EMIT2_F2U(r * (f32) spr->alphaRnd + (f32) spr->alpha);
+                    func_15148310((u8 *) &spark, (s32) &sparkMove, 0, 1, 0, 0, 0, 0, 0, 0, 0, (u8 *) &sparkDraw, 0,
+                                  e[0xC], e[1]);
+                }
+                rec->u138 -= 1.0f;
+            } while (1.0f < rec->u138);
+        }
+    }
+
+    /* second spray: func_151307F0 sprites towards tgt2 */
+    if (*(u8 **) (obj + 0x1D4) != NULL && (obj[0x74] & 0xF) != 0xF) {
+        r = func_150ADA68();
+        rec->u13C += (spr->rate2 + r * spr->rate2Rnd) * D_800BE9A4;
+        if (1.0f < rec->u13C) {
+            sprite.u1D = 0x28;
+            sprite.u08 = 0x2203;
+            sprite.u04 = 0x1F0600;
+            sprite.u00 = 0x200005;
+            sprite.u0C = 0;
+            sprite.u10 = 0;
+            sprite.rgb[0] = 0xFF;
+            sprite.rgb[1] = 0xFF;
+            sprite.rgb[2] = 0xFF;
+            sprite.rgb[3] = 0xFF;
+            sprite.rgb[4] = 0xFF;
+            sprite.rgb[5] = 0xFF;
+            sprite.rgb[6] = 0xFF;
+            sprite.pos[0] = pos[0];
+            sprite.pos[1] = pos[1];
+            sprite.pos[2] = pos[2];
+            sprite.u3C[0] = 0.0f;
+            sprite.u3C[1] = 0.0f;
+            sprite.u3C[2] = 0.0f;
+            sprite.u1E = spr->u1E;
+            sprite.u22 = 1;
+            sprite.u24 = 1.0f;
+            sprite.u58 = 0xC207;
+            sprite.u60 = 6;
+            sprite.u61 = 8;
+            sprite.u62[0] = -1;
+            sprite.u62[1] = -1;
+            sprite.u62[2] = -1;
+            sprite.u65 = 0;
+            sprite.u20 = spr->u20;
+            do {
+                sprite.life = (u32) func_150ADA20() % (u32) (spr->life2Rnd + 1) + spr->life2;
+                sprite.shade = (u32) func_150ADA20() % (u32) (spr->shade2Rnd + 1) + spr->shade2;
+                sprite.size2 = sprite.size = func_150ADA68() * spr->size2Rnd + spr->size2;
+                off[0] = tgt2[0] - sprite.pos[0];
+                off[1] = tgt2[1] - sprite.pos[1];
+                off[2] = tgt2[2] - sprite.pos[2];
+                if (func_15146078(off, u, v)) {
+                    speed = func_150ADA68() * spr->speed2Rnd + spr->speed2;
+                    angle = func_150ADA20();
+                    func_15143874(angle & 0xFF, func_150ADA68() * spr->spread2Rnd, &cs, &sn);
+                    sprite.vel[0] = (u[0] * cs + v[0] * sn + off[0]) * speed;
+                    sprite.vel[1] = (u[1] * cs + v[1] * sn + off[1]) * speed;
+                    sprite.vel[2] = (u[2] * cs + v[2] * sn + off[2]) * speed;
+                    sprite.u54 = func_150ADA68() * spr->u54Rnd + spr->u54;
+                    func_151307F0((s32) &sprite, 1, 0, 0, e[0xC], e[1]);
+                }
+                rec->u13C -= 1.0f;
+            } while (1.0f < rec->u13C);
+        }
+    }
+
+    /* every 0x33 ticks: step the attach object's +0x31C counter */
+    rec->u151 += D_800BE9E4;
+    if (*(s8 *) &rec->u151 >= 0x33) {
+        o = rec->obj;
+        if (o != NULL && *(u8 **) (o + 0x31C) != NULL) {
+            (*(s16 *) (*(u8 **) (o + 0x31C) + 0x1AA))++;
+        }
+        rec->u151 = 0;
+    }
+    if ((rec->flags & 8) && *(u8 **) (obj + 0x318) != NULL) {
+        rec->u152 -= D_800BE9E4;
+        if (rec->u152 < 0) {
+            burst.unk0 = 1;
+            burst.unk2 = (u32) func_150ADA20() % 21 + 20;
+            burst.unk5 = 1 << (*(u8 **) (obj + 0x318))[0x23D];
+            burst.unk4 = (u32) func_150ADA20() % 7 + 2;
+            burst.unk6 = -1;
+            func_151D8E18(&burst, 0, e[0xC], e[1]);
+            rec->u152 = (u32) func_150ADA20() % 21 + 0x78;
+        }
+    }
+    return 1;
+}
+#undef E2F
+#undef EMIT2_F2U
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519A1A4.s")
+#endif
 
 #ifdef NON_MATCHING
 void *memcpy(void *, const void *, s32);
@@ -2376,7 +2969,219 @@ s32 func_1519AF14(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519AF14.s")
 #endif
 
+#ifdef NON_MATCHING
+s32 func_150A6840(s32 cam, s32 *mtx, f32 x, f32 y, f32 z, f32 r, f32 ry, f32 far);
+extern u8 D_800DA030[];   /* per view: 0x40-byte matrix for func_150A6840 */
+extern u8 D_80091414[];   /* texture descriptor */
+extern s32 D_800A4EA8[];  /* render mode word pairs */
+static const f32 sEmit2CullFar[1] = { 20000.0f }; /* D_800A8ED4 */
+
+/* n = (a - b) x (p - cam), scaled to length `width` (0 when degenerate) */
+#define FLAME_NORMAL(p, width)                               \
+    do {                                                     \
+        dx = a[0] - b[0];                                    \
+        dy = a[1] - b[1];                                    \
+        dz = a[2] - b[2];                                    \
+        cx = (p)[0] - cam[0];                                \
+        cy = (p)[1] - cam[1];                                \
+        cz = (p)[2] - cam[2];                                \
+        nx = dy * cz - cy * dz;                              \
+        ny = dz * cx - cz * dx;                              \
+        nz = dx * cy - cx * dy;                              \
+        len2 = nx * nx + ny * ny + nz * nz;                  \
+        if (len2 == 0.0f) {                                  \
+            nx = ny = nz = 0.0f;                             \
+        } else {                                             \
+            k = (width) / sqrtf(len2);                       \
+            nx *= k;                                         \
+            ny *= k;                                         \
+            nz *= k;                                         \
+        }                                                    \
+    } while (0)
+/* the two vertices p + n (t 0x47C0) and p - n (t 0x4000), white, texture s and alpha given */
+#define FLAME_PAIR(p, s, alpha)                              \
+    do {                                                     \
+        vtx->v.ob[0] = (s32) ((p)[0] + nx);                  \
+        vtx->v.ob[1] = (s32) ((p)[1] + ny);                  \
+        vtx->v.ob[2] = (s32) ((p)[2] + nz);                  \
+        vtx->v.tc[0] = (s32) (s);                            \
+        vtx->v.tc[1] = 0x47C0;                               \
+        vtx->v.cn[0] = 0xFF;                                 \
+        vtx->v.cn[1] = 0xFF;                                 \
+        vtx->v.cn[2] = 0xFF;                                 \
+        vtx->v.cn[3] = (alpha);                              \
+        vtx->v.flag = 0;                                     \
+        vtx++;                                               \
+        vtx->v.ob[0] = (s32) ((p)[0] - nx);                  \
+        vtx->v.ob[1] = (s32) ((p)[1] - ny);                  \
+        vtx->v.ob[2] = (s32) ((p)[2] - nz);                  \
+        vtx->v.tc[0] = (s32) (s);                            \
+        vtx->v.tc[1] = 0x4000;                               \
+        vtx->v.cn[0] = 0xFF;                                 \
+        vtx->v.cn[1] = 0xFF;                                 \
+        vtx->v.cn[2] = 0xFF;                                 \
+        vtx->v.cn[3] = (alpha);                              \
+        vtx->v.flag = 0;                                     \
+        vtx++;                                               \
+    } while (0)
+
+// emitter2_flame_draw: entry 12 of D_8008A644 (`s32 (u8 *, s32 gfx, s16 slot)`) for the emitter2 e updated by
+// func_1519A1A4 (ring of 0x28-byte Emitter2Point at e +0x94, e[0x25] entries, tail +0x2D, head +0x2E, count +0x2C;
+// record rec = e +0x98). Returns gfx unchanged with fewer than 2 points, when hidden (rec flags 0x20 and 0x10 while
+// D_800BE616 is 0), when rec flag 1 is set and the box around the newest and oldest points (centre = midpoint,
+// radius = their horizontal distance, half height |dy| + 2 * rec +0x2C) is outside view `slot` (func_150A6840 with
+// D_800BE628 + slot * 0x180, D_800DA030 + slot * 0x40, far 20000), or without a vertex buffer (func_151D6310, 0x20
+// bytes per point + 0xA0). Sets texture D_80091414 (0x6B), geometry 0x200005 / 0x1F0600, combine 0x4C and render
+// mode D_800D30BC | 0x80000 | 0x2CA0 / D_800A4EA8[6] | [7], then draws a camera-facing strip (camera
+// func_15144B34(slot)) from the newest point (or, with e +0x1E bit 2, from e +0x10 with rec +0x2C / +0x144 / +0x3A)
+// back to the tail: two vertices per point at +-n (n = segment x (point - camera), length = the point's size),
+// texture s = the point's +0x24, alpha its +0x20. When s drops along the strip (older s < newer s), the older pair
+// is re-emitted with s - 0x8000 and a fresh copy starts the next segment.
+s32 func_1519BA28(u8 *e, s32 gfxArg, s16 slot) {
+    Gfx *gfx = (Gfx *) gfxArg;
+    Emitter2Record *rec;
+    Emitter2Point *pts;
+    Emitter2Point *p;
+    Emitter2Point *q;
+    Vtx *vtx;
+    f32 *cam;
+    u8 flag;
+    f32 a[3];       /* newer end of the segment */
+    f32 b[3];       /* older end */
+    f32 widthA;
+    f32 widthB;
+    f32 sA;
+    f32 sB;
+    s32 alphaA;
+    s32 alphaB;
+    s32 i;
+    s32 j;
+    f32 dx, dy, dz;
+    f32 cx, cy, cz;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+
+    if (*(s8 *) (e + 0x2C) < 2) {
+        return (s32) gfx;
+    }
+    rec = *(Emitter2Record **) (e + 0x98);
+    pts = *(Emitter2Point **) (e + 0x94);
+    if ((rec->flags & 0x20) && D_800BE616 == 0 && (rec->flags & 0x10)) {
+        return (s32) gfx;
+    }
+    if (rec->flags & 1) {
+        /* visibility of the box around the newest and the oldest point */
+        i = *(s8 *) (e + 0x2E) - 1;
+        if (i < 0) {
+            i = e[0x25] - 1;
+        }
+        p = &pts[i];
+        q = &pts[*(s8 *) (e + 0x2D)];
+        dx = p->pos[0] - q->pos[0];
+        dz = p->pos[2] - q->pos[2];
+        dy = p->pos[1] - q->pos[1];
+        if (!func_150A6840(D_800BE628 + slot * 0x180, (s32 *) (D_800DA030 + slot * 0x40),
+                           (q->pos[0] + p->pos[0]) * 0.5f, (q->pos[1] + p->pos[1]) * 0.5f,
+                           (q->pos[2] + p->pos[2]) * 0.5f, sqrtf(dx * dx + dz * dz),
+                           fabsf(dy) + (*(f32 *) ((u8 *) rec + 0x2C) + *(f32 *) ((u8 *) rec + 0x2C)),
+                           sEmit2CullFar[0])) {
+            return (s32) gfx;
+        }
+    }
+    func_151D6310(e + 0x84, slot, e[0x25] * 0x20 + 0xA0, &vtx, NULL);
+    if (vtx == NULL) {
+        return (s32) gfx;
+    }
+    cam = func_15144B34(slot);
+    flag = 1;
+    gfx = (Gfx *) func_15142E24((s32) gfx, (s32) D_80091414, 0, 0, 0, 0, 0x6B, 0, 0, &flag, 3);
+    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = func_1513F4E4(gfx, 0x4C, &flag);
+    gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[7] | D_800A4EA8[6], &flag);
+
+    if (*(u16 *) (e + 0x1E) & 2) {
+        /* from the live position to the newest point */
+        j = *(s8 *) (e + 0x2E) - 1;
+        if (j < 0) {
+            j = e[0x25] - 1;
+        }
+        a[0] = *(f32 *) (e + 0x10);
+        a[1] = *(f32 *) (e + 0x14);
+        a[2] = *(f32 *) (e + 0x18);
+        widthA = *(f32 *) ((u8 *) rec + 0x2C);
+        sA = rec->u144;
+        alphaA = rec->u3A;
+    } else {
+        i = *(s8 *) (e + 0x2E) - 1;
+        if (i < 0) {
+            i = e[0x25] - 1;
+        }
+        j = i - 1;
+        if (j < 0) {
+            j = e[0x25] - 1;
+        }
+        p = &pts[i];
+        a[0] = p->pos[0];
+        a[1] = p->pos[1];
+        a[2] = p->pos[2];
+        widthA = p->size;
+        sA = p->texS;
+        alphaA = p->alpha;
+    }
+    q = &pts[j];
+    b[0] = q->pos[0];
+    b[1] = q->pos[1];
+    b[2] = q->pos[2];
+    widthB = q->size;
+    alphaB = q->alpha;
+    sB = q->texS;
+    FLAME_NORMAL(a, widthA);
+    FLAME_PAIR(a, sA, alphaA);
+
+    do {
+        FLAME_NORMAL(b, widthB);
+        FLAME_PAIR(b, sB, alphaB);
+        gfx->words.w0 = 0x01004008; /* gSPVertex(vtx - 4, 4, 0) */
+        gfx->words.w1 = (u32) (vtx - 4);
+        gfx++;
+        gfx->words.w0 = 0x05000204; /* gSP1Triangle(0, 1, 2) */
+        gfx->words.w1 = 0;
+        gfx++;
+        gfx->words.w0 = 0x05020604; /* gSP1Triangle(1, 3, 2) */
+        gfx->words.w1 = 0;
+        gfx++;
+        if (sB < sA) {
+            /* s wrapped: this segment ends at s - 0x8000, the next one starts from a copy */
+            memcpy(vtx, vtx - 2, 0x20);
+            vtx[-2].v.tc[0] -= 0x8000;
+            vtx[-1].v.tc[0] -= 0x8000;
+            vtx += 2;
+        }
+        i = j;
+        j--;
+        if (j < 0) {
+            j = e[0x25] - 1;
+        }
+        a[0] = pts[i].pos[0];
+        a[1] = pts[i].pos[1];
+        a[2] = pts[i].pos[2];
+        q = &pts[j];
+        b[0] = q->pos[0];
+        b[1] = q->pos[1];
+        b[2] = q->pos[2];
+        widthB = q->size;
+        sA = pts[i].texS;
+        alphaB = q->alpha;
+        sB = q->texS;
+    } while (i != *(s8 *) (e + 0x2D));
+    return (s32) gfx;
+}
+#undef FLAME_NORMAL
+#undef FLAME_PAIR
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519BA28.s")
+#endif
 
 void func_1519C38C(f32 *arg0, f32 *arg1, f32 arg2, f32 arg3) {
     vertex sp4 = *(vertex *)arg1;

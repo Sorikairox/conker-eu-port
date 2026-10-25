@@ -10,6 +10,19 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P305 (port-c, group C1) (session P305, 2026-10-26). Details: `docs/port/sessions/P305.md`
+
+Hand C (NM), registry rows `P305`, files in docs/port/sessions/p305 (setup generators gen*.py): func_151976B8
+(emitter_ribbon_draw, D_8008A644 entry 2, mutants 74/76, 2 equivalent), func_1519A1A4 (emitter2_flame_update,
+D_8008A5DC entry 12, 106/106 after two setup fixes), func_1519BA28 (emitter2_flame_draw, D_8008A644 entry 12, 85/85).
+Rodata copies D_800A8EC0 / EC4 / ED4 as `static const` arrays. verify_all rc 0 (3995/5916, full ROM OK), NM build rc 0,
+protocheck 0 (1691 bodies), implicit_scan 0 NM+float (829 sites), selftest 133/133, progress_nm
+`total 5916 3995 1710 211 5705 96.4% 2029920/2253856 (90.1%)`.
+
+## Next steps (from P305, group C1)
+1. Group C1 is done. Lesson for draw handlers: give geometry mutants a large-size setup (s16 truncation hides
+   normal-length changes under 1 unit).
+
 ## P299 (port-c, group C1) (session P299, 2026-10-26). Details: `docs/port/sessions/P299.md`
 
 Hand C (NM), registry rows `P299`, files in docs/port/sessions/p299: func_151CA4E8 (hud_bar_spawn, 1F7960, mutants
