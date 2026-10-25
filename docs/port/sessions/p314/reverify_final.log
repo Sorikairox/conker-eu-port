@@ -1,0 +1,4 @@
+func_15175EC8 (P314, game_eu_1A2970) knobs: DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_SLOTS=1 DIFFTEST_ARGMEM=15049398=0:12 TR=4
+  random: EQUIV func_15175EC8 (90 trials ok, 10 inconclusive, 375 calls, ret=void, ref 961 words, cand 961 words)
+  setups s5EC8.txt: 119 EQUIV / 119
+  muts m5EC8.txt: 175 killed / 175; not applied: 0 [layout whole: 175 vs body 0 applied]

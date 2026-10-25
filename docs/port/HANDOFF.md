@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P314 (port-e slot reused, group D1 leftover: func_15175EC8 to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P314.md`
+- New NM hand C: func_15175EC8 ambient_flyer_update (game_eu_1A2970; per-frame update of the ambient birds / bats of
+  func_15175900: level-6 scatter circling, fade, home tether / wander, floor follow, height bob, pitch / turn / roll /
+  speed integration, wing model by pitch, chirp, view cull). `void (u8 *)` (render-layer field 0 of layers 10 / 20 /
+  68 / 69 via func_151670C0, C func_15176DCC / func_151770F4, asm func_15176DCC). Registry row P314, setups /
+  mutants / generator in `docs/port/sessions/p314/`. port-e's game_eu_1A2970.c was identical to port-d's (no checkout).
+- Random EQUIV, 119 setups EQUIV, mutants 175/175. Checks: verify_all rc 0, NM build rc 0, protocheck rc 0,
+  implicit_scan 0 NM+float, selftest 143/143. progress_nm `total 5916 3995 1729 33 159 5757 97.3% 2042120/2253856 (90.6%)`.
+- Merge note: port-d (P303) and port-e both touch game_eu_1A2970.c only in this session's block (port-d's copy is the
+  base here); func_151EE93C (game_eu_216470) was left to the other session.
+- Lesson: mutants that only move a clamp comparison onto its own bound (`> lim` -> `>= lim`, `alpha < 0` -> `< 1`)
+  are equivalent by construction; write them as `lim + 1.0f` / `< -1` with a setup landing in the gap instead.
+
+### Next steps (from P314)
+1. Group D1 is done (P303 + P314) once func_151EE93C lands; group D2 (P304) as listed in port-d's HANDOFF.
+
 ## P306 (port-e slot, group C part C2 finished: 2 compiled functions to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P306.md`
 - New NM hand C: func_151E67A0 mp_report_hit (game_eu_20B730; multiplayer hit stats + taunt sounds), func_150FBE40
   gun_fire_effects (game_eu_129650; tracer / spark / shell / screen flash of one shot; now `void`, the file's
