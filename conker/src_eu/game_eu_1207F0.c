@@ -318,7 +318,347 @@ f32 func_150F3A20(s32 arg0, f32 arg1) {
     return var_f2;
 }
 
+#ifdef NON_MATCHING
+extern u16 D_800BEB30[];
+extern u8 *D_800CC6A4; /* controller: +0 buttons (u16), +2 stick x, +3 stick y (s8) */
+extern s32 D_800CC6A0;
+extern u8 D_800CC68D;
+extern u8 D_800CC1F3;
+void func_150585F0(struct127 *); /* P209: the asm reads only a0 (this caller leaves 0.25f in a1) */
+u8 func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);
+f32 func_1505A3A8(f32 arg0, struct127 *arg1, f32 arg2, f32 arg3, u8 arg4);
+void func_15052590(struct127 *);
+void func_15073FA0(void);
+
+// player_swim_update: player interaction state 0x15 handler (entry 21 of D_800863B4, called as `(obj)` by
+// func_1504A730 / func_15022A40). Reads the controller (D_800CC6A4, cleared when the D_800DDE3C / D_800DDDC8 gate
+// of player D_800C3E78 holds). Stunned: drops the carried object (unk13C = 100 + index). Entry (unk102 == 0): heading
+// from the stick (func_1505A630 / func_1505A5CC), may grab object D_800CC68D, dives below unk118. Then each frame:
+// stick y / buttons 0x8000 / 0x4000 / 0x10 steer pitch (unkB8), turn (unkC4 -> unk76) and speed (func_1505A3A8),
+// gravity damping and clamps, the closest grabbable object (ids 0x9C / 0x9D) to D_800D154C (unk222), carry / drop
+// sounds, the 0x2000 spawn (id 0x25, fewer than 5), surfacing near the floor, and the animation (func_1505E650).
+void func_150F3A74(struct127 *self) {
+    struct127 *pl;
+    s32 i;
+    s32 n;
+    u16 heading;
+    u16 btn;
+    u16 anim;
+    u8 who;
+    f32 floor_h;
+    f32 speed;
+    f32 stick;
+    f32 mag;
+    f32 best;
+    f32 d;
+    f32 rate;
+    f32 lim;
+    f32 g;
+    f32 vy;
+    f32 c4;
+    f32 anim_speed;
+
+    floor_h = 0.0f;
+    self->unkAB = 1;
+    self->unk80 = 1;
+    self->unk222 = 0;
+    D_800CC288 = D_800BEB30[0];
+    D_800CC6A4 = *(u8 **) D_800BE728[0];
+    who = D_800C3E78;
+    if (who <= D_80082FA0 && (&D_800DDE3C)[who] != 0 && 0.75f < (&D_800DDDC8)[who] && D_800E0B94 != 2) {
+        /* input blocked */
+        D_800CC6A4[2] = 0;
+        D_800CC6A4[3] = 0;
+        *(u16 *) D_800CC6A4 = 0;
+        D_800CC288 = 0;
+    }
+    self->unkF8 |= 0x40;
+    self->unk1CC = self->y_position;
+    if (self->unk103 != 0) {
+        self->unk103--;
+    }
+    if (self->stunned != 0) {
+        func_150585F0(self);
+        func_15059140(self);
+        self->unk40 = (f32) ((s16) self->unk7A + 0x4000) * 0.0054931640625f; /* 360 / 65536 */
+        if (self->unk13C != 0) {
+            /* let go of the carried object */
+            pl = &D_800CC2D0[self->unk13C - 100];
+            pl->unk13D = 0;
+            pl->unk232 = 0x21;
+            pl->unk218 = NULL;
+            pl->stunned = 0;
+            pl->unkF8 &= ~0x400;
+            pl->xz_velocity = self->xz_velocity;
+            self->unk13C = 0;
+        }
+        return;
+    }
+    if (self->unk102 == 0) {
+        /* entering: face the stick direction */
+        self->in_water = 0;
+        heading = func_1505A630((f32) ((s8 *) D_800CC6A4)[2], (f32) ((s8 *) D_800CC6A4)[3], 0);
+        mag = func_1505A5CC((struct49 *) D_800CC6A4);
+        if (*(u16 *) D_800CC6A4 & 0x10) {
+            mag = 0.0f;
+        }
+        self->unk78 = self->unk7A;
+        if (1.0f < mag) {
+            self->unk78 = heading + D_800CC6A0;
+        }
+        self->unk232 = 7;
+        self->unk44 = mag * 0.35f;
+        self->unk218 = NULL;
+        if ((D_800CC288 & 0xC000) || self->unk28 > 100.0f) {
+            self->unk232 = 8;
+            self->unk102 = 1;
+        }
+        func_15052590(self);
+        if (D_800CC68D != 0) {
+            if (self->unk28 > 30.0f) {
+                /* grab object D_800CC68D - 100 */
+                D_800D1580 = 0xFF010074;
+                func_1506E8D8();
+                func_1505959C(&D_800CC2D0[D_800CC68D - 100], D_800C3E78);
+                self->unk102 = 1;
+                self->unk13C = D_800CC68D;
+            }
+            self->y_velocity = 23.0f;
+        }
+        if (self->y_position < self->unk118) {
+            self->unk102 = 1;
+            self->unk86 = 1;
+            self->y_velocity = -6.0f;
+        }
+        return;
+    }
+    speed = self->xz_velocity;
+    if (60.0f < speed) {
+        speed = 60.0f;
+    }
+    stick = ((s8 *) D_800CC6A4)[3] * 1.25f;
+    btn = *(u16 *) D_800CC6A4 & 0x10;
+    if (btn) {
+        stick = 0.0f;
+    }
+    if (self->unk13C != 0) {
+        if (!btn) {
+            self->y_position -= 16.0f * D_800D1550[0];
+        }
+    } else {
+        /* closest grabbable object (ids 0x9C / 0x9D) resting on the ground */
+        best = 1000.0f;
+        for (i = 0, pl = D_800CC2D0; i != 25; i++, pl++) {
+            if (pl->interaction_state != 0 && pl->health != 0 && pl->unk28 == 0.0f && pl->unk232 != 0x21 &&
+                (pl->id == 0x9C || pl->id == 0x9D)) {
+                d = func_1505A6F8(D_800D154C, pl);
+                if (d < best) {
+                    self->unk222 = i;
+                    best = d;
+                }
+            }
+        }
+    }
+    if (stick < -90.0f) {
+        stick = -90.0f;
+    }
+    if (90.0f < stick) {
+        stick = 90.0f;
+    }
+    if (2100.0f < self->y_position) {
+        if (-30.0f < self->y_velocity) {
+            self->y_velocity -= 1.5f;
+        }
+        stick = 40.0f;
+    }
+    c4 = self->unkC4;
+    self->unkC4 = c4 + ((f32) ((s8 *) D_800CC6A4)[2] - c4) * (0.2f * D_800D1550[0]);
+    self->unk7E = 0x19;
+    self->unk76 -= (s32) (self->unkC4 * D_800D1550[0] * 0.04f * ((100.0f - speed) * 0.015f) * 220.0f);
+    func_150599C8(self, 8, self->unk76);
+    self->target_speed = 0.0f;
+    speed = 0.0f;
+    if (self->y_position < self->unk118) {
+        if (self->unk86 == 0) {
+            self->unk86 = 1;
+            self->xz_velocity = 0.0f;
+            self->y_velocity = -6.0f;
+        }
+    } else if (self->unk86 != 0) {
+        self->unk86 = 0;
+        self->y_velocity = 9.0f;
+    }
+    rate = 1.3f;
+    btn = *(u16 *) D_800CC6A4;
+    if (!(btn & 0x10)) {
+        if (btn & 0x8000) {
+            self->target_speed = -22.0f;
+            speed = 1.0f;
+            rate = 1.8f;
+            btn = *(u16 *) D_800CC6A4;
+        }
+        if (btn & 0x4000) {
+            self->target_speed = 30.0f;
+            if (self->y_velocity < 0.0f) {
+                self->target_speed -= self->y_velocity * 0.6f;
+            }
+            speed = 1.5f;
+            rate = 0.3f;
+        }
+    }
+    func_1505A3A8(self->target_speed, self, speed, rate, 1);
+    self->unk40 = (f32) ((s16) self->unk7A + 0x4000) * 0.0054931640625f; /* 360 / 65536 */
+    self->gravity = stick * 0.000125f * (200.0f - self->xz_velocity);
+    if (self->unk13C == 0) {
+        if (26.0f < self->y_velocity) {
+            self->y_velocity = 26.0f;
+        }
+        if (self->y_velocity < -34.0f) {
+            self->y_velocity = -34.0f;
+        }
+    }
+    lim = fabsf(stick * 0.5f);
+    if (self->unk86 != 0) {
+        lim *= 0.4f;
+        self->gravity *= 0.6f;
+    }
+    g = self->gravity;
+    vy = self->y_velocity;
+    if (g == 0.0f) {
+        if (fabsf(vy) < 1.5f) {
+            self->y_velocity = 0.0f;
+        } else if (0.0f < vy) {
+            self->gravity = 1.6f;
+        } else {
+            self->gravity = -1.6f;
+        }
+    } else if (lim * 1.2f < vy && g < 0.0f) {
+        self->gravity = 0.0f;
+    } else if (vy < -lim * 1.5f && 0.0f < g) {
+        self->gravity = 0.0f;
+    }
+    self->in_water = 10;
+    if (*(u16 *) D_800CC6A4 & 0x10) {
+        self->y_velocity = 0.0f;
+        self->gravity = 0.0f;
+        self->unkB8 += ((f32) ((s8 *) D_800CC6A4)[3] - self->unkB8) * 0.2f;
+    } else {
+        self->unkB8 = (self->y_velocity - 0.0f) * -2.0f;
+        if (40.0f < self->unkB8) {
+            self->unkB8 = 40.0f;
+        } else if (self->unkB8 < -55.0f) {
+            self->unkB8 = -55.0f;
+        }
+    }
+    speed = self->y_velocity;
+    D_800CC1F3 = 1;
+    func_15059140(self);
+    D_800CC1F3 = 0;
+    if (self->unk13C != 0 && self->unk28 < 50.0f) {
+        floor_h = 50.0f;
+    }
+    if (!(*(u16 *) D_800CC6A4 & 0x10)) {
+        if (D_800CC68D != 0 && self->unk13C == 0 && D_800CC2D0[D_800CC68D - 100].unk28 == 0.0f) {
+            /* pick up object D_800CC68D - 100 from the ground */
+            self->y_velocity = 20.0f;
+            self->y_position = D_800CC2D0[D_800CC68D - 100].y_position + 70.0f;
+            func_1505959C(&D_800CC2D0[D_800CC68D - 100], D_800C3E78);
+            self->unk13C = D_800CC68D;
+            D_800D1580 = 0xFF010074;
+            func_1506E8D8();
+        }
+        if (self->unk13C != 0) {
+            if (self->unk25C & 2) {
+                /* drop the carried object */
+                self->unk25C &= ~2;
+                pl = &D_800CC2D0[self->unk13C - 100];
+                pl->unk13D = 0;
+                pl->unk232 = 0x21;
+                pl->unk218 = NULL;
+                pl->stunned = 0;
+                pl->unkF8 &= ~0x400;
+                pl->xz_velocity = self->xz_velocity;
+                self->unk13C = 0;
+                self->y_velocity = 0.0f;
+                D_800D1580 = 0x76;
+                func_1506E8D8();
+            }
+        } else if ((D_800CC288 & 0x2000) && self->unk103 == 0 && D_800BE9F0 == 0x3C) {
+            n = 0;
+            for (pl = &D_800CC2D0[1]; pl != &D_800CC2D0[25]; pl++) {
+                if (pl->interaction_state != 0 && pl->id == 0x25) {
+                    n++;
+                }
+            }
+            if (n < 5) {
+                D_800D1580 = 6;
+                self->unk103 = 4;
+                func_15073FA0();
+            }
+        }
+    }
+    if (self->unk28 <= floor_h) {
+        /* at the floor */
+        self->xz_velocity *= 0.6f;
+        if ((*(u16 *) D_800CC6A4 & 0x4000) || self->unk86 != 0 || self->unk13C != 0) {
+            if (self->unk13C != 0) {
+                if (self->y_velocity < -10.0f) {
+                    D_800D1580 = 0xFF0100A7;
+                    func_1506E5FC();
+                    D_800D1580 = 0xFF060372;
+                    func_1506E8D8();
+                }
+            } else if (self->y_position < 0.0f) {
+                D_800D1580 = 0xFF010072;
+                func_1506E8D8();
+            }
+            if (self->unk13C == 0) {
+                self->y_velocity = 20.0f;
+            } else if (self->unk86 == 0) {
+                self->y_velocity = 38.0f;
+            }
+            stick = -80.0f;
+        } else {
+            self->unk102 = 0;
+            self->y_velocity = speed * -1.0f;
+            self->unkB8 = 0.0f;
+            self->unk28 = 0.1f;
+        }
+    }
+    if (!(*(u16 *) D_800CC6A4 & 0x10)) {
+        self->unkB8 += 20.0f;
+    } else {
+        self->y_velocity = self->unkB8 * -0.35f;
+    }
+    if (self->unk86 != 0) {
+        self->unk83 = 0;
+        if (8.0f < fabsf(stick) || 7.0f < self->target_speed) {
+            anim_speed = 1.0f;
+        } else {
+            anim_speed = 0.5f;
+        }
+    } else {
+        anim_speed = func_150F3A20((s32) self, stick);
+    }
+    anim = 0xF;
+    if (40.0f < self->unkB8 && 20.0f < stick) {
+        anim = 0x11;
+    }
+    if (self->xz_velocity < 20.0f && self->target_speed <= 0.0f && stick == 0.0f) {
+        anim = 0x18;
+    }
+    if (self->xz_velocity < 0.0f) {
+        anim = 0x1F;
+    }
+    if (self->unk13C != 0) {
+        anim = 0x17;
+        anim_speed += 0.2f;
+    }
+    func_1505E650(self, anim, anim_speed, 9.0f, 0.0f, 0.0f, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F3A74.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1509BE40(s32, s32, ...);

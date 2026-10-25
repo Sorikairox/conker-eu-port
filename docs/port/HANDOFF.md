@@ -10,6 +10,19 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P309 (port-f, group D2) (session P309, 2026-10-26). Details: `docs/port/sessions/P309.md`
+
+Hand C (NM), registry rows `P309`, setups / mutants in docs/port/sessions/p309: func_150D7E38 carried_object_update
+(D_800863B4 entry 32, 36 setups, mutants 112/112) and func_150F3A74 player_swim_update (entry 21, 74 setups,
+mutants 177/178, the survivor is equivalent). Both `void (struct127 *)` as func_1504A730 calls them. func_150D7E38
+tests func_15052F9C's leftover v0 (that callee returns nothing): the C models it (obj->unk124, or obj->unk7A after a
+landing in state 0x20) - see P309.md. Asm symbols D_800CC7BC / D_800CC3D4 / D_800CC8D4 / D_800CCA1C / D_800D121C are
+D_800CC2D0 fields in EU; the C uses the array.
+
+## Next steps (from P309)
+1. Group D2 is done. If func_15052F9C is ever touched: it should return its "landed" result explicitly; then drop
+   the leftover-v0 model in func_150D7E38 (and check its other callers' use of v0).
+
 ## P304 (port-f, group D2) (session P304, 2026-10-26). Details: `docs/port/sessions/P304.md`
 
 Hand C (NM), registry rows `P304`, setups / mutants in docs/port/sessions/p304: func_150E5384 impact_dust_spawn
