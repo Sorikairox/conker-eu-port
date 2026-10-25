@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P303 (port-d, group D1) (session P303, 2026-10-26). Details: `docs/port/sessions/P303.md`
+
+Hand C (NM), registry rows `P303`, setups / mutants in docs/port/sessions/p303: func_151ADEDC rope_draw (53/53),
+func_151AD724 rope_update (61/62), func_151A4194 trail_ribbon_draw (72/73), func_151B58D8 electric_bolt_draw (49/51).
+Survivors are equivalent (P303.md). Lesson: functions with fixed-size stack copies (func_151AD724: 20 points) need
+the random phase pinned (count and heap pointers), else both sides overflow / read harness stack and DIFFER.
+progress_nm `total 5916 3995 1706 215 5701 96.4% 2021568/2253856 (89.7%)`.
+
+## Next steps (from P303, group D1 left)
+1. func_151EE93C (216470, 665 insns): cheat-code entry screen (letter wheel D_800E10B0..B3, string table match at
+   D_800E1008 + 0x240 / +0x28C, cheat bits D_800E9D00), `Gfx *(Gfx *)`, callers asm func_151ECB98 + C in 216470.
+2. func_15175EC8 (1A2970, 961 insns): `void (u8 *)`, render-layer field 0 of layers 10 / 20 / 68 / 69, also called
+   directly by asm func_15176DCC and C in 1A2970.
+3. D2 (P304) has func_150E5384, func_150DD420, func_150DDBC0, func_150DCAD8, func_150D7E38, func_150F3A74.
+
 ## P297 (port-d, group D) (session P297, 2026-10-26). Details: `docs/port/sessions/P297.md`
 
 Hand C (NM), registry rows `P297`, setups / mutants in docs/port/sessions/p297: func_150BF71C lift_platform_update
