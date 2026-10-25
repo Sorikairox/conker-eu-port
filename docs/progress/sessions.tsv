@@ -362,3 +362,4 @@ P284	port-c	nm convert	7			group C: func_150B1964 finished (mode-14 divisor = fu
 P283	port-d	nm convert	8			group D: 8 conversions incl. func_151C5280 (51190 rodata copy); scalar static const f32 lands in .data (use 1-elem arrays); func_150FBA40 is hand asm -> E
 P288	port-e	nm convert+harness	4			group E: stub_write maps pages (STUBMAP_OLD, selftest 143); func_10001194 main loop + func_1600288C (debugger rodata poke) landed; walls: tri_misses_box + ray_hits_triangle readable (ray coverage thin); engine/ray bodies left; port-e 97.2%
 P289	port-c	nm convert	3			group C: func_1505D1C4 s32 (4 decls) + func_150E1AF0; D_8008B704 handlers given NM phase param (wasm call_indirect fix); func_150B2290 (duplicate of P279 - resolve at merge) + func_151B8DB0; port-c 96.2%
+P287	port-b	nm convert	8			group A: protocheck fixed (func_15116A8C void protos), 8 conversions (a store-order bug caught); func_15171770 blocked on EF410 proto; 17 left; portb 5698/5916 96.3% 89.2%
