@@ -1392,4 +1392,173 @@ void func_151C5060(u8 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32 *, u8 *, f32 *, f32 *, f32 *, f32 *, s32 *, u8 *, f32);
+
+typedef struct {
+    u8 *object;         /* +0x00 */
+    f32 dist;           /* +0x04 distance to the hit (-1 = none) */
+    f32 point[3];       /* +0x08 */
+    f32 normal[3];      /* +0x14 */
+    f32 exit[3];        /* +0x20 */
+    f32 start[3];       /* +0x2C */
+    f32 dir[3];         /* +0x38 */
+    u8 surface[0x15];   /* +0x44 level surface (func_150ACEA0) */
+    u8 kind;            /* +0x59 0 none, 1 level, 2 object bounds, 3 object model */
+    u8 pad5A[2];
+    u8 *material;       /* +0x5C D_800DBEF4 entry (0xA0 bytes each) */
+    s32 extra;          /* +0x60 level hit extra */
+} RayHit;               /* 0x64 bytes, func_15081A90's hit record */
+
+// beam_hit_update: keeps a beam's hit record (hitArg) for this frame and writes its length (dist * lenScale, or
+// missLen when nothing is hit) to *outArg. With a previous record (srcArg) it is copied; when the start moved to
+// posArg the direction (point - pos) is renormalised (func_15145128, which also gives dist; failure -> 0), and with
+// `recheck` an object hit (kind 2 / 3) is cast again against object bounds only (func_15081A90, taken when it hits).
+// Without one and without `cast` the record only gets the start (pos) and direction (dirArg, else toArg): returns
+// whether there was one. Otherwise it casts from fromArg along toArg (both given) or from pos along dirArg
+// (func_15081A90: objects unless !objects, models unless !(models && objects), filter, skipMask). A level hit
+// counts; an object hit is re-cast against the level from the hit point toward pos when from / to were given (the
+// lengths add up), else from pos (func_150ACEA0). On a hit the direction is renormalised from pos if needed, the
+// impact handled (func_151C2600) and the material pointer refreshed; on a miss flagMask is cleared in *flags and
+// it returns whether dirArg or toArg was given. The argument types are the callers' (game_eu_1EFE10 /
+// game_eu_125200 prototypes).
+s32 func_151C50BC(s32 srcArg, s32 *hitArg, u8 *posArg, s32 *dirArg, s32 *outArg, f32 lenScale, s32 castArg,
+                  u8 *fromArg, s32 *toArg, s8 *flags, s32 flagMask, f32 missLen, u8 *caster, s32 filter,
+                  s32 objects, s32 models, s32 skipMask, s32 recheck) {
+    RayHit *src = (RayHit *) srcArg;
+    RayHit *hit = (RayHit *) hitArg;
+    f32 *pos = (f32 *) posArg;
+    f32 *dir = (f32 *) dirArg;
+    f32 *from = (f32 *) fromArg;
+    f32 *to = (f32 *) toArg;
+    RayHit tmp;
+    f32 len;
+    s32 matIdx;
+    u8 found;
+
+    if (src != NULL) {
+        *hit = *src;
+        if (hit->start[0] != pos[0] || hit->start[1] != pos[1] || hit->start[2] != pos[2]) {
+            hit->dir[0] = hit->point[0] - pos[0];
+            hit->dir[1] = hit->point[1] - pos[1];
+            hit->dir[2] = hit->point[2] - pos[2];
+            hit->start[0] = pos[0];
+            hit->start[1] = pos[1];
+            hit->start[2] = pos[2];
+            if (func_15145128((u8 *) hit->dir, (s32 *) hit->dir, (s32) &hit->dist, 0) == 0) {
+                return 0;
+            }
+        }
+        if ((u8) recheck && (hit->kind == 2 || hit->kind == 3)) {
+            func_15081A90((struct127 *) caster, hit->start[0], hit->start[1], hit->start[2], hit->dir[0], hit->dir[1],
+                          hit->dir[2], (u8 *) &tmp, 0.0f, 0, 1, 1, -1, 0, skipMask);
+            if (tmp.kind != 0) {
+                *hit = tmp;
+            }
+        }
+        *(f32 *) outArg = hit->dist * lenScale;
+        return 1;
+    }
+    if ((u8) castArg == 0) {
+        *flags &= ~(u8) flagMask;
+        *(f32 *) outArg = missLen;
+        hit->start[0] = pos[0];
+        hit->start[1] = pos[1];
+        hit->start[2] = pos[2];
+        if (dir != NULL) {
+            hit->dir[0] = dir[0];
+            hit->dir[1] = dir[1];
+            hit->dir[2] = dir[2];
+            return 1;
+        }
+        if (to != NULL) {
+            hit->dir[0] = to[0];
+            hit->dir[1] = to[1];
+            hit->dir[2] = to[2];
+            return 1;
+        }
+        return 0;
+    }
+
+    matIdx = -1;
+    if (from != NULL && to != NULL) {
+        hit->start[0] = from[0];
+        hit->start[1] = from[1];
+        hit->start[2] = from[2];
+        hit->dir[0] = to[0];
+        hit->dir[1] = to[1];
+        hit->dir[2] = to[2];
+    } else {
+        hit->start[0] = pos[0];
+        hit->start[1] = pos[1];
+        hit->start[2] = pos[2];
+        hit->dir[0] = dir[0];
+        hit->dir[1] = dir[1];
+        hit->dir[2] = dir[2];
+    }
+    func_15081A90((struct127 *) caster, hit->start[0], hit->start[1], hit->start[2], hit->dir[0], hit->dir[1],
+                  hit->dir[2], (u8 *) hit, 0.0f, 0, !(u8) objects, !((u8) models && (u8) objects), (s8) filter, 0,
+                  skipMask);
+    if (hit->material == NULL) {
+        matIdx = -1;
+    } else {
+        matIdx = (hit->material - (u8 *) D_800DBEF4) / 0xA0;
+    }
+    if (hit->kind == 0) {
+        found = 0;
+    } else if (hit->kind == 1) {
+        found = 1;
+    } else if (from != NULL && to != NULL) {
+        /* (the asm also saves a copy of the record here that is never read) */
+        hit->start[0] = pos[0];
+        hit->start[1] = pos[1];
+        hit->start[2] = pos[2];
+        hit->dir[0] = hit->point[0] - pos[0];
+        hit->dir[1] = hit->point[1] - pos[1];
+        hit->dir[2] = hit->point[2] - pos[2];
+        if (func_15145128((u8 *) hit->dir, (s32 *) hit->dir, (s32) &hit->dist, 0) == 0) {
+            return 0;
+        }
+        len = hit->dist;
+        found = func_150ACEA0(hit->point[0], hit->point[1], hit->point[2], hit->dir[0], hit->dir[1], hit->dir[2], NULL,
+                              hit->surface, &hit->point[0], &hit->point[1], &hit->point[2], &hit->dist, &matIdx,
+                              (u8 *) &hit->extra, 0.0f);
+        if (found) {
+            hit->dist += len;
+            hit->start[0] = pos[0];
+            hit->start[1] = pos[1];
+            hit->start[2] = pos[2];
+        }
+    } else {
+        found = func_150ACEA0(pos[0], pos[1], pos[2], hit->dir[0], hit->dir[1], hit->dir[2], NULL, hit->surface,
+                              &hit->point[0], &hit->point[1], &hit->point[2], &hit->dist, &matIdx,
+                              (u8 *) &hit->extra, 0.0f);
+    }
+    if (!found) {
+        *flags &= ~(u8) flagMask;
+        *(f32 *) outArg = missLen;
+        return dir != NULL || to != NULL;
+    }
+    *(f32 *) outArg = hit->dist * lenScale;
+    if (hit->start[0] != pos[0] || hit->start[1] != pos[1] || hit->start[2] != pos[2]) {
+        hit->dir[0] = hit->point[0] - pos[0];
+        hit->dir[1] = hit->point[1] - pos[1];
+        hit->dir[2] = hit->point[2] - pos[2];
+        hit->start[0] = pos[0];
+        hit->start[1] = pos[1];
+        hit->start[2] = pos[2];
+        if (func_15145128((u8 *) hit->dir, (s32 *) hit->dir, (s32) &hit->dist, 0) == 0) {
+            return 0;
+        }
+    }
+    func_151C2600(caster, (u8 *) hit->point, (u8 *) hit->dir, hit->extra, hit->dist);
+    if (matIdx == -1) {
+        hit->material = NULL;
+    } else {
+        hit->material = (u8 *) D_800DBEF4 + matIdx * 0xA0;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C50BC.s")
+#endif

@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P295 (port, group B) (session P295, 2026-10-26). Details: `docs/port/sessions/P295.md`
+
+Hand C (NM), registry rows `P295`, setups / mutants in docs/port/sessions/p295: func_150CBF80 ground_puff_spawn (41/41;
+D_800A0A10 copied as `static const` table, random phase needs `DIFFTEST_ARG=1=0|1|2`), func_151C50BC beam_hit_update
+(39/41, 2 equivalent), func_151B6ED8 ribbon_trail_draw (34/34). Re-checks: func_151B1138 56/57 (known equivalent),
+func_15136F50 39/39, func_15054A94 40/40 (6 survivors killed by named boundary setups, m4A94b.txt), func_1513334C 34/37.
+Lesson: in a mutant file, a line without `% names` runs only the first setup file of the registry row.
+Checks: verify_all rc 0, NM rc 0, protocheck 0 (1687), selftest 130/130, implicit NM+float 0, progress_nm
+`total 5916 3995 1707 214 5702 96.4% 2022796/2253856 (89.7%)`.
+
+## Next steps (from P295)
+1. func_1513334C: 3 survivors (`1.0f < len` needs len == 1.0; old[] argument swaps at the D_80089CD4 / D_80089D14
+   handler calls need distinct components); reverify says its RET / ARGMEM keys 150B8EC0 / 150B9424 / 15133F44 /
+   151A7EB8 are not jal targets (table handlers) -> check that they act at all.
+2. Group B left (7): func_151C40BC, func_150E3CB8, func_150B4BF0, func_1506C460, func_150E2294, func_1516E100, func_151206C8.
+3. func_150E2294 (group D finding): it stores only sp+0x10 / 0x14 before `jal func_150E4AD0`; the 7th stack argument
+   (sp+0x18) is left over -> check what func_150E4AD0 reads and mirror / document it.
+4. func_15008340: switch to void together with game_39750's prototypes (from P282).
+
 ## P286 (port, group B) (session P286, 2026-10-26). Details: `docs/port/sessions/P286.md`
 
 NM link fixed: game_eu_12C5F0's func_150FEDE0 copies are `static const` (NM build rc 0). Hand C (NM), registry rows

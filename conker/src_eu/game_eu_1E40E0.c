@@ -228,7 +228,216 @@ s32 func_151B6B84(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B6B84.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_1513F4E4(s32, s32, s8 *);
+s32 func_15142B7C(s32, s32, s32);
+s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *func_15142FBC(s32, s32, s32, s8 *);
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+u8 *func_15142C10(u8 *, s32, s32, s32, s32, s8 *);
+extern s32 D_80091084;
+extern s32 D_800D30BC;
+
+typedef struct {
+    f32 pos[3];         /* +0x00 */
+    u8 pad0C[4];
+    u8 alpha;           /* +0x10 */
+    u8 pad11[3];
+    f32 width;          /* +0x14 texture s at this point */
+    u8 pad18[4];
+} RibbonPoint;          /* 0x1C bytes, trail +0x94 */
+
+// ribbon_trail_draw: draws the trail's points (+0x94, ring of +0x25 entries, newest before +0x2E, oldest +0x2D;
+// nothing below 2 points, +0x2C) as a camera-facing ribbon of half-width 10: each point gets two vertices offset by
+// +-10 * normalize((prev - next) x (point - camera)) (no offset when that is 0), texture s = the point's width
+// value, t 0 / 0x7FF, white with the point's alpha; one G_VTX of 4 + two triangles per segment. With +0x1E bit 1
+// the ribbon starts at the trail's own position (+0x10, alpha 0x80, s 0). Vertices come from func_151D6310 (the
+// trail's +0x84 buffer, (count << 5) + 0xA0 bytes; none -> gfx unchanged); render state: texture D_80091084,
+// combine 0x4E, geometry 0x200005 / 0x1F0600, othermode D_800D30BC | 0x82CA0 / D_800A4EA8 words 6 | 7.
+u8 *func_151B6ED8(u8 *trail, u8 *gfx, s16 arg2) {
+    RibbonPoint *pts;
+    f32 *cam;
+    Vtx *v;
+    s32 *g;
+    f32 a[3];
+    f32 b[3];
+    f32 widthA;
+    f32 widthB;
+    f32 dx, dy, dz;
+    f32 ex, ey, ez;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+    u8 alphaA;
+    u8 alphaB;
+    s32 cur;
+    s32 next;
+    s32 s;
+    s8 flag;
+
+    if (*(s8 *) (trail + 0x2C) < 2) {
+        return gfx;
+    }
+    func_151D6310((s32 *) (trail + 0x84), arg2, (trail[0x25] << 5) + 0xA0, (s32 *) &v, 0);
+    if (v == NULL) {
+        return gfx;
+    }
+    pts = *(RibbonPoint **) (trail + 0x94);
+    cam = func_15144B34(arg2);
+    flag = 1;
+    gfx = (u8 *) func_15142E24(gfx, &D_80091084, 0, 0, 0, 0, 0x1F, 0, 0, &flag, 3);
+    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, 0xFF, &flag);
+    gfx = (u8 *) func_1513F4E4((s32) gfx, 0x4E, &flag);
+    gfx = (u8 *) func_15142B7C((s32) gfx, 0x200005, 0x1F0600);
+    gfx = func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
+                        &flag);
+
+    if (*(u16 *) (trail + 0x1E) & 2) {
+        next = *(s8 *) (trail + 0x2E) - 1;
+        if (next < 0) {
+            next = trail[0x25] - 1;
+        }
+        a[0] = *(f32 *) (trail + 0x10);
+        a[1] = *(f32 *) (trail + 0x14);
+        a[2] = *(f32 *) (trail + 0x18);
+        alphaA = 0x80;
+        widthA = 0.0f;
+    } else {
+        cur = *(s8 *) (trail + 0x2E) - 1;
+        if (cur < 0) {
+            cur = trail[0x25] - 1;
+        }
+        next = cur - 1;
+        if (next < 0) {
+            next = trail[0x25] - 1;
+        }
+        a[0] = pts[cur].pos[0];
+        a[1] = pts[cur].pos[1];
+        a[2] = pts[cur].pos[2];
+        widthA = pts[cur].width;
+        alphaA = pts[cur].alpha;
+    }
+    b[0] = pts[next].pos[0];
+    b[1] = pts[next].pos[1];
+    b[2] = pts[next].pos[2];
+    alphaB = pts[next].alpha;
+    widthB = pts[next].width;
+
+    /* the first pair, at a */
+    dx = a[0] - cam[0];
+    dy = a[1] - cam[1];
+    dz = a[2] - cam[2];
+    ey = a[1] - b[1];
+    ez = a[2] - b[2];
+    ex = a[0] - b[0];
+    nx = ey * dz - dy * ez;
+    ny = ez * dx - dz * ex;
+    nz = ex * dy - dx * ey;
+    len2 = nx * nx + ny * ny + nz * nz;
+    if (0.0f == len2) {
+        nx = ny = nz = 0.0f;
+    } else {
+        k = 10.0f / sqrtf(len2);
+        nx *= k;
+        ny *= k;
+        nz *= k;
+    }
+    s = (s32) widthA;
+    v->v.ob[0] = (s32) (a[0] + nx);
+    v->v.ob[1] = (s32) (a[1] + ny);
+    v->v.ob[2] = (s32) (a[2] + nz);
+    v->v.tc[0] = s;
+    v->v.tc[1] = 0;
+    v->v.cn[0] = 0xFF;
+    v->v.cn[1] = 0xFF;
+    v->v.cn[2] = 0xFF;
+    v->v.cn[3] = alphaA;
+    v->v.flag = 0;
+    v++;
+    v->v.ob[0] = (s32) (a[0] - nx);
+    v->v.ob[1] = (s32) (a[1] - ny);
+    v->v.ob[2] = (s32) (a[2] - nz);
+    v->v.tc[0] = s;
+    v->v.tc[1] = 0x7FF;
+    v->v.cn[0] = 0xFF;
+    v->v.cn[1] = 0xFF;
+    v->v.cn[2] = 0xFF;
+    v->v.cn[3] = alphaA;
+    v->v.flag = 0;
+    v++;
+
+    /* one pair per point at b, back to the oldest (+0x2D) */
+    do {
+        dx = b[0] - cam[0];
+        dy = b[1] - cam[1];
+        dz = b[2] - cam[2];
+        cur = next;
+        next = cur - 1;
+        ey = a[1] - b[1];
+        ez = a[2] - b[2];
+        ex = a[0] - b[0];
+        nx = ey * dz - dy * ez;
+        ny = ez * dx - dz * ex;
+        nz = ex * dy - dx * ey;
+        len2 = nx * nx + ny * ny + nz * nz;
+        s = (s32) widthB;
+        if (0.0f == len2) {
+            nx = ny = nz = 0.0f;
+        } else {
+            k = 10.0f / sqrtf(len2);
+            nx *= k;
+            ny *= k;
+            nz *= k;
+        }
+        v->v.ob[0] = (s32) (b[0] + nx);
+        v->v.ob[1] = (s32) (b[1] + ny);
+        v->v.ob[2] = (s32) (b[2] + nz);
+        v->v.tc[0] = s;
+        v->v.tc[1] = 0;
+        v->v.cn[0] = 0xFF;
+        v->v.cn[1] = 0xFF;
+        v->v.cn[2] = 0xFF;
+        v->v.cn[3] = alphaB;
+        v->v.flag = 0;
+        v++;
+        v->v.ob[0] = (s32) (b[0] - nx);
+        v->v.ob[1] = (s32) (b[1] - ny);
+        v->v.ob[2] = (s32) (b[2] - nz);
+        v->v.tc[0] = s;
+        v->v.tc[1] = 0x7FF;
+        v->v.cn[0] = 0xFF;
+        v->v.cn[1] = 0xFF;
+        v->v.cn[2] = 0xFF;
+        v->v.cn[3] = alphaB;
+        v->v.flag = 0;
+        v++;
+        g = (s32 *) gfx;
+        g[0] = 0x01004008;      /* G_VTX: the last 4 vertices (previous pair, this pair) to slots 0..3 */
+        g[1] = (s32) (v - 4);
+        g[2] = 0x05000204;      /* G_TRI1 0, 1, 2 */
+        g[3] = 0;
+        g[4] = 0x05020604;      /* G_TRI1 1, 3, 2 */
+        g[5] = 0;
+        gfx += 0x18;
+        if (next < 0) {
+            next = trail[0x25] - 1;
+        }
+        if (cur != *(s8 *) (trail + 0x2D)) {
+            a[0] = b[0];
+            a[1] = b[1];
+            a[2] = b[2];
+            b[0] = pts[next].pos[0];
+            b[1] = pts[next].pos[1];
+            b[2] = pts[next].pos[2];
+            alphaB = pts[next].alpha;
+            widthB = pts[next].width;
+        }
+    } while (cur != *(s8 *) (trail + 0x2D));
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B6ED8.s")
+#endif
 
 void func_151B7664(u8 *arg0, s32 *arg1, u8 arg2)
 {

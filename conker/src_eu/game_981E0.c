@@ -8,6 +8,7 @@ void func_1507F640(void); /* P60: idle animation, was implicitly int */
 s32 func_151AABC4(struct127 *, s32); /* P192: C on port-b (returns 0), was implicit */
 s32 func_150CA150(u8 *); /* P204: C on port-b (P201, returns 0), was implicit */
 u8 *func_15196438(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitter, was implicit */
+void func_150CBF80(struct127 *, u8, s32, u8); /* P295: hand C (void), was implicit */
 #endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 func_151C0698();   /* still asm; called by func_15070300 */
