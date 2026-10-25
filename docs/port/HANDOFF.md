@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P306 (port-e slot, group C part C2 finished: 2 compiled functions to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P306.md`
+- New NM hand C: func_151E67A0 mp_report_hit (game_eu_20B730; multiplayer hit stats + taunt sounds), func_150FBE40
+  gun_fire_effects (game_eu_129650; tracer / spark / shell / screen flash of one shot; now `void`, the file's
+  prototype for its caller func_150FCB94 changed to match). Registry rows P306, setups / mutants / generators in
+  `docs/port/sessions/p306/`.
+- Mutants: 67A0 85/85, BE40 86/86. Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0 NM+float,
+  selftest 143/143. progress_nm `total 5916 3995 1728 33 160 5756 97.3% 2038276/2253856 (90.4%)`.
+- Lessons: some US-named symbols sit elsewhere in EU (D_8008FD8C = 0x8009012C, D_800BE616 = 0x800BEA36, D_800BE9F0 =
+  0x800BEE10): take poke addresses from `mips-linux-gnu-nm conker/build/conker.eu.elf`, and read `[POKE unread]`.
+  An ARGMEM `0*OFF` dereference into a page the candidate never touched reads "unmapped" on one side only (lazy
+  pages): keep tables the reference loads from as `extern` (or touch the page) instead of static copies.
+
+### Next steps (group C, from P306)
+1. Group C2 is complete; port-e carries group C work in game_eu_106830 / game_eu_1579B0 / game_eu_20B730 /
+   game_eu_129650 (file-disjoint from C1 / port-c).
+
 ## P300 (port-e slot, group C part C2: 4 compiled functions to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P300.md`
 - New NM hand C: func_150D99AC trail_update, func_150DA1FC trail_draw_ribbon, func_150DABFC trail_hit_effects
   (game_eu_106830; the trail kind's update / draw handlers and their hit-effect helper, producer + consumer together),

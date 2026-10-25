@@ -10,4 +10,4 @@ NMBLOCK_WHOLE=1 python3 tools/port/nmblock.py $F $C > /dev/null
 sed "$E" $C > $M; cmp -s $C $M && { echo "NOAPPLY $E"; exit 1; }
 l=$(grep "^$SN " $SF); IFS='!' read -r n a p r rf ow ww wb <<< "$l"
 sw=(); for kv in "DIFFTEST_ARG=$(echo $a)" "DIFFTEST_POKE=$(echo $p)" "DIFFTEST_RET=$(echo $r)" "DIFFTEST_RETF=$(echo $rf)" "DIFFTEST_OUTA=$(echo $ow)" "DIFFTEST_OUTW=$(echo $ww)" "DIFFTEST_OUTB=$(echo $wb)"; do [ -n "${kv#*=}" ] && sw+=("$kv"); done
-env "${envs[@]}" "${sw[@]}" DIFFTEST_EXACT='*' DIFFTEST_TMP=build/dt306m tools/port/difftest.sh $F $M --trials 4 --seed 1 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | cut -c1-200
+env "${envs[@]}" "${sw[@]}" DIFFTEST_EXACT='*' DIFFTEST_TMP=build/dt306m tools/port/difftest.sh $F $M --trials 4 --seed 1 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | cut -c1-${CUT:-200}

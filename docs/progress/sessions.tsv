@@ -86,3 +86,4 @@ P288	port-e	stub_write page fix; 10001194 + 1600288C landed; D5E90 AAF00 + AD844
 P291	port-e	star field 150FBA40 (new nmasm_stars harness); ray inputs kill AD844 projection mutant; ray cast ACEA0 readable	2	0	118	stars 17/18; ray body 15/25 (3 next-leaf coverage gaps); walls engine bodies still asm2c (97.2%)
 P294	port-e	D5E90 wall engine AB708 (AB6D0 / AC8C4) readable, walls.inc deleted, ray far-leaf scenes	2	0	115	walls 33/41, ledge 20/32, P291 ray next-leaf survivors killed; 0 asm2c left (97.2%)
 P300	port-e	group C part C2 (trail update/draw/hit effects 106830, freecam 1579B0)	4	0	130	D99AC 53/53, DA1FC 34/34, DABFC 57/57, 2A1A0 47/50; 151E67A0 + 150FBE40 left (97.3%)
+P306	port-e	group C part C2 finished (mp hit report 20B730, gun fire effects 129650)	2	0	115	67A0 85/85, BE40 86/86; C2 complete (97.3%)
