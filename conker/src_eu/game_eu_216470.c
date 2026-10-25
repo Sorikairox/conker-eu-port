@@ -399,7 +399,117 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9150.s")
 #endif
 
+#ifdef NON_MATCHING
+extern s8 D_80087608;            /* score marks per team */
+extern s16 D_800E0ED0[];         /* team score */
+u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_150859AC(s16, s32);
+#define TM_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
+/* mp_team_marks_draw: the team panel of the multiplayer HUD at row `y`; returns the new DL end (the end so far when
+ * a texture is missing). D_800E0FE0 teams share 0x124 pixels. With `loadTex` (s8) it loads texture 0xD16 (32 x 32
+ * RGBA32); with `refresh` (u8) it finds the teams out of the game (bit per team: 0xF minus the teams D_800E1030[i] of
+ * the D_8008FD8C players for which func_150859AC(i, 3) is set) and re-reads the scores (func_150859AC(team, 6)) into
+ * D_800E0ED0. Each live team draws D_80087608 marks in its colour (D_800ABEA0), 8 pixels apart around its column,
+ * the marks from its score on (one more for `sel`) greyed (0x40404040). With any team out, texture 0xD19 (64 x 64
+ * colour-indexed sheet + TLUT) draws a 16 x 0x40 cross in that team's colour over each team out. Ends with a pipe
+ * sync. */
+u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
+    Gfx *gdl = (Gfx *) buf;
+    s32 tex;
+    s32 pitch;
+    s32 x;
+    s32 i;
+    s32 j;
+    s32 score;
+    s32 mx;
+    s8 out = 0;
+
+    if ((s8) loadTex != 0) {
+        tex = func_1510D66C(0xD16, 0, 3, 0);
+        if (tex == (s32) 0x80000000) {
+            return (u8 *) gdl;
+        }
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xFC12FE25, 0xFFFFF3F9); /* SetCombine */
+        TM_W(gdl, 0xFD180000, tex);        /* SetTImg RGBA32 */
+        TM_W(gdl, 0xF5180000, 0x07094250); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        TM_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xF5181000, 0x00094250); /* SetTile (render) */
+        TM_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
+        gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
+    }
+    pitch = 0x124;
+    if (D_800E0FE0 > 0) {
+        pitch = 0x124 / D_800E0FE0;
+    }
+    if ((u8) refresh != 0) {
+        out = 0xF;
+        for (i = 0; i < D_8008FD8C; i++) {
+            if (func_150859AC((s16) i, 3) != 0) {
+                out &= ~(1 << D_800E1030[i]);
+            }
+        }
+    }
+    x = pitch >> 1;
+    for (i = 0; i < D_800E0FE0; i++, x += pitch) {
+        if ((u8) refresh != 0) {
+            score = func_150859AC((s16) i, 6);
+            D_800E0ED0[i] = score;
+        } else {
+            score = D_800E0ED0[i];
+        }
+        if (out & (1 << i)) {
+            continue;
+        }
+        if (i == sel) {
+            score++;
+        }
+        gDPPipeSync(gdl++);
+        gDPSetEnvColor(gdl++, D_800ABEA0[i][0], D_800ABEA0[i][1], D_800ABEA0[i][2], 0xFF);
+        mx = x - D_80087608 * 4;
+        for (j = 0; j < D_80087608; j++, mx += 8) {
+            if (j == score) {
+                gDPPipeSync(gdl++);
+                TM_W(gdl, 0xFB000000, 0x40404040); /* SetEnvColor grey */
+            }
+            gdl = (Gfx *) func_151E8E94((u8 *) gdl, mx * 4, y, (mx + 7) * 4, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+        }
+    }
+    if (out != 0) {
+        tex = func_1510D66C(0xD19, 0, 3, 0);
+        if (tex == (s32) 0x80000000) {
+            return (u8 *) gdl;
+        }
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xFD500000, tex);        /* SetTImg RGBA16 (load as 16b) */
+        TM_W(gdl, 0xF5500000, 0x07098260); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        TM_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xF5400800, 0x00098260); /* SetTile (render, palette) */
+        TM_W(gdl, 0xF2000000, 0x000FC0FC); /* SetTileSize 64x64 */
+        TM_W(gdl, 0xFD100000, tex + 0x800); /* SetTImg TLUT */
+        gDPLoadSync(gdl++);
+        TM_W(gdl, 0xF0000000, 0x0603C000); /* LoadTLUT */
+        gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);
+        x = pitch >> 1;
+        for (i = 0; i < D_800E0FE0; i++, x += pitch) {
+            if (out & (1 << i)) {
+                gDPPipeSync(gdl++);
+                gDPSetEnvColor(gdl++, D_800ABEA0[i][0], D_800ABEA0[i][1], D_800ABEA0[i][2], 0xFF);
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, (x - 8) * 4, y - 0x18, (x + 8) * 4, y + 0x28, 0, 0x600, 0x280,
+                                            0x400, 0x400);
+            }
+        }
+    }
+    gDPPipeSync(gdl++);
+    return (u8 *) gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9E1C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s16 D_800E0ED0[];         /* team score */

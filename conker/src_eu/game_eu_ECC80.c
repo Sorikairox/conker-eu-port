@@ -76,7 +76,127 @@ s32 func_150BF5F4(u8 *e) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF5F4.s")
 #endif
 
+#ifdef NON_MATCHING
+s32 func_151152A4(u8 *obj, s32 sound, s32 vol, s16 r0, s16 r1, s32 flags);
+void func_15115484(s32 arg0, s32 arg1, s32 arg2);
+void func_150A7DA0(u8 *mtx, s32 x, s32 y, s32 z);
+void func_15043F6C(f32 arg0[4][4], f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9);
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+
+// lift_platform_update: world-object callback (D_80089030[9][0], obj +0x38) of a lift that moves its model up to the
+// target height +0x3C (s32). The current height is +0x7C, the speed +0x84; while D_800C35EA is set and D_800C3A08 is
+// not 1 nothing moves (height 0 in the matrix, the bob is left alone). D_800BE9B4 snaps the height to the target.
+// At the target: the bob phase +0x80 advances by 0.05, the bob amplitude is (height / 1500 + 1) * D_800BE9A4 (not
+// below 0) and the move sound stops (func_151152A4 -1). Moving: the phase is reset, the speed accelerates by -5
+// (down to -60) or +0.5 (up to 6, with the move sound 0xB9 looping); while the step is shorter than the remaining
+// distance the height moves by speed * D_800BE9A4, +0x124 = speed * 0.4 (-10 below -25), +0xDC = 0x7D00, mode
+// (+0x73 & 3) 2, the start sound when +0x74 is 0, and func_15115484 with the speed * 500; else it lands on the
+// target (+0xDC = 0x80 when going down, +0x124 = 0, mode 3, sound stop). The offsets +0/+4/+8 ease (0.05, 0.2 while
+// moving) toward the bob (amp * 3 sin(ph), amp * 4 sin(1.1 ph), amp * 3 cos(ph)); then the vertex list +0x28
+// (+0x16 entries of 16 bytes) is transformed by translate(0, height, 0) * model(pos, scale +0x2C, angles +0x10)
+// into the current buffer +0x20[D_800BE9C0].
+void func_150BF71C(u8 *p) {
+    f32 ease = 0.05f;
+    f32 amp = 0.0f;
+    f32 height = *(f32 *) (p + 0x7C);
+    f32 dist;
+    f32 speed;
+    f32 amp3;
+    f32 trans[4][4];
+    f32 model[4][4];
+    f32 x, y, z;
+    s16 *src;
+    s16 *dst;
+    s32 i;
+    s32 frozen;
+
+    if (D_800C35EA == 0) {
+        frozen = 0;
+    } else if (D_800C3A08 != 1) {
+        frozen = 1;
+    } else {
+        frozen = 0;
+    }
+    if (D_800BE9B4 != 0) {
+        height = *(s32 *) (p + 0x3C);
+        *(f32 *) (p + 0x7C) = height;
+    }
+    if (frozen) {
+        height = 0.0f;
+    } else {
+        dist = (f32) *(s32 *) (p + 0x3C) - height;
+        if (dist == 0.0f) {
+            *(f32 *) (p + 0x84) = 0.0f;
+            *(f32 *) (p + 0x80) += 0.05f;
+            amp = (height / 1500.0f + 1.0f) * D_800BE9A4;
+            if (amp < 0.0f) {
+                amp = 0.0f;
+            }
+            func_151152A4(p, -1, 0x7D00, 0x1F4, 0x7D0, 0);
+        } else {
+            ease = 0.2f;
+            *(f32 *) (p + 0x80) = 0.0f;
+            speed = *(f32 *) (p + 0x84);
+            if (dist < 0.0f) {
+                if (-60.0f < speed) {
+                    speed -= 5.0f;
+                }
+            } else {
+                if (speed < 6.0f) {
+                    speed += 0.5f;
+                }
+                func_151152A4(p, 0xB9, 0x7D00, 0x1F4, 0x7D0, 1);
+            }
+            *(f32 *) (p + 0x84) = speed;
+            if (fabsf(speed) < fabsf(dist)) {
+                height += speed * D_800BE9A4;
+                if (speed < -25.0f) {
+                    *(f32 *) (p + 0x124) = -10.0f;
+                } else {
+                    *(f32 *) (p + 0x124) = speed * 0.4f;
+                }
+                *(s32 *) (p + 0xDC) = 0x7D00;
+                p[0x73] &= 0xFC;
+                p[0x73] |= 2;
+                if (*(u16 *) (p + 0x74) == 0) {
+                    func_151152A4(p, 0xB9, 0x3E80, 0x3E8, 0xFA0, 0);
+                }
+                func_15115484((s32) p, 0x3E80, (s32) (speed * 500.0f));
+            } else {
+                height = *(s32 *) (p + 0x3C);
+                if (speed < 0.0f) {
+                    *(s32 *) (p + 0xDC) = 0x80;
+                }
+                *(f32 *) (p + 0x124) = 0.0f;
+                p[0x73] &= 0xFC;
+                p[0x73] |= 3;
+                func_151152A4(p, -1, 0, 0, 0, 0);
+            }
+            *(f32 *) (p + 0x84) = speed;
+            *(f32 *) (p + 0x7C) = height;
+        }
+        amp3 = amp * 3.0f;
+        *(f32 *) (p + 0x0) += (amp3 * sinf(*(f32 *) (p + 0x80)) - *(f32 *) (p + 0x0)) * ease;
+        *(f32 *) (p + 0x4) += (amp * 4.0f * sinf(*(f32 *) (p + 0x80) * 1.1f) - *(f32 *) (p + 0x4)) * ease;
+        *(f32 *) (p + 0x8) += (amp3 * cosf(*(f32 *) (p + 0x80)) - *(f32 *) (p + 0x8)) * ease;
+    }
+    func_150A7DA0((u8 *) trans, 0, *(s32 *) &height, 0);
+    func_15043F6C(model, *(f32 *) (p + 0x0), *(f32 *) (p + 0x4), *(f32 *) (p + 0x8), *(f32 *) (p + 0x2C),
+                  *(f32 *) (p + 0x30), *(f32 *) (p + 0x34), *(s16 *) (p + 0x10), *(s16 *) (p + 0x12),
+                  *(s16 *) (p + 0x14));
+    func_150A7A48(trans, model, trans);
+    dst = *(s16 **) (p + 0x20 + D_800BE9C0 * 4);
+    src = *(s16 **) (p + 0x28);
+    for (i = 0; i < *(u16 *) (p + 0x16); i++) {
+        func_150A7E40(trans, src[i * 8 + 0], src[i * 8 + 1], src[i * 8 + 2], &x, &y, &z);
+        dst[i * 8 + 0] = x;
+        dst[i * 8 + 1] = y;
+        dst[i * 8 + 2] = z;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF71C.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_1511BAA4(u8 *);
@@ -157,7 +277,140 @@ void func_150BFC60(u8 *p) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFC60.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_1518BC20(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4);
+u8 *func_1516547C(u8 kind, u8 view, u8 *data, u8 arg3, s32 arg4);
+void func_1518D290(u8 *obj, s32 arg1, s32 arg2);
+void func_1508F26C(s32 arg0, s32 arg1);
+s32 func_151EFDD0(void);
+extern u8 D_800BEE0B;
+
+// sinking_platform_update: world-object callback (D_80089030[1] / [2], obj +0x38) of a platform that drops when stood
+// on. kind = +0x3C >> 16: 0 drops 0x82 below its rest height at a speed falling from 16 near the bottom, with a
+// start sound; 1 just follows the rest height + the offset +0x80; 2 drops 0x622 at 48 and, landed, marks itself and
+// the next 0xA0-byte placement (+0x6E / +0x10E = 1, func_1508F26C(2, index)); 4 plays a sound when landed. The rest
+// height (s16 +0x12 the first time) is kept in +0x7C with bit 31 set; the platform rests 0x50 below it. Mode
+// (+0x73 & 3): 0 at rest (height = rest), stepping on it (+0x4F bit 4 with player D_800CC2D0's +0x31C->0x57 == 1)
+// shakes the camera and rumbles (only in mode 0); 2 shakes (+0 / +8 random offsets) for the -(+0x80) ticks of
+// D_800BE9E4, then sinks (offsets random / 12 for 40 ticks) to the bottom, where the rest height and +0x11C move
+// down by the drop, mode 3; 3 sits at the low height until it is no longer stood on (+0x4F / +0x73 bit 4), then
+// mode 1 rises by 3 per tick back to the rest height and mode 0.
+void func_150BFF7C(u8 *p) {
+    s32 kind = (*(s32 *) (p + 0x3C) >> 16) & 0xFFFF;
+    s32 mode = p[0x73] & 3;
+    s32 depth = 0;
+    s32 step = 0x10;
+    s32 top;
+    s16 low;
+    s16 bottom;
+    s32 t;
+    s32 h;
+    structEU_151D8E18 rumble;
+
+    if (kind == 0) {
+        depth = 0x82;
+    } else if (kind == 2) {
+        depth = 0x622;
+        step = 0x30;
+    }
+    if (*(s32 *) (p + 0x7C) == 0) {
+        *(s32 *) (p + 0x7C) = *(s16 *) (p + 0x12) | 0x80000000;
+    }
+    top = (s16) *(s32 *) (p + 0x7C);
+    low = top - 0x50;
+    bottom = low - depth;
+    if (kind == 1) {
+        if (top - *(s16 *) (p + 0x12) != *(s32 *) (p + 0x80)) {
+            *(s16 *) (p + 0x12) = top + *(s32 *) (p + 0x80);
+        }
+        return;
+    }
+    if ((p[0x4F] & 4) && (*(u8 **) ((u8 *) D_800CC2D0 + 0x31C))[0x57] == 1) {
+        func_1518BC20(*(f32 *) ((u8 *) D_800CC2D0 + 0x14), *(f32 *) ((u8 *) D_800CC2D0 + 0x18),
+                      *(f32 *) ((u8 *) D_800CC2D0 + 0x1C), 0xFF, 0);
+        if (mode == 0) {
+            func_1516547C(3, D_800BEE0B, NULL, 0xFF, 0);
+            rumble.unk0 = 1;
+            rumble.unk2 = 0x3C;
+            rumble.unk5 = 1;
+            rumble.unk4 = 8;
+            rumble.unk6 = -1;
+            func_151D8E18(&rumble, 0, 0xFF, 0);
+        }
+    }
+    if (mode == 3) {
+        if (low != *(s16 *) (p + 0x12)) {
+            *(s16 *) (p + 0x12) = low;
+        }
+        if (!(p[0x4F] & 4) && !(p[0x73] & 4)) {
+            mode = 1;
+        }
+    } else if (mode == 0) {
+        if (top != *(s16 *) (p + 0x12)) {
+            *(s16 *) (p + 0x12) = top;
+        }
+    } else if (mode == 2) {
+        t = *(s32 *) (p + 0x80) + D_800BE9E4;
+        *(s32 *) (p + 0x80) = t;
+        if (t < 0) {
+            *(f32 *) (p + 0x0) = ((f32) (func_151EFDD0() % 5) - 2.0f) * 0.125f;
+            *(f32 *) (p + 0x8) = ((f32) (func_151EFDD0() % 5) - 2.0f) * 0.125f;
+        } else {
+            if (t < 0x28) {
+                *(f32 *) (p + 0x0) = ((f32) (func_151EFDD0() % 5) - 2.0f) / 12.0f;
+                *(f32 *) (p + 0x8) = ((f32) (func_151EFDD0() % 5) - 2.0f) / 12.0f;
+            } else {
+                *(f32 *) (p + 0x8) = 0.0f;
+                *(f32 *) (p + 0x0) = 0.0f;
+            }
+            h = *(s16 *) (p + 0x12);
+            if (h < low) {
+                if (kind == 0) {
+                    step = (h - bottom + 0x10) * step / depth;
+                    if (*(s32 *) (p + 0x84) == 0) {
+                        func_1518D290(p, 0xFF, 0);
+                        *(s32 *) (p + 0x84) = 1;
+                    }
+                }
+                *(s16 *) (p + 0x12) -= step;
+                *(s32 *) (p + 0x120) = *(s16 *) (p + 0x12) - low;
+            } else {
+                *(s16 *) (p + 0x12) = h - step;
+                *(s32 *) (p + 0x84) = 0;
+            }
+            if (bottom >= *(s16 *) (p + 0x12) || step == 0) {
+                *(s16 *) (p + 0x12) = bottom;
+                *(s32 *) (p + 0x7C) = (*(s32 *) (p + 0x7C) + (bottom - low)) | 0x80000000;
+                *(s32 *) (p + 0x11C) = (*(s32 *) (p + 0x11C) + (bottom - low)) | 0x80000000;
+                *(s32 *) (p + 0x80) = 0;
+                *(s32 *) (p + 0x120) = 0;
+                if (kind == 4) {
+                    func_1518D290(p, 0xFF, 0);
+                }
+                *(f32 *) (p + 0x8) = 0.0f;
+                *(f32 *) (p + 0x0) = 0.0f;
+                mode = 3;
+                if (kind == 2) {
+                    p[0x6E] = 1;
+                    p[0x10E] = 1;
+                    func_1508F26C(2, (u16) ((p - (u8 *) D_800DBEF4) / 0xA0));
+                    func_1508F26C(2, (u16) ((p - (u8 *) D_800DBEF4 + 0xA0) / 0xA0));
+                }
+            }
+        }
+    } else if (mode == 1) {
+        *(s16 *) (p + 0x12) += 3;
+        if (*(s16 *) (p + 0x12) >= top) {
+            *(s16 *) (p + 0x12) = top;
+            mode = 0;
+        }
+    }
+    p[0x73] &= 0xFC;
+    p[0x73] |= mode;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFF7C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15136C3C(u8 *, s32, s32, s32, s32, s32, s32, s32);

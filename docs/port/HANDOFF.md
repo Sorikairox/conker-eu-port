@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P297 (port-d, group D) (session P297, 2026-10-26). Details: `docs/port/sessions/P297.md`
+
+Hand C (NM), registry rows `P297`, setups / mutants in docs/port/sessions/p297: func_150BF71C lift_platform_update
+(53/54), func_150C8300 player_flight_mode_update (61/61), func_150BFF7C sinking_platform_update (67/68),
+func_150D0DD0 player_tint_update (22/22), func_151AECA0 ground_burst_spawn (67/67), func_151E9E1C
+mp_team_marks_draw (34/36). Survivors are equivalent (P297.md). Lessons: difftest ARGMEM lengths are decimal; IDO
+rounds some float literals one ulp low (0.807f -> 0x3F4E978D), so write the late_rodata value's exact digits
+(0.80700004f) and let ARGMEM/compare catch it. progress_nm `total 5916 3995 1702 219 5697 96.3% 2013352/2253856 (89.3%)`.
+
+## Next steps (from P297, group D left)
+1. Group-D asm left (smallest first): func_151ADEDC (1D9C00, 464), func_150E5384 (1122E0, 469), func_151B58D8
+   (1E3000, 477), func_150DD420 (109770, 488), func_151AD724 (1D9C00, 494), func_150DDBC0 (109770, 548),
+   func_150DCAD8 (109770, 594), func_150D7E38 (105140, 610), func_151A4194 (1D1150, 619), func_151EE93C (216470, 665),
+   func_150F3A74 (1207F0, 959), func_15175EC8 (1A2970, 961). Hand asm (group E): func_150A80F0, func_150FBA40.
+2. func_151AECA0 is called implicitly (no prototype) from game_eu_981E0 (not group D): a prototype
+   `void func_151AECA0(u8 *, u8, s32);` there would be cleaner.
+3. P290 items still open: func_150E2294's missing 7th argument to func_150E4AD0; table D_80089CD4 mixed arities.
+
 ## P290 (port-d, group D) (session P290, 2026-10-26). Details: `docs/port/sessions/P290.md`
 
 Re-runs: func_150403C8 mutants 38/39 (the 2 P283 UNSURE now killed; survivor = unused 3rd arg), func_150BABE0 38/38.
