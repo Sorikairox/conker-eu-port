@@ -372,3 +372,4 @@ P294	port-e	nm convert+harness	2			group E: wall engine readable (nmw_engine + 8
 P296	port-c	nm convert	6			group C: 6 conversions + func_150C3574 boundary setups; 13 left (split C1 pc / C2 pe)
 P295	port	nm convert	3			group B: 3 conversions + rechecks (func_15054A94 40/40); lesson: mutant lines without % names only run the first setup file; 7 left; port 96.4% 89.7%
 P298	port-b	nm convert	6			group A: 6 conversions; 5 left; portb 5711/5916 96.5% 90.1%
+P297	port-d	nm convert	6			group D: 6 conversions; lessons: ARGMEM lengths are decimal, IDO float literal rounding (write exact digits); 12 left (split D1 pd / D2 pf)
