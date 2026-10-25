@@ -3,7 +3,241 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+struct127 *func_1507515C(struct127 *, struct127 *, s32);
+void func_15145EA4(f32 **src, f32 **dst, u8 *bone, s32 n);
+s32 func_151C284C(f32 *, f32 *, f32 *, f32 *, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32,
+                  s32, s32, s32, f32, s32, s32, s32, s32, s32);
+void func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+void func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+extern f32 D_800A21A4[2][3];   /* per side: muzzle offsets (non-0x23 characters) */
+extern f32 D_800A21BC[2][3];
+extern f32 D_800A21D4[2][3];
+extern f32 D_800A21EC[2][3];
+extern f32 D_800A2208[2][3];   /* the same for character 0x23 */
+extern f32 D_800A2220[2][3];
+extern f32 D_800A2238[2][3];
+extern f32 D_800A2250[2][3];
+extern u8 D_800A21A0[2];       /* per side: hand bone index ({ 5, 7 }) */
+extern u8 D_800A2204[2];       /* the same for character 0x23 ({ 3, 2 }) */
+static const f32 gunfire_tracer_k[1] = { 0.003968254f };   /* D_800A2268 */
+static const f32 gunfire_shell_v1m[1] = { 2.4350002f };    /* D_800A226C */
+static const f32 gunfire_shell_v1a[1] = { 3.5340002f };    /* D_800A2270 */
+static const f32 gunfire_shell_v0m[1] = { 43.4f };         /* D_800A2274 */
+static const f32 gunfire_shell_v0a[1] = { 48.4f };         /* D_800A2278 */
+static const f32 gunfire_shell_life[1] = { 1497.0f };      /* D_800A227C */
+
+typedef struct {
+    f32 pos[2];       /* 0x00 screen offset */
+    f32 size[2];      /* 0x08 */
+    u8 b10;           /* 0x10 */
+    u8 pad11;
+    s16 h12;          /* 0x12 */
+    s16 h14;          /* 0x14 */
+    s16 h16;          /* 0x16 */
+    s16 h18;          /* 0x18 */
+    u8 b1A[10];       /* 0x1A */
+    s32 w24[7];       /* 0x24 */
+    u8 b40;           /* 0x40 */
+    u8 b41;           /* 0x41 */
+    u8 pad42[2];
+    u8 mask;          /* 0x44 */
+} GunfireFlash;       /* func_151559FC's spec */
+
+// gun_fire_effects: muzzle flash, tracer and shells for one shot of `obj`'s gun on hand `side` (0 / 1), `dt` into the
+// frame. Unless `noOwner`, the shooter is func_1507515C(obj) (no shooter -> nothing); `aimed` = its record's 0x197.
+// func_15145EA4 places the muzzle point / direction points from the hand bone (obj+0x1D4, 64-byte bones; character
+// 0x23 has its own tables). Aimed shots project onto the shooter's aim line (unk31C 0x13C point, 0x130 direction).
+// func_151C284C spawns the tracer (kind 5 in levels 0x34 / 0x26, else 4; hidden from the shooter's own camera); unless
+// obj+0x74's low nibble is 0xF a 1-in-8 spark (func_151602C0) and a 1-in-2 shell (func_151030B8) follow; aimed shots
+// with a camera also get the screen flash (func_151559FC) and func_15155C9C event 0x37.
+void func_150FBE40(u8 *obj, u8 side, f32 dt, u8 noOwner, s32 fxflag, s32 fxowner) {
+    struct127 *owner;
+    u8 aimed;
+    f32 *tbl[3];
+    f32 *out[3];
+    f32 alt[3];
+    f32 pos[3];
+    f32 side0[3];
+    f32 side1[3];
+    f32 tip[3];
+    f32 norm[3];
+    f32 hit[3];
+    f32 dir[3];
+    u8 *bone;
+    u8 *aim;
+    f32 *p;
+    f32 t;
+    s32 sgn;
+    u8 mask;
+    s8 kind;
+    f32 r1;
+    f32 r2;
+    u32 r3;
+    struct {
+        u8 b0;
+        u8 b1;
+        s16 h2;
+        u8 b4;
+    } spark;
+    s32 ipos[3];
+    f32 vel[2];
+    u32 r4;
+    u32 r5;
+    GunfireFlash flash;
+    struct {
+        u8 side;
+        void *camera;
+    } ev;
+
+    if (obj == NULL || side >= 2) {
+        return;
+    }
+    if (noOwner) {
+        owner = NULL;
+        aimed = 0;
+    } else {
+        /* the asm leaves side / dt's bits in a1 / a2 (func_1507515C ignores both) */
+        owner = func_1507515C((struct127 *)obj, (struct127 *)(u32)side, *(s32 *)&dt);
+        if (owner == NULL || owner->unk31C == NULL) {
+            return;
+        }
+        aimed = (*((u8 *)owner->unk31C + 0x197) != 0) ? 1 : 0;
+    }
+    if (*(u8 **)(obj + 0x1D4) == NULL) {
+        return;
+    }
+    if (obj[4] == 0x23) {
+        tbl[0] = D_800A2208[side];
+        tbl[1] = aimed ? D_800A2238[side] : D_800A2220[side];
+        tbl[2] = D_800A2250[side];
+        bone = *(u8 **)(obj + 0x1D4) + D_800A2204[side] * 64;
+    } else {
+        r1 = func_150ADA68();
+        sgn = side ? -1 : 1;
+        alt[0] = (f32)sgn * (13.0f - (1.0f + r1 * 6.0f));
+        alt[1] = D_800A21BC[side][1];
+        alt[2] = D_800A21BC[side][2];
+        tbl[0] = D_800A21A4[side];
+        tbl[1] = aimed ? D_800A21D4[side] : alt;
+        tbl[2] = D_800A21EC[side];
+        bone = *(u8 **)(obj + 0x1D4) + D_800A21A0[side] * 64;
+    }
+    out[0] = pos;
+    out[1] = aimed ? side0 : tip;
+    out[2] = side1;
+    func_15145EA4(tbl, out, bone, aimed ? 3 : 2);
+    if (aimed) {
+        aim = (u8 *)owner->unk31C;
+        p = (f32 *)(aim + 0x13C);
+        side0[0] -= pos[0];
+        side0[1] -= pos[1];
+        side0[2] -= pos[2];
+        side1[0] -= pos[0];
+        side1[1] -= pos[1];
+        side1[2] -= pos[2];
+        func_151450B4((struct17 *)side0, (struct17 *)side1, (struct17 *)norm);
+        aim = (u8 *)owner->unk31C;
+        t = (norm[0] * (pos[0] - p[0]) + norm[1] * (pos[1] - p[1]) + norm[2] * (pos[2] - p[2])) /
+            (norm[0] * *(f32 *)(aim + 0x130) + norm[1] * *(f32 *)(aim + 0x134) + norm[2] * *(f32 *)(aim + 0x138));
+        hit[0] = p[0] + t * *(f32 *)(aim + 0x130);
+        hit[1] = p[1] + t * *(f32 *)((u8 *)owner->unk31C + 0x134);
+        hit[2] = p[2] + t * *(f32 *)((u8 *)owner->unk31C + 0x138);
+        dir[0] = *(f32 *)((u8 *)owner->unk31C + 0x130);
+        dir[1] = *(f32 *)((u8 *)owner->unk31C + 0x134);
+        dir[2] = *(f32 *)((u8 *)owner->unk31C + 0x138);
+    } else {
+        tip[0] -= pos[0];
+        tip[1] -= pos[1];
+        tip[2] -= pos[2];
+    }
+    if (aimed && owner->camera != NULL) {
+        mask = ~(1 << *((u8 *)owner->camera + 0x23D));
+    } else {
+        mask = 0xFF;
+    }
+    kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;
+    r1 = func_150ADA68();
+    r2 = func_150ADA68();
+    r3 = func_150ADA20();
+    func_151C284C(pos, aimed ? NULL : tip, aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,
+                  gunfire_tracer_k[0], r1 * 20.0f + 75.0f, r2 * 250.0f + 502.0f, 50.0f, r3 % 31 + 225,
+                  (owner != NULL) ? (u8 *)owner : obj, 1, 1, D_800BE616 ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,
+                  0, (u8)fxflag, fxowner);
+    if ((obj[0x74] & 0xF) != 0xF) {
+        if ((func_150ADA20() & 7) == 0) {
+            spark.b0 = 3;
+            spark.b1 = 0xFF;
+            spark.h2 = (u32)func_150ADA20() % 5 + 4;
+            ipos[0] = pos[0];
+            ipos[1] = pos[1];
+            ipos[2] = pos[2];
+            spark.b4 = 0;
+            func_151602C0((Header *)&spark, (Header2 *)ipos, (u32)func_150ADA20() % 31 + 0x46, 0xFF, 0xFF, 0xFF, 0xFF,
+                          0, 0, (u8)fxflag, fxowner);
+        }
+        if ((func_150ADA20() & 1) == 0) {
+            vel[1] = func_150ADA68() * gunfire_shell_v1m[0] + gunfire_shell_v1a[0];
+            vel[0] = func_150ADA68() * gunfire_shell_v0m[0] + gunfire_shell_v0a[0];
+            if (aimed && owner->camera != NULL) {
+                mask = ~(1 << *((u8 *)owner->camera + 0x23D));
+            } else {
+                mask = 0xFF;
+            }
+            r4 = func_150ADA20();
+            r5 = func_150ADA20();
+            r1 = func_150ADA68();
+            if (obj[4] == 0x23) {
+                func_151030B8(obj, D_800A2204[side], D_800A2208[side], D_800A2220[side], vel, r4 % 3 + 4,
+                              r5 % 101 + 0x9B, r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, -1,
+                              (u8)fxflag, fxowner);
+            } else {
+                func_151030B8(obj, D_800A21A0[side], D_800A21A4[side], D_800A21BC[side], vel, r4 % 3 + 4,
+                              r5 % 101 + 0x9B, r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, -1,
+                              (u8)fxflag, fxowner);
+            }
+        }
+    }
+    if (!aimed || owner->camera == NULL) {
+        return;
+    }
+    flash.pos[0] = side ? -59.0f : 59.0f;
+    flash.pos[1] = 68.0f;
+    flash.size[0] = func_150ADA68() * 20.0f + 40.0f;
+    flash.size[1] = func_150ADA68() * 20.0f + 80.0f;
+    flash.b10 = 0x80;
+    flash.h12 = (func_150ADA20() & 3) + 5;
+    flash.h14 = (side ? 2 : 0) | 0x39;
+    flash.h16 = 3;
+    flash.h18 = 0x55;
+    flash.b1A[0] = 0;
+    flash.b1A[1] = 0xFF;
+    flash.b1A[2] = 0xFF;
+    flash.b1A[3] = 0xFF;
+    flash.b1A[4] = (u32)func_150ADA20() % 56 + 0xC8;
+    flash.b1A[5] = 0xFF;
+    flash.b1A[6] = 0xFF;
+    flash.b1A[7] = 0xFF;
+    flash.b1A[8] = 0xFF;
+    flash.b1A[9] = 0xFF;
+    flash.w24[0] = 0;
+    flash.w24[1] = 0x200004;
+    flash.w24[2] = 0x1F0601;
+    flash.w24[3] = 3;
+    flash.w24[4] = 0x22;
+    flash.w24[5] = 0x80;
+    flash.w24[6] = 0x20;
+    flash.b40 = 0;
+    flash.b41 = 7;
+    flash.mask = *((u8 *)owner->camera + 0x23D);
+    func_151559FC(&flash, 0, 0, 0, 0, 0, fxowner);
+    ev.side = side;
+    ev.camera = owner->camera;
+    func_15155C9C(&ev, 0x37);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_129650/func_150FBE40.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_150FC8E8(u8 *arg0) {
@@ -105,7 +339,7 @@ void func_150FC438(struct127 *obj, struct127 *other, u8 a, u8 b) {
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150FBE40(u8 *, u8, f32, u8, s32, s32);
+void func_150FBE40(u8 *, u8, f32, u8, s32, s32);
 
 void func_150FCB94(u8 *arg0) {
     struct {

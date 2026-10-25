@@ -10,11 +10,12 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
-## Integration status (P308, port-b, 2026-10-26)
+## Integration status (P312, port-b, 2026-10-26)
 
-Merged into port-b: group A (port-b, P274..P302, finished) + port-e at `74c6f08a` (P307: group E finished, C2 part
-P300/P306) + port-c at `1e0ceb49` (P308: group C1 finished, P284..P305). port-e may get more commits; re-merge with
-`git merge --no-edit port-e`.
+Merged into port-b so far: A, E, C1, C2. Group A (port-b, P274..P302, finished) + port-e at `74c6f08a` (P307: group E
+finished, C2 part P300) + port-c at `1e0ceb49` (P308: group C1 finished, P284..P305) + port-e at `eb28e800` (P312:
+group C2 finished, P306 func_151E67A0 / func_150FBE40). Still to merge, in this order, each followed by check.sh:
+`port` (group B), `port-d` (D1), `port-f` (D2), `port-c` again (B2 lands there), then the Final-merge notes below.
 
 Conflict resolutions:
 - P307 `game_eu_D5650.c` func_150A7EF4 (private w-tail entry of func_150A7EE0): both sides folded it into the NM
@@ -29,15 +30,17 @@ Conflict resolutions:
   no identical cases to dedupe).
 - P307 difftest.py / selftest.sh / progress_nm.py / nmblock.py / reverify.sh: port-b ARGMEM `LEN@K` (P280) + port-e
   STOPCALL, RETV1, SRET/ldiv, STUBMAP (P281/P288). ARGMEM tuples are 5-wide everywhere.
+- P312 port-e merge: code merged cleanly; only HANDOFF / sessions.tsv (merge_union + hodedup + hoorder 150) and
+  verify_registry.tsv (reg3way, no CONFLICT lines, 440 rows / 437 funcs) conflicted.
 - verify_registry.tsv: `reg3way.py` (P258, from `~/conker-wt/web/docs/port/sessions/p258/`), only conflict
   func_150B2290 (-> P289), 439 rows / 436 funcs. sessions.tsv / HANDOFF: merge_union + hodedup (p240) + hoorder 150.
 
-Checks (`docs/port/sessions/p308/check.sh`): verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0 NM+float
-(828 sites; clang errors in game_A28B0.c / init_2070.c are pre-existing), selftest **150/150**, progress_nm
-`total 5916 3995 1808 33 80 5836 98.6% 2135248/2253856 (94.7%)`.
+Checks (`docs/port/sessions/p312/check.sh`, P312): verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0
+NM+float (828 sites; clang errors in game_A28B0.c / init_2070.c are pre-existing), selftest **150/150**, progress_nm
+`total 5916 3995 1809 33 79 5837 98.7% 2137976/2253856 (94.9%)`. (P308: 98.6% / 94.7%.)
 
 Remaining for the final merge (in this order, each followed by check.sh): `port` (group B), `port-d` (D1),
-`port-f` (D2), re-merge `port-e` if it moved. Then the "Final-merge notes" of `docs/progress/split-P276.txt`:
+`port-f` (D2), `port-c` again (B2), re-merge `port-e` if it moved. Then the "Final-merge notes" of `docs/progress/split-P276.txt`:
 - func_150B2290 and the STUBMAP double fix: done (P308).
 - wasm call_indirect hazards: D_8008A0B4 (dispatcher func_15141A7C in game_16EE20 passes 3-4 args, entries void(3));
   D_80089CD4 mixed 5/6 args (P278).
@@ -254,6 +257,22 @@ Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1666), implicit_scan 0 NM+
    (3E890), func_150EBE44 (1191C0), func_150C4620 (F1E30), func_15116A8C (142E40), func_150B6CC0 (E44D0), ...
 2. Harness: a candidate that executes `break 7` (divide by zero) is not reported (func_15171E60 `count < 0` mutant).
 3. func_1515B500 (group B, game_eu_188D10) analysed in P275.md, not written.
+## P306 (port-e slot, group C part C2 finished: 2 compiled functions to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P306.md`
+- New NM hand C: func_151E67A0 mp_report_hit (game_eu_20B730; multiplayer hit stats + taunt sounds), func_150FBE40
+  gun_fire_effects (game_eu_129650; tracer / spark / shell / screen flash of one shot; now `void`, the file's
+  prototype for its caller func_150FCB94 changed to match). Registry rows P306, setups / mutants / generators in
+  `docs/port/sessions/p306/`.
+- Mutants: 67A0 85/85, BE40 86/86. Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0 NM+float,
+  selftest 143/143. progress_nm `total 5916 3995 1728 33 160 5756 97.3% 2038276/2253856 (90.4%)`.
+- Lessons: some US-named symbols sit elsewhere in EU (D_8008FD8C = 0x8009012C, D_800BE616 = 0x800BEA36, D_800BE9F0 =
+  0x800BEE10): take poke addresses from `mips-linux-gnu-nm conker/build/conker.eu.elf`, and read `[POKE unread]`.
+  An ARGMEM `0*OFF` dereference into a page the candidate never touched reads "unmapped" on one side only (lazy
+  pages): keep tables the reference loads from as `extern` (or touch the page) instead of static copies.
+
+### Next steps (group C, from P306)
+1. Group C2 is complete; port-e carries group C work in game_eu_106830 / game_eu_1579B0 / game_eu_20B730 /
+   game_eu_129650 (file-disjoint from C1 / port-c).
+
 ## P300 (port-e slot, group C part C2: 4 compiled functions to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P300.md`
 - New NM hand C: func_150D99AC trail_update, func_150DA1FC trail_draw_ribbon, func_150DABFC trail_hit_effects
   (game_eu_106830; the trail kind's update / draw handlers and their hit-effect helper, producer + consumer together),

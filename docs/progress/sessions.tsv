@@ -101,3 +101,5 @@ P296	port-c	group C	6		~130	ED1F0 + A39E4 (caller A3990 4 args) + CB6F4 + 970BC 
 P299	port-c	group C1	4		~120	CA4E8 (rodata copied, shared D_800AB164.. exported const) + B3878 rope_draw + A1E0 debris_update + FE30 menu list to NM C; 1C3530 trio left
 P305	port-c	group C1	3		~115	976B8 emitter_ribbon_draw + A1A4 emitter2_flame_update + BA28 emitter2_flame_draw (1C3530) to NM C, mutants 74/76 + 106/106 + 85/85; group C1 done
 P308	port-b	integration 2	0		~35	merge port-c (C1): func_150B2290 keep P289, STUBMAP unified, selftest 150/150, progress_nm 98.6% / 94.7%
+P306	port-e	group C part C2 finished (mp hit report 20B730, gun fire effects 129650)	2	0	115	67A0 85/85, BE40 86/86; C2 complete (97.3%)
+P312	port-b	integration 3	0		~25	merge port-e (C2 finished, P306): docs/registry conflicts only, selftest 150/150, progress_nm 98.7% / 94.9%
