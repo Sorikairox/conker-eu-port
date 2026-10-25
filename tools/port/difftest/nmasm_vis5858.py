@@ -60,7 +60,7 @@ class Ref:
         o = pc - self.cv
         return struct.unpack('>I', self.cb[o:o + 4])[0]
     def run(self, mem, args, gp=0, maxi=3000000, entry='func_150A5858'):
-        r = [0] * 32; f = [0] * 32; cc = False
+        r = [0] * 32; f = [0] * 32; cc = False; lo = hi = 0
         for k, a in enumerate(args[:4]): r[4 + k] = sx32(a)
         r[28] = gp; r[29] = sx32(SP0); r[31] = sx32(RET)
         sp = SP0 - 0x10
@@ -97,6 +97,13 @@ class Ref:
                 elif fn == 0x2B: setr(rdr, int(r[rs] < r[rt]))
                 elif fn == 0x3C: setr(rdr, r[rt] << (sa + 32))
                 elif fn == 0x38: setr(rdr, r[rt] << sa)                               # dsll (P279)
+                elif fn == 0x20: setr(rdr, sx32(r[rs] + r[rt]))                       # add (P291: no overflow trap)
+                elif fn == 0x2D: setr(rdr, r[rs] + r[rt])                             # daddu (P291)
+                elif fn == 0x2F: setr(rdr, r[rs] - r[rt])                             # dsubu (P291)
+                elif fn == 0x18:                                                      # mult (P291)
+                    pr = (s64(sx32(r[rs])) * s64(sx32(r[rt]))) & M64; lo, hi = sx32(pr), sx32(pr >> 32)
+                elif fn == 0x12: setr(rdr, lo)                                        # mflo (P291)
+                elif fn == 0x10: setr(rdr, hi)                                        # mfhi (P291)
                 elif fn == 0x3A: setr(rdr, (r[rt] & M64) >> sa)                       # dsrl (P279)
                 else: raise RuntimeError('special %x at %08X' % (fn, pc))
             elif op == 1:
@@ -135,6 +142,9 @@ class Ref:
                     if fn == 0: res = b32(a + b)
                     elif fn == 1: res = b32(a - b)
                     elif fn == 2: res = b32(a * b)
+                    elif fn == 3:                                                    # div.s (P291; double rounding is exact)
+                        if b == 0: res = 0x7FBFFFFF if a == 0 or a != a else (0x7F800000 | ((f[fs] ^ f[ft]) & 0x80000000))
+                        else: res = b32(a / b)
                     elif fn == 5: res = f[fs] & 0x7FFFFFFF
                     elif fn == 6: res = f[fs] & 0xFFFFFFFF
                     elif fn == 7: res = (f[fs] ^ 0x80000000) & 0xFFFFFFFF
@@ -190,7 +200,7 @@ class Ref:
 
 class Cand:
     def __init__(self, elf, data_from):
-        self.secs = [section(data_from if n == '.game_data' else elf, n) for n in ('.game', '.game_data', '.nm_rodata')]
+        self.secs = [section(data_from if n == '.game_data' else elf, n) for n in ('.game', '.game_data', '.nm_rodata', '.init')]   # .init: IDO's __ll_* helpers (P291)
         self.s = syms(elf)
         mu = Uc(UC_ARCH_MIPS, UC_MODE_MIPS32 | UC_MODE_BIG_ENDIAN)
         mu.mem_map(0x15000000, 0x400000, UC_PROT_ALL)
