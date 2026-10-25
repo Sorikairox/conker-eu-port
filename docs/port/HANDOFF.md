@@ -10,6 +10,15 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P270 (port) (session P270, 2026-10-25). Details: `docs/port/sessions/P270.md`
+- Merged port-b (P267). Fixed the user's intro crash (func_151D7FE8 `f32 * + 0xC` velocity pointer, P269) and the same
+  class in 10 more NM functions (vertex `s16 * + 0x10` stride in the func_151D6310 quad family, float spills cast to
+  int, extra leading float args to func_15145548, `idx*4 + &D_800DD608` on s32 symbols, a garbage memcpy). All
+  difftested with registry rows (`P270`); func_151C8448's float mutant survives (same shape as killed ones).
+- New `tools/port/stride_scan.py` (typed pointer + constant offset, asm hint): 151 -> 119 NM hits, no open hex hits.
+- Next: scans for the other classes found here (float spill `(u8 *)(s32)temp_f`, implicit callees given extra float
+  args, `x*4 + &D_s32sym`); run stride_scan after each merge.
+
 ## P267 (port-b) (session P267, 2026-10-25). Details: `docs/port/sessions/P267.md`
 
 Hand C (NM): func_150D5268 smoke_puff_burst (ARGMEM on the func_151307F0 template, mutants 48/49, 1 equivalent) and

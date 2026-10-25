@@ -128,7 +128,7 @@ s16 *func_150E6920(u8 *arg0, s16 arg1) {
         temp_f12 = sp.u90 - sp.u9C;
         temp_f18 = ((temp_f12 * 0.5f) + sp.u9C) - (*(f32 *)((u8 *)temp_v0_2 + 8));
         temp_f8 = (temp_f2 * temp_f18) - (temp_f16 * temp_f12);
-        sp38 = (u8 *)(s32)temp_f8;
+        /* P270: the asm spills temp_f8 to sp38 as a float (swc1/lwc1); no int truncation */
         temp_f4 = (temp_f12 * temp_f14) - (temp_f18 * temp_f0_2);
         sp34 = temp_f4;
         temp_f10_2 = (temp_f0_2 * temp_f16) - (temp_f14 * temp_f2);
@@ -142,7 +142,7 @@ s16 *func_150E6920(u8 *arg0, s16 arg1) {
             var_f14 = 0.0f;
         } else {
             temp_f2_2 = (*(f32 *)((u8 *)arg0 + 0x2C)) / sqrtf(sp.u54);
-            var_f12 = (s32)sp38 * (s32)temp_f2_2;
+            var_f12 = temp_f8 * temp_f2_2;  /* P270: was (s32)sp38 * (s32)temp_f2_2 (asm mul.s) */
             var_f14 = sp34 * temp_f2_2;
             var_f16 = sp30 * temp_f2_2;
         }
@@ -151,21 +151,21 @@ s16 *func_150E6920(u8 *arg0, s16 arg1) {
         (*(s16 *)((u8 *)sp.u48 + 4)) = (s16) (s32) (sp.u9C - var_f16);
         (*(u8 *)((u8 *)sp.u48 + 0xF)) = (u8) (*(u8 *)((u8 *)arg0 + 0x5C));
         (*(s16 *)((u8 *)sp.u48 + 6)) = 0;
-        temp_t0 = sp.u48 + 0x10;
+        temp_t0 = (s16 *) ((u8 *) sp.u48 + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u48 = temp_t0;
         *temp_t0 = (s16) (s32) (sp.u88 - var_f12);
         (*(s16 *)((u8 *)sp.u48 + 2)) = (s16) (s32) (sp.u8C - var_f14);
         (*(s16 *)((u8 *)sp.u48 + 4)) = (s16) (s32) (sp.u90 - var_f16);
         (*(u8 *)((u8 *)sp.u48 + 0xF)) = 0U;
         (*(s16 *)((u8 *)sp.u48 + 6)) = 0;
-        temp_t0_2 = sp.u48 + 0x10;
+        temp_t0_2 = (s16 *) ((u8 *) sp.u48 + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u48 = temp_t0_2;
         *temp_t0_2 = (s16) (s32) (sp.u88 + var_f12);
         (*(s16 *)((u8 *)sp.u48 + 2)) = (s16) (s32) (sp.u8C + var_f14);
         (*(s16 *)((u8 *)sp.u48 + 4)) = (s16) (s32) (sp.u90 + var_f16);
         (*(u8 *)((u8 *)sp.u48 + 0xF)) = 0U;
         (*(s16 *)((u8 *)sp.u48 + 6)) = 0;
-        temp_t0_3 = sp.u48 + 0x10;
+        temp_t0_3 = (s16 *) ((u8 *) sp.u48 + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u48 = temp_t0_3;
         *temp_t0_3 = (s16) (s32) (sp.u94 + var_f12);
         (*(s16 *)((u8 *)sp.u48 + 2)) = (s16) (s32) (sp.u98 + var_f14);

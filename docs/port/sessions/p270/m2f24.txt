@@ -1,0 +1,2 @@
+s|(s16 \*) ((u8 \*) sp.uAC - 0x40)|sp.uAC - 0x40|
+s|sp.uAC = (s16 \*) ((u8 \*) sp.uAC + 0x10);|sp.uAC += 0x10;|

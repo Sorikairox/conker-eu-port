@@ -1,0 +1,1 @@
+s|(f32 \*) ((u8 \*) temp_a0 + 0xC), var_f22|temp_a0 + 0xC, var_f22|

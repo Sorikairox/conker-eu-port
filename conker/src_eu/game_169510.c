@@ -1488,9 +1488,9 @@ u8 *func_1513EAD8(u8 *arg0, u8 arg1, s16 arg2) {
         temp_f0 = (*(f32 *)((u8 *)arg0 + 0x2C));
         temp_f12 = (*(f32 *)((u8 *)arg0 + 0x30));
         (*(s16 *)((u8 *)sp.u64 + 6)) = 0;
-        temp_f14 = *(&D_800DD608 + temp_t0) * temp_f0;
+        temp_f14 = *(f32 *) ((u8 *) &D_800DD608 + temp_t0) * temp_f0;  /* P270: was *(&D_800DD608 + temp_t0) (s32 * stride = arg2 * 16 bytes, int-to-float load; asm lwc1 at arg2 * 4) */
         (*(s16 *)((u8 *)sp.u64 + 0x16)) = 0;
-        temp_f16 = *(&D_800DD618 + temp_t0) * temp_f0;
+        temp_f16 = *(f32 *) ((u8 *) &D_800DD618 + temp_t0) * temp_f0;  /* P270: was *(&D_800DD618 + temp_t0) (s32 * stride = arg2 * 16 bytes, int-to-float load; asm lwc1 at arg2 * 4) */
         (*(s16 *)((u8 *)sp.u64 + 0x26)) = 0;
         temp_f2 = (*(f32 *)((u8 *)arg0 + 0x50)) * temp_f12;
         (*(s16 *)((u8 *)sp.u64 + 0x36)) = 0;

@@ -1,0 +1,2 @@
+s|\*(f32 \*) ((u8 \*) &D_800DD608 + temp_t0) \* temp_f0;|*(\&D_800DD608 + temp_t0) * temp_f0;|
+s|\*(f32 \*) ((u8 \*) &D_800DD618 + temp_t0) \* temp_f0;|*(f32 *) ((u8 *) \&D_800DD618 + temp_t0 + 4) * temp_f0;|

@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING
+void func_15145548(void *, void *, void *, void *, f32 *); /* P270 */
+#endif
 
 extern u8 D_800A8E7C;
 
@@ -2362,13 +2365,13 @@ s16 *func_1519CADC(u8 *arg0, s16 arg1) {
         sp.u6C = temp_f12;
         sp.u84 = temp_v0;
         sp.u80 = temp_f16 - (*(f32 *)((u8 *)arg0 + 0x3C));
-        func_15145548(temp_f12, temp_f14, arg0 + 0x34, &sp.u78, temp_a2, &sp.u48, &sp.u44);
+        func_15145548(arg0 + 0x34, &sp.u78, temp_a2, &sp.u48, &sp.u44);  /* P270: m2c passed live f12/f14 as two extra leading args (asm: a0 = arg0 + 0x34) */
         temp_f0_2 = sp.u48 - (*(f32 *)((u8 *)sp.u84 + 0));
         temp_f2_2 = sp.u4C - (*(f32 *)((u8 *)sp.u84 + 4));
         temp_f12_2 = sp.u50 - (*(f32 *)((u8 *)sp.u84 + 8));
         temp_f18 = (sp.u7C * temp_f12_2) - (temp_f2_2 * sp.u80);
         temp_f16_2 = (sp.u80 * temp_f0_2) - (temp_f12_2 * sp.u78);
-        sp30 = (u8 *)(s32)temp_f16_2;
+        /* P270: the asm spills temp_f16_2 to sp30 as a float (swc1/lwc1); no int truncation */
         temp_f8 = (sp.u78 * temp_f2_2) - (temp_f0_2 * sp.u7C);
         sp2C = temp_f8;
         temp_f14_2 = (temp_f18 * temp_f18) + (temp_f16_2 * temp_f16_2) + (temp_f8 * temp_f8);
@@ -2376,7 +2379,7 @@ s16 *func_1519CADC(u8 *arg0, s16 arg1) {
         if (temp_f14_2 != 0.0f) {
             temp_f2_3 = (*(f32 *)((u8 *)arg0 + 0x2C)) / sqrtf(sp.u40);
             var_f12 = temp_f18 * temp_f2_3;
-            var_f14 = (s32)sp30 * (s32)temp_f2_3;
+            var_f14 = temp_f16_2 * temp_f2_3;  /* P270: was (s32)sp30 * (s32)temp_f2_3 (asm mul.s) */
             var_f16 = temp_f8 * temp_f2_3;
         } else {
             var_f16 = 0.0f;
@@ -2387,19 +2390,19 @@ s16 *func_1519CADC(u8 *arg0, s16 arg1) {
         (*(s16 *)((u8 *)sp.u8C + 2)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x38)) + var_f14);
         (*(s16 *)((u8 *)sp.u8C + 4)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) + var_f16);
         (*(s16 *)((u8 *)sp.u8C + 6)) = 0;
-        temp_t2 = sp.u8C + 0x10;
+        temp_t2 = (s16 *) ((u8 *) sp.u8C + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u8C = temp_t2;
         *temp_t2 = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x34)) - var_f12);
         (*(s16 *)((u8 *)sp.u8C + 2)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x38)) - var_f14);
         (*(s16 *)((u8 *)sp.u8C + 4)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x3C)) - var_f16);
         (*(s16 *)((u8 *)sp.u8C + 6)) = 0;
-        temp_t4 = sp.u8C + 0x10;
+        temp_t4 = (s16 *) ((u8 *) sp.u8C + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u8C = temp_t4;
         *temp_t4 = (s16) (s32) (sp.u6C - var_f12);
         (*(s16 *)((u8 *)sp.u8C + 2)) = (s16) (s32) (sp.u70 - var_f14);
         (*(s16 *)((u8 *)sp.u8C + 4)) = (s16) (s32) (sp.u74 - var_f16);
         (*(s16 *)((u8 *)sp.u8C + 6)) = 0;
-        temp_t5 = sp.u8C + 0x10;
+        temp_t5 = (s16 *) ((u8 *) sp.u8C + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u8C = temp_t5;
         *temp_t5 = (s16) (s32) (sp.u6C + var_f12);
         (*(s16 *)((u8 *)sp.u8C + 2)) = (s16) (s32) (sp.u70 + var_f14);

@@ -77,3 +77,4 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 172	wt	game 0x15130000-0x1518FFFF+dbg	6			interrupted by usage limit after committing 6 near-miss matches
 P73	port-b	port NM C (151BF8F0, 1501D348, 1509A024)	3	0	130	difftest build_tu fix (multi-function NM blocks tested the src_eu body); 3 stubs in hand C, verify_all OK
 P267	port-b	port NM C (150D5268, 15198180)	2	0	45	P264 leftovers in hand C; 5268 needs ARGMEM on the func_151307F0 template (5 survivors without it)
+P270	port	intro crash fix + stride bug class (151D7FE8 + 10 NM funcs)	11	0	100	func_151D7FE8 vel pointer fix (user crash); stride_scan.py 151->119 NM hits; verify_all OK

@@ -390,7 +390,7 @@ u8 *func_151C8448(u8 *arg0, s16 arg1) {
         temp_f12 = sp.u6C - (*(f32 *)((u8 *)sp.u7C + 8));
         temp_f18 = (sp.u74 * temp_f12) - (temp_f2 * sp.u78);
         temp_f4 = (sp.u78 * temp_f0) - (temp_f12 * sp.u70);
-        sp30 = (u8 *)(s32)temp_f4;
+        /* P270: the asm spills temp_f4 to sp30 as a float (swc1/lwc1); no int truncation */
         temp_f10 = (sp.u70 * temp_f2) - (temp_f0 * sp.u74);
         sp2C = temp_f10;
         temp_f14 = (temp_f18 * temp_f18) + (temp_f4 * temp_f4) + (temp_f10 * temp_f10);
@@ -402,7 +402,7 @@ u8 *func_151C8448(u8 *arg0, s16 arg1) {
         } else {
             temp_f2_2 = (*(f32 *)((u8 *)arg0 + 0x30)) / sqrtf(sp.u48);
             var_f12 = temp_f18 * temp_f2_2;
-            var_f14 = (s32)sp30 * (s32)temp_f2_2;
+            var_f14 = temp_f4 * temp_f2_2;  /* P270: was (s32)sp30 * (s32)temp_f2_2 (asm mul.s) */
             var_f16 = sp2C * temp_f2_2;
         }
         (*(s16 *)((u8 *)sp.u84 + 0)) = (s16) (s32) ((*(f32 *)((u8 *)arg0 + 0x40)) - var_f12);
