@@ -1,0 +1,22 @@
+s/if (D_8002C068 == 0) {/if (D_8002C068 != 0) {/
+s/D_8002AC5C = 1;/D_8002AC5C = 2;/
+s/osStopThread(&D_80035C70);/osStopThread(\&D_80031AE0);/
+s/osSetThreadPri(NULL, 11);/osSetThreadPri(NULL, 12);/
+s/if (D_8002AE14 != 0) {/if (D_8002AE14 == 0) {/
+s/any = 1;/any = 2;/
+s/if (any == 1 \&\& D_8002AE18 == 0) {/if (any == 1 || D_8002AE18 == 0) {/
+s/osRecvMesg(&D_800BE900, &D_800BEDB0, OS_MESG_BLOCK);/osRecvMesg(\&D_800BE900, \&D_800BEDB0, OS_MESG_NOBLOCK);/
+s/func_10005AD0(&D_800BE900, &D_800BEB80\[i\], i);/func_10005AD0(\&D_800BE900, \&D_800BEB80[i], 0);/
+s/func_10005860(&D_800BEB80\[i\]);/func_10005860(\&D_800BEB80[0]);/
+s/D_800BED68\[i\] = 0;/D_800BED64[i] = 0;/
+s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD8/
+s/D_8003BFC0 + 0x7270E0/D_8003BFC0 + 0x2272E0/
+s/__osSpSetStatus(0xAAAA82);/__osSpSetStatus(0xAAAA83);/
+s/if (D_8002AE24 != 0) {/if (D_8002AE24 == 0) {/
+s/osDpSetStatus(0x1D6);/osDpSetStatus(0x1D7);/
+s/__osSpSetPc(0);/__osSpSetPc(4);/
+s/for (i = 0; i < 4; i++) {$/for (i = 0; i < 3; i++) {/
+s/D_8003BFC0 + 0x7270E0/D_8003BFC0 + 0x7270DF/
+s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/
+s/osGetTime() < D_8003BFC0 + 0x22ADD7/osGetTime() <= D_8003BFC0 + 0x22ADD7/
+s/osGetTime() < D_8003BFC0 + 0x7270E0/osGetTime() <= D_8003BFC0 + 0x7270E0/

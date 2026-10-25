@@ -7,7 +7,7 @@ func_150A8EF8	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	key-frame 
 func_150A8DF8	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	half-angle sine/cosine (Euler to quaternion)
 func_150A99BC	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	readable	joint matrix times parent
 D_150AA11C	D5E90	func_150A86B0	src_eu/nm_asm/D5E90_anim.c	data	sine table (513 floats) in .text: read as data by the NM C, nothing to convert
-func_150AA950	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	outcode helper
+func_150AA950	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90.c	readable	outcode helper (P281: nmw_box_outcode)
 func_150AA9B0	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	bevel helper
 func_150AAA88	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	corner helper
 func_150AAB24	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	edge lerp + outcode

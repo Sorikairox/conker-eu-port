@@ -8,8 +8,9 @@ progress.csv comes from `make VERSION=eu progress` (verify_all.sh regenerates it
 Run from the repo root or conker/ (host or container).  --list prints the asm-only functions (name, insns, file).
 P279: functions of raw asm segments (asm/D5E90.s) count as nm when the Makefile lists them in NM_ASM_C_FUNCS_X or
 tools/port/nm_folded.tsv lists them (private entries folded into another function's NM C; kind asm2c = register-level
-translation, reported separately). --platform also counts tools/port/platform_replaced.tsv rows (privileged / OS /
-padding code the port's platform layer replaces) as done, in a `plat` column.
+translation, reported separately). tools/port/platform_replaced.tsv rows (privileged / OS / padding code the port's
+platform layer replaces, one reason per row) count as done, in a `plat` column (P281, user decision 2026-10-25: this
+is the default; --strict = the old count without them; --platform is accepted and does nothing).
 """
 import sys as _pgs, os as _pgo; _pgs.path.insert(0, _pgo.path.dirname(_pgo.path.abspath(__file__))); import portguard  # wrong-checkout guard (P7)
 import sys, os, re, csv, glob, collections
@@ -91,7 +92,7 @@ def main():
     nm = nm_funcs()
     nma = nm_asm_funcs()
     for f in nma: nm.setdefault(f, 'asm/D5E90.s')
-    plat = {r['func'] for r in tsv_rows('platform_replaced.tsv')} if '--platform' in sys.argv else set()
+    plat = {r['func'] for r in tsv_rows('platform_replaced.tsv')} if '--strict' not in sys.argv else set()
     t = collections.OrderedDict()
     asm_only = []
     for r in rows:
@@ -116,6 +117,7 @@ def main():
             print('%-9s %6d %8d %6d %8d %5d %4.1f%%   %d/%d (%.1f%%)' % (
                 name, s['n'], s['c'], s['nm'], s['asm'], s['c'] + s['nm'], 100.0 * (s['c'] + s['nm']) / max(1, s['n']),
                 s['bc'] + s['bnm'], s['b'], 100.0 * (s['bc'] + s['bnm']) / max(1, s['b'])))
+    if plat: print('plat %d: asm-only functions counted as done because the port replaces them (tools/port/platform_replaced.tsv; --strict = without)' % tot['pl'])
     a2c = [f for f, k in nma.items() if k == 'asm2c']
     if a2c: print('nm includes %d asm2c register-level entries (nm_folded.tsv kind asm2c, still to be rewritten readably)' % len(a2c))
     missing = [f for f in nm if f not in {r['function'] for r in rows}]

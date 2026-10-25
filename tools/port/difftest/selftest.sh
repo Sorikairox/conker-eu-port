@@ -309,6 +309,26 @@ chkcn yes func_15104A80 "$S4A80 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target 
 chkcn yes func_15104A80 "$S4A80 DIFFTEST_RET=151494E0=1" "RET 151494E0"
 chkcn no  func_15104A80 "$S4A80" "not a jal target"
 chkcn no  func_15104A80 "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target"
+# P281: DIFFTEST_STOPCALL=ADDR=N ends a trial at the N-th call of a stub (endless thread loops: func_100052A0 spins in
+# `while (1) {}` after osWritebackDCacheAll 100252A0). Without it every trial times out (UNSURE). A candidate that never
+# makes the stop call times out alone (DIFFER). DIFFTEST_RETV1 sets the low word of osGetTime (100252D0): the busy wait
+# bound 0x22ADD7 shows only with exact low words (EQUIV without them).
+S52A0="DIFFTEST_STOPCALL=100252A0=1 DIFFTEST_RET=100252D0=0 DIFFTEST_POKE=8002C068=1,8002AE14=0"
+V52A0="DIFFTEST_RETV1=100252D0=0;22ADD6;7270E0;0;7270E0"
+chkce UNSURE func_100052A0 "DIFFTEST_RET=100252D0=0"
+chkce EQUIV  func_100052A0 "$S52A0"
+chkce DIFFER func_100052A0 "$S52A0" 's/__osSpSetPc(0);/__osSpSetPc(4);/'
+chkce DIFFER func_100052A0 "$S52A0" 's/    osWritebackDCacheAll();//'
+chkce EQUIV  func_100052A0 "$S52A0 $V52A0"
+chkce DIFFER func_100052A0 "$S52A0 $V52A0" 's/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/'
+chkce EQUIV  func_100052A0 "$S52A0" 's/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/'
+# P281: a struct returned by value (ldiv_t ldiv(long, long)) takes a hidden a0, so its divisor is a2: the arity now
+# counts it (DIFFTEST_SRET_OLD=1 = old: the divisor was never compared), and ldiv's stub computes the real quotient /
+# remainder (DIFFTEST_LDIV_OLD=1 = old random). func_10001550 = libc _Ldtob on 1234.5678 with %e.
+S1550="DIFFTEST_ARG=0=80480000,1=65 DIFFTEST_POKE=80480000=40934A45,80480004=6D5CFAAD,80480008=80490000,80480024=6 DIFFTEST_RET=10001A80=FFFFFFFF DIFFTEST_OUTB=10001A80=0:00;0B"
+chkce EQUIV  func_10001550 "$S1550"
+chkce DIFFER func_10001550 "$S1550" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
+chkce EQUIV  func_10001550 "$S1550 DIFFTEST_SRET_OLD=1 DIFFTEST_LDIV_OLD=1" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
 # P260: a candidate path the container already read, rewritten on the host with a different size (what every
 # chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares

@@ -1,0 +1,78 @@
+diff --git a/conker/src_eu/debugger/debugger.c b/conker/src_eu/debugger/debugger.c
+index cc5d1040..10dc5d96 100644
+--- a/conker/src_eu/debugger/debugger.c
++++ b/conker/src_eu/debugger/debugger.c
+@@ -655,7 +655,73 @@ void func_16000F8C(s32 arg0, f32 arg1)
+ //     }
+ // }
+ 
++#ifdef NON_MATCHING
++/* P281: readable C for func_16001044 (compiled C, 155 insns). */
++extern s32 D_16003B50[10]; /* powers of ten 1 .. 1000000000 (the asm copies them to the stack first) */
++extern u8 D_160047E4[]; /* "NaN" */
++extern u8 D_160047E8[]; /* "%s%s%f" */
++extern u8 D_160047F0[]; /* "" */
++extern u8 D_160047F4[]; /* "" */
++// debug_print_value: prints `value` at text cell `cell` (rows from D_160038A0 to 0x340): kind 0 = 8 hex digits
++// (written right to left), kind 1 = signed decimal without leading zeros, kind 2 = the float whose bits are `value`
++// ("NaN" for infinities, NaNs and denormals).
++void func_16001044(s32 cell, s32 kind, s32 value) {
++    u8 buf[0x24];
++    u8 *pos;
++    s32 *p;
++    s32 i;
++    s32 digit;
++    s32 started;
++    u8 c;
++    s32 exp;
++
++    if (cell < D_160038A0 * 32 || cell >= 0x341) {
++        return;
++    }
++    pos = (u8 *) func_1600160C(cell);
++    switch (kind) {
++        case 0:
++            pos += 0x70;
++            for (i = 0; i < 8; i++) {
++                c = value & 0xF;
++                if (c >= 10) {
++                    c += 7;
++                }
++                c += '0';
++                func_160014F0((s16 *) pos, c);
++                value >>= 4;
++                pos -= 0x10;
++            }
++            break;
++        case 1:
++            if (value < 0) {
++                pos = func_160014F0((s16 *) pos, '-');
++                value = -value;
++            }
++            started = 0;
++            for (p = &D_16003B50[9]; p >= D_16003B50; p--) {
++                digit = value / *p;
++                value = value % *p;
++                if (digit > 0 || started || p == D_16003B50) {
++                    pos = func_160014F0((s16 *) pos, (u8) (digit + '0'));
++                    started = 1;
++                }
++            }
++            break;
++        case 2:
++            exp = (value & 0x7F800000) >> 23;
++            if ((exp <= 0 || exp >= 0xFF) && (exp != 0 || (value << 9) != 0)) {
++                func_160012B0(cell, D_160047E4);
++                return;
++            }
++            func_16001B34(buf, D_160047E8, D_160047F0, D_160047F4, *(f32 *) &value); /* sprintf */
++            func_160012B0(cell, buf);
++            break;
++    }
++}
++#else
+ #pragma GLOBAL_ASM("asm/nonmatchings/debugger/debugger/func_16001044.s")
++#endif
+ 
+ void func_160012B0(s32 arg0, u8 *arg1) {
+     if (arg1 && (arg0 >= (D_160038A0 << 5)) && (arg0 < 833)) {

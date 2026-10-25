@@ -10,6 +10,23 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P281 (port-e, group E: compiled leftovers, endless loops, D5E90 helper) (2026-10-25). Details: `docs/port/sessions/P281.md`
+
+Committed NM C (registry rows `P281`): func_100052A0 prenmi_thread (endless; STOPCALL), func_10001550 libc _Ldtob,
+func_151FA3E0 mp3_imdct_short (hand asm, group B request), func_150AA950 D5E90 box outcode (first readable D5E90
+helper, nmasm_walls.py EQUIV). difftest: DIFFTEST_STOPCALL (ends endless loops at the N-th call of a stub),
+DIFFTEST_RETV1, struct-return arity (ldiv divisor now compared), real ldiv stub; selftest +10 cases.
+progress_nm.py: platform-replaced count as done by default (`plat 37`), `--strict` = old count (user decision).
+Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0 NM+float, selftest 140/140.
+
+### Next steps (group E, from P281)
+1. Six drafts NOT committed (random EQUIV, mutant runs stopped at wrap-up): func_16001044, func_1600288C,
+   func_100036E8, func_15007830, func_10005B04, func_10001194. Patches in docs/port/sessions/p281/drafts, setups /
+   mutants / knobs in p281 and P281.md: apply, add the registry row, `MUT=1 tools/port/reverify.sh`.
+2. D5E90 walls: give nmasm_walls.py a unit mode for the private helpers (the bevel helpers' readable draft killed only
+   3/9 mutants under the whole-engine harness), then continue helper by helper (16 asm2c entries left).
+3. Port: func_10001194 needs vbe.py ROM_ABS for D_427B0 / D_19EDE8 once its NM C lands.
+
 ## P279 (port-e, group E: hand asm + init / debugger leftovers) (2026-10-25). Details: `docs/port/sessions/P279.md`
 
 NM C + verification (registry rows `P279`): func_150A7770 (memset), func_150A80F0 + func_150B2290 (64-bit hand asm,

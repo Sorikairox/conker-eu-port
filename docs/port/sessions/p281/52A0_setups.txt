@@ -1,0 +1,14 @@
+# P281 func_100052A0 (prenmi_thread). Knobs: STOPCALL osWritebackDCacheAll (100252A0) #1 ends the trial before the final
+# `while (1) {}`; RET osGetTime (100252D0) = 0, RETV1 (low words) 0;22ADD6;22ADD7;7270E0;7270DF;7270E0 (a
+# higher first bound ends the first wait on 7270E0, then waits again). Setups b1lo / b2lo (9th field = RETV1, P281) probe
+# the lower side of each bound: the busy waits only show through the number of osGetTime calls.
+# POKE words: D_8002C068 wait flag, D_8002AE14 / AE18 / AE24 bytes (high byte of the word), D_800BED64[4], D_800BED68[4]
+wait ! ! 8002C068=0,8002AE14=0,8002AE24=0 ! ! ! ! ! !
+nowait ! ! 8002C068=1,8002AE14=0,8002AE24=01000000 ! ! ! ! ! !
+rumble2 ! ! 8002C068=1,8002AE14=01000000,8002AE18=0,800BED64=00010001,800BED68=01010101,8002AE24=0 ! ! ! ! ! !
+rumble2own ! ! 8002C068=1,8002AE14=01000000,8002AE18=01000000,800BED64=01000100,800BED68=01010101,8002AE24=0 ! ! ! ! ! !
+rumble0 ! ! 8002C068=0,8002AE14=01000000,8002AE18=0,800BED64=0,800BED68=01010101,8002AE24=01000000 ! ! ! ! ! !
+rumble4 ! ! 8002C068=0,8002AE14=01000000,8002AE18=0,800BED64=01010101,800BED68=01010101,8002AE24=0 ! ! ! ! ! !
+rumble3 ! ! 8002C068=0,8002AE14=01000000,8002AE18=0,800BED64=00000001,800BED68=01010101,8002AE24=0 ! ! ! ! ! !
+b1lo ! ! 8002C068=1,8002AE14=0 ! ! ! ! ! ! 100252D0=0;22ADD6;7270E0;0;7270E0
+b2lo ! ! 8002C068=1,8002AE14=0 ! ! ! ! ! ! 100252D0=0;22ADD6;22ADD7;7270DF;7270E0

@@ -71,15 +71,15 @@ for F in "$@"; do NR=$NR0
   randok=""; if [ "${NR:-100}" != 0 ]; then r=$(dt tools/port/difftest.sh $F $C --trials ${NR:-100} --seed 1); echo "  random: $r"
     # mut.sh P77: random kills only count when the unmutated draft is EQUIV on random (without ARGMEM)
     [ -n "$MUT" ] && [ "$(NOARGMEM=1 CUT=5 dt tools/port/difftest.sh $F $C --trials ${NR:-100} --seed 1)" = EQUIV ] && randok=1; fi
-  # setup runner: name ! ARG ! POKE ! RET ! RETF ! OUTA ! OUTW ! OUTB (the p218 knobs.sh format)
+  # setup runner: name ! ARG ! POKE ! RET ! RETF ! OUTA ! OUTW ! OUTB (the p218 knobs.sh format) [! RETV1 (P281, optional)]
   runset() { # cand setupfile [names] -> prints "name RESULT" lines
     local c=$1 s=$2; shift 2
-    grep -vE '^\s*(#|$)' "$s" | while IFS='!' read -r n a p r rf ow ww wb; do
+    grep -vE '^\s*(#|$)' "$s" | while IFS='!' read -r n a p r rf ow ww wb v1; do
       n=$(echo $n); [ $# -gt 0 ] && ! [[ " $* " == *" $n "* ]] && continue
       # P244: a non-empty setup field wins over the same registry knob (dt's `env "${envs[@]}"` used to override it:
       # func_15170648's random-phase knob DIFFTEST_ARG=5=0|1|2 replaced every setup's arguments -> 0 / 4 UNSURE)
       local sw=() kv; for kv in "DIFFTEST_ARG=$(echo $a)" "DIFFTEST_POKE=$(echo $p)" "DIFFTEST_RET=$(echo $r)" "DIFFTEST_RETF=$(echo $rf)" \
-          "DIFFTEST_OUTA=$(echo $ow)" "DIFFTEST_OUTW=$(echo $ww)" "DIFFTEST_OUTB=$(echo $wb)"; do [ -n "${kv#*=}" ] && sw+=("$kv"); done
+          "DIFFTEST_OUTA=$(echo $ow)" "DIFFTEST_OUTW=$(echo $ww)" "DIFFTEST_OUTB=$(echo $wb)" "DIFFTEST_RETV1=$(echo $v1)"; do [ -n "${kv#*=}" ] && sw+=("$kv"); done
       o=$(DIFFTEST_EXACT='*' DIFFTEST_ARG="$(echo $a)" DIFFTEST_POKE="$(echo $p)" DIFFTEST_RET="$(echo $r)" DIFFTEST_RETF="$(echo $rf)" \
           DIFFTEST_OUTA="$(echo $ow)" DIFFTEST_OUTW="$(echo $ww)" DIFFTEST_OUTB="$(echo $wb)" dt env "${sw[@]}" tools/port/difftest.sh $F $c --trials $tr --seed 1)
       echo "$n ${o:-NOOUTPUT}"; [ -n "$STOP" ] && [ "${o%% *}" != EQUIV ] && break

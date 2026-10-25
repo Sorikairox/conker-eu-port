@@ -1,0 +1,6 @@
+s/    if (x > hx) code |= 1;/    if (x >= hx) code |= 1;/
+s/    if (x < -hx) code |= 2;/    if (x < -hy) code |= 2;/
+s/    if (y > hy) code |= 4;/    if (y > hy) code |= 8;/
+s/    if (y < -hy) code |= 8;/    if (y <= -hy) code |= 8;/
+s/    if (z > hz) code |= 0x10;/    if (!(z <= hz)) code |= 0x10;/
+s/    if (z < -hz) code |= 0x20;/    if (z < hz) code |= 0x20;/

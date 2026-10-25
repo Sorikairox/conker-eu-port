@@ -604,6 +604,9 @@ def lookup_proto(p, tu, pn):
                 new[pn] = (proto_arity(all_hdr_protos(), pn), proto_fslots(all_hdr_protos(), pn), hf)
     return new[pn]
 
+SRET_OLD = os.environ.get('DIFFTEST_SRET_OLD') == '1'   # P281
+LDIV_OLD = os.environ.get('DIFFTEST_LDIV_OLD') == '1'   # P281
+
 def proto_arity(tu, name):
     """number of parameter words of name per the declarations in tu (None if unknown / K&R)"""
     best = None
@@ -620,6 +623,11 @@ def proto_arity(tu, name):
         n = 0
         for p in _split_top(ps):
             n += 2 if re.search(r'\b(f64|double|s64|u64|long long)\b', p) and '*' not in p else 1
+        # P281: a struct returned by value (ldiv_t ldiv(long, long)) is written through a hidden first argument (a0),
+        # so the visible parameters start at a1: before, ldiv's arity was 2 and its divisor (a2) was never compared
+        # (func_10001550 `ldiv(lo, 16)` mutant survived). DIFFTEST_SRET_OLD=1 = old count.
+        if not SRET_OLD and re.search(r'(\b(l?ldiv_t)|\bstruct\s+\w+)\s*$', tu[tu.rfind('\n', 0, m.start()) + 1:m.start()]):
+            n += 1
         best = n
     return best
 
@@ -768,6 +776,25 @@ for _p in _knob_items('DIFFTEST_RET'):
     # P24: "ADDR=V1;V2;..." returns V1 on the first call, V2 on the second, ... (the last value repeats),
     # e.g. a message loop: osRecvMesg=0;0;0;FFFFFFFF
     STUBRET[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
+
+# P281 (opt-in): DIFFTEST_STOPCALL="ADDR=N,..." (hex ADDR, decimal N >= 1) ends the trial when the stub at ADDR is
+# entered for the N-th time: that call is logged (its arguments compared), then the run stops as "stopped" instead of
+# returning. For endless main loops / thread entries (viMgrMain func_100036E8, func_15007830, func_10001194,
+# func_100052A0's final `b .`) that never reach RET_MAGIC: without it every trial times out (UNSURE, prefix only).
+# Both sides stopped: the call lists, call counts and written memory are compared (not the registers / return value,
+# which do not exist yet); only one side stopped: DIFFER. No knob = old behaviour.
+STOPCALL = {}
+for _p in _knob_items('DIFFTEST_STOPCALL'):
+    _a, _v = _p.split('=')
+    STOPCALL[int(_a, 16) & 0x1FFFFFFF] = max(1, int(_v))
+
+# P281 (opt-in): DIFFTEST_RETV1="ADDR=V1;V2;...,..." (hex) sets v1 (the low word of a u64 return) of the stub at ADDR,
+# like DIFFTEST_RET does v0: osGetTime busy waits (func_100052A0 waits until base + 0x22ADD7 ticks) need exact low words
+# to test the bounds (with random low words the wait ends on the first call either way).
+STUBRETV1 = {}
+for _p in _knob_items('DIFFTEST_RETV1'):
+    _a, _v = _p.split('=')
+    STUBRETV1[int(_a, 16) & 0x1FFFFFFF] = [int(x, 16) & 0xFFFFFFFF for x in _v.split(';')]
 
 # P50 (opt-in): DIFFTEST_RETF="ADDR=V1;V2;...,..." (hex float bits) makes the stub at ADDR return V in f0 (V1 on the
 # first call, ...; the last repeats), e.g. func_1504B0FC's speed in func_1504CB98 (a random f0 is often 0 / NaN).
@@ -1289,10 +1316,14 @@ class Run:
             self.calls[-1]['argmem'] = am
         self.pending = len(self.calls) - 1
         k = self.ncall.get(addr, 0); self.ncall[addr] = k + 1
+        if STOPCALL.get(addr & 0x1FFFFFFF) == k + 1:   # P281: DIFFTEST_STOPCALL reached
+            self.stopped = True; self.done = True; mu.emu_stop(); return
         r = random.Random(h32('ret', self.seed, addr, k))
         mu.reg_write(UC_MIPS_REG_V0, rand_arg(r)); mu.reg_write(UC_MIPS_REG_V1, rand_arg(r))
         if (addr & 0x1FFFFFFF) in STUBRET:
             _rs = STUBRET[addr & 0x1FFFFFFF]; mu.reg_write(UC_MIPS_REG_V0, _rs[min(k, len(_rs) - 1)])
+        if (addr & 0x1FFFFFFF) in STUBRETV1:
+            _rs = STUBRETV1[addr & 0x1FFFFFFF]; mu.reg_write(UC_MIPS_REG_V1, _rs[min(k, len(_rs) - 1)])
         # P45: the libultra 64-bit helpers are pure; compute them (a0:a1 op a2:a3 -> v0:v1) instead of a random
         # return, so u64 bit-mask loops (func_150A16A4) run their real course on both sides.
         if name in LL_HELPERS:
@@ -1302,6 +1333,13 @@ class Run:
                 _r &= (1 << 64) - 1
                 mu.reg_write(UC_MIPS_REG_V0, _r >> 32); mu.reg_write(UC_MIPS_REG_V1, _r & 0xFFFFFFFF)
         mu.mem_write(phys(SCR) + 0x10, struct.pack('>3I', rand_float_bits(r), rand_float_bits(r), rand_float_bits(r)))
+        # P281: libc ldiv is pure too: write the real {quot, rem} of a1 / a2 (C truncation) through the hidden result
+        # pointer a0, so digit loops (_Ldtob func_10001550 / func_1600288C) produce real digits. DIFFTEST_LDIV_OLD=1 = old.
+        if name == 'ldiv' and not LDIV_OLD and regs[2] != 0:
+            _x = regs[1] - (1 << 32) if regs[1] >> 31 else regs[1]; _y = regs[2] - (1 << 32) if regs[2] >> 31 else regs[2]
+            _q = _tdiv(_x, _y); _rm = _x - _q * _y
+            try: self.stub_write(regs[0], struct.pack('>ii', max(-(1 << 31), min(_q, (1 << 31) - 1)), _rm))
+            except Exception: pass
         if (addr & 0x1FFFFFFF) in STUBRETF:
             _rs = STUBRETF[addr & 0x1FFFFFFF]; mu.mem_write(phys(SCR) + 0x10, struct.pack('>I', _rs[min(k, len(_rs) - 1)]))
         # P7, opt-in (DIFFTEST_OUTPARAMS=1 or --outparams): a callee writes a deterministic random
@@ -1355,7 +1393,7 @@ class Run:
         for i, r in enumerate(S_REGS): mu.reg_write(r, 0x5EED0000 + i)
         for i, r in enumerate(SCRATCH): mu.reg_write(r, 0xDEAD0000 + i)
         mu.reg_write(UC_MIPS_REG_SP, SP_ENTRY); mu.reg_write(UC_MIPS_REG_RA, RET_MAGIC)
-        self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None; self.badjalr = None
+        self.fault = None; self.icount = 0; pc = PROLOGUE; self.d64fault = None; self.badjalr = None; self.stopped = False
         self.minsp = SP_ENTRY; self.nblk = 0; self.awr = set(); self.awf = set(); self.awr_all = set(); self.awf_all = set()
         while True:
             self.resume = None
@@ -1382,7 +1420,7 @@ class Run:
         self.flush_fregs()
         pc = mu.reg_read(UC_MIPS_REG_PC)
         fo = struct.unpack('>16I', bytes(mu.mem_read(phys(SCR) + 0x100, 64)))
-        self.done = self.done and fo[15] == 0   # (Unicorn may stop with PC short of RET_END)
+        self.done = self.stopped or (self.done and fo[15] == 0)   # (Unicorn may stop with PC short of RET_END)
         self.out = dict(v0=mu.reg_read(UC_MIPS_REG_V0), v1=mu.reg_read(UC_MIPS_REG_V1),
                         f0=fo[0], f1=fo[1],
                         sp=mu.reg_read(UC_MIPS_REG_SP), s=[mu.reg_read(r) for r in S_REGS],
@@ -1545,11 +1583,15 @@ def compare(R, C, rk, arity):
     if len(R.calls) != len(C.calls):
         return 'call count ref=%d cand=%d (%s)' % (len(R.calls), len(C.calls),
                                                     (R.calls[n] if len(R.calls) > n else C.calls[n])['name'])
+    if getattr(R, 'stopped', False) != getattr(C, 'stopped', False):   # P281 DIFFTEST_STOPCALL
+        return 'stop call (DIFFTEST_STOPCALL) reached only in %s' % ('ref' if R.stopped else 'cand')
     dr, dc = R.dirty(), C.dirty()
     if dr != dc:
         sr, sc = dict(dr), dict(dc)
         k = min(set(sr) ^ set(sc) | {p for p in sr if p in sc and sr[p] != sc[p]})
         return 'memory differs at 0x%08X (ref=%s cand=%s)' % (k, '%02X' % sr[k] if k in sr else 'init', '%02X' % sc[k] if k in sc else 'init')
+    if R.stopped:
+        return None   # P281: stopped inside a callee: no return value / restored registers to compare
     o, p = R.out, C.out
     # P106: DIFFTEST_SIGNORE="7,..." leaves s-registers out (hand asm that uses s7 as its ra save: the event VM's
     # native helpers, whose caller saved s7 itself)
@@ -1837,7 +1879,7 @@ def knob_notes(called, ntrials):
     # (function pointer) is listed too. DIFFTEST_JALKEY_OLD=1 = no check.
     if os.environ.get('DIFFTEST_JALKEY_OLD') != '1' and REF_JAL:
         nj = []
-        for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
+        for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM), ('STOPCALL', STOPCALL), ('RETV1', STUBRETV1)):
             nj += ['%s %08X' % (nm, a) for a in sorted(d) if (a & 0x1FFFFFFF) not in REF_JAL]
         if nj: out += ' [knob not a jal target of the reference (EU address? jalr-only callee?): %s]' % ', '.join(nj)
     return out

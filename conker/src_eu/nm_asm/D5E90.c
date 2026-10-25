@@ -370,6 +370,22 @@ static f32 nmw_u2f(u32 u) {
 }
 #define U2F(x) nmw_u2f(x)
 
+/* P281: readable bodies of the wall engine's private helpers (the .inc keeps only their register-level calls). */
+/* box_outcode (func_150AA950): one bit per face of the box (+/- hx, hy, hz) the point (x, y, z) lies beyond:
+ * 1 / 2 = x above hx / below -hx, 4 / 8 = y, 0x10 / 0x20 = z (ordered compares: a NaN coordinate sets no bit) */
+static s32 nmw_box_outcode(f32 x, f32 y, f32 z, f32 hx, f32 hy, f32 hz) {
+    s32 code = 0;
+
+    if (x > hx) code |= 1;
+    if (x < -hx) code |= 2;
+    if (y > hy) code |= 4;
+    if (y < -hy) code |= 8;
+    if (z > hz) code |= 0x10;
+    if (z < -hz) code |= 0x20;
+    return code;
+}
+
+
 /* the register file and frame of one machine run */
 #define NMW_REGS                                                                                         \
     u32 at = 0, v0 = 0, v1 = 0, a0 = 0, a1 = 0, a2 = 0, a3 = 0, t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, \
