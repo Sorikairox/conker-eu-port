@@ -6,5 +6,5 @@ cd "$(dirname "$0")/../.."
 url=$(git remote get-url origin)
 case "$url" in *Sorikairox/conker-eu-port*) ;; *) echo "origin is not the private backup repo: $url" >&2; exit 1;; esac
 git -c credential.helper= -c credential.helper='!gh auth git-credential' \
-  push --quiet origin eu eu-wt-a port port-b port-web 2>&1 | tail -3
+  push --quiet origin eu eu-wt-a port port-b port-web port-web-b port-c port-d port-e 2>&1 | tail -3
 echo "backup push done: $(date '+%F %T')"
