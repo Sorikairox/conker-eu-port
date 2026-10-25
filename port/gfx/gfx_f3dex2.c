@@ -699,11 +699,11 @@ static void p78_material(void) {
                 port_log("[p189pal] mat %d tlut mode %u: %s\n", p78_mat, oth_h >> 14 & 3, pb);
             }
         }
-        static unsigned seen[256][3]; static unsigned nseen;
+        static unsigned seen[1024][3]; static unsigned nseen;
         unsigned key0 = tmem_gen, key1 = t->tmem | t->line << 12 | t->siz << 24 | t->fmt << 28, key2 = t->masks | t->maskt << 4 | t->pal << 8;
         int dup = 0;
         for (unsigned j = 0; j < nseen; j++) if (seen[j][0] == key0 && seen[j][1] == key1 && seen[j][2] == key2) dup = 1;
-        if (dup || nseen >= 256 || p78_ntex >= 60) continue;
+        if (dup || nseen >= 1024 || p78_ntex >= (p158_on ? 600 : 60)) continue;   /* P273: p158 dumps 600 */
         seen[nseen][0] = key0; seen[nseen][1] = key1; seen[nseen][2] = key2; nseen++;
         unsigned w, h; tile_dims(t, &w, &h);
         if (p158_on ? w > 256 || h > (w <= 8 ? 256u : 128u) : w > 64 || h > (w <= 8 ? 256u : 64u)) continue;   /* P202: p158 narrow strips up to 256 rows (backdrop 4x256) */   /* P94: narrow gradient strips (sky 4x256) too; P158: up to 256x128 */
