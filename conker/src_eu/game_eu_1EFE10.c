@@ -1262,7 +1262,63 @@ s32 func_151C4B0C(s32 arg0, u8 *arg1, f32 arg2) {
     return var_v1;
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    /* 0x00 */ s16 *pos;
+    /* 0x04 */ s32 timer;
+    /* 0x08 */ s32 interval_min;
+    /* 0x0C */ s32 interval_range;
+    /* 0x10 */ s16 effect_min;
+    /* 0x12 */ s16 effect_range;
+    /* 0x14 */ f32 param9_min;
+    /* 0x18 */ f32 param9_range;
+    /* 0x1C */ f32 param0;
+    /* 0x20 */ f32 param1;
+    /* 0x24 */ f32 param23_range;
+    /* 0x28 */ f32 param67;
+    /* 0x2C */ f32 tail[3];
+} TimedEmitter;
+
+// timed_emitter_update: counts the emitter at obj+0x28 down by the frame time D_800BE9E4; when it runs out, spawns a
+// random effect of type 0x2B (id effect_min + rand % (effect_range + 1)) with flags (1, 0), size 0x44, obj bytes
+// +0xC / +1, and copies a 17-float parameter block into it at +0x28 (random spreads, the emitter position as floats,
+// the three tail floats); then re-arms the timer to interval_min + rand % (interval_range + 1).
+void func_151C4BF4(u8 *obj) {
+    TimedEmitter *e = (TimedEmitter *)(obj + 0x28);
+    f32 p[17];
+    u8 *fx;
+
+    e->timer -= D_800BE9E4;
+    if (e->timer >= 0) {
+        return;
+    }
+    p[0] = e->param0;
+    p[1] = e->param1;
+    p[2] = func_150ADA68() * e->param23_range;
+    p[3] = func_150ADA68() * e->param23_range;
+    p[4] = func_150ADA68() * 6.2831855f;
+    p[5] = func_150ADA68() * 6.2831855f;
+    p[6] = e->param67;
+    p[7] = e->param67;
+    p[8] = 0.0f;
+    p[9] = func_150ADA68() * e->param9_range + e->param9_min;
+    p[10] = 0.0f;
+    p[11] = e->pos[0];
+    p[12] = e->pos[1];
+    p[13] = e->pos[2];
+    p[14] = e->tail[0];
+    p[15] = e->tail[1];
+    p[16] = e->tail[2];
+    fx = (u8 *)func_15149130((s16)((u32)func_150ADA20() % (u32)(e->effect_range + 1) + e->effect_min), -1, 0x2B, -1, 1,
+                             0, (struct37 *)0x44, obj[0xC], obj[1]);
+    if (fx != NULL) {
+        memcpy((s32)(fx + 0x28), (s32)p, 0x44);
+    }
+    e->timer = (u32)func_150ADA20() % (u32)(e->interval_range + 1) + e->interval_min;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4BF4.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4DD0.s")
 

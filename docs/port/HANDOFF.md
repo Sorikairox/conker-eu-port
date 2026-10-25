@@ -10,6 +10,28 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P262, 2026-10-25). Details: `docs/port/sessions/P262.md`
+- Breadth, hand C (NM), all random EQUIV + setups + mutants 100%: func_150B0344 player_joint_beam_spawn,
+  func_151C4BF4 timed_emitter_update, func_1511DF6C mesh_tex_scroll_update, func_1514E88C object_glow_attach,
+  func_15195564 character_hit_react, func_150B5F1C smoke_puff_spawn, func_150FF604 object_beam_fire,
+  func_1511DD44 mesh_tex_wave_update, func_1514F43C character_fire_effect_start, func_150B0574 beam_trail_spawn.
+- func_151030B8 callers (game_eu_10D650, 12C5F0, 1F4090, 981E0): exact prototype under NON_MATCHING, the old one kept
+  for the default build (narrow s16 / u8 parameters would change IDO's call code); pointer casts at the call sites.
+- Prototype fixes: func_150B0344 `void` in 981E0; func_15195564 declared in 1C1A20 / 8FCB0 (was implicit);
+  func_150B5F1C's third parameter s32 (lw) in E35E0.
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1606), selftest 129 / 129, implicit_scan
+  `838 implicit call sites (162 in NM code, 0 float-related, 0 NM+float)`, progress_nm
+  `total 5915 3994 1623 298 5617 95.0% 1946388/2253856 (86.4%)`.
+- Stale container views: port_work/p262/sync.sh (ls -l refresh + host / container md5) found nothing stale.
+
+## Next steps (from P262)
+1. Browser: P262.md section 4 list, plus P259's Tank-mode items.
+2. Breadth (owned, compiled, from progress_nm --list): func_150B696C (E35E0, 148), func_150E1DE0 (10F5F0, 148, table
+   EU 80089A9C), func_150F2FE0 (1207F0, 139, table EU 8008D0FC), func_eu_151670C0 (194720, 134, table EU 8008BAEC),
+   func_151A88F0 (1D5710, 136), func_150B2290 (DFAA0, 28).
+3. ROM rodata statics (D_800A5D14 style) are not readable by ARGMEM on the reference side (unmapped page); a harness
+   option to map the ELF .rodata page on ARGMEM reads would let pointer-to-static arguments be compared.
+
 ## State (session P259, 2026-10-25). Details: `docs/port/sessions/P259.md`
 - Tank mode stubs from browser P258, hand C (NM): func_1506CE6C player_camera_view_update (game_981E0, now
   `void (void)`: the asm never reads a0 / a1; the C caller func_15070300 updated) and func_151030B8

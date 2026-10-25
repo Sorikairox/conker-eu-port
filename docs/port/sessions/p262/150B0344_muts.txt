@@ -1,0 +1,21 @@
+# P262 func_150B0344 (player_joint_beam_spawn) mutants: sed % setup names
+s/if (mtx == NULL) {/if (mtx != NULL) {/ % s0 null
+s/joint = 3;/joint = 2;/ % s0
+s/joint = 2;$/joint = 3;/ % s1
+s/if (side == 0) {/if (side > 0) {/ % sneg
+s/(joint << 6)/(joint << 5)/ % s0
+s/z0 = -20.0f;/z0 = 20.0f;/ % s0
+s/z1 = -150.0f;/z1 = -15.0f;/ % s0
+s/func_150A7E40(m, x1, y1, z1, \&x1, \&y1, \&z1);/func_150A7E40(m, x1, y1, z1, \&x1, \&z1, \&y1);/ % s0
+s/func_150E2030(0, x0, y0, z0, x1, y1, z1,/func_150E2030(0, x0, y0, z0, y1, x1, z1,/ % s0
+s/40.0f, 0.0f, 2.0f, 120.0f, 0x3C, 0x23/40.0f, 0.0f, 2.0f, 12.0f, 0x3C, 0x23/ % s0
+s/120.0f, 0x3C, 0x23, 0, 0,/120.0f, 0x3C, 0x22, 0, 0,/ % s0
+s/0, 0, 0, 0, 0, 0, 0,$/0, 0, 0, 0, 0, 0, 1,/ % s0
+s/^                  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);/                  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);/ % s0
+s/D_800D154C->unique_id, (s16)joint/D_800D154C->unique_id, (s16)side/ % s0
+s/D_800D154C->unique_id, (s16)joint/0, (s16)joint/ % s0
+s/(s16)joint, -1, 0.0f/(s16)joint, 1, 0.0f/ % s0
+s/-39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,/-39.0f, 0.0f, 0.0f, -150.0f, 3, 0x7F,/ % s0
+s/-39.0f, 0.0f, 0.0f, -150.0f/-39.0f, 0.0f, 0.0f, -15.0f/ % s0
+s/^                  4, 0);/                  5, 0);/ % s0
+s/func_150E3334((s32)D_800D154C,/func_150E3334((s32)mtx,/ % s0

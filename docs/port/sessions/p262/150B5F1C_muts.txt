@@ -1,0 +1,29 @@
+# P262 func_150B5F1C (smoke_puff_spawn) mutants: sed % setup names
+s/rec.kind = 5;/rec.kind = 0xD;/ % base
+s/rec.sub = 5;/rec.sub = 8;/ % base
+s/rec.pos\[1\] = pos\[1\];/rec.pos[1] = pos[2];/ % base
+s/rec.u30 = 20.0f;/rec.u30 = 2.0f;/ % base
+s/rec.u34 = 10.08f;/rec.u34 = 10.080001f;/ % base
+s/rec.u38 = -1.353f;/rec.u38 = 1.353f;/ % base
+s/rec.u3C = 0.731f;/rec.u3C = 0.73f;/ % base
+s/rec.u44 = 35.0f;/rec.u44 = 39.0f;/ % base
+s/rec.u4A = 0xFF;/rec.u4A = 0x7F;/ % base
+s/rec.u4C = -0x1F;/rec.u4C = 0x1F;/ % base
+s/rec.u54 = 2;/rec.u54 = 3;/ % base
+s/rec.u5A = 0x1E;/rec.u5A = 0xF;/ % base
+s/rec.u5F = 2;/rec.u5F = 4;/ % base
+s/rec.u63 = 0xFF;/rec.u63 = 0xB4;/ % base
+s/rec.u66 = 0;/;/ % base
+s/rec.u6B = 0xFF;/rec.u6B = 0xB4;/ % base
+s/rec.u73 = 3;/rec.u73 = 2;/ % base
+s/rec.u74 = 0x24;/rec.u74 = 0x25;/ % base
+s/rec.u78 = 0x200005;/rec.u78 = 0x200004;/ % base
+s/rec.u7C = 0x60600;/rec.u7C = 0x60606;/ % base
+s/rec.u82 = 0x1F;/rec.u82 = 0x1E;/ % base
+s/rec.u88 = 1.0f;/rec.u88 = 0.5f;/ % base
+s/rec.u8D = 0;/rec.u8D = -1;/ % base
+s/rec.u8F = -1;/;/ % base
+s/func_151530A8(\&rec.kind, arg1, arg2);/func_151530A8(\&rec.kind, arg1, 1);/ % wide
+s/func_150B6314((u8 \*)pos, arg1, arg2);/func_150B6314((u8 *)pos, arg2, arg1);/ % base
+s/func_150B64E0((u8 \*)pos, arg1, arg2);/func_150B64E0((u8 *)pos, 0, arg2);/ % base
+s/func_150B64E0((u8 \*)pos, arg1, arg2);/func_150B64E0((u8 *)pos, arg1, (u8)arg2);/ % wide

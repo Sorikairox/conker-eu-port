@@ -3,6 +3,8 @@
 #include "functions.h"
 #include "variables.h"
 
+void func_15195564(struct127 *obj, struct127 *target, u8 attached);
+
 
 void func_15058F24(struct127 *arg0, f32, f32);
 u8   func_150599C8(struct127 *arg0, u8 arg1, u16 arg2);

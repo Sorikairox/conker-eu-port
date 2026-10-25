@@ -13,7 +13,7 @@ u8 *func_150B5DD0(u8 *arg0, s32 arg1) {
     (*(u16 *)((u8 *)arg0 + 2)) = *(u16 *)((u8 *)&D_800CC76A + (arg1 * 0x32C));
     return arg0 + 4;
 }
-void func_150B5F1C(f32 *, u8, u8);
+void func_150B5F1C(f32 *, u8, s32);
 void func_150B60E0(u8 *, u8 *);
 void func_150B5E30(u8 *arg0) {
     s32 pad; // fakematch: frame/spill slot padding
@@ -38,7 +38,133 @@ void func_150B5E30(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2);
+s32 func_150B6314(u8 *, u8, s32);
+s32 func_151530A8(s32 *, u8, s32);
+
+// smoke_puff_spawn: like func_150B5C38 with other numbers: spawns particle record kind 5 / 5 at `pos`
+// (func_151530A8: 20, 10.08, -1.353, 0.731, 39, 35, life -31 / 80, colours 255 / 0, ...) and then the two follow-up
+// emitters func_150B6314 / func_150B64E0 at the same point.
+void func_150B5F1C(f32 *pos, u8 arg1, s32 arg2) {
+    struct {
+        s32 kind;
+        s32 sub;
+        f32 pos[3];
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        s16 u48;
+        s16 u4A;
+        s16 u4C;
+        s16 u4E;
+        s32 u50;
+        s32 u54;
+        s16 u58;
+        s16 u5A;
+        s16 u5C;
+        s8 u5E;
+        s8 u5F;
+        s8 u60;
+        u8 u61;
+        u8 u62;
+        u8 u63;
+        u8 u64;
+        s8 u65;
+        s8 u66;
+        s8 u67;
+        s8 u68;
+        u8 u69;
+        u8 u6A;
+        u8 u6B;
+        u8 u6C;
+        s8 u6D;
+        s8 u6E;
+        s8 u6F;
+        s8 u70;
+        u8 u71;
+        s8 u72;
+        s8 u73;
+        s8 u74;
+        u8 pad75[0x3];
+        s32 u78;
+        s32 u7C;
+        s16 u80;
+        s16 u82;
+        s16 u84;
+        s8 u86;
+        u8 pad87[0x1];
+        f32 u88;
+        s8 u8C;
+        s8 u8D;
+        s8 u8E;
+        s8 u8F;
+    } rec;
+
+    rec.kind = 5;
+    rec.sub = 5;
+    rec.pos[0] = pos[0];
+    rec.pos[1] = pos[1];
+    rec.pos[2] = pos[2];
+    rec.u30 = 20.0f;
+    rec.u34 = 10.08f;
+    rec.u38 = -1.353f;
+    rec.u3C = 0.731f;
+    rec.u40 = 39.0f;
+    rec.u44 = 35.0f;
+    rec.u48 = 0;
+    rec.u4A = 0xFF;
+    rec.u4C = -0x1F;
+    rec.u4E = 0x50;
+    rec.u50 = 3;
+    rec.u54 = 2;
+    rec.u58 = 0x14;
+    rec.u5A = 0x1E;
+    rec.u5C = 1;
+    rec.u5E = 4;
+    rec.u5F = 2;
+    rec.u60 = 3;
+    rec.u61 = 0xFF;
+    rec.u62 = 0xFF;
+    rec.u63 = 0xFF;
+    rec.u64 = 0xFF;
+    rec.u65 = 0;
+    rec.u66 = 0;
+    rec.u67 = 0;
+    rec.u68 = 0;
+    rec.u69 = 0xFF;
+    rec.u6A = 0xFF;
+    rec.u6B = 0xFF;
+    rec.u6C = 0xFF;
+    rec.u6D = 0;
+    rec.u6E = 0;
+    rec.u6F = 0;
+    rec.u70 = 0;
+    rec.u71 = 0xFF;
+    rec.u72 = 0;
+    rec.u73 = 3;
+    rec.u74 = 0x24;
+    rec.u78 = 0x200005;
+    rec.u7C = 0x60600;
+    rec.u80 = 8;
+    rec.u82 = 0x1F;
+    rec.u84 = 1;
+    rec.u86 = 0;
+    rec.u88 = 1.0f;
+    rec.u8C = -1;
+    rec.u8D = 0;
+    rec.u8E = -1;
+    rec.u8F = -1;
+    func_151530A8(&rec.kind, arg1, arg2);
+    func_150B6314((u8 *)pos, arg1, arg2);
+    func_150B64E0((u8 *)pos, arg1, arg2);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B5F1C.s")
+#endif
 
 typedef struct { s32 x, y, z; } V3i;
 void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2);

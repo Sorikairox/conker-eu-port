@@ -431,7 +431,48 @@ void func_150B0290(void) {
     D_800DD5C0--;
 }
 
+#ifdef NON_MATCHING
+s32 func_150E2030(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32,
+                  s32, f32, f32, f32, f32, f32, f32);
+void func_150E3334(s32 arg0, u8 arg1, s16 arg2, s32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9,
+                   s16 argA, s16 argB, u16 argC, u8 argD);
+
+// player_joint_beam_spawn: event-mode helper (D_800D1580 modes 9 / 10). Uses joint matrix 3 (side 0) or 2 (side 1)
+// of the player's (D_800D154C) matrix block at +0x1D4 (64 bytes per matrix; nothing when it is NULL); transforms the
+// local points (0, 0, -20) and (0, 0, -150) to world space, spawns the line effect func_150E2030 between them
+// (40, 0, 2, 120, 60, 35) and attaches effect func_150E3334 to that joint ((0, 0, -39) .. (0, 0, -150), 3, 255, 4).
+void func_150B0344(s32 side) {
+    u8 *mtx = (u8 *)D_800D154C->unk1D4;
+    f32 x0, y0, z0;
+    f32 x1, y1, z1;
+    f32 (*m)[4];
+    s32 joint;
+
+    if (mtx == NULL) {
+        return;
+    }
+    if (side == 0) {
+        joint = 3;
+    } else {
+        joint = 2;
+    }
+    m = (f32 (*)[4])(mtx + (joint << 6));
+    x0 = 0.0f;
+    y0 = 0.0f;
+    z0 = -20.0f;
+    func_150A7E40(m, x0, y0, z0, &x0, &y0, &z0);
+    x1 = 0.0f;
+    y1 = 0.0f;
+    z1 = -150.0f;
+    func_150A7E40(m, x1, y1, z1, &x1, &y1, &z1);
+    func_150E2030(0, x0, y0, z0, x1, y1, z1, 40.0f, 0.0f, 2.0f, 120.0f, 0x3C, 0x23, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+    func_150E3334((s32)D_800D154C, D_800D154C->unique_id, (s16)joint, -1, 0.0f, 0.0f, -39.0f, 0.0f, 0.0f, -150.0f, 3, 0xFF,
+                  4, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0344.s")
+#endif
 
 void func_150B051C(s32 arg0) {
     if (D_800BE9F0 == 6) {
@@ -442,7 +483,122 @@ void func_150B051C(s32 arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_15145128(f32 *, f32 *, s32 *, s32 *);
+void func_15145974(f32 *, f32 *, f32 *);
+u8 *func_15132BBC(u8 *req, s32 nTrails, s32 arg2, s32 *bounds, s32 extraSize, u8 arg5, s32 owner);
+u8 *func_151B78D8(void *src, u8 type, s32 size, u8 alpha, s32 arg4);
+
+// beam_trail_spawn: spawns a 3-strand trail (func_15132BBC, request below, 4 extra bytes) from `from` along
+// (to - from) when that direction is non-zero (func_15145128): scale (1, 1, 0.7, 0.7), heading / pitch of the
+// direction * 80 (func_15145974), colour 1, start `from`, speed (to - from) * 80, life 0x19A0 / 300 / 210; then
+// records an effect of type 1 (func_151B78D8, size 8, owner = the trail) in the trail's extra word (+0x170).
+void func_150B0574(f32 *from, f32 *to, u8 alpha, s32 arg3) {
+    struct {
+        f32 u00;
+        f32 u04;
+        f32 u08;
+        f32 u0C;
+        f32 pitch;
+        f32 yaw;
+        f32 u18;
+        f32 u1C;
+        f32 u20;
+        f32 u24;
+        f32 pos[3];
+        f32 vel[3];
+        f32 u40[3];
+        f32 u4C;
+        s32 u50;
+        s16 u54;
+        s16 u56;
+        u8 u58;
+        u8 pad59[3];
+        s32 u5C;
+        u8 u60;
+        u8 u61;
+        u8 u62;
+        u8 u63;
+        u8 u64;
+        u8 u65;
+        u8 u66;
+        u8 u67;
+        u8 u68;
+        u8 pad69;
+        u8 u6A;
+        u8 pad6B;
+        s32 u6C;
+        u8 u70;
+        u8 pad71;
+        s16 u72;
+        s16 u74;
+        u8 pad76[2];
+        s32 u78;
+    } req;
+    f32 dir[3];
+    s32 o44;
+    s32 o40;
+    s32 zero;
+    u8 *src;
+    u8 *trail;
+
+    zero = 0;
+    dir[0] = to[0] - from[0];
+    dir[1] = to[1] - from[1];
+    dir[2] = to[2] - from[2];
+    if (func_15145128(dir, dir, &o44, &o40) == 0) {
+        return;
+    }
+    req.u00 = 1.0f;
+    req.u04 = 1.0f;
+    req.u0C = 0.7f;
+    req.u08 = 0.7f;
+    req.pos[0] = from[0];
+    req.pos[1] = from[1];
+    req.pos[2] = from[2];
+    req.vel[0] = dir[0] * 80.0f;
+    req.vel[1] = dir[1] * 80.0f;
+    req.vel[2] = dir[2] * 80.0f;
+    func_15145974(req.vel, &req.yaw, &req.pitch);
+    req.u1C = 1.0f;
+    req.u20 = 1.0f;
+    req.u24 = 1.0f;
+    req.u18 = 0.0f;
+    req.u40[0] = ((f32 *)D_800A5860)[0];
+    req.u40[1] = ((f32 *)D_800A5860)[1];
+    req.u40[2] = ((f32 *)D_800A5860)[2];
+    req.u50 = 0x19A0;
+    req.u54 = 0x12C;
+    req.u56 = 0xD2;
+    req.u58 = 7;
+    req.u5C = 0;
+    req.u60 = 0xFF;
+    req.u61 = 8;
+    req.u62 = 0;
+    req.u63 = 0;
+    req.u64 = 0;
+    req.u65 = 0;
+    req.u66 = 0;
+    req.u67 = 0;
+    req.u68 = 2;
+    req.u6A = 0;
+    req.u6C = 0;
+    req.u70 = 0;
+    req.u72 = 1;
+    req.u74 = 0xFF;
+    req.u78 = 0;
+    req.u4C = 0.0f;
+    trail = func_15132BBC((u8 *)&req, 3, 0xFF, NULL, 4, alpha, arg3);
+    if (trail == NULL) {
+        return;
+    }
+    memcpy((s32)(trail + 0x170), (s8 *)&zero, 4);
+    src = trail;
+    *(u8 **)(trail + 0x170) = func_151B78D8(&src, 1, 8, alpha, arg3);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DCEF0/func_150B0574.s")
+#endif
 
 void func_150B07A0(struct102 **arg0) {
     if (*(s32 *)&arg0[0x170 / 4] != 0) {

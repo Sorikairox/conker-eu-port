@@ -13,7 +13,7 @@ u8 *func_15196438(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitte
 s32 func_151C0698();   /* still asm; called by func_15070300 */
 void func_1507E7E4(struct127 *, u8, u8, u16, s32);
 void func_1506BF5C(void);  /* P68 hand C; called by func_1506BF1C */
-s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+void *func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32); /* P262: the C definition's exact types (game_eu_1306B0) */
 extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];
 void func_150F9BB0(u8 *, u8, s32);        /* P238: port-b hand C (void); called by func_15071830 */
@@ -1198,7 +1198,7 @@ void func_1506DE04(void) {
 void func_1506E0EC(void);
 void func_1506E2CC(void);
 s32 func_150B0290();
-s32 func_150B0344(s32);
+void func_150B0344(s32 side);
 void func_1516F730(s32, s32, u8, s32);
 s32 func_1516F868(u8, s32, s32, s32, u8, s32);
 #ifdef NON_MATCHING
@@ -2032,7 +2032,7 @@ block_10:
                 func_15145EA4(&sp.u5C, &sp.u58, &D_800D154C->unk1D4->pad0[0x100], 1);
                 sp4C = func_150ADA20();
                 sp50 = func_150ADA20();
-                func_151030B8(D_800D154C, 4U, &sp.u80, &sp.u74, &sp.u6C, ((u32) sp4C % 5U) + 5, ((u32) sp50 % 56U) + 0xC8, (func_150ADA68() * 510.0f) + 1296.0f, &sp.u60, 0xFF, 0, -1, 0xFF, 1);
+                func_151030B8((u8 *)D_800D154C, 4U, (f32 *)&sp.u80, (f32 *)&sp.u74, &sp.u6C, ((u32) sp4C % 5U) + 5, ((u32) sp50 % 56U) + 0xC8, (func_150ADA68() * 510.0f) + 1296.0f, (u8 *)&sp.u60, 0xFF, 0, -1, 0xFF, 1);
                 func_151C1E10(&sp.u60, 0xFF, 1);
             }
         }
@@ -2128,7 +2128,9 @@ void func_15070D00(s32 arg0) {
     func_15070C40(0);
 }
 
+#ifndef NON_MATCHING /* P262: the NM build uses the exact prototype hoisted at the top */
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+#endif
 extern struct17 D_80099F48;
 extern struct17 D_80099F54;
 
@@ -2146,7 +2148,7 @@ void func_15070D24(s32 arg0) {
         f[0] = (func_150ADA68() * 101.0f) + 151.0f;
         f[1] = (func_150ADA68() * 4.0f) + 4.0f;
         func_15143134(&a, pos, (u8 *)D_800D154C->unk1D4 + 0x40);
-        func_151030B8(D_800D154C, 1, (u8 *)&a, (s32 *)&b, f, (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 2496.0f) + 3496.0f, pos, 0xFF, 0, -1, 0xFF, 0);
+        func_151030B8((u8 *)D_800D154C, 1, (f32 *)&a, (f32 *)&b, f, (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 2496.0f) + 3496.0f, (u8 *)pos, 0xFF, 0, -1, 0xFF, 0);
         header.unk0 = 3;
         header.unk1 = -1;
         header.unk2 = (func_150ADA20() % 6U) + 0xA;
@@ -2175,7 +2177,7 @@ void func_15070F60(u8 arg0) {
         f[0] = (func_150ADA68() * 180.0f) + 150.0f;
         f[1] = (func_150ADA68() * 2.0f) + 2.5f;
         func_15143134(&a, pos, (u8 *)D_800D154C->unk1D4 + ((arg0 ? 1 : 2) << 6));
-        func_151030B8(D_800D154C, arg0 ? 1 : 2, (u8 *)&a, (s32 *)&b, f, (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 4000.0f) + 4000.0f, pos, 0xFF, 0, -1, 0xFF, 0);
+        func_151030B8((u8 *)D_800D154C, arg0 ? 1 : 2, (f32 *)&a, (f32 *)&b, f, (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 4000.0f) + 4000.0f, (u8 *)pos, 0xFF, 0, -1, 0xFF, 0);
         header.unk0 = 3;
         header.unk1 = -1;
         header.unk2 = (func_150ADA20() % 5U) + 3;

@@ -849,7 +849,120 @@ void func_1514E704(struct127 *arg0) {
     func_151D7A60(arg0, 5, -1, 0xFF, 1);
 }
 
+#ifdef NON_MATCHING
+// object_glow_attach: handler (table EU 8008AE1C) that builds a sprite effect (func_1518A560 with the same
+// three records as func_1514DBBC: render block a, size / fade block b, attachment c = {obj, its id, joint 0xC, mode
+// 2, offset (0, 100, 0) .. (0, 600, 0)}), attaches it to the object in slot 7 (func_1514F18C), then adds a light
+// (func_15160A58: joint 0xC, offset (0, 0, 150), then 300, 40, 255, 181, 0, 255, 0, 2, 0, 0, 255, 1).
+void func_1514E88C(struct127 *obj) {
+    struct {
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        struct127 *u44;
+        s8 u48;
+        u8 u49;
+        s8 u4A;
+        u8 pad4B;
+    } c;
+    struct {
+        s8 u4C;
+        u8 pad4D;
+        s16 u4E;
+        s16 u50;
+        u8 pad52[2];
+        s32 u54;
+        s32 u58;
+        u8 u5C;
+        u8 u5D;
+        u8 u5E;
+        u8 u5F;
+        u8 pad60[8];
+        f32 u68;
+        f32 u6C;
+        f32 u70;
+        f32 u74;
+        f32 u78;
+        f32 u7C;
+        u8 pad80[0xC];
+        s32 u8C;
+        u8 pad90;
+        u8 u91;
+        u8 pad92[0x12];
+    } a;
+    struct {
+        f32 uA4;
+        f32 uA8;
+        f32 uAC;
+        f32 uB0;
+        f32 uB4;
+        f32 uB8;
+        f32 uBC;
+        f32 uC0;
+        f32 uC4;
+        u8 padC8[0x24];
+        f32 uEC;
+        u8 padF0[8];
+        s8 uF8;
+        s8 uF9;
+        s8 uFA;
+        s8 uFB;
+    } b;
+    f32 light[3];
+
+    a.u4C = 3;
+    a.u54 = 0;
+    a.u58 = 0;
+    a.u8C = 0x2012;
+    a.u50 = 0;
+    a.u91 = 0xFF;
+    a.u5C = 0xFF;
+    a.u5D = 0xE6;
+    a.u5E = 0;
+    a.u5F = 0xFF;
+    a.u4E = 0x401;
+    a.u68 = 0.0f;
+    a.u6C = 0.0f;
+    a.u70 = 0.0f;
+    a.u74 = 0.0f;
+    a.u78 = 0.0f;
+    a.u7C = 0.0f;
+    b.uA4 = 45.0f;
+    b.uB0 = 45.0f;
+    b.uB4 = 0.5f;
+    b.uB8 = 0.5f;
+    b.uC0 = 0.0f;
+    b.uA8 = 55.0f;
+    b.uAC = 25.0f;
+    b.uBC = 0.9f;
+    b.uC4 = 1e-06f;
+    c.u49 = obj->unique_id;
+    c.u2C = 0.0f;
+    c.u30 = 0.0f;
+    c.u38 = 0.0f;
+    c.u3C = 0.0f;
+    c.u48 = 0xC;
+    b.uF8 = 0;
+    b.uF9 = 0;
+    b.uFA = 0;
+    b.uFB = 0;
+    c.u4A = 2;
+    c.u34 = 100.0f;
+    c.u40 = 600.0f;
+    c.u44 = obj;
+    b.uEC = 1.0f;
+    func_1514F18C(func_1518A560(&a, &b, &c, 2, 3, 0, 0), obj, 7);
+    light[0] = 0.0f;
+    light[1] = 0.0f;
+    light[2] = 150.0f;
+    func_15160A58(obj, 0xC, (s32 *)light, 2, 0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2, 0, 0, 0xFF, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514E88C.s")
+#endif
 
 u8 * func_1515D5F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, u8);
 u8 * func_1518D1C0(struct127 *, s16, s32, u8, u8, s32, u8 *);
@@ -1174,7 +1287,140 @@ void func_1514F3E0(u8 *arg0) {
     func_1514F18C(func_1515C3C0(&sp20, 0, 255, 1), arg0, 0x16);
 }
 
+#ifdef NON_MATCHING
+// character_fire_effect_start: handler (table EU 8008AE80): adds a light at (0, 90, 0) on joint 1 of the object
+// (func_15160A58: 300, 2, 255, 0, 0, 255, 0, 3, 0, 0, 255, 1) attached in slot 0x19 (func_1514F18C), then a sprite
+// effect (func_1518A560) with render block kind 0x69 / 3 / 0x4403, size 95 / 65, fade 0.15 / 0.7 / 0.4, attached to
+// joint 1 from (0, 70, 0) to (0, 120, 0) (mode 3).
+void func_1514F43C(struct127 *obj) {
+    static const f32 sLightPos[3] = { 0.0f, 90.0f, 0.0f };
+    static const f32 sFrom[3] = { 0.0f, 70.0f, 0.0f };
+    static const f32 sTo[3] = { 0.0f, 120.0f, 0.0f };
+    struct {
+        f32 from[3];
+        f32 to[3];
+        struct127 *obj;
+        u8 joint;
+        u8 id;
+        u8 mode;
+        u8 pad1F;
+    } c;
+    struct {
+        f32 u00;
+        f32 u04;
+        f32 u08;
+        f32 u0C;
+        f32 u10;
+        f32 u14;
+        f32 u18;
+        f32 u1C;
+        f32 u20;
+        u8 pad24[0x24];
+        f32 u48;
+        u8 pad4C[8];
+        s8 u54;
+        s8 u55;
+        s8 u56;
+        s8 u57;
+    } b;
+    struct {
+        u8 u00;
+        u8 u01;
+        s16 u02;
+        s16 u04;
+        u8 pad06[2];
+        s32 u08;
+        s32 u0C;
+        u8 u10;
+        u8 u11;
+        u8 u12;
+        u8 u13;
+        f32 u14;
+        f32 u18;
+        f32 u1C;
+        f32 u20;
+        f32 u24;
+        f32 u28;
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        s32 u40;
+        u8 u44;
+        u8 u45;
+        u8 u46;
+        u8 u47;
+        s32 u48;
+        u8 u4C;
+        u8 pad4D[3];
+        s32 u50;
+        s16 u54;
+        s16 u56;
+    } a;
+
+    func_1514F18C(func_15160A58(obj, 1, (s32 *)sLightPos, 2, 0x12C, 2, 0xFF, 0, 0, 0xFF, 0, 3, 0, 0, 0xFF, 1), obj,
+                  0x19);
+    a.u00 = 0x69;
+    a.u40 = 0x4ED200A;
+    a.u04 = 0x12C;
+    a.u08 = 0;
+    a.u0C = 0;
+    a.u45 = 0xFF;
+    a.u10 = 0xFF;
+    a.u11 = 0;
+    a.u12 = 0;
+    a.u13 = 0xFF;
+    a.u02 = 0x4403;
+    a.u1C = 0.0f;
+    a.u20 = 0.0f;
+    a.u24 = 0.0f;
+    a.u28 = 0.0f;
+    a.u2C = 0.0f;
+    a.u30 = 0.0f;
+    a.u01 = 3;
+    a.u18 = 100.0f;
+    a.u14 = 100.0f;
+    a.u34 = 1.0f;
+    a.u38 = 1.0f;
+    a.u3C = 1.0f;
+    a.u44 = 0xFF;
+    a.u46 = 0;
+    a.u47 = 6;
+    a.u48 = 0;
+    a.u4C = 0xFF;
+    a.u50 = 0;
+    a.u54 = 1;
+    a.u56 = 0xFF;
+    b.u04 = 95.0f;
+    b.u00 = 95.0f;
+    b.u0C = 65.0f;
+    b.u08 = 65.0f;
+    b.u10 = 0.15f;
+    b.u14 = 0.15f;
+    b.u18 = 0.7f;
+    b.u1C = 0.4f;
+    b.u20 = 1e-06f;
+    c.obj = obj;
+    c.id = obj->unique_id;
+    c.from[0] = sFrom[0];
+    c.from[1] = sFrom[1];
+    c.from[2] = sFrom[2];
+    c.to[0] = sTo[0];
+    c.to[1] = sTo[1];
+    c.to[2] = sTo[2];
+    c.joint = 1;
+    b.u54 = 0;
+    b.u55 = 0;
+    b.u56 = 0;
+    b.u57 = 0;
+    b.u48 = 1.0f;
+    c.mode = 3;
+    func_1518A560(&a, &b, &c, 2, 0, 0, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17A800/func_1514F43C.s")
+#endif
 
 void func_1514F680(struct127 *arg0) {   /* P76: callback; a0 passes through */
     func_1514F704(arg0);
