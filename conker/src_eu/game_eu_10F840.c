@@ -104,7 +104,93 @@ s32 func_150E2030(s32 arg0, f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2294.s")
 
+#ifdef NON_MATCHING
+extern s32 D_800D30BC;
+Gfx *func_15095380(Gfx *gfx, u8 *header, s32 tmem, void *spr, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+
+// beam_effect_draw: draw handler of the beam objects of func_150E2030 (Gfx *(Gfx *, u8 *obj, s16 viewer)). With a
+// texture (+0xD6 > 0) the beam from +0x94 along the direction +0xC4 times the length +0xC0 is drawn as one quad
+// facing character `viewer` (D_800DBFF0 entry, position +0x2F8): at each end the offset cross(end - eye, dir) scaled
+// to the half width +0xBC gives the two corners end +- offset (far end first). The corners go to this frame's 4
+// vertices (obj + 0x10 + D_800BE9C0 * 0x40, s16 x / y / z), then texture D_8008CDEC[+0xD8] is loaded
+// (func_15095380; its sprite-parameter pointer is an unset local, as in the asm), the render mode is set
+// (func_15142FBC) and gSPVertex + 2 triangles are emitted; +0xDB = 1. Returns gfx unchanged without setting +0xDB
+// when an end lies on the eye line (zero offset). The asm also computes the squared eye distances of both ends and
+// an unused first offset; neither is read.
+Gfx *func_150E2E5C(Gfx *gfx, u8 *obj, s16 viewer) {
+    f32 ends[2][3];
+    f32 verts[4][3];
+    u8 spr[0x10];
+    u8 flag;
+    f32 *eye;
+    f32 *dir;
+    f32 *p;
+    f32 e[3];
+    f32 n[3];
+    f32 len;
+    f32 s;
+    s32 i;
+    s32 j;
+    u32 *cmd;
+
+    if (*(s16 *) (obj + 0xD6) <= 0) {
+        obj[0xDB] = 1;
+        return gfx;
+    }
+    dir = (f32 *) (obj + 0xC4);
+    /* far end first */
+    ends[0][0] = *(f32 *) (obj + 0x94) + *(f32 *) (obj + 0xC0) * dir[0];
+    ends[0][1] = *(f32 *) (obj + 0x98) + *(f32 *) (obj + 0xC0) * dir[1];
+    ends[0][2] = *(f32 *) (obj + 0x9C) + *(f32 *) (obj + 0xC0) * dir[2];
+    ends[1][0] = *(f32 *) (obj + 0x94);
+    ends[1][1] = *(f32 *) (obj + 0x98);
+    ends[1][2] = *(f32 *) (obj + 0x9C);
+    eye = (f32 *) ((u8 *) D_800DBFF0 + viewer * 0x9A0 + 0x2F8);
+    for (i = 0; i < 2; i++) {
+        p = ends[i];
+        e[0] = p[0] - eye[0];
+        e[1] = p[1] - eye[1];
+        e[2] = p[2] - eye[2];
+        n[0] = e[1] * dir[2] - e[2] * dir[1];
+        n[1] = e[2] * dir[0] - e[0] * dir[2];
+        n[2] = e[0] * dir[1] - e[1] * dir[0];
+        len = sqrtf(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        if (len == 0.0f) {
+            return gfx;
+        }
+        s = *(f32 *) (obj + 0xBC) / len;
+        n[0] *= s;
+        n[1] *= s;
+        n[2] *= s;
+        verts[i * 2][0] = n[0] + p[0];
+        verts[i * 2][1] = n[1] + p[1];
+        verts[i * 2][2] = n[2] + p[2];
+        verts[i * 2 + 1][0] = p[0] - n[0];
+        verts[i * 2 + 1][1] = p[1] - n[1];
+        verts[i * 2 + 1][2] = p[2] - n[2];
+    }
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            *(s16 *) (obj + D_800BE9C0 * 0x40 + i * 0x10 + 0x10 + j * 2) = (s32) verts[i][j];
+        }
+    }
+    gfx = func_15095380(gfx, D_8008CDEC[*(s16 *) (obj + 0xD8)], 0, spr, 0, 0, 0, 2, 3);
+    flag = 0;
+    gfx = func_15142FBC(gfx, D_800D30BC | 0x82CA0, 0x504A50, &flag);
+    cmd = (u32 *) gfx;
+    cmd[0] = 0x01004008; /* gSPVertex(this frame's 4 vertices) */
+    cmd[1] = (u32) (obj + D_800BE9C0 * 0x40 + 0x10);
+    cmd[2] = 0x05000206; /* triangle 0 1 3 */
+    cmd[3] = 0;
+    cmd[4] = 0x05000604; /* triangle 0 3 2 */
+    cmd[5] = 0;
+    obj[0xDB] = 1;
+    return gfx + 3;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10F840/func_150E2E5C.s")
+#endif
 
 s32 func_150E3324(s32 arg0, s32 arg1) {
     return arg0;

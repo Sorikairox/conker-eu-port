@@ -1320,7 +1320,62 @@ void func_151C4BF4(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4BF4.s")
 #endif
 
+#ifdef NON_MATCHING
+f32 sinf(f32);
+void func_151436B4(f32, f32, f32, f32 *);
+
+// orbit_sparks_emit: emitter handler of object p (state at p + 0x28 = s). The emit accumulator s+0x28 grows by
+// rate s+0x24 * dt; while it is above 1 one spark is emitted per unit: the spawn point swings on two sines
+// (centre s+0 / s+4, amplitudes s+8 / s+0xC, phases s+0x10 / s+0x14 advanced by s+0x18 / s+0x1C * dt spread over
+// the emitted sparks), func_151436B4 turns it into a position, and func_151C284C launches the spark (s+0x2C, speed
+// 55..95, size 250..550, life 200..255, time s+0x20 + dt counting down per spark). The phases are wrapped with
+// func_15144B68 and the time stored back at the end.
+void func_151C4DD0(u8 *p) {
+    f32 vec[3];
+    f32 db;
+    f32 da;
+    f32 step;
+    f32 inv;
+    f32 t;
+    f32 a;
+    f32 b;
+    f32 r1;
+    f32 r2;
+    f32 sa;
+    f32 *s;
+
+    s = (f32 *) (p + 0x28);
+    s[10] += s[9] * D_800BE9A4;
+    if (!(1.0f < s[10])) {
+        return;
+    }
+    inv = 1.0f / s[10];
+    t = s[8] + D_800BE9A4;
+    step = t * inv;
+    a = s[4];
+    b = s[5];
+    da = s[6] * D_800BE9A4 * inv;
+    db = s[7] * D_800BE9A4 * inv;
+    do {
+        sa = sinf(a);
+        func_151436B4(s[0] + sa * s[2], s[1] + sinf(b) * s[3], 5.0f, vec);
+        r1 = func_150ADA68();
+        r2 = func_150ADA68();
+        func_151C284C((u8 *) (s + 11), (u8 *) vec, NULL, NULL, 0, 0, s[14], s[15], r1 * 40.0f + 55.0f,
+                      r2 * 300.0f + 250.0f, s[16], (u32) func_150ADA20() % 56 + 200, NULL, 0, 0, 0, 0, 0, 0, -1, 0, t,
+                      0xFF, -1, 0, p[0xC], p[1]);
+        s[10] -= 1.0f;
+        a += da;
+        b += db;
+        t -= step;
+    } while (1.0f < s[10]);
+    s[4] = func_15144B68(a);
+    s[5] = func_15144B68(b);
+    s[8] = t;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C4DD0.s")
+#endif
 
 void func_151C5060(u8 *arg0, s32 *arg1, u8 arg2) {
     u8 *p = arg0 + 0x110;

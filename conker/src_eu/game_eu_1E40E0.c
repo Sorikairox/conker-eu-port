@@ -572,7 +572,88 @@ s32 func_151B7DA4(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7DA4.s")
 #endif
 
+#ifdef NON_MATCHING
+// trail_ring_trim_fade: update handler (s32 (u8 *obj), returns 1) of the trail objects whose ring +0x94 holds 20-byte
+// entries {pos, step length +0xC, alpha +0x10} (write index +0x2E, read index +0x2D, count +0x2C, size +0x25). With
+// 2+ points it walks back from the newest point summing the step lengths; once the sum passes 1198 the oldest kept
+// point is pulled along its step so the trail is exactly 1198 long, that step shortened by the same fraction, and all
+// older points dropped (read index advanced, count decremented). Then each point's alpha is set to 255 * (length from
+// it to the trail's end) / total length, newest first.
+s32 func_151B7F48(u8 *obj) {
+    u8 *ring = *(u8 **) (obj + 0x94);
+    u8 *e;
+    f32 *prev;
+    f32 total;
+    f32 len;
+    f32 frac;
+    f32 inv;
+    f32 scale;
+    f32 rem;
+    s32 i;
+    s32 cur;
+
+    if ((s8) obj[0x2C] >= 2) {
+        i = (s8) obj[0x2E] - 1;
+        if (i < 0) {
+            i = obj[0x25] - 1;
+        }
+        total = 0.0f;
+        while (i != (s8) obj[0x2D]) {
+            cur = i;
+            i--;
+            if (i < 0) {
+                i = obj[0x25] - 1;
+            }
+            e = ring + cur * 20;
+            len = *(f32 *) (e + 0xC);
+            total += len;
+            if (1198.0f < total) {
+                if (len != 0.0f) {
+                    frac = (total - 1198.0f) / len;
+                    prev = (f32 *) (ring + i * 20);
+                    prev[0] = prev[0] - (prev[0] - ((f32 *) e)[0]) * frac;
+                    prev[1] = prev[1] - (prev[1] - ((f32 *) e)[1]) * frac;
+                    prev[2] = prev[2] - (prev[2] - ((f32 *) e)[2]) * frac;
+                    *(f32 *) (e + 0xC) = *(f32 *) (e + 0xC) * (1.0f - frac);
+                }
+                total = 1198.0f;
+                while (i != (s8) obj[0x2D]) {
+                    obj[0x2D] = (s8) obj[0x2D] + 1;
+                    if (obj[0x25] == (s8) obj[0x2D]) {
+                        obj[0x2D] = 0;
+                    }
+                    obj[0x2C] = (s8) obj[0x2C] - 1;
+                }
+            }
+        }
+        if (total == 0.0f) {
+            inv = 0.0f;
+        } else {
+            inv = 1.0f / total;
+        }
+        if ((s8) obj[0x2C] >= 2) {
+            scale = 255.0f * inv;
+            rem = total;
+            i = (s8) obj[0x2E] - 1;
+            for (;;) {
+                if (i < 0) {
+                    i = obj[0x25] - 1;
+                }
+                e = ring + i * 20;
+                e[0x10] = (u32) (rem * scale);
+                rem -= *(f32 *) (e + 0xC);
+                if (i == (s8) obj[0x2D]) {
+                    break;
+                }
+                i--;
+            }
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E40E0/func_151B7F48.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1513F4E4(s32, s32, s8 *);

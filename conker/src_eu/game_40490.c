@@ -990,7 +990,83 @@ s32 func_15015300(struct134 *arg0) {
 }
 
 
+#ifdef NON_MATCHING
+/* the level record func_15015354 reads (D_80082EA0 entry 0x34) */
+typedef struct {
+    s16 x, y, z;        /* 0x00 */
+    s16 halfX;          /* 0x06 */
+    s16 pad08;
+    s16 halfZ;          /* 0x0A */
+    f32 angX;           /* 0x0C */
+    f32 angY;           /* 0x10 */
+    u8 started;         /* 0x14 */
+} Rec15015354;
+
+// record_quad_zone_start: start handler (void, D_80082EA0 entry 0x34) of a rectangular zone record: marks it started
+// (+0x14 = 1), turns the rectangle (+-halfX, 0, +-halfZ) around the record's position by its angles (func_150A8050 /
+// func_150A7E40) into 4 world corners, stores the 4 edge vectors (next corner - corner) and the sound id of the spot
+// (func_1510F800(0); func_1510FD20(x, z)), and hands that 0x74-byte block to a new func_15149130 object (+0x28).
+void func_15015354(Rec15015354 *src) {
+    struct {
+        Rec15015354 *src;   /* 0x00 */
+        s16 u4;             /* 0x04 */
+        f32 u8;             /* 0x08 */
+        f32 corner[4][3];   /* 0x0C */
+        f32 edge[4][3];     /* 0x3C */
+        s32 sound;          /* 0x6C */
+        s32 u70;            /* 0x70 */
+    } blk;
+    f32 m[4][4];
+    f32 local[4][3];
+    f32 pos[3];
+    u8 *e;
+    u8 i;
+    u8 j;
+
+    blk.src = src;
+    blk.u4 = -1;
+    blk.u8 = 0.0f;
+    src->started = 1;
+    pos[0] = src->x;
+    pos[1] = src->y;
+    pos[2] = src->z;
+    local[0][0] = src->halfX;
+    local[0][1] = 0.0f;
+    local[0][2] = src->halfZ;
+    local[1][0] = src->halfX;
+    local[1][1] = 0.0f;
+    local[1][2] = -src->halfZ;
+    local[2][0] = -src->halfX;
+    local[2][1] = 0.0f;
+    local[2][2] = -src->halfZ;
+    local[3][0] = -src->halfX;
+    local[3][1] = 0.0f;
+    local[3][2] = src->halfZ;
+    func_150A8050(m, src->angX, src->angY, 0.0f);
+    m[3][0] = pos[0];
+    m[3][1] = pos[1];
+    m[3][2] = pos[2];
+    for (i = 0; i < 4; i++) {
+        func_150A7E40(m, local[i][0], local[i][1], local[i][2], &blk.corner[i][0], &blk.corner[i][1],
+                      &blk.corner[i][2]);
+    }
+    for (i = 0; i < 4; i++) {
+        j = (i + 1) & 3;
+        blk.edge[i][0] = blk.corner[j][0] - blk.corner[i][0];
+        blk.edge[i][1] = blk.corner[j][1] - blk.corner[i][1];
+        blk.edge[i][2] = blk.corner[j][2] - blk.corner[i][2];
+    }
+    func_1510F800(0);
+    blk.sound = func_1510FD20(src->x, src->z);
+    blk.u70 = 0;
+    e = (u8 *) func_15149130(0x12C, -1, 0x3D, -1, 0, 0x2E, (struct37 *) 0x74, 0xFF, 0);
+    if (e != NULL) {
+        memcpy(e + 0x28, &blk, 0x74);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15015354.s")
+#endif
 s32 func_15015644(struct134 *arg0) {
     struct {
         struct134 *unk0;

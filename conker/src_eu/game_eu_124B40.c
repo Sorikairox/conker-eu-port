@@ -14,7 +14,129 @@ void func_150F7330(u8 *arg0) {
     func_151494E0((s32)&tmp, 0x3E);
 }
 
+#ifdef NON_MATCHING
+/* func_151307F0 sprite template (same layout as game_eu_1F3040's SprTmpl64F4) */
+typedef struct {
+    /* 0x00 */ s32 u0;
+    /* 0x04 */ s32 u4;
+    /* 0x08 */ u16 flags;
+    /* 0x0A */ s16 life;
+    /* 0x0C */ s32 uC;
+    /* 0x10 */ s32 u10;
+    /* 0x14 */ u8 colour[8];
+    /* 0x1C */ u8 u1C;
+    /* 0x1D */ u8 sprite;
+    /* 0x1E */ s16 u1E;
+    /* 0x20 */ s16 u20;
+    /* 0x22 */ s16 u22;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 size[2];
+    /* 0x30 */ f32 pos[3];
+    /* 0x3C */ f32 u3C[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ s32 mode;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8 u60[7];
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 u68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 u6C;
+} SprTmpl7364;
+
+/* the 0x78-byte record copied to the new object's +0x28 */
+typedef struct {
+    /* 0x00 */ struct127 *owner;
+    /* 0x04 */ u8 room;
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 sprite[2]; /* the two func_151307F0 particles */
+    /* 0x10 */ u8 pad10[0x64];
+    /* 0x74 */ u8 u74;
+    /* 0x75 */ u8 pad75[3];
+} Rec7364;
+
+s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+void *memcpy(void *, const void *, size_t);
+
+// owner_glow_pair_spawn: creates a func_15149130 object (type 0x12C, 0x43) whose 0x78-byte record (+0x28) holds the
+// owner, its byte +0x3B and two glow sprites (sprite 0x64, 300 frames, size 1511) made with func_151307F0 at the
+// origin: the first tinted 00 00 FF FF, the second FF 00 00 FF (template colour bytes 4..7). Returns the object
+// (NULL when it could not be created).
+void *func_150F7364(struct127 *owner) {
+    Rec7364 rec;
+    SprTmpl7364 t;
+    struct260 *obj;
+    u8 *o;
+    Rec7364 *r;
+    u8 i;
+
+    rec.owner = owner;
+    rec.room = ((u8 *) owner)[0x3B];
+    for (i = 0; i < 2; i++) {
+        rec.sprite[i] = 0;
+    }
+    rec.u74 = 0;
+    obj = func_15149130(0x12C, -1, 0x43, -1, 0, 0x37, (struct37 *) sizeof(Rec7364), 0xFF, 1);
+    if (obj == NULL) {
+        return NULL;
+    }
+    o = (u8 *) obj;
+    r = (Rec7364 *) (o + 0x28);
+    memcpy(r, &rec, sizeof(Rec7364));
+    t.flags = 0x4417;
+    t.u0 = 0x200004;
+    t.u4 = 0;
+    t.life = 300;
+    t.uC = 0;
+    t.u10 = 0;
+    t.colour[0] = 0xFF;
+    t.colour[1] = 0xFF;
+    t.colour[2] = 0xFF;
+    t.colour[3] = 0xFF;
+    t.u1C = 0xFF;
+    t.size[1] = 1511.0f;
+    t.size[0] = 1511.0f;
+    t.pos[0] = ((f32 *) D_800A5860)[0];
+    t.pos[1] = ((f32 *) D_800A5860)[1];
+    t.pos[2] = ((f32 *) D_800A5860)[2];
+    t.u3C[0] = ((f32 *) D_800A5860)[0];
+    t.u3C[1] = ((f32 *) D_800A5860)[1];
+    t.u3C[2] = ((f32 *) D_800A5860)[2];
+    t.vel[0] = ((f32 *) D_800A5860)[0];
+    t.vel[1] = ((f32 *) D_800A5860)[1];
+    t.vel[2] = ((f32 *) D_800A5860)[2];
+    t.u1E = 1;
+    t.u20 = 0xFF;
+    t.u22 = 1;
+    t.mode = 0x64C000;
+    t.u60[0] = 8;
+    t.u60[1] = 6;
+    t.u60[2] = 0xFF;
+    t.u60[3] = 0xFF;
+    t.u60[4] = 3;
+    t.u60[5] = 0;
+    t.u5C = 0;
+    t.u60[6] = 0xFF;
+    t.u68 = 10;
+    t.sprite = 0x64;
+    t.colour[4] = 0;
+    t.colour[5] = 0;
+    t.colour[6] = 0xFF;
+    t.colour[7] = 0xFF;
+    t.u54 = 0.0f;
+    t.u24 = 1.0f;
+    t.u6C = 20.0f;
+    r->sprite[0] = func_151307F0((s32 *) &t, 1, 0, 0, o[0xC], o[1]);
+    t.colour[4] = 0xFF;
+    t.colour[5] = 0;
+    t.colour[6] = 0;
+    t.colour[7] = 0xFF;
+    r->sprite[1] = func_151307F0((s32 *) &t, 1, 0, 0, o[0xC], o[1]);
+    return obj;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_124B40/func_150F7364.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A1F84;

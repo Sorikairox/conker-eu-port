@@ -1739,13 +1739,313 @@ void func_1506F17C(s32 arg0) {
     func_150AEEB0(D_800D154C, 0xFF);
 }
 
+#ifdef NON_MATCHING
+/* the emitter spec func_15199A28 reads (layout as game_eu_1C3530's Emitter2Spec) */
+typedef struct {
+    /* 0x000 */ s32 u000;
+    /* 0x004 */ u8 *u004;
+    /* 0x008 */ u8 u008;
+    /* 0x009 */ u8 u009;
+    /* 0x00A */ u8 pad00A[2];
+    /* 0x00C */ f32 u00C;
+    /* 0x010 */ f32 u010;
+    /* 0x014 */ f32 u014;
+    /* 0x018 */ f32 u018;
+    /* 0x01C */ f32 u01C;
+    /* 0x020 */ f32 u020;
+    /* 0x024 */ f32 u024;
+    /* 0x028 */ f32 u028;
+    /* 0x02C */ f32 u02C;
+    /* 0x030 */ f32 u030;
+    /* 0x034 */ f32 u034;
+    /* 0x038 */ s8 u038;
+    /* 0x039 */ u8 u039;
+    /* 0x03A */ s8 u03A;
+    /* 0x03B */ s8 u03B;
+    /* 0x03C */ u8 u03C;
+    /* 0x03D */ u8 u03D;
+    /* 0x03E */ u8 u03E;
+    /* 0x03F */ u8 pad03F[1];
+    /* 0x040 */ f32 u040;
+    /* 0x044 */ f32 u044;
+    /* 0x048 */ f32 u048;
+    /* 0x04C */ u8 u04C;
+    /* 0x04D */ u8 pad04D[3];
+    /* 0x050 */ u8 u050;
+    /* 0x051 */ u8 u051;
+    /* 0x052 */ u8 u052;
+    /* 0x053 */ u8 u053;
+    /* 0x054 */ u8 u054;
+    /* 0x055 */ u8 pad055[3];
+    /* 0x058 */ f32 u058;
+    /* 0x05C */ f32 u05C;
+    /* 0x060 */ s16 u060;
+    /* 0x062 */ s16 u062;
+    /* 0x064 */ f32 u064;
+    /* 0x068 */ f32 u068;
+    /* 0x06C */ f32 u06C;
+    /* 0x070 */ f32 u070;
+    /* 0x074 */ f32 u074;
+    /* 0x078 */ f32 u078;
+    /* 0x07C */ f32 u07C;
+    /* 0x080 */ f32 u080;
+    /* 0x084 */ f32 u084;
+    /* 0x088 */ f32 u088;
+    /* 0x08C */ s16 u08C;
+    /* 0x08E */ s16 u08E;
+    /* 0x090 */ f32 u090;
+    /* 0x094 */ u8 u094;
+    /* 0x095 */ u8 u095;
+    /* 0x096 */ u8 pad096[2];
+    /* 0x098 */ f32 u098;
+    /* 0x09C */ f32 u09C;
+    /* 0x0A0 */ f32 u0A0;
+    /* 0x0A4 */ f32 u0A4;
+    /* 0x0A8 */ f32 u0A8;
+    /* 0x0AC */ f32 u0AC;
+    /* 0x0B0 */ s32 u0B0;
+    /* 0x0B4 */ s32 u0B4;
+    /* 0x0B8 */ s16 u0B8;
+    /* 0x0BA */ s16 u0BA;
+    /* 0x0BC */ f32 u0BC;
+    /* 0x0C0 */ f32 u0C0;
+    /* 0x0C4 */ f32 u0C4;
+    /* 0x0C8 */ f32 u0C8;
+    /* 0x0CC */ f32 u0CC;
+    /* 0x0D0 */ f32 u0D0;
+    /* 0x0D4 */ f32 u0D4;
+    /* 0x0D8 */ s16 u0D8;
+    /* 0x0DA */ s16 u0DA;
+    /* 0x0DC */ s16 u0DC;
+    /* 0x0DE */ s16 u0DE;
+    /* 0x0E0 */ f32 u0E0;
+    /* 0x0E4 */ f32 u0E4;
+    /* 0x0E8 */ f32 u0E8;
+    /* 0x0EC */ f32 u0EC;
+    /* 0x0F0 */ f32 u0F0;
+    /* 0x0F4 */ s16 u0F4;
+    /* 0x0F6 */ s16 u0F6;
+    /* 0x0F8 */ s16 u0F8;
+    /* 0x0FA */ s16 u0FA;
+    /* 0x0FC */ f32 u0FC;
+    /* 0x100 */ f32 u100;
+    /* 0x104 */ f32 u104;
+    /* 0x108 */ f32 u108;
+    /* 0x10C */ f32 u10C;
+    /* 0x110 */ f32 u110;
+    /* 0x114 */ f32 u114;
+    /* 0x118 */ s16 u118;
+    /* 0x11A */ s16 u11A;
+} EmitterSpec981E0;
+u8 *func_15199A28(s32 arg0, u8 *spec, u8 arg2, s32 arg3);
+#endif
+
+#ifdef NON_MATCHING
+// player_emitter_spawn_c: player action handler (void (s32), argument unused): spawns the kind-0xC emitter on the
+// player D_800D154C (node byte its +0x3B) through func_15199A28 (no extra data, layer 0xFF, owner 0) with a constant
+// spec (all fields set except padding, as the asm fills them).
+void func_1506F1A8(s32 arg0) {
+    EmitterSpec981E0 spec;
+
+    spec.u000 = 0xF;
+    spec.u004 = (u8 *) D_800D154C;
+    spec.u008 = ((u8 *) D_800D154C)[0x3B];
+    spec.u009 = 0xC;
+    spec.u00C = 0.0f;
+    spec.u010 = 0.0f;
+    spec.u014 = 80.0f;
+    spec.u018 = 0.0f;
+    spec.u01C = 0.0f;
+    spec.u020 = 102.0f;
+    spec.u024 = 0.1223f;
+    spec.u028 = 0.6f;
+    spec.u02C = 1200.0f;
+    spec.u030 = 26.0f;
+    spec.u034 = 4.8f;
+    spec.u038 = -1;
+    spec.u039 = 2;
+    spec.u03A = -1;
+    spec.u03B = 0;
+    spec.u03C = 0;
+    spec.u03D = 0;
+    spec.u03E = 0xC8;
+    spec.u040 = 0.656f;
+    spec.u044 = -187.0f;
+    spec.u048 = 4.64f;
+    spec.u04C = 0xFF;
+    spec.u050 = 0x3C;
+    spec.u051 = 0xFF;
+    spec.u052 = 0xEB;
+    spec.u053 = 0x52;
+    spec.u054 = 1;
+    spec.u058 = 0.00502f;
+    spec.u05C = 0.003f;
+    spec.u060 = 0x1E;
+    spec.u062 = 0xF;
+    spec.u064 = 0.606f;
+    spec.u068 = 0.23900001f;
+    spec.u06C = 0.418f;
+    spec.u070 = 0.20500001f;
+    spec.u074 = 1.177f;
+    spec.u078 = 0.572f;
+    spec.u07C = 0.81900007f;
+    spec.u080 = 0.846f;
+    spec.u084 = 0.94086f;
+    spec.u088 = 0.942411f;
+    spec.u08C = 0xC;
+    spec.u08E = 0x15;
+    spec.u090 = 0.39200002f;
+    spec.u094 = 0x50;
+    spec.u095 = 0x78;
+    spec.u098 = 0.008f;
+    spec.u09C = 0.0f;
+    spec.u0A0 = 5.0f;
+    spec.u0A4 = 100.0f;
+    spec.u0A8 = 0.24900001f;
+    spec.u0AC = 0.35200003f;
+    spec.u0B0 = 4;
+    spec.u0B4 = 2;
+    spec.u0B8 = 0x1E;
+    spec.u0BA = 0x11;
+    spec.u0BC = 14.0f;
+    spec.u0C0 = 9.0f;
+    spec.u0C4 = 0.5f;
+    spec.u0C8 = 0.5f;
+    spec.u0CC = 25.0f;
+    spec.u0D0 = 0.44000003f;
+    spec.u0D4 = 0.45100003f;
+    spec.u0D8 = 0x50;
+    spec.u0DA = 0x78;
+    spec.u0DC = 0x10;
+    spec.u0DE = 0xF;
+    spec.u0E0 = 0.0f;
+    spec.u0E4 = 5.0f;
+    spec.u0E8 = 100.0f;
+    spec.u0EC = 0.30900002f;
+    spec.u0F0 = 0.312f;
+    spec.u0F4 = 0x28;
+    spec.u0F6 = 0xF;
+    spec.u0F8 = 0x50;
+    spec.u0FA = 0x50;
+    spec.u0FC = 402.0f;
+    spec.u100 = 303.0f;
+    spec.u104 = 0.101f;
+    spec.u108 = 0.19800001f;
+    spec.u10C = 45.0f;
+    spec.u110 = -0.65500003f;
+    spec.u114 = 0.30800003f;
+    spec.u118 = 0x14;
+    spec.u11A = 0xC;
+    func_15199A28(0, (u8 *) &spec, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506F1A8.s")
+#endif
 
 void func_1506F524(s32 arg0) {
     func_15197A7C(D_800D154C);
 }
 
+#ifdef NON_MATCHING
+// player_emitter_spawn_d: player action handler (void (s32), argument unused): as func_1506F1A8 with the kind-0xD
+// spec (trail colour 3C FF EB 52).
+void func_1506F54C(s32 arg0) {
+    EmitterSpec981E0 spec;
+
+    spec.u000 = 0xF;
+    spec.u004 = (u8 *) D_800D154C;
+    spec.u008 = ((u8 *) D_800D154C)[0x3B];
+    spec.u009 = 0xD;
+    spec.u00C = 22.0f;
+    spec.u010 = 22.0f;
+    spec.u014 = 165.0f;
+    spec.u018 = 22.0f;
+    spec.u01C = 22.0f;
+    spec.u020 = 193.0f;
+    spec.u024 = 1.138f;
+    spec.u028 = 0.795f;
+    spec.u02C = 370.0f;
+    spec.u030 = 17.800001f;
+    spec.u034 = 4.9f;
+    spec.u038 = 0;
+    spec.u039 = 0xFF;
+    spec.u03A = 0;
+    spec.u03B = 0;
+    spec.u03C = 0;
+    spec.u03D = 0;
+    spec.u03E = 0x9F;
+    spec.u040 = 0.615f;
+    spec.u044 = -191.0f;
+    spec.u048 = 7.85f;
+    spec.u04C = 0xFF;
+    spec.u050 = 0x3C;
+    spec.u051 = 0xFF;
+    spec.u052 = 0xEB;
+    spec.u053 = 0x52;
+    spec.u054 = 1;
+    spec.u058 = 0.0029f;
+    spec.u05C = 0.00235f;
+    spec.u060 = 0x23;
+    spec.u062 = 0xA;
+    spec.u064 = 0.80200005f;
+    spec.u068 = 0.58900005f;
+    spec.u06C = 0.367f;
+    spec.u070 = 0.307f;
+    spec.u074 = 0.614f;
+    spec.u078 = 0.29900002f;
+    spec.u07C = 0.0f;
+    spec.u080 = 0.73800004f;
+    spec.u084 = 0.962646f;
+    spec.u088 = 0.961868f;
+    spec.u08C = 0xF;
+    spec.u08E = 0x11;
+    spec.u090 = 0.36900002f;
+    spec.u094 = 0x50;
+    spec.u095 = 0x50;
+    spec.u098 = 0.024f;
+    spec.u09C = 22.0f;
+    spec.u0A0 = 58.0f;
+    spec.u0A4 = 212.0f;
+    spec.u0A8 = 0.2f;
+    spec.u0AC = 0.105000004f;
+    spec.u0B0 = 3;
+    spec.u0B4 = 2;
+    spec.u0B8 = 0x19;
+    spec.u0BA = 0xA;
+    spec.u0BC = 6.0f;
+    spec.u0C0 = 10.0f;
+    spec.u0C4 = 0.3f;
+    spec.u0C8 = 0.2f;
+    spec.u0CC = 37.0f;
+    spec.u0D0 = 0.75100005f;
+    spec.u0D4 = 0.32200003f;
+    spec.u0D8 = 0x50;
+    spec.u0DA = 0x50;
+    spec.u0DC = 0xF;
+    spec.u0DE = 0x11;
+    spec.u0E0 = 22.0f;
+    spec.u0E4 = 130.0f;
+    spec.u0E8 = 306.0f;
+    spec.u0EC = 0.208f;
+    spec.u0F0 = 0.193f;
+    spec.u0F4 = 0x23;
+    spec.u0F6 = 0xF;
+    spec.u0F8 = 0x50;
+    spec.u0FA = 0x64;
+    spec.u0FC = 198.0f;
+    spec.u100 = 102.0f;
+    spec.u104 = 0.040000003f;
+    spec.u108 = 0.040000003f;
+    spec.u10C = 89.0f;
+    spec.u110 = -0.49500003f;
+    spec.u114 = 0.44300002f;
+    spec.u118 = 0xF;
+    spec.u11A = 0x11;
+    func_15199A28(0, (u8 *) &spec, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506F54C.s")
+#endif
 
 void func_1506F8C0(s32 arg0) {
     func_1519EF70(D_800D154C, 0, 0);
@@ -2087,7 +2387,106 @@ void func_15070860(s32 arg0) {
     func_150FE49C(D_800D154C, 0xFF, 1, 0, 0);
 }
 
+#ifdef NON_MATCHING
+// player_emitter_spawn_9: player action handler (void (s32), argument unused): as func_1506F1A8 with the kind-9
+// spec (spec flags 0x11).
+void func_15070898(s32 arg0) {
+    EmitterSpec981E0 spec;
+
+    spec.u000 = 0xF;
+    spec.u004 = (u8 *) D_800D154C;
+    spec.u008 = ((u8 *) D_800D154C)[0x3B];
+    spec.u009 = 9;
+    spec.u00C = -4.734001f;
+    spec.u010 = -111.957596f;
+    spec.u014 = 33.473396f;
+    spec.u018 = -8.837997f;
+    spec.u01C = -159.75f;
+    spec.u020 = 33.473396f;
+    spec.u024 = 0.278f;
+    spec.u028 = 0.82800007f;
+    spec.u02C = 312.0f;
+    spec.u030 = 7.1f;
+    spec.u034 = 5.0f;
+    spec.u038 = -1;
+    spec.u039 = 1;
+    spec.u03A = -1;
+    spec.u03B = -1;
+    spec.u03C = 0xFF;
+    spec.u03D = 0xFF;
+    spec.u03E = 0xB4;
+    spec.u040 = 0.325f;
+    spec.u044 = -232.0f;
+    spec.u048 = 9.07f;
+    spec.u04C = 0xFF;
+    spec.u050 = 0x3C;
+    spec.u051 = 0xFF;
+    spec.u052 = 0xEB;
+    spec.u053 = 0x52;
+    spec.u054 = 0x11;
+    spec.u058 = 0.00689f;
+    spec.u05C = 0.01038f;
+    spec.u060 = 0x19;
+    spec.u062 = 0xA;
+    spec.u064 = 0.367f;
+    spec.u068 = 0.35000002f;
+    spec.u06C = 0.256f;
+    spec.u070 = 0.20500001f;
+    spec.u074 = 0.776f;
+    spec.u078 = 0.81100005f;
+    spec.u07C = 0.125f;
+    spec.u080 = 1.3110001f;
+    spec.u084 = 0.935119f;
+    spec.u088 = 0.943452f;
+    spec.u08C = 0xC;
+    spec.u08E = 0x15;
+    spec.u090 = 0.307f;
+    spec.u094 = 0x50;
+    spec.u095 = 0x50;
+    spec.u098 = 0.002f;
+    spec.u09C = -8.837997f;
+    spec.u0A0 = -159.75f;
+    spec.u0A4 = 33.473396f;
+    spec.u0A8 = 0.3f;
+    spec.u0AC = 0.40100002f;
+    spec.u0B0 = 4;
+    spec.u0B4 = 2;
+    spec.u0B8 = 0x1A;
+    spec.u0BA = 0x10;
+    spec.u0BC = 6.0f;
+    spec.u0C0 = 5.0f;
+    spec.u0C4 = 0.3f;
+    spec.u0C8 = 0.3f;
+    spec.u0CC = 50.0f;
+    spec.u0D0 = 0.0f;
+    spec.u0D4 = 0.712f;
+    spec.u0D8 = 0x50;
+    spec.u0DA = 0x78;
+    spec.u0DC = 0xF;
+    spec.u0DE = 0x11;
+    spec.u0E0 = -8.837997f;
+    spec.u0E4 = -159.75f;
+    spec.u0E8 = 33.473396f;
+    spec.u0EC = 0.20400001f;
+    spec.u0F0 = 0.504f;
+    spec.u0F4 = 0x1E;
+    spec.u0F6 = 0xF;
+    spec.u0F8 = 0x50;
+    spec.u0FA = 0x50;
+    spec.u0FC = 140.0f;
+    spec.u100 = 182.0f;
+    spec.u104 = 0.16000001f;
+    spec.u108 = 0.113000005f;
+    spec.u10C = 42.0f;
+    spec.u110 = -0.518f;
+    spec.u114 = 0.37600002f;
+    spec.u118 = 0xA;
+    spec.u11A = 0x19;
+    func_15199A28(0, (u8 *) &spec, 0xFF, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15070898.s")
+#endif
 
 void func_15070C18(s32 arg0) {
     func_15199834(D_800D154C);
