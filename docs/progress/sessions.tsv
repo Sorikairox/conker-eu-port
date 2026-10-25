@@ -364,3 +364,4 @@ P288	port-e	nm convert+harness	4			group E: stub_write maps pages (STUBMAP_OLD, 
 P289	port-c	nm convert	3			group C: func_1505D1C4 s32 (4 decls) + func_150E1AF0; D_8008B704 handlers given NM phase param (wasm call_indirect fix); func_150B2290 (duplicate of P279 - resolve at merge) + func_151B8DB0; port-c 96.2%
 P287	port-b	nm convert	8			group A: protocheck fixed (func_15116A8C void protos), 8 conversions (a store-order bug caught); func_15171770 blocked on EF410 proto; 17 left; portb 5698/5916 96.3% 89.2%
 P291	port-e	nm convert+harness	2			group E: star_field_draw func_150FBA40 (nmasm_stars.py), ray cast func_150ACEA0 readable (D5E90_ray.inc deleted), ray harness coverage; wall engine bodies left (func_150AB708/150AC8C4); port-e 97.2%
+P286	port	nm convert	4			group B: NM link fixed (static const copies 12C5F0); 4 conversions; P282 rechecks partly done (func_1513334C mutants pending); 10 left; port 96.3% 89.5%
