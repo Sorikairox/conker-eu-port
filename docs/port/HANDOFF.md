@@ -10,6 +10,17 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P313 (port-d) (session P313, 2026-10-26). Details: `docs/port/sessions/P313.md`
+
+Hand C (NM), registry row `P313`, setups / mutants in docs/port/sessions/p313: func_151EE93C cheat_entry_draw
+(game_eu_216470; random EQUIV, 68 setups, mutants 190/190). Letter wheel + text entry; enter matches 32 cheat codes
+(column strings D_800E1008[0x90..0xA2], mask 0xFFC3FFFE, D_800E9D00 bits) then whole-word phrases [0xA3..0xC7].
+progress_nm `total 5916 3995 1707 214 5702 96.4% 2024228/2253856 (89.8%)`.
+
+## Next steps (from P313)
+1. func_15175EC8 (1A2970, 961 insns): being converted by another session (see its hand-off).
+2. D2 (P304) list: func_150E5384, func_150DD420, func_150DDBC0, func_150DCAD8, func_150D7E38, func_150F3A74.
+
 ## P303 (port-d, group D1) (session P303, 2026-10-26). Details: `docs/port/sessions/P303.md`
 
 Hand C (NM), registry rows `P303`, setups / mutants in docs/port/sessions/p303: func_151ADEDC rope_draw (53/53),

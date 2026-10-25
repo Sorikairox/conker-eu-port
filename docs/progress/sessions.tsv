@@ -83,3 +83,4 @@ P278	port-d	group D NM C (150DBF60 15096E78 151A4FE8 150DFEA0 1513BBFC 150CD3C0 
 P283	port-d	group D NM C (15036860 150403C8 150BABE0 151C5280 151A3D70 15104BB4 150F3294 150CDD08)	8	0	140	8 compiled funcs to hand C, survivors equivalent; 151C5280 rodata copies (1F3040, 51190); IDO float scalar statics go to .data -> use arrays; verify_all/NM rc 0
 P297	port-d	group D NM C (150BF71C 150C8300 150BFF7C 150D0DD0 151AECA0 151E9E1C)	6	0	~125	6 compiled funcs to hand C, survivors equivalent; ARGMEM lengths decimal; IDO float literal ulp rounding (0.807f); verify_all/NM rc 0
 P303	port-d	group D1 NM C (151ADEDC 151AD724 151A4194 151B58D8)	4	0	~150	4 compiled funcs to hand C, survivors equivalent; pin random-phase counts/pointers for fixed stack copies; verify_all/NM rc 0
+P313	port-d	group D1 NM C (151EE93C)	1	0	~75	cheat-code entry screen to hand C, 68 setups, mutants 190/190; verify_all/NM rc 0
