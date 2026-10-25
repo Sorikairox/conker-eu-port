@@ -2110,7 +2110,139 @@ void func_15119C54(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119C54.s")
 #endif
 
+#ifdef NON_MATCHING
+u8 *func_1505EFD0(s32);
+f32 func_150489B0(u8);
+void func_15119C54(u8 *);
+s32 func_151EFDD0(void);
+f32 sinf(f32);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_eu_800A3530_c[1] = { 0.7111111f };  /* 0x3F360B61, 256 / 360 */
+static const f32 D_800A3534_c[1] = { 0.1f };           /* 0x3DCCCCCD */
+static const f32 D_800A3538_c[1] = { 6.2831855f };     /* 0x40C90FDB, 2 pi */
+static const f32 D_800A353C_c[1] = { 0.3926991f };     /* 0x3EC90FDB, pi / 8 */
+
+// mesh_cluster_flap_update: per-frame update of the clustered mesh that func_15119C54 sets up (called once, when
+// +0x84 is 0). Every source vertex (+0x28, 16-byte records, count +0x16) with a cluster tag (+6: group << 8 | angle)
+// is bent in its y/z plane by the group's angle (4 groups, sin / cos pairs), its y kept >= 1, then turned around y by
+// (tag + the object's heading +4 in 256ths); the result is scaled (+0x2C..+0x34), moved to the object's position
+// (+0x10..+0x14, s16) and written to this frame's vertex buffer (+0x20 + D_800BE9C0 * 4). State +0x7C / phase +0x80:
+// below 0x400 the groups flap (phase += (0.0195 + 0.0039 * rand % 6) * D_800BE9A4, amplitude sin(+0x7C / 2) drops
+// by rand % 3 per frame, back to 0xEC under 0x14); 0x400 + n eases the angle +0x80 towards n by 0.1 per frame
+// (0x41F counts down and ends at state 0; 0x420 stays). The player (func_1505EFD0(0)) within sqrt(3072) closes it:
+// 0x420 when its +0x31C record's +0x57 is 1, else 0x41F.
+void func_15119EB8(u8 *obj) {
+    f32 sc[4][2];
+    s16 *src;
+    s16 *dst;
+    u8 *pl;
+    s32 heading;
+    s32 state;
+    s32 i;
+    u32 tag;
+    f32 ox, oy, oz;
+    f32 kx, ky, kz;
+    f32 t, s, c, x, y, z, ps, pc, by, bz;
+    f32 dx, dy, dz;
+    u8 a;
+
+    dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+    src = *(s16 **) (obj + 0x28);
+    ox = *(s16 *) (obj + 0x10);
+    oy = *(s16 *) (obj + 0x12);
+    oz = *(s16 *) (obj + 0x14);
+    kx = *(f32 *) (obj + 0x2C);
+    ky = *(f32 *) (obj + 0x30);
+    kz = *(f32 *) (obj + 0x34);
+    heading = (s32) (*(f32 *) (obj + 4) * D_eu_800A3530_c[0]);
+    if (*(s32 *) (obj + 0x84) == 0) {
+        func_15119C54(obj);
+    }
+
+    state = *(s32 *) (obj + 0x7C);
+    if (state >= 0x400) {
+        t = *(f32 *) (obj + 0x80);
+        *(f32 *) (obj + 0x80) = t + ((f32) (state - 0x400) - t) * D_800A3534_c[0] * D_800BE9A4;
+        if (state != 0x420) {
+            *(s32 *) (obj + 0x7C) = state - 1;
+            if (state - 1 == 0x400) {
+                *(s32 *) (obj + 0x7C) = 0;
+                *(f32 *) (obj + 0x80) = 0.0f;
+            }
+        }
+    } else {
+        i = func_151EFDD0() % 6;
+        *(f32 *) (obj + 0x80) += (0.01953125f + 0.00390625f * (f32) i) * D_800BE9A4;
+        i = func_151EFDD0() % 3;
+        *(s32 *) (obj + 0x7C) -= i;
+        if (*(s32 *) (obj + 0x7C) < 0x14) {
+            *(s32 *) (obj + 0x7C) = 0xEC;
+        }
+    }
+
+    for (i = 0; i < 4; i++) {
+        state = *(s32 *) (obj + 0x7C);
+        if (state >= 0x400) {
+            sc[i][0] = func_15048A40((u32) *(f32 *) (obj + 0x80) & 0xFF);
+            sc[i][1] = func_150489B0((u32) *(f32 *) (obj + 0x80) & 0xFF);
+        } else {
+            t = *(f32 *) (obj + 0x80) * D_800A3538_c[0] - D_800A353C_c[0] * (f32) i;
+            if (t <= 0.0f) {
+                t = 5.0f;
+            } else {
+                s = func_15048A40((state >> 1) & 0xFF);
+                t = sinf(t) * (s + s) + 5.0f;
+            }
+            a = (u32) t & 0xFF;
+            sc[i][0] = func_15048A40(a);
+            sc[i][1] = func_150489B0(a);
+        }
+    }
+
+    if (*(s32 *) (obj + 0x7C) != 0x420) {
+        pl = func_1505EFD0(0);
+        if (pl != NULL) {
+            dx = *(f32 *) (pl + 0x14) - ox;
+            dy = *(f32 *) (pl + 0x18) - oy;
+            dz = *(f32 *) (pl + 0x1C) - oz;
+            if (dx * dx + dy * dy + dz * dz < 3072.0f) {
+                *(s32 *) (obj + 0x7C) = (*(u8 *) (*(u8 **) (pl + 0x31C) + 0x57) == 1) ? 0x420 : 0x41F;
+            }
+        }
+    }
+
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+        tag = *(u16 *) &src[3];
+        if (tag != 0) {
+            s = func_15048A40((tag + heading) & 0xFF);
+            c = func_150489B0((*(u16 *) &src[3] + heading) & 0xFF);
+            by = src[1];
+            bz = src[2];
+            ps = sc[tag >> 8][0];
+            pc = sc[tag >> 8][1];
+            z = by * ps + bz * pc;
+            y = by * pc - bz * ps;
+            if (y < 1.0f) {
+                z -= y;
+                y = 1.0f;
+            }
+            t = src[0];
+            x = t * c + z * s;
+            z = z * c - t * s;
+        } else {
+            x = src[0];
+            y = src[1];
+            z = src[2];
+        }
+        dst[0] = (s32) (x * kx + ox);
+        dst[1] = (s32) (y * ky + oy);
+        dst[2] = (s32) (z * kz + oz);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119EB8.s")
+#endif
 
 #ifdef NON_MATCHING
 // pickup_spin_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler for a spinning, bobbing pickup (P195). The phase
@@ -2367,7 +2499,176 @@ void func_1511AD48(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s16 *allocate_memory(s32, s32, s32, s32);
+f32 sqrtf(f32);
+f32 func_150489B0(u8);
+void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_15114E8C(f32 (*)[4], u8 *);
+void func_1511AA1C(u8 *obj, s32 *slots, s32 *state);
+void func_1511AD48(u8 *arg0);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A3550_c[1] = { 1.2f };  /* 0x3F99999A */
+static const f32 D_800A3554_c[1] = { 0.8f };  /* 0x3F4CCCCD */
+
+/* +0x80 state of the wobbling mesh (0x28 bytes, allocated on the first call) */
+typedef struct {
+    u8 *phase;      /* 0x00 per-vertex wobble phase (equal positions share one) */
+    f32 *wave;      /* 0x04 per-vertex wave height, follows `cur` */
+    f32 *follow;    /* 0x08 per-vertex follow rate: (radius - 1.2 * d) / radius, >= 0 */
+    f32 *lift;      /* 0x0C per-vertex lift scale: (radius - d) / radius */
+    f32 cur;        /* 0x10 wave height this frame */
+    f32 amp;        /* 0x14 wave amplitude (decays) */
+    f32 u18;        /* 0x18 */
+    u8 angle;       /* 0x1C */
+    u8 speed;       /* 0x1D */
+    u8 active;      /* 0x1E */
+    u8 pad1F;
+    s32 slots;      /* 0x20 func_1511AA1C */
+    s32 state;      /* 0x24 func_1511AA1C */
+} WobbleADC0;
+
+// mesh_wobble_update: per-frame update of a wobbling mesh object (vertices +0x28, 16-byte records, count +0x16).
+// First call: allocates the +0x80 state; per vertex at distance d (x/z) from the centre and radius = high half of
+// +0x3C: lift / follow rates, a random phase shared by vertices at the same position. Flags 3 in +0x73 start a wave
+// (func_1511AD48). While a wave runs its angle advances by speed * D_800BE9E4, the amplitude shrinks (x 0.5 below
+// +0x18, else x 0.8) on each wrap / half turn and the wave stops at amplitude <= 3; each vertex height follows it.
+// Every vertex not flagged 0x4000 in the output (+6) circles by the low byte of +0x3C (angle = its phase + one of
+// the 4 phase bytes of +0x84, negated for phase bit 7) and is lifted by lift * wave; all go through the object's
+// matrix (func_15114E8C) into this frame's buffer (+0x20 + D_800BE9C0 * 4). Advances the phase bytes by 1 / 2 / 3 /
+// 4 and runs the animation slots (func_1511AA1C).
+void func_1511ADC0(u8 *obj) {
+    f32 mtx[4][4];
+    u8 ph[4];
+    f32 ox, oy, oz;
+    WobbleADC0 *st;
+    s16 *verts;
+    s16 *v;
+    s16 *w;
+    s16 *dst;
+    u8 *phase;
+    f32 *wave;
+    f32 *follow;
+    f32 *lift;
+    f32 amp;
+    f32 radius;
+    f32 inv;
+    f32 d;
+    f32 k;
+    f32 sx;
+    f32 cz;
+    s32 i;
+    s32 j;
+    s32 up;
+    u8 old;
+    u8 a;
+
+    amp = (u8) *(s32 *) (obj + 0x3C);
+    st = *(WobbleADC0 **) (obj + 0x80);
+    verts = *(s16 **) (obj + 0x28);
+    if (st == NULL) {
+        st = (WobbleADC0 *) allocate_memory(0x28, 1, 0, 0);
+        *(WobbleADC0 **) (obj + 0x80) = st;
+        phase = (u8 *) allocate_memory(*(u16 *) (obj + 0x16), 1, 0, 0);
+        st->phase = phase;
+        wave = (f32 *) allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+        st->wave = wave;
+        follow = (f32 *) allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+        st->follow = follow;
+        lift = (f32 *) allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+        st->lift = lift;
+        radius = (u16) (*(s32 *) (obj + 0x3C) >> 16);
+        inv = (radius == 0.0f) ? 1.0f : 1.0f / radius;
+        for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+            phase[i] = (u32) func_150ADA20() % 255;
+            d = sqrtf((f32) v[0] * (f32) v[0] + (f32) v[2] * (f32) v[2]);
+            lift[i] = (radius - d) * inv;
+            follow[i] = (radius - d * D_800A3550_c[0]) * inv;
+            if (follow[i] < 0.0f) {
+                follow[i] = 0.0f;
+            }
+        }
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            phase[i] = func_150ADA20();
+            v = verts + i * 8;
+            for (j = 0, w = verts; j < *(u16 *) (obj + 0x16); j++, w += 8) {
+                if (v[0] == w[0] && v[1] == w[1] && v[2] == w[2]) {
+                    phase[j] = phase[i];
+                }
+            }
+        }
+        st->cur = 0.0f;
+        st->active = 0;
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            wave[i] = 0.0f;
+        }
+        st->slots = 0;
+        st->state = 0;
+    }
+
+    phase = st->phase;
+    wave = st->wave;
+    follow = st->follow;
+    lift = st->lift;
+    if ((obj[0x73] & 3) == 3) {
+        func_1511AD48(obj);
+        obj[0x73] &= ~3;
+    }
+    if (st->active) {
+        old = st->angle;
+        st->angle = old + st->speed * D_800BE9E4;
+        k = (st->amp < st->u18) ? 0.5f : D_800A3554_c[0];
+        if (st->angle < old || (st->angle > 0x80 && old <= 0x80)) {
+            st->amp *= k;
+        }
+        sx = func_15048A40(st->angle);
+        st->cur = st->amp * sx;
+        if (st->amp <= 3.0f) {
+            st->cur = 0.0f;
+            st->active = 0;
+        }
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            wave[i] = wave[i] + (st->cur - wave[i]) * follow[i];
+        }
+    }
+
+    func_15114E8C(mtx, obj);
+    dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+    ph[0] = *(s32 *) (obj + 0x84);
+    ph[1] = *(s32 *) (obj + 0x84) >> 8;
+    ph[2] = *(s32 *) (obj + 0x84) >> 16;
+    ph[3] = *(s32 *) (obj + 0x84) >> 24;
+    up = 0;
+    for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8, dst += 8) {
+        if (*(u16 *) &dst[3] & 0x4000) {
+            func_150A7E40(mtx, v[0], v[1], v[2], &ox, &oy, &oz);
+        } else {
+            a = ph[phase[i] & 3] + phase[i];
+            if (phase[i] & 0x80) {
+                a = -a;
+            }
+            sx = func_15048A40(a) * amp;
+            cz = func_150489B0(a) * amp;
+            if (st->active) {
+                up = (s32) (lift[i] * wave[i]);
+            }
+            func_150A7E40(mtx, (f32) v[0] + sx, v[1] + up, (f32) v[2] + cz, &ox, &oy, &oz);
+        }
+        dst[0] = (s32) ox;
+        dst[1] = (s32) oy;
+        dst[2] = (s32) oz;
+    }
+    ph[3] += 4;
+    ph[0] += 1;
+    ph[1] += 2;
+    ph[2] += 3;
+    *(s32 *) (obj + 0x84) = (ph[3] << 24) | ph[0] | (ph[1] << 8) | (ph[2] << 16);
+    func_1511AA1C(obj, &st->slots, &st->state);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ADC0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A3558;
@@ -3262,7 +3563,179 @@ void func_1511D0B4(s32 arg0, f32 *arg1) {
     *arg1 = 22000.0f;
 }
 
+#ifdef NON_MATCHING
+s16 *allocate_memory(s32, s32, s32, s32);
+f32 func_150489B0(u8);
+void func_1511D0B4(s32 arg0, f32 *arg1);
+s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
+void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
+extern s32 D_80090688;
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A35C8_c[1] = { 0.453f };        /* 0x3EE7EF9E */
+static const f32 D_800A35CC_c[1] = { 0.1f };         /* 0x3DCCCCCD */
+static const f32 D_800A35D0_c[1] = { 0.81f };        /* 0x3F4F5C29 */
+static const f32 D_800A35D4_c[1] = { 12000.0f };     /* 0x463B8000 */
+
+/* +0x7C state of the rippling surface (0x1C bytes, allocated on the first call) */
+typedef struct {
+    u8 *phase;      /* 0x00 per-vertex ripple phase (from the depth below the top) */
+    u16 time;       /* 0x04 ripple clock (high byte = angle) */
+    u16 speed;      /* 0x06 */
+    f32 height;     /* 0x08 ripple height */
+    s32 sound;      /* 0x0C func_15195FB0 (level 0x13) */
+    u8 glowTimer;   /* 0x10 */
+    u8 glowPhase;   /* 0x11 */
+    u8 glow;        /* 0x12 1: +0x8A glows, vertex colours untouched */
+    u8 speedPhase;  /* 0x13 */
+    f32 rot;        /* 0x14 texture angle (degrees) */
+    s16 *uv;        /* 0x18 texture coordinates - 0x2000 (2 per vertex) */
+} RippleD0CC;
+
+// rippling_wall_update: per-frame update of a rippling vertical surface (levels D_800BE9F0 4 and 0x13 only; vertex
+// records 0x10 bytes, template +0x28, output +0x20 + D_800BE9C0 * 4). The top is 22000 (func_1511D0B4) above +0x14.
+// First call: the +0x7C state; level 4: speed 0x1DA, height 100, phase = (top - z) * 0.1; level 0x13: speed 0x259,
+// height 36, phase = top - z, a sound (func_15195FB0 D_80090688), and for the +0x72 == 0xFE variant a texture that
+// turns 0.453 degrees a frame (uv copy at +0x18, func_15094EC8 32 x 32). Level 4 objects other than 0xF2 glow
+// (+0x8A, phase 0 for 0xF1, else 0x80) instead of shading their vertices. Every frame each vertex gets
+// y = template y + +0x12 + cos(phase + clock) * height and the shade 32.5 * (cos + 1) + 190; on level 4 vertices
+// below z 12000 are pulled towards it (by 0.81 .. 1 of the distance) and the clock speed swings with
+// cos(clock + speedPhase).
+void func_1511D0CC(u8 *obj) {
+    f32 top;
+    f32 spin;
+    f32 k;
+    f32 c;
+    f32 y;
+    f32 z;
+    f32 f;
+    s32 uw;
+    s32 uh;
+    s32 lvl13;
+    s32 init;
+    s32 i;
+    s32 t;
+    u32 speed;
+    u32 half;
+    u8 shade;
+    RippleD0CC *st;
+    s16 *src;
+    s16 *dst;
+
+    spin = 0.0f;
+    if (D_800BE9F0 == 4) {
+        lvl13 = FALSE;
+    } else if (D_800BE9F0 == 0x13) {
+        lvl13 = TRUE;
+        if (obj[0x72] == 0xFE) {
+            spin = D_800A35C8_c[0];
+            uh = 0x20;
+            uw = 0x20;
+        }
+    } else {
+        return;
+    }
+    func_1511D0B4((s32) obj, &top);
+    top -= *(s16 *) (obj + 0x14);
+
+    st = *(RippleD0CC **) (obj + 0x7C);
+    if (st == NULL) {
+        init = TRUE;
+        st = (RippleD0CC *) allocate_memory(0x1C, 1, 0, 0);
+        *(RippleD0CC **) (obj + 0x7C) = st;
+        st->phase = (u8 *) allocate_memory(*(u16 *) (obj + 0x16), 1, 0, 0);
+        if (spin != 0.0f) {
+            st->uv = allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+            for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+                st->uv[i * 2 + 0] = (*(s16 **) (obj + 0x28))[i * 8 + 4] - 0x2000;
+                st->uv[i * 2 + 1] = (*(s16 **) (obj + 0x28))[i * 8 + 5] - 0x2000;
+            }
+            st->rot = 0.0f;
+        }
+    } else {
+        init = FALSE;
+    }
+
+    if (init) {
+        if (!lvl13) {
+            st->speed = 0x1DA;
+            st->speedPhase = 0x6D;
+            st->height = 100.0f;
+            k = D_800A35CC_c[0];
+        } else {
+            k = 1.0f;
+            st->speed = 0x259;
+            st->speedPhase = 0x6D;
+            st->height = 36.0f;
+        }
+        st->time = 0;
+        dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+        src = *(s16 **) (obj + 0x28);
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+            st->phase[i] = (u32) ((top - (*(s16 **) (obj + 0x28))[i * 8 + 2]) * k);
+            dst[0] = src[0] + *(s16 *) (obj + 0x10);
+            dst[2] = src[2] + *(s16 *) (obj + 0x14);
+        }
+        st->glow = 0;
+        st->glowTimer = 0;
+        if (D_800BE9F0 == 4 && obj[0x72] != 0xF2) {
+            st->glowPhase = (obj[0x72] == 0xF1) ? 0 : 0x80;
+            st->glow = 1;
+        }
+        if (lvl13 == TRUE) {
+            st->sound = func_15195FB0(obj, D_80090688, 0, 0, 0, 0, 8);
+        }
+    }
+
+    t = (st->time >> 8) & 0xFF;
+    dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+    src = *(s16 **) (obj + 0x28);
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+        c = func_150489B0((st->phase[i] + t) & 0xFF);
+        y = (f32) (src[1] + *(s16 *) (obj + 0x12)) + c * st->height;
+        f = c;
+        if (!lvl13) {
+            z = src[2] + *(s16 *) (obj + 0x14);
+            if (z < D_800A35D4_c[0]) {
+                f = (c + 1.0f) * 0.5f;
+                dst[2] = (s32) (D_800A35D4_c[0] + (z - D_800A35D4_c[0]) * ((1.0f - D_800A35D0_c[0]) * f + D_800A35D0_c[0]));
+            }
+        }
+        dst[1] = (s32) y;
+        if (st->glow == 0) {
+            shade = (u32) (32.5f * (f + 1.0f) + 190.0f);
+            ((u8 *) dst)[0xC] = shade;
+            ((u8 *) dst)[0xD] = shade;
+            ((u8 *) dst)[0xE] = shade;
+        }
+    }
+
+    if (!lvl13) {
+        half = (u16) (st->speed >> 1);
+        c = func_150489B0(((st->time >> 8) + st->speedPhase) & 0xFF);
+        speed = (u16) (u32) ((f32) half + (c + 1.0f) * 0.5f * (f32) half);
+    } else {
+        speed = st->speed;
+    }
+    st->time -= speed * D_800BE9E4;
+    if (st->glow) {
+        st->glowTimer += D_800BE9E4 * 2;
+        c = func_150489B0((st->glowTimer + st->glowPhase) & 0xFF);
+        obj[0x8A] = (u32) ((c + 1.0f) * 0.5f * 205.0f + 50.0f);
+    }
+    if (spin != 0.0f) {
+        func_15094EC8(*(u8 **) (obj + 0x20 + D_800BE9C0 * 4), (s32 *) st->uv, *(u16 *) (obj + 0x16), st->rot, uh, uw);
+        st->rot += spin;
+        if (st->rot >= 360.0f) {
+            st->rot -= 360.0f;
+        } else if (st->rot < 0.0f) {
+            st->rot += 360.0f;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D0CC.s")
+#endif
 
 #ifdef NON_MATCHING
 s16 *allocate_memory(s32, s32, s32, s32);

@@ -162,7 +162,174 @@ void func_150C4620(u8 *obj, s16 kind, u8 flag, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/func_150C4620.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_1504715C(f32 *, u8 *);
+u8 *func_15031C4C(u8 *arg0, s32 arg1, s32 arg2);
+s32 func_1514654C(u8 *, u8 *, s32, f32 **, f32 **, s32);
+void func_151C3C88(u8 *arg0, u8 arg1, s32 arg2);
+s32 func_1515C668(u8 *, f32 **);
+void func_15143794(s16, s16, f32, f32 *);
+
+extern f32 D_800A0720[3][3];    /* offsets by health third */
+extern u8 D_800A0744[3];        /* bone index by health third */
+extern f32 D_800A0748[4][3];    /* offsets by quarter */
+extern u8 D_800A0778[4];        /* attachment point by quarter */
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A0788_c[1] = { 0.33333334f };  /* 0x3EAAAAAB */
+static const f32 D_800A078C_c[1] = { 0.12900001f };  /* 0x3E041894 */
+static const f32 D_800A0790_c[1] = { 0.117000006f }; /* 0x3DEF9DB3 */
+static const f32 D_800A0794_c[1] = { 0.13000001f };  /* 0x3E051EB9 */
+static const f32 D_800A0798_c[1] = { 0.2f };         /* 0x3E4CCCCD */
+static const f32 D_800A079C_c[1] = { 0.6f };         /* 0x3F19999A */
+static const f32 D_800A07A0_c[1] = { 2.5970001f };   /* 0x40263540 */
+static const f32 D_800A07A4_c[1] = { 4.8700004f };   /* 0x409BD70B */
+static const f32 D_800A07A8_c[1] = { 0.25800002f };  /* 0x3E841894 */
+static const f32 D_800A07AC_c[1] = { -0.60800004f }; /* 0xBF1BA5E4 */
+static const f32 D_800A07B0_c[1] = { 0.70000005f };  /* 0x3F333334 */
+
+/* +0x28 record of the effect object (written by func_150C4620) */
+typedef struct {
+    u8 *obj;        /* 0x00 owner */
+    u8 room;        /* 0x04 owner +0x3B at spawn */
+    u8 pad5[3];
+    f32 smoke;      /* 0x08 smoke puff accumulator */
+    u8 *glow;       /* 0x0C */
+    f32 sparks;     /* 0x10 spark accumulator */
+    s16 point;      /* 0x14 attachment point id */
+    u8 mode;        /* 0x16 bit 0: attachment-point mode, bit 1: off */
+    u8 pad17;
+    s32 sound;      /* 0x18 */
+} Smoke49A4;
+
+typedef struct {
+    f32 v[3];
+} Vec49A4;
+
+// damage_smoke_update: handler 21 of D_8008A980 (`void (u8 *)`). Ends the effect (+0xE = -1) when the owner is gone
+// or changed room; with the owner switched off (+0x1D4 == 0 or mode bit 1) it only sets the glow's +0x74 to 3.
+// Otherwise starts the 0x96 loop sound once, places the emitter on the owner (mode bit 0: attachment point
+// func_15031C4C / func_1514654C by the +0x2DC * +0x2D8 quarter, fallback owner + (0, 800, 0); else bone
+// D_800A0744[third] of +0x1D4 by the +0x2E4 / +0x2E8 third), moves the glow there, then emits smoke puffs
+// (func_151C3C88, (0.129 + 0.117 * random) * D_800BE9A4 per frame, skipped in mode 2 when func_150A29C8 says no) and
+// sparks (func_151D9014, (0.13 + 0.2 * random) * D_800BE9A4 per frame, blown against the owner's func_1515C668 vector).
+void func_150C49A4(u8 *self) {
+    f32 basis[12];
+    f32 off[3];
+    f32 pos[3];
+    f32 vel[3];
+    f32 *offp;
+    f32 *posp;
+    f32 *up;
+    Smoke49A4 *rec;
+    u8 *obj;
+    u8 *glow;
+    s32 i;
+    s32 enabled;
+    f32 t;
+    f32 f;
+    f32 a;
+    f32 b;
+    f32 c;
+    s32 r1;
+    s32 r2;
+
+    rec = (Smoke49A4 *) (self + 0x28);
+    obj = rec->obj;
+    if (*(s32 *) obj == 0 || rec->room != obj[0x3B]) {
+        *(s16 *) (self + 0xE) = -1;
+        return;
+    }
+    if (*(s32 *) (obj + 0x1D4) == 0 || (rec->mode & 2)) {
+        if (rec->glow != NULL) {
+            rec->glow[0x74] = 3;
+        }
+        return;
+    }
+    func_1504715C(basis, obj);
+    if (rec->sound == 0) {
+        rec->sound = func_10010154(0x96, (struct127 *) obj, 0x36B0, 0x190, 0x4268);
+    }
+    if (rec->mode & 1) {
+        u8 *pt = func_15031C4C(obj, rec->point, 0);
+
+        if (pt == NULL) {
+            return;
+        }
+        t = (*(s32 *) (obj + 0x2EC) != 0) ? *(f32 *) (obj + 0x2DC) * *(f32 *) (obj + 0x2D8) : 0.0f;
+        i = (s32) (t * 4.0f);
+        if (i >= 4) {
+            i = 3;
+        }
+        f = (t - (f32) i * 0.25f) * 4.0f;
+        off[0] = D_800A0748[i][0] * f;
+        off[1] = D_800A0748[i][1] * f;
+        off[2] = D_800A0748[i][2] * f;
+        offp = off;
+        posp = pos;
+        if (func_1514654C(obj, pt, D_800A0778[i], &offp, &posp, 1) == 0) {
+            pos[0] = *(f32 *) (obj + 0x14);
+            pos[1] = *(f32 *) (obj + 0x18) + 800.0f;
+            pos[2] = *(f32 *) (obj + 0x1C);
+        }
+    } else {
+        t = (*(s32 *) (obj + 0x2E8) != 0) ? (f32) *(s32 *) (obj + 0x2E4) / (f32) *(s32 *) (obj + 0x2E8) : 1.0f;
+        i = (s32) (t * 3.0f);
+        if (i >= 3) {
+            i = 2;
+        }
+        f = (t - (f32) i * D_800A0788_c[0]) * 3.0f;
+        off[0] = D_800A0720[i][0] * f;
+        off[1] = D_800A0720[i][1] * f;
+        off[2] = D_800A0720[i][2] * f;
+        func_15143134(off, pos, *(u8 **) (obj + 0x1D4) + (D_800A0744[i] << 6));
+    }
+    glow = rec->glow;
+    if (glow != NULL) {
+        glow[0x74] = 0xFF;
+        *(Vec49A4 *) (rec->glow + 0x40) = *(Vec49A4 *) pos;
+    }
+
+    enabled = TRUE;
+    if (D_800BE9F0 == 2 && func_150A29C8(((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C, 0x4065) == 0) {
+        enabled = FALSE;
+    }
+    if (enabled) {
+        rec->smoke += (D_800A078C_c[0] + func_150ADA68() * D_800A0790_c[0]) * D_800BE9A4;
+        while (1.0f < rec->smoke) {
+            func_151C3C88((u8 *) pos, self[0xC], self[1]);
+            rec->smoke -= 1.0f;
+        }
+    }
+
+    rec->sparks += (D_800A0794_c[0] + func_150ADA68() * D_800A0798_c[0]) * D_800BE9A4;
+    if (!(1.0f < rec->sparks)) {
+        return;
+    }
+    if (func_1515C668(obj, &up) == 0) {
+        up = (f32 *) D_800A5860;
+    }
+    do {
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        f = func_150ADA68();
+        func_15143794((s16) (r1 & 0xFF), (s16) ((u32) r2 % 25 - 0x40), f * D_800A07A0_c[0] + D_800A07A4_c[0], vel);
+        vel[0] -= up[0] * D_800A079C_c[0];
+        vel[2] -= up[2] * D_800A079C_c[0];
+        a = func_150ADA68();
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        b = func_150ADA68();
+        c = func_150ADA68();
+        func_151D9014(pos, vel, 0xC, a * D_800A07A8_c[0] + D_800A07AC_c[0], (u32) r1 % 41 + 0x3C, (u32) r2 % 56 + 0xC8,
+                      b * 160.0f + 121.0f, c < D_800A07B0_c[0], 1.0f, 1.0f, 0, (s32) basis, 1, 1,
+                      self[0xC], self[1]);
+        rec->sparks -= 1.0f;
+    } while (1.0f < rec->sparks);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_F1E30/func_150C49A4.s")
+#endif
 
 void func_150C4FD8(u8 *arg0) { u8 *p = arg0; if (*(s32 *)(p + 0x34) != 0) { func_1516972C(*(struct102 **)(p + 0x34)); } }
 

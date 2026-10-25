@@ -446,7 +446,247 @@ s32 func_150B9AFC(struct102 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_15046F70(f32 *, s32, f32, f32 *);
+void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+extern s32 D_80088AE0;    /* landing sound id */
+void *memcpy(void *, const void *, s32);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A01B0_c[1] = { 2500.0f };   /* 0x451C4000 */
+static const f32 D_800A01B4_c[1] = { 1.3f };      /* 0x3FA66666 */
+static const f32 D_800A01B8_c[1] = { 1.3f };      /* 0x3FA66666 */
+static const f32 D_800A01BC_c[1] = { 0.001f };    /* 0x3A83126F */
+static const f32 D_800A01C0_c[1] = { 1e-05f };    /* 0x3727C5AC */
+static const f32 D_800A01C4_c[1] = { 3.1000001f }; /* 0x40466667 */
+static const f32 D_800A01C8_c[1] = { 0.70500004f }; /* 0x3F347AE2 */
+static const f32 D_800A01CC_c[1] = { 0.31f };     /* 0x3E9EB852 */
+static const f32 D_800A01D0_c[1] = { 0.2f };      /* 0x3E4CCCCD */
+
+/* func_1513D594 record (0x58 bytes; as Rec8EC0A) */
+typedef struct {
+    /* 0x00 */ u8 u00;
+    /* 0x01 */ u8 u01;
+    /* 0x02 */ s16 u02;
+    /* 0x04 */ s16 u04;
+    /* 0x06 */ u8 pad06[2];
+    /* 0x08 */ s32 u08;
+    /* 0x0C */ s32 u0C;
+    /* 0x10 */ u8 colour[4];
+    /* 0x14 */ f32 scale[2];
+    /* 0x1C */ f32 pos[3];
+    /* 0x28 */ f32 u28[6];
+    /* 0x40 */ s32 u40;
+    /* 0x44 */ u8 u44[4];
+    /* 0x48 */ u8 pad48[8];
+    /* 0x50 */ s32 u50;
+    /* 0x54 */ s16 u54;
+    /* 0x56 */ s16 u56;
+} Rec9B1CA;
+
+/* func_15151FA8 burst request (0x88 bytes; as Burst8EC0B) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 u0C;
+    /* 0x10 */ f32 u10;
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ s16 u24[10];
+    /* 0x38 */ u8 u38;
+    /* 0x39 */ u8 u39;
+    /* 0x3A */ u8 u3A;
+    /* 0x3B */ u8 pad3B;
+    /* 0x3C */ s32 u3C;
+    /* 0x40 */ s32 u40[5];
+    /* 0x54 */ u8 u54;
+    /* 0x55 */ u8 u55;
+    /* 0x56 */ u8 u56;
+    /* 0x57 */ u8 pad57;
+    /* 0x58 */ s32 u58;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ s32 u60;
+    /* 0x64 */ s32 u64;
+    /* 0x68 */ s32 u68;
+    /* 0x6C */ s32 u6C;
+    /* 0x70 */ s32 u70;
+    /* 0x74 */ s32 u74;
+    /* 0x78 */ s32 u78;
+    /* 0x7C */ u8 u7C;
+    /* 0x7D */ u8 u7D;
+    /* 0x7E */ u8 pad7E[2];
+    /* 0x80 */ s16 u80;
+    /* 0x82 */ s16 u82;
+    /* 0x84 */ s32 u84;
+} Burst9B1CB;
+
+typedef struct {
+    f32 v[3];
+} Vec9B1C;
+
+// thrown_object_land_check: per-frame check of a thrown / falling object (+0x38..+0x40 position, +0x10 radius)
+// against the current holder D_80088730 (refreshed with func_15083E90(1) when gone or not in room 1). Inside
+// radius^2 + 2500: if the holder's +0x3C is above 15, half the time it is knocked away (flags on +0x60 / +0x71..+0x78,
+// velocity 1.3 * +0x3C * the sin / cos (func_151423D8) of the holder's heading +0x76, up 10..25, timer 300; returns
+// 1). Otherwise it lands: a func_1513D594 dust record on the ground below (func_15046F70, ground height kept at
+// +0x110; random 8-byte spin at +0x128 of the record), a func_15151FA8 burst and the D_80088AE0 sound; returns 0.
+// Out of range it eases +0x20..+0x28 by 0.2 towards D_80088724 (the second holder D_80088720's position + 50 up)
+// and returns 1.
+s32 func_150B9B1C(u8 *obj) {
+    Burst9B1CB b;
+    f32 spin[2];
+    Rec9B1CA a;
+    f32 pos[3];
+    f32 s, c;
+    f32 dx, dy, dz;
+    f32 k;
+    s32 r0, r1, r2;
+    u8 *h;
+    u8 *rec;
+    f32 *tgt;
+
+    h = (u8 *) D_80088730;
+    if (h == NULL || *(s32 *) h == 0 || h[0x3B] != 1) {
+        D_80088730 = func_15083E90(1);
+        h = (u8 *) D_80088730;
+    }
+    if (h != NULL) {
+        dx = *(f32 *) (obj + 0x38) - *(f32 *) (h + 0x14);
+        dy = *(f32 *) (obj + 0x3C) - *(f32 *) (h + 0x18);
+        dz = *(f32 *) (obj + 0x40) - *(f32 *) (h + 0x1C);
+        if (dx * dx + dy * dy + dz * dz < *(f32 *) (obj + 0x10) * *(f32 *) (obj + 0x10) + D_800A01B0_c[0]) {
+            if (15.0f < *(f32 *) (h + 0x3C) && (func_150ADA20() & 1)) {
+                s = func_151423D8(*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8);
+                c = func_151423D8((*(u16 *) ((u8 *) D_80088730 + 0x76) >> 8) + 0x40);
+                obj[0x71] = 1;
+                *(s32 *) (obj + 0x60) |= 0x7D;
+                obj[0x73] = 1;
+                obj[0x75] = 1;
+                obj[0x78] = 0;
+                *(f32 *) (obj + 0x44) = *(f32 *) ((u8 *) D_80088730 + 0x3C) * s * D_800A01B4_c[0];
+                *(f32 *) (obj + 0x48) = func_150ADA68() * 15.0f + 10.0f;
+                *(s16 *) (obj + 0x64) = 0x12C;
+                *(s32 *) (obj + 0x60) |= 0x80;
+                *(f32 *) (obj + 0x4C) = *(f32 *) ((u8 *) D_80088730 + 0x3C) * c * D_800A01B8_c[0];
+                *(f32 *) (obj + 0x20) = 0.0f;
+                *(f32 *) (obj + 0x24) = 0.0f;
+                *(f32 *) (obj + 0x28) = 0.0f;
+                return 1;
+            }
+            pos[0] = *(f32 *) (obj + 0x38);
+            pos[1] = *(f32 *) (obj + 0x3C) + 100.0f;
+            pos[2] = *(f32 *) (obj + 0x40);
+            if (func_15046F70(pos, 0, *(f32 *) (obj + 0x3C) - 2000.0f, (f32 *) (obj + 0x110)) != 0) {
+                pos[1] = *(f32 *) (obj + 0x110);
+                a.u54 = 0x19;
+                a.u56 = 0xA;
+                a.u00 = 4;
+                a.u01 = 0;
+                a.u02 = 0x3B02;
+                a.u04 = (u32) func_150ADA20() % 31 + 40;
+                a.u08 = 0;
+                a.u0C = 0;
+                a.colour[0] = 0xFF;
+                a.colour[1] = 0xFF;
+                a.colour[2] = 0xFF;
+                a.colour[3] = 0xFF;
+                k = (func_150ADA68() * 25.0f + 25.0f) * D_800A01BC_c[0];
+                a.scale[1] = k;
+                a.scale[0] = k;
+                *(Vec9B1C *) a.pos = *(Vec9B1C *) pos;
+                a.u40 = 0x0C5C0001;
+                a.u44[0] = 0xFF;
+                a.u44[1] = 0xFF;
+                a.u44[2] = 0;
+                a.u44[3] = 7;
+                a.u28[0] = 0.0f;
+                a.u28[1] = 0.0f;
+                a.u28[2] = 0.0f;
+                a.u28[3] = 0.0f;
+                a.u28[4] = 0.0f;
+                a.u28[5] = 0.0f;
+                spin[0] = (func_150ADA68() * 80.0f + 50.0f) * D_800A01C0_c[0];
+                a.u50 = *(s32 *) (obj + 0x128);
+                r0 = func_150ADA20();
+                r1 = func_150ADA20();
+                r2 = func_150ADA20();
+                rec = (u8 *) func_1513D594((s32) &a, (s32) &D_800A4AA0, 0x18, 0, 0, (r0 & 1) * 2 + (r1 & 1), r2 & 0xFF,
+                                           500.0f, 500.0f, 0, (s32) (obj + 0x114), *(s32 *) (obj + 0x14C),
+                                           *(s32 *) (obj + 0x168), 0, 8, obj[0xC], obj[1]);
+                if (rec != NULL) {
+                    memcpy(rec + 0x128, spin, 8);
+                }
+            }
+            *(Vec9B1C *) b.pos = *(Vec9B1C *) (obj + 0x38);
+            b.u0C = 3.0f;
+            b.u10 = D_800A01C4_c[0];
+            b.u24[0] = 6;
+            b.u24[1] = 6;
+            b.u24[3] = 0xFF;
+            b.u24[4] = -0x40;
+            b.u24[5] = 0x1E;
+            b.u24[2] = 0;
+            b.u24[6] = 3;
+            b.u24[7] = 3;
+            b.u24[8] = 0x1E;
+            b.u24[9] = 0x14;
+            b.u38 = 1;
+            b.u39 = 0x21;
+            b.u3A = 0x48;
+            b.u3C = 1;
+            b.u40[0] = 0;
+            b.u40[1] = 0;
+            b.u40[2] = 0;
+            b.u40[3] = 0;
+            b.u40[4] = 0;
+            b.u54 = 0;
+            b.u55 = 0x9A;
+            b.u56 = 0x65;
+            b.u14 = D_800A01C8_c[0];
+            b.u18 = D_800A01CC_c[0];
+            b.u1C = 5.0f;
+            b.u20 = 7.0f;
+            b.u58 = *(s32 *) (obj + 0x14C);
+            b.u60 = 0;
+            b.u64 = 0x220005;
+            b.u68 = 0x1D0600;
+            b.u6C = 1;
+            b.u70 = 0x3B;
+            b.u74 = 0x80;
+            b.u78 = 0x20;
+            b.u7C = 0;
+            b.u7D = 7;
+            b.u80 = 0xA;
+            b.u82 = 0x19;
+            b.u5C = *(s32 *) (obj + 0x168);
+            b.u84 = *(s32 *) (obj + 0x128);
+            func_15151FA8((u8 *) &b, obj[0xC], obj[1]);
+            func_10010F88(D_80088AE0, 0x61A8, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C),
+                          *(f32 *) (obj + 0x40), 1000, 4000);
+            return 0;
+        }
+    }
+
+    h = (u8 *) D_80088720;
+    if (h == NULL || *(s32 *) h == 0 || h[0x3B] != 1) {
+        D_80088720 = func_15083E90(1);
+        h = (u8 *) D_80088720;
+    }
+    tgt = (f32 *) &D_80088724;
+    if (h != NULL) {
+        tgt[0] = *(f32 *) (h + 0x14);
+        tgt[1] = *(f32 *) (h + 0x18) + 50.0f;
+        tgt[2] = *(f32 *) (h + 0x1C);
+    }
+    *(f32 *) (obj + 0x20) += D_800A01D0_c[0] * (tgt[0] - *(f32 *) (obj + 0x20));
+    *(f32 *) (obj + 0x24) += D_800A01D0_c[0] * (tgt[1] - *(f32 *) (obj + 0x24));
+    *(f32 *) (obj + 0x28) += D_800A01D0_c[0] * (tgt[2] - *(f32 *) (obj + 0x28));
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E66D0/func_150B9B1C.s")
+#endif
 
 #ifdef NON_MATCHING /* P209: void, the caller ignores v0 */
 void func_15142600(s32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32);

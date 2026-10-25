@@ -1,0 +1,35 @@
+s#    dst = \*(s16 \*\*) (obj + 0x20 + D_800BE9C0 \* 4);#    dst = *(s16 **) (obj + 0x24 - D_800BE9C0 * 4);# % flapb1
+s#    oy = \*(s16 \*) (obj + 0x12);#    oy = *(s16 *) (obj + 0x10);# % flap
+s#    kz = \*(f32 \*) (obj + 0x34);#    kz = *(f32 *) (obj + 0x30);# % flap
+s#    heading = (s32) (\*(f32 \*) (obj + 4) \* D_eu_800A3530_c\[0\]);#    heading = (s32) (*(f32 *) (obj + 4) * D_800A3534_c[0]);# % flap
+s#    if (\*(s32 \*) (obj + 0x84) == 0) {#    if (*(s32 *) (obj + 0x84) != 0) {# % flap flapinit
+s#        \*(f32 \*) (obj + 0x80) = t + ((f32) (state - 0x400) - t) \* D_800A3534_c\[0\] \* D_800BE9A4;#        *(f32 *) (obj + 0x80) = t + ((f32) (state - 0x401) - t) * D_800A3534_c[0] * D_800BE9A4;# % s420 s41F s410
+s#        if (state != 0x420) {#        if (state != 0x41F) {# % s420 s41F
+s#            if (state - 1 == 0x400) {#            if (state - 1 == 0x401) {# % s401
+s#                \*(f32 \*) (obj + 0x80) = 0\.0f;#                *(f32 *) (obj + 0x80) = 1.0f;# % s401
+s#        \*(f32 \*) (obj + 0x80) += (0\.01953125f + 0\.00390625f \* (f32) i) \* D_800BE9A4;#        *(f32 *) (obj + 0x80) += (0.01953125f + 0.0078125f * (f32) i) * D_800BE9A4;# % flap
+s#        if (\*(s32 \*) (obj + 0x7C) < 0x14) {#        if (*(s32 *) (obj + 0x7C) <= 0x14) {# % wrap
+s#            \*(s32 \*) (obj + 0x7C) = 0xEC;#            *(s32 *) (obj + 0x7C) = 0xED;# % wrap
+s#            sc\[i\]\[1\] = func_150489B0((u32) \*(f32 \*) (obj + 0x80) \& 0xFF);#            sc[i][1] = func_15048A40((u32) *(f32 *) (obj + 0x80) \& 0xFF);# % s420 s410
+s#            t = \*(f32 \*) (obj + 0x80) \* D_800A3538_c\[0\] - D_800A353C_c\[0\] \* (f32) i;#            t = *(f32 *) (obj + 0x80) * D_800A3538_c[0] - D_800A353C_c[0] * (f32) (i + 1);# % flap
+s#            if (t <= 0\.0f) {#            if (t < 0.0f) {# % zero
+s#                t = 5\.0f;#                t = 4.0f;# % neg zero
+s#                s = func_15048A40((state >> 1) \& 0xFF);#                s = func_15048A40((state >> 2) \& 0xFF);# % flap
+s#                t = sinf(t) \* (s + s) + 5\.0f;#                t = sinf(t) * (s + s) + 6.0f;# % flap
+s#            sc\[i\]\[1\] = func_150489B0(a);#            sc[i][1] = func_150489B0(a + 1);# % flap
+s#    if (\*(s32 \*) (obj + 0x7C) != 0x420) {#    if (*(s32 *) (obj + 0x7C) != 0x41F) {# % flap s420
+s#            dy = \*(f32 \*) (pl + 0x18) - oy;#            dy = *(f32 *) (pl + 0x18) + oy;# % flap
+s#            if (dx \* dx + dy \* dy + dz \* dz < 3072\.0f) {#            if (dx * dx + dy * dy + dz * dz < 30.0f) {# % flap
+s#                \*(s32 \*) (obj + 0x7C) = (\*(u8 \*) (\*(u8 \*\*) (pl + 0x31C) + 0x57) == 1) ? 0x420 : 0x41F;#                *(s32 *) (obj + 0x7C) = (*(u8 *) (*(u8 **) (pl + 0x31C) + 0x56) == 1) ? 0x420 : 0x41F;# % flap r57
+s#            s = func_15048A40((tag + heading) \& 0xFF);#            s = func_15048A40((tag - heading) \& 0xFF);# % flap neghead
+s#            ps = sc\[tag >> 8\]\[0\];#            ps = sc[tag >> 8][1];# % flap
+s#            pc = sc\[tag >> 8\]\[1\];#            pc = sc[(tag >> 8) \& 1][1];# % flap
+s#            z = by \* ps + bz \* pc;#            z = by * ps - bz * pc;# % flap
+s#            y = by \* pc - bz \* ps;#            y = by * pc + bz * ps;# % flap
+s#            if (y < 1\.0f) {#            if (y < 0.0f) {# % flap flat
+s#                z -= y;#                z += y;# % flap flat
+s#            x = t \* c + z \* s;#            x = t * c - z * s;# % flap
+s#            z = z \* c - t \* s;#            z = z * c + t * s;# % flap
+s#            y = src\[1\];#            y = src[0];# % flap
+s#        dst\[1\] = (s32) (y \* ky + oy);#        dst[1] = (s32) (y * ky + oz);# % flap
+s#        dst\[2\] = (s32) (z \* kz + oz);#        dst[2] = (s32) (z * kz - oz);# % flap

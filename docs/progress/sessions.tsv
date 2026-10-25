@@ -83,3 +83,4 @@ P275	port-b	group A + carry-over	12	-	~130	merge P272; 11 compiled functions + 1
 P280	port-b	group A (split-P276)	9	-	~125	9 compiled functions to hand C (NM); difftest ARGMEM @K call index; 2 cross-file prototype fixes listed
 P287	port-b	group A	8	-	~130	prototype fixes (protocheck 0) + 8 compiled functions to hand C (NM); func_15171770 blocked on game_EF410 prototype
 P293	port-b	group A	7	-	~130	func_15171770 (EF410 prototype void) + 6 compiled functions to hand C (NM); memcpy EU key 10023360
+P298	port-b	group A	6	15448	~130	6 hand C (NM), 3 unkilled mutants explained; 5 left in group A

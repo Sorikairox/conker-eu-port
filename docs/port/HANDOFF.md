@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P298 (port-b, group A) (session P298, 2026-10-26). Details: `docs/port/sessions/P298.md`
+
+Hand C (NM), registry rows `P298`, setups / mutants in docs/port/sessions/p298: func_150C49A4 damage_smoke_update
+(F1E30), func_150DF240 big_explosion_spawn (10CA50; its block's func_151A74B0 prototype is s32), func_15119EB8
+mesh_cluster_flap_update, func_1511ADC0 mesh_wobble_update, func_1511D0CC rippling_wall_update (142E40),
+func_150B9B1C thrown_object_land_check (E66D0). All setups EQUIV; mutants all killed except 3 (P298.md: one hidden by
+stubbed sin/cos arguments, two exact float boundaries).
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1696), implicit_scan 0 NM+float, selftest 134/134,
+progress_nm `total 5916 3995 1716 205 5711 96.5% 2029892/2253856 (90.1%)`.
+
+## Next steps (from P298)
+1. Group A remaining (5): func_1500F3BC (3CA50, 369 B, not in the earlier lists), func_151BD040 (1E7CC0),
+   func_151D06FC (1FB080), func_150CEC50 (FC460), func_1519DF64 (1CACF0).
+
 ## P293 (port-b, group A) (session P293, 2026-10-26). Details: `docs/port/sessions/P293.md`
 
 game_EF410.c: func_15171770 prototype `s32` -> `void` (one-line exception; callers ignore v0). Hand C (NM), registry
