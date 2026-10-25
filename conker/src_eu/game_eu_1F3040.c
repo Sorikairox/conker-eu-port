@@ -254,7 +254,122 @@ void func_151C6424(f32 *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 arg4, u8 *arg
     func_151D9014(sp6C, sp54, 1, sp50, sp4E, sp4D, sp48, 0, 1.0f, 1.0f, 1, 0, 1, 0, arg5[0xC], arg5[1]);
 }
 
+#ifdef NON_MATCHING
+/* func_151307F0's sprite particle template (same layout as SprTmpl5268 in game_eu_101080) */
+typedef struct {
+    /* 0x00 */ s32 u0;
+    /* 0x04 */ s32 u4;
+    /* 0x08 */ u16 flags;
+    /* 0x0A */ s16 life;
+    /* 0x0C */ s32 uC;
+    /* 0x10 */ s32 u10;
+    /* 0x14 */ u8 colour[8]; /* 7 bytes, alpha */
+    /* 0x1C */ u8 u1C;
+    /* 0x1D */ u8 sprite;
+    /* 0x1E */ s16 u1E;
+    /* 0x20 */ s16 u20;
+    /* 0x22 */ s16 u22;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 size[2];
+    /* 0x30 */ f32 pos[3];
+    /* 0x3C */ f32 u3C[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ s32 mode;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8 u60[7];
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 u68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 u6C;
+} SprTmpl64F4;
+
+/* the 8-byte record copied to the particle's +0xB0 */
+typedef struct {
+    u8 u0;
+    u8 u1;
+    u8 pad2[2];
+    f32 u4;
+} DebrisExtra64F4;
+
+// debris_sprite_spawn: spawns one tumbling debris sprite (sprite 0x6C, colour E2 B2 60 FF 39 0F 00 + alpha) with
+// func_151307F0 at *pos moving with *vel. arg2 goes to template +0x54, spin is stored at the particle's +0xA8,
+// the record {1, 0, 0.703} at +0xB0. life -1 = 300 frames (and no mode bit 1), size sets both size fields, bright
+// selects u60[2] 0x1D / 0xA; random flip bits 0x40 / 0x80. Callers ignore the returned particle (void here, as in
+// every prototype).
+void func_151C64F4(s32 pos, f32 *vel, f32 arg2, f32 spin, s32 alpha, s32 life, f32 size, s32 bright, s32 room,
+                   u8 kind, s32 owner) {
+    /* one frame record, laid out like the asm's stack (sp30 extra, sp3C spin copy, sp40 template) */
+    struct {
+        DebrisExtra64F4 extra;
+        s32 pad8;
+        f32 spin;
+        SprTmpl64F4 t;
+    } f;
+    s32 bit40;
+    s32 bit1;
+    s32 bit80;
+    s32 p;
+
+    f.spin = spin;
+    f.t.sprite = 0x6C;
+    f.t.flags = 0x5103;
+    f.t.u0 = 0x200005;
+    f.t.u4 = 0;
+    f.t.uC = 0;
+    f.t.u10 = 0;
+    f.t.u1E = 0x14;
+    f.t.u20 = 0xC;
+    bit40 = (func_150ADA20() & 1) ? 0x40 : 0;
+    bit1 = ((s16) life == -1) ? 0 : 1;
+    bit80 = (func_150ADA20() & 1) ? 0x80 : 0;
+    f.t.mode = bit80 | bit1 | 6 | bit40 | 0xC200 | 0x800000;
+    f.t.u60[0] = 8;
+    f.t.u60[1] = 6;
+    f.t.u60[2] = (u8) bright ? 0x1D : 0xA;
+    f.t.u22 = 1;
+    f.t.u60[3] = 0xFF;
+    f.t.u60[4] = 0xFF;
+    f.t.u60[5] = 0;
+    f.extra.u0 = 1;
+    f.extra.u1 = 0;
+    f.t.colour[0] = 0xE2;
+    f.t.colour[1] = 0xB2;
+    f.t.colour[2] = 0x60;
+    f.t.colour[3] = 0xFF;
+    f.t.colour[4] = 0x39;
+    f.t.colour[5] = 0x0F;
+    f.t.colour[6] = 0;
+    f.t.u1C = 0xFF;
+    f.t.u24 = 1.0f;
+    f.extra.u4 = 0.703f;
+    f.t.pos[0] = ((f32 *) pos)[0];
+    f.t.pos[1] = ((f32 *) pos)[1];
+    f.t.pos[2] = ((f32 *) pos)[2];
+    f.t.u3C[0] = 0.0f;
+    f.t.u3C[1] = 0.0f;
+    f.t.u3C[2] = 0.0f;
+    f.t.vel[0] = vel[0];
+    f.t.vel[1] = vel[1];
+    f.t.vel[2] = vel[2];
+    f.t.u54 = arg2;
+    f.t.colour[7] = (u8) alpha;
+    if ((s16) life == -1) {
+        f.t.life = 300;
+    } else {
+        f.t.life = (s16) life;
+    }
+    f.t.size[1] = size;
+    f.t.size[0] = size;
+    p = func_151307F0((s32 *) &f.t, 1, room, 0x10, kind, owner);
+    if (p != 0) {
+        memcpy(p + 0xA8, &f.spin, 4);
+        memcpy(p + 0xB0, (f32 *) &f.extra, 8);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F3040/func_151C64F4.s")
+#endif
 
 typedef struct {
     s16 n0; s16 n1; s32 p; s16 c; s16 a; s16 d; s16 e;

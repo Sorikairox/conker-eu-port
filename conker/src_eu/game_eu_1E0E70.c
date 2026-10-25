@@ -71,7 +71,43 @@ void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+// rope_nodes_reset: lays the 10 rope nodes (obj + 0x48, 0x18 bytes: pos, vel) evenly from the start point +0x14
+// towards the end point +0x20 (step = (end - start) / 9, D_800AA774 .. D_800AA77C), zeroes their velocities and
+// clears flag 2 at +0x10. Returns 1. (Table entry next to func_151B42A0; also the fallback of func_151B458C /
+// func_151B4854, which call it with their own a0.)
+s32 func_151B402C(u8 *obj) {
+    f32 *start = (f32 *) (obj + 0x14);
+    f32 *end = (f32 *) (obj + 0x20);
+    f32 p[3];
+    f32 step[3];
+    f32 *node;
+    s32 i;
+
+    step[0] = (end[0] - start[0]) * 0.11111111f;
+    step[1] = (end[1] - start[1]) * 0.11111111f;
+    step[2] = (end[2] - start[2]) * 0.11111111f;
+    p[0] = start[0];
+    p[1] = start[1];
+    p[2] = start[2];
+    for (i = 0; i < 10; i++) {
+        node = (f32 *) (obj + 0x48 + i * 0x18);
+        node[0] = p[0];
+        node[1] = p[1];
+        node[2] = p[2];
+        node[3] = 0.0f;
+        node[4] = 0.0f;
+        node[5] = 0.0f;
+        p[0] += step[0];
+        p[1] += step[1];
+        p[2] += step[2];
+    }
+    obj[0x10] &= ~2;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B402C.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_151B42A0(u8 *arg0) {
     f32 sp80;
@@ -192,7 +228,7 @@ s32 func_151B44D8(u8 *arg0, f32 *arg1, u8 arg2)
 }
 
 #ifdef NON_MATCHING
-s32 func_151B402C(f32, f32);
+s32 func_151B402C(u8 *);
 
 s32 func_151B458C(u8 *arg0) {
     f32 sp110;
@@ -292,7 +328,7 @@ s32 func_151B458C(u8 *arg0) {
         temp_f6 = temp_f4 * 0.25f;
         sp6C = temp_f6;
         if (temp_f10_2 < sp6C) {
-            return func_151B402C(temp_f12, temp_f14);
+            return func_151B402C(arg0); /* P274: was (temp_f12, temp_f14); the asm passes its own a0 */
         }
         var_f20 = 0.0f;
         var_s1 = 0;

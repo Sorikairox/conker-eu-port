@@ -479,8 +479,10 @@ void func_151B34B4(u8 *arg0, s32 *arg1, u8 arg2)
 
 s32 func_151B4D88(void *arg0, void *arg1, s32 arg2, u8 arg3);
 
-void func_151B3550(u8 *arg0, s32 arg1, u8 arg2) {
-    func_151B4D88(arg0, arg0 + 0x150, arg1, arg2);
+/* P274: s32 (D_8008FE90 entry; func_151B44D8 and the C dispatchers test the result: the asm passes on
+   func_151B4D88's v0) */
+s32 func_151B3550(u8 *arg0, s32 arg1, u8 arg2) {
+    return func_151B4D88(arg0, arg0 + 0x150, arg1, arg2);
 }
 
 void func_151B3580(struct_eu_1DFE20 *arg0) {

@@ -16,7 +16,93 @@ void func_15171434(s32 arg0, u8 arg1, s32 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_1518C900(s32);
+void func_15168BE4(u8 *arg0, u8 arg1, s32 arg2);
+
+/* D_800A72B8: the 6 pieces (model id, offset, velocity) */
+typedef struct {
+    u16 model;
+    u8 pad2[2];
+    f32 offset[3];
+    f32 vel[3];
+} Piece714BC;
+extern Piece714BC D_800A72B8[6];
+
+/* func_15168BE4's debris template */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];
+    /* 0x18 */ f32 spin[3];
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 u28;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 scale[3];
+    /* 0x3C */ s32 life;
+    /* 0x40 */ s32 model;
+    /* 0x44 */ s32 u44; /* not set */
+    /* 0x48 */ f32 u48[3];
+    /* 0x54 */ u8 u54[6];
+    /* 0x5A */ u8 id;
+    /* 0x5B */ u8 u5B;
+    /* 0x5C */ u8 u5C;
+    /* 0x5D */ u8 u5D;
+} Debris714BC;
+
+// barrel_break_pieces: breaks the object into the 6 pieces of D_800A72B8 (func_15168BE4 debris, model
+// func_1518C900(id)) at the object position (+0x10 / +0x12 / +0x14) plus each piece offset, with the piece velocity,
+// spin from the offset (x, |y|, z times 0.09 / 0.23 / 0.09), u24 = vel x * 0.1, random u28 -2..2 / u2C -5..5,
+// scale 2, life 60; then sets +0x6E to 1. kind / arg2 go to func_15168BE4.
+void func_151714BC(u8 *obj, u8 kind, s32 arg2) {
+    Debris714BC t;
+    Piece714BC *pc = D_800A72B8;
+    f32 x, y, z;
+    s32 i;
+
+    t.u5C = 2;
+    t.u5D = 1;
+    t.u5B = 6;
+    t.u54[5] = 0;
+    x = *(s16 *) (obj + 0x10);
+    y = *(s16 *) (obj + 0x12);
+    z = *(s16 *) (obj + 0x14);
+    t.vel[0] = 0.0f;
+    t.vel[1] = 0.0f;
+    t.vel[2] = 0.0f;
+    t.scale[0] = 2.0f;
+    t.scale[1] = 2.0f;
+    t.scale[2] = 2.0f;
+    t.life = 0x3C;
+    t.u54[0] = 2;
+    t.u54[1] = 0xFF;
+    t.u54[2] = 0;
+    t.u54[3] = 0;
+    t.u54[4] = 0;
+    t.u48[0] = 0.3f;  /* D_800A7378 */
+    t.u48[1] = -0.7f; /* D_800A737C */
+    t.u48[2] = -0.2f; /* D_800A7380 */
+    for (i = 0; i < 6; i++, pc++) {
+        t.model = func_1518C900(pc->model);
+        t.id = pc->model;
+        t.pos[0] = pc->offset[0] + x;
+        t.pos[1] = pc->offset[1] + y;
+        t.pos[2] = pc->offset[2] + z;
+        t.spin[0] = pc->offset[0] * 0.09f;        /* D_800A738C */
+        t.spin[1] = fabsf(pc->offset[1]) * 0.23f; /* D_800A7388 */
+        t.spin[2] = pc->offset[2] * 0.09f;
+        t.vel[0] = pc->vel[0];
+        t.u24 = t.vel[0] * 0.1f;                  /* D_800A7384 */
+        t.vel[1] = pc->vel[1];
+        t.vel[2] = pc->vel[2];
+        t.u28 = func_150ADA68() * 4.0f - 2.0f;
+        t.u2C = func_150ADA68() * 10.0f - 5.0f;
+        func_15168BE4((u8 *) &t, kind, arg2);
+    }
+    obj[0x6E] = 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19E910/func_151714BC.s")
+#endif
 
 void func_15171734(u8 *arg0) {
     if (arg0[4] == 0x33) {

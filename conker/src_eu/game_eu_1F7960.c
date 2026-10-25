@@ -898,7 +898,26 @@ void func_151CC840(s32 arg0) {
     func_15155C9C((f32 *) &sp1C, 0x46);
 }
 
+#ifdef NON_MATCHING
+// glow_colour_on_message: message handler (same table row as func_151CBEC8). On message 0x46 whose key (*arg1)
+// matches the record's (+0x70): sets flag 2 at +0x7C, the fade value +0xC0 to 35, and copies the four colour floats
+// +0x9C .. +0xA8 (as u32 bytes) to the colour bytes +0x2B .. +0x2E.
+void func_151CC86C(u8 *arg0, u8 *arg1, u8 arg2) {
+    u8 *rec = arg0 + 0x70;
+
+    if (arg2 != 0x46 || *(s32 *) arg1 != *(s32 *) rec) {
+        return;
+    }
+    rec[0xC] |= 2;
+    *(f32 *) (rec + 0x50) = 35.0f;
+    arg0[0x2B] = (u32) *(f32 *) (rec + 0x2C);
+    arg0[0x2C] = (u32) *(f32 *) (rec + 0x30);
+    arg0[0x2D] = (u32) *(f32 *) (rec + 0x34);
+    arg0[0x2E] = (u32) *(f32 *) (rec + 0x38);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CC86C.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_151CCAD4(u8 *arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5) {
