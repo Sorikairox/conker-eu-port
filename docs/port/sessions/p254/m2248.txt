@@ -1,0 +1,42 @@
+\#^    if (\*(s8 \*) (arg0 + 0x2C) < 2) {$#s/< 2/< 3/
+\#^    owner = \*(u8 \*\*) (arg0 + 0x98);$#s/0x98/0x94/
+\#^    func_151D6310((s32 \*) (arg0 + 0x84), slot, (arg0\[0x25\] << 5) + 0xA0, (s32 \*) &vtx, NULL);$#s/0x84/0x88/
+\#^    func_151D6310((s32 \*) (arg0 + 0x84), slot, (arg0\[0x25\] << 5) + 0xA0, (s32 \*) &vtx, NULL);$#s/<< 5/<< 4/
+\#^    func_151D6310((s32 \*) (arg0 + 0x84), slot, (arg0\[0x25\] << 5) + 0xA0, (s32 \*) &vtx, NULL);$#s/0xA0/0xA4/
+\#^    func_151D6310((s32 \*) (arg0 + 0x84), slot, (arg0\[0x25\] << 5) + 0xA0, (s32 \*) &vtx, NULL);$#s/slot,/0,/
+\#^    if (vtx == NULL) {$#s/==/!=/
+\#^    flag = 1;$#s/1/2/
+\#^        func_1513F4E4(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0xBC\],/0xBB],/
+\#^        func_1513F4E4(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/0, 0xBC, 0, 0/0, 0xBB, 0, 0/
+\#^        func_1513F4E4(func_15142B7C(func_15142E24((u8 \*) dl, &D_80090F10\[0xBC\], 0, 0, 0, 0, 0xBC, 0, 0, &flag, 3),$#s/&flag, 3)/\&flag, 2)/
+\#^                                    0x220005, 0x1D0600),$#s/0x1D0600/0x1D0601/
+\#^                      0x4C, &flag),$#s/0x4C/0x4E/
+\#^        D_800D30BC | 0x80000 | 0x2CA0, \*(s32 \*) (D_800A4EA8 + 0xC) | \*(s32 \*) (D_800A4EA8 + 8), &flag);$#s/0x2CA0/0x2CA1/
+\#^        D_800D30BC | 0x80000 | 0x2CA0, \*(s32 \*) (D_800A4EA8 + 0xC) | \*(s32 \*) (D_800A4EA8 + 8), &flag);$#s/+ 0xC)/+ 0x4)/
+\#^    cur = \*(s8 \*) (arg0 + 0x2E) - 1;$#s/- 1/- 2/
+\#^    if (cur < 0) {$#s/< 0/<= 0/
+\#^    next = cur - 1;$#s/- 1/- 2/
+\#^    alpha_a = (p\[0x14\] \* owner\[8\]) >> 8;$#s/>> 8/>> 7/
+\#^    alpha_a = (p\[0x14\] \* owner\[8\]) >> 8;$#s/owner\[8\]/owner[9]/
+\#^    ax = \*(f32 \*) (p + 0x20) \* \*(f32 \*) (p + 0x1C);$#s/0x20/0x24/
+\#^    az = \*(f32 \*) (p + 0x24) \* \*(f32 \*) (p + 0x1C);$#s/0x1C/0x18/
+\#^    ta = \*(f32 \*) (p + 0x18);$#s/0x18/0x1C/
+\#^    ti = (s32) ta;$#s/ta/tb/
+\#^    vtx\[0\] = (s32) (a\[0\] + ax);$#s/+ ax/- ax/
+\#^    vtx\[2\] = (s32) (a\[2\] + az);$#s/+ az/+ ax/
+\#^    vtx\[0\] = (s32) (a\[0\] - ax);$#s/a\[0\]/a[1]/
+\#^    vtx\[2\] = (s32) (a\[2\] - az);$#s/- az/+ az/
+\#^        ti = (s32) tb;$#s/tb/ta/
+\#^        vtx\[0\] = (s32) (b\[0\] + bx);$#s/+ bx/- bx/
+\#^        vtx\[2\] = (s32) (b\[2\] - bz);$#s/b\[2\]/b[1]/
+\#^        gfx\[0\] = 0x01004008; /\* gSPVertex(vtx - 4, 4, 0) \*/$#s/0x01004008/0x01004009/
+\#^        gfx\[1\] = (u32) (vtx - 0x20);$#s/0x20/0x18/
+\#^        gfx\[1\] = 0x00020604;$#s/0x00020604/0x00020605/
+\#^        if (ta < tb) {$#s/</<=/
+\#^        if (ta < tb) {$#s/ta < tb/tb < ta/
+\#^            memcpy(vtx, vtx - 0x10, 0x20);$#s/0x20)/0x10)/
+\#^            memcpy(vtx, vtx - 0x10, 0x20);$#s/vtx - 0x10/vtx - 0x8/
+\#^        if (cur == \*(s8 \*) (arg0 + 0x2D)) {$#s/0x2D/0x2E/
+\#^        ta = \*(f32 \*) (points + cur \* 0x28 + 0x18);$#s/cur/next/
+\#^        tb = \*(f32 \*) (p + 0x18);$#s/0x18/0x1C/
+\#^    return (s32) gfx;$#s/gfx/dl/

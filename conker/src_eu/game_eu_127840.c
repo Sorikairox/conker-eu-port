@@ -315,7 +315,101 @@ void func_150F9BB0(u8 *obj, u8 alpha, s32 owner) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150F9BB0.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_15145EA4(f32 **, f32 **, void *, s32);
+extern f32 D_800A209C[3]; /* the two emitter offsets (bone space) */
+extern f32 D_800A20A8[3];
+extern f32 D_800A20B4[3]; /* the two direction points */
+extern f32 D_800A20C0[3];
+extern f32 D_800A2164;
+// twin_emitters_follow_owner: handler 15 of D_8008A980 (`void (u8 *)`). Ends the effect (+0xE = -1) when the owner
+// (+0x28) is gone or its id +0x3B no longer matches +0x2C. With the owner's bone matrices (+0x1D4) it transforms the
+// four offsets D_800A209C..C0 by the first matrix (func_15145EA4) and gives each of the two emitter pairs (+0x30 / +0x38
+// and +0x34 / +0x3C) its position and direction: the first kind gets the flag 1 at +0x168, the second the flag 2 (and
+// loses 4) at +0x58. Without matrices both flags are cleared. Then the first kind's +0x158 / +0x15C become 0 / 0 while
+// +0xE < 10, else 6 / 15, and the second kind's +0x174 becomes 0, else D_800A2164 (1.306).
+void func_150FA738(u8 *arg0) {
+    u8 *owner = *(u8 **) (arg0 + 0x28);
+    u8 **a = (u8 **) (arg0 + 0x30);
+    u8 **b = (u8 **) (arg0 + 0x38);
+    f32 *src[4];
+    f32 *dst[4];
+    f32 pos[2][3]; /* sp88, sp94 */
+    f32 dir[2][3]; /* sp70, sp7C */
+    u8 *p;
+    u8 i;
+
+    if (*(s32 *) owner == 0 || arg0[0x2C] != owner[0x3B]) {
+        *(s16 *) (arg0 + 0xE) = -1;
+        return;
+    }
+    if (*(u8 **) (owner + 0x1D4) != NULL) {
+        src[0] = D_800A209C;
+        src[1] = D_800A20A8;
+        src[2] = D_800A20B4;
+        src[3] = D_800A20C0;
+        dst[0] = pos[0];
+        dst[1] = pos[1];
+        dst[2] = dir[0];
+        dst[3] = dir[1];
+        func_15145EA4(src, dst, *(u8 **) (owner + 0x1D4) + 0x40, 4);
+        for (i = 0; i < 2; i++) {
+            p = a[i];
+            if (p != NULL) {
+                p[0x168] |= 1;
+                ((f32 *) (p + 0x34))[0] = pos[i][0];
+                ((f32 *) (p + 0x34))[1] = pos[i][1];
+                ((f32 *) (p + 0x34))[2] = pos[i][2];
+                ((f32 *) (p + 0x40))[0] = dir[i][0];
+                ((f32 *) (p + 0x40))[1] = dir[i][1];
+                ((f32 *) (p + 0x40))[2] = dir[i][2];
+            }
+            p = b[i];
+            if (p != NULL) {
+                *(s32 *) (p + 0x58) |= 2;
+                *(s32 *) (p + 0x58) &= ~4;
+                ((f32 *) (p + 0x34))[0] = pos[i][0];
+                ((f32 *) (p + 0x34))[1] = pos[i][1];
+                ((f32 *) (p + 0x34))[2] = pos[i][2];
+                ((f32 *) (p + 0x40))[0] = dir[i][0];
+                ((f32 *) (p + 0x40))[1] = dir[i][1];
+                ((f32 *) (p + 0x40))[2] = dir[i][2];
+            }
+        }
+    } else {
+        for (i = 0; i < 2; i++) {
+            if (a[i] != NULL) {
+                a[i][0x168] &= ~1;
+            }
+            if (b[i] != NULL) {
+                *(s32 *) (b[i] + 0x58) &= ~2;
+            }
+        }
+    }
+    for (i = 0; i < 2; i++) {
+        p = a[i];
+        if (p != NULL) {
+            if (*(s16 *) (arg0 + 0xE) < 10) {
+                *(f32 *) (p + 0x158) = 0.0f;
+                *(f32 *) (p + 0x15C) = 0.0f;
+            } else {
+                *(f32 *) (p + 0x158) = 6.0f;
+                *(f32 *) (p + 0x15C) = 15.0f;
+            }
+        }
+        p = b[i];
+        if (p != NULL) {
+            if (*(s16 *) (arg0 + 0xE) < 10) {
+                *(f32 *) (p + 0x174) = 0.0f;
+            } else {
+                *(f32 *) (p + 0x174) = D_800A2164;
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FA738.s")
+#endif
 
 void func_150FA9E8(u8 *arg0, s32 arg1, u8 arg2) {
     s32 temp_t6;
@@ -585,7 +679,39 @@ void func_150FAFC0(u8 arg0, s32 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_1514470C(u8 *node, u8 *pos);
+void func_150F4AF0(u8 *arg0, u8 *arg1, u8 arg2, f32 arg3, f32 arg4, f32 arg5, u8 arg6, s32 arg7, u8 arg8, s32 arg9);
+extern u8 D_80088ECC;   /* number of bolt styles */
+extern u8 *D_80088ED0;  /* per style: 2 bytes, [1] = colour index */
+extern f32 *D_80088ED4; /* per style: width */
+// arc_bolts_emit: handler 25 of D_8008A980 (`void (u8 *)`). Accumulates (0.08 + 0.18 * random) * D_800BE9A4 bolts
+// per frame in +0x30; for each whole bolt it spawns one (func_150F4AF0) between the positions of the nodes +0x28 and
+// +0x2C (func_1514470C), with a random style (D_80088ECC styles: colour D_80088ED0[2 * i + 1], width D_80088ED4[i] *
+// (1..2)), length 30..55 (and 1 / length), life 750..752, and the object's +0x0C / +0x01 bytes.
+void func_150FB06C(u8 *arg0) {
+    u8 *ends = arg0 + 0x28;
+    f32 from[3];
+    f32 to[3];
+    u32 style;
+    f32 len;
+    f32 width;
+
+    ((f32 *) ends)[2] += (0.0800000057f + func_150ADA68() * 0.18f) * D_800BE9A4;
+    while (1.0f < ((f32 *) ends)[2]) {
+        func_1514470C(((u8 **) ends)[0], (u8 *) from);
+        func_1514470C(((u8 **) ends)[1], (u8 *) to);
+        style = (u8) ((u32) func_150ADA20() % D_80088ECC);
+        len = func_150ADA68() * 25.0f + 30.0f;
+        width = func_150ADA68();
+        func_150F4AF0((u8 *) from, (u8 *) to, D_80088ED0[style * 2 + 1], len, 1.0f / len,
+                      (width * 1.0f + 1.0f) * D_80088ED4[style], 1, (u32) func_150ADA20() % 3 + 750, arg0[0xC], arg0[1]);
+        ((f32 *) ends)[2] -= 1.0f;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_127840/func_150FB06C.s")
+#endif
 
 void func_150FB264(struct102 *arg0, s32 arg1, u8 arg2) {
     if ((arg2 == 0x4E) || (arg2 == 0x4F)) {

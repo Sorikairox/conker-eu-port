@@ -1,0 +1,30 @@
+\#^    u8 \*owner = \*(u8 \*\*) (arg0 + 0x98);$#s/0x98/0x94/
+\#^    u8 \*points = \*(u8 \*\*) (arg0 + 0x94);$#s/0x94/0x98/
+\#^    for (obj = (u8 \*) D_800CC2D0; obj != (u8 \*) &D_800D121C; obj += 0x32C) {$#s/0x32C/0x330/
+\#^    for (obj = (u8 \*) D_800CC2D0; obj != (u8 \*) &D_800D121C; obj += 0x32C) {$#s/obj !=/obj </
+\#^        if (\*(s32 \*) obj == 0 || obj\[0x65\] != 0 || obj\[0x3B\] == (\*(u8 \*\*) owner)\[0x3B\]) {$#s/== 0/!= 0/
+\#^        if (\*(s32 \*) obj == 0 || obj\[0x65\] != 0 || obj\[0x3B\] == (\*(u8 \*\*) owner)\[0x3B\]) {$#s/0x65/0x64/
+\#^        if (\*(s32 \*) obj == 0 || obj\[0x65\] != 0 || obj\[0x3B\] == (\*(u8 \*\*) owner)\[0x3B\]) {$#s/obj\[0x3B\]/obj[0x3A]/
+\#^        if (\*(s32 \*) obj == 0 || obj\[0x65\] != 0 || obj\[0x3B\] == (\*(u8 \*\*) owner)\[0x3B\]) {$#s/owner)\[0x3B\]/owner)[0x3A]/
+\#^        i = \*(s8 \*) (arg0 + 0x2E);$#s/0x2E/0x2D/
+\#^        i = \*(s8 \*) (arg0 + 0x2E);$#s/(s8 \*)/(u8 *)/
+\#^            if (i < 0) {$#s/< 0/<= 0/
+\#^                i = arg0\[0x25\] - 1;$#s/- 1/- 2/
+\#^            pt = (f32 \*) (points + i \* 0x24);$#s/0x24/0x20/
+\#^            radius = \*(s16 \*) (obj + 0xE4);$#s/0xE4/0xE6/
+\#^            height = \*(s16 \*) (obj + 0xE6);$#s/0xE6/0xE4/
+\#^            dx = pt\[0\] - \*(f32 \*) (obj + 0x14);$#s/pt\[0\]/pt[1]/
+\#^            dz = pt\[2\] - \*(f32 \*) (obj + 0x1C);$#s/0x1C/0x18/
+\#^            dy = (pt\[1\] - (\*(f32 \*) (obj + 0x18) + \*(s16 \*) (obj + 0xE8))) \* ((1\.0f + radius / height) \* 0\.5f);$#s/+ \*(s16 \*) (obj + 0xE8)/- *(s16 *) (obj + 0xE8)/
+\#^            dy = (pt\[1\] - (\*(f32 \*) (obj + 0x18) + \*(s16 \*) (obj + 0xE8))) \* ((1\.0f + radius / height) \* 0\.5f);$#s/1\.0f +/2.0f +/
+\#^            dy = (pt\[1\] - (\*(f32 \*) (obj + 0x18) + \*(s16 \*) (obj + 0xE8))) \* ((1\.0f + radius / height) \* 0\.5f);$#s/\* 0\.5f/* 0.25f/
+\#^            dy = (pt\[1\] - (\*(f32 \*) (obj + 0x18) + \*(s16 \*) (obj + 0xE8))) \* ((1\.0f + radius / height) \* 0\.5f);$#s/radius \/ height/height \/ radius/
+\#^            if (dx \* dx + dy \* dy + dz \* dz < radius \* radius + 2500\.0f) {$#s/2500\.0f/2600.0f/
+\#^            if (dx \* dx + dy \* dy + dz \* dz < radius \* radius + 2500\.0f) {$#s/< radius/> radius/
+\#^            if (dx \* dx + dy \* dy + dz \* dz < radius \* radius + 2500\.0f) {$#s/dy \* dy +/dy * dx +/
+\#^            if (dx \* dx + dy \* dy + dz \* dz < radius \* radius + 2500\.0f) {$#s/radius \* radius/radius/
+\#^                    (\*(s8 \*) (arg0 + 0x2D))++;$#s/++/--/
+\#^                    if (arg0\[0x25\] == \*(s8 \*) (arg0 + 0x2D)) {$#s/==/</
+\#^                        \*(s8 \*) (arg0 + 0x2D) = 0;$#s/= 0/= 1/
+\#^                    (\*(s8 \*) (arg0 + 0x2C))--;$#s/0x2C/0x2F/
+\#^    return 1;$#s/1/0/
