@@ -10,6 +10,19 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P304 (port-f, group D2) (session P304, 2026-10-26). Details: `docs/port/sessions/P304.md`
+
+Hand C (NM), registry rows `P304`, setups / mutants in docs/port/sessions/p304: func_150E5384 impact_dust_spawn
+(39/39), func_150DD420 fountain_emit (55/56), func_150DCAD8 fountain_step (64/64), func_150DDBC0 fountain_draw (30/31);
+the three fountain handlers (entry 4 of D_8008A5A0 / D_8008A5DC / D_8008A644) share types in a types-only NM block.
+Survivors are equivalent (P304.md). Lessons: no `#ifndef/#endif` inside a function's NM block (difftest's splice drops
+the candidate); func_150DDBC0's asm reads the head alpha through an unset stack index (C uses the newest point).
+progress_nm `total 5916 3995 1706 215 5701 96.4% 2021748/2253856 (89.7%)`.
+
+## Next steps (from P304, group D2 left)
+1. func_150D7E38 (105140, 610) and func_150F3A74 (1207F0, 959): both entries of table D_800863B4 (+0x80 / +0x54);
+   check that table's dispatcher signature first.
+
 ## P297 (port-d, group D) (session P297, 2026-10-26). Details: `docs/port/sessions/P297.md`
 
 Hand C (NM), registry rows `P297`, setups / mutants in docs/port/sessions/p297: func_150BF71C lift_platform_update

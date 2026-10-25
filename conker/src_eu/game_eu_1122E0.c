@@ -250,7 +250,179 @@ void func_150E523C(E523S *arg0) {
     arg0->u90 += D_800BE9E4;
 }
 
+#ifdef NON_MATCHING
+/* Dust particle record for func_15167D84 (0x38 bytes, cleared first). */
+typedef struct {
+    u8 *tex;        /* +0x00 texture / animation */
+    u8 pad04[8];
+    s16 u0C, u0E;   /* +0x0C */
+    s16 x, y, z;    /* +0x10 position */
+    s16 vx, vz;     /* +0x16 velocity x / z */
+    u8 pad1A[5];
+    u8 u1F;         /* +0x1F */
+    s16 vy;         /* +0x20 velocity y */
+    s16 gravity;    /* +0x22 */
+    s16 size0;      /* +0x24 start size */
+    s16 size1;      /* +0x26 end size */
+    s16 u28;        /* +0x28 0x182 or 0x183 */
+    u8 u2A;         /* +0x2A */
+    u8 pad2B;
+    u8 r, g, b, a;  /* +0x2C colour */
+    u8 pad30[4];
+    s16 u34;        /* +0x34 */
+    u8 pad36[2];
+} ImpactDust;
+void func_15049350(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
+extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last func_15049350 triangle */
+void func_150440A0(f32 mtx[4][4], f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy,
+                   f32 upz);
+f32 func_150489B0(u8);
+void *func_15167D84(void *, s32, s32, s8, u8, s32);
+void func_150E5AD8(f32, f32, f32, f32, f32, f32, s32);
+extern u8 D_80091C2C[], D_80091C50[], D_80091C5C[], D_800908D0[];
+extern u8 D_800D9D80[]; /* 28-byte records; +0x10..+0x18 a direction (f32 x3) */
+
+// impact_dust_spawn: the dust sub-effect of an impact (func_150E4AD0) at (x, y, z). Kind (flag 0x8000 = only update
+// the record, spawn nothing) picks the texture: 0x11 D_80091C2C, 4 / 9 / 10 D_80091C50, 8 D_800908D0 (fixed sizes
+// 180..380), else D_80091C5C. With the triangle `tri` (three s16 vertex pointers) the dust leaves along its normal
+// (func_15049350 plane; nothing at all for a degenerate one): a lookat matrix on the normal turns the cone, and
+// record `slot` of D_800D9D80 gets the normal's direction at +0x10. A flat (|ny| >= 0.9) or missing triangle, or
+// slot 0xFF, sprays upwards, and the record's byte +3 is cleared. size 0 / 2 spray 12 particles (2: random speed
+// scale, double speed, stronger gravity), size 1 one; it stops when func_15167D84 has no free record. Kinds 4 / 5 /
+// 9 then add a smoke puff (func_150E5AD8) one time in five. The asm passes size as an 8th argument, which
+// func_150E5AD8 does not take. Callers ignore v0 (v0use).
+void func_150E5384(f32 x, f32 y, f32 z, s32 kind, s32 size, s32 *tri, s32 slot) {
+    f32 v[3][3];
+    f32 mtx[4][4];
+    ImpactDust rec;
+    f32 dx, dy, dz;
+    f32 nx, ny, nz, len;
+    f32 base = 815.0f;
+    f32 sizeF, sizeBase, sizeRange;
+    f32 speed, s, c, kx, kz;
+    s32 flat = 0;
+    s32 fast = 0;
+    s32 count = 1;
+    s32 more = 1;
+    s32 quiet = 0;
+    s32 i;
+    u8 angle;
+
+    bzero(&rec, sizeof(rec));
+    if (kind & 0x8000) {
+        quiet = 1;
+        kind ^= 0x8000;
+    }
+    if (tri != NULL) {
+        for (i = 0; i < 3; i++) {
+            v[i][0] = ((s16 **) tri)[i][0];
+            v[i][1] = ((s16 **) tri)[i][1];
+            v[i][2] = ((s16 **) tri)[i][2];
+        }
+        func_15049350(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
+        nx = -D_800CC630;
+        ny = -D_800CC634;
+        nz = -D_800CC638;
+        len = sqrtf(nx * nx + ny * ny + nz * nz);
+        if (len < 0.0001f) {
+            return;
+        }
+        dx = nx / len;
+        dy = ny / len;
+        dz = nz / len;
+        if (slot != 0xFF && fabsf(dy) < 0.9f) {
+            func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);
+            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),
+                          (f32 *) (D_800D9D80 + slot * 28 + 0x14), (f32 *) (D_800D9D80 + slot * 28 + 0x18));
+        } else {
+            flat = 1;
+        }
+    } else {
+        flat = 1;
+    }
+    if (slot != 0xFF && flat) {
+        D_800D9D80[slot * 28 + 3] = 0;
+    }
+    if (quiet) {
+        return;
+    }
+    rec.x = (s32) x;
+    rec.y = (s32) y;
+    rec.z = (s32) z;
+    rec.r = 0xB4;
+    rec.g = 0xB4;
+    rec.b = 0xB4;
+    rec.a = 0xFF;
+    rec.u1F = 0xFF;
+    rec.u34 = 0;
+    rec.u0C = 0;
+    rec.u0E = 0;
+    sizeF = D_800A14E0[size][1];
+    sizeBase = sizeF * 95.0f * 0.00390625f;
+    sizeRange = sizeF * 130.0f * 0.00390625f;
+    if (kind == 0x11) {
+        rec.tex = D_80091C2C;
+    } else if (kind == 10) {
+        rec.tex = D_80091C50;
+    } else if (kind == 4 || kind == 9) {
+        rec.tex = D_80091C50;
+    } else if (kind == 8) {
+        rec.tex = D_800908D0;
+        sizeBase = 180.0f;
+        sizeRange = 200.0f;
+    } else {
+        rec.tex = D_80091C5C;
+    }
+    if (size == 2) {
+        fast = 1;
+        rec.gravity = -0x175;
+        count = 12;
+        base = base * (0.5f * (func_151EFDD0() % 3 + 1));
+    } else if (size == 0) {
+        rec.gravity = -0xDA;
+        base = base * 0.5f;
+        count = 12;
+    } else {
+        rec.gravity = -0xDA;
+    }
+    while (count-- != 0 && more) {
+        speed = func_150ADA68() * 957.0f + base;
+        angle = func_151EFDD0() % 256;
+        if (fast) {
+            speed += speed;
+        }
+        if (flat) {
+            dx = func_15048A40(angle);
+            dy = 1.0f;
+            dz = func_150489B0(angle);
+        } else {
+            s = func_15048A40(angle);
+            c = func_150489B0(angle);
+            func_150A7E40(mtx, s * 0.5f, c * 0.5f, 1.0f, &dx, &dy, &dz);
+        }
+        kx = 0.315f * dx;
+        kz = 0.315f * dz;
+        rec.u28 = func_151EFDD0() % 2 + 0x182;
+        rec.vx = (s32) (speed * kx);
+        rec.vy = (s32) (speed * dy);
+        rec.vz = (s32) (speed * kz);
+        func_151EFDD0();
+        rec.u2A = 10;
+        rec.size0 = (s32) (func_150ADA68() * sizeRange + sizeBase);
+        rec.size1 = (s32) (func_150ADA68() * sizeRange + sizeBase);
+        if (func_15167D84(&rec, 0, 0, -1, 0xFF, 0) == NULL) {
+            more = 0;
+        }
+    }
+    if (kind == 4 || kind == 9 || kind == 5) {
+        if (func_151EFDD0() % 5 == 0) {
+            func_150E5AD8(x, y, z, dx, dy, dz, kind);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/func_150E5384.s")
+#endif
 
 s32 func_15132FBC(void *, s32, s32, s32, u8, s32);
 s32 func_151EFDD0(void);
