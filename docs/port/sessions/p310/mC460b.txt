@@ -1,0 +1,2 @@
+# P310 mutants for func_1506C460: the m460 survivor with a -0.0 / +0.0 equality setup
+/if (\*(f32 \*) (obj + 0x18) < lift) {/s/</<=/ % targetnz targeteq

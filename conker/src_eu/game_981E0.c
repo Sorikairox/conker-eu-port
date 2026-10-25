@@ -744,7 +744,267 @@ void func_1506C43C(void) {
 }
 
 // requires jump table
+#ifdef NON_MATCHING
+struct127 *func_1505EEB0(s32, s32 *);
+void *func_1505ED34(void);
+u8 *func_1515D9F0(s32 arg0);
+void *func_1515D9B0(void);
+s32 func_1505DADC(u8 *, u16 *, s32, s32, s32);
+void *allocate_memory(s32, s32, s32, s32);
+u8 *func_15159140(u8 *arg0, u8 arg1, s32 arg2);
+void func_1506B04C(u8 *, s32, void *);
+extern f32 D_800CC704;
+extern f32 D_800CC70C;
+extern u8 D_80099E84[];
+extern s16 D_eu_80099E98[][4];
+// P310: copies of the asm's injected rodata (D_8009A050 / D_8009A054); 1-element arrays so IDO keeps them in .rodata (P283)
+static const f32 sCamDegToAngle[1] = { 182.04445f };
+static const f32 sCamRadToAngle[1] = { 10430.378f };
+
+// camera_object_spawn: P310: takes a camera object slot from the D_800CC2D0 pool (25 records of 0x32C; a recycled
+// type-4 slot via func_1505EEB0 when 5 or more cameras are live or the free slot is out of range), places it at
+// `target`, above the player (+50), or at the player's mode attach point (D_eu_80099E98[mode] = x, y, z, matrix index
+// in the player's +0x1D4 matrices; fixed-point when D_800C42B0), lifts it to at least player y + floor_off, starts
+// its mode sound (not modes 0 / 1), then sets yaw (degrees -> binary angle - 90 deg), distance / rise / height with the
+// flag bits (1 = no aim search, 2 = face the first object, 4 = aim height at it, 8 = random yaw jitter, 0x10 = orbit
+// the object the player follows), the style fields and per-mode setup. `snap` (11th arg) allocates a 0x1C0 history
+// buffer. Returns the camera object.
+s32 func_1506C460(f32 yaw, f32 dist, f32 rise, f32 height, u8 alpha, s32 mode, f32 floor_off, f32 smooth, s32 target,
+                  s32 flags, s32 snap) {
+    u8 *base = (u8 *) D_800CC2D0;
+    u8 *player;
+    u8 *obj;
+    u8 *rec;
+    u8 *mtx;
+    s16 *attach;
+    f32 (*m)[4];
+    f32 mf[4][4];
+    f32 pos[3];
+    f32 orbit[3];
+    f32 lift;
+    f32 aimY;
+    f32 d;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    f32 pitch;
+    f32 unused;
+    s32 count;
+    s32 slot;
+    s32 i;
+    s32 sound;
+    s32 hit;
+    s16 angle;
+    u16 aim;
+
+    count = 0;
+    for (rec = base; rec < (u8 *) &D_800D121C; rec += 0x32C) {
+        if (*(s32 *) rec == 4) {
+            count++;
+        }
+    }
+    if (count >= 5) {
+        obj = (u8 *) func_1505EEB0(4, &slot);
+        func_15060F28((struct127 *) obj, 0);
+    } else {
+        obj = (u8 *) func_1505ED34();
+        if ((u32) ((obj - base) / 0x32C) >= 25 && count > 0) {
+            obj = (u8 *) func_1505EEB0(4, &slot);
+            func_15060F28((struct127 *) obj, 0);
+        }
+    }
+    obj[0x136] = 0xB;
+    *(s32 *) obj = 4;
+    obj[0x1CA] = 1;
+    *(u16 *) (obj + 0x7A) = *(u16 *) ((u8 *) D_800D154C + 0x7A);
+    if ((f32 *) target != NULL) {
+        *(f32 *) (obj + 0x14) = ((f32 *) target)[0];
+        *(f32 *) (obj + 0x18) = ((f32 *) target)[1];
+        *(f32 *) (obj + 0x1C) = ((f32 *) target)[2];
+    } else {
+        player = (u8 *) D_800D154C;
+        mtx = *(u8 **) (player + 0x1D4);
+        if (mtx == NULL) {
+            *(f32 *) (obj + 0x14) = *(f32 *) (player + 0x14);
+            *(f32 *) (obj + 0x18) = *(f32 *) ((u8 *) D_800D154C + 0x18) + 50.0f;
+            *(f32 *) (obj + 0x1C) = *(f32 *) ((u8 *) D_800D154C + 0x1C);
+        } else {
+            attach = D_eu_80099E98[mode];
+            if (D_800C42B0 != 0) {
+                guMtxL2F(mf, (Mtx *) (mtx + attach[3] * 0x40));
+                m = mf;
+            } else {
+                m = (f32 (*)[4]) (mtx + attach[3] * 0x40);
+            }
+            func_150A7E40(m, (f32) attach[0], (f32) attach[1], (f32) attach[2], &pos[0], &pos[1], &pos[2]);
+            *(f32 *) (obj + 0x14) = pos[0];
+            *(f32 *) (obj + 0x18) = pos[1];
+            *(f32 *) (obj + 0x1C) = pos[2];
+        }
+    }
+    if (floor_off != 0.0f) {
+        lift = *(f32 *) ((u8 *) D_800D154C + 0x18) + floor_off;
+        if (*(f32 *) (obj + 0x18) < lift) {
+            *(f32 *) (obj + 0x18) = lift;
+        }
+    }
+    *(s16 *) (obj + 0x160) = 0x6E;
+    obj[0x3B] = 0xFF - (obj - base) / 0x32C;
+    if (mode == 0 || mode == 1) {
+        obj[5] = 2;
+        obj[0x103] = 1;
+    } else {
+        obj[5] = 5;
+        for (i = 0; i <= D_80082FA0; i++) {
+            *(u8 **) (obj + 0x304 + i * 4) = func_1515D9F0(1);
+        }
+        if (*(s32 *) (obj + 0x300 + i * 4) != 0) {
+            obj[0x301] = 1;
+        }
+        *(void **) (obj + 0x314) = func_1515D9B0();
+        switch (mode) {
+        case 2:
+            obj[0x103] = 1;
+            *(f32 *) (obj + 0xB8) = 260.0f;
+            sound = 0x2A;
+            break;
+        case 18:
+            obj[0x103] = 1;
+            *(f32 *) (obj + 0xB8) = 260.0f;
+            sound = 0x22;
+            break;
+        case 11:
+            sound = 0x6D;
+            break;
+        case 12:
+            sound = 0x6B;
+            break;
+        case 3:
+            sound = 0x39;
+            break;
+        case 6:
+            sound = 0x51;
+            break;
+        case 15:
+            sound = 0x93;
+            break;
+        case 17:
+            sound = 0x39;
+            break;
+        default:
+            sound = 0x50;
+            break;
+        }
+        func_15083568((struct127 *) obj, sound, 1.0f, 0);
+    }
+
+    angle = (s32) (yaw * sCamDegToAngle[0]) - 0x4000;
+    if (D_800BE616 != 0 && !(flags & 1) && mode != 5 && mode != 9 && mode != 10 && mode != 4) {
+        aim = func_1505A630(dist, rise, 0);
+        hit = func_1505DADC(obj, &aim, (aim >> 8) & 0xFF, 0xFF, 0x14);
+        if (hit != 0xFF) {
+            rec = base + (hit & 0xFF) * 0x32C;
+            aimY = *(f32 *) (rec + 0x18);
+            d = func_1505A6F8(D_800D154C, (struct127 *) rec);
+            if (mode == 2 || mode == 18) {
+                aimY -= 30.0f;
+            }
+            angle = aim;
+            height = 0.0f;
+            rise = (aimY - *(f32 *) ((u8 *) D_800D154C + 0x18)) / (d / dist);
+        }
+    }
+    if (flags & 2) {
+        angle = func_1505A630(D_800CC704 - *(f32 *) (obj + 0x14), *(f32 *) (obj + 0x1C) - D_800CC70C, 0);
+    }
+    if (flags & 4) {
+        d = func_1505A6F8((struct127 *) obj, D_800CC2D0);
+        rise = ((D_800CC2E8[0] + 60.0f) - *(f32 *) (obj + 0x18)) / (d / dist);
+    }
+    if (flags & 8) {
+        angle = angle + (u32) func_150ADA20() % 0x1200 - 0x900;
+    }
+    if (flags & 0x10) {
+        rec = base + *((u8 *) D_800D154C + 0x222) * 0x32C;
+        func_1505A184(*(u16 *) (rec + 0x76), *(f32 *) (rec + 0x3C) * 4.0f, 0.0f, &orbit[0], &orbit[1], &orbit[2]);
+        dx = (*(f32 *) (rec + 0x14) + orbit[0]) - *(f32 *) (obj + 0x14);
+        dz = (*(f32 *) (rec + 0x1C) + orbit[1]) - *(f32 *) (obj + 0x1C);
+        dy = ((*(f32 *) (rec + 0x18) + 30.0f) + *(f32 *) (rec + 0x20) * 4.0f) - *(f32 *) (obj + 0x18);
+        pitch = func_150484A0(dy, sqrtf(dx * dx + dz * dz)) * sCamRadToAngle[0];
+        angle = func_1505A630(dx, -dz, 0);
+        func_1505A184((s32) pitch, dist, 0.0f, &dist, &rise, &unused);
+        rise = -rise;
+    }
+    *(f32 *) (obj + 0x40) = (f32) (s16) (angle + 0x4000) * 0.0054931640625f;
+    *(s16 *) (obj + 0x7A) = angle;
+    *(s16 *) (obj + 0x76) = angle;
+    *(f32 *) (obj + 0x24) = height;
+    *(f32 *) (obj + 0x20) = rise;
+    *(f32 *) (obj + 0x3C) = dist;
+    obj[0x81] = 0;
+    obj[0x7F] = 0;
+    obj[0x80] = 0xFF;
+    obj[0x83] = alpha;
+    if (flags & 0x20) {
+        obj[0x80] = obj[0x126] = *((u8 *) D_800D154C + 0x222);
+    }
+    obj[0x82] = 0x26;
+    if (snap == 0) {
+        obj[0xD0] = D_80099E84[mode] + 1;
+    }
+    *(f32 *) (obj + 0x28) = 100.0f;
+    *(f32 *) (obj + 0x114) = 255.0f;
+    *(s16 *) (obj + 0xE4) = 5;
+    *(s16 *) (obj + 0xE6) = 5;
+    *(f32 *) (obj + 0xEC) = 1.0f;
+    *(f32 *) (obj + 0xF0) = 1.0f;
+    *(f32 *) (obj + 0xDC) = 1.0f;
+    *(f32 *) (obj + 0xE0) = 1.0f;
+    obj[0x124] = D_800C3E78 + 1;
+    obj[0x122] = 0x11;
+    obj[0x232] = 0;
+    obj[0x125] = 0xFF;
+    *(s32 *) (obj + 0xF8) = 0x100E;
+    if (snap != 0) {
+        *(s32 *) (obj + 0xF8) = 0x100E | 0x8000;
+        *(void **) (obj + 0x31C) = allocate_memory(0x1C0, 1, 0, 0);
+        bzero(*(void **) (obj + 0x31C), 0x1C0);
+        obj[0x103] = 1;
+    }
+    *(f32 *) (obj + 0x14C) = smooth;
+    *(f32 *) (obj + 0x150) = smooth;
+    obj[0x66] = *((u8 *) D_800D154C + 0x66) & 0xC;
+    obj[0x284] = snap;
+    *(s16 *) (obj + 0x278) = mode;
+    if (mode == 2 || mode == 18) {
+        *(s16 *) (obj + 0x282) = 0x3C;
+    }
+    switch (mode) {
+    case 0:
+        func_1506B04C(obj, 8, NULL);
+        func_1514F18C(func_15159140(obj, 1, 0), (struct127 *) obj, 0x13);
+        break;
+    case 1:
+        func_1506B04C(obj, 1, NULL);
+        func_1514F18C(func_15159140(obj, 1, 0), (struct127 *) obj, 0x13);
+        break;
+    case 15:
+        func_1506B04C(obj, 0xD, NULL);
+        break;
+    case 13:
+        func_10010154(0x237, (struct127 *) obj, 0x7530, 0x1F4, 0x7D0);
+        // fall through
+    case 5:
+    case 9:
+    case 10:
+        func_1506B04C(obj, 0xC, NULL);
+        break;
+    }
+    return (s32) obj;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C460.s")
+#endif
 // requires jump table
 #ifdef NON_MATCHING
 void func_15145974(void *, f32 *, f32 *);
