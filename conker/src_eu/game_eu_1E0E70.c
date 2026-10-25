@@ -62,7 +62,151 @@ void func_151B3734(Obj_151B3734 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
+s32 func_15142B7C(s32, s32, s32);
+s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
+s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
+s32 func_1513F4E4(s32, u8, s8 *);
+s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+s32 func_15142FBC(s32, s32, s32, s8 *);
+/* rope style getters (by obj +0x2E): geometry mode set / clear, prim colour, env colour, combine, render mode,
+   render-mode pair index; 0 = draw nothing */
+extern s32 (*D_8008FEB0[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *,
+                           u8 *);
+extern s32 D_80091198;   /* rope texture descriptor */
+extern s32 D_800D30BC;
+extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+
+/* n = (b - a) x (p - cam), scaled to the rope width obj +0x30 (0 when degenerate) */
+#define ROPE_NORMAL(px, py, pz) \
+    do { \
+        ex = bx - ax; \
+        ey = by - ay; \
+        ez = bz - az; \
+        cx = (px) - cam[0]; \
+        cy = (py) - cam[1]; \
+        cz = (pz) - cam[2]; \
+        nx = ey * cz - cy * ez; \
+        ny = ez * cx - cz * ex; \
+        nz = ex * cy - cx * ey; \
+        len2 = nx * nx + ny * ny + nz * nz; \
+        if (len2 == 0.0f) { \
+            nx = ny = nz = 0.0f; \
+        } else { \
+            k = *(f32 *) (obj + 0x30) / sqrtf(len2); \
+            nx *= k; \
+            ny *= k; \
+            nz *= k; \
+        } \
+    } while (0)
+
+/* one rope vertex: position, texture (s, t), colour (255, 100, 100, 255) */
+#define ROPE_VTX(px, py, pz, s, t) \
+    do { \
+        v->v.ob[0] = (px); \
+        v->v.ob[1] = (py); \
+        v->v.ob[2] = (pz); \
+        v->v.tc[0] = (s); \
+        v->v.tc[1] = (t); \
+        v->v.cn[0] = 0xFF; \
+        v->v.cn[1] = 100; \
+        v->v.cn[2] = 100; \
+        v->v.cn[3] = 0xFF; \
+        v++; \
+    } while (0)
+
+// rope_draw: draws the 10-point rope (obj +0x48, 0x18 bytes per point) as a camera-facing ribbon for view `id`
+// (camera at D_800DBFF0 + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when func_151D6310 gives
+// no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter D_8008FEB0[obj +0x2E] returns 0.
+// The getter's values set the geometry mode, prim / env colours, combine, render mode (| 0x80000 | 0x2CA0 |
+// D_800D30BC with the D_800A4EA8 pair) and the texture D_80091198. Each point gets two vertices offset by +-n
+// (ROPE_NORMAL), s = 0 / 0x3C0 across, t growing by obj +0x13C per point; each segment loads 4 vertices and draws
+// two triangles. Returns the display list end.
+s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
+    Vtx *v;
+    f32 *cam;
+    f32 *pts;
+    s32 geoSet, geoClr, envR, envG, envB, envA, primR, primG, primB, primA, combine, rmode;
+    u8 rmodePair, tex;
+    s8 flag;
+    s32 t;
+    s32 i;
+    f32 ax, ay, az;
+    f32 bx, by, bz;
+    f32 ex, ey, ez;
+    f32 cx, cy, cz;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+
+    if (obj[0x10] & 4) {
+        return gfx;
+    }
+    if (obj[0x10] & 8) {
+        return gfx;
+    }
+    if (obj[0x10] & 2) {
+        return gfx;
+    }
+    func_151D6310((s32 *) (obj + 0x140), id, 0x190, &v, NULL);
+    if (v == NULL) {
+        return gfx;
+    }
+    cam = (f32 *) ((u8 *) D_800DBFF0 + id * 0x9A0 + 0x2F8);
+    flag = 1;
+    if (!D_8008FEB0[obj[0x2E]](obj, &geoSet, &geoClr, &envR, &envG, &envB, &envA, &primR, &primG, &primB, &primA,
+                               &rmode, &rmodePair, &tex)) {
+        return gfx;
+    }
+    gfx = func_15142B7C(gfx, geoSet, geoClr);
+    gfx = func_15142C10(gfx, primR, primG, primB, primA, &flag);
+    gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &flag);
+    gfx = func_1513F4E4(gfx, tex, &flag);
+    gfx = func_15142E24(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
+    gfx = func_15142FBC(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
+                        D_800A4EA8[rmodePair * 2 + 1] | D_800A4EA8[rmodePair * 2], &flag);
+
+    /* the first point, offset across the first segment */
+    pts = (f32 *) (obj + 0x48);
+    ax = pts[0];
+    ay = pts[1];
+    az = pts[2];
+    bx = pts[6];
+    by = pts[7];
+    bz = pts[8];
+    ROPE_NORMAL(ax, ay, az);
+    ROPE_VTX(ax + nx, ay + ny, az + nz, 0, 0);
+    ROPE_VTX(ax - nx, ay - ny, az - nz, 0x3C0, 0);
+
+    /* one segment per following point */
+    t = *(s32 *) (obj + 0x13C);
+    for (i = 0; i < 9; i++) {
+        ax = pts[i * 6 + 0];
+        ay = pts[i * 6 + 1];
+        az = pts[i * 6 + 2];
+        bx = pts[i * 6 + 6];
+        by = pts[i * 6 + 7];
+        bz = pts[i * 6 + 8];
+        ROPE_NORMAL(bx, by, bz);
+        ROPE_VTX(bx + nx, by + ny, bz + nz, 0, t);
+        ROPE_VTX(bx - nx, by - ny, bz - nz, 0x3C0, t);
+        t += *(s32 *) (obj + 0x13C);
+        ((s32 *) gfx)[0] = 0x01004008; /* gSPVertex(v - 4, 4, 0) */
+        ((s32 *) gfx)[1] = (s32) (v - 4);
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05000204; /* gSP1Triangle(0, 1, 2) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05020604; /* gSP1Triangle(1, 3, 2) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+    }
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3878.s")
+#endif
 
 void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
     void (*fp)(void *, s32, u8) = D_8008FF08[arg0[0x44]];

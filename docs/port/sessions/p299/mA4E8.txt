@@ -1,0 +1,49 @@
+\#^        blk.colourInit\[i\] = sBarColourInit\[i\];#s/Init\[i\]/Init[0]/
+\#^        blk.colour\[i\] = sBarColour\[k\]\[i\];#s/sBarColour/sBarBackColour/
+\#^    blk.widthM1 = sBarWidth\[k\] - 1.0f;#s/1.0f/2.0f/
+\#^    blk.u08 = 130.0f;#s/130/129/
+\#^    blk.mode = (arg3 == -1) ? 0 : 4;#s/? 0 : 4/? 4 : 0/
+\#^    arg3 = (s8) arg3;#s/(s8)/(u8)/
+\#^    blk.arg3 = arg3;#s/= arg3/= 0/
+\#^    spec.span = 300;#s/300/301/
+\#^    spec.u16 = 1;#s/= 1;/= 0;/
+\#^    spec.u1A = 7;#s/7/6/
+\#^    spec.u20\[3\] = 0xFF;#s/0xFF/0xFE/
+\#^    spec.u2C = 0x1F0601;#s/0601/0602/
+\#^    spec.u28 = 0x200004;#s/0004/0005/
+\#^    spec.u41 = 0xA;#s/0xA/0xB/
+\#^    spec.w = sBarWidth\[k\];#s/sBarWidth/sBarHeight/
+\#^    spec.player = obj\[0x23D\];#s/0x23D/0x23C/
+\#^    spec.x = sBarX\[k\];#s/\[k\]/[0]/
+\#^    spec.h = sBarHeight\[k\];#s/sBarHeight/sBarWidth/
+\#^    spec.flags = #s/0x40 : 0/0x20 : 0/
+\#^    spec.flags = #s/+ 11/+ 12/
+\#^    spec.flags = #s/| 0x10 |/| 0x18 |/
+\#^    spec.flags = #s/(u8) wide/wide/
+\#^    spec.u30 = 8;#s/8/9/
+\#^    spec.u34 = 0x54;#s/0x54/0x55/
+\#^    blk.part = 3;#s/3/2/
+\#^    blk.range = sBarRange\[0\];#s/sBarRange\[0\]/0.0f/
+\#^    blk.layoutY = sBarLayoutY\[k\]\[alt\];#s/\[alt\]/[0]/
+\#^    blk.layoutScale = sBarLayoutScale\[k\]\[alt\];#s/\[alt\]/[1]/
+\#^    s32 alt = (D_80082FA0 == 1);#s/== 1/!= 0/
+\#^        spec.rgba\[i\] = BAR_F2U(sBarColour\[k\]\[i\]);#s/\[k\]\[i\]/[k][0]/
+\#func_151559FC(&spec, 8, 0#s/8, 0, 0/5, 0, 0/
+\#func_151559FC(&spec, 8, 0#s/group, 1)/group, 0)/
+\#func_151559FC(&spec, 0, 0#s/group, 0)/group, 1)/
+1,\#if (spr != NULL)#s/!= NULL/== NULL/
+1,\#memcpy(spr + 0x70#s/0x58)/0x50)/
+\#func_151559FC(&spec, 8, 0#,\#blk.part = 0#s/blk.part = 0/blk.part = 1/
+\#^    spec.h = sBarHeight\[k\] + 2.0f;#s/2.0f/1.0f/
+\#^    spec.w = sBarWidth\[k\] + 2.0f;#s/2.0f/1.0f/
+\#BAR_F2U(sBarBackColour#s/sBarBackColour/sBarColour/
+\#func_151559FC(&spec, 0, 0#,\#memcpy(spr + 0x70#s/0x70/0x74/
+\#0.02631579f, 0.021505376f#s/0.021505376f/0.0215f/
+\#^    { -50.0f, -62.0f }, { -38.0f, -46.5f }#s/-46.5f/-46.0f/
+\#^    { 255.0f, 255.0f, 0.0f, 90.0f }, { 0.0f, 0.0f, 180.0f, 90.0f },#s/90.0f }, {/91.0f }, {/
+\#^    { 255.0f, 0.0f, 0.0f, 65.0f }, { 0.0f, 0.0f, 180.0f, 65.0f },#s/180.0f/181.0f/
+\#^static const f32 sBarX\[5\]#s/37.0f, 37.0f/37.0f, 36.0f/
+\#^static const f32 sBarRange\[1\]#s/99999.0f/100000.0f/
+\#^static const f32 sBarColourInit\[4\]#s/0.0f, 255.0f }/0.0f, 254.0f }/
+\#^static const f32 sBarHeight\[5\]#s/1.0f, 1.0f/1.0f, 1.5f/
+\#^    s32 k = (u8) kind;#s/(u8) kind/kind/

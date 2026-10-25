@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P299 (port-c, group C1) (session P299, 2026-10-26). Details: `docs/port/sessions/P299.md`
+
+Hand C (NM), registry rows `P299`, files in docs/port/sessions/p299: func_151CA4E8 (hud_bar_spawn, 1F7960, mutants
+49/49; NM `void`, its .s rodata copied, D_800AB164/16C/18C/194 exported as `const f32[2]` for the NM siblings),
+func_151B3878 (rope_draw, 1E0E70, 53/54, 1 equivalent), func_1516A1E0 (debris_update, 1979F0, 66/66; file's NM
+func_1510FE58 decl now `(s32, s32, s32, s32 *)`), func_1503FE30 (menu_list_update_draw, 6D4F0, 62/66, 4 equivalent).
+verify_all rc 0 (3995/5916, full ROM OK), NM build rc 0, protocheck 0 (1688 bodies), implicit_scan 0 NM+float (829 sites), selftest 133/133, progress_nm `total 5916 3995 1707 214 5702 96.4% 2021852/2253856 (89.7%)`.
+
+## Next steps (from P299, group C1)
+1. Group C1 left: func_151976B8 (556 insns), func_1519BA28 (601), func_1519A1A4 (860), all in game_eu_1C3530
+   (emitter handler table at EU 0x8008A5E4, siblings `s32 (u8 *)`, see P296 func_151970BC).
+2. func_1503FE30 has no jal / data-word reference (dead or computed address); func_151B3878's descriptor
+   dispatcher (draw slot) not located, signature taken from the asm as for P296's func_15106D38.
+
 ## P296 (port-c, group C) (session P296, 2026-10-26). Details: `docs/port/sessions/P296.md`
 
 Hand C (NM), registry rows `P296`, files in docs/port/sessions/p296: func_150ED1F0 (object_update_option_tint, 11A2B0,
