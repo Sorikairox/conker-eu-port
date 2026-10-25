@@ -5,10 +5,10 @@
 
 #ifdef NON_MATCHING
 /* local copies of func_150FEDE0's rodata D_800A23D0 / DC / E8 / F4 (its .s carries it) */
-static f32 sPuffPoint[3] = { 10.0f, -102.0f, 75.0f };
-static f32 sSparkEnd[3] = { 10.0f, -151.0f, 105.0f };
-static f32 sSegStart[3] = { -1.0f, -38.0f, 38.0f };
-static f32 sSegEnd[3] = { -26.0f, -23.0f, 51.0f };
+static const f32 sPuffPoint[3] = { 10.0f, -102.0f, 75.0f };
+static const f32 sSparkEnd[3] = { 10.0f, -151.0f, 105.0f };
+static const f32 sSegStart[3] = { -1.0f, -38.0f, 38.0f };
+static const f32 sSegEnd[3] = { -26.0f, -23.0f, 51.0f };
 s32 func_15145EA4(s32 **, s32 *, s32, s32);
 extern u8 D_80088F40;
 void func_150FF1A8(s32 arg0, u8 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s32 arg6);
@@ -28,7 +28,7 @@ void func_151D49B8(f32 *, f32 *, s32, struct127 *, f32, u8, s32);
 // obj+0x74 & 0xF == 0xF, also func_151D44C4 at the puff, func_151D49B8 along the segment, and on a coin flip
 // func_150FF1A8 between sPuffPoint and sSparkEnd.
 void func_150FEDE0(struct127 *obj, u8 room, s32 owner) {
-    f32 *src[3];
+    const f32 *src[3];
     f32 *dst[3];
     f32 pos[3];
     f32 dir[3];

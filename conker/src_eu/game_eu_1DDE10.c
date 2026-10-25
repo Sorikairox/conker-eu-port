@@ -338,7 +338,213 @@ s32 func_151B09BC(u8 *obj, u8 *target, s16 span, u8 arg3, s32 arg4) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B09BC.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_1513F680(u8 *, u8, u8, u8, u8);
+void func_151B1EC8(u8 *arg0);
+
+/* bone-attached point: bone index (64-byte matrices at the character's +0x1D4) and offset */
+typedef struct {
+    /* 0x00 */ u8 bone;
+    /* 0x01 */ u8 pad1[3];
+    /* 0x04 */ f32 ofs[3];
+} BonePt1138;
+extern BonePt1138 D_800AA50C[]; /* 11 points */
+extern BonePt1138 D_800AA5BC[]; /* the same for character kind 0x36 */
+extern u8 D_800AB6F0[];
+
+typedef struct SparkSlot1138 {
+    /* 0x00 */ u8 *rec;    /* the spark (func_1513D524 record) */
+    /* 0x04 */ s32 timer;  /* frames until it is let go */
+    /* 0x08 */ struct SparkSlot1138 *next;
+} SparkSlot1138;
+
+/* the spark set at +0x28 of the object */
+typedef struct {
+    /* 0x00 */ u8 *target;  /* character */
+    /* 0x04 */ u8 targetId; /* its id byte (+0x3B) */
+    /* 0x05 */ u8 pad5[3];
+    /* 0x08 */ s32 count;   /* attached sparks */
+    /* 0x0C */ SparkSlot1138 slots[11];
+    /* 0x90 */ f32 accum;
+    /* 0x94 */ u8 kind;
+} SparkSet1138;
+
+/* func_1513D524's template */
+typedef struct {
+    /* 0x00 */ u8 sprite;
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ s16 flags;
+    /* 0x04 */ s16 life;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 u8w;
+    /* 0x0C */ s32 uC;
+    /* 0x10 */ u8 colour[4];
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 pos[3];
+    /* 0x28 */ s32 prev[3]; /* f32, copied as words */
+    /* 0x34 */ f32 scale[3];
+    /* 0x40 */ s32 u40;
+    /* 0x44 */ u8 u44;
+    /* 0x45 */ u8 u45;
+    /* 0x46 */ u8 pad46[2];
+} Spr1138;
+
+/* the spark's motion block (record +0x110) */
+typedef struct {
+    /* 0x00 */ u8 pad0[0xC];
+    /* 0x0C */ f32 spin;
+    /* 0x10 */ u8 u10;
+    /* 0x11 */ u8 u11;
+    /* 0x12 */ u8 u12;
+    /* 0x13 */ u8 u13;
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ u8 u24;
+    /* 0x25 */ u8 kind;
+    /* 0x26 */ u8 pad26[2];
+} SparkMotion1138;
+
+// character_sparks_update: keeps up to 11 sparks attached to bone points (D_800AA50C, D_800AA5BC for character kind
+// 0x36) of the target character. Each frame every attached spark is moved to its point (old position kept at
+// +0x40) and its timer counts down by D_800BE9E4; at < 0 it is let go (velocity (pos - old) * D_800BEDC8 in x / z,
+// func_1513F680(rec, 0x10, 0x1B, 0, 0x10), flag 1 at +0x58). New sparks (sprite D_800AB6F0[kind], life 52..102,
+// timer 20..50) are spawned with func_1513D524 at random free points while accum (+ random 0..0.307 *
+// D_800BE9A4 per frame) is above 1. Without a skeleton (+0x1D4) or with (+0x74 & 0xF) == 0xF all sparks are
+// released (func_151B1EC8); when the target is gone or changed the object is ended (+0xE = -1).
+void func_151B1138(u8 *obj) {
+    SparkSet1138 *s = (SparkSet1138 *) (obj + 0x28);
+    Spr1138 t;
+    SparkMotion1138 m;
+    SparkSlot1138 *slot;
+    SparkSlot1138 *free;
+    SparkSlot1138 *last;
+    BonePt1138 *pt;
+    u8 *tgt;
+    u8 *rec;
+    s32 nfree;
+    s32 isFree;
+    s32 i;
+    u32 k;
+    u8 kill = 0;
+
+    if (*(s32 *) s->target == 0 || s->targetId != s->target[0x3B]) {
+        kill = 1;
+    }
+    if (!kill) {
+        tgt = s->target;
+        if (*(s32 *) (tgt + 0x1D4) == 0 || (tgt[0x74] & 0xF) == 0xF) {
+            if (s->count != 0) {
+                func_151B1EC8(obj);
+            }
+        } else {
+            free = NULL;
+            last = NULL;
+            nfree = 0;
+            for (i = 0; i < 11; i++) {
+                slot = &s->slots[i];
+                isFree = 1;
+                if (slot->rec != NULL) {
+                    rec = slot->rec;
+                    ((s32 *) (rec + 0x40))[0] = ((s32 *) (rec + 0x34))[0];
+                    ((s32 *) (rec + 0x40))[1] = ((s32 *) (rec + 0x34))[1];
+                    ((s32 *) (rec + 0x40))[2] = ((s32 *) (rec + 0x34))[2];
+                    tgt = s->target;
+                    pt = (tgt[4] == 0x36) ? &D_800AA5BC[i] : &D_800AA50C[i];
+                    func_15143134(pt->ofs, slot->rec + 0x34, (void *) (pt->bone * 64 + *(s32 *) (tgt + 0x1D4)));
+                    slot->timer -= D_800BE9E4;
+                    if (slot->timer < 0) {
+                        rec = slot->rec;
+                        *(f32 *) (rec + 0x114) = 0.0f;
+                        *(f32 *) (rec + 0x110) = (*(f32 *) (rec + 0x34) - *(f32 *) (rec + 0x40)) * D_800BEDC8;
+                        *(f32 *) (rec + 0x118) = (*(f32 *) (rec + 0x3C) - *(f32 *) (rec + 0x48)) * D_800BEDC8;
+                        func_1513F680(slot->rec, 0x10, 0x1B, 0, 0x10);
+                        *(s32 *) (slot->rec + 0x58) |= 1;
+                        slot->rec = NULL;
+                        s->count--;
+                    } else {
+                        isFree = 0;
+                    }
+                }
+                if (isFree) {
+                    if (last == NULL) {
+                        last = slot;
+                    }
+                    slot->next = free;
+                    free = slot;
+                    nfree++;
+                }
+            }
+            if (nfree != 0) {
+                s->accum = s->accum + func_150ADA68() * 307.0f * 0.001f * D_800BE9A4;
+                if (1.0f < s->accum) {
+                    last->next = free; /* the free list becomes a ring */
+                    t.sprite = D_800AB6F0[s->kind];
+                    t.flags = 0x1001;
+                    t.life = (u32) func_150ADA20() % 51 + 52;
+                    t.u8w = 0;
+                    t.uC = 0;
+                    t.colour[0] = 0;
+                    t.colour[1] = 0;
+                    t.colour[2] = 0;
+                    t.colour[3] = 0xFF;
+                    t.u40 = 0;
+                    t.scale[0] = 1.0f;
+                    t.scale[1] = 1.0f;
+                    t.scale[2] = 1.0f;
+                    m.u10 = 0;
+                    m.u11 = 0;
+                    *(f32 *) &t.prev[0] = 0.0f;
+                    *(f32 *) &t.prev[1] = 0.0f;
+                    *(f32 *) &t.prev[2] = 0.0f;
+                    m.kind = s->kind;
+                    m.u24 = func_150ADA20() & 1;
+                    m.u14 = 5.0f;
+                    m.u18 = 25.0f;
+                    m.u1C = 2.0f;
+                    t.u14 = 0.0f;
+                    t.u18 = 0.0f;
+                    m.u20 = 8.0f;
+                    do {
+                        for (k = (u32) func_150ADA20() % (u32) nfree; k != 0; k--) {
+                            last = free;
+                            free = free->next;
+                        }
+                        pt = &D_800AA50C[free - s->slots];
+                        t.u45 = (u32) func_150ADA20() % 101 + 100;
+                        t.u44 = (u32) func_150ADA20() % 101 + 155;
+                        m.u12 = (u32) func_150ADA20() % 5 + 4;
+                        m.u13 = (u32) func_150ADA20() % 5 + 4;
+                        m.spin = (func_150ADA68() * 506.0f + -703.0f) * 0.001f;
+                        func_15143134(pt->ofs, t.pos, (void *) (pt->bone * 64 + *(s32 *) (s->target + 0x1D4)));
+                        t.prev[0] = *(s32 *) &t.pos[0];
+                        t.prev[1] = *(s32 *) &t.pos[1];
+                        t.prev[2] = *(s32 *) &t.pos[2];
+                        func_150ADA20(); /* RNG advance, result unused */
+                        free->rec = (u8 *) func_1513D524((s32) &t, 0x11, 0, 0, 0x10, 2, 0x28, obj[0xC], obj[1]);
+                        if (free->rec != NULL) {
+                            memcpy(free->rec + 0x110, &m, 0x28);
+                            free->timer = (u32) func_150ADA20() % 31 + 20;
+                            free = free->next;
+                            nfree--;
+                            last->next = free;
+                            s->count++;
+                        }
+                        s->accum -= 1.0f;
+                    } while (1.0f < s->accum && nfree != 0);
+                }
+            }
+        }
+    }
+    if (kill) {
+        *(s16 *) (obj + 0xE) = -1;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DDE10/func_151B1138.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P143 */

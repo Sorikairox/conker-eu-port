@@ -1,0 +1,57 @@
+# P286 mutants for func_151B1138 (character_sparks_update)
+/if (\*(s32 \*) s->target == 0 || s->targetId != s->target\[0x3B\]) {/s/ || s->targetId != s->target\[0x3B\]//
+/if (\*(s32 \*) s->target == 0 || s->targetId != s->target\[0x3B\]) {/s/0x3B/0x3A/
+/if (\*(s32 \*) (tgt + 0x1D4) == 0 || (tgt\[0x74\] & 0xF) == 0xF) {/s/& 0xF) == 0xF/\& 0x7) == 0x7/
+/if (\*(s32 \*) (tgt + 0x1D4) == 0 || (tgt\[0x74\] & 0xF) == 0xF) {/s/0x1D4) == 0/0x1D4) != 0/
+/^            if (s->count != 0) {/s/!= 0/== 0/
+/for (i = 0; i < 11; i++) {/s/11/10/
+/((s32 \*) (rec + 0x40))\[1\] = ((s32 \*) (rec + 0x34))\[1\];/s/\[1\];/[2];/
+/pt = (tgt\[4\] == 0x36) ? &D_800AA5BC\[i\] : &D_800AA50C\[i\];/s/0x36/0x35/
+/pt = (tgt\[4\] == 0x36) ? &D_800AA5BC\[i\] : &D_800AA50C\[i\];/s/&D_800AA50C\[i\]/\&D_800AA50C[i + 1]/
+/func_15143134(pt->ofs, slot->rec + 0x34,/s/pt->bone \* 64/pt->bone * 32/
+/slot->timer -= D_800BE9E4;/s/-=/+=/
+/if (slot->timer < 0) {/s/< 0/<= 0/
+/\*(f32 \*) (rec + 0x114) = 0.0f;/s/0.0f/1.0f/
+/\*(f32 \*) (rec + 0x110) = /s/- \*(f32 \*) (rec + 0x40)/- *(f32 *) (rec + 0x44)/
+/\*(f32 \*) (rec + 0x118) = /s/D_800BEDC8/D_800BE9A4/
+/func_1513F680(slot->rec, 0x10, 0x1B, 0, 0x10);/s/0x1B/0x1C/
+/\*(s32 \*) (slot->rec + 0x58) |= 1;/s/|= 1/|= 2/
+/^                        s->count--;/s/--/++/
+/^                        isFree = 0;/s/0/1/
+/^                        last = slot;/s/slot/free/
+/^                    slot->next = free;/s/free/NULL/
+/s->accum = s->accum + func_150ADA68()/s/307.0f/308.0f/
+/s->accum = s->accum + func_150ADA68()/s/ \* D_800BE9A4//
+/^                if (1.0f < s->accum) {/s/1.0f/2.0f/
+/last->next = free; \/\* the free list/s/free;/NULL;/
+/t.sprite = D_800AB6F0\[s->kind\];/s/s->kind/s->kind + 1/
+/t.flags = 0x1001;/s/0x1001/0x1002/
+/t.life = (u32) func_150ADA20()/s/+ 52/+ 53/
+/t.colour\[3\] = 0xFF;/s/0xFF/0xFE/
+/t.scale\[1\] = 1.0f;/s/1.0f/2.0f/
+/m.u11 = 0;/s/0/1/
+/\*(f32 \*) &t.prev\[2\] = 0.0f;/s/0.0f/1.0f/
+/m.kind = s->kind;/s/s->kind/s->targetId/
+/m.u24 = func_150ADA20() & 1;/s/& 1/\& 2/
+/m.u1C = 2.0f;/s/2.0f/3.0f/
+/t.u18 = 0.0f;/s/0.0f/1.0f/
+/m.u20 = 8.0f;/s/8.0f/7.0f/
+/^                            last = free;/d
+/for (k = (u32) func_150ADA20()/,/free = free->next;/s/free = free->next;/free = free;/
+/pt = &D_800AA50C\[free - s->slots\];/s/D_800AA50C/D_800AA5BC/
+/t.u45 = (u32) func_150ADA20()/s/+ 100/+ 101/
+/t.u44 = (u32) func_150ADA20()/s/+ 155/+ 154/
+/m.u12 = (u32) func_150ADA20()/s/+ 4/+ 3/
+/m.spin = (func_150ADA68() \* 506.0f + -703.0f) \* 0.001f;/s/-703.0f/-702.0f/
+/func_15143134(pt->ofs, t.pos,/s/t.pos/t.scale/
+/t.prev\[1\] = \*(s32 \*) &t.pos\[1\];/s/pos\[1\]/pos[0]/
+/free->rec = (u8 \*) func_1513D524(/s/0x11, 0, 0, 0x10, 2, 0x28/0x11, 0, 0, 0x10, 2, 0x20/
+/free->rec = (u8 \*) func_1513D524(/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/memcpy(free->rec + 0x110, &m, 0x28);/s/0x110/0x10C/
+/free->timer = (u32) func_150ADA20()/s/+ 20/+ 21/
+/^                            nfree--;/d
+/^                            last->next = free;/d
+/^                            s->count++;/d
+/^                        s->accum -= 1.0f;/s/1.0f/0.5f/
+/} while (1.0f < s->accum && nfree != 0);/s/ \&\& nfree != 0//
+/\*(s16 \*) (obj + 0xE) = -1;/s/0xE/0xC/

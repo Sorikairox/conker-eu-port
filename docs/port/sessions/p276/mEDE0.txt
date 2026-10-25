@@ -1,5 +1,5 @@
-\#^static f32 sPuffPoint\[3\] = #s/-102.0f/-101.0f/
-\#^static f32 sSparkEnd\[3\] = #s/105.0f/104.0f/
+\#^static const f32 sPuffPoint\[3\] = #s/-102.0f/-101.0f/
+\#^static const f32 sSparkEnd\[3\] = #s/105.0f/104.0f/
 \#^        src\[1\] = sSegStart;$#s/sSegStart/sSegEnd/
 \#^        func_150FF1A8((s32) obj, D_80088F40, (s32) sPuffPoint, (s32) sSparkEnd#s/(s32) sPuffPoint, (s32) sSparkEnd/(s32) sSparkEnd, (s32) sPuffPoint/
 \#^    func_15145740(obj, (s32) dir, (s32) tmp1, (s32) tmp2, 0.81100005f);$#s/0.81100005f/0.8f/

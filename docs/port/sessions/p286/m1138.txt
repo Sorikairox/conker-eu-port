@@ -1,0 +1,52 @@
+# P286 mutants for func_150C1138 (smoke_trail_update)
+/if (!(obj->flags & 2)) {/s/& 2/\& 4/
+/if (\*(s32 \*) obj->target == 0) {/s/== 0/!= 0/
+/if (obj->targetId != obj->target\[0x3B\]) {/s/0x3B/0x3A/
+/\*(f32 \*) &pos\[1\] = \*(f32 \*) (obj->target + 0x180);/s/0x180/0x184/
+/\*(f32 \*) &pos\[2\] = \*(f32 \*) (obj->target + 0x1C);/s/0x1C/0x18/
+/\*(f32 \*) &pos\[1\] -= 65.0f;/s/65.0f/64.0f/
+/for (i = obj->used; i != -1; i = obj->slots\[i\].next) {/s/i = obj->slots\[i\].next/i = -1/
+/((s32 \*) (rec + 0x40))\[2\] = pos\[2\];/s/pos\[2\]/pos[0]/
+/if (obj->flags & 4) {/s/& 4/\& 8/
+/!= 0x1D &&/s/0x1D/0x1C/
+/!= 0x1E) {/s/0x1E/0x1F/
+/obj->target + 0x3C) < 3.0f/s/3.0f/2.0f/
+/obj->target + 0x3C) < 3.0f/s/</<=/
+/== obj->lastX && \*(f32 \*) &pos\[2\] == obj->lastZ) && emit) {/s/ && \*(f32 \*) &pos\[2\] == obj->lastZ//
+/== obj->lastX && \*(f32 \*) &pos\[2\] == obj->lastZ) && emit) {/s/ && emit//
+/obj->accum = obj->accum + obj->rate \* D_800BE9A4;/s/obj->rate \* //
+/^            if (1.0f < obj->accum) {/s/1.0f </1.0f <=/
+/t.u0 = 0x00200005;/s/5;/4;/
+/t.flags = 0x5103;/s/0x5103/0x5101/
+/t.sprite = 0x6C;/s/0x6C/0x6D/
+/t.u54 = 0.0f;/s/0.0f/1.0f/
+/t.u20 = 8;/s/8/9/
+/t.mode = 0x0080DE01;/s/0x0080DE01/0x0080DEC1/
+/t.u60\[2\] = 0xFF;/s/0xFF/0xFE/
+/while (1.0f < obj->accum && self->free != -1) {/s/ && self->free != -1//
+/cs = func_151423D8(r - 0x40);/s/r - 0x40/r + 0x40/
+/speed = func_150ADA68() \* 33.0f + 40.0f;/s/33.0f/32.0f/
+/t.colour\[6\] = 0x97;/s/0x97/0x96/
+/t.colour\[7\] = (u32) func_150ADA20()/s/+ 80/+ 81/
+/t.size\[0\] = t.size\[1\] = /s/67.0f/66.0f/
+/t.pos\[1\] = pos\[1\];/s/pos\[1\]/pos[2]/
+/t.dir\[2\] = speed \* sn;/s/sn/cs/
+/t.dir\[1\] = 0.0f;/s/0.0f/1.0f/
+/t.mode &= ~0xC0;/s/0xC0/0x80/
+/flipX = (func_150ADA20() & 1) ? 0x80 : 0;/s/0x80/0x40/
+/t.life = t.u22 = (u32) func_150ADA20()/s/t.u22 = //
+/t.u24 = 1.0352269f;/s/1.0352269f/1.035227f + 0.001f/
+/func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/0, 4,/0, 0x1C,/
+/func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner)/s/obj->room, obj->owner/obj->owner, obj->room/
+/if (rec != NULL) {/s/rec != NULL/rec == NULL/
+/memcpy(rec + 0xA8, &self, 4);/s/0xA8/0xA4/
+/obj->free = obj->slots\[slot\].next;/s/obj->slots\[slot\].next/-1/
+/obj->slots\[slot\].next = obj->used;/s/obj->used/-1/
+/obj->used = slot;/s/slot/0/
+/obj->used = slot;/,/accum -= 1.0f/s/accum -= 1.0f/accum -= 0.5f/
+/^                while (1.0f < obj->accum) {/,/}/s/1.0f;/0.5f;/
+/obj->lastZ = \*(f32 \*) &pos\[2\];/s/pos\[2\]/pos[1]/
+/if (obj->flags & 1) {/s/& 1/\& 2/
+/obj->timer -= D_800BE9E4;/s/D_800BE9E4/D_800BE9E4 + 1/
+/if (obj->timer < 0) {/s/< 0/<= 0/
+/^        emit = 1;/s/1/0/

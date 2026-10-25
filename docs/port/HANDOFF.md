@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P286 (port, group B) (session P286, 2026-10-26). Details: `docs/port/sessions/P286.md`
+
+NM link fixed: game_eu_12C5F0's func_150FEDE0 copies are `static const` (NM build rc 0). Hand C (NM), registry rows
+`P286`, setups / mutants in docs/port/sessions/p286: func_1517D5E4 sprite_billboard_quad_draw (37/37), func_150C1138
+smoke_trail_update (49/51, 2 equivalent), func_151A1794 spark_burst_emitter_update (50/50), func_151B1138
+character_sparks_update (54/56). func_151356D4 ARGMEM widened to 88 (97/97 killed). Checks: verify_all rc 0, NM rc 0,
+protocheck 0 (1684), selftest 130/130, implicit NM+float 0, progress_nm `total 5916 3995 1704 217 5699 96.3% 2017236/2253856 (89.5%)`.
+
+## Next steps (from P286)
+1. `MUT=1 tools/port/reverify.sh func_1513334C func_151B1138` (334C setups + mutants never ran; B1138 has new setup acc15
+   + mB1138b.txt); func_15054A94: 6 surviving mutants (34/40, list in P286.md) need boundary setups; func_15136F50: 1
+   mutant hit a stale-view ERROR, re-run.
+2. Group B left (10): func_150CBF80, func_151C50BC, func_151B6ED8, func_151C40BC, func_150E3CB8, func_150B4BF0,
+   func_1506C460, func_150E2294, func_1516E100, func_151206C8.
+3. func_15008340: switch to void together with game_39750's prototypes (from P282).
+
 ## P282 (port, group B) (session P282, 2026-10-25). Details: `docs/port/sessions/P282.md`
 
 10 group B functions to hand C (NM), registry rows `P282`, setups / mutants in docs/port/sessions/p282: func_15139D74,
