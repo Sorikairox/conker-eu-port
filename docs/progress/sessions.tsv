@@ -109,3 +109,5 @@ P297	port-d	group D NM C (150BF71C 150C8300 150BFF7C 150D0DD0 151AECA0 151E9E1C)
 P304	port-f	group D2 NM C (150E5384 150DD420 150DCAD8 150DDBC0)	4	0	~125	4 compiled funcs to hand C, survivors equivalent; no #ifndef/#endif inside an NM block (splice drops cand); DDBC0 asm reads an unset stack index; verify_all/NM rc 0
 P309	port-f	group D2 NM C (150D7E38 150F3A74)	2	0	~95	2 compiled funcs (1569 insns) to hand C, 1 equivalent survivor; func_150D7E38 models func_15052F9C leftover v0; verify_all/NM rc 0
 P315	port-b	integration 4	0		~20	merge port-f (D2 finished, P304/P309, +port-d P278..P297): docs/registry conflicts only (reg3way 474 rows/471 funcs); checks ok, selftest 150/150, progress_nm 99.2% / 96.8%
+P303	port-d	group D1 NM C (151ADEDC 151AD724 151A4194 151B58D8)	4	0	~150	4 compiled funcs to hand C, survivors equivalent; pin random-phase counts/pointers for fixed stack copies; verify_all/NM rc 0
+P313	port-d	group D1 NM C (151EE93C)	1	0	~75	cheat-code entry screen to hand C, 68 setups, mutants 190/190; verify_all/NM rc 0

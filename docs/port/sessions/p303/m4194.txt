@@ -1,0 +1,73 @@
+54s/if (\*(s8 \*) (obj + 0x2C) < 2) {/if (*(s8 *) (obj + 0x2C) < 1) {/ % few
+57s/obj\[0x25\] \* 0x20 + 0xA0,/obj[0x25] * 0x20 + 0x80,/ % emit
+57s/(s32 \*) \&v, NULL);/(s32 *) \&v, (u8 *) \&flag);/ % emit
+58s/if (v == NULL) {/if (v == (u8 *) 1) {/ % vnull
+61s/player \* 0x9A0 + 0x2F8);/player * 0x9A0 + 0x2FC);/ % emit newest
+61s/player \* 0x9A0 + 0x2F8);/player * 0x9A8 + 0x2F8);/ % fadeout0 wrap
+64s/flag = 1;/flag = 0;/ % emit few
+65s/if (def\[0x30\] \& 2) {/if (def[0x30] \& 1) {/ % fadein mix
+66s/cnt = def\[0x2B\];/cnt = def[0x2C];/ % fadein
+67s/i = \*(s8 \*) (obj + 0x2D);/i = *(s8 *) (obj + 0x2E);/ % fadein
+68s/ramp = 0;/ramp = 1;/ % fadein
+70s/pts\[i \* 0x18 + 0x14\] = ramp;/pts[i * 0x18 + 0x15] = ramp;/ % fadein
+73s/ramp += def\[0x2C\];/ramp += def[0x2B];/ % fadein
+74s/if (i == obj\[0x25\]) {/if (i > obj[0x25]) {/ % fadein0
+77s/} while (cnt != 0 \&\& i != \*(s8 \*) (obj + 0x2E));/} while (cnt != 0);/ % fadein0
+77s/} while (cnt != 0 \&\& i != \*(s8 \*) (obj + 0x2E));/} while (cnt > 0 \&\& i != *(s8 *) (obj + 0x2E));/ % fadein0
+79s/if (def\[0x30\] \& 4) {/if (def[0x30] \& 8) {/ % fadeout
+80s/i = \*(s8 \*) (obj + 0x2E) - 1;/i = *(s8 *) (obj + 0x2E);/ % fadeout mix
+82s/i = obj\[0x25\] - 1;/i = obj[0x25];/ % fadeout
+85s/cnt = def\[0x2D\];/cnt = def[0x2E];/ % fadeout
+88s/p\[0x14\] = (p\[0x14\] \* ramp) >> 8;/p[0x14] = (p[0x14] * ramp) >> 7;/ % fadeout mix
+91s/ramp += def\[0x2E\];/ramp += def[0x2D];/ % fadeout mix
+95s/} while (cnt != 0 \&\& i != \*(s8 \*) (obj + 0x2E));/} while (cnt != 0 \&\& i != *(s8 *) (obj + 0x2D));/ % fadeout0 fadeout1 mix
+95s/} while (cnt != 0 \&\& i != \*(s8 \*) (obj + 0x2E));/} while (i != *(s8 *) (obj + 0x2E));/ % fadeout mix
+97s/0, 0, 0, 0, 0x1F, 0, 0, \&flag, 3);/0, 0, 0, 0, 0x1F, 0, 0, \&flag, 4);/ % emit
+98s/gfx = func_15142B7C(gfx, 1, 0x160600);/gfx = func_15142B7C(gfx, 1, 0x160601);/ % emit
+99s/0xFF, 0xFF, 0xFF, 0xFF, \&flag);/0xFF, 0xFF, 0xFF, 0xFE, \&flag);/ % emit
+101s/gfx = func_1513F4E4(gfx, 6, \&flag);/gfx = func_1513F4E4(gfx, 5, \&flag);/ % emit
+102s/D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8,/D_800D30BC | 0x2CA0, 0x5049D8,/ % emit
+102s/D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8,/D_800D30BC | 0x80000 | 0x2CA0, 0x5049D9,/ % emit
+104s/if (\*(u16 \*) (obj + 0x1E) \& 2) {/if (*(u16 *) (obj + 0x1E) \& 0x10) {/ % emit newest
+105s/cur = \*(s8 \*) (obj + 0x2E) - 1;/cur = *(s8 *) (obj + 0x2E) - 2;/ % emit
+109s/ax = \*(f32 \*) (obj + 0x10);/ax = *(f32 *) (obj + 0x14);/ % emit
+111s/az = \*(f32 \*) (obj + 0x18);/az = *(f32 *) (obj + 0x10);/ % emit
+118s/cur = prev - 1;/cur = prev - 2;/ % newest
+204s/cur = obj\[0x25\] - 1;/cur = obj[0x25] - 2;/ % fadeout mix
+122s/p = pts + prev \* 0x18;/p = pts + cur * 0x18;/ % newest
+124s/ay = \*(f32 \*) (p + 0x4);/ay = *(f32 *) (p + 0x8);/ % newest
+127s/a0 = (\*(s16 \*) (p + 0x10) \* p\[0x14\]) >> 8;/a0 = (*(s16 *) (p + 0x10) * p[0x15]) >> 8;/ % emit newest
+128s/s0 = p\[0x15\] + def\[0x4C\];/s0 = p[0x15];/ % emit newest wrap
+133s/s1 = p\[0x15\] + def\[0x4C\];/s1 = p[0x14] + def[0x4C];/ % emit newest
+134s/a1 = (\*(s16 \*) (p + 0x10) \* p\[0x14\]) >> 8;/a1 = (*(s16 *) (p + 0x12) * p[0x14]) >> 8;/ % emit newest
+138s/dy = ay - cam\[1\];/dy = ay - cam[0];/ % emit
+142s/ez = az - bz;/ez = bz - az;/ % emit
+144s/cy = ez \* dx - dz \* ex;/cy = ez * dx + dz * ex;/ % emit
+147s/if (len2 == 0\.0f) {/if (len2 < 1.0f) {/ % flat tiny emit
+148s/nx = ny = nz = 0\.0f;/nx = ny = nz = 1.0f;/ % flat
+150s/k = \*(f32 \*) (p + 0xC) \/ sqrtf(len2);/k = *(f32 *) (p + 0xC) \/ len2;/ % emit
+150s/k = \*(f32 \*) (p + 0xC) \/ sqrtf(len2);/k = *(f32 *) (p + 0x8) \/ sqrtf(len2);/ % emit newest
+155s/TRAIL6_VTX(v, ax + nx, ay + ny, az + nz, s0 << 6, 0x7C0, a0);/TRAIL6_VTX(v, ax + nx, ay + ny, az + nz, s0 << 6, 0x7C0, a1);/ % emit newest
+157s/TRAIL6_VTX(v, ax - nx, ay - ny, az - nz, s0 << 6, 0, a0);/TRAIL6_VTX(v, ax - nx, ay - ny, az + nz, s0 << 6, 0, a0);/ % emit
+157s/TRAIL6_VTX(v, ax - nx, ay - ny, az - nz, s0 << 6, 0, a0);/TRAIL6_VTX(v, ax - nx, ay - ny, az - nz, s0 << 5, 0, a0);/ % emit
+18s/\*(s16 \*) ((v) + 0xA) = (t);/*(s16 *) ((v) + 0xA) = (t) + 1;/ % emit
+21s/(v)\[0xE\] = 0xFF;/(v)[0xE] = 0xFE;/ % emit
+23s/\*(s16 \*) ((v) + 0x6) = 0;/;/ % emit
+164s/dz = bz - cam\[2\];/dz = bz - cam[1];/ % emit
+168s/cx = ey \* dz - dy \* ez;/cx = ey * dz - dy * ey;/ % emit
+170s/cz = ex \* dy - dx \* ey;/cz = ex * dy - dx * ex;/ % emit
+175s/k = \*(f32 \*) (pts + cur \* 0x18 + 0xC) \/ sqrtf(len2);/k = *(f32 *) (pts + prev * 0x18 + 0xC) \/ sqrtf(len2);/ % emit newest mix
+180s/TRAIL6_VTX(v, bx + nx, by + ny, bz + nz, s1 << 6, 0x7C0, a1);/TRAIL6_VTX(v, bx + nx, by + ny, bz + nz, s0 << 6, 0x7C0, a1);/ % emit newest
+182s/TRAIL6_VTX(v, bx - nx, by - ny, bz - nz, s1 << 6, 0, a1);/TRAIL6_VTX(v, bx - nx, by - ny, bz - nz, s1 << 6, 0x7C0, a1);/ % emit
+184s/((s32 \*) gfx)\[0\] = 0x01004008;/((s32 *) gfx)[0] = 0x01004006;/ % emit
+185s/((s32 \*) gfx)\[1\] = (s32) (v - 0x40);/((s32 *) gfx)[1] = (s32) (v - 0x20);/ % emit
+190s/((s32 \*) gfx)\[0\] = 0x05020604;/((s32 *) gfx)[0] = 0x05020404;/ % emit
+193s/if (s0 < s1) {/if (s0 <= s1) {/ % emit newest wrap mix flat
+193s/if (s0 < s1) {/if (s0 > s1) {/ % emit newest
+195s/memcpy(v, v - 0x20, 0x20);/memcpy(v, v - 0x10, 0x20);/ % emit wrap
+196s/\*(s16 \*) (v - 0x18) -= 0x4000;/*(s16 *) (v - 0x18) -= 0x2000;/ % emit wrap
+198s/\*(s16 \*) (v - 0x18) -= 0x4000;/*(s16 *) (v - 0x16) -= 0x4000;/ % emit wrap
+206s/if (prev != \*(s8 \*) (obj + 0x2D)) {/if (prev != *(s8 *) (obj + 0x2E)) {/ % emit newest mix
+210s/s0 = s1;/s0 = s0;/ % emit wrap mix
+207s/ax = bx;/ax = by;/ % emit
+218s/} while (prev != \*(s8 \*) (obj + 0x2D));/} while (cur != *(s8 *) (obj + 0x2D));/ % emit newest mix

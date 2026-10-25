@@ -535,9 +535,265 @@ s32 func_151ACBD4(s8 *arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ACBD4.s")
 #endif
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AD724.s")
+#ifdef NON_MATCHING
+f32 func_150489B0(u8);
 
+// rope_update: per-node update of the hanging rope (render layers 0x2F / 0x4E, built by func_151ACBD4): counts
+// down the +0x52 timer, applies the push of the attached object +0x44 (its controller +0x31C: point +0xAE gets
+// strength +0xA8 * 1.9 along angle +0xAC + the object's heading, the object's own speed +0x3C * 19 along the heading,
+// and -1000 vertical; the controller's +0xAD frame count ends the push), then the decaying kick +0x4C (angle +0x50,
+// point +0x51, * 0.9 per frame). The points (+0x38, 6 floats each: position, velocity) are relaxed from the
+// second-last up to the first: gravity -9 split along the segment, velocity damping 0.96, a bending pull towards the
+// neighbours' midpoint, a 1150 x limit in level 0x39 and a fixed segment length +0x3C to the point below. When the
+// summed x / z speed exceeds 250 a creak sound (0x507 + random 0..8) starts unless the last one (+0x54) still plays.
+void func_151AD724(u8 *e) {
+    f32 pos[20][3];
+    f32 cur[3];
+    f32 vel[3];
+    f32 acc[3];
+    f32 total;
+    f32 amp, dx, dy, dz, len, horiz, side, side2, s, bend;
+    f32 *p;
+    u8 *obj;
+    u8 *ctl;
+    u8 ang;
+    s32 last, i, j, k, frames;
+
+    total = 0.0f;
+    if (*(s16 *) (e + 0x52) != 0) {
+        *(s16 *) (e + 0x52) -= D_800BE9E4;
+        if (*(s16 *) (e + 0x52) < 0) {
+            *(s16 *) (e + 0x52) = 0;
+        }
+    }
+    last = e[0x42] - 1;
+    obj = *(u8 **) (e + 0x44);
+    if (obj != NULL) {
+        ctl = *(u8 **) (obj + 0x31C);
+        i = ctl[0xAE];
+        ang = ctl[0xAC] + (*(u16 *) (obj + 0x76) >> 8);
+        amp = *(f32 *) (ctl + 0xA8) * 1.9f;
+        p = *(f32 **) (e + 0x38) + i * 6;
+        p[3] += amp * func_150489B0(ang);
+        p = *(f32 **) (e + 0x38) + i * 6;
+        p[5] -= amp * func_15048A40(ang);
+        obj = *(u8 **) (e + 0x44);
+        ang = *(u16 *) (obj + 0x76) >> 8;
+        amp = *(f32 *) (obj + 0x3C) * 19.0f;
+        p = *(f32 **) (e + 0x38) + i * 6;
+        p[3] += amp * func_150489B0(ang);
+        p = *(f32 **) (e + 0x38) + i * 6;
+        p[5] -= amp * func_15048A40(ang);
+        p = *(f32 **) (e + 0x38) + i * 6;
+        p[4] -= 1000.0f;
+        ctl = *(u8 **) (*(u8 **) (e + 0x44) + 0x31C);
+        frames = ctl[0xAD] - 1;
+        if (frames > 0) {
+            ctl[0xAD] = frames;
+        } else {
+            *(f32 *) (ctl + 0xA8) = 0.0f;
+            ctl = *(u8 **) (*(u8 **) (e + 0x44) + 0x31C);
+            ctl[0xAD] = 0;
+        }
+    }
+    if (*(f32 *) (e + 0x4C) != 0.0f) {
+        p = *(f32 **) (e + 0x38) + e[0x51] * 6;
+        p[3] -= *(f32 *) (e + 0x4C) * func_150489B0(e[0x50]);
+        p = *(f32 **) (e + 0x38) + e[0x51] * 6;
+        p[5] += *(f32 *) (e + 0x4C) * func_15048A40(e[0x50]);
+        *(f32 *) (e + 0x4C) *= 0.9f;
+    }
+    for (i = 0; i < last + 1; i++) {
+        for (k = 0; k < 3; k++) {
+            pos[i][k] = (*(f32 **) (e + 0x38))[i * 6 + k];
+        }
+    }
+    for (j = last - 1; j >= 0; j--) {
+        for (k = 0; k < 3; k++) {
+            cur[k] = pos[j][k];
+            vel[k] = (*(f32 **) (e + 0x38))[j * 6 + 3 + k];
+        }
+        dx = cur[0] - pos[j + 1][0];
+        dy = cur[1] - pos[j + 1][1];
+        dz = cur[2] - pos[j + 1][2];
+        len = sqrtf(dx * dx + dy * dy + dz * dz);
+        horiz = sqrtf(dx * dx + dz * dz);
+        if (len == 0.0f) {
+            len = 1.0f;
+        }
+        side = 9.0f * (horiz / len);
+        side2 = side * side;
+        s = 9.0f * 9.0f - side2;
+        if (side2 <= 9.0f * 9.0f) {
+            s = sqrtf(s);
+        } else {
+            s = 0.0f;
+        }
+        s /= len;
+        acc[0] = 0.0f - dx * s;
+        acc[1] = -9.0f - dy * s;
+        acc[2] = 0.0f - dz * s;
+        for (k = 0; k < 3; k++) {
+            vel[k] += acc[k];
+            vel[k] *= 0.96f;
+            if (j != 0) {
+                bend = (pos[j - 1][k] + pos[j + 1][k]) * 0.5f - cur[k];
+                vel[k] += bend * 1.24;
+            }
+            cur[k] += vel[k];
+            if (D_800BE9F0 == 0x39 && cur[0] > 1150.0f) {
+                cur[0] = 1150.0f;
+            }
+        }
+        p = *(f32 **) (e + 0x38) + j * 6;
+        dz = cur[2] - p[8];
+        dx = cur[0] - p[6];
+        dy = cur[1] - p[7];
+        total += fabsf(vel[0]);
+        total += fabsf(vel[2]);
+        len = sqrtf(dz * dz + (dx * dx + dy * dy));
+        if (len == 0.0f) {
+            s = 1.0f;
+        } else {
+            s = *(f32 *) (e + 0x3C) / len;
+        }
+        for (k = 0; k < 3; k++) {
+            p = *(f32 **) (e + 0x38) + j * 6;
+            p[k] = (cur[k] - p[6 + k]) * s + p[6 + k];
+            p = *(f32 **) (e + 0x38) + j * 6;
+            p[3 + k] = p[k] - pos[j][k];
+        }
+    }
+    if (total > 250.0f) {
+        if (*(u16 *) (e + 0x54) == 0 || func_1000F3D0(*(u16 *) (e + 0x54)) == 0) {
+            *(u16 *) (e + 0x54) = func_10010E78(0, (u32) func_150ADA20() % 9 + 0x507, 30000, 0, 0, 0, (s32) cur[0],
+                                                (s32) cur[1], (s32) cur[2], 250, -0x7E0C);
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151AD724.s")
+#endif
+
+#ifdef NON_MATCHING
+s32 func_150953F8(s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+extern s32 D_800D30BC;
+
+// rope_draw: render-layer draw callback of the rope (layers 0x2F / 0x4E): writes 4 vertices per point into vertex
+// buffer D_800BE9C0 of +0x48 (a cross of two 4-unit offsets perpendicular to the segment to the next point; the
+// last point uses an upward segment), loads texture +0x40 (func_150953F8) and draws each segment as 8 triangles
+// from 8 vertices, setting the t coordinates of vertices 0 / 4 (0x100 + k * (height - 1), << 5 for texture 0x36
+// else << 4); the first segment also closes the top end.
+Gfx *func_151ADEDC(Gfx *gfx, u8 *e, s16 player) {
+    struct_eu_80090F10 *tex;
+    Vtx *v;
+    f32 *p;
+    f32 x, y, z, dx, dy, ndy, dz, len, inv, ox, oy, oz;
+    s32 n, th, tw, shift, i, s, tTop, tBot;
+
+    tex = &D_80090F10[*(u16 *) (e + 0x40)];
+    n = e[0x42];
+    th = tex->unk8 - 1;
+    tw = tex->unk6;
+    if (*(u16 *) (e + 0x40) == 0x36) {
+        shift = 5;
+    } else {
+        shift = 4;
+    }
+    for (i = 0; i < n; i++) {
+        p = *(f32 **) (e + 0x38) + i * 6;
+        x = p[0];
+        y = p[1];
+        z = p[2];
+        if (i + 1 == n) {
+            dx = 0.0f;
+            dy = 1.0f;
+            dz = 0.0f;
+        } else {
+            dx = p[6] - x;
+            dy = p[7] - y;
+            dz = p[8] - z;
+        }
+        ndy = -dy;
+        len = sqrtf(dz * dz + ndy * ndy);
+        if (len == 0.0f) {
+            ox = 100.0f;
+            oy = 0.0f;
+            oz = 0.0f;
+        } else {
+            inv = 1.0f / len;
+            ox = 0.0f;
+            oy = dz * inv;
+            oz = ndy * inv;
+        }
+        ox *= 4.0f;
+        oy *= 4.0f;
+        oz *= 4.0f;
+        v = *(Vtx **) (e + 0x48) + (D_800BE9C0 * n + i) * 4;
+        v[0].v.ob[0] = (s32) (x + ox);
+        v[0].v.ob[1] = (s32) (y + oy);
+        v[0].v.ob[2] = (s32) (z + oz);
+        v[2].v.ob[0] = (s32) (x - ox);
+        v[2].v.ob[1] = (s32) (y - oy);
+        v[2].v.ob[2] = (s32) (z - oz);
+        len = sqrtf(ndy * ndy + dx * dx);
+        if (len == 0.0f) {
+            ox = 1.0f;
+            oy = 0.0f;
+            oz = 1.0f;
+        } else {
+            inv = 1.0f / len;
+            ox = ndy * inv;
+            oy = dx * inv;
+            oz = 0.0f;
+        }
+        ox *= 4.0f;
+        oy *= 4.0f;
+        oz *= 4.0f;
+        v[1].v.ob[0] = (s32) (x + ox);
+        v[1].v.ob[1] = (s32) (y + oy);
+        v[1].v.ob[2] = (s32) (z + oz);
+        v[3].v.ob[0] = (s32) (x - ox);
+        v[3].v.ob[1] = (s32) (y - oy);
+        v[3].v.ob[2] = (s32) (z - oz);
+    }
+    gSPSetGeometryMode(gfx++, G_CULL_BACK);
+    gSPClearGeometryMode(gfx++, G_CULL_FRONT);
+    gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPPipeSync(gfx++);
+    gfx = (Gfx *) func_150953F8((s32) gfx, (s32) &D_80090F10[*(u16 *) (e + 0x40)], 0, 0, 0, 0, 0, 0, 0x100, 0x100,
+                                0x3E);
+    gfx->words.w0 = 0xFC121824; /* combine mode */
+    gfx->words.w1 = 0xFF33FFFF;
+    gfx++;
+    gDPSetOtherMode(gfx++, D_800D30BC | 0x80000 | 0x2C0F, 0x552078);
+    s = ((tw + 0x100) << 5) << 16;
+    tTop = 0x100;
+    tBot = th + 0x100;
+    for (i = 1; i < n; i++) {
+        gSPVertex(gfx++, *(Vtx **) (e + 0x48) + (D_800BE9C0 * n + (i - 1)) * 4, 8, 0);
+        gSP1Triangle(gfx++, 0, 1, 4, 0);
+        gSP1Triangle(gfx++, 1, 5, 4, 0);
+        gSP1Triangle(gfx++, 1, 2, 5, 0);
+        gSP1Triangle(gfx++, 2, 6, 5, 0);
+        gSP1Triangle(gfx++, 2, 3, 7, 0);
+        gSP1Triangle(gfx++, 2, 7, 6, 0);
+        gSPModifyVertex(gfx++, 0, G_MWO_POINT_ST, s | (tTop << shift));
+        gSPModifyVertex(gfx++, 4, G_MWO_POINT_ST, s | (tBot << shift));
+        gSP1Triangle(gfx++, 3, 0, 7, 0);
+        gSP1Triangle(gfx++, 0, 4, 7, 0);
+        if (i == 1) {
+            gSP1Triangle(gfx++, 2, 1, 0, 0);
+            gSP1Triangle(gfx++, 3, 2, 0, 0);
+        }
+        tTop += th;
+        tBot += th;
+    }
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D9C00/func_151ADEDC.s")
+#endif
 
 void func_151AE814(u8 *);
 void func_151AE694(u8 *, u8);

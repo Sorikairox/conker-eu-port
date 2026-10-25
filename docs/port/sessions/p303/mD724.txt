@@ -1,0 +1,62 @@
+25s/if (\*(s16 \*) (e + 0x52) != 0) {/if (*(s16 *) (e + 0x52) > 1) {/ % timer1
+26s/\*(s16 \*) (e + 0x52) -= D_800BE9E4;/*(s16 *) (e + 0x52) -= 1;/ % timer5
+27s/if (\*(s16 \*) (e + 0x52) < 0) {/if (*(s16 *) (e + 0x52) < -1) {/ % timer1
+31s/last = e\[0x42\] - 1;/last = e[0x42] - 2;/ % n2
+35s/i = ctl\[0xAE\];/i = ctl[0xAD];/ % obj5
+36s/ang = ctl\[0xAC\] + (\*(u16 \*) (obj + 0x76) >> 8);/ang = ctl[0xAC] + (*(u16 *) (obj + 0x76) >> 7);/ % obj5
+36s/ang = ctl\[0xAC\] + (\*(u16 \*) (obj + 0x76) >> 8);/ang = ctl[0xAC];/ % obj5
+37s/amp = \*(f32 \*) (ctl + 0xA8) \* 1\.9f;/amp = *(f32 *) (ctl + 0xA8) * 1.8f;/ % obj5
+39s/p\[3\] += amp \* func_150489B0(ang);/p[3] -= amp * func_150489B0(ang);/ % obj5
+41s/p\[5\] -= amp \* func_15048A40(ang);/p[4] -= amp * func_15048A40(ang);/ % obj5
+43s/ang = \*(u16 \*) (obj + 0x76) >> 8;/ang = *(u16 *) (obj + 0x76);/ % obj5
+44s/amp = \*(f32 \*) (obj + 0x3C) \* 19\.0f;/amp = *(f32 *) (obj + 0x3C) * 18.0f;/ % obj5
+46s/p\[3\] += amp \* func_150489B0(ang);/p[3] += amp;/ % obj5
+48s/p\[5\] -= amp \* func_15048A40(ang);/p[5] += amp * func_15048A40(ang);/ % obj5
+50s/p\[4\] -= 1000\.0f;/p[4] -= 100.0f;/ % obj5
+52s/frames = ctl\[0xAD\] - 1;/frames = ctl[0xAD];/ % obj5 obj1
+53s/if (frames > 0) {/if (frames >= 0) {/ % obj1
+56s/\*(f32 \*) (ctl + 0xA8) = 0\.0f;/*(f32 *) (ctl + 0xA8) = 1.0f;/ % obj1 obj0
+58s/ctl\[0xAD\] = 0;/ctl[0xAD] = 1;/ % obj0
+61s/if (\*(f32 \*) (e + 0x4C) != 0\.0f) {/if (*(f32 *) (e + 0x4C) > 0.0f) {/ % kickneg
+62s/p = \*(f32 \*\*) (e + 0x38) + e\[0x51\] \* 6;/p = *(f32 **) (e + 0x38) + e[0x50] * 6;/ % kick
+63s/p\[3\] -= \*(f32 \*) (e + 0x4C) \* func_150489B0(e\[0x50\]);/p[3] += *(f32 *) (e + 0x4C) * func_150489B0(e[0x50]);/ % kick
+65s/p\[5\] += \*(f32 \*) (e + 0x4C) \* func_15048A40(e\[0x50\]);/p[5] += *(f32 *) (e + 0x4C) * func_15048A40(e[0x51]);/ % kick
+66s/\*(f32 \*) (e + 0x4C) \*= 0\.9f;/*(f32 *) (e + 0x4C) *= 0.8f;/ % kick
+68s/for (i = 0; i < last + 1; i++) {/for (i = 0; i < last; i++) {/ % n2 n20
+70s/pos\[i\]\[k\] = (\*(f32 \*\*) (e + 0x38))\[i \* 6 + k\];/pos[i][k] = (*(f32 **) (e + 0x38))[i * 6 + k + 3];/ % n2
+73s/for (j = last - 1; j >= 0; j--) {/for (j = last - 1; j > 0; j--) {/ % n2
+76s/vel\[k\] = (\*(f32 \*\*) (e + 0x38))\[j \* 6 + 3 + k\];/vel[k] = (*(f32 **) (e + 0x38))[j * 6 + k];/ % n2
+79s/dy = cur\[1\] - pos\[j + 1\]\[1\];/dy = cur[1] - pos[j][1];/ % n2
+82s/horiz = sqrtf(dx \* dx + dz \* dz);/horiz = sqrtf(dx * dx + dy * dy);/ % n2
+84s/len = 1\.0f;/len = 2.0f;/ % same
+86s/side = 9\.0f \* (horiz \/ len);/side = 8.0f * (horiz \/ len);/ % n2
+88s/s = 9\.0f \* 9\.0f - side2;/s = 9.0f * 8.0f - side2;/ % n2
+94s/s \/= len;/s *= len;/ % n2
+95s/acc\[0\] = 0\.0f - dx \* s;/acc[0] = 0.0f + dx * s;/ % n2
+96s/acc\[1\] = -9\.0f - dy \* s;/acc[1] = -8.0f - dy * s;/ % n2
+97s/acc\[2\] = 0\.0f - dz \* s;/acc[2] = 0.0f - dy * s;/ % n2
+99s/vel\[k\] += acc\[k\];/vel[k] = acc[k];/ % n2
+100s/vel\[k\] \*= 0\.96f;/vel[k] *= 0.95f;/ % n2
+101s/if (j != 0) {/if (j > 1) {/ % n20
+102s/bend = (pos\[j - 1\]\[k\] + pos\[j + 1\]\[k\]) \* 0\.5f - cur\[k\];/bend = (pos[j - 1][k] + pos[j + 1][k]) * 0.5f;/ % n20
+103s/vel\[k\] += bend \* 1\.24;/vel[k] += bend * 1.25;/ % n20
+103s/vel\[k\] += bend \* 1\.24;/vel[k] += bend * 1.24f;/ % n20 kick obj5 lvl39
+105s/cur\[k\] += vel\[k\];/cur[k] -= vel[k];/ % n2
+106s/if (D_800BE9F0 == 0x39 \&\& cur\[0\] > 1150\.0f) {/if (cur[0] > 1150.0f) {/ % lvl39 lvl39b
+106s/if (D_800BE9F0 == 0x39 \&\& cur\[0\] > 1150\.0f) {/if (D_800BE9F0 == 0x39 \&\& cur[0] > 1149.0f) {/ % lvl39
+107s/cur\[0\] = 1150\.0f;/cur[0] = 1149.0f;/ % lvl39
+111s/dz = cur\[2\] - p\[8\];/dz = cur[2] - p[2];/ % n2
+114s/total += fabsf(vel\[0\]);/total += vel[0];/ % snd0 slow
+115s/total += fabsf(vel\[2\]);/total += fabsf(vel[1]);/ % snd0 slow
+116s/len = sqrtf(dz \* dz + (dx \* dx + dy \* dy));/len = sqrtf(dz * dz + dx * dx);/ % n2
+118s/s = 1\.0f;/s = 0.0f;/ % same
+120s/s = \*(f32 \*) (e + 0x3C) \/ len;/s = *(f32 *) (e + 0x3C) * len;/ % n2
+124s/p\[k\] = (cur\[k\] - p\[6 + k\]) \* s + p\[6 + k\];/p[k] = (cur[k] - p[6 + k]) * s;/ % n2
+126s/p\[3 + k\] = p\[k\] - pos\[j\]\[k\];/p[3 + k] = p[k] - cur[k];/ % n2
+129s/if (total > 250\.0f) {/if (total > 25.0f) {/ % medium slow snd0
+130s/if (\*(u16 \*) (e + 0x54) == 0 ||/if (/ % snd0
+130s/func_1000F3D0(\*(u16 \*) (e + 0x54)) == 0) {/func_1000F3D0(*(u16 *) (e + 0x54)) != 0) {/ % sndplay sndend
+131s/(s32) cur\[0\],/(s32) cur[2],/ % snd0
+132s/(s32) cur\[1\], (s32) cur\[2\], 250, -0x7E0C);/(s32) cur[1], (s32) cur[2], 250, -0x7E0D);/ % snd0
+131s/+ 0x507, 30000,/+ 0x508, 30000,/ % snd0
+131s/0x507, 30000, 0,/0x507, 3000, 0,/ % snd0
