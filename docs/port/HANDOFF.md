@@ -32,6 +32,20 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 3. ROM rodata statics (D_800A5D14 style) are not readable by ARGMEM on the reference side (unmapped page); a harness
    option to map the ELF .rodata page on ARGMEM reads would let pointer-to-static arguments be compared.
 
+## P264 (port-b) (session P264, 2026-10-25). Details: `docs/port/sessions/P264.md`
+
+Branch `port-b`. Merged port 34922b88 (selftest 130/130). Hand C (NM): func_150D5634 rocket_sound_update, func_151BE33C
+player_twin_emitters_follow, func_15199A28 spec_emitter_spawn, func_1519CF34 trail_emitter_spawn, func_1516EE3C
+glow_colour_update (setups + mutants, registry rows). Stopped early (wrap-up request). Checks: verify_all rc 0, NM rc 0,
+protocheck 0 (1635).
+
+## Next steps (from P264)
+
+1. Finish func_150D5268 (docs/port/sessions/p264/d_5268.c, mutants interrupted) and func_15198180 (d_8180.c: re-run
+   random dt first), then func_15198680 (280), func_151CF930, game_161520 group, D5E90 hand asm.
+2. Run implicit_scan / v0use / arity_scan for the P264 functions; selftest after the next harness change.
+3. func_1519CADC: suspicious `(s32)sp30 * (s32)temp_f2_3` in the NM body.
+
 ## P260 (port-b) (session P260, 2026-10-25). Details: `docs/port/sessions/P260.md`
 
 Branch `port-b`. **Selftest 118 / 123 root cause: stale Docker bind-mount view after the P256 Docker restart.** A file the
