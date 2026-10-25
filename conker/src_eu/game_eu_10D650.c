@@ -16,7 +16,97 @@ s32 func_150DFE40(s32 arg0) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+void func_15174F10(s32 arg0, s32 arg1);
+void func_150A2D44(s32, s32);
+void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3);
+extern u8 D_800D9D70[3];
+
+// level_lights_and_scroll_update: per-frame level handler (table D_8008D0C0); does nothing unless arg0 is 0. Steps
+// the D_800DD835 counter (func_15174F10(5, 4)), places light slots 3 / 4 at objects 6 / 7 (200 above them; a slot
+// whose object is missing is switched off with func_150A2D44(slot, 1)). Then for the three parts i (segment i + 2):
+// the fade D_800D9D70[i] rises by D_800BE9E4 up to 0x60 while func_150DFE40(i) is on (else 0), and the first
+// G_SETTILESIZE after the part's G_SETTIMG of segment address (i + 2) << 24 in the level display list D_800B0E00[0]
+// gets its low coordinate advanced by fade / 16 * D_800BE9E4 (on) or both coordinates set to 2 (off).
+void func_150DFEA0(s32 arg0) {
+    u32 *dl;
+    u8 *fade;
+    u8 *obj;
+    s32 i;
+    s32 j;
+    s32 on;
+    s32 lo;
+    s32 hi;
+    s32 slot;
+    s32 kind;
+
+    if (arg0 != 0) {
+        return;
+    }
+    func_15174F10(5, 4);
+    kind = 6;
+    slot = 3;
+    for (i = 0; i < 2; i++) {
+        obj = (u8 *) func_15083E90(kind);
+        kind = 7;
+        if (obj != NULL) {
+            func_150A2D44(slot, 0);
+            func_150A3924(slot, (s32) *(f32 *) (obj + 0x14), (s32) (*(f32 *) (obj + 0x18) + 200.0f),
+                          (s32) *(f32 *) (obj + 0x1C));
+        } else {
+            func_150A2D44(slot, 1);
+        }
+        slot = 4;
+    }
+    dl = (u32 *) D_800B0E00[0];
+    fade = D_800D9D70;
+    for (i = 0; i < 3; i++, fade++) {
+        on = func_150DFE40(i);
+        if (on) {
+            if (*fade < 0x60) {
+                *fade += D_800BE9E4;
+                if (*fade > 0x60) {
+                    *fade = 0x60;
+                }
+            }
+        } else {
+            *fade = 0;
+        }
+        /* the part's G_SETTIMG (0xFD) of segment i + 2; stop at G_ENDDL (0xDF) */
+        j = 0;
+        while (TRUE) {
+            while ((s8) (dl[j * 2] >> 24) != (s8) 0xFD && (s8) (dl[j * 2] >> 24) != (s8) 0xDF) {
+                j++;
+            }
+            if ((s8) (dl[j * 2] >> 24) == (s8) 0xDF) {
+                j = -1;
+                break;
+            }
+            if (dl[j * 2 + 1] == (u32) ((i << 24) + 0x2000000)) {
+                break;
+            }
+            j++;
+        }
+        if (j == -1) {
+            continue;
+        }
+        /* the next G_SETTILESIZE (0xF2) */
+        do {
+            j++;
+        } while ((s8) (dl[j * 2] >> 24) != (s8) 0xF2);
+        if (on) {
+            hi = (dl[j * 2] >> 12) & 0xFFF;
+            lo = (dl[j * 2] & 0xFFF) + (*fade >> 4) * D_800BE9E4;
+        } else {
+            lo = 2;
+            hi = 2;
+        }
+        dl[j * 2] = 0xF2000000 | ((hi & 0xFFF) << 12) | (lo & 0xFFF);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_10D650/func_150DFEA0.s")
+#endif
 
 s32 func_1510D66C(s32, s32 *, s32, s32);
 extern s32 D_800906D4[];
@@ -315,8 +405,14 @@ s32 func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s32, s32, f32, s32 *, s32, s32,
 #endif
 s32 func_15145EA4(f32 **, s32 **, s32, s32);
 extern u8 D_80088D28;
+#ifdef NON_MATCHING
+/* the rodata of func_150DFEA0.s (D_800A1340 / D_800A1358), gone from the NM build: local copies */
+static const f32 D_800A1340[2][3] = { { 17.0f, 0.0f, 90.0f }, { -17.0f, 0.0f, 90.0f } };
+static const f32 D_800A1358[2][3] = { { 17.0f, 0.0f, 150.0f }, { -17.0f, 0.0f, 150.0f } };
+#else
 extern f32 D_800A1340[][3];
 extern f32 D_800A1358[][3];
+#endif
 
 void func_150E0C58(u8 *arg0, u8 arg1, u8 arg2, s32 arg3) {
     s32 sp64[3];

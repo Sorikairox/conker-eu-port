@@ -3,7 +3,109 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+void func_151534E0(u8 *arg0, s32 arg1);
+void func_15153808(u8 *arg0, s32 arg1, s32 arg2);
+u8 *func_15196438(u8 *, s32, u8, s32);
+extern u8 D_800908C4[];
+
+// spark_effect_on_event: event effect for obj. mode 0: starts emitter kind 1 on obj (func_15196438), a spark burst
+// (func_151534E0 spec at x 177.9 / z -1708), sound effect 0x1E (func_151491F4) and a sprite burst (func_15153808 spec,
+// D_800908C4 animation); mode 1: emitter kind 2 only; other modes and a NULL obj do nothing. flag goes to every call.
+void func_150DBF60(u8 *obj, s32 mode, u8 flag) {
+    struct {
+        f32 x, y, z;            // 0x00
+        f32 u0C, u10;           // 0x0C
+        f32 u14, u18;           // 0x14
+        f32 u1C, u20;           // 0x1C
+        s16 u24, u26, u28, u2A, u2C, u2E, u30, u32, u34, u36; // 0x24
+        s8 u38, u39;            // 0x38
+        s32 u3C, u40, u44, u48, u4C, u50; // 0x3C
+        s8 u54, u55;            // 0x54
+    } spark;                    // sp78
+    struct {
+        f32 x, y, z;            // 0x00
+        s16 u0C, u0E, u10, u12, u14, u16; // 0x0C
+        f32 u18, u1C;           // 0x18
+        s16 u20, u22, u24, u26; // 0x20
+        s8 u28;                 // 0x28
+        u8 u29;                 // 0x29
+        s16 u2A, u2C, u2E, u30, u32, u34, u36; // 0x2A
+        u8 *anim;               // 0x38
+        u8 u3C, u3D;            // 0x3C
+    } burst;                    // sp38
+
+    if (obj == NULL) {
+        return;
+    }
+    if (mode == 0) {
+        func_15196438(obj, 1, flag, 0);
+        spark.x = 177.901749f;
+        spark.y = -13.3882484f;
+        spark.z = -1708.0238f;
+        spark.u0C = 3.0f;
+        spark.u10 = 3.0f;
+        spark.u14 = 0.319999993f;
+        spark.u18 = 0.0f;
+        spark.u1C = 9.0f;
+        spark.u20 = 8.0f;
+        spark.u24 = 8;
+        spark.u26 = 8;
+        spark.u28 = -0x4B;
+        spark.u2A = 0x16;
+        spark.u2C = -0x26;
+        spark.u2E = 0x23;
+        spark.u30 = 3;
+        spark.u32 = 2;
+        spark.u34 = 0x29;
+        spark.u36 = 0;
+        spark.u38 = 0xA;
+        spark.u39 = 0x28;
+        spark.u3C = 1;
+        spark.u40 = 0;
+        spark.u44 = 0;
+        spark.u48 = 0;
+        spark.u4C = 0;
+        spark.u50 = 0;
+        spark.u54 = 0xFF;
+        spark.u55 = 0xFF;
+        func_151534E0((u8 *) &spark, flag);
+        func_151491F4(0x1E, -1, 0, 1, 0, 0, flag, 0);
+        burst.x = 177.901749f;
+        burst.y = -13.3882484f;
+        burst.z = -1708.0238f;
+        burst.u0C = 6;
+        burst.u0E = 3;
+        burst.u10 = -0x4A;
+        burst.u12 = 0x15;
+        burst.u14 = -0x26;
+        burst.u16 = 0x23;
+        burst.u18 = 1285.0f;
+        burst.u1C = 1149.0f;
+        burst.u20 = 0xE;
+        burst.u22 = 0xE;
+        burst.u24 = -0x3D;
+        burst.u26 = 0x1C;
+        burst.u28 = -1;
+        burst.u29 = 0x12;
+        burst.u2A = 6;
+        burst.u2C = 6;
+        burst.u2E = 0;
+        burst.u30 = 0xAE;
+        burst.u32 = 0x73;
+        burst.u34 = 0x73;
+        burst.u36 = 0x87;
+        burst.anim = D_800908C4;
+        burst.u3C = 0xFF;
+        burst.u3D = 0xFF;
+        func_15153808((u8 *) &burst, flag, 1);
+    } else if (mode == 1) {
+        func_15196438(obj, 2, flag, 0);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_109770/func_150DBF60.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_151534E0(u8 *arg0, s32 arg1);

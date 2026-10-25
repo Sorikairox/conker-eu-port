@@ -422,7 +422,141 @@ void func_151A4F4C(u8 *arg0, u8 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15153BA4(u8 *tmpl, s32 arg1, u8 room, u8 kind);
+
+/* func_15153BA4's particle template (sp2C in the asm) */
+typedef struct {
+    /* 0x00 */ s16 count;
+    /* 0x02 */ s16 u02;
+    /* 0x04 */ u8 u04;
+    /* 0x06 */ s16 u06;
+    /* 0x08 */ s32 u08;
+    /* 0x0C */ s32 u0C;
+    /* 0x10 */ s16 u10;
+    /* 0x12 */ s16 u12;
+    /* 0x14 */ s32 u14;
+    /* 0x18 */ s32 u18;
+    /* 0x1C */ u8 colour[10];
+    /* 0x26 */ s16 u26;
+    /* 0x28 */ s16 u28;
+    /* 0x2A */ s16 u2A;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 u30;
+    /* 0x34 */ f32 u34;
+    /* 0x38 */ f32 pos[3];
+    /* 0x44 */ s16 angle;
+    /* 0x46 */ s16 u46;
+    /* 0x48 */ s16 u48;
+    /* 0x4A */ s16 u4A;
+    /* 0x4C */ f32 u4C;
+    /* 0x50 */ f32 u50;
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ f32 u58;
+    /* 0x5C */ s32 mode;
+    /* 0x60 */ s8 u60;
+    /* 0x61 */ s8 u61;
+    /* 0x62 */ u8 u62;
+    /* 0x63 */ u8 u63;
+    /* 0x64 */ u8 u64;
+} SmokeTmpl4FE8;
+
+/* the effect data at obj + 0x28 (filled by func_151A4F4C) */
+typedef struct {
+    /* 0x00 */ u8 *owner;
+    /* 0x04 */ u8 ownerId;      // owner's +0x3B when attached
+    /* 0x08 */ f32 rate;        // puffs per frame
+    /* 0x0C */ f32 accum;
+    /* 0x10 */ u8 bone;         // matrix index in owner + 0x1D4
+    /* 0x14 */ f32 offset[3];
+} SmokeData4FE8;
+
+// owner_smoke_update: effect handler (table D_8008A890) for the smoke trail started by func_151A4F4C. Ends the effect
+// (+0xE = -1, +0xD |= 1) when the owner is gone (type 0 / 8, or +0x3B no longer the saved id). Otherwise, while the
+// owner has matrices (+0x1D4) and its +0x74 low nibble is not 0xF, accumulates rate * D_800BE9A4; once over 1 it emits
+// the whole number of puffs (func_15153BA4, count = int part) at the bone position (func_15143134), facing the
+// owner's yaw (+0x76 high byte), with random flip bits 0x40 / 0x80.
+void func_151A4FE8(u8 *obj) {
+    SmokeData4FE8 *d = (SmokeData4FE8 *) (obj + 0x28);
+    u8 *owner;
+    SmokeTmpl4FE8 t;
+    s16 yaw;
+    f32 pos[3];
+
+    if (*(s32 *) d->owner == 0 || *(s32 *) d->owner == 8 || d->ownerId != d->owner[0x3B]) {
+        *(s16 *) (obj + 0xE) = -1;
+        obj[0xD] |= 1;
+        return;
+    }
+    owner = d->owner;
+    if (*(u8 **) (owner + 0x1D4) == NULL) {
+        return;
+    }
+    if ((owner[0x74] & 0xF) == 0xF) {
+        return;
+    }
+    d->accum += d->rate * D_800BE9A4;
+    if (!(1.0f < d->accum)) {
+        return;
+    }
+    owner = d->owner;
+    yaw = (*(u16 *) (owner + 0x76) >> 8) - 0x40;
+    func_15143134(d->offset, pos, *(u8 **) (owner + 0x1D4) + (d->bone << 6));
+    t.u02 = 0;
+    t.count = (s32) d->accum;
+    d->accum -= (f32) t.count;
+    t.u04 = 0x28;
+    t.u06 = 0xC01;
+    t.u08 = 0x200005;
+    t.u0C = 0;
+    t.u10 = 0x17;
+    t.u12 = 0xD;
+    t.u14 = 0;
+    t.u18 = 0;
+    t.colour[0] = 0;
+    t.colour[1] = 0;
+    t.colour[2] = 0;
+    t.colour[3] = 0xFF;
+    t.colour[4] = 0;
+    t.colour[5] = 0;
+    t.colour[6] = 0;
+    t.u30 = 300.0f;
+    t.u34 = 400.0f;
+    t.pos[0] = pos[0];
+    t.pos[1] = pos[1];
+    t.pos[2] = pos[2];
+    t.u26 = 1;
+    t.u28 = 0;
+    t.u2A = 1;
+    t.u64 = 0;
+    t.angle = yaw - 0x19;
+    t.u46 = -0x2C;
+    t.u48 = 0x32;
+    t.u4A = 0x32;
+    t.mode = 7;
+    t.u62 = 1;
+    t.u63 = 0;
+    t.u54 = -0.5f;
+    t.u58 = -0.5f;
+    t.u4C = 0.0f;
+    t.u2C = 1.0f;
+    t.u50 = 15.0f;
+    if (func_150ADA20() & 1) {
+        t.mode |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        t.mode |= 0x80;
+    }
+    t.colour[7] = 0xFF;
+    t.colour[8] = 0;
+    t.colour[9] = 0xFF;
+    t.u60 = -1;
+    t.u61 = -1;
+    func_15153BA4((u8 *) &t, 0xFF, obj[0xC], obj[1]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4FE8.s")
+#endif
 
 void func_151A544C(u8 *);
 void func_151A5290(u8 *arg0, u8 *arg1, u8 arg2) {

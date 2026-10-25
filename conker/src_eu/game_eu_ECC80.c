@@ -78,7 +78,84 @@ s32 func_150BF5F4(u8 *e) {
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BF71C.s")
 
+#ifdef NON_MATCHING
+void func_1511BAA4(u8 *);
+s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
+s32 func_150829C0(s32, s32);
+
+// door_lift_update: per-frame update of the object driven by object 0x14's animation (skipped while D_800C35EA is 1
+// and D_800C3A08 is not). Runs func_1511BAA4, starts its looping sound D_800902B8 once (handle at +0x124), and takes
+// the animation progress `ratio` = frame (+8) / (length (+0x18) - 2) of object 0x14's +0x2D0 (0 without the object).
+// +0xA8 (a sway offset) is cleared, then by mode (+0x73 & 3): 2: sway -10 sin(ratio * pi * 4/3) up to ratio 0.75,
+// spawning object 0x14 when missing, and its state +0x232 set to 2 (+0x218 = 0); 3: func_15060F28(obj, 0) once the
+// animation ends (ratio >= 1); 0: sway 10 sin((ratio - 1) * 4pi/3) from ratio 0.25 and the same end call; 1: the same
+// sway, spawning object 0x14 when missing. Mode 1's state-3 store is only reached when the spawn fails and then
+// writes through NULL, as in the asm.
+void func_150BFC60(u8 *p) {
+    f32 ratio = 0.0f;
+    u8 *obj;
+    u8 *anim;
+    s32 mode;
+    s32 idx;
+
+    if (D_800C35EA == 1 && D_800C3A08 != 1) {
+        return;
+    }
+    func_1511BAA4(p);
+    if (*(s32 *) (p + 0x124) == 0) {
+        *(s32 *) (p + 0x124) = func_15195FB0(p, D_800902B8, 1, -1, 0, 0, -8);
+    }
+    obj = (u8 *) func_15083E90(0x14);
+    mode = p[0x73] & 3;
+    if (obj != NULL) {
+        anim = *(u8 **) (obj + 0x2D0);
+        ratio = *(f32 *) (anim + 8) / (*(f32 *) (anim + 0x18) - 2.0f);
+    }
+    *(f32 *) (p + 0xA8) = 0.0f;
+    if (mode == 2) {
+        if (ratio <= 0.75f) {
+            *(f32 *) (p + 0xA8) = -sinf(ratio * 3.14159274f * 1.33333325f) * 10.0f;
+        }
+        if (obj == NULL) {
+            idx = func_15083E0C(0x14);
+            ((u8 *) D_800D20FC + idx * 48)[2] = 0;
+            func_150829C0(idx, 0);
+            obj = (u8 *) func_15083E90(0x14);
+        }
+        if (obj[0x232] != 2) {
+            obj[0x232] = 2;
+            *(s32 *) (obj + 0x218) = 0;
+        }
+    } else if (mode == 3) {
+        if (obj != NULL && 1.0f <= ratio) {
+            func_15060F28((struct127 *) obj, 0);
+        }
+    } else if (mode == 0) {
+        if (0.25f <= ratio) {
+            *(f32 *) (p + 0xA8) = sinf(ratio * 4.18878937f - 4.18878937f) * 10.0f;
+        }
+        if (obj != NULL && 1.0f <= ratio) {
+            func_15060F28((struct127 *) obj, 0);
+        }
+    } else if (mode == 1) {
+        if (0.25f <= ratio) {
+            *(f32 *) (p + 0xA8) = sinf(ratio * 4.18878937f - 4.18878937f) * 10.0f;
+        }
+        if (obj == NULL) {
+            idx = func_15083E0C(0x14);
+            ((u8 *) D_800D20FC + idx * 48)[2] = 0;
+            func_150829C0(idx, 0);
+            obj = (u8 *) func_15083E90(0x14);
+        }
+        if (obj == NULL && obj[0x232] != 3) {
+            obj[0x232] = 3;
+            *(s32 *) (obj + 0x218) = 0;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFC60.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_ECC80/func_150BFF7C.s")
 

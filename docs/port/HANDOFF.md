@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P278 (port-d, group D) (session P278, 2026-10-25). Details: `docs/port/sessions/P278.md`
+
+Hand C (NM), registry rows `P278`, setups / mutants in docs/port/sessions/p278 (all mutants killed): func_150DBF60
+spark_effect_on_event, func_15096E78 camera_timed_record_update, func_151A4FE8 owner_smoke_update, func_150DFEA0
+level_lights_and_scroll_update (+ NM `static const` copies of its rodata D_800A1340 / D_800A1358 for func_150E0C58),
+func_1513BBFC water_texcoords_update, func_150CD3C0 spark_record_spawn, func_150E5D90 debris_ground_bounce,
+func_15188008 shard_ring_draw, func_150BFC60 door_lift_update. Checks: verify_all rc 0, NM build rc 0, protocheck 0
+(1664), implicit_scan 0 NM+float (832 sites), selftest 130/130 (start), progress_nm `total 5916 3995 1683 238 5678 96.0% 1991008/2253856 (88.3%)`.
+
+## Next steps (from P278, group D left)
+1. Smallest group-D asm left: func_15036860 (64070), func_150403C8 (6D800), func_150BABE0 (E88D0), func_150FBA40
+   (129250), func_150F3294 (1207F0), func_151A3D70 (1D1150), func_15104BB4 (132370), then the 300+ insn rows.
+2. func_151C5280 (1F3040): its .s owns rodata D_800AAE70 / D_800AAE88 that func_150268BC's NM C (game_eu_51190, not
+   group D) reads; convert both together (give 51190 a `static const` copy) or ask the 51190 owner.
+3. func_150A80F0 (D5900) is hand asm (`sd` stores): group E.
+4. Table D_80089CD4 mixed arities [5, 6] (tablesig, pre-existing): the C dispatcher passes 6; entries func_150BD498 /
+   func_151A79EC / func_150B3B8C / func_15133F44 are declared with 5 (other groups' files).
+
 ## P274 (port-b) (session P274, 2026-10-25). Details: `docs/port/sessions/P274.md`
 
 Hand C (NM), registry rows `P274`, setups / mutants in docs/port/sessions/p274: func_1511BD5C part_vertices_follow_refs,

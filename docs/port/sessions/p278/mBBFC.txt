@@ -1,0 +1,29 @@
+\#^    func_1513B968(obj, part);#s/part/0/
+\#^    rec = #s/0xF8/0xF4/
+\#^    scaleS = sinf(rec\[3\])#s/rec\[3\]/rec[2]/
+\#^    scaleS = #s/D_800A4E54 + D_800A4E58/D_800A4E58 + D_800A4E54/
+\#^    scaleT = sinf(rec\[4\])#s/D_800A4E60/D_800A4E58/
+\#^    cam = func_15144B34(part);#s/part/0/
+\#^    scrollS = #s/1024\.0f;/1000.0f;/
+\#^    scrollS = #s/(s32)/(u16)/
+\#^    scrollT = rec\[1\]#s/rec\[1\] - /rec[0] - /
+\#^    for (k = 0; k < 9; k++) {#s/9/8/
+\#^        dx = D_800A4DA0\[k\]\[0\] - cam\[0\];#s/cam\[0\]/cam[1]/
+\#^        dz = D_800A4DA0\[k\]\[2\] - cam\[2\];#s/\[k\]\[2\]/[k][1]/
+\#^        if (dx == 0\.0f && dz == 0\.0f) {#s/&&/||/
+\#^            dirX = 1\.0f;#s/1\.0f/0.0f/
+\#^            dirZ = 0\.0f;#s/0\.0f/1.0f/
+\#^            inv = 1\.0f / sqrtf#s/1\.0f/2.0f/
+\#^            dirX = dz \* inv;#s/dz/dx/
+\#^            dirZ = -dx \* inv;#s/-dx/dx/
+\#^        for (n = D_800A4E0C#s/n < D_800A4E0C\[k\]\[0\] + /n < /
+\#^            v = (Vtx_t \*) #s/D_800BE9C0 \* 16/D_800BE9C0 * 8/
+\#^            v = (Vtx_t \*) #s/part \* 4/part * 8/
+\#^            v = (Vtx_t \*) #s/n \* 16/n * 12/
+\#^            v->tc\[0\] = #s/v->ob\[0\]/v->ob[1]/
+\#^            v->tc\[0\] = #s/\* dirZ/* dirX/
+\#^            v->tc\[0\] = #s/(s32)/(s16)(u8)/
+\#^                                  scaleS - scrollS);#s/- scrollS/+ scrollS/
+\#^            v->tc\[1\] = #s/\[k\]\[1\]/[k][2]/
+\#^            v->tc\[1\] = #s/scaleT - scrollT/scaleS - scrollT/
+\#^    return 1;#s/1;/0;/

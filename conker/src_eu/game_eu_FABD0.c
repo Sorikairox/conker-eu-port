@@ -3,7 +3,115 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+struct210 *func_1513D524(s32 arg0, u8 arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, s32 arg6, u8 arg7, s32 arg8);
+void *memcpy(void *, const void *, s32);
+
+/* func_150CD3C0's input (func_15152DE4's S_2de4) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 vel[3];
+    /* 0x18 */ f32 a;
+    /* 0x1C */ f32 b;
+    /* 0x20 */ u8 rgba[4];
+    /* 0x24 */ s32 life;
+    /* 0x28 */ f32 size[2];
+    /* 0x30 */ f32 z;
+} SparkIn_D3C0;
+
+/* func_1513D524 parameter block (sp74) */
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x02 */ s16 flags;
+    /* 0x04 */ s16 life;
+    /* 0x08 */ s32 w8;
+    /* 0x0C */ s32 wC;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ f32 size[2];
+    /* 0x1C */ f32 pos[3];
+    /* 0x28 */ f32 rot[3];
+    /* 0x34 */ f32 u34[3];
+    /* 0x40 */ s32 w40;
+    /* 0x44 */ u8 b44;
+    /* 0x45 */ u8 b45;
+    /* 0x46 */ u8 b46;
+    /* 0x47 */ u8 b47;
+} SparkSpec_D3C0;
+
+/* the 0x40 bytes copied to the record's +0x110 (sp34) */
+typedef struct {
+    /* 0x00 */ f32 vel[3];
+    /* 0x0C */ f32 b;
+    /* 0x10 */ f32 a;
+    /* 0x14 */ f32 spin[3];
+    /* 0x20 */ f32 u20;         // never set (stack garbage, as in the asm)
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 u28;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 u30;
+    /* 0x34 */ f32 u34;
+    /* 0x38 */ f32 u38;
+    /* 0x3C */ f32 z;
+} SparkExtra_D3C0;
+
+// spark_record_spawn: spawns one type 0x57 effect record (func_1513D524, flags 0x2D03, 0xC03E1) for func_15152DE4's
+// spark description: life, colour (alpha 0xFF; the 4th byte goes to +0x44), size and position from `in`, a random
+// orientation (0..360 each axis). The record's +0x110 block gets in's velocity, b, a, z and random spins
+// ((rand * 20000 - 10000) / 1000 per axis) and rates. room / group go to the spawner's last two arguments.
+// The asm returns the record; every caller ignores it (void as in their prototypes).
+void func_150CD3C0(SparkIn_D3C0 *in, u8 room, u8 group) {
+    SparkExtra_D3C0 x;
+    SparkSpec_D3C0 s;
+    u8 *rec;
+
+    s.type = 0x57;
+    s.flags = 0x2D03;
+    s.w8 = 0;
+    s.wC = 0;
+    s.life = in->life;
+    s.rgba[0] = in->rgba[0];
+    s.rgba[1] = in->rgba[1];
+    s.rgba[3] = 0xFF;
+    s.rgba[2] = in->rgba[2];
+    s.size[0] = in->size[0];
+    s.size[1] = in->size[1];
+    s.pos[0] = in->pos[0];
+    s.pos[1] = in->pos[1];
+    s.pos[2] = in->pos[2];
+    s.rot[0] = func_150ADA68() * 360.0f;
+    s.rot[1] = func_150ADA68() * 360.0f;
+    s.rot[2] = func_150ADA68() * 360.0f;
+    s.w40 = 0xC03E1;
+    s.u34[0] = 0.0f;
+    s.u34[1] = 0.0f;
+    s.u34[2] = 0.0f;
+    s.b45 = 0xFF;
+    s.b46 = 0;
+    s.b47 = 6;
+    s.b44 = in->rgba[3];
+    x.vel[0] = in->vel[0];
+    x.vel[1] = in->vel[1];
+    x.vel[2] = in->vel[2];
+    x.z = in->z;
+    x.a = in->a;
+    x.b = in->b;
+    x.spin[0] = (func_150ADA68() * 20000.0f - 10000.0f) * 0.001f;
+    x.spin[1] = (func_150ADA68() * 20000.0f - 10000.0f) * 0.001f;
+    x.u24 = 0.0f;
+    x.spin[2] = (func_150ADA68() * 20000.0f - 10000.0f) * 0.001f;
+    x.u28 = (func_150ADA68() * 206.0f + 58.0f) * 0.001f;
+    x.u30 = 0.0f;
+    x.u2C = func_150ADA68() * 360.0f;
+    x.u34 = func_150ADA68() * 1210.0f * 0.0001f;
+    x.u38 = (func_150ADA68() * 12960.0f + 15241.0f) * 0.0001f;
+    rec = (u8 *) func_1513D524((s32) &s, 0x13, 0x1E, 0, 0x11, 0, 0x40, room, group);
+    if (rec != NULL) {
+        memcpy(rec + 0x110, &x, sizeof(x));
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FABD0/func_150CD3C0.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_151436B4(f32, f32, f32, void *);

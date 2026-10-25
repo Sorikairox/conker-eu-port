@@ -143,4 +143,72 @@ void func_150E5AD8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, s
     func_15132FBC(&sp, 3, 0xFF, 0, 0xFF, 0);
 }
 
+#ifdef NON_MATCHING
+void func_15049350(s32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, f32 x2, f32 y2, f32 z2);
+f32 func_150ADDE0(f32 *a, f32 *b);
+extern f32 D_800CC630, D_800CC634, D_800CC638; /* plane of the last func_15049350 triangle */
+
+// debris_ground_bounce: ground handler 4 of D_80089CD4 (`s32 (u8 *, f32, f32, f32, f32, u8 *)`, func_15132BBC's
+// dispatcher; x / y / z unused). Puts the object on the ground (+0x3C = +0x10 * 1.1 + ground). Slower than 2 downwards
+// it stops: velocities +0x44..+0x4C cleared, flags 0x6F of +0x60 dropped. Otherwise it bounces: with the ground
+// triangle `tri` (nine s16) the velocity is reflected about the triangle's normal (v - 2 (v.n) n, from the
+// func_15049350 plane D_800CC630; skipped when the normal is shorter than 1e-5) and scaled by +0x14 (x / z also
+// by 0.8); without a triangle only the y velocity is flipped. The spin +0x50..+0x58 is scaled by +0x14 too.
+// Returns 1 (keep the object).
+s32 func_150E5D90(u8 *p, f32 x, f32 y, f32 z, f32 ground, s16 *tri) {
+    f32 vy = *(f32 *) (p + 0x48);
+    f32 v[3][3];
+    f32 n[3];
+    f32 unit[3];
+    f32 vel[3];
+    f32 len;
+    f32 fac;
+    s32 i;
+
+    *(f32 *) (p + 0x3C) = *(f32 *) (p + 0x10) * 1.1f + ground;
+    if (-2.0f < vy) {
+        *(f32 *) (p + 0x44) = 0.0f;
+        *(s32 *) (p + 0x60) &= ~0x6F;
+        *(f32 *) (p + 0x48) = 0.0f;
+        *(f32 *) (p + 0x4C) = 0.0f;
+        return 1;
+    }
+    if (tri != NULL) {
+        for (i = 0; i < 3; i++) {
+            v[i][0] = tri[i * 3 + 0];
+            v[i][1] = tri[i * 3 + 1];
+            v[i][2] = tri[i * 3 + 2];
+        }
+        func_15049350(*(s32 *) &v[0][0], v[0][1], v[0][2], v[1][0], v[1][1], v[1][2], v[2][0], v[2][1], v[2][2]);
+        n[0] = -D_800CC630;
+        n[1] = -D_800CC634;
+        n[2] = -D_800CC638;
+        len = func_150AD930(n);
+        if (1e-05f < len) {
+            func_15049148((struct17 *) n, 1.0f / len, (struct17 *) unit);
+            vel[0] = *(f32 *) (p + 0x44);
+            vel[1] = *(f32 *) (p + 0x48);
+            vel[2] = *(f32 *) (p + 0x4C);
+            len = func_150ADDE0(unit, vel);
+            func_15049148((struct17 *) unit, len + len, (struct17 *) n);
+            func_15048F58((struct17 *) vel, (struct17 *) n, (struct17 *) n);
+            fac = *(f32 *) (p + 0x14);
+            *(f32 *) (p + 0x44) = fac * n[0] * 0.8f;
+            *(f32 *) (p + 0x48) = fac * n[1];
+            *(f32 *) (p + 0x4C) = fac * n[2] * 0.8f;
+        }
+        fac = *(f32 *) (p + 0x14);
+    } else {
+        fac = *(f32 *) (p + 0x14);
+        *(f32 *) (p + 0x44) *= fac;
+        *(f32 *) (p + 0x48) = -vy * fac;
+        *(f32 *) (p + 0x4C) *= fac;
+    }
+    *(f32 *) (p + 0x50) *= fac;
+    *(f32 *) (p + 0x54) *= fac;
+    *(f32 *) (p + 0x58) *= fac;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1122E0/func_150E5D90.s")
+#endif
