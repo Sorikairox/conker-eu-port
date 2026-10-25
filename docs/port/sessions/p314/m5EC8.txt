@@ -1,0 +1,175 @@
+72s/static const f32 sFlyerCircleX\[1\] = { -3478\.0f };/static const f32 sFlyerCircleX[1] = { -3477.0f };/ % ev8go ev8circ
+73s/static const f32 sFlyerCircleZ\[1\] = { 3858\.0f };/static const f32 sFlyerCircleZ[1] = { 3857.0f };/ % ev8go ev8circ
+74s/{ 1\.57079637f }/{ 1.57079648f }/ % ev9go ev8go
+75s/{ 0\.0115f }/{ 0.0116f }/ % ev9go ev8go
+76s/{ 0\.200000003f }/{ 0.300000003f }/ % turnmin turn21 rollz rollp
+77s/{ 0\.149999991f }/{ 0.150000006f }/ % ev8sink
+78s/{ 0\.00518999994f }/{ 0.00519000040f }/ % ev8circ ev8sink
+79s/{ 3\.20000005f }/{ 3.25f }/ % ev8circ ev8sink circok
+80s/{ -3100\.0f }/{ -3200.0f }/ % ev8sink
+81s/{ 0\.0174532924f }/{ 0.0174532942f }/ % base plo
+112s/(u8 \*)D_800DDE80 + f->type \* 0x14);/(u8 *)D_800DDE80 + f->type * 0x10);/ % off ev8go mup mdn
+113s/row->enabled == 0/row->enabled != 0/ % off base
+113s/D_800DDF78\[f->type\] == 0/D_800DDF78[f->type + 1] == 0/ % off78 base
+117s/alpha = f->alpha;/alpha = f->fading;/ % fadein fadeout
+118s/(f->type == 8 || f->type == 9)/(f->type == 8 || f->type == 10)/ % ev9go ev7
+118s/(f->type == 8 || f->type == 9)/(f->type == 7 || f->type == 9)/ % ev8go ev7 ev8wait
+118s/D_800BE9F0 == 6/D_800BE9F0 >= 5/ % ev8lvl5
+118s/D_800C35EA != 0 \&\& D_800C3A08 == 0xF) {/D_800C35EA != 0 \&\& D_800C3A08 >= 0xE) {/ % ev8evE
+118s/D_800C35EA != 0 \&\& D_800C3A08 == 0xF) {/D_800C3A08 == 0xF) {/ % ev8ev35
+119s/f->flags \&= 0xFFF7;/f->flags \&= 0xFFFF;/ % ev8wait
+124s/if (D_800C39D0 >= 60 \&\&/if (D_800C39D0 >= 61 \&\&/ % ev9go
+124s/!(f->flags \& 0x200)) {/!(f->flags \& 0x400)) {/ % ev8circ
+125s/(f->flags \& 0xFFB3) | 0x200;/(f->flags \& 0xFFB7) | 0x200;/ % ev9go ev8go
+126s/dx = f->x - sFlyerCircleX\[0\];/dx = f->z - sFlyerCircleX[0];/ % ev8go
+127s/dz = f->z - sFlyerCircleZ\[0\];/dz = f->x - sFlyerCircleZ[0];/ % ev8go
+128s/sFlyerHalfPi\[0\] - func_150484A0(dx, dz);/sFlyerHalfPi[0] - func_150484A0(dz, dx);/ % ev8go
+128s/sFlyerHalfPi\[0\] - func_150484A0(dx, dz);/sFlyerHalfPi[0] + func_150484A0(dx, dz);/ % ev8go ev9go
+130s/f->rollVel = sqrtf(dx \* dx + dz \* dz);/f->rollVel = sqrtf(dx * dx + dx * dz);/ % ev8go
+134s/if (f->fading == 0) {/if (f->fading != 1) {/ % fadeout fadein
+135s/(f->flags \& 8) \&\& D_800DDF5C\[f->slot\] == 0/(f->flags \& 8) || D_800DDF5C[f->slot] == 0/ % fade8on base
+136s/f->fading = 1;/f->fading = 2;/ % fade8
+137s/alpha != 0xFF/alpha != 0xFE/ % fadeFF fadeFE fadeFFn
+138s/alpha += D_800BE9E4 \* 4;/alpha += D_800BE9E4 * 3;/ % base fade8on
+139s/if (alpha > 0xFF) {/if (alpha > 0x100) {/ % fadein fadeFC
+140s/alpha = 0xFF;/alpha = 0xFE;/ % fadein
+145s/if (alpha == 0) {/if (alpha <= 1) {/ % fadeclp fade0 fade1
+149s/alpha -= D_800BE9E4 \* 4;/alpha -= D_800BE9E4 * 2;/ % fadeout
+150s/if (alpha < 0) {/if (alpha < -1) {/ % fadeclp fade7
+156s/D_800DDF68\[f->type\] = 1;/D_800DDF68[f->slot] = 1;/ % base
+157s/(u8 \*)\&D_8008D450 + f->type \* 0x38/(u8 *)\&D_8008D450 + f->type * 0x34/ % base plo spdhi
+160s/if (func_1000F3D0(f->sound) != 0) {/if (func_1000F3D0(f->sound) == 0) {/ % sndon sndoff
+161s/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4001/ % sndon
+161s/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000/0x7D00, 0, 0, 0, (s32)f->x, (s32)f->z, (s32)f->z, 1000, 4000/ % sndon
+163s/f->sound = 0;/f->sound = 1;/ % sndoff
+167s/if (f->flags \& 4) {/if (f->flags \& 6) {/ % cull0 base
+168s/dist = func_150ADE40((s32)f->x, (s32)f->z, f->homeX, f->homeZ);/dist = func_150ADE40((s32)f->x, (s32)f->z, f->homeX, f->homeY);/ % tfar
+170s/(f->flags \& 0x10) \&\& dist < f->rangeMin/(f->flags \& 0x10) \&\& dist <= f->rangeMin/ % tedge
+170s/(f->flags \& 0x10) \&\& dist < f->rangeMin/(f->flags \& 0x14) \&\& dist < f->rangeMin/ % tnearno
+173s/if (dist > f->rangeMax || near) {/if (dist >= f->rangeMax || near) {/ % tedge
+174s/dir\.unk0 = (f32)f->homeX - f->x;/dir.unk0 = f->x - (f32)f->homeX;/ % tfar tfarwrap
+175s/dir\.unk8 = f->z - (f32)f->homeZ;/dir.unk8 = (f32)f->homeZ - f->z;/ % tfar tfarwrap
+178s/ang += 0x80;/ang += 0x40;/ % tnear tnear2
+180s/if (ang >= 0x100) {/if (ang > 0x100) {/ % tnear tnear3
+181s/ang -= 0x100;/ang -= 0x80;/ % tnear
+183s/f->targetHeading = (f32)ang \* 1\.40625f;/f->targetHeading = (f32)ang * 1.4f;/ % tfar
+185s/f->timer = t->homeTime;/f->timer = t->wanderTime;/ % tfar
+187s/if (f->state == 3) {/if (f->state != 3) {/ % st3pos st2pos
+188s/step = D_800BE9E4 \* 0\.5f;/step = D_800BE9E4 * 0.25f;/ % st3pos
+189s/if (f->targetHeading < f->heading) {/if (f->targetHeading <= f->heading) {/ % st3eq
+192s/fabsf(f->targetHeading - f->heading) >= 180\.0f/fabsf(f->targetHeading - f->heading) > 180.0f/ % st3d180
+192s/fabsf(f->targetHeading - f->heading) >= 180\.0f/(f->targetHeading - f->heading) >= 180.0f/ % st3wrap
+195s/(step > 0\.0f \&\& f->turnVel < 0\.0f)/(step > 0.0f \&\& f->turnVel < 1.0f)/ % st3pos
+195s/(step < 0\.0f \&\& f->turnVel > 0\.0f)/(step < 0.0f \&\& f->turnVel > -1.0f)/ % st3neg
+196s/f->state = 2;/f->state = 4;/ % st3opp st3opp2
+198s/f->turnVel += step;/f->turnVel -= step;/ % st3pos st3neg
+201s/if (f->state == 2) {/if (f->state == 3) {/ % st2pos st3opp
+202s/if (f->turnVel != 0\.0f) {/if (f->turnVel > 1.0f) {/ % st2neg st2posz
+203s/if (f->turnVel > 0\.0f) {/if (f->turnVel > 1.0f) {/ % st2posz st2posd1
+204s/f->turnVel -= D_800BE9E4 \* 0\.5f;/f->turnVel -= D_800BE9E4 * 0.75f;/ % st2pos
+205s/if (f->turnVel < 0\.0f) {/if (f->turnVel < -0.5f) {/ % st2posz
+209s/f->turnVel += D_800BE9E4 \* 0\.5f;/f->turnVel += D_800BE9E4 * 0.75f;/ % st2neg
+210s/if (f->turnVel > 0\.0f) {/if (f->turnVel > 0.5f) {/ % st2negz
+215s/f->timer -= D_800BE9E4;/f->timer -= 1;/ % st2pos st2tmr
+216s/if (f->timer <= 0) {/if (f->timer < 0) {/ % st2tmr st2zero
+217s/(f32)((u32)func_150ADA20()/(f32)((s32)func_150ADA20()/ % st2tmr st2tmr1 st2tmrn
+217s/360);/359);/ % st2tmr1 st2zero
+219s/f->timer = t->wanderTime;/f->timer = t->homeTime;/ % st2tmr st2zero st2tmr1
+222s/if (fabsf(f->turnVel) > t->turnMax) {/if (fabsf(f->turnVel) > t->turnMax + 1.0f) {/ % tmaxeq tmax35
+222s/if (fabsf(f->turnVel) > t->turnMax) {/if (f->turnVel > t->turnMax) {/ % tmaxn
+226s/f->turnVel = -t->turnMax;/f->turnVel = t->turnMax;/ % tmaxn
+231s/if (f->flags \& 0x80) {/if (f->flags \& 0x800) {/ % floor0 floor1
+232s/f->floorY = (f32)func_1510FE58((s32)f->x, (s32)f->y, (s32)f->z, \&tri);/f->floorY = (f32)func_1510FE58((s32)f->x, (s32)f->z, (s32)f->y, \&tri);/ % floor0
+235s/v = ((s32 \*)D_800DBE5C)\[(tri - D_800DC26C) \/ 12\];/v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) \/ 9];/ % floor1
+234s/if (tri != 0) {/if (tri == 0) {/ % floor0 floor1
+237s/f->surface = v;/f->surface = v + 1;/ % floor0 floor1
+241s/if (f->climbTimer >= 0) {/if (f->climbTimer > 0) {/ % bobexp bobup
+242s/f->climbTimer -= D_800BE9E4;/f->climbTimer -= 1;/ % bobexp bobup
+243s/if (f->climbTimer <= 0) {/if (f->climbTimer < 0) {/ % bobexp
+244s/f->climbTimer = -1;/f->climbTimer = -2;/ % bobexp
+245s/f->yRange) + (f32)f->homeY;/(u16)f->yRange) + (f32)f->homeY;/ % bobexp2
+245s/f->yRange) + (f32)f->homeY;/f->yRange) + (f32)f->homeX;/ % bobexp bobexp3
+246s/if (f->y < f->targetY) {/if (f->y <= f->targetY) {/ % bobexp3
+251s/} else if (f->pitch > 0\.0f) {/} else if (f->pitch >= 0.0f) {/ % bob0
+253s/} else if (f->pitch < 0\.0f) {/} else if (f->pitch <= 0.0f) {/ % bob0
+256s/(f->pitchVel > 0\.0f \&\& f->y < f->targetY)/(f->pitchVel > 0.0f \&\& f->y > f->targetY)/ % bobm1 bobm2
+256s/(f->pitchVel < 0\.0f \&\& f->targetY < f->y)/(f->pitchVel < 0.0f \&\& f->targetY > f->y)/ % bobm3 bobm4
+257s/f->climbTimer = 120;/f->climbTimer = 121;/ % bobm1
+258s/f->pitchVel = -f->pitchVel;/f->pitchVel = f->pitchVel;/ % bobm1 bobm3
+263s/f->pitch += f->pitchVel;/f->pitch -= f->pitchVel;/ % base
+265s/if (f->pitch < -lim) {/if (f->pitch < lim) {/ % pmid base
+266s/f->pitch = -lim;/f->pitch = lim;/ % plo
+268s/f->pitch = (f->pitch > lim) ? lim : f->pitch;/f->pitch = (f->pitch > lim) ? -lim : f->pitch;/ % phi
+270s/if (fabsf(f->turnVel) > sFlyerTurnMin\[0\]) {/if (fabsf(f->turnVel) >= sFlyerTurnMin[0]) {/ % turnmin
+270s/if (fabsf(f->turnVel) > sFlyerTurnMin\[0\]) {/if (f->turnVel > sFlyerTurnMin[0]) {/ % rcllo hwrapn
+271s/f->heading += f->turnVel;/f->heading -= f->turnVel;/ % base
+272s/if (f->heading < 0\.0f) {/if (f->heading < 1.0f) {/ % hwrap0 hwrapn base
+273s/f->heading += 360\.0f;/f->heading += 359.0f;/ % hwrapn
+274s/} else if (f->heading >= 360\.0f) {/} else if (f->heading > 360.0f) {/ % hwrap0
+275s/f->heading -= 360\.0f;/f->heading -= 361.0f;/ % hwrapp
+277s/if (!(f->flags \& 0x20)) {/if (!(f->flags \& 0x40)) {/ % flag20
+278s/f->rollVel = -f->turnVel;/f->rollVel = f->turnVel;/ % base
+279s/f->roll += f->rollVel;/f->roll -= f->rollVel;/ % base
+280s/lim = t->rollMax;/lim = t->pitchMax;/ % rclhi rcllo
+282s/f->roll = -lim;/f->roll = lim;/ % rcllo
+284s/f->roll = (f->roll > lim) ? lim : f->roll;/f->roll = (f->roll > lim + 1.0f) ? lim : f->roll;/ % rclmid rclhi
+284s/f->roll = (f->roll > lim) ? lim : f->roll;/f->roll = (f->roll > lim) ? -lim : f->roll;/ % rclhi
+288s/if (f->roll > 0\.0f) {/if (f->roll >= 0.0f) {/ % roll0
+289s/f->rollVel = -1\.0f;/f->rollVel = -2.0f;/ % rollp
+290s/} else if (f->roll < 0\.0f) {/} else if (f->roll <= 0.0f) {/ % roll0
+291s/f->rollVel = 1\.0f;/f->rollVel = 2.0f;/ % rolln
+293s/f->roll += f->rollVel;/f->roll += f->turnVel;/ % rollbig rollp
+294s/if (fabsf(f->roll) < sFlyerTurnMin\[0\]) {/if (f->roll < sFlyerTurnMin[0]) {/ % rollbign
+294s/if (fabsf(f->roll) < sFlyerTurnMin\[0\]) {/if (fabsf(f->roll) < sFlyerCircleTurnMax[0]) {/ % rollz rollz2
+295s/f->roll = 0\.0f;/f->roll = 0.1f;/ % rollp
+298s/f->speed += f->accel;/f->speed -= f->accel;/ % base
+299s/if (f->speed < t->speedMin) {/if (f->speed < t->speedMax) {/ % spdeq base
+300s/f->speed = t->speedMin;/f->speed = t->speedMax;/ % spdlo
+303s/if (sp > t->speedMax) {/if (sp > t->speedMin) {/ % spdmid base
+304s/sp = t->speedMax;/sp = t->speedMin;/ % spdhi
+310s/if (!(f->flags \& 1)) {/if (!(f->flags \& 3)) {/ % mup cull0
+311s/if (f->pitch >= 0\.0f) {/if (f->pitch > 0.0f) {/ % mup0
+312s/row->modelUp == f->model \&\& t->flapA < t->flapB \&\& -t->flapB < t->flapA/row->modelDown == f->model \&\& t->flapA < t->flapB \&\& -t->flapB < t->flapA/ % mup mupx
+312s/row->modelUp == f->model \&\& t->flapA < t->flapB \&\& -t->flapB < t->flapA/row->modelUp == f->model \&\& t->flapA <= t->flapB \&\& -t->flapB < t->flapA/ % mfa
+313s/f->model = row->modelDown;/f->model = row->modelUp;/ % mup
+315s/row->modelDown == f->model \&\& t->flapA < t->flapB \&\& -t->flapB < t->flapA/row->modelDown == f->model \&\& t->flapA < t->flapB \&\& -t->flapB <= t->flapA/ % mfb
+315s/row->modelDown == f->model \&\& t->flapA < t->flapB \&\& -t->flapB < t->flapA/row->modelDown == f->model \&\& t->flapA < t->flapB \&\& t->flapB < t->flapA/ % mfb2
+316s/f->model = row->modelUp;/f->model = row->modelDown;/ % mdn
+320s/if (f->flags \& 0x200) {/if (f->flags \& 0x300) {/ % base
+321s/d = D_800BE9E4;/d = D_800BE9E4 + 1;/ % ev8circ
+322s/f->pitchVel += f->turnVel \* d;/f->pitchVel += f->turnVel;/ % ev8circ
+323s/f->turnVel += sFlyerCircleTurnAcc\[0\];/f->turnVel -= sFlyerCircleTurnAcc[0];/ % ev8circ
+324s/if (f->turnVel > sFlyerCircleTurnMax\[0\]) {/if (f->turnVel > sFlyerTurnMin[0]) {/ % ev8sink
+325s/f->turnVel = sFlyerCircleTurnMax\[0\];/f->turnVel = sFlyerCircleTurnAcc[0];/ % ev8sink
+327s/f->rollVel -= sFlyerCircleShrink\[0\] \* d;/f->rollVel -= sFlyerCircleShrink[0];/ % ev8circ
+328s/if (f->rollVel < 60\.0f) {/if (f->rollVel < 59.0f) {/ % ev8sink circok ev8r59
+329s/f->rollVel = 60\.0f;/f->rollVel = 61.0f;/ % ev8sink circok
+331s/s = func_150AD78C(f->pitchVel);/s = func_150AD78C(f->turnVel);/ % ev8circ
+332s/c = func_150AD780(f->pitchVel);/c = func_150AD780(f->rollVel);/ % ev8circ
+333s/f->x = f->rollVel \* c + sFlyerCircleX\[0\];/f->x = f->rollVel * s + sFlyerCircleX[0];/ % ev8circ
+334s/f->z = f->rollVel \* s + sFlyerCircleZ\[0\];/f->z = f->rollVel * c + sFlyerCircleZ[0];/ % ev8circ
+335s/f->y -= 100\.0f \/ ((f->rollVel - 60\.0f) + 4\.0f);/f->y -= 100.0f \/ ((f->rollVel - 60.0f) + 2.0f);/ % ev8circ
+336s/f->y < sFlyerCircleFloor\[0\] || D_800C35EA == 0/f->y < sFlyerCircleFloor[0] \&\& D_800C35EA == 0/ % ev8sink circ35
+336s/|| D_800C3A08 != 0xF) {/|| D_800C3A08 != 0xE) {/ % circend
+341s/a = f->pitch \* sFlyerDegToRad\[0\];/a = f->roll * sFlyerDegToRad[0];/ % base
+342s/h = f->heading \* sFlyerDegToRad\[0\];/h = f->pitch * sFlyerDegToRad[0];/ % base
+344s/sh = func_150AD78C(h);/sh = func_150AD78C(a);/ % base
+346s/ch = func_150AD780(h);/ch = func_150AD780(a);/ % base
+347s/dir\.unk0 = ca \* sh;/dir.unk0 = sa * sh;/ % base
+348s/dir\.unk4 = -sa;/dir.unk4 = sa;/ % base
+349s/dir\.unk8 = ca \* ch;/dir.unk8 = ca * sh;/ % base
+350s/d = f->speed \* D_800BE9E4;/d = f->speed;/ % base
+351s/f->x += dir\.unk0 \* d;/f->x += dir.unk8 * d;/ % base
+353s/f->z += dir\.unk8 \* d;/f->z -= dir.unk8 * d;/ % base
+356s/f->kind == 0x13 \&\& D_800DDF60\[f->slot\] == 0/f->kind >= 0x13 \&\& D_800DDF60[f->slot] == 0/ % chirpk chirp
+356s/f->kind == 0x13 \&\& D_800DDF60\[f->slot\] == 0/f->kind == 0x13 \&\& D_800DDF60[f->slot] != 1/ % chirpno chirp chirpf2
+357s/func_10010F88(0x10, 0x7FFF, func_150ADA20() \& 0x7F, 0, 0/func_10010F88(0x10, 0x7FFF, func_150ADA20() \& 0xFF, 0, 0/ % chirp
+357s/(s32)f->z, 500, 4000);/(s32)f->z, 400, 4000);/ % chirp
+358s/D_800DDF60\[f->slot\] = (func_150ADA20() \& 0x3F) + 30;/D_800DDF60[f->slot] = (func_150ADA20() \& 0x7F) + 30;/ % chirp
+358s/D_800DDF60\[f->slot\] = (func_150ADA20() \& 0x3F) + 30;/D_800DDF60[f->slot] = (func_150ADA20() \& 0x3F) + 31;/ % chirp
+360s/if ((f->flags \& 2)/if ((f->flags \& 1)/ % cull1
+361s/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A00, 0, 0) != 0/ % cull1
+361s/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F3C, D_800D9F40, D_800D3A00, D_800D3A04, 0, 0) != 0/ % cull1
+361s/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0/func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) == 0/ % cull0 cull1
+362s/(D_800D2138 != 1/(D_800D2138 != 2/ % cull2a cull2c
+363s/|| func_1510B460(D_800DA070, f->x, f->y, f->z/|| func_1510B460(D_800DA030, f->x, f->y, f->z/ % cull2b

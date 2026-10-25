@@ -328,7 +328,376 @@ void func_15175900(s32 count, s32 slot, s32 x, s32 y, s32 z, s32 rMax, s32 playe
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15175900.s")
 #endif
 
+#ifdef NON_MATCHING
+/* ambient flyer object (the func_15167A68 particles of func_15175900 / game_eu_1B1010) */
+typedef struct {
+    u8 kind;            /* 0x00: 0x13 = chirping kind */
+    u8 pad1[0x8F];
+    u8 slot;            /* 0x90: spawn slot (D_800DDF5C / D_800DDF60 index) */
+    u8 state;           /* 0x91: 2 = wander, 3 = turn to targetHeading */
+    s16 flags;          /* 0x92 */
+    s32 model;          /* 0x94 */
+    f32 x, y, z;        /* 0x98 */
+    s16 speed;          /* 0xA4 */
+    s16 accel;          /* 0xA6 */
+    f32 pitch;          /* 0xA8 */
+    f32 heading;        /* 0xAC */
+    f32 roll;           /* 0xB0 */
+    f32 pitchVel;       /* 0xB4: also the circling angle (flag 0x200) */
+    f32 turnVel;        /* 0xB8 */
+    f32 rollVel;        /* 0xBC: also the circling radius (flag 0x200) */
+    u8 padC0[8];
+    f32 floorY;         /* 0xC8 */
+    u8 padCC[4];
+    s16 homeX, homeY, homeZ; /* 0xD0 */
+    s16 rangeMax;       /* 0xD6 */
+    s16 rangeMin;       /* 0xD8 */
+    s16 yRange;         /* 0xDA */
+    s16 timer;          /* 0xDC */
+    s16 climbTimer;     /* 0xDE */
+    f32 targetHeading;  /* 0xE0 */
+    f32 targetY;        /* 0xE4 */
+    s32 surface;        /* 0xE8 */
+    u8 padEC;
+    u8 type;            /* 0xED */
+    u16 sound;          /* 0xEE */
+    u8 alpha;           /* 0xF0 */
+    u8 fading;          /* 0xF1 */
+} Flyer;
+
+/* D_8008D450: per type, 0x38 bytes */
+typedef struct {
+    u8 speedMax, speedMin, wanderTime, homeTime;
+    f32 rollMax;        /* 0x04 */
+    f32 pitchMax;       /* 0x08 */
+    f32 pad0C;
+    f32 turnMax;        /* 0x10 */
+    f32 pad14;
+    f32 flapA;          /* 0x18 */
+    f32 pad1C;
+    f32 flapB;          /* 0x20 */
+    u8 pad24[0x14];
+} FlyerType;
+
+/* D_800DDE80: per type, 0x14 bytes */
+typedef struct {
+    s32 enabled;
+    s32 modelUp;        /* model while climbing (pitch >= 0) */
+    s32 modelDown;
+    s32 pad[2];
+} FlyerModels;
+
+extern s32 D_8008D450;
+extern s32 D_800C39D0;
+extern f32 D_800D3A00;
+extern f32 D_800D3A04;
+extern f32 D_800D9F3C;
+extern f32 D_800D9F40;
+extern u8 D_800DA030[];
+extern u8 D_800DA070[];
+s32 func_150490A8(struct17 *);
+s32 func_1510B460(u8 *, f32, f32, f32, f32, f32, f32, f32, s32, s32);
+
+/* rodata copies (D_800A755C..D_800A7588) */
+static const f32 sFlyerCircleX[1] = { -3478.0f };       /* D_800A755C / D_800A757C */
+static const f32 sFlyerCircleZ[1] = { 3858.0f };        /* D_800A7560 / D_800A7580 */
+static const f32 sFlyerHalfPi[1] = { 1.57079637f };     /* D_800A7564 */
+static const f32 sFlyerCircleTurn[1] = { 0.0115f };     /* D_800A7568 */
+static const f32 sFlyerTurnMin[1] = { 0.200000003f };   /* D_800A756C */
+static const f32 sFlyerCircleTurnMax[1] = { 0.149999991f }; /* D_800A7570 */
+static const f32 sFlyerCircleTurnAcc[1] = { 0.00518999994f }; /* D_800A7574 */
+static const f32 sFlyerCircleShrink[1] = { 3.20000005f }; /* D_800A7578 */
+static const f32 sFlyerCircleFloor[1] = { -3100.0f };   /* D_800A7584 */
+static const f32 sFlyerDegToRad[1] = { 0.0174532924f }; /* D_800A7588 */
+
+// ambient_flyer_update: per-frame update of an ambient flyer (bird / bat; render-layer field 0 of layers 10 / 20 /
+// 68 / 69, also called by func_15176DCC / func_151770F4). Removed (func_1516972C) when its type row is off. Types 8
+// and 9 on level 6 during D_800C3A08 == 0xF scatter after 60 frames of D_800C39D0: they start circling (flag 0x200)
+// round (-3478, 3858), the radius shrinking to 60 while they sink, and vanish below -3100 or when the event ends.
+// Otherwise: fade in / fade out (alpha +0xF0, `fading` once the slot is gone and flag 8 is set), keep the looping
+// sound at the flyer (+0xEE), flag 4 = tether to home (turn back past rangeMax, or away inside rangeMin with flag
+// 0x10, then wander with random headings), flag 0x80 = follow the floor, flag 0x40 = bob between home y and a random
+// height; then pitch / turn / roll / speed integration (limits in D_8008D450), wing model by pitch (flag 1 = fixed),
+// a chirp for kind 0x13 and removal when outside both views (flag 2).
+void func_15175EC8(u8 *arg0) {
+    Flyer *f = (Flyer *)arg0;
+    FlyerModels *row;
+    FlyerType *t;
+    s32 alpha;
+    s32 near;
+    s32 ang;
+    s32 dist;
+    s32 tri;
+    s32 v;
+    s16 sp;
+    f32 dx, dz;
+    f32 step;
+    f32 d;
+    f32 lim;
+    f32 a, h;
+    f32 sa, sh, ca, ch;
+    f32 s, c;
+    struct17 dir;
+
+    row = (FlyerModels *)((u8 *)D_800DDE80 + f->type * 0x14);
+    if (row->enabled == 0 || D_800DDF78[f->type] == 0) {
+        func_1516972C((struct102 *)f);
+        return;
+    }
+    alpha = f->alpha;
+    if ((f->type == 8 || f->type == 9) && D_800BE9F0 == 6 && D_800C35EA != 0 && D_800C3A08 == 0xF) {
+        f->flags &= 0xFFF7;
+        if (D_800C35EA == 0 || D_800C3A08 != 0xF) {
+            func_1516972C((struct102 *)f);
+            return;
+        }
+        if (D_800C39D0 >= 60 && !(f->flags & 0x200)) {
+            f->flags = (f->flags & 0xFFB3) | 0x200;
+            dx = f->x - sFlyerCircleX[0];
+            dz = f->z - sFlyerCircleZ[0];
+            f->pitchVel = sFlyerHalfPi[0] - func_150484A0(dx, dz);
+            f->turnVel = sFlyerCircleTurn[0];
+            f->rollVel = sqrtf(dx * dx + dz * dz);
+        }
+    }
+
+    if (f->fading == 0) {
+        if ((f->flags & 8) && D_800DDF5C[f->slot] == 0) {
+            f->fading = 1;
+        } else if (alpha != 0xFF) {
+            alpha += D_800BE9E4 * 4;
+            if (alpha > 0xFF) {
+                alpha = 0xFF;
+            }
+            f->alpha = alpha;
+        }
+    } else {
+        if (alpha == 0) {
+            func_1516972C((struct102 *)f);
+            return;
+        }
+        alpha -= D_800BE9E4 * 4;
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        f->alpha = alpha;
+    }
+    row = (FlyerModels *)((u8 *)D_800DDE80 + f->type * 0x14);
+    D_800DDF68[f->type] = 1;
+    t = (FlyerType *)((u8 *)&D_8008D450 + f->type * 0x38);
+
+    if (f->sound != 0) {
+        if (func_1000F3D0(f->sound) != 0) {
+            func_1000F91C(f->sound, 0x7D00, 0, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 1000, 4000);
+        } else {
+            f->sound = 0;
+        }
+    }
+
+    if (f->flags & 4) {
+        dist = func_150ADE40((s32)f->x, (s32)f->z, f->homeX, f->homeZ);
+        near = 0;
+        if ((f->flags & 0x10) && dist < f->rangeMin) {
+            near = 1;
+        }
+        if (dist > f->rangeMax || near) {
+            dir.unk0 = (f32)f->homeX - f->x;
+            dir.unk8 = f->z - (f32)f->homeZ;
+            ang = func_150490A8(&dir);
+            if (near) {
+                ang += 0x80;
+            }
+            if (ang >= 0x100) {
+                ang -= 0x100;
+            }
+            f->targetHeading = (f32)ang * 1.40625f;
+            f->state = 3;
+            f->timer = t->homeTime;
+        }
+        if (f->state == 3) {
+            step = D_800BE9E4 * 0.5f;
+            if (f->targetHeading < f->heading) {
+                step = -step;
+            }
+            if (fabsf(f->targetHeading - f->heading) >= 180.0f) {
+                step = -step;
+            }
+            if ((step > 0.0f && f->turnVel < 0.0f) || (step < 0.0f && f->turnVel > 0.0f)) {
+                f->state = 2;
+            } else {
+                f->turnVel += step;
+            }
+        }
+        if (f->state == 2) {
+            if (f->turnVel != 0.0f) {
+                if (f->turnVel > 0.0f) {
+                    f->turnVel -= D_800BE9E4 * 0.5f;
+                    if (f->turnVel < 0.0f) {
+                        f->turnVel = 0.0f;
+                    }
+                } else {
+                    f->turnVel += D_800BE9E4 * 0.5f;
+                    if (f->turnVel > 0.0f) {
+                        f->turnVel = 0.0f;
+                    }
+                }
+            }
+            f->timer -= D_800BE9E4;
+            if (f->timer <= 0) {
+                f->targetHeading = (f32)((u32)func_150ADA20() % 360);
+                f->state = 3;
+                f->timer = t->wanderTime;
+            }
+        }
+        if (fabsf(f->turnVel) > t->turnMax) {
+            if (f->turnVel > 0.0f) {
+                f->turnVel = t->turnMax;
+            } else {
+                f->turnVel = -t->turnMax;
+            }
+        }
+    }
+
+    if (f->flags & 0x80) {
+        f->floorY = (f32)func_1510FE58((s32)f->x, (s32)f->y, (s32)f->z, &tri);
+        v = 0;
+        if (tri != 0) {
+            v = ((s32 *)D_800DBE5C)[(tri - D_800DC26C) / 12];
+        }
+        f->surface = v;
+    }
+
+    if (f->flags & 0x40) {
+        if (f->climbTimer >= 0) {
+            f->climbTimer -= D_800BE9E4;
+            if (f->climbTimer <= 0) {
+                f->climbTimer = -1;
+                f->targetY = (f32)((u32)func_150ADA20() % f->yRange) + (f32)f->homeY;
+                if (f->y < f->targetY) {
+                    f->pitchVel = -1.0f;
+                } else {
+                    f->pitchVel = 1.0f;
+                }
+            } else if (f->pitch > 0.0f) {
+                f->pitchVel = -1.0f;
+            } else if (f->pitch < 0.0f) {
+                f->pitchVel = 1.0f;
+            }
+        } else if ((f->pitchVel > 0.0f && f->y < f->targetY) || (f->pitchVel < 0.0f && f->targetY < f->y)) {
+            f->climbTimer = 120;
+            f->pitchVel = -f->pitchVel;
+        }
+    }
+
+    if (!(f->flags & 0x200)) {
+        f->pitch += f->pitchVel;
+        lim = t->pitchMax;
+        if (f->pitch < -lim) {
+            f->pitch = -lim;
+        } else {
+            f->pitch = (f->pitch > lim) ? lim : f->pitch;
+        }
+        if (fabsf(f->turnVel) > sFlyerTurnMin[0]) {
+            f->heading += f->turnVel;
+            if (f->heading < 0.0f) {
+                f->heading += 360.0f;
+            } else if (f->heading >= 360.0f) {
+                f->heading -= 360.0f;
+            }
+            if (!(f->flags & 0x20)) {
+                f->rollVel = -f->turnVel;
+                f->roll += f->rollVel;
+                lim = t->rollMax;
+                if (f->roll < -lim) {
+                    f->roll = -lim;
+                } else {
+                    f->roll = (f->roll > lim) ? lim : f->roll;
+                }
+            }
+        } else {
+            if (f->roll > 0.0f) {
+                f->rollVel = -1.0f;
+            } else if (f->roll < 0.0f) {
+                f->rollVel = 1.0f;
+            }
+            f->roll += f->rollVel;
+            if (fabsf(f->roll) < sFlyerTurnMin[0]) {
+                f->roll = 0.0f;
+            }
+        }
+        f->speed += f->accel;
+        if (f->speed < t->speedMin) {
+            f->speed = t->speedMin;
+        } else {
+            sp = f->speed;
+            if (sp > t->speedMax) {
+                sp = t->speedMax;
+            }
+            f->speed = sp;
+        }
+    }
+
+    if (!(f->flags & 1)) {
+        if (f->pitch >= 0.0f) {
+            if (row->modelUp == f->model && t->flapA < t->flapB && -t->flapB < t->flapA) {
+                f->model = row->modelDown;
+            }
+        } else if (row->modelDown == f->model && t->flapA < t->flapB && -t->flapB < t->flapA) {
+            f->model = row->modelUp;
+        }
+    }
+
+    if (f->flags & 0x200) {
+        d = D_800BE9E4;
+        f->pitchVel += f->turnVel * d;
+        f->turnVel += sFlyerCircleTurnAcc[0];
+        if (f->turnVel > sFlyerCircleTurnMax[0]) {
+            f->turnVel = sFlyerCircleTurnMax[0];
+        }
+        f->rollVel -= sFlyerCircleShrink[0] * d;
+        if (f->rollVel < 60.0f) {
+            f->rollVel = 60.0f;
+        }
+        s = func_150AD78C(f->pitchVel);
+        c = func_150AD780(f->pitchVel);
+        f->x = f->rollVel * c + sFlyerCircleX[0];
+        f->z = f->rollVel * s + sFlyerCircleZ[0];
+        f->y -= 100.0f / ((f->rollVel - 60.0f) + 4.0f);
+        if (f->y < sFlyerCircleFloor[0] || D_800C35EA == 0 || D_800C3A08 != 0xF) {
+            func_1516972C((struct102 *)f);
+            return;
+        }
+    } else {
+        a = f->pitch * sFlyerDegToRad[0];
+        h = f->heading * sFlyerDegToRad[0];
+        sa = func_150AD78C(a);
+        sh = func_150AD78C(h);
+        ca = func_150AD780(a);
+        ch = func_150AD780(h);
+        dir.unk0 = ca * sh;
+        dir.unk4 = -sa;
+        dir.unk8 = ca * ch;
+        d = f->speed * D_800BE9E4;
+        f->x += dir.unk0 * d;
+        f->y += dir.unk4 * d;
+        f->z += dir.unk8 * d;
+    }
+
+    if (f->kind == 0x13 && D_800DDF60[f->slot] == 0) {
+        func_10010F88(0x10, 0x7FFF, func_150ADA20() & 0x7F, 0, 0, (s32)f->x, (s32)f->y, (s32)f->z, 500, 4000);
+        D_800DDF60[f->slot] = (func_150ADA20() & 0x3F) + 30;
+    }
+    if ((f->flags & 2)
+        && func_1510B460(D_800DA030, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0) != 0
+        && (D_800D2138 != 1
+            || func_1510B460(D_800DA070, f->x, f->y, f->z, D_800D9F40, D_800D9F3C, D_800D3A00, D_800D3A04, 0, 0)
+                   != 0)) {
+        func_1516972C((struct102 *)f);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A2970/func_15175EC8.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15176DCC(u8 *arg0) {
