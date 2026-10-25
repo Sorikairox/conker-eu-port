@@ -1,0 +1,48 @@
+\#^    if (\*(u8 \*\*) (\*(u8 \*\*) (spec + 4) + 0x1D4) == NULL) {$#s/0x1D4/0x1D0/
+\#^    req\.kind = 0x12C;$#s/0x12C/0x12D/
+\#^    req\.u0E = 0x12;$#s/0x12/0x13/
+\#^    req\.u15 = \*(s32 \*) spec;$#s/spec;/(spec + 4);/
+\#^    req\.u10 = 0xE;$#s/0xE/0xF/
+\#^    req\.u14 = 0;$#s/0/1/
+\#^    for (i = 0; i < 0x4C / 4; i++) {$#s/0x4C/0x48/
+\#^        ((s32 \*) &rec)\[i\] = ((s32 \*) (spec + 4))\[i\];$#s/spec + 4/spec + 8/
+\#^    src\[0\] = rec\.at;$#s/rec\.at/rec.at2/
+\#^    dst\[1\] = rec\.pos2;$#s/rec\.pos2/rec.pos/
+\#^    func_15145EA4(src, dst, \*(u8 \*\*) (rec\.obj + 0x1D4) + (rec\.node << 6), 2);$#s/<< 6/<< 5/
+\#^    func_15145EA4(src, dst, \*(u8 \*\*) (rec\.obj + 0x1D4) + (rec\.node << 6), 2);$#s/2);/1);/
+\#^    req\.pos\[1\] = rec\.pos\[1\];$#s/rec\.pos\[1\]/rec.pos2[1]/
+\#^    rec\.u128 = 0\.0f;$#s/0\.0f/1.0f/
+\#^    rec\.u12C = 0\.0f;$#s/0\.0f/1.0f/
+\#^    rec\.u140 = rec\.u3A;$#s/rec\.u3A/(s8) rec.u3A/
+\#^    rec\.u144 = -16384\.0f;$#s/-16384\.0f/-16383.0f/
+\#^    for (i = 0; i < 0x31; i++) {$#s/0x31/0x30/
+\#^        rec\.u4C\[i\] = ((s32 \*) (spec + 0x58))\[i\];$#s/0x58/0x54/
+\#^    rec\.u134 = 0\.0f;$#s/0\.0f/2.0f/
+\#^    rec\.u138 = 0\.0f;$#s/0\.0f/2.0f/
+\#^    rec\.u13C = 0\.0f;$#s/0\.0f/2.0f/
+\#^    rec\.u14C = 0\.0f;$#s/0\.0f/2.0f/
+\#^    fl = spec\[0x54\];$#s/0x54/0x53/
+\#^    rec\.flags = ((fl & 0x10) ? 0x20 : 0) | ((fl & 2) ? 2 : 0) | ((fl & 4) ? 4 : 0) | ((fl & 8) ? 8 : 0);$#s/? 0x20/? 0x10/
+\#^    rec\.flags = ((fl & 0x10) ? 0x20 : 0) | ((fl & 2) ? 2 : 0) | ((fl & 4) ? 4 : 0) | ((fl & 8) ? 8 : 0);$#s/((fl & 2) ? 2/((fl \& 1) ? 2/
+\#^    rec\.flags = ((fl & 0x10) ? 0x20 : 0) | ((fl & 2) ? 2 : 0) | ((fl & 4) ? 4 : 0) | ((fl & 8) ? 8 : 0);$#s/((fl & 4) ? 4/((fl \& 4) ? 1/
+\#^    rec\.flags = ((fl & 0x10) ? 0x20 : 0) | ((fl & 2) ? 2 : 0) | ((fl & 4) ? 4 : 0) | ((fl & 8) ? 8 : 0);$#s/((fl & 8) ? 8/((fl \& 8) ? 0x80/
+\#^    rec\.u152 = 0;$#s/0/1/
+\#^    rec\.u151 = 0;$#s/0/1/
+\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/arg0 + 0x158/arg0 + 0x154/
+\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/0x28,/0x29,/
+\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/0xC, 0xC, 0xC/0xC, 0xD, 0xC/
+\#^    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);$#s/arg2, arg3)/arg3, arg2)/
+\#^    if (e != NULL) {$#s/!=/==/
+\#^        data = \*(Emitter2Record \*\*) (e + 0x98);$#s/0x98/0x94/
+\#^        memcpy(data, &rec, sizeof(Emitter2Record));$#s/sizeof(Emitter2Record)/0x150/
+\#^        if (rec\.soundFn != -1) {$#s/rec\.soundFn/rec.initFn/
+\#^            data->voice = D_8008FC58\[rec\.soundFn\]();$#s/data->voice/rec.voice/
+\#^            data->voice = 0;$#s/0/1/
+\#^        if (rec\.initFn != -1) {$#s/!= -1/!= 0/
+\#^            D_8008FC44\[rec\.initFn\](e);$#s/(e)/((u8 *) data)/
+\#^        if (spec\[0x54\] & 1) {$#s/& 1/\& 2/
+\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/req\.pos/rec.pos2/
+\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x50\], spec\[0x51\]/spec[0x51], spec[0x50]/
+\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/spec\[0x52\], spec\[0x53\]/spec[0x53], spec[0x52]/
+\#^            data->u148 = (s32) func_1519C60C((s32) e, req\.pos, spec\[0x50\], spec\[0x51\], spec\[0x52\], spec\[0x53\], arg2, arg3);$#s/arg2, arg3/arg2, 0/
+\#^            data->u148 = 0;$#s/0/1/

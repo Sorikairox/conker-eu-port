@@ -10,6 +10,20 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P264 (port-b) (session P264, 2026-10-25). Details: `docs/port/sessions/P264.md`
+
+Branch `port-b`. Merged port 34922b88 (selftest 130/130). Hand C (NM): func_150D5634 rocket_sound_update, func_151BE33C
+player_twin_emitters_follow, func_15199A28 spec_emitter_spawn, func_1519CF34 trail_emitter_spawn, func_1516EE3C
+glow_colour_update (setups + mutants, registry rows). Stopped early (wrap-up request). Checks: verify_all rc 0, NM rc 0,
+protocheck 0 (1635).
+
+## Next steps (from P264)
+
+1. Finish func_150D5268 (docs/port/sessions/p264/d_5268.c, mutants interrupted) and func_15198180 (d_8180.c: re-run
+   random dt first), then func_15198680 (280), func_151CF930, game_161520 group, D5E90 hand asm.
+2. Run implicit_scan / v0use / arity_scan for the P264 functions; selftest after the next harness change.
+3. func_1519CADC: suspicious `(s32)sp30 * (s32)temp_f2_3` in the NM body.
+
 ## State (session P263, 2026-10-25). Details: `docs/port/sessions/P263.md`
 - Merged port-b cfd21c46 (P256-P260: difftest.sh stale-view guard, selftest pinned-Unicorn preflight): selftest 130 / 130.
 - func_1506D4EC (EU 0x1506D8AC, the empty handler glued to func_1506D2E8; D_8008679C entry 16) split: symbol_addrs
@@ -148,6 +162,7 @@ progress_nm total 5617 / 5915 (95.0%), C bytes 86.5%.
    func_15062800 (8FCB0, 177), func_150124A0 (3F820, 160), func_150144B8 (40490, 165), then larger ones.
 3. func_15117D40: add a registry row + setups/mutants (level 0x34, JALRARG_OLD=1).
 4. When keying ARGMEM / RET / OUT* knobs, decode the jal word: func_151494E0's EU target is 15149A50.
+
 ## State (session P255, 2026-10-25). Details: `docs/port/sessions/P255.md`
 - Level 0x29 route stubs (browser P248 / P252), hand C (NM), all random EQUIV + setups + mutants 100%: func_150D88E8
   tile_slide_by_anim_update (scene 7), func_15072B44 player_anim_follow_up (event-4 bubbles), func_151473F4

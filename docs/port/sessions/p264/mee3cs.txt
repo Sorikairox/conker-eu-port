@@ -1,0 +1,2 @@
+\#^        if (fade != 0xFF) {$#s/0xFF/0xFE/
+\#^        if (fade < 0) {$#s/< 0/<= 0/
