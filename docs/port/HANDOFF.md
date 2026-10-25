@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P301 (port, group B) (session P301, 2026-10-26). Details: `docs/port/sessions/P301.md`
+
+Hand C (NM), registry rows `P301`, setups / mutants in docs/port/sessions/p301: func_151C40BC impact_effects_spawn
+(81/82, 1 equivalent), func_150E3CB8 zap_bolt_update (76/79, 3 equivalent), func_150B4BF0 beam_ribbon_draw (m4BF0 66/71
++ m4BF0b 4/4, 2 equivalent). func_1513334C: 37/37 now. Its old[] comes from memcpy, which difftest stubs, so old[] was
+A5A5A5A5 on both sides. s334Cb re-runs the P282 setups with `DIFFTEST_OUTA=10023360=0:...` plus |v| == 1.0 setups.
+RET / ARGMEM knobs on jalr table targets do act (stubs are keyed by address); the "not a jal target" note is static.
+Lesson: a C or asm local filled by memcpy (EU 10023360) is garbage in difftest unless OUTA writes it; check
+memcpy-filled locals in older registry rows.
+Checks: verify_all rc 0, NM rc 0, protocheck 0 (1690), selftest 130/130, implicit NM+float 0, progress_nm
+`total 5916 3995 1710 211 5705 96.4% 2029588/2253856 (90.0%)`.
+
+## Next steps (from P301)
+1. Group B left (7, progress_nm --list): func_1506C460 (643 insns; injected jtbl_8009A00C / jtbl_8009A058 and
+   D_8009A050 / D_8009A054 -> `static const` copies), func_150E2294 (754; P295 7th-argument note), func_1516E100 (762),
+   func_151206C8 (1230), plus 3 that were not on the brief's list: func_150A7770 (8, game_D4C20), func_150A7BD0 (32,
+   game_eu_D4C90), func_151FA3E0 (336, game_eu_227BF0).
+2. func_15008340: switch to void together with game_39750's prototypes (from P282).
+
 ## P295 (port, group B) (session P295, 2026-10-26). Details: `docs/port/sessions/P295.md`
 
 Hand C (NM), registry rows `P295`, setups / mutants in docs/port/sessions/p295: func_150CBF80 ground_puff_spawn (41/41;

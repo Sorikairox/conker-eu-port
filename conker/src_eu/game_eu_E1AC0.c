@@ -260,7 +260,265 @@ s32 func_150B4774(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B4774.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_1513F4E4(s32, s32, s8 *);
+s32 func_15142B7C(s32, s32, s32);
+s32 func_15142E24(u8 *, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+u8 *func_15142FBC(s32, s32, s32, s8 *);
+void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
+u8 *func_15142C10(u8 *, s32, s32, s32, s32, s8 *);
+extern s32 D_800915E8;
+extern s32 D_800D30BC;
+
+typedef struct {
+    f32 pos[3];         /* +0x00 */
+    u8 pad0C[0xC];
+    f32 width;          /* +0x18 ribbon half-width at this point */
+    u16 fade;           /* +0x1C alpha ramp (x style +0x26 >> 8) */
+    u8 pad1E[2];
+    u8 s;               /* +0x20 texture s (<< 6) */
+    u8 pad21[3];
+} BeamPoint;            /* 0x24 bytes, trail +0x94 */
+
+// beam_ribbon_draw: draws the trail's points (+0x94, ring of +0x25 entries, newest before +0x2E, oldest +0x2D;
+// nothing below 2 points, +0x2C) as a camera-facing ribbon (camera = D_800DBFF0 view `arg2` + 0x2F8): each point
+// gets two vertices offset by +-width * normalize((prev - next) x (point - camera)), texture s = the point's +0x20
+// << 6, t 0x43C0 / 0x4000, white with alpha (fade * style +0x26) >> 8. Style (+0x98) bits 2 / 4 first rewrite the
+// fade ramps from the oldest (start 0, step +0x33, +0x32 points) / the newest (step +0x35, +0x34 points). When s
+// grows between two points the last pair is repeated with s - 0x4000 (texture wrap). With +0x1E bit 1 the ribbon
+// starts at the trail's own position (+0x10). Vertices from func_151D6310 (+0x84 buffer, (count << 5) + 0xA0 bytes;
+// none -> gfx unchanged); render state: texture D_800915E8, combine 0x4D, grey +0x24, geometry 1 / 0x160600,
+// othermode D_800D30BC | 0x82CA0 / 0x5049D8.
+u8 *func_150B4BF0(u8 *trail, u8 *gfx, s16 arg2) {
+    BeamPoint *pts;
+    BeamPoint *p;
+    u8 *style;
+    f32 *cam;
+    Vtx *v;
+    s32 *g;
+    f32 a[3];
+    f32 b[3];
+    f32 dx, dy, dz;
+    f32 ex, ey, ez;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+    s16 alphaA;
+    s16 alphaB;
+    s16 n;
+    s32 i;
+    s32 cur;
+    s32 next;
+    s32 prevS;
+    s32 curS;
+    u8 ramp;
+    s8 flag;
+
+    if (*(s8 *) (trail + 0x2C) < 2) {
+        return gfx;
+    }
+    func_151D6310((s32 *) (trail + 0x84), arg2, (trail[0x25] << 5) + 0xA0, (s32 *) &v, 0);
+    if (v == NULL) {
+        return gfx;
+    }
+    cam = (f32 *) ((u8 *) D_800DBFF0 + arg2 * 0x9A0 + 0x2F8);
+    style = *(u8 **) (trail + 0x98);
+    pts = *(BeamPoint **) (trail + 0x94);
+    flag = 1;
+
+    if (style[0x1C] & 2) {
+        ramp = 0;
+        n = style[0x32];
+        i = *(s8 *) (trail + 0x2D);
+        do {
+            n--;
+            pts[i].fade = ramp;
+            ramp += style[0x33];
+            i++;
+            if (i == trail[0x25]) {
+                i = 0;
+            }
+        } while (n != 0 && i != *(s8 *) (trail + 0x2E));
+    }
+    if (style[0x1C] & 4) {
+        ramp = 0;
+        n = style[0x34];
+        i = *(s8 *) (trail + 0x2E) - 1;
+        if (i < 0) {
+            i = trail[0x25] - 1;
+        }
+        do {
+            n--;
+            pts[i].fade = ramp;
+            ramp += style[0x35];
+            i--;
+            if (i < 0) {
+                i = trail[0x25] - 1;
+            }
+        } while (n != 0 && i != *(s8 *) (trail + 0x2E));
+    }
+
+    gfx = (u8 *) func_15142E24(gfx, &D_800915E8, 0, 0, 0, 0, 0x92, 0, 0, &flag, 3);
+    gfx = (u8 *) func_15142B7C((s32) gfx, 1, 0x160600);
+    gfx = (u8 *) func_1513F4E4((s32) gfx, 0x4D, &flag);
+    gfx = func_15142C10(gfx, style[0x24], style[0x24], style[0x24], 0xFF, &flag);
+    gfx = func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, 0x5049D8, &flag);
+
+    if (*(u16 *) (trail + 0x1E) & 2) {
+        next = *(s8 *) (trail + 0x2E) - 1;
+        if (next < 0) {
+            next = trail[0x25] - 1;
+        }
+        a[0] = *(f32 *) (trail + 0x10);
+        a[1] = *(f32 *) (trail + 0x14);
+        a[2] = *(f32 *) (trail + 0x18);
+        p = &pts[next];
+        alphaA = (p->fade * *(s16 *) (style + 0x26)) >> 8;
+        prevS = p->s;
+    } else {
+        cur = *(s8 *) (trail + 0x2E) - 1;
+        if (cur < 0) {
+            cur = trail[0x25] - 1;
+        }
+        next = cur - 1;
+        if (next < 0) {
+            next = trail[0x25] - 1;
+        }
+        a[0] = pts[cur].pos[0];
+        a[1] = pts[cur].pos[1];
+        a[2] = pts[cur].pos[2];
+        alphaA = (pts[cur].fade * *(s16 *) (style + 0x26)) >> 8;
+        prevS = pts[cur].s;
+        p = &pts[next];
+    }
+    b[0] = p->pos[0];
+    b[1] = p->pos[1];
+    b[2] = p->pos[2];
+    alphaB = (p->fade * *(s16 *) (style + 0x26)) >> 8;
+    curS = p->s;
+
+    /* the first pair, at a (width and s of the next point) */
+    dx = a[0] - cam[0];
+    dy = a[1] - cam[1];
+    dz = a[2] - cam[2];
+    ey = a[1] - b[1];
+    ez = a[2] - b[2];
+    ex = a[0] - b[0];
+    nx = ey * dz - dy * ez;
+    ny = ez * dx - dz * ex;
+    nz = ex * dy - dx * ey;
+    len2 = nx * nx + ny * ny + nz * nz;
+    if (0.0f == len2) {
+        nx = ny = nz = 0.0f;
+    } else {
+        k = p->width / sqrtf(len2);
+        nx *= k;
+        ny *= k;
+        nz *= k;
+    }
+    v->v.ob[0] = (s32) (a[0] + nx);
+    v->v.ob[1] = (s32) (a[1] + ny);
+    v->v.ob[2] = (s32) (a[2] + nz);
+    v->v.tc[0] = p->s << 6;
+    v->v.tc[1] = 0x43C0;
+    v->v.cn[0] = 0xFF;
+    v->v.cn[1] = 0xFF;
+    v->v.cn[2] = 0xFF;
+    v->v.cn[3] = alphaA;
+    v->v.flag = 0;
+    v++;
+    v->v.ob[0] = (s32) (a[0] - nx);
+    v->v.ob[1] = (s32) (a[1] - ny);
+    v->v.ob[2] = (s32) (a[2] - nz);
+    v->v.tc[0] = p->s << 6;
+    v->v.tc[1] = 0x4000;
+    v->v.cn[0] = 0xFF;
+    v->v.cn[1] = 0xFF;
+    v->v.cn[2] = 0xFF;
+    v->v.cn[3] = alphaA;
+    v->v.flag = 0;
+    v++;
+
+    /* one pair per point at b, back to the oldest (+0x2D) */
+    do {
+        dx = b[0] - cam[0];
+        dy = b[1] - cam[1];
+        dz = b[2] - cam[2];
+        ey = a[1] - b[1];
+        ez = a[2] - b[2];
+        ex = a[0] - b[0];
+        nx = ey * dz - dy * ez;
+        ny = ez * dx - dz * ex;
+        nz = ex * dy - dx * ey;
+        len2 = nx * nx + ny * ny + nz * nz;
+        if (0.0f == len2) {
+            nx = ny = nz = 0.0f;
+        } else {
+            k = p->width / sqrtf(len2);
+            nx *= k;
+            ny *= k;
+            nz *= k;
+        }
+        v->v.ob[0] = (s32) (b[0] + nx);
+        v->v.ob[1] = (s32) (b[1] + ny);
+        v->v.ob[2] = (s32) (b[2] + nz);
+        v->v.tc[0] = p->s << 6;
+        v->v.tc[1] = 0x43C0;
+        v->v.cn[0] = 0xFF;
+        v->v.cn[1] = 0xFF;
+        v->v.cn[2] = 0xFF;
+        v->v.cn[3] = alphaB;
+        v->v.flag = 0;
+        v++;
+        v->v.ob[0] = (s32) (b[0] - nx);
+        v->v.ob[1] = (s32) (b[1] - ny);
+        v->v.ob[2] = (s32) (b[2] - nz);
+        v->v.tc[0] = p->s << 6;
+        v->v.tc[1] = 0x4000;
+        v->v.cn[0] = 0xFF;
+        v->v.cn[1] = 0xFF;
+        v->v.cn[2] = 0xFF;
+        v->v.cn[3] = alphaB;
+        v->v.flag = 0;
+        v++;
+        g = (s32 *) gfx;
+        g[0] = 0x01004008;      /* G_VTX: the last 4 vertices (previous pair, this pair) to slots 0..3 */
+        g[1] = (s32) (v - 4);
+        g[2] = 0x05000204;      /* G_TRI1 0, 1, 2 */
+        g[3] = 0;
+        g[4] = 0x05020604;      /* G_TRI1 1, 3, 2 */
+        g[5] = 0;
+        gfx += 0x18;
+        if (prevS < curS) {
+            /* s wrapped: the next segment starts from a copy of this pair, this pair ends at s - 0x4000 */
+            memcpy((s32 *) v, (s32 *) (v - 2), 0x20);
+            v[-2].v.tc[0] -= 0x4000;
+            v++;
+            v[-2].v.tc[0] -= 0x4000;
+            v++;
+        }
+        cur = next;
+        next = cur - 1;
+        p--;
+        if (next < 0) {
+            next = trail[0x25] - 1;
+            p = &pts[next];
+        }
+        a[0] = pts[cur].pos[0];
+        a[1] = pts[cur].pos[1];
+        a[2] = pts[cur].pos[2];
+        b[0] = p->pos[0];
+        b[1] = p->pos[1];
+        b[2] = p->pos[2];
+        prevS = (u8) curS;
+        alphaB = (p->fade * *(s16 *) (style + 0x26)) >> 8;
+        curS = p->s;
+    } while (cur != *(s8 *) (trail + 0x2D));
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E1AC0/func_150B4BF0.s")
+#endif
 
 void func_150B5540(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x98);

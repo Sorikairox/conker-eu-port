@@ -1163,7 +1163,261 @@ void func_151C3C88(u8 *arg0, u8 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C3C88.s")
 #endif
+#ifdef NON_MATCHING
+extern s32 D_800AADB0[6]; /* per-surface texture byte of the spark burst */
+extern s32 D_800AADC8[6]; /* per-surface texture byte of the smoke puff */
+extern u8 D_800AADE0[6][3]; /* per-surface debris colour A */
+extern u8 D_800AADF4[6][3]; /* per-surface debris colour B */
+extern u8 D_800AAE08[2][3]; /* the two flash colours */
+extern f32 D_800AAE44;
+extern f32 D_800AAE48;
+extern f32 D_800AAE4C;
+extern f32 D_800AAE50;
+extern f32 D_800AAE54;
+extern f32 D_800AAE58;
+void func_15153BA4(u8 *req, s32 tag, s32 room, s32 owner);
+
+// impact_effects_spawn: the impact effects at object `obj`'s position (+0x140), chosen by level (D_800BE9F0) and the
+// object's surface bits (+0x198 & 0x1F) as one of 6 surface types: each of 4 effects is spawned when a random number
+// is below its chance: a spark burst (func_1513C650, scale 15..30), a smoke puff (func_1513D2F0, moving along
+// +0x140 - +0x170), a debris spray (func_15153BA4, two per-surface colours, `debrisTag`) and a light flash
+// (func_151602C0, one of 2 colours). Unknown surfaces (type 0) only keep the flash chance.
+void func_151C40BC(s32 arg0, f32 sparkChance, f32 smokeChance, f32 debrisChance, f32 flashChance, u8 sparkTag,
+                   u8 debrisTag, u8 smokeTag) {
+    u8 *obj = (u8 *) arg0;
+    f32 *pos = (f32 *) (obj + 0x140);
+    f32 *prev = (f32 *) (obj + 0x170);
+    s32 level = D_800BE9F0;
+    s32 surface = *(s32 *) (obj + 0x198) & 0x1F;
+    s32 type;
+    struct {
+        s32 flags;      /* +0x00 */
+        s16 life;       /* +0x04 */
+        u8 texture;     /* +0x06 */
+        u8 u07;
+        s32 u08;
+        s32 u0C;
+        u8 color[6];    /* +0x10 */
+        u8 u16;
+        u8 blend;       /* +0x17 */
+        s32 frames;     /* +0x18 */
+        s32 pad1C;      /* not written */
+        u8 tag;         /* +0x20 */
+        u8 pad21;       /* not written */
+        s16 u22;
+        s16 u24;
+    } spark;
+    struct {
+        u8 texture;     /* +0x00 */
+        u8 u01;
+        s16 texSet;     /* +0x02 */
+        s16 life;       /* +0x04 */
+        s16 pad06;      /* not written */
+        s32 u08;
+        s32 u0C;
+        u8 color[4];    /* +0x10 */
+        f32 grow;       /* +0x14 */
+        f32 size;       /* +0x18 */
+        f32 pos[3];     /* +0x1C */
+        f32 vel[3];     /* +0x28 */
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        s32 flags;      /* +0x40 */
+        u8 alpha;       /* +0x44 */
+        u8 u45;
+        u8 u46;
+        u8 u47;
+        s32 u48;
+        u8 tag;         /* +0x4C */
+        u8 pad4D[7];    /* not written */
+        s16 u54;
+        s16 u56;
+    } smoke;
+    struct {
+        s16 type;       /* +0x00 */
+        s16 u02;
+        u8 u04;
+        u8 pad05;       /* not written */
+        s16 texSet;     /* +0x06 */
+        s32 handlers;   /* +0x08 */
+        s32 u0C;
+        s16 u10;
+        s16 u12;
+        s32 u14;
+        s32 u18;
+        u8 colorA[4];   /* +0x1C */
+        u8 colorB[4];   /* +0x20 */
+        u8 u24;
+        u8 u25;
+        s16 u26;
+        s16 u28;
+        s16 u2A;
+        f32 u2C;
+        f32 u30;
+        f32 u34;
+        f32 pos[3];     /* +0x38 */
+        s16 u44;
+        s16 u46;
+        s16 u48;
+        s16 u4A;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+        f32 u58;
+        s32 flags;      /* +0x5C */
+        s8 u60;
+        s8 u61;
+        s8 u62;
+        s8 u63;
+        s8 u64;
+        u8 pad65[3];    /* not written */
+        f32 u68;
+    } debris;
+    Header flash;
+    Header2 at;
+    u8 i;
+    f32 s;
+
+    if (level == 0x2B || level == 0x30) {
+        type = (surface == 1) ? 3 : 4;
+    } else if (surface == 0xB && level == 4) {
+        type = 1;
+    } else if ((surface == 1 || surface == 0xA) && level == 0xE) {
+        type = 2;
+    } else if (level == 0x34) {
+        type = 3;
+    } else if (level == 0x27) {
+        type = 5;
+    } else {
+        type = 0;
+        sparkChance = 0.0f;
+        smokeChance = 0.0f;
+        debrisChance = 0.0f;
+    }
+
+    if (func_150ADA68() < sparkChance) {
+        s = func_150ADA68() * 15.0f + 15.0f;
+        spark.texture = D_800AADB0[type];
+        spark.u07 = 0;
+        spark.flags = (D_800BE616 ? 0x20000 : 0) | 0xBF01;
+        spark.life = func_150ADA20() % 61U + 60;
+        spark.u08 = 0;
+        spark.u0C = 0;
+        spark.color[0] = func_150ADA20() % 56U + 200;
+        spark.color[1] = 0xFF;
+        spark.color[2] = 0;
+        spark.color[3] = 0;
+        spark.color[4] = 0;
+        spark.color[5] = 0xFF;
+        spark.frames = (((type == 4) ? 0x48 : 0x3B) << 16) + 2;
+        spark.u16 = 0;
+        spark.blend = (type == 4) ? 6 : 7;
+        spark.u22 = 0x20;
+        spark.u24 = 7;
+        spark.tag = sparkTag;
+        func_1513C650((s32) &spark, 0, 0, (s32) (obj + 0x17C), pos[0], pos[1], pos[2], s, s, func_150ADA20() & 0xFF,
+                      0, 0, 0, 0, obj[0xC], obj[1]);
+    }
+
+    if (func_150ADA68() < smokeChance) {
+        smoke.texture = D_800AADC8[type];
+        smoke.u01 = 0;
+        smoke.texSet = 0x3B03;
+        smoke.life = func_150ADA20() % 6U + 13;
+        smoke.u08 = 0;
+        smoke.u0C = 0;
+        smoke.color[0] = 0xFF;
+        smoke.color[1] = 0xFF;
+        smoke.color[2] = 0xFF;
+        smoke.color[3] = 0xFF;
+        smoke.grow = func_150ADA68() * 5.0f + 7.0f;
+        smoke.size = func_150ADA68() * 40.0f + 10.0f;
+        smoke.pos[0] = pos[0];
+        smoke.pos[1] = pos[1];
+        smoke.pos[2] = pos[2];
+        smoke.vel[0] = pos[0] - prev[0];
+        smoke.vel[1] = pos[1] - prev[1];
+        smoke.vel[2] = pos[2] - prev[2];
+        smoke.u34 = D_800AAE44;
+        smoke.u38 = 1.0f;
+        smoke.u3C = D_800AAE48;
+        smoke.flags = (D_800BE616 ? 0x40000000 : 0) | 0x08DC0009;
+        smoke.alpha = func_150ADA20() % 76U + 180;
+        smoke.u45 = 0xFF;
+        smoke.u46 = 0;
+        smoke.u47 = 7;
+        smoke.u48 = 0;
+        smoke.u54 = 8;
+        smoke.u56 = 0x1F;
+        smoke.tag = smokeTag;
+        func_1513D2F0(&smoke, (s32) &D_800A4AA0, 0x22, 0, 0, 0x1C, 2, 0, 0, 0, obj[0xC], obj[1]);
+    }
+
+    if (func_150ADA68() < debrisChance) {
+        debris.type = 5;
+        debris.u02 = 0xF;
+        debris.u04 = 0x6C;
+        debris.texSet = 0x5103;
+        debris.handlers = 0x200005;
+        debris.u0C = 0;
+        debris.u10 = 0x14;
+        debris.u12 = 0xF;
+        debris.u14 = 0;
+        debris.u18 = 0;
+        debris.colorA[0] = D_800AADE0[type][0];
+        debris.colorA[1] = D_800AADE0[type][1];
+        debris.colorA[2] = D_800AADE0[type][2];
+        debris.colorA[3] = 0xFF;
+        debris.colorB[0] = D_800AADF4[type][0];
+        debris.colorB[1] = D_800AADF4[type][1];
+        debris.colorB[2] = D_800AADF4[type][2];
+        debris.colorB[3] = 0xE6;
+        debris.u24 = 0x14;
+        debris.u25 = 0xFF;
+        debris.u26 = 0x19;
+        debris.u28 = 0xA;
+        debris.u2A = 0x1E;
+        debris.u2C = D_800AAE4C;
+        debris.u30 = 60.0f;
+        debris.u34 = 65.0f;
+        debris.pos[0] = pos[0];
+        debris.pos[1] = pos[1];
+        debris.pos[2] = pos[2];
+        debris.u44 = 0;
+        debris.u46 = -0x28;
+        debris.u48 = 0xFF;
+        debris.u4A = 0x28;
+        debris.u4C = 9.0f;
+        debris.u50 = 17.0f;
+        debris.u54 = D_800AAE50;
+        debris.u58 = D_800AAE54;
+        debris.flags = (D_800BE616 ? 0x800000 : 0) | 0x40E07;
+        debris.u60 = 0x10;
+        debris.u61 = -1;
+        debris.u62 = 8;
+        debris.u63 = 6;
+        debris.u64 = 1;
+        debris.u68 = D_800AAE58;
+        func_15153BA4((u8 *) &debris, debrisTag, obj[0xC], obj[1]);
+    }
+
+    if (func_150ADA68() < flashChance) {
+        flash.unk0 = 3;
+        flash.unk1 = -1;
+        flash.unk2 = func_150ADA20() % 6U + 3;
+        flash.unk4 = 0;
+        at.unk0 = pos[0];
+        at.unk4 = pos[1];
+        at.unk8 = pos[2];
+        i = func_150ADA20() & 1;
+        func_151602C0(&flash, &at, func_150ADA20() % 6U + 10, D_800AAE08[i][0], D_800AAE08[i][1], D_800AAE08[i][2],
+                      0xFF, 0, 0, obj[0xC], obj[1]);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1EFE10/func_151C40BC.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_151C491C(s32 arg0, u8 *arg1, s32 arg2) {
