@@ -490,6 +490,74 @@ static void nmw_tri_to_local(u32 *tri, u32 base, f32 cx, f32 cy, f32 cz, f32 si,
     }
 }
 
+/* box_diagonal_misses (part of func_150AAF00): the box diagonal (1, sy * ky, sz * kz) with ky / kz = D_800CC658 /
+ * D_800CC65C meets the plane n (n[0..2] . p = n[3]) at x = t; 0 if |t| is not beyond hx (NaN passes too) and that
+ * point lies in the triangle v, else 1. A zero denominator is replaced by 0.0001. */
+static s32 nmw_box_diagonal_misses(TriPt *v, f32 *n, f32 sy, f32 sz, f32 hx) {
+    f32 ny = n[1] * D_800CC658;
+    f32 nz = n[2] * D_800CC65C;
+    f32 denom = n[0] + sy * ny + sz * nz;
+    f32 t;
+    TriPt q;
+
+    if (denom == 0.0f) {
+        denom = 0.0001f;
+    }
+    t = n[3] / denom;
+    if (NM_FABS(t) > hx) {
+        return 1;
+    }
+    q.x = t;
+    q.y = sy * (t * D_800CC658);
+    q.z = sz * (t * D_800CC65C);
+    return nmD5E90_pointInTri(&q, v);
+}
+
+/* triangle_misses_box (func_150AAF00): the wall engine's copy of func_150AB278 with the box half extents in
+ * registers (hx, hy, hz) instead of D_800CC64C..54: 0 if the triangle v (vertices relative to the box centre) meets
+ * the box, 1 if not. Same steps: a vertex inside -> hit; all vertices beyond one face / edge bevel / corner bevel ->
+ * miss; an edge crossing the box -> hit; else the 4 box diagonals against the triangle's plane (made to face +z).
+ * The plane is left in D_800CC630..3C whenever it is computed (the hit paths reload it from there). */
+static s32 nmw_tri_misses_box(TriPt *v, f32 hx, f32 hy, f32 hz) {
+    s32 o1, o2, o3;
+    f32 n[4];
+
+    o1 = nmw_box_outcode(v[0].x, v[0].y, v[0].z, hx, hy, hz);
+    if (o1 == 0) goto hit;
+    o2 = nmw_box_outcode(v[1].x, v[1].y, v[1].z, hx, hy, hz);
+    if (o2 == 0) goto hit;
+    o3 = nmw_box_outcode(v[2].x, v[2].y, v[2].z, hx, hy, hz);
+    if (o3 == 0) goto hit;
+    if (o1 & o2 & o3) return 1;
+    o1 |= nmw_box_edge_outcode(v[0].x, v[0].y, v[0].z, hx, hy, hz) << 8;
+    o2 |= nmw_box_edge_outcode(v[1].x, v[1].y, v[1].z, hx, hy, hz) << 8;
+    o3 |= nmw_box_edge_outcode(v[2].x, v[2].y, v[2].z, hx, hy, hz) << 8;
+    if (o1 & o2 & o3) return 1;
+    o1 |= nmw_box_corner_outcode(v[0].x, v[0].y, v[0].z, hx, hy, hz) << 24;
+    o2 |= nmw_box_corner_outcode(v[1].x, v[1].y, v[1].z, hx, hy, hz) << 24;
+    o3 |= nmw_box_corner_outcode(v[2].x, v[2].y, v[2].z, hx, hy, hz) << 24;
+    if (o1 & o2 & o3) return 1;
+    if ((o1 & o2) == 0 && nmw_segment_misses_box(&v[0].x, &v[1].x, o1 | o2, hx, hy, hz) == 0) goto hit;
+    if ((o1 & o3) == 0 && nmw_segment_misses_box(&v[0].x, &v[2].x, o1 | o3, hx, hy, hz) == 0) goto hit;
+    if ((o2 & o3) == 0 && nmw_segment_misses_box(&v[1].x, &v[2].x, o2 | o3, hx, hy, hz) == 0) goto hit;
+    nmD5E90_plane(v, n);
+    if (!(n[2] >= 0.0f)) {
+        n[0] = -n[0];
+        n[1] = -n[1];
+        n[2] = -n[2];
+        n[3] = -n[3];
+    }
+    if (nmw_box_diagonal_misses(v, n, 1.0f, 1.0f, hx) == 0) return 0;
+    if (nmw_box_diagonal_misses(v, n, 1.0f, -1.0f, hx) == 0) return 0;
+    if (nmw_box_diagonal_misses(v, n, -1.0f, 1.0f, hx) == 0) return 0;
+    if (nmw_box_diagonal_misses(v, n, -1.0f, -1.0f, hx) == 0) return 0;
+    return 1;
+
+hit:
+    nmD5E90_plane(v, n);
+    return 0;
+}
+
 /* P285: the GPRs nmw_unit passes in / out, in io order (io[32] = v0 .. io[57] = fp) */
 #define NMW_IO_GPRS(X) X(v0) X(v1) X(a0) X(a1) X(a2) X(a3) X(t0) X(t1) X(t2) X(t3) X(t4) X(t5) X(t6) X(t7) \
     X(t8) X(t9) X(s0) X(s1) X(s2) X(s3) X(s4) X(s5) X(s6) X(s7) X(gp) X(fp)
@@ -571,6 +639,98 @@ s32 func_150AB6D0(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
 /* returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 */
 s32 func_150AC8C4(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
     return nmw_walls(0x150AC8C4, x, y, zbits, (u32) rec, mark, NULL);
+}
+
+/* ray_hits_triangle (func_150AD844, the ray cast's private helper): the ray org + t * dir (t >= 0) against triangle
+ * `tri` of the current collision set (D_800DC26C: 3 vertex offsets from vbase per triangle, vertices s16 x, y, z;
+ * D_800DC270: s16 min x, min z, max x, max z per triangle; D_800DC274: s16 min y, max y). Misses (0) when the ray
+ * is parallel to the plane, the plane is behind the origin, the hit point is outside the triangle's bounds widened
+ * by 1, it is not nearer than best[0], or it lies outside the triangle (edge cross products, see below). On a hit (1): best[0] = distance, best[1..3] = hit point. */
+static s32 nmr_ray_hits_triangle(u32 tri, u32 vbase, f32 *org, f32 *dir, f32 *best) {
+    u32 *offs = (u32 *) (*(u32 *) D_800DC26C + tri * 12);
+    s16 *box = (s16 *) (*(u32 *) D_800DC270 + tri * 8);
+    s16 *ybox = (s16 *) (*(u32 *) D_800DC274 + tri * 4);
+    f32 v[3][3];
+    f32 e1x, e1y, e1z, e2x, e2y, e2z;
+    f32 nx, ny, nz, d, denom, t;
+    f32 hx, hy, hz, dist;
+    f32 c1, c2, c3, a1, a2, a3;
+    s16 *p;
+    s32 i, pos;
+
+    for (i = 0; i < 3; i++) {
+        p = (s16 *) (offs[i] + vbase);
+        v[i][0] = p[0];
+        v[i][1] = p[1];
+        v[i][2] = p[2];
+    }
+    /* plane n . x + d = 0 */
+    e1x = v[1][0] - v[0][0];
+    e1y = v[1][1] - v[0][1];
+    e1z = v[1][2] - v[0][2];
+    e2x = v[2][0] - v[0][0];
+    e2y = v[2][1] - v[0][1];
+    e2z = v[2][2] - v[0][2];
+    nx = e1y * e2z - e1z * e2y;
+    ny = e1z * e2x - e1x * e2z;
+    nz = e1x * e2y - e1y * e2x;
+    d = -(nx * v[0][0]) - ny * v[0][1] - nz * v[0][2];
+    denom = nx * dir[0] + ny * dir[1] + nz * dir[2];
+    if (denom == 0.0f) {
+        return 0;
+    }
+    t = (-(nx * org[0]) - ny * org[1] - nz * org[2] - d) / denom;
+    if (t < 0.0f) {
+        return 0;
+    }
+    hx = org[0] + t * dir[0];
+    hy = org[1] + t * dir[1];
+    hz = org[2] + t * dir[2];
+    if ((f32) (box[0] - 1) > hx || (f32) (box[2] + 1) < hx) {
+        return 0;
+    }
+    if ((f32) (box[1] - 1) > hz || (f32) (box[3] + 1) < hz) {
+        return 0;
+    }
+    if ((f32) (ybox[0] - 1) > hy || (f32) (ybox[1] + 1) < hy) {
+        return 0;
+    }
+    dist = sqrtf((hx - org[0]) * (hx - org[0]) + (hy - org[1]) * (hy - org[1]) + (hz - org[2]) * (hz - org[2]));
+    if (dist >= best[0]) {
+        return 0;
+    }
+    /* edge v0-v1 against the hit point: the cross product component that is largest in magnitude (of c1 / c3, or
+     * of c2 / c3) is kept, the two others are redone with the edges v1-v2 and v2-v0 */
+    e1x = v[1][0] - v[0][0];
+    e1y = v[1][1] - v[0][1];
+    e1z = v[1][2] - v[0][2];
+    c1 = e1y * (hz - v[0][2]) - e1z * (hy - v[0][1]);
+    c2 = e1z * (hx - v[0][0]) - e1x * (hz - v[0][2]);
+    c3 = e1x * (hy - v[0][1]) - e1y * (hx - v[0][0]);
+    a1 = NM_FABS(c1);
+    a2 = NM_FABS(c2);
+    a3 = NM_FABS(c3);
+    if (a1 > a2 ? !(a3 > a1) : !(a3 > a2)) {
+        if (a1 > a2) { /* keep c1: the y-z projection */
+            c2 = (v[2][1] - v[1][1]) * (hz - v[1][2]) - (v[2][2] - v[1][2]) * (hy - v[1][1]);
+            c3 = (v[0][1] - v[2][1]) * (hz - v[2][2]) - (v[0][2] - v[2][2]) * (hy - v[2][1]);
+        } else { /* keep c2: the z-x projection */
+            c1 = (v[2][2] - v[1][2]) * (hx - v[1][0]) - (v[2][0] - v[1][0]) * (hz - v[1][2]);
+            c3 = (v[0][2] - v[2][2]) * (hx - v[2][0]) - (v[0][0] - v[2][0]) * (hz - v[2][2]);
+        }
+    } else { /* keep c3: the x-y projection */
+        c1 = (v[2][0] - v[1][0]) * (hy - v[1][1]) - (v[2][1] - v[1][1]) * (hx - v[1][0]);
+        c2 = (v[0][0] - v[2][0]) * (hy - v[2][1]) - (v[0][1] - v[2][1]) * (hx - v[2][0]);
+    }
+    pos = (c1 >= 0.0f) + (c2 >= 0.0f) + (c3 >= 0.0f);
+    if (pos != 0 && pos != 3) {
+        return 0;
+    }
+    best[0] = dist;
+    best[1] = hx;
+    best[2] = hy;
+    best[3] = hz;
+    return 1;
 }
 
 /* ray cast: o32 arguments (f12, f14, a2, a3, then the stack words 0x10..0x38 of the caller) */

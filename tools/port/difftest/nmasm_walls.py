@@ -36,6 +36,10 @@ def run(ref, cand, m, fn, args, fa=None, stack=()):
     k1 = (r1['v0'] & M32, [r1['gpr'][i] & M32 for i in list(range(16, 24)) + [28, 29, 30]])
     k2 = (r2['v0'] & M32, [r2['gpr'][i] & M32 for i in list(range(16, 24)) + [28, 29, 30]])
     d = memdiff(m1, m2, skip=[(SP0 - 0x4000, SP0 + 0x100), (SCR, SCR + 0x100), (0x80700000, 0x80710004)])
+    if d and os.environ.get('NMW_DEBUG'):   # P288: the differing words, ref / cand (hex and float)
+        for a in sorted(set(q & ~3 for q in d))[:8]:
+            w1, w2 = R(m1, a, 'I')[0], R(m2, a, 'I')[0]
+            print('  word %08x ref %08x %r cand %08x %r' % (a, w1, f32(w1), w2, f32(w2)))
     return k1 == k2 and not d, r1['v0'] & M32, (k1, k2, [hex(q) for q in d]), m1
 
 def walltris(rng, m, nt, c, rel_base=None):
@@ -279,6 +283,19 @@ def unit(ref, cand, base, rng, n, which):
         if nm == 'aacf4' and rng.random() < 0.5: W(m, SY['D_8009FAB0'], 'f', rng.choice([0.0, 1.0, 0.5, 2.0]))
         if nm == 'aaf00':
             for i, a in enumerate(('D_800CC64C', 'D_800CC650', 'D_800CC654')): W(m, SY[a], 'I', fv[i])
+            # P288: the box diagonals' slopes ky / kz = hy / hx, hz / hx (func_150492CC sets them with the box); they
+            # were left as the image's values, so the diagonal stage saw ky = kz = 0 and its mutants survived
+            hx = f32(fv[0]) or 1.0
+            W(m, SY['D_800CC658'], 'f', f32(fv[1]) / hx); W(m, SY['D_800CC65C'], 'f', f32(fv[2]) / hx)
+            if rng.random() < 0.5:   # a big triangle around a point near the box (no vertex in it, its plane cuts
+                box = [max(f32(fv[i]), 0.5) for i in range(3)]   # the box or passes a corner): reaches the diagonals
+                c = [rng.uniform(-1.3, 1.3) * box[i] for i in range(3)]
+                u = [rng.uniform(-1, 1) for _ in range(3)]; w = [rng.uniform(-1, 1) for _ in range(3)]
+                if rng.random() < 0.4: u[rng.randrange(3)] = 0.0   # axis-parallel edges / planes
+                R = rng.uniform(3, 8) * max(box); a0 = rng.uniform(0, 6.3)
+                for k in range(3):
+                    ca, sa = math.cos(a0 + 2.0944 * k), math.sin(a0 + 2.0944 * k)
+                    for d in range(3): fv[23 + 3 * k + d] = b32(c[d] + R * (ca * u[d] + sa * w[d]))
         frame = [0] * (0x268 // 4)
         if nm == 'ac824':                                       # 3 vertex offsets at t0, vertex base at sp+0x150
             vb = 0x80660000 + 8 * rng.randrange(0x100); frame[0x150 // 4] = vb

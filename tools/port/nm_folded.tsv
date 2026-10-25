@@ -15,12 +15,12 @@ func_150AAB58	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	as
 func_150AAC58	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	unreferenced helper
 func_150AACF4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	plane test
 func_150AAE80	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	outcode merge
-func_150AAF00	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	triangle/box test (private regs)
+func_150AAF00	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	readable	triangle/box test (P288: nmw_tri_misses_box)
 func_150AC200	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
 func_150AC6A4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
 func_150AC824	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
 func_150ACE90	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	tail jump to func_150AC7B8
-func_150AD844	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	asm2c	ray cast inner part
+func_150AD844	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	readable	ray vs triangle (P288: nmr_ray_hits_triangle)
 func_150AB6D0	D5E90	func_150AB6D0	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine entry (NM_ASM_C_FUNCS)
 func_150AC8C4	D5E90	func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine entry (NM_ASM_C_FUNCS)
 func_150ACEA0	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	asm2c	ray cast entry (NM_ASM_C_FUNCS)
