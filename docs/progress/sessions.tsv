@@ -379,3 +379,4 @@ P302	port-b	nm convert	5			GROUP A DONE (0 asm-only in group A files); level_mis
 P305	port-c	nm convert	3			GROUP C1 DONE: emitter_ribbon_draw, emitter2_flame_update, emitter2_flame_draw (1C3530); lesson: geometry mutants need large-size setups
 P307	port-b	integration	0			merged port-e into port-b (38377a3b); harness features unified, selftest 147/147; combined progress 98.1% (92.7% bytes)
 P308	port-b	integration	0			merged port-c (C1) into port-b (e9a35783); kept P289 func_150B2290; unified STUBMAP; selftest 150/150; combined 98.6% (94.7% bytes)
+P304	port-f	nm convert	4			group D2: impact_dust_spawn + fountain emit/step/draw (fountain_draw: original reads uninit stack slot, C uses newest point); 2 left (func_150D7E38, func_150F3A74)
