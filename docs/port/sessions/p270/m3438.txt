@@ -1,0 +1,1 @@
+s|func_15145548(temp_v0 + 0x18, &sp.u7C,|func_15145548(temp_v0 + 0x1C, \&sp.u7C,|

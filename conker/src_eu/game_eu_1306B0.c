@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING
+void func_15145548(void *, void *, void *, void *, f32 *); /* P270 */
+#endif
 
 
 #ifdef NON_MATCHING
@@ -336,7 +339,7 @@ s16 *func_15103438(u8 *arg0, s16 arg1) {
         sp.u88 = temp_f16;
         sp38 = temp_v0;
         sp.u84 = temp_f6 - (*(f32 *)((u8 *)temp_v0 + 0x20));
-        func_15145548(temp_f12, temp_f14, temp_v0 + 0x18, &sp.u7C, temp_s1, &sp.u6C, &sp.u48);
+        func_15145548(temp_v0 + 0x18, &sp.u7C, temp_s1, &sp.u6C, &sp.u48);  /* P270: m2c passed live f12/f14 as two extra leading args (asm: a0 = arg0 + 0x128) */
         temp_f0_2 = sp.u6C - (*(f32 *)((u8 *)temp_s1 + 0));
         temp_f2_2 = sp.u70 - (*(f32 *)((u8 *)temp_s1 + 4));
         temp_f12_2 = sp.u74 - (*(f32 *)((u8 *)temp_s1 + 8));
@@ -361,19 +364,19 @@ s16 *func_15103438(u8 *arg0, s16 arg1) {
         (*(s16 *)((u8 *)sp.u50 + 2)) = (s16) (s32) ((*(f32 *)((u8 *)sp38 + 0x1C)) + var_f14);
         (*(s16 *)((u8 *)sp.u50 + 4)) = (s16) (s32) ((*(f32 *)((u8 *)sp38 + 0x20)) + var_f16);
         (*(s16 *)((u8 *)sp.u50 + 6)) = 0;
-        temp_t4 = sp.u50 + 0x10;
+        temp_t4 = (s16 *) ((u8 *) sp.u50 + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u50 = temp_t4;
         *temp_t4 = (s16) (s32) (sp.u88 + var_f12);
         (*(s16 *)((u8 *)sp.u50 + 2)) = (s16) (s32) (sp.u8C + var_f14);
         (*(s16 *)((u8 *)sp.u50 + 4)) = (s16) (s32) (sp.u90 + var_f16);
         (*(s16 *)((u8 *)sp.u50 + 6)) = 0;
-        temp_t6 = sp.u50 + 0x10;
+        temp_t6 = (s16 *) ((u8 *) sp.u50 + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u50 = temp_t6;
         *temp_t6 = (s16) (s32) (sp.u88 - var_f12);
         (*(s16 *)((u8 *)sp.u50 + 2)) = (s16) (s32) (sp.u8C - var_f14);
         (*(s16 *)((u8 *)sp.u50 + 4)) = (s16) (s32) (sp.u90 - var_f16);
         (*(s16 *)((u8 *)sp.u50 + 6)) = 0;
-        temp_t7 = sp.u50 + 0x10;
+        temp_t7 = (s16 *) ((u8 *) sp.u50 + 0x10);  /* P270: byte offset (was s16 stride) */
         sp.u50 = temp_t7;
         *temp_t7 = (s16) (s32) ((*(f32 *)((u8 *)sp38 + 0x18)) - var_f12);
         (*(s16 *)((u8 *)sp.u50 + 2)) = (s16) (s32) ((*(f32 *)((u8 *)sp38 + 0x1C)) - var_f14);

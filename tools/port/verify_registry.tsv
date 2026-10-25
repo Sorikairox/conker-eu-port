@@ -292,3 +292,16 @@ func_151BE33C	game_eu_1E7CC0	docs/port/sessions/p264/se33c.txt	DIFFTEST_ROMDATA=
 func_15199A28	game_eu_1C3530	docs/port/sessions/p264/s9a28.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=10023360=1:340,15147FF0=0:22,15146414=0*0:12,15146414=0*4:12,1519C60C=1:12 DIFFTEST_OUTP=15146414=1.0:41200000;41A00000;41F00000/1.1:C1200000;C1A00000;C1F00000 TR=4	docs/port/sessions/p264/m9a28.txt	P264
 func_1519CF34	game_eu_1C3530	docs/port/sessions/p264/scf34.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15199A28=1:284,10023360=1:8 TR=4	docs/port/sessions/p264/mcf34.txt	P264
 func_1516EE3C	game_eu_19B180	docs/port/sessions/p264/see3c.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p264/mee3c.txt	P264
+func_150D5268	game_eu_101080	docs/port/sessions/p264/s5268.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=151307F0=0:112 TR=4	docs/port/sessions/p264/m5268.txt	P267
+func_15198180	game_eu_1C3530	docs/port/sessions/p264/s8180.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p264/m8180.txt	P267
+func_151D7FE8	game_eu_204F70		DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/m7fe8.txt	P270
+func_150D4810	game_eu_101080		DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt,docs/port/sessions/p270/m4810.txt	P270
+func_151C3080	game_eu_1EFE10	docs/port/sessions/p270/s3438.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt	P270
+func_1519CADC	game_eu_1C3530	docs/port/sessions/p270/s3438.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt,docs/port/sessions/p270/mcadc.txt	P270
+func_151CE3D0	game_eu_1FB080	docs/port/sessions/p270/se3d0.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt,docs/port/sessions/p270/me3d0.txt	P270
+func_150E6920	game_eu_113D60	docs/port/sessions/p270/s3438.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt,docs/port/sessions/p270/m6920.txt	P270
+func_15103438	game_eu_1306B0	docs/port/sessions/p270/s3438.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt,docs/port/sessions/p270/m3438.txt	P270
+func_151B2F24	game_eu_1DFE20	docs/port/sessions/p270/s2f24.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mstride_all.txt,docs/port/sessions/p270/m2f24.txt	P270
+func_151C8448	game_eu_1F4F60	docs/port/sessions/p270/s3438.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/m8448.txt	P270
+func_15101F44	game_eu_12E390	docs/port/sessions/p270/s1f44.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/m1f44.txt	P270
+func_1513EAD8	game_169510	docs/port/sessions/p270/sead8.txt	DIFFTEST_ROMDATA=1 NR=200	docs/port/sessions/p270/mead8.txt	P270

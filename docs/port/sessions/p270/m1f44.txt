@@ -1,0 +1,2 @@
+s|func_15145548(&sp.u78, &sp.uB4, temp_v0_2, &sp.uA8, 0);|func_15145548(\&sp.uB4, \&sp.uB4, temp_v0_2, \&sp.uA8, 0);|
+s|func_15145548(&sp.u78, &sp.uB4, temp_v0_2, &sp.uA8, 0);|func_15145548(\&sp.u78, \&sp.uB4, temp_v0_2, \&sp.uA8, \&sp.uA8);|

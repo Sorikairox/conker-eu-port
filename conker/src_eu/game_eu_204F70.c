@@ -368,7 +368,7 @@ s32 func_151D7FE8(u8 *arg0) {
             (*(f32 *)((u8 *)temp_a0 + 0x18)) = 0.0f;
             (*(s32 *)((u8 *)temp_a0 + 8)) = (s32) (*(s32 *)((u8 *)(&sp.u88) + 8));
             sp64 = var_f2;
-            func_151D8CC8(temp_a0, temp_a0 + 0xC, var_f22);
+            func_151D8CC8(temp_a0, (f32 *) ((u8 *) temp_a0 + 0xC), var_f22); /* P270: was temp_a0 + 0xC (f32 stride = +0x30 bytes; asm addiu a1,a0,0xC) */
             (*(s8 *)((u8 *)arg0 + 0x2E)) = (s8) ((*(s8 *)((u8 *)arg0 + 0x2E)) + 1);
             var_f22 -= temp_f26;
             if ((*(u8 *)((u8 *)arg0 + 0x25)) == (*(s8 *)((u8 *)arg0 + 0x2E))) {

@@ -50,6 +50,21 @@ docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: 
 ## Next steps (from P265)
 - port-web: re-tune the r5g gap-2/last-gap jump on this build, then replay pan8 (lever, doors, 0x2E Frying Pan).
 - port-web (cleanup): drop the dead port-side func_1506D8AC (p49_walk.c + n64mem VM_NATIVES); game C func_1506D4EC is at that address now.
+## P270 (port) (session P270, 2026-10-25). Details: `docs/port/sessions/P270.md`
+- Merged port-b (P267). Fixed the user's intro crash (func_151D7FE8 `f32 * + 0xC` velocity pointer, P269) and the same
+  class in 10 more NM functions (vertex `s16 * + 0x10` stride in the func_151D6310 quad family, float spills cast to
+  int, extra leading float args to func_15145548, `idx*4 + &D_800DD608` on s32 symbols, a garbage memcpy). All
+  difftested with registry rows (`P270`); func_151C8448's float mutant survives (same shape as killed ones).
+- New `tools/port/stride_scan.py` (typed pointer + constant offset, asm hint): 151 -> 119 NM hits, no open hex hits.
+- Next: scans for the other classes found here (float spill `(u8 *)(s32)temp_f`, implicit callees given extra float
+  args, `x*4 + &D_s32sym`); run stride_scan after each merge.
+
+## P267 (port-b) (session P267, 2026-10-25). Details: `docs/port/sessions/P267.md`
+
+Hand C (NM): func_150D5268 smoke_puff_burst (ARGMEM on the func_151307F0 template, mutants 48/49, 1 equivalent) and
+func_15198180 beam_quad_build (random EQUIV again, 24/24). Registry rows. verify_all / NM rc 0, protocheck 0 (1646),
+implicit_scan 0 NM+float, selftest 130/130. Next: func_15198680, func_151CF930, game_161520 group, D5E90 hand asm,
+func_1519CADC `(s32)sp30 * (s32)temp_f2_3` check.
 
 ## P264 (port-b) (session P264, 2026-10-25). Details: `docs/port/sessions/P264.md`
 

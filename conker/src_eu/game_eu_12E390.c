@@ -1,6 +1,9 @@
 #include <ultra64.h>
 #include "functions.h"
 #include "variables.h"
+#ifdef NON_MATCHING
+void func_15145548(void *, void *, void *, void *, f32 *); /* P270 */
+#endif
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 s32 memcpy(s32, s32, s32);
 void func_151D6310(s32 *, s16, s32, s32 *, u8 *);
@@ -844,7 +847,7 @@ u8 *func_15101F44(u8 *arg0, s16 arg1) {
                 sp.u68 = (*(f32 *)((u8 *)sp48 + 0x44));
             }
             sp.uC0 = temp_v0_2;
-            func_15145548(3508.0f, &sp.u78, &sp.uB4, temp_v0_2, &sp.uA8, 0);
+            func_15145548(&sp.u78, &sp.uB4, temp_v0_2, &sp.uA8, 0);  /* P270: m2c passed a live f12 (3508.0f) as an extra leading arg (asm: a0 = sp + 0x78) */
             temp_f0_2 = sp.uA8 - (*(f32 *)((u8 *)sp.uC0 + 0));
             temp_f2_2 = sp.uAC - (*(f32 *)((u8 *)sp.uC0 + 4));
             temp_f12 = sp.uB0 - (*(f32 *)((u8 *)sp.uC0 + 8));

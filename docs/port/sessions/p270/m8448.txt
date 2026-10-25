@@ -1,0 +1,1 @@
+s|var_f14 = temp_f4 \* temp_f2_2;|var_f14 = (s32)temp_f4 * (s32)temp_f2_2;|
