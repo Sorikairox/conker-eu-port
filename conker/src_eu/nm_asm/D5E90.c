@@ -319,13 +319,9 @@ f32 func_150AD780(f32 x) {
 /* ---- P56: wall engine func_150AB6D0 / func_150AC8C4 (-> func_150AB708) and ray cast func_150ACEA0 ----
  * Hand asm with private register conventions: the helpers pass points / boxes / planes in FPRs, the engine keeps
  * its state in s0-s7 / fp / gp / f23-f31 across helpers and jumps through 4 continuation pointers that each entry
- * stub stores at sp+0x1D0..0x1DC (map: docs/port/sessions/P53.md section 5). Rather than a hand rewrite, the code is
- * a mechanical register-level translation (tools/port/asm2c_hand.py, regenerate with tools/port/gen_d5e90_walls.sh):
- * GPRs are u32 locals, FPRs the union array F, one C statement per instruction, branch delay slots honoured,
- * internal jal / jr through the `dispatch` switch over the code addresses a register can hold, external callees as
- * C calls. The asm frame (0x268 / 0x70 bytes) is a local buffer; sp holds its address.
- * Includes: D5E90_walls.inc = func_150AA950 .. func_150AB264 (triangle / box test of func_150AAF00 and helpers)
- * + func_150AB6D0 .. func_150ACE90. The ray cast func_150ACEA0 .. func_150ADC40 is readable C below (P291). */
+ * stub stores at sp+0x1D0..0x1DC (map: docs/port/sessions/P53.md section 5). P56 first translated it register by
+ * register (D5E90_walls.inc / D5E90_ray.inc, tools/port/asm2c_hand.py); since P294 all of it is readable C below
+ * (helpers P281-P288, ray cast P291, engine P294) and the .inc files are gone. */
 #include <libc/math.h>
 
 extern u8 D_8009FAC0[], D_8009FAC8[], D_8009FACC[], D_8009FAD0[], D_800C5D38[], D_800CC1B0[], D_800CC1B4[];
@@ -368,35 +364,8 @@ typedef union {
     s32 i;
 } NmwReg;
 
-#define NMW_RET 0xFFFFFFF0u
-/* ASM2C_TRACE=1 tools/port/gen_d5e90_walls.sh puts NMW_TRACE(label) at every label (debugging: ring at 0x80700000) */
-#define NMW_TRACE(a) { u32 *tr_ = (u32 *) 0x80700000; tr_[1 + (tr_[0]++ & 0x3FFF)] = (a); }
-#define NMW_P(a) ((u8 *) (a))
-#define LW(a) (*(u32 *) NMW_P(a))
-#define LH(a) ((u32) (s32) *(s16 *) NMW_P(a))
-#define LHU(a) ((u32) *(u16 *) NMW_P(a))
-#define LB(a) ((u32) (s32) *(s8 *) NMW_P(a))
-#define LBU(a) ((u32) *(u8 *) NMW_P(a))
-#define SW(a, v) (*(u32 *) NMW_P(a) = (u32) (v))
-#define SH(a, v) (*(u16 *) NMW_P(a) = (u16) (v))
-#define SB(a, v) (*(u8 *) NMW_P(a) = (u8) (v))
-#define HI(x) (((u32) (x) + 0x8000) & 0xFFFF0000)
-#define LO(x) ((u32) (s32) (s16) ((u32) (x) & 0xFFFF))
-#define MULT(a, b) (lo = (u32) ((s32) (a) * (s32) (b)))
-/* VR4300 div: by zero lo = (rs < 0 ? 1 : -1); only lo is read */
-#define DIV(a, b) (lo = ((b) == 0 ? ((s32) (a) < 0 ? 1 : (u32) -1) \
-                       : ((a) == 0x80000000 && (b) == (u32) -1) ? 0x80000000 : (u32) ((s32) (a) / (s32) (b))))
-#define CVTW(f) nmD5E90_rint(f)
 
-static f32 nmw_u2f(u32 u) {
-    NmwReg r;
-
-    r.u = u;
-    return r.f;
-}
-#define U2F(x) nmw_u2f(x)
-
-/* P281: readable bodies of the wall engine's private helpers (the .inc keeps only their register-level calls). */
+/* P281 / P285 / P288: the wall engine's private helpers (register conventions of the asm in each comment). */
 /* box_outcode (func_150AA950): one bit per face of the box (+/- hx, hy, hz) the point (x, y, z) lies beyond:
  * 1 / 2 = x above hx / below -hx, 4 / 8 = y, 0x10 / 0x20 = z (ordered compares: a NaN coordinate sets no bit) */
 static s32 nmw_box_outcode(f32 x, f32 y, f32 z, f32 hx, f32 hy, f32 hz) {
@@ -582,80 +551,6 @@ static s32 nmw_tri_misses_box(TriPt *v, f32 hx, f32 hy, f32 hz) {
 hit:
     nmD5E90_plane(v, n);
     return 0;
-}
-
-/* P285: the GPRs nmw_unit passes in / out, in io order (io[32] = v0 .. io[57] = fp) */
-#define NMW_IO_GPRS(X) X(v0) X(v1) X(a0) X(a1) X(a2) X(a3) X(t0) X(t1) X(t2) X(t3) X(t4) X(t5) X(t6) X(t7) \
-    X(t8) X(t9) X(s0) X(s1) X(s2) X(s3) X(s4) X(s5) X(s6) X(s7) X(gp) X(fp)
-#define NMW_IO_LOAD(r) r = io[k_++];
-#define NMW_IO_STORE(r) io[k_++] = r;
-
-/* the register file and frame of one machine run */
-#define NMW_REGS                                                                                         \
-    u32 at = 0, v0 = 0, v1 = 0, a0 = 0, a1 = 0, a2 = 0, a3 = 0, t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0, \
-        t5 = 0, t6 = 0, t7 = 0, t8 = 0, t9 = 0, s0 = 0, s1 = 0, s2 = 0, s3 = 0, s4 = 0, s5 = 0, s6 = 0,  \
-        s7 = 0, gp = 0, fp = 0, ra = NMW_RET, sp, pc, lo = 0;                                            \
-    s32 c, cc = 0, k_;                                                                                   \
-    NmwReg F[32]
-
-/* f12 / f14 = target x / y, a2 = target z (float bits; the callers' prototype is (f32, f32, s32, u8 *, s32)), a3 = record, stack word 0x10 = mark touched objects.
- * Returns 1 if a wall moved the record (rec+0x14..0x1C written back). */
-static s32 nmw_walls(u32 entry, f32 x, f32 y, u32 zbits, u32 rec, s32 mark, u32 *io) {
-    NMW_REGS;
-    u32 stk[(0x268 + 0x20) / 4];
-
-    for (k_ = 0; k_ < 32; k_++) {
-        F[k_].u = 0;
-    }
-    if (io != NULL) { /* nmw_unit: one private helper with the registers from io, inside the engine's frame */
-        sp = (u32) stk;
-        for (k_ = 0; k_ < 32; k_++) {
-            F[k_].u = io[k_];
-        }
-        k_ = 32;
-        NMW_IO_GPRS(NMW_IO_LOAD)
-        for (k_ = 0; k_ < 0x268 / 4; k_++) { /* io[58..]: the frame words sp+0 .. sp+0x264 */
-            SW(sp + 4 * k_, io[58 + k_]);
-        }
-        switch (entry) {
-            case 0x150AA950: goto L_150AA950;
-            case 0x150AA9B0: goto L_150AA9B0;
-            case 0x150AAA88: goto L_150AAA88;
-            case 0x150AAB58: goto L_150AAB58;
-            case 0x150AACF4: goto L_150AACF4;
-            case 0x150AAE80: goto L_150AAE80;
-            case 0x150AAF00: goto L_150AAF00;
-            case 0x150AC824: goto L_150AC824;
-        }
-        return 0xBAD00000 | (entry & 0xFFFFF);
-    }
-    sp = (u32) stk + 0x268;
-    SW(sp + 0x10, mark);
-    F[12].f = x;
-    F[14].f = y;
-    a2 = zbits;
-    a3 = rec;
-    pc = entry;
-    goto dispatch;
-#include "D5E90_walls.inc"
-bad: /* a code address the translation does not know: cannot happen */
-    return 0xBAD00000 | (pc & 0xFFFFF);
-done:
-    if (io != NULL) {
-        for (k_ = 0; k_ < 32; k_++) {
-            io[k_] = F[k_].u;
-        }
-        k_ = 32;
-        NMW_IO_GPRS(NMW_IO_STORE)
-    }
-    return v0;
-}
-
-/* P285: test entry for tools/port/difftest/nmasm_walls.py --unit (NM build only): runs the private wall helper at
- * `entry` (an asm address, see the switch in nmw_walls) with io[0..31] = f0..f31, io[32..57] = the GPRs in
- * NMW_IO_GPRS order and io[58..211] = the frame words sp+0..0x264 (in only), then writes the registers back to io. Returns v0. */
-s32 nmw_unit(u32 entry, u32 *io) {
-    return nmw_walls(entry, 0.0f, 0.0f, 0, 0, 0, io);
 }
 
 /* ---- P294: the wall engine (func_150AB708 behind the entries func_150AB6D0 / func_150AC8C4), readable ----
@@ -1338,9 +1233,57 @@ s32 func_150AB6D0(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
     return nmw_engine(rec, x, y, zbits, mark, 0);
 }
 
-/* returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 */
+/* ledges: returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 (rising), else clears
+ * D_800CC1C0[record] and runs the engine in ledge mode */
 s32 func_150AC8C4(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
-    return nmw_walls(0x150AC8C4, x, y, zbits, (u32) rec, mark, NULL);
+    if (*(s32 *) (rec + 0x20) > 0) {
+        return 0;
+    }
+    ((s16 *) D_800CC1C0)[(s32) (rec - (u8 *) D_800CC2D0) / NMW_REC_SIZE] = 0;
+    return nmw_engine(rec, x, y, zbits, mark, 1);
+}
+
+/* P285 / P294: test entry for tools/port/difftest/nmasm_walls.py --unit (NM build only): calls the C of the private
+ * wall helper at `entry` (its asm address) with the asm's registers: io[0..31] = f0..f31, io[32..57] = v0 v1 a0 a1
+ * a2 a3 t0..t9 s0..s7 gp fp, io[58..] = the frame words sp+0..0x264 (in only); register outputs are written back
+ * to io. Returns v0. */
+#define NMW_IO_F(k) (((NmwReg *) io)[k].f)
+#define NMW_IO_FP(k) (&((NmwReg *) io)[k].f)
+#define NMW_IO_FRAME(off) (io[58 + (off) / 4])
+s32 nmw_unit(u32 entry, u32 *io) {
+    NmwState w;
+    f32 side;
+    s32 k;
+
+    switch (entry) {
+        case 0x150AA950:
+            return nmw_box_outcode(NMW_IO_F(3), NMW_IO_F(4), NMW_IO_F(5), NMW_IO_F(0), NMW_IO_F(1), NMW_IO_F(2));
+        case 0x150AA9B0:
+            return nmw_box_edge_outcode(NMW_IO_F(3), NMW_IO_F(4), NMW_IO_F(5), NMW_IO_F(0), NMW_IO_F(1), NMW_IO_F(2));
+        case 0x150AAA88:
+            return nmw_box_corner_outcode(NMW_IO_F(3), NMW_IO_F(4), NMW_IO_F(5), NMW_IO_F(0), NMW_IO_F(1), NMW_IO_F(2));
+        case 0x150AAB58: /* diff in v1 */
+            return nmw_segment_misses_box(NMW_IO_FP(6), NMW_IO_FP(9), io[33], NMW_IO_F(0), NMW_IO_F(1), NMW_IO_F(2));
+        case 0x150AACF4:
+            return nmD5E90_pointInTri((TriPt *) NMW_IO_FP(3), (TriPt *) NMW_IO_FP(23));
+        case 0x150AAE80: /* plane -> f19..f22 */
+            nmD5E90_plane((TriPt *) NMW_IO_FP(23), NMW_IO_FP(19));
+            return io[32];
+        case 0x150AAF00:
+            return nmw_tri_misses_box((TriPt *) NMW_IO_FP(23), NMW_IO_F(0), NMW_IO_F(1), NMW_IO_F(2));
+        case 0x150AC824: /* offsets at t0, vertex base sp+0x150 -> f23..f31 */
+            nmw_tri_to_local((u32 *) io[38], NMW_IO_FRAME(0x150), NMW_IO_F(20), NMW_IO_F(21), NMW_IO_F(22),
+                             NMW_IO_F(18), NMW_IO_F(19), NMW_IO_FP(23));
+            return io[32];
+        case 0x150AC200: /* plane f19..f22, point f26..f28, triangle sp+0x20C.. -> t0, f4 */
+            for (k = 0; k < 9; k++) {
+                ((NmwReg *) &w.tv[0].x)[k].u = NMW_IO_FRAME(0x20C + 4 * k);
+            }
+            io[38] = nmw_projects_inside(&w, NMW_IO_FP(19), NMW_IO_FP(26), &side);
+            NMW_IO_F(4) = side;
+            return io[32];
+    }
+    return 0xBAD00000 | (entry & 0xFFFFF);
 }
 
 /* ray_hits_triangle (func_150AD844, the ray cast's private helper): the ray org + t * dir (t >= 0) against triangle

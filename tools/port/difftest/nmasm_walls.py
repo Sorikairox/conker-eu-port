@@ -112,12 +112,13 @@ RAY_PCS = {0x150ADAF8: 'yz', 0x150ADB48: 'zx', 0x150ADB88: 'xy', 0x150ADC10: 'hi
            0x150AD510: 'obj listed', 0x150AD68C: 'obj hit', 0x150AD32C: 'next leaf'}    # func_150ACEA0 (P291)
 OBJS, OBJVB, OBJFT = 0x80670000, 0x80674000, 0x80676000
 
-def ray_grid_tree(rng, m, vs, pos):
+def ray_grid_tree(rng, m, vs, pos, geo=None):
     """P291: a root square split into g x g leaves (half size h), each listing the level triangles whose xz bounds
     meet the cell (absolute / relative entries; sometimes a relative first entry, which counts from the asm's t3):
     rays then hit in later leaves, so the next-leaf walk (exit point, side flags, maxDist) decides the result."""
     g = rng.choice([2, 3, 4, 6]); h = rng.choice([60, 150, 300, 600])
     cx0, cz0 = pos[0] + rng.randint(-h, h), pos[2] + rng.randint(-h, h)
+    if geo: g, h, cx0, cz0 = geo   # P294: ray_far's grid
     buf = bytearray(struct.pack('>IhHhhh', 0, 0, g * h + rng.choice([0, 0, 5]), cx0, cz0, 14))
     leaves = []
     for i in range(g):
@@ -169,6 +170,65 @@ def ray_objects(rng, m, nt, pos):
     W(m, SY['D_800DBEF4'], 'I', OBJS); W(m, SY['D_800DC328'], 'I', OBJVB); W(m, SY['D_800DC32C'], 'I', OBJFT + 0x1000)
     return nobj, out
 
+def ray_far(rng, m, pos, nt, vs):
+    """P294: one wall triangle (index 0) whose only hit lies in a later leaf of a g x g grid tree; the other
+    triangles are lifted 5000 units out of the way. The ray leaves the origin's leaf toward -z / +z (often exactly
+    along z: dx 0.0 / -0.0, the dx == 0 exit) / -x / +x / diagonally (-x, -z); maxDist sometimes just past the
+    first exit point (1.5 .. 9.5 units before it: the +10 of the exit point decides). Returns (p0, d, maxDist)."""
+    g = rng.choice([3, 4, 5]); h = rng.choice([40, 60, 150, 300])
+    cx0, cz0 = pos[0], pos[2]
+    cell = lambda i: -g * h + h + 2 * h * i
+    ax = rng.choice(['-z', '-z', '+z', '+z', '+z', '-x', '-x', '+x', 'd'])
+    i0, j0 = rng.randrange(g), rng.randrange(g)
+    if ax == '-z': j0 = rng.randrange(1, g)
+    elif ax == '+z': j0 = rng.randrange(0, g - 1)
+    elif ax == '-x': i0 = rng.randrange(1, g)
+    elif ax == '+x': i0 = rng.randrange(0, g - 1)
+    else: i0, j0 = rng.randrange(1, g), rng.randrange(1, g)
+    ox = cx0 + cell(i0) + rng.uniform(-0.6, 0.6) * h; oz = cz0 + cell(j0) + rng.uniform(-0.6, 0.6) * h
+    if rng.random() < 0.4: ox, oz = float(round(ox)), float(round(oz))
+    oy = float(pos[1] + rng.randint(-20, 20))
+    s = rng.choice([1.0, 64.0, 0.01, 300.0])
+    w = rng.choice([10, 30, h * 0.5])
+    small = rng.choice([0.0, 0.0, -0.0, rng.uniform(-0.01, 0.01)])
+    md = 0.0
+    if ax in ('-z', '+z', '-x', '+x'):
+        sg = -1 if ax[0] == '-' else 1
+        along = 2 if ax[1] == 'z' else 0
+        i = j0 if along == 2 else i0; o = oz if along == 2 else ox; c0 = cz0 if along == 2 else cx0
+        k = 1 if rng.random() < 0.5 else rng.randrange(1, (i + 1) if sg < 0 else (g - i))
+        t = c0 + cell(i + sg * k) + rng.uniform(-0.7, 0.7) * h      # the wall's plane, inside a leaf k ahead
+        exitd = abs(c0 + cell(i) + sg * h - o)
+        md = rng.choice([0.0, exitd + rng.uniform(1.5, 9.5), exitd + rng.uniform(1.5, 9.5), exitd + rng.uniform(10.5, 40.0)])
+        if md and md < exitd + 10:                               # the hit just inside the next leaf, nearer than
+            t = c0 + cell(i) + sg * (h + rng.uniform(1.0, max(1.1, md - exitd - 0.5)))   # maxDist (best starts there)
+        if along == 2:
+            d = [small * s, 0.0, sg * s]
+            v = [[ox - w, oy - 30, t], [ox + w, oy - 30, t], [ox, oy + 60, t]]
+        else:
+            d = [sg * s, 0.0, small * s]
+            v = [[t, oy - 30, oz - w], [t, oy - 30, oz + w], [t, oy + 60, oz]]
+    else:
+        r = rng.uniform(0.5, 2.0); n = math.sqrt(1 + r * r); u = [-1 / n, -r / n]
+        te = min((ox - (cx0 + cell(i0) - h)) / -u[0], (oz - (cz0 + cell(j0) - h)) / -u[1])
+        dd = te + rng.uniform(5, 2 * h)
+        q = [ox + dd * u[0], oz + dd * u[1]]; pp = [-u[1], u[0]]
+        d = [u[0] * s, 0.0, u[1] * s]
+        v = [[q[0] - w * pp[0], oy - 30, q[1] - w * pp[1]], [q[0] + w * pp[0], oy - 30, q[1] + w * pp[1]],
+             [q[0], oy + 60, q[1]]]
+    v = [[int(round(a)) for a in q] for q in v]
+    for kk in range(3): W(m, VP + 8 * kk, '3h', *v[kk]); W(m, VOFS + 4 * kk, 'I', VP + 8 * kk)
+    W(m, BND, '4h', min(q[0] for q in v), min(q[2] for q in v), max(q[0] for q in v), max(q[2] for q in v))
+    W(m, YB, '2h', min(q[1] for q in v), max(q[1] for q in v))
+    out = [v]
+    for t2 in range(1, nt):                                     # the others: 5000 up
+        vv = [[q[0], min(32760, q[1] + 5000), q[2]] for q in vs[t2]]
+        for kk in range(3): W(m, VP + 0x18 * t2 + 8 * kk, '3h', *vv[kk])
+        W(m, YB + 4 * t2, '2h', min(q[1] for q in vv), max(q[1] for q in vv))
+        out.append(vv)
+    ray_grid_tree(rng, m, out, pos, geo=(g, h, cx0, cz0))
+    return out, ([ox, oy, oz], d, md)
+
 def ray_aim(rng, p0, vs):
     """P291: a direction from p0 at a point of one of the triangles vs: a vertex, an edge point (midpoint, thirds,
     random), the inside, just outside an edge, or along an edge (parallel to the plane); scaled so the hit is inside
@@ -191,19 +251,21 @@ def ray_aim(rng, p0, vs):
     sc = rng.choice([1.0, 1.0, 1.25, 4.0, 0.5, -1.0])
     return [(q[j] - p0[j]) * sc for j in range(3)]
 
-def ray_call(ref, cand, m, rng, pos, vs=None):
+def ray_call(ref, cand, m, rng, pos, vs=None, far=None):
     p0 = [pos[0] + rng.uniform(-50, 50), pos[1] + rng.uniform(-50, 150), pos[2] + rng.uniform(-50, 50)]
     if rng.random() < 0.3:
         p0 = [float(round(q)) for q in p0]   # integer origins: exact hits on integer vertices / edges
     if vs and rng.random() < 0.75: d = ray_aim(rng, p0, vs)
     else: d = [rng.choice([0.0, rng.uniform(-400, 400)]) for _ in range(3)]
     if rng.random() < 0.05: d = [0.0, 0.0, 0.0]
+    md = rng.choice([0.0, 0.0, 50.0, 300.0])
+    if far: p0, d, md = far                  # P294: ray_far's ray
     for k in range(0x14): W(m, OUTS + 4 * k, 'I', 0xDEAD0000 + k)
     stack = (b32(d[1]), b32(d[2]), rng.choice([0, OUTS + 0x20]), rng.choice([0, OUTS + 0x40]),
              rng.choice([0, OUTS]), rng.choice([0, OUTS + 4]), rng.choice([0, OUTS + 8]),
              rng.choice([0, OUTS + 12]), rng.choice([0, OUTS + 16]),
              rng.choice([0, OUTS + 0x24]) if R(m, DBE5C, 'I')[0] else 0,   # flags out: needs D_800DBE5C
-             b32(rng.choice([0.0, 0.0, 50.0, 300.0])))
+             b32(md))
     fa = {12: b32(p0[0]), 14: b32(p0[1])}
     return run(ref, cand, m, (0x150ACEA0, 'func_150ACEA0'), (0, 0, b32(p0[2]), b32(d[0])), fa=fa, stack=stack)
 
@@ -251,6 +313,10 @@ def synth(ref, cand, base, rng, n, only):
                 yy = pos[1] + rng.choice([62, 63, 64, 65, 66, 67]); r = rng.choice([30, 100, 300])
                 v = [[pos[0] - r + rng.randint(-20, 20), yy, pos[2] - r], [pos[0] + 2 * r, yy, pos[2] - r],
                      [pos[0] - r, yy + rng.choice([0, 0, 1, -1]), pos[2] + 2 * r]]
+                if rng.random() < 0.3:                         # P294: one short edge (|dx| < 4, |dz| >= 4 when the
+                    e = rng.choice([1, 2, 3, -2, 0]); dz = rng.choice([4, 6, 20, r])   # heading is 0 / 180)
+                    v = [[pos[0] - r, yy, pos[2] - r], [pos[0] - r + e, yy, pos[2] - r + dz], [pos[0] + 2 * r, yy, pos[2] + 2 * r]]
+                    k0 = rng.randrange(3); v = v[k0:] + v[:k0]
                 if rng.random() < 0.5: v = v[::-1]
                 for kk in range(3): W(m, VP + 0x18 * t2 + 8 * kk, '3h', *v[kk])
                 W(m, BND + 8 * t2, '4h', min(q[0] for q in v), min(q[2] for q in v), max(q[0] for q in v),
@@ -279,14 +345,19 @@ def synth(ref, cand, base, rng, n, only):
         elif area == 3:                                        # P294: the other records' own models
             rec_models(rng, m, recs, nt); W(m, DC280, 'i', 3)
         rec, ri = setup_rec(rng, m, recs, pos)
+        if kind == 'ac8c4' and rng.random() < 0.4: W(m, rec + 0x40, 'f', rng.choice([0.0, 180.0, -180.0, 90.0]))
         if kind == 'ray':
-            if rng.random() < 0.5: ray_grid_tree(rng, m, vs, pos)
+            far = None
+            if rng.random() < 0.35: vs, far = ray_far(rng, m, pos, nt, vs); hist['ray far'] = hist.get('ray far', 0) + 1
+            elif rng.random() < 0.5: ray_grid_tree(rng, m, vs, pos)
             W(m, DBE08, 'I', R(m, T278, 'I')[0])
-            nobj, ovs = ray_objects(rng, m, nt, pos); W(m, DC320, 'i', nobj); vs = vs + ovs
+            nobj, ovs = ray_objects(rng, m, nt, pos)
+            if far and rng.random() < 0.7: nobj, ovs = 0, []
+            W(m, DC320, 'i', nobj); vs = vs + ovs
             STUBS[:] = [{ref.s['func_1510F800']: lambda r, f, mm: None}, {cand.s['func_1510F800']: lambda r, f, mm: None}]
             ref.trace = []
             try:
-                ok, v0, info, m1 = ray_call(ref, cand, m, rng, pos, vs)
+                ok, v0, info, m1 = ray_call(ref, cand, m, rng, pos, vs, far)
             except RuntimeError as e:   # P291: an object hit with the flags output and no vertex output reads the flags
                 if not str(e).startswith('ref'): raise   # through the last triangle record (Rare's gp): may fault
                 hist['ray ref fault'] = hist.get('ray ref fault', 0) + 1; ref.trace = None; STUBS[:] = [None, None]; continue
@@ -303,6 +374,7 @@ def synth(ref, cand, base, rng, n, only):
             for q in sorted(set(WALL_PCS[x] for x in ref.trace if x in WALL_PCS)): hist['  ' + q] = hist.get('  ' + q, 0) + 1
             ref.trace = None
         key = '%s:%s' % (kind, v0 if v0 in (0, 1) else 'other')
+        if kind == 'ray' and far: key += ' far'
         if kind == 'ac8c4': key += ' hit%d' % R(m1, SY['D_800CC1C0'] + 2 * ri, 'h')[0]
         if kind != 'ray': key += ' area%d' % area
         hist[key] = hist.get(key, 0) + 1
@@ -374,6 +446,7 @@ UNIT = {
     'aae80': (0x150AAE80, list(range(23, 32)), {}, ['f19', 'f20', 'f21', 'f22'], 'triangle plane'),
     'ac824': (0x150AC824, list(range(18, 23)), {8: 'tri'}, ['f%d' % k for k in range(23, 32)], 'triangle to local'),
     'aaf00': (0x150AAF00, list(range(0, 3)) + list(range(23, 32)), {}, ['v0'], 'triangle vs box'),
+    'ac200': (0x150AC200, [19, 20, 21, 22, 26, 27, 28], {}, [8, 'f4'], 'projected point inside (P294)'),
 }
 
 def unit_val(rng, k, pooled):
@@ -441,6 +514,19 @@ def unit(ref, cand, base, rng, n, which):
                     ca, sa = math.cos(a0 + 2.0944 * k), math.sin(a0 + 2.0944 * k)
                     for d in range(3): fv[23 + 3 * k + d] = b32(c[d] + R * (ca * u[d] + sa * w[d]))
         frame = [0] * (0x268 // 4)
+        if nm == 'ac200':                                       # P294: triangle at sp+0x20C, often the point on
+            tri = [unit_val(rng, 23 + k, pooled) for k in range(9)]   # it and the triangle's own plane
+            for k in range(9): frame[0x20C // 4 + k] = b32(tri[k])
+            v = [tri[0:3], tri[3:6], tri[6:9]]
+            if rng.random() < 0.6:
+                w = rng.sample(rng.choice([(1, 0, 0), (0.5, 0.5, 0), (0.25, 0.25, 0.5), (0.6, 0.3, 0.1), (1.2, -0.1, -0.1)]), 3)
+                for d in range(3): fv[26 + d] = b32(sum(w[i] * v[i][d] for i in range(3)) + rng.choice([0.0, 0.0, 3.0, -0.5]))
+            if rng.random() < 0.5:
+                a = [v[1][d] - v[0][d] for d in range(3)]; b = [v[2][d] - v[0][d] for d in range(3)]
+                n = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+                if any(n):
+                    for d in range(3): fv[19 + d] = b32(n[d])
+                    fv[22] = b32(sum(n[d] * v[0][d] for d in range(3)))
         if nm == 'ac824':                                       # 3 vertex offsets at t0, vertex base at sp+0x150
             vb = 0x80660000 + 8 * rng.randrange(0x100); frame[0x150 // 4] = vb
             W(m, IO + 0x400, '3I', *[0x18 * rng.randrange(8) + 6 * rng.randrange(3) for _ in range(3)])
