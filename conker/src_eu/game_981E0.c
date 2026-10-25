@@ -745,7 +745,140 @@ void func_1506C43C(void) {
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C460.s")
 // requires jump table
+#ifdef NON_MATCHING
+void func_15145974(void *, f32 *, f32 *);
+// player_camera_view_update: P259: sets up the player camera for D_800D154C (the args the callers leave in a0 / a1
+// are not read) by event mode D_800D1580: yaw = facing angle +0x7A + 90 degrees, pitch 45, distance 323; in modes
+// 5 / 9 / 10 yaw / pitch come from the direction of matrix 3 of the player's +0x1D4 matrices (degrees, folded to
+// -180..180); otherwise the pitch follows the camera record's +0x780 (when its +0x2C is 0x100) or the player's tilt
+// +0x1D1. Per mode: distance / height / smoothing (mode 3: aim at the D_800CCA0C target, distance 500), then
+// func_1505A184 turns pitch / distance into the offset and func_1506C460 applies it (flag t1 = snap).
+void func_1506CE6C(void) {
+    struct127 *player;
+    f32 (*mtx)[4];
+    f32 target[3];
+    f32 *target_ptr;
+    f32 dir_x;
+    f32 dir_y;
+    f32 dir_z;
+    f32 off_h;
+    f32 off_y;
+    f32 off_unused;
+    f32 smooth;
+    f32 yaw;
+    f32 pitch;
+    f32 dist;
+    f32 height;
+    f32 cam_pitch;
+    f32 a;
+    f32 b;
+    s32 flags54;
+    s32 view;
+    s32 snap;
+    s32 mode;
+    struct108 *cam;
+
+    player = D_800D154C;
+    flags54 = 0;
+    height = 0.0f;
+    pitch = 45.0f;
+    dist = 323.0f;
+    smooth = 0.5f;
+    yaw = (f32) (player->unk7A + 0x4000) * 0.0054931640625f;
+    mode = D_800D1580;
+    view = -1;
+    snap = FALSE;
+    target_ptr = NULL;
+    if (mode == 5 || mode == 9 || mode == 10) {
+        view = 3;
+    }
+    if (view != -1) {
+        if (player->unk1D4 != NULL) {
+            mtx = (f32 (*)[4]) ((u8 *) player->unk1D4 + view * 0x40);
+            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, &dir_x, &dir_y, &dir_z);
+            dir_x -= mtx[3][0];
+            dir_y -= mtx[3][1];
+            dir_z -= mtx[3][2];
+            a = func_150484A0(dir_x, dir_z);
+            b = func_150484A0(dir_y, sqrtf(dir_x * dir_x + dir_z * dir_z));
+            a *= 57.295776f;
+            b *= 57.295776f;
+            if (180.0f < a) {
+                a -= 360.0f;
+            }
+            if (180.0f < b) {
+                b -= 360.0f;
+            }
+            yaw = a;
+            pitch = b;
+        }
+    } else {
+        cam = player->camera;
+        if (cam != NULL && cam->unk2C == 0x100) {
+            cam_pitch = cam->unk780;
+            if (cam_pitch < 0.0f) {
+                cam_pitch = cam_pitch * -0.5f + cam_pitch * -0.2333f + 7.0f;
+            } else {
+                cam_pitch = cam_pitch * -0.5f + (60.0f - cam_pitch) * 0.133f;
+            }
+            pitch = cam_pitch * 1.40625f;
+        } else {
+            pitch = (f32) -player->unk1D1;
+        }
+    }
+    switch (mode) {
+    case 2:
+    case 11:
+    case 12:
+    case 18:
+        snap = TRUE;
+        break;
+    case 15:
+        pitch = pitch * 2.2f + 7.0f;
+        height = 3.3f;
+        break;
+    case 1:
+        height = 2.4f;
+        break;
+    case 3:
+        dist = 500.0f;
+        func_15145974(D_800CCA0C + 0xE8, &yaw, &pitch);
+        target[0] = *(f32 *) (D_800CCA0C + 0xDC);
+        target[1] = *(f32 *) (D_800CCA0C + 0xE0);
+        pitch = -pitch;
+        snap = TRUE;
+        target_ptr = target;
+        target[2] = *(f32 *) (D_800CCA0C + 0xE4);
+        break;
+    case 6:
+        snap = TRUE;
+        pitch = 0.0f;
+        dist = 500.0f;
+        break;
+    case 17:
+        flags54 = 0x30;
+        pitch = 0.0f;
+        dist = 150.0f;
+        break;
+    case 4:
+        dist = 250.0f;
+        break;
+    case 5:
+    case 9:
+    case 10:
+        snap = TRUE;
+        height = 5.0f;
+        dist = 593.0f;
+        smooth = 1.5f;
+        break;
+    }
+    func_1505A184((u16) (s32) (pitch * 182.04445f), dist, 0.0f, &off_h, &off_y, &off_unused);
+    off_y = -off_y;
+    func_1506C460(yaw, off_h, off_y, height, 100, mode, 0.0f, smooth, (s32) target_ptr, flags54, snap);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506CE6C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009A104;
@@ -1782,7 +1915,7 @@ void func_15070224(s32 arg0) {
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 #ifdef NON_MATCHING
-s32 func_1506CE6C(struct127 *, u8);
+void func_1506CE6C(void); // P259: reads D_800D154C itself (the asm ignores a0 / a1)
 struct127 *func_1507515C(struct127 *, struct127 *, s32);
 void func_15145EA4(f32 **, f32 **, void *, s32);
 void func_151C1E10(u8 *, u8, s32);
@@ -1879,7 +2012,7 @@ block_10:
             sp.u98 = D_800D154C;
             func_151C0698(sp.uA8, sp.uA0, &sp.u8C, var_a3_2, 0xFF, 1);
         } else {
-            func_1506CE6C(sp.uA8, var_a1);
+            func_1506CE6C();
         }
         if (D_800D154C->unk1D4 != NULL) {
             temp_t4 = ((u8 *)&D_eu_80099F30);

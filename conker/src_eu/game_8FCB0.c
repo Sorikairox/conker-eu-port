@@ -14,7 +14,76 @@ s32 func_1505C1E4(struct127 *arg0, struct127 *arg1, void *arg2, s32 arg3, s32 ar
 
 // EU: split from game_83300.c, EU pads to a file boundary before this.
 
+#ifdef NON_MATCHING
+void func_150341B4(s32, s32);
+// object_slots_swap: P259: swaps the objects `a` and `b` of D_800CC2D0 (after func_15146508(a, b)), then fixes up
+// what is tied to the slot rather than the object: each object's index fields (+0x127 / +0x13F = index, unique_id =
+// index + 1) and its +0x144 pointer (kept in the slot); `b` gets the camera record D_800DBFF0[index of b] (whose
+// +0x3D4 takes b's +0x31C, and that record's byte +0x197 is cleared), `a` none; func_150341B4 swaps the unique ids;
+// both objects' +0x2D4 handles are released (func_1516972C); other live objects' +0x65 links (unique id) to either
+// slot are swapped; when b's +0x13C names a carrier (>= 100), that object's +0x13D = 100 + b's index; then
+// func_150615DC(b) / func_150627D4(b).
+void func_15062800(struct127 *a, struct127 *b) {
+    struct127 tmp;
+    struct129 *p144;
+    struct127 *obj;
+    s32 ia;
+    s32 ib;
+    s32 i;
+    u8 link;
+
+    func_15146508(a, b);
+    bcopy(b, &tmp, sizeof(struct127));
+    bcopy(a, b, sizeof(struct127));
+    bcopy(&tmp, a, sizeof(struct127));
+    ib = b - D_800CC2D0;
+    ia = a - D_800CC2D0;
+    b->unk127 = ib;
+    b->unique_id = ib + 1;
+    b->unk13F = ib;
+    b->camera = &D_800DBFF0[ib];
+    a->unk127 = ia;
+    a->unique_id = ia + 1;
+    a->unk13F = ia;
+    a->camera = NULL;
+    p144 = b->unk144;
+    b->unk144 = a->unk144;
+    a->unk144 = p144;
+    *(struct126 **) ((u8 *) &D_800DBFF0[ib] + 0x3D4) = b->unk31C;
+    *((u8 *) b->unk31C + 0x197) = 0;
+    func_150341B4(b->unique_id, a->unique_id);
+    if (b->unk2D4 != NULL) {
+        func_1516972C((struct102 *) b->unk2D4);
+        b->unk2D4 = NULL;
+    }
+    if (a->unk2D4 != NULL) {
+        func_1516972C((struct102 *) a->unk2D4);
+        a->unk2D4 = NULL;
+    }
+    func_150615DC(b);
+    for (i = 0; i < 25; i++) {
+        if (i == ib || i == ia) {
+            continue;
+        }
+        obj = &D_800CC2D0[i];
+        if (obj->interaction_state == 0 || obj->unk65 == 0) {
+            continue;
+        }
+        link = obj->unk65 - 1;
+        if (link == ib) {
+            obj->unk65 = ia + 1;
+        } else if (link == ia) {
+            obj->unk65 = ib + 1;
+        }
+    }
+    if (b->unk13C >= 100) {
+        D_800CC2D0[(u8) (b->unk13C - 100)].unk13D = ib + 100;
+    }
+    func_150627D4(b);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_8FCB0/func_15062800.s")
+#endif
 
 void func_15062AC4(struct127 *arg0) {
     if (arg0->unkE6 && arg0->unkE4) {

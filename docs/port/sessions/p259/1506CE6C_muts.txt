@@ -1,0 +1,59 @@
+# P259 func_1506CE6C (player_camera_view_update) mutants: sed % setup names
+s/    flags54 = 0;/    flags54 = 1;/ % m0
+s/    height = 0.0f;/    height = 1.0f;/ % m0
+s/    pitch = 45.0f;/    pitch = 44.0f;/ % m5nomat
+s/    dist = 323.0f;/    dist = 322.0f;/ % m0
+s/    smooth = 0.5f;/    smooth = 0.6f;/ % m0
+s/(player->unk7A + 0x4000)/(player->unk7A + 0x3000)/ % m0
+s/(player->unk7A + 0x4000)/(u16) (player->unk7A + 0x4000)/ % ang
+s/\* 0.0054931640625f;/* 0.0055f;/ % m0
+s/    snap = FALSE;/    snap = TRUE;/ % m0
+s/if (mode == 5 || mode == 9 || mode == 10) {/if (mode == 5 || mode == 9) {/ % m10
+s/if (mode == 5 || mode == 9 || mode == 10) {/if (mode == 9 || mode == 10) {/ % m5
+s/view \* 0x40);/view * 0x30);/ % m5
+s/func_150A7E40(mtx, 0.0f, 0.0f, 1.0f,/func_150A7E40(mtx, 0.0f, 1.0f, 0.0f,/ % m5
+s/dir_x -= mtx\[3\]\[0\];/dir_x -= mtx[3][1];/ % m5
+s/dir_y -= mtx\[3\]\[1\];/;/ % m5
+s/dir_z -= mtx\[3\]\[2\];/dir_z += mtx[3][2];/ % m5
+s/a = func_150484A0(dir_x, dir_z);/a = func_150484A0(dir_z, dir_x);/ % m5
+s/sqrtf(dir_x \* dir_x + dir_z \* dir_z)/sqrtf(dir_x * dir_x + dir_y * dir_y)/ % m5
+s/a \*= 57.295776f;/a *= 57.29578f;/ % m5
+s/b \*= 57.295776f;/b *= 57.0f;/ % m5
+s/if (180.0f < a) {/if (180.0f <= a) {/ % m5edge
+s/if (180.0f < b) {/if (170.0f < b) {/ % m5big
+s/a -= 360.0f;/a -= 350.0f;/ % m5big
+s/b -= 360.0f;/b -= 350.0f;/ % m5big
+s/            yaw = a;/            ;/ % m5
+s/            pitch = b;/            ;/ % m5
+s/cam->unk2C == 0x100/cam->unk2C != 0x101/ % camnot100
+s/cam != NULL \&\& //  % camnull
+s/if (cam_pitch < 0.0f) {/if (cam_pitch <= 0.0f) {/ % camzero
+s/cam_pitch \* -0.5f + cam_pitch \* -0.2333f + 7.0f;/cam_pitch * -0.5f + cam_pitch * -0.2333f + 6.0f;/ % m0
+s/cam_pitch \* -0.5f + cam_pitch \* -0.2333f/cam_pitch * -0.5f + cam_pitch * 0.2333f/ % m0
+s/cam_pitch \* -0.5f + (60.0f - cam_pitch) \* 0.133f;/cam_pitch * -0.5f + (50.0f - cam_pitch) * 0.133f;/ % campos
+s/(60.0f - cam_pitch) \* 0.133f;/(60.0f - cam_pitch) * 0.13f;/ % campos
+s/pitch = cam_pitch \* 1.40625f;/pitch = cam_pitch * 1.4f;/ % m0
+s/pitch = (f32) -player->unk1D1;/pitch = (f32) player->unk1D1;/ % camnull
+s/pitch = (f32) -player->unk1D1;/pitch = (f32) -(u8) player->unk1D1;/ % camnull15
+s/    case 18:/    case 19:/ % m18 m19
+s/pitch = pitch \* 2.2f + 7.0f;/pitch = pitch * 2.2f + 6.0f;/ % m15
+s/        height = 3.3f;/        height = 3.0f;/ % m15
+s/        height = 2.4f;/        height = 2.0f;/ % m1
+s/func_15145974(D_800CCA0C + 0xE8, \&yaw, \&pitch);/func_15145974(D_800CCA0C + 0xE4, \&yaw, \&pitch);/ % m3
+s/target\[0\] = \*(f32 \*) (D_800CCA0C + 0xDC);/target[0] = 0.0f;/ % m3
+s/target\[1\] = \*(f32 \*) (D_800CCA0C + 0xE0);/target[1] = *(f32 *) (D_800CCA0C + 0xE4);/ % m3
+s/        pitch = -pitch;/        ;/ % m3
+s/        target_ptr = target;/        ;/ % m3
+s/        flags54 = 0x30;/        flags54 = 0x20;/ % m17
+s/        dist = 150.0f;/        dist = 160.0f;/ % m17
+s/        dist = 250.0f;/        dist = 260.0f;/ % m4
+s/        dist = 593.0f;/        dist = 590.0f;/ % m5
+s/        smooth = 1.5f;/        smooth = 1.0f;/ % m9
+s/        height = 5.0f;/        height = 4.0f;/ % m10
+s/(u16) (s32) (pitch \* 182.04445f)/(u16) (s32) (pitch * 182.0f)/ % m0
+s/(u16) (s32) (pitch \* 182.04445f), dist, 0.0f,/(u16) (s32) (pitch * 182.04445f), dist, 1.0f,/ % m0
+s/    off_y = -off_y;/    ;/ % m0
+s/func_1506C460(yaw, off_h, off_y, height, 100, mode,/func_1506C460(yaw, off_y, off_h, height, 100, mode,/ % m0
+s/height, 100, mode, 0.0f,/height, 99, mode, 0.0f,/ % m0
+s/(s32) target_ptr, flags54, snap);/(s32) target_ptr, flags54, 0);/ % m2
+s/mode, 0.0f, smooth,/mode, 1.0f, smooth,/ % m0

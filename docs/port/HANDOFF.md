@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P259, 2026-10-25). Details: `docs/port/sessions/P259.md`
+- Tank mode stubs from browser P258, hand C (NM): func_1506CE6C player_camera_view_update (game_981E0, now
+  `void (void)`: the asm never reads a0 / a1; the C caller func_15070300 updated) and func_151030B8
+  attached_particle_spawn (game_eu_1306B0; u8 / s16 parameter types matter for func_151037D4's arguments).
+- Breadth, all random EQUIV + setups + mutants 100%: func_1508A41C mode_pick_mid_range_object, func_15040A78
+  dl_walk_call_handlers (no callers), func_15062800 object_slots_swap, func_150124A0 pipe_spray_points_init (pipe
+  angles mirrored from port-b's static D_8009FCF0), func_150144B8 screen_effect_start.
+- func_15117D40 registry row (JALRARG_OLD=1, 24 setups, 28 / 28 mutants).
+- Harness: difftest flags knob keys (RET / RETF / OUT* / ARGMEM) that are no jal / j target of the reference
+  (`[knob not a jal target of the reference ...]`, static, also in setup runs; DIFFTEST_JALKEY_OLD=1 = off, forwarded
+  by difftest.sh); reverify.sh keeps that note on the random and setup summary lines. Selftest 129 / 129 (+4).
+- Checks: verify_all rc 0 (3994 / 5915), NM build rc 0, protocheck 0 (1596), implicit_scan 0 NM+float (162 NM),
+  progress_nm `total 5915 3994 1613 308 5607 94.8% 1941264/2253856 (86.1%)`.
+
+## Next steps (from P259)
+1. Browser: Tank mode camera / emitters (func_1506CE6C, func_151030B8) and the P259.md section 5 list.
+2. func_151030B8's callers (game_eu_10D650, 12C5F0, 1F4090, 981E0) still declare it `s32 (... s32 ...)`: same wasm
+   signature, protocheck 0; tidy to `void *(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32)`
+   when touching those files.
+3. Breadth (owned, 118-134 insns, check compiled first): func_150B0344 (DCEF0), func_151C4BF4 (1EFE10), func_1511DF6C
+   (142E40), func_1514E88C (17A800), func_15195564 (1C1A20), func_150B5F1C (E35E0), func_150FF604 (12CAC0).
+4. Never edit a script (reverify.sh, ...) while a background job runs it (P259 broke one run that way).
+
 ## State (session P256, 2026-10-25). Details: `docs/port/sessions/P256.md`
 - func_15194210 (game_eu_1C1A20, 388 insns) hand C (NM) `hit_impact_effect`: the impact effect at the last hit
   point D_800CC2C0 by the struck object's kind (embers / spark styles 0,1,2,5,6), anti-tamper code checksum skipped

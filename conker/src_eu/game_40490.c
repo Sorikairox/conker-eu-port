@@ -786,7 +786,73 @@ s32 func_150142EC(struct134 *arg0) {
     }
     return 1;
 }
+#ifdef NON_MATCHING
+void func_15145974(void *, f32 *, f32 *);
+/* the 0x38-byte parameter block func_150144B8 copies to the effect at +0x28 */
+typedef struct {
+    u8 *rec;          /* 0x00 */
+    s32 count;        /* 0x04 min + rand % (range + 1) */
+    s32 min;          /* 0x08 */
+    s32 range;        /* 0x0C */
+    s16 b2;           /* 0x10 */
+    s16 b3;           /* 0x12 */
+    f32 scale0;       /* 0x14 */
+    f32 scale1;       /* 0x18 */
+    f32 screen_x;     /* 0x1C */
+    f32 screen_y;     /* 0x20 */
+    f32 angle;        /* 0x24 */
+    f32 spin;         /* 0x28 */
+    f32 frames;       /* 0x2C */
+    f32 inv_frames;   /* 0x30 */
+    f32 step;         /* 0x34 */
+} Effect150144B8;
+// screen_effect_start: P259: start handler of a level record `rec` (s16 +6 / +8, f32 +0xC / +0x10, flags +0x16,
+// packed bytes +0x18 / +0x1C): sets flag 4; in single player (D_80082FA0 < 2) projects the point 100 above
+// (+0xC, 0, +0x10) to the screen (func_150A8050 / func_150A7E40 / func_15145974, scaled by pi/180) and spawns effect
+// 300 / 0x2A (func_15149130) with a parameter block from the packed bytes: count min + rand % (range + 1), two s16,
+// two scales / 64, angle func_150484A0(+6, +8), spin byte / 256 * pi/4, a frame count with its inverse and
+// +8 / frames. Always returns 1.
+s32 func_150144B8(u8 *rec) {
+    f32 mtx[4][4];
+    f32 pos[3];
+    Effect150144B8 e;
+    struct260 *fx;
+    u32 lo;
+    u32 hi;
+
+    rec[0x16] |= 4;
+    if (D_80082FA0 >= 2) {
+        return 1;
+    }
+    func_150A8050(mtx, *(f32 *) (rec + 0xC), *(f32 *) (rec + 0x10), 0.0f);
+    func_150A7E40(mtx, 0.0f, 100.0f, 0.0f, &pos[0], &pos[1], &pos[2]);
+    func_15145974(pos, &e.screen_x, &e.screen_y);
+    e.screen_x *= 0.017453292f;
+    e.screen_y *= 0.017453292f;
+    e.min = *(u32 *) (rec + 0x18) & 0xFF;
+    e.range = (*(u32 *) (rec + 0x18) >> 8) & 0xFF;
+    lo = e.min;
+    hi = e.range;
+    e.rec = rec;
+    e.count = (u32) func_150ADA20() % (hi + 1) + lo;
+    e.b2 = (*(u32 *) (rec + 0x18) >> 16) & 0xFF;
+    e.b3 = (*(u32 *) (rec + 0x18) >> 24) & 0xFF;
+    e.scale0 = (f32) (*(u32 *) (rec + 0x1C) & 0xFF) * 0.015625f;
+    e.scale1 = (f32) ((*(u32 *) (rec + 0x1C) >> 8) & 0xFF) * 0.015625f;
+    e.frames = (f32) ((*(u32 *) (rec + 0x1C) >> 24) & 0xFF);
+    e.inv_frames = 1.0f / e.frames;
+    e.step = (f32) *(s16 *) (rec + 8) * e.inv_frames;
+    e.angle = func_150484A0((f32) *(s16 *) (rec + 6), (f32) *(s16 *) (rec + 8));
+    e.spin = (f32) ((*(u32 *) (rec + 0x1C) >> 16) & 0xFF) * 0.00390625f * 0.7853982f;
+    fx = func_15149130(300, -1, 0x2A, -1, 0, 0, (struct37 *) sizeof(e), 0xFF, 0);
+    if (fx != NULL) {
+        memcpy((u8 *) fx + 0x28, &e, sizeof(e));
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_150144B8.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_1501474C.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_40490/func_15014B60.s")
 s32 func_15014F6C(struct134 *arg0) {

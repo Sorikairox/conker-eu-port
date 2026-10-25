@@ -1,0 +1,37 @@
+# P259 func_15062800 (object_slots_swap) mutants: sed % setup names
+s/func_15146508(a, b);/func_15146508(b, a);/ % base
+s/bcopy(b, \&tmp, sizeof(struct127));/bcopy(a, \&tmp, sizeof(struct127));/ % base
+s/bcopy(a, b, sizeof(struct127));/bcopy(b, a, sizeof(struct127));/ % base
+s/b->unk127 = ib;/b->unk127 = ia;/ % base
+s/b->unique_id = ib + 1;/b->unique_id = ib;/ % base
+s/b->unk13F = ib;/b->unk13F = ib + 1;/ % base
+s/b->camera = \&D_800DBFF0\[ib\];/b->camera = \&D_800DBFF0[ia];/ % base
+s/a->unk127 = ia;/a->unk127 = ib;/ % base
+s/a->unique_id = ia + 1;/a->unique_id = ia;/ % base
+s/a->unk13F = ia;/a->unk13F = 0;/ % base
+s/a->camera = NULL;/;/ % base
+s/b->unk144 = a->unk144;/b->unk144 = p144;/ % base
+s/a->unk144 = p144;/;/ % base
+s/(u8 \*) \&D_800DBFF0\[ib\] + 0x3D4)/(u8 *) \&D_800DBFF0[ib] + 0x3D0)/ % base
+s/= b->unk31C;/= a->unk31C;/ % base
+s/b->unk31C + 0x197) = 0;/a->unk31C + 0x197) = 0;/ % base
+s/func_150341B4(b->unique_id, a->unique_id);/func_150341B4(a->unique_id, b->unique_id);/ % base
+s/        b->unk2D4 = NULL;/        ;/ % base
+s/if (b->unk2D4 != NULL) {/if (a->unk2D4 != NULL) {/ % base a2d4
+s/func_1516972C((struct102 \*) a->unk2D4);/func_1516972C((struct102 *) b->unk2D4);/ % both2d4 a2d4
+s/        a->unk2D4 = NULL;/        ;/ % both2d4
+s/func_150615DC(b);/func_150615DC(a);/ % base
+s/for (i = 0; i < 25; i++) {/for (i = 0; i < 24; i++) {/ % base
+s/for (i = 0; i < 25; i++) {/for (i = 1; i < 25; i++) {/ % base ends
+s/if (i == ib || i == ia) {/if (i == ib) {/ % base
+s/if (i == ib || i == ia) {/if (i == ia) {/ % base
+s/obj->interaction_state == 0 || //  % dead
+s/|| obj->unk65 == 0) {/|| obj->unk65 == 3) {/ % base
+s/link = obj->unk65 - 1;/link = obj->unk65;/ % base
+s/            obj->unk65 = ia + 1;/            obj->unk65 = ia;/ % base
+s/            obj->unk65 = ib + 1;/            obj->unk65 = ib;/ % base
+s/} else if (link == ia) {/} else if (link != ia) {/ % base
+s/if (b->unk13C >= 100) {/if (b->unk13C > 100) {/ % a2d4
+s/(u8) (b->unk13C - 100)\].unk13D = ib + 100;/(u8) (b->unk13C - 99)].unk13D = ib + 100;/ % base
+s/\].unk13D = ib + 100;/].unk13D = ia + 100;/ % base
+s/func_150627D4(b);/func_150627D4(a);/ % base

@@ -1707,6 +1707,9 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
             cwords, cdata = link_candidate(opath, func, cvram)
             cwords = strip_pad(cwords)
             break
+    # P259: the reference's direct call / tail-jump targets, for the static knob-key check in knob_notes
+    REF_JAL.clear(); REF_JAL.update(((((vram + 4 * k + 4) & 0xF0000000) | ((w & 0x3FFFFFF) << 2)) & 0x1FFFFFFF)
+                                   for k, w in enumerate(rwords) if (w >> 26) in (2, 3))
     rk = ret_kind(tu, func)
     kinds = param_kinds(tu, func)
     arity = {}
@@ -1818,14 +1821,26 @@ def check(func, code=None, self_mode=False, trials=64, seed=1, maxi=100000, verb
     return res
 
 
+REF_JAL = set()  # P259
+
+
 def knob_notes(called, ntrials):
     """P93: DIFFTEST_RET / RETF / OUTW / OUTA / OUTB / ARGMEM keys whose callee the reference never called (a US
     address instead of the decoded EU jal target, e.g. func_1513D2F0 is jal 0x1513D860, or an unreached call)."""
-    if not ntrials: return ''
     un = []
     for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
-        un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called]
-    return ' [knob callee never called: %s]' % ', '.join(un) if un else ''
+        un += ['%s %08X' % (nm, a) for a in sorted(d) if a not in called] if ntrials else []
+    out = ' [knob callee never called: %s]' % ', '.join(un) if un else ''
+    # P259: a key that is no jal / j target of the reference at all (static, so it also shows when no trial reaches
+    # the call, and in setup runs): usually the US address of a callee whose EU jal target differs (P256:
+    # func_151494E0 is jal 0x15149A50; the ARGMEM compare silently did nothing). A callee reached only through jalr
+    # (function pointer) is listed too. DIFFTEST_JALKEY_OLD=1 = no check.
+    if os.environ.get('DIFFTEST_JALKEY_OLD') != '1' and REF_JAL:
+        nj = []
+        for nm, d in (('RET', STUBRET), ('RETF', STUBRETF), ('OUTW', OUTW), ('OUTA', OUTA), ('OUTB', OUTB), ('OUTP', OUTP), ('ARGMEM', ARGMEM)):
+            nj += ['%s %08X' % (nm, a) for a in sorted(d) if (a & 0x1FFFFFFF) not in REF_JAL]
+        if nj: out += ' [knob not a jal target of the reference (EU address? jalr-only callee?): %s]' % ', '.join(nj)
+    return out
 
 
 def poke_notes(pread, nwatched):
