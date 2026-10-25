@@ -925,6 +925,8 @@ void func_15031C1C(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
 }
 
 #ifdef NON_MATCHING
+// attachment_find_nth: returns the arg2-th (0 = first) entry of the D_800C3EE0 list whose owner id (+0) is obj+0x3B
+// and whose sub id (+6) is arg1, or NULL.
 u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2) {
     s32 var_a2;
     s32 var_v1;
@@ -939,13 +941,13 @@ u8 * func_15031C4C(u8 *arg0, s32 arg1, s32 arg2) {
     if (var_v1 != 0) {
 loop_3:
         if ((temp_v0 == (*(u8 *)((u8 *)var_v1 + 0))) && (arg1 == (*(u8 *)((u8 *)var_v1 + 6)))) {
-            var_a2 -= 1;
-            if (var_a2 != 0) {
-                goto block_8;
+            /* P272: the asm tests a2 == 0 before the decrement (beqz in front of the
+               delay-slot addiu), so a2 = 0 returns the first match. */
+            if (var_a2 == 0) {
+                return (u8 *) var_v1;
             }
-            return (u8 *) var_v1;
+            var_a2 -= 1;
         }
-block_8:
         var_v1 = (*(s32 *)((u8 *)var_v1 + 0x54));
         if (var_v1 == 0) {
             /* Duplicate return node #9. Try simplifying control flow for better match */
@@ -997,69 +999,64 @@ void func_151D7A60(u8 *, u8, s8, u8, s32);
 extern s32 D_800905D8;
 extern s32 D_800905DC;
 
+// attachment_start_effect: runs the start effect of an attachment record by its kind (rec[1]): two jump tables
+// in the asm, kinds 0x82..0x90 (jtbl_800972F0) and 0x37..0x5E (jtbl_8009732C), plus kind 0x1D. P272 rewrite: the
+// m2c C nested the low kinds inside the 0x82..0x90 branch, so they never ran.
 void func_15031D40(u8 *arg0, u8 *arg1) {
-    u8 temp_v0;
-    u8 *temp_v0_2;
+    u8 kind = arg0[1];
+    u8 *other;
 
-    temp_v0 = (*(u8 *)((u8 *)arg0 + 1));
-    switch ((s32) temp_v0) {                        /* switch 2; irregular */
-    default:                                        /* switch 2 */
-        if ((u32) (temp_v0 - 0x82) < 0xFU) {
-            switch (temp_v0) {                      /* switch 1 */
-            case 0x37:                              /* switch 2 */
-            case 0x91:                              /* switch 1 */
-                func_15100734(arg1);
-                return;
-            case 0x5A:                              /* switch 2 */
-            case 0xB4:                              /* switch 1 */
-                temp_v0_2 = (*(u8 **)((u8 *)arg1 + 0x31C));
-                if (temp_v0_2 != NULL) {
-                    (*(u16 *)((u8 *)temp_v0_2 + 0x1A6)) = (u16) ((*(u16 *)((u8 *)temp_v0_2 + 0x1A6)) + 0xAA);
-                    return;
-                }
-                break;
-            case 0x90:                              /* switch 1 */
-                (*(s32 *)((u8 *)arg1 + 0x9C)) = (s32) ((*(s32 *)((u8 *)arg1 + 0x9C)) | 0x70);
-                return;
-            case 0x8F:                              /* switch 1 */
-                (*(s32 *)((u8 *)arg1 + 0x9C)) = (s32) ((*(s32 *)((u8 *)arg1 + 0x9C)) | 0xE00);
-                return;
-            case 0x49:                              /* switch 2 */
-            case 0xA3:                              /* switch 1 */
-                func_15163BE8(arg1, 0xFF, 1);
-                return;
-            case 0x5D:                              /* switch 2 */
-            case 0xB7:                              /* switch 1 */
-                func_150D3870(arg1, 0xFF, 1);
-                func_150D5950(arg1, 0xFF, 1);
-                return;
-            case 0x3D:                              /* switch 2 */
-            case 0x97:                              /* switch 1 */
-                func_151BDDD8(arg1, 0xFF, 1);
-                return;
-            case 0x5E:                              /* switch 2 */
-            case 0x85:                              /* switch 1 */
-            case 0xB8:                              /* switch 1 */
-                (*(s32 *)((u8 *)arg1 + 0x9C)) = (s32) ((*(s32 *)((u8 *)arg1 + 0x9C)) | 0x6000);
-                return;
-            case 0x8D:                              /* switch 1 */
-                if (func_150859AC(0, 6) < 0x64) {
-                    (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) D_800905D8;
-                    return;
-                }
-                (*(s16 *)((u8 *)arg0 + 0x18)) = (s16) D_800905DC;
-                return;
-            case 0x82:                              /* switch 1 */
-                func_151D7A60(arg1, 6, -1, 0xFF, 1);
-                break;
+    if (kind >= 0x5F) {
+        switch (kind) {
+        case 0x82:
+            func_151D7A60(arg1, 6, -1, 0xFF, 1);
+            break;
+        case 0x85:
+            *(s32 *)(arg1 + 0x9C) |= 0x6000;
+            break;
+        case 0x8D:
+            if (func_150859AC(0, 6) < 0x64) {
+                *(s16 *)(arg0 + 0x18) = (s16) D_800905D8;
+            } else {
+                *(s16 *)(arg0 + 0x18) = (s16) D_800905DC;
             }
-        } else {
-            return;
+            break;
+        case 0x8F:
+            *(s32 *)(arg1 + 0x9C) |= 0xE00;
+            break;
+        case 0x90:
+            *(s32 *)(arg1 + 0x9C) |= 0x70;
+            break;
         }
-        break;
-    case 0x1D:                                      /* switch 2 */
+        return;
+    }
+    if (kind == 0x1D) {
         func_151D7A60(arg1, 0, 2, 0xFF, 1);
         return;
+    }
+    switch (kind) {
+    case 0x37:
+        func_15100734(arg1);
+        break;
+    case 0x3D:
+        func_151BDDD8(arg1, 0xFF, 1);
+        break;
+    case 0x49:
+        func_15163BE8(arg1, 0xFF, 1);
+        break;
+    case 0x5A:
+        other = *(u8 **)(arg1 + 0x31C);
+        if (other != NULL) {
+            *(u16 *)(other + 0x1A6) += 0xAA;
+        }
+        break;
+    case 0x5D:
+        func_150D3870(arg1, 0xFF, 1);
+        func_150D5950(arg1, 0xFF, 1);
+        break;
+    case 0x5E:
+        *(s32 *)(arg1 + 0x9C) |= 0x6000;
+        break;
     }
 }
 #else

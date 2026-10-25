@@ -315,3 +315,5 @@ func_151CC86C	game_eu_1F7960	docs/port/sessions/p274/sC86C.txt	DIFFTEST_ROMDATA=
 func_150EB740	game_eu_118F50	docs/port/sessions/p274/sB740.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p274/mB740.txt	P274
 func_151B402C	game_eu_1E0E70	docs/port/sessions/p274/s402C.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 TR=4	docs/port/sessions/p274/m402C.txt	P274
 func_151714BC	game_eu_19E910	docs/port/sessions/p274/s14BC.txt	DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=15169154=0:68,15169154=0+48:22 TR=4	docs/port/sessions/p274/m14BC.txt	P274
+func_15031C4C	game_eu_5D910	docs/port/sessions/p272/s1c4c.txt		docs/port/sessions/p272/m1c4c.txt	P272
+func_15031D40	game_eu_5D910	docs/port/sessions/p272/s1d40.txt	DIFFTEST_ROMDATA=1	docs/port/sessions/p272/m1d40.txt	P272
