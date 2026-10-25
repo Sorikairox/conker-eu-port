@@ -10,6 +10,31 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## State (session P263, 2026-10-25). Details: `docs/port/sessions/P263.md`
+- Merged port-b cfd21c46 (P256-P260: difftest.sh stale-view guard, selftest pinned-Unicorn preflight): selftest 130 / 130.
+- func_1506D4EC (EU 0x1506D8AC, the empty handler glued to func_1506D2E8; D_8008679C entry 16) split: symbol_addrs
+  entry + plain C in game_981E0, byte-identical. Table scan port_work/p263/midptr.py: no other table entry points
+  into the middle of code (all other hits are switch jump tables).
+- Hand C (NM): func_15097188 camera_script_set (door camera, 43 / 43), func_150B696C cutscene_beam_spawn,
+  func_150E1DE0 door_lights_update, func_150F2FE0 player_item_drop_check, func_eu_151670C0 spark_burst_tick,
+  func_151A88F0 bolt_subdivide, func_151BA260 burst_emitter_finish, func_150D13A0 level_item_flags_update,
+  func_15117A98 pendulum_angle_step. All random EQUIV + setups; mutants: see P263.md (final numbers below).
+- func_150B60E0 (default C) uses a local static copy of D_800A0000 under NON_MATCHING (that rodata lives in
+  func_150B696C's GLOBAL_ASM).
+- Mutants: 7188 43/43, 696C 28/28, 1DE0 17/17, 2FE0 21/21, 70C0 22/22, BA260 18/18, 13A0 16/16, 7A98 22/22; func_151A88F0
+  18/19 with the one survivor equivalent ((hi+lo)>>1); its replacement mutant run was stopped at the wrap-up (re-run
+  `MUT=1 tools/port/reverify.sh func_151A88F0`).
+- Checks (final): verify_all rc 0 (3995 / 5916), NM build rc 0, protocheck 0 (1639; void-vs-s32 prototypes of
+  func_1507CD64 / func_15136C3C and a func_15096DB0 prototype fixed), selftest 130 / 130, implicit_scan 0 NM+float,
+  progress_nm `total 5916 3995 1658 263 5653 95.6% 1972684/2253856 (87.5%)`. Session stopped at the coordinator's
+  wrap-up request.
+
+## Next steps (from P263)
+1. Browser: P263.md section 6 (door camera ops 10 / 11 first).
+2. Breadth (owned, compiled): func_1511BD5C (142E40, 148, rodata statics D_800A3340 / 54), func_151C64F4 (1F3040, 151,
+   record + 2 memcpy), func_150CDAAC (FABD0), func_150E6550 (113D60), func_150E2030 (10F840), func_15119C54 (142E40).
+3. Hand asm pass: P263.md section 5.
+
 ## State (session P262, 2026-10-25). Details: `docs/port/sessions/P262.md`
 - Breadth, hand C (NM), all random EQUIV + setups + mutants 100%: func_150B0344 player_joint_beam_spawn,
   func_151C4BF4 timed_emitter_update, func_1511DF6C mesh_tex_scroll_update, func_1514E88C object_glow_attach,

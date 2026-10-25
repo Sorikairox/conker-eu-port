@@ -48,7 +48,207 @@ block_6:
     }
 }
 
+#ifdef NON_MATCHING
+extern s32 D_800D3C60;
+extern f32 D_800C3A20[];
+extern u8 D_800C3A80;
+extern s32 D_800DC740;
+extern s32 D_800898C0;
+void func_1512A390(struct108 *);
+void func_1512DAD0(struct108 *, s32, void *);
+s32 func_15084000(s32);
+void func_151254F4(struct108 *, s32);
+s32 func_15096DB0(s32);
+extern s32 D_800DC450;
+
+#define CAM_F(c, off) (*(f32 *) ((u8 *) (c) + (off)))
+#define CAM_B(c, off) (*(u8 *) ((u8 *) (c) + (off)))
+
+/* camera_script_set: the "set" half of the camera script commands (table EU 80088894, the "get" half is
+ * func_150979AC at 80088858). `id` picks the camera record D_800DBFF0[id] (0x9A0 bytes), `op` the command and
+ * `cmd` its words (arguments from cmd + 8). Covers the camera position / target vectors (+0x2A4, +0x2BC, +0x2F8),
+ * the door camera (op 10 / 11: the D_800C3A20 path record from a D_800DC450 marker, func_1512DAD0 modes 5 / 7 / 6,
+ * object 0's flag 0x200), timed camera records (op 12, D_800D31E0), fixed-point (/ 65536) speeds and the
+ * remaining per-camera settings. Returns 1 for ops 4-9, 0 otherwise; 0 when id > D_80082FA0. */
+s32 func_15097188(s32 id, s32 op, u8 *cmd) {
+    struct108 *cam = (struct108 *) ((u8 *) D_800DBFF0 + id * 0x9A0);
+    s32 *a = (s32 *) cmd;
+    u8 *rec;
+    u8 *mk;
+
+    if (D_80082FA0 < id) {
+        return 0;
+    }
+    switch (op) {
+    case 2: /* camera target */
+        cam->unk2F8 = (f32) a[2];
+        cam->unk2FC = (f32) a[3];
+        cam->unk358 = cam->unk2FC;
+        cam->unk300 = (f32) a[4];
+        func_1512A390(cam);
+        return 0;
+    case 3: /* camera position */
+        cam->unk2A4 = (f32) a[2];
+        cam->unk2A8 = (f32) a[3];
+        CAM_F(cam, 0x2AC) = (f32) a[4];
+        return 0;
+    case 4:
+        func_15123934(cam, a[2], a[3], a[4], 0x11);
+        return 1;
+    case 5:
+        func_151239CC(cam, 0x11);
+        return 1;
+    case 6: /* set / clear flags */
+        if (a[2] != 0) {
+            cam->unk84 |= a[3];
+        } else {
+            cam->unk84 &= ~a[3];
+        }
+        return 1;
+    case 7:
+        cam->unk1E0 = a[2];
+        cam->unk1B4 = a[3];
+        return 1;
+    case 8:
+        if (*((u8 *) cam->unk3D4 + 0x120) == 0) {
+            cam->unk374 = (f32) a[2];
+            cam->unk34C = (f32) a[3];
+            cam->unk348 = (f32) a[3];
+        }
+        return 1;
+    case 9:
+        cam->unk134 = a[2];
+        return 1;
+    case 10: /* door camera on: path record from marker a[2] */
+        D_800D2DB4 = 1;
+        D_800DBFF4[id] = 3;
+        mk = (u8 *) D_800DC450 + (a[2] & 0xFFF) * 0x18;
+        ((s32 *) D_800C3A20)[0] = 1;
+        ((s32 *) D_800C3A20)[1] = 0;
+        D_800C3A20[5] = (f32) *(s16 *) (mk + 0);
+        D_800C3A20[6] = (f32) *(s16 *) (mk + 2);
+        D_800C3A20[7] = (f32) *(s16 *) (mk + 4);
+        D_800C3A20[8] = *(f32 *) (mk + 0x14);
+        D_800C3A20[9] = *(f32 *) (mk + 0xC);
+        D_800C3A20[2] = 0.0f;
+        D_800C3A20[10] = *(f32 *) (mk + 0x10);
+        D_800C3A80 = 0;
+        func_1512DAD0(cam, 5, NULL);
+        func_1512DAD0(cam, 7, D_800C3A20);
+        *(s32 *) ((u8 *) D_800CC2D0 + 0x25C) |= 0x200;
+        return 0;
+    case 11: /* door camera off */
+        func_1512DAD0(cam, 6, NULL);
+        D_800D2DB4 = 0;
+        *(s32 *) ((u8 *) D_800CC2D0 + 0x25C) &= ~0x200;
+        return 0;
+    case 12: /* timed camera record a[2] */
+        rec = D_800D31E0 + a[2] * 0x24;
+        *(f32 *) (rec + 0x20) = cam->unk37C;
+        rec[1] = id;
+        rec[2] = a[3];
+        *(s16 *) (rec + 4) = a[4];
+        rec[0] = 1;
+        if (D_800D3C60 >= 6) {
+            *(s32 *) (rec + 0xC) = a[5];
+        } else {
+            *(s32 *) (rec + 0xC) = 0;
+        }
+        if (D_800D3C60 >= 7) {
+            *(f32 *) (rec + 0x10) = (f32) a[6] * (1.0f / 65536.0f);
+        } else {
+            *(f32 *) (rec + 0x10) = 1.0f;
+        }
+        if (func_15096DB0(a[2]) == 0) {
+            func_15096E78(a[2]);
+        }
+        return 0;
+    case 14: /* position, second position and target */
+        cam->unk2A4 = (f32) a[2];
+        cam->unk2A8 = (f32) a[3];
+        CAM_F(cam, 0x2AC) = (f32) a[4];
+        cam->unk2BC = (f32) a[2];
+        cam->unk2C0 = (f32) a[3];
+        cam->unk2C4 = (f32) a[4];
+        cam->unk2F8 = (f32) a[5];
+        cam->unk2FC = (f32) a[6];
+        cam->unk358 = cam->unk2FC;
+        cam->unk300 = (f32) a[7];
+        func_1512A390(cam);
+        return 0;
+    case 15:
+        cam->unk198 = (f32) a[2];
+        if (D_800D3C60 == 4) {
+            cam->unk194 = (f32) a[3];
+        }
+        return 0;
+    case 16:
+        cam->unk190 = (f32) a[2];
+        if (D_800D3C60 == 4) {
+            cam->unk18C = (f32) a[3];
+        }
+        return 0;
+    case 17:
+        if ((D_800D3C60 == 5 && a[4] != 0) || *(s32 *) ((u8 *) &D_800DC740 + id * 0x68) == 5) {
+            func_1512D748(cam, a[2], a[3]);
+            return 1;
+        }
+        return 0;
+    case 18:
+        func_151254F4(cam, func_15084000(a[2] & 0xFFF));
+        return 0;
+    case 19:
+        func_15124770(cam, func_15084000(a[2] & 0xFFF));
+        return 0;
+    case 20: /* 16.16 speeds */
+        cam->unk1A4 = (f32) a[2] * (1.0f / 65536.0f);
+        cam->unk1A8 = (f32) a[3] * (1.0f / 65536.0f);
+        if (D_800D3C60 == 5 && a[4] != 0) {
+            cam->unk19C = cam->unk1A4;
+            cam->unk1A0 = cam->unk1A8;
+        }
+        return 0;
+    case 21: /* move marker a[2] */
+        mk = (u8 *) D_800DC450 + (a[2] & 0xFFF) * 0x18;
+        *(s16 *) (mk + 0) = a[3];
+        *(s16 *) (mk + 2) = a[4];
+        *(s16 *) (mk + 4) = a[5];
+        return 0;
+    case 22:
+        cam->unk23C = 1;
+        return 0;
+    case 23:
+        CAM_F(cam, 0x7C0) = (f32) a[2] * (1.0f / 65536.0f);
+        return 0;
+    case 24:
+        if (D_800D3C60 == 5) {
+            CAM_B(cam, 0x78C) = 1;
+            CAM_F(cam, 0x794) = (f32) a[2];
+            CAM_F(cam, 0x790) = (f32) a[3];
+            CAM_F(cam, 0x798) = (f32) a[4];
+        } else {
+            CAM_B(cam, 0x78C) = 0;
+        }
+        return 0;
+    case 25:
+        cam->pad3A4 = (f32) a[2] * (1.0f / 65536.0f);
+        D_800D2DB0 = cam->pad3A4;
+        return 0;
+    case 26:
+        func_1512868C(cam);
+        return 0;
+    case 27:
+        D_800898C0 = a[2] - 1;
+        return 0;
+    default:
+        return 0;
+    }
+}
+#undef CAM_F
+#undef CAM_B
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15097188.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 func_150ADDE0(f32 *, struct17 *);

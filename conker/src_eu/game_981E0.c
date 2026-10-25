@@ -931,6 +931,11 @@ void func_1506D2E8(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D2E8.s")
 #endif
+
+// mode_handler_noop: empty handler, entry 16 of the D_8008679C mode table (EU 0x1506D8AC; US 0x1506D4EC). It was
+// glued to the end of func_1506D2E8 (split in P263), so the port had no function at that table address.
+void func_1506D4EC(void) {
+}
 // NON-MATCHING: plenty to figure out here
 // void func_1506D2E8(void) {
 //     f32 sp40;

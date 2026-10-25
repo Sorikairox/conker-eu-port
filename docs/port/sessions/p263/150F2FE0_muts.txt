@@ -1,0 +1,22 @@
+# P263 func_150F2FE0 (player_item_drop_check) mutants: sed % setup names
+s/if (D_800CCA0C == NULL || D_800CCA0C\[0x120\] != 0) {/if (D_800CCA0C == NULL) {/ % busy
+s/if (D_800CCA0C == NULL || D_800CCA0C\[0x120\] != 0) {/if (D_800CCA0C[0x120] != 0) {/ % nullp
+s/for (i = 0; i < 2; i++) {/for (i = 0; i < 1; i++) {/ % hit1
+s/item = func_151149AC(0xFA - i);/item = func_151149AC(0xFA + i);/ % hit1
+s/(item - (s32) D_800DBEF4) \/ 160\]/(item - (s32) D_800DBEF4) \/ 128]/ % hit0
+s/(item - (s32) D_800DBEF4) \/ 160\]/((u32) item - (u32) D_800DBEF4) \/ 160]/ % neg
+s/\] \& 1) {/] \& 2) {/ % hit1
+s/            if (D_800CC82C != 0) {/            if (D_800CC82C == 0) {/ % hit0 hit1
+s/(D_800CC82C - 100) \* 0x32C)/(D_800CC82C - 101) * 0x32C)/ % hit0
+s/            D_800CC8BA = 0;/            ;/ % hit0
+s/func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);/func_15136C3C(D_800CC2D0, 0, 1, 1, 1, 0, 0xFF, 1);/ % hit0
+s/func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);/func_10010630(0x627, D_800CC2D0, 0x6D60, 0x3E8, 0x1F4);/ % hit0
+s/func_15145A50(D_800CC2D0);/;/ % hit0
+s/func_1507CD64(D_800CC2D0, 6);/func_1507CD64(D_800CC2D0, 5);/ % hit0
+s/            break;/            ;/ % hit0
+s/o = func_15083E90(0xE);/o = func_15083E90(0xF);/ % hit0
+s/: 0;/: 1;/ % none
+s/0x2E4) : 0;/0x2E0) : 0;/ % hit0
+s/func_15196888(((u8 \*\*) D_800BE4F0)\[1\], 0, -off);/func_15196888(((u8 **) D_800BE4F0)[1], -off, 0);/ % hit0
+s/func_15196888(((u8 \*\*) D_800BE4F0)\[3\], -off, 0);/func_15196888(((u8 **) D_800BE4F0)[3], off, 0);/ % hit0
+s/func_15196888(((u8 \*\*) D_800BE4F0)\[2\], off, 0);/func_15196888(((u8 **) D_800BE4F0)[1], off, 0);/ % hit0

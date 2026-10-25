@@ -894,7 +894,56 @@ void func_15117A70(f32 *arg0) {
     arg0[0] = func_15117858(arg0, arg0[0]);
 }
 
+#ifdef NON_MATCHING
+// pendulum_angle_step: like func_15117858 with a bounce instead of a spring: the swing speed (+0x84) grows by
+// +0x80 * D_800BE9E4 towards the rest angle (signed low 10 bits of +0x3C); when the angle crosses the rest angle it
+// lands on it and the speed reverses scaled by +0x7C (-bounce * speed). A swing that starts from rest plays the
+// move sound of the D_80089600 entry (+0x3C >> 10). Near rest (|offset| < 2, |speed| < 1) it stops; the angle
+// stays in [0, 360). Returns the new angle (callers func_15117CF0 / 15117D18 pick the axis).
+f32 func_15117A98(f32 *arg0, f32 angle) {
+    u8 *obj = (u8 *) arg0;
+    f32 bounce = *(f32 *) (obj + 0x7C);
+    f32 accel = *(f32 *) (obj + 0x80) * (f32) D_800BE9E4;
+    s32 params = *(s32 *) (obj + 0x3C);
+    f32 speed = *(f32 *) (obj + 0x84);
+    f32 rest = (f32) ((params << 22) >> 22);
+    s32 kind;
+    f32 before;
+    f32 diff;
+
+    if (angle == rest && speed == 0.0f) {
+        return angle;
+    }
+    kind = params >> 10;
+    if (speed == 0.0f && kind != 0 && D_80089600[kind].move_sfx != 0) {
+        func_151152A4(obj, D_80089600[kind].move_sfx, 0x5DC0, 0xC8, 0x9C4, 0);
+    }
+    before = func_15048A70(angle, rest);
+    angle += speed * (f32) D_800BE9E4;
+    diff = func_15048A70(angle, rest);
+    if ((diff <= 0.0f && 0.0f < before) || (0.0f <= diff && before < 0.0f)) {
+        diff = 0.0f;
+        angle = rest;
+        speed = -bounce * speed;
+    } else if (0.0f < diff) {
+        speed += accel;
+    } else {
+        speed -= accel;
+    }
+    if (fabsf(diff) < 2.0f && fabsf(speed) < 1.0f) {
+        angle = rest;
+        speed = 0.0f;
+    } else if (angle < 0.0f) {
+        angle += 360.0f;
+    } else if (360.0f <= angle) {
+        angle -= 360.0f;
+    }
+    *(f32 *) (obj + 0x84) = speed;
+    return angle;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117A98.s")
+#endif
 
 void func_15117CF0(f32 *arg0) {
     arg0[0] = func_15117A98(arg0, arg0[0]);

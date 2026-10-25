@@ -5,7 +5,51 @@
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D0DD0.s")
 
+#ifdef NON_MATCHING
+extern s32 D_80088C30;
+extern s32 D_80088C34;
+extern s32 D_80088C38;
+extern s32 D_80088C3C;
+extern s32 *D_800DC3C4;
+s32 func_151149AC(u8);
+void func_15195750(struct127 *);
+s32 func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
+s32 func_1507CD64(struct127 *, s32);
+
+// level_item_flags_update: advances the four scroll counters D_80088C30..3C by the frame step (x40, x-66, x-8, x92);
+// unless the player's held object (object 0 +0x31C, byte 0x120) is busy: for items 0xFA..0xF8 with flag bit 0
+// (func_151149AC entry index = (item - D_800DBEF4) / 160 into D_800DC3C4) calls func_15195750 on the player and plays
+// sound 0x627; for item 0xFB plays it and resets the player (func_15136C3C, func_15145A50, mode 6 via func_1507CD64).
+void func_150D13A0(s32 arg0) {
+    s32 step = D_800BE9E4;
+    s32 i;
+    s32 item;
+
+    D_80088C30 += step * 40;
+    D_80088C34 += -step * 66;
+    D_80088C38 += -step * 8;
+    D_80088C3C += step * 92;
+    if ((*(u8 **) ((u8 *) D_800CC2D0 + 0x31C))[0x120] != 0) {
+        return;
+    }
+    for (i = 0; i < 3; i++) {
+        item = func_151149AC(0xFA - i);
+        if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
+            func_15195750(D_800CC2D0);
+            func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+        }
+    }
+    item = func_151149AC(0xFB);
+    if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
+        func_10010154(0x627, D_800CC2D0, 0x7FFF, 0xC8, 0x2BC);
+        func_15136C3C(D_800CC2D0, 1, 1, 1, 1, 0, 0xFF, 1);
+        func_15145A50(D_800CC2D0);
+        func_1507CD64(D_800CC2D0, 6);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D13A0.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15134DAC(u8 *, s32);
