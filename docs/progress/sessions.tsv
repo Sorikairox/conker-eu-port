@@ -377,3 +377,4 @@ P299	port-c	nm convert	4			group C1: hud_bar_spawn, rope_draw, debris_update, me
 P300	port-e	nm convert	4			group C2: trail_update/draw_ribbon/hit_effects (106830), freecam_update; 2 left (func_151E67A0, func_150FBE40)
 P302	port-b	nm convert	5			GROUP A DONE (0 asm-only in group A files); level_mist_setup, ribbon_strip_draw, limb_band_draw, rider_ai_control, spray_trail_draw; portb 5716/5916 96.6% 90.5%
 P305	port-c	nm convert	3			GROUP C1 DONE: emitter_ribbon_draw, emitter2_flame_update, emitter2_flame_draw (1C3530); lesson: geometry mutants need large-size setups
+P307	port-b	integration	0			merged port-e into port-b (38377a3b); harness features unified, selftest 147/147; combined progress 98.1% (92.7% bytes)
