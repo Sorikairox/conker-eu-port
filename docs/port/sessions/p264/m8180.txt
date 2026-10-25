@@ -21,4 +21,4 @@
 \#^    vtx\[2\] = (s32) (a\[2\] - off\[2\]);$#s/-/+/
 \#^    vtx\[0\] = (s32) (mid\[0\] + off\[0\]);$#s/+/-/
 \#^    vtx\[2\] = (s32) (mid\[2\] - off\[2\]);$#s/mid\[2\]/a[2]/
-\#^    return ret;$#s/ret/vtx/
+\#^    return ret;$#s/return ret/return vtx/

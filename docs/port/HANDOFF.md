@@ -10,6 +10,13 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P267 (port-b) (session P267, 2026-10-25). Details: `docs/port/sessions/P267.md`
+
+Hand C (NM): func_150D5268 smoke_puff_burst (ARGMEM on the func_151307F0 template, mutants 48/49, 1 equivalent) and
+func_15198180 beam_quad_build (random EQUIV again, 24/24). Registry rows. verify_all / NM rc 0, protocheck 0 (1646),
+implicit_scan 0 NM+float, selftest 130/130. Next: func_15198680, func_151CF930, game_161520 group, D5E90 hand asm,
+func_1519CADC `(s32)sp30 * (s32)temp_f2_3` check.
+
 ## P264 (port-b) (session P264, 2026-10-25). Details: `docs/port/sessions/P264.md`
 
 Branch `port-b`. Merged port 34922b88 (selftest 130/130). Hand C (NM): func_150D5634 rocket_sound_update, func_151BE33C
