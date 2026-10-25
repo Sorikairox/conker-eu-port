@@ -25,10 +25,10 @@ fi
 TMP=$(mktemp -d)
 CH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 URL="http://localhost:$PORT/app/index.html?$Q&romurl=../dev/rom.z64"
-perl -e 'alarm shift; exec @ARGV' $((BUDGET / 1000 + 60)) "$CH" --headless=new --user-data-dir="$TMP" --use-angle=swiftshader --enable-unsafe-swiftshader \
+perl -e 'alarm shift; exec @ARGV' $((BUDGET / 1000 + 60)) "$CH" --headless=new --mute-audio --user-data-dir="$TMP" --use-angle=swiftshader --enable-unsafe-swiftshader \
   --window-size=1000,900 --virtual-time-budget="$BUDGET" --screenshot="$OUT" "$URL" >/dev/null 2>&1 || true
 if [ -n "$DOM" ]; then
-  perl -e 'alarm shift; exec @ARGV' $((BUDGET / 1000 + 60)) "$CH" --headless=new --user-data-dir="$TMP" --use-angle=swiftshader --enable-unsafe-swiftshader \
+  perl -e 'alarm shift; exec @ARGV' $((BUDGET / 1000 + 60)) "$CH" --headless=new --mute-audio --user-data-dir="$TMP" --use-angle=swiftshader --enable-unsafe-swiftshader \
     --window-size=1000,900 --virtual-time-budget="$BUDGET" --dump-dom "$URL" > "$DOM" 2>/dev/null || true
 fi
 rm -rf "$TMP"

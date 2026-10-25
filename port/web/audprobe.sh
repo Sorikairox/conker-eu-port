@@ -15,7 +15,8 @@ docker run -d --rm --name "$NAME" -p 127.0.0.1:$PORT:8000 -v "$ROOT/port/build/w
   -v "$ROOT/baserom.eu.z64":/www/dev/rom.z64:ro -w /www conker-emsdk python3 -m http.server 8000 >/dev/null
 trap 'docker rm -f "$NAME" >/dev/null 2>&1 || true' EXIT
 sleep 1.5
-URL="http://localhost:$PORT/app/index.html?$Q&audprobe=1&romurl=../dev/rom.z64"
+MUTE="&mute=1"; [ -n "${PROBE_UNMUTE:-}" ] && MUTE=""   # P271: silent by default (user request); PROBE_UNMUTE=1 to hear
+URL="http://localhost:$PORT/app/index.html?$Q&audprobe=1$MUTE&romurl=../dev/rom.z64"
 # P27: PROBE_STEPS that navigate (nav:QUERY) get the same romurl appended
 [ -n "${PROBE_STEPS:-}" ] && export PROBE_STEPS=$(echo "$PROBE_STEPS" | sed -E 's#(nav:[^;]*)#\1\&romurl=../dev/rom.z64#g')
 node "$ROOT/port/web/audprobe.js" "$URL" "$SECS"

@@ -8,7 +8,10 @@ const CH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'audprobe-'));
 const port = 9300 + (process.pid % 500);
 const ch = spawn(CH, ['--headless=new', `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, `--use-angle=${process.env.PROBE_ANGLE || 'swiftshader'}`,
-  '--enable-unsafe-swiftshader', ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), '--window-size=1000,900', url], { stdio: 'ignore' });
+  '--enable-unsafe-swiftshader',
+  // P271 (user request): muted by default so runs never play sound on the host; the Web Audio graph still runs
+  // (the probe's pull counts are unchanged). PROBE_UNMUTE=1 to hear it.
+  ...(process.env.PROBE_UNMUTE ? [] : ['--mute-audio']), ...(process.env.PROBE_NOAUTOPLAY ? [] : ['--autoplay-policy=no-user-gesture-required']), '--window-size=1000,900', url], { stdio: 'ignore' });
 const done = (code) => { try { ch.kill('SIGKILL'); } catch (e) {} fs.rmSync(dir, { recursive: true, force: true }); process.exit(code); };
 setTimeout(() => { console.log('audprobe: timeout'); done(2); }, (+secs + 90) * 1000);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

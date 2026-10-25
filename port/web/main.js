@@ -345,6 +345,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.portVolume = store.get('volume', 80) / 100;
+if (Q.get('mute')) window.portVolume = 0;  // P271: test runs pass ?mute=1 (audprobe.sh does by default): gain 0
 $('volume').value = Math.round(window.portVolume * 100);
 $('volume').addEventListener('input', (e) => {
   window.portVolume = e.target.value / 100;
