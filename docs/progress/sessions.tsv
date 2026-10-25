@@ -380,3 +380,4 @@ P305	port-c	nm convert	3			GROUP C1 DONE: emitter_ribbon_draw, emitter2_flame_up
 P307	port-b	integration	0			merged port-e into port-b (38377a3b); harness features unified, selftest 147/147; combined progress 98.1% (92.7% bytes)
 P308	port-b	integration	0			merged port-c (C1) into port-b (e9a35783); kept P289 func_150B2290; unified STUBMAP; selftest 150/150; combined 98.6% (94.7% bytes)
 P304	port-f	nm convert	4			group D2: impact_dust_spawn + fountain emit/step/draw (fountain_draw: original reads uninit stack slot, C uses newest point); 2 left (func_150D7E38, func_150F3A74)
+P301	port	nm convert	3			group B: impact_effects_spawn, zap_bolt_update, beam_ribbon_draw; func_1513334C 37/37 (memcpy stub copies nothing: use OUTA on 10023360); 4 left (split B1 port / B2 pc)
