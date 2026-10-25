@@ -1,0 +1,42 @@
+s/D_800DBEF4) \/ 0xA0;/D_800DBEF4) \/ 0x50;/
+s/s32 tries = 5;/s32 tries = 4;/
+s/f32 height = D_800A14F8\[0\];/f32 height = 0.0f;/
+s/if (idx >= D_800DC320 || idx < 0)/if (idx > D_800DC320 || idx < 0)/
+s/if (idx >= D_800DC320 || idx < 0)/if (idx >= D_800DC320 || idx < -1)/
+s/func_1510F800(2);/func_1510F800(1);/
+s/func_150A49D0(1, (s32 \*) &id, 0);/func_150A49D0(1, (s32 *) \&id, 1);/
+s/id = idx;/id = idx + 1;/
+s/x = \*(s16 \*) (obj + 0x10);/x = *(s16 *) (obj + 0x12);/
+s/z = \*(s16 \*) (obj + 0x14);/z = *(s16 *) (obj + 0x10);/
+s/if (\*(u16 \*) (obj + 0x50) != 0)/if (*(u16 *) (obj + 0x50) == 0)/
+s/x = x + (func_151EFDD0() /x = x - (func_151EFDD0() /
+s/\* 2 - n;/* 2 + n;/
+s/z = z + (func_151EFDD0() /z = z + 2 * (func_151EFDD0() /
+s/found = func_150A48C0(x, z, 1,/found = func_150A48C0(x, z, 0,/
+s/found = func_150A48C0(x, z,/found = func_150A48C0(z, x,/
+s/best = -0x800000;/best = 0;/
+s/for (i = found - 1; i >= 0; i--)/for (i = found - 1; i >= 1; i--)/
+s/if (best < D_800D3720\[i\].height)/if (best <= D_800D3720[i].height)/
+s/tri = D_800D3720\[i\].tri;/tri = D_800D3720[0].tri;/
+s/height = best \* 0.00390625f;/height = best * 0.0078125f;/
+s/tries = 0;/tries = 1;/
+s/            tries--;/            tries -= 2;/
+s/if (!found) {/if (found) {/
+s/D_800DC26C) \/ 12 - \*(u16 \*) (obj + 0x58)\]/D_800DC26C) \/ 12 + *(u16 *) (obj + 0x58)]/
+s/D_800DC26C) \/ 12/D_800DC26C) \/ 16/
+s/material = \*(s32 \*) (obj + 0x40);/material = *(s32 *) (obj + 0x44);/
+s/if (\*(s32 \*\*) (obj + 0x44) != NULL)/if (*(s32 **) (obj + 0x40) != NULL)/
+s/func_15114E8C(mtx, obj);/func_15114E8C(mtx, obj + 4);/
+s/if (tri != NULL) {/if (tri == NULL) {/
+s/world\[0\] = tri\[0\] + \*(s32 \*) (obj + 0x20 + D_800BE9C0 \* 4)/world[0] = tri[0] + *(s32 *) (obj + 0x20)/
+s/world\[1\] = tri\[1\]/world[1] = tri[2]/
+s/world\[2\] = tri\[2\] + \*(s32 \*) (obj + 0x20 + D_800BE9C0 \* 4)/world[2] = tri[2] + *(s32 *) (obj + 0x24 + D_800BE9C0 * 4)/
+s/func_150A7E40(mtx, v\[0\], v\[1\], v\[2\]/func_150A7E40(mtx, v[0], v[2], v[1]/
+s/verts\[i\]\[0\] = ox;/verts[i][0] = oy;/
+s/verts\[i\]\[2\] = oz;/verts[i][3] = oz;/
+s/world\[i\] = (s32) verts\[i\];/world[i] = (s32) verts[0];/
+s/        tri = world;/        tri = (s32 *) world[0];/
+s/func_150E4AD0(x, height, z, 1,/func_150E4AD0(z, height, x, 1,/
+s/func_150E4AD0(x, height, z, 1,/func_150E4AD0(x, height, z, 0,/
+s/func_1510FE4C(material), tri, 0)/func_1510FE4C(material), tri, 1)/
+s/func_1510FE4C(material)/func_1510FE4C(material + 1)/

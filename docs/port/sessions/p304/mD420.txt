@@ -1,0 +1,56 @@
+s/    d->u0C += ((u32) func_150ADA20() .*/    d->u0C += (func_150ADA20() \& (d->u0E + 1)) * D_800BE9E4;/ % idle big
+s/    d->u04 += ((u32) /    d->u04 += ((s32) / % big
+s/    d->u20 += d->u1C \* D_800BE9A4;/    d->u20 += d->u1C;/ % one two
+s/    if (D_800A10C4 < d->u20) {/    if (1.0f < d->u20) {/ % edge
+s/        step = dt \* inv;/        step = inv;/ % two
+s/        dx = func_151423D8(d->u04 - 0x40) \* d->u00 + \*(f32 \*) (obj + 0x10) - d->pos\[0\];/        dx = func_151423D8(d->u04) * d->u00 + *(f32 *) (obj + 0x10) - d->pos[0];/ % one two
+s/        dz = func_151423D8(d->u0C - 0x40) \* d->u08 + \*(f32 \*) (obj + 0x18) - d->pos\[1\];/        dz = func_151423D8(d->u0C - 0x40) * d->u00 + *(f32 *) (obj + 0x18) - d->pos[1];/ % one two
+s/            sdz = dz \* inv;/            sdz = dx * inv;/ % two
+s/                d->u68 += d->u64;/                d->u68 = d->u64;/ % one two
+s/                    drop.u1D = 0;/                    drop.u1D = 1;/ % one
+s/                    drop.b = 0xFF;/                    drop.b = 0xFE;/ % one
+s/                    drop.u31 = 0;/                    drop.u31 = 2;/ % one
+s/                    drop.u34 = 0x12;/                    drop.u34 = 0x13;/ % one
+s/                    drop.u1F = d->u98;/                    drop.u1F = 0xFF;/ % one
+s/                    drop.u0E = d->u94;/                    drop.u0E = d->u98;/ % one
+s/                    drop.y = (s32) \*(f32 \*) (obj + 0x14);/                    drop.y = (s32) *(f32 *) (obj + 0x18);/ % one
+s/                    drop.u28 = d->u7C;/                    drop.u28 = d->u7E;/ % one
+s/                        speed = func_150ADA68() \* d->u78 + d->u74;/                        speed = func_150ADA68() * d->u74 + d->u78;/ % one
+s/                        cosA = func_151423D8(a - 0x40);/                        cosA = func_151423D8(a + 0x40);/ % one
+s/(d->u72 + 1) + d->u70;/(d->u72 + 1) + d->u72;/ % one
+s/                        cosB = func_151423D8(b - 0x40);/                        cosB = func_151423D8(b);/ % one
+s/                        drop.x = (s32) (\*(f32 \*) (obj + 0x10) + d->u6C \* cosA);/                        drop.x = (s32) (*(f32 *) (obj + 0x10) + d->u6C * sinA);/ % one
+s/                        drop.vy = (s32) (-speed \* cosB);/                        drop.vy = (s32) (speed * cosB);/ % one
+s/                        drop.vz = (s32) (h \* sinA);/                        drop.vz = (s32) (h * cosA);/ % one
+s/                        drop.gravity = (s32) (func_150ADA68() \* d->u80 + d->u7E);/                        drop.gravity = (s32) (func_150ADA68() * d->u80 + d->u7C);/ % one
+s/(d->u86 + 1) + d->u84;/(d->u86 + 1) + d->u86;/ % one
+s/                        drop.size1 = drop.size0 = .*/                        drop.size1 = drop.size0 = (s32) (func_150ADA68() * d->u8C);/ % one
+s/                        if (func_15167D84(\&drop, 0, 0, -1, obj\[0xC\], obj\[1\]) == NULL) {/                        if (func_15167D84(\&drop, 0, 0, -1, obj[1], obj[0xC]) == NULL) {/ % one
+s/                    } while (1.0f < d->u68 \&\& more);/                    } while (1.0f < d->u68);/ % full more
+s/                        d->u68 -= 1.0f;$/                        d->u68 -= 0.5f;/ % full
+s/                \*(f32 \*) (pt + 0x4) = \*(f32 \*) (obj + 0x14);/                *(f32 *) (pt + 0x4) = *(f32 *) (obj + 0x10);/ % one
+s/                \*(f32 \*) (pt + 0xC) = d->u38;/                *(f32 *) (pt + 0xC) = d->u18;/ % one
+s/                \*(f32 \*) (pt + 0x10) = func_151423D8(d->u34 - 0x40) \* d->u30 + d->u2C;/                *(f32 *) (pt + 0x10) = func_151423D8(d->u34) * d->u30 + d->u2C;/ % one
+s/                \*(s16 \*) (pt + 0x14) = d->u29;/                *(s16 *) (pt + 0x14) = d->u28;/ % one
+s/                pt\[0x16\] = d->u40;/                pt[0x16] = d->u3C;/ % one
+s/                d->u40 = d->u40 + d->u3C + .*/                d->u40 = d->u40 + d->u3C;/ % one two
+s/                \*(f32 \*) (pt + 0xC) += d->u18 \* dt;/                *(f32 *) (pt + 0xC) += d->u18;/ % one
+s/                \*(f32 \*) (pt + 0x4) += \*(f32 \*) (pt + 0xC) \* dt;/                *(f32 *) (pt + 0x4) += *(f32 *) (pt + 0xC);/ % one
+s/                if (\*(s8 \*) (obj + 0x2E) == obj\[0x25\]) {/                if (*(s8 *) (obj + 0x2E) > obj[0x25]) {/ % wrap
+s/                (\*(s8 \*) (obj + 0x2C))++;/                (*(s8 *) (obj + 0x2C)) += 2;/ % one
+s/                if (\*(s8 \*) (obj + 0x2D) == \*(s8 \*) (obj + 0x2E)) {/                if (*(s8 *) (obj + 0x2D) == *(s8 *) (obj + 0x2E) + 1) {/ % wrap wrap2
+s/                    if (\*(s8 \*) (obj + 0x2D) == obj\[0x25\]) {/                    if (*(s8 *) (obj + 0x2D) == obj[0x25] + 1) {/ % wrap2
+s/                    (\*(s8 \*) (obj + 0x2C))--;/                    (*(s8 *) (obj + 0x2C)) -= 2;/ % wrap wrap2
+s/                dt -= step;/                dt += step;/ % two
+s/            } while (1.0f < d->u20);/            } while (2.0f < d->u20);/ % two
+s/        d->pos\[1\] = z;/        d->pos[1] = x;/ % one idle edge
+s/    d->u118 -= D_800BE9E4;/    d->u118 -= 1;/ % fade1 one
+s/    if (d->u118 < 0) {/    if (d->u118 <= 0) {/ % fade1
+s/        i = \*(s8 \*) (obj + 0x2E) - 1;/        i = *(s8 *) (obj + 0x2E);/ % fade
+s/        \*(s16 \*) (pt + 0x14) = 0x3F;/        *(s16 *) (pt + 0x14) = 0x40;/ % fade
+s/        \*(s16 \*) (pt + 0x14) = 0xBE;/        *(s16 *) (pt + 0x14) = 0xBF;/ % fade
+s/        obj\[0x30\] = 0;/        obj[0x30] = 1;/ % fade
+s/        \*(u16 \*) (obj + 0x1E) \&= ~2;/        *(u16 *) (obj + 0x1E) \&= ~3;/ % fade
+s/    return 1;/    return 0;/ % idle
+s/    d->u34 += (u32) /    d->u34 += (s32) / % big
+s/(d->u3E + 1);/(d->u3E + 2);/ % one big

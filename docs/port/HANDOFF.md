@@ -10,12 +10,14 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
-## Integration status (P312, port-b, 2026-10-26)
+## Integration status (P315, port-b, 2026-10-26)
 
-Merged into port-b so far: A, E, C1, C2. Group A (port-b, P274..P302, finished) + port-e at `74c6f08a` (P307: group E
-finished, C2 part P300) + port-c at `1e0ceb49` (P308: group C1 finished, P284..P305) + port-e at `eb28e800` (P312:
-group C2 finished, P306 func_151E67A0 / func_150FBE40). Still to merge, in this order, each followed by check.sh:
-`port` (group B), `port-d` (D1), `port-f` (D2), `port-c` again (B2 lands there), then the Final-merge notes below.
+Merged into port-b so far: A, E, C1, C2, D2 (+D up to `c0c91c4d`). Group A (port-b, P274..P302, finished) + port-e at
+`74c6f08a` (P307: group E finished, C2 part P300) + port-c at `1e0ceb49` (P308: group C1 finished, P284..P305) + port-e at
+`eb28e800` (P312: group C2 finished, P306 func_151E67A0 / func_150FBE40) + port-f at `e4b53d6e` (P315: group D2 finished,
+P304 / P309; port-f branched from port-d `c0c91c4d`, so it also brought port-d P278 / P283 / P290 / P297). Still to merge,
+in this order, each followed by check.sh: `port` (group B), `port-d` again (D1 rest), `port-c` again (B2), `port-e` again
+(D1's func_15175EC8), then the Final-merge notes below.
 
 Conflict resolutions:
 - P307 `game_eu_D5650.c` func_150A7EF4 (private w-tail entry of func_150A7EE0): both sides folded it into the NM
@@ -32,21 +34,36 @@ Conflict resolutions:
   STOPCALL, RETV1, SRET/ldiv, STUBMAP (P281/P288). ARGMEM tuples are 5-wide everywhere.
 - P312 port-e merge: code merged cleanly; only HANDOFF / sessions.tsv (merge_union + hodedup + hoorder 150) and
   verify_registry.tsv (reg3way, no CONFLICT lines, 440 rows / 437 funcs) conflicted.
+- P315 port-f merge: code merged cleanly (103 files); only HANDOFF / sessions.tsv (merge_union + hodedup + hoorder 150)
+  and verify_registry.tsv (reg3way, no CONFLICT lines, 474 rows / 471 funcs) conflicted.
 - verify_registry.tsv: `reg3way.py` (P258, from `~/conker-wt/web/docs/port/sessions/p258/`), only conflict
   func_150B2290 (-> P289), 439 rows / 436 funcs. sessions.tsv / HANDOFF: merge_union + hodedup (p240) + hoorder 150.
 
-Checks (`docs/port/sessions/p312/check.sh`, P312): verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0
+Checks (`docs/port/sessions/p315/check.sh`, P315): verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0
 NM+float (828 sites; clang errors in game_A28B0.c / init_2070.c are pre-existing), selftest **150/150**, progress_nm
-`total 5916 3995 1809 33 79 5837 98.7% 2137976/2253856 (94.9%)`. (P308: 98.6% / 94.7%.)
+`total 5916 3995 1843 33 45 5871 99.2% 2181320/2253856 (96.8%)`. (P312: 98.7% / 94.9%.)
 
-Remaining for the final merge (in this order, each followed by check.sh): `port` (group B), `port-d` (D1),
-`port-f` (D2), `port-c` again (B2), re-merge `port-e` if it moved. Then the "Final-merge notes" of `docs/progress/split-P276.txt`:
+Remaining for the final merge (in this order, each followed by check.sh): `port` (group B), `port-d` again (D1 rest),
+`port-c` again (B2), `port-e` again (D1's func_15175EC8). Then the "Final-merge notes" of `docs/progress/split-P276.txt`:
 - func_150B2290 and the STUBMAP double fix: done (P308).
 - wasm call_indirect hazards: D_8008A0B4 (dispatcher func_15141A7C in game_16EE20 passes 3-4 args, entries void(3));
   D_80089CD4 mixed 5/6 args (P278).
 - port-web vbe.py ROM_ABS entries: D_427B0, D_19EDE8 (P281/P288).
 - verify_all/run.sh container naming (P245) lives in port-web only.
 - Run `tools/port/arity_scan.py` and the v0use check after the last code merge.
+
+## P309 (port-f, group D2) (session P309, 2026-10-26). Details: `docs/port/sessions/P309.md`
+
+Hand C (NM), registry rows `P309`, setups / mutants in docs/port/sessions/p309: func_150D7E38 carried_object_update
+(D_800863B4 entry 32, 36 setups, mutants 112/112) and func_150F3A74 player_swim_update (entry 21, 74 setups,
+mutants 177/178, the survivor is equivalent). Both `void (struct127 *)` as func_1504A730 calls them. func_150D7E38
+tests func_15052F9C's leftover v0 (that callee returns nothing): the C models it (obj->unk124, or obj->unk7A after a
+landing in state 0x20) - see P309.md. Asm symbols D_800CC7BC / D_800CC3D4 / D_800CC8D4 / D_800CCA1C / D_800D121C are
+D_800CC2D0 fields in EU; the C uses the array.
+
+## Next steps (from P309)
+1. Group D2 is done. If func_15052F9C is ever touched: it should return its "landed" result explicitly; then drop
+   the leftover-v0 model in func_150D7E38 (and check its other callers' use of v0).
 
 ## P305 (port-c, group C1) (session P305, 2026-10-26). Details: `docs/port/sessions/P305.md`
 
@@ -60,6 +77,19 @@ protocheck 0 (1691 bodies), implicit_scan 0 NM+float (829 sites), selftest 133/1
 ## Next steps (from P305, group C1)
 1. Group C1 is done. Lesson for draw handlers: give geometry mutants a large-size setup (s16 truncation hides
    normal-length changes under 1 unit).
+
+## P304 (port-f, group D2) (session P304, 2026-10-26). Details: `docs/port/sessions/P304.md`
+
+Hand C (NM), registry rows `P304`, setups / mutants in docs/port/sessions/p304: func_150E5384 impact_dust_spawn
+(39/39), func_150DD420 fountain_emit (55/56), func_150DCAD8 fountain_step (64/64), func_150DDBC0 fountain_draw (30/31);
+the three fountain handlers (entry 4 of D_8008A5A0 / D_8008A5DC / D_8008A644) share types in a types-only NM block.
+Survivors are equivalent (P304.md). Lessons: no `#ifndef/#endif` inside a function's NM block (difftest's splice drops
+the candidate); func_150DDBC0's asm reads the head alpha through an unset stack index (C uses the newest point).
+progress_nm `total 5916 3995 1706 215 5701 96.4% 2021748/2253856 (89.7%)`.
+
+## Next steps (from P304, group D2 left)
+1. func_150D7E38 (105140, 610) and func_150F3A74 (1207F0, 959): both entries of table D_800863B4 (+0x80 / +0x54);
+   check that table's dispatcher signature first.
 
 ## P302 (port-b, group A) (session P302, 2026-10-26). Details: `docs/port/sessions/P302.md`
 
@@ -101,6 +131,24 @@ progress_nm `total 5916 3995 1716 205 5711 96.5% 2029892/2253856 (90.1%)`.
 ## Next steps (from P298)
 1. Group A remaining (5): func_1500F3BC (3CA50, 369 B, not in the earlier lists), func_151BD040 (1E7CC0),
    func_151D06FC (1FB080), func_150CEC50 (FC460), func_1519DF64 (1CACF0).
+
+## P297 (port-d, group D) (session P297, 2026-10-26). Details: `docs/port/sessions/P297.md`
+
+Hand C (NM), registry rows `P297`, setups / mutants in docs/port/sessions/p297: func_150BF71C lift_platform_update
+(53/54), func_150C8300 player_flight_mode_update (61/61), func_150BFF7C sinking_platform_update (67/68),
+func_150D0DD0 player_tint_update (22/22), func_151AECA0 ground_burst_spawn (67/67), func_151E9E1C
+mp_team_marks_draw (34/36). Survivors are equivalent (P297.md). Lessons: difftest ARGMEM lengths are decimal; IDO
+rounds some float literals one ulp low (0.807f -> 0x3F4E978D), so write the late_rodata value's exact digits
+(0.80700004f) and let ARGMEM/compare catch it. progress_nm `total 5916 3995 1702 219 5697 96.3% 2013352/2253856 (89.3%)`.
+
+## Next steps (from P297, group D left)
+1. Group-D asm left (smallest first): func_151ADEDC (1D9C00, 464), func_150E5384 (1122E0, 469), func_151B58D8
+   (1E3000, 477), func_150DD420 (109770, 488), func_151AD724 (1D9C00, 494), func_150DDBC0 (109770, 548),
+   func_150DCAD8 (109770, 594), func_150D7E38 (105140, 610), func_151A4194 (1D1150, 619), func_151EE93C (216470, 665),
+   func_150F3A74 (1207F0, 959), func_15175EC8 (1A2970, 961). Hand asm (group E): func_150A80F0, func_150FBA40.
+2. func_151AECA0 is called implicitly (no prototype) from game_eu_981E0 (not group D): a prototype
+   `void func_151AECA0(u8 *, u8, s32);` there would be cleaner.
+3. P290 items still open: func_150E2294's missing 7th argument to func_150E4AD0; table D_80089CD4 mixed arities.
 
 ## P296 (port-c, group C) (session P296, 2026-10-26). Details: `docs/port/sessions/P296.md`
 
@@ -156,6 +204,23 @@ docs/port/sessions/p292: func_1518D290 (object_ring_burst_particles, mutants 59/
    func_150FBE40, func_1519A1A4.
 3. func_150C3574 boundary setups (P284 survivors) still open.
 
+## P290 (port-d, group D) (session P290, 2026-10-26). Details: `docs/port/sessions/P290.md`
+
+Re-runs: func_150403C8 mutants 38/39 (the 2 P283 UNSURE now killed; survivor = unused 3rd arg), func_150BABE0 38/38.
+Hand C (NM), registry rows `P290`, setups / mutants / CANDSED in docs/port/sessions/p290: func_150E4AD0
+impact_effect_spawn (39/39) + func_150E4EA8 object_impact_effect (41/42) with NM `static const` copies of their
+.s-owned rodata (game_eu_1122E0), func_150EBEC0 gun_barrel_fire (45/46), func_1515A178 dust_emitter_update (55/55),
+func_151229B0 camera_orbit_update (55/55). Survivors are explained in P290.md. Lesson: an asm listing without `nop`
+lines hides nop delay slots (two wrong first drafts, caught by difftest). progress_nm
+`total 5916 3995 1696 225 5691 96.2% 2004580/2253856 (88.9%)`.
+
+## Next steps (from P290, group D left)
+1. Next smallest group-D asm: func_150BF71C (ECC80, 337), func_150C8300 (F5B10, 340), func_150BFF7C (ECC80, 345),
+   func_150D0DD0 (FE5E0, 372), func_151AECA0 (1DC570, 372), then `progress_nm --list` for the rest.
+2. func_150E2294 (game_eu_10F840, not group D) calls func_150E4AD0 without storing its 7th argument (slot, sp+0x18):
+   check what it should pass when that function is converted (0xFF = none).
+3. func_150FBA40 / func_150A80F0 hand asm: group E. Table D_80089CD4 mixed arities [5, 6] still open.
+
 ## P289 (port-c, group C) (session P289, 2026-10-26). Details: `docs/port/sessions/P289.md`
 
 P284 re-runs: func_150F536C mutants 35/35, func_150B1EC0 49/49, func_15162B28 25/25. func_1505D1C4 is now `s32`
@@ -209,6 +274,21 @@ func_150C3574, func_15198680. Checks: verify_all rc 0, NM build rc 0, protocheck
 4. Group C left (smallest first): func_151B8DB0 (asm read, 4 stack records), func_1518D290, func_151AFC84,
    func_151B4854, func_150ED1F0, func_150A39E4, func_150CB6F4, func_151970BC, ... (+ func_150E1AF0 after step 1).
 
+## P283 (port-d, group D) (session P283, 2026-10-26). Details: `docs/port/sessions/P283.md`
+
+Hand C (NM), registry rows `P283`, setups / mutants in docs/port/sessions/p283: func_15036860 vertex_anchor_follow,
+func_150403C8 dl_validate, func_150BABE0 foot_splash_effect, func_151C5280 gun_muzzle_smoke_spawn (+ NM `static
+const` copies of its rodata in game_eu_1F3040 and game_eu_51190), func_151A3D70 trail_emitter_update, func_15104BB4
+floor_height_below, func_150F3294 drip_emitter_update, func_150CDD08 shooting_star_sky_update. Survivors are
+equivalent ones (see P283.md); 2 func_150403C8 segment-mask mutants UNSURE. Lesson: IDO puts scalar `static const
+f32` in .data (discarded by the NM link): use 1-element arrays for float rodata copies.
+
+## Next steps (from P283, group D left)
+1. Next smallest group-D asm: func_150E4EA8 / func_150E4AD0 (1122E0, own late_rodata), func_150EBEC0, func_1515A178,
+   func_151229B0, func_150BF71C, func_150C8300, func_150BFF7C, then the 370+ rows.
+2. func_150FBA40 (129250) is "Handwritten function" (sd / dsll32 / $gp): group E, with func_150A80F0 (D5900).
+3. Table D_80089CD4 mixed arities [5, 6] (from P278) still open.
+
 ## P280 (port-b, group A) (session P280, 2026-10-25). Details: `docs/port/sessions/P280.md`
 
 Hand C (NM), registry rows `P280`, setups / mutants in docs/port/sessions/p280: func_15177F90 debris_burst_spawn,
@@ -226,6 +306,24 @@ game_eu_EBF20 / game_eu_F5580, see P280.md), implicit_scan: implicit_scan: 663 T
 2. Group A remaining (26), smallest first: func_15171770 (19E910), func_151522DC (17D3C0), func_1511D91C,
    func_15117424, func_151194A4, func_1511B604 (142E40), func_151CF930 (1FB080), func_150C5BA4 (F3080), func_151787D8
    (1A5D10), func_150B8EC0 (E66D0), func_150D3F78, func_150F7E34, func_1519D9C4, func_1517EA18, func_1500F3BC, ...
+
+## P278 (port-d, group D) (session P278, 2026-10-25). Details: `docs/port/sessions/P278.md`
+
+Hand C (NM), registry rows `P278`, setups / mutants in docs/port/sessions/p278 (all mutants killed): func_150DBF60
+spark_effect_on_event, func_15096E78 camera_timed_record_update, func_151A4FE8 owner_smoke_update, func_150DFEA0
+level_lights_and_scroll_update (+ NM `static const` copies of its rodata D_800A1340 / D_800A1358 for func_150E0C58),
+func_1513BBFC water_texcoords_update, func_150CD3C0 spark_record_spawn, func_150E5D90 debris_ground_bounce,
+func_15188008 shard_ring_draw, func_150BFC60 door_lift_update. Checks: verify_all rc 0, NM build rc 0, protocheck 0
+(1664), implicit_scan 0 NM+float (832 sites), selftest 130/130 (start), progress_nm `total 5916 3995 1683 238 5678 96.0% 1991008/2253856 (88.3%)`.
+
+## Next steps (from P278, group D left)
+1. Smallest group-D asm left: func_15036860 (64070), func_150403C8 (6D800), func_150BABE0 (E88D0), func_150FBA40
+   (129250), func_150F3294 (1207F0), func_151A3D70 (1D1150), func_15104BB4 (132370), then the 300+ insn rows.
+2. func_151C5280 (1F3040): its .s owns rodata D_800AAE70 / D_800AAE88 that func_150268BC's NM C (game_eu_51190, not
+   group D) reads; convert both together (give 51190 a `static const` copy) or ask the 51190 owner.
+3. func_150A80F0 (D5900) is hand asm (`sd` stores): group E.
+4. Table D_80089CD4 mixed arities [5, 6] (tablesig, pre-existing): the C dispatcher passes 6; entries func_150BD498 /
+   func_151A79EC / func_150B3B8C / func_15133F44 are declared with 5 (other groups' files).
 
 ## P277 (port-c, group C) (session P277, 2026-10-25). Details: `docs/port/sessions/P277.md`
 

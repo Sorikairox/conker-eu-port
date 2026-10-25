@@ -189,7 +189,115 @@ s32 func_151A3BCC(TrailObj18 *arg0) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+void func_151A544C(u8 *);
+struct260 *func_151491F4(s16 arg0, s8 arg1, s8 arg2, u8 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
+/* the .s's late_rodata D_800A9138 is dropped in the NM link */
+static const f32 D_800A9138[1] = { 9.99999975e-05f }; /* 0x38D1B717 (array: IDO puts scalar float statics in .data) */
+#endif
+
+#ifdef NON_MATCHING
+// trail_emitter_update: object update of a trail emitter made by func_151A3AB4 (state SB3AB4 at +0x98, ring of 0x18
+// byte trail points at +0x94, position +0x10). Ends (returns 0) when the owner record is gone or its id (+0x3B)
+// changed. The first time (flag 4 in +0x1E) it fetches the start position (func_151A53E4). When the source can no
+// longer be read, the emitter is released (func_151A544C) and a fade record (func_151491F4 type 0x12C, the 0x30
+// spec copied to +0x28) takes over. Otherwise the travelled distance * rate (+0x14) is added to +0x40 and one point
+// is dropped per unit of it, interpolated from the last point to the new position, with the width going from
+// +0x20 + +0x24 * t to +0x20, colour +0x18 / +0x1A and a random-walk shade +0x44; the ring head / count / tail
+// (+0x2E / +0x2C / +0x2D, size +0x25) advance as in func_15147FF0's trail objects.
+s32 func_151A3D70(u8 *obj) {
+    SB3AB4 *st = *(SB3AB4 **) (obj + 0x98);
+    u8 *ring = *(u8 **) (obj + 0x94);
+    u8 *owner = *(u8 **) st;
+    u8 *pt;
+    u8 spec[0x30];
+    struct260 *fade;
+    f32 dx, dy, dz;
+    f32 dist, inv;
+    f32 t, dt;
+    f32 width, dwidth;
+    f32 sx, sy, sz;
+    V33AB4 pos;
+    s32 started = 0;
+
+    if (*(s32 *) owner == 0) {
+        return 0;
+    }
+    if (st->raw[4] != owner[0x3B]) {
+        return 0;
+    }
+    if (!(*(u16 *) (obj + 0x1E) & 4)) {
+        if (func_151A53E4((u8 *) st, obj + 0x10) == 0) {
+            return 1;
+        }
+        started = 1;
+        st->u34 = *(V33AB4 *) (obj + 0x10);
+        *(u16 *) (obj + 0x1E) |= 4;
+    }
+    if (!started && func_151A53E4((u8 *) st, obj + 0x10) == 0) {
+        func_151A544C(obj);
+        memcpy(spec, st, 0x30);
+        fade = func_151491F4(0x12C, -1, 0xA, 0, 5, 0x30, obj[0xC], 0);
+        if (fade != NULL) {
+            memcpy((u8 *) fade + 0x28, spec, 0x30);
+        }
+        return 1;
+    }
+    dx = *(f32 *) (obj + 0x10) - st->u34.x;
+    dy = *(f32 *) (obj + 0x14) - st->u34.y;
+    dz = *(f32 *) (obj + 0x18) - st->u34.z;
+    if (fabsf(dx) > D_800A9138[0] || fabsf(dy) > D_800A9138[0] || fabsf(dz) > D_800A9138[0]) {
+        st->u40 += sqrtf(dx * dx + dy * dy + dz * dz) * *(f32 *) (st->raw + 0x14);
+    }
+    dist = st->u40;
+    if (1.0f < dist) {
+        inv = 1.0f / dist;
+        pos = st->u34;
+        t = st->u48 + D_800BE9A4;
+        dt = t * inv;
+        width = *(f32 *) (st->raw + 0x20) + *(f32 *) (st->raw + 0x24) * t;
+        sx = dx * inv;
+        sy = dy * inv;
+        sz = dz * inv;
+        dwidth = (*(f32 *) (st->raw + 0x20) - width) * inv;
+        do {
+            pt = ring + *(s8 *) (obj + 0x2E) * 0x18;
+            *(V33AB4 *) pt = pos;
+            *(f32 *) (pt + 0xC) = width;
+            *(s16 *) (pt + 0x10) = *(s16 *) (st->raw + 0x18);
+            *(s16 *) (pt + 0x12) = *(s16 *) (st->raw + 0x1A);
+            pt[0x15] = st->u44;
+            st->u44 = st->u44 + st->raw[0x28] + (u32) func_150ADA20() % (st->raw[0x29] + 1);
+            pt[0x14] = 0xFF;
+            (*(s8 *) (obj + 0x2E))++;
+            if (obj[0x25] == *(s8 *) (obj + 0x2E)) {
+                *(s8 *) (obj + 0x2E) = 0;
+            }
+            (*(s8 *) (obj + 0x2C))++;
+            if (*(s8 *) (obj + 0x2D) == *(s8 *) (obj + 0x2E)) {
+                (*(s8 *) (obj + 0x2D))++;
+                if (obj[0x25] == *(s8 *) (obj + 0x2D)) {
+                    *(s8 *) (obj + 0x2D) = 0;
+                }
+                (*(s8 *) (obj + 0x2C))--;
+            }
+            width += dwidth;
+            pos.x += sx;
+            pos.y += sy;
+            pos.z += sz;
+            t -= dt;
+            st->u40 -= 1.0f;
+        } while (1.0f < st->u40);
+        st->u34 = pos;
+        st->u48 = t;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A3D70.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4194.s")
 
@@ -422,7 +530,141 @@ void func_151A4F4C(u8 *arg0, u8 arg1) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_15153BA4(u8 *tmpl, s32 arg1, u8 room, u8 kind);
+
+/* func_15153BA4's particle template (sp2C in the asm) */
+typedef struct {
+    /* 0x00 */ s16 count;
+    /* 0x02 */ s16 u02;
+    /* 0x04 */ u8 u04;
+    /* 0x06 */ s16 u06;
+    /* 0x08 */ s32 u08;
+    /* 0x0C */ s32 u0C;
+    /* 0x10 */ s16 u10;
+    /* 0x12 */ s16 u12;
+    /* 0x14 */ s32 u14;
+    /* 0x18 */ s32 u18;
+    /* 0x1C */ u8 colour[10];
+    /* 0x26 */ s16 u26;
+    /* 0x28 */ s16 u28;
+    /* 0x2A */ s16 u2A;
+    /* 0x2C */ f32 u2C;
+    /* 0x30 */ f32 u30;
+    /* 0x34 */ f32 u34;
+    /* 0x38 */ f32 pos[3];
+    /* 0x44 */ s16 angle;
+    /* 0x46 */ s16 u46;
+    /* 0x48 */ s16 u48;
+    /* 0x4A */ s16 u4A;
+    /* 0x4C */ f32 u4C;
+    /* 0x50 */ f32 u50;
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ f32 u58;
+    /* 0x5C */ s32 mode;
+    /* 0x60 */ s8 u60;
+    /* 0x61 */ s8 u61;
+    /* 0x62 */ u8 u62;
+    /* 0x63 */ u8 u63;
+    /* 0x64 */ u8 u64;
+} SmokeTmpl4FE8;
+
+/* the effect data at obj + 0x28 (filled by func_151A4F4C) */
+typedef struct {
+    /* 0x00 */ u8 *owner;
+    /* 0x04 */ u8 ownerId;      // owner's +0x3B when attached
+    /* 0x08 */ f32 rate;        // puffs per frame
+    /* 0x0C */ f32 accum;
+    /* 0x10 */ u8 bone;         // matrix index in owner + 0x1D4
+    /* 0x14 */ f32 offset[3];
+} SmokeData4FE8;
+
+// owner_smoke_update: effect handler (table D_8008A890) for the smoke trail started by func_151A4F4C. Ends the effect
+// (+0xE = -1, +0xD |= 1) when the owner is gone (type 0 / 8, or +0x3B no longer the saved id). Otherwise, while the
+// owner has matrices (+0x1D4) and its +0x74 low nibble is not 0xF, accumulates rate * D_800BE9A4; once over 1 it emits
+// the whole number of puffs (func_15153BA4, count = int part) at the bone position (func_15143134), facing the
+// owner's yaw (+0x76 high byte), with random flip bits 0x40 / 0x80.
+void func_151A4FE8(u8 *obj) {
+    SmokeData4FE8 *d = (SmokeData4FE8 *) (obj + 0x28);
+    u8 *owner;
+    SmokeTmpl4FE8 t;
+    s16 yaw;
+    f32 pos[3];
+
+    if (*(s32 *) d->owner == 0 || *(s32 *) d->owner == 8 || d->ownerId != d->owner[0x3B]) {
+        *(s16 *) (obj + 0xE) = -1;
+        obj[0xD] |= 1;
+        return;
+    }
+    owner = d->owner;
+    if (*(u8 **) (owner + 0x1D4) == NULL) {
+        return;
+    }
+    if ((owner[0x74] & 0xF) == 0xF) {
+        return;
+    }
+    d->accum += d->rate * D_800BE9A4;
+    if (!(1.0f < d->accum)) {
+        return;
+    }
+    owner = d->owner;
+    yaw = (*(u16 *) (owner + 0x76) >> 8) - 0x40;
+    func_15143134(d->offset, pos, *(u8 **) (owner + 0x1D4) + (d->bone << 6));
+    t.u02 = 0;
+    t.count = (s32) d->accum;
+    d->accum -= (f32) t.count;
+    t.u04 = 0x28;
+    t.u06 = 0xC01;
+    t.u08 = 0x200005;
+    t.u0C = 0;
+    t.u10 = 0x17;
+    t.u12 = 0xD;
+    t.u14 = 0;
+    t.u18 = 0;
+    t.colour[0] = 0;
+    t.colour[1] = 0;
+    t.colour[2] = 0;
+    t.colour[3] = 0xFF;
+    t.colour[4] = 0;
+    t.colour[5] = 0;
+    t.colour[6] = 0;
+    t.u30 = 300.0f;
+    t.u34 = 400.0f;
+    t.pos[0] = pos[0];
+    t.pos[1] = pos[1];
+    t.pos[2] = pos[2];
+    t.u26 = 1;
+    t.u28 = 0;
+    t.u2A = 1;
+    t.u64 = 0;
+    t.angle = yaw - 0x19;
+    t.u46 = -0x2C;
+    t.u48 = 0x32;
+    t.u4A = 0x32;
+    t.mode = 7;
+    t.u62 = 1;
+    t.u63 = 0;
+    t.u54 = -0.5f;
+    t.u58 = -0.5f;
+    t.u4C = 0.0f;
+    t.u2C = 1.0f;
+    t.u50 = 15.0f;
+    if (func_150ADA20() & 1) {
+        t.mode |= 0x40;
+    }
+    if (func_150ADA20() & 1) {
+        t.mode |= 0x80;
+    }
+    t.colour[7] = 0xFF;
+    t.colour[8] = 0;
+    t.colour[9] = 0xFF;
+    t.u60 = -1;
+    t.u61 = -1;
+    func_15153BA4((u8 *) &t, 0xFF, obj[0xC], obj[1]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D1150/func_151A4FE8.s")
+#endif
 
 void func_151A544C(u8 *);
 void func_151A5290(u8 *arg0, u8 *arg1, u8 arg2) {

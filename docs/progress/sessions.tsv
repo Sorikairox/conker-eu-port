@@ -103,3 +103,9 @@ P305	port-c	group C1	3		~115	976B8 emitter_ribbon_draw + A1A4 emitter2_flame_upd
 P308	port-b	integration 2	0		~35	merge port-c (C1): func_150B2290 keep P289, STUBMAP unified, selftest 150/150, progress_nm 98.6% / 94.7%
 P306	port-e	group C part C2 finished (mp hit report 20B730, gun fire effects 129650)	2	0	115	67A0 85/85, BE40 86/86; C2 complete (97.3%)
 P312	port-b	integration 3	0		~25	merge port-e (C2 finished, P306): docs/registry conflicts only, selftest 150/150, progress_nm 98.7% / 94.9%
+P278	port-d	group D NM C (150DBF60 15096E78 151A4FE8 150DFEA0 1513BBFC 150CD3C0 150E5D90 15188008 150BFC60)	9	0	125	9 compiled funcs to hand C, all mutants killed; NM rodata copy for func_150E0C58; verify_all OK
+P283	port-d	group D NM C (15036860 150403C8 150BABE0 151C5280 151A3D70 15104BB4 150F3294 150CDD08)	8	0	140	8 compiled funcs to hand C, survivors equivalent; 151C5280 rodata copies (1F3040, 51190); IDO float scalar statics go to .data -> use arrays; verify_all/NM rc 0
+P297	port-d	group D NM C (150BF71C 150C8300 150BFF7C 150D0DD0 151AECA0 151E9E1C)	6	0	~125	6 compiled funcs to hand C, survivors equivalent; ARGMEM lengths decimal; IDO float literal ulp rounding (0.807f); verify_all/NM rc 0
+P304	port-f	group D2 NM C (150E5384 150DD420 150DCAD8 150DDBC0)	4	0	~125	4 compiled funcs to hand C, survivors equivalent; no #ifndef/#endif inside an NM block (splice drops cand); DDBC0 asm reads an unset stack index; verify_all/NM rc 0
+P309	port-f	group D2 NM C (150D7E38 150F3A74)	2	0	~95	2 compiled funcs (1569 insns) to hand C, 1 equivalent survivor; func_150D7E38 models func_15052F9C leftover v0; verify_all/NM rc 0
+P315	port-b	integration 4	0		~20	merge port-f (D2 finished, P304/P309, +port-d P278..P297): docs/registry conflicts only (reg3way 474 rows/471 funcs); checks ok, selftest 150/150, progress_nm 99.2% / 96.8%

@@ -1,0 +1,32 @@
+\#^    if (obj == NULL) {$#s/==/!=/
+\#^    if (mode == 0) {$#s/0/2/
+\#^    } else if (mode == 1) {$#s/1/2/
+\#^        func_15196438(obj, 1, flag, 0);$#s/1,/2,/
+\#^        func_15196438(obj, 2, flag, 0);$#s/flag, 0/flag, 1/
+\#^        spark\.x = 177#s/177\.901749f/177.9f/
+\#^        spark\.y = #s/-13/13/
+\#^        spark\.u0C = 3\.0f#s/3\.0f/3.5f/
+\#^        spark\.u14 = #s/0\.319999993f/0.32001f/
+\#^        spark\.u18 = 0\.0f#s/0\.0f/1.0f/
+\#^        spark\.u1C = #s/9\.0f/8.0f/
+\#^        spark\.u28 = #s/-0x4B/0x4B/
+\#^        spark\.u36 = 0;#s/0;/1;/
+\#^        spark\.u39 = #s/0x28/0x29/
+\#^        spark\.u3C = 1;#s/1;/0;/
+\#^        spark\.u50 = 0;#s/0;/1;/
+\#^        spark\.u55 = #s/0xFF/0xFE/
+\#^        func_151534E0(#s/flag/0/
+\#^        func_151491F4(#s/0x1E/0x1F/
+\#^        func_151491F4(#s/, flag, 0)/, 0, 0)/
+\#^        func_151491F4(#s/-1, 0, 1/-1, 0, 0/
+\#^        burst\.z = #s/-1708\.0238f/-1708.0f/
+\#^        burst\.u0C = 6#s/6/7/
+\#^        burst\.u18 = #s/1285/1284/
+\#^        burst\.u1C = #s/1149/1148/
+\#^        burst\.u24 = #s/-0x3D/0x3D/
+\#^        burst\.u28 = -1#s/-1/1/
+\#^        burst\.u29 = #s/0x12/0x13/
+\#^        burst\.u36 = #s/0x87/0x86/
+\#^        burst\.anim = #s/D_800908C4/D_800908C4 + 4/
+\#^        burst\.u3D = #s/0xFF/0x7F/
+\#^        func_15153808(#s/flag, 1/flag, 0/

@@ -1,0 +1,23 @@
+\#^    func_1510F800(0);#s/0/1/
+\#^    n = func_150A3F50((s32) x, (s32) z);#s/(s32) x, (s32) z/(s32) z, (s32) x/
+\#^        return 0;$#s/0/1/
+\#^        for (k = 0; k < 3; k++) {#s/k < 3/k < 2/
+\#^            v = (s16 \*) #s/\[i\]\.off/[0].off/
+\#^            vx\[k\] = v\[0\];#s/v\[0\]/v[1]/
+\#^            vz\[k\] = v\[2\];#s/v\[2\]/v[1]/
+\#^        ex = vx\[0\] - vx\[1\];#s/vx\[1\]/vx[2]/
+\#^        ez = vz\[1\] - vz\[0\];#s/vz\[1\] - vz\[0\]/vz[0] - vz[1]/
+\#^        c = -(vz\[0\] \* ex#s/vx\[0\]/vx[1]/
+\#^        side = #s/+ c/- c/
+\#^        if (0\.0f < side) {#s/</<=/
+\#^            list\[cnt++\] = i;#s/= i/= k/
+\#^    if (cnt == 0) {#s/cnt == 0/cnt < 0/
+\#^    bestd = D_800A2740;#s/D_800A2740/0.0f/
+\#^        d = D_800D3720\[list\[i\]\]\.h#s/list\[i\]/i/
+\#^        d = D_800D3720\[list\[i\]\]\.h#s/0\.00390625f/0.0078125f/
+\#^        if (d < 0\.0f) {#s/</>/
+\#^        if (d < bestd #s/d < bestd/d <= bestd/
+\#^        if (d < bestd #s/ || best == -1//
+\#^            best = list\[i\];#s/list\[i\]/i/
+\#^    \*out = D_800D3720\[best\]\.h#s/\[best\]/[best + 1]/
+\#^    return 1;$#s/1/2/

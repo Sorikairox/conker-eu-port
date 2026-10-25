@@ -12,7 +12,136 @@ void func_1512E6B0(u8 *);
 #endif
 
 
+#ifdef NON_MATCHING
+f32 sqrtf(f32);
+#pragma intrinsic(sqrtf)
+f32 sinf(f32);
+f32 cosf(f32);
+void func_15123070(u8 *arg0);
+void func_150491EC(struct17 *arg0, struct17 *arg1, struct17 *arg2);
+extern f32 D_80089860;  /* last yaw (degrees) */
+extern f32 D_800A3850;  /* pi / 180 */
+extern f32 D_800A3854;  /* pi / 2 */
+extern f32 D_800A3858;  /* 999: "no yaw override" in +0x86C */
+extern f32 D_800A385C;  /* pi / 180 */
+extern f32 D_800A3860, D_800A3864; /* 2.2, 2.2 */
+extern f32 D_800A3868;  /* 0.15 */
+#define CAMF(off) (*(f32 *) (cam + (off)))
+
+// camera_orbit_update: third-person camera placement around the target cam+0x2BC. Pitch from the target's
+// +0x40 (+90 deg) or, when flag 1 of +0x5F0 and the target's +0x102 are clear, +0x39C - pi/2; yaw from +0x86C unless
+// it is 999 (then the target's +0xB8, +10 when +0x102, 0 when its +0x1CA is clear), halved when +0x102, clamped to
+// +-88 deg and kept at the previous value D_80089860 within 10 deg. Distance 150 when flag 0x10 of *(+0x36C), else
+// +0x374 (the shorter +0x370 when +0x102 and not +0x3E8). The new eye (height clamped to +-200 around the target) is set at
+// once (+0x23C) or eased per axis by func_150498A0 (speeds +0x3C0.., rate 2 / 2.2+2.2, doubled when +0x102), kept
+// at least 120 away from the target, at least 30 above the floor +0x35C. Also eases +0x5E8 to +0x5EC, sets
+// +0x3DC (pitch), +0x344 / +0x348 (eye height over +0x354) and +0x370 (horizontal distance).
+void func_151229B0(u8 *cam) {
+    u8 *tgt;
+    f32 pitch, yaw, prev, dist;
+    f32 sinP, cosP;
+    f32 v[3];
+    f32 h, rate, speed;
+    f32 x, y, z;
+    f32 dx, dy, dz;
+    f32 dir[3];
+
+    pitch = (*(f32 *) (*(u8 **) (cam + 0x3D0) + 0x40) + 90.0f) * D_800A3850;
+    func_1512A390(cam);
+    if (!(*(s32 *) (cam + 0x5F0) & 1) && *(*(u8 **) (cam + 0x3D0) + 0x102) == 0) {
+        pitch = CAMF(0x39C) - D_800A3854;
+    }
+    tgt = *(u8 **) (cam + 0x3D0);
+    if (D_800A3858 == CAMF(0x86C)) {
+        if (tgt[0x1CA] == 0) {
+            yaw = 0.0f;
+        } else {
+            yaw = (tgt[0x102] != 0 ? 10.0f : 0.0f) + *(f32 *) (tgt + 0xB8);
+        }
+    } else {
+        yaw = CAMF(0x86C);
+    }
+    if (tgt[0x102] != 0) {
+        yaw *= 0.5f;
+    }
+    if (yaw < -88.0f) {
+        yaw = -88.0f;
+    } else if (88.0f < yaw) {
+        yaw = 88.0f;
+    }
+    prev = D_80089860;
+    if (fabsf(prev - yaw) < 10.0f) {
+        yaw = prev;
+    } else {
+        D_80089860 = yaw;
+    }
+    yaw *= D_800A385C;
+    func_15123070(cam);
+    if (**(u16 **) (cam + 0x36C) & 0x10) {
+        dist = 150.0f;
+    } else {
+        dist = CAMF(0x374);
+    }
+    if ((*(u8 **) (cam + 0x3D0))[0x102] != 0 && cam[0x3E8] == 0 && CAMF(0x370) < CAMF(0x374)) {
+        dist = CAMF(0x370);
+    }
+    h = cosf(yaw) * dist;
+    y = sinf(yaw) * dist;
+    sinP = sinf(pitch);
+    cosP = cosf(pitch);
+    CAMF(0x3DC) = pitch;
+    z = -h * sinP;
+    x = h * cosP;
+    if (y < -200.0f) {
+        y = -200.0f;
+    } else if (200.0f < y) {
+        y = 200.0f;
+    }
+    v[0] = x + CAMF(0x2BC);
+    v[1] = y + CAMF(0x2C0);
+    v[2] = z + CAMF(0x2C4);
+    if (cam[0x23C] != 0) {
+        CAMF(0x2F8) = v[0];
+        CAMF(0x2FC) = v[1];
+        CAMF(0x300) = v[2];
+        CAMF(0x3C0) = 0.0f;
+        CAMF(0x3C4) = 0.0f;
+        CAMF(0x3C8) = 0.0f;
+    } else {
+        speed = 1.0f + 1.0f;
+        rate = D_800A3860 + D_800A3864;
+        if ((*(u8 **) (cam + 0x3D0))[0x102] != 0) {
+            speed += speed;
+            rate += rate;
+        }
+        func_150498A0(&CAMF(0x2F8), v[0], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));
+        func_150498A0(&CAMF(0x2FC), v[1], &CAMF(0x3C4), speed, rate, CAMF(0x7B4));
+        func_150498A0(&CAMF(0x300), v[2], &CAMF(0x3C8), speed, rate, CAMF(0x7B4));
+    }
+    if ((*(u8 **) (cam + 0x3D0))[0x102] == 0 && !(*(u16 *) (cam + 0x36A) & 0x10)) {
+        dx = CAMF(0x2F8) - CAMF(0x2BC);
+        dy = CAMF(0x2FC) - CAMF(0x2C0);
+        dz = CAMF(0x300) - CAMF(0x2C4);
+        if (sqrtf(dx * dx + dy * dy + dz * dz) < 120.0f) {
+            func_150491EC((struct17 *) &CAMF(0x2BC), (struct17 *) &CAMF(0x2F8), (struct17 *) dir);
+            CAMF(0x2F8) = CAMF(0x2BC) + 120.0f * dir[0];
+            CAMF(0x2FC) = CAMF(0x2C0) + 120.0f * dir[1];
+            CAMF(0x300) = CAMF(0x2C4) + 120.0f * dir[2];
+        }
+    }
+    if (CAMF(0x2FC) < CAMF(0x35C) + 30.0f) {
+        CAMF(0x2FC) = CAMF(0x35C) + 30.0f;
+    }
+    CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) * D_800A3868;
+    dx = CAMF(0x2F8) - CAMF(0x2BC);
+    dz = CAMF(0x300) - CAMF(0x2C4);
+    CAMF(0x344) = CAMF(0x348) = CAMF(0x2FC) - CAMF(0x354);
+    CAMF(0x370) = sqrtf(dx * dx + dz * dz);
+}
+#undef CAMF
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1501C0/func_151229B0.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P41: camera mode 1 (follow). Unless 0xDC == 4: turn yaw 0x37C by the angle between eye->0x2C8 and eye->at

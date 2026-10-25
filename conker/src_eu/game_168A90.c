@@ -230,7 +230,67 @@ struct102 *func_1513BAE8(void) {
     }
     return p;
 }
+#ifdef NON_MATCHING
+float sqrtf(float);
+extern f32 D_800A4DA0[9][3];    // the nine texture-projection centres
+extern s32 D_800A4E0C[9][2];    // their vertex ranges { first, count }
+extern f32 D_800A4E54;          // 1.21f
+extern f32 D_800A4E58;          // 2.854f
+extern f32 D_800A4E5C;          // 1.994f
+extern f32 D_800A4E60;          // 8.328f
+
+// water_texcoords_update: object-type handler (table D_80089FC8 + 0x14). Calls func_1513B968 first, then rewrites the
+// texture coordinates of the nine vertex groups of the object's current vertex buffer (obj + 0x58 + D_800BE9C0 * 16
+// + part * 4) so each group's texture faces the player camera point (func_15144B34(part)) seen from its centre
+// D_800A4DA0[k]: s = horizontal offset along the camera direction * (sin(rec + 0xC) * 1.21 + 2.854) - scroll u,
+// t = height * (sin(rec + 0x10) * 1.994 + 8.328) - scroll v, where rec = obj + obj[0x50] + 0xF8 holds the scroll
+// (+0 / +4, taken mod 1024) and the two wave phases. Returns 1.
+s32 func_1513BBFC(s32 obj, s16 part) {
+    f32 *rec;
+    f32 *cam;
+    f32 scaleS;
+    f32 scaleT;
+    f32 scrollS;
+    f32 scrollT;
+    f32 dx;
+    f32 dz;
+    f32 inv;
+    f32 dirX;
+    f32 dirZ;
+    Vtx_t *v;
+    s32 k;
+    s32 n;
+
+    func_1513B968(obj, part);
+    rec = (f32 *) (obj + *(s32 *) (obj + 0x50) + 0xF8);
+    scaleS = sinf(rec[3]) * D_800A4E54 + D_800A4E58;
+    scaleT = sinf(rec[4]) * D_800A4E5C + D_800A4E60;
+    cam = func_15144B34(part);
+    scrollS = rec[0] - (f32) (s32) (rec[0] * (1.0f / 1024.0f)) * 1024.0f;
+    scrollT = rec[1] - (f32) (s32) (rec[1] * (1.0f / 1024.0f)) * 1024.0f;
+    for (k = 0; k < 9; k++) {
+        dx = D_800A4DA0[k][0] - cam[0];
+        dz = D_800A4DA0[k][2] - cam[2];
+        if (dx == 0.0f && dz == 0.0f) {
+            dirX = 1.0f;
+            dirZ = 0.0f;
+        } else {
+            inv = 1.0f / sqrtf(dx * dx + dz * dz);
+            dirX = dz * inv;
+            dirZ = -dx * inv;
+        }
+        for (n = D_800A4E0C[k][0]; n < D_800A4E0C[k][0] + D_800A4E0C[k][1]; n++) {
+            v = (Vtx_t *) (*(u8 **) (obj + 0x58 + D_800BE9C0 * 16 + part * 4) + n * 16);
+            v->tc[0] = (s32) ((((f32) v->ob[0] - D_800A4DA0[k][0]) * dirX + ((f32) v->ob[2] - D_800A4DA0[k][2]) * dirZ) *
+                                  scaleS - scrollS);
+            v->tc[1] = (s32) (((f32) v->ob[1] - D_800A4DA0[k][1]) * scaleT - scrollT);
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_168A90/func_1513BBFC.s")
+#endif
 extern f32 D_800A4E64; // 0.037f (file does not own .rodata)
 extern f32 D_800A4E68; // 1.9f
 extern f32 D_800A4E6C; // 77.3f
