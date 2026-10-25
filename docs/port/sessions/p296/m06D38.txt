@@ -1,0 +1,46 @@
+\#^    func_151D6310((s32 \*) (obj + 0x74), id#s/0x74/0x70/
+\#^    func_151D6310((s32 \*) (obj + 0x74), id#s/0x84/0x80/
+\#^    if (vtx == NULL) {#s/==/!=/
+\#^    cam = func_15144B34(id);#s/(id)/(0)/
+\#^    flag = 1;#s/1;/0;/
+\#^    gfx = func_15142E24(gfx, D_80091120#s/0x2C/0x2D/
+\#^    gfx = func_15142E24(gfx, D_80091120#s/&flag, 3/\&flag, 2/
+\#^    gfx = func_15142C10(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x59\]/obj[0x58]/
+\#^    gfx = func_15142C10(gfx, obj\[0x58\], obj\[0x59\]#s/obj\[0x5B\]/obj[0x5A]/
+\#^    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);#s/0x1F0600/0x1F0601/
+\#^    gfx = func_1513F4E4(gfx, 0x44, &flag);#s/0x44/0x45/
+\#^    gfx = func_15142FBC(gfx#s/0x2CA0/0x2CA1/
+\#^    gfx = func_15142FBC(gfx#s/D_800A4EA8\[3\]/D_800A4EA8[1]/
+\#^    dx = pts\[3\] - pts\[0\];#s/pts\[3\]/pts[4]/
+\#^    dz = pts\[5\] - pts\[2\];#s/pts\[2\]/pts[1]/
+\#^    ey = pts\[1\] - cam\[1\];#s/cam\[1\]/cam[0]/
+\#^    cx = dy \* ez - ey \* dz;#s/- ey/+ ey/
+\#^    cy = dz \* ex - ez \* dx;#s/dz \* ex/dz * ey/
+\#^    cz = dx \* ey - ex \* dy;#s/ex \* dy/ex * dz/
+\#^    len2 = cx \* cx + cy \* cy + cz \* cz;#s/ + cz \* cz//
+\#^    if (sRibbonMinLen2A\[0\] < len2) {#s/</>/
+\#^        k = \*(f32 \*) (obj + 0x50) / sqrtf(len2);#s/0x50/0x4C/
+\#^        ny = cy \* k;#s/cy/cx/
+\#^    RIBBON_VTX(vtx, pts\[0\] + nx, pts\[1\] + ny, pts\[2\] + nz, 0);#s/pts\[1\] + ny/pts[1] - ny/
+\#^    RIBBON_VTX(vtx, pts\[0\], pts\[1\], pts\[2\], 0x200);#s/0x200/0x100/
+\#^    RIBBON_VTX(vtx, pts\[0\] - nx, pts\[1\] - ny, pts\[2\] - nz, 0x400);#s/pts\[2\] - nz/pts[2] + nz/
+\#^    prev\[1\] = pts\[1\];#s/pts\[1\]/pts[2]/
+\#^    for (i = 1; i < \*(s32 \*) (obj + 0x48) + 2; i++) {#s/+ 2/+ 1/
+\#^    for (i = 1; i < \*(s32 \*) (obj + 0x48) + 2; i++) {#s/i = 1/i = 2/
+\#^        cur = &pts\[i \* 3\];#s/i \* 3/i * 3 - 3/
+\#^        dx = prev\[0\] - cur\[0\];#s/prev\[0\] - cur\[0\]/cur[0] - prev[0]/
+\#^        dy = prev\[1\] - cur\[1\];#s/prev\[1\]/prev[0]/
+\#^        ez = cur\[2\] - cam\[2\];#s/cam\[2\]/cam[1]/
+\#^        if (sRibbonMinLen2B\[0\] < len2) {#s/sRibbonMinLen2B\[0\] < len2/0.1f < len2/
+\#^            nz = cz \* k;#s/cz \* k/cz/
+\#^        RIBBON_VTX(vtx, cur\[0\] - nx, cur\[1\] - ny, cur\[2\] - nz, 0);#s/cur\[0\] - nx/cur[0] + nx/
+\#^        RIBBON_VTX(vtx, cur\[0\], cur\[1\], cur\[2\], 0x200);#s/cur\[2\], 0x200/cur[1], 0x200/
+\#^        RIBBON_VTX(vtx, cur\[0\] + nx, cur\[1\] + ny, cur\[2\] + nz, 0x400);#s/0x400/0x200/
+\#^        ((s32 \*) gfx)\[0\] = 0x0100600C;#s/0x0100600C/0x0100400C/
+\#^        ((s32 \*) gfx)\[1\] = (s32) (vtx - 6);#s/vtx - 6/vtx - 3/
+\#^        ((s32 \*) gfx)\[0\] = 0x05020806;#s/0x05020806/0x05020608/
+\#^        ((s32 \*) gfx)\[0\] = 0x05020A08;#s/0x05020A08/0x05020A06/
+\#^        prev\[2\] = cur\[2\];#s/cur\[2\]/cur[1]/
+\#^        (vp)->v.tc\[1\] = 0; \\#s/= 0;/= 1;/
+\#^        (vp)->v.ob\[1\] = (s32) (py); \\#s/(py)/(px)/
+1,/^static const f32 sRibbonMinLen2A/s/0.0001f/0.001f/

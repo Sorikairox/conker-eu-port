@@ -1,0 +1,16 @@
+verify_all rc 0
+debugger  funcs    36/   43 (83.7%)  bytes   10356/  14080 (73.6%)
+total     funcs  3995/ 5916 (67.5%)  bytes  660048/2253856 (29.3%)
+nm rc 0
+mips-linux-gnu-objcopy  -O binary build_nm/conker.eu.elf build_nm/conker.eu.bin
+make: Leaving directory '/conker/conker'
+protocheck rc 0
+# totals: ASM:count/strong=14, ASM:float/strong=10, ASM:narrow/strong=891, ASM:ret/strong=174, ASM:wide/weak=31, DEF/strong=376
+implicit rc 0
+clang errors (scan may be incomplete): src_eu/game_A28B0.c (1)
+clang errors (scan may be incomplete): src_eu/init_2070.c (3)
+implicit_scan: 663 TUs, 828 implicit call sites (159 in NM code, 0 float-related, 0 NM+float)
+selftest rc 0
+ok   [EQUIV] env case s/0.396174014f/0.396175f/  EQUIV func_1501175C (8 trials ok, 0 inconclusive, 48 calls, ret=void, ref 199 words, cand 201 words) [POKE unread: 8046003B]
+selftest: 150 ok, 0 failed
+total       5916     3995   1850     33       38  5878 99.4%   2200164/2253856 (97.6%)

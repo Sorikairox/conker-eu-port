@@ -293,7 +293,62 @@ s32 func_1000BC28(s32 arg0, u8 arg1, s32 arg2, s32 arg3) {
 }
 
 
+#ifdef NON_MATCHING
+/* P279: readable C for func_1000BCBC (compiled C, 169 insns). */
+extern f32 D_8002C580; /* listener y of the source */
+extern f32 D_8002C584; /* squared distance beyond which the volume is the minimum */
+extern f32 D_8002C588; /* full-volume distance */
+extern f32 D_8002C58C; /* volume per unit of distance */
+extern f32 D_8002C590; /* height threshold of the second parameter */
+extern f32 D_8002C594; /* scale of the second parameter */
+// ambience_update_level19: per-frame handler of a sound-channel slot (state arg0, channel arg1, position x arg2 /
+// z arg3 / y arg4). First call (arg0 == 0): set the channel up (func_10008790 kind 3 = 16, func_1000886C kind 4 =
+// 0) and return 1. Afterwards, only in level 0x13: kind 3 = 4 + (D_8002C588 - distance) * D_8002C58C from (x - 24,
+// y - D_8002C580) (4 when the squared distance exceeds D_8002C584), sent when it differs from arg0 (sic: the state,
+// not the channel's current value); kind 4 = 0 when func_150A29C8(0, 0x4041) is set, else 0x20 above D_8002C590,
+// else 0x20 + (D_8002C590 - z) * D_8002C594 (0xFF from 223 on), sent when the channel's kind-2 value differs.
+s32 func_1000BCBC(s32 arg0, u8 arg1, f32 arg2, f32 arg3, f32 arg4) {
+    f32 dx, dy, d2, f;
+    u8 vol;
+    u8 v;
+
+    if (arg0 == 0) {
+        func_10008790(arg1, 3, 0x10, 0);
+        func_1000886C(arg1, 4, 0);
+        arg0 = 1;
+    } else if (D_800BE9F0 == 0x13) {
+        dx = arg2 - 24.0f;
+        dy = arg4 - D_8002C580;
+        d2 = dx * dx + dy * dy;
+        if (D_8002C584 < d2) {
+            vol = 4;
+        } else {
+            vol = (u32) ((D_8002C588 - sqrtf(d2)) * D_8002C58C) + 4;
+        }
+        if (arg0 != vol) {
+            func_1000886C(arg1, 3, vol);
+        }
+        if (func_150A29C8(0, 0x4041) != 0) {
+            v = 0;
+        } else if (D_8002C590 < arg3) {
+            v = 0x20;
+        } else {
+            f = (D_8002C590 - arg3) * D_8002C594;
+            if (223.0f <= f) {
+                v = 0xFF;
+            } else {
+                v = (u32) f + 0x20;
+            }
+        }
+        if (v != func_10008A4C(arg1, 2)) {
+            func_1000886C(arg1, 4, v);
+        }
+    }
+    return arg0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_B1B0/func_1000BCBC.s")
+#endif
 #ifdef NON_MATCHING
 /* P204 */
 // ambient_voice_update_3d: sound-voice handler (D_8002B5xx table, like func_1000C350) for voice channel ch on

@@ -1,0 +1,39 @@
+s/    if (kind \& 0x8000) {/    if (kind \& 0x4000) {/ % quiet tiltq flatq
+s/            v\[i\]\[1\] = ((s16 \*\*) tri)\[i\]\[1\];/            v[i][1] = ((s16 **) tri)[i][2];/ % tilt flat deg
+s/        ny = -D_800CC634;/        ny = D_800CC634;/ % tilt flat tilt2
+s/        if (len < 0.0001f) {/        if (len < 0.00001f) {/ % deg deg2
+s/        dz = nz \/ len;/        dz = nz \/ ny;/ % tilt flat
+s/        if (slot != 0xFF \&\& fabsf(dy) < 0.9f) {/        if (slot != 0xFF \&\& dy < 0.9f) {/ % flat tilt flatdn
+s/            func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dx, dy, dz, 0.0f, 1.0f, 0.0f);/            func_150440A0(mtx, 0.0f, 0.0f, 0.0f, dx, dz, dy, 0.0f, 1.0f, 0.0f);/ % tilt
+s/            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, (f32 \*) (D_800D9D80 + slot \* 28 + 0x10),/            func_150A7E40(mtx, 0.0f, 1.0f, 0.0f, (f32 *) (D_800D9D80 + slot * 28 + 0x10),/ % tilt
+s/        D_800D9D80\[slot \* 28 + 3\] = 0;/        D_800D9D80[slot * 28 + 2] = 0;/ % k11s1 flat deg
+s/    if (slot != 0xFF \&\& flat) {/    if (flat) {/ % k10s0 tiltFF
+s/    rec.y = (s32) y;/    rec.y = (s32) z;/ % k11s1
+s/    rec.g = 0xB4;/    rec.g = 0xB5;/ % k11s1
+s/    rec.u1F = 0xFF;/    rec.u1F = 0xFE;/ % k11s1
+s/    sizeF = D_800A14E0\[size\]\[1\];/    sizeF = D_800A14E0[size][0];/ % k11s1 k10s0
+s/    sizeBase = sizeF \* 95.0f \* 0.00390625f;/    sizeBase = sizeF * 96.0f * 0.00390625f;/ % k11s1
+s/    sizeRange = sizeF \* 130.0f \* 0.00390625f;/    sizeRange = sizeF * 130.0f * 0.0039f;/ % k11s1 k11one
+s/        rec.tex = D_80091C2C;/        rec.tex = D_80091C5C;/ % k11s1
+s/    } else if (kind == 10) {/    } else if (kind == 11) {/ % k10s0
+s/    } else if (kind == 4 || kind == 9) {/    } else if (kind == 4) {/ % k9s2
+s/        sizeBase = 180.0f;/        sizeBase = 181.0f;/ % k8s1
+s/        sizeRange = 200.0f;/        sizeRange = 220.0f;/ % k8s1
+s/        rec.gravity = -0x175;/        rec.gravity = -0x174;/ % k4s2
+s/ 3 + 1));/ 3 + 2));/ % k4s2 k9s2
+s/        base = base \* 0.5f;/        base = base * 0.25f;/ % k10s0
+s/        count = 12;/        count = 11;/ % k10s0 k4s2
+s/    while (count-- != 0 \&\& more) {/    while (count-- > 1 \&\& more) {/ % k11s1 k10s0
+s/            more = 0;/            more = 1;/ % k7s0 k9full
+s/        speed = func_150ADA68() \* 957.0f + base;/        speed = func_150ADA68() * 958.0f + base;/ % k11s1
+s/            speed += speed;/            speed += base;/ % k4s2
+s/            dy = 1.0f;/            dy = 0.5f;/ % k11s1
+s/            func_150A7E40(mtx, s \* 0.5f, c \* 0.5f, 1.0f, \&dx, \&dy, \&dz);/            func_150A7E40(mtx, c * 0.5f, s * 0.5f, 1.0f, \&dx, \&dy, \&dz);/ % tilt tilt0
+s/        kz = 0.315f \* dz;/        kz = 0.315f * dx;/ % k11s1
+s/ 2 + 0x182;/ 2 + 0x181;/ % k11s1
+s/        rec.vy = (s32) (speed \* dy);/        rec.vy = (s32) (speed * kz);/ % k11s1
+s/        rec.u2A = 10;/        rec.u2A = 11;/ % k11s1
+s/        rec.size1 = (s32) (func_150ADA68() \* sizeRange + sizeBase);/        rec.size1 = rec.size0;/ % k11s1
+s/    if (kind == 4 || kind == 9 || kind == 5) {/    if (kind == 4 || kind == 9) {/ % k5s1
+s/ 5 == 0) {/ 5 != 0) {/ % k5s1 k5s1n
+s/            func_150E5AD8(x, y, z, dx, dy, dz, kind);/            func_150E5AD8(x, y, z, dx, dz, dy, kind);/ % k5s1 k4s2

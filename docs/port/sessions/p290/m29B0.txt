@@ -1,0 +1,55 @@
+s/+ 0x40) + 90.0f) \* D_800A3850;/+ 0x40) + 80.0f) * D_800A3850;/
+s/+ 0x40) + 90.0f) \* D_800A3850;/+ 0x44) + 90.0f) * D_800A3850;/
+s/    func_1512A390(cam);/    ;/
+s/if (!(\*(s32 \*) (cam + 0x5F0) & 1) &&/if (!(*(s32 *) (cam + 0x5F0) \& 2) \&\&/
+s/+ 0x3D0) + 0x102) == 0) {/+ 0x3D0) + 0x102) != 0) {/
+s/pitch = CAMF(0x39C) - D_800A3854;/pitch = CAMF(0x39C) + D_800A3854;/
+s/if (D_800A3858 == CAMF(0x86C)) {/if (D_800A3858 != CAMF(0x86C)) {/
+s/if (tgt\[0x1CA\] == 0) {/if (tgt[0x1CA] != 0) {/
+s/yaw = (tgt\[0x102\] != 0 ? 10.0f : 0.0f)/yaw = (tgt[0x102] != 0 ? 20.0f : 0.0f)/
+s/: 0.0f) + \*(f32 \*) (tgt + 0xB8);/: 0.0f) + *(f32 *) (tgt + 0xB4);/
+s/        yaw \*= 0.5f;/        yaw *= 0.25f;/
+s/if (yaw < -88.0f) {/if (yaw < -80.0f) {/
+s/    } else if (88.0f < yaw) {/    } else if (80.0f < yaw) {/
+s/        yaw = 88.0f;/        yaw = 80.0f;/
+s/if (fabsf(prev - yaw) < 10.0f) {/if (fabsf(prev - yaw) < 5.0f) {/
+s/        yaw = prev;/        ;/
+s/        D_80089860 = yaw;/        ;/
+s/    yaw \*= D_800A385C;/    yaw *= D_800A3850 * 2;/
+s/    func_15123070(cam);/    ;/
+s/(cam + 0x36C) & 0x10) {/(cam + 0x36C) \& 0x20) {/
+s/dist = 150.0f;/dist = 160.0f;/
+s/        dist = CAMF(0x374);/        dist = CAMF(0x370);/
+s/!= 0 \&\& cam\[0x3E8\] == 0 \&\&/!= 0 \&\& cam[0x3E8] != 0 \&\&/
+s/cam\[0x3E8\] == 0 \&\& CAMF(0x370) < CAMF(0x374)) {/cam[0x3E8] == 0 \&\& CAMF(0x370) <= CAMF(0x374) + 1.0f) {/
+s/        dist = CAMF(0x370);/        dist = CAMF(0x374);/
+s/h = cosf(yaw) \* dist;/h = cosf(yaw);/
+s/y = sinf(yaw) \* dist;/y = sinf(yaw) * h;/
+s/sinP = sinf(pitch);/sinP = sinf(yaw);/
+s/CAMF(0x3DC) = pitch;/CAMF(0x3DC) = yaw;/
+s/z = -h \* sinP;/z = h * sinP;/
+s/x = h \* cosP;/x = h * sinP;/
+s/if (y < -200.0f) {/if (y < -100.0f) {/
+s/    } else if (200.0f < y) {/    } else if (100.0f < y) {/
+s/v\[1\] = y + CAMF(0x2C0);/v[1] = y + CAMF(0x2BC);/
+s/v\[2\] = z + CAMF(0x2C4);/v[2] = z;/
+s/if (cam\[0x23C\] != 0) {/if (cam[0x23C] == 0) {/
+s/CAMF(0x300) = v\[2\];/CAMF(0x300) = v[1];/
+s/CAMF(0x3C4) = 0.0f;/CAMF(0x3C4) = 1.0f;/
+s/speed = 1.0f + 1.0f;/speed = 1.0f;/
+s/rate = D_800A3860 + D_800A3864;/rate = D_800A3860;/
+s/            speed += speed;/            ;/
+s/            rate += rate;/            rate += speed;/
+s/func_150498A0(&CAMF(0x2F8), v\[0\], &CAMF(0x3C0), speed, rate, CAMF(0x7B4));/func_150498A0(\&CAMF(0x2F8), v[0], \&CAMF(0x3C0), rate, speed, CAMF(0x7B4));/
+s/func_150498A0(&CAMF(0x2FC), v\[1\], &CAMF(0x3C4)/func_150498A0(\&CAMF(0x2FC), v[1], \&CAMF(0x3C0)/
+s/func_150498A0(&CAMF(0x300), v\[2\], &CAMF(0x3C8), speed, rate, CAMF(0x7B4));/func_150498A0(\&CAMF(0x300), v[2], \&CAMF(0x3C8), speed, rate, 0.0f);/
+s/\[0x102\] == 0 && !(\*(u16 \*) (cam + 0x36A) & 0x10)) {/[0x102] == 0 \&\& !(*(u16 *) (cam + 0x36A) \& 0x20)) {/
+s/dy = CAMF(0x2FC) - CAMF(0x2C0);/dy = 0.0f;/
+s/+ dz \* dz) < 120.0f) {/+ dz * dz) < 100.0f) {/
+s/(struct17 \*) &CAMF(0x2BC), (struct17 \*) &CAMF(0x2F8),/(struct17 *) \&CAMF(0x2F8), (struct17 *) \&CAMF(0x2BC),/
+s/CAMF(0x2F8) = CAMF(0x2BC) + 120.0f \* dir\[0\];/CAMF(0x2F8) = CAMF(0x2BC) + 100.0f * dir[0];/
+s/CAMF(0x300) = CAMF(0x2C4) + 120.0f \* dir\[2\];/CAMF(0x300) = CAMF(0x2C4) + 120.0f * dir[1];/
+s/if (CAMF(0x2FC) < CAMF(0x35C) + 30.0f) {/if (CAMF(0x2FC) < CAMF(0x35C) + 20.0f) {/
+s/CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) \* D_800A3868;/CAMF(0x5E8) += (CAMF(0x5EC) - CAMF(0x5E8)) * D_800A3860;/
+s/CAMF(0x344) = CAMF(0x348) = CAMF(0x2FC) - CAMF(0x354);/CAMF(0x344) = CAMF(0x2FC) - CAMF(0x354);/
+s/CAMF(0x370) = sqrtf(dx \* dx + dz \* dz);/CAMF(0x370) = sqrtf(dx * dx + dx * dz);/

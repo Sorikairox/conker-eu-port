@@ -3,7 +3,60 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+f32 func_150ADDE0(struct17 *, struct17 *);
+void func_15049978(f32 *, f32, s32 *, f32, f32, f32);
+extern struct17 D_800A1F50;  /* (0, 98, -5530) */
+extern struct17 D_800A1F5C;  /* (0, 98, 1198) */
+extern struct17 D_800D9E70;
+
+// camera_segment_track: while button state (func_1509BE40(1, 0x4003, 6, 0x2000)) holds and the target object
+// (+0x3D0) is alive, sets flags 0xC0001000 in +0x84 and steers the camera: t = the projection of +0x2A4 on the
+// segment D_800A1F50 -> D_800A1F5C (0.75 x, clamped to 0..1); the two button groups pick a side offset of -900 / +900
+// (distance 220) or none (294); func_1509BFB0 gets (offset, -20, 6728 t - 5530); the angle +0x37C eases towards the
+// D_800D9E70 heading - 180 (func_15049978) and +0x39C is it in radians. Otherwise the flags are cleared.
+void func_150F6B00(struct108 *arg0) {
+    struct17 toObj;
+    struct17 axis;
+    struct17 dir;
+    f32 invLen;
+    f32 t;
+    f32 offset;
+
+    if (func_1509BE40(1, 0x4003, 6, 0x2000) != 0 && arg0->unk3D0->health != 0) {
+        arg0->unk84 |= 0xC0001000;
+        func_15048F90(&D_800A1F50, (struct17 *) &arg0->unk2A4, &toObj);
+        func_15048F90(&D_800A1F50, &D_800A1F5C, &axis);
+        invLen = 1.0f / func_150AD930((f32 *) &axis);
+        func_1504917C(&axis, &dir);
+        t = func_150ADDE0(&dir, &toObj) * invLen * 0.75f;
+        if (t < 0.0f) {
+            t = 0.0f;
+        } else if (1.0f < t) {
+            t = 1.0f;
+        }
+        if (func_1509BE40(4, 0x2000, 0xAC, 0x4040, 0x4041, 0x4042, 0x4043) != 0) {
+            offset = 0.0f * t + -900.0f;
+            arg0->unk374 = 220.0f;
+        } else if (func_1509BE40(4, 0x2000, 0xAC, 0x4047, 0x4046, 0x4045, 0x4044) != 0) {
+            offset = 0.0f * t + 900.0f;
+            arg0->unk374 = 220.0f;
+        } else {
+            offset = 0.0f * t;
+            arg0->unk374 = 294.0f;
+        }
+        func_1509BFB0(3, 0x4003, 3, (s32) offset, (s32) -20.0f, (s32) (6728.0f * t + -5530.0f));
+        func_15049978(&arg0->unk37C, func_15048FC8(&D_800D9E70) - 180.0f, &arg0->unk7C8, 8.0f, 10.0f,
+                      arg0->unk7B4);
+        arg0->unk39C = arg0->unk37C * 0.017453292f;
+    } else {
+        arg0->unk84 &= 0x3FFFEFFF;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_123FB0/func_150F6B00.s")
+#endif
 // NON-MATCHING: 90% there
 // void func_150F6B00(struct108 *arg0) {
 //     struct190 tmp;

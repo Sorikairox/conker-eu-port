@@ -1,0 +1,40 @@
+\#^    SB3AB4 \*st = #s/0x98/0x94/
+\#^    if (\*(s32 \*) owner == 0) {#s/== 0/!= 0/
+\#^    if (st->raw\[4\] != owner\[0x3B\]) {#s/0x3B/0x3A/
+\#^    if (!(\*(u16 \*) (obj + 0x1E) \& 4)) {#s/\& 4/\& 2/
+\#^            return 1;$#s/1/0/
+\#^        \*(u16 \*) (obj + 0x1E) |= 4;#s/4/8/
+\#^        st->u34 = \*(V33AB4 \*) (obj + 0x10);#s/0x10/0x14/
+\#^    if (!started \&\& #s/!started \&\& //
+\#^        func_151A544C(obj);#s/obj/(u8 *) st/
+\#^        fade = func_151491F4(0x12C, #s/0xA, 0, 5/0xA, 0, 6/
+\#^        fade = func_151491F4(0x12C, #s/obj\[0xC\]/obj[0xD]/
+\#^            memcpy((u8 \*) fade + 0x28, #s/0x28/0x2C/
+\#^    dy = \*(f32 \*) (obj + 0x14) - st->u34\.y;#s/u34\.y/u34.x/
+\#^    if (fabsf(dx) > D_800A9138\[0\] #s/fabsf(dz) > D_800A9138\[0\]/fabsf(dz) > 0.001f/
+\#^    if (fabsf(dx) > D_800A9138\[0\] #s/fabsf(dy) > D_800A9138\[0\]/fabsf(dy) >= 1.0f/
+\#^        st->u40 += sqrtf(#s/dz \* dz/dz * dy/
+\#^        st->u40 += sqrtf(#s/(st->raw + 0x14)/(st->raw + 0x10)/
+\#^    if (1\.0f < dist) {#s/1\.0f < dist/1.0f <= dist/
+\#^        t = st->u48 + D_800BE9A4;#s/+ D_800BE9A4/- D_800BE9A4/
+\#^        width = #s/(st->raw + 0x24) \* t/(st->raw + 0x24) * dist/
+\#^        dwidth = #s/- width/+ width/
+\#^        sz = dz \* inv;#s/dz/dy/
+\#^            pt = ring + #s/0x18/0x14/
+\#^            \*(f32 \*) (pt + 0xC) = width;#s/width/t/
+\#^            \*(s16 \*) (pt + 0x12) = #s/0x1A/0x18/
+\#^            pt\[0x15\] = st->u44;#s/0x15/0x16/
+\#^            st->u44 = #s/st->raw\[0x28\]/st->raw[0x29]/
+\#^            st->u44 = #s/(st->raw\[0x29\] + 1)/st->raw[0x29]/
+\#^            pt\[0x14\] = 0xFF;#s/0xFF/0xFE/
+\#^            if (obj\[0x25\] == \*(s8 \*) (obj + 0x2E)) {#s/0x25/0x24/
+\#^            (\*(s8 \*) (obj + 0x2C))++;#s/++/--/
+\#^            if (\*(s8 \*) (obj + 0x2D) == #s/==/!=/
+\#^                if (obj\[0x25\] == \*(s8 \*) (obj + 0x2D)) {#s/== \*(s8/!= *(s8/
+\#^                (\*(s8 \*) (obj + 0x2C))--;#s/--/++/
+\#^            t -= dt;#s/-=/+=/
+\#^            pos\.y += sy;#s/sy/sx/
+\#^            st->u40 -= 1\.0f;#s/1\.0f/0.5f/
+\#^        } while (1\.0f < st->u40);#s/1\.0f/2.0f/
+\#^        st->u48 = t;#s/t;/dt;/
+\#^        st->u34 = pos;#s/pos/st->u34/

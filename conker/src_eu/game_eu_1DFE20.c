@@ -283,7 +283,128 @@ void func_151B28F8(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B28F8.s")
 #endif
+#ifdef NON_MATCHING
+/* a light attachment: owner, its room byte, a mode and an offset from the owner */
+typedef struct {
+    u8 *owner;
+    u8 room;
+    u8 mode;
+    u8 pad6[2];
+    f32 offset[3];
+} Attach2C40;
+
+/* the 0x30-byte record copied to each func_151B3660 light (+0x150) */
+typedef struct {
+    Attach2C40 a;   /* 0x00 */
+    Attach2C40 b;   /* 0x14 */
+    u8 *obj;        /* 0x28 */
+    u8 first;       /* 0x2C */
+    u8 pad2D[3];
+} Light2C40;
+
+/* the 0x28-byte record copied to the func_15149130 object (+0x28) */
+typedef struct {
+    u8 *owner;      /* 0x00 */
+    u8 room;        /* 0x04 */
+    u8 mode;        /* 0x05 */
+    u8 pad6[2];
+    f32 left[3];    /* 0x08 */
+    f32 right[3];   /* 0x14 */
+    f32 u20;        /* 0x20 */
+    u8 *obj;        /* 0x24 */
+} Beam2C40;
+
+/* func_151B3660's light template */
+typedef struct {
+    u8 u0;          /* 0x00 */
+    s16 u2;         /* 0x02 */
+    f32 pos[3];     /* 0x04 */
+    f32 pos2[3];    /* 0x10 */
+    u8 u1C[3];      /* 0x1C */
+    f32 u20;        /* 0x20 */
+    u8 u24;         /* 0x24 */
+    f32 u28;        /* 0x28 */
+    f32 u2C;        /* 0x2C */
+    f32 u30;        /* 0x30 */
+    u8 u34;         /* 0x34 */
+} LightTmpl2C40;
+
+typedef struct {
+    f32 v[3];
+} Vec3f2C40;
+/* D_800AA700 (77, 20, 67) / D_800AA70C (-77, 20, 67): declared s32 above */
+extern f32 D_800AA748[3]; /* (27, 42, 0) */
+extern f32 D_800AA754[3]; /* (-27, 42, 0) */
+
+// twin_lights_spawn: obj +0x28 holds the owner. Spawns two lights (func_151B3660: template at the owner position,
+// rate 0.0015) whose records attach them to the owner at (+-77, 20, 67) (mode 5) and (+-27, 42, 0) (mode 2), the
+// first one flagged; stores them at obj +0x3C / +0x38. Then a type 0x13 object (func_15149130) for the beam between
+// (27, 42, 0) and (-27, 42, 0), stored at obj +0x44.
+void func_151B2C40(u8 *obj) {
+    Beam2C40 beam;
+    Light2C40 rec;
+    LightTmpl2C40 t;
+    u8 *owner = *(u8 **) (obj + 0x28);
+    u8 *o;
+    struct260 *b;
+
+    rec.obj = obj;
+    rec.first = 1;
+    rec.a.owner = owner;
+    rec.a.mode = 5;
+    rec.a.room = owner[0x3B];
+    *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &D_800AA700;
+    rec.b.owner = owner;
+    rec.b.mode = 2;
+    rec.b.room = owner[0x3B];
+    *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) D_800AA748;
+    t.u34 = 0;
+    t.u0 = 0;
+    t.u2 = 100;
+    t.pos[0] = *(f32 *) (owner + 0x14);
+    t.pos[1] = *(f32 *) (owner + 0x18);
+    t.pos[2] = *(f32 *) (owner + 0x1C);
+    t.pos2[0] = *(f32 *) (owner + 0x14);
+    t.pos2[1] = *(f32 *) (owner + 0x18);
+    t.pos2[2] = *(f32 *) (owner + 0x1C);
+    t.u1C[0] = 1;
+    t.u1C[1] = 1;
+    t.u1C[2] = 1;
+    t.u24 = 3;
+    t.u20 = 5.0f;
+    t.u28 = 180.0f;
+    t.u2C = -0.01185f;  /* D_800AA768 */
+    t.u30 = 0.713000059f; /* D_800AA76C */
+    o = func_151B3660(&t, 0.0015f, 0x30, 0xFF, 0);
+    *(u8 **) (obj + 0x3C) = o;
+    if (o != NULL) {
+        memcpy(o + 0x150, &rec, 0x30);
+    }
+    rec.first = 0;
+    *(Vec3f2C40 *) rec.a.offset = *(Vec3f2C40 *) &D_800AA70C;
+    *(Vec3f2C40 *) rec.b.offset = *(Vec3f2C40 *) D_800AA754;
+    t.u1C[2] = 1;
+    o = func_151B3660(&t, 0.0015f, 0x30, 0xFF, 0);
+    *(u8 **) (obj + 0x38) = o;
+    if (o != NULL) {
+        memcpy(o + 0x150, &rec, 0x30);
+    }
+    beam.owner = owner;
+    beam.room = owner[0x3B];
+    beam.mode = 2;
+    *(Vec3f2C40 *) beam.left = *(Vec3f2C40 *) D_800AA748;
+    *(Vec3f2C40 *) beam.right = *(Vec3f2C40 *) D_800AA754;
+    beam.u20 = 5.0f;
+    beam.obj = obj;
+    b = func_15149130(0x12C, -1, -1, 0, 0, 0x13, (struct37 *) 0x28, 0xFF, 1);
+    *(struct260 **) (obj + 0x44) = b;
+    if (b != NULL) {
+        memcpy((u8 *) b + 0x28, &beam, 0x28);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DFE20/func_151B2C40.s")
+#endif
 
 void func_151B2F00(struct_eu_1DFE20_d *arg0) {
     struct_eu_1DFE20_c *temp_v0 = arg0->unk178;
@@ -479,8 +600,10 @@ void func_151B34B4(u8 *arg0, s32 *arg1, u8 arg2)
 
 s32 func_151B4D88(void *arg0, void *arg1, s32 arg2, u8 arg3);
 
-void func_151B3550(u8 *arg0, s32 arg1, u8 arg2) {
-    func_151B4D88(arg0, arg0 + 0x150, arg1, arg2);
+/* P274: s32 (D_8008FE90 entry; func_151B44D8 and the C dispatchers test the result: the asm passes on
+   func_151B4D88's v0) */
+s32 func_151B3550(u8 *arg0, s32 arg1, u8 arg2) {
+    return func_151B4D88(arg0, arg0 + 0x150, arg1, arg2);
 }
 
 void func_151B3580(struct_eu_1DFE20 *arg0) {

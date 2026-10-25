@@ -1,9 +1,6 @@
 #!/bin/sh
-# P56: regenerate the register-level C of the hand-asm wall engine and ray cast (src_eu/nm_asm/D5E90_*.inc).
-# Run from the worktree root. D5E90.c includes both; touch it so make rebuilds.
-set -e
-cd conker
-python3 ../tools/port/asm2c_hand.py asm/D5E90.s walls 150AA950 150AB278 150AB6D0 150ACEA0 e150AB6D0 e150AC8C4 \
-    > src_eu/nm_asm/D5E90_walls.inc
-python3 ../tools/port/asm2c_hand.py asm/D5E90.s ray 150ACEA0 150ADC44 e150ACEA0 > src_eu/nm_asm/D5E90_ray.inc
-touch src_eu/nm_asm/D5E90.c
+# P56 generated the register-level C of the hand-asm wall engine (D5E90_walls.inc) and ray cast (D5E90_ray.inc)
+# with tools/port/asm2c_hand.py. Retired in P294: the whole engine is readable C in src_eu/nm_asm/D5E90.c (ray cast
+# P291, engine P294) and both .inc files are deleted. Do not regenerate them.
+echo "gen_d5e90_walls.sh: retired (P294), D5E90.c is readable C" >&2
+exit 1

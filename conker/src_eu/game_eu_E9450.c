@@ -765,7 +765,8 @@ loop_6:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BCBBC.s")
 #endif
-s32 func_150BD498(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* P317: D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 are unused, the code is unchanged */
+s32 func_150BD498(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     *(f32 *)(arg0 + 0x3C) = *(f32 *)(arg0 + 0x10) * 1.1f + arg4;
     if (*(f32 *)(arg0 + 0x48) > -2.0f) {
         *(f32 *)(arg0 + 0x44) = 0.0f;
@@ -785,4 +786,204 @@ s32 func_150BD498(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
     return 1;
 }
 
+#ifdef NON_MATCHING
+s32 func_15132BBC(void *, s32, s32, s32, s32, s32, s32);
+s32 func_151307F0(s32 *, s32, s32, s32, s32, s32);
+void func_1514470C(u8 *node, u8 *pos);
+void func_15143794(s16, s16, f32, void *);
+void func_151D58E4(struct17 *, f32, f32, f32, s16, s32, s32);
+void *memcpy(void *, const void *, s32);
+
+/* rodata of func_150BD550 (bit-exact copies: the NM link drops this file's .rodata / .late_rodata) */
+static const u8 sBlastCyl[2] = { 0x4C, 0x4D };             /* D_800A0260: the two D_800D34B8 cylinders */
+static const f32 sBlastSpinBase[1] = { -22.733002f };     /* D_800A02CC 0xC1B5DD30 */
+static const f32 sBlastSpinRange[1] = { 45.466003f };     /* D_800A02D0 0x4235DD30 */
+static const f32 sBlastSizeRange[1] = { 0.24700001f };    /* D_800A02D4 0x3E7CED92 */
+static const f32 sBlastSizeBase[1] = { 0.20300001f };     /* D_800A02D8 0x3E4FDF3C */
+static const f32 sBlastSpeedRange[1] = { 21.800001f };    /* D_800A02DC 0x41AE6667 */
+static const f32 sBlastSpeedBase[1] = { 30.2f };          /* D_800A02E0 0x41F1999A */
+static const f32 sBlastU4CRange[1] = { 1.1290001f };      /* D_800A02E4 0x3F908313 */
+static const f32 sBlastU4CBase[1] = { -1.909f };          /* D_800A02E8 0xBFF45A1D */
+static const f32 sSmokeU24[1] = { 1.012537f };            /* D_800A02EC 0x3F819AD0 */
+static const f32 sSmokeTail[1] = { 0.917015f };           /* D_800A02F0 0x3F6AC17F */
+static const f32 sSmokeSpeedRange[1] = { 45.600002f };    /* D_800A02F4 0x42366667 */
+static const f32 sSmokeSizeBase[1] = { 1262.0f };         /* D_800A02F8 0x449DC000 */
+static const f32 sSmokeSizeRange[1] = { 755.0f };         /* D_800A02FC 0x443CC000 */
+static const f32 sSmokeSpeedBase[1] = { 18.800001f };     /* D_800A0300 0x41966667 */
+static const f32 sSmokeU54Range[1] = { 0.559f };          /* D_800A0304 0x3F0F1AA0 */
+static const f32 sSmokeU54Base[1] = { -0.777f };          /* D_800A0308 0xBF46E979 */
+
+// blast_debris_and_smoke: an explosion at the two collision cylinders 0x4C / 0x4D: 13..21 tumbling debris pieces
+// (func_15132BBC requests from a random point of either cylinder, func_1514470C, flying out at a random angle,
+// func_15143794), 17..25 smoke puffs (func_151307F0, type 0x5103, its +0xA8 gets 0.917), then a light flash
+// (func_151D58E4) and a shock ring (func_151D5404) at cylinder 0x4C. arg0 / owner are passed on to every spawn.
+void func_150BD550(u8 arg0, s32 owner) {
+    struct {
+        f32 u00, u04;       /* 0x00: 1.0 */
+        f32 size[2];        /* 0x08 */
+        f32 rot[3];         /* 0x10: 0..360 */
+        f32 u1C[3];         /* 0x1C: 1.0 */
+        f32 pos[3];         /* 0x28 */
+        f32 vel[3];         /* 0x34 */
+        f32 spinA;          /* 0x40 */
+        f32 u44;            /* 0x44: 0.0 */
+        f32 spinB;          /* 0x48 */
+        f32 u4C;            /* 0x4C */
+        s32 u50;            /* 0x50: 0x12DE8 */
+        s16 life;           /* 0x54 */
+        s16 u56;            /* 0x56: 1 */
+        u8 u58;             /* 0x58 */
+        s32 u5C;            /* 0x5C */
+        u8 u60[11];         /* 0x60 */
+        s32 u6C;            /* 0x6C */
+        u8 u70;             /* 0x70 */
+        s16 u72;            /* 0x72: 0xC */
+        s16 u74;            /* 0x74: 0x15 */
+        s32 u78;            /* 0x78 */
+    } debris;
+    struct {
+        s32 u00;            /* 0x00: 0x200005 */
+        s32 u04;            /* 0x04 */
+        s16 type;           /* 0x08: 0x5103 */
+        s16 life;           /* 0x0A */
+        s32 u0C;            /* 0x0C */
+        s32 u10;            /* 0x10 */
+        u8 u14[10];         /* 0x14: +0x17 = random 155..255 */
+        s16 u1E;            /* 0x1E: 0x23 */
+        s16 u20;            /* 0x20: 7 */
+        s16 life2;          /* 0x22 */
+        f32 u24;            /* 0x24 */
+        f32 size[2];        /* 0x28 */
+        f32 pos[3];         /* 0x30 */
+        s32 dir[3];         /* 0x3C: D_800A5860 */
+        f32 vel[3];         /* 0x48 */
+        f32 u54;            /* 0x54 */
+        s32 flags;          /* 0x58 */
+        s32 u5C;            /* 0x5C */
+        u8 u60[7];          /* 0x60 */
+        s16 u68;            /* 0x68 */
+        f32 u6C;            /* 0x6C */
+    } smoke;
+    f32 tail;
+    u8 *cyl[2];
+    f32 at[3];
+    f32 at2[3];
+    s32 r1, r2;
+    f32 rf;
+    s16 n;
+    s32 bitA, bitB;
+    s32 i;
+    u8 *p;
+
+    cyl[0] = D_800D34B8 + sBlastCyl[0] * 0x34;
+    cyl[1] = D_800D34B8 + sBlastCyl[1] * 0x34;
+
+    /* debris */
+    n = func_150ADA20() % 9U + 13;
+    debris.u50 = 0x12DE8;
+    debris.u56 = 1;
+    debris.u58 = 0;
+    debris.u5C = 0;
+    debris.u60[0] = 0xFF;
+    debris.u60[1] = 8;
+    for (i = 2; i < 8; i++) {
+        debris.u60[i] = 0;
+    }
+    debris.u60[8] = 2;
+    debris.u60[9] = 0xFF;
+    debris.u60[10] = 2;
+    debris.u6C = 0;
+    debris.u70 = 0;
+    debris.u72 = 0xC;
+    debris.u74 = 0x15;
+    debris.u78 = 0;
+    debris.u00 = 1.0f;
+    debris.u04 = 1.0f;
+    debris.u1C[0] = 1.0f;
+    debris.u1C[1] = 1.0f;
+    debris.u1C[2] = 1.0f;
+    debris.u44 = 0.0f;
+    for (; n > 0; n--) {
+        debris.life = func_150ADA20() % 26U + 40;
+        debris.size[0] = debris.size[1] = func_150ADA68() * sBlastSizeRange[0] + sBlastSizeBase[0];
+        debris.rot[0] = func_150ADA68() * 360.0f;
+        debris.rot[1] = func_150ADA68() * 360.0f;
+        debris.rot[2] = func_150ADA68() * 360.0f;
+        debris.spinA = func_150ADA68() * sBlastSpinRange[0] + sBlastSpinBase[0];
+        debris.spinB = func_150ADA68() * sBlastSpinRange[0] + sBlastSpinBase[0];
+        func_1514470C(cyl[func_150ADA20() & 1], (u8 *) debris.pos);
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        rf = func_150ADA68();
+        func_15143794((u32) r1 % 31 - 0x54, (u32) r2 % 26 - 0x2D, rf * sBlastSpeedRange[0] + sBlastSpeedBase[0],
+                      debris.vel);
+        debris.u4C = func_150ADA68() * sBlastU4CRange[0] + sBlastU4CBase[0];
+        func_15132BBC(&debris, 3, 0xFF, 0, 0, arg0, owner);
+    }
+
+    /* smoke */
+    n = func_150ADA20() % 9U + 17;
+    smoke.u00 = 0x200005;
+    smoke.type = 0x5103;
+    smoke.u14[1] = 0xAA;
+    smoke.u04 = 0;
+    smoke.u0C = 0;
+    smoke.u10 = 0;
+    smoke.u14[0] = 0xD4;
+    smoke.u14[2] = 8;
+    smoke.u14[3] = 0xFF;
+    smoke.u14[4] = 0x15;
+    smoke.u14[5] = 4;
+    smoke.u14[6] = 0;
+    smoke.u14[8] = 0xFF;
+    smoke.u14[9] = 0x6C;
+    smoke.u1E = 0x23;
+    smoke.u20 = 7;
+    smoke.u24 = sSmokeU24[0];
+    smoke.dir[0] = ((s32 *) D_800A5860)[0];
+    smoke.dir[1] = ((s32 *) D_800A5860)[1];
+    smoke.dir[2] = ((s32 *) D_800A5860)[2];
+    bitA = (func_150ADA20() & 1) ? 0x40 : 0;
+    bitB = (func_150ADA20() & 1) ? 0x80 : 0;
+    smoke.flags = bitB | 7 | bitA | 0xCE00 | 0x20000 | 0x800000;
+    smoke.u5C = 0;
+    smoke.u60[0] = 8;
+    smoke.u60[1] = 6;
+    smoke.u60[2] = 0x10;
+    smoke.u60[3] = 0xFF;
+    smoke.u60[4] = 0xFF;
+    smoke.u60[5] = 0;
+    smoke.u60[6] = 0xFF;
+    smoke.u68 = 0;
+    smoke.u6C = 0.0f;
+    tail = sSmokeTail[0];
+    for (; n > 0; n--) {
+        smoke.life2 = smoke.life = func_150ADA20() % 31U + 0x1E;
+        smoke.u14[7] = func_150ADA20() % 101U + 0x9B;
+        smoke.size[0] = smoke.size[1] = func_150ADA68() * sSmokeSizeRange[0] + sSmokeSizeBase[0];
+        func_1514470C(cyl[func_150ADA20() & 1], (u8 *) smoke.pos);
+        r1 = func_150ADA20();
+        r2 = func_150ADA20();
+        rf = func_150ADA68();
+        func_15143794((u32) r1 % 41 - 0x59, (u32) r2 % 51 - 0x40, rf * sSmokeSpeedRange[0] + sSmokeSpeedBase[0],
+                      smoke.vel);
+        smoke.u54 = func_150ADA68() * sSmokeU54Range[0] + sSmokeU54Base[0];
+        p = (u8 *) func_151307F0((s32 *) &smoke, 1, 0, 4, arg0, owner);
+        if (p != NULL) {
+            memcpy(p + 0xA8, &tail, 4);
+        }
+    }
+
+    /* flash and shock ring at the first cylinder */
+    at[0] = ((s16 *) cyl[0])[0];
+    at[1] = ((s16 *) cyl[0])[1];
+    at[2] = ((s16 *) cyl[0])[2];
+    func_151D58E4((struct17 *) at, 0.0f, 1000.0f, 0.001f, 5, arg0, owner);
+    at2[0] = ((s16 *) cyl[0])[0];
+    at2[1] = ((s16 *) cyl[0])[1];
+    at2[2] = ((s16 *) cyl[0])[2];
+    func_151D5404((struct17 *) at2, 506.0f, 1013.0f, 0.0009871669f, 0xF, 0x14, arg0, owner);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E9450/func_150BD550.s")
+#endif

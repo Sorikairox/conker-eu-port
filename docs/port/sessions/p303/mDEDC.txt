@@ -1,0 +1,53 @@
+21s/shift = 5;/shift = 6;/ % n1 vert2 gen20
+20s/== 0x36)/== 0x37)/ % vert2 gen20 gen5
+18s/th = tex->unk8 - 1;/th = tex->unk8;/ % gen5 gen20
+19s/tw = tex->unk6;/tw = tex->unk8;/ % gen5 gen20
+30s/if (i + 1 == n) {/if (i == n) {/ % n1 vert2
+32s/dy = 1\.0f;/dy = -1.0f;/ % n1
+33s/dz = 0\.0f;/dz = 1.0f;/ % n1
+36s/dy = p\[7\] - y;/dy = p[7] + y;/ % gen5
+37s/dz = p\[8\] - z;/dz = p[8] - x;/ % gen5
+42s/ox = 100\.0f;/ox = 10.0f;/ % flat3
+43s/oy = 0\.0f;/oy = 1.0f;/ % flat3
+47s/ox = 0\.0f;/ox = 1.0f;/ % gen5
+48s/oy = dz \* inv;/oy = dx * inv;/ % gen5
+49s/oz = ndy \* inv;/oz = dy * inv;/ % gen5
+51s/ox \*= 4\.0f;/ox *= 2.0f;/ % flat3
+53s/oz \*= 4\.0f;/oz *= 2.0f;/ % gen5
+54s/(D_800BE9C0 \* n + i) \* 4;/(D_800BE9C0 * n + i) * 3;/ % gen5
+54s/(D_800BE9C0 \* n + i) \* 4;/(D_800BE9C0 + i) * 4;/ % gen5 gen7b
+56s/v\[0\]\.v\.ob\[1\] = (s32) (y + oy);/v[0].v.ob[1] = (s32) (y - oy);/ % gen5
+60s/v\[2\]\.v\.ob\[2\] = (s32) (z - oz);/v[2].v.ob[2] = (s32) (z + oz);/ % gen5
+61s/len = sqrtf(ndy \* ndy + dx \* dx);/len = sqrtf(ndy * ndy + dz * dz);/ % gen5
+63s/ox = 1\.0f;/ox = 0.0f;/ % vert2 zdir3
+65s/oz = 1\.0f;/oz = 0.0f;/ % vert2 zdir3
+68s/ox = ndy \* inv;/ox = dy * inv;/ % gen5
+69s/oy = dx \* inv;/oy = dz * inv;/ % gen5
+70s/oz = 0\.0f;/oz = 1.0f;/ % gen5
+73s/oy \*= 4\.0f;/oy *= 2.0f;/ % gen5
+75s/v\[1\]\.v\.ob\[0\] = (s32) (x + ox);/v[1].v.ob[0] = (s32) (x - ox);/ % gen5
+79s/v\[3\]\.v\.ob\[1\] = (s32) (y - oy);/v[3].v.ob[1] = (s32) (y + oy);/ % gen5
+82s/gSPSetGeometryMode(gfx++, G_CULL_BACK);/gSPSetGeometryMode(gfx++, G_CULL_FRONT);/ % n0
+83s/gSPClearGeometryMode(gfx++, G_CULL_FRONT);/gSPClearGeometryMode(gfx++, G_CULL_BACK);/ % n0
+84s/gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);/gSPTexture(gfx++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);/ % n0
+85s/gDPPipeSync(gfx++);/;/ % n0
+86s/0, 0, 0, 0, 0, 0, 0x100, 0x100,/0, 0, 0, 0, 0, 0, 0x100, 0x80,/ % n0
+87s/0x3E);/0x3F);/ % n0
+89s/0xFF33FFFF;/0xFF33FFFE;/ % n0
+91s/D_800D30BC | 0x80000 | 0x2C0F,/D_800D30BC | 0x2C0F,/ % n0
+91s/0x552078);/0x552070);/ % n0
+92s/s = ((tw + 0x100) << 5) << 16;/s = ((tw + 0x100) << 4) << 16;/ % vert2
+93s/tTop = 0x100;/tTop = 0x101;/ % vert2
+94s/tBot = th + 0x100;/tBot = th + 0x101;/ % vert2
+95s/for (i = 1; i < n; i++) {/for (i = 1; i <= n; i++) {/ % vert2
+96s/(D_800BE9C0 \* n + (i - 1)) \* 4, 8, 0);/(D_800BE9C0 * n + i) * 4, 8, 0);/ % vert2
+96s/(D_800BE9C0 \* n + (i - 1)) \* 4, 8, 0);/(D_800BE9C0 * n + (i - 1)) * 4, 7, 0);/ % vert2
+98s/gSP1Triangle(gfx++, 1, 5, 4, 0);/gSP1Triangle(gfx++, 1, 5, 3, 0);/ % vert2
+102s/gSP1Triangle(gfx++, 2, 7, 6, 0);/gSP1Triangle(gfx++, 2, 7, 5, 0);/ % vert2
+104s/gSPModifyVertex(gfx++, 4, G_MWO_POINT_ST,/gSPModifyVertex(gfx++, 5, G_MWO_POINT_ST,/ % vert2
+104s/s | (tBot << shift));/s | (tTop << shift));/ % flat3
+106s/gSP1Triangle(gfx++, 0, 4, 7, 0);/gSP1Triangle(gfx++, 0, 4, 6, 0);/ % vert2
+107s/if (i == 1) {/if (i == 2) {/ % vert2
+109s/gSP1Triangle(gfx++, 3, 2, 0, 0);/gSP1Triangle(gfx++, 3, 1, 0, 0);/ % vert2
+111s/tTop += th;/tTop += tw;/ % flat3 gen5
+112s/tBot += th;/tBot += 1;/ % flat3 gen5

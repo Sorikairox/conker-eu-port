@@ -48,6 +48,34 @@ s32 func_10023DA0(OSPiHandle *pihandle, s32 direction, u32 devAddr, void *dramAd
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* P279: readable C for libultra's hand-asm bcopy (also replaced on PC by port/ultra/pc_libc.c vbe.bcopy). The asm
+ * also returns dst in v0; the libultra prototype is void (v0use.py: only func_15177F90 passes it on as its own
+ * return value, and nothing reads that). */
+// bcopy: memmove(dst, src, n) for n >= 0: copies forward when dst is below src or past the source's end (signed
+// address compares, as the asm), backward otherwise, so overlapping ranges are safe. The asm's word / 16-byte
+// blocks for co-aligned ranges only change speed.
+void bcopy(const void *src, void *dst, int n) {
+    const u8 *s = src;
+    u8 *d = dst;
+
+    if (n == 0 || s == d) {
+        return;
+    }
+    if ((s32) d < (s32) s || (s32) d >= (s32) s + n) {
+        while (n-- > 0) {
+            *d++ = *s++;
+        }
+    } else {
+        s += n;
+        d += n;
+        while (n-- > 0) {
+            *--d = *--s;
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/bcopy.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/init_eu_23CC0/func_10024190.s")

@@ -1,0 +1,34 @@
+\#^    if (obj->interaction_state == 20) {$#s/20/21/
+\#^        if (obj->unk2E4 == 0) {$#s/==/!=/
+\#^            func_151BA1A0(0x2F, 1, (s16) (s32) obj->x_position, (s16) (s32) (obj->y_position + 30.0f),$#s/30.0f/31.0f/
+\#^                          (s32) obj->z_position, 2000, 1000, 400, 200, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);$#s/400, 200/400, 300/
+\#^                          (s32) obj->z_position, 2000, 1000, 400, 200, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);$#s/1, 1, 0, 0xFF/1, 2, 0, 0xFF/
+\#^            func_15188D80(obj, 100, 0);$#s/100/101/
+\#^    if (obj->y_velocity < 0.0f && 20.0f < obj->unk28 && obj->unk136 == 0 &&$#s/20.0f < /21.0f < /
+\#^    if (obj->y_velocity < 0.0f && 20.0f < obj->unk28 && obj->unk136 == 0 &&$#s/unk136 == 0/unk136 != 0/
+\#^        obj->unk28 < -20.0f \* obj->y_velocity) {$#s/-20.0f/-10.0f/
+\#^        func_10010630(0x92, obj, 0x7D00, 200, 2500);$#s/2500/2501/
+\#^        obj->unk136 = 1;$#s/1/2/
+\#^    if (obj->unk83 == 0) {$#s/==/!=/
+\#^        obj->unk148 = 70.0f;$#s/70/71/
+\#^                          (s32) obj->z_position, 2200, 1280, 800, 700, 0xC00, 0xC00, 20, 1, 0, 0xFF, 0);$#s/20, 1, 0/21, 1, 0/
+\#^                          (s32) obj->z_position, 2200, 1280, 800, 700, 0xC00, 0xC00, 20, 1, 0, 0xFF, 0);$#s/2200, 1280/2200, 1281/
+\#^            func_150C1B60(obj->x_position, obj->y_position + 30.0f, obj->z_position, 0xFF);$#s/0xFF)/0xFE)/
+\#^            func_150C1B60(obj->x_position, obj->y_position + 30.0f, obj->z_position, 0xFF);$#s/obj->z_position, 0xFF/obj->x_position, 0xFF/
+\#^            func_1506B04C(obj, 6, NULL);$#s/6/7/
+\#^        func_10010344(0x1A9, obj, 0x7FFF, 1000, 2000);$#s/1000/999/
+\#^        obj->unkD0 = 1;$#s/1/0/
+\#^        obj->unkF8 |= 0x1008000;$#s/0x1008000/0x1000000/
+\#^        obj->unk114 = 500.0f;$#s/500/501/
+\#^    obj->immune = 0xFF;$#s/0xFF/0xFE/
+\#^    if (obj->unk83 >= 11) {$#s/11/12/
+\#^        obj->unkF8 &= ~0x8000;$#s/0x8000/0x8001/
+\#^    obj->unk40 = (f32) (obj->unk7A + 0x4000) \* 0.0054931640625f;$#s/(f32) (obj/(f32) (s16) (obj/
+\#^    obj->unkB8 += obj->unk148;$#s/+=/-=/
+\#^    obj->unk148 \*= 0.96f;$#s/0.96f/0.95f/
+\#^    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {$#s/>= 21/>= 22/
+\#^    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {$#s/unkCC == 0/unkCC != 0/
+\#^    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {$#s/ || obj->health == 0//
+\#^    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {$#s/ || obj->unk107 != 0//
+\#^        func_10010630(0x93, obj, 0x7D00, 200, 2500);$#s/0x93/0x92/
+\#^        func_15060F28(obj, 1);$#s/1)/0)/

@@ -4063,7 +4063,233 @@ s8 func_151E6758(void) {
     return D_80090130;
 }
 
+#ifdef NON_MATCHING
+extern s16 D_8009015C;
+extern u8 D_800E0FE8[];
+s32 func_150ADA20(void);
+s32 func_1000F568(s32, s32);
+void func_10010558(u16, struct127 *, s32, s32, s32, s32);
+
+/* Per-player multiplayer stats in the menu record D_80090174: s16 counters at 0x46 + 2 * player and in 12-byte
+ * rows at 0x66 + 12 * player. */
+#define MP_KILLS(p) (*(s16 *)(D_80090174 + 0x46 + (p) * 2))
+#define MP_ROW(p, off) (*(s16 *)(D_80090174 + (p) * 0xC + (off)))
+
+// mp_report_hit: multiplayer hit report. `attacker` hit `victim` with damage kind `kind`. The scoring player is the
+// attacker's slot in D_800CC2D0 or, for a non-player attacker, its owner (unk124 = slot + 1); no player -> nothing.
+// Marks the victim's last hitter (D_800E0FE8[victim] = player | 0x80); for human players (< D_80090130) counts hits
+// on other teams (D_800E1030 = team; row +0x66, +0x6A for kind 0x2E) and team kills (row +0x70, not kind 0x2D); a
+// kill of another team's player raises the kill score (+0x46, capped at 9999; func_15085710 when flag 0x200 of
+// D_8009015C is set); the victim counts a hit taken (row +0x6E). Then the scoring character (by id 0x75 / 0x80 /
+// 0x3B / 0x88) may say a taunt: sound id (func_1000F568 picks one of `n` variants) played by func_10010558.
+// Kind 0x33 instead plays sound 0x510 on the victim when its character type (unk31C + 0x78) is 0x21 / 0x22.
+void func_151E67A0(struct127 *attacker, struct127 *victim, s32 kind) {
+    struct127 *src = attacker;
+    s32 player = (s32)((u8 *)attacker - (u8 *)D_800CC2D0) / 0x32C;
+    s32 vi;
+    s32 sound;
+    s32 n;
+    s32 arg5;
+    s32 mode;
+    s32 r;
+
+    if (player >= D_8008FD8C) {
+        player = attacker->unk124 - 1;
+        if (player >= 0) {
+            src = &D_800CC2D0[player];
+        }
+    }
+    if (player < 0 || player >= D_8008FD8C) {
+        return;
+    }
+    vi = (s32)((u8 *)victim - (u8 *)D_800CC2D0) / 0x32C;
+    D_800E0FE8[vi] = player | 0x80;
+    if (player < D_80090130) {
+        if (D_800E1030[player] != D_800E1030[vi]) {
+            MP_ROW(player, 0x66)++;
+            if (kind == 0x2E) {
+                MP_ROW(player, 0x6A)++;
+            }
+        }
+        if (victim->health == 0 && D_800E1030[player] == D_800E1030[vi] && kind != 0x2D) {
+            MP_ROW(player, 0x70)++;
+        }
+    }
+    if (victim->health == 0 && MP_KILLS(player) < 9999 && D_800E1030[player] != D_800E1030[vi]) {
+        MP_KILLS(player)++;
+        if ((u16)D_8009015C & 0x200) {
+            func_15085710(D_800E1030[player] != 0, 10, 1);
+        }
+    }
+    if (vi < D_80090130) {
+        MP_ROW(vi, 0x6E)++;
+    }
+    if (src == victim || victim->unk31C == NULL || src->health == 0) {
+        return;
+    }
+    sound = 0;
+    *((u8 *)src->unk31C + 0xAF) = 0;
+    arg5 = 0;
+    n = 0;
+    if (kind == 0x33) {
+        r = *((u8 *)victim->unk31C + 0x78);
+        if (r == 0x21 || r == 0x22) {
+            func_10010630(0x510, victim, 0x61A8, 0x12C, 0x190);
+        }
+        return;
+    }
+    if (src->id == 0x75 && victim->health == 0) {
+        if (victim->id == 0x75) {
+            if (vi < D_80090130 && MP_ROW(vi, 0x70) >= 4) {
+                sound = 0x665;
+                n = 4;
+            }
+        } else if (kind == 0x34) {
+            if ((func_150ADA20() & 3) == 3) {
+                sound = 0x52A;
+            }
+        } else {
+            sound = 0x4D1;
+            n = 3;
+        }
+        if (sound == 0) {
+            return;
+        }
+        if (n != 0) {
+            sound = func_1000F568(sound, n);
+        }
+        func_10010558((u16)sound, src, 0x6D60, 0x320, 0xBB8, 0);
+    } else if (src->id == 0x80) {
+        mode = -1;
+        if (attacker != src && attacker->interaction_state == 4) {
+            mode = (u16)attacker->unk278;
+        }
+        if (victim->id == 0x80) {
+            if (vi < D_80090130 && MP_ROW(vi, 0x70) >= 4) {
+                n = 8;
+                sound = 0x65A;
+            }
+        } else if (mode == 2) {
+            if (victim->health == 0 || (func_150ADA20() & 7) == 0) {
+                sound = 0x571;
+                n = 3;
+            }
+        } else if (*((u8 *)victim->unk31C + 0x1AC) != 0) {
+            if (kind != 0x21 && (victim->health == 0 || (func_150ADA20() & 3) == 3)) {
+                n = 4;
+                sound = 0x582;
+                arg5 = 25;
+            }
+        } else if (kind == 0x2E) {
+            arg5 = 25;
+            if (*((u8 *)src->unk31C + 0x78) == 0x23 && (func_150ADA20() & 3) == 0) {
+                sound = 0x587;
+            } else {
+                sound = 0x579;
+                n = 3;
+            }
+        } else if (kind == 0x2F) {
+            if (func_150ADA20() & 1) {
+                sound = 0x588;
+                arg5 = 25;
+            }
+        } else if (kind == 0x2C) {
+            sound = 0x56D;
+            n = 7;
+            arg5 = 50;
+        } else if (kind == 0x21 || kind == 0x20 || kind == 0x31) {
+            if (victim->health == 0 || (func_150ADA20() & 7) == 3) {
+                sound = 0x571;
+                n = 3;
+                arg5 = 25;
+            }
+        }
+        if (sound == 0) {
+            return;
+        }
+        if (n != 0) {
+            sound = func_1000F568(sound, n);
+        }
+        func_10010558((u16)sound, src, 0x7D00, 0x258, 0x7D0, arg5);
+    } else if (src->id == 0x3B) {
+        mode = -1;
+        if (attacker != src && attacker->interaction_state == 4) {
+            mode = (u16)attacker->unk278;
+        }
+        if (mode == 2) {
+            if (victim->health == 0 || (func_150ADA20() & 7) == 7) {
+                sound = 0x538;
+                n = 3;
+            }
+        } else if (kind == 0x2E) {
+            sound = 0x52F;
+            n = 3;
+            arg5 = 25;
+        } else if (kind == 0x2C || kind == 0x2F) {
+            sound = 0x540;
+            n = 2;
+            arg5 = 50;
+        } else if (kind == 0x25 || kind == 0x26) {
+            if (player & 1) {
+                if (victim->health >= 2) {
+                    sound = 0x55F - victim->health;
+                    arg5 = 25;
+                }
+            } else {
+                sound = 0x565 - victim->health;
+                arg5 = 25;
+            }
+        } else if (kind == 0x21) {
+            if ((func_150ADA20() & 3) == 3) {
+                sound = 0x52C;
+                arg5 = 25;
+            }
+        } else if (kind == 0x20) {
+            r = func_150ADA20() & 0xF;
+            if (r != 0) {
+                r++;
+            }
+            if (r < 4) {
+                sound = r + 0x52B;
+                arg5 = 25;
+            }
+        }
+        if (sound == 0) {
+            return;
+        }
+        if (n != 0) {
+            sound = func_1000F568(sound, n);
+        }
+        func_10010558((u16)sound, src, 0x7D00, 0x258, 0x7D0, arg5);
+    } else if (src->id == 0x88) {
+        if (victim->health != 0) {
+            return;
+        }
+        if (kind == 0x34) {
+            if ((func_150ADA20() & 3) == 3) {
+                sound = 0x52A;
+            }
+        } else if (kind == 0x21) {
+            sound = 0x41A;
+        } else {
+            sound = 0x415;
+            arg5 = 25;
+            n = 5;
+        }
+        if (sound == 0) {
+            return;
+        }
+        if (n != 0) {
+            sound = func_1000F568(sound, n);
+        }
+        func_10010558((u16)sound, src, 0x6D60, 0x320, 0xBB8, arg5);
+    }
+}
+#undef MP_KILLS
+#undef MP_ROW
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_20B730/func_151E67A0.s")
+#endif
 
 #ifdef NON_MATCHING
 /* Load the text bank `bank` (1, 2, 4: picked per game mode by func_151E5928) for the current language.

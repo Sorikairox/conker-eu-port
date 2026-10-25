@@ -496,7 +496,8 @@ s32 func_150B3668(s32 mode, s16 index, f32 px, f32 py, f32 pz, f32 cx, f32 cy, f
 #endif
 
 #ifdef NON_MATCHING
-s32 func_150B3B8C(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, f32 arg4) {
+/* P317: NM signature = D_80089CD4's dispatcher type (wasm call_indirect); args 1..3 / 5 unused */
+s32 func_150B3B8C(u8 *arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, u8 *arg5) {
     f32 temp_f0;
     f32 temp_f2;
     s32 temp_t1;

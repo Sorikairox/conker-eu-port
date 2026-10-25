@@ -1,0 +1,34 @@
+\#^    if ((state & 3) == 3) {$#s/== 3/== 1/
+\#^    if ((state & 3) == 2) {$#s/== 2/== 0/
+\#^        if (angle == \*(f32 \*) obj) {$#s/==/!=/
+\#^            obj\[0x73\] = (obj\[0x73\] & ~3) | 3;$#s/| 3/| 1/
+\#^            \*(f32 \*) obj = 0\.0f;$#s/0\.0f/1.0f/
+\#^    if (obj\[0x4F\] & 4) {$#s/4/8/
+\#^        if ((\*(u8 \*\*) (player + 0x31C))\[0x57\] != 0) {$#s/0x57/0x56/ % grab
+\#^            obj\[0x73\] = (state & ~3) | 2;$#s/| 2/| 1/ % grab
+\#^            \*(s32 \*) (obj + 0x3C) = 0;$#s/0;/1;/ % grab
+\#^            \*(f32 \*) (obj + 0x7C) = 0\.5f;$#s/0\.5f/0.6f/ % grab
+\#^            \*(f32 \*) (obj + 0x80) = 0\.3f;#s/0\.3f/0.25f/ % grab
+\#^        dz = \*(s16 \*) (obj + 0x14) - \*(f32 \*) (player + 0x1C);$#s/0x1C/0x18/
+\#^        dx = \*(s16 \*) (obj + 0x10) - \*(f32 \*) (player + 0x14);$#s/s16/u16/ % mid
+\#^        dist = sqrtf(dz \* dz + (dx \* dx + dy \* dy));$#s/dy \* dy/dy * dz/
+\#^        if (740\.0f < dist) {$#s/740/700/ % mid
+\#^            dist = 740\.0f;$#s/740/741/ % farneg
+\#^        target = dist \* 0\.010810811f#s/+ -40\.0f/+ -41.0f/
+\#^        target = dist \* 0\.010810811f#s/0\.010810811f/0.0108f/
+\#^        target = -40\.0f;$#s/-40/-41/
+\#^    if (angle == target && vel == 0\.0f) {$#s/&&/||/
+\#^    angle += vel \* D_800BE9E4;$#s/+=/-=/
+\#^    diff = func_15048A70(angle, target);$#s/angle, target/target, angle/
+\#^    if (0\.0f < diff) {$#s/</<=/ % zero
+\#^        vel += fabsf(diff) \* stiffness;$#s/stiffness/damping/
+\#^        vel -= fabsf(diff) \* stiffness;$#s/-=/+=/
+\#^    vel \*= damping;$#s/damping/stiffness/
+\#^    if (fabsf(diff) < 0\.01f#s/fabsf(diff) < 0\.01f/fabsf(diff) < 0.02f/ % snap2
+\#^    if (fabsf(diff) < 0\.01f#s/&& fabsf(vel)/|| fabsf(vel)/
+\#^        angle = target;$#s/target/0.0f/ % snap
+\#^    } else if (angle < 0\.0f) {$#s/angle < 0\.0f/angle > 0.0f/
+\#^        angle += 360\.0f;$#s/360/361/ % wrapneg
+\#^    } else if (360\.0f <= angle) {$#s/<=/</
+\#^        angle -= 360\.0f;$#s/360/359/ % wrappos
+\#^    \*(f32 \*) (obj + 0x84) = vel;$#s/0x84/0x80/

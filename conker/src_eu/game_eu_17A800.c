@@ -9,6 +9,8 @@ extern f32 D_800A6238;
 
 s32 func_1514F2FC(u8 *, u8 *);
 
+void func_1501175C(u8 *, u8, s32);
+
 s32 func_1514F2AC(u8 *, s32, u8 **);
 
 u8 *func_15160A58(struct127 *, s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);

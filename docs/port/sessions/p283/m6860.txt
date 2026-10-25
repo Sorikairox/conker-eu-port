@@ -1,0 +1,30 @@
+\#^    u8 \*obj = #s/0x32C/0x328/
+\#^    s16 \*vtx = #s/\[idx\]/[idx + 1]/
+\#^    u16 type = #s/0x84/0x86/
+\#^    u16 type = #s/u16/s8/
+\#^    f32 h = #s/+ 8)/+ 4)/
+\#^    if (type == 0x3E #s/0x3E/0x3F/
+\#^    if (type == 0x3E #s/0x41/0x42/
+\#^    if (type == 0x3E #s/h >= 36/h > 36/
+\#^    if (type == 0x3E #s/0x138 \&\&/0x139 \&\&/
+\#^        ((type == 0x3D #s/h > 21/h >= 21/
+\#^        ((type == 0x3D #s/0xD9/0xD8/
+\#^        func_150A7E40(mfA, #s/-17\.0f/-7.0f/
+\#^        func_150A7E40(mfA, #s/mfA/mfB/
+\#^        cur\[1\] = (s32) y;#s/y/x/
+\#^        cur\[2\] = (s32) z;#s/cur\[2\]/cur[1]/
+\#^        if (((type == 0x3D #s/h > 7\.0f/h >= 7.0f/
+\#^        if (((type == 0x3D #s/0x139/0x13A/
+\#^        if (((type == 0x3D #s/(type == 0x3D || type == 0xD9)/(type == 0xD9)/
+\#^            rate = 1\.0f;#s/1\.0f/0.5f/
+\#^        x = (vtx\[0x18\] #s/0x18/0x17/
+\#^        y = (vtx\[0x19\] #s/0x11/0x10/
+\#^        z = (vtx\[0x1A\] #s/0\.5f/0.25f/
+\#^        func_150A7E40(mfB, #s/\&tz)/\&tx)/
+\#^        cur = D_800C43E4\[idx\];#s/idx/idx + 1/
+\#^        cur\[0\] = (s32) (cx #s/(tx - cx)/(cx - tx)/
+\#^        cur\[1\] = (s32) (cy #s/\* rate/* 0.5f/
+\#^        cur\[2\] = (s32) (cz #s/cz +/tz +/
+\#^        y = cur\[1\];#s/1/2/
+\#^    vtx\[0\] = (s32) x;#s/) x;/) y;/
+\#^    vtx\[2\] = (s32) z;#s/vtx\[2\]/vtx[3]/

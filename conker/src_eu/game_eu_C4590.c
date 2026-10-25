@@ -19,7 +19,78 @@ s32 func_15096DB0(s32 arg0)
   return 0;
 }
 
+#ifdef NON_MATCHING
+extern f32 D_800C3A20[];
+extern s32 D_800DC450;
+extern f32 D_800D31D8;
+extern s32 D_800D3250[];
+void func_1512DAD0(struct108 *, s32, void *);
+
+// camera_timed_record_update: steps timed camera record `idx` (D_800D31E0, 0x24 bytes, filled by camera script op 12:
+// +1 camera id, +2 marker, +4 s16 timer, +0xC flags, +0x10 f32 speed, +0x20 saved +0x3A4). State 1 starts it: saves the
+// camera's +0x2C0, builds the D_800C3A20 path record from marker D_800DC450[+2] (as op 10), switches the camera to
+// modes 5 / 7, hides the camera object (+7 = 0, flag 0x200) unless flags bit 0, stores the speed as an int in
+// D_800D3250[idx] and goes to state 2. State 2 counts the timer down by D_800BE9A0 (to 0 at once when the camera
+// object's +0x1CA is 0); at 0 it restores +0x3A4 / +0x2C0, leaves mode 6 (unless flags bit 1), shows the object again
+// (unless bit 0) and clears the record. Returns 0 when the record ended this call, 1 otherwise.
+s32 func_15096E78(s32 idx) {
+    u8 *rec = D_800D31E0 + idx * 0x24;
+    struct108 *cam;
+    u8 *mk;
+
+    if (rec[0] == 1) {
+        cam = (struct108 *) ((u8 *) D_800DBFF0 + rec[1] * 0x9A0);
+        D_800D31D8 = cam->unk2C0;
+        D_800D2DB4 = 1;
+        D_800DBFF4[rec[1]] = 3;
+        mk = (u8 *) D_800DC450 + rec[2] * 0x18;
+        ((s32 *) D_800C3A20)[0] = 1;
+        ((s32 *) D_800C3A20)[1] = 0;
+        D_800C3A20[5] = (f32) *(s16 *) (mk + 0);
+        D_800C3A20[6] = (f32) *(s16 *) (mk + 2);
+        D_800C3A20[7] = (f32) *(s16 *) (mk + 4);
+        D_800C3A20[8] = *(f32 *) (mk + 0x14);
+        D_800C3A20[9] = *(f32 *) (mk + 0xC);
+        D_800C3A20[2] = 0.0f;
+        D_800C3A20[10] = *(f32 *) (mk + 0x10);
+        func_1512DAD0(cam, 5, NULL);
+        func_1512DAD0(cam, 7, D_800C3A20);
+        if (!(*(s32 *) (rec + 0xC) & 1)) {
+            *((u8 *) cam->unk3D0 + 7) = 0;
+            *(s32 *) ((u8 *) cam->unk3D0 + 0x25C) |= 0x200;
+        }
+        D_800D3250[idx] = (s32) *(f32 *) (rec + 0x10);
+        rec[0] = 2;
+        return 1;
+    }
+    if (rec[0] == 2) {
+        cam = (struct108 *) ((u8 *) D_800DBFF0 + rec[1] * 0x9A0);
+        *(s16 *) (rec + 4) -= D_800BE9A0;
+        if (*((u8 *) cam->unk3D0 + 0x1CA) == 0) {
+            *(s16 *) (rec + 4) = 0;
+        }
+        if (*(s16 *) (rec + 4) > 0) {
+            return 1;
+        }
+        *(f32 *) ((u8 *) cam + 0x3A4) = *(f32 *) (rec + 0x20);
+        if (!(*(s32 *) (rec + 0xC) & 2)) {
+            func_1512DAD0(cam, 6, NULL);
+        }
+        D_800D2DB4 = 0;
+        if (!(*(s32 *) (rec + 0xC) & 1)) {
+            *(s32 *) ((u8 *) cam->unk3D0 + 0x25C) &= ~0x200;
+            *((u8 *) cam->unk3D0 + 7) = 0xFF;
+        }
+        *(s16 *) (rec + 4) = 0;
+        rec[0] = 0;
+        cam->unk2C0 = D_800D31D8;
+        return 0;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C4590/func_15096E78.s")
+#endif
 
 s32 func_15096E78(s32);
 

@@ -1,0 +1,29 @@
+\#^    func_15145740((struct127 \*) obj, #s/(s32) dir, (s32) side/(s32) side, (s32) dir/
+\#^    dir\[1\] \*= D_800AAE94\[0\];#s/D_800AAE94/D_800AAE98/
+\#^    if (\*(u8 \*\*) (obj + 0x1D4) != NULL) {#s/!=/==/
+\#^        out\[1\] = end;#s/end/start/
+\#^        att = func_15031C4C(obj, 0x46, 0);#s/0x46/0x45/
+\#^        if (func_1514654C(obj, att, 0, in, out, 2) == 0) {#s/, 2)/, 1)/
+\#^        func_151C5C54((u8 \*) start, flag, arg2);#s/start/end/
+\#^        if (func_150ADA20() \& 1) {#s/\& 1/\& 2/
+\#^            func_151C5B38((s32) obj, (s32) start, 0x46, flag, arg2);#s/0x46/0x47/
+\#^            func_151C5B38((s32) obj, (s32) start, 0x46, flag, arg2);#s/flag, arg2/flag, 0/
+\#^        start\[1\] = \*(f32 \*) (obj + 0x18) + 106\.0f;#s/106/107/
+\#^        start\[2\] = \*(f32 \*) (obj + 0x1C);#s/0x1C/0x18/
+\#^        end\[0\] = dir\[0\] \* -82\.0f#s/-82/82/
+\#^        end\[2\] = dir\[2\] \* -82\.0f + start\[2\];#s/start\[2\]/start[1]/
+\#^        start\[0\] -= dir\[0\] \* -120\.0f;#s/-=/+=/
+\#^        start\[1\] -= dir\[1\] \* -120\.0f;#s/-120/-82/
+\#^    func_151C284C((u8 \*) start, NULL, #s/(u8 \*) end, (u8 \*) dir/(u8 *) dir, (u8 *) end/
+\#^    func_151C284C((u8 \*) start, NULL, #s/300\.0f/200.0f/
+\#^    func_151C284C((u8 \*) start, NULL, #s/D_800AAE98/D_800AAE94/
+\#^    func_151C284C((u8 \*) start, NULL, #s/a \* 10\.0f + 25\.0f/b * 10.0f + 25.0f/
+\#^                  b \* 150\.0f + 400\.0f#s/400/300/
+\#^                  b \* 150\.0f + 400\.0f#s/80\.0f/90.0f/
+\#^                  b \* 150\.0f + 400\.0f#s/+ 200, obj/+ 201, obj/
+\#^                  b \* 150\.0f + 400\.0f#s/obj, 1, 1, 0/obj, 1, 0, 0/
+\#^                  b \* 150\.0f + 400\.0f#s/0xFF : 0x80/0xFF : 0x7F/
+\#^                  0, 1, 0, 0x1A#s/0x1A/0x1B/
+\#^                  0, 1, 0, 0x1A#s/? -1 : 2/? -1 : 1/
+\#^                  0, 1, 0, 0x1A#s/flag, arg2)/flag, 0)/
+\#^                  0, 1, 0, 0x1A#s/0xFF, D_800BE616/0xFE, D_800BE616/

@@ -7,9 +7,9 @@ extern u8 D_800A0430[];
 #endif
 
 #ifdef NON_MATCHING
-s32 func_15116A8C(u8 *, s32, s32, f32); /* P95: f32 parameter */
+void func_15116A8C(u8 *, s32, s32, f32); /* P95: f32 parameter */
 #else
-s32 func_15116A8C(u8 *, s32, s32, s32);
+void func_15116A8C(u8 *, s32, s32, s32);
 #endif
 
 void func_150BE710(u8 *arg0)

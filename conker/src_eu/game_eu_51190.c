@@ -1498,7 +1498,8 @@ extern s16 *D_eu_800C3C88[4][30];   /* per player and track: s16 x, y, z */
 extern s32 *D_800C3A00[4];          /* per player: word table indexed by w6 */
 extern s32 D_8008CDF0;
 extern u8 *D_8008AF88[];
-extern f32 D_800AAE70[];
+/* func_151C5280's .s rodata (game_eu_1F3040) is dropped in the NM link: local copy of its first muzzle point */
+static const f32 D_800AAE70[3] = { -113.828796f, -14.0823936f, 14.5422001f };
 extern char D_80096DEC[];          /* "Cutscene 2" */
 
 extern u8 D_800844D8[3][6];         /* sub 0x11 colour sets (.data) */

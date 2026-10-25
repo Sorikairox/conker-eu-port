@@ -1,0 +1,27 @@
+\#^    rec->flags16 |= 4;$#s/4/8/
+\#^    sn = sinf(rec->angY \* D_80096A40);$#s/angY/angX/
+\#^    cs = cosf(rec->angY \* D_80096A44);$#s/D_80096A44/D_80096A40/
+\#^    c\[0\]\[0\] = rec->halfX \* cs + cx + rec->halfZ \* sn;$#s/+ rec->halfZ/- rec->halfZ/
+\#^    c\[0\]\[1\] = rec->halfZ \* cs + cz - rec->halfX \* sn;$#s/+ cz/+ cx/
+\#^    c\[1\]\[0\] = rec->halfX \* cs + cx + (f32) -rec->halfZ \* sn;$#s/(f32) -rec/(f32) rec/
+\#^    c\[1\]\[1\] = (f32) -rec->halfZ \* cs + cz - rec->halfX \* sn;$#s/- rec->halfX/+ rec->halfX/
+\#^    c\[2\]\[0\] = (f32) -rec->halfX \* cs#s/cs + cx/sn + cx/
+\#^    c\[2\]\[1\] = (f32) -rec->halfZ \* cs + cz#s/cs + cz/cs + cx/
+\#^    c\[3\]\[1\] = rec->halfZ \* cs + cz - (f32) -rec->halfX \* sn;$#s/rec->halfZ \* cs/rec->halfX * cs/
+\#^    blk.c1\[1\] = c\[1\]\[1\];$#s/c\[1\]\[1\]/c[0][1]/
+\#^    blk.c2\[0\] = c\[2\]\[0\];$#s/c\[2\]\[0\]/c[3][0]/
+\#^    blk.e0\[0\] = c\[0\]\[0\] - c\[1\]\[0\];$#s/- c/+ c/
+\#^    blk.e1\[1\] = c\[3\]\[1\] - c\[2\]\[1\];$#s/c\[3\]\[1\]/c[3][0]/
+\#^    blk.top = rec->y + rec->height;$#s/+ rec->height/- rec->height/
+\#^    blk.bottom = rec->y;$#s/rec->y/rec->z/
+\#^    blk.p0 = (rec->params & 0xFF)#s/0.5f/0.25f/
+\#^    blk.p1 = ((rec->params >> 8) & 0xFF)#s/>> 8/>> 9/
+\#^    blk.zero = 0.0f;$#s/0.0f/1.0f/
+\#^    blk.p2 = ((rec->params >> 16) & 0xFF)#s/250.0f/251.0f/
+\#^    blk.p3 = ((rec->params >> 24) & 0xFF)#s/0.00390625f/0.0039f/
+\#^    blk.colour\[0\] = rec->colour;$#s/rec->colour/rec->colour >> 8/
+\#^    blk.colour\[3\] = rec->colour >> 24;$#s/24/16/
+\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x2C#s/0x2C/0x2D/
+\#^    e = (u8 \*) func_15149130(0x12C, -1, 0x2C#s/0xFF, 0)/0xFF, 1)/
+\#^        memcpy(e + 0x28, &blk, 0x40);$#s/0x28/0x2C/
+\#^    return 1;$#s/1/0/

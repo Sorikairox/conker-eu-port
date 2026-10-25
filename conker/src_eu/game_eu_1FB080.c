@@ -1093,7 +1093,122 @@ s32 func_151CF6D0(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF6D0.s")
 #endif
+#ifdef NON_MATCHING
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+
+// ribbon_trail_draw: draws a trail ribbon (same draw-handler shape as func_151CE3D0). Needs at least 2 points
+// (+0x2C) and, when the owner record (*+0x98) exists, its +0x1D4 drawable. Vertices come from func_151D6310 (slot
+// `slot`, 0x20 bytes per point + 0xA0). The render state is flat colour (0xED, 0xD2, 0x85, 200) with
+// D_800A4EA8 combine words. The points (+0x94, 0x28 bytes: position at +0, side offset x / z at +0x18 / +0x1C,
+// scale +0x14, centre offset x / z at +0x20 / +0x24) form a ring buffer of +0x25 entries walked backwards from the
+// head (+0x2E - 1) to the tail (+0x2D); each point gives two vertices (position +- side offset + scaled centre
+// offset) and each segment one quad (gSPVertex of the last 4 vertices + two triangles).
+u8 *func_151CF930(u8 *rope, u8 *gdl, s16 slot) {
+    u8 *pts;
+    u8 *owner;
+    u8 *p;
+    u8 *q;
+    s16 *vtx;
+    u8 flag;
+    s32 cur;
+    s32 next;
+    f32 a[3];
+    f32 aSide[2];
+    f32 b[3];
+    f32 bSide[2];
+    f32 bOffX;
+    f32 bOffZ;
+    f32 aOffX;
+    f32 aOffZ;
+    u32 *g;
+
+    if ((s8) rope[0x2C] < 2) {
+        return gdl;
+    }
+    owner = **(u8 ***) (rope + 0x98);
+    pts = *(u8 **) (rope + 0x94);
+    if (owner != NULL && *(s32 *) (owner + 0x1D4) == 0) {
+        return gdl;
+    }
+    func_151D6310((s32 *) (rope + 0x84), slot, (rope[0x25] << 5) + 0xA0, (s32 *) &vtx, NULL);
+    flag = 1;
+    gdl = (u8 *) func_15142C10((Gfx *) gdl, 0xED, 0xD2, 0x85, 200, &flag);
+    gdl = (u8 *) func_15142B7C((s32) gdl, 0x200005, 0x1F0600);
+    gdl = (u8 *) func_1513F4E4((s32) gdl, 0x54, (s8 *) &flag);
+    gdl = func_15142FBC((s32) gdl, D_800D30BC | 0x80000 | 0x2CA0,
+                        *(s32 *) (D_800A4EA8 + 0xC) | *(s32 *) (D_800A4EA8 + 0x8), (s8 *) &flag);
+    cur = (s8) rope[0x2E] - 1;
+    if (cur < 0) {
+        cur = rope[0x25] - 1;
+    }
+    next = cur - 1;
+    if (next < 0) {
+        next = rope[0x25] - 1;
+    }
+    p = pts + cur * 0x28;
+    q = pts + next * 0x28;
+    a[0] = *(f32 *) (p + 0x0);
+    a[1] = *(f32 *) (p + 0x4);
+    a[2] = *(f32 *) (p + 0x8);
+    aSide[0] = *(f32 *) (p + 0x18);
+    aSide[1] = *(f32 *) (p + 0x1C);
+    aOffX = *(f32 *) (p + 0x20) * *(f32 *) (p + 0x14);
+    aOffZ = *(f32 *) (p + 0x24) * *(f32 *) (p + 0x14);
+    b[0] = *(f32 *) (q + 0x0);
+    b[1] = *(f32 *) (q + 0x4);
+    b[2] = *(f32 *) (q + 0x8);
+    bSide[0] = *(f32 *) (q + 0x18);
+    bSide[1] = *(f32 *) (q + 0x1C);
+    bOffX = *(f32 *) (q + 0x20) * *(f32 *) (q + 0x14);
+    bOffZ = *(f32 *) (q + 0x24) * *(f32 *) (q + 0x14);
+    vtx[0] = (s32) (a[0] + aSide[0] + aOffX);
+    vtx[1] = (s32) a[1];
+    vtx[2] = (s32) (a[2] + aSide[1] + aOffZ);
+    vtx[3] = 0;
+    vtx += 8;
+    vtx[0] = (s32) (a[0] - aSide[0] + aOffX);
+    vtx[1] = (s32) a[1];
+    vtx[2] = (s32) (a[2] - aSide[1] + aOffZ);
+    vtx[3] = 0;
+    vtx += 8;
+    do {
+        cur = next;
+        vtx[0] = (s32) (b[0] + bSide[0] + bOffX);
+        vtx[1] = (s32) b[1];
+        vtx[2] = (s32) (b[2] + bSide[1] + bOffZ);
+        vtx[3] = 0;
+        vtx += 8;
+        vtx[0] = (s32) (b[0] - bSide[0] + bOffX);
+        vtx[1] = (s32) b[1];
+        vtx[2] = (s32) (b[2] - bSide[1] + bOffZ);
+        vtx[3] = 0;
+        vtx += 8;
+        g = (u32 *) gdl;
+        g[0] = 0x01004008; /* gSPVertex: 4 vertices */
+        g[1] = (u32) (vtx - 0x20);
+        g[2] = 0x06000204; /* gSP2Triangles */
+        g[3] = 0x00020604;
+        gdl += 0x10;
+        next--;
+        if (next < 0) {
+            next = rope[0x25] - 1;
+        }
+        if (cur != (s8) rope[0x2D]) {
+            q = pts + next * 0x28;
+            b[0] = *(f32 *) (q + 0x0);
+            b[1] = *(f32 *) (q + 0x4);
+            b[2] = *(f32 *) (q + 0x8);
+            bSide[0] = *(f32 *) (q + 0x18);
+            bSide[1] = *(f32 *) (q + 0x1C);
+            bOffX = *(f32 *) (q + 0x20) * *(f32 *) (q + 0x14);
+            bOffZ = *(f32 *) (q + 0x24) * *(f32 *) (q + 0x14);
+        }
+    } while (cur != (s8) rope[0x2D]);
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151CF930.s")
+#endif
 
 void func_151CFDF4(u8 *arg0, s32 arg1, u8 arg2) {
     s32 *temp_t7;
@@ -1390,7 +1505,169 @@ void func_151D06D8(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+/* file-scope prototypes above: func_15142E24 / func_1513F4E4 / func_15142B7C / func_15142FBC (s32 display lists),
+   func_151D6310, func_15143E64, D_800D30BC, D_800A4EA8 (u8[]) */
+Gfx *func_15142C10(Gfx *gfx, s32 r, s32 g, s32 b, s32 a, u8 *arg5);
+f32 sqrtf(f32);
+f32 sinf(f32);
+extern u8 D_80091504[];
+extern f32 D_800AB33C[2][3];  /* hand points (bone matrix +0x80), left / right */
+extern f32 D_800AB354[3];     /* far point */
+extern u8 D_800AB360[2];      /* bone of the far point, left / right */
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800AB430_c[1] = { 0.16666667f };  /* 0x3E2AAAAB */
+static const f32 D_800AB434_c[1] = { 0.02f };        /* 0x3CA3D70A */
+static const f32 D_800AB438_c[1] = { 0.6f };         /* 0x3F19999A (also D_800AB43C) */
+static const f32 D_800AB440_c[1] = { 0.5235988f };   /* 0x3F060A92, pi / 6 */
+static const f32 D_800AB444_c[1] = { 341.33334f };   /* 0x43AAAAAB */
+
+/* one band vertex: position, texture (s, t), white */
+#define BAND_VTX(v, x, y, z, s, t) \
+    do { \
+        (v)->ob[0] = (s32) (x); \
+        (v)->ob[1] = (s32) (y); \
+        (v)->ob[2] = (s32) (z); \
+        (v)->cn[0] = 0xFF; \
+        (v)->cn[1] = 0xFF; \
+        (v)->cn[2] = 0xFF; \
+        (v)->cn[3] = 0xFF; \
+        (v)->tc[0] = (s); \
+        (v)->tc[1] = (t); \
+    } while (0)
+
+// limb_band_draw: draw handler (gfx, effect, slot) of a stretchy band between two points of the owner (effect +0x28)
+// skeleton: a hand point D_800AB33C[side] in bone matrix +0x80 and D_800AB354 in bone D_800AB360[side] (side =
+// effect +0x35, matrices at owner +0x1D4). Ends the effect (+0xE = -1) once the owner is gone or its id byte +0x3B
+// no longer matches +0x2C; draws nothing without matrices or vertices (func_151D6310, 0x1C0 bytes). The band is 6
+// quads along the line, 35 * (+0x30) wide across (line x (centre - camera)), pinched by 1 - sin(phase) * amp with
+// phase stepping pi / 6 per quad and amp 0 below length 20, (length - 20) * 0.02 * 0.6 up to 70, 0.6 beyond.
+// Texture D_80091504, alpha +0x34, texture t steps 341.33 per quad (s 0 / 0x7C0 across).
+Gfx *func_151D06FC(Gfx *gfx, u8 *obj, s16 slot) {
+    Vtx_t *vtx;
+    u8 *owner;
+    f32 *cam;
+    f32 a[3];
+    f32 b[3];
+    f32 dir[3];
+    f32 side[3];
+    f32 pos[3];
+    f32 step[3];
+    f32 len;
+    f32 amp;
+    f32 vx, vy, vz;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+    f32 w;
+    f32 phase;
+    f32 nextPhase;
+    f32 t;
+    f32 nextT;
+    f32 ox, oy, oz;
+    s32 i;
+    u8 flag;
+
+    owner = *(u8 **) (obj + 0x28);
+    if (*(s32 *) owner == 0 || obj[0x2C] != owner[0x3B]) {
+        *(s16 *) (obj + 0xE) = -1;
+        return gfx;
+    }
+    if (*(u8 **) (owner + 0x1D4) == NULL) {
+        return gfx;
+    }
+    func_151D6310((s32 *) (obj + 0x14), slot, 0x1C0, (s32 *) &vtx, NULL);
+    if (vtx == NULL) {
+        return gfx;
+    }
+    flag = 1;
+    func_15143134(D_800AB33C[obj[0x35]], a, *(u8 **) (owner + 0x1D4) + 0x80);
+    func_15143134(D_800AB354, b, *(u8 **) (owner + 0x1D4) + (D_800AB360[obj[0x35]] << 6));
+    cam = func_15144B34(slot);
+    gfx = (Gfx *) func_15142B7C((s32) gfx, 0x200005, 0x60600);
+    gfx = (Gfx *) func_15142E24((u8 *) gfx, (struct_eu_80090F10 *) D_80091504, 0, 0, 0, 0, 0x7F, 0, 0, (s8 *) &flag, 3);
+    gfx = (Gfx *) func_1513F4E4((s32) gfx, 0x3B, (s8 *) &flag);
+    gfx = func_15142C10(gfx, 0xFF, 0xFF, 0xFF, obj[0x34], &flag);
+    gfx = (Gfx *) func_15142FBC((s32) gfx, D_800D30BC | 0x80000 | 0x2CA0, ((s32 *) D_800A4EA8)[7] | ((s32 *) D_800A4EA8)[6],
+                                (s8 *) &flag);
+
+    dir[0] = b[0] - a[0];
+    dir[1] = b[1] - a[1];
+    dir[2] = b[2] - a[2];
+    len = func_15143E64(dir);
+    /* across: the line x (its middle - camera) */
+    vx = dir[0] * 0.5f + a[0] - cam[0];
+    vy = dir[1] * 0.5f + a[1] - cam[1];
+    vz = dir[2] * 0.5f + a[2] - cam[2];
+    nx = dir[1] * vz - vy * dir[2];
+    ny = dir[2] * vx - vz * dir[0];
+    nz = dir[0] * vy - vx * dir[1];
+    len2 = nx * nx + ny * ny + nz * nz;
+    if (len2 == 0.0f) {
+        side[0] = 0.0f;
+        side[1] = 0.0f;
+        side[2] = 0.0f;
+    } else {
+        k = 35.0f * *(f32 *) (obj + 0x30) / sqrtf(len2);
+        side[0] = nx * k;
+        side[1] = ny * k;
+        side[2] = nz * k;
+    }
+    step[0] = dir[0] * D_800AB430_c[0];
+    step[1] = dir[1] * D_800AB430_c[0];
+    step[2] = dir[2] * D_800AB430_c[0];
+    if (len < 20.0f) {
+        amp = 0.0f;
+    } else if (len < 70.0f) {
+        amp = (len - 20.0f) * D_800AB434_c[0] * D_800AB438_c[0];
+    } else {
+        amp = D_800AB438_c[0];
+    }
+
+    pos[0] = a[0];
+    pos[1] = a[1];
+    pos[2] = a[2];
+    phase = 0.0f;
+    t = 0.0f;
+    for (i = 0; i != 6; i++) {
+        w = 1.0f - sinf(phase) * amp;
+        ox = side[0] * w;
+        BAND_VTX(vtx, ox + pos[0], side[1] * w + pos[1], side[2] * w + pos[2], 0, (s32) t);
+        vtx++;
+        BAND_VTX(vtx, pos[0] - ox, pos[1] - side[1] * w, pos[2] - side[2] * w, 0x7C0, (s32) t);
+        vtx++;
+        nextPhase = phase + D_800AB440_c[0];
+        w = 1.0f - sinf(nextPhase) * amp;
+        ox = side[0] * w;
+        oy = side[1] * w;
+        oz = side[2] * w;
+        nextT = t + D_800AB444_c[0];
+        BAND_VTX(vtx, pos[0] + step[0] - ox, pos[1] + step[1] - oy, pos[2] + step[2] - oz, 0x7C0, (s32) nextT);
+        vtx++;
+        BAND_VTX(vtx, pos[0] + step[0] + ox, pos[1] + step[1] + oy, pos[2] + step[2] + oz, 0, (s32) nextT);
+        vtx++;
+        ((s32 *) gfx)[0] = 0x01004008;           /* gSPVertex(vtx - 4, 4, 0) */
+        ((s32 *) gfx)[1] = (s32) (vtx - 4);
+        gfx++;
+        ((s32 *) gfx)[0] = 0x05000204;           /* gSP1Triangle(0, 1, 2) */
+        ((s32 *) gfx)[1] = 0;
+        gfx++;
+        ((s32 *) gfx)[0] = 0x05000406;           /* gSP1Triangle(0, 2, 3) */
+        ((s32 *) gfx)[1] = 0;
+        gfx++;
+        pos[0] += step[0];
+        pos[1] += step[1];
+        pos[2] += step[2];
+        phase = nextPhase;
+        t = nextT;
+    }
+    return gfx;
+}
+#undef BAND_VTX
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1FB080/func_151D06FC.s")
+#endif
 
 /* NEAR 2 from func_150D5E7C: sib -li at,#; sib -beq a2,at,T */
 void func_151D0EA0(struct102 *arg0, u8 *arg1, u8 arg2) {

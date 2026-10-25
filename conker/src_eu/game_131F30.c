@@ -323,7 +323,87 @@ void func_15105548(struct207 *arg0, s32 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+typedef struct { s16 v[9]; } HitSurface558C; /* 0x12-byte surface record (func_150ACEA0) */
+void func_151C384C(void *, u8, s32);
+void func_151522DC(void *, s32 *, f32 *, s32, u8, s32);
+struct210 *func_15102EA0(f32, u8, s32, u8 *, s16, u8, u8, s32, u8, s32);
+
+// impact_debris_burst: hit effect of object p (state at p + 0x110 = s: impact point s+0x30, normal s+0x60, surface
+// record s+0x6C, flags s+0x88). Always throws debris with func_15102EA0 (speed 15..40, 200..255, 50..130); on
+// surface type 9 (flags & 0x1F) it adds embers (func_151C384C) with chance 0.4 and stops. Otherwise embers with
+// chance 0.1, and with chance 0.4 an animated impact flash (func_151522DC, one keyframe {0x85, 0.1}) at the point
+// facing back along the normal.
+void func_1510558C(u8 *p) {
+    struct {
+        s32 u0;
+        s32 u4;
+        f32 pos[3];
+        f32 dir[3];
+        HitSurface558C hit;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        s16 u48;
+        s16 u4A;
+        f32 u4C;
+        f32 u50;
+        f32 u54;
+    } flash;
+    s32 frames[1];
+    f32 scales[1];
+    f32 r;
+    s32 a;
+    u8 *s;
+    f32 *pos;
+    HitSurface558C *hit;
+
+    r = func_150ADA68();
+    a = func_150ADA20();
+    s = p + 0x110;
+    hit = (HitSurface558C *) (s + 0x6C);
+    pos = (f32 *) (s + 0x30);
+    func_15102EA0(r * 25.0f + 15.0f, (u32) a % 56 + 200, (s32) hit, (u8 *) pos, (u32) func_150ADA20() % 81 + 50, 1, 1,
+                  *(s32 *) (s + 0x88), p[0xC], p[1]);
+    if ((*(s32 *) (s + 0x88) & 0x1F) == 9) {
+        if (func_150ADA68() < 0.4f) {
+            func_151C384C(pos, p[0xC], p[1]);
+        }
+        return;
+    }
+    if (func_150ADA68() < 0.1f) {
+        func_151C384C(pos, p[0xC], p[1]);
+    }
+    if (func_150ADA68() < 0.4f) {
+        frames[0] = 0x85;
+        scales[0] = 0.1f;
+        flash.u0 = 1;
+        flash.u4 = 3;
+        flash.pos[0] = pos[0];
+        flash.pos[1] = pos[1];
+        flash.pos[2] = pos[2];
+        flash.dir[0] = -*(f32 *) (s + 0x60);
+        flash.dir[1] = -*(f32 *) (s + 0x64);
+        flash.dir[2] = -*(f32 *) (s + 0x68);
+        flash.hit = *hit;
+        flash.u34 = 614.0f;
+        flash.u38 = 0.009000001f;
+        flash.u48 = 0xF;
+        flash.u4A = 0xF;
+        flash.u3C = 0.010000001f;
+        flash.u40 = -0.90400004f;
+        flash.u44 = 0.395f;
+        flash.u4C = 0.060000002f;
+        flash.u50 = 0.142f;
+        flash.u54 = 25.777f;
+        func_151522DC(&flash, frames, scales, 1, p[0xC], p[1]);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_131F30/func_1510558C.s")
+#endif
 
 void func_15105848(struct207 *arg0, s32 arg1, u8 arg2) {
     struct206 *temp_v0;

@@ -47,6 +47,8 @@ void func_150186D0(void);
 int port_entry_iterations;
 void port_wait_frame(void); /* main-loop passes (for the log) */
 
+/* P318: the game main loop func_15007830 is game C now (game/entrypoint.c, P281/P317); this PC translation of the asm is kept for A/B runs only (-DP318_ENTRY_PC_OLD) */
+#ifdef P318_ENTRY_PC_OLD
 void func_15007830(void) {
     const u32 *jtbl = port_n64_to_wasm(0x80095DE0); /* jtbl_80095DE0_game, 5 entries */
     u32 target;
@@ -115,6 +117,18 @@ void func_15007830(void) {
         port_wait_frame(); /* PC: the frame wait happens inside asm stubs today; pace one pass per frame */
     }
 }
+#endif /* P318_ENTRY_PC_OLD */
+#ifndef P318_ENTRY_PC_OLD
+/* P318: the game C main loop (game/entrypoint.c) ends each pass with func_150186D0. The PC version above paced one
+ * pass per frame with port_wait_frame(); keep that pacing (same frame timing, so det=2 routes stay comparable) by
+ * wrapping the pass's last call (port/Makefile -Wl,--wrap=func_150186D0; the main loop is its only caller). */
+void __real_func_150186D0(void);
+void __wrap_func_150186D0(void) {
+    if (port_entry_iterations++ < 3) port_log("[entry] game C main loop pass %d (state %d)\n", port_entry_iterations, D_800BEA35);
+    __real_func_150186D0();
+    port_wait_frame();
+}
+#endif
 
 /* ---------------------------------------------------------------- memory-model self-test */
 

@@ -1,0 +1,86 @@
+s/if (obj == NULL || side >= 2) {/if (obj == NULL || side >= 3) {/ % side2
+s/if (obj == NULL || side >= 2) {/if (side >= 2) {/ % nullobj
+s/if (noOwner) {/if (!noOwner) {/ % noown aim0
+s/owner = func_1507515C((struct127 \*)obj,/owner = func_1507515C((struct127 *)obj + 1,/ % aim0
+s/if (owner == NULL || owner->unk31C == NULL) {/if (owner == NULL) {/ % noaimrec
+s/aimed = (\*((u8 \*)owner->unk31C + 0x197) != 0) ? 1 : 0;/aimed = *((u8 *)owner->unk31C + 0x196) != 0;/ % aim0
+s/aimed = (\*((u8 \*)owner->unk31C + 0x197) != 0) ? 1 : 0;/aimed = *((u8 *)owner->unk31C + 0x197) \& 1;/ % aimbyte
+s/if (\*(u8 \*\*)(obj + 0x1D4) == NULL) {/if (*(u8 **)(obj + 0x1D0) == NULL) {/ % nobones
+s/if (obj\[4\] == 0x23) {/if (obj[4] == 0x24) {/ % noown23 aim23
+s/tbl\[0\] = D_800A2208\[side\];/tbl[0] = D_800A2208[0];/ % aim23s1
+s/tbl\[1\] = aimed ? D_800A2238\[side\] : D_800A2220\[side\];/tbl[1] = D_800A2220[side];/ % aim23
+s/tbl\[1\] = aimed ? D_800A2238\[side\] : D_800A2220\[side\];/tbl[1] = aimed ? D_800A2238[side] : D_800A2238[side];/ % noaim23
+s/tbl\[2\] = D_800A2250\[side\];/tbl[2] = D_800A2238[side];/ % aim23
+s/bone = \*(u8 \*\*)(obj + 0x1D4) + D_800A2204\[side\] \* 64;/bone = *(u8 **)(obj + 0x1D4) + D_800A2204[side] * 16;/ % aim23
+s/+ D_800A2204\[side\] \* 64;/+ D_800A2204[0] * 64;/ % aim23s1
+s/+ D_800A21A0\[side\] \* 64;/+ D_800A21A0[0] * 64;/ % aim1
+s/sgn = side ? -1 : 1;/sgn = side ? 1 : 1;/ % noaim1
+s/alt\[0\] = (f32)sgn \* (13.0f - (1.0f + r1 \* 6.0f));/alt[0] = (f32)sgn * (13.0f - (1.0f + r1 * 5.0f));/ % noaim
+s/alt\[0\] = (f32)sgn \* (13.0f - (1.0f + r1 \* 6.0f));/alt[0] = (f32)sgn * (12.0f - (1.0f + r1 * 6.0f));/ % noaim
+s/alt\[1\] = D_800A21BC\[side\]\[1\];/alt[1] = D_800A21BC[side][0];/ % noaim
+s/alt\[2\] = D_800A21BC\[side\]\[2\];/alt[2] = D_800A21BC[side][1];/ % noaim
+s/tbl\[0\] = D_800A21A4\[side\];/tbl[0] = D_800A21BC[side];/ % aim0
+s/tbl\[1\] = aimed ? D_800A21D4\[side\] : alt;/tbl[1] = aimed ? D_800A21EC[side] : alt;/ % aim0
+s/tbl\[2\] = D_800A21EC\[side\];/tbl[2] = D_800A21EC[0];/ % aim1
+s/out\[1\] = aimed ? side0 : tip;/out[1] = tip;/ % aim0
+s/func_15145EA4(tbl, out, bone, aimed ? 3 : 2);/func_15145EA4(tbl, out, bone, aimed ? 3 : 3);/ % noaim
+s/side0\[1\] -= pos\[1\];/side0[1] -= pos[0];/ % aim0
+s/side1\[2\] -= pos\[2\];/side1[2] += pos[2];/ % aim0
+s/p = (f32 \*)(aim + 0x13C);/p = (f32 *)(aim + 0x130);/ % aim0
+s/t = (norm\[0\] \* (pos\[0\] - p\[0\])/t = (norm[0] * (pos[0] + p[0])/ % aim0
+s/+ norm\[2\] \* (pos\[2\] - p\[2\])) \//+ norm[1] * (pos[2] - p[2])) \// % aim0
+s/+ norm\[2\] \* \*(f32 \*)(aim + 0x138));/+ norm[2] * *(f32 *)(aim + 0x134));/ % ndir
+s/hit\[0\] = p\[0\] + t \* \*(f32 \*)(aim + 0x130);/hit[0] = p[0] - t * *(f32 *)(aim + 0x130);/ % aim0
+s/hit\[2\] = p\[2\] + t \*/hit[2] = p[1] + t */ % aim0
+s/dir\[1\] = \*(f32 \*)((u8 \*)owner->unk31C + 0x134);/dir[1] = *(f32 *)((u8 *)owner->unk31C + 0x130);/ % ndir
+s/tip\[1\] -= pos\[1\];/tip[1] -= pos[2];/ % noaim
+1,/kind = /s/mask = ~(1 << \*((u8 \*)owner->camera + 0x23D));/mask = ~(2 << *((u8 *)owner->camera + 0x23D));/ % aim0
+1,/kind = /s/if (aimed \&\& owner->camera != NULL) {/if (aimed) {/ % aimnocam
+1,/kind = /s/mask = 0xFF;/mask = 0x7F;/ % noaim
+s/kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;/kind = (D_800BE9F0 == 0x34) ? 5 : 4;/ % lvl26
+s/kind = (D_800BE9F0 == 0x34 || D_800BE9F0 == 0x26) ? 5 : 4;/kind = (D_800BE9F0 == 0x26) ? 5 : 4;/ % lvl34
+s/func_151C284C(pos, aimed ? NULL : tip,/func_151C284C(pos, tip,/ % aim0
+s/aimed ? hit : NULL, aimed ? dir : NULL, aimed ? 1 : 0, 0, 252.0f,/aimed ? hit : NULL, aimed ? dir : NULL, 1, 0, 252.0f,/ % noaim
+s/aimed ? 1 : 0, 0, 252.0f,/aimed ? 1 : 0, 0, 250.0f,/ % aim0
+s/static const f32 gunfire_tracer_k\[1\] = { 0.003968254f };/static const f32 gunfire_tracer_k[1] = { 0.00396825f };/ % aim0
+s/r1 \* 20.0f + 75.0f, r2/r2 * 20.0f + 75.0f, r2/ % aim0
+s/\(r3 .\) 31 + 225,/\1 32 + 225,/ % r2
+s/(owner != NULL) ? (u8 \*)owner : obj, 1, 1, D_800BE616 ? 0 : 1,/obj, 1, 1, D_800BE616 ? 0 : 1,/ % aim0
+s/D_800BE616 ? 0 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,/D_800BE616 ? 1 : 1, 50, 0, 1, kind, 0x2C, dt, mask, 0,/ % f616
+s/1, kind, 0x2C, dt, mask, 0,/1, kind, 0x2C, -dt, mask, 0,/ % aim0
+s/0, (u8)fxflag, fxowner);/0, fxflag, fxowner);/ % fl
+s/if ((obj\[0x74\] \& 0xF) != 0xF) {/if ((obj[0x74] \& 0x1F) != 0xF) {/ % nibF nibF2
+s/if ((func_150ADA20() \& 7) == 0) {/if ((func_150ADA20() \& 3) == 0) {/ % aimcam7 r2
+s/spark.b0 = 3;/spark.b0 = 2;/ % aim0
+s/spark.b1 = 0xFF;/spark.b1 = 0xFE;/ % aim0
+s/\(spark.h2 = (u32)func_150ADA20() .\) 5 + 4;/\1 6 + 4;/ % aimcam7 r2
+s/ipos\[1\] = pos\[1\];/ipos[1] = pos[0];/ % aim0
+s/spark.b4 = 0;/spark.b4 = 1;/ % aim0
+s/\(.\) 31 + 0x46, 0xFF,/\1 31 + 0x47, 0xFF,/ % aim0
+s/if ((func_150ADA20() \& 1) == 0) {/if ((func_150ADA20() \& 1) != 0) {/ % aim0 noshell
+s/vel\[1\] = func_150ADA68() \* gunfire_shell_v1m\[0\] + gunfire_shell_v1a\[0\];/vel[1] = func_150ADA68() * gunfire_shell_v1m[0] + gunfire_shell_v0a[0];/ % aim0
+s/vel\[0\] = func_150ADA68() \* gunfire_shell_v0m\[0\] + gunfire_shell_v0a\[0\];/vel[0] = func_150ADA68() * gunfire_shell_v1m[0] + gunfire_shell_v0a[0];/ % aim0
+/vel\[0\] = /,/r4 = /s/if (aimed \&\& owner->camera != NULL) {/if (aimed) {/ % aimnocam
+s/\(r4 .\) 3 + 4,/\1 3 + 5,/ % aim0
+s/\(r5 .\) 101 + 0x9B,/\1 100 + 0x9B,/ % r2
+s/r1 \* 1012.0f + gunfire_shell_life\[0\], pos, mask, 0, -1,/r1 * 1012.0f + gunfire_shell_life[0], pos, mask, 0, 0,/ % aim0 aim23
+s/func_151030B8(obj, D_800A2204\[side\],/func_151030B8(obj, D_800A21A0[side],/ % aim23
+s/func_151030B8(obj, D_800A21A0\[side\], D_800A21A4\[side\], D_800A21BC\[side\], vel,/func_151030B8(obj, D_800A21A0[side], D_800A21A4[side], D_800A21D4[side], vel,/ % aim0
+s/static const f32 gunfire_shell_life\[1\] = { 1497.0f };/static const f32 gunfire_shell_life[1] = { 1496.0f };/ % aim0
+s/if (!aimed || owner->camera == NULL) {/if (!aimed) {/ % aimnocam
+s/flash.pos\[0\] = side ? -59.0f : 59.0f;/flash.pos[0] = 59.0f;/ % aim1
+s/flash.pos\[1\] = 68.0f;/flash.pos[1] = 64.0f;/ % aim0
+s/flash.size\[0\] = func_150ADA68() \* 20.0f + 40.0f;/flash.size[0] = func_150ADA68() * 20.0f + 80.0f;/ % aim0
+s/flash.b10 = 0x80;/flash.b10 = 0x81;/ % aim0
+s/flash.h12 = (func_150ADA20() \& 3) + 5;/flash.h12 = (func_150ADA20() \& 7) + 5;/ % aimcam7 flashr
+s/flash.h14 = (side ? 2 : 0) | 0x39;/flash.h14 = 0x39;/ % aim1
+s/flash.h18 = 0x55;/flash.h18 = 0x56;/ % aim0
+s/\(flash.b1A\[4\] = (u32)func_150ADA20() .\) 56 + 0xC8;/\1 55 + 0xC8;/ % r2 flashr
+s/flash.b1A\[9\] = 0xFF;/flash.b1A[9] = 0xFE;/ % aim0
+s/flash.w24\[1\] = 0x200004;/flash.w24[1] = 0x200005;/ % aim0
+s/flash.w24\[6\] = 0x20;/flash.w24[6] = 0x21;/ % aim0
+s/flash.b41 = 7;/flash.b41 = 6;/ % aim0
+s/flash.mask = \*((u8 \*)owner->camera + 0x23D);/flash.mask = *((u8 *)owner->camera + 0x23C);/ % aim0
+s/func_151559FC(\&flash, 0, 0, 0, 0, 0, fxowner);/func_151559FC(\&flash, 0, 0, 0, 0, fxflag, fxowner);/ % aim0
+s/ev.side = side;/ev.side = 0;/ % aim1
+s/func_15155C9C(\&ev, 0x37);/func_15155C9C(\&ev, 0x38);/ % aim0

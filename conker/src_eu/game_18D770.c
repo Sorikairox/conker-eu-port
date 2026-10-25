@@ -45,8 +45,16 @@ struct225 *func_15162034(s32 arg0, u8 arg1, s32 arg2);
 void func_15162110(s32 arg0);
 struct225 *func_15162740(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
 struct225 *func_1516284C(Header *header, s32 arg1, s32 arg2, s32 arg3, s32 arg4, u8 arg5, u8 arg6, s32 size, u8 arg8, u8 arg9, s32 argA);
+#ifdef NON_MATCHING
+void func_15162EF8(struct239 *arg0, s32 phase);
+#else
 void func_15162EF8(struct239 *arg0);
+#endif
+#ifdef NON_MATCHING
+void func_15162F50(struct239 *arg0, s32 phase);
+#else
 void func_15162F50(struct239 *arg0);
+#endif
 struct225 *func_15162FAC(s32 arg0, u8 arg1, u8 arg2, u8 arg3, s16 arg4, s8 arg5, u8 arg6, s32 arg7);
 struct225 *func_15163414(Header *header, f32* arg1, f32* arg2, f32* arg3, s8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, s32 argC, u8 argD, s32 argE);
 struct225 *func_15163604(s32 arg0, u8 arg1, u8 arg2, s16 arg3, u8 arg4, s32 arg5, u8 arg6, s32 arg7);
@@ -1189,9 +1197,79 @@ struct225 *func_1516295C(struct226 *arg0, s32 arg1, u8 arg2, u8 arg3, s16 arg4, 
 // }
 
 // a biggun'
-#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162B28.s")
+#ifdef NON_MATCHING
+extern void (*D_8008B704[])(u8 *, s32); // {func_15162EF8, func_15162F50} (P289: 2 entries, D_8008B70C is the next table); a1 = the new phase
 
+// envelope_update: drives a byte (+0x14 -> +0x2F, e.g. an alpha) through a looping 4-phase envelope on the timer
+// +0x24: before +0x28 the base +0x1C (phase 0); rising to base + range (+0x20) until +0x2C (phase 1, slope +0x38);
+// the hold value +0x18 until +0x30 (phase 2); then falling back (phase 3). On a phase change the phase's handler id
+// (+0x3D..+0x40, -1 = none) is run from D_8008B704 with (obj, phase). The timer advances by the frame time and wraps at +0x34.
+// Returns 1.
+s32 func_15162B28(u8 *obj) {
+    u8 old;
+    f32 t;
+    s8 id;
+
+    old = obj[0x3C];
+    if (*(f32 *) (obj + 0x24) < *(f32 *) (obj + 0x28)) {
+        (*(u8 **) (obj + 0x14))[0x2F] = (u32) *(f32 *) (obj + 0x1C);
+        obj[0x3C] = 0;
+    } else {
+        t = *(f32 *) (obj + 0x24);
+        if (t < *(f32 *) (obj + 0x2C)) {
+            (*(u8 **) (obj + 0x14))[0x2F] =
+                (u32) (*(f32 *) (obj + 0x1C) +
+                       *(f32 *) (obj + 0x20) * ((t - *(f32 *) (obj + 0x28)) * *(f32 *) (obj + 0x38)));
+            obj[0x3C] = 1;
+        } else if (t < *(f32 *) (obj + 0x30)) {
+            (*(u8 **) (obj + 0x14))[0x2F] = (u32) *(f32 *) (obj + 0x18);
+            obj[0x3C] = 2;
+        } else {
+            (*(u8 **) (obj + 0x14))[0x2F] =
+                (u32) (*(f32 *) (obj + 0x1C) +
+                       *(f32 *) (obj + 0x20) * (1.0f - (t - *(f32 *) (obj + 0x30)) * *(f32 *) (obj + 0x38)));
+            obj[0x3C] = 3;
+        }
+    }
+    if (obj[0x3C] != old) {
+        switch (obj[0x3C]) {
+            case 0:
+                id = obj[0x3D];
+                break;
+            case 1:
+                id = obj[0x3E];
+                break;
+            case 2:
+                id = obj[0x3F];
+                break;
+            case 3:
+                id = obj[0x40];
+                break;
+            default:
+                id = -1;
+                break;
+        }
+        if (id != -1) {
+            D_8008B704[id](obj, obj[0x3C]);
+        }
+    }
+    *(f32 *) (obj + 0x24) += D_800BE9A4;
+    while (*(f32 *) (obj + 0x34) < *(f32 *) (obj + 0x24)) {
+        *(f32 *) (obj + 0x24) -= *(f32 *) (obj + 0x34);
+    }
+    return 1;
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_18D770/func_15162B28.s")
+#endif
+
+// P289: NM `phase` (unused) = the a1 the D_8008B704 dispatcher (func_15162B28) passes; it keeps the wasm call_indirect
+// signature void (u8 *, s32) of the table (the default build keeps the one-parameter text: IDO frames it differently).
+#ifdef NON_MATCHING
+void func_15162EF8(struct239 *arg0, s32 phase) {
+#else
 void func_15162EF8(struct239 *arg0) {
+#endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 
@@ -1203,7 +1281,11 @@ void func_15162EF8(struct239 *arg0) {
     func_151403A8(&sp1C, 36);
 }
 
+#ifdef NON_MATCHING
+void func_15162F50(struct239 *arg0, s32 phase) {
+#else
 void func_15162F50(struct239 *arg0) {
+#endif
     s8 sp1C[9]; // FIXME: what size should this be?
     struct240 *temp_v0;
 

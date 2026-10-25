@@ -1,0 +1,57 @@
+s#    twin = (obj\[4\] == 0x21) ? 1 : 0;#    twin = (obj[4] == 0x20) ? 1 : 0;# % sp tw
+s#    if (obj\[0x13C\] != 0 || D_800BE616 != 0) {#    if (obj[0x13C] != 0) {# % mp
+s#            if ((\*(u8 \*\*) (obj + 0x31C))\[0x84\] != 0) {#            if ((*(u8 **) (obj + 0x31C))[0x84] == 0) {# % mphuman mpbtn
+s#                D_800CC288 = D_800BEB30\[D_800C3E78\];#                D_800CC288 = D_800BEB30[0];# % mpbtn
+s#            D_800CC288 = ((u16 \*) \&D_800BEA68)\[obj\[0x13C\]\];#            D_800CC288 = ((u16 *) \&D_800BEA68)[0];# % spbump
+s#        if ((D_800CC288 \& 0x8000) \&\& obj\[0x8A\] == 0 \&\& P(0x28, f32) == 0\.0f) {#        if ((D_800CC288 \& 0x8000) \&\& P(0x28, f32) == 0.0f) {# % spbump8a
+s#            act = 1;#            act = 2;# % spbump
+s#        if ((D_800CC288 \& 0x6000) \&\& P(0x28, f32) == 0\.0f) {#        if ((D_800CC288 \& 0x2000) \&\& P(0x28, f32) == 0.0f) {# % spnudge89
+s#                if (obj\[0x89\] != 0xFF) {#                if (obj[0x89] != 0xFE) {# % twnudgeff
+s#            } else if (obj\[0x89\] == 0) {#            } else if (obj[0x89] != 3) {# % spnudge spnudge89
+s#                act = (u8) (act + 4);#                act = (u8) (act + 3);# % twbump twnudge
+s#                act = (u8) (act + 2);#                act = (u8) (act + 1);# % mphuman mpbtn
+s#            obj\[0x89\] = 0xB4;#            obj[0x89] = 0xB5;# % spbump
+s#            st = D_800A0BE0_c\[act - 1\];#            st = D_800A0BE0_c[act];# % spbump spnudge
+s#            if (st == 0x22 \&\& P(0x2E4, s32) == 0) {#            if (st == 0x22) {# % twnudge
+s#                (\*(s16 \*) (\*(u8 \*\*) (obj + 0x31C) + 0x1AA))++;#                (*(s16 *) (*(u8 **) (obj + 0x31C) + 0x1AA))--;# % twnudge mptw mpnudge0
+s#        if (obj\[0x89\] == 0 \&\& !(D_800BE616 != 0 \&\& (\*(u8 \*\*) (obj + 0x31C))\[0x84\] != 0)) {#        if (obj[0x89] == 0) {# % mphuman2
+s#                D_800CC6A0 = (s32) (\*(f32 \*) ((u8 \*) D_800DBFF0 + D_800C3E78 \* 0x9A0 + 0x37C) \* D_800A0BF0_c\[0\]);#                D_800CC6A0 = (s32) (*(f32 *) ((u8 *) D_800DBFF0 + D_800C3E78 * 0x9A0 + 0x378) * D_800A0BF0_c[0]);# % mpbtn mpsteer
+s#                yaw = func_1505A630((s8) D_800CC6A4\[2\], (s8) D_800CC6A4\[3\], 0) + D_800CC6A0;#                yaw = func_1505A630((s8) D_800CC6A4[3], (s8) D_800CC6A4[2], 0) + D_800CC6A0;# % mp
+s#                P(0x44, f32) = \*(f32 \*) (pl + 0x44) \* 1\.75f;#                P(0x44, f32) = *(f32 *) (pl + 0x44) * 1.5f;# % sp
+s#                yaw = \*(u16 \*) (\*(u8 \*\*) (pl + 0x31C) + 0x4C);#                yaw = *(u16 *) (*(u8 **) (pl + 0x31C) + 0x4E);# % sp
+s#            if (obj\[0x223\] == 0xD) {#            if (obj[0x223] == 0xC) {# % spd twd
+s#                if (P(0x44, f32) < 5\.0f) {#                if (P(0x44, f32) < 50.0f) {# % tw
+s#                P(0x44, f32) = P(0x44, f32) \* 0\.5f + 22\.0f;#                P(0x44, f32) = P(0x44, f32) * 0.5f + 21.0f;# % tw
+s#                if ((u8) (((s32) (P(0x76, u16) - target) >> 8) - 0x50) < 0x60) {#                if ((u8) (((s32) (P(0x76, u16) - target) >> 8) - 0x50) < 0x5F) {# % twbehind twedge
+s#                    obj\[0x232\] = 0x10;#                    obj[0x232] = 0x11;# % twbehind
+s#            } else if (P(0x44, f32) < 5\.0f) {#            } else if (P(0x44, f32) <= 3.5f) {# % spslow spslow4
+s#                if (obj\[0x232\] != 5) {#                if (obj[0x232] != 4) {# % spslow5
+s#                    P(0x78, u16) = P(0x76, u16);#                    P(0x78, u16) = P(0x7A, u16);# % spslow
+s#                P(0x78, u16) = yaw;#                P(0x78, u16) = yaw + 1;# % sp
+s#                if (obj\[0x223\] == 1) {#                if (obj[0x223] != 1) {# % sp spturn
+s#                    st = (P(0x3C, f32) < 35\.0f) ? 4 : 3;#                    st = (P(0x3C, f32) < 5.0f) ? 4 : 3;# % spturn
+s#                    obj\[0x1E5\] = st;#                    obj[0x1E4] = st;# % spturn
+s#                    if ((u8) (((s32) (P(0x76, u16) - P(0x78, u16)) >> 8) - 0x50) < 0x60) {#                    if ((u8) (((s32) (P(0x76, u16) - P(0x78, u16)) >> 8) - 0x40) < 0x60) {# % spturnb spturn
+s#                        obj\[0x232\] = (35\.0f < P(0x3C, f32)) ? 4 : 5;#                        obj[0x232] = (35.0f <= P(0x3C, f32)) ? 4 : 5;# % spfast spedge35
+s#                        obj\[0x232\] = 3;#                        obj[0x232] = 6;# % spturn
+s#    if (D_800BE616 == 0 || D_800C3E78 >= D_8008FD8C || (\*(u8 \*\*) (obj + 0x31C))\[0x120\] == 0) {#    if (D_800BE616 == 0 || (*(u8 **) (obj + 0x31C))[0x120] == 0) {# % mpb120p1
+s#    if (pl\[0x27\] != 0 \&\& (obj\[0x232\] != D_800A0BE8_c\[twin\] || obj\[0x104\] != 0)) {#    if (pl[0x27] != 0 \&\& obj[0x232] != D_800A0BE8_c[twin]) {# % hold104
+s#        ((u8 \*) D_800CC2D0)\[0x83\] = 0;#        ((u8 *) D_800CC2D0)[0x84] = 0;# % holdx
+s#        obj\[0x232\] = 0x11;#        obj[0x232] = 0x12;# % holdx
+s#            func_15052F9C(self, 156\.0f, atk\[4\], 4, 0, atk\[2\], 0xFF, 0, 0, 0);#            func_15052F9C(self, 156.0f, atk[4], 4, 0, atk[3], 0xFF, 0, 0, 0);# % atk atkt
+s#        } else if ((D_800CC268 \& 1) \&\& ((u8 \*) D_800CC2D0 + obj\[0x124\] \* 0x32C)\[0x65\] == 0#        } else if ((D_800CC268 \& 1) \&\& ((u8 *) D_800CC2D0 + obj[0x124] * 0x32C)[0x66] == 0# % hitb65
+s#                   \&\& (P(0x25C, s32) \& 0x400)) {#                   \&\& (P(0x25C, s32) \& 0x600)) {# % hitno
+s#            func_1505327C(self, 50\.0f, 3\.0f, atk\[0\], atk\[4\]);#            func_1505327C(self, 50.0f, 3.0f, atk[0], atk[2]);# % hit
+s#    if ((twin \&\& 5\.0f < P(0x3C, f32)) || (!twin \&\& P(0x84, u16) == 0xA)) {#    if ((twin \&\& 5.0f <= P(0x3C, f32)) || (!twin \&\& P(0x84, u16) == 0xA)) {# % twleanslow
+s#        if (err > 0x3000) {#        if (err > 0x2000) {# % splean spleanmid
+s#            err = -0x3000;#            err = -0x2000;# % spleanneg
+s#            err = (s16) (err >> 1);#            err = (s16) (err >> 2);# % twleanp0
+s#    P(0xC4, f32) = P(0xC4, f32) + ((f32) err \* D_800A0BF4_c\[0\] - P(0xC4, f32)) \* D_800A0BF8_c\[0\];#    P(0xC4, f32) = P(0xC4, f32) + ((f32) err * D_800A0BF4_c[0] - P(0xC4, f32)) * D_800A0BF4_c[0];# % sp
+s#        sway = (s16) ((prevYaw - P(0x7A, u16)) << 2);#        sway = (s16) ((prevYaw - P(0x7A, u16)) << 3);# % twsway twswayw
+s#        P(0x2E4, s32) = P(0x2E4, s32) + (sway - (s16) P(0x2E4, s32)) \/ 8;#        P(0x2E4, s32) = P(0x2E4, s32) + (sway - P(0x2E4, s32)) \/ 8;# % twsway
+s#        P(0x2E8, s32) = P(0x2E8, s32) + (-err - P(0x2E8, s32)) \/ 8;#        P(0x2E8, s32) = P(0x2E8, s32) + (-err - P(0x2E8, s32)) >> 3;# % twsway2
+s#    if (D_800BE616 != 0 \&\& D_800CC268 != 0 \&\& \*(u8 \*\*) (obj + 0x31C) != NULL \&\& (\*(u8 \*\*) (obj + 0x31C))\[0x1AC\] != 0) {#    if (D_800BE616 != 0 \&\& D_800CC268 != 0 \&\& *(u8 **) (obj + 0x31C) != NULL) {# % mpfin0
+s#static const u8 D_800A0BE8_c\[8\] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x19, 0x9C, 0xBE };#static const u8 D_800A0BE8_c[8] = { 0x10, 0x0C, 0x0A, 0x0D, 0x01, 0x18, 0x9C, 0xBE };# % atkt
+s#static const f32 D_800A0BF0_c\[1\] = { 182\.04445f };#static const f32 D_800A0BF0_c[1] = { 182.04443f };# % mp mpbtn mpyaw
+s#) + 20\.0f;#) + 21.0f;# % twslow
+s#+ yaw - 5000;#+ yaw - 5001;# % tw

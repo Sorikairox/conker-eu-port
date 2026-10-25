@@ -3,7 +3,64 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+void func_150498A0(f32 *arg0, f32 arg1, f32 *arg2, f32 arg3, f32 arg4, f32 arg5);
+extern f32 D_80088C60; // tint red, green, blue (current)
+extern f32 D_80088C64;
+extern f32 D_80088C68;
+extern f32 D_80088C6C; // tint target
+extern f32 D_80088C70;
+extern f32 D_80088C74;
+extern f32 D_80088C78; // tint speed
+extern f32 D_80088C7C;
+extern f32 D_80088C80;
+
+// player_tint_update: player state handler (D_80089A10 table). While event flag 0x9000/6/0x403D is set the player
+// gets +0x84 bits 0x80021000 and the screen tint target becomes red-less (0x4043: 64, 255, 255), green-less (0x4044:
+// 255, 64, 255), blue-less (0x4045: 255, 255, 64) or white; otherwise the target is white and +0x84 loses
+// 0x80021000 and gains 8. The tint D_80088C60..68 eases toward the target (func_150498A0, rate 4, max 6, the
+// player's +0x7B4 step) and is published as bytes in event flags 0x12/0x30F5..0x30F3 and 0x30FA..0x30F8.
+void func_150D0DD0(u8 *obj) {
+    if (func_1509BE40(1, 0x403D, 6, 0x9000) != 0) {
+        *(s32 *) (obj + 0x84) |= 0x80021000;
+        if (func_1509BE40(1, 0x4043, 6, 0x9000) != 0) {
+            D_80088C6C = 64.0f;
+            D_80088C70 = 255.0f;
+            D_80088C74 = 255.0f;
+        } else if (func_1509BE40(1, 0x4044, 6, 0x9000) != 0) {
+            D_80088C6C = 255.0f;
+            D_80088C70 = 64.0f;
+            D_80088C74 = 255.0f;
+        } else if (func_1509BE40(1, 0x4045, 6, 0x9000) != 0) {
+            D_80088C6C = 255.0f;
+            D_80088C70 = 255.0f;
+            D_80088C74 = 64.0f;
+        } else {
+            D_80088C6C = 255.0f;
+            D_80088C70 = 255.0f;
+            D_80088C74 = 255.0f;
+        }
+    } else {
+        D_80088C6C = 255.0f;
+        D_80088C70 = 255.0f;
+        D_80088C74 = 255.0f;
+        *(s32 *) (obj + 0x84) &= ~0x80021000;
+        *(s32 *) (obj + 0x84) |= 8;
+    }
+    func_150498A0(&D_80088C60, D_80088C6C, &D_80088C78, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    func_150498A0(&D_80088C64, D_80088C70, &D_80088C7C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    func_150498A0(&D_80088C68, D_80088C74, &D_80088C80, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    func_1509BFB0(1, 0x30F5, 0x12, (u32) D_80088C60 & 0xFF);
+    func_1509BFB0(1, 0x30F4, 0x12, (u32) D_80088C64 & 0xFF);
+    func_1509BFB0(1, 0x30F3, 0x12, (u32) D_80088C68 & 0xFF);
+    func_1509BFB0(1, 0x30FA, 0x12, (u32) D_80088C60 & 0xFF);
+    func_1509BFB0(1, 0x30F9, 0x12, (u32) D_80088C64 & 0xFF);
+    func_1509BFB0(1, 0x30F8, 0x12, (u32) D_80088C68 & 0xFF);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FE5E0/func_150D0DD0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s32 D_80088C30;

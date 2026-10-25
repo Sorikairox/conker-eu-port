@@ -1,0 +1,73 @@
+# P301 mutants for func_150B4BF0 (beam_ribbon_draw)
+/if (\*(s8 \*) (trail + 0x2C) < 2) {/s/< 2/< 3/
+/func_151D6310((s32 \*) (trail + 0x84)/s/<< 5) + 0xA0/<< 5) + 0xA4/
+/func_151D6310((s32 \*) (trail + 0x84)/s/trail + 0x84/trail + 0x88/
+/cam = (f32 \*) ((u8 \*) D_800DBFF0/s/0x9A0/0x9A4/
+/cam = (f32 \*) ((u8 \*) D_800DBFF0/s/0x2F8/0x2FC/
+/if (style\[0x1C\] & 2) {/s/& 2/\& 1/
+/n = style\[0x32\];/s/0x32/0x34/
+/i = \*(s8 \*) (trail + 0x2D);/s/0x2D/0x2E/
+/ramp += style\[0x33\];/s/0x33/0x35/
+/if (i == trail\[0x25\]) {/s/i == /i >= /
+/^                i = 0;/s/0/1/
+/} while (n != 0 && i != \*(s8 \*) (trail + 0x2E));/s/n != 0 \&\& //
+/if (style\[0x1C\] & 4) {/s/& 4/\& 8/
+/n = style\[0x34\];/s/0x34/0x32/
+/ramp += style\[0x35\];/s/0x35/0x33/
+/^            i--;/s/i--/i++/
+/gfx = (u8 \*) func_15142E24(gfx, &D_800915E8/s/0x92/0x93/
+/gfx = (u8 \*) func_15142E24(gfx, &D_800915E8/s/&flag, 3/\&flag, 2/
+/gfx = (u8 \*) func_15142B7C((s32) gfx, 1, 0x160600);/s/1, 0x160600/0, 0x160600/
+/gfx = (u8 \*) func_15142B7C((s32) gfx, 1, 0x160600);/s/0x160600/0x160601/
+/gfx = (u8 \*) func_1513F4E4((s32) gfx, 0x4D, &flag);/s/0x4D/0x4E/
+/gfx = func_15142C10(gfx, style\[0x24\]/s/style\[0x24\], 0xFF/style[0x24], 0xFE/
+/gfx = func_15142C10(gfx, style\[0x24\]/s/style\[0x24\], style\[0x24\], style\[0x24\]/style[0x24], style[0x25], style[0x24]/
+/gfx = func_15142FBC((s32) gfx, D_800D30BC/s/0x2CA0/0x2CA1/
+/gfx = func_15142FBC((s32) gfx, D_800D30BC/s/0x5049D8/0x5049D9/
+/flag = 1;/s/1/0/
+/if (\*(u16 \*) (trail + 0x1E) & 2) {/s/& 2/\& 1/
+/a\[1\] = \*(f32 \*) (trail + 0x14);/s/0x14/0x18/
+/alphaA = (p->fade \* \*(s16 \*) (style + 0x26)) >> 8;/s/>> 8/>> 7/
+/prevS = p->s;/s/p->s/0/
+/a\[2\] = pts\[cur\].pos\[2\];/s/pos\[2\]/pos[1]/
+/alphaA = (pts\[cur\].fade/s/pts\[cur\]/pts[next]/
+/prevS = pts\[cur\].s;/s/pts\[cur\]/pts[next]/
+/b\[1\] = p->pos\[1\];/s/pos\[1\]/pos[0]/
+/^    alphaB = (p->fade/s/(s16 \*) (style + 0x26)/(u16 *) (style + 0x26)/
+/^    curS = p->s;/s/p->s/p->s + 1/
+/^    dy = a\[1\] - cam\[1\];/s/cam\[1\]/cam[0]/
+/^    nz = ex \* dy - dx \* ey;/s/dx \* ey/dx * ez/
+/^    if (0.0f == len2) {/s/0.0f == len2/0.0f != len2/
+/^        k = p->width \/ sqrtf(len2);/s/p->width/10.0f/
+/^    v->v.ob\[1\] = (s32) (a\[1\] + ny);/s/+ ny/- ny/
+/^    v->v.tc\[1\] = 0x43C0;/s/0x43C0/0x43C1/
+/^    v->v.tc\[1\] = 0x4000;/s/0x4000/0x4001/
+/^    v->v.cn\[3\] = alphaA;/s/alphaA/alphaB/
+/^    v->v.ob\[2\] = (s32) (a\[2\] - nz);/s/- nz/+ nz/
+/^    v->v.tc\[0\] = p->s << 6;/s/<< 6/<< 5/
+/^        dz = b\[2\] - cam\[2\];/s/cam\[2\]/cam[1]/
+/^        ny = ez \* dx - dz \* ex;/s/dz \* ex/dz * ey/
+/^        len2 = nx \* nx + ny \* ny + nz \* nz;/s/+ nz \* nz//
+/^            k = p->width \/ sqrtf(len2);/s/p->width/(p - 1)->width/
+/^        v->v.ob\[0\] = (s32) (b\[0\] + nx);/s/(b\[0\] + nx)/(a[0] + nx)/
+/^        v->v.tc\[1\] = 0x43C0;/s/0x43C0/0x4000/
+/^        v->v.cn\[3\] = alphaB;/s/alphaB/alphaA/
+/^        v->v.ob\[1\] = (s32) (b\[1\] - ny);/s/- ny/+ ny/
+/^        v->v.flag = 0;/s/0;/1;/
+/g\[0\] = 0x01004008;/s/0x01004008/0x01004009/
+/g\[1\] = (s32) (v - 4);/s/v - 4/v - 2/
+/g\[4\] = 0x05020604;/s/0x05020604/0x05020605/
+/^        gfx += 0x18;/s/0x18/0x10/
+/if (prevS < curS) {/s/prevS < curS/prevS <= curS/
+/if (prevS < curS) {/s/prevS < curS/prevS > curS/
+/memcpy((s32 \*) v, (s32 \*) (v - 2), 0x20);/s/v - 2/v - 1/
+/^            v\[-2\].v.tc\[0\] -= 0x4000;/s/0x4000/0x2000/
+/^            v++;/d
+/^        p--;/d
+/^            p = &pts\[next\];/d
+/^        a\[0\] = pts\[cur\].pos\[0\];/s/pts\[cur\]/pts[next]/
+/^        b\[2\] = p->pos\[2\];/s/pos\[2\]/pos[1]/
+/prevS = (u8) curS;/s/(u8) curS/curS + 1/
+/^        alphaB = (p->fade/s/>> 8/>> 9/
+/} while (cur != \*(s8 \*) (trail + 0x2D));/s/0x2D/0x2E/
+# (P301: the `next = cur - 1` -> `cur + 1` mutant was dropped: the line exists twice (else branch and loop), both change -> endless loop, no verdict)

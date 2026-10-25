@@ -1,0 +1,2 @@
+# P286: the `1 < accum` threshold (accum 1.535 after the add)
+/^                if (1.0f < s->accum) {/s/1.0f/2.0f/ % acc15

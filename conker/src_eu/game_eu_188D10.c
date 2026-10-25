@@ -3,7 +3,97 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+s32 memcpy(s32, f32 *, s32);
+s32 func_15046C6C(f32 *, s32, f32, f32 *);
+
+/* func_15046C6C ground probe: start position, hit height in/out (+0xC) */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ f32 hit;
+    /* 0x10 */ u8 pad10[0x14];
+    /* 0x24 */ s32 u24;
+    /* 0x28 */ u8 u28;
+    /* 0x29 */ u8 u29;
+    /* 0x2A */ u8 pad2A[2];
+    /* 0x2C */ s32 u2C;
+} Probe1515B500;
+
+// character_dust_drop_spawn: one call in 16 (func_150ADA20() & 0xF == 0) spawns a falling dust object near character
+// idx (D_800DBFF0 entries of 0x9A0 bytes: position +0x2F8, yaw +0x380). The spot is 107..2010 units away at the yaw
+// (in 256ths of a turn, 256 / 360 per degree) +-20; it needs ground under it: a probe from y 19500 down to the
+// character's y gives the ground height, a second probe from the character's y down 250 more gives the start height
+// (else y - 250). The func_151491F4 object (5..65, -1, 0xC, 1, 7, 0x18 bytes, 0xFF, 0) gets the record
+// {x, start y, z, 195 * 0.001, 0, ground y} at +0x28.
+void func_1515B500(s16 idx) {
+    Probe1515B500 q2;
+    Probe1515B500 q;
+    s16 angle;
+    f32 rec[6]; /* x, y, z, speed, 0, ground */
+    u8 ok;
+    f32 dist;
+    f32 c;
+    f32 s;
+    f32 *pos;
+    s32 yaw;
+    f32 y0;
+    struct260 *obj;
+
+    if (func_150ADA20() & 0xF) {
+        return;
+    }
+    ok = 1;
+    pos = (f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x2F8);
+    yaw = *(f32 *) ((u8 *) D_800DBFF0 + idx * 0x9A0 + 0x380) * 0.7111111f;
+    angle = (u32) func_150ADA20() % 41 + yaw - 20;
+    dist = func_150ADA68() * 1903.0f + 107.0f;
+    c = func_151423D8((u8) angle);
+    s = func_151423D8((u8) (angle - 0x40));
+    rec[0] = pos[0] - dist * s;
+    rec[2] = pos[2] - dist * c;
+    q.pos[0] = rec[0];
+    q.u24 = 0;
+    q.u28 = 0;
+    q.u29 = 0;
+    q.u2C = 0;
+    q.pos[1] = 19500.0f;
+    q.pos[2] = rec[2];
+    q.hit = -10000.0f;
+    if (func_15046C6C(q.pos, 0, pos[1], &q.hit) != 0) {
+        rec[5] = q.hit;
+    } else {
+        ok = 0;
+    }
+    if (ok) {
+        y0 = pos[1] + -250.0f;
+        q2.u2C = 0;
+        q2.u29 = 0;
+        q2.u28 = 0;
+        q2.u24 = 0;
+        q2.hit = -10000.0f;
+        q2.pos[0] = rec[0];
+        q2.pos[1] = pos[1];
+        q2.pos[2] = rec[2];
+        if (func_15046C6C(q2.pos, 0, y0, &q2.hit) != 0) {
+            rec[1] = q2.hit;
+        } else {
+            rec[1] = y0;
+        }
+    }
+    func_150ADA68(); /* result unused */
+    rec[4] = 0.0f;
+    rec[3] = 195.0f * 0.001f;
+    if (!ok) {
+        return;
+    }
+    obj = func_151491F4((s16) ((u32) func_150ADA20() % 61 + 5), -1, 0xC, 1, 7, 0x18, 0xFF, 0);
+    if (obj != NULL) {
+        memcpy((s32) obj + 0x28, rec, 0x18);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515B500.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 memcpy(s32, f32 *, s32);
@@ -158,7 +248,108 @@ void func_1515BB9C(u8 *arg0, s16 *arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+u8 func_151D8E20(void);
+s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
+extern u8 (*D_800900A4[])(void);
+
+// smoke_cloud_burst: spawns 10 drifting smoke sprites (func_151559FC list 2, 0x18 / 0xFF / 1) tagged with id (the
+// sprite's +0x70 gets the 0x18-byte block {id, speed (105..210) * 0.001, spin 0..3008 * 0.001, size, size 2
+// ((94..395) * 0.01), ...}; size = (489..2068) * 0.01. Each starts at (-100..100, -100..48), with the texture byte of
+// the current kind's D_800900A4 handler (func_151D8E20), life 50..100, alpha 100..200 and random flip flags 2 / 4.
+// The first func_150ADA20 call's result is not used.
+void func_1515BBE4(s16 id) {
+    struct {
+        s16 id;             /* 0x00 */
+        u8 pad2[2];
+        f32 speed;          /* 0x04 */
+        f32 spin;           /* 0x08 */
+        f32 size;           /* 0x0C */
+        f32 size2;          /* 0x10 */
+        u8 pad14[4];
+    } blk;
+    struct {
+        f32 x;              /* 0x00 */
+        f32 y;              /* 0x04 */
+        f32 w;              /* 0x08 */
+        f32 h;              /* 0x0C */
+        u8 tex;             /* 0x10 */
+        u8 pad11;
+        s16 life;           /* 0x12 */
+        u16 flags;          /* 0x14 */
+        s16 u16;            /* 0x16 */
+        s16 u18;            /* 0x18 */
+        u8 u1A;             /* 0x1A */
+        u8 colour[5];       /* 0x1B: FF FF FF alpha FF */
+        u8 u20[4];          /* 0x20 */
+        s32 u24;            /* 0x24 */
+        s32 u28;            /* 0x28 */
+        s32 u2C;            /* 0x2C */
+        s32 u30;            /* 0x30 */
+        s32 u34;            /* 0x34 */
+        s32 u38;            /* 0x38 */
+        s32 u3C;            /* 0x3C */
+        u8 u40;             /* 0x40 */
+        u8 u41;             /* 0x41 */
+        u8 pad42[2];
+        u8 id;              /* 0x44 */
+    } spr;
+    f32 size;
+    s32 n;
+    u8 *e;
+
+    func_150ADA20(); /* result unused */
+    spr.flags = 0x19;
+    spr.u1A = 1;
+    spr.u16 = 0x14;
+    spr.u18 = 0xC;
+    spr.colour[0] = 0xFF;
+    spr.colour[1] = 0xFF;
+    spr.colour[2] = 0xFF;
+    spr.colour[4] = 0xFF;
+    blk.id = id;
+    spr.id = id;
+    spr.u20[0] = 0xFF;
+    spr.u20[1] = 0xFF;
+    spr.u20[2] = 0xFF;
+    spr.u20[3] = 0xFF;
+    spr.u24 = 0;
+    spr.u28 = 0;
+    spr.u2C = 0;
+    spr.u40 = 0;
+    spr.u41 = 9;
+    spr.u30 = 7;
+    spr.u34 = 0x3C;
+    spr.u38 = 0x80;
+    spr.u3C = 0x20;
+    for (n = 10; n != 0; n--) {
+        blk.speed = (func_150ADA68() * 105.0f + 105.0f) * 0.001f;
+        blk.spin = func_150ADA68() * 3008.0f * 0.001f;
+        size = (func_150ADA68() * 1579.0f + 489.0f) * 0.01f;
+        spr.w = size;
+        spr.h = size;
+        blk.size = size;
+        blk.size2 = (func_150ADA68() * 301.0f + 94.0f) * 0.01f;
+        spr.x = func_150ADA68() * 200.0f + -100.0f;
+        spr.y = func_150ADA68() * 148.0f + -100.0f;
+        spr.tex = D_800900A4[func_151D8E20()]();
+        spr.life = (u32) func_150ADA20() % 51 + 50;
+        spr.colour[3] = (u32) func_150ADA20() % 101 + 100;
+        if (func_150ADA20() & 1) {
+            spr.flags |= 2;
+        }
+        if (func_150ADA20() & 1) {
+            spr.flags |= 4;
+        }
+        e = (u8 *) func_151559FC(&spr, 2, 0, 0, 0x18, 0xFF, 1);
+        if (e != NULL) {
+            memcpy((s32) (e + 0x70), (f32 *) &blk, 0x18);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_188D10/func_1515BBE4.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1515BF04(u8 *arg0) {

@@ -1,0 +1,2 @@
+s/    } while (--n != 0);/    } while (--n > 1);/
+s/        \*dst++ = val;/        *dst++ = val | 1;/

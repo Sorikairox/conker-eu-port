@@ -1,0 +1,9 @@
+s/        dx = arg2 - 24.0f;/        dx = arg2 - 25.0f;/
+s/            vol = 4;/            vol = 5;/
+s/        if (arg0 != vol) {/        if (arg0 == vol) {/
+s/            func_1000886C(arg1, 3, vol);/            func_1000886C(arg1, 4, vol);/
+s/        } else if (D_8002C590 < arg3) {/        } else if (D_8002C590 > arg3) {/
+s/                v = (u32) f + 0x20;/                v = (u32) f + 0x21;/
+s/        if (v != func_10008A4C(arg1, 2)) {/        if (v != func_10008A4C(arg1, 3)) {/
+s/        arg0 = 1;/        arg0 = 2;/
+s/    } else if (D_800BE9F0 == 0x13) {/    } else if (D_800BE9F0 != 0x14) {/

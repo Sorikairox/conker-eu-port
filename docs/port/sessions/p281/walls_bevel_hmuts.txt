@@ -1,0 +1,9 @@
+s/    if (d > e) code |= 0x20;/    if (s > e) code |= 0x20;/
+s/    if (-s > e) code |= 8;/    if (-s > e) code |= 4;/
+s/    e = hy + hz;/    e = hx + hz;/
+s/    s = y + z;/    s = y - z;/
+s/    if (-d > e) code |= 0x400;/    if (d > e) code |= 0x400;/
+s/    e = hx + hy + hz;/    e = hx + hy - hz;/
+s/    c = x - y + z;/    c = x + y + z;/
+s/    if (-b > e) code |= 0x40;/    if (-b > e) code |= 0x20;/
+s/    if (d > e) code |= 8;/    if (d >= e) code |= 8;/

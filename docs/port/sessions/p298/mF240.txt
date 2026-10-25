@@ -1,0 +1,39 @@
+s# + D_80082FA4 \* 0x9A0 + 0x380)# + D_80082FA4 * 0x9A0 + 0x384)# % pl3
+s#    fr\.u4 = D_800A12D8_c\[0\];#    fr.u4 = D_800A12E0_c[0];# % base
+s#    \*(Vec240 \*) fr\.org = \*(Vec240 \*) D_800A5860;#    *(Vec240 *) fr.org = *(Vec240 *) (D_800A5860 + 4);# % base
+s#    fr\.scale\[1\] = 1\.0f;#    fr.scale[1] = 0.0f;# % base
+s#    fr\.spin\[1\] = 0\.0f;#    fr.spin[1] = 1.0f;# % base
+s#    fr\.u60\[1\] = 0xD;#    fr.u60[1] = 0xE;# % base
+s#    fr\.u6A = 2;#    fr.u6A = 3;# % base
+s#    fr\.u74 = 7;#    fr.u74 = 8;# % base
+s#    fr\.vel\[2\] = 0\.0f;#    fr.vel[2] = 1.0f;# % base
+s#    for (i = 0; i < 15; i++) {#    for (i = 0; i < 14; i++) {# % base
+s#        kind = (u8) (u32) D_800A1298\[i\];#        kind = (u8) (u32) D_800A1298[i] + 1;# % base
+s#        fr\.pos\[1\] = D_800A1130\[i\]\[1\] + pos\[1\];#        fr.pos[1] = D_800A1130[i][2] + pos[1];# % base
+s#        fr\.vel\[1\] = D_80088D0C\[kind\] \* func_150ADA68() + D_80088D00\[kind\];#        fr.vel[1] = D_80088D00[kind] * func_150ADA68() + D_80088D00[kind];# % base
+s#        fr\.spin\[0\] = D_800A1220\[i\] \* D_800A125C\[i\] \* D_800A12E4_c\[0\];#        fr.spin[0] = D_800A11E4[i] * D_800A125C[i] * D_800A12E4_c[0];# % base
+s#        fr\.spin\[2\] = D_800A11E4\[i\] \* D_800A125C\[i\] \* D_800A12E4_c\[0\];#        fr.spin[2] = D_800A11E4[i] * D_800A1220[i] * D_800A12E4_c[0];# % base
+s#        fr\.u4C = func_150ADA68() \* D_800A12E0_c\[0\] + D_800A12DC_c\[0\];#        fr.u4C = func_150ADA68() * D_800A12E0_c[0] - D_800A12DC_c[0];# % base
+s# + 0x82;# + 0x83;# % base
+s#        fr\.tex = (func_150ADA20() \& 1) ? 0xC4 : 0xC5;#        fr.tex = (func_150ADA20() \& 2) ? 0xC4 : 0xC5;# % base rnd2
+s#        func_15132BBC(\&fr, 3, 0xFF, 0, 0, room, arg2);#        func_15132BBC(\&fr, 3, 0xFF, 0, 0, 0xFF, arg2);# % room
+s#    func_151664F0(-1, (s32) pos\[0\], (s32) pos\[1\], (s32) pos\[2\], 0x1E, 0x32, 0, room, arg2);#    func_151664F0(-1, (s32) pos[0], (s32) pos[2], (s32) pos[2], 0x1E, 0x32, 0, room, arg2);# % base
+s#    func_151D5404((struct17 \*) pos, 506\.0f, D_800A12E8_c\[0\], D_800A12EC_c\[0\], 0xF, 0x14, room, arg2);#    func_151D5404((struct17 *) pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 0xF, 0x15, room, arg2);# % base
+s#    func_151D58E4(pos, 506\.0f, D_800A12E8_c\[0\], D_800A12EC_c\[0\], 5, room, arg2);#    func_151D58E4(pos, 506.0f, D_800A12E8_c[0], D_800A12EC_c[0], 5, room, 1);# % room
+s#    func_151D5AC4(pos, room, arg2);#    func_151D5AC4(pos, 0xFF, arg2);# % room
+s#    func_151D45A4(pos, room, arg2);#    func_151D45A4(pos, room, 1);# % room
+s#    func_15154728(pos, f \* 4\.0f + 12\.0f, 1\.6409999f,#    func_15154728(pos, f * 4.0f + 12.0f, 1.641f,# % base
+s# + 0xC8), 0\.0f, room, arg2);# + 0xC9), 0.0f, room, arg2);# % base
+s#    ring\.count = (func_150ADA20() \& 3) + 3;#    ring.count = (func_150ADA20() \& 7) + 3;# % base rnd2
+s#    ring\.u18 = camv - 0x40;#    ring.u18 = camv - 0x41;# % base
+s#    ring\.u1C = -0x3F;#    ring.u1C = 0x3F;# % base
+s#    \*(Vec240 \*) ring\.pos = \*(Vec240 \*) pos;#    *(Vec240 *) ring.pos = *(Vec240 *) D_800A5860;# % base
+s#    ring\.u20\[3\] = 15\.0f;#    ring.u20[3] = 5.0f;# % base
+s#    ring\.u20\[5\] = 0\.0f;#    ring.u20[5] = 1.0f;# % base
+s#    ring\.u55 = 1;#    ring.u55 = 0;# % base
+s#    ring\.u58 = 50;#    ring.u58 = 5;# % base
+s#    ring\.u20\[12\] = 10\.0f;#    ring.u20[12] = 1.0f;# % base
+s#    ring\.u20\[10\] = D_800A12F4_c\[0\];#    ring.u20[10] = D_800A12F0_c[0];# % base
+s#    func_151A74B0(\&ring, 0, room, arg2);#    func_151A74B0(\&ring, 1, room, arg2);# % base
+s#    e = (u8 \*) func_15149130(0xF, 8, -1, -1, 1, 0, (struct37 \*) 0xC, room, arg2);#    e = (u8 *) func_15149130(0xF, 8, -1, -1, 1, 1, (struct37 *) 0xC, room, arg2);# % base
+s#        memcpy(e + 0x28, \&at, 0xC);#        memcpy(e + 0x2C, \&at, 0xC);# % base

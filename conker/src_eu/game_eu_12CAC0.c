@@ -3,7 +3,76 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+u8 *func_150FF808(s32 arg0);
+void func_150FF82C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_150FF854(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                   s32 argA, s32 argB, u8 *argC, u8 *argD, s32 argE);
+void func_150FF9F4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
+s32 func_151C284C(f32 *, f32 *, s32, s32, s32, s32, f32, f32, f32, f32, f32, s32, u8 *, s32, s32, s32, s32, s32, s32,
+                  s32, s32, f32, s32, s32, s32, s32, s32);
+void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2);
+void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+void func_151D56F8(u8 *arg0);
+
+// object_bolt_fire: like object_beam_fire (func_150FF604) but fires a lightning bolt: reads the muzzle frame of the
+// object's muzzle node (func_150FF808 / func_151D56F8 / func_150FF82C; nothing without a node), aims (func_150FF854,
+// aim flag set when the object has a matrix block +0x1D4 and its +0x74 low nibble is not 0xF), spawns the bolt
+// (func_151C284C: length 300, 1/300, width 25..35, 600..800, 50, life 100..255, kind 0x35 when D_800BE616 else
+// 0x1A, direction 1 for object type 0x98 else -1) and, when aimed, the muzzle flash, node glow and impact.
+void func_150FF2B0(struct127 *obj, u8 arg1, s32 arg2) {
+    u8 aimed;
+    u8 *node;
+    s32 surface;
+    s32 target;
+    s32 hit[18];
+    f32 axisEC[3];
+    f32 axisF8[3];
+    f32 dir104[3];
+    f32 pos110[3];
+    f32 axis11C[3];
+    f32 axis128[3];
+    f32 pos134[3];
+    f32 end140[3];
+    f32 start14C[3];
+    f32 r1, r2;
+    s32 r3;
+    s32 kind;
+    s32 dir;
+
+    node = func_150FF808((s32) obj);
+    if (node == NULL) {
+        return;
+    }
+    func_151D56F8((u8 *) obj);
+    func_150FF82C((s32) obj, (s32) pos134, (s32) axis128, (s32) axis11C);
+    if (obj->unk1D4 != NULL && (((u8 *) obj)[0x74] & 0xF) != 0xF) {
+        aimed = 1;
+    } else {
+        aimed = 0;
+    }
+    func_150FF854(&aimed, (s32) hit, (u8 *) start14C, (s32) pos110, (s32) dir104, (u8 *) pos134, (s32) axis128,
+                  (s32) axis11C, (s32) axisF8, (s32) axisEC, (s32) &target, (s32) &surface, (u8 *) end140, (u8 *) obj,
+                  (s32) node);
+    r1 = func_150ADA68();
+    r2 = func_150ADA68();
+    r3 = func_150ADA20();
+    kind = D_800BE616 ? 0x35 : 0x1A;
+    dir = (((u8 *) obj)[4] == 0x98) ? 1 : -1;
+    func_151C284C(end140, pos134, target, surface, 1, 0, 300.0f, 0.0033333334f /* D_800A24E0 */, r1 * 10.0f + 25.0f,
+                  r2 * 200.0f + 600.0f, 50.0f, (u32) r3 % 156 + 100, (u8 *) obj, 0x63, 1, 1, 1, 0, 1, 0, kind, 0.0f,
+                  0xFF, dir, 0, arg1, arg2);
+    if (aimed == 0) {
+        return;
+    }
+    func_151D44C4((u8 *) start14C, arg1, arg2);
+    func_151D49B8((u8 *) pos110, (u8 *) dir104, (s32) ((u8 *) obj->unk1D4 + node[2] * 64), (u8 *) obj, 1.0f, arg1,
+                  arg2);
+    func_150FF9F4((u8 *) start14C, (s32) hit, arg1, arg2);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF2B0.s")
+#endif
 
 extern s32 D_800A2420;
 void func_150FF550(u8 *arg0, s16 arg1, u8 *arg2) {

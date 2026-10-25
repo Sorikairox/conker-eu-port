@@ -314,6 +314,42 @@ chkcn yes func_15104A80 "$S4A80 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target 
 chkcn yes func_15104A80 "$S4A80 DIFFTEST_RET=151494E0=1" "RET 151494E0"
 chkcn no  func_15104A80 "$S4A80" "not a jal target"
 chkcn no  func_15104A80 "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target"
+# P281: DIFFTEST_STOPCALL=ADDR=N ends a trial at the N-th call of a stub (endless thread loops: func_100052A0 spins in
+# `while (1) {}` after osWritebackDCacheAll 100252A0). Without it every trial times out (UNSURE). A candidate that never
+# makes the stop call times out alone (DIFFER). DIFFTEST_RETV1 sets the low word of osGetTime (100252D0): the busy wait
+# bound 0x22ADD7 shows only with exact low words (EQUIV without them).
+S52A0="DIFFTEST_STOPCALL=100252A0=1 DIFFTEST_RET=100252D0=0 DIFFTEST_POKE=8002C068=1,8002AE14=0"
+V52A0="DIFFTEST_RETV1=100252D0=0;22ADD6;7270E0;0;7270E0"
+chkce UNSURE func_100052A0 "DIFFTEST_RET=100252D0=0"
+chkce EQUIV  func_100052A0 "$S52A0"
+chkce DIFFER func_100052A0 "$S52A0" 's/__osSpSetPc(0);/__osSpSetPc(4);/'
+chkce DIFFER func_100052A0 "$S52A0" 's/    osWritebackDCacheAll();//'
+chkce EQUIV  func_100052A0 "$S52A0 $V52A0"
+chkce DIFFER func_100052A0 "$S52A0 $V52A0" 's/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/'
+chkce EQUIV  func_100052A0 "$S52A0" 's/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/'
+# P281: a struct returned by value (ldiv_t ldiv(long, long)) takes a hidden a0, so its divisor is a2: the arity now
+# counts it (DIFFTEST_SRET_OLD=1 = old: the divisor was never compared), and ldiv's stub computes the real quotient /
+# remainder (DIFFTEST_LDIV_OLD=1 = old random). func_10001550 = libc _Ldtob on 1234.5678 with %e.
+S1550="DIFFTEST_ARG=0=80480000,1=65 DIFFTEST_POKE=80480000=40934A45,80480004=6D5CFAAD,80480008=80490000,80480024=6 DIFFTEST_RET=10001A80=FFFFFFFF DIFFTEST_OUTB=10001A80=0:00;0B"
+chkce EQUIV  func_10001550 "$S1550"
+chkce DIFFER func_10001550 "$S1550" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
+chkce EQUIV  func_10001550 "$S1550 DIFFTEST_SRET_OLD=1 DIFFTEST_LDIV_OLD=1" 's/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/'
+# P288: a stub's OUTW / OUTA into a page the function never touched (func_10001194's func_10004514 reads into
+# D_80082EB0) faulted in stub_write (mem_write without ensure()) -> UNSURE; stub_write now maps the pages first
+# (DIFFTEST_STUBMAP_OLD=1 = old). The xor-key mutant is only seen through the OUTW-read offset table.
+S1194="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=0 DIFFTEST_POKE=8000030C=0 DIFFTEST_RET=10003E90=80480000,10003EBC=80400000;80420000 DIFFTEST_OUTW=10004764=1:00001234;0;8039CCCB"
+chkce EQUIV  func_10001194 "$S1194"
+chkce UNSURE func_10001194 "$S1194 DIFFTEST_STUBMAP_OLD=1"
+chkce DIFFER func_10001194 "$S1194" 's/(D_8003585C\[i\] ^ 0x8039CCCA)/(D_8003585C[i] ^ 0x8039CCCB)/'
+# P292: a stub output (DIFFTEST_OUTW / OUTA) into a heap page the function had not touched yet faulted with
+# UC_ERR_WRITE_UNMAPPED at the stub, so every trial was inconclusive (func_1518D290: the ring / world buffers that
+# DIFFTEST_RET hands out are filled by stubs first). same fix as P288 above (one ensure() loop, one
+# DIFFTEST_STUBMAP_OLD switch since the P308 merge).
+# (The old-behaviour case uses 1 trial: with more, the fault-learning re-runs map the page and later trials pass.)
+SD290="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80480000,1=7,2=1234 DIFFTEST_RET=10003EBC=80460000;80470000 DIFFTEST_OUTW=15143CAC=2:42C80000;C2480000/3:41200000;C1A00000 DIFFTEST_OUTA=15146324=2:43480000;C2C80000;44160000;41200000;C1200000;42F00000;3F800000;40000000;40400000;C0800000;C0A00000;C0C00000 DIFFTEST_ARGMEM=151307F0=0:102"
+TRIALS=4 chkce EQUIV  func_1518D290 "$SD290"
+TRIALS=1 chkce UNSURE func_1518D290 "$SD290 DIFFTEST_STUBMAP_OLD=1"
+TRIALS=1 chkce DIFFER func_1518D290 "$SD290" 's/(func_150ADA68() \* 202.0f/(func_150ADA68() * 200.0f/'
 # P260: a candidate path the container already read, rewritten on the host with a different size (what every
 # chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares
@@ -321,4 +357,17 @@ chkcn no  func_15104A80 "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0
 F28=$T/func_15103828.mut.c
 sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/func_15103828.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
 TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
+# P280: DIFFTEST_ARGMEM "N:LEN@K" compares only at the K-th call to ADDR. func_1501175C memcpys a 0x10 link record,
+# then a 0x5C tail: LEN 92 on every call compares stack bytes past the link record (layout-dependent, DIFFER as is);
+# with @0 / @1 the case is EQUIV and a one-ulp change of a tail constant DIFFERs.
+S175C="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80460000,1=00000012,2=00000001 DIFFTEST_POKE=8046003B=07000000,8046014C=41200000,80460150=42C80000 DIFFTEST_RET=151496A0=80470000,1513D860=80480000,150ADF00=00000003,15160830=80490000"
+chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:92"
+chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1"
+chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0,10023360=1:92@1" 's/0.396174014f/0.396175f/'
+chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0" 's/0.396174014f/0.396175f/'
+# P317: DIFFTEST_MEMCPY=1 makes the memcpy stub copy for real. func_1501175C's 0x5C tail record is memcpy'd to the
+# heap: with the stub copying nothing, a tail-constant change was invisible without an ARGMEM compare (EQUIV above);
+# with the real copy the destination writes are compared and it DIFFERs, while the unmutated function stays EQUIV.
+chkce EQUIV  func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1"
+chkce DIFFER func_1501175C "$S175C DIFFTEST_ARGMEM=10023360=1:16@0 DIFFTEST_MEMCPY=1" 's/0.396174014f/0.396175f/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]

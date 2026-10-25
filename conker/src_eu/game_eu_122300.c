@@ -197,7 +197,54 @@ u8 *func_150F4E50(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4E50.s")
 #endif
+#ifdef NON_MATCHING
+f32 func_15143E64(f32 *);
+
+// ambient_emitter_update: per-frame update of an ambient object with flags +0x194: the distance to the camera
+// (func_15144B34(0)) from the position +0x38..; flag 1 fades the alpha +0x70 (0 below 500, 255 from 1200, linear in
+// between); flag 2 (unless flag 4) keeps a looping sound: when a handle is in the high half of +0x88 it is moved to
+// the position (func_1000F9D4), otherwise within 200 units sound id (+0x88 low half) starts at a random pitch
+// 0x4000..0x7FFF (func_10010F88) and its handle goes to the high half. Returns 1.
+s32 func_150F4FB8(u8 *obj) {
+    f32 delta[3];
+    f32 *cam;
+    f32 dist;
+    u32 sound;
+    u16 handle;
+
+    if ((obj[0x194] & 1) || (obj[0x194] & 2)) {
+        cam = func_15144B34(0);
+        delta[0] = *(f32 *) (obj + 0x38) - cam[0];
+        delta[1] = *(f32 *) (obj + 0x3C) - cam[1];
+        delta[2] = *(f32 *) (obj + 0x40) - cam[2];
+        dist = func_15143E64(delta);
+    }
+    if (obj[0x194] & 1) {
+        if (dist < 500.0f) {
+            obj[0x70] = 0;
+        } else if (dist < 1200.0f) {
+            obj[0x70] = (u32) ((dist - 500.0f) * 0.0014285714285714286 * 255.0);
+        } else {
+            obj[0x70] = 0xFF;
+        }
+    }
+    if ((obj[0x194] & 2) && !(obj[0x194] & 4)) {
+        sound = *(u32 *) (obj + 0x88);
+        if ((sound >> 16) != 0) {
+            func_1000F9D4(sound >> 16, (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
+                          (s32) * (f32 *) (obj + 0x40));
+        } else if (dist < 200.0f) {
+            handle = func_10010F88(*(u32 *) (obj + 0x88) & 0xFFFF, (func_150ADA20() & 0x3FFF) + 0x4000, 0, 0, -1,
+                                   (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
+                                   (s32) * (f32 *) (obj + 0x40), 10000, 20000);
+            *(u32 *) (obj + 0x88) |= handle << 16;
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4FB8.s")
+#endif
 
 void func_150F527C(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *v = arg0 + 0x170;
@@ -229,4 +276,82 @@ void func_150F4D5C(u8 *arg0, s8 arg1, u8 arg2, u8 arg3, s32 arg4) {
     }
 }
 
+#ifdef NON_MATCHING
+typedef struct {
+    f32 v[3];
+} Vec3F536C;
+typedef struct {
+    u8 count;
+    u8 *pairs;  // 2 bytes per choice, byte 1 = the bolt's texture / style
+    f32 *scales;
+} BoltSet536C;
+extern s32 (*D_80088ED8[])(u8 *);
+extern BoltSet536C D_80088EC0[];
+void func_15143874(s16, f32, f32 *, f32 *);
+
+// lightning_emitter_update: per-frame update of an emitter (record at +0x28: owner, accumulator, condition +0x30,
+// bolt set +0x31). If a condition function (D_80088ED8[+0x30], -1 = none) says no, nothing happens. Otherwise the
+// accumulator grows by (~0.051 + rand x ~0.153) x frame time and every whole unit spawns one bolt (func_150F4AF0)
+// between two points around the owner's camera (func_15144B34(owner[0x23D])): both at a random distance 254..635
+// along the camera heading (owner +0x380 degrees, to 256-unit angle) +-21, at height -133..79 relative to it, in
+// random order; style / scale picked at random from the D_80088EC0 set, width 5..15.
+void func_150F536C(u8 *obj) {
+    struct {
+        u8 *owner;
+        f32 acc;
+        s8 cond;
+        u8 set;
+    } *em = (void *) (obj + 0x28);
+    Vec3F536C a;
+    Vec3F536C b;
+    Vec3F536C tmp;
+    f32 *cam;
+    s32 angle;
+    s16 left;
+    s16 right;
+    BoltSet536C *set;
+    u8 k;
+    f32 width;
+    f32 r;
+
+    if ((s8) obj[0x30] != -1) {
+        if (D_80088ED8[(s8) obj[0x30]](obj) == 0) {
+            return;
+        }
+    }
+    em->acc += (0.0510000028f + func_150ADA68() * 0.153000012f) * D_800BE9A4;
+    if (!(1.0f < em->acc)) {
+        return;
+    }
+    cam = func_15144B34(em->owner[0x23D]);
+    angle = (s32) ((*(f32 *) (em->owner + 0x380) + 180.0f) * 0.7111111283f);
+    left = angle - 21;
+    right = angle + 21;
+    do {
+        func_15143874(right, func_150ADA68() * 381.0f + 254.0f, &a.v[0], &a.v[2]);
+        a.v[1] = func_150ADA68() * 212.0f + -133.0f;
+        a.v[0] += cam[0];
+        a.v[1] += cam[1];
+        a.v[2] += cam[2];
+        func_15143874(left, func_150ADA68() * 381.0f + 254.0f, &b.v[0], &b.v[2]);
+        b.v[1] = func_150ADA68() * 212.0f + -133.0f;
+        b.v[0] += cam[0];
+        b.v[1] += cam[1];
+        b.v[2] += cam[2];
+        if (func_150ADA20() & 1) {
+            tmp = a;
+            a = b;
+            b = tmp;
+        }
+        set = &D_80088EC0[em->set];
+        k = (u32) func_150ADA20() % set->count;
+        width = func_150ADA68() * 10.0f + 5.0f;
+        r = func_150ADA68();
+        func_150F4AF0((u8 *) &a, (u8 *) &b, set->pairs[k * 2 + 1], width, 1.0f / width,
+                      (r * 0.075f + 0.075f) * set->scales[k], 0, 0, obj[0xC], obj[1]);
+        em->acc -= 1.0f;
+    } while (1.0f < em->acc);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F536C.s")
+#endif

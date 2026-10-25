@@ -1,0 +1,83 @@
+# P301 mutants for func_151C40BC (impact_effects_spawn)
+/if (level == 0x2B || level == 0x30) {/s/0x2B/0x2C/
+/if (level == 0x2B || level == 0x30) {/s/ || level == 0x30//
+/type = (surface == 1) ? 3 : 4;/s/? 3 : 4/? 4 : 4/
+/type = (surface == 1) ? 3 : 4;/s/surface == 1/surface == 2/
+/} else if (surface == 0xB && level == 4) {/s/0xB/0xC/
+/} else if (surface == 0xB && level == 4) {/s/level == 4/level == 5/
+/} else if ((surface == 1 || surface == 0xA) && level == 0xE) {/s/ || surface == 0xA//
+/} else if ((surface == 1 || surface == 0xA) && level == 0xE) {/s/level == 0xE/level == 0xF/
+/} else if (level == 0x34) {/s/0x34/0x35/
+/} else if (level == 0x27) {/s/0x27/0x28/
+/^        sparkChance = 0.0f;/d
+/^        smokeChance = 0.0f;/d
+/^        debrisChance = 0.0f;/d
+/^        type = 0;/s/0/1/
+/if (func_150ADA68() < sparkChance) {/s/</<=/
+/s = func_150ADA68() \* 15.0f + 15.0f;/s/+ 15.0f/+ 16.0f/
+/s = func_150ADA68() \* 15.0f + 15.0f;/s/\* 15.0f/* 16.0f/
+/spark.texture = D_800AADB0\[type\];/s/\[type\]/[type + 1]/
+/spark.flags = /s/0x20000/0x10000/
+/spark.flags = /s/0xBF01/0xBF00/
+/spark.life = /s/61U/62U/
+/spark.color\[0\] = /s/56U/57U/
+/spark.color\[5\] = 0xFF;/s/0xFF/0xFE/
+/spark.color\[3\] = 0;/s/0;/1;/
+/spark.frames = /s/0x48/0x49/
+/spark.frames = /s/0x3B/0x3C/
+/spark.frames = /s/+ 2;/+ 3;/
+/spark.blend = /s/6 : 7/6 : 8/
+/spark.u22 = 0x20;/s/0x20/0x21/
+/spark.tag = sparkTag;/s/sparkTag/debrisTag/
+/func_1513C650((s32) &spark/s/func_150ADA20() & 0xFF,/func_150ADA20() \& 0x7F,/
+/func_1513C650((s32) &spark/s/obj + 0x17C/obj + 0x178/
+/func_1513C650((s32) &spark/s/pos\[1\], pos\[2\], s, s/pos[1], pos[2], s, 1.0f/
+/0, 0, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/if (func_150ADA68() < smokeChance) {/s/</<=/
+/smoke.texture = D_800AADC8\[type\];/s/D_800AADC8/D_800AADB0/
+/smoke.texSet = 0x3B03;/s/0x3B03/0x3B02/
+/smoke.life = /s/+ 13;/+ 14;/
+/smoke.grow = /s/5.0f + 7.0f/5.0f + 8.0f/
+/smoke.size = /s/40.0f/41.0f/
+/smoke.vel\[1\] = /s/prev\[1\]/prev[0]/
+/smoke.pos\[2\] = /s/pos\[2\];/pos[1];/
+/smoke.u34 = D_800AAE44;/s/D_800AAE44/D_800AAE48/
+/smoke.u3C = D_800AAE48;/s/D_800AAE48/D_800AAE44/
+/smoke.flags = /s/0x08DC0009/0x08DC0008/
+/smoke.flags = /s/0x40000000/0x20000000/
+/smoke.alpha = /s/76U/75U/
+/smoke.u47 = 7;/s/7/6/
+/smoke.u56 = 0x1F;/s/0x1F/0x1E/
+/smoke.tag = smokeTag;/s/smokeTag/sparkTag/
+/func_1513D2F0(&smoke/s/0x22, 0, 0, 0x1C, 2/0x21, 0, 0, 0x1C, 2/
+/func_1513D2F0(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1D, 2/
+/func_1513D2F0(&smoke/s/0x22, 0, 0, 0x1C, 2/0x22, 0, 0, 0x1C, 3/
+/func_1513D2F0(&smoke/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/if (func_150ADA68() < debrisChance) {/s/</<=/
+/debris.colorA\[1\] = /s/\[type\]\[1\]/[type][2]/
+/debris.colorB\[0\] = /s/D_800AADF4/D_800AADE0/
+/debris.colorB\[3\] = 0xE6;/s/0xE6/0xE7/
+/debris.texSet = 0x5103;/s/0x5103/0x5102/
+/debris.handlers = 0x200005;/s/0x200005/0x200004/
+/debris.u2C = D_800AAE4C;/s/D_800AAE4C/D_800AAE50/
+/debris.u34 = 65.0f;/s/65.0f/64.0f/
+/debris.u46 = -0x28;/s/-0x28/0x28/
+/debris.u58 = D_800AAE54;/s/D_800AAE54/D_800AAE50/
+/debris.flags = /s/0x800000/0x400000/
+/debris.flags = /s/0x40E07/0x40E06/
+/debris.u64 = 1;/s/1/0/
+/debris.u68 = D_800AAE58;/s/D_800AAE58/D_800AAE54/
+/debris.pos\[2\] = pos\[2\];/s/pos\[2\];/pos[1];/
+/debris.u26 = 0x19;/s/0x19/0x18/
+/debris.u61 = -1;/s/-1/1/
+/func_15153BA4((u8 \*) &debris/s/debrisTag/smokeTag/
+/func_15153BA4((u8 \*) &debris/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/if (func_150ADA68() < flashChance) {/s/flashChance/debrisChance/
+/flash.unk2 = /s/+ 3;/+ 4;/
+/flash.unk1 = -1;/s/-1/1/
+/at.unk4 = pos\[1\];/s/pos\[1\]/pos[0]/
+/i = func_150ADA20() & 1;/s/& 1/\& 0/
+/func_151602C0(&flash/s/+ 10,/+ 11,/
+/func_151602C0(&flash/s/D_800AAE08\[i\]\[0\]/D_800AAE08[i][1]/
+/0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/0xFF, 0, 0/0xFE, 0, 0/
+/0xFF, 0, 0, obj\[0xC\], obj\[1\]);/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/

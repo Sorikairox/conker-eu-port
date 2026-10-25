@@ -1,0 +1,26 @@
+s#    Morph15117424 \*m = \&D_800896C0\[info \& 0xFFFF\];#    Morph15117424 *m = \&D_800896C0[(info \& 0xFFFF) + 1];#
+s#    s32 size = block\[1\] - block\[0\];#    s32 size = block[1] - block[0] + 4;#
+s#    s32 speed = info >> 16;#    s32 speed = (info >> 16) + 1;#
+s#    if (\*(u8 \*\*) (obj + 0x80) == NULL) {#    if (*(u8 **) (obj + 0x80) != NULL) {#
+s#        \*(s16 \*\*) (obj + 0x80) = allocate_memory(size, 1, 2, 0);#        *(s16 **) (obj + 0x80) = allocate_memory(size, 1, 1, 0);# % load
+s#        func_10004514(block\[0\], \*(u8 \*\*) (obj + 0x80), size, 1);#        func_10004514(block[1], *(u8 **) (obj + 0x80), size, 1);# % load
+s#    t = (f32) frames \* ((f32) pos \* 1\.5259022e-05f);#    t = (f32) frames * ((f32) pos * 1.5258789e-05f);#
+s#    frac = t - (f32) k;#    frac = t - (f32) k - 0.01f;#
+s#    if (frames == k) {#    if (frames == k + 1) {#
+# equivalent (b == a when k == frames): s#        frac = 1\.0f;#        frac = 0.0f;# % end onend
+s#        k--;#        ;# % end onend
+s#    stride = (size \/ frames) \& ~1;#    stride = (size \/ frames) \& ~3;# % odd
+s#    count = (u32) stride \/ 6;#    count = (u32) stride \/ 6 - 1;#
+s#    if (k + 1 != frames) {#    if (k + 1 == frames) {#
+s#        b = (s16 \*) (buf + (k + 1) \* stride);#        b = (s16 *) (buf + k * stride);#
+s#    target = \*(s32 \*) (obj + 0x7C);#    target = *(s32 *) (obj + 0x80);#
+s#        pos -= speed;#        pos -= speed + 1;# % down
+s#        if (pos < target) {#        if (pos <= target + 1) {# % downedge
+s#    } else if (pos < target) {#    } else if (pos <= target) {# % start
+s#        pos += speed;#        pos += 2 * speed;# % mid
+s#        if (target < pos) {#        if (target + 1 < pos) {# % upedge
+s#        \*(s16 \*) (v + 0) = (s32) (((f32) b\[0\] - (f32) a\[0\]) \* frac + (f32) a\[0\] + (f32) \*(s16 \*) (obj + 0x10));#        *(s16 *) (v + 0) = (s32) (((f32) b[0] - (f32) a[0]) * frac + (f32) b[0] + (f32) *(s16 *) (obj + 0x10));#
+s#        \*(s16 \*) (v + 4) = (s32) (((f32) b\[2\] - (f32) a\[2\]) \* frac + (f32) a\[2\] + (f32) \*(s16 \*) (obj + 0x12));#        *(s16 *) (v + 4) = (s32) (((f32) b[1] - (f32) a[1]) * frac + (f32) a[1] + (f32) *(s16 *) (obj + 0x12));#
+s#        \*(s16 \*) (v + 2) = (s32) (((f32) b\[1\] - (f32) a\[1\]) \* frac + (f32) a\[1\] + (f32) \*(s16 \*) (obj + 0x14));#        *(s16 *) (v + 2) = (s32) (((f32) b[1] - (f32) a[1]) * frac + (f32) a[1] + (f32) *(s16 *) (obj + 0x12));#
+s#    for (i = 0; i < count; i++, a += 3, b += 3) {#    for (i = 0; i < count; i++, a += 3, b += 2) {#
+1,/if (target < pos) {/s/if (target < pos) {/if (target <= pos) {/ % start

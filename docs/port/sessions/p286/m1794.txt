@@ -1,0 +1,51 @@
+# P286 mutants for func_151A1794 (spark_burst_emitter_update)
+/e->accum = e->accum + e->rate \* D_800BE9A4;/s/e->rate \* //
+/if (!(1.0f < e->accum)) {/s/1.0f </1.0f <=/
+/t.colour\[2\] = 0xFF;/s/0xFF/0xFE/
+/t.u30\[1\] = 0;/s/0;/1;/
+/t.u1F = 0x10;/s/0x10/0x11/
+/t.flags = 0x120;/s/0x120/0x121/
+/t.mode = 0x000C0001;/s/0x000C0001/0x000C0002/
+/t.sprites = &D_800910E4;/s/&D_800910E4/\&D_800910E4 + 1/
+/t.u22 = 0;/s/0;/1;/
+/t.u2A = 0;/s/0;/1;/
+/t.u24 = 0x7D0;/s/0x7D0/0x7D1/
+/sin1 = func_151423D8(r1 - 0x40);/s/r1 - 0x40/r1 + 0x40/
+/sin2 = func_151423D8(r2 - 0x40);/s/r2 - 0x40/r2/
+/dist = func_150ADA68() \* e->spread;/s/e->spread/e->accum/
+/horiz = dist \* cos2;/s/cos2/sin2/
+/tx = e->pos\[0\] + horiz \* sin1;/s/horiz/dist/
+/ty = e->pos\[1\] - dist \* sin2;/s/ - / + /
+/tz = e->pos\[2\] + horiz \* cos1;/s/cos1/sin1/
+/t.flags |= 4;/s/4/2/
+/t.flags |= 8;/s/8/0x10/
+/t.life = (u32) func_150ADA20()/s/+ 1) + e->lifeMin/) + e->lifeMin/
+/t.life = (u32) func_150ADA20()/s/e->lifeMin;/e->lifeMin + 1;/
+/fade = (u32) func_150ADA20()/s/e->fadeRange + 1/e->fadeRange + 2/
+/t.total = ((u8 \*) D_80090F10)\[0x1D8\]/s/0x1D8/0x1D9/
+/^        q = n >> 2;/s/>> 2/>> 3/
+/^        h = n >> 1;/s/n >> 1/(n + 1) >> 1/
+/^        rest = n - q;/s/n - q/n - h/
+/f.inStep = 0xFF \/ (n - rest);/s/0xFF/0xFE/
+/f.rest = rest;/s/rest;/q;/
+/f.midStep = fade \/ (n - h);/s/(n - h)/h/
+/f.total2 = n;/s/n;/h;/
+/f.half2 = h;/s/h;/n;/
+/f.quarter = q;/s/q;/h;/
+/f.outStep = 0xFF \/ q;/s/q/h/
+/f.half3 = h;/s/h;/q;/
+/f.endStep = fade \/ h;/s/fade/0xFF/
+/t.pos\[1\] = (s32) e->pos\[1\];/s/pos\[1\];/pos[2];/
+/t.frac\[2\] = (s32) (e->pos\[1\] \* 256.0f);/s/256.0f/255.0f/
+/t.frac\[1\] = (s32) (e->pos\[2\] \* 256.0f);/s/pos\[2\]/pos[1]/
+/inv = 1.0f \/ h;/s/h/n/
+/v = (tx - e->pos\[0\]) \* inv;/s/tx - e->pos\[0\]/tx/
+/f.velFrac\[0\] = (s32) (v \* 256.0f) & 0xFF;/s/& 0xFF/\& 0x7F/
+/v = (ty - e->pos\[1\]) \* inv;/s/ty/tz/
+/f.vel\[2\] = (s32) v;/s/v;/(v + 1.0f);/
+/func_15167D84((s32 \*\*) &t, 0, 0x22, -1, obj\[0xC\], obj\[1\])/s/0x22/0x20/
+/func_15167D84((s32 \*\*) &t, 0, 0x22, -1, obj\[0xC\], obj\[1\])/s/obj\[0xC\], obj\[1\]/obj[1], obj[0xC]/
+/memcpy(rec + 0x50, &f, 0x22);/s/0x50/0x4C/
+/memcpy(rec + 0x50, &f, 0x22);/s/0x22/0x20/
+/^        e->accum -= 1.0f;/s/1.0f/0.5f/
+/} while (1.0f < e->accum);/s/1.0f/2.0f/

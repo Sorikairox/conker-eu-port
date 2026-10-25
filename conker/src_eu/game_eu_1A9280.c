@@ -503,7 +503,102 @@ void func_1517D534(void)
  do { var_s0 = &D_800DDA90; var_s1 = 0; do { temp_a0 = *((s32 *) (((u8 *) var_s0) + 8)); if (temp_a0 != 0) { temp_a1 = (&D_800DD478)[var_s1 * 0x1A]; if (temp_a1 != 0) { func_10006530(temp_a0, temp_a1, D_8003809C); func_10004074(*((s32 *) (((u8 *) var_s0) + 8))); } *((s32 *) (((u8 *) var_s0) + 8)) = 0; } var_s1 += 1; var_s0 += 4; } while (var_s1 != 0xF); } while (0);
 }
 
+#ifdef NON_MATCHING
+extern s32 D_8008D340;
+// sprite_billboard_quad_draw: appends one upright textured quad to the display list gfx and returns the new end.
+// The quad takes vertex slot D_800DE188 of this frame's quad buffer D_800DDD10[D_800BE9C0] (nothing is drawn once
+// D_800DDD0C slots are used). It stands on (x, y, z), turned by angle (degrees) around the vertical axis, half width
+// radius, height 2 * halfHeight. tex is a w x h RGBA16 image followed by its w x h I4 mask: both are loaded with one
+// LoadBlock (rows (h * 5 + 3) >> 2), tile 0 = the image, tile 1 = the mask (TMEM offset w * h / 4 words).
+s32 func_1517D5E4(s32 gfx, s16 x, s16 y, s16 z, f32 angle, s32 radius, s32 halfHeight, s32 w, s32 h, s32 tex) {
+    u32 *g = (u32 *) gfx;
+    u32 slot = D_800DE188;
+    Vtx *quad = (Vtx *) (D_800DDD10[D_800BE9C0] + slot * 64);
+    u8 tw = w;
+    u8 th = h;
+    s16 dx;
+    s16 dz;
+    s16 top;
+    f32 r;
+    s32 loadRows;
+    s32 lrs;
+    s32 words;
+    s32 dxt;
+
+    if (slot >= (u32) D_800DDD0C) {
+        return gfx;
+    }
+    g[0] = 0xDE000000; /* gSPDisplayList(sprite render setup) */
+    g[1] = (u32) &D_8008D340;
+    g[2] = 0xFCFFFFFF; /* gDPSetCombineLERP */
+    g[3] = 0xFFFCF438;
+    g[4] = 0xD9FFFBFF; /* gSPClearGeometryMode(G_CULL_BACK) */
+    g[5] = 0;
+    g[6] = 0xEF182C3F; /* gDPSetOtherMode */
+    g[7] = 0x0C184B50;
+    g += 8;
+
+    angle *= 0.017453292f;
+    r = radius;
+    dx = (s32) (cosf(angle) * r);
+    dz = (s32) (sinf(angle) * r);
+    quad[0].v.ob[0] = quad[3].v.ob[0] = x + dx;
+    quad[0].v.ob[1] = quad[1].v.ob[1] = y;
+    quad[0].v.ob[2] = quad[3].v.ob[2] = z - dz;
+    quad[1].v.ob[0] = quad[2].v.ob[0] = x - dx;
+    top = y + halfHeight + halfHeight;
+    quad[2].v.ob[1] = quad[3].v.ob[1] = top;
+    quad[1].v.ob[2] = quad[2].v.ob[2] = z + dz;
+    quad[1].v.tc[0] = quad[2].v.tc[0] = (tw << 5) - 1;
+    quad[2].v.tc[1] = quad[3].v.tc[1] = (th << 5) - 1;
+
+    loadRows = (th * 5 + 3) >> 2;
+    lrs = tw * loadRows - 1;
+    if (lrs >= 0x7FF) {
+        lrs = 0x7FF;
+    }
+    words = (tw * 2) / 8;
+    if (words <= 0) {
+        words = 1;
+    }
+    dxt = (words + 0x7FF) / words;
+
+    g[0] = 0x01004008; /* gSPVertex(quad, 4, 0) */
+    g[1] = D_800DDD10[D_800BE9C0] + slot * 64;
+    g[2] = 0xFD100000; /* gDPSetTextureImage(RGBA, 16b, 1, tex) */
+    g[3] = tex;
+    g[4] = 0xF5100000; /* gDPSetTile(G_TX_LOADTILE) */
+    g[5] = 0x07080200;
+    g[6] = 0xE6000000; /* gDPLoadSync */
+    g[7] = 0;
+    g[8] = 0xF3000000; /* gDPLoadBlock(G_TX_LOADTILE, 0, 0, lrs, dxt) */
+    g[9] = 0x07000000 | ((lrs & 0xFFF) << 12) | (dxt & 0xFFF);
+    g[10] = 0xE7000000; /* gDPPipeSync */
+    g[11] = 0;
+    g[12] = 0xF5100000 | ((((tw * 2 + 7) >> 3) & 0x1FF) << 9); /* gDPSetTile 0: RGBA16 image */
+    g[13] = 0x00080200;
+    g[14] = 0xF2000000; /* gDPSetTileSize 0 */
+    g[15] = ((((tw - 1) << 2) & 0xFFF) << 12) | (((loadRows - 1) << 2) & 0xFFF);
+    g[16] = 0xF5800000 | (((((tw >> 1) + 7) >> 3) & 0x1FF) << 9) | (((tw * th) >> 2) & 0x1FF); /* tile 1: I4 mask */
+    g[17] = 0x01080200;
+    g[18] = 0xF2000000; /* gDPSetTileSize 1 */
+    g[19] = 0x01000000 | ((((tw - 1) << 2) & 0xFFF) << 12) | (((th - 1) << 2) & 0xFFF);
+
+    quad = (Vtx *) (D_800DDD10[D_800BE9C0] + slot * 64);
+    quad[0].v.flag = quad[1].v.flag = quad[2].v.flag = quad[3].v.flag = 0;
+
+    g[20] = 0x05000402; /* gSP1Triangle(0, 2, 1) */
+    g[21] = 0;
+    g[22] = 0x05000604; /* gSP1Triangle(0, 3, 2) */
+    g[23] = 0;
+    g[24] = 0xD9FFFFFF; /* gSPSetGeometryMode(G_SHADING_SMOOTH) */
+    g[25] = 0x00200000;
+    D_800DE188++;
+    return (s32) (g + 26);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A9280/func_1517D5E4.s")
+#endif
 
 extern u8 D_800DE158[];
 

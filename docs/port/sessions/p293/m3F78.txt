@@ -1,0 +1,35 @@
+s#    if (\*(s32 \*) tgt == 0 || st\[4\] != tgt\[0x3B\]) {#    if (*(s32 *) tgt == 0 \&\& st[4] != tgt[0x3B]) {# % gone idchg
+s#    if (D_800BE9E4 > 0) {#    if (D_800BE9E4 >= 0) {# % noframe
+s#        r = func_150D4FF0((u8 \*) pos, (u8 \*) dir, (struct127 \*) tgt, \*(s32 \*) (st + 8));#        r = func_150D4FF0((u8 *) pos, (u8 *) dir, (struct127 *) tgt, *(s32 *) (st + 4));# % r0
+s#            \*(u16 \*) (obj + 0x1E) \&= ~4;#            *(u16 *) (obj + 0x1E) \&= ~5;# % r0
+s#            return 1;#            return 0;# % r0
+s#                \*(f32 \*) (\*(u8 \*\*) (st + 0xC) + 0x38) = pos\[1\];#                *(f32 *) (*(u8 **) (st + 0xC) + 0x38) = pos[2];# % r1
+s#                \*(f32 \*) (\*(u8 \*\*) (st + 0x10) + 0x44) = dir\[1\];#                *(f32 *) (*(u8 **) (st + 0x10) + 0x44) = dir[0];# % r1
+s#                \*(s32 \*) (\*(u8 \*\*) (st + 0x10) + 0x58) |= 2;#                *(s32 *) (*(u8 **) (st + 0x10) + 0x58) |= 6;# % r1
+s#        } else if (r == 2) {#        } else if (r == 3) {# % r2 r3
+s#        step\[1\] = pos\[1\] - old\[1\];#        step[1] = pos[1] - old[0];# % r3 r1
+s#        spd = func_15143E64((s32) step);#        spd = func_15143E64((s32) old);# % r3
+s#        ring\[(s8) obj\[0x2E\]\]\.dist = spd;#        ring[(s8) obj[0x2E]].dist = -spd;# % r3
+s#        ring\[(s8) obj\[0x2E\]\]\.u10 = 100\.0f;#        ring[(s8) obj[0x2E]].u10 = 10.0f;# % r3
+s#        if (obj\[0x25\] == (s8) obj\[0x2E\]) {#        if (obj[0x25] <= (s8) obj[0x2E]) {# % wrap r3
+s#        obj\[0x2C\]++;#        obj[0x2C] += 2;# % r3
+s#        if ((s8) obj\[0x2D\] == (s8) obj\[0x2E\]) {#        if ((s8) obj[0x2D] != (s8) obj[0x2E]) {# % catch r3
+s#            obj\[0x2C\]--;#            obj[0x2C] -= 0;# % catch
+s#                glow = (f32 \*) (\*(u8 \*\*) (st + 0x10) + 0x170);#                glow = (f32 *) (*(u8 **) (st + 0x10) + 0x174);# % fast slow
+s#            if (rec\[0x84\] != 0) {#            if (rec[0x84] == 0) {# % fast plhi
+s#                if (6\.0f < \*(f32 \*) (tgt + 0x44)) {#                if (6.0f <= *(f32 *) (tgt + 0x44)) {# % edge6
+s#                } else if (3\.0f < \*(f32 \*) (tgt + 0x44)) {#                } else if (3.0f <= *(f32 *) (tgt + 0x44)) {# % edge3
+s#                slot = (tgt - (u8 \*) D_800CC2D0) \/ 0x32C;#                slot = (tgt - (u8 *) D_800CC2D0) \/ 0x32C + 1;# % plhi plfar
+s#                if (slot >= 4) {#                if (slot >= 2) {# % plhi
+s#                    lean = \*(s8 \*) (((u8 \*\*) D_800BE728\[0\])\[slot\] + 3);#                    lean = *(u8 *) (((u8 **) D_800BE728[0])[slot] + 3);# % pllo
+s#                    if (lean > 20) {#                    if (lean >= 20) {# % pl20
+s#                    } else if (lean < -20) {#                    } else if (lean <= -20) {# % plm20
+s#                    glow\[1\] = D_800A0DD4_c\[0\];#                    glow[1] = D_800A0DD8_c[0];# % fast
+s#                \*(f32 \*) (st + 0x18) = 50\.0f;#                *(f32 *) (st + 0x18) = 40.0f;# % fast
+s#                if (st\[5\] != prev) {#                if (st[5] == prev) {# % fast fastsame
+s#                        surface = (f32 \*) D_800A5860;#                        surface = (f32 *) D_800A5860 + 1;# % fastnos
+s#                    func_150D5268(pos, surface, \*(f32 \*) (tgt + 0x40), obj\[0xC\], obj\[1\]);#                    func_150D5268(pos, surface, *(f32 *) (tgt + 0x44), obj[0xC], obj[1]);# % fast
+s#                    glow\[1\] = D_800A0DD8_c\[0\];#                    glow[1] = D_800A0DDC_c[0];# % slow
+s#                \*(f32 \*) (st + 0x18) = 10\.0f;#                *(f32 *) (st + 0x18) = 20.0f;# % slow
+s#                    glow\[1\] = 1\.0f;#                    glow[1] = 0.5f;# % mid
+s#    \*(f32 \*) (st + 0x14) += (\*(f32 \*) (st + 0x18) - \*(f32 \*) (st + 0x14)) \* D_800A0DDC_c\[0\];#    *(f32 *) (st + 0x14) += (*(f32 *) (st + 0x18) - *(f32 *) (st + 0x14)) * D_800A0DD8_c[0];# % noframe

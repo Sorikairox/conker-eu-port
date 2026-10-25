@@ -33,6 +33,8 @@ void port_log(const char *fmt, ...);
 void port_js_stack(int skip, int n);
 unsigned port_gu_f2l_calls; /* P25: ?gulog=N logs the first N guMtxF2L calls with a stack */
 
+/* P318: guMtxF2L is game C now (libultra/gu/guMtxF2L.c, P279; same cvt.w.s rounding); PC copy kept for A/B (-DP318_PC_GU_OLD) */
+#ifdef P318_PC_GU_OLD
 void guMtxF2L(const float *mf, uint32_t *m) {
     static int gl = -1;
     if (gl < 0) gl = port_flag("gulog");
@@ -50,6 +52,7 @@ void guMtxF2L(const float *mf, uint32_t *m) {
         m[k + 8] = (e1 << 16) | (e2 & 0xFFFFu);
     }
 }
+#endif /* P318_PC_GU_OLD */
 
 /* func_150A7B80 (guMtxIdent): removed in P131, game_D5030.c has the NON_MATCHING C (void (Mtx *)). */
 
@@ -58,6 +61,8 @@ void guMtxF2L(const float *mf, uint32_t *m) {
 static const fu cP[] = { {0x3F800000}, {0xBE2AAAA6}, {0x3C088769}, {0xB94FB7FD}, {0x362EDEFA} };
 static const fu c_rpi = {0x3EA2F984}, c_pihi = {0x40490FDC}, c_pilo = {0x330885A3};
 
+/* P318: cosf is game C now (libultra/gu/cosf.c, P279, vbe.cosf via LIBC_VBE); PC copy kept for A/B (-DP318_PC_GU_OLD) */
+#ifdef P318_PC_GU_OLD
 float port_cosf(float x) __asm__("vbe.cosf");
 float port_cosf(float x) {
     fu u = { .f = x };
@@ -78,6 +83,7 @@ float port_cosf(float x) {
     if (x != x) { fu q = {0x7FBFFFFF}; return q.f; } /* __libm_qnan_f */
     return 0.0f;
 }
+#endif /* P318_PC_GU_OLD */
 
 /* P26: Rare's fast sin/cos (func_150AD78C / func_150AD780, asm/D5E90.s) were PC copies here in P25.
  * The port branch now has them as game C (conker/src_eu/nm_asm/D5E90.c, P24), which wins. */

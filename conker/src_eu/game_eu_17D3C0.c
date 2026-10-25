@@ -989,7 +989,136 @@ void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_15151FA8.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_15145128(u8 *, u8 *, void *, void *);
+void func_15143874(s16, f32, f32 *, f32 *);
+s32 func_15132FBC(void *, s32, s32, s32, s32, s32);
+
+/* func_15132FBC particle request built by func_151522DC (0x7C bytes; layout as Spark9768 in game_161520) */
+typedef struct {
+    /* 0x00 */ f32 u00;
+    /* 0x04 */ f32 u04;
+    /* 0x08 */ f32 scaleB;
+    /* 0x0C */ f32 scaleA;
+    /* 0x10 */ f32 rot[3];
+    /* 0x1C */ f32 scl[3];
+    /* 0x28 */ s32 pos[3];
+    /* 0x34 */ f32 vel[3];
+    /* 0x40 */ f32 u40;
+    /* 0x44 */ f32 u44;
+    /* 0x48 */ f32 u48;
+    /* 0x4C */ f32 u4C;
+    /* 0x50 */ s32 u50;
+    /* 0x54 */ s16 life;
+    /* 0x56 */ s16 frame;
+    /* 0x58 */ u8 u58;
+    /* 0x59 */ u8 pad59[3];
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8 u60[8];
+    /* 0x68 */ u8 u68;
+    /* 0x69 */ u8 pad69;
+    /* 0x6A */ u8 u6A;
+    /* 0x6B */ u8 pad6B;
+    /* 0x6C */ s32 u6C;
+    /* 0x70 */ u8 u70;
+    /* 0x71 */ u8 pad71;
+    /* 0x72 */ s16 u72;
+    /* 0x74 */ s16 u74;
+    /* 0x76 */ u8 pad76[6];
+} Flash22DC;
+
+// impact_flash_spray: spawns def +0 + random [0, def +4] kind-3 particles (func_15132FBC) at def +8 for an impact
+// flash (def = the 0x58-byte request of func_151BBBCC). The surface record at def +0x20 gives three axes
+// (func_15144E80, each normalised by func_15145128); the third is flipped to face def +0x14 and scaled by 1000. Each
+// particle moves along (a0 * c + a1 * s + a2) * speed, (c, s) = func_15143874(random angle, random * def +0x34),
+// speed = def +0x38 + random * def +0x3C; random rotation (0..360 per axis), a random keyframe v of `n`
+// (frames[v] at +0x56, scales[v] * (def +0x4C + random * def +0x50) as both scales), drift +-def +0x54 on +0x40 /
+// +0x48, +0x4C = def +0x40 + random * def +0x44, life def +0x48 + random [0, def +0x4A].
+void func_151522DC(u8 *def, s32 *frames, f32 *scales, s32 n, u8 kind, s32 owner) {
+    Flash22DC rec;
+    f32 ax0[3];
+    f32 ax1[3];
+    f32 ax2[3];
+    f32 c;
+    f32 s;
+    f32 speed;
+    f32 r;
+    f32 w;
+    u32 count;
+    u32 v;
+    s32 ang;
+    f32 unused0;
+    f32 unused1;
+
+    if (func_15144E80(def + 0x20, (u8 *) ax0, (u8 *) ax1, (u8 *) ax2) == 0) {
+        return;
+    }
+    func_15145128((u8 *) ax0, (u8 *) ax0, &unused0, &unused1);
+    func_15145128((u8 *) ax1, (u8 *) ax1, &unused0, &unused1);
+    func_15145128((u8 *) ax2, (u8 *) ax2, &unused0, &unused1);
+    if (func_15144A74((u8 *) ax2, def + 0x14) < 0.0f) {
+        ax2[0] = -ax2[0];
+        ax2[1] = -ax2[1];
+        ax2[2] = -ax2[2];
+    }
+    ax2[0] *= 1000.0f;
+    ax2[1] *= 1000.0f;
+    ax2[2] *= 1000.0f;
+    rec.u00 = 1.0f;
+    rec.u04 = 1.0f;
+    rec.scl[0] = 1.0f;
+    rec.scl[1] = 1.0f;
+    rec.scl[2] = 1.0f;
+    rec.pos[0] = *(s32 *) (def + 0x8);
+    rec.pos[1] = *(s32 *) (def + 0xC);
+    rec.pos[2] = *(s32 *) (def + 0x10);
+    rec.u44 = 0.0f;
+    rec.u50 = 0x29E8;
+    count = (u32) func_150ADA20() % (u32) (*(s32 *) (def + 4) + 1) + *(s32 *) def;
+    rec.u58 = 0;
+    rec.u5C = 0;
+    rec.u60[0] = 0xFF;
+    rec.u60[1] = 8;
+    rec.u60[2] = 0;
+    rec.u60[3] = 0;
+    rec.u60[4] = 0;
+    rec.u60[5] = 0;
+    rec.u60[6] = 0;
+    rec.u60[7] = 0;
+    rec.u68 = 2;
+    rec.u6A = 0;
+    rec.u6C = 0;
+    rec.u70 = 0;
+    rec.u72 = 12;
+    rec.u74 = 0x15;
+    while (count != 0) {
+        speed = func_150ADA68() * *(f32 *) (def + 0x3C) + *(f32 *) (def + 0x38);
+        ang = func_150ADA20();
+        r = func_150ADA68() * *(f32 *) (def + 0x34);
+        func_15143874((s16) (ang & 0xFF), r, &c, &s);
+        rec.vel[0] = (ax0[0] * c + ax1[0] * s + ax2[0]) * speed;
+        rec.vel[1] = (ax0[1] * c + ax1[1] * s + ax2[1]) * speed;
+        rec.vel[2] = (ax0[2] * c + ax1[2] * s + ax2[2]) * speed;
+        rec.rot[0] = func_150ADA68() * 360.0f;
+        rec.rot[1] = func_150ADA68() * 360.0f;
+        rec.rot[2] = func_150ADA68() * 360.0f;
+        v = (u32) func_150ADA20() % (u32) n;
+        rec.frame = frames[v];
+        rec.scaleA = scales[v] * (*(f32 *) (def + 0x4C) + func_150ADA68() * *(f32 *) (def + 0x50));
+        rec.scaleB = rec.scaleA;
+        w = *(f32 *) (def + 0x54);
+        rec.u40 = func_150ADA68() * (w + w) - w;
+        w = *(f32 *) (def + 0x54);
+        rec.u48 = func_150ADA68() * (w + w) - w;
+        rec.u4C = func_150ADA68() * *(f32 *) (def + 0x44) + *(f32 *) (def + 0x40);
+        rec.life = (u32) func_150ADA20() % (u32) (*(s16 *) (def + 0x4A) + 1) + *(s16 *) (def + 0x48);
+        func_15132FBC(&rec, 3, 0xFF, 0, kind, owner);
+        count--;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_17D3C0/func_151522DC.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P179 */

@@ -1,0 +1,35 @@
+s#    if (func_15144E80(def + 0x20, (u8 \*) ax0, (u8 \*) ax1, (u8 \*) ax2) == 0) {#    if (func_15144E80(def + 0x20, (u8 *) ax0, (u8 *) ax1, (u8 *) ax2) != 0) {#
+s#    func_15145128((u8 \*) ax1, (u8 \*) ax1, \&unused0, \&unused1);#    func_15145128((u8 *) ax0, (u8 *) ax1, \&unused0, \&unused1);# % flip
+s#    if (func_15144A74((u8 \*) ax2, def + 0x14) < 0\.0f) {#    if (func_15144A74((u8 *) ax2, def + 0x14) <= 0.0f) {# % dotzero
+s#        ax2\[1\] = -ax2\[1\];#        ;# % flip
+s#    ax2\[2\] \*= 1000\.0f;#    ax2[2] *= 100.0f;# % flip
+s#    rec\.u04 = 1\.0f;#    rec.u04 = 0.0f;# % flip
+s#    rec\.scl\[2\] = 1\.0f;#    rec.scl[2] = 0.5f;# % flip
+s#    rec\.pos\[1\] = \*(s32 \*) (def + 0xC);#    rec.pos[1] = *(s32 *) (def + 0x8);# % flip
+s#    rec\.u44 = 0\.0f;#    rec.u44 = 1.0f;# % flip
+s#    rec\.u50 = 0x29E8;#    rec.u50 = 0x29E9;# % flip
+s#    rec\.u58 = 0;#    rec.u58 = 1;# % flip
+s#    rec\.u5C = 0;#    rec.u5C = 1;# % flip
+s#    rec\.u60\[1\] = 8;#    rec.u60[1] = 9;# % flip
+s#    rec\.u60\[7\] = 0;#    rec.u60[7] = 1;# % flip
+s#    rec\.u68 = 2;#    rec.u68 = 3;# % flip
+s#    rec\.u6C = 0;#    rec.u6C = 1;# % flip
+s#    rec\.u72 = 12;#    rec.u72 = 13;# % flip
+s#    rec\.u74 = 0x15;#    rec.u74 = 0x16;# % flip
+s#        speed = func_150ADA68() \* \*(f32 \*) (def + 0x3C) + \*(f32 \*) (def + 0x38);#        speed = func_150ADA68() * *(f32 *) (def + 0x38) + *(f32 *) (def + 0x3C);# % flip
+s#        r = func_150ADA68() \* \*(f32 \*) (def + 0x34);#        r = func_150ADA68() * *(f32 *) (def + 0x38);#
+s#        func_15143874((s16) (ang \& 0xFF), r, \&c, \&s);#        func_15143874((s16) (ang \& 0x7F), r, \&c, \&s);# % flip
+s#        rec\.vel\[0\] = (ax0\[0\] \* c + ax1\[0\] \* s + ax2\[0\]) \* speed;#        rec.vel[0] = (ax0[0] * s + ax1[0] * c + ax2[0]) * speed;# % flip
+s#        rec\.vel\[2\] = (ax0\[2\] \* c + ax1\[2\] \* s + ax2\[2\]) \* speed;#        rec.vel[2] = (ax0[2] * c + ax1[2] * s + ax2[2]) * speed * 2.0f;# % flip
+s#        rec\.rot\[1\] = func_150ADA68() \* 360\.0f;#        rec.rot[1] = func_150ADA68() * 361.0f;# % flip
+s#        rec\.frame = frames\[v\];#        rec.frame = frames[v + 1];# % flip
+s#        rec\.scaleA = scales\[v\] \* (\*(f32 \*) (def + 0x4C) + func_150ADA68() \* \*(f32 \*) (def + 0x50));#        rec.scaleA = scales[v] * (*(f32 *) (def + 0x50) + func_150ADA68() * *(f32 *) (def + 0x4C));# % flip
+s#        rec\.scaleB = rec\.scaleA;#        rec.scaleB = 1.0f;# % flip
+s#        rec\.u40 = func_150ADA68() \* (w + w) - w;#        rec.u40 = func_150ADA68() * (w + w) + w;# % flip
+s#        rec\.u48 = func_150ADA68() \* (w + w) - w;#        rec.u48 = func_150ADA68() * w - w;# % flip
+s#        rec\.u4C = func_150ADA68() \* \*(f32 \*) (def + 0x44) + \*(f32 \*) (def + 0x40);#        rec.u4C = func_150ADA68() * *(f32 *) (def + 0x40) + *(f32 *) (def + 0x44);# % flip
+s#        func_15132FBC(\&rec, 3, 0xFF, 0, kind, owner);#        func_15132FBC(\&rec, 3, 0xFF, 1, kind, owner);#
+s#        count--;#        count -= 2;#
+/count = (u32) func_150ADA20/s/+ 1) + \*(s32 \*) def;/+ 2) + *(s32 *) def;/
+/v = (u32) func_150ADA20/s/(u32) n;/(u32) (n - 1);/ % flip noflip
+/rec.life = (u32)/s/(def + 0x48)/(def + 0x4A)/ % flip

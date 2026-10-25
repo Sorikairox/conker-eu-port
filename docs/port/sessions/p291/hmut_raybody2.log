@@ -1,0 +1,12 @@
+SURVIVED 1: s/    xMajor = !(NM_FABS(ray.dir\[0\]) <= NM_FABS(ray.dir\[2\]));/    xMajor = !(NM_FABS(ray.dir[0]) < NM_FABS(ray.dir[2]));/
+SURVIVED 2: s/    negZ = !(ray.dir\[2\] >= 0.0f);/    negZ = ray.dir[2] > 0.0f;/
+SURVIVED 3: s/            ez = negZ ? (cz - h) - 10.0f : (cz + h) + 10.0f;/            ez = negZ ? (cz - h) - 10.0f : (cz + h) + 1.0f;/
+SURVIVED 4: s/            ex = posX ? ex + 10.0f : ex - 10.0f;/            ex = posX ? ex + 10.0f : ex + 10.0f;/
+SURVIVED 5: s/            if (ez < cz - h || !(ez <= cz + h)) {/            if (ez < cz - h || !(ez < cz + h)) {/
+SURVIVED 6: /^s32 func_150ACEA0/,/^}/s/                prev = 1;/                prev = 0;/
+SURVIVED 7: s/        if (maxDist != 0.0f \&\& !(sqrtf((x0 - ex) \* (x0 - ex) + (z0 - ez) \* (z0 - ez)) < maxDist)) {/        if (maxDist != 0.0f \&\& !(sqrtf((x0 - ex) * (x0 - ex) + (z0 - ez) * (z0 - ez)) <= maxDist)) {/
+SURVIVED 8: s/        if (node != skip \&\& /        if (/
+SURVIVED 9: s/    return above != 0 \&\& above != 4;/    return above != 0;/
+KILLED 10: s/                flags = triFlags\[ray.hitTri - NMR_OBJ_U16(obj, NMR_OBJ_TRI0)\];/                flags = triFlags[ray.hitTri];/
+SURVIVED 11: s/        slope = ((z0 + ray.dir\[2\]) - z0) \/ t;/        slope = ray.dir[2] \/ t;/
+done: killed 1 survived 10 other 0

@@ -1,0 +1,3 @@
+func_1600288C (P288, debugger_257350) knobs: NR=0 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=16002DE4=2:16
+  setups 288C_setups.txt: 20 EQUIV / 20
+  muts 288C_muts.txt: 27 killed / 32 (survived: [s/xexp + 10 : 6/xexp + 11 : 6/] [s/if (gen > 19) {/if (gen > 18) {/] [s/(gen -= 8) > 0/(gen -= 7) > 0/] [s/        if (gen < nsig) {/        if (gen <= nsig) {/] [s/            gen = 19;/            gen = 20;/]); not applied: 0

@@ -21,7 +21,7 @@ program):
     descriptor + a constructor that converts them in place at startup (__vbe_fix).
 usage: vbe.py in.ll out.ll  (prints one stats line)
 """
-import collections, re, sys
+import collections, os, re, sys
 
 # ---------------------------------------------------------------- type layout (wasm32 datalayout)
 SCAL = {'i1': (1, 1), 'i8': (1, 1), 'i16': (2, 2), 'i32': (4, 4), 'i64': (8, 8), 'float': (4, 4),
@@ -406,6 +406,21 @@ def self_intrinsic(text, st):
     return text
 
 
+# P318: game functions that now have NON_MATCHING C but must stay replaced by the port's platform layer (the PC cannot
+# run them: func_10001194 clears RDRAM up to 0x80400000, decompresses the game segment from ROM and sets up the TLB;
+# port/boot/game_main.c has the PC main thread). The game definition becomes `weak`, so the port's strong definition
+# wins at link time and references (osCreateThread(..., func_10001194, ...) in init_1050.c) go to it.
+PORT_OWNED = ['func_10001194']
+
+
+def port_owned(text, st, src=''):
+    if os.path.basename(src).startswith('port__'):  # the port's own TUs (BOOT_SRC) keep their strong definitions
+        return text
+    for name in PORT_OWNED:
+        text, n = re.subn(r'^define (?:dso_local )?([^\n]*@' + re.escape(name) + r'\()', r'define weak \1', text, flags=re.M)
+        st['port_owned'] += n
+    return text
+
 # Data symbols that the N64 link places at absolute addresses below the RAM range: ROM offsets (and a
 # texture id) that the game uses as `&sym` and hands to the PI DMA / texture cache. In the port they
 # must keep their absolute value, so every reference becomes a constant `inttoptr` and the external
@@ -423,7 +438,9 @@ ROM_ABS = {'D_11AF': 0x11AF, 'D_2D810': 0x2D810, 'D_1A3B40': 0x1A3B40, 'D_AB2240
            # P228: texture ids D_88C (barrel menu title) / D_87B (fill bar) of the C barrel_menu_draw func_151ECE00
            # (port P226): as data stubs they were wasm addresses (0x10A377xx) -> func_1510D66C range -> fatal
            # func_150ADC50 + trap in func_1510D984 in the multiplayer barrel menu (frame 4442).
-           'D_88C': 0x88C, 'D_87B': 0x87B}
+           'D_88C': 0x88C, 'D_87B': 0x87B,
+           # P318: ROM offsets of the compressed game segment used by func_10001194's NM C (init_1050.c, P281/P288).
+           'D_427B0': 0x427B0, 'D_19EDE8': 0x19EDE8}
 # P233: link symbols whose value is the PHYSICAL / segment address of real RAM data (KSEG0 | value = that symbol).
 # The C hands them to the RSP as pointers (gSPMatrix(&D_89810) = the identity matrix D_80089810 in the shadow pass of
 # game_eu_1B1ED0.c); as zero data stubs the port drew with an all-zero view matrix. Every reference is renamed to the
@@ -607,7 +624,7 @@ def rcp_io(text, st):
 def main():
     src, dst = sys.argv[1], sys.argv[2]
     st0 = collections.Counter()
-    p = Pass(self_intrinsic(rcp_io(k0_add_sites(k0_ptr_sites(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0), st0), st0).split('\n'))
+    p = Pass(port_owned(self_intrinsic(rcp_io(k0_add_sites(k0_ptr_sites(k0_checks(abs_syms(RENAME.sub(r'@vbe.\1', open(src).read()), st0), st0), st0), st0), st0), st0), st0, src).split('\n'))
     p.st.update(st0)
     if len(sys.argv) > 3:  # canonical signatures (port/tools/sigs.py, written by vbe_build.py)
         import json, sigs

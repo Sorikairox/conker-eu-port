@@ -1,0 +1,145 @@
+preflight: unicorn 2.0.1 (pinned port_work/pyuc201)
+ok   [EQUIV] self  EQUIV func_15103800 (32 trials ok, 0 inconclusive, 32 calls, ret=void, ref 10 words, cand 10 words)
+ok   [EQUIV] self  EQUIV func_15103828 (32 trials ok, 0 inconclusive, 0 calls, ret=void, ref 58 words, cand 58 words)
+ok   [EQUIV] self  EQUIV func_15141564 (32 trials ok, 0 inconclusive, 64 calls, ret=int, ref 28 words, cand 28 words)
+ok   [EQUIV] self  EQUIV func_15141928 (32 trials ok, 0 inconclusive, 32 calls, ret=int, ref 16 words, cand 16 words, 10 trials via learned pointer inputs)
+ok   [EQUIV] self  EQUIV func_15123934 (29 trials ok, 3 inconclusive, 8 calls, ret=int, ref 38 words, cand 38 words)
+ok   [DIFFER] s/D_800D9AB0, 8/D_800D9AB0, 6/  DIFFER func_15103800: trial 0: call #0 bzero: a1 ref=0x8 cand=0x6
+ok   [EQUIV] s/D_800D9AB0\[i\] > D_800BE9E4/D_800D9AB0[i] >= D_800BE9E4/  EQUIV func_15103828 (32 trials ok, 0 inconclusive, 0 calls, ret=void, ref 58 words, cand 58 words)
+ok   [DIFFER] s/D_800D9AB0\[i\] = 0;/D_800D9AB0[i] = 1;/  DIFFER func_15103828: trial 0: memory differs at 0x000D9ED5 (ref=00 cand=01)
+ok   [DIFFER] s/i < 4;/i < 3;/  DIFFER func_15103828: trial 0: memory differs at 0x000D9ED6 (ref=00 cand=init)
+ok   [DIFFER] s/temp->unkC \* D_800BE9A4/temp->unk4 * D_800BE9A4/  DIFFER func_15141564: trial 2: call #1 func_15144B68: f12 ref=0x10001 cand=0x82914775
+ok   [DIFFER] s/return 1;/return 2;/  DIFFER func_15141564: trial 0: return v0 ref=0x1 cand=0x2
+ok   [DIFFER] s/temp_v0\[0\], temp_v0\[2\]/temp_v0[2], temp_v0[0]/  DIFFER func_15141928: trial 0: call #0 func_1514182C: stack arg sp+0x10 ref=0xC297428F cand=0x3
+ok   [DIFFER] s/STK->unk2C\[0\] = arg1;/STK->unk2C[0] = arg2;/  DIFFER func_15123934: trial 0: memory state before call #0 (func_15125394) differs
+ok   [EQUIV] case as is  EQUIV func_150A7D00 (32 trials ok, 0 inconclusive, 0 calls, ret=void, ref 37 words, cand 42 words)
+ok   [DIFFER] case s/mtx\[15\] = 1;/mtx[15] = 2;/  DIFFER func_150A7D00: trial 0: memory differs at 0x00479F8F (ref=01 cand=02)
+ok   [DIFFER] case s/i < 16;/i < 15;/  DIFFER func_150A7D00: trial 0: memory differs at 0x00479FAE (ref=00 cand=init)
+ok   [EQUIV] case as is  EQUIV func_151DAE28 (32 trials ok, 0 inconclusive, 32 calls, ret=int, ref 119 words, cand 122 words)
+ok   [DIFFER] case s/arg1, 0x40, \&sp4C/arg1, 0x41, \&sp4C/  DIFFER func_151DAE28: trial 0: call #0 0x151D6310: a2 ref=0x40 cand=0x41
+ok   [EQUIV] case as is  EQUIV func_150ADACC (32 trials ok, 0 inconclusive, 0 calls, ret=void, ref 6 words, cand 10 words)
+ok   [DIFFER] case s/(s64)arg0 + 1/(s64)arg0 + 2/  DIFFER func_150ADACC: trial 0: memory differs at 0x00088957 (ref=02 cand=03)
+ok   [EQUIV] self  EQUIV func_15048A70 (32 trials ok, 0 inconclusive, 0 calls, ret=f32, ref 24 words, cand 24 words)
+ok   [DIFFER] s/return arg1 - arg0;/return arg0 - arg1;/  DIFFER func_15048A70: trial 0: return f0 ref=0xC0365720 cand=0x40365720
+ok   [DIFFER] s/arg0 -= 360.0f;/arg0 -= 361.0f;/  DIFFER func_15048A70: trial 6: return f0 ref=0x4323A418 cand=0x4324A418
+ok   [EQUIV] case as is  EQUIV func_151B97C4 (32 trials ok, 0 inconclusive, 64 calls, ret=int, ref 63 words, cand 65 words)
+ok   [DIFFER] case s/0.0234f/0.0235f/g  DIFFER func_151B97C4: trial 1: memory differs at 0x004DAA46 (ref=93 cand=92)
+ok   [DIFFER] case s/sinf(temp_f0)/sinf(temp_f2)/  DIFFER func_151B97C4: trial 0: call #1 sinf: f12 ref=0x432F641D cand=0x20000
+ok   [EQUIV] self  EQUIV func_1501B300 (28 trials ok, 4 inconclusive, 84 calls, ret=void, ref 200 words, cand 195 words, 3 trials via learned pointer inputs)
+ok   [DIFFER] s/out\[1\] = negSinPitch \* 127.0f;/out[1] = x * 127.0f;/  DIFFER func_1501B300: trial 0: memory differs at 0x000DD164 (ref=9B cand=65)
+ok   [EQUIV] case as is  EQUIV func_15030448 (32 trials ok, 0 inconclusive, 187 calls, ret=void, ref 102 words, cand 102 words, 26 trials via learned pointer inputs)
+ok   [DIFFER] case s/ATT_W(rec, 0x2C), 4);/ATT_W(rec, 0x2C), 5);/  DIFFER func_15030448: trial 2: call #2 func_100043B4: a1 ref=0x4 cand=0x5
+ok   [EQUIV] case as is  EQUIV func_1506EF5C (32 trials ok, 0 inconclusive, 0 calls, ret=void, ref 22 words, cand 22 words, 5 trials via learned pointer inputs)
+ok   [DIFFER] case s/= 0xFFFF;/= 0xFFFE;/  DIFFER func_1506EF5C: trial 0: memory differs at 0x00000287 (ref=FF cand=FE)
+ok   [EQUIV] env case as is  EQUIV func_1502AB94 (8 trials ok, 0 inconclusive, 32 calls, ret=int, ref 147 words, cand 144 words) [POKE unread: 800C3A14,800C3A18,800C3A1C,800C3D78,800C3D7C,800C3D80,800C3D84,80520014] [knob callee never called: RET 15114F2C]
+ok   [EQUIV] env case as is  EQUIV func_1502AB94 (8 trials ok, 0 inconclusive, 32 calls, ret=int, ref 147 words, cand 144 words) [POKE unread: 800C3A14,800C3A18,800C3A1C,800C3D78,800C3D7C,800C3D80,800C3D84,80520014] [knob callee never called: RET 15114F2C]
+ok   [DIFFER] env case s/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/  DIFFER func_1502AB94: trial 0: call #1 0x15024910: stack arg sp+0x1C ref=0x80660014 cand=0x80660010 [POKE unread: 800C3A14,800C3A18,800C3A1C,800C3D78,800C3D7C,800C3D80,800C3D84,80520014]
+ok   [EQUIV] env case s/data = (u8 \*) obj + 0x14;/data = (u8 *) obj + 0x10;/  EQUIV func_1502AB94 (8 trials ok, 0 inconclusive, 32 calls, ret=int, ref 147 words, cand 144 words) [POKE unread: 800C3A14,800C3A18,800C3A1C,800C3D78,800C3D7C,800C3D80,800C3D84,80520014] [knob callee never called: RET 15114F2C]
+ok   [EQUIV] env case as is  EQUIV func_150268BC (8 trials ok, 0 inconclusive, 16 calls, ret=int, ref 3451 words, cand 3327 words) [POKE unread: 800C395C,800C3A04,800C3D08,800C3E00,80490088,8049008C,80490090,80490094,80490098,804900A0,804900A4,804900A8]... [knob callee never called: RET 150ADF00, RET 151905AC]
+ok   [DIFFER] env case s/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/  DIFFER func_150268BC: trial 0: call #1 0x1516DF0C: stack arg sp+0xB0 ref=0x1 cand=0x2 [POKE unread: 800C395C,800C3A04,800C3D08,800C3E00,80490088,8049008C,80490090,80490094,80490098,804900A0,804900A4,804900A8]...
+ok   [EQUIV] env case s/0, 0, player, 0, 0, flag, 0);/0, 0, track, 0, 0, flag, 0);/  EQUIV func_150268BC (8 trials ok, 0 inconclusive, 16 calls, ret=int, ref 3451 words, cand 3328 words) [POKE unread: 800C395C,800C3A04,800C3D08,800C3E00,80490088,8049008C,80490090,80490094,80490098,804900A0,804900A4,804900A8]... [knob callee never called: RET 150ADF00, RET 151905AC]
+ok   [EQUIV*POKE unread: 800C395C] env case as is  EQUIV func_150268BC (8 trials ok, 0 inconclusive, 8 calls, ret=int, ref 3451 words, cand 3327 words, 3 trials via learned pointer inputs) [POKE unread: 800C395C,800C3A04,800C3D08,800C3E00,80490088,8049008C,80490090,80490094,80490098,804900A0,804900A4,804900A8]... [knob callee never called: RET 15023C60, RET 150ADF00, RET 151905AC, RETF 15048CA0, RETF 15048D30, RETF 150ADF48]
+ok   [DIFFER] env case s/O_F32(r, 0x18) \* 0.1f + 1.0f, scale/O_F32(r, 0x1C) * 0.1f + 1.0f, scale/  DIFFER func_150268BC: trial 0: call #0 0x1514948C: stack arg sp+0x24 ref=0x40066666 cand=0x400CCCCD [POKE unread: 800C3A04,800C3D08,800C3E00,80490088,8049008C,80490090,804A0004,804A0014,804A0018,804A001C,804D1000,804D1004]
+ok   [EQUIV] env case as is  EQUIV func_150FD554 (8 trials ok, 0 inconclusive, 88 calls, ret=void, ref 336 words, cand 334 words)
+ok   [DIFFER] env case s/0U, 0, (u8) (s32) arg1, arg2);/0U, 0, (u8) (s32) arg1, arg2 + 1);/  DIFFER func_150FD554: trial 0: call #10 func_1513D594: stack arg sp+0x40 ref=0x5 cand=0x6
+ok   [EQUIV*knob callee never called: RET 1513D2F0] env case as is  EQUIV func_150FD554 (5 trials ok, 3 inconclusive, 85 calls, ret=void, ref 336 words, cand 334 words) [knob callee never called: RET 1513D2F0] [knob not a jal target of the reference (EU address? jalr-only callee?): RET 1513D2F0]
+ok   [EQUIV] env case as is  EQUIV func_15035220 (8 trials ok, 0 inconclusive, 32 calls, ret=void, ref 486 words, cand 380 words) [POKE unread: 80460000,80460004,80460008,8046000C,80460010,80460014,80460018,8046001C,80460020,80460024,80460028,8046002C]... [knob callee never called: RET 150ADE40]
+ok   [DIFFER] env case s/(dist - g) \/ (h - g)/(dist - g) \/ (h - g + 1.0f)/  DIFFER func_15035220: trial 0: memory state before call #3 (0x15034A18) differs [POKE unread: 80460000,80460004,80460008,8046000C,80460010,80460014,80460018,8046001C,80460020,80460024,80460028,8046002C]...
+ok   [EQUIV] env case as is  EQUIV func_1517E3CC (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 128 words, cand 128 words) [POKE unread: 800DDEC8,800DDECC,800DDED8,800DDEE8,800DDEF8,800DDEFC,800DDF08,800DDF18,800DDF28,800DDF2C,800DDF38,800DDF48]...
+ok   [DIFFER] env case s/ \&\& voices\[i \* 0x10 + 0xC\] == 0) {/) {/  DIFFER func_1517E3CC: trial 0: memory differs at 0x000DDE5B (ref=init cand=00) [POKE unread: 800DDEC8,800DDECC,800DDED8,800DDEE8,800DDEF8,800DDEFC,800DDF08,800DDF18,800DDF28,800DDF2C,800DDF38,800DDF48]...
+ok   [EQUIV] env case s/ \&\& voices\[i \* 0x10 + 0xC\] == 0) {/) {/  EQUIV func_1517E3CC (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 128 words, cand 104 words) [POKE unread: 800DDEC8,800DDECC,800DDED8,800DDEE8,800DDEF8,800DDEFC,800DDF08,800DDF18,800DDF28,800DDF2C,800DDF38,800DDF48]...
+ok   [EQUIV] env case as is  EQUIV func_151DA6F8 (8 trials ok, 0 inconclusive, 16 calls, ret=int, ref 144 words, cand 135 words)
+ok   [DIFFER] env case s/sb.owner = owner;/sb.owner = argC;/  DIFFER func_151DA6F8: trial 0: call #0 0x15148310: argument memory (DIFFTEST_ARGMEM) differs: ref ['80490000'] cand ['00000077']
+ok   [DIFFER] s/sinf(temp->unk8)/sinf(temp->unk4)/  DIFFER func_15141564: trial 0: call #0 sinf: f12 ref=0x0 cand=0x20000
+ok   [EQUIV] env case as is  EQUIV func_150AE60C (8 trials ok, 0 inconclusive, 8 calls, ret=int, ref 26 words, cand 23 words)
+ok   [DIFFER] env case s/args\[1\], args)/args[0], args)/  DIFFER func_150AE60C: trial 0: call #0 0x1509C850: a1 ref=0x1234 cand=0x1001
+ok   [EQUIV] env case as is  EQUIV func_151DE100 (8 trials ok, 0 inconclusive, 24 calls, ret=void, ref 685 words, cand 669 words)
+ok   [DIFFER] env case s/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/  DIFFER func_151DE100: trial 0: call #2 func_15042D94: stack arg sp+0x14 ref=0x3B cand=0x31
+ok   [EQUIV] env case s/secs = D_80090118 \/ 50;/secs = D_80090118 \/ 60;/  EQUIV func_151DE100 (8 trials ok, 0 inconclusive, 24 calls, ret=void, ref 685 words, cand 669 words)
+ok   [DIFFER] env case s/y = 100;/y = 101;/  DIFFER func_151DE100: trial 0: call #2 func_15042D94: a1 ref=0x64 cand=0x65
+ok   [EQUIV] env case s/y = 100;/y = 101;/  EQUIV func_151DE100 (8 trials ok, 0 inconclusive, 24 calls, ret=void, ref 685 words, cand 669 words) [POKE in ROM data (even trials only): 80083330,80090118,8009029C]
+ok   [no POKE unread] EQUIV func_151DE100 (4 trials ok, 0 inconclusive, 12 calls, ret=void, ref 685 words, cand 669 words)
+ok   [EQUIV] env case as is  EQUIV func_150F1F80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 82 words, cand 83 words, 4 trials via learned pointer inputs)
+ok   [DIFFER] env case as is  DIFFER func_150F1F80: trial 0: call #0 cosf: a0 ref=0x800CC6B8 cand=0x80479F70
+ok   [EQUIV] env case as is  EQUIV func_150F1F80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 82 words, cand 83 words, 4 trials via learned pointer inputs)
+ok   [DIFFER] env case s/0.35000002f/0.35f/  DIFFER func_150F1F80: trial 1: memory differs at 0x004503D3 (ref=D7 cand=D6)
+ok   [EQUIV] env case as is  EQUIV func_1507D754 (8 trials ok, 0 inconclusive, 8 calls, ret=int, ref 252 words, cand 253 words) [POKE unread: 800BEA34,800BEE10,800C3A08,80480014,80480018,8048001C,80480040,804800B8,804800C4,80480124] [knob callee never called: RET 1507551C, RET 15114F2C]
+ok   [DIFFER] env case s/func_151CFFFC(obj, 0xFF, 1);/func_151CFFFC(obj, 0xFE, 1);/  DIFFER func_1507D754: trial 0: call #0 0x151CFFFC: a1 ref=0xFF cand=0xFE [POKE unread: 800BEA34,800BEE10,800C3A08,80480014,80480018,8048001C,80480040,804800B8,804800C4,80480124]
+ok   [UNSURE] env case as is  UNSURE func_1507D754: only 0 trials ran to completion (8 faulted/timed out) [POKE unread: 800BEA34,800BEE10,800C3A08,80480014,80480018,8048001C,80480040,804800B8,804800C4,80480124] [knob callee never called: RET 1507551C, RET 15114F2C]
+ok   [EQUIV] env case as is  EQUIV func_15063254 (8 trials ok, 0 inconclusive, 16 calls, ret=void, ref 76 words, cand 78 words)
+ok   [DIFFER] env case s/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/  DIFFER func_15063254: trial 0: memory differs at 0x000CC7B4 (ref=init cand=DE)
+ok   [EQUIV] env case s/    \*(f32 \*) (o + 0xC4) = fC4;/    ;/  EQUIV func_15063254 (8 trials ok, 0 inconclusive, 16 calls, ret=void, ref 76 words, cand 74 words)
+ok   [EQUIV] env case as is  EQUIV func_15087204 (8 trials ok, 0 inconclusive, 8 calls, ret=f32, ref 207 words, cand 208 words)
+ok   [DIFFER] env case s/            ex = -ex;//  DIFFER func_15087204: trial 0: return f0 ref=0x41E24630 cand=0xBF800000
+ok   [EQUIV] env case s/            ex = -ex;//  EQUIV func_15087204 (4 trials ok, 0 inconclusive, 4 calls, ret=f32, ref 207 words, cand 206 words)
+ok   [EQUIV] env case as is  EQUIV func_1513472C (8 trials ok, 0 inconclusive, 8 calls, ret=int, ref 20 words, cand 20 words)
+ok   [DIFFER] env case s|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|  DIFFER func_1513472C: trial 0: call #0 0x80450000: a0 ref=0x80490000 cand=0x0
+ok   [EQUIV] env case s|idx = 0; /\* hi \*/|idx = 0; arg0 = 0;|  EQUIV func_1513472C (8 trials ok, 0 inconclusive, 8 calls, ret=int, ref 20 words, cand 21 words)
+ok   [EQUIV] env case as is  EQUIV func_151C384C (4 trials ok, 0 inconclusive, 36 calls, ret=void, ref 271 words, cand 267 words)
+ok   [DIFFER] env case s/    req.angle\[1\] = 0.0f;//  DIFFER func_151C384C: trial 0: call #5 0x151307F0: argument memory (DIFFTEST_ARGMEM) differs: ref ['0020000500020000440300060000000000000000ffffffffffffffffff2b0003005500013f80000042d4000042d4000044610000c2c800003f800000000000000000000000000000000000000000000000000000000000000000c201', '0606ffffff04'] cand ['0020000500020000440300060000000000000000ffffffffffffffffff2b0003005500013f80000042d4000042d4000044610000c2c800003f800000000000005a5a5a5a00000000000000000000000000000000000000000000c201', '0606ffffff04']
+ok   [EQUIV] env case s/    req.angle\[1\] = 0.0f;//  EQUIV func_151C384C (4 trials ok, 0 inconclusive, 36 calls, ret=void, ref 271 words, cand 266 words)
+ok   [EQUIV] env case as is  EQUIV func_150768DC (4 trials ok, 0 inconclusive, 12 calls, ret=void, ref 160 words, cand 166 words) [POKE unread: 800CD8E4,800CD8EC,800CD8FC]
+ok   [DIFFER] env case s/dx = o->x_position - D_800D154C->x_position;/dx = D_800D154C->x_position - o->x_position;/  DIFFER func_150768DC: trial 0: call #1 func_1505A630: f12 ref=0x42480000 cand=0xC2480000 [POKE unread: 800CD8E4,800CD8EC,800CD8FC]
+ok   [EQUIV] env case s/dx = o->x_position - D_800D154C->x_position;/dx = D_800D154C->x_position - o->x_position;/  EQUIV func_150768DC (4 trials ok, 0 inconclusive, 12 calls, ret=void, ref 160 words, cand 166 words) [POKE unread: 800CD8E4,800CD8EC,800CD8FC]
+ok   [EQUIV] env case as is  EQUIV func_150768DC (4 trials ok, 0 inconclusive, 12 calls, ret=void, ref 160 words, cand 166 words) [POKE unread: 800CD8E4,800CD8EC,800CD8FC]
+ok   [DIFFER] env case s/dx = o->x_position - D_800D154C->x_position;/dx = D_800D154C->x_position - o->x_position;/  DIFFER func_150768DC: trial 0: call #1 func_1505A630: f12 ref=0x42480000 cand=0xC2480000 [POKE unread: 800CD8E4,800CD8EC,800CD8FC]
+ok   [EQUIV] env case s/dx = o->x_position - D_800D154C->x_position;/dx = D_800D154C->x_position - o->x_position;/  EQUIV func_150768DC (4 trials ok, 0 inconclusive, 12 calls, ret=void, ref 160 words, cand 166 words) [POKE unread: 800CD8E4,800CD8EC,800CD8FC]
+ok   [EQUIV] env case as is  EQUIV func_1506B04C (4 trials ok, 0 inconclusive, 4 calls, ret=void, ref 38 words, cand 36 words)
+ok   [DIFFER] env case s/handler(obj, arg);/handler(obj, obj);/  DIFFER func_1506B04C: trial 0: call #0 0x1506AEA0: a1 ref=0x80460010 cand=0x80450000
+ok   [DIFFER] env case s/handler(obj, arg);/handler(arg, arg);/  DIFFER func_1506B04C: trial 0: call #0 0x1506AEA0: a0 ref=0x80450000 cand=0x80460010
+ok   [DIFFER] env case as is  DIFFER func_1506B04C: trial 0: call #0 0x1506AEA0: a2 ref=0x1506AEA0 cand=0x80460010
+ok   [DIFFER] env case as is  DIFFER func_1506B04C: trial 0: call #0 0x1506AEA0: a3 ref=0x80460010 cand=0x80463D90
+ok   [EQUIV] env case as is  EQUIV func_1508AB7C (4 trials ok, 0 inconclusive, 38 calls, ret=int, ref 669 words, cand 663 words) [knob callee never called: RETF 150ADF48]
+ok   [DIFFER] env case s/(s32) "%d"/(s32) "%x"/  DIFFER func_1508AB7C: trial 0: call #8 func_15042D94: a3 ref=0x8009DDF0 cand=0x80705000
+ok   [DIFFER] env case as is  DIFFER func_1508AB7C: trial 0: call #8 func_15042D94: a3 ref=0x8009DDF0 cand=0x80705000
+ok   [EQUIV] env case as is  EQUIV func_151416E8 (24 trials ok, 8 inconclusive, 10 calls, ret=void, ref 55 words, cand 45 words)
+ok   [DIFFER] env case as is  DIFFER func_151416E8: trial 24: call #1: ref calls 0x15141E02, cand calls 0x15141D6A
+ok   [DIFFER] env case s/D_8008A3CC\[rec\[0x168\]\](rec/D_8008A3CC[rec[0x167]](rec/  DIFFER func_151416E8: trial 0: fault only in cand: jalr to bad target 0x00000001 at 0x15141CA4
+ok   [DIFFER] env case s/(rec, msg, c);/(rec, msg, code);/  DIFFER func_151416E8: trial 7: call #0 0x15147B48: a2 ref=0xF4 cand=0x92F4
+ok   [EQUIV] env case as is  EQUIV func_15109DC8 (4 trials ok, 0 inconclusive, 28 calls, ret=void, ref 246 words, cand 233 words)
+ok   [DIFFER] env case as is  DIFFER func_15109DC8: trial 0: call #1 func_150ADA20: f12 ref=0x3F7353F9 cand=0xC09F0D65
+ok   [DIFFER] env case s/t.life = (func_150ADA20() \& 0xF) + 10;/t.life = (func_150ADA20() \& 0xF) + 11;/  DIFFER func_15109DC8: trial 0: call #5 0x151308E4: argument memory (DIFFTEST_ARGMEM) differs: ref ['00200005000200004401000a0000000000000000ffffffffffffffffff2b0005003300013f80000042250000422500008057d7f0c1d53333f9cc27fe000000000000000000000000000000000000000000000000000000000000c205', '0606ffffff04'] cand ['00200005000200004401000b0000000000000000ffffffffffffffffff2b0005003300013f80000042250000422500008057d7f0c1d53333f9cc27fe000000000000000000000000000000000000000000000000000000000000c205', '0606ffffff04']
+ok   [DIFFER] env case s/scale = (func_150ADA68() \* D_800A2A04/scale = (func_150ADA68() * D_800A2A08/  DIFFER func_15109DC8: trial 1: call #5 0x151308E4: argument memory (DIFFTEST_ARGMEM) differs: ref ['00200005000200004401000a0000000000000000ffffffffffffffffff2b0005003300013f80000042250000422500000004000400000000e945c7c9000000000000000000000000000000000000000101f357ca000000000000c205', '0606ffffff04'] cand ['00200005000200004401000a0000000000000000ffffffffffffffffff2b0005003300013f80000042250000422500000004000400000000e945c7c9000000000000000000000000000000000000000101c99cc4000000000000c205', '0606ffffff04']
+ok   [EQUIV] env case as is  EQUIV func_15160E30 (4 trials ok, 0 inconclusive, 12 calls, ret=int, ref 258 words, cand 207 words)
+ok   [DIFFER] env case s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = start[0] - dir[0];/  DIFFER func_15160E30: trial 0: call #1 func_15145128: argument memory (DIFFTEST_ARGMEM) differs: ref ['41f00000c1f0000041a00000'] cand ['c1f00000c1f0000041a00000']
+ok   [EQUIV] env case s/        dir\[0\] = dir\[0\] - start\[0\];/        dir[0] = start[0] - dir[0];/  EQUIV func_15160E30 (4 trials ok, 0 inconclusive, 12 calls, ret=int, ref 258 words, cand 207 words)
+ok   [EQUIV] env case as is  EQUIV func_15103828 (8 trials ok, 0 inconclusive, 0 calls, ret=void, ref 58 words, cand 58 words)
+ok   [CERR] env case as is  CERR func_15103828: cfe: Error: build/difftest/func_15103828.c, line 65: Syntax Error | cfe: Error: build/difftest/func_15103828.c, line 116: Syntax Error | cfe: Error: build/difftest/func_15103828.c, line 116: Syntax Error | cfe: Error: build/difftest/func_15103828.c, line 157: Syntax Error | @@s32 func_15103910(SfxEn
+ok   [DIFFER] env case s/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/  DIFFER func_15103828: trial 4: memory differs at 0x000D9ED3 (ref=24 cand=22)
+ok   [EQUIV] env case s/D_800BE9E4 + 1;/D_800BE9E4 + 3;/  EQUIV func_15103828 (8 trials ok, 0 inconclusive, 0 calls, ret=void, ref 58 words, cand 58 words)
+ok   [ERROR] env case as is  ERROR DIFFTEST_STKFILL: 'WORD' is not a 32-bit hex word (e.g. A5A5A5A5)
+ok   [EQUIV] env case as is  EQUIV func_15103828 (8 trials ok, 0 inconclusive, 0 calls, ret=void, ref 58 words, cand 58 words)
+ok   [ERROR] env case as is  ERROR DIFFTEST_ARG: 'A=7' is not INDEX=HEX[|HEX...] with a decimal index (e.g. 1=10)
+ok   [EQUIV] env case as is  EQUIV func_15103828 (8 trials ok, 0 inconclusive, 0 calls, ret=void, ref 58 words, cand 58 words)
+ok   [EQUIV] env case as is  EQUIV func_150305E0 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 8 words, cand 18 words)
+ok   [DIFFER] env case 1,/0xFF/s/0xFF/0xFE/  DIFFER func_150305E0: trial 0: call #0 0x15030600: a2 ref=0xFF cand=0xFE [POKE unread: 800C4300]
+ok   [EQUIV] env case 1,/0xFF/s/0xFF/0xFE/  EQUIV func_150305E0 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 8 words, cand 18 words)
+ok   [EQUIV] env case as is  EQUIV func_15031C1C (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 12 words, cand 12 words)
+ok   [DIFFER] env case s/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, arg2)/  DIFFER func_15031C1C: trial 0: call #0 func_1503195C: a2 ref=0xF560 cand=0x5
+ok   [EQUIV] env case s/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/  EQUIV func_15031C1C (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 12 words, cand 14 words)
+ok   [DIFFER] env case s/func_15031C4C(arg0, arg1, arg3)/func_15031C4C(arg0, arg1, (arg3 = arg2 ^ arg3) ^ arg2)/  DIFFER func_15031C1C: trial 0: call #0 func_1503195C: a3 ref=0xF560 cand=0xF565
+ok   [EQUIV] env case as is  EQUIV func_150C5A68 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 79 words, cand 79 words) [POKE unread: 804100C0] [knob callee never called: RETF 151443D4] [knob not a jal target of the reference (EU address? jalr-only callee?): RET 150C6088]
+ok   [DIFFER] env case as is  DIFFER func_150C5A68: trial 0: call #0 0x150C6088: f14 ref=0xC1DDEF94 cand=0x40A00000 [POKE unread: 804100C0] [knob not a jal target of the reference (EU address? jalr-only callee?): RET 150C6088]
+ok   [DIFFER] env case s/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/  DIFFER func_150C5A68: trial 0: call #0 0x150C6088: a0 ref=0x80410000 cand=0x80410004 [POKE unread: 804100C0] [knob not a jal target of the reference (EU address? jalr-only callee?): RET 150C6088]
+ok   [KNOBERROR] env case as is  KNOBERROR DIFFTEST_OUTW: address 150C6088 given twice (150C6088=0:1 / 150C6088=1:2); join several outputs for one stub with '/'
+ok   [EQUIV] env case as is  EQUIV func_15104A80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 113 words, cand 95 words)
+ok   [DIFFER] env case s/parts = D_800A275C;/parts = D_800A2768;/  DIFFER func_15104A80: trial 0: call #0 func_151494E0: argument memory (DIFFTEST_ARGMEM) differs: ref ['00000009', '800cd074', '06070818191a121314'] cand ['00000009', '800cd074', '090a0b0c0d0e151617']
+ok   [yes: not a jal target of the reference (EU address? jalr-only callee?): ARGMEM 151494E0] env case  EQUIV func_15104A80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 113 words, cand 95 words) [knob callee never called: ARGMEM 151494E0] [knob not a jal target of the reference (EU address? jalr
+ok   [yes: RET 151494E0] env case  EQUIV func_15104A80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 113 words, cand 95 words) [knob callee never called: RET 151494E0] [knob not a jal target of the reference (EU address? jalr-on
+ok   [no: not a jal target] env case  EQUIV func_15104A80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 113 words, cand 95 words)
+ok   [no: not a jal target] env case  EQUIV func_15104A80 (8 trials ok, 0 inconclusive, 8 calls, ret=void, ref 113 words, cand 95 words) [knob callee never called: ARGMEM 151494E0]
+ok   [UNSURE] env case as is  UNSURE func_100052A0: only 0 trials ran to completion (8 faulted/timed out)
+ok   [EQUIV] env case as is  EQUIV func_100052A0 (8 trials ok, 0 inconclusive, 179 calls, ret=void, ref 194 words, cand 187 words)
+ok   [DIFFER] env case s/__osSpSetPc(0);/__osSpSetPc(4);/  DIFFER func_100052A0: trial 0: call #9 __osSpSetPc: a0 ref=0x0 cand=0x4
+ok   [DIFFER] env case s/    osWritebackDCacheAll();//  DIFFER func_100052A0: trial 0: timeout only in cand
+ok   [EQUIV] env case as is  EQUIV func_100052A0 (8 trials ok, 0 inconclusive, 98 calls, ret=void, ref 194 words, cand 187 words)
+ok   [DIFFER] env case s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/  DIFFER func_100052A0: trial 0: call #7: ref calls osGetTime, cand calls __osSpSetStatus
+ok   [EQUIV] env case s/D_8003BFC0 + 0x22ADD7/D_8003BFC0 + 0x22ADD6/  EQUIV func_100052A0 (8 trials ok, 0 inconclusive, 179 calls, ret=void, ref 194 words, cand 187 words)
+ok   [EQUIV] env case as is  EQUIV func_10001550 (8 trials ok, 0 inconclusive, 80 calls, ret=void, ref 296 words, cand 292 words) [POKE unread: 80480008]
+ok   [DIFFER] env case s/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/  DIFFER func_10001550: trial 0: call #1 ldiv: a2 ref=0xA cand=0x10 [POKE unread: 80480008]
+ok   [EQUIV] env case s/qr = ldiv(lo, 10);/qr = ldiv(lo, 16);/  EQUIV func_10001550 (8 trials ok, 0 inconclusive, 24 calls, ret=void, ref 296 words, cand 292 words) [POKE unread: 80480008]
+ok   [EQUIV] env case as is  EQUIV func_10001194 (8 trials ok, 0 inconclusive, 200 calls, ret=void, ref 203 words, cand 242 words)
+ok   [UNSURE] env case as is  UNSURE func_10001194: only 0 trials ran to completion (8 faulted/timed out) [knob callee never called: RET 10003E90]
+ok   [DIFFER] env case s/(D_8003585C\[i\] ^ 0x8039CCCA)/(D_8003585C[i] ^ 0x8039CCCB)/  DIFFER func_10001194: trial 0: memory state before call #21 (func_10005B04) differs
+ok   [DIFFER] env case s/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/  DIFFER func_15103828: trial 4: memory differs at 0x000D9ED3 (ref=24 cand=22)
+selftest: 143 ok, 0 failed

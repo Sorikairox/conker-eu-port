@@ -1,0 +1,34 @@
+s/if (\*(s8 \*)(obj + 0x2C) < 2)/if (*(s8 *)(obj + 0x2C) < 3)/
+s/\* 32 + 0xA0, &vtx/* 32 + 0x90, \&vtx/
+s/cam = func_15144B34(id);/cam = func_15144B34(0);/
+s/flag = 1;/flag = 0;/
+s/0, 0, 0, 0, 0x92, 0, 0, &flag, 3)/0, 0, 0, 0, 0x93, 0, 0, \&flag, 3)/
+s/0x220005, 0x1D0600/0x220005, 0x1D0700/
+s/0x4E, &flag/0x4F, \&flag/
+s/D_800A4EA8\[7\] | D_800A4EA8\[6\]/D_800A4EA8[7] | D_800A4EA8[5]/
+s/if (\*(u16 \*)(obj + 0x1E) & 2)/if (*(u16 *)(obj + 0x1E) \& 4)/
+s/sa = \*(f32 \*)(data + 0x38);/sa = *(f32 *)(data + 0x34);/
+s/a\[1\] = \*(f32 \*)(obj + 0x14);/a[1] = *(f32 *)(obj + 0x18);/
+1,/i = prev - 1;/s/i = prev - 1;/i = prev - 2;/
+1,/b\[2\] = \*(f32 \*)(pb + 8);/s/b\[2\] = \*(f32 \*)(pb + 8);/b[2] = *(f32 *)(pb + 4);/
+1,/alpha = \*(u8 \*)(pb + 0x1C);/s/alpha = \*(u8 \*)(pb + 0x1C);/alpha = *(u8 *)(pb + 0x1D);/
+1,/d\[0\] = a\[0\] - cam\[0\];/s/d\[0\] = a\[0\] - cam\[0\];/d[0] = b[0] - cam[0];/
+1,/n\[1\] = e\[2\] \* d\[0\] - d\[2\] \* e\[0\];/s/n\[1\] = e\[2\] \* d\[0\] - d\[2\] \* e\[0\];/n[1] = e[2] * d[0] - d[2] * e[1];/
+1,/inv = 4.0f/s/inv = 4.0f/inv = 2.0f/
+1,/vtx->v.tc\[1\] = 0x400;/s/vtx->v.tc\[1\] = 0x400;/vtx->v.tc[1] = 0x200;/
+1,/vtx->v.cn\[3\] = alpha;/s/vtx->v.cn\[3\] = alpha;/vtx->v.cn[3] = 0xFF;/
+1,/vtx->v.ob\[2\] = (s32)(a\[2\] - n\[2\]);/s/vtx->v.ob\[2\] = (s32)(a\[2\] - n\[2\]);/vtx->v.ob[2] = (s32)(a[2] + n[2]);/
+1,/vtx->v.flag = 0;/s/vtx->v.flag = 0;/vtx->v.flag = 1;/
+s/d\[1\] = b\[1\] - cam\[1\];/d[1] = a[1] - cam[1];/
+s/vtx->v.ob\[1\] = (s32)(b\[1\] - n\[1\]);/vtx->v.ob[1] = (s32)(b[1] + n[1]);/
+s/gfx->words.w1 = (u32)(vtx - 4);/gfx->words.w1 = (u32)(vtx - 2);/
+s/gfx->words.w0 = 0x05020604;/gfx->words.w0 = 0x05020406;/
+s/if (sb < sa)/if (sb > sa)/
+s/memcpy(vtx, vtx - 2, 2 \* sizeof(Vtx));/memcpy(vtx, vtx - 4, 2 * sizeof(Vtx));/
+s/vtx\[-1\].v.tc\[0\] -= 0x8000;/vtx[-1].v.tc[0] -= 0x4000;/
+s/            vtx += 2;/            vtx += 1;/
+s/        pb -= 0x24;/        pb -= 0x20;/
+s/            pb = pts + i \* 0x24;/            pb = pts;/
+2,/sa = \*(f32 \*)(pts + prev \* 0x24 + 0x20);/{/alpha = \*(u8 \*)(pb + 0x1C);/!s/sa = \*(f32 \*)(pts + prev \* 0x24 + 0x20);/sa = *(f32 *)(pb + 0x20);/;}
+s/} while (prev != \*(s8 \*)(obj + 0x2D));/} while (i != *(s8 *)(obj + 0x2D));/
+s/        sb = \*(f32 \*)(pb + 0x20);/        sb = *(f32 *)(pb + 0x1C);/

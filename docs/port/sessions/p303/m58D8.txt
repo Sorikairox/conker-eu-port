@@ -1,0 +1,51 @@
+54s/if (\*(s32 \*) a == 0 || st\[0x584\] != a\[0x3B\]) {/if (*(s32 *) a == 0) {/ % deadAid
+54s/if (\*(s32 \*) a == 0 || st\[0x584\] != a\[0x3B\]) {/if (st[0x584] != a[0x3B]) {/ % deadA
+58s/if (\*(s32 \*) b == 0 || st\[0x58C\] != b\[0x3B\]) {/if (*(s32 *) b == 0 || st[0x584] != b[0x3B]) {/ % deadBid mid
+58s/if (\*(s32 \*) b == 0 || st\[0x58C\] != b\[0x3B\]) {/if (st[0x58C] != b[0x3B]) {/ % deadB
+61s/!= NULL \&\& \*(u8 \*\*) (b + 0x1D4) != NULL) {/!= NULL) {/ % nomatB
+61s/if (!dead \&\&/if (/ % deadA deadB
+62s/func_15143134(D_800AA7E0, pa,/func_15143134(D_800AA7EC, pa,/ % mid
+62s/+ 0x1D4) + D_8008FF20 \* 0x40);/+ 0x1D4) + D_8008FF20 * 0x20);/ % mid
+63s/+ 0x1D4) + D_8008FF24 \* 0x40);/+ 0x1D4) + D_8008FF20 * 0x40);/ % mid close
+64s/v = st + D_800BE9C0 \* 0x2C0;/v = st + D_800BE9C0 * 0x280;/ % mid
+65s/player \* 0x9A0 + 0x2F8);/player * 0x9A0 + 0x2FC);/ % mid far
+66s/flag = 1;/flag = 0;/ % mid
+67s/func_15142B7C(gfx, 0x200005, 0x60600);/func_15142B7C(gfx, 0x200004, 0x60600);/ % mid
+68s/0, 0, 0, 0, 0x56, 0, 0, \&flag, 3);/0, 0, 0, 0, 0x55, 0, 0, \&flag, 3);/ % mid
+70s/gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, \&flag);/gfx = func_15142CF0(gfx, 0, 0, 0xFF, 0xFF, 0, 0xFF, \&flag);/ % mid
+71s/gfx = func_1513F4E4(gfx, 0x2E, \&flag);/gfx = func_1513F4E4(gfx, 0x2F, \&flag);/ % mid
+72s/D_800A4EA8\[5 \* 2 + 1\] | D_800A4EA8\[5 \* 2\],/D_800A4EA8[5 * 2 + 1],/ % mid
+74s/dir\[1\] = pb\[1\] - pa\[1\];/dir[1] = pb[1] - pa[0];/ % mid
+78s/my = dir\[1\] \* 0\.5f + pa\[1\] - cam\[1\];/my = dir[1] * 0.25f + pa[1] - cam[1];/ % close mid
+79s/mz = dir\[2\] \* 0\.5f + pa\[2\] - cam\[2\];/mz = dir[2] * 0.5f + pa[2] - cam[1];/ % mid
+81s/cy = dir\[2\] \* mx - mz \* dir\[0\];/cy = dir[2] * mx + mz * dir[0];/ % mid
+84s/if (len2 == 0\.0f) {/if (len2 < 1.0f) {/ % tiny flat mid
+86s/n\[1\] = 0\.0f;/n[1] = 1.0f;/ % flat
+89s/k = \*(f32 \*) (st + 0x590) \/ sqrtf(len2);/k = *(f32 *) (st + 0x590) \/ len2;/ % mid
+92s/n\[2\] = cz \* k;/n[2] = cy * k;/ % mid
+94s/sx = dir\[0\] \* 0\.1f;/sx = dir[0] * 0.125f;/ % mid
+96s/sz = dir\[2\] \* 0\.1f;/sz = dir[2] * 0.1f + 1.0f;/ % mid
+97s/if (dist < \*(f32 \*) (st + 0x594)) {/if (dist <= *(f32 *) (st + 0x594)) {/ % atmin
+98s/amp = 0\.0f;/amp = 0.5f;/ % near
+99s/} else if (dist < \*(f32 \*) (st + 0x598)) {/} else if (dist > *(f32 *) (st + 0x598)) {/ % mid far
+100s/\* \*(f32 \*) (st + 0x59C) \* \*(f32 \*) (st + 0x5A0);/* *(f32 *) (st + 0x59C);/ % mid
+102s/amp = \*(f32 \*) (st + 0x5A0);/amp = *(f32 *) (st + 0x59C);/ % far
+104s/p\[0\] = pa\[0\];/p[0] = pb[0];/ % mid
+108s/t = 0\.0f;/t = 1.0f;/ % mid
+109s/for (i = 0; i < 10; i++) {/for (i = 0; i < 9; i++) {/ % mid
+110s/w = 1\.0f - sinf(phase) \* amp;/w = 1.0f + sinf(phase) * amp;/ % mid
+112s/BOLT_VTX(v, ox + p\[0\], n\[1\] \* w + p\[1\], n\[2\] \* w + p\[2\], 0, t);/BOLT_VTX(v, ox + p[0], n[1] * w + p[1], n[2] * w + p[2], 0, t + 1);/ % mid
+113s/BOLT_VTX(v + 0x10, p\[0\] - ox, p\[1\] - n\[1\] \* w, p\[2\] - n\[2\] \* w, 0x7C0, t);/BOLT_VTX(v + 0x10, p[0] - ox, p[1] - n[1] * w, p[2] + n[2] * w, 0x7C0, t);/ % mid
+114s/phase2 = phase + 0\.31415927f;/phase2 = phase + 0.3141593f;/ % mid
+115s/w = 1\.0f - sinf(phase2) \* amp;/w = 1.0f - sinf(phase) * amp;/ % mid
+118s/oz = n\[2\] \* w;/oz = n[1] * w;/ % mid
+119s/t2 = t + 204\.8f;/t2 = t + 204.80002f;/ % mid
+120s/BOLT_VTX(v + 0x20, p\[0\] + sx - ox, p\[1\] + sy - oy, p\[2\] + sz - oz, 0x7C0, t2);/BOLT_VTX(v + 0x20, p[0] + sx - ox, p[1] - oy, p[2] + sz - oz, 0x7C0, t2);/ % mid
+121s/BOLT_VTX(v + 0x30, p\[0\] + sx + ox, p\[1\] + sy + oy, p\[2\] + sz + oz, 0, t2);/BOLT_VTX(v + 0x30, p[0] + sx + ox, p[1] + sy + oy, p[2] + sz + oz, 0x7C0, t2);/ % mid
+24s/(v)\[0xD\] = 0;/(v)[0xD] = 1;/ % mid
+124s/((s32 \*) gfx)\[1\] = (s32) (v - 0x40);/((s32 *) gfx)[1] = (s32) (v - 0x30);/ % mid
+127s/((s32 \*) gfx)\[4\] = 0x05000406;/((s32 *) gfx)[4] = 0x05000604;/ % mid
+129s/gfx += 0x18;/gfx += 0x10;/ % mid
+132s/p\[2\] += sz;/p[2] += sy;/ % mid
+134s/t = t2;/t = t2 + 1.0f;/ % mid
+138s/\*(s16 \*) (obj + 0xE) = -1;/*(s16 *) (obj + 0xC) = -1;/ % deadA

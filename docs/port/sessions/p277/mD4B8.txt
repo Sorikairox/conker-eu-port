@@ -1,0 +1,30 @@
+\#^    blk.u1C = 0.0f;$#s/0.0f/1.0f/
+\#^    blk.u18 = D_800AB16C\[D_80082FA0 == 1\];$#s/== 1/== 0/
+\#^    blk.u20 = D_800AB194\[D_80082FA0 == 1\];$#s/D_800AB194/D_800AB16C/
+\#^    blk.owner = obj;$#d
+\#^    blk.alphaA = 0.0f;$#s/0.0f/130.0f/
+\#^    blk.alphaB = 130.0f;$#s/130.0f/131.0f/
+\#^    blk.mode = (arg2 == -1) ? 0 : 4;$#s/0 : 4/4 : 0/
+\#^    blk.u54 = arg2;$#s/arg2/group/
+\#^    spec.flags = (wide ? 0x40 : 0) | 0x30;$#s/0x30/0x32/
+\#^    spec.flags = (wide ? 0x40 : 0) | 0x30;$#s/0x40 : 0/0 : 0x40/
+\#^    spec.col\[3\] = 0xFF;$#s/0xFF/0/
+\#^    spec.u30 = 8;$#s/8/7/
+\#^    spec.u34 = 0x13;$#s/0x13/0x22/
+\#^    spec.u41 = 0;$#s/0/7/
+\#^    spec.u50 = 0.0f;$#d
+\#^    spec.u48 = 1.0f;$#s/1.0f/0.0f/
+\#^    spec.scaleA = 35.75f;$#s/35.75f/35.5f/
+\#^    spec.scaleB = 16.0f;$#s/16.0f/18.0f/
+\#^    spec.player = obj\[0x23D\];$#s/obj\[0x23D\]/0/
+\#^    for (row = 0; row < 2; row++) {$#s/row < 2/row < 1/
+\#^        kinds.w = \*(s32 \*) D_8008FFC8;$#s/D_8008FFC8/(D_8008FFC8 + 1)/
+\#^        spec.y = row ? 92.0f : -90.0f;$#s/92.0f : -90.0f/-90.0f : 92.0f/
+\#^        spec.flags |= row ? 4 : 0;$#s/4 : 0/2 : 0/
+\#^        blk.type = row ? 5 : 4;$#s/5 : 4/4 : 5/
+\#^        for (i = 0; i < 4; i++) {$#s/i < 4/i < 3/
+\#^            spec.x = (f32) i \* 71.5f + 35.75f - 143.0f;$#s/71.5f/71.0f/
+\#^            spec.kind = kinds.b\[i\];$#s/kinds.b\[i\]/kinds.b[0]/
+\#^            rec = (u8 \*) func_151559FC(&spec, 0xB, 0, 0, 0x58, group, 1);$#s/0xB/0xA/
+\#^            rec = (u8 \*) func_151559FC(&spec, 0xB, 0, 0, 0x58, group, 1);$#s/group, 1/group, 0/
+\#^                memcpy(rec + 0x70, &blk, 0x58);$#s/0x70/0x6C/

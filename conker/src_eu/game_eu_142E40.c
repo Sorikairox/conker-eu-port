@@ -615,7 +615,105 @@ void func_15116940(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116940.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3);
+
+// platform_drift_update: speed (s16 +0x3C) of a drifting platform. With flag 4 (+0x4F) a push from the player
+// (func_15116E08 / 8; only forward pushes with `flags` bit 1) adds to it and clears the +0x80 timer. Without the timer
+// the speed loses 0.32 % and one unit per frame towards 0; on reaching 0 without a push it starts a 20-frame timer
+// (or, if the timer had run out (-1), stops). While the timer runs the speed grows by one unit away from 0 and the
+// timer counts down by the frame step (ends at -1). Then func_151156DC moves it; with a `sound` id, a looping sound
+// (pitch 20000 + 12767 * min(|+0x64| * 0.1, 1), volume that factor * `dist` - 500) is started at the position while
+// +0x64 > 0.01 (handle at +0x74), updated, or stopped and cleared.
+void func_15116A8C(u8 *obj, s32 flags, s32 sound, f32 dist) {
+    s32 push;
+    s32 speed;
+    s32 drag;
+    s32 timer;
+    f32 f;
+    f32 vel;
+    u32 pitch;
+
+    if (!(obj[0x4F] & 4)) {
+        push = 0;
+    } else {
+        push = func_15116E08(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x14), (s32) (obj + 0x7C), (u8 *) D_800CC2D0) >> 3;
+    }
+    if ((flags & 1) && push < 0) {
+        push = 0;
+    }
+    speed = *(s16 *) (obj + 0x3C) + push;
+    if (push != 0) {
+        *(s32 *) (obj + 0x80) = 0;
+    }
+    drag = speed * -0.0032;
+    timer = *(s32 *) (obj + 0x80);
+    if (timer <= 0) {
+        speed += drag;
+        if (speed > 0) {
+            speed--;
+            if (speed <= 0) {
+                if (push != 0) {
+                    speed = 0;
+                } else if (timer == 0) {
+                    *(s32 *) (obj + 0x80) = 20;
+                } else {
+                    *(s32 *) (obj + 0x80) = 0;
+                    speed = 0;
+                }
+            }
+        } else if (speed < 0) {
+            speed++;
+            if (speed >= 0) {
+                if (push != 0) {
+                    speed = 0;
+                } else if (timer == 0) {
+                    *(s32 *) (obj + 0x80) = 20;
+                } else {
+                    *(s32 *) (obj + 0x80) = 0;
+                    speed = 0;
+                }
+            }
+        }
+    } else {
+        if (speed > 0) {
+            speed++;
+        } else {
+            speed--;
+        }
+        *(s32 *) (obj + 0x80) = timer - D_800BE9E4;
+        if (*(s32 *) (obj + 0x80) <= 0) {
+            *(s32 *) (obj + 0x80) = -1;
+        }
+    }
+    *(s16 *) (obj + 0x3C) = speed;
+    func_151156DC(obj);
+    if (sound == 0) {
+        return;
+    }
+    vel = *(f32 *) (obj + 0x64);
+    f = (vel < 0.0f ? -vel : vel) * 0.1f;
+    if (1.0f < f) {
+        f = 1.0f;
+    }
+    pitch = 12767.0f * f + 20000.0f;
+    f = f * dist - 500.0f;
+    if (*(u16 *) (obj + 0x74) == 0) {
+        if (0.01f < vel) {
+            *(u16 *) (obj + 0x74) = func_10010F88(sound, pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10),
+                                                  *(s16 *) (obj + 0x12), *(s16 *) (obj + 0x14), 1000, 6000);
+        }
+    } else if (0.01f < vel) {
+        func_1000F91C(*(u16 *) (obj + 0x74), pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+                      *(s16 *) (obj + 0x14), 200, 2000);
+    } else {
+        func_100111C8(*(u16 *) (obj + 0x74));
+        *(u16 *) (obj + 0x74) = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116A8C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {
@@ -833,7 +931,86 @@ void func_151172FC(u8 *o) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151172FC.s")
 #endif
 
+#ifdef NON_MATCHING
+s16 *allocate_memory(s32, s32, s32, s32);
+/* func_15117424 morph settings, indexed by +0x3C & 0xFFFF: ROM block (index into D_8002AE00) and keyframe count */
+typedef struct {
+    u8 block;
+    u8 frames;
+} Morph15117424;
+extern Morph15117424 D_800896C0[];
+extern s32 D_8002AE00[][2]; /* ROM start / end of each block */
+
+// mesh_morph_update: per-frame vertex morph of a mesh object. The keyframes (`frames` sets of s16 x, y, z
+// records, 6 bytes per vertex) are loaded from ROM (func_10004514) into a buffer at +0x80 on first use. The
+// position +0x84 (0..0xFFFF over the whole morph) picks keyframe k = frames * pos / 65535 and the blend fraction
+// (the last keyframe blends to itself at 1); each vertex (0x10-byte records in the current buffer, +0x20 / +0x24 by
+// D_800BE9C0) becomes the blended point plus the object origin (+0x10 / +0x12 / +0x14; keyframe y goes to vertex +4,
+// z to +2). Then the position moves towards the target +0x7C by the speed +0x3C >> 16 without overshooting.
+void func_15117424(u8 *obj) {
+    s32 info = *(s32 *) (obj + 0x3C);
+    Morph15117424 *m = &D_800896C0[info & 0xFFFF];
+    s32 *block = D_8002AE00[m->block];
+    s32 size = block[1] - block[0];
+    s32 pos = *(s32 *) (obj + 0x84);
+    s32 frames = m->frames;
+    s32 speed = info >> 16;
+    s16 *a;
+    s16 *b;
+    u8 *buf;
+    s32 stride;
+    s32 count;
+    s32 k;
+    s32 i;
+    f32 t;
+    f32 frac;
+    s32 target;
+    u8 *v;
+
+    if (*(u8 **) (obj + 0x80) == NULL) {
+        *(s16 **) (obj + 0x80) = allocate_memory(size, 1, 2, 0);
+        func_10004514(block[0], *(u8 **) (obj + 0x80), size, 1);
+    }
+    buf = *(u8 **) (obj + 0x80);
+    t = (f32) frames * ((f32) pos * 1.5259022e-05f); /* D_800A33A4 = 0x37800080 */
+    k = (s32) t;
+    frac = t - (f32) k;
+    if (frames == k) {
+        frac = 1.0f;
+        k--;
+    }
+    stride = (size / frames) & ~1;
+    count = (u32) stride / 6;
+    a = (s16 *) (buf + k * stride);
+    b = a;
+    if (k + 1 != frames) {
+        b = (s16 *) (buf + (k + 1) * stride);
+    }
+    for (i = 0; i < count; i++, a += 3, b += 3) {
+        v = *(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + i * 0x10;
+        *(s16 *) (v + 0) = (s32) (((f32) b[0] - (f32) a[0]) * frac + (f32) a[0] + (f32) *(s16 *) (obj + 0x10));
+        v = *(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + i * 0x10;
+        *(s16 *) (v + 4) = (s32) (((f32) b[2] - (f32) a[2]) * frac + (f32) a[2] + (f32) *(s16 *) (obj + 0x12));
+        v = *(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + i * 0x10;
+        *(s16 *) (v + 2) = (s32) (((f32) b[1] - (f32) a[1]) * frac + (f32) a[1] + (f32) *(s16 *) (obj + 0x14));
+    }
+    target = *(s32 *) (obj + 0x7C);
+    if (target < pos) {
+        pos -= speed;
+        if (pos < target) {
+            pos = target;
+        }
+    } else if (pos < target) {
+        pos += speed;
+        if (target < pos) {
+            pos = target;
+        }
+    }
+    *(s32 *) (obj + 0x84) = pos;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15117424.s")
+#endif
 
 #ifdef NON_MATCHING
 // swing_angle_step: spring-damped swing of one angle (degrees) of a swinging object towards its rest angle (the signed
@@ -1628,7 +1805,125 @@ void func_15118F2C(s32 arg0, s32 arg1) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15118F2C.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_15166F10(s32 arg0, s32 arg1, s32 arg2, f32 arg3, u8 arg4, s32 arg5);
+void func_151885BC(s32 arg0, f32 arg1);
+void func_151741D0(s32, s32);
+
+// bell_swing_update: per-frame swing of a hanging object (angle +0x8 in degrees, velocity +0x84). Mode (+0x73 & 3):
+// 0 = at rest, 1 = swinging to 0, 2 = swinging to +0x3E, 3 = held at +0x3E. Gravity pulls the velocity towards the
+// rest angle by +0x80 * (angle, or 180 - angle past 90) (+0.1 when it starts from rest, with sound 0x4BA unless the
+// rest angle is 0), capped at +-10. When the angle passes the rest angle (func_15048A70 difference smaller than the
+// step) it bounces back at velocity * -(+0x7C), with a thud (func_15166F10); a bounce slower than +0x80 * 133.3
+// stops it at rest (mode 3, sound 0x4BB; mode 0 when the rest angle is 0), else +0x80 halves. +0x7C / +0x80 default
+// to 0.3 / 0.0075. The angle wraps to [0, 360). When it changed (or D_800BE9B4 is set) it is stored and, for a
+// light slot (+0x3C >> 24, 1-based) and a non-zero +0x3E, the slot gets 1 - |angle - rest| / rest (func_151885BC /
+// func_151741D0 * 255).
+void func_151194A4(u8 *obj) {
+    s32 restInt;
+    f32 restF;
+    f32 rest;
+    f32 angle;
+    f32 vel;
+    f32 bounce;
+    f32 damp;
+    f32 pull;
+    f32 diff;
+    f32 level;
+    s32 mode;
+    s32 slot;
+
+    func_1511FF00(obj, 1);
+    restInt = *(s16 *) (obj + 0x3E);
+    restF = restInt;
+    rest = restF;
+    mode = obj[0x73] & 3;
+    angle = *(f32 *) (obj + 0x8);
+    vel = *(f32 *) (obj + 0x84);
+    if (mode == 0 || mode == 1) {
+        rest = 0.0f;
+    }
+    if (mode == 0 || mode == 3) {
+        vel = 0.0f;
+        angle = rest;
+    }
+    if (angle == rest && vel == 0.0f) {
+        *(f32 *) (obj + 0x84) = vel;
+    } else {
+        if (*(f32 *) (obj + 0x7C) == 0.0f) {
+            *(f32 *) (obj + 0x7C) = 0.3f;
+        }
+        bounce = *(f32 *) (obj + 0x7C);
+        if (*(f32 *) (obj + 0x80) == 0.0f) {
+            *(f32 *) (obj + 0x80) = 0.0075f;
+        }
+        damp = *(f32 *) (obj + 0x80);
+        if (90.0f < angle) {
+            pull = damp * (180.0f - angle);
+        } else {
+            pull = damp * angle;
+        }
+        if (vel == 0.0f) {
+            if (rest != 0.0f) {
+                func_10010F88(0x4BA, 0x5DC0, 0, 0, 0, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+                              *(s16 *) (obj + 0x14), 200, 2500);
+            }
+            pull += 0.1f;
+        }
+        angle += vel;
+        diff = func_15048A70(angle, rest);
+        if (fabsf(diff) < fabsf(vel)) {
+            vel = -vel * bounce;
+            if (fabsf(vel) < *(f32 *) (obj + 0x80) * 133.33334f) {
+                vel = 0.0f;
+                angle = rest;
+                mode = 3;
+                if (rest == 0.0f) {
+                    mode = 0;
+                } else {
+                    func_10010F88(0x4BB, 0x5DC0, 0, 0, 0, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+                                  *(s16 *) (obj + 0x14), 200, 2500);
+                }
+            } else {
+                *(f32 *) (obj + 0x80) *= 0.5f;
+            }
+            func_15166F10(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12), *(s16 *) (obj + 0x14), 0.15f, 0xFF, 0);
+        } else if (0.0f < diff) {
+            vel += pull;
+            if (10.0f < vel) {
+                vel = 10.0f;
+            }
+        } else {
+            vel -= pull;
+            if (vel < -10.0f) {
+                vel = -10.0f;
+            }
+        }
+        if (angle < 0.0f) {
+            angle += 360.0f;
+        } else if (360.0f <= angle) {
+            angle -= 360.0f;
+        }
+        obj[0x73] = (obj[0x73] & 0xFC) | mode;
+        *(f32 *) (obj + 0x84) = vel;
+    }
+    if (D_800BE9B4 == 0 && angle == *(f32 *) (obj + 0x8)) {
+        return;
+    }
+    *(f32 *) (obj + 0x8) = angle;
+    slot = (*(s32 *) (obj + 0x3C) >> 24) & 0xFF;
+    if (slot == 0) {
+        return;
+    }
+    if (restInt != 0) {
+        level = 1.0f - fabsf((angle - restF) / restF);
+        func_151885BC(slot - 1, level);
+        func_151741D0((s32) (level * 255.0f), slot - 1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_151194A4.s")
+#endif
 
 void func_1511992C(u8 *arg0, s32 *arg1) {
     if ((arg1[0] == 1) && (((u8 *)arg1)[0x65] == 0) && !(arg0[0x73] & 3) && !(arg0[0x73] & 4)) {
@@ -1751,9 +2046,203 @@ void func_15119A54(u8 *arg0, u8 *arg1, s32 arg2, u16 arg3) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119A54.s")
 #endif
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119C54.s")
+#ifdef NON_MATCHING
+f32 func_150484A0(f32, f32);
+f32 func_150489B0(u8);
+f32 func_15048A40(u8);
 
+// mesh_cluster_spin: splits the vertices (obj + 0x28, 16-byte records, count +0x16) into clusters with
+// func_15119A54 (seed = each unassigned vertex outside the radius, 100 or 400 for kinds 0x21 / 0x22; cluster tag at
+// +6). Then, last cluster first, rotates each cluster whose centre angle a (func_150484A0(sum x, sum z) in 256ths)
+// exceeds its tag by -a (sin func_15048A40 / cos func_150489B0) in the x/z plane and re-tags its vertices
+// ((tag - 1) & 3) << 8 | a. Sets the done flag +0x84.
+void func_15119C54(u8 *obj) {
+    s16 *v = *(s16 **) (obj + 0x28);
+    s32 radius = 100;
+    s32 tag = 0;
+    s32 i;
+    s32 sx, sz, a;
+    f32 s, c, x, z;
+
+    if (*(u16 *) (obj + 0x54) == 0x21 || *(u16 *) (obj + 0x54) == 0x22) {
+        radius = 400;
+    }
+    *(s32 *) (obj + 0x84) = 1;
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+        if (*(u16 *) &v[3] == 0 && radius < v[2] * v[2] + v[0] * v[0]) {
+            tag++;
+            v[3] = tag;
+            func_15119A54(obj, (u8 *) v, radius, tag);
+        }
+    }
+    for (; tag != 0; tag--) {
+        sx = 0;
+        sz = 0;
+        v = *(s16 **) (obj + 0x28);
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+            if (*(u16 *) &v[3] == tag) {
+                sx += v[0];
+                sz += v[2];
+            }
+        }
+        if (sx == 0 && sz == 0) {
+            continue;
+        }
+        a = (s32) (func_150484A0((f32) sx, (f32) sz) * 40.743664f) & 0xFF;
+        if (tag >= a) {
+            continue;
+        }
+        s = func_15048A40(-a & 0xFF);
+        c = func_150489B0(-a & 0xFF);
+        v = *(s16 **) (obj + 0x28);
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+            if (*(u16 *) &v[3] == tag) {
+                z = (f32) v[2];
+                x = (f32) v[0];
+                v[3] = (((tag - 1) & 3) << 8) | a;
+                v[0] = (s32) (z * s + x * c);
+                v[2] = (s32) (z * c - x * s);
+            }
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119C54.s")
+#endif
+
+#ifdef NON_MATCHING
+u8 *func_1505EFD0(s32);
+f32 func_150489B0(u8);
+void func_15119C54(u8 *);
+s32 func_151EFDD0(void);
+f32 sinf(f32);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_eu_800A3530_c[1] = { 0.7111111f };  /* 0x3F360B61, 256 / 360 */
+static const f32 D_800A3534_c[1] = { 0.1f };           /* 0x3DCCCCCD */
+static const f32 D_800A3538_c[1] = { 6.2831855f };     /* 0x40C90FDB, 2 pi */
+static const f32 D_800A353C_c[1] = { 0.3926991f };     /* 0x3EC90FDB, pi / 8 */
+
+// mesh_cluster_flap_update: per-frame update of the clustered mesh that func_15119C54 sets up (called once, when
+// +0x84 is 0). Every source vertex (+0x28, 16-byte records, count +0x16) with a cluster tag (+6: group << 8 | angle)
+// is bent in its y/z plane by the group's angle (4 groups, sin / cos pairs), its y kept >= 1, then turned around y by
+// (tag + the object's heading +4 in 256ths); the result is scaled (+0x2C..+0x34), moved to the object's position
+// (+0x10..+0x14, s16) and written to this frame's vertex buffer (+0x20 + D_800BE9C0 * 4). State +0x7C / phase +0x80:
+// below 0x400 the groups flap (phase += (0.0195 + 0.0039 * rand % 6) * D_800BE9A4, amplitude sin(+0x7C / 2) drops
+// by rand % 3 per frame, back to 0xEC under 0x14); 0x400 + n eases the angle +0x80 towards n by 0.1 per frame
+// (0x41F counts down and ends at state 0; 0x420 stays). The player (func_1505EFD0(0)) within sqrt(3072) closes it:
+// 0x420 when its +0x31C record's +0x57 is 1, else 0x41F.
+void func_15119EB8(u8 *obj) {
+    f32 sc[4][2];
+    s16 *src;
+    s16 *dst;
+    u8 *pl;
+    s32 heading;
+    s32 state;
+    s32 i;
+    u32 tag;
+    f32 ox, oy, oz;
+    f32 kx, ky, kz;
+    f32 t, s, c, x, y, z, ps, pc, by, bz;
+    f32 dx, dy, dz;
+    u8 a;
+
+    dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+    src = *(s16 **) (obj + 0x28);
+    ox = *(s16 *) (obj + 0x10);
+    oy = *(s16 *) (obj + 0x12);
+    oz = *(s16 *) (obj + 0x14);
+    kx = *(f32 *) (obj + 0x2C);
+    ky = *(f32 *) (obj + 0x30);
+    kz = *(f32 *) (obj + 0x34);
+    heading = (s32) (*(f32 *) (obj + 4) * D_eu_800A3530_c[0]);
+    if (*(s32 *) (obj + 0x84) == 0) {
+        func_15119C54(obj);
+    }
+
+    state = *(s32 *) (obj + 0x7C);
+    if (state >= 0x400) {
+        t = *(f32 *) (obj + 0x80);
+        *(f32 *) (obj + 0x80) = t + ((f32) (state - 0x400) - t) * D_800A3534_c[0] * D_800BE9A4;
+        if (state != 0x420) {
+            *(s32 *) (obj + 0x7C) = state - 1;
+            if (state - 1 == 0x400) {
+                *(s32 *) (obj + 0x7C) = 0;
+                *(f32 *) (obj + 0x80) = 0.0f;
+            }
+        }
+    } else {
+        i = func_151EFDD0() % 6;
+        *(f32 *) (obj + 0x80) += (0.01953125f + 0.00390625f * (f32) i) * D_800BE9A4;
+        i = func_151EFDD0() % 3;
+        *(s32 *) (obj + 0x7C) -= i;
+        if (*(s32 *) (obj + 0x7C) < 0x14) {
+            *(s32 *) (obj + 0x7C) = 0xEC;
+        }
+    }
+
+    for (i = 0; i < 4; i++) {
+        state = *(s32 *) (obj + 0x7C);
+        if (state >= 0x400) {
+            sc[i][0] = func_15048A40((u32) *(f32 *) (obj + 0x80) & 0xFF);
+            sc[i][1] = func_150489B0((u32) *(f32 *) (obj + 0x80) & 0xFF);
+        } else {
+            t = *(f32 *) (obj + 0x80) * D_800A3538_c[0] - D_800A353C_c[0] * (f32) i;
+            if (t <= 0.0f) {
+                t = 5.0f;
+            } else {
+                s = func_15048A40((state >> 1) & 0xFF);
+                t = sinf(t) * (s + s) + 5.0f;
+            }
+            a = (u32) t & 0xFF;
+            sc[i][0] = func_15048A40(a);
+            sc[i][1] = func_150489B0(a);
+        }
+    }
+
+    if (*(s32 *) (obj + 0x7C) != 0x420) {
+        pl = func_1505EFD0(0);
+        if (pl != NULL) {
+            dx = *(f32 *) (pl + 0x14) - ox;
+            dy = *(f32 *) (pl + 0x18) - oy;
+            dz = *(f32 *) (pl + 0x1C) - oz;
+            if (dx * dx + dy * dy + dz * dz < 3072.0f) {
+                *(s32 *) (obj + 0x7C) = (*(u8 *) (*(u8 **) (pl + 0x31C) + 0x57) == 1) ? 0x420 : 0x41F;
+            }
+        }
+    }
+
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+        tag = *(u16 *) &src[3];
+        if (tag != 0) {
+            s = func_15048A40((tag + heading) & 0xFF);
+            c = func_150489B0((*(u16 *) &src[3] + heading) & 0xFF);
+            by = src[1];
+            bz = src[2];
+            ps = sc[tag >> 8][0];
+            pc = sc[tag >> 8][1];
+            z = by * ps + bz * pc;
+            y = by * pc - bz * ps;
+            if (y < 1.0f) {
+                z -= y;
+                y = 1.0f;
+            }
+            t = src[0];
+            x = t * c + z * s;
+            z = z * c - t * s;
+        } else {
+            x = src[0];
+            y = src[1];
+            z = src[2];
+        }
+        dst[0] = (s32) (x * kx + ox);
+        dst[1] = (s32) (y * ky + oy);
+        dst[2] = (s32) (z * kz + oz);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15119EB8.s")
+#endif
 
 #ifdef NON_MATCHING
 // pickup_spin_update: world mesh record (D_800DBEF4, 0xA0 bytes) handler for a spinning, bobbing pickup (P195). The phase
@@ -2010,7 +2499,176 @@ void func_1511AD48(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s16 *allocate_memory(s32, s32, s32, s32);
+f32 sqrtf(f32);
+f32 func_150489B0(u8);
+void func_150A7E40(f32 mf[4][4], f32 x, f32 y, f32 z, f32 *ox, f32 *oy, f32 *oz);
+void func_15114E8C(f32 (*)[4], u8 *);
+void func_1511AA1C(u8 *obj, s32 *slots, s32 *state);
+void func_1511AD48(u8 *arg0);
+
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A3550_c[1] = { 1.2f };  /* 0x3F99999A */
+static const f32 D_800A3554_c[1] = { 0.8f };  /* 0x3F4CCCCD */
+
+/* +0x80 state of the wobbling mesh (0x28 bytes, allocated on the first call) */
+typedef struct {
+    u8 *phase;      /* 0x00 per-vertex wobble phase (equal positions share one) */
+    f32 *wave;      /* 0x04 per-vertex wave height, follows `cur` */
+    f32 *follow;    /* 0x08 per-vertex follow rate: (radius - 1.2 * d) / radius, >= 0 */
+    f32 *lift;      /* 0x0C per-vertex lift scale: (radius - d) / radius */
+    f32 cur;        /* 0x10 wave height this frame */
+    f32 amp;        /* 0x14 wave amplitude (decays) */
+    f32 u18;        /* 0x18 */
+    u8 angle;       /* 0x1C */
+    u8 speed;       /* 0x1D */
+    u8 active;      /* 0x1E */
+    u8 pad1F;
+    s32 slots;      /* 0x20 func_1511AA1C */
+    s32 state;      /* 0x24 func_1511AA1C */
+} WobbleADC0;
+
+// mesh_wobble_update: per-frame update of a wobbling mesh object (vertices +0x28, 16-byte records, count +0x16).
+// First call: allocates the +0x80 state; per vertex at distance d (x/z) from the centre and radius = high half of
+// +0x3C: lift / follow rates, a random phase shared by vertices at the same position. Flags 3 in +0x73 start a wave
+// (func_1511AD48). While a wave runs its angle advances by speed * D_800BE9E4, the amplitude shrinks (x 0.5 below
+// +0x18, else x 0.8) on each wrap / half turn and the wave stops at amplitude <= 3; each vertex height follows it.
+// Every vertex not flagged 0x4000 in the output (+6) circles by the low byte of +0x3C (angle = its phase + one of
+// the 4 phase bytes of +0x84, negated for phase bit 7) and is lifted by lift * wave; all go through the object's
+// matrix (func_15114E8C) into this frame's buffer (+0x20 + D_800BE9C0 * 4). Advances the phase bytes by 1 / 2 / 3 /
+// 4 and runs the animation slots (func_1511AA1C).
+void func_1511ADC0(u8 *obj) {
+    f32 mtx[4][4];
+    u8 ph[4];
+    f32 ox, oy, oz;
+    WobbleADC0 *st;
+    s16 *verts;
+    s16 *v;
+    s16 *w;
+    s16 *dst;
+    u8 *phase;
+    f32 *wave;
+    f32 *follow;
+    f32 *lift;
+    f32 amp;
+    f32 radius;
+    f32 inv;
+    f32 d;
+    f32 k;
+    f32 sx;
+    f32 cz;
+    s32 i;
+    s32 j;
+    s32 up;
+    u8 old;
+    u8 a;
+
+    amp = (u8) *(s32 *) (obj + 0x3C);
+    st = *(WobbleADC0 **) (obj + 0x80);
+    verts = *(s16 **) (obj + 0x28);
+    if (st == NULL) {
+        st = (WobbleADC0 *) allocate_memory(0x28, 1, 0, 0);
+        *(WobbleADC0 **) (obj + 0x80) = st;
+        phase = (u8 *) allocate_memory(*(u16 *) (obj + 0x16), 1, 0, 0);
+        st->phase = phase;
+        wave = (f32 *) allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+        st->wave = wave;
+        follow = (f32 *) allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+        st->follow = follow;
+        lift = (f32 *) allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+        st->lift = lift;
+        radius = (u16) (*(s32 *) (obj + 0x3C) >> 16);
+        inv = (radius == 0.0f) ? 1.0f : 1.0f / radius;
+        for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8) {
+            phase[i] = (u32) func_150ADA20() % 255;
+            d = sqrtf((f32) v[0] * (f32) v[0] + (f32) v[2] * (f32) v[2]);
+            lift[i] = (radius - d) * inv;
+            follow[i] = (radius - d * D_800A3550_c[0]) * inv;
+            if (follow[i] < 0.0f) {
+                follow[i] = 0.0f;
+            }
+        }
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            phase[i] = func_150ADA20();
+            v = verts + i * 8;
+            for (j = 0, w = verts; j < *(u16 *) (obj + 0x16); j++, w += 8) {
+                if (v[0] == w[0] && v[1] == w[1] && v[2] == w[2]) {
+                    phase[j] = phase[i];
+                }
+            }
+        }
+        st->cur = 0.0f;
+        st->active = 0;
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            wave[i] = 0.0f;
+        }
+        st->slots = 0;
+        st->state = 0;
+    }
+
+    phase = st->phase;
+    wave = st->wave;
+    follow = st->follow;
+    lift = st->lift;
+    if ((obj[0x73] & 3) == 3) {
+        func_1511AD48(obj);
+        obj[0x73] &= ~3;
+    }
+    if (st->active) {
+        old = st->angle;
+        st->angle = old + st->speed * D_800BE9E4;
+        k = (st->amp < st->u18) ? 0.5f : D_800A3554_c[0];
+        if (st->angle < old || (st->angle > 0x80 && old <= 0x80)) {
+            st->amp *= k;
+        }
+        sx = func_15048A40(st->angle);
+        st->cur = st->amp * sx;
+        if (st->amp <= 3.0f) {
+            st->cur = 0.0f;
+            st->active = 0;
+        }
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            wave[i] = wave[i] + (st->cur - wave[i]) * follow[i];
+        }
+    }
+
+    func_15114E8C(mtx, obj);
+    dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+    ph[0] = *(s32 *) (obj + 0x84);
+    ph[1] = *(s32 *) (obj + 0x84) >> 8;
+    ph[2] = *(s32 *) (obj + 0x84) >> 16;
+    ph[3] = *(s32 *) (obj + 0x84) >> 24;
+    up = 0;
+    for (i = 0, v = verts; i < *(u16 *) (obj + 0x16); i++, v += 8, dst += 8) {
+        if (*(u16 *) &dst[3] & 0x4000) {
+            func_150A7E40(mtx, v[0], v[1], v[2], &ox, &oy, &oz);
+        } else {
+            a = ph[phase[i] & 3] + phase[i];
+            if (phase[i] & 0x80) {
+                a = -a;
+            }
+            sx = func_15048A40(a) * amp;
+            cz = func_150489B0(a) * amp;
+            if (st->active) {
+                up = (s32) (lift[i] * wave[i]);
+            }
+            func_150A7E40(mtx, (f32) v[0] + sx, v[1] + up, (f32) v[2] + cz, &ox, &oy, &oz);
+        }
+        dst[0] = (s32) ox;
+        dst[1] = (s32) oy;
+        dst[2] = (s32) oz;
+    }
+    ph[3] += 4;
+    ph[0] += 1;
+    ph[1] += 2;
+    ph[2] += 3;
+    *(s32 *) (obj + 0x84) = (ph[3] << 24) | ph[0] | (ph[1] << 8) | (ph[2] << 16);
+    func_1511AA1C(obj, &st->slots, &st->state);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511ADC0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A3558;
@@ -2055,11 +2713,313 @@ void func_1511B4B8(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511B4B8.s")
 #endif
+#ifdef NON_MATCHING
+// sliding_door_update: per-frame update of a sliding door / gate (type +0x3C & 0x3FF, 0..7). On a networked game
+// (D_800C35EA == 1) nothing happens when func_15022BB0 (object index) says so. The closed position (x +0x10,
+// z +0x14) is saved at +0x7C (bit 31 = saved) / +0x80 on first use. Mode +0x73 & 3: 0 = closed, 1 = closing,
+// 2 = opening, 3 = open. While opening / open each type has its open position (x first, or z first for types 4 /
+// 7; types 0 / 1 / 7 move x without waiting for z) and speed (7, 15 for types 4 / 7); closing goes back to the saved
+// position. A start sound plays when the move begins (func_151152A4; 0x4E, type 5: 0x4C1). Modes 0 / 3 snap to the
+// target. The speed +0x84 eases towards the type's speed (3% per frame) and each frame moves one axis by at most
+// the speed; x reaching its target stops (sound 0x4E for type 0). When both axes are there, opening becomes open and
+// closing closed, the looping sound +0x74 is stopped (func_100111C8) and sound 0x4C8 plays.
+void func_1511B604(u8 *obj) {
+    f32 maxSpeed = 7.0f;
+    s32 xFirst = 0;
+    s32 zFirst = 0;
+    s32 sound = 0;
+    s32 tx;
+    s32 tz;
+    s32 kind;
+    s32 mode;
+    s32 cur;
+    s32 step;
+    f32 vel;
+    f32 d;
+
+    if (D_800C35EA == 1 && func_15022BB0((s32) (obj - (u8 *) D_800DBEF4) / 0xA0, 0) != 0) {
+        return;
+    }
+    if (*(s32 *) (obj + 0x7C) == 0) {
+        *(s32 *) (obj + 0x7C) = *(s16 *) (obj + 0x10) | 0x80000000;
+        *(s32 *) (obj + 0x80) = *(s16 *) (obj + 0x14);
+    }
+    tx = (s16) *(s32 *) (obj + 0x7C);
+    tz = *(s32 *) (obj + 0x80);
+    kind = *(s32 *) (obj + 0x3C) & 0x3FF;
+    if (kind >= 4 && kind < 7) {
+        func_1511FF00(obj, 1);
+    }
+    mode = obj[0x73] & 3;
+    if (mode == 3 || mode == 2) {
+        switch (kind) {
+        case 0:
+            tx = -0x45;
+            tz = -0x78;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            xFirst = 1;
+            break;
+        case 1:
+            tx = -0x45;
+            tz = 0x78;
+            xFirst = 1;
+            break;
+        case 2:
+            tx = 0x64;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            break;
+        case 3:
+            tx = 0;
+            break;
+        case 4:
+            maxSpeed = 15.0f;
+            tx = 0x10E;
+            tz = -0x756;
+            zFirst = 1;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            break;
+        case 5:
+            tz = 0x8C;
+            if (mode == 2) {
+                sound = 0x4C1;
+            }
+            break;
+        case 6:
+            tz = -0x8C;
+            break;
+        case 7:
+            maxSpeed = 15.0f;
+            tx = -0x1004;
+            tz = 0x1A6;
+            xFirst = 1;
+            if (mode == 2) {
+                sound = 0x4E;
+            }
+            break;
+        }
+    } else if (kind == 4) {
+        maxSpeed = 15.0f;
+        xFirst = 1;
+        if (mode == 1) {
+            sound = 0x4E;
+        }
+    } else if (kind == 7) {
+        maxSpeed = 15.0f;
+        zFirst = 1;
+        if (mode == 1) {
+            sound = 0x4E;
+        }
+    }
+    if (sound != 0) {
+        func_151152A4(obj, sound, 0x7D00, 100, 2500, 1);
+    }
+    vel = *(f32 *) (obj + 0x84);
+    if (mode == 0 || mode == 3) {
+        vel = 0.0f;
+        *(s16 *) (obj + 0x10) = tx;
+        *(s16 *) (obj + 0x14) = tz;
+    }
+    if (vel < maxSpeed) {
+        vel += (maxSpeed - vel) * 0.03f;
+    }
+    if ((xFirst || tz == *(s16 *) (obj + 0x14)) && tx != *(s16 *) (obj + 0x10) &&
+        (!zFirst || tz == *(s16 *) (obj + 0x14))) {
+        cur = *(s16 *) (obj + 0x10);
+        step = tx - cur;
+        d = step;
+        if (d < -vel) {
+            step = (s32) -vel;
+        } else if (vel < d) {
+            step = (s32) vel;
+        }
+        *(s16 *) (obj + 0x10) = cur + step;
+        if (tx == *(s16 *) (obj + 0x10)) {
+            vel = 0.0f;
+            if (kind == 0) {
+                func_151152A4(obj, 0x4E, 0x7D00, 100, 2500, 1);
+            }
+        }
+        *(f32 *) (obj + 0x84) = vel;
+        return;
+    }
+    cur = *(s16 *) (obj + 0x14);
+    if (tz != cur) {
+        step = tz - cur;
+        d = step;
+        if (d < -vel) {
+            step = (s32) -vel;
+        } else if (vel < d) {
+            step = (s32) vel;
+        }
+        *(s16 *) (obj + 0x14) = cur + step;
+    } else if (mode == 2 || mode == 1) {
+        obj[0x73] = (obj[0x73] & 0xFC) | (mode == 2 ? 3 : 0);
+        if (*(u16 *) (obj + 0x74) != 0) {
+            func_100111C8(*(u16 *) (obj + 0x74));
+            *(u16 *) (obj + 0x74) = 0;
+            func_151152A4(obj, 0x4C8, 0x7D00, 100, 2500, 1);
+        }
+    }
+    *(f32 *) (obj + 0x84) = vel;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511B604.s")
+#endif
 
+#ifdef NON_MATCHING
+void func_151741D0(s32, s32);
+void func_151885BC(s32 arg0, f32 arg1);
+
+// door_swing_update: swings the door angle obj +0x8 (velocity +0x84) by the state in the low 2 bits of +0x73:
+// 0 closed / 3 open (angle pinned to 0 / the open angle s16 +0x3E), 1 closing (target 0), 2 opening (target
+// +0x3E). The angle moves by the velocity; on overshoot (|func_15048A70(angle, target)| < |velocity|) the
+// velocity bounces back scaled by +0x7C (0.45 when 0) and the door settles (state 0 / 3) once it is below 0.05 *
+// +0x80 (0.5 when 0); else the velocity accelerates towards +-(+0x80) by 1%. The angle wraps into [0, 360). When it
+// changes (or D_800BE9B4 is set) it is stored and, for a door with a light slot (byte +0x3C), the slot's light
+// (func_151885BC) and vertex colours (func_151741D0) follow the open fraction.
+void func_1511BAA4(u8 *obj) {
+    s16 open = *(s16 *) (obj + 0x3E);
+    s32 state = obj[0x73] & 3;
+    f32 openAngle = open;
+    f32 target = openAngle;
+    f32 angle = *(f32 *) (obj + 0x8);
+    f32 vel = *(f32 *) (obj + 0x84);
+    f32 bounce;
+    f32 speed;
+    f32 diff;
+    f32 frac;
+    s32 slot;
+
+    if (state == 0 || state == 1) {
+        target = 0.0f;
+    }
+    if (state == 0 || state == 3) {
+        angle = target;
+        vel = 0.0f;
+    }
+    if (angle == target && vel == 0.0f) {
+        *(f32 *) (obj + 0x84) = vel;
+    } else {
+        bounce = *(f32 *) (obj + 0x7C);
+        if (bounce == 0.0f) {
+            bounce = 0.45f; /* D_800A358C */
+        }
+        speed = *(f32 *) (obj + 0x80);
+        if (speed == 0.0f) {
+            speed = 0.5f;
+        }
+        angle += vel;
+        diff = func_15048A70(angle, target);
+        if (fabsf(diff) < fabsf(vel)) {
+            vel = -vel * bounce;
+            if (fabsf(vel) < speed * 0.05f /* D_800A3590 */) {
+                vel = 0.0f;
+                angle = target;
+                if (target == 0.0f) {
+                    state = 0;
+                } else {
+                    state = 3;
+                }
+            }
+        } else if (0.0f < diff) {
+            vel += (speed - vel) * 0.01f; /* D_800A3594 */
+        } else {
+            vel -= (speed + vel) * 0.01f; /* D_800A3598 */
+        }
+        if (angle < 0.0f) {
+            angle += 360.0f;
+        } else if (360.0f <= angle) {
+            angle -= 360.0f;
+        }
+        obj[0x73] = (obj[0x73] & ~3) | state;
+        *(f32 *) (obj + 0x84) = vel;
+    }
+    if (D_800BE9B4 == 0 && angle == *(f32 *) (obj + 0x8)) {
+        return;
+    }
+    *(f32 *) (obj + 0x8) = angle;
+    slot = obj[0x3C];
+    if (slot == 0 || open == 0) {
+        return;
+    }
+    frac = fabsf((angle - openAngle) / openAngle);
+    func_151885BC(slot - 1, frac);
+    func_151741D0((s32) ((1.0f - frac) * 255.0f), slot - 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BAA4.s")
+#endif
 
+#ifdef NON_MATCHING
+f32 sinf(f32);
+f32 cosf(f32);
+
+/* D_800A3340: vertex count, then (vertex index, reference object 0 / 1) pairs */
+static const u8 D_800A3340_pairs[17] = {
+    8, 0, 0, 1, 1, 2, 0, 3, 1, 4, 0, 5, 1, 6, 1, 7, 0,
+};
+
+// part_vertices_follow_refs: rotates this part's 8 template vertices (obj + 0x28) around two reference objects
+// (obj - 0xA0 and obj - 0x140) by each reference's yaw (+0x8, degrees) and writes them into the current vertex
+// buffer (obj + 0x20 + D_800BE9C0 * 4), offset by the part position (+0x10/+0x12/+0x14). Runs while the redraw
+// counter +0x7C is non-zero; a change of either reference yaw (cached at +0x80 / +0x84) restarts it at 2.
+// Only for obj + 0x3C == 0: otherwise the asm reads uninitialised locals (the reference pointers and the table
+// are set only in that branch) and draws nothing; the C does nothing in that case.
+void func_1511BD5C(u8 *obj) {
+    u8 *ref[2];
+    const u8 *pair;
+    s32 n;
+    u8 *r;
+    s16 *src;
+    s32 dx, dy, sx, sy, sz;
+    f32 ang, s, c, fx, fy;
+
+    if (*(s32 *) (obj + 0x3C) != 0) {
+        return;
+    }
+    n = D_800A3340_pairs[0];
+    ref[0] = obj - 0xA0;
+    ref[1] = obj - 0x140;
+    pair = &D_800A3340_pairs[1];
+
+    if (*(f32 *) (obj + 0x80) != *(f32 *) (ref[0] + 8) || *(f32 *) (obj + 0x84) != *(f32 *) (ref[1] + 8)) {
+        *(f32 *) (obj + 0x80) = *(f32 *) (ref[0] + 8);
+        *(s32 *) (obj + 0x7C) = 2;
+        *(f32 *) (obj + 0x84) = *(f32 *) (ref[1] + 8);
+    }
+    if (*(s32 *) (obj + 0x7C) == 0) {
+        return;
+    }
+    *(s32 *) (obj + 0x7C) -= 1;
+
+    while (n-- != 0) {
+        r = ref[pair[1]];
+        dx = *(s16 *) (r + 0x10) - *(s16 *) (obj + 0x10);
+        dy = *(s16 *) (r + 0x12) - *(s16 *) (obj + 0x12);
+        ang = -*(f32 *) (r + 8) * 0.0174532924f;
+        s = sinf(ang);
+        c = cosf(ang);
+        src = (s16 *) (*(u8 **) (obj + 0x28) + pair[0] * 16);
+        fy = (f32) (src[1] - dy);
+        fx = (f32) (src[0] - dx);
+        sz = src[2] + *(s16 *) (obj + 0x14);
+        sy = (s32) (fy * c - fx * s) + dy + *(s16 *) (obj + 0x12);
+        sx = (s32) (fy * s + fx * c) + dx + *(s16 *) (obj + 0x10);
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + pair[0] * 16 + 0) = sx;
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + pair[0] * 16 + 2) = sy;
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + pair[0] * 16 + 4) = sz;
+        pair += 2;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511BD5C.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_15188580(s32, f32 *);
@@ -2459,15 +3419,16 @@ void func_1511CAD0(u8 *arg0) {
 
 #ifdef NON_MATCHING
 s32 func_150B2C20(s32, s32);
-s32 func_151714BC(u8 *, s32, s32, s32);
+void func_151714BC(u8 *, u8, s32); /* P274: 3 arguments, void (the asm caller also sets a3 = 1, unused) */
 void func_151741D0(s32, s32);
-extern s32 D_800A3354;
+/* D_800A3354 (rodata in func_1511BD5C's GLOBAL_ASM): the three hit sound ids, copied to the stack table */
+static const u16 D_800A3354_ids[3] = { 0x2B6, 0x2BD, 0x2BE };
 s32 func_1000EC24(s32, s32, s32, s32, s32, s32, s32); /* a function (init_EB00.c), not data */
 
 void func_1511CBC0(u8 *arg0) {
     struct {
-        u8 * u50;
-        u8 pad54[0x4];
+        u16 u50[3]; /* P274: was u8 * (indexing read bytes through an uninitialised pointer) */
+        u8 pad56[0x2];
         u16 u58;
         u16 u5A;
         u8 * u5C;
@@ -2538,13 +3499,14 @@ void func_1511CBC0(u8 *arg0) {
                 case 2:
                     break;
                 case 1:
-                    func_151714BC(sp48, 0xFF, 0, 1);
+                    func_151714BC(sp48, 0xFF, 0);
                     func_10010F30(0x2BE, 0x7FFFU, 0x40U, 0, 0U);
                     break;
                 case 0:
                     temp_t9 = func_150ADA20() % 3U;
-                    (*(s32 *)((u8 *)(&sp.u50[0]) + 0)) = (s32) (*(s32 *)((u8 *)(&D_800A3354) + 0));
-                    (*(u16 *)((u8 *)(&sp.u50[0]) + 4)) = (u16) (*(u16 *)((u8 *)(&D_800A3354) + 4));
+                    sp.u50[0] = D_800A3354_ids[0];
+                    sp.u50[1] = D_800A3354_ids[1];
+                    sp.u50[2] = D_800A3354_ids[2];
                     sp.u5A = (u16) temp_t9;
                     temp_t1 = (&sp.u50[0])[((u32) ((func_150ADA20() & 1) + sp.u5A + 1) % 3U) & 0xFFFF];
                     sp.u5A = (&sp.u50[0])[sp.u5A];
@@ -2601,9 +3563,279 @@ void func_1511D0B4(s32 arg0, f32 *arg1) {
     *arg1 = 22000.0f;
 }
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D0CC.s")
+#ifdef NON_MATCHING
+s16 *allocate_memory(s32, s32, s32, s32);
+f32 func_150489B0(u8);
+void func_1511D0B4(s32 arg0, f32 *arg1);
+s32 func_15195FB0(u8 *, s32, s32, s32, s32, s32, s32);
+void func_15094EC8(u8 *, s32 *, s32, f32, s32, s32);
+extern s32 D_80090688;
 
+/* rodata copies (NM link drops the asm rodata) */
+static const f32 D_800A35C8_c[1] = { 0.453f };        /* 0x3EE7EF9E */
+static const f32 D_800A35CC_c[1] = { 0.1f };         /* 0x3DCCCCCD */
+static const f32 D_800A35D0_c[1] = { 0.81f };        /* 0x3F4F5C29 */
+static const f32 D_800A35D4_c[1] = { 12000.0f };     /* 0x463B8000 */
+
+/* +0x7C state of the rippling surface (0x1C bytes, allocated on the first call) */
+typedef struct {
+    u8 *phase;      /* 0x00 per-vertex ripple phase (from the depth below the top) */
+    u16 time;       /* 0x04 ripple clock (high byte = angle) */
+    u16 speed;      /* 0x06 */
+    f32 height;     /* 0x08 ripple height */
+    s32 sound;      /* 0x0C func_15195FB0 (level 0x13) */
+    u8 glowTimer;   /* 0x10 */
+    u8 glowPhase;   /* 0x11 */
+    u8 glow;        /* 0x12 1: +0x8A glows, vertex colours untouched */
+    u8 speedPhase;  /* 0x13 */
+    f32 rot;        /* 0x14 texture angle (degrees) */
+    s16 *uv;        /* 0x18 texture coordinates - 0x2000 (2 per vertex) */
+} RippleD0CC;
+
+// rippling_wall_update: per-frame update of a rippling vertical surface (levels D_800BE9F0 4 and 0x13 only; vertex
+// records 0x10 bytes, template +0x28, output +0x20 + D_800BE9C0 * 4). The top is 22000 (func_1511D0B4) above +0x14.
+// First call: the +0x7C state; level 4: speed 0x1DA, height 100, phase = (top - z) * 0.1; level 0x13: speed 0x259,
+// height 36, phase = top - z, a sound (func_15195FB0 D_80090688), and for the +0x72 == 0xFE variant a texture that
+// turns 0.453 degrees a frame (uv copy at +0x18, func_15094EC8 32 x 32). Level 4 objects other than 0xF2 glow
+// (+0x8A, phase 0 for 0xF1, else 0x80) instead of shading their vertices. Every frame each vertex gets
+// y = template y + +0x12 + cos(phase + clock) * height and the shade 32.5 * (cos + 1) + 190; on level 4 vertices
+// below z 12000 are pulled towards it (by 0.81 .. 1 of the distance) and the clock speed swings with
+// cos(clock + speedPhase).
+void func_1511D0CC(u8 *obj) {
+    f32 top;
+    f32 spin;
+    f32 k;
+    f32 c;
+    f32 y;
+    f32 z;
+    f32 f;
+    s32 uw;
+    s32 uh;
+    s32 lvl13;
+    s32 init;
+    s32 i;
+    s32 t;
+    u32 speed;
+    u32 half;
+    u8 shade;
+    RippleD0CC *st;
+    s16 *src;
+    s16 *dst;
+
+    spin = 0.0f;
+    if (D_800BE9F0 == 4) {
+        lvl13 = FALSE;
+    } else if (D_800BE9F0 == 0x13) {
+        lvl13 = TRUE;
+        if (obj[0x72] == 0xFE) {
+            spin = D_800A35C8_c[0];
+            uh = 0x20;
+            uw = 0x20;
+        }
+    } else {
+        return;
+    }
+    func_1511D0B4((s32) obj, &top);
+    top -= *(s16 *) (obj + 0x14);
+
+    st = *(RippleD0CC **) (obj + 0x7C);
+    if (st == NULL) {
+        init = TRUE;
+        st = (RippleD0CC *) allocate_memory(0x1C, 1, 0, 0);
+        *(RippleD0CC **) (obj + 0x7C) = st;
+        st->phase = (u8 *) allocate_memory(*(u16 *) (obj + 0x16), 1, 0, 0);
+        if (spin != 0.0f) {
+            st->uv = allocate_memory(*(u16 *) (obj + 0x16) * 4, 1, 0, 0);
+            for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+                st->uv[i * 2 + 0] = (*(s16 **) (obj + 0x28))[i * 8 + 4] - 0x2000;
+                st->uv[i * 2 + 1] = (*(s16 **) (obj + 0x28))[i * 8 + 5] - 0x2000;
+            }
+            st->rot = 0.0f;
+        }
+    } else {
+        init = FALSE;
+    }
+
+    if (init) {
+        if (!lvl13) {
+            st->speed = 0x1DA;
+            st->speedPhase = 0x6D;
+            st->height = 100.0f;
+            k = D_800A35CC_c[0];
+        } else {
+            k = 1.0f;
+            st->speed = 0x259;
+            st->speedPhase = 0x6D;
+            st->height = 36.0f;
+        }
+        st->time = 0;
+        dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+        src = *(s16 **) (obj + 0x28);
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+            st->phase[i] = (u32) ((top - (*(s16 **) (obj + 0x28))[i * 8 + 2]) * k);
+            dst[0] = src[0] + *(s16 *) (obj + 0x10);
+            dst[2] = src[2] + *(s16 *) (obj + 0x14);
+        }
+        st->glow = 0;
+        st->glowTimer = 0;
+        if (D_800BE9F0 == 4 && obj[0x72] != 0xF2) {
+            st->glowPhase = (obj[0x72] == 0xF1) ? 0 : 0x80;
+            st->glow = 1;
+        }
+        if (lvl13 == TRUE) {
+            st->sound = func_15195FB0(obj, D_80090688, 0, 0, 0, 0, 8);
+        }
+    }
+
+    t = (st->time >> 8) & 0xFF;
+    dst = *(s16 **) (obj + 0x20 + D_800BE9C0 * 4);
+    src = *(s16 **) (obj + 0x28);
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++, src += 8, dst += 8) {
+        c = func_150489B0((st->phase[i] + t) & 0xFF);
+        y = (f32) (src[1] + *(s16 *) (obj + 0x12)) + c * st->height;
+        f = c;
+        if (!lvl13) {
+            z = src[2] + *(s16 *) (obj + 0x14);
+            if (z < D_800A35D4_c[0]) {
+                f = (c + 1.0f) * 0.5f;
+                dst[2] = (s32) (D_800A35D4_c[0] + (z - D_800A35D4_c[0]) * ((1.0f - D_800A35D0_c[0]) * f + D_800A35D0_c[0]));
+            }
+        }
+        dst[1] = (s32) y;
+        if (st->glow == 0) {
+            shade = (u32) (32.5f * (f + 1.0f) + 190.0f);
+            ((u8 *) dst)[0xC] = shade;
+            ((u8 *) dst)[0xD] = shade;
+            ((u8 *) dst)[0xE] = shade;
+        }
+    }
+
+    if (!lvl13) {
+        half = (u16) (st->speed >> 1);
+        c = func_150489B0(((st->time >> 8) + st->speedPhase) & 0xFF);
+        speed = (u16) (u32) ((f32) half + (c + 1.0f) * 0.5f * (f32) half);
+    } else {
+        speed = st->speed;
+    }
+    st->time -= speed * D_800BE9E4;
+    if (st->glow) {
+        st->glowTimer += D_800BE9E4 * 2;
+        c = func_150489B0((st->glowTimer + st->glowPhase) & 0xFF);
+        obj[0x8A] = (u32) ((c + 1.0f) * 0.5f * 205.0f + 50.0f);
+    }
+    if (spin != 0.0f) {
+        func_15094EC8(*(u8 **) (obj + 0x20 + D_800BE9C0 * 4), (s32 *) st->uv, *(u16 *) (obj + 0x16), st->rot, uh, uw);
+        st->rot += spin;
+        if (st->rot >= 360.0f) {
+            st->rot -= 360.0f;
+        } else if (st->rot < 0.0f) {
+            st->rot += 360.0f;
+        }
+    }
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D0CC.s")
+#endif
+
+#ifdef NON_MATCHING
+s16 *allocate_memory(s32, s32, s32, s32);
+/* func_1511D91C wave settings, indexed by (+0x3C >> 8) & 0xFF (0x14 bytes each) */
+typedef struct {
+    /* 0x00 */ f32 gain;   /* scales the distance to the target height into a velocity cap */
+    /* 0x04 */ f32 accel;  /* velocity change per frame */
+    /* 0x08 */ u16 offset; /* added to the vertex drop */
+    /* 0x0A */ u16 depth;  /* height (0..1) -> vertex drop */
+    /* 0x0C */ u8 phaseAdd;
+    /* 0x0D */ u8 pad0D;
+    /* 0x0E */ u16 sway;   /* sideways swing amplitude */
+    /* 0x10 */ u8 glowPhase;
+    /* 0x11 */ u8 glowTimer;
+    /* 0x12 */ u8 pad12[2];
+} Wave1511D91C;
+extern Wave1511D91C D_800897E4[];
+
+// water_surface_wave_update: per-frame update of a waving surface mesh (vertex records 0x10 bytes; two vertex buffers
+// at +0x20 / +0x24, the current one picked by D_800BE9C0). The wave source object is func_151149AC(+0x3C low byte);
+// nothing happens unless it exists and has its +0x7C record. On first use the rest heights (vertex +8 of the
+// +0x28 template) are copied to a new array at +0x7C and the glow timer is reset. The target height
+// (sin(phase) + 1) / 2 (phase = source record +4 >> 8 plus the setting's phaseAdd) is followed by a spring: the
+// velocity +0x80 moves by `accel` towards (target - height +0x84) * gain and is capped by it; the first frame jumps
+// straight to the target. Each vertex gets y = rest - (height * depth + offset) and x = the other buffer's x + sway *
+// (cos(phase) + 0.5) / 2 (minus 0x800 when the first vertex's x is above 0x800). The glow timer then advances by
+// 2 * D_800BE9E4 and +0x8A = 50 + 205 * (sin(timer + glowPhase) + 1) / 2.
+void func_1511D91C(u8 *obj) {
+    u8 *src;
+    u8 *rec;
+    Wave1511D91C *w;
+    s16 *rest;
+    s32 first;
+    s32 i;
+    s32 drop;
+    s32 sway;
+    u8 phase;
+    f32 target;
+    f32 swing;
+    f32 d;
+    u8 *verts;
+
+    src = func_151149AC(*(s32 *) (obj + 0x3C) & 0xFF);
+    if (src == NULL) {
+        return;
+    }
+    rec = *(u8 **) (src + 0x7C);
+    if (rec == NULL) {
+        return;
+    }
+    w = &D_800897E4[(*(s32 *) (obj + 0x3C) >> 8) & 0xFF];
+    first = 0;
+    rest = *(s16 **) (obj + 0x7C);
+    if (rest == NULL) {
+        rest = allocate_memory(*(u16 *) (obj + 0x16) * 2, 1, 0, 0);
+        *(s16 **) (obj + 0x7C) = rest;
+        for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+            rest[i] = *(s16 *) (*(u8 **) (obj + 0x28) + i * 0x10 + 8);
+        }
+        w->glowTimer = 0;
+        first = 1;
+    }
+    phase = (*(u16 *) (rec + 4) >> 8) + w->phaseAdd;
+    target = (func_150489B0(phase) + 1.0f) * 0.5f;
+    swing = (func_15048A40(phase) + 0.5f) * 0.5f;
+    if (first) {
+        *(f32 *) (obj + 0x84) = target;
+        *(f32 *) (obj + 0x80) = 0.0f;
+    } else {
+        d = (target - *(f32 *) (obj + 0x84)) * w->gain;
+        if (0.0f < d) {
+            *(f32 *) (obj + 0x80) += w->accel;
+            if (d < *(f32 *) (obj + 0x80)) {
+                *(f32 *) (obj + 0x80) = d;
+            }
+        } else {
+            *(f32 *) (obj + 0x80) -= w->accel;
+            if (*(f32 *) (obj + 0x80) < d) {
+                *(f32 *) (obj + 0x80) = d;
+            }
+        }
+        *(f32 *) (obj + 0x84) += *(f32 *) (obj + 0x80);
+    }
+    drop = (s32) (*(f32 *) (obj + 0x84) * (f32) (s32) w->depth) + w->offset;
+    sway = (s32) ((f32) (s32) w->sway * swing);
+    if (*(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + 0xA) >= 0x801) {
+        sway -= 0x800;
+    }
+    for (i = 0; i < *(u16 *) (obj + 0x16); i++) {
+        verts = *(u8 **) (obj + 0x20 + D_800BE9C0 * 4);
+        *(s16 *) (verts + i * 0x10 + 8) = rest[i] - drop;
+        *(s16 *) (*(u8 **) (obj + 0x20 + D_800BE9C0 * 4) + i * 0x10 + 0xA) =
+            *(s16 *) (*(u8 **) (obj + 0x20 + (D_800BE9C0 == 0) * 4) + i * 0x10 + 0xA) + sway;
+    }
+    w->glowTimer += D_800BE9E4 * 2;
+    *(u8 *) (obj + 0x8A) = (u32) ((func_150489B0(w->glowTimer + w->glowPhase) + 1.0f) * 0.5f * 205.0f + 50.0f);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_1511D91C.s")
+#endif
 
 #ifdef NON_MATCHING
 f32 func_150489B0(u8);

@@ -1,0 +1,20 @@
+s/    D_800D3048 = 0;/    D_800D3048 = 1;/
+s/osCreateMesgQueue(&D_800BEE30, D_800BEE48, 16);/osCreateMesgQueue(\&D_800BEE30, D_800BEE48, 15);/
+s/    D_800BEE88\[0x10\] = 2;/    D_800BEE88[0x8] = 2;/
+s/    D_800BEA37 = 0;/    D_800BEA37 = 1;/
+s/    D_800BEECB = 0;/    D_800BEECB = 2;/
+s/    D_800BEEC8 = 0;/    D_800BEEC8 = 3;/
+s/    func_150158D0(0);/    func_150158D0(1);/
+s/    D_800BEA35 = 5;/    D_800BEA35 = 2;/
+s/    D_800BEE20 = 1;/    D_800BEE20 = 0;/
+s/    D_800BEECA = 1;/    D_800BEECA = 0;/
+s/            case 5:/            case 6:/
+s/            case 1:/            case 4:/
+s/                \/\* fallthrough \*\/$/                break;/
+s/if (D_800E0B94 == 2) {/if (D_800E0B94 != 3) {/
+s/func_150ADACC(0x81280783);/func_150ADACC(0x81280782);/
+s/func_15007A70((s16) D_800BEE24, (s16) D_800BEE20/func_15007A70((s16) D_800BEE20, (s16) D_800BEE24/
+s/((s16 \*) \&D_800BE9F4)\[1\]/((s16 *) \&D_800BE9F4)[0]/
+s/                D_800BEA35 = 0;/                D_800BEA35 = 1;/
+s/        D_800BEE08 = 0;/        D_800BEE08 = 1;/
+s/        func_100051E8();//

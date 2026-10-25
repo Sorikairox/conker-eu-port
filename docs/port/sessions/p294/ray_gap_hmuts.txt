@@ -1,0 +1,1 @@
+s/            ez = negZ ? (cz - h) - 10.0f : (cz + h) + 10.0f;/            ez = negZ ? (cz - h) - 10.0f : (cz + h) + 1.0f;/

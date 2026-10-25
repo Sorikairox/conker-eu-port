@@ -1,0 +1,25 @@
+s/    if (z > hz) code |= 0x10;/    if (!(z <= hz)) code |= 0x10;/
+s/    if (d > e) code |= 8;/    if (d >= e) code |= 8;/
+s/    f32 x = (a\[0\] - b\[0\]) \* t + b\[0\];/    f32 x = (a[0] - b[0]) * t + a[0];/
+s/    f32 z = (a\[2\] - b\[2\]) \* t + b\[2\];/    f32 z = (a[2] - b[1]) * t + b[2];/
+s/    return nmw_box_outcode(x, y, z, hx, hy, hz) & mask;/    return nmw_box_outcode(x, y, z, hx, hy, hz) \& mask \& 0x1F;/
+s/        inv = 1.0f \/ (a\[0\] - b\[0\]);/        inv = 1.0f \/ (b[0] - a[0]);/
+s/(hx - b\[0\]) \* inv, hx, hy, hz, 0x3E)/(hx - b[0]) * inv, hx, hy, hz, 0x3F)/
+s/-(hx + b\[0\]) \* inv/(hx + b[0]) * inv/
+s/(diff \& 4) \&\& nmw_lerp/(diff \& 8) \&\& nmw_lerp/
+s/(hy - b\[1\]) \* inv, hx, hy, hz, 0x3B)/(hy - b[1]) * inv, hx, hy, hz, 0x3E)/
+s/-(hy + b\[1\]) \* inv, hx, hy, hz, 0x37)/-(hy + b[1]) * inv, hx, hy, hz, 0x3B)/
+s/    if (diff \& 0x30) {/    if (diff \& 0x10) {/
+s/(hz - b\[2\]) \* inv/(hy - b[2]) * inv/
+s/-(hz + b\[2\]) \* inv, hx, hy, hz, 0x1F) == 0) return 0;/-(hz + b[2]) * inv, hx, hy, hz, 0x1F) == 0) return 1;/
+s/        if (c2 < lo) {/        if (c2 <= lo) {/
+s/        if (!(pc <= hi + eps) || pc < lo - eps) {/        if (!(pc <= hi + eps) || pc <= lo - eps) {/
+s/    if (cx < 0.0f) r |= 4;/    if (cx <= 0.0f) r |= 4;/
+s/    if (NM_FABS(cy) < 1.0f) \*mask \&= 5;/    if (NM_FABS(cy) <= 1.0f) *mask \&= 5;/
+s/    if (NM_FABS(cz) < 1.0f) \*mask \&= 6;/    if (NM_FABS(cz) < 1.0f) *mask \&= 3;/
+s/    f32 cy = ez \* px - ex \* pz;/    f32 cy = ez * px - ex * py;/
+s/    s2 = nmD5E90_sign3(p, \&v\[1\], \&v\[2\], \&mask);/    s2 = nmD5E90_sign3(p, \&v[2], \&v[1], \&mask);/
+s/    if ((s1 \& mask) != (s2 \& mask) || (s2 \& mask) != (s3 \& mask)) {/    if ((s1 \& mask) != (s2 \& mask)) {/
+s/    n\[1\] = dz12 \* dx13 - dx12 \* dz13;/    n[1] = dz12 * dx13 - dx12 * dz12;/
+s/    n\[3\] = n\[0\] \* v\[0\].x + n\[1\] \* v\[0\].y + n\[2\] \* v\[0\].z;/    n[3] = n[0] * v[0].x + n[1] * v[0].y + n[2] * v[1].z;/
+s/    D_800CC638 = n\[2\];/    D_800CC638 = n[1];/

@@ -1,0 +1,26 @@
+\#^    t\.u5C = 2;$#s/2/3/
+\#^    t\.u5D = 1;$#s/1/2/
+\#^    t\.u5B = 6;$#s/6/7/
+\#^    t\.u54\[5\] = 0;$#s/= 0/= 1/
+\#^    x = \*(s16 \*) (obj + 0x10);$#s/s16/u16/
+\#^    y = \*(s16 \*) (obj + 0x12);$#s/0x12/0x14/
+\#^    t\.vel\[1\] = 0\.0f;$#s/0\.0f/1.0f/
+\#^    t\.scale\[2\] = 2\.0f;$#s/2\.0f/3.0f/
+\#^    t\.life = 0x3C;$#s/0x3C/0x3D/
+\#^    t\.u54\[1\] = 0xFF;$#s/0xFF/0xFE/
+\#^    t\.u54\[4\] = 0;$#s/= 0/= 1/
+\#^    t\.u48\[1\] = -0\.7f;#s/-0\.7f/-0.6f/
+\#^    for (i = 0; i < 6; i++, pc++) {$#s/< 6/< 5/
+\#^        t\.model = func_1518C900(pc->model);$#s/pc->model/i/
+\#^        t\.id = pc->model;$#s/pc->model/i/
+\#^        t\.pos\[1\] = pc->offset\[1\] + y;$#s/+ y/+ z/
+\#^        t\.spin\[0\] = pc->offset\[0\] \* 0\.09f;#s/0\.09f/0.08f/
+\#^        t\.spin\[1\] = fabsf(pc->offset\[1\]) \* 0\.23f;#s/fabsf(pc->offset\[1\])/pc->offset[1]/
+\#^        t\.spin\[2\] = pc->offset\[2\] \* 0\.09f;$#s/offset\[2\]/offset[1]/
+\#^        t\.vel\[0\] = pc->vel\[0\];$#s/vel\[0\];/vel[1];/
+\#^        t\.u24 = t\.vel\[0\] \* 0\.1f;#s/0\.1f/0.2f/
+\#^        t\.vel\[2\] = pc->vel\[2\];$#s/pc->vel\[2\]/pc->offset[2]/
+\#^        t\.u28 = func_150ADA68() \* 4\.0f - 2\.0f;$#s/- 2\.0f/- 1.0f/
+\#^        t\.u2C = func_150ADA68() \* 10\.0f - 5\.0f;$#s/10\.0f/4.0f/
+\#^        func_15168BE4((u8 \*) &t, kind, arg2);$#s/kind, arg2/kind, 0/
+\#^    obj\[0x6E\] = 1;$#s/1;/2;/

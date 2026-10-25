@@ -28,7 +28,117 @@ s32 func_151AFC70(s32 arg0, s32 arg1) {
     return 0xC;
 }
 
+#ifdef NON_MATCHING
+/* P292 */
+void func_150CD2A0(f32, f32 *, f32 *, f32 *);
+void func_1514CBE8(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 arg5, s16 arg6, u8 arg7, s32 arg8, f32 arg9, s32 argA, u8 argB);
+void *memcpy(void *, const void *, s32);
+
+/* rodata D_800AA4E8 / D_800AA4EC (bit-exact copies: the NM link drops this file's .late_rodata) */
+static const f32 sSplashScaleA[1] = { 0.001f };     /* 0x3A83126F */
+static const f32 sSplashScaleB[1] = { 0.001f };     /* 0x3A83126F */
+
+/* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
+#define SPLASH_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
+
+// object_ground_splash: handler of D_8008A0B4 entry 12 (EU 0x8008A4B4, called by func_15141A7C with (obj, arg1, 0)):
+// when obj has a model (+0x1D4) and func_151AFB70 finds its effect point (pos) and the ground under it for mode arg1
+// (1 / 2), spawns a 0x50-type splash particle there (func_1513D668: 4 vertices tinted by func_150CD2A0's colour of
+// pos z in level 0x14, white elsewhere; size 0.091..0.112, height from obj's u16 +0x7A >> 8, +10 for mode 1, -10 otherwise;
+// its +0x128 gets a lifetime / scale pair) and a dust ring (func_1514CBE8: radius 29..46, 5..15 frames). arg2 unused.
+void func_151AFC84(u8 *obj, s32 arg1, s32 arg2) {
+    struct {
+        s16 r, g, b, a, z;
+    } verts[4];
+    struct {
+        u8 type;            /* 0x00 */
+        s16 u02;            /* 0x02 */
+        s16 life;           /* 0x04 */
+        s32 u08;            /* 0x08 */
+        s32 u0C;            /* 0x0C */
+        u8 col[4];          /* 0x10 */
+        f32 size[2];        /* 0x14 */
+        f32 pos[3];         /* 0x1C */
+        f32 u28[3];         /* 0x28 */
+        f32 u34;            /* 0x34 */
+        f32 u38[2];         /* 0x38 */
+        s32 flags;          /* 0x40 */
+        u8 u44[4];          /* 0x44 */
+    } part;
+    struct {
+        s16 life;           /* +0x128 */
+        f32 scale;          /* +0x12C */
+    } tail;
+    f32 r, g, b;
+    s32 ground[9];          /* func_151AFB70's ground record: [0] = height (f32), +4 passed on */
+    f32 pos[3];
+    s32 cr, cg, cb;
+    s32 i;
+    s32 height;
+    s16 ringLife;
+    u8 *p;
+
+    if (obj == NULL || *(void **) (obj + 0x1D4) == NULL) {
+        return;
+    }
+    if (func_151AFB70(pos, obj, (s32) ground, (u8) arg1) == 0) {
+        return;
+    }
+    if (D_800BE9F0 == 0x14) {
+        func_150CD2A0(pos[2], &r, &g, &b);
+        cr = SPLASH_F2U(r) & 0xFF;
+        cg = SPLASH_F2U(g) & 0xFF;
+        cb = SPLASH_F2U(b) & 0xFF;
+    } else {
+        cr = 0xFF;
+        cg = 0xFF;
+        cb = 0xFF;
+    }
+    for (i = 0; i < 4; i++) {
+        verts[i].r = cr;
+        verts[i].g = cg;
+        verts[i].b = cb;
+        verts[i].a = 0xB4;
+        verts[i].z = 0;
+    }
+    part.type = 0x50;
+    part.u02 = 0x2502;
+    part.life = func_150ADA20() % 61U + 0x58;
+    part.u08 = 0;
+    part.u0C = 0;
+    part.col[0] = 0xFF;
+    part.col[1] = 0xFF;
+    part.col[2] = 0xFF;
+    part.col[3] = 0xFF;
+    part.size[0] = part.size[1] = (func_150ADA68() * 21.0f + 91.0f) * sSplashScaleA[0];
+    part.pos[0] = pos[0];
+    part.pos[1] = *(f32 *) &ground[0];
+    part.pos[2] = pos[2];
+    part.u28[0] = 0.0f;
+    part.u28[1] = 0.0f;
+    part.u28[2] = 0.0f;
+    part.u34 = 1.0f;
+    part.u38[0] = 1.0f;
+    part.u38[1] = 1.0f;
+    part.flags = 0x401C0001;
+    part.u44[0] = func_150ADA20() % 41U + 0x50;
+    part.u44[1] = 0xFF;
+    tail.life = part.life - func_150ADA20() % 6U - 8;
+    tail.scale = (func_150ADA68() * 40.0f + 51.0f) * part.size[0] * sSplashScaleB[0];
+    part.u44[2] = 0;
+    part.u44[3] = 6;
+    height = (*(u16 *) (obj + 0x7A) >> 8) - ((arg1 == 1) ? -10 : 10);
+    p = (u8 *) func_1513D668((s32) &part, (s32) verts, 0, 0x16, 0, 0, height, 500.0f, 500.0f, 0, (s32) &ground[1], 1, 8,
+                             0xFF, 0);
+    if (p != NULL) {
+        memcpy(p + 0x128, &tail, 8);
+    }
+    ringLife = func_150ADA20() % 11U + 5;
+    func_1514CBE8(pos[0], pos[1], pos[2], func_150ADA68() * 17.0f + 29.0f, 0, 0xFF, ringLife, 0x10, 0, 0.0f, 0, 0xFF);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DD380/func_151AFC84.s")
+#endif
 
 s32 func_151B0184(u8 *arg0) {
     s16 temp_v0 = *(s16 *)(arg0 + 0x1C);

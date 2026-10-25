@@ -167,7 +167,66 @@ s32 func_1517A904(s32 arg0) {
     return arg0;
 }
 
+#ifdef NON_MATCHING
+s32 func_1510B460(u8 *, f32, f32, f32, f32, f32, f32, f32, f32 *, f32 *);
+u8 *func_15142FBC(s32, s32, s32, s8 *);
+s32 func_1517AF18(s32 arg0, s32 arg1);
+extern f32 D_800D9F40;     /* screen width */
+extern f32 D_800D9F3C;     /* screen height */
+extern f32 D_800D3A00[2];  /* frustum side slopes */
+extern f32 D_800DA030[][4][4];
+extern Gfx D_8008D190[];
+extern s32 D_800D30BC;
+
+// puff_sprite_draw: draw handler of the puff sprite objects (types 8, 9, 0xC, 0x59) for `player`. Except for
+// types 0xC and 0x59, a puff outside the player's view (func_1510B460) is skipped; a culled type 8 puff that was seen
+// by this player (obj + 0xB2 bit 1 << player) also gets bit 0x10 << player. Otherwise it marks itself seen (all but
+// type 9), sets the texture (func_1517AF18, obj + 0x9F), builds its matrix (rotation 0x96.., scale 0xA8, position
+// 0x90..) and draws D_8008D190 with alpha obj + 0xB3 (prim colour reloaded only when it changed, D_800DD880).
+s32 func_1517A910(s32 gfxArg, u8 *obj, s16 player) {
+    Gfx *gfx;
+    Mtx *mtx;
+    f32 scale;
+    s8 flag;
+    s32 mode;
+
+    if (obj[0] != 0xC && obj[0] != 0x59) {
+        if (func_1510B460((u8 *) D_800DA030[player], *(s16 *) (obj + 0x90), *(s16 *) (obj + 0x92),
+                          *(s16 *) (obj + 0x94), D_800D9F40, D_800D9F3C, D_800D3A00[0], D_800D3A00[1], NULL,
+                          NULL) != 0) {
+            if (obj[0] == 8 && (obj[0xB2] & (1 << player))) {
+                obj[0xB2] |= 0x10 << player;
+            }
+            return gfxArg;
+        }
+    }
+    if (obj[0] != 9) {
+        obj[0xB2] |= 1 << player;
+    }
+    gfx = (Gfx *) func_1517AF18(gfxArg, obj[0x9F]);
+    scale = *(f32 *) (obj + 0xA8);
+    mtx = &((Mtx *) (obj + 0x10))[D_800BE9C0];
+    func_15043D90(mtx, *(s16 *) (obj + 0x96), *(s16 *) (obj + 0x98), *(s16 *) (obj + 0x9A), scale, scale, scale,
+                  *(s16 *) (obj + 0x90), *(s16 *) (obj + 0x92), *(s16 *) (obj + 0x94));
+    gSPMatrix(gfx++, &((Mtx *) (obj + 0x10))[D_800BE9C0], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    if (obj[0xB3] != D_800DD880) {
+        gDPPipeSync(gfx++);
+        gDPSetPrimColor(gfx++, 0, 0, 0, 0, 0, obj[0xB3]);
+        D_800DD880 = obj[0xB3];
+    }
+    flag = 0;
+    if (obj[0] == 8 || obj[0] == 9) {
+        mode = 0x5049D8;
+    } else {
+        mode = 0x504240;
+    }
+    gfx = (Gfx *) func_15142FBC((s32) gfx, D_800D30BC | 0x82CA0, mode, &flag);
+    gSPDisplayList(gfx++, D_8008D190);
+    return (s32) gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1A7B30/func_1517A910.s")
+#endif
 
 s32 func_1510EDAC(s32, s32, f32 *, s32, s32, s32, f32, f32, f32, f32, s32, s32);
 

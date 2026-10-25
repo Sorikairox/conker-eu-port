@@ -1,0 +1,4 @@
+func_10001194 (P285, init_1050) knobs: DIFFTEST_ROMDATA=1
+  random: EQUIV func_10001194 (100 trials ok, 0 inconclusive, 2500 calls, ret=void, ref 203 words, cand 242 words)
+  setups 1194_setups.txt: 0 EQUIV / 2 (bad: cold=UNSURE nmi=UNSURE )
+  muts 1194_muts.txt: 26 killed / 28; not applied: 0; invalid: [s/+ 0xFFF) >> 12;/+ 0xFFE) >> 12;/](cold=UNSURE func_10001194: only 0 trials ran to completion (4 faulted/timed out) [knob callee never called: RET 10003E90]) [s/(((u32) D_80032E90 + 0xF) \& ~0xF)/((u32) D_80032E90 \& ~0xF)/](cold=UNSURE func_10001194: only 0 trials ran to completion (4 faulted/timed out) [knob callee never called: RET 10003E90])

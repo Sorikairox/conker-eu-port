@@ -1424,7 +1424,78 @@ void func_15187EE8(struct102 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15187EE8.s")
 #endif
+#ifdef NON_MATCHING
+void func_150A7DA0(u8 *mtx, s32 x, s32 y, s32 z);
+void func_150A7A48(f32 (*)[4], f32 (*)[4], f32 (*)[4]);
+void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+void func_151882DC(u8 *arg0, f32 arg1, f32 arg2, f32 arg3);
+void guMtxF2L2(float mf[4][4], Mtx *m);
+extern u8 D_8008D8D8[];         /* the 4-vertex quad */
+
+// shard_ring_draw: draw handler (table D_8008B988) of the twelve-quad ring built by func_15187B50 / stepped by
+// func_15187EE8; nothing (gfx returned unchanged) when obj + 0xA8 < 0. Loads the object matrix (translation obj
+// + 0x90, this frame's Mtx at obj + 0x10 + D_800BE9C0 * 64), then for each 0xA0-byte quad record (obj + 0xA4):
+// translation (rec + 0x90, 0, 0) scaled by obj + 0xA0 (x) / obj + 0x9C (y, z) times its rotation (rec + 0x80..0x88;
+// func_150A8050, or func_151882DC when rec + 0x98 is set) into its own frame Mtx (rec + D_800BE9C0 * 64), prim alpha
+// (life - age) * 255 / life (rec + 0x96 / + 0x94), and the quad D_8008D8D8 as two triangles. arg2 is unused.
+Gfx *func_15188008(Gfx *gfx, u8 *obj, s32 arg2) {
+    f32 mtx[4][4];
+    f32 rot[4][4];
+    u8 *rec;
+    s32 i;
+
+    if (*(s16 *) (obj + 0xA8) < 0) {
+        return gfx;
+    }
+    func_150A7DA0((u8 *) mtx, *(s32 *) (obj + 0x90), *(s32 *) (obj + 0x94), *(s32 *) (obj + 0x98));
+    guMtxF2L2(mtx, (Mtx *) (obj + 0x10 + D_800BE9C0 * 64));
+    for (i = 0; i < 12; i++) {
+        /* gSPMatrix(load, modelview): the object matrix */
+        gfx->words.w0 = 0xDA380003;
+        gfx->words.w1 = (u32) (obj + 0x10 + D_800BE9C0 * 64);
+        gfx++;
+        rec = *(u8 **) (obj + 0xA4) + i * 0xA0;
+        func_150A7DA0((u8 *) mtx, *(s32 *) (rec + 0x90), 0, 0);
+        mtx[0][0] *= *(f32 *) (obj + 0xA0);
+        mtx[1][1] *= *(f32 *) (obj + 0x9C);
+        mtx[2][2] *= *(f32 *) (obj + 0x9C);
+        rec = *(u8 **) (obj + 0xA4) + i * 0xA0;
+        if (rec[0x98] == 0) {
+            func_150A8050(rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
+        } else {
+            func_151882DC((u8 *) rot, *(f32 *) (rec + 0x80), *(f32 *) (rec + 0x84), *(f32 *) (rec + 0x88));
+        }
+        func_150A7A48(mtx, rot, mtx);
+        guMtxF2L(mtx, (Mtx *) (*(u8 **) (obj + 0xA4) + i * 0xA0 + D_800BE9C0 * 64));
+        rec = *(u8 **) (obj + 0xA4) + i * 0xA0;
+        /* gDPSetPrimColor: white, alpha by remaining life */
+        gfx->words.w1 = 0xFFFFFF00 |
+                        (u8) (((*(s16 *) (rec + 0x96) - *(s16 *) (rec + 0x94)) * 255) / *(s16 *) (rec + 0x96));
+        gfx->words.w0 = 0xFA000100;
+        gfx++;
+        /* gSPMatrix(mul, modelview): the quad matrix */
+        gfx->words.w0 = 0xDA380001;
+        gfx->words.w1 = (u32) (*(u8 **) (obj + 0xA4) + i * 0xA0 + D_800BE9C0 * 64);
+        gfx++;
+        /* gSPVertex(D_8008D8D8, 4, 0); triangles (0, 1, 2), (0, 1, 3), (0, 2, 3) */
+        gfx->words.w0 = 0x01004008;
+        gfx->words.w1 = (u32) D_8008D8D8;
+        gfx++;
+        gfx->words.w0 = 0x05000204;
+        gfx->words.w1 = 0;
+        gfx++;
+        gfx->words.w0 = 0x05000206;
+        gfx->words.w1 = 0;
+        gfx++;
+        gfx->words.w0 = 0x05000406;
+        gfx->words.w1 = 0;
+        gfx++;
+    }
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1B1ED0/func_15188008.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_151F05C0(u8 *);

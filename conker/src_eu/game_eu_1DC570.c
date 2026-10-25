@@ -130,7 +130,113 @@ void func_151AF064(arg0, arg1, arg2)
   func_151DA6F8(arg0, sp88, (sp5C * 0.40600002f) + 0.21000001f, (s16) ((((u32) sp60) % 41U) + 0x3C), (((u32) sp64) % 101U) + 0x9B, (sp68 * 4.0f) + 3.1000001f, (func_150ADA20() % 5U) + 3, (s32) arg1, 1.0f, 1.0f, 0, 0, 0, 0x10, 0xF, 0, (s32) arg2, 1);
 }
 
+#ifdef NON_MATCHING
+void func_1504715C(void *, u8 *);
+void func_15154488(struct_eu_15154488 *arg0, struct17 *arg1, s32 arg2, u8 arg3, s32 arg4);
+void func_15143874(s16, f32, f32 *, f32 *);
+s32 func_15046F70(f32 *, s32, f32, f32 *);
+s32 func_151D9B8C(u8 arg0, f32 arg1, u8 arg2, s32 arg3, struct17 *arg4, s16 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+void func_151DAB58(u8, f32, u8, f32 *, u8, u8, s32);
+s32 func_15136698(f32 arg0, f32 arg1, u8 arg2, u8 arg3, s16 arg4, s32 arg5, struct17 *arg6, u8 arg7, u8 arg8, u8 arg9, s32 argA);
+
+// ground_burst_spawn: spawns a burst effect at obj's position (+0x14): the func_15154488 cloud (sizes 5.08 / 3.02,
+// alpha 0.807 / 0.701, speeds 18 / 11.8), then 7..12 debris pieces in a ring of radius 90..149 at a random angle,
+// each dropped onto the floor below (func_15046F70 from 100 above down to 500 below; stops on no floor or floor type
+// 3): odd random -> func_151D9B8C (size 15..19.5, alpha 155..255, on the floor normal), even -> func_151DAB58 (size
+// 6.1..12), and finally one func_15136698 splash on the floor under obj (scale (90..120) / 1000, colour 155..255 /
+// 100..200, life 70..125). room / owner are passed to every spawn.
+void func_151AECA0(u8 *obj, u8 room, s32 owner) {
+    f32 floor[9];          // floor probe: height, normal (+4), type byte +0x1D
+    struct_eu_15154488 fx;
+    f32 probe[3];
+    f32 piece[3];
+    f32 base[3];
+    f32 under[3];
+    f32 size;
+    f32 shade;
+    s32 r;
+    u32 a;
+    u32 b;
+    u32 c;
+    u32 n;
+
+    if (obj == NULL) {
+        return;
+    }
+    func_1504715C(floor, obj);
+    fx.unk8.unk0 = *(f32 *) (obj + 0x14);
+    fx.unk8.unk4 = *(f32 *) (obj + 0x18);
+    fx.unk8.unk8 = *(f32 *) (obj + 0x1C);
+    fx.unk14 = 5.08f;
+    fx.unk18 = 3.02f;
+    fx.unk1C = 0.80700004f; // 0x3F4E978E
+    fx.unk20 = 0.70100003f; // 0x3F3374BD
+    fx.unk24 = 18.0f;
+    fx.unk28 = 11.8f;
+    fx.unk2C = 0xA;
+    fx.unk2E = 0;
+    fx.unk0 = 0;
+    fx.unk2 = 0xFF;
+    fx.unk4 = -0x3F;
+    fx.unk6 = 0x2D;
+    fx.unk30 = 3;
+    fx.unk32 = 2;
+    fx.unk34 = 0x28;
+    fx.unk36 = 0x14;
+    fx.unk38 = 0x9B;
+    fx.unk3A = 0x64;
+    fx.unk44 = 0x10;
+    fx.unk46 = 0xF;
+    fx.unk48 = 0;
+    fx.unk3C = 0;
+    fx.unk40 = 0.5f;
+    func_15154488(&fx, &fx.unk8, (s32) floor, 0xFF, 1);
+
+    n = (u32) func_150ADA20() % 6 + 7;
+    probe[1] = *(f32 *) (obj + 0x18) + 100.0f;
+    for (; n != 0; n--) {
+        r = func_150ADA20();
+        func_15143874(r & 0xFF, func_150ADA68() * 59.0f + 90.0f, &piece[0], &piece[2]);
+        piece[0] += *(f32 *) (obj + 0x14);
+        probe[0] = piece[0];
+        piece[2] += *(f32 *) (obj + 0x1C);
+        probe[2] = piece[2];
+        if (func_15046F70(probe, 0, *(f32 *) (obj + 0x18) - 500.0f, floor) == 0 || ((u8 *) floor)[0x1D] == 3) {
+            return;
+        }
+        piece[1] = floor[0] + 10.0f;
+        if (func_150ADA20() & 1) {
+            size = func_150ADA68();
+            shade = func_150ADA68();
+            func_151D9B8C(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 155.0f), (s32) &floor[1], (struct17 *) piece,
+                          100, 0, 1, 0, room, owner);
+        } else {
+            size = func_150ADA68();
+            shade = func_150ADA68();
+            func_151DAB58(0, size * 5.9f + 6.1f, (u32) (shade * 100.0f + 155.0f), piece, 1, room, owner);
+        }
+    }
+    base[0] = *(f32 *) (obj + 0x14);
+    base[1] = *(f32 *) (obj + 0x18);
+    base[2] = *(f32 *) (obj + 0x1C);
+    under[0] = base[0];
+    under[1] = base[1] + 100.0f;
+    under[2] = base[2];
+    if (func_15046F70(under, 0, base[1] - 500.0f, floor) == 0 || ((u8 *) floor)[0x1D] == 3) {
+        return;
+    }
+    base[1] = floor[0] + 10.0f;
+    size = func_150ADA68();
+    shade = func_150ADA68();
+    a = func_150ADA20();
+    b = func_150ADA20();
+    c = func_150ADA20();
+    func_15136698((size * 30.0f + 90.0f) * 0.001f, (shade * 103.0f + 103.0f) * 1e-05f, a % 101 + 0x9B, b % 101 + 100,
+                  c % 0x38 + 0x46, (s32) &floor[1], (struct17 *) base, 0, 1, room, owner);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1DC570/func_151AECA0.s")
+#endif
 
 #ifdef NON_MATCHING
 // obj_steam_puff_spawn: plays sound 0x16 on the object (func_1516962C) and spawns a 9.8 / 0.143 effect of type 1

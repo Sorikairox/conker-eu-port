@@ -1,0 +1,20 @@
+s#    func_1500F328(0x1612, -0x553, -0x2DC, -0x69F);#    func_1500F328(0x1613, -0x553, -0x2DC, -0x69F);# % base
+s#    func_1500F328(0x1633, -0x553, -0x3C2, -0x69F);#    func_1500F328(0x1633, -0x553, -0x3C3, -0x69F);# % base
+s#D_80096600_c\[0\], 0\.0f);#D_80096600_c[0], 1.0f);# % base
+s#D_80096600_c\[0\], -78\.0f);#D_80096600_c[0], -77.0f);# % base
+s#    D_800D9CF0\[3\] =#    D_800D9CF0[2] =# % base
+s#    spec\.w48 = 3;#    spec.w48 = 4;# % base
+s#    spec\.h04 = -0x15;#    spec.h04 = -0x14;# % base
+s#    spec\.h46 = 0x29;#    spec.h46 = 0x28;# % base
+s#    spec\.f2C = D_8009661C_c\[0\];#    spec.f2C = D_80096620_c[0];# % base
+s#    spec\.f34 = 6\.0f;#    spec.f34 = 7.0f;# % base
+s#    spec\.f40 = D_80096624_c\[0\];#    spec.f40 = D_80096620_c[0];# % base
+s#    { 1894\.0f, -1674\.0f, 788\.0f,#    { 1894.0f, -1674.0f, 789.0f,# % base
+s#1400\.0f, -1678\.0f, 613\.0f#1400.0f, -1677.0f, 613.0f# % base
+s#        spec\.dir\[1\] = seg\[4\] - seg\[1\];#        spec.dir[1] = seg[4] - seg[2];# % base
+s#        spec\.dir\[2\] = seg\[5\] - seg\[2\];#        spec.dir[2] = seg[5] - seg[0];# % base
+s#        spec\.pos\[2\] = seg\[2\];#        spec.pos[2] = seg[1];# % base
+s#\* D_80096634_c\[0\]) - 0x40;#* D_80096634_c[0]) - 0x41;# % base base2
+s#spec\.dir\[2\]) \* D_80096634_c\[0\])#spec.dir[1]) * D_80096634_c[0])# % base
+s#    for (i = 0; i < 9; i++) {#    for (i = 0; i < 8; i++) {# % base
+s#        func_15189E70(\&spec, 1);#        func_15189E70(\&spec, 0);# % base

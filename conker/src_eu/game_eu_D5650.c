@@ -24,7 +24,14 @@ void func_150A7EE0(f32 (*mf)[4], f32 x, f32 y, f32 z, f32 *outX, f32 *outY, f32 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7EE0.s")
 #endif
 
+#ifdef NON_MATCHING
+// matrix_transform_point_w_tail: not a function of its own. In the original it is the second half of the
+// func_150A7EE0 trampoline (func_150A7E40 returns into it with f0 / f2 / f4 = x / y / z still live; it computes
+// w = m[0][3] * x + m[1][3] * y + m[2][3] * z + m[3][3] into the 8th argument and returns through $t9). The
+// NON_MATCHING func_150A7EE0 computes w itself, so nothing reaches this entry; no other code references it.
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D5650/func_150A7EF4.s")
+#endif
 
 #ifdef NON_MATCHING
 /* 4x4 f32 matrix product c = a * b (row-major, hand-written asm in the original). b is read completely

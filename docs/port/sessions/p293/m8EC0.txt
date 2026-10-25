@@ -1,0 +1,40 @@
+s#    \*(f32 \*) (obj + 0x3C) = \*(f32 \*) (obj + 0x10) + w;#    *(f32 *) (obj + 0x3C) = *(f32 *) (obj + 0x10) + z;# % stop bounce
+s#    if (!(15\.0f < speed)) {#    if (!(15.0f <= speed)) {# % stop15
+s#        obj\[0x78\] = 1;#        obj[0x78] = 2;# % stop
+s#        \*(s32 \*) (obj + 0x60) \&= ~0xFF;#        *(s32 *) (obj + 0x60) \&= ~0xF;# % stop
+s#        func_150A7E40(mtx, 0\.0f, 0\.0f, 200\.0f, (f32 \*) (obj + 0x20), (f32 \*) (obj + 0x24), (f32 \*) (obj + 0x28));#        func_150A7E40(mtx, 0.0f, 200.0f, 0.0f, (f32 *) (obj + 0x20), (f32 *) (obj + 0x24), (f32 *) (obj + 0x28));# % stop
+s#        \*(f32 \*) (obj + 0x24) += \*(f32 \*) (obj + 0x3C);#        *(f32 *) (obj + 0x24) += *(f32 *) (obj + 0x38);# % stop
+s#        return 1;#        return 0;# % stop
+s#    if (30\.0f < speed) {#    if (30.0f <= speed) {# % bounce30
+s#        a\.u56 = 0xA;#        a.u56 = 0xB;# % break
+s#        a\.u02 = 0x3B02;#        a.u02 = 0x3B03;# % break
+s#        a\.colour\[2\] = 0xFF;#        a.colour[2] = 0xFE;# % break
+s#        k = (func_150ADA68() \* 25\.0f + 25\.0f) \* D_800A0180_c\[0\];#        k = (func_150ADA68() * 25.0f + 20.0f) * D_800A0180_c[0];# % break
+s#        a\.u44\[3\] = 7;#        a.u44[3] = 6;# % break
+s#        a\.u40 = 0x0C5C0001;#        a.u40 = 0x0C5C0002;# % break
+s#        a\.scale\[1\] = k;#        a.scale[1] = x;# % break
+s#        a\.u28\[4\] = 0\.0f;#        a.u28[4] = 1.0f;# % break
+s#        a\.pos\[1\] = w;#        a.pos[1] = y;# % break
+s#        spin\[0\] = (func_150ADA68() \* 80\.0f + 50\.0f) \* D_800A0184_c\[0\];#        spin[0] = (func_150ADA68() * 80.0f + 50.0f) * D_800A0180_c[0];# % break
+s#        a\.u50 = \*(s32 \*) (obj + 0x128);#        a.u50 = *(s32 *) (obj + 0x12C);# % break
+s#        r2 = func_150ADA20();#        r2 = func_150ADA20() + 1;# % break
+s#        rec = (u8 \*) func_1513D594((s32) \&a, (s32) \&D_800A4AA0, 0x18, 0, 0, (r0 \& 1) \* 2 + (r1 \& 1), r2 \& 0xFF, 500\.0f,#        rec = (u8 *) func_1513D594((s32) \&a, (s32) \&D_800A4AA0, 0x18, 0, 0, (r1 \& 1) * 2 + (r0 \& 1), r2 \& 0xFF, 500.0f,# % break
+s#                                   500\.0f, 0, (s32) ext, \*(s32 \*) (obj + 0x14C), \*(s32 \*) (obj + 0x168), 0, 8,#                                   500.0f, 0, (s32) ext, *(s32 *) (obj + 0x168), *(s32 *) (obj + 0x14C), 0, 8,# % break
+s#            memcpy(rec + 0x128, spin, 8);#            memcpy(rec + 0x124, spin, 8);# % break
+s#        b\.u10 = 3\.0f;#        b.u10 = 2.0f;# % break
+s#        b\.u24\[4\] = -0x3F;#        b.u24[4] = 0x3F;# % break
+s#        b\.u24\[9\] = 0x14;#        b.u24[9] = 0x15;# % break
+s#        b\.u3A = 0x48;#        b.u3A = 0x49;# % break
+s#        b\.u40\[3\] = 0;#        b.u40[3] = 1;# % break
+s#        b\.u55 = 0x9B;#        b.u55 = 0x9C;# % break
+s#        b\.u14 = D_800A0188_c\[0\];#        b.u14 = D_800A0184_c[0];# % break
+s#        b\.u68 = 0x1D0600;#        b.u68 = 0x1D0601;# % break
+s#        b\.u78 = 0x20;#        b.u78 = 0x21;# % break
+s#        b\.u82 = 0x19;#        b.u82 = 0x18;# % break
+s#        b\.u84 = \*(s32 \*) (obj + 0x128);#        b.u84 = *(s32 *) (obj + 0x168);# % break
+s#        func_15151FA8((u8 \*) \&b, obj\[0xC\], obj\[1\]);#        func_15151FA8((u8 *) \&b, obj[1], obj[0xC]);# % break
+s#        func_10010F88(D_80088AD4\[func_150ADA20() \& 1\], 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), w + 25\.0f,#        func_10010F88(D_80088AD4[func_150ADA20() \& 1], 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), w + 20.0f,# % break
+s#        return 0;#        return 1;# % break
+s#    \*(f32 \*) (obj + 0x48) = -\*(f32 \*) (obj + 0x48) \* k;#    *(f32 *) (obj + 0x48) = *(f32 *) (obj + 0x48) * k;# % bounce
+s#    \*(f32 \*) (obj + 0x54) \*= k;#    *(f32 *) (obj + 0x54) *= -k;# % bounce
+s#    func_10010F88(D_80088ADC, 0x7D00, 0, 0, 0, \*(f32 \*) (obj + 0x38), \*(f32 \*) (obj + 0x3C), \*(f32 \*) (obj + 0x40),#    func_10010F88(D_80088ADC, 0x7D00, 0, 0, 0, *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x40), *(f32 *) (obj + 0x40),# % bounce

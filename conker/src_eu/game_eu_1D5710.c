@@ -42,7 +42,74 @@ u8 *func_151A7F00(u8 *def, s32 extra, u8 arg2, s32 arg3) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A7F00.s")
 #endif
 
+#ifdef NON_MATCHING
+extern s32 (*D_8008FCE0[])(u8 *);
+extern s32 (*D_8008FCE8[])(u8 *);
+void func_151A88F0(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth);
+
+// bolt_path_update: per-frame update of a lightning bolt path record (func_151A7F00). Flag 1 counts the lifetime at
+// +0x10 down (done below 0); the hooks D_8008FCE0[+0x2C] / D_8008FCE8[+0x2D] (-1 = none) end it by returning 0.
+// While alive, the +0x68 timer counts down; at 0 the points are re-jittered (func_151A88F0 over [0, count - 1],
+// amplitude +0x20, depth 100) and the timer restarts at +0x14 + rand * +0x18. Flag 2 then maps every point (stride
+// 0x18: local x, y, z at +0, world at +0xC) from the local frame (x: side axis from func_151450B4 * +0x58 scale, y: +0x48 up, z: end +0x3C - start +0x30)
+// to the world, based at the start point. Finished records are freed (func_1516972C).
+void func_151A8040(u8 *obj) {
+    struct17 fwd;
+    struct17 up;
+    struct17 side;
+    f32 *pt;
+    f32 x;
+    f32 y;
+    f32 z;
+    s32 i;
+    s32 done = 0;
+
+    if (obj[0x1C] & 1) {
+        *(s16 *) (obj + 0x10) -= D_800BE9E4;
+        if (*(s16 *) (obj + 0x10) < 0) {
+            done = 1;
+        }
+    }
+    if ((s8) obj[0x2C] != -1 && !done) {
+        done = D_8008FCE0[(s8) obj[0x2C]](obj) == 0;
+    }
+    if ((s8) obj[0x2D] != -1 && !done) {
+        done = D_8008FCE8[(s8) obj[0x2D]](obj) == 0;
+    }
+    if (!done) {
+        *(f32 *) (obj + 0x68) -= D_800BE9A4;
+        if (*(f32 *) (obj + 0x68) < 0.0f) {
+            func_151A88F0(obj, 0, *(s16 *) (obj + 0x12) - 1, *(f32 *) (obj + 0x20), 100);
+            *(f32 *) (obj + 0x68) = func_150ADA68() * *(f32 *) (obj + 0x18) + *(f32 *) (obj + 0x14);
+        }
+        if (obj[0x1C] & 2) {
+            fwd.unk0 = *(f32 *) (obj + 0x3C) - *(f32 *) (obj + 0x30);
+            fwd.unk4 = *(f32 *) (obj + 0x40) - *(f32 *) (obj + 0x34);
+            fwd.unk8 = *(f32 *) (obj + 0x44) - *(f32 *) (obj + 0x38);
+            up = *(struct17 *) (obj + 0x48);
+            func_151450B4(&fwd, &up, &side);
+            side.unk0 *= *(f32 *) (obj + 0x58);
+            side.unk4 *= *(f32 *) (obj + 0x58);
+            side.unk8 *= *(f32 *) (obj + 0x58);
+            pt = *(f32 **) (obj + 0x64);
+            for (i = 0; i < *(s16 *) (obj + 0x12); i++) {
+                x = pt[0];
+                y = pt[1];
+                z = pt[2];
+                pt[3] = *(f32 *) (obj + 0x30) + x * side.unk0 + y * up.unk0 + z * fwd.unk0;
+                pt[4] = *(f32 *) (obj + 0x34) + x * side.unk4 + y * up.unk4 + z * fwd.unk4;
+                pt[5] = *(f32 *) (obj + 0x38) + x * side.unk8 + y * up.unk8 + z * fwd.unk8;
+                pt += 6;
+            }
+        }
+    }
+    if (done) {
+        func_1516972C((struct102 *) obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A8040.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_1513F4E4(s32, s32, s8 *);

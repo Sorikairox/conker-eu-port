@@ -206,8 +206,10 @@ void func_150AFC18(s16 arg0, u8 arg1, s32 arg2) {
     func_151604E4(&sp18, 0, arg1, arg2);
 }
 
+void func_150B2290(u16 *start, u16 *end);
+
 void func_150AFC70(s32 arg0, s32 arg1) {
-    func_150B2290(arg1, arg1 + 0x1ECC0);
+    func_150B2290((u16 *)arg1, (u16 *)(arg1 + 0x1ECC0));
 }
 
 #ifdef NON_MATCHING

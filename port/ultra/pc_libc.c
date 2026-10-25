@@ -12,12 +12,18 @@
 void __vbe_memmove(unsigned char *d, const unsigned char *s, unsigned n);
 void __vbe_memset(unsigned char *d, unsigned c, unsigned n);
 
+/* P318: bcopy is game C now (init_eu_23CC0.c, vbe.bcopy via LIBC_VBE); PC copy kept for A/B (-DP318_PC_LIBC_OLD) */
+#ifdef P318_PC_LIBC_OLD
 void port_bcopy(const void *src, void *dst, int n) __asm__("vbe.bcopy");
 void port_bcopy(const void *src, void *dst, int n) {
     if (n > 0) __vbe_memmove(dst, src, (unsigned)n);
 }
+#endif /* P318_PC_LIBC_OLD */
 
+/* P318: bzero is game C now (init_eu_22A10.c, vbe.bzero via LIBC_VBE); PC copy kept for A/B (-DP318_PC_LIBC_OLD) */
+#ifdef P318_PC_LIBC_OLD
 void port_bzero(void *p, int n) __asm__("vbe.bzero");
 void port_bzero(void *p, int n) {
     if (n > 0) __vbe_memset(p, 0, (unsigned)n);
 }
+#endif /* P318_PC_LIBC_OLD */

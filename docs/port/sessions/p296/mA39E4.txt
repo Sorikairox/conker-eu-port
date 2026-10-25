@@ -1,0 +1,43 @@
+\#^        src = (i == 0) ? p0 : p1;#s/? p0 : p1/? p1 : p0/
+\#^        dy = src\[1\] - cyl->y;#s/cyl->y/cyl->z/
+\#^        local\[i\]\[0\] = dx \* cyl->cosY - dz \* cyl->sinY;#s/- dz/+ dz/
+\#^        dz = dz \* cyl->cosY + dx \* cyl->sinY;#s/cyl->sinY/cyl->sinX/
+\#^        local\[i\]\[2\] = dz \* cyl->cosX - dy \* cyl->sinX;#s/cyl->cosX/cyl->cosY/
+\#^        local\[i\]\[1\] = dy \* cyl->cosX + dz \* cyl->sinX;#s/dy \* cyl->cosX/dy/
+\#^    sy = local\[1\]\[1\] - y0;#s/y0/x0/
+\#^    if (sy != 0.0f) {#s/!=/==/
+\#^        tmin = -y0 \* inv;#s/-y0/y0/
+\#^        tmax = (cyl->height - y0) \* inv;#s/cyl->height/cyl->radius/
+\#^        if (tmax < tmin) {#s/</>/
+\#^        if (tmax < 0.0f || 1.0f < tmin) {#s/tmax < 0.0f || //
+\#^        if (tmax < 0.0f || 1.0f < tmin) {#s/ || 1.0f < tmin//
+\#^        if (tmin < 0.0f) {#s/0.0f/-1.0f/
+\#^        if (1.0f < tmax) {#s/1.0f < tmax/2.0f < tmax/
+\#^        if (y0 < 0.0f || (f32) cyl->height < y0) {#s/y0 < 0.0f || //
+\#^        if (y0 < 0.0f || (f32) cyl->height < y0) {#s/(f32) cyl->height < y0/(f32) cyl->height <= y0/
+\#^        tmax = 1.0f;#s/1.0f/0.5f/
+\#^    if (a == 0.0f) {#s/==/!=/
+\#^    b = 2.0f \* (z0 \* sz + sx \* x0);#s/2.0f/4.0f/
+\#^    disc = b \* b - #s/cyl->radius \* cyl->radius/cyl->radius/
+\#^    disc = b \* b - #s/(4.0f \* a)/(2.0f * a)/
+\#^    if (disc < 0.0f) {#s/</<=/
+\#^    half = 0.5f / a;#s/0.5f/1.0f/
+\#^    s0 = (-b + root) \* half;#s/-b + root/-b/
+\#^    if (s1 < s0) {#s/</>/
+\#^    if (s1 < 0.0f || 1.0f < s0) {#s/s1 < 0.0f || //
+\#^    if (s1 < 0.0f || 1.0f < s0) {#s/ || 1.0f < s0//
+\#^    if (s0 < 0.0f) {#s/0.0f/-1.0f/
+\#^    if (1.0f < s1) {#s/1.0f < s1/2.0f < s1/
+\#^    if (s1 < tmin || tmax < s0) {#s/s1 < tmin || //
+\#^    if (s1 < tmin || tmax < s0) {#s/ || tmax < s0//
+\#^    t = (s0 < tmin) ? tmin : s0;#s/? tmin : s0/? s0 : tmin/
+\#^    hy = sy \* t + y0;#s/sy \* t/sy/
+\#^    angle = -(cyl->angleX \* D_8009FA44_nm\[0\]);#s/angleX/angleY/
+\#^    out\[2\] = hz \* cs - hy \* sn;#s/- hy/+ hy/
+\#^    out\[1\] = hy \* cs + hz \* sn;#s/hz \* sn/hx * sn/
+\#^    angle = -(cyl->angleY \* D_8009FA48_nm\[0\]);#s/-(/(/
+\#^    out\[0\] = hx \* cs - out\[2\] \* sn;#s/out\[2\] \* sn/hz * sn/
+\#^    out\[2\] = out\[2\] \* cs + hx \* sn;#s/hx \* sn/hx * cs/
+\#^    out\[1\] += cyl->y;#s/cyl->y/cyl->x/
+\#^    return 1;#s/1;/2;/
+1,/^static const f32 D_8009FA44_nm/s/0.017453292f/0.017453294f/

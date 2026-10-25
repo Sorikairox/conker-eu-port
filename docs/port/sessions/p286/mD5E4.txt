@@ -1,0 +1,38 @@
+# P286 mutants for func_1517D5E4 (sprite_billboard_quad_draw)
+/if (slot >= (u32) D_800DDD0C) {/s/(u32) D_800DDD0C/D_800DDD0C - 1/
+/if (slot >= (u32) D_800DDD0C) {/s/slot >= (u32) D_800DDD0C/(s32) slot >= D_800DDD0C/
+/g\[1\] = (u32) &D_8008D340;/s/&D_8008D340/\&D_8008D340 + 1/
+/g\[3\] = 0xFFFCF438;/s/0xFFFCF438/0xFFFCF439/
+/g\[7\] = 0x0C184B50;/s/0x0C184B50/0x0C184B51/
+/^    g += 8;/s/8/6/
+/angle \*= 0.017453292f;/s/0.017453292f/0.0174533f/
+/^    r = radius;/s/radius/radius + 1/
+/dx = (s32) (cosf(angle) \* r);/s/cosf/sinf/
+/dz = (s32) (sinf(angle) \* r);/s/\* r/* r * 2.0f/
+/quad\[0\].v.ob\[0\] = quad\[3\].v.ob\[0\] = x + dx;/s/x + dx/x - dx/
+/quad\[0\].v.ob\[1\] = quad\[1\].v.ob\[1\] = y;/s/quad\[1\].v.ob\[1\] = //
+/quad\[0\].v.ob\[2\] = quad\[3\].v.ob\[2\] = z - dz;/s/z - dz/z + dz/
+/quad\[1\].v.ob\[0\] = quad\[2\].v.ob\[0\] = x - dx;/s/quad\[2\]/quad[3]/
+/top = y + halfHeight + halfHeight;/s/ + halfHeight;/;/
+/quad\[1\].v.ob\[2\] = quad\[2\].v.ob\[2\] = z + dz;/s/z + dz/z/
+/quad\[1\].v.tc\[0\] = quad\[2\].v.tc\[0\]/s/(tw << 5) - 1/tw << 5/
+/quad\[2\].v.tc\[1\] = quad\[3\].v.tc\[1\]/s/(th << 5)/(tw << 5)/
+/loadRows = (th \* 5 + 3) >> 2;/s/+ 3/+ 4/
+/if (lrs >= 0x7FF) {/s/0x7FF/0x7FE/ % lrs7FE
+/words = (tw \* 2) \/ 8;/s/\/ 8/\/ 4/
+/^        words = 1;/s/1/2/
+/dxt = (words + 0x7FF) \/ words;/s/0x7FF/0x800/
+/g\[1\] = D_800DDD10\[D_800BE9C0\] + slot \* 64;/s/slot \* 64/slot * 32/
+/^    g\[3\] = tex;/s/tex/tex + 2/
+/g\[9\] = 0x07000000/s/(lrs \& 0xFFF) << 12/(lrs \& 0x7FF) << 11/
+/g\[12\] = 0xF5100000/s/tw \* 2 + 7/tw * 2 + 8/
+/g\[15\] = /s/loadRows - 1/th - 1/
+/g\[16\] = 0xF5800000/s/(tw \* th) >> 2/(tw * th) >> 1/
+/g\[16\] = 0xF5800000/s/(tw >> 1) + 7/tw + 7/
+/g\[19\] = 0x01000000/s/(th - 1) << 2/th << 2/
+/quad\[0\].v.flag = quad\[1\].v.flag/s/= 0;/= 1;/
+/g\[20\] = 0x05000402;/s/0x05000402/0x05000204/
+/g\[25\] = 0x00200000;/s/0x00200000/0/
+/^    D_800DE188++;/s/++/ += 2/
+/return (s32) (g + 26);/s/26/24/
+/^    u8 th = h;/s/u8/s32/

@@ -1,0 +1,67 @@
+s/    if (obj == NULL) {/    if (obj == (u8 *) 1) {/
+s/    func_1504715C(floor, obj);/    ;/
+s/    fx.unk8.unk0 = \*(f32 \*) (obj + 0x14);/    fx.unk8.unk0 = *(f32 *) (obj + 0x18);/
+s/    fx.unk8.unk8 = \*(f32 \*) (obj + 0x1C);/    fx.unk8.unk8 = *(f32 *) (obj + 0x14);/
+s/    fx.unk14 = 5.08f;/    fx.unk14 = 5.07f;/
+s/    fx.unk18 = 3.02f;/    fx.unk18 = 3.03f;/
+s/    fx.unk1C = 0.80700004f;/    fx.unk1C = 0.808f;/
+s/    fx.unk20 = 0.70100003f;/    fx.unk20 = 0.702f;/
+s/    fx.unk24 = 18.0f;/    fx.unk24 = 17.0f;/
+s/    fx.unk28 = 11.8f;/    fx.unk28 = 11.7f;/
+s/    fx.unk2C = 0xA;/    fx.unk2C = 0xB;/
+s/    fx.unk2E = 0;/    fx.unk2E = 1;/
+s/    fx.unk0 = 0;/    fx.unk0 = 1;/
+s/    fx.unk2 = 0xFF;/    fx.unk2 = 0xFE;/
+s/    fx.unk4 = -0x3F;/    fx.unk4 = -0x3E;/
+s/    fx.unk6 = 0x2D;/    fx.unk6 = 0x2C;/
+s/    fx.unk30 = 3;/    fx.unk30 = 4;/
+s/    fx.unk32 = 2;/    fx.unk32 = 3;/
+s/    fx.unk34 = 0x28;/    fx.unk34 = 0x29;/
+s/    fx.unk36 = 0x14;/    fx.unk36 = 0x15;/
+s/    fx.unk38 = 0x9B;/    fx.unk38 = 0x9C;/
+s/    fx.unk3A = 0x64;/    fx.unk3A = 0x65;/
+s/    fx.unk44 = 0x10;/    fx.unk44 = 0x11;/
+s/    fx.unk46 = 0xF;/    fx.unk46 = 0xE;/
+s/    fx.unk48 = 0;/    fx.unk48 = 1;/
+s/    fx.unk3C = 0;/    fx.unk3C = 1;/
+s/    fx.unk40 = 0.5f;/    fx.unk40 = 0.25f;/
+s/    func_15154488(\&fx, \&fx.unk8, (s32) floor, 0xFF, 1);/    func_15154488(\&fx, \&fx.unk8, (s32) floor, 0xFF, 0);/
+s/    n = (u32) func_150ADA20() .*/    n = 7;/
+s/    probe\[1\] = \*(f32 \*) (obj + 0x18) + 100.0f;/    probe[1] = *(f32 *) (obj + 0x18) + 50.0f;/
+s/        func_15143874(r \& 0xFF, func_150ADA68() \* 59.0f + 90.0f/        func_15143874(r \& 0x7F, func_150ADA68() * 59.0f + 90.0f/
+s/        func_15143874(r \& 0xFF, func_150ADA68() \* 59.0f + 90.0f/        func_15143874(r \& 0xFF, func_150ADA68() * 60.0f + 90.0f/
+s/        func_15143874(r \& 0xFF, func_150ADA68() \* 59.0f + 90.0f/        func_15143874(r \& 0xFF, func_150ADA68() * 59.0f + 80.0f/
+s/        piece\[0\] += \*(f32 \*) (obj + 0x14);/        piece[0] += *(f32 *) (obj + 0x1C);/
+s/        probe\[0\] = piece\[0\];/        probe[0] = piece[2];/
+s/        piece\[2\] += \*(f32 \*) (obj + 0x1C);/        piece[2] += *(f32 *) (obj + 0x18);/
+s/        probe\[2\] = piece\[2\];/        probe[2] = piece[0];/
+s/        if (func_15046F70(probe, 0, \*(f32 \*) (obj + 0x18) - 500.0f, floor) == 0/        if (func_15046F70(probe, 0, *(f32 *) (obj + 0x18) - 400.0f, floor) == 0/
+s/ || ((u8 \*) floor)\[0x1D\] == 3) {/ || ((u8 *) floor)[0x1C] == 3) {/
+s/        piece\[1\] = floor\[0\] + 10.0f;/        piece[1] = floor[0] + 11.0f;/
+s/        if (func_150ADA20() \& 1) {/        if (func_150ADA20() \& 2) {/
+s/            func_151D9B8C(0, size \* 4.5f + 15.0f/            func_151D9B8C(0, size * 4.5f + 16.0f/
+s/            func_151D9B8C(0, size \* 4.5f/            func_151D9B8C(0, shade * 4.5f/
+s/            func_151D9B8C(0, size \* 4.5f + 15.0f, (u32) (shade \* 100.0f + 155.0f)/            func_151D9B8C(0, size * 4.5f + 15.0f, (u32) (shade * 100.0f + 154.0f)/
+s/(s32) \&floor\[1\], (struct17 \*) piece,/(s32) \&floor[2], (struct17 *) piece,/
+s/                          100, 0, 1, 0, room, owner);/                          100, 0, 1, 0, 0xFF, owner);/
+s/                          100, 0, 1, 0, room, owner);/                          99, 0, 1, 0, room, owner);/
+s/                          100, 0, 1, 0, room, owner);/                          100, 0, 1, 0, room, 0);/
+s/            func_151DAB58(0, size \* 5.9f + 6.1f/            func_151DAB58(0, size * 5.9f + 6.0f/
+s/            func_151DAB58(0, size \* 5.9f/            func_151DAB58(0, size * 6.0f/
+s/155.0f), piece, 1, room, owner);/155.0f), piece, 0, room, owner);/
+s/155.0f), piece, 1, room, owner);/155.0f), piece, 1, 0, owner);/
+s/    under\[1\] = base\[1\] + 100.0f;/    under[1] = base[1] + 101.0f;/
+s/    under\[0\] = base\[0\];/    under[0] = base[2];/
+s/    if (func_15046F70(under, 0, base\[1\] - 500.0f, floor) == 0/    if (func_15046F70(under, 0, base[1] - 501.0f, floor) == 0/
+s/    base\[1\] = floor\[0\] + 10.0f;/    base[1] = floor[0] + 9.0f;/
+s/    func_15136698((size \* 30.0f + 90.0f) \* 0.001f/    func_15136698((size * 31.0f + 90.0f) * 0.001f/
+s/    func_15136698((size \* 30.0f + 90.0f) \* 0.001f/    func_15136698((size * 30.0f + 90.0f) * 0.002f/
+s/(shade \* 103.0f + 103.0f) \* 1e-05f/(shade * 103.0f + 104.0f) * 1e-05f/
+s/(shade \* 103.0f + 103.0f) \* 1e-05f/(shade * 103.0f + 103.0f) * 2e-05f/
+s/ + 0x9B, b/ + 0x9C, b/
+s/101 + 100,$/100 + 100,/
+s/0x38 + 0x46,/0x39 + 0x46,/
+s/0x38 + 0x46,/0x38 + 0x45,/
+s/(struct17 \*) base, 0, 1, room, owner);/(struct17 *) base, 1, 1, room, owner);/
+s/(struct17 \*) base, 0, 1, room, owner);/(struct17 *) base, 0, 1, owner, owner);/
+s/    a = func_150ADA20();/    a = func_150ADA20() + 1;/

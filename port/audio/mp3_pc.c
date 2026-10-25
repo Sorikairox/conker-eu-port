@@ -173,6 +173,8 @@ void func_151F94E0(f32 *in, s32 sb, f32 *out, f32 *prev, f32 *win) {
 
 /* three 12-point IMDCTs over the interleaved short-block values in[w + 3k], each windowed and
  * placed at 6 + 6w in the 36-sample block */
+/* P318: port-b P317 made func_151FA3E0 (IMDCT, short blocks) game C (game_eu_227BF0.c); this P14 PC version is kept for A/B runs only (-DP318_MP3_PC_OLD, without the game C one) */
+#ifdef P318_MP3_PC_OLD
 void func_151FA3E0(f32 *in, s32 sb, f32 *out, f32 *prev) {
     f32 z[36];
     s32 i, k, w;
@@ -186,3 +188,4 @@ void func_151FA3E0(f32 *in, s32 sb, f32 *out, f32 *prev) {
         }
     overlap_out(z, sb, out, prev);
 }
+#endif /* P318_MP3_PC_OLD */

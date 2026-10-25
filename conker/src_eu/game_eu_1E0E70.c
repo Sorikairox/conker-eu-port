@@ -62,7 +62,151 @@ void func_151B3734(Obj_151B3734 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
+s32 func_15142B7C(s32, s32, s32);
+s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
+s32 func_15142CF0(s32, s32, s32, s32, s32, s32, s32, s8 *);
+s32 func_1513F4E4(s32, u8, s8 *);
+s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+s32 func_15142FBC(s32, s32, s32, s8 *);
+/* rope style getters (by obj +0x2E): geometry mode set / clear, prim colour, env colour, combine, render mode,
+   render-mode pair index; 0 = draw nothing */
+extern s32 (*D_8008FEB0[])(u8 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, s32 *, u8 *,
+                           u8 *);
+extern s32 D_80091198;   /* rope texture descriptor */
+extern s32 D_800D30BC;
+extern s32 D_800A4EA8[]; /* render mode pairs (2 words each) */
+
+/* n = (b - a) x (p - cam), scaled to the rope width obj +0x30 (0 when degenerate) */
+#define ROPE_NORMAL(px, py, pz) \
+    do { \
+        ex = bx - ax; \
+        ey = by - ay; \
+        ez = bz - az; \
+        cx = (px) - cam[0]; \
+        cy = (py) - cam[1]; \
+        cz = (pz) - cam[2]; \
+        nx = ey * cz - cy * ez; \
+        ny = ez * cx - cz * ex; \
+        nz = ex * cy - cx * ey; \
+        len2 = nx * nx + ny * ny + nz * nz; \
+        if (len2 == 0.0f) { \
+            nx = ny = nz = 0.0f; \
+        } else { \
+            k = *(f32 *) (obj + 0x30) / sqrtf(len2); \
+            nx *= k; \
+            ny *= k; \
+            nz *= k; \
+        } \
+    } while (0)
+
+/* one rope vertex: position, texture (s, t), colour (255, 100, 100, 255) */
+#define ROPE_VTX(px, py, pz, s, t) \
+    do { \
+        v->v.ob[0] = (px); \
+        v->v.ob[1] = (py); \
+        v->v.ob[2] = (pz); \
+        v->v.tc[0] = (s); \
+        v->v.tc[1] = (t); \
+        v->v.cn[0] = 0xFF; \
+        v->v.cn[1] = 100; \
+        v->v.cn[2] = 100; \
+        v->v.cn[3] = 0xFF; \
+        v++; \
+    } while (0)
+
+// rope_draw: draws the 10-point rope (obj +0x48, 0x18 bytes per point) as a camera-facing ribbon for view `id`
+// (camera at D_800DBFF0 + id * 0x9A0 + 0x2F8). Nothing when obj +0x10 has flag 4, 8 or 2, when func_151D6310 gives
+// no vertices (0x190 bytes from the cache at obj +0x140) or when the style getter D_8008FEB0[obj +0x2E] returns 0.
+// The getter's values set the geometry mode, prim / env colours, combine, render mode (| 0x80000 | 0x2CA0 |
+// D_800D30BC with the D_800A4EA8 pair) and the texture D_80091198. Each point gets two vertices offset by +-n
+// (ROPE_NORMAL), s = 0 / 0x3C0 across, t growing by obj +0x13C per point; each segment loads 4 vertices and draws
+// two triangles. Returns the display list end.
+s32 func_151B3878(s32 gfx, u8 *obj, s16 id) {
+    Vtx *v;
+    f32 *cam;
+    f32 *pts;
+    s32 geoSet, geoClr, envR, envG, envB, envA, primR, primG, primB, primA, combine, rmode;
+    u8 rmodePair, tex;
+    s8 flag;
+    s32 t;
+    s32 i;
+    f32 ax, ay, az;
+    f32 bx, by, bz;
+    f32 ex, ey, ez;
+    f32 cx, cy, cz;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+
+    if (obj[0x10] & 4) {
+        return gfx;
+    }
+    if (obj[0x10] & 8) {
+        return gfx;
+    }
+    if (obj[0x10] & 2) {
+        return gfx;
+    }
+    func_151D6310((s32 *) (obj + 0x140), id, 0x190, &v, NULL);
+    if (v == NULL) {
+        return gfx;
+    }
+    cam = (f32 *) ((u8 *) D_800DBFF0 + id * 0x9A0 + 0x2F8);
+    flag = 1;
+    if (!D_8008FEB0[obj[0x2E]](obj, &geoSet, &geoClr, &envR, &envG, &envB, &envA, &primR, &primG, &primB, &primA,
+                               &rmode, &rmodePair, &tex)) {
+        return gfx;
+    }
+    gfx = func_15142B7C(gfx, geoSet, geoClr);
+    gfx = func_15142C10(gfx, primR, primG, primB, primA, &flag);
+    gfx = func_15142CF0(gfx, 0, 0, envR, envG, envB, envA, &flag);
+    gfx = func_1513F4E4(gfx, tex, &flag);
+    gfx = func_15142E24(gfx, &D_80091198, 0, 0, 0, 0, 0x36, 0, 0, &flag, 3);
+    gfx = func_15142FBC(gfx, rmode | 0x80000 | D_800D30BC | 0x2CA0,
+                        D_800A4EA8[rmodePair * 2 + 1] | D_800A4EA8[rmodePair * 2], &flag);
+
+    /* the first point, offset across the first segment */
+    pts = (f32 *) (obj + 0x48);
+    ax = pts[0];
+    ay = pts[1];
+    az = pts[2];
+    bx = pts[6];
+    by = pts[7];
+    bz = pts[8];
+    ROPE_NORMAL(ax, ay, az);
+    ROPE_VTX(ax + nx, ay + ny, az + nz, 0, 0);
+    ROPE_VTX(ax - nx, ay - ny, az - nz, 0x3C0, 0);
+
+    /* one segment per following point */
+    t = *(s32 *) (obj + 0x13C);
+    for (i = 0; i < 9; i++) {
+        ax = pts[i * 6 + 0];
+        ay = pts[i * 6 + 1];
+        az = pts[i * 6 + 2];
+        bx = pts[i * 6 + 6];
+        by = pts[i * 6 + 7];
+        bz = pts[i * 6 + 8];
+        ROPE_NORMAL(bx, by, bz);
+        ROPE_VTX(bx + nx, by + ny, bz + nz, 0, t);
+        ROPE_VTX(bx - nx, by - ny, bz - nz, 0x3C0, t);
+        t += *(s32 *) (obj + 0x13C);
+        ((s32 *) gfx)[0] = 0x01004008; /* gSPVertex(v - 4, 4, 0) */
+        ((s32 *) gfx)[1] = (s32) (v - 4);
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05000204; /* gSP1Triangle(0, 1, 2) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05020604; /* gSP1Triangle(1, 3, 2) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+    }
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B3878.s")
+#endif
 
 void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
     void (*fp)(void *, s32, u8) = D_8008FF08[arg0[0x44]];
@@ -71,7 +215,43 @@ void func_151B3FE4(u8 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+// rope_nodes_reset: lays the 10 rope nodes (obj + 0x48, 0x18 bytes: pos, vel) evenly from the start point +0x14
+// towards the end point +0x20 (step = (end - start) / 9, D_800AA774 .. D_800AA77C), zeroes their velocities and
+// clears flag 2 at +0x10. Returns 1. (Table entry next to func_151B42A0; also the fallback of func_151B458C /
+// func_151B4854, which call it with their own a0.)
+s32 func_151B402C(u8 *obj) {
+    f32 *start = (f32 *) (obj + 0x14);
+    f32 *end = (f32 *) (obj + 0x20);
+    f32 p[3];
+    f32 step[3];
+    f32 *node;
+    s32 i;
+
+    step[0] = (end[0] - start[0]) * 0.11111111f;
+    step[1] = (end[1] - start[1]) * 0.11111111f;
+    step[2] = (end[2] - start[2]) * 0.11111111f;
+    p[0] = start[0];
+    p[1] = start[1];
+    p[2] = start[2];
+    for (i = 0; i < 10; i++) {
+        node = (f32 *) (obj + 0x48 + i * 0x18);
+        node[0] = p[0];
+        node[1] = p[1];
+        node[2] = p[2];
+        node[3] = 0.0f;
+        node[4] = 0.0f;
+        node[5] = 0.0f;
+        p[0] += step[0];
+        p[1] += step[1];
+        p[2] += step[2];
+    }
+    obj[0x10] &= ~2;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B402C.s")
+#endif
 #ifdef NON_MATCHING
 s32 func_151B42A0(u8 *arg0) {
     f32 sp80;
@@ -192,7 +372,7 @@ s32 func_151B44D8(u8 *arg0, f32 *arg1, u8 arg2)
 }
 
 #ifdef NON_MATCHING
-s32 func_151B402C(f32, f32);
+s32 func_151B402C(u8 *);
 
 s32 func_151B458C(u8 *arg0) {
     f32 sp110;
@@ -292,7 +472,7 @@ s32 func_151B458C(u8 *arg0) {
         temp_f6 = temp_f4 * 0.25f;
         sp6C = temp_f6;
         if (temp_f10_2 < sp6C) {
-            return func_151B402C(temp_f12, temp_f14);
+            return func_151B402C(arg0); /* P274: was (temp_f12, temp_f14); the asm passes its own a0 */
         }
         var_f20 = 0.0f;
         var_s1 = 0;
@@ -318,7 +498,139 @@ block_6:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B458C.s")
 #endif
+
+#ifdef NON_MATCHING
+/* P292 */
+
+// rope_update_sag: entry 5 of the rope handler table at EU 0x8008FE90 (siblings func_151B402C / func_151B458C).
+// The rope of obj runs from end0 (+0x14) to end1 (+0x20); its 10 points (+0x48, 0x18 bytes: pos, vel) hang on an
+// ellipse in the vertical plane through both ends (half axes |end1 - end0| / 2 and sqrt(+0x138 - len^2 / 4), +0x138 =
+// the squared half rope length). When the ends are closer than 0.0001 horizontally nothing moves; when they are too
+// far apart the rope goes taut (func_151B402C, whose result is returned). Each point i takes the ellipse point at
+// angle i * 0.349 (20 degrees): placed there with zero speed while flag 2 of +0x10 is set (then cleared), or with the
+// rest speed D_800A5860 while D_800DBFF4 is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
+// +0x40, acceleration * +0x3C over the frame time D_800BE9A4). Returns 1 except for the taut case.
+s32 func_151B4854(u8 *obj) {
+    f32 *seg;
+    f32 old[3];
+    f32 target[3];
+    f32 x0, y0, z0;
+    f32 dx, dy, dz;
+    f32 mx, my, mz;
+    f32 a0x, a0y, a0z;
+    f32 a1x, a1y, a1z;
+    f32 inv;
+    f32 px, pz;
+    f32 du, dv;
+    f32 lenSq;
+    f32 len;
+    f32 halfLen;
+    f32 cosA, sinA;
+    f32 sag;
+    f32 quarter;
+    f32 angle;
+    f32 angle2;
+    f32 s, c, s2;
+    f32 u, v;
+    f32 pull[3];
+    f32 acc[3];
+    f32 k;
+    s32 i;
+    u8 ret;
+
+    ret = 1;
+    x0 = *(f32 *) (obj + 0x14);
+    y0 = *(f32 *) (obj + 0x18);
+    z0 = *(f32 *) (obj + 0x1C);
+    dx = *(f32 *) (obj + 0x20) - x0;
+    dy = *(f32 *) (obj + 0x24) - y0;
+    dz = *(f32 *) (obj + 0x28) - z0;
+    if (fabsf(dx) > 0.0001f || fabsf(dz) > 0.0001f) {
+        mx = x0 + dx * 0.5f;
+        my = y0 + dy * 0.5f;
+        mz = z0 + dz * 0.5f;
+        a0x = x0 - mx;
+        a1x = *(f32 *) (obj + 0x20) - mx;
+        a1y = *(f32 *) (obj + 0x24) - my;
+        a0y = y0 - my;
+        a0z = z0 - mz;
+        a1z = *(f32 *) (obj + 0x28) - mz;
+        inv = 1.0f / sqrtf(dx * dx + dz * dz);
+        pz = dz * inv;
+        px = dx * inv;
+        du = (a1z * pz + a1x * px) - (a0z * pz + a0x * px);
+        dv = a1y - a0y;
+        lenSq = du * du + dv * dv;
+        len = sqrtf(lenSq);
+        inv = 1.0f / len;
+        halfLen = len * 0.5f;
+        cosA = du * inv;
+        sinA = dv * inv;
+        quarter = lenSq * 0.25f;
+        if (*(f32 *) (obj + 0x138) < quarter) {
+            ret = func_151B402C(obj);
+        } else {
+            sag = sqrtf(*(f32 *) (obj + 0x138) - quarter);
+            angle = 0.0f;
+            angle2 = 0.0f;
+            seg = (f32 *) (obj + 0x48);
+            for (i = 0; i < 10; i++) {
+                ((s32 *) old)[0] = ((s32 *) seg)[0];
+                ((s32 *) old)[1] = ((s32 *) seg)[1];
+                ((s32 *) old)[2] = ((s32 *) seg)[2];
+                s = sinf(angle);
+                c = cosf(angle);
+                s2 = sinf(angle2);
+                u = halfLen * c;
+                v = sag * s;
+                target[0] = (u * cosA - v * sinA) * px + mx;
+                target[1] = (u * sinA - v * cosA) + my;
+                target[2] = (u * cosA - v * sinA) * pz + mz;
+                if (obj[0x10] & 2) {
+                    ((s32 *) seg)[0] = ((s32 *) target)[0];
+                    ((s32 *) seg)[1] = ((s32 *) target)[1];
+                    ((s32 *) seg)[2] = ((s32 *) target)[2];
+                    seg[3] = 0.0f;
+                    seg[4] = 0.0f;
+                    seg[5] = 0.0f;
+                } else if (*(s32 *) D_800DBFF4 != 0) {
+                    ((s32 *) seg)[0] = ((s32 *) target)[0];
+                    ((s32 *) seg)[1] = ((s32 *) target)[1];
+                    ((s32 *) seg)[2] = ((s32 *) target)[2];
+                    ((s32 *) seg)[3] = ((s32 *) D_800A5860)[0];
+                    ((s32 *) seg)[4] = ((s32 *) D_800A5860)[1];
+                    ((s32 *) seg)[5] = ((s32 *) D_800A5860)[2];
+                } else {
+                    k = *(f32 *) (obj + 0x40);
+                    pull[0] = (old[0] - target[0]) * s2 * k;
+                    pull[1] = (old[1] - target[1]) * s2 * k;
+                    pull[2] = (old[2] - target[2]) * s2 * k;
+                    seg[0] = target[0] + pull[0];
+                    seg[1] = target[1] + pull[1];
+                    seg[2] = target[2] + pull[2];
+                    k = *(f32 *) (obj + 0x3C);
+                    acc[0] = k * pull[0];
+                    acc[1] = k * pull[1];
+                    acc[2] = k * pull[2];
+                    seg[0] = seg[0] + (seg[3] * D_800BE9A4 + 0.5f * acc[0] * D_800BE9A4 * D_800BE9A4);
+                    seg[1] = seg[1] + (seg[4] * D_800BE9A4 + 0.5f * acc[1] * D_800BE9A4 * D_800BE9A4);
+                    seg[2] = seg[2] + (seg[5] * D_800BE9A4 + 0.5f * acc[2] * D_800BE9A4 * D_800BE9A4);
+                    seg[3] = seg[3] + acc[0] * D_800BE9A4;
+                    seg[4] = seg[4] + acc[1] * D_800BE9A4;
+                    seg[5] = seg[5] + acc[2] * D_800BE9A4;
+                }
+                angle2 += 0.34906587f;
+                angle += 0.34906587f;
+                seg += 6;
+            }
+        }
+    }
+    obj[0x10] &= ~2;
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4854.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_151B4D88(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {

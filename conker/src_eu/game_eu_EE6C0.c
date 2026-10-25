@@ -92,7 +92,202 @@ block_5:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C0FC0.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_151307F0(s32 arg0, u8 arg1, s32 arg2, s32 arg3, u8 arg4, s32 arg5);
+extern f32 D_800BE9A4;
+extern s32 D_800BE9E4;
+
+typedef struct {
+    /* 0x00 */ u8 *rec; /* the smoke puff (func_151307F0 record) */
+    /* 0x04 */ s16 next;
+    /* 0x06 */ s16 pad6;
+} TrailSlot1138;
+
+/* smoke trail (object type 0x25, made by func_150C0FC0; +0x18..0x33 come from its template) */
+typedef struct {
+    /* 0x00 */ u8 u0;
+    /* 0x01 */ u8 owner;
+    /* 0x02 */ u8 pad2[0xA];
+    /* 0x0C */ u8 room;
+    /* 0x0D */ u8 padD[0xB];
+    /* 0x18 */ f32 *src;       /* followed point (flag 2) */
+    /* 0x1C */ s32 u1C;
+    /* 0x20 */ u8 *target;     /* followed object */
+    /* 0x24 */ u8 targetId;    /* its id byte (+0x3B) at creation */
+    /* 0x25 */ u8 pad25[3];
+    /* 0x28 */ f32 rate;       /* puffs per frame unit */
+    /* 0x2C */ s16 u2C;
+    /* 0x2E */ s16 timer;      /* flag 1: frames left */
+    /* 0x30 */ u8 flags;
+    /* 0x31 */ u8 pad31[3];
+    /* 0x34 */ f32 lastX;
+    /* 0x38 */ f32 lastZ;
+    /* 0x3C */ f32 accum;
+    /* 0x40 */ TrailSlot1138 *slots;
+    /* 0x44 */ s16 used;       /* used slot list head (-1 = none) */
+    /* 0x46 */ s16 free;       /* free slot list head */
+} Trail1138;
+
+/* func_151307F0's sprite particle template (the func_15153BA4 layout, as SprTmpl5268 in game_eu_101080) */
+typedef struct {
+    /* 0x00 */ s32 u0;
+    /* 0x04 */ s32 u4;
+    /* 0x08 */ u16 flags;
+    /* 0x0A */ s16 life;
+    /* 0x0C */ s32 uC;
+    /* 0x10 */ s32 u10;
+    /* 0x14 */ u8 colour[8]; /* 7 bytes, alpha */
+    /* 0x1C */ u8 u1C;
+    /* 0x1D */ u8 sprite;
+    /* 0x1E */ s16 u1E;
+    /* 0x20 */ s16 u20;
+    /* 0x22 */ s16 u22;
+    /* 0x24 */ f32 u24;
+    /* 0x28 */ f32 size[2];
+    /* 0x30 */ s32 pos[3]; /* f32, copied as words */
+    /* 0x3C */ f32 dir[3];
+    /* 0x48 */ f32 vel[3];
+    /* 0x54 */ f32 u54;
+    /* 0x58 */ s32 mode;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ u8 u60[7];
+    /* 0x67 */ u8 pad67;
+    /* 0x68 */ s16 u68;
+    /* 0x6A */ u8 pad6A[2];
+    /* 0x6C */ f32 u6C;
+} SprTmpl1138;
+
+// smoke_trail_update: update handler of a smoke trail. It follows its target object (x, +0x180 y, z), or with flag 2
+// the point obj->src (65 lower), and dies (func_1516972C) when the target is gone (word 0 == 0) or became another
+// object (id +0x3B != targetId), or with flag 1 when the timer runs out. The puffs on the used slot list are moved to
+// the current position. When the position changed, and (flag 4) the target is in state 0x1D / 0x1E, and its +0x3C
+// speed is not below 3, the trail adds rate * D_800BE9A4 to accum and spawns one blue-grey smoke puff (sprite 0x6C,
+// size 67..84, alpha 80..200, life 70..91, random flips, drifting 40..73 in a random direction) per whole unit from
+// the free slot list; each puff gets the trail pointer at +0xA8 and its slot moves to the used list.
+void func_150C1138(Trail1138 *obj) {
+    s32 pos[3]; /* f32 x, y, z */
+    SprTmpl1138 t;
+    Trail1138 *self;
+    u8 kill = 0;
+    s32 emit;
+    s16 i;
+    s16 slot;
+    u32 r;
+    f32 cs;
+    f32 sn;
+    f32 speed;
+    s32 flipX;
+    u8 *rec;
+
+    if (!(obj->flags & 2)) {
+        if (*(s32 *) obj->target == 0) {
+            kill = 1;
+        }
+        if (obj->targetId != obj->target[0x3B]) {
+            kill = 1;
+        }
+        *(f32 *) &pos[0] = *(f32 *) (obj->target + 0x14);
+        *(f32 *) &pos[1] = *(f32 *) (obj->target + 0x180);
+        *(f32 *) &pos[2] = *(f32 *) (obj->target + 0x1C);
+    } else {
+        memcpy(pos, obj->src, 12);
+        *(f32 *) &pos[1] -= 65.0f;
+    }
+    if (!kill) {
+        emit = 1;
+        for (i = obj->used; i != -1; i = obj->slots[i].next) {
+            rec = obj->slots[i].rec;
+            ((s32 *) (rec + 0x40))[0] = pos[0];
+            ((s32 *) (rec + 0x40))[1] = pos[1];
+            ((s32 *) (rec + 0x40))[2] = pos[2];
+        }
+        if (obj->flags & 4) {
+            if (*(u16 *) (obj->target + 0x84) != 0x1D && *(u16 *) (obj->target + 0x84) != 0x1E) {
+                emit = 0;
+            }
+        }
+        if (*(f32 *) (obj->target + 0x3C) < 3.0f) {
+            emit = 0;
+        }
+        if (!(*(f32 *) &pos[0] == obj->lastX && *(f32 *) &pos[2] == obj->lastZ) && emit) {
+            obj->accum = obj->accum + obj->rate * D_800BE9A4;
+            if (1.0f < obj->accum) {
+                t.u0 = 0x00200005;
+                t.u4 = 0x001F0600;
+                t.flags = 0x5103;
+                t.uC = 0;
+                t.u10 = 0;
+                t.colour[3] = 0xFF;
+                t.u1C = 0xFF;
+                t.sprite = 0x6C;
+                t.vel[0] = t.vel[1] = t.vel[2] = 0.0f;
+                t.u54 = 0.0f;
+                t.u1E = 0x1E;
+                t.u20 = 8;
+                t.mode = 0x0080DE01;
+                t.u60[0] = 8;
+                t.u60[1] = 6;
+                t.u60[2] = 0xFF;
+                t.u60[3] = 0;
+                t.u60[4] = 0xFF;
+                t.u60[5] = 0;
+                self = obj;
+                while (1.0f < obj->accum && self->free != -1) {
+                    slot = obj->free;
+                    r = func_150ADA20();
+                    cs = func_151423D8(r - 0x40);
+                    sn = func_151423D8(r);
+                    speed = func_150ADA68() * 33.0f + 40.0f;
+                    t.colour[4] = 0x52;
+                    t.colour[5] = 0x6B;
+                    t.colour[6] = 0x97;
+                    t.colour[0] = 0x87;
+                    t.colour[1] = 0x6B;
+                    t.colour[2] = 0x97;
+                    t.colour[7] = (u32) func_150ADA20() % 121 + 80;
+                    t.size[0] = t.size[1] = func_150ADA68() * 17.0f + 67.0f;
+                    t.pos[0] = pos[0];
+                    t.pos[1] = pos[1];
+                    t.pos[2] = pos[2];
+                    t.dir[0] = speed * cs;
+                    t.dir[2] = speed * sn;
+                    t.dir[1] = 0.0f;
+                    t.mode &= ~0xC0;
+                    flipX = (func_150ADA20() & 1) ? 0x80 : 0;
+                    t.mode |= ((func_150ADA20() & 1) ? 0x40 : 0) | flipX;
+                    t.life = t.u22 = (u32) func_150ADA20() % 22 + 70;
+                    t.u24 = 1.0352269f; /* D_800A0590 */
+                    obj->slots[slot].rec = (u8 *) func_151307F0((s32) &t, 1, 0, 4, obj->room, obj->owner);
+                    rec = obj->slots[slot].rec;
+                    if (rec != NULL) {
+                        memcpy(rec + 0xA8, &self, 4);
+                        obj->free = obj->slots[slot].next;
+                        obj->slots[slot].next = obj->used;
+                        obj->used = slot;
+                    }
+                    obj->accum -= 1.0f;
+                }
+                while (1.0f < obj->accum) {
+                    obj->accum -= 1.0f;
+                }
+            }
+        }
+        obj->lastX = *(f32 *) &pos[0];
+        obj->lastZ = *(f32 *) &pos[2];
+    }
+    if (obj->flags & 1) {
+        obj->timer -= D_800BE9E4;
+        if (obj->timer < 0) {
+            kill = 1;
+        }
+    }
+    if (kill) {
+        func_1516972C((struct102 *) obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_EE6C0/func_150C1138.s")
+#endif
 
 #ifdef NON_MATCHING
 /*

@@ -195,4 +195,7 @@ void func_150A79FC(Vtx *out, s32 count, u8 *state, u8 *hue, u8 *phase, f32 *amp,
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/func_150A79FC.s")
 #endif
 
+/* P279: private entry of func_150A79FC (sine lookup by quarter, t4/s6/s7 in, f8 out, returns via v0): folded into the VTX_WAVE_COS macro of func_150A79FC's NM C */
+#ifndef NON_MATCHING
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_D4C90/func_150A7BD0.s")
+#endif

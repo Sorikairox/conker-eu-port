@@ -1,0 +1,49 @@
+\#^    obj->unkF8 &= ~4;$#s/~4/~5/
+\#^    obj->unkB0 = 25;$#s/25/26/
+\#^    obj->unk13C = 0;$#s/0;/1;/
+\#^    obj->unkF8 |= 0x80;$#s/0x80/0x40/
+\#^    if (1.0f < obj->xz_velocity) {$#s/1.0f </2.0f </
+\#^        obj->unkF8 |= 4;$#s/4/8/
+\#^    obj->stunned = 10;$#s/10/11/
+\#^    obj->unk239 = 3;$#s/3/2/
+\#^    obj->unkFC = 0xA7;$#s/0xA7/0xA6/
+\#^    obj->unk80 = 1;$#s/1/2/
+\#^    if (obj->unk25C & 0x40) {$#s/0x40/0x20/
+\#^        obj->unk25C &= ~0x40;$#s/~0x40/~0x41/
+\#^        obj->old_x_position = D_800CC2D0\[0\].x_position;$#s/x_position;/y_position;/
+\#^        obj->old_z_position = D_800CC2D0\[0\].z_position;$#s/old_z/old_y/
+\#^        func_150562FC(obj);$#s/func_150562FC(obj);//
+\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/0x32C/0x328/
+\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/& 4/\& 2/
+\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/>= 9/>= 10/
+\#^        if ((D_800B8AC4\[obj->unk13D \* 0x32C\] == 0 || (D_800CC670 & 4)) && obj->unk21C >= 9) {$#s/ || (D_800CC670 & 4)//
+\#^            target = -20.0f;$#s/-20/-21/
+\#^    obj->unkB8 = obj->unkB8 + (target - obj->unkB8) \* 0.2f;$#s/0.2f/0.25f/
+\#^    obj->unk40 = (f32) (s16) (obj->unk7A + 0x4000) \* 0.0054931640625f;$#s/(s16) //
+\#^    func_150597FC(obj);$#s/func_150597FC(obj);//
+\#^    func_1505E650(obj, 0, 1.0f, 0.0f, 0.0f, 0.0f, 0);$#s/1.0f/0.0f/
+\#^    if (obj->unk13D == 0 || (u8) func_150ADA20() >= 40) {$#s/>= 40/>= 41/
+\#^    if (obj->unk13D == 0 || (u8) func_150ADA20() >= 40) {$#s/(u8) //
+\#^    dist = obj->xz_scale \* (f32) ((u32) func_150ADA20() . 40);$#s/(u32) //
+\#^    dist = obj->xz_scale \* (f32) ((u32) func_150ADA20() . 40);$#s/obj->xz_scale \* //
+\#^    c = func_15048A40(a);$#s/(a)/(a + 1)/
+\#^    rec.u0E = 0;$#s/rec.u0E = 0;//
+\#^    rec.pos\[0\] = (s32) (obj->x_position + s \* dist);$#s/s \* dist/c * dist/
+\#^    rec.pos\[1\] = (s32) obj->y_position;$#s/y_position/x_position/
+\#^    rec.pos\[2\] = (s32) (obj->z_position + c \* dist);$#s/+ c/- c/
+\#^    func_1510F800(0);$#s/0/1/
+\#^    rec.u04 = func_1510FE58(rec.pos\[0\], rec.pos\[1\], rec.pos\[2\], NULL);$#s/rec.pos\[1\], rec.pos\[2\]/rec.pos[2], rec.pos[1]/
+\#^    speed = D_800CC2D0\[0\].xz_velocity \* 64.0f;$#s/64.0f/32.0f/
+\#^    a = D_800CC2D0\[0\].unk76 >> 8;$#s/>> 8/\& 0xFF/
+\#^    rec.u18 = (s32) (func_15048A40(a) \* -speed);$#s/-speed/speed/
+\#^    rec.u1A = -30;$#s/-30/-31/
+\#^    rec.u1F = 7;$#s/7/6/
+\#^    rec.u22 = -80;$#s/-80/-81/
+\#^    rec.u24 = (r << 12) / 5100 + 204;$#s/5100/5000/
+\#^    rec.u24 = (r << 12) / 5100 + 204;$#s/204/205/
+\#^    rec.u26 = (r << 12) / 12750 + 81;$#s/81/80/
+\#^    rec.u28 = 400;$#s/400/401/
+\#^    rec.u2B = r;$#s/r;/0;/
+\#^    rec.u2E = 0;$#s/0;/0xFF;/
+\#^    rec.u34 = 0;$#s/0;/1;/
+\#^    func_15167D84(&rec, 0, 0, -1, 0xFF, 0);$#s/0xFF/0xFE/

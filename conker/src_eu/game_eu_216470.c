@@ -399,7 +399,117 @@ u8 *func_151E9150(u8 *buf, s32 unused, s32 alpha) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9150.s")
 #endif
 
+#ifdef NON_MATCHING
+extern s8 D_80087608;            /* score marks per team */
+extern s16 D_800E0ED0[];         /* team score */
+u8 *func_151E8E94(u8 *, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+s32 func_150859AC(s16, s32);
+#define TM_W(g, a, b) ((g)->words.w0 = (a), (g)->words.w1 = (b), (g)++)
+/* mp_team_marks_draw: the team panel of the multiplayer HUD at row `y`; returns the new DL end (the end so far when
+ * a texture is missing). D_800E0FE0 teams share 0x124 pixels. With `loadTex` (s8) it loads texture 0xD16 (32 x 32
+ * RGBA32); with `refresh` (u8) it finds the teams out of the game (bit per team: 0xF minus the teams D_800E1030[i] of
+ * the D_8008FD8C players for which func_150859AC(i, 3) is set) and re-reads the scores (func_150859AC(team, 6)) into
+ * D_800E0ED0. Each live team draws D_80087608 marks in its colour (D_800ABEA0), 8 pixels apart around its column,
+ * the marks from its score on (one more for `sel`) greyed (0x40404040). With any team out, texture 0xD19 (64 x 64
+ * colour-indexed sheet + TLUT) draws a 16 x 0x40 cross in that team's colour over each team out. Ends with a pipe
+ * sync. */
+u8 *func_151E9E1C(u8 *buf, s32 y, s32 sel, s32 loadTex, s32 refresh) {
+    Gfx *gdl = (Gfx *) buf;
+    s32 tex;
+    s32 pitch;
+    s32 x;
+    s32 i;
+    s32 j;
+    s32 score;
+    s32 mx;
+    s8 out = 0;
+
+    if ((s8) loadTex != 0) {
+        tex = func_1510D66C(0xD16, 0, 3, 0);
+        if (tex == (s32) 0x80000000) {
+            return (u8 *) gdl;
+        }
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xFC12FE25, 0xFFFFF3F9); /* SetCombine */
+        TM_W(gdl, 0xFD180000, tex);        /* SetTImg RGBA32 */
+        TM_W(gdl, 0xF5180000, 0x07094250); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        TM_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xF5181000, 0x00094250); /* SetTile (render) */
+        TM_W(gdl, 0xF2000000, 0x0007C07C); /* SetTileSize 32x32 */
+        gDPSetOtherMode(gdl++, 0x002C3F, 0x504244);
+    }
+    pitch = 0x124;
+    if (D_800E0FE0 > 0) {
+        pitch = 0x124 / D_800E0FE0;
+    }
+    if ((u8) refresh != 0) {
+        out = 0xF;
+        for (i = 0; i < D_8008FD8C; i++) {
+            if (func_150859AC((s16) i, 3) != 0) {
+                out &= ~(1 << D_800E1030[i]);
+            }
+        }
+    }
+    x = pitch >> 1;
+    for (i = 0; i < D_800E0FE0; i++, x += pitch) {
+        if ((u8) refresh != 0) {
+            score = func_150859AC((s16) i, 6);
+            D_800E0ED0[i] = score;
+        } else {
+            score = D_800E0ED0[i];
+        }
+        if (out & (1 << i)) {
+            continue;
+        }
+        if (i == sel) {
+            score++;
+        }
+        gDPPipeSync(gdl++);
+        gDPSetEnvColor(gdl++, D_800ABEA0[i][0], D_800ABEA0[i][1], D_800ABEA0[i][2], 0xFF);
+        mx = x - D_80087608 * 4;
+        for (j = 0; j < D_80087608; j++, mx += 8) {
+            if (j == score) {
+                gDPPipeSync(gdl++);
+                TM_W(gdl, 0xFB000000, 0x40404040); /* SetEnvColor grey */
+            }
+            gdl = (Gfx *) func_151E8E94((u8 *) gdl, mx * 4, y, (mx + 7) * 4, y + 0x1C, 0, 0x1C0, 0x200, 0x400, 0x400);
+        }
+    }
+    if (out != 0) {
+        tex = func_1510D66C(0xD19, 0, 3, 0);
+        if (tex == (s32) 0x80000000) {
+            return (u8 *) gdl;
+        }
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xFD500000, tex);        /* SetTImg RGBA16 (load as 16b) */
+        TM_W(gdl, 0xF5500000, 0x07098260); /* SetTile (load) */
+        gDPLoadSync(gdl++);
+        TM_W(gdl, 0xF3000000, 0x073FF000); /* LoadBlock */
+        gDPPipeSync(gdl++);
+        TM_W(gdl, 0xF5400800, 0x00098260); /* SetTile (render, palette) */
+        TM_W(gdl, 0xF2000000, 0x000FC0FC); /* SetTileSize 64x64 */
+        TM_W(gdl, 0xFD100000, tex + 0x800); /* SetTImg TLUT */
+        gDPLoadSync(gdl++);
+        TM_W(gdl, 0xF0000000, 0x0603C000); /* LoadTLUT */
+        gDPSetOtherMode(gdl++, 0x00AC3F, 0x504244);
+        x = pitch >> 1;
+        for (i = 0; i < D_800E0FE0; i++, x += pitch) {
+            if (out & (1 << i)) {
+                gDPPipeSync(gdl++);
+                gDPSetEnvColor(gdl++, D_800ABEA0[i][0], D_800ABEA0[i][1], D_800ABEA0[i][2], 0xFF);
+                gdl = (Gfx *) func_151E8E94((u8 *) gdl, (x - 8) * 4, y - 0x18, (x + 8) * 4, y + 0x28, 0, 0x600, 0x280,
+                                            0x400, 0x400);
+            }
+        }
+    }
+    gDPPipeSync(gdl++);
+    return (u8 *) gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151E9E1C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern s16 D_800E0ED0[];         /* team score */
@@ -2088,7 +2198,300 @@ void func_151EE704(void) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE704.s")
 #endif
 
+#ifdef NON_MATCHING
+extern u8 D_800ABEE4[];          /* "-": the blinking text cursor */
+void func_150A7D00(Mtx *, f32, f32, f32);
+s32 func_1507BB28(s32, s32);
+void func_15042BC4(u8 *, s32 *, s32 *, s32 *);
+// cheat_entry_draw: the cheat-code entry screen (barrel menu page 1 while D_800902A4 is set, from func_151ECB98).
+// Pad bits at D_80090174 + 0x20 (1 up, 2 down, 4 left, 8 right, 0x10 select) move the cursor over the letter wheel
+// (row D_800E10B1 0..5 wrapping, column D_800E10B0 clamped to 0 / last: rows 0-3 'A'..'X', row 4 delete / '.' / 'Y' /
+// 'Z' / enter, row 5 space) with sound 0x62D; D_800E10B2 tilts the selected letter (+8 / -8 a frame within 0..12
+// while D_800BE748[0] bit 0x8000 is set / clear). Select (sound 0x500) appends to the typed text D_800E10AC (19 chars
+// max, length D_800E10B3) or deletes / enters. Enter: column k of the 19 strings D_800E1008[0x90..0xA2] holds char k
+// (space padded) of 32 cheat codes; the highest code equal to the text sets its D_800E9D00 bit (0x400 / 0x800 clear
+// each other), sound 0xC3 / 0xC4, message kind 0x10. Else (kind 0x11) the whole-word phrases D_800E1008[0xA3..0xC7]
+// are searched in the text (sound 0xC1 / 0xC2); else 0xC5 / 0xC6, or 0xC7 when the same text is entered a second
+// time in a row (D_800E10B4 counts repeats). The text is kept at D_800E10AC + 0x20, an object of type 9
+// (func_15083E90) gets the kind at +0x232 and becomes D_800D154C, and the text is cleared. Then the wheel is drawn:
+// the 30 sprite display lists of D_800904E8 (12-byte entries) under the matrix built by func_15043E68 and the
+// projection D_800E1068, the selected one magenta with the tilt matrix, and the text at (75 - width / 2, min 10;
+// 180) with a '-' cursor shown 22 frames out of 32. Returns the display list end.
+Gfx *func_151EE93C(Gfx *gdl) {
+    s32 moved;
+    s32 row;
+    s32 col;
+    s32 cols;
+    s32 sel;
+    s32 ch;
+    s32 sfx;
+    s32 kind;
+    s32 cheat;
+    s32 bit;
+    s32 len;
+    s32 i;
+    s32 n;
+    u32 match;
+    u8 c;
+    u8 *str;
+    u8 *in;
+    u8 *pat;
+    u8 *text;
+    Mtx *mtx;
+    struct127 *obj;
+    u16 persp;
+    s32 w;
+    s32 h;
+    s32 d;
+    s32 x;
+    s32 off;
+
+    sfx = 0;
+    if (D_800904E8 == NULL) {
+        return gdl;
+    }
+
+    /* cursor movement over the wheel */
+    moved = FALSE;
+    if (*(u16 *) (D_80090174 + 0x20) & 1) {
+        D_800E10B1--;
+        moved = TRUE;
+    }
+    if (*(u16 *) (D_80090174 + 0x20) & 2) {
+        D_800E10B1++;
+        moved = TRUE;
+        if (D_800E10B1 == 4 && D_800E10B0 >= 5) {
+            D_800E10B0 = 4;
+        }
+    }
+    row = D_800E10B1;
+    col = D_800E10B0;
+    if (row < 0) {
+        D_800E10B1 = 5;
+        row = D_800E10B1;
+    }
+    if (row >= 6) {
+        D_800E10B1 = 0;
+        row = D_800E10B1;
+    }
+    if (*(u16 *) (D_80090174 + 0x20) & 8) {
+        D_800E10B0 = col + 1;
+        col = D_800E10B0;
+        moved = TRUE;
+    }
+    if (*(u16 *) (D_80090174 + 0x20) & 4) {
+        D_800E10B0 = col - 1;
+        col = D_800E10B0;
+        moved = TRUE;
+    }
+    if (row == 4) {
+        cols = 5;
+    } else if (row == 5) {
+        cols = 1;
+    } else {
+        cols = 6;
+    }
+    if (col < 0) {
+        D_800E10B0 = cols - 1;
+        col = D_800E10B0;
+    }
+    if (col >= cols) {
+        D_800E10B0 = 0;
+    }
+    if (moved) {
+        func_10010F30(0x62D, 0x4650, 0x40, 0, 0);
+    }
+    sel = D_800E10B1 * 6 + D_800E10B0;
+    if (D_800E10B1 == 5) {
+        sel--;
+    }
+
+    mtx = (Mtx *) allocate_memory(0x80, 4, 2, 0);
+    if (D_800BE748[0] & 0x8000) {
+        D_800E10B2 += 8;
+    } else {
+        D_800E10B2 -= 8;
+    }
+    if (D_800E10B2 < 0) {
+        D_800E10B2 = 0;
+    }
+    if (D_800E10B2 >= 13) {
+        D_800E10B2 = 12;
+    }
+
+    if (*(u16 *) (D_80090174 + 0x20) & 0x10) {
+        func_10010F30(0x500, 0x7D00, 0x40, 0, 0);
+        ch = sel + 'A';
+        if (D_800E10B1 == 5) {
+            ch = ' ';
+        } else if (D_800E10B1 == 4) {
+            if (D_800E10B0 == 0) {
+                /* delete */
+                if (D_800E10B3 > 0) {
+                    D_800E10B3--;
+                }
+                D_800E10AC[D_800E10B3] = '\0';
+                ch = 0;
+            } else if (D_800E10B0 == 1) {
+                ch = '.';
+            } else if (D_800E10B0 != 4) {
+                ch = sel + 'A' - 2;
+            } else {
+                /* enter: cheat codes, one column string per text position */
+                match = 0xFFC3FFFE;
+                len = D_800E10B3;
+                for (i = 0x90; i < 0xA3; i++) {
+                    str = ((u8 **) D_800E1008)[i];
+                    if (i - 0x90 < len) {
+                        c = D_800E10AC[i - 0x90];
+                    } else {
+                        c = ' ';
+                    }
+                    for (n = 0; n < 32; n++) {
+                        if (c != str[n]) {
+                            match &= ~(1 << n);
+                        }
+                    }
+                }
+                cheat = -1;
+                for (n = 0; n < 33; n++) {
+                    if (match & 1) {
+                        cheat = n;
+                    }
+                    match >>= 1;
+                }
+                if (cheat >= 0) {
+                    bit = 1 << cheat;
+                    D_800E9D00 |= bit;
+                    if (bit == 0x400) {
+                        D_800E9D00 &= ~0x800;
+                    } else if (bit == 0x800) {
+                        D_800E9D00 &= ~0x400;
+                    }
+                    kind = 0x10;
+                    sfx = (func_150ADA20() & 1) + 0xC3;
+                } else {
+                    /* phrases: a phrase must equal a whole space-separated word run of the text */
+                    kind = 0x11;
+                    for (i = 0xA3; i < 0xC8 && sfx == 0; i++) {
+                        in = D_800E10AC;
+                        if (in == NULL) {
+                            continue;
+                        }
+                        while ((pat = ((u8 **) D_800E1008)[i]) != NULL) {
+                            n = 0;
+                            while (pat[n] == *in && *in != '\0' && pat[n] != '\0') {
+                                in++;
+                                n++;
+                            }
+                            if (pat[n] == '\0' && (*in == ' ' || *in == '\0')) {
+                                in = NULL;
+                                sfx = (func_150ADA20() & 1) + 0xC1;
+                            } else if (*in == ' ') {
+                                in++;
+                            } else {
+                                while (*in != '\0' && *in != ' ') {
+                                    in++;
+                                }
+                                if (*in == '\0') {
+                                    in = NULL;
+                                }
+                            }
+                            if (in == NULL) {
+                                break;
+                            }
+                        }
+                    }
+                    if (sfx == 0) {
+                        sfx = (func_150ADA20() & 1) + 0xC5;
+                        text = D_800E10AC;
+                        n = 0;
+                        while (text[n + 0x20] != '\0' && text[n] != '\0' && text[n + 0x20] == text[n]) {
+                            n++;
+                        }
+                        if (text[n + 0x20] == '\0' && text[n] == '\0') {
+                            D_800E10B4++;
+                            if (D_800E10B4 == 1) {
+                                sfx = 0xC7;
+                            }
+                        } else {
+                            D_800E10B4 = 0;
+                        }
+                    } else {
+                        D_800E10B4 = 0;
+                    }
+                }
+                /* keep the text as the previous entry */
+                for (n = 0; D_800E10AC[n] != '\0'; n++) {
+                    D_800E10AC[n + 0x20] = D_800E10AC[n];
+                }
+                D_800E10AC[n + 0x20] = '\0';
+                if (sfx != 0) {
+                    func_1001263C(sfx, 0x7D00, 0x40);
+                }
+                obj = func_15083E90(9);
+                if (obj != NULL) {
+                    obj->unk232 = kind;
+                    D_800D154C = obj;
+                    D_800C3E78 = ((u8 *) obj - (u8 *) D_800CC2D0) / 0x32C;
+                    obj->unk218 = (struct216 *) func_1507BB28(0, obj->unk232);
+                    obj->unk21C = 0;
+                }
+                D_800E10B3 = 0;
+                D_800E10AC[D_800E10B3] = '\0';
+                ch = 0;
+            }
+        }
+        if (ch > 0) {
+            D_800E10AC[D_800E10B3] = ch;
+            if (D_800E10B3 < 19) {
+                D_800E10B3++;
+            }
+            D_800E10AC[D_800E10B3] = '\0';
+        }
+    }
+
+    /* the wheel */
+    func_15043E68(mtx, -30.0f, -10.0f, 0.0f, -115.0f, 10.0f, -530.0f);
+    func_150A7D00(mtx + 1, 0.0f, 0.0f, -(f32) D_800E10B2);
+    guPerspective((Mtx *) &D_800E1068, &persp, 50.0f, 60.6f, 53.0f, 20000.0f, 1.0f);
+    gSPPerspNormalize(gdl++, persp);
+    gSPMatrix(gdl++, &D_800E1068, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPClearGeometryMode(gdl++, 0xFFFFFFFF);
+    gSPSetGeometryMode(gdl++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+    gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    for (off = 0; off < 30 * 12; off += 12) {
+        gDPPipeSync(gdl++);
+        if (off == sel * 12) {
+            gDPSetEnvColor(gdl++, 0xFF, 0x00, 0xFF, D_800E0EC5);
+            gSPMatrix(gdl++, mtx + 1, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
+        } else {
+            gDPSetEnvColor(gdl++, 0xFF, 0xFF, 0xFF, D_800E0EC5);
+        }
+        gSPDisplayList(gdl++, *(Gfx **) (D_800904E8 + off));
+        if (off == sel * 12) {
+            gSPMatrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+        }
+    }
+
+    /* the text and its cursor */
+    func_1504332C(0xFF, 0xB1, 0x1E, D_800E0EC5);
+    func_15042BC4(D_800E10AC, &w, &h, &d);
+    x = 75 - (w >> 1);
+    if (x < 10) {
+        x = 10;
+    }
+    func_15042D94(x, 180, 0x80, D_800E10AC);
+    if ((D_800BEDCC & 0x1F) >= 10) {
+        w = x + w + 2;
+        func_1504332C(0xFF, 0xFF, 0xFF, 0xFF);
+        func_15042D94(w, 180, 0x80, D_800ABEE4);
+    }
+    return gdl;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_216470/func_151EE93C.s")
+#endif
 
 #ifdef NON_MATCHING
 /* save_screen_frame_draw: draws the save / load screen frame (D_80090174 mode of func_151ECB98, padC[0] = selected

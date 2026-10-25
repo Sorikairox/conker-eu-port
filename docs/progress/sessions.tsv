@@ -80,3 +80,45 @@ P269	port-web	user crash level 6 (type-77 trail)	0	0	~110	culprit func_151D7FE8 
 P267	port-b	port NM C (150D5268, 15198180)	2	0	45	P264 leftovers in hand C; 5268 needs ARGMEM on the func_151307F0 template (5 survivors without it)
 P270	port	intro crash fix + stride bug class (151D7FE8 + 10 NM funcs)	11	0	100	func_151D7FE8 vel pointer fix (user crash); stride_scan.py 151->119 NM hits; verify_all OK
 P271	port-web	milk glass intro + mute runs	0	0	103	func_15031C4C m2c off-by-one (sub-attachments never drawn), fix diff to port; runs muted
+P274	port-b	port NM C (1511BD5C 15119C54 151C64F4 150E2030 150CDAAC 151CC86C 150EB740 151B402C 151714BC)	9	0	135	9 compiled funcs to hand C + 3 caller/type fixes (1511CBC0 sound table, 151B458C float args, 151B3550 return); verify_all OK
+P275	port-b	group A + carry-over	12	-	~130	merge P272; 11 compiled functions + 1 absorbed tail entry to hand C (NM)
+P280	port-b	group A (split-P276)	9	-	~125	9 compiled functions to hand C (NM); difftest ARGMEM @K call index; 2 cross-file prototype fixes listed
+P287	port-b	group A	8	-	~130	prototype fixes (protocheck 0) + 8 compiled functions to hand C (NM); func_15171770 blocked on game_EF410 prototype
+P293	port-b	group A	7	-	~130	func_15171770 (EF410 prototype void) + 6 compiled functions to hand C (NM); memcpy EU key 10023360
+P298	port-b	group A	6	15448	~130	6 hand C (NM), 3 unkilled mutants explained; 5 left in group A
+P302	port-b	group A	5	-	~125	5 hand C (NM) + P298 D0CC survivors killed; group A at 0
+P279	port-e	group E hand asm + init/debugger (150A7770 150A80F0 150B2290 bzero bcopy guMtxF2L cosf 1000BCBC; folded 150A7EF4 150A7BD0)	10	0	135	8 NM C + 2 folded pragmas, all EQUIV with mutants killed; progress_nm counts D5E90 NM_ASM/folded entries (+28) and --platform (40-row platform_replaced.tsv)
+P281	port-e	group E leftovers + endless-loop difftest (100052A0 10001550 151FA3E0 150AA950)	4	0	150	STOPCALL/RETV1/sret/ldiv harness; 4 NM C committed, 6 drafts pending mutants; progress_nm plat default (97.1%)
+P285	port-e	P281 drafts landed (36E8 5B04 7830 1044) + D5E90 wall helper unit mode, 6 helpers readable	10	0	130	nmasm_walls --unit; 288C setups DIFFER, 1194 blocked by stub_write page bug (97.2%)
+P288	port-e	stub_write page fix; 10001194 + 1600288C landed; D5E90 AAF00 + AD844 readable	4	0	135	288C DIFFER = unpoked 1e8 late_rodata; engine/ray bodies still asm2c (97.2%)
+P291	port-e	star field 150FBA40 (new nmasm_stars harness); ray inputs kill AD844 projection mutant; ray cast ACEA0 readable	2	0	118	stars 17/18; ray body 15/25 (3 next-leaf coverage gaps); walls engine bodies still asm2c (97.2%)
+P294	port-e	D5E90 wall engine AB708 (AB6D0 / AC8C4) readable, walls.inc deleted, ray far-leaf scenes	2	0	115	walls 33/41, ledge 20/32, P291 ray next-leaf survivors killed; 0 asm2c left (97.2%)
+P300	port-e	group C part C2 (trail update/draw/hit effects 106830, freecam 1579B0)	4	0	130	D99AC 53/53, DA1FC 34/34, DABFC 57/57, 2A1A0 47/50; 151E67A0 + 150FBE40 left (97.3%)
+P307	port-b	integration start: merge port-e (74c6f08a) into port-b; 1 game-C conflict (func_150A7EF4 fold, kept port-b)	0	0	30	verify_all OK, NM links, protocheck 0, implicit NM+float 0, selftest 147/147, 98.1% (92.7% bytes)
+P277	port-c	group C	10		~170	10 compiled funcs to NM C; B1964 drafted (mode-14 DIFFER), E1AF0 blocked on func_1505D1C4 void
+P284	port-c	group C	7		~140	B1964 fixed (mode-14 divisor = func_1505A6F8 result) + 6 compiled funcs to NM C; func_1505D1C4->s32 blocked by void decls in 201240/C5530
+P289	port-c	group C	3		~120	P284 mutants re-run clean; func_1505D1C4->s32 + E1AF0; D_8008B704 = 2 entries, NM phase param; B2290 (ld/sd hand asm) via Python-model harness; B8DB0
+P292	port-c	group C	3		~125	DCEF0 B2290 proto; 1505D1C4 v0 callers need no change; difftest stub_write maps pages (OUTW/OUTA into untouched heap faulted); D290 + AFC84 + B4854 to NM C
+P296	port-c	group C	6		~130	ED1F0 + A39E4 (caller A3990 4 args) + CB6F4 + 970BC + 06D38 + BD550 to NM C; func_150C3574 boundary setups kill the 5 P284 survivors
+P299	port-c	group C1	4		~120	CA4E8 (rodata copied, shared D_800AB164.. exported const) + B3878 rope_draw + A1E0 debris_update + FE30 menu list to NM C; 1C3530 trio left
+P305	port-c	group C1	3		~115	976B8 emitter_ribbon_draw + A1A4 emitter2_flame_update + BA28 emitter2_flame_draw (1C3530) to NM C, mutants 74/76 + 106/106 + 85/85; group C1 done
+P308	port-b	integration 2	0		~35	merge port-c (C1): func_150B2290 keep P289, STUBMAP unified, selftest 150/150, progress_nm 98.6% / 94.7%
+P306	port-e	group C part C2 finished (mp hit report 20B730, gun fire effects 129650)	2	0	115	67A0 85/85, BE40 86/86; C2 complete (97.3%)
+P312	port-b	integration 3	0		~25	merge port-e (C2 finished, P306): docs/registry conflicts only, selftest 150/150, progress_nm 98.7% / 94.9%
+P278	port-d	group D NM C (150DBF60 15096E78 151A4FE8 150DFEA0 1513BBFC 150CD3C0 150E5D90 15188008 150BFC60)	9	0	125	9 compiled funcs to hand C, all mutants killed; NM rodata copy for func_150E0C58; verify_all OK
+P283	port-d	group D NM C (15036860 150403C8 150BABE0 151C5280 151A3D70 15104BB4 150F3294 150CDD08)	8	0	140	8 compiled funcs to hand C, survivors equivalent; 151C5280 rodata copies (1F3040, 51190); IDO float scalar statics go to .data -> use arrays; verify_all/NM rc 0
+P297	port-d	group D NM C (150BF71C 150C8300 150BFF7C 150D0DD0 151AECA0 151E9E1C)	6	0	~125	6 compiled funcs to hand C, survivors equivalent; ARGMEM lengths decimal; IDO float literal ulp rounding (0.807f); verify_all/NM rc 0
+P304	port-f	group D2 NM C (150E5384 150DD420 150DCAD8 150DDBC0)	4	0	~125	4 compiled funcs to hand C, survivors equivalent; no #ifndef/#endif inside an NM block (splice drops cand); DDBC0 asm reads an unset stack index; verify_all/NM rc 0
+P309	port-f	group D2 NM C (150D7E38 150F3A74)	2	0	~95	2 compiled funcs (1569 insns) to hand C, 1 equivalent survivor; func_150D7E38 models func_15052F9C leftover v0; verify_all/NM rc 0
+P315	port-b	integration 4	0		~20	merge port-f (D2 finished, P304/P309, +port-d P278..P297): docs/registry conflicts only (reg3way 474 rows/471 funcs); checks ok, selftest 150/150, progress_nm 99.2% / 96.8%
+P303	port-d	group D1 NM C (151ADEDC 151AD724 151A4194 151B58D8)	4	0	~150	4 compiled funcs to hand C, survivors equivalent; pin random-phase counts/pointers for fixed stack copies; verify_all/NM rc 0
+P313	port-d	group D1 NM C (151EE93C)	1	0	~75	cheat-code entry screen to hand C, 68 setups, mutants 190/190; verify_all/NM rc 0
+P311	port-c	group B2	2		~120	1516E100 particle_emitter_update + 151206C8 player_camera_update (1300-insn camera) to NM C, mutants 81/81 + 116/121 (5 equivalent); func_151CA150 prototype fixed
+P316	port-b	integration 5	0		~20	merge port-d (D1 rest, P313) + port-c (B2, P311): docs/registry conflicts only; 99.4%/97.6%
+P276	port	group B compiled funcs to hand C (16)	16	0	140	group B: 16 compiled funcs to hand C (spec fillers via specgen.py, static rodata copies for 150FEDE0); verify_all OK
+P286	port	group B: NM link fix + 4 compiled funcs to hand C	4	0	130	NM link fixed (static const), 1517D5E4 150C1138 151A1794 151B1138 hand C, 151356D4 re-check 97/97; verify_all OK
+P301	port	group B: 3 compiled funcs to hand C + 1513334C survivors	3	0	125	151C40BC 150E3CB8 150B4BF0 hand C; 1513334C 37/37 (memcpy OUTA fills old[]); verify_all OK
+P310	port	group B1: 2 compiled funcs to hand C	2	0	118	1506C460 150E2294 hand C (static const rodata copies; volatile zero keeps -0.0, IDO folds 0.0f + x); verify_all OK
+P314	port-e	group D1 leftover func_15175EC8 (ambient flyer update, 1A2970)	1	0	100	5EC8 175/175, 119 setups; 1A2970 identical to port-d (97.3%)
+P317	port-b	final integration: merge port + port-e, final-merge notes	1	0	140	conversion complete: 0 asm-only (5916/5916, strict 99.4%); D_8008A0B4 / D_80089CD4 signatures, 5 volatile-zero folds, DIFFTEST_MEMCPY; verify_all OK
+P318	port-web	merge port-b P317 + dup-symbol fixes	0	0	~85	checks green, 0 game stubs; smoke test blocked (orphan Chrome)

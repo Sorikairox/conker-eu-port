@@ -1,0 +1,36 @@
+\#^    angle += 180.0f;$#s/180/181/
+\#^    angle += (f32) (s32)#s/angSpread >> 1/angSpread >> 2/
+\#^    rad = angle \* 0.017453292f;$#s/0.017453292f/0.0175f/
+\#^        speedSpread = 1;$#s/1/2/
+\#^    x = (s32) (x + d \* sn);$#s/sn/cs/
+\#^    z = (s32) (z + d \* cs);$#s/+ d/- d/
+\#^    spd = speed + (f32) r;$#s/+/-/
+\#^    y++;$#s/++/--/
+\#^    r = rise + (s32)#s/rise +/rise - 1 +/
+\#^    r = rise + (s32)#s/riseSpread >> 1/riseSpread >> 2/
+\#^    if (mode == 2) {$#s/2/3/
+\#^        red = 0x68;$#s/0x68/0x69/
+\#^        green = 0x38;$#s/0x38/0x39/
+\#^        blue = 0x10;$#s/0x10/0x11/
+\#^        blue = 0xFF;$#s/0xFF/0xFE/
+\#^    rec.tex = D_8008CDEC\[tex\];$#s/\[tex\]/[tex + 1]/
+\#^    rec.u4 = (hi << 16) | (y0 & 0xFFFF);$#s/y0 & 0xFFFF/y \& 0xFFFF/
+\#^    rec.u4 = (hi << 16) | (y0 & 0xFFFF);$#s/hi << 16/hi << 15/
+\#^    rec.uE = 0x100;$#s/0x100/0x101/
+\#^    rec.mode = mode;$#s/= mode/= 0/
+\#^    rec.uC = 0;$#s/0/1/
+\#^    rec.size = size;$#s/= size/= 0/
+\#^    rec.u1F = 0;$#s/0/1/
+\#^    rec.gravity = -0xA0;$#s/0xA0/0xA1/
+\#^    rec.u24 = size;$#s/= size/= 0/
+\#^    rec.u26 = size;$#s/= size/= 0/
+\#^    rec.u28 = 0x190;$#s/0x190/0x191/
+\#^    rec.u2A = 0;$#s/0/1/
+\#^    rec.vel\[0\] = (s32) (spd \* sn);$#s/sn/cs/
+\#^    rec.vel\[1\] = (s32) (spd \* cs);$#s/spd/d/
+\#^    rec.colour\[3\] = 0xFF;$#s/0xFF/0xFE/
+\#^    rec.u34 = 0;$#s/0/1/
+\#^    func_15167D84(&rec, 0, 0, -1, room, owner);$#s/-1/0/
+\#^    func_15167D84(&rec, 0, 0, -1, room, owner);$#s/owner)/room)/
+\#^    r = (u32) func_150ADA20()#s/speedSpread >> 1/speedSpread >> 2/
+\#^    angle += (f32) (s32)#{s/(u32) func_150ADA20()/(s32) func_150ADA20()/;s/(u32) angSpread/angSpread/;}

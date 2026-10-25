@@ -1,0 +1,12 @@
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if (a1 > a2 ? !(a3 > a1) : !(a3 > a2)) {/    if (a1 > a2 ? !(a3 > a2) : !(a3 > a1)) {/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if ((f32) (box\[0\] - 1) > hx/    if ((f32) (box[0] - 2) > hx/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if ((f32) (box\[1\] - 1) > hz || (f32) (box\[3\] + 1) < hz) {/    if ((f32) (box[1] - 1) > hz) {/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if ((f32) (ybox\[0\] - 1) > hy || (f32) (ybox\[1\] + 1) < hy) {/    if ((f32) (ybox[0] - 1) > hy || (f32) (ybox[1]) < hy) {/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if (dist >= best\[0\]) {/    if (dist > best[0]) {/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if (t < 0.0f) {/    if (t < -1.0f) {/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    d = -(nx \* v\[0\]\[0\]) - ny \* v\[0\]\[1\] - nz \* v\[0\]\[2\];/    d = -(nx * v[1][0]) - ny * v[0][1] - nz * v[0][2];/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    if (pos != 0 \&\& pos != 3) {/    if (pos != 3) {/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/            c3 = (v\[0\]\[1\] - v\[2\]\[1\]) \* (hz - v\[2\]\[2\])/            c3 = (v[0][1] - v[2][1]) * (hz - v[1][2])/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/        c2 = (v\[0\]\[0\] - v\[2\]\[0\]) \* (hy - v\[2\]\[1\])/        c2 = (v[0][0] - v[2][0]) * (hy - v[1][1])/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/            c1 = (v\[2\]\[2\] - v\[1\]\[2\]) \* (hx - v\[1\]\[0\])/            c1 = (v[2][2] - v[1][2]) * (hx - v[2][0])/
+/^static s32 nmr_ray_hits_triangle/,/^}/s/    best\[2\] = hy;/    best[2] = hx;/

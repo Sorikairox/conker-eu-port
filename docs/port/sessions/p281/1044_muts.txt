@@ -1,0 +1,28 @@
+s/cell < D_160038A0 \* 32/cell < D_160038A0 * 16/
+s/cell >= 0x341/cell >= 0x340/
+s/cell < D_160038A0 \* 32/cell <= D_160038A0 * 32/
+s/            pos += 0x70;/            pos += 0x60;/
+s/for (i = 0; i < 8; i++) {/for (i = 0; i < 7; i++) {/
+s/c = value \& 0xF;/c = value \& 0x7;/
+s/if (c >= 10) {/if (c > 10) {/
+s/c += 7;/c += 6;/
+s/value >>= 4;/value >>= 3;/
+s/pos -= 0x10;/pos -= 0x8;/
+s/pos = func_160014F0((s16 \*) pos, '-');/pos = func_160014F0((s16 *) pos, '+');/
+s/value = -value;/value = value;/
+s/if (value < 0) {/if (value <= 0) {/
+s/p >= D_16003B50; p--/p > D_16003B50; p--/
+s/p = \&D_16003B50\[9\]/p = \&D_16003B50[8]/
+s/value = value . \*p;/value = value - *p;/
+s/if (digit > 0 || started || p == D_16003B50) {/if (digit > 0 || p == D_16003B50) {/
+s/if (digit > 0 || started || p == D_16003B50) {/if (digit > 0 || started) {/
+s/(u8) (digit + '0')/(u8) (digit + 'a')/
+s/(value \& 0x7F800000) >> 23/(value \& 0x7F000000) >> 23/
+s/exp >= 0xFF/exp > 0xFF/
+s/(value << 9) != 0/(value << 8) != 0/
+s/exp <= 0 ||/exp < 0 ||/
+s/D_160047E8, D_160047F0, D_160047F4/D_160047E8, D_160047F4, D_160047F0/
+s/func_160012B0(cell, buf);/func_160012B0(cell + 1, buf);/
+s/func_160012B0(cell, D_160047E4);/func_160012B0(cell, D_160047E8);/
+s/        case 1:/        case 3:/
+s/digit = value \/ \*p;/digit = value \/ p[1];/

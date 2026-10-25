@@ -1,0 +1,36 @@
+\#^    if (!(obj\[0x4F\] & 4)) {$#s/& 4/\& 2/ % push
+\#^        push = func_15116E08(#s/>> 3/>> 2/ % push
+\#^        push = func_15116E08(#s/0x7C/0x78/ % push
+\#^    if ((flags & 1) && push < 0) {$#s/push < 0/push <= 0/ % pushnf pushclamp push
+\#^    if ((flags & 1) && push < 0) {$#s/(flags \& 1) \&\& //  % pushnf
+\#^    if (push != 0) {$#s/!=/==/ % push
+\#^    drag = speed \* -0.0032;$#s/0.0032/0.0031/ % big
+\#^    if (timer <= 0) {$#s/<=/</ % dpos
+\#^        if (speed > 0) {$#s/>/>=/ % zero
+\#^            speed--;$#s/--/++/ % dpos
+\#^            if (speed <= 0) {$#s/<=/</ % dpos
+\#^                if (push != 0) {$#s/!=/==/ % dpos pushdpos
+\#^                } else if (timer == 0) {$#s/==/!=/ % dpos
+\#^                    \*(s32 \*) (obj + 0x80) = 20;$#s/20/21/ % dpos
+\#^        } else if (speed < 0) {$#s/</<=/ % zero
+\#^            if (speed >= 0) {$#s/>=/>/ % dneg
+\#^                    speed = 0;$#s/0;/1;/ % dposstop
+\#^        if (speed > 0) {$#s/>/>=/ % tzero
+\#^            speed++;$#s/++/--/ % tpos
+\#^        \*(s32 \*) (obj + 0x80) = timer - D_800BE9E4;$#s/-/+/ % tpos
+\#^        if (\*(s32 \*) (obj + 0x80) <= 0) {$#s/<=/</ % bigtimer
+\#^            \*(s32 \*) (obj + 0x80) = -1;$#s/-1/0/ % tneg
+\#^    \*(s16 \*) (obj + 0x3C) = speed;$#d % dpos
+\#^    if (sound == 0) {$#s/==/!=/ % push
+\#^    f = (vel < 0.0f ? -vel : vel) \* 0.1f;$#s/? -vel : vel/? vel : vel/ % stopneg fast
+\#^    f = (vel < 0.0f ? -vel : vel) \* 0.1f;$#s/0.1f/0.2f/ % push
+\#^    if (1.0f < f) {$#s/1.0f < f/2.0f < f/ % fast
+\#^    pitch = 12767.0f \* f + 20000.0f;$#s/20000/20001/ % push
+\#^    f = f \* dist - 500.0f;$#s/500/501/ % push
+\#^    if (\*(u16 \*) (obj + 0x74) == 0) {$#s/==/!=/ % push upd
+\#^        if (0.01f < vel) {$#s/0.01f/0.02f/ % nostart mid
+\#^            \*(u16 \*) (obj + 0x74) = func_10010F88(#s/sound, pitch/sound + 1, pitch/ % push
+\#^                                                  \*(s16 \*) (obj + 0x12)#s/1000, 6000/1000, 6001/ % push
+\#^    } else if (0.01f < vel) {$#s/</<=/ % stop eq
+\#^                      \*(s16 \*) (obj + 0x14), 200, 2000);$#s/200,/201,/ % upd
+\#^        \*(u16 \*) (obj + 0x74) = 0;$#d % stop

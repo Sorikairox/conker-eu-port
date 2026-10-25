@@ -1,0 +1,31 @@
+\#^    t.u1F = 6;$#s/6/7/ % c3
+\#^    t.u34 = 0;$#s/0/1/ % c3
+\#^    t.rgba\[2\] = 0xFF;$#s/0xFF/0xFE/ % c3
+\#^    t.u0 = D_8008CE04;$#s/D_8008CE04/0/ % c3
+\#^    t.owner = rec;$#d % c3
+\#^    t.span = span;$#s/span;/arg9;/ % c3
+\#^    t.size\[1\] = size;$#s/size;/0x118;/ % pos2
+\#^    size = (w6 == 0)#s/== 0/!= 0/ % c3
+\#^        \*(s32 \*) (rec + 0x14) = 0x80000000;$#s/0x80000000/0/ % pos2
+\#^        \*(s32 \*) (rec + 0x10) = (x << 16)#s/y & 0xFFFF/y \& 0xFFF/ % c3
+\#^        \*(s32 \*) (rec + 0x14) = z << 16;$#s/16/15/ % c3
+\#^    \*(s32 \*) (rec + 0x1C) = y;$#s/y;/z;/ % c3
+\#^    \*(s16 \*) (rec + 0x32) = 0x3C0;$#s/0x3C0/0x3C1/ % c3
+\#^    rec\[0x34\] = (u8) arg2;$#s/(u8) arg2/arg9/ % c3
+\#^    rec\[0x37\] = (u8) arg9;$#s/arg9/arg2/ % c3
+\#^    \*(s16 \*) (rec + 0x2E) = 0;$#s/0;/1;/ % c3
+\#^        s = func_150489B0(a);$#s/(a)/(a + 1)/ % c3
+\#^        r = #s/50.0f/40.0f/ % c3
+\#^        r = #s/& 0xFFFF/\& 0x7FFF/ % c3
+\#^        px = #s/r \* c/r * s/ % c3
+\#^        pz = #s/(f32) z/(f32) x/ % c3
+\#^        py = #s/0x4E/0x4F/ % c3
+\#^        py = #s/(u8) //  % c3
+\#^        t.life = #s/& 7/\& 3/ % c3
+\#^        t.pos\[1\] = py;$#s/py/pz/ % c3
+\#^        rec = func_15167A68(0x3B#s/0x4C/0x48/ % c3
+\#^        rec\[0x48\] = 0xFF;$#s/0xFF/0/ % c3
+\#^        bcopy(&t, rec + 0x10, 0x38);$#s/0x10/0x14/ % c3
+\#^    for (i = 0; i < count; i++) {$#s/i < count/i < count - 1/ % c3
+\#^    rec = func_15167A68(0x3A, 0, 0x38, 0, (u8) flag, 1);$#s/(u8) flag/(u8) arg2/ % c3
+\#^        t.u0C = 0;$#d % c3

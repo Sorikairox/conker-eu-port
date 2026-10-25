@@ -1,0 +1,3 @@
+func_10001550 (P281, init_1420) knobs: NR=0 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARGMEM=10001B38=2:16
+  setups 1550_setups.txt: 20 EQUIV / 20
+  muts 1550_muts.txt: 26 killed / 32 (survived: [s/xexp + 10 : 6/xexp + 11 : 6/] [s/if (gen > 19) {/if (gen > 18) {/] [s/(gen -= 8) > 0/(gen -= 7) > 0/] [s/val = (val - lo) \* D_8002C2C8;/val = (val - lo) * D_8002C270[3];/] [s/        if (gen < nsig) {/        if (gen <= nsig) {/] [s/            gen = 19;/            gen = 20;/]); not applied: 0
