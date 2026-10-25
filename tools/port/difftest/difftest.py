@@ -741,6 +741,7 @@ for _p in filter(None, os.environ.get('DIFFTEST_POKE', '').split(',')):
 # P106 (opt-in): DIFFTEST_MEMSTK="ADDR,..." (hex): memory words that hold a stack address (a function that saves
 # its sp in a global, e.g. func_150ADFD0 -> D_800D3858) compare by class ('STK' in the used stack window), not bytes.
 POKE_OLD = os.environ.get('DIFFTEST_POKE_OLD') == '1'   # P132: pre-P132 precedence (the ROM image overwrites pokes)
+STUBMAP_OLD = os.environ.get('DIFFTEST_STUBMAP_OLD') == '1'   # P292: stub_write maps pages first
 
 MEMSTK = [int(_a, 16) & 0x1FFFFFFF for _a in filter(None, os.environ.get('DIFFTEST_MEMSTK', '').split(','))]
 
@@ -1197,6 +1198,11 @@ class Run:
     def stub_write(self, p, data):
         """P198: a stub's write (no Unicorn write hook fires for mem_write): store it and log it like on_write"""
         p = phys(p)
+        # P292: map the pages first (lazy init, as on_unmapped does): a stub output into a heap page the function had
+        # not touched yet faulted with UC_ERR_WRITE_UNMAPPED at the stub (func_1518D290: ring / world buffers that
+        # DIFFTEST_RET hands out are filled by stubs before the function reads them). DIFFTEST_STUBMAP_OLD=1 = old.
+        if not STUBMAP_OLD:
+            for _pp in range(p & ~(PAGE - 1), p + max(len(data), 1), PAGE): self.ensure(_pp)
         self.mu.mem_write(p, data)
         if STUBW_OLD: return
         if phys(STK_LO) <= p < phys(STK_TOP) + PAGE or phys(SCR) <= p < phys(SCR) + PAGE: return

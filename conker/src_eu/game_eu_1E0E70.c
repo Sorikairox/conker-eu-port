@@ -354,7 +354,139 @@ block_6:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B458C.s")
 #endif
+
+#ifdef NON_MATCHING
+/* P292 */
+
+// rope_update_sag: entry 5 of the rope handler table at EU 0x8008FE90 (siblings func_151B402C / func_151B458C).
+// The rope of obj runs from end0 (+0x14) to end1 (+0x20); its 10 points (+0x48, 0x18 bytes: pos, vel) hang on an
+// ellipse in the vertical plane through both ends (half axes |end1 - end0| / 2 and sqrt(+0x138 - len^2 / 4), +0x138 =
+// the squared half rope length). When the ends are closer than 0.0001 horizontally nothing moves; when they are too
+// far apart the rope goes taut (func_151B402C, whose result is returned). Each point i takes the ellipse point at
+// angle i * 0.349 (20 degrees): placed there with zero speed while flag 2 of +0x10 is set (then cleared), or with the
+// rest speed D_800A5860 while D_800DBFF4 is set; otherwise it springs towards it (pull (old - target) * sin(angle) *
+// +0x40, acceleration * +0x3C over the frame time D_800BE9A4). Returns 1 except for the taut case.
+s32 func_151B4854(u8 *obj) {
+    f32 *seg;
+    f32 old[3];
+    f32 target[3];
+    f32 x0, y0, z0;
+    f32 dx, dy, dz;
+    f32 mx, my, mz;
+    f32 a0x, a0y, a0z;
+    f32 a1x, a1y, a1z;
+    f32 inv;
+    f32 px, pz;
+    f32 du, dv;
+    f32 lenSq;
+    f32 len;
+    f32 halfLen;
+    f32 cosA, sinA;
+    f32 sag;
+    f32 quarter;
+    f32 angle;
+    f32 angle2;
+    f32 s, c, s2;
+    f32 u, v;
+    f32 pull[3];
+    f32 acc[3];
+    f32 k;
+    s32 i;
+    u8 ret;
+
+    ret = 1;
+    x0 = *(f32 *) (obj + 0x14);
+    y0 = *(f32 *) (obj + 0x18);
+    z0 = *(f32 *) (obj + 0x1C);
+    dx = *(f32 *) (obj + 0x20) - x0;
+    dy = *(f32 *) (obj + 0x24) - y0;
+    dz = *(f32 *) (obj + 0x28) - z0;
+    if (fabsf(dx) > 0.0001f || fabsf(dz) > 0.0001f) {
+        mx = x0 + dx * 0.5f;
+        my = y0 + dy * 0.5f;
+        mz = z0 + dz * 0.5f;
+        a0x = x0 - mx;
+        a1x = *(f32 *) (obj + 0x20) - mx;
+        a1y = *(f32 *) (obj + 0x24) - my;
+        a0y = y0 - my;
+        a0z = z0 - mz;
+        a1z = *(f32 *) (obj + 0x28) - mz;
+        inv = 1.0f / sqrtf(dx * dx + dz * dz);
+        pz = dz * inv;
+        px = dx * inv;
+        du = (a1z * pz + a1x * px) - (a0z * pz + a0x * px);
+        dv = a1y - a0y;
+        lenSq = du * du + dv * dv;
+        len = sqrtf(lenSq);
+        inv = 1.0f / len;
+        halfLen = len * 0.5f;
+        cosA = du * inv;
+        sinA = dv * inv;
+        quarter = lenSq * 0.25f;
+        if (*(f32 *) (obj + 0x138) < quarter) {
+            ret = func_151B402C(obj);
+        } else {
+            sag = sqrtf(*(f32 *) (obj + 0x138) - quarter);
+            angle = 0.0f;
+            angle2 = 0.0f;
+            seg = (f32 *) (obj + 0x48);
+            for (i = 0; i < 10; i++) {
+                ((s32 *) old)[0] = ((s32 *) seg)[0];
+                ((s32 *) old)[1] = ((s32 *) seg)[1];
+                ((s32 *) old)[2] = ((s32 *) seg)[2];
+                s = sinf(angle);
+                c = cosf(angle);
+                s2 = sinf(angle2);
+                u = halfLen * c;
+                v = sag * s;
+                target[0] = (u * cosA - v * sinA) * px + mx;
+                target[1] = (u * sinA - v * cosA) + my;
+                target[2] = (u * cosA - v * sinA) * pz + mz;
+                if (obj[0x10] & 2) {
+                    ((s32 *) seg)[0] = ((s32 *) target)[0];
+                    ((s32 *) seg)[1] = ((s32 *) target)[1];
+                    ((s32 *) seg)[2] = ((s32 *) target)[2];
+                    seg[3] = 0.0f;
+                    seg[4] = 0.0f;
+                    seg[5] = 0.0f;
+                } else if (*(s32 *) D_800DBFF4 != 0) {
+                    ((s32 *) seg)[0] = ((s32 *) target)[0];
+                    ((s32 *) seg)[1] = ((s32 *) target)[1];
+                    ((s32 *) seg)[2] = ((s32 *) target)[2];
+                    ((s32 *) seg)[3] = ((s32 *) D_800A5860)[0];
+                    ((s32 *) seg)[4] = ((s32 *) D_800A5860)[1];
+                    ((s32 *) seg)[5] = ((s32 *) D_800A5860)[2];
+                } else {
+                    k = *(f32 *) (obj + 0x40);
+                    pull[0] = (old[0] - target[0]) * s2 * k;
+                    pull[1] = (old[1] - target[1]) * s2 * k;
+                    pull[2] = (old[2] - target[2]) * s2 * k;
+                    seg[0] = target[0] + pull[0];
+                    seg[1] = target[1] + pull[1];
+                    seg[2] = target[2] + pull[2];
+                    k = *(f32 *) (obj + 0x3C);
+                    acc[0] = k * pull[0];
+                    acc[1] = k * pull[1];
+                    acc[2] = k * pull[2];
+                    seg[0] = seg[0] + (seg[3] * D_800BE9A4 + 0.5f * acc[0] * D_800BE9A4 * D_800BE9A4);
+                    seg[1] = seg[1] + (seg[4] * D_800BE9A4 + 0.5f * acc[1] * D_800BE9A4 * D_800BE9A4);
+                    seg[2] = seg[2] + (seg[5] * D_800BE9A4 + 0.5f * acc[2] * D_800BE9A4 * D_800BE9A4);
+                    seg[3] = seg[3] + acc[0] * D_800BE9A4;
+                    seg[4] = seg[4] + acc[1] * D_800BE9A4;
+                    seg[5] = seg[5] + acc[2] * D_800BE9A4;
+                }
+                angle2 += 0.34906587f;
+                angle += 0.34906587f;
+                seg += 6;
+            }
+        }
+    }
+    obj[0x10] &= ~2;
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E0E70/func_151B4854.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_151B4D88(u8 *arg0, u8 *arg1, u8 *arg2, s32 arg3) {

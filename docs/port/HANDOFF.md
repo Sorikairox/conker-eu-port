@@ -10,6 +10,26 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P292 (port-c, group C) (session P292, 2026-10-26). Details: `docs/port/sessions/P292.md`
+
+game_eu_DCEF0: func_150B2290 prototype added (func_150AFC70 casts its s32 args; byte-identical). func_1505D1C4's v0
+callers (func_1519D320, func_151D441C, func_151D4684, func_151D4898): no caller (C or asm, no table) uses their v0,
+so no type change. difftest.py `stub_write` now maps unmapped pages before a stub output (before: UC_ERR_WRITE_UNMAPPED
+at the stub -> UNSURE; DIFFTEST_STUBMAP_OLD=1 = old; 3 selftest cases). Hand C (NM), registry rows `P292`, files in
+docs/port/sessions/p292: func_1518D290 (object_ring_burst_particles, mutants 59/59), func_151AFC84
+(object_ground_splash, 53/53), func_151B4854 (rope_update_sag, 47/49, 2 equivalent). See P292.md for checks.
+
+## Next steps (from P292, group C)
+1. Not group C: NM dispatcher func_15141A7C (game_16EE20) calls D_8008A0B4 entries as `s32 (*)(struct127 *, s32,
+   s32, s32)` / `(struct127 *, s32, s16)` but the entries are 3-parameter void functions (func_150BAEF4,
+   func_150D8F44, func_151AFC84, ...): wasm call_indirect mismatch. Rope table EU 0x8008FE90 (func_151B4854's): no
+   dispatcher found by %lo search; check how it is reached.
+2. Group C left (smallest first): func_150ED1F0 (11A2B0, 344), func_150A39E4 (CE6C0), func_150CB6F4 (F8DF0, entry of
+   D_8008A0B4 too), func_151970BC (1C3530), func_15106D38, func_150BD550, func_1512A1A0, func_151CA4E8, func_151B3878,
+   func_1516A1E0, func_150DABFC / DA1FC / D99AC (106830), func_1503FE30, func_151976B8, func_1519BA28, func_151E67A0,
+   func_150FBE40, func_1519A1A4.
+3. func_150C3574 boundary setups (P284 survivors) still open.
+
 ## P289 (port-c, group C) (session P289, 2026-10-26). Details: `docs/port/sessions/P289.md`
 
 P284 re-runs: func_150F536C mutants 35/35, func_150B1EC0 49/49, func_15162B28 25/25. func_1505D1C4 is now `s32`
