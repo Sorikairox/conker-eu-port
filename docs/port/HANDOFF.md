@@ -10,6 +10,21 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P294 (port-e, group E: readable D5E90 wall engine, no asm2c left) (2026-10-26). Details: `docs/port/sessions/P294.md`
+
+Committed: func_150AB6D0 / func_150AC8C4 (engine func_150AB708) readable in src_eu/nm_asm/D5E90.c (nmw_engine +
+NmwState + helpers nmw_set_box / walk_tree / next_record / next_triangle / projects_inside / edge_push /
+wall_triangle / ledge_triangle); D5E90_walls.inc deleted, gen_d5e90_walls.sh retired, nmw_unit calls the C helpers
+(+ unit ac200). nmasm_walls.py: area kind 2 / 3 wall scenes, engine path counts, ledge headings / short edges, ray_far
+scenes (hit only in a later leaf, -z / +z / -x, critical maxDist). 300 x seeds 1-5 EQUIV (ab6d0, ac8c4, ray), unit
+EQUIV. Mutants: walls 33/41, ledge 20/32, ray: P291's 3 next-leaf survivors all killed (survivors justified in P294.md).
+Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, selftest 143/143. progress_nm: `total       5916     3995   1722     33      166  5750 97.2%   2025072/2253856 (89.8%)`, 0 asm2c entries.
+
+### Next steps (group E, from P294)
+1. Optional harness gaps (P294.md): ledge short-edge rule / discriminant (0, 1] / box z from radius; walls area 2
+   relative-entry start and object +0x40 flags.
+2. Port (port-web): vbe.py ROM_ABS for D_427B0 / D_19EDE8 (func_10001194, from P288).
+
 ## P291 (port-e, group E: star field, ray coverage, readable ray cast) (2026-10-26). Details: `docs/port/sessions/P291.md`
 
 Committed (registry rows `P291`, HARNESS= / HMUT=): func_150FBA40 star_field_draw (game_eu_129250, hand asm from group D):
