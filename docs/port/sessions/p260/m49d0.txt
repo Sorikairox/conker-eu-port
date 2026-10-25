@@ -1,0 +1,35 @@
+\#^    pos\[0\] = \*\*(f32 \*\*) (obj + 0x10);$#s/0x10/0x14/
+\#^    pos\[2\] = \*\*(f32 \*\*) (obj + 0x18);$#s/0x18/0x14/
+\#^    if ((obj\[0x26\] & 4) && (s8) obj\[0x29\] != -1) {$#s/& 4/\& 1/
+\#^    if ((obj\[0x26\] & 4) && (s8) obj\[0x29\] != -1) {$#s/!= -1/!= 0/
+\#^        if (D_80089EB8\[(s8) obj\[0x29\]\](obj) == 0) {$#s/== 0/!= 0/
+\#^        if (D_80089EB8\[(s8) obj\[0x29\]\](obj) == 0) {$#s/(obj)/(obj + 4)/
+\#^    if (obj\[0x26\] & 2) {$#s/& 2/\& 4/
+\#^        obj\[0x26\] &= ~2;$#s/~2/~3/
+\#^        dx = \*(f32 \*) (obj + 0x2C) - pos\[0\];$#s/pos\[0\]/pos[1]/
+\#^        dy = \*(f32 \*) (obj + 0x30) - pos\[1\];$#s/0x30/0x2C/
+\#^        dz = \*(f32 \*) (obj + 0x34) - pos\[2\];$#s/- pos\[2\]/+ pos[2]/
+\#^        dist = sqrtf(dx \* dx + dy \* dy + dz \* dz);$#s/dz \* dz/dy * dz/
+\#^        \*(f32 \*) (obj + 0x3C) += (\*(f32 \*) (obj + 0x38) \* dist + 1\.0f) \* D_800BE9A4 \* \*(f32 \*) (obj + 0x20);$#s/1\.0f)/2.0f)/
+\#^        \*(f32 \*) (obj + 0x3C) += (\*(f32 \*) (obj + 0x38) \* dist + 1\.0f) \* D_800BE9A4 \* \*(f32 \*) (obj + 0x20);$#s/0x38/0x1C/
+\#^        \*(f32 \*) (obj + 0x3C) += (\*(f32 \*) (obj + 0x38) \* dist + 1\.0f) \* D_800BE9A4 \* \*(f32 \*) (obj + 0x20);$#s/\* D_800BE9A4 \*/* 1.0f */
+\#^        \*(f32 \*) (obj + 0x3C) += (\*(f32 \*) (obj + 0x38) \* dist + 1\.0f) \* D_800BE9A4 \* \*(f32 \*) (obj + 0x20);$#s/(obj + 0x20)/(obj + 0x1C)/
+\#^        if (\*(f32 \*) (obj + 0x3C) > 7\.0f) {$#s/> 7\.0f/> 7.5f/
+\#^            \*(f32 \*) (obj + 0x3C) = 7\.0f;$#s/7\.0f/6.0f/
+\#^        while (\*(f32 \*) (obj + 0x3C) > 1\.0f) {$#s/> 1\.0f/>= 1.0f/
+\#^            size2 = \*(f32 \*) (obj + 0x1C) + \*(f32 \*) (obj + 0x1C);$#s/+ \*(f32 \*) (obj + 0x1C)/* 2.5f/
+\#^            if (D_80089E9C\[obj\[0x27\]\] != NULL) {$#s/0x27/0x26/
+\#^                size = \*(f32 \*) (obj + 0x1C);$#s/0x1C/0x20/
+\#^                D_80089E9C\[obj\[0x27\]\](pos\[0\] + dx \* t + size - jx \* size2, pos\[1\] + dy \* t + size - jy \* size2,$#s/dx \* t/dx * jx/
+\#^                D_80089E9C\[obj\[0x27\]\](pos\[0\] + dx \* t + size - jx \* size2, pos\[1\] + dy \* t + size - jy \* size2,$#s/jx \* size2/jy * size2/
+\#^                D_80089E9C\[obj\[0x27\]\](pos\[0\] + dx \* t + size - jx \* size2, pos\[1\] + dy \* t + size - jy \* size2,$#s/pos\[1\] + dy \* t + size/pos[1] + dy * t - size/
+\#^                                      pos\[2\] + dz \* t + size - jz \* size2, dx, dy, dz, obj);$#s/dx, dy, dz/dx, dz, dy/
+\#^                                      pos\[2\] + dz \* t + size - jz \* size2, dx, dy, dz, obj);$#s/dz, obj)/dz, obj + 4)/
+\#^                                      pos\[2\] + dz \* t + size - jz \* size2, dx, dy, dz, obj);$#s/jz \* size2/jz * size/
+\#^            \*(f32 \*) (obj + 0x3C) -= 1\.0f;$#s/1\.0f/0.5f/
+\#^    \*(f32 \*) (obj + 0x30) = pos\[1\];$#s/pos\[1\]/pos[2]/
+\#^    \*(f32 \*) (obj + 0x34) = pos\[2\];$#s/0x34/0x38/
+\#^    if (obj\[0x26\] & 1) {$#s/& 1/\& 2/
+\#^        \*(s16 \*) (obj + 0x24) -= D_800BE9E4;$#s/-=/+=/
+\#^        if (\*(s16 \*) (obj + 0x24) < 0) {$#s/< 0/<= 0/
+\#^        if (\*(s16 \*) (obj + 0x24) < 0) {$#s/(s16 \*)/(u16 *)/

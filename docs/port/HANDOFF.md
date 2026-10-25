@@ -10,6 +10,29 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P260 (port-b) (session P260, 2026-10-25). Details: `docs/port/sessions/P260.md`
+
+Branch `port-b`. **Selftest 118 / 123 root cause: stale Docker bind-mount view after the P256 Docker restart.** A file the
+host rewrites under a path the container already read keeps its OLD size / content in the container (> 100 s; host
+touch and rename-writes do not help; `ls -l` of the parent dir inside the container refreshes it). The 5 chkce cases
+re-use `build/difftest_self/FUNC.mut.c`, so the candidate was compiled truncated (CERR); it also hit an edited src_eu TU.
+Fix: `tools/port/difftest.sh` refreshes (lists src_eu / include / each file argument's dir in the container) and
+compares md5s / the src_eu size digest with the host, else `ERROR difftest.sh: stale container view` (exit 4;
+`DIFFTEST_FCHK_OLD=1` = old). selftest.sh: pinned-Unicorn preflight + stale-path regression case (124 cases).
+With the fix 124 / 124; guard off 118 / 124 (same 5 + new case). conkerdev-port: same VM, read-only checks show no stale
+entry right now; expect the same 5 CERR there until it merges this. Hand C (NM): func_151349D0 point_emitter_update
+(35 / 35), func_15198EEC path_hit_scene_nodes (35 / 35). Checks: verify_all rc 0, NM rc 0, protocheck 0 (1606),
+implicit NM+float 0, selftest 124 / 124. progress_nm total 5619 / 5915 (95.0%), C bytes 86.6%.
+
+## Next steps (from P260)
+
+1. Docker Desktop restart when no agent runs (clean file-sharing state); give nmharness*.sh / verify_all.sh the same
+   in-container refresh. port: merge the difftest.sh / selftest.sh change.
+2. D5E90 sin / cos hand-asm group; breadth: func_150D5634 (199, 101080), func_151BE33C (200, 1E7CC0), func_15199A28
+   (223, 1C3530), func_1519CF34, func_150D5268.
+3. Browser: point emitters (func_151349D0), path handler 1 (func_15198EEC), plus the P257 list.
+4. port-web: D_80089E9C entry 0 func_15134CD4 takes 4 args but is called with 7 (mixed arities in an indirect table).
+
 ## P257 (port-b) (session P257, 2026-10-25). Details: `docs/port/sessions/P257.md`
 
 Branch `port-b`. Merged port aad230e1 (ae929f60; 123 / 123 selftest at the merge). DUPKEY fallout fixed: p247/s4e48.txt
