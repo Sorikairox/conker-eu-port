@@ -3,3 +3,10 @@ B (45 funcs): game_161520 game_981E0 game_eu_1EFE10 game_40490 game_eu_1E40E0 ga
 C (45 funcs): game_eu_1C3530 game_EF410 game_eu_1F7960 game_eu_106830 game_eu_DEDE0 game_eu_1E0E70 game_eu_122300 guMtxF2L game_eu_FF950 game_eu_F8DF0 game_eu_E9450 game_eu_DFAA0 game_eu_CE6C0 game_eu_6D4F0 game_eu_20B730 game_eu_1E6B70 game_eu_1DD380 game_eu_1BAAA0 game_eu_1A7B30 game_eu_1979F0 game_eu_1579B0 game_eu_133A70 game_eu_129650 game_eu_11A2B0 game_eu_10F300 game_eu_108C00 game_6E240 game_18D770 game_123FB0 45 (87.8%)
 D (45 funcs): game_eu_1122E0 game_eu_109770 game_eu_ECC80 game_eu_1D1150 game_eu_FABD0 game_eu_216470 game_eu_1D9C00 game_eu_1207F0 game_eu_FE5E0 game_eu_F5B10 game_eu_E88D0 game_eu_D5900 game_eu_C4590 game_eu_64070 game_eu_1F3040 game_eu_1E3000 game_eu_1DC570 game_eu_1B1ED0 game_eu_1A2970 game_eu_186A80 game_eu_1501C0 game_eu_132370 game_eu_129250 game_eu_119C50 game_eu_10D650 game_eu_105140 game_6D800 game_168A90 entrypoint 229D0 (85.9%)
 E hand-asm (69 funcs): D5E90 init_eu_5DA0 init_eu_23CC0 init_eu_23260 init_eu_22D50 init_eu_8410 init_eu_3570 init_eu_277C0 init_eu_27700 init_eu_26640 init_eu_26600 init_eu_251D0 init_eu_24BF0 init_eu_24BE0 init_eu_231B0 init_eu_23130 init_eu_22D70 init_eu_22A10 init_eu_1000 init_B1B0 init_50A0 init_1420 init_1050 debugger_eu_259B40 debugger_258ED0 debugger_257350 debugger
+
+Final-merge notes (collected by the coordinator):
+- func_150B2290 converted twice (port-e P279 and port-c P289): keep one.
+- difftest stub_write page-map fix done twice (port-e P288 STUBMAP_OLD, port-c P292 STUBMAP_OLD): unify.
+- wasm call_indirect hazards to fix after merge: D_8008A0B4 (dispatcher func_15141A7C in game_16EE20 passes 3-4 args, entries void(3)); D_80089CD4 mixed 5/6 args (P278).
+- port-web vbe.py ROM_ABS entries needed: D_427B0, D_19EDE8 (P281/P288).
+- verify_all/run.sh container naming (P245) is in port-web only.
