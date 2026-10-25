@@ -10,6 +10,23 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P290 (port-d, group D) (session P290, 2026-10-26). Details: `docs/port/sessions/P290.md`
+
+Re-runs: func_150403C8 mutants 38/39 (the 2 P283 UNSURE now killed; survivor = unused 3rd arg), func_150BABE0 38/38.
+Hand C (NM), registry rows `P290`, setups / mutants / CANDSED in docs/port/sessions/p290: func_150E4AD0
+impact_effect_spawn (39/39) + func_150E4EA8 object_impact_effect (41/42) with NM `static const` copies of their
+.s-owned rodata (game_eu_1122E0), func_150EBEC0 gun_barrel_fire (45/46), func_1515A178 dust_emitter_update (55/55),
+func_151229B0 camera_orbit_update (55/55). Survivors are explained in P290.md. Lesson: an asm listing without `nop`
+lines hides nop delay slots (two wrong first drafts, caught by difftest). progress_nm
+`total 5916 3995 1696 225 5691 96.2% 2004580/2253856 (88.9%)`.
+
+## Next steps (from P290, group D left)
+1. Next smallest group-D asm: func_150BF71C (ECC80, 337), func_150C8300 (F5B10, 340), func_150BFF7C (ECC80, 345),
+   func_150D0DD0 (FE5E0, 372), func_151AECA0 (1DC570, 372), then `progress_nm --list` for the rest.
+2. func_150E2294 (game_eu_10F840, not group D) calls func_150E4AD0 without storing its 7th argument (slot, sp+0x18):
+   check what it should pass when that function is converted (0xFF = none).
+3. func_150FBA40 / func_150A80F0 hand asm: group E. Table D_80089CD4 mixed arities [5, 6] still open.
+
 ## P283 (port-d, group D) (session P283, 2026-10-26). Details: `docs/port/sessions/P283.md`
 
 Hand C (NM), registry rows `P283`, setups / mutants in docs/port/sessions/p283: func_15036860 vertex_anchor_follow,

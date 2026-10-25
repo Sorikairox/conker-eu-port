@@ -19,6 +19,7 @@ s32 func_15159690(u8 *, u8);
 s32 func_151596F4(u8 *, u8);
 s32 func_151597A0(u8 *, u8 *, u8);
 s32 func_15159828(u8 *, s32);
+s32 func_1513092C(void *, s32, s32); /* P290: hoisted (func_1515A178; the NM caller above it used it undeclared) */
 
 /* sllv uses the low 5 bits of the shift count */
 #define STATE_BIT(n) (1 << ((n) & 0x1F))
@@ -545,7 +546,164 @@ void func_1515A120(f32 arg0, f32 arg1, f32 arg2, s32 arg3, s32 arg4, s32 arg5, u
     func_15159E00(sp24, sp18, *(u8 *)(arg6 + 0xC), *(u8 *)(arg6 + 1));
 }
 
+#ifdef NON_MATCHING
+extern u8 D_800BEE0B;
+s32 func_151454BC(u8 arg0, f32 arg1, struct17 *arg2);
+void func_150A8050(f32 mtx[4][4], f32 arg1, f32 arg2, f32 arg3);
+f32 sinf(f32);
+f32 cosf(f32);
+typedef struct {
+    f32 pos[3];   /* +0x00 */
+    f32 vel[3];   /* +0x0C */
+    f32 life;     /* +0x18 lifetime scale */
+    f32 radius;   /* +0x1C spawn disc radius */
+    f32 rotA;     /* +0x20 disc orientation (func_150A8050) */
+    f32 rotB;     /* +0x24 */
+    f32 acc;      /* +0x28 particles owed */
+    f32 rate;     /* +0x2C particles per tick */
+    f32 rateRand; /* +0x30 random extra rate */
+} DustEmitter;
+typedef struct {
+    s32 type;     /* +0x00 0x200005 */
+    s32 u04;
+    s16 u08;      /* 0xC01 */
+    s16 life;     /* +0x0A */
+    s32 u0C;
+    s32 u10;
+    u8 u14[7];
+    u8 shade;     /* +0x1B */
+    u8 alpha;     /* +0x1C */
+    u8 u1D;       /* 0x2F */
+    s16 fade;     /* +0x1E */
+    s16 fadeStep; /* +0x20 0xFF / fade */
+    s16 u22;
+    f32 u24;
+    f32 sizeA;    /* +0x28 */
+    f32 sizeB;    /* +0x2C */
+    f32 pos[3];   /* +0x30 */
+    f32 u3C[3];
+    f32 vel[3];   /* +0x48 */
+    f32 u54;
+    s32 flags;    /* +0x58 */
+    s32 u5C;      /* not set */
+    u8 u60[4];    /* 5, 5, 0xC, 0xFF */
+} DustTemplate;
+typedef struct {
+    f32 size;     /* +0x00 */
+    u8 u04, u05;
+    u8 spinA, spinB; /* +0x06 4..8 */
+    f32 growA;    /* +0x08 */
+    f32 growB;    /* +0x0C */
+    f32 pos[3];   /* +0x10 offset on the disc */
+    f32 angle;    /* +0x1C */
+    f32 spin;     /* +0x20 */
+} DustExtra;      /* 0x24 bytes copied to the particle's +0xA8 */
+
+// dust_emitter_update: object update of a dust / spray emitter (state at obj+0x28). Only near the camera
+// (func_151454BC, 3000 units). Adds rate + rand * rateRand per tick (frame scale D_800BE9A4) to the owed count and
+// spawns one particle (func_1513092C, template type 0x200005, 0x24 extra bytes at +0xA8) per whole unit above 1:
+// a random point on the disc of the given radius (r = rand * radius, so denser near the centre) rotated by
+// rotA / rotB, random angle / spin, lifetime life * 1 / k and fade from random ranges, velocity vel * k
+// (k = 4.46..6.07), random shade 0x7C..0xAE, size 240..340 and flip flags 0x40 / 0x80.
+void func_1515A178(u8 *obj) {
+    DustEmitter *e = (DustEmitter *) (obj + 0x28);
+    DustTemplate t;
+    DustExtra ex;
+    f32 mtx[4][4];
+    f32 ang, rr, r, x, z;
+    f32 k, inv, life, fade;
+    f32 size;
+    s16 fadeI;
+    u8 *p;
+
+    if (func_151454BC(D_800BEE0B, 3000.0f, (struct17 *) e) == 0) {
+        return;
+    }
+    e->acc += (e->rate + func_150ADA68() * e->rateRand) * D_800BE9A4;
+    if (!(1.0f < e->acc)) {
+        return;
+    }
+    t.u1D = 0x2F;
+    t.u08 = 0xC01;
+    t.type = 0x200005;
+    t.u04 = 0;
+    t.u14[6] = 0;
+    t.u14[5] = 0;
+    t.u14[4] = 0;
+    t.u14[3] = 0;
+    t.u14[2] = 0;
+    t.u14[1] = 0;
+    t.u14[0] = 0;
+    t.u10 = 0;
+    t.u0C = 0;
+    t.alpha = 0xFF;
+    t.u22 = 0;
+    t.u24 = 0.0f;
+    t.flags = 0x1205;
+    t.u60[0] = 5;
+    t.u60[1] = 5;
+    t.u60[2] = 0xC;
+    t.u60[3] = 0xFF;
+    t.pos[0] = e->pos[0];
+    t.pos[1] = e->pos[1];
+    t.pos[2] = e->pos[2];
+    t.u3C[0] = 0.0f;
+    t.u3C[1] = 0.0f;
+    t.u3C[2] = 0.0f;
+    ex.u04 = 0;
+    ex.u05 = 0;
+    t.u54 = 0.0f;
+    do {
+        ang = func_150ADA68() * 6.2831855f; /* 0x40C90FDB */
+        rr = func_150ADA68();
+        r = rr * e->radius;
+        x = sinf(ang) * r;
+        z = cosf(ang) * r;
+        func_150A8050(mtx, e->rotA, e->rotB, 0.0f);
+        func_150A7E40(mtx, x, 0.0f, z, &ex.pos[0], &ex.pos[1], &ex.pos[2]);
+        ex.angle = func_150ADA68() * 6.2831855f;
+        ex.spin = (func_150ADA68() * 320.0f + -160.0f) * 0.001f; /* 0x3A83126F */
+        k = (func_150ADA68() * 161.0f + 446.0f) * 0.01f;       /* 0x3C23D70A */
+        inv = 1.0f / k;
+        life = e->life * inv;
+        fade = (func_150ADA68() * 6596.0f + 2402.0f) * 0.1f * inv; /* 0.1f = 0x3DCCCCCD */
+        t.vel[0] = e->vel[0] * k;
+        t.vel[1] = e->vel[1] * k;
+        t.vel[2] = e->vel[2] * k;
+        if (500.0f < life) {
+            t.life = 500;
+        } else {
+            t.life = fade * 0.5f + life;
+        }
+        fadeI = (s32) fade;
+        t.flags &= ~0xC0;
+        t.fadeStep = 0xFF / fadeI;
+        t.fade = fadeI;
+        if (func_150ADA20() & 1) {
+            t.flags |= 0x40;
+        }
+        if (func_150ADA20() & 1) {
+            t.flags |= 0x80;
+        }
+        t.shade = (u32) func_150ADA20() % 0x33 + 0x7C;
+        size = func_150ADA68() * 100.0f + 240.0f;
+        t.sizeA = size;
+        ex.size = size;
+        t.sizeB = size;
+        ex.spinA = (u32) func_150ADA20() % 5 + 4;
+        ex.spinB = (u32) func_150ADA20() % 5 + 4;
+        ex.growA = (func_150ADA68() * 0.25f + 0.15f) * ex.size; /* 0.15f = 0x3E19999A */
+        ex.growB = (func_150ADA68() * 0.25f + 0.15f) * ex.size;
+        p = (u8 *) func_1513092C(&t, 2, 0x24);
+        if (p != NULL) {
+            memcpy((s32) (p + 0xA8), (f32 *) &ex, 0x24); /* memcpy is declared (s32, f32 *, s32) above */
+        }
+        e->acc -= 1.0f;
+    } while (1.0f < e->acc);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_186A80/func_1515A178.s")
+#endif
 
 s32 func_1515A68C(u8 *arg0, s32 arg1) {
     u8 *p;

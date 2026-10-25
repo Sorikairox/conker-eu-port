@@ -1,0 +1,39 @@
+s/flag = 0x8000;/flag = 0;/
+s/if (kind & 0x8000)/if (kind \& 0x4000)/
+s/if (k->debris != 0)/if (k->debris == 0)/
+s/+ k->countBase + 1;/+ k->countBase;/
+s/+ k->countBase + 1;/+ k->countRange + 1;/
+s/if (size != 1)/if (size != 2)/
+s/spread = 0x1E;/spread = 0x1F;/
+s/D_800A14EC\[size\] \* count/D_800A14EC[0] * count/
+s/k->debris == 0x13/k->debris == 0x12/
+s/0xF, 0x55, 0, 0xFF, 0)/0xF, 0x56, 0, 0xFF, 0)/
+s/(x, y, z, 0x1E, 0, 0x13,/(x, y, z, 0x1E, 0, 0x12,/
+s/} else if (tri != NULL)/} else if (tri == NULL)/
+s/(s32) tri, spread, 0xB5AD/(s32) tri, 0x1E, 0xB5AD/
+s/(s32) tri, spread, 0xB5AD, k->debris, count, 0, 0, 0, 0xFF/(s32) tri, spread, 0xB5AD, k->debris, count, 0, 0, 0, 0xFE/
+s/(s16) spread, 0xB5AD/(s16) 0x78, 0xB5AD/
+s/0xB5AD, k->debris, 0.0f, 0, count, 0, 0, 0/0xB5AD, k->debris, 0.0f, 0, count, 1, 0, 0/
+s/k->subEffect | flag/k->subEffect/
+s/if (k->subEffect != 0)/if (k->subEffect == 0)/
+s/flag, size, tri, slot)/flag, 0, tri, slot)/
+s/if (size != 0 \&\&/if (size != 1 \&\&/
+s/< k->smokePct/<= k->smokePct/
+s/y + 20.0f;/y + 10.0f;/
+s/pos\[2\] = z;/pos[2] = x;/
+s/func_151C384C(pos, 0xFF, 1)/func_151C384C(pos, 0xFF, 0)/
+s/D_800D9D83\[slot \* 28\] = 100;/D_800D9D83[slot * 27] = 100;/
+s/D_800D9D83\[slot \* 28\] = 0;/D_800D9D83[slot * 28] = 1;/
+s/} else if (slot != 0xFF) {/} else if (slot != 0xFE) {/
+s/spark.u84 = D_800A14E0\[size\]\[0\]/spark.u84 = D_800A14E0[size][1]/
+s/spark.u86 = D_800A14E0\[size\]\[1\]/spark.u86 = D_800A14E0[size][0]/
+s/spark.y = y;/spark.y = z;/
+s/spark.uA2 = 0xD;/spark.uA2 = 0xC;/
+s/spark.kind = k->sparkKind;/spark.kind = k->debris;/
+s/spark.u98 = 0x2A00;/spark.u98 = 0x2A01;/
+s/spark.u94 = 1;/spark.u94 = 2;/
+s/spark.uA4 = 0xFF;/spark.uA4 = 0xFE;/
+s/0xB4, 0xB4, 0xB4, 0xFF)/0xB4, 0xB4, 0xB4, 0xFE)/
+s/func_15168800(&spark, 0xFF, 0)/func_15168800(\&spark, 0xFF, 1)/
+s/if (k->sparkKind != 0)/if (k->sparkKind == 0)/
+s/bzero(&spark, sizeof(spark));/bzero(\&spark, 0x10);/
