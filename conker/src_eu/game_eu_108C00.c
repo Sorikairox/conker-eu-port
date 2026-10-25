@@ -3,7 +3,113 @@
 #include "variables.h"
 
 
+#ifdef NON_MATCHING
+// limb_trail_effect_spawn: spawns a type 0x17 effect record (func_1513D524) along the limb `idx` of obj's skeleton
+// (obj + 0x1D4, 0x40-byte matrices): the two limb points D_80088CB0[idx] / D_80088CBC[idx] are transformed by the
+// limb's matrix (func_15143134), their scaled difference gives the direction; nothing is spawned when its XZ length
+// is below D_800A0FB0. The record gets the start point and the normalised XZ direction, and its fields 0x110..0x138
+// come from the per-limb tables (direction, speeds, scales, mode byte).
+typedef struct {
+    /* 0x00 */ u8 type;
+    /* 0x01 */ u8 pad1;
+    /* 0x02 */ s16 flags;
+    /* 0x04 */ s16 span;
+    /* 0x06 */ u8 pad6[2];
+    /* 0x08 */ s32 w8;
+    /* 0x0C */ s32 wC;
+    /* 0x10 */ u8 rgba[4];
+    /* 0x14 */ u8 pad14[8];
+    /* 0x1C */ f32 pos[3];
+    /* 0x28 */ f32 dir[3];
+    /* 0x34 */ f32 scale[3];
+    /* 0x40 */ s32 w40;
+    /* 0x44 */ u8 b44;
+    /* 0x45 */ u8 b45;
+    /* 0x46 */ u8 pad46[2];
+} EffSpawn150DB3F0;
+
+extern f32 D_80088CB0[][3];  // limb start point (limb space)
+extern f32 D_80088CBC[][3];  // limb end point (limb space)
+extern s32 D_80088CC8[];     // limb matrix index
+extern f32 D_80088CCC[];     // direction scale
+extern s16 D_80088CD0[];     // record lifetime
+extern f32 D_80088CD4[];     // record +0x11C
+extern f32 D_80088CD8[];     // record +0x120
+extern f32 D_80088CDC[];     // record +0x134
+extern u8 D_80088CE0[];      // record +0x138
+extern f32 D_80088CE4[];     // record +0x12C
+extern f32 D_80088CE8[];     // record +0x130
+
+void func_150DB3F0(u8 *obj, s32 idx, u8 group, s32 arg3) {
+    EffSpawn150DB3F0 spec;
+    f32 b[3];
+    f32 a[3];
+    f32 dir[3];
+    u8 *bones;
+    u8 *mtx;
+    f32 scale;
+    f32 lenSq;
+    f32 inv;
+    u8 *rec;
+
+    if (obj == NULL) {
+        return;
+    }
+    bones = *(u8 **) (obj + 0x1D4);
+    if (bones == NULL) {
+        return;
+    }
+    mtx = bones + (D_80088CC8[idx] << 6);
+    func_15143134(D_80088CB0[idx], a, mtx);
+    func_15143134(D_80088CBC[idx], b, mtx);
+    scale = D_80088CCC[idx];
+    dir[0] = scale * (b[0] - a[0]);
+    dir[1] = scale * (b[1] - a[1]);
+    dir[2] = scale * (b[2] - a[2]);
+    lenSq = dir[0] * dir[0] + dir[2] * dir[2];
+    if (fabsf(lenSq) < 0.0001f) {
+        return;
+    }
+    inv = 1.0f / sqrtf(lenSq);
+    spec.type = 0x17;
+    spec.wC = 0x243A;
+    spec.w8 = 0;
+    spec.w40 = 0x401;
+    spec.b44 = 0xFF;
+    spec.b45 = 0xFF;
+    spec.rgba[1] = 0xC8;
+    spec.rgba[2] = 0xC8;
+    spec.rgba[0] = 0xC8;
+    spec.rgba[3] = 0xC8;
+    spec.flags = 0x401;
+    spec.span = D_80088CD0[idx];
+    spec.pos[0] = a[0];
+    spec.pos[1] = a[1];
+    spec.pos[2] = a[2];
+    spec.scale[0] = 1.0f;
+    spec.scale[1] = 1.0f;
+    spec.scale[2] = 1.0f;
+    spec.dir[1] = 0.0f;
+    spec.dir[0] = dir[2] * inv;
+    spec.dir[2] = dir[0] * inv;
+    rec = (u8 *) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);
+    if (rec != NULL) {
+        *(f32 *) (rec + 0x110) = dir[0];
+        *(f32 *) (rec + 0x114) = dir[1];
+        *(f32 *) (rec + 0x118) = dir[2];
+        *(f32 *) (rec + 0x11C) = D_80088CD4[idx];
+        *(f32 *) (rec + 0x120) = D_80088CD8[idx];
+        *(f32 *) (rec + 0x12C) = D_80088CE4[idx];
+        *(f32 *) (rec + 0x124) = 1.0f;
+        *(f32 *) (rec + 0x128) = 1.0f;
+        *(f32 *) (rec + 0x130) = D_80088CE8[idx];
+        *(f32 *) (rec + 0x134) = D_80088CDC[idx];
+        rec[0x138] = D_80088CE0[idx];
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_108C00/func_150DB3F0.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_800A0FB4;

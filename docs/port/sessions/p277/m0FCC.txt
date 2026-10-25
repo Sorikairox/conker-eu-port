@@ -1,0 +1,16 @@
+\@^#define MARKER_PIXEL(col, row) (x + (col) + D_800BE620 \* ((row) + 225) + 200)$@s/225/224/
+\@^#define MARKER_PIXEL(col, row) (x + (col) + D_800BE620 \* ((row) + 225) + 200)$@s/200)/201)/
+\@^#define MARKER_PIXEL(col, row) (x + (col) + D_800BE620 \* ((row) + 225) + 200)$@s/D_800BE620 \* ((row) + 225)/320 * ((row) + 225)/
+\#^    u16 \*other = (u16 \*) D_8002AAE8\[D_800BE9C0 == 0\];$#s/== 0/!= 0/
+\#^    u16 \*aux = (u16 \*) D_800BEDE4;$#s/D_800BEDE4/D_8002AAE8[1]/
+\#^    for (col = 0; col < 8; col++) {$#s/col < 8/col < 7/
+\#^        other\[MARKER_PIXEL(col, 0)\] = 0xF800;$#s/0xF800/0xF801/
+\#^        aux\[MARKER_PIXEL(col, 0)\] = 0;$#d
+\#^    for (row = 1; row < 7; row++) {$#s/row < 7/row < 6/
+\#^        for (col = 0; col < 8; col += 7) {$#s/col += 7/col += 6/
+\#^            current\[MARKER_PIXEL(col, row)\] = 0xF800;$#s/0xF800/0/
+\#^        for (col = 1; col < 7; col++) {$#s/col = 1/col = 2/
+\#^            other\[MARKER_PIXEL(col, row)\] = 0;$#d
+\#^            aux\[MARKER_PIXEL(col, row)\] = 0;$#s/0;/0xF800;/
+\#^        current\[MARKER_PIXEL(col, 7)\] = 0xF800;$#s/7)/6)/
+\#^        aux\[MARKER_PIXEL(col, 7)\] = 0;$#s/aux/other/

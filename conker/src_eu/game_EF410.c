@@ -4,9 +4,171 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
+/* func_151506E8's spec (S06E8 in game_2062D0) */
+typedef struct {
+    s16 u0[4];
+    f32 u8;
+    f32 uC;
+    f32 u10;
+    s16 u14;
+    s16 u16;
+    f32 u18;
+    f32 u1C;
+    s16 u20;
+    s16 u22;
+    f32 u24;
+    f32 u28;
+    u8 u2C;
+    u8 u2D;
+    f32 u30;
+    f32 u34;
+    u8 u38;
+    u8 u39;
+    f32 u3C;
+    u8 u40;
+    f32 u44;
+} S2700;
+s32 func_151506E8(S2700 *, f32 *, s32, u8, s32);
+
 #ifdef NON_MATCHING
 void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+
+/* func_15151FA8's smoke spec (layout as func_150C2290's) */
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 u0C;
+    /* 0x10 */ f32 u10;
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ s16 u24[10];
+    /* 0x38 */ u8 u38;
+    /* 0x39 */ u8 u39;
+    /* 0x3A */ u8 u3A;
+    /* 0x3C */ s32 u3C;
+    /* 0x40 */ s32 u40;
+    /* 0x44 */ s32 u44[4];
+    /* 0x54 */ u8 u54;
+    /* 0x55 */ u8 u55;
+    /* 0x56 */ u8 u56;
+    /* 0x58 */ s32 u58;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ s32 u60;
+    /* 0x64 */ s32 u64;
+    /* 0x68 */ s32 u68;
+    /* 0x6C */ s32 u6C;
+    /* 0x70 */ s32 u70;
+    /* 0x74 */ s32 u74;
+    /* 0x78 */ s32 u78;
+    /* 0x7C */ u8 u7C;
+    /* 0x7D */ u8 u7D;
+    /* 0x7E */ u8 pad7E[2];
+    /* 0x80 */ s16 u80;
+    /* 0x82 */ s16 u82;
+} SmokeSpec150C1F60;
+
+
+// smoke_columns_spawn: queues two smoke columns (func_15151FA8, owner byte `flag`) at (8152, 40, -309): a wide one
+// (size 9 x 21.9, ...) and a thin one (55.6 x 39, ...), then a func_151506E8 effect at the same place.
+void func_150C1F60(u8 flag) {
+    SmokeSpec150C1F60 spec;
+    S2700 t;
+
+    spec.pos.unk0 = 8152.0f;
+    spec.pos.unk4 = 40.0f;
+    spec.u24[0] = 12;
+    spec.u24[2] = -160;
+    spec.u24[4] = -60;
+    spec.u24[3] = 0x45;
+    spec.u24[5] = 0x43;
+    spec.u24[6] = 3;
+    spec.u24[7] = 5;
+    spec.u24[9] = 0x1F;
+    spec.u38 = 0xB;
+    spec.pos.unk8 = -309.0f;
+    spec.u24[1] = 13;
+    spec.u24[8] = 0x32;
+    spec.u3A = 0x28;
+    spec.u3C = 1;
+    spec.u40 = 4;
+    spec.u54 = 0xFF;
+    spec.u55 = 0xFF;
+    spec.u58 = 3;
+    spec.u39 = 1;
+    spec.u44[0] = 0;
+    spec.u44[1] = 0;
+    spec.u44[2] = 0;
+    spec.u44[3] = 0;
+    spec.u56 = 0;
+    spec.u5C = 0xFF;
+    spec.u60 = 0;
+    spec.u64 = 0x220005;
+    spec.u68 = 0x1D0600;
+    spec.u6C = 1;
+    spec.u70 = 0x3B;
+    spec.u74 = 0x80;
+    spec.u78 = 0x20;
+    spec.u7C = 0;
+    spec.u7D = 7;
+    spec.u80 = 0xC;
+    spec.u82 = 0x15;
+    spec.u1C = 40.92f;
+    spec.u20 = 20.45f;
+    spec.u0C = 9.0f;
+    spec.u10 = 21.9f;
+    spec.u14 = 1.46f;
+    spec.u18 = 0.5f;
+    func_15151FA8((u8 *) &spec, flag, 1);
+
+    spec.u24[0] = 2;
+    spec.u24[1] = 3;
+    spec.u24[2] = -108;
+    spec.u24[4] = -22;
+    spec.u24[3] = 0x15;
+    spec.u24[5] = 0x16;
+    spec.u24[6] = 7;
+    spec.u24[7] = 0;
+    spec.u24[8] = 0x30;
+    spec.u24[9] = 0x15;
+    spec.u1C = 100.0f;
+    spec.u20 = 57.5f;
+    spec.u0C = 55.6f;
+    spec.u10 = 39.0f;
+    spec.u14 = 0.46f;
+    spec.u18 = 1.0f;
+    func_15151FA8((u8 *) &spec, flag, 1);
+
+    t.u8 = spec.pos.unk0;
+    t.uC = spec.pos.unk4;
+    t.u10 = spec.pos.unk8;
+    t.u14 = 0x19;
+    t.u16 = 0x12;
+    t.u0[0] = -0x9F;
+    t.u0[1] = 0x44;
+    t.u0[2] = -0x34;
+    t.u0[3] = 0x26;
+    t.u20 = 0x19;
+    t.u22 = 0x19;
+    t.u2C = 0x9B;
+    t.u2D = 0x64;
+    t.u38 = 1;
+    t.u39 = 6;
+    t.u3C = 0.0f;
+    t.u40 = 1;
+    t.u44 = 0.0f;
+    t.u18 = 40.0f;
+    t.u1C = 35.0f;
+    t.u24 = -2.0210001f;
+    t.u28 = 0.89400005f;
+    t.u30 = 1152.0f;
+    t.u34 = 848.0f;
+    func_151506E8(&t, &t.u8, 0, flag, 1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
+#endif
+#ifdef NON_MATCHING
 
 void func_150C2290(s32 arg0) {
     struct {
@@ -307,30 +469,6 @@ s32 func_150C2558(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2558.s")
 #endif
-typedef struct {
-    s16 u0[4];
-    f32 u8;
-    f32 uC;
-    f32 u10;
-    s16 u14;
-    s16 u16;
-    f32 u18;
-    f32 u1C;
-    s16 u20;
-    s16 u22;
-    f32 u24;
-    f32 u28;
-    u8 u2C;
-    u8 u2D;
-    f32 u30;
-    f32 u34;
-    u8 u38;
-    u8 u39;
-    f32 u3C;
-    u8 u40;
-    f32 u44;
-} S2700;
-s32 func_151506E8(S2700 *, f32 *, s32, u8, s32);
 
 s32 func_150C2700(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     extern f32 D_800A064C;
@@ -655,9 +793,278 @@ Gfx *func_150C3160(Gfx *gfx, struct_eu_EF410_c *arg1) {
     gDPSetTileSize(gfx++, 4, v, t, 0x1FE, 0x3E);
     return gfx;
 }
+#ifdef NON_MATCHING
+void func_15059C84(struct127 *);
+void func_1505A770(struct127 *);
+void func_1507C700(struct127 *, struct127 *);
+void func_1506B04C(struct127 *, s32, void *);
+
+// carried_object_update: update of an object that another one (unk65, 1-based D_800CC2D0 slot) can carry: always
+// flag 0x4000000 in unkF8; when a carrier was set (unk222) and none is now, it restarts from its owner's position
+// (unk124); then the usual movement steps (func_15059C84 / func_1505A770 / func_15058898 / func_1505B5F8), half the
+// speed when unk28 is 0, the animation (func_1505E650 mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
+// other) and the carrier link (func_1507C700). With a timer (unk2E4): a carrier in state 5 drops it; the timer stops
+// when nothing (D_800BE616 / D_800C35EA / carrier) holds it; while running it counts down by D_800BE9E4 (sound
+// func_1508B20C when D_800BE616); when it runs out the carrier is released (stunned / immune cleared, health 1) and
+// the object sends event 0xB (D_800BE616) or 0xE (func_1506B04C, its owner, position, carrier) and goes to state 1.
+void func_150C3230(struct127 *obj) {
+    struct {
+        struct127 *owner;
+        f32 pos[3];
+        s32 carrier;
+    } msg;
+    struct127 *owner;
+    struct127 *carrier;
+    u16 id;
+    u16 mode;
+
+    obj->unkF8 |= 0x4000000;
+    if (obj->unk222 != 0 && obj->unk65 == 0) {
+        owner = &D_800CC2D0[obj->unk124 - 1];
+        obj->old_x_position = owner->x_position;
+        obj->old_y_position = owner->y_position;
+        obj->old_z_position = owner->z_position;
+        obj->unk222 = 0;
+    }
+    func_15059C84(obj);
+    func_1505A770(obj);
+    func_15058898(obj, obj->old_y_position);
+    func_1505B5F8(obj, obj->unk180);
+    if (obj->unk28 == 0.0f) {
+        obj->xz_velocity *= 0.5f;
+    }
+    if (obj->unk65 != 0) {
+        obj->unk222 = obj->unk65;
+        id = D_800CC2D0[obj->unk65 - 1].unk84.uh;
+        if (id == 0x1F9) {
+            mode = 2;
+        } else if (id == 0x1FB) {
+            mode = 3;
+        } else {
+            mode = 1;
+        }
+    } else {
+        mode = 0;
+    }
+    func_1505E650(obj, mode, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+    if (obj->unk65 != 0) {
+        func_1507C700(obj, &D_800CC2D0[obj->unk65 - 1]);
+    }
+    if (obj->unk2E4 == 0) {
+        return;
+    }
+    carrier = NULL;
+    if (obj->unk65 != 0) {
+        carrier = &D_800CC2D0[obj->unk65 - 1];
+        if (carrier->interaction_state == 5) {
+            obj->unk65 = 0;
+            obj->unk2E4 = 0;
+        }
+    }
+    if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {
+        obj->unk2E4 = 0;
+    }
+    if (D_800BE9E4 < obj->unk2E4) {
+        obj->unk2E4 -= D_800BE9E4;
+        if (D_800BE616 != 0) {
+            func_1508B20C(obj->x_position, obj->y_position, obj->z_position, 900.0f);
+        }
+        return;
+    }
+    msg.pos[0] = obj->x_position;
+    msg.pos[1] = obj->y_position;
+    msg.pos[2] = obj->z_position;
+    msg.owner = &D_800CC2D0[obj->unk124 - 1];
+    msg.carrier = obj->unk65;
+    if (carrier != NULL) {
+        carrier->stunned = 0;
+        carrier->immune = 0;
+        if (carrier->health != 0) {
+            carrier->health = 1;
+        }
+    }
+    func_1506B04C(obj, D_800BE616 ? 0xB : 0xE, &msg);
+    func_15060F28(obj, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3230.s")
+#endif
+#ifdef NON_MATCHING
+void func_1505A250(f32, f32, f32, f32 *, f32 *);
+f32 func_1505A3A8(f32, struct127 *, f32, f32, u8);
+u8 func_150599C8(struct127 *, u8, u16);
+void func_1001091C(u8 *, s32);
+
+// rolling_object_update: per-frame update of a rolling object (barrel / ball; kinds 0x25, 0x10, 0xAC): unk80 = 10;
+// kind 0x25 first damps its push vector (func_1505A250, 0.15) and, when unk87 bit 0, keeps its height in unk224;
+// friction (func_1505A3A8, 2 / 0.1 or 0.25), gravity 3, the move (func_15056B08, water func_150562FC) and animation.
+// Its frame velocity (unkBC / unk148 = position delta x D_800BEDC8) gives the speed d; xz_velocity is capped at 2d
+// when it exceeds 2(d + 4). unk87 == 4 (a hit) fires event 0xFF020133 as the player (func_1506E8D8) and stores the
+// velocity as the push vector. unk87 shifts left each frame. Moving faster than 0.5 on land turns the heading unk78
+// towards the motion (func_1505A630) and the facing towards it or its opposite (func_150599C8). The roll speed unk44
+// decays by 0.9 in the air (unk28 > 30), else is 2d (0 in water) and spins the model (func_15052490, scale
+// (2 - xz_scale) x 0.375 / 0.28125 / 1.125 by kind). Below 0.2 the rolling sound stops (func_100109D0); otherwise it
+// is started (func_1506E5FC with sound 0x630 / 0x67A / 0x62A by kind) or its pitch set to unk44 x 2500 (max 28000,
+// halved for kind 0x25, func_1001091C).
+void func_150C3574(struct127 *obj) {
+    f32 scale;
+    f32 friction;
+    f32 d;
+    u16 heading;
+    s32 pitch;
+    u8 flags;
+
+    scale = 0.5f;
+    obj->unk80 = 10;
+    if (obj->id == 0x25) {
+        func_1505A250(0.0f, 0.0f, 0.15f, &obj->unk164, &obj->unk168);
+        friction = 0.1f;
+        if (obj->unk87 & 1) {
+            obj->unk224 = (s32) obj->y_position;
+        }
+        obj->unk160 = 0;
+    } else {
+        friction = 0.25f;
+    }
+    func_1505A3A8(0.0f, obj, 2.0f, friction, 0);
+    obj->gravity = 3.0f;
+    if (obj->id == 0x10) {
+        scale = 0.375f;
+    }
+    if (obj->id == 0xAC) {
+        scale = 1.5f;
+    }
+    scale *= 0.75f;
+    func_15056B08(obj);
+    if (obj->unk13D != 0) {
+        func_150562FC(obj);
+    }
+    func_15059140(obj);
+    obj->unkBC = (obj->x_position - obj->old_x_position) * D_800BEDC8;
+    obj->unk148 = (obj->z_position - obj->old_z_position) * D_800BEDC8;
+    d = sqrtf(obj->unkBC * obj->unkBC + obj->unk148 * obj->unk148);
+    if ((d + 4.0f) + (d + 4.0f) < obj->xz_velocity) {
+        obj->xz_velocity = d + d;
+    }
+    flags = obj->unk87;
+    if (flags == 4) {
+        D_800D1580 = 0xFF020133;
+        D_800D154C = D_800CC2D0;
+        func_1506E8D8();
+        D_800D154C = obj;
+        obj->unk164 = obj->unkBC;
+        obj->unk168 = obj->unk148;
+        obj->xz_velocity = 0.0f;
+        flags = obj->unk87;
+    }
+    obj->unk87 = flags << 1;
+    if (0.5f < d && obj->unk13D == 0) {
+        obj->unk78 = func_1505A630(obj->x_position - obj->old_x_position, obj->old_z_position - obj->z_position, 0);
+    }
+    heading = obj->unk78;
+    if ((obj->unk7A - heading - 0x4000) & 0x8000) {
+        func_150599C8(obj, 2, heading);
+    } else {
+        func_150599C8(obj, 2, heading ^ 0x8000);
+    }
+    if (30.0f < obj->unk28) {
+        obj->unk44 *= 0.9f;
+    } else {
+        obj->unk44 = d + d;
+    }
+    if (obj->unk13D != 0) {
+        obj->unk44 = 0.0f;
+    }
+    func_15052490(obj, obj->unk78, obj->unk44, (2.0f - obj->xz_scale) * scale);
+    if (obj->unk44 < 0.2f) {
+        func_100109D0(obj);
+    } else if (func_100107F8(obj) == 0) {
+        if (obj->id == 0xAC) {
+            D_800D1580 = 0x630;
+        } else if (obj->id == 0x25) {
+            D_800D1580 = 0x67A;
+        } else {
+            D_800D1580 = 0x62A;
+        }
+        func_1506E5FC();
+    } else {
+        pitch = (s32) (obj->unk44 * 2500.0f);
+        if (pitch > 28000) {
+            pitch = 28000;
+        }
+        if (obj->id == 0x25) {
+            pitch >>= 1;
+        }
+        func_1001091C((u8 *) obj, pitch);
+    }
+    if (obj->unk44 < 0.2f) {
+        func_100109D0(obj);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3574.s")
+#endif
+#ifdef NON_MATCHING
+void func_15188D80(struct127 *, s32, s32);
+s32 func_150C1B60(f32, f32, f32, s32);
+void func_150C3D5C(struct127 *);
+void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+
+// bouncing_bomb_update: per-frame update of a falling / bouncing object. In state 20 it spawns a small dust puff
+// (func_151BA1A0 effect 0x2F) at its position, or with a timer (unk2E4) shows it (func_15188D80). On a fast enough
+// landing (falling, unk28 > 20 and unk28 < -20 x vy) it plays sound 0x92 once (unk136). On the first frame (unk83 0)
+// it sets the spin speed unk148 = 70, spawns a big puff plus a light (func_150C1B60) and sends event 6, or with a
+// timer shows it, plays sound 0x1A9, sets unkD0, flags 0x1008000 and unk114 = 500. Each frame: unk83 counts up,
+// immune 0xFF, flag 0x8000 cleared from frame 11; facing unk40 from unk7A, animation, spin unkB8 += unk148 with
+// unk148 x 0.96. It ends (func_150C3D5C, sound 0x93, state 1) once it rests (unk28 0) after frame 20 with unkCC 0,
+// or when unk107 is set or its health is 0.
+void func_150C3994(struct127 *obj) {
+    if (obj->interaction_state == 20) {
+        if (obj->unk2E4 == 0) {
+            func_151BA1A0(0x2F, 1, (s16) (s32) obj->x_position, (s16) (s32) (obj->y_position + 30.0f),
+                          (s32) obj->z_position, 2000, 1000, 400, 200, 0xC00, 0xC00, 1, 1, 0, 0xFF, 0);
+        } else {
+            func_15188D80(obj, 100, 0);
+        }
+    }
+    if (obj->y_velocity < 0.0f && 20.0f < obj->unk28 && obj->unk136 == 0 &&
+        obj->unk28 < -20.0f * obj->y_velocity) {
+        func_10010630(0x92, obj, 0x7D00, 200, 2500);
+        obj->unk136 = 1;
+    }
+    if (obj->unk83 == 0) {
+        obj->unk148 = 70.0f;
+        if (obj->unk2E4 == 0) {
+            func_151BA1A0(0x2F, 1, (s16) (s32) obj->x_position, (s16) (s32) (obj->y_position + 30.0f),
+                          (s32) obj->z_position, 2200, 1280, 800, 700, 0xC00, 0xC00, 20, 1, 0, 0xFF, 0);
+            func_150C1B60(obj->x_position, obj->y_position + 30.0f, obj->z_position, 0xFF);
+            func_1506B04C(obj, 6, NULL);
+        } else {
+            func_15188D80(obj, 100, 0);
+        }
+        func_10010344(0x1A9, obj, 0x7FFF, 1000, 2000);
+        obj->unkD0 = 1;
+        obj->unkF8 |= 0x1008000;
+        obj->unk114 = 500.0f;
+    }
+    obj->immune = 0xFF;
+    obj->unk83++;
+    if (obj->unk83 >= 11) {
+        obj->unkF8 &= ~0x8000;
+    }
+    obj->unk40 = (f32) (obj->unk7A + 0x4000) * 0.0054931640625f;
+    func_15059140(obj);
+    obj->unkB8 += obj->unk148;
+    obj->unk148 *= 0.96f;
+    if ((obj->unk28 == 0.0f && obj->unk83 >= 21 && obj->unkCC == 0) || obj->unk107 != 0 || obj->health == 0) {
+        func_150C3D5C(obj);
+        func_10010630(0x93, obj, 0x7D00, 200, 2500);
+        func_15060F28(obj, 1);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3994.s")
+#endif
 
 s32 func_150C3D48(s32 arg0) {
     return arg0 + 0xEDCBA988;
@@ -666,7 +1073,11 @@ s32 func_150C3D48(s32 arg0) {
 s32 func_1516DF0C(s16, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
 s32 func_15170F24(s32, s32, s32, s32, f32, s32, s32);
 void func_15171770(s32, s32, f32, f32, f32, f32, f32, f32, f32, s32, s32, f32, s32, s32);
+#ifdef NON_MATCHING // the definition is void (P284)
+void func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#else
 s32 func_151BA1A0(s32, s32, s16, s16, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32, s32);
+#endif
 s32 func_150C3D48(s32 arg0);
 s32 func_151EF800(u32, u32 *);
 #ifdef NON_MATCHING // the definition is void (asm: v0 is not a result); one signature for wasm

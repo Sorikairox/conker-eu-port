@@ -1,0 +1,31 @@
+\#^    obj->unkF8 |= 0x4000000;$#s/0x4000000/0x2000000/
+\#^    if (obj->unk222 != 0 && obj->unk65 == 0) {$#s/ && obj->unk65 == 0//
+\#^        owner = &D_800CC2D0\[obj->unk124 - 1\];$#s/ - 1//
+\#^        obj->old_y_position = owner->y_position;$#s/owner->y_position/owner->z_position/
+\#^        obj->unk222 = 0;$#d
+\#^    func_15058898(obj, obj->old_y_position);$#s/old_y_position/y_position/
+\#^    func_1505B5F8(obj, obj->unk180);$#s/unk180/unk28/
+\#^    if (obj->unk28 == 0.0f) {$#s/==/!=/
+\#^        obj->xz_velocity \*= 0.5f;$#s/0.5f/0.25f/
+\#^        obj->unk222 = obj->unk65;$#d
+\#^        if (id == 0x1F9) {$#s/0x1F9/0x1FA/
+\#^            mode = 3;$#s/3/1/
+\#^            mode = 1;$#s/1/0/
+\#^        mode = 0;$#s/0/1/
+\#^    func_1505E650(obj, mode, 0.0f, 0.0f, 0.0f, 0.0f, 0);$#s/0.0f, 0);/1.0f, 0);/
+\#^        func_1507C700(obj, &D_800CC2D0\[obj->unk65 - 1\]);$#s/ - 1//
+\#^        if (carrier->interaction_state == 5) {$#s/5/4/
+\#^            obj->unk65 = 0;$#d
+\#^    if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {$#s/ && D_800C35EA == 0//
+\#^    if (D_800BE9E4 < obj->unk2E4) {$#s/</<=/
+\#^        obj->unk2E4 -= D_800BE9E4;$#s/-=/+=/
+\#^            func_1508B20C(obj->x_position, obj->y_position, obj->z_position, 900.0f);$#s/900.0f/800.0f/
+\#^    msg.pos\[1\] = obj->y_position;$#s/y_position/z_position/
+\#^    msg.owner = &D_800CC2D0\[obj->unk124 - 1\];$#s/unk124/unk65/
+\#^    msg.carrier = obj->unk65;$#s/unk65/unk124/
+\#^        carrier->stunned = 0;$#d
+\#^        carrier->immune = 0;$#s/0;/1;/
+\#^        if (carrier->health != 0) {$#s/!=/==/
+\#^            carrier->health = 1;$#s/1;/0;/
+\#^    func_1506B04C(obj, D_800BE616 ? 0xB : 0xE, &msg);$#s/0xB : 0xE/0xE : 0xB/
+\#^    func_15060F28(obj, 1);$#s/1)/2)/

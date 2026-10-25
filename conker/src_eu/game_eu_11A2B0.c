@@ -225,4 +225,96 @@ void func_150ED180(s32 arg0, u8 arg1, s32 arg2) {
     func_150ECFE8((u8 *)arg0, 0, 0xFF, 0, 0xFF, 4, -1, arg1, arg2);
 }
 
+#ifdef NON_MATCHING
+s32 func_1509BE40(s32, s32, ...);
+void func_150498A0(f32 *, f32, f32 *, f32, f32, f32);
+extern f32 D_80088E70; /* current tint r, g, b */
+extern f32 D_80088E74;
+extern f32 D_80088E78;
+extern f32 D_80088E7C; /* target tint r, g, b */
+extern f32 D_80088E80;
+extern f32 D_80088E84;
+extern f32 D_80088E88; /* approach speeds */
+extern f32 D_80088E8C;
+extern f32 D_80088E90;
+
+/* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
+#define TINT_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
+
+// object_update_option_tint: reads the option flags (0x403B tint on, 0x4038..0x403A which channel drops to 128,
+// 0x4010 with the 0x2007 settings block) into the object's flags (+0x84), mode (+0x134) and value (+0x190), sends
+// the 0x9000 parameters, then moves the global tint toward its target and sends it as 3 bytes (0x30F3..0x30F5).
+void func_150ED1F0(u8 *obj) {
+    s32 block;
+    s32 v;
+    s32 hi;
+    s32 lo;
+
+    if (func_1509BE40(1, 0x403B, 6, 0x2000) == 0) {
+        D_80088E7C = 255.0f;
+        D_80088E80 = 255.0f;
+        D_80088E84 = 255.0f;
+        func_1509BFB0(0, 0x4031, 0);
+        func_1509BFB0(0, 0x4032, 0);
+        func_1509BFB0(0, 0x4033, 0);
+        *(u32 *) (obj + 0x84) &= 0x7FFDEDFF;
+        *(u32 *) (obj + 0x84) |= 8;
+    } else {
+        func_1509BFB0(0, 0x4031, 1);
+        func_1509BFB0(0, 0x4032, 1);
+        func_1509BFB0(0, 0x4033, 1);
+        *(u32 *) (obj + 0x84) |= 0x80021200;
+        if (func_1509BE40(1, 0x4038, 6, 0x2000) != 0) {
+            D_80088E7C = 128.0f;
+            D_80088E80 = 255.0f;
+            D_80088E84 = 255.0f;
+        } else if (func_1509BE40(1, 0x4039, 6, 0x2000) != 0) {
+            D_80088E7C = 255.0f;
+            D_80088E80 = 128.0f;
+            D_80088E84 = 255.0f;
+        } else if (func_1509BE40(1, 0x403A, 6, 0x2000) != 0) {
+            D_80088E7C = 255.0f;
+            D_80088E80 = 255.0f;
+            D_80088E84 = 128.0f;
+        } else {
+            D_80088E7C = 255.0f;
+            D_80088E80 = 255.0f;
+            D_80088E84 = 255.0f;
+        }
+        block = func_1509BE40(0, 0x2007, 0xB7) | 0x2000;
+        if (func_1509BE40(1, 0x4010, 6, 0x2000) == 0) {
+            *(s32 *) (obj + 0x134) = 0;
+            *(f32 *) (obj + 0x190) = 0.0f;
+            return;
+        }
+        if (block == 0) { /* never true (bit 0x2000 is set), kept from the asm */
+            return;
+        }
+        *(s32 *) (obj + 0x134) = 1;
+        func_1509BFB0(1, 0x9000, 0x17, func_1509BE40(1, block, 0x9C, 0x2000));
+        v = func_1509BE40(1, block, 0x9A, 0x2000);
+        hi = v;
+        lo = v >> 1;
+        if (v < 0x384) {
+            hi = 0x384;
+        } else if (v >= 0x4A7) {
+            hi = 0x4A6;
+        }
+        if (lo < 0xB4) {
+            lo = 0xB4;
+        } else if (lo >= 0xE8) {
+            lo = 0xE7;
+        }
+        func_1509BFB0(2, 0x9000, 8, hi, lo);
+        *(f32 *) (obj + 0x190) = 220.0f;
+    }
+    func_150498A0(&D_80088E70, D_80088E7C, &D_80088E88, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    func_150498A0(&D_80088E74, D_80088E80, &D_80088E8C, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    func_150498A0(&D_80088E78, D_80088E84, &D_80088E90, 4.0f, 6.0f, *(f32 *) (obj + 0x7B4));
+    func_1509BFB0(1, 0x30F3, 0x12, (u8) TINT_F2U(D_80088E70));
+    func_1509BFB0(1, 0x30F4, 0x12, (u8) TINT_F2U(D_80088E74));
+    func_1509BFB0(1, 0x30F5, 0x12, (u8) TINT_F2U(D_80088E78));
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_11A2B0/func_150ED1F0.s")
+#endif

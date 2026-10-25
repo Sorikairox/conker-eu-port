@@ -93,3 +93,11 @@ P291	port-e	star field 150FBA40 (new nmasm_stars harness); ray inputs kill AD844
 P294	port-e	D5E90 wall engine AB708 (AB6D0 / AC8C4) readable, walls.inc deleted, ray far-leaf scenes	2	0	115	walls 33/41, ledge 20/32, P291 ray next-leaf survivors killed; 0 asm2c left (97.2%)
 P300	port-e	group C part C2 (trail update/draw/hit effects 106830, freecam 1579B0)	4	0	130	D99AC 53/53, DA1FC 34/34, DABFC 57/57, 2A1A0 47/50; 151E67A0 + 150FBE40 left (97.3%)
 P307	port-b	integration start: merge port-e (74c6f08a) into port-b; 1 game-C conflict (func_150A7EF4 fold, kept port-b)	0	0	30	verify_all OK, NM links, protocheck 0, implicit NM+float 0, selftest 147/147, 98.1% (92.7% bytes)
+P277	port-c	group C	10		~170	10 compiled funcs to NM C; B1964 drafted (mode-14 DIFFER), E1AF0 blocked on func_1505D1C4 void
+P284	port-c	group C	7		~140	B1964 fixed (mode-14 divisor = func_1505A6F8 result) + 6 compiled funcs to NM C; func_1505D1C4->s32 blocked by void decls in 201240/C5530
+P289	port-c	group C	3		~120	P284 mutants re-run clean; func_1505D1C4->s32 + E1AF0; D_8008B704 = 2 entries, NM phase param; B2290 (ld/sd hand asm) via Python-model harness; B8DB0
+P292	port-c	group C	3		~125	DCEF0 B2290 proto; 1505D1C4 v0 callers need no change; difftest stub_write maps pages (OUTW/OUTA into untouched heap faulted); D290 + AFC84 + B4854 to NM C
+P296	port-c	group C	6		~130	ED1F0 + A39E4 (caller A3990 4 args) + CB6F4 + 970BC + 06D38 + BD550 to NM C; func_150C3574 boundary setups kill the 5 P284 survivors
+P299	port-c	group C1	4		~120	CA4E8 (rodata copied, shared D_800AB164.. exported const) + B3878 rope_draw + A1E0 debris_update + FE30 menu list to NM C; 1C3530 trio left
+P305	port-c	group C1	3		~115	976B8 emitter_ribbon_draw + A1A4 emitter2_flame_update + BA28 emitter2_flame_draw (1C3530) to NM C, mutants 74/76 + 106/106 + 85/85; group C1 done
+P308	port-b	integration 2	0		~35	merge port-c (C1): func_150B2290 keep P289, STUBMAP unified, selftest 150/150, progress_nm 98.6% / 94.7%

@@ -336,6 +336,15 @@ S1194="DIFFTEST_ROMDATA=1 DIFFTEST_ARG=0=0 DIFFTEST_POKE=8000030C=0 DIFFTEST_RET
 chkce EQUIV  func_10001194 "$S1194"
 chkce UNSURE func_10001194 "$S1194 DIFFTEST_STUBMAP_OLD=1"
 chkce DIFFER func_10001194 "$S1194" 's/(D_8003585C\[i\] ^ 0x8039CCCA)/(D_8003585C[i] ^ 0x8039CCCB)/'
+# P292: a stub output (DIFFTEST_OUTW / OUTA) into a heap page the function had not touched yet faulted with
+# UC_ERR_WRITE_UNMAPPED at the stub, so every trial was inconclusive (func_1518D290: the ring / world buffers that
+# DIFFTEST_RET hands out are filled by stubs first). same fix as P288 above (one ensure() loop, one
+# DIFFTEST_STUBMAP_OLD switch since the P308 merge).
+# (The old-behaviour case uses 1 trial: with more, the fault-learning re-runs map the page and later trials pass.)
+SD290="DIFFTEST_EXACT=* DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=80480000,1=7,2=1234 DIFFTEST_RET=10003EBC=80460000;80470000 DIFFTEST_OUTW=15143CAC=2:42C80000;C2480000/3:41200000;C1A00000 DIFFTEST_OUTA=15146324=2:43480000;C2C80000;44160000;41200000;C1200000;42F00000;3F800000;40000000;40400000;C0800000;C0A00000;C0C00000 DIFFTEST_ARGMEM=151307F0=0:102"
+TRIALS=4 chkce EQUIV  func_1518D290 "$SD290"
+TRIALS=1 chkce UNSURE func_1518D290 "$SD290 DIFFTEST_STUBMAP_OLD=1"
+TRIALS=1 chkce DIFFER func_1518D290 "$SD290" 's/(func_150ADA68() \* 202.0f/(func_150ADA68() * 200.0f/'
 # P260: a candidate path the container already read, rewritten on the host with a different size (what every
 # chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
 # selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares

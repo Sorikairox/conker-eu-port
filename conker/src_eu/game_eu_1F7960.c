@@ -4,6 +4,7 @@
 #ifdef NON_MATCHING // hoisted declarations of the NON_MATCHING bodies
 void func_151CA398(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4);
 void func_151CA484(u8 *arg0);
+void func_151CA4E8(u8 *obj, s32 kind, s32 wide, s32 arg3, s32 group);
 s32 func_151559FC(void *, s32, s32, s32, s32, s32, s32);
 #endif
 void *memcpy(void *, const void *, unsigned int);
@@ -15,7 +16,9 @@ s32 func_151CA398(u8 *, s32, s32, s32, s32);
 #ifndef NON_MATCHING
 s32 func_151CA484(u8 *);
 #endif
+#ifndef NON_MATCHING
 s32 func_151CA4E8(u8 *, s32, s32, s32, s32);
+#endif
 s32 func_151CAC50(u8 *, s32);
 void func_151CB128(u8 *, u8);
 s32 func_151CB2D8(u8 *, u8);
@@ -97,7 +100,7 @@ void func_151CA150(u8 *arg0, s32 arg1)
 
 #ifdef NON_MATCHING
 void func_150BE390(s32, u8, s32);
-s32 func_151CD4B8(u8 *, s32, s8, s32);
+void func_151CD4B8(u8 *, u8, s8, u8);
 
 void func_151CA398(u8 *arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4) {
     s32 temp_s1;
@@ -137,7 +140,166 @@ void func_151CA484(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CA484.s")
 #endif
+#ifdef NON_MATCHING
+/* rodata of func_151CA4E8.s (D_800AB060..D_800AB268); D_800AB164 / 16C / 18C / 194 are also read by
+   func_151CBBAC and the hud_slot_row spawner below, so they stay exported. */
+static const f32 sBarColourInit[4] = { 255.0f, 0.0f, 0.0f, 255.0f };            /* D_800AB060 */
+static const f32 sBarColour[5][4] = {                                           /* D_800AB070 */
+    { 0.0f, 255.0f, 0.0f, 130.0f }, { 0.0f, 255.0f, 0.0f, 130.0f }, { 0.0f, 255.0f, 0.0f, 130.0f },
+    { 255.0f, 255.0f, 0.0f, 90.0f }, { 0.0f, 0.0f, 180.0f, 90.0f },
+};
+static const f32 sBarBackColour[5][4] = {                                       /* D_800AB0C0 */
+    { 0.0f, 255.0f, 0.0f, 65.0f }, { 0.0f, 255.0f, 0.0f, 65.0f }, { 0.0f, 255.0f, 0.0f, 65.0f },
+    { 255.0f, 0.0f, 0.0f, 65.0f }, { 0.0f, 0.0f, 180.0f, 65.0f },
+};
+static const f32 sBarHeight[5] = { 2.0f, 2.0f, 2.0f, 1.0f, 1.0f };              /* D_800AB110 */
+static const f32 sBarWidth[5] = { 60.0f, 60.0f, 60.0f, 30.0f, 30.0f };          /* D_800AB124 */
+static const f32 sBarX[5] = { -90.0f, -90.0f, -90.0f, 37.0f, 37.0f };           /* D_800AB138 */
+static const f32 sBarLayoutY[5][2] = {                                          /* D_800AB14C (+164, +16C) */
+    { -50.0f, -62.0f }, { -38.0f, -46.5f }, { -38.0f, -46.0f }, { -25.0f, -31.0f }, { -25.0f, -31.0f },
+};
+static const f32 sBarLayoutScale[5][2] = {                                      /* D_800AB174 (+18C, +194) */
+    { 0.02f, 0.016129032f }, { 0.02631579f, 0.021505376f }, { 0.02631579f, 0.02173913f },
+    { 0.04f, 0.032258064f }, { 0.04f, 0.032258064f },
+};
+static const f32 sBarRange[1] = { 99999.0f };                                   /* D_800AB268 */
+const f32 D_800AB164[2] = { -25.0f, -31.0f };
+const f32 D_800AB16C[2] = { -25.0f, -31.0f };
+const f32 D_800AB18C[2] = { 0.04f, 0.032258064f };
+const f32 D_800AB194[2] = { 0.04f, 0.032258064f };
+
+/* IDO's f32 -> u32 conversion: <= -1, >= 2^32 and NaN give 0xFFFFFFFF (undefined in C, wasm traps) */
+#define BAR_F2U(f) ((!((f) > -1.0f) || (f) >= 4294967296.0f) ? 0xFFFFFFFFU : (u32) (f))
+
+/* handler block copied to sprite + 0x70 (0x58 bytes) */
+typedef struct {
+    /* 0x00 */ u8 *owner;
+    /* 0x04 */ f32 u04;
+    /* 0x08 */ f32 u08;
+    /* 0x0C */ s8 mode;
+    /* 0x0D */ s8 part;
+    /* 0x0E */ u8 pad0E[0xA];
+    /* 0x18 */ f32 layoutY;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 layoutScale;
+    /* 0x24 */ u8 pad24[4];
+    /* 0x28 */ f32 range;
+    /* 0x2C */ f32 colourInit[4];
+    /* 0x3C */ f32 colour[4];
+    /* 0x4C */ f32 widthM1;
+    /* 0x50 */ u8 pad50[4];
+    /* 0x54 */ s8 arg3;
+    /* 0x55 */ u8 pad55[3];
+} BarBlockCA4E8;
+
+/* sprite request for func_151559FC */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 h;
+    /* 0x0C */ f32 w;
+    /* 0x10 */ u8 u10;
+    /* 0x11 */ u8 pad11;
+    /* 0x12 */ s16 span;
+    /* 0x14 */ u16 flags;
+    /* 0x16 */ s16 u16;
+    /* 0x18 */ s16 u18;
+    /* 0x1A */ s8 u1A;
+    /* 0x1B */ u8 rgba[4];
+    /* 0x1F */ u8 u1F;
+    /* 0x20 */ u8 u20[4];
+    /* 0x24 */ s32 u24;
+    /* 0x28 */ s32 u28;
+    /* 0x2C */ s32 u2C;
+    /* 0x30 */ s32 u30;
+    /* 0x34 */ s32 u34;
+    /* 0x38 */ s32 u38;
+    /* 0x3C */ s32 u3C;
+    /* 0x40 */ s8 u40;
+    /* 0x41 */ s8 u41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 player;
+    /* 0x45 */ u8 pad45[3];
+} BarSpecCA4E8;
+
+// hud_bar_spawn: spawns a two-part HUD bar of kind `kind` (0..4) for player obj + 0x23D (list 0x58): first the
+// front sprite (colour sBarColour[kind], height sBarHeight, width sBarWidth at x sBarX, part 3), then the back
+// sprite (colour sBarBackColour[kind], both sizes + 2, part 0). Each sprite gets the 0x58-byte handler block at
+// +0x70: owner, mode (0 when `arg3` is -1, else 4), layout constants (second entry when D_80082FA0 == 1), the
+// colour and `arg3`. `wide` adds flag 0x40. The asm leaves memcpy's / func_151559FC's v0; no caller reads it.
+void func_151CA4E8(u8 *obj, s32 kind, s32 wide, s32 arg3, s32 group) {
+    BarBlockCA4E8 blk;
+    BarSpecCA4E8 spec;
+    u8 *spr;
+    s32 k = (u8) kind;
+    s32 alt = (D_80082FA0 == 1);
+    s32 i;
+
+    arg3 = (s8) arg3;
+    for (i = 0; i < 4; i++) {
+        blk.colourInit[i] = sBarColourInit[i];
+        blk.colour[i] = sBarColour[k][i];
+    }
+    blk.widthM1 = sBarWidth[k] - 1.0f;
+    blk.u04 = 0.0f;
+    blk.part = 0;
+    blk.u08 = 130.0f;
+    blk.owner = obj;
+    blk.mode = (arg3 == -1) ? 0 : 4;
+    blk.arg3 = arg3;
+
+    spec.span = 300;
+    spec.u16 = 1;
+    spec.u1F = 0xFF;
+    spec.u18 = 0xFF;
+    spec.u1A = 7;
+    spec.u20[3] = 0xFF;
+    spec.u20[0] = 0xFF;
+    spec.u20[1] = 0xFF;
+    spec.u20[2] = 0xFF;
+    spec.u2C = 0x1F0601;
+    spec.u24 = 0;
+    spec.u28 = 0x200004;
+    spec.u38 = 0x80;
+    spec.u3C = 0x20;
+    spec.u40 = 0;
+    spec.u41 = 0xA;
+    spec.y = 0.0f;
+    spec.w = sBarWidth[k];
+    spec.u10 = 0xFF;
+    spec.player = obj[0x23D];
+    spec.x = sBarX[k];
+    spec.h = sBarHeight[k];
+    spec.flags = ((u8) wide ? 0x40 : 0) | 0x10 | (1 << (obj[0x23D] + 11));
+    spec.u30 = 8;
+    spec.u34 = 0x54;
+    blk.u1C = 0.0f;
+    blk.part = 3;
+    blk.range = sBarRange[0];
+    blk.layoutY = sBarLayoutY[k][alt];
+    blk.layoutScale = sBarLayoutScale[k][alt];
+    for (i = 0; i < 4; i++) {
+        spec.rgba[i] = BAR_F2U(sBarColour[k][i]);
+    }
+    spr = (u8 *) func_151559FC(&spec, 8, 0, 0, 0x58, (u8) group, 1);
+    if (spr != NULL) {
+        memcpy(spr + 0x70, &blk, 0x58);
+    }
+
+    blk.part = 0;
+    spec.h = sBarHeight[k] + 2.0f;
+    spec.w = sBarWidth[k] + 2.0f;
+    for (i = 0; i < 4; i++) {
+        spec.rgba[i] = BAR_F2U(sBarBackColour[k][i]);
+    }
+    spr = (u8 *) func_151559FC(&spec, 0, 0, 0, 0x58, (u8) group, 0);
+    if (spr != NULL) {
+        memcpy(spr + 0x70, &blk, 0x58);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CA4E8.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_151CAC50(u8 *arg0, s32 arg1) {
@@ -733,7 +895,139 @@ void func_151CBAC0(u8 *arg0) {
     arg0[0x2E] = *(f32 *)(p + 4);
 }
 
+#ifdef NON_MATCHING
+/* func_151559FC's sprite spec (0x58 bytes). */
+typedef struct {
+    /* 0x00 */ f32 x;
+    /* 0x04 */ f32 y;
+    /* 0x08 */ f32 scaleA;
+    /* 0x0C */ f32 scaleB;
+    /* 0x10 */ u8 kind;
+    /* 0x12 */ s16 span;
+    /* 0x14 */ u16 flags;
+    /* 0x16 */ s16 u16;
+    /* 0x18 */ s16 u18;
+    /* 0x1A */ u8 u1A;
+    /* 0x1B */ u8 col[9];
+    /* 0x24 */ s32 u24;
+    /* 0x28 */ s32 u28;
+    /* 0x2C */ s32 u2C;
+    /* 0x30 */ s32 u30;
+    /* 0x34 */ s32 u34;
+    /* 0x38 */ s32 u38;
+    /* 0x3C */ s32 u3C;
+    /* 0x40 */ u8 u40;
+    /* 0x41 */ u8 u41;
+    /* 0x42 */ u8 pad42[2];
+    /* 0x44 */ u8 player;
+    /* 0x48 */ f32 u48;
+    /* 0x4C */ f32 u4C;
+    /* 0x50 */ f32 u50;
+    /* 0x54 */ f32 u54;
+} SpriteSpecCBBAC;
+
+/* the 0x58-byte block copied to the sprite's +0x70 (its handler state) */
+typedef struct {
+    /* 0x00 */ u8 *owner;
+    /* 0x04 */ f32 alphaA;
+    /* 0x08 */ f32 alphaB;
+    /* 0x0C */ u8 mode;
+    /* 0x0D */ u8 type;
+    /* 0x0E */ u8 side;
+    /* 0x10 */ f32 u10;
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ u8 pad24[0x30];
+    /* 0x54 */ s8 u54;
+    /* 0x55 */ u8 pad55[3];
+} HudBlockCBBAC;
+
+extern const f32 D_800AB164[2];
+extern const f32 D_800AB18C[2];
+
+// hud_side_bars_spawn: spawns four HUD sprites for player obj + 0x23D (list 5, span 300, scale 49 x 18): kind 0x7B
+// (colour byte 0xFF) and 0x7C (0) at (88, 91), then the same pair mirrored at (-88, 91) without flag 2. Each gets the
+// handler block above: owner, alpha 255, mode (0 when `arg3` is -1, else 4), `type`, side (0 right / 1 left), the
+// layout constants of D_800AB164 / D_800AB18C (second entry when D_80082FA0 == 1) and `arg3`. `wide` adds flag 0x40.
+void func_151CBBAC(u8 *obj, u8 type, u8 wide, s8 arg3, u8 group) {
+    HudBlockCBBAC blk;
+    SpriteSpecCBBAC spec;
+    u8 *rec;
+
+    blk.alphaA = 255.0f;
+    blk.alphaB = 255.0f;
+    blk.type = type;
+    blk.owner = obj;
+    blk.mode = (arg3 == -1) ? 0 : 4;
+    blk.u54 = arg3;
+    blk.u14 = 255.0f;
+    spec.span = 300;
+    spec.scaleA = 49.0f;
+    blk.u10 = 0.0f;
+    spec.scaleB = 18.0f;
+    spec.flags = (wide ? 0x40 : 0) | 0x32 | (1 << (obj[0x23D] + 11));
+    spec.u1A = 7;
+    spec.col[0] = 0xFF;
+    spec.u16 = 1;
+    spec.col[1] = 0xFF;
+    spec.col[2] = 0xFF;
+    spec.col[4] = 0xFF;
+    spec.col[5] = 0xFF;
+    spec.col[6] = 0xFF;
+    spec.u18 = 0xFF;
+    spec.col[7] = 0xFF;
+    spec.col[8] = 0xFF;
+    spec.u24 = 0;
+    spec.u28 = 0x200004;
+    spec.u2C = 0x1F0601;
+    spec.u30 = 7;
+    spec.u34 = 0x22;
+    spec.u38 = 0x80;
+    spec.u3C = 0x20;
+    spec.u40 = 0;
+    spec.u41 = 7;
+    spec.player = obj[0x23D];
+    blk.side = 0;
+    spec.col[3] = 0xFF;
+    spec.kind = 0x7B;
+    blk.u1C = 0.0f;
+    spec.x = 88.0f;
+    spec.y = 91.0f;
+    blk.u18 = D_800AB164[D_80082FA0 == 1];
+    blk.u20 = D_800AB18C[D_80082FA0 == 1];
+    rec = (u8 *) func_151559FC(&spec, 5, 0, 0, 0x58, group, 0);
+    if (rec != NULL) {
+        memcpy(rec + 0x70, &blk, 0x58);
+    }
+    spec.col[3] = 0;
+    spec.kind = 0x7C;
+    rec = (u8 *) func_151559FC(&spec, 5, 0, 0, 0x58, group, 0);
+    if (rec != NULL) {
+        memcpy(rec + 0x70, &blk, 0x58);
+    }
+
+    spec.flags &= ~2;
+    spec.col[3] = 0xFF;
+    spec.kind = 0x7B;
+    blk.side = 1;
+    spec.x = -88.0f;
+    spec.y = 91.0f;
+    rec = (u8 *) func_151559FC(&spec, 5, 0, 0, 0x58, group, 0);
+    if (rec != NULL) {
+        memcpy(rec + 0x70, &blk, 0x58);
+    }
+    spec.col[3] = 0;
+    spec.kind = 0x7C;
+    rec = (u8 *) func_151559FC(&spec, 5, 0, 0, 0x58, group, 0);
+    if (rec != NULL) {
+        memcpy(rec + 0x70, &blk, 0x58);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CBBAC.s")
+#endif
 void func_151CBEC8(u8 *arg0, u8 *arg1, u8 arg2) {
     u8 *temp_v0 = arg0 + 0x70;
     if ((arg2 == 0x37) && (arg1[0] == temp_v0[0xE]) && (*(s32 *)(arg1 + 4) == *(s32 *)temp_v0)) {
@@ -1285,7 +1579,82 @@ void func_151CD444(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+extern u8 D_8008FFC8[4];
+extern const f32 D_800AB16C[2];
+extern const f32 D_800AB194[2];
+
+// hud_slot_row_spawn: spawns two rows of four HUD sprites for player obj + 0x23D (list 0xB, span 300, scale
+// 35.75 x 16, kinds D_8008FFC8[0..3]) at x = 71.5 i - 107.25, y = -90 (row 0) and 92 (row 1, flag 4 added). Each
+// gets the 0x58-byte handler block: owner, 0, 130, mode (0 when `arg2` is -1, else 4), 4 / 5 for the row, the layout
+// constants of D_800AB16C / D_800AB194 (second entry when D_80082FA0 == 1) and `arg2`. `wide` adds flag 0x40.
+void func_151CD4B8(u8 *obj, u8 wide, s8 arg2, u8 group) {
+    HudBlockCBBAC blk;
+    union {
+        s32 w;
+        u8 b[4];
+    } kinds;
+    SpriteSpecCBBAC spec;
+    u8 row;
+    u8 i;
+    u8 *rec;
+
+    blk.u1C = 0.0f;
+    blk.u18 = D_800AB16C[D_80082FA0 == 1];
+    blk.u20 = D_800AB194[D_80082FA0 == 1];
+    blk.owner = obj;
+    blk.alphaA = 0.0f;
+    blk.alphaB = 130.0f;
+    blk.mode = (arg2 == -1) ? 0 : 4;
+    blk.u54 = arg2;
+    spec.span = 300;
+    spec.flags = (wide ? 0x40 : 0) | 0x30;
+    spec.u1A = 7;
+    spec.col[0] = 0xFF;
+    spec.u16 = 1;
+    spec.col[1] = 0xFF;
+    spec.col[2] = 0xFF;
+    spec.col[3] = 0xFF;
+    spec.col[4] = 0xFF;
+    spec.u18 = 0xFF;
+    spec.col[5] = 0xFF;
+    spec.col[6] = 0xFF;
+    spec.col[7] = 0xFF;
+    spec.col[8] = 0xFF;
+    spec.u24 = 0;
+    spec.u28 = 0x200004;
+    spec.u2C = 0x1F0601;
+    spec.u30 = 8;
+    spec.u34 = 0x13;
+    spec.u38 = 0x80;
+    spec.u3C = 0x20;
+    spec.u40 = 0;
+    spec.u41 = 0;
+    spec.u50 = 0.0f;
+    spec.u54 = 0.0f;
+    spec.u48 = 1.0f;
+    spec.u4C = 1.0f;
+    spec.scaleA = 35.75f;
+    spec.scaleB = 16.0f;
+    spec.player = obj[0x23D];
+    for (row = 0; row < 2; row++) {
+        kinds.w = *(s32 *) D_8008FFC8;
+        spec.y = row ? 92.0f : -90.0f;
+        spec.flags |= row ? 4 : 0;
+        blk.type = row ? 5 : 4;
+        for (i = 0; i < 4; i++) {
+            spec.x = (f32) i * 71.5f + 35.75f - 143.0f;
+            spec.kind = kinds.b[i];
+            rec = (u8 *) func_151559FC(&spec, 0xB, 0, 0, 0x58, group, 1);
+            if (rec != NULL) {
+                memcpy(rec + 0x70, &blk, 0x58);
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1F7960/func_151CD4B8.s")
+#endif
 f32 func_151CC784(u8 *);
 typedef struct { u8 pad0[0xD]; u8 unkD; u8 padE[0xA]; f32 unk18; f32 unk1C; f32 unk20; } SubCD;
 void func_151CD7D4(u8 *arg0) {

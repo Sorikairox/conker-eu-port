@@ -1,0 +1,54 @@
+\#if (obj\[0x10\] & 4)#s/& 4/\& 1/
+\#if (obj\[0x10\] & 8)#s/& 8/\& 0x80/
+\#if (obj\[0x10\] & 2)#s/& 2/\& 0x20/
+\#func_151D6310((s32 \*) (obj + 0x140), id, 0x190#s/0x190/0x180/
+\#func_151D6310((s32 \*) (obj + 0x140), id#s/0x140/0x144/
+\#^    if (v == NULL) {#s/==/!=/
+\#^    cam = (f32 \*)#s/0x9A0/0x9A4/
+\#^    cam = (f32 \*)#s/0x2F8/0x2FC/
+\#^    flag = 1;#s/= 1;/= 0;/
+\#if (!D_8008FEB0#s/if (!D_8008FEB0/if (D_8008FEB0/
+\#if (!D_8008FEB0#s/obj\[0x2E\]/obj[0x2D]/
+\#gfx = func_15142B7C(gfx, geoSet, geoClr)#s/geoSet, geoClr/geoClr, geoSet/
+\#gfx = func_15142C10(gfx#s/primG, primB/primB, primG/
+\#gfx = func_15142CF0(gfx#s/0, 0, envR/0, 1, envR/
+\#gfx = func_15142CF0(gfx#s/envA, &flag/primA, \&flag/
+\#gfx = func_1513F4E4(gfx, tex#s/tex/rmodePair/
+\#gfx = func_15142E24(gfx#s/0x36/0x37/
+\#gfx = func_15142E24(gfx#s/&flag, 3)/\&flag, 2)/
+\#gfx = func_15142FBC(gfx#s/| 0x80000 |/| 0x40000 |/
+\#gfx = func_15142FBC(gfx#s/0x2CA0/0x2C20/
+\#D_800A4EA8\[rmodePair \* 2 + 1\]#s/\* 2 + 1\]/* 2 + 3]/
+\#gfx = func_15142FBC(gfx#s/rmode |/geoSet |/
+\#^    bx = pts\[6\];#s/pts\[6\]/pts[7]/
+\#^    ROPE_NORMAL(ax, ay, az);#s/(ax, ay, az)/(bx, by, bz)/
+\#ROPE_VTX(ax + nx, ay + ny, az + nz, 0, 0);#s/0, 0);/0, 1);/
+\#ROPE_VTX(ax - nx, ay - ny, az - nz, 0x3C0, 0);#s/0x3C0/0x3C1/
+\#ROPE_VTX(ax - nx, ay - ny#s/ax - nx/ax + nx/
+\#^    t = \*(s32 \*) (obj + 0x13C);#s/0x13C/0x138/
+\#for (i = 0; i < 9; i++)#s/< 9/< 8/
+\#^        ax = pts\[i \* 6 + 0\];#s/+ 0\]/+ 6]/
+\#^        bz = pts\[i \* 6 + 8\];#s/+ 8\]/+ 2]/
+\#^        ROPE_NORMAL(bx, by, bz);#s/(bx, by, bz)/(ax, ay, az)/
+\#ROPE_VTX(bx + nx, by + ny, bz + nz, 0, t);#s/0, t)/0, 0)/
+\#ROPE_VTX(bx - nx, by - ny, bz - nz, 0x3C0, t);#s/t);/t + 1);/
+\#^        t += \*(s32 \*) (obj + 0x13C);#s/\*(s32 \*) (obj + 0x13C)/0x20/
+\#= 0x01004008;#s/0x01004008/0x01003006/
+\#(s32) (v - 4);#s/v - 4/v - 2/
+\#= 0x05000204;#s/0x05000204/0x05000402/
+\#= 0x05020604;#s/0x05020604/0x05040602/
+\#cx = (px) - cam\[0\];#s/cam\[0\]/cam[1]/
+\#nx = ey \* cz - cy \* ez;#s/- cy/+ cy/
+\#ny = ez \* cx - cz \* ex;#s/cz \* ex/cz * ey/
+\#nz = ex \* cy - cx \* ey;#s/cx \* ey/cx * ez/
+\#len2 = nx \* nx + ny \* ny + nz \* nz;#s/+ nz \* nz/+ nz * ny/
+\#if (len2 == 0.0f)#s/== 0.0f/<= 1.0f/
+\#nx = ny = nz = 0.0f;#s/0.0f/1.0f/
+\#k = \*(f32 \*) (obj + 0x30) / sqrtf(len2);#s/sqrtf(len2)/len2/
+\#k = \*(f32 \*) (obj + 0x30)#s/0x30/0x34/
+\#nz \*= k;#s/\*= k/*= -k/
+\#v->v.cn\[1\] = 100;#s/100/101/
+\#v->v.cn\[3\] = 0xFF;#s/0xFF/0xFE/
+\#v->v.tc\[1\] = (t);#s/(t)/(s)/
+\#ez = bz - az;#s/- az/- ay/
+\#cz = (pz) - cam\[2\];#s/(pz) - cam/(pz) + cam/

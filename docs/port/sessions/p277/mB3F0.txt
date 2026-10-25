@@ -1,0 +1,39 @@
+\#^    if (obj == NULL) {$#s/== NULL/!= NULL/
+\#^    bones = \*(u8 \*\*) (obj + 0x1D4);$#s/0x1D4/0x1D8/
+\#^    mtx = bones + (D_80088CC8\[idx\] << 6);$#s/<< 6/<< 5/
+\#^    func_15143134(D_80088CB0\[idx\], a, mtx);$#s/D_80088CB0/D_80088CBC/
+\#^    func_15143134(D_80088CBC\[idx\], b, mtx);$#s/mtx/bones/
+\#^    scale = D_80088CCC\[idx\];$#s/idx/0/ % idx1 idx2
+\#^    dir\[0\] = scale \* (b\[0\] - a\[0\]);$#s/b\[0\] - a\[0\]/a[0] - b[0]/
+\#^    dir\[1\] = scale \* (b\[1\] - a\[1\]);$#s/scale \* //
+\#^    dir\[2\] = scale \* (b\[2\] - a\[2\]);$#s/a\[2\]/a[1]/
+\#^    lenSq = dir\[0\] \* dir\[0\] + dir\[2\] \* dir\[2\];$#s/dir\[2\] \* dir\[2\]/dir[1] * dir[1]/
+\#^    if (fabsf(lenSq) < 0.0001f) {$#s/< 0.0001f/<= 0.0001f/
+\#^    if (fabsf(lenSq) < 0.0001f) {$#s/0.0001f/1e-5f/
+\#^    inv = 1.0f / sqrtf(lenSq);$#s/sqrtf(lenSq)/lenSq/
+\#^    spec.type = 0x17;$#s/0x17/0x16/
+\#^    spec.wC = 0x243A;$#s/0x243A/0x243B/
+\#^    spec.w8 = 0;$#d
+\#^    spec.w40 = 0x401;$#s/0x401/0x400/
+\#^    spec.b45 = 0xFF;$#d
+\#^    spec.rgba\[2\] = 0xC8;$#s/0xC8/0xC9/
+\#^    spec.flags = 0x401;$#d
+\#^    spec.span = D_80088CD0\[idx\];$#s/idx/idx + 1/
+\#^    spec.pos\[1\] = a\[1\];$#s/a\[1\]/b[1]/
+\#^    spec.scale\[2\] = 1.0f;$#d
+\#^    spec.dir\[1\] = 0.0f;$#d
+\#^    spec.dir\[0\] = dir\[2\] \* inv;$#s/dir\[2\]/dir[0]/
+\#^    spec.dir\[2\] = dir\[0\] \* inv;$#s/inv/scale/
+\#^    rec = (u8 \*) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/0x2C/0x2D/
+\#^    rec = (u8 \*) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/9, 0, 0, 7/9, 0, 0, 8/
+\#^    rec = (u8 \*) func_1513D524((s32) &spec, 9, 0, 0, 7, 0, 0x2C, group, arg3);$#s/group, arg3/arg3, group/
+\#^    if (rec != NULL) {$#s/!= NULL/== NULL/
+\#^        \*(f32 \*) (rec + 0x114) = dir\[1\];$#s/dir\[1\]/dir[2]/
+\#^        \*(f32 \*) (rec + 0x11C) = D_80088CD4\[idx\];$#s/D_80088CD4/D_80088CD8/
+\#^        \*(f32 \*) (rec + 0x12C) = D_80088CE4\[idx\];$#s/0x12C/0x12E/
+\#^        \*(f32 \*) (rec + 0x128) = 1.0f;$#d
+\#^        \*(f32 \*) (rec + 0x130) = D_80088CE8\[idx\];$#s/D_80088CE8/D_80088CE4/
+\#^        \*(f32 \*) (rec + 0x134) = D_80088CDC\[idx\];$#s/idx/0/ % idx1 idx2
+\#^        rec\[0x138\] = D_80088CE0\[idx\];$#s/rec\[0x138\]/rec[0x139]/
+\#^        rec\[0x138\] = D_80088CE0\[idx\];$#s/D_80088CE0\[idx\]/D_80088CE0[idx * 4]/ % idx1 idx2
+\#^    if (fabsf(lenSq) < 0.0001f) {$#s/0.0001f/0.001f/

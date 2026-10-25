@@ -4,23 +4,22 @@
 
 
 #ifdef NON_MATCHING
-/* P279: readable C for the hand asm (28 insns, 64-bit ld / sd of 4 pixels at a time with the lane masks
- * D_8009FCA0 = 0x07C0 x4 and D_8009FCA8 = 0x07C1 x4). */
-// texture_green_to_grey: RGBA5551 pixels from start up to end (at least one 16-byte block, then while < end) get
-// red = blue = green: each pixel keeps its green and alpha bits (0x07C1) and receives the green field (0x07C0)
-// shifted up 5 into red and down 5 into blue. Called by func_150AFC70 (game_eu_DCEF0) on a 0x1ECC0-byte image.
+// framebuffer_green_to_gray: turns the RGBA5551 pixels in [start, end) gray by copying each pixel's green field
+// into its red and blue fields (alpha kept). Rare's asm (hand-written) does 8 pixels per step with 64-bit masks
+// D_8009FCA0 = 0x07C0 (green) / D_8009FCA8 = 0x07C1 (green + alpha) in every halfword; it always does at least one
+// step and stops when start reaches end (signed compare). The port does the same per 16-bit pixel.
 void func_150B2290(u16 *start, u16 *end) {
-    u16 *p = start;
+    u16 *px = start;
     s32 i;
 
     do {
         for (i = 0; i < 8; i++) {
-            u16 g = p[i] & 0x07C0;
+            u16 green = px[i] & 0x07C0;
 
-            p[i] = (p[i] & 0x07C1) | (g << 5) | (g >> 5);
+            px[i] = (px[i] & 0x07C1) | (green << 5) | (green >> 5);
         }
-        p += 8;
-    } while ((s32) p < (s32) end);
+        px += 8;
+    } while (px < end);
 }
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_DFAA0/func_150B2290.s")

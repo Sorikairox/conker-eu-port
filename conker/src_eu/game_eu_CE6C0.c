@@ -1133,16 +1133,151 @@ void func_150A3924(s32 arg0, s16 arg1, s16 arg2, s16 arg3) {
     (*(s16 *)((u8 *)((D_800D34B8 + temp_v0)) + 4)) = arg3;
 }
 
-s32 func_150A39E4();
+s32 func_150A39E4(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3);
 
-s32 func_150A3990(u8 *arg0) {
+s32 func_150A3990(u8 *arg0, f32 *arg1, f32 *arg2, f32 *arg3) {
     if (arg0[0x14] == 1) {
         return 0;
     }
     if (!(arg0[0x15] & 3)) {
-        return func_150A39E4();
+        return func_150A39E4(arg0, arg1, arg2, arg3);
     }
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* collision cylinder (0x34-byte entries of D_800D34B8, see func_150A3924 / func_150A11F4) */
+typedef struct {
+    s16 x, y, z;    /* base centre */
+    s16 radius;
+    s16 height;     /* top, above the base */
+    s16 pad0A;
+    f32 angleX;     /* 0x0C: degrees, sin/cos at 0x24/0x28 */
+    f32 angleY;     /* 0x10: degrees, sin/cos at 0x2C/0x30 */
+    u8 pad14[0x10];
+    f32 sinX;       /* 0x24 */
+    f32 cosX;
+    f32 sinY;
+    f32 cosY;       /* 0x30 */
+} CollCylinder;
+
+static const f32 D_8009FA44_nm[1] = { 0.017453292f }; /* 0x3C8EFA35: pi / 180 */
+static const f32 D_8009FA48_nm[1] = { 0.017453292f }; /* 0x3C8EFA35 */
+
+// cylinder_segment_hit: intersects the segment p0 -> p1 with the rotated cylinder cyl; on a hit writes the entry
+// point (world coordinates) to out and returns 1, else returns 0 (out untouched).
+s32 func_150A39E4(u8 *arg0, f32 *p0, f32 *p1, f32 *out) {
+    CollCylinder *cyl = (CollCylinder *) arg0;
+    f32 local[2][3]; /* p0, p1 in cylinder space */
+    f32 *src;
+    f32 dx, dy, dz;
+    f32 x0, y0, z0;
+    f32 sx, sy, sz;
+    f32 inv;
+    f32 tmin, tmax, tmp;
+    f32 a, b, disc, root, half;
+    f32 s0, s1;
+    f32 t;
+    f32 hx, hy, hz;
+    f32 angle, sn, cs;
+    s32 i;
+
+    for (i = 0; i < 2; i++) {
+        src = (i == 0) ? p0 : p1;
+        dx = src[0] - cyl->x;
+        dy = src[1] - cyl->y;
+        dz = src[2] - cyl->z;
+        local[i][0] = dx * cyl->cosY - dz * cyl->sinY;
+        dz = dz * cyl->cosY + dx * cyl->sinY;
+        local[i][2] = dz * cyl->cosX - dy * cyl->sinX;
+        local[i][1] = dy * cyl->cosX + dz * cyl->sinX;
+    }
+    x0 = local[0][0];
+    y0 = local[0][1];
+    z0 = local[0][2];
+    sx = local[1][0] - x0;
+    sy = local[1][1] - y0;
+    sz = local[1][2] - z0;
+
+    /* segment range [tmin, tmax] between the base (y 0) and the top (y height) */
+    if (sy != 0.0f) {
+        inv = 1.0f / sy;
+        tmin = -y0 * inv;
+        tmax = (cyl->height - y0) * inv;
+        if (tmax < tmin) {
+            tmp = tmin;
+            tmin = tmax;
+            tmax = tmp;
+        }
+        if (tmax < 0.0f || 1.0f < tmin) {
+            return 0;
+        }
+        if (tmin < 0.0f) {
+            tmin = 0.0f;
+        }
+        if (1.0f < tmax) {
+            tmax = 1.0f;
+        }
+    } else {
+        if (y0 < 0.0f || (f32) cyl->height < y0) {
+            return 0;
+        }
+        tmin = 0.0f;
+        tmax = 1.0f;
+    }
+
+    /* segment range [s0, s1] inside the circle x^2 + z^2 = radius^2 */
+    a = sz * sz + sx * sx;
+    if (a == 0.0f) {
+        return 0;
+    }
+    b = 2.0f * (z0 * sz + sx * x0);
+    disc = b * b - ((z0 * z0 + x0 * x0) - (f32) (cyl->radius * cyl->radius)) * (4.0f * a);
+    if (disc < 0.0f) {
+        return 0;
+    }
+    root = sqrtf(disc);
+    half = 0.5f / a;
+    s0 = (-b + root) * half;
+    s1 = (-b - root) * half;
+    if (s1 < s0) {
+        tmp = s0;
+        s0 = s1;
+        s1 = tmp;
+    }
+    if (s1 < 0.0f || 1.0f < s0) {
+        return 0;
+    }
+    if (s0 < 0.0f) {
+        s0 = 0.0f;
+    }
+    if (1.0f < s1) {
+        s1 = 1.0f;
+    }
+    if (s1 < tmin || tmax < s0) {
+        return 0;
+    }
+    t = (s0 < tmin) ? tmin : s0;
+
+    hx = sx * t + x0;
+    hy = sy * t + y0;
+    hz = sz * t + z0;
+    /* back to world space: undo the X tilt, then the Y turn */
+    angle = -(cyl->angleX * D_8009FA44_nm[0]);
+    sn = func_150AD78C(angle);
+    cs = func_150AD780(angle);
+    out[2] = hz * cs - hy * sn;
+    out[1] = hy * cs + hz * sn;
+    angle = -(cyl->angleY * D_8009FA48_nm[0]);
+    sn = func_150AD78C(angle);
+    cs = func_150AD780(angle);
+    out[0] = hx * cs - out[2] * sn;
+    out[2] = out[2] * cs + hx * sn;
+    out[0] += cyl->x;
+    out[1] += cyl->y;
+    out[2] += cyl->z;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_CE6C0/func_150A39E4.s")
+#endif

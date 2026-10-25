@@ -1,0 +1,106 @@
+s/if (\*(s32 \*) obj == 0 || rec->u04/if (*(s32 *) obj == 1 || rec->u04/ % gone0 base
+s/rec->u04 != obj\[0x3B\]/rec->u04 != obj[0x3A]/ % base goneid
+s/if ((obj\[0x74\] & 0xF) == 0xF) {/if ((obj[0x74] \& 0x1F) == 0xF) {/ % hidden1F
+s/rec->flags |= 0x10;/rec->flags |= 0x18;/ % hidden
+s/rec->flags &= ~0x10;/rec->flags \&= ~0x18;/ % flag8fire
+s/src\[2\] = spr->at3;/src[2] = spr->at4;/ % base
+s/dst\[1\] = tip;/dst[1] = tgt;/ % base
+s/rec->node \* 0x40, 4);/rec->node * 0x40, 3);/ % base
+s/rec->node \* 0x40/rec->u04 * 0x40/ % base
+s/        rec->flags &= ~1;/        rec->flags \&= ~9;/ % flag8fire
+s/(s32) dir, (s32) dir2, 0, 0.0f/(s32) dir, (s32) dir2, 1, 0.0f/ % nomtx
+s/(obj + 0x18) + 33.0f;/(obj + 0x18) + 32.0f;/ % nomtx
+s/tip\[1\] = dir\[1\] \* sEmit2TipStep\[0\] + pos\[1\];/tip[1] = dir[1] * sEmit2TipStep[0] + pos[0];/ % nomtx
+s/tip\[0\] = dir\[0\] \* sEmit2TipStep\[0\]/tip[0] = dir[0] * 0.03f/ % nomtx
+s/        rec->flags |= 1;/        rec->flags |= 2;/ % nomtx
+s/\*(f32 \*) (e + 0x14) = pos\[1\];/*(f32 *) (e + 0x14) = pos[2];/ % base
+s/rec->u12C += E2F(0x24) \* D_800BE9A4;/rec->u12C += E2F(0x28) * D_800BE9A4;/ % base
+s/    if (1.0f < rec->u12C) {/    if (1.0f <= rec->u12C) {/ % emit1
+s/inv = 1.0f \/ rec->u12C;/inv = 0.5f \/ rec->u12C;/ % base
+s/time = rec->u128 + D_800BE9A4;/time = rec->u128;/ % base
+s/timeStep = time \* inv;/timeStep = inv;/ % base
+s/b\[1\] = rec->pos2\[1\];/b[1] = rec->pos[1];/ % base
+s/stepA\[2\] = (pos\[2\] - rec->pos\[2\]) \* inv;/stepA[2] = (pos[2] - rec->pos[1]) * inv;/ % base
+s/stepB\[0\] = (tip\[0\] - rec->pos2\[0\]) \* inv;/stepB[0] = (tgt[0] - rec->pos2[0]) * inv;/ % base
+s/pt = &pts\[\*(s8 \*) (e + 0x2E)\];/pt = \&pts[*(s8 *) (e + 0x2D)];/ % base
+s/pt->vel\[1\] = b\[1\] - a\[1\];/pt->vel[1] = a[1] - b[1];/ % base
+s/pt->size = E2F(0x2C);/pt->size = E2F(0x30);/ % base
+s/pt->u1C = 0.0f;/pt->u1C = 1.0f;/ % base
+s/pt->alpha = rec->u3A;/pt->alpha = rec->u3B[0];/ % base
+s/pt->texS = rec->u144;/pt->texS = rec->u140;/ % base
+s/func_1519C38C(pt->pos, pt->vel, E2F(0x20), time);/func_1519C38C(pt->pos, pt->vel, E2F(0x24), time);/ % base
+s/pt->size += E2F(0x30) \* time;/pt->size += E2F(0x30);/ % base
+/advance the ring head/,/e\[0x2C\]++;/s/e\[0x2E\] = 0;/e[0x2E] = 1;/ % wrap full
+s/if (\*(s8 \*) (e + 0x2D) == \*(s8 \*) (e + 0x2E)) {/if (*(s8 *) (e + 0x2D) == *(s8 *) (e + 0x2C)) {/ % full
+s/                    e\[0x2D\] = 0;/                    e[0x2D] = 1;/ % full
+s/                e\[0x2C\]--;/                e[0x2C] -= 2;/ % full
+s/a\[2\] += stepA\[2\];/a[2] += stepA[1];/ % emit3
+s/b\[0\] += stepB\[0\];/b[0] -= stepB[0];/ % emit3
+s/time -= timeStep;/time -= inv;/ % emit3
+s/rec->u12C -= 1.0f;/rec->u12C -= 0.5f;/ % base
+s/rec->pos2\[2\] = b\[2\];/rec->pos2[2] = a[2];/ % base
+s/rec->u128 = time;/rec->u128 = timeStep;/ % base
+s/} while (1.0f < rec->u12C);/} while (2.0f < rec->u12C);/ % base emit3
+s/rec->u138 += (spr->rate + r \* spr->rateRnd)/rec->u138 += (spr->rate + spr->rateRnd)/ % base
+s/if (1.0f < rec->u138) {/if (2.0f < rec->u138) {/ % base
+/first spray/,/r = func_150ADA68/s/\*(u8 \*\*) (obj + 0x1D4) != NULL/1/ % nomtx
+s/sparkDraw.u08 = 0x1F0600;/sparkDraw.u08 = 0x1F0601;/ % base
+s/sparkDraw.u1D = 7;/sparkDraw.u1D = 8;/ % base
+s/spark.u0E = 0x15;/spark.u0E = 0x16;/ % base
+s/spark.u14 = -1;/spark.u14 = 0;/ % base
+s/sparkMove.rgba\[1\] = 0xA;/sparkMove.rgba[1] = 0xB;/ % base
+s/sparkMove.floorY = sEmit2SparkFloor\[0\];/sparkMove.floorY = 0.0f;/ % base
+s/sparkMove.u1E = spr->u1A;/sparkMove.u1E = spr->u18;/ % base
+s/(u32) (spr->shadeRnd + 1) + spr->shade;/(u32) (spr->shadeRnd) + spr->shade;/ % base rndmod
+s/(u32) (spr->lifeRnd + 1) + spr->life;/(u32) (spr->lifeRnd + 1) + spr->lifeRnd;/ % base
+s/sparkMove.size = func_150ADA68() \* spr->sizeRnd + spr->size;/sparkMove.size = func_150ADA68() * spr->sizeRnd;/ % base
+s/off\[0\] = tgt\[0\] - spark.pos\[0\];/off[0] = tgt2[0] - spark.pos[0];/ % base
+s/if (func_15146078(off, u, v)) {/if (!func_15146078(off, u, v)) {/ % base nobasis
+s/speed = func_150ADA68() \* spr->speedRnd + spr->speed;/speed = func_150ADA68() * spr->speedRnd + spr->speed2;/ % base
+1,/spr->spreadRnd/s/func_15143874(angle & 0xFF,/func_15143874(angle \& 0x7F,/ % base rndmod
+s/sparkMove.vel\[0\] = (u\[0\] \* cs + v\[0\] \* sn + off\[0\]) \* speed;/sparkMove.vel[0] = (u[0] * sn + v[0] * cs + off[0]) * speed;/ % base
+s/sparkMove.vel\[2\] = (u\[2\] \* cs + v\[2\] \* sn + off\[2\]) \* speed;/sparkMove.vel[2] = (u[2] * cs + v[2] * sn + off[1]) * speed;/ % base
+s/sparkMove.u10 = func_150ADA68() \* spr->u10Rnd + spr->u10;/sparkMove.u10 = func_150ADA68() * spr->u10 + spr->u10Rnd;/ % base
+s/sparkMove.rgba\[3\] = EMIT2_F2U(r \* (f32) spr->alphaRnd + (f32) spr->alpha);/sparkMove.rgba[3] = (s32) (r * (f32) spr->alphaRnd + (f32) spr->alpha);/ % alphaneg alphabig
+s/sparkMove.rgba\[3\] = EMIT2_F2U(r \* (f32) spr->alphaRnd + (f32) spr->alpha);/sparkMove.rgba[3] = EMIT2_F2U(r * (f32) spr->alphaRnd);/ % base
+s/0, 0, 0, 0, 0, 0, 0, (u8 \*) &sparkDraw, 0,/0, 0, 0, 0, 0, 0, 1, (u8 *) \&sparkDraw, 0,/ % base
+s/                                  e\[0xC\], e\[1\]);/                                  e[1], e[0xC]);/ % base
+s/rec->u138 -= 1.0f;/rec->u138 -= 0.5f;/ % base
+s/rec->u13C += (spr->rate2 + r \* spr->rate2Rnd)/rec->u13C += (spr->rate2 + r * spr->rateRnd)/ % base
+s/sprite.u1D = 0x28;/sprite.u1D = 0x29;/ % base
+s/sprite.u08 = 0x2203;/sprite.u08 = 0x2202;/ % base
+s/sprite.rgb\[6\] = 0xFF;/sprite.rgb[6] = 0xFE;/ % base
+s/sprite.u3C\[1\] = 0.0f;/sprite.u3C[1] = 1.0f;/ % base
+s/sprite.u1E = spr->u1E;/sprite.u1E = spr->u20;/ % base
+s/sprite.u24 = 1.0f;/sprite.u24 = 0.5f;/ % base
+s/sprite.u58 = 0xC207;/sprite.u58 = 0xC206;/ % base
+s/sprite.u62\[1\] = -1;/sprite.u62[1] = 0;/ % base
+s/(u32) (spr->life2Rnd + 1) + spr->life2;/(u32) (spr->life2Rnd + 1) + spr->shade2;/ % base
+s/(u32) (spr->shade2Rnd + 1) + spr->shade2;/(u32) (spr->life2Rnd + 1) + spr->shade2;/ % base rndmod
+s/sprite.size2 = sprite.size = /sprite.size = / % base
+s/off\[1\] = tgt2\[1\] - sprite.pos\[1\];/off[1] = tgt2[1] - sprite.pos[0];/ % base
+s/speed = func_150ADA68() \* spr->speed2Rnd + spr->speed2;/speed = func_150ADA68() * spr->speedRnd + spr->speed2;/ % base
+s/func_150ADA68() \* spr->spread2Rnd, &cs, &sn);/func_150ADA68() * spr->spread2Rnd, \&sn, \&cs);/ % base
+s/sprite.vel\[1\] = (u\[1\] \* cs + v\[1\] \* sn + off\[1\]) \* speed;/sprite.vel[1] = (u[1] * cs + v[1] * sn + off[1]);/ % base
+s/sprite.u54 = func_150ADA68() \* spr->u54Rnd + spr->u54;/sprite.u54 = func_150ADA68() * spr->u54Rnd;/ % base
+s/func_151307F0((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/func_151307F0((s32) \&sprite, 2, 0, 0, e[0xC], e[1]);/ % base
+s/func_151307F0((s32) &sprite, 1, 0, 0, e\[0xC\], e\[1\]);/func_151307F0((s32) \&sprite, 1, 0, 0, e[0xC], e[0]);/ % base
+s/rec->u13C -= 1.0f;/rec->u13C -= 2.0f;/ % spray3
+/second spray/,/r = func_150ADA68/s/(obj\[0x74\] & 0xF) != 0xF/(obj[0x74] \& 0xF) != 0xE/ % hidden
+s/if (1.0f < rec->u13C) {/if (1.5f < rec->u13C) {/ % base spray2one
+s/rec->u151 += D_800BE9E4;/rec->u151 += D_800BE9E4 * 2;/ % base
+s/if (\*(s8 \*) &rec->u151 >= 0x33) {/if (*(s8 *) \&rec->u151 > 0x33) {/ % tick50
+s/(\*(s16 \*) (\*(u8 \*\*) (o + 0x31C) + 0x1AA))++;/(*(s16 *) (*(u8 **) (o + 0x31C) + 0x1A8))++;/ % tick51
+s/        rec->u151 = 0;/        rec->u151 = 1;/ % tick51
+s/if (o != NULL && \*(u8 \*\*) (o + 0x31C) != NULL) {/if (o != NULL) {/ % tick51n
+s/if ((rec->flags & 8) && \*(u8 \*\*) (obj + 0x318) != NULL) {/if ((rec->flags \& 8)) {/ % flag8n318
+s/rec->u152 -= D_800BE9E4;/rec->u152 -= D_800BE9E4 + 1;/ % flag8
+s/if (rec->u152 < 0) {/if (rec->u152 <= 0) {/ % flag8eq
+s/burst.unk0 = 1;/burst.unk0 = 2;/ % flag8fire
+s/ 21 + 20;/ 20 + 20;/ % flag8fire
+s/(obj + 0x318))\[0x23D\];/(obj + 0x318))[0x23C];/ % flag8fire
+s/ 7 + 2;/ 7 + 3;/ % flag8fire
+s/burst.unk6 = -1;/burst.unk6 = 0;/ % flag8fire
+s/func_151D8E18(&burst, 0, e\[0xC\], e\[1\]);/func_151D8E18(\&burst, 1, e[0xC], e[1]);/ % flag8fire
+s/ 21 + 0x78;/ 21 + 0x77;/ % flag8fire
+s/^    return 1;$/    return 2;/ % base

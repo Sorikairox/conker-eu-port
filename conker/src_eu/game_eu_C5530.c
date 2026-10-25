@@ -87,7 +87,7 @@ void func_1507EF0C(struct127 *);
 void func_1507EB4C(struct127 *, s32);
 void func_15080A20(s32, s32, s32, s32);
 s32 func_1505D024(struct127 *, s32, u16, s32);
-void func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
+s32 func_1505D1C4(f32, f32, f32, s32, s32, u16, s32, s32);
 void func_1503DE70(struct127 *, s32, s32);
 struct127 *func_15072208(struct127 *, s32);
 void func_15062BDC(struct127 *, f32, f32);

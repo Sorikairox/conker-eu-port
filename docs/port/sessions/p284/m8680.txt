@@ -1,0 +1,40 @@
+\#^    \*(f32 \*) (owner + 0x70) += \*(f32 \*) (owner + 0x6C);$#s/0x6C/0x68/
+\#^    cur = points + idx \* 0x24;$#s/0x24/0x20/
+\#^    cur\[0x21\] = 1;$#s/0x21/0x20/
+\#^    kind = &D_800A8AF0\[owner\[0x69\]\];$#s/0x69/0x68/
+\#^    if (n == obj\[0x25\]) {$#s/0x25/0x24/
+\#^    if (!(1.0f < \*(f32 \*) (owner + 0x70)) || n == (s8) obj\[0x2E\]) {$#s/1.0f </1.5f </
+\#^    if (!(1.0f < \*(f32 \*) (owner + 0x70)) || n == (s8) obj\[0x2E\]) {$#s/ || n == (s8) obj\[0x2E\]//
+\#^    hdr.u08 = 0;$#s/0;/1;/
+\#^    rec.u20 = 25137.0f;$#s/25137/25136/
+\#^    rec.u24 = 6733.0f;$#s/6733/6734/
+\#^    hdr.u0C = (s32) ((25137.0f + 6733.0f) \* 0.5f);$#s/0.5f/0.25f/
+\#^    rec.u48 = \*(f32 \*) (owner + 0x40);$#s/0x40/0x44/
+\#^    rec.u5A = 0x20;$#s/0x20/0x21/
+\#^    rec.u54 = -0.012f;$#s/-0.012f/0.012f/
+\#^    rec.size0 = kind->size \* 30.090544f;$#s/30.090544f/30.09f/
+\#^    rec.size1 = kind->size \* 18.355232f;$#s/kind->size/kind->grow/
+\#^    rec.size = hdr.size;$#s/hdr.size/hdr.grow/
+\#^    rec.grow1 = kind->grow \* 2.919177f;$#s/2.919177f/2.92f/
+\#^    rec.grow2 = kind->grow \* 8.116549f;$#s/8.116549f/8.0f/
+\#^    hdr.u40 = 0x40000001;$#s/0x40000001/0x40000000/
+\#^    hdr.u45 = 0xFF;$#s/0xFF/0xFE/
+\#^    hdr.grow = (rec.grow0 + rec.grow1) \* 0.5f;$#s/rec.grow1/rec.grow2/
+\#^        hdr.type = 0x13;$#s/0x13/0x14/
+\#^    hdr.u13 = 0x68;$#s/0x68/0x69/
+\#^    hdr.u02 = 0x301;$#s/0x301/0x300/
+\#^    rec.vel0\[1\] = \*(f32 \*) (next + 0x10);$#s/next/cur/
+\#^    rec.vel1\[2\] = \*(f32 \*) (cur + 0x14);$#s/0x14/0x10/
+\#^        sa = func_151423D8(a - 0x40);$#s/0x40/0x80/
+\#^        cb = func_151423D8(b);$#s/(b)/(a)/
+\#^        r = \*(f32 \*) (next + 0x18) \* 0.8f;$#s/next/cur/
+\#^        hdr.life = (u32) func_150ADA20() . (u32) (kind->life_range + 1) + kind->life_min;$#s/(u32) func/(s32) func/
+\#^        hdr.life = (u32) func_150ADA20() . (u32) (kind->life_range + 1) + kind->life_min;$#s/+ 1)/)/
+\#^        dy = -r \* sb;$#s/-r/r/
+\#^        dz = h \* ca;$#s/ca/sa/
+\#^        hdr.p0\[1\] = \*(f32 \*) (next + 4) + dy;$#s/+ dy/- dy/
+\#^        hdr.p1\[0\] = \*(f32 \*) (cur + 0) + dx;$#s/cur/next/
+\#^        fx = (u8 \*) func_1513D524((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);$#s/| 2/| 4/
+\#^        fx = (u8 \*) func_1513D524((s32) &hdr, 10, 11, 0, 9, (func_150ADA20() & 1 ? 1 : 0) | 2, 0x5C, 0xFF, 0);$#s/10, 11/10, 12/
+\#^            memcpy(fx + 0x110, &rec, 0x5C);$#s/0x110/0x100/
+\#^        \*(f32 \*) (owner + 0x70) -= 1.0f;$#s/1.0f/0.5f/
