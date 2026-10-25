@@ -325,7 +325,7 @@ f32 func_150AD780(f32 x) {
  * internal jal / jr through the `dispatch` switch over the code addresses a register can hold, external callees as
  * C calls. The asm frame (0x268 / 0x70 bytes) is a local buffer; sp holds its address.
  * Includes: D5E90_walls.inc = func_150AA950 .. func_150AB264 (triangle / box test of func_150AAF00 and helpers)
- * + func_150AB6D0 .. func_150ACE90; D5E90_ray.inc = func_150ACEA0 .. func_150ADC40 (with func_150AD844). */
+ * + func_150AB6D0 .. func_150ACE90. The ray cast func_150ACEA0 .. func_150ADC40 is readable C below (P291). */
 #include <libc/math.h>
 
 extern u8 D_8009FAC0[], D_8009FAC8[], D_8009FACC[], D_8009FAD0[], D_800C5D38[], D_800CC1B0[], D_800CC1B4[];
@@ -733,37 +733,339 @@ static s32 nmr_ray_hits_triangle(u32 tri, u32 vbase, f32 *org, f32 *dir, f32 *be
     return 1;
 }
 
-/* ray cast: o32 arguments (f12, f14, a2, a3, then the stack words 0x10..0x38 of the caller) */
-s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 a6, s32 a7, s32 a8, s32 a9, s32 a10, s32 a11,
-                  s32 a12, s32 a13, f32 a14) {
-    NMW_REGS;
-    u32 stk[(0x70 + 0x40) / 4];
+/* BSP node of the level collision tree (D_800DBE08): a square of half size `half` around (cx, cz); `next` = byte
+ * offset to the next sibling (0: last), `child` = byte offset to the first child (0: leaf, the triangle list follows). */
+typedef struct {
+    /* 0x00 */ u32 unk0;
+    /* 0x04 */ s16 next;
+    /* 0x06 */ u16 half;
+    /* 0x08 */ s16 cx;
+    /* 0x0A */ s16 cz;
+    /* 0x0C */ s16 child;
+    /* 0x0E */ u8 list[1]; /* leaf: triangle indices, 0-terminated: 0x80 | hi, lo = absolute; 1..0x7F = previous + n */
+} NmrNode;
 
-    for (k_ = 0; k_ < 32; k_++) {
-        F[k_].u = 0;
+/* collidable object (D_800DBEF4[D_800DC320], 0xA0 bytes): the fields the ray cast reads */
+#define NMR_OBJ_SIZE 0xA0
+#define NMR_OBJ_S16(o, off) (*(s16 *) ((u8 *) (o) + (off)))
+#define NMR_OBJ_U16(o, off) (*(u16 *) ((u8 *) (o) + (off)))
+#define NMR_OBJ_CX 0x10       /* s16 centre x, y, z (0x10 / 0x12 / 0x14) */
+#define NMR_OBJ_FLAGS 0x40    /* u32 flags of every triangle when the table below is NULL */
+#define NMR_OBJ_TRIFLAGS 0x44 /* u32 * per-triangle flags, indexed from the first triangle */
+#define NMR_OBJ_MODE 0x4F     /* u8: (mode & 0x60) == 0x20 -> not collidable */
+#define NMR_OBJ_RADIUS1 0x50  /* u16 radii: the larger one bounds the object */
+#define NMR_OBJ_RADIUS2 0x52
+#define NMR_OBJ_NTRIS 0x56    /* u16 triangle count */
+#define NMR_OBJ_TRI0 0x58     /* u16 first triangle (index into the shared triangle tables) */
+#define NMR_OBJ_OFF 0x6E      /* u8: != 0 -> not collidable */
+
+/* the ray cast's state: origin, direction scaled to length 65536, best hit (distance, point), the hit */
+typedef struct {
+    f32 org[3];
+    f32 dir[3];
+    f32 best[4];
+    s32 kind;    /* 0 none, 1 level triangle, 2 object triangle */
+    u32 hitRec;  /* D_800DC26C record (3 vertex offsets) of the hit triangle */
+    u32 hitTri;  /* its index */
+    u32 lastRec; /* the asm's gp: the record of the last tested triangle (read by the flags output, see below) */
+} NmrRay;
+
+/* test triangle `tri` (vertices at vbase + its offsets) against the ray; on a hit the ray's best and hit change */
+static s32 nmr_test_triangle(NmrRay *ray, u32 tri, u32 vbase) {
+    ray->lastRec = *(u32 *) D_800DC26C + tri * 12;
+    if (!nmr_ray_hits_triangle(tri, vbase, ray->org, ray->dir, ray->best)) {
+        return 0;
     }
-    sp = (u32) stk + 0x70;
-    SW(sp + 0x10, *(u32 *) &dy);
-    SW(sp + 0x14, *(u32 *) &dz);
-    SW(sp + 0x18, a6);
-    SW(sp + 0x1C, a7);
-    SW(sp + 0x20, a8);
-    SW(sp + 0x24, a9);
-    SW(sp + 0x28, a10);
-    SW(sp + 0x2C, a11);
-    SW(sp + 0x30, a12);
-    SW(sp + 0x34, a13);
-    SW(sp + 0x38, *(u32 *) &a14);
-    F[12].f = x0;
-    F[14].f = y0;
-    a2 = *(u32 *) &z0;
-    a3 = *(u32 *) &dx;
-    pc = 0x150ACEA0;
-    goto dispatch;
-#include "D5E90_ray.inc"
-bad: /* a code address the translation does not know: cannot happen */
-    return 0xBAD00000 | (pc & 0xFFFFF);
-done:
-    return v0;
+    ray->hitRec = ray->lastRec;
+    ray->kind = 1;
+    ray->hitTri = tri;
+    return 1;
+}
+
+/* does the xz line (dep = slope * ind + icept) separate the corners of a triangle's xz bounds? ind / dep point at
+ * the min of the independent / dependent coordinate in its D_800DC270 entry (s16 min x, min z, max x, max z) */
+static s32 nmr_line_splits_box(s16 *ind, s16 *dep, f32 slope, f32 icept) {
+    f32 k1 = slope * (f32) ind[0];
+    f32 k2 = slope * (f32) ind[2];
+    s32 above = 0;
+
+    if ((icept - (f32) dep[0]) + k1 >= 0.0f) {
+        above++;
+    }
+    if ((k1 + icept) - (f32) dep[2] >= 0.0f) {
+        above++;
+    }
+    if (k2 + (icept - (f32) dep[2]) >= 0.0f) {
+        above++;
+    }
+    if ((k2 + icept) - (f32) dep[0] >= 0.0f) {
+        above++;
+    }
+    return above != 0 && above != 4;
+}
+
+/* the BSP leaf (from the root, skipping `skip`) whose square holds (x, z); NULL if none */
+static NmrNode *nmr_find_leaf(f32 x, f32 z, NmrNode *skip) {
+    NmrNode *node = *(NmrNode **) D_800DBE08;
+    f32 cx, cz, h;
+
+    for (;;) {
+        cx = node->cx;
+        cz = node->cz;
+        h = node->half;
+        if (node != skip && !(cx - h > x) && !(x > cx + h) && !(cz - h > z) && z <= cz + h) {
+            if (node->child == 0) {
+                return node;
+            }
+            node = (NmrNode *) ((u8 *) node + node->child);
+        } else {
+            if (node->next == 0) {
+                return NULL;
+            }
+            node = (NmrNode *) ((u8 *) node + node->next);
+        }
+    }
+}
+
+/*
+ * ray_cast (func_150ACEA0, Rare hand asm): nearest hit of the ray (x0, y0, z0) + t * (dx, dy, dz), t >= 0, with the
+ * level's collision triangles and the collidable objects' triangles, within maxDist (0: unlimited, 2^48).
+ * Level: walks the BSP leaves the ray crosses in xz (from the leaf holding the origin, each next leaf found from a
+ * point 10 units past the exit side of the current square, until a hit, no leaf, or the exit point is maxDist or
+ * more away in xz); in each leaf the triangles whose xz bounds the ray's xz line crosses are tested
+ * (func_150AD844). Objects: those whose bounding sphere the ray's line meets (in front of the origin) are listed in
+ * D_800D3C00, sorted by func_150A49D0, and all their triangles tested the same way.
+ * Outputs (each optional): *outRec = the hit triangle's D_800DC26C record, *outX / Y / Z = the point, outVerts = its
+ * 3 vertices (s16 x, y, z each), *outDist, *outObj = the object index (-1: level), *outFlags = the triangle's flags
+ * (level: D_800DBE5C[tri]; object: its table +0x44 [tri - first], or +0x40 for all). Returns 1 on a hit, else 0.
+ * func_1510F800(0 / 2) marks the level / object phases (profiler).
+ */
+s32 func_150ACEA0(f32 x0, f32 y0, f32 z0, f32 dx, f32 dy, f32 dz, s32 outRec, s32 outVerts, s32 outX, s32 outY,
+                  s32 outZ, s32 outDist, s32 outObj, s32 outFlags, f32 maxDist) {
+    NmrRay ray;
+    NmrNode *leaf;
+    u8 *list;
+    u8 *obj;
+    u8 *objEnd;
+    u16 *idx;
+    u16 *idxEnd;
+    s16 *ind;
+    s16 *dep;
+    s16 *v;
+    u32 *rec;
+    u32 *triFlags;
+    f32 len, slope, icept, cx, cz, h, ex, ez, t;
+    f32 ox, oy, oz, rr, b, c, disc, sq, dd, tx, ty, tz;
+    s32 posX, negZ, xMajor;
+    s32 hitObj;
+    u32 tri, triEnd, vbase, prev, flags;
+    s32 n, i, r;
+
+    func_1510F800(0);
+    if (*(u32 *) &dx == 0 && dy == 0.0f && dz == 0.0f) {
+        return 0;
+    }
+    ray.org[0] = x0;
+    ray.org[1] = y0;
+    ray.org[2] = z0;
+    len = sqrtf(dx * dx + dy * dy + dz * dz);
+    len = 65536.0f / len;
+    ray.dir[0] = dx * len;
+    ray.dir[1] = dy * len;
+    ray.dir[2] = dz * len;
+    ray.kind = 0;
+    hitObj = -1;
+    posX = ray.dir[0] >= 0.0f;
+    negZ = !(ray.dir[2] >= 0.0f);
+
+    /* the ray's xz line: z = slope * x + icept when |dx| > |dz| (xMajor), else x = slope * z + icept */
+    xMajor = !(NM_FABS(ray.dir[0]) <= NM_FABS(ray.dir[2]));
+    if (xMajor) {
+        t = (x0 + ray.dir[0]) - x0;
+        if (t == 0.0f) {
+            t = 0.0001f;
+        }
+        slope = ((z0 + ray.dir[2]) - z0) / t;
+        icept = z0 - slope * x0;
+    } else {
+        t = (z0 + ray.dir[2]) - z0;
+        if (t == 0.0f) {
+            t = 0.0001f;
+        }
+        slope = ((x0 + ray.dir[0]) - x0) / t;
+        icept = x0 - slope * z0;
+    }
+    ray.best[0] = maxDist;
+    if (ray.best[0] == 0.0f) {
+        ray.best[0] = 281474976710656.0f; /* 65536^3 */
+    }
+
+    /* level */
+    prev = 0; /* the asm's t3: the first entry of a leaf is relative to the caller's t3 (0) or the last exit side */
+    leaf = nmr_find_leaf(x0, z0, NULL);
+    while (leaf != NULL) {
+        ind = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 0 : 1);
+        dep = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 1 : 0);
+        list = leaf->list;
+        while ((tri = *list++) != 0) {
+            if (tri & 0x80) {
+                tri = ((tri & 0x7F) << 8) + *list++;
+            } else {
+                tri += prev;
+            }
+            prev = tri;
+            if (nmr_line_splits_box(ind + tri * 4, dep + tri * 4, slope, icept)) {
+                nmr_test_triangle(&ray, tri, 0);
+            }
+        }
+        if (ray.kind != 0) {
+            break;
+        }
+        /* exit point of the ray from this square, pushed 10 units on into the next one */
+        cx = leaf->cx;
+        cz = leaf->cz;
+        h = leaf->half;
+        if (ray.dir[0] == 0.0f) {
+            ex = x0;
+            prev = 0;
+            ez = negZ ? (cz - h) - 10.0f : (cz + h) + 10.0f;
+        } else if (ray.dir[2] == 0.0f) {
+            ez = z0;
+            prev = 1;
+            ex = posX ? (cx + h) + 10.0f : (cx - h) - 10.0f;
+        } else {
+            ex = posX ? cx + h : cx - h;
+            ez = (ex - x0) / ray.dir[0] * ray.dir[2] + z0;
+            if (ez < cz - h || !(ez <= cz + h)) { /* leaves through a z side */
+                prev = 0;
+                ez = negZ ? cz - h : cz + h;
+                ex = (ez - z0) / ray.dir[2] * ray.dir[0] + x0;
+            } else {
+                prev = 1;
+            }
+            ex = posX ? ex + 10.0f : ex - 10.0f;
+            ez = negZ ? ez - 10.0f : ez + 10.0f;
+        }
+        if (maxDist != 0.0f && !(sqrtf((x0 - ex) * (x0 - ex) + (z0 - ez) * (z0 - ez)) < maxDist)) {
+            break;
+        }
+        leaf = nmr_find_leaf(ex, ez, leaf);
+    }
+
+    /* objects */
+    func_1510F800(2);
+    obj = (u8 *) D_800DBEF4;
+    objEnd = obj + D_800DC320 * NMR_OBJ_SIZE;
+    if (obj != objEnd) {
+        dd = (ray.dir[0] * ray.dir[0] + ray.dir[1] * ray.dir[1] + ray.dir[2] * ray.dir[2]) * 4.0f;
+        tx = 2.0f * ray.dir[0];
+        ty = 2.0f * ray.dir[1];
+        tz = 2.0f * ray.dir[2];
+        n = 0;
+        i = 0;
+        idx = (u16 *) D_800D3C00;
+        do {
+            if (obj[NMR_OBJ_OFF] == 0 && (obj[NMR_OBJ_MODE] & 0x60) != 0x20) {
+                /* |o + t d - c|^2 = r^2 with the doubled direction: b = 2 d.(o - c), c = |o - c|^2 - r^2 */
+                ox = x0 - (f32) NMR_OBJ_S16(obj, NMR_OBJ_CX);
+                oy = y0 - (f32) NMR_OBJ_S16(obj, NMR_OBJ_CX + 2);
+                oz = z0 - (f32) NMR_OBJ_S16(obj, NMR_OBJ_CX + 4);
+                r = NMR_OBJ_U16(obj, NMR_OBJ_RADIUS1);
+                if (r < NMR_OBJ_U16(obj, NMR_OBJ_RADIUS2)) {
+                    r = NMR_OBJ_U16(obj, NMR_OBJ_RADIUS2);
+                }
+                rr = (f32) r;
+                rr = rr * rr;
+                b = tx * ox + ty * oy + tz * oz;
+                c = ox * ox + oy * oy + oz * oz - rr;
+                disc = b * b - c * dd;
+                if (!(disc < 0.0f)) {
+                    sq = sqrtf(disc);
+                    if (-b + sq >= 0.0f || !(-b - sq < 0.0f)) {
+                        *idx++ = i;
+                        n++;
+                    }
+                }
+            }
+            obj += NMR_OBJ_SIZE;
+            i++;
+        } while (obj != objEnd);
+
+        if (n != 0) {
+            func_150A49D0(n, (s32 *) D_800D3C00, 0);
+            ind = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 0 : 1);
+            dep = (s16 *) *(u32 *) D_800DC270 + (xMajor ? 1 : 0);
+            idx = (u16 *) D_800D3C00;
+            idxEnd = idx + n;
+            do {
+                vbase = D_800DC328[*idx];
+                obj = (u8 *) D_800DBEF4 + *idx * NMR_OBJ_SIZE;
+                tri = NMR_OBJ_U16(obj, NMR_OBJ_TRI0);
+                triEnd = NMR_OBJ_U16(obj, NMR_OBJ_NTRIS) + tri;
+                do {
+                    if (nmr_line_splits_box(ind + tri * 4, dep + tri * 4, slope, icept) &&
+                        nmr_test_triangle(&ray, tri, vbase)) {
+                        hitObj = *idx;
+                        ray.kind = 2;
+                    }
+                    tri++;
+                } while (tri != triEnd);
+                idx++;
+            } while (idx != idxEnd);
+        }
+    }
+
+    if (ray.kind == 0) {
+        return 0;
+    }
+    if (outRec != 0) {
+        *(u32 *) outRec = ray.hitRec;
+    }
+    if (outX != 0) {
+        *(f32 *) outX = ray.best[1];
+    }
+    if (outY != 0) {
+        *(f32 *) outY = ray.best[2];
+    }
+    if (outZ != 0) {
+        *(f32 *) outZ = ray.best[3];
+    }
+    if (outVerts != 0 && ray.hitRec != 0) {
+        rec = (u32 *) ray.hitRec;
+        for (i = 0; i < 3; i++) {
+            if (hitObj == -1) {
+                v = (s16 *) rec[i];
+            } else {
+                ray.lastRec = (u32) D_800DBEF4 + hitObj * NMR_OBJ_SIZE;
+                v = (s16 *) (D_800DC328[hitObj] + rec[i]);
+            }
+            ((s16 *) outVerts)[3 * i + 0] = v[0];
+            ((s16 *) outVerts)[3 * i + 1] = v[1];
+            ((s16 *) outVerts)[3 * i + 2] = v[2];
+        }
+    }
+    if (outDist != 0) {
+        *(f32 *) outDist = ray.best[0];
+    }
+    if (outObj != 0) {
+        *(s32 *) outObj = hitObj;
+    }
+    if (outFlags != 0) {
+        if (ray.kind == 1) {
+            flags = ((u32 *) D_800DBE5C)[ray.hitTri];
+        } else {
+            /* Rare's asm reads the object from gp, which holds the object only when the vertex output ran; without
+             * it gp is still the last tested triangle's D_800DC26C record (kept: ray.lastRec) */
+            obj = (u8 *) ray.lastRec;
+            triFlags = *(u32 **) (obj + NMR_OBJ_TRIFLAGS);
+            if (triFlags != NULL) {
+                flags = triFlags[ray.hitTri - NMR_OBJ_U16(obj, NMR_OBJ_TRI0)];
+            } else {
+                flags = *(u32 *) (obj + NMR_OBJ_FLAGS);
+            }
+        }
+        *(u32 *) outFlags = flags;
+    }
+    return 1;
 }
 #endif

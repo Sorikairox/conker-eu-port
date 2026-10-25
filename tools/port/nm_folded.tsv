@@ -20,7 +20,7 @@ func_150AC200	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	as
 func_150AC6A4	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
 func_150AC824	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine part
 func_150ACE90	D5E90	func_150AB6D0 func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	tail jump to func_150AC7B8
-func_150AD844	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	readable	ray vs triangle (P288: nmr_ray_hits_triangle)
+func_150AD844	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90.c	readable	ray vs triangle (P288: nmr_ray_hits_triangle)
 func_150AB6D0	D5E90	func_150AB6D0	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine entry (NM_ASM_C_FUNCS)
 func_150AC8C4	D5E90	func_150AC8C4	src_eu/nm_asm/D5E90_walls.inc	asm2c	wall engine entry (NM_ASM_C_FUNCS)
-func_150ACEA0	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90_ray.inc	asm2c	ray cast entry (NM_ASM_C_FUNCS)
+func_150ACEA0	D5E90	func_150ACEA0	src_eu/nm_asm/D5E90.c	readable	ray cast entry (NM_ASM_C_FUNCS; P291: readable, D5E90_ray.inc removed)
