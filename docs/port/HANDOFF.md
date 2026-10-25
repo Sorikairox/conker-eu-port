@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P296 (port-c, group C) (session P296, 2026-10-26). Details: `docs/port/sessions/P296.md`
+
+Hand C (NM), registry rows `P296`, files in docs/port/sessions/p296: func_150ED1F0 (object_update_option_tint, 11A2B0,
+mutants 30/33, 3 equivalent), func_150A39E4 (cylinder_segment_hit, CE6C0, 36/43, 7 equivalent redundant clamps; its
+caller func_150A3990 now takes / passes the 4 arguments, byte-identical), func_150CB6F4 (object_water_entry_splash,
+F8DF0, 45/45), func_151970BC (emitter_update_points, 1C3530, 51/51), func_15106D38 (ribbon_draw, 133A70, 46/46),
+func_150BD550 (blast_debris_and_smoke, E9450, 47/47). func_150C3574: 13 boundary setups (p296/s3574b.txt) kill all 5
+P284 survivors (p296/m3574b.txt, new registry row). verify_all rc 0, NM build rc 0, protocheck 0, implicit_scan 0
+NM+float, selftest 133/133, progress_nm 5698 96.3%.
+
+## Next steps (from P296, group C)
+1. Group C left (smallest first): func_1512A1A0 (1579B0), func_151CA4E8 (1F7960), func_151B3878 (1E0E70),
+   func_1516A1E0 (1979F0), func_150DABFC / DA1FC / D99AC (106830), func_1503FE30 (6D4F0), func_151976B8 (1C3530),
+   func_1519BA28, func_151E67A0, func_150FBE40, func_1519A1A4.
+2. Not group C: func_15106D38 sits at +0x20 of the 0x34-byte descriptor at EU 0x8008C530; its dispatcher was not
+   found by grep; check the call signature (the C is `s32 (s32 gfx, u8 *obj, s16 id)`). P292's D_8008A0B4 dispatcher
+   hazard (func_15141A7C) also covers func_150CB6F4.
+
 ## P292 (port-c, group C) (session P292, 2026-10-26). Details: `docs/port/sessions/P292.md`
 
 game_eu_DCEF0: func_150B2290 prototype added (func_150AFC70 casts its s32 args; byte-identical). func_1505D1C4's v0

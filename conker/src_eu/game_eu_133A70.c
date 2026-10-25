@@ -320,7 +320,139 @@ void func_15106B90(struct102 *arg0)
 
 }
 
+#ifdef NON_MATCHING
+void func_151D6310(s32 *, s16, s32, Vtx **, u8 *);
+s32 func_15142E24(s32, s32 *, s32, s32, s32, s32, s32, s32, s32, s8 *, s32);
+s32 func_1513F4E4(s32, u8, s8 *);
+s32 func_15142B7C(s32, s32, s32);
+s32 func_15142C10(s32, s32, s32, s32, s32, s8 *);
+s32 func_15142FBC(s32, s32, s32, s8 *);
+extern s32 D_80091120[];  /* ribbon texture descriptor */
+extern s32 D_800D30BC;
+extern s32 D_800A4EA8[];  /* render mode pairs (2 words each) */
+
+/* rodata D_800A27E8 / D_800A27EC (bit-exact copies: the NM link drops this file's .late_rodata) */
+static const f32 sRibbonMinLen2A[1] = { 0.0001f };  /* 0x38D1B717 */
+static const f32 sRibbonMinLen2B[1] = { 0.0001f };  /* 0x38D1B717 */
+
+#define RIBBON_VTX(vp, px, py, pz, s) \
+    do { \
+        (vp)->v.ob[0] = (s32) (px); \
+        (vp)->v.ob[1] = (s32) (py); \
+        (vp)->v.ob[2] = (s32) (pz); \
+        (vp)->v.tc[0] = (s); \
+        (vp)->v.tc[1] = 0; \
+        (vp)++; \
+    } while (0)
+
+// ribbon_draw: draws the object's point chain (func_1510676C: obj +0x48 + 2 points) as a camera-facing ribbon of
+// half width obj +0x50: each point gets 3 vertices (p + n, p, p - n with s = 0 / 0x200 / 0x400, n = the side normal of
+// the segment and the camera of view id, func_15144B34), each segment one 6-vertex load and 4 triangles. Vertices
+// from func_151D6310 (obj +0x74 pool, obj +0x84 count; nothing drawn without). Texture D_80091120 (combine 3), prim
+// colour obj +0x58..+0x5B, geometry 0x200005 / 0x1F0600, combine 0x44, render mode 0x80000 | 0x2CA0 | D_800D30BC
+// with the second D_800A4EA8 pair. Returns the display list end.
+s32 func_15106D38(s32 gfx, u8 *obj, s16 id) {
+    Vtx *vtx;
+    f32 *cam;
+    f32 *pts;
+    f32 *cur;
+    f32 prev[3];
+    s8 flag;
+    f32 dx, dy, dz;
+    f32 ex, ey, ez;
+    f32 cx, cy, cz;
+    f32 nx, ny, nz;
+    f32 len2;
+    f32 k;
+    s32 i;
+
+    func_151D6310((s32 *) (obj + 0x74), id, *(s32 *) (obj + 0x84), &vtx, NULL);
+    if (vtx == NULL) {
+        return gfx;
+    }
+    cam = func_15144B34(id);
+    flag = 1;
+    pts = (f32 *) func_1510676C((struct_eu_133A70 *) obj);
+    gfx = func_15142E24(gfx, D_80091120, 0, 0, 0, 0, 0x2C, 0, 0, &flag, 3);
+    gfx = func_15142C10(gfx, obj[0x58], obj[0x59], obj[0x5A], obj[0x5B], &flag);
+    gfx = func_15142B7C(gfx, 0x200005, 0x1F0600);
+    gfx = func_1513F4E4(gfx, 0x44, &flag);
+    gfx = func_15142FBC(gfx, D_800D30BC | 0x80000 | 0x2CA0, D_800A4EA8[3] | D_800A4EA8[2], &flag);
+
+    /* first point: side normal of the first segment */
+    dx = pts[3] - pts[0];
+    dy = pts[4] - pts[1];
+    dz = pts[5] - pts[2];
+    ex = pts[0] - cam[0];
+    ey = pts[1] - cam[1];
+    ez = pts[2] - cam[2];
+    cx = dy * ez - ey * dz;
+    cy = dz * ex - ez * dx;
+    cz = dx * ey - ex * dy;
+    len2 = cx * cx + cy * cy + cz * cz;
+    if (sRibbonMinLen2A[0] < len2) {
+        k = *(f32 *) (obj + 0x50) / sqrtf(len2);
+        nx = cx * k;
+        ny = cy * k;
+        nz = cz * k;
+    } else {
+        nx = ny = nz = 0.0f;
+    }
+    RIBBON_VTX(vtx, pts[0] + nx, pts[1] + ny, pts[2] + nz, 0);
+    RIBBON_VTX(vtx, pts[0], pts[1], pts[2], 0x200);
+    RIBBON_VTX(vtx, pts[0] - nx, pts[1] - ny, pts[2] - nz, 0x400);
+    prev[0] = pts[0];
+    prev[1] = pts[1];
+    prev[2] = pts[2];
+
+    /* one segment per further point (the segment direction is reversed: cur -> prev) */
+    for (i = 1; i < *(s32 *) (obj + 0x48) + 2; i++) {
+        cur = &pts[i * 3];
+        dx = prev[0] - cur[0];
+        dy = prev[1] - cur[1];
+        dz = prev[2] - cur[2];
+        ex = cur[0] - cam[0];
+        ey = cur[1] - cam[1];
+        ez = cur[2] - cam[2];
+        cx = dy * ez - ey * dz;
+        cy = dz * ex - ez * dx;
+        cz = dx * ey - ex * dy;
+        len2 = cx * cx + cy * cy + cz * cz;
+        if (sRibbonMinLen2B[0] < len2) {
+            k = *(f32 *) (obj + 0x50) / sqrtf(len2);
+            nx = cx * k;
+            ny = cy * k;
+            nz = cz * k;
+        } else {
+            nx = ny = nz = 0.0f;
+        }
+        RIBBON_VTX(vtx, cur[0] - nx, cur[1] - ny, cur[2] - nz, 0);
+        RIBBON_VTX(vtx, cur[0], cur[1], cur[2], 0x200);
+        RIBBON_VTX(vtx, cur[0] + nx, cur[1] + ny, cur[2] + nz, 0x400);
+        ((s32 *) gfx)[0] = 0x0100600C; /* gSPVertex(vtx - 6, 6, 0) */
+        ((s32 *) gfx)[1] = (s32) (vtx - 6);
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05000206; /* gSP1Triangle(0, 1, 3) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05020806; /* gSP1Triangle(1, 4, 3) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x0502040A; /* gSP1Triangle(1, 2, 5) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+        ((s32 *) gfx)[0] = 0x05020A08; /* gSP1Triangle(1, 5, 4) */
+        ((s32 *) gfx)[1] = 0;
+        gfx += 8;
+        prev[0] = cur[0];
+        prev[1] = cur[1];
+        prev[2] = cur[2];
+    }
+    return gfx;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_133A70/func_15106D38.s")
+#endif
 
 extern void (*D_80088FB8[])(u8 *);
 void func_151073F8(u8 *arg0)

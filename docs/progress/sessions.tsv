@@ -83,3 +83,4 @@ P277	port-c	group C	10		~170	10 compiled funcs to NM C; B1964 drafted (mode-14 D
 P284	port-c	group C	7		~140	B1964 fixed (mode-14 divisor = func_1505A6F8 result) + 6 compiled funcs to NM C; func_1505D1C4->s32 blocked by void decls in 201240/C5530
 P289	port-c	group C	3		~120	P284 mutants re-run clean; func_1505D1C4->s32 + E1AF0; D_8008B704 = 2 entries, NM phase param; B2290 (ld/sd hand asm) via Python-model harness; B8DB0
 P292	port-c	group C	3		~125	DCEF0 B2290 proto; 1505D1C4 v0 callers need no change; difftest stub_write maps pages (OUTW/OUTA into untouched heap faulted); D290 + AFC84 + B4854 to NM C
+P296	port-c	group C	6		~130	ED1F0 + A39E4 (caller A3990 4 args) + CB6F4 + 970BC + 06D38 + BD550 to NM C; func_150C3574 boundary setups kill the 5 P284 survivors

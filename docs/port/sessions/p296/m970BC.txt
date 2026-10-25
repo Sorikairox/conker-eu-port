@@ -1,0 +1,51 @@
+\#^    if (\*(u8 \*\*) (rec->obj + 0x1D4) == NULL) {#s/== NULL/!= NULL/
+\#^    if (rec->speedFn != -1) {#s/!= -1/!= 0/
+\#^    mtx = \*(u8 \*\*) (rec->obj + 0x1D4) + rec->node \* 0x40;#s/0x40/0x30/
+\#^    func_15143134(&rec->at, e + 0x10, mtx);#s/&rec->at,/\&rec->at2,/
+\#^    func_15143134(&rec->at2, &newPos2, mtx);#s/&rec->at2/\&rec->at/
+\#^    rec->u4C += rec->u48 \* D_800BE9A4;#s/rec->u48 \* //
+\#^    if (!(1.0f < rec->u4C)) {#s/1.0f < rec->u4C/1.0f <= rec->u4C/
+\#^    time = rec->u3C + D_800BE9A4;#s/+ D_800BE9A4//
+\#^    timeStep = time \* inv;#s/time \* inv/inv/
+\#^    sizeEnd = rec->u5C;#s/u5C/u58/
+\#^    size = sizeEnd + rec->u58 \* time;#s/\* time//
+\#^    step.x = (\*(f32 \*) (e + 0x10) - rec->pos.x) \* inv;#s/0x10/0x14/
+\#^    dz = \*(f32 \*) (e + 0x18) - rec->pos.z;#s/rec->pos.z/rec->pos.y/
+\#^    dy2 = newPos2.y - rec->pos2.y;#s/newPos2.y/newPos2.x/
+\#^    dspeed = rec->u44 - speed;#s/u44/u40/
+\#^    step2.z = dz2 \* inv;#s/dz2/dy2/
+\#^        rec->u7C += rec->u78;#s/u78/u84/
+\#^        if (1.0f < rec->u7C) {#s/1.0f/0.5f/
+\#^            func_151992F8(e, (u8 \*) &newPos2);#s/(u8 \*) &newPos2/e + 0x10/
+\#^        if (1.0f < rec->u88) {#s/</>/
+\#^            func_1519961C(e, (u8 \*) &newPos2);#s/e,/(u8 *) rec,/
+\#^        pt = &pts\[(s8) e\[0x2E\]\];#s/0x2E/0x2D/
+\#^        pt->age = 0;#s/0;/1;/
+\#^        pt->pos.y = cur.y;#s/cur.y/cur2.y/
+\#^        pt->vel.x = (cur2.x - cur.x) \* speed;#s/\* speed/* size/
+\#^        pt->vel.z = (cur2.z - cur.z) \* speed;#s/cur2.z - cur.z/cur2.z - cur.y/
+\#^        pt->size = size;#s/size;/speed;/
+\#^        pt->u1C = rec->u53;#s/u53/u54/
+\#^        pt->alpha = 0xFF;#s/0xFF/0xFE/
+\#^        pt->seed = rec->u50;#s/u50/u51/
+\#^        rec->u50 = rec->u50 + func_150ADA20() . 6U + 3;#s/6U/7U/
+\#^        rec->u50 = rec->u50 + func_150ADA20() . 6U + 3;#s/+ 3;/+ 2;/
+\#^        pt->vel.y += rec->u40 \* time;#s/vel.y/vel.x/
+\#^        pt->pos.y += pt->vel.y \* time;#s/\* time/* timeStep/
+\#^        time -= timeStep;#s/-=/+=/
+\#^        if (e\[0x25\] == (s8) e\[0x2E\]) {#s/0x25/0x24/
+\#^            e\[0x2E\] = 0;#s/0;/1;/
+\#^        e\[0x2C\]++;#s/++/--/
+\#^        if ((s8) e\[0x2D\] == (s8) e\[0x2E\]) {#s/==/!=/
+\#^            e\[0x2D\]++;#s/++/--/
+\#^                e\[0x2D\] = 0;#s/0;/1;/
+\#^            e\[0x2C\]--;#s/--/++/
+\#^        cur.y += step.y;#s/step.y/step.z/
+\#^        cur2.x += step2.x;#s/step2.x/step.x/
+\#^        speed += speedStep;#s/speedStep/sizeStep/
+\#^        size += sizeStep;#s/+=/-=/
+\#^        rec->u4C -= 1.0f;#s/1.0f/0.5f/
+\#^    rec->pos2 = cur2;#s/cur2/cur/
+\#^    rec->speed = speed;#s/speed;/rec->u44;/
+\#^    rec->u3C = time;#s/time/timeStep/
+\#^    return 1;#s/1;/2;/

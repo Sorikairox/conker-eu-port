@@ -1,0 +1,5 @@
+\#^    if ((d + 4.0f) + (d + 4.0f) < obj->xz_velocity) {$#s/4.0f) + (d + 4.0f)/4.0f) + (d + 5.0f)/ % cap12_5 cap13
+\#^        flags = obj->unk87;$#s/flags = obj->unk87;// % hitreread hitreread2
+\#^    if (0.5f < d && obj->unk13D == 0) {$#s/0.5f/0.25f/ % d04 d05
+\#^    if (obj->unk44 < 0.2f) {$#s/0.2f/0.3f/ % s025 s02
+\#^        if (pitch > 28000) {$#s/28000/27000/ % p27500 p27500k25

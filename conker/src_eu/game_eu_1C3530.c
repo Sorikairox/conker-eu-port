@@ -811,7 +811,141 @@ loop_30:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15196CB8.s")
 #endif
+#ifdef NON_MATCHING
+/* One point of an emitter's ring (emitter +0x94, emitter +0x25 entries; head +0x2E, tail +0x2D, count +0x2C). */
+typedef struct {
+    /* 0x00 */ EmitterVec pos;
+    /* 0x0C */ EmitterVec vel;  /* (pos2 - pos) * speed, + rise */
+    /* 0x18 */ f32 size;
+    /* 0x1C */ u16 u1C;         /* record +0x53 */
+    /* 0x1E */ u8 u1E;          /* record +0x54 */
+    /* 0x1F */ u8 alpha;        /* 0xFF */
+    /* 0x20 */ u8 seed;         /* record +0x50 */
+    /* 0x21 */ u8 age;
+} EmitterPoint;
+
+void func_151992F8(u8 *arg0, u8 *arg1);
+void func_1519961C(u8 *arg0, u8 *arg1);
+
+// emitter_update_points: D_8008A1C4-table update handler of a model-attached emitter (record +0x98, see
+// func_15196CB8's spawn): re-evaluates the target speed (D_8008FC10), moves the two world points with the model node,
+// and for every whole step of the emit counter (+0x4C, rate +0x48 per dt) appends a point to the ring, interpolating
+// position, second point, speed and size between the previous and the new frame and pre-moving it by the time left
+// in the frame; side counters +0x7C / +0x88 trigger func_151992F8 / func_1519961C. Returns 0 when the object has no
+// model matrices, else 1.
+s32 func_151970BC(u8 *e) {
+    EmitterRecord *rec = *(EmitterRecord **) (e + 0x98);
+    EmitterPoint *pts = *(EmitterPoint **) (e + 0x94);
+    EmitterPoint *pt;
+    u8 *mtx;
+    EmitterVec newPos2;
+    EmitterVec cur;     /* interpolated point */
+    EmitterVec cur2;    /* interpolated second point */
+    EmitterVec step;
+    EmitterVec step2;
+    f32 inv;
+    f32 time;           /* time left in the frame for the current point */
+    f32 timeStep;
+    f32 speed, speedStep;
+    f32 size, sizeEnd, sizeStep;
+    f32 dz, dx2, dy2, dz2, dy, dsize, dspeed;
+
+    if (*(u8 **) (rec->obj + 0x1D4) == NULL) {
+        return 0;
+    }
+    if (rec->speedFn != -1) {
+        rec->u44 = D_8008FC10[rec->speedFn](e);
+    }
+    mtx = *(u8 **) (rec->obj + 0x1D4) + rec->node * 0x40;
+    func_15143134(&rec->at, e + 0x10, mtx);
+    func_15143134(&rec->at2, &newPos2, mtx);
+    rec->u4C += rec->u48 * D_800BE9A4;
+    if (!(1.0f < rec->u4C)) {
+        return 1;
+    }
+    inv = 1.0f / rec->u4C;
+    cur = rec->pos;
+    cur2 = rec->pos2;
+    time = rec->u3C + D_800BE9A4;
+    timeStep = time * inv;
+    sizeEnd = rec->u5C;
+    size = sizeEnd + rec->u58 * time;
+    speed = rec->speed;
+    step.x = (*(f32 *) (e + 0x10) - rec->pos.x) * inv;
+    dy = *(f32 *) (e + 0x14) - rec->pos.y;
+    dz = *(f32 *) (e + 0x18) - rec->pos.z;
+    dx2 = newPos2.x - rec->pos2.x;
+    dy2 = newPos2.y - rec->pos2.y;
+    dz2 = newPos2.z - rec->pos2.z;
+    dsize = sizeEnd - size;
+    dspeed = rec->u44 - speed;
+    step.y = dy * inv;
+    step.z = dz * inv;
+    step2.x = dx2 * inv;
+    step2.y = dy2 * inv;
+    step2.z = dz2 * inv;
+    sizeStep = dsize * inv;
+    speedStep = dspeed * inv;
+    do {
+        rec->u7C += rec->u78;
+        if (1.0f < rec->u7C) {
+            func_151992F8(e, (u8 *) &newPos2);
+        }
+        rec->u88 += rec->u84;
+        if (1.0f < rec->u88) {
+            func_1519961C(e, (u8 *) &newPos2);
+        }
+        pt = &pts[(s8) e[0x2E]];
+        pt->age = 0;
+        pt->pos.x = cur.x;
+        pt->pos.y = cur.y;
+        pt->pos.z = cur.z;
+        pt->vel.x = (cur2.x - cur.x) * speed;
+        pt->vel.y = (cur2.y - cur.y) * speed;
+        pt->vel.z = (cur2.z - cur.z) * speed;
+        pt->size = size;
+        pt->u1C = rec->u53;
+        pt->u1E = rec->u54;
+        pt->alpha = 0xFF;
+        pt->seed = rec->u50;
+        rec->u50 = rec->u50 + func_150ADA20() % 6U + 3;
+        pt->vel.y += rec->u40 * time;
+        pt->pos.x += pt->vel.x * time;
+        pt->pos.y += pt->vel.y * time;
+        pt->pos.z += pt->vel.z * time;
+        time -= timeStep;
+        /* advance the ring head; when it reaches the tail, drop the oldest point */
+        e[0x2E]++;
+        if (e[0x25] == (s8) e[0x2E]) {
+            e[0x2E] = 0;
+        }
+        e[0x2C]++;
+        if ((s8) e[0x2D] == (s8) e[0x2E]) {
+            e[0x2D]++;
+            if (e[0x25] == (s8) e[0x2D]) {
+                e[0x2D] = 0;
+            }
+            e[0x2C]--;
+        }
+        cur.x += step.x;
+        cur.y += step.y;
+        cur.z += step.z;
+        cur2.x += step2.x;
+        cur2.y += step2.y;
+        cur2.z += step2.z;
+        speed += speedStep;
+        size += sizeStep;
+        rec->u4C -= 1.0f;
+    } while (1.0f < rec->u4C);
+    rec->pos = cur;
+    rec->pos2 = cur2;
+    rec->speed = speed;
+    rec->u3C = time;
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151970BC.s")
+#endif
 
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_151976B8.s")
 
