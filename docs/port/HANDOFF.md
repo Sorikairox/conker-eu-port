@@ -10,14 +10,16 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
-## Integration status (P315, port-b, 2026-10-26)
+## Integration status (P316, port-b, 2026-10-26)
 
-Merged into port-b so far: A, E, C1, C2, D2 (+D up to `c0c91c4d`). Group A (port-b, P274..P302, finished) + port-e at
+Merged into port-b so far: A, B2, C1, C2, D (all but func_15175EC8), E. Group A (port-b, P274..P302, finished) + port-e at
 `74c6f08a` (P307: group E finished, C2 part P300) + port-c at `1e0ceb49` (P308: group C1 finished, P284..P305) + port-e at
 `eb28e800` (P312: group C2 finished, P306 func_151E67A0 / func_150FBE40) + port-f at `e4b53d6e` (P315: group D2 finished,
-P304 / P309; port-f branched from port-d `c0c91c4d`, so it also brought port-d P278 / P283 / P290 / P297). Still to merge,
-in this order, each followed by check.sh: `port` (group B), `port-d` again (D1 rest), `port-c` again (B2), `port-e` again
-(D1's func_15175EC8), then the Final-merge notes below.
+P304 / P309; port-f branched from port-d `c0c91c4d`, so it also brought port-d P278 / P283 / P290 / P297) + port-d at
+`b23e0b5b` (P316 merge 4c0a91f8: D1 rest incl. P313 func_151EE93C) + port-c at `00d2150c` (P316 merge b8f3a2a7: group B2,
+P311 func_1516E100 / func_151206C8 and the func_151CA150 arity fix in game_eu_14D9E0). Still to merge, in this order,
+each followed by check.sh: `port` (group B incl. B1, in progress), `port-e` again (D1's func_15175EC8, in progress),
+then the Final-merge notes below.
 
 Conflict resolutions:
 - P307 `game_eu_D5650.c` func_150A7EF4 (private w-tail entry of func_150A7EE0): both sides folded it into the NM
@@ -36,15 +38,17 @@ Conflict resolutions:
   verify_registry.tsv (reg3way, no CONFLICT lines, 440 rows / 437 funcs) conflicted.
 - P315 port-f merge: code merged cleanly (103 files); only HANDOFF / sessions.tsv (merge_union + hodedup + hoorder 150)
   and verify_registry.tsv (reg3way, no CONFLICT lines, 474 rows / 471 funcs) conflicted.
+- P316 port-d and port-c merges: code merged cleanly both times; only HANDOFF / sessions.tsv (merge_union + hodedup +
+  hoorder 150) and verify_registry.tsv (reg3way, no CONFLICT lines; 479 rows / 476 funcs, then 481 / 478) conflicted.
 - verify_registry.tsv: `reg3way.py` (P258, from `~/conker-wt/web/docs/port/sessions/p258/`), only conflict
   func_150B2290 (-> P289), 439 rows / 436 funcs. sessions.tsv / HANDOFF: merge_union + hodedup (p240) + hoorder 150.
 
-Checks (`docs/port/sessions/p315/check.sh`, P315): verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0
+Checks (`docs/port/sessions/p316/check.sh`, P316, after each merge: check1.out / check2.out): verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0
 NM+float (828 sites; clang errors in game_A28B0.c / init_2070.c are pre-existing), selftest **150/150**, progress_nm
-`total 5916 3995 1843 33 45 5871 99.2% 2181320/2253856 (96.8%)`. (P312: 98.7% / 94.9%.)
+`total 5916 3995 1850 33 38 5878 99.4% 2200164/2253856 (97.6%)`. (P315: 99.2% / 96.8%; after port-d: 99.3% / 97.3%.)
 
-Remaining for the final merge (in this order, each followed by check.sh): `port` (group B), `port-d` again (D1 rest),
-`port-c` again (B2), `port-e` again (D1's func_15175EC8). Then the "Final-merge notes" of `docs/progress/split-P276.txt`:
+Remaining for the final merge (in this order, each followed by check.sh): `port` (group B incl. B1), `port-e` again
+(D1's func_15175EC8). Then the "Final-merge notes" of `docs/progress/split-P276.txt`:
 - func_150B2290 and the STUBMAP double fix: done (P308).
 - wasm call_indirect hazards: D_8008A0B4 (dispatcher func_15141A7C in game_16EE20 passes 3-4 args, entries void(3));
   D_80089CD4 mixed 5/6 args (P278).
