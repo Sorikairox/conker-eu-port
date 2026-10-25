@@ -2,322 +2,28 @@
 L_150AA950: /* box_outcode(f3, f4, f5 vs half extents f0, f1, f2) -> v0 (P281: readable, nmw_box_outcode) */
     v0 = nmw_box_outcode(F[3].f, F[4].f, F[5].f, F[0].f, F[1].f, F[2].f);
     pc = ra;  goto dispatch;
-L_150AA9B0:
-    v0 = 0 | 0;
-    F[6].f = F[0].f + F[1].f;
-    F[7].f = F[3].f + F[4].f;
-    F[8].f = F[3].f - F[4].f;
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 1; goto L_150AA9CC; }
-L_150AA9CC:
-    F[7].u = F[7].u ^ 0x80000000;
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 2; goto L_150AA9DC; }
-L_150AA9DC:
-    F[8].u = F[8].u ^ 0x80000000;
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 8; goto L_150AA9EC; }
-L_150AA9EC:
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 4; goto L_150AA9F8; }
-L_150AA9F8:
-    F[6].f = F[0].f + F[2].f;
-    F[7].f = F[3].f + F[5].f;
-    F[8].f = F[3].f - F[5].f;
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 16; goto L_150AAA10; }
-L_150AAA10:
-    F[7].u = F[7].u ^ 0x80000000;
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 32; goto L_150AAA20; }
-L_150AAA20:
-    F[8].u = F[8].u ^ 0x80000000;
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 128; goto L_150AAA30; }
-L_150AAA30:
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 64; goto L_150AAA3C; }
-L_150AAA3C:
-    F[6].f = F[1].f + F[2].f;
-    F[7].f = F[4].f + F[5].f;
-    F[8].f = F[4].f - F[5].f;
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 256; goto L_150AAA54; }
-L_150AAA54:
-    F[7].u = F[7].u ^ 0x80000000;
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 512; goto L_150AAA64; }
-L_150AAA64:
-    F[8].u = F[8].u ^ 0x80000000;
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 2048; goto L_150AAA74; }
-L_150AAA74:
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 1024; goto L_150AAA80; }
-L_150AAA80:
+L_150AA9B0: /* box_edge_outcode(f3, f4, f5 vs f0, f1, f2) -> v0 (P285: readable, nmw_box_edge_outcode) */
+    v0 = nmw_box_edge_outcode(F[3].f, F[4].f, F[5].f, F[0].f, F[1].f, F[2].f);
     pc = ra;  goto dispatch;
-L_150AAA88:
-    F[6].f = F[0].f + F[1].f;
-    v0 = 0 | 0;
-    F[7].f = F[3].f + F[4].f;
-    F[6].f = F[6].f + F[2].f;
-    F[8].f = F[7].f + F[5].f;
-    F[9].f = F[7].f - F[5].f;
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 1; goto L_150AAAAC; }
-L_150AAAAC:
-    F[7].f = F[3].f - F[4].f;
-    cc = !(F[9].f > F[6].f);
-    if (!cc) { v0 = v0 | 2; goto L_150AAABC; }
-L_150AAABC:
-    F[10].f = F[7].f + F[5].f;
-    F[7].f = F[7].f - F[5].f;
-    cc = !(F[10].f > F[6].f);
-    if (!cc) { v0 = v0 | 4; goto L_150AAAD0; }
-L_150AAAD0:
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 8; goto L_150AAADC; }
-L_150AAADC:
-    F[8].u = F[8].u ^ 0x80000000;
-    F[9].u = F[9].u ^ 0x80000000;
-    F[10].u = F[10].u ^ 0x80000000;
-    F[7].u = F[7].u ^ 0x80000000;
-    cc = !(F[8].f > F[6].f);
-    if (!cc) { v0 = v0 | 128; goto L_150AAAF8; }
-L_150AAAF8:
-    cc = !(F[9].f > F[6].f);
-    if (!cc) { v0 = v0 | 64; goto L_150AAB04; }
-L_150AAB04:
-    cc = !(F[10].f > F[6].f);
-    if (!cc) { v0 = v0 | 32; goto L_150AAB10; }
-L_150AAB10:
-    cc = !(F[7].f > F[6].f);
-    if (!cc) { v0 = v0 | 16; goto L_150AAB1C; }
-L_150AAB1C:
+L_150AAA88: /* box_corner_outcode(f3, f4, f5 vs f0, f1, f2) -> v0 (P285: readable, nmw_box_corner_outcode) */
+    v0 = nmw_box_corner_outcode(F[3].f, F[4].f, F[5].f, F[0].f, F[1].f, F[2].f);
     pc = ra;  goto dispatch;
-L_150AAB24:
-    F[3].f = F[6].f - F[9].f;
-    F[4].f = F[7].f - F[10].f;
-    F[3].f = F[3].f * F[12].f;
-    F[5].f = F[8].f - F[11].f;
-    F[4].f = F[4].f * F[12].f;
-    F[3].f = F[3].f + F[9].f;
-    F[5].f = F[5].f * F[12].f;
-    F[4].f = F[4].f + F[10].f;
-    t9 = ra | 0;
-    ra = 0x150AAB50; F[5].f = F[5].f + F[11].f; goto L_150AA950;
-L_150AAB50:
-    pc = t9; v0 = v0 & a0; goto dispatch;
-L_150AAB58:
-    at = 0x3F800000;
-    F[14].u = at;
-    t8 = ra | 0;
-    t0 = v1 & 3;
-    c = t0 == 0; t0 = v1 & 1; if (c) goto L_150AABB0;
-    F[15].f = F[6].f - F[9].f;
-    c = t0 == 0; F[15].f = F[14].f / F[15].f; if (c) goto L_150AAB98;
-    F[12].f = F[0].f - F[9].f;
-    F[12].f = F[12].f * F[15].f;
-    ra = 0x150AAB8C; a0 = 0 + 62; goto L_150AAB24;
-L_150AAB8C:
-    c = v0 == 0; t0 = v1 & 2; if (c) goto L_150AAC50;
-    c = t0 == 0; F[12].f = F[0].f + F[9].f; if (c) goto L_150AABB0;
-    if (0) { L_150AAB98: F[12].f = F[0].f + F[9].f; }
-    F[12].u = F[12].u ^ 0x80000000;
-    F[12].f = F[12].f * F[15].f;
-    ra = 0x150AABAC; a0 = 0 + 61; goto L_150AAB24;
-L_150AABAC:
-    c = v0 == 0; t0 = v1 & 12; if (c) goto L_150AAC50;
-    if (0) { L_150AABB0: t0 = v1 & 12; }
-    c = t0 == 0; t0 = v1 & 4; if (c) goto L_150AABFC;
-    F[15].f = F[7].f - F[10].f;
-    c = t0 == 0; F[15].f = F[14].f / F[15].f; if (c) goto L_150AABE4;
-    F[12].f = F[1].f - F[10].f;
-    F[12].f = F[12].f * F[15].f;
-    ra = 0x150AABD8; a0 = 0 + 59; goto L_150AAB24;
-L_150AABD8:
-    c = v0 == 0; t0 = v1 & 8; if (c) goto L_150AAC50;
-    c = t0 == 0; F[12].f = F[1].f + F[10].f; if (c) goto L_150AABFC;
-    if (0) { L_150AABE4: F[12].f = F[1].f + F[10].f; }
-    F[12].u = F[12].u ^ 0x80000000;
-    F[12].f = F[12].f * F[15].f;
-    ra = 0x150AABF8; a0 = 0 + 55; goto L_150AAB24;
-L_150AABF8:
-    c = v0 == 0; t0 = v1 & 48; if (c) goto L_150AAC50;
-    if (0) { L_150AABFC: t0 = v1 & 48; }
-    c = t0 == 0; t0 = v1 & 16; if (c) goto L_150AAC4C;
-    F[15].f = F[8].f - F[11].f;
-    c = t0 == 0; F[15].f = F[14].f / F[15].f; if (c) goto L_150AAC30;
-    F[12].f = F[2].f - F[11].f;
-    F[12].f = F[12].f * F[15].f;
-    ra = 0x150AAC24; a0 = 0 + 47; goto L_150AAB24;
-L_150AAC24:
-    c = v0 == 0; t0 = v1 & 32; if (c) goto L_150AAC50;
-    c = t0 == 0; F[12].f = F[2].f + F[11].f; if (c) goto L_150AAC4C;
-    if (0) { L_150AAC30: F[12].f = F[2].f + F[11].f; }
-    F[12].u = F[12].u ^ 0x80000000;
-    F[12].f = F[12].f * F[15].f;
-    ra = 0x150AAC44; a0 = 0 + 31; goto L_150AAB24;
-L_150AAC44:
-    c = v0 == 0;  if (c) goto L_150AAC50;
-L_150AAC4C:
-    v0 = 0 + 1;
-L_150AAC50:
-    pc = t8;  goto dispatch;
-L_150AAC58:
-    F[10].f = F[7].f - F[10].f;
-    F[11].f = F[8].f - F[11].f;
-    F[7].f = F[7].f - F[4].f;
-    F[8].f = F[8].f - F[5].f;
-    F[13].f = F[10].f * F[8].f;
-    F[9].f = F[6].f - F[9].f;
-    F[15].f = F[11].f * F[7].f;
-    F[6].f = F[6].f - F[3].f;
-    F[13].f = F[13].f - F[15].f;
-    F[14].f = F[9].f * F[8].f;
-    cc = F[13].f < F[18].f;
-    F[15].f = F[11].f * F[6].f;
-    if (cc) { v0 = 0 + 4; goto L_150AAC94; }
-    v0 = 0 + 0;
-L_150AAC94:
-    F[14].f = F[15].f - F[14].f;
-    F[15].f = F[9].f * F[7].f;
-    cc = F[14].f < F[18].f;
-    F[8].f = F[10].f * F[6].f;
-    if (cc) { v0 = v0 | 2; goto L_150AACAC; }
-L_150AACAC:
-    F[15].f = F[15].f - F[8].f;
-    cc = F[15].f < F[18].f;
-    if (cc) { v0 = v0 | 1; goto L_150AACBC; }
-L_150AACBC:
-    F[8].u = F[13].u & 0x7FFFFFFF;
-    cc = F[8].f < F[12].f;
-    if (cc) { t8 = t8 & 3; goto L_150AACCC; }
-L_150AACCC:
-    F[8].u = F[14].u & 0x7FFFFFFF;
-    cc = F[8].f < F[12].f;
-    if (cc) { t8 = t8 & 5; goto L_150AACDC; }
-L_150AACDC:
-    F[8].u = F[15].u & 0x7FFFFFFF;
-    cc = F[8].f < F[12].f;
-    if (cc) { t8 = t8 & 6; goto L_150AACEC; }
-L_150AACEC:
+L_150AAB58: /* segment_misses_box(a = f6-f8, b = f9-f11, diff = v1, box f0-f2) -> v0 (P285: readable,
+             * nmw_segment_misses_box; it inlines the lerp helper func_150AAB24) */
+    v0 = nmw_segment_misses_box(&F[6].f, &F[9].f, v1, F[0].f, F[1].f, F[2].f);
     pc = ra;  goto dispatch;
-L_150AACF4:
-    at = 0x3F800000;
-    F[12].u = at;
-    at = HI((u32) &D_8009FAB0);
-    F[8].u = LW(at + LO((u32) &D_8009FAB0));
-    t9 = ra | 0;
-    F[6].f = F[23].f;
-    F[7].f = F[23].f;
-    cc = F[26].f < F[23].f;
-    if (cc) { F[6].f = F[26].f; goto L_150AAD24; }
-    F[7].f = F[26].f;
-L_150AAD24:
-    cc = F[29].f < F[6].f;
-    if (cc) { F[6].f = F[29].f; goto L_150AAD3C; }
-    cc = !(F[29].f > F[7].f);
-    if (!cc) { F[7].f = F[29].f; goto L_150AAD3C; }
-L_150AAD3C:
-    F[6].f = F[6].f - F[8].f;
-    F[7].f = F[7].f + F[8].f;
-    cc = !(F[3].f > F[7].f);
-    c = !cc; cc = F[3].f < F[6].f; if (c) goto L_150AAE64;
-    c = cc; F[6].f = F[24].f; if (c) goto L_150AAE64;
-    F[7].f = F[24].f;
-    cc = F[27].f < F[24].f;
-    if (cc) { F[6].f = F[27].f; goto L_150AAD6C; }
-    F[7].f = F[27].f;
-L_150AAD6C:
-    cc = F[30].f < F[6].f;
-    if (cc) { F[6].f = F[30].f; goto L_150AAD84; }
-    cc = !(F[30].f > F[7].f);
-    if (!cc) { F[7].f = F[30].f; goto L_150AAD84; }
-L_150AAD84:
-    F[6].f = F[6].f - F[8].f;
-    F[7].f = F[7].f + F[8].f;
-    cc = !(F[4].f > F[7].f);
-    c = !cc; cc = F[4].f < F[6].f; if (c) goto L_150AAE64;
-    c = cc; F[6].f = F[25].f; if (c) goto L_150AAE64;
-    F[7].f = F[25].f;
-    cc = F[28].f < F[25].f;
-    if (cc) { F[6].f = F[28].f; goto L_150AADB4; }
-    F[7].f = F[28].f;
-L_150AADB4:
-    cc = F[31].f < F[6].f;
-    if (cc) { F[6].f = F[31].f; goto L_150AADCC; }
-    cc = !(F[31].f > F[7].f);
-    if (!cc) { F[7].f = F[31].f; goto L_150AADCC; }
-L_150AADCC:
-    F[6].f = F[6].f - F[8].f;
-    F[7].f = F[7].f + F[8].f;
-    cc = !(F[5].f > F[7].f);
-    c = !cc; cc = F[5].f < F[6].f; if (c) goto L_150AAE64;
-    c = cc; t8 = 0 + 7; if (c) goto L_150AAE64;
-    F[6].f = F[23].f;
-    F[7].f = F[24].f;
-    F[8].f = F[25].f;
-    F[9].f = F[26].f;
-    F[10].f = F[27].f;
-    ra = 0x150AAE04; F[11].f = F[28].f; goto L_150AAC58;
-L_150AAE04:
-    t0 = v0 | 0;
-    F[6].f = F[26].f;
-    F[7].f = F[27].f;
-    F[8].f = F[28].f;
-    F[9].f = F[29].f;
-    F[10].f = F[30].f;
-    ra = 0x150AAE24; F[11].f = F[31].f; goto L_150AAC58;
-L_150AAE24:
-    t1 = v0 | 0;
-    F[6].f = F[29].f;
-    F[7].f = F[30].f;
-    F[8].f = F[31].f;
-    F[9].f = F[23].f;
-    F[10].f = F[24].f;
-    ra = 0x150AAE44; F[11].f = F[25].f; goto L_150AAC58;
-L_150AAE44:
-    t0 = t0 & t8;
-    t1 = t1 & t8;
-    c = t0 != t1; v0 = v0 & t8; if (c) goto L_150AAE64;
-    c = t1 != v0;  if (c) goto L_150AAE64;
-    pc = t9; v0 = 0 + 0; goto dispatch;
-L_150AAE64:
-    pc = t9; v0 = 0 + 1; goto dispatch;
+L_150AACF4: /* point_in_triangle(p = f3-f5, triangle f23-f31) -> v0 0 inside / 1 outside (P285: readable, the
+             * C of func_150AB278's nmD5E90_pointInTri; its edge-sign helper func_150AAC58 is nmD5E90_sign3. The asm
+             * compares against f18, which its only caller func_150AAF00 sets to 0) */
+    v0 = nmD5E90_pointInTri((TriPt *) &F[3].f, (TriPt *) &F[23].f);
+    pc = ra;  goto dispatch;
     s3 = t3 + 9587;
     /* data 0x76202566 */
     /* data 0x20256620 */
     a2 = t3 + 2560;
-L_150AAE80:
-    F[4].f = F[24].f - F[27].f;
-    F[8].f = F[25].f - F[31].f;
-    F[7].f = F[24].f - F[30].f;
-    F[19].f = F[4].f * F[8].f;
-    F[5].f = F[25].f - F[28].f;
-    F[3].f = F[23].f - F[26].f;
-    F[9].f = F[5].f * F[7].f;
-    F[6].f = F[23].f - F[29].f;
-    F[20].f = F[3].f * F[8].f;
-    F[19].f = F[19].f - F[9].f;
-    F[9].f = F[5].f * F[6].f;
-    F[21].f = F[3].f * F[7].f;
-    F[20].f = F[9].f - F[20].f;
-    F[9].f = F[4].f * F[6].f;
-    F[10].f = F[20].f * F[24].f;
-    F[21].f = F[21].f - F[9].f;
-    F[9].f = F[19].f * F[23].f;
-    F[22].f = F[9].f + F[10].f;
-    F[10].f = F[21].f * F[25].f;
-    F[22].f = F[22].f + F[10].f;
-    at = HI((u32) &D_800CC630);
-    SW(at + LO((u32) &D_800CC630), F[19].u);
-    at = HI((u32) &D_800CC634);
-    SW(at + LO((u32) &D_800CC634), F[20].u);
-    at = HI((u32) &D_800CC638);
-    SW(at + LO((u32) &D_800CC638), F[21].u);
-    at = HI((u32) &D_800CC63C);
-    SW(at + LO((u32) &D_800CC63C), F[22].u);
+L_150AAE80: /* triangle_plane(f23-f31) -> normal f19-f21, d f22, also D_800CC630..3C (P285: readable, the C of
+             * func_150AB278's nmD5E90_plane) */
+    nmD5E90_plane((TriPt *) &F[23].f, &F[19].f);
     pc = ra;  goto dispatch;
 L_150AAF00:
     t7 = ra | 0;
@@ -1530,42 +1236,10 @@ L_150AC7B8:
     v0 = LW(sp + 356);
     sp = sp + 616;
     pc = ra;  goto dispatch;
-L_150AC824:
-    t6 = LW(sp + 336);
-    t5 = t0 | 0;
-    t4 = t5 + 8;
-L_150AC830:
-    t3 = LW(t5);
-    t3 = t3 + t6;
-    t1 = LH(t3);
-    t2 = LH(t3 + 2);
-    t3 = LH(t3 + 4);
-    F[0].u = t1;
-    F[1].u = t2;
-    F[2].u = t3;
-    F[0].f = (f32) F[0].i;
-    F[1].f = (f32) F[1].i;
-    F[2].f = (f32) F[2].i;
-    F[0].f = F[0].f - F[20].f;
-    F[1].f = F[1].f - F[21].f;
-    F[2].f = F[2].f - F[22].f;
-    F[3].f = F[0].f * F[19].f;
-    F[4].f = F[2].f * F[18].f;
-    F[5].f = F[0].f * F[18].f;
-    F[6].f = F[2].f * F[19].f;
-    if (t5 == t0) { F[24].f = F[1].f; goto L_150AC8A8; }
-    if (t5 == t4) { F[30].f = F[1].f; goto L_150AC8B8; }
-    F[27].f = F[1].f;
-    F[26].f = F[3].f + F[4].f;
-    F[28].f = F[6].f - F[5].f;
-    t5 = t5 + 4; goto L_150AC830;
-L_150AC8A8:
-    F[23].f = F[3].f + F[4].f;
-    F[25].f = F[6].f - F[5].f;
-    t5 = t5 + 4; goto L_150AC830;
-L_150AC8B8:
-    F[29].f = F[3].f + F[4].f;
-    pc = ra; F[31].f = F[6].f - F[5].f; goto dispatch;
+L_150AC824: /* triangle_to_local(vertex offsets at t0, base sp+0x150, centre f20-f22, sin f18, cos f19) -> f23-f31
+             * (P285: readable, nmw_tri_to_local) */
+    nmw_tri_to_local((u32 *) t0, LW(sp + 336), F[20].f, F[21].f, F[22].f, F[18].f, F[19].f, &F[23].f);
+    pc = ra;  goto dispatch;
 L_150AC8C4:
     t0 = LW(a3 + 32);
     c = (s32) t0 <= 0;  if (c) goto L_150AC8D8;
@@ -1916,21 +1590,11 @@ dispatch:
         if (pc < 0x150AAF40) {
             if (pc < 0x150AAC44) {
                 if (pc < 0x150AABD8) {
-                    if (pc == 0x150AAB50) goto L_150AAB50;
-                    if (pc == 0x150AAB8C) goto L_150AAB8C;
-                    if (pc == 0x150AABAC) goto L_150AABAC;
                 } else {
-                    if (pc == 0x150AABD8) goto L_150AABD8;
-                    if (pc == 0x150AABF8) goto L_150AABF8;
-                    if (pc == 0x150AAC24) goto L_150AAC24;
                 }
             } else {
                 if (pc < 0x150AAE44) {
-                    if (pc == 0x150AAC44) goto L_150AAC44;
-                    if (pc == 0x150AAE04) goto L_150AAE04;
-                    if (pc == 0x150AAE24) goto L_150AAE24;
                 } else {
-                    if (pc == 0x150AAE44) goto L_150AAE44;
                     if (pc == 0x150AAF18) goto L_150AAF18;
                     if (pc == 0x150AAF28) goto L_150AAF28;
                 }

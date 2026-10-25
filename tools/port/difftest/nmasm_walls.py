@@ -10,8 +10,9 @@ area kind 0 / 1 (level) and 3 (records' own models), record kinds 0 / 4 / 0x2C (
 record placed next to real triangles of areas 0 / 1.
 Compared: v0 and all RDRAM except the stacks.
 Run in the container from /conker/conker: python3 ../tools/port/difftest/nmasm_walls.py [N] [seed]
-   [--only ab6d0|ac8c4|ray] [--level 0x21 --rom ../baserom.eu.z64]"""
-import sys, random, struct, os
+   [--only ab6d0|ac8c4|ray] [--level 0x21 --rom ../baserom.eu.z64] [--unit all|aa950,aa9b0,..] (P285: one private
+   helper called directly, see unit())"""
+import sys, random, struct, os, math
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from nmasm_vr import *
 import nmasm_floorsets as FS
@@ -205,6 +206,111 @@ def level_mode(ref, cand, rng, n, levelno, rom, only):
                 if bad <= 6: print('DIFF level', area, t, kind, info)
     return bad, hist
 
+# P285: unit mode (--unit HELPER|all): call one private helper of the wall machine directly. Reference = the asm entry
+# with the registers set; candidate = nmw_unit(entry, io) in the NM build (D5E90.c), io = f0..f31 then the GPRs in
+# NMW_IO_GPRS order. Inputs come half from a small pool of exact values (0, -0, halves, small integers: sums and
+# differences coincide, so the `>` / `<` boundaries and equal coordinates are hit), half random. No NaN / inf.
+# Compared: memory, and each helper's outputs (v0, plus the registers listed; the helpers' scratch FPRs are not
+# outputs: their callers overwrite them).
+IO = 0x80670000
+IOG = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 24, 25, 16, 17, 18, 19, 20, 21, 22, 23, 28, 30]
+POOL = [0.0, -0.0, 0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0, -2.0, 3.0, -3.0, 4.0, -4.0, 5.0, -5.0, 6.0, -6.0, 7.0, -7.0,
+        10.0, -10.0, 0.25, -0.25]
+# helper: (fprs set, gprs set {reg: kind}, outputs: ('v0' | 'f<n>' | '<gpr no>'), description)
+UNIT = {
+    'aa950': (0x150AA950, list(range(0, 6)), {}, ['v0'], 'box outcode'),
+    'aa9b0': (0x150AA9B0, list(range(0, 6)), {}, ['v0'], 'box edge outcode'),
+    'aaa88': (0x150AAA88, list(range(0, 6)), {}, ['v0'], 'box corner outcode'),
+    'aab58': (0x150AAB58, list(range(0, 12)), {3: 'mask6'}, ['v0'], 'segment vs box faces'),
+    'aacf4': (0x150AACF4, [3, 4, 5] + list(range(23, 32)), {}, ['v0'], 'point in triangle'),
+    'aae80': (0x150AAE80, list(range(23, 32)), {}, ['f19', 'f20', 'f21', 'f22'], 'triangle plane'),
+    'ac824': (0x150AC824, list(range(18, 23)), {8: 'tri'}, ['f%d' % k for k in range(23, 32)], 'triangle to local'),
+    'aaf00': (0x150AAF00, list(range(0, 3)) + list(range(23, 32)), {}, ['v0'], 'triangle vs box'),
+}
+
+def unit_val(rng, k, pooled):
+    if k in (0, 1, 2):                                         # box half extents: >= 0
+        return abs(rng.choice(POOL)) if pooled else rng.choice([rng.uniform(0, 60), float(rng.randint(0, 40))])
+    if k == 12 and pooled: return rng.choice([1.0, 0.5, 0.0, 2.0, 0.25])
+    if k == 18 and pooled: return rng.choice([0.0, 0.0, -0.0, 1.0, -1.0])
+    return rng.choice(POOL) if pooled else rng.choice([rng.uniform(-80, 80), float(rng.randint(-60, 60)),
+                                                       rng.uniform(-1, 1)])
+
+def unit(ref, cand, base, rng, n, which):
+    names = sorted(UNIT) if which == 'all' else which.split(',')
+    bad = 0; hist = {}
+    for t in range(n):
+        nm = names[t % len(names)]
+        entry, fl, gl, outs, _ = UNIT[nm]
+        pooled = rng.random() < 0.5
+        fv = {k: b32(unit_val(rng, k, pooled)) for k in fl}
+        if nm == 'aab58' or nm == 'aac58' or nm == 'aaf00':     # sometimes an exact copy of one point in another
+            if rng.random() < 0.3:
+                src = rng.choice([3, 6, 9, 23, 26, 29]); dst = rng.choice([3, 6, 9, 23, 26, 29])
+                for d in range(3):
+                    if src + d in fv and dst + d in fv: fv[dst + d] = fv[src + d]
+        if nm in ('aa950', 'aa9b0', 'aaa88') and pooled and rng.random() < 0.6:   # the point exactly on a face /
+            ax = rng.sample([0, 1, 2], rng.choice([1, 2, 2, 3, 3]))                  # edge / corner plane
+            sg = [rng.choice([1, -1]) for _ in ax]
+            e = sum(f32(fv[i]) for i in ax) - sum(sg[j] * f32(fv[3 + ax[j]]) for j in range(len(ax) - 1))
+            fv[3 + ax[-1]] = b32(sg[-1] * e)
+        if nm == 'aacf4' and rng.random() < 0.7:                # the point on the triangle: a vertex, an edge
+            vv = [[f32(fv[23 + 3 * i + d]) for d in range(3)] for i in range(3)]   # midpoint or an inner point
+            w = rng.choice([(1, 0, 0), (0.5, 0.5, 0), (0, 0.5, 0.5), (0.25, 0.25, 0.5), (0.5, 0.25, 0.25)])
+            w = rng.sample(w, 3)
+            for d in range(3): fv[3 + d] = b32(sum(w[i] * vv[i][d] for i in range(3)))
+        if nm == 'aacf4' and pooled and rng.random() < 0.5:     # a small triangle: edge cross products of +-1
+            for k in range(23, 32): fv[k] = b32(rng.choice([0.0, 0.5, -0.5, 1.0, -1.0, 2.0, -2.0, 1.5]))
+            for k in (3, 4, 5): fv[k] = b32(rng.choice([0.0, 0.5, -0.5, 1.0, -1.0, 0.25]))
+        gv = {}
+        for r, kind in gl.items():
+            if kind == 'tri': gv[r] = IO + 0x400; continue
+            gv[r] = rng.choice([rng.getrandbits(6), rng.choice([1, 2, 3, 4, 8, 12, 0x30, 0x3F, 0])]) if kind == 'mask6' \
+                else rng.choice([7, 7, rng.getrandbits(3)])
+        if nm == 'aab58' and rng.random() < 0.6:                 # as the caller: a crossing segment, diff = the
+            box = [f32(fv[i]) for i in range(3)]                  # end points' outcode bits
+            for k in range(6, 12):
+                h = box[(k - 6) % 3] + 0.001
+                fv[k] = b32(rng.choice([rng.uniform(-1.5 * h, 1.5 * h), rng.uniform(-3 * h, 3 * h), rng.choice([h, -h])]))
+            oc = lambda q: sum(b for b, c in ((1, q[0] > box[0]), (2, q[0] < -box[0]), (4, q[1] > box[1]),
+                                              (8, q[1] < -box[1]), (16, q[2] > box[2]), (32, q[2] < -box[2])) if c)
+            gv[3] = oc([f32(fv[6 + d]) for d in range(3)]) | oc([f32(fv[9 + d]) for d in range(3)])
+        m = bytearray(base)
+        if nm == 'aacf4' and rng.random() < 0.5: W(m, SY['D_8009FAB0'], 'f', rng.choice([0.0, 1.0, 0.5, 2.0]))
+        if nm == 'aaf00':
+            for i, a in enumerate(('D_800CC64C', 'D_800CC650', 'D_800CC654')): W(m, SY[a], 'I', fv[i])
+        frame = [0] * (0x268 // 4)
+        if nm == 'ac824':                                       # 3 vertex offsets at t0, vertex base at sp+0x150
+            vb = 0x80660000 + 8 * rng.randrange(0x100); frame[0x150 // 4] = vb
+            W(m, IO + 0x400, '3I', *[0x18 * rng.randrange(8) + 6 * rng.randrange(3) for _ in range(3)])
+            for k in range(0x60): W(m, vb + 2 * k, 'h', rng.choice([rng.randint(-32768, 32767), rng.randint(-50, 50)]))
+            if pooled:
+                for k in (18, 19): fv[k] = b32(rng.choice([0.0, 1.0, -1.0, 0.5, -0.5, 0.70710677]))
+            else:
+                a = rng.uniform(-7, 7); fv[18] = b32(math.sin(a)); fv[19] = b32(math.cos(a))
+        m1, m2 = bytearray(m), bytearray(m)
+        for k, w in enumerate(frame): W(m1, SP0 + 4 * k, 'I', w)
+        r1 = ref.run(m1, fa=fv, regs=dict(gv), entry=entry, maxi=200000)
+        for k, w in enumerate(frame): W(m1, SP0 + 4 * k, 'I', 0)
+        io = [fv.get(k, 0) for k in range(32)] + [gv.get(r, 0) for r in IOG] + frame
+        m2[phys(IO):phys(IO) + 4 * len(io)] = struct.pack('>%dI' % len(io), *io)
+        r2 = cand.run(m2, a=(entry, IO), entry='nmw_unit')
+        io2 = list(struct.unpack('>%dI' % len(io), bytes(m2[phys(IO):phys(IO) + 4 * len(io)])))
+        m2[phys(IO):phys(IO) + 4 * len(io)] = m[phys(IO):phys(IO) + 4 * len(io)]
+        o1, o2 = [], []
+        for o in outs:
+            if o == 'v0': o1.append(r1['v0']); o2.append(r2['v0'] & M32)
+            elif isinstance(o, str): o1.append(r1['fpr'][int(o[1:])]); o2.append(io2[int(o[1:])])
+            else: o1.append(r1['gpr'][o] & M32); o2.append(io2[32 + IOG.index(o)])
+        d = memdiff(m1, m2, skip=[(SP0 - 0x4000, SP0 + 0x100), (SCR, SCR + 0x100)])
+        key = '%s:%s' % (nm, o1[0] if o1[0] < 0x10000 else 'val')
+        hist[key] = hist.get(key, 0) + 1
+        if o1 != o2 or d:
+            bad += 1
+            if bad <= 8: print('DIFF unit', t, nm, 'in', {k: hex(v) for k, v in fv.items()}, gv,
+                                'ref', [hex(q) for q in o1], 'cand', [hex(q) for q in o2], [hex(q) for q in d[:4]])
+    return bad, hist
+
 def patch_libm(ref, cand, fns=('sinf', 'cosf', 'func_150484A0', 'func_15048360')):
     """some NM-build callees read tables / literals at addresses that only exist in the NM data layout, which the
     candidate does not have (it runs on the reference's data image): sinf / cosf (libultra C) and func_150484A0
@@ -237,7 +343,9 @@ def main():
     rng = random.Random(int(pos[1]) if len(pos) > 1 else 1)
     ref, cand = Ref(), Cand()
     patch_libm(ref, cand)
-    if 'level' in opts:
+    if 'unit' in opts:
+        bad, hist = unit(ref, cand, base_image(), rng, n, opts['unit'])
+    elif 'level' in opts:
         bad, hist = level_mode(ref, cand, rng, n, int(opts['level'], 0), opts.get('rom', '../baserom.eu.z64'),
                                opts.get('only'))
     else:

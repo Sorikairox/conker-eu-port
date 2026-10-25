@@ -385,6 +385,116 @@ static s32 nmw_box_outcode(f32 x, f32 y, f32 z, f32 hx, f32 hy, f32 hz) {
     return code;
 }
 
+/* box_edge_outcode (func_150AA9B0): one bit per edge plane of the box (the 12 planes |a| + |b| = ha + hb of the
+ * axis pairs xy, xz, yz) the point lies beyond: per pair a + b, a - b, -(a + b), -(a - b) give bits 1, 2, 8, 4
+ * (xy), 0x10, 0x20, 0x80, 0x40 (xz), 0x100, 0x200, 0x800, 0x400 (yz) */
+static s32 nmw_box_edge_outcode(f32 x, f32 y, f32 z, f32 hx, f32 hy, f32 hz) {
+    s32 code = 0;
+    f32 e, s, d;
+
+    e = hx + hy;
+    s = x + y;
+    d = x - y;
+    if (s > e) code |= 1;
+    if (d > e) code |= 2;
+    if (-s > e) code |= 8;
+    if (-d > e) code |= 4;
+    e = hx + hz;
+    s = x + z;
+    d = x - z;
+    if (s > e) code |= 0x10;
+    if (d > e) code |= 0x20;
+    if (-s > e) code |= 0x80;
+    if (-d > e) code |= 0x40;
+    e = hy + hz;
+    s = y + z;
+    d = y - z;
+    if (s > e) code |= 0x100;
+    if (d > e) code |= 0x200;
+    if (-s > e) code |= 0x800;
+    if (-d > e) code |= 0x400;
+    return code;
+}
+
+/* box_corner_outcode (func_150AAA88): one bit per corner plane of the box (|x| + |y| + |z| = hx + hy + hz):
+ * x + y + z, x + y - z, x - y + z, x - y - z give bits 1, 2, 4, 8, their negations 0x80, 0x40, 0x20, 0x10 */
+static s32 nmw_box_corner_outcode(f32 x, f32 y, f32 z, f32 hx, f32 hy, f32 hz) {
+    s32 code = 0;
+    f32 e, a, b, c, d;
+
+    e = hx + hy + hz;
+    a = x + y + z;
+    b = x + y - z;
+    c = x - y + z;
+    d = x - y - z;
+    if (a > e) code |= 1;
+    if (b > e) code |= 2;
+    if (c > e) code |= 4;
+    if (d > e) code |= 8;
+    if (-a > e) code |= 0x80;
+    if (-b > e) code |= 0x40;
+    if (-c > e) code |= 0x20;
+    if (-d > e) code |= 0x10;
+    return code;
+}
+
+
+/* lerp_outcode (func_150AAB24): box_outcode of the point b + (a - b) * t, masked */
+static s32 nmw_lerp_outcode(f32 *a, f32 *b, f32 t, f32 hx, f32 hy, f32 hz, s32 mask) {
+    f32 x = (a[0] - b[0]) * t + b[0];
+    f32 y = (a[1] - b[1]) * t + b[1];
+    f32 z = (a[2] - b[2]) * t + b[2];
+
+    return nmw_box_outcode(x, y, z, hx, hy, hz) & mask;
+}
+
+/* segment_misses_box (func_150AAB58): 0 if the segment a-b crosses one of the box faces named in diff (the end
+ * points' outcode bits 1 / 2 = +x / -x .. 0x10 / 0x20 = +z / -z) at a point inside all the other face planes, else 1 */
+static s32 nmw_segment_misses_box(f32 *a, f32 *b, s32 diff, f32 hx, f32 hy, f32 hz) {
+    f32 inv;
+
+    if (diff & 3) {
+        inv = 1.0f / (a[0] - b[0]);
+        if ((diff & 1) && nmw_lerp_outcode(a, b, (hx - b[0]) * inv, hx, hy, hz, 0x3E) == 0) return 0;
+        if ((diff & 2) && nmw_lerp_outcode(a, b, -(hx + b[0]) * inv, hx, hy, hz, 0x3D) == 0) return 0;
+    }
+    if (diff & 0xC) {
+        inv = 1.0f / (a[1] - b[1]);
+        if ((diff & 4) && nmw_lerp_outcode(a, b, (hy - b[1]) * inv, hx, hy, hz, 0x3B) == 0) return 0;
+        if ((diff & 8) && nmw_lerp_outcode(a, b, -(hy + b[1]) * inv, hx, hy, hz, 0x37) == 0) return 0;
+    }
+    if (diff & 0x30) {
+        inv = 1.0f / (a[2] - b[2]);
+        if ((diff & 0x10) && nmw_lerp_outcode(a, b, (hz - b[2]) * inv, hx, hy, hz, 0x2F) == 0) return 0;
+        if ((diff & 0x20) && nmw_lerp_outcode(a, b, -(hz + b[2]) * inv, hx, hy, hz, 0x1F) == 0) return 0;
+    }
+    return 1;
+}
+
+/* triangle_to_local (func_150AC824): the triangle whose 3 vertex offsets (from base) are at tri (s16 x, y, z each),
+ * relative to the centre (cx, cy, cz) and turned by the heading (sine si, cosine co) about y:
+ * x' = dx co + dz si, y' = dy, z' = dz co - dx si; out = the 9 floats (f23-f31 in the asm) */
+static void nmw_tri_to_local(u32 *tri, u32 base, f32 cx, f32 cy, f32 cz, f32 si, f32 co, f32 *out) {
+    s32 i;
+    s16 *v;
+    f32 dx, dy, dz;
+
+    for (i = 0; i < 3; i++) {
+        v = (s16 *) (tri[i] + base);
+        dx = (f32) v[0] - cx;
+        dy = (f32) v[1] - cy;
+        dz = (f32) v[2] - cz;
+        out[3 * i + 0] = dx * co + dz * si;
+        out[3 * i + 1] = dy;
+        out[3 * i + 2] = dz * co - dx * si;
+    }
+}
+
+/* P285: the GPRs nmw_unit passes in / out, in io order (io[32] = v0 .. io[57] = fp) */
+#define NMW_IO_GPRS(X) X(v0) X(v1) X(a0) X(a1) X(a2) X(a3) X(t0) X(t1) X(t2) X(t3) X(t4) X(t5) X(t6) X(t7) \
+    X(t8) X(t9) X(s0) X(s1) X(s2) X(s3) X(s4) X(s5) X(s6) X(s7) X(gp) X(fp)
+#define NMW_IO_LOAD(r) r = io[k_++];
+#define NMW_IO_STORE(r) io[k_++] = r;
 
 /* the register file and frame of one machine run */
 #define NMW_REGS                                                                                         \
@@ -396,12 +506,34 @@ static s32 nmw_box_outcode(f32 x, f32 y, f32 z, f32 hx, f32 hy, f32 hz) {
 
 /* f12 / f14 = target x / y, a2 = target z (float bits; the callers' prototype is (f32, f32, s32, u8 *, s32)), a3 = record, stack word 0x10 = mark touched objects.
  * Returns 1 if a wall moved the record (rec+0x14..0x1C written back). */
-static s32 nmw_walls(u32 entry, f32 x, f32 y, u32 zbits, u32 rec, s32 mark) {
+static s32 nmw_walls(u32 entry, f32 x, f32 y, u32 zbits, u32 rec, s32 mark, u32 *io) {
     NMW_REGS;
     u32 stk[(0x268 + 0x20) / 4];
 
     for (k_ = 0; k_ < 32; k_++) {
         F[k_].u = 0;
+    }
+    if (io != NULL) { /* nmw_unit: one private helper with the registers from io, inside the engine's frame */
+        sp = (u32) stk;
+        for (k_ = 0; k_ < 32; k_++) {
+            F[k_].u = io[k_];
+        }
+        k_ = 32;
+        NMW_IO_GPRS(NMW_IO_LOAD)
+        for (k_ = 0; k_ < 0x268 / 4; k_++) { /* io[58..]: the frame words sp+0 .. sp+0x264 */
+            SW(sp + 4 * k_, io[58 + k_]);
+        }
+        switch (entry) {
+            case 0x150AA950: goto L_150AA950;
+            case 0x150AA9B0: goto L_150AA9B0;
+            case 0x150AAA88: goto L_150AAA88;
+            case 0x150AAB58: goto L_150AAB58;
+            case 0x150AACF4: goto L_150AACF4;
+            case 0x150AAE80: goto L_150AAE80;
+            case 0x150AAF00: goto L_150AAF00;
+            case 0x150AC824: goto L_150AC824;
+        }
+        return 0xBAD00000 | (entry & 0xFFFFF);
     }
     sp = (u32) stk + 0x268;
     SW(sp + 0x10, mark);
@@ -415,16 +547,30 @@ static s32 nmw_walls(u32 entry, f32 x, f32 y, u32 zbits, u32 rec, s32 mark) {
 bad: /* a code address the translation does not know: cannot happen */
     return 0xBAD00000 | (pc & 0xFFFFF);
 done:
+    if (io != NULL) {
+        for (k_ = 0; k_ < 32; k_++) {
+            io[k_] = F[k_].u;
+        }
+        k_ = 32;
+        NMW_IO_GPRS(NMW_IO_STORE)
+    }
     return v0;
 }
 
+/* P285: test entry for tools/port/difftest/nmasm_walls.py --unit (NM build only): runs the private wall helper at
+ * `entry` (an asm address, see the switch in nmw_walls) with io[0..31] = f0..f31, io[32..57] = the GPRs in
+ * NMW_IO_GPRS order and io[58..211] = the frame words sp+0..0x264 (in only), then writes the registers back to io. Returns v0. */
+s32 nmw_unit(u32 entry, u32 *io) {
+    return nmw_walls(entry, 0.0f, 0.0f, 0, 0, 0, io);
+}
+
 s32 func_150AB6D0(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
-    return nmw_walls(0x150AB6D0, x, y, zbits, (u32) rec, mark);
+    return nmw_walls(0x150AB6D0, x, y, zbits, (u32) rec, mark, NULL);
 }
 
 /* returns at once (v0 = 0 here, the caller's v0 in the asm) if rec+0x20 > 0 */
 s32 func_150AC8C4(f32 x, f32 y, s32 zbits, u8 *rec, s32 mark) {
-    return nmw_walls(0x150AC8C4, x, y, zbits, (u32) rec, mark);
+    return nmw_walls(0x150AC8C4, x, y, zbits, (u32) rec, mark, NULL);
 }
 
 /* ray cast: o32 arguments (f12, f14, a2, a3, then the stack words 0x10..0x38 of the caller) */
