@@ -76,3 +76,4 @@ session	slot	slice	funcs_added	bytes_added	tool_calls	key_result
 167	main	game>=0x15190000	0	0		interrupted by weekly usage limit; func_151B99B8 OK draft found but not applied
 172	wt	game 0x15130000-0x1518FFFF+dbg	6			interrupted by usage limit after committing 6 near-miss matches
 P73	port-b	port NM C (151BF8F0, 1501D348, 1509A024)	3	0	130	difftest build_tu fix (multi-function NM blocks tested the src_eu body); 3 stubs in hand C, verify_all OK
+P269	port-web	user crash level 6 (type-77 trail)	0	0	~110	culprit func_151D7FE8 (204F70) f32* + 0xC vel pointer; fix difftest EQUIV + browser 0 traps past 18969 (temp edit, not committed); det repro; 4 stride leads

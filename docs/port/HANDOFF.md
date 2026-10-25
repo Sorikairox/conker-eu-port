@@ -10,6 +10,25 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P269 (port-web) (session P269, 2026-10-25). Details: `docs/port/sessions/P269.md`
+- User crash ("Em, this way I suppose") SOLVED: **func_151D7FE8** (game_eu_204F70, owner **port**, P17 m2c body) passes
+  `temp_a0 + 0xC` with `f32 *temp_a0` as the velocity pointer to func_151D8CC8 = entry + 0x30 bytes (asm: +0xC). For
+  ring entry 24 that stores f32 0.70 at node + 0x390 = the next node's list link -> wasm trap at retrace 18969.
+- Fix (not committed here, game C): `func_151D8CC8(temp_a0, (f32 *) ((u8 *) temp_a0 + 0xC), var_f22);`
+  (docs/port/sessions/p269/fix_151D7FE8.patch). difftest old DIFFER (a1 +0x24) / fixed EQUIV. Browser with the fix as
+  a temporary edit: past 18969 to retrace 40325 (levels 6 -> 18 -> 29), 0 traps.
+- Deterministic repro: `docs/port/sessions/p269/run.sh DIR 300 8000,4000 100 "&p268nodes=2&det=1&timer=2"` (traps at
+  18969 without the fix). `?p268nodes=2` = cheap type-77 overrun watch (+ wraps of func_151D7EDC/7FE8/8280).
+- port/build/vbe.stamp was deleted after reverting the temporary edit: rebuild before the next browser run.
+
+## Next steps (from P269)
+1. port: apply the func_151D7FE8 fix + registry row (setup with a ring object; the P269 difftest used random/learned
+   pointers only). Then port-web merges and the user's play build gets it.
+2. Same bug class (typed `s16 *` vertex pointer `+ 0x10` = 0x20 bytes, asm 0x10), unverified leads:
+   func_150D4810 (101080, port-b), func_151C3080 (1EFE10, port), func_1519CADC (1C3530, port-b),
+   func_151CE3D0 (1FB080, port-b). Extend port/tools/m2c_sanity.py with "typed pointer + hex offset" and sweep.
+3. Milk glass / Berri's glove: still open (P268 next step 2).
+
 ## P268 (port-web) (session P268, 2026-10-25). Details: `docs/port/sessions/P268.md`
 - User crash ("Em, this way I suppose") reproduced at retrace 18970 (level 6) with button taps, no det. Cause: list corruption
   in D_800DD280 — the update of a **type 77 node** (func_15147CB0 -> one of its behaviours D_8008A5A0 / A5DC / A624) writes an

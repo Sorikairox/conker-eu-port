@@ -76,6 +76,26 @@ void __wrap_func_151670C0(void) {
             while (node) {
                 unsigned *cur = (unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4);
                 *cur = W((const unsigned char *)(uintptr_t)node, 8);
+                if (on == 2 && j == 77) {   /* P269 ?p268nodes=2: cheap mode, only type-77 nodes, watch the 0x20 bytes past the block */
+                    const unsigned char *q = (const unsigned char *)(uintptr_t)node;
+                    unsigned sz = W(q - 0xC, 8) & 0xFFFFFF, k, before[8];
+                    static unsigned seen[64]; static int nseen, nhit;
+                    unsigned key = sz << 8 ^ vbe_ld8(q + 0x2F) << 16 ^ vbe_ld8(q + 0x30) << 4 ^ (vbe_ld8(q + 0x24) & 0xF) ^ (unsigned)(*(unsigned short *)((uintptr_t)(q + 0x1E) ^ 2)) << 24;
+                    for (k = 0; k < (unsigned)nseen && seen[k] != key; k++) ;
+                    if (k == (unsigned)nseen && nseen < 64) { seen[nseen++] = key;
+                        port_log("[p269] type77 frame %u node %08X size %X +1E %04X +24 %d +2F %d +30 %d +31 %d +25 %d\n", port_frame_count, node, sz,
+                                 *(unsigned short *)((uintptr_t)(q + 0x1E) ^ 2), (signed char)vbe_ld8(q + 0x24), vbe_ld8(q + 0x2F), vbe_ld8(q + 0x30), vbe_ld8(q + 0x31), vbe_ld8(q + 0x25)); }
+                    for (k = 0; k < 8; k++) before[k] = W(q, sz + k * 4);
+                    fn((void *)(uintptr_t)node);
+                    for (k = 0; k < 8; k++) if (W(q, sz + k * 4) != before[k] && nhit++ < 20) {
+                        port_log("[p269] OVERRUN frame %u node %08X size %X: +%X %08X -> %08X | +1E %04X +24 %d +2F %d +30 %d +2C %d +2D %d +2E %d +25 %d\n", port_frame_count, node, sz,
+                                 sz + k * 4, before[k], W(q, sz + k * 4), *(unsigned short *)((uintptr_t)(q + 0x1E) ^ 2), (signed char)vbe_ld8(q + 0x24),
+                                 vbe_ld8(q + 0x2F), vbe_ld8(q + 0x30), (signed char)vbe_ld8(q + 0x2C), (signed char)vbe_ld8(q + 0x2D), (signed char)vbe_ld8(q + 0x2E), vbe_ld8(q + 0x25));
+                        dump("handled", node); dump("handled+80", node + 0x80); dump("handled+98", W(q, 0x98)); dump("handled+94", W(q, 0x94)); }
+                    node = *(unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4);
+                    continue;
+                }
+                if (on == 2) { fn((void *)(uintptr_t)node); node = *(unsigned *)(D_800DD5C8_ + D_800DD5C0 * 4); continue; }
                 fn((void *)(uintptr_t)node);
                 if (!logged && check("after handler")) { const unsigned char *q = (const unsigned char *)(uintptr_t)node;
                     port_log("[p268]   handler of type %d (group %d) on node %08X: +1E %04X +24 %d +2F %d +30 %d +20 %08X\n", j, i, node,
@@ -92,3 +112,25 @@ void *__wrap_func_151674F8(void *gdl, int group, short a2, int list) {
     if (on) check("before draw");
     return __real_func_151674F8(gdl, group, a2, list);
 }
+
+/* P269 DIAGNOSTIC (?p268nodes=2): the three behaviours of the type-77 trail nodes of func_151D7DE0 (game_eu_204F70),
+ * each checked for writes past the node's heap block (8 words from the block end), with the ring state before. */
+static void p269_beh(const char *name, int (*real)(void *), int *ret, unsigned char *q) {
+    unsigned sz = W(q - 0xC, 8) & 0xFFFFFF, k, before[8];
+    signed char c = vbe_ld8(q + 0x2C), o = vbe_ld8(q + 0x2D), h = vbe_ld8(q + 0x2E);
+    static int nhit;
+    for (k = 0; k < 8; k++) before[k] = W(q, sz + k * 4);
+    *ret = real(q);
+    if (on != 2) return;
+    for (k = 0; k < 8; k++) if (W(q, sz + k * 4) != before[k] && nhit++ < 20) {
+        port_log("[p269] %s wrote past node %08X (size %X): +%X %08X -> %08X | before +2C %d +2D %d +2E %d, after +2C %d +2D %d +2E %d, +25 %d +1E %04X ret %d\n",
+                 name, (unsigned)(uintptr_t)q, sz, sz + k * 4, before[k], W(q, sz + k * 4), c, o, h, (signed char)vbe_ld8(q + 0x2C),
+                 (signed char)vbe_ld8(q + 0x2D), (signed char)vbe_ld8(q + 0x2E), vbe_ld8(q + 0x25), *(unsigned short *)((uintptr_t)(q + 0x1E) ^ 2), *ret);
+        dump("ring", W(q, 0x94)); dump("state", W(q, 0x98));
+        port_js_stack(1, 6);
+    }
+}
+int __real_func_151D7EDC(void *); int __real_func_151D7FE8(void *); int __real_func_151D8280(void *);
+int __wrap_func_151D7EDC(void *o) { int r; p269_beh("func_151D7EDC", __real_func_151D7EDC, &r, o); return r; }
+int __wrap_func_151D7FE8(void *o) { int r; p269_beh("func_151D7FE8", __real_func_151D7FE8, &r, o); return r; }
+int __wrap_func_151D8280(void *o) { int r; p269_beh("func_151D8280", __real_func_151D8280, &r, o); return r; }
