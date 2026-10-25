@@ -6,7 +6,59 @@ extern u8 D_800A5860[];
 #endif
 
 
+#ifdef NON_MATCHING
+s32 func_150ACEA0(f32, f32, f32, f32, f32, f32, s32, void *, f32 *, f32 *, f32 *, f32 *, s32, s32, f32);
+extern f32 D_800A0CC0[6][3];  /* beam end points (beam space) */
+
+// beam_rays_update: obj + 0x28 is the source point, +0x34 the beam position (moved by its velocity +0x40 x
+// D_800BE9A4), +0x4C six ray parts. While obj + 0x6C bit 0 is set, each ray's end D_800A0CC0[i] is moved to the
+// beam's position (func_150A8050 / func_150A7E40) and traced from the source (func_150ACEA0): on a hit the part's
+// sprite (+0x14) is shown at the hit point with alpha +0x64 x hit fraction, otherwise it is hidden. Without the bit
+// every ray sprite is hidden.
+void func_150D2140(u8 *obj) {
+    f32 mtx[4][4];
+    f32 end[3];
+    f32 hit[3];
+    f32 frac;
+    u8 *part;
+    u8 *sprite;
+    s32 i;
+
+    if (obj[0x6C] & 1) {
+        *(f32 *) (obj + 0x34) += *(f32 *) (obj + 0x40) * D_800BE9A4;
+        *(f32 *) (obj + 0x38) += *(f32 *) (obj + 0x44) * D_800BE9A4;
+        *(f32 *) (obj + 0x3C) += *(f32 *) (obj + 0x48) * D_800BE9A4;
+        func_150A8050(mtx, *(f32 *) (obj + 0x34), *(f32 *) (obj + 0x38), *(f32 *) (obj + 0x3C));
+        for (i = 0; i < 6; i++) {
+            part = ((u8 **) (obj + 0x4C))[i];
+            if (part == NULL) {
+                continue;
+            }
+            func_150A7E40(mtx, D_800A0CC0[i][0], D_800A0CC0[i][1], D_800A0CC0[i][2], &end[0], &end[1], &end[2]);
+            if (func_150ACEA0(*(f32 *) (obj + 0x28), *(f32 *) (obj + 0x2C), *(f32 *) (obj + 0x30), end[0], end[1],
+                              end[2], 0, NULL, &hit[0], &hit[1], &hit[2], &frac, 0, 0, 0.0f) != 0) {
+                (*(u8 **) (part + 0x14))[9] = 0;
+                *(s16 *) (*(u8 **) (part + 0x14) + 0xE) = (s32) hit[0];
+                *(s16 *) (*(u8 **) (part + 0x14) + 0x10) = (s32) hit[1];
+                *(s16 *) (*(u8 **) (part + 0x14) + 0x12) = (s32) hit[2];
+                (*(u8 **) (part + 0x14))[0x2F] = (u32) (*(f32 *) (obj + 0x64) * frac);
+            } else {
+                (*(u8 **) (part + 0x14))[9] = 1;
+            }
+        }
+    } else {
+        for (i = 0; i < 6; i++) {
+            part = ((u8 **) (obj + 0x4C))[i];
+            if (part != NULL) {
+                sprite = *(u8 **) (part + 0x14);
+                sprite[9] = 1;
+            }
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_FF950/func_150D2140.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_150D247C(struct102 *arg0, u8 *arg1, s32 arg2) {

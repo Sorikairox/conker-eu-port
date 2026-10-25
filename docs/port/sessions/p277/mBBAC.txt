@@ -1,0 +1,38 @@
+\#^    blk.alphaA = 255.0f;$#s/255.0f/254.0f/
+\#^    blk.alphaB = 255.0f;$#d
+\#^    blk.type = type;$#s/type;/wide;/
+\#^    blk.owner = obj;$#s/obj;/NULL;/
+\#^    blk.mode = (arg3 == -1) ? 0 : 4;$#s/== -1/== 0/
+\#^    blk.mode = (arg3 == -1) ? 0 : 4;$#s/0 : 4/4 : 0/
+\#^    blk.u54 = arg3;$#d
+\#^    blk.u14 = 255.0f;$#s/255.0f/0.0f/
+\#^    spec.span = 300;$#s/300/301/
+\#^    spec.scaleA = 49.0f;$#s/49.0f/18.0f/
+\#^    blk.u10 = 0.0f;$#s/0.0f/1.0f/
+\#^    spec.flags = (wide ? 0x40 : 0) | 0x32 | (1 << (obj\[0x23D\] + 11));$#s/0x40 : 0/0 : 0x40/
+\#^    spec.flags = (wide ? 0x40 : 0) | 0x32 | (1 << (obj\[0x23D\] + 11));$#s/+ 11/+ 12/
+\#^    spec.flags = (wide ? 0x40 : 0) | 0x32 | (1 << (obj\[0x23D\] + 11));$#s/0x32/0x30/
+\#^    spec.u1A = 7;$#s/7/6/
+\#^    spec.u16 = 1;$#s/1;/0;/
+\#^    spec.col\[5\] = 0xFF;$#s/0xFF/0xFE/
+\#^    spec.u18 = 0xFF;$#s/0xFF/-1/
+\#^    spec.col\[8\] = 0xFF;$#d
+\#^    spec.u28 = 0x200004;$#s/0x200004/0x200005/
+\#^    spec.u2C = 0x1F0601;$#s/0x1F0601/0x1F0600/
+\#^    spec.u34 = 0x22;$#s/0x22/0x20/
+\#^    spec.u41 = 7;$#s/7/8/
+\#^    spec.player = obj\[0x23D\];$#s/0x23D/0x23C/
+\#^    blk.side = 0;$#d
+\#^    spec.kind = 0x7B;$#s/0x7B/0x7A/
+\#^    blk.u1C = 0.0f;$#s/0.0f/1.0f/
+\#^    spec.x = 88.0f;$#s/88.0f/-88.0f/
+\#^    spec.y = 91.0f;$#s/91.0f/90.0f/
+\#^    blk.u18 = D_800AB164\[D_80082FA0 == 1\];$#s/== 1/!= 1/
+\#^    blk.u20 = D_800AB18C\[D_80082FA0 == 1\];$#s/D_800AB18C/D_800AB164/
+\#^    spec.col\[3\] = 0;$#s/0;/1;/
+\#^    spec.kind = 0x7C;$#s/0x7C/0x7B/
+\#^    spec.flags &= ~2;$#s/~2/~4/
+\#^    blk.side = 1;$#s/1;/2;/
+\#^    spec.x = -88.0f;$#s/-88.0f/88.0f/
+\#^        memcpy(rec + 0x70, &blk, 0x58);$#s/0x70/0x74/
+\#^        memcpy(rec + 0x70, &blk, 0x58);$#s/0x58/0x54/

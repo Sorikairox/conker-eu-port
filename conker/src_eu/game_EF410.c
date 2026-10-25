@@ -4,9 +4,171 @@
 #include "variables.h"
 
 
-#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
+/* func_151506E8's spec (S06E8 in game_2062D0) */
+typedef struct {
+    s16 u0[4];
+    f32 u8;
+    f32 uC;
+    f32 u10;
+    s16 u14;
+    s16 u16;
+    f32 u18;
+    f32 u1C;
+    s16 u20;
+    s16 u22;
+    f32 u24;
+    f32 u28;
+    u8 u2C;
+    u8 u2D;
+    f32 u30;
+    f32 u34;
+    u8 u38;
+    u8 u39;
+    f32 u3C;
+    u8 u40;
+    f32 u44;
+} S2700;
+s32 func_151506E8(S2700 *, f32 *, s32, u8, s32);
+
 #ifdef NON_MATCHING
 void func_15151FA8(u8 *arg0, s32 arg1, s32 arg2);
+
+/* func_15151FA8's smoke spec (layout as func_150C2290's) */
+typedef struct {
+    /* 0x00 */ struct17 pos;
+    /* 0x0C */ f32 u0C;
+    /* 0x10 */ f32 u10;
+    /* 0x14 */ f32 u14;
+    /* 0x18 */ f32 u18;
+    /* 0x1C */ f32 u1C;
+    /* 0x20 */ f32 u20;
+    /* 0x24 */ s16 u24[10];
+    /* 0x38 */ u8 u38;
+    /* 0x39 */ u8 u39;
+    /* 0x3A */ u8 u3A;
+    /* 0x3C */ s32 u3C;
+    /* 0x40 */ s32 u40;
+    /* 0x44 */ s32 u44[4];
+    /* 0x54 */ u8 u54;
+    /* 0x55 */ u8 u55;
+    /* 0x56 */ u8 u56;
+    /* 0x58 */ s32 u58;
+    /* 0x5C */ s32 u5C;
+    /* 0x60 */ s32 u60;
+    /* 0x64 */ s32 u64;
+    /* 0x68 */ s32 u68;
+    /* 0x6C */ s32 u6C;
+    /* 0x70 */ s32 u70;
+    /* 0x74 */ s32 u74;
+    /* 0x78 */ s32 u78;
+    /* 0x7C */ u8 u7C;
+    /* 0x7D */ u8 u7D;
+    /* 0x7E */ u8 pad7E[2];
+    /* 0x80 */ s16 u80;
+    /* 0x82 */ s16 u82;
+} SmokeSpec150C1F60;
+
+
+// smoke_columns_spawn: queues two smoke columns (func_15151FA8, owner byte `flag`) at (8152, 40, -309): a wide one
+// (size 9 x 21.9, ...) and a thin one (55.6 x 39, ...), then a func_151506E8 effect at the same place.
+void func_150C1F60(u8 flag) {
+    SmokeSpec150C1F60 spec;
+    S2700 t;
+
+    spec.pos.unk0 = 8152.0f;
+    spec.pos.unk4 = 40.0f;
+    spec.u24[0] = 12;
+    spec.u24[2] = -160;
+    spec.u24[4] = -60;
+    spec.u24[3] = 0x45;
+    spec.u24[5] = 0x43;
+    spec.u24[6] = 3;
+    spec.u24[7] = 5;
+    spec.u24[9] = 0x1F;
+    spec.u38 = 0xB;
+    spec.pos.unk8 = -309.0f;
+    spec.u24[1] = 13;
+    spec.u24[8] = 0x32;
+    spec.u3A = 0x28;
+    spec.u3C = 1;
+    spec.u40 = 4;
+    spec.u54 = 0xFF;
+    spec.u55 = 0xFF;
+    spec.u58 = 3;
+    spec.u39 = 1;
+    spec.u44[0] = 0;
+    spec.u44[1] = 0;
+    spec.u44[2] = 0;
+    spec.u44[3] = 0;
+    spec.u56 = 0;
+    spec.u5C = 0xFF;
+    spec.u60 = 0;
+    spec.u64 = 0x220005;
+    spec.u68 = 0x1D0600;
+    spec.u6C = 1;
+    spec.u70 = 0x3B;
+    spec.u74 = 0x80;
+    spec.u78 = 0x20;
+    spec.u7C = 0;
+    spec.u7D = 7;
+    spec.u80 = 0xC;
+    spec.u82 = 0x15;
+    spec.u1C = 40.92f;
+    spec.u20 = 20.45f;
+    spec.u0C = 9.0f;
+    spec.u10 = 21.9f;
+    spec.u14 = 1.46f;
+    spec.u18 = 0.5f;
+    func_15151FA8((u8 *) &spec, flag, 1);
+
+    spec.u24[0] = 2;
+    spec.u24[1] = 3;
+    spec.u24[2] = -108;
+    spec.u24[4] = -22;
+    spec.u24[3] = 0x15;
+    spec.u24[5] = 0x16;
+    spec.u24[6] = 7;
+    spec.u24[7] = 0;
+    spec.u24[8] = 0x30;
+    spec.u24[9] = 0x15;
+    spec.u1C = 100.0f;
+    spec.u20 = 57.5f;
+    spec.u0C = 55.6f;
+    spec.u10 = 39.0f;
+    spec.u14 = 0.46f;
+    spec.u18 = 1.0f;
+    func_15151FA8((u8 *) &spec, flag, 1);
+
+    t.u8 = spec.pos.unk0;
+    t.uC = spec.pos.unk4;
+    t.u10 = spec.pos.unk8;
+    t.u14 = 0x19;
+    t.u16 = 0x12;
+    t.u0[0] = -0x9F;
+    t.u0[1] = 0x44;
+    t.u0[2] = -0x34;
+    t.u0[3] = 0x26;
+    t.u20 = 0x19;
+    t.u22 = 0x19;
+    t.u2C = 0x9B;
+    t.u2D = 0x64;
+    t.u38 = 1;
+    t.u39 = 6;
+    t.u3C = 0.0f;
+    t.u40 = 1;
+    t.u44 = 0.0f;
+    t.u18 = 40.0f;
+    t.u1C = 35.0f;
+    t.u24 = -2.0210001f;
+    t.u28 = 0.89400005f;
+    t.u30 = 1152.0f;
+    t.u34 = 848.0f;
+    func_151506E8(&t, &t.u8, 0, flag, 1);
+}
+#else
+#pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C1F60.s")
+#endif
+#ifdef NON_MATCHING
 
 void func_150C2290(s32 arg0) {
     struct {
@@ -307,30 +469,6 @@ s32 func_150C2558(s32 mode, s16 i, f32 x, f32 y, f32 z, f32 x0, f32 y0, f32 z0, 
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C2558.s")
 #endif
-typedef struct {
-    s16 u0[4];
-    f32 u8;
-    f32 uC;
-    f32 u10;
-    s16 u14;
-    s16 u16;
-    f32 u18;
-    f32 u1C;
-    s16 u20;
-    s16 u22;
-    f32 u24;
-    f32 u28;
-    u8 u2C;
-    u8 u2D;
-    f32 u30;
-    f32 u34;
-    u8 u38;
-    u8 u39;
-    f32 u3C;
-    u8 u40;
-    f32 u44;
-} S2700;
-s32 func_151506E8(S2700 *, f32 *, s32, u8, s32);
 
 s32 func_150C2700(s32 arg0, s32 arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 argA, s32 argB, s32 argC, s32 argD, u8 argE) {
     extern f32 D_800A064C;
@@ -655,7 +793,102 @@ Gfx *func_150C3160(Gfx *gfx, struct_eu_EF410_c *arg1) {
     gDPSetTileSize(gfx++, 4, v, t, 0x1FE, 0x3E);
     return gfx;
 }
+#ifdef NON_MATCHING
+void func_15059C84(struct127 *);
+void func_1505A770(struct127 *);
+void func_1507C700(struct127 *, struct127 *);
+void func_1506B04C(struct127 *, s32, void *);
+
+// carried_object_update: update of an object that another one (unk65, 1-based D_800CC2D0 slot) can carry: always
+// flag 0x4000000 in unkF8; when a carrier was set (unk222) and none is now, it restarts from its owner's position
+// (unk124); then the usual movement steps (func_15059C84 / func_1505A770 / func_15058898 / func_1505B5F8), half the
+// speed when unk28 is 0, the animation (func_1505E650 mode 0, or 2 / 3 / 1 by the carrier's unk84 0x1F9 / 0x1FB /
+// other) and the carrier link (func_1507C700). With a timer (unk2E4): a carrier in state 5 drops it; the timer stops
+// when nothing (D_800BE616 / D_800C35EA / carrier) holds it; while running it counts down by D_800BE9E4 (sound
+// func_1508B20C when D_800BE616); when it runs out the carrier is released (stunned / immune cleared, health 1) and
+// the object sends event 0xB (D_800BE616) or 0xE (func_1506B04C, its owner, position, carrier) and goes to state 1.
+void func_150C3230(struct127 *obj) {
+    struct {
+        struct127 *owner;
+        f32 pos[3];
+        s32 carrier;
+    } msg;
+    struct127 *owner;
+    struct127 *carrier;
+    u16 id;
+    u16 mode;
+
+    obj->unkF8 |= 0x4000000;
+    if (obj->unk222 != 0 && obj->unk65 == 0) {
+        owner = &D_800CC2D0[obj->unk124 - 1];
+        obj->old_x_position = owner->x_position;
+        obj->old_y_position = owner->y_position;
+        obj->old_z_position = owner->z_position;
+        obj->unk222 = 0;
+    }
+    func_15059C84(obj);
+    func_1505A770(obj);
+    func_15058898(obj, obj->old_y_position);
+    func_1505B5F8(obj, obj->unk180);
+    if (obj->unk28 == 0.0f) {
+        obj->xz_velocity *= 0.5f;
+    }
+    if (obj->unk65 != 0) {
+        obj->unk222 = obj->unk65;
+        id = D_800CC2D0[obj->unk65 - 1].unk84.uh;
+        if (id == 0x1F9) {
+            mode = 2;
+        } else if (id == 0x1FB) {
+            mode = 3;
+        } else {
+            mode = 1;
+        }
+    } else {
+        mode = 0;
+    }
+    func_1505E650(obj, mode, 0.0f, 0.0f, 0.0f, 0.0f, 0);
+    if (obj->unk65 != 0) {
+        func_1507C700(obj, &D_800CC2D0[obj->unk65 - 1]);
+    }
+    if (obj->unk2E4 == 0) {
+        return;
+    }
+    carrier = NULL;
+    if (obj->unk65 != 0) {
+        carrier = &D_800CC2D0[obj->unk65 - 1];
+        if (carrier->interaction_state == 5) {
+            obj->unk65 = 0;
+            obj->unk2E4 = 0;
+        }
+    }
+    if (D_800BE616 == 0 && D_800C35EA == 0 && obj->unk65 == 0) {
+        obj->unk2E4 = 0;
+    }
+    if (D_800BE9E4 < obj->unk2E4) {
+        obj->unk2E4 -= D_800BE9E4;
+        if (D_800BE616 != 0) {
+            func_1508B20C(obj->x_position, obj->y_position, obj->z_position, 900.0f);
+        }
+        return;
+    }
+    msg.pos[0] = obj->x_position;
+    msg.pos[1] = obj->y_position;
+    msg.pos[2] = obj->z_position;
+    msg.owner = &D_800CC2D0[obj->unk124 - 1];
+    msg.carrier = obj->unk65;
+    if (carrier != NULL) {
+        carrier->stunned = 0;
+        carrier->immune = 0;
+        if (carrier->health != 0) {
+            carrier->health = 1;
+        }
+    }
+    func_1506B04C(obj, D_800BE616 ? 0xB : 0xE, &msg);
+    func_15060F28(obj, 1);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3230.s")
+#endif
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3574.s")
 #pragma GLOBAL_ASM("asm/nonmatchings/game_EF410/func_150C3994.s")
 

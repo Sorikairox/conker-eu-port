@@ -10,6 +10,19 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P277 (port-c, group C) (session P277, 2026-10-25). Details: `docs/port/sessions/P277.md`
+
+Hand C (NM), registry rows `P277`, setups / mutants in docs/port/sessions/p277: func_150DB3F0, func_1517A910,
+func_150F6B00, func_150F4FB8, func_15040FCC, func_151CBBAC, func_151CD4B8, func_150C1F60, func_150D2140, func_150C3230.
+Checks: verify_all rc 0, NM build rc 0, protocheck 0 (1665), implicit_scan 0 NM+float (831), selftest 130/130,
+progress_nm `total 5916 3995 1684 237 5679 96.0% 1992220/2253856 (88.4%)`.
+
+## Next steps (from P277, group C)
+1. func_150B1964: finish the mode-14 DIFFER (draft in port_work/p277_func_150B1964_draft.c).
+2. func_150E1AF0 needs func_1505D1C4 (game_83300) to return s32 (func_1505C7D8's result) first.
+3. Group C left (compiled, smallest first): func_150C3994, func_150F536C, func_150B1EC0, func_15162B28, func_150C3574,
+   func_15198680, func_151B8DB0, func_1518D290, func_151AFC84, func_151B4854, func_150ED1F0, func_150A39E4, ... (34 total).
+
 ## P274 (port-b) (session P274, 2026-10-25). Details: `docs/port/sessions/P274.md`
 
 Hand C (NM), registry rows `P274`, setups / mutants in docs/port/sessions/p274: func_1511BD5C part_vertices_follow_refs,

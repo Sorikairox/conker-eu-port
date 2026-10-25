@@ -48,6 +48,7 @@ extern f32 D_8009FC8C;
 extern f32 D_8009FC90;
 void func_15021834(struct127 *, s32, s32);
 void func_15056B08(struct127 *);
+s32 func_150535F4(struct127 *);
 
 void func_150B17DC(struct127 *arg0) {
     f32 var_f2;

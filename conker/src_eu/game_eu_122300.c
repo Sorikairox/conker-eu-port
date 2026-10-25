@@ -197,7 +197,54 @@ u8 *func_150F4E50(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4E50.s")
 #endif
+#ifdef NON_MATCHING
+f32 func_15143E64(f32 *);
+
+// ambient_emitter_update: per-frame update of an ambient object with flags +0x194: the distance to the camera
+// (func_15144B34(0)) from the position +0x38..; flag 1 fades the alpha +0x70 (0 below 500, 255 from 1200, linear in
+// between); flag 2 (unless flag 4) keeps a looping sound: when a handle is in the high half of +0x88 it is moved to
+// the position (func_1000F9D4), otherwise within 200 units sound id (+0x88 low half) starts at a random pitch
+// 0x4000..0x7FFF (func_10010F88) and its handle goes to the high half. Returns 1.
+s32 func_150F4FB8(u8 *obj) {
+    f32 delta[3];
+    f32 *cam;
+    f32 dist;
+    u32 sound;
+    u16 handle;
+
+    if ((obj[0x194] & 1) || (obj[0x194] & 2)) {
+        cam = func_15144B34(0);
+        delta[0] = *(f32 *) (obj + 0x38) - cam[0];
+        delta[1] = *(f32 *) (obj + 0x3C) - cam[1];
+        delta[2] = *(f32 *) (obj + 0x40) - cam[2];
+        dist = func_15143E64(delta);
+    }
+    if (obj[0x194] & 1) {
+        if (dist < 500.0f) {
+            obj[0x70] = 0;
+        } else if (dist < 1200.0f) {
+            obj[0x70] = (u32) ((dist - 500.0f) * 0.0014285714285714286 * 255.0);
+        } else {
+            obj[0x70] = 0xFF;
+        }
+    }
+    if ((obj[0x194] & 2) && !(obj[0x194] & 4)) {
+        sound = *(u32 *) (obj + 0x88);
+        if ((sound >> 16) != 0) {
+            func_1000F9D4(sound >> 16, (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
+                          (s32) * (f32 *) (obj + 0x40));
+        } else if (dist < 200.0f) {
+            handle = func_10010F88(*(u32 *) (obj + 0x88) & 0xFFFF, (func_150ADA20() & 0x3FFF) + 0x4000, 0, 0, -1,
+                                   (s32) * (f32 *) (obj + 0x38), (s32) * (f32 *) (obj + 0x3C),
+                                   (s32) * (f32 *) (obj + 0x40), 10000, 20000);
+            *(u32 *) (obj + 0x88) |= handle << 16;
+        }
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_122300/func_150F4FB8.s")
+#endif
 
 void func_150F527C(u8 *arg0, s32 arg1, u8 arg2) {
     u8 *v = arg0 + 0x170;
