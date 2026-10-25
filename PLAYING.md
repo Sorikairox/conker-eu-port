@@ -69,7 +69,8 @@ A save is tied to the browser profile. Clearing site data, or using a private wi
   - the B pads, and swimming;
   - the door route across the river;
   - the "Jumping" hint and the ledges up the pit;
-  - the gargoyle scene.
+  - the gargoyle scene;
+  - pulling the lever (jump and hang on it), which opens the doors to the mushroom cave (level 0x2E), and the Frying Pan training there (hit the walking mushroom with B), which sends you back to level 0x29.
 - **Multiplayer:** Race A and B, Total War, Colors and Tank all start and play. Race A has been won and Total War played to the end.
 - **Also working:**
   - music and sound, with the music decoder now converted to C;
@@ -77,9 +78,9 @@ A save is tied to the browser profile. Clearing site data, or using a private wi
 
 ## Known problems
 
-- **The gargoyle:** it can't be beaten yet. The level script needs the frying pan first, and that part hasn't been reached in testing.
-- **The lever:** pulling the lever before the gargoyle bridge (jump and hang on it) is still being worked on.
-- **Unconverted functions:** about 6% of the game's functions still run as placeholders. A part of the game that uses one may draw or behave wrongly.
+- **The gargoyle:** beating it (climb back up after the Frying Pan training and hit it with B) hasn't been reached in testing yet.
+- **Test routes:** the automated test route now misses the last jump across the gaps before the lever, so the lever / Frying Pan part was not re-checked on the latest build. It worked in testing on the previous build.
+- **Unconverted functions:** about 4% of the game's functions still run as placeholders. A part of the game that uses one may draw or behave wrongly.
 - **Speed:** heavy scenes may run slower than full speed.
 
 ## Reporting what you find
