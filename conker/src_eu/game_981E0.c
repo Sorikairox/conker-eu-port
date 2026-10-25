@@ -13,7 +13,7 @@ u8 *func_15196438(u8 *, s32, u8, s32); /* P230 (port-b P229): returns the emitte
 s32 func_151C0698();   /* still asm; called by func_15070300 */
 void func_1507E7E4(struct127 *, u8, u8, u16, s32);
 void func_1506BF5C(void);  /* P68 hand C; called by func_1506BF1C */
-s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+void *func_151030B8(u8 *, u8, f32 *, f32 *, f32 *, s16, u8, f32, u8 *, u8, s32, s16, u8, s32); /* P262: the C definition's exact types (game_eu_1306B0) */
 extern u8 D_eu_80099F30[];
 extern u8 D_80099F3C[];
 void func_150F9BB0(u8 *, u8, s32);        /* P238: port-b hand C (void); called by func_15071830 */
@@ -747,7 +747,140 @@ void func_1506C43C(void) {
 // requires jump table
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506C460.s")
 // requires jump table
+#ifdef NON_MATCHING
+void func_15145974(void *, f32 *, f32 *);
+// player_camera_view_update: P259: sets up the player camera for D_800D154C (the args the callers leave in a0 / a1
+// are not read) by event mode D_800D1580: yaw = facing angle +0x7A + 90 degrees, pitch 45, distance 323; in modes
+// 5 / 9 / 10 yaw / pitch come from the direction of matrix 3 of the player's +0x1D4 matrices (degrees, folded to
+// -180..180); otherwise the pitch follows the camera record's +0x780 (when its +0x2C is 0x100) or the player's tilt
+// +0x1D1. Per mode: distance / height / smoothing (mode 3: aim at the D_800CCA0C target, distance 500), then
+// func_1505A184 turns pitch / distance into the offset and func_1506C460 applies it (flag t1 = snap).
+void func_1506CE6C(void) {
+    struct127 *player;
+    f32 (*mtx)[4];
+    f32 target[3];
+    f32 *target_ptr;
+    f32 dir_x;
+    f32 dir_y;
+    f32 dir_z;
+    f32 off_h;
+    f32 off_y;
+    f32 off_unused;
+    f32 smooth;
+    f32 yaw;
+    f32 pitch;
+    f32 dist;
+    f32 height;
+    f32 cam_pitch;
+    f32 a;
+    f32 b;
+    s32 flags54;
+    s32 view;
+    s32 snap;
+    s32 mode;
+    struct108 *cam;
+
+    player = D_800D154C;
+    flags54 = 0;
+    height = 0.0f;
+    pitch = 45.0f;
+    dist = 323.0f;
+    smooth = 0.5f;
+    yaw = (f32) (player->unk7A + 0x4000) * 0.0054931640625f;
+    mode = D_800D1580;
+    view = -1;
+    snap = FALSE;
+    target_ptr = NULL;
+    if (mode == 5 || mode == 9 || mode == 10) {
+        view = 3;
+    }
+    if (view != -1) {
+        if (player->unk1D4 != NULL) {
+            mtx = (f32 (*)[4]) ((u8 *) player->unk1D4 + view * 0x40);
+            func_150A7E40(mtx, 0.0f, 0.0f, 1.0f, &dir_x, &dir_y, &dir_z);
+            dir_x -= mtx[3][0];
+            dir_y -= mtx[3][1];
+            dir_z -= mtx[3][2];
+            a = func_150484A0(dir_x, dir_z);
+            b = func_150484A0(dir_y, sqrtf(dir_x * dir_x + dir_z * dir_z));
+            a *= 57.295776f;
+            b *= 57.295776f;
+            if (180.0f < a) {
+                a -= 360.0f;
+            }
+            if (180.0f < b) {
+                b -= 360.0f;
+            }
+            yaw = a;
+            pitch = b;
+        }
+    } else {
+        cam = player->camera;
+        if (cam != NULL && cam->unk2C == 0x100) {
+            cam_pitch = cam->unk780;
+            if (cam_pitch < 0.0f) {
+                cam_pitch = cam_pitch * -0.5f + cam_pitch * -0.2333f + 7.0f;
+            } else {
+                cam_pitch = cam_pitch * -0.5f + (60.0f - cam_pitch) * 0.133f;
+            }
+            pitch = cam_pitch * 1.40625f;
+        } else {
+            pitch = (f32) -player->unk1D1;
+        }
+    }
+    switch (mode) {
+    case 2:
+    case 11:
+    case 12:
+    case 18:
+        snap = TRUE;
+        break;
+    case 15:
+        pitch = pitch * 2.2f + 7.0f;
+        height = 3.3f;
+        break;
+    case 1:
+        height = 2.4f;
+        break;
+    case 3:
+        dist = 500.0f;
+        func_15145974(D_800CCA0C + 0xE8, &yaw, &pitch);
+        target[0] = *(f32 *) (D_800CCA0C + 0xDC);
+        target[1] = *(f32 *) (D_800CCA0C + 0xE0);
+        pitch = -pitch;
+        snap = TRUE;
+        target_ptr = target;
+        target[2] = *(f32 *) (D_800CCA0C + 0xE4);
+        break;
+    case 6:
+        snap = TRUE;
+        pitch = 0.0f;
+        dist = 500.0f;
+        break;
+    case 17:
+        flags54 = 0x30;
+        pitch = 0.0f;
+        dist = 150.0f;
+        break;
+    case 4:
+        dist = 250.0f;
+        break;
+    case 5:
+    case 9:
+    case 10:
+        snap = TRUE;
+        height = 5.0f;
+        dist = 593.0f;
+        smooth = 1.5f;
+        break;
+    }
+    func_1505A184((u16) (s32) (pitch * 182.04445f), dist, 0.0f, &off_h, &off_y, &off_unused);
+    off_y = -off_y;
+    func_1506C460(yaw, off_h, off_y, height, 100, mode, 0.0f, smooth, (s32) target_ptr, flags54, snap);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506CE6C.s")
+#endif
 
 #ifdef NON_MATCHING
 extern f32 D_8009A104;
@@ -800,6 +933,11 @@ void func_1506D2E8(void) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_1506D2E8.s")
 #endif
+
+// mode_handler_noop: empty handler, entry 16 of the D_8008679C mode table (EU 0x1506D8AC; US 0x1506D4EC). It was
+// glued to the end of func_1506D2E8 (split in P263), so the port had no function at that table address.
+void func_1506D4EC(void) {
+}
 // NON-MATCHING: plenty to figure out here
 // void func_1506D2E8(void) {
 //     f32 sp40;
@@ -1067,7 +1205,7 @@ void func_1506DE04(void) {
 void func_1506E0EC(void);
 void func_1506E2CC(void);
 s32 func_150B0290();
-s32 func_150B0344(s32);
+void func_150B0344(s32 side);
 void func_1516F730(s32, s32, u8, s32);
 s32 func_1516F868(u8, s32, s32, s32, u8, s32);
 #ifdef NON_MATCHING
@@ -1784,7 +1922,7 @@ void func_15070224(s32 arg0) {
     func_151602C0(&header, &header2, (func_150ADA20() % 3U) + 4, 0xFF, 0xFF, 0xFF, 0xFF, 0, 0, 0xFF, 1);
 }
 #ifdef NON_MATCHING
-s32 func_1506CE6C(struct127 *, u8);
+void func_1506CE6C(void); // P259: reads D_800D154C itself (the asm ignores a0 / a1)
 struct127 *func_1507515C(struct127 *, struct127 *, s32);
 void func_15145EA4(f32 **, f32 **, void *, s32);
 void func_151C1E10(u8 *, u8, s32);
@@ -1881,7 +2019,7 @@ block_10:
             sp.u98 = D_800D154C;
             func_151C0698(sp.uA8, sp.uA0, &sp.u8C, var_a3_2, 0xFF, 1);
         } else {
-            func_1506CE6C(sp.uA8, var_a1);
+            func_1506CE6C();
         }
         if (D_800D154C->unk1D4 != NULL) {
             temp_t4 = ((u8 *)&D_eu_80099F30);
@@ -1901,7 +2039,7 @@ block_10:
                 func_15145EA4(&sp.u5C, &sp.u58, &D_800D154C->unk1D4->pad0[0x100], 1);
                 sp4C = func_150ADA20();
                 sp50 = func_150ADA20();
-                func_151030B8(D_800D154C, 4U, &sp.u80, &sp.u74, &sp.u6C, ((u32) sp4C % 5U) + 5, ((u32) sp50 % 56U) + 0xC8, (func_150ADA68() * 510.0f) + 1296.0f, &sp.u60, 0xFF, 0, -1, 0xFF, 1);
+                func_151030B8((u8 *)D_800D154C, 4U, (f32 *)&sp.u80, (f32 *)&sp.u74, &sp.u6C, ((u32) sp4C % 5U) + 5, ((u32) sp50 % 56U) + 0xC8, (func_150ADA68() * 510.0f) + 1296.0f, (u8 *)&sp.u60, 0xFF, 0, -1, 0xFF, 1);
                 func_151C1E10(&sp.u60, 0xFF, 1);
             }
         }
@@ -1997,7 +2135,9 @@ void func_15070D00(s32 arg0) {
     func_15070C40(0);
 }
 
+#ifndef NON_MATCHING /* P262: the NM build uses the exact prototype hoisted at the top */
 s32 func_151030B8(struct127 *, u8, u8 *, s32 *, f32 *, s32, s32, f32, f32 *, s32, s32, s32, s32, s32);
+#endif
 extern struct17 D_80099F48;
 extern struct17 D_80099F54;
 
@@ -2015,7 +2155,7 @@ void func_15070D24(s32 arg0) {
         f[0] = (func_150ADA68() * 101.0f) + 151.0f;
         f[1] = (func_150ADA68() * 4.0f) + 4.0f;
         func_15143134(&a, pos, (u8 *)D_800D154C->unk1D4 + 0x40);
-        func_151030B8(D_800D154C, 1, (u8 *)&a, (s32 *)&b, f, (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 2496.0f) + 3496.0f, pos, 0xFF, 0, -1, 0xFF, 0);
+        func_151030B8((u8 *)D_800D154C, 1, (f32 *)&a, (f32 *)&b, f, (func_150ADA20() % 6U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 2496.0f) + 3496.0f, (u8 *)pos, 0xFF, 0, -1, 0xFF, 0);
         header.unk0 = 3;
         header.unk1 = -1;
         header.unk2 = (func_150ADA20() % 6U) + 0xA;
@@ -2044,7 +2184,7 @@ void func_15070F60(u8 arg0) {
         f[0] = (func_150ADA68() * 180.0f) + 150.0f;
         f[1] = (func_150ADA68() * 2.0f) + 2.5f;
         func_15143134(&a, pos, (u8 *)D_800D154C->unk1D4 + ((arg0 ? 1 : 2) << 6));
-        func_151030B8(D_800D154C, arg0 ? 1 : 2, (u8 *)&a, (s32 *)&b, f, (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 4000.0f) + 4000.0f, pos, 0xFF, 0, -1, 0xFF, 0);
+        func_151030B8((u8 *)D_800D154C, arg0 ? 1 : 2, (f32 *)&a, (f32 *)&b, f, (func_150ADA20() % 5U) + 5, (func_150ADA20() % 156U) + 0x64, (func_150ADA68() * 4000.0f) + 4000.0f, (u8 *)pos, 0xFF, 0, -1, 0xFF, 0);
         header.unk0 = 3;
         header.unk1 = -1;
         header.unk2 = (func_150ADA20() % 5U) + 3;
@@ -2525,7 +2665,66 @@ void func_150723E0(void) {
     }
 }
 
+#ifdef NON_MATCHING
+// event_respawn_record_object: P256: event-script command (request word D_800D1580): byte 0 = record id (looked up
+// with func_15083E0C, -1 = none), bits 8..14 = the new object's +0x5C, bit 15 = no +0x101 mode (else 4), bits
+// 16..23 = state (+0x232 gets the low 7 bits; bit 7 keeps the record's current object, otherwise that object is
+// released first: func_15060F28(obj, 0) + func_1505F188). Clears the record's flag bytes (D_800D252C[rec], record
+// +2), spawns it again (func_15082E44, 1-based object number) and places the object on the current object
+// D_800D154C, owned by it (+0x65 = its index + 1, +0x124 = D_800C3E78 + 1). With D_800BE616 set and the current
+// object of kind 0x53 that one remembers the new index (+0x222); kind 0x16 objects on level 0x3F get +0x94 bit 2.
+extern u8 *D_800D252C;
+s32 func_15082E44(u8 *, s32, s32, s32, s32);
+void func_1505F188(struct127 *);
+void func_15072420(void) {
+    s32 req = D_800D1580;
+    s32 word5C = (req >> 8) & 0x7F;
+    s32 noMode = (req >> 15) & 1;
+    s32 state = (req >> 16) & 0xFF;
+    s32 rec;
+    s32 n;
+    struct127 *old;
+    struct127 *obj;
+
+    rec = func_15083E0C(req & 0xFF);
+    if (rec == -1) {
+        return;
+    }
+    D_800D252C[rec] = 0;
+    if (!(state & 0x80)) {
+        old = func_1505EEF4(rec);
+        if (old != NULL) {
+            func_15060F28(old, 0);
+            func_1505F188(old);
+        }
+    }
+    ((u8 *) D_800D20FC + rec * 0x30)[2] = 0;
+    n = func_15082E44((u8 *) D_800D20FC + rec * 0x30, rec, 0, 0, 0);
+    if (n == 0) {
+        return;
+    }
+    obj = &D_800CC2D0[n - 1];
+    if (obj == NULL) {
+        return;
+    }
+    obj->unk65 = (D_800D154C - D_800CC2D0) + 1;
+    obj->unk5C = word5C;
+    obj->unk101 = noMode ? 0 : 4;
+    obj->unk232 = state & 0x7F;
+    obj->unk124 = D_800C3E78 + 1;
+    obj->x_position = D_800D154C->x_position;
+    obj->y_position = D_800D154C->y_position;
+    obj->z_position = D_800D154C->z_position;
+    if (D_800BE616 != 0 && D_800D154C->id == 0x53) {
+        D_800D154C->unk222 = obj - D_800CC2D0;
+    }
+    if (D_800BE9F0 == 0x3F && obj->id == 0x16) {
+        obj->unk94 |= 2;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_981E0/func_15072420.s")
+#endif
 void func_1507266C(void)
 {
   u8 new_var;

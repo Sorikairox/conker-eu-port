@@ -61,7 +61,12 @@ for F in "$@"; do NR=$NR0
     # P243: `env -u` must come before the K=V assignments: after them env took `-u` as the command, so with any
     # registry knob the no-ARGMEM random run printed nothing, randok stayed empty and random kills never counted
     # (mutants were killed only by setups; func_150D1D20's 3 random-only mutants all "survived"). RVENV_OLD=1 = old order.
-    if [ -n "$RVENV_OLD" ]; then env "${envs[@]}" "${u[@]}" DIFFTEST_TMP=$T "$@"; else env "${u[@]}" "${envs[@]}" DIFFTEST_TMP=$T "$@"; fi 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | cut -c1-${CUT:-160}; }
+    if [ -n "$RVENV_OLD" ]; then env "${envs[@]}" "${u[@]}" DIFFTEST_TMP=$T "$@"; else env "${u[@]}" "${envs[@]}" DIFFTEST_TMP=$T "$@"; fi 2>&1 | grep -E "^(EQUIV|DIFFER|UNSURE|ERROR)" | head -1 | dtcut; }
+  # P259: keep difftest's static "[knob not a jal target ...]" note (a knob keyed on a non-EU address) after the cut
+  # verdict when no CUT is given (CUT=N callers compare the cut text, e.g. `= DIFFER`, and stay as before)
+  dtcut() { local l; IFS= read -r l || return 0; if [ -n "$CUT" ]; then echo "$l" | cut -c1-$CUT
+    else local c n; c=$(echo "$l" | cut -c1-160); c=${c%% \[knob not a jal*}
+      n=$(echo "$l" | grep -o ' \[knob not a jal target[^]]*\]' | head -1); echo "$c$n"; fi; }
   echo "$F ($ses, $file) knobs: ${kn:-none}"
   randok=""; if [ "${NR:-100}" != 0 ]; then r=$(dt tools/port/difftest.sh $F $C --trials ${NR:-100} --seed 1); echo "  random: $r"
     # mut.sh P77: random kills only count when the unmutated draft is EQUIV on random (without ARGMEM)
@@ -82,7 +87,8 @@ for F in "$@"; do NR=$NR0
   if [ -z "$NOSETUP" ]; then for s in ${st//,/ }; do
     res=$(runset $C $s); n=$(echo "$res" | grep -c .); e=$(echo "$res" | grep -c ' EQUIV')
     bad=$(echo "$res" | grep -v ' EQUIV' | awk '{print $1"="$2}' | tr '\n' ' ')
-    echo "  setups $(basename $s): $e EQUIV / $n${bad:+ (bad: $bad)}"
+    jn=$(echo "$res" | grep -o '\[knob not a jal target[^]]*\]' | sort -u | head -1)  # P259
+    echo "  setups $(basename $s): $e EQUIV / $n${bad:+ (bad: $bad)}${jn:+ $jn}"
   done; fi
   [ -n "$MUT" ] && for m in ${mu//,/ }; do
     M=$W/${F}_mut_$$.c; k=0; sv=""; na=0; inv=""; tot=0

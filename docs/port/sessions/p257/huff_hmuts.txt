@@ -1,0 +1,50 @@
+# P257: sed form of docs/port/sessions/p251/mhuff.txt (huff2sed.py), for tools/port/nmharness_mut.sh on conker/src_eu/game_eu_226870.c
+/^\/\/ huff_get_bits/,/^#else/{/w <<= r->pos & 7;/s#& 7#\& 3#;}
+/^\/\/ huff_get_bits/,/^#else/{/return w >> ((32 - n) & 0x1F);/s#32 - n#31 - n#;}
+/^\/\/ huff_get_bits/,/^#else/{/r->pos += n;/s#+= n#+= n + 1#;}
+/^\/\/ huff_get_bits/,/^#else/{/| p\[3\];/s#p\[3\]#p[2]#;}
+/^\/\/ huff_get_bit:/,/^#else/{/>> (7 - (r->pos & 7))) & 1;/s#7 -#6 -#;}
+/^\/\/ huff_get_bit:/,/^#else/{/r->pos++;/s#r->pos++#r->pos += 2#;}
+/^\/\/ huff_decode_pair/,/^#else/{/s32 k = (table << 8)/s#8 -#7 -#;}
+/^\/\/ huff_decode_pair/,/^#else/{/s32 k = (table << 8)/s#& 0xFF#\& 0x7F#;}
+/^\/\/ huff_decode_pair/,/^#else/{/s32 k = (table << 8)/s#table << 8#table << 7#;}
+/^\/\/ huff_decode_pair/,/^#else/{/s32 len = D_800E0E24/s#0x2200#0x2100#;}
+/^\/\/ huff_decode_pair/,/^#else/{/if (len != 0) {/s#len != 0#len > 1#;}
+/^\/\/ huff_decode_pair/,/^#else/{/r->pos += len;/s#+= len#+= len - 1#;}
+/^\/\/ huff_decode_pair/,/^#else/{/\*x = D_800E0E24\[k\] & 0xF;/s#0xF#0x7#;}
+/^\/\/ huff_decode_pair/,/^#else/{/\*y = D_800E0E24\[k\] >> 4;/s#>> 4#>> 3#;}
+/^\/\/ huff_decode_pair/,/^#else/{/node\[1\] : node\[0\]/s#node\[1\] : node\[0\]#node[0] : node[1]#;}
+/^\/\/ huff_decode_pair/,/^#else/{/node\[1\] : node\[0\]/s#\* 4#* 2#;}
+/^\/\/ huff_decode_pair/,/^#else/{/} while ((s8) node\[2\] == -1);/s#== -1#< -1#;}
+/^\/\/ huff_decode_pair/,/^#else/{/\*x = (s8) node\[2\];/s#node\[2\]#node[3]#;}
+/^\/\/ huff_decode_pair/,/^#else/{/node = D_800E0E20\[table\];/s#\[table\]#[table + 1]#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/while (end - i > 0) {/s#> 0#>= 0#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/if (linbits != 0 && x == 15) {/s#x == 15#x == 14#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/x = huff_get_bits(&r, linbits) + 15;/s#+ 15#+ 14#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/x = huff_get_bits(&r, linbits) + 15;/s#linbits)#linbits - 1)#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/s\[0\] = (x != 0) ? huff_get_bit(&r) : 0;/s#: 0#: 1#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/if (linbits != 0 && y == 15) {/s#linbits != 0 &&##;}
+/^\/\/ huff_decode_big_values/,/^#else/{/y = huff_get_bits(&r, linbits) + 15;/s#+ 15#+ 16#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/o\[1\] = y;/s#= y#= x#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/o += 2;/s#+= 2#+= 1#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/s\[1\] = (y != 0)/s#(y != 0)#(x != 0)#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/i += 2;/s#+= 2#+= 4#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/s += 2;/s#+= 2#+= 1#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/\*bitpos = r\.pos;/s#r\.pos#r.pos + 1#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/\*signs = s;/s#= s#= s + 2#;}
+/^\/\/ huff_decode_big_values/,/^#else/{/return i;/s#i#i + 2#;}
+/^\/\/ huff_decode_count1/,/^#else/{/while (endBit - (s32) r\.pos > 0 && i < 576) {/s#> 0#>= 0#;}
+/^\/\/ huff_decode_count1/,/^#else/{/while (endBit - (s32) r\.pos > 0 && i < 576) {/s#576#572#;}
+/^\/\/ huff_decode_count1/,/^#else/{/v\[k\] = (q >> (3 - k)) & 1;/s#3 - k#k#;}
+/^\/\/ huff_decode_count1/,/^#else/{/o\[k\] = v\[k\];/s#= v\[k\]#= q#;}
+/^\/\/ huff_decode_count1/,/^#else/{/bits = huff_get_bits(&r, 4);/s#4)#3)#;}
+/^\/\/ huff_decode_count1/,/^#else/{/n = 3;/s#3#4#;}
+/^\/\/ huff_decode_count1/,/^#else/{/v\[k\] &= bits >> n;/s#>> n#>> (n + 1)#;}
+/^\/\/ huff_decode_count1/,/^#else/{/n--;/s#n--;#n -= 2;#;}
+/^\/\/ huff_decode_count1/,/^#else/{/s\[k\] = v\[k\];/s#= v\[k\]#= 1#;}
+/^\/\/ huff_decode_count1/,/^#else/{/r\.pos -= n + 1;/s#n + 1#n#;}
+/^\/\/ huff_decode_count1/,/^#else/{/o += 4;/s#+= 4#+= 2#;}
+/^\/\/ huff_decode_count1/,/^#else/{/s += 4;/s#+= 4#+= 3#;}
+/^\/\/ huff_decode_count1/,/^#else/{/i += 4;/s#+= 4#+= 2#;}
+/^\/\/ huff_decode_count1/,/^#else/{/\*out = o;/s#= o#= o + 1#;}
+/^\/\/ huff_decode_count1/,/^#else/{/if (v\[k\] != 0) {/s#v\[k\] != 0#1#;}

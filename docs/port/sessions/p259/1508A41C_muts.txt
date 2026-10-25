@@ -1,0 +1,27 @@
+# P259 func_1508A41C (mode_pick_mid_range_object) mutants: sed % setup names
+s/f32 best = -1000000.0f;/f32 best = -999990.0f;/ % justlow
+s/s32 best_i = -1;/s32 best_i = 0;/ % nomask verylow
+s/state + player \* 4 + 0x15C/state + player * 4 + 0x160/ % p0 p0far
+s/lo = 750.0f;/lo = 760.0f;/ % p1
+s/hi = 3500.0f;/hi = 3400.0f;/ % p1
+s/lo = 1500.0f;/lo = 1400.0f;/ % p1far
+s/hi = 8000.0f;/hi = 7000.0f;/ % p1far
+s/slots\[i\] == 3 ||/slots[i] == 2 ||/ % slot3 slot2
+s/slots\[i\] == 3 || // % slot3
+s/!(mask \& bit)/0/ % maskoff
+s/(bit << 16)/(bit << 15)/ % pmaskoff pmasklow
+s/D_800D27D0 + player \* 4 + 0x16C0/D_800D27D0 + 0x16C0/ % p1
+s/scale = 6.2831855f/scale = 6.28318f/ % p1 mid
+s/D_800CC2D0\[player\].x_position - obj->x_position/D_800CC2D0[player].x_position + obj->x_position/ % midoff
+s/dz = D_800CC2D0\[player\].z_position/dz = D_800CC2D0[0].z_position/ % midoff
+s/dx \* dx + dz \* dz/dx * dx + dx * dz/ % p1
+s/if (hi < dist) {/if (hi > dist) {/ % p1
+s/if (dist < lo) {/if (dist > lo) {/ % p1
+s/(dist - lo) \* scale/(dist - hi) * scale/ % p1
+s/+ -1.5707964f) + 1.0f;/+ -1.5707964f) + 2.0f;/ % between
+s/+ -1.5707964f)/+ -1.5707963f)/ % p1 mid
+s/if (best < score) {/if (best <= score) {/ % tie
+s/            best = score;//  % last
+s/best_i = i;/best_i = i + 1;/ % p1
+s/for (i = 0; i < count; i++)/for (i = 0; i <= count; i++)/ % count2
+s/for (i = 0; i < count; i++)/for (i = 1; i < count; i++)/ % tie

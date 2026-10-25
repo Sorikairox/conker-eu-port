@@ -100,7 +100,107 @@ block_7:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_15102EA0.s")
 #endif
+#ifdef NON_MATCHING
+void func_151037D4(s16, u8, f32, u8 *, u8, u8, s32);
+s32 memcpy(s32, u8 *, s32); /* as declared further down in this file */
+/* the owner attachment block copied to the particle emitter at +0x110 (read by func_15103310) */
+typedef struct {
+    u8 *owner;         /* 0x00 */
+    u8 unique_id;      /* 0x04 owner's unique id when attached */
+    s32 matrix_offset; /* 0x08 matrix index * 0x40 into the owner's +0x1D4 list */
+    s16 joint;         /* 0x0C -1 = use the matrix */
+    s32 matrix;        /* 0x10 */
+    u8 flags;          /* 0x14 */
+    f32 point0[3];     /* 0x18 */
+    f32 point1[3];     /* 0x24 */
+} EmitterAttach;
+/* the emitter record passed to func_1513D2F0 */
+typedef struct {
+    u8 kind;           /* 0x00 0x5F */
+    u8 sub;            /* 0x01 5 */
+    s16 flags;         /* 0x02 0x2203 */
+    s16 count;         /* 0x04 */
+    s32 unk8;          /* 0x08 */
+    s32 unkC;          /* 0x0C */
+    u8 color[4];       /* 0x10 */
+    f32 range[2];      /* 0x14 */
+    f32 pos[3];        /* 0x1C */
+    f32 dir[3];        /* 0x28 */
+    f32 vel[3];        /* 0x34 */
+    s32 unk40;         /* 0x40 */
+    u8 alpha;          /* 0x44 */
+    u8 unk45;          /* 0x45 */
+    u8 unk46;          /* 0x46 */
+    u8 unk47;          /* 0x47 */
+    s32 unk48;         /* 0x48 (not set) */
+    u8 unk4C;          /* 0x4C */
+} EmitterSpawn;
+// attached_particle_spawn: P259: spawns particle emitter 0x29 of D_800A4AA0 (func_1513D2F0, render layer 1 or 3
+// at random) attached to `owner`'s matrix `matrix` (joint `joint`, -1 = none): kind 0x5F / 5, flags 0x2203,
+// `count` particles at `pos` toward `dir`, range from `range`, alpha `alpha`; copies the attachment block (owner,
+// its unique id, matrix offset, joint, zero points D_800A5860) to the emitter's +0x110, then starts the matching
+// trail / sound (func_151037D4). Returns the emitter, or NULL (also when `owner` is NULL).
+void *func_151030B8(u8 *owner, u8 matrix, f32 *pos, f32 *dir, f32 *range, s16 count, u8 alpha, f32 speed,
+                    u8 *target, u8 arg9, s32 argA, s16 joint, u8 argC, s32 argD) {
+    EmitterAttach att;
+    EmitterSpawn spawn;
+    void *emitter;
+    f32 *zero;
+
+    if (owner == NULL) {
+        return NULL;
+    }
+    zero = (f32 *) D_800A5860;
+    att.flags = 0;
+    att.point0[0] = zero[0];
+    att.point0[1] = zero[1];
+    att.point0[2] = zero[2];
+    att.point1[0] = zero[0];
+    att.point1[1] = zero[1];
+    att.point1[2] = zero[2];
+    att.joint = joint;
+    att.matrix = matrix;
+    att.owner = owner;
+    att.unique_id = owner[0x3B];
+    att.matrix_offset = matrix * 0x40;
+    spawn.kind = 0x5F;
+    spawn.sub = 5;
+    spawn.flags = 0x2203;
+    spawn.unk8 = 0;
+    spawn.unkC = 0;
+    spawn.color[0] = 0xFF;
+    spawn.color[1] = 0xFF;
+    spawn.color[2] = 0xFF;
+    spawn.color[3] = 0xFF;
+    spawn.count = count;
+    spawn.range[0] = range[0];
+    spawn.range[1] = range[1];
+    spawn.pos[0] = pos[0];
+    spawn.pos[1] = pos[1];
+    spawn.pos[2] = pos[2];
+    spawn.dir[0] = dir[0];
+    spawn.dir[1] = dir[1];
+    spawn.dir[2] = dir[2];
+    spawn.unk40 = 0x40CC0009;
+    spawn.unk45 = 0xFF;
+    spawn.unk46 = 0;
+    spawn.unk47 = 7;
+    spawn.vel[0] = 0.0f;
+    spawn.vel[1] = 0.0f;
+    spawn.vel[2] = 0.0f;
+    spawn.alpha = alpha;
+    spawn.unk4C = arg9;
+    emitter = func_1513D2F0(&spawn, (s32) &D_800A4AA0, 0x29, 0, 0, 0x16, ((func_150ADA20() & 1) ? 2 : 0) + 1, 0, 0,
+                            argA + 0x30, argC, argD);
+    if (emitter != NULL) {
+        memcpy((s32) emitter + 0x110, (u8 *) &att, sizeof(att));
+    }
+    func_151037D4(count, alpha, speed, target, arg9, argC, argD);
+    return emitter;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1306B0/func_151030B8.s")
+#endif
 
 void func_151032D0(s32 arg0, s32 arg1, u8 arg2) {
     func_15169850(arg1, arg2, arg0 + 0x110, arg0 + 0x114, arg0);

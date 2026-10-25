@@ -1,0 +1,33 @@
+# P259 func_150144B8 (screen_effect_start) mutants: sed % setup names
+s/rec\[0x16\] |= 4;/rec[0x16] |= 8;/ % base
+s/rec\[0x16\] |= 4;/;/ % mp
+s/if (D_80082FA0 >= 2) {/if (D_80082FA0 >= 3) {/ % mp
+s/if (D_80082FA0 >= 2) {/if (D_80082FA0 > 2) {/ % mp
+s/if (D_80082FA0 >= 2) {/if ((u32) D_80082FA0 >= 2) {/ % neg
+s/\*(f32 \*) (rec + 0x10), 0.0f);/*(f32 *) (rec + 0x10), 1.0f);/ % base
+s/\*(f32 \*) (rec + 0xC), \*(f32 \*) (rec + 0x10)/*(f32 *) (rec + 0x10), *(f32 *) (rec + 0xC)/ % base
+s/func_150A7E40(mtx, 0.0f, 100.0f, 0.0f,/func_150A7E40(mtx, 0.0f, 10.0f, 0.0f,/ % base
+s/func_15145974(pos, \&e.screen_x, \&e.screen_y);/func_15145974(pos, \&e.screen_y, \&e.screen_x);/ % base
+s/e.screen_y \*= 0.017453292f;/;/ % base
+s/e.min = \*(u32 \*) (rec + 0x18) \& 0xFF;/e.min = *(u32 *) (rec + 0x18) \& 0x7F;/ % one
+s/e.range = (\*(u32 \*) (rec + 0x18) >> 8) \& 0xFF;/e.range = (*(u32 *) (rec + 0x18) >> 8) \& 0x7F;/ % one
+s/e.rec = rec;/e.rec = NULL;/ % base
+s/(hi + 1) + lo;/(hi + 1) - lo;/ % base
+s/(hi + 1) + lo;/hi + lo;/ % base
+s/(hi + 1) + lo;/(hi + 2) + lo;/ % base
+s/e.b2 = (\*(u32 \*) (rec + 0x18) >> 16) \& 0xFF;/e.b2 = (*(u32 *) (rec + 0x18) >> 16);/ % base
+s/e.b3 = (\*(u32 \*) (rec + 0x18) >> 24) \& 0xFF;/e.b3 = (*(s32 *) (rec + 0x18) >> 24);/ % one
+s/\& 0xFF) \* 0.015625f;/\& 0xFF) * 0.03125f;/ % base
+s/>> 8) \& 0xFF) \* 0.015625f;/>> 8) \& 0xFF) * 0.0156f;/ % base
+s/e.frames = (f32) ((\*(u32 \*) (rec + 0x1C) >> 24) \& 0xFF);/e.frames = (f32) ((*(u32 *) (rec + 0x1C) >> 24) \& 0x7F);/ % one
+s/e.inv_frames = 1.0f \/ e.frames;/e.inv_frames = 2.0f \/ e.frames;/ % base
+s/e.step = (f32) \*(s16 \*) (rec + 8) \* e.inv_frames;/e.step = (f32) *(u16 *) (rec + 8) * e.inv_frames;/ % one
+s/e.step = (f32) \*(s16 \*) (rec + 8) \* e.inv_frames;/e.step = (f32) *(s16 *) (rec + 6) * e.inv_frames;/ % base
+s/func_150484A0((f32) \*(s16 \*) (rec + 6), (f32) \*(s16 \*) (rec + 8));/func_150484A0((f32) *(s16 *) (rec + 8), (f32) *(s16 *) (rec + 6));/ % base
+s/e.angle = func_150484A0(/e.angle = 1.0f + func_150484A0(/ % base
+s/\* 0.00390625f \* 0.7853982f;/* 0.00390625f * 0.785398f;/ % base
+s/>> 16) \& 0xFF) \* 0.00390625f/>> 16) \& 0xFE) * 0.00390625f/ % zr
+s/func_15149130(300, -1, 0x2A, -1, 0, 0,/func_15149130(300, -1, 0x2B, -1, 0, 0,/ % base
+s/(struct37 \*) sizeof(e), 0xFF, 0);/(struct37 *) sizeof(e), 0xFF, 1);/ % base
+s/memcpy((u8 \*) fx + 0x28, \&e, sizeof(e));/memcpy((u8 *) fx + 0x2C, \&e, sizeof(e));/ % base
+s/if (fx != NULL) {/if (1) {/ % nofx

@@ -1,0 +1,26 @@
+# P262 func_1511DF6C (mesh_tex_scroll_update) mutants: sed % setup names
+s/if (uv == NULL) {/if (uv != NULL) {/ % alloc cached
+s/uv = allocate_memory(\*(u16 \*)(obj + 0x16) \* 4, 1, 0, 0);/uv = allocate_memory(*(u16 *)(obj + 0x16) * 2, 1, 0, 0);/ % alloc
+s/uv = allocate_memory(\*(u16 \*)(obj + 0x16) \* 4, 1, 0, 0);/uv = allocate_memory(*(u16 *)(obj + 0x16) * 4, 0, 0, 0);/ % alloc
+s/\*(s16 \*\*)(obj + 0x7C) = uv;/;/ % alloc
+s/dst\[-2\] = \*(s16 \*)(\*(u8 \*\*)(obj + 0x28) + off + 8) - 0x2000;/dst[-2] = *(s16 *)(*(u8 **)(obj + 0x28) + off + 8) - 0x1000;/ % alloc
+s/+ off + 0xA) - 0x2000;/+ off + 8) - 0x2000;/ % alloc
+s/off += 0x10) {$/off += 0x8) {/ % alloc
+s/^        for (i = 0, off = 0; i < \*(u16 \*)(obj + 0x16); i++, off += 0x10) {/        for (i = 1, off = 0; i < *(u16 *)(obj + 0x16); i++, off += 0x10) {/ % alloc
+s/i < \*(u16 \*)(obj + 0x16)/i <= *(u16 *)(obj + 0x16)/ % alloc
+s/i < \*(u16 \*)(obj + 0x16)/i < *(u16 *)(obj + 0x14)/ % alloc
+s/+ off + 0) + \*(s16 \*)(obj + 0x10);/+ off + 0) + *(s16 *)(obj + 0x12);/ % alloc
+s/+ off + 2) + \*(s16 \*)(obj + 0x12);/+ off + 2) - *(s16 *)(obj + 0x12);/ % alloc
+s/+ off + 4) + \*(s16 \*)(obj + 0x14);/+ off + 4);/ % alloc
+s/\*(s16 \*)(\*(u8 \*\*)(obj + 0x20) + off + 2) = \*(s16 \*)(\*(u8 \*\*)(obj + 0x24) + off + 2) =/*(s16 *)(*(u8 **)(obj + 0x24) + off + 2) =/ % alloc
+s/\*(s16 \*)(\*(u8 \*\*)(obj + 0x20) + off + 4) = \*(s16 \*)(\*(u8 \*\*)(obj + 0x24) + off + 4) =/*(s16 *)(*(u8 **)(obj + 0x20) + off + 4) =/ % alloc
+s/(f32)((f32)(s16)packed \* 0.01)/(f32)((f32)(s16)packed * 0.010000001)/ % alloc
+s/(f32)((f32)(s16)packed \* 0.01)/((f32)(s16)packed * 0.01f)/ % alloc neg
+s/(f32)(s16)packed \* 0.01/(f32)(u16)packed * 0.01/ % neg
+s/\* (f32)D_800BE9E4;/+ (f32)D_800BE9E4;/ % alloc
+s/\*(f32 \*)(obj + 0x80) += /*(f32 *)(obj + 0x80) = / % alloc
+s/(obj + 0x20 + D_800BE9C0 \* 4)/(obj + 0x24 - D_800BE9C0 * 4)/ % alloc
+s/(s32 \*)uv, \*(u16 \*)(obj + 0x16)/(s32 *)uv, *(u8 *)(obj + 0x16)/ % alloc
+s/packed >> 24, (packed >> 16) \& 0xFF);/(u32)packed >> 24, (packed >> 16) \& 0xFF);/ % alloc
+s/packed >> 24, (packed >> 16) \& 0xFF);/packed >> 24, (packed >> 16) \& 0x7F);/ % neg
+s/packed >> 24, (packed >> 16) \& 0xFF);/packed >> 24, (packed >> 8) \& 0xFF);/ % alloc

@@ -216,7 +216,39 @@ u8 *func_151A831C(u8 *arg0, u8 *arg1, s16 arg2) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A831C.s")
 #endif
+#ifdef NON_MATCHING
+#define BOLT_PT(obj, i) ((f32 *) (*(u8 **) ((u8 *) (obj) + 0x64) + (i) * 0x18))
+
+// bolt_subdivide: midpoint displacement of a lightning bolt's point list (obj+0x64, 0x18-byte points): the midpoint
+// of [lo, hi] becomes the average of the two ends, x / y jittered by +-amp (func_150ADA68), z not; recurses on the
+// left half and loops on the right half while the span has an inner point and depth (decremented per split) > 0.
+void func_151A88F0(u8 *obj, s16 lo, s16 hi, f32 amp, s16 depth) {
+    f32 *a;
+    f32 *b;
+    f32 dx;
+    f32 dy;
+    f32 dz;
+    s16 mid;
+
+    while (hi - lo >= 2 && depth > 0) {
+        mid = lo + ((hi - lo) >> 1);
+        a = BOLT_PT(obj, lo);
+        b = BOLT_PT(obj, hi);
+        dx = b[0] - a[0];
+        dy = b[1] - a[1];
+        dz = b[2] - a[2];
+        BOLT_PT(obj, mid)[0] = (func_150ADA68() * (amp + amp) + -amp) + (a[0] + dx * 0.5f);
+        BOLT_PT(obj, mid)[1] = (func_150ADA68() * (amp + amp) + -amp) + (a[1] + dy * 0.5f);
+        BOLT_PT(obj, mid)[2] = a[2] + dz * 0.5f;
+        depth--;
+        func_151A88F0(obj, lo, mid, amp, depth);
+        lo = mid;
+    }
+}
+#undef BOLT_PT
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1D5710/func_151A88F0.s")
+#endif
 
 void func_151A8B10(u8 *arg0) {
     func_151D5E30(arg0 + 0x6C, arg0);

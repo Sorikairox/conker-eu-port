@@ -91,4 +91,47 @@ void func_151BA1A0(s32 arg0, s32 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, s
     }
 }
 
+#ifdef NON_MATCHING
+void func_151B9C40(u8, u8, s16, s16, s16, s32, f32, s32, s32, s32, s32, s32, s32, s32, s32, u8, u8);
+
+// burst_emitter_finish: emits the object's burst at its anchor (the f32 position at obj+0x10 if any, else the s16
+// position at obj+0x16): obj+0x28 shots with the parameters at obj+0x1C..0x26, then 4 more with the first two
+// widened (x1.5 / x2), all through func_151B9C40 (types obj+0x14 / 0x15, angle -80, spread 360, life 15). Then counts
+// obj+0x2A down by the frame step D_800BE9E4 and frees the object when it goes negative (func_1516972C).
+void func_151BA260(u8 *obj) {
+    f32 *anchor = *(f32 **) (obj + 0x10);
+    s16 x;
+    s16 y;
+    s16 z;
+    s32 i;
+    s32 t;
+
+    if (anchor == NULL) {
+        x = *(s16 *) (obj + 0x16);
+        y = *(s16 *) (obj + 0x18);
+        z = *(s16 *) (obj + 0x1A);
+    } else {
+        x = (s32) anchor[0];
+        y = (s32) anchor[1];
+        z = (s32) anchor[2];
+    }
+    for (i = 0; i < *(s16 *) (obj + 0x28); i++) {
+        func_151B9C40(obj[0x14], obj[0x15], x, y, z, -0x50, 0.0f, 0x168, *(s16 *) (obj + 0x1C), *(s16 *) (obj + 0x1E),
+                      *(s16 *) (obj + 0x20), *(s16 *) (obj + 0x22), 0xF, *(s16 *) (obj + 0x24), *(s16 *) (obj + 0x26),
+                      obj[0xC], obj[1]);
+    }
+    for (i = 0; i < 4; i++) {
+        func_151B9C40(obj[0x14], obj[0x15], x, y, z, -0x50, 0.0f, 0x168, (*(s16 *) (obj + 0x1C) * 3) / 2,
+                      *(s16 *) (obj + 0x1E) * 2, *(s16 *) (obj + 0x20), *(s16 *) (obj + 0x22), 0xF,
+                      *(s16 *) (obj + 0x24), *(s16 *) (obj + 0x26), obj[0xC], obj[1]);
+    }
+    t = *(s16 *) (obj + 0x2A) - D_800BE9E4;
+    if (t < 0) {
+        func_1516972C((struct102 *) obj);
+    } else {
+        *(s16 *) (obj + 0x2A) = t;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1E7450/func_151BA260.s")
+#endif

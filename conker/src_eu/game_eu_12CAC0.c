@@ -28,7 +28,71 @@ void func_150FF550(u8 *arg0, s16 arg1, u8 *arg2) {
     func_1514654C(arg0, temp_v0, 0, &sp34, &sp30, 1);
 }
 
+#ifdef NON_MATCHING
+u8 *func_150FF808(s32 arg0);
+void func_150FF82C(s32 arg0, s32 arg1, s32 arg2, s32 arg3);
+void func_150FF854(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3, s32 arg4, u8 *arg5, s32 arg6, s32 arg7, s32 arg8, s32 arg9,
+                   s32 argA, s32 argB, u8 *argC, u8 *argD, s32 argE);
+void func_150FF9F4(u8 *arg0, s32 arg1, u8 arg2, s32 arg3);
+void func_150F79F0(f32 *, void *, void *, void *, u8, u8 *, f32, f32, f32, u8 *, u8, u8, u8, u8, s32, s8, s32, u8, u8,
+                   s32);
+void func_151D44C4(u8 *arg0, u8 arg1, s32 arg2);
+void func_151D49B8(u8 *, u8 *, s32, u8 *, f32, u8, s32);
+void func_151D56F8(u8 *arg0);
+
+// object_beam_fire: for an object with a muzzle node (func_150FF808, model node 0x82; nothing without one): updates the
+// node (func_151D56F8), reads the muzzle frame (func_150FF82C: position, two axes), aims the beam (func_150FF854 fills
+// the start / end points, the aim flag and the hit target / surface), spawns the beam effect (func_150F79F0: width 54,
+// 1/54, length 300, id 0x327 + rand % 5, hit flag = surface found) and, when the object has a matrix block (+0x1D4),
+// also the muzzle flash (func_151D44C4), the node-attached glow (func_151D49B8 on the node's matrix) and the impact
+// (func_150FF9F4).
+void func_150FF604(struct127 *obj, u8 arg1, s32 arg2) {
+    u8 aimed;
+    u8 *node;
+    s32 surface;
+    s32 target;
+    s32 hit[18];
+    f32 axisC4[3];
+    f32 axisD0[3];
+    f32 dirDC[3];
+    f32 posE8[3];
+    f32 axisF4[3];
+    f32 axis100[3];
+    f32 pos10C[3];
+    f32 end118[3];
+    f32 start124[3];
+    s32 has_surface;
+
+    node = func_150FF808((s32)obj);
+    if (node == NULL) {
+        return;
+    }
+    func_151D56F8((u8 *)obj);
+    func_150FF82C((s32)obj, (s32)pos10C, (s32)axis100, (s32)axisF4);
+    if (obj->unk1D4 != NULL) {
+        aimed = 1;
+    } else {
+        aimed = 0;
+    }
+    func_150FF854((u8 *)&aimed, (s32)hit, (u8 *)start124, (s32)posE8, (s32)dirDC, (u8 *)pos10C, (s32)axis100,
+                  (s32)axisF4, (s32)axisD0, (s32)axisC4, (s32)&target, (s32)&surface, (u8 *)end118, (u8 *)obj,
+                  (s32)node);
+    has_surface = 1;
+    if (surface == 0) {
+        has_surface = 0;
+    }
+    func_150F79F0(start124, pos10C, (void *)target, (void *)surface, has_surface, NULL, 54.000004f, 0.018518517f,
+                  300.0f, (u8 *)obj, 1, 1, 1, 0, 0x1A, 1, (u32)func_150ADA20() % 5 + 0x327, 0, arg1, arg2);
+    if (aimed == 0) {
+        return;
+    }
+    func_151D44C4((u8 *)start124, arg1, arg2);
+    func_151D49B8((u8 *)posE8, (u8 *)dirDC, (s32)((u8 *)obj->unk1D4 + node[2] * 64), (u8 *)obj, 1.0f, arg1, arg2);
+    func_150FF9F4((u8 *)start124, (s32)hit, arg1, arg2);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_12CAC0/func_150FF604.s")
+#endif
 
 u8 *func_150FF808(s32 arg0) {
     return func_15031C4C(arg0, 0x82, 0);

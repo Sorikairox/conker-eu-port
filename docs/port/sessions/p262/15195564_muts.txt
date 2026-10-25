@@ -1,0 +1,30 @@
+# P262 func_15195564 (character_hit_react) mutants: sed % setup names
+s/func_15190A88((u8 \*)target);/func_15190A88((u8 *)obj);/ % plain
+s/        case 0x00:/        case 0x05:/ % attach other
+s/        case 0x16:/        case 0x17:/ % noattach c17
+s/        case 0x3B:/        case 0x3A:/ % pl1 mid
+s/        case 0xB4:/        case 0xB5:/ % player0 top
+s/        case 0x9D:/        case 0x9E:/ % player
+s/            return;$/            break;/ % other
+s/if (D_800BE616 == 0) {/if (D_800BE616 != 0) {/ % plain attach
+s/func_1518FA8C((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 1);/func_1518FA8C((s32)target, 0, 0x12C, -1, -1, 8, 0, 0, 0xFF, 0);/ % plain
+s/0x12C, -1, -1, 8, 0, 0,/0x12C, -1, 0, 8, 0, 0,/ % plain
+s/rec\[0\] = 0x7D;/rec[0] = 0x7C;/ % attach
+s/rec\[1\] = 5;/;/ % attach
+s/if (obj->id == 0xFF \&\& obj->unk124 != 0) {/if (obj->id == 0xFF) {/ % player0
+s/if (obj->id == 0xFF \&\& obj->unk124 != 0) {/if (obj->id >= 0xFE \&\& obj->unk124 != 0) {/ % pl1
+s/D_800CC2D0\[obj->unk124 - 1\]/D_800CC2D0[obj->unk124]/ % player
+s/rec\[2\] = (s32)obj;/rec[2] = (s32)target;/ % attach
+s/0xFA, attached ? 0 : -1, attached ? 0 : -1, 8,/0xFA, attached ? 0 : -1, attached ? 0 : -1, 9,/ % attach
+s/0xFA, attached ? 0 : -1,/0xFA, attached ? 1 : -1,/ % attach
+s/0xFA, attached ? 0 : -1, attached ? 0 : -1,/0xFA, attached ? 0 : -1, attached ? 0 : -2,/ % noattach
+s/8, attached ? 1 : 0,/8, attached ? 2 : 0,/ % attach
+s/attached ? 0xC : 0, 0xFF, 1);/attached ? 0xC : 1, 0xFF, 1);/ % noattach
+s/attached ? 0xC : 0, 0xFF, 1);/attached ? 0xD : 0, 0xFF, 1);/ % attach
+s/        case 0x50:/        case 0x51:/ % nullret
+s/if (r != 0 \&\& attached) {/if (attached) {/ % nullret
+s/if (r != 0 \&\& attached) {/if (r != 0) {/ % noattach
+s/memcpy(r + 0x90, (s32)rec, 0xC);/memcpy(r + 0x8C, (s32)rec, 0xC);/ % attach
+s/memcpy(r + 0x90, (s32)rec, 0xC);/memcpy(r + 0x90, (s32)rec, 0x8);/ % attach
+s/if (target->unk31C != NULL) {/if (1) {/ % no31c
+s/((u8 \*)target->unk31C)\[0x1AC\] = 1;/((u8 *)target->unk31C)[0x1AC] = 2;/ % attach

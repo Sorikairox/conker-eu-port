@@ -1,0 +1,29 @@
+# P262 func_1514E88C (object_glow_attach) mutants: sed % setup names
+s/a.u4C = 3;/a.u4C = 2;/ % base
+s/a.u8C = 0x2012;/a.u8C = 0x12012;/ % base
+s/a.u91 = 0xFF;/a.u91 = 0xFE;/ % base
+s/a.u5D = 0xE6;/a.u5D = 0;/ % base
+s/a.u5F = 0xFF;/;/ % base
+s/a.u4E = 0x401;/a.u4E = 0x400;/ % base
+s/a.u7C = 0.0f;/a.u7C = 1.0f;/ % base
+s/b.uA4 = 45.0f;/b.uA4 = 55.0f;/ % base
+s/b.uB0 = 45.0f;/b.uB0 = 25.0f;/ % base
+s/b.uB8 = 0.5f;/b.uB8 = 0.9f;/ % base
+s/b.uC0 = 0.0f;/;/ % base
+s/b.uBC = 0.9f;/b.uBC = 0.90000004f;/ % base
+s/b.uC4 = 1e-06f;/b.uC4 = 1e-05f;/ % base
+s/c.u49 = obj->unique_id;/c.u49 = 0;/ % base
+s/c.u48 = 0xC;/c.u48 = 0xB;/ % base
+s/b.uFA = 0;/;/ % base
+s/c.u4A = 2;/c.u4A = 1;/ % base
+s/c.u34 = 100.0f;/c.u34 = -100.0f;/ % base
+s/c.u40 = 600.0f;/c.u40 = 60.0f;/ % base
+s/c.u44 = obj;/c.u44 = NULL;/ % base
+s/b.uEC = 1.0f;/b.uEC = 0.5f;/ % base
+s/\&c, 2, 3, 0, 0), obj, 7);/\&c, 2, 0, 0, 0), obj, 7);/ % base
+s/\&c, 2, 3, 0, 0), obj, 7);/\&c, 2, 3, 0, 0), obj, 9);/ % base
+s/light\[2\] = 150.0f;/light[2] = 15.0f;/ % base
+s/light\[0\] = 0.0f;/;/ % base
+s/func_15160A58(obj, 0xC,/func_15160A58(obj, 5,/ % base
+s/0x12C, 0x28, 0xFF, 0xB5, 0, 0xFF, 0, 2,/0x12C, 0x28, 0xFF, 0xB4, 0, 0xFF, 0, 2,/ % base
+s/0xFF, 0, 2, 0, 0, 0xFF, 1);/0xFF, 0, 1, 0, 0, 0xFF, 1);/ % base

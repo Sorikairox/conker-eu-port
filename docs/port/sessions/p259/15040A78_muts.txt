@@ -1,0 +1,27 @@
+# P259 func_15040A78 (dl_walk_call_handlers) mutants: sed % setup names
+s/for (i = 0; i < 16; i++) {/for (i = 0; i < 15; i++) {/ % base
+s/D_800C6860\[0\] = 0;/D_800C6860[0] = 1;/ % base
+s/if (end < cmd) {/if (end <= cmd) {/ % endfirst
+s/if (end < cmd) {/if (end < cmd - 8) {/ % endbefore
+s/if (cmd == from) {/if (cmd == from + 8) {/ % base
+s/            active = TRUE;/            active = FALSE;/ % base
+s/        if (active) {/        if (1) {/ % base
+s/D_80084840\[op\](cmd);/D_80084840[op](cmd + 8);/ % base
+s/D_80084840\[op\](cmd);/D_80084840[0](cmd);/ % base
+/if (cmd == end) {/,/}/s/active = FALSE;/active = TRUE;/ % endmid
+s/stack\[depth++\] = cmd + 8;/stack[depth++] = cmd;/ % base
+s/seg = (w1 >> 24) \& 0xF;/seg = (w1 >> 24) \& 0x7;/ % seg9
+s/seg = (w1 >> 24) \& 0xF;/seg = (w1 >> 28) \& 0xF;/ % base
+s/if (D_800C6860\[seg\] == -1) {/if (D_800C6860[seg] == 0) {/ % base seg0
+s/                depth--;/                ;/ % base
+s/(w1 \& 0xFFFFFF) + D_800C6860\[seg\]/(w1 \& 0xFFFFF) + D_800C6860[seg]/ % bigoff
+s/| 0x80000000);/| 0x80000008);/ % base
+s/cmd = stack\[--depth\];/cmd = stack[depth - 1];/ % base
+s/if (((w0 >> 16) \& 0xFF) == 6) {/if (((w0 >> 16) \& 0xFF) != 2) {/ % mwother base
+s/D_800C6860\[(s32) (w0 \& 0xFFFF) >> 2\] = w1;/D_800C6860[(s32) (w0 \& 0xFF) >> 2] = w1;/ % mwbig
+s/D_800C6860\[(s32) (w0 \& 0xFFFF) >> 2\] = w1;/D_800C6860[(s32) (w0 \& 0xFFFF) >> 2] = w1 + 1;/ % base
+s/case 0xDE:/case 0xDD:/ % base ops
+s/case 0xDF:/case 0xE7:/ % base
+s/case 0xDB:/case 0xDC:/ % base ops
+s/} while (cmd <= end || depth > 0);/} while (cmd < end || depth > 0);/ % base endfirst
+s/} while (cmd <= end || depth > 0);/} while (cmd <= end);/ % endsub nested

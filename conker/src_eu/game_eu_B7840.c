@@ -116,7 +116,71 @@ block_12:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508A040.s")
 #endif
+#ifdef NON_MATCHING
+// mode_pick_mid_range_object: P259: for player slot `player` of the mode state D_800D27D0, returns the index of the
+// object D_800CC2D0[i] (i < state count +0x10, state slot i != 3, bit i set in the mask +0x14 and bit 16 + i set in
+// the player's mask +0x16C0) whose ground distance to the player's object scores best on
+// 1 + sin((d - lo) * 2pi / (hi - lo) - pi/2), i.e. lies closest to the middle of [lo, hi] (d clamped to [lo, hi];
+// lo / hi = 750 / 3500, or 1500 / 8000 when the player's flag +0x15C is set); -1 when none qualifies.
+s32 func_1508A41C(s32 player) {
+    s8 *state = D_800D27D0;
+    s32 *slots = (s32 *) (state + 0xE64);
+    s32 mask = *(s32 *) (state + 0x14);
+    s32 count = *(s32 *) (state + 0x10);
+    f32 lo;
+    f32 hi;
+    f32 best = -1000000.0f;
+    f32 scale;
+    f32 dist;
+    f32 dx;
+    f32 dz;
+    f32 score;
+    s32 best_i = -1;
+    s32 bit;
+    s32 i;
+    struct127 *obj;
+
+    if (*(s32 *) (state + player * 4 + 0x15C) == 0) {
+        lo = 750.0f;
+        hi = 3500.0f;
+    } else {
+        lo = 1500.0f;
+        hi = 8000.0f;
+    }
+    for (i = 0; i < count; i++) {
+        bit = 1 << i;
+        if (slots[i] == 3 || !(mask & bit)) {
+            continue;
+        }
+        if (!(*(s32 *) (D_800D27D0 + player * 4 + 0x16C0) & (bit << 16))) {
+            continue;
+        }
+        scale = 6.2831855f / (hi - lo);
+        obj = &D_800CC2D0[i];
+        if (obj != NULL) {
+            dx = D_800CC2D0[player].x_position - obj->x_position;
+            dz = D_800CC2D0[player].z_position - obj->z_position;
+            dist = sqrtf(dx * dx + dz * dz);
+        } else {
+            dist = 32000.0f;
+        }
+        if (hi < dist) {
+            dist = hi;
+        }
+        if (dist < lo) {
+            dist = lo;
+        }
+        score = sinf((dist - lo) * scale + -1.5707964f) + 1.0f;
+        if (best < score) {
+            best = score;
+            best_i = i;
+        }
+    }
+    return best_i;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_B7840/func_1508A41C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_150859AC(s16, s32);

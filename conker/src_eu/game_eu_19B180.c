@@ -98,7 +98,101 @@ void func_1516DBE8(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+s32 func_15142E24(s32, s32, s32, s32, s32, s32, s32, u8, s32, u8 *, s32);
+Gfx *func_15142FBC(Gfx *, s32, s32, u8 *);
+u8 *func_15095B70(u8 *, u8 *);
+extern u8 *D_8008CDEC[];
+extern s16 D_800DD5EC; /* last sprite other-mode (1 / 2 / 3), shared with func_150A6D40 */
+extern s32 D_800D30BC; /* TLUT bit of the last loaded texture */
+extern u8 D_800D31C8;
+extern u8 D_800D31C9;
+extern u8 D_800D31CA;
+// tinted_sprite_draw: draw handler of the particle type whose tick is func_1516DBE8 (D_8008BBF8 / D_8008CD3C, same
+// slot as func_150A6D40). Loads the texture D_8008CDEC[+0x1A] frame +0x1B (func_15142E24), picks the combine mode
+// (2 for a texture of format 5 at +0xA, else 1; set only when it differs from D_800DD5EC, after a pipe sync), sets the
+// other mode 0x2C00 | TLUT | (0x100000 for mode 2), the colour D_800D31C8..CA from +0x1C..+0x1E and the env colour
+// +0x20..+0x22 (only when it differs from D_800DD5F8..FC; alpha 0), and draws the quad (+0xE..+0x16, alpha +0x1F)
+// with func_15095B70. Returns the advanced display list.
+// The asm leaves its other-mode word (sp+0x5C) uninitialised when the combine mode is unchanged (a stale stack
+// word); the C uses the word that belongs to the mode, i.e. what the previous draw of this mode set.
+u8 *func_1516DCA8(u8 *gfx, u8 *obj, s32 arg2) {
+    struct {
+        s16 x, y, z;
+        s16 sizeX, sizeZ;
+        u8 alpha;
+        u8 pad[2];
+        u8 flag;
+    } quad; /* sp84 */
+    s32 *tex;
+    s32 synced; /* the s32 at sp78; func_15142E24 / func_15142FBC see it as a byte */
+    s32 mode;
+    s32 other;
+    s32 r;
+    s32 g;
+    s32 b;
+
+    synced = 0;
+    D_800D31CB = 0;
+    tex = (s32 *) D_8008CDEC[obj[0x1A]];
+    gfx = (u8 *) func_15142E24((s32) gfx, (s32) tex, obj[0x1B] << 8, 2, 0x100, 0x100, 0, 6, (s32) &quad,
+                               (u8 *) &synced, 3);
+    if (((u8 *) tex)[0xA] == 5) {
+        mode = 2;
+    } else {
+        mode = 1;
+    }
+    other = (mode == 1) ? 0 : 0x100000;
+    if (mode != D_800DD5EC) {
+        if (synced == 0) {
+            ((s32 *) gfx)[0] = 0xE7000000; /* gDPPipeSync */
+            ((s32 *) gfx)[1] = 0;
+            gfx += 8;
+            synced = 1;
+        }
+        D_800DD5EC = mode;
+        if (mode == 1) {
+            ((s32 *) gfx)[0] = 0xFC30B261; /* gDPSetCombine */
+            ((s32 *) gfx)[1] = 0x5566FF7F;
+        } else {
+            ((s32 *) gfx)[0] = 0xFC30B5FF;
+            ((s32 *) gfx)[1] = 0x5FFEFE38;
+        }
+        gfx += 8;
+    }
+    gfx = (u8 *) func_15142FBC((Gfx *) gfx, other | D_800D30BC | 0x2C00, 0x5049DC, (u8 *) &synced);
+
+    quad.x = *(s16 *) (obj + 0xE);
+    quad.y = *(s16 *) (obj + 0x10);
+    quad.z = *(s16 *) (obj + 0x12);
+    quad.sizeX = *(s16 *) (obj + 0x14);
+    quad.sizeZ = *(s16 *) (obj + 0x16);
+    quad.flag = 0;
+    quad.alpha = obj[0x1F];
+    D_800D31C8 = obj[0x1C];
+    D_800D31C9 = obj[0x1D];
+    D_800D31CA = obj[0x1E];
+    r = obj[0x20];
+    g = obj[0x21];
+    b = obj[0x22];
+    if (r != D_800DD5F8 || g != D_800DD5FA || b != D_800DD5FC) {
+        D_800DD5F8 = r;
+        D_800DD5FA = g;
+        D_800DD5FC = b;
+        if (synced == 0) {
+            ((s32 *) gfx)[0] = 0xE7000000; /* gDPPipeSync */
+            ((s32 *) gfx)[1] = 0;
+            gfx += 8;
+        }
+        ((s32 *) gfx)[0] = 0xFB000000; /* gDPSetEnvColor(r, g, b, 0) */
+        ((s32 *) gfx)[1] = (r << 24) | (g << 16) | (b << 8);
+        gfx += 8;
+    }
+    return func_15095B70(gfx, (u8 *) &quad);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516DCA8.s")
+#endif
 
 void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA, u8 argB, u8 argC, u8 argD, u8 argE, u8 argF, u8 arg10, u8 arg11, u8 arg12, u8 arg13, u8 arg14, u8 arg15, u8 arg16, u8 arg17, u8 arg18, u8 arg19, u8 arg1A, s16 arg1B, s16 arg1C, s16 arg1D, s16 arg1E, u16 arg1F, u8 arg20, u8 arg21, u8 arg22, u8 arg23, s16 arg24, u16 arg25, u16 arg26, u8 arg27, u8 arg28, u8 arg29, u8 arg2A, u8 arg2B, s32 arg2C, u8 arg2D, u8 arg2E, u8 arg2F, s32 arg30) {
     s32 var_a0;
@@ -173,7 +267,67 @@ void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     func_1516DF0C(arg0 >> 0x10, arg0 & 0xFFFF, 0, arg2, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0, 8, 8, 1, 0, 0, 0, 0, 0x155, 0x155, 0x155, 0x155, arg1, 0x1E, 0, 0xFF, 0x28, 0x168, 0x18, 0x21, 4, 0, 1, 0, 0, 0, 0, 0, arg3, arg4);
 }
 
+#ifdef NON_MATCHING
+extern u8 D_800A71E0[]; /* glow level thresholds (descending) */
+extern u8 D_800A71EC[]; /* rgb per threshold */
+// glow_colour_update: handler 0 of D_8008CF40 (`s32 (u8 *)`). While +0x24 (the glow level) is set the fade +0x1F
+// rises by D_800BE9E4 * 32 up to 0xFF, else it falls by D_800BE9E4 * 16 down to 0; returns 1 (done) when both are 0.
+// The phase +0x14 advances by D_800BE9E4 * 10 (copied to +0x16). The level (+0x24 + 8, or fade >> 5 while fading
+// out) picks, from index +0x26 for 8 entries, the first threshold of D_800A71E0 at or below it, and the colour
+// +0x1C..+0x1E is that entry's rgb (D_800A71EC) blended with the previous entry's by the level's position between
+// the two thresholds. Returns 0.
+s32 func_1516EE3C(u8 *arg0) {
+    u8 on = arg0[0x24];
+    s32 fade = arg0[0x1F];
+    s32 level;
+    s32 i;
+    u8 *rgb;
+    f32 t;
+    f32 u;
+
+    if (on != 0) {
+        if (fade != 0xFF) {
+            fade += D_800BE9E4 << 5;
+            if (fade >= 0x100) {
+                fade = 0xFF;
+            }
+            arg0[0x1F] = fade;
+            on = arg0[0x24];
+        }
+    } else if (fade != 0) {
+        fade -= D_800BE9E4 << 4;
+        if (fade < 0) {
+            fade = 0;
+        }
+        arg0[0x1F] = fade;
+        on = arg0[0x24];
+    }
+    if (on == 0 && fade == 0) {
+        return 1;
+    }
+    *(s16 *) (arg0 + 0x14) += D_800BE9E4 * 10;
+    *(s16 *) (arg0 + 0x16) = *(s16 *) (arg0 + 0x14);
+    if (on == 0) {
+        level = arg0[0x1F] >> 5;
+    } else {
+        level = on + 8;
+    }
+    for (i = arg0[0x26]; i < arg0[0x26] + 8; i++) {
+        if (level >= D_800A71E0[i]) {
+            t = (f32) (level - D_800A71E0[i]) / (f32) (D_800A71E0[i - 1] - D_800A71E0[i]);
+            u = 1.0f - t;
+            rgb = &D_800A71EC[i * 3];
+            arg0[0x1C] = (u32) (rgb[-3] * t + rgb[0] * u);
+            arg0[0x1D] = (u32) (rgb[-2] * t + rgb[1] * u);
+            arg0[0x1E] = (u32) (rgb[-1] * t + rgb[2] * u);
+            break;
+        }
+    }
+    return 0;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516EE3C.s")
+#endif
 
 s32 func_1516F21C(u8 *arg0) {
     s32 v;

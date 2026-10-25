@@ -6,7 +6,53 @@ extern u8 D_800A1D20[];
 #endif
 
 
+#ifdef NON_MATCHING
+extern u8 D_800CC82C;
+extern u8 D_800CC8BA;
+extern s32 *D_800DC3C4;
+s32 func_151149AC(u8);
+s32 func_15136C3C(void *, s32, s32, s32, s32, s32, s32, s32);
+s32 func_1507CD64(struct127 *, s32);
+void func_15196888(u8 *, s32, s32);
+
+// player_item_drop_check: unless the player's held object (D_800CCA0C, byte 0x120) is busy, checks items 0xFA and
+// 0xF9 (func_151149AC; entry index = (item - D_800DBEF4) / 160 into the flag words at D_800DC3C4). The first one
+// with bit 0 set: releases the player's current carried object (func_15060F28), clears D_800CC8BA and resets the
+// player (func_15136C3C, sound 0x627 via func_10010630, func_15145A50, mode 6 via func_1507CD64). Then the four
+// D_800BE4F0 nodes are offset by +-object 0xE's +0x2E4 value (func_15196888).
+void func_150F2FE0(s32 arg0) {
+    struct127 *o;
+    s32 off;
+    s32 i;
+    s32 item;
+
+    if (D_800CCA0C == NULL || D_800CCA0C[0x120] != 0) {
+        return;
+    }
+    for (i = 0; i < 2; i++) {
+        item = func_151149AC(0xFA - i);
+        if (D_800DC3C4[(item - (s32) D_800DBEF4) / 160] & 1) {
+            if (D_800CC82C != 0) {
+                func_15060F28((struct127 *) ((u8 *) D_800CC2D0 + (D_800CC82C - 100) * 0x32C), 0);
+            }
+            D_800CC8BA = 0;
+            func_15136C3C(D_800CC2D0, 0, 0, 1, 1, 0, 0xFF, 1);
+            func_10010630(0x627, D_800CC2D0, 0x6D60, 0x1F4, 0x3E8);
+            func_15145A50(D_800CC2D0);
+            func_1507CD64(D_800CC2D0, 6);
+            break;
+        }
+    }
+    o = func_15083E90(0xE);
+    off = (o != NULL) ? *(s32 *) ((u8 *) o + 0x2E4) : 0;
+    func_15196888(((u8 **) D_800BE4F0)[0], off, 0);
+    func_15196888(((u8 **) D_800BE4F0)[1], 0, -off);
+    func_15196888(((u8 **) D_800BE4F0)[2], off, 0);
+    func_15196888(((u8 **) D_800BE4F0)[3], -off, 0);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1207F0/func_150F2FE0.s")
+#endif
 
 void func_150F320C(u8 *arg0) {
     struct {

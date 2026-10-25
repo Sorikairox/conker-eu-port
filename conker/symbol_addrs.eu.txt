@@ -993,6 +993,7 @@ func_1506C43C                   = 0x1506C7FC; // type:func
 func_1506C460                   = 0x1506C820; // type:func
 func_1506CE6C                   = 0x1506D22C; // type:func
 func_1506D2E8                   = 0x1506D6A8; // type:func
+func_1506D4EC                   = 0x1506D8AC; // type:func
 func_1506D4F4                   = 0x1506D8B4; // type:func
 func_1506D538                   = 0x1506D8F8; // type:func
 func_1506D570                   = 0x1506D930; // type:func

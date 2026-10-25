@@ -1006,7 +1006,93 @@ s32 func_15198D3C(u8 *arg0) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198D3C.s")
 #endif
 
+#ifdef NON_MATCHING
+void func_1518403C(s32);
+s32 func_1510FE58(s32, s32, s32, s32 *);
+extern u8 D_8008FC40[3];
+// path_hit_scene_nodes: path handler 1 of D_8008FC20 (`s32 (*)(u8 *)`, result tested by the path updater). Returns 0
+// when the owner's (**(arg0 + 0x98)) attachment +0x31C is missing, or (clearing bit 0x100 of the owner's u16
+// +0x2F8) when that attachment's +0x58 is not 1. Otherwise, for the three scene-node lists D_800DD280[0][t] with
+// t from D_8008FC40, it walks each list (safe iteration through D_800DD5C8[++D_800DD5C0]) and, from the path's head
+// point +0x2E back to the current point +0x2D (ring of +0x25 points of 0x24 bytes at +0x94, radius f32 +0x18), hits
+// the node when its position (+0x98 / +0x9C / +0xA0) is within radius^2 + 900 of a point: sound func_1518403C(5),
+// func_15168B10(node, 0x18), state +0xED = 5, +0x94 = D_800DDE80[27], s16 +0x92 = 9, +0xB8 = +0xA8 = 40, +0xB4 = 0,
+// +0xC8 = func_1510FE58 at the node's position (then +0x91 = 4). As in the asm, the walk index is set once per list,
+// so only the first node of each list sees the points (later nodes start at +0x2D). Returns 1.
+s32 func_15198EEC(u8 *arg0) {
+    u8 *points = *(u8 **) (arg0 + 0x94);
+    u8 *owner = **(u8 ***) (arg0 + 0x98);
+    u8 *att = *(u8 **) (owner + 0x31C);
+    u8 types[3];
+    struct_eu_node *node;
+    u8 *n;
+    f32 pt[3];
+    f32 nx, ny, nz;
+    f32 dx, dy, dz;
+    f32 r;
+    s32 i;
+    s32 k;
+    s32 v;
+
+    types[0] = D_8008FC40[0];
+    types[1] = D_8008FC40[1];
+    types[2] = D_8008FC40[2];
+    if (att == NULL) {
+        return 0;
+    }
+    if (att[0x58] != 1) {
+        *(u16 *) (owner + 0x2F8) &= 0xFEFF;
+        return 0;
+    }
+    for (k = 0; k < 3; k++) {
+        node = D_800DD280[0][types[k]];
+        if (node == NULL) {
+            continue;
+        }
+        i = *(s8 *) (arg0 + 0x2E);
+        D_800DD5C0++;
+        while (node != NULL) {
+            n = (u8 *) node;
+            D_800DD5C8[D_800DD5C0] = node->next;
+            nx = *(f32 *) (n + 0x98);
+            ny = *(f32 *) (n + 0x9C);
+            nz = *(f32 *) (n + 0xA0);
+            while (i != *(s8 *) (arg0 + 0x2D)) {
+                i--;
+                if (i < 0) {
+                    i = arg0[0x25] - 1;
+                }
+                pt[0] = ((f32 *) (points + i * 0x24))[0];
+                pt[1] = ((f32 *) (points + i * 0x24))[1];
+                pt[2] = ((f32 *) (points + i * 0x24))[2];
+                r = ((f32 *) (points + i * 0x24))[6];
+                dx = pt[0] - nx;
+                dy = pt[1] - ny;
+                dz = pt[2] - nz;
+                if (dx * dx + dy * dy + dz * dz < r * r + 900.0f) {
+                    func_1518403C(5);
+                    func_15168B10((s32) node, 0x18);
+                    n[0xED] = 5;
+                    *(s32 *) (n + 0x94) = D_800DDE80[27];
+                    *(s16 *) (n + 0x92) = 9;
+                    *(f32 *) (n + 0xB8) = 40.0f;
+                    *(f32 *) (n + 0xA8) = 40.0f;
+                    *(f32 *) (n + 0xB4) = 0.0f;
+                    v = func_1510FE58((s32) *(f32 *) (n + 0x98), (s32) *(f32 *) (n + 0x9C), (s32) *(f32 *) (n + 0xA0),
+                                      NULL);
+                    n[0x91] = 4;
+                    *(f32 *) (n + 0xC8) = v;
+                }
+            }
+            node = D_800DD5C8[D_800DD5C0];
+        }
+        D_800DD5C0--;
+    }
+    return 1;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15198EEC.s")
+#endif
 
 #ifdef NON_MATCHING
 /* P163: D_8008FC30 is the one-entry start-sound table (FC34 / FC38 / FC3C are separate update / stop / extra tables,
@@ -1295,7 +1381,130 @@ void func_151999BC(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+struct225 *func_1519C60C(s32 arg0, f32 *arg1, u8 arg2, u8 arg3, u8 arg4, u8 arg5, u8 arg6, s32 arg7);
+void func_15145EA4(f32 **, f32 **, void *, s32);
+extern void (*D_8008FC44[])(u8 *); /* init: func_1519C428, func_1519CEB8, func_1519CEE0, func_1519CF08, func_1519C490 */
+extern u16 (*D_8008FC58[])(void);  /* start sound: func_1519C4FC */
+
+/* The 0x154-byte record copied into the spawned object's data (+0x98). */
+typedef struct {
+    /* 0x000 */ u8 *obj;
+    /* 0x004 */ u8 u04;
+    /* 0x005 */ u8 node;
+    /* 0x006 */ u8 pad06[2];
+    /* 0x008 */ f32 at[3];   /* two points in the node's space */
+    /* 0x014 */ f32 at2[3];
+    /* 0x020 */ u8 u20[0x14];
+    /* 0x034 */ s8 initFn;   /* D_8008FC44 index or -1 */
+    /* 0x035 */ u8 u35[2];
+    /* 0x037 */ s8 soundFn;  /* D_8008FC58 index or -1 */
+    /* 0x038 */ u8 u38[2];
+    /* 0x03A */ u8 u3A;
+    /* 0x03B */ u8 u3B[0x11];
+    /* 0x04C */ s32 u4C[0x31]; /* copy of the spec's +0x58..+0x11C */
+    /* 0x110 */ f32 pos[3];  /* world positions of at / at2 */
+    /* 0x11C */ f32 pos2[3];
+    /* 0x128 */ f32 u128;
+    /* 0x12C */ f32 u12C;
+    /* 0x130 */ u16 voice;
+    /* 0x134 */ f32 u134;
+    /* 0x138 */ f32 u138;
+    /* 0x13C */ f32 u13C;
+    /* 0x140 */ f32 u140;
+    /* 0x144 */ f32 u144;
+    /* 0x148 */ s32 u148;
+    /* 0x14C */ f32 u14C;
+    /* 0x150 */ u8 flags;
+    /* 0x151 */ u8 u151;
+    /* 0x152 */ s16 u152;
+} Emitter2Record;
+
+/* The request func_15147FF0 reads. */
+typedef struct {
+    /* 0x00 */ f32 pos[3];
+    /* 0x0C */ s16 kind;
+    /* 0x0E */ s16 u0E;
+    /* 0x10 */ s32 u10;
+    /* 0x14 */ u8 u14;
+    /* 0x15 */ u8 u15;
+} Emitter2Request;
+
+// spec_emitter_spawn: spawns a type-0x12C emitter object from a spec (arg1: +0 kind byte, +4.. the record head with
+// the attach object, node and two local points, +0x50..+0x53 trail parameters, +0x54 flags, +0x58.. the rest of the
+// record) with arg0 extra data bytes (func_15147FF0 size arg0 + 0x158, layer / owner arg2 / arg3). Returns 0 when the
+// object has no model matrices (+0x1D4) or no object is free. The two points are transformed by the node's matrix
+// (func_15145EA4); the first is the spawn position. Spec flags 2 / 4 / 8 / 0x10 become record flags 2 / 4 / 8 / 0x20.
+// After copying the record into the new object it stores the start sound's voice (D_8008FC58), runs the init handler
+// (D_8008FC44) and, with spec flag 1, starts a trail (func_1519C60C) whose handle goes to +0x148.
+u8 *func_15199A28(s32 arg0, u8 *spec, u8 arg2, s32 arg3) {
+    Emitter2Record rec;
+    Emitter2Request req;
+    f32 *src[2];
+    f32 *dst[2];
+    Emitter2Record *data;
+    u8 *e;
+    s32 i;
+    u8 fl;
+
+    if (*(u8 **) (*(u8 **) (spec + 4) + 0x1D4) == NULL) {
+        return NULL;
+    }
+    req.kind = 0x12C;
+    req.u0E = 0x12;
+    req.u15 = *(s32 *) spec;
+    req.u10 = 0xE;
+    req.u14 = 0;
+    for (i = 0; i < 0x4C / 4; i++) {
+        ((s32 *) &rec)[i] = ((s32 *) (spec + 4))[i];
+    }
+    src[0] = rec.at;
+    src[1] = rec.at2;
+    dst[0] = rec.pos;
+    dst[1] = rec.pos2;
+    func_15145EA4(src, dst, *(u8 **) (rec.obj + 0x1D4) + (rec.node << 6), 2);
+    req.pos[0] = rec.pos[0];
+    req.pos[1] = rec.pos[1];
+    req.pos[2] = rec.pos[2];
+    rec.u128 = 0.0f;
+    rec.u12C = 0.0f;
+    rec.u140 = rec.u3A;
+    rec.u144 = -16384.0f;
+    for (i = 0; i < 0x31; i++) {
+        rec.u4C[i] = ((s32 *) (spec + 0x58))[i];
+    }
+    rec.u134 = 0.0f;
+    rec.u138 = 0.0f;
+    rec.u13C = 0.0f;
+    rec.u14C = 0.0f;
+    fl = spec[0x54];
+    rec.flags = ((fl & 0x10) ? 0x20 : 0) | ((fl & 2) ? 2 : 0) | ((fl & 4) ? 4 : 0) | ((fl & 8) ? 8 : 0);
+    rec.u152 = 0;
+    rec.u151 = 0;
+
+    e = func_15147FF0(&req, arg0 + 0x158, 0x28, 0xC, 0xC, 0xC, 0, 0, 0, arg2, arg3);
+    if (e != NULL) {
+        data = *(Emitter2Record **) (e + 0x98);
+        memcpy(data, &rec, sizeof(Emitter2Record));
+        if (rec.soundFn != -1) {
+            data->voice = D_8008FC58[rec.soundFn]();
+        } else {
+            data->voice = 0;
+        }
+        if (rec.initFn != -1) {
+            D_8008FC44[rec.initFn](e);
+        }
+        if (spec[0x54] & 1) {
+            data->u148 = (s32) func_1519C60C((s32) e, req.pos, spec[0x50], spec[0x51], spec[0x52], spec[0x53], arg2, arg3);
+        } else {
+            data->u148 = 0;
+        }
+    }
+    return e;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_15199A28.s")
+#endif
 
 void func_15199834(u8 *arg0) {
     struct {
@@ -2137,7 +2346,213 @@ s32 func_1519CF08(s32 arg0) {
     return 0;
 }
 
+#ifdef NON_MATCHING
+/* The emitter spec func_15199A28 reads (0x11C bytes; only the fields this caller fills are named). */
+typedef struct {
+    /* 0x000 */ s32 u000;
+    /* 0x004 */ u8 *u004;
+    /* 0x008 */ u8 u008;
+    /* 0x009 */ u8 u009;
+    /* 0x00A */ u8 pad00A[2];
+    /* 0x00C */ f32 u00C;
+    /* 0x010 */ f32 u010;
+    /* 0x014 */ f32 u014;
+    /* 0x018 */ f32 u018;
+    /* 0x01C */ f32 u01C;
+    /* 0x020 */ f32 u020;
+    /* 0x024 */ f32 u024;
+    /* 0x028 */ f32 u028;
+    /* 0x02C */ f32 u02C;
+    /* 0x030 */ f32 u030;
+    /* 0x034 */ f32 u034;
+    /* 0x038 */ s8 u038;
+    /* 0x039 */ u8 u039;
+    /* 0x03A */ s8 u03A;
+    /* 0x03B */ s8 u03B;
+    /* 0x03C */ u8 u03C;
+    /* 0x03D */ u8 u03D;
+    /* 0x03E */ u8 u03E;
+    /* 0x03F */ u8 pad03F[1];
+    /* 0x040 */ f32 u040;
+    /* 0x044 */ f32 u044;
+    /* 0x048 */ f32 u048;
+    /* 0x04C */ u8 u04C;
+    /* 0x04D */ u8 pad04D[3];
+    /* 0x050 */ u8 u050;
+    /* 0x051 */ u8 u051;
+    /* 0x052 */ u8 u052;
+    /* 0x053 */ u8 u053;
+    /* 0x054 */ u8 u054;
+    /* 0x055 */ u8 pad055[3];
+    /* 0x058 */ f32 u058;
+    /* 0x05C */ f32 u05C;
+    /* 0x060 */ s16 u060;
+    /* 0x062 */ s16 u062;
+    /* 0x064 */ f32 u064;
+    /* 0x068 */ f32 u068;
+    /* 0x06C */ f32 u06C;
+    /* 0x070 */ f32 u070;
+    /* 0x074 */ f32 u074;
+    /* 0x078 */ f32 u078;
+    /* 0x07C */ f32 u07C;
+    /* 0x080 */ f32 u080;
+    /* 0x084 */ f32 u084;
+    /* 0x088 */ f32 u088;
+    /* 0x08C */ s16 u08C;
+    /* 0x08E */ s16 u08E;
+    /* 0x090 */ f32 u090;
+    /* 0x094 */ u8 u094;
+    /* 0x095 */ u8 u095;
+    /* 0x096 */ u8 pad096[2];
+    /* 0x098 */ f32 u098;
+    /* 0x09C */ f32 u09C;
+    /* 0x0A0 */ f32 u0A0;
+    /* 0x0A4 */ f32 u0A4;
+    /* 0x0A8 */ f32 u0A8;
+    /* 0x0AC */ f32 u0AC;
+    /* 0x0B0 */ s32 u0B0;
+    /* 0x0B4 */ s32 u0B4;
+    /* 0x0B8 */ s16 u0B8;
+    /* 0x0BA */ s16 u0BA;
+    /* 0x0BC */ f32 u0BC;
+    /* 0x0C0 */ f32 u0C0;
+    /* 0x0C4 */ f32 u0C4;
+    /* 0x0C8 */ f32 u0C8;
+    /* 0x0CC */ f32 u0CC;
+    /* 0x0D0 */ f32 u0D0;
+    /* 0x0D4 */ f32 u0D4;
+    /* 0x0D8 */ s16 u0D8;
+    /* 0x0DA */ s16 u0DA;
+    /* 0x0DC */ s16 u0DC;
+    /* 0x0DE */ s16 u0DE;
+    /* 0x0E0 */ f32 u0E0;
+    /* 0x0E4 */ f32 u0E4;
+    /* 0x0E8 */ f32 u0E8;
+    /* 0x0EC */ f32 u0EC;
+    /* 0x0F0 */ f32 u0F0;
+    /* 0x0F4 */ s16 u0F4;
+    /* 0x0F6 */ s16 u0F6;
+    /* 0x0F8 */ s16 u0F8;
+    /* 0x0FA */ s16 u0FA;
+    /* 0x0FC */ f32 u0FC;
+    /* 0x100 */ f32 u100;
+    /* 0x104 */ f32 u104;
+    /* 0x108 */ f32 u108;
+    /* 0x10C */ f32 u10C;
+    /* 0x110 */ f32 u110;
+    /* 0x114 */ f32 u114;
+    /* 0x118 */ s16 u118;
+    /* 0x11A */ s16 u11A;
+} Emitter2Spec;
+
+// trail_emitter_spawn: handler 7 of D_8008A860 (`void (u8 *)`): spawns the type-0xF trail emitter (func_15199A28
+// with 8 extra bytes, layer arg0[0xC], owner arg0[1]) attached to node 9 of the owner (+0x28) from a spec filled
+// with this effect's constants (two local points, colours 0x3C / 0xFF / 0xEB / 0x52, flags 0xF = trail + record
+// flags 2 / 4 / 8, start sound 0, no init handler), then copies the 8 bytes at +0x30 into the new object's extra
+// data (data +0x158).
+u8 *func_15199A28(s32 arg0, u8 *spec, u8 arg2, s32 arg3);
+void func_1519CF34(u8 *arg0) {
+    Emitter2Spec spec;
+    u8 *obj = *(u8 **) (arg0 + 0x28);
+    u8 *e;
+
+    spec.u000 = 0xF;
+    spec.u004 = obj;
+    spec.u008 = obj[0x3B];
+    spec.u009 = 9;
+    spec.u00C = 7.0f;
+    spec.u010 = -147.0f;
+    spec.u014 = 54.0f;
+    spec.u018 = 7.0f;
+    spec.u01C = -228.0f;
+    spec.u020 = 80.0f;
+    spec.u024 = 0.87f;
+    spec.u028 = 0.697f;
+    spec.u02C = 703.0f;
+    spec.u030 = 8.400001f;
+    spec.u034 = 6.6f;
+    spec.u038 = -1;
+    spec.u039 = 0;
+    spec.u03A = -1;
+    spec.u03B = 0;
+    spec.u03C = 0;
+    spec.u03D = 0;
+    spec.u03E = 200;
+    spec.u040 = 0.56f;
+    spec.u044 = -234.0f;
+    spec.u048 = 9.58f;
+    spec.u04C = 0;
+    spec.u050 = 0x3C;
+    spec.u051 = 0xFF;
+    spec.u052 = 0xEB;
+    spec.u053 = 0x52;
+    spec.u054 = 0xF;
+    spec.u058 = 0.00195f;
+    spec.u05C = 0.0069999998f;
+    spec.u060 = 0x14;
+    spec.u062 = 0xD;
+    spec.u064 = 0.503f;
+    spec.u068 = 0.29900002f;
+    spec.u06C = 0.512f;
+    spec.u070 = 0.39200002f;
+    spec.u074 = 0.555f;
+    spec.u078 = 0.708f;
+    spec.u07C = 0.042000003f;
+    spec.u080 = 0.34100002f;
+    spec.u084 = 0.973477f;
+    spec.u088 = 0.975986f;
+    spec.u08C = 0xC;
+    spec.u08E = 0x15;
+    spec.u090 = 0.43600002f;
+    spec.u094 = 100;
+    spec.u095 = 80;
+    spec.u098 = 0.006f;
+    spec.u09C = 7.0f;
+    spec.u0A0 = -218.0f;
+    spec.u0A4 = 150.0f;
+    spec.u0A8 = 0.20400001f;
+    spec.u0AC = 0.40300003f;
+    spec.u0B0 = 4;
+    spec.u0B4 = 3;
+    spec.u0B8 = 0x32;
+    spec.u0BA = 0x15;
+    spec.u0BC = 4.0f;
+    spec.u0C0 = 6.0f;
+    spec.u0C4 = 0.1f;
+    spec.u0C8 = 0.1f;
+    spec.u0CC = 50.0f;
+    spec.u0D0 = 0.31100002f;
+    spec.u0D4 = 0.30800003f;
+    spec.u0D8 = 0x50;
+    spec.u0DA = 0xAF;
+    spec.u0DC = 0x16;
+    spec.u0DE = 0xB;
+    spec.u0E0 = 7.0f;
+    spec.u0E4 = -218.0f;
+    spec.u0E8 = 150.0f;
+    spec.u0EC = 0.05f;
+    spec.u0F0 = 0.351f;
+    spec.u0F4 = 0x3C;
+    spec.u0F6 = 0x14;
+    spec.u0F8 = 0x9B;
+    spec.u0FA = 0x64;
+    spec.u0FC = 134.0f;
+    spec.u100 = 120.0f;
+    spec.u104 = 0.05f;
+    spec.u108 = 0.060000002f;
+    spec.u10C = 43.0f;
+    spec.u110 = -0.25f;
+    spec.u114 = 0.178f;
+    spec.u118 = 0x17;
+    spec.u11A = 0xB;
+    e = func_15199A28(8, (u8 *) &spec, arg0[0xC], arg0[1]);
+    if (e != NULL) {
+        memcpy(*(u8 **) (e + 0x98) + 0x158, arg0 + 0x30, 8);
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1C3530/func_1519CF34.s")
+#endif
 
 void func_1519D2D4(u8 *arg0) {
     u8 *temp_v0 = *(u8 **)(arg0 + 0x28);

@@ -1,0 +1,20 @@
+# P263 func_151A88F0 (bolt_subdivide) mutants: sed % setup names
+s/while (hi - lo >= 2 \&\& depth > 0) {/while (hi - lo >= 1 \&\& depth > 0) {/ % tight
+s/while (hi - lo >= 2 \&\& depth > 0) {/while (hi - lo >= 2 \&\& depth >= 0) {/ % nodepth
+s/while (hi - lo >= 2 \&\& depth > 0) {/while (hi - lo >= 2) {/ % negdepth
+s/mid = lo + ((hi - lo) >> 1);/mid = lo + ((hi - lo + 1) >> 1);/ % span5
+s/mid = lo + ((hi - lo) >> 1);/mid = hi - ((hi - lo) >> 1);/ % span5 neg
+s/b = BOLT_PT(obj, hi);/b = BOLT_PT(obj, hi - 1);/ % span4
+s/dy = b\[1\] - a\[1\];/dy = a[1] - b[1];/ % span4
+s/dz = b\[2\] - a\[2\];/dz = b[2] - a[1];/ % span4
+s/(func_150ADA68() \* (amp + amp) + -amp) + (a\[0\] + dx \* 0.5f);/(func_150ADA68() * (amp + amp) + amp) + (a[0] + dx * 0.5f);/ % span4
+s/(func_150ADA68() \* (amp + amp) + -amp) + (a\[1\] + dy \* 0.5f);/(func_150ADA68() * amp + -amp) + (a[1] + dy * 0.5f);/ % span4
+s/BOLT_PT(obj, mid)\[2\] = a\[2\] + dz \* 0.5f;/BOLT_PT(obj, mid)[2] = a[2] + dz * 0.25f;/ % span4
+s/BOLT_PT(obj, mid)\[1\] = (func_150ADA68()/BOLT_PT(obj, mid)[2] = (func_150ADA68()/ % span4
+s/        depth--;/        ;/ % span4
+s/func_151A88F0(obj, lo, mid, amp, depth);/func_151A88F0(obj, mid, hi, amp, depth);/ % span4
+s/func_151A88F0(obj, lo, mid, amp, depth);/func_151A88F0(obj, lo, mid, amp * 0.5f, depth);/ % span4
+s/        lo = mid;/        hi = mid;/ % span4
+s/s16 hi, f32 amp, s16 depth) {/s16 hi, f32 amp, s32 depth) {/ % wide
+s/(u8 \*obj, s16 lo, s16 hi,/(u8 *obj, s16 lo, s32 hi,/ % wide
+s/(i) \* 0x18))/(i) * 0x14))/ % span4

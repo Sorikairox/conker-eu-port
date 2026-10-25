@@ -13,7 +13,7 @@ u8 *func_150B5DD0(u8 *arg0, s32 arg1) {
     (*(u16 *)((u8 *)arg0 + 2)) = *(u16 *)((u8 *)&D_800CC76A + (arg1 * 0x32C));
     return arg0 + 4;
 }
-void func_150B5F1C(f32 *, u8, u8);
+void func_150B5F1C(f32 *, u8, s32);
 void func_150B60E0(u8 *, u8 *);
 void func_150B5E30(u8 *arg0) {
     s32 pad; // fakematch: frame/spill slot padding
@@ -38,7 +38,133 @@ void func_150B5E30(u8 *arg0) {
     }
 }
 
+#ifdef NON_MATCHING
+void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2);
+s32 func_150B6314(u8 *, u8, s32);
+s32 func_151530A8(s32 *, u8, s32);
+
+// smoke_puff_spawn: like func_150B5C38 with other numbers: spawns particle record kind 5 / 5 at `pos`
+// (func_151530A8: 20, 10.08, -1.353, 0.731, 39, 35, life -31 / 80, colours 255 / 0, ...) and then the two follow-up
+// emitters func_150B6314 / func_150B64E0 at the same point.
+void func_150B5F1C(f32 *pos, u8 arg1, s32 arg2) {
+    struct {
+        s32 kind;
+        s32 sub;
+        f32 pos[3];
+        f32 u30;
+        f32 u34;
+        f32 u38;
+        f32 u3C;
+        f32 u40;
+        f32 u44;
+        s16 u48;
+        s16 u4A;
+        s16 u4C;
+        s16 u4E;
+        s32 u50;
+        s32 u54;
+        s16 u58;
+        s16 u5A;
+        s16 u5C;
+        s8 u5E;
+        s8 u5F;
+        s8 u60;
+        u8 u61;
+        u8 u62;
+        u8 u63;
+        u8 u64;
+        s8 u65;
+        s8 u66;
+        s8 u67;
+        s8 u68;
+        u8 u69;
+        u8 u6A;
+        u8 u6B;
+        u8 u6C;
+        s8 u6D;
+        s8 u6E;
+        s8 u6F;
+        s8 u70;
+        u8 u71;
+        s8 u72;
+        s8 u73;
+        s8 u74;
+        u8 pad75[0x3];
+        s32 u78;
+        s32 u7C;
+        s16 u80;
+        s16 u82;
+        s16 u84;
+        s8 u86;
+        u8 pad87[0x1];
+        f32 u88;
+        s8 u8C;
+        s8 u8D;
+        s8 u8E;
+        s8 u8F;
+    } rec;
+
+    rec.kind = 5;
+    rec.sub = 5;
+    rec.pos[0] = pos[0];
+    rec.pos[1] = pos[1];
+    rec.pos[2] = pos[2];
+    rec.u30 = 20.0f;
+    rec.u34 = 10.08f;
+    rec.u38 = -1.353f;
+    rec.u3C = 0.731f;
+    rec.u40 = 39.0f;
+    rec.u44 = 35.0f;
+    rec.u48 = 0;
+    rec.u4A = 0xFF;
+    rec.u4C = -0x1F;
+    rec.u4E = 0x50;
+    rec.u50 = 3;
+    rec.u54 = 2;
+    rec.u58 = 0x14;
+    rec.u5A = 0x1E;
+    rec.u5C = 1;
+    rec.u5E = 4;
+    rec.u5F = 2;
+    rec.u60 = 3;
+    rec.u61 = 0xFF;
+    rec.u62 = 0xFF;
+    rec.u63 = 0xFF;
+    rec.u64 = 0xFF;
+    rec.u65 = 0;
+    rec.u66 = 0;
+    rec.u67 = 0;
+    rec.u68 = 0;
+    rec.u69 = 0xFF;
+    rec.u6A = 0xFF;
+    rec.u6B = 0xFF;
+    rec.u6C = 0xFF;
+    rec.u6D = 0;
+    rec.u6E = 0;
+    rec.u6F = 0;
+    rec.u70 = 0;
+    rec.u71 = 0xFF;
+    rec.u72 = 0;
+    rec.u73 = 3;
+    rec.u74 = 0x24;
+    rec.u78 = 0x200005;
+    rec.u7C = 0x60600;
+    rec.u80 = 8;
+    rec.u82 = 0x1F;
+    rec.u84 = 1;
+    rec.u86 = 0;
+    rec.u88 = 1.0f;
+    rec.u8C = -1;
+    rec.u8D = 0;
+    rec.u8E = -1;
+    rec.u8F = -1;
+    func_151530A8(&rec.kind, arg1, arg2);
+    func_150B6314((u8 *)pos, arg1, arg2);
+    func_150B64E0((u8 *)pos, arg1, arg2);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B5F1C.s")
+#endif
 
 typedef struct { s32 x, y, z; } V3i;
 void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2);
@@ -282,7 +408,13 @@ void func_150B64E0(u8 *arg0, u8 arg1, s32 arg2) {
 }
 
 void func_150B60E0(u8 *arg0, u8 *arg1) {
+#ifdef NON_MATCHING
+    /* D_800A0000 = {0, -205, 0} sits in func_150B696C's GLOBAL_ASM rodata (default build only) */
+    static const f32 D_800A0000_vec[3] = { 0.0f, -205.0f, 0.0f };
+    func_15143134((void *) D_800A0000_vec, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
+#else
     func_15143134(D_800A0000, arg1, (*(s32 *)((u8 *)arg0 + 0x1D4)) + 0x140);
+#endif
 }
 
 #ifdef NON_MATCHING
@@ -383,7 +515,90 @@ void func_150B6930(struct102 *arg0, s32 arg1, u8 arg2) {
     }
 }
 
+#ifdef NON_MATCHING
+/* func_150B696C's ROM statics (D_800A000C ... D_800A005C, the default build keeps them in its GLOBAL_ASM rodata) */
+static const f32 D_800A000C_nm[3][3] = {
+    { 0.0f, 0.0f, 0.0f }, { 2325.0f, 2915.0f, 904.0f }, { -1815.0f, 1412.0f, -3192.0f },
+};
+static const f32 D_800A0030_nm[3] = { -3.71f, -1.302f, -1.302f };
+static const f32 D_800A003C_nm[3] = { 1.84f, 1.5430001f, 1.5430001f };
+static const f32 D_800A0048_nm[3] = { 47.0f, 130.0f, 130.0f };
+static const s16 D_800A0054_nm[3] = { 30, 70, 70 };
+static const s32 D_800A005C_nm[3] = { 20, 50, 50 };
+s32 func_150B443C(void *, f32 *, s16);
+void func_15143794(s16, s16, f32, f32 *);
+
+// cutscene_beam_spawn: spawns effect record `kind` (0..2) through func_150B443C: kind 0 starts at a random-ish
+// point (func_151423D8 samples * 10, y 3) aimed at (1005 - 150 s, 351, -1706 - 150 s); kinds 1 / 2 start at a
+// func_15143794 direction point (-69 / 28 or 24 / 15, length 9.35) aimed at a fixed ROM target. The per-kind
+// sizes / colours / timings come from the function's ROM tables.
+void func_150B696C(u8 kind) {
+    struct {
+        f32 pos[3];
+        f32 u0C;
+        u8 u10;
+        f32 u14;
+        f32 u18;
+        u8 u1C;
+        f32 u20;
+        u8 u24;
+        s16 u26;
+        f32 u28;
+        f32 u2C;
+        u8 u30;
+        u8 u31;
+        u8 u32;
+        u8 u33;
+        u8 u34;
+        u8 u35;
+        s16 u36;
+        u8 u38;
+        f32 u3C;
+    } rec;
+    f32 to[3];
+
+    if (kind == 0) {
+        rec.pos[0] = func_151423D8(0xAA) * 10.0f;
+        rec.pos[1] = 3.0f;
+        rec.pos[2] = func_151423D8(0xEA) * 10.0f;
+        to[0] = 1005.0f - func_151423D8(0xAA) * 150.0f;
+        to[1] = 351.0f;
+        to[2] = -1706.0f - func_151423D8(0xEA) * 150.0f;
+    } else if (kind == 1) {
+        func_15143794(-0x45, 0x1C, 9.3499994f, rec.pos);
+        to[0] = D_800A000C_nm[kind][0];
+        to[1] = D_800A000C_nm[kind][1];
+        to[2] = D_800A000C_nm[kind][2];
+    } else {
+        func_15143794(0x18, 0xF, 9.3499994f, rec.pos);
+        to[0] = D_800A000C_nm[kind][0];
+        to[1] = D_800A000C_nm[kind][1];
+        to[2] = D_800A000C_nm[kind][2];
+    }
+    rec.u0C = D_800A0030_nm[kind];
+    rec.u10 = 4;
+    rec.u14 = 3.3f;
+    rec.u18 = 0.7f;
+    rec.u1C = 6;
+    rec.u20 = 0.4f;
+    rec.u24 = 0x80;
+    rec.u26 = 0xFF;
+    rec.u28 = D_800A003C_nm[kind];
+    rec.u2C = D_800A0048_nm[kind];
+    rec.u30 = 2;
+    rec.u31 = 5;
+    rec.u32 = 5;
+    rec.u33 = 0x33;
+    rec.u34 = 3;
+    rec.u35 = 0x55;
+    rec.u36 = D_800A0054_nm[kind];
+    rec.u38 = 0;
+    rec.u3C = 0.3f;
+    func_150B443C(&rec, to, D_800A005C_nm[kind]);
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_E35E0/func_150B696C.s")
+#endif
 
 s32 func_150B6BBC(u8 *arg0) {
     u8 *p = *(u8 **)(arg0 + 0x18);

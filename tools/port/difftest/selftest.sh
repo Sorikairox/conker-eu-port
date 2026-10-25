@@ -3,6 +3,7 @@
 # usage: tools/port/difftest/selftest.sh   (after eval "$(tools/eu_port/wt.sh env <name>)")
 . "$(dirname "${BASH_SOURCE[0]}")/../portguard.sh"  # wrong-checkout guard (P7)
 R=${CONKER_ROOT:-$HOME/conker}; T=$R/conker/build/difftest_self; mkdir -p $T
+export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 ext() { python3 - "$R/conker/$1" "$2" <<'PY'
 import sys,re
 src=open(sys.argv[1]).read(); f=sys.argv[2]
@@ -19,6 +20,10 @@ if [ ! -d "$R/port_work/pyuc201/unicorn" ] && [ -z "$DIFFTEST_UNICORN" ]; then
   echo "ERROR: no pinned unicorn in $R/port_work/pyuc201: docker exec \$CONKERDEV pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1"; exit 2
 fi
 pass=0; fail=0
+# P260 preflight: name the environment causes that turned cases red before (P233 unpinned Unicorn: faults at pc 0 next
+# to FPU code; P260 stale bind-mount view after a Docker restart: re-used mutant paths compiled truncated -> CERR).
+pf=$(docker exec -w /conker/conker ${CONKERDEV:-conkerdev} python3 -c "import sys; sys.path.insert(0, '../port_work/pyuc201'); import unicorn; print(unicorn.__version__)" 2>&1 | tail -1)
+case "$pf" in 2.0.1*) echo "preflight: unicorn $pf (pinned port_work/pyuc201)";; *) echo "FAIL preflight: unicorn '$pf', want the pinned 2.0.1 in port_work/pyuc201 (orchestrator.md: pip3 install --target /conker/port_work/pyuc201 unicorn==2.0.1.post1)"; fail=$((fail+1));; esac
 C=$R/tools/port/difftest/cases
 chkc() { # expect func case-file [sed-expr]: a draft kept in tools/port/difftest/cases
   local exp=$1 f=$2 cf=$C/$2.c ex=$3 out
@@ -290,4 +295,30 @@ chkce EQUIV  func_150C5A68 "$S5A68"
 chkce DIFFER func_150C5A68 "$S5A68 DIFFTEST_JALRFPR_OLD=1"
 chkce DIFFER func_150C5A68 "$S5A68" 's/D_80088B00\[\*(s8 \*) (o + 0x30)\](o) == 0/D_80088B00[*(s8 *) (o + 0x30)](o + 4) == 0/'
 TRIALS=1 chkce KNOBERROR func_150C5A68 "$S5A68 DIFFTEST_OUTW=150C6088=0:1,150C6088=1:2"
+# P256: DIFFTEST_ARGMEM "N*OFF:LEN" compares LEN bytes at the pointer stored at aN + OFF (func_15104A80's key holds a
+# stack copy of a 9-byte part list; the pointer itself differs between the builds, so only the deref sees a swapped list).
+S4A80="DIFFTEST_ROMDATA=1 DIFFTEST_STKFILL=A5A5A5A5 DIFFTEST_ARG=0=804100A0 DIFFTEST_POKE=800DC324=80410000,800DC3C4=80420000,80420004=0000000C,80410110=0000F800,800CCD48=00000000,800CD074=00000001 DIFFTEST_ARGMEM=15149A50=0:4,15149A50=0+8:4,15149A50=0*4:9"
+chkce EQUIV  func_15104A80 "$S4A80"
+chkce DIFFER func_15104A80 "$S4A80" 's/parts = D_800A275C;/parts = D_800A2768;/'
+# P259: knob keys that are no jal / j target of the reference are flagged statically ("[knob not a jal target of the
+# reference ...]"), also when no trial reaches the call (P256 keyed ARGMEM on func_151494E0's US address 151494E0; its
+# EU jal target is 15149A50, and the compare silently did nothing). chkcn: want yes|no, func, env, substring.
+chkcn() {
+  local want=$1 f=$2 ev=$3 pat=$4 cf=$C/$2.c out has=no
+  out=$(set -f; env $ev $R/tools/port/difftest.sh $f $cf --trials ${TRIALS:-8})
+  case "$out" in *"$pat"*) has=yes;; esac
+  if [ $has = $want ]; then pass=$((pass+1)); echo "ok   [$want: $pat] env case  $(echo "$out" | cut -c1-200)"
+  else fail=$((fail+1)); echo "FAIL [want $want: $pat] env case  $out"; fi
+}
+chkcn yes func_15104A80 "$S4A80 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target of the reference (EU address? jalr-only callee?): ARGMEM 151494E0"
+chkcn yes func_15104A80 "$S4A80 DIFFTEST_RET=151494E0=1" "RET 151494E0"
+chkcn no  func_15104A80 "$S4A80" "not a jal target"
+chkcn no  func_15104A80 "$S4A80 DIFFTEST_JALKEY_OLD=1 DIFFTEST_ARGMEM=151494E0=0:4" "not a jal target"
+# P260: a candidate path the container already read, rewritten on the host with a different size (what every
+# chkce sed mutant does with $T/FUNC.mut.c). After the P256 Docker restart the container kept the old size, so the
+# selftest's 5 re-used mutant paths compiled truncated (CERR). difftest.sh now refreshes the parent dir and compares
+# md5s (ERROR "stale container view" if it still differs). The rewritten file must be the DIFFER mutant, not CERR.
+F28=$T/func_15103828.mut.c
+sed -e 's/D_800BE9E4 + 1;/D_800BE9E4 + 3;/' $C/func_15103828.c > $F28; docker exec ${CONKERDEV:-conkerdev} cat ${F28/#$R//conker} > /dev/null
+TRIALS=8 chkce DIFFER func_15103828 "" 's/D_800D9AB0\[i\] -= D_800BE9E4;/D_800D9AB0[i] -= D_800BE9E4 + 2;/'
 echo "selftest: $pass ok, $fail failed"; [ $fail = 0 ]
