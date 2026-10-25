@@ -10,6 +10,24 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P280 (port-b, group A) (session P280, 2026-10-25). Details: `docs/port/sessions/P280.md`
+
+Hand C (NM), registry rows `P280`, setups / mutants in docs/port/sessions/p280: func_15177F90 debris_burst_spawn,
+func_15178D1C debris_emitter_update (1A5D10), func_151A8040 bolt_path_update (1D5710), func_1501175C
+object_glow_attach (3E890), func_150EBE44 fireworks_burst (1191C0), func_150C4620 object_glow_spawn (F1E30),
+func_15116A8C platform_drift_update (142E40), func_150B6CC0 player_carry_state_update (E44D0), func_15094EC8 uv_rotate
+(C24E0). All random EQUIV + setups; mutants all killed except 5 equivalent / untestable ones (P280.md).
+Harness: DIFFTEST_ARGMEM `ADDR=N:LEN@K` (compare at the K-th call only), 4 selftest cases.
+Checks: verify_all rc 0, NM build rc 0, selftest 134/134, # 1675 NON_MATCHING bodies checked, 2 problems (2 = cross-file func_15116A8C `s32` prototypes in
+game_eu_EBF20 / game_eu_F5580, see P280.md), implicit_scan: implicit_scan: 663 TUs, 831 implicit call sites (158 in NM code, 0 float-related, 0 NM+float), progress_nm `total 5916 3995 1695 226 5690 96.2% 2000416/2253856 (88.8%)`.
+
+## Next steps (from P280)
+1. Fix the func_15116A8C prototypes in game_eu_EBF20.c / game_eu_F5580.c to `void` (protocheck back to 0); add a
+   func_1501175C prototype in game_eu_17A800.c.
+2. Group A remaining (26), smallest first: func_15171770 (19E910), func_151522DC (17D3C0), func_1511D91C,
+   func_15117424, func_151194A4, func_1511B604 (142E40), func_151CF930 (1FB080), func_150C5BA4 (F3080), func_151787D8
+   (1A5D10), func_150B8EC0 (E66D0), func_150D3F78, func_150F7E34, func_1519D9C4, func_1517EA18, func_1500F3BC, ...
+
 ## P275 (port-b) (session P275, 2026-10-25). Details: `docs/port/sessions/P275.md`
 
 Merged port e6300743 (P272). func_150E2030 mutants 38/38. Hand C (NM), registry rows `P275`, setups / mutants in

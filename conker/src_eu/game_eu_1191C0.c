@@ -138,7 +138,125 @@ void func_150EBB94(u8 *obj) {
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EBB94.s")
 #endif
 
+#ifdef NON_MATCHING
+/* func_15132BBC spark template (func_150EBE44); pad bytes stay unset like the asm's */
+typedef struct {
+    f32 u0;         /* 0x00 9.0 */
+    f32 u4;         /* 0x04 D_800A18B8 (0.435) */
+    f32 u8;         /* 0x08 */
+    f32 uC;         /* 0x0C */
+    f32 pos[3];     /* 0x10 D_800A5860 */
+    f32 scale[3];   /* 0x1C */
+    f32 dir[3];     /* 0x28 D_800A1878[i] */
+    f32 vel[3];     /* 0x34 func_15143794 */
+    f32 u40;        /* 0x40 */
+    f32 u44;        /* 0x44 */
+    f32 u48;        /* 0x48 */
+    f32 u4C;        /* 0x4C */
+    s32 u50;        /* 0x50 0x29E9 */
+    s16 life;       /* 0x54 */
+    s16 u56;        /* 0x56 D_800A18A8[i] */
+    u8 u58;         /* 0x58 */
+    u8 pad59[3];
+    s32 u5C;        /* 0x5C */
+    u8 u60[8];      /* 0x60 */
+    u8 u68;         /* 0x68 */
+    u8 pad69;
+    u8 u6A;         /* 0x6A */
+    u8 pad6B;
+    s32 u6C;        /* 0x6C */
+    u8 u70;         /* 0x70 */
+    u8 pad71;
+    s16 u72;        /* 0x72 */
+    s16 u74;        /* 0x74 */
+    u8 pad76[2];
+    s32 u78;        /* 0x78 */
+} SparkBE44;
+
+typedef struct {
+    f32 v[3];
+} VecBE44;
+
+extern u8 D_800BEE0B;
+extern f32 D_800A1860[];
+extern f32 D_800A186C[];
+extern VecBE44 D_800A1878[];
+extern u8 D_800A18A8[];
+#endif
+
+#ifdef NON_MATCHING
+void func_150E892C(void *, s16, u8, s32);
+s32 func_15154728(f32 *, f32, f32, f32, f32, s32, s32);
+s32 func_1516547C(s32, s32, s32, s32, s32);
+void func_151D45A4(u8 *, u8, s32);
+s32 func_151D5AC4(f32 *, s32, s32);
+s32 func_15132BBC(f32 *, s32, s32, s32, s32, s32, s32);
+void func_15143794(s16, s16, f32, void *);
+
+// fireworks_burst: sound (func_1516547C 2), a flash at D_800A186C (func_150E892C, size 120..181) and the effects at
+// D_800A1860 (func_151D5AC4 / func_151D45A4 / func_15154728 radius 12..16), then four spark showers (func_15132BBC
+// type 3), one per D_800A1878 direction, each with a random launch velocity (func_15143794: angle 45..70, yaw
+// -25..-10, speed 15..45), sizes and a life of 50..100 frames. Returns the last func_15132BBC result; `arg0` (the
+// event id the dispatcher func_1509DB90 passes) is unused.
+s32 func_150EBE44(s32 arg0) {
+    SparkBE44 t;
+    f32 f;
+    u8 i;
+    u32 a;
+    u32 b;
+    s32 ret;
+
+    func_1516547C(2, D_800BEE0B, 0, 0xFF, 1);
+    func_150E892C(D_800A186C, (u32) func_150ADA20() % 62 + 120, 0xFF, 1);
+    func_151D5AC4(D_800A1860, 0xFF, 1);
+    func_151D45A4((u8 *) D_800A1860, 0xFF, 1);
+    f = func_150ADA68();
+    func_15154728(D_800A1860, f * 4.0f + 12.0f, 1.64099991f, (u32) func_150ADA20() % 56 + 200, 0.0f, 0xFF, 1);
+    t.u8 = 1.0f;
+    t.uC = 1.0f;
+    t.u0 = 9.0f;
+    t.u4 = 0.435000032f;  /* D_800A18B8 */
+    *(VecBE44 *) t.pos = *(VecBE44 *) D_800A5860;
+    t.u44 = 0.0f;
+    t.scale[0] = 1.0f;
+    t.scale[1] = 1.0f;
+    t.scale[2] = 1.0f;
+    t.u50 = 0x29E9;
+    t.u58 = 0;
+    t.u5C = 0;
+    t.u60[0] = 0xFF;
+    t.u60[1] = 0xD;
+    t.u60[2] = 0;
+    t.u60[3] = 0xC;
+    t.u60[4] = 0;
+    t.u60[5] = 0;
+    t.u60[6] = 0;
+    t.u60[7] = 0;
+    t.u68 = 2;
+    t.u6A = 2;
+    t.u6C = 0;
+    t.u70 = 0;
+    t.u72 = 0x19;
+    t.u74 = 0xA;
+    t.u78 = 0;
+    for (i = 0; i < 4; i++) {
+        *(VecBE44 *) t.dir = D_800A1878[i];
+        a = func_150ADA20();
+        b = func_150ADA20();
+        f = func_150ADA68();
+        func_15143794(a % 26 + 45, (b & 0xF) - 25, f * 30.0f + 15.0f, t.vel);
+        t.u40 = func_150ADA68() * 15.1080008f + -7.55400038f; /* D_800A18C8, D_800A18C4 */
+        t.u48 = func_150ADA68() * 15.1080008f + -7.55400038f;
+        t.u4C = func_150ADA68() * 0.617000043f + -1.62100005f; /* D_800A18C0, D_800A18BC */
+        t.life = (u32) func_150ADA20() % 51 + 50;
+        t.u56 = D_800A18A8[i];
+        ret = func_15132BBC((f32 *) &t, 3, 0xFF, 0, 0, 0xFF, 1);
+    }
+    return ret;
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_1191C0/func_150EBE44.s")
+#endif
 
 #ifdef NON_MATCHING
 void func_150E892C(void *, s16, u8, s32);

@@ -1,0 +1,29 @@
+\#^    if (obj\[0x1C\] & 1) {$#s/& 1/\& 4/ % die
+\#^        \*(s16 \*) (obj + 0x10) -= D_800BE9E4;$#s/-=/+=/ % die
+\#^        if (\*(s16 \*) (obj + 0x10) < 0) {$#s/< 0/<= 0/ % live1
+\#^    if ((s8) obj\[0x2C\] != -1 && !done) {$#s/ \&\& !done// % dead2c
+\#^        done = D_8008FCE0\[(s8) obj\[0x2C\]\](obj) == 0;$#s/== 0/!= 0/ % hook0 hook1
+\#^        done = D_8008FCE8\[(s8) obj\[0x2D\]\](obj) == 0;$#s/== 0/!= 0/ % hook1 hookd
+\#^        done = D_8008FCE8\[(s8) obj\[0x2D\]\](obj) == 0;$#s/FCE8/FCE0/ % hook1 hookd
+\#^    if ((s8) obj\[0x2D\] != -1 && !done) {$#s/0x2D/0x2C/ % hookd
+\#^        \*(f32 \*) (obj + 0x68) -= D_800BE9A4;$#s/-=/+=/ % all
+\#^        if (\*(f32 \*) (obj + 0x68) < 0.0f) {$#s/</>/ % all
+\#^            func_151A88F0(obj, 0, #s/- 1/- 2/ % all
+\#^            func_151A88F0(obj, 0, #s/100/99/ % all
+\#^            func_151A88F0(obj, 0, #s/0x20/0x24/ % all
+\#^            \*(f32 \*) (obj + 0x68) = func_150ADA68() #s/0x18/0x14/ % all
+\#^            \*(f32 \*) (obj + 0x68) = func_150ADA68() #s/+ \*(f32 \*) (obj + 0x14)// % all
+\#^        if (obj\[0x1C\] & 2) {$#s/2/1/ % notimer
+\#^            fwd.unk0 = #s/0x30/0x34/ % notimer
+\#^            fwd.unk8 = #s/0x44/0x40/ % notimer
+\#^            up = #s/0x48/0x4C/ % notimer
+\#^            side.unk4 \*= #s/0x58/0x5C/ % notimer
+\#^            side.unk8 \*= #d % notimer
+\#^                x = pt\[0\];$#s/0/1/ % notimer
+\#^                z = pt\[2\];$#s/2/1/ % notimer
+\#^                pt\[3\] = #s/up.unk0/up.unk4/ % notimer
+\#^                pt\[4\] = #s/0x34/0x30/ % notimer
+\#^                pt\[5\] = #s/z \* fwd.unk8/z * fwd.unk4/ % notimer
+\#^                pt += 6;$#s/6/3/ % notimer
+\#^            for (i = 0; i < \*(s16 \*) (obj + 0x12); i++) {$#s/i < /i + 1 < / % notimer
+\#^    if (done) {$#s/done/!done/ % all die

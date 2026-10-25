@@ -615,7 +615,105 @@ void func_15116940(u8 *arg0) {
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116940.s")
 #endif
+#ifdef NON_MATCHING
+s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3);
+
+// platform_drift_update: speed (s16 +0x3C) of a drifting platform. With flag 4 (+0x4F) a push from the player
+// (func_15116E08 / 8; only forward pushes with `flags` bit 1) adds to it and clears the +0x80 timer. Without the timer
+// the speed loses 0.32 % and one unit per frame towards 0; on reaching 0 without a push it starts a 20-frame timer
+// (or, if the timer had run out (-1), stops). While the timer runs the speed grows by one unit away from 0 and the
+// timer counts down by the frame step (ends at -1). Then func_151156DC moves it; with a `sound` id, a looping sound
+// (pitch 20000 + 12767 * min(|+0x64| * 0.1, 1), volume that factor * `dist` - 500) is started at the position while
+// +0x64 > 0.01 (handle at +0x74), updated, or stopped and cleared.
+void func_15116A8C(u8 *obj, s32 flags, s32 sound, f32 dist) {
+    s32 push;
+    s32 speed;
+    s32 drag;
+    s32 timer;
+    f32 f;
+    f32 vel;
+    u32 pitch;
+
+    if (!(obj[0x4F] & 4)) {
+        push = 0;
+    } else {
+        push = func_15116E08(*(s16 *) (obj + 0x10), *(s16 *) (obj + 0x14), (s32) (obj + 0x7C), (u8 *) D_800CC2D0) >> 3;
+    }
+    if ((flags & 1) && push < 0) {
+        push = 0;
+    }
+    speed = *(s16 *) (obj + 0x3C) + push;
+    if (push != 0) {
+        *(s32 *) (obj + 0x80) = 0;
+    }
+    drag = speed * -0.0032;
+    timer = *(s32 *) (obj + 0x80);
+    if (timer <= 0) {
+        speed += drag;
+        if (speed > 0) {
+            speed--;
+            if (speed <= 0) {
+                if (push != 0) {
+                    speed = 0;
+                } else if (timer == 0) {
+                    *(s32 *) (obj + 0x80) = 20;
+                } else {
+                    *(s32 *) (obj + 0x80) = 0;
+                    speed = 0;
+                }
+            }
+        } else if (speed < 0) {
+            speed++;
+            if (speed >= 0) {
+                if (push != 0) {
+                    speed = 0;
+                } else if (timer == 0) {
+                    *(s32 *) (obj + 0x80) = 20;
+                } else {
+                    *(s32 *) (obj + 0x80) = 0;
+                    speed = 0;
+                }
+            }
+        }
+    } else {
+        if (speed > 0) {
+            speed++;
+        } else {
+            speed--;
+        }
+        *(s32 *) (obj + 0x80) = timer - D_800BE9E4;
+        if (*(s32 *) (obj + 0x80) <= 0) {
+            *(s32 *) (obj + 0x80) = -1;
+        }
+    }
+    *(s16 *) (obj + 0x3C) = speed;
+    func_151156DC(obj);
+    if (sound == 0) {
+        return;
+    }
+    vel = *(f32 *) (obj + 0x64);
+    f = (vel < 0.0f ? -vel : vel) * 0.1f;
+    if (1.0f < f) {
+        f = 1.0f;
+    }
+    pitch = 12767.0f * f + 20000.0f;
+    f = f * dist - 500.0f;
+    if (*(u16 *) (obj + 0x74) == 0) {
+        if (0.01f < vel) {
+            *(u16 *) (obj + 0x74) = func_10010F88(sound, pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10),
+                                                  *(s16 *) (obj + 0x12), *(s16 *) (obj + 0x14), 1000, 6000);
+        }
+    } else if (0.01f < vel) {
+        func_1000F91C(*(u16 *) (obj + 0x74), pitch, (s32) f, 0, -1, *(s16 *) (obj + 0x10), *(s16 *) (obj + 0x12),
+                      *(s16 *) (obj + 0x14), 200, 2000);
+    } else {
+        func_100111C8(*(u16 *) (obj + 0x74));
+        *(u16 *) (obj + 0x74) = 0;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_142E40/func_15116A8C.s")
+#endif
 
 #ifdef NON_MATCHING
 s32 func_15116E08(s32 arg0, s32 arg1, s32 arg2, u8 *arg3) {

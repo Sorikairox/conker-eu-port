@@ -110,7 +110,29 @@ block_12:
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15094DAC.s")
 #endif
+#ifdef NON_MATCHING
+// uv_rotate: writes `count` texture coordinates (s16 u, v pairs of `uv`) rotated by `angle` degrees about the
+// centre ((w / 2) * 32, (h / 2) * 32) to the vertices of `vtx` (stride 0x10, s, t at +8 / +0xA).
+void func_15094EC8(u8 *vtx, s32 *uv, s32 count, f32 angle, s32 w, s32 h) {
+    f32 rad = angle * 0.0174532924f; /* D_8009E270 */
+    f32 s = sinf(rad);
+    f32 c = cosf(rad);
+    f32 cu;
+    f32 cv;
+    s16 *src;
+    s32 i;
+
+    for (i = 0; i < count; i++) {
+        cu = (w / 2) * 32;
+        cv = (h / 2) * 32;
+        src = (s16 *) uv + i * 2;
+        *(s16 *) (vtx + i * 0x10 + 8) = ((f32) src[0] - cu) * c - ((f32) src[1] - cv) * s + cu;
+        *(s16 *) (vtx + i * 0x10 + 0xA) = ((f32) src[1] - cv) * c + ((f32) src[0] - cu) * s + cv;
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_C24E0/func_15094EC8.s")
+#endif
 
 extern Mtx *D_800DC6D0[];
 extern f32 D_800D30C8[][4][4];

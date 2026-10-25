@@ -831,7 +831,11 @@ for _p in filter(None, os.environ.get('DIFFTEST_ARGMEM', '').split(',')):
     # stack key struct points to; the pointer itself is a stack address that differs between the builds).
     _d = '*' in _n
     _n, _o = (_n.split('*' if _d else '+') + ['0'])[:2]
-    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16), _d))
+    # P280: 'LEN@K' (decimal K) compares only at the K-th call (0-based) to ADDR, e.g. memcpy called twice with
+    # different source structs and lengths (func_1501175C: a 0x10 link record, then a 0x5C tail): a LEN that fits
+    # the second call made the first one compare stack bytes past its struct (layout-dependent, false DIFFER).
+    _l, _k = (_l.split('@') + [None])[:2]
+    ARGMEM.setdefault(int(_a, 16) & 0x1FFFFFFF, []).append((int(_n), int(_l), int(_o, 16), _d, None if _k is None else int(_k)))
 
 def rand_word(seed, addr):
     if POKES and (addr & 0x1FFFFFFF) in POKES:
@@ -1279,7 +1283,9 @@ class Run:
                                mem=hashlib.md5(repr(self.dirty()).encode()).hexdigest()[:8], tail=site is None, ra=ra))
         if (addr & 0x1FFFFFFF) in ARGMEM:
             am = []
-            for _n, _l, _o, _d in ARGMEM[addr & 0x1FFFFFFF]:
+            for _n, _l, _o, _d, _k in ARGMEM[addr & 0x1FFFFFFF]:
+                if _k is not None and self.ncall.get(addr, 0) != _k:
+                    am.append('-'); continue   # P280: entry for another call index
                 # P43: N >= 4 is a stack argument (the pointer at sp+0x10+4*(N-4)), as in DIFFTEST_OUTA
                 try:
                     _pa = (regs[_n] if _n < 4 else stkw[_n - 4]) + _o
