@@ -63,6 +63,21 @@ progress_nm `total 5916 3995 1707 214 5702 96.4% 2024228/2253856 (89.8%)`.
 1. func_15175EC8 (1A2970, 961 insns): being converted by another session (see its hand-off).
 2. D2 (P304) list: func_150E5384, func_150DD420, func_150DDBC0, func_150DCAD8, func_150D7E38, func_150F3A74.
 
+## P311 (port-c slot, group B2) (session P311, 2026-10-26). Details: `docs/port/sessions/P311.md`
+- func_1516E100 particle_emitter_update (game_eu_19B180, emitter table entry 0) and func_151206C8
+  player_camera_update (game_eu_14D9E0, called from func_151283B8) to hand C (NM). Registry rows P311.
+- func_1516E100: random EQUIV, 25 setups, mutants 81/81. func_151206C8: random EQUIV, 57 setups, mutants 116/121
+  (5 equivalent, listed in m6c8.txt).
+- Also in game_eu_14D9E0: func_151CA150 declaration fixed to its definition `void (u8 *, s32)` (func_151201D0's
+  call now 2 args), func_151CA484 declared before use.
+- Checks: verify_all rc 0 (3995/5916), NM build rc 0, protocheck 0 (1693 bodies), implicit_scan 0 NM+float
+  (829 sites), selftest 133/133.
+
+## Next steps (from P311, group B2)
+1. Merge port-c into port (files disjoint from P310's game_981E0 / game_eu_10F840).
+2. Optional: one full `MUT=1 reverify.sh` of both functions after the merge (the fixed survivors were re-checked
+   one by one with p311/mut1.sh, not in a full registry run).
+
 ## P309 (port-f, group D2) (session P309, 2026-10-26). Details: `docs/port/sessions/P309.md`
 
 Hand C (NM), registry rows `P309`, setups / mutants in docs/port/sessions/p309: func_150D7E38 carried_object_update
@@ -75,7 +90,6 @@ D_800CC2D0 fields in EU; the C uses the array.
 ## Next steps (from P309)
 1. Group D2 is done. If func_15052F9C is ever touched: it should return its "landed" result explicitly; then drop
    the leftover-v0 model in func_150D7E38 (and check its other callers' use of v0).
-
 ## P305 (port-c, group C1) (session P305, 2026-10-26). Details: `docs/port/sessions/P305.md`
 
 Hand C (NM), registry rows `P305`, files in docs/port/sessions/p305 (setup generators gen*.py): func_151976B8

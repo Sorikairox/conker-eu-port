@@ -259,7 +259,250 @@ void func_1516DF0C(s16 arg0, s16 arg1, s16 arg2, u8 arg3, u8 arg4, u8 arg5, u8 a
     }
 }
 
+#ifdef NON_MATCHING
+// Particle emitter record (handler table entry 0 at 0x8008BBBC / 0x8008CD00, a0 = the record).
+typedef struct {
+    u8 kind;          // 0x00: 0x11 = emitter whose particles get arg 0x1B = 0
+    u8 owner;         // 0x01
+    u8 pad02[0xA];
+    u8 unk0C;         // 0x0C
+    u8 pad0D;
+    s16 posX;         // 0x0E: x / table index (object mode) / high half of the position pointer (flags 0x10 / 0x20)
+    s16 posY;         // 0x10: y / low half of the position pointer
+    s16 posZ;         // 0x12: z / y offset (pointer modes)
+    s16 parmA;        // 0x14 \ two s16 particle parameters (args 0x17 / 0x18), each with a random range
+    s16 parmB;        // 0x16 /
+    s16 parmRandAB;   // 0x18: random added to both (flag 1) or to parmA only
+    s16 parmRandB;    // 0x1A: random added to parmB (flag 1 clear)
+    s16 riseBase;     // 0x1C: arg 0x1A (vertical speed) when no velocity mode is set
+    u16 riseRand;     // 0x1E
+    u16 timer;        // 0x20: frames left, 0xFFFF = forever
+    u16 flags;        // 0x22
+    u8 parm[10];      // 0x24..0x2D: args 3..0xC
+    u8 col[4];        // 0x2E..0x31: args 0xD..0x10 base (colour)
+    u8 parm2[6];      // 0x32..0x37: args 0x11..0x16
+    u8 colRand[4];    // 0x38..0x3B
+    u8 lifeTotal;     // 0x3C: flag 4 fades the spawn chance with timer / lifeTotal
+    u8 scatterXZ;     // 0x3D
+    u8 scatterY;      // 0x3E
+    u8 obj;           // 0x3F: D_800CC2D0 object index, 0xFF = none
+    u8 parm40;        // 0x40: arg 0x19
+    u8 period;        // 0x41
+    u8 countdown;     // 0x42
+    u8 chance;        // 0x43: spawn chance out of 256 (0 = always)
+    u8 count;         // 0x44: particles per burst
+    u8 speedScale;    // 0x45: flag 8 velocity * 16 * this
+    u8 offsetScale;   // 0x46: flag 8 start offset along the velocity
+    u8 mtx;           // 0x47: object matrix index
+    u8 parm48;        // 0x48: arg 0x1C
+} ParticleEmitter;
+
+extern s16 D_800A7210[][7]; /* object-attached emitter points: a xyz, b xyz, random z mask */
+f32 func_150489B0(s32 angle); // defined (u8); the file's unprototyped declaration rules out u8 here
+s32 func_151705A4(s32 flags, f32 *vx, f32 *vy, f32 *vz);
+
+// particle_emitter_update: emitter tick. The countdown +0x42 runs down by D_800BE9E4 frames; each time it passes 0
+// it is re-armed with +0x41 (0 = once) and a burst of +0x44 particles is rolled (+0x43 = chance out of 256, scaled
+// by timer / +0x3C with flag 4). A particle starts at the emitter's xyz, at a s16 / f32 position behind a pointer
+// (flags 0x10 / 0x20), or (object +0x3F) at two points of D_800A7210 moved by the object's matrix +0x1D4[+0x47],
+// whose difference (minus the object's movement) is its velocity. Flag 8 gives a random direction
+// (func_151705A4), +0x3D / +0x3E scatter the start, then func_1516DA58 spawns it. Velocities are passed as
+// hi / lo bytes in the colour args. Finally the timer +0x20 runs down and the emitter is freed (func_1516972C).
+void func_1516E100(u8 *arg0) {
+    ParticleEmitter *e = (ParticleEmitter *) arg0;
+    s32 notKind11;
+    s32 n;
+    s32 i;
+    u8 roll;
+    s32 chance;
+    s16 x, y, z;
+    s16 parmA, parmB;
+    u32 r;
+    s32 rise;
+    s32 a0D, a0E, a0F, a10; // colour bytes, or velocity x / z as hi / lo bytes
+    s32 vi;
+    f32 ax, ay, az, bx, by, bz;
+    f32 vx, vy, vz;
+    f32 speed, offset, dist, dirA, dirB;
+    s16 *pt;
+    u8 *obj;
+    s32 ang;
+    s32 left;
+
+    notKind11 = (e->kind == 0x11) ? 0 : 1;
+    n = e->countdown - D_800BE9E4;
+    while (n < 0) {
+        if (e->period != 0) {
+            n += e->period;
+        } else {
+            n = 0;
+        }
+        for (i = 0; i < e->count; i++) {
+            if (e->chance != 0) {
+                roll = func_150ADA20();
+                if (e->flags & 4) {
+                    chance = (s32) (e->timer * e->chance) / e->lifeTotal;
+                } else {
+                    chance = e->chance;
+                }
+            }
+            if (e->chance != 0 && roll >= chance) {
+                continue;
+            }
+            if (e->obj == 0xFF) {
+                if (e->flags & 0x10) {
+                    pt = (s16 *) ((e->posX << 16) | (u16) e->posY);
+                    x = pt[0];
+                    z = pt[2];
+                    y = pt[1] + e->posZ;
+                } else if (e->flags & 0x20) {
+                    f32 *pf = (f32 *) ((e->posX << 16) | (u16) e->posY);
+                    x = (s32) pf[0];
+                    z = (s32) pf[2];
+                    y = (s32) (pf[1] + (f32) e->posZ);
+                } else {
+                    x = e->posX;
+                    y = e->posY;
+                    z = e->posZ;
+                }
+            } else {
+                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                if (*(u8 **) (obj + 0x1D4) == NULL) {
+                    continue;
+                }
+                ax = D_800A7210[e->posX][0];
+                ay = D_800A7210[e->posX][1];
+                az = D_800A7210[e->posX][2];
+                bx = D_800A7210[e->posX][3];
+                by = D_800A7210[e->posX][4];
+                bz = D_800A7210[e->posX][5];
+                if (D_800A7210[e->posX][6] != 0) {
+                    bz += (f32) (u32) (func_150ADA20() & D_800A7210[e->posX][6]);
+                }
+                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                func_150A7E40((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), ax, ay, az, &ax, &ay, &az);
+                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                func_150A7E40((f32 (*)[4]) (*(u8 **) (obj + 0x1D4) + e->mtx * 64), bx, by, bz, &bx, &by, &bz);
+                vx = (bx - ax) * 8.0f;
+                vy = (by - ay) * 8.0f;
+                rise = (s32) vy;
+                vz = (bz - az) * 8.0f;
+                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                ang = (0x40 - *(u16 *) (obj + 0x76)) & 0xFF;
+                vx -= *(f32 *) (obj + 0x3C) * func_15048A40(ang) * 64.0f;
+                obj = (u8 *) D_800CC2D0 + e->obj * 0x32C;
+                vz -= *(f32 *) (obj + 0x3C) * func_150489B0(ang) * 64.0f;
+                vi = (s32) vx;
+                a0D = (vi >> 8) & 0xFF;
+                a0E = vi & 0xFF;
+                vi = (s32) vz;
+                a0F = (vi >> 8) & 0xFF;
+                a10 = vi & 0xFF;
+                x = (s32) ax;
+                y = (s32) ay;
+                z = (s32) az;
+            }
+            if (e->flags & 8) {
+                func_151705A4(e->flags, &vx, &vy, &vz);
+                speed = (s32) (e->speedScale * 16);
+                offset = e->offsetScale;
+                y = (s32) ((f32) y + offset * vy);
+                vy = speed * vy;
+                rise = (s32) vy;
+                func_150ADA20();
+                x = (s32) ((f32) x + vx * offset);
+                z = (s32) ((f32) z + vz * offset);
+                vx = vx * speed;
+                vz = vz * speed;
+                vi = (s32) vx;
+                a0D = (vi >> 8) & 0xFF;
+                a0E = vi & 0xFF;
+                vi = (s32) vz;
+                a0F = (vi >> 8) & 0xFF;
+                a10 = vi & 0xFF;
+            }
+            if (e->scatterXZ != 0) {
+                r = func_150ADA20();
+                dirA = func_15048A40(r & 0xFF);
+                dirB = func_150489B0(r & 0xFF);
+                dist = (f32) (u32) ((func_150ADA20() & 0xFFFF) * e->scatterXZ) * 1.52587890625e-05f;
+                x = (s32) ((f32) x + dist * dirA);
+                z = (s32) ((f32) z + dist * dirB);
+            }
+            if (e->scatterY != 0) {
+                r = func_150ADA20();
+                dirA = func_15048A40(r & 0xFF);
+                dist = (f32) (u32) ((func_150ADA20() & 0xFFFF) * e->scatterY) * 1.52587890625e-05f;
+                y += (s32) (dist * dirA);
+            }
+            parmA = e->parmA;
+            parmB = e->parmB;
+            r = 0;
+            if (e->parmRandAB != 0) {
+                r = (u32) func_150ADA20() % (u32) e->parmRandAB;
+            }
+            if (e->flags & 1) {
+                parmA += r;
+                parmB += r;
+            } else {
+                parmA += r;
+                if (e->parmRandB != 0) {
+                    parmB += (u32) func_150ADA20() % (u32) e->parmRandB;
+                }
+            }
+            if (!(e->flags & 8) && !(e->flags & 0x80)) {
+                rise = e->riseBase;
+                if (e->riseRand != 0) {
+                    rise += (u32) func_150ADA20() % e->riseRand;
+                }
+                a0D = e->col[0];
+                if (e->colRand[0] != 0) {
+                    a0D += (u32) func_150ADA20() % e->colRand[0];
+                    if (a0D >= 0x100) {
+                        a0D = 0xFF;
+                    }
+                }
+                a0E = e->col[1];
+                if (e->colRand[1] != 0) {
+                    a0E += (u32) func_150ADA20() % e->colRand[1];
+                    if (a0E >= 0x100) {
+                        a0E = 0xFF;
+                    }
+                }
+                a0F = e->col[2];
+                if (e->colRand[2] != 0) {
+                    a0F += (u32) func_150ADA20() % e->colRand[2];
+                    if (a0F >= 0x100) {
+                        a0F = 0xFF;
+                    }
+                }
+                a10 = e->col[3];
+                if (e->colRand[3] != 0) {
+                    a10 += (u32) func_150ADA20() % e->colRand[3];
+                    if (a10 >= 0x100) {
+                        a10 = 0xFF;
+                    }
+                }
+            }
+            func_1516DA58(x, y, z, e->parm[0], e->parm[1], e->parm[2], e->parm[3], e->parm[4], e->parm[5],
+                          e->parm[6], e->parm[7], e->parm[8], e->parm[9], a0D, a0E, a0F, a10, e->parm2[0],
+                          e->parm2[1], e->parm2[2], e->parm2[3], e->parm2[4], e->parm2[5], parmA, parmB, e->parm40,
+                          rise, notKind11, e->parm48, e->unk0C, e->owner);
+        }
+    }
+    e->countdown = n;
+    if (e->timer != 0xFFFF) {
+        left = e->timer - D_800BE9E4;
+        if (left > 0) {
+            e->timer = left;
+        } else {
+            func_1516972C((struct102 *) e);
+        }
+    }
+}
+#else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_19B180/func_1516E100.s")
+#endif
 
 void func_1516ECE8(u32 arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4) {
     if (arg1) { // fakematch: permuter, forces arg1 home/reload order

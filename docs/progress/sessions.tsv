@@ -111,3 +111,4 @@ P309	port-f	group D2 NM C (150D7E38 150F3A74)	2	0	~95	2 compiled funcs (1569 ins
 P315	port-b	integration 4	0		~20	merge port-f (D2 finished, P304/P309, +port-d P278..P297): docs/registry conflicts only (reg3way 474 rows/471 funcs); checks ok, selftest 150/150, progress_nm 99.2% / 96.8%
 P303	port-d	group D1 NM C (151ADEDC 151AD724 151A4194 151B58D8)	4	0	~150	4 compiled funcs to hand C, survivors equivalent; pin random-phase counts/pointers for fixed stack copies; verify_all/NM rc 0
 P313	port-d	group D1 NM C (151EE93C)	1	0	~75	cheat-code entry screen to hand C, 68 setups, mutants 190/190; verify_all/NM rc 0
+P311	port-c	group B2	2		~120	1516E100 particle_emitter_update + 151206C8 player_camera_update (1300-insn camera) to NM C, mutants 81/81 + 116/121 (5 equivalent); func_151CA150 prototype fixed
