@@ -10,6 +10,22 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P300 (port-e slot, group C part C2: 4 compiled functions to hand C (NM)) (2026-10-26). Details: `docs/port/sessions/P300.md`
+- New NM hand C: func_150D99AC trail_update, func_150DA1FC trail_draw_ribbon, func_150DABFC trail_hit_effects
+  (game_eu_106830; the trail kind's update / draw handlers and their hit-effect helper, producer + consumer together),
+  func_1512A1A0 freecam_update (game_eu_1579B0, unreferenced debug camera). Registry rows P300, setups / mutants /
+  generators in `docs/port/sessions/p300/`.
+- Mutants: D99AC 53/53, DA1FC 34/34, DABFC 57/57, 2A1A0 47/50 (3 speed-cap survivors unreachable: speeds in .game_data).
+- Checks: verify_all rc 0, NM build rc 0, protocheck rc 0, implicit_scan 0 NM+float (the 2 clang errors per TU are the
+  baseline), selftest 143/143. progress_nm `total 5916 3995 1726 33 162 5754 97.3% 2033132/2253856 (90.2%)`.
+- Lesson: difftest's stale-file guard digests the sizes of ALL src_eu files: editing any src_eu file during a mutant
+  run turns the remaining mutants into NOOUTPUT (invalid). Draft in the scratchpad, insert between runs.
+
+### Next steps (group C, from P300)
+1. func_151E67A0 (game_eu_20B730, multiplayer hit report, 662 lines) and func_150FBE40 (game_eu_129650, 735 lines) are
+   the 2 C2 functions not started (budget). Neither shares a file with C1 (P299).
+2. port-e now carries group C work in game_eu_106830 / game_eu_1579B0: merge with port-c is file-disjoint.
+
 ## P294 (port-e, group E: readable D5E90 wall engine, no asm2c left) (2026-10-26). Details: `docs/port/sessions/P294.md`
 
 Committed: func_150AB6D0 / func_150AC8C4 (engine func_150AB708) readable in src_eu/nm_asm/D5E90.c (nmw_engine +
