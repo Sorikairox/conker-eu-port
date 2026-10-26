@@ -113,6 +113,15 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Deploy rule (user, 2026-10-26): ALWAYS deploy the latest version. After a port-web change passes its checks and
   browser test, run `tools/eu_port/deploy_web.sh` (ships port/build/web to https://conker-web-port.netlify.app;
   apply_names.sh does it itself). Never deploy a build that failed or skipped its browser test.
+- Variable naming rule (user, 2026-10-26): variables get readable names too, not only functions. Locals/params
+  (var_v0, temp_t6, arg0...) are renamed directly in the C a session works on (names don't affect codegen). Global
+  data symbols (D_XXXXXXXX) go through names.tsv + the rename tooling, with a `/* was D_XXXXXXXX */` comment; a full
+  global-variable renaming pass is planned after the cleanup.
+- Plan (user, 2026-10-26): P327 speed-up tooling (?warp level test boot, incremental web build, fast check mode) ->
+  cleanup (branch `exact-byte-decomp-wip` keeps the matching build; port-web drops it: frozen symbol/address table
+  for the port tools, difftest reference code read from the ROM, then remove IDO/splat/asm/US/debug/ects, GLOBAL_ASM
+  and NON_MATCHING wrappers, and the docs session history except live test inputs) -> global variable renaming ->
+  cash counter with the pause-screen digit images.
 - Renaming done (P323, 2026-10-26): 5695 functions renamed through tools/eu_port/names.tsv (proposals in
   docs/names/proposals/, applied with tools/eu_port/apply_names.sh). Only func_150A4ED4 / func_150A69A8 keep their
   names: secondary entry points inside another function's asm (listing them splits the parent). Names with
