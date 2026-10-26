@@ -41,8 +41,10 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 `docs/names/` (naming tables and proposals), `docs/progress/` (session log), `PLAYING.md` (what works).
 
 ## Open items
-- Global variable renaming pass (D_XXXXXXXX -> names via names.tsv + rename tooling), then the cash counter with the
-  pause-screen digit images (user plan, 2026-10-26).
+- Globals not renamed: 562 D_ symbols only declared in conker/include/variables.h (no C use), D_ names that appear
+  only in tables / comments, ROM-offset symbols < 0x10000000, and D_ names inside log strings (kept so the wasm stayed
+  identical). Some descriptions note wrong declaration comments or US/EU alias pairs (`_alias`) worth merging later.
+- port_cdata name strings (n64mem_tab.c) still print the original D_ names (n64mem.py, RENAMED_FROM).
 - ?warp is tested on level 0x29 only; other levels may need event state the real route sets.
 - Route tests `p261 r5g / pan8` (new game -> later levels) were not re-tuned after P319; their pad scripts are in git
   history (docs/port/sessions/p261).
@@ -54,6 +56,15 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
   needed. romabs_check's source scan still skips `#ifndef NON_MATCHING` blocks (none left).
 
 ## Sessions
+### P330 (port-web, 2026-10-27): global variable names, cash counter images
+- Tooling 666e0ef9 (+ fixes 2 later commits): rename.py / apply_names.sh handle `D_` rows (`/* was D_X */` on each
+  declaration line, string literals kept, wasm byte-identity enforced; tools/eu_port/wasm_sig.py,
+  tools/eu_port/globals_chunks.py -> docs/names/globals.tsv). docs/RENAMING.md "Globals".
+- 3920 globals renamed in 4 batches (ebb2912c, be9ad98b, d6348054, 004c464f) from 15 proposal files
+  (docs/names/proposals/globals01..15.tsv, written by naming sessions); object-table fields unified to
+  `g_objects_<field>` (cf93e1fd). conker.wasm md5 f73eb4a2... unchanged throughout.
+- Cash counter 3478fd22: option "Always show cash" draws the pause screen's $ + digit images, half size, top right
+  (hud_cash_counter_draw in game_eu_216470.c); the P325 text version is gone. Browser-tested, hold-L OK, deployed.
 ### P329 (port-web, 2026-10-27): cleanup part 2 of 2
 - Step 1 (3771055a): gen_stubs `asm_only()` and difftest `find_file` read `port/symbols/global_asm.tsv` (1892 former
   GLOBAL_ASM functions, 31 asm-only) instead of the pragmas. Same results for all names; md5 unchanged.
