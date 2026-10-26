@@ -1,0 +1,6 @@
+# name	rom_start	rom_end	vram	rodata_rom   (frozen P328 from conker/conker.eu.yaml; offsets into port/symbols/romimage.py image)
+init	1000	29400	10001000	-
+init_data	29400	2D810	80029400	2C080
+game	2D810	228130	15000000	-
+game_data	228130	256450	80082EB0	237060
+debugger	256450	259B50	16000000	-
