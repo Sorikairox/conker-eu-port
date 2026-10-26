@@ -750,6 +750,15 @@ extern s32 D_800BE9F0;
  * no D_800C40BC, and either D_800D3260 or a skippable scene (func_1501D330 with the slot's scene number) that is
  * forced (D_800C40B9) or still has more than 25 frames to run (D_800C39D0 + 25 < D_eu_800C3A60). The second
  * argument is not read. */
+#ifdef PORT
+/* DELIBERATE PORT CHANGE (P321, user request): L skips a cutscene only after it is held for 3 s straight.
+ * The L test moves to the end: once the scene may be skipped, port_skip_hold (port/ultra/pc_os.c) times how
+ * long L is held (D_800BEB30 only flags the press) and the page draws a ring around an L badge from port_skip_progress. */
+s32 port_skip_hold(void);
+#define SKIP_YES port_skip_hold()
+#else
+#define SKIP_YES 1
+#endif
 s32 func_1501E0C8(s32 slot, u8 *unused) {
     s32 level = D_800BE9F0;
 
@@ -774,10 +783,10 @@ s32 func_1501E0C8(s32 slot, u8 *unused) {
         }
         return 0;
     }
+#ifndef PORT
     if (!(D_800BEB30 & 0x20)) {
         return 0;
     }
-#ifndef PORT
     /* D_800C40BC: the scene script carries the "no skip" event 0xE (func_1501DB18), or an event set it
      * (func_1509C850 case 6).
      * DELIBERATE PORT CHANGE (P320): the port ignores it so every cutscene can be skipped with L, the opening
@@ -787,19 +796,20 @@ s32 func_1501E0C8(s32 slot, u8 *unused) {
     }
 #endif
     if (D_800D3260 != 0) {
-        return 1;
+        return SKIP_YES;
     }
     if (func_1501D330(level, (&D_800C3A08)[slot]) == 0) {
         return 0;
     }
     if (D_800C40B9 != 0) {
-        return 1;
+        return SKIP_YES;
     }
     if ((&D_800C39D0)[slot] + 25 < (&D_eu_800C3A60)[slot]) {
-        return 1;
+        return SKIP_YES;
     }
     return 0;
 }
+#undef SKIP_YES
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_eu_4A070/func_1501E0C8.s")
 #endif

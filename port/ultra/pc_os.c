@@ -306,6 +306,27 @@ EMSCRIPTEN_KEEPALIVE void port_set_paused(int p) {
     else if (!p && port_paused) pause_total += t - pause_at;
     port_paused = p != 0;
 }
+/* P321: hold-to-skip for cutscenes (user request; the game side is func_1501E0C8 under PORT). The game calls
+ * port_skip_hold() every frame a cutscene may be skipped; it answers 1 once L was held for 3 s of
+ * retraces (150 PAL / 180 NTSC) without a break. Counting retraces, not reading the clock, keeps ?det runs
+ * unchanged. port_skip_progress (0..1) is polled by the page for the ring; 0 once the game stops asking. */
+extern unsigned port_frame_count;
+extern int port_tv_type;
+static unsigned skip_start, skip_seen;
+static int skip_on;
+static float skip_prog;
+int port_pad0_held(void); /* pc_pif.c */
+int port_skip_hold(void) {
+    int held = port_pad0_held() & 0x20; /* L */
+    unsigned f = port_frame_count, need = port_tv_type == 0 ? 150 : 180;
+    if (!held || !skip_on || f - skip_seen > 25) { skip_on = held != 0; skip_start = f; }
+    skip_seen = f;
+    skip_prog = skip_on ? (float)(f - skip_start) / need : 0;
+    if (skip_prog >= 1) { skip_on = 0; skip_prog = 0; return 1; }
+    return 0;
+}
+EMSCRIPTEN_KEEPALIVE float port_skip_progress(void) { return port_frame_count - skip_seen > 25 ? 0 : skip_prog; }
+
 /* P21: ?det=1 / PORT_DET=1: deterministic clock for node-vs-browser comparisons. Time is
  * frame * 1/50 s (PAL; 1/60 NTSC, P147) plus 1000 ticks (~21 us) per read, so busy-waits still progress; it never depends
  * on the host's speed or on wall time. */

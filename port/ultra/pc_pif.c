@@ -31,6 +31,10 @@ void *port_n64_to_wasm(unsigned n64addr);
 /* ---- input state written by the page: per pad {present, buttons (N64 bits), stick_x, stick_y} */
 static int32_t port_pads[MAXCONTROLLERS][4] = { { 1, 0, 0, 0 } };
 EMSCRIPTEN_KEEPALIVE int32_t *port_pad_state(void) { return &port_pads[0][0]; }
+/* P321: pad 0 buttons as last delivered to the game (the game's own copy is edge-triggered; port_skip_hold needs
+ * "held"). Taken at the controller read, after ?padf, since the page rewrites port_pads every animation frame. */
+static u32 pad0_delivered;
+int port_pad0_held(void) { return (int)pad0_delivered; }
 
 /* ---- P149: frame-based pad script for test runs (50 Hz retraces made wall-clock scripts drift).
  * ?padf=F:BTN:X:Y,F:BTN:X:Y,...  (node: PORT_PADF=...): from VI retrace F (port_frame_count) on, pad 0 reports
@@ -126,6 +130,7 @@ static void pif_run(void) {
             else if (c[0] == 0x01 && rx >= 4) {
                 u32 b = (u32)port_pads[ch][1];
                 r[0] = (u8)(b >> 8); r[1] = (u8)b;
+                if (ch == 0) pad0_delivered = b;
                 r[2] = (u8)(s8)port_pads[ch][2]; r[3] = (u8)(s8)port_pads[ch][3];
             }
             else ok = 0;                                /* pak commands: no pak */

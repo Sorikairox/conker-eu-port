@@ -226,6 +226,8 @@ const capture = (el, e) => { try { el.setPointerCapture(e.pointerId); } catch (_
   rest();
 })();
 
+const SKIP_ARC = 2 * Math.PI * 27;
+$('skiparc').style.strokeDasharray = String(SKIP_ARC);
 let lastPadText = '';
 function pollInput() {
   const gps = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter((g) => g && g.connected);
@@ -242,6 +244,11 @@ function pollInput() {
   });
   const txt = gps.length ? gps.map((g, i) => `pad ${i + 1}: ${g.id.slice(0, 40)}${g.mapping === 'standard' ? '' : ' (non-standard mapping)'}`).join('\n') : 'no gamepad (press a button on it to connect)';
   if (txt !== lastPadText) { $('pads').textContent = txt; lastPadText = txt; }
+  if (M && M._port_skip_progress) {  // P321: ring while L is held over a skippable cutscene
+    const pr = M._port_skip_progress(), ring = $('skipring');
+    if (pr > 0) $('skiparc').style.strokeDashoffset = String(SKIP_ARC * (1 - Math.min(1, pr)));
+    if (ring.hasAttribute('hidden') !== !(pr > 0)) ring.toggleAttribute('hidden', !(pr > 0));  // SVG: no .hidden property
+  }
   if (M && M._port_pad_state) {
     const p = M._port_pad_state() >> 2, H = M.HEAP32;
     for (let i = 0; i < 4; i++) {
