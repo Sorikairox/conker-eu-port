@@ -107,6 +107,9 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
 - Check `port/build/census` has 0 FAIL after merges: a TU that fails the clang census build is silently replaced by stubs (P107 found 4 such TUs).
 - Naming (user request 2026-10-23): every converted function gets a description comment whose first line starts with a proposed snake_case name, e.g. `// level_request_music: requests the level's songs ...`. A script collects them into a names table; the actual symbol/file rename happens later in one scripted pass at a quiet merge point.
 - Naming update (user request 2026-10-26): when a session touches or reads a function, it RENAMES it to an explicit, human-readable name and keeps a comment with the original asm name (`/* was func_XXXXXXXX */`). The rename must be repo-wide and keep verify_all byte-identical (symbol files, asm, Makefile --wrap lists, port tables, TSV registries), so use the rename script (to be built, P322) rather than an IDE rename.
+- Deploy rule (user, 2026-10-26): ALWAYS deploy the latest version. After a port-web change passes its checks and
+  browser test, run `tools/eu_port/deploy_web.sh` (ships port/build/web to https://conker-web-port.netlify.app;
+  apply_names.sh does it itself). Never deploy a build that failed or skipped its browser test.
 - Renaming done (P323, 2026-10-26): 5695 functions renamed through tools/eu_port/names.tsv (proposals in
   docs/names/proposals/, applied with tools/eu_port/apply_names.sh). Only func_150A4ED4 / func_150A69A8 keep their
   names: secondary entry points inside another function's asm (listing them splits the parent). Names with

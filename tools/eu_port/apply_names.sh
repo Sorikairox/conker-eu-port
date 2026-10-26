@@ -77,3 +77,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_014MU6B4SSHUBUyCXqLySTxn"
 git log -1 --oneline
 ~/conker/tools/eu_port/backup_push.sh
+tools/eu_port/deploy_web.sh   # user rule: the public site always runs the latest version
