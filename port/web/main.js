@@ -64,6 +64,8 @@ const OPTIONS = [
     help: 'Your cash total ($) stays in the top right corner during play. Off: as on the N64, it only pops up above Conker when he gets cash (and on the pause screen).' },
   { key: 'longbreath', label: 'Longer breath', def: false, game: 4,
     help: 'Conker can stay under water about twice as long before he starts to drown (the air meter empties at half speed). Off: the N64 air time.' },
+  { key: 'longspin', label: 'Longer tail spin', def: false, game: 5,
+    help: 'Holding A during the helicopter tail spin (A, then A again in the air) keeps Conker hovering about twice as long before he drops. Off: the N64 hover time.' },
 ];
 const optOverride = {};
 for (const kv of (Q.get('opt') || '').split(',')) { const [k, v] = kv.split(':'); if (k) optOverride[k] = v === '1'; }

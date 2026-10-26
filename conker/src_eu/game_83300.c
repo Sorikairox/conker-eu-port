@@ -5366,6 +5366,14 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                 }
             } else {
                 /* gliding: count up; A held keeps it to 0x3E frames, else 0x13 */
+#ifdef PORT
+                /* P326 option "Longer tail spin": while A is held the spin lasts to 0x79 instead of 0x3E, i.e.
+                 * 3 + 2 * (0x3E - 3): twice the hover. The rise (< 0xD), the spin-up (< 0x11) and the early stop
+                 * when A is released (>= 0x13) are unchanged. */
+#define GLIDE_HOLD_MAX (port_option(PORT_OPT_LONG_TAILSPIN) ? 0x79 : 0x3E)
+#else
+#define GLIDE_HOLD_MAX 0x3E
+#endif
                 ctl->unk31 += D_800BE9A0;
                 if (rec->unk31C->unk31 < 0xD) {
                     rec->y_velocity = 8.0f;
@@ -5378,7 +5386,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
                 anim = 0xE9;
                 speed = rec->animation_speed;
                 rec->unk31C->pad3C[0] = 6;
-                if ((!(*(u16 *)pad & 0x8000) && rec->unk31C->unk31 >= 0x13) || rec->unk31C->unk31 >= 0x3E) {
+                if ((!(*(u16 *)pad & 0x8000) && rec->unk31C->unk31 >= 0x13) || rec->unk31C->unk31 >= GLIDE_HOLD_MAX) {
                     rec->disable_run = 0xFF;
                     rec->unk100 = 0x55;
                     rec->unk31C->unk31 = 0;
@@ -5408,6 +5416,7 @@ void obj_jump_swim_glide_update(struct127 *rec, u8 *pad) {
         rec->gravity = 6.2f;
     }
 }
+#undef GLIDE_HOLD_MAX
 #else
 #pragma GLOBAL_ASM("asm/nonmatchings/game_83300/obj_jump_swim_glide_update.s")
 #endif

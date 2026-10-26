@@ -349,10 +349,11 @@ void p205_goto_apply(int *btn, int *sx, int *sy) {
     else if (go_jmp[go_i] == 1 && port_frame_count % 40 < 8) *btn |= 0x8000;
     else if (go_jmp[go_i] == 2) {   /* P248 hX:Z: jump + helicopter: A 0-5, 10-15 (a second chance to jump when the
                                      * first press came during a landing), then held from 20; cycle 200 retraces */
-        static int hi = -1; static unsigned hf;
+        static int hi = -1, hc = -1; static unsigned hf;
         unsigned ht;
+        if (hc < 0) { hc = port_flag("p326hcycle"); if (hc <= 20) hc = 200; }   /* P326 TEST: cycle length (A held longer) */
         if (hi != go_i) { hi = go_i; hf = port_frame_count; }
-        ht = (port_frame_count - hf) % 200;
+        ht = (port_frame_count - hf) % (unsigned)hc;
         if (ht < 6 || (ht >= 10 && ht < 16) || ht >= 20) *btn |= 0x8000;
     }
     go_th = th;

@@ -11,6 +11,7 @@ enum {
     PORT_OPT_HEALTH_ALWAYS = 2, /* HUD health pieces stay on screen (hud_health_update, P325) */
     PORT_OPT_CASH_ALWAYS = 3,   /* cash total always on screen (hud_cash_always_draw, P325) */
     PORT_OPT_LONG_BREATH = 4,   /* air under water lasts twice as long (swim_water_physics, P326) */
+    PORT_OPT_LONG_TAILSPIN = 5, /* helicopter tail spin hovers twice as long (obj_jump_swim_glide_update, P326) */
     PORT_OPT_COUNT = 16
 };
 int port_option(int id);
