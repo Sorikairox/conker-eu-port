@@ -34,6 +34,23 @@ EM_JS(int, __port_flag_js, (const char *name), {
     return v === null ? 0 : (parseInt(v, 0) || (v === '' ? 1 : 0));
 });
 int port_flag(const char *name) { return __port_flag_js(name); }
+/* P327: same, but the value is hex without a prefix (?warp=29 = level 0x29). Absent = 0, present without a value = 1. */
+EM_JS(int, __port_flag_hex_js, (const char *name), {
+    var n = UTF8ToString(name), v = null;
+    if (typeof location !== 'undefined') { var m = new RegExp('[?&]' + n + '(=([^&]*))?(&|$)').exec(location.search); if (m) v = m[2] === undefined ? '1' : m[2]; }
+    else if (typeof process !== 'undefined' && process.env) { var e = process.env['PORT_' + n.toUpperCase()]; if (e !== undefined) v = e; }
+    return v === null ? 0 : (parseInt(v, 16) || (v === '' ? 1 : 0));
+});
+int port_flag_hex(const char *name) { return __port_flag_hex_js(name); }
+/* P327 test aid for game C (which cannot pass string literals here: its strings live in word-swapped vbe memory):
+ * ?warp=<level hex> boots straight into that level (intro_mode_update), ?warpscene=N its start / scene argument. */
+int port_warp_level(void) {
+    static int v = -1;
+    if (v < 0 && (v = port_flag_hex("warp")) > 0)
+        port_log("[warp] ?warp: gameplay on level %X, scene %d, from the boot screen (P327 test aid)\n", v, port_flag("warpscene"));
+    return v;
+}
+int port_warp_scene(void) { static int v = -1; if (v < 0) v = port_flag("warpscene"); return v; }
 /* P21: print the current wasm/JS call stack (function names only), skipping `skip` frames */
 EM_JS(void, __port_js_stack, (int skip, int n), {
     var l = new Error().stack.split('\n').slice(1 + skip, 1 + skip + n);

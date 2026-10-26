@@ -346,6 +346,8 @@ void game_pause_update(void) {
 void screen_fade_update(void);
 #ifdef PORT
 static s32 port_intro_skipped; /* P324 "Skip intro": done once per boot (the attract loop also returns to level 0x21) */
+static s32 port_warp_started;  /* P327 ?warp: done once per boot */
+void port_warp_game_start(s32 level, s32 scene);
 #endif
 /* intro_mode_update: game mode 11 (set by menu_init at power-on), the boot screen on level 0x25: the age / legal /
  * logo pages run on the timer D_800E0EC0 (A skips ahead), then at 0x2C7 mode 1 and level 0x21, the logo-screen
@@ -374,6 +376,17 @@ void intro_mode_update(void) {
      * Off = the N64 path. */
     if (port_option(PORT_OPT_SKIP_INTRO) && !port_intro_skipped && D_800E0EC0 >= 25) {
         D_800E0EC0 = 0x2C7;
+    }
+#endif
+#ifdef PORT
+    /* TEST AID (P327, not a game feature): ?warp=<level hex>[&warpscene=N] starts gameplay on that level straight
+     * from the boot screen, skipping the legal / logo pages, the logo-screen intro, the title menu and the opening
+     * (port_warp_game_start). Same 25-frame wait as "Skip intro" (a level request on the first boot frame stops the
+     * game). Without ?warp, port_warp_level() is 0 and this does nothing. */
+    if (!port_warp_started && D_800E0EC0 >= 25 && port_warp_level() > 0) {
+        port_warp_started = 1;
+        port_warp_game_start(port_warp_level(), port_warp_scene());
+        return;
     }
 #endif
     if (D_800E0EC0 >= 0x2C7) {
@@ -2895,6 +2908,34 @@ void slot_game_start(void) {
     D_800E0FE1 = 1;
     menu_settings_apply_checked();
 }
+
+#ifdef PORT
+/* port_warp_game_start: P327 TEST AID for ?warp (intro_mode_update): starts single-player gameplay on `level` with
+ * start / scene argument `scene`, the way the title menu's "continue" does (title_slot_page accept + slot_game_start,
+ * without the save slot load: D_8008FDA8 = -1 = no slot, so the fresh save is left alone). Game mode 0. */
+void port_warp_game_start(s32 level, s32 scene) {
+    D_8008FDA8 = -1;
+    D_800BE7FC = -1;
+    D_80082F50 = 0;
+    D_80087260 = 3;
+    if (D_800E9D00 & 0x200) {
+        D_80087260 = 0x33;
+    }
+    *D_80087270 = 0;
+    D_8008FD8C = 1;
+    D_80090130 = 1;
+    D_80090134 = 1;
+    D_8009015C = 0;
+    D_800BEA38 = 1;
+    D_800D27C8 = 0;
+    D_800E0B94 = 0;
+    D_800D3260 = 0;
+    game_request_transition(6, level, scene, 0, 1);
+    D_800E0FC9 = 1;
+    D_800E0FE1 = 1;
+    menu_settings_apply_checked();
+}
+#endif
 
 #ifdef NON_MATCHING
 f32 catmull_rom_eval(s32 points, s32 segment, f32 t);

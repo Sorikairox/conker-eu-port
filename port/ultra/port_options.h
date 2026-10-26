@@ -15,6 +15,10 @@ enum {
     PORT_OPT_COUNT = 16
 };
 int port_option(int id);
+/* P327 test aids (URL flags, port/ultra/pc_os.c), 0 when the flag is absent so they do nothing unless given:
+ * port_warp_level() = ?warp=29 (hex level id), port_warp_scene() = ?warpscene=N (decimal, or 0x..). */
+int port_warp_level(void);
+int port_warp_scene(void);
 void port_set_option(int id, int value);
 
 #endif
