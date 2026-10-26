@@ -1,4 +1,4 @@
-# name	addr	size	type	bind	section	segment	link   (frozen P328 from the matching build; see port/symbols/freeze_symbols.py)
+# name	addr	size	type	bind	section	segment	link   (frozen P328 from the matching build; columns: port/symbols/symbols.py)
 K0BASE	80000000	0	none	local	abs	abs	-
 K1BASE	A0000000	0	none	local	abs	abs	-
 K2BASE	C0000000	0	none	local	abs	abs	-

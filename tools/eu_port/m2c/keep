@@ -1,9 +1,0 @@
-#!/bin/bash
-_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
-# usage: keep <func> <draft.c>  -- stores a hand-fixed OK draft in conker/build/hand/ (with its
-# `OK func file` line) for a later `apply.py build/hand` in the container.
-d=${CONKER_ROOT:-$HOME/conker}/conker/build/hand; mkdir -p $d
-src=$(awk -v f=$1 '$3==f{print $2}' ${CONKER_ROOT:-$HOME/conker}/tools/eu_port/m2c/all.txt)
-[ -n "$src" ] || { echo "no source for $1"; exit 1; }
-cp "$2" $d/$1.c; grep -v " $1 " $d/screen.txt 2>/dev/null > $d/s.tmp; echo "OK $1 $src" >> $d/s.tmp; mv $d/s.tmp $d/screen.txt
-echo "kept $1 ($src), $(wc -l < $d/screen.txt) total"

@@ -47,7 +47,6 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', '..', '..', 'port', 'symbols'))
 import symbols as portsyms, romimage
 ROMFILE = os.environ.get('DIFFTEST_ROM') or os.path.join(HERE, '..', '..', '..', 'baserom.eu.z64')
-PRAG = re.compile(r'#pragma GLOBAL_ASM\("([^"]*)/(\w+)\.s"\)')
 WORD_RE = re.compile(r"/\*\s+([0-9A-F]+)\s+([0-9A-F]+)\s+([0-9A-F]{8})\s+\*/\s*(.*)")
 PAGE = 0x1000
 HEAP_LO, HEAP_HI = 0x80400000, 0x80600000       # fake heap (lazy random)
@@ -264,17 +263,6 @@ def ref_from_rom(func):
     if words and is_branch(words[-1]): words.append(0)
     return vram, words
 
-def ref_from_s(spath):
-    words, vram = [], None
-    for line in open(spath):
-        m = WORD_RE.search(line)
-        if m:
-            if vram is None: vram = int(m.group(2), 16)
-            words.append(int(m.group(3), 16))
-    while words and words[-1] == 0: words.pop()
-    if words and is_branch(words[-1]): words.append(0)   # keep the delay slot of the final jr ra
-    return vram, words
-
 
 # ---------------------------------------------------------------- candidate build
 _CC = {}
@@ -290,12 +278,7 @@ def _cc_cmd(p):
         for l in open(os.path.join(portsyms.HERE, 'ido_cc.tsv')):
             if not l.startswith('#') and '\t' in l:
                 k, v = l.rstrip('\n').split('\t', 1); _IDOCC[k] = shlex.split(v)
-    if p in _IDOCC and os.environ.get('DIFFTEST_CC_MAKE') != '1': return list(_IDOCC[p])
-    r = subprocess.run(['make', '-n', '-B', 'VERSION=eu', 'build/' + p + '.o'], capture_output=True, text=True).stdout
-    for l in r.split('\n'):
-        if '/cc ' in l and ' -c ' in l:
-            a = shlex.split(l); i = a.index('-o'); a = a[:i] + a[i + 2:]
-            return [x for x in a if not x.endswith('.c')]
+    if p in _IDOCC: return list(_IDOCC[p])   # P329: no Makefile fallback (DIFFTEST_CC_MAKE) any more
     return None
 
 def func_span(src, func):
@@ -419,34 +402,13 @@ def build_tu(func, p, src, code):
     hoist = [l[8:] for l in code.split('\n') if l.startswith('//HOIST ')]
     dropl = [l[7:] for l in code.split('\n') if l.startswith('//DROP ')]
     code = '\n'.join(l for l in code.split('\n') if not l.startswith(('//HOIST ', '//DROP ')))
-    pm = [m for m in PRAG.finditer(src) if m.group(2) == func]
-    if pm:
-        m = pm[-1]; a, b = m.start(), m.end()
-        k = src.rfind('#ifdef NON_MATCHING\n', 0, a)
-        # P80: comment / blank lines may sit between the #else and the pragma (game_981E0.c "// ??" notes)
-        e = src.rfind('#else\n', 0, a)
-        between = src[e + len('#else\n'):a] if e >= 0 else None
-        only_notes = between is not None and all(not l.strip() or l.strip().startswith('//') for l in between.split('\n'))
-        # P73: the NON_MATCHING side may hold more functions than this one
-        nmside = func_span(src[k:e], func) if k >= 0 and k < e and '#endif' not in src[k:a] else None
-        if k >= 0 and e > k and only_notes and '#endif' not in src[k:a] and src[b:].startswith('\n#endif'):
-            a, b = k, b + len('\n#endif')   # already converted: replace the whole NON_MATCHING block
-            tu = src[:a] + '\n' + code + '\n' + src[b:]
-        elif nmside:
-            # P73: the NON_MATCHING side holds more than this function (camera_update_dir_vector + camera_update_dir_vector_thunk): replace
-            # only its definition there. Before, the candidate went into the #else side, which nm_resolve drops,
-            # so the src_eu body was tested instead of the candidate (every mutant "survived").
-            tu = src[:k + nmside[0]] + code + src[k + nmside[1]:]
-        else:
-            tu = src[:a] + '\n' + code + '\n' + src[b:]
-    else:
-        tu = splice_items(src, func, code)
-        if tu is None:
-            sp = func_span(src, func)
-            if sp: tu = src[:sp[0]] + code + src[sp[1]:]
-        if tu is None and (_GA or {}).get(func, ('', False))[1]:
-            tu = src + '\n' + code + '\n'   # P329: asm-only function (no C body in the stripped source): append the candidate
-        if tu is None: raise RuntimeError('no definition or pragma of %s in %s' % (func, p))
+    tu = splice_items(src, func, code)
+    if tu is None:
+        sp = func_span(src, func)
+        if sp: tu = src[:sp[0]] + code + src[sp[1]:]
+    if tu is None and (_GA or {}).get(func, ('', False))[1]:
+        tu = src + '\n' + code + '\n'   # P329: asm-only function (no C body in the stripped source): append the candidate
+    if tu is None: raise RuntimeError('no definition of %s in %s' % (func, p))
     for l in dropl: tu = tu.replace(l + '\n', '', 1)
     if hoist:
         ms = list(re.finditer(r'^#include[^\n]*\n', tu, re.M)); k = ms[-1].end() if ms else 0
@@ -458,7 +420,7 @@ def build_tu(func, p, src, code):
     cr = nm_resolve(code, True); cs = func_span(cr, func)
     if cs is not None and cr[cs[0]:cs[1]] not in tu:
         raise RuntimeError('candidate %s was dropped when splicing it into %s' % (func, p))
-    return PRAG.sub('', tu)
+    return tu
 
 def nm_resolve(text, on=True):
     """evaluate the #ifdef/#ifndef NON_MATCHING ... [#else ...] #endif blocks. P225: other #if blocks nested inside
@@ -697,8 +659,8 @@ def all_hdr_protos():
 # P214 rule compared IDO's scratch f12 left right before `jal random_int` as an argument (false DIFFER, P232
 # point_spark_spawn). DIFFTEST_INCHDR_OLD=1 = old behaviour (TU text, then the P93 / P100 header fallbacks only).
 INCHDR_OLD = os.environ.get('DIFFTEST_INCHDR_OLD') == '1'
-INC_DIRS = ['.', 'include', 'include/2.0L', 'include/2.0L/PR', 'include/libc', 'src/libultra/os', 'src/libultra/audio',
-            'src/libultra/io']
+INC_DIRS = ['.', 'include', 'include/2.0L', 'include/2.0L/PR', 'include/libc', 'include/libultra/os', 'include/libultra/audio',
+            'include/libultra/io']
 _INCH = {}
 def inc_hdr_text(path, tu):
     """concatenated text of every header the TU includes (recursively; .h files only)"""

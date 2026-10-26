@@ -1,7 +1,7 @@
 #!/bin/bash
 # Parallel-agent worktrees: one git worktree + one dev container per agent.
-#   wt.sh new <name>    worktree ~/conker-wt/<name> on branch eu-wt-<name> (from eu), copies submodules / ROM /
-#                       permuter code / m2c venv, starts container conkerdev-<name> (conker-arm) mounting it at /conker
+#   wt.sh new <name>    worktree ~/conker-wt/<name> on branch eu-wt-<name> (from eu), copies the ROM, starts
+#                       container conkerdev-<name> (conker-arm image, Dockerfile.arm: IDO for difftest) at /conker
 #   wt.sh env <name>    print the export lines every tool needs (eval "$(tools/eu_port/wt.sh env a)")
 #   wt.sh merge <name>  merge eu-wt-<name> into eu in the MAIN checkout. Only when no agent is working in main!
 #   wt.sh rm <name>     remove the container and the worktree (branch is kept)
@@ -20,21 +20,10 @@ new)
   [ -e "$wt" ] && { echo "$wt exists"; exit 1; }
   mkdir -p "$WTDIR"
   git -C "$MAIN" worktree add "$wt" -b "$br" eu
-  # submodules (drop the .git pointer files: they would point into the main checkout's modules dir)
-  for s in n64splat asm-processor asm-differ mips_to_c; do
-    rm -rf "$wt/tools/$s"; cp -R "$MAIN/tools/$s" "$wt/tools/$s"; rm -f "$wt/tools/$s/.git"
-  done
   cp "$MAIN/baserom.eu.z64" "$wt/"
-  # permuter code only (no nm/ sweep/ repair/ s34/ data)
-  mkdir -p "$wt/tools/decomp-permuter"
-  rsync -a --exclude=/nm --exclude=/sweep --exclude=/repair --exclude=/s34 "$MAIN/tools/decomp-permuter/" "$wt/tools/decomp-permuter/"
-  # m2c: generated function list + rodata cache (ctx/ is regenerated on demand); venv has absolute paths, so recreate it
-  for x in all.txt rod; do [ -e "$MAIN/tools/eu_port/m2c/$x" ] && cp -R "$MAIN/tools/eu_port/m2c/$x" "$wt/tools/eu_port/m2c/"; done
-  /usr/bin/python3 -m venv "$wt/tools/eu_port/m2c/venv"
-  "$wt/tools/eu_port/m2c/venv/bin/pip" install -q 'pycparser<3' >/dev/null 2>&1 || echo "WARN: pycparser install failed"
   docker run -d --name "$ct" --platform linux/arm64 -v "$wt":/conker -w /conker conker-arm sleep infinity >/dev/null
   echo "worktree $wt  branch $br  container $ct"
-  echo "next: eval \"\$($wt/tools/eu_port/wt.sh env $name)\"; cd \$CONKER_ROOT; tools/eu_port/verify_all.sh   (populates asm/ and build/)";;
+  echo "next: eval \"\$($wt/tools/eu_port/wt.sh env $name)\"; cd \$CONKER_ROOT; tools/eu_port/check.sh";;
 merge)
   [ -d "$wt" ] || { echo "no worktree $wt"; exit 1; }
   git -C "$wt" diff --quiet && git -C "$wt" diff --cached --quiet || { echo "uncommitted changes in $wt"; exit 1; }

@@ -25,6 +25,12 @@ for F in "$@"; do NR=$NR0
   # other O` (tools/port/nmharness.sh / nmharness_mut.sh do both). Output: `  harness: VERDICT ...` and
   # `  muts harness: K killed / N (survived: [..])`. Rows with HARNESS skip random / setups / difftest mutants.
   hc=""; hm=""; for k in $kn; do case $k in HARNESS=*) hc=${k#HARNESS=};; HMUT=*) hm=${k#HMUT=};; esac; done
+  if [ -n "$hc" ] && [ ! -e "${hc%%,*}" ]; then
+    # P329: the whole-function NM harnesses (tools/port/nmharness*.sh, nmasm_*.py) ran on the matching build's ELFs,
+    # which port-web no longer has (branch exact-byte-decomp-wip keeps them)
+    echo "$F ($ses, $file) knobs: $kn"; echo "  harness: UNSURE skipped (${hc%%,*} needs the matching build: branch exact-byte-decomp-wip)"
+    continue
+  fi
   if [ -n "$hc" ]; then
     echo "$F ($ses, $file) knobs: $kn"
     r=$(bash -c "${hc//,/ }" 2>&1 | grep -E '^(RESULT )?(EQUIV|DIFFER|UNSURE|ERROR)' | tail -1 | cut -c1-${CUT:-160})

@@ -2,7 +2,10 @@
 
 These replace, for the port tools and difftest, everything that used to come from the byte-matching decomp build:
 conker/build/conker.eu.elf (+ .map), conker/undefined_*_auto.txt, undefined_*.eu.txt, symbol_addrs.eu.txt and the
-segment list of conker/conker.eu.yaml. Columns: see freeze_symbols.py.
+segment list of conker/conker.eu.yaml (P329: those are gone from port-web; branch exact-byte-decomp-wip keeps them and
+the one-time generator freeze_symbols.py). symbols.tsv columns: name, addr (hex), size (hex), type func/data/none,
+bind, section, segment, link (position in the old linker symbol files = the "link values"; `-` = ELF only); rows in
+ELF symbol-table order (tools take the FIRST name at an address). global_asm.tsv: see global_asm().
   elf_symbols()    -> [(name, value, size, type, bind, shndx, section)] like port/tools/elf32.symbols() on the old ELF
                       (type/bind as ELF numbers; shndx 0 for abs/link-only rows, 1 otherwise)
   link_addresses() -> {name: value} of the old linker symbol files, in their order

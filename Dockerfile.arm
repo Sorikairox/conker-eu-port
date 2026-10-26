@@ -1,28 +1,20 @@
-# Native arm64 build image for fast inner loops (screening, permuter) on Apple silicon.
-# Same toolchain as Dockerfile, but IDO is the native linux-arm recomp build instead of the
-# x86-64 one in ido/ (byte-identical .text/.data/.rodata; only .mdebug differs).
-# The authoritative check (tools/eu_port/verify_all.sh) still uses the x86-64 image.
+# Dev container image (conker-arm, Apple silicon) for port-web tools: python + MIPS binutils, and IDO 5.3
+# (static recomp, /opt/ido5.3) as the compiler of tools/port/difftest's candidates (flags: port/symbols/ido_cc.tsv).
+# The byte-matching decomp build that also used it lives on branch exact-byte-decomp-wip (P329).
+# The web build runs in its own image (conker-emsdk, `port/web/run.sh image`).
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-# asm-processor expects GLOBAL_ASM files to start with glabel
-ENV SPIMDISASM_ASM_NM_LABEL=""
-
 COPY /packages.txt /
 RUN apt-get update && apt-get install -y $(cat /packages.txt) curl
 
 COPY requirements.txt /
 RUN python3 -m pip install -r /requirements.txt --no-cache-dir --break-system-packages
 
-COPY tools/n64splat/requirements.txt /splat-requirements.txt
-RUN python3 -m pip install -r /splat-requirements.txt --no-cache-dir --break-system-packages
-
 RUN mkdir -p /opt/ido5.3 && \
     curl -sL https://github.com/decompals/ido-static-recomp/releases/download/v1.2/ido-5.3-recomp-linux-arm.tar.gz \
     | tar xz -C /opt/ido5.3
 ENV IDO_DIR=/opt/ido5.3
-
-COPY .bash_aliases /root/.bash_aliases
 
 RUN mkdir /conker
 WORKDIR /conker

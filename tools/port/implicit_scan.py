@@ -27,8 +27,8 @@ if not ROOT:
 SRC = os.path.join(ROOT, "conker")
 FLAGS = ["-fsyntax-only", "--target=mips-linux-gnu", "-std=gnu89", "-D_LANGUAGE_C", "-D_FINALROM",
          "-DF3DEX_GBI_2", "-D_MIPS_SZLONG=32", "-I", ".", "-I", "include", "-I", "include/2.0L",
-         "-I", "include/2.0L/PR", "-I", "include/libc", "-I", "src/libultra/os", "-I", "src/libultra/audio",
-         "-I", "src/libultra/io", "-nostdinc", "-Wno-everything", "-Wno-error",
+         "-I", "include/2.0L/PR", "-I", "include/libc", "-I", "include/libultra/os", "-I", "include/libultra/audio",
+         "-I", "include/libultra/io", "-nostdinc", "-Wno-everything", "-Wno-error",
          "-Wimplicit-function-declaration", "-ferror-limit=0"]
 LIBM = {"sinf", "cosf", "tanf", "sqrtf", "atan2f", "atanf", "asinf", "acosf", "fabsf", "powf", "expf",
         "logf", "floorf", "ceilf", "fmodf", "sin", "cos", "sqrt", "atan2", "fabs", "pow", "floor", "ceil",

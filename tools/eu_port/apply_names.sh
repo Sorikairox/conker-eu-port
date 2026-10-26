@@ -5,11 +5,9 @@
 # confidence kept as "(med)"/"(low)" in the description) -> rename.py --check, apply, --verify -> full checks ->
 # census + web build -> browser hold-L test (opening must end at retrace 5789) -> commit -> backup_push.
 # Stops at the first red step; nothing is committed then (fix, or `git checkout -- . && git clean` the rename).
-# P328: APPLY_PORT=1 = port mode (no byte-matching build needed): rename.py --port (C + port/symbols/symbols.tsv),
-# checks = tools/eu_port/check.sh --port, inner entry points from the frozen table instead of conker/asm. Cleanup part 2
-# makes port mode the default.
+# P329: there is only the port mode (the byte-matching build is on branch exact-byte-decomp-wip): rename.py edits the C
+# and port/symbols/symbols.tsv, checks = tools/eu_port/check.sh, inner entry points come from the frozen table.
 set -euo pipefail
-PM=; [ "${APPLY_PORT:-}" = 1 ] && PM=--port
 cd ~/conker-wt/web
 eval "$(tools/eu_port/wt.sh env web)"
 export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
@@ -17,31 +15,26 @@ export PATH=/Applications/Docker.app/Contents/Resources/bin:$PATH
 L=port_work/apply_names_$(echo "$@" | tr ' ' _); mkdir -p "$L"
 [ -z "$(git status --porcelain --untracked-files=no)" ] || { echo "tree not clean"; exit 1; }
 
-APPLY_PORT=${APPLY_PORT:-} python3 -I - "$@" <<'EOF'
+python3 -I - "$@" <<'EOF'
 import re, sys, collections
 have = {}
 for line in open('tools/eu_port/names.tsv'):
     if line.startswith('#') or line.startswith('old\t') or not line.strip(): continue
     o, n = line.split('\t')[:2]; have[o] = n
 used = set(have.values()); rows = []
-# secondary entry points (a glabel inside another function's .s) can't be renamed: listing them in the symbol list
-# makes splat split the parent function (P322 wave 3: game_eu_D1760 / D3880 changed size). Keep their func_ name.
+# secondary entry points (a function symbol inside another function) keep their func_ name (P322: renaming them made
+# splat split the parent function; kept as a rule).
 import glob, os, bisect
 inner = set()
-if os.environ.get('APPLY_PORT') == '1':
-    # P328: from the frozen table: a function symbol strictly inside another function's [addr, addr+size) (same 65 func_
-    # names as the asm glabel scan at the split)
-    rws = [l.rstrip('\n').split('\t') for l in open('port/symbols/symbols.tsv') if not l.startswith('#')]
-    fs = sorted((int(r[1], 16), int(r[2], 16)) for r in rws if r[3] == 'func' and r[4] != '-' and int(r[2], 16)
-                and r[6] in ('init', 'game', 'debugger'))
-    for r in rws:
-        a = int(r[1], 16); i = bisect.bisect_left(fs, (a, 0))
-        if r[0].startswith('func_') and any(pa < a < pa + pz for pa, pz in fs[max(0, i - 40):i]):
-            inner.add(r[0])
-else:
-  for f in glob.glob('conker/asm/nonmatchings/*/*.s'):
-    base = os.path.basename(f)[:-2]
-    inner |= {m for m in re.findall(r'^\s*glabel\s+(\S+)', open(f).read(), re.M) if m != base}
+# P328: from the frozen table: a function symbol strictly inside another function's [addr, addr+size) (same 65 func_
+# names as the asm glabel scan at the split)
+rws = [l.rstrip('\n').split('\t') for l in open('port/symbols/symbols.tsv') if not l.startswith('#')]
+fs = sorted((int(r[1], 16), int(r[2], 16)) for r in rws if r[3] == 'func' and r[4] != '-' and int(r[2], 16)
+            and r[6] in ('init', 'game', 'debugger'))
+for r in rws:
+    a = int(r[1], 16); i = bisect.bisect_left(fs, (a, 0))
+    if r[0].startswith('func_') and any(pa < a < pa + pz for pa, pz in fs[max(0, i - 40):i]):
+        inner.add(r[0])
 for c in sys.argv[1:]:
     for line in open(f'docs/names/proposals/chunk{c}.tsv'):
         if line.startswith('#') or line.startswith('old\t') or not line.strip(): continue
@@ -63,13 +56,13 @@ with open('tools/eu_port/names.tsv', 'a') as out:
 print(f'{len(rows)} rows appended')
 EOF
 
-tools/eu_port/rename.py $PM --check > $L/check.txt 2>&1 || { tail -3 $L/check.txt; echo "rename --check failed"; exit 1; }
+tools/eu_port/rename.py --check > $L/check.txt 2>&1 || { tail -3 $L/check.txt; echo "rename --check failed"; exit 1; }
 tail -1 $L/check.txt
-tools/eu_port/rename.py $PM > $L/apply.txt 2>&1 || { tail -3 $L/apply.txt; exit 1; }
-tools/eu_port/rename.py $PM --verify > $L/verify.txt 2>&1 || { tail -5 $L/verify.txt; echo "verify failed"; exit 1; }
+tools/eu_port/rename.py > $L/apply.txt 2>&1 || { tail -3 $L/apply.txt; exit 1; }
+tools/eu_port/rename.py --verify > $L/verify.txt 2>&1 || { tail -5 $L/verify.txt; echo "verify failed"; exit 1; }
 echo "verify OK"
-# P328: tools/eu_port/check.sh (--full with the matching build, --port without); it ends GREEN / RED
-tools/eu_port/check.sh ${PM:---full} > $L/checks.txt 2>&1 || { tail -12 $L/checks.txt; echo "checks red"; exit 1; }
+# tools/eu_port/check.sh ends GREEN / RED
+tools/eu_port/check.sh > $L/checks.txt 2>&1 || { tail -12 $L/checks.txt; echo "checks red"; exit 1; }
 echo "checks OK"
 (port/web/run.sh census && port/web/run.sh build) > $L/build.txt 2>&1 || { tail -5 $L/build.txt; echo "web build failed"; exit 1; }
 echo "web build OK"
@@ -84,8 +77,7 @@ git add -A conker/src_eu conker/include conker port tools && git add -u   # -u: 
 for c in "$@"; do git add docs/names/proposals/chunk$c.tsv; done
 git commit -q -m "rename: chunks $* of docs/names/chunks.tsv named via tools/eu_port/names.tsv
 
-$n. verify_all byte-identical, NM link, protocheck, implicit_scan, romabs, arity, selftest 152/152, census + web
-build, browser hold-L skip unchanged (opening ends at 5789). Applied with tools/eu_port/apply_names.sh.
+$n. check.sh green (implicit_scan, romabs, selftest 152/152, census + web build), browser hold-L skip unchanged (opening ends at 5789). Applied with tools/eu_port/apply_names.sh.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_014MU6B4SSHUBUyCXqLySTxn"

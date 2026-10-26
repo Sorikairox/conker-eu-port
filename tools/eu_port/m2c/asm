@@ -1,5 +1,0 @@
-#!/bin/bash
-_top=$(git rev-parse --show-toplevel 2>/dev/null); if [ -n "$_top" ] && [ "$_top" != "${CONKER_ROOT:-$HOME/conker}" ]; then echo "refusing: cwd repo $_top != CONKER_ROOT ${CONKER_ROOT:-$HOME/conker} (run: eval \"\$(tools/eu_port/wt.sh env <name>)\")" >&2; exit 3; fi
-# usage: asm func...  -- compact listing of a function's .s (labels + instructions only)
-for f in "$@"; do echo "=== $f $(grep -l "pragma GLOBAL_ASM.*/$f.s" ${CONKER_ROOT:-$HOME/conker}/conker/src_eu/*.c ${CONKER_ROOT:-$HOME/conker}/conker/src_eu/**/*.c 2>/dev/null | head -1 | xargs basename)"
-sed -E -n 's|^ */\* [0-9A-F]+ [0-9A-F]+ [0-9A-F]{8} \*/ *||p; s|^ *(\.L[0-9A-F]+:)|\1|p' $(find ${CONKER_ROOT:-$HOME/conker}/conker/asm/nonmatchings -name $f.s | head -1); done
