@@ -10,6 +10,35 @@ export PATH=$PATH:/Applications/Docker.app/Contents/Resources/bin
 docker exec conkerdev-port python3 -c 'import unicorn'            # if missing: pip3 install --break-system-packages unicorn
 ```
 
+## P328 (port-web) (session P328, 2026-10-27). Details: `docs/port/sessions/P328.md`
+- Cleanup part 1 of 2 done: the port build, port tools, difftest and `check.sh --port` no longer need the byte-matching
+  build. Branch `exact-byte-decomp-wip` (at 502d9581, pushed by backup_push.sh) keeps it. Names and addresses now
+  come from `port/symbols/symbols.tsv` (+ segments.tsv, ido_cc.tsv); code/data from the user's ROM
+  (port/symbols/romimage.py). Proof: clean build with conker/build, asm, *_auto.txt (and the symbol lists / yaml)
+  moved away -> conker.wasm md5 f73eb4a2... = before; selftest 152/152 on the ROM path.
+- Renames from now on: `tools/eu_port/rename.py --port` / `APPLY_PORT=1 tools/eu_port/apply_names.sh` (changes the
+  table, not splat); checks: `tools/eu_port/check.sh --port` (139 s). --fast/--full still exist until part 2.
+- Part 2 can delete (port-web only; all of it stays on exact-byte-decomp-wip):
+  - generated: conker/build, conker/build_nm, conker/asm, conker/assets, conker/conker.eu.bin, conker/conker.eu.ok,
+    conker/undefined_*_auto.txt, root assets/ and build/ (splat / make output, gitignored).
+  - matching config: conker/symbol_addrs.*.txt, conker/undefined_{syms,funcs}.*.txt, conker/conker.*.yaml,
+    conker/conker.*.sha1, conker/conker.ld, conker/Makefile, conker/diff_settings.py, conker/progress*.csv, root
+    Makefile, game.*.rzip.yaml, conker.*.yaml/.sha1 at the root, config/compressed.*.yaml (check each for port use
+    first; none found in P328).
+  - vendored matching tools: tools/n64splat, tools/splat_ext, tools/asm-processor, tools/asm-differ, tools/mips_to_c,
+    tools/decomp-permuter, the IDO recomp (ido/ or wherever conker/Makefile IDO_DIR points), tools/compress_dir.py,
+    tools/extract_compressed.py.
+  - matching-build tools: tools/eu_port/verify_all.sh, protocheck.py, datarefs.py, rename.py's non-port mode,
+    check.sh --fast/--full (make --port the default), port_work/p28h/nmcheck.sh, and the conversion-era scripts
+    (tools/eu_port/m2c/, port.py, port_one.py, match.py, sweep.sh, repair_*.sh, rodata_*.py, file_split.py, ...).
+  - source: `#pragma GLOBAL_ASM` lines, the `#ifdef NON_MATCHING` / `#else` matching halves (keep the NM C),
+    conker/src (US) except the libultra headers the census includes (conker/src/libultra/{os,audio,io}/*.h).
+  - docs session history except live test inputs (difftest setups/mutants named by tools/port/verify_registry.tsv,
+    docs/port/sessions/p320/run.sh, p326/t.sh, p327/warp.sh, ...).
+- Part 2 must decide first: difftest compiles its candidate with IDO (container /opt/ido5.3 + ido_cc.tsv) -> keep IDO
+  in the container for difftest or retire difftest; difftest find_file and gen_stubs asm_only (stub kinds: asm vs absolute alias, changes the wasm!) read the GLOBAL_ASM pragmas;
+  arity_scan / stubcalls / nmasm harnesses read the matching ELF (P328.md section 5).
+
 ## P327 (port-web) (session P327, 2026-10-27). Details: `docs/port/sessions/P327.md`
 - Session speed-up tools (no game change unless ?warp): `?warp=<level hex>[&warpscene=N]` boots straight into
   gameplay (docs/port/sessions/p327/warp.sh: level 0x29 at retrace 38, 30 s walk tests); `port/web/run.sh build` is

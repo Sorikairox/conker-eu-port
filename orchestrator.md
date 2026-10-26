@@ -148,6 +148,12 @@ Env for a worktree: `eval "$(tools/eu_port/wt.sh env <a|port|portb|web>)"`.
     fresh save, det=2, muted). A walk test is a 30 s run (33 s wall) instead of the new-game route (title + opening,
     0x29 at ~5795, 155-260 s runs). Test-only URL flag: without ?warp nothing changes. Use the p320 new-game route
     only for things that need the real route (intro, title, opening, saves, the hold-L regression).
+  - **P328 (cleanup part 1)**: the port no longer needs the byte-matching build (kept on branch
+    `exact-byte-decomp-wip`, pushed by backup_push.sh, never merged back). Names/addresses: `port/symbols/symbols.tsv`
+    (frozen; a rename edits the table: `tools/eu_port/rename.py --port`, `APPLY_PORT=1 apply_names.sh`); difftest
+    reference code from the ROM. `tools/eu_port/check.sh --port` (139 s: implicit + romabs + selftest + census +
+    build) works without conker/build / asm. Until part 2, --fast/--full stay the commit gates; part 2 deletes the
+    matching machinery (list in docs/port/HANDOFF.md P328) and makes --port / rename --port the defaults.
   - **Checks**: `tools/eu_port/check.sh --fast` (101 s: verify_all + NM + protocheck + implicit_scan + build) is
     allowed before a commit when the change ONLY touches `#ifdef PORT` blocks, port/ or the page (port/web).
     `--full` (270 s: + romabs + arity + selftest + full census) is required for anything else (NM C, headers, harness,
